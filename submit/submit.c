@@ -108,7 +108,7 @@ struct in_addr     server_inetaddr;
 struct hostent    *serverinfo;
 
 /* Submission information */
-string problem, language, server, team;
+string problem, language, extension, server, team;
 char *filename, *submitdir, *tempfile;
 int temp_fd;
 
@@ -138,9 +138,12 @@ int main(int argc, char **argv)
 		lang=strtok_r(NULL," ",&lang_ptr)) {
 
 		languages.push_back(vector<string>());
+		
+		/* First read the language */
 		ext=strtok_r(lang,",",&ext_ptr);
 		languages[languages.size()-1].push_back(string(ext));
 		
+		/* Then all valid extensions for that language */
 		for(ext=strtok_r(NULL,",",&ext_ptr); ext!=NULL;
 			ext=strtok_r(NULL,",",&ext_ptr)) {
 			languages[languages.size()-1].push_back(stringtolower(ext));
@@ -198,10 +201,10 @@ int main(int argc, char **argv)
 		case 0:   /* long-only option */
 			break;
 			
-		case 'p': problem  = string(optarg); break;
-		case 'l': language = string(optarg); break;
-		case 's': server   = string(optarg); break;
-		case 't': team     = string(optarg); break;
+		case 'p': problem   = string(optarg); break;
+		case 'l': extension = string(optarg); break;
+		case 's': server    = string(optarg); break;
+		case 't': team      = string(optarg); break;
 			
 		case 'P': /* port option */
 			port = strtol(optarg,&ptr,10);
@@ -244,16 +247,22 @@ int main(int argc, char **argv)
 	if ( ! (fstats.st_mode & S_IFREG) )    warnuser("file is not a regular file");
 	if ( ! (fstats.st_mode & S_IRUSR) )    warnuser("file is not readable");
 	if ( fstats.st_size==0 )               warnuser("file is empty");
-	if ( fstats.st_size>=SOURCESIZE*1024 ) warnuser("file is too large");
+	if ( fstats.st_size>=SOURCESIZE*1024 ) {
+		ptr = allocstr("file is larger than %d kB",SOURCESIZE);
+		warnuser(ptr);
+		free(ptr);
+	}
 	
-	if ( time(NULL)-fstats.st_mtime>WARN_MTIME*60 ) {
-		warnuser("file has not been modified recently");
+	if ( (i=(time(NULL)-fstats.st_mtime))>WARN_MTIME*60 ) {
+		ptr = allocstr("file has not been modified for %d minutes",i/60);
+		warnuser(ptr);
+		free(ptr);
 	}
 	
 	/* Try to parse problem and language from filename */
 	filebase = string(gnu_basename(filename));
 	if ( filebase.find('.')!=string::npos ) {
-		fileext = stringtolower(filebase.substr(filebase.rfind('.')+1));
+		fileext = filebase.substr(filebase.rfind('.')+1);
 		filebase.erase(filebase.find('.'));
 
 		/* Check for only alphanumeric characters in problem */
@@ -264,15 +273,25 @@ int main(int argc, char **argv)
 			problem = filebase;
 		}
 
-		/* Check for matching file extension */
-		for(i=0; i<languages.size(); i++) {
-			for(j=1; j<languages[i].size(); j++) {
-				if ( languages[i][j]==fileext && language.empty() ) {
-					language = languages[i][1];
-				}
+		if ( extension.empty() ) extension = fileext;
+	}
+	
+	/* Check for languages matching file extension */
+	extension = stringtolower(extension);
+	for(i=0; i<languages.size(); i++) {
+		for(j=1; j<languages[i].size(); j++) {
+			if ( languages[i][j]==extension ) {
+				language  = languages[i][0];
+				extension = languages[i][1];
 			}
 		}
-		
+	}
+	
+	if ( language.empty() ) {
+		ptr = allocstr("language `%s' not recognised",extension.c_str());
+		warnuser(ptr);
+		free(ptr);
+		language = extension;
 	}
 	
 	if ( problem.empty()  ) usage2(0,"no problem specified");
@@ -302,8 +321,8 @@ int main(int argc, char **argv)
 
 	/* Make tempfile to submit */
 	tempfile = allocstr("%s/%s.XXXXXX.%s",submitdir,
-	                    problem.c_str(),language.c_str());
-	temp_fd = mkstemps(tempfile,language.length()+1);
+	                    problem.c_str(),extension.c_str());
+	temp_fd = mkstemps(tempfile,extension.length()+1);
 	if ( temp_fd<0 || strlen(tempfile)==0 ) {
 		error(errno,"mkstemps cannot create tempfile");
 	}
@@ -358,7 +377,7 @@ int main(int argc, char **argv)
 	receive(socket_fd);
 	sendit(socket_fd,"+problem %s",problem.c_str());
 	receive(socket_fd);
-	sendit(socket_fd,"+language %s",language.c_str());
+	sendit(socket_fd,"+language %s",extension.c_str());
 	receive(socket_fd);
 	sendit(socket_fd,"+filename %s",gnu_basename(tempfile));
 	receive(socket_fd);
