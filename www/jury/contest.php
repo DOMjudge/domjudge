@@ -35,7 +35,7 @@ if($mostrecent['start_u'] < time()) {
 }
 echo "<table>\n".
 	"<tr><td>Contest:</td><td>".htmlentities($mostrecent['contestname']).
-		' ['.(int)$mostrecent['cid']."]</td></tr>\n".
+		' [c'.(int)$mostrecent['cid']."]</td></tr>\n".
 	"<tr><td>Start:</td><td>".htmlspecialchars($mostrecent['starttime'])."</td></tr>\n".
 	"<tr><td>End:</td><td>".htmlspecialchars($mostrecent['endtime'])."</td></tr>\n".
 	"</table>\n\n";
@@ -45,7 +45,7 @@ echo "<h3>Past Contests</h3>\n\n";
 echo "<table>\n<tr><th>Contest</th><th>Start</th><th>End</th></tr>\n";
 foreach($res as $row) {
 	echo "<tr><td>".htmlentities($row['contestname']).
-	        ' ['.(int)$row['cid'].
+	        ' [c'.(int)$row['cid'].
 			"]</td><td>" . htmlspecialchars($row['starttime']).
 			"</td><td>" . htmlspecialchars($row['endtime']).
 			"</td></tr>\n";
