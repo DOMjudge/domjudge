@@ -8,6 +8,7 @@
 require('init.php');
 $title = 'Judging';
 require('../header.php');
+require('menu.php');
 
 $id = (int)$_GET['id'];
 if(!$id)	error ("Missing judging id");

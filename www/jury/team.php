@@ -8,6 +8,7 @@
 require('init.php');
 $title = 'Team';
 require('../header.php');
+require('menu.php');
 
 $login = $_GET['id'];
 if(preg_match('/\W/', $login)) {

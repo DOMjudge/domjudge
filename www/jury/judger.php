@@ -8,6 +8,7 @@
 require('init.php');
 $title = 'Judger';
 require('../header.php');
+require('menu.php');
 
 $id = (int)$_REQUEST['id'];
 if(!$id)	error ("Missing judger id");

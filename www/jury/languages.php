@@ -8,6 +8,7 @@
 require('init.php');
 $title = 'Languages';
 require('../header.php');
+require('menu.php');
 
 echo "<h1>Languages</h1>\n\n";
 

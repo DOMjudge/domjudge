@@ -8,6 +8,7 @@
 require('init.php');
 $title = 'Language';
 require('../header.php');
+require('menu.php');
 
 $id = $_GET['id'];
 

@@ -6,6 +6,7 @@
 require('init.php');
 $title = 'Jury interface';
 require('../header.php');
+require('menu.php');
 
 echo "<h1>Jury interface</h1>\n\n";
 ?>
