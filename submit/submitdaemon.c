@@ -53,6 +53,7 @@ using namespace std;
 
 /* Include some functions, which are not always available */
 #include "../lib/mkstemps.h"
+#include "../lib/basename.h"
 
 /* Common send/receive functions */
 #include "submitcommon.h"
@@ -258,18 +259,23 @@ void create_server()
  */
 int handle_client()
 {
-	string line, command, argument;
+	string command, argument;
 	string team, problem, language, filename;
-	char *fromfile, *tempfile, *tmp, *tmp2;
-    struct passwd *userinfo;
+	char *fromfile, *tempfile, *tmp;
+	struct passwd *userinfo;
+	char *args[MAXARGS];
+	int redir_fd[3];
+	int status;
+	pid_t cpid, pid;
 	FILE *rpipe;
+	char line[LINELEN];
 	int i;
 	
 	sendit(client_fd,"+server ready");
 
 	while ( receive(client_fd) ) {
-		line = string(lastmesg);
-		istringstream line_iss(line);
+		command = string(lastmesg);
+		istringstream line_iss(command);
 		line_iss >> command >> argument;
 
 		command = stringtolower(command);
@@ -297,15 +303,13 @@ int handle_client()
 		if ( command=="done" ) {
 			break;
 		} else {
-			error(0,"invalid command: '%s'",command.c_str());
+			senderror(client_fd,0,"invalid command: '%s'",command.c_str());
 		}
 	}
 
 	if ( problem.empty()  || team.empty() ||
 	     language.empty() || filename.empty() ) {
-		sendit(client_fd,"-error: missing submission info");
-		close(client_fd);
-		logmsg(LOG_ERR,"missing submission info");
+		senderror(client_fd,0,"missing submission info");
 	}
 
 	logmsg(LOG_NOTICE,"submission received: %s/%s/%s",
@@ -314,62 +318,85 @@ int handle_client()
 	/* Create the absolute path to submission file, which is expected
 	   (and for security explicitly taken) to be basename only! */
 	if ( (userinfo = getpwnam(team.c_str()))==NULL ) {
-		sendit(client_fd,"-error: cannot find team");
-		close(client_fd);
-		error(errno,"looking up username");
+		senderror(client_fd,0,"cannot find team username");
 	}
 
-	if ( (tmp = strdup(filename.c_str()))==NULL ) error(errno,"copying string");
-	fromfile = allocstr("%s/%s/%s",userinfo->pw_dir,USERSUBMITDIR,basename(tmp));
-	free(tmp);
-
+	fromfile = allocstr("%s/%s/%s",userinfo->pw_dir,USERSUBMITDIR,
+	                    gnu_basename(filename.c_str()));
+	
 	tempfile = allocstr("%s/%s.%s.XXXXXX.%s",INCOMINGDIR,
 	                    problem.c_str(),team.c_str(),language.c_str());
+	
 	if ( mkstemps(tempfile,language.length()+1)<0 || strlen(tempfile)==0 ) {
-		error(errno,"mkstemps cannot create tempfile");
+		senderror(client_fd,errno,"mkstemps cannot create tempfile");
 	}
-	if ( (tmp = strdup(tempfile))==NULL ) error(errno,"copying string");
-	logmsg(LOG_INFO,"created tempfile: `%s'",basename(tmp));
-	free(tmp);
+	
+	logmsg(LOG_INFO,"created tempfile: `%s'",gnu_basename(tempfile));
 	
 	/* Copy the source-file */
-	tmp = allocstr("./submit_copy.sh %s %s %s",team.c_str(),fromfile,tempfile);
-	if ( system(tmp)!=0 ) {
-		sendit(client_fd,"-error: cannot copy file");
-		close(client_fd);
-		error(errno,"cannot copy `%s' to `%s'",fromfile,tempfile);
+	args[0] = (char *) team.c_str();
+	args[1] = fromfile;
+	args[2] = tempfile;
+	redir_fd[0] = redir_fd[1] = redir_fd[2] = 0;
+	switch ( (status = execute("./submit_copy.sh",args,3,redir_fd,1)) ) {
+	case  0: break;
+	case -1: senderror(client_fd,errno,"starting submit_copy");
+	case -2: senderror(client_fd,0,"starting submit_copy: internal error");
+	default: senderror(client_fd,0,"submit_copy failed with exitcode %d",status);
 	}
-	free(tmp);
+	
 	logmsg(LOG_INFO,"copied `%s' to tempfile",filename.c_str());
 	
 	/* Check with database for correct parameters
 	   and then add a database entry for this file. */
-	if ( (tmp2 = strdup(tempfile))==NULL ) error(errno,"copying string");
-	tmp = allocstr("./submit_db.php %s %s %s %s %s 2>&1",
-	               team.c_str(),inet_ntoa(client_addr.sin_addr),
-	               problem.c_str(),language.c_str(),basename(tmp2));
-	free(tmp2);
-	if ( (rpipe = popen(tmp,"r"))==NULL ) error(errno,"opening submit_db pipe");
-	free(tmp);
+	args[0] = (char *) team.c_str();
+	args[1] = inet_ntoa(client_addr.sin_addr);
+	args[2] = (char *) problem.c_str();
+	args[3] = (char *) language.c_str();
+	args[4] = gnu_basename(tempfile);
+	redir_fd[0] = 0;
+	redir_fd[1] = 1;
+	redir_fd[2] = 0;
+	if ( (cpid = execute("./submit_db.php",args,5,redir_fd,1))<0 ) {
+		senderror(client_fd,errno,"starting submit_db");
+	}
 
-	if ( (tmp = (char *) malloc(LINELEN))==NULL ) error(errno,"malloc");
-	
-	while ( fgets(tmp,LINELEN,rpipe)!=NULL ) {
-		if ( strstr(tmp,ERRMATCH)!=NULL ) {
-			/* Strip line to error message only and return that as error */
-			tmp2 = strstr(tmp,ERRMATCH);
-			tmp2 = &tmp2[strlen(ERRMATCH)];
-			i = strlen(tmp2) - 1;
-			while ( i>=0 && (tmp2[i]=='\n' || tmp2[i]=='\r') ) tmp2[i--] = 0;
-			sendit(client_fd,"-error: %s",tmp2);
-			close(client_fd);
-			error(0,"submit_db: %s",tmp2);
-		}
+	if ( (rpipe = fdopen(redir_fd[1],"r"))==NULL ) {
+		senderror(client_fd,errno,"binding submit_db stdout to stream");
 	}
 	
-	if ( pclose(rpipe)!=0 ) error(errno,"closing submit_db pipe");
-	logmsg(LOG_INFO,"added submission to database");
+	/* Read stdout/stderr and try to find errors */
+	while ( fgets(line,LINELEN,rpipe)!=NULL ) {
 
+		/* Remove newlines from end of line */
+		i = strlen(line)-1;
+		while ( i>=0 && (line[i]=='\n' || line[i]=='\r') ) line[i--] = 0;
+		
+		/* Strip line to error message only and return that as error */
+		if ( (tmp = strstr(line,ERRMATCH))!=NULL ) {
+			senderror(client_fd,0,"%s",&tmp[strlen(ERRMATCH)]);
+		}
+	}
+
+	if ( fclose(rpipe)!=0 ) {
+		senderror(client_fd,errno,"closing submit_db pipe");
+	}
+	
+	if ( pid==0 && waitpid(cpid,&status,0)<0 ) {
+		senderror(client_fd,errno,"waiting for submit_db");
+	}
+	
+	if ( WIFEXITED(status) && WEXITSTATUS(status)!=0 ) {
+		senderror(client_fd,0,"submit_db failed with exitcode %d",
+		          WEXITSTATUS(status));
+	}
+
+	if ( ! WIFEXITED(status) ) {
+		senderror(client_fd,0,"submit_db failed with signal");
+	}
+	
+	logmsg(LOG_INFO,"added submission to database");
+	
 	if ( unlink(tempfile)!=0 ) error(errno,"deleting tempfile");
 
 	sendit(client_fd,"+done submission successful");
