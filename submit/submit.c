@@ -402,4 +402,4 @@ char readanswer(char *answers)
 }
 
 
-//  vim:ts=4:sw=4:et:
+//  vim:ts=4:sw=4:
