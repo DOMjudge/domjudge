@@ -36,18 +36,19 @@ $EXITCODES = array (
 /** Database login credentials */
 $DBDATA = array (
 	'jury'	=> array (				// s/i/u/d on each table
-		'host' => 'localhost',
+		'host' => 'judge.nkp.nl',
 		'db'   => 'nkpjury',
 		'user' => 'nkp',
-		'pass' => 'JudgeJudy' ),
+		'pass' => '=2nP4iVns' ),
 	'team'	=> array (				// ...
-		'host' => 'localhost',
+		'host' => 'judge.nkp.nl',
 		'db'   => 'nkpjury',
 		'user' => 'nkp_team',
-		'pass' => 'xb8*$Spp[2j4' ),
+		'pass' => 'gasI87^cR' ),
 	'public'	=> array (			// Select on team,problem,submission,juding,contest
-		'host' => 'localhost',
+		'host' => 'judge.nkp.nl',
 		'db'   => 'nkpjury',
 		'user' => 'nkp_public',
-		'pass' => '4nG47c!h&;090f' )
+		'pass' => 'yrJ84cjU~' )
 	);
+
