@@ -99,7 +99,7 @@ foreach($SCORES as $team => $totals) {
 	echo "<tr><td>".htmlentities($TEAMNAMES[$team])."</td><td>".$totals['num_correct']."</td><td>".$totals['total_time']."</td>";
 	foreach($THEMATRIX[$team] as $prob => $pdata) {
 		echo "<td class=\"".($pdata['correct']?'correct':'incorrect')."\">" . 
-			$pdata['submitted']."/".$pdata['time']." + ".$pdata['penalty'] ."</td>";
+			$pdata['submitted']."/".$pdata['time']."' + ".$pdata['penalty'] ."'</td>";
 	}
 	echo "</tr>\n";
 
