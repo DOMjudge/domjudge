@@ -2,29 +2,80 @@
 
 % $Id$
 
-\usepackage{a4}
+\usepackage{a4wide}
 \usepackage[dutch]{babel}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{epsfig}
 \usepackage{bbm}
 \usepackage{expdlist}
 
+% Voor up-to-date definities van runlimits e.d.
+\include{systemconfig}
+
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
 
 \newcommand{\DOMjudge}{DOMjudge }
 
-\title{Teamhandleiding voor het \DOMjudge jurysysteem}
-
-\author{Jaap Eldering, Thijs Kinkhorst \& Peter van de Werken}
+\title{Teamhandleiding\\~\\Nederlands Kampioenschap Programmeren 2004}
 
 \begin{document}
 
 \maketitle
 
-\section{Inleiding}
+\tableofcontents
+\newpage
 
-Deze handleiding beschrijft de onderdelen van het \DOMjudge
+
+\section{De computers}
+
+Alle teams krijgen \'e\'en computer aangewezen, waarop zij kunnen
+werken om de opgaven op te lossen. Dit zijn computers van het
+Informatica Instituut en zijn allemaal Dell computers met 15 inch TFT
+flatscreens met een Intel Pentium processor varie\"erend van xxx tot
+yyy MHz.
+
+Tijdens het NKP kunnen alle teams kiezen tussen twee verschillende
+computer (besturings) systemen: Microsoft Windows 2000 Professional of
+Redhat GNU/Linux 9.0. Beide draaien op dezelfde hardware.
+
+Hieronder volgt documentatie specifiek voor de verschillende platformen.
+
+\subsection{Windows}
+\subsection{Linux}
+
+
+\section{Opgaven}
+
+stdin/stdout, geen andere files (stderr mag wel, genegeerd).
+
+altijd: nruns, ...
+
+
+\section{Programmeertalen}
+
+specifieke details:
+op welk platform?
+evt alternatieve compilers
+
+\subsection{C \& C++}
+inclusief STL
+
+\subsection{Java}
+verschillen gcj met javac
+javadocs beschikbaar
+
+\subsection{Pascal}
+
+\subsection{Haskell}
+geen garanties
+
+
+\section{Het jurysysteem: \DOMjudge}
+
+\subsection{Inleiding}
+
+Dit hoofdstuk beschrijft de onderdelen van het \DOMjudge
 jurysysteem, die aan de teams ter beschikking staan om oplossingen in
 te sturen, uitslagen te bekijken en ``clarification requests'' te
 sturen.
@@ -32,7 +83,7 @@ sturen.
 Het systeem is voor een groot deel gebaseerd op een webinterface. Het
 insturen van oplossingen gaat echter via een command-line programma.
 
-\section{Oplossingen insturen: \texttt{submit}}
+\subsection{Oplossingen insturen: \texttt{submit}}\label{submit}
 
 Het insturen van oplossingen voor problemen gebeurt via een
 command-line interface: het programma \texttt{submit} (onder Windows
@@ -56,7 +107,7 @@ tijd niet veranderd is of groter is dan de maximale source-code grootte.
 Hierna geeft \texttt{submit} een kort overzicht met de details van de
 inzending en vraagt om bevestiging. Controleer vooral of je het goede
 bestand, probleem en taal hebt en druk dan op `y' om de oplossing in
-te sturen. Als alles goed gaat zal \texttt{submit} een melding geven,
+te sturen. Als alles goed gaat, zal \texttt{submit} een melding geven
 dat de inzending succesvol is. Indien niet, zal er een foutmelding
 verschijnen.
 
@@ -65,12 +116,12 @@ in de homedirectory van het account. Hier slaat het tijdelijk
 bestanden op voor inzending en staat ook een logfile \texttt{submit.log}.
 Verwijder deze directory niet of pas hem niet aan, omdat anders het
 submit programma eventueel niet meer correct functioneert. Verder
-is een ``public-ssh-key'' van de jury in de ssh config
+is een ``public ssh-key'' van de jury in de ssh configuratie
 toegevoegd. Deze is ook nodig voor het functioneren van \texttt{submit}.
  
-\section{De uitslag bekijken van inzendingen}
+\subsection{De uitslag bekijken van inzendingen}
 
-\subsection{Mogelijke uitslagen}
+\subsubsection{Mogelijke uitslagen}
 
 Op een ingestuurde oplossing zijn een aantal verschillende uitslagen
 mogelijk. Hier volgen ze, met een korte beschrijving:
@@ -81,7 +132,9 @@ Je oplossing was goed en je hebt dit probleem opgelost!
 
 \item[COMPILER-ERROR]
 Het compilen van je programma gaf een fout. Zie de inzendingsdetails
-voor de precieze foutmelding.
+voor de precieze foutmelding. Compiler waarschuwingen worden niet als
+fouten gezien, maar kun je eventueel wel bekijken bij de details van
+je inzending.
 
 \item[TIMELIMIT]
 Je programma draaide langer dan de maximale toegestane tijd en is
@@ -100,12 +153,122 @@ Je programma gaf geen uitvoer. Let op dat je uitvoer naar standard
 output schrijft!
 
 \item[WRONG-ANSWER]
-De uitvoer van je programma was niet correct.
+De uitvoer van je programma was niet correct. Het kan zijn dat je
+oplossing niet correct is, maar let ook goed op dat je de antwoorden
+precies zoals beschreven uitvoert: de uitvoer moet exact kloppen met
+de antwoorden van de jury!
 
 \end{description}
 
 
-\section{Clarification requests insturen}
+\subsection{Clarification requests insturen}
+
+
+\subsection{Hoe worden opgaven beoordeeld?}
+
+Het \DOMjudge jurysysteem is volledig geautomatiseerd. Dit betekent
+dat er (in principe) geen menselijke interactie is tijdens de
+beoordeling. Het beoordelen gebeurt via de volgende stappen:
+
+\subsubsection{Insturen}
+
+Via het \texttt{submit} (zie \ref{submit}) programma kun je een
+oplossing voor een opgave insturen. Let op dat je de source-code van
+je programma moet insturen (en dus niet een gecompiled programma of de
+uitvoer van je programma). \texttt{submit} maakt dan een verbinding
+met een server en die kopieert je programma dan naar de
+jury-computers.
+
+Dan komt je programma in de wachtrij te staan, om gecompiled,
+uitgevoerd en de uitvoer getest te worden op \'e\'en van de
+jury-computers.
+
+\subsubsection{Compileren}
+
+Je programma wordt op een jury-computer onder Linux gecompiled. De
+exacte compilers en opties die we gebruiken, staan in tabel
+\ref{compilertabel}. Als je een andere compiler of besturingssysteem
+gebruikt, moet dat in principe geen probleem zijn, maar let wel op dat
+je geen compiler/systeem-specifieke dingen gebruikt (bij een
+compileerfout kun je altijd de foutmelding bekijken).
+
+\begin{table}[!ht]
+\caption{Compiler commando's}
+\begin{tabular}{|l|l|l|}
+\hline
+programmeertaal & jury compiler-commando & niet-statisch gelinked \\
+\hline
+C		& \texttt{gcc -Wall -O2 -static -lm}		& \texttt{gcc -Wall -O2 -lm}\\
+C++		& \texttt{g++ -Wall -O2 -static}			& \texttt{g++ -Wall -O2}\\
+Java	& \texttt{gcj -Wall -static --main=Main}	& \texttt{gcj -Wall --main=Main}\\
+Pascal	& \texttt{fpc -vwnh -O2 -Sg -XS}			& \texttt{fpc -vwnf -O2 -Sg}\\
+Haskell	& \texttt{ghc -Wall -O -static -optl-static}& \texttt{ghc -Wall -O}\\
+\hline
+\end{tabular}
+\label{compilertabel}
+\end{table}
+
+Merk op dat wij statisch compileren i.v.m. het jurysysteem, maar wat
+betreft foutmeldingen e.d. zijn de compiler-commando's in de kolom
+``niet-statisch gelinked'' equivalent.
+
+\subsubsection{Testen}
+
+Als je programma succesvol gecompileerd is, wordt het gedraaid en de
+uitvoer vergeleken met de correcte uitvoer van de jury. Er wordt eerst
+gecontroleerd of je programma correct geeindigd is: als je programma
+met een fout eindigd en het goede antwoord geeft, krijg je toch een
+``RUN-ERROR''! Er zijn een aantal beperkingen die aan je programma
+opgelegd worden. Als je programma die overschreidt, wordt het ook
+afgebroken met een fout, zie (\ref{runlimits}).
+
+Verder moet de uitvoer van jouw programma exact overeenkomen met de
+uitvoer van de jury. Let dus goed op, dat je de uitvoer specificatie
+volgt.
+
+\subsubsection{Beperkingen}\label{runlimits}
+
+Om hacken tegen te gaan, het jurysysteem stabiel te houden en iedereen
+duidelijke, gelijke omstandigheden te geven, zijn er een aantal
+beperkingen die aan iedere ingestuurde oplossing opgelegd worden:
+
+\begin{description}[\setlabelphantom{aantal processen}]
+\item[compile-tijd]
+Je programma mag er maximaal \COMPILETIME\ seconden over doen om te
+compileren. Daarna wordt het compileren afgebroken en levert dit een
+compileerfout op. Dit zou in de praktijk nooit een probleem mogen
+opleveren. Mocht dit toch gebeuren bij een normaal programma, laat het
+dan de organisatie weten.
+
+\item[source grootte]
+De sourcecode van je programma mag maximaal \SOURCESIZE\ kilobytes
+groot zijn. Bij het inzenden zul je hier al voor gewaarschuwd worden,
+bij compileren levert dit ook een compileerfout.
+
+\item[geheugen]
+Je programma heeft tijdens het draaien maximaal \MEMLIMIT\ kilobytes
+geheugen ter beschikking. Let op dat dit totaal geheugen is (inclusief
+programma code, statisch en dynamisch gedefini\"eerde variabelen,
+stack, \dots)!
+
+\item[bestandsgrootte]
+Hoewel je geen bestanden mag schrijven, wordt de standaard (fout)uitvoer
+(stout/stderr) wel naar een bestand geschreven. De maximale grootte
+van deze bestanden is \FILELIMIT\ kilobytes (per bestand).
+
+\item[aantal processen]
+Het is niet de bedoeling dat je programma meerdere processen (threads)
+start. Dit heeft ook geen zin, want je programma heeft precies 1
+processor volledig tot zijn beschikking. Om stabiliteit van het
+jurysysteem te bevorderen, kunnen er maximaal \PROCLIMIT\ processen
+tegelijk draaien (inclusief de processen, die je programma gestart
+hebben).
+
+Mensen, die nooit met meerdere processen geprogrammeerd hebben (of
+niet weten wat dat is), hoeven zich geen zorgen te maken: standaard
+draait een gecompileerd programma in \'e\'en proces.
+
+\end{description}
 
 
 \end{document}
