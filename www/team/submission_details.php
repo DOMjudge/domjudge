@@ -39,7 +39,7 @@ if(!$row) {
 <p>Status: <?=printresult($row['result'], TRUE, TRUE)?></p>
 
 <h2>Compiler output:</h2>
-<?
+<?php
 if(@$row['output_compile']) {
 	echo "<pre class=\"output_text\">\n".
 		htmlspecialchars(@$row['output_compile'])."\n</pre>\n\n";

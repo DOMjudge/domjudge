@@ -26,15 +26,15 @@ function putClar($clar, $isjury = FALSE)
 
 	echo "<table>\n";
 	echo '<tr><td>From:</td>' . 
-		'<td class="teamid" title="' . htmlentities($from) . '">' .
+		'<td><span class="teamid">' .
 		( $fromlink ? '<a href="team.php?id=' . urlencode($clar['sender']) .
-			'">' : '' ) .
+			'">' : '' ) . '</span>' .
 		htmlspecialchars($from) . ( $fromlink ? '</a>' : '') . "</td></tr>\n";
 	echo  '<tr><td>To:</td>' .
-		'<td class="teamid" title="' . htmlentities($to) . '">' .
+		'<td>' .
 		( $tolink ? '<a href="team.php?id=' . urlencode($clar['recipient']) .
 			'">' : '' ) .
-		htmlspecialchars($to) . ( $tolink ? '</a>' : '') . "</td><tr>\n";
+		htmlspecialchars($to) . ( $tolink ? '</a>' : '') . "</td></tr>\n";
 	echo '<tr><td>Time:</td><td>' . printtime($clar['submittime']) .
 		"</td></tr>\n";
 	echo '<tr><td valign="top"></td><td class="filename">' .
@@ -70,7 +70,7 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
 		if ( $isjury || ( $clar['sender']==$team || ( $clar['sender']==NULL &&
 			( $clar['recipient']==NULL || $clar['recipient']==$team ) ) ) ) {
 			putClar($clar,$isjury);
-			echo "<br>\n\n";
+			echo "<p></p>\n\n";
 		}
 	}
 }
@@ -149,19 +149,15 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 	echo '<form action="' . addUrl(urlencode($action), $popupTag) .
 		"\" method=\"post\">\n";
 
-	if ( $isjury && $respid ) {
-		echo '<input type="hidden" name="id" value="' . $respid . "\" />\n";
-	}
 
 	echo "<table>\n";
 
-	if ( $isjury ) {
-		echo "<tr><td><b>Send to:</b></td><td>\n";
-	} else {
-		echo "<tr><td><b>To:</b></td><td>Jury</td></tr>\n";
-	}
-
 	if ( $isjury ) { // list all possible recipients in the "sendto" box
+		echo "<tr><td><b>Send to:</b></td><td>\n";
+
+		if ( $respid ) {
+			echo '<input type="hidden" name="id" value="' . $respid . "\" />\n";
+		}
 
 		echo "<select name=\"sendto\">\n";
 		echo "<option value=\"\">ALL</option>\n";
@@ -183,12 +179,12 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 				LEFT JOIN team f ON (f.login = c.sender)
 				WHERE c.clarid = %i', $respid);
 			if ( $clar['sender'] ) {
-				echo '<option selected="1" value="' .
+				echo '<option selected="selected" value="' .
 					htmlspecialchars($clar['sender']) . '">' .
 					htmlspecialchars($clar['sender']) . ': ' .
 					htmlentities($clar['fromname']) . "</option>\n";
 			} else if ( $clar['recipient'] ) {
-				echo '<option selected="1" value="' .
+				echo '<option selected="selected" value="' .
 					htmlspecialchars($clar['recipient']) . '">' .
 					htmlspecialchars($clar['recipient']) . ': ' .
 					htmlentities($clar['toname']) . "</option>\n";
@@ -196,6 +192,8 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 		}
 		echo "</select>\n";
 		echo "</td></tr>\n";
+	} else {
+		echo "<tr><td><b>To:</b></td><td>Jury</td></tr>\n";
 	}
 
 	?>
@@ -209,6 +207,6 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 </tr>
 </table>
 </form>
-	<?php
+<?php
 
 }

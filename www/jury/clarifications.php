@@ -34,24 +34,24 @@ $clarifications = $DB->q('SELECT * FROM clarification
 	AND ( respid < 0 OR recipient IS NULL )
 	ORDER BY submittime DESC', $cid);
 
-echo '<h3><a name="New Requests" id="newrequests">' .
-	"New Requests:</a></h3>\n";
+echo '<h3><a name="newrequests"></a>' .
+	"New Requests:</h3>\n";
 if ( $newrequests->count() == 0 ) {
 	echo "<p><em>No new clarification requests.</em></p>\n\n";
 } else {
 	putClarificationList($newrequests,NULL,TRUE);
 }
 
-echo '<h3><a name="Old Requests" id="oldrequests">' .
-	"Old Requests:</a></h3>\n";
+echo '<h3><a name="oldrequests"></a>' .
+	"Old Requests:</h3>\n";
 if ( $oldrequests->count() == 0 ) {
 	echo "<p><em>No old clarification requests.</em></p>\n\n";
 } else {
 	putClarificationList($oldrequests,NULL,TRUE);
 }
 
-echo '<h3><a name="Clarifications" id="clarifications">' .
-	"General Clarifications:</a></h3>\n";
+echo '<h3><a name="clarifications"></a>' .
+	"General Clarifications:</h3>\n";
 if ( $clarifications->count() == 0 ) {
 	echo "<p><em>No general clarifications.</em></p>\n\n";
 } else {
