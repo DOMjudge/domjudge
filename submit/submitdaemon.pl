@@ -27,7 +27,7 @@
 BEGIN { require "../etc/config.pm"; }
 
 use Socket;
-use IO;
+use IO::Handle;
 use IO::Socket;
 use Net::hostent;
 use Carp;

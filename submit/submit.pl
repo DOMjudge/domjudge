@@ -47,7 +47,7 @@ our $success = 1;
 our $failure = 0;
 
 use Socket;
-use IO;
+use IO::Handle;
 use IO::Socket;
 use File::Copy;
 use File::Basename;
@@ -178,7 +178,7 @@ sub readanswer {
 	my $answers = shift;
 	my $answer;
 	while ( "TRUE" ) {
-		$answer = readkey();
+		chomp($answer = <STDIN>);
 		if ( $answer =~ /[$answers]/i   ) { last; }
 	}
 	return lc($answer);
