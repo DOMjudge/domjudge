@@ -14,7 +14,7 @@ require('menu.php');
 
 $cid = getCurContest();
 
-echo "<h1>Clarifications</h1>\n\n";
+echo "<h1>Clarifications team " . htmlentities($name) ."</h1>\n\n";
 
 echo '<p><a href="' . addUrl('clarification.php',$popupTag) .
 	"\">Request Clarification</a></p>\n";
@@ -32,16 +32,16 @@ $clarifications = $DB->q('SELECT * FROM clarification
 	ORDER BY submittime DESC', $cid, $login,
 	(isset($_REQUEST['stamp']) ? $_REQUEST['stamp'] : 0));
 
-echo '<h3><a name="Clarifications" id="clarifications">' .
-	"Clarifications:</a></h3>\n";
+echo '<h3><a name="clarifications"></a>' .
+	"Clarifications:</h3>\n";
 if ( $clarifications->count() == 0 ) {
 	echo "<p><em>No clarifications.</em></p>\n\n";
 } else {
 	putClarificationList($clarifications,$login);
 }
 
-echo '<h3><a name="Clarification Requests" id="requests">' .
-	"Clarification Requests:</a></h3>\n";
+echo '<h3><a name="requests"></a>' .
+	"Clarification Requests:</h3>\n";
 if ( $requests->count() == 0 ) {
 	echo "<p><em>No clarification requests.</em></p>\n\n";
 } else {

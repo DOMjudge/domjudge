@@ -5,12 +5,12 @@
 
 require('init.php');
 $refresh = '30;url=' . getBaseURI() . 'team/';
-$title = 'Team overview';
+$title = 'Submissions';
 require('../header.php');
 
 include('menu.php');
 
-echo "<h1>Teampage ".htmlentities($name)."</h1>\n\n";
+echo "<h1>Submissions team ".htmlentities($name)."</h1>\n\n";
 
 // call putSubmissions function from common.php for this team.
 putSubmissions('team', $login);
