@@ -12,7 +12,7 @@ if ( ! defined('SCRIPT_ID') ) {
 // is this the webinterface or commandline?
 $is_web = isset($_SERVER['REMOTE_ADDR']);
 
-if ( ! $is_web ) {
+if ( ! $is_web && ! defined('STDERR') ) {
 	define('STDERR', fopen('php://stderr', 'w'));
 }
 
@@ -30,13 +30,17 @@ function logmsg($msglevel, $string) {
 	if ( $msglevel <= $verbose  ) {
 		// if this is the webinterface, print it to stdout, else to stderr
 		if ( $is_web ) {
-			echo "<fieldset class=\"error\"><legend>Error</legend>\n" . htmlspecialchars($msg) . "</fieldset>\n";
+			echo "<fieldset class=\"error\"><legend>Error</legend>\n" .
+				htmlspecialchars($msg) . "</fieldset>\n";
 		} else {
-			fwrite(STDERR, $msg); fflush(STDERR);
+			fwrite(STDERR, $msg);
+			fflush(STDERR);
 		}
 	}
-	if ( $msglevel <= $loglevel &&
-	     defined('STDLOG')      ) { fwrite(STDLOG, $msg); fflush (STDLOG); }
+	if ( $msglevel <= $loglevel && defined('STDLOG') ) {
+		fwrite(STDLOG, $msg);
+		fflush(STDLOG);
+	}
 }
 
 function error($string) {
