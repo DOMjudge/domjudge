@@ -79,7 +79,7 @@ sub error {
 		sendit "-error: @_";
 		$socket->close();
 	}
-	logmsg($LOG_ERROR,"error: @_");
+	logmsg($LOG_ERR,"error: @_");
 	die;
 }
 

@@ -20,10 +20,7 @@ define('JUDGEDIR',    OUTPUT_ROOT.'/judging');
 define('LOGDIR',      OUTPUT_ROOT.'/log');
 
 /** Loglevels */
-define('LOG_ERROR',  0);
-define('LOG_NOTICE', 1);
-define('LOG_INFO',   2);
-define('LOG_DEBUG',  3);
+define_syslog_variables();
 
 /** Possible exitcodes from testsol and their meaning */
 $EXITCODES = array (

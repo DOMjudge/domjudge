@@ -63,9 +63,9 @@ function error ()
 	trap - ERR
 
 	if [ "$@" ]; then
-		logmsg $LOG_ERROR "error: $@"
+		logmsg $LOG_ERR "error: $@"
 	else
-		logmsg $LOG_ERROR "unexpected error, aborting!"
+		logmsg $LOG_ERR "unexpected error, aborting!"
 	fi
 
 	exit $E_INTERN
@@ -93,7 +93,7 @@ PROGNAME=`basename $0`
 if [ "$VERBOSE" ]; then
 	export VERBOSE
 else
-	export VERBOSE=$LOG_ERROR
+	export VERBOSE=$LOG_ERR
 fi
 
 # Location of scripts/programs:

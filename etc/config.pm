@@ -23,10 +23,10 @@ our $LOGDIR      = $OUTPUT_ROOT . "/log";
 our $USERSUBMITDIR = ".submit";
 
 # Loglevels
-our $LOG_ERROR  = 0;
-our $LOG_NOTICE = 1;
-our $LOG_INFO   = 2;
-our $LOG_DEBUG  = 3;
+our $LOG_ERR    = 3;
+our $LOG_NOTICE = 5;
+our $LOG_INFO   = 6;
+our $LOG_DEBUG  = 7;
 
 # For extra clarity in return statements (perl specific)
 our $success = 1;
