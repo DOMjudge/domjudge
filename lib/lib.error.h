@@ -8,8 +8,10 @@
 #define _LIB_ERROR_
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <unistd.h>
 #include <syslog.h>
 #include <time.h>
 #include <errno.h>
@@ -19,7 +21,7 @@
 
 const int exit_failure = -1;
 
-/* Import from the main program */
+/* Import from the main program for logging purposes */
 extern char *progname;
 
 /* Variables defining logmessages verbosity to stderr/logfile */
@@ -38,6 +40,19 @@ FILE *stdlog      = NULL;
  */
 void logmsg (int, char *, ...);
 void vlogmsg(int, char *, va_list);
+
+/* Error string generating function:
+ * Returns a pointer to a dynamically allocated string containing the
+ * complete error message.
+ *
+ * Arguments:
+ * int errnum      'errno' value to use for error string output, set 0 to skip
+ * char *mesg      message, may include printf output format characters '%'
+ * va_list         optional arguments for format characters
+ *
+ * Returns a char pointer to the allocated string.
+ */
+char *errorstring(int, char *, va_list);
 
 /* Error and warning functions (v.. uses va_list instead of argument list):
  * Logs an error message including error string from 'errno'.
@@ -65,7 +80,8 @@ void vwarning (int, char *, va_list);
  * All argument-list based functions call their va_list (v..) counterparts
  * to avoid doubled code. Furthermore, all functions use 'vlogmsg' to do the
  * actual writing of the logmessage and all error/warning functions use
- * 'vlogerror' to generate the error-logmessage from the input.
+ * 'vlogerror' to generate the error-logmessage from the input. vlogerror in
+ * turn calls verrorstr to generate the actual error message;
  */
 
 /* Main function that contains logging code */
@@ -87,6 +103,7 @@ void vlogmsg(int msglevel, char *mesg, va_list ap)
 
 	bufferlen = strlen(timestring)+strlen(progname)+mesglen+20;
 	buffer = (char *)malloc(bufferlen);
+	if ( buffer==NULL ) abort();
 
 	snprintf(buffer, bufferlen, "[%s] %s[%d]: %s\n",
 	         timestring, progname, getpid(), mesg);
@@ -109,14 +126,15 @@ void logmsg(int msglevel, char *mesg, ...)
 	va_end(ap);
 }
 
-/* Function to generate and write error logmessage (using vlogmsg) */
-void vlogerror(int errnum, char *mesg, va_list ap)
+/* Function to generate error string */
+char *errorstring(int errnum, char *mesg, va_list ap)
 {
 	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
 	char *buffer;
 	char *endptr; /* pointer to current end of buffer */
 	
 	endptr = buffer = (char *) malloc(mesglen+256);
+	if ( buffer==NULL ) abort();
 
 	sprintf(buffer,ERRSTR);
 	endptr = strchr(buffer,0);
@@ -133,6 +151,16 @@ void vlogerror(int errnum, char *mesg, va_list ap)
 		sprintf(endptr,": unknown error");
 	}
 
+	return buffer;
+}
+
+/* Function to generate and write error logmessage (using vlogmsg) */
+void vlogerror(int errnum, char *mesg, va_list ap)
+{
+	char *buffer;
+
+	buffer = errorstring(errnum, mesg, ap);
+	
 	vlogmsg(LOG_ERR, buffer, ap);
 
 	free(buffer);
