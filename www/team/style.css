@@ -1,5 +1,10 @@
 /* $Id$ */
 
+body {
+	font-color: black;
+	background-color: white;
+}
+
 .output_text {
 	border: 2px dotted #C0C0C0;
 	background-color: #f9f9f9;

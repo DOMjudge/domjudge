@@ -1,5 +1,10 @@
 /* $Id$ */
 
+body {
+	font-color: black;
+	background-color: white;
+}
+
 .correct {
 	background: #33FF66;
 }
