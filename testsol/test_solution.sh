@@ -130,7 +130,7 @@ touch diff.{out,tmp}    # Compare output
 logmsg "starting compile"
 
 if [ `cat $SOURCE | wc -c` -gt $((SOURCESIZE*1024)) ]; then
-	echo "Source-code is larger than $SOURCESIZE KB." | tee compile.out
+	echo "Source-code is larger than $SOURCESIZE KB." >>compile.out
 	exit $E_COMPILE
 fi
 
@@ -179,7 +179,8 @@ exitcode=$?
 cat error.out >>error.tmp
 
 sudo umount $PWD/proc
-# Check for still running processes:
+# Check for still running processes (first wait for all exiting processes):
+sleep 1
 if ps -u $RUNUSER &>/dev/null; then
 	error "found processes still running"
 fi
@@ -210,11 +211,11 @@ fi
 ### Removed, because these are not consistenly reported the same way
 ### by all different compilers.
 #if grep  'Floating point exception' error.tmp &>/dev/null; then
-#	echo "Floating point exception." | tee error.out
+#	echo "Floating point exception." >>error.out
 #	exit $E_RUNERROR
 #fi
 #if grep  'Segmentation fault' error.tmp &>/dev/null; then
-#	echo "Segmentation fault." | tee error.out
+#	echo "Segmentation fault." >>tee error.out
 #	exit $E_RUNERROR
 #fi
 
