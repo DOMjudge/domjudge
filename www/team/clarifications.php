@@ -9,10 +9,12 @@
 require('init.php');
 $title = 'Clarification Response';
 include('../header.php');
+include('menu.php');
 
 ?>
+<h1>Clarifications</h1>
 <p><table>
-<tr><th colspan="2">Clarifications</th></tr>
+<tr><th>Time</th><th>Reponse</th></tr>
 <?
 
 $data = $DB->q('TABLE SELECT * FROM clar_response WHERE cid = %i 

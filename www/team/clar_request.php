@@ -7,8 +7,9 @@
  */
 
 require('init.php');
-include('menu.php');
 $title = 'Clarification Request';
+include('../header.php');
+include('menu.php');
 
 unset($send);
 if (isset($_REQUEST['submit'])
@@ -17,10 +18,8 @@ if (isset($_REQUEST['submit'])
 	$respid = $DB->q('RETURNID INSERT INTO clar_request (cid, submittime, login, body)
 		VALUES (%i, now(), %s, %s)', getCurContest(), $login, $_REQUEST['request']);
 	$send = true;
-	$refresh = '5;url=clarifications.php';
 }
 
-include('../header.php');
 
 ?>
 <h1>Clarification Request</h1>
@@ -42,8 +41,8 @@ if(!isset($send))
 <table>
 <tr><td><b>To:</b></td><td>Jury</td></tr>
 <tr><td valign="top"><b>Request:</b></td><td class="output_text"><?=$_REQUEST['request']?></td></tr>
-<tr><td>&nbsp;</td><td>Send!<br />You will be redirected to your team page in 5 seconds.</td></tr>
 </table>
+<p>Clarification Request Sent!</p>
 <?
 }
 
