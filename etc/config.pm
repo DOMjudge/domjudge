@@ -1,6 +1,6 @@
 # Configuration file for perl scripts
 
-# Include in scripts with 'BEGIN { require "<filename>";'
+# Include in scripts with 'BEGIN { require "<filename>"; }'
 
 # Globally require perl version
 require 5.002;
