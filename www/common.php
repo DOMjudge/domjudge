@@ -24,7 +24,7 @@ function getSubmissions($key = null, $value = null) {
 	}
 
 	$resulttable = $DB->q('KEYTABLE SELECT j.*,submitid AS ARRAYKEY,judger.name AS judgername
-		FROM judging j LEFT JOIN judger ON(j.judger=judger.judgerid)
+		FROM judging j LEFT JOIN judger USING(judgerid)
 		WHERE (valid = 1 OR valid IS NULL)');
 
 	echo "<table>\n".
@@ -42,7 +42,7 @@ function getSubmissions($key = null, $value = null) {
 			($key != 'probid' ? "</td><td>".$row['probid'] : '').
 			($key != 'langid' ? "</td><td>".$row['langid'] : '').
 			"</td><td>".
-				printresult( @$row['judger'] ? @$resulttable[$row['submitid']]['result'] : 'queued');
+				printresult( @$row['judgerid'] ? @$resulttable[$row['submitid']]['result'] : 'queued');
 
 		echo "</td><td>".@$resulttable[$row['submitid']]['judgername'];
 		echo "</td></tr>\n";

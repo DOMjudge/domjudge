@@ -18,7 +18,7 @@ if(!$id)	error ("Missing submission id");
 
 if(isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge') {
 	$DB->q('UPDATE judging SET valid = 0 WHERE submitid = %i', $id);
-	$DB->q('UPDATE submission SET judger = NULL, judgemark = NULL WHERE submitid = %i', $id);
+	$DB->q('UPDATE submission SET judgerid = NULL, judgemark = NULL WHERE submitid = %i', $id);
 }
 
 echo "<h1>Submission $id</h1>\n\n";
@@ -45,7 +45,7 @@ $submdata = $DB->q('TUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.source,
 <?php
 $hasfinal = FALSE;
 
-$judgedata = $DB->q('SELECT * FROM judging LEFT JOIN judger ON(judger=judgerid)
+$judgedata = $DB->q('SELECT * FROM judging LEFT JOIN judger USING(judgerid)
 	WHERE submitid = %i ORDER BY starttime', $id);
 
 if($judgedata->count() == 0) {
@@ -58,7 +58,7 @@ if($judgedata->count() == 0) {
 		echo "<td align=\"right\"><a href=\"judging.php?id=".$jrow['judgingid']."\">".$jrow['judgingid']."</a>".
 		"</td><td>".printtime($jrow['starttime']).
 		"</td><td>".printtime(@$jrow['endtime']).
-		"</td><td title=\"".$jrow['judger']."\">".$jrow['name'].
+		"</td><td title=\"".$jrow['judgerid']."\">".$jrow['name'].
 		"</td><td>".printresult(@$jrow['result']).
 		"</td><td align=\"right\">".$jrow['valid'].
 		"</td></tr>\n";

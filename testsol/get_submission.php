@@ -6,6 +6,7 @@
  *
  * $Id$
  */
+
 define ('SCRIPT_ID', 'get_submission');
 require ('../etc/config.php');
 require ('../php/init.php');
@@ -39,14 +40,14 @@ while ( TRUE ) {
 	$row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
 	if ( $row['active'] != 1 ) {
 		if ( $active ) {
-			logmsg("$me Not active, waiting for reactivation...");
+			logmsg("$me Not active, waiting for activation...");
 			$active = FALSE;
 		}
-		sleep(15);
+		sleep(5);
 		continue;
 	}
 	if ( ! $active ) {
-		logmsg("$me Reactivated, checking queue...");
+		logmsg("$me Activated, checking queue...");
 		$active = TRUE;
 		$waiting = FALSE;
 	}
@@ -57,7 +58,7 @@ while ( TRUE ) {
 
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-		SET judger = %i, judgemark = %s WHERE judger IS NULL LIMIT 1', $myid, $mark);
+		SET judgerid = %i, judgemark = %s WHERE judgerid IS NULL LIMIT 1', $myid, $mark);
 
 	// nothing updated -> no open submissions
 	if ( $numupd == 0 ) {
@@ -75,12 +76,12 @@ while ( TRUE ) {
 		s.submitid, s.source, s.langid, testdata
 		FROM submission s, problem p, language l
 		WHERE s.probid = p.probid AND s.langid = l.langid AND
-		judgemark = %s AND judger = %i', $mark, $myid);
+		judgemark = %s AND judgerid = %i', $mark, $myid);
 
 	logmsg("$me Starting judging of $row[submitid]...");
 
 	// update the judging table with our ID and the starttime
-	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,starttime,judger)
+	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,starttime,judgerid)
 		VALUES (%i,NOW(),%i)',
 		$row['submitid'], $myid);
 
@@ -105,7 +106,7 @@ while ( TRUE ) {
 	// pop the result back into the judging table
 	$DB->q('UPDATE judging
 		SET endtime = NOW(), result = %s, output_compile = %s, output_run = %s, output_diff = %s
-		WHERE judgingid = %i AND judger = %i',
+		WHERE judgingid = %i AND judgerid = %i',
 		$result,
 		get_content($tempdir.'/compile.out'),
 		get_content($tempdir.'/program.out'),

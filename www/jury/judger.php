@@ -26,7 +26,7 @@ $row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $id);
 
 <?php
 
-$res = $DB->q('SELECT * FROM judging WHERE judger = %s', $id);
+$res = $DB->q('SELECT * FROM judging WHERE judgerid = %i', $id);
 
 if( $res->count() == 0 ) {
 	echo "<em>Nothing judged.</em>";

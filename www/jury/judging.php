@@ -16,7 +16,7 @@ echo "<h1>Judging $id</h1>\n\n";
 
 $jdata = $DB->q('TUPLE SELECT j.*,s.*,judger.name as judgename
 	FROM judging j LEFT JOIN submission s USING(submitid)
-	LEFT JOIN judger ON(j.judger=judger.judgerid)
+	LEFT JOIN judger USING(judgerid)
 	WHERE judgingid = %i',
 	$id);
 
@@ -39,7 +39,7 @@ htmlentities($jdata['team'] .' / '. $jdata['probid'].' / '.$jdata['langid'])?></
 <tr><td>Source:</td><td><tt><?= htmlspecialchars($jdata['source']) ?></tt></td></tr>
 <tr><td>Start:</td><td><?=$jdata['starttime']?></td></tr>
 <tr><td>End:</td><td><?=$endtime?></td></tr>
-<tr><td>Judger:</td><td><?=$jdata['judgename'].'/'.$jdata['judger']?></td></tr>
+<tr><td>Judger:</td><td><?=$jdata['judgename'].'/'.$jdata['judgerid']?></td></tr>
 <tr><td>Result:</td><td><?=printresult(@$jdata['result'])?></td></tr>
 <tr><td>Valid:</td><td><?=$jdata['valid']?></td></tr>
 </table>
