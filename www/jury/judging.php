@@ -41,7 +41,7 @@ htmlentities($jdata['team'] .' / '. $jdata['probid'].' / '.$jdata['langid'])?></
 <tr><td>End:</td><td><?=$endtime?></td></tr>
 <tr><td>Judger:</td><td><a href="judger.php?id=<?=$jdata['judgerid'].'">'.
 	$jdata['judgename'].'/'.$jdata['judgerid']?></a></td></tr>
-<tr><td>Result:</td><td><?=printresult(@$jdata['result'])?></td></tr>
+<tr><td>Result:</td><td><?=printresult(@$jdata['result'], $jdata['valid'])?></td></tr>
 <tr><td>Valid:</td><td><?=$jdata['valid']?></td></tr>
 </table>
 

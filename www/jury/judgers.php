@@ -17,7 +17,7 @@ echo "<table>
 <tr><th>nr</th><th>name</th><th>active</th></tr>\n";
 while($row = $res->next()) {
 	echo "<tr".
-		( $row['active'] ? '': ' class="invalid"').
+		( $row['active'] ? '': ' class="disabled"').
 		"><td><a href=\"judger.php?id=".$row['judgerid'].'">'.$row['judgerid'].'</a>'.
 		"</td><td>".htmlentities($row['name']).
 		"</td><td align=\"center\">".$row['active'].

@@ -52,20 +52,26 @@ function getSubmissions($key = null, $value = null) {
 }
 
 // prints result with correct style, '' -> judging
-function printresult($result) {
+function printresult($result, $valid = TRUE) {
 
-	$start = '<span class="sol-';
+	$start = '<span class="sol ';
 	$end   = '</span>';
+	$disab  = ($valid ? '': ' disabled');
+
 	switch($result) {
 		case '':
 			$result = 'judging';
 		case 'judging':
 		case 'queued':
-			return $start.'queued">'.$result.$end;
+			$style = 'queued';
+			break;
 		case 'correct':
-			return $start.$result.'">'.$result.$end;
+			$style = 'correct';
+			break;
 		default:
-			return $start.'incorrect">'.$result.$end;
+			$style = 'incorrect';
 	}
+
+	return $start . $style . $disab . '">' . $result . $end;
 
 }

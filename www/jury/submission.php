@@ -54,12 +54,12 @@ if($judgedata->count() == 0) {
 	echo "<table>\n";
 	echo "<tr><th>ID</th><th>start</th><th>end</th><th>judge</th><th>result</th><th>valid</th></tr>\n";
 	while($jrow = $judgedata->next()) {
-		echo "<tr" . ($jrow['valid'] ? '' : " class=\"invalid\"") .'>';
+		echo "<tr" . ($jrow['valid'] ? '' : " class=\"disabled\"") .'>';
 		echo "<td align=\"right\"><a href=\"judging.php?id=".$jrow['judgingid']."\">".$jrow['judgingid']."</a>".
 		"</td><td>".printtime($jrow['starttime']).
 		"</td><td>".printtime(@$jrow['endtime']).
 		"</td><td title=\"".$jrow['judgerid']."\">".$jrow['name'].
-		"</td><td>".printresult(@$jrow['result']).
+		"</td><td>".printresult(@$jrow['result'], $jrow['valid']).
 		"</td><td align=\"right\">".$jrow['valid'].
 		"</td></tr>\n";
 		
