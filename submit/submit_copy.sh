@@ -9,7 +9,7 @@ source `dirname $0`/../etc/config.sh
 
 function error()
 {
-    echo "[`date '+Bb %d %T'`] $0[$$]: $@"
+    echo "[`date '+%b %d %T'`] $0[$$]: $@"
 }
 
 [ $# -eq 3 ] || exit 1
