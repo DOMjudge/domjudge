@@ -9,6 +9,7 @@
 require('init.php');
 $title = 'Clarification Response';
 include('../header.php');
+include('menu.php');
 
 $respid = (int)$_GET['id'];
 
