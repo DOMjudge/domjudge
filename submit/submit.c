@@ -44,6 +44,7 @@ using namespace std;
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 /* Some system/site specific config */
 #include "../etc/config.h"
@@ -111,9 +112,12 @@ string problem, language, server, team;
 char *filename, *submitdir, *tempfile;
 int temp_fd;
 
+/* Language extensions */
+vector<vector<string> > languages;
+
 int main(int argc, char **argv)
 {
-	unsigned i;
+	unsigned i,j;
 	int c;
 	int redir_fd[3];
 	char *ptr;
@@ -121,10 +125,26 @@ int main(int argc, char **argv)
 	char *homedir;
 	struct stat fstats;
 	string filebase, fileext;
+	char *lang_exts;
+	char *lang, *ext;
+	char *lang_ptr, *ext_ptr;
 
 	progname = argv[0];
 	stdlog = NULL;
-	
+
+	/* Parse LANGEXTS define into separate strings */
+	lang_exts = strdup(LANG_EXTS);
+	for(lang=strtok_r(lang_exts," ",&lang_ptr); lang!=NULL;
+		lang=strtok_r(NULL," ",&lang_ptr)) {
+
+		languages.push_back(vector<string>());
+		for(ext=strtok_r(lang,",",&ext_ptr); ext!=NULL;
+			ext=strtok_r(NULL,",",&ext_ptr)) {
+
+			languages[languages.size()-1].push_back(stringtolower(ext));
+		}
+	}
+
 	if ( getenv("HOME")==NULL ) error(0,"environment variable `HOME' not set");
 	homedir = getenv("HOME");
 	
@@ -231,17 +251,26 @@ int main(int argc, char **argv)
 	/* Try to parse problem and language from filename */
 	filebase = string(gnu_basename(filename));
 	if ( filebase.find('.')!=string::npos ) {
-		fileext = filebase.substr(filebase.rfind('.')+1);
+		fileext = stringtolower(filebase.substr(filebase.rfind('.')+1));
 		filebase.erase(filebase.find('.'));
 
 		/* Check for only alphanumeric characters in problem */
 		for(i=0; i<filebase.length(); i++) {
 			if ( ! isalnum(filebase[i]) ) break;
 		}
-		if ( i>=filebase.length() && filebase.length()>0 &&
-		     problem.empty() ) problem = filebase;
+		if ( i>=filebase.length() && filebase.length()>0 && problem.empty() ) {
+			problem = filebase;
+		}
 
-		/* TODO: check extension for languages */
+		/* Check for matching file extension */
+		for(i=0; i<languages.size(); i++) {
+			for(j=0; j<languages[i].size(); j++) {
+				if ( languages[i][j]==fileext && language.empty() ) {
+					language = languages[i][0];
+				}
+			}
+		}
+		
 	}
 	
 	if ( problem.empty()  ) usage2(0,"no problem specified");
