@@ -62,8 +62,8 @@ Verder bestaat de invoer van opgaven standaard uit meerdere
 testgevallen. Als eerste is dan op \'e\'en regel het aantal
 testgevallen gegeven en daarna volgen de testgevallen.
 
-Zie verder bijlage \ref{codevoorbeeld} voor een enkele voorbeelden van
-code om dit af te handelen.
+Zie verder bijlage \ref{codevoorbeeld} voor voorbeelden van code om
+dit af te handelen.
 
 
 \newpage
@@ -91,14 +91,14 @@ tabel (\ref{compilers}) met alle beschikbare compilers en welke versies.
 \hline
 Compiler & Linux versie & Windows \\
 \hline
-GCC				& \LINUXGCC		& \WINDOWSGCC \\
-MS Visual C++	&				& \WINDOWSMSC \\
-GCJ				& \LINUXGCJ		& \WINDOWSGCJ \\
-Sun Java		& \LINUXJAVA	& \WINDOWSJAVA \\
-FreePascal		& \LINUXFPC		& \WINDOWSFPC \\
-GPC				& \LINUXGPC		& \WINDOWSGPC \\
-GHC				& \LINUXGHC		& \WINDOWSGHC \\
-HUGS			& \LINUXHUGS	& \WINDOWSHUGS \\
+GCC             & \LINUXGCC     & \WINDOWSGCC   \\
+MS Visual C++   &               & \WINDOWSMSC   \\
+GCJ             & \LINUXGCJ     & \WINDOWSGCJ   \\
+Sun Java        & \LINUXJAVA    & \WINDOWSJAVA  \\
+FreePascal      & \LINUXFPC     & \WINDOWSFPC   \\
+GPC             & \LINUXGPC     & \WINDOWSGPC   \\
+GHC             & \LINUXGHC     & \WINDOWSGHC   \\
+HUGS            & \LINUXHUGS    & \WINDOWSHUGS  \\
 \hline
 \end{tabular}
 \label{compilers}
@@ -290,11 +290,11 @@ compileerfout kun je altijd de foutmelding bekijken).
 \hline
 programmeertaal & jury compiler-commando & niet-statisch gelinked \\
 \hline
-C		& \texttt{gcc -Wall -O2 -static -lm}		& \texttt{gcc -Wall -O2 -lm}\\
-C++		& \texttt{g++ -Wall -O2 -static}			& \texttt{g++ -Wall -O2}\\
-Java	& \texttt{gcj -Wall -static --main=Main}	& \texttt{gcj -Wall --main=Main}\\
-Pascal	& \texttt{fpc -vwnh -O2 -Sg -XS}			& \texttt{fpc -vwnf -O2 -Sg}\\
-Haskell	& \texttt{ghc -Wall -O -static -optl-static}& \texttt{ghc -Wall -O}\\
+C       & \texttt{gcc -Wall -O2 -static -lm}         & \texttt{gcc -Wall -O2 -lm}     \\
+C++     & \texttt{g++ -Wall -O2 -static}             & \texttt{g++ -Wall -O2}         \\
+Java    & \texttt{gcj -Wall -static --main=Main}     & \texttt{gcj -Wall --main=Main} \\
+Pascal  & \texttt{fpc -vwnh -O2 -Sg -XS}             & \texttt{fpc -vwnf -O2 -Sg}     \\
+Haskell & \texttt{ghc -Wall -O -static -optl-static} & \texttt{ghc -Wall -O}          \\
 \hline
 \end{tabular}
 \label{compilercommandos}
@@ -400,5 +400,8 @@ Een oplossing in C++ kan als volgt:
 
 Een oplossing in Pascal:
 \verbatiminput{voorbeeld.pas}
+
+En tenslotte een oplossing in Java:
+\verbatiminput{voorbeeld.java}
 
 \end{document}
