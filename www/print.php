@@ -42,13 +42,11 @@ function printyn ($val) {
 }
 
 /**
- * given 2004-12-31 15:43:05, returns 15:43:05
+ * given 2004-12-31 15:43:05, returns 15:43
  */
 function printtime($datetime) {
 	if ( ! $datetime ) return '';
-	$date_time = explode(' ',$datetime);
-	return htmlspecialchars($date_time[1]);
-
+	return htmlspecialchars(substr($datetime,11,5));
 }
 
 /**
