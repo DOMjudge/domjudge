@@ -10,9 +10,9 @@ our $SUBMITPORT   = 9147;
 our $SUBMITSERVER = "square.a-eskwadraat.nl";
 
 # Root-paths for different parts of the system
-our $SYSTEM_ROOT = "/home/cies/nkp0405/systeem/svn/jury";
-our $OUTPUT_ROOT = "/home/cies/nkp0405/systeem/systest";
-our $INPUT_ROOT  = "/home/cies/nkp0405/opgaven";
+our $SYSTEM_ROOT = "$ENV{HOME}/systeem/svn/jury";
+our $OUTPUT_ROOT = "$ENV{HOME}/systeem/systest";
+our $INPUT_ROOT  = "$ENV{HOME}/opgaven";
 
 # Paths within OUTPUT_ROOT
 our $INCOMINGDIR = $OUTPUT_ROOT . "/incoming";

@@ -9,9 +9,9 @@
  */
 
 /** Define absulote paths used for finding other files */
-define('SYSTEM_ROOT', '/home/cies/nkp0405/systeem/svn/jury');
-define('OUTPUT_ROOT', '/home/cies/nkp0405/systeem/systest');
-define('INPUT_ROOT',  '/home/cies/nkp0405/opgaven');
+define('SYSTEM_ROOT', $_ENV['HOME'].'/systeem/svn/jury');
+define('OUTPUT_ROOT', $_ENV['HOME'].'/systeem/systest');
+define('INPUT_ROOT',  $_ENV['HOME'].'/opgaven');
 
 /** Paths within OUTPUT_ROOT */
 define('INCOMINGDIR', OUTPUT_ROOT.'/incoming');
