@@ -6,7 +6,9 @@ TARGETSPDF = $(addsuffix .pdf,$(TARGETS))
 
 LATEXOPTIONS = --file-line-error-style
 
-all: dvi ps pdf
+all: build
+
+build: dvi ps pdf
 
 $(TARGETSDVI): %.dvi: %.tex domjudgelogo.eps systemconfig.tex example.*
 	latex $(LATEXOPTIONS) $<
@@ -19,8 +21,6 @@ $(TARGETSPS): %.ps: %.dvi
 $(TARGETSPDF): %.pdf: %.dvi
 	dvipdf $<
 
-.PHONY: dvi ps pdf clean texclean
-
 dvi: $(TARGETSDVI)
 ps:  $(TARGETSPS)
 pdf: $(TARGETSPDF)
@@ -30,3 +30,6 @@ texclean:
 
 clean: texclean
 	-rm -f $(TARGETSDVI) $(TARGETSPS) $(TARGETSPDF)
+	-rm -f *~
+
+.PHONY: build dvi ps pdf clean texclean

@@ -1,10 +1,12 @@
-EXTENSIONS := h sh php tex
-TEMPLATES = $(addprefix config.template.$(EXTENSIONS))
-CONFIGS = $(addprefix config.,$(EXTENSIONS))
+EXTENSIONS = h sh php tex
+TEMPLATES  = $(addprefix config.template.,$(EXTENSIONS))
+CONFIGS    = $(addprefix config.,$(EXTENSIONS))
 
 TEMPFILEDIR = ../bin
 
-all: $(CONFIGS)
+all: config
+
+config: $(CONFIGS)
 
 $(CONFIGS): config.%: config.template.% global.cfg $(TEMPFILEDIR)/tempfile
 	./generate_config.sh $*
@@ -12,7 +14,8 @@ $(CONFIGS): config.%: config.template.% global.cfg $(TEMPFILEDIR)/tempfile
 $(TEMPFILEDIR)/tempfile:
 	$(MAKE) -C $(TEMPFILEDIR) tempfile
 
-.PHONY: clean
-
 clean:
 	-rm -f $(CONFIGS)
+	-rm -f *~
+
+.PHONY: config clean

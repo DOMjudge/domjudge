@@ -1,21 +1,21 @@
-CFLAGS=-O2 -Wall
-TARGETS=runguard beep mkstemps tempfile
+CFLAGS  = -O2 -Wall
+TARGETS = runguard beep mkstemps tempfile
+
+# Targets to be installed setuid root:
 SUIDTARGETS=runguard beep
+# Files where to save intermediate (non-setuid) builds:
 SUIDBUILDS=$(addsuffix .build,$(SUIDTARGETS))
-
-CSINSTALLDIR=/private/nkpjury/bin
-CSDOMAIN=students.cs.uu.nl
-DOMAIN=$(shell dnsdomainname)
-
-ifeq ($(DOMAIN),$(CSDOMAIN))
-INSTALLDIR=$(CSINSTALLDIR)
-SUROOT=sudo -u root /bin/bash -c
-else
-INSTALLDIR=$(PWD)
+# Where to install them:
+SUIDINSTALLDIR=$(PWD)
+# Command to become root:
 SUROOT=su root
-endif
+#SUROOT=sudo -u root /bin/bash -c
 
-all: $(TARGETS) install-setuid
+all: build install-setuid
+
+build: $(TARGETS)
+
+install: install-setuid
 
 $(SUIDTARGETS): %: %.build
 
@@ -25,15 +25,18 @@ $(SUIDBUILDS): %.build: %.c
 runguard.build: ../etc/config.h
 
 install-setuid: $(SUIDBUILDS)
-	mkdir -p $(INSTALLDIR)
-	cd $(INSTALLDIR) && rm -f $(SUIDTARGETS)
-	for i in $(SUIDTARGETS) ; do cp -a $$i.build $(INSTALLDIR)/$$i ; done
-	$(SUROOT) 'cd $(INSTALLDIR) && chown root.root $(SUIDTARGETS) && chmod u+s $(SUIDTARGETS)'
-ifneq ($(INSTALLDIR),$(PWD))
+	mkdir -p $(SUIDINSTALLDIR)
+	cd $(SUIDINSTALLDIR) && rm -f $(SUIDTARGETS)
+	for i in $(SUIDTARGETS) ; do cp -a $$i.build $(SUIDINSTALLDIR)/$$i ; done
+	$(SUROOT) 'cd $(SUIDINSTALLDIR) && \
+	           chown root.root $(SUIDTARGETS) && \
+	           chmod u+s $(SUIDTARGETS)'
+ifneq ($(SUIDINSTALLDIR),$(PWD))
 	for i in $(SUIDTARGETS) ; do ln -sf $(INSTALLDIR)/$$i ; done
 endif
 
 clean:
-	-rm -f $(TARGETS) $(addsuffix .o,$(TARGETS))
+	-rm -f $(TARGETS) $(SUIDBUILDS)
+	-rm -f *~
 
-.PHONY: clean install-setuid runguard beep
+.PHONY: build install install-setuid $(SUIDTARGETS) clean
