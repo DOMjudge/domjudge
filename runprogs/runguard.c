@@ -41,7 +41,7 @@
 #include "../etc/config.h"
 
 #define PROGRAM "runguard"
-#define VERSION "0.1"
+#define VERSION "0.2"
 #define AUTHORS "Jaap Eldering"
 
 extern int errno;
@@ -161,7 +161,7 @@ void usage()
 	printf("      --version       output version information and exit\n");
 	printf("\n");
 	printf("Note that root privileges are needed for the `root' and `user' options.\n");
-	printf("When run setuid root without the `user' option, the user id is set to the");
+	printf("When run setuid without the `user' option, the user id is set to the\n");
 	printf("real user id.\n");
 	exit(0);
 }
@@ -178,7 +178,9 @@ void outputtime()
 	verbose("runtime is %d.%03d seconds",timediff/1000,timediff%1000);
 
 	if ( use_output ) {
-		fprintf(outputfile,"%d.%03d\n",timediff/1000,timediff%1000);
+		if ( fprintf(outputfile,"%d.%03d\n",timediff/1000,timediff%1000)==0 ) {
+			error(0,"cannot write to file `%s'",outputfile);
+		}
 		if ( fclose(outputfile) ) error(errno,"closing file `%s'",outputfile);
 	}
 }
@@ -301,12 +303,10 @@ int main(int argc, char **argv)
 		if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped");
 		verbose("using user id `%d'",runuid);
 	} else {
-		/* Check if this program is run as (setuid) root and set effective uid
-		   to real uid, to increase security */
-		if ( geteuid()==0 ) {
-			if ( setuid(getuid()) ) error(errno,"cannot set user id");
-			verbose("using user id `%d'",getuid());
-		}
+		/* Reset effective uid to real uid, to increase security
+		   when program is run setuid */
+		if ( setuid(getuid()) ) error(errno,"cannot set real user id");
+		verbose("using real uid `%d' as effective uid",getuid());
 	}
 
 	/* Open output file for writing running time to */
