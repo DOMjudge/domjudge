@@ -2,16 +2,10 @@
 // $Id$
 
 /******************************************************************************
-*    Info                                                                     *
-*******************************************************************************
-
-This file needs to be translated into English.
-
-/******************************************************************************
 *    Licence                                                                  *
 *******************************************************************************
 
-Copyright (C) 2001-2004 Jeroen van Wolffelaar <jeroen@php.net>
+Copyright (C) 2001-2005 Jeroen van Wolffelaar <jeroen@php.net>, et al.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -35,15 +29,14 @@ if (!@define('INCLUDED_LIB_DATABASE',true)) return;
 define('DB_EQ'    , '='        );
 define('DB_NEQ'   , '!='       );
 define('DB_LIKE'  , 'like'     );
-// bevat...:
 define('DB_CONT'  , 'cont'     );
 define('DB_NLIKE' , 'not like' );
 //define('DB_NCONT' , 'ncont'    );
 define('DB_REGEX' , 'regex'    );
 define('DB_NREGEX', 'not regex');
 
-// Speciale sentinel voor set, want die moet altijd '=' hebben, en nooit 'is'
-// (bijv bij null)
+// Special sentinel for set, because it should always use '=', and never 'is'
+// (e.g. with null)
 define('DB_SET', 'DB_SET');
 
 /******************************************************************************
@@ -52,8 +45,8 @@ define('DB_SET', 'DB_SET');
 
 function db_vw($kolom,$waarde,$mode=NULL)
 {
-	if (!$mode) $mode = DB_EQ; // staat niet direct zo in de header, want
-				// je mag ook expliciet NULL opgeven
+	if (!$mode) $mode = DB_EQ; // not in the header because you can also pass
+				// NULL explicitly
 	
 	if ($waarde === NULL) {
 		switch ($mode) {
@@ -62,7 +55,7 @@ function db_vw($kolom,$waarde,$mode=NULL)
 		}
 	}
 
-	// als je set, dan escapen
+	// if set, then escape
 	if ($mode === DB_SET) {
 		$mode='=';
 		$waarde = db__val2sql($waarde);
@@ -71,12 +64,12 @@ function db_vw($kolom,$waarde,$mode=NULL)
 		$waarde = db__val2sql((string)$waarde);
 		$waarde = '"%'.substr($waarde,1, -1).'%"';
 		$mode = 'LIKE';
-	// dit is ook een voorwaarde
+	// this is also a condition
 	} elseif ( is_array($waarde) ) {
 		$mode = 'in';
 		$waarde = array_map('db__val2sql', $waarde);
 		$waarde = '('. implode(',', $waarde) . ')';
-	// anders gewoon escapen, want is voorwaarde
+	// else just escape, because is a condition
 	} else {
 		$waarde = db__val2sql($waarde);
 	}
@@ -106,9 +99,7 @@ function db__connect($database,$host,$user,$pass,$persist=TRUE)
 /******************************************************************************
 *    (internal) Type conversion                                               *
 ******************************************************************************/
-// zet een php-variabele om in een vorm
-// die rechtstreeks in een query geplaatst
-// kan worden
+// transform a php variable into one that can be put directly into a query
 function db__val2sql($val, $mode='.')
 {
 	if (isset($GLOBALS['MODE'])) {
@@ -150,9 +141,10 @@ function db__sql2val($val)
 	return $t !== false ? $t : $val;
 }
 
-/* gebruik:
- * - $wat is een string, "<table>", met $db de database
- * - $db is een db_result
+/**
+ * usage:
+ * - $wat is a string, "<table>", with $db being the database
+ * - $db is a db_result
  *
  * $result[]:
  *   [0]["table"]  table name
@@ -192,24 +184,24 @@ function db__metadata(&$db,$table=null)
 	return $res;
 }
 			
-/*
- * Zowel met als zonder constructor te gebruiken.  Zonder constructor is
- * een eenvoudige extend mogelijk:
+/**
+ * To be used with or without constructor. Without constructor, a simple
+ * extend is possible:
  *
  * class fake_db extends db
  * {
  * 		function my_db()
  * 		{
  * 			$this->db('dilithium','localhost','nobody','<password>',TRUE);
- *			// voor het faken van een andere db
+ *			// for faking another db
  *			$this->setprefix('fake');
  *		}
  * }
- * Zo wordt de echte database 'dilithium' gebruikt om een database 'fake'
- * te faken.  In 'dilithium' hebben de tables uit 'fake' het prefix 'fake_'.
- * Dus wil je een table 'mytable' uit 'fake' faken:
+ * This uses the real database 'dilithium' to fake the database 'fake'.
+ * In 'dilithium', the tables from 'fake' have the prefix 'fake_'.
+ * So if you want to fake the table 'myfake' from 'fake':
  * 		$fake_db->insert('mytable',array('name'=>'me, myself and I'));
- * dan wordt dat gemapt op de volgende query in 'dilithium':
+ * then this will be mapped to the following query on 'dilithium':
  * 		INSERT fake_mytable SET name='me, myself and I';
  */
 class db
@@ -296,9 +288,9 @@ class db
 			case 'maybevalue':
 				$maybe = true;
 				$key = substr($key,5,5);
-				// LET OP: De substr verderop zal als keylength de nieuwe key
-				// nemen, daarom moeten we vast de lengte van VALUE/TUPLE van
-				// de format afhalen. Gelukkig zijn BEIDE 5
+				// ATTENTION: the substr below will use the new key as its
+				// keylength, that's why we have to take the length of
+				// VALUE/TUPLE from the format. Luckily BOTH are 5 long.
 				$format = substr($format,5);
 			case 'column':
 			case 'table':
@@ -339,8 +331,8 @@ class db
 				case 'A':
 					$val = array_shift($argv);
 					if (!is_array($val) || !$val) {
-						error("Met %A in \$DATABASE->q() moet een "
-							."niet-lege array corresponderen, het is nu een "
+						error("%A in \$DATABASE->q() has to correspond to a "
+							."non-empty array, it's now a "
 							."'$val'!" );
 					}
 					$GLOBALS['MODE'] = $part{1};
@@ -472,10 +464,10 @@ class db_result
 		return @mysql_free_result($this->_result);
 	}
 
-	// geef een assoc array die een resultaatrij is
+	// return an assoc array that is a result row
 	function next()
 	{
-		// er is al te vaak hieroverheen genext. Error.
+		// we've nexted over this result too many times already.
 		if(!isset($this->_result)) {
 			error('Result does not contain a valid resource.');
 		}  
@@ -483,7 +475,7 @@ class db_result
 		$this->_nextused = TRUE;
 		if ($this->tuple === FALSE)
 		{
-			// garbase collection
+			// garbage collection
 			$this->_result = null;
 			return FALSE;
 		}
@@ -502,7 +494,7 @@ class db_result
 	function getcolumn($field=NULL)
 	{
 		if($this->_nextused) {
-			error('Getcolumn werkt niet als je al eens genext() hebt over het result!');
+			error('Getcolumn does not work if you\'ve already next()ed over the result!');
 		}
 		$col = array();
 		while($this->next())
@@ -512,11 +504,11 @@ class db_result
 		return $col;
 	}
 
-	// geeft een 2-dim array die het resultaat voorstelt
+	// returns a 2-dim array containing the result
 	function gettable()
 	{
 		if($this->_nextused) {
-			error('Gettable werkt niet als je al eens genext() hebt over het result!');
+			error('Gettable does not work if you\'ve already next()ed over the result!');
 		}
 		$tabel = array();
 		while ($this->next())
@@ -526,12 +518,12 @@ class db_result
 		return $tabel;
 	}
 
-	// geeft een 2-dim array die het resultaat voorstelt, met een kolom als
-	// key (aparte functie ivm performance, hoef je niet de loop te iffen
+	// returns a 2-dim array containing the result, with a column as key
+	// (separate function for performance reasons)
 	function getkeytable($key)
 	{
 		if($this->_nextused) {
-			error('Gettable werkt niet als je al eens genext() hebt over het result!');
+			error('Gettable does not work if you\'ve already next()ed over the result!');
 		}
 		$tabel = array();
 		while ($this->next()) {
