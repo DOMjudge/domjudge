@@ -43,3 +43,11 @@ function getCurContest() {
 	
 	return $curcontest;
 }
+
+/**
+ * Add another key/value to a url
+ */
+function addUrl($url, $keyvalue)
+{
+	return $url.(strrpos($url, '?')===False ? '?' : '&' ).$keyvalue;
+}
