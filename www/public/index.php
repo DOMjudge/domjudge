@@ -111,8 +111,10 @@ echo "</table>\n\n";
 // last modified date
 echo "<div id=\"lastmod\">Last Update: ".date('r')."</div>\n\n";
 
-
 require('../footer.php');
+
+// FIXME HACK ALERT: Bug #962 'fix'
+die;
 
 // comparison function
 function cmp ($b, $a) {
