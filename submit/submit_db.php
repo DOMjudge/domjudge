@@ -12,7 +12,7 @@
  * $Id$
  */
 	define ('SCRIPT_ID', 'submit_db');
-	define ('LOG_ID', 'submit');
+	define ('LOGFILE', 'submit');
 	
 	require ('../etc/config.php');
 	require ('../php/init.php');

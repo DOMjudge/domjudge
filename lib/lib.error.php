@@ -6,12 +6,12 @@
  * $Id$
  */
 
-if(!defined('LOG_ID')) {
-	define('LOG_ID', SCRIPT_ID);
+if(!defined('LOGFILE')) {
+	define('LOGFILE', SCRIPT_ID);
 }
 
 define('STDERR', fopen('php://stderr', 'w'));
-define('STDLOG', fopen(LOGDIR.'/'.LOG_ID, 'w'));
+define('STDLOG', fopen(LOGDIR.'/'.LOGFILE, 'w'));
 
 function logmsg($msglevel, $string) {
 	global $verbose, $loglevel;
