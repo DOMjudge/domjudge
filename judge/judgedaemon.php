@@ -10,6 +10,8 @@
 
 require ('../etc/config.php');
 
+$waittime = 5;
+
 $myhost = trim(`hostname`);
 
 define ('SCRIPT_ID', 'judgedaemon');
@@ -49,7 +51,7 @@ while ( TRUE ) {
 			logmsg(LOG_NOTICE, "Not active, waiting for activation...");
 			$active = FALSE;
 		}
-		sleep(5);
+		sleep($waittime);
 		continue;
 	}
 	if ( ! $active ) {
@@ -59,7 +61,7 @@ while ( TRUE ) {
 	}
 
 	$cid = $DB->q('MAYBEVALUE SELECT cid FROM contest ORDER BY starttime DESC LIMIT 1');
-	if( ! $cid ) {
+	if( ! isset($cid) ) {
 		error("No contest found in database, aborting.");
 	}
 	
@@ -68,14 +70,14 @@ while ( TRUE ) {
 	$probs = $DB->q('COLUMN SELECT probid FROM problem WHERE allow_judge = 1');
 	if( count($probs) == 0 ) {
 		logmsg(LOG_NOTICE, "No judgable problems, waiting...");
-		sleep(5);
+		sleep($waittime);
 		continue;
 	}
 	$judgable_prob = array_unique(array_values($probs));
 	$langs = $DB->q('COLUMN SELECT langid FROM language WHERE allow_judge = 1');
 	if( count($langs) == 0 ) {
 		logmsg(LOG_NOTICE, "No judgable languages, waiting...");
-		sleep(5);
+		sleep($waittime);
 		continue;
 	}
 	$judgable_lang = array_unique(array_values($langs));
@@ -86,10 +88,9 @@ while ( TRUE ) {
 
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-		SET judgerid = %s, judgemark = %s
-		WHERE judgerid IS NULL AND cid = %i
-		  AND langid IN (%As) AND probid IN (%As)
-		LIMIT 1', $myhost, $mark, $cid, $judgable_lang, $judgable_prob);
+		SET judgerid = %s, judgemark = %s WHERE judgerid IS NULL
+		AND cid = %i AND langid IN (%As) AND probid IN (%As) LIMIT 1',
+		$myhost, $mark, $cid, $judgable_lang, $judgable_prob);
 
 	// nothing updated -> no open submissions
 	if ( $numupd == 0 ) {
@@ -97,19 +98,20 @@ while ( TRUE ) {
 			logmsg(LOG_INFO, "No submissions in queue, waiting...");
 			$waiting = TRUE;
 		}
-		sleep(5);
+		sleep($waittime);
 		continue;
 	}
 	$waiting = FALSE;
 
 	// get max.runtime, path to submission and other params
 	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS runtime,
-		s.submitid, s.sourcefile, s.langid, testdata
+		s.submitid, s.sourcefile, s.langid, s.team, s.probid, testdata
 		FROM submission s, problem p, language l
 		WHERE s.probid = p.probid AND s.langid = l.langid AND
 		judgemark = %s AND judgerid = %s', $mark, $myhost);
 
-	logmsg(LOG_NOTICE, "Judging submission s$row[submitid]...");
+	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
+	       "($row[team]/$row[probid]/$row[langid])...");
 
 	// update the judging table with our ID and the starttime
 	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgerid)
@@ -117,7 +119,7 @@ while ( TRUE ) {
 		$row['submitid'], $cid, $myhost);
 
 	// create tempdir for tempfiles
-	$tempdir = "$tempdirpath/c$cid/j$judgingid";
+	$tempdir = "$tempdirpath/c$cid-s$row[submitid]-j$judgingid";
 	system("mkdir -p $tempdir", $retval);
 	if ( $retval != 0 ) error("Could not create $tempdir");
 
