@@ -1,0 +1,110 @@
+#!/bin/bash
+#
+# Script to compare output from different solutions.
+# Written by Jaap Eldering, April 2004
+#
+# Run this script in a problem-directory. Expects testdata
+# input in 'testdata.in' and output in 'testdata.out'.
+# Solutions must be of the form '<name>*.<langext>'
+#
+# Optionally the timelimit may be specified as argument.
+#
+
+# Extended pattern matching:
+shopt -s extglob
+
+NLANG=5
+LANG=('c' 'cpp'        'java' 'pascal'   'haskell')
+EXTS=('c' 'cpp cc c++' 'java' 'pas pp p' 'hs'     )
+ALLEXTS="${EXTS[@]}"
+
+TESTSOL=~/systeem/svn/testsol/test_solution.sh
+
+TESTIN=testdata.in
+TESTOUT=testdata.out
+SAMPLEIN=testsample.in
+SAMPLEOUT=testsample.out
+
+USERS="jan jaap gerben maarten pieter wouter test"
+
+TMPDIR="compare.$$.tmp"
+TIMELIMIT=20
+ALLOK=1
+
+if [ "$1" ]; then
+	TIMELIMIT="$1"
+fi
+
+if [ "$DEBUG" ]; then
+	export DEBUG
+	export VERBOSE=1
+fi
+
+function test_sol ()
+{
+	local lang base="" file=$1 in=$2 out=$3
+	# First determine language:
+	for ((i=0; i<NLANG; i++)); do
+		for ext in ${EXTS[$i]}; do
+			if [[ "$file" == *.$ext ]]; then
+				base="${file%.$ext}"
+				lang=$i
+				break 2
+			fi
+		done
+	done
+	if [ -z "$base" ]; then
+		echo "Could not determine language!?"
+		exit 1
+	fi
+
+	mkdir $TMPDIR/$file
+	$TESTSOL $file ${LANG[$lang]} $in $out \
+	          $TIMELIMIT $TMPDIR/$file || ALLOK=0
+}
+
+[ -r $TESTIN    ] || { echo "No input testdata found."; exit 1; }
+[ -r $TESTOUT   ] || { echo "No output testdata found."; exit 1; }
+[ -r $SAMPLEIN  ] || { echo "No input sample testdata found."; exit 1; }
+[ -r $SAMPLEOUT ] || { echo "No output sample testdata found."; exit 1; }
+
+echo -n "Supported languages:"
+for((i=0; i<NLANG; i++)); do echo -n " ${LANG[$i]},"; done
+echo
+
+# As extra information:
+printf 'Checking %-15s   ' "$TESTIN"
+checkinput $TESTIN || ALLOK=0
+printf 'Checking %-15s   ' "$SAMPLEIN"
+checkinput $SAMPLEIN || ALLOK=0
+
+# Make a pattern string to match solutions with:
+FILEMATCH="^("
+for user in $USERS;	  do FILEMATCH="${FILEMATCH}$user|"; done
+FILEMATCH="${FILEMATCH%|}).*\\.("
+for ext	 in $ALLEXTS; do FILEMATCH="${FILEMATCH}$ext|";	 done
+FILEMATCH="${FILEMATCH%|})$"
+
+mkdir $TMPDIR
+# Loop through all solutions:
+FIRST=1
+for file in `ls | grep -E $FILEMATCH`; do
+	if [ $FIRST == 1 ]; then
+		FIRST=0
+		printf '%-40s' "Testing sample testdata..."
+		[ "$DEBUG" -o "$VERBOSE" ] && echo
+		samplesol="sample-sol.${file##*.}"
+		ln -s -f $file $samplesol
+		test_sol $samplesol $SAMPLEIN $SAMPLEOUT
+	fi
+	printf '%-40s' "Testing solution '$file'... "
+	[ "$DEBUG" -o "$VERBOSE" ] && echo
+	test_sol $file $TESTIN $TESTOUT
+done
+
+[ "$DEBUG" ] || rm -rf $TMPDIR $samplesol
+
+[ $ALLOK = 1 ] && exit 0
+
+echo "There were errors!"
+exit 1

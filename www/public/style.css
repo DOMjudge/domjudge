@@ -1,0 +1,17 @@
+/* $Id$ */
+
+.correct {
+	background: lime;
+}
+.incorrect {
+	background : white;
+}
+td {
+	text-align: right;	
+}
+#lastmod {
+	color:	blue;
+	text-align: right;
+	font-family: sans-serif;
+	font-size: x-small;
+}
