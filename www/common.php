@@ -144,7 +144,7 @@ function putResponse($id, $showReq = true) {
 ?>
 <tr><td>Send to:</td><td><?=isset($respdata['rcpt'])?'<a href="team.php?id='.urlencode($respdata['rcpt']).'"><span class="teamid">'. htmlspecialchars($respdata['rcpt'])."</span></a>":"All"?></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($respdata['submittime']) ?></td></tr>
-<tr><td valign="top">Response:</td><td class="filename"><pre class="output_text"><?=htmlspecialchars($respdata['body']) ?></pre></td></tr>
+<tr><td valign="top">Response:</td><td class="filename"><pre class="output_text"><?=nl2br(htmlspecialchars($respdata['body'])) ?></pre></td></tr>
 </table>
 <?
 }
@@ -164,7 +164,7 @@ function putRequest($id) {
 <tr><td>Contest:</td><td><?=htmlentities($reqdata['contestname'])?></td></tr>
 <tr><td>From:</td><td><a href="team.php?id=<?=urlencode($reqdata['login'])?>"><span class="teamid"><?=htmlspecialchars($reqdata['login'])?></span></a></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($reqdata['submittime']) ?></td></tr>
-<tr><td valign="top">Request:</td><td class="filename"><pre class="output_text"><?=htmlspecialchars($reqdata['body']) ?></pre></td></tr>
+<tr><td valign="top">Request:</td><td class="filename"><pre class="output_text"><?=nl2br(htmlspecialchars($reqdata['body'])) ?></pre></td></tr>
 </table>
 
 <?
