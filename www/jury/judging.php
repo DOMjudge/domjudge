@@ -36,7 +36,7 @@ if(@$jdata['endtime']) {
 htmlentities($jdata['team'] .' / '. $jdata['probid'].' / '.$jdata['langid'])?></a></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($jdata['submittime']) .' (queued for '.
 	$sec_queued.' s)'?></td></tr>
-<tr><td>Source:</td><td><tt><?= htmlspecialchars($jdata['source']) ?></tt></td></tr>
+<tr><td>Source:</td><td><a href="show_source.php?id=<?=$jdata['submitid']?>"><tt><?= htmlspecialchars($jdata['source']) ?></tt></td></tr>
 <tr><td>Start:</td><td><?=$jdata['starttime']?></td></tr>
 <tr><td>End:</td><td><?=$endtime?></td></tr>
 <tr><td>Judger:</td><td><a href="judger.php?id=<?=$jdata['judgerid'].'">'.
