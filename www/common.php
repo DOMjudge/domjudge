@@ -18,7 +18,7 @@ function getBaseURI() {
  * match <key> = <value>. Output is always limited to the
  * current or last contest.
  */
-function getSubmissions($key = null, $value = null, $isjury = FALSE) {
+function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 
 	global $DB;
 	
@@ -122,7 +122,7 @@ function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 /**
  * Outputs a list of judgings, limited by key=value
  */
-function getJudgings($key, $value) {
+function putJudgings($key, $value) {
 	global $DB;
 
 	// get the judgings for a specific key and value pair

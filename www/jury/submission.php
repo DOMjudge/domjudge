@@ -60,7 +60,7 @@ echo "<h1>Submission s$id</h1>\n\n";
 <h3>Judgings</h3>
 
 <?php
-getJudgings('submitid', $id);
+putJudgings('submitid', $id);
 
 ?>
 

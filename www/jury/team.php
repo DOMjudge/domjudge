@@ -36,6 +36,6 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 
 <?php
 
-getSubmissions('team', $login, TRUE);
+putSubmissions('team', $login, TRUE);
 
 require('../footer.php');

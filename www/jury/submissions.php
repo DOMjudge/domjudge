@@ -13,6 +13,6 @@ require('menu.php');
 
 echo "<h1>Submissions</h1>\n\n";
 
-getSubmissions('','',TRUE);
+putSubmissions('','',TRUE);
 
 require('../footer.php');
