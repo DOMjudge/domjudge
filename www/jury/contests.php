@@ -34,4 +34,7 @@ foreach($res as $row) {
 }
 echo "</table>\n\n";
 
+
+echo "<p><a href=\"checkconfig.php\">Check config</a></p>\n\n";
+
 require('../footer.php');
