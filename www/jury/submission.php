@@ -44,7 +44,7 @@ $submdata = $DB->q('TUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.source,
 $hasfinal = FALSE;
 
 $judgedata = $DB->q('SELECT * FROM judging LEFT JOIN judger USING(judgerid)
-	WHERE submitid = %i ORDER BY starttime', $id);
+	WHERE submitid = %i ORDER BY starttime DESC', $id);
 
 if($judgedata->count() == 0) {
 	echo "<em>Submission still queued</em>";

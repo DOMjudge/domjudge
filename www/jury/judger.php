@@ -34,7 +34,7 @@ $row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $id);
 
 <?php
 
-$res = $DB->q('SELECT * FROM judging WHERE judgerid = %i', $id);
+$res = $DB->q('SELECT * FROM judging WHERE judgerid = %i ORDER BY starttime DESC', $id);
 
 if( $res->count() == 0 ) {
 	echo "<em>Nothing judged.</em>";

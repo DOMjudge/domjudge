@@ -12,10 +12,10 @@ function getSubmissions($key = null, $value = null) {
 
 	// we need two queries: one for all submissions, and one with the results for the valid ones.
 	if($key && $value) {
-		$res = $DB->q('SELECT * FROM submission WHERE '.$key.' = %s ORDER BY submittime',
+		$res = $DB->q('SELECT * FROM submission WHERE '.$key.' = %s ORDER BY submittime DESC',
 			$value);
 	} else {
-		$res = $DB->q('SELECT * FROM submission ORDER BY submittime');
+		$res = $DB->q('SELECT * FROM submission ORDER BY submittime DESC');
 	}
 
 	if($res->count() == 0) {
