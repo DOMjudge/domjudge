@@ -36,7 +36,7 @@ if(!$row) {
 <p>Status:
 <span class="<?=($row['result'] == 'correct'?'sol-correct':'sol-incorrect')?>"><?=$row['result']?></span></p>
 
-<h2>Compile-errors:</h2>
+<h2>Compiler output:</h2>
 <?
 if(@$row['output_compile']) {
 	echo "<pre class=\"errors\">\n".
