@@ -7,7 +7,7 @@
  */
 
 require('init.php');
-$title = 'Clarification Response';
+$title = 'Clarifications';
 include('../header.php');
 include('menu.php');
 
