@@ -97,6 +97,7 @@ void usage()
 
 void create_server();
 void handle_client(int);
+void sendit(int,char*);
 void sigchld_handler(int);
 
 const int false = 0;
@@ -172,7 +173,7 @@ int main(int argc, char **argv)
         sin_size = sizeof(struct sockaddr_in);
 		
         if ( (client_fd = accept(server_fd, (struct sockaddr *) &client_addr,
-		                         &sin_size))!=0 ) {
+		                         &sin_size)) == -1 ) {
 			warning(errno,"accepting incoming connection");
             continue;
         }
@@ -214,7 +215,7 @@ int main(int argc, char **argv)
  */
 void create_server()
 {
-	if ( (server_fd = socket(PF_INET,SOCK_STREAM,0))!=0 ) {
+	if ( (server_fd = socket(PF_INET,SOCK_STREAM,0)) == -1 ) {
 		error(errno,"cannot open server socket");
 	}
 
@@ -222,7 +223,7 @@ void create_server()
 		error(errno,"cannot set socket options");
 	}
     
-	server_addr.sin_family      = AF_INET;      /* address family                */
+	server_addr.sin_family      = PF_INET;      /* address family                */
 	server_addr.sin_port        = htons(port);  /* port in network short order   */
 	server_addr.sin_addr.s_addr = INADDR_ANY;   /* automatically fill with my IP */
 	//	memset(&(server_addr.sin_zero),'\0',8);     /* zero the rest of the struct   */
@@ -242,11 +243,15 @@ void create_server()
  */
 void handle_client(int client)
 {
-	if (send(client, "+hello, send submission info, then files", 40, 0)!=0 )
-		perror("send");
-//	close(new_fd);
+	sendit(client, "-server NOT ready");
+	close(client);
 }
 
+void sendit(int client, char *mesg)
+{
+	logmsg(LOG_DEBUG, "send: %s", mesg);
+	send(client, mesg, strlen(mesg), 0);
+}
 
 /***
  *  used to watch termination of child threads
