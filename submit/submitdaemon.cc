@@ -127,13 +127,13 @@ int main(int argc, char **argv)
 	int c;
 	char *ptr;
 	
+	progname = argv[0];
+
 	/* Set logging levels & open logfile */
 	verbose  = LOG_DEBUG;
 	loglevel = LOG_DEBUG;
 	stdlog   = fopen(LOGFILE,"a");
 	if ( stdlog==NULL ) error(errno,"cannot open logfile `%s'",LOGFILE);
-
-	progname = argv[0];
 
 	/* Parse command-line options */
 	show_help = show_version = 0;
