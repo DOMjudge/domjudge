@@ -19,8 +19,19 @@
 
 #include <string.h>
 
+#if defined(__CYGWIN__) || defined(__CYGWIN32__)
+#define PATHSEP "\\/"
+#else
+#define PATHSEP "/"
+#endif
+
 char *gnu_basename(const char *filename)
 {
-	char *p = strrchr (filename, '/');
-	return p ? p + 1 : (char *) filename;
+	char *p;
+
+	for(p=(char *)filename+strlen(filename)-1; p>=filename; p--) {
+		if ( strchr(PATHSEP,*p)!=NULL ) break;
+	}
+
+	return p+1;
 }
