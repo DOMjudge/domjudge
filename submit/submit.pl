@@ -210,6 +210,7 @@ logmsg "copied '$filename' to tempfile '$tmpfile'";
 
 # Ask user for confirmation.
 print "Submission information:\n";
+print "  filename:   $filename\n";
 print "  problem:    $problem\n";
 print "  language:   $language\n";
 print "  team:       $team\n";
