@@ -17,6 +17,13 @@ define('INPUT_ROOT',  '/home/cies/nkp0405/opgaven');
 define('INCOMINGDIR', OUTPUT_ROOT.'/incoming');
 define('SUBMITDIR',   OUTPUT_ROOT.'/sources');
 define('JUDGEDIR',    OUTPUT_ROOT.'/judging');
+define('LOGDIR',      OUTPUT_ROOT.'/log');
+
+/** Loglevels */
+define('LOG_ERROR',  0);
+define('LOG_NOTICE', 1);
+define('LOG_INFO',   2);
+define('LOG_DEBUG',  3);
 
 /** Possible exitcodes from testsol and their meaning */
 $EXITCODES = array (
@@ -31,7 +38,7 @@ $EXITCODES = array (
 /** Database login credentials */
 $DBDATA = array (
 	'jury'	=> array (				// s/i/u/d on each table
-		'host' => 'localhost',
+		'host' => 'alan',
 		'db'   => 'nkpjury',
 		'user' => 'nkp',
 		'pass' => 'JudgeJudy' ),

@@ -17,9 +17,16 @@ our $INPUT_ROOT  = "/home/cies/nkp0405/opgaven";
 our $INCOMINGDIR = $OUTPUT_ROOT . "/incoming";
 our $SUBMITDIR   = $OUTPUT_ROOT . "/sources";
 our $JUDGEDIR    = $OUTPUT_ROOT . "/judging";
+our $LOGDIR      = $OUTPUT_ROOT . "/log";
 
 # Directory where submit-client puts files for sending (relative to $HOME)
 our $USERSUBMITDIR = ".submit";
+
+# Loglevels
+our $LOG_ERROR  = 0;
+our $LOG_NOTICE = 1;
+our $LOG_INFO   = 2;
+our $LOG_DEBUG  = 3;
 
 # For extra clarity in return statements (perl specific)
 our $success = 1;

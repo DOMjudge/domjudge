@@ -10,6 +10,13 @@ INPUT_ROOT=/home/cies/nkp0405/opgaven
 INCOMINGDIR=$OUTPUT_ROOT/incoming
 SUBMITDIR=$OUTPUT_ROOT/sources
 JUDGEDIR=$OUTPUT_ROOT/judging
+LOGDIR=$OUTPUT_ROOT/log
+
+# Loglevels
+LOG_ERROR=0
+LOG_NOTICE=1
+LOG_INFO=2
+LOG_DEBUG=3
 
 # Maximum seconds available for compiling
 COMPILETIME=30
