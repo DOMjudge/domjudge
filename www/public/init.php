@@ -4,6 +4,8 @@
  * $Id$
  */
 
-require('../../etc/config.php');
-require('../../lib/lib.error.php');
-require('../../lib/use_db_public.php');
+require_once('../../etc/config.php');
+require_once('../../lib/lib.error.php');
+require_once('../../lib/use_db_public.php');
+require_once('../../lib/lib.misc.php');
+require_once('../common.php');
