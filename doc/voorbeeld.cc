@@ -5,15 +5,15 @@ using namespace std;
 
 int main()
 {
-    int aantaltests, test;
-    string naam;
+	int aantaltests, test;
+	string naam;
 
-    cin >> aantaltests;
+	cin >> aantaltests;
 
-    for(test=1; test<=aantaltests; test++) {
-        cin >> naam;
-        cout << "Hallo " << naam << "!\n";
-    }
-    
-    return 0;
+	for(test=1; test<=aantaltests; test++) {
+		cin >> naam;
+		cout << "Hallo " << naam << "!\n";
+	}
+
+	return 0;
 }
