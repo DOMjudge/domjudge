@@ -11,7 +11,7 @@ require('menu.php');
 echo "<h1>DOMjudge Jury interface</h1>\n\n";
 ?>
 <ul>
-<li><a href="contest.php">Contest</a></li>
+<li><a href="contests.php">Contests</a></li>
 <li><a href="submissions.php">Submissions</a></li>
 <li><a href="clarifications.php">Clarifications</a></li>
 <li><a href="teams.php">Teams</a></li>
