@@ -248,7 +248,7 @@ logmsg($LOG_INFO,"connected");
 receive;
 
 # Send submission info.
-logmsg($LOG_NOTICE,"sending data...\n");
+logmsg($LOG_NOTICE,"sending data...");
 sendit "+team $team";
 receive;
 sendit "+problem $problem";
@@ -265,6 +265,6 @@ logmsg($LOG_INFO,"connection closed");
 
 unlink($tmpfile) or error "deleting '$tmpfile': $!";
 
-logmsg($LOG_NOTICE,"done: submission successful.\n");
+logmsg($LOG_NOTICE,"submission successful");
 
 print "Submission finished successfully.\n";
