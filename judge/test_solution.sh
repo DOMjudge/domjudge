@@ -232,7 +232,7 @@ if [ ! -r program.exit ]; then
 	cat error.tmp >>error.out
 	error "'program.exit' not readable"
 fi
-if [ `cat program.exit` != "0" ]; then
+if [ "`cat program.exit`" != "0" ]; then
 	echo "Non-zero exitcode `cat program.exit`" >>error.out
 	cat error.tmp >>error.out
 	exit $E_RUNERROR
