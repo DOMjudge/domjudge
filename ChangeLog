@@ -12,11 +12,14 @@ Version 0.2.0 - CVS
  - Added some notes on security to the INSTALL docs.
  - Symbolic links now included (subversion >= 1.1)
  - Fixed buffer size bug in log/error C-code.
+ - Fix bug in submit_db where the problem name got case-normalized.
  - Feature: Add caching to the Scoreboard. This vastly improves the
    responsiveness and scalability of DOMjudge; outputting the scoreboard
    is now an O(1) operation. (Closes: #1070079)
  - Some fixes to XHTML1.0 compliancy.
  - In tables, the time is now printed as hh:mm (without seconds).
+ - Complete rewrite of the clarification interface of both teams and jury.
+   Functional changes: added possibility to (un)set a request as "answered".
 
 Version 0.1.1 - 24 November 2004
 --------------------------------

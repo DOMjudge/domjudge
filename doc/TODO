@@ -18,7 +18,3 @@
 - jury interface features: add possibility to change more using the jury interface.
 
 - mass rejudging: add rejudging possibility per problem/judger/language.
-
-- clarification request read: make option to mark clarification requests as read
-  even if no response on these has been sent. (e.g. when a general response to
-  multiple requests has been sent).
