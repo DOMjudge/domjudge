@@ -44,6 +44,15 @@ int  receive(int);
  */
 char *allocstr(char *, ...);
 
+/*  Convert a C++ string to lowercase.
+ *
+ * Arguments:
+ * string str  string to convert to lowercase
+ *
+ * Returns a copy of str, converted to lowercase
+ */
+string stringtolower(string);
+
 
 
 void sendit(int fd, char *mesg, ...)
@@ -119,6 +128,15 @@ char *allocstr(char *mesg, ...)
 	va_end(ap);
 
 	if ( n==-1 || n>len ) error(0,"cannot write all of string");
+
+	return str;
+}
+
+string stringtolower(string str)
+{
+	unsigned int i;
+
+	for(i=0; i<str.length(); i++) str[i] = tolower(str[i]);
 
 	return str;
 }
