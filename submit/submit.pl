@@ -64,7 +64,7 @@ my $permdir  = 0711;
 my $permfile = 0644;
 
 # Variables defining logmessages verbosity to stderr/logfile
-my $verbose  = $ENV{SUBMITVERBOSE} || $LOG_ERR;
+my $verbose  = $LOG_DEBUG;
 my $loglevel = $LOG_DEBUG;
 my $logfile = "$submitdir/submit.log";
 my $loghandle;
@@ -387,6 +387,8 @@ sendit "+filename ".basename($tmpfile);
 receive;
 sendit "+done";
 while ( receive ) {};
+
+if ( ! ( $lastreply =~ /^done/ ) ) { error "connection closed unexpected"; }
 
 $socket->close();
 $socket = '';
