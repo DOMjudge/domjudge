@@ -7,6 +7,5 @@
 <a href="clarifications.php">clarifications</a>
 </div>
 
-<div id="clock"><?php echo strftime('%a %e %b %Y %T'); ?></div>
-
+<?php putClock(); ?>
 
