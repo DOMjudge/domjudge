@@ -59,9 +59,7 @@ if($judgedata->count() == 0) {
 		"</td><td>".printtime($jrow['starttime']).
 		"</td><td>".printtime(@$jrow['endtime']).
 		"</td><td title=\"".$jrow['judger']."\">".$jrow['name'].
-		"</td><td class=\"sol-".(@$jrow['result'] == 'correct' ? 'correct':'incorrect') .
-			"\">". ($jrow['valid'] ?
-				@$jrow['result'] : "<span class=\"invalid\">".@$jrow['result'])."</span>".
+		"</td><td>".printresult(@$jrow['result']).
 		"</td><td align=\"right\">".$jrow['valid'].
 		"</td></tr>\n";
 		

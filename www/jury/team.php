@@ -33,40 +33,4 @@ $row = $DB->q('TUPLE SELECT t.*,c.name as catname
 
 getSubmissions('team', $login);
 
-/*
-
-$res = $DB->q('SELECT * FROM submission LEFT JOIN judging USING(submitid)
-        WHERE (valid = 1 OR valid IS NULL) AND team = %s ORDER BY submittime', $login);
-
-if($res->count() == 0) {
-	echo "<em>Nothing submitted yet.</em>";
-} else {
-	echo "<table>\n";
-	while($srow = $res->next()) {
-
-		// abstract this into a general print-submissions function??
-		
-		echo "<tr><td><a href=\"submission.php?id=".$srow['submitid']."\">".$srow['submitid']."</a>".
-			"</td><td>".printtime($srow['submittime']).
-			"</td><td>".$srow['probid'].
-			"</td><td>".$srow['langid'].
-			"</td><td class=\"sol-";
-		
-		if(! @$srow['judger'] ) {
-			echo "queued\">queued";
-		} elseif( @!$srow['result'] ) {
-			echo "queued\">judging";
-		} elseif( $srow['result'] == 'correct') {
-			echo "correct\">correct";
-		} else {
-			echo "incorrect\">".$srow['result'];
-		}
-
-		echo "</td><td>".@$srow['judger'];
-		echo "</td></tr>\n";
-	}
-	echo "</table>\n\n";
-}
-*/
-
 require('../footer.php');

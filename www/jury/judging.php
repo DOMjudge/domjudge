@@ -19,22 +19,28 @@ $jdata = $DB->q('TUPLE SELECT j.*,s.*,judger.name as judgename
 	LEFT JOIN judger ON(j.judger=judger.judgerid)
 	WHERE judgingid = %i',
 	$id);
-	
-?>
 
+$unix_start = strtotime($jdata['starttime']);
+$sec_queued = $unix_start - strtotime($jdata['submittime']);
+if(@$jdata['endtime']) {
+	$endtime = $jdata['endtime']. ' (judging took '.
+		(strtotime($jdata['endtime']) - $unix_start) .' s)';
+} else {
+	$endtime = 'still judging - busy '.(time()-$unix_start). ' s';
+}
+
+?>
 <table>
-<tr><td>Team:</td><td><a href="team.php?id=<?=$jdata['team'].'">'. $jdata['team']?></a></td></tr>
-<tr><td>Problem:</td><td><?= htmlentities($jdata['probid'])?></td></tr>
-<tr><td>Language:</td><td><?= htmlentities($jdata['langid'])?></td></tr>
-<tr><td>Submittime:</td><td><?= htmlspecialchars($jdata['submittime']) ?></td></tr>
+<tr><td>Submission:</td><td>
+<a href="submission.php?id=<?=$jdata['submitid'].'">'.
+htmlentities($jdata['team'] .' / '. $jdata['probid'].' / '.$jdata['langid'])?></a></td></tr>
+<tr><td>Submittime:</td><td><?= htmlspecialchars($jdata['submittime']) .' (queued for '.
+	$sec_queued.' s)'?></td></tr>
 <tr><td>Source:</td><td><tt><?= htmlspecialchars($jdata['source']) ?></tt></td></tr>
 <tr><td>Start:</td><td><?=$jdata['starttime']?></td></tr>
-<tr><td>End:</td><td><?=$jdata['endtime']?></td></tr>
+<tr><td>End:</td><td><?=$endtime?></td></tr>
 <tr><td>Judger:</td><td><?=$jdata['judgename'].'/'.$jdata['judger']?></td></tr>
-<tr><td>Result:</td><td class="sol-<?=
-	($jdata['result'] == 'correct' ? 'correct':'incorrect').
-	"\">".$jdata['result']
-	?></td></tr>
+<tr><td>Result:</td><td><?=printresult(@$jdata['result'])?></td></tr>
 <tr><td>Valid:</td><td><?=$jdata['valid']?></td></tr>
 </table>
 

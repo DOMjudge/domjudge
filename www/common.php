@@ -41,21 +41,31 @@ function getSubmissions($key = null, $value = null) {
 			($key != 'team' ? "</td><td>".$row['team'] : '').
 			($key != 'probid' ? "</td><td>".$row['probid'] : '').
 			($key != 'langid' ? "</td><td>".$row['langid'] : '').
-			"</td><td class=\"sol-";
-		
-			if(! @$row['judger'] ) {
-				echo "queued\">queued";
-			} elseif( @!$resulttable[$row['submitid']]['result'] ) {
-				echo "queued\">judging";
-			} elseif( $resulttable[$row['submitid']]['result'] == 'correct') {
-				echo "correct\">correct";
-			} else {
-				echo "incorrect\">".$resulttable[$row['submitid']]['result'];
-			}
+			"</td><td>".
+				printresult( @$row['judger'] ? @$resulttable[$row['submitid']]['result'] : 'queued');
 
 		echo "</td><td>".@$resulttable[$row['submitid']]['judgername'];
 		echo "</td></tr>\n";
 	}
 	echo "</table>\n\n";
+
+}
+
+// prints result with correct style, '' -> judging
+function printresult($result) {
+
+	$start = '<span class="sol-';
+	$end   = '</span>';
+	switch($result) {
+		case '':
+			$result = 'judging';
+		case 'judging':
+		case 'queued':
+			return $start.'queued">'.$result.$end;
+		case 'correct':
+			return $start.$result.'">'.$result.$end;
+		default:
+			return $start.'incorrect">'.$result.$end;
+	}
 
 }
