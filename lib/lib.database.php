@@ -5,30 +5,7 @@
 *    Info                                                                     *
 *******************************************************************************
 
-Levert classes om querys uit te voeren. 
-
-Features:
-- transparant arrays en strings opslaan in database, zonder je druk te hoeven
-  maken over escapen enzo
-- autmatisch verbinding maken
-- in één commando een bepaalde waarde uitlezen
-- eenvoudig queries bouwen
-- transparant meerdere databases faken (handig als je een zuinige 
-  opdrachtgever hebt en per db moet betalen :)
-- transparante multi-application support
-
-Gebruik:
-
-[hier q() documenteren]
-
-Alle andere query-functies als select(), insert() ed zijn deprecated.
-
-/******************************************************************************
-*    TODO                                                                     *
-*******************************************************************************
-
-- support joins in an easy way
-- Some kind of view-faking
+This file needs to be translated into English.
 
 /******************************************************************************
 *    Licence                                                                  *
@@ -70,7 +47,7 @@ define('DB_NREGEX', 'not regex');
 define('DB_SET', 'DB_SET');
 
 /******************************************************************************
-*    Hulpfuncties                                                             *
+*    Helperfunctions
 ******************************************************************************/
 
 function db_vw($kolom,$waarde,$mode=NULL)
@@ -255,10 +232,6 @@ class db
 		$this->password=$password;
 		$this->persist=$persist;
 
-		/*
-		$this->_connection=db__connect($database,$host,$user,$password,
-									   $persist);
-		*/
 	}
 
 	function setprefix($prefix)
@@ -273,20 +246,30 @@ class db
 		return $this->_cached_metadata[$table];
 	}
 
-	// voer een query uit mbv speciale formatting 
-	/* syntax:
+	/**
+	 * Execute a query.
+	 *
+	 * syntax:
 		%%: literal %
 		%.: auto-detect
-		%s: string met quotes en escaping
-		%c: string met quotes en escaping, en procentjes eromheen voor in een
-			like
+		%s: string with quotes and escaping
+		%c: string with quotes and escaping, embraced by percent signs for
+		    usage with LIKE
 		%i: integer
 		%f: floating point
-		%A?: array van ?, gescheiden door komma's
-		%S: array van key => ., wordt key=., gescheiden door komma's
+		%A?: array of type ?, comma separated
+		%S: array of key => ., becomes key=., comma separated
 
-		ook verschillende keywords om het gedrag te veranderen van wat
-		gereturned wordt
+		query can be prepended with a keyword to change the returned data
+		format:
+		- returnid: for use with INSERT, returns the auto_increment value used
+		  for that row.
+		- returnaffected: return the number of modified rows by this query.
+		- tuple, value: select exactly one row or one value
+		- maybetuple, maybevalue: select zero or one rows or values
+		- column: return a list of a single attribute
+		- table: return complete result in one array
+		- keytable: same as table but arraykey is the field called ARRAYKEY
 	*/
 	function q() // queryf
 	{
@@ -297,7 +280,7 @@ class db
 		$maybe = false;
 		switch ($key) {
 
-			// modifying commando's; eerst keywords, dan normale
+			// modifying commands; keywords first, then regular
 			case 'returnid':
 			case 'returnaffected':
 				$format = substr($format,strlen($key)+1);
@@ -308,7 +291,7 @@ class db
 				$type = 'update';
 				break;
 
-			// selecting commando's; eerst keywords, dan normale
+			// select commandos; keywords, then regular
 			case 'maybetuple':
 			case 'maybevalue':
 				$maybe = true;
@@ -342,7 +325,7 @@ class db
 				continue;
 			}
 			if (!isset($query)) {
-				// eerste part
+				// first part
 				$query = $part;
 				continue;
 			}
@@ -437,8 +420,8 @@ class db
 										   $this->user,$this->password,$this->persist);
 		}
 
-		// selecteer opnieuw de db, want hij zou door brakke php/mysql
-		// implementatie gechanged kunnen zijn
+		// reselect DB, could have been changed by some bad php/mysql
+		// implementation.
 		mysql_select_db($this->database,$this->_connection);
 
 		list($micros, $secs) = explode(' ',microtime());
@@ -450,7 +433,7 @@ class db
 
 		if (!$res)
 		{
-			// switch error message afhankelijk van errornr.
+			// switch error message depending on errornr.
 			switch(mysql_errno($this->_connection)) {
 				case 1062:	// duplicate key
 				error("Item with this key already exists.\n".
@@ -495,8 +478,8 @@ class db_result
 		$this->_nextused = TRUE;
 		if ($this->tuple === FALSE)
 		{
-			// laat de gc zijn werk doen
-			$this->_result = null; //(Geeft de volgende keer een foutmelding)
+			// garbase collection
+			$this->_result = null;
 			return FALSE;
 		}
 		return $this->tuple = array_map('db__sql2val',$this->tuple);
