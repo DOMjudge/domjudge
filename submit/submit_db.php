@@ -12,6 +12,7 @@
  * $Id$
  */
 	define ('SCRIPT_ID', 'submit_db');
+	define ('LOG_ID', 'submit');
 	
 	require ('../etc/config.php');
 	require ('../php/init.php');
@@ -61,7 +62,7 @@
 	if( ! is_readable(INCOMINGDIR."/$file") ) {
 		error("File '$file' not found in incoming directory (or not readable).");
 	}
-	logmsg ("submit_db: input verified");
+	logmsg (LOG_INFO, "input verified");
 
 
 	// Copy the submission to a (uniquely generated) file in SUBMITDIR
@@ -81,6 +82,6 @@
 		VALUES (%s, %s, %s, NOW(), %s)',
 		$team, $prob, $lang, $tofile);
 
-	logmsg ("submit_db: submitted $team/$prob/$lang, file $tofile, id $id");
+	logmsg (LOG_INFO, "submitted $team/$prob/$lang, file $tofile, id $id");
 
 	exit;
