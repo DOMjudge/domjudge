@@ -247,7 +247,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	$teams = $DB->q('TABLE SELECT login,name,category
 		FROM team');
 	$probs = $DB->q('TABLE SELECT probid,name
-		FROM problem WHERE allow_submit = 1 ORDER BY probid');
+		FROM problem WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
 
 	echo "<colgroup><col id=\"scoreteamname\" /><col id=\"scoresolv\" /><col id=\"scoretotal\" />";
 	for($i = 0; $i < count($probs); $i++) {
