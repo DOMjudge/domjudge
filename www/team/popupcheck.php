@@ -3,7 +3,6 @@
 /**
  * Check if we have to popup a window to notify the team of a new
  * clarification.
- http://www.nkp.nl/systest/team/?stamp=1098179314
  */
 
 global $popup, $popupTag;
@@ -11,6 +10,7 @@ global $popup, $popupTag;
 $popup = false;
 $popupTag = 'stamp='.time();
 
+// ald die niet geset is, niet gelijk een popup gooien
 if ( isset($_REQUEST['stamp']) ) {
 	$res = $DB->q('SELECT * FROM clar_response
 	               WHERE submittime >= FROM_UNIXTIME(%i) AND cid = %i AND rcpt in (NULL, %s)',
