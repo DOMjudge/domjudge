@@ -21,6 +21,7 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Some system/site specific config and common includes/functions
+use lib "../etc/";
 use config;
 use submit_common;
 

@@ -21,6 +21,7 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Some system/site specific config and common includes/functions
+use lib "../etc/";
 use config;
 use submit_common;
 
@@ -107,7 +108,7 @@ if ($#ARGV < 0) { die "Please specify a filename.\n$usage2" };
 
 $filename = shift @ARGV;
 if ( ! -f $filename ) { die "Cannot find file: '$filename'.\n$usage2"; }
-logmsg("filename is '$filename'");
+logmsg "filename is '$filename'";
 
 # If the problem was not specified, figure it out from the file name.
 if ( ! defined $problem ) {
