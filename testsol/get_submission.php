@@ -9,37 +9,41 @@
 require ('../etc/config.php');
 require ('../php/init.php');
 
-// get my hostname
-$myhost = trim(`hostname`);
-
-// who am I, and am I active?
-$row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
-if($row['active'] != 1) {
-	error("$myhost I'm not active.");
-}
-
-// environment
-$MYID = $row['judgerid'];
-
-$ME = $myhost/$MYID;
-
-logmsg ("$ME Judger started");
-
-// ff seeden
+// Seed the random generator
 list($usec,$sec)=explode(" ",microtime());
 mt_srand($sec * $usec);
 
-while (1) {
+// Retrieve hostname and check database for judger entry
+$myhost = trim(`hostname`);
 
-	$randomding = md5(uniqid(mt_rand(), true));
+$row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
 
-	// update exactly one submission with our random string...
+$myid = $row['judgerid'];
+$me = "$myhost/$myid";
+
+logmsg ("$me Judge started");
+
+// Constantly check database for unjudged submissions
+while ( 1 ) {
+
+	// Generate (unique) random string to mark submission to be judged
+	$randomstring = $me.microtime().md5(uniqid(mt_rand(), true));
+
+	// Check that this judge is active, else wait and check again later
+	$row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
+	if($row['active'] != 1) {
+		logmsg("$me Not active, waiting");
+		sleep(15);
+		continue;
+	}
+
+	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-		SET judger = %i, uniqueding = %s WHERE judger IS NULL LIMIT 1', $MYID, $randomding);
+		SET judger = %i, uniqueding = %s WHERE judger IS NULL LIMIT 1', $myid, $randomstring);
 
 	// nothing updated -> no open submissions
 	if($numupd == 0) {
-		logmsg("$ME No submissions in queue");
+		logmsg("$me No submissions in queue");
 		sleep(5);
 		continue;
 	}
@@ -49,19 +53,19 @@ while (1) {
 		s.submitid, s.source, s.langid, testdata
 		FROM submission s, problem p, language l
 		WHERE s.probid = p.probid AND s.langid = l.langid AND
-		uniqueding = %s AND judger = %i', $randomding, $MYID);
+		uniqueding = %s AND judger = %i', $randomstring, $myid);
 
-	logmsg("$ME Starting judging of $row[submitid]...");
+	logmsg("$me Starting judging of $row[submitid]...");
 
 	// update the judging table with our ID and the starttime
 	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,starttime,judger)
 		VALUES (%i,NOW(),%i)',
-		$row['submitid'], $MYID);
+		$row['submitid'], $myid);
 
 	// create tempdir for tempfiles.
-	$tempdir = system("mktemp -d -p ".SYSTEN_ROOT."/$myhost", $retval);
+	$tempdir = system("mktemp -d -p ".SYSTEM_ROOT."/$myhost/$judgingid", $retval);
 	if($retval != 0) {
-		error("$ME Could not create tempdir ".SYSTEM_ROOT."/$myhost");
+		error("$me Could not create tempdir ".SYSTEM_ROOT."/$myhost/$judgingid");
 	}
 
 	// do the actual compile-run-test
@@ -73,7 +77,7 @@ while (1) {
 
 	// what does the exitcode mean?
 	if(!isset($EXITCODES[$retval])) {
-		error("$ME $row[submitid] Unknown exitcode from test_solution.sh: $retval");
+		error("$me $row[submitid] Unknown exitcode from test_solution.sh: $retval");
 	}
 	$result = $EXITCODES[$retval];
 
@@ -85,22 +89,21 @@ while (1) {
 		get_content($tempdir.'/compile.out'),
 		get_content($tempdir.'/program.out'),
 		get_content($tempdir.'/diff.out'),
-		$judgingid, $MYID);
+		$judgingid, $myid);
 
 	// done!
-	logmsg("$ME Juding $judgingid/$row[submitid] finished, result: $result");
-
+	logmsg("$me Judging $judgingid/$row[submitid] finished, result: $result");
 
 }
 
 // helperfunction to read 50,000 bytes from a file
 function get_content($filename) {
-	global $ME;
+	global $me;
 	
 	if(!file_exists($filename)) return '';
 	$fh = fopen($filename,'r');
 	if(!$fh) {
-		error("$ME Could not open $filename for reading");
+		error("$me Could not open $filename for reading");
 	}
 	return fread($fh, 50000);
 }
