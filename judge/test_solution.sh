@@ -97,9 +97,9 @@ else
 fi
 
 # Location of scripts/programs:
-RUNSCRIPTDIR=$SYSTEM_ROOT/testsol
-BASHSTATIC=$SYSTEM_ROOT/runprogs/bash-static
-RUNGUARD=$SYSTEM_ROOT/runprogs/runguard
+RUNSCRIPTDIR=$SYSTEM_ROOT/judge
+BASHSTATIC=$SYSTEM_ROOT/bin/bash-static
+RUNGUARD=$SYSTEM_ROOT/bin/runguard
 
 logmsg $LOG_NOTICE "starting '$0', PID = $$"
 

@@ -9,7 +9,7 @@
 
 $myhost = trim(`hostname`);
 
-define ('SCRIPT_ID', 'get_submission');
+define ('SCRIPT_ID', 'judgedaemon');
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 
 require ('../etc/config.php');
