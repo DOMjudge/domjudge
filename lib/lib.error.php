@@ -12,7 +12,7 @@ if ( ! defined('SCRIPT_ID') ) {
 // is this the webinterface or commandline?
 $is_web = isset($_SERVER['REMOTE_ADDR']);
 
-if(!$is_web) {
+if ( ! $is_web ) {
 	define('STDERR', fopen('php://stderr', 'w'));
 }
 
