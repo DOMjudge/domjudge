@@ -26,17 +26,18 @@ usage (int status)
 {
   if (status)
     fprintf(stderr, "Try `%s --help' for more information.\n", progname);
-  else
-    printf("Usage: %s [OPTION]\n\
-Create a temporary file in a safe manner.
-\n\
--d, --directory=DIR  place temporary file in DIR\n\
--p, --prefix=STRING  set temporary file's prefix to STRING\n\
--s, --suffix=STRING  set temporary file's suffix to STRING\n\
--m, --mode=MODE      open with MODE instead of 0600\n\
--n, --name=FILE      use FILE instead of tempnam(3)\n\
-    --help           display this help and exit\n\
-    --version        output version information and exit\n", progname);
+  else {
+    printf("Usage: %s [OPTION]\n", progname);
+    printf("Create a temporary file in a safe manner.\n");
+    printf("\n");
+    printf("-d, --directory=DIR  place temporary file in DIR\n");
+    printf("-p, --prefix=STRING  set temporary file's prefix to STRING\n");
+    printf("-s, --suffix=STRING  set temporary file's suffix to STRING\n");
+    printf("-m, --mode=MODE      open with MODE instead of 0600\n");
+    printf("-n, --name=FILE      use FILE instead of tempnam(3)\n");
+    printf("    --help           display this help and exit\n");
+    printf("    --version        output version information and exit\n");
+  }
   exit(status);
 }
 
