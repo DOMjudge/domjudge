@@ -12,7 +12,9 @@ require('../header.php');
 require('menu.php');
 
 ?>
-<h1><a href="clarification.php">Send Clarification Response</a></h1>
+<p>
+<a href="clarification.php">Send Clarification Response</a>
+</p>
 <?
 
 echo "<h1>Clarification Requests</h1>\n\n";

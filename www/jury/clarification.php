@@ -6,9 +6,6 @@
  */
 
 require('init.php');
-$title = 'Clarification Requests';
-require('../header.php');
-require('menu.php');
 
 /** insert new response */
 if (isset($_REQUEST['submit'])
@@ -26,6 +23,10 @@ if (isset($_REQUEST['submit'])
 	header('Location: clarifications.php');
 	exit;
 }
+
+$title = 'Clarification Requests';
+require('../header.php');
+require('menu.php');
 
 ?>
 <h1>Send Clarification Request</h1>
