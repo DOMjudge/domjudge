@@ -11,6 +11,13 @@ require('../header.php');
 
 echo "<h1>Judgers</h1>\n\n";
 
+if(isset($_POST['cmd'])) {
+	if($_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate') {
+		$DB->q('UPDATE judger SET active = %i WHERE 1'
+		      ,($_POST['cmd'] == 'activate'?1:0));
+	}
+}
+
 $res = $DB->q('SELECT * FROM judger ORDER BY name');
 
 echo "<table>
@@ -24,4 +31,15 @@ while($row = $res->next()) {
 		"</td></tr>\n";
 }
 echo "</table>\n\n";
+?>
+<p>
+<form action="judgers.php" method="post">
+<input type="hidden" name="cmd" value="activate" />
+<input type="submit" value=" Go Judgers! " />
+</form>
+<form action="judgers.php" method="post">
+<input type="hidden" name="cmd" value="deactivate" />
+<input type="submit" value=" Stop Judgers! " />
+</form>
+<?
 require('../footer.php');
