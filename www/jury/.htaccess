@@ -7,5 +7,5 @@ AuthType Basic
 # peter
 	allow from 80.100.101.197
 # thijs
-	allow from 131.211.225.133
+	allow from 131.211.224.63
 </Limit>
