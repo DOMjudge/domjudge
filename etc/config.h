@@ -32,4 +32,10 @@ const int valid_uid[5] = {5051,65534,9013,-1};
 /* Directory where submit-client puts files for sending (relative to $HOME). */
 #define USERSUBMITDIR ".submit"
 
+/* Warn user when submission file modifications are older than (in minutes) */
+#define WARN_MTIME 5
+
+/* Maximum size of solution source code in KB */
+#define SOURCESIZE 256
+
 #endif /* _LOCAL_CONFIG_ */
