@@ -19,19 +19,8 @@
 
 #include <string.h>
 
-#ifndef _LIBC
-/* We cannot generally use the name `basename' since XPG defines an unusable
-   variant of the function but we cannot use it.  */
-# define basename gnu_basename
-#endif
-
-
-char *basename(const char *filename)
+char *gnu_basename(const char *filename)
 {
 	char *p = strrchr (filename, '/');
 	return p ? p + 1 : (char *) filename;
 }
-
-#ifdef _LIBC
-libc_hidden_def (basename)
-#endif
