@@ -15,10 +15,8 @@ if (isset($_REQUEST['submit'])
 		VALUES (%i, now(), %s, %s)', getCurContest(), $login, $_REQUEST['request']);
 
 	// after input, redirect to the appropriate requestpage
-	// fixme: following the HTTP spec., this should be a complete url but we
-	// don't have that available at the time. this works in any known browser though.
 	header('Location: '
-		.addUrl('request.php?id='.urlencode($respid), $popupTag));
+		.addUrl( getBaseURI() . 'team/request.php?id='.urlencode($respid), $popupTag));
 	exit;
 }
 $title = 'Clarification Request';

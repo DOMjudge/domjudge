@@ -20,7 +20,7 @@ if (isset($_REQUEST['submit'])
 	}
 
 	/** redirect back to the clarifications overview */
-	header('Location: clarifications.php');
+	header('Location: ' . getBaseURI() . 'jury/clarifications.php');
 	exit;
 }
 

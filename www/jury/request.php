@@ -11,10 +11,10 @@ $id = (int)$_REQUEST['id'];
 if(!$id)	error ("Missing clarification id");
 
 /** insert a new response */
-if (isset($_REQUEST['submit'])
-  && !empty($_REQUEST['response']))
+if ( isset($_REQUEST['submit'])
+  && !empty($_REQUEST['response']) )
 {
-	if(empty($_REQUEST['sendto'])) {
+	if( empty($_REQUEST['sendto']) ) {
 		$respid = $DB->q('RETURNID INSERT INTO clar_response (reqid, cid, submittime, rcpt, body)
 			VALUES (%i, %i, now(), NULL, %s)',
 			$id, getCurContest(), $_REQUEST['response']);
@@ -24,7 +24,7 @@ if (isset($_REQUEST['submit'])
 			$id, getCurContest(), $_REQUEST['sendto'], $_REQUEST['response']);
 	}
 	/** redirect back to the original request */
-	header('Location: request.php?id='. urlencode($id));
+	header('Location: ' . getBaseURI() . 'jury/request.php?id='. urlencode($id));
 	exit;
 }
 
