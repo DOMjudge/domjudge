@@ -213,6 +213,10 @@ toegevoegd. Deze is ook nodig voor het functioneren van \texttt{submit}.
  
 \subsection{De uitslag bekijken van inzendingen}
 
+Op de persoonlijke team website is een overzicht van de inzendingen.
+Dit overzicht bevat alle relevante gegevens: de tijd van inzending, de
+programmeer taal, het probleem en de status.
+
 \subsubsection{Mogelijke uitslagen}
 
 Op een ingestuurde oplossing zijn een aantal verschillende uitslagen
@@ -290,11 +294,11 @@ compileerfout kun je altijd de foutmelding bekijken).
 \hline
 programmeertaal & jury compiler-commando & niet-statisch gelinked \\
 \hline
-C       & \texttt{gcc -Wall -O2 -static -lm}         & \texttt{gcc -Wall -O2 -lm}     \\
-C++     & \texttt{g++ -Wall -O2 -static}             & \texttt{g++ -Wall -O2}         \\
-Java    & \texttt{gcj -Wall -static --main=Main}     & \texttt{gcj -Wall --main=Main} \\
-Pascal  & \texttt{fpc -vwnh -O2 -Sg -XS}             & \texttt{fpc -vwnf -O2 -Sg}     \\
-Haskell & \texttt{ghc -Wall -O -static -optl-static} & \texttt{ghc -Wall -O}          \\
+C       & \texttt{gcc -Wall -O2 -static -lm}         & \texttt{gcc -Wall -O2 -lm} \\
+C++     & \texttt{g++ -Wall -O2 -static}             & \texttt{g++ -Wall -O2} \\
+Java    & \texttt{gcj -Wall -O2 -static --main=Main} & \texttt{gcj -Wall -O2 --main=Main} \\
+Pascal  & \texttt{fpc -vwnh -O2 -Sg -XS}             & \texttt{fpc -vwnf -O2 -Sg} \\
+Haskell & \texttt{ghc -Wall -O -static -optl-static} & \texttt{ghc -Wall -O} \\
 \hline
 \end{tabular}
 \label{compilercommandos}
