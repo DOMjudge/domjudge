@@ -6,10 +6,9 @@
 SOURCE="$1"
 DEST="$2"
 
-# -x c:		Run g++ as C-compiler (gcc doesn't link math-lib statically)
 # -Wall:	Report all warnings
 # -O2:		Level 2 optimizations (default for speed)
-# -lm:		Link with math-library
 # -static:	Static link with all libraries
-g++ -x c -Wall -O2 -lm -static -o $DEST $SOURCE
+# -lm:		Link with math-library (has to be last argument!)
+gcc -Wall -O2 -static -o $DEST $SOURCE -lm
 exit $?
