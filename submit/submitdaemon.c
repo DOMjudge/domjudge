@@ -276,6 +276,9 @@ int handle_client()
 	while ( receive(client_fd) ) {
 		command = string(lastmesg);
 		istringstream line_iss(command);
+
+		command.erase();
+		argument.erase();
 		line_iss >> command >> argument;
 
 		command = stringtolower(command);
