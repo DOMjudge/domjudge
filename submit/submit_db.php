@@ -57,7 +57,12 @@
 		error("Team '$team' not found in database.");
 	}
 	if( $teamrow['ipaddress'] != $ip ) {
-		error("Team '$team' not registered at this IP address.");
+		if( $teamrow['ipaddress'] != null ) {
+			error("Team '$team' not registered at this IP address.");
+		}
+		// DS: team heeft nog geen IP
+		$id = $DB->q('RETURNID UPDATE team SET ipaddress = %s WHERE login = %s',
+		             $ip, $team);
 	}
 	if( ! $DB->q('MAYBETUPLE SELECT * FROM problem WHERE probid = %s
 	              AND allow_submit = "1"', $prob) ) {
