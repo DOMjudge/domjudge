@@ -3,6 +3,9 @@
 # submit.pl - Submit program.
 #
 # Copyright (C) 1999 Eelco Dolstra (eelco@cs.uu.nl).
+# Copyright (C) 2004 Jaap Eldering (eldering@a-eskwadraat.nl),
+#                    Thijs Kinkhorst,
+#                    Peter van de Werken.
 #
 # $Id$
 #
@@ -53,7 +56,7 @@ use File::stat;
 use POSIX qw(strftime);
 
 # Variables defining logmessages verbosity to stderr/logfile
-my $verbose  = $ENV{SUBMITVERBOSE} || $LOG_NOTICE;
+my $verbose  = $ENV{SUBMITVERBOSE} || $LOG_ERR;
 my $loglevel = $LOG_DEBUG;
 my $logfile = "$ENV{HOME}/$USERSUBMITDIR/submit.log";
 my $loghandle;
@@ -72,8 +75,9 @@ my $team = $ENV{TEAM} || $ENV{USER} || $ENV{USERNAME};
 
 my $tmpdir = "$ENV{HOME}/" . $USERSUBMITDIR;
 my $tmpfile;
-# Weer terug veranderen na debugging:
-my $mask = 0744; # 0700
+# Tijdelijk voor DS-practicum (moet normaal 0700/0600 zijn):
+my $permdir  = 0711;
+my $permfile = 0644;
 
 # variables for checking submission sanity.
 my $userwarning = 0;
@@ -167,8 +171,36 @@ my $usage2 = "Type '$progname --help' to get help.\n";
 ### Start of program ###
 ########################
 
+# Voor het DS-practicum: check of homedir executable is
+if ( (stat($ENV{HOME})->mode & $permdir) != $permdir ) {
+
+	print <<"EOF";
+WAARSCHUWING:
+
+Voor dit practicum is het noodzakelijk, dat je homedir toegankelijk
+is voor de jury, om de source-code bestanden van je inzending te
+kunnen kopieeren.
+
+Deze permissies zullen nu ingesteld worden op je home-directory.
+Wil je doorgaan? (j/n) 
+EOF
+
+    # Read characters from terminal one by one.
+	system("stty", '-icanon', 'eol', "\001");
+	while ( 1 ) {
+		my $answer = getc(STDIN);
+		if ( $answer =~ /j|n/i ) { print "\n"; }
+		if ( $answer =~ /j/i   ) { last; }
+		if ( $answer =~ /n/i   ) { error "permissions denied by user"; }
+	}
+	
+	chmod($permdir,$ENV{HOME}) or error "setting permissions on $ENV{HOME}: $!";
+}
+
 open($loghandle,">> $logfile") or error "opening logfile '$logfile': $!";
 $loghandle->autoflush(1);
+
+### TODO: netjes met getopt parsen, zodat opties ook na filename kunnen ###
 
 # Parse options from command-line.
 for (; @ARGV; shift @ARGV) {
@@ -225,16 +257,13 @@ logmsg($LOG_INFO,"server is '$server'");
 
 # Make tempfile to submit.
 if ( ! -d $tmpdir ) { mkdir($tmpdir) or error "creating dir $tmpdir: $!"; }
-# Weer terug veranderen na debugging:
-#chmod($mask,$tmpdir) or error  "setting permissions on $tmpdir: $!";
+chmod($permdir,$tmpdir) or error "setting permissions on $tmpdir: $!";
 
 (my $handle, $tmpfile) = mkstemps("$tmpdir/$problem.XXXX",".$language")
 	or error "creating tempfile: $!";
 
-### Tijdelijk permissies van file aanpassen: ###
-chmod($mask,$tmpfile);
-
 copy($filename, $tmpfile) or error "copying '$filename' to tempfile: $!";
+chmod($permfile,$tmpfile) or error "setting permissions on $tmpfile: $!";
 logmsg($LOG_INFO,"copied '$filename' to tempfile '$tmpfile'");
 
 # Ask user for confirmation.
