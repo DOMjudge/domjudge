@@ -93,6 +93,6 @@
 	             $cont["cid"], $team, $prob, $lang, $tofile,
 	             get_content(SUBMITDIR."/".$tofile));
 
-	logmsg (LOG_NOTICE, "submitted c$cid/$team/$prob/$lang, file $tofile, id s$id");
+	logmsg (LOG_NOTICE, "submitted $team/$prob/$lang, file $tofile, id s$id");
 
 	exit;
