@@ -39,19 +39,14 @@
 #include <pwd.h>
 #include <libgen.h>
 
-/* Some C++ includes for easy string handling */
+/* C++ includes for easy string handling */
 using namespace std;
 #include <iostream>
 #include <sstream>
 #include <string>
 
-/* Some system/site specific config */
+/* System/site specific config */
 #include "../etc/config.h"
-
-/* These defines are needed in 'version' in submitcommon.h */
-#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
-#define PROGRAM "submitdaemon"
-#define AUTHORS "Peter van de Werken & Jaap Eldering"
 
 /* Logging and error functions */
 #include "../lib/lib.error.h"
@@ -59,6 +54,11 @@ using namespace std;
 /* Include some functions, which are not always available */
 #include "../lib/mkstemps.h"
 #include "../lib/basename.h"
+
+/* These defines are needed in 'version' in submitcommon.h */
+#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
+#define PROGRAM "submitdaemon"
+#define AUTHORS "Peter van de Werken & Jaap Eldering"
 
 /* Common send/receive functions */
 #include "submitcommon.h"
