@@ -8,7 +8,7 @@ TARGETSDVI = $(addsuffix .dvi,$(TARGETS))
 TARGETSPS  = $(addsuffix .ps ,$(TARGETS))
 TARGETSPDF = $(addsuffix .pdf,$(TARGETS))
 
-LATEXOPTIONS = --file-line-error-style
+LATEXOPTIONS = --file-line-error-style --interaction=errorstopmode
 
 CONFIGDIR = ../etc
 
@@ -26,9 +26,9 @@ $(TARGETSDVI): %.dvi: %.tex $(CONFIGDIR)/global.cfg \
                             $(CONFIGDIR)/config.tex \
                             example.* logos/DOMjudgelogo.eps \
                             expdlist.sty svn.sty 
-	latex $(LATEXOPTIONS) $< &> /dev/null
-	latex $(LATEXOPTIONS) $< &> /dev/null
 	latex $(LATEXOPTIONS) $<
+	latex $(LATEXOPTIONS) $< &> /dev/null
+	latex $(LATEXOPTIONS) $< &> /dev/null
 
 $(TARGETSPS): %.ps: %.dvi
 	dvips $<
@@ -45,7 +45,10 @@ texclean:
 	       $(addsuffix .toc,$(TARGETS)) \
 	       systemconfig.aux
 
+dviclean:
+	-rm -f $(TARGETSDVI)
+
 clean: texclean
 	-rm -f $(TARGETSPS) $(TARGETSPDF)
 
-.PHONY: documentation dvi ps pdf texclean
+.PHONY: documentation dvi ps pdf texclean dviclean
