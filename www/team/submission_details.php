@@ -41,7 +41,7 @@ if(!$row) {
 <h2>Compiler output:</h2>
 <?
 if(@$row['output_compile']) {
-	echo "<pre class=\"errors\">\n".
+	echo "<pre class=\"output_text\">\n".
 		htmlspecialchars(@$row['output_compile'])."\n</pre>\n\n";
 } else {
 	echo "<p><em>There were no compiler errors or warnings.</em></p>\n";
