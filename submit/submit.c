@@ -37,6 +37,7 @@
 #include <arpa/inet.h>
 #include <getopt.h>
 #include <libgen.h>
+#include <termios.h>
 
 /* Some C++ includes for easy string handling */
 using namespace std;
@@ -53,20 +54,20 @@ using namespace std;
 /* Common send/receive functions */
 #include "submitcommon.h"
 
-#define PROGRAM "submitdaemon"
+/* Include 'mkstemps' function from GNU libiberty library */
+#include "../lib/mkstemps.h"
+
+#define PROGRAM "submit"
 #define VERSION "0.1"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
-
-#define BACKLOG 32      // how many pending connections queue will hold
 
 extern int errno;
 
 /* Variables defining logmessages verbosity to stderr/logfile */
-#define LOGFILE LOGDIR"/submit.log"
+extern int verbose;
+extern int loglevel;
 
-extern int  verbose;
-extern int  loglevel;
-extern char *logfile;
+char *logfile;
 
 char *progname;
 
@@ -88,6 +89,192 @@ struct option const long_opts[] = {
 	{"version",  no_argument,       &show_version, 1 },
 	{ NULL,      0,                 NULL,          0 }
 };
+
+void version();
+void usage();
+void usage2(int , char *, ...);
+void warnuser(char *);
+char readanswer(char *answers);
+
+int nwarnings;
+
+int socket_fd;
+struct sockaddr_in server_addr; // my address information
+struct sockaddr_in their_addr;  // connector's address information
+int sin_size;
+
+/* Submission information */
+string problem, language, server, team;
+char *filename, *submitdir, *tempfile;
+
+
+int main(int argc, char **argv)
+{
+	unsigned i, len;
+	int c;
+	char *ptr;
+	char *homedir;
+	struct stat fstats;
+	string filebase, fileext;
+
+	progname = argv[0];
+	stdlog = NULL;
+	
+	if ( getenv("HOME")==NULL ) error(0,"environment variable `HOME' not set");
+	homedir = getenv("HOME");
+	
+	/* Check for USERSUBMITDIR and create it if nessary */
+	len = strlen(homedir) + strlen(USERSUBMITDIR) + 20;
+	submitdir = (char *) malloc(len);
+	if ( snprintf(submitdir,len,"%s/%s",homedir,USERSUBMITDIR)>=(int)len ) {
+		error(0,"cannot allocate or write all of `submitdir' string");
+	}
+	
+	if ( stat(submitdir,&fstats)!=0 ) {
+		if ( mkdir(submitdir,USERPERMDIR)!=0 ) {
+			error(errno,"creating directory `%s'",submitdir);
+		}
+	} else {
+		if ( ! S_ISDIR(fstats.st_mode) ) {
+			error(0,"`%s' is not a directory",submitdir);
+		}
+		if ( chmod(submitdir,USERPERMDIR)!=0 ) {
+			error(errno,"setting permissions on `%s'",submitdir);
+		}
+	}
+	
+	/* Set logging levels & open logfile */
+	verbose  = LOG_DEBUG;
+	loglevel = LOG_DEBUG;
+
+	logfile = (char *) malloc(len);
+	if ( snprintf(logfile,len,"%s/submit.log",submitdir)>=(int)len ) {
+		error(0,"cannot allocate or write all of `logfile' string");
+	}
+	
+	stdlog = fopen(logfile,"a");
+	if ( stdlog==NULL ) error(errno,"cannot open logfile `%s'",logfile);
+
+	logmsg(LOG_INFO,"started");
+	
+	/* Set defaults for server and team */
+#ifdef SUBMITSERVER
+	server = string(SUBMITSERVER);
+#endif
+	if ( server.empty() && getenv("SUBMITSERVER")!=NULL ) {
+		server = string(getenv("SUBMITSERVER"));
+	}
+	if ( server.empty() ) server = string("localhost");
+
+	if ( team.empty() && getenv("TEAM")!=NULL ) team = string(getenv("TEAM"));
+	if ( team.empty() && getenv("USER")!=NULL ) team = string(getenv("USER"));
+	if ( team.empty() && getenv("USERNAME")!=NULL ) {
+		team = string(getenv("USERNAME"));
+	}
+
+	/* Parse command-line options */
+	quiet =	show_help = show_version = 0;
+	opterr = 0;
+	while ( (c = getopt_long(argc,argv,"p:l:s:t:P:v:q",long_opts,NULL))!=-1 ) {
+		switch ( c ) {
+		case 0:   /* long-only option */
+			break;
+			
+		case 'p': problem  = string(optarg); break;
+		case 'l': language = string(optarg); break;
+		case 's': server   = string(optarg); break;
+		case 't': team     = string(optarg); break;
+			
+		case 'P': /* port option */
+			port = strtol(optarg,&ptr,10);
+			if ( ptr!=0 || port<0 || port>65535 ) {
+				usage2(0,"invalid tcp port specified: `%s'",optarg);
+			}
+			break;
+		case 'v': /* verbose option */
+			verbose = strtol(optarg,&ptr,10);
+			if ( ptr!=0 || verbose<0 ) {
+				usage2(0,"invalid verbosity specified: `%s'",optarg);
+			}
+			break;
+		case 'q': /* quiet option */
+			verbose = LOG_ERR;
+			quiet = 1;
+			break;
+		case ':': /* getopt error */
+		case '?':
+			usage2(0,"unknown option or missing argument `%c'",optopt);
+			break;
+		default:
+			error(0,"getopt returned character code `%c' ??",c);
+		}
+	}
+
+	if ( show_help ) usage();
+	if ( show_version ) version();
+	
+	if ( argc<=optind   ) usage2(0,"no filename specified");
+	if ( argc> optind+1 ) usage2(0,"multiple filenames specified");
+	filename = argv[optind];
+
+	/* Stat file and do some sanity checks */
+	if ( stat(filename,&fstats)!=0 ) usage2(errno,"cannot find `%s'",filename);
+	logmsg(LOG_DEBUG,"submission file is %s",filename);
+
+	nwarnings = 0;
+
+	if ( ! (fstats.st_mode & S_IFREG) )    warnuser("file is not a regular file");
+	if ( ! (fstats.st_mode & S_IRUSR) )    warnuser("file is not readable");
+	if ( fstats.st_size==0 )               warnuser("file is empty");
+	if ( fstats.st_size>=SOURCESIZE*1024 ) warnuser("file is too large");
+	
+	if ( time(NULL)-fstats.st_mtime>WARN_MTIME*60 ) {
+		warnuser("file has not been modified recently");
+	}
+	
+	/* Try to parse problem and language from filename */
+	filebase = string(basename(filename));
+	if ( filebase.find('.')!=string::npos ) {
+		fileext = filebase.substr(filebase.rfind('.')+1);
+		filebase.erase(filebase.find('.'));
+
+		/* Check for only alphanumeric characters in problem */
+		for(i=0; i<filebase.length(); i++) {
+			if ( ! isalnum(filebase[i]) ) break;
+		}
+		if ( i>=filebase.length() && filebase.length()>0 ) problem = filebase;
+
+		/* TODO: check extension for languages */
+	}
+	
+	if ( problem.empty()  ) usage2(0,"no problem specified");
+	if ( language.empty() ) usage2(0,"no language specified");
+	if ( team.empty()     ) usage2(0,"no team specified");
+	if ( server.empty()   ) usage2(0,"no server specified");
+
+	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
+	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
+	logmsg(LOG_DEBUG,"team is `%s'",team.c_str());
+	logmsg(LOG_DEBUG,"server is `%s'",server.c_str());
+
+	/* Ask user for confirmation */
+	if ( ! quiet ) {
+		printf("Submission information:\n");
+		printf("  filename:   %s\n",filename);
+		printf("  problem:    %s\n",problem.c_str());
+		printf("  language:   %s\n",language.c_str());
+		printf("  team:       %s\n",team.c_str());
+		printf("  server:     %s\n",server.c_str());
+		if ( nwarnings>0 ) printf("There are warnings for this submission!\a\n");
+		printf("Do you want to continue? (y/n) ");
+		c = readanswer("yn");
+		printf("\n");
+		if ( c=='n' ) error(0,"submission aborted by user");
+	}
+	
+    return 0;
+}
+
 
 void version()
 {
@@ -173,128 +360,45 @@ void usage2(int errnum, char *mesg, ...)
 	exit(1);
 }
 
-int nwarnings;
-
 void warnuser(char *warning)
 {
 	nwarnings++;
 
 	logmsg(LOG_DEBUG,"user warning #%d: %s",nwarnings,warning);
 	
-	if ( ! quiet ) printf("WARNING: %s\n",warning);
+	if ( ! quiet ) printf("WARNING: %s!\n",warning);
 }
 
-int socket_fd;
-struct sockaddr_in server_addr; // my address information
-struct sockaddr_in their_addr;  // connector's address information
-int sin_size;
-
-struct stat filestat;
-
-/* Submission information */
-string problem, language, server, team;
-char *filename;
-
-int main(int argc, char **argv)
+char readanswer(char *answers)
 {
-	unsigned i;
-	int c;
-	char *ptr;
-	string filebase, fileext;
-	
-	/* Set logging levels & open logfile */
-	verbose  = LOG_DEBUG;
-	loglevel = LOG_DEBUG;
-	stdlog   = fopen(LOGFILE,"a");
-	if ( stdlog==NULL ) error(errno,"cannot open logfile `%s'",LOGFILE);
+	struct termios old_termio, new_termio;
+	char c;
 
-	progname = argv[0];
+	/* save the terminal settings for stdin */
+	tcgetattr(STDIN_FILENO,&old_termio);
+	new_termio = old_termio;
 
-	nwarnings = 0;
+	/* disable canonical mode (buffered i/o) and local echo */
+	new_termio.c_lflag &= (~ICANON & ~ECHO);
+	tcsetattr(STDIN_FILENO,TCSANOW,&new_termio);
 
-	/* Parse command-line options */
-	quiet =	show_help = show_version = 0;
-	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:s:t:P:v:q",long_opts,NULL))!=-1 ) {
-		switch ( c ) {
-		case 0:   /* long-only option */
-			break;
-		case 'p': /* problem option */
-			problem = string(optarg);
-			break;
-		case 'l': /* language option */
-			language = string(optarg);
-			break;
-		case 's': /* server option */
-			server = string(optarg);
-			break;
-		case 't': /* team option */
-			team = string(optarg);
-			break;
-		case 'P': /* port option */
-			port = strtol(optarg,&ptr,10);
-			if ( ptr!=0 || port<0 || port>65535 ) {
-				usage2(0,"invalid tcp port specified: `%s'",optarg);
+	while ( true ) {
+		c = getchar();
+		if ( c!=0 && (strchr(answers,tolower(c)) ||
+					  strchr(answers,toupper(c))) ) {
+			if ( strchr(answers,tolower(c))!=NULL ) {
+				c = tolower(c);
+			} else {
+				c = toupper(c);
 			}
 			break;
-		case 'v': /* verbose option */
-			verbose = strtol(optarg,&ptr,10);
-			if ( ptr!=0 || verbose<0 ) {
-				usage2(0,"invalid verbosity specified: `%s'",optarg);
-			}
-			break;
-		case 'q': /* quiet option */
-			verbose = LOG_ERR;
-			quiet = 1;
-			break;
-		case ':': /* getopt error */
-		case '?':
-			usage2(0,"unknown option or missing argument `%c'",optopt);
-			break;
-		default:
-			error(0,"getopt returned character code `%c' ??",c);
 		}
 	}
 
-	if ( show_help ) usage();
-	if ( show_version ) version();
-	
-	if ( argc<=optind ) usage2(0,"no filename specified");
-	filename = argv[optind];
+	/* restore the saved settings */
+	tcsetattr(STDIN_FILENO,TCSANOW,&old_termio);
 
-	/* Stat file and do some sanity checks */
-	if ( stat(filename,&filestat)!=0 ) error(errno,"cannot stat `%s'",filename);
-
-	if ( ! S_ISREG(filestat.st_mode) )         warnuser("file is not a regular file");
-	if ( ! (filestat.st_mode & S_IRUSR) )      warnuser("file is not readable");
-	if ( filestat.st_size==0 )                 warnuser("file is empty");
-	if ( filestat.st_size>=(SOURCESIZE*1024) ) warnuser("file is too large");
-	
-	if ( time(NULL)-filestat.st_mtime>(WARN_MTIME*60) ) {
-		warnuser("file has not been modified recently");
-	}
-	
-	/* Try to parse problem and language from filename */
-	filebase = string(basename(filename));
-	if ( filebase.find('.')!=string::npos ) {
-		fileext = filebase.substr(filebase.rfind('.')+1);
-		filebase.erase(filebase.find('.'));
-
-		/* Check for only alphanumeric characters */
-		for(i=0; i<filebase.length(); i++) {
-			if ( ! isalnum(filebase[i]) ) break;
-		}
-		if ( i>=filebase.length() && filebase.length()>0 ) problem = filebase;
-
-		
-	}
-	
-	if ( problem.empty()  ) usage2(0,"no problem specified");
-	if ( language.empty() ) usage2(0,"no language specified");
-	if ( team.empty()     ) usage2(0,"no team specified");
-	if ( server.empty()   ) usage2(0,"no server specified");
-
-    return 0;
+	return c;
 }
 
 
