@@ -14,6 +14,9 @@
 #include <time.h>
 #include <errno.h>
 
+#define ERRSTR   "error"
+#define ERRMATCH ERRSTR": "
+
 const int exit_failure = -1;
 
 /* Import from the main program */
@@ -115,7 +118,7 @@ void vlogerror(int errnum, char *mesg, va_list ap)
 	
 	endptr = buffer = (char *) malloc(mesglen+256);
 
-	sprintf(buffer,"error");
+	sprintf(buffer,ERRSTR);
 	endptr = strchr(buffer,0);
 	
 	if ( mesg!=NULL ) {
