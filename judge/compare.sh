@@ -17,7 +17,13 @@ PROGRAM="$1"
 TESTDATA="$2"
 DIFFOUT="$3"
 
-### diff met optie '-b' voor whitespace, voor DS-practicum ###
-diff -b $PROGRAM $TESTDATA > $DIFFOUT || exit 1
+# Test an exact match between program output and testdata output:
+diff $PROGRAM $TESTDATA > $DIFFOUT
+
+# Exit with failure, when diff reports internal errors:
+# Exitcode 1 means that differences were found!
+if [ $? -ge 2 ]; then
+	exit 1
+fi
 
 exit 0
