@@ -20,6 +20,8 @@ Version 0.2.0 - CVS
  - In tables, the time is now printed as hh:mm (without seconds).
  - Complete rewrite of the clarification interface of both teams and jury.
    Functional changes: added possibility to (un)set a request as "answered".
+ - Fix Dutch text in lib.database.php. (ClosesL #1103043)
+ - Add functions for debugging and profiling (timing) the web interface.
 
 Version 0.1.1 - 24 November 2004
 --------------------------------
