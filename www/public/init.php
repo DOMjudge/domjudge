@@ -6,16 +6,11 @@
  * $Id$
  */
 
-require_once('../../lib/lib.error.php');
+require_once('../../etc/config.php');
 
-/** If config not found, exit with an error */
-if( ! @include_once('../../etc/config.php') ) {
-	error('Failed to include etc/config.php! '.
-		'Check if you configured DOMjudge through editing "etc/global.cfg" '.
-		'and then run \'make\'.');
-}
+require_once(SYSTEM_ROOT . '/lib/lib.error.php');
+require_once(SYSTEM_ROOT . '/lib/use_db_public.php');
+require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
 
-require_once('../../lib/use_db_public.php');
-require_once('../../lib/lib.misc.php');
 require_once('../common.php');
 require_once('../print.php');

@@ -17,7 +17,7 @@ $myhost = trim(`hostname --short`);
 define ('SCRIPT_ID', 'judgedaemon');
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 
-require ('../lib/init.php');
+require (SYSTEM_ROOT . '/lib/init.php');
 
 $verbose = LOG_INFO;
 

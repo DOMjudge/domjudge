@@ -12,7 +12,7 @@
 	define ('SCRIPT_ID', 'runssh_teams');
 	define ('LOGFILE', LOGDIR.'/check.log');
 
-	require ('../lib/init.php');
+	require (SYSTEM_ROOT . '/lib/init.php');
 	
 	$argv = $_SERVER['argv'];
 
