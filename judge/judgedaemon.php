@@ -7,25 +7,27 @@
  * $Id$
  */
 
+require ('../etc/config.php');
+
 $myhost = trim(`hostname`);
 
 define ('SCRIPT_ID', 'judgedaemon');
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 
-require ('../etc/config.php');
 require ('../php/init.php');
 
-logmsg(LOG_NOTICE, "Judge started");
+logmsg(LOG_NOTICE, "Judge started on $myhost");
 
 // Seed the random generator
 list($usec,$sec)=explode(" ",microtime());
 mt_srand($sec * $usec);
 
 // Retrieve hostname and check database for judger entry
-$row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
-
+$row = $DB->q('MAYBETUPLE SELECT * FROM judger WHERE name = %s', $myhost);
+if ( ! $row ) {
+	error("No database entry found for me ($myhost), exiting");
+}
 $myid = $row['judgerid'];
-$me = "$myhost/$myid";
 
 // Create directory where to test submissions
 $tempdirpath = JUDGEDIR."/$myhost";
@@ -56,7 +58,7 @@ while ( TRUE ) {
 
 	// Generate (unique) random string to mark submission to be judged
 	list($usec,$sec)=explode(" ",microtime());
-	$mark = $me.'@'.($sec+$usec).'#'.md5(uniqid(mt_rand(), true));
+	$mark = "$myhost/$myid".'@'.($sec+$usec).'#'.md5(uniqid(mt_rand(), true));
 
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
@@ -123,8 +125,7 @@ while ( TRUE ) {
 
 // helperfunction to read 50,000 bytes from a file
 function get_content($filename) {
-	global $me;
-	
+
 	if ( ! file_exists($filename) ) return '';
 	$fh = fopen($filename,'r');
 	if ( ! $fh ) {
