@@ -24,7 +24,7 @@ TODO: list of necessary protocols between different parts of the system.
   jury-computers (e.g. via NFS).
   
 - Team accounts which are accessible via SSH on the jurycomputers
-  (a ssh-key of the jury account should be installed on all team
+  (a SSH public key of the jury account should be installed on all team
    accounts to provide public-key access).
 
 - (Local) root access on the jury-computers (preferably also on the
@@ -44,9 +44,9 @@ SOFTWARE REQUIREMENTS
 
 - A webserver which supports PHP >= 4.1.0
 
-- MySQL 3 Database and client software
+- MySQL 3.23.x or higher database and client software
 
-- PHP >= 4.1.0, located in /usr/bin/php
+- PHP >= 4.1.0, located in /usr/bin/php (command line interface)
 
 - Bash 2, located in /bin/bash
 
@@ -66,27 +66,27 @@ SOFTWARE REQUIREMENTS
 FILE LOCATIONS
 --------------
 
-There are three different directory-trees which must be set up and
-configured, before the beginning of a contest. The root-paths of these
-directory-trees should be set in the main config file. (Directories in
+There are three different directory trees which must be set up and
+configured, before the beginning of a contest. The root paths of these
+directory trees should be set in the main config file. (Directories in
 uppercase are configuration variables, which can be set to different
 locations (even within different roots, although not tested!)).
 
 SYSTEM_ROOT
-	The judging system itself is contained in this directory-tree. All
-	programs needed for the judging system, are located here and also
+	The judging system itself is contained in this directory tree. All
+	programs needed for the judging system are located here and alongside
 	some extra utilities and the configuration of the system.
 
 INPUT_ROOT
 	The problem input and output testdata should be put here. This
 	directory-tree is for input only, so (in principle) this directory
-	tree can be non-writable.
+	tree can be read-only.
 
-	Each problem should have it's own directory within INPUT_ROOT,
+	Each problem should have its own directory within INPUT_ROOT,
 	where input and output testdata have to be placed.
 
 OUTPUT_ROOT
-	Here are placed all submission files, logfiles and temporary
+	Places here are all submission files, logfiles and temporary
 	files, made while testing submissions. The following directories
 	should be present within OUTPUT_ROOT:
 
@@ -94,8 +94,8 @@ OUTPUT_ROOT
 	INCOMINGDIR   contains submission files, being submitted or where
 	              a submission error has occurred.
 	SUBMITDIR     contains all correctly submitted files.
-	JUDGEDIR      place where submissions are tested, each in it's own
-	              subdirectory. The system needs root-access to this
+	JUDGEDIR      place where submissions are tested, each in its own
+	              subdirectory. The system needs root access to this
 	              directory! (for chroot and mounting of proc-fs).
 
 
@@ -109,11 +109,11 @@ system. To implement configuration changes, these settings should be
 converted to the different language-specific configuration-files,
 needed by different parts of the system. This is done by running the
 command 'generate_config.sh' in the configuration directory. After
-that, also all C/C++ programs should be rebuild to implement these
+that, also all C/C++ programs should be rebuilt to implement these
 changes!
 
 The global configuration file has a ini-file like syntax, with some
-extensions to make it more flexible and be able to correctly convert
+extensions to make it more flexible and to be able to correctly convert
 variables to all specific configuration files. See comments there for
 more information.
 

@@ -21,7 +21,7 @@ to name them here too:
 - tempfile.c is included from the Debian "debianutils" package.
 - mkstemps.h and basename.h are modified versions from the
   GNU libiberty library (copyright Free Software Foundation).
-- lib.database.php by Jeroen van Wolffelaar
+- lib.database.php by Jeroen van Wolffelaar et al.
 - submit.c and submitdaemon.c are based on submit.pl and
   submitdaemon.pl by Eelco Dolstra.
 
@@ -52,13 +52,15 @@ Problems are solved by writing a program in one of the allowed
 languages, that reads input according to the problem input
 specification and writes the correct, corresponding output.
 
-The judging is done by submitting the source-code of the solution to
-the jury. There the jury-system compiles and runs the program and
-compares the output, with the expected output.
+The judging is done by submitting the source code of the solution to
+the jury. There the jury system compiles and runs the program and
+compares the program output with the expected output.
 
 This software can be used to handle the submission and judging during
 such contests. It also handles feedback to the teams and communication
-on problems (clarification requests).
+on problems (clarification requests). It has webinterfaces for the
+jury, the teams (their submissions and clarification requests) and the
+public (scoreboard).
 
 
 Design
@@ -75,9 +77,9 @@ write our own, new system for the following reasons:
   necessary for a big contest.
 - The systems written by other universities (Delft and Groningen) are
   nice, but have some disadvantages. First of all, the advantage of
-  writing your own system, is that you know all it's inside
-  functioning, which might come in handy when problems during the 
-  contest arise. Studying and adapting other systems to our
+  writing your own system, is that you know all its inside
+  functioning, which might come in handy when problems arise during
+  the contest. Studying and adapting other systems to our
   environment will probable take (almost) as much time as writing
   our own system an therefor we chose the last option.
   Specific reasons why we chose not to use the existing systems:
@@ -102,16 +104,16 @@ For the design of this system, the main goals are:
 	security concerning attemps to submit code, which tries to hack the
 	jurysystem. It is difficult to detect malicious code, because this
 	differs per language. Therefor we have chosen to secure the system
-	by running compiled programs in an restricted environment.
+	by running compiled programs in a restricted environment.
 - flexibility:
 	- It should be easy to rejudge individual solutions or all solutions
 	  for a particular language, problem, etc...
 	- Addition of new languages should be easy.
 - simplicity:
 	The system should kept as simple as possible, given the necessary
-	security and flexibility requirements. We try to reach this, by
+	security and flexibility requirements. We try to reach this by
 	using as much standard utilities as possible. This also reduces
-	the chances of bugs.
+	the chances on bugs.
 
 For the specific implementation details see the file INSTALL.
 
