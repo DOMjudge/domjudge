@@ -17,6 +17,8 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 	global $DB;
 
 	// we need two queries: one for all submissions, and one with the results for the valid ones.
+	// when key & value are supplied we're looking for the submissions of a specific team or judger,
+	// else the complete list.
 	if($key && $value) {
 		$res = $DB->q('SELECT submitid,team,probid,langid,submittime,judgerid
 			FROM submission WHERE '.$key.' = %s AND cid = %i ORDER BY submittime DESC',
@@ -27,6 +29,7 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 			getCurContest() );
 	}
 
+	// nothing found...
 	if($res->count() == 0) {
 		echo "<p><em>No submissions</em></p>\n\n";
 		return;
@@ -36,6 +39,9 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 		FROM judging j
 		WHERE (valid = 1 OR valid IS NULL) AND cid = %i', getCurContest() );
 
+	// print the table with the submissions. 
+	// table header; leave out the field that is our key (because it's the same
+	// for all rows)
 	echo "<table>\n<tr>".
 		( $detailed ? "<th>ID</th>" : '' ) .
 		"<th>time</th>".
@@ -45,6 +51,7 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 		"<th>status</th>".
 		($detailed ? "<th>last<br>judge</th>" : '') .
 		"</tr>\n";
+	// print each row with links to detailed information
 	while($row = $res->next()) {
 		$sid = (int)$row['submitid'];
 		$isfinished = ($detailed || ! @$resulttable[$row['submitid']]['result']);
@@ -58,6 +65,7 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 		if( ! @$resulttable[$row['submitid']]['result'] ) {
 			echo printresult(@$row['judgerid'] ? '' : 'queued', TRUE, isset($value));
 		} else {
+			// link directly to a specific judging
 			if ( $detailed ) {
 				echo '<a href="judging.php?id=' . $resulttable[$row['submitid']]['judgingid'] . '">';
 			} else {
@@ -82,6 +90,7 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 function getJudgings($key, $value) {
 	global $DB;
 
+	// get the judgings for a specific key and value pair
 	$res = $DB->q('SELECT * FROM judging
 		WHERE '.$key.' = %s AND cid = %i ORDER BY starttime DESC',
 		$value, getCurContest() );
@@ -117,6 +126,11 @@ function putClock() {
 	echo '<div id="clock">' . strftime('%a %e %b %Y %T') . "</div>\n\n";
 }
 
+/**
+ * Output a clarification response with id $id.
+ * $showReq determines if the corresponding request should also be
+ * displayed, and $teamlink whether the teamname has to be linked.
+ */
 function putResponse($id, $showReq = true, $teamlink = true) {
 	global $DB;
 
@@ -153,6 +167,10 @@ function putResponse($id, $showReq = true, $teamlink = true) {
 <?
 }
 
+/**
+ * Output a clarification request with id $id.
+ * $login can be used to check if your team may view this request.
+ */
 function putRequest($id, $login = NULL) {
 	global $DB;
 
@@ -179,7 +197,10 @@ function putRequest($id, $login = NULL) {
 	return $reqdata;
 }
 
-
+/**
+ * Output the general scoreboard.
+ * $myteamid can be passed to highlight a specific row.
+ */
 function putScoreBoard($myteamid = null) {
 
 	global $DB;
@@ -190,6 +211,7 @@ function putScoreBoard($myteamid = null) {
 
 	$cid = getCurContest();
 
+	// get the teams and problems
 	$teams = $DB->q('TABLE SELECT login,name,category
 		FROM team');
 	$probs = $DB->q('TABLE SELECT probid,name
@@ -204,6 +226,7 @@ function putScoreBoard($myteamid = null) {
 
 	$THEMATRIX = $SCORES = $TEAMNAMES = array();
 
+	// for each team, fetch the status of each problem
 	foreach($teams as $team) {
 
 		// to lookup the team name at the end
@@ -213,6 +236,7 @@ function putScoreBoard($myteamid = null) {
 		$grand_total_correct = 0;
 		$grand_total_time = 0;
 		
+		// for each problem fetch the result
 		foreach($probs as $pr) {
 
 			$result = $DB->q('SELECT result, 
@@ -308,7 +332,7 @@ function putScoreBoard($myteamid = null) {
 	return;
 }
 
-// comparison function voor scoreboard
+// comparison function for scoreboard
 function cmp ($a, $b) {
 	if ( $a['num_correct'] != $b['num_correct'] ) {
 		return $a['num_correct'] > $b['num_correct'] ? -1 : 1;

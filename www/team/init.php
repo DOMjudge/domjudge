@@ -1,4 +1,9 @@
 <?php
+/**
+ * Include required files.
+ *
+ * $Id$
+ */
 
 require_once('../../etc/config.php');
 require_once('../../lib/lib.error.php');

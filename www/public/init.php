@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Include required files.
+ *
  * $Id$
  */
 
