@@ -16,7 +16,7 @@
 	define ('SCRIPT_ID', 'submit_db');
 	define ('LOGFILE', LOGDIR.'/submit.log');
 
-	require ('../php/init.php');
+	require ('../lib/init.php');
 	
 	// every file written has to be in 0600 filemode
 	umask(0177);
