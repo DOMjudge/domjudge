@@ -43,6 +43,9 @@
 /* Logging and error functions */
 #include "../lib/lib.error.h"
 
+/* Common send/receive functions */
+#include "submitcommon.h"
+
 #define PROGRAM "submitdaemon"
 #define VERSION "0.1"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
@@ -52,6 +55,8 @@
 extern int errno;
 
 /* Variables defining logmessages verbosity to stderr/logfile */
+#define LOGFILE LOGDIR"/submit.log"
+
 extern int  verbose;
 extern int  loglevel;
 extern char *logfile;
@@ -70,6 +75,14 @@ struct option const long_opts[] = {
 	{"version", no_argument,       &show_version, 1 },
 	{ NULL,     0,                 NULL,          0 }
 };
+
+const int false = 0;
+const int true  = 1;
+
+int server_fd, client_fd;       /* server/client socket filedescriptors */
+struct sockaddr_in server_addr; /* server address information */
+struct sockaddr_in client_addr; /* client address information */
+int sin_size;
 
 void version()
 {
@@ -94,30 +107,22 @@ void usage()
 	exit(0);
 }
 
-
 void create_server();
-void handle_client(int);
-void sendit(int,char*);
+void handle_client();
 void sigchld_handler(int);
-
-const int false = 0;
-const int true  = 1;
-
-int server_fd, client_fd;       /* server/client socket filedescriptors */
-struct sockaddr_in server_addr; /* server address information */
-struct sockaddr_in client_addr; /* client address information */
-int sin_size;
 
 int main(int argc, char **argv)
 {
     struct sigaction sigchildaction;
     int child_pid;
 	int c;
-
-	/* Define logging levels & file */
-	verbose = LOG_NOTICE;
+	char *ptr;
+	
+	/* Set logging levels & open logfile */
+	verbose  = LOG_DEBUG;
 	loglevel = LOG_DEBUG;
-	logfile = LOGDIR"/submit.log";
+	stdlog   = fopen(LOGFILE,"a");
+	if ( stdlog==NULL ) error(errno,"cannot open logfile `%s'",LOGFILE);
 
 	progname = argv[0];
 
@@ -129,15 +134,14 @@ int main(int argc, char **argv)
 		case 0:   /* long-only option */
 			break;
 		case 'P': /* port option */
-			port = strtol(optarg,NULL,10);
-			if (errno == EINVAL || errno == ERANGE
-			 || port<=0 || port>65535 ) {
+			port = strtol(optarg,&ptr,10);
+			if ( ptr!=0 || port<0 || port>65535 ) {
 				error(0,"invalid tcp port specified: `%s'",optarg);
 			}
 			break;
 		case 'v': /* verbose option */
-			verbose = strtol(optarg,NULL,10);
-			if ( errno == EINVAL || errno == ERANGE || verbose<=0 ) {
+			verbose = strtol(optarg,&ptr,10);
+			if ( ptr!=0 || verbose<0 ) {
 				error(0,"invalid verbosity specified: `%s'",optarg);
 			}
 			break;
@@ -153,7 +157,7 @@ int main(int argc, char **argv)
 	if ( show_help ) usage();
 	if ( show_version ) version();
 	
-	if ( argc>optind ) error(0,"");
+	if ( argc>optind ) error(0,"non-option arguments given");
 	
     logmsg(LOG_NOTICE,"server started");
     
@@ -185,14 +189,14 @@ int main(int argc, char **argv)
 			error(errno,"cannot fork");
 		
 		case  0: /* child thread */
-            logmsg(LOG_NOTICE,"connection from %s",inet_ntoa(client_addr.sin_addr));
-			
-            close(server_fd); /* child doesn't need the listener */
-            handle_client(client_fd);
-			
+			logmsg(LOG_NOTICE,"connection from %s",inet_ntoa(client_addr.sin_addr));
+
+			close(server_fd); /* child doesn't need the listener */
+			handle_client();
+
 			logmsg(LOG_INFO,"child exiting");
-            exit(0);
-			
+			exit(0);
+
 		default: /* parent thread */
 			logmsg(LOG_DEBUG,"spawned child, pid=%d", child_pid);
 			close(client_fd);
@@ -200,7 +204,7 @@ int main(int argc, char **argv)
 
 	}
 
-    return 0; /* This should never be reached */
+	return 0; /* This should never be reached */
 }
 
 /*****************************************************************************/
@@ -222,11 +226,11 @@ void create_server()
 	if ( setsockopt(server_fd,SOL_SOCKET,SO_REUSEADDR,&true,sizeof(int))!=0 ) {
 		error(errno,"cannot set socket options");
 	}
-    
-	server_addr.sin_family      = PF_INET;      /* address family                */
-	server_addr.sin_port        = htons(port);  /* port in network short order   */
+
+	server_addr.sin_family      = AF_INET;      /* address family                */
+	server_addr.sin_port        = htons(port);  /* port in network shortorder    */
 	server_addr.sin_addr.s_addr = INADDR_ANY;   /* automatically fill with my IP */
-	//	memset(&(server_addr.sin_zero),'\0',8);     /* zero the rest of the struct   */
+	//memset(&(server_addr.sin_zero),'\0',8);     /* zero the rest of the struct   */
 
 	if ( bind(server_fd,(struct sockaddr *) &server_addr,
 	          sizeof(struct sockaddr))!=0 ) {
@@ -241,28 +245,21 @@ void create_server()
 /***
  *
  */
-void handle_client(int client)
+void handle_client()
 {
-	sendit(client, "-server NOT ready");
-	close(client);
-}
-
-void sendit(int client, char *mesg)
-{
-	logmsg(LOG_DEBUG, "send: %s", mesg);
-	send(client, mesg, strlen(mesg), 0);
+	sendit(client_fd, "+server ready");
+    receive(client_fd);
+	close(client_fd);
 }
 
 /***
- *  used to watch termination of child threads
- *  
- *  TODO: return the exit code
+ *  Watch and report termination of child threads
  */
 void sigchld_handler(int sig)
 {
-    int exitpid, exitcode;
-    exitpid = wait(&exitcode);
-    logmsg(LOG_INFO,"child process %d exiting with exitcode %d",
+	int exitpid, exitcode;
+	exitpid = wait(&exitcode);
+	logmsg(LOG_INFO,"child process %d exiting with exitcode %d",
 	       exitpid,exitcode);
 }
 

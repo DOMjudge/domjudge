@@ -3,7 +3,11 @@
  *
  * $Id$
  */
-  
+
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
 #define SOCKETBUFFERSIZE 256
 
 /* Buffer where the last received message is stored */
