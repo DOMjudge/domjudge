@@ -2,7 +2,7 @@
 
 /**
  * Recalculate all values for the scoreboard from scratch. Use this
- * sparingly since it requires (2 x #teams x #problems) queries.
+ * sparingly since it requires (3 x #teams x #problems) queries.
  *
  * $Id$
  */

@@ -87,7 +87,7 @@ function calcScoreRow($cid, $team, $prob) {
 		if($row['result'] == 'correct') {
 
 			$correct_j = 1;
-			$time = round((int)@$row['timediff']);
+			$time_j = round((int)@$row['timediff']);
 			if ( ! $row['afterfreeze'] ) {
 				$correct_p = 1;
 				$time_p = round((int)@$row['timediff']);
@@ -104,7 +104,7 @@ function calcScoreRow($cid, $team, $prob) {
 
 	// calculate penalty time: only when correct add it to the total
 	if ( $correct_j == 0 ) $penalty_j = 0;
-	if ( $correct_f == 0 ) $penalty_p = 0;
+	if ( $correct_p == 0 ) $penalty_p = 0;
 
 	// insert or update the values in the jury scores table
 	$DB->q('REPLACE INTO scoreboard_jury
