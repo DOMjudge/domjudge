@@ -62,7 +62,11 @@ while ( TRUE ) {
 		$waiting = FALSE;
 	}
 
-	$cid = getCurContest();
+	$newcid = getCurContest();
+	if ( $cid != $newcid ) {
+		logmsg(LOG_NOTICE, "Contest has changed. (from $cid to $newcid)");
+		$cid = $newcid;
+	}
 	
 	// we have to check for the judgability of problems/languages this way,
 	// because we use an UPDATE below where joining is not possible.
