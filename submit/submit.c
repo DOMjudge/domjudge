@@ -205,13 +205,13 @@ int main(int argc, char **argv)
 			
 		case 'P': /* port option */
 			port = strtol(optarg,&ptr,10);
-			if ( ptr!=0 || port<0 || port>65535 ) {
+			if ( *ptr!=0 || port<0 || port>65535 ) {
 				usage2(0,"invalid tcp port specified: `%s'",optarg);
 			}
 			break;
 		case 'v': /* verbose option */
 			verbose = strtol(optarg,&ptr,10);
-			if ( ptr!=0 || verbose<0 ) {
+			if ( *ptr!=0 || verbose<0 ) {
 				usage2(0,"invalid verbosity specified: `%s'",optarg);
 			}
 			break;
