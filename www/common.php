@@ -59,7 +59,7 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 		($key != 'probid' ? "<th>problem</th>" : '') .
 		($key != 'langid' ? "<th>lang</th>" : '') .
 		"<th>status</th>".
-		($detailed ? "<th>last<br>judge</th>" : '') .
+		($detailed ? "<th>last<br />judge</th>" : '') .
 		"</tr>\n";
 	// print each row with links to detailed information
 	while($row = $res->next()) {
@@ -89,7 +89,7 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 		}
 		echo "</td>" .
 		 	( $detailed ? "<td>".printhost(@$resulttable[$row['submitid']]['judgerid']) . "</td>" : '') .
-		 	"</td></tr>\n";
+		 	"</tr>\n";
 	}
 	echo "</table>\n\n";
 
@@ -112,7 +112,7 @@ function getJudgings($key, $value) {
 		echo "<p><em>No judgings.</em></p>\n\n";
 	} else {
 		echo "<table>\n".
-			"<tr><th>ID</th><th>start</th><th>end</th><th>judge</th><th>result</th><th>valid</th>\n";
+			"<tr><th>ID</th><th>start</th><th>end</th><th>judge</th><th>result</th><th>valid</th></tr>\n";
 		while( $jud = $res->next() ) {
 			echo "<tr" . ( $jud['valid'] ? '':' class="disabled"' ).
 				"><td><a href=\"judging.php?id=" . (int)$jud['judgingid'] . '">j' .
@@ -247,9 +247,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		FROM problem WHERE allow_submit = 1 ORDER BY probid');
 
 
-	echo "<colgroup><col id=\"scoreteamname\" /><col id=\"scorenumcorrect\"><col id=\"scoretotaltime\">";
+	echo "<colgroup><col id=\"scoreteamname\" /><col id=\"scorenumcorrect\" /><col id=\"scoretotaltime\" />";
 	for($i = 0; $i < count($probs); $i++) {
-		echo "<col>";
+		echo "<col />";
 	}
 	echo "</colgroup>\n";
 
@@ -428,6 +428,6 @@ function cmp ($a, $b) {
 
 
 function putDOMjudgeVersion() {
-	echo "<hr><address>DOMjudge/" . DOMJUDGE_VERSION . 
+	echo "<hr /><address>DOMjudge/" . DOMJUDGE_VERSION . 
 		" at ".$_SERVER['SERVER_NAME']." Port ".$_SERVER['SERVER_PORT']."</address>\n";
 }

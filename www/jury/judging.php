@@ -5,12 +5,13 @@
  * $Id$
  */
 
+$id = (int)$_GET['id'];
+
 require('init.php');
-$title = 'Judging';
+$title = 'Judging j'.@$id;
 require('../header.php');
 require('menu.php');
 
-$id = (int)$_GET['id'];
 if(!$id)	error ("Missing judging id");
 
 $jdata = $DB->q('TUPLE SELECT j.*,s.*, c.contestname

@@ -16,8 +16,8 @@ $res = $DB->q('SELECT * FROM problem NATURAL JOIN contest ORDER BY probid');
 $curcid = getCurContest();
 
 echo "<table>
-<tr><th>ID</th><th>name</th><th>contest</th><th>allow<br>submit</th>
-	<th>allow<br>judge</th><th>testdata</th><th>timelimit</th></tr>\n";
+<tr><th>ID</th><th>name</th><th>contest</th><th>allow<br />submit</th>
+	<th>allow<br />judge</th><th>testdata</th><th>timelimit</th></tr>\n";
 while($row = $res->next()) {
 	echo "<tr" . ($row['cid'] == $curcid ? '' : ' class="disabled"').
 		"><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".

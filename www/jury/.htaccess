@@ -21,4 +21,6 @@ AuthType Basic
 	allow from 80.100.101.197
 # thijs vast ip
 	allow from 145.99.250.218
+# validator
+	allow from 128.30.52.13
 </Limit>

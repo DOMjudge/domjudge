@@ -49,8 +49,10 @@ while ( $row = $list->next())
 
 ?>
 <h1>Send Response</h1>
+
 <form action="request.php" method="post">
-<input type="hidden" name="id" value="<?=$id?>">
+<p>
+<input type="hidden" name="id" value="<?=$id?>" /></p>
 <table>
 <tr><td>Send to:</td><td>
 <select name="sendto">
@@ -63,6 +65,7 @@ while ( $row = $list->next())
 <tr><td valign="top">Response:</td><td><textarea name="response" cols="80" rows="5"></textarea></td></tr>
 <tr><td>&nbsp;</td><td><input type="submit" name="submit" value="Send" /></td></tr>
 </table>
-<?php
+</form>
 
+<?php
 require('../footer.php');

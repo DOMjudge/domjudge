@@ -31,16 +31,15 @@ $row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $id);
 <tr><td>Active:</td><td><?=printyn($row['active'])?></td></tr>
 </table>
 
-<?	$cmd = ($row['active'] == 1?'deactivate':'activate'); ?>
-<p>
+<?php	$cmd = ($row['active'] == 1?'deactivate':'activate'); ?>
 <form action="judger.php" method="post">
-<input type="hidden" name="id" value="<?=htmlspecialchars($row['judgerid'])?>" />
+<p><input type="hidden" name="id" value="<?=htmlspecialchars($row['judgerid'])?>" />
 <input type="hidden" name="cmd" value="<?=$cmd?>" />
-<input type="submit" value=" <?=$cmd?> " />
+<input type="submit" value=" <?=$cmd?> " /></p>
 </form>
 
 <h3>Judgings by <?=printhost($row['judgerid'])?></h3>
-<?
+<?php
 
 getJudgings('judgerid', $row['judgerid']);
 

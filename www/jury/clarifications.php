@@ -41,7 +41,7 @@ if ( $res->count() == 0 ) {
 } else {
 	echo "<h3>New Requests:</h3>\n";
 	echo "<table>\n".
-		"<tr><th>ID</th><th>team</th><th>time</th><th>request</th>\n";
+		"<tr><th>ID</th><th>team</th><th>time</th><th>request</th></tr>\n";
 	while ($req = $res->next())
 	{
 		$req['reqid'] = (int)$req['reqid'];
@@ -58,7 +58,6 @@ if ( $res->count() == 0 ) {
 	echo "</table>\n\n";
 }
 
-echo "<p>\n\n";
 
 $res = $DB->q('SELECT DISTINCT q.*
 	FROM  clar_request q
@@ -71,7 +70,7 @@ if ( $res->count() == 0 ) {
 } else {
 	echo "<h3>Old Requests:</h3>\n";
 	echo "<table>\n".
-		"<tr><th>ID</th><th>team</th><th>time</th><th>request</th>\n";
+		"<tr><th>ID</th><th>team</th><th>time</th><th>request</th></tr>\n";
 	while ($req = $res->next())
 	{
 		$req['reqid'] = (int)$req['reqid'];
@@ -99,7 +98,7 @@ if ( $res->count() == 0 ) {
 	echo "<p><em>No clarification responses.</em></p>\n\n";
 } else {
 	echo "<table>\n".
-		"<tr><th>ID</th><th>team</th><th>time</th><th>message</th>\n";
+		"<tr><th>ID</th><th>team</th><th>time</th><th>message</th></tr>\n";
 	while ($req = $res->next())
 	{
 		$team = (isset($req['rcpt'])
@@ -113,7 +112,7 @@ if ( $res->count() == 0 ) {
 			"<td>".printtime($req['submittime'])."</td>".
 			"<td><a href=\"response.php?id=".$req['respid']."\">".
 				htmlspecialchars(str_cut($req['body'], 50)).
-			"</a></td></tr>";
+			"</a></td>";
 		echo "</tr>\n";
 	}
 	echo "</table>\n\n";
@@ -121,6 +120,7 @@ if ( $res->count() == 0 ) {
 
 ?>
 <h1>Send Response</h1>
+
 <form action="clarifications.php" method="post">
 <table>
 <tr><td>Send to:</td><td>
@@ -139,6 +139,7 @@ if ( $res->count() == 0 ) {
 <tr><td valign="top">Response:</td><td><textarea name="response" cols="80" rows="5"></textarea></td></tr>
 <tr><td>&nbsp;</td><td><input type="submit" name="submit" value="Send" /></td></tr>
 </table>
-<?
+</form>
 
+<?php
 require('../footer.php');

@@ -5,12 +5,13 @@
  * $Id$
  */
 
+$id = (int)$_REQUEST['id'];
+
 require('init.php');
-$title = 'Submissions';
+$title = 'Submission s'.@$id;
 require('../header.php');
 require('menu.php');
 
-$id = (int)$_REQUEST['id'];
 if(!$id)	error ("Missing submission id");
 
 $iscorrect = (bool) $DB->q('VALUE SELECT count(judgingid) FROM judging WHERE submitid = %i
@@ -57,11 +58,13 @@ if(!$submdata)	error ("Missing submission data");
 getJudgings('submitid', $id);
 
 ?>
-<p>
+
 <form action="submission.php" method="post">
+<p>
 <input type="hidden" name="id" value="<?=$id?>" />
 <input type="hidden" name="cmd" value="rejudge" />
 <input type="submit" value=" Rejudge Me! " <?=($iscorrect?'disabled="disabled "':'')?>/>
+</p>
 </form>
 
 <?php

@@ -10,7 +10,7 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>'."\n";
 <?php
 	echo "\t<!-- DOMjudge version " . DOMJUDGE_VERSION . " -->\n";
 
-	if(isset($refresh)) { echo "\t<meta http-equiv=\"refresh\" content=\"$refresh\">\n"; }
+	if(isset($refresh)) { echo "\t<meta http-equiv=\"refresh\" content=\"$refresh\" />\n"; }
 	?>
 	<title><?php echo $title; ?></title>
 	<link rel="stylesheet" href="style.css" type="text/css" />

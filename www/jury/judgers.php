@@ -32,14 +32,16 @@ while($row = $res->next()) {
 }
 echo "</table>\n\n";
 ?>
-<p>
+
 <form action="judgers.php" method="post">
-<input type="hidden" name="cmd" value="activate" />
-<input type="submit" value=" Go Judgers! " />
+<p><input type="hidden" name="cmd" value="activate" />
+<input type="submit" value=" Go Judgers! " /></p>
 </form>
+
 <form action="judgers.php" method="post">
-<input type="hidden" name="cmd" value="deactivate" />
-<input type="submit" value=" Stop Judgers! " />
+<p><input type="hidden" name="cmd" value="deactivate" />
+<input type="submit" value=" Stop Judgers! " /></p>
 </form>
-<?
+
+<?php
 require('../footer.php');
