@@ -5,7 +5,7 @@
 # Usage: $0 <team> <fromfile> <tofile>
 
 # Global configuration
-source `dirname $0`/../etc/config.sh
+source "`dirname $0`/../etc/config.sh"
 
 function error()
 {
@@ -14,9 +14,9 @@ function error()
 
 [ $# -eq 3 ] || exit 1
 
-team=$1
-fromfile=$2
-tofile=$3
+team="$1"
+fromfile="$2"
+tofile="$3"
 
 output1=`scp -Bq "${team}@${SCP_HOST}:${fromfile}" "$tofile" 2>&1`
 if [ $? -eq 0 -a ${#output1} -eq 0 ]; then
