@@ -29,7 +29,7 @@ if(!$row) {
 
 <p>
 <table>
-<tr><td><b>To:</b></td><td><?=htmlentities(empty($row['rcpt']) ? 'All' : $row['rcpt'])?></td></tr>
+<tr><td><b>To:</b></td><td><?=htmlentities(empty($row['rcpt']) ? 'All' : '<span class="teamid">'.$row['rcpt'].'</span>')?></td></tr>
 <tr><td><b>Time:</b></td><td><?=printtime($row['submittime'])?></td></tr>
 <tr><td valign="top"><b>Response:</b></td><td class="output_text"><?=nl2br(htmlspecialchars($row['body']))?></td></tr>
 </table>

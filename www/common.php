@@ -117,7 +117,7 @@ function putClock() {
 	echo '<div id="clock">' . strftime('%a %e %b %Y %T') . "</div>\n\n";
 }
 
-function putResponse($id, $showReq = true) {
+function putResponse($id, $showReq = true, $teamlink = true) {
 	global $DB;
 
 	$respdata = $DB->q('MAYBETUPLE SELECT r.*, c.contestname
@@ -142,7 +142,11 @@ function putResponse($id, $showReq = true) {
 		echo "</td></tr>\n";
 	}
 ?>
-<tr><td>Send to:</td><td><?=isset($respdata['rcpt'])?'<a href="team.php?id='.urlencode($respdata['rcpt']).'"><span class="teamid">'. htmlspecialchars($respdata['rcpt'])."</span></a>":"All"?></td></tr>
+<tr><td>Send to:</td><td><?=isset($respdata['rcpt'])?
+	($teamlink?'<a href="team.php?id='.urlencode($respdata['rcpt']).'">':'')
+	.'<span class="teamid">'. htmlspecialchars($respdata['rcpt']).'</span>'
+	.($teamlink?'</a>':'')
+	:'All'?></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($respdata['submittime']) ?></td></tr>
 <tr><td valign="top">Response:</td><td class="filename"><pre class="output_text"><?=nl2br(htmlspecialchars($respdata['body'])) ?></pre></td></tr>
 </table>
@@ -163,7 +167,10 @@ function putRequest($id, $login = NULL) {
 
 <table>
 <tr><td>Contest:</td><td><?=htmlentities($reqdata['contestname'])?></td></tr>
-<tr><td>From:</td><td><a href="team.php?id=<?=urlencode($reqdata['login'])?>"><span class="teamid"><?=htmlspecialchars($reqdata['login'])?></span></a></td></tr>
+<tr><td>From:</td><td>
+<?=!isset($login)?'<a href="team.php?id='.urlencode($reqdata['login']).'">':''?><span class="teamid"><?=htmlspecialchars($reqdata['login'])?></span>
+<?=!isset($login)?'</a>':''?>
+</td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($reqdata['submittime']) ?></td></tr>
 <tr><td valign="top">Request:</td><td class="filename"><pre class="output_text"><?=nl2br(htmlspecialchars($reqdata['body'])) ?></pre></td></tr>
 </table>

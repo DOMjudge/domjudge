@@ -29,7 +29,7 @@ if ( $list->count() == 0 ) {
 } else {
 	while ( $row = $list->next())
 	{
-		putResponse($row['respid'], false);
+		putResponse($row['respid'], false, false);
 	}
 }
 
