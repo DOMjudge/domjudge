@@ -6,6 +6,7 @@ Version 0.1.1 - CVS
  - Improve Makefiles and add global targets.
  - Move passwords to separate passwords.php file.
  - Redirect in webroot changed from permanent to temporary.
+ - Recreated EPS logo, now 75% smaller filesize.
 
 Version 0.1.0 - 18 November 2004
 --------------------------------
