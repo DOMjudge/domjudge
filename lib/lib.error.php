@@ -14,5 +14,5 @@ function error($string) {
 
 function log_mysql_error($string) {
 	print $string;
-	exit;
+	exit(1);
 }
