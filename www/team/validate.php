@@ -14,8 +14,8 @@ if(!$row) {
 	header('HTTP/1.1 403 Forbidden');
 	$title = '403 Forbidden';
 	include('../header.php');
-	echo "<h1>403 Forbidden</h1>\n\n<p>Sorry, no access.</p>\n\n".
-		"<hr><address>DOMjudge/".DOMJUDGE_VERSION." at ".$_SERVER['SERVER_NAME']." Port ".$_SERVER['SERVER_PORT']."</address>\n";
+	echo "<h1>403 Forbidden</h1>\n\n<p>Sorry, no access.</p>\n\n";
+	putDOMjudgeVersion();
 	include('../footer.php');
 	exit;
 }

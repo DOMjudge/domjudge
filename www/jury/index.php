@@ -8,7 +8,7 @@ $title = 'Jury interface';
 require('../header.php');
 require('menu.php');
 
-echo "<h1>Jury interface</h1>\n\n";
+echo "<h1>DOMjudge Jury interface</h1>\n\n";
 ?>
 <ul>
 <li><a href="contest.php">Contest</a></li>
@@ -20,6 +20,8 @@ echo "<h1>Jury interface</h1>\n\n";
 <li><a href="languages.php">Languages</a></li>
 <li><a href="problems.php">Problems</a></li>
 </ul>
-
+<br><br><br><br>
 <?php
+putDOMjudgeVersion();
+
 require('../footer.php');

@@ -13,6 +13,7 @@ if(FALSE) {
 	$title = '403 Forbidden';
 	include('../header.php');
 	echo "<h1>403 Forbidden</h1>\n\nSorry, no access.";
+	putDOMjudgeVersion();
 	include('../footer.php');
 	exit;
 }

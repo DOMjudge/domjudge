@@ -14,5 +14,6 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>'."\n";
 	?>
 	<title><?php echo $title; ?></title>
 	<link rel="stylesheet" href="style.css" type="text/css" />
+	<!--  javascript popup code hier -->
 </head>
-<body>
+<body <? /* popup? check (WORK IN PROGRESS...) */ ?>>

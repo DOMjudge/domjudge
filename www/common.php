@@ -235,7 +235,7 @@ function putScoreBoard($myteamid = null) {
 	echo "<h1>Scoreboard ".htmlentities($contdata['contestname'])."</h1>\n\n";
 	echo "<h4>starts: ".printtime($contdata['starttime']) . ' - ends: ' .printtime($contdata['endtime'])."</h4>\n\n";
 
-	echo "<table class=\"scoreboard\" border=\"1\" width=\"80%\">\n";
+	echo "<table class=\"scoreboard\" border=\"1\">\n";
 
 
 	// get the teams and problems
@@ -412,4 +412,10 @@ function cmp ($a, $b) {
 		return $a['teamname'] < $b['teamname'] ? -1 : 1;
 	}
 	return 0;
+}
+
+
+function putDOMjudgeVersion() {
+	echo "<hr><address>DOMjudge/" . DOMJUDGE_VERSION . 
+		" at ".$_SERVER['SERVER_NAME']." Port ".$_SERVER['SERVER_PORT']."</address>\n";
 }
