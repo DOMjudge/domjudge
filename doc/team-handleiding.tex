@@ -1,10 +1,11 @@
-\documentclass[11pt,titlepage,a4paper]{article}
+\documentclass[11pt,a4paper]{article}
 
 % $Id$
 
 \usepackage{a4wide}
 \usepackage{url}
 \usepackage{verbatim}
+\usepackage{moreverb}
 \usepackage[dutch]{babel}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{epsfig}
@@ -17,16 +18,68 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
 
-\newcommand{\DOMjudge}{\textsc{dom}judge }
+\newcommand{\DOMjudge}{\textsc{DOM}judge }
 
 \title{Teamhandleiding\\~\\Nederlands Kampioenschap Programmeren 2004}
 
 \begin{document}
 
+\thispagestyle{empty}
+
 \maketitle
+
+\vspace{1cm}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[height=7cm]{nkplogo.eps}}
+\end{figure}
+
 
 \newpage
 \tableofcontents
+
+
+\newpage
+\section{Samenvatting}
+
+Hieronder staat kort samengevat de belangrijkste informatie. Dit is
+bedoeld om snel aan de slag te kunnen. We raden echter ten zeerste
+aan, dat minstens iemand binnen je team de complete handleiding
+doorneemt, omdat daarin specifieke details van de verschillende
+programmeertalen en het jurysysteem staan, die ook van belang kunnen
+zijn.
+
+\subsection{Inlezen en wegschrijven}
+
+Tijdens de wedstrijd is het de bedoeling dat alles wat je inleest, van de
+`standard in' (toetsenbord) gelezen wordt, en weggeschreven wordt naar de
+`standard out' (beeldscherm). Je hoeft dus nooit een bestand te openen. Zie voor
+voorbeeldcode de bijlage van de systeemhandleiding.
+
+Let op dat bij wegschrijven het gebruik van hoofd- en kleine letters kritisch
+is. Dit betekend dat als je iets wegschrijft, het er toe doet of dat met
+hoofdletters is, of met kleine letters. Ook extra spaties zorgen ervoor dat de
+jurycomputer je oplossing afkeurd.
+
+\subsection{Programmeertalen}
+
+De volgende programmeertalen kunnen gebruikt worden: C, C++, Java,
+Pascal en Haskell. Voor de exacte compiler-opties die we gebruiken en
+taal specifieke details wordt verwezen naar de complete team-handleiding.
+
+\subsection{Insturen van oplossingen}
+
+Insturen van oplossingen gaat via het command-line programma
+\texttt{submit}. Gebruik \texttt{submit <probleem>.<extensie>}, met
+de letter van het probleem en een standaard extensie van je taal.
+Voor de complete documentatie en alle opties, zie
+\texttt{submit --help}.
+
+\subsection{Bekijken van scores, inzendingen, e.d.}
+
+Het bekijken van inzendingen, scores en sturen en lezen van
+``clarification requests'' gaat via een webinterface. Het adres is
+\url{judge.nkp.nl} en de pagina wijst zich verder vanzelf.
 
 
 \newpage
@@ -35,7 +88,8 @@
 Alle teams krijgen \'e\'en computer aangewezen, waarop zij kunnen
 werken om de opgaven op te lossen. Dit zijn computers van het
 Informatica Instituut en zijn allemaal Dell computers met 15 inch TFT
-flatscreens met een Intel Pentium 4 processor van minimaal 2 GHz.
+flatscreens met een Intel Pentium 3 of 4 processor van minimaal 1 GHz
+en 256 MB intern geheugen.
 
 Tijdens het NKP kan gebruik gemaakt worden van twee verschillende
 besturingssystemen: Microsoft Windows 2000 Professional of
@@ -383,7 +437,7 @@ Hieronder staan een aantal voorbeelden van code om de invoer van een
 probleem in te lezen en de uitvoer weg te schrijven.
 
 De code hoort bij de volgende probleembeschrijving: gegeven een string
-met een naam (\'e\'en woord), voer de string ``Hallo <naam>!'' uit.
+met een naam (\'e\'en woord), voer de string ``Hallo $<$naam$>$!'' uit.
 
 Dit probleem zou de volgende in- en uitvoer kunnen hebben:
 
@@ -400,18 +454,23 @@ Let op dat het op de eerste regel het getal 3 aangeeft, dat er 3
 testgevallen volgen.
 
 Een oplossing voor dit probleem in C:
-\verbatiminput{voorbeeld.c}
+\listinginput{1}{voorbeeld.c}
 
 Let op de \texttt{return 0;} aan het einde, zodat we geen
 run-error krijgen!
 
+\newpage
+
 Een oplossing in C++ kan als volgt:
-\verbatiminput{voorbeeld.cc}
+\listinginput{1}{voorbeeld.cc}
 
 Een oplossing in Pascal:
-\verbatiminput{voorbeeld.pas}
+\listinginput{1}{voorbeeld.pas}
+
+\newpage
 
 En tenslotte een oplossing in Java:
-\verbatiminput{voorbeeld.java}
+\listinginput{1}{voorbeeld.java}
+
 
 \end{document}
