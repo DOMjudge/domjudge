@@ -71,7 +71,6 @@ sub logmsg {
 sub sendit;
 
 sub error {
-#	if ( -f $tmpfile ) { unlink $tmpfile; }
 	if ( $socket ) {
 		sendit "-error: @_";
 		$socket->close();
@@ -223,7 +222,10 @@ while ( 1 ) {
 	my $answer = getc(STDIN);
 	if ( $answer =~ /y|n/i ) { print "\n"; }
 	if ( $answer =~ /y/i   ) { last; }
-	if ( $answer =~ /n/i   ) { error "submission aborted by user"; }
+	if ( $answer =~ /n/i   ) {
+		unlink($tmpfile);
+		error "submission aborted by user";
+	}
 }
 
 # Connect to the submission server.
@@ -259,3 +261,5 @@ unlink($tmpfile) or error "deleting '$tmpfile': $!";
 print "Done: submission successful.\n";
 
 logmsg "exiting";
+
+
