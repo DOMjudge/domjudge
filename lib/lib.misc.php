@@ -47,9 +47,9 @@ function getCurContest() {
 /**
  * Add another key/value to a url
  */
-function addUrl($url, $keyvalue)
+function addUrl($url, $keyvalue, $encode = TRUE)
 {
-	return $url.(strrpos($url, '?')===False ? '?' : '&' ).$keyvalue;
+	return $url.(strrpos($url, '?')===False ? '?' : ( $encode ? '&amp;' : '&') ).$keyvalue;
 }
 
 

@@ -27,7 +27,7 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>'."\n";
 	<title><?= $title ?></title>
 	<link rel="stylesheet" href="style.css" type="text/css" />
 	
-	<script language="JavaScript">
+	<script type="text/javascript">
 	function popUp(URL) {
 		var w = window.open(URL, 'ALERT', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=300,height=200');
 		w.focus();

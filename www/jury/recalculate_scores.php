@@ -26,7 +26,7 @@ $probs = $DB->q('COLUMN SELECT probid FROM problem
 
 echo "<p>Recalculating all values for the scoreboard cache (" .
 	count($teams) . " teams, " . count($probs) ." problems, contest c" .
-	htmlspecialchars($cid) . ")...</p>\n\n<p><pre>\n";
+	htmlspecialchars($cid) . ")...</p>\n\n<pre>\n";
 
 // for each team, fetch the status of each problem
 foreach( $teams as $team ) {
@@ -42,7 +42,7 @@ foreach( $teams as $team ) {
 	echo "\n";
 }
 
-echo "</pre></p>\n\n<p>Deleting irrelevant data...</p>\n\n";
+echo "</pre>\n\n<p>Deleting irrelevant data...</p>\n\n";
 
 // drop all contests that are not current, teams and problems that do not exist
 $DB->q('DELETE FROM scoreboard_jury WHERE cid != %i OR team NOT IN (%As) OR problem NOT IN (%As)',

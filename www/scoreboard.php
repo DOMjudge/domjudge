@@ -39,11 +39,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
 
 	// output table column groups (for the styles)
-	echo '<colgroup><col id="scoreteamname" /><col id="scoresolv" /><col id="scoretotal" />';
-	for( $i = 0; $i < count($probs); $i++ ) {
-		echo '<col class="scoreprob" />';
-	}
-	echo "</colgroup>\n";
+	echo '<colgroup><col id="scoreteamname" /><col id="scoresolv" /><col id="scoretotal" />' .
+		str_repeat('<col class="scoreprob" />', count($probs)) . "</colgroup>\n";
 
 	// column headers
 	echo '<tr id="scoreheader"><th>TEAM</th>';
@@ -124,14 +121,12 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		foreach ( array_keys($probs) as $prob ) {
 
 			// if we have scores, use them, else, provide the defaults
-			// (happens when nothing submitted for this problem,team yet
+			// (happens when nothing submitted for this problem,team yet)
 			if ( isset ( $THEMATRIX[$team][$prob] ) ) {
 				$pdata = $THEMATRIX[$team][$prob];
 			} else {
-				$pdata = array ( 'submitted' => 0,
-					'correct' => 0,
-					'time' => 0,
-					'penalty' => 0);
+				$pdata = array ( 'submitted' => 0, 'correct' => 0,
+					'time' => 0, 'penalty' => 0);
 			}
 
 			echo '<td class="';
@@ -180,7 +175,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// only print legend when there's more than one category
 	if ( $res->count() > 1 ) {
-		echo "<br /><br /><br />\n<table class=\"scoreboard\"><tr><th>Legend</th></tr>\n";
+		echo "<p><br /><br /></p>\n<table class=\"scoreboard\"><tr><th>Legend</th></tr>\n";
 		while ( $row = $res->next() ) {
 			echo '<tr class="category' . $row['catid'] . '">' .
 				'<td align="center" class="scoretn">' .	$row['name'] . "</td></tr>";
@@ -194,8 +189,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	} else {
 		$lastupdate = time();
 	}
-	echo "<span id=\"lastmod\">Last Update: " .
-		date('j M Y H:i', $lastupdate) . "</span>\n\n";
+	echo "<p id=\"lastmod\">Last Update: " .
+		date('j M Y H:i', $lastupdate) . "</p>\n\n";
 
 	return;
 }

@@ -15,6 +15,7 @@ Version 0.2.0 - CVS
  - Feature: Add caching to the Scoreboard. This vastly improves the
    responsiveness and scalability of DOMjudge; outputting the scoreboard
    is now an O(1) operation. (Closes: #1070079)
+ - Some fixes to XHTML1.0 compliancy.
 
 Version 0.1.1 - 24 November 2004
 --------------------------------

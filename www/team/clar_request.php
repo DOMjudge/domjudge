@@ -16,7 +16,7 @@ if (isset($_REQUEST['submit'])
 
 	// after input, redirect to the appropriate requestpage
 	header('Location: '
-		.addUrl( getBaseURI() . 'team/request.php?id='.urlencode($respid), $popupTag));
+		.addUrl( getBaseURI() . 'team/request.php?id='.urlencode($respid), $popupTag, FALSE));
 	exit;
 }
 $title = 'Clarification Request';

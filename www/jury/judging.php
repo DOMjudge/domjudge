@@ -37,7 +37,7 @@ if(@$jdata['endtime']) {
 <table>
 <tr><td>Submission:</td><td>
 <a href="submission.php?id=<?=$sid.'">s'.$sid.' / <span class="teamid">'.
-	$jdata['team'].	'</span> / '. htmlspecialchars($jdata['probid'].' / '.$jdata['langid'])?></a>
+	$jdata['team'].	'</span> / '. htmlspecialchars($jdata['probid'].' / '.$jdata['langid'])?></a></td></tr>
 <tr><td>Contest:</td><td><?=htmlentities($jdata['contestname'])?></td></tr>
 <tr><td>Team:</td><td><a href="team.php?id=<?=urlencode($jdata['team']).
 	'"><span class="teamid">'. htmlspecialchars($jdata['team'])."</span>: ".
