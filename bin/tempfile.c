@@ -8,6 +8,7 @@
  * COPYING supplied with this code.
  *
  */
+#define PACKAGE_VERSION "2.8.4"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -26,18 +27,16 @@ usage (int status)
 {
   if (status)
     fprintf(stderr, "Try `%s --help' for more information.\n", progname);
-  else {
-    printf("Usage: %s [OPTION]\n", progname);
-    printf("Create a temporary file in a safe manner.\n");
-    printf("\n");
-    printf("-d, --directory=DIR  place temporary file in DIR\n");
-    printf("-p, --prefix=STRING  set temporary file's prefix to STRING\n");
-    printf("-s, --suffix=STRING  set temporary file's suffix to STRING\n");
-    printf("-m, --mode=MODE      open with MODE instead of 0600\n");
-    printf("-n, --name=FILE      use FILE instead of tempnam(3)\n");
-    printf("    --help           display this help and exit\n");
-    printf("    --version        output version information and exit\n");
-  }
+  else
+    printf("Usage: %s [OPTION]\n\n"
+"Create a temporary file in a safe manner.\n\n"
+"-d, --directory=DIR  place temporary file in DIR\n"
+"-p, --prefix=STRING  set temporary file's prefix to STRING\n"
+"-s, --suffix=STRING  set temporary file's suffix to STRING\n"
+"-m, --mode=MODE      open with MODE instead of 0600\n"
+"-n, --name=FILE      use FILE instead of tempnam(3)\n"
+"    --help           display this help and exit\n"
+"    --version        output version information and exit\n", progname);
   exit(status);
 }
 
@@ -107,7 +106,7 @@ main (int argc, char **argv)
     case 'h':
       usage(0);
     case 'v':
-      puts("tempfile 1.0");
+      puts("tempfile " PACKAGE_VERSION);
       exit(0);
     default:
       usage(1);
