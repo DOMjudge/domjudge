@@ -9,12 +9,13 @@
 /**
  * Print a list of submissions, either all or only those that
  * match <key> = <value>. Output is always limited to the
- * current or last contest. $detailed will be set to false
- * for a team page.
+ * current or last contest.
  */
-function getSubmissions($key = null, $value = null, $detailed = TRUE) {
+function getSubmissions($key = null, $value = null) {
 
 	global $DB;
+	
+	$detailed = $key != 'team';
 
 	// we need two queries: one for all submissions, and one with the results for the valid ones.
 	// when key & value are supplied we're looking for the submissions of a specific team or judger,
