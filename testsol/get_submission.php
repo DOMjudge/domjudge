@@ -29,26 +29,26 @@ $tempdirpath = JUDGEDIR."/$myhost";
 system("mkdir -p $tempdirpath", $retval);
 if ( $retval != 0 ) error("$me Could not create $tempdirpath");
 
-$waiting = 0;
-$active = 1;
+$waiting = FALSE;
+$active = TRUE;
 
 // Constantly check database for unjudged submissions
-while ( 1 ) {
+while ( TRUE ) {
 
 	// Check that this judge is active, else wait and check again later
 	$row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
 	if ( $row['active'] != 1 ) {
 		if ( $active ) {
 			logmsg("$me Not active, waiting for reactivation...");
-			$active = 0;
+			$active = FALSE;
 		}
 		sleep(15);
 		continue;
 	}
 	if ( ! $active ) {
 		logmsg("$me Reactivated, checking queue...");
-		$active = 1;
-		$waiting = 0;
+		$active = TRUE;
+		$waiting = FALSE;
 	}
 
 	// Generate (unique) random string to mark submission to be judged
@@ -63,12 +63,12 @@ while ( 1 ) {
 	if ( $numupd == 0 ) {
 		if ( ! $waiting ) {
 			logmsg("$me No submissions in queue, waiting...");
-			$waiting = 1;
+			$waiting = TRUE;
 		}
 		sleep(5);
 		continue;
 	}
-	$waiting = 0;
+	$waiting = FALSE;
 
 	// get max.runtime, path to submission and other params
 	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS runtime,
@@ -115,6 +115,7 @@ while ( 1 ) {
 	// done!
 	logmsg("$me Judging $judgingid/$row[submitid] finished, result: $result");
 
+	// restart the judging loop
 }
 
 // helperfunction to read 50,000 bytes from a file
