@@ -6,6 +6,9 @@
 
 shopt -s extglob
 
+# Include '../bin' in path for 'tempfile'
+PATH=../bin:$PATH
+
 GLOBALCONF=global.cfg
 LOCALCONF=config
 LOCALTEMPLATE=config.template
