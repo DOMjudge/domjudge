@@ -10,7 +10,7 @@ require('init.php');
 $title = 'Submission details';
 include('../header.php');
 
-$sid = (int)$_GET['submitid'];
+$sid = (int)$_GET['id'];
 
 // select also on teamid so we can only select our own submissions
 $row = $DB->q('MAYBETUPLE SELECT p.probid, p.name as probname,submittime,l.name as langname,
