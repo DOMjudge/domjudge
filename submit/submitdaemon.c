@@ -37,6 +37,12 @@
 #include <signal.h>
 #include <getopt.h>
 
+/* Some C++ includes for easy string handling */
+using namespace std;
+#include <iostream>
+#include <sstream>
+#include <string>
+
 /* Some system/site specific config */
 #include "../etc/config.h"
 
@@ -76,13 +82,10 @@ struct option const long_opts[] = {
 	{ NULL,     0,                 NULL,          0 }
 };
 
-const int false = 0;
-const int true  = 1;
-
 int server_fd, client_fd;       /* server/client socket filedescriptors */
 struct sockaddr_in server_addr; /* server address information */
 struct sockaddr_in client_addr; /* client address information */
-int sin_size;
+socklen_t sin_size;
 
 void version()
 {
@@ -108,13 +111,13 @@ void usage()
 }
 
 void create_server();
-void handle_client();
+int  handle_client();
 void sigchld_handler(int);
 
 int main(int argc, char **argv)
 {
-    struct sigaction sigchildaction;
-    int child_pid;
+	struct sigaction sigchildaction;
+	int child_pid;
 	int c;
 	char *ptr;
 	
@@ -158,48 +161,49 @@ int main(int argc, char **argv)
 	if ( show_version ) version();
 	
 	if ( argc>optind ) error(0,"non-option arguments given");
-	
-    logmsg(LOG_NOTICE,"server started");
-    
-    create_server();
-    logmsg(LOG_INFO,"listening on port %d/tcp", port);
+
+	logmsg(LOG_NOTICE,"server started");
+
+	create_server();
+	logmsg(LOG_INFO,"listening on port %d/tcp", port);
     
     /* Setup the child signal handler */
-    sigchildaction.sa_handler = sigchld_handler;
-    sigemptyset(&sigchildaction.sa_mask);
-    sigchildaction.sa_flags = SA_RESTART;
-    if ( sigaction(SIGCHLD,&sigchildaction,NULL)!=0 ) {
+	sigchildaction.sa_handler = sigchld_handler;
+	sigemptyset(&sigchildaction.sa_mask);
+	sigchildaction.sa_flags = SA_RESTART;
+	if ( sigaction(SIGCHLD,&sigchildaction,NULL)!=0 ) {
 		error(errno,"setting child signal handler");
-    }
+	}
+	logmsg(LOG_DEBUG,"child signal handler installed");
     
     /* main accept() loop */
     while ( true ) {
         sin_size = sizeof(struct sockaddr_in);
 		
-        if ( (client_fd = accept(server_fd, (struct sockaddr *) &client_addr,
+		if ( (client_fd = accept(server_fd, (struct sockaddr *) &client_addr,
 		                         &sin_size)) == -1 ) {
 			warning(errno,"accepting incoming connection");
-            continue;
-        }
+			continue;
+		}
         
-        logmsg(LOG_INFO,"incoming connection, spawning child");
+		logmsg(LOG_INFO,"incoming connection, spawning child");
         
-        switch ( child_pid = fork() ) {
+		switch ( child_pid = fork() ) {
 		case -1: /* error */
 			error(errno,"cannot fork");
 		
 		case  0: /* child thread */
+			close(server_fd); /* child doesn't need the listener */
 			logmsg(LOG_NOTICE,"connection from %s",inet_ntoa(client_addr.sin_addr));
 
-			close(server_fd); /* child doesn't need the listener */
 			handle_client();
 
 			logmsg(LOG_INFO,"child exiting");
 			exit(0);
 
 		default: /* parent thread */
+			close(client_fd); /* parent doesn't need the client_fd */
 			logmsg(LOG_DEBUG,"spawned child, pid=%d", child_pid);
-			close(client_fd);
 		}
 
 	}
@@ -208,6 +212,18 @@ int main(int argc, char **argv)
 }
 
 /*****************************************************************************/
+
+/***
+ *  Convert a C++ string to lowercase
+ */
+string stringtolower(string str)
+{
+	int i;
+
+	for(i=0; i<str.length(); i++) str[i] = tolower(str[i]);
+
+	return str;
+}
 
 /***
  *  Open a listening socket on the localhost.
@@ -219,11 +235,14 @@ int main(int argc, char **argv)
  */
 void create_server()
 {
+	/* setsockopt needs a pointer to the value of the option to be set */
+	int enable = 1;
+	
 	if ( (server_fd = socket(PF_INET,SOCK_STREAM,0)) == -1 ) {
 		error(errno,"cannot open server socket");
 	}
 
-	if ( setsockopt(server_fd,SOL_SOCKET,SO_REUSEADDR,&true,sizeof(int))!=0 ) {
+	if ( setsockopt(server_fd,SOL_SOCKET,SO_REUSEADDR,&enable,sizeof(int))!=0 ) {
 		error(errno,"cannot set socket options");
 	}
 
@@ -243,13 +262,52 @@ void create_server()
 }
 
 /***
- *
+ *  Talk with a client: receive submission information and copy source-file.
  */
-void handle_client()
+int handle_client()
 {
-	sendit(client_fd, "+server ready");
-    receive(client_fd);
+	string line, command, argument;
+	string team, problem, language, filename;
+	
+	sendit(client_fd,"+server ready");
+
+	while ( receive(client_fd) ) {
+		line = string(lastmesg);
+		istringstream line_iss(line);
+		line_iss >> command >> argument;
+
+		if ( command=="team" ) {
+			team = argument;
+			sendit(client_fd,"+received team '%s'",argument.c_str());
+		} else
+		if ( command=="problem" ) {
+			problem = stringtolower(argument);
+			sendit(client_fd,"+received problem '%s'",argument.c_str());
+		} else
+		if ( command=="language" ) {
+			language = stringtolower(argument);
+			sendit(client_fd,"+received language '%s'",argument.c_str());
+		} else
+		if ( command=="filename" ) {
+			filename = argument;
+			sendit(client_fd,"+received filename '%s'",argument.c_str());
+		} else 
+		if ( command=="quit" ) {
+			logmsg(LOG_NOTICE,"received quit, aborting");
+			close(client_fd);
+			return 0;
+		} else 
+		if ( command=="done" ) {
+			break;
+		} else {
+			error(0,"invalid command: '%s'",command.c_str());
+		}
+	}
+
+	sleep(1);
+	
 	close(client_fd);
+	return 1;
 }
 
 /***
