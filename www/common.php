@@ -8,12 +8,9 @@
 
 /**
  * Return the base URI for the DOMjudge Webinterface.
- * Change this if redirects are broken, e.g. when you use https
- * or a different port number.
- * TODO: maybe the complete baseURI should be configurable?
  */
 function getBaseURI() {
-	return 'http://' . WEBSERVER . '/';
+	return WEBBASEURI;
 }
 
 /**
