@@ -229,11 +229,14 @@ function putScoreBoard($myteamid = null) {
 
 	global $DB;
 
-	echo "<h1>Scoreboard</h1>\n\n";
+	$cid = getCurContest();
+	$contdata = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $cid);
+	
+	echo "<h1>Scoreboard ".htmlentities($contdata['contestname'])."</h1>\n\n";
+	echo "<h4>starts: ".printtime($contdata['starttime']) . ' - ends: ' .printtime($contdata['endtime'])."</h4>\n\n";
 
 	echo "<table class=\"scoreboard\" border=\"1\" width=\"80%\">\n";
 
-	$cid = getCurContest();
 
 	// get the teams and problems
 	$teams = $DB->q('TABLE SELECT login,name,category
