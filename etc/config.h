@@ -10,6 +10,6 @@
 
 /* User ID's under which programs are allowed to run.
    End list with -1, UID 0 (root) is ignored. */
-const int valid_uid[5] = {5051,65534,-1};
+const int valid_uid[5] = {5051,65534,9013,-1};
 
 #endif /* _LOCAL_CONFIG_ */

@@ -21,4 +21,4 @@ SOURCESIZE=256
 MEMLIMIT=65536
 	 
 # User under which to run solutions (can be ID or name)
-RUNUSER="nobody"
+RUNUSER="test"
