@@ -25,7 +25,7 @@ TESTOUT=testdata.out
 SAMPLEIN=testsample.in
 SAMPLEOUT=testsample.out
 
-USERS="jan jaap gerben maarten pieter wouter peter thijs test"
+USERS="jan jaap erik gerben maarten pieter wouter peter thijs test"
 
 TMPDIR="compare.$$.tmp"
 TIMELIMIT=20
