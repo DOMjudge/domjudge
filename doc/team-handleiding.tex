@@ -152,7 +152,7 @@ tijdslimiet) bestaat! Verder kan Haskell gewoon gebruikt worden.
 
 Als compiler gebruiken we de Glasgow Haskell Compiler, GHC
 (\url{http://www.haskell.org/ghc/}) versie \LINUXGHC. Deze compiler
-ondersteund de volledige Haskell 98 standaard.
+ondersteunt de volledige Haskell 98 standaard.
 
 GHC en ook HUGS zijn beide beschikbaar onder Linux en Windows.
 
@@ -226,12 +226,12 @@ Je oplossing was goed en je hebt dit probleem opgelost!
 
 \item[COMPILER-ERROR]
 Het compilen van je programma gaf een fout. Zie de inzendingsdetails
-voor de precieze foutmelding. Compiler waarschuwingen worden niet als
+voor de precieze foutmelding. Compiler{\textit waarschuwingen} worden niet als
 fouten gezien, maar kun je eventueel wel bekijken bij de details van
 je inzending.
 
 \item[TIMELIMIT]
-Je programma draaide langer dan de maximale toegestane tijd en is
+Je programma draaide langer dan de maximaal toegestane tijd en is
 afgebroken. Dit kan betekenen dat je programma ergens in een loop
 blijft hangen, of dat je oplossing niet effici\"ent genoeg is.
 
@@ -239,8 +239,8 @@ blijft hangen, of dat je oplossing niet effici\"ent genoeg is.
 Je programma gaf een fout tijdens het uitvoeren. Dit kan verschillende
 oorzaken hebben, zoals deling door nul, incorrecte geheugen adressering
 (segfault, bijvoorbeeld door arrays buiten bereik te indiceren), te
-veel geheugen gebruik, enzovoort\dots
-Let ook op, dat je programma met een exitcode nul eindigt!
+veel geheugengebruik, enzovoort\dots\ 
+Let ook op, dat je programma met een exitcode 0 eindigt!
 
 \item[NO-OUTPUT]
 Je programma gaf geen uitvoer. Let op dat je uitvoer naar standard
@@ -297,7 +297,7 @@ compileerfout kun je altijd de foutmelding bekijken).
 \caption{Compiler commando's}
 \begin{tabular}{|l|l|l|}
 \hline
-programmeertaal & jury compiler-commando & niet-statisch gelinked \\
+programmeertaal & jury compiler-commando & niet-statisch gelinkt \\
 \hline
 C       & \texttt{gcc -Wall -O2 -static -lm}         & \texttt{gcc -Wall -O2 -lm} \\
 C++     & \texttt{g++ -Wall -O2 -static}             & \texttt{g++ -Wall -O2} \\
@@ -311,20 +311,20 @@ Haskell & \texttt{ghc -Wall -O -static -optl-static} & \texttt{ghc -Wall -O} \\
 
 Merk op dat wij statisch compileren i.v.m. het jurysysteem, maar wat
 betreft foutmeldingen e.d. zijn de compiler-commando's in de kolom
-``niet-statisch gelinked'' equivalent.
+``niet-statisch gelinkt'' equivalent.
 
 \subsubsection{Testen}
 
 Als je programma succesvol gecompileerd is, wordt het gedraaid en de
 uitvoer vergeleken met de correcte uitvoer van de jury. Er wordt eerst
-gecontroleerd of je programma correct geeindigd is: als je programma
+gecontroleerd of je programma correct ge\"eindigd is: als je programma
 met een fout eindigt en het goede antwoord geeft, krijg je toch een
 run-error! Er zijn een aantal beperkingen die aan je programma
 opgelegd worden. Als je programma die overschrijdt, wordt het ook
 afgebroken met een fout, zie (\ref{runlimits}).
 
 Verder moet de uitvoer van jouw programma exact overeenkomen met de
-uitvoer van de jury. Let dus goed op, dat je de uitvoer specificatie
+uitvoer van de jury. Let dus goed op, dat je de uitvoerspecificatie
 volgt.
 
 \subsubsection{Beperkingen}\label{runlimits}
@@ -344,12 +344,12 @@ dan de organisatie weten.
 \item[source grootte]
 De sourcecode van je programma mag maximaal \SOURCESIZE\ kilobytes
 groot zijn. Bij het inzenden zul je hier al voor gewaarschuwd worden,
-bij compileren levert dit ook een compileerfout.
+bij compileren levert dit ook een compileerfout op.
 
 \item[geheugen]
 Je programma heeft tijdens het draaien maximaal \MEMLIMIT\ kilobytes
 geheugen ter beschikking. Let op dat dit totaal geheugen is (inclusief
-programma code, statisch en dynamisch gedefini\"eerde variabelen,
+programmacode, statisch en dynamisch gedefini\"eerde variabelen,
 stack, \dots)! Als je programma meer probeert te gebruiken, zal het
 waarschijnlijk afbreken, zodat dit een ``RUN-ERROR'' geeft.
 
@@ -363,10 +363,10 @@ Het is niet de bedoeling dat je programma meerdere processen (threads)
 start. Dit heeft ook geen zin, want je programma heeft precies 1
 processor volledig tot zijn beschikking. Om de stabiliteit van het
 jurysysteem te bevorderen, kun je maximaal \PROCLIMIT\ processen
-tegelijk draaien (inclusief de processen, waardoor je programma
+tegelijk draaien (inclusief de processen waardoor je programma
 gestart is).
 
-Mensen, die nooit met meerdere processen geprogrammeerd hebben (of
+Mensen die nooit met meerdere processen geprogrammeerd hebben (of
 niet weten wat dat is), hoeven zich geen zorgen te maken: standaard
 draait een gecompileerd programma in \'e\'en proces.
 
@@ -382,7 +382,7 @@ Hieronder staan een aantal voorbeelden van code om de invoer van een
 probleem in te lezen en de uitvoer weg te schrijven.
 
 De code hoort bij de volgende probleembeschrijving: gegeven een string
-met een naam (\'e\'en woord), voer de string ``Hallo naam!'' uit.
+met een naam (\'e\'en woord), voer de string ``Hallo <naam>!'' uit.
 
 Dit probleem zou de volgende in- en uitvoer kunnen hebben:
 
