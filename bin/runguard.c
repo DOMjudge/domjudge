@@ -4,7 +4,7 @@
 
    Based on:
    chroot   - written by Roland McGrath
-   timeout  - written by Wietse Venema
+   timeout  - written by Wietse Venema (see timeout.copyright)
 
    $Id$
 
