@@ -23,9 +23,9 @@ $loglevel = LOG_DEBUG;
 function logmsg($msglevel, $string) {
 	global $verbose, $loglevel;
 	$msg = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . ": ". $string . "\n";
-	if ( $msglevel <= $verbose  ) { fwrite(STDERR, $msg); }
+	if ( $msglevel <= $verbose  ) { fwrite(STDERR, $msg); fflush(STDERR); }
 	if ( $msglevel <= $loglevel &&
-	     defined('LOGFILE')     ) { fwrite(STDLOG, $msg); }
+	     defined('STDLOG')      ) { fwrite(STDLOG, $msg); fflush (STDLOG); }
 }
 
 function error($string) {
