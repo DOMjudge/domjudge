@@ -286,8 +286,8 @@ int main(int argc, char **argv)
 		if ( cwd[strlen(cwd)-1]!='/' ) strcat(cwd,"/");
 
 		/* Check that we are within prescribed path. */
-		if ( strncmp(cwd,ROOT_PREFIX,strlen(ROOT_PREFIX))!=0 ) {
-			error(0,"invalid root: must be within `%s'",ROOT_PREFIX);
+		if ( strncmp(cwd,CHROOT_PREFIX,strlen(CHROOT_PREFIX))!=0 ) {
+			error(0,"invalid root: must be within `%s'",CHROOT_PREFIX);
 		}
 		
 		if ( chroot(".") ) error(errno,"cannot change root to `%s'",cwd);
