@@ -81,7 +81,7 @@ struct option const long_opts[] = {
 	{"team",     required_argument, NULL,         't'},
 	{"port",     required_argument, NULL,         'P'},
 	{"verbose",  required_argument, NULL,         'v'},
-	{"quiet",    no_argument,       &quiet,        1 },
+	{"quiet",    no_argument,       NULL,         'q'},
 	{"help",     no_argument,       &show_help,    1 },
 	{"version",  no_argument,       &show_version, 1 },
 	{ NULL,      0,                 NULL,          0 }
@@ -166,8 +166,6 @@ int sin_size;
 /* Submission information */
 string problem, language, server, team, filename;
 
-/*****************************************************************************/
-
 int main(int argc, char **argv)
 {
 	int c;
@@ -182,9 +180,9 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	/* Parse command-line options */
-	quiet = show_help = show_version = 0;
+	quiet =	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:s:t:P:v:q",long_opts,NULL)!=-1 ) ) {
+	while ( (c = getopt_long(argc,argv,"p:l:s:t:P:v:q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
@@ -208,6 +206,10 @@ int main(int argc, char **argv)
 				error(0,"invalid verbosity specified: `%s'",optarg);
 			}
 			break;
+		case 'q': /* quiet option */
+			verbose = LOG_ERR;
+			quiet = 1;
+			break;
 		case ':': /* getopt error */
 		case '?':
 			error(0,"unknown option or missing argument `%c'",optopt);
@@ -220,12 +222,10 @@ int main(int argc, char **argv)
 	if ( show_help ) usage();
 	if ( show_version ) version();
 	
-	if ( argc>optind ) error(0,"non-option arguments given");
+	if ( argc<=optind ) error(0,"no filename specified");
 
     return 0;
 }
-
-/*****************************************************************************/
 
 
 //  vim:ts=4:sw=4:et:
