@@ -19,7 +19,7 @@
 
 $DBLOGIN = array (
 	'jury'	=> array (		// s/i/u/d on each table
-		'user' => 'nkp',
+		'user' => 'domjudge_jury',
 		'pass' => 'jury' ),
 	'team'	=> array (		// ...
 		'user' => 'domjudge_team',
