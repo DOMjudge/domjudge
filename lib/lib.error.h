@@ -1,7 +1,7 @@
-/**
- *  Error handling and logging functions
+/*
+ * Error handling and logging functions
  *
- *  $Id$
+ * $Id$
  */
 
 #ifndef _LIB_ERROR_
@@ -22,7 +22,6 @@ extern char *progname;
 /* Variables defining logmessages verbosity to stderr/logfile */
 int  verbose      = LOG_NOTICE;
 int  loglevel     = LOG_DEBUG;
-char *logfile     = NULL;
 FILE *stdlog      = NULL;
 
 /* Argument-list and va_list versions of logging function:
@@ -52,20 +51,19 @@ void warning(int, char *, ...);
 
 void vlogmsg(int msglevel, char *mesg, va_list ap)
 {
-    time_t     currtime;
-	struct tm *datetime;
+    time_t currtime;
     char timestring[128];
 	char *buffer;
 	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
 	int bufferlen;
-    
-	if(stdlog==NULL && logfile!=NULL) {
-		// TODO open stdlog
-	}
+
+	/* Try to open logfile if it is defined */
+#ifdef LOGFILE
+	if ( stdlog==NULL ) stdlog = fopen(LOGFILE,"a");
+#endif
 	
     currtime  = time(NULL);
-	datetime = localtime(&currtime);
-    strftime(timestring, sizeof(timestring), "%b %d %T", datetime);
+    strftime(timestring, sizeof(timestring), "%b %d %T", localtime(&currtime));
 
 	bufferlen = strlen(timestring)+strlen(progname)+mesglen+20;
 	buffer = (char *)malloc(bufferlen);
