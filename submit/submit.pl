@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#!/usr/bin/perl -w
 
 # submit.pl - Submit program.
 #
@@ -29,6 +29,7 @@ use IO::Socket;
 use File::Copy;
 use File::Basename;
 use File::Temp;
+use File::stat;
 use POSIX qw(strftime);
 
 # Variables defining what to do with messages
@@ -52,19 +53,31 @@ my $tmpfile;
 # Weer terug veranderen na debugging:
 my $mask = 0744; # 0700
 
+# variables for checking submission sanity.
+my $userwarning = 0;
+# Warn user when submission file modifications are older than (in minutes):
+my $warn_mtime = 5;
+
 sub datestr {
 	return POSIX::strftime("%b %d %T",localtime);
 }
 
 sub logmsg {
 	if ( $verbose ) { print STDERR "@_\n"; }
-	if ( $log ) { print "[", datestr, "] ", $progname, "[$$]: @_\n"; }
+	if ( $log ) { print "[".datestr()."] ".$progname."[$$]: @_\n"; }
 }
+
+# Forward declaration of 'sendit' for use in 'error'.
+sub sendit;
 
 sub error {
 	if ( -f $tmpfile ) { unlink $tmpfile; }
+	if ( $socket ) {
+		sendit "-error: @_";
+		$socket->close();
+	}
 	logmsg "error: @_";
-	die "$progname: error: @_\n"
+	die "$progname: error: @_\n";
 }
 
 sub netchomp {
@@ -79,11 +92,16 @@ sub sendit { # 'send' is already defined
 sub receive {
 	if ( ! ($_ = <$socket>) ) { return $failure; }
 	netchomp;
-	if ( /^[^+]/ ) { error("received: $_\n"); }
-	logmsg("recv: $_");
+	if ( /^[^+]/ ) { error "received: $_"; }
+	logmsg "recv: $_";
 	s/^.//;
 	$lastreply = $_;
 	return $success;
+}
+
+sub warnuser {
+	print "WARNING: @_.\n";
+	$userwarning++;
 }
 
 my $usage = <<"EOF";
@@ -93,7 +111,7 @@ Usage: $progname
 			  
 For <problem> use the letter of the problem in lower- or uppercase.
 The default for <problem> is the filename excluding the extension.
-For example, 'c.java' will indicate problem C.
+For example, 'c.java' will indicate problem 'C'.
 
 For <language> use one of the following in lower- or uppercase:
    C:        c
@@ -139,13 +157,21 @@ for (; @ARGV; shift @ARGV) {
 if ($#ARGV < 0) { die "Please specify a filename.\n$usage2" };
 
 $filename = shift @ARGV;
-if ( ! -f $filename ) { die "Cannot find file: '$filename'.\n$usage2"; }
+if ( ! -r $filename ) { die "Cannot find file: '$filename'.\n$usage2"; }
 logmsg "filename is '$filename'";
+
+# Check some file attributes and warn user.
+if ( ! -f $filename ) { warnuser "'$filename' is not a regular file"; }
+if (   -z $filename ) { warnuser "'$filename' is empty"; }
+if ( ! -T $filename ) { warnuser "'$filename' seems not to be a text file"; }
+if ( (time - stat($filename)->mtime) > ($warn_mtime * 60) ) {
+	warnuser "'$filename' is last modified more than $warn_mtime minutes ago";
+}
 
 # If the problem was not specified, figure it out from the file name.
 if ( ! defined $problem ) {
-	if ( basename($filename) =~ /(.+)\..*/ ) { $problem = $1; }
-	else { die "No problem specified (as argument or in filename).\n$usage" };
+	if ( basename($filename) =~ /^([a-zA-Z0-9]*)(\..*)?$/ ) { $problem = $1; }
+	else { die "No problem specified (as argument or in filename).\n$usage2" };
 }
 logmsg "problem is '$problem'";
 
@@ -169,9 +195,6 @@ logmsg "team is '$team'";
 if ( ! defined $server ) { die "No server specified.\n$usage2" };
 logmsg "server is '$server'";
 
-# Do some checks on the submission and ask confirmation from user.
-### TODO ###
-
 # Make tempfile to submit.
 if ( ! -d $tmpdir ) { mkdir($tmpdir) or error "creating dir $tmpdir: $!"; }
 # Weer terug veranderen na debugging:
@@ -185,6 +208,23 @@ chmod($mask,$tmpfile);
 
 copy($filename, $tmpfile) or error "copying '$filename' to tempfile: $!";
 logmsg "copied '$filename' to tempfile '$tmpfile'";
+
+# Ask user for confirmation.
+print "Submission information:\n";
+print "  problem:    $problem\n";
+print "  language:   $language\n";
+print "  team:       $team\n";
+print "  server:     $server\n";
+if ( $userwarning > 0 ) { print "There are warnings for this submission!\n"; }
+print "Do you want to continue? (y/n) ";
+# Read characters from terminal one by one.
+system("stty", '-icanon', 'eol', "\001");
+while ( 1 ) {
+	my $answer = getc(STDIN);
+	if ( $answer =~ /y|n/i ) { print "\n"; }
+	if ( $answer =~ /y/i   ) { last; }
+	if ( $answer =~ /n/i   ) { error "submission aborted by user"; }
+}
 
 # Connect to the submission server.
 print "Connecting to the server ($server, $submitport/tcp)...\n";
