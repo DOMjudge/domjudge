@@ -20,7 +20,9 @@ echo "<h1>DOMjudge Jury interface</h1>\n\n";
 <li><a href="languages.php">Languages</a></li>
 <li><a href="problems.php">Problems</a></li>
 </ul>
-<br /><br /><br /><br />
+
+<p><br /><br /><br /><br /></p>
+
 <?php
 putDOMjudgeVersion();
 
