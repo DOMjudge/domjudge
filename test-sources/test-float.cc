@@ -1,3 +1,5 @@
+using namespace std;
+
 #include <vector>
 #include <stdio.h>
 #include <math.h>
