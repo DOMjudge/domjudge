@@ -4,6 +4,10 @@
 # Script to copy a submission file from a team to judge account.
 # Usage: $0 <team> <fromfile> <tofile>
 
+# This script will depend very much on the setup of your system:
+# what kind of filesystems do you have, how can you access the team
+# accounts, etc...  Rewrite to fit your needs.
+
 # Global configuration
 source "`dirname $0`/../etc/config.sh"
 
@@ -14,22 +18,14 @@ function error()
 
 [ $# -eq 3 ] || exit 1
 
-team="$1"
-fromfile="$2"
-tofile="$3"
+team=$1
+fromfile=$2
+tofile=$3
 
 output1=`scp -Bq "${team}@${SCP_HOST}:${fromfile}" "$tofile" 2>&1`
 if [ $? -eq 0 -a ${#output1} -eq 0 ]; then
 	exit 0
-else
-	homedir="${fromfile%%.submit*}"
-	fromfile="${fromfile#*.submit}"
-	fromfile="${homedir}cygwin/.submit${fromfile}"
-
-	output2=`scp -Bq "${team}@${SCP_HOST}:${fromfile}" "$tofile" 2>&1`
-	[ $? -eq 0 -a ${#output2} -eq 0 ] && exit 0
 fi
 
 error "$output1"
-error "$output2"
 exit 1
