@@ -86,7 +86,7 @@ while ( TRUE ) {
 
 	// get max.runtime, path to submission and other params
 	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS runtime,
-		s.submitid, s.source, s.langid, testdata
+		s.submitid, s.sourcefile, s.langid, testdata
 		FROM submission s, problem p, language l
 		WHERE s.probid = p.probid AND s.langid = l.langid AND
 		judgemark = %s AND judgerid = %i', $mark, $myid);
@@ -105,7 +105,7 @@ while ( TRUE ) {
 
 	// do the actual compile-run-test
 	system("./test_solution.sh ".
-			SUBMITDIR."/$row[source] $row[langid] ".
+			SUBMITDIR."/$row[sourcefile] $row[langid] ".
 			INPUT_ROOT."/$row[testdata]/testdata.in ".
 			INPUT_ROOT."/$row[testdata]/testdata.out $row[runtime] $tempdir",
 		$retval);
@@ -118,29 +118,19 @@ while ( TRUE ) {
 
 	// pop the result back into the judging table
 	$DB->q('UPDATE judging
-		SET endtime = NOW(), result = %s, output_compile = %s, output_run = %s, output_diff = %s
+		SET endtime = NOW(), result = %s, output_compile = %s, output_run = %s, output_diff = %s, output_error = %s
 		WHERE judgingid = %i AND judgerid = %i',
 		$result,
 		get_content($tempdir.'/compile.out'),
 		get_content($tempdir.'/program.out'),
 		get_content($tempdir.'/diff.out'),
+		get_content($tempdir.'/error.out'),
 		$judgingid, $myid);
 
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
 
 	// restart the judging loop
-}
-
-// helperfunction to read 50,000 bytes from a file
-function get_content($filename) {
-
-	if ( ! file_exists($filename) ) return '';
-	$fh = fopen($filename,'r');
-	if ( ! $fh ) {
-		error("Could not open $filename for reading");
-	}
-	return fread($fh, 50000);
 }
 
 

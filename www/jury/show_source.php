@@ -1,6 +1,6 @@
 <?php
 /**
- * Show a source file
+ * Show source code from the database.
  *
  * $Id$
  */
@@ -12,18 +12,12 @@ require('menu.php');
 
 $id = (int)$_GET['id'];
 
-$filename = $DB->q('VALUE SELECT source FROM submission WHERE submitid = %i',$id);
+$source = $DB->q('TUPLE SELECT sourcefile,sourcecode FROM submission WHERE submitid = %i',$id);
 
-echo "<h2 class=\"filename\">".htmlspecialchars($filename)."</h2>\n\n";
+echo "<h2 class=\"filename\">".htmlspecialchars($source['sourcefile'])."</h2>\n\n";
 
-$file = @file(SUBMITDIR.'/'.$filename);
-if(!$file) {
-	error ( "Couldn't open file ".SUBMITDIR.'/'.$filename );
-}
-echo '<pre class="output_text">';
-foreach($file as $line) {
-	echo htmlspecialchars($line);
-}
-echo "</pre>\n\n";
+echo '<pre class="output_text">' .
+	htmlspecialchars($source['sourcecode']) .
+	"</pre>\n\n";
 
 require('../footer.php');

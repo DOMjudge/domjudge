@@ -39,7 +39,7 @@ if(@$jdata['endtime']) {
 <tr><td>Submittime:</td><td><?= htmlspecialchars($jdata['submittime']) .' (queued for '.
 	$sec_queued.' s)'?></td></tr>
 <tr><td>Source:</td><td class="filename"><a href="show_source.php?id=<?=
-	(int)$jdata['submitid']?>"><?= htmlspecialchars($jdata['source']) ?></a></td></tr>
+	(int)$jdata['submitid']?>"><?= htmlspecialchars($jdata['sourcefile']) ?></a></td></tr>
 <tr><td>Start:</td><td><?=htmlspecialchars($jdata['starttime'])?></td></tr>
 <tr><td>End:</td><td><?=$endtime?></td></tr>
 <tr><td>Judger:</td><td><a href="judger.php?id=<?=(int)$jdata['judgerid'].'">'.
@@ -84,6 +84,16 @@ if(@$jdata['output_diff']) {
 }
 ?>
 
+<h3>Output error</h3>
+
+<?php
+if(@$jdata['output_error']) {
+	echo "<pre class=\"output_text\">".
+		htmlspecialchars(@$jdata['output_error'])."</pre>\n\n";
+} else {
+	echo "<p><em>There was no error output.</em></p>\n";
+}
+?>
 
 <?php
 require('../footer.php');

@@ -17,10 +17,12 @@ function getSubmissions($key = null, $value = null) {
 
 	// we need two queries: one for all submissions, and one with the results for the valid ones.
 	if($key && $value) {
-		$res = $DB->q('SELECT * FROM submission WHERE '.$key.' = %s AND cid = %i ORDER BY submittime DESC',
+		$res = $DB->q('SELECT submitid,team,probid,langid,submittime,judgerid
+			FROM submission WHERE '.$key.' = %s AND cid = %i ORDER BY submittime DESC',
 			$value, getCurCont() );
 	} else {
-		$res = $DB->q('SELECT * FROM submission WHERE cid = %i ORDER BY submittime DESC',
+		$res = $DB->q('SELECT submitid,team,probid,langid,submittime,judgerid
+			FROM submission WHERE cid = %i ORDER BY submittime DESC',
 			getCurCont() );
 	}
 

@@ -20,7 +20,7 @@ if(isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge') {
 
 echo "<h1>Submission $id</h1>\n\n";
 
-$submdata = $DB->q('MAYBETUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.source,
+$submdata = $DB->q('MAYBETUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.sourcefile,
 		t.name as teamname, l.name as langname, p.name as probname, c.contestname
 	FROM submission s LEFT JOIN team t ON (t.login=s.team)
 	LEFT JOIN problem p ON (p.probid=s.probid) LEFT JOIN language l ON (l.langid=s.langid)
@@ -40,7 +40,7 @@ if(!$submdata)	error ("Missing submission data");
 <tr><td>Language:</td><td><a href="language.php?id=<?=$submdata['langid'].'">'.
 	htmlentities($submdata['langid'].": ".$submdata['langname'])?></a></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
-<tr><td>Source:</td><td class="filename"><a href="show_source.php?id=<?=$id?>"><?= htmlspecialchars($submdata['source']) ?></a></td></tr>
+<tr><td>Source:</td><td class="filename"><a href="show_source.php?id=<?=$id?>"><?= htmlspecialchars($submdata['sourcefile']) ?></a></td></tr>
 </table>
 
 <h3>Judgings</h3>

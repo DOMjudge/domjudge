@@ -10,9 +10,10 @@ require('../header.php');
 echo "<h1>Teampage ".htmlentities($name)."</h1>\n\n";
 
 // get submissions
-$res = $DB->q('SELECT * FROM submission LEFT JOIN judging USING(submitid)
+$res = $DB->q('SELECT probid,submittime,s.submitid,j.result
+	FROM submission s LEFT JOIN judging j USING(submitid)
 	WHERE (valid = 1 OR valid IS NULL) AND team = %s AND cid = %i
-	ORDER BY submittime DESC',
+	ORDER BY s.submittime DESC',
 	$login, getCurCont() );
 
 if($res->count() == 0) {
