@@ -11,9 +11,19 @@
 #include <string.h>
 #include <stdarg.h>
 #include <syslog.h>
+#include <time.h>
 #include <errno.h>
 
 const int exit_failure = -1;
+
+/* Import from the main program */
+extern char *progname;
+
+/* Variables defining logmessages verbosity to stderr/logfile */
+int  verbose      = LOG_NOTICE;
+int  loglevel     = LOG_DEBUG;
+char *logfile     = NULL;
+FILE *stdlog      = NULL;
 
 /* Argument-list and va_list versions of logging function:
  * Logs a message to stderr and/or logfile, including date and program name,
@@ -46,15 +56,21 @@ void vlogmsg(int msglevel, char *mesg, va_list ap)
 	struct tm *datetime;
     char timestring[128];
 	char *buffer;
-	int msglen = (mesg==NULL ? 0 : strlen(mesg));
+	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
+	int bufferlen;
     
+	if(stdlog==NULL && logfile!=NULL) {
+		// TODO open stdlog
+	}
+	
     currtime  = time(NULL);
-	datetime = localtime(&curtime);
+	datetime = localtime(&currtime);
     strftime(timestring, sizeof(timestring), "%b %d %T", datetime);
 
-	buffer = (char *) malloc(strlen(timestring)+strlen(progname)+mesglen+20);
+	bufferlen = strlen(timestring)+strlen(progname)+mesglen+20;
+	buffer = (char *)malloc(bufferlen);
 
-	snprintf(buffer, sizeof(buffer), "[%s] %s[%d]: %s\n",
+	snprintf(buffer, bufferlen, "[%s] %s[%d]: %s\n",
 	         timestring, progname, getpid(), mesg);
 	
     if ( msglevel<=verbose  ) { vfprintf(stderr, buffer, ap); fflush(stderr); }
@@ -77,7 +93,7 @@ void logmsg(int msglevel, char *mesg, ...)
 
 void error(int errnum, char *mesg, ...)
 {
-	int msglen = (mesg==NULL ? 0 : strlen(mesg));
+	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
 	char *buffer, *endptr;
 	va_list ap;
 	
@@ -109,7 +125,7 @@ void error(int errnum, char *mesg, ...)
 
 void warning(int errnum, char *mesg, ...)
 {
-	int msglen = (mesg==NULL ? 0 : strlen(mesg));
+	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
 	char *buffer, *endptr;
 	va_list ap;
 	
