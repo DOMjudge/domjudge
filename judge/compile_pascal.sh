@@ -6,11 +6,11 @@
 SOURCE="$1"
 DEST="$2"
 
-# -vwnh:	Verbose warnings, notes and hints
+# -viwn:	Verbose warnings, notes and informational messages
 # -02:		Level 2 optimizations (default for speed)
 # -Sg:		Support label and goto commands (for those who need it ;-)
 # -XS:		Static link with all libraries
-fpc -vwnh -O2 -Sg -XS -o$DEST $SOURCE
+fpc -viwn -O2 -Sg -XS -o$DEST $SOURCE
 exitcode=$?
 
 # clean created object files:
