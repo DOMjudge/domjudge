@@ -6,6 +6,9 @@
  * $Id$
  */
 
+if(!defined('SCRIPT_ID')) {
+	define('SCRIPT_ID', basename($PHP_SELF, '.php'));
+}
 if(!defined('LOGFILE')) {
 	define('LOGFILE', SCRIPT_ID);
 }
