@@ -113,12 +113,12 @@ logmsg $LOG_NOTICE "starting '$0', PID = $$"
 
 [ $# -eq 6 ] || error "wrong number of arguments. see script-code for usage."
 SOURCE="$1";    shift
-LANG="$1";      shift
+PROGLANG="$1";      shift
 TESTIN="$1";    shift
 TESTOUT="$1";   shift
 TIMELIMIT="$1"; shift
 TMPDIR="$1";    shift
-logmsg $LOG_INFO "arguments: $SOURCE $LANG $TESTIN $TESTOUT $TIMELIMIT $TMPDIR"
+logmsg $LOG_INFO "arguments: $SOURCE $PROGLANG $TESTIN $TESTOUT $TIMELIMIT $TMPDIR"
 
 [ -r $SOURCE ]  || error "solution not found: $SOURCE";
 [ -r $TESTIN ]  || error "test-input not found: $TESTIN";
@@ -160,7 +160,7 @@ fi
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
 ( $RUNGUARD -t $COMPILETIME -o compile.time \
-	$RUNSCRIPTDIR/compile_$LANG.sh source.$EXT source
+	$RUNSCRIPTDIR/compile_$PROGLANG.sh source.$EXT source
 ) &>compile.tmp
 exitcode=$?
 [ -f source ] && mv -f source program
