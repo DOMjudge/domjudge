@@ -9,6 +9,7 @@
 require('init.php');
 $title = 'Submission details';
 include('../header.php');
+include('menu.php');
 
 $sid = (int)$_GET['id'];
 

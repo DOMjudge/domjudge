@@ -32,6 +32,20 @@ body {
 	font-family: monospace;
 }
 
+#scorethisisme {
+	background-color: yellow;	
+}
+
+#menutop a {
+	font-weight: bold;
+	background-color: #FFFFF0;
+	border: 1px solid black;
+	text-decoration: none;
+	margin: 2px;
+	padding: 2px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
 #clock {
 	position: absolute;
 	right: 1ex;
