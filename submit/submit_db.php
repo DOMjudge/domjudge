@@ -86,11 +86,12 @@
 		                "' to '".SUBMITDIR."/".$tofile."'");
 	}
 
-	// Insert submission into the database	
-	$id = $DB->q('RETURNID INSERT INTO submission 
-		(cid,team,probid,langid,submittime,sourcefile,sourcecode)
-		VALUES (%i, %s, %s, %s, NOW(), %s, %s)',
-		$cid, $team, $prob, $lang, $tofile, get_content(SUBMITDIR."/".$tofile));
+	// Insert submission into the database
+	$id = $DB->q('RETURNID INSERT INTO submission
+	              (cid,team,probid,langid,submittime,sourcefile,sourcecode)
+	              VALUES (%i, %s, %s, %s, NOW(), %s, %s)',
+	             $cont["cid"], $team, $prob, $lang, $tofile,
+	             get_content(SUBMITDIR."/".$tofile));
 
 	logmsg (LOG_NOTICE, "submitted c$cid/$team/$prob/$lang, file $tofile, id s$id");
 
