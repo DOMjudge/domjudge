@@ -25,14 +25,11 @@ if($res->count() == 0) {
 
 		echo "<tr><td>".htmlspecialchars($row['probid'])."</td><td>".
 			printtime(htmlspecialchars($row['submittime'])). "</td><td>";
-		if(!@$row['judgingid']) {
-			echo "<span class=\"sol-queued\">queued</span>";
-		} elseif (!@$row['endtime']) {
-			echo "<span class=\"sol-queued\">judging</span>";
+		if(@$row['result']) {
+			echo '<a href="submission_details.php?submitid='.(int)$row['submitid'].'">'.
+			printresult($row['result'])."</a>";
 		} else {
-			echo '<a href="submission_details.php?submitid='.(int)$row['submitid'].'" '.
-				'class="'.($row['result']=='correct'?'sol-correct':'sol-incorrect').'">'.
-				htmlspecialchars($row['result']).'</a>';
+			echo printresult(@$row['result']);
 		}
 		echo "</td></tr>\n";
 			

@@ -35,9 +35,7 @@ if(!$row) {
 <tr><td>Language:</td><td><?=htmlentities($row['langname'])?></td></tr>
 </table>
 
-<p>Status:
-<span class="<?=($row['result'] == 'correct'?'sol-correct':'sol-incorrect')?>">
-<?=htmlspecialchars($row['result'])?></span></p>
+<p>Status: <?=printresult($row['result'])?></p>
 
 <h2>Compiler output:</h2>
 <?

@@ -7,19 +7,21 @@
 	padding: 5px;
 	font-family: monospace;	
 }
-.sol-correct {
+
+.sol {
 	font-weight: bold;
 	font-variant: small-caps;
+}
+.correct {
 	color: green;
 }
-.sol-incorrect {
-	font-weight: bold;
-	font-variant: small-caps;
+.incorrect {
 	color: red;
 }
-
-.sol-queued {
-	font-weight: bold;
-	font-variant: small-caps;
+.queued {
 	color: gray;
+}
+
+.teamid, .filename {
+	font-family: monospace;
 }
