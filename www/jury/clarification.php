@@ -29,7 +29,7 @@ require('../header.php');
 require('menu.php');
 
 ?>
-<h1>Send Clarification Request</h1>
+<h1>Send Clarification Response</h1>
 
 <form action="clarification.php" method="post">
 <table>
