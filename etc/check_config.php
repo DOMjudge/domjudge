@@ -16,7 +16,7 @@
 	define ('SCRIPT_ID', 'check_config');
 	define ('LOGFILE', LOGDIR.'/check_config.log');
 
-	require ('../lib/init.php');
+	require (SYSTEM_ROOT . '/lib/init.php');
 	
 	logmsg(LOG_NOTICE, "started [DOMjudge/" . DOMJUDGE_VERSION . "]");
 
