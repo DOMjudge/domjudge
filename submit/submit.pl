@@ -54,13 +54,23 @@ use File::Basename;
 use File::Temp;
 use File::stat;
 use POSIX qw(strftime);
+use Getopt::Long;
+use HotKey;
+
+# Variables defining where/how to store files.
+my $submitdir = "$ENV{HOME}/$USERSUBMITDIR";
+my $tmpfile;
+### Tijdelijk voor DS-practicum (moet normaal 0700/0600 zijn):
+my $permdir  = 0711;
+my $permfile = 0644;
 
 # Variables defining logmessages verbosity to stderr/logfile
 my $verbose  = $ENV{SUBMITVERBOSE} || $LOG_ERR;
 my $loglevel = $LOG_DEBUG;
-my $logfile = "$ENV{HOME}/$USERSUBMITDIR/submit.log";
+my $logfile = "$submitdir/submit.log";
 my $loghandle;
 my $progname = basename($0);
+my $quiet = 0;
 
 # Variables for client-server communication
 my $socket;
@@ -72,12 +82,6 @@ my $language;
 my $filename;
 my $server = $SUBMITSERVER || $ENV{SUBMITSERVER} || "localhost";
 my $team = $ENV{TEAM} || $ENV{USER} || $ENV{USERNAME};
-
-my $tmpdir = "$ENV{HOME}/" . $USERSUBMITDIR;
-my $tmpfile;
-# Tijdelijk voor DS-practicum (moet normaal 0700/0600 zijn):
-my $permdir  = 0711;
-my $permfile = 0644;
 
 # variables for checking submission sanity.
 my $userwarning = 0;
@@ -127,49 +131,97 @@ sub receive {
 }
 
 sub warnuser {
-	print "WARNING: @_.\n";
+	if ( ! $quiet ) { print "WARNING: @_.\n"; }
 	$userwarning++;
 }
 
+sub readanswer {
+	my $answers = shift;
+	my $answer;
+	while ( "TRUE" ) {
+		$answer = readkey();
+		if ( $answer =~ /[$answers]/i   ) { last; }
+	}
+	return lc($answer);
+}
+
 my $usage = <<"EOF";
-Usage: $progname
-              [--problem <problem>] [--lang <language>]
-              [--server <server>]   [--team <team>]     <filename>
-			  
-For <problem> use the letter of the problem in lower- or uppercase.
-The default for <problem> is the filename excluding the extension.
+Usage: $progname [OPTION]... FILENAME
+Submit a solution for a problem.
+
+Options (see below for more information)
+  -p, --problem=PROBLEM    submit for problem PROBLEM
+  -l, --language=LANGUAGE  submit in language LANGUAGE
+  -s, --server=SERVER      submit to server SERVER
+  -t, --team=TEAM          submit as team TEAM
+  -v, --verbose[=LEVEL]	   set verbosity to LEVEL, where LEVEL must be
+                               numerically specified as in 'syslog.h'
+                               defaults to LOG_INFO without argument
+  -q, --quiet              set verbosity to LOG_ERR and suppress user
+                               input and warning/info messages
+      --help               display this help and exit
+      --version            output version information and exit
+
+Explanation of submission options:
+
+For PROBLEM use the ID of the problem (letter, number or short name)
+in lower- or uppercase. When not specified, PROBLEM defaults to
+FILENAME excluding the extension.
 For example, 'c.java' will indicate problem 'C'.
 
-For <language> use one of the following in lower- or uppercase:
+For LANGUAGE use one of the following in lower- or uppercase:
    C:        c
    C++:      cc, cpp, c++
    Java:     java
    Pascal:   pas
    Haskell:  hs
-The default for <language> is the extension of the filename.
+The default for LANGUAGE is the extension of FILENAME.
 For example, 'c.java' wil indicate a Java solution.
 
-Example: $progname c.java
-         $progname --problem e --lang cpp ProblemE.cc
+Examples:
+
+Submit problem 'c' in Java:
+	$progname c.java
+
+Submit problem 'e' in C++:
+	$progname --problem e --language=cpp ProblemE.cc
+
+Submit problem 'hello' in C (options override the defaults from FILENAME):
+	$progname -p hello -l C HelloWorld.java
 
 
-The following options should not be needed, but are supported:
+The following options should normally not be needed:
 
-For <server> use the servername or IP-address of the submit-server.
-The default value for <server> is defined internally or otherwise
+For SERVER use the servername or IP-address of the submit-server.
+The default value for SERVER is defined internally or otherwise
 taken from the environment variable 'SUBMITSERVER', or 'localhost'
 if 'SUBMITSERVER' is not defined.
 
-For <team> use the login of the account, you want to submit for.
-The default value for <team> is taken from the environment variable
+For TEAM use the login of the account, you want to submit for.
+The default value for TEAM is taken from the environment variable
 'TEAM' or your login name if 'TEAM' is not defined.
 
 EOF
 my $usage2 = "Type '$progname --help' to get help.\n";
 
+my $version = <<"EOF";
+submit
+Copyright (C) 2004 Jaap Eldering, Thijs Kinkhorst and Peter van de Werken
+
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+EOF
+
 ########################
 ### Start of program ###
 ########################
+
+# Make directory where to store logfile and tempfiles for submission.
+if ( ! -d $submitdir ) { mkdir($submitdir) or error "creating dir $submitdir: $!"; }
+chmod($permdir,$submitdir) or error "setting permissions on $submitdir: $!";
+
+open($loghandle,">> $logfile") or error "opening logfile '$logfile': $!";
+$loghandle->autoflush(1);
 
 # Voor het DS-practicum: check of homedir executable is
 if ( (stat($ENV{HOME})->mode & $permdir) != $permdir ) {
@@ -177,7 +229,7 @@ if ( (stat($ENV{HOME})->mode & $permdir) != $permdir ) {
 	print <<"EOF";
 WAARSCHUWING:
 
-Voor dit practicum is het noodzakelijk, dat je homedir toegankelijk
+Voor dit practicum is het noodzakelijk dat je homedir toegankelijk
 is voor de jury, om de source-code bestanden van je inzending te
 kunnen kopieeren.
 
@@ -185,34 +237,28 @@ Deze permissies zullen nu ingesteld worden op je home-directory.
 Wil je doorgaan? (j/n) 
 EOF
 
-    # Read characters from terminal one by one.
-	system("stty", '-icanon', 'eol', "\001");
-	while ( 1 ) {
-		my $answer = getc(STDIN);
-		if ( $answer =~ /j|n/i ) { print "\n"; }
-		if ( $answer =~ /j/i   ) { last; }
-		if ( $answer =~ /n/i   ) { error "permissions denied by user"; }
-	}
+	if ( readanswer('jn') eq 'n' ) { die "Afgebroken: permissies niet aangepast.\n"; }
 	
 	chmod($permdir,$ENV{HOME}) or error "setting permissions on $ENV{HOME}: $!";
+	print "Permissies van $ENV{HOME} aangepast!\n\n";
 }
 
-open($loghandle,">> $logfile") or error "opening logfile '$logfile': $!";
-$loghandle->autoflush(1);
 
-### TODO: netjes met getopt parsen, zodat opties ook na filename kunnen ###
+my $show_help = 0;
+my $show_version = 0;
+eval {
+	GetOptions('team|t=s'     => \$team,
+	           'problem|p=s'  => \$problem,
+	           'language|l=s' => \$language,
+	           'server|s=s'   => \$server,
+	           'verbose|v=i'  => \$verbose,
+			   'quiet|q' => sub { $quiet = 1; $verbose = $LOG_ERR; },
+	           'help'    => sub { $show_help = 1; },
+	           'version' => sub { $show_version = 1; });
+} or die "$@$usage2";
 
-# Parse options from command-line.
-for (; @ARGV; shift @ARGV) {
-	$_ = $ARGV[0];
-	if ( /^--$/ || ! /^--.*/ ) { last; }
-	elsif ( /^--team$/    ) { shift @ARGV; $team     = $ARGV[0]; }
-	elsif ( /^--problem$/ ) { shift @ARGV; $problem  = $ARGV[0]; }
-	elsif ( /^--lang$/    ) { shift @ARGV; $language = $ARGV[0]; }
-	elsif ( /^--server$/  ) { shift @ARGV; $server   = $ARGV[0]; }
-	elsif ( /^--help$/    ) { die $usage; }
-	else { die "invalid option: '$ARGV[0]'.\n$usage2"; }
-}
+if ( $show_help )    { print $usage;   exit; }
+if ( $show_version ) { print $version; exit; }
 
 if ($#ARGV < 0) { die "Please specify a filename.\n$usage2" };
 
@@ -256,10 +302,7 @@ if ( ! defined $server ) { die "No server specified.\n$usage2" };
 logmsg($LOG_INFO,"server is '$server'");
 
 # Make tempfile to submit.
-if ( ! -d $tmpdir ) { mkdir($tmpdir) or error "creating dir $tmpdir: $!"; }
-chmod($permdir,$tmpdir) or error "setting permissions on $tmpdir: $!";
-
-(my $handle, $tmpfile) = mkstemps("$tmpdir/$problem.XXXX",".$language")
+(my $handle, $tmpfile) = mkstemps("$submitdir/$problem.XXXX",".$language")
 	or error "creating tempfile: $!";
 
 copy($filename, $tmpfile) or error "copying '$filename' to tempfile: $!";
@@ -267,23 +310,19 @@ chmod($permfile,$tmpfile) or error "setting permissions on $tmpfile: $!";
 logmsg($LOG_INFO,"copied '$filename' to tempfile '$tmpfile'");
 
 # Ask user for confirmation.
-print "Submission information:\n";
-print "  filename:   $filename\n";
-print "  problem:    $problem\n";
-print "  language:   $language\n";
-print "  team:       $team\n";
-print "  server:     $server\n";
-if ( $userwarning > 0 ) { print "There are warnings for this submission!\n"; }
-print "Do you want to continue? (y/n) ";
-# Read characters from terminal one by one.
-system("stty", '-icanon', 'eol', "\001");
-while ( 1 ) {
-	my $answer = getc(STDIN);
-	if ( $answer =~ /y|n/i ) { print "\n"; }
-	if ( $answer =~ /y/i   ) { last; }
-	if ( $answer =~ /n/i   ) {
+if ( ! $quiet ) {
+	print "Submission information:\n";
+	print "  filename:   $filename\n";
+	print "  problem:    $problem\n";
+	print "  language:   $language\n";
+	print "  team:       $team\n";
+	print "  server:     $server\n";
+	if ( $userwarning > 0 ) { print "There are warnings for this submission!\n"; }
+	print "Do you want to continue? (y/n)\n";
+	if ( readanswer('yn') eq 'n' ) {
 		unlink($tmpfile);
-		error "submission aborted by user";
+		logmsg($LOG_INFO,"submission aborted by user");
+		die "Submission aborted by user.\n";
 	}
 }
 
