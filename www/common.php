@@ -80,3 +80,11 @@ function printresult($result, $valid = TRUE) {
 function printyn ($val) {
 	return ($val ? '1':'0');
 }
+
+// given 2004-12-31 15:43:05, returns 15:43:05
+function printtime($datetime) {
+	if(!$datetime) return '';
+	$date_time = explode(' ',$datetime);
+	return htmlspecialchars($date_time[1]);
+
+}
