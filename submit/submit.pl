@@ -32,9 +32,11 @@ use File::Temp;
 use File::stat;
 use POSIX qw(strftime);
 
-# Variables defining what to do with messages
-my $verbose = $ENV{SUBMITVERBOSE} || 1;
-my $log = 0;
+# Variables defining logmessages verbosity to stderr/logfile
+my $verbose  = $ENV{SUBMITVERBOSE} || $LOG_NOTICE;
+my $loglevel = $LOG_DEBUG;
+my $logfile = "$ENV{HOME}/$USERSUBMITDIR/submit.log";
+my $loghandle;
 my $progname = basename($0);
 
 # Variables for client-server communication
@@ -58,13 +60,15 @@ my $userwarning = 0;
 # Warn user when submission file modifications are older than (in minutes):
 my $warn_mtime = 5;
 
-sub datestr {
+sub logdate {
 	return POSIX::strftime("%b %d %T",localtime);
 }
 
 sub logmsg {
-	if ( $verbose ) { print STDERR "@_\n"; }
-	if ( $log ) { print "[".datestr()."] ".$progname."[$$]: @_\n"; }
+	my $msglevel = shift;
+	my $msgstring = "[".logdate()."] ".$progname."[$$]: @_\n";
+	if ( $msglevel <= $verbose  ) { print STDERR     $msgstring; }
+	if ( $msglevel <= $loglevel ) { print $loghandle $msgstring; }
 }
 
 # Forward declaration of 'sendit' for use in 'error'.
@@ -75,8 +79,8 @@ sub error {
 		sendit "-error: @_";
 		$socket->close();
 	}
-	logmsg "error: @_";
-	die "$progname: error: @_\n";
+	logmsg($LOG_ERROR,"error: @_");
+	die;
 }
 
 sub netchomp {
@@ -84,7 +88,7 @@ sub netchomp {
 }
 
 sub sendit { # 'send' is already defined
-	logmsg "send: @_";
+	logmsg($LOG_DEBUG,"send: @_");
 	print $socket "@_\015\012";
 }
 
@@ -92,7 +96,7 @@ sub receive {
 	if ( ! ($_ = <$socket>) ) { return $failure; }
 	netchomp;
 	if ( /^[^+]/ ) { error "received: $_"; }
-	logmsg "recv: $_";
+	logmsg($LOG_DEBUG,"recv: $_");
 	s/^.//;
 	$lastreply = $_;
 	return $success;
@@ -141,6 +145,9 @@ my $usage2 = "Type '$progname --help' to get help.\n";
 ### Start of program ###
 ########################
 
+open($loghandle,">> $logfile") or error "opening logfile '$logfile': $!";
+$loghandle->autoflush(1);
+
 # Parse options from command-line.
 for (; @ARGV; shift @ARGV) {
 	$_ = $ARGV[0];
@@ -157,7 +164,7 @@ if ($#ARGV < 0) { die "Please specify a filename.\n$usage2" };
 
 $filename = shift @ARGV;
 if ( ! -r $filename ) { die "Cannot find file: '$filename'.\n$usage2"; }
-logmsg "filename is '$filename'";
+logmsg($LOG_INFO,"filename is '$filename'");
 
 # Check some file attributes and warn user.
 if ( ! -f $filename ) { warnuser "'$filename' is not a regular file"; }
@@ -172,7 +179,7 @@ if ( ! defined $problem ) {
 	if ( basename($filename) =~ /^([a-zA-Z0-9]*)(\..*)?$/ ) { $problem = $1; }
 	else { die "No problem specified (as argument or in filename).\n$usage2" };
 }
-logmsg "problem is '$problem'";
+logmsg($LOG_INFO,"problem is '$problem'");
 
 # If the language was not specified, figure it out from the file name.
 if ( ! defined $language ) {
@@ -186,13 +193,13 @@ if ( ! defined $language ) {
 	elsif ( /\.pas$/i   ) { $language = "pascal" }
 	else { die "No language specified (as argument or in filename).\n$usage2"; }
 }
-logmsg "language is '$language'";
+logmsg($LOG_INFO,"language is '$language'");
 
 if ( ! defined $team ) { die "No team specified.\n$usage2" };
-logmsg "team is '$team'";
+logmsg($LOG_INFO,"team is '$team'");
 
 if ( ! defined $server ) { die "No server specified.\n$usage2" };
-logmsg "server is '$server'";
+logmsg($LOG_INFO,"server is '$server'");
 
 # Make tempfile to submit.
 if ( ! -d $tmpdir ) { mkdir($tmpdir) or error "creating dir $tmpdir: $!"; }
@@ -206,7 +213,7 @@ if ( ! -d $tmpdir ) { mkdir($tmpdir) or error "creating dir $tmpdir: $!"; }
 chmod($mask,$tmpfile);
 
 copy($filename, $tmpfile) or error "copying '$filename' to tempfile: $!";
-logmsg "copied '$filename' to tempfile '$tmpfile'";
+logmsg($LOG_INFO,"copied '$filename' to tempfile '$tmpfile'");
 
 # Ask user for confirmation.
 print "Submission information:\n";
@@ -230,19 +237,18 @@ while ( 1 ) {
 }
 
 # Connect to the submission server.
-print "Connecting to the server ($server, $SUBMITPORT/tcp)...\n";
-logmsg "connecting...";
+logmsg($LOG_NOTICE,"connecting to the server ($server, $SUBMITPORT/tcp)...");
 $socket = IO::Socket::INET->new(Proto => 'tcp',
                                 PeerAddr => $server,
                                 PeerPort => $SUBMITPORT);
 if ( ! $socket ) { error "cannot connect to the server"; }
 $socket->autoflush;
-logmsg "connected!";
+logmsg($LOG_INFO,"connected");
 
 receive;
 
 # Send submission info.
-print "Sending data...\n";
+logmsg($LOG_NOTICE,"sending data...\n");
 sendit "+team $team";
 receive;
 sendit "+problem $problem";
@@ -255,12 +261,10 @@ sendit "+done";
 while ( receive ) {};
 
 $socket->close();
-logmsg "connection closed";
+logmsg($LOG_INFO,"connection closed");
 
 unlink($tmpfile) or error "deleting '$tmpfile': $!";
 
-print "Done: submission successful.\n";
+logmsg($LOG_NOTICE,"done: submission successful.\n");
 
-logmsg "exiting";
-
-
+print "Submission finished successfully.\n";
