@@ -96,7 +96,7 @@
 	              (cid,team,probid,langid,submittime,sourcefile,sourcecode)
 	              VALUES (%i, %s, %s, %s, NOW(), %s, %s)',
 	             $cont["cid"], $team, $prob, $lang, $tofile,
-	             get_content(SUBMITDIR."/".$tofile));
+	             getFileContents(SUBMITDIR."/".$tofile));
 
 	logmsg (LOG_NOTICE, "submitted $team/$prob/$lang, file $tofile, id s$id");
 
