@@ -9,6 +9,9 @@ Version 0.1.2 - CVS
    to be compatible with the HTTP-specification.
  - Fix bug in getSubmissions() that caused a syntax error on the
    team-overview in the jury interface.
+ - Added some notes on security to the INSTALL docs.
+ - Symbolic links now included (subversion >= 1.1)
+ - Fixed buffer size bug in log/error C-code.
 
 Version 0.1.1 - 24 November 2004
 --------------------------------
