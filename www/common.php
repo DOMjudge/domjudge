@@ -372,8 +372,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			echo "</td>";
 			@$SUMMARY[$prob]['submissions'] += $pdata['submitted'];
 			@$SUMMARY[$prob]['correct'] += ($pdata['correct'] ? 1 : 0);
-			if($pdata['time']+$pdata['penalty'] > 0) {
-				@$SUMMARY[$prob]['times'][] = $pdata['time']+$pdata['penalty'];
+			if($pdata['time'] > 0) {
+				@$SUMMARY[$prob]['times'][] = $pdata['time'];
 			}
 		}
 		echo "</tr>\n";
