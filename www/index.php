@@ -10,7 +10,7 @@ require_once('../etc/config.php');
 require_once(SYSTEM_ROOT . '/lib/lib.error.php');
 require_once(SYSTEM_ROOT . '/lib/use_db_public.php');
 
-require_once('../common.php');
+require_once('common.php');
 
 $ip = $_SERVER['REMOTE_ADDR'];
 $res = $DB->q('SELECT ipaddress FROM team WHERE ipaddress = %s', $ip);
