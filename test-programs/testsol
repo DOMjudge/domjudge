@@ -8,7 +8,8 @@
 #
 # Usage: $0 <filename>
 #
-
+# $Id$
+#
 # Extended pattern matching:
 shopt -s extglob
 
