@@ -126,7 +126,7 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 		echo '<td>' . printtime($clar['submittime']) . '</td>';
 		echo '<td><a href="' .
 			addUrl('clarification.php?id=' . $clar['clarid'], $popupTag) . '">' .
-			htmlspecialchars(str_cut($clar['body'],50)) . "</a></td></tr>\n";
+			htmlspecialchars(str_cut($clar['body'],80)) . "</a></td></tr>\n";
 	}
 	echo "</table>\n\n";
 }
