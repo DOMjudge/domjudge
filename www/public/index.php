@@ -68,9 +68,12 @@ foreach($teams as $team) {
 				break;
 			}
 
+			// 20 penality minutes for each submission
+			// (will only be counted if this problem is correctly solved)
 			$penalty += 20;
 		}
 
+		// calculate penalty time: only when correct add it to the total
 		if(!$correct) {
 			$penalty = 0;
 		} else {
@@ -99,11 +102,14 @@ uasort($SCORES, 'cmp');
 // print the whole thing
 foreach($SCORES as $team => $totals) {
 
-	echo "<tr><td>".htmlentities($TEAMNAMES[$team]).
-		"<br /><span class=\"teamid\">".htmlspecialchars($team)."</span></td><td>"
+	// team name, total correct, total time
+	echo "<tr><td>".htmlentities($TEAMNAMES[$team])
+		."</td><td>"
 		.$totals['num_correct']."</td><td>".$totals['total_time']."</td>";
+	// for each problem
 	foreach($THEMATRIX[$team] as $prob => $pdata) {
 		echo "<td class=\"";
+		// CSS class for correct/incorrect/neutral results
 		if( $pdata['correct'] ) { 
 			echo 'correct';
 		} elseif ( $pdata['submitted'] > 0 ) {
@@ -111,8 +117,13 @@ foreach($SCORES as $team => $totals) {
 		} else {
 			echo 'neutral';
 		}
-		echo "\">" . $pdata['submitted']."/".$pdata['time'] . 
-			"' + ".$pdata['penalty'] ."'</td>";
+		// number of submissions for this problem
+		echo "\">" . $pdata['submitted'];
+		// if correct, print time scored
+		if( ($pdata['time']+$pdata['penalty']) > 0) {
+			echo " (".($pdata['time']+$pdata['penalty']).")";
+		}
+		echo "</td>";
 	}
 	echo "</tr>\n";
 
@@ -122,12 +133,9 @@ echo "</table>\n\n";
 
 
 // last modified date
-echo "<div id=\"lastmod\">Last Update: ".date('r')."</div>\n\n";
+echo "<div id=\"lastmod\">Last Update: " . date('j M Y H:i') . "</div>\n\n";
 
 require('../footer.php');
-
-// FIXME HACK ALERT: Bug #962 'fix'
-die;
 
 // comparison function
 function cmp ($b, $a) {
