@@ -103,8 +103,16 @@ foreach($SCORES as $team => $totals) {
 		"<br /><span class=\"teamid\">".htmlspecialchars($team)."</span></td><td>"
 		.$totals['num_correct']."</td><td>".$totals['total_time']."</td>";
 	foreach($THEMATRIX[$team] as $prob => $pdata) {
-		echo "<td class=\"".($pdata['correct']?'correct':'incorrect')."\">" . 
-			$pdata['submitted']."/".$pdata['time']."' + ".$pdata['penalty'] ."'</td>";
+		echo "<td class=\"";
+		if( $pdata['correct'] ) { 
+			echo 'correct';
+		} elseif ( $pdata['submitted'] > 0 ) {
+			echo 'incorrect';
+		} else {
+			echo 'neutral';
+		}
+		echo "\">" . $pdata['submitted']."/".$pdata['time'] . 
+			"' + ".$pdata['penalty'] ."'</td>";
 	}
 	echo "</tr>\n";
 

@@ -1,10 +1,13 @@
 /* $Id$ */
 
 .correct {
-	background: lime;
+	background: #CCFF99;
 }
 .incorrect {
-	background : white;
+	background: #FF6666;
+}
+.neutral {
+	background: white;
 }
 td {
 	text-align: right;	
