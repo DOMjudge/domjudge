@@ -55,6 +55,11 @@ a:active          { color: red;    }
     padding: 4px;
 }
 
+.highlight {
+	background-color: yellow;
+	font-size: large;
+}
+
 .error {
 	color: red;
 	font-weight: bold;
