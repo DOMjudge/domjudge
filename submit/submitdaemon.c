@@ -103,7 +103,7 @@ void usage()
 	printf("Usage: %s [OPTION]...\n",progname);
 	printf("Start the submitserver.\n");
 	printf("\n");
-	printf("  -P, --port=PORT       set tcp port to listen on to PORT\n");
+	printf("  -P, --port=PORT       set TCP port to listen on to PORT (default: %i)\n", port);
 	printf("  -v, --verbose=LEVEL   set verbosity to LEVEL (syslog levels)\n");
 	printf("      --help            display this help and exit\n");
 	printf("      --version         output version information and exit\n");
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 		case 'P': /* port option */
 			port = strtol(optarg,&ptr,10);
 			if ( ptr!=0 || port<0 || port>65535 ) {
-				error(0,"invalid tcp port specified: `%s'",optarg);
+				error(0,"invalid TCP port specified: `%s'",optarg);
 			}
 			break;
 		case 'v': /* verbose option */

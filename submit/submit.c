@@ -311,7 +311,7 @@ Explanation of submission options:
 For PROBLEM use the ID of the problem (letter, number or short name)
 in lower- or uppercase. When not specified, PROBLEM defaults to
 FILENAME excluding the extension.
-For example, 'c.java' will indicate problem 'C'.
+For example, 'b.java' will indicate problem 'B'.
 
 For LANGUAGE use one of the following in lower- or uppercase:
    C:        c
@@ -339,7 +339,7 @@ The default value for SERVER is defined internally or otherwise
 taken from the environment variable 'SUBMITSERVER', or 'localhost'
 if 'SUBMITSERVER' is not defined.
 
-For TEAM use the login of the account, you want to submit for.
+For TEAM use the login of the account you want to submit for.
 The default value for TEAM is taken from the environment variable
 'TEAM' or your login name if 'TEAM' is not defined.
 ");
