@@ -22,7 +22,7 @@
 	umask(0177);
 
 	// Get commandline vars and case-normalize them
-	$argv = $GLOBALS['argv'];
+	$argv = $_SERVER['argv'];
 	
 	$team    = strtolower(@$argv[1]);
 	$ip      = @$argv[2];
