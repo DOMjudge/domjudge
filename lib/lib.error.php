@@ -14,9 +14,10 @@ define('STDERR', fopen('php://stderr', 'w'));
 define('STDLOG', fopen(LOGDIR.'/'.LOG_ID, 'w'));
 
 function logmsg($msglevel, $string) {
+	global $verbose, $loglevel;
 	$msg = '[' . date('M d H:i:s') . '] ' . SCRIPT_ID . ": ". $string . "\n";
-	if ( $msglevel <= LOG_NOTICE ) { fwrite(STDERR, $msg); }
-	if ( $msglevel <= LOG_DEBUG  ) { fwrite(STDLOG, $msg); }
+	if ( $msglevel <= $verbose  ) { fwrite(STDERR, $msg); }
+	if ( $msglevel <= $loglevel ) { fwrite(STDLOG, $msg); }
 }
 
 function error($string) {
