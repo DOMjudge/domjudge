@@ -6,6 +6,7 @@
  */
 
 require('init.php');
+$refresh = '15;url='.$_SERVER["REQUEST_URI"];
 $title = 'Submissions';
 require('../header.php');
 require('menu.php');
