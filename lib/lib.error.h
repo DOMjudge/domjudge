@@ -79,8 +79,8 @@ void vlogmsg(int msglevel, char *mesg, va_list ap)
 	if ( stdlog==NULL ) stdlog = fopen(LOGFILE,"a");
 #endif
 	
-    currtime  = time(NULL);
-    strftime(timestring, sizeof(timestring), "%b %d %T", localtime(&currtime));
+	currtime  = time(NULL);
+	strftime(timestring, sizeof(timestring), "%b %d %H:%M:%S", localtime(&currtime));
 
 	bufferlen = strlen(timestring)+strlen(progname)+mesglen+20;
 	buffer = (char *)malloc(bufferlen);
@@ -88,7 +88,7 @@ void vlogmsg(int msglevel, char *mesg, va_list ap)
 	snprintf(buffer, bufferlen, "[%s] %s[%d]: %s\n",
 	         timestring, progname, getpid(), mesg);
 	
-    if ( msglevel<=verbose  ) { vfprintf(stderr, buffer, ap); fflush(stderr); }
+	if ( msglevel<=verbose  ) { vfprintf(stderr, buffer, ap); fflush(stderr); }
 	if ( msglevel<=loglevel &&
 	     stdlog!=NULL       ) { vfprintf(stdlog, buffer, ap); fflush(stdlog); }
 
