@@ -249,7 +249,6 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	$probs = $DB->q('TABLE SELECT probid,name
 		FROM problem WHERE allow_submit = 1 ORDER BY probid');
 
-
 	echo "<colgroup><col id=\"scoreteamname\" /><col id=\"scoresolv\" /><col id=\"scoretotal\" />";
 	for($i = 0; $i < count($probs); $i++) {
 		echo "<col class=\"scoreprob\" />";
@@ -270,8 +269,10 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	// for each team, fetch the status of each problem
 	foreach($teams as $team) {
 
+
 		// to lookup the team name at the end
-		$TEAMNAMES[$team['login']]=$team['name'];
+		$TEAMNAMES[$team['login']] = $team['name'];
+		$THEMATRIX[$team['login']] = array();
 
 		// reset vars
 		$grand_total_correct = 0;
