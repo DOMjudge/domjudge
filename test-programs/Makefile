@@ -1,4 +1,5 @@
-CFLAGS  = -O2 -Wall
+-include Makefile.global
+
 TARGETS = checkinput
 
 all: build
@@ -9,6 +10,3 @@ install:
 
 clean:
 	-rm -f $(TARGETS)
-	-rm -f *~
-
-.PHONY: build install clean

@@ -1,4 +1,5 @@
-CFLAGS  = -O2 -Wall
+-include Makefile.global
+
 TARGETS = submit submitdaemon
 
 all: build
@@ -12,6 +13,3 @@ $(TARGETS): %: %.cc submitcommon.h ../etc/config.h ../lib/*.h
 
 clean:
 	-rm -f $(TARGETS)
-	-rm -f *~
-
-.PHONY: build install clean

@@ -1,3 +1,5 @@
+-include Makefile.global
+
 TARGETS = team-manual team-manual-NL
 
 TARGETSDVI = $(addsuffix .dvi,$(TARGETS))
@@ -30,6 +32,5 @@ texclean:
 
 clean: texclean
 	-rm -f $(TARGETSDVI) $(TARGETSPS) $(TARGETSPDF)
-	-rm -f *~
 
-.PHONY: build dvi ps pdf clean texclean
+.PHONY: dvi ps pdf texclean

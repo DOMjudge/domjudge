@@ -1,0 +1,8 @@
+CFLAGS = -O2 -Wall
+
+.PHONY: build config install clean clean-backupfiles
+
+clean: clean-backupfiles
+
+clean-backupfiles:
+	rm -rf *~

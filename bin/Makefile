@@ -1,4 +1,5 @@
-CFLAGS  = -O2 -Wall
+-include Makefile.global
+
 TARGETS = runguard beep mkstemps tempfile
 
 # Targets to be installed setuid root:
@@ -37,6 +38,5 @@ endif
 
 clean:
 	-rm -f $(TARGETS) $(SUIDBUILDS)
-	-rm -f *~
 
-.PHONY: build install install-setuid $(SUIDTARGETS) clean
+.PHONY: install-setuid $(SUIDTARGETS)

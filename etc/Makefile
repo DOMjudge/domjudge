@@ -1,3 +1,5 @@
+-include Makefile.global
+
 EXTENSIONS = h sh php tex
 TEMPLATES  = $(addprefix config.template.,$(EXTENSIONS))
 CONFIGS    = $(addprefix config.,$(EXTENSIONS))
@@ -16,6 +18,3 @@ $(TEMPFILEDIR)/tempfile:
 
 clean:
 	-rm -f $(CONFIGS)
-	-rm -f *~
-
-.PHONY: config clean
