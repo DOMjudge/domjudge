@@ -44,7 +44,7 @@ foreach($teams as $team) {
 				(UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 as timediff
 			FROM judging LEFT JOIN submission USING(submitid)
 				LEFT OUTER JOIN contest c ON(1)
-			WHERE team = %s AND probid = %s AND valid = 1
+			WHERE team = %s AND probid = %s AND valid = 1 AND result IS NOT NULL
 			ORDER BY submittime',
 			$team['login'], $pr['probid']);
 
