@@ -8,14 +8,16 @@
  * $Id$
  */
 
+$loglevel = LOG_VERBOSE;
+
 require ('../etc/config.php');
 
 $waittime = 5;
 
-$myhost = trim(`hostname`);
+$myhost = trim(`hostname --short`);
 
 define ('SCRIPT_ID', 'judgedaemon');
-define ('LOGFILE', LOGDIR.'/judge.'.trim(`hostname --short`).'.log');
+define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 
 require ('../lib/init.php');
 
@@ -130,7 +132,7 @@ while ( TRUE ) {
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {
 		system(SYSTEM_ROOT."/bin/beep ".BEEP_ERROR." &");
-		error("$row[submitid] Unknown exitcode from test_solution.sh: $retval");
+		error("s$row[submitid] Unknown exitcode from test_solution.sh: $retval");
 	}
 	$result = $EXITCODES[$retval];
 
