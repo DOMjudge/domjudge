@@ -40,17 +40,18 @@
 	if( ! $lang ) error("No value for Language.");
 	if( ! $file ) error("No value for Filename.");
 
-	
+
 	// Check 1: is the contest open?
 	$cont = $DB->q('MAYBETUPLE SELECT *,
 		UNIX_TIMESTAMP(starttime) as start_u, UNIX_TIMESTAMP(endtime) as end_u
 		FROM contest ORDER BY starttime DESC LIMIT 1');
-	if(!$cont) {
+	if( ! $cont ) {
 		error("No contest found in the database, aborting.");
 	}
 	if( $cont['start_u'] > time() || $cont['end_u'] < time() ) {
 		error("The contest is closed, no submissions accepted. [c$cont[cid]]");
 	}
+
 
 	// Check 2: valid parameters?
 	if( ! $langext = $DB->q('MAYBEVALUE SELECT extension FROM language
@@ -70,6 +71,9 @@
 	}
 	if( ! is_readable(INCOMINGDIR."/$file") ) {
 		error("File '$file' not found in incoming directory (or not readable).");
+	}
+	if( filesize(INCOMINGDIR."/$file") > SOURCESIZE*1024 ) {
+		error("Submission file is larger than ".SOURCESIZE." KB."); 
 	}
 	logmsg (LOG_INFO, "input verified");
 
