@@ -12,11 +12,12 @@
 #define OUTPUT_ROOT HOME"/systeem/systest"
 #define INPUT_ROOT  HOME"/opgaven"
 
-/* Paths within OUTPUT_ROOT */
+/* Paths within ROOT's */
 #define INCOMINGDIR OUTPUT_ROOT"/incoming"
 #define SUBMITDIR   OUTPUT_ROOT"/sources"
 #define JUDGEDIR    OUTPUT_ROOT"/judging"
 #define LOGDIR      OUTPUT_ROOT"/log"
+#define LIBDIR      SYSTEM_ROOT"/lib"
 
 /* Absolute path prefix within which chroot is allowed. */
 #define CHROOT_PREFIX JUDGEDIR

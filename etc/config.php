@@ -24,10 +24,6 @@ define('LOGDIR',      OUTPUT_ROOT.'/log');
 /** Loglevels */
 define_syslog_variables();
 
-global $verbose, $loglevel;
-$verbose = LOG_NOTICE;
-$loglevel = LOG_DEBUG;
-
 /** Possible exitcodes from testsol and their meaning */
 $EXITCODES = array (
 	0	=>	'correct',
