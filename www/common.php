@@ -48,6 +48,7 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 		"</tr>\n";
 	while($row = $res->next()) {
 		$sid = (int)$row['submitid'];
+		$isfinished = ($detailed || ! @$resulttable[$row['submitid']]['result']);
 		echo "<tr>" .
 			($detailed ? "<td><a href=\"submission.php?id=".$sid."\">".$sid."</a></td>" : '') .
 			"<td>" . printtime($row['submittime']) . "</td>" .
@@ -55,8 +56,10 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 			($key != 'probid' ? "<td>".htmlspecialchars($row['probid']) . "</td>" : '') .
 			($key != 'langid' ? "<td>".htmlspecialchars($row['langid']) . "</td>" : '') .
 			"<td>" .
+				($isfinished ? '' : '<a href="submission_details.php?id='.$sid.'">') .
 				printresult( @$row['judgerid'] ? @$resulttable[$row['submitid']]['result'] : 'queued') .
-			"</td>" .
+				($isfinished ? '' : '</a>') .
+				"</td>" .
 		 	( $detailed ? "<td>".printhost(@$resulttable[$row['submitid']]['judgername']) . "</td>" : '') .
 		 	"</td></tr>\n";
 	}
