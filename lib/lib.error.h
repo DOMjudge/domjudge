@@ -77,7 +77,6 @@ void vlogmsg(int msglevel, char *mesg, va_list ap)
 	if ( msglevel<=loglevel &&
 	     stdlog!=NULL       ) { vfprintf(stdlog, buffer, ap); fflush(stdlog); }
 
-	free(datetime);
 	free(buffer);
 }
 
