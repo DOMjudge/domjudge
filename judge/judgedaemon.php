@@ -13,7 +13,7 @@ require ('../etc/config.php');
 $myhost = trim(`hostname`);
 
 define ('SCRIPT_ID', 'judgedaemon');
-define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
+define ('LOGFILE', LOGDIR.'/judge.'.trim(`hostname --short`).'.log');
 
 require ('../php/init.php');
 
@@ -70,7 +70,8 @@ while ( TRUE ) {
 
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-		SET judgerid = %i, judgemark = %s WHERE judgerid IS NULL AND cid = %i LIMIT 1', $myid, $mark, $cid);
+		SET judgerid = %i, judgemark = %s
+		WHERE judgerid IS NULL AND cid = %i LIMIT 1', $myid, $mark, $cid);
 
 	// nothing updated -> no open submissions
 	if ( $numupd == 0 ) {
