@@ -7,15 +7,18 @@
  */
 
 require('init.php');
+$refresh = '30;url=clarifications.php';
 $title = 'Clarifications';
 include('../header.php');
 include('menu.php');
 
 ?>
+<p><a href="clar_request.php">Request Clarification</a></p>
+
 <h1>Clarifications</h1>
 <p><table>
 <tr><th>Time</th><th>Reponse</th></tr>
-<?php
+<?
 
 $data = $DB->q('TABLE SELECT * FROM clar_response WHERE cid = %i 
 	AND (rcpt = %s OR rcpt IS NULL) ORDER BY submittime DESC',
@@ -24,9 +27,10 @@ $data = $DB->q('TABLE SELECT * FROM clar_response WHERE cid = %i
 foreach($data as $row) {
 	echo "<tr><td>".
 		printtime($row['submittime'])."</td><td>".
-		"<a href=\"clarification.php?id=".
-		urlencode($row['respid'])."\">".
-		htmlspecialchars(str_cut($row['body'],50)).
+		'<a href="'.
+		addUrl("clarification.php?id=".urlencode($row['respid']),$popupTag).
+		'">'.
+			htmlspecialchars(str_cut($row['body'],50)).
 		"</a></td></tr>\n";
 }
 
@@ -54,9 +58,5 @@ while ($req = $res->next())
 		"</tr>\n";
 	}
 	echo "</table>\n\n";
-?>
 
-<p><a href="clar_request.php">Request Clarification</a></p>
-
-<?php
 include('../footer.php');

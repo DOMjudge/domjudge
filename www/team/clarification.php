@@ -6,12 +6,13 @@
  * $Id$
  */
 
+$respid = (int)@$_GET['id'];
+
 require('init.php');
+$refresh = addUrl('30;url=clarification.php?id='.$respid, $popupTag);
 $title = 'Clarification Response';
 include('../header.php');
 include('menu.php');
-
-$respid = (int)$_GET['id'];
 
 echo "<h1>Clarification Response</h1>\n\n";
 

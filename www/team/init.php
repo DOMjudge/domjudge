@@ -5,8 +5,6 @@
  * $Id$
  */
 
-session_start();
-
 require_once('../../etc/config.php');
 require_once('../../lib/lib.error.php');
 require_once('../../lib/lib.misc.php');

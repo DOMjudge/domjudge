@@ -20,7 +20,8 @@ if (isset($_REQUEST['submit'])
 	// after input, redirect to the appropriate requestpage
 	// fixme: following the HTTP spec., this should be a complete url but we
 	// don't have that available at the time. this works in any known browser though.
-	header('Location: request.php?id='.urlencode($respid));
+	header('Location: '
+		.addUrl('request.php?id='.urlencode($respid), $popupTag));
 	exit;
 }
 
@@ -34,6 +35,6 @@ if (isset($_REQUEST['submit'])
 <tr><td>&nbsp;</td><td><input type="submit" name="submit" value="Send" /></td></tr>
 </table>
 </form>
-<?php
+<?
 
 include('../footer.php');
