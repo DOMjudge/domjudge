@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Display the clarification responses
  *
@@ -9,63 +8,44 @@
 require('init.php');
 $refresh = '30;url=' . getBaseURI() . 'team/clarifications.php';
 $title = 'Clarifications';
-include('../header.php');
-include('menu.php');
-
-?>
-<p><a href="clar_request.php">Request Clarification</a></p>
-
-<h1>Clarifications</h1>
-<?php
+require('../header.php');
+require('../clarification.php');
+require('menu.php');
 
 $cid = getCurContest();
 
-$data = $DB->q('TABLE SELECT * FROM clar_response WHERE cid = %i 
-	AND (rcpt = %s OR rcpt IS NULL) ORDER BY submittime DESC',
-	$cid, $login );
+echo "<h1>Clarifications</h1>\n\n";
 
-if(count($data) == 0 ) {
-	echo "<p><em>No responses yet</em></p>\n";
+echo '<p><a href="' . addUrl('clarification.php',$popupTag) .
+	"\">Request Clarification</a></p>\n";
+
+echo "<p><a href=\"#clarifications\">View Clarifications</a></p>\n";
+echo "<p><a href=\"#requests\">View Clarification Requests</a></p>\n\n";
+
+$requests = $DB->q('SELECT * FROM clarification
+	WHERE cid = %i AND sender = %s
+	ORDER BY submittime DESC', $cid, $login);
+
+$clarifications = $DB->q('SELECT * FROM clarification
+	WHERE cid = %i AND sender IS NULL
+	AND ( recipient IS NULL OR recipient = %s )
+	ORDER BY submittime DESC', $cid, $login,
+	(isset($_REQUEST['stamp']) ? $_REQUEST['stamp'] : 0));
+
+echo '<h3><a name="Clarifications" id="clarifications">' .
+	"Clarifications:</a></h3>\n";
+if ( $clarifications->count() == 0 ) {
+	echo "<p><em>No clarifications.</em></p>\n\n";
 } else {
-	echo "<table>\n<tr><th>Time</th><th>Response</th></tr>\n";
-	foreach($data as $row) {
-		echo "<tr><td>".
-			printtime($row['submittime'])."</td><td>".
-			'<a href="'.
-			addUrl("clarification.php?id=".urlencode($row['respid']),$popupTag).
-			'">'.
-				htmlspecialchars(str_cut($row['body'],50)).
-			"</a></td></tr>\n";
-	}
-	echo "</table>\n";
+	putClarificationList($clarifications,$login);
 }
 
-?>
-
-<h1>Requests</h1>
-
-<?php
-$res = $DB->q('SELECT q.*
-	FROM  clar_request q
-	WHERE q.cid = %i AND q.login = %s
-	ORDER BY q.submittime DESC', $cid, $login);
-
-if( $res->count() == 0 ) {
-	echo "<p><em>No requests done</em></p>\n";
+echo '<h3><a name="Clarification Requests" id="requests">' .
+	"Clarification Requests:</a></h3>\n";
+if ( $requests->count() == 0 ) {
+	echo "<p><em>No clarification requests.</em></p>\n\n";
 } else {
-	echo "<table>\n".
-		"<tr><th>Time</th><th>Request</th></tr>\n";
-	while ($req = $res->next())
-	{
-		$req['reqid'] = (int)$req['reqid'];
-		echo "<tr>".
-			"<td>".printtime($req['submittime'])."</td>".
-			"<td><a href=\"request.php?id=".$req['reqid']."\">".
-				htmlspecialchars(str_cut($req['body'],50)).
-			"</a></td>".
-			"</tr>\n";
-	}
-	echo "</table>\n";
+	putClarificationList($requests,$login);
 }
 
-include('../footer.php');
+require('../footer.php');

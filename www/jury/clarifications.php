@@ -1,6 +1,6 @@
 <?php
 /**
- * Clarification Request Management
+ * Clarifications overview
  *
  * $Id$
  */
@@ -9,104 +9,53 @@ require('init.php');
 $refresh = '15;url='.getBaseURI().'jury/clarifications.php';
 $title = 'Clarification Requests';
 require('../header.php');
+require('../clarification.php');
 require('menu.php');
-
-?>
-<p>
-<a href="clarification.php">Send Clarification Response</a>
-</p>
-<?php
 
 $cid = getCurContest();
 
-echo "<h1>Clarification Requests</h1>\n\n";
+echo "<h1>Clarifications</h1>\n\n";
 
-$res = $DB->q('SELECT q.*
-	FROM  clar_request q
-	LEFT JOIN clar_response r ON (r.reqid = q.reqid)
-	WHERE r.reqid IS NULL AND q.cid = %i
-	ORDER BY q.submittime DESC', $cid);
+echo "<p><a href=\"clarification.php\">Send Clarification</a></p>\n";
+echo "<p><a href=\"#newrequests\">View New Clarification Requests</a></p>\n";
+echo "<p><a href=\"#oldrequests\">View Old Clarification Requests</a></p>\n";
+echo "<p><a href=\"#clarifications\">View General Clarifications</a></p>\n\n";
 
-if ( $res->count() == 0 ) {
+$newrequests = $DB->q('SELECT * FROM clarification
+	WHERE sender IS NOT NULL AND cid = %i AND answered = 0
+	ORDER BY submittime DESC', $cid);
+
+$oldrequests = $DB->q('SELECT * FROM clarification
+	WHERE sender IS NOT NULL AND cid = %i AND answered != 0
+	ORDER BY submittime DESC', $cid);
+
+$clarifications = $DB->q('SELECT * FROM clarification
+	WHERE sender IS NULL AND cid = %i
+	AND ( respid < 0 OR recipient IS NULL )
+	ORDER BY submittime DESC', $cid);
+
+echo '<h3><a name="New Requests" id="newrequests">' .
+	"New Requests:</a></h3>\n";
+if ( $newrequests->count() == 0 ) {
 	echo "<p><em>No new clarification requests.</em></p>\n\n";
 } else {
-	echo "<h3>New Requests:</h3>\n";
-	echo "<table>\n".
-		"<tr><th>ID</th><th>team</th><th>time</th><th>request</th></tr>\n";
-	while ($req = $res->next())
-	{
-		$req['reqid'] = (int)$req['reqid'];
-		echo "<tr>".
-			"<td><a href=\"request.php?id=".$req['reqid']."\">q".$req['reqid']."</a></td>".
-			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($req['login']). "\">".
-				htmlspecialchars($req['login'])."</a></td>".
-			"<td>".printtime($req['submittime'])."</td>".
-			"<td><a href=\"request.php?id=".$req['reqid']."\">".
-				htmlspecialchars(str_cut($req['body'],50)).
-			"</a></td>".
-			"</tr>\n";
-	}
-	echo "</table>\n\n";
+	putClarificationList($newrequests,NULL,TRUE);
 }
 
-
-$res = $DB->q('SELECT DISTINCT q.*
-	FROM  clar_request q
-	LEFT JOIN clar_response r ON (r.reqid = q.reqid)
-	WHERE r.reqid IS NOT NULL AND q.cid = %i
-	ORDER BY q.submittime DESC', $cid);
-
-if ( $res->count() == 0 ) {
+echo '<h3><a name="Old Requests" id="oldrequests">' .
+	"Old Requests:</a></h3>\n";
+if ( $oldrequests->count() == 0 ) {
 	echo "<p><em>No old clarification requests.</em></p>\n\n";
 } else {
-	echo "<h3>Old Requests:</h3>\n";
-	echo "<table>\n".
-		"<tr><th>ID</th><th>team</th><th>time</th><th>request</th></tr>\n";
-	while ($req = $res->next())
-	{
-		$req['reqid'] = (int)$req['reqid'];
-		echo "<tr>".
-			"<td><a href=\"request.php?id=".$req['reqid']."\">q".$req['reqid']."</a></td>".
-			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($req['login']). "\">".
-				htmlspecialchars($req['login'])."</a></td>".
-			"<td>".printtime($req['submittime'])."</td>".
-			"<td><a href=\"request.php?id=".$req['reqid']."\">".
-				htmlspecialchars(str_cut($req['body'], 50)).
-			"</a></td>".
-			"</tr>\n";
-	}
-	echo "</table>\n\n";
+	putClarificationList($oldrequests,NULL,TRUE);
 }
 
-echo "<h3>Clarification Responses:</h3>\n\n";
-
-$res = $DB->q('SELECT r.*
-	FROM  clar_response r
-	WHERE r.cid = %i
-	ORDER BY r.submittime DESC', $cid);
-
-if ( $res->count() == 0 ) {
-	echo "<p><em>No clarification responses.</em></p>\n\n";
+echo '<h3><a name="Clarifications" id="clarifications">' .
+	"General Clarifications:</a></h3>\n";
+if ( $clarifications->count() == 0 ) {
+	echo "<p><em>No general clarifications.</em></p>\n\n";
 } else {
-	echo "<table>\n".
-		"<tr><th>ID</th><th>team</th><th>time</th><th>message</th></tr>\n";
-	while ($req = $res->next())
-	{
-		$team = (isset($req['rcpt'])
-				?"<a href=\"team.php?id=".urlencode($req['rcpt']). "\">".htmlspecialchars($req['rcpt'])."</a>"
-				:'All');
-
-		$req['respid'] = (int)$req['respid'];
-		echo "<tr>".
-			"<td><a href=\"response.php?id=".$req['respid']."\">r".$req['respid']."</a></td>".
-			"<td class=\"teamid\">".$team."</td>".
-			"<td>".printtime($req['submittime'])."</td>".
-			"<td><a href=\"response.php?id=".$req['respid']."\">".
-				htmlspecialchars(str_cut($req['body'], 50)).
-			"</a></td>";
-		echo "</tr>\n";
-	}
-	echo "</table>\n\n";
+	putClarificationList($clarifications,NULL,TRUE);
 }
 
 require('../footer.php');
