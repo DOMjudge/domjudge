@@ -83,9 +83,8 @@ if ( $res->count() == 0 ) {
 
 echo "<h3>Clarification Responses:</h3>\n\n";
 
-$res = $DB->q('SELECT r.*, q.submittime as reqtime
+$res = $DB->q('SELECT r.*
 	FROM  clar_response r
-	LEFT JOIN clar_request q ON (r.reqid = q.reqid)
 	WHERE r.cid = %i
 	ORDER BY r.submittime DESC', getCurContest());
 
@@ -93,21 +92,20 @@ if ( $res->count() == 0 ) {
 	echo "<p><em>No clarification responses.</em></p>\n\n";
 } else {
 	echo "<table>\n".
-		"<tr><th>ID</th><th>response time</th><th>to</th><th>request</th><th>request time</th>\n";
+		"<tr><th>ID</th><th>team</th><th>time</th><th>message</th>\n";
 	while ($req = $res->next())
 	{
+		$team = (isset($req['rcpt'])
+				?"<a href=\"team.php?id=".urlencode($req['rcpt']). "\">".htmlspecialchars($req['rcpt'])."</a>"
+				:'All');
+		
 		echo "<tr>".
 			"<td><a href=\"response.php?id=".$req['respid']."\">r".$req['respid']."</a></td>".
+			"<td class=\"teamid\">".$team."</td>".
 			"<td>".$req['submittime']."</td>".
-			"<td class=\"teamid\">".
-				(isset($req['rcpt'])
-				?"<a href=\"team.php?id=".urlencode($req['rcpt']). "\">".htmlspecialchars($req['rcpt'])."</a>"
-				:'All')."</td>";
-		if (isset($req['reqid']))
-		{
-			echo "<td><a href=\"request.php?id=".$req['reqid']."\">q".$req['reqid']."</a></td>".
-				"<td>".$req['reqtime']."</td>";
-		}
+			"<td><a href=\"response.php?id=".$req['respid']."\">".
+				htmlspecialchars(str_cut($req['body'], 50)).
+			"</a></td></tr>";
 		echo "</tr>\n";
 	}
 	echo "</table>\n\n";
@@ -130,7 +128,7 @@ if ( $res->count() == 0 ) {
 ?>
 </select>
 </td></tr>
-<tr><td>Response:</td><td><textarea name="response" cols="80" rows="5"></textarea></td></tr>
+<tr><td valign="top">Response:</td><td><textarea name="response" cols="80" rows="5"></textarea></td></tr>
 <tr><td>&nbsp;</td><td><input type="submit" name="submit" value="Send" /></td></tr>
 </table>
 <?
