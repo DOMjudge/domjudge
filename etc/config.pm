@@ -6,7 +6,8 @@
 require 5.002;
 
 # TCP port on which submitdaemon listens
-our $SUBMITPORT = 9147;
+our $SUBMITPORT   = 9147;
+our $SUBMITSERVER = "square.a-eskwadraat.nl";
 
 # Root-paths for different parts of the system
 our $SYSTEM_ROOT = "/home/cies/nkp0405/systeem/svn/jury";
