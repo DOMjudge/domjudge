@@ -3,6 +3,7 @@
 body {
 	font-color: black;
 	background-color: white;
+	font-family: sans-serif;
 }
 
 .output_text {
@@ -34,7 +35,6 @@ a:active          { color: red;    }
 }
 
 #menutop a {
-	font-family: sans-serif;
 	font-weight: bold;
 	background-color: #FFFFF0;
 	border: 1px solid black;

@@ -3,6 +3,7 @@
 body {
 	font-color: black;
 	background-color: white;
+	font-family: sans-serif;
 }
 
 .correct {
@@ -20,7 +21,6 @@ td {
 #lastmod {
 	color:	blue;
 	text-align: right;
-	font-family: sans-serif;
 	font-size: x-small;
 }
 .teamid {
