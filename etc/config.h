@@ -5,6 +5,8 @@
 #ifndef _LOCAL_CONFIG_
 #define _LOCAL_CONFIG_
 
+#define HOME "/home/cies/nkp0405"
+
 /* Root-paths for different parts of the system. */
 #define SYSTEM_ROOT HOME"/systeem/svn/jury"
 #define OUTPUT_ROOT HOME"/systeem/systest"
