@@ -30,9 +30,6 @@
 #include <stdio.h>
 #include <getopt.h>
 
-/* Some system/site specific config */
-#include "../etc/config.h"
-
 /* Include some functions, which are not always available */
 #include "../lib/mkstemps.h"
 #include "../lib/basename.h"
