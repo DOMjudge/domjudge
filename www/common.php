@@ -32,9 +32,8 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 		return;
 	}
 
-	$resulttable = $DB->q('KEYTABLE SELECT j.*, submitid AS ARRAYKEY' .
-		($detailed ? ', judger.name AS judgername ' : '' ) . '
-		FROM judging j ' . ($detailed ? 'LEFT JOIN judger USING(judgerid) ' : '') . '
+	$resulttable = $DB->q('KEYTABLE SELECT j.*, submitid AS ARRAYKEY
+		FROM judging j
 		WHERE (valid = 1 OR valid IS NULL) AND cid = %i', getCurCont() );
 
 	echo "<table>\n<tr>".
@@ -68,7 +67,7 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 				'</a>';
 		}
 		echo "</td>" .
-		 	( $detailed ? "<td>".printhost(@$resulttable[$row['submitid']]['judgername']) . "</td>" : '') .
+		 	( $detailed ? "<td>".printhost(@$resulttable[$row['submitid']]['judgerid']) . "</td>" : '') .
 		 	"</td></tr>\n";
 	}
 	echo "</table>\n\n";
@@ -83,7 +82,7 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 function getJudgings($key, $value) {
 	global $DB;
 
-	$res = $DB->q('SELECT j.*,judger.name FROM judging j NATURAL JOIN judger
+	$res = $DB->q('SELECT * FROM judging
 		WHERE '.$key.' = %s AND cid = %i ORDER BY starttime DESC',
 		$value, getCurCont() );
 
@@ -98,7 +97,7 @@ function getJudgings($key, $value) {
 					(int)$jud['judgingid'] . "</a>" .
 				"</td><td>".printtime($jud['starttime']) .
 				"</td><td>".printtime(@$jud['endtime']) .
-				"</td><td>".printhost(@$jud['name']) .
+				"</td><td>".printhost(@$jud['judgerid']) .
 				"</td><td>".printresult(@$jud['result'], $jud['valid']) .
 				"</td><td align=\"center\">".printyn($jud['valid']) .
 				"</td></tr>\n";

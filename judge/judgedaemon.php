@@ -26,11 +26,10 @@ list($usec,$sec)=explode(" ",microtime());
 mt_srand($sec * $usec);
 
 // Retrieve hostname and check database for judger entry
-$row = $DB->q('MAYBETUPLE SELECT * FROM judger WHERE name = %s', $myhost);
+$row = $DB->q('MAYBETUPLE SELECT * FROM judger WHERE judgerid = %s', $myhost);
 if ( ! $row ) {
 	error("No database entry found for me ($myhost), exiting");
 }
-$myid = $row['judgerid'];
 
 // Create directory where to test submissions
 $tempdirpath = JUDGEDIR."/$myhost";
@@ -44,7 +43,7 @@ $active = TRUE;
 while ( TRUE ) {
 
 	// Check that this judge is active, else wait and check again later
-	$row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
+	$row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $myhost);
 	if ( $row['active'] != 1 ) {
 		if ( $active ) {
 			logmsg(LOG_NOTICE, "Not active, waiting for activation...");
@@ -66,12 +65,12 @@ while ( TRUE ) {
 
 	// Generate (unique) random string to mark submission to be judged
 	list($usec,$sec)=explode(" ",microtime());
-	$mark = "$myhost/$myid".'@'.($sec+$usec).'#'.md5(uniqid(mt_rand(), true));
+	$mark = $myhost.'@'.($sec+$usec).'#'.md5(uniqid(mt_rand(), true));
 
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-		SET judgerid = %i, judgemark = %s
-		WHERE judgerid IS NULL AND cid = %i LIMIT 1', $myid, $mark, $cid);
+		SET judgerid = %s, judgemark = %s
+		WHERE judgerid IS NULL AND cid = %i LIMIT 1', $myhost, $mark, $cid);
 
 	// nothing updated -> no open submissions
 	if ( $numupd == 0 ) {
@@ -89,17 +88,17 @@ while ( TRUE ) {
 		s.submitid, s.sourcefile, s.langid, testdata
 		FROM submission s, problem p, language l
 		WHERE s.probid = p.probid AND s.langid = l.langid AND
-		judgemark = %s AND judgerid = %i', $mark, $myid);
+		judgemark = %s AND judgerid = %s', $mark, $myhost);
 
-	logmsg(LOG_NOTICE, "Judging submission $row[submitid]...");
+	logmsg(LOG_NOTICE, "Judging submission s$row[submitid]...");
 
 	// update the judging table with our ID and the starttime
 	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgerid)
-		VALUES (%i,%i,NOW(),%i)',
-		$row['submitid'], $cid, $myid);
+		VALUES (%i,%i,NOW(),%s)',
+		$row['submitid'], $cid, $myhost);
 
 	// create tempdir for tempfiles
-	$tempdir = "$tempdirpath/$cid/$judgingid";
+	$tempdir = "$tempdirpath/c$cid/j$judgingid";
 	system("mkdir -p $tempdir", $retval);
 	if ( $retval != 0 ) error("Could not create $tempdir");
 
@@ -118,14 +117,15 @@ while ( TRUE ) {
 
 	// pop the result back into the judging table
 	$DB->q('UPDATE judging
-		SET endtime = NOW(), result = %s, output_compile = %s, output_run = %s, output_diff = %s, output_error = %s
-		WHERE judgingid = %i AND judgerid = %i',
+		SET endtime = NOW(), result = %s,
+			output_compile = %s, output_run = %s, output_diff = %s, output_error = %s
+		WHERE judgingid = %i AND judgerid = %s',
 		$result,
 		get_content($tempdir.'/compile.out'),
 		get_content($tempdir.'/program.out'),
 		get_content($tempdir.'/diff.out'),
 		get_content($tempdir.'/error.out'),
-		$judgingid, $myid);
+		$judgingid, $myhost);
 
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");

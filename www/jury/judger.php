@@ -10,12 +10,12 @@ $title = 'Judger';
 require('../header.php');
 require('menu.php');
 
-$id = (int)$_REQUEST['id'];
-if(!$id)	error ("Missing judger id");
+$id = $_REQUEST['id'];
+if(!$id || !preg_match("/^[A-Za-z0-9_\-.]*$/", $id))	error ("Invalid judger id");
 
 if(isset($_POST['cmd'])) {
 	if($_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate') {
-		$DB->q('UPDATE judger SET active = %i WHERE judgerid = %i'
+		$DB->q('UPDATE judger SET active = %i WHERE judgerid = %s'
 		      ,($_POST['cmd'] == 'activate'?1:0), $id);
 	}
 }
@@ -23,25 +23,24 @@ $row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $id);
 
 ?>
 
-<h1>Judger <?=printhost($row['name'])?></h1>
+<h1>Judger <?=printhost($row['judgerid'])?></h1>
 
 <table>
-<tr><td>ID:</td><td><?=$id?></td></tr>
-<tr><td>Name:</td><td><?=printhost($row['name'], TRUE)?></td></tr>
+<tr><td>Name:</td><td><?=printhost($row['judgerid'], TRUE)?></td></tr>
 <tr><td>Active:</td><td><?=printyn($row['active'])?></td></tr>
 </table>
 
-<h3>Judgings by <?=printhost($row['name'])?></h3>
+<h3>Judgings by <?=printhost($row['judgerid'])?></h3>
 
 <?php
 
-getJudgings('j.judgerid', $row['judgerid']);
+getJudgings('judgerid', $row['judgerid']);
 
 $cmd = ($row['active'] == 1?'deactivate':'activate');
 ?>
 <p>
 <form action="judger.php" method="post">
-<input type="hidden" name="id" value="<?=$id?>" />
+<input type="hidden" name="id" value="<?=htmlspecialchars($row['judgerid'])?>" />
 <input type="hidden" name="cmd" value="<?=$cmd?>" />
 <input type="submit" value=" <?=$cmd?> " />
 </form>

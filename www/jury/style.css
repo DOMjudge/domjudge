@@ -8,25 +8,25 @@
 	font-family: monospace;	
 }
 
-.disabled {
-	color: silver;
-}
-
 .sol {
 	font-weight: bold;
 	font-variant: small-caps;
 }
-.correct   { color: green; }
-.incorrect { color: red;   }
-.queued    { color: gray;  }
 
-.teamid, .filename, .hostname {
-	font-family: monospace;
-}
+.correct          { color: green;  }
+.incorrect        { color: red;    }
+.queued           { color: gray;   }
 
 a:link, a:visited { color: blue;   }
 a:hover           { color: purple; }
 a:active          { color: red;    }
+
+.disabled	      { color: silver; }
+.disabled a       { color: gray;   }
+
+.teamid, .filename, .hostname {
+	font-family: monospace;
+}
 
 #menutop a {
 	font-family: sans-serif;

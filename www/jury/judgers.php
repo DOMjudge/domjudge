@@ -14,20 +14,19 @@ echo "<h1>Judgers</h1>\n\n";
 
 if(isset($_POST['cmd'])) {
 	if($_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate') {
-		$DB->q('UPDATE judger SET active = %i WHERE 1'
+		$DB->q('UPDATE judger SET active = %i'
 		      ,($_POST['cmd'] == 'activate'?1:0));
 	}
 }
 
-$res = $DB->q('SELECT * FROM judger ORDER BY name');
+$res = $DB->q('SELECT * FROM judger ORDER BY judgerid');
 
 echo "<table>
-<tr><th>nr</th><th>name</th><th>active</th></tr>\n";
+<tr><th>judgerid</th><th>active</th></tr>\n";
 while($row = $res->next()) {
 	echo "<tr".
 		( $row['active'] ? '': ' class="disabled"').
-		"><td><a href=\"judger.php?id=".(int)$row['judgerid'].'">'.(int)$row['judgerid'].'</a>'.
-		"</td><td>".printhost($row['name']).
+		"><td><a href=\"judger.php?id=".urlencode($row['judgerid']).'">'.printhost($row['judgerid']).'</a>'.
 		"</td><td align=\"center\">".printyn($row['active']).
 		"</td></tr>\n";
 }

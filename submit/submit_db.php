@@ -34,7 +34,7 @@
 
 
 	// Check 0: called correctly?
-	if( ! $team ) error("No value for team.");
+	if( ! $team ) error("No value for Team.");
 	if( ! $ip   ) error("No value for IP.");
 	if( ! $prob ) error("No value for Problem.");
 	if( ! $lang ) error("No value for Language.");
@@ -49,7 +49,7 @@
 		error("No contest found in the database, aborting.");
 	}
 	if( $cont['start_u'] > time() || $cont['end_u'] < time() )
-		error("The contest is closed, no submissions accepted. [$cont[cid]]");
+		error("The contest is closed, no submissions accepted. [c$cont[cid]]");
 	}
 
 	// Check 2: valid parameters?
@@ -92,6 +92,6 @@
 		VALUES (%i, %s, %s, %s, NOW(), %s, %s)',
 		$cid, $team, $prob, $lang, $tofile, get_content(SUBMITDIR."/".$tofile));
 
-	logmsg (LOG_NOTICE, "submitted c$cid/$team/$prob/$lang, file $tofile, sid $id");
+	logmsg (LOG_NOTICE, "submitted c$cid/$team/$prob/$lang, file $tofile, id s$id");
 
 	exit;

@@ -15,9 +15,9 @@ if(!$id)	error ("Missing judging id");
 
 echo "<h1>Judging j$id</h1>\n\n";
 
-$jdata = $DB->q('TUPLE SELECT j.*,s.*,judger.name as judgename, c.contestname
+$jdata = $DB->q('TUPLE SELECT j.*,s.*, c.contestname
 	FROM judging j LEFT JOIN submission s USING(submitid)
-	LEFT JOIN judger USING(judgerid) LEFT JOIN contest c ON(c.cid=j.cid)
+	LEFT JOIN contest c ON(c.cid=j.cid)
 	WHERE judgingid = %i',
 	$id);
 
@@ -42,8 +42,8 @@ if(@$jdata['endtime']) {
 	(int)$jdata['submitid']?>"><?= htmlspecialchars($jdata['sourcefile']) ?></a></td></tr>
 <tr><td>Start:</td><td><?=htmlspecialchars($jdata['starttime'])?></td></tr>
 <tr><td>End:</td><td><?=$endtime?></td></tr>
-<tr><td>Judger:</td><td><a href="judger.php?id=<?=(int)$jdata['judgerid'].'">'.
-	printhost($jdata['judgename']).' / '.(int)$jdata['judgerid']?></a></td></tr>
+<tr><td>Judger:</td><td><a href="judger.php?id=<?=urlencode($jdata['judgerid']).'">'.
+	printhost($jdata['judgerid'])?></a></td></tr>
 <tr><td>Result:</td><td><?=printresult(@$jdata['result'], $jdata['valid'])?></td></tr>
 <tr><td>Valid:</td><td><?=printyn($jdata['valid'])?></td></tr>
 </table>
