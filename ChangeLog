@@ -5,6 +5,8 @@ Version 0.1.2 - CVS
  - Fixed faulty EPS-logo, finally.
  - Add database privileges and move sql-files to own directory.
  - Improve config.tex dependency.
+ - Make the base URI of the webinterface configurable and fix redirects
+   to be compatible with the HTTP-specification.
 
 Version 0.1.1 - 24 November 2004
 --------------------------------
