@@ -62,7 +62,7 @@ int receive(int fd)
 		error(errno,"reading from socket");
 	}
 
-	strcpy(lastmsg,buffer);
+	strcpy(lastmesg,buffer);
 	while ( nread>0 && iscntrl(lastmesg[nread-1]) ) lastmesg[--nread] = 0;
 	logmsg(LOG_DEBUG, "recv: %s", lastmesg);
 
