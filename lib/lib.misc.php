@@ -23,7 +23,7 @@ function getCurContest() {
 
 	global $DB;
 	$now = $DB->q('SELECT cid FROM contest
-	               WHERE starttime <= NOW() AND endtime >= NOW()');
+		WHERE starttime <= NOW() AND endtime >= NOW()');
 	
 	if ( $now->count() == 1 ) {
 		$row = $now->next();
@@ -31,9 +31,7 @@ function getCurContest() {
 	}
 	if ( $now->count() == 0 ) {
 		$prev = $DB->q('SELECT cid FROM contest
-				WHERE endtime <= NOW()
-				ORDER BY endtime DESC
-				LIMIT 1');	
+			WHERE endtime <= NOW() ORDER BY endtime DESC LIMIT 1');	
 		$row = $prev->next();
 		$curcontest = $row['cid'];
 	}
@@ -73,7 +71,7 @@ function calcScoreRow($cid, $team, $prob) {
 		LEFT JOIN submission s USING(submitid)
 		LEFT OUTER JOIN contest c ON(c.cid=s.cid)
 		WHERE team = %s AND probid = %s AND valid = 1 AND result IS NOT NULL
-		AND	s.cid = %i ORDER BY submittime', $team, $prob, $cid);
+		AND s.cid = %i ORDER BY submittime', $team, $prob, $cid);
 
 	// reset vars
 	$submitted_j = $penalty_j = $time_j = $correct_j = 0;
@@ -112,7 +110,7 @@ function calcScoreRow($cid, $team, $prob) {
 	$DB->q('REPLACE INTO scoreboard_jury
 		(cid, team, problem, submissions, totaltime, penalty, is_correct )
 		VALUES (%i,%s,%s,%i,%i,%i,%i)',
-		$cid, $team, $prob,	$submitted_j, $time_j, $penalty_j, $correct_j);
+		$cid, $team, $prob, $submitted_j, $time_j, $penalty_j, $correct_j);
 	
 	// insert or update the values in the public/team scores table
 	$DB->q('REPLACE INTO scoreboard_public
