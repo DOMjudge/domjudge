@@ -65,9 +65,8 @@ extern int errno;
 /* Variables defining logmessages verbosity to stderr/logfile */
 #define LOGFILE LOGDIR"/submit.log"
 
-extern int  verbose;
-extern int  loglevel;
-extern char *logfile;
+extern int verbose;
+extern int loglevel;
 
 char *progname;
 
