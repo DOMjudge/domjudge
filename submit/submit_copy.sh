@@ -3,10 +3,14 @@
 
 # Script to copy a submission file from a team to judge account.
 # Usage: $0 <team> <fromfile> <tofile>
-
+#
+# Where <team> is the account of the team and <fromfile> and <tofile>
+# are including full absolute path.
+#
 # This script will depend very much on the setup of your system:
 # what kind of filesystems do you have, how can you access the team
 # accounts, etc...  Rewrite to fit your needs.
+#
 
 # Global configuration
 source "`dirname $0`/../etc/config.sh"

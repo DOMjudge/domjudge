@@ -38,7 +38,7 @@
 #
 #   compile_<lang>.sh <source> <dest>
 #
-# where <dest> will be the same filename as <source> but without extension.
+# where <dest> is the same filename as <source> but without extension.
 #
 # For running the solution a script 'run.sh' is called. For usage of
 # 'run.sh' see that script.
