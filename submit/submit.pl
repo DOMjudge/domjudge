@@ -21,7 +21,27 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Some system/site specific config
-BEGIN { require "../etc/config.pm"; }
+#BEGIN { require "../etc/config.pm"; }
+
+# Globally require perl version
+require 5.002;
+
+# TCP port on which submitdaemon listens
+our $SUBMITPORT   = 9147;
+our $SUBMITSERVER = "square.a-eskwadraat.nl";
+
+# Directory where submit-client puts files for sending (relative to $HOME)
+our $USERSUBMITDIR = ".submit";
+
+# Loglevels
+our $LOG_ERR    = 3;
+our $LOG_NOTICE = 5;
+our $LOG_INFO   = 6;
+our $LOG_DEBUG  = 7;
+
+# For extra clarity in return statements (perl specific)
+our $success = 1;
+our $failure = 0;
 
 use Socket;
 use IO;
@@ -47,7 +67,7 @@ my $lastreply;
 my $problem;
 my $language;
 my $filename;
-my $server = $ENV{SUBMITSERVER} || "localhost";
+my $server = $SUBMITSERVER || $ENV{SUBMITSERVER} || "localhost";
 my $team = $ENV{TEAM} || $ENV{USER} || $ENV{USERNAME};
 
 my $tmpdir = "$ENV{HOME}/" . $USERSUBMITDIR;
@@ -132,11 +152,13 @@ Example: $progname c.java
 The following options should not be needed, but are supported:
 
 For <server> use the servername or IP-address of the submit-server.
-The default value for <server> is taken from the environment variable
-'SUBMITSERVER', or 'localhost' if 'SUBMITSERVER' is not defined.
+The default value for <server> is defined internally or otherwise
+taken from the environment variable 'SUBMITSERVER', or 'localhost'
+if 'SUBMITSERVER' is not defined.
 
 For <team> use the login of the account, you want to submit for.
-The default value for <team> is your login name.
+The default value for <team> is taken from the environment variable
+'TEAM' or your login name if 'TEAM' is not defined.
 
 EOF
 my $usage2 = "Type '$progname --help' to get help.\n";
