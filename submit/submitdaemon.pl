@@ -65,7 +65,6 @@ sub logmsg {
 sub sendit;
 
 sub error {
-#	if ( -f $tmpfile ) { unlink $tmpfile; }
 	if ( $socket ) {
 		sendit "-error: @_";
 		$socket->close();
@@ -201,7 +200,7 @@ sub child {
 	if ( $? != 0 ) { error "adding to database: exitcode $?"; }
 	logmsg "added submission to database";
 
-	unlink($tmpfile);
+	unlink($tmpfile) or error "deleting '$tmpfile': $!";
 
 	sendit "+submission successful";
 	$socket->close();
