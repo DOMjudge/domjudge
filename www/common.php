@@ -17,9 +17,11 @@ function getSubmissions($key = null, $value = null) {
 	
 	$detailed = $key != 'team';
 
-	// we need two queries: one for all submissions, and one with the results for the valid ones.
-	// when key & value are supplied we're looking for the submissions of a specific team or judger,
-	// else the complete list.
+	/* We need two queries: one for all submissions, and one with the
+	 * results for the valid ones. When key & value are supplied we're
+	 * looking for the submissions of a specific team or judger, else
+	 * the complete list.
+	 */
 	if($key && $value) {
 		$res = $DB->q('SELECT s.submitid,s.team,s.probid,s.langid,s.submittime,s.judgerid,
 			t.name as teamname, p.name as probname, l.name as langname
