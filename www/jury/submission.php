@@ -13,7 +13,15 @@ require('menu.php');
 $id = (int)$_REQUEST['id'];
 if(!$id)	error ("Missing submission id");
 
+$iscorrect = (bool) $DB->q('VALUE SELECT count(judgingid) FROM judging WHERE submitid = %i
+	AND valid = 1 AND result = "correct"',
+	$id);
+
 if(isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge') {
+	if($iscorrect) {
+		error("Submission already judged as valid, not rejudging.");
+	}
+
 	$DB->q('UPDATE judging SET valid = 0 WHERE submitid = %i', $id);
 	$DB->q('UPDATE submission SET judgerid = NULL, judgemark = NULL WHERE submitid = %i', $id);
 }
@@ -47,12 +55,13 @@ if(!$submdata)	error ("Missing submission data");
 
 <?php
 getJudgings('submitid', $id);
+
 ?>
 <p>
 <form action="submission.php" method="post">
 <input type="hidden" name="id" value="<?=$id?>" />
 <input type="hidden" name="cmd" value="rejudge" />
-<input type="submit" value=" Rejudge Me! " />
+<input type="submit" value=" Rejudge Me! " <?=($iscorrect?'disabled="disabled "':'')?>/>
 </form>
 
 <?php
