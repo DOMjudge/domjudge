@@ -200,8 +200,9 @@ sub child {
 	
 	# Check with database for correct parameters and then
 	# add a database entry for this file.
-	system(("./submit_db.php",$team,$ip,$problem,$language,basename($tmpfile)));
-	if ( $? != 0 ) { error "adding to database: exitcode $?"; }
+	my $stderr = readpipe ("./submit_db.php $team $ip $problem $language ".basename($tmpfile)." 2>&1 1>/dev/null");
+	$stderr =~ s/^submit_db: //;
+	if ( $? != 0 ) { error ($stderr); }
 	logmsg($LOG_INFO,"added submission to database");
 
 	unlink($tmpfile) or error "deleting '$tmpfile': $!";
@@ -218,6 +219,8 @@ sub child {
 
 open($loghandle,">> $logfile") or error "opening logfile '$logfile': $!";
 $loghandle->autoflush(1);
+
+### TODO: checken of SUBMITSERVER overeenkomt met localhost ###
 
 logmsg($LOG_NOTICE,"server started");
 logmsg($LOG_DEBUG,
