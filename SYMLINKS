@@ -5,7 +5,7 @@ required for DOMjudge to operate
 www/jury/style.css -> ../style.css
 www/team/style.css -> ../style.css
 www/public/style.css -> ../style.css
-
+doc/systemconfig.tex -> ../etc/config.tex
 
 
 $Id$
