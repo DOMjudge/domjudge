@@ -7,6 +7,7 @@
  */
 
 require('init.php');
+include('menu.php');
 $title = 'Clarification Request';
 
 unset($send);
@@ -16,7 +17,7 @@ if (isset($_REQUEST['submit'])
 	$respid = $DB->q('RETURNID INSERT INTO clar_request (cid, submittime, login, body)
 		VALUES (%i, now(), %s, %s)', getCurContest(), $login, $_REQUEST['request']);
 	$send = true;
-	$refresh = '5;url=index.php';
+	$refresh = '5;url=clarifications.php';
 }
 
 include('../header.php');
