@@ -4,7 +4,7 @@
 
    Based on submitdaemon.pl by Eelco Dolstra.
    
-   $Id$
+   $Id: submitdaemon.c 437 2004-08-26 20:38:29Z nkp0405 $
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

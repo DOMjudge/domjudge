@@ -1,7 +1,7 @@
-all: daemon client
+CFLAGS = -Wall -O2
+TARGETS = submit submitdaemon
 
-daemon:
-	g++ -Wall submitdaemon.c -o submitdaemon
+all: $(TARGETS)
 
-client:
-	g++ -Wall submit.c -o submit
+$(TARGETS): %: %.cc submitcommon.h ../etc/config.h ../lib/*.h
+	$(CXX) $(CFLAGS) $(CXXFLAGS) $< -o $@
