@@ -1,3 +1,7 @@
-all:
+daemon:
 	g++ -Wall submitdaemon.c -o submitdaemon
-	g++ -Wall submit.c       -o submit
+
+client:
+	g++ -Wall submit.c -o submit
+
+all: daemon client
