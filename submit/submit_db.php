@@ -11,12 +11,13 @@
  *
  * $Id$
  */
+	require ('../etc/config.php');
+
 	define ('SCRIPT_ID', 'submit_db');
 	define ('LOGFILE', LOGDIR.'/submit.log');
-	
-	require ('../etc/config.php');
-	require ('../php/init.php');
 
+	require ('../php/init.php');
+	
 	// every file written has to be in 0600 filemode
 	umask(0177);
 
@@ -76,7 +77,8 @@
 	$tofile = basename($tofile);
 
 	if ( ! copy(INCOMINGDIR."/$file", SUBMITDIR."/$tofile") ) {
-		error("Could not copy '".INCOMINGDIR."/".$file."' to '".SUBMITDIR."/".$tofile."'");
+		error("Could not copy '".INCOMINGDIR."/".$file.
+		                "' to '".SUBMITDIR."/".$tofile."'");
 	}
 
 	// Insert submission into the database	
