@@ -1,8 +1,7 @@
 /* $Id$ */
 
 body {
-	color: black;
-	background-color: white;
+	color: black; background-color: white;
 	font-family: sans-serif;
 }
 
@@ -28,18 +27,16 @@ a:active          { color: red;    }
 .teamid, .filename, .hostname { font-family: monospace; }
 
 #menutop a {
-	font-weight: bold;
+	font-weight: bold; text-decoration: none;
 	background-color: #FFFFF0;
 	border: 1px solid black;
-	text-decoration: none;
 	margin: 2px; padding: 2px; padding-left: 5px; padding-right: 5px;
 }
 #clock {
 	position: absolute; right: 1ex; top: 1ex;
 	font-size: small; font-family: monospace;
+	border: 1px dashed #ccc; padding: 4px;
 	color: gray;
-	border: 1px dashed #ccc;
-    padding: 4px;
 }
 
 .highlight { background-color: yellow; font-size: large; }
@@ -57,33 +54,32 @@ a:active          { color: red;    }
 	border-right: 1px solid gray; border-bottom: 1px solid gray;
 }
 
-/* this doesn't work? */
-.scoreboard { border: 1px solid black; }
-.score_correct {
-	background: #33FF66;
-}
-.score_incorrect {
-	background: #FF6666;
-}
-.score_neutral {
-	background: white;
-}
-#scorenumcorrect, #scoretotaltime {
-	text-align: right;
-}
-.scoreboard_summary {
+.scoreboard			{ border-collapse: collapse;		}
+.scoreboard td		{ font-size: small;					}
+.scoreboard tr		{ border-bottom: 1px solid silver;	}
+.scoreboard td,th	{ border-right:  1px solid black;	}
+#scoreheader		{ border-bottom: 2px solid black;	}
+.score_correct		{ background: #33FF66;	}
+.score_incorrect	{ background: #FF6666;	}
+.score_neutral		{ background: white;	}
+
+#scoresolv,#scoretotal { width: 5em; }
+.scorenc,.scorett { text-align: right; }
+.scoreprob { width: 7em; }
+
+#scoresummary {
 	border-top: 2px solid black;
+	border-bottom: none;
+	font-variant: small-caps;
 }
-/* this doesn't work? */
-td.scoreboard {
-	text-align: right;	
+#scorethisisme .scoretn {
+	background: yellow;
+	font-weight: bold;
 }
 
 #lastmod {
-	color: blue;
-	position: absolute; right: 1ex;
-	font-size: x-small;
-	margin-top: 1em;
+	color: gray; font-size: x-small;
+	position: absolute; right: 1ex; margin-top: 1em;
 }
 
 /* backgrounds for categories */

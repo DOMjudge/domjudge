@@ -239,7 +239,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	echo "<h1>Scoreboard ".htmlentities($contdata['contestname'])."</h1>\n\n";
 	echo "<h4>starts: ".printtime($contdata['starttime']) . ' - ends: ' .printtime($contdata['endtime'])."</h4>\n\n";
 
-	echo "<table class=\"scoreboard\" border=\"1\">\n";
+	echo "<table class=\"scoreboard\" cellpadding=\"3\">\n";
 
 
 	// get the teams and problems
@@ -249,14 +249,14 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		FROM problem WHERE allow_submit = 1 ORDER BY probid');
 
 
-	echo "<colgroup><col id=\"scoreteamname\" /><col id=\"scorenumcorrect\" /><col id=\"scoretotaltime\" />";
+	echo "<colgroup><col id=\"scoreteamname\" /><col id=\"scoresolv\" /><col id=\"scoretotal\" />";
 	for($i = 0; $i < count($probs); $i++) {
-		echo "<col />";
+		echo "<col class=\"scoreprob\" />";
 	}
 	echo "</colgroup>\n";
 
-	echo "<tr><th>TEAM</th>";
-	echo "<th>#correct</th><th>time</th>\n";
+	echo "<tr id=\"scoreheader\"><th>TEAM</th>";
+	echo "<th>solved</th><th>time</th>\n";
 	foreach($probs as $pr) {
 		echo "<th title=\"".htmlentities($pr['name'])."\">".htmlentities($pr['probid'])."</th>";
 	}
@@ -344,9 +344,10 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 		// team name, total correct, total time
 		echo "<tr" . (@$myteamid == $team ? ' id="scorethisisme"':'')
-			." class=\"category" . $totals['category'] . "\"><td>".htmlentities($TEAMNAMES[$team])
-			."</td><td>"
-			.$totals['num_correct']."</td><td>".$totals['total_time']."</td>";
+			." class=\"category" . $totals['category'] . "\"><td class=\"scoretn\">"
+			.htmlentities($TEAMNAMES[$team])
+			."</td><td class=\"scorenc\">"
+			.$totals['num_correct']."</td><td class=\"scorett\">".$totals['total_time']."</td>";
 
 		$SUMMARY['num_correct'] += $totals['num_correct'];
 		$SUMMARY['total_time']  += $totals['total_time'];
@@ -380,11 +381,12 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	}
 
 	// print a summaryline
-	echo "\n<tr class=\"scoreboard_summary\"><td>Summary</td>";
-	echo "<td>".$SUMMARY['num_correct']."</td><td>".$SUMMARY['total_time']."</td>";
+	echo "\n<tr id=\"scoresummary\"><td>Summary</td>";
+	echo "<td class=\"scorenc\">".$SUMMARY['num_correct']."</td><td class=\"scorett\">".
+		$SUMMARY['total_time']."</td>";
 	foreach($probs as $pr) {
-		echo "<td>".$SUMMARY[$pr['probid']]['submissions'].'/'.$SUMMARY[$pr['probid']]['correct'].
-			'/'.( isset($SUMMARY[$pr['probid']]['times']) ? min(@$SUMMARY[$pr['probid']]['times']) : 0)."</td>";
+		echo "<td>".$SUMMARY[$pr['probid']]['submissions'].' / '.$SUMMARY[$pr['probid']]['correct'].
+			' / '.( isset($SUMMARY[$pr['probid']]['times']) ? min(@$SUMMARY[$pr['probid']]['times']) : '-')."</td>";
 	}
 	echo "</tr>\n\n";
 
