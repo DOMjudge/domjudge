@@ -4,6 +4,15 @@ AuthType Basic
 	order deny,allow
 	deny from all
 	allow from 192.168.1.0/24
+
+# *.students.cs.uu.nl
+#	allow from 131.211.83.0/24
+
+# 4 jury compu's tijdens test
+	allow from 131.211.83.131
+	allow from 131.211.83.133
+	allow from 131.211.83.134
+	allow from 131.211.83.135
 # peter
 	allow from 80.100.101.197
 # thijs
