@@ -34,8 +34,11 @@ foreach($data as $row) {
 ?>
 </table>
 </p>
-<?php
 
-echo "<p><a href=\"../public/\">Scoreboard</a></p>\n\n";
+<p><a href="clar_request.php">Request Clarification</a></p>
+
+<p><a href="../public/">Scoreboard</a></p>
+
+<?php
 
 require('../footer.php');
