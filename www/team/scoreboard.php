@@ -11,8 +11,9 @@ $refresh = '30;url=' . getBaseURI() . 'team/scoreboard.php';
 $title = 'Scoreboard';
 include('../header.php');
 include('menu.php');
+require('../scoreboard.php');
 
-// call the general putScoreBoard function from common.php
+// call the general putScoreBoard function from scoreboad.php
 putScoreBoard($login);
 
 include('../footer.php');

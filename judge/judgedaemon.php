@@ -142,6 +142,7 @@ while ( TRUE ) {
 	}
 	$result = $EXITCODES[$retval];
 
+	// NOTE: START TRANSACTION
 	// pop the result back into the judging table
 	$DB->q('UPDATE judging
 		SET endtime = NOW(), result = %s,
@@ -154,6 +155,14 @@ while ( TRUE ) {
 		getFileContents( $tempdir . '/error.out' ),
 		$judgingid, $myhost);
 
+	// recalculate the scoreboard cell (team,problem) after this judging
+	calcScoreRow($cid, $row['team'], $row['probid']);
+
+	// END TRANSACTION
+	// this should really be a transaction. what if something crashes between the update
+	// and calcScoreRow? Then the scoreboard is in an inconsistent state compared to the
+	// submissions.
+	
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
 	if ( $result == 'correct' ) {

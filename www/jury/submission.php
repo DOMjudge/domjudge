@@ -14,26 +14,34 @@ require('menu.php');
 
 if ( ! $id ) error ("Missing submission id");
 
-$iscorrect = (bool) $DB->q('VALUE SELECT count(judgingid) FROM judging WHERE submitid = %i
-	AND valid = 1 AND result = "correct"', $id);
-
-if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
-	if ( $iscorrect ) error("Submission already judged as valid, not rejudging.");
-
-	$DB->q('UPDATE judging SET valid = 0 WHERE submitid = %i', $id);
-	$DB->q('UPDATE submission SET judgerid = NULL, judgemark = NULL WHERE submitid = %i', $id);
-}
-
-echo "<h1>Submission s$id</h1>\n\n";
-
 $submdata = $DB->q('MAYBETUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.sourcefile,
-	t.name as teamname, l.name as langname, p.name as probname, c.contestname
+	t.name as teamname, l.name as langname, p.name as probname, c.cid, c.contestname
 	FROM submission s LEFT JOIN team t ON (t.login=s.team)
 	LEFT JOIN problem p ON (p.probid=s.probid) LEFT JOIN language l ON (l.langid=s.langid)
 	LEFT JOIN contest c ON (c.cid = s.cid)
 	WHERE submitid = %i', $id);
 
 if ( ! $submdata ) error ("Missing submission data");
+
+$iscorrect = (bool) $DB->q('VALUE SELECT count(judgingid) FROM judging WHERE submitid = %i
+	AND valid = 1 AND result = "correct"', $id);
+
+if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
+	if ( $iscorrect ) error("Submission already judged as valid, not rejudging.");
+
+	// START TRANSACTION
+	$DB->q('UPDATE judging SET valid = 0 WHERE submitid = %i', $id);
+	$DB->q('UPDATE submission SET judgerid = NULL, judgemark = NULL WHERE submitid = %i', $id);
+
+	calcScoreRow($submdata['cid'], $submdata['team'], $submdata['probid']);
+	// END TRANSACTION
+
+	header('Location: ' . getBaseURI() . 'jury/submission.php?id=' . urlencode($id) ) ;
+	exit;
+}
+
+echo "<h1>Submission s$id</h1>\n\n";
+
 ?>
 
 <table>
