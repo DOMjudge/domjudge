@@ -18,7 +18,7 @@ echo "<table>
 while($row = $res->next()) {
 	echo "<tr".
 		( $row['allow_judge'] ? '': ' class="invalid"').
-		"><td>".$row['langid'].
+		"><td><a href=\"language.php?id=".$row['langid']."\">".$row['langid']."</a>".
 		"</td><td>".htmlentities($row['name']).
 		"</td><td><tt>.".$row['extension']."</tt>".
 		"</td><td align=\"center\">".$row['allow_judge'].
