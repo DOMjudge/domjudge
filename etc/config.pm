@@ -1,27 +1,26 @@
 # Configuration file for perl scripts
-# Include in scripts with 'require "<filename>";'
-package config;
+
+# Include in scripts with 'BEGIN { require "<filename>";'
 
 # Globally require perl version
 require 5.002;
 
-# Export all variable definitions to user namespace
-require Exporter;
-@ISA = qw(Exporter);
-@EXPORT = qw($SYSTEM_ROOT $OUTPUT_ROOT $submitport $submitclientdir $submitserverdir);
-
 # TCP port on which submitdaemon listens
-$submitport = 9147;
+our $submitport = 9147;
 
 # Root-paths for different parts of the system
-$SYSTEM_ROOT = "/home/cies/nkp0405/system/svn";
-$OUTPUT_ROOT = "/home/cies/nkp0405/system/systest";
+our $SYSTEM_ROOT = "/home/cies/nkp0405/systeem/svn/jury";
+our $OUTPUT_ROOT = "/home/cies/nkp0405/systeem/systest";
 
 # Directory where submit-client puts files for sending (relative to $HOME)
-$submitclientdir = ".submit";
+our $submitclientdir = ".submit";
 
 # Directory where submitdaemon puts received files
-$submitserverdir = $OUTPUT_ROOT . "/submit";
+our $submitserverdir = $OUTPUT_ROOT . "/submit";
+
+# For extra clarity in return statements (perl specific)
+our $success = 1;
+our $failure = 0;
 
 # End of configuration file: end with true (needed by 'require')
 1;
