@@ -1,0 +1,7 @@
+AuthName "Jury Only Area"
+AuthType Basic
+<Limit GET POST>
+	order deny,allow
+	deny from all
+	allow from 192.168.1.0/24
+</Limit>
