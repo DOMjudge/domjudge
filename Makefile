@@ -1,4 +1,4 @@
-all: config build
+all: config build documentation
 
 export TOPDIR = $(PWD)
 -include $(TOPDIR)/Makefile.global
@@ -9,6 +9,9 @@ build: config
 
 config:
 	$(MAKE) -C etc config
+
+documentation:
+	$(MAKE) -C doc documentation
 
 dvi:
 	$(MAKE) -C doc dvi
@@ -21,4 +24,4 @@ REC_TARGETS = build clean
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 
-.PHONY: dvi
+.PHONY: dvi documentation

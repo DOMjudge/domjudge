@@ -1,4 +1,4 @@
-all: build
+all: documentation
 
 -include $(TOPDIR)/Makefile.global
 
@@ -12,7 +12,7 @@ LATEXOPTIONS = --file-line-error-style
 
 CONFIGDIR = ../etc
 
-build: ps pdf
+documentation: ps pdf
 
 dvi: $(TARGETSDVI)
 # Clean-up generated tex-files afterwards:
@@ -48,4 +48,4 @@ texclean:
 clean: texclean
 	-rm -f $(TARGETSPS) $(TARGETSPDF)
 
-.PHONY: dvi ps pdf texclean
+.PHONY: documentation dvi ps pdf texclean
