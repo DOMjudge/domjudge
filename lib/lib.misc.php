@@ -47,6 +47,7 @@ function getCurContest() {
  */
 function addUrl($url, $keyvalue, $encode = TRUE)
 {
+	if ( empty($keyvalue) ) return $url;
 	$separator = (strrpos($url, '?')===False) ? '?' : ( $encode ? '&amp;' : '&');
 	return $url . $separator . $keyvalue;
 }
