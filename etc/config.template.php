@@ -18,6 +18,7 @@
 
 /** Loglevels */
 define_syslog_variables();
+error_reporting(E_ALL);
 
 /** Possible exitcodes from testsol and their meaning */
 $EXITCODES = array (
