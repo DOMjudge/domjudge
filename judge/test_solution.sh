@@ -91,15 +91,6 @@ function error ()
 # Global configuration
 source `dirname $0`/../etc/config.sh
 
-# Exit/error codes:
-E_CORRECT=0
-E_COMPILE=1
-E_TIMELIMIT=2
-E_RUNERROR=3
-E_OUTPUT=4
-E_ANSWER=5
-E_INTERN=127 # Internal script error
-
 # Logging:
 LOGFILE="$LOGDIR/judge.`hostname --short`.log"
 LOGLEVEL=$LOG_DEBUG
