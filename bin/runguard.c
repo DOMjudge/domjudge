@@ -279,7 +279,17 @@ int main(int argc, char **argv)
 	/* Command to be executed */
 	cmdname = argv[optind];
 	cmdargs = argv+optind;
-	
+
+	/* Check that new uid is in list of valid uid's.
+	   This must be done before chroot for /etc/passwd looku.p */
+	if ( use_user ) {
+		valid_users = strdup(VALID_USERS);
+		for(ptr=strtok(valid_users,","); ptr!=NULL; ptr=strtok(NULL,",")) {
+			if ( runuid==userid(ptr) ) break;
+		}
+		if ( ptr==NULL || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
+	}
+
 	/* Set root-directory and change directory to there. */
 	if ( use_root ) {
 		/* Small security issue: when running setuid-root, people can find
@@ -301,13 +311,6 @@ int main(int argc, char **argv)
 	
 	/* Set user-id (must be root for this). */
 	if ( use_user ) {
-		/* Check that new uid is in list of valid uid's */
-		valid_users = strdup(VALID_USERS);
-		for(ptr=strtok(valid_users,","); ptr!=NULL; ptr=strtok(NULL,",")) {
-			if ( runuid==userid(ptr) ) break;
-		}
-		if ( ptr==NULL || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
-		
 		if ( setuid(runuid) ) error(errno,"cannot set user id to `%d'",runuid);
 		if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped");
 		verbose("using user id `%d'",runuid);
