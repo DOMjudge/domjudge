@@ -178,7 +178,8 @@ function putResponse($id, $showReq = true, $teamlink = true) {
 	.($teamlink?'</a>':'')
 	:'ALL'?></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($respdata['submittime']) ?></td></tr>
-<tr><td valign="top">Response:</td><td class="filename"><pre class="output_text"><?=nl2br(htmlspecialchars($respdata['body'])) ?></pre></td></tr>
+<tr><td valign="top">Response:</td><td class="filename"><pre class="output_text"><?=
+	wordwrap(htmlspecialchars($respdata['body'])) ?></pre></td></tr>
 </table>
 <?php
 }
@@ -214,7 +215,8 @@ function putRequest($id, $login = NULL) {
 <?=!isset($login)?'</a>':''?>
 </td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($reqdata['submittime']) ?></td></tr>
-<tr><td valign="top">Request:</td><td class="filename"><pre class="output_text"><?=htmlspecialchars($reqdata['body']) ?></pre></td></tr>
+<tr><td valign="top">Request:</td><td class="filename"><pre class="output_text"><?=
+	wordwrap(htmlspecialchars($reqdata['body'])) ?></pre></td></tr>
 </table>
 
 <?
@@ -406,8 +408,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	} else {
 		$lastupdate = time();
 	}
-	echo "<div id=\"lastmod\">Last Update: " . date('j M Y H:i', 
-		$lastupdate ) . "</div>\n\n";
+	echo "<span id=\"lastmod\">Last Update: " . date('j M Y H:i', 
+		$lastupdate ) . "</span>\n\n";
 
 	return;
 }

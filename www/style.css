@@ -80,9 +80,10 @@ td.scoreboard {
 }
 
 #lastmod {
-	color:	blue;
-	text-align: right;
+	color: blue;
+	position: absolute; right: 1ex;
 	font-size: x-small;
+	margin-top: 1em;
 }
 
 /* backgrounds for categories */
