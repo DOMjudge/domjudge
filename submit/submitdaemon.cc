@@ -58,8 +58,8 @@ using namespace std;
 /* Common send/receive functions */
 #include "submitcommon.h"
 
+#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
 #define PROGRAM "submitdaemon"
-#define VERSION "0.1"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
 
 #define BACKLOG 32      /* how many pending connections queue will hold */
@@ -95,7 +95,7 @@ socklen_t sin_size;
 
 void version()
 {
-	printf("%s -- version %s\n",PROGRAM,VERSION);
+	printf("%s %s\n",DOMJUDGE_PROGRAM,PROGRAM);
 	printf("Written by %s\n\n",AUTHORS);
 	printf("%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n",PROGRAM);
 	printf("are welcome to redistribute it under certain conditions.  See the GNU\n");
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 	
 	if ( argc>optind ) error(0,"non-option arguments given");
 
-	logmsg(LOG_NOTICE,"server started");
+	logmsg(LOG_NOTICE,"server started [%s]", DOMJUDGE_PROGRAM);
 
 	create_server();
 	logmsg(LOG_INFO,"listening on port %d/tcp", port);

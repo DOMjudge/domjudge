@@ -7,9 +7,12 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>'."\n";
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en">
 <head>
-<?php if(isset($refresh)) { echo '<meta http-equiv="refresh" content="'.$refresh.'">'; } ?>
+<?php
+	echo "\t<!-- DOMjudge version " . DOMJUDGE_VERSION . " -->\n";
 
-<title><?php echo $title; ?></title>
-<link rel="stylesheet" href="style.css" type="text/css" />
+	if(isset($refresh)) { echo "\t<meta http-equiv=\"refresh\" content=\"$refresh\">\n"; }
+	?>
+	<title><?php echo $title; ?></title>
+	<link rel="stylesheet" href="style.css" type="text/css" />
 </head>
 <body>

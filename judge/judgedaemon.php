@@ -23,7 +23,7 @@ require ('../lib/init.php');
 
 $verbose = LOG_INFO;
 
-logmsg(LOG_NOTICE, "Judge started on $myhost");
+logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
 // Seed the random generator
 list($usec,$sec)=explode(" ",microtime());
