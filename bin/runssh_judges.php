@@ -14,16 +14,7 @@
 
 	require ('../lib/init.php');
 
-/*
-	define('PHP_LIB_PATH', SYSTEM_ROOT.'/lib');
-	require(PHP_LIB_PATH . '/use_db_jury.php');
-	require(PHP_LIB_PATH . '/lib.error.php');
-	require(PHP_LIB_PATH . '/lib.misc.php');
-*/
-
-//	exit;
-
-	$argv = $GLOBALS['argv'];
+	$argv = $_SERVER['argv'];
 	
 	$program = @$argv[1];
 

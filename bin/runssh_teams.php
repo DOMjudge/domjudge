@@ -14,7 +14,7 @@
 
 	require ('../lib/init.php');
 	
-	$argv = $GLOBALS['argv'];
+	$argv = $_SERVER['argv'];
 
 	$program = @$argv[1];
 
