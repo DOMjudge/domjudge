@@ -121,7 +121,19 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		$SUMMARY['total_time']  += $totals['total_time'];
 
 		// for each problem
-		foreach( $THEMATRIX[$team] as $prob => $pdata ) {
+		foreach ( array_keys($probs) as $prob ) {
+
+			// if we have scores, use them, else, provide the defaults
+			// (happens when nothing submitted for this problem,team yet
+			if ( isset ( $THEMATRIX[$team][$prob] ) ) {
+				$pdata = $THEMATRIX[$team][$prob];
+			} else {
+				$pdata = array ( 'submitted' => 0,
+					'correct' => 0,
+					'time' => 0,
+					'penalty' => 0);
+			}
+
 			echo '<td class="';
 			// CSS class for correct/incorrect/neutral results
 			if( $pdata['correct'] ) { 
@@ -138,6 +150,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 				echo " (" . $pdata['time'] . ' + ' . $pdata['penalty'] . ")";
 			}
 			echo "</td>";
+			
+			// update summary data for the bottom row
 			@$SUMMARY[$prob]['submissions'] += $pdata['submitted'];
 			@$SUMMARY[$prob]['correct'] += ($pdata['correct'] ? 1 : 0);
 			if( $pdata['time'] > 0 ) {
@@ -152,6 +166,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	echo "\n<tr id=\"scoresummary\"><td>Summary</td>";
 	echo '<td class="scorenc">' . $SUMMARY['num_correct'] . '</td>' .
 	     '<td class="scorett">' . $SUMMARY['total_time'] . '</td>';
+
 	foreach( $probs as $pr ) {
 		echo '<td>' . $SUMMARY[$pr['probid']]['submissions'] . ' / ' .
 			$SUMMARY[$pr['probid']]['correct'] . ' / ' .
