@@ -10,7 +10,10 @@ function getFileContents($filename) {
 	if ( ! file_exists($filename) ) return '';
 	$fh = fopen($filename,'r');
 	if ( ! $fh ) error("Could not open $filename for reading");
-	return fread($fh, 50000);
+
+	$note = (filesize($filename) > 50000 ? "\n[output truncated after 50.000 B]\n" : '');
+	
+	return fread($fh, 50000) . $note;
 }
 
 /**
