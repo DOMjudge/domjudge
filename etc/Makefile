@@ -10,6 +10,7 @@ TEMPFILEDIR = ../bin
 
 PASSWD_FILE = passwords.php
 
+.PHONY: config
 config: $(TEMPFILEDIR)/tempfile $(CONFIGS)
 
 $(CONFIGS): config.%: config.template.% global.cfg $(TEMPFILEDIR)/tempfile
