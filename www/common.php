@@ -65,7 +65,42 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 	}
 	echo "</table>\n\n";
 
+	return;
 }
+
+
+/**
+ * Outputs a list of judgings, limited by key=value
+ */
+function getJudgings($key, $value) {
+	global $DB;
+
+	$res = $DB->q('SELECT j.*,judger.name FROM judging j NATURAL JOIN judger
+		WHERE '.$key.' = %s AND cid = %i ORDER BY starttime DESC',
+		$value, getCurCont() );
+
+	if( $res->count() == 0 ) {
+		echo "<p><em>No judgings.</em></p>\n\n";
+	} else {
+		echo "<table>\n".
+			"<tr><th>ID</th><th>start</th><th>end</th><th>judge</th><th>result</th><th>valid</th>\n";
+		while( $jud = $res->next() ) {
+			echo "<tr" . ( $jud['valid'] ? '':' class="disabled"' ).
+				"><td><a href=\"judging.php?id=".(int)$jud['judgingid'] . '">' .
+					(int)$jud['judgingid'] . "</a>" .
+				"</td><td>".printtime($jud['starttime']) .
+				"</td><td>".printtime(@$jud['endtime']) .
+				"</td><td>".printhost(@$jud['name']) .
+				"</td><td>".printresult(@$jud['result'], $jud['valid']) .
+				"</td><td align=\"center\">".printyn($jud['valid']) .
+				"</td></tr>\n";
+		}
+		echo "</table>\n\n";
+	}
+
+	return;
+}
+
 
 /**
  * Will return either the current contest, or else the upcoming one

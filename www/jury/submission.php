@@ -46,39 +46,13 @@ if(!$submdata)	error ("Missing submission data");
 <h3>Judgings</h3>
 
 <?php
-$hasfinal = FALSE;
-
-$judgedata = $DB->q('SELECT * FROM judging LEFT JOIN judger USING(judgerid)
-	WHERE submitid = %i ORDER BY starttime DESC', $id);
-
-if($judgedata->count() == 0) {
-	echo "<em>Submission still queued</em>";
-} else {
-	echo "<table>\n";
-	echo "<tr><th>ID</th><th>start</th><th>end</th><th>judge</th><th>result</th><th>valid</th></tr>\n";
-	while($jrow = $judgedata->next()) {
-		$jid = (int)$jrow['judgingid'];
-		echo "<tr" . ($jrow['valid'] ? '' : " class=\"disabled\"") .'>';
-		echo "<td align=\"right\"><a href=\"judging.php?id=".$jid.
-			"\">".$jid."</a>".
-		"</td><td>".printtime($jrow['starttime']).
-		"</td><td>".printtime(@$jrow['endtime']).
-		"</td><td>".printhost($jrow['name']).
-		"</td><td>".printresult(@$jrow['result'], $jrow['valid']).
-		"</td><td align=\"right\">".printyn($jrow['valid']).
-		"</td></tr>\n";
-		
-		if($jrow['valid'] == 1) $hasfinal = TRUE;
-	}
-	echo "</table>\n\n";
-}
-
+getJudgings('submitid', $id);
 ?>
 <p>
 <form action="submission.php" method="post">
 <input type="hidden" name="id" value="<?=$id?>" />
 <input type="hidden" name="cmd" value="rejudge" />
-<input type="submit" value=" Rejudge Me! " <?=($hasfinal?'':'disabled="1" ')?>/>
+<input type="submit" value=" Rejudge Me! " />
 </form>
 
 <?php

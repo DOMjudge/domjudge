@@ -35,25 +35,8 @@ $row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $id);
 
 <?php
 
-$res = $DB->q('SELECT * FROM judging WHERE judgerid = %i AND cid = %i ORDER BY starttime DESC',
-	$id, getCurCont() );
+getJudgings('j.judgerid', $row['judgerid']);
 
-if( $res->count() == 0 ) {
-	echo "<em>Nothing judged.</em>";
-} else {
-	echo "<table>\n\n".
-		"<tr><th>ID</th><th>start</th><th>end</th><th>result</th><th>valid</th>\n";
-	while( $jud = $res->next() ) {
-		echo "<tr".($jud['valid'] ? '':' class="disabled"').
-			"><td><a href=\"judging.php?id=".(int)$jud['judgingid'].'">'.
-			(int)$jud['judgingid']."</a></td><td>".printtime($jud['starttime']).
-			"</td><td>".printtime(@$jud['endtime']).
-			"</td><td>".printresult(@$jud['result'], $jud['valid']).
-			"</td><td align=\"center\">".printyn($jud['valid']).
-			"</td></tr>\n";
-	}
-	echo "</table>";
-}
 $cmd = ($row['active'] == 1?'deactivate':'activate');
 ?>
 <p>
