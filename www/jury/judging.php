@@ -12,13 +12,14 @@ $title = 'Judging j'.@$id;
 require('../header.php');
 require('menu.php');
 
-if(!$id)	error ("Missing judging id");
+if ( ! $id ) error ("Missing judging id");
 
-$jdata = $DB->q('TUPLE SELECT j.*,s.*, c.contestname
-	FROM judging j LEFT JOIN submission s USING(submitid)
+$jdata = $DB->q('TUPLE SELECT j.*,s.*,t.*, c.contestname
+	FROM judging j
+	LEFT JOIN submission s USING(submitid)
+	LEFT JOIN team t ON(t.login=s.team)
 	LEFT JOIN contest c ON(c.cid=j.cid)
-	WHERE judgingid = %i',
-	$id);
+	WHERE judgingid = %i', $id);
 
 $sid = (int)$jdata['submitid'];
 
@@ -37,7 +38,10 @@ if(@$jdata['endtime']) {
 <tr><td>Submission:</td><td>
 <a href="submission.php?id=<?=$sid.'">s'.$sid.' / <span class="teamid">'.
 	$jdata['team'].	'</span> / '. htmlspecialchars($jdata['probid'].' / '.$jdata['langid'])?></a>
-	in <?=htmlentities($jdata['contestname'])?></td></tr>
+<tr><td>Contest:</td><td><?=htmlentities($jdata['contestname'])?></td></tr>
+<tr><td>Team:</td><td><a href="team.php?id=<?=urlencode($jdata['team']).
+	'"><span class="teamid">'. htmlspecialchars($jdata['team'])."</span>: ".
+	htmlentities($jdata['name'])?></a></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($jdata['submittime']) .' (queued for '.
 	printtimediff(strtotime($jdata['submittime']), $unix_start) .
 	')'?></td></tr>
