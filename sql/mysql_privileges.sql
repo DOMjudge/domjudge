@@ -1,17 +1,17 @@
--- Privileges for the DOMjudge tables.
--- This assumes databasename 'domjudge'
--- $Id$
+# Privileges for the DOMjudge tables.
+# This assumes databasename 'domjudge'
+# $Id$
 
--- Add users and passwords
--- Change these default passwords, and change them in etc/passwords.php too.
+# Add users and passwords
+# Change these default passwords, and change them in etc/passwords.php too.
 INSERT INTO user VALUES ('localhost','domjudge_jury',PASSWORD('jury'),'N','N','N','N','N','N','N','N','N','N','N','N','N','N');
 INSERT INTO user VALUES ('localhost','domjudge_team',PASSWORD('team'),'N','N','N','N','N','N','N','N','N','N','N','N','N','N');
 INSERT INTO user VALUES ('localhost','domjudge_public',PASSWORD('public'),'N','N','N','N','N','N','N','N','N','N','N','N','N','N');
 
--- Juryaccount can do anything to the database
+# Juryaccount can do anything to the database
 INSERT INTO db VALUES ('localhost','domjudge_jury','domjudge','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
 
--- Other privileges
+# Other privileges
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team','language','name',NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team','language','langid',NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team','problem','probid',NOW(),'Select');
@@ -40,11 +40,13 @@ INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','language
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','clar_response','domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','clar_request','domjudge@localhost',NOW(),'Select,Insert','');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','category','domjudge@localhost',NOW(),'Select','');
+INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','scoreboard_public','domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_public','category','domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_public','contest','domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_public','judging','domjudge@localhost',NOW(),'','Select');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_public','problem','domjudge@localhost',NOW(),'','Select');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_public','submission','domjudge@localhost',NOW(),'','Select');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_public','team','domjudge@localhost',NOW(),'Select','');
+INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_public','scoreboard_public','domjudge@localhost',NOW(),'Select','');
 
 FLUSH PRIVILEGES;

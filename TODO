@@ -1,9 +1,3 @@
-- submit/webserver load: testing in live contest (42 teams) showed, that load
-  on the submit- and webserver can burst to 10+. Precise cause is unclear, but
-  can be related to the scoreboard generating a _lot_ of MySQL queries and/or
-  the scp-ing of submission files. A solution is to statically generate the
-  scoreboard or maybe split the submit/webserver task over two computers.
-
 - alive daemon: make a separate daemon, that checks whether all processes that
   should be running, are running and working correctly.
 
