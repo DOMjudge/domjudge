@@ -11,6 +11,6 @@ $title = 'Scoreboard';
 include('../header.php');
 include('menu.php');
 
-putScoreBoard($login);
+putScoreBoard();
 
 include('../footer.php');
