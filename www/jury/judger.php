@@ -9,8 +9,15 @@ require('init.php');
 $title = 'Judger';
 require('../header.php');
 
-$id = (int)$_GET['id'];
+$id = (int)$_REQUEST['id'];
+if(!$id)	error ("Missing judger id");
 
+if(isset($_POST['cmd'])) {
+	if($_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate') {
+		$DB->q('UPDATE judger SET active = %i WHERE judgerid = %i'
+		      ,($_POST['cmd'] == 'activate'?1:0), $id);
+	}
+}
 $row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $id);
 
 ?>
@@ -45,5 +52,13 @@ if( $res->count() == 0 ) {
 	}
 	echo "</table>";
 }
-
+$cmd = ($row['active'] == 1?'deactivate':'activate');
+?>
+<p>
+<form action="judger.php" method="post">
+<input type="hidden" name="id" value="<?=$id?>" />
+<input type="hidden" name="cmd" value="<?=$cmd?>" />
+<input type="submit" value=" <?=$cmd?> " />
+</form>
+<?
 require('../footer.php');
