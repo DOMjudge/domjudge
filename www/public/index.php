@@ -23,7 +23,7 @@ $probs = $DB->q('TABLE SELECT probid,name
 echo "<tr><th>TEAM</th>";
 echo "<th>#corr</th><th>time</th>\n";
 foreach($probs as $pr) {
-	echo "<th>".$pr['name']."</th>";
+	echo "<th>".htmlentities($pr['name'])."</th>";
 }
 echo "</tr>\n";
 
