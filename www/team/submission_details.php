@@ -13,8 +13,10 @@ include('../header.php');
 $sid = (int)$_GET['submitid'];
 
 // select also on teamid so we can only select our own submissions
-$row = $DB->q('MAYBETUPLE SELECT probid,submittime,langid,result,output_compile
+$row = $DB->q('MAYBETUPLE SELECT p.probid, p.name as probname,submittime,l.name as langname,
+					result,output_compile
 	FROM judging j LEFT JOIN submission s USING(submitid)
+		LEFT JOIN language l USING (langid) LEFT JOIN problem p ON(p.probid=s.probid)
 	WHERE j.submitid = %i AND team = %s AND valid = 1',
 	$sid, $login);
 
@@ -28,13 +30,14 @@ if(!$row) {
 
 <p>
 <table>
-<tr><td>Problem:</td><td><?=$row['probid']?></td></tr>
+<tr><td>Problem:</td><td><?=htmlentities($row['probname'].' ['.$row['probid'].']')?></td></tr>
 <tr><td>Submittime:</td><td><?=printtime($row['submittime'])?></td></tr>
-<tr><td>Language:</td><td><?=$row['langid']?></td></tr>
+<tr><td>Language:</td><td><?=htmlentities($row['langname'])?></td></tr>
 </table>
 
 <p>Status:
-<span class="<?=($row['result'] == 'correct'?'sol-correct':'sol-incorrect')?>"><?=$row['result']?></span></p>
+<span class="<?=($row['result'] == 'correct'?'sol-correct':'sol-incorrect')?>">
+<?=htmlspecialchars($row['result'])?></span></p>
 
 <h2>Compiler output:</h2>
 <?
