@@ -9,11 +9,7 @@ require('init.php');
 $title = 'Submissions';
 require('../header.php');
 
-if(isset($_POST['id'])) {
-	$id = (int)$_POST['id'];
-} else {
-	$id = (int)$_GET['id'];
-}
+$id = (int)$_REQUEST['id'];
 if(!$id)	error ("Missing submission id");
 
 if(isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge') {
