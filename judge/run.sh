@@ -28,6 +28,7 @@ PROCLIMIT="$1"; shift
 # Set some resource limits (for restricting the running solution)
 ulimit -c 0           # max. size of coredump files in kB
 ulimit -v $MEMLIMIT   # max. total memory usage in kB
+ulimit -s $MEMLIMIT   # max. stack size: set the same as max. memory usage
 ulimit -f $FILELIMIT  # max. size of created files in kB
 ulimit -u $PROCLIMIT  # max. no. processes
 
