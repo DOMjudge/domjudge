@@ -73,8 +73,9 @@
 		error("File '$file' not found in incoming directory (or not readable).");
 	}
 	if( filesize(INCOMINGDIR."/$file") > SOURCESIZE*1024 ) {
-		error("Submission file is larger than ".SOURCESIZE." KB."); 
+		error("Submission file is larger than ".SOURCESIZE." kB."); 
 	}
+
 	logmsg (LOG_INFO, "input verified");
 
 
