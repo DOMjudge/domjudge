@@ -138,9 +138,11 @@ int main(int argc, char **argv)
 		lang=strtok_r(NULL," ",&lang_ptr)) {
 
 		languages.push_back(vector<string>());
-		for(ext=strtok_r(lang,",",&ext_ptr); ext!=NULL;
+		ext=strtok_r(lang,",",&ext_ptr);
+		languages[languages.size()-1].push_back(string(ext));
+		
+		for(ext=strtok_r(NULL,",",&ext_ptr); ext!=NULL;
 			ext=strtok_r(NULL,",",&ext_ptr)) {
-
 			languages[languages.size()-1].push_back(stringtolower(ext));
 		}
 	}
@@ -264,9 +266,9 @@ int main(int argc, char **argv)
 
 		/* Check for matching file extension */
 		for(i=0; i<languages.size(); i++) {
-			for(j=0; j<languages[i].size(); j++) {
+			for(j=1; j<languages[i].size(); j++) {
 				if ( languages[i][j]==fileext && language.empty() ) {
-					language = languages[i][0];
+					language = languages[i][1];
 				}
 			}
 		}
@@ -385,6 +387,7 @@ exit(0);
 
 void usage()
 {
+unsigned i,j;
 printf("Usage: %s [OPTION]... FILENAME\n",progname);
 printf("Submit a solution for a problem.\n");
 printf("\n");
@@ -407,11 +410,12 @@ printf("in lower- or uppercase. When not specified, PROBLEM defaults to\n");
 printf("FILENAME excluding the extension.\n");
 printf("For example, 'c.java' will indicate problem 'C'.\n");
 printf("\n");
-printf("For LANGUAGE use one of the following in lower- or uppercase:\n");
-printf("   C:        c\n");
-printf("   C++:      cc, cpp, c++\n");
-printf("   Java:     java\n");
-printf("   Pascal:   pas\n");
+printf("For LANGUAGE use one of the following extensions in lower- or uppercase:\n");
+for(i=0; i<languages.size(); i++) {
+	printf("   %-10s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
+	for(j=2; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
+	printf("\n");
+}
 printf("The default for LANGUAGE is the extension of FILENAME.\n");
 printf("For example, 'c.java' wil indicate a Java solution.\n");
 printf("\n");
