@@ -44,7 +44,7 @@ if ( $res->count() == 0 ) {
 			"<td><a href=\"request.php?id=".$req['reqid']."\">q".$req['reqid']."</a></td>".
 			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($req['login']). "\">".
 				htmlspecialchars($req['login'])."</a></td>".
-			"<td>".printdate($req['submittime'])."</td>".
+			"<td>".printtime($req['submittime'])."</td>".
 			"<td><a href=\"request.php?id=".$req['reqid']."\">".
 				htmlspecialchars(str_cut($req['body'],50)).
 			"</a></td>".
