@@ -18,7 +18,7 @@ TESTDATA="$2"
 DIFFOUT="$3"
 
 # Test an exact match between program output and testdata output:
-diff -u0 $PROGRAM $TESTDATA >$DIFFOUT
+diff -U 0 $PROGRAM $TESTDATA >$DIFFOUT
 
 # Exit with failure, when diff reports internal errors:
 # Exitcode 1 means that differences were found!
