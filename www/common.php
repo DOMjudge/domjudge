@@ -291,6 +291,7 @@ function putScoreBoard($myteamid = null) {
 		$SCORES[$team['login']]['num_correct'] = $grand_total_correct;
 		$SCORES[$team['login']]['total_time'] = $grand_total_time;
 		$SCORES[$team['login']]['teamname'] = $TEAMNAMES[$team['login']];
+		$SCORES[$team['login']]['category'] = $team['category'];
 
 	}
 
@@ -302,7 +303,7 @@ function putScoreBoard($myteamid = null) {
 
 		// team name, total correct, total time
 		echo "<tr" . (@$myteamid == $team ? ' id="scorethisisme"':'')
-			."><td>".htmlentities($TEAMNAMES[$team])
+			." class=\"category" . $totals['category'] . "\"><td>".htmlentities($TEAMNAMES[$team])
 			."</td><td>"
 			.$totals['num_correct']."</td><td>".$totals['total_time']."</td>";
 		// for each problem
@@ -326,6 +327,14 @@ function putScoreBoard($myteamid = null) {
 		}
 		echo "</tr>\n";
 
+	}
+	echo "</table>\n\n";
+
+	$res = $DB->q('SELECT * FROM category ORDER BY catid');
+
+	echo "<table class=\"scoreboard_legend\"><tr><th>Legenda</th></tr>\n";
+	while($row = $res->next()) {
+		echo "<tr class=\"category" . $row['catid'] . "\"><td align=\"center\">" . $row['name'] . "</td></tr>";
 	}
 	echo "</table>\n\n";
 

@@ -57,7 +57,7 @@ a:active          { color: red;    }
 	border-right: 1px solid gray; border-bottom: 1px solid gray;
 }
 
-/* this does't work? */
+/* this doesn't work? */
 .scoreboard { border: 1px solid black; }
 .score_correct {
 	background: #33FF66;
@@ -68,7 +68,7 @@ a:active          { color: red;    }
 .score_neutral {
 	background: white;
 }
-/* this does't work? */
+/* this doesn't work? */
 td.scoreboard {
 	text-align: right;	
 }
@@ -78,3 +78,8 @@ td.scoreboard {
 	text-align: right;
 	font-size: x-small;
 }
+
+/* backgrounds for categories */
+.category1 { background: white; }
+.category2 { background: purple; }
+.category3 { background: yellow; }
