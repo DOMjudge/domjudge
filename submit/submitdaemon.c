@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 		error(errno,"setting child signal handler");
 	}
 	logmsg(LOG_DEBUG,"child signal handler installed");
-    
+	
     /* main accept() loop */
     while ( true ) {
         sin_size = sizeof(struct sockaddr_in);
@@ -395,7 +395,15 @@ int handle_client()
 	}
 
 	if ( ! WIFEXITED(status) ) {
-		senderror(client_fd,0,"submit_db failed with signal");
+		if ( WIFSIGNALED(status) ) {
+			senderror(client_fd,0,"submit_db terminated with signal %d",
+					  WTERMSIG(status));
+		}
+		if ( WIFSTOPPED(status) ) {
+			senderror(client_fd,0,"submit_db stopped with signal %d",
+					  WSTOPSIG(status));
+		}
+		senderror(client_fd,0,"submit_db aborted due to unknown error");
 	}
 	
 	logmsg(LOG_INFO,"added submission to database");
@@ -413,10 +421,22 @@ int handle_client()
  */
 void sigchld_handler(int sig)
 {
-	int exitpid, exitcode;
-	exitpid = wait(&exitcode);
-	logmsg(LOG_INFO,"child process %d exiting with exitcode %d",
-	       exitpid,exitcode);
+	pid_t pid;
+	int exitcode;
+	
+	pid = waitpid(0,&exitcode,WNOHANG);
+
+	if ( pid<=0 ) {
+		/* Don't react on "No child processes" or looping will occur
+		   due to childs from 'system' call */
+		if ( errno==ECHILD ) return;
+		warning(errno,"waiting for child, pid = %d, exitcode = %d",pid,exitcode);
+		system(SYSTEM_ROOT"/bin/beep "BEEP_ERROR" &");
+		return;
+	}
+	
+	logmsg(LOG_INFO,"child process %d exited with exitcode %d",pid,exitcode);
+
 	if ( exitcode==0 ) {
 		system(SYSTEM_ROOT"/bin/beep "BEEP_SUBMIT" &");
 	} else {
