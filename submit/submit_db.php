@@ -12,7 +12,7 @@
  * $Id$
  */
 	define ('SCRIPT_ID', 'submit_db');
-	define ('LOGFILE', 'submit');
+	define ('LOGFILE', LOGDIR.'/submit.log');
 	
 	require ('../etc/config.php');
 	require ('../php/init.php');
@@ -29,34 +29,37 @@
 	$lang = strtolower(@$argv[4]);
 	$file = @$argv[5];
 
+	logmsg(LOG_DEBUG, "arguments: '$team' '$ip' '$prob' '$lang' '$file'");
+
 
 	// Check 0: called correctly?
-	if(!$team)	error("No value for team.");
-	if(!$ip)	error("No value for IP.");
-	if(!$prob)	error("No value for Problem.");
-	if(!$lang)	error("No value for Language.");
-	if(!$file)	error("No value for Filename.");
+	if( ! $team ) error("No value for team.");
+	if( ! $ip   ) error("No value for IP.");
+	if( ! $prob ) error("No value for Problem.");
+	if( ! $lang ) error("No value for Language.");
+	if( ! $file ) error("No value for Filename.");
 
 	
 	// Check 1: is the contest still open?
-	if( ! $DB->q('VALUE SELECT starttime <= now() && endtime >= now() FROM contest') ) {
+	if( ! $DB->q('VALUE SELECT starttime <= now() &&
+	                           endtime   >= now() FROM contest') ) {
 		error("The contest is closed, no submissions accepted.");
 	}
 
 	// Check 2: valid parameters?
 	if( ! $langext = $DB->q('MAYBEVALUE SELECT extension FROM language
-		                   WHERE langid = %s', $lang) ) {
+	                         WHERE langid = %s', $lang) ) {
 		error("Language '$lang' not found in database.");
 	}
 	if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',
-		              $team) ) {
+	                        $team) ) {
 		error("Team '$team' not found in database.");
 	}
 	if( $teamrow['ipaddress'] != $ip ) {
 		error("Team '$team' not registered at this IP address.");
 	}
 	if( ! $DB->q('MAYBETUPLE SELECT * FROM problem WHERE probid = %s
-		        AND allow_submit = "1"', $prob) ) {
+	              AND allow_submit = "1"', $prob) ) {
 		error("Problem '$prob' not found in database or not submittable.");
 	}
 	if( ! is_readable(INCOMINGDIR."/$file") ) {
@@ -82,6 +85,6 @@
 		VALUES (%s, %s, %s, NOW(), %s)',
 		$team, $prob, $lang, $tofile);
 
-	logmsg (LOG_INFO, "submitted $team/$prob/$lang, file $tofile, id $id");
+	logmsg (LOG_NOTICE, "submitted $team/$prob/$lang, file $tofile, id $id");
 
 	exit;
