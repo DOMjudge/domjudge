@@ -195,7 +195,7 @@ sub child {
 
 	# Copy the source-file.
 	### TODO: exitcode 0 bij authetication failure afvangen ###
-	system(("scp","-Bq",$team.'@localhost:'.$filename,$tmpfile));
+	system(("./submit_copy",$team,$filename,$tmpfile));
 	if ( $? != 0 ) { error "copying file: exitcode $?"; }
 #	copy("$filename","$tmpfile") or error "copying file: $!";
 	logmsg($LOG_INFO,"copied '$filename' to tempfile");
