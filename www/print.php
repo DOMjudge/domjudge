@@ -21,13 +21,13 @@ function printresult($result, $valid = TRUE, $teamstatus = FALSE) {
 		case 'judging':
 		case 'queued':
 			if($teamstatus) $result = 'pending';
-			$style = 'queued';
+			$style = 'sol_queued';
 			break;
 		case 'correct':
-			$style = 'correct';
+			$style = 'sol_correct';
 			break;
 		default:
-			$style = 'incorrect';
+			$style = 'sol_incorrect';
 	}
 
 	return $start . ($valid ? $style : 'disabled') . '">' . $result . $end;

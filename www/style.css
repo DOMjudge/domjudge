@@ -7,9 +7,9 @@ body {
 }
 
 .sol { font-weight: bold; font-variant: small-caps; }
-.correct          { color: green;  }
-.incorrect        { color: red;    }
-.queued           { color: gray;   }
+.sol_correct          { color: green;  }
+.sol_incorrect        { color: red;    }
+.sol_queued           { color: gray;   }
 
 a:link, a:visited { color: blue;   }
 a:hover           { color: purple; }
@@ -42,8 +42,7 @@ a:active          { color: red;    }
     padding: 4px;
 }
 
-.highlight { background-color: yellow; font-size: large;
-}
+.highlight { background-color: yellow; font-size: large; }
 
 .error {
 	color: red;
@@ -58,19 +57,22 @@ a:active          { color: red;    }
 	border-right: 1px solid gray; border-bottom: 1px solid gray;
 }
 
+/* this does't work? */
 .scoreboard { border: 1px solid black; }
-.correct {
+.score_correct {
 	background: #33FF66;
 }
-.incorrect {
+.score_incorrect {
 	background: #FF6666;
 }
-.neutral {
+.score_neutral {
 	background: white;
 }
-td {
+/* this does't work? */
+td.scoreboard {
 	text-align: right;	
 }
+
 #lastmod {
 	color:	blue;
 	text-align: right;

@@ -286,11 +286,11 @@ function putScoreBoard($myteamid = null) {
 			echo "<td class=\"";
 			// CSS class for correct/incorrect/neutral results
 			if( $pdata['correct'] ) { 
-				echo 'correct';
+				echo 'score_correct';
 			} elseif ( $pdata['submitted'] > 0 ) {
-				echo 'incorrect';
+				echo 'score_incorrect';
 			} else {
-				echo 'neutral';
+				echo 'score_neutral';
 			}
 			// number of submissions for this problem
 			echo "\">" . $pdata['submitted'];
