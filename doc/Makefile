@@ -16,13 +16,14 @@ build: ps pdf
 
 dvi: $(TARGETSDVI)
 # Clean-up generated tex-files afterwards:
-	make texclean
+	$(MAKE) texclean
 
 ps:  $(TARGETSPS)
 pdf: $(TARGETSPDF)
 
 $(TARGETSDVI): %.dvi: %.tex $(CONFIGDIR)/global.cfg \
                             $(CONFIGDIR)/config.template.tex \
+                            $(CONFIGDIR)/config.tex \
                             example.* logos/DOMjudgelogo.eps \
                             expdlist.sty svn.sty 
 	latex $(LATEXOPTIONS) $< &> /dev/null
@@ -35,10 +36,14 @@ $(TARGETSPS): %.ps: %.dvi
 $(TARGETSPDF): %.pdf: %.dvi
 	dvipdf $<
 
+$(CONFIGDIR)/config.tex:
+	$(MAKE) -C $(CONFIGDIR) config.tex
+
 texclean:
 	-rm -f $(addsuffix .aux,$(TARGETS)) \
 	       $(addsuffix .log,$(TARGETS)) \
-	       $(addsuffix .toc,$(TARGETS))
+	       $(addsuffix .toc,$(TARGETS)) \
+	       systemconfig.aux
 
 clean: texclean
 	-rm -f $(TARGETSPS) $(TARGETSPDF)
