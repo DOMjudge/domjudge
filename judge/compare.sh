@@ -17,10 +17,6 @@ PROGRAM="$1"
 TESTDATA="$2"
 DIFFOUT="$3"
 
-# Width of the diff output (minimum 50):
-OUTPUTWIDTH=80
-OUTPUTHALF=$((OUTPUTWIDTH/2 - 2))
-
 # Test an exact match between program output and testdata output:
 diff -U 0 $PROGRAM $TESTDATA >$DIFFOUT
 
@@ -35,40 +31,74 @@ if [ ! -s $DIFFOUT ]; then
 	exit 0
 fi
 
+FIRSTDIFF=""
+LINEMAXLEN=10
+LINEDIGITS=6
+
+OLD_IFS="$IFS"
+IFS='
+'
+
 exec 3<$PROGRAM
 exec 4<$TESTDATA
 
 LINE=0
-DIFFBLOCK=0
 while true ; do
+	((LINE++))
+	
 	if ! read PROGLINE <&3 ; then
 		if read TESTLINE <&4 ; then
-			echo "### MORE TESTDATA OUTPUT:"
-			echo "$TESTLINE"
-			cat <&4
+			if [ -z "$FIRSTDIFF" ]; then FIRSTDIFF=$LINE ; fi
+		else
+			break
 		fi
-		break
-	fi
-	if ! read TESTLINE <&4 ; then
-		echo "### MORE PROGRAM OUTPUT:"
-		echo "$PROGLINE"
-		cat <&3
-		break
+	else
+		if ! read TESTLINE <&4 ; then
+			if [ -z "$FIRSTDIFF" ]; then FIRSTDIFF=$LINE ; fi
+		fi
 	fi
 
-	((LINE++))
 	if [ "$PROGLINE" != "$TESTLINE" ]; then
-		if [ $DIFFBLOCK -eq 0 ]; then
-			DIFFBLOCK=1
-			printf "### LINE %-6d%-$((OUTPUTHALF-23))s PROGRAM | TESTDATA\n" "$LINE" " "
-		fi
-		printf "%-${OUTPUTHALF}s | %-${OUTPUTHALF}s\n" "$PROGLINE" "$TESTLINE"
-	else
-		DIFFBLOCK=0
+		if [ -z "$FIRSTDIFF" ]; then FIRSTDIFF=$LINE ; fi
 	fi
-done >$DIFFOUT
+
+	if [ ${#PROGLINE} -gt $LINEMAXLEN ]; then LINEMAXLEN=${#PROGLINE} ; fi
+	if [ ${#TESTLINE} -gt $LINEMAXLEN ]; then LINEMAXLEN=${#TESTLINE} ; fi
+done
 
 exec 3<&-
 exec 4<&-
+
+echo "### DIFFERENCES FROM LINE $FIRSTDIFF ###" >$DIFFOUT
+
+exec 3<$PROGRAM
+exec 4<$TESTDATA
+
+LINE=0
+SEPCHAR='?'
+while true ; do
+	((LINE++))
+	SEPCHAR='='
+	if ! read PROGLINE <&3 ; then
+		PROGLINE=""
+		if read TESTLINE <&4 ; then
+			SEPCHAR='>'
+		else
+			break
+		fi
+	else
+		if ! read TESTLINE <&4 ; then
+			TESTLINE=""
+			SEPCHAR='<'
+		fi
+	fi
+	
+	if [ "$PROGLINE" != "$TESTLINE" -a "$SEPCHAR" = '=' ]; then
+		SEPCHAR='!'
+	fi
+
+	printf "%-${LINEDIGITS}d:%-${LINEMAXLEN}s $SEPCHAR %-${LINEMAXLEN}s\n" $LINE "'$PROGLINE'" "'$TESTLINE'"
+
+done >>$DIFFOUT
 
 exit 0
