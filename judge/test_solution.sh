@@ -43,24 +43,13 @@
 # For running the solution a script 'run.sh' is called. For usage of
 # 'run.sh' see that script.
 
+# Global configuration
+source "`dirname $0`/../etc/config.sh"
+
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
 trap error ERR
 trap cleanexit EXIT
-
-function logdate ()
-{
-	date '+%b %d %T'
-}
-
-function logmsg ()
-{
-	local msglevel msgstring
-	msglevel=$1; shift
-	msgstring="[`logdate`] $PROGNAME[$$]: $@"
-	if [ $msglevel -le "$VERBOSE"  ]; then echo "$msgstring" >&2 ; fi
-	if [ $msglevel -le "$LOGLEVEL" ]; then echo "$msgstring" >>$LOGFILE ; fi
-}
 
 function cleanexit ()
 {
@@ -74,22 +63,8 @@ function cleanexit ()
 	logmsg $LOG_INFO "exiting"
 }
 
-function error ()
-{
-	set +e
-	trap - ERR
-
-	if [ "$@" ]; then
-		logmsg $LOG_ERR "error: $@"
-	else
-		logmsg $LOG_ERR "unexpected error, aborting!"
-	fi
-
-	exit $E_INTERN
-}
-
-# Global configuration
-source "`dirname $0`/../etc/config.sh"
+# Error and logging functions
+source "$SYSTEM_ROOT/lib/lib.error.sh"
 
 # Logging:
 LOGFILE="$LOGDIR/judge.`hostname --short`.log"
