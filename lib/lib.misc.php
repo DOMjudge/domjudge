@@ -49,15 +49,15 @@ function getCurContest() {
  */
 function addUrl($url, $keyvalue, $encode = TRUE)
 {
-	return $url.(strrpos($url, '?')===False ? '?' : ( $encode ? '&amp;' : '&') ).$keyvalue;
+	$separator = (strrpos($url, '?')===False) ? '?' : ( $encode ? '&amp;' : '&');
+	return $url . $separator . $keyvalue;
 }
-
-
 
 /**
  * Scoreboard calculation
  *
- * This is here because it needs to be called by the submit_db script aswell.
+ * This is here because it needs to be called by the submit_db script
+ * as well.  
  *
  * Given a contestid, teamid and a problemid,
  * (re)calculate the values for one row in the scoreboard.
@@ -66,64 +66,59 @@ function calcScoreRow($cid, $team, $prob) {
 	global $DB;
 
 	$result = $DB->q('SELECT result, 
-		(UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 as timediff,
-		(c.lastscoreupdate IS NOT NULL && submittime >= c.lastscoreupdate) as afterfreeze
+		(UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 AS timediff,
+		(c.lastscoreupdate IS NOT NULL &&
+		 submittime >= c.lastscoreupdate) AS afterfreeze
 		FROM judging
 		LEFT JOIN submission s USING(submitid)
 		LEFT OUTER JOIN contest c ON(c.cid=s.cid)
-		WHERE team = %s AND probid = %s AND valid = 1 AND result IS NOT NULL AND s.cid = %i
-		ORDER BY submittime',
-		$team, $prob, $cid);
+		WHERE team = %s AND probid = %s AND valid = 1 AND result IS NOT NULL
+		AND	s.cid = %i ORDER BY submittime', $team, $prob, $cid);
 
 	// reset vars
-	$total_submitted = $penalty = $total_time = $correct = 0;
-	$total_submitted_f = $penalty_f = $total_time_f = $correct_f = 0;
+	$submitted_j = $penalty_j = $time_j = $correct_j = 0;
+	$submitted_p = $penalty_p = $time_p = $correct_p = 0;
 
 	// for each submission
 	while( $row = $result->next() ) {
 
-		$total_submitted++;
-		if ( ! $row['afterfreeze'] ) $total_submitted_f++;
+		$submitted_j++;
+		if ( ! $row['afterfreeze'] ) $submitted_p++;
 
 		// if correct, don't look at any more submissions after this one
 		if($row['result'] == 'correct') {
 
-			$correct = 1;
-			$total_time = round((int)@$row['timediff']);
+			$correct_j = 1;
+			$time = round((int)@$row['timediff']);
 			if ( ! $row['afterfreeze'] ) {
-				$correct_f = 1;
-				$total_time_f = round((int)@$row['timediff']);
+				$correct_p = 1;
+				$time_p = round((int)@$row['timediff']);
 			}
 			break;
 		}
 
-		// 20 penality minutes for each submission
+		// 20 penalty minutes for each submission
 		// (will only be counted if this problem is correctly solved)
-		$penalty += PENALTY_TIME;
-		if ( ! $row['afterfreeze'] ) $penalty_f += PENALTY_TIME;
+		$penalty_j += PENALTY_TIME;
+		if ( ! $row['afterfreeze'] ) $penalty_p += PENALTY_TIME;
 		
 	}
 
 	// calculate penalty time: only when correct add it to the total
-	if ( $correct == 0 ) {
-		$penalty = 0;
-	}
-	if ( $correct_f == 0 ) {
-		$penalty_f = 0;
-	}
+	if ( $correct_j == 0 ) $penalty_j = 0;
+	if ( $correct_f == 0 ) $penalty_p = 0;
 
 	// insert or update the values in the jury scores table
-	$DB->q('REPLACE INTO scoreboard_jury (cid, team, problem, submissions, totaltime, penalty, is_correct )
+	$DB->q('REPLACE INTO scoreboard_jury
+		(cid, team, problem, submissions, totaltime, penalty, is_correct )
 		VALUES (%i,%s,%s,%i,%i,%i,%i)',
-		$cid, $team, $prob,
-		$total_submitted, $total_time, $penalty, $correct);
+		$cid, $team, $prob,	$submitted_j, $time_j, $penalty_j, $correct_j);
 	
 	// insert or update the values in the public/team scores table
-	$DB->q('REPLACE INTO scoreboard_public (cid, team, problem, submissions, totaltime, penalty, is_correct )
+	$DB->q('REPLACE INTO scoreboard_public
+		(cid, team, problem, submissions, totaltime, penalty, is_correct )
 		VALUES (%i,%s,%s,%i,%i,%i,%i)',
-		$cid, $team, $prob,
-		$total_submitted_f, $total_time_f, $penalty_f, $correct_f);
+		$cid, $team, $prob, $submitted_p, $time_p, $penalty_p, $correct_p);
 
 	return;
 }
-

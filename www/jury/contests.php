@@ -18,7 +18,8 @@ $res = $DB->q('TABLE SELECT *,
                UNIX_TIMESTAMP(endtime) as end_u
                FROM contest ORDER BY starttime DESC');
 
-echo "<table>\n<tr><th>CID</th><th>starts</th><th>ends</th><th>last<br />scoreupdate</th><th>name</th></tr>\n";
+echo "<table>\n<tr><th>CID</th><th>starts</th><th>ends</th>" .
+	"<th>last<br />scoreupdate</th><th>name</th></tr>\n";
 foreach($res as $row) {
 	echo "<tr" .
 		($row['cid'] == $curcont ? ' class="highlight"':'') . ">" .
@@ -28,7 +29,8 @@ foreach($res as $row) {
 		"\t<td title=\"".htmlentities($row['endtime']) . "\">" .
 			printtime($row['endtime'])."</td>\n".
 		"\t<td title=\"".htmlentities(@$row['lastscoreupdate']) . "\">" .
-			(isset($row['lastscoreupdate']) ? printtime($row['lastscoreupdate']) : '-') . "</td>\n".
+		( isset($row['lastscoreupdate']) ?
+		  printtime($row['lastscoreupdate']) : '-' ) . "</td>\n" .
 		"\t<td>" . htmlentities($row['contestname']) . "</td>\n" .
 		"</tr>\n";
 }

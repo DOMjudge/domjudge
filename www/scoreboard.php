@@ -7,16 +7,17 @@
  */
 
 
-/** The calcScoreRow is in lib/lib.misc.php because it's used by other parts
- * of the system aswell.
+/** 
+ * The calcScoreRow is in lib/lib.misc.php because it's used by other
+ * parts of the system aswell.
  */
 
 
 /**
- * Output the general scoreboard based on the cached data in table 'scoreboard'.
- * $myteamid can be passed to highlight a specific row.
- * $isjury set to true means the scoreboard will always be current, regardless of the
- * lastscoreupdate setting in the contesttable.
+ * Output the general scoreboard based on the cached data in table
+ * 'scoreboard'. $myteamid can be passed to highlight a specific row.
+ * $isjury set to true means the scoreboard will always be current,
+ * regardless of the lastscoreupdate setting in the contesttable.
  */
 function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
@@ -26,7 +27,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	$contdata = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $cid);
 	
 	// page heading with contestname and start/endtimes
-	echo "<h1>Scoreboard ".htmlentities($contdata['contestname'])."</h1>\n\n";
+	echo "<h1>Scoreboard " . htmlentities($contdata['contestname']) . "</h1>\n\n";
 	echo "<h4>starts: " . printtime($contdata['starttime']) .
 	        " - ends: " . printtime($contdata['endtime']) . "</h4>\n\n";
 
@@ -34,13 +35,17 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 
 	// get the teams and problems
-	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY, login, name, category FROM team');
-	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, name FROM problem
+	$teams = $DB->q('KEYTABLE SELECT login
+		AS ARRAYKEY, login, name, category FROM team');
+	$probs = $DB->q('KEYTABLE SELECT probid
+		AS ARRAYKEY, probid, name FROM problem
 		WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
 
 	// output table column groups (for the styles)
-	echo '<colgroup><col id="scoreteamname" /><col id="scoresolv" /><col id="scoretotal" />' .
-		str_repeat('<col class="scoreprob" />', count($probs)) . "</colgroup>\n";
+	echo '<colgroup><col id="scoreteamname" /><col id="scoresolv" />' .
+		'<col id="scoretotal" />' .
+		str_repeat('<col class="scoreprob" />', count($probs)) .
+		"</colgroup>\n";
 
 	// column headers
 	echo '<tr id="scoreheader"><th>TEAM</th>';
@@ -80,9 +85,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	
 		// skip this row if the team or problem is not known by us
 		if ( ! array_key_exists ( $srow['team'], $teams ) ||
-			 ! array_key_exists ( $srow['problem'], $probs ) ) {
-			continue;
-		}
+			 ! array_key_exists ( $srow['problem'], $probs ) ) continue;
 	
 		// fill our matrix with the scores from the database,
 		// we'll print this out later when we've sorted the teams
@@ -93,10 +96,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 				'penalty' => $srow['penalty'] );
 
 		// calculate totals for this team
-		if ( $srow['is_correct'] ) {
-			$SCORES[$srow['team']]['num_correct'] ++;
-		}
-		$SCORES[$srow['team']]['total_time'] += $srow['totaltime'] + $srow['penalty'];
+		if ( $srow['is_correct'] ) $SCORES[$srow['team']]['num_correct']++;
+		$SCORES[$srow['team']]['total_time'] +=
+			$srow['totaltime'] + $srow['penalty'];
 
 	}
 
@@ -165,7 +167,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	foreach( $probs as $pr ) {
 		echo '<td>' . $SUMMARY[$pr['probid']]['submissions'] . ' / ' .
 			$SUMMARY[$pr['probid']]['correct'] . ' / ' .
-			( isset($SUMMARY[$pr['probid']]['times']) ? min(@$SUMMARY[$pr['probid']]['times']) : '-') . "</td>";
+			( isset($SUMMARY[$pr['probid']]['times']) ?
+			  min(@$SUMMARY[$pr['probid']]['times']) : '-' ) . "</td>";
 	}
 	echo "</tr>\n\n";
 
@@ -175,15 +178,18 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// only print legend when there's more than one category
 	if ( $res->count() > 1 ) {
-		echo "<p><br /><br /></p>\n<table class=\"scoreboard\"><tr><th>Legend</th></tr>\n";
+		echo "<p><br /><br /></p>\n<table class=\"scoreboard\"><tr>" .
+			"<th>Legend</th></tr>\n";
 		while ( $row = $res->next() ) {
 			echo '<tr class="category' . $row['catid'] . '">' .
-				'<td align="center" class="scoretn">' .	$row['name'] . "</td></tr>";
+				'<td align="center" class="scoretn">' .	$row['name'] .
+				"</td></tr>";
 		}
 		echo "</table>\n\n";
 	}
 
-	// last modified date, now if we are the jury, else include the lastscoreupdate time
+	// last modified date, now if we are the jury, else include the
+	// lastscoreupdate time
 	if( ! $isjury && isset($contdata['lastscoreupdate']) ) {
 		$lastupdate = min(time(), strtotime($contdata['lastscoreupdate']));
 	} else {

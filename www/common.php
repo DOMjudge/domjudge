@@ -28,12 +28,14 @@ function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 	 * complete list.
 	 */
 	$keyvalmatch = '';
-	if( $key && $value ) $keyvalmatch = " s.$key = \"" . mysql_escape_string($value) . "\" AND ";
+	if( $key && $value ) {
+		$keyvalmatch = " s.$key = \"" . mysql_escape_string($value) . '" AND ';
+	}
 
 	$cid = getCurContest();
 
-	$res = $DB->q('SELECT s.submitid,s.team,s.probid,s.langid,s.submittime,s.judgerid,
-		t.name as teamname, p.name as probname, l.name as langname
+	$res = $DB->q('SELECT s.submitid, s.team, s.probid, s.langid, s.submittime,
+		s.judgerid,	t.name as teamname, p.name as probname, l.name as langname
 		FROM submission s
 		LEFT JOIN team t ON(t.login=s.team)
 		LEFT JOIN problem p ON(p.probid=s.probid)
@@ -136,12 +138,12 @@ function getJudgings($key, $value) {
 		echo "<th>result</th><th>valid</th></tr>\n";
 		while( $jud = $res->next() ) {
 			echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
-			echo '<td><a href="judging.php?id=' . (int)$jud['judgingid'] . '">j' .
-				(int)$jud['judgingid'] . '</a></td>';
+			echo '<td><a href="judging.php?id=' . (int)$jud['judgingid'] .
+				'">j' .	(int)$jud['judgingid'] . '</a></td>';
 			echo '<td>' . printtime($jud['starttime']) . '</td>';
 			echo '<td>' . printtime(@$jud['endtime'])  . '</td>';
-			echo '<td><a href="judger.php?id=' . urlencode(@$jud['judgerid']) . '">' .
-				 printhost(@$jud['judgerid']) . '</a></td>';
+			echo '<td><a href="judger.php?id=' . urlencode(@$jud['judgerid']) .
+				'">' . printhost(@$jud['judgerid']) . '</a></td>';
 			echo '<td><a href="judging.php?id=' . (int)$jud['judgingid'] . '">' .
 				printresult(@$jud['result'], $jud['valid']) . '</a></td>';
 			echo '<td align="center">' . printyn($jud['valid']) . '</td>';
