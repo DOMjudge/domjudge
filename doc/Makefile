@@ -10,7 +10,7 @@ all: build
 
 build: dvi ps pdf
 
-$(TARGETSDVI): %.dvi: %.tex logos/DOMjudgelogo.eps systemconfig.tex example.*
+$(TARGETSDVI): %.dvi: %.tex expdlist.sty logos/DOMjudgelogo.eps systemconfig.tex example.*
 	latex $(LATEXOPTIONS) $<
 	latex $(LATEXOPTIONS) $<
 	latex $(LATEXOPTIONS) $<

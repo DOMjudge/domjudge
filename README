@@ -24,7 +24,8 @@ to name them here too:
 - lib.database.php by Jeroen van Wolffelaar et al.
 - submit.c and submitdaemon.c are based on submit.pl and
   submitdaemon.pl by Eelco Dolstra.
-
+- expdlist.sty is included from the expdlist LaTeX package
+  (copyright R. Huelse, W. Kaspar).
 
 Copying
 -------
@@ -37,7 +38,8 @@ any later version. See the file COPYING.
 Additionally, parts of this system are based on other programs, which
 are covered by other copyrights. This will be noted in the files themselves.
 Files (partly) covered by other copyrights are:
-- bin/runguard.c partly by the IBM public license
+- bin/runguard.c is partly covered by the IBM public license
+- doc/expdlist.sty is covered by the LaTeX Project Public License
 
 
 Overview
