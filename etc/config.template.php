@@ -1,13 +1,19 @@
 <?php
 
-// DEZE FILE MOET ALTIJD DICHT STAAN!
-// (ivm database-logingegevens)
+// THIS FILE SHOULD ALWAYS BE NON-READABLE!
+// (because of database-login usernames/passwords)
 
 /* Configuration file for PHP-scripts
  * $Id$
  */
 
 /*** GLOBAL CONFIG HEADER START ***/
+
+// This is a template configuration file.
+//
+// Use `generate_config.sh' to generate the corresponding config file
+// from the global config file.
+
 /*** GLOBAL CONFIG HEADER END ***/
 
 /** Loglevels */
@@ -44,4 +50,3 @@ $DBDATA = array (
 		'user' => 'nkp_public',
 		'pass' => '4nG47c!h&;090f' )
 	);
-

@@ -8,6 +8,7 @@ shopt -s extglob
 
 GLOBALCONF=global.cfg
 LOCALCONF=config
+LOCALTEMPLATE=config.template
 
 CONFHEADTAG="GLOBAL CONFIG HEADER"
 CONFMAINTAG="GLOBAL CONFIG MAIN"
@@ -129,6 +130,10 @@ EOF
 	cat $FROMFILE >>$TOFILE
 	grep -A 1000 "$CONFMAINTAG END" $TMPFILE >>$TOFILE
 }
+
+cp -a $LOCALTEMPLATE.h   $LOCALCONF.h
+cp -a $LOCALTEMPLATE.sh  $LOCALCONF.sh
+cp -a $LOCALTEMPLATE.php $LOCALCONF.php
 
 config_include $TMPFILE_C   ${LOCALCONF}.h   '//'
 config_include $TMPFILE_SH  ${LOCALCONF}.sh  '#'
