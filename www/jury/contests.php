@@ -1,12 +1,12 @@
 <?php
 /**
- * View current and past contests
+ * View current, past and future contests
  *
  * $Id$
  */
 
 require('init.php');
-$title = 'Contest';
+$title = 'Contests';
 require('../header.php');
 require('menu.php');
 
@@ -18,19 +18,19 @@ $res = $DB->q('TABLE SELECT *,
                UNIX_TIMESTAMP(endtime) as end_u
                FROM contest ORDER BY starttime DESC');
 
-echo "<table>\n<tr><th>CID</th><th>starttime</th><th>endtime</th><th>name</th></tr>\n";
+echo "<table>\n<tr><th>CID</th><th>starts</th><th>ends</th><th>last<br>scoreupdate</th><th>name</th></tr>\n";
 foreach($res as $row) {
 	echo "<tr" .
 		($row['cid'] == $curcont ? ' class="highlight"':'') . ">" .
-		"<td align=\"right\">" . htmlentities($row['cid']) . "</td>" .
-		"<td title=\"" . htmlentities($row['starttime']) . "\">" .
-			printtime($row['starttime'])."</td>".
-		"<td title=\"".htmlentities($row['endtime']) . "\">" .
-			printtime($row['endtime'])."</td>".
-		"<td>" . htmlentities($row['contestname']) . "</td>" .
+		"\t<td align=\"right\">" . htmlentities($row['cid']) . "</td>\n" .
+		"\t<td title=\"" . htmlentities($row['starttime']) . "\">" .
+			printtime($row['starttime'])."</td>\n".
+		"\t<td title=\"".htmlentities($row['endtime']) . "\">" .
+			printtime($row['endtime'])."</td>\n".
+		"\t<td title=\"".htmlentities(@$row['lastscoreupdate']) . "\">" .
+			(isset($row['lastscoreupdate']) ? printtime($row['lastscoreupdate']) : '-') . "</td>\n".
+		"\t<td>" . htmlentities($row['contestname']) . "</td>\n" .
 		"</tr>\n";
-	
-
 }
 echo "</table>\n\n";
 

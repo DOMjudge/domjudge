@@ -13,6 +13,7 @@ include('../header.php');
 include('menu.php');
 
 // call the general putScoreBoard function from common.php
-putScoreBoard();
+// and pass that we're the jury so we can view the current scores anytime.
+putScoreBoard(null, TRUE);
 
 include('../footer.php');

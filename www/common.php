@@ -224,8 +224,10 @@ function putRequest($id, $login = NULL) {
 /**
  * Output the general scoreboard.
  * $myteamid can be passed to highlight a specific row.
+ * $isjury set to true means the scoreboard will always be current, regardless of the
+ *  lastscoreupdate setting in the contesttable.
  */
-function putScoreBoard($myteamid = null) {
+function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	global $DB;
 
@@ -279,7 +281,8 @@ function putScoreBoard($myteamid = null) {
 				(UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 as timediff
 				FROM judging LEFT JOIN submission s USING(submitid)
 				LEFT OUTER JOIN contest c ON(c.cid=s.cid)
-				WHERE team = %s AND probid = %s AND valid = 1 AND result IS NOT NULL AND s.cid = %i
+				WHERE team = %s AND probid = %s AND valid = 1 AND result IS NOT NULL AND s.cid = %i'
+				. ( !$isjury && isset($contdata['lastscoreupdate']) ? ' AND submittime <= c.lastscoreupdate ' : '' )  . '
 				ORDER BY submittime',
 				$team['login'], $pr['probid'], $cid);
 
@@ -396,6 +399,15 @@ function putScoreBoard($myteamid = null) {
 		}
 		echo "</table>\n\n";
 	}
+
+	// last modified date, now if we are the jury, else include the lastupdatetime
+	if( !$isjury && isset($contdata['lastscoreupdate'])) {
+		$lastupdate = min(time(), strtotime($contdata['lastscoreupdate']));
+	} else {
+		$lastupdate = time();
+	}
+	echo "<div id=\"lastmod\">Last Update: " . date('j M Y H:i', 
+		$lastupdate ) . "</div>\n\n";
 
 	return;
 }
