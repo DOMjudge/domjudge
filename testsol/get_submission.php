@@ -7,7 +7,11 @@
  * $Id$
  */
 
+$myhost = trim(`hostname`);
+
 define ('SCRIPT_ID', 'get_submission');
+define ('LOGFILE', 'judge.'.$myhost);
+
 require ('../etc/config.php');
 require ('../php/init.php');
 
@@ -16,19 +20,17 @@ list($usec,$sec)=explode(" ",microtime());
 mt_srand($sec * $usec);
 
 // Retrieve hostname and check database for judger entry
-$myhost = trim(`hostname`);
-
 $row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
 
 $myid = $row['judgerid'];
 $me = "$myhost/$myid";
 
-logmsg ("$me Judge started");
+logmsg (LOG_INFO, "Judge started");
 
 // Create directory where to test submissions
 $tempdirpath = JUDGEDIR."/$myhost";
 system("mkdir -p $tempdirpath", $retval);
-if ( $retval != 0 ) error("$me Could not create $tempdirpath");
+if ( $retval != 0 ) error("Could not create $tempdirpath");
 
 $waiting = FALSE;
 $active = TRUE;
@@ -40,14 +42,14 @@ while ( TRUE ) {
 	$row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
 	if ( $row['active'] != 1 ) {
 		if ( $active ) {
-			logmsg("$me Not active, waiting for activation...");
+			logmsg(LOG_INFO, "Not active, waiting for activation...");
 			$active = FALSE;
 		}
 		sleep(5);
 		continue;
 	}
 	if ( ! $active ) {
-		logmsg("$me Activated, checking queue...");
+		logmsg(LOG_INFO, "Activated, checking queue...");
 		$active = TRUE;
 		$waiting = FALSE;
 	}
@@ -63,7 +65,7 @@ while ( TRUE ) {
 	// nothing updated -> no open submissions
 	if ( $numupd == 0 ) {
 		if ( ! $waiting ) {
-			logmsg("$me No submissions in queue, waiting...");
+			logmsg(LOG_INFO, "$me No submissions in queue, waiting...");
 			$waiting = TRUE;
 		}
 		sleep(5);
@@ -78,7 +80,7 @@ while ( TRUE ) {
 		WHERE s.probid = p.probid AND s.langid = l.langid AND
 		judgemark = %s AND judgerid = %i', $mark, $myid);
 
-	logmsg("$me Starting judging of $row[submitid]...");
+	logmsg(LOG_INFO, "$me Starting judging of $row[submitid]...");
 
 	// update the judging table with our ID and the starttime
 	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,starttime,judgerid)
@@ -99,7 +101,7 @@ while ( TRUE ) {
 
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {
-		error("$me $row[submitid] Unknown exitcode from test_solution.sh: $retval");
+		error("$row[submitid] Unknown exitcode from test_solution.sh: $retval");
 	}
 	$result = $EXITCODES[$retval];
 
@@ -114,7 +116,7 @@ while ( TRUE ) {
 		$judgingid, $myid);
 
 	// done!
-	logmsg("$me Judging $judgingid/$row[submitid] finished, result: $result");
+	logmsg(LOG_INFO, "Judging $judgingid/$row[submitid] finished, result: $result");
 
 	// restart the judging loop
 }
@@ -126,7 +128,7 @@ function get_content($filename) {
 	if ( ! file_exists($filename) ) return '';
 	$fh = fopen($filename,'r');
 	if ( ! $fh ) {
-		error("$me Could not open $filename for reading");
+		error("Could not open $filename for reading");
 	}
 	return fread($fh, 50000);
 }
