@@ -6,6 +6,7 @@
  *
  * $Id$
  */
+define ('SCRIPT_ID', 'get_submission');
 require ('../etc/config.php');
 require ('../php/init.php');
 
