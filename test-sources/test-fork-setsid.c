@@ -9,6 +9,7 @@ int main()
     if ( fork()==0 ) {
       parent = 0;
       malloc(1);
+      setsid();
     }
   }
 
