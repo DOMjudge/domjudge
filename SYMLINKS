@@ -1,0 +1,11 @@
+Subversion can't store symlinks yet. This file lists the links that are
+required for DOMjudge to operate
+
+
+www/jury/style.css -> ../style.css
+www/team/style.css -> ../style.css
+www/public/style.css -> ../style.css
+
+
+
+$Id$
