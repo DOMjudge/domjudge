@@ -63,7 +63,7 @@
 	if( $teamrow['ipaddress'] != $ip ) {
 		error("Team '$team' not registered at this IP address.");
 	}
-	if( ! $DB->q('MAYBETUPLE SELECT * FROM problem WHERE probid = %s
+	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem WHERE probid = %s
 	              AND cid = %i AND allow_submit = "1"', $prob, $cid) ) {
 		error("Problem '$prob' not found in database or not submittable [c$cid].");
 	}
@@ -93,7 +93,7 @@
 	$id = $DB->q('RETURNID INSERT INTO submission
 	              (cid,team,probid,langid,submittime,sourcefile,sourcecode)
 	              VALUES (%i, %s, %s, %s, NOW(), %s, %s)',
-	             $cid, $team, $prob, $lang, $tofile,
+	             $cid, $teamrow['login'], $probid, $lang, $tofile,
 	             getFileContents(SUBMITDIR."/".$tofile));
 
 	logmsg (LOG_NOTICE, "submitted $team/$prob/$lang, file $tofile, id s$id/c$cid");
