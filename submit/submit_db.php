@@ -40,8 +40,13 @@
 		$prob) ){
 		error("Problem '$prob' not found in database or not submittable.");
 	}
+	if(!is_readable(INCOMINGDIR."/$file")) {
+		error("File '$file' not found in incoming directory.");
+	}
 	logmsg ("submit_db: input verified");
-
+	
+	copy(INCOMINGDIR."/$file", SUBMITDIR."/$file");
+	
 	$id = $DB->q('RETURNID INSERT INTO submission 
 		(team,probid,langid,submittime,source)
 		VALUES (%s, %s, %s, NOW(), %s)',
