@@ -9,8 +9,17 @@ require('init.php');
 $title = 'Submissions';
 require('../header.php');
 
-$id = (int)$_GET['id'];
+if(isset($_POST['id'])) {
+	$id = (int)$_POST['id'];
+} else {
+	$id = (int)$_GET['id'];
+}
 if(!$id)	error ("Missing submission id");
+
+if(isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge') {
+	$DB->q('UPDATE judging SET valid = 0 WHERE submitid = %i', $id);
+	$DB->q('UPDATE submission SET judger = NULL, judgemark = NULL WHERE submitid = %i', $id);
+}
 
 echo "<h1>Submission $id</h1>\n\n";
 
@@ -32,7 +41,11 @@ $submdata = $DB->q('TUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.source,
 <h3>Judgings</h3>
 
 <?php
-$judgedata = $DB->q('SELECT * FROM judging NATURAL JOIN judger WHERE submitid = %i ORDER BY starttime', $id);
+$hasfinal = FALSE;
+
+$judgedata = $DB->q('SELECT * FROM judging LEFT JOIN judger ON(judger=judgerid)
+	WHERE submitid = %i ORDER BY starttime', $id);
+
 if($judgedata->count() == 0) {
 	echo "<em>Submission still queued</em>";
 } else {
@@ -40,7 +53,7 @@ if($judgedata->count() == 0) {
 	echo "<tr><th>ID</th><th>start</th><th>end</th><th>judge</th><th>result</th><th>valid</th></tr>\n";
 	while($jrow = $judgedata->next()) {
 		echo "<tr" . ($jrow['valid'] ? '' : " class=\"invalid\"") .'>';
-		echo "<td align=\"right\">".$jrow['judgingid'].
+		echo "<td align=\"right\"><a href=\"judging.php?id=".$jrow['judgingid']."\">".$jrow['judgingid']."</a>".
 		"</td><td>".printtime($jrow['starttime']).
 		"</td><td>".printtime(@$jrow['endtime']).
 		"</td><td title=\"".$jrow['judger']."\">".$jrow['name'].
@@ -48,11 +61,20 @@ if($judgedata->count() == 0) {
 			"\">".@$jrow['result'].
 		"</td><td align=\"right\">".$jrow['valid'].
 		"</td></tr>\n";
-
+		
+		if($jrow['valid'] == 1) $hasfinal = TRUE;
 	}
 	echo "</table>\n\n";
 }
 
+?>
+<p>
+<form action="submission.php" method="post">
+<input type="hidden" name="id" value="<?=$id?>" />
+<input type="hidden" name="cmd" value="rejudge" />
+<input type="submit" value=" Rejudge Me! " <?=($hasfinal?'':'disabled="1" ')?>/>
+</form>
 
+<?php
 
 require('../footer.php');

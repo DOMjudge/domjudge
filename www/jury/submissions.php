@@ -11,13 +11,13 @@ require('../header.php');
 
 echo "<h1>Submissions</h1>\n\n";
 
-
-
-$res = $DB->q('SELECT * FROM submission LEFT JOIN judging USING(submitid)
-        WHERE (valid = 1 OR valid IS NULL) ORDER BY submittime');
+// we need two queries: one for all submissions, and one with the results for the valid ones.
+$res = $DB->q('SELECT * FROM submission ORDER BY submittime');
+$resulttable = $DB->q('KEYTABLE SELECT *,submitid AS ARRAYKEY
+		FROM judging WHERE (valid = 1 OR valid IS NULL)');
 
 echo "<table>
-<tr><th>ID</th><th>time</th><th>team</th><th>problem</th><th>lang</th><th>status</th><th>judge</th></tr>\n";
+<tr><th>ID</th><th>time</th><th>team</th><th>problem</th><th>lang</th><th>status</th><th>last<br>judge</th></tr>\n";
 while($row = $res->next()) {
 	echo "<tr><td><a href=\"submission.php?id=".$row['submitid']."\">".$row['submitid']."</a>".
 		"</td><td>".printtime($row['submittime']).
@@ -28,14 +28,13 @@ while($row = $res->next()) {
 	
 		if(! @$row['judger'] ) {
 			echo "queued\">queued";
-		} elseif( @!$row['result'] ) {
+		} elseif( @!$resulttable[$row['submitid']]['result'] ) {
 			echo "queued\">judging";
-		} elseif( $row['result'] == 'correct') {
+		} elseif( $resulttable[$row['submitid']]['result'] == 'correct') {
 			echo "correct\">correct";
 		} else {
-			echo "incorrect\">".$row['result'];
+			echo "incorrect\">".$resulttable[$row['submitid']]['result'];
 		}
-
 
 	echo "</td><td>".@$row['judger'];
 	echo "</td></tr>\n";
