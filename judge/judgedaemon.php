@@ -2,7 +2,7 @@
 <?php
 
 /**
- * Request a jet unjudged submission from the database, judge it, and pass
+ * Request a yet unjudged submission from the database, judge it, and pass
  * the results back in to the database.
  *
  * $Id$
@@ -127,6 +127,7 @@ while ( TRUE ) {
 
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {
+		system(SYSTEM_ROOT."/bin/beep ".BEEP_ERROR." &");
 		error("$row[submitid] Unknown exitcode from test_solution.sh: $retval");
 	}
 	$result = $EXITCODES[$retval];
@@ -145,6 +146,11 @@ while ( TRUE ) {
 
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
+	if ( $result == 'correct' ) {
+		system(SYSTEM_ROOT."/bin/beep ".BEEP_ACCEPT." &");
+	} else {
+		system(SYSTEM_ROOT."/bin/beep ".BEEP_REJECT." &");
+	}
 
 	// restart the judging loop
 }

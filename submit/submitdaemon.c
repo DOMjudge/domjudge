@@ -417,6 +417,11 @@ void sigchld_handler(int sig)
 	exitpid = wait(&exitcode);
 	logmsg(LOG_INFO,"child process %d exiting with exitcode %d",
 	       exitpid,exitcode);
+	if ( exitcode==0 ) {
+		system(SYSTEM_ROOT"/bin/beep "BEEP_SUBMIT" &");
+	} else {
+		system(SYSTEM_ROOT"/bin/beep "BEEP_ERROR" &");
+	}
 }
 
 //  vim:ts=4:sw=4:
