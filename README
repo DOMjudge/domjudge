@@ -51,6 +51,8 @@ to name them here too:
 - expdlist.sty is included from the expdlist LaTeX package
   (copyright R. Huelse, W. Kaspar).
 
+
+
 Copying
 -------
 
@@ -64,6 +66,17 @@ are covered by other copyrights. This will be noted in the files themselves.
 Files (partly) covered by other copyrights are:
 - bin/runguard.c is partly covered by the IBM public license
 - doc/expdlist.sty is covered by the LaTeX Project Public License
+
+
+
+Further reading
+---------------
+
+For more information see the following files:
+
+INSTALL		Contains details on how to deploy this judging system.
+doc/TODO	A list of features, fixes, etc. to be implemented.
+doc/DESIGN	Background information on the design of this software.
 
 
 
