@@ -50,16 +50,24 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 		$sid = (int)$row['submitid'];
 		$isfinished = ($detailed || ! @$resulttable[$row['submitid']]['result']);
 		echo "<tr>" .
-			($detailed ? "<td><a href=\"submission.php?id=".$sid."\">".$sid."</a></td>" : '') .
+			($detailed ? "<td><a href=\"submission.php?id=".$sid."\">s".$sid."</a></td>" : '') .
 			"<td>" . printtime($row['submittime']) . "</td>" .
 			($key != 'team' ? "<td class=\"teamid\">".htmlspecialchars($row['team']) . "</td>" : '') .
 			($key != 'probid' ? "<td>".htmlspecialchars($row['probid']) . "</td>" : '') .
 			($key != 'langid' ? "<td>".htmlspecialchars($row['langid']) . "</td>" : '') .
-			"<td>" .
-				($isfinished ? '' : '<a href="submission_details.php?id='.$sid.'">') .
-				printresult( @$row['judgerid'] ? @$resulttable[$row['submitid']]['result'] : 'queued') .
-				($isfinished ? '' : '</a>') .
-				"</td>" .
+			"<td>";
+		if( ! @$resulttable[$row['submitid']]['result'] ) {
+			echo printresult(@$row['judgerid'] ? '' : 'queued');
+		} else {
+			if ( $detailed ) {
+				echo '<a href="judging.php?id=' . $resulttable[$row['submitid']]['judgingid'] . '">';
+			} else {
+				echo '<a href="submission_details.php?id=' . $sid . '">';
+			}
+			echo printresult( @$resulttable[$row['submitid']]['result'] ) .
+				'</a>';
+		}
+		echo "</td>" .
 		 	( $detailed ? "<td>".printhost(@$resulttable[$row['submitid']]['judgername']) . "</td>" : '') .
 		 	"</td></tr>\n";
 	}
@@ -86,7 +94,7 @@ function getJudgings($key, $value) {
 			"<tr><th>ID</th><th>start</th><th>end</th><th>judge</th><th>result</th><th>valid</th>\n";
 		while( $jud = $res->next() ) {
 			echo "<tr" . ( $jud['valid'] ? '':' class="disabled"' ).
-				"><td><a href=\"judging.php?id=".(int)$jud['judgingid'] . '">' .
+				"><td><a href=\"judging.php?id=".(int)$jud['judgingid'] . '">j' .
 					(int)$jud['judgingid'] . "</a>" .
 				"</td><td>".printtime($jud['starttime']) .
 				"</td><td>".printtime(@$jud['endtime']) .

@@ -18,7 +18,7 @@ if(isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge') {
 	$DB->q('UPDATE submission SET judgerid = NULL, judgemark = NULL WHERE submitid = %i', $id);
 }
 
-echo "<h1>Submission $id</h1>\n\n";
+echo "<h1>Submission s$id</h1>\n\n";
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.sourcefile,
 		t.name as teamname, l.name as langname, p.name as probname, c.contestname

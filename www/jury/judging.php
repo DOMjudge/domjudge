@@ -13,7 +13,7 @@ require('menu.php');
 $id = (int)$_GET['id'];
 if(!$id)	error ("Missing judging id");
 
-echo "<h1>Judging $id</h1>\n\n";
+echo "<h1>Judging j$id</h1>\n\n";
 
 $jdata = $DB->q('TUPLE SELECT j.*,s.*,judger.name as judgename, c.contestname
 	FROM judging j LEFT JOIN submission s USING(submitid)
