@@ -1,0 +1,66 @@
+DOMjudge INSTALLATION INSTRUCTIONS
+==================================
+
+
+SYSTEM REQUIREMENTS
+
+This judging system was developed and tested on GNU/Linux systems,
+specifically on Debian Woody and RedHat 9. We have tried to make it
+reasonably portable to other Unix systems, but have not done any
+tests, so nothing guaranteed...
+
+For the deployment of this jury-system, there are some requirements:
+
+- A TCP/IP network which connects all jury and team computers.
+  Extra network security which restricts internet access and access to
+  other services (ssh, mail, talk, etc..) is advisable, but not
+  provided by this software.
+
+TODO: list of necessary protocols between different parts of the system.
+
+- One jury account with a homedirectory which is shared between all
+  jury-computers (e.g. via NFS).
+  
+- Team accounts which are accessible via SSH on the jurycomputers
+  (a ssh-key of the jury account should be installed on all team
+   accounts to provide public-key access).
+
+- (Local) root access on the jury-computers (preferably also on the
+  shared homedirectory) for (un)mounting proc and installing some
+  programs setuid-root.
+
+
+SOFTWARE REQUIREMENTS
+
+- gcc with standard libraries
+
+- make
+
+- For every supported programming language a compiler is needed,
+  which can generate statically linked standalone executables.
+
+- A webserver which supports PHP >= 4.1.0
+
+- MySQL 3 Database and client software
+
+- PHP >= 4.1.0, located in /usr/bin/php
+
+- Bash 2, located in /bin/bash
+
+- Statically compiled Bash 2 (included for Linux IA32)
+
+- Perl 5 or higher, located in /usr/bin/perl
+
+- A lot of standard (GNU) programs, a probably incomplete list:
+	hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
+	grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail
+
+- sudo
+
+- OpenSSH/SCP (or a compatible ssh/scp client)
+
+
+
+
+
+$Id$
