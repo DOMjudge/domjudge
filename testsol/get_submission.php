@@ -7,6 +7,7 @@
  * $Id$
  */
 require ('../etc/config.php');
+require ('../php/init.php');
 
 // get my hostname
 $myhost = trim(`hostname`);
@@ -48,7 +49,7 @@ while (1) {
 		s.submitid, s.source, s.langid, testdata
 		FROM submission s, problem p, language l
 		WHERE s.probid = p.probid AND s.langid = l.langid AND
-		uniqueding = %s AND judgerid = %i', $randomding, $MYID);
+		uniqueding = %s AND judger = %i', $randomding, $MYID);
 
 	logmsg("$ME Starting judging of $row[submitid]...");
 

@@ -5,6 +5,7 @@
  */
 
 	require('../etc/config.php');
+	require('../php/init.php');
 
 	$argv = $GLOBALS['argv'];
 	

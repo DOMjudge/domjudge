@@ -1,5 +1,8 @@
 <?php
 
+// DEZE FILE MOET ALTIJD DICHT STAAN!
+// (ivm database-logingegevens)
+
 /**
  * Configuration file for PHP-scripts
  * $Id$
@@ -19,5 +22,22 @@ $EXITCODES = array (
 	5	=>	'wrong-answer'
 	);
 
-/** init.php is always needed, so we include it here */
-require(SYSTEM_ROOT . '/php/init.php');
+/** Database login credentials */
+$DBDATA = array (
+	'jury'	=> array (				// s/i/u/d on each table
+		'host' => 'localhost',
+		'db'   => 'nkpjury',
+		'user' => 'nkp',
+		'pass' => 'JudgeJudy' ),
+	'team'	=> array (				// ...
+		'host' => 'localhost',
+		'db'   => 'nkpjury',
+		'user' => 'nkp_team',
+		'pass' => 'xb8*$Spp[2j4' ),
+	'public'	=> array (			// Select on team,problem,submission,juding,contest
+		'host' => 'localhost',
+		'db'   => 'nkpjury',
+		'user' => 'nkp_public',
+		'pass' => '4nG47c!h&;090f' )
+	);
+
