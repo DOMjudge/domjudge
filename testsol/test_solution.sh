@@ -31,13 +31,30 @@ set -e
 trap error ERR
 trap cleanexit EXIT
 
+function logdate ()
+{
+	date '+%b %d %T'
+}
+
+function logmsg ()
+{
+	local msglevel msgstring
+	msglevel=$1; shift
+	msgstring="[`logdate`] $PROGNAME[$$]: $@"
+	if [ $msglevel -le "$VERBOSE"  ]; then echo "$msgstring" >&2 ; fi
+	if [ $msglevel -le "$LOGLEVEL" ]; then echo "$msgstring" >>$LOGFILE ; fi
+}
+
 function cleanexit ()
 {
 	trap - EXIT
 
 	if [ "$CATPID" ] && ps --pid $CATPID &>/dev/null; then
+		logmsg $LOG_DEBUG "killing $CATPID (cat-pipe to /dev/null)"
 		kill -9 $CATPID
 	fi
+
+	logmsg $LOG_INFO "exiting"
 }
 
 function error ()
@@ -46,19 +63,12 @@ function error ()
 	trap - ERR
 
 	if [ "$@" ]; then
-		echo "$PROGNAME: error: $@" >&2
+		logmsg $LOG_ERROR "error: $@"
 	else
-		echo "$PROGNAME: unexpected error, aborting!" >&2
+		logmsg $LOG_ERROR "unexpected error, aborting!"
 	fi
 
 	exit $E_INTERN
-}
-
-function logmsg ()
-{
-	if [ "$VERBOSE" ]; then
-		echo "$@" >&2
-	fi
 }
 
 # Global configuration
@@ -73,21 +83,25 @@ E_OUTPUT=4
 E_ANSWER=5
 E_INTERN=127 # Internal script error
 
-# Logname of this program:
+# Logging:
+LOGFILE="$LOGDIR/judge.$HOSTNAME.log"
+LOGLEVEL=$LOG_DEBUG
 PROGNAME=`basename $0`
+
+# Set this for extra verbosity:
+#VERBOSE=$LOG_DEBUG
+if [ "$VERBOSE" ]; then
+	export VERBOSE
+else
+	export VERBOSE=$LOG_ERROR
+fi
 
 # Location of scripts/programs:
 RUNSCRIPTDIR=$SYSTEM_ROOT/testsol
 BASHSTATIC=$SYSTEM_ROOT/runprogs/bash-static
 RUNGUARD=$SYSTEM_ROOT/runprogs/runguard
 
-# Set this for extra verbosity:
-#VERBOSE=1
-if [ "$VERBOSE" ]; then
-	export VERBOSE
-fi
-
-logmsg "starting '$0', PID = $$"
+logmsg $LOG_NOTICE "starting '$0', PID = $$"
 
 [ $# -eq 6 ] || error "wrong number of arguments. see script-code for usage."
 SOURCE="$1";    shift
@@ -96,7 +110,7 @@ TESTIN="$1";    shift
 TESTOUT="$1";   shift
 TIMELIMIT="$1"; shift
 TMPDIR="$1";    shift
-logmsg "arguments: $SOURCE $LANG $TESTIN $TESTOUT $TIMELIMIT $TMPDIR"
+logmsg $LOG_INFO "arguments: $SOURCE $LANG $TESTIN $TESTOUT $TIMELIMIT $TMPDIR"
 
 [ -r $SOURCE ]  || error "solution not found: $SOURCE";
 [ -r $TESTIN ]  || error "test-input not found: $TESTIN";
@@ -104,11 +118,11 @@ logmsg "arguments: $SOURCE $LANG $TESTIN $TESTOUT $TIMELIMIT $TMPDIR"
 [ -d $TMPDIR -a -w $TMPDIR -a -x $TMPDIR ] || \
 	error "Tempdir not found or not writable: $TMPDIR"
 
-logmsg "setting resource limits"
+logmsg $LOG_NOTICE "setting resource limits"
 ulimit -HS -c 0     # Do not write core-dumps
 ulimit -HS -f 65536 # Maximum filesize in KB
 
-logmsg "creating input/output files"
+logmsg $LOG_NOTICE "creating input/output files"
 cp $TESTIN $TMPDIR
 cp $SOURCE $TMPDIR
 TESTIN=`basename $TESTIN`
@@ -127,14 +141,14 @@ touch diff.{out,tmp}    # Compare output
 # program.{out,time,exit} are created by processes running as RUNUSER and
 # should NOT be created here, or "Permission denied" will result when writing.
 
-logmsg "starting compile"
+logmsg $LOG_NOTICE "starting compile"
 
 if [ `cat $SOURCE | wc -c` -gt $((SOURCESIZE*1024)) ]; then
 	echo "Source-code is larger than $SOURCESIZE KB." >>compile.out
 	exit $E_COMPILE
 fi
 
-( $RUNGUARD -u $USER -t $COMPILETIME -o compile.time \
+( $RUNGUARD -t $COMPILETIME -o compile.time \
 	$RUNSCRIPTDIR/compile_$LANG.sh $SOURCE $DEST
 ) &>compile.tmp
 exitcode=$?
@@ -153,7 +167,7 @@ if [ $exitcode -ne 0 ]; then
 fi
 mv compile.tmp compile.out
 
-logmsg "setting up chroot-ed environment"
+logmsg $LOG_NOTICE "setting up chroot-ed environment"
 
 mkdir bin dev proc
 # Copy the run-script and a statically compiled bash-shell:
@@ -170,7 +184,7 @@ disown $CATPID
 # Make directory (sticky) writable for program output:
 chmod a+rwxt .
 
-logmsg "running program"
+logmsg $LOG_NOTICE "running program"
 
 ( $RUNGUARD -r $PWD -u $RUNUSER -t $TIMELIMIT -o program.time \
 	/run.sh $LANG /$DEST $TESTIN program.out error.out program.exit $MEMLIMIT \
@@ -207,9 +221,11 @@ if [ $exitcode -ne 0 ]; then
 	error "exitcode $exitcode without program.exit != 0"
 fi
 
-### Checks for other runtime errors: ###
-### Removed, because these are not consistenly reported the same way
-### by all different compilers.
+############################################################
+### Checks for other runtime errors:                     ###
+### Removed, because these are not consistently reported ###
+### the same way by all different compilers.             ###
+############################################################
 #if grep  'Floating point exception' error.tmp &>/dev/null; then
 #	echo "Floating point exception." >>error.out
 #	exit $E_RUNERROR
@@ -219,8 +235,7 @@ fi
 #	exit $E_RUNERROR
 #fi
 
-
-logmsg "comparing output"
+logmsg $LOG_NOTICE "comparing output"
 
 # Copy testdata output (first cd to olddir to correctly resolve relative paths)
 cd $OLDDIR
