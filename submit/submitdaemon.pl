@@ -1,8 +1,11 @@
 #!/usr/bin/perl -w
 
-# jurydaemon.pl - Server for the submit program.
+# submitdaemon.pl - Server for the submit program.
 #
 # Copyright (C) 1999, 2000 Eelco Dolstra (eelco@cs.uu.nl).
+# Copyright (C) 2004       Jaap Eldering (eldering@a-eskwadraat.nl),
+#                          Thijs Kinkhorst,
+#                          Peter van de Werken.
 #
 # $Id$
 #
