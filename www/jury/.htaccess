@@ -5,20 +5,10 @@ php_flag magic_quotes_runtime off
 AuthName "Jury Only Area"
 AuthType Basic
 <Limit GET POST>
-	order deny,allow
-	deny from all
-	allow from 192.168.1.0/24
 
-# *.students.cs.uu.nl
-#	allow from 131.211.83.0/24
+require valid-user
+AuthType Basic
+AuthName "DOMjudge"
+AuthUserFile /users/nkpjury/htpasswd
 
-# 4 jury compu's tijdens test
-	allow from 131.211.83.131
-	allow from 131.211.83.133
-	allow from 131.211.83.134
-	allow from 131.211.83.135
-# peter
-	allow from 80.100.101.197
-# thijs vast ip
-	allow from 145.99.250.218
 </Limit>
