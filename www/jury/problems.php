@@ -12,7 +12,7 @@ require('menu.php');
 
 echo "<h1>Problems</h1>\n\n";
 
-$res = $DB->q('SELECT * FROM problem NATURAL JOIN contest ORDER BY probid');
+$res = $DB->q('SELECT * FROM problem NATURAL JOIN contest ORDER BY problem.cid, probid');
 $curcid = getCurContest();
 
 echo "<table>
