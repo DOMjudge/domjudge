@@ -142,7 +142,7 @@ function putResponse($id, $showReq = true, $teamlink = true) {
 		echo "</td></tr>\n";
 	}
 ?>
-<tr><td>Send to:</td><td><?=isset($respdata['rcpt'])?
+<tr><td>Sent to:</td><td><?=isset($respdata['rcpt'])?
 	($teamlink?'<a href="team.php?id='.urlencode($respdata['rcpt']).'">':'')
 	.'<span class="teamid">'. htmlspecialchars($respdata['rcpt']).'</span>'
 	.($teamlink?'</a>':'')
@@ -186,7 +186,7 @@ function putScoreBoard($myteamid = null) {
 
 	echo "<h1>Scoreboard</h1>\n\n";
 
-	echo "<table border=\"1\">\n";
+	echo "<table class=\"scoreboard\">\n";
 
 	$cid = getCurContest();
 
