@@ -19,14 +19,18 @@ if(isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge') {
 
 echo "<h1>Submission $id</h1>\n\n";
 
-$submdata = $DB->q('TUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.source,
-		t.name as teamname, l.name as langname, p.name as probname
+$submdata = $DB->q('MAYBETUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.source,
+		t.name as teamname, l.name as langname, p.name as probname, c.contestname
 	FROM submission s LEFT JOIN team t ON (t.login=s.team)
 	LEFT JOIN problem p ON (p.probid=s.probid) LEFT JOIN language l ON (l.langid=s.langid)
+	LEFT JOIN contest c ON (c.cid = s.cid)
 	WHERE submitid = %i', $id);
+
+if(!$submdata)	error ("Missing submission data");
 ?>
 
 <table>
+<tr><td>Contest:</td><td><?=htmlentities($submdata['contestname'])?></td></tr>
 <tr><td>Team:</td><td><a href="team.php?id=<?=urlencode($submdata['team']).
 	'"><span class="teamid">'. htmlspecialchars($submdata['team'])."</span>: ".
 	htmlentities($submdata['teamname'])?></a></td></tr>
@@ -58,7 +62,7 @@ if($judgedata->count() == 0) {
 			"\">".$jid."</a>".
 		"</td><td>".printtime($jrow['starttime']).
 		"</td><td>".printtime(@$jrow['endtime']).
-		"</td><td title=\"".$jid."\">".htmlspecialchars($jrow['name']).
+		"</td><td>".printhost($jrow['name']).
 		"</td><td>".printresult(@$jrow['result'], $jrow['valid']).
 		"</td><td align=\"right\">".printyn($jrow['valid']).
 		"</td></tr>\n";

@@ -25,7 +25,8 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <tr><td>Login:</td><td class="teamid"><?=$row['login']?></td></tr>
 <tr><td>Name:</td><td><?=htmlentities($row['name'])?></td></tr>
 <tr><td>Category:</td><td><?=(int)$row['category'].' - '.htmlentities($row['catname'])?></td></tr>
-<tr><td>IP-address:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress'].' - '.gethostbyaddr($row['ipaddress'])):''?></td></tr>
+<tr><td>IP-address:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']) .
+	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):''?></td></tr>
 </table>
 
 <h3>Submissions</h3>

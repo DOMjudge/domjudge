@@ -9,9 +9,12 @@
 require('init.php');
 $title="Scoreboard";
 require('../header.php');
+
+$contdata = $DB->q('TUPLE SELECT * FROM contest ORDER BY starttime DESC LIMIT 1');
+$cid = $contdata['cid'];
 ?>
 
-<h1>Scoreboard</h1>
+<h1>Scoreboard <?=htmlentities($contdata['contestname'])?></h1>
 
 <table border="1">
 <?php
@@ -42,11 +45,11 @@ foreach($teams as $team) {
 
 		$result = $DB->q('SELECT result, 
 				(UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 as timediff
-			FROM judging LEFT JOIN submission USING(submitid)
-				LEFT OUTER JOIN contest c ON(1)
-			WHERE team = %s AND probid = %s AND valid = 1 AND result IS NOT NULL
+			FROM judging LEFT JOIN submission s USING(submitid)
+				LEFT OUTER JOIN contest c ON(c.cid=s.cid)
+			WHERE team = %s AND probid = %s AND valid = 1 AND result IS NOT NULL AND s.cid = %i
 			ORDER BY submittime',
-			$team['login'], $pr['probid']);
+			$team['login'], $pr['probid'], $cid);
 
 		// reset vars
 		$total_submitted = $penalty = $total_time = 0;
@@ -97,7 +100,7 @@ uasort($SCORES, 'cmp');
 foreach($SCORES as $team => $totals) {
 
 	echo "<tr><td>".htmlentities($TEAMNAMES[$team]).
-		"<br /><tt>".htmlspecialchars($team)."</tt></td><td>"
+		"<br /><span class=\"teamid\">".htmlspecialchars($team)."</span></td><td>"
 		.$totals['num_correct']."</td><td>".$totals['total_time']."</td>";
 	foreach($THEMATRIX[$team] as $prob => $pdata) {
 		echo "<td class=\"".($pdata['correct']?'correct':'incorrect')."\">" . 

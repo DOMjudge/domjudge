@@ -11,8 +11,9 @@ echo "<h1>Teampage ".htmlentities($name)."</h1>\n\n";
 
 // get submissions
 $res = $DB->q('SELECT * FROM submission LEFT JOIN judging USING(submitid)
-	WHERE (valid = 1 OR valid IS NULL) AND team = %s ORDER BY submittime DESC',
-	$login);
+	WHERE (valid = 1 OR valid IS NULL) AND team = %s AND cid = %i
+	ORDER BY submittime DESC',
+	$login, getCurCont() );
 
 if($res->count() == 0) {
 	echo "<p><em>Nothing submitted yet.</em></p>\n";
@@ -24,7 +25,7 @@ if($res->count() == 0) {
 	while($row = $res->next()) {
 
 		echo "<tr><td>".htmlspecialchars($row['probid'])."</td><td>".
-			printtime(htmlspecialchars($row['submittime'])). "</td><td>";
+			printtime($row['submittime']). "</td><td>";
 		if(@$row['result']) {
 			echo '<a href="submission_details.php?submitid='.(int)$row['submitid'].'">'.
 			printresult($row['result'])."</a>";

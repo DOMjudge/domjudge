@@ -41,10 +41,15 @@
 	if( ! $file ) error("No value for Filename.");
 
 	
-	// Check 1: is the contest still open?
-	if( ! $DB->q('VALUE SELECT starttime <= now() &&
-	                           endtime   >= now() FROM contest') ) {
-		error("The contest is closed, no submissions accepted.");
+	// Check 1: is the contest open?
+	$cont = $DB->q('MAYBETUPLE SELECT *,
+		UNIX_TIMESTAMP(starttime) as start_u, UNIX_TIMESTAMP(endtime) as end_u
+		FROM contest ORDER BY starttime DESC LIMIT 1');
+	if(!$cont) {
+		error("No contest found in the database, aborting.");
+	}
+	if( $cont['start_u'] > time() || $cont['end_u'] < time() )
+		error("The contest is closed, no submissions accepted. [$cont[cid]]");
 	}
 
 	// Check 2: valid parameters?
@@ -57,12 +62,7 @@
 		error("Team '$team' not found in database.");
 	}
 	if( $teamrow['ipaddress'] != $ip ) {
-		if( $teamrow['ipaddress'] != null ) {
-			error("Team '$team' not registered at this IP address.");
-		}
-		// DS: team heeft nog geen IP
-		$id = $DB->q('RETURNID UPDATE team SET ipaddress = %s WHERE login = %s',
-		             $ip, $team);
+		error("Team '$team' not registered at this IP address.");
 	}
 	if( ! $DB->q('MAYBETUPLE SELECT * FROM problem WHERE probid = %s
 	              AND allow_submit = "1"', $prob) ) {
@@ -88,10 +88,10 @@
 
 	// Insert submission into the database	
 	$id = $DB->q('RETURNID INSERT INTO submission 
-		(team,probid,langid,submittime,source)
-		VALUES (%s, %s, %s, NOW(), %s)',
-		$team, $prob, $lang, $tofile);
+		(cid,team,probid,langid,submittime,source)
+		VALUES (%i, %s, %s, %s, NOW(), %s)',
+		$cid, $team, $prob, $lang, $tofile);
 
-	logmsg (LOG_NOTICE, "submitted $team/$prob/$lang, file $tofile, id $id");
+	logmsg (LOG_NOTICE, "submitted c$cid/$team/$prob/$lang, file $tofile, sid $id");
 
 	exit;

@@ -22,19 +22,20 @@ $row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $id);
 
 ?>
 
-<h1>Judger <?=htmlspecialchars($row['name'])?></h1>
+<h1>Judger <?=printhost($row['name'])?></h1>
 
 <table>
 <tr><td>ID:</td><td><?=$id?></td></tr>
-<tr><td>Name:</td><td><?=htmlspecialchars($row['name'])?></td></tr>
+<tr><td>Name:</td><td><?=printhost($row['name'], TRUE)?></td></tr>
 <tr><td>Active:</td><td><?=printyn($row['active'])?></td></tr>
 </table>
 
-<h3>Judgings by <?=htmlspecialchars($row['name'])?></h3>
+<h3>Judgings by <?=printhost($row['name'])?></h3>
 
 <?php
 
-$res = $DB->q('SELECT * FROM judging WHERE judgerid = %i ORDER BY starttime DESC', $id);
+$res = $DB->q('SELECT * FROM judging WHERE judgerid = %i AND cid = %i ORDER BY starttime DESC',
+	$id, getCurCont() );
 
 if( $res->count() == 0 ) {
 	echo "<em>Nothing judged.</em>";

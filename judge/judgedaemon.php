@@ -59,13 +59,18 @@ while ( TRUE ) {
 		$waiting = FALSE;
 	}
 
+	$cid = $DB->q('MAYBETUPLE SELECT cid FROM contest ORDER BY starttime DESC LIMIT 1');
+	if(!$cid) {
+		error("No contest found in database, aborting.");
+	}
+
 	// Generate (unique) random string to mark submission to be judged
 	list($usec,$sec)=explode(" ",microtime());
 	$mark = "$myhost/$myid".'@'.($sec+$usec).'#'.md5(uniqid(mt_rand(), true));
 
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-		SET judgerid = %i, judgemark = %s WHERE judgerid IS NULL LIMIT 1', $myid, $mark);
+		SET judgerid = %i, judgemark = %s WHERE judgerid IS NULL AND cid = %i LIMIT 1', $myid, $mark, $cid);
 
 	// nothing updated -> no open submissions
 	if ( $numupd == 0 ) {
@@ -88,12 +93,12 @@ while ( TRUE ) {
 	logmsg(LOG_NOTICE, "Judging submission $row[submitid]...");
 
 	// update the judging table with our ID and the starttime
-	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,starttime,judgerid)
-		VALUES (%i,NOW(),%i)',
-		$row['submitid'], $myid);
+	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgerid)
+		VALUES (%i,%i,NOW(),%i)',
+		$row['submitid'], $cid, $myid);
 
 	// create tempdir for tempfiles
-	$tempdir = "$tempdirpath/$judgingid";
+	$tempdir = "$tempdirpath/$cid/$judgingid";
 	system("mkdir -p $tempdir", $retval);
 	if ( $retval != 0 ) error("Could not create $tempdir");
 
@@ -121,7 +126,7 @@ while ( TRUE ) {
 		$judgingid, $myid);
 
 	// done!
-	logmsg(LOG_NOTICE, "Judging $row[submitid]/$judgingid finished, result: $result");
+	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
 
 	// restart the judging loop
 }

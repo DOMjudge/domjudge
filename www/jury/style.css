@@ -26,6 +26,6 @@
 	color: gray;
 }
 
-.teamid, .filename {
+.teamid, .filename, .hostname {
 	font-family: monospace;
 }

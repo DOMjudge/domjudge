@@ -6,16 +6,22 @@
  * $Id$
  */
 
+/**
+ * Print a list of submissions, either all or only those that
+ * match <key> = <value>. Output is always limited to the
+ * current or last contest.
+ */
 function getSubmissions($key = null, $value = null) {
 
 	global $DB;
 
 	// we need two queries: one for all submissions, and one with the results for the valid ones.
 	if($key && $value) {
-		$res = $DB->q('SELECT * FROM submission WHERE '.$key.' = %s ORDER BY submittime DESC',
-			$value);
+		$res = $DB->q('SELECT * FROM submission WHERE '.$key.' = %s AND cid = %i ORDER BY submittime DESC',
+			$value, getCurCont() );
 	} else {
-		$res = $DB->q('SELECT * FROM submission ORDER BY submittime DESC');
+		$res = $DB->q('SELECT * FROM submission WHERE cid = %i ORDER BY submittime DESC',
+			getCurCont() );
 	}
 
 	if($res->count() == 0) {
@@ -25,7 +31,7 @@ function getSubmissions($key = null, $value = null) {
 
 	$resulttable = $DB->q('KEYTABLE SELECT j.*,submitid AS ARRAYKEY,judger.name AS judgername
 		FROM judging j LEFT JOIN judger USING(judgerid)
-		WHERE (valid = 1 OR valid IS NULL)');
+		WHERE (valid = 1 OR valid IS NULL) AND cid = %i', getCurCont() );
 
 	echo "<table>\n".
 		"<tr><th>ID".
@@ -45,46 +51,20 @@ function getSubmissions($key = null, $value = null) {
 			"</td><td>".
 				printresult( @$row['judgerid'] ? @$resulttable[$row['submitid']]['result'] : 'queued');
 
-		echo "</td><td>".htmlspecialchars(@$resulttable[$row['submitid']]['judgername']);
+		echo "</td><td>".printhost(@$resulttable[$row['submitid']]['judgername']);
 		echo "</td></tr>\n";
 	}
 	echo "</table>\n\n";
 
 }
 
-// prints result with correct style, '' -> judging
-function printresult($result, $valid = TRUE) {
+/**
+ * Will return either the current contest, or else the upcoming one
+ */
+function getCurCont() {
+	static $curcont;
+	if(isset($curcont)) return $curcont;
 
-	$start = '<span class="sol ';
-	$end   = '</span>';
-
-	switch($result) {
-		case '':
-			$result = 'judging';
-		case 'judging':
-		case 'queued':
-			$style = 'queued';
-			break;
-		case 'correct':
-			$style = 'correct';
-			break;
-		default:
-			$style = 'incorrect';
-	}
-
-	return $start . ($valid ? $style : 'disabled') . '">' . $result . $end;
-
-}
-
-// print a yes/no field, input: something that evaluates to a boolean
-function printyn ($val) {
-	return ($val ? '1':'0');
-}
-
-// given 2004-12-31 15:43:05, returns 15:43:05
-function printtime($datetime) {
-	if(!$datetime) return '';
-	$date_time = explode(' ',$datetime);
-	return htmlspecialchars($date_time[1]);
-
+	global $DB;
+	return $curcont = $DB->q('MAYBEVALUE SELECT cid FROM contest ORDER BY starttime DESC LIMIT 1');
 }
