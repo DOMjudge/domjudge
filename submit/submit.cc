@@ -394,7 +394,8 @@ int main(int argc, char **argv)
 	if ( strncasecmp(lastmesg,"done",4)!=0 ) {
 		error(0,"connection closed unexpectedly");
 	}
-	
+
+	logmsg(LOG_NOTICE,"submission successful");
 
     return 0;
 }
