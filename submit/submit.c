@@ -31,10 +31,12 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <getopt.h>
+#include <libgen.h>
 
 /* Some C++ includes for easy string handling */
 using namespace std;
@@ -158,18 +160,47 @@ The default value for TEAM is taken from the environment variable
 	exit(0);
 }
 
+void usage2(int errnum, char *mesg, ...)
+{
+	va_list ap;
+	va_start(ap,mesg);
+	
+	vlogerror(errnum,mesg,ap);
+
+	va_end(ap);
+
+	printf("Type '%s --help' to get help.\n",progname);
+	exit(1);
+}
+
+int nwarnings;
+
+void warnuser(char *warning)
+{
+	nwarnings++;
+
+	logmsg(LOG_DEBUG,"user warning #%d: %s",nwarnings,warning);
+	
+	if ( ! quiet ) printf("WARNING: %s\n",warning);
+}
+
 int socket_fd;
 struct sockaddr_in server_addr; // my address information
 struct sockaddr_in their_addr;  // connector's address information
 int sin_size;
 
+struct stat filestat;
+
 /* Submission information */
-string problem, language, server, team, filename;
+string problem, language, server, team;
+char *filename;
 
 int main(int argc, char **argv)
 {
+	unsigned i;
 	int c;
 	char *ptr;
+	string filebase, fileext;
 	
 	/* Set logging levels & open logfile */
 	verbose  = LOG_DEBUG;
@@ -179,6 +210,8 @@ int main(int argc, char **argv)
 
 	progname = argv[0];
 
+	nwarnings = 0;
+
 	/* Parse command-line options */
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
@@ -187,23 +220,27 @@ int main(int argc, char **argv)
 		case 0:   /* long-only option */
 			break;
 		case 'p': /* problem option */
+			problem = string(optarg);
 			break;
 		case 'l': /* language option */
+			language = string(optarg);
 			break;
 		case 's': /* server option */
+			server = string(optarg);
 			break;
 		case 't': /* team option */
+			team = string(optarg);
 			break;
 		case 'P': /* port option */
 			port = strtol(optarg,&ptr,10);
 			if ( ptr!=0 || port<0 || port>65535 ) {
-				error(0,"invalid tcp port specified: `%s'",optarg);
+				usage2(0,"invalid tcp port specified: `%s'",optarg);
 			}
 			break;
 		case 'v': /* verbose option */
 			verbose = strtol(optarg,&ptr,10);
 			if ( ptr!=0 || verbose<0 ) {
-				error(0,"invalid verbosity specified: `%s'",optarg);
+				usage2(0,"invalid verbosity specified: `%s'",optarg);
 			}
 			break;
 		case 'q': /* quiet option */
@@ -212,7 +249,7 @@ int main(int argc, char **argv)
 			break;
 		case ':': /* getopt error */
 		case '?':
-			error(0,"unknown option or missing argument `%c'",optopt);
+			usage2(0,"unknown option or missing argument `%c'",optopt);
 			break;
 		default:
 			error(0,"getopt returned character code `%c' ??",c);
@@ -222,7 +259,40 @@ int main(int argc, char **argv)
 	if ( show_help ) usage();
 	if ( show_version ) version();
 	
-	if ( argc<=optind ) error(0,"no filename specified");
+	if ( argc<=optind ) usage2(0,"no filename specified");
+	filename = argv[optind];
+
+	/* Stat file and do some sanity checks */
+	if ( stat(filename,&filestat)!=0 ) error(errno,"cannot stat `%s'",filename);
+
+	if ( ! S_ISREG(filestat.st_mode) )         warnuser("file is not a regular file");
+	if ( ! (filestat.st_mode & S_IRUSR) )      warnuser("file is not readable");
+	if ( filestat.st_size==0 )                 warnuser("file is empty");
+	if ( filestat.st_size>=(SOURCESIZE*1024) ) warnuser("file is too large");
+	
+	if ( time(NULL)-filestat.st_mtime>(WARN_MTIME*60) ) {
+		warnuser("file has not been modified recently");
+	}
+	
+	/* Try to parse problem and language from filename */
+	filebase = string(basename(filename));
+	if ( filebase.find('.')!=string::npos ) {
+		fileext = filebase.substr(filebase.rfind('.')+1);
+		filebase.erase(filebase.find('.'));
+
+		/* Check for only alphanumeric characters */
+		for(i=0; i<filebase.length(); i++) {
+			if ( ! isalnum(filebase[i]) ) break;
+		}
+		if ( i>=filebase.length() && filebase.length()>0 ) problem = filebase;
+
+		
+	}
+	
+	if ( problem.empty()  ) usage2(0,"no problem specified");
+	if ( language.empty() ) usage2(0,"no language specified");
+	if ( team.empty()     ) usage2(0,"no team specified");
+	if ( server.empty()   ) usage2(0,"no server specified");
 
     return 0;
 }
