@@ -108,7 +108,7 @@ logmsg "setting resource limits"
 ulimit -HS -c 0     # Do not write core-dumps
 ulimit -HS -f 65536 # Maximum filesize in KB
 
-logmsg "start"
+logmsg "creating input/output files"
 cp $TESTIN $TMPDIR
 cp $SOURCE $TMPDIR
 SOURCE=`basename $SOURCE`
