@@ -2,7 +2,7 @@
 
 .output_text {
 	border: 2px dotted #C0C0C0;
-	background-color: #f9f9f9;
+	background-color: #F9F9F9;
 	margin: 0;
 	padding: 5px;
 	font-family: monospace;	
@@ -16,28 +16,23 @@
 	font-weight: bold;
 	font-variant: small-caps;
 }
-.correct {
-	color: green;
-}
-.incorrect {
-	color: red;
-}
-.queued {
-	color: gray;
-}
+.correct   { color: green; }
+.incorrect { color: red;   }
+.queued    { color: gray;  }
 
 .teamid, .filename, .hostname {
 	font-family: monospace;
 }
 
+a:link, a:visited { color: blue;   }
+a:hover           { color: purple; }
+a:active          { color: red;    }
+
 .menutop a {
 	font-family: sans-serif;
+	font-weight: bold;
 	background-color: #FFFFF0;
-	font-family: sans-serif;
-	font-size: smaller;
-	font-weight: lighter;
-	border-style: solid;
-	border-width: 1px;
+	border: 1px solid black;
 	text-decoration: none;
 	margin: 2px;
 	padding: 2px;
@@ -45,3 +40,21 @@
 	padding-right: 5px;
 }
 
+.error {
+	color: red;
+	font-weight: bold;
+	font-family: monospace;
+	border: 1px dotted red;
+	margin-left: 1em;
+	margin-right: 1em;
+	padding: 1em;
+}
+
+.error legend {
+	font-variant: small-caps;
+	font-size: x-large;
+	font-weight: bold;
+	padding: .1ex .5ex;
+	border-right: 1px solid gray;
+	border-bottom: 1px solid gray;
+}

@@ -26,7 +26,7 @@ function logmsg($msglevel, $string) {
 	if ( $msglevel <= $verbose  ) {
 		// if this is the webinterface, print it to stdout, else to stderr
 		if ( isset ( $_SERVER['REMOTE_ADDR'] ) ) {
-			echo "<div class=\"error\">" . htmlspecialchars($msg) . "</div>\n";
+			echo "<fieldset class=\"error\"><legend>Error</legend>\n" . htmlspecialchars($msg) . "</fieldset>\n";
 		} else {
 			fwrite(STDERR, $msg); fflush(STDERR);
 		}
