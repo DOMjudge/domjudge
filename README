@@ -1,6 +1,30 @@
 This is the Programming Contest Jury System "DOMjudge" version 0.2.0
 
 
+Overview
+--------
+
+DOMjudge is a system for running a programming contest, like the ACM
+regional and world championship programming contests.
+
+This means that teams are onsite and have a fixed time period (mostly
+5 hours) and one computer to solve a number of problems (mostly 6-10).
+Problems are solved by writing a program in one of the allowed
+languages, that reads input according to the problem input
+specification and writes the correct, corresponding output.
+
+The judging is done by submitting the source code of the solution to
+the jury. There the jury system compiles and runs the program and
+compares the program output with the expected output.
+
+This software can be used to handle the submission and judging during
+such contests. It also handles feedback to the teams and communication
+on problems (clarification requests). It has webinterfaces for the
+jury, the teams (their submissions and clarification requests) and the
+public (scoreboard).
+
+
+
 Authors
 -------
 
@@ -42,88 +66,14 @@ Files (partly) covered by other copyrights are:
 - doc/expdlist.sty is covered by the LaTeX Project Public License
 
 
-Overview
---------
-
-DOMjudge is a system for running a programming contest, like the ACM
-regional and world championship programming contests.
-
-This means that teams are onsite and have a fixed time period (mostly
-5 hours) and one computer to solve a number of problems (mostly 6-10).
-Problems are solved by writing a program in one of the allowed
-languages, that reads input according to the problem input
-specification and writes the correct, corresponding output.
-
-The judging is done by submitting the source code of the solution to
-the jury. There the jury system compiles and runs the program and
-compares the program output with the expected output.
-
-This software can be used to handle the submission and judging during
-such contests. It also handles feedback to the teams and communication
-on problems (clarification requests). It has webinterfaces for the
-jury, the teams (their submissions and clarification requests) and the
-public (scoreboard).
-
-
-Design
-------
-
-This system was designed and developed for the 2004 Dutch Programming
-Championship (NKP 2004).
-
-Although there were already some jurysystems around, we decided to
-write our own, new system for the following reasons:
-- The system used here in Utrecht was set up as a simple perl script,
-  made for local contests with fewer teams and doesn't have the
-  required scalability, flexibility, security and ease of use
-  necessary for a big contest.
-- The systems written by other universities (Delft and Groningen) are
-  nice, but have some disadvantages. First of all, the advantage of
-  writing your own system, is that you know all its inside
-  functioning, which might come in handy when problems arise during
-  the contest. Studying and adapting other systems to our
-  environment will probable take (almost) as much time as writing
-  our own system and therefor we chose the last option.
-  Specific reasons why we chose not to use the existing systems:
-  - The Delft system (SZP) is a very complex system, consisting of
-    more than 19.000 lines of C/C++ code. Also it implements complex
-    communication and authentication protocols. However it works great
-    and has very good documentation!
-  - The Groningen system (Iudex) is a much simpler system based on
-    Python and a database. It handles communication via mail.
-    Because we had no/little experience with Python and this system
-    seemed not to have many security and rejudging features, we didn't
-    choose for this system. 
-  - The ACM PC^2 system is a self-contained system, which is easy to
-    setup, but closed source, so not adaptable. Experience with the
-    system from team and jury side leads to the conclusion that the
-    interface requires a lot of manual control.
-
-For the design of this system, the main goals are:
-- security:
-	Although not very likely to happen, we want to detect fraud as
-	much as possible. This is a judging system, so it focuses on
-	security concerning attemps to submit code, which tries to hack the
-	jurysystem. It is difficult to detect malicious code, because this
-	differs per language. Therefor we have chosen to secure the system
-	by running compiled programs in a restricted environment.
-- flexibility:
-	- It should be easy to rejudge individual solutions or all solutions
-	  for a particular language, problem, etc...
-	- Addition of new languages should be easy.
-- simplicity:
-	The system should kept as simple as possible, given the necessary
-	security and flexibility requirements. We try to reach this by
-	using as much standard utilities as possible. This also reduces
-	the chances on bugs.
-
-For the specific implementation details see the file INSTALL.
-
 
 Contact
 -------
 
-The authors can be reached at the following address.
+The DOMjudge homepage can be found at:
+http://domjudge.sourceforge.net/
+
+The authors can be reached at the following address:
 domjudge@a-eskwadraat.nl
 
 
