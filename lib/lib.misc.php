@@ -18,15 +18,10 @@ function getFileContents($filename) {
  */
 function getCurContest() {
 
-	static $curcontest;
-	static $endtime;
-
-	if ( isset($curcontest) && $endtime <= time() ) return $curcontest;
-
 	global $DB;
 	$now = $DB->q('SELECT cid FROM contest
 	               WHERE starttime <= NOW() AND endtime >= NOW()');
-
+	
 	if ( $now->count() == 1 ) {
 		$row = $now->next();
 		$curcontest = $row['cid'];
@@ -42,14 +37,6 @@ function getCurContest() {
 	if ( $now->count() > 1 ) {
 		error("Contests table contains overlapping contests");
 	}
-
-	$endtime = $DB->q('MAYBEVALUE SELECT endtime FROM contest WHERE cid = %s',
-	                   $curcontest);
-
-	if(!isset($curcontest))
-	{
-		error("There is no (previous) contest");
-	}
-
+	
 	return $curcontest;
 }
