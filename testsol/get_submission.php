@@ -10,10 +10,12 @@
 $myhost = trim(`hostname`);
 
 define ('SCRIPT_ID', 'get_submission');
-define ('LOGFILE', 'judge.'.$myhost);
+define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 
 require ('../etc/config.php');
 require ('../php/init.php');
+
+logmsg(LOG_NOTICE, "Judge started");
 
 // Seed the random generator
 list($usec,$sec)=explode(" ",microtime());
@@ -24,8 +26,6 @@ $row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
 
 $myid = $row['judgerid'];
 $me = "$myhost/$myid";
-
-logmsg (LOG_INFO, "Judge started");
 
 // Create directory where to test submissions
 $tempdirpath = JUDGEDIR."/$myhost";
@@ -42,7 +42,7 @@ while ( TRUE ) {
 	$row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
 	if ( $row['active'] != 1 ) {
 		if ( $active ) {
-			logmsg(LOG_INFO, "Not active, waiting for activation...");
+			logmsg(LOG_NOTICE, "Not active, waiting for activation...");
 			$active = FALSE;
 		}
 		sleep(5);
@@ -65,7 +65,7 @@ while ( TRUE ) {
 	// nothing updated -> no open submissions
 	if ( $numupd == 0 ) {
 		if ( ! $waiting ) {
-			logmsg(LOG_INFO, "$me No submissions in queue, waiting...");
+			logmsg(LOG_INFO, "No submissions in queue, waiting...");
 			$waiting = TRUE;
 		}
 		sleep(5);
@@ -80,7 +80,7 @@ while ( TRUE ) {
 		WHERE s.probid = p.probid AND s.langid = l.langid AND
 		judgemark = %s AND judgerid = %i', $mark, $myid);
 
-	logmsg(LOG_INFO, "$me Starting judging of $row[submitid]...");
+	logmsg(LOG_NOTICE, "Judging submission $row[submitid]...");
 
 	// update the judging table with our ID and the starttime
 	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,starttime,judgerid)
@@ -90,7 +90,7 @@ while ( TRUE ) {
 	// create tempdir for tempfiles
 	$tempdir = "$tempdirpath/$judgingid";
 	system("mkdir -p $tempdir", $retval);
-	if ( $retval != 0 ) error("$me Could not create $tempdir");
+	if ( $retval != 0 ) error("Could not create $tempdir");
 
 	// do the actual compile-run-test
 	system("./test_solution.sh ".
@@ -116,7 +116,7 @@ while ( TRUE ) {
 		$judgingid, $myid);
 
 	// done!
-	logmsg(LOG_INFO, "Judging $judgingid/$row[submitid] finished, result: $result");
+	logmsg(LOG_NOTICE, "Judging $row[submitid]/$judgingid finished, result: $result");
 
 	// restart the judging loop
 }
