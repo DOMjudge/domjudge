@@ -31,8 +31,8 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>'."\n";
 	<script language="JavaScript">
 	function popUp(URL) {
 		day = new Date();
-		id = day.getTime();
-		eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=300,height=200');");
+		uniqID = day.getTime();
+		window.open(URL, uniqID, 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=300,height=200');
 	}
 	</script>
 </head>
