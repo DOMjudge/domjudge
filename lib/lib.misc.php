@@ -17,11 +17,39 @@ function getFileContents($filename) {
  * Will return either the current contest, or else the upcoming one
  */
 function getCurContest() {
+
 	static $curcontest;
-	if(isset($curcontest)) return $curcontest;
+	static $endtime;
+
+	if ( isset($curcontest) && $endtime <= time() ) return $curcontest;
 
 	global $DB;
-	return $curcontest = $DB->q('MAYBEVALUE SELECT cid FROM contest
-	                             ORDER BY starttime DESC LIMIT 1');
-}
+	$now = $DB->q('SELECT cid FROM contest
+	               WHERE starttime <= NOW() AND endtime >= NOW()');
 
+	if ( $now->count() == 1 ) {
+		$row = $now->next();
+		$curcontest = $row['cid'];
+	}
+	if ( $now->count() == 0 ) {
+		$prev = $DB->q('SELECT cid FROM contest
+				WHERE endtime <= NOW()
+				ORDER BY endtime DESC
+				LIMIT 1');	
+		$row = $prev->next();
+		$curcontest = $row['cid'];
+	}
+	if ( $now->count() > 1 ) {
+		error("Contests table contains overlapping contests");
+	}
+
+	$endtime = $DB->q('MAYBEVALUE SELECT endtime FROM contest WHERE cid = %s',
+	                   $curcontest);
+
+	if(!isset($curcontest))
+	{
+		error("There is no (previous) contest");
+	}
+
+	return $curcontest;
+}
