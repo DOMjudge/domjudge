@@ -4,11 +4,10 @@
 # Run wrapper-script for 'test_solution.sh'.
 # See that script for more info.
 
-# Usage: $0 <lang> <prog> <testin> <output> <error> <exitfile>
+# Usage: $0 <program> <testin> <output> <error> <exitfile>
 #           <memlimit> <filelimit> <proclimit>
 #
-# <lang>      Language of the compiled program.
-# <prog>      Executable of the program to be run.
+# <program>   Executable of the program to be run.
 # <testin>    File containing test-input.
 # <output>    File where to write solution output.
 # <error>     File where to write error messages.
@@ -17,8 +16,7 @@
 # <filelimit> Maximum filesize in KB.
 # <proclimit> Maximum total no. processes (including this shell)
 
-LANG="$1";      shift
-PROG="$1";      shift
+PROGRAM="$1";   shift
 TESTIN="$1";    shift
 OUTPUT="$1";    shift
 ERROR="$1";     shift
@@ -34,7 +32,7 @@ ulimit -f $FILELIMIT  # max. size of created files in KB
 ulimit -u $PROCLIMIT  # max. no. processes
 
 # Run the program while redirecting input, output and stderr
-$PROG <$TESTIN >$OUTPUT 2>$ERROR
+$PROGRAM <$TESTIN >$OUTPUT 2>$ERROR
 exitcode=$?
 
 echo -n "$exitcode" >$EXITFILE
