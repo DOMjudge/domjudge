@@ -1,9 +1,25 @@
 #!/bin/bash
-# $Id$
 
-# Script to compile and run solutions.
-# Written by Jaap Eldering, April 2004
+# Script to test (compile, run and compare) solutions.
+# Copyright (C) 2004 Jaap Eldering (eldering@a-eskwadraat.nl).
 #
+# $Id$
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+
 # Usage: $0 <source> <lang> <testdata.in> <testdata.out> <timelimit> <tmpdir>
 #
 # <source>        File containing source-code.
@@ -16,15 +32,11 @@
 #                 Certainly do not place output-files there!
 #
 # This script supports languages, by calling separate compile and run scripts
-# depending on <lang>, namely 'compile_<lang>.sh' and 'run_<lang>.sh'.
-# Syntax for these scripts should be:
+# depending on <lang>, namely 'compile_<lang>.sh' and 'run_<lang>.sh'
+# indirectly from 'run.sh'. For usage of 'run.sh' see that script; syntax of
+# the compile scripts is:
 #
-# compile_<lang>.sh  <source> <dest>
-# run_<lang>.sh      <dest> <testdata.in> <output>
-#
-# Where both scripts may optionally modify <dest>, but then both scripts
-# must do so the same way (e.g. for Java: '<dest>.class').
-#
+# compile_<lang>.sh <source> <dest>
 
 # Exit automatically, whenever a simple command fails and trap it:
 set -e

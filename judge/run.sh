@@ -1,20 +1,18 @@
 #!/bin/bash
 # $Id$
 
-# Solution run wrapper-script for 'test_solution.sh'.
-# Written by Jaap Eldering, May 2004
-#
+# Run wrapper-script for 'test_solution.sh'.
+# See that script for more info.
+
 # Usage: $0 <lang> <prog> <testin> <output> <error> <exitfile> <memlim>
 #
 # <lang>      Language of the compiled program.
+# <prog>      Executable of the program to be run.
 # <testin>    File containing test-input.
 # <output>    File where to write solution output.
 # <error>     File where to write error messages.
 # <exitfile>  File where to write solution exitcode.
 # <memlimit>  Maximum total memory usage in KB.
-#
-# See 'test_solution.sh' script for more info.
-#
 
 LANG="$1";     shift
 PROG="$1";     shift

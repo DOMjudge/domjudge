@@ -1,13 +1,12 @@
 /*
    runguard -- run command with optional restrictions: time, root, user
-   Written by Jaap Eldering, April 2004
+   Copyright (C) 2004 Jaap Eldering (eldering@a-eskwadraat.nl).
 
    Based on:
    chroot   - written by Roland McGrath
    timeout  - written by Wietse Venema
 
    $Id$
-   
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
