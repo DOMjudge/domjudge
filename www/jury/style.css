@@ -1,0 +1,23 @@
+/* $Id$ */
+
+.invalid {
+	color: silver;
+	
+}
+
+.sol-correct {
+	font-weight: bold;
+	font-variant: small-caps;
+	color: green;
+}
+.sol-incorrect {
+	font-weight: bold;
+	font-variant: small-caps;
+	color: red;
+}
+
+.sol-queued {
+	font-weight: bold;
+	font-variant: small-caps;
+	color: gray;
+}

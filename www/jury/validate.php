@@ -7,8 +7,8 @@
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
-/* this needs some validation */
-if($ip != '131.211.224.224') {
+/* FIXME: this needs some validation, how? */
+if(FALSE) {
 	header('HTTP/1.1 403 Forbidden');
 	$title = '403 Forbidden';
 	include('../header.php');
