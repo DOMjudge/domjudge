@@ -4,4 +4,8 @@ AuthType Basic
 	order deny,allow
 	deny from all
 	allow from 192.168.1.0/24
+# peter
+	allow from 80.100.101.197
+# thijs
+	allow from 131.211.225.133
 </Limit>
