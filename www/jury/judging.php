@@ -22,12 +22,11 @@ $jdata = $DB->q('TUPLE SELECT j.*,s.*,judger.name as judgename, c.contestname
 	$id);
 
 $unix_start = strtotime($jdata['starttime']);
-$sec_queued = $unix_start - strtotime($jdata['submittime']);
 if(@$jdata['endtime']) {
 	$endtime = htmlspecialchars($jdata['endtime']). ' (judging took '.
-		(strtotime($jdata['endtime']) - $unix_start) .' s)';
+		printtimediff($unix_start, strtotime($jdata['endtime']) ) . ')';
 } else {
-	$endtime = 'still judging - busy '.(time()-$unix_start). ' s';
+	$endtime = 'still judging - busy ' . printtimediff($unix_start);
 }
 
 ?>
@@ -37,7 +36,8 @@ if(@$jdata['endtime']) {
 	$jdata['team'].	'</span> / '. htmlspecialchars($jdata['probid'].' / '.$jdata['langid'])?></a>
 	in <?=htmlentities($jdata['contestname'])?></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($jdata['submittime']) .' (queued for '.
-	$sec_queued.' s)'?></td></tr>
+	printtimediff(strtotime($jdata['submittime']), $unix_start) .
+	')'?></td></tr>
 <tr><td>Source:</td><td class="filename"><a href="show_source.php?id=<?=
 	(int)$jdata['submitid']?>"><?= htmlspecialchars($jdata['sourcefile']) ?></a></td></tr>
 <tr><td>Start:</td><td><?=htmlspecialchars($jdata['starttime'])?></td></tr>

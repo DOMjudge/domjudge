@@ -62,3 +62,28 @@ function printhost($hostname, $full = FALSE) {
 
 	return "<span class=\"hostname\">".htmlspecialchars($hostname)."</span>";
 }
+
+/**
+ * print the time something took from start to end.
+ * input: timestamps, end defaults to now.
+ */
+function printtimediff($start, $end = null) {
+	
+	if(!$end)	$end = time();
+	$ret = '';
+	$diff = $end - $start;
+
+	$h = floor($diff/3600);
+	$diff %= 3600;
+	if($h > 0) {
+		$ret .= $h.' h ';
+	}
+	
+	$m = floor($diff/60);
+	$diff %= 60;
+	if ( $m > 0) {
+		$ret .= $m.' m ';
+	}
+	
+	return $ret . $diff .' s';
+}
