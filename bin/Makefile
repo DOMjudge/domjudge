@@ -3,13 +3,13 @@ TARGETS=runguard beep mkstemps tempfile
 SUIDTARGETS=runguard beep
 SUIDBUILDS=$(addsuffix .build,$(SUIDTARGETS))
 
-CSINSTALLDIR=/tmp/private/nkpjury/bin
+CSINSTALLDIR=/private/nkpjury/bin
 CSDOMAIN=students.cs.uu.nl
 DOMAIN=$(shell dnsdomainname)
 
 ifeq ($(DOMAIN),$(CSDOMAIN))
 INSTALLDIR=$(CSINSTALLDIR)
-SUROOT=sudo -u root
+SUROOT=sudo -u root /bin/bash -c
 else
 INSTALLDIR=$(PWD)
 SUROOT=su root
