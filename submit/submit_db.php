@@ -42,12 +42,10 @@
 
 
 	// Check 1: is the contest open?
-	$cont = $DB->q('MAYBETUPLE SELECT *,
+	$cid = getCurContest();
+	$cont = $DB->q('TUPLE SELECT *,
 		UNIX_TIMESTAMP(starttime) as start_u, UNIX_TIMESTAMP(endtime) as end_u
-		FROM contest ORDER BY starttime DESC LIMIT 1');
-	if( ! $cont ) {
-		error("No contest found in the database, aborting.");
-	}
+		FROM contest WHERE cid = %i',$cid);
 	if( $cont['start_u'] > time() || $cont['end_u'] < time() ) {
 		error("The contest is closed, no submissions accepted. [c$cont[cid]]");
 	}
@@ -55,7 +53,7 @@
 
 	// Check 2: valid parameters?
 	if( ! $lang = $DB->q('MAYBEVALUE SELECT langid FROM language WHERE
-		                   extension = %s AND allow_submit = 1', $langext) ) {
+		                  extension = %s AND allow_submit = 1', $langext) ) {
 		error("Language '$langext' not found in database or not submittable.");
 	}
 	if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',
@@ -95,7 +93,7 @@
 	$id = $DB->q('RETURNID INSERT INTO submission
 	              (cid,team,probid,langid,submittime,sourcefile,sourcecode)
 	              VALUES (%i, %s, %s, %s, NOW(), %s, %s)',
-	             $cont["cid"], $team, $prob, $lang, $tofile,
+	             $cid, $team, $prob, $lang, $tofile,
 	             getFileContents(SUBMITDIR."/".$tofile));
 
 	logmsg (LOG_NOTICE, "submitted $team/$prob/$lang, file $tofile, id s$id");
