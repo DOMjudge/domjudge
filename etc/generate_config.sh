@@ -51,6 +51,11 @@ CONFMAINTAG="GLOBAL CONFIG INCLUDE"
 # Maximum number of lines in config files
 MAXLINES=1000
 
+if [ -z "$1" ]; then
+	echo "Usage: $0 <filename> | <extension>"
+	exit 1
+fi
+
 EXT=${1##*.}
 TEMPLATE="$LOCALTEMPLATE.$EXT"
 CONFIG="$LOCALCONF.$EXT"
