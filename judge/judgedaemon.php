@@ -100,6 +100,8 @@ while ( TRUE ) {
 		if ( ! $waiting ) {
 			logmsg(LOG_INFO, "No submissions in queue, waiting...");
 			$waiting = TRUE;
+		} else {
+			echo ".";
 		}
 		sleep($waittime);
 		continue;
