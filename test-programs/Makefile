@@ -1,8 +1,8 @@
--include Makefile.global
+all: build
+
+-include $(TOPDIR)/Makefile.global
 
 TARGETS = checkinput
-
-all: build
 
 build: $(TARGETS)
 

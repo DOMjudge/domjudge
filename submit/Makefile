@@ -1,4 +1,4 @@
--include Makefile.global
+-include $(TOPDIR)/Makefile.global
 
 TARGETS = submit submitdaemon
 

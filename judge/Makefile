@@ -1,6 +1,6 @@
--include Makefile.global
+all: build
 
-all:
+-include $(TOPDIR)/Makefile.global
 
 build:
 

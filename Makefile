@@ -1,17 +1,24 @@
--include Makefile.global
-
-SUBDIRS = bin etc lib doc submit judge www test-sources test-programs
-
 all: config build
 
+export TOPDIR = $(PWD)
+-include $(TOPDIR)/Makefile.global
+
+SUBDIRS = bin etc lib doc submit judge www test-programs
+
 build: config
-	-for i in $(SUBDIRS) ; do make -I .. -C $$i build ; done
 
 config:
-	make -I .. -C etc config
+	$(MAKE) -C etc config
+
+dvi:
+	$(MAKE) -C doc dvi
 
 install: build
 	@echo "FIXME: Nothing done here, install manually."
 
-clean:
-	-for i in $(SUBDIRS) ; do make -I .. -C $$i clean ; done
+REC_TARGETS = build clean
+
+$(REC_TARGETS): %:
+	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
+
+.PHONY: dvi

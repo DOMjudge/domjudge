@@ -1,4 +1,6 @@
--include Makefile.global
+all: build install-setuid
+
+-include $(TOPDIR)/Makefile.global
 
 TARGETS = runguard beep mkstemps tempfile
 
@@ -11,8 +13,6 @@ SUIDINSTALLDIR=$(PWD)
 # Command to become root:
 SUROOT=su root
 #SUROOT=sudo -u root /bin/bash -c
-
-all: build install-setuid
 
 build: $(TARGETS)
 

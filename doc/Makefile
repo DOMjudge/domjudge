@@ -1,4 +1,6 @@
--include Makefile.global
+all: build
+
+-include $(TOPDIR)/Makefile.global
 
 TARGETS = team-manual team-manual-NL
 
@@ -8,7 +10,7 @@ TARGETSPDF = $(addsuffix .pdf,$(TARGETS))
 
 LATEXOPTIONS = --file-line-error-style
 
-all: build
+CONFIGDIR = ../etc
 
 build: ps pdf
 
@@ -19,9 +21,12 @@ dvi: $(TARGETSDVI)
 ps:  $(TARGETSPS)
 pdf: $(TARGETSPDF)
 
-$(TARGETSDVI): %.dvi: %.tex expdlist.sty svn.sty logos/DOMjudgelogo.eps systemconfig.tex example.*
-	latex $(LATEXOPTIONS) $<
-	latex $(LATEXOPTIONS) $<
+$(TARGETSDVI): %.dvi: %.tex $(CONFIGDIR)/global.cfg \
+                            $(CONFIGDIR)/config.template.tex \
+                            example.* logos/DOMjudgelogo.eps \
+                            expdlist.sty svn.sty 
+	latex $(LATEXOPTIONS) $< &> /dev/null
+	latex $(LATEXOPTIONS) $< &> /dev/null
 	latex $(LATEXOPTIONS) $<
 
 $(TARGETSPS): %.ps: %.dvi
