@@ -4,7 +4,8 @@
 
    Based on:
    chroot   - written by Roland McGrath
-   timeout  - written by Wietse Venema (see timeout.copyright)
+   timeout  - written by Wietse Venema (licensed under IBM public license,
+                                        see timeout.copyright for details)
 
    $Id$
 

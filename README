@@ -14,7 +14,7 @@ to name them here too:
 
 - runguard.c is based on
 	- chroot from GNU coreutils by Roland McGrath
-	- timeout from SATAN by Wietse Venema
+	- timeout from The Coroner's Toolkit by Wietse Venema
 - beep.c is made by Johnathan Nightingale
 - bash is included from the Debian "bash-static" (i386) package
   (copyright Free Software Foundation).
@@ -37,7 +37,7 @@ any later version. See the file COPYING.
 Additionally, parts of this system are based on other programs, which
 are covered by other copyrights. This will be noted in the files themselves.
 Files (partly) covered by other copyrights are:
-- bin/runguard.c
+- bin/runguard.c partly by the IBM public license
 
 
 Overview
