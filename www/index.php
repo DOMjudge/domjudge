@@ -11,7 +11,7 @@ require_once('../lib/use_db_public.php');
 
 $ip = $_SERVER['REMOTE_ADDR'];
 $res = $DB->q('SELECT ipaddress FROM team WHERE ipaddress = %s', $ip);
-if($res->count() > 0) {
+if( $res->count() > 0 ) {
 	$target = 'team/';
 } else {
 	$target = 'public/';

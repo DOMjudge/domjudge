@@ -22,7 +22,7 @@ function getSubmissions($key = null, $value = null) {
 	 * looking for the submissions of a specific team or judger, else
 	 * the complete list.
 	 */
-	if($key && $value) {
+	if( $key && $value ) {
 		$res = $DB->q('SELECT s.submitid,s.team,s.probid,s.langid,s.submittime,s.judgerid,
 			t.name as teamname, p.name as probname, l.name as langname
 			FROM submission s
@@ -43,7 +43,7 @@ function getSubmissions($key = null, $value = null) {
 	}
 
 	// nothing found...
-	if($res->count() == 0) {
+	if( $res->count() == 0 ) {
 		echo "<p><em>No submissions</em></p>\n\n";
 		return;
 	}
@@ -65,7 +65,7 @@ function getSubmissions($key = null, $value = null) {
 		($detailed ? "<th>last<br />judge</th>" : '') .
 		"</tr>\n";
 	// print each row with links to detailed information
-	while($row = $res->next()) {
+	while( $row = $res->next() ) {
 		$sid = (int)$row['submitid'];
 		$isfinished = ($detailed || ! @$resulttable[$row['submitid']]['result']);
 		echo "<tr>" .
@@ -156,15 +156,15 @@ function putResponse($id, $showReq = true, $teamlink = true) {
 		LEFT JOIN team t ON (t.login = r.rcpt)
 		WHERE r.respid = %i', $id);
 
-	if(!$respdata)	error ("Missing clarification response data");
+	if( ! $respdata ) error ("Missing clarification response data");
 
 ?>
 <table>
 <tr><td>Contest:</td><td><?=htmlentities($respdata['contestname'])?></td></tr>
-<?
-	if($showReq) {
+<?php
+	if( $showReq ) {
 		echo "<tr><td>Request:</td><td>";
-		if(isset($respdata['reqid'])) {
+		if( isset($respdata['reqid']) ) {
 			echo '<a href="request.php?id=' . urlencode($respdata['reqid']) .
 				'">q' . htmlspecialchars($respdata['reqid']) . '</a>';
 		} else {
@@ -199,10 +199,10 @@ function putRequest($id, $login = NULL) {
 		LEFT JOIN contest c ON (c.cid = q.cid)
 	    LEFT JOIN team t ON (q.login = t.login)
 		WHERE q.reqid = %i', $id);
-	if(!$reqdata) {
+	if( ! $reqdata ) {
 		error ("Missing clarification request data");
 	}
-	if(isset($login) && $reqdata['login'] != $login) {
+	if( isset($login) && $reqdata['login'] != $login ) {
 		error ("Not your clarification request");
 	}
 
@@ -222,7 +222,7 @@ function putRequest($id, $login = NULL) {
 	wordwrap(htmlspecialchars($reqdata['body'])) ?></pre></td></tr>
 </table>
 
-<?
+<?php
 	return $reqdata;
 }
 
@@ -252,14 +252,14 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		FROM problem WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
 
 	echo "<colgroup><col id=\"scoreteamname\" /><col id=\"scoresolv\" /><col id=\"scoretotal\" />";
-	for($i = 0; $i < count($probs); $i++) {
+	for( $i = 0; $i < count($probs); $i++ ) {
 		echo "<col class=\"scoreprob\" />";
 	}
 	echo "</colgroup>\n";
 
 	echo "<tr id=\"scoreheader\"><th>TEAM</th>";
 	echo "<th>solved</th><th>time</th>\n";
-	foreach($probs as $pr) {
+	foreach( $probs as $pr ) {
 		echo "<th title=\"".htmlentities($pr['name'])."\">".htmlentities($pr['probid'])."</th>";
 	}
 	echo "</tr>\n";
@@ -269,7 +269,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	$SUMMARY = array('num_correct' => 0, 'total_time' => 0);
 
 	// for each team, fetch the status of each problem
-	foreach($teams as $team) {
+	foreach( $teams as $team ) {
 
 
 		// to lookup the team name at the end
@@ -281,7 +281,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		$grand_total_time = 0;
 		
 		// for each problem fetch the result
-		foreach($probs as $pr) {
+		foreach( $probs as $pr ) {
 
 			$result = $DB->q('SELECT result, 
 				(UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 as timediff
@@ -297,7 +297,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			$correct = FALSE;
 
 			// for each submission
-			while($row = $result->next()) {
+			while( $row = $result->next() ) {
 				$total_submitted++;
 
 				// if correct, don't look at any more submissions after this one
@@ -315,7 +315,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			}
 
 			// calculate penalty time: only when correct add it to the total
-			if(!$correct) {
+			if( ! $correct ) {
 				$penalty = 0;
 			} else {
 				$grand_total_correct++;
@@ -344,7 +344,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	uasort($SCORES, 'cmp');
 
 	// print the whole thing
-	foreach($SCORES as $team => $totals) {
+	foreach( $SCORES as $team => $totals ) {
 
 		// team name, total correct, total time
 		echo "<tr" . (@$myteamid == $team ? ' id="scorethisisme"':'')
@@ -357,7 +357,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		$SUMMARY['total_time']  += $totals['total_time'];
 
 		// for each problem
-		foreach($THEMATRIX[$team] as $prob => $pdata) {
+		foreach( $THEMATRIX[$team] as $prob => $pdata ) {
 			echo "<td class=\"";
 			// CSS class for correct/incorrect/neutral results
 			if( $pdata['correct'] ) { 
@@ -376,7 +376,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			echo "</td>";
 			@$SUMMARY[$prob]['submissions'] += $pdata['submitted'];
 			@$SUMMARY[$prob]['correct'] += ($pdata['correct'] ? 1 : 0);
-			if($pdata['time'] > 0) {
+			if( $pdata['time'] > 0 ) {
 				@$SUMMARY[$prob]['times'][] = $pdata['time'];
 			}
 		}
@@ -388,7 +388,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	echo "\n<tr id=\"scoresummary\"><td>Summary</td>";
 	echo "<td class=\"scorenc\">".$SUMMARY['num_correct']."</td><td class=\"scorett\">".
 		$SUMMARY['total_time']."</td>";
-	foreach($probs as $pr) {
+	foreach( $probs as $pr ) {
 		echo "<td>".$SUMMARY[$pr['probid']]['submissions'].' / '.$SUMMARY[$pr['probid']]['correct'].
 			' / '.( isset($SUMMARY[$pr['probid']]['times']) ? min(@$SUMMARY[$pr['probid']]['times']) : '-')."</td>";
 	}
@@ -400,9 +400,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	$res = $DB->q('SELECT * FROM category ORDER BY catid');
 
 	// only print legend when there's more than one category
-	if ($res->count() > 1) {
+	if ( $res->count() > 1 ) {
 		echo "<br /><br /><br />\n<table class=\"scoreboard\"><tr><th>Legend</th></tr>\n";
-		while($row = $res->next()) {
+		while ( $row = $res->next() ) {
 			echo "<tr class=\"category" . $row['catid'] .
 				"\"><td align=\"center\" class=\"scoretn\">" .
 				$row['name'] . "</td></tr>";
@@ -411,7 +411,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	}
 
 	// last modified date, now if we are the jury, else include the lastupdatetime
-	if( !$isjury && isset($contdata['lastscoreupdate'])) {
+	if( ! $isjury && isset($contdata['lastscoreupdate']) ) {
 		$lastupdate = min(time(), strtotime($contdata['lastscoreupdate']));
 	} else {
 		$lastupdate = time();

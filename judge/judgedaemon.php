@@ -26,8 +26,8 @@ $verbose = LOG_INFO;
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
 // Seed the random generator
-list($usec,$sec)=explode(" ",microtime());
-mt_srand($sec * $usec);
+list($usec, $sec) = explode( " ", microtime() );
+mt_srand( $sec * $usec );
 
 // Retrieve hostname and check database for judger entry
 $row = $DB->q('MAYBETUPLE SELECT * FROM judger WHERE judgerid = %s', $myhost);
@@ -36,7 +36,7 @@ if ( ! $row ) {
 }
 
 // Create directory where to test submissions
-$tempdirpath = JUDGEDIR."/$myhost";
+$tempdirpath = JUDGEDIR . "/$myhost";
 system("mkdir -p $tempdirpath", $retval);
 if ( $retval != 0 ) error("Could not create $tempdirpath");
 
@@ -86,8 +86,8 @@ while ( TRUE ) {
 	$judgable_lang = array_unique(array_values($langs));
 
 	// Generate (unique) random string to mark submission to be judged
-	list($usec,$sec)=explode(" ",microtime());
-	$mark = $myhost.'@'.($sec+$usec).'#'.md5(uniqid(mt_rand(), true));
+	list($usec, $sec) = explode(" ", microtime());
+	$mark = $myhost.'@'.($sec+$usec).'#'.md5( uniqid( mt_rand(), true ) );
 
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
@@ -148,10 +148,10 @@ while ( TRUE ) {
 			output_compile = %s, output_run = %s, output_diff = %s, output_error = %s
 		WHERE judgingid = %i AND judgerid = %s',
 		$result,
-		getFileContents($tempdir.'/compile.out'),
-		getFileContents($tempdir.'/program.out'),
-		getFileContents($tempdir.'/diff.out'),
-		getFileContents($tempdir.'/error.out'),
+		getFileContents( $tempdir . '/compile.out' ),
+		getFileContents( $tempdir . '/program.out' ),
+		getFileContents( $tempdir . '/diff.out' ),
+		getFileContents( $tempdir . '/error.out' ),
 		$judgingid, $myhost);
 
 	// done!

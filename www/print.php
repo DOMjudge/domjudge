@@ -15,7 +15,7 @@ function printresult($result, $valid = TRUE, $teamstatus = FALSE) {
 	$start = '<span class="sol ';
 	$end   = '</span>';
 
-	switch($result) {
+	switch( $result ) {
 		case '':
 			$result = 'judging';
 		case 'judging':
@@ -45,7 +45,7 @@ function printyn ($val) {
  * given 2004-12-31 15:43:05, returns 15:43:05
  */
 function printtime($datetime) {
-	if(!$datetime) return '';
+	if ( ! $datetime ) return '';
 	$date_time = explode(' ',$datetime);
 	return htmlspecialchars($date_time[1]);
 
@@ -57,7 +57,7 @@ function printtime($datetime) {
  * the local part (for keeping tables readable)
  */
 function printhost($hostname, $full = FALSE) {
-	if(!$full) {
+	if( ! $full ) {
 		$hostname = array_shift(explode('.', $hostname));
 	}
 
@@ -70,7 +70,7 @@ function printhost($hostname, $full = FALSE) {
  */
 function printtimediff($start, $end = null) {
 	
-	if(!$end)	$end = time();
+	if( ! $end )	$end = time();
 	$ret = '';
 	$diff = $end - $start;
 
@@ -82,7 +82,7 @@ function printtimediff($start, $end = null) {
 	
 	$m = floor($diff/60);
 	$diff %= 60;
-	if ( $m > 0) {
+	if ( $m > 0 ) {
 		$ret .= $m.' m ';
 	}
 	
@@ -95,8 +95,9 @@ function printtimediff($start, $end = null) {
 function str_cut ($str, $size) {
 	// is the string already short enough?
 	// we count '...' for 2 'regular' chars.
-	if(strlen($str) <= $size+2)
+	if( strlen($str) <= $size+2 ) {
 		return $str;
+	}
 
-	return substr($str,0,$size).'...';
+	return substr($str, 0, $size) . '...';
 }

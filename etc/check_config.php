@@ -34,7 +34,7 @@
 		'CHROOT_PREFIX' => 'r'
 		);
 
-	foreach ($dirstocheck as $dir => $ops) {
+	foreach ( $dirstocheck as $dir => $ops ) {
 		$realdir = constant($dir);
 		if( ! file_exists ($realdir) )	{ logmsg(LOG_WARNING, "$dir [$realdir] does not exist!" ); continue; }
 		if( ! is_dir($realdir) )		{ logmsg(LOG_WARNING, "$dir [$realdir] is not a directory!" ); continue; }

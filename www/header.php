@@ -11,9 +11,8 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>'."\n";
 <html lang="en">
 <head>
 	<!-- DOMjudge version <?= DOMJUDGE_VERSION ?> -->
-<?
-	if(isset($refresh))
-	{
+<?php
+	if( isset($refresh) ) {
 ?>
 	<meta http-equiv="refresh" content="<?
 		if(isset($popup)) {
@@ -22,7 +21,7 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>'."\n";
 			echo $refresh;
 		}
 		?>" />
-<?
+<?php
 	}
 ?>
 	<title><?= $title ?></title>
@@ -35,4 +34,4 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>'."\n";
 	}
 	</script>
 </head>
-<body <? if(isset($popup) && $popup) { echo "onLoad=\"javascript:popUp('popup.php')\""; } ?>>
+<body <?php if( isset($popup) && $popup ) { echo "onLoad=\"javascript:popUp('popup.php')\""; } ?>>
