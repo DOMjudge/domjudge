@@ -66,6 +66,9 @@ while true ; do
 	if [ ${#TESTLINE} -gt $LINEMAXLEN ]; then LINEMAXLEN=${#TESTLINE} ; fi
 done
 
+# Add 2 chars to line length to account for surrounding qoutes
+((LINEMAXLEN+=2))
+
 exec 3<&-
 exec 4<&-
 
@@ -97,7 +100,7 @@ while true ; do
 		SEPCHAR='!'
 	fi
 
-	printf "%-${LINEDIGITS}d:%-${LINEMAXLEN}s $SEPCHAR %-${LINEMAXLEN}s\n" $LINE "'$PROGLINE'" "'$TESTLINE'"
+	printf "%-${LINEDIGITS}d %-${LINEMAXLEN}s $SEPCHAR %-${LINEMAXLEN}s\n" $LINE "'$PROGLINE'" "'$TESTLINE'"
 
 done >>$DIFFOUT
 
