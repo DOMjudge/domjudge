@@ -60,10 +60,7 @@ while ( TRUE ) {
 		$waiting = FALSE;
 	}
 
-	$cid = $DB->q('MAYBEVALUE SELECT cid FROM contest ORDER BY starttime DESC LIMIT 1');
-	if( ! isset($cid) ) {
-		error("No contest found in database, aborting.");
-	}
+	$cid = getCurContest();
 	
 	// we have to check for the judgability of problems/languages this way,
 	// because we use an UPDATE below where joining is not possible.
