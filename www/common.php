@@ -134,9 +134,10 @@ function putClock() {
 function putResponse($id, $showReq = true, $teamlink = true) {
 	global $DB;
 
-	$respdata = $DB->q('MAYBETUPLE SELECT r.*, c.contestname
+	$respdata = $DB->q('MAYBETUPLE SELECT r.*, c.contestname, t.name
 		FROM  clar_response r
 		LEFT JOIN contest c ON (c.cid = r.cid)
+		LEFT JOIN team t ON (t.login = r.rcpt)
 		WHERE r.respid = %i', $id);
 
 	if(!$respdata)	error ("Missing clarification response data");
@@ -158,13 +159,15 @@ function putResponse($id, $showReq = true, $teamlink = true) {
 ?>
 <tr><td>Sent to:</td><td><?=isset($respdata['rcpt'])?
 	($teamlink?'<a href="team.php?id='.urlencode($respdata['rcpt']).'">':'')
-	.'<span class="teamid">'. htmlspecialchars($respdata['rcpt']).'</span>'
+	.'<span class="teamid">'
+	.htmlspecialchars($respdata['rcpt']).'</span>: '
+	.htmlentities($respdata['name'])
 	.($teamlink?'</a>':'')
-	:'All'?></td></tr>
+	:'ALL'?></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($respdata['submittime']) ?></td></tr>
 <tr><td valign="top">Response:</td><td class="filename"><pre class="output_text"><?=nl2br(htmlspecialchars($respdata['body'])) ?></pre></td></tr>
 </table>
-<?
+<?php
 }
 
 /**
@@ -174,23 +177,31 @@ function putResponse($id, $showReq = true, $teamlink = true) {
 function putRequest($id, $login = NULL) {
 	global $DB;
 
-	$reqdata = $DB->q('MAYBETUPLE SELECT q.*, c.contestname
+	$reqdata = $DB->q('MAYBETUPLE SELECT q.*, c.contestname, t.name
 		FROM  clar_request q
 		LEFT JOIN contest c ON (c.cid = q.cid)
+	    LEFT JOIN team t ON (q.login = t.login)
 		WHERE q.reqid = %i', $id);
-	if(!$reqdata)	error ("Missing clarification request data");
-	if(isset($login) && $reqdata['login'] != $login)
-			error ("Not your clarification request");
+	if(!$reqdata) {
+		error ("Missing clarification request data");
+	}
+	if(isset($login) && $reqdata['login'] != $login) {
+		error ("Not your clarification request");
+	}
+
 ?>
 
 <table>
 <tr><td>Contest:</td><td><?=htmlentities($reqdata['contestname'])?></td></tr>
 <tr><td>From:</td><td>
-<?=!isset($login)?'<a href="team.php?id='.urlencode($reqdata['login']).'">':''?><span class="teamid"><?=htmlspecialchars($reqdata['login'])?></span>
+<?=!isset($login)?'<a href="team.php?id='.urlencode($reqdata['login']).'">':''?>
+<?= '<span class="teamid">' .
+	htmlspecialchars($reqdata['login']) . '</span>: '.
+	htmlentities($reqdata['name'])?>
 <?=!isset($login)?'</a>':''?>
 </td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($reqdata['submittime']) ?></td></tr>
-<tr><td valign="top">Request:</td><td class="filename"><pre class="output_text"><?=nl2br(htmlspecialchars($reqdata['body'])) ?></pre></td></tr>
+<tr><td valign="top">Request:</td><td class="filename"><pre class="output_text"><?=htmlspecialchars($reqdata['body']) ?></pre></td></tr>
 </table>
 
 <?
@@ -207,7 +218,7 @@ function putScoreBoard($myteamid = null) {
 
 	echo "<h1>Scoreboard</h1>\n\n";
 
-	echo "<table class=\"scoreboard\">\n";
+	echo "<table class=\"scoreboard\" border=\"1\" width=\"80%\">\n";
 
 	$cid = getCurContest();
 

@@ -30,6 +30,7 @@ if ( $list->count() == 0 ) {
 	while ( $row = $list->next())
 	{
 		putResponse($row['respid'], false, false);
+		echo "<p>\n\n";
 	}
 }
 

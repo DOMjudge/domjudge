@@ -13,6 +13,7 @@ require('menu.php');
 $id = (int)$_REQUEST['id'];
 if(!$id)	error ("Missing clarification id");
 
+/** insert a new response */
 if (isset($_REQUEST['submit'])
   && !empty($_REQUEST['response']))
 {
@@ -25,6 +26,9 @@ if (isset($_REQUEST['submit'])
 			VALUES (%i, %i, now(), %s, %s)',
 			$id, getCurContest(), $_REQUEST['sendto'], $_REQUEST['response']);
 	}
+	/** redirect back to the original request */
+	header('Location: request.php?id='. urlencode($id));
+	exit;
 }
 
 
@@ -51,12 +55,14 @@ while ( $row = $list->next())
 <tr><td>Send to:</td><td>
 <select name="sendto">
   <option value="">ALL</option>
-  <option value="<?=$reqdata['login']?>"><?=$reqdata['login']?></option>
+  <option value="<?=htmlspecialchars($reqdata['login'])?>"><?=
+  	htmlspecialchars($reqdata['login']).': '.
+	htmlentities($reqdata['name'])?></option>
 </select>
 </td></tr>
 <tr><td valign="top">Response:</td><td><textarea name="response" cols="80" rows="5"></textarea></td></tr>
 <tr><td>&nbsp;</td><td><input type="submit" name="submit" value="Send" /></td></tr>
 </table>
-<?
+<?php
 
 require('../footer.php');

@@ -11,6 +11,7 @@ $title = 'Clarification Requests';
 require('../header.php');
 require('menu.php');
 
+/** insert new response */
 if (isset($_REQUEST['submit'])
   && !empty($_REQUEST['response']))
 {
@@ -21,6 +22,10 @@ if (isset($_REQUEST['submit'])
 		$respid = $DB->q('RETURNID INSERT INTO clar_response (reqid, cid, submittime, rcpt, body)
 			VALUES (NULL, %i, now(), %s, %s)', getCurContest(), $_REQUEST['sendto'], $_REQUEST['response']);
 	}
+
+	/** redirect back to the clarifications overview */
+	header('Location: clarifications.php');
+	exit;
 }
 
 echo "<h1>Clarification Requests</h1>\n\n";
@@ -36,7 +41,7 @@ if ( $res->count() == 0 ) {
 } else {
 	echo "<h3>New Requests:</h3>\n";
 	echo "<table>\n".
-		"<tr><th>ID</th><th>team</th><th>request time</th><th>request</th>\n";
+		"<tr><th>ID</th><th>team</th><th>time</th><th>request</th>\n";
 	while ($req = $res->next())
 	{
 		$req['reqid'] = (int)$req['reqid'];
@@ -66,7 +71,7 @@ if ( $res->count() == 0 ) {
 } else {
 	echo "<h3>Old Requests:</h3>\n";
 	echo "<table>\n".
-		"<tr><th>ID</th><th>team</th><th>request time</th><th>request</th>\n";
+		"<tr><th>ID</th><th>team</th><th>time</th><th>request</th>\n";
 	while ($req = $res->next())
 	{
 		$req['reqid'] = (int)$req['reqid'];
@@ -74,7 +79,7 @@ if ( $res->count() == 0 ) {
 			"<td><a href=\"request.php?id=".$req['reqid']."\">q".$req['reqid']."</a></td>".
 			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($req['login']). "\">".
 				htmlspecialchars($req['login'])."</a></td>".
-			"<td>".$req['submittime']."</td>".
+			"<td>".printtime($req['submittime'])."</td>".
 			"<td><a href=\"request.php?id=".$req['reqid']."\">".
 				htmlspecialchars(str_cut($req['body'], 50)).
 			"</a></td>".
@@ -105,7 +110,7 @@ if ( $res->count() == 0 ) {
 		echo "<tr>".
 			"<td><a href=\"response.php?id=".$req['respid']."\">r".$req['respid']."</a></td>".
 			"<td class=\"teamid\">".$team."</td>".
-			"<td>".$req['submittime']."</td>".
+			"<td>".printtime($req['submittime'])."</td>".
 			"<td><a href=\"response.php?id=".$req['respid']."\">".
 				htmlspecialchars(str_cut($req['body'], 50)).
 			"</a></td></tr>";

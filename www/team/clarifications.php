@@ -15,7 +15,7 @@ include('menu.php');
 <h1>Clarifications</h1>
 <p><table>
 <tr><th>Time</th><th>Reponse</th></tr>
-<?
+<?php
 
 $data = $DB->q('TABLE SELECT * FROM clar_response WHERE cid = %i 
 	AND (rcpt = %s OR rcpt IS NULL) ORDER BY submittime DESC',
@@ -35,19 +35,18 @@ foreach($data as $row) {
 </p>
 
 <h1>Requests</h1>
-<?
+<?php
 $res = $DB->q('SELECT q.*
 	FROM  clar_request q
 	WHERE q.cid = %i AND q.login = %s
 	ORDER BY q.submittime DESC', getCurContest(), $login);
 
 echo "<table>\n".
-	"<tr><th>ID</th><th>request time</th><th>request</th>\n";
+	"<tr><th>Time</th><th>Request</th>\n";
 while ($req = $res->next())
 {
 	$req['reqid'] = (int)$req['reqid'];
 	echo "<tr>".
-		"<td><a href=\"request.php?id=".$req['reqid']."\">q".$req['reqid']."</a></td>".
 		"<td>".printtime($req['submittime'])."</td>".
 		"<td><a href=\"request.php?id=".$req['reqid']."\">".
 			htmlspecialchars(str_cut($req['body'],50)).
@@ -59,5 +58,5 @@ while ($req = $res->next())
 
 <p><a href="clar_request.php">Request Clarification</a></p>
 
-<?
+<?php
 include('../footer.php');
