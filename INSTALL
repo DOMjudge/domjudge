@@ -74,7 +74,7 @@ locations (even within different roots, although not tested!)).
 
 SYSTEM_ROOT
 	The judging system itself is contained in this directory tree. All
-	programs needed for the judging system are located here and alongside
+	programs needed for the judging system are located here alongside
 	some extra utilities and the configuration of the system.
 
 INPUT_ROOT
@@ -86,7 +86,7 @@ INPUT_ROOT
 	where input and output testdata have to be placed.
 
 OUTPUT_ROOT
-	Places here are all submission files, logfiles and temporary
+	Placed here are all submission files, logfiles and temporary
 	files, made while testing submissions. The following directories
 	should be present within OUTPUT_ROOT:
 
