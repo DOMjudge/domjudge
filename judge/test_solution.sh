@@ -31,12 +31,17 @@
 #                 environment. For best security leave it as empty as possible.
 #                 Certainly do not place output-files there!
 #
-# This script supports languages, by calling separate compile and run scripts
-# depending on <lang>, namely 'compile_<lang>.sh' and 'run_<lang>.sh'
-# indirectly from 'run.sh'. For usage of 'run.sh' see that script; syntax of
-# the compile scripts is:
+# This script supports languages, by calling separate compile scripts
+# depending on <lang>, namely 'compile_<lang>.sh'. These compile scripts
+# should compile the source to a statically linked, standalone executable!
+# Syntax for these compile scripts is:
 #
-# compile_<lang>.sh <source> <dest>
+#   compile_<lang>.sh <source> <dest>
+#
+# where <dest> will be the same filename as <source> but without extension.
+#
+# For running the solution a script 'run.sh' is called. For usage of
+# 'run.sh' see that script.
 
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
@@ -135,18 +140,17 @@ ulimit -HS -c 0     # Do not write core-dumps
 ulimit -HS -f 65536 # Maximum filesize in KB
 
 logmsg $LOG_NOTICE "creating input/output files"
-cp $TESTIN $TMPDIR
-cp $SOURCE $TMPDIR
-TESTIN=`basename $TESTIN`
-SOURCE=`basename $SOURCE`
-DEST="${SOURCE%.*}"
+EXT=${SOURCE##*.}
+[ "$EXT" ] || error "source-file does not have an extension: $SOURCE"
+cp $SOURCE $TMPDIR/source.$EXT
+cp $TESTIN $TMPDIR/testdata.in
 
 OLDDIR=$PWD
 cd $TMPDIR
 
 # Create files, which are expected to exist:
 touch compile.{out,time}   # Compiler output and runtime
-touch error.out            # Error output while running program
+touch error.out            # Error output after compiler output
 touch diff.out             # Compare output
 touch program.{out,err}    # Program output and stderr (for extra information)
 touch program.{time,exit}  # Program runtime and exitcode
@@ -157,17 +161,20 @@ chmod a+rw program.{out,err,time,exit}
 
 logmsg $LOG_NOTICE "starting compile"
 
-if [ `cat $SOURCE | wc -c` -gt $((SOURCESIZE*1024)) ]; then
+if [ `cat source.$EXT | wc -c` -gt $((SOURCESIZE*1024)) ]; then
 	echo "Source-code is larger than $SOURCESIZE KB." >>compile.out
 	exit $E_COMPILE
 fi
 
+# First compile to 'source' then rename to 'program' to avoid problems with
+# the compiler writing to different filenames and deleting intermediate files.
 ( $RUNGUARD -t $COMPILETIME -o compile.time \
-	$RUNSCRIPTDIR/compile_$LANG.sh $SOURCE $DEST
+	$RUNSCRIPTDIR/compile_$LANG.sh source.$EXT source
 ) &>compile.tmp
 exitcode=$?
+mv source program
 
-# Check for errors during compile:
+logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep 'timelimit reached: aborting command' compile.tmp &>/dev/null; then
 	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
 	exit $E_COMPILE
@@ -177,6 +184,7 @@ if [ $exitcode -ne 0 ]; then
 	cat compile.tmp >>compile.out
 	exit $E_COMPILE
 fi
+cat compile.tmp >>compile.out
 
 
 logmsg $LOG_NOTICE "setting up chroot-ed environment"
@@ -184,11 +192,13 @@ logmsg $LOG_NOTICE "setting up chroot-ed environment"
 mkdir bin dev proc
 # Copy the run-script and a statically compiled bash-shell:
 cp -p $RUNSCRIPTDIR/run.sh .
-cp -p $RUNSCRIPTDIR/run_$LANG.sh .
-cp -p $BASHSTATIC ./bin/bash
-# Mount (bind) the proc filesystem (needed by Java):
+cp -p $BASHSTATIC          ./bin/bash
+
+# Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
+logmsg $LOG_DEBUG "mounting proc filesystem"
 sudo mount -n -t proc --bind /proc proc
-# Make a fifo link to the real /dev/null:
+
+logmsg $LOG_DEBUG "making a fifo-buffer link to /dev/null"
 mkfifo -m a+rw ./dev/null
 cat < ./dev/null >/dev/null &
 CATPID=$!
@@ -198,11 +208,13 @@ disown $CATPID
 logmsg $LOG_NOTICE "running program"
 
 ( $RUNGUARD -r $PWD -u $RUNUSER -t $TIMELIMIT -o program.time \
-	/run.sh $LANG /$DEST $TESTIN program.out program.err program.exit \
+	/run.sh /program testdata.in program.out program.err program.exit \
 	        $MEMLIMIT $FILELIMIT $PROCLIMIT ) &>error.tmp
 exitcode=$?
 
+logmsg $LOG_DEBUG "unmounting proc filesystem"
 sudo umount $PWD/proc
+
 # Check for still running processes (first wait for all exiting processes):
 sleep 1
 if ps -u $RUNUSER &>/dev/null; then
@@ -218,7 +230,8 @@ else
 	cat program.err >>error.tmp
 fi
 
-# Check for errors from running the program: 
+# Check for errors from running the program:
+logmsg $LOG_DEBUG "checking program run exit-status"
 if grep  'timelimit reached: aborting command' error.tmp &>/dev/null; then
 	echo "Timelimit exceeded." >>error.out
 	cat error.tmp >>error.out
@@ -257,8 +270,7 @@ logmsg $LOG_NOTICE "comparing output"
 
 # Copy testdata output (first cd to olddir to correctly resolve relative paths)
 cd $OLDDIR
-cp $TESTOUT $TMPDIR
-TESTOUT=`basename $TESTOUT`
+cp $TESTOUT $TMPDIR/testdata.out
 cd $TMPDIR
 
 if [ ! -s program.out ]; then
@@ -267,7 +279,7 @@ if [ ! -s program.out ]; then
 	exit $E_OUTPUT
 fi
 
-$RUNSCRIPTDIR/compare.sh program.out $TESTOUT diff.out 2>diff.tmp
+$RUNSCRIPTDIR/compare.sh program.out testdata.out diff.out 2>diff.tmp
 exitcode=$?
 
 if [ $exitcode -ne 0 ]; then
@@ -279,7 +291,6 @@ if [ -s diff.out ]; then
 	cat error.tmp >>error.out
 	exit $E_ANSWER
 fi
-rm diff.tmp
 
 echo "Correct!" >>error.out
 cat error.tmp >>error.out
