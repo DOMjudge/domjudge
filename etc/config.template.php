@@ -7,14 +7,14 @@
  * $Id$
  */
 
-/*** GLOBAL CONFIG HEADER START ***/
+/*** AUTOGENERATE HEADER START ***/
 
 // This is a template configuration file.
 //
 // Use `generate_config.sh' to generate the corresponding config file
 // from the global config file.
 
-/*** GLOBAL CONFIG HEADER END ***/
+/*** AUTOGENERATE HEADER END ***/
 
 /** Loglevels */
 define_syslog_variables();
@@ -30,8 +30,8 @@ $EXITCODES = array (
 	5	=>	'wrong-answer'
 	);
 
-/*** GLOBAL CONFIG MAIN START ***/
-/*** GLOBAL CONFIG MAIN END ***/
+/*** GLOBAL CONFIG INCLUDE START ***/
+/*** GLOBAL CONFIG INCLUDE END ***/
 
 /** Database login credentials */
 $DBDATA = array (

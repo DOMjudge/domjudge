@@ -1,14 +1,14 @@
 # Configuration file for bash-shell scripts
 # $Id$
 
-### GLOBAL CONFIG HEADER START ###
+### AUTOGENERATE HEADER START ###
 
 # This is a template configuration file.
 #
 # Use `generate_config.sh' to generate the corresponding config file
 # from the global config file.
 
-### GLOBAL CONFIG HEADER END ###
+### AUTOGENERATE HEADER END ###
 
 # Loglevels (as defined in syslog.h)
 LOG_EMERG=0
@@ -29,5 +29,5 @@ E_OUTPUT=4
 E_ANSWER=5
 E_INTERN=127 # Internal script error
 
-### GLOBAL CONFIG MAIN START ###
-### GLOBAL CONFIG MAIN END ###
+### GLOBAL CONFIG INCLUDE START ###
+### GLOBAL CONFIG INCLUDE END ###
