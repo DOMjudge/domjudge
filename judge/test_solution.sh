@@ -270,6 +270,9 @@ if [ ! -s program.out ]; then
 	exit $E_OUTPUT
 fi
 
+# Add $SYSTEM_ROOT/bin to path for 'tempfile' (needed by compare.sh)
+export PATH=$SYSTEM_ROOT/bin:$PATH
+
 $RUNSCRIPTDIR/compare.sh program.out testdata.out diff.out 2>diff.tmp
 exitcode=$?
 
