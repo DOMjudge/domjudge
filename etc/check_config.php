@@ -64,7 +64,7 @@
 		foreach($inout as $i) {
 			$testdata = INPUT_ROOT . '/' . $row['testdata'] . '/testdata.' . $i;
 			if ( ! file_exists ( $testdata ) ) {
-				logmsg(LOG_WARNING, "problem $row[probid] testdata.$i [$testdata] not readable!");
+				logmsg(LOG_WARNING, "problem $row[probid] testdata.$i [$testdata] does not exist!");
 			} elseif ( ! is_readable ( $testdata ) ) {
 				logmsg(LOG_WARNING, "problem $row[probid] testdata.$i [$testdata] not readable!");
 			}
