@@ -6,10 +6,6 @@
  */
 
 require('init.php');
-$refresh = '15;url=clarifications.php';
-$title = 'Clarification Requests';
-require('../header.php');
-require('menu.php');
 
 /** insert new response */
 if (isset($_REQUEST['submit'])
@@ -27,6 +23,11 @@ if (isset($_REQUEST['submit'])
 	header('Location: clarifications.php');
 	exit;
 }
+
+$refresh = '15;url=clarifications.php';
+$title = 'Clarification Requests';
+require('../header.php');
+require('menu.php');
 
 echo "<h1>Clarification Requests</h1>\n\n";
 

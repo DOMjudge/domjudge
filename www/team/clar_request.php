@@ -7,9 +7,6 @@
  */
 
 require('init.php');
-$title = 'Clarification Request';
-include('../header.php');
-include('menu.php');
 
 if (isset($_REQUEST['submit'])
   && !empty($_REQUEST['request']))
@@ -24,6 +21,9 @@ if (isset($_REQUEST['submit'])
 		.addUrl('request.php?id='.urlencode($respid), $popupTag));
 	exit;
 }
+$title = 'Clarification Request';
+include('../header.php');
+include('menu.php');
 
 ?>
 <h1>Clarification Request</h1>

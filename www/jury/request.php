@@ -6,9 +6,6 @@
  */
 
 require('init.php');
-$title = 'Clarification Request';
-require('../header.php');
-require('menu.php');
 
 $id = (int)$_REQUEST['id'];
 if(!$id)	error ("Missing clarification id");
@@ -30,6 +27,10 @@ if (isset($_REQUEST['submit'])
 	header('Location: request.php?id='. urlencode($id));
 	exit;
 }
+
+$title = 'Clarification Request';
+require('../header.php');
+require('menu.php');
 
 
 echo "<h1>Clarification Request q$id</h1>\n\n";
