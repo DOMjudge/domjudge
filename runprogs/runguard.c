@@ -161,6 +161,8 @@ void usage()
 	printf("      --version       output version information and exit\n");
 	printf("\n");
 	printf("Note that root privileges are needed for the `root' and `user' options.\n");
+	printf("When run setuid root without the `user' option, the user id is set to the");
+	printf("real user id.\n");
 	exit(0);
 }
 
@@ -297,7 +299,14 @@ int main(int argc, char **argv)
 		
 		if ( setuid(runuid) ) error(errno,"cannot set user id to `%d'",runuid);
 		if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped");
-		verbose("using user-id `%d'",runuid);
+		verbose("using user id `%d'",runuid);
+	} else {
+		/* Check if this program is run as (setuid) root and set effective uid
+		   to real uid, to increase security */
+		if ( geteuid()==0 ) {
+			if ( setuid(getuid()) ) error(errno,"cannot set user id");
+			verbose("using user id `%d'",getuid());
+		}
 	}
 
 	/* Open output file for writing running time to */
