@@ -73,7 +73,7 @@ a:active          { color: red;    }
 	font-variant: small-caps;
 }
 #scorethisisme .scoretn {
-	background: yellow;
+	background: #ff6600;
 	font-weight: bold;
 }
 
@@ -83,6 +83,7 @@ a:active          { color: red;    }
 }
 
 /* backgrounds for categories */
-.category1 { background: white; }
-.category2 { background: purple; }
-.category3 { background: yellow; }
+.category1 .scoretn { background: white; }
+.category2 .scoretn { background: #ffffcc; }
+.category3 .scoretn { background: #ffccff; }
+.category4 .scoretn { background: #99ccff; }

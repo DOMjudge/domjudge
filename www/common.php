@@ -399,9 +399,11 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// only print legend when there's more than one category
 	if ($res->count() > 1) {
-		echo "<table class=\"scoreboard_legend\"><tr><th>Legenda</th></tr>\n";
+		echo "<br /><br /><br />\n<table class=\"scoreboard\"><tr><th>Legend</th></tr>\n";
 		while($row = $res->next()) {
-			echo "<tr class=\"category" . $row['catid'] . "\"><td align=\"center\">" . $row['name'] . "</td></tr>";
+			echo "<tr class=\"category" . $row['catid'] .
+				"\"><td align=\"center\" class=\"scoretn\">" .
+				$row['name'] . "</td></tr>";
 		}
 		echo "</table>\n\n";
 	}
