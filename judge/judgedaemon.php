@@ -59,9 +59,23 @@ while ( TRUE ) {
 	}
 
 	$cid = $DB->q('MAYBETUPLE SELECT cid FROM contest ORDER BY starttime DESC LIMIT 1');
-	if(!$cid) {
+	if( ! $cid ) {
 		error("No contest found in database, aborting.");
 	}
+	// we have to check for the judgability of problems/languages this way,
+	// because we use an UPDATE below where joining is not possible.
+	$probs = $DB->q('COLUMN SELECT probid FROM problem WHERE allow_judge = 1');
+	if( count($probs) == 0 ) {
+			logmsg(LOG_NOTICE, "No judgable problems, waiting...");
+			sleep(5); continue;
+	}
+	$judgable_prob = array_unique(array_values($probs));
+	$langs = $DB->q('COLUMN SELECT langid FROM language WHERE allow_judge = 1');
+	if( count($langs) == 0 ) {
+			logmsg(LOG_NOTICE, "No judgable languages, waiting...");
+			sleep(5); continue;
+	}
+	$judgable_lang = array_unique(array_values($langs));
 
 	// Generate (unique) random string to mark submission to be judged
 	list($usec,$sec)=explode(" ",microtime());
@@ -70,7 +84,9 @@ while ( TRUE ) {
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
 		SET judgerid = %s, judgemark = %s
-		WHERE judgerid IS NULL AND cid = %i LIMIT 1', $myhost, $mark, $cid);
+		WHERE judgerid IS NULL AND cid = %i
+			AND language IN (%As) AND problem IN (%As)
+		LIMIT 1', $myhost, $mark, $cid, $judgeable_lang, $judgable_prob);
 
 	// nothing updated -> no open submissions
 	if ( $numupd == 0 ) {
