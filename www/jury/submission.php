@@ -35,7 +35,7 @@ $submdata = $DB->q('TUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.source,
 <tr><td>Problem:</td><td><?= htmlentities($submdata['probid'].": ".$submdata['probname'])?></td></tr>
 <tr><td>Language:</td><td><?= htmlentities($submdata['langid'].": ".$submdata['langname'])?></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
-<tr><td>Source:</td><td><?= htmlspecialchars($submdata['source']) ?></td></tr>
+<tr><td>Source:</td><td><a href="show_source.php?id=<?=$id?>"><tt><?= htmlspecialchars($submdata['source']) ?></tt></a></td></tr>
 </table>
 
 <h3>Judgings</h3>
@@ -58,7 +58,8 @@ if($judgedata->count() == 0) {
 		"</td><td>".printtime(@$jrow['endtime']).
 		"</td><td title=\"".$jrow['judger']."\">".$jrow['name'].
 		"</td><td class=\"sol-".(@$jrow['result'] == 'correct' ? 'correct':'incorrect') .
-			"\">".@$jrow['result'].
+			"\">". ($jrow['valid'] ?
+				@$jrow['result'] : "<span class=\"invalid\">".@$jrow['result'])."</span>".
 		"</td><td align=\"right\">".$jrow['valid'].
 		"</td></tr>\n";
 		
