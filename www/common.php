@@ -332,11 +332,14 @@ function putScoreBoard($myteamid = null) {
 
 	$res = $DB->q('SELECT * FROM category ORDER BY catid');
 
-	echo "<table class=\"scoreboard_legend\"><tr><th>Legenda</th></tr>\n";
-	while($row = $res->next()) {
-		echo "<tr class=\"category" . $row['catid'] . "\"><td align=\"center\">" . $row['name'] . "</td></tr>";
+	// only print legend when there's more than one category
+	if ($res->count() > 1) {
+		echo "<table class=\"scoreboard_legend\"><tr><th>Legenda</th></tr>\n";
+		while($row = $res->next()) {
+			echo "<tr class=\"category" . $row['catid'] . "\"><td align=\"center\">" . $row['name'] . "</td></tr>";
+		}
+		echo "</table>\n\n";
 	}
-	echo "</table>\n\n";
 
 	return;
 }
