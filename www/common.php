@@ -28,7 +28,7 @@ function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 	 * complete list.
 	 */
 	$keyvalmatch = '';
-	if( $key && $value ) $keyvalmatch = " s.$key = $value AND ";
+	if( $key && $value ) $keyvalmatch = " s.$key = \"" . mysql_escape_string($value) . "\" AND ";
 
 	$res = $DB->q('SELECT s.submitid,s.team,s.probid,s.langid,s.submittime,s.judgerid,
 		t.name as teamname, p.name as probname, l.name as langname
