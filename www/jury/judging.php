@@ -68,7 +68,7 @@ if(@$jdata['output_run']) {
 	echo "<pre class=\"output_text\">".
 		htmlspecialchars(@$jdata['output_run'])."</pre>\n\n";
 } else {
-	echo "<p><em>There were no runtime errors or warnings.</em></p>\n";
+	echo "<p><em>There was no program output.</em></p>\n";
 }
 ?>
 
