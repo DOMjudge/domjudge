@@ -6,8 +6,10 @@
  * $Id$
  */
 
+define('STDERR', fopen('php://stderr', 'w'));
+
 function error($string) {
-	print SCRIPT_ID.": $string\n";
+	fwrite(STDERR, SCRIPT_ID.": $string\n");
 	exit(1);
 }
 
