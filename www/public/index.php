@@ -8,6 +8,7 @@
  
 require('init.php');
 $title="Scoreboard";
+$refresh="30;url=index.php";
 require('../header.php');
 
 putScoreBoard();
