@@ -19,4 +19,4 @@ if ( isset($_SERVER['REMOTE_ADDR']) ) {
 	echo "DOMjudge is not configured yet: edit 'etc/global.cfg' and then run 'make'.\n";
 }
 
-exit(1);
+exit(-1);
