@@ -3,23 +3,12 @@
 // DEZE FILE MOET ALTIJD DICHT STAAN!
 // (ivm database-logingegevens)
 
-/**
- * Configuration file for PHP-scripts
+/* Configuration file for PHP-scripts
  * $Id$
  */
 
-/** Define absulote paths used for finding other files */
-define('ROOT_PREFIX', (isset($_ENV['HOME'])?$_ENV['HOME']:'/home/cies/nkp0405'));
-
-define('SYSTEM_ROOT', ROOT_PREFIX.'/systeem/svn/jury');
-define('OUTPUT_ROOT', ROOT_PREFIX.'/systeem/systest');
-define('INPUT_ROOT',  ROOT_PREFIX.'/opgaven');
-
-/** Paths within OUTPUT_ROOT */
-define('INCOMINGDIR', OUTPUT_ROOT.'/incoming');
-define('SUBMITDIR',   OUTPUT_ROOT.'/sources');
-define('JUDGEDIR',    OUTPUT_ROOT.'/judging');
-define('LOGDIR',      OUTPUT_ROOT.'/log');
+/*** GLOBAL CONFIG HEADER START ***/
+/*** GLOBAL CONFIG HEADER END ***/
 
 /** Loglevels */
 define_syslog_variables();
@@ -33,6 +22,9 @@ $EXITCODES = array (
 	4	=>	'no-output',
 	5	=>	'wrong-answer'
 	);
+
+/*** GLOBAL CONFIG MAIN START ***/
+/*** GLOBAL CONFIG MAIN END ***/
 
 /** Database login credentials */
 $DBDATA = array (
