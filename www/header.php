@@ -1,19 +1,39 @@
 <?php
-/** Common page header. Before including this, one can set
- * $title and $refresh. */
+/**
+ * Common page header.
+ * Before including this, one can set $title, $refresh and $popup.
+ */
+
 echo '<?xml version="1.0" encoding="iso-8859-1" ?>'."\n";
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en">
 <head>
-<?php
-	echo "\t<!-- DOMjudge version " . DOMJUDGE_VERSION . " -->\n";
-
-	if(isset($refresh)) { echo "\t<meta http-equiv=\"refresh\" content=\"$refresh\" />\n"; }
-	?>
-	<title><?php echo $title; ?></title>
+	<!-- DOMjudge version <?= DOMJUDGE_VERSION ?> -->
+<?
+	if(isset($refresh))
+	{
+?>
+	<meta http-equiv="refresh" content="<?
+		if(isset($popup)) {
+			echo addUrl($refresh, $popupTag);
+		} else {
+			echo $refresh;
+		}
+		?>" />
+<?
+	}
+?>
+	<title><?= $title ?></title>
 	<link rel="stylesheet" href="style.css" type="text/css" />
-	<!--  javascript popup code hier -->
+	
+	<script language="JavaScript">
+	function popUp(URL) {
+		day = new Date();
+		id = day.getTime();
+		eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=300,height=200');");
+	}
+	</script>
 </head>
-<body <? /* popup? check (WORK IN PROGRESS...) */ ?>>
+<body <? if(isset($popup) && $popup) { echo "onLoad=\"javascript:popUp('popup.php')\""; } ?>>
