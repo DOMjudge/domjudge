@@ -22,7 +22,7 @@ if ( isset($_REQUEST['id']) ) {
 		error("Permission denied");
 	}
 
-	$respid = $req['respid'] < 0 ? $id : $req['respid'];
+	$respid = empty($req['respid']) ? $id : $req['respid'];
 }
 
 // insert a request (if posted)

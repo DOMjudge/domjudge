@@ -155,7 +155,7 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 	if ( $isjury ) { // list all possible recipients in the "sendto" box
 		echo "<tr><td><b>Send to:</b></td><td>\n";
 
-		if ( $respid ) {
+		if ( !empty($respid) ) {
 			echo '<input type="hidden" name="id" value="' . $respid . "\" />\n";
 		}
 

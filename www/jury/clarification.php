@@ -19,7 +19,7 @@ if ( isset($_REQUEST['id']) ) {
 		WHERE q.cid = %i AND q.clarid = %i', $cid, $id);
 	if ( ! $req ) error("clarification $id not found");
 
-	$respid = $req['respid'] < 0 ? $id : $req['respid'];
+	$respid = (int) (empty($req['respid']) ? $id : $req['respid']);
 	$isgeneral = FALSE;
 } else {
 	$isgeneral = TRUE;
@@ -76,7 +76,7 @@ if ( ! $isgeneral ) {
 // display clarification thread
 echo "<h1>Clarification $id</h1>\n\n";
 
-if ( $req['respid']>=0 ) {
+if ( ! empty ( $req['respid'] ) ) {
 	$orig = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name
 		FROM clarification q LEFT JOIN team t ON (t.login = q.sender)
 		WHERE q.clarid = %i', $respid);

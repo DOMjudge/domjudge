@@ -31,7 +31,7 @@ $oldrequests = $DB->q('SELECT * FROM clarification
 
 $clarifications = $DB->q('SELECT * FROM clarification
 	WHERE sender IS NULL AND cid = %i
-	AND ( respid < 0 OR recipient IS NULL )
+	AND ( respid IS NULL OR recipient IS NULL )
 	ORDER BY submittime DESC', $cid);
 
 echo '<h3><a name="newrequests"></a>' .

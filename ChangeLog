@@ -10,7 +10,7 @@ Version 0.2.0 - CVS
  - Fix bug in getSubmissions() that caused a syntax error on the
    team-overview in the jury interface.
  - Added some notes on security to the INSTALL docs.
- - Symbolic links now included (subversion >= 1.1)
+ - Symbolic links now included (subversion >= 1.1).
  - Fixed buffer size bug in log/error C-code.
  - Fix bug in submit_db where the problem name got case-normalized.
  - Feature: Add caching to the Scoreboard. This vastly improves the
