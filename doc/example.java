@@ -4,16 +4,16 @@ class Main {
 	public static BufferedReader in;
 
 	public static void main(String[] args) throws Exception {
-		int aantaltests, test;
-		String naam;
+		int ntests, test;
+		String name;
         
 		in = new BufferedReader( new InputStreamReader(System.in) );
 
-		aantaltests = Integer.parseInt(in.readLine());
+		ntests = Integer.parseInt(in.readLine());
 
-		for(test=1; test<=aantaltests; test++) {
-			naam = in.readLine();
-			System.out.print("Hallo "+naam+"!\n");
+		for(test=1; test<=ntests; test++) {
+			name = in.readLine();
+			System.out.print("Hello "+name+"!\n");
 		}
 	}
 }

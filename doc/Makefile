@@ -1,4 +1,4 @@
-TARGETS = team-handleiding
+TARGETS = team-manual team-manual-NL
 
 TARGETSDVI = $(addsuffix .dvi,$(TARGETS))
 TARGETSPS  = $(addsuffix .ps ,$(TARGETS))
@@ -8,7 +8,7 @@ LATEXOPTIONS = --file-line-error-style
 
 all: dvi ps pdf
 
-$(TARGETSDVI): %.dvi: %.tex
+$(TARGETSDVI): %.dvi: %.tex domjudgelogo.eps systemconfig.tex example.*
 	latex $(LATEXOPTIONS) $<
 	latex $(LATEXOPTIONS) $<
 	latex $(LATEXOPTIONS) $<
@@ -18,8 +18,6 @@ $(TARGETSPS): %.ps: %.dvi
 
 $(TARGETSPDF): %.pdf: %.dvi
 	dvipdf $<
-
-team-handleiding.dvi: systemconfig.tex voorbeeld.*
 
 .PHONY: dvi ps pdf clean texclean
 

@@ -1,0 +1,322 @@
+\documentclass[11pt,a4paper]{article}
+
+% $Id: team-handleiding.tex 650 2004-10-20 18:09:41Z nkp0405 $
+
+\usepackage[dutch]{babel}
+\usepackage{a4wide}
+\usepackage{verbatim}
+\usepackage{moreverb}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{epsfig}
+\usepackage{bbm}
+\usepackage{expdlist}
+
+% For up-to-date definitions of runlimits, etc.
+\include{systemconfig}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+\newcommand{\DOMjudge}{\textsc{DOM}judge }
+
+% We define our own \url command, because the one in the url package
+% doesn't expand defines (from systemconfig.tex).
+\newcommand{\url}[1]{\texttt{#1}}
+
+\title{Teamhandleiding \DOMjudge}
+
+\begin{document}
+
+\begin{titlepage}
+
+\maketitle
+
+\vspace{1cm}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[height=7cm]{domjudgelogo.eps}}
+\end{figure}
+
+\end{titlepage}
+
+
+\newpage
+\tableofcontents
+
+\newpage
+\section{Inleiding}
+
+Deze documentatie beschrijft de onderdelen van het \DOMjudge
+jurysysteem, die aan de teams ter beschikking staan om oplossingen in
+te sturen, uitslagen te bekijken en ``clarification requests'' te
+sturen.
+
+Het systeem is voor een groot deel gebaseerd op een webinterface. Het
+insturen van oplossingen gaat echter via een command-line programma.
+
+\section{Samenvatting}
+
+Hieronder staat kort samengevat de belangrijkste informatie. Dit is
+bedoeld om snel aan de slag te kunnen. We raden echter ten zeerste
+aan, dat minstens iemand binnen je team de complete handleiding
+doorneemt, omdat daarin specifieke details van het jurysysteem staan,
+die ook van belang kunnen zijn op het moment dat niet alles perfect
+gaat (zoals een oplossing die fout is). \textbf{WEES GEWAARSCHUWD!!}
+
+\subsection{Inlezen en wegschrijven}
+
+Oplossingen moeten invoer en uitvoer lezen van `standard in'
+(toetsenbord) en wegschrijven naar de `standard out' (beeldscherm).
+Je hoeft dus nooit een bestand te openen. Zie bijlage
+\ref{codeexamples} voor een aantal voorbeelden hiervan.
+
+\subsection{Insturen van oplossingen}
+
+Insturen van oplossingen gaat via het command-line programma
+\texttt{submit}. Gebruik \texttt{submit <probleem>.<extensie>}, met
+\texttt{<probleem>} het label van het probleem en \texttt{<extensie>}
+een standaard extensie van je taal. Voor de complete documentatie en
+alle opties, zie \texttt{submit --help}.
+
+\subsection{Bekijken van scores, inzendingen, e.d.}
+
+Het bekijken van inzendingen, scores en sturen en lezen van
+``clarification requests'' gaat via een webinterface. Het adres is
+\url{http://\WEBSERVER} en de pagina wijst zich verder vanzelf.
+
+\newpage
+\section{Oplossingen insturen: \texttt{submit}}\label{submit}
+
+Het insturen van oplossingen voor problemen gebeurt via een
+command-line interface: het programma \texttt{submit} (onder Windows
+\texttt{submit.exe}).
+
+\textbf{Syntax:} \texttt{submit [opties] bestandsnaam.ext}
+
+Het submit programma haalt de naam (label) van het probleem uit
+\texttt{bestandsnaam} en de de programmeertaal uit de extensie
+\texttt{ext}. Dit kan handmatig aangepast worden met de opties
+\texttt{-p probleemnaam} en \texttt{-l taalextensie}. Zie
+\texttt{submit --help} voor een compleet overzicht van mogelijke
+opties en extensies en een aantal voorbeelden. Let op, dat deze
+help-tekst redelijk lang is en misschien niet op \'e\'en scherm
+past. Gebruik dan bijvoorbeeld \texttt{submit --help | more} om alles
+te lezen.
+
+\texttt{submit} zal het bestand controleren op een aantal eigenschappen
+en eventueel waarschuwingen geven, zoals wanneer het bestand al lange
+tijd niet veranderd is of groter is dan de maximale source-code grootte.
+
+Hierna geeft \texttt{submit} een kort overzicht met de details van de
+inzending en vraagt om bevestiging. Controleer vooral of je het goede
+bestand, probleem en taal hebt en druk dan op `y' om de oplossing in
+te sturen. Als alles goed gaat, zal \texttt{submit} een melding geven
+dat de inzending succesvol is. Indien niet, zal er een foutmelding
+verschijnen.
+
+Het submit programma maakt gebruik van een directory \texttt{\USERSUBMITDIR}
+in de homedirectory van het account. Hier slaat het tijdelijk
+bestanden op voor inzending en staat ook een logfile \texttt{submit.log}.
+Verwijder deze directory niet of pas hem niet aan, omdat anders het
+submit programma eventueel niet meer correct functioneert. Verder
+is een ``public ssh-key'' van de jury in de ssh configuratie
+toegevoegd. Deze is ook nodig voor het functioneren van \texttt{submit}.
+ 
+\section{De uitslag bekijken van inzendingen}
+
+Op de team webpagina staat een overzicht van je inzendingen.
+Dit overzicht bevat alle relevante gegevens: de tijd van inzending, de
+programmeertaal, het probleem en de status. Het adres van je
+teampagina is \url{http://\WEBSERVER}. Hiervandaan kun je ook naar
+de publieke pagina, waarop de scores van alle teams vermeld staan.
+
+\subsection{Mogelijke uitslagen}
+
+Op een ingestuurde oplossing zijn een aantal verschillende uitslagen
+mogelijk. Hier volgen ze, met een korte beschrijving:
+
+\begin{description}[\setleftmargin{4.5cm}]
+\item[CORRECT]
+Je oplossing was goed en je hebt dit probleem opgelost!
+
+\item[COMPILER-ERROR]
+Het compilen van je programma gaf een fout. Zie de inzendingsdetails
+voor de precieze foutmelding. Compiler\emph{waarschuwingen} worden
+niet als fouten gezien, maar kun je eventueel wel bekijken bij de
+details van je inzending.
+
+\item[TIMELIMIT]
+Je programma draaide langer dan de maximaal toegestane tijd en is
+afgebroken. Dit kan betekenen dat je programma ergens in een loop
+blijft hangen, of dat je oplossing niet effici\"ent genoeg is.
+
+\item[RUN-ERROR]
+Je programma gaf een fout tijdens het uitvoeren. Dit kan verschillende
+oorzaken hebben, zoals deling door nul, incorrecte geheugen adressering
+(segfault, bijvoorbeeld door arrays buiten bereik te indiceren), te
+veel geheugengebruik, enzovoort\dots\ 
+Let ook op, dat je programma met een exitcode 0 eindigt!
+
+\item[NO-OUTPUT]
+Je programma gaf geen uitvoer. Let op dat je uitvoer naar standard
+output schrijft!
+
+\item[WRONG-ANSWER]
+De uitvoer van je programma was niet correct. Het kan zijn dat je
+oplossing niet correct is, maar let ook goed op dat je de antwoorden
+precies zoals beschreven uitvoert: de uitvoer moet exact kloppen met
+de antwoorden van de jury!
+\end{description}
+
+\section{Clarifications}
+
+Communicatie met de jury loopt door middel van clarifications, deze
+komen op je teampagina te staan.  Boven aan de pagina de gedane
+clarifications, daar onder je requests.
+
+Je kan vragen aan de jury stellen door middel van het doen van een
+``Clarification Request'', de link hiervoor bevindt zich onderaan de
+clarifications-pagina.  Je vraag zal alleen bij de jury aan komen, zij
+zullen deze zo snel mogelijk en adequaat beantwoorden. Antwoorden die
+voor iedereen relevant zijn zullen naar iedereen gestuurd worden.
+
+\section{Hoe worden opgaven beoordeeld?}
+
+Het \DOMjudge jurysysteem is volledig geautomatiseerd. Dit betekent
+dat er (in principe) geen menselijke interactie is tijdens de
+beoordeling. Het beoordelen gebeurt via de volgende stappen:
+
+\subsection{Insturen}
+
+Via het \texttt{submit} (zie \ref{submit}) programma kun je een
+oplossing voor een opgave insturen. Let op dat je de source-code van
+je programma moet insturen (en dus niet een gecompiled programma of de
+uitvoer van je programma). \texttt{submit} maakt dan een verbinding
+met een server en die kopieert je programma dan naar de
+jury-computers.
+
+Dan komt je programma in de wachtrij te staan, om gecompiled,
+uitgevoerd en de uitvoer getest te worden op \'e\'en van de
+jury-computers.
+
+\subsection{Compileren}
+
+Je programma wordt op een jury-computer onder Linux gecompileerd.
+Als je een andere compiler of besturingssysteem gebruikt dan de jury,
+moet dat in principe geen probleem zijn, maar let wel op dat
+je geen compiler/systeem-specifieke dingen gebruikt (bij een
+compileerfout kun je altijd de foutmelding bekijken).
+
+Verder wordt door in het jurysysteem alles statisch gecompileerd, maar
+wat betreft foutmeldingen e.d. zou dit niet relevant moeten zijn.
+
+\subsection{Testen}
+
+Als je programma succesvol gecompileerd is, wordt het gedraaid en de
+uitvoer vergeleken met de correcte uitvoer van de jury. Er wordt eerst
+gecontroleerd of je programma correct ge\"eindigd is: als je programma
+met een fout eindigt en het goede antwoord geeft, krijg je toch een
+run-error! Er zijn een aantal beperkingen die aan je programma
+opgelegd worden. Als je programma die overschrijdt, wordt het ook
+afgebroken met een fout, zie (\ref{runlimits}).
+
+Verder moet de uitvoer van jouw programma exact overeenkomen met de
+uitvoer van de jury. Let dus goed op, dat je de uitvoerspecificatie
+volgt. In gevallen waarin er niet \'e\'en unieke uitvoer is (zoals bij
+floating point antwoorden) kan de jury een aangepaste beoordeling
+hiervoor maken.
+
+\subsection{Beperkingen}\label{runlimits}
+
+Om hacken tegen te gaan, het jurysysteem stabiel te houden en iedereen
+duidelijke, gelijke omstandigheden te geven, zijn er een aantal
+beperkingen die aan iedere ingestuurde oplossing opgelegd worden:
+
+\begin{description}[\setlabelphantom{aantal processen}]
+\item[compile-tijd]
+Je programma mag er maximaal \COMPILETIME\ seconden over doen om te
+compileren. Daarna wordt het compileren afgebroken en levert dit een
+compileerfout op. Dit zou in de praktijk nooit een probleem mogen
+opleveren. Mocht dit toch gebeuren bij een normaal programma, laat het
+dan de organisatie weten.
+
+\item[source grootte]
+De sourcecode van je programma mag maximaal \SOURCESIZE\ kilobytes
+groot zijn. Bij het inzenden zul je hier al voor gewaarschuwd worden,
+bij compileren levert dit ook een compileerfout op.
+
+\item[geheugen]
+Je programma heeft tijdens het draaien maximaal \MEMLIMIT\ kilobytes
+geheugen ter beschikking. Let op dat dit totaal geheugen is (inclusief
+programmacode, statisch en dynamisch gedefini\"eerde variabelen,
+stack, \dots)! Als je programma meer probeert te gebruiken, zal het
+waarschijnlijk afbreken, zodat dit een ``RUN-ERROR'' geeft.
+
+\item[bestandsgrootte]
+Hoewel je geen bestanden mag schrijven, wordt de standaard (fout)uitvoer
+(stout/stderr) wel naar een bestand geschreven. De maximale grootte
+van deze bestanden is \FILELIMIT\ kilobytes (per bestand).
+
+\item[aantal processen]
+Het is niet de bedoeling dat je programma meerdere processen (threads)
+start. Dit heeft ook geen zin, want je programma heeft precies 1
+processor volledig tot zijn beschikking. Om de stabiliteit van het
+jurysysteem te bevorderen, kun je maximaal \PROCLIMIT\ processen
+tegelijk draaien (inclusief de processen waardoor je programma
+gestart is).
+
+Mensen die nooit met meerdere processen geprogrammeerd hebben (of
+niet weten wat dat is), hoeven zich geen zorgen te maken: standaard
+draait een gecompileerd programma in \'e\'en proces.
+
+\end{description}
+
+
+\newpage
+\appendix
+
+\section{Code voorbeelden}\label{codeexamples}
+
+Hieronder staan een aantal voorbeelden van code om de invoer van een
+probleem in te lezen en de uitvoer weg te schrijven. De manier van
+in- en uitvoer lezen en wegschrijven in deze opgave, is zoals dat bij
+veel programmeerwedstrijden gebeurt (o.a. de ACM regionals), maar kan
+bij jullie wedstrijd anders zijn.
+
+De code hoort bij de volgende probleembeschrijving: gegeven een string
+met een naam (\'e\'en woord), voer de string ``Hello $<$naam$>$!'' uit.
+
+Dit probleem zou de volgende in- en uitvoer kunnen hebben:
+
+\begin{tabular}{|p{0.5\textwidth}|p{0.5\textwidth}|}
+\hline
+\textbf{Invoer} & \textbf{Uitvoer} \\
+\hline
+\verbatiminput{example.in} &
+\verbatiminput{example.out} \\
+\hline
+\end{tabular}
+
+Let op dat het op de eerste regel het getal 3 aangeeft, dat er 3
+testgevallen volgen.
+
+Een oplossing voor dit probleem in C:
+\listinginput{1}{example.c}
+
+Let op de \texttt{return 0;} aan het einde, zodat we geen
+run-error krijgen!
+
+\newpage
+
+Een oplossing in C++ kan als volgt:
+\listinginput{1}{example.cc}
+
+Een oplossing in Pascal:
+\listinginput{1}{example.pas}
+
+\newpage
+
+En tenslotte een oplossing in Java:
+\listinginput{1}{example.java}
+
+\end{document}

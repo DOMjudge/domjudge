@@ -1,0 +1,312 @@
+\documentclass[11pt,a4paper]{article}
+
+% $Id: team-handleiding.tex 650 2004-10-20 18:09:41Z nkp0405 $
+
+\usepackage[english]{babel}
+\usepackage{a4wide}
+\usepackage{verbatim}
+\usepackage{moreverb}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{epsfig}
+\usepackage{bbm}
+\usepackage{expdlist}
+
+% For up-to-date definitions of runlimits, etc.
+\include{systemconfig}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+\newcommand{\DOMjudge}{\textsc{DOM}judge }
+
+% We define our own \url command, because the one in the url package
+% doesn't expand defines (from systemconfig.tex).
+\newcommand{\url}[1]{\texttt{#1}}
+
+\title{Teammanual \DOMjudge}
+
+\begin{document}
+
+\begin{titlepage}
+
+\maketitle
+
+\vspace{1cm}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[height=7cm]{domjudgelogo.eps}}
+\end{figure}
+
+\end{titlepage}
+
+
+\newpage
+\tableofcontents
+
+\newpage
+\section{Introduction}
+
+This document describes these parts of the \DOMjudge jury-system, that
+are available to teams to submit solutions, view results and submit
+``clarification requests''.
+
+All interaction with the system is done using a webinterface, except
+the submission of solutions: this is done with a command-line program.
+
+\section{Summary}
+
+Here follows a short summary of the system interface. This is meant as
+a quick introduction, to be able to start using the system. It is
+however strongly advised, that at least one of your team's members
+read all of this manual, because there are specific details of this
+jury-system, that might become of importance when you run into
+problems (like a incorrect solution). \textbf{BE WARNED!!}
+
+\subsection{Reading and writing}
+
+Solutions have to read all input from `standard in' and write all
+output to `standard out' (also known as console). You will never have
+to open (other) files. See appendix \ref{codeexamples} for some
+examples.
+
+\subsection{Submission of solutions}
+
+You can submit solutions with the command-line program
+\texttt{submit}. Use \texttt{submit <problem>.<extension>}, where
+\texttt{<problem>} is the label of the problem and
+\texttt{<extension>} is a standard extension for your language.
+For a complete reference of all options and examples, see
+\texttt{submit --help}.
+
+\subsection{Viewing scores, submissions, etc.}
+
+Viewing scores, submissions and submitting and reading clarification
+requests is done through a webinterface. The address is
+\url{http://\WEBSERVER}. Usage of these webpages should be clear.
+
+\newpage
+\section{Submitting solutions: \texttt{submit}}\label{submit}
+
+You can submit solutions with the command-line program
+\texttt{submit} (\texttt{submit.exe} in Windows).
+
+\textbf{Syntax:} \texttt{submit [options] filename.ext}
+
+The submit program takes the name (label) of the problem from
+\texttt{filename} and the programming language from the extension
+\texttt{ext}. This can be overruled by hand with the options
+\texttt{-p problemname} and \texttt{-l languageextension}.
+See \texttt{submit --help} for a complete list of all options and
+extensions and some examples. Note that this help is quite long and
+might not fit on a screen. Then use for example
+\texttt{submit --help | more} to read everything.
+
+\texttt{submit} will check your file on a couple of things and warns
+you for some things: for example when the file has not been modified
+for a long time or when is is larger than the maximal source-code size.
+
+Then \texttt{submit} displays a summary with all details of your
+submission and asks for confirmation. Check whether you are submitting
+the right file for the right problem and language and press `y' to
+confirm. \texttt{submit} will report a successful submission or give
+an error message otherwise.
+
+The submit program uses a directory \texttt{\USERSUBMITDIR} in the
+homedirectory of your account. In there, it stores temporary files for
+submission and also a logfile \texttt{submit.log}. Do not remove or
+change this directory, or the \texttt{submit} program might fail to
+function correctly. Furthermore a ``public ssh-key'' of the jury has
+been added to the ssh configuration; this is also necessary for the
+functioning of \texttt{submit}.
+
+\section{Viewing the results of submissions}
+
+There is a overview of your submissions on your team webpage.
+It contains all relevant information: submission time, programming
+language, problem en status. The address of your teampage is
+\url{http://\WEBSERVER}. From here you can also view the public
+scoreboard page with the scores of all teams.
+
+\subsection{Possible results}
+
+A submission can have a few different results. All possible results
+are listed here with a short description:
+
+\begin{description}[\setleftmargin{4.5cm}]
+\item[CORRECT]
+The submisson was correct and you solved this problem!
+
+\item[COMPILER-ERROR]
+There was an error when compiling your program. You can view the
+submission details on your teampage to see the exact error.
+Notice the compiler\emph{warnings} do not count as error, but can also
+be viewed in the submission details.
+
+\item[TIMELIMIT]
+Your program took longer than the maximum allowed time for this
+problem. Therefor it has been aborted. This might indicate that your
+program hangs in a loop, or that your solution is not effici\"ently
+enough.
+
+\item[RUN-ERROR]
+There was an error during the execution of your program. This can have
+a lot of different causes like division by zero, incorrectly
+addressing memory (e.g. by indexing arrays out of bounds), trying to
+use more memory than the limit, etc\dots\ 
+Also check that your program exits with exitcode 0!
+
+\item[NO-OUTPUT]
+Your program did not generate any output. Check that you write to
+standard out.
+
+\item[WRONG-ANSWER]
+The output of your program was incorrect. This can happen, simply
+because your solution is not correct, but also check that your output
+complies exactly with the specifications of the jury.
+\end{description}
+
+\section{Clarifications}
+
+All communication with the jury is to be done with clarifications.
+These can be found on your teampage. Both clarification replies from
+the jury and requests sent by you are displayed  there.
+
+There is also a link to submit a new clarification request to the
+jury. This request is only readable for the jury and they will
+try to respond as soon as possible. Answers that are relevant for
+everyone, will be sent to everyone.
+
+\section{How are submissions being judged?}
+
+The \DOMjudge jury-system is fully automated. In principle no human
+interaction is necessary. The judging is done in the following way:
+
+\subsection{Submission}
+
+With the \texttt{submit} (see \ref{submit}) program, you can submit a
+solution to a problem. Note that you have to submit the source-code of
+your program (and not a compiled program or the output of your
+program). \texttt{submit} makes a connection to the submission server,
+which copies your program to the jury-computers.
+
+There your program enters a queue, awaiting being compiled, executed
+and the output tested on one of the jury-computers.
+
+\subsection{Compilation}
+
+Your program will be compiled on a jury-computer running Linux.
+Using a different compiler or operating system than the jury, should
+not be a problem. Be careful however, not to use any special compiler
+and/or system specific things (you can always check compiler errors on
+the teampage).
+
+The jury-system compiles all programs statically. This should not
+matter concerning generated errors.
+
+\subsection{Testing}
+
+After your program has compiled successfully, it will be executed and
+it's output compared to the output of jury. Before comparing the
+output, the exit status of your program is checked: if your programs
+gives the correct answer, but exits with a nonzero exitcode, the
+result will be a run-error! There are some restrictions during
+execution. If your program violates these, it will also be aborted
+with a run-error, see (\ref{runlimits}).
+
+When comparing program output, it has to exactly match to output of
+the jury. So take care, that you follow the outputspecifications. In
+case of problem statements, which do not have unique output (e.g. with
+floating point answers), the jury can have made a modified comparison
+function.
+
+\subsection{Restrictions}\label{runlimits}
+
+To prevent hacking, keep the jury-system stable and give everyone
+clear and equal environments, there are some restrictions to which all
+submissions are subjected:
+
+\begin{description}[\setlabelphantom{number of processes}]
+\item[compile time]
+Compilation of your program may take no longer than \COMPILETIME\
+seconds. After that, compilation will be aborted and results in a
+compile error. In practice, this should never give rise to
+problems. Should this happen to a normal program, please inform the
+jury right away.
+
+\item[source size]
+The source-code of your program may not exceed \SOURCESIZE\ kilobytes.
+When submitting your program, you will already be warned for this, but
+during compilation this will result in a compile error.
+
+\item[memory]
+During execution of your program, there is \MEMLIMIT\ kilobytes memory
+available. This is the total amount of memory (including program code,
+statically and dynamically defined variables, stack, \dots)! If your
+program tries to use more memory, it will (probably) abort, resulting
+in a run error.
+
+\item[filesize]
+Although you are not allowed to write to files, standard (error)output
+are written to a file. The maximal size of these files is \FILELIMIT\
+kilobytes (per file).
+
+\item[number of processes]
+You are not supposed to create multiple processes (threads). This is
+to no avail anyways, because your program has exactly 1 processor fully
+at it's disposal. To increase stability of the jury-system, there is a
+maximum of \PROCLIMIT\ processes that can be run simultaneously
+(including processes that started your program).
+
+People who have never programmed with multiple processes (or have
+never heard of ``threads'') do not have to worry: a normal program
+runs in one proces.
+
+\end{description}
+
+
+\newpage
+\appendix
+
+\section{Code examples}\label{codeexamples}
+
+Below are a few examples on how to read input and write output for a
+problem. The way of doing reading/writing input/output in this problem
+is like how it is done in a lot of programming contests (e.g. the ACM
+regionals), but can be different at your contest.
+
+The examples are solutions for the problem: given a string with a name
+consisting of one word, output the string ``Helloo $<$name$>$!''.
+
+Sample input and output for this problem:
+
+\begin{tabular}{|p{0.5\textwidth}|p{0.5\textwidth}|}
+\hline
+\textbf{Input} & \textbf{Output} \\
+\hline
+\verbatiminput{example.in} &
+\verbatiminput{example.out} \\
+\hline
+\end{tabular}
+
+Note that the number 3 on the first line indicates, that 3 testcases
+follow.
+
+A solution for this problem in C:
+\listinginput{1}{example.c}
+
+Notice the last \texttt{return 0;}, to prevent a run-error!
+
+\newpage
+
+A solution in C++:
+\listinginput{1}{example.cc}
+
+A solution in Pascal:
+\listinginput{1}{example.pas}
+
+\newpage
+
+And finally a solution in Java:
+\listinginput{1}{example.java}
+
+\end{document}
