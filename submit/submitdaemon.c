@@ -36,6 +36,8 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <getopt.h>
+#include <pwd.h>
+#include <libgen.h>
 
 /* Some C++ includes for easy string handling */
 using namespace std;
@@ -132,7 +134,7 @@ int main(int argc, char **argv)
 	/* Parse command-line options */
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"P:v:q",long_opts,NULL)!=-1 ) ) {
+	while ( (c = getopt_long(argc,argv,"P:v:q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
@@ -211,14 +213,12 @@ int main(int argc, char **argv)
 	return 0; /* This should never be reached */
 }
 
-/*****************************************************************************/
-
 /***
  *  Convert a C++ string to lowercase
  */
 string stringtolower(string str)
 {
-	int i;
+	unsigned int i;
 
 	for(i=0; i<str.length(); i++) str[i] = tolower(str[i]);
 
@@ -267,7 +267,8 @@ void create_server()
 int handle_client()
 {
 	string line, command, argument;
-	string team, problem, language, filename;
+	string team, problem, language, filename, fileloc;
+    struct passwd *userinfo;
 	
 	sendit(client_fd,"+server ready");
 
@@ -306,6 +307,13 @@ int handle_client()
 
 	sleep(1);
 	
+	if ( problem.empty() || team.empty() ||
+	     language.empty() || filename.empty() ) {
+		sendit(client_fd,"-error: missing submission info");
+		close(client_fd);
+		logmsg(LOG_ERR,"missing submission info");
+	}
+    
 	close(client_fd);
 	return 1;
 }
