@@ -143,10 +143,10 @@ while ( TRUE ) {
 			output_compile = %s, output_run = %s, output_diff = %s, output_error = %s
 		WHERE judgingid = %i AND judgerid = %s',
 		$result,
-		get_content($tempdir.'/compile.out'),
-		get_content($tempdir.'/program.out'),
-		get_content($tempdir.'/diff.out'),
-		get_content($tempdir.'/error.out'),
+		getFileContents($tempdir.'/compile.out'),
+		getFileContents($tempdir.'/program.out'),
+		getFileContents($tempdir.'/diff.out'),
+		getFileContents($tempdir.'/error.out'),
 		$judgingid, $myhost);
 
 	// done!
