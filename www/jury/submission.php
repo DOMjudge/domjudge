@@ -32,8 +32,10 @@ $submdata = $DB->q('TUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.source,
 
 <table>
 <tr><td>Team:</td><td><a href="team.php?id=<?=$submdata['team'].'">'. htmlentities($submdata['team'].": ".$submdata['teamname'])?></a></td></tr>
-<tr><td>Problem:</td><td><?= htmlentities($submdata['probid'].": ".$submdata['probname'])?></td></tr>
-<tr><td>Language:</td><td><?= htmlentities($submdata['langid'].": ".$submdata['langname'])?></td></tr>
+<tr><td>Problem:</td><td><a href="problem.php?id=<?=$submdata['probid'].'">'.
+	htmlentities($submdata['probid'].": ".$submdata['probname'])?></a></td></tr>
+<tr><td>Language:</td><td><a href="language.php?id=<?=$submdata['langid'].'">'.
+	htmlentities($submdata['langid'].": ".$submdata['langname'])?></a></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
 <tr><td>Source:</td><td><a href="show_source.php?id=<?=$id?>"><tt><?= htmlspecialchars($submdata['source']) ?></tt></a></td></tr>
 </table>

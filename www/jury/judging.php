@@ -31,7 +31,10 @@ $jdata = $DB->q('TUPLE SELECT j.*,s.*,judger.name as judgename
 <tr><td>Start:</td><td><?=$jdata['starttime']?></td></tr>
 <tr><td>End:</td><td><?=$jdata['endtime']?></td></tr>
 <tr><td>Judger:</td><td><?=$jdata['judgename'].'/'.$jdata['judger']?></td></tr>
-<tr><td>Result:</td><td><?=$jdata['result']?></td></tr>
+<tr><td>Result:</td><td class="sol-<?=
+	($jdata['result'] == 'correct' ? 'correct':'incorrect').
+	"\">".$jdata['result']
+	?></td></tr>
 <tr><td>Valid:</td><td><?=$jdata['valid']?></td></tr>
 </table>
 
