@@ -130,21 +130,22 @@ void logmsg(int msglevel, char *mesg, ...)
 char *errorstring(int errnum, char *mesg)
 {
 	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
+	int buffersize = mesglen + 256;
 	char *buffer;
 	char *endptr; /* pointer to current end of buffer */
 	
-	endptr = buffer = (char *) malloc(mesglen+256);
+	endptr = buffer = (char *) malloc(buffersize);
 	if ( buffer==NULL ) abort();
 
 	sprintf(buffer,ERRSTR);
 	endptr = strchr(buffer,0);
 	
 	if ( mesg!=NULL ) {
-		snprintf(endptr, sizeof(buffer)-strlen(buffer), ": %s", mesg);
+		snprintf(endptr, buffersize-strlen(buffer), ": %s", mesg);
 		endptr = strchr(endptr,0);
 	}		
 	if ( errnum!=0 ) {
-		snprintf(endptr, sizeof(buffer)-strlen(buffer), ": %s",strerror(errnum));
+		snprintf(endptr, buffersize-strlen(buffer), ": %s",strerror(errnum));
 		endptr = strchr(endptr,0);
 	}
 	if ( mesg==NULL && errnum==0 ) {
@@ -160,7 +161,7 @@ void vlogerror(int errnum, char *mesg, va_list ap)
 	char *buffer;
 
 	buffer = errorstring(errnum, mesg);
-	
+
 	vlogmsg(LOG_ERR, buffer, ap);
 
 	free(buffer);
