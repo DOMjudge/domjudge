@@ -51,7 +51,7 @@
 		              $team) ) {
 		error("Team '$team' not found in database.");
 	}
-	if( $teamrow['ipadres'] != $ip ) {
+	if( $teamrow['ipaddress'] != $ip ) {
 		error("Team '$team' not registered at this IP address.");
 	}
 	if( ! $DB->q('MAYBETUPLE SELECT * FROM problem WHERE probid = %s
