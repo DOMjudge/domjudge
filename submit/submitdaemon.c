@@ -51,6 +51,9 @@ using namespace std;
 /* Logging and error functions */
 #include "../lib/lib.error.h"
 
+/* Include some functions, which are not always available */
+#include "../lib/mkstemps.h"
+
 /* Common send/receive functions */
 #include "submitcommon.h"
 
@@ -58,7 +61,8 @@ using namespace std;
 #define VERSION "0.1"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
 
-#define BACKLOG 32      // how many pending connections queue will hold
+#define BACKLOG 32      /* how many pending connections queue will hold */
+#define LINELEN 256     /* maximum length read from submit_db stdout lines */
 
 extern int errno;
 
@@ -195,6 +199,8 @@ int main(int argc, char **argv)
 		
 		case  0: /* child thread */
 			close(server_fd); /* child doesn't need the listener */
+			signal(SIGCHLD,SIG_DFL); /* child should not listen to signals */
+			
 			logmsg(LOG_NOTICE,"connection from %s",inet_ntoa(client_addr.sin_addr));
 
 			handle_client();
@@ -248,7 +254,6 @@ void create_server()
 	server_addr.sin_family      = AF_INET;      /* address family                */
 	server_addr.sin_port        = htons(port);  /* port in network shortorder    */
 	server_addr.sin_addr.s_addr = INADDR_ANY;   /* automatically fill with my IP */
-	//memset(&(server_addr.sin_zero),'\0',8);     /* zero the rest of the struct   */
 
 	if ( bind(server_fd,(struct sockaddr *) &server_addr,
 	          sizeof(struct sockaddr))!=0 ) {
@@ -266,8 +271,11 @@ void create_server()
 int handle_client()
 {
 	string line, command, argument;
-	string team, problem, language, filename, fileloc;
+	string team, problem, language, filename;
+	char *fromfile, *tempfile, *tmp, *tmp2;
     struct passwd *userinfo;
+	FILE *rpipe;
+	int i;
 	
 	sendit(client_fd,"+server ready");
 
@@ -304,16 +312,80 @@ int handle_client()
 		}
 	}
 
-	sleep(1);
-	
-	if ( problem.empty() || team.empty() ||
+	if ( problem.empty()  || team.empty() ||
 	     language.empty() || filename.empty() ) {
 		sendit(client_fd,"-error: missing submission info");
 		close(client_fd);
 		logmsg(LOG_ERR,"missing submission info");
 	}
-    
+
+	logmsg(LOG_NOTICE,"submission received: %s/%s/%s",
+	       team.c_str(),problem.c_str(),language.c_str());
+
+	/* Create the absolute path to submission file, which is expected
+	   (and for security explicitly taken) to be basename only! */
+	if ( (userinfo = getpwnam(team.c_str()))==NULL ) {
+		sendit(client_fd,"-error: cannot find team");
+		close(client_fd);
+		error(errno,"looking up username");
+	}
+
+	if ( (tmp = strdup(filename.c_str()))==NULL ) error(errno,"copying string");
+	fromfile = allocstr("%s/%s/%s",userinfo->pw_dir,USERSUBMITDIR,basename(tmp));
+	free(tmp);
+
+	tempfile = allocstr("%s/%s.%s.XXXXXX.%s",INCOMINGDIR,
+	                    problem.c_str(),team.c_str(),language.c_str());
+	if ( mkstemps(tempfile,language.length()+1)<0 || strlen(tempfile)==0 ) {
+		error(errno,"mkstemps cannot create tempfile");
+	}
+	if ( (tmp = strdup(tempfile))==NULL ) error(errno,"copying string");
+	logmsg(LOG_INFO,"created tempfile: `%s'",basename(tmp));
+	free(tmp);
+	
+	/* Copy the source-file */
+	tmp = allocstr("./submit_copy.sh %s %s %s",team.c_str(),fromfile,tempfile);
+	if ( system(tmp)!=0 ) {
+		sendit(client_fd,"-error: cannot copy file");
+		close(client_fd);
+		error(errno,"cannot copy `%s' to `%s'",fromfile,tempfile);
+	}
+	free(tmp);
+	logmsg(LOG_INFO,"copied `%s' to tempfile",filename.c_str());
+	
+	/* Check with database for correct parameters
+	   and then add a database entry for this file. */
+	if ( (tmp2 = strdup(tempfile))==NULL ) error(errno,"copying string");
+	tmp = allocstr("./submit_db.php %s %s %s %s %s 2>&1",
+	               team.c_str(),inet_ntoa(client_addr.sin_addr),
+	               problem.c_str(),language.c_str(),basename(tmp2));
+	free(tmp2);
+	if ( (rpipe = popen(tmp,"r"))==NULL ) error(errno,"opening submit_db pipe");
+	free(tmp);
+
+	if ( (tmp = (char *) malloc(LINELEN))==NULL ) error(errno,"malloc");
+	
+	while ( fgets(tmp,LINELEN,rpipe)!=NULL ) {
+		if ( strstr(tmp,ERRMATCH)!=NULL ) {
+			/* Strip line to error message only and return that as error */
+			tmp2 = strstr(tmp,ERRMATCH);
+			tmp2 = &tmp2[strlen(ERRMATCH)];
+			i = strlen(tmp2) - 1;
+			while ( i>=0 && (tmp2[i]=='\n' || tmp2[i]=='\r') ) tmp2[i--] = 0;
+			sendit(client_fd,"-error: %s",tmp2);
+			close(client_fd);
+			error(0,"submit_db: %s",tmp2);
+		}
+	}
+	
+	if ( pclose(rpipe)!=0 ) error(errno,"closing submit_db pipe");
+	logmsg(LOG_INFO,"added submission to database");
+
+	if ( unlink(tempfile)!=0 ) error(errno,"deleting tempfile");
+
+	sendit(client_fd,"+submission successful");
 	close(client_fd);
+	
 	return 1;
 }
 
