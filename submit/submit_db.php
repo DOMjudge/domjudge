@@ -38,27 +38,27 @@
 
 	
 	// Check 1: is the contest still open?
-	if(!$aap = $DB->q('VALUE SELECT starttime <= now() && endtime >= now() FROM contest')) {
+	if( ! $DB->q('VALUE SELECT starttime <= now() && endtime >= now() FROM contest') ) {
 		error("The contest is closed, no submissions accepted.");
 	}
 
 	// Check 2: valid parameters?
-	if(!$langext = $DB->q('MAYBEVALUE SELECT extension FROM language
+	if( ! $langext = $DB->q('MAYBEVALUE SELECT extension FROM language
 		                   WHERE langid = %s', $lang) ) {
 		error("Language '$lang' not found in database.");
 	}
-	if(!$row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',
+	if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',
 		              $team) ) {
 		error("Team '$team' not found in database.");
 	}
-	if($row['ipadres'] != $ip) {
+	if( $teamrow['ipadres'] != $ip ) {
 		error("Team '$team' not registered at this IP address.");
 	}
-	if(!$DB->q('MAYBETUPLE SELECT * FROM problem WHERE probid = %s
+	if( ! $DB->q('MAYBETUPLE SELECT * FROM problem WHERE probid = %s
 		        AND allow_submit = "1"', $prob) ) {
 		error("Problem '$prob' not found in database or not submittable.");
 	}
-	if( ! is_readable(INCOMINGDIR."/$file")) {
+	if( ! is_readable(INCOMINGDIR."/$file") ) {
 		error("File '$file' not found in incoming directory (or not readable).");
 	}
 	logmsg ("submit_db: input verified");
