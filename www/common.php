@@ -56,7 +56,6 @@ function printresult($result, $valid = TRUE) {
 
 	$start = '<span class="sol ';
 	$end   = '</span>';
-	$disab  = ($valid ? '': ' disabled');
 
 	switch($result) {
 		case '':
@@ -72,6 +71,6 @@ function printresult($result, $valid = TRUE) {
 			$style = 'incorrect';
 	}
 
-	return $start . $style . $disab . '">' . $result . $end;
+	return $start . ($valid ? $style : 'disabled') . '">' . $result . $end;
 
 }
