@@ -15,31 +15,21 @@ CREATE TABLE category (
 ) TYPE=MyISAM;
 
 #
-# Table structure for table 'clar_request'
+# Table structure for table `clarification`
 #
 
-CREATE TABLE clar_request (
-  reqid tinyint(3) unsigned NOT NULL auto_increment,
-  cid tinyint(3) unsigned NOT NULL default '0',
-  submittime datetime NOT NULL default '0000-00-00 00:00:00',
-  login varchar(15) NOT NULL default '',
-  body text NOT NULL,
-  PRIMARY KEY  (reqid)
-) TYPE=MyISAM COMMENT='Clarification Requests';
-
-#
-# Table structure for table 'clar_response'
-#
-
-CREATE TABLE clar_response (
-  respid tinyint(3) unsigned NOT NULL auto_increment,
-  reqid tinyint(3) unsigned default NULL,
-  cid tinyint(3) unsigned NOT NULL default '0',
-  submittime datetime NOT NULL default '0000-00-00 00:00:00',
-  rcpt varchar(15) default NULL,
-  body text NOT NULL,
-  PRIMARY KEY  (respid)
+CREATE TABLE `clarification` (
+  `clarid` mediumint(8) unsigned NOT NULL auto_increment,
+  `cid` mediumint(8) unsigned NOT NULL default '0',
+  `respid` mediumint(8) unsigned default NULL,
+  `submittime` datetime NOT NULL default '0000-00-00 00:00:00',
+  `sender` varchar(15) default NULL,
+  `recipient` varchar(15) default NULL,
+  `body` text NOT NULL,
+  `answered` tinyint(4) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`clarid`)
 ) TYPE=MyISAM;
+
 
 #
 # Table structure for table 'contest'

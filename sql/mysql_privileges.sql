@@ -37,9 +37,8 @@ INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','contest'
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','team','domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','problem','domjudge@localhost',NOW(),'','Select');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','language','domjudge@localhost',NOW(),'','Select');
-INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','clar_response','domjudge@localhost',NOW(),'Select','');
-INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','clar_request','domjudge@localhost',NOW(),'Select,Insert','');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','category','domjudge@localhost',NOW(),'Select','');
+INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','clarification','domjudge@localhost',NOW(),'Select,Insert','');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_team','scoreboard_public','domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_public','category','domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv VALUES ('localhost','domjudge','domjudge_public','contest','domjudge@localhost',NOW(),'Select','');
