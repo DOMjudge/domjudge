@@ -7,7 +7,7 @@
  * and if ok, copy the file from INCOMING to SUBMIT and add a database
  * entry.
  *
- * Called: submit_db.php <team> <ip> <problem> <language> <filename>
+ * Called: submit_db.php <team> <ip> <problem> <langext> <filename>
  *
  * $Id$
  */
@@ -24,21 +24,21 @@
 	// Get commandline vars and case-normalize them
 	$argv = $GLOBALS['argv'];
 	
-	$team = strtolower(@$argv[1]);
-	$ip   = @$argv[2];
-	$prob = strtolower(@$argv[3]);
-	$lang = strtolower(@$argv[4]);
-	$file = @$argv[5];
+	$team    = strtolower(@$argv[1]);
+	$ip      = @$argv[2];
+	$prob    = strtolower(@$argv[3]);
+	$langext = strtolower(@$argv[4]);
+	$file    = @$argv[5];
 
-	logmsg(LOG_DEBUG, "arguments: '$team' '$ip' '$prob' '$lang' '$file'");
+	logmsg(LOG_DEBUG, "arguments: '$team' '$ip' '$prob' '$langext' '$file'");
 
 
 	// Check 0: called correctly?
-	if( ! $team ) error("No value for Team.");
-	if( ! $ip   ) error("No value for IP.");
-	if( ! $prob ) error("No value for Problem.");
-	if( ! $lang ) error("No value for Language.");
-	if( ! $file ) error("No value for Filename.");
+	if( ! $team    ) error("No value for Team.");
+	if( ! $ip      ) error("No value for IP.");
+	if( ! $prob    ) error("No value for Problem.");
+	if( ! $langext ) error("No value for Language.");
+	if( ! $file    ) error("No value for Filename.");
 
 
 	// Check 1: is the contest open?
@@ -54,9 +54,9 @@
 
 
 	// Check 2: valid parameters?
-	if( ! $langext = $DB->q('MAYBEVALUE SELECT extension FROM language
-	                         WHERE langid = %s AND allow_submit = 1', $lang) ) {
-		error("Language '$lang' not found in database or not submittable.");
+	if( ! $lang = $DB->q('MAYBEVALUE SELECT langid FROM language WHERE
+		                   extension = %s AND allow_submit = 1', $langext) ) {
+		error("Language '$langext' not found in database or not submittable.");
 	}
 	if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',
 	                        $team) ) {
