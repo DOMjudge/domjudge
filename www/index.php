@@ -17,5 +17,5 @@ if($res->count() > 0) {
 	$target = 'public/';
 }
 
-header('HTTP/1.1 301 Please see this page');
-header('Location: http://'.$WEBSERVER.'/'.$target);
+header('HTTP/1.1 302 Please see this page');
+header('Location: http://'.WEBSERVER.'/'.$target);
