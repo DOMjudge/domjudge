@@ -125,6 +125,108 @@ database. For more information, see for example compile_c.sh and
 test_solution.sh for syntax in SYSTEM_ROOT/judge.
 
 
+SECURITY
+--------
+
+This judging system was developed with security as one of the main
+goals in mind. To implement this rigorously in various aspects 
+(restricting teams access to others and the internet, restricting
+access to the submitted programs on the jury computers, etc...)
+requires root privileges to different parts of the whole contest
+environment. Also, security measures might depend on the environment.
+Therefor we have decided not to implement security measures which are
+not directly related to the judging system itself. We do have some
+suggestions on how you can setup external security.
+
+CONSIDERATIONS
+
+Security considerations for a programming contest are a bit different
+from those in normal conditions: normally users only have to be
+protected from deliberately harming eachother. During a contest we
+also have to restrict users from cooperatively communicating,
+accessing restricted resources (like internet) and restrict user
+programs running on jury computers.
+
+We expect that chances are small that people are trying to cheat
+during a programming contest: you have to hack the system and make use
+of that within very limited time. And you have to not get caught and
+disqualified afterwards. Therefor passive security measures of warning
+people of the consequenses and only check (or probe) things will
+probably be enough.
+
+However we wanted the system to be as secure as possible within
+reason. Furthermore this software is open source, so users can try to
+find weak spots before the contest.
+
+INTERNAL SECURITY
+
+Internal security of the system relies on users not being able to get
+to any vital data (jury input/output and users' solutions). Data is
+stored in two places: files on the jury account and in the SQL
+database. Files should be protected by preventing permission to the
+relevant directories. Database access is protected by passwords.
+
+NOTE: database passwords are stored in SYSTEM_ROOT/etc/passwords.php.
+This file has to be non-readable to teams, but has to be readable to
+the webserver to let the jury webinterface work. A solution is, to
+make it readable to a special group the webserver runs as.
+
+Secondly, the files submitted should not be interceptable by other
+teams. Even if these would be sent clear-text, a team would normally
+have to be root/administrator on their computer to intercept this.
+However, this is by default handled by transferring these files with
+ssh (and even locallly on the jury-computers).
+See SYSTEM_ROOT/submit/submit_copy.sh for more information.
+
+Teams should not be able to fake the identity of another team. This is
+prevented in the submission system, by making use of temporary files
+in a world non-readable directory of the team account: during
+submission, the file is copied there with some random part and this
+file will be copied by the jury. An other team cannot guess filenames
+there, so trying to send as a different team would only result in a
+copying error. During submission, the IP address is also checked.
+The team webinterface relies on authentication by IP address only:
+this has the advantage for teams that they do not have to fill in yet
+another user/password combination. Only if teams are able to spoof
+their IP (for which they normally need root/administrator privileges),
+then they would be able to view other teams' submission info (not their
+code) and clarifications. As this gives a team little advantage, we
+think that this suffices.
+
+A difficult issue is the securing of submitted programs run by the
+jury. We do not have any control over these sources and do not want to
+rely on checking them manually or filtering on things like system
+calls (which can be obscured and are different per language). Therefor
+we decided to tackle this isssue by running these programs in a
+environment as restrictive as possible. This is done by setting up a
+minimal chroot environment, for which root privileges and statically
+compiled programs are needed. By also limiting all kinds of system
+resources (memory, processes, time, unprivileged user) we protect the
+system from programs, which try to hack or could crash the system.
+However, a chroot environment does not restrict network access, so
+there lies a possible security risk, which has to be handled
+separately.
+
+EXTERNAL SECURITY
+
+The following security issues are NOT handled by DOMjudge, but left to
+the jury to set up.
+
+Network traffic between team- and jury-computers and the internet
+should be limited to what is allowed. Possible ways of enforcing this,
+might be: monitor traffic, modify firewall rules on team computers or
+(what we implemented with great satisfaction) put all team computers
+behind a firewalling router.
+
+Solutions are run within a restricted (chroot) environment on the
+judge computers. This however does not restrict network access, so a
+team could try to send in a solution, that tries to send input
+testdata back to them, access the internet, etc... A solution to this
+problem is to disallow all network traffic for the test user on the
+judge computers. On linux with kernel 2.4 and higher, this can be
+accomplished by modifying the iptables, by adding a rule like:
+
+iptables -I OUTPUT -o <network_interface> -m owner --uid-owner <testuser_uid> -j REJECT
 
 
 
