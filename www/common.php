@@ -134,7 +134,8 @@ function putResponse($id, $showReq = true) {
 	if($showReq) {
 		echo "<tr><td>Request:</td><td>";
 		if(isset($respdata['reqid'])) {
-			echo '<a href="request.php?id=',$respdata['reqid'].'">q'.$respdata['reqid'].'</a>';
+			echo '<a href="request.php?id=' . urlencode($respdata['reqid']) .
+				'">q' . htmlspecialchars($respdata['reqid']) . '</a>';
 		} else {
 			echo 'none';
 		}

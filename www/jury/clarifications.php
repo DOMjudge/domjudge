@@ -39,11 +39,12 @@ if ( $res->count() == 0 ) {
 		"<tr><th>ID</th><th>team</th><th>request time</th><th>request</th>\n";
 	while ($req = $res->next())
 	{
+		$req['reqid'] = (int)$req['reqid'];
 		echo "<tr>".
 			"<td><a href=\"request.php?id=".$req['reqid']."\">q".$req['reqid']."</a></td>".
 			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($req['login']). "\">".
 				htmlspecialchars($req['login'])."</a></td>".
-			"<td>".$req['submittime']."</td>".
+			"<td>".printdate($req['submittime'])."</td>".
 			"<td><a href=\"request.php?id=".$req['reqid']."\">".
 				htmlspecialchars(str_cut($req['body'],50)).
 			"</a></td>".
@@ -68,6 +69,7 @@ if ( $res->count() == 0 ) {
 		"<tr><th>ID</th><th>team</th><th>request time</th><th>request</th>\n";
 	while ($req = $res->next())
 	{
+		$req['reqid'] = (int)$req['reqid'];
 		echo "<tr>".
 			"<td><a href=\"request.php?id=".$req['reqid']."\">q".$req['reqid']."</a></td>".
 			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($req['login']). "\">".
@@ -98,7 +100,8 @@ if ( $res->count() == 0 ) {
 		$team = (isset($req['rcpt'])
 				?"<a href=\"team.php?id=".urlencode($req['rcpt']). "\">".htmlspecialchars($req['rcpt'])."</a>"
 				:'All');
-		
+
+		$req['respid'] = (int)$req['respid'];
 		echo "<tr>".
 			"<td><a href=\"response.php?id=".$req['respid']."\">r".$req['respid']."</a></td>".
 			"<td class=\"teamid\">".$team."</td>".
@@ -122,8 +125,8 @@ if ( $res->count() == 0 ) {
 
 	$res = $DB->q('SELECT login, name FROM team ORDER  BY category ASC, name ASC');
 	while ($row = $res->next()) {
-?><option value="<?=$row['login']?>"><?=$row['login']?>: <?=$row['name']?></option>
-<?
+		echo "<option value=\"" . htmlspecialchars($row['login']) . "\">" .
+			htmlentities($row['login'] . ": " . $row['name']) . "</option>\n";
 	}
 ?>
 </select>
