@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 0.2.0 - CVS
--------------------
+Version 0.2.0 - 23 February 2005
+--------------------------------
  - Fixed faulty EPS-logo, finally.
  - Add database privileges and move sql-files to own directory.
  - Improve config.tex dependency.
@@ -26,7 +26,6 @@ Version 0.2.0 - CVS
    system is unconfigured.
  - Fix layout error of differences output.
  - Only define STDERR when not already defined (differs per PHP version).
-  
 
 Version 0.1.1 - 24 November 2004
 --------------------------------
