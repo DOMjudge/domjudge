@@ -219,18 +219,6 @@ int main(int argc, char **argv)
 }
 
 /***
- *  Convert a C++ string to lowercase
- */
-string stringtolower(string str)
-{
-	unsigned int i;
-
-	for(i=0; i<str.length(); i++) str[i] = tolower(str[i]);
-
-	return str;
-}
-
-/***
  *  Open a listening socket on the localhost.
  *  
  *  global variables used:
@@ -284,6 +272,7 @@ int handle_client()
 		istringstream line_iss(line);
 		line_iss >> command >> argument;
 
+		command = stringtolower(command);
 		if ( command=="team" ) {
 			team = argument;
 			sendit(client_fd,"+received team '%s'",argument.c_str());
@@ -383,7 +372,7 @@ int handle_client()
 
 	if ( unlink(tempfile)!=0 ) error(errno,"deleting tempfile");
 
-	sendit(client_fd,"+submission successful");
+	sendit(client_fd,"+done submission successful");
 	close(client_fd);
 	
 	return 1;
