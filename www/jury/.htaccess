@@ -9,6 +9,6 @@ AuthType Basic
 require valid-user
 AuthType Basic
 AuthName "DOMjudge"
-AuthUserFile /users/nkpjury/htpasswd
+AuthUserFile /home/domjudge/.htpasswd
 
 </Limit>
