@@ -20,6 +20,7 @@
 	
 	logmsg(LOG_NOTICE, "started [DOMjudge/" . DOMJUDGE_VERSION . "]");
 
+	logmsg(LOG_DEBUG, "checking dirs");
 	// check some dirs for existence and read/writablility
 	$dirstocheck = array (
 		'SYSTEM_ROOT' => 'r',
@@ -29,8 +30,8 @@
 		'INCOMINGDIR' => 'rw',
 		'SUBMITDIR' => 'rw',
 		'JUDGEDIR' => 'rw',
-		'LOGDIR' => 'rw'
-#		CHROOT_PREFIX => ' ???
+		'LOGDIR' => 'rw',
+		'CHROOT_PREFIX' => 'r'
 		);
 
 	foreach ($dirstocheck as $dir => $ops) {
@@ -43,15 +44,32 @@
 			! is_writable ($realdir) )	{ logmsg(LOG_WARNING, "$dir [$realdir] is not writable!" ); continue; }
 	}
 
+	logmsg(LOG_DEBUG, "checking users");
+
 	// does our runuser even exist?
 	// In PHP 4.1.2 this crashes when the user doesn't exist, but the warning is output anyway.
 	if ( ! @posix_getpwnam( RUNUSER ) ) {
 		logmsg(LOG_WARNING, "RUNUSER [" . RUNUSER ."] does not exist!");
 	}
 
+	// check problems. 
+	logmsg(LOG_DEBUG, "checking problems");
 
-	// add more tests here
-		
+	global $DB;	
+	$probs = $DB->q('SELECT probid,testdata FROM problem ORDER BY cid,probid');
+
+	// check whether the problem input/output is readable by me.
+	$inout = array('in','out');
+	while ( $row = $res->next() ) {
+		foreach($inout as $i) {
+			$testdata = INPUT_ROOT . '/' . $row['testdata'] . '/testdata.' . $i;
+			if ( ! file_exists ( $testdata ) ) {
+				logmsg(LOG_WARNING, "problem $row[probid] testdata.$i [$testdata] not readable!");
+			} elseif ( ! is_readable ( $testdata ) ) {
+				logmsg(LOG_WARNING, "problem $row[probid] testdata.$i [$testdata] not readable!");
+			}
+		}
+	}
 
 	logmsg(LOG_NOTICE, "end");
 
