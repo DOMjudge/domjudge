@@ -52,10 +52,10 @@
 extern int errno;
 
 /* Variables defining logmessages verbosity to stderr/logfile */
-int  verbose      = LOG_NOTICE;
-int  loglevel     = LOG_DEBUG;
-char logfile[255] = LOGDIR"/submit.log"
-FILE *stdlog;
+extern int  verbose;
+extern int  loglevel;
+extern char *logfile;
+
 char *progname;
 
 int port = SUBMITPORT;
@@ -64,7 +64,7 @@ int show_help;
 int show_version;
 
 struct option const long_opts[] = {
-	{"port",    required_argmuent, NULL,         'P'},
+	{"port",    required_argument, NULL,         'P'},
 	{"verbose", required_argument, NULL,         'v'},
 	{"help",    no_argument,       &show_help,    1 },
 	{"version", no_argument,       &show_version, 1 },
@@ -112,25 +112,31 @@ int main(int argc, char **argv)
     struct sigaction sigchildaction;
     int child_pid;
 	int c;
-	
+
+	/* Define logging levels & file */
+	verbose = LOG_NOTICE;
+	loglevel = LOG_DEBUG;
+	logfile = LOGDIR"/submit.log";
+
 	progname = argv[0];
 
 	/* Parse command-line options */
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"P:v:q",long_opts,NULL)!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"P:v:q",long_opts,NULL)!=-1 ) ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
 		case 'P': /* port option */
-			port = strtol(optarg,&ptr,10);
-			if ( *ptr!=0 || port<=0 || port>65535 ) {
+			port = strtol(optarg,NULL,10);
+			if (errno == EINVAL || errno == ERANGE
+			 || port<=0 || port>65535 ) {
 				error(0,"invalid tcp port specified: `%s'",optarg);
 			}
 			break;
 		case 'v': /* verbose option */
-			verbose = strtol(optarg,&ptr,10);
-			if ( *ptr!=0 || verbose<=0 ) {
+			verbose = strtol(optarg,NULL,10);
+			if ( errno == EINVAL || errno == ERANGE || verbose<=0 ) {
 				error(0,"invalid verbosity specified: `%s'",optarg);
 			}
 			break;
@@ -151,7 +157,7 @@ int main(int argc, char **argv)
     logmsg(LOG_NOTICE,"server started");
     
     create_server();
-    logmsg("listening on port %d/tcp", port);
+    logmsg(LOG_INFO,"listening on port %d/tcp", port);
     
     /* Setup the child signal handler */
     sigchildaction.sa_handler = sigchld_handler;
@@ -183,7 +189,7 @@ int main(int argc, char **argv)
             close(server_fd); /* child doesn't need the listener */
             handle_client(client_fd);
 			
-			logmsg(LOG_INFO,"child exiting")
+			logmsg(LOG_INFO,"child exiting");
             exit(0);
 			
 		default: /* parent thread */
@@ -238,7 +244,7 @@ void handle_client(int client)
 {
 	if (send(client, "+hello, send submission info, then files", 40, 0)!=0 )
 		perror("send");
-	close(new_fd);
+//	close(new_fd);
 }
 
 
