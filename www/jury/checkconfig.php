@@ -11,6 +11,8 @@ require('init.php');
 $title = 'Config Checker';
 require('../header.php');
 require('menu.php');
+
+ob_implicit_flush();
 ?>
 
 <h1>Config Checker</h1>
