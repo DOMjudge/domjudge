@@ -172,7 +172,7 @@ fi
 	$RUNSCRIPTDIR/compile_$LANG.sh source.$EXT source
 ) &>compile.tmp
 exitcode=$?
-mv source program
+[ -f source ] && mv -f source program
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep 'timelimit reached: aborting command' compile.tmp &>/dev/null; then
