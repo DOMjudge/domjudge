@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#!/usr/bin/perl -w
 
 # jurydaemon.pl - Server for the submit program.
 #
@@ -58,13 +58,20 @@ sub datestr {
 
 sub logmsg {
 	if ( $verbose ) { print STDERR "@_\n"; }
-	if ( $log ) { print "[", datestr, "] ", $progname, "[$$]: @_\n"; }
+	if ( $log ) { print "[".datestr()."] ".$progname."[$$]: @_\n"; }
 }
+
+# Forward declaration of 'sendit' for use in 'error'.
+sub sendit;
 
 sub error {
 	if ( -f $tmpfile ) { unlink $tmpfile; }
+	if ( $socket ) {
+		sendit "-error: @_";
+		$socket->close();
+	}
 	logmsg "error: @_";
-	die "$progname: error: @_\n"
+	die "$progname: error: @_\n";
 }
 
 sub netchomp {
@@ -79,8 +86,8 @@ sub sendit { # 'send' is already defined
 sub receive {
 	if ( ! ($_ = <$socket>) ) { return $failure; }
 	netchomp;
-	if ( /^[^+]/ ) { error("received: $_\n"); }
-	logmsg("recv: $_");
+	if ( /^[^+]/ ) { error "received: $_"; }
+	logmsg "recv: $_";
 	s/^.//;
 	$lastreply = $_;
 	return $success;
@@ -132,79 +139,69 @@ sub child {
 
 	logmsg "connection from ".($hostinfo->name || $socket->peerhost)." [$ip]";
 
-	# Talk with the client: get submission info & transfer file.
+	# Talk with the client: get submission info.
 	sendit "+server ready";
 	while ( receive ) {
 		$_ = $lastreply;
 		if      ( /^team\s+(\S+)\s*$/i ) {
 			$team = $1;
-			sendit "+received team $team";
+			sendit "+received team '$team'";
 		} elsif ( /^problem\s+(\S+)\s*$/i ) {
 			$problem = lc $1;
-			sendit "+received problem $problem";
+			sendit "+received problem '$problem'";
 		} elsif ( /^language\s+(\S+)\s*$/i ) {
 			$language = lc $1;
-			sendit "+received language $language";
+			sendit "+received language '$language'";
 		} elsif ( /^filename\s+(\S+)\s*$/i ) {
 			$filename = $1;
-			sendit "+received filename $filename";
+			sendit "+received filename '$filename'";
+		} elsif ( /^quit:?\s*(.*)$/i ) {
+			logmsg "received quit: '$1'";
+			$socket->close();
+			return $failure;
+		} elsif ( /^error:?\s*(.*)$/i ) {
+			logmsg "received error: '$1'";
+			$socket->close();
+			return $failure;
 		} elsif ( /^done\s*$/i ) {
 			last;
-		} elsif ( /^quit\s*$/i ) {
-			sendit "-received quit, aborting";
-			return $failure;
 		} else {
-			sendit "-invalid command";
+			error "invalid command: '$_'";
 		}
 	}
 
+	# Check for succesful transmission of all info.
 	if ( $lastreply ne "done" ) { error "connection lost"; }
 
-	# Did we get all required info?
 	if ( ! ($problem && $team && $language && $filename) ) {
-		sendit "-missing data, aborting";
 		error "missing submission data";
 	}
 
 	# Create the absolute path to submission file, which is expected
 	# (and for security explicitly taken) to be basename only!
-	if ( ! ($pw = getpwnam($team)) ) {
-		sendit "-invalid username";
-		error "looking up username";
-	}
+	$pw = getpwnam($team) or error "looking up username: $!";
+	
 	$filename = $pw->dir . "/$submitclientdir/" . basename($filename);
 
 	($handle, $tmpfile) = mkstemps("$submitserverdir/$problem.$team.XXXX",".$language")
 		or error "creating tempfile: $!";
+	logmsg "created tempfile: '$tmpfile'";
 
-	# Check parameters with database: does the language exist, team matches IP,
-	# is the problem active and submittable?
-	system(("./submit_checkvars.php",$team,$ip,$problem,$language,$tmpfile));
-
-	if ( $? != 0 ) {
-		sendit "-error checking parameters";
-		error "invalid submission parameters";
-	}
+	# Copy the source-file.
+	### TODO: exitcode 0 bij authetication failure afvangen ###
+	system(("scp","-Bq",$team.'@localhost:'.$filename,$tmpfile));
+	if ( $? != 0 ) { error "copying file: exitcode $?"; }
+#	copy("$filename","$tmpfile") or error "copying file: $!";
+	logmsg "copied '$filename' to tempfile";
 	
-	# if that's ok, copy the file
-	if( ! copy("$filename","$tmpfile") ) {
-		my $errno = $!;
-		sendit "-error copying file";
-		$! = $errno;
-		error "copying file: $!";
-	}
-	logmsg "submission copied to '" . basename($tmpfile) . "'";
-	
-	# add a db-entry for this file.
-	system(("./submit_db.php",$team,$ip,$problem,$language,basename($tmpfile)));
-	if ( $? != 0 ) {
-		sendit "-error adding to database";
-		error "adding to database";
-	}
+	# Check with database for correct parameters and then
+	# add a database entry for this file.
+	### TODO: basename($tmpfile) naar $tmpfile veranderen bij 'incoming' ###
+	system(("./submit_db.php",$team,$ip,$problem,$language,$tmpfile));
+	if ( $? != 0 ) { error "adding to database: exitcode $?"; }
+	logmsg "added submission to database";
 
-	sendit "+done submission successful";
-	logmsg "submission received successfully";
-
+	sendit "+submission successful";
 	$socket->close();
 	
 	return $success;
@@ -225,7 +222,7 @@ $server = IO::Socket::INET->new(Proto => 'tcp',
 
 logmsg "listening on port $submitport/tcp";
 
-# Accept connections and fork off children to handle them.	
+# Accept connections and fork off children to handle them.
 while ( 1 ) {
 	if ( $socket = $server->accept() ) {
 		logmsg "incoming connection, spawning child";
