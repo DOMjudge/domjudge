@@ -109,13 +109,15 @@ struct hostent    *serverinfo;
 /* Submission information */
 string problem, language, server, team;
 char *filename, *submitdir, *tempfile;
-int temp_fh;
+int temp_fd;
 
 int main(int argc, char **argv)
 {
 	unsigned i;
 	int c;
+	int redir_fd[3];
 	char *ptr;
+	char *args[MAXARGS];
 	char *homedir;
 	struct stat fstats;
 	string filebase, fileext;
@@ -227,7 +229,7 @@ int main(int argc, char **argv)
 	}
 	
 	/* Try to parse problem and language from filename */
-	filebase = string(basename(filename));
+	filebase = string(gnu_basename(filename));
 	if ( filebase.find('.')!=string::npos ) {
 		fileext = filebase.substr(filebase.rfind('.')+1);
 		filebase.erase(filebase.find('.'));
@@ -246,7 +248,7 @@ int main(int argc, char **argv)
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( team.empty()     ) usage2(0,"no team specified");
 	if ( server.empty()   ) usage2(0,"no server specified");
-
+	
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
 	logmsg(LOG_DEBUG,"team is `%s'",team.c_str());
@@ -270,18 +272,19 @@ int main(int argc, char **argv)
 	/* Make tempfile to submit */
 	tempfile = allocstr("%s/%s.XXXXXX.%s",submitdir,
 	                    problem.c_str(),language.c_str());
-	temp_fh = mkstemps(tempfile,language.length()+1);
-	if ( temp_fh<0 || strlen(tempfile)==0 ) {
+	temp_fd = mkstemps(tempfile,language.length()+1);
+	if ( temp_fd<0 || strlen(tempfile)==0 ) {
 		error(errno,"mkstemps cannot create tempfile");
 	}
 
-	/* Construct copy command and execute with `system' */
-	ptr = allocstr("cp %s %s",filename,tempfile);
-	if ( system(ptr)!=0 ) {
-		error(errno,"cannot copy `%s' to `%s'",filename,tempfile);
+	/* Construct copy command and execute it */
+	args[0] = filename;
+	args[1] = tempfile;
+	redir_fd[0] = redir_fd[1] = redir_fd[2] = 0;
+	if ( execute("cp",args,2,redir_fd,1)!=0 ) {
+		error(0,"cannot copy `%s' to `%s'",filename,tempfile);
 	}
-	free(ptr);
-
+	
 	if ( chmod(tempfile,USERPERMFILE)!=0 ) {
 		error(errno,"setting permissions on `%s'",tempfile);
 	}
@@ -326,7 +329,7 @@ int main(int argc, char **argv)
 	receive(socket_fd);
 	sendit(socket_fd,"+language %s",language.c_str());
 	receive(socket_fd);
-	sendit(socket_fd,"+filename %s",basename(tempfile));
+	sendit(socket_fd,"+filename %s",gnu_basename(tempfile));
 	receive(socket_fd);
 	sendit(socket_fd,"+done");
 
