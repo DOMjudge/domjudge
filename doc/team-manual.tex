@@ -61,7 +61,7 @@ a quick introduction, to be able to start using the system. It is
 however strongly advised, that at least one of your team's members
 read all of this manual, because there are specific details of this
 jury-system, that might become of importance when you run into
-problems (like a incorrect solution). \textbf{BE WARNED!!}
+problems (like an incorrect solution). \textbf{BE WARNED!!}
 
 \subsection{Reading and writing}
 
@@ -102,9 +102,9 @@ extensions and some examples. Note that this help is quite long and
 might not fit on a screen. Then use for example
 \texttt{submit --help | more} to read everything.
 
-\texttt{submit} will check your file on a couple of things and warns
-you for some things: for example when the file has not been modified
-for a long time or when is is larger than the maximal source-code size.
+\texttt{submit} will check your file and warns you for some things:
+for example when the file has not been modified for a long time or
+when is is larger than the maximal source-code size.
 
 Then \texttt{submit} displays a summary with all details of your
 submission and asks for confirmation. Check whether you are submitting
@@ -135,7 +135,7 @@ are listed here with a short description:
 
 \begin{description}[\setleftmargin{4.5cm}]
 \item[CORRECT]
-The submisson was correct and you solved this problem!
+The submission was correct and you solved this problem!
 
 \item[COMPILER-ERROR]
 There was an error when compiling your program. You can view the
@@ -178,9 +178,9 @@ try to respond as soon as possible. Answers that are relevant for
 everyone, will be sent to everyone.
 
 When you receive a new clarification from the jury, you will
-automatically be notified by a popup window. For this to work, you
+automatically be notified by a pop-up window. For this to work, you
 have to have the teampage opened in a webbrowser and the browser must
-not block popup windows.
+not block pop-up windows.
 
 \section{How are submissions being judged?}
 
@@ -220,8 +220,8 @@ execution. If your program violates these, it will also be aborted
 with a run-error, see (\ref{runlimits}).
 
 When comparing program output, it has to exactly match to output of
-the jury. So take care, that you follow the outputspecifications. In
-case of problem statements, which do not have unique output (e.g. with
+the jury. So take care, that you follow the output specifications. In
+case of problem statements which do not have unique output (e.g. with
 floating point answers), the jury can have made a modified comparison
 function.
 
@@ -265,7 +265,7 @@ maximum of \PROCLIMIT\ processes that can be run simultaneously
 
 People who have never programmed with multiple processes (or have
 never heard of ``threads'') do not have to worry: a normal program
-runs in one proces.
+runs in one process.
 
 \end{description}
 
@@ -276,12 +276,12 @@ runs in one proces.
 \section{Code examples}\label{codeexamples}
 
 Below are a few examples on how to read input and write output for a
-problem. The way of doing reading/writing input/output in this problem
+problem. The way of doing reading and writing input and output in this problem
 is like how it is done in a lot of programming contests (e.g. the ACM
 regionals), but can be different at your contest.
 
 The examples are solutions for the problem: given a string with a name
-consisting of one word, output the string ``Helloo $<$name$>$!''.
+consisting of one word, output the string ``Hello $<$name$>$!''.
 
 Sample input and output for this problem:
 
@@ -300,7 +300,7 @@ follow.
 A solution for this problem in C:
 \listinginput{1}{example.c}
 
-Notice the last \texttt{return 0;}, to prevent a run-error!
+Notice the last \texttt{return 0;} to prevent a run-error!
 
 \newpage
 
