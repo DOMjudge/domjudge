@@ -48,7 +48,7 @@
 	if(!$cont) {
 		error("No contest found in the database, aborting.");
 	}
-	if( $cont['start_u'] > time() || $cont['end_u'] < time() )
+	if( $cont['start_u'] > time() || $cont['end_u'] < time() ) {
 		error("The contest is closed, no submissions accepted. [c$cont[cid]]");
 	}
 
