@@ -17,6 +17,10 @@ PROGRAM="$1"
 TESTDATA="$2"
 DIFFOUT="$3"
 
+# Width of the diff output (minimum 50):
+OUTPUTWIDTH=80
+OUTPUTHALF=$((OUTPUTWIDTH/2 - 2))
+
 # Test an exact match between program output and testdata output:
 diff -U 0 $PROGRAM $TESTDATA >$DIFFOUT
 
@@ -26,16 +30,45 @@ if [ $? -ge 2 ]; then
 	exit 1
 fi
 
-# Format the diff output to a reasonably readable format:
-TMPFILE=`tempfile -d "$PWD" -p diff -s .tmp`
-[ -r $TMPFILE ] || exit 1
-cp -a $DIFFOUT $TMPFILE
+# Exit when no differences found:
+if [ ! -s $DIFFOUT ]; then
+	exit 0
+fi
 
-cat $TMPFILE | \
-	grep -vE '^(\-\-\-|\+\+\+)' | \
-	sed -e 's/^-/PROG: /g;s/^+/TEST: /g;s/^\@\@ -\([0-9]*\).*/### LINE \1 ###/' \
-	>$DIFFOUT || exit 1
+exec 3<$PROGRAM
+exec 4<$TESTDATA
 
-rm -f $TMPFILE
+LINE=0
+DIFFBLOCK=0
+while true ; do
+	if ! read PROGLINE <&3 ; then
+		if read TESTLINE <&4 ; then
+			echo "### MORE TESTDATA OUTPUT:"
+			echo "$TESTLINE"
+			cat <&4
+		fi
+		break
+	fi
+	if ! read TESTLINE <&4 ; then
+		echo "### MORE PROGRAM OUTPUT:"
+		echo "$PROGLINE"
+		cat <&3
+		break
+	fi
+
+	((LINE++))
+	if [ "$PROGLINE" != "$TESTLINE" ]; then
+		if [ $DIFFBLOCK -eq 0 ]; then
+			DIFFBLOCK=1
+			printf "### LINE %-6d%-$((OUTPUTHALF-23))s PROGRAM | TESTDATA\n" "$LINE" " "
+		fi
+		printf "%-${OUTPUTHALF}s | %-${OUTPUTHALF}s\n" "$PROGLINE" "$TESTLINE"
+	else
+		DIFFBLOCK=0
+	fi
+done >$DIFFOUT
+
+exec 3<&-
+exec 4<&-
 
 exit 0
