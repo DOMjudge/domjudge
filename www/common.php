@@ -22,8 +22,6 @@ function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 
 	global $DB;
 	
-//	$detailed = $key != 'team';
-
 	/* We need two queries: one for all submissions, and one with the
 	 * results for the valid ones. When key & value are supplied we're
 	 * looking for the submissions of a specific team or judger, else
@@ -266,7 +264,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	$contdata = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $cid);
 	
 	echo "<h1>Scoreboard ".htmlentities($contdata['contestname'])."</h1>\n\n";
-	echo "<h4>starts: ".printtime($contdata['starttime']) . ' - ends: ' .printtime($contdata['endtime'])."</h4>\n\n";
+	echo "<h4>starts: " . printtime($contdata['starttime']) .
+	        ' - ends: ' . printtime($contdata['endtime']) . "</h4>\n\n";
 
 	echo "<table class=\"scoreboard\" cellpadding=\"3\">\n";
 
