@@ -5,13 +5,14 @@
  * $Id$
  */
 
+$id = $_GET['id'];
+
 require('init.php');
-$refresh = '15;url='.$_SERVER["REQUEST_URI"];
+$refresh = '15;url=' . getBaseURI() . 'jury/problem.php?id=' . urlencode($id);
 $title = 'Problem';
 require('../header.php');
 require('menu.php');
 
-$id = $_GET['id'];
 
 echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
 
@@ -31,6 +32,6 @@ $data = $DB->q('TUPLE SELECT * FROM problem NATURAL JOIN contest WHERE probid = 
 <h2>Submissions for <?=htmlspecialchars($id)?></h2>
 
 <?php
-getSubmissions('probid', $id);
+getSubmissions('probid', $id, TRUE);
 
 require('../footer.php');

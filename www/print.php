@@ -38,7 +38,7 @@ function printresult($result, $valid = TRUE, $teamstatus = FALSE) {
  * print a yes/no field, input: something that evaluates to a boolean
  */
 function printyn ($val) {
-	return ($val ? '1':'0');
+	return ($val ? 'yes':'no');
 }
 
 /**

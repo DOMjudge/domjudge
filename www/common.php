@@ -7,15 +7,25 @@
  */
 
 /**
+ * Return the base URI for the DOMjudge Webinterface.
+ * Change this if redirects are broken, e.g. when you use https
+ * or a different port number.
+ * TODO: maybe the complete baseURI should be configurable?
+ */
+function getBaseURI() {
+	return 'http://' . WEBSERVER . '/';
+}
+
+/**
  * Print a list of submissions, either all or only those that
  * match <key> = <value>. Output is always limited to the
  * current or last contest.
  */
-function getSubmissions($key = null, $value = null) {
+function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 
 	global $DB;
 	
-	$detailed = $key != 'team';
+//	$detailed = $key != 'team';
 
 	/* We need two queries: one for all submissions, and one with the
 	 * results for the valid ones. When key & value are supplied we're
@@ -56,43 +66,60 @@ function getSubmissions($key = null, $value = null) {
 	// table header; leave out the field that is our key (because it's the same
 	// for all rows)
 	echo "<table>\n<tr>".
-		( $detailed ? "<th>ID</th>" : '' ) .
+		( $isjury ? "<th>ID</th>" : '' ) .
 		"<th>time</th>".
-		($key != 'team' ? "<th>team</th>" : '') .
+		($key != 'team'   ? "<th>team</th>"    : '') .
 		($key != 'probid' ? "<th>problem</th>" : '') .
-		($key != 'langid' ? "<th>lang</th>" : '') .
+		($key != 'langid' ? "<th>lang</th>"    : '') .
 		"<th>status</th>".
-		($detailed ? "<th>last<br />judge</th>" : '') .
+		($isjury ? "<th>last<br />judge</th>" : '') .
 		"</tr>\n";
 	// print each row with links to detailed information
 	while( $row = $res->next() ) {
 		$sid = (int)$row['submitid'];
-		$isfinished = ($detailed || ! @$resulttable[$row['submitid']]['result']);
-		echo "<tr>" .
-			($detailed ? "<td><a href=\"submission.php?id=".$sid."\">s".$sid."</a></td>" : '') .
-			"<td>" . printtime($row['submittime']) . "</td>" .
-			($key != 'team' ? "<td class=\"teamid\" title=\"".htmlentities($row['teamname'])."\">".
-				htmlspecialchars($row['team']) . "</td>" : '') .
-			($key != 'probid' ? "<td title=\"".htmlentities($row['probname'])."\">".
-				htmlspecialchars($row['probid']) . "</td>" : '') .
-			($key != 'langid' ? "<td title=\"".htmlentities($row['langname'])."\">".
-				htmlspecialchars($row['langid']) . "</td>" : '') .
-			"<td>";
+		$isfinished = ($isjury || ! @$resulttable[$row['submitid']]['result']);
+		echo "<tr>";
+		if ( $isjury ) {
+			echo "<td><a href=\"submission.php?id=".$sid."\">s".$sid."</a></td>";
+		}
+		echo "<td>" . printtime($row['submittime']) . "</td>";
+		if ( $key != 'team' ) {
+			echo "<td class=\"teamid\" title=\"".htmlentities($row['teamname'])."\">" .
+				( $isjury ? '<a href="team.php?id=' . $row['team'] . '">' : '' ) .
+				htmlspecialchars($row['team']) .
+				($isjury ? '</a>' : '') . '</td>';
+		}
+		if ( $key != 'probid' ) {
+			echo '<td title="' . htmlentities($row['probname']) . '">' .
+				($isjury ? '<a href="problem.php?id=' . $row['probid'] . '">' : '') .
+				htmlspecialchars($row['probid']) .
+				($isjury ? '</a>' : '') . '</td>';
+		}
+		if ( $key != 'langid' ) {
+			echo '<td title="' . htmlentities($row['langname']) . '">' .
+				($isjury ? '<a href="language.php?id=' . $row['langid'] . '">' : '') .
+				htmlspecialchars($row['langid']) .
+				($isjury ? '</a>' : '') . '</td>';
+		}
+		echo "<td>";
 		if( ! @$resulttable[$row['submitid']]['result'] ) {
 			echo printresult(@$row['judgerid'] ? '' : 'queued', TRUE, isset($value));
 		} else {
 			// link directly to a specific judging
-			if ( $detailed ) {
+			if ( $isjury ) {
 				echo '<a href="judging.php?id=' . $resulttable[$row['submitid']]['judgingid'] . '">';
 			} else {
 				echo '<a href="submission_details.php?id=' . $sid . '">';
 			}
-			echo printresult( @$resulttable[$row['submitid']]['result'] ) .
-				'</a>';
+			echo printresult( @$resulttable[$row['submitid']]['result'] ) . '</a>';
 		}
-		echo "</td>" .
-		 	( $detailed ? "<td>".printhost(@$resulttable[$row['submitid']]['judgerid']) . "</td>" : '') .
-		 	"</tr>\n";
+		echo "</td>";
+		if ( $isjury ) {
+			$judger = @$resulttable[$row['submitid']]['judgerid'];
+			echo '<td><a href="judger.php?id=' . urlencode($judger) . '">' .
+				 printhost($judger) . '</a></td>';
+		}
+		echo "</tr>\n";
 	}
 	echo "</table>\n\n";
 
@@ -114,19 +141,21 @@ function getJudgings($key, $value) {
 	if( $res->count() == 0 ) {
 		echo "<p><em>No judgings.</em></p>\n\n";
 	} else {
-		echo "<table>\n".
-			"<tr><th>ID</th><th>start</th><th>end</th><th>judge</th><th>result</th><th>valid</th></tr>\n";
+		echo "<table>\n<tr><th>ID</th><th>start</th><th>end</th>";
+		if ( $key != 'judge' ) echo "<th>judge</th>";
+		echo "<th>result</th><th>valid</th></tr>\n";
 		while( $jud = $res->next() ) {
-			echo "<tr" . ( $jud['valid'] ? '':' class="disabled"' ).
-				"><td><a href=\"judging.php?id=" . (int)$jud['judgingid'] . '">j' .
-					(int)$jud['judgingid'] . "</a>" .
-				"</td><td>".printtime($jud['starttime']) .
-				"</td><td>".printtime(@$jud['endtime']) .
-				"</td><td>".printhost(@$jud['judgerid']) .
-				"</td><td><a href=\"judging.php?id=" . (int)$jud['judgingid'] . '">' .
-					printresult(@$jud['result'], $jud['valid']) . "</a>" .
-				"</td><td align=\"center\">".printyn($jud['valid']) .
-				"</td></tr>\n";
+			echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
+			echo '<td><a href="judging.php?id=' . (int)$jud['judgingid'] . '">j' .
+				(int)$jud['judgingid'] . '</a></td>';
+			echo '<td>' . printtime($jud['starttime']) . '</td>';
+			echo '<td>' . printtime(@$jud['endtime'])  . '</td>';
+			echo '<td><a href="judger.php?id=' . urlencode(@$jud['judgerid']) . '">' .
+				 printhost(@$jud['judgerid']) . '</a></td>';
+			echo '<td><a href="judging.php?id=' . (int)$jud['judgingid'] . '">' .
+				printresult(@$jud['result'], $jud['valid']) . '</a></td>';
+			echo '<td align="center">' . printyn($jud['valid']) . '</td>';
+			echo "</tr>\n";
 		}
 		echo "</table>\n\n";
 	}

@@ -5,19 +5,20 @@
  * $Id$
  */
 
+$id = $_REQUEST['id'];
+
 require('init.php');
-$refresh = '15;url='.$_SERVER["REQUEST_URI"];
+$refresh = '15;url='.getBaseURI().'jury/judger.php?id='.urlencode($id);
 $title = 'Judger';
 require('../header.php');
 require('menu.php');
 
-$id = $_REQUEST['id'];
-if(!$id || !preg_match("/^[A-Za-z0-9_\-.]*$/", $id))	error ("Invalid judger id");
+if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) error ("Invalid judger id");
 
-if(isset($_POST['cmd'])) {
-	if($_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate') {
-		$DB->q('UPDATE judger SET active = %i WHERE judgerid = %s'
-		      ,($_POST['cmd'] == 'activate'?1:0), $id);
+if ( isset($_POST['cmd']) ) {
+	if ( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) {
+		$DB->q('UPDATE judger SET active = %i WHERE judgerid = %s',
+		       ($_POST['cmd'] == 'activate' ? 1 : 0), $id);
 	}
 }
 $row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $id);
@@ -31,7 +32,7 @@ $row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $id);
 <tr><td>Active:</td><td><?=printyn($row['active'])?></td></tr>
 </table>
 
-<?php	$cmd = ($row['active'] == 1?'deactivate':'activate'); ?>
+<?php	$cmd = ($row['active'] == 1 ? 'deactivate' : 'activate'); ?>
 <form action="judger.php" method="post">
 <p><input type="hidden" name="id" value="<?=htmlspecialchars($row['judgerid'])?>" />
 <input type="hidden" name="cmd" value="<?=$cmd?>" />

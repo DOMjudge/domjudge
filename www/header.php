@@ -15,7 +15,7 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>'."\n";
 	if( isset($refresh) ) {
 ?>
 	<meta http-equiv="refresh" content="<?
-		if(isset($popup)) {
+		if( isset($popup) ) {
 			echo addUrl($refresh, $popupTag);
 		} else {
 			echo $refresh;

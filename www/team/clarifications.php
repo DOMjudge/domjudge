@@ -7,7 +7,7 @@
  */
 
 require('init.php');
-$refresh = '30;url=clarifications.php';
+$refresh = '30;url=' . getBaseURI() . 'team/clarifications.php';
 $title = 'Clarifications';
 include('../header.php');
 include('menu.php');

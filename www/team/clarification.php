@@ -9,7 +9,7 @@
 $respid = (int)@$_GET['id'];
 
 require('init.php');
-$refresh = '30;url=clarification.php?id='.$respid;
+$refresh = '30;url=' . getBaseURI() . 'team/clarification.php?id=' . urlencode($respid);
 $title = 'Clarification Response';
 include('../header.php');
 include('menu.php');

@@ -6,7 +6,7 @@
  */
 
 require('init.php');
-$refresh = '15;url=clarifications.php';
+$refresh = '15;url='.getBaseURI().'jury/clarifications.php';
 $title = 'Clarification Requests';
 require('../header.php');
 require('menu.php');

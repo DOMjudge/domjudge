@@ -5,13 +5,14 @@
  * $Id$
  */
 
+$login = $_GET['id'];
+
 require('init.php');
-$refresh = '15;url='.$_SERVER["REQUEST_URI"];
+$refresh = '15;url=' . getBaseURI() . 'jury/team.php?id=' . urlencode($login);
 $title = 'Team';
 require('../header.php');
 require('menu.php');
 
-$login = $_GET['id'];
 if(preg_match('/\W/', $login)) {
 	error("Login contains invalid chars");
 }
@@ -35,6 +36,6 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 
 <?php
 
-getSubmissions('team', $login);
+getSubmissions('team', $login, TRUE);
 
 require('../footer.php');

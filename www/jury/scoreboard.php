@@ -7,7 +7,7 @@
  */
 
 require('init.php');
-$refresh = '30;url='.$_SERVER["REQUEST_URI"];
+$refresh = '30;url=' . getBaseURI() . 'jury/scoreboard.php';
 $title = 'Scoreboard';
 include('../header.php');
 include('menu.php');

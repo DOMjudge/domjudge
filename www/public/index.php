@@ -9,7 +9,7 @@
 require('init.php');
 $title="Scoreboard";
 // set auto refresh
-$refresh="30;url=./";
+$refresh="30;url=" . getBaseURI() . 'public/';
 require('../header.php');
 
 // call the general putScoreBoard function from common.php
