@@ -16,11 +16,3 @@ tofile=$3
 cp "$fromfile" "$tofile" || exit 1
 
 exit 0
-
-
-
-
-
-
-
-
