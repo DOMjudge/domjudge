@@ -40,6 +40,9 @@
 /* Some system/site specific config */
 #include "../etc/config.h"
 
+/* Logging and error functions */
+#include "../lib/lib.error.h"
+
 #define PROGRAM "submitdaemon"
 #define VERSION "0.1"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
@@ -55,10 +58,13 @@ char logfile[255] = LOGDIR"/submit.log"
 FILE *stdlog;
 char *progname;
 
+int port = SUBMITPORT;
+
 int show_help;
 int show_version;
 
 struct option const long_opts[] = {
+	{"port",    required_argmuent, NULL,         'P'},
 	{"verbose", required_argument, NULL,         'v'},
 	{"help",    no_argument,       &show_help,    1 },
 	{"version", no_argument,       &show_version, 1 },
@@ -80,6 +86,7 @@ void usage()
 	printf("Usage: %s [OPTION]...\n",progname);
 	printf("Start the submitserver.\n");
 	printf("\n");
+	printf("  -P, --port=PORT       set tcp port to listen on to PORT\n");
 	printf("  -v, --verbose=LEVEL   set verbosity to LEVEL (syslog levels)\n");
 	printf("      --help            display this help and exit\n");
 	printf("      --version         output version information and exit\n");
@@ -91,20 +98,19 @@ void usage()
 void create_server();
 void handle_client(int);
 void sigchld_handler(int);
-void logmsg(char *, ...);
-void error(char *, ...);
 
-int yes=1;
+const int false = 0;
+const int true  = 1;
 
-int server_fd, new_fd;          // listen on server_fd, new connection on new_fd
-struct sockaddr_in server_addr; // my address information
-struct sockaddr_in their_addr;  // connector's address information
+int server_fd, client_fd;       /* server/client socket filedescriptors */
+struct sockaddr_in server_addr; /* server address information */
+struct sockaddr_in client_addr; /* client address information */
 int sin_size;
 
 int main(int argc, char **argv)
 {
-    struct sigaction sa;
-    int cpid;
+    struct sigaction sigchildaction;
+    int child_pid;
 	int c;
 	
 	progname = argv[0];
@@ -112,9 +118,15 @@ int main(int argc, char **argv)
 	/* Parse command-line options */
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"v:q",long_opts,NULL)!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"P:v:q",long_opts,NULL)!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
+			break;
+		case 'P': /* port option */
+			port = strtol(optarg,&ptr,10);
+			if ( *ptr!=0 || port<=0 || port>65535 ) {
+				error(0,"invalid tcp port specified: `%s'",optarg);
+			}
 			break;
 		case 'v': /* verbose option */
 			verbose = strtol(optarg,&ptr,10);
@@ -136,59 +148,52 @@ int main(int argc, char **argv)
 	
 	if ( argc>optind ) error(0,"");
 	
-    logmsg("server started");
+    logmsg(LOG_NOTICE,"server started");
     
     create_server();
-    logmsg("listening on port %i", port);
+    logmsg("listening on port %d/tcp", port);
     
-    // reap all dead processes
-    sa.sa_handler = sigchld_handler;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    if (sigaction(SIGCHLD, &sa, NULL) == -1) {
-        perror("sigaction");
-        exit(1);
+    /* Setup the child signal handler */
+    sigchildaction.sa_handler = sigchld_handler;
+    sigemptyset(&sigchildaction.sa_mask);
+    sigchildaction.sa_flags = SA_RESTART;
+    if ( sigaction(SIGCHLD,&sigchildaction,NULL)!=0 ) {
+		error(errno,"setting child signal handler");
     }
     
-    // main accept() loop
-    while(1) {
+    /* main accept() loop */
+    while ( true ) {
         sin_size = sizeof(struct sockaddr_in);
-        if ((new_fd = accept(server_fd
-                        , (struct sockaddr *)&their_addr, &sin_size)
-            ) == -1) {
-            perror("accept");
+		
+        if ( (client_fd = accept(server_fd, (struct sockaddr *) &client_addr,
+		                         &sin_size))!=0 ) {
+			warning(errno,"accepting incoming connection");
             continue;
         }
         
-        // loadOptions();
-        logmsg("incoming connection, spawning child");
+        logmsg(LOG_INFO,"incoming connection, spawning child");
         
-        cpid = fork();
-        
-        if (cpid == -1) {
-            perror("fork");
-        } else if (cpid == 0) {
-            // this is the child process
-            
-            logmsg("connection from %s", inet_ntoa(their_addr.sin_addr));
-            
-            close(server_fd); // child doesn't need the listener
-            
-// -- child function
-            
-            handle_client(new_fd);
-            // compile()
-            // run()
-            // checkoutput()
-            
-            // Done.  The program is correct.
-// --
+        switch ( child_pid = fork() ) {
+		case -1: /* error */
+			error(errno,"cannot fork");
+		
+		case  0: /* child thread */
+            logmsg(LOG_NOTICE,"connection from %s",inet_ntoa(client_addr.sin_addr));
+			
+            close(server_fd); /* child doesn't need the listener */
+            handle_client(client_fd);
+			
+			logmsg(LOG_INFO,"child exiting")
             exit(0);
-        }
-        logmsg("spawned %05i", cpid);
-        close(new_fd);
-    }
-    return 0;
+			
+		default: /* parent thread */
+			logmsg(LOG_DEBUG,"spawned child, pid=%d", child_pid);
+			close(client_fd);
+		}
+
+	}
+
+    return 0; /* This should never be reached */
 }
 
 /*****************************************************************************/
@@ -203,32 +208,27 @@ int main(int argc, char **argv)
  */
 void create_server()
 {
-    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-        perror("socket");
-        exit(1);
-    }
+	if ( (server_fd = socket(PF_INET,SOCK_STREAM,0))!=0 ) {
+		error(errno,"cannot open server socket");
+	}
 
-    if (setsockopt(server_fd
-                , SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-        perror("setsockopt");
-        exit(1);
-    }
+	if ( setsockopt(server_fd,SOL_SOCKET,SO_REUSEADDR,&true,sizeof(int))!=0 ) {
+		error(errno,"cannot set socket options");
+	}
     
-    server_addr.sin_family = AF_INET;           // host byte order
-    server_addr.sin_port = htons(port);         // short, network byte order
-    server_addr.sin_addr.s_addr = INADDR_ANY;   // automatically fill with my IP
-    memset(&(server_addr.sin_zero), '\0', 8);   // zero the rest of the struct
-    
-    if (bind(server_fd, (struct sockaddr *)&server_addr
-                , sizeof(struct sockaddr)) == -1) {
-        perror("bind");
-        exit(1);
-    }
-    
-    if (listen(server_fd, BACKLOG) == -1) {
-        perror("listen");
-        exit(1);
-    }
+	server_addr.sin_family      = AF_INET;      /* address family                */
+	server_addr.sin_port        = htons(port);  /* port in network short order   */
+	server_addr.sin_addr.s_addr = INADDR_ANY;   /* automatically fill with my IP */
+	//	memset(&(server_addr.sin_zero),'\0',8);     /* zero the rest of the struct   */
+
+	if ( bind(server_fd,(struct sockaddr *) &server_addr,
+	          sizeof(struct sockaddr))!=0 ) {
+		error(errno,"binding server socket");
+	}
+
+	if ( listen(server_fd,BACKLOG)!=0 ) {
+		error(errno,"starting listening");
+	}
 }
 
 /***
@@ -236,22 +236,23 @@ void create_server()
  */
 void handle_client(int client)
 {
-    if (send(client, "+hello, send submission info, then files", 40, 0) == -1)
-        perror("send");
-    close(new_fd);
-}           
+	if (send(client, "+hello, send submission info, then files", 40, 0)!=0 )
+		perror("send");
+	close(new_fd);
+}
 
 
 /***
- *  used to kill of (child) threads
+ *  used to watch termination of child threads
  *  
  *  TODO: return the exit code
  */
-void sigchld_handler(int s)
+void sigchld_handler(int sig)
 {
     int exitpid, exitcode;
     exitpid = wait(&exitcode);
-    logmsg("reaped process %05i with exit code %i", exitpid, exitcode);
+    logmsg(LOG_INFO,"child process %d exiting with exitcode %d",
+	       exitpid,exitcode);
 }
 
 //  vim:ts=4:sw=4:et:
