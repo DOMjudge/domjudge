@@ -24,7 +24,7 @@ int  verbose      = LOG_NOTICE;
 int  loglevel     = LOG_DEBUG;
 FILE *stdlog      = NULL;
 
-/* Argument-list and va_list versions of logging function:
+/* Logging function (vlogmsg uses va_list instead of argument list):
  * Logs a message to stderr and/or logfile, including date and program name,
  * depending on the loglevel treshold values.
  *
@@ -36,19 +36,36 @@ FILE *stdlog      = NULL;
 void logmsg (int, char *, ...);
 void vlogmsg(int, char *, va_list);
 
-/* Error and warning functions:
- * Logs an error message including error string from 'errno' and error
- * then exits with exit_failure, warning returns.
+/* Error and warning functions (v.. uses va_list instead of argument list):
+ * Logs an error message including error string from 'errno'.
+ *   logerror   only logs the error message
+ *   error      log the message and exits with exit_failure
+ *   warning    log the message and generates extra warning signals
  *
  * Arguments:
- * int errnum    'errno' value to use for error string output, set 0 to skip
- * char *mesg    message, may include printf output format characters '%'
- * ...           optional arguments for format characters
+ * int errnum      'errno' value to use for error string output, set 0 to skip
+ * char *mesg      message, may include printf output format characters '%'
+ * ... or va_list  optional arguments for format characters
  */
-void error  (int, char *, ...);
-void warning(int, char *, ...);
+void logerror (int, char *, ...);
+void error    (int, char *, ...);
+void warning  (int, char *, ...);
+void vlogerror(int, char *, va_list);
+void verror   (int, char *, va_list);
+void vwarning (int, char *, va_list);
 
 
+/* ========================= IMPLEMENTATION ============================== */
+
+/* Implementation details:
+ *
+ * All argument-list based functions call their va_list (v..) counterparts
+ * to avoid doubled code. Furthermore, all functions use 'vlogmsg' to do the
+ * actual writing of the logmessage and all error/warning functions use
+ * 'vlogerror' to generate the error-logmessage from the input.
+ */
+
+/* Main function that contains logging code */
 void vlogmsg(int msglevel, char *mesg, va_list ap)
 {
     time_t currtime;
@@ -78,6 +95,7 @@ void vlogmsg(int msglevel, char *mesg, va_list ap)
 	free(buffer);
 }
 
+/* Argument-list wrapper function around vlogmsg */
 void logmsg(int msglevel, char *mesg, ...)
 {
 	va_list ap;
@@ -88,15 +106,14 @@ void logmsg(int msglevel, char *mesg, ...)
 	va_end(ap);
 }
 
-void error(int errnum, char *mesg, ...)
+/* Function to generate and write error logmessage (using vlogmsg) */
+void vlogerror(int errnum, char *mesg, va_list ap)
 {
 	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
-	char *buffer, *endptr;
-	va_list ap;
+	char *buffer;
+	char *endptr; /* pointer to current end of buffer */
 	
-	va_start(ap, mesg);
-	
-	buffer = (char *) malloc(mesglen+256);
+	endptr = buffer = (char *) malloc(mesglen+256);
 
 	sprintf(buffer,"error");
 	endptr = strchr(buffer,0);
@@ -116,40 +133,51 @@ void error(int errnum, char *mesg, ...)
 	vlogmsg(LOG_ERR, buffer, ap);
 
 	free(buffer);
+}
+
+/* Argument-list wrapper function around vlogerror */
+void logerror(int errnum, char *mesg, ...)
+{
+	va_list ap;
+	va_start(ap, mesg);
+
+	vlogerror(errnum, mesg, ap);
+
 	va_end(ap);
+}
+
+/* Logs an error message and exit with non-zero exitcode */
+void verror(int errnum, char *mesg, va_list ap)
+{
+	vlogerror(errnum, mesg, ap);
+
 	exit(exit_failure);
 }
 
+/* Argument-list wrapper function around verror */
+void error(int errnum, char *mesg, ...)
+{
+	va_list ap;
+	va_start(ap, mesg);
+
+	verror(errnum, mesg, ap);
+}
+
+/* Logs an error message and generate some extra warning signals */
+void vwarning(int errnum, char *mesg, va_list ap)
+{
+	vlogerror(errnum, mesg, ap);
+}
+
+/* Argument-list wrapper function around vwarning */
 void warning(int errnum, char *mesg, ...)
 {
-	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
-	char *buffer, *endptr;
 	va_list ap;
-	
 	va_start(ap, mesg);
-	
-	buffer = (char *) malloc(mesglen+256);
 
-	sprintf(buffer,"error");
-	endptr = strchr(buffer,0);
-	
-	if ( mesg!=NULL ) {
-		snprintf(endptr, sizeof(buffer)-strlen(buffer), ": %s", mesg);
-		endptr = strchr(endptr,0);
-	}		
-	if ( errnum!=0 ) {
-		snprintf(endptr, sizeof(buffer)-strlen(buffer), ": %s",strerror(errnum));
-		endptr = strchr(endptr,0);
-	}
-	if ( mesg==NULL && errnum==0 ) {
-		sprintf(endptr,": unknown error");
-	}
+	vwarning(errnum, mesg, ap);
 
-	vlogmsg(LOG_ERR, buffer, ap);
-
-	free(buffer);
 	va_end(ap);
-	exit(exit_failure);
 }
 
 #endif /* _LIB_ERROR_ */
