@@ -1,5 +1,5 @@
 <?php
 
 require('../../etc/config.php');
-require('../../php/init.php');
+require('../../lib/use_db_jury.php');
 require('validate.php');

@@ -5,4 +5,4 @@
  */
 
 require('../../etc/config.php');
-require('../../php/init_public.php');
+require('../../lib/use_db_public.php');
