@@ -64,8 +64,8 @@
 		error("Team '$team' not registered at this IP address.");
 	}
 	if( ! $DB->q('MAYBETUPLE SELECT * FROM problem WHERE probid = %s
-	              AND allow_submit = "1"', $prob) ) {
-		error("Problem '$prob' not found in database or not submittable.");
+	              AND cid = %i AND allow_submit = "1"', $cid, $prob) ) {
+		error("Problem '$prob' not found in database or not submittable [c$cid].");
 	}
 	if( ! is_readable(INCOMINGDIR."/$file") ) {
 		error("File '$file' not found in incoming directory (or not readable).");
@@ -96,6 +96,6 @@
 	             $cid, $team, $prob, $lang, $tofile,
 	             getFileContents(SUBMITDIR."/".$tofile));
 
-	logmsg (LOG_NOTICE, "submitted $team/$prob/$lang, file $tofile, id s$id");
+	logmsg (LOG_NOTICE, "submitted $team/$prob/$lang, file $tofile, id s$id/c$cid");
 
 	exit;
