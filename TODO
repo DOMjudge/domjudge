@@ -1,30 +1,17 @@
-- submit/webserver load: testing in live contest (42 teams) showed, that load
-  on the submit- and webserver can burst to 10+. Precise cause is unclear, but
-  can be related to the scoreboard generating a _lot_ of MySQL queries and/or
-  the scp-ing of submission files. A solution is to statically generate the
-  scoreboard or maybe split the submit/webserver task over two computers.
+submit & submitdaemon:
+- Windows: uitgebreid testen en problemen oplossen:
+  - chmod van submitdir
+- error van child: parent exiten? zorgen dat fout duidelijk is EN systeem
+  zo foutbestendig mogelijk
 
-- alive daemon: make a separate daemon, that checks whether all processes that
-  should be running, are running and working correctly.
+jurering:
+- pascal werkt nog niet op de redhatsystemen (JAAP)
+- paddestoeldaemon die checkt of judgers nog leven
 
-- submit_copy hack: the submit_copy.sh script is a hack, because at our contest
-  the homedirectory under Windows (Cygwin) and Linux were different. Maybe
-  implement configurable option for multiple home-directory locations?
-
-- submit input: submit normally requires the user to press a key to aknowlegde
-  submission. This should be implemented more portable to allow porting the
-  submit program to other platforms. (Client side only needs submit and
-  webbrowser, so that's fairly portable).
-
-- error beeps: at the moment, sounds are programmed for errors, submission and
-  judging with correct/incorrect result. This helps the jury keep informed, but
-  gives a lot of beeping noise, especially during submission errors by
-  contestants. Maybe reduce the number of events for beeping errors?
-
-- jury interface features: add possibility to change more using the jury interface.
-
-- mass rejudging: add rejudging possibility per problem/judger/language.
-
-- clarification request read: make option to mark clarification requests as read
-  even if no response on these has been sent. (e.g. when a general response to
-  multiple requests has been sent).
+web:
+- juryinterface maken om dingen te wijzigen??
++ alle code xhtml1.0/html4.01 verifien
+- massrejudging bv per problem/judger/taal
++ notification van binnenkomende clarification response????!? PETER
++ waar autorefreshen...
++ authorisatie juryinterface of andere beveiliging tegen outsiders
