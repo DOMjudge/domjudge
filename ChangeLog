@@ -2,8 +2,11 @@ DOMjudge Programming Contest Judging System
 
 Version 0.1.1 - CVS
 -------------------
- - Improve documentation layout
+ - Improve documentation layout.
+ - Improve Makefiles and add global targets.
+ - Move passwords to separate passwords.php file.
+ - Redirect in webroot changed from permanent to temporary.
 
 Version 0.1.0 - 18 November 2004
 --------------------------------
- - First public release
+ - First public release.
