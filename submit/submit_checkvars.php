@@ -39,4 +39,4 @@ require ('../php/init.php');
 	}
 
 	logmsg ("checkvars: input verified");
-	exit(0);
+	exit;

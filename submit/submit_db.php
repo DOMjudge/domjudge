@@ -4,8 +4,9 @@
  * $Id$
  */
 
-	require('../etc/config.php');
-	require('../php/init.php');
+	
+	require ('../etc/config.php');
+	require ('../php/init.php');
 
 	$argv = $GLOBALS['argv'];
 	
@@ -18,15 +19,34 @@
 	// Check 0: called correctly?
 	if(!$team)	error("No value for team.");
 	if(!$ip)	error("No value for ip.");
-	if(!$prob)	error("No value for problem.");
-	if(!$lang)	error("No value for language.");
+	if(!$prob)	error("No value for prob.");
+	if(!$lang)	error("No value for lang.");
 	if(!$file)	error("No value for file.");
+	
+	// Check 1: valid parameters?
+	if(!$DB->q('MAYBETUPLE SELECT * FROM language WHERE langid = %s',
+		$lang) ){
+		error("Language '$lang' not found in database");
+	}
+	if(!$row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',
+		$team) ){
+		error("Team '$team' not found in database");
+	}
+	if($row['ipadres'] != $ip) {
+		error("Team '$team' not registered at this IP address.");
+	}
+	if(!$DB->q('MAYBETUPLE SELECT * FROM problem WHERE probid = %s
+		AND allow_submit = "1"',
+		$prob) ){
+		error("Problem '$prob' not found in database or not submittable.");
+	}
+	logmsg ("submit_db: input verified");
 
 	$id = $DB->q('RETURNID INSERT INTO submission 
 		(team,probid,langid,submittime,source)
 		VALUES (%s, %s, %s, NOW(), %s)',
 		$team, $prob, $lang, $file);
 
-	logmsg ("Submitted $team-$prob-$lang, filename: $file with id: $id");
+	logmsg ("submit_db: submitted $team/$prob/$lang, filename: $file, id: $id");
 
 	exit;
