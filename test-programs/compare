@@ -77,7 +77,7 @@ function test_sol ()
 		*) echo "script error $exitcode";;
 		esac
 	else
-		echo "Correct!"
+		printf "Correct, runtime: %s\n" `cat $TMPDIR/$file/program.time`
 	fi
 
 }
