@@ -149,15 +149,16 @@ function putResponse($id, $showReq = true) {
 <?
 }
 
-function putRequest($id) {
+function putRequest($id, $login = NULL) {
 	global $DB;
 
 	$reqdata = $DB->q('MAYBETUPLE SELECT q.*, c.contestname
 		FROM  clar_request q
 		LEFT JOIN contest c ON (c.cid = q.cid)
 		WHERE q.reqid = %i', $id);
-	if(!$reqdata)	error ("Missing clarification response data");
-
+	if(!$reqdata)	error ("Missing clarification request data");
+	if(isset($login) && $reqdata['login'] != $login)
+			error ("Not your clarification request");
 ?>
 
 <table>
