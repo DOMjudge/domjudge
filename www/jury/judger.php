@@ -42,6 +42,6 @@ $row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $id);
 <h3>Judgings by <?=printhost($row['judgerid'])?></h3>
 <?php
 
-getJudgings('judgerid', $row['judgerid']);
+putJudgings('judgerid', $row['judgerid']);
 
 require('../footer.php');
