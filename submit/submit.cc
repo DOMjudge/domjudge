@@ -63,6 +63,12 @@ using namespace std;
 #define VERSION "0.1"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
 
+#if defined(__CYGWIN__) || defined(__CYGWIN32__)
+#define COPY_CMD "c:/cygwin/bin/cp"
+#else
+#define COPY_CMD "cp"
+#endif
+
 extern int errno;
 
 /* Variables defining logmessages verbosity to stderr/logfile */
@@ -331,7 +337,7 @@ int main(int argc, char **argv)
 	args[0] = filename;
 	args[1] = tempfile;
 	redir_fd[0] = redir_fd[1] = redir_fd[2] = 0;
-	if ( execute("cp",args,2,redir_fd,1)!=0 ) {
+	if ( execute(COPY_CMD,args,2,redir_fd,1)!=0 ) {
 		error(0,"cannot copy `%s' to `%s'",filename,tempfile);
 	}
 	
