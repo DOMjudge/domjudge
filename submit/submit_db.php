@@ -8,12 +8,14 @@
 	require ('../etc/config.php');
 	require ('../php/init.php');
 
+	umask(0177);
+
 	$argv = $GLOBALS['argv'];
 	
-	$team = @$argv[1];
+	$team = strtolower(@$argv[1]);
 	$ip   = @$argv[2];
-	$prob = @$argv[3];
-	$lang = @$argv[4];
+	$prob = strtolower(@$argv[3]);
+	$lang = strtolower(@$argv[4]);
 	$file = @$argv[5];
 
 	// Check 0: called correctly?
@@ -24,7 +26,7 @@
 	if(!$file)	error("No value for file.");
 	
 	// Check 1: valid parameters?
-	if(!$DB->q('MAYBETUPLE SELECT * FROM language WHERE langid = %s',
+	if(!$langext = $DB->q('MAYBEVALUE SELECT extension FROM language WHERE langid = %s',
 		$lang) ){
 		error("Language '$lang' not found in database");
 	}
@@ -44,14 +46,20 @@
 		error("File '$file' not found in incoming directory.");
 	}
 	logmsg ("submit_db: input verified");
-	
-	copy(INCOMINGDIR."/$file", SUBMITDIR."/$file");
+
+	// exec tempfile to create a temporary file in the submitdir
+	// we take the basename because we reprepend SUBMITDIR in get_submission.
+	$dummy = null;
+	$tofile = basename(exec("tempfile -d SUBMITDIR -p subm_ -s _".$team."_".$prob.".$langext", $dummy, $retval));
+	if ( $retval != 0 ) error("Could not create tempfile.");
+
+	copy(INCOMINGDIR."/$file", SUBMITDIR."/$tofile");
 	
 	$id = $DB->q('RETURNID INSERT INTO submission 
 		(team,probid,langid,submittime,source)
 		VALUES (%s, %s, %s, NOW(), %s)',
-		$team, $prob, $lang, $file);
+		$team, $prob, $lang, $tofile);
 
-	logmsg ("submit_db: submitted $team/$prob/$lang, filename: $file, id: $id");
+	logmsg ("submit_db: submitted $team/$prob/$lang, filename: $tofile, id: $id");
 
 	exit;
