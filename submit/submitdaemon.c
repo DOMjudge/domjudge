@@ -221,11 +221,6 @@ int main(int argc, char **argv)
 
 /***
  *  Open a listening socket on the localhost.
- *  
- *  global variables used:
- *      port
- *      server_addr
- *      server_fd
  */
 void create_server()
 {
