@@ -59,9 +59,8 @@ use Getopt::Long;
 # Variables defining where/how to store files.
 my $submitdir = "$ENV{HOME}/$USERSUBMITDIR";
 my $tmpfile;
-### Tijdelijk voor DS-practicum (moet normaal 0700/0600 zijn):
-my $permdir  = 0711;
-my $permfile = 0644;
+my $permdir  = 0700;
+my $permfile = 0600;
 
 # Variables defining logmessages verbosity to stderr/logfile
 my $verbose  = $LOG_DEBUG;
@@ -213,6 +212,7 @@ For LANGUAGE use one of the following in lower- or uppercase:
    C++:      cc, cpp, c++
    Java:     java
    Pascal:   pas
+   Haskell:  hs
 The default for LANGUAGE is the extension of FILENAME.
 For example, 'c.java' wil indicate a Java solution.
 
@@ -260,27 +260,6 @@ chmod($permdir,$submitdir) or error "setting permissions on $submitdir: $!";
 
 open($loghandle,">> $logfile") or error "opening logfile '$logfile': $!";
 $loghandle->autoflush(1);
-
-# Voor het DS-practicum: check of homedir executable is
-if ( (stat($ENV{HOME})->mode & $permdir) != $permdir ) {
-
-	print <<"EOF";
-WAARSCHUWING:
-
-Voor dit practicum is het noodzakelijk dat je homedir toegankelijk
-is voor de jury, om de source-code bestanden van je inzending te
-kunnen kopieeren.
-
-Deze permissies zullen nu ingesteld worden op je home-directory.
-Wil je doorgaan? (j/n) 
-EOF
-
-	if ( readanswer('jn') eq 'n' ) { die "Afgebroken: permissies niet aangepast.\n"; }
-	
-	chmod($permdir,$ENV{HOME}) or error "setting permissions on $ENV{HOME}: $!";
-	print "Permissies van $ENV{HOME} aangepast!\n\n";
-}
-
 
 my $show_help = 0;
 my $show_version = 0;
