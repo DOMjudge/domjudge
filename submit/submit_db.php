@@ -64,7 +64,7 @@
 		error("Team '$team' not registered at this IP address.");
 	}
 	if( ! $DB->q('MAYBETUPLE SELECT * FROM problem WHERE probid = %s
-	              AND cid = %i AND allow_submit = "1"', $cid, $prob) ) {
+	              AND cid = %i AND allow_submit = "1"', $prob, $cid) ) {
 		error("Problem '$prob' not found in database or not submittable [c$cid].");
 	}
 	if( ! is_readable(INCOMINGDIR."/$file") ) {
