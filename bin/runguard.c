@@ -201,17 +201,26 @@ void terminate(int sig)
 	if ( killpg(child_pid,kill_signal) ) error(errno,"cannot kill command");
 }
 
+int userid(char *name)
+{
+	struct passwd *pwd;
+	
+	pwd = getpwnam(name);
+
+	if ( pwd==NULL ) return -1;
+	
+	return pwd->pw_uid;
+}
+
 int main(int argc, char **argv)
 {
 	pid_t pid;
 	int   status;
 	int   exitcode;
+	char *valid_users;
 	char *ptr;
 	char  cwd[MAXPATHLEN+3];
 	char  c;
-	int   i;
-	
-	struct passwd *pwd;
 	
 	progname = argv[0];
 
@@ -239,11 +248,7 @@ int main(int argc, char **argv)
 		case 'u': /* user option */
 			use_user = 1;
 			runuid = strtol(optarg,&ptr,10);
-			if ( *ptr!=0 ) {
-				runuid = -1;
-				pwd = getpwnam(optarg);
-				if ( pwd!=NULL ) runuid = pwd->pw_uid;
-			}
+			if ( *ptr!=0 ) runuid = userid(optarg);
 			if ( runuid<0 ) error(0,"invalid username or id specified: `%s'",optarg);
 			break;
 		case 'o': /* output option */
@@ -297,8 +302,11 @@ int main(int argc, char **argv)
 	/* Set user-id (must be root for this). */
 	if ( use_user ) {
 		/* Check that new uid is in list of valid uid's */
-		for(i=0; valid_uid[i]!=-1; i++) if ( runuid==valid_uid[i] ) break;
-		if ( valid_uid[i]<=0 ) error(0,"illegal user specified: %d",runuid);
+		valid_users = strdup(VALID_USERS);
+		for(ptr=strtok(valid_users,","); ptr!=NULL; ptr=strtok(NULL,",")) {
+			if ( runuid==userid(ptr) ) break;
+		}
+		if ( ptr==NULL || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
 		
 		if ( setuid(runuid) ) error(errno,"cannot set user id to `%d'",runuid);
 		if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped");
