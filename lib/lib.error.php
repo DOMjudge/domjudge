@@ -6,7 +6,7 @@
  * $Id$
  */
 if ( ! defined('SCRIPT_ID') ) {
-	define('SCRIPT_ID', basename($PHP_SELF, '.php'));
+	define('SCRIPT_ID', basename($_SERVER['PHP_SELF'], '.php'));
 }
 
 // is this the webinterface or commandline?
