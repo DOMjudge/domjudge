@@ -21,7 +21,7 @@ a:link, a:visited { color: blue;   }
 a:hover           { color: purple; }
 a:active          { color: red;    }
 
-.disabled	      { color: silver; }
+.disabled         { color: silver; }
 .disabled a       { color: gray;   }
 
 .teamid, .filename, .hostname {

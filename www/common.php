@@ -93,12 +93,13 @@ function getJudgings($key, $value) {
 			"<tr><th>ID</th><th>start</th><th>end</th><th>judge</th><th>result</th><th>valid</th>\n";
 		while( $jud = $res->next() ) {
 			echo "<tr" . ( $jud['valid'] ? '':' class="disabled"' ).
-				"><td><a href=\"judging.php?id=".(int)$jud['judgingid'] . '">j' .
+				"><td><a href=\"judging.php?id=" . (int)$jud['judgingid'] . '">j' .
 					(int)$jud['judgingid'] . "</a>" .
 				"</td><td>".printtime($jud['starttime']) .
 				"</td><td>".printtime(@$jud['endtime']) .
 				"</td><td>".printhost(@$jud['judgerid']) .
-				"</td><td>".printresult(@$jud['result'], $jud['valid']) .
+				"</td><td><a href=\"judging.php?id=" . (int)$jud['judgingid'] . '">' .
+					printresult(@$jud['result'], $jud['valid']) . "</a>" .
 				"</td><td align=\"center\">".printyn($jud['valid']) .
 				"</td></tr>\n";
 		}
