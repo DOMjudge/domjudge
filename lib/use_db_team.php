@@ -1,6 +1,7 @@
 <?php
 /* $Id$ */
 
+require_once('lib.error.php');
 require('lib.database.php');
 require('lib.handig.php');
 
