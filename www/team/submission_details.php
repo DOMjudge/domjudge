@@ -46,12 +46,7 @@ if(@$row['output_compile']) {
 }?>
 
 <h2>Runtime errors:</h2>
-<?
-if(@$row['output_run']) {
-	echo "<pre class=\"errors\">\n".
-		htmlspecialchars(@$row['output_run'])."\n</pre>\n\n";
-} else {
-	echo "<p><em>There were no runtime errors.</em></p>\n";
-}
+<em>Wat moet hier staan??!</em>
+<?php
 
 include('../footer.php');

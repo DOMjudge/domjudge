@@ -15,7 +15,7 @@ $res = $DB->q('SELECT * FROM submission LEFT JOIN judging USING(submitid)
 	$login);
 
 if($res->count() == 0) {
-	echo "<p>You haven't submitted anything yet...</p>\n";
+	echo "<p><em>Nothing submitted yet.</em></p>\n";
 
 } else {
 	echo "<table>\n".
@@ -39,5 +39,8 @@ if($res->count() == 0) {
 	}
 	echo "</table>\n\n";
 }
+
+
+echo "<p><a href=\"../public/\">Scoreboard</a></p>\n\n";
 
 require('../footer.php');
