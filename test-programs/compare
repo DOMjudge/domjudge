@@ -46,13 +46,13 @@ fi
 
 function test_sol ()
 {
-	local lang base="" file=$1 in=$2 out=$3
+	local lang base="" file="$1" in="$2" out="$3"
 	# First determine language:
 	for ((i=0; i<NLANG; i++)); do
 		for ext in ${EXTS[$i]}; do
 			if [[ "$file" == *.$ext ]]; then
 				base="${file%.$ext}"
-				lang=$i
+				lang="$i"
 				break 2
 			fi
 		done
@@ -62,8 +62,8 @@ function test_sol ()
 		exit 1
 	fi
 
-	mkdir $TMPDIR/$file
-	$TESTSOL $file ${LANG[$lang]} $in $out $TIMELIMIT $TMPDIR/$file
+	mkdir "$TMPDIR/$file"
+	$TESTSOL "$file" "${LANG[$lang]}" "$in" "$out" "$TIMELIMIT" "$TMPDIR/$file"
 	exitcode=$?
 	if [ $exitcode -ne 0 ]; then
 		ALLOK=0
@@ -82,10 +82,10 @@ function test_sol ()
 
 }
 
-[ -r $TESTIN    ] || { echo "No input testdata found."; exit 1; }
-[ -r $TESTOUT   ] || { echo "No output testdata found."; exit 1; }
-[ -r $SAMPLEIN  ] || { echo "No input sample testdata found."; exit 1; }
-[ -r $SAMPLEOUT ] || { echo "No output sample testdata found."; exit 1; }
+[ -r "$TESTIN"    ] || { echo "No input testdata found."; exit 1; }
+[ -r "$TESTOUT"   ] || { echo "No output testdata found."; exit 1; }
+[ -r "$SAMPLEIN"  ] || { echo "No input sample testdata found."; exit 1; }
+[ -r "$SAMPLEOUT" ] || { echo "No output sample testdata found."; exit 1; }
 
 echo -n "Supported languages:"
 for((i=0; i<NLANG; i++)); do echo -n " ${LANG[$i]},"; done
@@ -113,15 +113,15 @@ for file in `ls | grep -E $FILEMATCH`; do
 		printf '%-50s' "Testing sample testdata..."
 		[ "$VERBOSE" ] && echo
 		samplesol="sample-sol.${file##*.}"
-		ln -s -f $file $samplesol
-		test_sol $samplesol $SAMPLEIN $SAMPLEOUT
+		ln -s -f "$file" "$samplesol"
+		test_sol "$samplesol" "$SAMPLEIN" "$SAMPLEOUT"
 	fi
 	printf '%-50s' "Testing solution '$file'... "
 	[ "$VERBOSE" ] && echo
-	test_sol $file $TESTIN $TESTOUT
+	test_sol "$file" "$TESTIN" "$TESTOUT"
 done
 
-[ "$DEBUG" ] || rm -rf $TMPDIR $samplesol
+[ "$DEBUG" ] || rm -rf "$TMPDIR" "$samplesol"
 
 [ $ALLOK = 1 ] && exit 0
 
