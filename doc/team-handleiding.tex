@@ -21,8 +21,6 @@
 
 \title{Teamhandleiding\\~\\Nederlands Kampioenschap Programmeren 2004}
 
-\author{Jaap Eldering, Thijs Kinkhorst \& Peter van de Werken}
-
 \begin{document}
 
 \maketitle
@@ -39,17 +37,11 @@ Informatica Instituut en zijn allemaal Dell computers met 15 inch TFT
 flatscreens met een Intel Pentium 4 processor van minimaal 2 GHz.
 
 Tijdens het NKP kan gebruik gemaakt worden van twee verschillende
-computer (besturings) systemen: Microsoft Windows 2000 Professional of
-Redhat GNU/Linux 9.0. Beide draaien op dezelfde hardware. Je keuze
-voor Windows of Linux moet je van tevoren aangeven.
+besturingssystemen: Microsoft Windows 2000 Professional of
+CentOS GNU/Linux (RedHat Enterprise). Beide draaien op dezelfde
+hardware. Je keuze voor Windows of Linux moet je van tevoren
+aangeven.
 
-Hieronder volgt documentatie specifiek voor de verschillende platformen.
-
-\subsection{Windows}
-\subsection{Linux}
-
-
-\newpage
 \section{Opgaven}
 
 Voor iedere opgave is het noodzakelijk om de invoer van het probleem
@@ -90,7 +82,7 @@ tabel (\ref{compilers}) met alle beschikbare compilers en welke versies.
 \caption{Beschikbare compilers}
 \begin{tabular}{|l|c|c|}
 \hline
-Compiler & Linux versie & Windows \\
+Compiler & Linux versie & Windows versie \\
 \hline
 GCC             & \LINUXGCC     & \WINDOWSGCC   \\
 MS Visual C++   &               & \WINDOWSMSC   \\
@@ -130,10 +122,10 @@ delen, zoals java.swing en java.awt worden niet (volledig)
 ondersteund).
 
 De Java compiler van Sun zelf is ook beschikbaar en verder zullen de
-JavaDocs beschikbaar zijn (ook onder Linux?).
+JavaDocs beschikbaar zijn.
 
 Let op: de hoofdklasse van je programma moet \texttt{Main} (met
-hoofdletter) heten en een publieke functie \texttt{main} bevatten!
+hoofdletter) heten en een public function \texttt{main} bevatten!
 
 \subsection{Pascal}
 
@@ -152,7 +144,7 @@ worden ook ondersteund.
 \subsection{Haskell}
 
 Waarschuwing vooraf: Haskell is een functionele programmeertaal en
-verschilt daarmee erg van de andere (procedurele) talen. We geven geen
+verschilt daarmee erg van de andere (imperatieve) talen. We geven geen
 garanties dat voor alle opgaven in Haskell een oplossing (binnen de
 tijdslimiet) bestaat! Verder kan Haskell gewoon gebruikt worden.
 
@@ -216,7 +208,7 @@ toegevoegd. Deze is ook nodig voor het functioneren van \texttt{submit}.
 
 Op de persoonlijke team website is een overzicht van de inzendingen.
 Dit overzicht bevat alle relevante gegevens: de tijd van inzending, de
-programmeer taal, het probleem en de status.
+programmeertaal, het probleem en de status.
 
 \subsubsection{Mogelijke uitslagen}
 
@@ -315,8 +307,8 @@ Als je programma succesvol gecompileerd is, wordt het gedraaid en de
 uitvoer vergeleken met de correcte uitvoer van de jury. Er wordt eerst
 gecontroleerd of je programma correct geeindigd is: als je programma
 met een fout eindigt en het goede antwoord geeft, krijg je toch een
-``RUN-ERROR''! Er zijn een aantal beperkingen die aan je programma
-opgelegd worden. Als je programma die overschreidt, wordt het ook
+run-error! Er zijn een aantal beperkingen die aan je programma
+opgelegd worden. Als je programma die overschrijdt, wordt het ook
 afgebroken met een fout, zie (\ref{runlimits}).
 
 Verder moet de uitvoer van jouw programma exact overeenkomen met de
@@ -358,7 +350,7 @@ van deze bestanden is \FILELIMIT\ kilobytes (per bestand).
 Het is niet de bedoeling dat je programma meerdere processen (threads)
 start. Dit heeft ook geen zin, want je programma heeft precies 1
 processor volledig tot zijn beschikking. Om de stabiliteit van het
-jurysysteem te bevorderen, kunnen je maximaal \PROCLIMIT\ processen
+jurysysteem te bevorderen, kun je maximaal \PROCLIMIT\ processen
 tegelijk draaien (inclusief de processen, waardoor je programma
 gestart is).
 
@@ -398,7 +390,7 @@ Een oplossing voor dit probleem in C:
 \verbatiminput{voorbeeld.c}
 
 Let op de \texttt{return 0;} aan het einde, zodat we geen
-``RUN-ERROR'' krijgen!
+run-error krijgen!
 
 Een oplossing in C++ kan als volgt:
 \verbatiminput{voorbeeld.cc}
