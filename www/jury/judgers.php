@@ -26,7 +26,7 @@ while($row = $res->next()) {
 	echo "<tr".
 		( $row['active'] ? '': ' class="disabled"').
 		"><td><a href=\"judger.php?id=".(int)$row['judgerid'].'">'.(int)$row['judgerid'].'</a>'.
-		"</td><td>".htmlentities($row['name']).
+		"</td><td>".printhost($row['name']).
 		"</td><td align=\"center\">".printyn($row['active']).
 		"</td></tr>\n";
 }
