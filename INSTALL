@@ -3,6 +3,7 @@ DOMjudge INSTALLATION INSTRUCTIONS
 
 
 SYSTEM REQUIREMENTS
+-------------------
 
 This judging system was developed and tested on GNU/Linux systems,
 specifically on Debian Woody and RedHat 9. We have tried to make it
@@ -31,6 +32,7 @@ TODO: list of necessary protocols between different parts of the system.
 
 
 SOFTWARE REQUIREMENTS
+---------------------
 
 - gcc with standard libraries
 
@@ -57,7 +59,67 @@ SOFTWARE REQUIREMENTS
 
 - sudo
 
-- OpenSSH/SCP (or a compatible ssh/scp client)
+- OpenSSH/SCP (or a compatible ssh/scp client/daemon)
+
+
+FILE LOCATIONS
+--------------
+
+There are three different directory-trees which must be set up and
+configured, before the beginning of a contest. The root-paths of these
+directory-trees should be set in the main config file. (Directories in
+uppercase are configuration variables, which can be set to different
+locations (even within different roots, although not tested!)).
+
+SYSTEM_ROOT
+	The judging system itself is contained in this directory-tree. All
+	programs needed for the judging system, are located here and also
+	some extra utilities and the configuration of the system.
+
+INPUT_ROOT
+	The problem input and output testdata should be put here. This
+	directory-tree is for input only, so (in principle) this directory
+	tree can be non-writable.
+
+	Each problem should have it's own directory within INPUT_ROOT,
+	where input and output testdata have to be placed.
+
+OUTPUT_ROOT
+	Here are placed all submission files, logfiles and temporary
+	files, made while testing submissions. The following directories
+	should be present within OUTPUT_ROOT:
+
+	LOGDIR        contains all logfiles.
+	INCOMINGDIR   contains submission files, being submitted or where
+	              a submission error has occurred.
+	SUBMITDIR     contains all correctly submitted files.
+	JUDGEDIR      place where submissions are tested, each in it's own
+	              subdirectory.
+
+
+CONFIGURATION
+-------------
+
+Configuration of the judge system is mostly done, by editing the
+global configuration file in SYSTEM_ROOT/etc/global.cfg. This file
+contains the configuration data for all programs within the
+system. To implement configuration changes, these settings should be
+converted to the different specific configuration-files, needed by
+different parts of the system. This is done by running the command
+'generate_config.sh' in the configuration directory. After that, also
+all C/C++ programs should be rebuild to implement these changes!
+
+The global configuration file has a ini-file like syntax, with some
+extensions to make it more flexible and be able to correctly convert
+variables to all specific configuration files. See comments there for
+more information.
+
+Configuration of the compilers of the supported languages should be
+done separately. For each supported language a bash shell-script named
+'compile_<lang>.sh' should be made and placed in SYSTEM_ROOT/judge,
+where <lang> is the ID of the language as specified in the
+database. For more information, see for example compile_c.sh and
+test_solution.sh for syntax in SYSTEM_ROOT/judge.
 
 
 
