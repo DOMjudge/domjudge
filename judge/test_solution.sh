@@ -262,18 +262,18 @@ if [ ! -s program.out ]; then
 	exit $E_OUTPUT
 fi
 
-( diff program.out $TESTOUT >diff.out ) 2>diff.tmp
+$RUNSCRIPTDIR/compare.sh program.out $TESTOUT diff.out 2>diff.tmp
 exitcode=$?
 
-if [ $exitcode -eq 1 ]; then
+if [ $exitcode -ne 0 ]; then
+	mv error.tmp error.out
+	error "diff: `cat diff.tmp`";
+fi
+if [ -s diff.out ]; then
 	echo "Wrong answer." >>error.out
 	cat error.tmp >>error.out
 	rm error.tmp
 	exit $E_ANSWER
-fi
-if [ $exitcode -ne 0 ]; then
-	mv error.tmp error.out
-	error "diff: `cat diff.tmp`";
 fi
 rm diff.tmp
 
