@@ -8,5 +8,5 @@ DEST="$2"
 
 # -Wall:	Report all warnings
 # -static:	Static link with all libraries
-gcj -Wall -static --main=Main -o $DEST $SOURCE
+gcj -Wall -O2 -static --main=Main -o $DEST $SOURCE
 exit $?
