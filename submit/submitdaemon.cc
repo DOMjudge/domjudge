@@ -261,7 +261,7 @@ int handle_client()
 	char *args[MAXARGS];
 	int redir_fd[3];
 	int status;
-	pid_t cpid, pid;
+	pid_t cpid;
 	FILE *rpipe;
 	char line[LINELEN];
 	int i;
@@ -380,7 +380,7 @@ int handle_client()
 		senderror(client_fd,errno,"closing submit_db pipe");
 	}
 	
-	if ( pid==0 && waitpid(cpid,&status,0)<0 ) {
+	if ( waitpid(cpid,&status,0)<0 ) {
 		senderror(client_fd,errno,"waiting for submit_db");
 	}
 	
