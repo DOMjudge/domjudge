@@ -16,7 +16,7 @@ $respid = (int)$_GET['id'];
 $row = $DB->q('MAYBETUPLE SELECT *
 	FROM clar_response
 	WHERE cid = %i AND (rcpt = %s OR rcpt IS NULL) AND respid = %i',
-	getCurCont(), $login, $respid);
+	getCurContest(), $login, $respid);
 
 if(!$row) {
 	echo "Clarification Response not found for this team.\n";

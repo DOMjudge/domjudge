@@ -20,11 +20,11 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 	if($key && $value) {
 		$res = $DB->q('SELECT submitid,team,probid,langid,submittime,judgerid
 			FROM submission WHERE '.$key.' = %s AND cid = %i ORDER BY submittime DESC',
-			$value, getCurCont() );
+			$value, getCurContest() );
 	} else {
 		$res = $DB->q('SELECT submitid,team,probid,langid,submittime,judgerid
 			FROM submission WHERE cid = %i ORDER BY submittime DESC',
-			getCurCont() );
+			getCurContest() );
 	}
 
 	if($res->count() == 0) {
@@ -34,7 +34,7 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 
 	$resulttable = $DB->q('KEYTABLE SELECT j.*, submitid AS ARRAYKEY
 		FROM judging j
-		WHERE (valid = 1 OR valid IS NULL) AND cid = %i', getCurCont() );
+		WHERE (valid = 1 OR valid IS NULL) AND cid = %i', getCurContest() );
 
 	echo "<table>\n<tr>".
 		( $detailed ? "<th>ID</th>" : '' ) .
@@ -84,7 +84,7 @@ function getJudgings($key, $value) {
 
 	$res = $DB->q('SELECT * FROM judging
 		WHERE '.$key.' = %s AND cid = %i ORDER BY starttime DESC',
-		$value, getCurCont() );
+		$value, getCurContest() );
 
 	if( $res->count() == 0 ) {
 		echo "<p><em>No judgings.</em></p>\n\n";
@@ -111,12 +111,61 @@ function getJudgings($key, $value) {
 
 
 /**
- * Will return either the current contest, or else the upcoming one
+ * Output clock
  */
-function getCurCont() {
-	static $curcont;
-	if(isset($curcont)) return $curcont;
+function putClock() {
+	echo '<div id="clock">' . strftime('%a %e %b %Y %T') . "</div>\n\n";
+}
 
+function putResponse($id, $showReq = true) {
 	global $DB;
-	return $curcont = $DB->q('MAYBEVALUE SELECT cid FROM contest ORDER BY starttime DESC LIMIT 1');
+
+	$respdata = $DB->q('MAYBETUPLE SELECT r.*, c.contestname
+		FROM  clar_response r
+		LEFT JOIN contest c ON (c.cid = r.cid)
+		WHERE r.respid = %i', $id);
+
+	if(!$respdata)	error ("Missing clarification response data");
+
+?>
+<table>
+<tr><td>Contest:</td><td><?=htmlentities($respdata['contestname'])?></td></tr>
+<?
+	if($showReq) {
+		echo "<tr><td>Request:</td><td>";
+		if(isset($respdata['reqid'])) {
+			echo '<a href="request.php?id=',$respdata['reqid'].'">q'.$respdata['reqid'].'</a>';
+		} else {
+			echo 'none';
+		}
+		echo "</td></tr>\n";
+	}
+?>
+<tr><td>Send to:</td><td><?=isset($respdata['rcpt'])?'<a href="team.php?id='.urlencode($respdata['rcpt']).'"><span class="teamid">'. htmlspecialchars($respdata['rcpt'])."</span></a>":"All"?></td></tr>
+<tr><td>Submittime:</td><td><?= htmlspecialchars($respdata['submittime']) ?></td></tr>
+<tr><td>Response:</td><td class="filename"><pre class="output_text"><?=htmlspecialchars($respdata['body']) ?></pre></td></tr>
+</table>
+<?
+}
+
+function putRequest($id) {
+	global $DB;
+
+	$reqdata = $DB->q('MAYBETUPLE SELECT q.*, c.contestname
+		FROM  clar_request q
+		LEFT JOIN contest c ON (c.cid = q.cid)
+		WHERE q.reqid = %i', $id);
+	if(!$reqdata)	error ("Missing clarification response data");
+
+?>
+
+<table>
+<tr><td>Contest:</td><td><?=htmlentities($reqdata['contestname'])?></td></tr>
+<tr><td>From:</td><td><a href="team.php?id=<?=urlencode($reqdata['login'])?>"><span class="teamid"><?=htmlspecialchars($reqdata['login'])?></span></a></td></tr>
+<tr><td>Submittime:</td><td><?= htmlspecialchars($reqdata['submittime']) ?></td></tr>
+<tr><td>Request:</td><td class="filename"><pre class="output_text"><?=htmlspecialchars($reqdata['body']) ?></pre></td></tr>
+</table>
+
+<?
+	return $reqdata;
 }

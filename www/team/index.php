@@ -19,7 +19,7 @@ getSubmissions('team', $login, FALSE);
 <?php
 $data = $DB->q('TABLE SELECT * FROM clar_response WHERE cid = %i 
 	AND (rcpt = %s OR rcpt IS NULL) ORDER BY submittime DESC',
-	getCurCont(), $login );
+	getCurContest(), $login );
 
 foreach($data as $row) {
 	echo "<tr><td>".
