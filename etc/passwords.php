@@ -20,7 +20,7 @@
 $DBLOGIN = array (
 	'jury'	=> array (		// s/i/u/d on each table
 		'user' => 'nkp',
-		'pass' => 'RoyRogerBill' ),
+		'pass' => 'jury' ),
 	'team'	=> array (		// ...
 		'user' => 'domjudge_team',
 		'pass' => 'team' ),
