@@ -8,9 +8,10 @@
 #include <ctype.h>
 #include <string.h>
 
-#define SOCKETBUFFERSIZE 256
+/* Logging and error functions */
+#include "../lib/lib.error.h"
 
-#define ERRSTR "error: "
+#define SOCKETBUFFERSIZE 256
 
 /* Buffer where the last received message is stored */
 char lastmesg[SOCKETBUFFERSIZE];
@@ -32,6 +33,19 @@ void sendit(int, char *, ...);
  */
 int  receive(int);
 
+/* Create a c-string by allocating memory for it and writing to it,
+ * using printf type format characters.
+ *
+ * Arguments:
+ * char *mesg  message to write, may include printf format characters '%'
+ * ...         optional arguments for format characters
+ *
+ * Returns a pointer to the allocated string
+ */
+char *allocstr(char *, ...);
+
+
+
 void sendit(int fd, char *mesg, ...)
 {
 	char buffer[SOCKETBUFFERSIZE];
@@ -49,9 +63,6 @@ void sendit(int fd, char *mesg, ...)
 	}
 }
 
-/*** 
- *  Receive mesg from socket and log it.
- */
 int receive(int fd)
 {
 	char buffer[SOCKETBUFFERSIZE];
@@ -62,6 +73,11 @@ int receive(int fd)
 		error(errno,"reading from socket");
 	}
 
+	/* Check for end of file */
+	if ( nread==0 ) {
+		return 0;
+	}
+	
 	strcpy(lastmesg,buffer);
 	while ( nread>0 && iscntrl(lastmesg[nread-1]) ) lastmesg[--nread] = 0;
 	logmsg(LOG_DEBUG, "recv: %s", lastmesg);
@@ -70,8 +86,8 @@ int receive(int fd)
 		close(fd);
 		i = 0;
 		if ( lastmesg[i]=='-' ) i++;
-		if ( strncmp(&lastmesg[i],ERRSTR,strlen(ERRSTR))==0 ) {
-			i += strlen(ERRSTR);
+		if ( strncmp(&lastmesg[i],ERRMATCH,strlen(ERRMATCH))==0 ) {
+			i += strlen(ERRMATCH);
 		}
 		error(0,&lastmesg[i]);
 	}
@@ -83,4 +99,26 @@ int receive(int fd)
 	}
 
 	return nread;
+}
+
+char *allocstr(char *mesg, ...)
+{
+	va_list ap;
+	char *str;
+	char tmp[2];
+	int len, n;
+
+	va_start(ap,mesg);
+	len = vsnprintf(tmp,1,mesg,ap);
+	va_end(ap);
+	
+	if ( (str = (char *) malloc(len+1))==NULL ) error(errno,"allocating string");
+
+	va_start(ap,mesg);
+	n = vsnprintf(str,len+1,mesg,ap);
+	va_end(ap);
+
+	if ( n==-1 || n>len ) error(0,"cannot write all of string");
+
+	return str;
 }
