@@ -26,9 +26,6 @@ logmsg ("$me Judge started");
 // Constantly check database for unjudged submissions
 while ( 1 ) {
 
-	// Generate (unique) random string to mark submission to be judged
-	$randomstring = $me.microtime().md5(uniqid(mt_rand(), true));
-
 	// Check that this judge is active, else wait and check again later
 	$row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
 	if($row['active'] != 1) {
@@ -37,9 +34,12 @@ while ( 1 ) {
 		continue;
 	}
 
+	// Generate (unique) random string to mark submission to be judged
+	$mark = $me.microtime().md5(uniqid(mt_rand(), true));
+
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-		SET judger = %i, uniqueding = %s WHERE judger IS NULL LIMIT 1', $myid, $randomstring);
+		SET judger = %i, judgemark = %s WHERE judger IS NULL LIMIT 1', $myid, $mark);
 
 	// nothing updated -> no open submissions
 	if($numupd == 0) {
@@ -53,7 +53,7 @@ while ( 1 ) {
 		s.submitid, s.source, s.langid, testdata
 		FROM submission s, problem p, language l
 		WHERE s.probid = p.probid AND s.langid = l.langid AND
-		uniqueding = %s AND judger = %i', $randomstring, $myid);
+		judgemark = %s AND judger = %i', $mark, $myid);
 
 	logmsg("$me Starting judging of $row[submitid]...");
 
@@ -62,17 +62,18 @@ while ( 1 ) {
 		VALUES (%i,NOW(),%i)',
 		$row['submitid'], $myid);
 
-	// create tempdir for tempfiles.
-	$tempdir = system("mktemp -d -p ".SYSTEM_ROOT."/$myhost/$judgingid", $retval);
+	// create tempdir for tempfiles
+	$tempdirpath = JUDGEDIR."/$myhost/";
+	$tempdir = system("mktemp -d -p $tempdirpath $judgingid.XXXX", $retval);
 	if($retval != 0) {
-		error("$me Could not create tempdir ".SYSTEM_ROOT."/$myhost/$judgingid");
+		error("$me Could not create tempdir $tempdirpath/$judgingid.XXXX");
 	}
 
 	// do the actual compile-run-test
 	system("./test_solution.sh ".
-			OUTPUT_ROOT."/submit/$row[source] $row[langid] ".
-			SYSTEM_ROOT."/$row[testdata]/testdata.in ".
-			SYSTEM_ROOT."/$row[testdata]/testdata.out $row[runtime] $tempdir",
+			SUBMITDIR."/$row[source] $row[langid] ".
+			INPUT_ROOT."/$row[testdata]/testdata.in ".
+			INPUT_ROOT."/$row[testdata]/testdata.out $row[runtime] $tempdir",
 		$retval);
 
 	// what does the exitcode mean?
