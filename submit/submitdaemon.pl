@@ -194,15 +194,12 @@ sub child {
 	logmsg($LOG_INFO,"created tempfile: '".basename($tmpfile)."'");
 
 	# Copy the source-file.
-	### TODO: exitcode 0 bij authetication failure afvangen ###
-	system(("./submit_copy",$team,$filename,$tmpfile));
+	system(("./submit_copy.sh",$team,$filename,$tmpfile));
 	if ( $? != 0 ) { error "copying file: exitcode $?"; }
-#	copy("$filename","$tmpfile") or error "copying file: $!";
 	logmsg($LOG_INFO,"copied '$filename' to tempfile");
 	
 	# Check with database for correct parameters and then
 	# add a database entry for this file.
-	### TODO: basename($tmpfile) naar $tmpfile veranderen bij 'incoming' ###
 	system(("./submit_db.php",$team,$ip,$problem,$language,basename($tmpfile)));
 	if ( $? != 0 ) { error "adding to database: exitcode $?"; }
 	logmsg($LOG_INFO,"added submission to database");

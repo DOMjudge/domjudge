@@ -4,7 +4,7 @@
 # Script to copy a submission file from a team to judge account.
 # Usage: $0 <team> <fromfile> <tofile>
 
-[ $# -qe 3 ] || exit 1
+[ $# -eq 3 ] || exit 1
 
 team=$1
 fromfile=$2
