@@ -181,11 +181,11 @@ sub child {
 	# (and for security explicitly taken) to be basename only!
 	$pw = getpwnam($team) or error "looking up username: $!";
 	
-	$filename = $pw->dir . "/$submitclientdir/" . basename($filename);
+	$filename = $pw->dir . "/$USERSUBMITDIR/" . basename($filename);
 
-	($handle, $tmpfile) = mkstemps("$submitserverdir/$problem.$team.XXXX",".$language")
+	($handle, $tmpfile) = mkstemps("$INCOMINGDIR/$problem.$team.XXXX",".$language")
 		or error "creating tempfile: $!";
-	logmsg "created tempfile: '$tmpfile'";
+	logmsg "created tempfile: '".basename($tmpfile)."'";
 
 	# Copy the source-file.
 	### TODO: exitcode 0 bij authetication failure afvangen ###
@@ -197,7 +197,7 @@ sub child {
 	# Check with database for correct parameters and then
 	# add a database entry for this file.
 	### TODO: basename($tmpfile) naar $tmpfile veranderen bij 'incoming' ###
-	system(("./submit_db.php",$team,$ip,$problem,$language,$tmpfile));
+	system(("./submit_db.php",$team,$ip,$problem,$language,basename($tmpfile)));
 	if ( $? != 0 ) { error "adding to database: exitcode $?"; }
 	logmsg "added submission to database";
 
@@ -215,12 +215,12 @@ logmsg "server started";
 
 # Create the server socket.
 $server = IO::Socket::INET->new(Proto => 'tcp',
-                                LocalPort => $submitport,
+                                LocalPort => $SUBMITPORT,
                                 Listen => SOMAXCONN,
                                 Reuse => 1)
-	or die "cannot start server on port $submitport/tcp";
+	or die "cannot start server on port $SUBMITPORT/tcp";
 
-logmsg "listening on port $submitport/tcp";
+logmsg "listening on port $SUBMITPORT/tcp";
 
 # Accept connections and fork off children to handle them.
 while ( 1 ) {

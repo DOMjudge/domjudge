@@ -48,7 +48,7 @@ my $filename;
 my $server = $ENV{SUBMITSERVER} || "localhost";
 my $team = $ENV{TEAM} || $ENV{USER} || $ENV{USERNAME};
 
-my $tmpdir = "$ENV{HOME}/" . $submitclientdir;
+my $tmpdir = "$ENV{HOME}/" . $USERSUBMITDIR;
 my $tmpfile;
 # Weer terug veranderen na debugging:
 my $mask = 0744; # 0700
@@ -227,11 +227,11 @@ while ( 1 ) {
 }
 
 # Connect to the submission server.
-print "Connecting to the server ($server, $submitport/tcp)...\n";
+print "Connecting to the server ($server, $SUBMITPORT/tcp)...\n";
 logmsg "connecting...";
 $socket = IO::Socket::INET->new(Proto => 'tcp',
                                 PeerAddr => $server,
-                                PeerPort => $submitport);
+                                PeerPort => $SUBMITPORT);
 if ( ! $socket ) { error "cannot connect to the server"; }
 $socket->autoflush;
 logmsg "connected!";
