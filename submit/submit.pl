@@ -71,7 +71,7 @@ sub logmsg {
 sub sendit;
 
 sub error {
-	if ( -f $tmpfile ) { unlink $tmpfile; }
+#	if ( -f $tmpfile ) { unlink $tmpfile; }
 	if ( $socket ) {
 		sendit "-error: @_";
 		$socket->close();
