@@ -23,7 +23,14 @@ $loglevel = LOG_DEBUG;
 function logmsg($msglevel, $string) {
 	global $verbose, $loglevel;
 	$msg = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . ": ". $string . "\n";
-	if ( $msglevel <= $verbose  ) { fwrite(STDERR, $msg); fflush(STDERR); }
+	if ( $msglevel <= $verbose  ) {
+		// if this is the webinterface, print it to stdout, else to stderr
+		if ( isset ( $_SERVER['REMOTE_ADDR'] ) ) {
+			echo "<div class=\"error\">" . htmlspecialchars($msg) . "</div>\n";
+		} else {
+			fwrite(STDERR, $msg); fflush(STDERR);
+		}
+	}
 	if ( $msglevel <= $loglevel &&
 	     defined('STDLOG')      ) { fwrite(STDLOG, $msg); fflush (STDLOG); }
 }
