@@ -1,5 +1,7 @@
-/*  beep - just what it sounds like, makes the console beep - but with
+/* beep - just what it sounds like, makes the console beep - but with
  * precision control.  See the man page for details.
+ *
+ * $Id$
  *
  * Try beep -h for command line args
  *
@@ -68,6 +70,8 @@ char *copyright =
 #define NO_STDIN_BEEP   0
 #define LINE_STDIN_BEEP 1
 #define CHAR_STDIN_BEEP 2
+
+#define TTYDEV "/dev/console"
 
 typedef struct beep_parms_t {
   float freq;     /* tone frequency (Hz)      */
@@ -218,8 +222,8 @@ void play_beep(beep_parms_t parms) {
   int i; /* loop counter */
 
   /* try to snag the console */
-  if((console_fd = open("/dev/tty0", O_WRONLY)) == -1) {
-    fprintf(stderr, "Could not open /dev/tty0 for writing.\n");
+  if((console_fd = open(TTYDEV, O_WRONLY)) == -1) {
+    fprintf(stderr, "Could not open "TTYDEV" for writing.\n");
     printf("\a");  /* Output the only beep we can, in an effort to fall back on usefulness */
     perror("open");
     exit(1);
