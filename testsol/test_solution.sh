@@ -111,9 +111,9 @@ ulimit -HS -f 65536 # Maximum filesize in KB
 logmsg "creating input/output files"
 cp $TESTIN $TMPDIR
 cp $SOURCE $TMPDIR
+TESTIN=`basename $TESTIN`
 SOURCE=`basename $SOURCE`
-DEST=`basename $SOURCE`
-DEST="${DEST%.*}"
+DEST="${SOURCE%.*}"
 
 OLDDIR=$PWD
 cd $TMPDIR
@@ -122,9 +122,10 @@ cd $TMPDIR
 touch compile.time      # Compiler runtime
 touch compile.{out,tmp} # Compiler output
 touch error.{out,tmp}   # Error output while running program
-touch diff.out          # Compare output
-# program.{out,time} are created by processes running as RUNUSER and should
-# NOT be created here, or "Permission denied" will result when writing.
+touch diff.{out,tmp}    # Compare output
+
+# program.{out,time,exit} are created by processes running as RUNUSER and
+# should NOT be created here, or "Permission denied" will result when writing.
 
 logmsg "starting compile"
 
@@ -140,16 +141,17 @@ exitcode=$?
 
 # Check for errors during compile:
 if grep 'timelimit reached: aborting command' compile.tmp &>/dev/null; then
-	echo "Compiling aborted after $COMPILETIME seconds." | tee compile.out
+	echo "Compiling aborted after $COMPILETIME seconds." >>compile.out
+	rm compile.tmp
 	exit $E_COMPILE
 fi
 if [ $exitcode -ne 0 ]; then
-	echo "Compiling failed with exitcode $exitcode." | tee compile.out
-	echo "Compiler output:" >>compile.out
+	echo "Compiling failed with exitcode $exitcode, compiler output:" >>compile.out
 	cat compile.tmp >>compile.out
+	rm compile.tmp
 	exit $E_COMPILE
 fi
-cp compile.tmp compile.out
+mv compile.tmp compile.out
 
 logmsg "setting up chroot-ed environment"
 
@@ -171,9 +173,11 @@ chmod a+rwxt .
 logmsg "running program"
 
 ( $RUNGUARD -r $PWD -u $RUNUSER -t $TIMELIMIT -o program.time \
-	/run.sh $LANG /$DEST `basename $TESTIN` program.out error.out $MEMLIMIT \
+	/run.sh $LANG /$DEST $TESTIN program.out error.out program.exit $MEMLIMIT \
 ) &>error.tmp
 exitcode=$?
+cat error.out >>error.tmp
+
 sudo umount $PWD/proc
 # Check for still running processes:
 if ps -u $RUNUSER &>/dev/null; then
@@ -182,9 +186,29 @@ fi
 
 # Check for errors from running the program: 
 if grep  'timelimit reached: aborting command' error.tmp &>/dev/null; then
-	echo "Timelimit exceeded." | tee error.out
+	echo "Timelimit exceeded." >>error.out
+	cat error.tmp >>error.out
+	rm error.tmp
 	exit $E_TIMELIMIT
 fi
+if [ ! -r program.exit ]; then
+	mv error.tmp error.out
+	error "'program.exit' not readable"
+fi
+if [ `cat program.exit` != "0" ]; then
+	echo "Non-zero exitcode `cat program.exit`" >>error.out
+	cat error.tmp >>error.out
+	rm error.tmp
+	exit $E_RUNERROR
+fi
+if [ $exitcode -ne 0 ]; then
+	mv error.tmp error.out
+	error "exitcode $exitcode without program.exit != 0"
+fi
+
+### Checks for other runtime errors: ###
+### Removed, because these are not consistenly reported the same way
+### by all different compilers.
 #if grep  'Floating point exception' error.tmp &>/dev/null; then
 #	echo "Floating point exception." | tee error.out
 #	exit $E_RUNERROR
@@ -193,24 +217,39 @@ fi
 #	echo "Segmentation fault." | tee error.out
 #	exit $E_RUNERROR
 #fi
-if [ $exitcode -ne 0 ]; then
-	echo "Non-zero exitcode." | tee error.out
-	exit $exitcode
-fi
-cp error.tmp error.out
 
-cd $OLDDIR
 
 logmsg "comparing output"
 
-if [ ! -s $TMPDIR/program.out ]; then
-	echo "Program produced no output." | tee $TMPDIR/error.out
+# Copy testdata output (first cd to olddir to correctly resolve relative paths)
+cd $OLDDIR
+cp $TESTOUT $TMPDIR
+TESTOUT=`basename $TESTOUT`
+cd $TMPDIR
+
+if [ ! -s program.out ]; then
+	echo "Program produced no output." >>error.out
+	cat error.tmp >>error.out
+	rm error.tmp
 	exit $E_OUTPUT
 fi
-if ! diff $TMPDIR/program.out $TESTOUT >$TMPDIR/diff.out 2>/dev/null; then
-	echo "Wrong answer." | tee $TMPDIR/error.out
+
+( diff program.out $TESTOUT >diff.out ) 2>diff.tmp
+exitcode=$?
+
+if [ $exitcode -eq 1 ]; then
+	echo "Wrong answer." >>error.out
+	cat error.tmp >>error.out
+	rm error.tmp
 	exit $E_ANSWER
 fi
+if [ $exitcode -ne 0 ]; then
+	mv error.tmp error.out
+	error "diff: `cat diff.tmp`";
+fi
+rm diff.tmp
 
-echo "Correct!"
+echo "Correct!" >>error.out
+cat error.tmp >>error.out
+rm error.tmp
 exit $E_CORRECT
