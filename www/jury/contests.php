@@ -23,7 +23,7 @@ echo "<table>\n<tr><th>CID</th><th>starts</th><th>ends</th>" .
 foreach($res as $row) {
 	echo "<tr" .
 		($row['cid'] == $curcont ? ' class="highlight"':'') . ">" .
-		"\t<td align=\"right\">" . htmlentities($row['cid']) . "</td>\n" .
+		"\t<td align=\"right\">c" . htmlentities($row['cid']) . "</td>\n" .
 		"\t<td title=\"" . htmlentities($row['starttime']) . "\">" .
 			printtime($row['starttime'])."</td>\n".
 		"\t<td title=\"".htmlentities($row['endtime']) . "\">" .

@@ -41,7 +41,7 @@ a:active          { color: red;    }
 	color: gray;
 }
 
-.highlight { background-color: yellow; font-size: large; }
+.highlight { background-color: yellow; }
 
 .error {
 	color: red;
