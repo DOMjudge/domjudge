@@ -22,30 +22,22 @@ function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 
 	global $DB;
 	
-	/* We need two queries: one for all submissions, and one with the
-	 * results for the valid ones. When key & value are supplied we're
-	 * looking for the submissions of a specific team or judger, else
-	 * the complete list.
+	/* We need two kind of queries: one for all submissions, and one with
+	 * the results for the valid ones. When key & value are supplied we're
+	 * looking for the submissions of a specific team or judger, else the
+	 * complete list.
 	 */
-	if( $key && $value ) {
-		$res = $DB->q('SELECT s.submitid,s.team,s.probid,s.langid,s.submittime,s.judgerid,
-			t.name as teamname, p.name as probname, l.name as langname
-			FROM submission s
-			LEFT JOIN team t ON(t.login=s.team)
-			LEFT JOIN problem p ON(p.probid=s.probid)
-			LEFT JOIN language l ON(l.langid=s.langid)
-			WHERE s.'.$key.' = %s AND s.cid = %i ORDER BY s.submittime DESC',
-			$value, getCurContest() );
-	} else {
-		$res = $DB->q('SELECT s.submitid,s.team,s.probid,s.langid,s.submittime,s.judgerid,
-			t.name as teamname, p.name as probname, l.name as langname
-			FROM submission s
-			LEFT JOIN team t ON(t.login=s.team)
-			LEFT JOIN problem p ON(p.probid=s.probid)
-			LEFT JOIN language l ON(l.langid=s.langid)
-			WHERE s.cid = %i ORDER BY s.submittime DESC',
-			getCurContest() );
-	}
+	$keyvalmatch = '';
+	if( $key && $value ) $keyvalmatch = " s.$key = $value AND ";
+
+	$res = $DB->q('SELECT s.submitid,s.team,s.probid,s.langid,s.submittime,s.judgerid,
+		t.name as teamname, p.name as probname, l.name as langname
+		FROM submission s
+		LEFT JOIN team t ON(t.login=s.team)
+		LEFT JOIN problem p ON(p.probid=s.probid)
+		LEFT JOIN language l ON(l.langid=s.langid)
+		WHERE ' . $keyvalmatch . 's.cid = %i ORDER BY s.submittime DESC',
+		getCurContest() );
 
 	// nothing found...
 	if( $res->count() == 0 ) {
@@ -60,13 +52,13 @@ function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 	// print the table with the submissions. 
 	// table header; leave out the field that is our key (because it's the same
 	// for all rows)
-	echo "<table>\n<tr>".
+	echo "<table>\n<tr>" .
 		( $isjury ? "<th>ID</th>" : '' ) .
-		"<th>time</th>".
+		"<th>time</th>" .
 		($key != 'team'   ? "<th>team</th>"    : '') .
 		($key != 'probid' ? "<th>problem</th>" : '') .
 		($key != 'langid' ? "<th>lang</th>"    : '') .
-		"<th>status</th>".
+		"<th>status</th>" .
 		($isjury ? "<th>last<br />judge</th>" : '') .
 		"</tr>\n";
 	// print each row with links to detailed information
@@ -75,26 +67,26 @@ function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 		$isfinished = ($isjury || ! @$resulttable[$row['submitid']]['result']);
 		echo "<tr>";
 		if ( $isjury ) {
-			echo "<td><a href=\"submission.php?id=".$sid."\">s".$sid."</a></td>";
+			echo "<td><a href=\"submission.php?id=$sid\">s$sid</a></td>";
 		}
 		echo "<td>" . printtime($row['submittime']) . "</td>";
 		if ( $key != 'team' ) {
-			echo "<td class=\"teamid\" title=\"".htmlentities($row['teamname'])."\">" .
+			echo '<td class="teamid" title="' . htmlentities($row['teamname']) . '">' .
 				( $isjury ? '<a href="team.php?id=' . $row['team'] . '">' : '' ) .
 				htmlspecialchars($row['team']) .
-				($isjury ? '</a>' : '') . '</td>';
+				( $isjury ? '</a>' : '') . '</td>';
 		}
 		if ( $key != 'probid' ) {
 			echo '<td title="' . htmlentities($row['probname']) . '">' .
-				($isjury ? '<a href="problem.php?id=' . $row['probid'] . '">' : '') .
+				( $isjury ? '<a href="problem.php?id=' . $row['probid'] . '">' : '' ) .
 				htmlspecialchars($row['probid']) .
-				($isjury ? '</a>' : '') . '</td>';
+				( $isjury ? '</a>' : '') . '</td>';
 		}
 		if ( $key != 'langid' ) {
 			echo '<td title="' . htmlentities($row['langname']) . '">' .
-				($isjury ? '<a href="language.php?id=' . $row['langid'] . '">' : '') .
+				( $isjury ? '<a href="language.php?id=' . $row['langid'] . '">' : '' ) .
 				htmlspecialchars($row['langid']) .
-				($isjury ? '</a>' : '') . '</td>';
+				( $isjury ? '</a>' : '') . '</td>';
 		}
 		echo "<td>";
 		if( ! @$resulttable[$row['submitid']]['result'] ) {
@@ -102,17 +94,18 @@ function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 		} else {
 			// link directly to a specific judging
 			if ( $isjury ) {
-				echo '<a href="judging.php?id=' . $resulttable[$row['submitid']]['judgingid'] . '">';
+				echo '<a href="judging.php?id=' .
+					$resulttable[$row['submitid']]['judgingid'] . '">';
 			} else {
 				echo '<a href="submission_details.php?id=' . $sid . '">';
 			}
-			echo printresult( @$resulttable[$row['submitid']]['result'] ) . '</a>';
+			echo printresult(@$resulttable[$row['submitid']]['result']) . '</a>';
 		}
 		echo "</td>";
 		if ( $isjury ) {
 			$judger = @$resulttable[$row['submitid']]['judgerid'];
 			echo '<td><a href="judger.php?id=' . urlencode($judger) . '">' .
-				 printhost($judger) . '</a></td>';
+				printhost($judger) . '</a></td>';
 		}
 		echo "</tr>\n";
 	}
@@ -221,7 +214,7 @@ function putRequest($id, $login = NULL) {
 	$reqdata = $DB->q('MAYBETUPLE SELECT q.*, c.contestname, t.name
 		FROM  clar_request q
 		LEFT JOIN contest c ON (c.cid = q.cid)
-	    LEFT JOIN team t ON (q.login = t.login)
+		LEFT JOIN team t ON (q.login = t.login)
 		WHERE q.reqid = %i', $id);
 	if( ! $reqdata ) {
 		error ("Missing clarification request data");
@@ -265,27 +258,27 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	
 	echo "<h1>Scoreboard ".htmlentities($contdata['contestname'])."</h1>\n\n";
 	echo "<h4>starts: " . printtime($contdata['starttime']) .
-	        ' - ends: ' . printtime($contdata['endtime']) . "</h4>\n\n";
+	        " - ends: " . printtime($contdata['endtime']) . "</h4>\n\n";
 
-	echo "<table class=\"scoreboard\" cellpadding=\"3\">\n";
+	echo '<table class="scoreboard" cellpadding="3">' . "\n";
 
 
 	// get the teams and problems
-	$teams = $DB->q('TABLE SELECT login,name,category
-		FROM team');
-	$probs = $DB->q('TABLE SELECT probid,name
-		FROM problem WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
+	$teams = $DB->q('TABLE SELECT login,name,category FROM team');
+	$probs = $DB->q('TABLE SELECT probid,name FROM problem
+		WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
 
-	echo "<colgroup><col id=\"scoreteamname\" /><col id=\"scoresolv\" /><col id=\"scoretotal\" />";
+	echo '<colgroup><col id="scoreteamname" /><col id="scoresolv" /><col id="scoretotal" />';
 	for( $i = 0; $i < count($probs); $i++ ) {
-		echo "<col class=\"scoreprob\" />";
+		echo '<col class="scoreprob" />';
 	}
 	echo "</colgroup>\n";
 
-	echo "<tr id=\"scoreheader\"><th>TEAM</th>";
+	echo '<tr id="scoreheader"><th>TEAM</th>';
 	echo "<th>solved</th><th>time</th>\n";
 	foreach( $probs as $pr ) {
-		echo "<th title=\"".htmlentities($pr['name'])."\">".htmlentities($pr['probid'])."</th>";
+		echo '<th title="' . htmlentities($pr['name']). '">' .
+			htmlentities($pr['probid']) . '</th>';
 	}
 	echo "</tr>\n";
 
@@ -310,7 +303,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 			$result = $DB->q('SELECT result, 
 				(UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 as timediff
-				FROM judging LEFT JOIN submission s USING(submitid)
+				FROM judging
+				LEFT JOIN submission s USING(submitid)
 				LEFT OUTER JOIN contest c ON(c.cid=s.cid)
 				WHERE team = %s AND probid = %s AND valid = 1 AND result IS NOT NULL AND s.cid = %i'
 				. ( !$isjury && isset($contdata['lastscoreupdate']) ? ' AND submittime <= c.lastscoreupdate ' : '' )  . '
@@ -372,18 +366,18 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	foreach( $SCORES as $team => $totals ) {
 
 		// team name, total correct, total time
-		echo "<tr" . (@$myteamid == $team ? ' id="scorethisisme"':'')
-			." class=\"category" . $totals['category'] . "\"><td class=\"scoretn\">"
-			.htmlentities($TEAMNAMES[$team])
-			."</td><td class=\"scorenc\">"
-			.$totals['num_correct']."</td><td class=\"scorett\">".$totals['total_time']."</td>";
+		echo '<tr' . ( @$myteamid == $team ? ' id="scorethisisme"' : '' ) .
+			' class="category' . $totals['category'] . '">' .
+			'<td class="scoretn">' . htmlentities($TEAMNAMES[$team]) . '</td>' .
+			'<td class="scorenc">' . $totals['num_correct'] . '</td>' .
+			'<td class="scorett">' . $totals['total_time'] . '</td>';
 
 		$SUMMARY['num_correct'] += $totals['num_correct'];
 		$SUMMARY['total_time']  += $totals['total_time'];
 
 		// for each problem
 		foreach( $THEMATRIX[$team] as $prob => $pdata ) {
-			echo "<td class=\"";
+			echo '<td class="';
 			// CSS class for correct/incorrect/neutral results
 			if( $pdata['correct'] ) { 
 				echo 'score_correct';
@@ -393,7 +387,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 				echo 'score_neutral';
 			}
 			// number of submissions for this problem
-			echo "\">" . $pdata['submitted'];
+			echo '">' . $pdata['submitted'];
 			// if correct, print time scored
 			if( ($pdata['time']+$pdata['penalty']) > 0) {
 				echo " (" . $pdata['time'] . ' + ' . $pdata['penalty'] . ")";
@@ -411,15 +405,15 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// print a summaryline
 	echo "\n<tr id=\"scoresummary\"><td>Summary</td>";
-	echo "<td class=\"scorenc\">".$SUMMARY['num_correct']."</td><td class=\"scorett\">".
-		$SUMMARY['total_time']."</td>";
+	echo '<td class="scorenc">' . $SUMMARY['num_correct'] . '</td>' .
+	     '<td class="scorett">' . $SUMMARY['total_time'] . '</td>';
 	foreach( $probs as $pr ) {
-		echo "<td>".$SUMMARY[$pr['probid']]['submissions'].' / '.$SUMMARY[$pr['probid']]['correct'].
-			' / '.( isset($SUMMARY[$pr['probid']]['times']) ? min(@$SUMMARY[$pr['probid']]['times']) : '-')."</td>";
+		echo '<td>' . $SUMMARY[$pr['probid']]['submissions'] . ' / ' .
+			$SUMMARY[$pr['probid']]['correct'] . ' / ' .
+			( isset($SUMMARY[$pr['probid']]['times']) ? min(@$SUMMARY[$pr['probid']]['times']) : '-') . "</td>";
 	}
 	echo "</tr>\n\n";
 
-	
 	echo "</table>\n\n";
 
 	$res = $DB->q('SELECT * FROM category ORDER BY catid');
@@ -428,9 +422,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	if ( $res->count() > 1 ) {
 		echo "<br /><br /><br />\n<table class=\"scoreboard\"><tr><th>Legend</th></tr>\n";
 		while ( $row = $res->next() ) {
-			echo "<tr class=\"category" . $row['catid'] .
-				"\"><td align=\"center\" class=\"scoretn\">" .
-				$row['name'] . "</td></tr>";
+			echo '<tr class="category' . $row['catid'] . '">' .
+				'<td align="center" class="scoretn">' .	$row['name'] . "</td></tr>";
 		}
 		echo "</table>\n\n";
 	}
@@ -441,8 +434,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	} else {
 		$lastupdate = time();
 	}
-	echo "<span id=\"lastmod\">Last Update: " . date('j M Y H:i', 
-		$lastupdate ) . "</span>\n\n";
+	echo "<span id=\"lastmod\">Last Update: " .
+		date('j M Y H:i', $lastupdate) . "</span>\n\n";
 
 	return;
 }
