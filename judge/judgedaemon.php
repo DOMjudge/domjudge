@@ -8,8 +8,6 @@
  * $Id$
  */
 
-$loglevel = LOG_VERBOSE;
-
 require ('../etc/config.php');
 
 $waittime = 5;
@@ -22,6 +20,8 @@ define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 require ('../lib/init.php');
 
 $verbose = LOG_INFO;
+
+$cid = getCurContest();
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
