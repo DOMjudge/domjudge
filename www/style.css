@@ -5,6 +5,8 @@ body {
 	font-family: sans-serif;
 }
 
+td { padding-right: 1ex; }
+
 .sol { font-weight: bold; font-variant: small-caps; }
 .sol_correct          { color: green;  }
 .sol_incorrect        { color: red;    }
@@ -54,6 +56,7 @@ a:active          { color: red;    }
 	border-right: 1px solid gray; border-bottom: 1px solid gray;
 }
 
+
 .scoreboard			{ border-collapse: collapse;		}
 .scoreboard td		{ font-size: small;					}
 .scoreboard tr		{ border-bottom: 1px solid silver;	}
@@ -82,7 +85,7 @@ a:active          { color: red;    }
 	position: absolute; right: 1ex; margin-top: 1em;
 }
 
-/* backgrounds for categories */
+/* backgrounds for categories, define as you see fit */
 .category1 .scoretn { background: white; }
 .category2 .scoretn { background: #ffffcc; }
 .category3 .scoretn { background: #ffccff; }
