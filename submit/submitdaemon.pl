@@ -65,7 +65,7 @@ sub logmsg {
 sub sendit;
 
 sub error {
-	if ( -f $tmpfile ) { unlink $tmpfile; }
+#	if ( -f $tmpfile ) { unlink $tmpfile; }
 	if ( $socket ) {
 		sendit "-error: @_";
 		$socket->close();
@@ -200,6 +200,8 @@ sub child {
 	system(("./submit_db.php",$team,$ip,$problem,$language,basename($tmpfile)));
 	if ( $? != 0 ) { error "adding to database: exitcode $?"; }
 	logmsg "added submission to database";
+
+	unlink($tmpfile);
 
 	sendit "+submission successful";
 	$socket->close();
