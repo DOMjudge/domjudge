@@ -28,7 +28,7 @@ a:link, a:visited { color: blue;   }
 a:hover           { color: purple; }
 a:active          { color: red;    }
 
-.menutop a {
+#menutop a {
 	font-family: sans-serif;
 	font-weight: bold;
 	background-color: #FFFFF0;
@@ -38,6 +38,16 @@ a:active          { color: red;    }
 	padding: 2px;
 	padding-left: 5px;
 	padding-right: 5px;
+}
+#clock {
+	position: absolute;
+	right: 1ex;
+	top: 1ex;
+	font-size: small;
+	font-family: monospace;
+	color: gray;
+	border: 1px dashed #ccc;
+    padding: 4px;
 }
 
 .error {
@@ -58,3 +68,4 @@ a:active          { color: red;    }
 	border-right: 1px solid gray;
 	border-bottom: 1px solid gray;
 }
+
