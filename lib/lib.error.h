@@ -29,7 +29,9 @@ int  verbose      = LOG_NOTICE;
 int  loglevel     = LOG_DEBUG;
 FILE *stdlog      = NULL;
 
-/* Logging function (vlogmsg uses va_list instead of argument list):
+void logmsg (int, char *, ...);
+void vlogmsg(int, char *, va_list);
+/* Logging functions (vlogmsg uses va_list instead of argument list):
  * Logs a message to stderr and/or logfile, including date and program name,
  * depending on the loglevel treshold values.
  *
@@ -38,22 +40,26 @@ FILE *stdlog      = NULL;
  * char *mesg      message, may include printf output format characters '%'
  * ... or va_list  optional arguments for format characters
  */
-void logmsg (int, char *, ...);
-void vlogmsg(int, char *, va_list);
 
+char *errorstring(int, char *);
 /* Error string generating function:
- * Returns a pointer to a dynamically allocated string containing the
- * complete error message.
+ * Returns a pointer to a dynamically allocated string containing the error
+ * message. Optional arguments still have to be inserted (e.g. by calling
+ * vlogmsg).
  *
  * Arguments:
  * int errnum      'errno' value to use for error string output, set 0 to skip
  * char *mesg      message, may include printf output format characters '%'
- * va_list         optional arguments for format characters
  *
  * Returns a char pointer to the allocated string.
  */
-char *errorstring(int, char *, va_list);
 
+void logerror (int, char *, ...);
+void error    (int, char *, ...);
+void warning  (int, char *, ...);
+void vlogerror(int, char *, va_list);
+void verror   (int, char *, va_list);
+void vwarning (int, char *, va_list);
 /* Error and warning functions (v.. uses va_list instead of argument list):
  * Logs an error message including error string from 'errno'.
  *   logerror   only logs the error message
@@ -65,12 +71,6 @@ char *errorstring(int, char *, va_list);
  * char *mesg      message, may include printf output format characters '%'
  * ... or va_list  optional arguments for format characters
  */
-void logerror (int, char *, ...);
-void error    (int, char *, ...);
-void warning  (int, char *, ...);
-void vlogerror(int, char *, va_list);
-void verror   (int, char *, va_list);
-void vwarning (int, char *, va_list);
 
 
 /* ========================= IMPLEMENTATION ============================== */
@@ -127,7 +127,7 @@ void logmsg(int msglevel, char *mesg, ...)
 }
 
 /* Function to generate error string */
-char *errorstring(int errnum, char *mesg, va_list ap)
+char *errorstring(int errnum, char *mesg)
 {
 	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
 	char *buffer;
@@ -159,7 +159,7 @@ void vlogerror(int errnum, char *mesg, va_list ap)
 {
 	char *buffer;
 
-	buffer = errorstring(errnum, mesg, ap);
+	buffer = errorstring(errnum, mesg);
 	
 	vlogmsg(LOG_ERR, buffer, ap);
 
