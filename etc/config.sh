@@ -2,7 +2,7 @@
 # $Id$
 
 # Root paths for various parts of the system
-SYSTEM_ROOT=/home/cies/nkp0405/systeem/svn
+SYSTEM_ROOT=/home/cies/nkp0405/systeem/svn/jury
 OUTPUT_ROOT=/home/cies/nkp0405/systeem/systest
 
 

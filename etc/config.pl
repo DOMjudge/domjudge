@@ -24,7 +24,7 @@ our $socket;
 our $lastreply;
 
 # Paths
-our $SYSTEM_ROOT = "/home/cies/nkp0405/system/svn";
+our $SYSTEM_ROOT = "/home/cies/nkp0405/system/svn/jury";
 our $OUTPUT_ROOT = "/home/cies/nkp0405/system/systest";
 
 # Directory where submitdaemon puts received files

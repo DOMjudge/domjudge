@@ -6,7 +6,7 @@
  */
 
 /** Define absulote paths used for finding other files */
-define('SYSTEM_ROOT', '/home/cies/nkp0405/systeem/svn');
+define('SYSTEM_ROOT', '/home/cies/nkp0405/systeem/svn/jury');
 define('OUTPUT_ROOT', '/home/cies/nkp0405/systeem/systest');
 
 /** Possible exitcodes from testsol and their meaning */
