@@ -1,8 +1,0 @@
-<?php
-
-/**
- * Misc. functions
- *
- * $Id$
- */
-
