@@ -13,19 +13,23 @@ if ( ! defined('SCRIPT_ID') ) {
 define('STDERR', fopen('php://stderr', 'w'));
 
 if ( defined('LOGFILE') ) {
-	define('STDLOG', fopen(LOGFILE, 'w'));
+	define('STDLOG', fopen(LOGFILE, 'a'));
 }
+
+// Default verbosity and loglevels:
+$verbose  = LOG_NOTICE;
+$loglevel = LOG_DEBUG;
 
 function logmsg($msglevel, $string) {
 	global $verbose, $loglevel;
 	$msg = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . ": ". $string . "\n";
 	if ( $msglevel <= $verbose  ) { fwrite(STDERR, $msg); }
 	if ( $msglevel <= $loglevel &&
-	     defined('STDLOG')      ) { fwrite(STDLOG, $msg); }
+	     defined('LOGFILE')     ) { fwrite(STDLOG, $msg); }
 }
 
 function error($string) {
-	logmsg(LOG_ERR, $string);
+	logmsg(LOG_ERR, "error: $string");
 	exit(1);
 }
 
