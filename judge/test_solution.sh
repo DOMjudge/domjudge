@@ -96,7 +96,7 @@ E_ANSWER=5
 E_INTERN=127 # Internal script error
 
 # Logging:
-LOGFILE="$LOGDIR/judge.$HOSTNAME.log"
+LOGFILE="$LOGDIR/judge.`hostname --short`.log"
 LOGLEVEL=$LOG_DEBUG
 PROGNAME=`basename $0`
 
@@ -145,13 +145,15 @@ OLDDIR=$PWD
 cd $TMPDIR
 
 # Create files, which are expected to exist:
-touch compile.time      # Compiler runtime
-touch compile.{out,tmp} # Compiler output
-touch error.{out,tmp}   # Error output while running program
-touch diff.{out,tmp}    # Compare output
+touch compile.{out,time}   # Compiler output and runtime
+touch error.out            # Error output while running program
+touch diff.out             # Compare output
+touch program.{out,err}    # Program output and stderr (for extra information)
+touch program.{time,exit}  # Program runtime and exitcode
 
-# program.{out,time,exit} are created by processes running as RUNUSER and
-# should NOT be created here, or "Permission denied" will result when writing.
+# program.{out,err,time,exit} are written to by processes running as RUNUSER:
+chmod a+rw program.{out,err,time,exit}
+
 
 logmsg $LOG_NOTICE "starting compile"
 
@@ -167,17 +169,15 @@ exitcode=$?
 
 # Check for errors during compile:
 if grep 'timelimit reached: aborting command' compile.tmp &>/dev/null; then
-	echo "Compiling aborted after $COMPILETIME seconds." >>compile.out
-	rm compile.tmp
+	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
 	exit $E_COMPILE
 fi
 if [ $exitcode -ne 0 ]; then
-	echo "Compiling failed with exitcode $exitcode, compiler output:" >>compile.out
+	echo "Compiling failed with exitcode $exitcode, compiler output:" >compile.out
 	cat compile.tmp >>compile.out
-	rm compile.tmp
 	exit $E_COMPILE
 fi
-mv compile.tmp compile.out
+
 
 logmsg $LOG_NOTICE "setting up chroot-ed environment"
 
@@ -193,16 +193,14 @@ mkfifo -m a+rw ./dev/null
 cat < ./dev/null >/dev/null &
 CATPID=$!
 disown $CATPID
-# Make directory (sticky) writable for program output:
-chmod a+rwxt .
+
 
 logmsg $LOG_NOTICE "running program"
 
 ( $RUNGUARD -r $PWD -u $RUNUSER -t $TIMELIMIT -o program.time \
-	/run.sh $LANG /$DEST $TESTIN program.out error.out program.exit $MEMLIMIT \
-) &>error.tmp
+	/run.sh $LANG /$DEST $TESTIN program.out program.err program.exit \
+	        $MEMLIMIT $FILELIMIT $PROCLIMIT ) &>error.tmp
 exitcode=$?
-cat error.out >>error.tmp
 
 sudo umount $PWD/proc
 # Check for still running processes (first wait for all exiting processes):
@@ -211,25 +209,32 @@ if ps -u $RUNUSER &>/dev/null; then
 	error "found processes still running"
 fi
 
+# Append (heading/trailing) program stderr to error.tmp:
+echo "*** Program stderr output following ***" >>error.tmp
+if [ `cat program.err | wc -l` -gt 20 ]; then
+	head -n 10 program.err >>error.tmp
+	tail -n 10 program.err >>error.tmp
+else
+	cat program.err >>error.tmp
+fi
+
 # Check for errors from running the program: 
 if grep  'timelimit reached: aborting command' error.tmp &>/dev/null; then
 	echo "Timelimit exceeded." >>error.out
 	cat error.tmp >>error.out
-	rm error.tmp
 	exit $E_TIMELIMIT
 fi
 if [ ! -r program.exit ]; then
-	mv error.tmp error.out
+	cat error.tmp >>error.out
 	error "'program.exit' not readable"
 fi
 if [ `cat program.exit` != "0" ]; then
 	echo "Non-zero exitcode `cat program.exit`" >>error.out
 	cat error.tmp >>error.out
-	rm error.tmp
 	exit $E_RUNERROR
 fi
 if [ $exitcode -ne 0 ]; then
-	mv error.tmp error.out
+	cat error.tmp >>error.out
 	error "exitcode $exitcode without program.exit != 0"
 fi
 
@@ -247,6 +252,7 @@ fi
 #	exit $E_RUNERROR
 #fi
 
+
 logmsg $LOG_NOTICE "comparing output"
 
 # Copy testdata output (first cd to olddir to correctly resolve relative paths)
@@ -258,7 +264,6 @@ cd $TMPDIR
 if [ ! -s program.out ]; then
 	echo "Program produced no output." >>error.out
 	cat error.tmp >>error.out
-	rm error.tmp
 	exit $E_OUTPUT
 fi
 
@@ -266,18 +271,16 @@ $RUNSCRIPTDIR/compare.sh program.out $TESTOUT diff.out 2>diff.tmp
 exitcode=$?
 
 if [ $exitcode -ne 0 ]; then
-	mv error.tmp error.out
+	cat error.tmp >>error.out
 	error "diff: `cat diff.tmp`";
 fi
 if [ -s diff.out ]; then
 	echo "Wrong answer." >>error.out
 	cat error.tmp >>error.out
-	rm error.tmp
 	exit $E_ANSWER
 fi
 rm diff.tmp
 
 echo "Correct!" >>error.out
 cat error.tmp >>error.out
-rm error.tmp
 exit $E_CORRECT
