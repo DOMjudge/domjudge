@@ -1,5 +1,6 @@
-#!/usr/bin/php4 -q
+#!/usr/bin/php -q
 <?php
+
 /**
  * Request a jet unjudged submission from the database, judge it, and pass
  * the results back in to the database.
@@ -15,6 +16,8 @@ define ('SCRIPT_ID', 'judgedaemon');
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 
 require ('../php/init.php');
+
+$verbose = LOG_INFO;
 
 logmsg(LOG_NOTICE, "Judge started on $myhost");
 
