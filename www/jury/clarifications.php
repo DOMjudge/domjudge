@@ -15,7 +15,9 @@ require('menu.php');
 <p>
 <a href="clarification.php">Send Clarification Response</a>
 </p>
-<?
+<?php
+
+$cid = getCurContest();
 
 echo "<h1>Clarification Requests</h1>\n\n";
 
@@ -23,7 +25,7 @@ $res = $DB->q('SELECT q.*
 	FROM  clar_request q
 	LEFT JOIN clar_response r ON (r.reqid = q.reqid)
 	WHERE r.reqid IS NULL AND q.cid = %i
-	ORDER BY q.submittime DESC', getCurContest());
+	ORDER BY q.submittime DESC', $cid);
 
 if ( $res->count() == 0 ) {
 	echo "<p><em>No new clarification requests.</em></p>\n\n";
@@ -52,7 +54,7 @@ $res = $DB->q('SELECT DISTINCT q.*
 	FROM  clar_request q
 	LEFT JOIN clar_response r ON (r.reqid = q.reqid)
 	WHERE r.reqid IS NOT NULL AND q.cid = %i
-	ORDER BY q.submittime DESC', getCurContest());
+	ORDER BY q.submittime DESC', $cid);
 
 if ( $res->count() == 0 ) {
 	echo "<p><em>No old clarification requests.</em></p>\n\n";
@@ -81,7 +83,7 @@ echo "<h3>Clarification Responses:</h3>\n\n";
 $res = $DB->q('SELECT r.*
 	FROM  clar_response r
 	WHERE r.cid = %i
-	ORDER BY r.submittime DESC', getCurContest());
+	ORDER BY r.submittime DESC', $cid);
 
 if ( $res->count() == 0 ) {
 	echo "<p><em>No clarification responses.</em></p>\n\n";

@@ -18,9 +18,11 @@ include('menu.php');
 <h1>Clarifications</h1>
 <?php
 
+$cid = getCurContest();
+
 $data = $DB->q('TABLE SELECT * FROM clar_response WHERE cid = %i 
 	AND (rcpt = %s OR rcpt IS NULL) ORDER BY submittime DESC',
-	getCurContest(), $login );
+	$cid, $login );
 
 if(count($data) == 0 ) {
 	echo "<p><em>No responses yet</em></p>\n";
@@ -46,7 +48,7 @@ if(count($data) == 0 ) {
 $res = $DB->q('SELECT q.*
 	FROM  clar_request q
 	WHERE q.cid = %i AND q.login = %s
-	ORDER BY q.submittime DESC', getCurContest(), $login);
+	ORDER BY q.submittime DESC', $cid, $login);
 
 if( $res->count() == 0 ) {
 	echo "<p><em>No requests done</em></p>\n";

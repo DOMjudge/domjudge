@@ -30,6 +30,8 @@ function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 	$keyvalmatch = '';
 	if( $key && $value ) $keyvalmatch = " s.$key = \"" . mysql_escape_string($value) . "\" AND ";
 
+	$cid = getCurContest();
+
 	$res = $DB->q('SELECT s.submitid,s.team,s.probid,s.langid,s.submittime,s.judgerid,
 		t.name as teamname, p.name as probname, l.name as langname
 		FROM submission s
@@ -37,7 +39,7 @@ function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 		LEFT JOIN problem p ON(p.probid=s.probid)
 		LEFT JOIN language l ON(l.langid=s.langid)
 		WHERE ' . $keyvalmatch . 's.cid = %i ORDER BY s.submittime DESC',
-		getCurContest() );
+		$cid );
 
 	// nothing found...
 	if( $res->count() == 0 ) {
@@ -47,7 +49,7 @@ function getSubmissions($key = null, $value = null, $isjury = FALSE) {
 
 	$resulttable = $DB->q('KEYTABLE SELECT j.*, submitid AS ARRAYKEY
 		FROM judging j
-		WHERE (valid = 1 OR valid IS NULL) AND cid = %i', getCurContest() );
+		WHERE (valid = 1 OR valid IS NULL) AND cid = %i', $cid );
 
 	// print the table with the submissions. 
 	// table header; leave out the field that is our key (because it's the same
