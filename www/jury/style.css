@@ -25,3 +25,7 @@
 .queued {
 	color: gray;
 }
+
+.teamid, .filename {
+	font-family: monospace;
+}

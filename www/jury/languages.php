@@ -18,11 +18,12 @@ echo "<table>
 while($row = $res->next()) {
 	echo "<tr".
 		( $row['allow_judge'] ? '': ' class="disabled"').
-		"><td><a href=\"language.php?id=".$row['langid']."\">".$row['langid']."</a>".
+		"><td><a href=\"language.php?id=".urlencode($row['langid'])."\">".
+			htmlspecialchars($row['langid'])."</a>".
 		"</td><td>".htmlentities($row['name']).
-		"</td><td><tt>.".$row['extension']."</tt>".
-		"</td><td align=\"center\">".$row['allow_judge'].
-		"</td><td>".$row['time_factor'].
+		"</td><td class=\"filename\">.".htmlspecialchars($row['extension']).
+		"</td><td align=\"center\">".printyn($row['allow_judge']).
+		"</td><td>".(int)$row['time_factor'].
 		"</td></tr>\n";
 }
 echo "</table>\n\n";

@@ -16,9 +16,10 @@ $res = $DB->q('SELECT * FROM category ORDER BY name');
 echo "<table>
 <tr><th>nr</th><th>name</th></tr>\n";
 while($row = $res->next()) {
-	echo "<tr><td>".$row['catid'].
+	echo "<tr><td>".(int)$row['catid'].
 		"</td><td>".htmlentities($row['name']).
 		"</td></tr>\n";
 }
 echo "</table>\n\n";
+
 require('../footer.php');

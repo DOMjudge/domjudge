@@ -23,7 +23,7 @@ $jdata = $DB->q('TUPLE SELECT j.*,s.*,judger.name as judgename
 $unix_start = strtotime($jdata['starttime']);
 $sec_queued = $unix_start - strtotime($jdata['submittime']);
 if(@$jdata['endtime']) {
-	$endtime = $jdata['endtime']. ' (judging took '.
+	$endtime = htmlspecialchars($jdata['endtime']). ' (judging took '.
 		(strtotime($jdata['endtime']) - $unix_start) .' s)';
 } else {
 	$endtime = 'still judging - busy '.(time()-$unix_start). ' s';
@@ -32,17 +32,18 @@ if(@$jdata['endtime']) {
 ?>
 <table>
 <tr><td>Submission:</td><td>
-<a href="submission.php?id=<?=$jdata['submitid'].'">'.
-htmlentities($jdata['team'] .' / '. $jdata['probid'].' / '.$jdata['langid'])?></a></td></tr>
+<a href="submission.php?id=<?=(int)$jdata['submitid'].'"><span class="teamid">'.
+	$jdata['team'].	'</span> / '. htmlspecialchars($jdata['probid'].' / '.$jdata['langid'])?></a></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($jdata['submittime']) .' (queued for '.
 	$sec_queued.' s)'?></td></tr>
-<tr><td>Source:</td><td><a href="show_source.php?id=<?=$jdata['submitid']?>"><tt><?= htmlspecialchars($jdata['source']) ?></tt></td></tr>
-<tr><td>Start:</td><td><?=$jdata['starttime']?></td></tr>
+<tr><td>Source:</td><td class="filename"><a href="show_source.php?id=<?=
+	(int)$jdata['submitid']?>"><?= htmlspecialchars($jdata['source']) ?></a></td></tr>
+<tr><td>Start:</td><td><?=htmlspecialchars($jdata['starttime'])?></td></tr>
 <tr><td>End:</td><td><?=$endtime?></td></tr>
-<tr><td>Judger:</td><td><a href="judger.php?id=<?=$jdata['judgerid'].'">'.
-	$jdata['judgename'].'/'.$jdata['judgerid']?></a></td></tr>
+<tr><td>Judger:</td><td><a href="judger.php?id=<?=(int)$jdata['judgerid'].'">'.
+	htmlentities($jdata['judgename'].'/'.$jdata['judgerid'])?></a></td></tr>
 <tr><td>Result:</td><td><?=printresult(@$jdata['result'], $jdata['valid'])?></td></tr>
-<tr><td>Valid:</td><td><?=$jdata['valid']?></td></tr>
+<tr><td>Valid:</td><td><?=printyn($jdata['valid'])?></td></tr>
 </table>
 
 

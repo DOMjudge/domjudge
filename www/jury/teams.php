@@ -16,10 +16,11 @@ $res = $DB->q('SELECT * FROM team ORDER BY name');
 echo "<table>
 <tr><th>login</th><th>teamname</th><th>cat.</th><th>IP address</th></tr>\n";
 while($row = $res->next()) {
-	echo "<tr><td><a href=\"team.php?id=".$row['login']."\">".$row['login']."</a>".
+	echo "<tr><td class=\"teamid\"><a href=\"team.php?id=".urlencode($row['login']).
+		"\">".htmlspecialchars($row['login'])."</a>".
 		"</td><td>".htmlentities($row['name']).
-		"</td><td>".$row['category'].
-		"</td><td>".@$row['ipaddress'].
+		"</td><td>".(int)$row['category'].
+		"</td><td>".htmlspecialchars(@$row['ipaddress']).
 		"</td></tr>\n";
 }
 echo "</table>\n\n";

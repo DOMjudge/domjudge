@@ -31,13 +31,15 @@ $submdata = $DB->q('TUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.source,
 ?>
 
 <table>
-<tr><td>Team:</td><td><a href="team.php?id=<?=$submdata['team'].'">'. htmlentities($submdata['team'].": ".$submdata['teamname'])?></a></td></tr>
+<tr><td>Team:</td><td><a href="team.php?id=<?=urlencode($submdata['team']).
+	'"><span class="teamid">'. htmlspecialchars($submdata['team'])."</span>: ".
+	htmlentities($submdata['teamname'])?></a></td></tr>
 <tr><td>Problem:</td><td><a href="problem.php?id=<?=$submdata['probid'].'">'.
 	htmlentities($submdata['probid'].": ".$submdata['probname'])?></a></td></tr>
 <tr><td>Language:</td><td><a href="language.php?id=<?=$submdata['langid'].'">'.
 	htmlentities($submdata['langid'].": ".$submdata['langname'])?></a></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
-<tr><td>Source:</td><td><a href="show_source.php?id=<?=$id?>"><tt><?= htmlspecialchars($submdata['source']) ?></tt></a></td></tr>
+<tr><td>Source:</td><td class="filename"><a href="show_source.php?id=<?=$id?>"><?= htmlspecialchars($submdata['source']) ?></a></td></tr>
 </table>
 
 <h3>Judgings</h3>
@@ -54,13 +56,15 @@ if($judgedata->count() == 0) {
 	echo "<table>\n";
 	echo "<tr><th>ID</th><th>start</th><th>end</th><th>judge</th><th>result</th><th>valid</th></tr>\n";
 	while($jrow = $judgedata->next()) {
+		$jid = (int)$jrow['judgingid'];
 		echo "<tr" . ($jrow['valid'] ? '' : " class=\"disabled\"") .'>';
-		echo "<td align=\"right\"><a href=\"judging.php?id=".$jrow['judgingid']."\">".$jrow['judgingid']."</a>".
+		echo "<td align=\"right\"><a href=\"judging.php?id=".$jid.
+			"\">".$jid."</a>".
 		"</td><td>".printtime($jrow['starttime']).
 		"</td><td>".printtime(@$jrow['endtime']).
-		"</td><td title=\"".$jrow['judgerid']."\">".$jrow['name'].
+		"</td><td title=\"".$jid."\">".htmlspecialchars($jrow['name']).
 		"</td><td>".printresult(@$jrow['result'], $jrow['valid']).
-		"</td><td align=\"right\">".$jrow['valid'].
+		"</td><td align=\"right\">".printyn($jrow['valid']).
 		"</td></tr>\n";
 		
 		if($jrow['valid'] == 1) $hasfinal = TRUE;

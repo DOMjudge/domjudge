@@ -17,12 +17,12 @@ $data = $DB->q('TUPLE SELECT * FROM problem WHERE probid = %s', $id);
 
 ?>
 <table>
-<tr><td>ID:</td><td><?=$data['probid']?></td></tr>
+<tr><td>ID:</td><td><?=htmlspecialchars($data['probid'])?></td></tr>
 <tr><td>Name:</td><td><?=htmlentities($data['name'])?></td></tr>
-<tr><td>Allow submit:</td><td><?=$data['allow_submit']?></td></tr>
-<tr><td>Allow judge:</td><td><?=$data['allow_judge']?></td></tr>
-<tr><td>Testdata:</td><td><tt><?=$data['testdata']?></tt></td></tr>
-<tr><td>Timelimit:</td><td><?=$data['timelimit']?></td></tr>
+<tr><td>Allow submit:</td><td><?=printyn($data['allow_submit'])?></td></tr>
+<tr><td>Allow judge:</td><td><?=printyn($data['allow_judge'])?></td></tr>
+<tr><td>Testdata:</td><td class="filename"><?=htmlspecialchars($data['testdata'])?></td></tr>
+<tr><td>Timelimit:</td><td><?=(int)$data['timelimit']?></td></tr>
 </table>
 
 <h2>Submissions for <?=htmlspecialchars($id)?></h2>
