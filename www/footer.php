@@ -1,3 +1,7 @@
-<?php /** Common page footer */ ?>
+<?php /** Common page footer */ 
+if ( DEBUG ) {
+	echo "<p>" . totaltime() . "</p>";
+} ?>
+
 </body>
 </html>

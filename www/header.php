@@ -6,6 +6,10 @@
  * $Id$
  */
 
+if( DEBUG ) {
+	include_once ( '../../lib/lib.timer.php');
+}
+
 echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 
 ?>

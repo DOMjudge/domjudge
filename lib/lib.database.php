@@ -429,7 +429,12 @@ class db
 		list($micros2, $secs2) = explode(' ',microtime());
 		$elapsed_ms = round(1000*(($secs2 - $secs) + ($micros2 - $micros)));
 
-//		log_mysql("$this->database: $query ({$elapsed_ms}ms)");
+		if ( DEBUG ) {
+			global $DEBUG_NUM_QUERIES;
+			printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>",
+				htmlspecialchars($query));
+			$DEBUG_NUM_QUERIES++;
+		}
 
 		if (!$res)
 		{
