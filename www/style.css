@@ -68,6 +68,12 @@ a:active          { color: red;    }
 .score_neutral {
 	background: white;
 }
+#scorenumcorrect, #scoretotaltime {
+	text-align: right;
+}
+.scoreboard_summary {
+	border-top: 2px solid black;
+}
 /* this doesn't work? */
 td.scoreboard {
 	text-align: right;	

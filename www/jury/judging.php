@@ -13,13 +13,15 @@ require('menu.php');
 $id = (int)$_GET['id'];
 if(!$id)	error ("Missing judging id");
 
-echo "<h1>Judging j$id</h1>\n\n";
-
 $jdata = $DB->q('TUPLE SELECT j.*,s.*, c.contestname
 	FROM judging j LEFT JOIN submission s USING(submitid)
 	LEFT JOIN contest c ON(c.cid=j.cid)
 	WHERE judgingid = %i',
 	$id);
+
+$sid = (int)$jdata['submitid'];
+
+echo "<h1>Judging j$id / s$sid</h1>\n\n";
 
 $unix_start = strtotime($jdata['starttime']);
 if(@$jdata['endtime']) {
@@ -32,14 +34,14 @@ if(@$jdata['endtime']) {
 ?>
 <table>
 <tr><td>Submission:</td><td>
-<a href="submission.php?id=<?=(int)$jdata['submitid'].'"><span class="teamid">'.
+<a href="submission.php?id=<?=$sid.'">s'.$sid.' / <span class="teamid">'.
 	$jdata['team'].	'</span> / '. htmlspecialchars($jdata['probid'].' / '.$jdata['langid'])?></a>
 	in <?=htmlentities($jdata['contestname'])?></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($jdata['submittime']) .' (queued for '.
 	printtimediff(strtotime($jdata['submittime']), $unix_start) .
 	')'?></td></tr>
 <tr><td>Source:</td><td class="filename"><a href="show_source.php?id=<?=
-	(int)$jdata['submitid']?>"><?= htmlspecialchars($jdata['sourcefile']) ?></a></td></tr>
+	$sid?>"><?= htmlspecialchars($jdata['sourcefile']) ?></a></td></tr>
 <tr><td>Start:</td><td><?=htmlspecialchars($jdata['starttime'])?></td></tr>
 <tr><td>End:</td><td><?=$endtime?></td></tr>
 <tr><td>Judger:</td><td><a href="judger.php?id=<?=urlencode($jdata['judgerid']).'">'.

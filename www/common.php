@@ -20,12 +20,22 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 	// when key & value are supplied we're looking for the submissions of a specific team or judger,
 	// else the complete list.
 	if($key && $value) {
-		$res = $DB->q('SELECT submitid,team,probid,langid,submittime,judgerid
-			FROM submission WHERE '.$key.' = %s AND cid = %i ORDER BY submittime DESC',
+		$res = $DB->q('SELECT s.submitid,s.team,s.probid,s.langid,s.submittime,s.judgerid,
+			t.name as teamname, p.name as probname, l.name as langname
+			FROM submission s
+			LEFT JOIN team t ON(t.login=s.team)
+			LEFT JOIN problem p ON(p.probid=s.probid)
+			LEFT JOIN language l ON(l.langid=s.langid)
+			WHERE s.'.$key.' = %s AND s.cid = %i ORDER BY s.submittime DESC',
 			$value, getCurContest() );
 	} else {
-		$res = $DB->q('SELECT submitid,team,probid,langid,submittime,judgerid
-			FROM submission WHERE cid = %i ORDER BY submittime DESC',
+		$res = $DB->q('SELECT s.submitid,s.team,s.probid,s.langid,s.submittime,s.judgerid,
+			t.name as teamname, p.name as probname, l.name as langname
+			FROM submission s
+			LEFT JOIN team t ON(t.login=s.team)
+			LEFT JOIN problem p ON(p.probid=s.probid)
+			LEFT JOIN language l ON(l.langid=s.langid)
+			WHERE s.cid = %i ORDER BY s.submittime DESC',
 			getCurContest() );
 	}
 
@@ -58,9 +68,12 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 		echo "<tr>" .
 			($detailed ? "<td><a href=\"submission.php?id=".$sid."\">s".$sid."</a></td>" : '') .
 			"<td>" . printtime($row['submittime']) . "</td>" .
-			($key != 'team' ? "<td class=\"teamid\">".htmlspecialchars($row['team']) . "</td>" : '') .
-			($key != 'probid' ? "<td>".htmlspecialchars($row['probid']) . "</td>" : '') .
-			($key != 'langid' ? "<td>".htmlspecialchars($row['langid']) . "</td>" : '') .
+			($key != 'team' ? "<td class=\"teamid\" title=\"".htmlentities($row['teamname'])."\">".
+				htmlspecialchars($row['team']) . "</td>" : '') .
+			($key != 'probid' ? "<td title=\"".htmlentities($row['probname'])."\">".
+				htmlspecialchars($row['probid']) . "</td>" : '') .
+			($key != 'langid' ? "<td title=\"".htmlentities($row['langname'])."\">".
+				htmlspecialchars($row['langid']) . "</td>" : '') .
 			"<td>";
 		if( ! @$resulttable[$row['submitid']]['result'] ) {
 			echo printresult(@$row['judgerid'] ? '' : 'queued', TRUE, isset($value));
@@ -228,6 +241,13 @@ function putScoreBoard($myteamid = null) {
 	$probs = $DB->q('TABLE SELECT probid,name
 		FROM problem WHERE allow_submit = 1 ORDER BY probid');
 
+
+	echo "<colgroup><col id=\"scoreteamname\" /><col id=\"scorenumcorrect\"><col id=\"scoretotaltime\">";
+	for($i = 0; $i < count($probs); $i++) {
+		echo "<col>";
+	}
+	echo "</colgroup>\n";
+
 	echo "<tr><th>TEAM</th>";
 	echo "<th>#correct</th><th>time</th>\n";
 	foreach($probs as $pr) {
@@ -236,6 +256,8 @@ function putScoreBoard($myteamid = null) {
 	echo "</tr>\n";
 
 	$THEMATRIX = $SCORES = $TEAMNAMES = array();
+
+	$SUMMARY = array('num_correct' => 0, 'total_time' => 0);
 
 	// for each team, fetch the status of each problem
 	foreach($teams as $team) {
@@ -317,6 +339,10 @@ function putScoreBoard($myteamid = null) {
 			." class=\"category" . $totals['category'] . "\"><td>".htmlentities($TEAMNAMES[$team])
 			."</td><td>"
 			.$totals['num_correct']."</td><td>".$totals['total_time']."</td>";
+
+		$SUMMARY['num_correct'] += $totals['num_correct'];
+		$SUMMARY['total_time']  += $totals['total_time'];
+
 		// for each problem
 		foreach($THEMATRIX[$team] as $prob => $pdata) {
 			echo "<td class=\"";
@@ -332,13 +358,29 @@ function putScoreBoard($myteamid = null) {
 			echo "\">" . $pdata['submitted'];
 			// if correct, print time scored
 			if( ($pdata['time']+$pdata['penalty']) > 0) {
-				echo " (".($pdata['time']+$pdata['penalty']).")";
+				echo " (" . $pdata['time'] . ' + ' . $pdata['penalty'] . ")";
 			}
 			echo "</td>";
+			@$SUMMARY[$prob]['submissions'] += $pdata['submitted'];
+			@$SUMMARY[$prob]['correct'] += ($pdata['correct'] ? 1 : 0);
+			if($pdata['time']+$pdata['penalty'] > 0) {
+				@$SUMMARY[$prob]['times'][] = $pdata['time']+$pdata['penalty'];
+			}
 		}
 		echo "</tr>\n";
 
 	}
+
+	// print a summaryline
+	echo "\n<tr class=\"scoreboard_summary\"><td>Summary</td>";
+	echo "<td>".$SUMMARY['num_correct']."</td><td>".$SUMMARY['total_time']."</td>";
+	foreach($probs as $pr) {
+		echo "<td>".$SUMMARY[$pr['probid']]['submissions'].'/'.$SUMMARY[$pr['probid']]['correct'].
+			'/'.( isset($SUMMARY[$pr['probid']]['times']) ? min(@$SUMMARY[$pr['probid']]['times']) : 0)."</td>";
+	}
+	echo "</tr>\n\n";
+
+	
 	echo "</table>\n\n";
 
 	$res = $DB->q('SELECT * FROM category ORDER BY catid');
