@@ -87,3 +87,15 @@ function printtimediff($start, $end = null) {
 	
 	return $ret . $diff .' s';
 }
+
+/**
+ * Cut a string at $size chars and append ..., only if neccessary.
+ */
+function str_cut ($str, $size) {
+	// is the string already short enough?
+	// we count '...' for 2 'regular' chars.
+	if(strlen($str) <= $size+2)
+		return $str;
+
+	return substr($str,0,$size).'...';
+}

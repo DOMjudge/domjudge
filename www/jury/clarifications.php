@@ -41,9 +41,12 @@ if ( $res->count() == 0 ) {
 	{
 		echo "<tr>".
 			"<td><a href=\"request.php?id=".$req['reqid']."\">q".$req['reqid']."</a></td>".
-			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($req['login']). "\">".htmlspecialchars($req['login'])."</a></td>".
+			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($req['login']). "\">".
+				htmlspecialchars($req['login'])."</a></td>".
 			"<td>".$req['submittime']."</td>".
-			"<td><a href=\"request.php?id=".$req['reqid']."\">".htmlspecialchars(substr($req['body'], 0, 50))."...</a></td>".
+			"<td><a href=\"request.php?id=".$req['reqid']."\">".
+				htmlspecialchars(str_cut($req['body'],50)).
+			"</a></td>".
 			"</tr>\n";
 	}
 	echo "</table>\n\n";
@@ -70,7 +73,9 @@ if ( $res->count() == 0 ) {
 			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($req['login']). "\">".
 				htmlspecialchars($req['login'])."</a></td>".
 			"<td>".$req['submittime']."</td>".
-			"<td><a href=\"request.php?id=".$req['reqid']."\">".htmlentities(substr($req['body'], 0, 50))."...</a></td>".
+			"<td><a href=\"request.php?id=".$req['reqid']."\">".
+				htmlspecialchars(str_cut($req['body'], 50)).
+			"</a></td>".
 			"</tr>\n";
 	}
 	echo "</table>\n\n";

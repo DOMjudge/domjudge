@@ -26,7 +26,8 @@ foreach($data as $row) {
 		printtime($row['submittime'])."</td><td>".
 		"<a href=\"clarification.php?id=".
 		urlencode($row['respid'])."\">".
-		htmlentities(substr($row['body'],0,50))."...</a></td></tr>\n";
+		htmlspecialchars(str_cut($row['body'],50)).
+		"</a></td></tr>\n";
 
 }
 
