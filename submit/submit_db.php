@@ -27,14 +27,19 @@
 	if(!$file)	error("No value for file.");
 
 	
-	// Check 1: valid parameters?
+	// Check 1: is the contest still open?
+	if(!$aap = $DB->q('VALUE SELECT starttime <= now() && endtime >= now() FROM contest')) {
+		error("The contest is closed, no submissions accepted.");
+	}
+
+	// Check 2: valid parameters?
 	if(!$langext = $DB->q('MAYBEVALUE SELECT extension FROM language
 		                   WHERE langid = %s', $lang) ) {
-		error("Language '$lang' not found in database");
+		error("Language '$lang' not found in database.");
 	}
 	if(!$row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',
 		              $team) ) {
-		error("Team '$team' not found in database");
+		error("Team '$team' not found in database.");
 	}
 	if($row['ipadres'] != $ip) {
 		error("Team '$team' not registered at this IP address.");
