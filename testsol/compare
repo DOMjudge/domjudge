@@ -18,7 +18,7 @@ LANG=('c' 'cpp'        'java' 'pascal'   'haskell')
 EXTS=('c' 'cpp cc c++' 'java' 'pas pp p' 'hs'     )
 ALLEXTS="${EXTS[@]}"
 
-TESTSOL=~/systeem/svn/testsol/test_solution.sh
+TESTSOL=~/systeem/svn/jury/testsol/test_solution.sh
 
 TESTIN=testdata.in
 TESTOUT=testdata.out
