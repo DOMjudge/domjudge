@@ -1,10 +1,10 @@
 <?php
 
 // $Id$
-// (because of database-login usernames/passwords)
 
 /** Database login credentials
  *  THIS FILE SHOULD ALWAYS BE NON-READABLE!
+ *  (because of database-login usernames/passwords)
  *
  *  Change these from the defaults below to something more difficult to
  *  guess! Also modify this in the MySQL database!
