@@ -330,7 +330,9 @@ int main(int argc, char **argv)
 
 	/* Keep reading until end of file, then check for errors */
 	while ( receive(socket_fd) );
-	if ( strncmp(lastmesg,"done",4)!=0 ) error(0,"connection closed unexpected");
+	if ( strncasecmp(lastmesg,"done",4)!=0 ) {
+		error(0,"connection closed unexpectedly");
+	}
 	
 
     return 0;
