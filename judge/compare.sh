@@ -18,12 +18,24 @@ TESTDATA="$2"
 DIFFOUT="$3"
 
 # Test an exact match between program output and testdata output:
-diff $PROGRAM $TESTDATA > $DIFFOUT
+diff -u0 $PROGRAM $TESTDATA >$DIFFOUT
 
 # Exit with failure, when diff reports internal errors:
 # Exitcode 1 means that differences were found!
 if [ $? -ge 2 ]; then
 	exit 1
 fi
+
+# Format the diff output to a reasonably readable format:
+TMPFILE=`tempfile -d "$PWD" -p diff -s .tmp`
+[ -r $TMPFILE ] || exit 1
+cp -a $DIFFOUT $TMPFILE
+
+cat $TMPFILE | \
+	grep -vE '^(\-\-\-|\+\+\+)' | \
+	sed -e 's/^-/PROG: /g;s/^+/TEST: /g;s/^\@\@ -\([0-9]*\).*/### LINE \1 ###/' \
+	>$DIFFOUT || exit 1
+
+rm -f $TMPFILE
 
 exit 0
