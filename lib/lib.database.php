@@ -442,14 +442,10 @@ class db
 		if ($key == 'tuple' || $key == 'value') {
 			if ($res->count() < 1) {
 				if ($maybe) return NULL;
-				log_mysql_error(time()." $this->database: $key $query; ".
-					"Query did not return any rows");
 				error("$this->database query error ($key $query".
 					"): Query did not return any rows");
 			}
 			if ($res->count() > 1) {
-				log_mysql_error(time()." $this->database: $key $query; ".
-					"Query did return too many rows (".$res->count().")");
 				error("$this->database query error ($key $query".
 					"): Query did return too many rows (".$res->count().")");
 			}
@@ -657,9 +653,6 @@ class db
 
 		if (!$res)
 		{
-			log_mysql_error(time()." $this->database: $query; ".
-				mysql_error($this->_connection));
-
 			// switch error message afhankelijk van errornr.
 			switch(mysql_errno($this->_connection)) {
 				case 1062:	// duplicate key

@@ -1,18 +1,13 @@
 <?php
 
-/** error handling
-
-  $Id$
-**/
-
-
+/**
+ * Error handling functions
+ *
+ * $Id$
+ */
 
 function error($string) {
-	print "$string\n";
+	print SCRIPT_ID.": $string\n";
 	exit(1);
 }
 
-function log_mysql_error($string) {
-	print $string;
-	exit(1);
-}
