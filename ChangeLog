@@ -7,6 +7,8 @@ Version 0.1.2 - CVS
  - Improve config.tex dependency.
  - Make the base URI of the webinterface configurable and fix redirects
    to be compatible with the HTTP-specification.
+ - Fix bug in getSubmissions() that caused a syntax error on the
+   team-overview in the jury interface.
 
 Version 0.1.1 - 24 November 2004
 --------------------------------
