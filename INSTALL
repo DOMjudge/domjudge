@@ -129,8 +129,8 @@ SECURITY
 --------
 
 This judging system was developed with security as one of the main
-goals in mind. To implement this rigorously in various aspects 
-(restricting teams access to others and the internet, restricting
+goals in mind. To implement this rigourously in various aspects 
+(restricting team access to others and the internet, restricting
 access to the submitted programs on the jury computers, etc...)
 requires root privileges to different parts of the whole contest
 environment. Also, security measures might depend on the environment.
@@ -168,7 +168,7 @@ relevant directories. Database access is protected by passwords.
 
 NOTE: database passwords are stored in SYSTEM_ROOT/etc/passwords.php.
 This file has to be non-readable to teams, but has to be readable to
-the webserver to let the jury webinterface work. A solution is, to
+the webserver to let the jury webinterface work. A solution is to
 make it readable to a special group the webserver runs as.
 
 Secondly, the files submitted should not be interceptable by other
