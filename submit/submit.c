@@ -295,9 +295,11 @@ int main(int argc, char **argv)
 	if ( (socket_fd = socket(PF_INET,SOCK_STREAM,0)) == -1 ) {
 		error(errno,"cannot open socket");
 	}
-	
-	if ( (serverinfo = gethostbyname(server.c_str()))==NULL ) {
-		error(0,"cannot get address of server");
+
+	if ( (serverinfo = gethostbyaddr(server.c_str(),server.length(),AF_INET))==NULL ) {
+		if ( (serverinfo = gethostbyname(server.c_str()))==NULL ) {
+			error(0,"cannot get address of server");
+		}
 	}
 
 	server_inetaddr.s_addr = *((unsigned long int *) serverinfo->h_addr_list[0]);
@@ -341,73 +343,68 @@ int main(int argc, char **argv)
 
 void version()
 {
-	printf("%s -- version %s\n",PROGRAM,VERSION);
-	printf("Written by %s\n\n",AUTHORS);
-	printf("%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n",PROGRAM);
-	printf("are welcome to redistribute it under certain conditions.  See the GNU\n");
-	printf("General Public Licence for details.\n");
-	exit(0);
+printf("%s -- version %s\n",PROGRAM,VERSION);
+printf("Written by %s\n\n",AUTHORS);
+printf("%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n",PROGRAM);
+printf("are welcome to redistribute it under certain conditions.  See the GNU\n");
+printf("General Public Licence for details.\n");
+exit(0);
 }
 
 void usage()
 {
-	printf("Usage: %s [OPTION]... FILENAME\n",progname);
-	
-	printf("\
-Submit a solution for a problem.
-
-Options (see below for more information)
-  -p, --problem=PROBLEM    submit for problem PROBLEM
-  -l, --language=LANGUAGE  submit in language LANGUAGE
-  -s, --server=SERVER      submit to server SERVER
-  -t, --team=TEAM          submit as team TEAM
-  -v, --verbose=LEVEL      set verbosity to LEVEL, where LEVEL must be
-                               numerically specified as in 'syslog.h'
-                               defaults to LOG_INFO without argument
-  -q, --quiet              set verbosity to LOG_ERR and suppress user
-                               input and warning/info messages
-      --help               display this help and exit
-      --version            output version information and exit
-
-Explanation of submission options:
-
-For PROBLEM use the ID of the problem (letter, number or short name)
-in lower- or uppercase. When not specified, PROBLEM defaults to
-FILENAME excluding the extension.
-For example, 'b.java' will indicate problem 'B'.
-
-For LANGUAGE use one of the following in lower- or uppercase:
-   C:        c
-   C++:      cc, cpp, c++
-   Java:     java
-   Pascal:   pas
-The default for LANGUAGE is the extension of FILENAME.
-For example, 'c.java' wil indicate a Java solution.
-
-Examples:
-");
-
-	printf("Submit problem 'c' in Java:\n\t%s c.java\n\n",progname);
-	printf("Submit problem 'e' in C++:\n"
-		   "\t%s --problem e --language=cpp ProblemE.cc\n\n",progname);
-	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
-		   "\t%s -p hello -l C HelloWorld.java\n\n",progname);
-	
-	printf("\
-
-The following options should normally not be needed:
-
-For SERVER use the servername or IP-address of the submit-server.
-The default value for SERVER is defined internally or otherwise
-taken from the environment variable 'SUBMITSERVER', or 'localhost'
-if 'SUBMITSERVER' is not defined.
-
-For TEAM use the login of the account you want to submit for.
-The default value for TEAM is taken from the environment variable
-'TEAM' or your login name if 'TEAM' is not defined.
-");
-	
-	exit(0);
+printf("Usage: %s [OPTION]... FILENAME\n",progname);
+printf("Submit a solution for a problem.\n");
+printf("\n");
+printf("Options (see below for more information)\n");
+printf("  -p, --problem=PROBLEM    submit for problem PROBLEM\n");
+printf("  -l, --language=LANGUAGE  submit in language LANGUAGE\n");
+printf("  -s, --server=SERVER      submit to server SERVER\n");
+printf("  -t, --team=TEAM          submit as team TEAM\n");
+printf("  -v, --verbose=LEVEL      set verbosity to LEVEL, where LEVEL must be\n");
+printf("                               numerically specified as in 'syslog.h'\n");
+printf("                               defaults to LOG_INFO without argument\n");
+printf("  -q, --quiet              set verbosity to LOG_ERR and suppress user\n");
+printf("                               input and warning/info messages\n");
+printf("      --help               display this help and exit\n");
+printf("      --version            output version information and exit\n\n");
+printf("Explanation of submission options:\n");
+printf("\n");
+printf("For PROBLEM use the ID of the problem (letter, number or short name)\n");
+printf("in lower- or uppercase. When not specified, PROBLEM defaults to\n");
+printf("FILENAME excluding the extension.\n");
+printf("For example, 'c.java' will indicate problem 'C'.\n");
+printf("\n");
+printf("For LANGUAGE use one of the following in lower- or uppercase:\n");
+printf("   C:        c\n");
+printf("   C++:      cc, cpp, c++\n");
+printf("   Java:     java\n");
+printf("   Pascal:   pas\n");
+printf("The default for LANGUAGE is the extension of FILENAME.\n");
+printf("For example, 'c.java' wil indicate a Java solution.\n");
+printf("\n");
+printf("Examples:\n");
+printf("\n");
+printf("Submit problem 'c' in Java:\n");
+printf("    %s c.java\n",progname);
+printf("\n");
+printf("Submit problem 'e' in C++:\n");
+printf("    %s --problem e --language=cpp ProblemE.cc\n",progname);
+printf("\n");
+printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n");
+printf("    %s -p hello -l C HelloWorld.java\n",progname);
+printf("\n");
+printf("The following options should normally not be needed:\n");
+printf("\n");
+printf("For SERVER use the servername or IP-address of the submit-server.\n");
+printf("The default value for SERVER is defined internally or otherwise\n");
+printf("taken from the environment variable 'SUBMITSERVER', or 'localhost'\n");
+printf("if 'SUBMITSERVER' is not defined.\n");
+printf("\n");
+printf("For TEAM use the login of the account, you want to submit for.\n");
+printf("The default value for TEAM is taken from the environment variable\n");
+printf("'TEAM' or your login name if 'TEAM' is not defined.\n");
+exit(0);
 }
 
 void usage2(int errnum, char *mesg, ...)
