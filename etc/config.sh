@@ -4,7 +4,12 @@
 # Root paths for various parts of the system
 SYSTEM_ROOT=/home/cies/nkp0405/systeem/svn/jury
 OUTPUT_ROOT=/home/cies/nkp0405/systeem/systest
+INPUT_ROOT=/home/cies/nkp0405/opgaven
 
+# Paths within OUTPUT_ROOT
+INCOMINGDIR=$OUTPUT_ROOT/incoming
+SUBMITDIR=$OUTPUT_ROOT/sources
+JUDGEDIR=$OUTPUT_ROOT/judging
 
 # Maximum seconds available for compiling
 COMPILETIME=30

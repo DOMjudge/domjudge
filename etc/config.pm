@@ -11,12 +11,15 @@ our $SUBMITPORT = 9147;
 # Root-paths for different parts of the system
 our $SYSTEM_ROOT = "/home/cies/nkp0405/systeem/svn/jury";
 our $OUTPUT_ROOT = "/home/cies/nkp0405/systeem/systest";
+our $INPUT_ROOT  = "/home/cies/nkp0405/opgaven";
+
+# Paths within OUTPUT_ROOT
+our $INCOMINGDIR = $OUTPUT_ROOT . "/incoming";
+our $SUBMITDIR   = $OUTPUT_ROOT . "/sources";
+our $JUDGEDIR    = $OUTPUT_ROOT . "/judging";
 
 # Directory where submit-client puts files for sending (relative to $HOME)
 our $USERSUBMITDIR = ".submit";
-
-# Directory where submitdaemon puts received files
-our $INCOMINGDIR = $OUTPUT_ROOT . "/incoming";
 
 # For extra clarity in return statements (perl specific)
 our $success = 1;

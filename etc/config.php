@@ -11,8 +11,12 @@
 /** Define absulote paths used for finding other files */
 define('SYSTEM_ROOT', '/home/cies/nkp0405/systeem/svn/jury');
 define('OUTPUT_ROOT', '/home/cies/nkp0405/systeem/systest');
+define('INPUT_ROOT',  '/home/cies/nkp0405/opgaven');
+
+/** Paths within OUTPUT_ROOT */
 define('INCOMINGDIR', OUTPUT_ROOT.'/incoming');
-define('SUBMITDIR', OUTPUT_ROOT.'/submit');
+define('SUBMITDIR',   OUTPUT_ROOT.'/sources');
+define('JUDGEDIR',    OUTPUT_ROOT.'/judging');
 
 /** Possible exitcodes from testsol and their meaning */
 $EXITCODES = array (
