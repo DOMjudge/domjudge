@@ -128,7 +128,7 @@ logmsg $LOG_INFO "arguments: $SOURCE $PROGLANG $TESTIN $TESTOUT $TIMELIMIT $TMPD
 
 logmsg $LOG_NOTICE "setting resource limits"
 ulimit -HS -c 0     # Do not write core-dumps
-ulimit -HS -f 65536 # Maximum filesize in KB
+ulimit -HS -f 65536 # Maximum filesize in kB
 
 logmsg $LOG_NOTICE "creating input/output files"
 EXT=${SOURCE##*.}
@@ -153,7 +153,7 @@ chmod a+rw program.{out,err,time,exit}
 logmsg $LOG_NOTICE "starting compile"
 
 if [ `cat source.$EXT | wc -c` -gt $((SOURCESIZE*1024)) ]; then
-	echo "Source-code is larger than $SOURCESIZE KB." >>compile.out
+	echo "Source-code is larger than $SOURCESIZE kB." >>compile.out
 	exit $E_COMPILE
 fi
 
