@@ -25,7 +25,7 @@ TESTOUT=testdata.out
 SAMPLEIN=testsample.in
 SAMPLEOUT=testsample.out
 
-USERS="jan jaap gerben maarten pieter wouter test"
+USERS="jan jaap gerben maarten pieter wouter peter thijs test"
 
 TMPDIR="compare.$$.tmp"
 TIMELIMIT=20
@@ -59,8 +59,23 @@ function test_sol ()
 	fi
 
 	mkdir $TMPDIR/$file
-	$TESTSOL $file ${LANG[$lang]} $in $out \
-	          $TIMELIMIT $TMPDIR/$file || ALLOK=0
+	$TESTSOL $file ${LANG[$lang]} $in $out $TIMELIMIT $TMPDIR/$file
+	exitcode=$?
+	if [ $exitcode -ne 0 ]; then
+		ALLOK=0
+		echo -n "Error: "
+		case $exitcode in
+		1) echo "compile";;
+		2) echo "timelimit";;
+		3) echo "runtime error";;
+		4) echo "no output";;
+		5) echo "wrong answer";;
+		*) echo "script error $exitcode";;
+		esac
+	else
+		echo "Correct!"
+	fi
+
 }
 
 [ -r $TESTIN    ] || { echo "No input testdata found."; exit 1; }
