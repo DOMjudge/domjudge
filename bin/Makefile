@@ -1,26 +1,39 @@
 CFLAGS=-O2 -Wall
 TARGETS=runguard beep mkstemps tempfile
-DOMAIN=`dnsdomainname`
-CSINSTALLDIR=/private/nkpjury/bin
+SUIDTARGETS=runguard beep
+SUIDBUILDS=$(addsuffix .build,$(SUIDTARGETS))
+
+CSINSTALLDIR=/tmp/private/nkpjury/bin
+CSDOMAIN=students.cs.uu.nl
+DOMAIN=$(shell dnsdomainname)
+
+ifeq ($(DOMAIN),$(CSDOMAIN))
+INSTALLDIR=$(CSINSTALLDIR)
+SUROOT=sudo -u root
+else
+INSTALLDIR=$(PWD)
+SUROOT=su root
+endif
 
 all: $(TARGETS) install-setuid
 
-.PHONY: clean install-setuid
+$(SUIDTARGETS): %: %.build
 
-install-setuid: runguard beep
-	case $(DOMAIN) in \
-	'localdomain') \
-		su root 'chown root.root runguard beep && chmod u+s runguard beep' || exit 1 ;; \
-	'students.cs.uu.nl') \
-		mkdir -p $(CSINSTALLDIR) ; \
-		mv -f runguard beep $(CSINSTALLDIR) ; \
-		rm -f runguard beep ; \
-		sudo -u root /bin/bash -c 'cd $(CSINSTALLDIR) && chown root.root runguard beep && chmod u+s runguard beep' || exit 1 ; \
-		ln -s $(CSINSTALLDIR)/runguard . ; \
-		ln -s $(CSINSTALLDIR)/beep . ;; \
-	*) \
-		echo "Don't know how to install setuid in domain '$(DOMAIN)'" ; exit 1 ;; \
-	esac
+$(SUIDBUILDS): %.build: %.c
+	$(CXX) $(CFLAGS) $(CXXFLAGS) $< -o $@
+
+runguard.build: ../etc/config.h
+
+install-setuid: $(SUIDBUILDS)
+	mkdir -p $(INSTALLDIR)
+	cd $(INSTALLDIR) && rm -f $(SUIDTARGETS)
+	for i in $(SUIDTARGETS) ; do cp -a $$i.build $(INSTALLDIR)/$$i ; done
+	$(SUROOT) 'cd $(INSTALLDIR) && chown root.root $(SUIDTARGETS) && chmod u+s $(SUIDTARGETS)'
+ifneq ($(INSTALLDIR),$(PWD))
+	for i in $(SUIDTARGETS) ; do ln -sf $(INSTALLDIR)/$$i ; done
+endif
 
 clean:
 	-rm -f $(TARGETS) $(addsuffix .o,$(TARGETS))
+
+.PHONY: clean install-setuid runguard beep
