@@ -56,7 +56,7 @@ function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 			($key != 'langid' ? "<td>".htmlspecialchars($row['langid']) . "</td>" : '') .
 			"<td>";
 		if( ! @$resulttable[$row['submitid']]['result'] ) {
-			echo printresult(@$row['judgerid'] ? '' : 'queued');
+			echo printresult(@$row['judgerid'] ? '' : 'queued', TRUE, isset($value));
 		} else {
 			if ( $detailed ) {
 				echo '<a href="judging.php?id=' . $resulttable[$row['submitid']]['judgingid'] . '">';

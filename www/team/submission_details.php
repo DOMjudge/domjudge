@@ -36,7 +36,7 @@ if(!$row) {
 <tr><td>Language:</td><td><?=htmlentities($row['langname'])?></td></tr>
 </table>
 
-<p>Status: <?=printresult($row['result'])?></p>
+<p>Status: <?=printresult($row['result'], TRUE, TRUE)?></p>
 
 <h2>Compiler output:</h2>
 <?
