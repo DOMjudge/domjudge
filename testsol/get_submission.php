@@ -23,30 +23,51 @@ $me = "$myhost/$myid";
 
 logmsg ("$me Judge started");
 
+// Create directory where to test submissions
+$tempdirpath = JUDGEDIR."/$myhost";
+system("mkdir -p $tempdirpath", $retval);
+if ( $retval != 0 ) error("$me Could not create $tempdirpath");
+
+$waiting = 0;
+$active = 1;
+
 // Constantly check database for unjudged submissions
 while ( 1 ) {
 
 	// Check that this judge is active, else wait and check again later
 	$row = $DB->q('TUPLE SELECT * FROM judger WHERE name = %s', $myhost);
-	if($row['active'] != 1) {
-		logmsg("$me Not active, waiting");
+	if ( $row['active'] != 1 ) {
+		if ( $active ) {
+			logmsg("$me Not active, waiting for reactivation...");
+			$active = 0;
+		}
 		sleep(15);
 		continue;
 	}
+	if ( ! $active ) {
+		logmsg("$me Reactivated, checking queue...");
+		$active = 1;
+		$waiting = 0;
+	}
 
 	// Generate (unique) random string to mark submission to be judged
-	$mark = $me.microtime().md5(uniqid(mt_rand(), true));
+	list($usec,$sec)=explode(" ",microtime());
+	$mark = $me.'@'.($sec+$usec).'#'.md5(uniqid(mt_rand(), true));
 
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
 		SET judger = %i, judgemark = %s WHERE judger IS NULL LIMIT 1', $myid, $mark);
 
 	// nothing updated -> no open submissions
-	if($numupd == 0) {
-		logmsg("$me No submissions in queue");
+	if ( $numupd == 0 ) {
+		if ( ! $waiting ) {
+			logmsg("$me No submissions in queue, waiting...");
+			$waiting = 1;
+		}
 		sleep(5);
 		continue;
 	}
+	$waiting = 0;
 
 	// get max.runtime, path to submission and other params
 	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS runtime,
@@ -63,11 +84,9 @@ while ( 1 ) {
 		$row['submitid'], $myid);
 
 	// create tempdir for tempfiles
-	$tempdirpath = JUDGEDIR."/$myhost/";
-	$tempdir = system("mktemp -d -p $tempdirpath $judgingid.XXXX", $retval);
-	if($retval != 0) {
-		error("$me Could not create tempdir $tempdirpath/$judgingid.XXXX");
-	}
+	$tempdir = "$tempdirpath/$judgingid";
+	system("mkdir -p $tempdir", $retval);
+	if ( $retval != 0 ) error("$me Could not create $tempdir");
 
 	// do the actual compile-run-test
 	system("./test_solution.sh ".
@@ -77,7 +96,7 @@ while ( 1 ) {
 		$retval);
 
 	// what does the exitcode mean?
-	if(!isset($EXITCODES[$retval])) {
+	if( ! isset($EXITCODES[$retval]) ) {
 		error("$me $row[submitid] Unknown exitcode from test_solution.sh: $retval");
 	}
 	$result = $EXITCODES[$retval];
@@ -85,7 +104,7 @@ while ( 1 ) {
 	// pop the result back into the judging table
 	$DB->q('UPDATE judging
 		SET endtime = NOW(), result = %s, output_compile = %s, output_run = %s, output_diff = %s
-		WHERE judgingid = %i AND judgeid = %i',
+		WHERE judgingid = %i AND judger = %i',
 		$result,
 		get_content($tempdir.'/compile.out'),
 		get_content($tempdir.'/program.out'),
@@ -101,9 +120,9 @@ while ( 1 ) {
 function get_content($filename) {
 	global $me;
 	
-	if(!file_exists($filename)) return '';
+	if ( ! file_exists($filename) ) return '';
 	$fh = fopen($filename,'r');
-	if(!$fh) {
+	if ( ! $fh ) {
 		error("$me Could not open $filename for reading");
 	}
 	return fread($fh, 50000);
