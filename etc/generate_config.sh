@@ -1,8 +1,40 @@
 #!/bin/bash
 # $Id$
 
-# Script to generate specific config files for all different languages
-# from one global config file 'global.cfg'.
+# Script to generate specific config files for different languages
+# from one global config file 'global.cfg'. This way all configuration
+# data which is shared between different languages used in the system
+# has to be changed in only one place: the global config file.
+#
+# Usage: generate_config.sh <extension>
+#
+# <extension> may be a complete filename (including path), but only
+# the extension (after the last dot) is taken. A configuration file
+# is then generated from 'config.template.<extension>' and 'global.cfg'
+# into 'config.<extension>'.
+#
+#
+# See 'global.cfg' for the syntax of that file.
+#
+# Syntax of the language specific templates:
+#
+# In these files different tags are used to specify parts of the files
+# which are replaced by automatically generated content. Tags must
+# exactly appear once with a 'START' and after that an 'END' suffix
+# and different tags may not overlap. The next tags are defined:
+#
+# 'GLOBAL CONFIG INCLUDE'
+#	Within these tags the content generated from the global config
+#	file is placed. All previous content is removed.
+#
+# 'AUTOGENERATE HEADER'
+#	Within these tags some information on the automatic generation of
+#	the config file is placed. All previous content is removed.
+#
+# Content in the configuration templates outside of any tags is copied
+# as is to the config file. Here language specific configuration data
+# can be placed and other things you like...
+#
 
 shopt -s extglob
 
@@ -13,18 +45,42 @@ GLOBALCONF=global.cfg
 LOCALCONF=config
 LOCALTEMPLATE=config.template
 
-CONFHEADTAG="GLOBAL CONFIG HEADER"
-CONFMAINTAG="GLOBAL CONFIG MAIN"
+CONFHEADTAG="AUTOGENERATE HEADER"
+CONFMAINTAG="GLOBAL CONFIG INCLUDE"
 
-TMPFILE=`tempfile -p 'cfg' -s '.tmp'`
+# Maximum number of lines in config files
+MAXLINES=1000
 
-TMPFILE_C=`  tempfile -p 'cfg' -s '.h'`
-TMPFILE_SH=` tempfile -p 'cfg' -s '.sh'`
-TMPFILE_PHP=`tempfile -p 'cfg' -s '.php'`
-TMPFILE_TEX=`tempfile -p 'cfg' -s '.tex'`
+EXT=${1##*.}
+TEMPLATE="$LOCALTEMPLATE.$EXT"
+CONFIG="$LOCALCONF.$EXT"
+
+case $EXT in
+	h)    COMMENT='//';;
+	sh)   COMMENT='#';;
+	php)  COMMENT='//';;
+	tex)  COMMENT='%';;
+	*)		echo "Filetype '$EXT' is not supported."; exit 1;;
+esac
+
+if [ ! -r "$TEMPLATE" ]; then
+	echo "Template '$TEMPLATE' does not exist."
+	exit 1
+fi
+
+if [ ! -r "$GLOBALCONF" ]; then
+	echo "Global config '$GLOBALCONF' does not exist."
+	exit 1
+fi
+
+# Store config generated from global config here
+TMPMAIN=`tempfile -p "main" -s ".$EXT"`
+TMPHEAD=`tempfile -p "head" -s ".$EXT"`
 
 COMMANDLINE="$0 $@"
 
+
+# Generate language specific config from global config
 exec 3<$GLOBALCONF
 
 OLDIFS=$IFS
@@ -46,25 +102,27 @@ while IFS='='; read VARDEF VALUE <&3; do
 	ATTR_EVAL=0
 	# Check for attributes
 	if [[ "$VARDEF" == *'['* ]]; then
-		if [[ "$VARDEF" != [A-Za-z]*([A-Za-z0-9_])'['+([a-z])*(,+([a-z]))']' ]]; then
+		VARATTR=${VARDEF##*'['}
+		if [[ "$VARATTR" != +([a-z])*(,+([a-z]))']' ]]; then
 			echo "Parse error on line $LINENR!"
 			exit 1
 		fi
-		VARNAME=${VARDEF%%'['*}
-		VARATTR=${VARDEF##*'['}
 		VARATTR=${VARATTR%']'}
 		IFS="$IFS,"
 		for ATTR in $VARATTR; do
-			[[ "$ATTR" == "string" ]] && ATTR_STRING=1
-			[[ "$ATTR" == "eval"   ]] && ATTR_EVAL=1
+			case "$ATTR" in
+			"string")	ATTR_STRING=1;;
+			"eval")		ATTR_EVAL=1;;
+			*)			echo "Unknown variable attribute '$ATTR' on line $LINENR!"
+						exit 1;;
+			esac
 		done
 		IFS=$OLDIFS
-	else
-		if [[ "$VARDEF" != [A-Za-z]*([A-Za-z0-9_]) ]]; then
-			echo "Parse error on line $LINENR!"
-			exit 1
-		fi
-		VARNAME=$VARDEF
+	fi
+	VARNAME=${VARDEF%%'['*}
+	if [[ "$VARNAME" != [A-Za-z]*([A-Za-z0-9_]) ]]; then
+		echo "Invalid variable name '$VARNAME' on line $LINENR!"
+		exit 1
 	fi
 
 	if [ $ATTR_EVAL -ne 0 ]; then
@@ -72,15 +130,19 @@ while IFS='='; read VARDEF VALUE <&3; do
 	fi
 
 	if [ $ATTR_STRING -ne 0 ]; then
-		echo "#define $VARNAME \"$VALUE\""   >>$TMPFILE_C
-		echo "$VARNAME=\"$VALUE\""           >>$TMPFILE_SH
-		echo "define('$VARNAME', '$VALUE');" >>$TMPFILE_PHP
-		echo "\\def\\$VARNAME{$VALUE}"       >>$TMPFILE_TEX
+		case $EXT in
+		h)    echo "#define $VARNAME \"$VALUE\""   >>$TMPMAIN;;
+		sh)   echo "$VARNAME=\"$VALUE\""           >>$TMPMAIN;;
+		php)  echo "define('$VARNAME', '$VALUE');" >>$TMPMAIN;;
+		tex)  echo "\\def\\$VARNAME{$VALUE}"       >>$TMPMAIN;;
+		esac
 	else
-		echo "#define $VARNAME $VALUE"     >>$TMPFILE_C
-		echo "$VARNAME=$VALUE"             >>$TMPFILE_SH
-		echo "define('$VARNAME', $VALUE);" >>$TMPFILE_PHP
-		echo "\\def\\$VARNAME{$VALUE}"     >>$TMPFILE_TEX
+		case $EXT in
+		h)    echo "#define $VARNAME $VALUE"       >>$TMPMAIN;;
+		sh)   echo "$VARNAME=$VALUE"               >>$TMPMAIN;;
+		php)  echo "define('$VARNAME', $VALUE);"   >>$TMPMAIN;;
+		tex)  echo "\\def\\$VARNAME{$VALUE}"       >>$TMPMAIN;;
+		esac
 	fi
 
 	if set | grep ^${VARNAME}= &>/dev/null; then
@@ -93,23 +155,8 @@ done
 
 exec 3<&-
 
-function config_include ()
-{
-	local FROMFILE=$1
-	local TOFILE=$2
-	local COMMENT=$3
-
-	local NSTART NEND
-
-	NSTART=`grep "$CONFHEADTAG START" $TOFILE | wc -l`
-	NEND=`grep "$CONFHEADTAG END" $TOFILE | wc -l`
-	if [ $NSTART -gt 1 -o $NEND -gt 1 -o $NSTART -ne $NEND ]; then
-		echo "Incorrect header START and/or END tags in $TOFILE!"
-		exit 1
-	fi
-
-	grep -B 1000 "$CONFHEADTAG START" $TOFILE >$TMPFILE
-	cat >>$TMPFILE <<EOF
+# Generate header tags include
+cat >>$TMPHEAD <<EOF
 $COMMENT
 $COMMENT This configuration file was automatically generated
 $COMMENT on `date` on host '$HOSTNAME'.
@@ -124,30 +171,41 @@ $COMMENT and then be included here by running the '`basename $0`'
 $COMMENT command.
 $COMMENT
 EOF
-	grep -A 1000 "$CONFHEADTAG END" $TOFILE >>$TMPFILE
 
-	NSTART=`grep "$CONFMAINTAG START" $TOFILE | wc -l`
-	NEND=`grep "$CONFMAINTAG END" $TOFILE | wc -l`
-	if [ $NSTART -gt 1 -o $NEND -gt 1 -o $NSTART -ne $NEND ]; then
-		echo "Incorrect main config START and/or END tags in $TOFILE!"
+function config_include ()
+{
+	local TAG=$1
+	local CFGFILE=$2
+	local TAGFILE=$3
+
+	local TMPFILE=`tempfile -p 'cfg' -s '.tmp'`
+
+	local NSTART NEND
+
+	NSTART=`grep "$TAG START" $CFGFILE | wc -l`
+	NEND=`  grep "$TAG END"   $CFGFILE | wc -l`
+	if [ $NSTART -ne 1 -o $NEND -ne 1 ]; then
+		echo "Incorrect number of '$TAG' START and/or END tags in $CFGFILE!"
+		exit 1
+	fi
+	if [ `grep -A $MAXLINES "$TAG START" $CFGFILE | grep "$TAG END" | wc -l` -ne 1 ]; then
+		echo "'$TAG' END tag does not close START tag in $CFGFILE!"
 		exit 1
 	fi
 
-	grep -B 1000 "$CONFMAINTAG START" $TMPFILE >$TOFILE
-	cat $FROMFILE >>$TOFILE
-	grep -A 1000 "$CONFMAINTAG END" $TMPFILE >>$TOFILE
+	grep -B $MAXLINES "$TAG START" $CFGFILE >$TMPFILE
+	cat $TAGFILE >>$TMPFILE
+	grep -A $MAXLINES "$TAG END"   $CFGFILE >>$TMPFILE
+	cp $TMPFILE $CFGFILE
+
+	rm -f $TMPFILE
 }
 
-cp -a $LOCALTEMPLATE.h   $LOCALCONF.h
-cp -a $LOCALTEMPLATE.sh  $LOCALCONF.sh
-cp -a $LOCALTEMPLATE.php $LOCALCONF.php
-cp -a $LOCALTEMPLATE.tex $LOCALCONF.tex
+cp -a $TEMPLATE $CONFIG
 
-config_include $TMPFILE_C   ${LOCALCONF}.h   '//'
-config_include $TMPFILE_SH  ${LOCALCONF}.sh  '#'
-config_include $TMPFILE_PHP ${LOCALCONF}.php '//'
-config_include $TMPFILE_TEX ${LOCALCONF}.tex '%'
+config_include $CONFHEADTAG $CONFIG $TMPHEAD
+config_include $CONFMAINTAG $CONFIG $TMPMAIN
 
-rm -f $TMPFILE $TMPFILE_C $TMPFILE_SH $TMPFILE_PHP $TMPFILE_TEX
+rm -f $TMPHEAD $TMPMAIN
 
 exit 0
