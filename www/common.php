@@ -9,9 +9,10 @@
 /**
  * Print a list of submissions, either all or only those that
  * match <key> = <value>. Output is always limited to the
- * current or last contest.
+ * current or last contest. $detailed will be set to false
+ * for a team page.
  */
-function getSubmissions($key = null, $value = null) {
+function getSubmissions($key = null, $value = null, $detailed = TRUE) {
 
 	global $DB;
 
@@ -31,30 +32,33 @@ function getSubmissions($key = null, $value = null) {
 		return;
 	}
 
-	$resulttable = $DB->q('KEYTABLE SELECT j.*,submitid AS ARRAYKEY,judger.name AS judgername
-		FROM judging j LEFT JOIN judger USING(judgerid)
+	$resulttable = $DB->q('KEYTABLE SELECT j.*, submitid AS ARRAYKEY' .
+		($detailed ? ', judger.name AS judgername ' : '' ) . '
+		FROM judging j ' . ($detailed ? 'LEFT JOIN judger USING(judgerid) ' : '') . '
 		WHERE (valid = 1 OR valid IS NULL) AND cid = %i', getCurCont() );
 
-	echo "<table>\n".
-		"<tr><th>ID".
-		"</th><th>time".
-		($key != 'team' ? "</th><th>team" : '').
-		($key != 'probid' ? "</th><th>problem" : '').
-		($key != 'langid' ? "</th><th>lang" : '').
-		"</th><th>status".
-		"</th><th>last<br>judge</th></tr>\n";
+	echo "<table>\n<tr>".
+		( $detailed ? "<th>ID</th>" : '' ) .
+		"<th>time</th>".
+		($key != 'team' ? "<th>team</th>" : '') .
+		($key != 'probid' ? "<th>problem</th>" : '') .
+		($key != 'langid' ? "<th>lang</th>" : '') .
+		"<th>status</th>".
+		($detailed ? "<th>last<br>judge</th>" : '') .
+		"</tr>\n";
 	while($row = $res->next()) {
 		$sid = (int)$row['submitid'];
-		echo "<tr><td><a href=\"submission.php?id=".$sid."\">".$sid."</a>".
-			"</td><td>".printtime($row['submittime']).
-			($key != 'team' ? "</td><td class=\"teamid\">".htmlspecialchars($row['team']) : '').
-			($key != 'probid' ? "</td><td>".htmlspecialchars($row['probid']) : '').
-			($key != 'langid' ? "</td><td>".htmlspecialchars($row['langid']) : '').
-			"</td><td>".
-				printresult( @$row['judgerid'] ? @$resulttable[$row['submitid']]['result'] : 'queued');
-
-		echo "</td><td>".printhost(@$resulttable[$row['submitid']]['judgername']);
-		echo "</td></tr>\n";
+		echo "<tr>" .
+			($detailed ? "<td><a href=\"submission.php?id=".$sid."\">".$sid."</a></td>" : '') .
+			"<td>" . printtime($row['submittime']) . "</td>" .
+			($key != 'team' ? "<td class=\"teamid\">".htmlspecialchars($row['team']) . "</td>" : '') .
+			($key != 'probid' ? "<td>".htmlspecialchars($row['probid']) . "</td>" : '') .
+			($key != 'langid' ? "<td>".htmlspecialchars($row['langid']) . "</td>" : '') .
+			"<td>" .
+				printresult( @$row['judgerid'] ? @$resulttable[$row['submitid']]['result'] : 'queued') .
+			"</td>" .
+		 	( $detailed ? "<td>".printhost(@$resulttable[$row['submitid']]['judgername']) . "</td>" : '') .
+		 	"</td></tr>\n";
 	}
 	echo "</table>\n\n";
 
