@@ -4,7 +4,6 @@
  * Switch a user to the right site based on IP (from database)
  * $Id$
  */
-$MYWEBROOT = 'http://judge.nkp.nl/';
 
 require_once('../etc/config.php');
 require_once('../lib/lib.error.php');
@@ -19,4 +18,4 @@ if($res->count() > 0) {
 }
 
 header('HTTP/1.1 301 Please see this page');
-header('Location: '.$MYWEBROOT.$target);
+header('Location: http://'.$WEBSERVER.'/'.$target);
