@@ -28,16 +28,15 @@
 \maketitle
 
 \tableofcontents
+
+
 \newpage
-
-
 \section{De computers}
 
 Alle teams krijgen \'e\'en computer aangewezen, waarop zij kunnen
 werken om de opgaven op te lossen. Dit zijn computers van het
 Informatica Instituut en zijn allemaal Dell computers met 15 inch TFT
-flatscreens met een Intel Pentium processor varie\"erend van xxx tot
-yyy MHz.
+flatscreens met een Intel Pentium 4 processor van minimaal 2 GHz.
 
 Tijdens het NKP kunnen alle teams kiezen tussen twee verschillende
 computer (besturings) systemen: Microsoft Windows 2000 Professional of
@@ -49,6 +48,7 @@ Hieronder volgt documentatie specifiek voor de verschillende platformen.
 \subsection{Linux}
 
 
+\newpage
 \section{Opgaven}
 
 Voor iedere opgave is het noodzakelijk om de invoer van het probleem
@@ -66,6 +66,7 @@ Zie verder bijlage \ref{codevoorbeeld} voor een enkele voorbeelden van
 code om dit af te handelen.
 
 
+\newpage
 \section{Programmeertalen}
 
 Tijdens het NKP kan gebruikt gemaakt worden van de programmeertalen C,
@@ -115,8 +116,8 @@ In C++ kan gebruik gemaakt worden van de Standard Template Library
 
 GCC ondersteunt de volledige ANSI C89 en C++ standaarden en GNU
 extensies. Windows gebruikers moeten opletten, dat het type van een
-64-bits integer ``long long'' is en dat alle STL datatypes binnen de
-namespace ``std'' gedeclareerd zijn.
+64-bits integer \texttt{long long} is en dat alle STL datatypes binnen de
+namespace \texttt{std} gedeclareerd zijn.
 
 \subsection{Java}
 
@@ -130,8 +131,8 @@ ondersteund).
 De Java compiler van Sun zelf is ook beschikbaar en verder zullen de
 JavaDocs beschikbaar zijn (ook onder Linux?).
 
-Let op: de hoofdklasse van je programma moet ``Main'' (met
-hoofdletter) heten en een publieke functie ``main'' bevatten!
+Let op: de hoofdklasse van je programma moet \texttt{Main} (met
+hoofdletter) heten en een publieke functie \texttt{main} bevatten!
 
 \subsection{Pascal}
 
@@ -141,6 +142,11 @@ Linux en Windows beschikbaar, maar alleen onder Windows is de
 bijbehorende IDE beschikbaar.
 
 Verder is GNU GPC beschikbaar (onder Windows via cygwin).
+
+Let op dat het datatype \texttt{integer} de 16 bits \texttt{smallint}
+is. Verder ondersteunt de compiler de ANSI Pascal standaard plus
+nagenoeg alle Turbo Pascal uitbreidingen. Labels en \texttt{goto}
+worden ook ondersteund.
 
 \subsection{Haskell}
 
@@ -156,6 +162,7 @@ ondersteund de volledige Haskell 98 standaard.
 GHC en ook HUGS zijn beide beschikbaar onder Linux en Windows.
 
 
+\newpage
 \section{Het jurysysteem: \DOMjudge}
 
 \subsection{Inleiding}
@@ -355,6 +362,7 @@ niet weten wat dat is), hoeven zich geen zorgen te maken: standaard
 draait een gecompileerd programma in \'e\'en proces.
 
 \end{description}
+
 
 \newpage
 \appendix
