@@ -6,21 +6,22 @@
  * $Id$
  */
 
-if(!defined('SCRIPT_ID')) {
+if ( ! defined('SCRIPT_ID') ) {
 	define('SCRIPT_ID', basename($PHP_SELF, '.php'));
-}
-if(!defined('LOGFILE')) {
-	define('LOGFILE', SCRIPT_ID);
 }
 
 define('STDERR', fopen('php://stderr', 'w'));
-define('STDLOG', fopen(LOGDIR.'/'.LOGFILE, 'w'));
+
+if ( defined('LOGFILE') ) {
+	define('STDLOG', fopen(LOGFILE, 'w'));
+}
 
 function logmsg($msglevel, $string) {
 	global $verbose, $loglevel;
-	$msg = '[' . date('M d H:i:s') . '] ' . SCRIPT_ID . ": ". $string . "\n";
+	$msg = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . ": ". $string . "\n";
 	if ( $msglevel <= $verbose  ) { fwrite(STDERR, $msg); }
-	if ( $msglevel <= $loglevel ) { fwrite(STDLOG, $msg); }
+	if ( $msglevel <= $loglevel &&
+	     defined('STDLOG')      ) { fwrite(STDLOG, $msg); }
 }
 
 function error($string) {
