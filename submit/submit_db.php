@@ -76,8 +76,8 @@
 
 	// Copy the submission to a (uniquely generated) file in SUBMITDIR
 	$dummy = null;
-	$tofile = exec(SYSTEM_ROOT."/bin/mkstemps.pl ".
-	               SUBMITDIR."/$team.$prob.XXXX .$langext", $dummy, $retval);
+	$tofile = exec(SYSTEM_ROOT."/bin/mkstemps ".
+	               SUBMITDIR."/$team.$prob.XXXXXX.$langext", $dummy, $retval);
 	if ( $retval != 0 ) error("Could not create tempfile.");
 	$tofile = basename($tofile);
 
