@@ -13,7 +13,7 @@ include('../header.php');
 $sid = (int)$_GET['submitid'];
 
 // select also on teamid so we can only select our own submissions
-$row = $DB->q('MAYBETUPLE SELECT probid,submittime,langid,result,output_compile,output_run
+$row = $DB->q('MAYBETUPLE SELECT probid,submittime,langid,result,output_compile
 	FROM judging j LEFT JOIN submission s USING(submitid)
 	WHERE j.submitid = %i AND team = %s AND valid = 1',
 	$sid, $login);
@@ -42,11 +42,7 @@ if(@$row['output_compile']) {
 	echo "<pre class=\"errors\">\n".
 		htmlspecialchars(@$row['output_compile'])."\n</pre>\n\n";
 } else {
-	echo "<p><em>There were no compile-errors.</em></p>\n";
-}?>
-
-<h2>Runtime errors:</h2>
-<em>Wat moet hier staan??!</em>
-<?php
+	echo "<p><em>There were no compiler errors or warnings.</em></p>\n";
+}
 
 include('../footer.php');
