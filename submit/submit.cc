@@ -175,7 +175,7 @@ int main(int argc, char **argv)
 	}
 	
 	/* Set logging levels & open logfile */
-	verbose  = LOG_DEBUG;
+	verbose  = LOG_NOTICE;
 	loglevel = LOG_DEBUG;
 
 	logfile = allocstr("%s/submit.log",submitdir);
