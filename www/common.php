@@ -36,15 +36,16 @@ function getSubmissions($key = null, $value = null) {
 		"</th><th>status".
 		"</th><th>last<br>judge</th></tr>\n";
 	while($row = $res->next()) {
-		echo "<tr><td><a href=\"submission.php?id=".$row['submitid']."\">".$row['submitid']."</a>".
+		$sid = (int)$row['submitid'];
+		echo "<tr><td><a href=\"submission.php?id=".$sid."\">".$sid."</a>".
 			"</td><td>".printtime($row['submittime']).
-			($key != 'team' ? "</td><td>".$row['team'] : '').
-			($key != 'probid' ? "</td><td>".$row['probid'] : '').
-			($key != 'langid' ? "</td><td>".$row['langid'] : '').
+			($key != 'team' ? "</td><td class=\"teamid\">".htmlspecialchars($row['team']) : '').
+			($key != 'probid' ? "</td><td>".htmlspecialchars($row['probid']) : '').
+			($key != 'langid' ? "</td><td>".htmlspecialchars($row['langid']) : '').
 			"</td><td>".
 				printresult( @$row['judgerid'] ? @$resulttable[$row['submitid']]['result'] : 'queued');
 
-		echo "</td><td>".@$resulttable[$row['submitid']]['judgername'];
+		echo "</td><td>".htmlspecialchars(@$resulttable[$row['submitid']]['judgername']);
 		echo "</td></tr>\n";
 	}
 	echo "</table>\n\n";
@@ -73,4 +74,9 @@ function printresult($result, $valid = TRUE) {
 
 	return $start . ($valid ? $style : 'disabled') . '">' . $result . $end;
 
+}
+
+// print a yes/no field, input: something that evaluates to a boolean
+function printyn ($val) {
+	return ($val ? '1':'0');
 }
