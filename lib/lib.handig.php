@@ -7,5 +7,5 @@ function printtime($datetime) {
 }
 
 function logmsg($string) {
-	echo '[' . date('r') . '] ' . $string . "\n";
+	echo '[' . date('M d H:i:s') . '] ' . $string . "\n";
 }
