@@ -54,8 +54,8 @@
 
 	// Check 2: valid parameters?
 	if( ! $langext = $DB->q('MAYBEVALUE SELECT extension FROM language
-	                         WHERE langid = %s', $lang) ) {
-		error("Language '$lang' not found in database.");
+	                         WHERE langid = %s AND allow_submit = 1', $lang) ) {
+		error("Language '$lang' not found in database or not submittable.");
 	}
 	if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',
 	                        $team) ) {

@@ -21,6 +21,7 @@ $data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 <tr><td>ID:</td><td><?=htmlspecialchars($data['langid'])?></td></tr>
 <tr><td>Name:</td><td><?=htmlentities($data['name'])?></td></tr>
 <tr><td>Extension:</td><td class="filename">.<?=htmlspecialchars($data['extension'])?></td></tr>
+<tr><td>Allow submit:</td><td><?=printyn($data['allow_submit'])?></td></tr>
 <tr><td>Allow judge:</td><td><?=printyn($data['allow_judge'])?></td></tr>
 <tr><td>Timefactor:</td><td><?=(int)$data['time_factor']?></td></tr>
 </table>
