@@ -35,6 +35,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <getopt.h>
 #include <libgen.h>
 #include <termios.h>
@@ -95,22 +96,25 @@ void usage();
 void usage2(int , char *, ...);
 void warnuser(char *);
 char readanswer(char *answers);
+char *allocstr(char *format, ...);
 
 int nwarnings;
 
 int socket_fd;
-struct sockaddr_in server_addr; // my address information
-struct sockaddr_in their_addr;  // connector's address information
-int sin_size;
+
+/* server name and adress information */
+struct sockaddr_in server_sockaddr;
+struct in_addr     server_inetaddr;
+struct hostent    *serverinfo;
 
 /* Submission information */
 string problem, language, server, team;
 char *filename, *submitdir, *tempfile;
-
+int temp_fh;
 
 int main(int argc, char **argv)
 {
-	unsigned i, len;
+	unsigned i;
 	int c;
 	char *ptr;
 	char *homedir;
@@ -124,12 +128,7 @@ int main(int argc, char **argv)
 	homedir = getenv("HOME");
 	
 	/* Check for USERSUBMITDIR and create it if nessary */
-	len = strlen(homedir) + strlen(USERSUBMITDIR) + 20;
-	submitdir = (char *) malloc(len);
-	if ( snprintf(submitdir,len,"%s/%s",homedir,USERSUBMITDIR)>=(int)len ) {
-		error(0,"cannot allocate or write all of `submitdir' string");
-	}
-	
+	submitdir = allocstr("%s/%s",homedir,USERSUBMITDIR);
 	if ( stat(submitdir,&fstats)!=0 ) {
 		if ( mkdir(submitdir,USERPERMDIR)!=0 ) {
 			error(errno,"creating directory `%s'",submitdir);
@@ -147,11 +146,7 @@ int main(int argc, char **argv)
 	verbose  = LOG_DEBUG;
 	loglevel = LOG_DEBUG;
 
-	logfile = (char *) malloc(len);
-	if ( snprintf(logfile,len,"%s/submit.log",submitdir)>=(int)len ) {
-		error(0,"cannot allocate or write all of `logfile' string");
-	}
-	
+	logfile = allocstr("%s/submit.log",submitdir);
 	stdlog = fopen(logfile,"a");
 	if ( stdlog==NULL ) error(errno,"cannot open logfile `%s'",logfile);
 
@@ -271,7 +266,85 @@ int main(int argc, char **argv)
 		printf("\n");
 		if ( c=='n' ) error(0,"submission aborted by user");
 	}
+
+	/* Make tempfile to submit */
+	tempfile = allocstr("%s/%s.XXXXXX.%s",submitdir,
+	                    problem.c_str(),language.c_str());
+	temp_fh = mkstemps(tempfile,language.length()+1);
+	if ( temp_fh==-1 || strlen(tempfile)==0 ) {
+		error(errno,"mkstemps cannot create tempfile");
+	}
+
+	/* Construct copy command and execute with `system' */
+	ptr = allocstr("cp %s %s",filename,tempfile);
+	if ( system(ptr)!=0 ) {
+		error(errno,"cannot copy `%s' to `%s'",filename,tempfile);
+	}
+	free(ptr);
+
+	if ( chmod(tempfile,USERPERMFILE)!=0 ) {
+		error(errno,"setting permissions on `%s'",tempfile);
+	}
+
+	logmsg(LOG_INFO,"copied `%s' to tempfile `%s'",filename,tempfile);
+
+	/* Connect to the submission server */
+	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",
+	       server.c_str(),port);
 	
+	if ( (socket_fd = socket(PF_INET,SOCK_STREAM,0)) == -1 ) {
+		error(errno,"cannot open socket");
+	}
+	
+	if ( (serverinfo = gethostbyname(server.c_str()))==NULL ) {
+		error(0,"cannot get address of server");
+	}
+
+	//server_inetaddr.s_addr = *((unsigned long int *) serverinfo->h_addr[0]);
+	
+	logmsg(LOG_DEBUG,"%d.%d.%d.%d",
+		   (unsigned char)serverinfo->h_addr[0],
+		   (unsigned char)serverinfo->h_addr[1],
+		   (unsigned char)serverinfo->h_addr[2],
+		   (unsigned char)serverinfo->h_addr[3]);
+
+	if ( inet_aton(serverinfo->h_addr_list[0],&server_inetaddr)!=0 ) {
+		error(0,"invalid server address `%d'",inet_ntoa(server_inetaddr));
+	}
+
+	//logmsg(LOG_DEBUG,"server address %s",inet_ntoa(server_inetaddr));
+	
+	server_sockaddr.sin_family = AF_INET;
+	server_sockaddr.sin_port   = htons(port);
+	server_sockaddr.sin_addr   = server_inetaddr;
+
+	/* Don't bind socket_fd, so a local port automatically is assigned */
+	if ( connect(socket_fd,(struct sockaddr *) &server_sockaddr,
+	             sizeof(struct sockaddr))!=0 ) {
+		error(errno,"cannot connect to the server");
+	}
+
+	logmsg(LOG_INFO,"connected, server-address: %s",serverinfo->h_addr_list[0]);
+
+	receive(socket_fd);
+
+	/* Send submission info */
+	logmsg(LOG_NOTICE,"sendind data...");
+	sendit(socket_fd,"+team %s",team.c_str());
+	receive(socket_fd);
+	sendit(socket_fd,"+problem %s",problem.c_str());
+	receive(socket_fd);
+	sendit(socket_fd,"+language %s",language.c_str());
+	receive(socket_fd);
+	sendit(socket_fd,"+filename %s",basename(tempfile));
+	receive(socket_fd);
+	sendit(socket_fd,"+done");
+
+	/* Keep reading until end of file, then check for errors */
+	while ( receive(socket_fd) );
+	if ( strncmp(lastmesg,"done",4)!=0 ) error(0,"connection closed unexpected");
+	
+
     return 0;
 }
 
@@ -401,5 +474,26 @@ char readanswer(char *answers)
 	return c;
 }
 
+char *allocstr(char *format, ...)
+{
+	va_list ap;
+	char *str;
+	char tmp[2];
+	int len, n;
+
+	va_start(ap,format);
+	len = vsnprintf(tmp,1,format,ap);
+	va_end(ap);
+	
+	if ( (str = (char *) malloc(len+1))==NULL ) error(errno,"allocating string");
+
+	va_start(ap,format);
+	n = vsnprintf(str,len+1,format,ap);
+	va_end(ap);
+
+	if ( n==-1 || n>len ) error(0,"cannot write all of string");
+
+	return str;
+}
 
 //  vim:ts=4:sw=4:
