@@ -1,4 +1,6 @@
-<a href="index.php">Home</a>
-<a href="judgers.php">Judgers</a>
-<a href="submissions.php">Submissions</a>
-<a href="teams.php">Teams</a>
+<div class="menutop">
+<a href="index.php">home</a>
+<a href="judgers.php">judgers</a>
+<a href="submissions.php">submissions</a>
+<a href="teams.php">teams</a>
+</div>

@@ -29,3 +29,19 @@
 .teamid, .filename, .hostname {
 	font-family: monospace;
 }
+
+.menutop a {
+	font-family: sans-serif;
+	background-color: #FFFFF0;
+	font-family: sans-serif;
+	font-size: smaller;
+	font-weight: lighter;
+	border-style: solid;
+	border-width: 1px;
+	text-decoration: none;
+	margin: 2px;
+	padding: 2px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
