@@ -20,12 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
-# Some system/site specific config and common includes/functions
-use lib "../etc/";
-use config;
-use submit_common;
-
-use strict;
+# Some system/site specific config
+BEGIN { require "../etc/config.pm"; }
 
 use Socket;
 use IO;
@@ -36,6 +32,17 @@ use File::Copy;
 use File::Basename;
 use File::Temp;
 use User::pwent;
+use POSIX qw(strftime);
+
+# Variables defining what to do with messages
+my $verbose = 0;
+my $log = 1;
+my $progname = basename($0);
+
+# Variables for client-server communication
+my $server;
+my $socket;
+my $lastreply;
 
 # Variables used in transmission.
 my $team;
@@ -45,18 +52,13 @@ my $filename;
 my $ip;
 my $tmpfile;
 
-# Don't buffer output.
-$| = 1;
-
-my $server;
-
-my $verbose = 0;
-
-my $progname = basename($0);
+sub datestr {
+	return POSIX::strftime("%b %d %T",localtime);
+}
 
 sub logmsg {
-#	if ( $verbose ) { print STDERR "@_\n"; }
-	print STDERR "[", scalar localtime, " $$] @_\n";
+	if ( $verbose ) { print STDERR "@_\n"; }
+	if ( $log ) { print "[", datestr, "] ", $progname, "[$$]: @_\n"; }
 }
 
 sub error {
@@ -65,10 +67,24 @@ sub error {
 	die "$progname: error: @_\n"
 }
 
-sub spawn;
-sub child;
+sub netchomp {
+	s/\015\012//;
+}
 
-logmsg "server started";
+sub sendit { # 'send' is already defined
+	logmsg "send: @_";
+	print $socket "@_\015\012";
+}
+
+sub receive {
+	if ( ! ($_ = <$socket>) ) { return $failure; }
+	netchomp;
+	if ( /^[^+]/ ) { error("received: $_\n"); }
+	logmsg("recv: $_");
+	s/^.//;
+	$lastreply = $_;
+	return $success;
+}
 
 # The reaper collects dead children.
 my $waitedpid = 0;
@@ -107,10 +123,7 @@ sub spawn {
 }
 
 sub child {
-	#sleep 1;
-
 	my $hostinfo;
-	my $teamdir;
 	my $handle;
 	my $pw;
 
@@ -161,14 +174,13 @@ sub child {
 	}
 	$filename = $pw->dir . "/$submitclientdir/" . basename($filename);
 
-	logmsg "$filename";
-
 	($handle, $tmpfile) = mkstemps("$submitserverdir/$problem.$team.XXXX",".$language")
 		or error "creating tempfile: $!";
 
 	# Check parameters with database: does the language exist, team matches IP,
 	# is the problem active and submittable?
 	system(("./submit_checkvars.php",$team,$ip,$problem,$language,$tmpfile));
+
 	if ( $? != 0 ) {
 		sendit "-error checking parameters";
 		error "invalid submission parameters";
@@ -181,6 +193,7 @@ sub child {
 		$! = $errno;
 		error "copying file: $!";
 	}
+	logmsg "submission copied to '" . basename($tmpfile) . "'";
 	
 	# add a db-entry for this file.
 	system(("./submit_db.php",$team,$ip,$problem,$language,basename($tmpfile)));
@@ -190,11 +203,18 @@ sub child {
 	}
 
 	sendit "+done submission successful";
+	logmsg "submission received successfully";
 
 	$socket->close();
 	
 	return $success;
 }
+
+########################
+### Start of program ###
+########################
+
+logmsg "server started";
 
 # Create the server socket.
 $server = IO::Socket::INET->new(Proto => 'tcp',
@@ -216,3 +236,4 @@ while ( 1 ) {
 
 # Never reached.
 logmsg "server going down";
+

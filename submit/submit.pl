@@ -20,12 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
-# Some system/site specific config and common includes/functions
-use lib "../etc/";
-use config;
-use submit_common;
-
-use strict;
+# Some system/site specific config
+BEGIN { require "../etc/config.pm"; }
 
 use Socket;
 use IO;
@@ -33,29 +29,61 @@ use IO::Socket;
 use File::Copy;
 use File::Basename;
 use File::Temp;
+use POSIX qw(strftime);
 
-my $tmpdir = "$ENV{HOME}/" . $submitclientdir;
-my $tmpfile;
-# Weer terug veranderen na debugging:
-my $mask = 0744; # 0700
-
+# Variables defining what to do with messages
 my $verbose = $ENV{SUBMITVERBOSE} || 1;
-
+my $log = 0;
 my $progname = basename($0);
 
+# Variables for client-server communication
+my $socket;
+my $lastreply;
+
+# Variables used in transmission.
 my $problem;
 my $language;
 my $filename;
 my $server = $ENV{SUBMITSERVER} || "localhost";
 my $team = $ENV{TEAM} || $ENV{USER} || $ENV{USERNAME};
 
+my $tmpdir = "$ENV{HOME}/" . $submitclientdir;
+my $tmpfile;
+# Weer terug veranderen na debugging:
+my $mask = 0744; # 0700
+
+sub datestr {
+	return POSIX::strftime("%b %d %T",localtime);
+}
+
 sub logmsg {
 	if ( $verbose ) { print STDERR "@_\n"; }
+	if ( $log ) { print "[", datestr, "] ", $progname, "[$$]: @_\n"; }
 }
 
 sub error {
 	if ( -f $tmpfile ) { unlink $tmpfile; }
+	logmsg "error: @_";
 	die "$progname: error: @_\n"
+}
+
+sub netchomp {
+	s/\015\012//;
+}
+
+sub sendit { # 'send' is already defined
+	logmsg "send: @_";
+	print $socket "@_\015\012";
+}
+
+sub receive {
+	if ( ! ($_ = <$socket>) ) { return $failure; }
+	netchomp;
+	if ( /^[^+]/ ) { error("received: $_\n"); }
+	logmsg("recv: $_");
+	s/^.//;
+	$lastreply = $_;
+	return $success;
 }
 
 my $usage = <<"EOF";
@@ -91,6 +119,10 @@ The default value for <team> is your login name.
 
 EOF
 my $usage2 = "Type '$progname --help' to get help.\n";
+
+########################
+### Start of program ###
+########################
 
 # Parse options from command-line.
 for (; @ARGV; shift @ARGV) {
@@ -152,7 +184,7 @@ if ( ! -d $tmpdir ) { mkdir($tmpdir) or error "creating dir $tmpdir: $!"; }
 chmod($mask,$tmpfile);
 
 copy($filename, $tmpfile) or error "copying '$filename' to tempfile: $!";
-logmsg "'$filename' copied to tempfile '$tmpfile'";
+logmsg "copied '$filename' to tempfile '$tmpfile'";
 
 # Connect to the submission server.
 print "Connecting to the server ($server, $submitport/tcp)...\n";
@@ -161,9 +193,9 @@ $socket = IO::Socket::INET->new(Proto => 'tcp',
                                 PeerAddr => $server,
                                 PeerPort => $submitport);
 if ( ! $socket ) { error "cannot connect to the server"; }
-
 $socket->autoflush;
 logmsg "connected!";
+
 receive;
 
 # Send submission info.
