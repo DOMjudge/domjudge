@@ -89,12 +89,12 @@ function error ()
 }
 
 # Global configuration
-source `dirname $0`/../etc/config.sh
+source "`dirname $0`/../etc/config.sh"
 
 # Logging:
 LOGFILE="$LOGDIR/judge.`hostname --short`.log"
 LOGLEVEL=$LOG_DEBUG
-PROGNAME=`basename $0`
+PROGNAME="`basename $0`"
 
 # Set this for extra verbosity:
 #VERBOSE=$LOG_DEBUG
@@ -105,25 +105,25 @@ else
 fi
 
 # Location of scripts/programs:
-RUNSCRIPTDIR=$SYSTEM_ROOT/judge
-BASHSTATIC=$SYSTEM_ROOT/bin/bash-static
-RUNGUARD=$SYSTEM_ROOT/bin/runguard
+RUNSCRIPTDIR="$SYSTEM_ROOT/judge"
+BASHSTATIC="$SYSTEM_ROOT/bin/bash-static"
+RUNGUARD="$SYSTEM_ROOT/bin/runguard"
 
 logmsg $LOG_NOTICE "starting '$0', PID = $$"
 
 [ $# -eq 6 ] || error "wrong number of arguments. see script-code for usage."
 SOURCE="$1";    shift
-PROGLANG="$1";      shift
+PROGLANG="$1";  shift
 TESTIN="$1";    shift
 TESTOUT="$1";   shift
 TIMELIMIT="$1"; shift
 TMPDIR="$1";    shift
-logmsg $LOG_INFO "arguments: $SOURCE $PROGLANG $TESTIN $TESTOUT $TIMELIMIT $TMPDIR"
+logmsg $LOG_INFO "arguments: '$SOURCE' '$PROGLANG' '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$TMPDIR'"
 
-[ -r $SOURCE ]  || error "solution not found: $SOURCE";
-[ -r $TESTIN ]  || error "test-input not found: $TESTIN";
-[ -r $TESTOUT ] || error "test-ouput not found: $TESTOUT";
-[ -d $TMPDIR -a -w $TMPDIR -a -x $TMPDIR ] || \
+[ -r "$SOURCE"  ] || error "solution not found: $SOURCE";
+[ -r "$TESTIN"  ] || error "test-input not found: $TESTIN";
+[ -r "$TESTOUT" ] || error "test-ouput not found: $TESTOUT";
+[ -d "$TMPDIR" -a -w "$TMPDIR" -a -x "$TMPDIR" ] || \
 	error "Tempdir not found or not writable: $TMPDIR"
 
 logmsg $LOG_NOTICE "setting resource limits"
@@ -131,13 +131,13 @@ ulimit -HS -c 0     # Do not write core-dumps
 ulimit -HS -f 65536 # Maximum filesize in kB
 
 logmsg $LOG_NOTICE "creating input/output files"
-EXT=${SOURCE##*.}
+EXT="${SOURCE##*.}"
 [ "$EXT" ] || error "source-file does not have an extension: $SOURCE"
-cp $SOURCE $TMPDIR/source.$EXT
-cp $TESTIN $TMPDIR/testdata.in
+cp "$SOURCE" "$TMPDIR/source.$EXT"
+cp "$TESTIN" "$TMPDIR/testdata.in"
 
-OLDDIR=$PWD
-cd $TMPDIR
+OLDDIR="$PWD"
+cd "$TMPDIR"
 
 # Create files, which are expected to exist:
 touch compile.{out,time}   # Compiler output and runtime
@@ -159,8 +159,8 @@ fi
 
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
-( $RUNGUARD -t $COMPILETIME -o compile.time \
-	$RUNSCRIPTDIR/compile_$PROGLANG.sh source.$EXT source
+( "$RUNGUARD" -t $COMPILETIME -o compile.time \
+	"$RUNSCRIPTDIR/compile_$PROGLANG.sh" "source.$EXT" source
 ) &>compile.tmp
 exitcode=$?
 [ -f source ] && mv -f source program
@@ -182,8 +182,8 @@ logmsg $LOG_NOTICE "setting up chroot-ed environment"
 
 mkdir bin dev proc
 # Copy the run-script and a statically compiled bash-shell:
-cp -p $RUNSCRIPTDIR/run.sh .
-cp -p $BASHSTATIC          ./bin/bash
+cp -p "$RUNSCRIPTDIR/run.sh" .
+cp -p "$BASHSTATIC"          ./bin/bash
 
 # Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
 logmsg $LOG_DEBUG "mounting proc filesystem"
@@ -198,17 +198,17 @@ disown $CATPID
 
 logmsg $LOG_NOTICE "running program"
 
-( $RUNGUARD -r $PWD -u $RUNUSER -t $TIMELIMIT -o program.time \
+( "$RUNGUARD" -r "$PWD" -u "$RUNUSER" -t $TIMELIMIT -o program.time \
 	/run.sh /program testdata.in program.out program.err program.exit \
 	        $MEMLIMIT $FILELIMIT $PROCLIMIT ) &>error.tmp
 exitcode=$?
 
 logmsg $LOG_DEBUG "unmounting proc filesystem"
-sudo umount $PWD/proc
+sudo umount "$PWD/proc"
 
 # Check for still running processes (first wait for all exiting processes):
 sleep 1
-if ps -u $RUNUSER &>/dev/null; then
+if ps -u "$RUNUSER" &>/dev/null; then
 	error "found processes still running"
 fi
 
@@ -260,9 +260,9 @@ fi
 logmsg $LOG_NOTICE "comparing output"
 
 # Copy testdata output (first cd to olddir to correctly resolve relative paths)
-cd $OLDDIR
-cp $TESTOUT $TMPDIR/testdata.out
-cd $TMPDIR
+cd "$OLDDIR"
+cp "$TESTOUT" "$TMPDIR/testdata.out"
+cd "$TMPDIR"
 
 if [ ! -s program.out ]; then
 	echo "Program produced no output." >>error.out
@@ -271,9 +271,9 @@ if [ ! -s program.out ]; then
 fi
 
 # Add $SYSTEM_ROOT/bin to path for 'tempfile' (needed by compare.sh)
-export PATH=$SYSTEM_ROOT/bin:$PATH
+export PATH="$SYSTEM_ROOT/bin:$PATH"
 
-$RUNSCRIPTDIR/compare.sh program.out testdata.out diff.out 2>diff.tmp
+"$RUNSCRIPTDIR/compare.sh" program.out testdata.out diff.out 2>diff.tmp
 exitcode=$?
 
 if [ $exitcode -ne 0 ]; then
