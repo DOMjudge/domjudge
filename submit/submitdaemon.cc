@@ -48,6 +48,11 @@ using namespace std;
 /* Some system/site specific config */
 #include "../etc/config.h"
 
+/* These defines are needed in 'version' in submitcommon.h */
+#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
+#define PROGRAM "submitdaemon"
+#define AUTHORS "Peter van de Werken & Jaap Eldering"
+
 /* Logging and error functions */
 #include "../lib/lib.error.h"
 
@@ -57,10 +62,6 @@ using namespace std;
 
 /* Common send/receive functions */
 #include "submitcommon.h"
-
-#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
-#define PROGRAM "submitdaemon"
-#define AUTHORS "Peter van de Werken & Jaap Eldering"
 
 #define BACKLOG 32      /* how many pending connections queue will hold */
 #define LINELEN 256     /* maximum length read from submit_db stdout lines */
@@ -93,26 +94,18 @@ struct sockaddr_in server_addr; /* server address information */
 struct sockaddr_in client_addr; /* client address information */
 socklen_t sin_size;
 
-void version()
-{
-	printf("%s %s\n",DOMJUDGE_PROGRAM,PROGRAM);
-	printf("Written by %s\n\n",AUTHORS);
-	printf("%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n",PROGRAM);
-	printf("are welcome to redistribute it under certain conditions.  See the GNU\n");
-	printf("General Public Licence for details.\n");
-	exit(0);
-}
-
 void usage()
 {
-	printf("Usage: %s [OPTION]...\n",progname);
-	printf("Start the submitserver.\n");
-	printf("\n");
-	printf("  -P, --port=PORT       set TCP port to listen on to PORT (default: %i)\n", port);
-	printf("  -v, --verbose=LEVEL   set verbosity to LEVEL (syslog levels)\n");
-	printf("      --help            display this help and exit\n");
-	printf("      --version         output version information and exit\n");
-	printf("\n");
+	printf(
+"Usage: %s [OPTION]...\n"
+"Start the submitserver.\n"
+"\n"
+"  -P, --port=PORT       set TCP port to listen on to PORT (default: %i)\n"
+"  -v, --verbose=LEVEL   set verbosity to LEVEL (syslog levels)\n"
+"      --help            display this help and exit\n"
+"      --version         output version information and exit\n"
+"\n",progname,port);
+	
 	exit(0);
 }
 

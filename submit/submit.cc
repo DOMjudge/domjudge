@@ -49,6 +49,11 @@ using namespace std;
 /* Some system/site specific config */
 #include "../etc/config.h"
 
+/* These defines are needed in 'version' in submitcommon.h */
+#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
+#define PROGRAM "submit"
+#define AUTHORS "Peter van de Werken & Jaap Eldering"
+
 /* Logging and error functions */
 #include "../lib/lib.error.h"
 
@@ -58,10 +63,6 @@ using namespace std;
 
 /* Common send/receive functions */
 #include "submitcommon.h"
-
-#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
-#define PROGRAM "submit"
-#define AUTHORS "Peter van de Werken & Jaap Eldering"
 
 #if defined(__CYGWIN__) || defined(__CYGWIN32__)
 #define COPY_CMD "c:/cygwin/bin/cp"
@@ -400,73 +401,63 @@ int main(int argc, char **argv)
     return 0;
 }
 
-
-void version()
-{
-printf("%s %s\n",DOMJUDGE_PROGRAM,PROGRAM);
-printf("Written by %s\n\n",AUTHORS);
-printf("%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n",PROGRAM);
-printf("are welcome to redistribute it under certain conditions.  See the GNU\n");
-printf("General Public Licence for details.\n");
-exit(0);
-}
-
 void usage()
 {
-unsigned i,j;
-printf("Usage: %s [OPTION]... FILENAME\n",progname);
-printf("Submit a solution for a problem.\n");
-printf("\n");
-printf("Options (see below for more information)\n");
-printf("  -p, --problem=PROBLEM    submit for problem PROBLEM\n");
-printf("  -l, --language=LANGUAGE  submit in language LANGUAGE\n");
-printf("  -s, --server=SERVER      submit to server SERVER\n");
-printf("  -t, --team=TEAM          submit as team TEAM\n");
-printf("  -v, --verbose=LEVEL      set verbosity to LEVEL, where LEVEL must be\n");
-printf("                               numerically specified as in 'syslog.h'\n");
-printf("                               defaults to LOG_INFO without argument\n");
-printf("  -q, --quiet              set verbosity to LOG_ERR and suppress user\n");
-printf("                               input and warning/info messages\n");
-printf("      --help               display this help and exit\n");
-printf("      --version            output version information and exit\n\n");
-printf("Explanation of submission options:\n");
-printf("\n");
-printf("For PROBLEM use the ID of the problem (letter, number or short name)\n");
-printf("in lower- or uppercase. When not specified, PROBLEM defaults to\n");
-printf("FILENAME excluding the extension.\n");
-printf("For example, 'c.java' will indicate problem 'C'.\n");
-printf("\n");
-printf("For LANGUAGE use one of the following extensions in lower- or uppercase:\n");
-for(i=0; i<languages.size(); i++) {
-	printf("   %-10s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
-	for(j=2; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
-	printf("\n");
-}
-printf("The default for LANGUAGE is the extension of FILENAME.\n");
-printf("For example, 'c.java' wil indicate a Java solution.\n");
-printf("\n");
-printf("Examples:\n");
-printf("\n");
-printf("Submit problem 'c' in Java:\n");
-printf("    %s c.java\n",progname);
-printf("\n");
-printf("Submit problem 'e' in C++:\n");
-printf("    %s --problem e --language=cpp ProblemE.cc\n",progname);
-printf("\n");
-printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n");
-printf("    %s -p hello -l C HelloWorld.java\n",progname);
-printf("\n");
-printf("The following options should normally not be needed:\n");
-printf("\n");
-printf("For SERVER use the servername or IP-address of the submit-server.\n");
-printf("The default value for SERVER is defined internally or otherwise\n");
-printf("taken from the environment variable 'SUBMITSERVER', or 'localhost'\n");
-printf("if 'SUBMITSERVER' is not defined.\n");
-printf("\n");
-printf("For TEAM use the login of the account, you want to submit for.\n");
-printf("The default value for TEAM is taken from the environment variable\n");
-printf("'TEAM' or your login name if 'TEAM' is not defined.\n");
-exit(0);
+	unsigned i,j;
+	
+	printf("Usage: %s [OPTION]... FILENAME\n",progname);
+	printf(
+"Submit a solution for a problem.\n"
+"\n"
+"Options (see below for more information)\n"
+"  -p, --problem=PROBLEM    submit for problem PROBLEM\n"
+"  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
+"  -s, --server=SERVER      submit to server SERVER\n"
+"  -t, --team=TEAM          submit as team TEAM\n"
+"  -v, --verbose=LEVEL      set verbosity to LEVEL, where LEVEL must be\n"
+"                               numerically specified as in 'syslog.h'\n"
+"                               defaults to LOG_INFO without argument\n"
+"  -q, --quiet              set verbosity to LOG_ERR and suppress user\n"
+"                               input and warning/info messages\n"
+"      --help               display this help and exit\n"
+"      --version            output version information and exit\n\n"
+"Explanation of submission options:\n"
+"\n"
+"For PROBLEM use the ID of the problem (letter, number or short name)\n"
+"in lower- or uppercase. When not specified, PROBLEM defaults to\n"
+"FILENAME excluding the extension.\n"
+"For example, 'c.java' will indicate problem 'C'.\n"
+"\n"
+"For LANGUAGE use one of the following extensions in lower- or uppercase:\n");
+	for(i=0; i<languages.size(); i++) {
+		printf("   %-10s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
+		for(j=2; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
+		printf("\n");
+	}
+	printf(
+"The default for LANGUAGE is the extension of FILENAME.\n"
+"For example, 'c.java' wil indicate a Java solution.\n"
+"\n"
+"Examples:\n"
+"\n");
+	printf("Submit problem 'c' in Java:\n"
+	       "    %s c.java\n\n",progname);
+	printf("Submit problem 'e' in C++:\n"
+	       "    %s --problem e --language=cpp ProblemE.cc\n\n",progname);
+	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
+	       "    %s -p hello -l C HelloWorld.java\n\n",progname);
+	printf(
+"The following options should normally not be needed:\n"
+"\n"
+"For SERVER use the servername or IP-address of the submit-server.\n"
+"The default value for SERVER is defined internally or otherwise\n"
+"taken from the environment variable 'SUBMITSERVER', or 'localhost'\n"
+"if 'SUBMITSERVER' is not defined.\n"
+"\n"
+"For TEAM use the login of the account, you want to submit for.\n"
+"The default value for TEAM is taken from the environment variable\n"
+"'TEAM' or your login name if 'TEAM' is not defined.\n");
+	exit(0);
 }
 
 void usage2(int errnum, char *mesg, ...)

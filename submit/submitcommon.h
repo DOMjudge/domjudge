@@ -25,6 +25,9 @@
 /* Buffer where the last received message is stored */
 char lastmesg[SOCKETBUFFERSIZE];
 
+void version();
+/* Print program version, authors, etc. in GNU style */
+
 void vsendit(int, char *, va_list);
 void  sendit(int, char *, ...);
 /* Send a message over a socket and log it (va_list and argument list versions).
@@ -104,6 +107,16 @@ int execute(char *, char **, int , int[3], int );
 
 
 /* ========================= IMPLEMENTATION ============================== */
+
+void version()
+{
+	printf("%s %s\nWritten by %s\n\n",DOMJUDGE_PROGRAM,PROGRAM,AUTHORS);
+	printf(
+"%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
+"are welcome to redistribute it under certain conditions.  See the GNU\n"
+"General Public Licence for details.\n",PROGRAM);
+	exit(0);
+}
 
 void vsendit(int fd, char *mesg, va_list ap)
 {
