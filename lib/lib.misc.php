@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Misc. functions
+ *
+ * $Id$
+ */
+
 function printtime($datetime) {
 	$date_time = explode(' ',$datetime);
 	return $date_time[1];
