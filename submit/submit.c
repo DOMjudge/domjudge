@@ -37,7 +37,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <getopt.h>
-#include <libgen.h>
 #include <termios.h>
 
 /* Some C++ includes for easy string handling */
@@ -52,11 +51,12 @@ using namespace std;
 /* Logging and error functions */
 #include "../lib/lib.error.h"
 
+/* Include some functions, which are not always available */
+#include "../lib/mkstemps.h"
+#include "../lib/basename.h"
+
 /* Common send/receive functions */
 #include "submitcommon.h"
-
-/* Include 'mkstemps' function from GNU libiberty library */
-#include "../lib/mkstemps.h"
 
 #define PROGRAM "submit"
 #define VERSION "0.1"
@@ -96,7 +96,6 @@ void usage();
 void usage2(int , char *, ...);
 void warnuser(char *);
 char readanswer(char *answers);
-char *allocstr(char *format, ...);
 
 int nwarnings;
 
@@ -237,7 +236,8 @@ int main(int argc, char **argv)
 		for(i=0; i<filebase.length(); i++) {
 			if ( ! isalnum(filebase[i]) ) break;
 		}
-		if ( i>=filebase.length() && filebase.length()>0 ) problem = filebase;
+		if ( i>=filebase.length() && filebase.length()>0 &&
+		     problem.empty() ) problem = filebase;
 
 		/* TODO: check extension for languages */
 	}
@@ -271,7 +271,7 @@ int main(int argc, char **argv)
 	tempfile = allocstr("%s/%s.XXXXXX.%s",submitdir,
 	                    problem.c_str(),language.c_str());
 	temp_fh = mkstemps(tempfile,language.length()+1);
-	if ( temp_fh==-1 || strlen(tempfile)==0 ) {
+	if ( temp_fh<0 || strlen(tempfile)==0 ) {
 		error(errno,"mkstemps cannot create tempfile");
 	}
 
@@ -300,36 +300,24 @@ int main(int argc, char **argv)
 		error(0,"cannot get address of server");
 	}
 
-	//server_inetaddr.s_addr = *((unsigned long int *) serverinfo->h_addr[0]);
-	
-	logmsg(LOG_DEBUG,"%d.%d.%d.%d",
-		   (unsigned char)serverinfo->h_addr[0],
-		   (unsigned char)serverinfo->h_addr[1],
-		   (unsigned char)serverinfo->h_addr[2],
-		   (unsigned char)serverinfo->h_addr[3]);
-
-	if ( inet_aton(serverinfo->h_addr_list[0],&server_inetaddr)!=0 ) {
-		error(0,"invalid server address `%d'",inet_ntoa(server_inetaddr));
-	}
-
-	//logmsg(LOG_DEBUG,"server address %s",inet_ntoa(server_inetaddr));
+	server_inetaddr.s_addr = *((unsigned long int *) serverinfo->h_addr_list[0]);
 	
 	server_sockaddr.sin_family = AF_INET;
 	server_sockaddr.sin_port   = htons(port);
 	server_sockaddr.sin_addr   = server_inetaddr;
-
+	
 	/* Don't bind socket_fd, so a local port automatically is assigned */
 	if ( connect(socket_fd,(struct sockaddr *) &server_sockaddr,
 	             sizeof(struct sockaddr))!=0 ) {
 		error(errno,"cannot connect to the server");
 	}
 
-	logmsg(LOG_INFO,"connected, server-address: %s",serverinfo->h_addr_list[0]);
+	logmsg(LOG_INFO,"connected, server-address: %s",inet_ntoa(server_inetaddr));
 
 	receive(socket_fd);
 
 	/* Send submission info */
-	logmsg(LOG_NOTICE,"sendind data...");
+	logmsg(LOG_NOTICE,"sending data...");
 	sendit(socket_fd,"+team %s",team.c_str());
 	receive(socket_fd);
 	sendit(socket_fd,"+problem %s",problem.c_str());
@@ -472,28 +460,6 @@ char readanswer(char *answers)
 	tcsetattr(STDIN_FILENO,TCSANOW,&old_termio);
 
 	return c;
-}
-
-char *allocstr(char *format, ...)
-{
-	va_list ap;
-	char *str;
-	char tmp[2];
-	int len, n;
-
-	va_start(ap,format);
-	len = vsnprintf(tmp,1,format,ap);
-	va_end(ap);
-	
-	if ( (str = (char *) malloc(len+1))==NULL ) error(errno,"allocating string");
-
-	va_start(ap,format);
-	n = vsnprintf(str,len+1,format,ap);
-	va_end(ap);
-
-	if ( n==-1 || n>len ) error(0,"cannot write all of string");
-
-	return str;
 }
 
 //  vim:ts=4:sw=4:
