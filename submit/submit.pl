@@ -213,7 +213,6 @@ For LANGUAGE use one of the following in lower- or uppercase:
    C++:      cc, cpp, c++
    Java:     java
    Pascal:   pas
-   Haskell:  hs
 The default for LANGUAGE is the extension of FILENAME.
 For example, 'c.java' wil indicate a Java solution.
 
@@ -328,7 +327,7 @@ if ( ! defined $language ) {
 	        /\.cpp$/i ||
 	        /\.c\+\+$/i ) { $language = "cpp" }
 	elsif ( /\.java$/i  ) { $language = "java" }
-	elsif ( /\.hs$/i    ) { $language = "haskell" }
+#	elsif ( /\.hs$/i    ) { $language = "haskell" }
 	elsif ( /\.pas$/i   ) { $language = "pascal" }
 	else { die "No language specified (as argument or in filename).\n$usage2"; }
 }
