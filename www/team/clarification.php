@@ -9,7 +9,7 @@
 $respid = (int)@$_GET['id'];
 
 require('init.php');
-$refresh = addUrl('30;url=clarification.php?id='.$respid, $popupTag);
+$refresh = '30;url=clarification.php?id='.$respid;
 $title = 'Clarification Response';
 include('../header.php');
 include('menu.php');
