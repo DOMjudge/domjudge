@@ -195,7 +195,7 @@ fi
 #fi
 if [ $exitcode -ne 0 ]; then
 	echo "Non-zero exitcode." | tee error.out
-	exit $E_EXITCODE
+	exit $exitcode
 fi
 cp error.tmp error.out
 
