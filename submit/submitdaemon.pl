@@ -75,6 +75,7 @@ sub error {
 	if ( $socket ) {
 		sendit "-error: @_";
 		$socket->close();
+		$socket = '';
 	}
 	logmsg($LOG_ERR,"error: @_");
 	die;
@@ -92,8 +93,13 @@ sub sendit { # 'send' is already defined
 sub receive {
 	if ( ! ($_ = <$socket>) ) { return $failure; }
 	netchomp;
-	if ( /^[^+]/ ) { error "received: $_"; }
 	logmsg($LOG_DEBUG,"recv: $_");
+	if ( /^[^+]/ ) {
+		$socket->close();
+		$socket = '';
+		s/-?(error: )?//;
+		error "$_";
+	}
 	s/^.//;
 	$lastreply = $_;
 	return $success;
@@ -166,10 +172,12 @@ sub child {
 		} elsif ( /^quit:?\s*(.*)$/i ) {
 			logmsg($LOG_NOTICE,"received quit: '$1'");
 			$socket->close();
+			$socket = '';
 			return $failure;
 		} elsif ( /^error:?\s*(.*)$/i ) {
 			logmsg($LOG_NOTICE,"received error: '$1'");
 			$socket->close();
+			$socket = '';
 			return $failure;
 		} elsif ( /^done\s*$/i ) {
 			last;
@@ -203,15 +211,19 @@ sub child {
 	
 	# Check with database for correct parameters and then
 	# add a database entry for this file.
-	my $stderr = readpipe ("./submit_db.php $team $ip $problem $language ".basename($tmpfile)." 2>&1 1>/dev/null");
-	$stderr =~ s/^submit_db: //;
-	if ( $? != 0 ) { error ($stderr); }
+	my $output = readpipe("./submit_db.php $team $ip $problem $language ".basename($tmpfile)." 2>&1");
+	my $exitcode = $?;
+	print STDERR $output;
+	$output =~ s/.*error: //s;
+	$output =~ s/\n.*//s;
+	if ( $exitcode != 0 ) { error($output); }
 	logmsg($LOG_INFO,"added submission to database");
 
 	unlink($tmpfile) or error "deleting '$tmpfile': $!";
 
 	sendit "+submission successful";
 	$socket->close();
+	$socket = '';
 	
 	return $success;
 }
@@ -244,6 +256,7 @@ while ( 1 ) {
 		logmsg($LOG_INFO,"incoming connection, spawning child");
 		spawn sub { child; };
 		$socket->close();
+		$socket = '';
 	}
 }
 

@@ -53,9 +53,8 @@ use File::Copy;
 use File::Basename;
 use File::Temp;
 use File::stat;
-use POSIX qw(strftime);
+use POSIX qw(:termios_h strftime);
 use Getopt::Long;
-use HotKey;
 
 # Variables defining where/how to store files.
 my $submitdir = "$ENV{HOME}/$USERSUBMITDIR";
@@ -106,6 +105,7 @@ sub error {
 	if ( $socket ) {
 		sendit "-error: @_";
 		$socket->close();
+		$socket = '';
 	}
 	logmsg($LOG_ERR,"error: @_");
 	die;
@@ -123,8 +123,13 @@ sub sendit { # 'send' is already defined
 sub receive {
 	if ( ! ($_ = <$socket>) ) { return $failure; }
 	netchomp;
-	if ( /^[^+]/ ) { error "received: $_"; }
 	logmsg($LOG_DEBUG,"recv: $_");
+	if ( /^[^+]/ ) {
+		$socket->close();
+		$socket = '';
+		s/-?(error: )?//;
+		error "$_";
+	}
 	s/^.//;
 	$lastreply = $_;
 	return $success;
@@ -134,6 +139,40 @@ sub warnuser {
 	if ( ! $quiet ) { print "WARNING: @_.\n"; }
 	$userwarning++;
 }
+
+### Copied inline from HotKey.pm ###
+my ($term, $oterm, $echo, $noecho, $fd_stdin);
+
+$fd_stdin = fileno(STDIN);
+$term     = POSIX::Termios->new();
+$term->getattr($fd_stdin);
+$oterm     = $term->getlflag();
+
+$echo     = ECHO | ECHOK | ICANON;
+$noecho   = $oterm & ~$echo;
+
+sub cbreak {
+	$term->setlflag($noecho);  # ok, so i don't want echo either
+	$term->setcc(VTIME, 1);
+	$term->setattr($fd_stdin, TCSANOW);
+}
+
+sub cooked {
+	$term->setlflag($oterm);
+	$term->setcc(VTIME, 0);
+	$term->setattr($fd_stdin, TCSANOW);
+}
+
+sub readkey {
+	my $key = '';
+	cbreak();
+	sysread(STDIN, $key, 1);
+	cooked();
+	return $key;
+}
+
+END { cooked() }
+### End of HotKey.pm ###
 
 sub readanswer {
 	my $answers = shift;
@@ -351,6 +390,7 @@ sendit "+done";
 while ( receive ) {};
 
 $socket->close();
+$socket = '';
 logmsg($LOG_INFO,"connection closed");
 
 unlink($tmpfile) or error "deleting '$tmpfile': $!";
