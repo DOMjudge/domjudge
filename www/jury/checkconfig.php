@@ -89,6 +89,7 @@ while($cdata = $res->next()) {
 
 echo "<h2>Submissions</h2>\n\n<p>Checking submissions...<br />\n";
 
+// check for non-existent problem references
 $res = $DB->q('SELECT s.submitid,s.probid,s.cid FROM submission s LEFT OUTER JOIN problem p
 	USING(probid)
 	WHERE s.cid != p.cid');
@@ -100,9 +101,20 @@ if($res->count() > 0) {
 	}
 }
 
+// check for submissions that have been marked by a judger but that have no judging-row
+$res = $DB->q('SELECT s.submitid FROM submission s LEFT OUTER JOIN judging j USING(submitid)
+	WHERE j.submitid IS NULL AND s.judgerid IS NOT NULL');
+
+if($res->count() > 0) {
+	while($row = $res->next()) {
+		err('Submission s' .  $row['submitid'] . ' has a judgerid but no entry in judgings!');
+	}
+}
+
 
 echo "</p>\n\n<h2>Judgings</h2>\n\n<p>Checking judgings...<br />\n";
 
+// check for start/endtime problems and contestids
 $res = $DB->q('SELECT s.submitid as s_submitid, j.submitid as j_submitid,
 	judgingid, starttime, endtime, submittime, s.cid AS s_cid, j.cid AS j_cid
 	FROM judging j LEFT OUTER JOIN submission s USING(submitid)
