@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 0.1.1 - CVS
--------------------
+Version 0.1.1 - 24 November 2004
+--------------------------------
  - Improve documentation layout.
  - Improve Makefiles and add global targets.
  - Move passwords to separate passwords.php file.
