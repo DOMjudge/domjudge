@@ -286,6 +286,6 @@ if [ -s diff.out ]; then
 	exit $E_ANSWER
 fi
 
-echo "Correct!" >>error.out
+echo "Correct! Runtime is `cat program.time` seconds." >>error.out
 cat error.tmp >>error.out
 exit $E_CORRECT
