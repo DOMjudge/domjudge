@@ -120,43 +120,6 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 
 
 /**
- * Outputs a list of judgings, limited by key=value
- */
-function putJudgings($key, $value) {
-	global $DB;
-
-	// get the judgings for a specific key and value pair
-	$res = $DB->q('SELECT * FROM judging
-		WHERE '.$key.' = %s AND cid = %i ORDER BY starttime DESC',
-		$value, getCurContest() );
-
-	if( $res->count() == 0 ) {
-		echo "<p><em>No judgings.</em></p>\n\n";
-	} else {
-		echo "<table>\n<tr><th>ID</th><th>start</th><th>end</th>";
-		if ( $key != 'judge' ) echo "<th>judge</th>";
-		echo "<th>result</th><th>valid</th></tr>\n";
-		while( $jud = $res->next() ) {
-			echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
-			echo '<td><a href="judging.php?id=' . (int)$jud['judgingid'] .
-				'">j' .	(int)$jud['judgingid'] . '</a></td>';
-			echo '<td>' . printtime($jud['starttime']) . '</td>';
-			echo '<td>' . printtime(@$jud['endtime'])  . '</td>';
-			echo '<td><a href="judger.php?id=' . urlencode(@$jud['judgerid']) .
-				'">' . printhost(@$jud['judgerid']) . '</a></td>';
-			echo '<td><a href="judging.php?id=' . (int)$jud['judgingid'] . '">' .
-				printresult(@$jud['result'], $jud['valid']) . '</a></td>';
-			echo '<td align="center">' . printyn($jud['valid']) . '</td>';
-			echo "</tr>\n";
-		}
-		echo "</table>\n\n";
-	}
-
-	return;
-}
-
-
-/**
  * Output clock
  */
 function putClock() {
