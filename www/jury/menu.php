@@ -9,5 +9,7 @@
 <a href="scoreboard.php">scoreboard</a>
 </div>
 
-<?php putClock(); ?>
+<?php putClock();
+// $Id$
+?>
 

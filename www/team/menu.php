@@ -5,5 +5,7 @@
 <a href="<?=addUrl('scoreboard.php', $popupTag)?>">scoreboard</a>
 </div>
 
-<?php putClock(); ?>
+<?php putClock();
+// $Id$
+?>
 
