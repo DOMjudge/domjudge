@@ -5,14 +5,22 @@
  * $Id$
  */
 
-$id = $_GET['id'];
+$id = $_REQUEST['id'];
 
 require('init.php');
 $refresh = '15;url=' . getBaseURI() . 'jury/problem.php?id=' . urlencode($id);
-$title = 'Problem';
+$title = 'Problem '.htmlspecialchars(@$id);
 require('../header.php');
 require('menu.php');
 
+if ( ! $id ) error ("Missing problem id");
+
+if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
+	rejudge('probid',$id);
+
+	header('Location: ' . getBaseURI() . 'jury/problem.php?id=' . urlencode($id) );
+	exit;
+}
 
 echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
 
@@ -28,6 +36,14 @@ $data = $DB->q('TUPLE SELECT * FROM problem NATURAL JOIN contest WHERE probid = 
 <tr><td>Testdata:</td><td class="filename"><?=htmlspecialchars($data['testdata'])?></td></tr>
 <tr><td>Timelimit:</td><td><?=(int)$data['timelimit']?></td></tr>
 </table>
+
+<form action="problem.php" method="post">
+<p>
+<input type="hidden" name="id" value="<?=$id?>" />
+<input type="hidden" name="cmd" value="rejudge" />
+<input type="submit" value=" REJUDGE ALL! " />
+</p>
+</form>
 
 <h2>Submissions for <?=htmlspecialchars($id)?></h2>
 

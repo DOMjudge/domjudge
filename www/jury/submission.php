@@ -16,9 +16,11 @@ if ( ! $id ) error ("Missing submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.sourcefile,
 	t.name as teamname, l.name as langname, p.name as probname, c.cid, c.contestname
-	FROM submission s LEFT JOIN team t ON (t.login=s.team)
-	LEFT JOIN problem p ON (p.probid=s.probid) LEFT JOIN language l ON (l.langid=s.langid)
-	LEFT JOIN contest c ON (c.cid = s.cid)
+	FROM submission s
+	LEFT JOIN team     t ON (t.login=s.team)
+	LEFT JOIN problem  p ON (p.probid=s.probid)
+	LEFT JOIN language l ON (l.langid=s.langid)
+	LEFT JOIN contest  c ON (c.cid = s.cid)
 	WHERE submitid = %i', $id);
 
 if ( ! $submdata ) error ("Missing submission data");
@@ -29,14 +31,9 @@ $iscorrect = (bool) $DB->q('VALUE SELECT count(judgingid) FROM judging WHERE sub
 if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 	if ( $iscorrect ) error("Submission already judged as valid, not rejudging.");
 
-	// START TRANSACTION
-	$DB->q('UPDATE judging SET valid = 0 WHERE submitid = %i', $id);
-	$DB->q('UPDATE submission SET judgerid = NULL, judgemark = NULL WHERE submitid = %i', $id);
-
-	calcScoreRow($submdata['cid'], $submdata['team'], $submdata['probid']);
-	// END TRANSACTION
-
-	header('Location: ' . getBaseURI() . 'jury/submission.php?id=' . urlencode($id) ) ;
+	rejudge('submitid',$id);
+	
+	header('Location: ' . getBaseURI() . 'jury/submission.php?id=' . urlencode($id) );
 	exit;
 }
 
@@ -57,21 +54,17 @@ echo "<h1>Submission s$id</h1>\n\n";
 <tr><td>Source:</td><td class="filename"><a href="show_source.php?id=<?=$id?>"><?= htmlspecialchars($submdata['sourcefile']) ?></a></td></tr>
 </table>
 
-<h3>Judgings</h3>
-
-<?php
-putJudgings('submitid', $id);
-
-?>
-
 <form action="submission.php" method="post">
 <p>
 <input type="hidden" name="id" value="<?=$id?>" />
 <input type="hidden" name="cmd" value="rejudge" />
-<input type="submit" value=" Rejudge Me! " <?=($iscorrect?'disabled="disabled "':'')?>/>
+<input type="submit" value=" REJUDGE! " <?=($iscorrect?'disabled="disabled "':'')?>/>
 </p>
 </form>
 
+<h3>Judgings</h3>
+
 <?php
+putJudgings('submitid', $id);
 
 require('../footer.php');
