@@ -15,8 +15,8 @@ function putJudgings($key, $value) {
 
 	// get the judgings for a specific key and value pair
 	$res = $DB->q('SELECT * FROM judging
-	               WHERE %s = %s AND cid = %i ORDER BY starttime DESC',
-	               $key, $value, getCurContest() );
+	               WHERE '.$key.' = %s AND cid = %i ORDER BY starttime DESC',
+	               $value, getCurContest() );
 
 	if( $res->count() == 0 ) {
 		echo "<p><em>No judgings.</em></p>\n\n";
@@ -56,19 +56,20 @@ function rejudge($key, $value) {
 	$DB->q('UPDATE judging j
 	        LEFT JOIN submission s ON (s.submitid=j.submitid)
 	        SET j.valid = 0, s.judgerid = NULL, s.judgermark = NULL
-	        WHERE %s = %s AND cid = %i AND valid = 1 AND result != correct',
-	       $key, $value, $cid);
+	        WHERE s.'.$key.' = %s AND cid = %i AND valid = 1 AND
+	        ( result IS NULL OR result != "correct" )',
+	       $value, $cid);
 */
 	
 	// Using MySQL < 4.0.4:
 
-	$res = $DB->q('SELECT j.*,s.submitid,s.team,s.probid FROM judging j
+	$res = $DB->q('SELECT j.*,s.submitid,s.team,s.probid,s.langid FROM judging j
 	               LEFT JOIN submission s ON (s.submitid=j.submitid)
-	               WHERE s.%s = %s AND j.cid = %i AND valid = 1 AND result != "correct"',
-				  $key, $value, $cid);
+	               WHERE s.'.$key.' = %s AND j.cid = %i AND valid = 1 AND
+	               ( result IS NULL OR result != "correct" )',
+	              $value, $cid);
 
 	while ( $jud = $res->next() ) {
-		logmsg(LOG_NOTICE,$jud['judgingid']);
 		// START TRANSACTION
 		$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
 		       $jud['judgingid']);
