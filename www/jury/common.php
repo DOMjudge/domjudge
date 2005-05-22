@@ -3,7 +3,7 @@
 /**
  * Common functions in jury interface
  *
- * $Id: common.php 696 2005-01-21 20:42:36Z nkp0405 $
+ * $Id$
  */
 
 
@@ -45,6 +45,7 @@ function putJudgings($key, $value) {
 
 /**
  * Marks a set of submissions for rejudging, limited by key=value
+ * key has to be a full quantifier, e.g. "submission.team"
  */
 function rejudge($key, $value) {
 	global $DB;
@@ -53,19 +54,19 @@ function rejudge($key, $value) {
 
 	// Using MySQL >= 4.0.4:
 /*
-	$DB->q('UPDATE judging j
-	        LEFT JOIN submission s ON (s.submitid=j.submitid)
-	        SET j.valid = 0, s.judgerid = NULL, s.judgermark = NULL
-	        WHERE s.'.$key.' = %s AND cid = %i AND valid = 1 AND
+	$DB->q('UPDATE judging
+	        LEFT JOIN submission ON (submission.submitid=judging.submitid)
+	        SET valid = 0, judgerid = NULL, judgermark = NULL
+	        WHERE '.$key.' = %s AND judging.cid = %i AND valid = 1 AND
 	        ( result IS NULL OR result != "correct" )',
 	       $value, $cid);
 */
 	
 	// Using MySQL < 4.0.4:
 
-	$res = $DB->q('SELECT j.*,s.submitid,s.team,s.probid,s.langid FROM judging j
-	               LEFT JOIN submission s ON (s.submitid=j.submitid)
-	               WHERE s.'.$key.' = %s AND j.cid = %i AND valid = 1 AND
+	$res = $DB->q('SELECT * FROM judging
+	               LEFT JOIN submission ON (submission.submitid=judging.submitid)
+	               WHERE '.$key.' = %s AND judging.cid = %i AND valid = 1 AND
 	               ( result IS NULL OR result != "correct" )',
 	              $value, $cid);
 
