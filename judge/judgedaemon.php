@@ -100,12 +100,11 @@ while ( TRUE ) {
 		if ( ! $waiting ) {
 			logmsg(LOG_INFO, "No submissions in queue, waiting...");
 			$waiting = TRUE;
-		} else {
-			echo ".";
 		}
 		sleep($waittime);
 		continue;
 	}
+
 	$waiting = FALSE;
 
 	// get max.runtime, path to submission and other params
