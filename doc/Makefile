@@ -8,7 +8,7 @@ TARGETSDVI = $(addsuffix .dvi,$(TARGETS))
 TARGETSPS  = $(addsuffix .ps ,$(TARGETS))
 TARGETSPDF = $(addsuffix .pdf,$(TARGETS))
 
-LATEXOPTIONS = --file-line-error-style --interaction=errorstopmode
+LATEXOPTIONS = --interaction=errorstopmode
 
 CONFIGDIR = ../etc
 
