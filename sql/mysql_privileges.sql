@@ -15,6 +15,7 @@ INSERT INTO db VALUES ('localhost','domjudge','domjudge_jury','Y','Y','Y','Y','Y
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team','language','name',NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team','language','langid',NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team','problem','probid',NOW(),'Select');
+INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team','problem','cid',NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team','problem','name',NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team','problem','allow_submit',NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_public','judging','judgingid',NOW(),'Select');
