@@ -213,7 +213,7 @@ function cmp ($a, $b) {
 	}
 	// else, order by teamname alphabetically
 	if ( $a['teamname'] != $b['teamname'] ) {
-		return $a['teamname'] < $b['teamname'] ? -1 : 1;
+		return strcasecmp($a['teamname'],$b['teamname']);
 	}
 	// undecided, should never happen in practice
 	return 0;
