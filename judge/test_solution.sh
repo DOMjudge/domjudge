@@ -97,7 +97,7 @@ logmsg $LOG_INFO "arguments: '$SOURCE' '$PROGLANG' '$TESTIN' '$TESTOUT' '$TIMELI
 
 [ -r "$SOURCE"  ] || error "solution not found: $SOURCE";
 [ -r "$TESTIN"  ] || error "test-input not found: $TESTIN";
-[ -r "$TESTOUT" ] || error "test-ouput not found: $TESTOUT";
+[ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT";
 [ -d "$TMPDIR" -a -w "$TMPDIR" -a -x "$TMPDIR" ] || \
 	error "Tempdir not found or not writable: $TMPDIR"
 
