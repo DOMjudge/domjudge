@@ -9,7 +9,7 @@ INSERT INTO user VALUES ('localhost','domjudge_team',PASSWORD('team'),'N','N','N
 INSERT INTO user VALUES ('localhost','domjudge_public',PASSWORD('public'),'N','N','N','N','N','N','N','N','N','N','N','N','N','N');
 
 # Juryaccount can do anything to the database
-INSERT INTO db VALUES ('localhost','domjudge_jury','domjudge','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
+INSERT INTO db VALUES ('localhost','domjudge','domjudge_jury','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
 
 # Other privileges
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team','language','name',NOW(),'Select');
