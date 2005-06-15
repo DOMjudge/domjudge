@@ -10,9 +10,6 @@ $pagename = basename($_SERVER['PHP_SELF']);
 $id = $_REQUEST['id'];
 
 require('init.php');
-$title = 'Submission '.@$id;
-require('../header.php');
-require('menu.php');
 
 if ( ! $id ) error("Missing or invalid submission id");
 
@@ -36,6 +33,10 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 	header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
 	exit;
 }
+
+$title = 'Submission '.@$id;
+require('../header.php');
+require('menu.php');
 
 echo "<h1>Submission ".htmlspecialchars($id)."</h1>\n\n";
 
