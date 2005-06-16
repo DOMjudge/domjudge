@@ -10,6 +10,7 @@ $pagename = basename($_SERVER['PHP_SELF']);
 $id = $_REQUEST['id'];
 
 require('init.php');
+$title = 'Submission '.@$id;
 
 if ( ! $id ) error("Missing or invalid submission id");
 
@@ -29,12 +30,11 @@ $iscorrect = (bool)$DB->q('VALUE SELECT count(judgingid) FROM judging WHERE
 
 if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 	if ( $iscorrect ) error("Submission already judged as valid, not rejudging.");
-	rejudge('submitid',$id);
+	rejudge('submission.submitid',$id);
 	header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
 	exit;
 }
 
-$title = 'Submission '.@$id;
 require('../header.php');
 require('menu.php');
 
