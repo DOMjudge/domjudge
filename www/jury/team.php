@@ -12,8 +12,6 @@ $id = $_REQUEST['id'];
 require('init.php');
 $refresh = '15;url='.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id);
 $title = 'Team '.htmlspecialchars(@$id);
-require('../header.php');
-require('menu.php');
 
 if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
 
@@ -25,6 +23,9 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 
 $row = $DB->q('TUPLE SELECT t.*,c.name as catname FROM team t
                LEFT JOIN category c ON(t.category=c.catid) WHERE login = %s', $id);
+
+require('../header.php');
+require('menu.php');
 
 echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 

@@ -12,8 +12,6 @@ $id = $_REQUEST['id'];
 require('init.php');
 $refresh = '15;url='.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id);
 $title = 'Problem '.htmlspecialchars(@$id);
-require('../header.php');
-require('menu.php');
 
 if ( ! $id ) error("Missing or invalid problem id");
 
@@ -22,6 +20,9 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 	header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
 	exit;
 }
+
+require('../header.php');
+require('menu.php');
 
 echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
 

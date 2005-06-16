@@ -9,6 +9,7 @@
 require('init.php');
 $refresh = '30;url=' . getBaseURI() . 'jury/scoreboard.php';
 $title = 'Scoreboard';
+
 include('../header.php');
 include('menu.php');
 require('../scoreboard.php');

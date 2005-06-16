@@ -8,6 +8,7 @@
 require('init.php');
 $refresh = '15;url=' . getBaseURI() . 'jury/submissions.php';
 $title = 'Submissions';
+
 require('../header.php');
 require('menu.php');
 

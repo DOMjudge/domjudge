@@ -8,11 +8,12 @@
 require('init.php');
 $refresh = '15;url='.getBaseURI().'jury/clarifications.php';
 $title = 'Clarification Requests';
+
+$cid = getCurContest();
+
 require('../header.php');
 require('../clarification.php');
 require('menu.php');
-
-$cid = getCurContest();
 
 echo "<h1>Clarifications</h1>\n\n";
 

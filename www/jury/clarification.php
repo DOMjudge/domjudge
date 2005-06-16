@@ -7,6 +7,7 @@
  */
 
 require('init.php');
+$title = 'Clarifications';
 
 $cid = getCurContest();
 
@@ -65,8 +66,6 @@ if ( isset($_REQUEST['submit']) && $_REQUEST['answered']!=NULL ) {
 	exit;
 }
 
-
-$title = 'Clarifications';
 require('../header.php');
 require('menu.php');
 require('../clarification.php');

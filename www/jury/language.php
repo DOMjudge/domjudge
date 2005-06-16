@@ -11,8 +11,6 @@ $id = $_REQUEST['id'];
 
 require('init.php');
 $title = 'Language '.htmlspecialchars(@$id);
-require('../header.php');
-require('menu.php');
 
 if ( ! $id ) error("Missing or invalid language id");
 
@@ -21,6 +19,9 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 	header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
 	exit;
 }
+
+require('../header.php');
+require('menu.php');
 
 echo "<h1>Language ".htmlspecialchars($id)."</h1>\n\n";
 

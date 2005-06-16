@@ -7,12 +7,14 @@
 
 require('init.php');
 $title = 'Teams';
+
+$res = $DB->q('SELECT t.*,c.name as catname FROM team t
+               LEFT JOIN category c ON(t.category=c.catid) ORDER BY t.name');
+
 require('../header.php');
 require('menu.php');
 
 echo "<h1>Teams</h1>\n\n";
-
-$res = $DB->q('SELECT t.*,c.name as catname FROM team t LEFT JOIN category c ON(t.category=c.catid) ORDER BY t.name');
 
 echo "<table>
 <tr><th>login</th><th>teamname</th><th>cat.</th><th>IP address</th></tr>\n";

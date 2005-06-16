@@ -9,8 +9,6 @@ $id = (int)$_GET['id'];
 
 require('init.php');
 $title = 'Judging j'.@$id;
-require('../header.php');
-require('menu.php');
 
 if ( ! $id ) error ("Missing judging id");
 
@@ -22,6 +20,9 @@ $jdata = $DB->q('TUPLE SELECT j.*,s.*,t.*, c.contestname
 	WHERE judgingid = %i', $id);
 
 $sid = (int)$jdata['submitid'];
+
+require('../header.php');
+require('menu.php');
 
 echo "<h1>Judging j$id / s$sid</h1>\n\n";
 

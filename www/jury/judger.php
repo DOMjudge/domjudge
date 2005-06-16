@@ -12,8 +12,6 @@ $id = $_REQUEST['id'];
 require('init.php');
 $refresh = '15;url='.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id);
 $title = 'Judger '.htmlspecialchars(@$id);
-require('../header.php');
-require('menu.php');
 
 if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
 	error("Missing or invalid judger id");
@@ -32,6 +30,9 @@ if ( isset($_POST['cmd']) ) {
 }
 
 $row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $id);
+
+require('../header.php');
+require('menu.php');
 
 echo "<h1>Judger ".printhost($row['judgerid'])."</h1>\n\n";
 

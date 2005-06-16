@@ -7,10 +7,6 @@
 
 require('init.php');
 $title = 'Judgers';
-require('../header.php');
-require('menu.php');
-
-echo "<h1>Judgers</h1>\n\n";
 
 if(isset($_POST['cmd'])) {
 	if($_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate') {
@@ -20,6 +16,11 @@ if(isset($_POST['cmd'])) {
 }
 
 $res = $DB->q('SELECT * FROM judger ORDER BY judgerid');
+
+require('../header.php');
+require('menu.php');
+
+echo "<h1>Judgers</h1>\n\n";
 
 echo "<table>
 <tr><th>judgerid</th><th>active</th></tr>\n";

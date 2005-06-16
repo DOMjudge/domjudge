@@ -7,6 +7,7 @@
 
 require('init.php');
 $title = 'Categories';
+
 require('../header.php');
 require('menu.php');
 
