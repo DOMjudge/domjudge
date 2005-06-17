@@ -6,9 +6,10 @@ Version 0.2.1 - CVS
  - Added FAQ in docs/FAQ.
  - Add missing column_priv (domjudge_user,problem,cid).
  - Fix sorting for equal scores to be alphabetical on teamname.
- - Change FSF address in GPL licence.
- - Add note to INSTALL on adding a 'test' user for judging.
+ - Miscellaneous documentation improvements.
  - Fix some problems with file permissions by setting those explicitly.
+ - Config checker now checks for existence of testdata.{in,out}.
+
 
 Version 0.2.0 - 23 February 2005
 --------------------------------
