@@ -6,6 +6,7 @@ Version 0.2.1 - CVS
  - Add missing column_priv (domjudge_user,problem,cid).
  - Fix sorting for equal scores to be alphabetical on teamname.
  - Change FSF address in GPL licence.
+ - Add note to README on adding a 'test' user for judging.
 
 Version 0.2.0 - 23 February 2005
 --------------------------------
