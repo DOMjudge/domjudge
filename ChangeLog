@@ -9,7 +9,7 @@ Version 0.2.1 - CVS
  - Miscellaneous documentation improvements.
  - Fix some problems with file permissions by setting those explicitly.
  - Config checker now checks for existence of testdata.{in,out}.
- - Web interface copes better with empty team or problem tables.
+ - Web interface copes better with empty database tables.
 
 
 Version 0.2.0 - 23 February 2005

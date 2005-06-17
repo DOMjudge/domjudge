@@ -24,6 +24,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	global $DB;
 
 	$cid = getCurContest();
+	if ( ! $cid ) { echo "<p><em>No contests defined</em></p>\n"; return; }
+	
 	$contdata = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $cid);
 	
 	// page heading with contestname and start/endtimes

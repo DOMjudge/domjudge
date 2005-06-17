@@ -22,27 +22,31 @@ require('menu.php');
 
 echo "<h1>Judgers</h1>\n\n";
 
-echo "<table>
-<tr><th>judgerid</th><th>active</th></tr>\n";
-while($row = $res->next()) {
-	echo "<tr".
-		( $row['active'] ? '': ' class="disabled"').
-		"><td><a href=\"judger.php?id=".urlencode($row['judgerid']).'">'.printhost($row['judgerid']).'</a>'.
-		"</td><td align=\"center\">".printyn($row['active']).
-		"</td></tr>\n";
-}
-echo "</table>\n\n";
-?>
+if( $res->count() == 0 ) {
+	echo "<p><em>No judgers defined</em></p>\n\n";
+} else {
+	echo "<table>
+	<tr><th>judgerid</th><th>active</th></tr>\n";
+	while($row = $res->next()) {
+		echo "<tr".
+			( $row['active'] ? '': ' class="disabled"').
+			"><td><a href=\"judger.php?id=".urlencode($row['judgerid']).'">'.printhost($row['judgerid']).'</a>'.
+			"</td><td align=\"center\">".printyn($row['active']).
+			"</td></tr>\n";
+	}
+	echo "</table>\n\n";
+	?>
 
-<form action="judgers.php" method="post">
-<p><input type="hidden" name="cmd" value="activate" />
-<input type="submit" value=" Go Judgers! " /></p>
-</form>
+	<form action="judgers.php" method="post">
+	<p><input type="hidden" name="cmd" value="activate" />
+	<input type="submit" value=" Go Judgers! " /></p>
+	</form>
 
-<form action="judgers.php" method="post">
-<p><input type="hidden" name="cmd" value="deactivate" />
-<input type="submit" value=" Stop Judgers! " /></p>
-</form>
+	<form action="judgers.php" method="post">
+	<p><input type="hidden" name="cmd" value="deactivate" />
+	<input type="submit" value=" Stop Judgers! " /></p>
+	</form>
 
 <?php
+}
 require('../footer.php');
