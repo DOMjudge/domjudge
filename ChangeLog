@@ -8,6 +8,7 @@ Version 0.2.1 - CVS
  - Fix sorting for equal scores to be alphabetical on teamname.
  - Change FSF address in GPL licence.
  - Add note to INSTALL on adding a 'test' user for judging.
+ - Fix some problems with file permissions by setting those explicitly.
 
 Version 0.2.0 - 23 February 2005
 --------------------------------
