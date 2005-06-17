@@ -2,13 +2,13 @@
   should be running, are running and working correctly.
 
 - submit_copy hack: the submit_copy.sh script is a hack, because at our contest
-  the homedirectory under Windows (Cygwin) and Linux were different. Maybe
+  the home directory under Windows (Cygwin) and Linux were different. Maybe
   implement configurable option for multiple home-directory locations?
 
-- submit input: submit normally requires the user to press a key to aknowlegde
+- submit input: submit normally requires the user to press a key to acknowledge
   submission. This should be implemented more portable to allow porting the
   submit program to other platforms. (Client side only needs submit and
-  webbrowser, so that's fairly portable).
+  web browser, so that's fairly portable).
 
 - error beeps: at the moment, sounds are programmed for errors, submission and
   judging with correct/incorrect result. This helps the jury keep informed, but

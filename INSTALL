@@ -23,7 +23,7 @@ TODO: list of necessary protocols between different parts of the system.
 - One jury account with a homedirectory which is shared between all
   jury-computers (e.g. via NFS).
   
-- Team accounts which are accessible via SSH on the jurycomputers
+- Team accounts which are accessible via SSH on the jury computers
   (a SSH public key of the jury account should be installed on all team
    accounts to provide public-key access).
 
@@ -40,9 +40,9 @@ SOFTWARE REQUIREMENTS
 - make
 
 - For every supported programming language a compiler is needed,
-  which can generate statically linked standalone executables.
+  which can generate statically linked stand-alone executables.
 
-- A webserver which supports PHP >= 4.1.0
+- A web server which supports PHP >= 4.1.0
 
 - MySQL 3.23.x or higher database and client software
 
@@ -141,7 +141,7 @@ SECURITY
 --------
 
 This judging system was developed with security as one of the main
-goals in mind. To implement this rigourously in various aspects 
+goals in mind. To implement this rigorously in various aspects 
 (restricting team access to others and the internet, restricting
 access to the submitted programs on the jury computers, etc...)
 requires root privileges to different parts of the whole contest
@@ -154,7 +154,7 @@ CONSIDERATIONS
 
 Security considerations for a programming contest are a bit different
 from those in normal conditions: normally users only have to be
-protected from deliberately harming eachother. During a contest we
+protected from deliberately harming each other. During a contest we
 also have to restrict users from cooperatively communicating,
 accessing restricted resources (like internet) and restrict user
 programs running on jury computers.
@@ -163,7 +163,7 @@ We expect that chances are small that people are trying to cheat
 during a programming contest: you have to hack the system and make use
 of that within very limited time. And you have to not get caught and
 disqualified afterwards. Therefor passive security measures of warning
-people of the consequenses and only check (or probe) things will
+people of the consequences and only check (or probe) things will
 probably be enough.
 
 However we wanted the system to be as secure as possible within
@@ -209,7 +209,7 @@ A difficult issue is the securing of submitted programs run by the
 jury. We do not have any control over these sources and do not want to
 rely on checking them manually or filtering on things like system
 calls (which can be obscured and are different per language). Therefor
-we decided to tackle this isssue by running these programs in a
+we decided to tackle this issue by running these programs in a
 environment as restrictive as possible. This is done by setting up a
 minimal chroot environment, for which root privileges and statically
 compiled programs are needed. By also limiting all kinds of system

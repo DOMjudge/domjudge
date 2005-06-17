@@ -9,9 +9,9 @@ backgrounds and details of its design.
 Origin
 ------
 
-Although there were already some jurysystems around, we decided to
+Although there were already some jury systems around, we decided to
 write our own, new system for the following reasons:
-- The system used here in Utrecht was set up as a simple perl script,
+- The system used here in Utrecht was set up as a simple Perl script,
   made for local contests with fewer teams and doesn't have the
   required scalability, flexibility, security and ease of use
   necessary for a big contest.
@@ -45,8 +45,8 @@ For the design of this system, the main goals are:
 - security:
 	Although not very likely to happen, we want to detect fraud as
 	much as possible. This is a judging system, so it focuses on
-	security concerning attemps to submit code, which tries to hack the
-	jurysystem. It is difficult to detect malicious code, because this
+	security concerning attempts to submit code, which tries to hack the
+	jury system. It is difficult to detect malicious code, because this
 	differs per language. Therefor we have chosen to secure the system
 	by running compiled programs in a restricted environment.
 - flexibility:

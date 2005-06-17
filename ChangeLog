@@ -5,7 +5,7 @@ Version 0.2.1 - CVS
  - Added mass rejudging support per team,language,problem,judger.
  - Added FAQ in docs/FAQ.
  - Add missing column_priv (domjudge_user,problem,cid).
- - Fix sorting for equal scores to be alphabetical on teamname.
+ - Fix sorting for equal scores to be alphabetical on team name.
  - Miscellaneous documentation improvements.
  - Fix some problems with file permissions by setting those explicitly.
  - Config checker now checks for existence of testdata.{in,out}.
@@ -17,18 +17,18 @@ Version 0.2.0 - 23 February 2005
  - Fixed faulty EPS-logo, finally.
  - Add database privileges and move sql-files to own directory.
  - Improve config.tex dependency.
- - Make the base URI of the webinterface configurable and fix redirects
+ - Make the base URI of the web interface configurable and fix redirects
    to be compatible with the HTTP-specification.
  - Fix bug in getSubmissions() that caused a syntax error on the
    team-overview in the jury interface.
  - Added some notes on security to the INSTALL docs.
  - Symbolic links now included (subversion >= 1.1).
  - Fixed buffer size bug in log/error C-code.
- - Fix bug in submit_db where the problem name got case-normalized.
+ - Fix bug in submit_db where the problem name got case-normalised.
  - Feature: Add caching to the Scoreboard. This vastly improves the
    responsiveness and scalability of DOMjudge; outputting the scoreboard
    is now an O(1) operation in queries. (Closes: #1070079)
- - Some fixes to XHTML1.0 compliancy.
+ - Some fixes to XHTML1.0 compliance.
  - In tables, the time is now printed as hh:mm (without seconds).
  - Complete rewrite of the clarification interface of both teams and jury.
    Functional changes: added possibility to (un)set a request as "answered".

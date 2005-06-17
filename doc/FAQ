@@ -2,7 +2,7 @@ DOMjudge FAQ
 ============
 
 This is a general FAQ covering all (possible) problems we have
-encoutered during installation, testing, running, etc. of this
+encountered during installation, testing, running, etc. of this
 DOMjudge jury-system. If you run into problems not mentioned here, you
 can always contact us (see domjudge.sourceforge.net for contact
 information). If we have time, we'll try to help. Furthermore any
@@ -32,7 +32,7 @@ and replace judge/compile_java.sh by this file.
 
 Make sure that the webserver serving the DOMjudge webinterface pages
 has correct permissions to the SYSTEM_ROOT/{www,lib,etc} directory
-trees. The 'www' and 'lib' trees can savely set to be readable and
+trees. The 'www' and 'lib' trees can safely set to be readable and
 accessible. Care should be taken with the 'etc' dir: 'config.php' and
 'passwords.php' should be readable, but 'passwords.php' should best
 not be readable by anyone else. This can be done for example by
