@@ -109,10 +109,12 @@ logmsg $LOG_NOTICE "creating input/output files"
 EXT="${SOURCE##*.}"
 [ "$EXT" ] || error "source-file does not have an extension: $SOURCE"
 cp "$SOURCE" "$TMPDIR/source.$EXT"
-cp "$TESTIN" "$TMPDIR/testdata.in"
 
 OLDDIR="$PWD"
 cd "$TMPDIR"
+
+# Make chroot dir accessible for RUNUSER:
+chmod a+x $TMPDIR
 
 # Create files, which are expected to exist:
 touch compile.{out,time}   # Compiler output and runtime
@@ -138,7 +140,10 @@ fi
 	"$RUNSCRIPTDIR/compile_$PROGLANG.sh" "source.$EXT" source
 ) &>compile.tmp
 exitcode=$?
-[ -f source ] && mv -f source program
+if [ -f source ]; then
+    mv -f source program
+    chmod a+rx program
+fi
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep 'timelimit reached: aborting command' compile.tmp &>/dev/null; then
@@ -155,10 +160,17 @@ cat compile.tmp >>compile.out
 
 logmsg $LOG_NOTICE "setting up chroot-ed environment"
 
-mkdir bin dev proc
+# Copy the testdata input (only after compilation to prevent information leakage)
+cd "$OLDDIR"
+cp "$TESTIN" "$TMPDIR/testdata.in"
+cd "$TMPDIR"
+chmod a+r testdata.in
+
+mkdir --mode=0711 bin dev proc
 # Copy the run-script and a statically compiled bash-shell:
 cp -p "$RUNSCRIPTDIR/run.sh" .
 cp -p "$BASHSTATIC"          ./bin/bash
+chmod a+rx run.sh bin/bash
 
 # Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
 logmsg $LOG_DEBUG "mounting proc filesystem"
