@@ -124,6 +124,18 @@ where <lang> is the ID of the language as specified in the
 database. For more information, see for example compile_c.sh and
 test_solution.sh for syntax in SYSTEM_ROOT/judge.
 
+For running solution programs under a non-privileged user, a user has
+to be added to the system(s) which act as judger. This user does not
+need a home-directory or password, so e.g. the following command
+would suffice to add a user 'test' with minimal privileges:
+
+useradd -d /nonexistent -g nobody -M -n -s /bin/false test
+
+This user must also be configured as the user under which programs run
+in SYSTEM_ROOT/etc/global.cfg.
+
+TODO: installation and configuration of webserver and mysql.
+
 
 SECURITY
 --------
@@ -172,11 +184,11 @@ the webserver to let the jury webinterface work. A solution is to
 make it readable to a special group the webserver runs as.
 
 Secondly, the files submitted should not be interceptable by other
-teams. Even if these would be sent clear-text, a team would normally
-have to be root/administrator on their computer to intercept this.
-However, this is by default handled by transferring these files with
-ssh (and even locallly on the jury-computers).
-See SYSTEM_ROOT/submit/submit_copy.sh for more information.
+teams (even though that, if these would be sent clear-text, a team
+would normally have to be root/administrator on their computer to
+intercept this). By default this is accomplished by transferring these
+files with ssh (and even locally on the jury-computers). See
+SYSTEM_ROOT/submit/submit_copy.sh for more information.
 
 Teams should not be able to fake the identity of another team. This is
 prevented in the submission system, by making use of temporary files
