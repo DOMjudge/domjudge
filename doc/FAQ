@@ -1,0 +1,47 @@
+DOMjudge FAQ
+============
+
+This is a general FAQ covering all (possible) problems we have
+encoutered during installation, testing, running, etc. of this
+DOMjudge jury-system. If you run into problems not mentioned here, you
+can always contact us (see domjudge.sourceforge.net for contact
+information). If we have time, we'll try to help. Furthermore any
+feedback on problems you ran into and solved is very welcome!
+
+
+- GCJ compiler warnings
+
+When using the GNU GCJ compiler for compiling Java sources, it can
+give a whole lot of warning messages of the form
+
+/usr/lib/gcc-lib/i386-linux/3.2.3/libgcj.a(gc_dlopen.o)(.text+0xbc): In function `GC_dlopen':
+: Using 'dlopen' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+
+These are generated because you are trying to compile statically
+linked sources, but some functions can not be static, e.g. the
+`dlopen' function above. These are _warnings_ and can be safely
+ignored, because under normal programming contest conditions people
+are not allowed to use these functions anyways (and they are not
+accessible within the chroot-ed environment the program is run in).
+
+To filter these warnings, take a look at judge/compile_java_gcjmod.sh
+and replace judge/compile_java.sh by this file.
+
+
+- Permissions for the webserver
+
+Make sure that the webserver serving the DOMjudge webinterface pages
+has correct permissions to the SYSTEM_ROOT/{www,lib,etc} directory
+trees. The 'www' and 'lib' trees can savely set to be readable and
+accessible. Care should be taken with the 'etc' dir: 'config.php' and
+'passwords.php' should be readable, but 'passwords.php' should best
+not be readable by anyone else. This can be done for example by
+setting the SYSTEM_ROOT/etc directory to owner:group
+<DOMjudge account>:<Webserver group> and permissions drwxr-x---,
+denying user other than yourself and the webserver group access to the
+configuration and password files. Of course a looser or tighter scheme
+can be applied.
+
+
+
+$Id$

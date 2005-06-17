@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 0.2.1 - CVS
 -------------------
  - Added mass rejudging support per team,language,problem,judger.
+ - Added FAQ in docs/FAQ.
  - Add missing column_priv (domjudge_user,problem,cid).
  - Fix sorting for equal scores to be alphabetical on teamname.
  - Change FSF address in GPL licence.
