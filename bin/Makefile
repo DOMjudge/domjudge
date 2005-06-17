@@ -10,7 +10,7 @@ SUIDTARGETS=runguard beep
 SUIDBUILDS=$(addsuffix .build,$(SUIDTARGETS))
 # Where to install them:
 SUIDINSTALLDIR=$(PWD)
-# Command to become root:
+# How to execute a command as root:
 SUROOT=su root
 #SUROOT=sudo -u root /bin/bash -c
 
@@ -31,9 +31,9 @@ install-setuid: $(SUIDBUILDS)
 	for i in $(SUIDTARGETS) ; do cp -a $$i.build $(SUIDINSTALLDIR)/$$i ; done
 	$(SUROOT) 'cd $(SUIDINSTALLDIR) && \
 	           chown root.root $(SUIDTARGETS) && \
-	           chmod u+s $(SUIDTARGETS)'
+	           chmod 4755 $(SUIDTARGETS)'
 ifneq ($(SUIDINSTALLDIR),$(PWD))
-	for i in $(SUIDTARGETS) ; do ln -sf $(INSTALLDIR)/$$i ; done
+	for i in $(SUIDTARGETS) ; do ln -sf $(SUIDINSTALLDIR)/$$i ; done
 endif
 
 clean:
