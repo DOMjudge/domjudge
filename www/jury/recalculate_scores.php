@@ -28,6 +28,17 @@ echo "<p>Recalculating all values for the scoreboard cache (" .
 	count($teams) . " teams, " . count($probs) ." problems, contest c" .
 	htmlspecialchars($cid) . ")...</p>\n\n<pre>\n";
 
+if ( count($teams) == 0 ) {
+	echo "No teams defined, doing nothing.</pre>\n\n";
+	include('../footer.php');
+	exit;
+}
+if ( count($probs) == 0 ) {
+	echo "No problems defined, doing nothing.</pre>\n\n";
+	include('../footer.php');
+	exit;
+}
+
 // for each team, fetch the status of each problem
 foreach( $teams as $team ) {
 

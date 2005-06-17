@@ -165,10 +165,14 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	     '<td class="scorett">' . $SUMMARY['total_time'] . '</td>';
 
 	foreach( $probs as $pr ) {
-		echo '<td>' . $SUMMARY[$pr['probid']]['submissions'] . ' / ' .
-			$SUMMARY[$pr['probid']]['correct'] . ' / ' .
-			( isset($SUMMARY[$pr['probid']]['times']) ?
-			  min(@$SUMMARY[$pr['probid']]['times']) : '-' ) . "</td>";
+		if ( !isset($SUMMARY[$pr['probid']]) ) {
+			echo '<td> 0 / 0 / -</td>';
+		} else {
+			echo '<td>' . $SUMMARY[$pr['probid']]['submissions'] . ' / ' .
+				$SUMMARY[$pr['probid']]['correct'] . ' / ' .
+				( isset($SUMMARY[$pr['probid']]['times']) ?
+				  min(@$SUMMARY[$pr['probid']]['times']) : '-' ) . "</td>";
+		}
 	}
 	echo "</tr>\n\n";
 
