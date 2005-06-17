@@ -162,9 +162,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	}
 
 	// print a summaryline
-	echo "\n<tr id=\"scoresummary\"><td>Summary</td>";
-	echo '<td class="scorenc">' . $SUMMARY['num_correct'] . '</td>' .
-	     '<td class="scorett">' . $SUMMARY['total_time'] . '</td>';
+	echo "\n<tr id=\"scoresummary\" title=\"#submitted / #correct / fastest time\"><td title=\" \">Summary</td>";
+	echo '<td class="scorenc" title="total solved">' . $SUMMARY['num_correct'] . '</td>' .
+	     '<td class="scorett" title="total time">' . $SUMMARY['total_time'] . '</td>';
 
 	foreach( $probs as $pr ) {
 		if ( !isset($SUMMARY[$pr['probid']]) ) {
