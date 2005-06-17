@@ -126,91 +126,10 @@ function putClock() {
 	echo '<div id="clock">' . strftime('%a %e %b %Y %T') . "</div>\n\n";
 }
 
-/**
- * Output a clarification response with id $id.
- * $showReq determines if the corresponding request should also be
- * displayed, and $teamlink whether the teamname has to be linked.
- */
-function putResponse($id, $showReq = true, $teamlink = true) {
-	global $DB;
-
-	$respdata = $DB->q('MAYBETUPLE SELECT r.*, c.contestname, t.name
-		FROM  clar_response r
-		LEFT JOIN contest c ON (c.cid = r.cid)
-		LEFT JOIN team t ON (t.login = r.rcpt)
-		WHERE r.respid = %i', $id);
-
-	if( ! $respdata ) error ("Missing clarification response data");
-
-?>
-<table>
-<tr><td>Contest:</td><td><?=htmlentities($respdata['contestname'])?></td></tr>
-<?php
-	if( $showReq ) {
-		echo "<tr><td>Request:</td><td>";
-		if( isset($respdata['reqid']) ) {
-			echo '<a href="request.php?id=' . urlencode($respdata['reqid']) .
-				'">q' . htmlspecialchars($respdata['reqid']) . '</a>';
-		} else {
-			echo 'none';
-		}
-		echo "</td></tr>\n";
-	}
-?>
-<tr><td>Sent to:</td><td><?=isset($respdata['rcpt'])?
-	($teamlink?'<a href="team.php?id='.urlencode($respdata['rcpt']).'">':'')
-	.'<span class="teamid">'
-	.htmlspecialchars($respdata['rcpt']).'</span>: '
-	.htmlentities($respdata['name'])
-	.($teamlink?'</a>':'')
-	:'ALL'?></td></tr>
-<tr><td>Submittime:</td><td><?= htmlspecialchars($respdata['submittime']) ?></td></tr>
-<tr><td valign="top">Response:</td><td class="filename"><pre class="output_text"><?=
-	wordwrap(htmlspecialchars($respdata['body'])) ?></pre></td></tr>
-</table>
-<?php
-}
 
 /**
- * Output a clarification request with id $id.
- * $login can be used to check if your team may view this request.
+ * Output a footer for pages containing the DOMjudge version and server host/port.
  */
-function putRequest($id, $login = NULL) {
-	global $DB;
-
-	$reqdata = $DB->q('MAYBETUPLE SELECT q.*, c.contestname, t.name
-		FROM  clar_request q
-		LEFT JOIN contest c ON (c.cid = q.cid)
-		LEFT JOIN team t ON (q.login = t.login)
-		WHERE q.reqid = %i', $id);
-	if( ! $reqdata ) {
-		error ("Missing clarification request data");
-	}
-	if( isset($login) && $reqdata['login'] != $login ) {
-		error ("Not your clarification request");
-	}
-
-?>
-
-<table>
-<tr><td>Contest:</td><td><?=htmlentities($reqdata['contestname'])?></td></tr>
-<tr><td>From:</td><td>
-<?=!isset($login)?'<a href="team.php?id='.urlencode($reqdata['login']).'">':''?>
-<?= '<span class="teamid">' .
-	htmlspecialchars($reqdata['login']) . '</span>: '.
-	htmlentities($reqdata['name'])?>
-<?=!isset($login)?'</a>':''?>
-</td></tr>
-<tr><td>Submittime:</td><td><?= htmlspecialchars($reqdata['submittime']) ?></td></tr>
-<tr><td valign="top">Request:</td><td class="filename"><pre class="output_text"><?=
-	wordwrap(htmlspecialchars($reqdata['body'])) ?></pre></td></tr>
-</table>
-
-<?php
-	return $reqdata;
-}
-
-
 function putDOMjudgeVersion() {
 	echo "<hr /><address>DOMjudge/" . DOMJUDGE_VERSION . 
 		" at ".$_SERVER['SERVER_NAME']." Port ".$_SERVER['SERVER_PORT']."</address>\n";
