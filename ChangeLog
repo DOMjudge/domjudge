@@ -12,6 +12,7 @@ Version 0.2.1 - CVS
  - Web interface copes better with empty database tables.
  - Fixed that time_factor was inadvertently cast to int for output.
  - Add tooltips explaining the scoreboard summary row.
+ - Made some enhancements to the Makefiles.
 
 Version 0.2.0 - 23 February 2005
 --------------------------------
