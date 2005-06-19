@@ -1,8 +1,32 @@
-CFLAGS = -O2 -Wall
+# Global Makefile
+#
+# $Id$
+#
+# Put here all things that need or can be defined globally, like
+# standard targets (clean, etc.) and global variables.
 
-.PHONY: build config install clean clean-backupfiles
+# Prevent this file from being included more than once
+ifndef GLOBALINCLUDED
+GLOBALINCLUDED=1
+
+# Default C/C++ compiler flags
+CXXFLAGS = -O2 -Wall
+CFLAGS = $(CXXFLAGS) -lm
+
+# How to execute a command as root:
+ROOTCMD=su root
+#alternatively: ROOTCMD=sudo -u root /bin/bash -c
+
+# Define the 'all' target here: because of inclusion of this file, it
+# will be the default target in all subdirectories and we default to
+# no automatic targets, when calling 'make'.
+all:
+
+.PHONY: all build config install clean clean-backupfiles
 
 clean: clean-backupfiles
 
 clean-backupfiles:
 	rm -rf *~
+
+endif # GLOBALINCLUDED

@@ -1,25 +1,34 @@
-all: config build documentation
+# Main Makefile
+#
+# $Id$
+#
+# From here all (subdir) Make targets can and _should_ be called to
+# ensure proper inclusion of globally defined variables.
 
+# Global Makefile definitions
 export TOPDIR = $(PWD)
--include $(TOPDIR)/Makefile.global
+include $(TOPDIR)/Makefile.global
 
-SUBDIRS = bin etc lib doc submit judge www test-programs
+# Subdirectories to recurse into for REC_TARGETS
+SUBDIRS = bin etc lib doc submit judge www sql test-programs
+REC_TARGETS = build install clean
 
+# Default targets
+all: config build docs
+
+# Build everything that needs building (C programs)
 build: config
 
+# Generate language specific config files from global config
 config:
 	$(MAKE) -C etc config
 
-documentation:
-	$(MAKE) -C doc documentation
+# Generate documentation
+docs:
+	$(MAKE) -C doc docs
 
 dvi:
 	$(MAKE) -C doc dvi
-
-install: build
-	@echo "FIXME: Nothing done here, install manually."
-
-REC_TARGETS = build clean
 
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done

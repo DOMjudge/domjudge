@@ -1,37 +1,34 @@
-all: build install-setuid
-
--include $(TOPDIR)/Makefile.global
+ifndef TOPDIR
+TOPDIR=..
+endif
+include $(TOPDIR)/Makefile.global
 
 TARGETS = runguard beep mkstemps tempfile
 
-# Targets to be installed setuid root:
+# Some configuration of programs that need set-uid root permissions:
 SUIDTARGETS=runguard beep
-# Files where to save intermediate (non-setuid) builds:
+SUIDINSTALLDIR=$(CURDIR)
 SUIDBUILDS=$(addsuffix .build,$(SUIDTARGETS))
-# Where to install them:
-SUIDINSTALLDIR=$(PWD)
-# How to execute a command as root:
-SUROOT=su root
-#SUROOT=sudo -u root /bin/bash -c
 
 build: $(TARGETS)
 
-install: install-setuid
+install: build install-setuid
 
 $(SUIDTARGETS): %: %.build
 
 $(SUIDBUILDS): %.build: %.c
-	$(CXX) $(CFLAGS) $(CXXFLAGS) $< -o $@
+	$(CXX) $(CXXFLAGS) $< -o $@
 
-runguard.build: ../etc/config.h
+runguard.build: $(TOPDIR)/etc/config.h
 
 install-setuid: $(SUIDBUILDS)
+	@echo $(SUIDINSTALLDIR)
 	mkdir -p $(SUIDINSTALLDIR)
 	cd $(SUIDINSTALLDIR) && rm -f $(SUIDTARGETS)
 	for i in $(SUIDTARGETS) ; do cp -a $$i.build $(SUIDINSTALLDIR)/$$i ; done
-	$(SUROOT) 'cd $(SUIDINSTALLDIR) && \
-	           chown root.root $(SUIDTARGETS) && \
-	           chmod 4755 $(SUIDTARGETS)'
+	$(ROOTCMD) 'cd $(SUIDINSTALLDIR) && \
+	            chown root.root $(SUIDTARGETS) && \
+	            chmod 4755 $(SUIDTARGETS)'
 ifneq ($(SUIDINSTALLDIR),$(PWD))
 	for i in $(SUIDTARGETS) ; do ln -sf $(SUIDINSTALLDIR)/$$i ; done
 endif

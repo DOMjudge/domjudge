@@ -1,6 +1,7 @@
-all: build
-
--include $(TOPDIR)/Makefile.global
+ifndef TOPDIR
+TOPDIR=..
+endif
+include $(TOPDIR)/Makefile.global
 
 build:
 

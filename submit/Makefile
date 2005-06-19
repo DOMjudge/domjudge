@@ -1,15 +1,16 @@
--include $(TOPDIR)/Makefile.global
+ifndef TOPDIR
+TOPDIR=..
+endif
+include $(TOPDIR)/Makefile.global
 
 TARGETS = submit submitdaemon
 
-all: build
-
 build: $(TARGETS)
 
-install:
+install: build
 
-$(TARGETS): %: %.cc submitcommon.h ../etc/config.h ../lib/*.h
-	$(CXX) $(CFLAGS) $(CXXFLAGS) $< -o $@
+$(TARGETS): %: %.cc submitcommon.h $(TOPDIR)/etc/config.h $(TOPDIR)/lib/*.h
+	$(CXX) $(CXXFLAGS) $< -o $@
 
 clean:
 	-rm -f $(TARGETS)

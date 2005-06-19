@@ -1,6 +1,7 @@
-all: documentation
-
--include $(TOPDIR)/Makefile.global
+ifndef TOPDIR
+TOPDIR=..
+endif
+include $(TOPDIR)/Makefile.global
 
 TARGETS = team-manual team-manual-NL
 
@@ -10,9 +11,9 @@ TARGETSPDF = $(addsuffix .pdf,$(TARGETS))
 
 LATEXOPTIONS = --interaction=errorstopmode
 
-CONFIGDIR = ../etc
+CONFIGDIR = $(TOPDIR)/etc
 
-documentation: ps pdf
+docs: ps pdf
 
 dvi: $(TARGETSDVI)
 # Clean-up generated tex-files afterwards:
@@ -21,14 +22,12 @@ dvi: $(TARGETSDVI)
 ps:  $(TARGETSPS)
 pdf: $(TARGETSPDF)
 
-$(TARGETSDVI): %.dvi: %.tex $(CONFIGDIR)/global.cfg \
-                            $(CONFIGDIR)/config.template.tex \
-                            $(CONFIGDIR)/config.tex \
+$(TARGETSDVI): %.dvi: %.tex $(CONFIGDIR)/config.tex \
                             example.* logos/DOMjudgelogo.eps \
                             expdlist.sty svn.sty 
-	latex $(LATEXOPTIONS) $<
-	latex $(LATEXOPTIONS) $< &> /dev/null
-	latex $(LATEXOPTIONS) $< &> /dev/null
+	-latex $(LATEXOPTIONS) $< < /dev/null &> /dev/null
+	-latex $(LATEXOPTIONS) $< < /dev/null &> /dev/null
+	 latex $(LATEXOPTIONS) $< < /dev/null
 
 $(TARGETSPS): %.ps: %.dvi
 	dvips $<
@@ -51,4 +50,4 @@ dviclean:
 clean: texclean
 	-rm -f $(TARGETSPS) $(TARGETSPDF)
 
-.PHONY: documentation dvi ps pdf texclean dviclean
+.PHONY: docs dvi ps pdf texclean dviclean
