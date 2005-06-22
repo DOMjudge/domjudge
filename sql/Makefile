@@ -6,6 +6,7 @@ include $(TOPDIR)/Makefile.global
 build:
 
 install:
-	@echo "FIXME: Nothing done here, install database sql files manually!"
+	mysql -p -u root < mysql_privileges.sql
+	mysql -p -u root < mysql_db_structure.sql
 
 clean:

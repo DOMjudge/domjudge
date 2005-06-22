@@ -13,6 +13,7 @@ Version 0.2.1 - CVS
  - Fixed that time_factor was inadvertently cast to int for output.
  - Add tooltips explaining the scoreboard summary row.
  - Made some enhancements to the Makefiles.
+ - Support MySQL 4 privilege tables and sql files installation.
 
 Version 0.2.0 - 23 February 2005
 --------------------------------

@@ -1,24 +1,28 @@
 # These are the database tables needed for DOMjudge
+# This assumes database name 'domjudge'
 #
 # You can pipe this file into the 'mysql' command to create the tables.
 #
 # $Id$
 
+# First create the database (if non-existent)
+CREATE DATABASE IF NOT EXISTS domjudge;
+
 #
 # Table structure for table 'category'
 #
 
-CREATE TABLE category (
+CREATE TABLE domjudge.category (
   catid tinyint(4) unsigned NOT NULL auto_increment,
   name varchar(255) NOT NULL default '',
   PRIMARY KEY  (catid)
 ) TYPE=MyISAM;
 
 #
-# Table structure for table `clarification`
+# Table structure for table 'clarification'
 #
 
-CREATE TABLE `clarification` (
+CREATE TABLE domjudge.clarification (
   `clarid` mediumint(8) unsigned NOT NULL auto_increment,
   `cid` mediumint(8) unsigned NOT NULL default '0',
   `respid` mediumint(8) unsigned default NULL,
@@ -35,7 +39,7 @@ CREATE TABLE `clarification` (
 # Table structure for table 'contest'
 #
 
-CREATE TABLE contest (
+CREATE TABLE domjudge.contest (
   cid tinyint(2) NOT NULL auto_increment,
   starttime datetime NOT NULL default '0000-00-00 00:00:00',
   lastscoreupdate datetime default NULL,
@@ -48,7 +52,7 @@ CREATE TABLE contest (
 # Table structure for table 'judger'
 #
 
-CREATE TABLE judger (
+CREATE TABLE domjudge.judger (
   judgerid varchar(50) NOT NULL default '',
   active tinyint(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (judgerid)
@@ -58,7 +62,7 @@ CREATE TABLE judger (
 # Table structure for table 'judging'
 #
 
-CREATE TABLE judging (
+CREATE TABLE domjudge.judging (
   judgingid int(10) unsigned NOT NULL auto_increment,
   cid tinyint(2) NOT NULL default '0',
   submitid int(10) unsigned NOT NULL default '0',
@@ -78,7 +82,7 @@ CREATE TABLE judging (
 # Table structure for table 'language'
 #
 
-CREATE TABLE language (
+CREATE TABLE domjudge.language (
   langid varchar(8) NOT NULL default '',
   name varchar(255) NOT NULL default '',
   extension varchar(5) NOT NULL default '',
@@ -92,7 +96,7 @@ CREATE TABLE language (
 # Table structure for table 'problem'
 #
 
-CREATE TABLE problem (
+CREATE TABLE domjudge.problem (
   probid varchar(8) NOT NULL default '',
   cid int(10) unsigned NOT NULL default '0',
   name varchar(255) NOT NULL default '',
@@ -107,7 +111,7 @@ CREATE TABLE problem (
 # Table structure for table `scoreboard_jury`
 #
 
-CREATE TABLE scoreboard_jury (
+CREATE TABLE domjudge.scoreboard_jury (
   cid mediumint(8) unsigned NOT NULL default '0',
   team varchar(15) NOT NULL default '',
   problem varchar(8) NOT NULL default '',
@@ -122,7 +126,7 @@ CREATE TABLE scoreboard_jury (
 # Table structure for table `scoreboard_jury`
 #
 
-CREATE TABLE scoreboard_public (
+CREATE TABLE domjudge.scoreboard_public (
   cid mediumint(8) unsigned NOT NULL default '0',
   team varchar(15) NOT NULL default '',
   problem varchar(8) NOT NULL default '',
@@ -137,7 +141,7 @@ CREATE TABLE scoreboard_public (
 # Table structure for table 'submission'
 #
 
-CREATE TABLE submission (
+CREATE TABLE domjudge.submission (
   submitid int(10) unsigned NOT NULL auto_increment,
   cid tinyint(2) NOT NULL default '0',
   team varchar(15) NOT NULL default '',
@@ -156,7 +160,7 @@ CREATE TABLE submission (
 # Table structure for table 'team'
 #
 
-CREATE TABLE team (
+CREATE TABLE domjudge.team (
   login varchar(15) NOT NULL default '',
   name varchar(255) NOT NULL default '',
   category tinyint(4) unsigned NOT NULL default '0',
