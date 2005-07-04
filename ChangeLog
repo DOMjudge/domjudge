@@ -4,7 +4,7 @@ Version 0.2.1 - CVS
 -------------------
  - Added mass rejudging support per team,language,problem,judger.
  - Added FAQ in docs/FAQ.
- - Add missing column_priv (domjudge_user,problem,cid).
+ - Fix missing column_priv (domjudge_user,problem,cid).
  - Fix sorting for equal scores to be alphabetical on team name.
  - Miscellaneous documentation improvements.
  - Fix some problems with file permissions by setting those explicitly.
@@ -13,7 +13,7 @@ Version 0.2.1 - CVS
  - Fixed that time_factor was inadvertently cast to int for output.
  - Add tooltips explaining the scoreboard summary row.
  - Made some enhancements to the Makefiles.
- - Support MySQL 4 privilege tables and sql files installation.
+ - Support MySQL 3/4 privilege tables and sql files installation.
 
 Version 0.2.0 - 23 February 2005
 --------------------------------
