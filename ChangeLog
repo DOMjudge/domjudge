@@ -1,5 +1,9 @@
 DOMjudge Programming Contest Judging System
 
+Version 0.3.1 - CVS
+-------------------
+
+
 Version 0.3.0 - 5 July 2004
 ---------------------------
  - Added mass rejudging support per team,language,problem,judger.
