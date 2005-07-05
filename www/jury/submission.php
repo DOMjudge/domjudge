@@ -7,7 +7,7 @@
 
 $pagename = basename($_SERVER['PHP_SELF']);
 
-$id = $_REQUEST['id'];
+$id = (int)$_REQUEST['id'];
 
 require('init.php');
 $title = 'Submission '.@$id;
