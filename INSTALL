@@ -99,6 +99,110 @@ OUTPUT_ROOT
 	              directory! (for chroot and mounting of proc-fs).
 
 
+DATABASE LAYOUT
+---------------
+
+DOMjudge uses a MySQL database server for storage of contest status
+information.
+
+The database structure and needed privileges are included in MySQL
+dump files in the sql subdirectory. The default database name is
+'domjudge', but this can be changed in the configuration.
+
+Installation of the database can be done with 'make install'. For
+this, you need an installed and configured MySQL server and root
+access to it. The install script also inserts some default/example
+data into the 'domjudge' database.
+
+The 'domjudge' database contains the following tables. Tables marked
+with a '*' have to be setup manually before running a contest
+(e.g. with phpMyAdmin), the other tables are used automatically by the
+software:
+
+  Name			Description
+
+* category		Different category groups teams can be put in.
+  clarification		Clarification requests/replies are stored here.
+* contest		Contest definitions with start/end time.
+* judger		Computers (hostnames) that function as judgers.
+  judging		Judgings of submissions.
+* language		Definition of allowed submission languages.
+* problem		Definition of problems (name, corresponding contest, etc.)
+  submission		Submissions of solutions to problems.
+* team			Definition of teams.
+  scoreboard_jury	Cache of the scoreboards for public/teams and for the jury
+  scoreboard_public	  separately, because of possibility of score freezing.
+
+Now follows a longer description (including fields) per table, that
+has to be setup manually. In general the reference ID's in each table
+can be left untouched and auto incremented. These are used to
+reference to a specific element from other tables and internally in
+the software. For example a problem with 'cid = 2' would reference to
+the contest with it's 'cid' (contest ID) set to 2.
+
+Category:
+'catid' is the reference ID.
+'name' is a string: the name of the category.
+
+Contest:
+'cid' is the reference ID.
+'starttime' and 'endtime' respectively are the start- and endtime of
+the contest: before and after that time, no submissions are accepted.
+'lastscoreupdate' is the time after which the public and team
+scoreboard are not updated anymore (freezed). This is meant to make
+the last stages of the contest thrilling, because no-one knows who has
+won... Setting this to 'NULL' disables this feature.
+'contestname' should be clear.
+
+Judger:
+'judgerid' is the hostname of a judger computer.
+'active' should be 0 or 1 and indicates whether this host should judge
+incoming submissions.
+
+Language:
+'langid' is string of maximum length 8, which references the
+language. This reference is also used to call the correct compile
+script (SYSTEM_ROOT/judge/compile_c.sh, etc.), so when adding a new
+language, check that these match.
+'name' is the displayed name of the language.
+'extension' the internally used extension for that language, which has
+to match the first extension as listed in the global configuration file.
+'allow_submit' (0 or 1) determines whether teams can submit using this
+language.
+'allow_judge' (0 or 1) determines whether judgers will judge
+submissions for this problem. This can for example be set to 0, to
+temporarily hold judging, when a problem occurs with the judging of
+specific languages and after resolution of the problem be set to 1
+again.
+'time_factor' is the relative factor with which the timelimit is
+multiplied for solutions in this language. For example Java is known
+to be structurally slower than C/C++.
+
+Problem:
+'probid' is the reference ID.
+'cid' is the contest ID this problem is (only) defined for.
+'allow_submit' (0 or 1) determines whether teams can submit solutions
+for this problem. Non-submittable problems are also not displayed on the
+scoreboard. This can be used to define spare problems, which can then
+be added to the contest in a second.
+'allow_judge' (0 or 1) determines whether judgers will judge
+submissions for this problem. See also the explanation for language.
+'testdata' is the directory within INPUT_ROOT that contains the
+input/output testdata in files 'testdata.in' and 'testdata.out'.
+'timelimit' is the timelimit in seconds within which solutions for
+this problem have to run (taking into account 'time_factor' per
+language).
+
+Team:
+'login' is the account/login-name of the team.
+'name' is the displayed name of the team.
+'category' is the ID ('catid') of the category the team is in.
+'ipaddress' is the IP-address of the team. This is used to
+automatically identify the team in the webinterface and to check
+submission origin. A value of 'NULL' results in the team being unable
+to submit or view it's teampage.
+
+
 CONFIGURATION
 -------------
 
@@ -134,7 +238,7 @@ useradd -d /nonexistent -g nobody -M -n -s /bin/false test
 This user must also be configured as the user under which programs run
 in SYSTEM_ROOT/etc/global.cfg.
 
-TODO: installation and configuration of webserver and mysql.
+TODO: installation and configuration of webserver.
 
 
 SECURITY
