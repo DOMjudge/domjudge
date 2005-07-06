@@ -13,7 +13,7 @@ USE domjudge;
 
 INSERT INTO `category` (`catid`, `name`) VALUES (1, 'Participants');
 INSERT INTO `category` (`catid`, `name`) VALUES (2, 'Observers');
-INSERT INTO `category` (`catid`, `name`) VALUES (3, 'Organization');
+INSERT INTO `category` (`catid`, `name`) VALUES (3, 'Organisation');
 
 # 
 # Dumping data for table `clarification`
