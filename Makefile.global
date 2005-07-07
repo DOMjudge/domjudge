@@ -22,11 +22,18 @@ ROOTCMD=su root
 # no automatic targets, when calling 'make'.
 all:
 
-.PHONY: all build config install clean clean-backupfiles
+TEMPFILEDIR = $(TOPDIR)/bin
+
+$(TEMPFILEDIR)/tempfile:
+	$(MAKE) -C $(TEMPFILEDIR) tempfile
 
 clean: clean-backupfiles
 
+distclean: clean
+
 clean-backupfiles:
 	rm -rf *~
+
+.PHONY: all build config install clean clean-backupfiles distclean
 
 endif # GLOBALINCLUDED

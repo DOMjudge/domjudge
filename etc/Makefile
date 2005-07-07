@@ -7,8 +7,6 @@ EXTENSIONS = h sh php tex
 TEMPLATES  = $(addprefix config.template.,$(EXTENSIONS))
 CONFIGS    = $(addprefix config.,$(EXTENSIONS))
 
-TEMPFILEDIR = $(TOPDIR)//bin
-
 PASSWD_FILE = passwords.php
 
 .PHONY: config passwd_perms
@@ -27,8 +25,5 @@ passwd_perms:
 		echo "WARNING: '$(PASSWD_FILE)' found with group/other permissions!" ; \
 		echo "WARNING: Check that permissions are set correctly!" ; \
 	fi
-
-$(TEMPFILEDIR)/tempfile:
-	$(MAKE) -C $(TEMPFILEDIR) tempfile
 
 clean:

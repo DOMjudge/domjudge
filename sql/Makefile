@@ -10,5 +10,5 @@ install:
 	mysql -p -u root < mysql_db_structure.sql
 	mysql -p -u root < mysql_db_examples.sql
 
-clean:
+distclean:
 	mysql -p -u root < mysql_clean.sql

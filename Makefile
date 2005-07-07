@@ -11,7 +11,7 @@ include $(TOPDIR)/Makefile.global
 
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = bin etc lib doc submit judge www sql test-programs
-REC_TARGETS = build install clean
+REC_TARGETS = build install clean distclean
 
 # Default targets
 all: config build docs
