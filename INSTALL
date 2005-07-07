@@ -42,7 +42,7 @@ SOFTWARE REQUIREMENTS
 - For every supported programming language a compiler is needed,
   which can generate statically linked stand-alone executables.
 
-- A web server which supports PHP >= 4.1.0
+- Apache web server with support for PHP >= 4.1.0
 
 - MySQL 3.23.x or higher database and client software
 
@@ -59,6 +59,8 @@ SOFTWARE REQUIREMENTS
 	grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail
 
 - sudo
+
+- htpasswd
 
 - OpenSSH/SCP (or a compatible ssh/scp client/daemon)
 

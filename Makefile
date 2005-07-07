@@ -23,6 +23,10 @@ build: config
 config:
 	$(MAKE) -C etc config
 
+# Generate passwords and modify all relevant instances
+gen_passwd: $(TEMPFILEDIR)/tempfile
+	bin/gen_passwords.sh
+
 # Generate documentation
 docs:
 	$(MAKE) -C doc docs
@@ -33,4 +37,4 @@ dvi:
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 
-.PHONY: dvi documentation
+.PHONY: dvi documentation gen_passwd
