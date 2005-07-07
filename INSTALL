@@ -107,7 +107,8 @@ information.
 
 The database structure and needed privileges are included in MySQL
 dump files in the sql subdirectory. The default database name is
-'domjudge', but this can be changed in the configuration.
+'domjudge'. This can in principle be changed manually in the
+configuration and SQL files, but we recommend not to do this.
 
 Installation of the database can be done with 'make install'. For
 this, you need an installed and configured MySQL server and root
@@ -239,6 +240,35 @@ This user must also be configured as the user under which programs run
 in SYSTEM_ROOT/etc/global.cfg.
 
 TODO: installation and configuration of webserver.
+TODO: password generation and installation.
+
+
+BUILDING AND INSTALLING
+-----------------------
+
+After you have configured the system, you can start installing the
+(few) components that need building and installing. This part is also
+interactive, because input of system and MySQL root passwords is
+needed.
+
+In the following, all calls to 'make' should in principle be done from
+the SYSTEM_ROOT directory: all relevant targets are defined in the
+main 'Makefile' there and it will call subdirectory makefiles.
+
+First the global configuration changes have to be translated to the
+different languages used by the system (_not_ contest languages).
+Run 'make config' to do this.
+
+After that you can run 'make build', which builds all programs that
+need building.
+
+Next, a few programs have to be install set-uid root and the domjudge
+database has to be installed with 'make install'. Now you will be
+asked for the system and MySQL root passwords one or a few times.
+
+Should installation not succeed and re-installation be necessary, then
+you can clean all built files with 'make clean' and 'make distclean'
+will additionally also remove all traces of domjudge from MySQL.
 
 
 SECURITY
