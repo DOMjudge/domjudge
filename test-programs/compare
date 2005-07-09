@@ -1,11 +1,12 @@
 #!/bin/bash
-#
+# $Id$
+
 # Script to compare output from different solutions.
 # Written by Jaap Eldering, April 2004
 #
 # Run this script in a problem-directory. Expects testdata
 # input in 'testdata.in' and output in 'testdata.out'.
-# Solutions must be of the form '<name>*.<langext>'
+# Solutions must be of the form '<username>*.<langext>'
 #
 # Optionally the timelimit may be specified as argument.
 #
@@ -13,19 +14,19 @@
 # Extended pattern matching:
 shopt -s extglob
 
+USERS="jaap peter thijs test"
+
 NLANG=5
 LANG=('c' 'cpp'        'java' 'pascal'   'haskell')
 EXTS=('c' 'cpp cc c++' 'java' 'pas pp p' 'hs'     )
 ALLEXTS="${EXTS[@]}"
 
-TESTSOL=$HOME/systeem/svn/jury/judge/test_solution.sh
+TESTSOL=$HOME/system/judge/test_solution.sh
 
 TESTIN=testdata.in
 TESTOUT=testdata.out
 SAMPLEIN=testsample.in
 SAMPLEOUT=testsample.out
-
-USERS="jan jaap erik gerben maarten pieter wouter peter thijs test"
 
 TMPDIR="compare.$$.tmp"
 TIMELIMIT=20
@@ -99,7 +100,7 @@ checkinput $SAMPLEIN || ALLOK=0
 
 # Make a pattern string to match solutions with:
 FILEMATCH="^("
-for user in $USERS;	  do FILEMATCH="${FILEMATCH}$user|"; done
+for user in $USERS;   do FILEMATCH="${FILEMATCH}$user|"; done
 FILEMATCH="${FILEMATCH%|}).*\\.("
 for ext	 in $ALLEXTS; do FILEMATCH="${FILEMATCH}$ext|";	 done
 FILEMATCH="${FILEMATCH%|})$"
