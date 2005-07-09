@@ -102,7 +102,7 @@ checkinput $SAMPLEIN || ALLOK=0
 FILEMATCH="^("
 for user in $USERS;   do FILEMATCH="${FILEMATCH}$user|"; done
 FILEMATCH="${FILEMATCH%|}).*\\.("
-for ext	 in $ALLEXTS; do FILEMATCH="${FILEMATCH}$ext|";	 done
+for ext  in $ALLEXTS; do FILEMATCH="${FILEMATCH}$ext|";	 done
 FILEMATCH="${FILEMATCH%|})$"
 
 mkdir $TMPDIR
