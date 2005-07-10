@@ -4,6 +4,7 @@ Version 0.3.1 - CVS
 -------------------
  - Added documentation on MySQL DB layout to INSTALL.
  - Improved SQL installation/cleaning scripts.
+ - Added make target to automatically generate passwords.
 
 Version 0.3.0 - 5 July 2005
 ---------------------------

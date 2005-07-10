@@ -7,23 +7,11 @@ EXTENSIONS = h sh php tex
 TEMPLATES  = $(addprefix config.template.,$(EXTENSIONS))
 CONFIGS    = $(addprefix config.,$(EXTENSIONS))
 
-PASSWD_FILE = passwords.php
-
-.PHONY: config passwd_perms
+.PHONY: config
 
 config: $(TEMPFILEDIR)/tempfile $(CONFIGS)
 
 $(CONFIGS): config.%: config.template.% global.cfg $(TEMPFILEDIR)/tempfile
 	./generate_config.sh $*
-
-config.php: $(PASSWD_FILE)
-
-$(PASSWD_FILE): | passwd_perms
-
-passwd_perms:
-	@if [ "`find . -name $(PASSWD_FILE) -perm +0077`" ] ; then \
-		echo "WARNING: '$(PASSWD_FILE)' found with group/other permissions!" ; \
-		echo "WARNING: Check that permissions are set correctly!" ; \
-	fi
 
 clean:

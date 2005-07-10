@@ -24,8 +24,27 @@ config:
 	$(MAKE) -C etc config
 
 # Generate passwords and modify all relevant instances
-gen_passwd: $(TEMPFILEDIR)/tempfile
-	bin/gen_passwords.sh
+gen_passwd: $(TEMPFILEDIR)/tempfile | passwd_perms
+	@bin/gen_passwords.sh
+
+# Check files containing sensitive password info for permissons
+PASSWD_FILES = etc/passwords.php sql/mysql_privileges.sql
+passwd_perms:
+	@echo "WARNING ABOUT PASSWORD SECURITY:"
+	@echo ""
+	@echo "The passwords that are about to be generated/asked are stored in"
+	@echo "plain-text in the following files:"
+	@echo "    $(PASSWD_FILES)"
+	@echo ""
+	@echo "Protect these files carefully with the correct permissions and do not"
+	@echo "choose a password equal to a sensitive existing one!"
+	@echo ""
+	@for f in $(PASSWD_FILES) ; do \
+		if find . -perm +0077 | grep "\./$$f$$" >& /dev/null ; then \
+			echo "WARNING: '$$f' found with group/other permissions!" ; \
+			echo "WARNING: Check that permissions are set correctly!" ; \
+		fi ; \
+	done
 
 # Generate documentation
 docs:
