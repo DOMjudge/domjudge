@@ -29,7 +29,8 @@ install-setuid: $(SUIDBUILDS)
 	$(ROOTCMD) 'cd $(SUIDINSTALLDIR) && \
 	            chown root.root $(SUIDTARGETS) && \
 	            chmod 4755 $(SUIDTARGETS)'
-ifneq ($(SUIDINSTALLDIR),$(PWD))
+# Make symlinks to setuid binaries when not located here:
+ifneq ($(SUIDINSTALLDIR),$(CURDIR))
 	for i in $(SUIDTARGETS) ; do ln -sf $(SUIDINSTALLDIR)/$$i ; done
 endif
 
