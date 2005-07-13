@@ -7,8 +7,7 @@
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
-/* FIXME: this needs some validation, how? *
- * Solution: we now use htaccess to control access here */
+/* This is disabled because we use htaccess to control access here */
 if(FALSE) {
 	header('HTTP/1.1 403 Forbidden');
 	$title = '403 Forbidden';
