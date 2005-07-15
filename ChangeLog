@@ -1,10 +1,13 @@
 DOMjudge Programming Contest Judging System
 
-Version 0.3.1 - CVS
--------------------
+Version 0.3.1 - 16 July 2005
+----------------------------
  - Added documentation on MySQL DB layout to INSTALL.
  - Improved SQL installation/cleaning scripts.
  - Added make target to automatically generate passwords.
+ - Fixed bug where teams received popups for their own clarifications.
+ - Fixed missing privilege definition in MySQL table.
+ - Miscellaneous other small fixes.
 
 Version 0.3.0 - 5 July 2005
 ---------------------------
