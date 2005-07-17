@@ -62,7 +62,12 @@ if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',$team) 
 	error("Team '$team' not found in database.");
 }
 if( $teamrow['ipaddress'] != $ip ) {
-	error("Team '$team' not registered at this IP address.");
+	if ( $teamrow['ipaddress'] == NULL && STRICTIPCHECK == false ) {
+		$DB->q('UPDATE team SET ipaddress = %s WHERE login = %s',$ip,$team);
+		logmsg (LOG_NOTICE, "Registered team '$team' at address '$ip'.");
+	} else {
+		error("Team '$team' not registered at this IP address.");
+	}
 }
 if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem WHERE probid = %s
                         AND cid = %i AND allow_submit = "1"', $prob, $cid) ) {
@@ -81,7 +86,7 @@ logmsg (LOG_INFO, "input verified");
 // Copy the submission to a (uniquely generated) file in SUBMITDIR
 $dummy = null;
 $tofile = exec(SYSTEM_ROOT."/bin/mkstemps ".
-			   SUBMITDIR."/$team.$prob.XXXXXX.$langext", $dummy, $retval);
+               SUBMITDIR."/$team.$prob.XXXXXX.$langext", $dummy, $retval);
 if ( $retval != 0 ) error("Could not create tempfile.");
 $tofile = basename($tofile);
 
