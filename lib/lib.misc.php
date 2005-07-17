@@ -96,7 +96,7 @@ function calcScoreRow($cid, $team, $prob) {
 			break;
 		}
 
-		// 20 penalty minutes for each submission
+		// extra penalty minutes for each submission
 		// (will only be counted if this problem is correctly solved)
 		$penalty_j += PENALTY_TIME;
 		if ( ! $row['afterfreeze'] ) $penalty_p += PENALTY_TIME;
