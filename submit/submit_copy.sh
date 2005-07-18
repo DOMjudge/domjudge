@@ -26,7 +26,7 @@ team=$1
 fromfile=$2
 tofile=$3
 
-output1=`scp -Bq "${team}@${SCP_HOST}:${fromfile}" "$tofile" 2>&1`
+output1=`scp -Bq "${team}@${SCP_HOST}:'${fromfile}'" "$tofile" 2>&1`
 if [ $? -eq 0 -a ${#output1} -eq 0 ]; then
 	exit 0
 fi
