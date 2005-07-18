@@ -55,13 +55,13 @@ using namespace std;
 #include "../lib/mkstemps.h"
 #include "../lib/basename.h"
 
-/* These defines are needed in 'version' in submitcommon.h */
+/* Common send/receive functions */
+#include "submitcommon.h"
+
+/* These defines are needed in 'version' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
 #define PROGRAM "submitdaemon"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
-
-/* Common send/receive functions */
-#include "submitcommon.h"
 
 #define BACKLOG 32      /* how many pending connections queue will hold */
 #define LINELEN 256     /* maximum length read from submit_db stdout lines */
@@ -94,21 +94,8 @@ struct sockaddr_in server_addr; /* server address information */
 struct sockaddr_in client_addr; /* client address information */
 socklen_t sin_size;
 
-void usage()
-{
-	printf(
-"Usage: %s [OPTION]...\n"
-"Start the submitserver.\n"
-"\n"
-"  -P, --port=PORT       set TCP port to listen on to PORT (default: %i)\n"
-"  -v, --verbose=LEVEL   set verbosity to LEVEL (syslog levels)\n"
-"      --help            display this help and exit\n"
-"      --version         output version information and exit\n"
-"\n",progname,port);
-	
-	exit(0);
-}
-
+void version();
+void usage();
 void create_server();
 int  handle_client();
 void sigchld_handler(int);
@@ -212,6 +199,31 @@ int main(int argc, char **argv)
 	return 0; /* This should never be reached */
 }
 
+void version()
+{
+	printf("%s %s\nWritten by %s\n\n",DOMJUDGE_PROGRAM,PROGRAM,AUTHORS);
+	printf(
+"%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
+"are welcome to redistribute it under certain conditions.  See the GNU\n"
+"General Public Licence for details.\n",PROGRAM);
+	exit(0);
+}
+
+void usage()
+{
+	printf(
+"Usage: %s [OPTION]...\n"
+"Start the submitserver.\n"
+"\n"
+"  -P, --port=PORT       set TCP port to listen on to PORT (default: %i)\n"
+"  -v, --verbose=LEVEL   set verbosity to LEVEL (syslog levels)\n"
+"      --help            display this help and exit\n"
+"      --version         output version information and exit\n"
+"\n",progname,port);
+	
+	exit(0);
+}
+
 /***
  *  Open a listening socket on the localhost.
  */
@@ -249,7 +261,7 @@ int handle_client()
 {
 	string command, argument;
 	string team, problem, language, filename;
-	char *fromfile, *tempfile, *tmp;
+	char *fromfile, *tempfile, *tmp, *tmp2;
 	struct passwd *userinfo;
 	char *args[MAXARGS];
 	int redir_fd[3];
@@ -262,13 +274,20 @@ int handle_client()
 	sendit(client_fd,"+server ready");
 
 	while ( receive(client_fd) ) {
-		command = string(lastmesg);
-		istringstream line_iss(command);
 
+		// Make sure that tmp is big enough to contain command and argument
+		tmp2 = tmp = allocstr("%s",lastmesg);
+		
+		strsep(&tmp2," ");
+		
 		command.erase();
 		argument.erase();
-		line_iss >> command >> argument;
-
+		
+		if ( tmp !=NULL ) command  = string(tmp);
+		if ( tmp2!=NULL ) argument = string(tmp2);
+		
+		free(tmp);
+	
 		command = stringtolower(command);
 		if ( command=="team" ) {
 			team = argument;
@@ -297,7 +316,7 @@ int handle_client()
 			senderror(client_fd,0,"invalid command: '%s'",command.c_str());
 		}
 	}
-
+	
 	if ( problem.empty()  || team.empty() ||
 	     language.empty() || filename.empty() ) {
 		senderror(client_fd,0,"missing submission info");

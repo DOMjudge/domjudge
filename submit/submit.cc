@@ -56,13 +56,13 @@ using namespace std;
 #include "../lib/mkstemps.h"
 #include "../lib/basename.h"
 
-/* These defines are needed in 'version' in submitcommon.h */
+/* Common send/receive functions */
+#include "submitcommon.h"
+
+/* These defines are needed in 'version' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
 #define PROGRAM "submit"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
-
-/* Common send/receive functions */
-#include "submitcommon.h"
 
 extern int errno;
 
@@ -451,6 +451,16 @@ void usage()
 "For TEAM use the login of the account, you want to submit for.\n"
 "The default value for TEAM is taken from the environment variable\n"
 "'TEAM' or your login name if 'TEAM' is not defined.\n");
+	exit(0);
+}
+
+void version()
+{
+	printf("%s %s\nWritten by %s\n\n",DOMJUDGE_PROGRAM,PROGRAM,AUTHORS);
+	printf(
+"%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
+"are welcome to redistribute it under certain conditions.  See the GNU\n"
+"General Public Licence for details.\n",PROGRAM);
 	exit(0);
 }
 
