@@ -3,8 +3,14 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-build:
+OBJECTS = lib.error.o
+
+build: $(OBJECTS)
+
+$(OBJECTS): %.o: %.c %.h
+	$(CC) -c $(CFLAGS) $< -o $@
 
 install:
 
 clean:
+	rm -rf $(OBJECTS)
