@@ -3,32 +3,56 @@
 
 # Compare wrapper-script for 'test_solution.sh'.
 # See that script for syntax and more info.
-
-# Usage: $0 <program> <testdata> <diffout>
 #
-# <program>   File containing solution output.
-# <testdata>  File containing correct output.
-# <diffout>   File to write differences to.
+# This script is written to comply with the ICPC Validator Interface Standard
+# as described in http://www.ecs.csus.edu/pc2/doc/valistandard.html.
+
+# Usage: $0 <testdata.in> <program.out> <testdata.out> <result.xml> <diff.out>
+#
+# <testdata.in>   File containing testdata input.
+# <program.out>   File containing the program output.
+# <testdata.out>  File containing the correct output.
+# <result.xml>    File containing an XML document describing the result.
+# <diff.out>      File to write program/correct output differences to.
 #
 # Exits successfully except when an internal error occurs.
 # Program output is considered correct when diffout is empty.
 
-PROGRAM="$1"
-TESTDATA="$2"
-DIFFOUT="$3"
+TESTIN="$1"
+PROGRAM="$2"
+TESTOUT="$3"
+RESULT="$4"
+DIFFOUT="$5"
+
+function writeresult()
+{
+    ( cat <<EOF
+<?xml version="1.0"?>
+<!DOCTYPE result [
+  <!ELEMENT result (#PCDATA)>
+  <!ATTLIST result outcome CDATA #REQUIRED>
+]>
+<result outcome="$1">$1</result>
+EOF
+    ) > "$RESULT"
+}
 
 # Test an exact match between program output and testdata output:
-diff -U 0 $PROGRAM $TESTDATA >$DIFFOUT
+diff -U 0 $PROGRAM $TESTOUT >$DIFFOUT
 
 # Exit with failure, when diff reports internal errors:
 # Exitcode 1 means that differences were found!
 if [ $? -ge 2 ]; then
+	writeresult "Internal error"
 	exit 1
 fi
 
 # Exit when no differences found:
 if [ ! -s $DIFFOUT ]; then
+	writeresult "Accepted"
 	exit 0
+else
+	writeresult "Wrong answer"
 fi
 
 FIRSTDIFF=""
@@ -40,7 +64,7 @@ IFS='
 '
 
 exec 3<$PROGRAM
-exec 4<$TESTDATA
+exec 4<$TESTOUT
 
 LINE=0
 while true ; do
@@ -75,7 +99,7 @@ exec 4<&-
 echo "### DIFFERENCES FROM LINE $FIRSTDIFF ###" >$DIFFOUT
 
 exec 3<$PROGRAM
-exec 4<$TESTDATA
+exec 4<$TESTOUT
 
 LINE=0
 SEPCHAR='?'

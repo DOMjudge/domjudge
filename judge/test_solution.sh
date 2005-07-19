@@ -120,6 +120,7 @@ chmod a+x $TMPDIR
 touch compile.{out,time}   # Compiler output and runtime
 touch error.out            # Error output after compiler output
 touch diff.out             # Compare output
+touch result.xml           # Result of comparison
 touch program.{out,err}    # Program output and stderr (for extra information)
 touch program.{time,exit}  # Program runtime and exitcode
 
@@ -260,7 +261,7 @@ fi
 # Add $SYSTEM_ROOT/bin to path for 'tempfile' (needed by compare.sh)
 export PATH="$SYSTEM_ROOT/bin:$PATH"
 
-"$RUNSCRIPTDIR/compare.sh" program.out testdata.out diff.out 2>diff.tmp
+"$RUNSCRIPTDIR/compare.sh" testdata.in program.out testdata.out result.xml diff.out 2>diff.tmp
 exitcode=$?
 
 if [ $exitcode -ne 0 ]; then
