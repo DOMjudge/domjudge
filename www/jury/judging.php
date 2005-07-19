@@ -5,12 +5,20 @@
  * $Id$
  */
 
-$id = (int)$_GET['id'];
+$pagename = basename($_SERVER['PHP_SELF']);
+
+$id = (int)$_REQUEST['id'];
 
 require('init.php');
 $title = 'Judging j'.@$id;
 
 if ( ! $id ) error ("Missing judging id");
+
+if ( isset($_POST['cmd']) ) {
+	if ( $_POST['cmd'] == 'verified' ) {
+		$DB->q('UPDATE judging SET verified = 1 WHERE judgingid = %i',$id);
+	}
+}
 
 $jdata = $DB->q('TUPLE SELECT j.*,s.*,t.*, c.contestname
 	FROM judging j
@@ -54,7 +62,17 @@ if(@$jdata['endtime']) {
 	printhost($jdata['judgerid'])?></a></td></tr>
 <tr><td>Result:</td><td><?=printresult(@$jdata['result'], $jdata['valid'])?></td></tr>
 <tr><td>Valid:</td><td><?=printyn($jdata['valid'])?></td></tr>
+<tr><td>Verified:</td><td><?=printyn($jdata['verified'])?></td></tr>
 </table>
+
+<form action="<?= $pagename.'?id='.$id ?>" method="post">
+<p>
+<input type="hidden" name="id" value="<?=$id?>" />
+<input type="hidden" name="cmd" value="verified" />
+<input type="submit" value="mark verified"
+ <?=($jdata['verified']?'disabled="disabled "':'')?> />
+</p>
+</form>
 
 
 <h3>Output compile</h3>

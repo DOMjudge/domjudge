@@ -71,6 +71,7 @@ CREATE TABLE `judging` (
   `endtime` datetime default NULL,
   `judgerid` varchar(50) NOT NULL default '',
   `result` enum('correct','compiler-error','timelimit','run-error','wrong-answer','no-output') default NULL,
+  `verified` tinyint(1) unsigned NOT NULL default '0',
   `valid` tinyint(1) unsigned NOT NULL default '1',
   `output_compile` text,
   `output_run` text,
