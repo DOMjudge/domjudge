@@ -2,7 +2,9 @@ DOMjudge Programming Contest Judging System
 
 Version 0.3.2 - CVS
 -------------------
-
+ - Added config option to autoconfigure team IP addresses.
+ - Moved C-code from headers to separate files.
+ - Fixed bugs where submitdaemon couldn't handle spaces in language ext.
 
 Version 0.3.1 - 16 July 2005
 ----------------------------
@@ -10,18 +12,21 @@ Version 0.3.1 - 16 July 2005
  - Improved SQL installation/cleaning scripts.
  - Added make target to automatically generate passwords.
  - Fixed bug where teams received popups for their own clarifications.
+   (Closes: #1233038)
  - Fixed missing privilege definition in MySQL table.
  - Miscellaneous other small fixes.
 
 Version 0.3.0 - 5 July 2005
 ---------------------------
  - Added mass rejudging support per team,language,problem,judger.
+   (Closes: #1070241)
  - Added FAQ in docs/FAQ.
  - Fix missing column_priv (domjudge_user,problem,cid).
  - Fix sorting for equal scores to be alphabetical on team name.
  - Miscellaneous documentation improvements.
  - Fix some problems with file permissions by setting those explicitly.
  - Config checker now checks for existence of testdata.{in,out}.
+   (Closes: #1221427)
  - Web interface copes better with empty database tables.
  - Fixed that time_factor was inadvertently cast to int for output.
  - Add tooltips explaining the scoreboard summary row.
@@ -32,6 +37,7 @@ Version 0.2.0 - 23 February 2005
 --------------------------------
  - Fixed faulty EPS-logo, finally.
  - Add database privileges and move sql-files to own directory.
+   (Closes #1070236)
  - Improve config.tex dependency.
  - Make the base URI of the web interface configurable and fix redirects
    to be compatible with the HTTP-specification.
