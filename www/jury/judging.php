@@ -15,8 +15,9 @@ $title = 'Judging j'.@$id;
 if ( ! $id ) error ("Missing judging id");
 
 if ( isset($_POST['cmd']) ) {
-	if ( $_POST['cmd'] == 'verified' ) {
-		$DB->q('UPDATE judging SET verified = 1 WHERE judgingid = %i',$id);
+	if ( $_POST['cmd'] == 'verified' || $_POST['cmd'] == 'deverified' ) {
+		$DB->q('UPDATE judging SET verified = %i WHERE judgingid = %i',
+		       ($_POST['cmd'] == 'verified' ? 1 : 0), $id);
 	}
 }
 
@@ -35,7 +36,7 @@ require('menu.php');
 echo "<h1>Judging j$id / s$sid</h1>\n\n";
 
 $unix_start = strtotime($jdata['starttime']);
-if(@$jdata['endtime']) {
+if ( @$jdata['endtime'] ) {
 	$endtime = htmlspecialchars($jdata['endtime']). ' (judging took '.
 		printtimediff($unix_start, strtotime($jdata['endtime']) ) . ')';
 } else {
@@ -65,61 +66,57 @@ if(@$jdata['endtime']) {
 <tr><td>Verified:</td><td><?=printyn($jdata['verified'])?></td></tr>
 </table>
 
+<?php
+
+if ( SUBM_VERIFY ) {
+	$cmd = ( $jdata['verified'] == 1 ? 'deverified' : 'verified' );
+?>
 <form action="<?= $pagename.'?id='.$id ?>" method="post">
 <p>
 <input type="hidden" name="id" value="<?=$id?>" />
-<input type="hidden" name="cmd" value="verified" />
-<input type="submit" value="mark verified"
- <?=($jdata['verified']?'disabled="disabled "':'')?> />
+<input type="hidden" name="cmd" value="<?=$cmd?>" />
+<input type="submit" value="<?= ($cmd=='verified' ? '' : 'un')?>mark verified"<?=
+	( ! @$jdata['endtime'] ? ' disabled="disabled"' : '' )?> />
 </p>
 </form>
-
-
-<h3>Output compile</h3>
-
+	
 <?php
+}
+
+echo "<h3>Output compile</h3>\n\n";
+
 if(@$jdata['output_compile']) {
 	echo "<pre class=\"output_text\">".
 		htmlspecialchars(@$jdata['output_compile'])."</pre>\n\n";
 } else {
 	echo "<p><em>There were no compiler errors or warnings.</em></p>\n";
 }
-?>
 
+echo "<h3>Output run</h3>\n\n";
 
-<h3>Output run</h3>
-
-<?php
 if(@$jdata['output_run']) {
 	echo "<pre class=\"output_text\">".
 		htmlspecialchars(@$jdata['output_run'])."</pre>\n\n";
 } else {
 	echo "<p><em>There was no program output.</em></p>\n";
 }
-?>
 
+echo "<h3>Output diff</h3>\n\n";
 
-<h3>Output diff</h3>
-
-<?php
 if(@$jdata['output_diff']) {
 	echo "<pre class=\"output_text\">".
 		htmlspecialchars(@$jdata['output_diff'])."</pre>\n\n";
 } else {
 	echo "<p><em>There was no diff output.</em></p>\n";
 }
-?>
 
-<h3>Output error</h3>
+echo "<h3>Output error</h3>\n\n";
 
-<?php
 if(@$jdata['output_error']) {
 	echo "<pre class=\"output_text\">".
 		htmlspecialchars(@$jdata['output_error'])."</pre>\n\n";
 } else {
 	echo "<p><em>There was no error output.</em></p>\n";
 }
-?>
 
-<?php
 require('../footer.php');

@@ -32,16 +32,17 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 		$keyvalmatch = " s.$key = \"" . mysql_escape_string($value) . '" AND ';
 	}
 
+	$showverified = $isjury && SUBM_VERIFY;
+	
 	$cid = getCurContest();
 
 	$res = $DB->q('SELECT s.submitid, s.team, s.probid, s.langid, s.submittime,
-		s.judgerid,	t.name as teamname, p.name as probname, l.name as langname
+		s.judgerid, t.name as teamname, p.name as probname, l.name as langname
 		FROM submission s
 		LEFT JOIN team t ON(t.login=s.team)
 		LEFT JOIN problem p ON(p.probid=s.probid)
 		LEFT JOIN language l ON(l.langid=s.langid)
-		WHERE ' . $keyvalmatch . 's.cid = %i ORDER BY s.submittime DESC',
-		$cid );
+		WHERE ' . $keyvalmatch . 's.cid = %i ORDER BY s.submittime DESC',$cid);
 
 	// nothing found...
 	if( $res->count() == 0 ) {
@@ -50,9 +51,8 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 	}
 
 	$resulttable = $DB->q('KEYTABLE SELECT j.*, submitid AS ARRAYKEY
-		FROM judging j
-		WHERE (valid = 1 OR valid IS NULL) AND cid = %i', $cid );
-
+		FROM judging j WHERE (valid = 1 OR valid IS NULL) AND cid = %i',$cid);
+	
 	// print the table with the submissions. 
 	// table header; leave out the field that is our key (because it's the same
 	// for all rows)
@@ -63,12 +63,13 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 		($key != 'probid' ? "<th>problem</th>" : '') .
 		($key != 'langid' ? "<th>lang</th>"    : '') .
 		"<th>status</th>" .
+		($showverified ? "<th>verified</th>" : '') .
 		($isjury ? "<th>last<br />judge</th>" : '') .
 		"</tr>\n";
 	// print each row with links to detailed information
 	while( $row = $res->next() ) {
 		$sid = (int)$row['submitid'];
-		$isfinished = ($isjury || ! @$resulttable[$row['submitid']]['result']);
+		$isfinished = ($isjury || ! @$resulttable[$sid]['result']);
 		echo "<tr>";
 		if ( $isjury ) {
 			echo "<td><a href=\"submission.php?id=$sid\">s$sid</a></td>";
@@ -93,21 +94,24 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 				( $isjury ? '</a>' : '') . '</td>';
 		}
 		echo "<td>";
-		if( ! @$resulttable[$row['submitid']]['result'] ) {
+		if( ! @$resulttable[$sid]['result'] ) {
 			echo printresult(@$row['judgerid'] ? '' : 'queued', TRUE, isset($value));
 		} else {
 			// link directly to a specific judging
 			if ( $isjury ) {
 				echo '<a href="judging.php?id=' .
-					$resulttable[$row['submitid']]['judgingid'] . '">';
+					$resulttable[$sid]['judgingid'] . '">';
 			} else {
 				echo '<a href="submission_details.php?id=' . $sid . '">';
 			}
-			echo printresult(@$resulttable[$row['submitid']]['result']) . '</a>';
+			echo printresult(@$resulttable[$sid]['result']) . '</a>';
 		}
 		echo "</td>";
+		if ( $showverified ) {
+			echo "<td>" . printyn(@$resulttable[$sid]['verified']) . "</td>";
+		}
 		if ( $isjury ) {
-			$judger = @$resulttable[$row['submitid']]['judgerid'];
+			$judger = @$resulttable[$sid]['judgerid'];
 			echo '<td><a href="judger.php?id=' . urlencode($judger) . '">' .
 				printhost($judger) . '</a></td>';
 		}
