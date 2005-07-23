@@ -392,7 +392,7 @@ int main(int argc, char **argv)
 
 	logmsg(LOG_NOTICE,"submission successful");
 
-    return 0;
+    return SUCCESS;
 }
 
 void usage()

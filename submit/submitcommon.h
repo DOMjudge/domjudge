@@ -20,6 +20,10 @@
 #define PIN  1
 #define POUT 0
 
+const int FAILURE = 0;
+const int SUCCESS = 1;
+const int WARNING = 2;
+
 /* Buffer where the last received message is stored */
 extern char lastmesg[];
 
@@ -33,9 +37,10 @@ void  sendit(int, char *, ...);
  * va_list or ...  optional arguments for format characters
  */
 
-void senderror(int fd, int errnum, char *mesg, ...);
-/* Send an error message over a socket using sendit, close the socket and
- * generate an error.
+void senderror  (int fd, int errnum, char *mesg, ...);
+void sendwarning(int fd, int errnum, char *mesg, ...);
+/* Send an error/warning message over a socket using sendit, close the
+ * socket and generate an error/warning.
  *
  * Arguments:
  * int fd      filedescriptor of the socket

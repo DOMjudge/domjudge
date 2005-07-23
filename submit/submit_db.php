@@ -49,7 +49,7 @@ $cont = $DB->q('TUPLE SELECT *,
                 UNIX_TIMESTAMP(endtime) as end_u
                 FROM contest WHERE cid = %i',$cid);
 if( $cont['start_u'] > time() || $cont['end_u'] < time() ) {
-	error("The contest is closed, no submissions accepted. [c$cont[cid]]");
+	warning("The contest is closed, no submissions accepted. [c$cont[cid]]");
 }
 
 
@@ -62,7 +62,7 @@ if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',$team) 
 	error("Team '$team' not found in database.");
 }
 if( $teamrow['ipaddress'] != $ip ) {
-	if ( $teamrow['ipaddress'] == NULL && STRICTIPCHECK == false ) {
+	if ( $teamrow['ipaddress'] == NULL && ! STRICTIPCHECK ) {
 		$DB->q('UPDATE team SET ipaddress = %s WHERE login = %s',$ip,$team);
 		logmsg (LOG_NOTICE, "Registered team '$team' at address '$ip'.");
 	} else {

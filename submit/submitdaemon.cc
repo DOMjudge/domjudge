@@ -196,7 +196,7 @@ int main(int argc, char **argv)
 
 	}
 
-	return 0; /* This should never be reached */
+	return FAILURE; /* This should never be reached */
 }
 
 void version()
@@ -308,7 +308,7 @@ int handle_client()
 		if ( command=="quit" ) {
 			logmsg(LOG_NOTICE,"received quit, aborting");
 			close(client_fd);
-			return 0;
+			return FAILURE;
 		} else 
 		if ( command=="done" ) {
 			break;
@@ -384,9 +384,13 @@ int handle_client()
 
 		fprintf(stderr,"%s\n",line);
 		
-		/* Strip line to error message only and return that as error */
+		/* Search line for error/warning messages */
 		if ( (tmp = strstr(line,ERRMATCH))!=NULL ) {
 			senderror(client_fd,0,"%s",&tmp[strlen(ERRMATCH)]);
+		}
+		if ( (tmp = strstr(line,WARNMATCH))!=NULL ) {
+			sendwarning(client_fd,0,"%s",&tmp[strlen(WARNMATCH)]);
+			return WARNING;
 		}
 	}
 
@@ -422,7 +426,7 @@ int handle_client()
 	sendit(client_fd,"+done submission successful");
 	close(client_fd);
 	
-	return 1;
+	return SUCCESS;
 }
 
 /***
@@ -446,10 +450,19 @@ void sigchld_handler(int sig)
 	
 	logmsg(LOG_INFO,"child process %d exited with exitcode %d",pid,exitcode);
 
-	if ( exitcode==0 ) {
-		system(SYSTEM_ROOT"/bin/beep "BEEP_SUBMIT" &");
-	} else {
-		system(SYSTEM_ROOT"/bin/beep "BEEP_ERROR" &");
+	/* Audibly report submission status with beeps */
+	switch ( exitcode ) {
+	case SUCCESS:
+		system(BEEP_CMD" "BEEP_SUBMIT" &");
+		break;
+
+	case WARNING:
+		system(BEEP_CMD" "BEEP_WARNING" &");
+		break;
+
+	case FAILURE:
+	default:
+		system(BEEP_CMD" "BEEP_ERROR" &");
 	}
 }
 

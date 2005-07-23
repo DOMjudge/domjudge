@@ -41,7 +41,7 @@ void senderror(int fd, int errnum, char *mesg, ...)
 	va_list ap;
 	char *buf, *tmp;
 
-	tmp = errorstring(errnum,mesg);
+	tmp = errorstring(ERRSTR,errnum,mesg);
 
 	buf = (char *) malloc(strlen(tmp)+2);
 	if ( buf==NULL ) abort();
@@ -60,6 +60,32 @@ void senderror(int fd, int errnum, char *mesg, ...)
 
 	va_start(ap,mesg);
 	verror(errnum,mesg,ap);
+}
+
+void sendwarning(int fd, int errnum, char *mesg, ...)
+{
+	va_list ap;
+	char *buf, *tmp;
+
+	tmp = errorstring(WARNSTR,errnum,mesg);
+
+	buf = (char *) malloc(strlen(tmp)+2);
+	if ( buf==NULL ) abort();
+
+	buf[0] = '-';
+	strcpy(&buf[1],tmp);
+	
+	va_start(ap,mesg);
+	vsendit(fd,buf,ap);
+	va_end(ap);
+
+	free(tmp);
+	free(buf);
+
+	if ( close(fd)!=0 ) error(errno,"close");
+
+	va_start(ap,mesg);
+	vwarning(errnum,mesg,ap);
 }
 
 int receive(int fd)
