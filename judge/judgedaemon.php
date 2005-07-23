@@ -136,7 +136,7 @@ while ( TRUE ) {
 
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {
-		system(SYSTEM_ROOT."/bin/beep ".BEEP_ERROR." &");
+		system(BEEP_CMD." ".BEEP_ERROR." &");
 		error("s$row[submitid] Unknown exitcode from test_solution.sh: $retval");
 	}
 	$result = $EXITCODES[$retval];
@@ -158,16 +158,16 @@ while ( TRUE ) {
 	calcScoreRow($cid, $row['team'], $row['probid']);
 
 	// END TRANSACTION
-	// this should really be a transaction. what if something crashes between the update
-	// and calcScoreRow? Then the scoreboard is in an inconsistent state compared to the
-	// submissions.
+	// this should really be a transaction. what if something crashes
+	// between the update and calcScoreRow? Then the scoreboard is in
+	// an inconsistent state compared to the submissions.
 	
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
 	if ( $result == 'correct' ) {
-		system(SYSTEM_ROOT."/bin/beep ".BEEP_ACCEPT." &");
+		system(BEEP_CMD." ".BEEP_ACCEPT." &");
 	} else {
-		system(SYSTEM_ROOT."/bin/beep ".BEEP_REJECT." &");
+		system(BEEP_CMD." ".BEEP_REJECT." &");
 	}
 
 	// restart the judging loop
