@@ -48,3 +48,6 @@ function error($string) {
 	exit(1);
 }
 
+function warning($string) {
+	logmsg(LOG_WARNING, "warning: $string");
+}

@@ -10,7 +10,7 @@
  * to avoid doubled code. Furthermore, all functions use 'vlogmsg' to do the
  * actual writing of the logmessage and all error/warning functions use
  * 'vlogerror' to generate the error-logmessage from the input. vlogerror in
- * turn calls verrorstr to generate the actual error message;
+ * turn calls errorstring to generate the actual error message;
  */
 
 #include "lib.error.h"
@@ -68,30 +68,58 @@ void logmsg(int msglevel, char *mesg, ...)
 	va_end(ap);
 }
 
-/* Function to generate error string */
-char *errorstring(int errnum, char *mesg)
+/* Function to generate error/warning string */
+char *errorstring(char *type, int errnum, char *mesg)
 {
-	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
-	int buffersize = mesglen + 256;
+	int buffersize;
 	char *buffer;
 	char *endptr; /* pointer to current end of buffer */
-	
+	char *tmpstr;
+	int tmplen;
+
+	if ( type==NULL ) {
+		type = strdup(ERRSTR);
+		if ( type==NULL ) abort();
+	}
+
+	/* 256 > maxlength strerror() */
+	buffersize = strlen(type) + (mesg==NULL ? 0 : strlen(mesg)) + 256;
+
 	endptr = buffer = (char *) malloc(buffersize);
 	if ( buffer==NULL ) abort();
 
-	sprintf(buffer,ERRSTR);
-	endptr = strchr(buffer,0);
+	sprintf(buffer,type);
+	endptr = strchr(endptr,0);
 	
 	if ( mesg!=NULL ) {
 		snprintf(endptr, buffersize-strlen(buffer), ": %s", mesg);
 		endptr = strchr(endptr,0);
 	}		
 	if ( errnum!=0 ) {
-		snprintf(endptr, buffersize-strlen(buffer), ": %s",strerror(errnum));
+		snprintf(endptr, buffersize-strlen(buffer), ": ");
+		endptr = strchr(endptr,0);
+#ifdef __GLIBC__
+/* glibc strerror_r doesn't comply with POSIX standards. From man-page:
+ *   
+ *   char *strerror_r(int errnum, char *buf, size_t n);
+ * 
+ * is a GNU extension used by glibc (since 2.0), and must be regarded
+ * as obsolete in view of SUSv3.  The GNU version may, but need not,
+ * use the user-supplied buffer. If it does, the result may be
+ * truncated in case the supplied buffer is too small. The result is
+ * always NUL-terminated.
+ */
+		tmplen = buffersize-strlen(buffer);
+		tmpstr = strerror_r(errnum, endptr, tmplen);
+		strncat(endptr, tmpstr, tmplen);
+#else
+		strerror_r(errnum, endptr, buffersize-strlen(buffer));
+#endif
 		endptr = strchr(endptr,0);
 	}
 	if ( mesg==NULL && errnum==0 ) {
 		sprintf(endptr,": unknown error");
+		endptr = strchr(endptr,0);
 	}
 
 	return buffer;
@@ -102,7 +130,7 @@ void vlogerror(int errnum, char *mesg, va_list ap)
 {
 	char *buffer;
 
-	buffer = errorstring(errnum, mesg);
+	buffer = errorstring(ERRSTR, errnum, mesg);
 
 	vlogmsg(LOG_ERR, buffer, ap);
 
@@ -137,10 +165,16 @@ void error(int errnum, char *mesg, ...)
 	verror(errnum, mesg, ap);
 }
 
-/* Logs an error message and generate some extra warning signals */
+/* Logs a warning message */
 void vwarning(int errnum, char *mesg, va_list ap)
 {
-	vlogerror(errnum, mesg, ap);
+	char *buffer;
+
+	buffer = errorstring(WARNSTR, errnum, mesg);
+
+	vlogmsg(LOG_WARNING, buffer, ap);
+
+	free(buffer);
 }
 
 /* Argument-list wrapper function around vwarning */

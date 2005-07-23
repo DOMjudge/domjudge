@@ -32,3 +32,7 @@ function error ()
 	exit $E_INTERN
 }
 
+function warning ()
+{
+	logmsg $LOG_WARNING "warning: $@"
+}

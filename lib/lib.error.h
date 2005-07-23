@@ -12,8 +12,11 @@
 #include <errno.h>
 #include <syslog.h>
 
-#define ERRSTR   "error"
-#define ERRMATCH ERRSTR": "
+#define ERRSTR    "error"
+#define ERRMATCH  ERRSTR": "
+
+#define WARNSTR   "warning"
+#define WARNMATCH WARNSTR": "
 
 #ifdef __cplusplus
 extern "C"
@@ -42,15 +45,15 @@ void vlogmsg(int, char *, va_list);
  * ... or va_list  optional arguments for format characters
  */
 
-char *errorstring(int, char *);
+char *errorstring(char *, int, char *);
 /* Error string generating function:
  * Returns a pointer to a dynamically allocated string containing the error
- * message. Optional arguments still have to be inserted (e.g. by calling
- * vlogmsg).
+ * message.
  *
  * Arguments:
+ * char *type      string of type of message: ERRSTR, WARNSTR or custom.
  * int errnum      'errno' value to use for error string output, set 0 to skip
- * char *mesg      message, may include printf output format characters '%'
+ * char *mesg      optional accompanying message to display, set NULL to skip
  *
  * Returns a char pointer to the allocated string.
  */
@@ -63,9 +66,9 @@ void verror   (int, char *, va_list);
 void vwarning (int, char *, va_list);
 /* Error and warning functions (v.. uses va_list instead of argument list):
  * Logs an error message including error string from 'errno'.
- *   logerror   only logs the error message
+ *   logerror   only logs the error message (non-fatal error)
  *   error      log the message and exits with exit_failure
- *   warning    log the message and generates extra warning signals
+ *   warning    same as 'logerror', but prints 'warning' instead of 'error'
  *
  * Arguments:
  * int errnum      'errno' value to use for error string output, set 0 to skip
