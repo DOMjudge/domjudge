@@ -23,51 +23,52 @@ PHPPASSWD="$SYSTEM_ROOT/etc/passwords.php"
 # only used internally.
 function generate_passwd ()
 {
-    local PASSWD=""
-    local PASSWDLEN=12
-    local ALPHABET="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    
-    for ((i=0; i<PASSWDLEN; i++)) ; do
-	PASSWD="$PASSWD${ALPHABET:(($RANDOM % ${#ALPHABET})):1}"
-    done
+	local PASSWD=""
+	local PASSWDLEN=12
+	local ALPHABET="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	
+	for ((i=0; i<PASSWDLEN; i++)) ; do
+		PASSWD="$PASSWD${ALPHABET:(($RANDOM % ${#ALPHABET})):1}"
+	done
 
-    echo "$PASSWD"
+	echo "$PASSWD"
 
-    # Clear password to reset memory (not sure how well this works...)
-    PASSWD="----------------------------"
+	# Clear password to reset memory (not sure how well this works...)
+	PASSWD="----------------------------"
 }
 
 # Function to interactively ask a password from the user. Password
 # input and output is done on stdin/stdout, messages on stderr.
 function ask_passwd ()
 {
-    local PASSWD=""
-    local CONFIRM=""
-    local PASSWDMINLEN=6
+	local PASSWD=""
+	local CONFIRM=""
+	local PASSWDMINLEN=6
 
-    while true; do
+	while true; do
 	read -e -s -p "Enter password: "   PASSWD  ; echo >&2
 	read -e -s -p "Confirm password: " CONFIRM ; echo >&2
 
 	if [ ${#PASSWD} -lt $PASSWDMINLEN ]; then
-	    echo "Password is too short: need at least $PASSWDMINLEN characters." >&2
-	    continue
+		echo "Password is too short: need at least $PASSWDMINLEN characters." >&2
+		continue
 	fi
 	if [ "$PASSWD" != "$CONFIRM" ]; then
-	    echo "Password and confirmation do not match." >&2
-	    continue
+		echo "Password and confirmation do not match." >&2
+		continue
 	fi
 	if [[ "$PASSWD" != *([0-9a-zA-z]) ]]; then
-	    echo "Password must consist of only digits and lower/uppercase letters." >&2
-	    continue
+		echo "Password must consist of only digits and lower/uppercase letters." >&2
+		continue
 	fi
 	break
-    done
+	done
 
-    echo "$PASSWD"
+	echo "$PASSWD"
 
-    # Clear password to reset memory (not sure how well this works...)
-    PASSWD="----------------------------"
+	# Clear password to reset memory (not sure how well this works...)
+	PASSWD="----------------------------"
+	CONFIRM="----------------------------"
 }
 
 # Function to replace string(s) within a file using 'sed'. Arguments
@@ -75,17 +76,17 @@ function ask_passwd ()
 # 'cat' to copy the file's contents back to preserve file permissions.
 function string_replace ()
 {
-    SCRIPT=$1
-    FILE=$2
+	SCRIPT=$1
+	FILE=$2
 
-    [ -r "$FILE" ] || return 1
+	[ -r "$FILE" ] || return 1
 
-    TEMPFILE=`bin/tempfile`
-    
-    cat "$FILE" | sed "$SCRIPT" > "$TEMPFILE"
-    cat "$TEMPFILE" > "$FILE"
+	TEMPFILE=`bin/tempfile`
+	
+	cat "$FILE" | sed "$SCRIPT" > "$TEMPFILE"
+	cat "$TEMPFILE" > "$FILE"
 
-    rm -f "$TEMPFILE"
+	rm -f "$TEMPFILE"
 }
 
 echo "Generating 'domjudge_team' password..."
@@ -110,13 +111,13 @@ htpasswd -b -c "$HTPASSWD" "domjudge_jury" "$PASSWD_JURY"
 string_replace "s!^AuthUserFile .*!AuthUserFile $HTPASSWD!" "$HTACCESS"
 
 # Update password info in php-config:
-string_replace "s!DOMJUDGE_JURY_PASSWD!$PASSWD_JURY!g;\
-                s!DOMJUDGE_TEAM_PASSWD!$PASSWD_TEAM!g;\
-                s!DOMJUDGE_PUBLIC_PASSWD!$PASSWD_PUBLIC!g;" "$PHPPASSWD"
+string_replace "s!\('domjudge_jury'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1$PASSWD_JURY!;\
+                s!\('domjudge_team'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1$PASSWD_TEAM!;\
+                s!\('domjudge_public'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1$PASSWD_PUBLIC!" "$PHPPASSWD"
 
 # Update password info in MySQL privileges file:
-string_replace "s!DOMJUDGE_JURY_PASSWD!$PASSWD_JURY!g;\
-                s!DOMJUDGE_TEAM_PASSWD!$PASSWD_TEAM!g;\
-                s!DOMJUDGE_PUBLIC_PASSWD!$PASSWD_PUBLIC!g;" "$SQLPRIVS"
+string_replace "s!\('domjudge_jury'.*PASSWORD('\)[^']*!\1$PASSWD_JURY!;\
+                s!\('domjudge_team'.*PASSWORD('\)[^']*!\1$PASSWD_TEAM!;\
+                s!\('domjudge_public'.*PASSWORD('\)[^']*!\1$PASSWD_PUBLIC!" "$SQLPRIVS"
 
 exit 0

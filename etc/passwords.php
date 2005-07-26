@@ -19,13 +19,13 @@
  */
 
 $DBLOGIN = array (
-	'jury'	=> array (		// s/i/u/d on each table
-		'user' => 'domjudge_jury',
-		'pass' => 'DOMJUDGE_JURY_PASSWD' ),
-	'team'	=> array (		// ...
-		'user' => 'domjudge_team',
-		'pass' => 'DOMJUDGE_TEAM_PASSWD' ),
-	'public'	=> array (	// Select on team,problem,submission,judging,contest
-		'user' => 'domjudge_public',
-		'pass' => 'DOMJUDGE_PUBLIC_PASSWD' )
+	'jury'   => array (	// s/i/u/d on each table
+		'user' => 'domjudge_jury', 'pass' => 'DOMJUDGE_JURY_PASSWD'
+		),
+	'team'   => array (	// ...
+		'user' => 'domjudge_team', 'pass' => 'DOMJUDGE_TEAM_PASSWD'
+		),
+	'public' => array (	// Select on team,problem,submission,judging,contest
+		'user' => 'domjudge_public', 'pass' => 'DOMJUDGE_PUBLIC_PASSWD'
+		)
 	);
