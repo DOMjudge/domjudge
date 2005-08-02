@@ -23,8 +23,8 @@ ps:  $(TARGETSPS)
 pdf: $(TARGETSPDF)
 
 $(TARGETSDVI): %.dvi: %.tex $(CONFIGDIR)/config.tex \
-                            example.* logos/DOMjudgelogo.eps \
-                            expdlist.sty svn.sty 
+                            example.* logos/DOMjudgelogo.* \
+                            expdlist.sty svn.sty
 	-latex $(LATEXOPTIONS) $< < /dev/null &> /dev/null
 	-latex $(LATEXOPTIONS) $< < /dev/null &> /dev/null
 	 latex $(LATEXOPTIONS) $< < /dev/null
@@ -44,10 +44,7 @@ texclean:
 	       $(addsuffix .toc,$(TARGETS)) \
 	       systemconfig.aux
 
-dviclean:
-	-rm -f $(TARGETSDVI)
-
 clean: texclean
-	-rm -f $(TARGETSPS) $(TARGETSPDF)
+	-rm -f $(TARGETSDVI) $(TARGETSPS) $(TARGETSPDF)
 
 .PHONY: docs dvi ps pdf texclean dviclean

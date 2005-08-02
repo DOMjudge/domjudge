@@ -47,11 +47,8 @@ passwd_perms:
 	done
 
 # Generate documentation
-docs:
+docs: config
 	$(MAKE) -C doc docs
-
-dvi:
-	$(MAKE) -C doc dvi
 
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
