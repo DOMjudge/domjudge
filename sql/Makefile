@@ -6,9 +6,11 @@ include $(TOPDIR)/Makefile.global
 build:
 
 install:
-	mysql -p -u root < mysql_privileges.sql
-	mysql -p -u root < mysql_db_structure.sql
-	mysql -p -u root < mysql_db_examples.sql
+# Install all sql files at once, so we have to ask the MySQL root
+# password only once:
+	cat mysql_privileges.sql   \
+	    mysql_db_structure.sql \
+	    mysql_db_examples.sql | mysql -p -u root
 
 distclean:
 	mysql -p -u root < mysql_clean.sql
