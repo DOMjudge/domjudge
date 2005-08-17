@@ -23,8 +23,9 @@ ROOTCMD=su root
 all:
 
 TEMPFILEDIR = $(TOPDIR)/bin
+TEMPFILE = $(TEMPFILEDIR)/tempfile
 
-$(TEMPFILEDIR)/tempfile:
+$(TEMPFILE):
 	$(MAKE) -C $(TEMPFILEDIR) tempfile
 
 clean: clean-backupfiles

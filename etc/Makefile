@@ -9,9 +9,9 @@ CONFIGS    = $(addprefix config.,$(EXTENSIONS))
 
 .PHONY: config
 
-config: $(TEMPFILEDIR)/tempfile $(CONFIGS)
+config: $(CONFIGS)
 
-$(CONFIGS): config.%: config.template.% global.cfg $(TEMPFILEDIR)/tempfile
+$(CONFIGS): config.%: config.template.% global.cfg $(TEMPFILE)
 	./generate_config.sh $*
 
 clean:
