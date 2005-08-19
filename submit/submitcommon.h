@@ -24,6 +24,10 @@ const int FAILURE = 0;
 const int SUCCESS = 1;
 const int WARNING = 2;
 
+const int FAILURE_EXITCODE = -1;
+const int SUCCESS_EXITCODE = 0;
+const int WARNING_EXITCODE = 1;
+
 /* Buffer where the last received message is stored */
 extern char lastmesg[];
 

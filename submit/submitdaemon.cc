@@ -104,6 +104,7 @@ int main(int argc, char **argv)
 {
 	struct sigaction sigchildaction;
 	int child_pid;
+	int exit_status;
 	int c;
 	char *ptr;
 	
@@ -184,10 +185,15 @@ int main(int argc, char **argv)
 			
 			logmsg(LOG_NOTICE,"connection from %s",inet_ntoa(client_addr.sin_addr));
 
-			handle_client();
+			exit_status = handle_client();
 
 			logmsg(LOG_INFO,"child exiting");
-			exit(0);
+			switch ( exit_status ) {
+			case SUCCESS: exit(SUCCESS_EXITCODE);
+			case WARNING: exit(WARNING_EXITCODE);
+			case FAILURE: exit(FAILURE_EXITCODE);
+			}
+			exit(FAILURE_EXITCODE); /* Shouldn't happen */
 
 		default: /* parent thread */
 			close(client_fd); /* parent doesn't need the client_fd */
@@ -452,15 +458,15 @@ void sigchld_handler(int sig)
 
 	/* Audibly report submission status with beeps */
 	switch ( exitcode ) {
-	case SUCCESS:
+	case SUCCESS_EXITCODE:
 		system(BEEP_CMD" "BEEP_SUBMIT" &");
 		break;
 
-	case WARNING:
+	case WARNING_EXITCODE:
 		system(BEEP_CMD" "BEEP_WARNING" &");
 		break;
 
-	case FAILURE:
+	case FAILURE_EXITCODE:
 	default:
 		system(BEEP_CMD" "BEEP_ERROR" &");
 	}
