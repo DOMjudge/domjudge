@@ -63,8 +63,11 @@ while ( TRUE ) {
 	}
 
 	$newcid = getCurContest();
-	if ( !isset($cid) || $cid != $newcid ) {
-		logmsg(LOG_NOTICE, "Contest has changed. (from c" . @$cid . " to c$newcid)");
+	$oldcid = $cid;
+	if ( $oldcid !== $newcid ) {
+		logmsg(LOG_NOTICE, "Contest has changed from " .
+		       (isset($oldcid) ? "c$oldcid" : "none" ) . " to " .
+		       (isset($newcid) ? "c$newcid" : "none" ) );
 		$cid = $newcid;
 	}
 	
