@@ -6,6 +6,7 @@ Version 0.3.2 - CVS
  - Added config option to (not) show compiler output to teams.
  - Moved C-code from headers to separate files.
  - Fixed bugs where submitdaemon couldn't handle spaces in language ext.
+ - Added balloons notification script (Closes #1238416).
 
 Version 0.3.1 - 16 July 2005
 ----------------------------
