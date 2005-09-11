@@ -19,11 +19,7 @@ $verbose = LOG_INFO;
 
 $waittime = 5;
 
-function notification_title($team, $problem) {
-	return "Team ".$team['login']." solved problem ".$problem['probid'];
-}
-
-function notification_body($team, $problem) {
+function notification_text($team, $problem) {
 	return
 		"Notification of a problem solved:\n".
 		"\n".
@@ -59,34 +55,20 @@ while ( TRUE ) {
 			$prob = $DB->q('TUPLE SELECT * FROM problem WHERE probid = %s',
 			               $row['problem']);
 
-			$title = notification_title($team,$prob);
-			$body  = notification_body ($team,$prob);
+			logmsg(LOG_DEBUG,"New problem solved: ".$row['problem'].
+				   " by team ".$row['team']);
 			
-			if ( defined('BALLOON_EMAIL') && BALLOON_EMAIL ) {
+			if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
 				
-				logmsg(LOG_INFO,"Mailing notification: team '".
-					   $row['team']."', problem '".$row['team']."'.");
+				logmsg(LOG_INFO,"Sending notification: team '".
+					   $row['team']."', problem '".$row['problem']."'.");
 				
-				$handle = popen("mail -s '".$title."' ".BALLOON_EMAIL, 'w');
-				if ( ! $handle ) error("Could not mail notification");
+				$handle = popen(BALLOON_CMD, 'w');
+				if ( ! $handle ) error("Could not run command '".BALLOON_CMD."'");
 				
-				fwrite($handle,$body);
+				fwrite($handle,notification_text($team,$prob));
 				if ( ($exitcode = pclose($handle))!=0 ) {
-					warning("Mail command exited with exitcode $exitcode");
-				}
-			}
-			
-			if ( defined('BALLOON_PRINT') && BALLOON_PRINT ) {
-
-				logmsg(LOG_INFO,"Printing notification: team '".
-					   $row['team']."', problem '".$row['team']."'.");
-				
-				$handle = popen(BALLOON_PRINT, 'w');
-				if ( ! $handle ) error("Could not print notification");
-				
-				fwrite($handle,$body);
-				if ( ($exitcode = pclose($handle))!=0 ) {
-					warning("Print command exited with exitcode $exitcode");
+					warning("Notification command exited with exitcode $exitcode");
 				}
 			}
 			
