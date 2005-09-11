@@ -10,7 +10,7 @@
 /**
  * prints result with correct style, '' -> judging
  */
-function printresult($result, $valid = TRUE, $teamstatus = FALSE) {
+function printresult($result, $valid = TRUE, $isjury = FALSE) {
 
 	$start = '<span class="sol ';
 	$end   = '</span>';
@@ -20,7 +20,7 @@ function printresult($result, $valid = TRUE, $teamstatus = FALSE) {
 			$result = 'judging';
 		case 'judging':
 		case 'queued':
-			if($teamstatus) $result = 'pending';
+			if ( ! $isjury ) $result = 'pending';
 			$style = 'sol_queued';
 			break;
 		case 'correct':

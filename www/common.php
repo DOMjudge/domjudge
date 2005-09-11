@@ -94,17 +94,21 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 				( $isjury ? '</a>' : '') . '</td>';
 		}
 		echo "<td>";
-		if( ! @$resulttable[$sid]['result'] ) {
-			echo printresult(@$row['judgerid'] ? '' : 'queued', TRUE, isset($value));
+		if ( $isjury ) {
+			if ( ! @$resulttable[$sid]['result'] ) {
+				echo printresult(@$row['judgerid'] ? '' : 'queued', TRUE, $isjury);
+			} else {
+				echo '<a href="judging.php?id=' . $resulttable[$sid]['judgingid'] . '">';
+				echo printresult(@$resulttable[$sid]['result']) . '</a>';
+			}
 		} else {
-			// link directly to a specific judging
-			if ( $isjury ) {
-				echo '<a href="judging.php?id=' .
-					$resulttable[$sid]['judgingid'] . '">';
+			if ( ! @$resulttable[$sid]['result'] ||
+				 ( SUBM_VERIFY==2 && ! @$resulttable[$sid]['verified'] ) ) {
+				echo printresult('', TRUE, $isjury);
 			} else {
 				echo '<a href="submission_details.php?id=' . $sid . '">';
+				echo printresult(@$resulttable[$sid]['result']) . '</a>';
 			}
-			echo printresult(@$resulttable[$sid]['result']) . '</a>';
 		}
 		echo "</td>";
 		if ( $showverified ) {

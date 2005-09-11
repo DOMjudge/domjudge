@@ -14,13 +14,6 @@ $title = 'Judging j'.@$id;
 
 if ( ! $id ) error ("Missing judging id");
 
-if ( isset($_POST['cmd']) ) {
-	if ( $_POST['cmd'] == 'verified' || $_POST['cmd'] == 'deverified' ) {
-		$DB->q('UPDATE judging SET verified = %i WHERE judgingid = %i',
-		       ($_POST['cmd'] == 'verified' ? 1 : 0), $id);
-	}
-}
-
 $jdata = $DB->q('TUPLE SELECT j.*,s.*,t.*, c.contestname
 	FROM judging j
 	LEFT JOIN submission s USING(submitid)
@@ -29,6 +22,16 @@ $jdata = $DB->q('TUPLE SELECT j.*,s.*,t.*, c.contestname
 	WHERE judgingid = %i', $id);
 
 $sid = (int)$jdata['submitid'];
+
+if ( isset($_POST['cmd']) ) {
+	if ( $_POST['cmd'] == 'verified' || $_POST['cmd'] == 'deverified' ) {
+		$DB->q('UPDATE judging SET verified = %i WHERE judgingid = %i',
+		       ($_POST['cmd'] == 'verified' ? 1 : 0), $id);
+		if ( SUBM_VERIFY == 2 ) {
+			calcScoreRow($jdata['cid'], $jdata['team'], $jdata['probid']);
+		}
+	}
+}
 
 require('../header.php');
 require('menu.php');
@@ -68,7 +71,7 @@ if ( @$jdata['endtime'] ) {
 
 <?php
 
-if ( SUBM_VERIFY ) {
+if ( SUBM_VERIFY==1 || ( SUBM_VERIFY==2 && ! $jdata['verified'] ) ) {
 	$cmd = ( $jdata['verified'] == 1 ? 'deverified' : 'verified' );
 ?>
 <form action="<?= $pagename.'?id='.$id ?>" method="post">
