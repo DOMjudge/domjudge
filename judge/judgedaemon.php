@@ -62,7 +62,8 @@ while ( TRUE ) {
 		$waiting = FALSE;
 	}
 
-	$newcid = getCurContest();
+	$contdata = getCurContest(TRUE);
+	$newcid = $contdata['cid'];
 	$oldcid = $cid;
 	if ( $oldcid !== $newcid ) {
 		logmsg(LOG_NOTICE, "Contest has changed from " .
@@ -95,8 +96,9 @@ while ( TRUE ) {
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
 		SET judgerid = %s, judgemark = %s WHERE judgerid IS NULL
-		AND cid = %i AND langid IN (%As) AND probid IN (%As) LIMIT 1',
-		$myhost, $mark, $cid, $judgable_lang, $judgable_prob);
+		AND cid = %i AND langid IN (%As) AND probid IN (%As)
+		AND submittime <= %s LIMIT 1',
+		$myhost, $mark, $cid, $judgable_lang, $judgable_prob, $contdata['endtime']);
 
 	// nothing updated -> no open submissions
 	if ( $numupd == 0 ) {

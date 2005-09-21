@@ -43,13 +43,18 @@ if( ! $file    ) error("No value for Filename.");
 
 
 // Check 1: is the contest open?
-$cid = getCurContest();
-$cont = $DB->q('TUPLE SELECT *,
-                UNIX_TIMESTAMP(starttime) as start_u,
-                UNIX_TIMESTAMP(endtime) as end_u
-                FROM contest WHERE cid = %i',$cid);
-if( $cont['start_u'] > time() || $cont['end_u'] < time() ) {
-	warning("The contest is closed, no submissions accepted. [c$cont[cid]]");
+$contdata = getCurContest(TRUE);
+$cid = $contdata['cid'];
+
+// If no contest has started yet, refuse submissions.
+$now = date('Y-m-d H:i:s');
+if( $contdata['starttime'] > $now ) {
+	error("The contest is closed, no submissions accepted. [c$cid]");
+}
+// If the contest has already ended, accept the submission anyway but do not
+// process it.
+if( $contdata['endtime'] < $now ) {
+	warning("The contest is closed, submission stored but not processed. [c$cid]");
 }
 
 

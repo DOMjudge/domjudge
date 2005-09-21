@@ -16,6 +16,9 @@ function printresult($result, $valid = TRUE, $isjury = FALSE) {
 	$end   = '</span>';
 
 	switch( $result ) {
+		case 'too-late':
+			$style = 'sol_queued';
+			break;
 		case '':
 			$result = 'judging';
 		case 'judging':

@@ -17,29 +17,32 @@ function getFileContents($filename) {
 }
 
 /**
- * Will return either the current contest, or else the upcoming one
+ * Will return either the current contest id, or
+ * the most recently finished one.
+ * When fulldata is true, returns the total row as an array
+ * instead of just the ID.
  */
-function getCurContest() {
+function getCurContest($fulldata = FALSE) {
 
 	global $DB;
-	$now = $DB->q('SELECT cid FROM contest
+	$now = $DB->q('SELECT * FROM contest
 		WHERE starttime <= NOW() AND endtime >= NOW()');
 	
 	if ( $now->count() == 1 ) {
 		$row = $now->next();
-		$curcontest = $row['cid'];
+		$retval = ( $fulldata ? $row : $row['cid'] );
 	}
 	if ( $now->count() == 0 ) {
-		$prev = $DB->q('SELECT cid FROM contest
+		$prev = $DB->q('SELECT * FROM contest
 			WHERE endtime <= NOW() ORDER BY endtime DESC LIMIT 1');	
 		$row = $prev->next();
-		$curcontest = $row['cid'];
+		$retval = ( $fulldata ? $row : $row['cid'] );
 	}
 	if ( $now->count() > 1 ) {
 		error("Contests table contains overlapping contests");
 	}
 	
-	return $curcontest;
+	return $retval;
 }
 
 /**

@@ -34,8 +34,9 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 
 	$showverified = $isjury && SUBM_VERIFY;
 	
-	$cid = getCurContest();
-
+	$contdata = getCurContest(TRUE);
+	$cid = $contdata['cid'];
+ 
 	$res = $DB->q('SELECT s.submitid, s.team, s.probid, s.langid, s.submittime,
 		s.judgerid, t.name as teamname, p.name as probname, l.name as langname
 		FROM submission s
@@ -49,7 +50,7 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 		echo "<p><em>No submissions</em></p>\n\n";
 		return;
 	}
-
+	
 	$resulttable = $DB->q('KEYTABLE SELECT j.*, submitid AS ARRAYKEY
 		FROM judging j WHERE (valid = 1 OR valid IS NULL) AND cid = %i',$cid);
 	
@@ -96,7 +97,11 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 		echo "<td>";
 		if ( $isjury ) {
 			if ( ! @$resulttable[$sid]['result'] ) {
-				echo printresult(@$row['judgerid'] ? '' : 'queued', TRUE, $isjury);
+				if ( $row['submittime'] > $contdata['endtime'] ) {
+					echo printresult('too-late', TRUE, TRUE);
+				} else {
+					echo printresult(@$row['judgerid'] ? '' : 'queued', TRUE, TRUE);
+				}
 			} else {
 				echo '<a href="judging.php?id=' . $resulttable[$sid]['judgingid'] . '">';
 				echo printresult(@$resulttable[$sid]['result']) . '</a>';
@@ -104,7 +109,11 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 		} else {
 			if ( ! @$resulttable[$sid]['result'] ||
 				 ( SUBM_VERIFY==2 && ! @$resulttable[$sid]['verified'] ) ) {
-				echo printresult('', TRUE, $isjury);
+				if ( $row['submittime'] > $contdata['endtime'] ) {
+					echo printresult('too-late');
+				} else {
+					echo printresult('', TRUE, FALSE);
+				}
 			} else {
 				echo '<a href="submission_details.php?id=' . $sid . '">';
 				echo printresult(@$resulttable[$sid]['result']) . '</a>';
