@@ -21,7 +21,7 @@ use the generated XML output of the validator at all at this moment.
 DOMjudge currently has one validator script: "judge/compare.sh". When 
 passed a 5th parameter, this is interpreted as a filename to which it 
 will write a 'diff' output of the program and jury output (in a readable 
-format). It also generates XML compliant output, written to the result 
-file specified in parameter 4 and fully complies with the standard.
+format). It also generates XML compliant output, which is written to the
+result file specified in parameter 4 and fully complies with the standard.
 
 $Id$
