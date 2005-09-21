@@ -38,24 +38,35 @@ EOF
 }
 
 # Test an exact match between program output and testdata output:
-diff -U 0 $PROGRAM $TESTOUT >$DIFFOUT
+DIFFOUTPUT=`diff -U 0 $PROGRAM $TESTOUT`
+DIFFEXIT=$?
+if [ -z "$DIFFOUTPUT" ]; then
+	SOLVED=1
+fi
 
 # Exit with failure, when diff reports internal errors:
 # Exitcode 1 means that differences were found!
-if [ $? -ge 2 ]; then
+if [ $DIFFEXIT -ge 2 ]; then
 	writeresult "Internal error"
 	exit 1
 fi
 
 # Exit when no differences found:
-if [ ! -s $DIFFOUT ]; then
+if [ "$SOLVED" = 1 ]; then
 	writeresult "Accepted"
 	exit 0
 else
 	writeresult "Wrong answer"
 fi
 
-FIRSTDIFF=""
+# Exit when no DIFFOUT given (nothing to do anymore):
+if [ -z "$DIFFOUT" ]; then
+	exit 0
+fi
+
+# Generate a diff output in readable format:
+
+DIRSTDIFF=""
 LINEMAXLEN=10
 LINEDIGITS=6
 
