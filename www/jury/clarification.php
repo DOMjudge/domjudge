@@ -18,6 +18,7 @@ if ( isset($_REQUEST['id']) ) {
 	$req = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
 		LEFT JOIN team t ON (t.login = q.sender)
 		WHERE q.cid = %i AND q.clarid = %i', $cid, $id);
+	
 	if ( ! $req ) error("clarification $id not found");
 
 	$respid = (int) (empty($req['respid']) ? $id : $req['respid']);
@@ -92,13 +93,16 @@ if ( ! empty ( $req['respid'] ) ) {
 putClarification($id, NULL, TRUE);
 
 // Display button to (un)set request as 'answered'
-echo '<form action="clarification.php" method="post"><p>' . "\n";
-echo '<input type="hidden" name="id" value="' . $id . "\" />\n";
-echo '<input type="hidden" name="answered" value="' .
-	($req['answered'] ? '0' : '1') . "\" />\n";
-echo '<input type="submit" name="submit" value="Set ' .
-	($req['answered'] ? 'unanswered' : 'answered') . "\" />\n";
-echo "</p></form>\n";
+// Not relevant for 'general clarifications', ie those with sender=null
+if ( !empty($req['sender']) ) {
+	echo '<form action="clarification.php" method="post"><p>' . "\n";
+	echo '<input type="hidden" name="id" value="' . $id . "\" />\n";
+	echo '<input type="hidden" name="answered" value="' .
+		($req['answered'] ? '0' : '1') . "\" />\n";
+	echo '<input type="submit" name="submit" value="Set ' .
+		($req['answered'] ? 'unanswered' : 'answered') . "\" />\n";
+	echo "</p></form>\n";
+}
 
 } // end if ( ! $isgeneral )
 
