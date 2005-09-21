@@ -1,8 +1,27 @@
 DOMjudge and the ICPC Validator Interface Standard
 --------------------------------------------------
 
+DOMjudge (partially) supports the ICPC Validator Interface Standard,
+which can be found at:
 
-...
+http://www.ecs.csus.edu/pc2/doc/valistandard.html
 
+The invocation code ("judge/test_solution.h") adheres to the invocation
+interface. It passes as a 5th optional parameter to the validator
+program the filename in which it expects a difference output between
+the program and jury output (parameters 2 and 3 respectively).
+
+DOMjudge does _not_ completely adhere to the standard in the following
+way: the exact contents of this difference output is not relevant, but
+the judging system reports the output as correct, when this difference 
+output is empty. The exitcode of the validator program should also be 
+zero, otherwise an internal error is generated. DOMjudge itself does not 
+use the generated XML output of the validator at all at this moment.
+
+DOMjudge currently has one validator script: "judge/compare.sh". When 
+passed a 5th parameter, this is interpreted as a filename to which it 
+will write a 'diff' output of the program and jury output (in a readable 
+format). It also generates XML compliant output, written to the result 
+file specified in parameter 4 and fully complies with the standard.
 
 $Id$
