@@ -1,0 +1,8 @@
+DOMjudge and the ICPC Validator Interface Standard
+--------------------------------------------------
+
+
+...
+
+
+$Id$

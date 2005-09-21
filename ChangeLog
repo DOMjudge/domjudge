@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 0.3.2 - CVS
--------------------
+Version 1.0.0 Release Candidate 1 - CVS
+---------------------------------------
  - Added config option to autoconfigure team IP addresses.
  - Added config option to (not) show compiler output to teams.
  - Moved C-code from headers to separate files.
@@ -11,6 +11,9 @@ Version 0.3.2 - CVS
    (Closes: #1070240).
  - Accept late submissions, but do not judge them (Closes: #1238421).
  - Improve efficiency of requesting contest data.
+ - Support the ICPC Validator Interface standard, concerning the
+   parameters of the compare script. The result.xml file is generated
+   but is not yet considered by test_solution.
 
 Version 0.3.1 - 16 July 2005
 ----------------------------

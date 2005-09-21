@@ -1,4 +1,4 @@
-This is the Programming Contest Jury System "DOMjudge" version 0.3.2
+This is the Programming Contest Jury System "DOMjudge" version 1.0.0rc1
 
 
 Overview
@@ -23,6 +23,8 @@ on problems (clarification requests). It has webinterfaces for the
 jury, the teams (their submissions and clarification requests) and the
 public (scoreboard).
 
+It supports the ICPC Validator Interface Standard, see doc/icpc-standard.txt
+for more information.
 
 
 Authors
@@ -58,10 +60,10 @@ to name them here too:
 Copying
 -------
 
-DOMjudge is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version. See the file COPYING.
+DOMjudge, including its documentation, is free software; you can redistribute
+it and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2, or (at your
+option) any later version. See the file COPYING.
 
 Additionally, parts of this system are based on other programs, which
 are covered by other copyrights. This will be noted in the files themselves.
