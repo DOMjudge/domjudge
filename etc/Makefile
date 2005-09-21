@@ -11,7 +11,7 @@ CONFIGS    = $(addprefix config.,$(EXTENSIONS))
 
 config: $(CONFIGS)
 
-$(CONFIGS): config.%: config.template.% global.cfg $(TEMPFILE)
+$(CONFIGS): config.%: config.template.% global.cfg generate_config.sh $(TEMPFILE)
 	./generate_config.sh $*
 
 clean:
