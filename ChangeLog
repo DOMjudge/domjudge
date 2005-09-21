@@ -1,7 +1,10 @@
 DOMjudge Programming Contest Judging System
 
-Version 1.0.0 Release Candidate 1 - CVS
+Version 1.0.0 Release Candidate 2 - CVS
 ---------------------------------------
+
+Version 1.0.0 Release Candidate 1 - 21 September 2005
+-----------------------------------------------------
  - Added config option to autoconfigure team IP addresses.
  - Added config option to (not) show compiler output to teams.
  - Moved C-code from headers to separate files.
