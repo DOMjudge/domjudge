@@ -1,18 +1,18 @@
-# These are the database tables needed for DOMjudge
-# This assumes database name 'domjudge'
-#
-# You can pipe this file into the 'mysql' command to create the
-# database and tables.
-#
-# $Id$
+-- These are the database tables needed for DOMjudge
+-- This assumes database name 'domjudge'
+--
+-- You can pipe this file into the 'mysql' command to create the
+-- database and tables.
+--
+-- $Id$
 
-# Create and use the database:
+-- Create and use the database:
 CREATE DATABASE domjudge;
 USE domjudge;
 
-#
-# Table structure for table `category`
-#
+--
+-- Table structure for table `category`
+--
 
 CREATE TABLE `category` (
   `catid` mediumint(8) unsigned NOT NULL auto_increment,
@@ -20,9 +20,9 @@ CREATE TABLE `category` (
   PRIMARY KEY  (`catid`)
 ) TYPE=MyISAM;
 
-#
-# Table structure for table `clarification`
-#
+--
+-- Table structure for table `clarification`
+--
 
 CREATE TABLE `clarification` (
   `clarid` mediumint(8) unsigned NOT NULL auto_increment,
@@ -36,9 +36,9 @@ CREATE TABLE `clarification` (
   PRIMARY KEY  (`clarid`)
 ) TYPE=MyISAM;
 
-#
-# Table structure for table `contest`
-#
+--
+-- Table structure for table `contest`
+--
 
 CREATE TABLE `contest` (
   `cid` mediumint(8) unsigned NOT NULL auto_increment,
@@ -49,9 +49,9 @@ CREATE TABLE `contest` (
   PRIMARY KEY  (`cid`)
 ) TYPE=MyISAM;
 
-#
-# Table structure for table `judger`
-#
+--
+-- Table structure for table `judger`
+--
 
 CREATE TABLE `judger` (
   `judgerid` varchar(50) NOT NULL default '',
@@ -59,9 +59,9 @@ CREATE TABLE `judger` (
   PRIMARY KEY  (`judgerid`)
 ) TYPE=MyISAM;
 
-#
-# Table structure for table `judging`
-#
+--
+-- Table structure for table `judging`
+--
 
 CREATE TABLE `judging` (
   `judgingid` mediumint(10) unsigned NOT NULL auto_increment,
@@ -80,9 +80,9 @@ CREATE TABLE `judging` (
   PRIMARY KEY  (`judgingid`)
 ) TYPE=MyISAM;
 
-#
-# Table structure for table `language`
-#
+--
+-- Table structure for table `language`
+--
 
 CREATE TABLE `language` (
   `langid` varchar(8) NOT NULL default '',
@@ -94,9 +94,9 @@ CREATE TABLE `language` (
   PRIMARY KEY  (`langid`)
 ) TYPE=MyISAM;
 
-#
-# Table structure for table `problem`
-#
+--
+-- Table structure for table `problem`
+--
 
 CREATE TABLE `problem` (
   `probid` varchar(8) NOT NULL default '',
@@ -109,9 +109,9 @@ CREATE TABLE `problem` (
   PRIMARY KEY  (`probid`)
 ) TYPE=MyISAM;
 
-#
-# Table structure for table `scoreboard_jury`
-#
+--
+-- Table structure for table `scoreboard_jury`
+--
 
 CREATE TABLE `scoreboard_jury` (
   `cid` mediumint(8) unsigned NOT NULL default '0',
@@ -125,9 +125,9 @@ CREATE TABLE `scoreboard_jury` (
   PRIMARY KEY  (`cid`,`team`,`problem`)
 ) TYPE=MyISAM COMMENT='Scoreboard cache (jury version)';
 
-#
-# Table structure for table `scoreboard_public`
-#
+--
+-- Table structure for table `scoreboard_public`
+--
 
 CREATE TABLE `scoreboard_public` (
   `cid` mediumint(8) unsigned NOT NULL default '0',
@@ -141,9 +141,9 @@ CREATE TABLE `scoreboard_public` (
   PRIMARY KEY  (`cid`,`team`,`problem`)
 ) TYPE=MyISAM COMMENT='Scoreboard cache (public/team version)';
 
-#
-# Table structure for table `submission`
-#
+--
+-- Table structure for table `submission`
+--
 
 CREATE TABLE `submission` (
   `submitid` mediumint(10) unsigned NOT NULL auto_increment,
@@ -160,9 +160,9 @@ CREATE TABLE `submission` (
   UNIQUE KEY `judgemark` (`judgemark`)
 ) TYPE=MyISAM;
 
-#
-# Table structure for table `team`
-#
+--
+-- Table structure for table `team`
+--
 
 CREATE TABLE `team` (
   `login` varchar(15) NOT NULL default '',
