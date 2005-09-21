@@ -13,7 +13,9 @@ Version 1.0.0 Release Candidate 1 - CVS
  - Improve efficiency of requesting contest data.
  - Support the ICPC Validator Interface standard, concerning the
    parameters of the compare script. The result.xml file is generated
-   but is not yet considered by test_solution.
+   but is not yet considered by test_solution (See: #1238454).
+ - Small improvements in Makefile's and install scripts.
+ - Some other small bugfixes.
 
 Version 0.3.1 - 16 July 2005
 ----------------------------
