@@ -25,7 +25,7 @@
 \newcommand{\url}[1]{\texttt{#1}}
 
 
-\title{Teammanual \DOMjudge\\(version \DOMJUDGE_VERSION)}
+\title{Team manual \DOMjudge\\(version \DOMJUDGE_VERSION)}
 
 % For inclusion of the correct date
 \SVNdate $Date$
@@ -51,7 +51,7 @@ This document describes these parts of the \DOMjudge jury-system, that
 are available to teams to submit solutions, view results and submit
 ``clarification requests''.
 
-All interaction with the system is done using a webinterface, except
+All interaction with the system is done using a web-interface, except
 the submission of solutions: this is done with a command-line program.
 
 \section{Summary}
@@ -82,7 +82,7 @@ For a complete reference of all options and examples, see
 \subsection{Viewing scores, submissions, etc.}
 
 Viewing scores, submissions and submitting and reading clarification
-requests is done through a webinterface. The address is
+requests is done through a web-interface. The address is
 \url{http://\WEBSERVER}. Usage of these webpages should be clear.
 
 \newpage
@@ -113,8 +113,8 @@ confirm. \texttt{submit} will report a successful submission or give
 an error message otherwise.
 
 The submit program uses a directory \texttt{\USERSUBMITDIR} in the
-homedirectory of your account. In there, it stores temporary files for
-submission and also a logfile \texttt{submit.log}. Do not remove or
+home directory of your account. In there, it stores temporary files for
+submission and also a log file \texttt{submit.log}. Do not remove or
 change this directory, or the \texttt{submit} program might fail to
 function correctly. Furthermore a ``public ssh-key'' of the jury has
 been added to the ssh configuration; this is also necessary for the
@@ -122,7 +122,7 @@ functioning of \texttt{submit}.
 
 \section{Viewing the results of submissions}
 
-There is a overview of your submissions on your team webpage.
+There is a overview of your submissions on your team web page.
 It contains all relevant information: submission time, programming
 language, problem and status. The address of your team page is
 \url{http://\WEBSERVER}. From here you can also view the public
@@ -145,8 +145,8 @@ be viewed in the submission details.
 
 \item[TIMELIMIT]
 Your program took longer than the maximum allowed time for this
-problem. Therefor it has been aborted. This might indicate that your
-program hangs in a loop, or that your solution is not effici\"ently
+problem. Therefore it has been aborted. This might indicate that your
+program hangs in a loop, or that your solution is not efficient
 enough.
 
 \item[RUN-ERROR]
@@ -164,6 +164,10 @@ standard out.
 The output of your program was incorrect. This can happen, simply
 because your solution is not correct, but also check that your output
 complies exactly with the specifications of the jury.
+
+\item[TOO-LATE]
+Bummer, you submitted after the contest ended! Your submission is stored but
+will not be processed anymore.
 \end{description}
 
 \section{Clarifications}
