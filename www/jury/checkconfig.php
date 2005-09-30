@@ -90,26 +90,6 @@ while($cdata = $res->next()) {
 }
 
 
-echo "<h2>Problems</h2>\n\n<p>Checking problems...<br />\n";
-
-$res = $DB->q('SELECT probid,testdata FROM problem ORDER BY probid');
-if($res->count() > 0) {
-	while($row = $res->next()) {
-		$files = array();
-		$files[0] = INPUT_ROOT . '/' . $row['testdata'] . '/' . 'testdata.in';
-		$files[1] = INPUT_ROOT . '/' . $row['testdata'] . '/' . 'testdata.out';
-		for ( $i = 0; $i < 2; ++$i ) {
-			if ( ! file_exists( $files[$i] ) ) {
-				err('Non-existent testdata file for problem ' . $row['probid'] .
-					': ' . $files[$i] );
-			}
-		}
-	}
-}
-
-echo "</p>\n\n";
-
-
 echo "<h2>Submissions</h2>\n\n<p>Checking submissions...<br />\n";
 
 // check for non-existent problem references
