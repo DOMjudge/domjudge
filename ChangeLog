@@ -2,7 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 1.0.0 Release Candidate 2 - CVS
 ---------------------------------------
- - Add TOO-LATE result to team manual.
+ - Updates to team manual.
  - Fix case-bug in sql/mysql_privileges.sql example.
  - Drop checking for existence of testdata in www/jury/checkconfig.php,
    since the webserver doesn't need to be able to read that data.
