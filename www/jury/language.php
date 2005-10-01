@@ -41,7 +41,7 @@ $data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 <p>
 <input type="hidden" name="id" value="<?=$id?>" />
 <input type="hidden" name="cmd" value="rejudge" />
-<input type="submit" value=" REJUDGE ALL! "
+<input type="submit" value="REJUDGE ALL for language <?=htmlentities($data['name'])?>"
  onclick="return confirm('Rejudge all submissions for this language?')" />
 </p>
 </form>

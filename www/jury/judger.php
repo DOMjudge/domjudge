@@ -56,7 +56,7 @@ echo "<h1>Judger ".printhost($row['judgerid'])."</h1>\n\n";
 <p>
 <input type="hidden" name="id" value="<?=$id?>" />
 <input type="hidden" name="cmd" value="rejudge" />
-<input type="submit" value=" REJUDGE ALL! "
+<input type="submit" value=" REJUDGE ALL for judger <?=$id?> "
  onclick="return confirm('Rejudge all submissions for this judger?')" />
 </p>
 </form>

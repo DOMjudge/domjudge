@@ -44,7 +44,7 @@ $data = $DB->q('TUPLE SELECT * FROM problem NATURAL JOIN contest WHERE probid = 
 <p>
 <input type="hidden" name="id" value="<?=$id?>" />
 <input type="hidden" name="cmd" value="rejudge" />
-<input type="submit" value=" REJUDGE ALL! "
+<input type="submit" value="REJUDGE ALL for problem <?=$id?>"
  onclick="return confirm('Rejudge all submissions for this problem?')" />
 </p>
 </form>

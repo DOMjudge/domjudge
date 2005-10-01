@@ -44,7 +44,7 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <p>
 <input type="hidden" name="id" value="<?=$id?>" />
 <input type="hidden" name="cmd" value="rejudge" />
-<input type="submit" value=" REJUDGE ALL! "
+<input type="submit" value="REJUDGE ALL for team <?=$id?>"
  onclick="return confirm('Rejudge all submissions for this team?')" />
 </p>
 </form>
