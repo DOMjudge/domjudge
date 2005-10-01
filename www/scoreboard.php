@@ -111,8 +111,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 		// team name, total correct, total time
 		echo '<tr' . ( @$myteamid == $team ? ' id="scorethisisme"' : '' ) .
-			' class="category' . $totals['category'] . '">' .
-			'<td class="scoretn">' . htmlentities($teams[$team]['name']) . '</td>' .
+			'>' .
+			'<td class="scoretn category' . $totals['category'] .
+			'">' . htmlentities($teams[$team]['name']) . '</td>' .
 			'<td class="scorenc">' . $totals['num_correct'] . '</td>' .
 			'<td class="scorett">' . $totals['total_time'] . '</td>';
 

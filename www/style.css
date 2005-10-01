@@ -86,7 +86,7 @@ a:active          { color: red;    }
 }
 
 /* backgrounds for categories, define as you see fit */
-.category1 .scoretn { background: white; }
-.category2 .scoretn { background: #ffffcc; }
-.category3 .scoretn { background: #ffccff; }
-.category4 .scoretn { background: #99ccff; }
+.category1 { background: white; }
+.category2 { background: #ffffcc; }
+.category3 { background: #ffccff; }
+.category4 { background: #99ccff; }

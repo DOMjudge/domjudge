@@ -20,9 +20,10 @@ if( $res->count() == 0 ) {
 	echo "<p><em>No teams defined</em></p>\n\n";
 } else {
 	echo "<table>
-	<tr><th>login</th><th>teamname</th><th>cat.</th><th>host</th></tr>\n";
+	<tr><th>login</th><th>teamname</th><th>category</th><th>host</th></tr>\n";
 	while($row = $res->next()) {
-		echo "<tr><td class=\"teamid\"><a href=\"team.php?id=".urlencode($row['login']).
+		echo "<tr class=\"category" . (int)$row['category'] .
+			"\"><td class=\"teamid\"><a href=\"team.php?id=".urlencode($row['login']).
 			"\">".htmlspecialchars($row['login'])."</a>".
 			"</td><td>".htmlentities($row['name']).
 			"</td><td title=\"catid ".(int)$row['category']."\">".htmlentities($row['catname']).
@@ -39,7 +40,7 @@ if( $res->count() == 0 ) {
 			} else {
 				echo "\">-";
 			}
-			"</td></tr>\n";
+			echo "</td></tr>\n";
 	}
 	echo "</table>\n\n";
 }
