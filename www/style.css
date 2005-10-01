@@ -61,7 +61,7 @@ a:active          { color: red;    }
 .scoreboard td		{ font-size: small;					}
 .scoreboard tr		{ border-bottom: 1px solid silver;	}
 .scoreboard td, .scoreboard th { border-right:  1px solid black;	}
-#scoreheader		{ border-bottom: 2px solid black;	}
+#scoreheader		{ border-bottom: 2px solid black; font-variant: small-caps; }
 .score_correct		{ background: #33FF66;	}
 .score_incorrect	{ background: #FF6666;	}
 .score_neutral		{ background: white;	}

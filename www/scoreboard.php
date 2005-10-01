@@ -49,7 +49,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		"</colgroup>\n";
 
 	// column headers
-	echo '<tr id="scoreheader"><th>TEAM</th>';
+	echo '<tr id="scoreheader"><th>team</th>';
 	echo "<th>solved</th><th>time</th>\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="' . htmlentities($pr['name']). '">' .
