@@ -25,7 +25,7 @@ if( $res->count() == 0 ) {
 		echo "<tr><td class=\"teamid\"><a href=\"team.php?id=".urlencode($row['login']).
 			"\">".htmlspecialchars($row['login'])."</a>".
 			"</td><td>".htmlentities($row['name']).
-			"</td><td title=\"".htmlentities($row['catname'])."\">".(int)$row['category'].
+			"</td><td title=\"catid ".(int)$row['category']."\">".htmlentities($row['catname']).
 			"</td><td title=\"";
 			if ( @$row['ipaddress'] ) {
 				$host = htmlspecialchars(gethostbyaddr($row['ipaddress']));
