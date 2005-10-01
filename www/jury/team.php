@@ -36,7 +36,7 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <tr><td>Name:      </td><td><?=htmlentities($row['name'])?></td></tr>
 <tr><td>Category:  </td><td><?=(int)$row['category'].
 	' - '.htmlentities($row['catname'])?></td></tr>
-<tr><td>IP-address:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
+<tr><td>Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
 	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):''?></td></tr>
 </table>
 

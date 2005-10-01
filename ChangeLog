@@ -6,6 +6,7 @@ Version 1.0.0 Release Candidate 2 - CVS
  - Fix case-bug in sql/mysql_privileges.sql example.
  - Drop checking for existence of testdata in www/jury/checkconfig.php,
    since the webserver doesn't need to be able to read that data.
+ - Display hostnames instead of IP-addresses in the Teams overview.
 
 Version 1.0.0 Release Candidate 1 - 21 September 2005
 -----------------------------------------------------
