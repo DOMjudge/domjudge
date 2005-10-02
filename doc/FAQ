@@ -9,6 +9,27 @@ information). If we have time, we'll try to help. Furthermore any
 feedback on problems you ran into and solved is very welcome!
 
 
+- Chroot environment and Java compilers
+
+With the default config, submitted programs are run within a minimal
+chroot environment. For this the programs have to be statically
+linked, because they do not have access to shared libraries.
+
+For most languages, compilers support this, but for Java, this is a
+bit problematic. The Sun Java compiler 'javac' isn't even a real
+compiler: a bytecode interpreter 'java' is needed to run the binaries
+and thus this cannot simply run in a chroot environment.
+
+The alternative is the 'gcj' compiler from GNU. This one generates
+true machine code and can link statically. However a few function
+calls cannot be linked statically (see 'GCJ compiler warnings' in this
+FAQ). Secondly, the static library 'libgcj.a' doesn't seem to be
+included in all GNU/Linux distributions: at least not in RedHat
+Enterprise 4. A workaround has been created: one can disable the use
+of a chroot environment in the configuration. Note that this reduces
+security.
+
+
 - GCJ compiler warnings
 
 When using the GNU GCJ compiler for compiling Java sources, it can
@@ -42,6 +63,20 @@ denying user other than yourself and the webserver group access to the
 configuration and password files. Of course a looser or tighter scheme
 can be applied.
 
+
+- Error: "submit_copy.sh failed with exitcode XX"
+
+This error can have various causes. First of all: check the
+'submit.log' file for more complete error messages.
+
+Assuming the default configuration where submit_copy.sh uses 'scp', we
+have found that shell initialisation scripts might contain statements,
+which generate errors: scp runs the user's default shell when copying
+submission files and when the shell dies (e.g. because of not having a
+terminal), the copying fails.
+
+Another cause might be that you do not have automatic access to the
+team's account (e.g. using ssh keys).
 
 
 $Id$
