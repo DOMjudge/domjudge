@@ -24,8 +24,7 @@ INSERT INTO `category` (`catid`, `name`) VALUES (3, 'Organisation');
 -- Dumping data for table `contest`
 -- 
 
-INSERT INTO `contest` (`cid`, `starttime`, `lastscoreupdate`, `endtime`, `contestname`) VALUES (1, '2006-01-01 11:00:00', NULL, '2006-01-01 11:30:00', 'Demo testsession');
-INSERT INTO `contest` (`cid`, `starttime`, `lastscoreupdate`, `endtime`, `contestname`) VALUES (2, '2006-01-01 12:00:00', '2006-01-01 16:00:00', '2006-01-01 17:00:00', 'Demo contest');
+INSERT INTO `contest` (`cid`, `starttime`, `lastscoreupdate`, `endtime`, `contestname`) VALUES (1, '2005-01-01 12:00:00', '2007-01-01 16:00:00', '2007-01-01 17:00:00', 'Demo contest');
 
 -- 
 -- Dumping data for table `judger`
@@ -47,7 +46,7 @@ INSERT INTO `judger` (`judgerid`, `active`) VALUES ('sparehost', 0);
 INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('c', 'C', 'c', 1, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('cpp', 'C++', 'cpp', 1, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('java', 'Java', 'java', 1, 1, 2.5);
-INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('pascal', 'Pascal', 'pas', 1, 1, 1);
+INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('pascal', 'Pascal', 'pas', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('haskell', 'Haskell', 'hs', 0, 1, 3);
 
 -- 
