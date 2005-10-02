@@ -5,35 +5,25 @@ include $(TOPDIR)/Makefile.global
 
 TARGETS = team-manual team-manual-NL
 
-TARGETSDVI = $(addsuffix .dvi,$(TARGETS))
-TARGETSPS  = $(addsuffix .ps ,$(TARGETS))
 TARGETSPDF = $(addsuffix .pdf,$(TARGETS))
 
-LATEXOPTIONS = --interaction=errorstopmode
+LATEX = pdflatex
+LATEXFLAGS = --interaction=errorstopmode
 
 CONFIGDIR = $(TOPDIR)/etc
 
-docs: ps pdf
+docs: pdf
 
-dvi: $(TARGETSDVI)
+pdf: $(TARGETSPDF)
 # Clean-up generated tex-files afterwards:
 	$(MAKE) texclean
 
-ps:  $(TARGETSPS)
-pdf: $(TARGETSPDF)
-
-$(TARGETSDVI): %.dvi: %.tex $(CONFIGDIR)/config.tex \
+$(TARGETSPDF): %.pdf: %.tex $(CONFIGDIR)/config.tex team-manual-preamble.tex \
                             example.* logos/DOMjudgelogo.* \
                             expdlist.sty svn.sty
-	-latex $(LATEXOPTIONS) $< < /dev/null &> /dev/null
-	-latex $(LATEXOPTIONS) $< < /dev/null &> /dev/null
-	 latex $(LATEXOPTIONS) $< < /dev/null
-
-$(TARGETSPS): %.ps: %.dvi
-	dvips $<
-
-$(TARGETSPDF): %.pdf: %.dvi
-	dvipdf $<
+	-$(LATEX) $(LATEXFLAGS) $< < /dev/null &> /dev/null
+	-$(LATEX) $(LATEXFLAGS) $< < /dev/null &> /dev/null
+	 $(LATEX) $(LATEXFLAGS) $< < /dev/null
 
 $(CONFIGDIR)/config.tex:
 	$(MAKE) -C $(CONFIGDIR) config.tex
@@ -45,6 +35,6 @@ texclean:
 	       systemconfig.aux
 
 clean: texclean
-	-rm -f $(TARGETSDVI) $(TARGETSPS) $(TARGETSPDF)
+	-rm -f $(TARGETSPDF)
 
-.PHONY: docs dvi ps pdf texclean dviclean
+.PHONY: docs pdf texclean
