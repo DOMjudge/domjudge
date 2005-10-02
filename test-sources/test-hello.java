@@ -1,3 +1,8 @@
+/* $Id$
+ *
+ * This should give CORRECT on the default problem 'hello'.
+ */
+
 import java.io.*;
 
 class Main {

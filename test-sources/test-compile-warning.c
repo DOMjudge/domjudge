@@ -1,3 +1,8 @@
+/* $Id$
+ *
+ * This should give compiler warnings and fail with NO-OUTPUT
+ */
+
 #include <stdio.h>
 
 int main()

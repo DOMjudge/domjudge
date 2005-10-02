@@ -1,3 +1,8 @@
+/* $Id$
+ *
+ * This should fail with RUN-ERROR due to integer division by zero.
+ */
+
 import java.io.*;
 
 class Main {

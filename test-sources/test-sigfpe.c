@@ -1,3 +1,9 @@
+/* $Id$
+ *
+ * This should fail with RUN-ERROR due to integer division by zero,
+ * giving an exitcode 136.
+ */
+
 #include <stdio.h>
 
 int main()

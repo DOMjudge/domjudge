@@ -1,3 +1,8 @@
+/* $Id$
+ *
+ * This should fail with a TIMELIMIT.
+ */
+
 #include <unistd.h>
 
 int main()

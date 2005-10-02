@@ -1,3 +1,8 @@
+(* $Id$
+ *
+ * This should fail with RUN-ERROR due to a segmentation fault.
+ *)
+
 program sigfpe(input, output);
 
 var

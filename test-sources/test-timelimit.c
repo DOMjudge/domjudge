@@ -1,3 +1,8 @@
+/* $Id$
+ *
+ * This should give a TIMELIMIT.
+ */
+
 int main()
 {
   int a;

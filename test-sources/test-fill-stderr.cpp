@@ -1,3 +1,9 @@
+/* $Id$
+ *
+ * Floods stderr and should fail with TIME-LIMIT or RUN-ERROR
+ * depending on whether timelimit or filesize limit is reached first.
+ */
+
 using namespace std;
 
 #include <iostream>

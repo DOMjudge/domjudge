@@ -1,3 +1,9 @@
+/* $Id$
+ *
+ * This should fail with WRONG-ANSWER (C doesn't give floating point
+ * errors when dividing by zero).
+ */
+
 #include <stdio.h>
 #include <math.h>
 
