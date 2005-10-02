@@ -14,22 +14,28 @@ tests, so nothing guaranteed...
 For the deployment of this jury-system, there are some requirements:
 
 - A TCP/IP network which connects all jury and team computers.
-  Extra network security which restricts internet access and access to
-  other services (ssh, mail, talk, etc..) is advisable, but not
-  provided by this software.
-
-TODO: list of necessary protocols between different parts of the system.
+  Extra network security which restricts internet access and access
+  to other services (ssh, mail, talk, etc..) is advisable, but not
+  provided by this software. TCP/IP networking is used in a few
+  different ways:
+  - The 'submit' command-line client connects to the submitserver via
+    a TCP connection on a port, which is configurable.
+  - The jury computers (judgers, and submit, MySQL and webserver) use
+    TCP/IP connections to connect to the MySQL database and for
+    copying submissions with scp (in the default configuration).
+  - HTTP traffic from teams, the public and jury to the webserver.
 
 - One jury account with a homedirectory which is shared between all
-  jury-computers (e.g. via NFS).
+  jury-computers (e.g. via NFS, Samba).
   
 - Team accounts which are accessible via SSH on the jury computers
   (a SSH public key of the jury account should be installed on all team
    accounts to provide public-key access).
 
 - (Local) root access on the jury-computers (preferably also on the
-  shared homedirectory) for (un)mounting proc and installing some
-  programs setuid-root.
+  shared homedirectory) for installing some programs setuid-root and
+  (un)mounting the 'proc' filesystem. See 'SECURITY: ROOT PRIVILEGES'
+  for more details.
 
 
 SOFTWARE REQUIREMENTS
@@ -341,19 +347,22 @@ then they would be able to view other teams' submission info (not their
 code) and clarifications. As this gives a team little advantage, we
 think that this suffices.
 
+ROOT PRIVILEGES
+
 A difficult issue is the securing of submitted programs run by the
 jury. We do not have any control over these sources and do not want to
 rely on checking them manually or filtering on things like system
-calls (which can be obscured and are different per language). Therefor
-we decided to tackle this issue by running these programs in a
-environment as restrictive as possible. This is done by setting up a
-minimal chroot environment, for which root privileges and statically
-compiled programs are needed. By also limiting all kinds of system
-resources (memory, processes, time, unprivileged user) we protect the
-system from programs, which try to hack or could crash the system.
-However, a chroot environment does not restrict network access, so
-there lies a possible security risk, which has to be handled
-separately.
+calls (which can be obscured and are different per language).
+
+Therefor we decided to tackle this issue by running these programs in
+a environment as restrictive as possible. This is done by setting up a
+minimal chroot environment. For this root privileges on the judging
+computers and statically compiled programs are needed. By also
+limiting all kinds of system resources (memory, processes, time,
+unprivileged user) we protect the system from programs, which try to
+hack or could crash the system.  However, a chroot environment does
+not restrict network access, so there lies a possible security risk,
+which has to be handled separately.
 
 EXTERNAL SECURITY
 
@@ -372,10 +381,9 @@ team could try to send in a solution, that tries to send input
 testdata back to them, access the internet, etc... A solution to this
 problem is to disallow all network traffic for the test user on the
 judge computers. On linux with kernel 2.4 and higher, this can be
-accomplished by modifying the iptables, by adding a rule like:
+accomplished by modifying the iptables, adding a rule like:
 
 iptables -I OUTPUT -o <network_interface> -m owner --uid-owner <testuser_uid> -j REJECT
-
 
 
 $Id$
