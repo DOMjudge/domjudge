@@ -15,7 +15,11 @@ CFLAGS = $(CXXFLAGS) -lm
 
 # How to execute a command as root:
 ROOTCMD=su root
-#alternatively: ROOTCMD=sudo -u root /bin/bash -c
+# alternatively:
+#ROOTCMD=sudo -u root /bin/bash -c
+
+# Where to install setuid root binaries: (default: own directory)
+SUIDINSTALLDIR=$(CURDIR)
 
 # Define the 'all' target here: because of inclusion of this file, it
 # will be the default target in all subdirectories and we default to

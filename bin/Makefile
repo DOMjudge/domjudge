@@ -7,7 +7,6 @@ TARGETS = runguard beep mkstemps tempfile
 
 # Some configuration of programs that need set-uid root permissions:
 SUIDTARGETS=runguard beep
-SUIDINSTALLDIR=$(CURDIR)
 SUIDBUILDS=$(addsuffix .build,$(SUIDTARGETS))
 
 build: $(TARGETS)
