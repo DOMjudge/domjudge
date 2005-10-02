@@ -1,46 +1,12 @@
-\documentclass[11pt,a4paper]{article}
-
-% $Id$
-
-% For up-to-date definitions of runlimits, etc.
-\include{systemconfig}
+\input{team-manual-preamble}
 
 \usepackage[english]{babel}
-\usepackage{a4wide}
-\usepackage{verbatim}
-\usepackage{moreverb}
-\usepackage{amsmath,amssymb,amsthm}
-\usepackage{epsfig}
-\usepackage{bbm}
-\usepackage{expdlist}
-\usepackage{svn}
-
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
-
-\newcommand{\DOMjudge}{\textsc{DOM}judge }
-
-% We define our own \url command, because the one in the url package
-% doesn't expand defines (present in systemconfig.tex).
-\newcommand{\url}[1]{\texttt{#1}}
-
 
 \title{Team manual \DOMjudge\\(version \DOMJUDGE_VERSION)}
 
-% For inclusion of the correct date
-\SVNdate $Date$
-
-
 \begin{document}
 
-\begin{titlepage}
-\thispagestyle{empty}
-\maketitle
-\vspace{1cm}
-\begin{figure}[htbp]
-\centerline{\includegraphics[height=7cm]{logos/DOMjudgelogo.eps}}
-\end{figure}
-\end{titlepage}
+\domjudgetitlepage
 
 \newpage
 \tableofcontents
@@ -73,12 +39,12 @@ examples.
 
 \subsection{Submission of solutions}
 
-You can submit solutions with the command-line program
-\texttt{submit}. Use \texttt{submit <problem>.<extension>}, where
-\texttt{<problem>} is the label of the problem and
-\texttt{<extension>} is a standard extension for your language.
-For a complete reference of all options and examples, see
-\texttt{submit --help}.
+You can submit solutions with the command-line program \cmd{submit}.
+
+Use \cmd{submit <problem>.<extension>}, where \cmd{<problem>} is the
+label of the problem and \cmd{<extension>} is a standard extension for
+your language.  For a complete reference of all options and examples,
+see \cmd{submit --help}.
 
 \subsection{Viewing scores, submissions, etc.}
 
@@ -87,39 +53,39 @@ requests is done through a web-interface. The address is
 \url{http://\WEBSERVER}. Usage of these webpages should be clear.
 
 \newpage
-\section{Submitting solutions: \texttt{submit}}\label{submit}
+\section{Submitting solutions: \cmd{submit}}\label{submit}
 
-You can submit solutions with the command-line program
-\texttt{submit} (\texttt{submit.exe} in Windows).
+You can submit solutions with the command-line program \cmd{submit}
+(\cmd{submit.exe} in Windows).
 
-\textbf{Syntax:} \texttt{submit [options] filename.ext}
+\textbf{Syntax:} \cmd{submit [options] filename.ext}
 
 The submit program takes the name (label) of the problem from
-\texttt{filename} and the programming language from the extension
-\texttt{ext}. This can be overruled by hand with the options
-\texttt{-p problemname} and \texttt{-l languageextension}.
-See \texttt{submit --help} for a complete list of all options and
+\cmd{filename} and the programming language from the extension
+\cmd{ext}. This can be overruled by hand with the options
+\cmd{-p problemname} and \cmd{-l~languageextension}.
+See \cmd{submit --help} for a complete list of all options and
 extensions and some examples. Note that this help is quite long and
 might not fit on a screen. Then use for example
-\texttt{submit --help | more} to read everything.
+\cmd{submit~--help | more} to read everything.
 
-\texttt{submit} will check your file and warns you for some things:
+\cmd{submit} will check your file and warns you for some things:
 for example when the file has not been modified for a long time or
 when is is larger than the maximal source-code size.
 
-Then \texttt{submit} displays a summary with all details of your
+Then \cmd{submit} displays a summary with all details of your
 submission and asks for confirmation. Check whether you are submitting
 the right file for the right problem and language and press `y' to
-confirm. \texttt{submit} will report a successful submission or give
+confirm. \cmd{submit} will report a successful submission or give
 an error message otherwise.
 
-The submit program uses a directory \texttt{\USERSUBMITDIR} in the
+The submit program uses a directory \cmd{\USERSUBMITDIR} in the
 home directory of your account. In there, it stores temporary files for
-submission and also a log file \texttt{submit.log}. Do not remove or
-change this directory, or the \texttt{submit} program might fail to
+submission and also a log file \cmd{submit.log}. Do not remove or
+change this directory, or the \cmd{submit} program might fail to
 function correctly. Furthermore a ``public ssh-key'' of the jury has
 been added to the ssh configuration; this is also necessary for the
-functioning of \texttt{submit}.
+functioning of \cmd{submit}.
 
 \section{Viewing the results of submissions}
 
@@ -194,10 +160,10 @@ interaction is necessary. The judging is done in the following way:
 
 \subsection{Submission}
 
-With the \texttt{submit} (see \ref{submit}) program, you can submit a
+With the \cmd{submit} (see \ref{submit}) program, you can submit a
 solution to a problem. Note that you have to submit the source-code of
 your program (and not a compiled program or the output of your
-program). \texttt{submit} makes a connection to the submission server,
+program). \cmd{submit} makes a connection to the submission server,
 which copies your program to the jury-computers.
 
 There your program enters a queue, awaiting being compiled, executed
@@ -305,7 +271,7 @@ follow.
 A solution for this problem in C:
 \listinginput{1}{example.c}
 
-Notice the last \texttt{return 0;} to prevent a run-error!
+Notice the last \cmd{return 0;} to prevent a run-error!
 
 \newpage
 

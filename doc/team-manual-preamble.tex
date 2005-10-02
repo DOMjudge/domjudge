@@ -1,0 +1,40 @@
+\documentclass[11pt,a4paper]{article}
+
+% $Id$
+
+% For up-to-date definitions of runlimits, etc.
+\input{systemconfig}
+
+\usepackage{a4wide}
+\usepackage{moreverb}
+\usepackage{graphicx}
+\usepackage{expdlist}
+\usepackage{svn}
+
+% Begin new paragraphs without indentation but vertical space.
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.5ex plus 0.5ex minus 0.2ex}
+
+\newcommand{\DOMjudge}{\textsc{DOM}judge }
+
+% We define our own \url command, because the one in the url package
+% doesn't expand defines (present in systemconfig.tex).
+\newcommand{\url}[1]{\texttt{#1}}
+
+% Display commands, arguments, etc. in texttt font and don't break those.
+\newcommand{\cmd}[1]{\mbox{\texttt{#1}}}
+
+% For inclusion of the correct date
+\SVNdate $Date: 2005-09-30 20:54:50 +0200 (Fri, 30 Sep 2005) $
+
+% Our titlepage
+\newcommand{\domjudgetitlepage}{%
+  \begin{titlepage}
+    \thispagestyle{empty}
+    \maketitle
+    \vspace{1cm}
+    \begin{figure}[htbp]
+      \centerline{\includegraphics[height=7cm]{logos/DOMjudgelogo}}
+    \end{figure}
+  \end{titlepage}
+}

@@ -1,46 +1,12 @@
-\documentclass[11pt,a4paper]{article}
-
-% $Id$
-
-% For up-to-date definitions of runlimits, etc.
-\include{systemconfig}
+\input{team-manual-preamble}
 
 \usepackage[dutch]{babel}
-\usepackage{a4wide}
-\usepackage{verbatim}
-\usepackage{moreverb}
-\usepackage{amsmath,amssymb,amsthm}
-\usepackage{epsfig}
-\usepackage{bbm}
-\usepackage{expdlist}
-\usepackage{svn}
-
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
-
-\newcommand{\DOMjudge}{\textsc{DOM}judge }
-
-% We define our own \url command, because the one in the url package
-% doesn't expand defines (present in systemconfig.tex).
-\newcommand{\url}[1]{\texttt{#1}}
-
 
 \title{Teamhandleiding \DOMjudge\\(versie \DOMJUDGE_VERSION)}
 
-% For inclusion of the correct date
-\SVNdate $Date$
-
-
 \begin{document}
 
-\begin{titlepage}
-\thispagestyle{empty}
-\maketitle
-\vspace{1cm}
-\begin{figure}[htbp]
-\centerline{\includegraphics[height=7cm]{logos/DOMjudgelogo.eps}}
-\end{figure}
-\end{titlepage}
+\domjudgetitlepage
 
 \newpage
 \tableofcontents
@@ -75,10 +41,12 @@ Je hoeft dus nooit een bestand te openen. Zie bijlage
 \subsection{Insturen van oplossingen}
 
 Insturen van oplossingen gaat via het command-line programma
-\texttt{submit}. Gebruik \texttt{submit <probleem>.<extensie>}, met
-\texttt{<probleem>} het label van het probleem en \texttt{<extensie>}
-een standaard extensie van je taal. Voor de complete documentatie en
-alle opties, zie \texttt{submit --help}.
+\cmd{submit}.
+
+Gebruik \cmd{submit <probleem>.<extensie>}, met \cmd{<probleem>} het
+label van het probleem en \cmd{<extensie>} een standaard extensie van
+je taal. Voor de complete documentatie en alle opties, zie \cmd{submit
+--help}.
 
 \subsection{Bekijken van scores, inzendingen, e.d.}
 
@@ -87,42 +55,42 @@ Het bekijken van inzendingen, scores en sturen en lezen van
 \url{http://\WEBSERVER} en de pagina wijst zich verder vanzelf.
 
 \newpage
-\section{Oplossingen insturen: \texttt{submit}}\label{submit}
+\section{Oplossingen insturen: \cmd{submit}}\label{submit}
 
 Het insturen van oplossingen voor problemen gebeurt via een
-command-line interface: het programma \texttt{submit} (onder Windows
-\texttt{submit.exe}).
+command-line interface: het programma \cmd{submit} (onder Windows
+\cmd{submit.exe}).
 
-\textbf{Syntax:} \texttt{submit [opties] bestandsnaam.ext}
+\textbf{Syntax:} \cmd{submit [opties] bestandsnaam.ext}
 
 Het submit programma haalt de naam (label) van het probleem uit
-\texttt{bestandsnaam} en de de programmeertaal uit de extensie
-\texttt{ext}. Dit kan handmatig aangepast worden met de opties
-\texttt{-p probleemnaam} en \texttt{-l taalextensie}. Zie
-\texttt{submit --help} voor een compleet overzicht van mogelijke
+\cmd{bestandsnaam} en de de programmeertaal uit de extensie
+\cmd{ext}. Dit kan handmatig aangepast worden met de opties
+\cmd{-p probleemnaam} en \cmd{-l taalextensie}. Zie
+\cmd{submit --help} voor een compleet overzicht van mogelijke
 opties en extensies en een aantal voorbeelden. Let op, dat deze
 helptekst redelijk lang is en misschien niet op \'e\'en scherm
-past. Gebruik dan bijvoorbeeld \texttt{submit --help | more} om alles
+past. Gebruik dan bijvoorbeeld \cmd{submit --help | more} om alles
 te lezen.
 
-\texttt{submit} zal het bestand controleren en eventueel
+\cmd{submit} zal het bestand controleren en eventueel
 waarschuwingen geven, zoals wanneer het bestand al lange tijd niet
 veranderd is of groter is dan de maximale source-code grootte.
 
-Hierna geeft \texttt{submit} een kort overzicht met de details van de
+Hierna geeft \cmd{submit} een kort overzicht met de details van de
 inzending en vraagt om bevestiging. Controleer vooral of je het goede
 bestand, probleem en taal hebt en druk dan op `y' om de oplossing in
-te sturen. Als alles goed gaat, zal \texttt{submit} een melding geven
+te sturen. Als alles goed gaat, zal \cmd{submit} een melding geven
 dat de inzending succesvol is. Indien niet, zal er een foutmelding
 verschijnen.
 
-Het submit programma maakt gebruik van een directory \texttt{\USERSUBMITDIR}
+Het submit programma maakt gebruik van een directory \cmd{\USERSUBMITDIR}
 in de homedirectory van het account. Hier slaat het tijdelijk
-bestanden op voor inzending en staat ook een logfile \texttt{submit.log}.
+bestanden op voor inzending en staat ook een logfile \cmd{submit.log}.
 Verwijder deze directory niet of pas hem niet aan, omdat anders het
 submit programma eventueel niet meer correct functioneert. Verder
 is een ``public ssh-key'' van de jury in de ssh configuratie
-toegevoegd. Deze is ook nodig voor het functioneren van \texttt{submit}.
+toegevoegd. Deze is ook nodig voor het functioneren van \cmd{submit}.
  
 \section{De uitslag bekijken van inzendingen}
 
@@ -199,10 +167,10 @@ beoordeling. Het beoordelen gebeurt via de volgende stappen:
 
 \subsection{Insturen}
 
-Via het \texttt{submit} (zie \ref{submit}) programma kun je een
+Via het \cmd{submit} (zie \ref{submit}) programma kun je een
 oplossing voor een opgave insturen. Let op dat je de source-code van
 je programma moet insturen (en dus niet een gecompileerd programma of de
-uitvoer van je programma). \texttt{submit} maakt dan een verbinding
+uitvoer van je programma). \cmd{submit} maakt dan een verbinding
 met een server en die kopieert je programma dan naar de
 jury-computers.
 
@@ -314,7 +282,7 @@ testgevallen volgen.
 Een oplossing voor dit probleem in C:
 \listinginput{1}{example.c}
 
-Let op de \texttt{return 0;} aan het einde, zodat we geen
+Let op de \cmd{return 0;} aan het einde, zodat we geen
 run-error krijgen!
 
 \newpage
