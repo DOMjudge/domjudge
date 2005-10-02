@@ -63,6 +63,8 @@ while ( TRUE ) {
 				logmsg(LOG_INFO,"Sending notification: team '".
 					   $row['team']."', problem '".$row['problem']."'.");
 				
+				logmsg(LOG_DEBUG,"Running command: '".BALLOON_CMD."'");
+				
 				$handle = popen(BALLOON_CMD, 'w');
 				if ( ! $handle ) error("Could not run command '".BALLOON_CMD."'");
 				
