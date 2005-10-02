@@ -113,7 +113,15 @@ cp "$SOURCE" "$TMPDIR/source.$EXT"
 OLDDIR="$PWD"
 cd "$TMPDIR"
 
-# Make chroot dir accessible for RUNUSER:
+# Check whether we're going to run in a chroot environment:
+if [ ! "$USE_CHROOT" -o "$USE_CHROOT" -eq 0 ]; then
+	unset USE_CHROOT
+	PREFIX=$PWD
+else
+	PREFIX=''
+fi
+
+# Make testing dir accessible for RUNUSER:
 chmod a+x $TMPDIR
 
 # Create files, which are expected to exist:
@@ -159,7 +167,7 @@ fi
 cat compile.tmp >>compile.out
 
 
-logmsg $LOG_NOTICE "setting up chroot-ed environment"
+logmsg $LOG_NOTICE "setting up testing (chroot) environment"
 
 # Copy the testdata input (only after compilation to prevent information leakage)
 cd "$OLDDIR"
@@ -174,8 +182,10 @@ cp -p "$BASHSTATIC"          ./bin/bash
 chmod a+rx run.sh bin/bash
 
 # Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
-logmsg $LOG_DEBUG "mounting proc filesystem"
-sudo mount -n -t proc --bind /proc proc
+if [ "$USE_CHROOT" ]; then
+	logmsg $LOG_DEBUG "mounting proc filesystem"
+	sudo mount -n -t proc --bind /proc proc
+fi
 
 logmsg $LOG_DEBUG "making a fifo-buffer link to /dev/null"
 mkfifo -m a+rw ./dev/null
@@ -183,16 +193,18 @@ cat < ./dev/null >/dev/null &
 CATPID=$!
 disown $CATPID
 
+# Run the solution program (within a restricted environment):
+logmsg $LOG_NOTICE "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
-logmsg $LOG_NOTICE "running program"
-
-( "$RUNGUARD" -r "$PWD" -u "$RUNUSER" -t $TIMELIMIT -o program.time \
-	/run.sh /program testdata.in program.out program.err program.exit \
-	        $MEMLIMIT $FILELIMIT $PROCLIMIT ) &>error.tmp
+( "$RUNGUARD" ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" -t $TIMELIMIT -o program.time -- \
+	$PREFIX/run.sh $PREFIX/program testdata.in program.out program.err program.exit \
+		$MEMLIMIT $FILELIMIT $PROCLIMIT ) &>error.tmp
 exitcode=$?
 
-logmsg $LOG_DEBUG "unmounting proc filesystem"
-sudo umount "$PWD/proc"
+if [ "$USE_CHROOT" ]; then
+	logmsg $LOG_DEBUG "unmounting proc filesystem"
+	sudo umount "$PWD/proc"
+fi
 
 # Check for still running processes (first wait for all exiting processes):
 sleep 1
