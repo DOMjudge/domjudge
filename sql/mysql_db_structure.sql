@@ -17,6 +17,7 @@ USE domjudge;
 CREATE TABLE `category` (
   `catid` mediumint(8) unsigned NOT NULL auto_increment,
   `name` varchar(255) NOT NULL default '',
+  `sortorder` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`catid`)
 ) TYPE=MyISAM;
 

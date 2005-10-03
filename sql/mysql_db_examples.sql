@@ -11,9 +11,9 @@ USE domjudge;
 -- Dumping data for table `category`
 -- 
 
-INSERT INTO `category` (`catid`, `name`) VALUES (1, 'Participants');
-INSERT INTO `category` (`catid`, `name`) VALUES (2, 'Observers');
-INSERT INTO `category` (`catid`, `name`) VALUES (3, 'Organisation');
+INSERT INTO `category` (`catid`, `name`, `sortorder`) VALUES (1, 'Participants', 0);
+INSERT INTO `category` (`catid`, `name`, `sortorder`) VALUES (2, 'Observers', 0);
+INSERT INTO `category` (`catid`, `name`, `sortorder`) VALUES (3, 'Organisation', 0);
 
 -- 
 -- Dumping data for table `clarification`

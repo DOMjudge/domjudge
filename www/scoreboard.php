@@ -37,7 +37,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login
-		AS ARRAYKEY, login, name, category FROM team');
+		AS ARRAYKEY, login, team.name, category, sortorder FROM team
+		LEFT JOIN category ON (category=catid)');
 	$probs = $DB->q('KEYTABLE SELECT probid
 		AS ARRAYKEY, probid, name FROM problem
 		WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
@@ -79,6 +80,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		$SCORES[$login]['total_time']  = 0;
 		$SCORES[$login]['teamname']    = $team['name'];
 		$SCORES[$login]['category']    = $team['category'];
+		$SCORES[$login]['sortorder']   = $team['sortorder'];
 	}
 
 	// loop all info the scoreboard cache and put it in our own datastructure
@@ -107,10 +109,16 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	uasort($SCORES, 'cmp');
 
 	// print the whole thing
+	$prevsortorder = -1;
 	foreach( $SCORES as $team => $totals ) {
 
 		// team name, total correct, total time
-		echo '<tr' . ( @$myteamid == $team ? ' id="scorethisisme"' : '' ) .
+		echo '<tr' . ( @$myteamid == $team ? ' id="scorethisisme"' : '' ) ;
+		if ( $totals['sortorder'] != $prevsortorder ) {
+			echo ' class="sortorderswitch"';
+			$prevsortorder = $totals['sortorder'];
+		}
+		echo
 			'>' .
 			'<td class="scoretn category' . $totals['category'] .
 			'">' . htmlentities($teams[$team]['name']) . '</td>' .
@@ -209,6 +217,10 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 // comparison function for scoreboard
 function cmp ($a, $b) {
+	// first order by our predefined sortorder based on category
+	if ( $a['sortorder'] != $b['sortorder'] ) {
+		return $a['sortorder'] < $b['sortorder'] ? -1 : 1;
+	}
 	// more correct than someone else means higher rank
 	if ( $a['num_correct'] != $b['num_correct'] ) {
 		return $a['num_correct'] > $b['num_correct'] ? -1 : 1;

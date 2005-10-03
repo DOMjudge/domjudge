@@ -9,6 +9,8 @@ Version 1.0.0 Release Candidate 2 - CVS
  - Minor enhancements to the jury webinterface display.
  - Added config option to disable chroot environment for judging.
  - Improved sample data.
+ - Add sort-order field to category table to enable some categories
+   to be sorted at the bottom automatically (Closes: #1311885).
  - Some other small bugfixes.
 
 Version 1.0.0 Release Candidate 1 - 21 September 2005
