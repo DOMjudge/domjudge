@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 1.0.0 Release Candidate 2 - CVS
----------------------------------------
+Version 1.0.0 - 4 October 2005
+------------------------------
  - Updates to team manual and other documentation (Closes: #1306335).
  - Fix case-bug in sql/mysql_privileges.sql example.
  - Drop checking for existence of testdata in www/jury/checkconfig.php,
