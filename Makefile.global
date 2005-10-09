@@ -39,6 +39,6 @@ distclean: clean
 clean-backupfiles:
 	rm -rf *~
 
-.PHONY: all build config install clean clean-backupfiles distclean
+.PHONY: all build config install check clean clean-backupfiles distclean
 
 endif # GLOBALINCLUDED
