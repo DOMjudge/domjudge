@@ -1,5 +1,10 @@
 DOMjudge Programming Contest Judging System
 
+Version 1.0.1 - CVS
+-------------------
+ - Added 'make check' target to submit test-sources.
+ - Fixed that no compiler output gives compilation error.
+
 Version 1.0.0 - 4 October 2005
 ------------------------------
  - Updates to team manual and other documentation (Closes: #1306335).
