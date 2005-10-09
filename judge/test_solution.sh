@@ -159,7 +159,7 @@ if grep 'timelimit reached: aborting command' compile.tmp &>/dev/null; then
 	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
 	exit $E_COMPILE
 fi
-if [ $exitcode -ne 0 ]; then
+if [ $exitcode -ne 0 -o ! -e program ]; then
 	echo "Compiling failed with exitcode $exitcode, compiler output:" >compile.out
 	cat compile.tmp >>compile.out
 	exit $E_COMPILE
