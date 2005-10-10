@@ -1,11 +1,9 @@
 /* $Id$
  *
  * Output answers slowly, should give TIMELIMIT with some output
- * However it doesn't give output: GNU C seems not to flush buffers
- * when it receives a signal.
  */
 
-#include <stdio.h>
+#include <iostream>
 
 int main()
 {
@@ -17,9 +15,8 @@ int main()
 			for(k=0; k<i; k++)
 				for(l=0; l<i; l++)
 					x++;
-		
-		printf("%d ^ 3 = %d\n",i,x);
-//		fflush(NULL);
+
+		std::cout << i << " ^ 3 = " << x << std::endl;
 	}
 	
 	return 0;
