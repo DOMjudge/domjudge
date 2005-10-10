@@ -49,7 +49,6 @@
 extern int errno;
 
 const int exit_failure = -1;
-const int kill_signal = SIGKILL;
 
 char  *progname;
 char  *cmdname;
@@ -198,8 +197,15 @@ void terminate(int sig)
 	} else {
 		warning("received signal %d: aborting command",sig);
 	}
+
+	/* First try to kill graciously, then hard */
+	verbose("sending signal QUIT");
+	killpg(child_pid,SIGQUIT);
 	
-	if ( killpg(child_pid,kill_signal) ) error(errno,"cannot kill command");
+	sleep(1);
+
+	verbose("sending signal KILL");
+	killpg(child_pid,SIGKILL);
 }
 
 int userid(char *name)
