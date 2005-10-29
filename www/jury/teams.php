@@ -9,7 +9,8 @@ require('init.php');
 $title = 'Teams';
 
 $res = $DB->q('SELECT t.*,c.name as catname FROM team t
-               LEFT JOIN category c ON(t.category=c.catid) ORDER BY t.name');
+               LEFT JOIN category c ON(t.category=c.catid)
+               ORDER BY c.sortorder, t.name');
 
 require('../header.php');
 require('menu.php');
