@@ -215,20 +215,19 @@ to submit or view it's teampage.
 CONFIGURATION
 -------------
 
-Configuration of the judge system is mostly done by editing the
-global configuration file in SYSTEM_ROOT/etc/global.cfg. This file
-contains the configuration data for all programs within the
-system. To implement configuration changes, these settings should be
-converted to the different language-specific configuration-files,
-needed by different parts of the system. This is done by running the
-command 'generate_config.sh' in the configuration directory. After
-that, also all C/C++ programs should be rebuilt to implement these
-changes!
+Configuration of the judge system is mostly done by editing the global
+configuration file in SYSTEM_ROOT/etc/global.cfg. This file contains
+the configuration data for all programs within the system. To
+implement configuration changes, these settings should be converted to
+the different language-specific configuration-files, needed by
+different parts of the system. This is done by running 'make config'
+in the SYSTEM_ROOT directory. After that, also all C/C++ programs
+should be rebuilt to implement these changes!
 
 The global configuration file has a ini-file like syntax, with some
-extensions to make it more flexible and to be able to correctly convert
-variables to all specific configuration files. See comments there for
-more information.
+extensions to make it more flexible and to be able to correctly
+convert variables to all specific configuration files. See comments
+there for more information.
 
 Configuration of the compilers of the supported languages should be
 done separately. For each supported language a bash shell-script named
@@ -239,8 +238,8 @@ test_solution.sh for syntax in SYSTEM_ROOT/judge.
 
 For running solution programs under a non-privileged user, a user has
 to be added to the system(s) which act as judger. This user does not
-need a home-directory or password, so e.g. the following command
-would suffice to add a user 'test' with minimal privileges:
+need a home-directory or password, so e.g. the following command would
+suffice to add a user 'test' with minimal privileges:
 
 useradd -d /nonexistent -g nobody -M -n -s /bin/false test
 
@@ -248,7 +247,6 @@ This user must also be configured as the user under which programs run
 in SYSTEM_ROOT/etc/global.cfg.
 
 TODO: installation and configuration of webserver.
-TODO: password generation and installation.
 
 
 BUILDING AND INSTALLING
@@ -263,20 +261,21 @@ In the following, all calls to 'make' should in principle be done from
 the SYSTEM_ROOT directory: all relevant targets are defined in the
 main 'Makefile' there and it will call subdirectory makefiles.
 
-First the global configuration changes have to be translated to the
-different languages used by the system (_not_ contest languages).
-Run 'make config' to do this.
-
-After that you can run 'make build', which builds all programs that
-need building.
-
-Next, a few programs have to be install set-uid root and the domjudge
-database has to be installed with 'make install'. Now you will be
-asked for the system and MySQL root passwords one or a few times.
+The system can be installed with the command 'make install' in
+SYSTEM_ROOT directory. This will first run 'make config' and 'make
+build' if neccesary. This command is interactive: it will ask for a
+few different passwords:
+- a password which will be set on the jury webinterface.
+- the system root password to install some programs set-uid root.
+- the MySQL database root password to install the DOMjudge database.
+It does also automatically generate and set passwords for the team and
+public webinterface: these are only used internally in the system and
+should best be left untouched.
 
 Should installation not succeed and re-installation be necessary, then
-you can clean all built files with 'make clean' and 'make distclean'
-will additionally also remove all traces of domjudge from MySQL.
+you can clean all built files with 'make clean'. 'make distclean' will
+additionally also remove all traces of DOMjudge from the MySQL
+database, which is needed if you want to reinstall the database!
 
 
 SECURITY
