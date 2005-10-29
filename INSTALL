@@ -70,6 +70,8 @@ SOFTWARE REQUIREMENTS
 
 - OpenSSH/SCP (or a compatible ssh/scp client/daemon)
 
+- wget (optionally for downloading LaTeX packages for documentation)
+
 
 FILE LOCATIONS
 --------------

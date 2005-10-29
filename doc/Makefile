@@ -12,6 +12,8 @@ LATEXFLAGS = --interaction=errorstopmode
 
 CONFIGDIR = $(TOPDIR)/etc
 
+LATEXPACKAGES = $(addsuffix .sty,svn expdlist)
+
 docs: pdf
 
 pdf: $(TARGETSPDF)
@@ -19,14 +21,22 @@ pdf: $(TARGETSPDF)
 	$(MAKE) texclean
 
 $(TARGETSPDF): %.pdf: %.tex $(CONFIGDIR)/config.tex team-manual-preamble.tex \
-                            example.* logos/DOMjudgelogo.* \
-                            expdlist.sty svn.sty
+                            example.* logos/DOMjudgelogo.* $(LATEXPACKAGES)
 	-$(LATEX) $(LATEXFLAGS) $< < /dev/null &> /dev/null
 	-$(LATEX) $(LATEXFLAGS) $< < /dev/null &> /dev/null
 	 $(LATEX) $(LATEXFLAGS) $< < /dev/null
 
 $(CONFIGDIR)/config.tex:
 	$(MAKE) -C $(CONFIGDIR) config.tex
+
+$(LATEXPACKAGES): %.sty:
+	if [ ! -f $*.zip ]; then \
+		wget -N ftp://tug.ctan.org/pub/tex-archive/macros/latex/contrib/$*.zip || \
+		(echo "Couldn't download TeX package '$*': download manually." && exit 1) ; \
+	fi
+	unzip $*.zip
+	cd $* && latex $*.ins
+	ln -s $*/$*.sty .
 
 texclean:
 	-rm -f $(addsuffix .aux,$(TARGETS)) \
@@ -36,5 +46,10 @@ texclean:
 
 clean: texclean
 	-rm -f $(TARGETSPDF)
+
+distclean:
+	for i in $(basename $(LATEXPACKAGES)) ; do \
+		rm -rf $$i{,.sty,.zip} ; \
+	done
 
 .PHONY: docs pdf texclean
