@@ -6,6 +6,7 @@ Version 1.0.1 - CVS
  - Fixed that no compiler output gives compilation error.
  - When solutions timeout, first try to kill graciously (Closes: #1312848)
  - Removed LaTeX packages from the sources to remove GPL/LPPL conflicts.
+ - Changed runguard license to IBM Public License.
  - Added diff to previous submission in source display (Closes: #1310244)
 
 Version 1.0.0 - 4 October 2005

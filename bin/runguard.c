@@ -2,26 +2,13 @@
    runguard -- run command with optional restrictions: time, root, user
    Copyright (C) 2004 Jaap Eldering (eldering@a-eskwadraat.nl).
 
-   Based on:
-   chroot   - written by Roland McGrath
-   timeout  - written by Wietse Venema (licensed under IBM public license,
-                                        see timeout.copyright for details)
-
+   Based on timeout - written by Wietse Venema
+   
    $Id$
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+   This program is licensed under the terms of the IBM PUBLIC LICENSE,
+   see 'timeout.license'. The IBM PUBLIC LICENSE must be distributed
+   with this software.
    
  */
 
@@ -288,7 +275,7 @@ int main(int argc, char **argv)
 	cmdargs = argv+optind;
 
 	/* Check that new uid is in list of valid uid's.
-	   This must be done before chroot for /etc/passwd looku.p */
+	   This must be done before chroot for /etc/passwd lookup. */
 	if ( use_user ) {
 		valid_users = strdup(VALID_USERS);
 		for(ptr=strtok(valid_users,","); ptr!=NULL; ptr=strtok(NULL,",")) {
