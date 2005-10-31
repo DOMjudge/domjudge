@@ -36,11 +36,41 @@ echo '<pre class="output_text">' .
 if ( $oldsource ) {
 	
 	$oldid = $oldsource['submitid'];
-	
+
 	$oldfile = SUBMITDIR.'/'.$oldsource['sourcefile'];
 	$newfile = SUBMITDIR.'/'.$source['sourcefile'];
 	
-	$difftext = `diff -bBt -u2 $oldfile $newfile 2>&1`;
+	if ( function_exists('xdiff_string_diff') ) {
+		
+		$difftext = xdiff_string_diff($oldsource['sourcecode'],
+									  $source['sourcecode'],2);
+		
+	} elseif ( is_readable($oldfile) && is_readable($newfile) ) {
+
+		$difftext = `diff -bBt -u2 $oldfile $newfile 2>&1`;
+
+	} else {
+		
+		if ( ! ($oldfile = tempnam("/tmp","source-old-s$oldid-")) ||
+			 ! ($newfile = tempnam("/tmp","source-new-s$id-"   )) ||
+			 ! ($oldhandle = fopen($oldfile,'w')) ||
+			 ! ($newhandle = fopen($newfile,'w')) ||
+			 ! fwrite($oldhandle,$oldsource['sourcecode']) ||
+			 ! fwrite($newhandle,   $source['sourcecode']) ||
+			 ! fclose($oldhandle) ||
+			 ! fclose($newhandle) ) {
+			
+			$difftext = "DOMjudge: error generating temporary files for diff.";
+			
+		} else {
+
+			$difftext = `diff -bBt -u2 $oldfile $newfile 2>&1`;
+
+		}
+
+		unlink($oldfile);
+		unlink($newfile);
+	}
 	
 	echo '<h2 class="filename"><a name="diff"></a>Diff to submission ' .
 		"<a href=\"submission.php?id=$oldid\">s$oldid</a> source: " .
