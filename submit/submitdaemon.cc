@@ -66,6 +66,9 @@ using namespace std;
 #define BACKLOG 32      /* how many pending connections queue will hold */
 #define LINELEN 256     /* maximum length read from submit_db stdout lines */
 
+/* Accepted characters in submission filenames (except for alphanumeric) */
+const char filename_chars[5] = ".-_ ";
+
 extern int errno;
 
 /* Variables defining logmessages verbosity to stderr/logfile */
@@ -333,12 +336,19 @@ int handle_client()
 
 	/* Create the absolute path to submission file, which is expected
 	   (and for security explicitly taken) to be basename only! */
+	filename = string(gnu_basename(filename.c_str()));
+
+	for(i=0; i<filename.length(); i++) {
+		if ( !( isalnum(filename[i]) || strchr(filename_chars,filename[i]) ) )
+			senderror(client_fd,0,"illegal character '%c' in filename",filename[i]);
+	}
+	
 	if ( (userinfo = getpwnam(team.c_str()))==NULL ) {
 		senderror(client_fd,0,"cannot find team username");
 	}
 
 	fromfile = allocstr("%s/%s/%s",userinfo->pw_dir,USERSUBMITDIR,
-	                    gnu_basename(filename.c_str()));
+	                    filename.c_str());
 	
 	tempfile = allocstr("%s/%s.%s.XXXXXX.%s",INCOMINGDIR,
 	                    problem.c_str(),team.c_str(),language.c_str());

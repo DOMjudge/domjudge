@@ -8,6 +8,8 @@ Version 1.0.1 - CVS
  - Removed LaTeX packages from the sources to remove GPL/LPPL conflicts.
  - Changed runguard license to IBM Public License.
  - Added diff to previous submission in source display (Closes: #1310244)
+ - Extra check on submission filenames to prevent possible exploits.
+   (Closes: #1355816)
 
 Version 1.0.0 - 4 October 2005
 ------------------------------
