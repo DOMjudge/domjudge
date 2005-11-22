@@ -50,6 +50,7 @@ INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','judgi
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','contest'          ,'domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','category'         ,'domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'scoreboard_public','domjudge@localhost',NOW(),'Select','');
+INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'scoreboard_jury'  ,'domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'clarification'    ,'domjudge@localhost',NOW(),'Select,Insert','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'category'         ,'domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'language'         ,'domjudge@localhost',NOW(),'','Select');
