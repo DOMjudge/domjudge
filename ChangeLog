@@ -10,6 +10,8 @@ Version 1.0.1 - CVS
  - Added diff to previous submission in source display (Closes: #1310244)
  - Extra check on submission filenames to prevent possible exploits.
    (Closes: #1355816)
+ - Added summary of solved problems to team submissions page
+   (Closes: #1312241).
 
 Version 1.0.0 - 4 October 2005
 ------------------------------

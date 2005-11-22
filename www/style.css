@@ -61,7 +61,7 @@ a:active          { color: red;    }
 .scoreboard td		{ font-size: small;					}
 .scoreboard tr		{ border-bottom: 1px solid silver;	}
 .scoreboard td, .scoreboard th { border-right:  1px solid black;	}
-#scoreheader		{ border-bottom: 2px solid black; font-variant: small-caps; }
+.scoreheader		{ border-bottom: 2px solid black; font-variant: small-caps; }
 .score_correct		{ background: #33FF66;	}
 .score_incorrect	{ background: #FF6666;	}
 .score_neutral		{ background: white;	}
@@ -84,6 +84,8 @@ a:active          { color: red;    }
 	color: gray; font-size: x-small;
 	position: absolute; right: 1ex; margin-top: 1em;
 }
+
+#teamscoresummary {	position: absolute; right: 1ex;	}
 
 /* backgrounds for categories, define as you see fit */
 .category1 { background: white; }

@@ -50,7 +50,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		"</colgroup>\n";
 
 	// column headers
-	echo '<tr id="scoreheader"><th>team</th>';
+	echo '<tr class="scoreheader"><th>team</th>';
 	echo "<th>solved</th><th>time</th>\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="' . htmlentities($pr['name']). '">' .
@@ -229,68 +229,38 @@ function putTeamRow($teamid) {
 	
 	echo '<table class="scoreboard" cellpadding="3">' . "\n";
 
-	// get the teams and problems
-	$teams = $DB->q('KEYTABLE SELECT login
-		AS ARRAYKEY, login, team.name, category, sortorder FROM team
-		LEFT JOIN category ON (category=catid)');
 	$probs = $DB->q('KEYTABLE SELECT probid
 		AS ARRAYKEY, probid, name FROM problem
 		WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
 
-	// output table column groups (for the styles)
-	echo '<colgroup><col id="scoreheader" /><col id="scoreprob" />' .
-		"</colgroup>\n";
-
 	// column headers
-	echo "<tr id=\"scoreheader\"><th>problem</th><th>score</th></tr>\n";
+	echo "<tr class=\"scoreheader\"><th>problem</th><th>score</th></tr>\n";
 
 	// initialize the arrays we'll build from the data
-	$THEMATRIX = $SCORES = array();
+	$THEMATRIX = array();
 	
-	// Get all stuff from the cached table, but don't bother with outdated
-	// info from previous contests.
-	
-	$scoredata = $DB->q("SELECT * FROM scoreboard_jury WHERE cid = %i", $cid);
-
-	// the SCORES table contains the totals for each team which we will
-	// use for determining the ranking. Initialise them here
-	foreach ($teams as $login => $team ) {
-		$SCORES[$login]['num_correct'] = 0;
-		$SCORES[$login]['total_time']  = 0;
-		$SCORES[$login]['teamname']    = $team['name'];
-		$SCORES[$login]['category']    = $team['category'];
-		$SCORES[$login]['sortorder']   = $team['sortorder'];
-	}
+	$scoredata = $DB->q("SELECT * FROM scoreboard_jury WHERE cid = %i AND team = %s",
+		$cid, $teamid);
 
 	// loop all info the scoreboard cache and put it in our own datastructure
 	while ( $srow = $scoredata->next() ) {
-	
-		// skip this row if the team or problem is not known by us
-		if ( ! array_key_exists ( $srow['team'], $teams ) ||
-			 ! array_key_exists ( $srow['problem'], $probs ) ) continue;
+		// skip this row if the problem is not known by us
+		if ( ! array_key_exists ( $srow['problem'], $probs ) ) continue;
 	
 		// fill our matrix with the scores from the database,
-		// we'll print this out later when we've sorted the teams
-		$THEMATRIX[$srow['team']][$srow['problem']] = array (
+		$THEMATRIX[$srow['problem']] = array (
 				'correct' => (bool) $srow['is_correct'],
 				'submitted' => $srow['submissions'],
 				'time' => $srow['totaltime'],
 				'penalty' => $srow['penalty'] );
-
-		// calculate totals for this team
-		if ( $srow['is_correct'] ) $SCORES[$srow['team']]['num_correct']++;
-		$SCORES[$srow['team']]['total_time'] +=
-			$srow['totaltime'] + $srow['penalty'];
-
 	}
 
 	// for each problem
 	foreach ( array_keys($probs) as $prob ) {
-
 		// if we have scores, use them, else, provide the defaults
 		// (happens when nothing submitted for this problem,team yet)
-		if ( isset ( $THEMATRIX[$teamid][$prob] ) ) {
-			$pdata = $THEMATRIX[$teamid][$prob];
+		if ( isset ( $THEMATRIX[$prob] ) ) {
+			$pdata = $THEMATRIX[$prob];
 		} else {
 			$pdata = array ( 'submitted' => 0, 'correct' => 0,
 							 'time' => 0, 'penalty' => 0);
