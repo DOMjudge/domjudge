@@ -7,8 +7,15 @@ require('init.php');
 $refresh = '30;url=' . getBaseURI() . 'team/';
 $title = 'Submissions';
 require('../header.php');
+require('../scoreboard.php');
 
 include('menu.php');
+
+// Put overview of team submissions (like scoreboard)
+echo "<div id=\"submissions\">\n";
+putTeamRow($login);
+echo "</div>\n";
+
 
 echo "<h1>Submissions team ".htmlentities($name)."</h1>\n\n";
 
