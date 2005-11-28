@@ -255,6 +255,7 @@ function putTeamRow($teamid) {
 				'penalty' => $srow['penalty'] );
 	}
 
+	$SUMMARY = array('num_correct' => 0, 'total_time' => 0);
 	// for each problem
 	foreach ( array_keys($probs) as $prob ) {
 		// if we have scores, use them, else, provide the defaults
@@ -280,9 +281,14 @@ function putTeamRow($teamid) {
 		// if correct, print time scored
 		if( ($pdata['time']+$pdata['penalty']) > 0) {
 			echo " (" . $pdata['time'] . ' + ' . $pdata['penalty'] . ")";
+			$SUMMARY['num_correct'] ++;
+			$SUMMARY['total_time'] += $pdata['time'] + $pdata['penalty'];
 		}
 		echo "</td></tr>\n";
 	}
+
+	echo "<tr id=\"scoresummary\" title=\"#correct / time\"><td>&nbsp;</td>".
+		"<td>" . $SUMMARY['num_correct'] . " / " . $SUMMARY['total_time'] . "</td></tr>\n";
 
 	echo "</table>\n\n";
 
