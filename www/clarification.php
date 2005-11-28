@@ -199,7 +199,15 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 	?>
 <tr>
 <td valign="top"><b>Text:</b></td>
-<td><textarea name="bodytext" cols="80" rows="10"></textarea></td>
+<td><textarea name="bodytext" cols="80" rows="10"><?php
+if ( $respid ) {
+	$text = explode("\n",wordwrap(htmlspecialchars($clar['body'])));
+	foreach($text as $line) {
+		echo "&gt; $line\n";
+	}
+	echo "\n";
+}
+?></textarea></td>
 </tr>
 <tr>
 <td>&nbsp;</td>

@@ -12,6 +12,7 @@ Version 1.0.1 - CVS
    (Closes: #1355816)
  - Added summary of solved problems to team submissions page
    (Closes: #1312241).
+ - Automatically quote clarification request when replying (Closes: #1347688)
 
 Version 1.0.0 - 4 October 2005
 ------------------------------
