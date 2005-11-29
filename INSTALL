@@ -140,7 +140,7 @@ software:
 * problem            Definition of problems (name, corresponding contest, etc.)
   submission         Submissions of solutions to problems.
 * team               Definition of teams.
-* team_category		 Different category groups teams can be put in.
+* team_category      Different category groups teams can be put in.
   scoreboard_jury    Cache of the scoreboards for public/teams and for the jury
   scoreboard_public    separately, because of possibility of score freezing.
 
