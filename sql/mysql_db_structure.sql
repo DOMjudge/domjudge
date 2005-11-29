@@ -159,6 +159,8 @@ CREATE TABLE `team` (
   `name` varchar(255) NOT NULL default '',
   `categoryid` mediumint(4) unsigned NOT NULL default '0',
   `ipaddress` varchar(15) default NULL,
+  `room` varchar(15) default NULL,
+  `comments` text,
   PRIMARY KEY  (`login`),
   UNIQUE KEY `ipaddress` (`ipaddress`)
 ) TYPE=MyISAM COMMENT='All teams participating in the contest';
