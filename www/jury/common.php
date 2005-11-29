@@ -13,6 +13,8 @@
 function putJudgings($key, $value) {
 	global $DB;
 
+	$showverified = SUBM_VERIFY;
+
 	// get the judgings for a specific key and value pair
 	$res = $DB->q('SELECT * FROM judging
 	               WHERE '.$key.' = %s AND cid = %i ORDER BY starttime DESC',
@@ -23,7 +25,9 @@ function putJudgings($key, $value) {
 	} else {
 		echo "<table>\n<tr><th>ID</th><th>start</th><th>end</th>";
 		if ( $key != 'judge' ) echo "<th>judge</th>";
-		echo "<th>result</th><th>valid</th></tr>\n";
+		echo "<th>result</th><th>valid</th>";
+		if ( $showverified ) echo "<th>verified</th>";
+		echo "</tr>\n";
 		while( $jud = $res->next() ) {
 			echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
 			echo '<td><a href="judging.php?id=' . (int)$jud['judgingid'] .
@@ -35,6 +39,9 @@ function putJudgings($key, $value) {
 			echo '<td><a href="judging.php?id=' . (int)$jud['judgingid'] . '">' .
 				printresult(@$jud['result'], $jud['valid']) . '</a></td>';
 			echo '<td align="center">' . printyn($jud['valid']) . '</td>';
+			if ( $showverified ) {
+				echo '<td align="center">' . printyn($jud['verified']) . '</td>';
+			}
 			echo "</tr>\n";
 		}
 		echo "</table>\n\n";

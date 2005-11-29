@@ -41,8 +41,8 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <?php if (!empty($row['affilid'])): ?>
 <tr><td>Affiliation:  </td><td><a href="affiliation.php?id=<?=
 	urlencode($row['affilid']) . "\">" .
-	htmlspecialchars($row['affilid']) . "</a> - " .
-	htmlentities($row['affname'])?></td></tr>
+	htmlentities($row['affilid'] . " - " .
+	$row['affname'])?></a></td></tr>
 <?php endif; ?>
 <tr><td>Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
 	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):''?></td></tr>

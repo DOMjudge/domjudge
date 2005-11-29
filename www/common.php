@@ -120,7 +120,7 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 			}
 		}
 		echo "</td>";
-		if ( $showverified ) {
+		if ( $showverified && isset($resulttable[$sid]['verified']) ) {
 			echo "<td>" . printyn(@$resulttable[$sid]['verified']) . "</td>";
 		}
 		if ( $isjury ) {
