@@ -258,7 +258,7 @@ function putTeamRow($teamid) {
 
 	$SUMMARY = array('num_correct' => 0, 'total_time' => 0);
 	// for each problem
-	foreach ( array_keys($probs) as $prob ) {
+	foreach ( $probs as $prob => $probdata ) {
 		// if we have scores, use them, else, provide the defaults
 		// (happens when nothing submitted for this problem,team yet)
 		if ( isset ( $THEMATRIX[$prob] ) ) {
@@ -267,8 +267,8 @@ function putTeamRow($teamid) {
 			$pdata = array ( 'submitted' => 0, 'correct' => 0,
 			                 'time' => 0, 'penalty' => 0);
 		}
-		
-		echo '<tr><td>' . htmlentities($prob) . '</td><td class="';
+		echo '<tr><td title="' . htmlentities($probdata['name']) . '">' .
+			htmlentities($prob) . '</td><td class="';
 		// CSS class for correct/incorrect/neutral results
 		if( $pdata['correct'] ) { 
 			echo 'score_correct';
