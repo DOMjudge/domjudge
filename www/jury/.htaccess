@@ -9,6 +9,6 @@ AuthType Basic
 require valid-user
 AuthType Basic
 AuthName "DOMjudge"
-AuthUserFile /nonexistent/.htpasswd
+AuthUserFile /home/extern/domjudge/.htpasswd
 
 </Limit>

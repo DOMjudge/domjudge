@@ -36,12 +36,13 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 
 	// get the teams and problems
-	$teams = $DB->q('KEYTABLE SELECT login
-		AS ARRAYKEY, login, team.name, category, sortorder FROM team
-		LEFT JOIN category ON (category=catid)');
-	$probs = $DB->q('KEYTABLE SELECT probid
-		AS ARRAYKEY, probid, name FROM problem
-		WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
+	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
+	                 login, team.name, category, sortorder FROM team
+	                 LEFT JOIN category ON (category=catid)');
+	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
+	                 probid, name FROM problem
+	                 WHERE cid = %i AND allow_submit = 1
+                         ORDER BY probid', $cid);
 
 	// output table column groups (for the styles)
 	echo '<colgroup><col id="scoreteamname" /><col id="scoresolv" />' .
@@ -88,15 +89,15 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	
 		// skip this row if the team or problem is not known by us
 		if ( ! array_key_exists ( $srow['team'], $teams ) ||
-			 ! array_key_exists ( $srow['problem'], $probs ) ) continue;
+		     ! array_key_exists ( $srow['problem'], $probs ) ) continue;
 	
 		// fill our matrix with the scores from the database,
 		// we'll print this out later when we've sorted the teams
 		$THEMATRIX[$srow['team']][$srow['problem']] = array (
-				'correct' => (bool) $srow['is_correct'],
-				'submitted' => $srow['submissions'],
-				'time' => $srow['totaltime'],
-				'penalty' => $srow['penalty'] );
+			'correct' => (bool) $srow['is_correct'],
+			'submitted' => $srow['submissions'],
+			'time' => $srow['totaltime'],
+			'penalty' => $srow['penalty'] );
 
 		// calculate totals for this team
 		if ( $srow['is_correct'] ) $SCORES[$srow['team']]['num_correct']++;
@@ -120,8 +121,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		}
 		echo
 			'>' .
-			'<td class="scoretn category' . $totals['category'] .
-			'">' . htmlentities($teams[$team]['name']) . '</td>' .
+			'<td class="scoretn category' . $totals['category'] . '">' .
+			htmlentities($teams[$team]['name']) . '</td>' .
 			'<td class="scorenc">' . $totals['num_correct'] . '</td>' .
 			'<td class="scorett">' . $totals['total_time'] . '</td>';
 
@@ -138,7 +139,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 				$pdata = $THEMATRIX[$team][$prob];
 			} else {
 				$pdata = array ( 'submitted' => 0, 'correct' => 0,
-					'time' => 0, 'penalty' => 0);
+				                 'time' => 0, 'penalty' => 0);
 			}
 
 			echo '<td class="';
@@ -229,9 +230,9 @@ function putTeamRow($teamid) {
 	
 	echo '<table class="scoreboard" cellpadding="3">' . "\n";
 
-	$probs = $DB->q('KEYTABLE SELECT probid
-		AS ARRAYKEY, probid, name FROM problem
-		WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
+	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, name
+	                 FROM problem WHERE cid = %i AND allow_submit = 1
+	                 ORDER BY probid', $cid);
 
 	// column headers
 	echo "<tr class=\"scoreheader\"><th>problem</th><th>score</th></tr>\n";
@@ -249,10 +250,10 @@ function putTeamRow($teamid) {
 	
 		// fill our matrix with the scores from the database,
 		$THEMATRIX[$srow['problem']] = array (
-				'correct' => (bool) $srow['is_correct'],
-				'submitted' => $srow['submissions'],
-				'time' => $srow['totaltime'],
-				'penalty' => $srow['penalty'] );
+			'correct' => (bool) $srow['is_correct'],
+			'submitted' => $srow['submissions'],
+			'time' => $srow['totaltime'],
+			'penalty' => $srow['penalty'] );
 	}
 
 	$SUMMARY = array('num_correct' => 0, 'total_time' => 0);
@@ -264,7 +265,7 @@ function putTeamRow($teamid) {
 			$pdata = $THEMATRIX[$prob];
 		} else {
 			$pdata = array ( 'submitted' => 0, 'correct' => 0,
-							 'time' => 0, 'penalty' => 0);
+			                 'time' => 0, 'penalty' => 0);
 		}
 		
 		echo '<tr><td>' . htmlentities($prob) . '</td><td class="';
@@ -287,7 +288,7 @@ function putTeamRow($teamid) {
 		echo "</td></tr>\n";
 	}
 
-	echo "<tr id=\"scoresummary\" title=\"#correct / time\"><td>&nbsp;</td>".
+	echo "<tr id=\"scoresummary\" title=\"#correct / time\"><td>Summary</td>".
 		"<td>" . $SUMMARY['num_correct'] . " / " . $SUMMARY['total_time'] . "</td></tr>\n";
 
 	echo "</table>\n\n";
