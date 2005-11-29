@@ -15,7 +15,8 @@ Version 1.1.0 - CVS
  - Automatically quote clarification request when replying
    (Closes: #1347688).
  - [INCOMPATIBLE CHANGE] Rename table category to team_category,
-   team_category.catid to categoryid and team.catid to categoryid.
+   team_category.catid to categoryid and team.catid to categoryid,
+   scoreboard_{jury,public}.problem to probid.
 
 Version 1.0.0 - 4 October 2005
 ------------------------------

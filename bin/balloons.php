@@ -49,11 +49,11 @@ while ( TRUE ) {
 					  $cid);
 
 		while ( $row = $res->next() ) {
-			
+			// FIXME: why not merge this into a join in the query above?
 			$team = $DB->q('TUPLE SELECT * FROM team    WHERE login  = %s',
 			               $row['team']);
 			$prob = $DB->q('TUPLE SELECT * FROM problem WHERE probid = %s',
-			               $row['problem']);
+			               $row['probid']);
 
 			logmsg(LOG_DEBUG,"New problem solved: ".$row['problem'].
 				   " by team ".$row['team']);

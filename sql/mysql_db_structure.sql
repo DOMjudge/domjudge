@@ -106,13 +106,13 @@ CREATE TABLE `problem` (
 CREATE TABLE `scoreboard_jury` (
   `cid` mediumint(8) unsigned NOT NULL default '0',
   `team` varchar(15) NOT NULL default '',
-  `problem` varchar(8) NOT NULL default '',
+  `probid` varchar(8) NOT NULL default '',
   `submissions` int(3) unsigned NOT NULL default '0',
   `totaltime` int(4) unsigned NOT NULL default '0',
   `penalty` int(4) unsigned NOT NULL default '0',
   `is_correct` tinyint(1) unsigned NOT NULL default '0',
   `balloon` tinyint(1) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`cid`,`team`,`problem`)
+  PRIMARY KEY  (`cid`,`team`,`probid`)
 ) TYPE=MyISAM COMMENT='Scoreboard cache (jury version)';
 
 --
@@ -122,13 +122,13 @@ CREATE TABLE `scoreboard_jury` (
 CREATE TABLE `scoreboard_public` (
   `cid` mediumint(8) unsigned NOT NULL default '0',
   `team` varchar(15) NOT NULL default '',
-  `problem` varchar(8) NOT NULL default '',
+  `probid` varchar(8) NOT NULL default '',
   `submissions` int(3) unsigned NOT NULL default '0',
   `totaltime` int(4) unsigned NOT NULL default '0',
   `penalty` int(4) unsigned NOT NULL default '0',
   `is_correct` tinyint(1) unsigned NOT NULL default '0',
   `balloon` tinyint(1) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`cid`,`team`,`problem`)
+  PRIMARY KEY  (`cid`,`team`,`probid`)
 ) TYPE=MyISAM COMMENT='Scoreboard cache (public/team version)';
 
 --

@@ -89,11 +89,11 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	
 		// skip this row if the team or problem is not known by us
 		if ( ! array_key_exists ( $srow['team'], $teams ) ||
-		     ! array_key_exists ( $srow['problem'], $probs ) ) continue;
+		     ! array_key_exists ( $srow['probid'], $probs ) ) continue;
 	
 		// fill our matrix with the scores from the database,
 		// we'll print this out later when we've sorted the teams
-		$THEMATRIX[$srow['team']][$srow['problem']] = array (
+		$THEMATRIX[$srow['team']][$srow['probid']] = array (
 			'correct' => (bool) $srow['is_correct'],
 			'submitted' => $srow['submissions'],
 			'time' => $srow['totaltime'],
@@ -246,10 +246,10 @@ function putTeamRow($teamid) {
 	// loop all info the scoreboard cache and put it in our own datastructure
 	while ( $srow = $scoredata->next() ) {
 		// skip this row if the problem is not known by us
-		if ( ! array_key_exists ( $srow['problem'], $probs ) ) continue;
+		if ( ! array_key_exists ( $srow['probid'], $probs ) ) continue;
 	
 		// fill our matrix with the scores from the database,
-		$THEMATRIX[$srow['problem']] = array (
+		$THEMATRIX[$srow['probid']] = array (
 			'correct' => (bool) $srow['is_correct'],
 			'submitted' => $srow['submissions'],
 			'time' => $srow['totaltime'],
