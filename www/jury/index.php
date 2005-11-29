@@ -16,11 +16,13 @@ echo "<h1>DOMjudge Jury interface</h1>\n\n";
 <li><a href="contests.php">Contests</a></li>
 <li><a href="submissions.php">Submissions</a></li>
 <li><a href="clarifications.php">Clarifications</a></li>
-<li><a href="teams.php">Teams</a></li>
 <li><a href="judgers.php">Judgers</a></li>
-<li><a href="categories.php">Categories</a></li>
 <li><a href="languages.php">Languages</a></li>
 <li><a href="problems.php">Problems</a></li>
+<li><a href="teams.php">Teams</a></li>
+<li><a href="categories.php">Team Categories</a></li>
+<li><a href="affiliations.php">Team Affiliations</a></li>
+
 </ul>
 
 <h3>Administrator:</h3>

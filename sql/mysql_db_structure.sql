@@ -24,7 +24,7 @@ CREATE TABLE `clarification` (
   `body` text NOT NULL,
   `answered` tinyint(4) unsigned NOT NULL default '0',
   PRIMARY KEY  (`clarid`)
-) TYPE=MyISAM;
+) TYPE=MyISAM COMMENT='Calarification requests by teams and responses by the jury';
 
 --
 -- Table structure for table `contest`
@@ -37,7 +37,7 @@ CREATE TABLE `contest` (
   `endtime` datetime NOT NULL default '0000-00-00 00:00:00',
   `contestname` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`cid`)
-) TYPE=MyISAM;
+) TYPE=MyISAM COMMENT='Contests that will be run with this install';
 
 --
 -- Table structure for table `judger`
@@ -47,7 +47,7 @@ CREATE TABLE `judger` (
   `judgerid` varchar(50) NOT NULL default '',
   `active` tinyint(8) unsigned NOT NULL default '1',
   PRIMARY KEY  (`judgerid`)
-) TYPE=MyISAM;
+) TYPE=MyISAM COMMENT='Hostnames of the autojudgers';
 
 --
 -- Table structure for table `judging`
@@ -68,7 +68,7 @@ CREATE TABLE `judging` (
   `output_diff` text,
   `output_error` text,
   PRIMARY KEY  (`judgingid`)
-) TYPE=MyISAM;
+) TYPE=MyISAM COMMENT='Result of judging a submission';
 
 --
 -- Table structure for table `language`
@@ -82,7 +82,7 @@ CREATE TABLE `language` (
   `allow_judge` tinyint(1) unsigned NOT NULL default '1',
   `time_factor` float NOT NULL default '0',
   PRIMARY KEY  (`langid`)
-) TYPE=MyISAM;
+) TYPE=MyISAM COMMENT='Programming languages in which teams can submit solutions';
 
 --
 -- Table structure for table `problem`
@@ -97,7 +97,7 @@ CREATE TABLE `problem` (
   `testdata` varchar(255) NOT NULL default '',
   `timelimit` mediumint(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`probid`)
-) TYPE=MyISAM;
+) TYPE=MyISAM COMMENT='Problems the teams can submit solutions for';
 
 --
 -- Table structure for table `scoreboard_jury`
@@ -148,7 +148,7 @@ CREATE TABLE `submission` (
   `judgemark` varchar(255) default NULL,
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `judgemark` (`judgemark`)
-) TYPE=MyISAM;
+) TYPE=MyISAM COMMENT='All incoming submissions';
 
 --
 -- Table structure for table `team`
@@ -161,7 +161,20 @@ CREATE TABLE `team` (
   `ipaddress` varchar(15) default NULL,
   PRIMARY KEY  (`login`),
   UNIQUE KEY `ipaddress` (`ipaddress`)
-) TYPE=MyISAM;
+) TYPE=MyISAM COMMENT='All teams participating in the contest';
+
+-- 
+-- Table structure for table `team_affiliation`
+-- 
+
+CREATE TABLE `team_affiliation` (
+  `affilid` varchar(10) NOT NULL default '',
+  `name` varchar(50) NOT NULL default '',
+  `country` char(2) default NULL,
+  `has_logo` tinyint(1) unsigned NOT NULL default '0',
+  `comments` text,
+  PRIMARY KEY  (`affilid`)
+) TYPE=MyISAM COMMENT='Affilitations for teams (e.g.: university, company)';
 
 --
 -- Table structure for table `team_category`
@@ -172,5 +185,5 @@ CREATE TABLE `team_category` (
   `name` varchar(255) NOT NULL default '',
   `sortorder` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`categoryid`)
-) TYPE=MyISAM;
+) TYPE=MyISAM COMMENT='Categories for teams (e.g.: participants, observers, ...)';
 

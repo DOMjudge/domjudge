@@ -66,8 +66,8 @@ INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `
 -- 
 
 INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (1, 'Participants', 0);
-INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (2, 'Observers', 0);
-INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (3, 'Organisation', 0);
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (2, 'Observers', 1);
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (3, 'Organisation', 1);
 
 
 -- 

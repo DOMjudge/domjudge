@@ -13,15 +13,16 @@ require('menu.php');
 
 echo "<h1>Categories</h1>\n\n";
 
-$res = $DB->q('SELECT * FROM team_category ORDER BY categoryid');
+$res = $DB->q('SELECT * FROM team_category ORDER BY sortorder,categoryid');
 
 if( $res->count() == 0 ) {
 	echo "<p><em>No categories defined</em></p>\n\n";
 } else {
 	echo "<table>
-	<tr><th>nr</th><th>name</th></tr>\n";
+	<tr><th>sort</th><th>cat id</th><th>name</th></tr>\n";
 	while($row = $res->next()) {
-		echo "<tr><td>" . (int)$row['categoryid'] .
+		echo "<tr><td>" . (int)$row['sortorder'] .
+			"</td><td>" . (int)$row['categoryid'] .
 			"</td><td>" . htmlentities($row['name']) .
 			"</td></tr>\n";
 	}

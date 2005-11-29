@@ -21,8 +21,10 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 	exit;
 }
 
-$row = $DB->q('TUPLE SELECT t.*,c.name as catname FROM team t
-               LEFT JOIN team_category c USING(categoryid) WHERE login = %s', $id);
+$row = $DB->q('TUPLE SELECT t.*,c.name as catname,a.name as affname FROM team t
+               LEFT JOIN team_category c USING(categoryid)
+			   LEFT JOIN team_affiliation a ON(t.affilid=a.affilid)
+			   WHERE login = %s', $id);
 
 require('../header.php');
 require('menu.php');
@@ -36,8 +38,17 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <tr><td>Name:      </td><td><?=htmlentities($row['name'])?></td></tr>
 <tr><td>Category:  </td><td><?=(int)$row['categoryid'].
 	' - '.htmlentities($row['catname'])?></td></tr>
+<?php if (!empty($row['affilid'])): ?>
+<tr><td>Affiliation:  </td><td><?=htmlentities($row['affilid'].
+	' - '.$row['affname'])?></td></tr>
+<?php endif; ?>
 <tr><td>Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
 	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):''?></td></tr>
+<tr><td>Room:</td><td><?=htmlentities($row['room'])?></td></tr>
+<?php if (!empty($row['comments'])): ?>
+<tr><td valign="top">Comments:</td><td><?=
+	nl2br(htmlentities($row['comments']))?></td></tr>
+<?php endif; ?>
 </table>
 
 <form action="<?=$pagename?>" method="post">

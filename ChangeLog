@@ -14,9 +14,13 @@ Version 1.1.0 - CVS
    (Closes: #1312241).
  - Automatically quote clarification request when replying
    (Closes: #1347688).
- - [INCOMPATIBLE CHANGE] Rename table category to team_category,
+ - [INCOMPATIBLE CHANGE] Renamed table category to team_category,
    team_category.catid to categoryid and team.catid to categoryid,
    scoreboard_{jury,public}.problem to probid.
+ - Added team_affiliation table which allows for storing the university,
+   institution or company teams belong to.
+ - Added room and comments fields to team table.
+ - Display sort-order in category overview.
 
 Version 1.0.0 - 4 October 2005
 ------------------------------
