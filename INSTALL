@@ -130,19 +130,19 @@ with a '*' have to be setup manually before running a contest
 (e.g. with phpMyAdmin), the other tables are used automatically by the
 software:
 
-  Name			Description
+  Name               Description
 
-* category		Different category groups teams can be put in.
-  clarification		Clarification requests/replies are stored here.
-* contest		Contest definitions with start/end time.
-* judger		Computers (hostnames) that function as judgers.
-  judging		Judgings of submissions.
-* language		Definition of allowed submission languages.
-* problem		Definition of problems (name, corresponding contest, etc.)
-  submission		Submissions of solutions to problems.
-* team			Definition of teams.
-  scoreboard_jury	Cache of the scoreboards for public/teams and for the jury
-  scoreboard_public	  separately, because of possibility of score freezing.
+  clarification      Clarification requests/replies are stored here.
+* contest            Contest definitions with start/end time.
+* judger             Computers (hostnames) that function as judgers.
+  judging            Judgings of submissions.
+* language           Definition of allowed submission languages.
+* problem            Definition of problems (name, corresponding contest, etc.)
+  submission         Submissions of solutions to problems.
+* team               Definition of teams.
+* team_category		 Different category groups teams can be put in.
+  scoreboard_jury    Cache of the scoreboards for public/teams and for the jury
+  scoreboard_public    separately, because of possibility of score freezing.
 
 Now follows a longer description (including fields) per table, that
 has to be setup manually. In general the reference ID's in each table
@@ -152,7 +152,7 @@ the software. For example a problem with 'cid = 2' would reference to
 the contest with it's 'cid' (contest ID) set to 2.
 
 Category:
-'catid' is the reference ID.
+'categoryid' is the reference ID.
 'name' is a string: the name of the category.
 
 Contest:
@@ -207,7 +207,7 @@ language).
 Team:
 'login' is the account/login-name of the team.
 'name' is the displayed name of the team.
-'category' is the ID ('catid') of the category the team is in.
+'categoryid' is the ID of the category the team is in.
 'ipaddress' is the IP-address of the team. This is used to
 automatically identify the team in the webinterface and to check
 submission origin. A value of 'NULL' results in the team being unable

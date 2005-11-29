@@ -9,7 +9,7 @@ require('init.php');
 $title = 'Teams';
 
 $res = $DB->q('SELECT t.*,c.name as catname FROM team t
-               LEFT JOIN category c ON(t.category=c.catid)
+               LEFT JOIN team_category c USING(categoryid)
                ORDER BY c.sortorder, t.name');
 
 require('../header.php');
@@ -23,11 +23,11 @@ if( $res->count() == 0 ) {
 	echo "<table>
 	<tr><th>login</th><th>teamname</th><th>category</th><th>host</th></tr>\n";
 	while($row = $res->next()) {
-		echo "<tr class=\"category" . (int)$row['category'] .
+		echo "<tr class=\"category" . (int)$row['categoryid'] .
 			"\"><td class=\"teamid\"><a href=\"team.php?id=".urlencode($row['login']).
 			"\">".htmlspecialchars($row['login'])."</a>".
 			"</td><td>".htmlentities($row['name']).
-			"</td><td title=\"catid ".(int)$row['category']."\">".htmlentities($row['catname']).
+			"</td><td title=\"catid ".(int)$row['categoryid']."\">".htmlentities($row['catname']).
 			"</td><td title=\"";
 			if ( @$row['ipaddress'] ) {
 				$host = htmlspecialchars(gethostbyaddr($row['ipaddress']));

@@ -8,14 +8,6 @@
 USE domjudge;
 
 -- 
--- Dumping data for table `category`
--- 
-
-INSERT INTO `category` (`catid`, `name`, `sortorder`) VALUES (1, 'Participants', 0);
-INSERT INTO `category` (`catid`, `name`, `sortorder`) VALUES (2, 'Observers', 0);
-INSERT INTO `category` (`catid`, `name`, `sortorder`) VALUES (3, 'Organisation', 0);
-
--- 
 -- Dumping data for table `clarification`
 -- 
 
@@ -69,10 +61,18 @@ INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `
 -- Dumping data for table `submission`
 -- 
 
+-- 
+-- Dumping data for table `team_category`
+-- 
+
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (1, 'Participants', 0);
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (2, 'Observers', 0);
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (3, 'Organisation', 0);
+
 
 -- 
 -- Dumping data for table `team`
 -- 
 
-INSERT INTO `team` (`login`, `name`, `category`, `ipaddress`) VALUES ('domjudge', 'DOMjudge', 3, '127.0.0.1');
-INSERT INTO `team` (`login`, `name`, `category`, `ipaddress`) VALUES ('team01', 'Some very cool teamname!', 1, '192.168.1.1');
+INSERT INTO `team` (`login`, `name`, `categoryid`, `ipaddress`) VALUES ('domjudge', 'DOMjudge', 3, '127.0.0.1');
+INSERT INTO `team` (`login`, `name`, `categoryid`, `ipaddress`) VALUES ('team01', 'Some very cool teamname!', 1, '192.168.1.1');

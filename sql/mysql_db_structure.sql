@@ -11,17 +11,6 @@ CREATE DATABASE domjudge;
 USE domjudge;
 
 --
--- Table structure for table `category`
---
-
-CREATE TABLE `category` (
-  `catid` mediumint(8) unsigned NOT NULL auto_increment,
-  `name` varchar(255) NOT NULL default '',
-  `sortorder` tinyint(1) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`catid`)
-) TYPE=MyISAM;
-
---
 -- Table structure for table `clarification`
 --
 
@@ -168,8 +157,20 @@ CREATE TABLE `submission` (
 CREATE TABLE `team` (
   `login` varchar(15) NOT NULL default '',
   `name` varchar(255) NOT NULL default '',
-  `category` mediumint(4) unsigned NOT NULL default '0',
+  `categoryid` mediumint(4) unsigned NOT NULL default '0',
   `ipaddress` varchar(15) default NULL,
   PRIMARY KEY  (`login`),
-  UNIQUE KEY `ipadres` (`ipaddress`)
+  UNIQUE KEY `ipaddress` (`ipaddress`)
 ) TYPE=MyISAM;
+
+--
+-- Table structure for table `team_category`
+--
+
+CREATE TABLE `team_category` (
+  `categoryid` mediumint(8) unsigned NOT NULL auto_increment,
+  `name` varchar(255) NOT NULL default '',
+  `sortorder` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`categoryid`)
+) TYPE=MyISAM;
+

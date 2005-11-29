@@ -22,7 +22,7 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 }
 
 $row = $DB->q('TUPLE SELECT t.*,c.name as catname FROM team t
-               LEFT JOIN category c ON(t.category=c.catid) WHERE login = %s', $id);
+               LEFT JOIN team_category c USING(categoryid) WHERE login = %s', $id);
 
 require('../header.php');
 require('menu.php');
@@ -34,7 +34,7 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <table>
 <tr><td>Login:     </td><td class="teamid"><?=$row['login']?></td></tr>
 <tr><td>Name:      </td><td><?=htmlentities($row['name'])?></td></tr>
-<tr><td>Category:  </td><td><?=(int)$row['category'].
+<tr><td>Category:  </td><td><?=(int)$row['categoryid'].
 	' - '.htmlentities($row['catname'])?></td></tr>
 <tr><td>Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
 	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):''?></td></tr>

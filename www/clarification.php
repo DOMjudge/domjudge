@@ -164,7 +164,7 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 
 		if ( ! $respid ) {
 			$teams = $DB->q('SELECT login, name FROM team
-				ORDER BY category ASC, name ASC');
+				ORDER BY team_category ASC, name ASC');
 			while ( $team = $teams->next() ) {
 				echo '<option value="' .
 					htmlspecialchars($team['login']) . '">' .

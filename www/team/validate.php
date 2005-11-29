@@ -20,5 +20,5 @@ if(!$row) {
 	exit;
 }
 
-// set the $login, $teamname, $category variables
+// set the $login, $teamname, $categoryid variables
 extract($row);

@@ -37,8 +37,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
-	                 login, team.name, category, sortorder FROM team
-	                 LEFT JOIN category ON (category=catid)');
+	                 login, team.name, categoryid, sortorder FROM team
+	                 LEFT JOIN team_category USING (categoryid)');
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
 	                 probid, name FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
@@ -80,7 +80,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		$SCORES[$login]['num_correct'] = 0;
 		$SCORES[$login]['total_time']  = 0;
 		$SCORES[$login]['teamname']    = $team['name'];
-		$SCORES[$login]['category']    = $team['category'];
+		$SCORES[$login]['categoryid']  = $team['categoryid'];
 		$SCORES[$login]['sortorder']   = $team['sortorder'];
 	}
 
@@ -121,7 +121,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		}
 		echo
 			'>' .
-			'<td class="scoretn category' . $totals['category'] . '">' .
+			'<td class="scoretn category' . $totals['categoryid'] . '">' .
 			htmlentities($teams[$team]['name']) . '</td>' .
 			'<td class="scorenc">' . $totals['num_correct'] . '</td>' .
 			'<td class="scorett">' . $totals['total_time'] . '</td>';
@@ -189,14 +189,14 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	echo "</table>\n\n";
 
-	$res = $DB->q('SELECT * FROM category ORDER BY catid');
+	$res = $DB->q('SELECT * FROM team_category ORDER BY categoryid');
 
 	// only print legend when there's more than one category
 	if ( $res->count() > 1 ) {
 		echo "<p><br /><br /></p>\n<table class=\"scoreboard\"><tr>" .
 			"<th>Legend</th></tr>\n";
 		while ( $row = $res->next() ) {
-			echo '<tr class="category' . $row['catid'] . '">' .
+			echo '<tr class="category' . $row['categoryid'] . '">' .
 				'<td align="center" class="scoretn">' .	$row['name'] .
 				"</td></tr>";
 		}
