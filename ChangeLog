@@ -1,18 +1,19 @@
 DOMjudge Programming Contest Judging System
 
-Version 1.0.1 - CVS
+Version 1.1.0 - CVS
 -------------------
- - Added 'make check' target to submit test-sources.
+ - Added 'make check' target which submits test-sources.
  - Fixed that no compiler output gives compilation error.
- - When solutions timeout, first try to kill graciously (Closes: #1312848)
+ - When solutions timeout, first try to kill graciously (Closes: #1312848).
  - Removed LaTeX packages from the sources to remove GPL/LPPL conflicts.
  - Changed runguard license to IBM Public License.
- - Added diff to previous submission in source display (Closes: #1310244)
- - Extra check on submission filenames to prevent possible exploits.
-   (Closes: #1355816)
+ - Added diff to previous submission in source display (Closes: #1310244).
+ - Extra check on submission filenames to prevent theoretical exploits
+   (Closes: #1355816).
  - Added summary of solved problems to team submissions page
    (Closes: #1312241).
- - Automatically quote clarification request when replying (Closes: #1347688)
+ - Automatically quote clarification request when replying
+   (Closes: #1347688).
 
 Version 1.0.0 - 4 October 2005
 ------------------------------
