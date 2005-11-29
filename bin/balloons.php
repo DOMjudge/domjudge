@@ -23,6 +23,7 @@ function notification_text($team, $problem) {
 	return
 		"Notification of a problem solved:\n".
 		"\n".
+		(empty($team['room']) ? "" : "Room:    $team[room]\n" ) .
 		"Team:    ".$team['login'].": ".$team['name']."\n".
 		"Problem: ".$problem['probid'].": ".$problem['name']."\n";
 }
@@ -44,16 +45,19 @@ while ( TRUE ) {
 	}
 	
 	do {
-		$res = $DB->q('SELECT * FROM scoreboard_public
-		               WHERE cid = %i AND is_correct = 1 AND balloon = 0',
+		$res = $DB->q('SELECT s.*,t.name as teamname,t.room,p.name as probname
+		               FROM scoreboard_public s
+		               LEFT JOIN problem p USING(probid)
+		               LEFT JOIN team t ON (t.login = s.team)
+		               WHERE s.cid = %i AND s.is_correct = 1 AND s.balloon = 0',
 					  $cid);
 
 		while ( $row = $res->next() ) {
-			// FIXME: why not merge this into a join in the query above?
-			$team = $DB->q('TUPLE SELECT * FROM team    WHERE login  = %s',
-			               $row['team']);
-			$prob = $DB->q('TUPLE SELECT * FROM problem WHERE probid = %s',
-			               $row['probid']);
+			$team = array ('name'   => $row['teamname'],
+			               'room'   => $row['room'],
+				       'login'  => $row['team']);
+			$prob = array ('name'   => $row['probname'],
+			               'probid' => $row['probid']);
 
 			logmsg(LOG_DEBUG,"New problem solved: ".$row['problem'].
 				   " by team ".$row['team']);

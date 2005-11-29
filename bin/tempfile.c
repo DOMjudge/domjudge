@@ -7,6 +7,7 @@
  * which can be found at http://www.gnu.org/copyleft or in the file
  * COPYING supplied with this code.
  *
+ * $Id$
  */
 #define PACKAGE_VERSION "2.8.4"
 
