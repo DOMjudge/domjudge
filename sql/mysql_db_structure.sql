@@ -158,6 +158,7 @@ CREATE TABLE `team` (
   `login` varchar(15) NOT NULL default '',
   `name` varchar(255) NOT NULL default '',
   `categoryid` mediumint(4) unsigned NOT NULL default '0',
+  `affilid` varchar(10) default NULL,
   `ipaddress` varchar(15) default NULL,
   `room` varchar(15) default NULL,
   `comments` text,
