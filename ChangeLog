@@ -1,5 +1,9 @@
 DOMjudge Programming Contest Judging System
 
+Version 1.2.0 - CVS
+-------------------
+
+
 Version 1.1.0 - 22 December 2005
 --------------------------------
  - Added 'make check' target which submits test-sources.
