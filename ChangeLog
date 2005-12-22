@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 1.1.0 - CVS
--------------------
+Version 1.1.0 - 22 December 2005
+--------------------------------
  - Added 'make check' target which submits test-sources.
  - Fixed that no compiler output gives compilation error.
  - When solutions timeout, first try to kill graciously (Closes: #1312848).
@@ -21,6 +21,7 @@ Version 1.1.0 - CVS
    institution or company teams belong to.
  - Added room and comments fields to team table.
  - Display sort-order in category overview.
+ - A lot of small webinterface enhancements.
 
 Version 1.0.0 - 4 October 2005
 ------------------------------
