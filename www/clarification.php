@@ -145,8 +145,20 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 	} else {
 		$popupTag = NULL;
 	}
+	
+	?>
 
-	echo '<form action="' . addUrl(urlencode($action), $popupTag) .
+<script language=javascript>
+function confirmClar() {
+	sendto = document.forms['sendclar'].sendto.value;
+	if ( sendto=='' ) sendto = "ALL";
+	return confirm("Send clarification reply to " + sendto + "?");
+}
+</script>
+	  
+	<?php
+	  
+	echo '<form name="sendclar" action="' . addUrl(urlencode($action), $popupTag) .
 		"\" method=\"post\">\n";
 
 
@@ -211,7 +223,7 @@ if ( $respid ) {
 </tr>
 <tr>
 <td>&nbsp;</td>
-<td><input type="submit" name="submit" value="Send" /></td>
+<td><input type="submit" name="submit" value="Send" onclick="return confirmClar()" /></td>
 </tr>
 </table>
 </form>
