@@ -125,8 +125,12 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 		}
 		if ( $isjury ) {
 			$judger = @$resulttable[$sid]['judgerid'];
-			echo '<td><a href="judger.php?id=' . urlencode($judger) . '">' .
-				printhost($judger) . '</a></td>';
+			if ( empty($judger) ) {
+				echo '<td></td>';
+			} else {
+				echo '<td><a href="judger.php?id=' . urlencode($judger) . '">' .
+					printhost($judger) . '</a></td>';
+			}
 		}
 		echo "</tr>\n";
 	}

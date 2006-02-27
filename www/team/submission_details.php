@@ -30,7 +30,6 @@ if( ! $row ) {
 ?>
 <h1>Submission details</h1>
 
-<p>
 <table>
 <tr><td>Problem:</td><td><?=htmlentities($row['probname'].' ['.$row['probid'].']')?></td></tr>
 <tr><td>Submittime:</td><td><?=printtime($row['submittime'])?></td></tr>

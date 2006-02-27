@@ -58,7 +58,7 @@ if ( isset($_REQUEST['submit'])	&& !empty($_REQUEST['bodytext']) ) {
 }
 
 // (un)set 'answered' (if posted)
-if ( isset($_REQUEST['submit']) && $_REQUEST['answered']!=NULL ) {
+if ( isset($_REQUEST['submit']) && isset($_REQUEST['answered']) ) {
 	$DB->q('UPDATE clarification SET answered = %i WHERE clarid = %i',
 		(int)$_REQUEST['answered'], $respid);
 

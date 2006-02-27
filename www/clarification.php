@@ -12,12 +12,14 @@
 function putClar($clar, $isjury = FALSE) 
 {
 	if ( $clar['sender'] ) {
-		$from = $clar['sender'] . ': ' . $clar['fromname'];
+		$from = '<span class="teamid">' . htmlspecialchars($clar['sender']) .
+			'</span>: ' . htmlspecialchars($clar['fromname']);
 	} else {
 		$from = 'Jury';
 	}
 	if ( $clar['recipient'] && $from == 'Jury' ) {
-		$to = $clar['recipient'] . ': ' . $clar['toname'];
+		$to = '<span class="teamid">' . htmlspecialchars($clar['recipient']) .
+			'</span>: ' . htmlspecialchars($clar['toname']);
 	} else {
 		$to = ( $from == 'Jury' ) ? 'All' : 'Jury' ;
 	}
@@ -26,15 +28,15 @@ function putClar($clar, $isjury = FALSE)
 
 	echo "<table>\n";
 	echo '<tr><td>From:</td>' . 
-		'<td><span class="teamid">' .
+		'<td>' .
 		( $fromlink ? '<a href="team.php?id=' . urlencode($clar['sender']) .
-			'">' : '' ) . '</span>' .
-		htmlspecialchars($from) . ( $fromlink ? '</a>' : '') . "</td></tr>\n";
+			'">' : '' ) .
+		$from . ( $fromlink ? '</a>' : '') . "</td></tr>\n";
 	echo  '<tr><td>To:</td>' .
 		'<td>' .
 		( $tolink ? '<a href="team.php?id=' . urlencode($clar['recipient']) .
 			'">' : '' ) .
-		htmlspecialchars($to) . ( $tolink ? '</a>' : '') . "</td></tr>\n";
+		$to . ( $tolink ? '</a>' : '') . "</td></tr>\n";
 	echo '<tr><td>Time:</td><td>' . printtime($clar['submittime']) .
 		"</td></tr>\n";
 	echo '<tr><td valign="top"></td><td class="filename">' .
@@ -70,7 +72,7 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
 		if ( $isjury || ( $clar['sender']==$team || ( $clar['sender']==NULL &&
 			( $clar['recipient']==NULL || $clar['recipient']==$team ) ) ) ) {
 			putClar($clar,$isjury);
-			echo "<p></p>\n\n";
+			echo "<br />\n\n";
 		}
 	}
 }
@@ -148,12 +150,14 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 	
 	?>
 
-<script language=javascript>
+<script type="text/javascript" language="JavaScript">
+<!--
 function confirmClar() {
 	sendto = document.forms['sendclar'].sendto.value;
 	if ( sendto=='' ) sendto = "ALL";
-	return confirm("Send clarification reply to " + sendto + "?");
+	return confirm("Send clarification to " + sendto + "?");
 }
+// -->
 </script>
 	  
 	<?php
