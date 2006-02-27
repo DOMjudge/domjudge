@@ -14,7 +14,8 @@ if(!$row) {
 	header('HTTP/1.1 403 Forbidden');
 	$title = '403 Forbidden';
 	include('../header.php');
-	echo "<h1>403 Forbidden</h1>\n\n<p>Sorry, no access.</p>\n\n";
+	echo "<h1>403 Forbidden</h1>\n\n<p>Sorry, access not allowed for " .
+		htmlspecialchars($_SERVER['REMOTE_ADDR']) . ".</p>\n\n";
 	putDOMjudgeVersion();
 	include('../footer.php');
 	exit;
