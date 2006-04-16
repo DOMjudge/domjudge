@@ -338,7 +338,7 @@ int handle_client()
 	   (and for security explicitly taken) to be basename only! */
 	filename = string(gnu_basename(filename.c_str()));
 
-	for(i=0; i<filename.length(); i++) {
+	for(i=0; i<(int)filename.length(); i++) {
 		if ( !( isalnum(filename[i]) || strchr(filename_chars,filename[i]) ) )
 			senderror(client_fd,0,"illegal character '%c' in filename",filename[i]);
 	}
