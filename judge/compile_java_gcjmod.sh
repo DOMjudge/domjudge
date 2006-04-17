@@ -2,6 +2,11 @@
 
 # Java compile wrapper-script for 'test_solution.sh'.
 # See that script for syntax and more info.
+#
+# This script compiles a statically linked binary with gcj. In
+# addition, it removes some warnings that gcj generates by default
+# with static compilation. These warnings have confused teams in the
+# past.
 
 SOURCE="$1"
 DEST="$2"

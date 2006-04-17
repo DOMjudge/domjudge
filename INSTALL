@@ -19,10 +19,10 @@ For the deployment of this jury-system, there are some requirements:
   provided by this software. TCP/IP networking is used in a few
   different ways:
   - The 'submit' command-line client connects to the submitserver via
-    a TCP connection on a port, which is configurable.
-  - The jury computers (judgers, and submit, MySQL and webserver) use
-    TCP/IP connections to connect to the MySQL database and for
-    copying submissions with scp (in the default configuration).
+    a TCP connection on a configurable port.
+  - The jury computers use TCP/IP connections to connect to the MySQL
+    database, for copying submissions with scp (in the default
+    configuration).
   - HTTP traffic from teams, the public and jury to the webserver.
 
 - One jury account with a homedirectory which is shared between all
@@ -31,6 +31,8 @@ For the deployment of this jury-system, there are some requirements:
 - Team accounts which are accessible via SSH on the jury computers
   (a SSH public key of the jury account should be installed on all team
    accounts to provide public-key access).
+  This can be circumvented by providing access by other means, see
+  'submit/submit_copy.sh' for more details.
 
 - (Local) root access on the jury-computers (preferably also on the
   shared homedirectory) for installing some programs setuid-root and
@@ -45,8 +47,9 @@ SOFTWARE REQUIREMENTS
 
 - make
 
-- For every supported programming language a compiler is needed,
-  which can generate statically linked stand-alone executables.
+- For every supported programming language a compiler is needed;
+  preferably one that can generate statically linked stand-alone
+  executables.
 
 - Apache web server with support for PHP >= 4.1.0
 
@@ -54,9 +57,9 @@ SOFTWARE REQUIREMENTS
 
 - PHP >= 4.1.0, located in /usr/bin/php (command line interface)
 
-- Bash 2, located in /bin/bash
+- Bash >= 2, located in /bin/bash
 
-- Statically compiled Bash 2 (included for Linux IA32)
+- Statically compiled Bash >= 2 (included for Linux IA32)
 
 - glibc 2.1 or higher
 
@@ -231,15 +234,29 @@ extensions to make it more flexible and to be able to correctly
 convert variables to all specific configuration files. See comments
 there for more information.
 
+CONFIGURATION OF LANGUAGES
+
 Configuration of the compilers of the supported languages should be
 done separately. For each supported language a bash shell-script named
 'compile_<lang>.sh' should be made and placed in SYSTEM_ROOT/judge,
 where <lang> is the ID of the language as specified in the
-database. For more information, see for example compile_c.sh and
-test_solution.sh for syntax in SYSTEM_ROOT/judge.
+database. For more information, see for example 'compile_c.sh' and
+'test_solution.sh' for syntax in SYSTEM_ROOT/judge.
+
+Interpreted languages and non-statically linked binaries can in
+principle also be used, but then the option USE_CHROOT should be
+disabled (or all dependencies be added to the chroot environment).
+Interpreted languages do not generate an executable and in principle
+do not need a compilation step. However, to be able to use interpreted
+languages (also Sun's Java), a script must be generated during the
+compilation step, which will function as the executable: the script
+must run the interpreter on the source. See 'compile_perl.sh' and
+'compile_java_javac.sh' in SYSTEM_ROOT/judge for examples.
+
+OTHER CONFIGURATION ISSUES
 
 For running solution programs under a non-privileged user, a user has
-to be added to the system(s) which act as judger. This user does not
+to be added to the system(s) that act as judger. This user does not
 need a home-directory or password, so e.g. the following command would
 suffice to add a user 'test' with minimal privileges:
 

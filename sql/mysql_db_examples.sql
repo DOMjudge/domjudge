@@ -40,6 +40,8 @@ INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_ju
 INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('java', 'Java', 'java', 1, 1, 2.5);
 INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('pascal', 'Pascal', 'pas', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('haskell', 'Haskell', 'hs', 0, 1, 3);
+INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('perl', 'Perl', 'pl', 1, 1, 1);
+INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('bash', 'Bash', 'sh', 1, 1, 1);
 
 -- 
 -- Dumping data for table `problem`
@@ -61,6 +63,19 @@ INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `
 -- Dumping data for table `submission`
 -- 
 
+
+-- 
+-- Dumping data for table `team`
+-- 
+
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `ipaddress`, `room`, `comments`) VALUES ('domjudge', 'DOMjudge', 3, NULL, '127.0.0.1', NULL, NULL);
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `ipaddress`, `room`, `comments`) VALUES ('team01', 'Some very cool teamname!', 1, NULL, '192.168.1.1', NULL, NULL);
+
+-- 
+-- Dumping data for table `team_affiliation`
+-- 
+
+
 -- 
 -- Dumping data for table `team_category`
 -- 
@@ -68,11 +83,3 @@ INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `
 INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (1, 'Participants', 0);
 INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (2, 'Observers', 1);
 INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (3, 'Organisation', 1);
-
-
--- 
--- Dumping data for table `team`
--- 
-
-INSERT INTO `team` (`login`, `name`, `categoryid`, `ipaddress`) VALUES ('domjudge', 'DOMjudge', 3, '127.0.0.1');
-INSERT INTO `team` (`login`, `name`, `categoryid`, `ipaddress`) VALUES ('team01', 'Some very cool teamname!', 1, '192.168.1.1');

@@ -135,6 +135,8 @@ touch program.{time,exit}  # Program runtime and exitcode
 # program.{out,err,time,exit} are written to by processes running as RUNUSER:
 chmod a+rw program.{out,err,time,exit}
 
+# Make source readable (for if it is interpreted):
+chmod a+r source.$EXT
 
 logmsg $LOG_NOTICE "starting compile"
 
