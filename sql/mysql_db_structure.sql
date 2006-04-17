@@ -10,9 +10,9 @@
 CREATE DATABASE domjudge;
 USE domjudge;
 
---
+-- 
 -- Table structure for table `clarification`
---
+-- 
 
 CREATE TABLE `clarification` (
   `clarid` mediumint(8) unsigned NOT NULL auto_increment,
@@ -24,11 +24,11 @@ CREATE TABLE `clarification` (
   `body` text NOT NULL,
   `answered` tinyint(4) unsigned NOT NULL default '0',
   PRIMARY KEY  (`clarid`)
-) TYPE=MyISAM COMMENT='Calarification requests by teams and responses by the jury';
+) TYPE=MyISAM COMMENT='Clarification requests by teams and responses by the jury';
 
---
+-- 
 -- Table structure for table `contest`
---
+-- 
 
 CREATE TABLE `contest` (
   `cid` mediumint(8) unsigned NOT NULL auto_increment,
@@ -39,9 +39,9 @@ CREATE TABLE `contest` (
   PRIMARY KEY  (`cid`)
 ) TYPE=MyISAM COMMENT='Contests that will be run with this install';
 
---
+-- 
 -- Table structure for table `judger`
---
+-- 
 
 CREATE TABLE `judger` (
   `judgerid` varchar(50) NOT NULL default '',
@@ -49,9 +49,9 @@ CREATE TABLE `judger` (
   PRIMARY KEY  (`judgerid`)
 ) TYPE=MyISAM COMMENT='Hostnames of the autojudgers';
 
---
+-- 
 -- Table structure for table `judging`
---
+-- 
 
 CREATE TABLE `judging` (
   `judgingid` mediumint(10) unsigned NOT NULL auto_increment,
@@ -70,9 +70,9 @@ CREATE TABLE `judging` (
   PRIMARY KEY  (`judgingid`)
 ) TYPE=MyISAM COMMENT='Result of judging a submission';
 
---
+-- 
 -- Table structure for table `language`
---
+-- 
 
 CREATE TABLE `language` (
   `langid` varchar(8) NOT NULL default '',
@@ -80,13 +80,13 @@ CREATE TABLE `language` (
   `extension` varchar(5) NOT NULL default '',
   `allow_submit` tinyint(1) unsigned NOT NULL default '1',
   `allow_judge` tinyint(1) unsigned NOT NULL default '1',
-  `time_factor` float NOT NULL default '0',
+  `time_factor` float NOT NULL default '1',
   PRIMARY KEY  (`langid`)
 ) TYPE=MyISAM COMMENT='Programming languages in which teams can submit solutions';
 
---
+-- 
 -- Table structure for table `problem`
---
+-- 
 
 CREATE TABLE `problem` (
   `probid` varchar(8) NOT NULL default '',
@@ -99,9 +99,9 @@ CREATE TABLE `problem` (
   PRIMARY KEY  (`probid`)
 ) TYPE=MyISAM COMMENT='Problems the teams can submit solutions for';
 
---
+-- 
 -- Table structure for table `scoreboard_jury`
---
+-- 
 
 CREATE TABLE `scoreboard_jury` (
   `cid` mediumint(8) unsigned NOT NULL default '0',
@@ -115,9 +115,9 @@ CREATE TABLE `scoreboard_jury` (
   PRIMARY KEY  (`cid`,`team`,`probid`)
 ) TYPE=MyISAM COMMENT='Scoreboard cache (jury version)';
 
---
+-- 
 -- Table structure for table `scoreboard_public`
---
+-- 
 
 CREATE TABLE `scoreboard_public` (
   `cid` mediumint(8) unsigned NOT NULL default '0',
@@ -131,9 +131,9 @@ CREATE TABLE `scoreboard_public` (
   PRIMARY KEY  (`cid`,`team`,`probid`)
 ) TYPE=MyISAM COMMENT='Scoreboard cache (public/team version)';
 
---
+-- 
 -- Table structure for table `submission`
---
+-- 
 
 CREATE TABLE `submission` (
   `submitid` mediumint(10) unsigned NOT NULL auto_increment,
@@ -150,9 +150,9 @@ CREATE TABLE `submission` (
   UNIQUE KEY `judgemark` (`judgemark`)
 ) TYPE=MyISAM COMMENT='All incoming submissions';
 
---
+-- 
 -- Table structure for table `team`
---
+-- 
 
 CREATE TABLE `team` (
   `login` varchar(15) NOT NULL default '',
@@ -179,9 +179,9 @@ CREATE TABLE `team_affiliation` (
   PRIMARY KEY  (`affilid`)
 ) TYPE=MyISAM COMMENT='Affilitations for teams (e.g.: university, company)';
 
---
+-- 
 -- Table structure for table `team_category`
---
+-- 
 
 CREATE TABLE `team_category` (
   `categoryid` mediumint(8) unsigned NOT NULL auto_increment,
@@ -189,4 +189,3 @@ CREATE TABLE `team_category` (
   `sortorder` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`categoryid`)
 ) TYPE=MyISAM COMMENT='Categories for teams (e.g.: participants, observers, ...)';
-
