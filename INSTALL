@@ -253,6 +253,22 @@ compilation step, which will function as the executable: the script
 must run the interpreter on the source. See 'compile_perl.sh' and
 'compile_java_javac.sh' in SYSTEM_ROOT/judge for examples.
 
+CONFIGURATION OF SPECIAL RUN OR JUDGE SCRIPTS
+
+To allow for problems that do not fit within the standard scheme of
+fixed input and/or output, there is the possibility to change the way
+that submissions are run and checked for correctness.
+
+The backend script (test_solution.sh) that handles the compilation,
+running and checking of submissions, calls separate scripts for
+running and comparison of the results. These can be specialized and
+adapted to the requirements per problem. For this, one has to create
+script 'run_<some-tag>.sh' and/or 'compare_<some-tag>.sh' in the
+SYSTEM_ROOT/judge directory (see run.sh and compare.sh for examples
+and usage information). Then one must specify this <some-tag> in the
+special_run and/or special_compare fields of the problem entry in the
+MySQL database (NULL means that the default script should be used).
+
 OTHER CONFIGURATION ISSUES
 
 For running solution programs under a non-privileged user, a user has

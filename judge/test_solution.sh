@@ -21,15 +21,21 @@
 
 
 # Usage: $0 <source> <lang> <testdata.in> <testdata.out> <timelimit> <tmpdir>
+#           [<special-run> [<special-compare>]]
 #
-# <source>        File containing source-code.
-# <lang>          Language of the source, see config-file for details.
-# <testdata.in>   File containing test-input.
-# <testdata.out>  File containing test-output.
-# <timelimit>     Timelimit in seconds.
-# <tmpdir>        Directory where to execute solution in a chroot-ed
-#                 environment. For best security leave it as empty as possible.
-#                 Certainly do not place output-files there!
+# <source>          File containing source-code.
+# <lang>            Language of the source, see config-file for details.
+# <testdata.in>     File containing test-input.
+# <testdata.out>    File containing test-output.
+# <timelimit>       Timelimit in seconds.
+# <tmpdir>          Directory where to execute solution in a chroot-ed
+#                   environment. For best security leave it as empty as possible.
+#                   Certainly do not place output-files there!
+# <special-run>     Extension name of specialized run or compare script to use.
+# <special-compare> Specify empty string for <special-run> if only
+#                   <special-compare> is to be used. The script
+#                   'run_<special-run>.sh' or 'compare_<special-compare>.sh'
+#                   will be called if argument is non-empty.
 #
 # This script supports languages, by calling separate compile scripts
 # depending on <lang>, namely 'compile_<lang>.sh'. These compile scripts
@@ -40,8 +46,13 @@
 #
 # where <dest> is the same filename as <source> but without extension.
 #
-# For running the solution a script 'run.sh' is called. For usage of
-# 'run.sh' see that script.
+#
+# For running the solution a script 'run.sh' is called (default). For
+# usage of 'run.sh' see that script. Likewise, for comparing results,
+# a script 'compare.sh' is called by default. A submissions results
+# are counted as accepted when the compare script returns with zero
+# exitcode and the filesize of diff.out is zero; it does not use the
+# result.xml file (see compare.sh for more information).
 
 # Global configuration
 source "`dirname $0`/../etc/config.sh"
@@ -80,26 +91,36 @@ else
 fi
 
 # Location of scripts/programs:
-RUNSCRIPTDIR="$SYSTEM_ROOT/judge"
+SCRIPTDIR="$SYSTEM_ROOT/judge"
 BASHSTATIC="$SYSTEM_ROOT/bin/bash-static"
 RUNGUARD="$SYSTEM_ROOT/bin/runguard"
 
 logmsg $LOG_NOTICE "starting '$0', PID = $$"
 
-[ $# -eq 6 ] || error "wrong number of arguments. see script-code for usage."
+[ $# -ge 6 ] || error "not enough of arguments. see script-code for usage."
 SOURCE="$1";    shift
 PROGLANG="$1";  shift
 TESTIN="$1";    shift
 TESTOUT="$1";   shift
 TIMELIMIT="$1"; shift
 TMPDIR="$1";    shift
+SPECIALRUN="$1";
+SPECIALCOMPARE="$2";
 logmsg $LOG_INFO "arguments: '$SOURCE' '$PROGLANG' '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$TMPDIR'"
+logmsg $LOG_INFO "optionals: '$SPECIALRUN' '$SPECIALCOMPARE'"
 
-[ -r "$SOURCE"  ] || error "solution not found: $SOURCE";
-[ -r "$TESTIN"  ] || error "test-input not found: $TESTIN";
-[ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT";
+COMPILE_SCRIPT="$SCRIPTDIR/compile_$PROGLANG.sh"
+COMPARE_SCRIPT="$SCRIPTDIR/compare${SPECIALCOMPARE:+_$SPECIALCOMPARE}.sh"
+RUN_SCRIPT="run${SPECIALRUN:+_$SPECIALRUN}.sh"
+
+[ -r "$SOURCE"  ] || error "solution not found: $SOURCE"
+[ -r "$TESTIN"  ] || error "test-input not found: $TESTIN"
+[ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT"
 [ -d "$TMPDIR" -a -w "$TMPDIR" -a -x "$TMPDIR" ] || \
 	error "Tempdir not found or not writable: $TMPDIR"
+[ -r "$COMPILE_SCRIPT" ] || error "compile script not found: $COMPILE_SCRIPT"
+[ -r "$COMPARE_SCRIPT" ] || error "compare script not found: $COMPARE_SCRIPT"
+[ -r "$SCRIPTDIR/$RUN_SCRIPT" ] || error "run script not found: $RUN_SCRIPT"
 
 logmsg $LOG_NOTICE "setting resource limits"
 ulimit -HS -c 0     # Do not write core-dumps
@@ -148,8 +169,7 @@ fi
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
 ( "$RUNGUARD" -t $COMPILETIME -o compile.time \
-	"$RUNSCRIPTDIR/compile_$PROGLANG.sh" "source.$EXT" source
-) &>compile.tmp
+	"$COMPILE_SCRIPT" "source.$EXT" source ) &>compile.tmp
 exitcode=$?
 if [ -f source ]; then
     mv -f source program
@@ -179,9 +199,9 @@ chmod a+r testdata.in
 
 mkdir --mode=0711 bin dev proc
 # Copy the run-script and a statically compiled bash-shell:
-cp -p "$RUNSCRIPTDIR/run.sh" .
-cp -p "$BASHSTATIC"          ./bin/bash
-chmod a+rx run.sh bin/bash
+cp -p "$SCRIPTDIR/$RUN_SCRIPT" .
+cp -p "$BASHSTATIC"            ./bin/bash
+chmod a+rx "$RUN_SCRIPT" bin/bash
 
 # Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
 if [ "$USE_CHROOT" ]; then
@@ -199,7 +219,7 @@ disown $CATPID
 logmsg $LOG_NOTICE "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 ( "$RUNGUARD" ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" -t $TIMELIMIT -o program.time -- \
-	$PREFIX/run.sh $PREFIX/program testdata.in program.out program.err program.exit \
+	$PREFIX/$RUN_SCRIPT $PREFIX/program testdata.in program.out program.err program.exit \
 		$MEMLIMIT $FILELIMIT $PROCLIMIT ) &>error.tmp
 exitcode=$?
 
@@ -275,7 +295,7 @@ fi
 # Add $SYSTEM_ROOT/bin to path for 'tempfile' (needed by compare.sh)
 export PATH="$SYSTEM_ROOT/bin:$PATH"
 
-"$RUNSCRIPTDIR/compare.sh" testdata.in program.out testdata.out result.xml diff.out 2>diff.tmp
+"$COMPARE_SCRIPT" testdata.in program.out testdata.out result.xml diff.out 2>diff.tmp
 exitcode=$?
 
 if [ $exitcode -ne 0 ]; then

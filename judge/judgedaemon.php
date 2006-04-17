@@ -114,7 +114,8 @@ while ( TRUE ) {
 
 	// get max.runtime, path to submission and other params
 	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS runtime,
-		s.submitid, s.sourcefile, s.langid, s.team, s.probid, testdata
+		s.submitid, s.sourcefile, s.langid, s.team, s.probid,
+		p.testdata, p.special_run, p.special_compare
 		FROM submission s, problem p, language l
 		WHERE s.probid = p.probid AND s.langid = l.langid AND
 		judgemark = %s AND judgerid = %s', $mark, $myhost);
@@ -133,10 +134,12 @@ while ( TRUE ) {
 	if ( $retval != 0 ) error("Could not create $tempdir");
 
 	// do the actual compile-run-test
-	system("./test_solution.sh ".
-			SUBMITDIR."/$row[sourcefile] $row[langid] ".
-			INPUT_ROOT."/$row[testdata]/testdata.in ".
-			INPUT_ROOT."/$row[testdata]/testdata.out $row[runtime] $tempdir",
+	system("./test_solution.sh " .
+			SUBMITDIR."/$row[sourcefile] $row[langid] " .
+			INPUT_ROOT."/$row[testdata]/testdata.in " .
+			INPUT_ROOT."/$row[testdata]/testdata.out " .
+		   "$row[runtime] $tempdir " .
+		   "'$row[special_run]' '$row[special_compare]'",
 		$retval);
 
 	// what does the exitcode mean?

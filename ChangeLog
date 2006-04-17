@@ -6,6 +6,7 @@ Version 1.2.0 - CVS
  - Display IP address of client on 403 error.
  - Tweak HTML to be fully XHTML 1.0 Strict compliant.
  - Added examples and documentation for how to use interpreted languages.
+ - Added support for specialized run and compare scripts.
 
 Version 1.1.0 - 22 December 2005
 --------------------------------
