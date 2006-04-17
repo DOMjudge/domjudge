@@ -13,10 +13,10 @@
 # <program.out>   File containing the program output.
 # <testdata.out>  File containing the correct output.
 # <result.xml>    File containing an XML document describing the result.
-# <diff.out>      File to write program/correct output differences to.
+# <diff.out>      File to write program/correct output differences to (optional).
 #
 # Exits successfully except when an internal error occurs.
-# Program output is considered correct when diffout is empty.
+# Program output is considered correct when diff.out is empty (and specified).
 
 TESTIN="$1"
 PROGRAM="$2"
