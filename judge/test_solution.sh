@@ -295,13 +295,14 @@ fi
 # Add $SYSTEM_ROOT/bin to path for 'tempfile' (needed by compare.sh)
 export PATH="$SYSTEM_ROOT/bin:$PATH"
 
-"$COMPARE_SCRIPT" testdata.in program.out testdata.out result.xml diff.out 2>diff.tmp
-exitcode=$?
+logmsg $LOG_INFO "starting script '$COMPARE_SCRIPT'"
 
-if [ $exitcode -ne 0 ]; then
+if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
+                       result.xml diff.out 2>diff.tmp ; then
 	cat error.tmp >>error.out
 	error "diff: `cat diff.tmp`";
 fi
+
 if [ -s diff.out ]; then
 	echo "Wrong answer." >>error.out
 	cat error.tmp >>error.out
