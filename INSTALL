@@ -163,7 +163,7 @@ Contest:
 'starttime' and 'endtime' respectively are the start- and endtime of
 the contest: before and after that time, no submissions are accepted.
 'lastscoreupdate' is the time after which the public and team
-scoreboard are not updated anymore (freezed). This is meant to make
+scoreboard are not updated anymore (frozen). This is meant to make
 the last stages of the contest thrilling, because no-one knows who has
 won... Setting this to 'NULL' disables this feature.
 'contestname' should be clear.
@@ -261,7 +261,7 @@ that submissions are run and checked for correctness.
 
 The backend script (test_solution.sh) that handles the compilation,
 running and checking of submissions, calls separate scripts for
-running and comparison of the results. These can be specialized and
+running and comparison of the results. These can be specialised and
 adapted to the requirements per problem. For this, one has to create
 script 'run_<some-tag>.sh' and/or 'compare_<some-tag>.sh' in the
 SYSTEM_ROOT/judge directory (see run.sh and compare.sh for examples
@@ -298,7 +298,7 @@ main 'Makefile' there and it will call subdirectory makefiles.
 
 The system can be installed with the command 'make install' in
 SYSTEM_ROOT directory. This will first run 'make config' and 'make
-build' if neccesary. This command is interactive: it will ask for a
+build' if necessary. This command is interactive: it will ask for a
 few different passwords:
 - a password which will be set on the jury webinterface.
 - the system root password to install some programs set-uid root.
@@ -414,7 +414,7 @@ judge computers. This however does not restrict network access, so a
 team could try to send in a solution, that tries to send input
 testdata back to them, access the internet, etc... A solution to this
 problem is to disallow all network traffic for the test user on the
-judge computers. On linux with kernel 2.4 and higher, this can be
+judge computers. On Linux with kernel 2.4 and higher, this can be
 accomplished by modifying the iptables, adding a rule like:
 
 iptables -I OUTPUT -o <network_interface> -m owner --uid-owner <testuser_uid> -j REJECT
