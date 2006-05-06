@@ -27,7 +27,7 @@ void vsendit(int fd, char *mesg, va_list ap)
 
 	nwrite = write(fd,buffer,strlen(buffer));
 	if ( nwrite<0 ) error(errno,"writing to socket");
-	if ( nwrite<strlen(buffer) ) error(0,"message sent incomplete");
+	if ( nwrite<(int)strlen(buffer) ) error(0,"message sent incomplete");
 }
 
 void sendit(int fd, char *mesg, ...)
