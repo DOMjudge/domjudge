@@ -7,6 +7,7 @@ Version 1.2.0 - CVS
  - Tweak HTML to be fully XHTML 1.0 Strict compliant.
  - Added examples and documentation for how to use interpreted languages.
  - Added support for specialised run and compare scripts.
+ - Timeout submitclient connection to server (Closes: #1477739).
 
 Version 1.1.0 - 22 December 2005
 --------------------------------

@@ -64,6 +64,8 @@ using namespace std;
 #define PROGRAM "submit"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
 
+#define TIMEOUT 60  /* seconds before send/receive timeouts with an error */
+
 extern int errno;
 
 /* Variables defining logmessages verbosity to stderr/logfile */
@@ -129,6 +131,7 @@ int main(int argc, char **argv)
 	char *lang_exts;
 	char *lang, *ext;
 	char *lang_ptr, *ext_ptr;
+	struct timeval timeout;
 
 	progname = argv[0];
 	stdlog = NULL;
@@ -348,6 +351,18 @@ int main(int argc, char **argv)
 	
 	if ( (socket_fd = socket(PF_INET,SOCK_STREAM,0)) == -1 ) {
 		error(errno,"cannot open socket");
+	}
+
+	/* Set socket timeout option on read/write */
+	timeout.tv_sec = TIMEOUT;
+	timeout.tv_usec = 0;
+	
+	if ( setsockopt(socket_fd,SOL_SOCKET,SO_SNDTIMEO,&timeout,sizeof(timeout)) < 0) {
+		error(errno,"setting socket option");
+	}
+
+	if ( setsockopt(socket_fd,SOL_SOCKET,SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0) {
+		error(errno,"setting socket option");
 	}
 
 	if ( (serverinfo = gethostbyaddr(server.c_str(),server.length(),AF_INET))==NULL ) {
