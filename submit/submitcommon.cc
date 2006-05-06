@@ -17,14 +17,17 @@ char lastmesg[SOCKETBUFFERSIZE];
 void vsendit(int fd, char *mesg, va_list ap)
 {
 	char buffer[SOCKETBUFFERSIZE];
-
+	ssize_t nwrite;
+	
 	vsnprintf(buffer,SOCKETBUFFERSIZE-2,mesg,ap);
 	
 	logmsg(LOG_DEBUG,"send: %s",buffer);
 	
 	strcat(buffer,"\015\012");
-	
-	if ( write(fd,buffer,strlen(buffer))<0 ) error(errno,"writing to socket");
+
+	nwrite = write(fd,buffer,strlen(buffer));
+	if ( nwrite<0 ) error(errno,"writing to socket");
+	if ( nwrite<strlen(buffer) ) error(0,"message sent incomplete");
 }
 
 void sendit(int fd, char *mesg, ...)
@@ -91,7 +94,7 @@ void sendwarning(int fd, int errnum, char *mesg, ...)
 int receive(int fd)
 {
 	char buffer[SOCKETBUFFERSIZE];
-	int nread;
+	ssize_t nread;
 	int i;
 	
 	if ( (nread = read(fd, buffer, SOCKETBUFFERSIZE)) == -1 ) {
@@ -99,9 +102,7 @@ int receive(int fd)
 	}
 
 	/* Check for end of file */
-	if ( nread==0 ) {
-		return 0;
-	}
+	if ( nread==0 ) return 0;
 	
 	strcpy(lastmesg,buffer);
 	while ( nread>0 && iscntrl(lastmesg[nread-1]) ) lastmesg[--nread] = 0;
