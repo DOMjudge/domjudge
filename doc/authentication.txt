@@ -1,0 +1,50 @@
+Authentication of teams in DOMjudge
+-----------------------------------
+
+The jury system needs to know which team it is dealing with. This document
+describes how we do that and what you can influence about it.
+
+The IP-address of a workstation is the primary means of authentication. The
+system assumes that someone coming from a specific IP is the team with that
+IP listed in the team table.
+
+When a team browses to the web interface, this is checked and the appropriate
+team page is presented. The submitclient also checks this IP for the origin
+of a submission.
+
+There are three possible ways of configuring that IP-address:
+1) Supply it beforehand.
+   Before the contest starts, when entering teams into the database, add the
+   IP that each team will have to that team's entry. When the teams arrive,
+   everything will work directly and without further configuration (except
+   when teams switch workplaces).
+   If possible, this is the recommended modus operandi, because it's the
+   least hassle just before and during the contest.
+
+2) Supply the teams with a password with which to authenticate. Beforehand,
+   generate passwords for each team in the jury interface. When the test
+   session (or contest) starts and a team connects to the web interface
+   and are an unknown IP, they will be prompted for username and password.
+   Once supplied, the IP is stored and the password is not needed anymore
+   for the rest of the contest.
+   This is also a secure option, but requires a bit more hassle from the
+   teams, and maybe from the organisers who have to distribute pieces of
+   paper.
+   Note: the web interface will only allow a team to authenticate
+   themselves once. If an IP is set, a next authentication will be
+   refused (to avoid trouble with lingering passwords). In order to fully
+   reauthenticate a team, the IP address needs to be set to NULL in the
+   database.
+
+3) Have DOMjudge configure the IP upon first submission with the command line
+   submit client. This is option STRICTIPCHECK which should be set to 0 to
+   activate. In that case, we start out without IP's (and the web interface
+   will not be accessible), but as soon as a team connects with the command
+   line client, the IP is registered and everything works as normal.
+   The connect can happen during the test session, so during the real contest
+   everything is fully available.
+   This is obviously somewhat less secure, but quite simple, especially in
+   environments where the teams can be quite trusted or very small contests.
+
+
+$Id$
