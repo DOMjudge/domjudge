@@ -52,7 +52,7 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 	}
 	
 	$resulttable = $DB->q('KEYTABLE SELECT j.*, submitid AS ARRAYKEY
-		FROM judging j WHERE (valid = 1 OR valid IS NULL) AND cid = %i',$cid);
+		FROM judging j WHERE valid = 1 AND cid = %i',$cid);
 	
 	// print the table with the submissions. 
 	// table header; leave out the field that is our key (because it's the same
