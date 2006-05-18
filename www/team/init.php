@@ -5,6 +5,7 @@
  * $Id$
  */
 
+// please keep any includes synchronised with checkpasswd.php
 require_once('../../etc/config.php');
 
 if( DEBUG ) {

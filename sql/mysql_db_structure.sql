@@ -162,6 +162,7 @@ CREATE TABLE `team` (
   `categoryid` mediumint(4) unsigned NOT NULL default '0',
   `affilid` varchar(10) default NULL,
   `ipaddress` varchar(15) default NULL,
+  `passwd` varchar(32) default NULL,
   `room` varchar(15) default NULL,
   `comments` text,
   `teampage_first_visited` datetime default NULL,

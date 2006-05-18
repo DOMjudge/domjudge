@@ -69,7 +69,7 @@ INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `
 -- 
 
 INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `ipaddress`, `room`, `comments`) VALUES ('domjudge', 'DOMjudge', 3, NULL, '127.0.0.1', NULL, NULL);
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `ipaddress`, `room`, `comments`) VALUES ('team01', 'Some very cool teamname!', 1, NULL, '192.168.1.1', NULL, NULL);
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `passwd`, `room`, `comments`) VALUES ('team01', 'Some very cool teamname!', 1, NULL, MD5('asjemenou'), NULL, NULL);
 
 -- 
 -- Dumping data for table `team_affiliation`

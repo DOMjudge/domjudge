@@ -41,6 +41,7 @@ INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'probl
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'problem'   ,'probid'      ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'language'  ,'langid'      ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'language'  ,'name'        ,NOW(),'Select');
+INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'team'      ,'passwd'      ,NOW(),'Update');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'team'      ,'teampage_first_visited',NOW(),'Update');
 
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','scoreboard_public','domjudge@localhost',NOW(),'Select','');
