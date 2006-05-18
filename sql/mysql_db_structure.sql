@@ -164,6 +164,7 @@ CREATE TABLE `team` (
   `ipaddress` varchar(15) default NULL,
   `room` varchar(15) default NULL,
   `comments` text,
+  `teampage_first_visited` datetime default NULL,
   PRIMARY KEY  (`login`),
   UNIQUE KEY `ipaddress` (`ipaddress`)
 ) TYPE=MyISAM COMMENT='All teams participating in the contest';
