@@ -9,13 +9,16 @@ require('init.php');
 $title = 'Administrator Functions';
 require('../header.php');
 require('menu.php');
+?>
 
-echo "<h1>Administrator Functions</h1>\n\n";
+<h1>Administrator Functions</h1>
 
-echo "<p><a href=\"checkconfig.php\">Config checker</a></p>\n\n";
+<p><a href="genpasswds.php">Generate team passwords</a></p>
 
-echo "<p><a href=\"recalculate_scores.php\">Recalculate the cached scoreboard</a> " .
-	"(expensive operation)</p>\n\n";
+<p><a href="checkconfig.php">Config checker</a></p>
+
+<p><a href="recalculate_scores.php">Recalculate the cached scoreboard</a> 
+(expensive operation)</p>
 	
-
+<?php
 require('../footer.php');
