@@ -21,12 +21,14 @@ if(!$row) {
 	exit;
 }
 
-// set the $login, $teamname, $categoryid variables
-extract($row);
-
 // is this the first visit? record that in the team table
 if ( empty($row['teampage_first_visited']) ) {
 	$DB->q('UPDATE team SET teampage_first_visited = NOW() '.
 		'WHERE login = %s', $login);
 }
+
+// make the following fields available for the scripts
+$login = $row['login'];
+$name = $row['name'];
+unset($row);
 
