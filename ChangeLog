@@ -3,12 +3,11 @@ DOMjudge Programming Contest Judging System
 Version 1.2.0 - CVS
 -------------------
  - Added confirm dialog when sending a clarification (reply).
- - Display IP address of client on 403 error.
  - Tweak HTML to be fully XHTML 1.0 Strict compliant.
  - Added examples and documentation for how to use interpreted languages.
  - Added support for specialised run and compare scripts.
  - Timeout submitclient connection to server (Closes: #1477739).
- - Add support for team passwords (generating and validating).
+ - Added support for team passwords (generating and validating).
 
 Version 1.1.0 - 22 December 2005
 --------------------------------
