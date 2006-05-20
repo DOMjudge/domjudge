@@ -12,6 +12,17 @@ When a team browses to the web interface, this is checked and the appropriate
 team page is presented. The submitclient also checks this IP for the origin
 of a submission.
 
+Authentication within the command line submitclient is fortified by the
+following process. When a client connects, it does not send the submission
+file, but only a reference to a randomized and not publicly visible file.
+This file is then copied from server side with the submit_copy script. This
+makes it impossible for teams to spoof a submission for a different team: the
+server "calls back" the team the submitter identified himself as and checks
+for existence of the advertised file. Because filename are randomized and
+invisible (within the $HOME/.submit directory by default), it is also
+impossible for someone to guess another team's filename and submit it for
+them.
+
 There are three possible ways of configuring that IP-address:
 1) Supply it beforehand.
    Before the contest starts, when entering teams into the database, add the
@@ -38,13 +49,14 @@ There are three possible ways of configuring that IP-address:
 
 3) Have DOMjudge configure the IP upon first submission with the command line
    submit client. This is option STRICTIPCHECK which should be set to 0 to
-   activate. In that case, we start out without IP's (and the web interface
-   will not be accessible), but as soon as a team connects with the command
-   line client, the IP is registered and everything works as normal.
+   activate. In that case, we (optionally) start out without IP's (and the web
+   interface will not be accessible), but as soon as a team connects with the
+   command line client, they are authenticated by correctly submitting a file
+   and the IP is registered and everything works as normal.
    The connect can happen during the test session, so during the real contest
-   everything is fully available.
-   This is obviously somewhat less secure, but quite simple, especially in
-   environments where the teams can be quite trusted or very small contests.
+   everything is fully available. This is also a secure way of authenticating
+   teams, which requires no passwords or IP configuration, but teams must
+   submit before they can access their teampage.
 
 
 $Id$
