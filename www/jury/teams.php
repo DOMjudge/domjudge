@@ -8,16 +8,23 @@
 require('init.php');
 $title = 'Teams';
 
-$teams = $DB->q('SELECT t.*,c.name as catname,a.name as affname,s.submitid
+$cid = getCurContest();
+
+$teams = $DB->q('SELECT t.*,c.name as catname,a.name as affname
                  FROM team t
                  LEFT JOIN team_category c USING(categoryid)
                  LEFT JOIN team_affiliation a ON(t.affilid=a.affilid)
-                 LEFT JOIN submission s ON(t.login=s.team)
-                 GROUP BY t.login ORDER BY c.sortorder, t.name');
+                 ORDER BY c.sortorder, t.name');
 
-$judgings = $DB->q('KEYTABLE SELECT j.*, submitid AS ARRAYKEY FROM judging j
-                    WHERE valid = 1 AND result = "correct" AND cid = %i',
-				   getCurContest());
+$nsubmits = $DB->q('KEYTABLE SELECT team AS ARRAYKEY, COUNT(team) AS cnt
+                    FROM submission s
+                    WHERE cid = %i GROUP BY team', $cid);
+
+$ncorrect = $DB->q('KEYTABLE SELECT team AS ARRAYKEY, COUNT(team) AS cnt
+                    FROM submission s
+                    LEFT JOIN judging j USING(submitid)
+                    WHERE j.valid = 1 AND j.result = "correct" AND s.cid = %i
+                    GROUP BY team', $cid);
 
 require('../header.php');
 require('menu.php');
@@ -30,14 +37,15 @@ if( $teams->count() == 0 ) {
 	echo "<table>\n" .
 		"<tr><th>login</th><th>teamname</th><th>category</th>" .
 		"<th>affiliation</th><th>host</th><th>room</th><th>status</th></tr>\n";
+
 	while( $row = $teams->next() ) {
-		
+
 		$status = 0;
 		if ( isset($row['teampage_first_visited']) ) $status = 1;
-		if ( isset($row['submitid']) ) {
-			$status = 2;
-			if ( isset($judgings[$row['submitid']]) ) $status = 3;
-		}
+		if ( isset($nsubmits[$row['login']]) &&
+			 $nsubmits[$row['login']]['cnt']>0 ) $status = 2;
+		if ( isset($ncorrect[$row['login']]) &&
+			 $ncorrect[$row['login']]['cnt']>0 ) $status = 3;
 		
 		echo "<tr class=\"category" . (int)$row['categoryid'] .
 			"\"><td class=\"teamid\"><a href=\"team.php?id=".
