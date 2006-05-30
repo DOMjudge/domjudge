@@ -60,7 +60,7 @@ INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'team_
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'team_affiliation'         ,'domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'language'         ,'domjudge@localhost',NOW(),'','Select');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'problem'          ,'domjudge@localhost',NOW(),'','Select');
-INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'team'             ,'domjudge@localhost',NOW(),'Select','');
+INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'team'             ,'domjudge@localhost',NOW(),'Select','Update');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'contest'          ,'domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'submission'       ,'domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'judging'          ,'domjudge@localhost',NOW(),'Select','');
