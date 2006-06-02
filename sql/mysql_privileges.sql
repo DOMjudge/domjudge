@@ -42,6 +42,7 @@ INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'probl
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'language'  ,'langid'      ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'language'  ,'name'        ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'language'  ,'extension'   ,NOW(),'Select');
+INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'language'  ,'allow_submit',NOW(),'Select');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'team'      ,'ipaddress'   ,NOW(),'Update');
 INSERT INTO columns_priv VALUES ('localhost','domjudge','domjudge_team'  ,'team'      ,'teampage_first_visited',NOW(),'Update');
 
@@ -51,13 +52,13 @@ INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','submi
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','problem'          ,'domjudge@localhost',NOW(),'','Select');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','judging'          ,'domjudge@localhost',NOW(),'','Select');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','contest'          ,'domjudge@localhost',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','team_category'         ,'domjudge@localhost',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','team_affiliation'         ,'domjudge@localhost',NOW(),'Select','');
+INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','team_category'    ,'domjudge@localhost',NOW(),'Select','');
+INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_public','team_affiliation' ,'domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'scoreboard_public','domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'scoreboard_jury'  ,'domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'clarification'    ,'domjudge@localhost',NOW(),'Select,Insert','');
-INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'team_category'         ,'domjudge@localhost',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'team_affiliation'         ,'domjudge@localhost',NOW(),'Select','');
+INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'team_category'    ,'domjudge@localhost',NOW(),'Select','');
+INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'team_affiliation' ,'domjudge@localhost',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'language'         ,'domjudge@localhost',NOW(),'','Select');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'problem'          ,'domjudge@localhost',NOW(),'','Select');
 INSERT INTO tables_priv  VALUES ('localhost','domjudge','domjudge_team'  ,'team'             ,'domjudge@localhost',NOW(),'Select','Update');
