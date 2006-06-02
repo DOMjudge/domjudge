@@ -16,7 +16,7 @@ $title = 'Websubmit';
 require('../header.php');
 require('menu.php');
 
-?><h2>Websubmit - upload status</h2><?
+echo "<h2>Websubmit - upload status</h2>\n\n";
 
 switch ( $_FILES['code']['error'] ) {
 	case 1:
@@ -52,9 +52,6 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
 
 if( ! $prob ) error("Unable to find problem '$probid'");
 
-echo 'problem: <i>' . $prob['name'] . '</i><br/>';
-
-
 /*	Determine the language */
 $langext = @$_REQUEST['langext'];
 
@@ -72,10 +69,13 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
 
 if( ! $lang ) error("Unable to find language '$langext'");
 
-echo 'language: <i>' . $lang['name'] . '</i><br/>';
-
 ?>
-<hr>
+<p>
+problem:  <i> <?=$prob['name']?> </i><br/>
+language: <i> <?=$lang['name']?> </i><br/>
+</p>
+
+<hr/>
 <pre>
 file is now uploaded to '<?=$_FILES['code']['tmp_name']?>'
 and should be moved to a incoming directory
