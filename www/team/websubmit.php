@@ -2,7 +2,7 @@
 /**
  * Web submissions form
  *
- * $Id: $
+ * $Id$
  */
 
 require('init.php');
@@ -19,19 +19,19 @@ require('menu.php');
 <tr><td>problem:</td>
     <td><?
 
-$res = $DB->q('SELECT probid, name, allow_submit '
-			. 'FROM problem WHERE cid = %i ORDER BY probid', getCurContest());
+$probs = $DB->q('SELECT probid, name FROM problem
+                 WHERE cid = %i AND allow_submit = 1
+                 ORDER BY probid', getCurContest());
 
-if( $res->count() == 0 ) {
+if( $probs->count() == 0 ) {
 	error('No problems defined for this contest');
 }
 
 echo '<select name="probid">'."\n";
 echo '<option value="">by filename</option>'."\n";
-while( $row = $res->next() ) {
-	echo '<option value="' . $row['probid'] . '"'
-			. ($row['allow_submit']?'':' disabled') . '>'
-			. $row['name'] . '</option>'."\n";
+while( $row = $probs->next() ) {
+	echo '<option value="' . $row['probid'] . '">'
+		. $row['name'] . '</option>'."\n";
 }
 echo "</select>";
 
@@ -40,17 +40,18 @@ echo "</select>";
 <tr><td>language:</td>
     <td><?
 
-$res = $DB->q('SELECT extension, name FROM language ORDER BY name');
+$langs = $DB->q('SELECT extension, name FROM language
+                 WHERE allow_submit = 1 ORDER BY name');
 
-if( $res->count() == 0 ) {
+if( $langs->count() == 0 ) {
 	error('No languages defined');
 }
 
 echo '<select name="langext">';
 echo '<option value="">by extension</option>'."\n";
-while( $row = $res->next() ) {
+while( $row = $langs->next() ) {
 	echo '<option value="' . $row['extension'] . '">'
-			. $row['name'] . '</option>'."\n";
+		. $row['name'] . '</option>'."\n";
 }
 echo "</select>";
 

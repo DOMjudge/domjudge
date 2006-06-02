@@ -2,13 +2,12 @@
 /**
  * Handle web submissions
  *
- * $Id: $
+ * $Id$
  */
 
 require('init.php');
 
-if ( !isset($_POST['submit']) )
-{
+if ( !isset($_POST['submit']) ) {
 	header('location: submit.php');
 	return;
 }
@@ -19,8 +18,7 @@ require('menu.php');
 
 ?><h2>Websubmit - upload status</h2><?
 
-
-switch($_FILES['code']['error']) {
+switch ( $_FILES['code']['error'] ) {
 	case 1:
 		error('The uploaded file exceeds the upload_max_filesize directive in php.ini.');
 	case 2:
@@ -37,49 +35,44 @@ switch($_FILES['code']['error']) {
 }
 
 $filename = $_FILES['code']['name'];
-$dot = strrpos($filename, '.');
-
 
 /*	Determine the problem */
 $probid = @$_REQUEST['probid'];
 
 if ( empty($probid) ) {
-	if($dot === false) {
+	if( strpos($filename, '.') === false ) {
 		error('Unable to autoselect the problem from the uploaded filename');
 	}
-	$probid = substr($filename, 0, $dot);
+	$probid = substr($filename, 0, strpos($filename, '.'));
 }
 
-$prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem '
-				.'WHERE probid = %s'
-	, $probid);
+$prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
+                WHERE cid = %d AND probid = %s AND allow_submit = 1',
+                getCurContest(), $probid);
 
-if(!$prob) {
-	error("Unable to find problem '$probid'");
-}
+if( ! $prob ) error("Unable to find problem '$probid'");
 
-echo 'problem: <i>' . $prob['name'] . '</i><br>';
+echo 'problem: <i>' . $prob['name'] . '</i><br/>';
 
 
 /*	Determine the language */
 $langext = @$_REQUEST['langext'];
 
 if ( empty($langext) ) {
-	if($dot === false) {
+	if ( strrpos($filename, '.') === false ) {
 		error('Unable to autoselect the language from the uploaded filename');
 	}
-	$langext = substr($filename, $dot + 1);
+	$langext = substr($filename, strrpos($filename, '.')+1);
 }
 
-$lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language '
-				.'WHERE extension = %s'
-	, $langext);
+$langexts = explode(" ", LANG_EXTS);
 
-if(!$lang) {
-	error("Unable to find language '$langext'");
-}
+$lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
+                WHERE extension = %s AND allow_submit = 1', $langext);
 
-echo 'language: <i>' . $lang['name'] . '</i><br>';
+if( ! $lang ) error("Unable to find language '$langext'");
+
+echo 'language: <i>' . $lang['name'] . '</i><br/>';
 
 ?>
 <hr>
