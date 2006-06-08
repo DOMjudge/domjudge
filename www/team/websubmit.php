@@ -58,7 +58,7 @@ echo "</select>";
 ?></td>
 </tr>
 <tr><td>file:</td>
-    <td><input type="file" name="code" /></td>
+    <td><input type="file" name="code" size="40" /></td>
 </tr>
 <tr><td></td>
     <td><input type="submit" value="Submit" name="submit" /></td>
