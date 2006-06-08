@@ -40,17 +40,17 @@ $filename = $_FILES['code']['name'];
 $probid = @$_REQUEST['probid'];
 
 if ( empty($probid) ) {
-	if( strpos($filename, '.') === false ) {
+	if ( strpos($filename, '.') === false ) {
 		error('Unable to autoselect the problem from the uploaded filename');
 	}
-	$probid = substr($filename, 0, strpos($filename, '.'));
+	$probid = strtolower(substr($filename, 0, strpos($filename, '.')));
 }
 
 $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
-                WHERE cid = %d AND probid = %s AND allow_submit = 1',
-                getCurContest(), $probid);
+                WHERE allow_submit = 1 AND probid = %s AND cid = %i',
+               $probid, getCurContest());
 
-if( ! $prob ) error("Unable to find problem '$probid'");
+if ( ! isset($prob) ) error("Unable to find problem '$probid'");
 
 /*	Determine the language */
 $langext = @$_REQUEST['langext'];
@@ -59,15 +59,26 @@ if ( empty($langext) ) {
 	if ( strrpos($filename, '.') === false ) {
 		error('Unable to autoselect the language from the uploaded filename');
 	}
-	$langext = substr($filename, strrpos($filename, '.')+1);
-}
+	$fileext = strtolower(substr($filename, strrpos($filename, '.')+1));
 
-$langexts = explode(" ", LANG_EXTS);
+	$all_lang_exts = explode(" ", LANG_EXTS);
+	
+	foreach ($all_lang_exts as $langextlist) {
+		$langexts = explode(",", $langextlist);
+
+		// Skip first element: that's the language name
+		for ($i = 1; $i < count($langexts); $i++) {
+			if ( $langexts[$i]==$fileext ) $langext = $langexts[1];
+		}
+	}
+	
+	if ( empty($langext) ) error("Unable to find language for extension '$fileext'");
+}
 
 $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
                 WHERE extension = %s AND allow_submit = 1', $langext);
 
-if( ! $lang ) error("Unable to find language '$langext'");
+if ( ! isset($lang) ) error("Unable to find language '$langext'");
 
 ?>
 <p>
