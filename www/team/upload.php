@@ -93,8 +93,14 @@ and should be moved to a incoming directory
 after which submission should also be added to the db.
 </pre>
 <?
-#	if(!move_uploaded_file($_FILES['code']['tmp_name'], TODO $dest)) {
-#		error('Failed to move uploaded file.');
-#	}
+
+$ipstr = str_replace(".","-",$ip);
+
+$tmpfile = $_FILES['code']['tmp_name'];
+$destfile = INCOMINGDIR . "/websubmit.$probid.$login.$ipstr.XXXXXX.$langext";
+
+if ( ! move_uploaded_file($tmpfile, $deestfile) ) {
+	error("Failed to move uploaded file '$tmpfile' to '$destfile'");
+}
 
 require('../footer.php');
