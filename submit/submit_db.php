@@ -1,7 +1,7 @@
 #!/usr/bin/php -q
 <?php
 /**
- * Called by submitdaemon.pl
+ * Called by commandline/web submitdaemon.
  * Given the details of a submission, check the parameters for validity
  * (is the contest open? is the problem valid? is this really the team?)
  * and if ok, copy the file from INCOMING to SUBMIT and add a database
