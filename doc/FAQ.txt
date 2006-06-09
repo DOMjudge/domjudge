@@ -59,9 +59,13 @@ accessible. Care should be taken with the 'etc' dir: 'config.php' and
 not be readable by anyone else. This can be done for example by
 setting the SYSTEM_ROOT/etc directory to owner:group
 <DOMjudge account>:<Webserver group> and permissions drwxr-x---,
-denying user other than yourself and the webserver group access to the
+denying users other than yourself and the webserver group access to the
 configuration and password files. Of course a looser or tighter scheme
 can be applied.
+
+Furthermore, the webserver must have write access to the INCOMINGDIR to
+place websubmissions (if used). This can also be done by making that
+directory group-owned and -writeable by the webserver group.
 
 
 - Error: "submit_copy.sh failed with exitcode XX"
