@@ -143,6 +143,7 @@ software:
 * problem            Definition of problems (name, corresponding contest, etc.)
   submission         Submissions of solutions to problems.
 * team               Definition of teams.
+* team_affiliation   Defintion of institutions a team can be affiliated with
 * team_category      Different category groups teams can be put in.
   scoreboard_jury    Cache of the scoreboards for public/teams and for the jury
   scoreboard_public    separately, because of possibility of score freezing.
@@ -154,27 +155,23 @@ reference to a specific element from other tables and internally in
 the software. For example a problem with 'cid = 2' would reference to
 the contest with it's 'cid' (contest ID) set to 2.
 
-Category:
-'categoryid' is the reference ID.
-'name' is a string: the name of the category.
-
-Contest:
+contest:
 'cid' is the reference ID.
 'starttime' and 'endtime' respectively are the start- and endtime of
 the contest: before and after that time, no submissions are accepted.
 'lastscoreupdate' is the time after which the public and team
 scoreboard are not updated anymore (frozen). This is meant to make
-the last stages of the contest thrilling, because no-one knows who has
-won... Setting this to 'NULL' disables this feature.
+the last stages of the contest more thrilling, because no-one knows
+who has won... Setting this to 'NULL' disables this feature.
 'contestname' should be clear.
 
-Judger:
+judger:
 'judgerid' is the hostname of a judger computer.
 'active' should be 0 or 1 and indicates whether this host should judge
 incoming submissions.
 
-Language:
-'langid' is string of maximum length 8, which references the
+language:
+'langid' is a string of maximum length 8, which references the
 language. This reference is also used to call the correct compile
 script (SYSTEM_ROOT/judge/compile_c.sh, etc.), so when adding a new
 language, check that these match.
@@ -192,9 +189,10 @@ again.
 multiplied for solutions in this language. For example Java is known
 to be structurally slower than C/C++.
 
-Problem:
+problem:
 'probid' is the reference ID.
 'cid' is the contest ID this problem is (only) defined for.
+'name' is the full name of the problem.
 'allow_submit' (0 or 1) determines whether teams can submit solutions
 for this problem. Non-submittable problems are also not displayed on the
 scoreboard. This can be used to define spare problems, which can then
@@ -206,16 +204,42 @@ input/output testdata in files 'testdata.in' and 'testdata.out'.
 'timelimit' is the timelimit in seconds within which solutions for
 this problem have to run (taking into account 'time_factor' per
 language).
+'special_run' if not-NULL defines a custom run-script 'run_<special_run>.sh'
+to run compiled submissions for this problem.
+'special_compare' if not-NULL defines a custom compare-script
+'compare_<special_compare>.sh' to compare output for this problem.
 
-Team:
+team:
 'login' is the account/login-name of the team.
 'name' is the displayed name of the team.
 'categoryid' is the ID of the category the team is in.
+'affilid' is the affiliation ID of the team
 'ipaddress' is the IP-address of the team. This is used to
 automatically identify the team in the webinterface and to check
 submission origin. A value of 'NULL' results in the team being unable
-to submit or view it's teampage.
+to submit or view it's teampage, unless they first authenticate via
+password or commandline submission.
+'passwd' is a MD5-hash of a one-time password teams can use to
+authenticate and register their IP address.
+'room' is the room the team is located.
+'comments' should be clear.
+'teampage_first_visited' is automatically updated when a team first
+visits their DOMjudge team page.
 
+team_affiliation:
+'affilid' is the reference ID.
+'name' is the name of the institution.
+'country' is the 2 character abbreviation of the country.
+'has_logo' is 0 or 1 whether the institution has a logo associated
+with it.
+'comments' should be clear.
+
+team_category:
+'categoryid' is the reference ID.
+'name' is a string: the name of the category.
+'sortorder' is the order at which this group must be sorted in the
+scoreboard, where a higher number sorts lower and equal sort depending
+on score.
 
 CONFIGURATION
 -------------
@@ -305,7 +329,14 @@ few different passwords:
 - the MySQL database root password to install the DOMjudge database.
 It does also automatically generate and set passwords for the team and
 public webinterface: these are only used internally in the system and
-should best be left untouched.
+are best left untouched.
+
+There are some files/directories that have to be readable/writeable by
+the webserver. These are:
+- SYSTEM_ROOT/etc/passwords.php must be readable by the webserver, but
+  (best) not world readable.
+- INCOMINGDIR must be writeable by the webserver to place websubmitted
+  files there.
 
 Should installation not succeed and re-installation be necessary, then
 you can clean all built files with 'make clean'. 'make distclean' will
@@ -390,13 +421,13 @@ calls (which can be obscured and are different per language).
 
 Therefor we decided to tackle this issue by running these programs in
 a environment as restrictive as possible. This is done by setting up a
-minimal chroot environment. For this root privileges on the judging
+minimal chroot environment. For this, root privileges on the judging
 computers and statically compiled programs are needed. By also
 limiting all kinds of system resources (memory, processes, time,
-unprivileged user) we protect the system from programs, which try to
+unprivileged user) we protect the system from programs which try to
 hack or could crash the system.  However, a chroot environment does
-not restrict network access, so there lies a possible security risk,
-which has to be handled separately.
+not restrict network access, so there lies a possible security risk
+that has to be handled separately.
 
 EXTERNAL SECURITY
 
@@ -411,10 +442,10 @@ behind a firewalling router.
 
 Solutions are run within a restricted (chroot) environment on the
 judge computers. This however does not restrict network access, so a
-team could try to send in a solution, that tries to send input
-testdata back to them, access the internet, etc... A solution to this
-problem is to disallow all network traffic for the test user on the
-judge computers. On Linux with kernel 2.4 and higher, this can be
+team could try to send in a solution that tries to send input testdata
+back to them, access the internet, etc... A solution to this problem
+is to disallow all network traffic for the test user on the judge
+computers. On Linux with kernel 2.4 and higher, this can be
 accomplished by modifying the iptables, adding a rule like:
 
 iptables -I OUTPUT -o <network_interface> -m owner --uid-owner <testuser_uid> -j REJECT
