@@ -350,7 +350,7 @@ int handle_client()
 	fromfile = allocstr("%s/%s/%s",userinfo->pw_dir,USERSUBMITDIR,
 	                    filename.c_str());
 	
-	tempfile = allocstr("%s/%s.%s.XXXXXX.%s",INCOMINGDIR,
+	tempfile = allocstr("%s/cmdsubmit.%s.%s.XXXXXX.%s",INCOMINGDIR,
 	                    problem.c_str(),team.c_str(),language.c_str());
 	
 	if ( mkstemps(tempfile,language.length()+1)<0 || strlen(tempfile)==0 ) {
