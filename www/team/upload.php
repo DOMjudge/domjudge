@@ -101,7 +101,7 @@ for($i=0; $i<3; $i++) {
 if ( $i<3 ) {
 	echo "<p>Upload successful.</p>\n";
 } else {
-	
+	echo "<p>Upload not (yet) successful.</p>\n";
 }
 
 require('../footer.php');
