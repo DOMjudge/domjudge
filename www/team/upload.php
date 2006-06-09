@@ -80,27 +80,28 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
 
 if ( ! isset($lang) ) error("Unable to find language '$langext'");
 
-?>
-<p>
-problem:  <i> <?=$prob['name']?> </i><br/>
-language: <i> <?=$lang['name']?> </i><br/>
-</p>
-
-<hr/>
-<pre>
-file is now uploaded to '<?=$_FILES['code']['tmp_name']?>'
-and should be moved to a incoming directory
-after which submission should also be added to the db.
-</pre>
-<?
+echo "<table>\n" .
+	"<tr><td>problem: </td><td><i>".$prob['name']."</i></td></tr>\n" .
+	"<tr><td>language:</td><td><i>".$lang['name']."</i></td></tr>\n" .
+	"</table>\n";
 
 $ipstr = str_replace(".","-",$ip);
 
 $tmpfile = $_FILES['code']['tmp_name'];
 $destfile = INCOMINGDIR . "/websubmit.$probid.$login.$ipstr.XXXXXX.$langext";
 
-if ( ! move_uploaded_file($tmpfile, $deestfile) ) {
+if ( ! move_uploaded_file($tmpfile, $destfile) ) {
 	error("Failed to move uploaded file '$tmpfile' to '$destfile'");
+}
+
+for($i=0; $i<3; $i++) {
+	sleep(1);
+	if ( ! file_exists($destfile) ) break;
+}
+if ( $i<3 ) {
+	echo "<p>Upload successful.</p>\n";
+} else {
+	
 }
 
 require('../footer.php');
