@@ -159,7 +159,7 @@ function mkstemps($template, $suffixlen)
 			$value /= 62;
 		}
 
-		$fd = fopen($filename,"x");
+		$fd = @fopen($filename,"x");
 
 		if ( $fd !== FALSE ) {
 			fclose($fd);
