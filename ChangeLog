@@ -9,6 +9,7 @@ Version 1.2.0 - CVS
  - Timeout submitclient connection to server (Closes: #1477739).
  - Added support for team passwords (generating and validating).
  - Added team status light to jury teams overview (Closes: #1441783).
+ - Minimum required PHP version now 4.3.2.
 
 Version 1.1.0 - 22 December 2005
 --------------------------------

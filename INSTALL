@@ -51,11 +51,11 @@ SOFTWARE REQUIREMENTS
   preferably one that can generate statically linked stand-alone
   executables.
 
-- Apache web server with support for PHP >= 4.1.0
+- Apache web server with support for PHP >= 4.3.2
 
 - MySQL 3.23.x or higher database and client software
 
-- PHP >= 4.1.0, located in /usr/bin/php (command line interface)
+- PHP >= 4.3.2, located in /usr/bin/php (command line interface)
 
 - Bash >= 2, located in /bin/bash
 

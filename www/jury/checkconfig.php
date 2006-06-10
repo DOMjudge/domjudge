@@ -20,16 +20,15 @@ ob_implicit_flush();
 <h2>Software</h2>
 
 <?php
-$phpver = PHP_VERSION;
 
 echo "<p>You are using DOMjudge version " . htmlspecialchars(DOMJUDGE_VERSION) . "<br />\n" .
-"PHP version " . htmlspecialchars($phpver);
+"PHP version " . htmlspecialchars(PHP_VERSION) . " ";
 
 // are we using the right php version?
-if($phpver{0} < 4 || ($phpver{0} == 4 && $phpver{2} == 0 ) ) {
-	err('You need at least PHP version 4.1.0.');
+if( !function_exists('version_compare') || version_compare( '4.3.2',PHP_VERSION,'>=') ) {
+	err('You need at least PHP version 4.3.2.');
 } else {
-	echo " OK";
+	echo "OK";
 }
 echo "</p>\n\n";
 ?>
