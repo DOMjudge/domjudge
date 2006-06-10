@@ -16,7 +16,7 @@ define ('LOGFILE', LOGDIR.'/submit.log');
 
 require (SYSTEM_ROOT . '/lib/init.php');
 
-$waittime = 3;
+$waittime = 1;
 
 $cid = getCurContest();
 
@@ -64,13 +64,18 @@ while ( TRUE ) {
 		$ip      = str_replace("-",".",$data[3]);
 		$langext = $data[5];
 
-		logmsg(LOG_NOTICE,"found file '$file': $team/$problem/$langext");
+		logmsg(LOG_NOTICE,"found file '$file'");
 		
 		system("./submit_db.php $team $ip $problem $langext $file", $retval);
 
 		if ( $retval!=0 ) {
 			logmsg(LOG_WARNING,"error: submit_db returned exitcode $retval");
 			system(BEEP_CMD." ".BEEP_WARNING." &");
+
+			if ( ! rename($filefull,INCOMINGDIR . "/rejected-" . $file) ) {
+				system(BEEP_CMD." ".BEEP_ERROR." &");
+				error("could not rename '$file'");
+			}
 		} else {
 			logmsg(LOG_INFO,"added submission to database");
 			system(BEEP_CMD." ".BEEP_SUBMIT." &");
