@@ -16,7 +16,7 @@ require('menu.php');
 <form action="upload.php" method="post" enctype="multipart/form-data">
 
 <table class="websubmit">
-<tr><td>problem:</td>
+<tr><td>Problem:</td>
     <td><?
 
 $probs = $DB->q('SELECT probid, name FROM problem
@@ -37,7 +37,7 @@ echo "</select>";
 
 ?></td>
 </tr>
-<tr><td>language:</td>
+<tr><td>Language:</td>
     <td><?
 
 $langs = $DB->q('SELECT extension, name FROM language
@@ -57,11 +57,12 @@ echo "</select>";
 
 ?></td>
 </tr>
-<tr><td>file:</td>
+<tr><td>File:</td>
     <td><input type="file" name="code" size="40" /></td>
 </tr>
+<tr><td colspan="2">&nbsp;</td></tr>
 <tr><td></td>
-    <td><input type="submit" value="Submit" name="submit" /></td>
+    <td><input type="submit" value="Submit solution" name="submit" /></td>
 </tr>
 </table>
 
