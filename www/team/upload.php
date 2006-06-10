@@ -16,6 +16,8 @@ $title = 'Websubmit';
 require('../header.php');
 require('menu.php');
 
+$waitsubmit = 5;
+
 echo "<h2>Websubmit - upload status</h2>\n\n";
 
 switch ( $_FILES['code']['error'] ) {
@@ -88,17 +90,22 @@ echo "<table>\n" .
 $ipstr = str_replace(".","-",$ip);
 
 $tmpfile = $_FILES['code']['tmp_name'];
-$destfile = INCOMINGDIR . "/websubmit.$probid.$login.$ipstr.XXXXXX.$langext";
+
+$desttemp = INCOMINGDIR . "/websubmit.$probid.$login.$ipstr.XXXXXX.$langext";
+$destfile = mkstemps($desttemp,strlen($langext)+1);
+if ( $destfile === FALSE ) {
+	error("Failed to create file from template '$desttemp'");
+}
 
 if ( ! move_uploaded_file($tmpfile, $destfile) ) {
 	error("Failed to move uploaded file '$tmpfile' to '$destfile'");
 }
 
-for($i=0; $i<3; $i++) {
+for($i=0; $i<$waitsubmit; $i++) {
 	sleep(1);
 	if ( ! file_exists($destfile) ) break;
 }
-if ( $i<3 ) {
+if ( $i<$waitsubmit ) {
 	echo "<p>Upload successful.</p>\n";
 } else {
 	echo "<p>Upload not (yet) successful.</p>\n";
