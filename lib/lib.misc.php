@@ -131,3 +131,42 @@ function calcScoreRow($cid, $team, $prob) {
 
 	return;
 }
+
+/**
+ * Create a unique file from a template string.
+ *
+ * Returns a full path to the filename or FALSE on failure.
+ */
+function mkstemps($template, $suffixlen)
+{
+	if ( $suffixlen<0 || strlen($template)<$suffixlen+6 ) return FALSE;
+
+	if ( substr($template,-($suffixlen+6),6)!='XXXXXX' ) return FALSE;
+
+	$letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	$TMP_MAX = 16384;
+
+	umask(0133);
+	
+	for($try=0; $try<$TMP_MAX; $try++) {
+		$value = rand();
+
+		$filename = $template;
+		$pos = strlen($filename)-$suffixlen-6;
+		
+		for($i=0; $i<6; $i++) {
+			$filename{$pos+$i} = $letters{$value % 62};
+			$value /= 62;
+		}
+
+		$fd = fopen($filename,"x");
+
+		if ( $fd !== FALSE ) {
+			fclose($fd);
+			return $filename;
+		}
+	}
+
+	// We couldn't create a non-existent filename from the template:
+	return FALSE;
+}
