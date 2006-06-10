@@ -83,8 +83,8 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
 if ( ! isset($lang) ) error("Unable to find language '$langext'");
 
 echo "<table>\n" .
-	"<tr><td>problem: </td><td><i>".$prob['name']."</i></td></tr>\n" .
-	"<tr><td>language:</td><td><i>".$lang['name']."</i></td></tr>\n" .
+	"<tr><td>Problem: </td><td><i>".$prob['name']."</i></td></tr>\n" .
+	"<tr><td>Language:</td><td><i>".$lang['name']."</i></td></tr>\n" .
 	"</table>\n";
 
 $ipstr = str_replace(".","-",$ip);
@@ -94,7 +94,7 @@ $tmpfile = $_FILES['code']['tmp_name'];
 $desttemp = INCOMINGDIR . "/websubmit.$probid.$login.$ipstr.XXXXXX.$langext";
 $destfile = mkstemps($desttemp,strlen($langext)+1);
 if ( $destfile === FALSE ) {
-	error("Failed to create file from template '$desttemp'");
+	error("Failed to create file from template '". basename($desttemp) . "'");
 }
 
 if ( ! move_uploaded_file($tmpfile, $destfile) ) {
