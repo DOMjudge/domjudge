@@ -33,6 +33,16 @@ if( !function_exists('version_compare') || version_compare( '4.3.2',PHP_VERSION,
 echo "</p>\n\n";
 ?>
 
+<h2>Websubmit</h2>
+
+<p>Checking for writeable incoming dir... <?php
+if ( ! is_writable(INCOMINGDIR) ) {
+	err("INCOMINGDIR '" . INCOMINGDIR . "' not writeable by webserver user!");
+} else {
+	echo "OK<br />\n";
+} ?>
+</p>
+
 
 <h2>Contests</h2>
 
