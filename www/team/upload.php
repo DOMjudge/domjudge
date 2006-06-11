@@ -12,6 +12,16 @@ if ( !isset($_POST['submit']) ) {
 	return;
 }
 
+ob_implicit_flush();
+
+// helper to output an error message.
+function err($string) {
+	echo "<font color=\"#FF0000\"><b><u>ERROR</u>: " .
+		htmlspecialchars($string) . "</b></font><br />\n";
+	require('../footer.php');
+	exit;
+}
+
 $title = 'Websubmit';
 require('../header.php');
 require('menu.php');
@@ -24,7 +34,7 @@ switch ( $_FILES['code']['error'] ) {
 	case 1:
 		error('The uploaded file exceeds the upload_max_filesize directive in php.ini.');
 	case 2:
-		error('The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.');
+		error('The uploaded file exceeds the MAX_FILE_SIZE directive in the HTML form.');
 	case 3:
 		error('The uploaded file was only partially uploaded.');
 	case 4:
@@ -43,7 +53,7 @@ $probid = @$_REQUEST['probid'];
 
 if ( empty($probid) ) {
 	if ( strpos($filename, '.') === false ) {
-		error('Unable to autoselect the problem from the uploaded filename');
+		err('Unable to autodetect the problem from the uploaded filename');
 	}
 	$probid = strtolower(substr($filename, 0, strpos($filename, '.')));
 }
@@ -52,14 +62,14 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
                 WHERE allow_submit = 1 AND probid = %s AND cid = %i',
                $probid, getCurContest());
 
-if ( ! isset($prob) ) error("Unable to find problem '$probid'");
+if ( ! isset($prob) ) err("Unable to find problem '$probid'");
 
 /*	Determine the language */
 $langext = @$_REQUEST['langext'];
 
 if ( empty($langext) ) {
 	if ( strrpos($filename, '.') === false ) {
-		error('Unable to autoselect the language from the uploaded filename');
+		err('Unable to autodetect the language from the uploaded filename');
 	}
 	$fileext = strtolower(substr($filename, strrpos($filename, '.')+1));
 
@@ -74,13 +84,13 @@ if ( empty($langext) ) {
 		}
 	}
 	
-	if ( empty($langext) ) error("Unable to find language for extension '$fileext'");
+	if ( empty($langext) ) err("Unable to find language for extension '$fileext'");
 }
 
 $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
                 WHERE extension = %s AND allow_submit = 1', $langext);
 
-if ( ! isset($lang) ) error("Unable to find language '$langext'");
+if ( ! isset($lang) ) err("Unable to find language '$langext'");
 
 echo "<table>\n" .
 	"<tr><td>Problem: </td><td><i>".$prob['name']."</i></td></tr>\n" .
@@ -105,10 +115,13 @@ for($i=0; $i<$waitsubmit; $i++) {
 	sleep(1);
 	if ( ! file_exists($destfile) ) break;
 }
-if ( $i<$waitsubmit ) {
-	echo "<p>Upload successful.</p>\n";
-} else {
+
+if ( file_exists($destfile) ) {
 	echo "<p>Upload not (yet) successful.</p>\n";
+} else if ( file_exists(INCOMINGDIR . "/rejected-" . basename($destfile)) ) {
+	echo "<p>Upload failed.</p>\n";
+} else {
+	echo "<p>Upload successful.</p>\n";
 }
 
 require('../footer.php');
