@@ -11,6 +11,14 @@ $title = 'Websubmit';
 require('../header.php');
 require('menu.php');
 
+$cid = getCurContest();
+
+if ( $cid === FALSE  ) {
+	echo "<p><b>No contest defined!</b></p>\n";
+	require('../footer.php');
+	exit;
+}
+
 ?><h1>New Submission</h1>
 
 <form action="upload.php" method="post" enctype="multipart/form-data">
@@ -21,7 +29,7 @@ require('menu.php');
 
 $probs = $DB->q('SELECT probid, name FROM problem
                  WHERE cid = %i AND allow_submit = 1
-                 ORDER BY probid', getCurContest());
+                 ORDER BY probid', $cid);
 
 if( $probs->count() == 0 ) {
 	error('No problems defined for this contest');
