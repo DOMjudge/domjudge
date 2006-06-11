@@ -13,6 +13,12 @@ require('../header.php');
 require('menu.php');
 
 ob_implicit_flush();
+
+// helper to output an error message.
+function err ($string) {
+	echo "<b><u>ERROR</u>: ".htmlspecialchars($string)."</b><br />\n";
+}
+
 ?>
 
 <h1>Config Checker</h1>
@@ -156,10 +162,5 @@ if($res->count() > 0) {
 echo "</p>\n\n";
 
 echo "<p>End of config checker.</p>\n\n";
-
-// helper to output an error message.
-function err ($string) {
-	echo "<b><u>ERROR</u>: ".htmlspecialchars($string)."</b><br />\n";
-}
 
 require('../footer.php');
