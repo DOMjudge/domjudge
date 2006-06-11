@@ -26,7 +26,7 @@ function getCurContest($fulldata = FALSE) {
 
 	global $DB;
 	$now = $DB->q('SELECT * FROM contest
-		WHERE starttime <= NOW() AND endtime >= NOW()');
+	               WHERE starttime <= NOW() AND endtime >= NOW()');
 	
 	if ( $now->count() == 1 ) {
 		$row = $now->next();
@@ -34,7 +34,8 @@ function getCurContest($fulldata = FALSE) {
 	}
 	if ( $now->count() == 0 ) {
 		$prev = $DB->q('SELECT * FROM contest
-			WHERE endtime <= NOW() ORDER BY endtime DESC LIMIT 1');	
+		                WHERE endtime <= NOW() ORDER BY endtime DESC LIMIT 1');
+		if ( $prev->count() == 0 ) return FALSE;
 		$row = $prev->next();
 		$retval = ( $fulldata ? $row : $row['cid'] );
 	}
