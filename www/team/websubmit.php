@@ -7,6 +7,11 @@
 
 require('init.php');
 
+if ( ! ENABLEWEBSUBMIT ) {
+	error("Websubmit disabled!");
+}
+
+
 $title = 'Websubmit';
 require('../header.php');
 require('menu.php');

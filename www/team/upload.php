@@ -7,8 +7,12 @@
 
 require('init.php');
 
+if ( ! ENABLEWEBSUBMIT ) {
+	error("Websubmit disabled!");
+}
+
 if ( !isset($_POST['submit']) ) {
-	header('location: submit.php');
+	header('Location: websubmit.php');
 	return;
 }
 
