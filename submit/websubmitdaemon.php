@@ -16,6 +16,10 @@ define ('LOGFILE', LOGDIR.'/submit.log');
 
 require (SYSTEM_ROOT . '/lib/init.php');
 
+if ( ! ENABLEWEBSUBMIT ) {
+	error("Websubmit disabled in config!");
+}
+
 $waittime = 1;
 
 $cid = getCurContest();
