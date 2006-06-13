@@ -41,11 +41,18 @@ echo "</p>\n\n";
 
 <h2>Websubmit</h2>
 
-<p>Checking for writeable incoming dir... <?php
-if ( ! is_writable(INCOMINGDIR) ) {
-	err("INCOMINGDIR '" . INCOMINGDIR . "' not writeable by webserver user!");
+<p>
+<?php 
+if ( ENABLEWEBSUBMIT ) {
+
+	echo "Checking for writeable incoming dir... ";
+	if ( ! is_writable(INCOMINGDIR) ) {
+		err("INCOMINGDIR '" . INCOMINGDIR . "' not writeable by webserver user!");
+	} else {
+		echo "OK";
+	}
 } else {
-	echo "OK<br />\n";
+	echo "Websubmit disabled in config.";
 } ?>
 </p>
 
