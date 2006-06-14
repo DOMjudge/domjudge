@@ -218,7 +218,8 @@ team:
 automatically identify the team in the webinterface and to check
 submission origin. A value of 'NULL' results in the team being unable
 to submit or view it's teampage, unless they first authenticate via
-password or commandline submission.
+password or commandline submission. It has a length of 30 to allow
+for IPv6 addresses.
 'passwd' is a MD5-hash of a one-time password teams can use to
 authenticate and register their IP address.
 'room' is the room the team is located.
