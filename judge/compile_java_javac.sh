@@ -38,7 +38,8 @@ cat > $DEST <<EOF
 #!/bin/bash
 # Generated shell-script to execute java interpreter on source.
 
-exec java $TMP
+cd $SOURCEDIR
+exec java $MAINCLASS
 EOF
 
 chmod a+x $DEST
