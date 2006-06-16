@@ -85,6 +85,11 @@ a:active          { color: red;    }
 	position: absolute; right: 1ex; margin-top: 1em;
 }
 
+#djlogo {
+	border: 0;
+	position: absolute; right: 1ex;
+}
+
 #teamscoresummary {	position: absolute; right: 1ex;	}
 
 /* backgrounds for categories, define as you see fit */
@@ -94,3 +99,4 @@ a:active          { color: red;    }
 .category4 { background: #99ccff; }
 /* between different sortorder-categories, print a thick line */
 .sortorderswitch { border-top: 2px solid black; }
+

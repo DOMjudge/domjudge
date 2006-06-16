@@ -9,6 +9,10 @@ require('../header.php');
 require('menu.php');
 
 echo "<h1>DOMjudge Jury interface</h1>\n\n";
+
+if ( is_readable('DOMjudgelogo.png') ) {
+	echo "<img src=\"DOMjudgelogo.png\" id=\"djlogo\" alt=\"DOMjudge logo\" />\n\n";
+}
 ?>
 
 <h3>Overviews:</h3>
