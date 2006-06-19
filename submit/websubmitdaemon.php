@@ -28,7 +28,7 @@ logmsg(LOG_NOTICE, "Websubmit server started [DOMjudge/".DOMJUDGE_VERSION."]");
 
 // Regular expression that websumbmitted files must match:
 // 'websubmit.<problem>.<team>.<IP(dash-separated)>.RANDOM.<ext>'
-$file_pregex = '/^websubmit\.([[:alnum:]]+\.){2}([0-9]{1,3}-){3}[0-9]{1,3}\.' .
+$file_pregex = '/^websubmit\.([[:alnum:]]+\.){2}([[:alnum:]:-]){7,29}\.' .
                '[[:alnum:]]{6}\.[a-zA-Z0-9+-]+$/';
 
 // Constantly check incoming dir for new websubmissions
