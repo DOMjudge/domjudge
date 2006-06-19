@@ -47,7 +47,7 @@ if ( $oldsource ) {
 		
 	} elseif ( is_readable($oldfile) && is_readable($newfile) ) {
 
-		$difftext = `diff -bBt -u2 $oldfile $newfile 2>&1`;
+		$difftext = `diff -bBt -U 2 $oldfile $newfile 2>&1`;
 
 	} else {
 		
@@ -64,7 +64,7 @@ if ( $oldsource ) {
 			
 		} else {
 
-			$difftext = `diff -bBt -u2 $oldfile $newfile 2>&1`;
+			$difftext = `diff -bBt -U 2 $oldfile $newfile 2>&1`;
 
 		}
 
