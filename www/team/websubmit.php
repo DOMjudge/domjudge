@@ -19,7 +19,7 @@ require('menu.php');
 $cid = getCurContest();
 
 if ( $cid === FALSE  ) {
-	echo "<p><b>No contest defined!</b></p>\n";
+	echo "<p><em>No contests defined!</em></p>\n";
 	require('../footer.php');
 	exit;
 }
