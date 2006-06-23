@@ -36,6 +36,9 @@
 # can be placed and other things you like...
 #
 
+# Exit on any error:
+set -e
+
 shopt -s extglob
 
 # Include '../bin' in path for 'tempfile'
