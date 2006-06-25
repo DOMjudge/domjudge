@@ -21,7 +21,7 @@ pdf: $(TARGETSPDF)
 	$(MAKE) texclean
 
 $(TARGETSPDF): %.pdf: %.tex $(CONFIGDIR)/config.tex team-manual-preamble.tex \
-                            example.* logos/DOMjudgelogo.* $(LATEXPACKAGES)
+                            examples/example.* logos/DOMjudgelogo.* $(LATEXPACKAGES)
 	-$(LATEX) $(LATEXFLAGS) $< < /dev/null &> /dev/null
 	-$(LATEX) $(LATEXFLAGS) $< < /dev/null &> /dev/null
 	 $(LATEX) $(LATEXFLAGS) $< < /dev/null
