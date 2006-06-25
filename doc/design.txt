@@ -26,7 +26,7 @@ write our own, new system for the following reasons:
   - The Delft system (SZP) is a very complex system, consisting of
     more than 19.000 lines of C/C++ code. Also it implements complex
     communication and authentication protocols. However it works great
-    and has very good documentation!
+    and has good documentation!
   - The Groningen system (Iudex) is a much simpler system based on
     Python and a database. It handles communication via mail.
     Because we had no/little experience with Python and this system
@@ -45,9 +45,9 @@ For the design of this system, the main goals are:
 - security:
 	Although not very likely to happen, we want to detect fraud as
 	much as possible. This is a judging system, so it focuses on
-	security concerning attempts to submit code, which tries to hack the
+	security concerning attempts to submit code that tries to hack the
 	jury system. It is difficult to detect malicious code, because this
-	differs per language. Therefor we have chosen to secure the system
+	differs per language. Therefore we have chosen to secure the system
 	by running compiled programs in a restricted environment.
 - flexibility:
 	- It should be easy to rejudge individual solutions or all solutions
