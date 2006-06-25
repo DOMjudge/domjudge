@@ -22,22 +22,22 @@ For the deployment of this jury-system, there are some requirements:
     a TCP connection on a configurable port.
   - The jury computers use TCP/IP connections to connect to the MySQL
     database, for copying submissions with scp (in the default
-    configuration).
+    configuration with the command-line submitdaemon).
   - HTTP traffic from teams, the public and jury to the webserver.
 
 - One jury account with a homedirectory which is shared between all
   jury-computers (e.g. via NFS, Samba).
   
-- Team accounts which are accessible via SSH on the jury computers
-  (a SSH public key of the jury account should be installed on all team
-   accounts to provide public-key access).
-  This can be circumvented by providing access by other means, see
-  'submit/submit_copy.sh' for more details.
-
 - (Local) root access on the jury-computers (preferably also on the
   shared homedirectory) for installing some programs setuid-root and
   (un)mounting the 'proc' filesystem. See 'SECURITY: ROOT PRIVILEGES'
   for more details.
+
+- For using the command-line submit program, team accounts which are
+  accessible via SSH on the jury computers (a SSH public key of the
+  jury account should be installed on all team accounts to provide
+  public-key access). This can be circumvented by providing access by
+  other means, see 'submit/submit_copy.sh' for more details.
 
 
 SOFTWARE REQUIREMENTS
@@ -71,7 +71,8 @@ SOFTWARE REQUIREMENTS
 
 - htpasswd
 
-- OpenSSH/SCP (or a compatible ssh/scp client/daemon)
+- OpenSSH/SCP (or a compatible ssh/scp client/daemon, optionally
+  for using the command-line submit program)
 
 - wget (optionally for downloading LaTeX packages for documentation)
 
