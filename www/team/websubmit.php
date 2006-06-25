@@ -75,7 +75,8 @@ echo "</select>";
 </tr>
 <tr><td colspan="2">&nbsp;</td></tr>
 <tr><td></td>
-    <td><input type="submit" value="Submit solution" name="submit" /></td>
+    <td><input type="submit" value="Submit solution" name="submit"
+               onclick="return confirm('Make submission?')" /></td>
 </tr>
 </table>
 
