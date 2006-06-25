@@ -19,8 +19,10 @@ jurysysteem, die aan de teams ter beschikking staan om oplossingen in
 te sturen, uitslagen te bekijken en ``clarification requests'' te
 sturen.
 
-Het systeem is voor een groot deel gebaseerd op een webinterface. Het
-insturen van oplossingen gaat echter via een command-line programma.
+Het systeem is voor een groot deel gebaseerd op een web-interface. Het
+insturen van oplossingen kan via de web-interface ofwel een
+command-line programma, afhankelijk van hoe dit door de jury
+geconfigureerd is.
 
 \section{Samenvatting}
 
@@ -41,25 +43,38 @@ Je hoeft dus nooit een bestand te openen. Zie bijlage
 \subsection{Insturen van oplossingen}
 
 Insturen van oplossingen gaat via het command-line programma
-\cmd{submit}.
-
+\cmd{submit} danwel de web-interface:
+\begin{description}[\breaklabel\setlabelstyle{\bfseries}]
+\item[Command-line] 
 Gebruik \cmd{submit <probleem>.<extensie>}, met \cmd{<probleem>} het
 label van het probleem en \cmd{<extensie>} een standaard extensie van
 je taal. Voor de complete documentatie en alle opties, zie \cmd{submit
 --help}.
+\item[Web-Interface]
+Vanaf je teampagina op \url{\WEBBASEURI team}, selecteer je
+\textbf{websubmit} en daar kun je een file selecteren en insturen.
+Standaard wordt het probleem uit het deel van de bestandsnaam voor de
+punt gehaald en de taal uit de extensie, net zoals bij de command-line
+submit.
+\end{description}
 
 \subsection{Bekijken van scores, inzendingen, e.d.}
 
 Het bekijken van inzendingen, scores en sturen en lezen van
-``clarification requests'' gaat via een webinterface. Het adres is
-\url{http://\WEBSERVER} en de pagina wijst zich verder vanzelf.
+``clarification requests'' gaat via een web-interface. Het adres is
+\url{\WEBBASEURI team} en de pagina wijst zich verder vanzelf.
 
 \newpage
-\section{Oplossingen insturen: \cmd{submit}}\label{submit}
+\section{Oplossingen insturen}\label{submit}
 
-Het insturen van oplossingen voor problemen gebeurt via een
-command-line interface: het programma \cmd{submit} (onder Windows
-\cmd{submit.exe}).
+Het insturen van oplossingen voor problemen kan op twee verschillende
+manieren: via een command-line interface, het programma \cmd{submit}
+(onder Windows \cmd{submit.exe}), of via de web-interface. Het kan
+zijn dat een van beide niet beschikbaar is, afhankelijk van de
+configuratie van het systeem door de jury. Hieronder worden beide
+methodes beschreven.
+
+\subsection{Command-line: \cmd{submit}}
 
 \textbf{Syntax:} \cmd{submit [opties] bestandsnaam.ext}
 
@@ -91,13 +106,27 @@ Verwijder deze directory niet of pas hem niet aan, omdat anders het
 submit programma eventueel niet meer correct functioneert. Verder
 is een ``public ssh-key'' van de jury in de ssh configuratie
 toegevoegd. Deze is ook nodig voor het functioneren van \cmd{submit}.
- 
+
+\subsection{Web-interface}
+
+Vanaf je teampagina \url{\WEBBASEURI team} kun je oplossingen insturen
+door naar \textbf{websubmit} te gaan. Daar kan een bestand
+geselecteerd worden om in te sturen. Verder kan het probleem en de
+taal van de inzending ingesteld worden. Deze kunnen ook op het
+standaard geselecteerde `automatisch' laten staan worden; dan wordt
+geprobeerd het probleem en de taal van de inzending uit
+respectievelijk de basis en de extensie van de bestandsnaam te halen.
+
+Nadat je op de submit knop geklikt hebt en dit bevestigd hebt, wordt
+geconfirmeerd of je inzending aangekomen is. Daarna zou deze in je
+lijst met inzendingen moeten staan.
+
 \section{De uitslag bekijken van inzendingen}
 
 Op de team webpagina staat een overzicht van je inzendingen.
 Dit overzicht bevat alle relevante gegevens: de tijd van inzending, de
 programmeertaal, het probleem en de status. Het adres van je
-teampagina is \url{http://\WEBSERVER}. Hiervandaan kun je ook naar
+teampagina is \url{\WEBBASEURI team}. Hiervandaan kun je ook naar
 de publieke pagina, waarop de scores van alle teams vermeld staan.
 
 \subsection{Mogelijke uitslagen}
@@ -271,8 +300,8 @@ Dit probleem zou de volgende in- en uitvoer kunnen hebben:
 \hline
 \textbf{Invoer} & \textbf{Uitvoer} \\
 \hline
-\verbatiminput{example.in} &
-\verbatiminput{example.out} \\
+\verbatiminput{examples/example.in} &
+\verbatiminput{examples/example.out} \\
 \hline
 \end{tabular}
 
@@ -280,7 +309,7 @@ Let op dat het op de eerste regel het getal 3 aangeeft, dat er 3
 testgevallen volgen.
 
 Een oplossing voor dit probleem in C:
-\listinginput{1}{example.c}
+\listinginput{1}{examples/example.c}
 
 Let op de \cmd{return 0;} aan het einde, zodat we geen
 run-error krijgen!
@@ -288,14 +317,14 @@ run-error krijgen!
 \newpage
 
 Een oplossing in C++ kan als volgt:
-\listinginput{1}{example.cc}
+\listinginput{1}{examples/example.cc}
 
 Een oplossing in Pascal:
-\listinginput{1}{example.pas}
+\listinginput{1}{examples/example.pas}
 
 \newpage
 
 En tenslotte een oplossing in Java:
-\listinginput{1}{example.java}
+\listinginput{1}{examples/example.java}
 
 \end{document}

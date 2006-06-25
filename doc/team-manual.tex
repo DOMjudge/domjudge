@@ -19,7 +19,9 @@ are available to teams to submit solutions, view results and submit
 ``clarification requests''.
 
 All interaction with the system is done using a web-interface, except
-the submission of solutions: this is done with a command-line program.
+(optionally) the submission of solutions: this is done either in the
+web-interface or with a command-line program. Availability of either
+may depend on the configuration by the jury.
 
 \section{Summary}
 
@@ -39,24 +41,37 @@ examples.
 
 \subsection{Submission of solutions}
 
-You can submit solutions with the command-line program \cmd{submit}.
-
+You can submit solutions with the command-line program \cmd{submit} or
+the using web-interface:
+\begin{description}[\breaklabel\setlabelstyle{\bfseries}]
+\item[Command-line] 
 Use \cmd{submit <problem>.<extension>}, where \cmd{<problem>} is the
 label of the problem and \cmd{<extension>} is a standard extension for
 your language.  For a complete reference of all options and examples,
 see \cmd{submit --help}.
+\item[Web-interface]
+From your teampage \url{\WEBBASEURI team}, browse to
+\textbf{websubmit} and select the file you want to submit. By default,
+the problem is selected from the base of the filename and the language
+from the extension, just as with the command-line submit.
+\end{description}
 
 \subsection{Viewing scores, submissions, etc.}
 
 Viewing scores, submissions and submitting and reading clarification
 requests is done through a web-interface. The address is
-\url{http://\WEBSERVER}. Usage of these webpages should be clear.
+\url{\WEBBASEURI team}. Usage of these webpages should be clear.
 
 \newpage
-\section{Submitting solutions: \cmd{submit}}\label{submit}
+\section{Submitting solutions}\label{submit}
 
-You can submit solutions with the command-line program \cmd{submit}
-(\cmd{submit.exe} in Windows).
+Submitting solutions can be done in two ways: with the command-line
+program \cmd{submit} (\cmd{submit.exe} in Windows) or using the
+web-interface. Both interfaces might not be available, depending on
+the system configuration by the jury. A description of both methods
+follows.
+
+\subsection{Command-line: \cmd{submit}}
 
 \textbf{Syntax:} \cmd{submit [options] filename.ext}
 
@@ -87,12 +102,24 @@ function correctly. Furthermore a ``public ssh-key'' of the jury has
 been added to the ssh configuration; this is also necessary for the
 functioning of \cmd{submit}.
 
+\subsection{Web-interface}
+
+Solutions can be submitted from the web-interface at \url{\WEBBASEURI team}.
+Navigate to \textbf{websubmit}, there you can select a file for
+submission and the problem and language. These can also be left on the
+default `automatic' setting; then the problem and language will be
+determined from the base and extension of the filename respectively.
+
+After you hit the submit button and confirm the submission, a page is
+shown with a confirmation of successful upload. Next, you should be
+able to see the submission in your submissions list.
+
 \section{Viewing the results of submissions}
 
 There is a overview of your submissions on your team web page.
 It contains all relevant information: submission time, programming
 language, problem and status. The address of your team page is
-\url{http://\WEBSERVER}. From here you can also view the public
+\url{\WEBBASEURI team}. From here you can also view the public
 scoreboard page with the scores of all teams.
 
 \subsection{Possible results}
