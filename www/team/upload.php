@@ -16,7 +16,6 @@ if ( !isset($_POST['submit']) ) {
 	return;
 }
 
-ob_implicit_flush();
 
 // helper to output an error message.
 function err($string) {
@@ -33,6 +32,8 @@ require('menu.php');
 $waitsubmit = 5;
 
 echo "<h2>Submit - upload status</h2>\n\n";
+
+ob_implicit_flush();
 
 switch ( $_FILES['code']['error'] ) {
 	case 1:
