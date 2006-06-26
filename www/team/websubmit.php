@@ -12,7 +12,7 @@ if ( ! ENABLEWEBSUBMIT ) {
 }
 
 
-$title = 'Websubmit';
+$title = 'Submit';
 require('../header.php');
 require('menu.php');
 

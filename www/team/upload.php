@@ -26,13 +26,13 @@ function err($string) {
 	exit;
 }
 
-$title = 'Websubmit';
+$title = 'Submit';
 require('../header.php');
 require('menu.php');
 
 $waitsubmit = 5;
 
-echo "<h2>Websubmit - upload status</h2>\n\n";
+echo "<h2>Submit - upload status</h2>\n\n";
 
 switch ( $_FILES['code']['error'] ) {
 	case 1:
