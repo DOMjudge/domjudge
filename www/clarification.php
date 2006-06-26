@@ -169,13 +169,13 @@ function confirmClar() {
 	echo "<table>\n";
 
 	if ( $isjury ) { // list all possible recipients in the "sendto" box
-		echo "<tr><td><b>Send to:</b></td><td>\n";
+		echo "<tr><td><b><label for=\"sendto\">Send to</label>:</b></td><td>\n";
 
 		if ( !empty($respid) ) {
 			echo '<input type="hidden" name="id" value="' . $respid . "\" />\n";
 		}
 
-		echo "<select name=\"sendto\">\n";
+		echo "<select name=\"sendto\" id=\"sendto\">\n";
 		echo "<option value=\"\">ALL</option>\n";
 
 		if ( ! $respid ) {
@@ -214,8 +214,8 @@ function confirmClar() {
 
 	?>
 <tr>
-<td valign="top"><b>Text:</b></td>
-<td><textarea name="bodytext" cols="80" rows="10"><?php
+<td valign="top"><b><label for="bodytext">Text</label>:</b></td>
+<td><textarea name="bodytext" cols="80" rows="10" id="bodytext"><?php
 if ( $respid ) {
 	$text = explode("\n",wordwrap(htmlspecialchars($clar['body'])));
 	foreach($text as $line) {

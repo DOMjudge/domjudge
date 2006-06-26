@@ -29,7 +29,7 @@ if ( $cid === FALSE  ) {
 <form action="upload.php" method="post" enctype="multipart/form-data">
 
 <table>
-<tr><td>Problem:</td>
+<tr><td><label for="probid">Problem</label>:</td>
     <td><?
 
 $probs = $DB->q('SELECT probid, name FROM problem
@@ -40,7 +40,7 @@ if( $probs->count() == 0 ) {
 	error('No problems defined for this contest');
 }
 
-echo '<select name="probid">'."\n";
+echo '<select name="probid" id="probid">'."\n";
 echo '<option value="">by filename</option>'."\n";
 while( $row = $probs->next() ) {
 	echo '<option value="' . $row['probid'] . '">'
@@ -50,7 +50,7 @@ echo "</select>";
 
 ?></td>
 </tr>
-<tr><td>Language:</td>
+<tr><td><label for="langext">Language</label>:</td>
     <td><?
 
 $langs = $DB->q('SELECT extension, name FROM language
@@ -60,7 +60,7 @@ if( $langs->count() == 0 ) {
 	error('No languages defined');
 }
 
-echo '<select name="langext">';
+echo '<select name="langext" id="langext">';
 echo '<option value="">by extension</option>'."\n";
 while( $row = $langs->next() ) {
 	echo '<option value="' . $row['extension'] . '">'
@@ -70,8 +70,8 @@ echo "</select>";
 
 ?></td>
 </tr>
-<tr><td>File:</td>
-    <td><input type="file" name="code" size="40" /></td>
+<tr><td><label for="code">File</label>:</td>
+    <td><input type="file" name="code" id="code" size="40" /></td>
 </tr>
 <tr><td colspan="2">&nbsp;</td></tr>
 <tr><td></td>
