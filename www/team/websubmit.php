@@ -28,7 +28,7 @@ if ( $cid === FALSE  ) {
 
 <form action="upload.php" method="post" enctype="multipart/form-data">
 
-<table class="websubmit">
+<table>
 <tr><td>Problem:</td>
     <td><?
 
