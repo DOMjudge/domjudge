@@ -1,18 +1,19 @@
 DOMjudge Programming Contest Judging System
 
-Version 1.2.0 - CVS
--------------------
+Version 1.2.0 - 26 June 2006
+----------------------------
+ - Added websubmit (Closes: #1103084).
+ - Added support for team passwords (generating and validating).
+ - Added team status light to jury teams overview (Closes: #1441783).
  - Added confirm dialog when sending a clarification (reply).
- - Tweak HTML to be fully XHTML 1.0 Strict compliant.
  - Added examples and documentation for how to use interpreted languages.
  - Added support for specialised run and compare scripts.
  - Timeout submitclient connection to server (Closes: #1477739).
- - Added support for team passwords (generating and validating).
- - Added team status light to jury teams overview (Closes: #1441783).
  - Minimum required PHP version now 4.3.2.
  - Allow for IPv6 IP-addresses to be used.
  - Correct parameters to `diff`, since '-2' is obsoleted.
  - Checked all BASH scripts for 'set -e' (Closes: #1508492).
+ - Tweak HTML to be fully XHTML 1.0 Strict compliant.
 
 Version 1.1.0 - 22 December 2005
 --------------------------------
