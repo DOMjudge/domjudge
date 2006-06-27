@@ -30,7 +30,7 @@ if ( $cid === FALSE  ) {
 
 <table>
 <tr><td><label for="probid">Problem</label>:</td>
-    <td><?
+    <td><?php
 
 $probs = $DB->q('SELECT probid, name FROM problem
                  WHERE cid = %i AND allow_submit = 1
@@ -43,15 +43,15 @@ if( $probs->count() == 0 ) {
 echo '<select name="probid" id="probid">'."\n";
 echo '<option value="">by filename</option>'."\n";
 while( $row = $probs->next() ) {
-	echo '<option value="' . $row['probid'] . '">'
-		. $row['name'] . '</option>'."\n";
+	echo '<option value="' . htmlspecialchars($row['probid']) . '">'
+		. htmlentities($row['probid'].': ' .$row['name']) . '</option>'."\n";
 }
 echo "</select>";
 
 ?></td>
 </tr>
 <tr><td><label for="langext">Language</label>:</td>
-    <td><?
+    <td><?php
 
 $langs = $DB->q('SELECT extension, name FROM language
                  WHERE allow_submit = 1 ORDER BY name');
@@ -63,8 +63,8 @@ if( $langs->count() == 0 ) {
 echo '<select name="langext" id="langext">';
 echo '<option value="">by extension</option>'."\n";
 while( $row = $langs->next() ) {
-	echo '<option value="' . $row['extension'] . '">'
-		. $row['name'] . '</option>'."\n";
+	echo '<option value="' . htmlspecialchars($row['extension']) . '">'
+		. htmlentities($row['name']) . '</option>'."\n";
 }
 echo "</select>";
 
@@ -82,5 +82,5 @@ echo "</select>";
 
 </form>
 
-<?
+<?php
 require('../footer.php');
