@@ -36,18 +36,18 @@ echo "<h2>Submit - upload status</h2>\n\n";
 ob_implicit_flush();
 
 switch ( $_FILES['code']['error'] ) {
-	case 1:
+	case UPLOAD_ERR_INI_SIZE:
 		error('The uploaded file exceeds the upload_max_filesize directive in php.ini.');
-	case 2:
+	case UPLOAD_ERR_FORM_SIZE:
 		error('The uploaded file exceeds the MAX_FILE_SIZE directive in the HTML form.');
-	case 3:
+	case UPLOAD_ERR_PARTIAL:
 		error('The uploaded file was only partially uploaded.');
-	case 4:
+	case UPLOAD_ERR_NO_FILE:
 		warning('No file was uploaded.');
 		break;
-	case 6:
+	case 6:	// UPLOAD_ERR_NO_TMP_DIR, constant doesn't exist in our minimal PHP version
 		error('Missing a temporary folder.');
-	case 7:
+	case 7: // UPLOAD_ERR_CANT_WRITE
 		error('Failed to write file to disk.');
 }
 
