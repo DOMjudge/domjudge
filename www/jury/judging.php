@@ -28,7 +28,7 @@ if ( isset($_POST['cmd']) ) {
 		$DB->q('UPDATE judging SET verified = %i WHERE judgingid = %i',
 		       ($_POST['cmd'] == 'verified' ? 1 : 0), $id);
 		$jdata['verified'] = 1;
-		if ( SUBM_VERIFY == 2 ) {
+		if ( VERIFICATION_REQUIRED ) {
 			calcScoreRow($jdata['cid'], $jdata['team'], $jdata['probid']);
 		}
 	}
@@ -72,7 +72,7 @@ if ( @$jdata['endtime'] ) {
 
 <?php
 
-if ( SUBM_VERIFY==1 || ( SUBM_VERIFY==2 && ! $jdata['verified'] ) ) {
+if ( ! VERIFICATION_REQUIRED || ! $jdata['verified'] ) ) {
 	$cmd = ( $jdata['verified'] == 1 ? 'deverified' : 'verified' );
 ?>
 <form action="<?= $pagename.'?id='.$id ?>" method="post">

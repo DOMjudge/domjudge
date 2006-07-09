@@ -32,8 +32,6 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 		$keyvalmatch = " s.$key = \"" . mysql_escape_string($value) . '" AND ';
 	}
 
-	$showverified = $isjury && SUBM_VERIFY;
-	
 	$contdata = getCurContest(TRUE);
 	$cid = $contdata['cid'];
  
@@ -64,7 +62,7 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 		($key != 'probid' ? "<th>problem</th>" : '') .
 		($key != 'langid' ? "<th>lang</th>"    : '') .
 		"<th>status</th>" .
-		($showverified ? "<th>verified</th>" : '') .
+		($isjury ? "<th>verified</th>" : '') .
 		($isjury ? "<th>last<br />judge</th>" : '') .
 		"</tr>\n";
 	// print each row with links to detailed information
@@ -108,7 +106,7 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 			}
 		} else {
 			if ( ! @$resulttable[$sid]['result'] ||
-				 ( SUBM_VERIFY==2 && ! @$resulttable[$sid]['verified'] ) ) {
+				 ( VERIFICATION_REQUIRED && ! @$resulttable[$sid]['verified'] ) ) {
 				if ( $row['submittime'] > $contdata['endtime'] ) {
 					echo printresult('too-late');
 				} else {
@@ -120,7 +118,7 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 			}
 		}
 		echo "</td>";
-		if ( $showverified && isset($resulttable[$sid]['verified']) ) {
+		if ( $isjury && isset($resulttable[$sid]['verified']) ) {
 			echo "<td>" . printyn(@$resulttable[$sid]['verified']) . "</td>";
 		}
 		if ( $isjury ) {

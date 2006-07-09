@@ -2,7 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 1.2.1 - SVN
 -------------------
-
+ - Changed config option SUBM_VERIFY to VERIFICATION_REQUIRED and
+   disabled "off" choice. 
 
 Version 1.2.0 - 26 June 2006
 ----------------------------

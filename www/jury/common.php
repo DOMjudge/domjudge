@@ -13,8 +13,6 @@
 function putJudgings($key, $value) {
 	global $DB;
 
-	$showverified = SUBM_VERIFY;
-
 	// get the judgings for a specific key and value pair
 	// select only specific fields to avoid retrieving large blobs
 	$res = $DB->q('SELECT judgingid,submitid,starttime,endtime,judgerid,result,verified,valid

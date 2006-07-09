@@ -90,7 +90,7 @@ function calcScoreRow($cid, $team, $prob) {
 	// for each submission
 	while( $row = $result->next() ) {
 
-		if ( SUBM_VERIFY == 2 && ! $row['verified'] ) continue;
+		if ( VERIFICATION_REQUIRED && ! $row['verified'] ) continue;
 		
 		$submitted_j++;
 		if ( ! $row['afterfreeze'] ) $submitted_p++;
