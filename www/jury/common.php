@@ -25,8 +25,7 @@ function putJudgings($key, $value) {
 	} else {
 		echo "<table>\n<tr><th>ID</th><th>start</th><th>end</th>";
 		if ( $key != 'judge' ) echo "<th>judge</th>";
-		echo "<th>result</th><th>valid</th>";
-		if ( $isjury ) echo "<th>verified</th>";
+		echo "<th>result</th><th>valid</th><th>verified</th>";
 		echo "</tr>\n";
 		while( $jud = $res->next() ) {
 			echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
@@ -39,9 +38,7 @@ function putJudgings($key, $value) {
 			echo '<td><a href="judging.php?id=' . (int)$jud['judgingid'] . '">' .
 				printresult(@$jud['result'], $jud['valid']) . '</a></td>';
 			echo '<td align="center">' . printyn($jud['valid']) . '</td>';
-			if ( $isjury ) {
-				echo '<td align="center">' . printyn($jud['verified']) . '</td>';
-			}
+			echo '<td align="center">' . printyn($jud['verified']) . '</td>';
 			echo "</tr>\n";
 		}
 		echo "</table>\n\n";
