@@ -22,11 +22,12 @@ EXCLUDEDEBS="adduser,apt-utils,aptitude,at,base-config,bsdmainutils,console-comm
 # Debian packages to include during bootstrap process (comma separated):
 INCLUDEDEBS="debconf-utils"
 
-# Debian packages to remove after bootstrap (space separated):
-REMOVEDEBS="libdb1-compat"
-
 # Debian packages to install after upgrade (space separated):
 INSTALLDEBS="sun-java5-jre"
+
+# Debian packages to remove after upgrade (space separated):
+REMOVEDEBS="gcc-3.3-base libstdc++5 libdb3 libgcrypt11 liblzo1 dselect"
+# initscripts lsb-base sysvinit util-linux login
 
 function usage()
 {
@@ -96,6 +97,16 @@ cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 deb http://ftp.debian.org/debian/	unstable	main non-free contrib
 EOF
 
+cat > "$CHROOTDIR/etc/apt/apt.conf" <<EOF
+APT::Get::Assume-Yes "true";
+APT::Get::Force-Yes "false";
+APT::Get::Purge "true";
+APT::Get::AllowUnauthenticated "true";
+Acquire::Retries "3";
+Acquire::PDiffs "false";
+DPkg::Options {"--no-debsig";}
+EOF
+
 mount -t proc proc "$CHROOTDIR/proc"
 
 chroot "$CHROOTDIR" /bin/bash -c debconf-set-selections <<EOF
@@ -114,15 +125,11 @@ passwd	passwd/md5	boolean	false
 passwd	passwd/user-fullname	string	
 passwd	passwd/user-uid	string	
 passwd	passwd/password-empty	note	
-#
 debconf	debconf/priority	select	high
 debconf	debconf/frontend	select	Noninteractive
-#
 locales	locales/locales_to_be_generated	multiselect	
 locales	locales/default_environment_locale	select	None
-#
 sun-java5-jre	sun-java5-jre/jcepolicy	note	
-# Do you agree with the DLJ license terms?
 sun-java5-bin	shared/accepted-sun-dlj-v1-1	boolean	true
 sun-java5-jre	shared/accepted-sun-dlj-v1-1	boolean	true
 sun-java5-jre	sun-java5-jre/stopthread	boolean	true
@@ -132,10 +139,10 @@ sun-java5-bin	shared/error-sun-dlj-v1-1	error
 sun-java5-jre	shared/error-sun-dlj-v1-1	error	
 EOF
 
-chroot "$CHROOTDIR" /bin/bash -c "apt-get remove $REMOVEDEBS"
 chroot "$CHROOTDIR" /bin/bash -c "apt-get update && apt-get dist-upgrade"
 chroot "$CHROOTDIR" /bin/bash -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/bash -c "apt-get install $INSTALLDEBS"
+chroot "$CHROOTDIR" /bin/bash -c "apt-get remove $REMOVEDEBS"
 chroot "$CHROOTDIR" /bin/bash -c "apt-get clean"
 
 umount "$CHROOTDIR/proc"
