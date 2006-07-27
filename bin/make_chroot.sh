@@ -68,7 +68,7 @@ else
 	DEBOOTDEB="debootstrap_0.2.45-0.2_${ARCH}.deb"
 	wget "http://ftp.debian.org/debian/pool/main/d/debootstrap/${DEBOOTDEB}"
 
-	ar -x "$DEBOOTFILE"
+	ar -x "$DEBOOTDEB"
 	cd /
 	zcat "$CHROOTDIR/debootstrap/data.tar.gz" | tar xv
 
