@@ -21,6 +21,16 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 	exit;
 }
 
+if ( isset($_POST['cmd']) && $_POST['cmd'] == 'toggle_submit' ) {
+	$DB->q('UPDATE problem SET allow_submit = %i WHERE probid = %s',
+		   $_POST['val'], $id);
+}
+
+if ( isset($_POST['cmd']) && $_POST['cmd'] == 'toggle_judge' ) {
+	$DB->q('UPDATE problem SET allow_judge = %i WHERE probid = %s',
+		   $_POST['val'], $id);
+}
+
 require('../header.php');
 require('menu.php');
 
@@ -34,8 +44,30 @@ $data = $DB->q('TUPLE SELECT * FROM problem NATURAL JOIN contest WHERE probid = 
 <tr><td>Name:        </td><td><?=htmlentities($data['name'])?></td></tr>
 <tr><td>Contest:     </td><td><?=htmlspecialchars($data['cid']).' - '.
                                  htmlentities($data['contestname'])?></td></tr>
-<tr><td>Allow submit:</td><td><?=printyn($data['allow_submit'])?></td></tr>
-<tr><td>Allow judge: </td><td><?=printyn($data['allow_judge'])?></td></tr>
+<tr><td>Allow submit:</td><td><?=printyn($data['allow_submit'])?>
+<?php
+$val = ! $data['allow_submit'];
+$str = $val ? 'Allow' : 'Disallow';
+?>
+<form action="<?=$pagename?>" method="post">
+<input type="hidden" name="id" value="<?=$id?>" />
+<input type="hidden" name="cmd" value="toggle_submit" />
+<input type="hidden" name="val" value="<?=$val?>" />
+<input type="submit" value="toggle"
+ onclick="return confirm('<?=$str?> submissions for this problem?')" />
+</form></td></tr>
+<tr><td>Allow judge: </td><td><?=printyn($data['allow_judge'])?>
+<?php
+$val = ! $data['allow_judge'];
+$str = $val ? 'Allow' : 'Disallow';
+?>
+<form action="<?=$pagename?>" method="post">
+<input type="hidden" name="id" value="<?=$id?>" />
+<input type="hidden" name="cmd" value="toggle_judge" />
+<input type="hidden" name="val" value="<?=$val?>" />
+<input type="submit" value="toggle"
+ onclick="return confirm('<?=$str?> judging for this problem?')" />
+</form></td></tr>
 <tr><td>Testdata:    </td><td class="filename"><?=htmlspecialchars($data['testdata'])?></td></tr>
 <tr><td>Timelimit:   </td><td><?=(int)$data['timelimit']?></td></tr>
 </table>
