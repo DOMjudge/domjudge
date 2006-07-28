@@ -72,7 +72,7 @@ if ( @$jdata['endtime'] ) {
 
 <?php
 
-if ( ! VERIFICATION_REQUIRED || ! $jdata['verified'] ) {
+if ( ! (VERIFICATION_REQUIRED && $jdata['verified']) ) {
 	$cmd = ( $jdata['verified'] == 1 ? 'deverified' : 'verified' );
 ?>
 <form action="<?= $pagename.'?id='.$id ?>" method="post">
