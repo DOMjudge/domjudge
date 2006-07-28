@@ -23,14 +23,19 @@ $jdata = $DB->q('TUPLE SELECT j.*,s.*,t.*, c.contestname
 
 $sid = (int)$jdata['submitid'];
 
-if ( isset($_POST['cmd']) ) {
-	if ( $_POST['cmd'] == 'verified' || $_POST['cmd'] == 'deverified' ) {
-		$DB->q('UPDATE judging SET verified = %i WHERE judgingid = %i',
-		       ($_POST['cmd'] == 'verified' ? 1 : 0), $id);
-		$jdata['verified'] = 1;
-		if ( VERIFICATION_REQUIRED ) {
-			calcScoreRow($jdata['cid'], $jdata['team'], $jdata['probid']);
-		}
+if ( isset($_POST['cmd']) && $_POST['cmd'] == 'verify' ) {
+	$verifier = "";
+	if ( isset($_POST['verifier_selected']) ) $verifier = $_POST['verifier_selected'];
+	if ( isset($_POST['verifier_typed'])    ) $verifier = $_POST['verifier_typed'];
+	
+	$DB->q('UPDATE judging SET verified = %i, verifier = %s WHERE judgingid = %i',
+		   $_POST['val'], $verifier, $id);
+	
+	$jdata['verified'] = $_POST['val'];
+	$jdata['verifier'] = $verifier;
+	
+	if ( VERIFICATION_REQUIRED ) {
+		calcScoreRow($jdata['cid'], $jdata['team'], $jdata['probid']);
 	}
 }
 
@@ -73,18 +78,31 @@ if ( @$jdata['endtime'] ) {
 <?php
 
 if ( ! (VERIFICATION_REQUIRED && $jdata['verified']) ) {
-	$cmd = ( $jdata['verified'] == 1 ? 'deverified' : 'verified' );
+	$val = ! $jdata['verified'];
 ?>
-<form action="<?= $pagename.'?id='.$id ?>" method="post">
-<p>
+<form name="verify" action="<?= $pagename.'?id='.$id ?>" method="post"><p>
 <input type="hidden" name="id" value="<?=$id?>" />
-<input type="hidden" name="cmd" value="<?=$cmd?>" />
-<input type="submit" value="<?= ($cmd=='verified' ? '' : 'un')?>mark verified"<?=
+<input type="hidden" name="cmd" value="verify" />
+<input type="hidden" name="val" value="<?=$val?>" />
+<input type="submit" value="<?= ($val ? '' : 'un')?>mark verified"<?=
 	( ! @$jdata['endtime'] ? ' disabled="disabled"' : '' )?> />
-</p>
-</form>
-	
 <?php
+	if ( $val ) {
+		echo "by <input type=\"text\" size=\"10\" name=\"verifier_typed\" />\n";
+		echo "or <select name=\"verifier_selected\" id=\"verifier_selected\">\n";
+		echo "	<option value=\"\"></option>\n";
+		
+		$verifiers = $DB->q('SELECT DISTINCT verifier FROM judging ORDER BY verifier');
+		while ( $verifier = $verifiers->next() ) {
+			if ( ! empty($verifier['verifier']) ) {
+				echo '  <option value="' . htmlspecialchars($verifier['verifier']) .
+					'">' . htmlspecialchars($verifier['verifier']) . "</option>\n";
+			}
+		}
+		echo "</select>\n";
+	}
+	
+	echo "</p></form>\n";
 }
 
 echo "<h3>Output compile</h3>\n\n";
