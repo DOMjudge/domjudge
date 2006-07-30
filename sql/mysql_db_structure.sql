@@ -24,7 +24,7 @@ CREATE TABLE `clarification` (
   `body` text NOT NULL,
   `answered` tinyint(4) unsigned NOT NULL default '0',
   PRIMARY KEY  (`clarid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Clarification requests by teams and responses by the jury';
+) TYPE=MyISAM COMMENT='Clarification requests by teams and responses by the jury';
 
 -- 
 -- Table structure for table `contest`
@@ -37,7 +37,7 @@ CREATE TABLE `contest` (
   `endtime` datetime NOT NULL default '0000-00-00 00:00:00',
   `contestname` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`cid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Contests that will be run with this install';
+) TYPE=MyISAM COMMENT='Contests that will be run with this install';
 
 -- 
 -- Table structure for table `judger`
@@ -47,7 +47,7 @@ CREATE TABLE `judger` (
   `judgerid` varchar(50) NOT NULL default '',
   `active` tinyint(8) unsigned NOT NULL default '1',
   PRIMARY KEY  (`judgerid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Hostnames of the autojudgers';
+) TYPE=MyISAM COMMENT='Hostnames of the autojudgers';
 
 -- 
 -- Table structure for table `judging`
@@ -69,7 +69,7 @@ CREATE TABLE `judging` (
   `output_diff` text,
   `output_error` text,
   PRIMARY KEY  (`judgingid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Result of judging a submission';
+) TYPE=MyISAM COMMENT='Result of judging a submission';
 
 -- 
 -- Table structure for table `language`
@@ -83,7 +83,7 @@ CREATE TABLE `language` (
   `allow_judge` tinyint(1) unsigned NOT NULL default '1',
   `time_factor` float NOT NULL default '1',
   PRIMARY KEY  (`langid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Programming languages in which teams can submit solutions';
+) TYPE=MyISAM COMMENT='Programming languages in which teams can submit solutions';
 
 -- 
 -- Table structure for table `problem`
@@ -100,7 +100,7 @@ CREATE TABLE `problem` (
   `special_run` varchar(8) default NULL,
   `special_compare` varchar(8) default NULL,
   PRIMARY KEY  (`probid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Problems the teams can submit solutions for';
+) TYPE=MyISAM COMMENT='Problems the teams can submit solutions for';
 
 -- 
 -- Table structure for table `scoreboard_jury`
@@ -116,7 +116,7 @@ CREATE TABLE `scoreboard_jury` (
   `is_correct` tinyint(1) unsigned NOT NULL default '0',
   `balloon` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`cid`,`team`,`probid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Scoreboard cache (jury version)';
+) TYPE=MyISAM COMMENT='Scoreboard cache (jury version)';
 
 -- 
 -- Table structure for table `scoreboard_public`
@@ -132,7 +132,7 @@ CREATE TABLE `scoreboard_public` (
   `is_correct` tinyint(1) unsigned NOT NULL default '0',
   `balloon` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`cid`,`team`,`probid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Scoreboard cache (public/team version)';
+) TYPE=MyISAM COMMENT='Scoreboard cache (public/team version)';
 
 -- 
 -- Table structure for table `submission`
@@ -151,7 +151,7 @@ CREATE TABLE `submission` (
   `judgemark` varchar(255) default NULL,
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `judgemark` (`judgemark`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='All incoming submissions';
+) TYPE=MyISAM COMMENT='All incoming submissions';
 
 -- 
 -- Table structure for table `team`
@@ -169,7 +169,7 @@ CREATE TABLE `team` (
   `teampage_first_visited` datetime default NULL,
   PRIMARY KEY  (`login`),
   UNIQUE KEY `ipaddress` (`ipaddress`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='All teams participating in the contest';
+) TYPE=MyISAM COMMENT='All teams participating in the contest';
 
 -- 
 -- Table structure for table `team_affiliation`
@@ -182,7 +182,7 @@ CREATE TABLE `team_affiliation` (
   `has_logo` tinyint(1) unsigned NOT NULL default '0',
   `comments` text,
   PRIMARY KEY  (`affilid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Affilitations for teams (e.g.: university, company)';
+) TYPE=MyISAM COMMENT='Affilitations for teams (e.g.: university, company)';
 
 -- 
 -- Table structure for table `team_category`
@@ -193,4 +193,4 @@ CREATE TABLE `team_category` (
   `name` varchar(255) NOT NULL default '',
   `sortorder` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`categoryid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Categories for teams (e.g.: participants, observers, ...)';
+) TYPE=MyISAM COMMENT='Categories for teams (e.g.: participants, observers, ...)';
