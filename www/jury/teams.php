@@ -47,43 +47,40 @@ if( $teams->count() == 0 ) {
 		if ( isset($ncorrect[$row['login']]) &&
 			 $ncorrect[$row['login']]['cnt']>0 ) $status = 3;
 		
-		echo "<tr class=\"category" . (int)$row['categoryid'] .
-			"\"><td class=\"teamid\"><a href=\"team.php?id=".
-			urlencode($row['login'])."\">".htmlspecialchars($row['login']).
-			"</a></td><td>".htmlentities($row['name']).
-			"</td><td title=\"catid ".(int)$row['categoryid']."\">".
-			htmlentities($row['catname']).
-			"</td><td title=\"affilid ".htmlspecialchars($row['affilid'])."\">".
-			htmlentities($row['affname'])."</td><td title=\"";
-			if ( @$row['ipaddress'] ) {
-				$host = htmlspecialchars(gethostbyaddr($row['ipaddress']));
-				echo htmlspecialchars($row['ipaddress']);
-				if ( $host == $row['ipaddress'] ) {
-					echo "\">" . printhost($host, TRUE);
-				} else {
-					echo " - $host\">" . printhost($host);
-				}
-				
+		echo "<tr class=\"category" . (int)$row['categoryid'] . "\">".
+			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($row['login'])."\">".
+				htmlspecialchars($row['login'])."</a></td>".
+			"<td><a href=\"team.php?id=".htmlspecialchars($row['login'])."\">".
+				htmlentities($row['name'])."</a></td>".
+			"<td title=\"catid ".(int)$row['categoryid']."\">".
+				htmlentities($row['catname'])."</td>".
+			"<td title=\"affilid ".htmlspecialchars($row['affilid'])."\">".
+				htmlentities($row['affname'])."</td><td title=\"";
+		
+		if ( @$row['ipaddress'] ) {
+			$host = htmlspecialchars(gethostbyaddr($row['ipaddress']));
+			echo htmlspecialchars($row['ipaddress']);
+			if ( $host == $row['ipaddress'] ) {
+				echo "\">" . printhost($host, TRUE);
 			} else {
-				echo "\">-";
+				echo " - $host\">" . printhost($host);
 			}
-			echo "</td><td>".htmlentities($row['room'])."</td>";
-			echo "<td class=\"teamstatus\"><img ";
-			switch ( $status ) {
-			case 0: echo 'src="gray.png" alt="gray" ' .
-						'title="no connections made"';
-				break;
-			case 1: echo 'src="red.png" alt="red" ' .
-						'title="teampage viewed, no submissions"';
-				break;
-			case 2: echo 'src="yellow.png" alt="yellow" ' .
-						'title="submitted, none correct"';
-				break;
-			case 3: echo 'src="green.png" alt="green" ' .
-						'title="correct submission(s)"';
-				break;
-			}
-			echo " width=\"16\" height=\"16\" /></td></tr>\n";
+		} else {
+			echo "\">-";
+		}
+		echo "</td><td>".htmlentities($row['room'])."</td>";
+		echo "<td class=\"teamstatus\"><img ";
+		switch ( $status ) {
+		case 0: echo 'src="gray.png"   alt="gray"   title="no connections made"';
+			break;
+		case 1: echo 'src="red.png"    alt="red"    title="teampage viewed, no submissions"';
+			break;
+		case 2: echo 'src="yellow.png" alt="yellow" title="submitted, none correct"';
+			break;
+		case 3: echo 'src="green.png"  alt="green"  title="correct submission(s)"';
+			break;
+		}
+		echo " width=\"16\" height=\"16\" /></td></tr>\n";
 	}
 	echo "</table>\n\n";
 }
