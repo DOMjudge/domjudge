@@ -25,9 +25,11 @@ if( $res->count() == 0 ) {
 	while($row = $res->next()) {
 		echo "<tr" . ($row['cid'] == $curcid ? '' : ' class="disabled"').
 			"><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".
-			htmlspecialchars($row['probid']).
-			"</a></td><td>".htmlentities($row['name']).
-			"</td><td title=\"".htmlentities($row['contestname'])."\">".htmlspecialchars($row['cid']).
+				htmlspecialchars($row['probid'])."</a>".
+			"</td><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".
+			htmlentities($row['name']).
+			"</td><td title=\"".htmlentities($row['contestname'])."\">".
+			htmlspecialchars($row['cid']).
 			"</td><td align=\"center\">".printyn($row['allow_submit']).
 			"</td><td align=\"center\">".printyn($row['allow_judge']).
 			"</td><td class=\"filename\">".htmlspecialchars($row['testdata']).
