@@ -8,10 +8,10 @@
 require('init.php');
 $title = 'Judgers';
 
-if(isset($_POST['cmd'])) {
-	if($_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate') {
-		$DB->q('UPDATE judger SET active = %i'
-		      ,($_POST['cmd'] == 'activate'?1:0));
+if ( !empty($_POST['cmd']) ) {
+	if ( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) {
+		$DB->q('UPDATE judger SET active = %i',
+		       ($_POST['cmd'] == 'activate' ? 1:0));
 	}
 }
 
@@ -35,17 +35,17 @@ if( $res->count() == 0 ) {
 			"</td></tr>\n";
 	}
 	echo "</table>\n\n";
-	?>
+?>
 
-	<form action="judgers.php" method="post">
-	<p><input type="hidden" name="cmd" value="activate" />
-	<input type="submit" value=" Go Judgers! " /></p>
-	</form>
+<form action="judgers.php" method="post"><p>
+<input type="hidden" name="cmd" value="activate" />
+<input type="submit" value="Start all judgers!" />
+</p></form>
 
-	<form action="judgers.php" method="post">
-	<p><input type="hidden" name="cmd" value="deactivate" />
-	<input type="submit" value=" Stop Judgers! " /></p>
-	</form>
+<form action="judgers.php" method="post"><p>
+<input type="hidden" name="cmd" value="deactivate" />
+<input type="submit" value="Stop all judgers!" />
+</p></form>
 
 <?php
 }
