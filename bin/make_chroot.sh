@@ -15,7 +15,6 @@ CHROOTDIR=$1
 ARCH=$2
 
 ARCHLIST="alpha,arm,hppa,i386,ia64,m86k,mips,mipsel,powerpc,s390,sparc"
-
 # Debian packages to exclude during bootstrap process (comma separated):
 EXCLUDEDEBS="adduser,apt-utils,aptitude,at,base-config,bsdmainutils,console-common,console-data,console-tools,cron,dhcp-client,dmidecode,exim4,exim4-base,exim4-config,exim4-daemon-light,fdutils,groff-base,ifupdown,info,ipchains,iptables,iputils-ping,klogd,laptop-detect,libconsole,libdb4.2,libgnutls11,libgnutls13,libncursesw5,libnewt0.51,libopencdk8,libpcap0.7,libpcap0.8,libpci2,libpcre3,libpopt0,libsigc++-1.2-5c102,libsigc++-2.0-0c2a,libssl0.9.7,libtasn1-2,libwrap0,logrotate,mailx,makedev,man-db,manpages,modconf,modutils,nano,net-tools,netbase,netkit-inetd,nvi,pciutils,ppp,pppconfig,pppoe,pppoeconf,procps,psmisc,sysklogd,tasksel,tasksel-data,tcpd,telnet,wget,whiptail"
 
@@ -28,6 +27,14 @@ INSTALLDEBS="sun-java5-jre"
 # Debian packages to remove after upgrade (space separated):
 REMOVEDEBS="gcc-3.3-base libstdc++5 libdb3 libgcrypt11 liblzo1 dselect"
 # initscripts lsb-base sysvinit util-linux login
+
+# Debian mirror, modify to match closest mirror
+DEBMIRROR="http://ftp.debian.org/debian"
+#DEBMIRROR="http://ftp.us.debian.org/debian"
+#DEBMIRROR="http://ftp.nl.debian.org/debian"
+
+# To prevent (libc6) upgrade questions:
+export DEBIAN_FRONTEND=noninteractive
 
 function usage()
 {
@@ -66,7 +73,7 @@ else
 	cd "$CHROOTDIR/debootstrap"
 
 	DEBOOTDEB="debootstrap_0.2.45-0.2_${ARCH}.deb"
-	wget "http://ftp.debian.org/debian/pool/main/d/debootstrap/${DEBOOTDEB}"
+	wget "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
 
 	ar -x "$DEBOOTDEB"
 	cd /
@@ -77,7 +84,7 @@ fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 /usr/sbin/debootstrap --include="$INCLUDEDEBS" --exclude="$EXCLUDEDEBS" \
-	--arch "$ARCH" sarge "$CHROOTDIR" "http://ftp.debian.org/debian"
+	--arch "$ARCH" sarge "$CHROOTDIR" "$DEBMIRROR"
 
 rm "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc"
@@ -86,15 +93,15 @@ cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
 
 # Stable
-#deb http://ftp.debian.org/debian/	stable		main non-free contrib
-#deb http://security.debian.org		stable/updates	main non-free contrib
+#deb $DEBMIRROR			stable		main non-free contrib
+#deb http://security.debian.org	stable/updates	main non-free contrib
 
 # Testing
-#deb http://ftp.debian.org/debian/	testing		main non-free contrib
-#deb http://security.debian.org		testing/updates	main non-free contrib
+#deb $DEBMIRROR			testing		main non-free contrib
+#deb http://security.debian.org	testing/updates	main non-free contrib
 
 # Unstable
-deb http://ftp.debian.org/debian/	unstable	main non-free contrib
+deb $DEBMIRROR			unstable	main non-free contrib
 EOF
 
 cat > "$CHROOTDIR/etc/apt/apt.conf" <<EOF
@@ -112,24 +119,24 @@ mount -t proc proc "$CHROOTDIR/proc"
 chroot "$CHROOTDIR" /bin/bash -c debconf-set-selections <<EOF
 passwd	passwd/root-password-crypted	password	
 passwd	passwd/user-password-crypted	password	
-passwd	passwd/root-password	password	
+passwd	passwd/root-password		password	
 passwd	passwd/root-password-again	password	
 passwd	passwd/user-password-again	password	
-passwd	passwd/user-password	password	
-passwd	passwd/shadow	boolean	true
-passwd	passwd/username-bad	note	
+passwd	passwd/user-password		password	
+passwd	passwd/shadow			boolean	true
+passwd	passwd/username-bad		note	
 passwd	passwd/password-mismatch	note	
-passwd	passwd/username	string	
-passwd	passwd/make-user	boolean	true
-passwd	passwd/md5	boolean	false
-passwd	passwd/user-fullname	string	
-passwd	passwd/user-uid	string	
-passwd	passwd/password-empty	note	
+passwd	passwd/username			string	
+passwd	passwd/make-user		boolean	true
+passwd	passwd/md5			boolean	false
+passwd	passwd/user-fullname		string	
+passwd	passwd/user-uid			string	
+passwd	passwd/password-empty		note	
 debconf	debconf/priority	select	high
 debconf	debconf/frontend	select	Noninteractive
 locales	locales/locales_to_be_generated	multiselect	
 locales	locales/default_environment_locale	select	None
-sun-java5-jre	sun-java5-jre/jcepolicy	note	
+sun-java5-jre	sun-java5-jre/jcepolicy		note	
 sun-java5-bin	shared/accepted-sun-dlj-v1-1	boolean	true
 sun-java5-jre	shared/accepted-sun-dlj-v1-1	boolean	true
 sun-java5-jre	sun-java5-jre/stopthread	boolean	true
