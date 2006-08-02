@@ -9,12 +9,16 @@
 # a POSIX shell in /bin/sh. About 250 MB disk space is needed. It must
 # be run as root and will install the Debian debootstrap package.
 
+# Abort when a single command fails:
 set -e
 
+# Read command-line parameters:
 CHROOTDIR=$1
 ARCH=$2
 
+# List of possible architectures to install chroot for:
 ARCHLIST="alpha,arm,hppa,i386,ia64,m86k,mips,mipsel,powerpc,s390,sparc"
+
 # Debian packages to exclude during bootstrap process (comma separated):
 EXCLUDEDEBS="adduser,apt-utils,aptitude,at,base-config,bsdmainutils,console-common,console-data,console-tools,cron,dhcp-client,dmidecode,exim4,exim4-base,exim4-config,exim4-daemon-light,fdutils,groff-base,ifupdown,info,ipchains,iptables,iputils-ping,klogd,laptop-detect,libconsole,libdb4.2,libgnutls11,libgnutls13,libncursesw5,libnewt0.51,libopencdk8,libpcap0.7,libpcap0.8,libpci2,libpcre3,libpopt0,libsigc++-1.2-5c102,libsigc++-2.0-0c2a,libssl0.9.7,libtasn1-2,libwrap0,logrotate,mailx,makedev,man-db,manpages,modconf,modutils,nano,net-tools,netbase,netkit-inetd,nvi,pciutils,ppp,pppconfig,pppoe,pppoeconf,procps,psmisc,sysklogd,tasksel,tasksel-data,tcpd,telnet,wget,whiptail"
 
