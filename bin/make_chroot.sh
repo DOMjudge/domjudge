@@ -59,6 +59,10 @@ function error()
     exit 1
 }
 
+if [ `id -u` != 0 ]; then
+    echo "Warning: you probably need to run this program as root."
+fi
+
 [ -z "$CHROOTDIR" ] && error "No installation directory given."
 [ -z "$ARCH" ]      && error "No architecture given."
 [ -e "$CHROOTDIR" ] && error "'$CHROOTDIR' already exists, remove manually."
