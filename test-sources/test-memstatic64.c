@@ -1,7 +1,8 @@
 /* $Id$
  *
- * This should fail with RUN-ERROR due to running out of memory, which
- * is restricted.
+ * This should fail in the default configuration with RUN-ERROR due to 
+ * running out of memory, which is restricted. When the memory limit is 
+ * set higher, it will give WRONG ANSWER.
  */
 
 #include <stdio.h>
