@@ -42,10 +42,12 @@
 # should compile the source to a statically linked, standalone executable!
 # Syntax for these compile scripts is:
 #
-#   compile_<lang>.sh <source> <dest>
+#   compile_<lang>.sh <source> <dest> <memlimit>
 #
 # where <dest> is the same filename as <source> but without extension.
-#
+# The <memlimit> (in Kb) is passed to the compile script, to let
+# interpreted languages (read: Sun javac/java) be able to set the
+# internal maximum memory size.
 #
 # For running the solution a script 'run.sh' is called (default). For
 # usage of 'run.sh' see that script. Likewise, for comparing results,
@@ -169,7 +171,7 @@ fi
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
 ( "$RUNGUARD" -t $COMPILETIME -o compile.time \
-	"$COMPILE_SCRIPT" "source.$EXT" source ) &>compile.tmp
+	"$COMPILE_SCRIPT" "source.$EXT" source "$MEMLIMIT" ) &>compile.tmp
 exitcode=$?
 if [ -f source ]; then
     mv -f source program
@@ -203,10 +205,10 @@ cp -p "$SCRIPTDIR/$RUN_SCRIPT" .
 cp -p "$BASHSTATIC"            ./bin/bash
 chmod a+rx "$RUN_SCRIPT" bin/bash
 
-# Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
-if [ "$USE_CHROOT" ]; then
-	logmsg $LOG_DEBUG "mounting proc filesystem"
-	sudo mount -n -t proc --bind /proc proc
+# Execute an optional chroot setup script:
+if [ "$USE_CHROOT" -ne 0 -a -n "$CHROOT_SCRIPT" ]; then
+	logmsg $LOG_DEBUG "executing chroot script: '$CHROOT_SCRIPT start'"
+	$CHROOT_SCRIPT start
 fi
 
 logmsg $LOG_DEBUG "making a fifo-buffer link to /dev/null"
@@ -223,9 +225,10 @@ logmsg $LOG_NOTICE "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 		$MEMLIMIT $FILELIMIT $PROCLIMIT ) &>error.tmp
 exitcode=$?
 
-if [ "$USE_CHROOT" ]; then
-	logmsg $LOG_DEBUG "unmounting proc filesystem"
-	sudo umount "$PWD/proc"
+# Execute an optional chroot destroy script:
+if [ "$USE_CHROOT" -ne 0 -a -n "$CHROOT_SCRIPT" ]; then
+	logmsg $LOG_DEBUG "executing chroot script: '$CHROOT_SCRIPT stop'"
+	$CHROOT_SCRIPT stop
 fi
 
 # Check for still running processes (first wait for all exiting processes):

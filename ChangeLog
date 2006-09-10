@@ -8,6 +8,9 @@ Version 1.2.1 - SVN
    and judging per problem and language.
  - Added option to enter verifier's name in jury interface.
  - Included sources to comply with licences of included programs.
+ - Added a separate script for extra setup of the chroot environment
+   and pass memory limit to Sun Java run script for better javac/java
+   support.
 
 Version 1.2.0 - 26 June 2006
 ----------------------------

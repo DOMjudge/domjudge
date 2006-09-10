@@ -1,1 +1,1 @@
-compile_java_gcjmod.sh
+compile_java_javac.sh
