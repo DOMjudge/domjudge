@@ -18,6 +18,7 @@ include('menu.php');
 <p>Generate new password for:</p>
 
 <form action="genpasswds.php" method="post">
+<p>
 <input type="submit" name="doteam" value="a specific team:" /> <select name="forteam"><?php
 		$teams = $DB->q('SELECT login, name FROM team
 		                 ORDER BY categoryid ASC, name ASC');
@@ -27,9 +28,9 @@ include('menu.php');
 				htmlspecialchars($team['login']) . ': ' .
 				htmlentities($team['name']) . "</option>\n";
 		}
-?></select><br /><br />
-<input type="submit" name="doallnull" value="all teams without a password" /><br /><br />
-<input type="submit" name="doall" value="absolutely all teams" />
+?></select><br /></p>
+<p><input type="submit" name="doallnull" value="all teams without a password" /><br /></p>
+<p><input type="submit" name="doall" value="absolutely all teams" /><br /></p>
 </form>
 
 <?php

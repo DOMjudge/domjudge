@@ -84,7 +84,7 @@ if ( $jdata['verified'] && ! empty($jdata['verifier']) ) {
 if ( ! (VERIFICATION_REQUIRED && $jdata['verified']) ) {
 	$val = ! $jdata['verified'];
 ?>
-<form name="verify" action="<?= $pagename.'?id='.$id ?>" method="post"><p>
+<form action="<?= $pagename.'?id='.$id ?>" method="post"><p>
 <input type="hidden" name="id" value="<?=$id?>" />
 <input type="hidden" name="cmd" value="verify" />
 <input type="hidden" name="val" value="<?=$val?>" />

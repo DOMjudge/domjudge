@@ -27,7 +27,7 @@ if( $res->count() == 0 ) {
 			"><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".
 				htmlspecialchars($row['probid'])."</a>".
 			"</td><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".
-			htmlentities($row['name']).
+			htmlentities($row['name'])."</a>".
 			"</td><td title=\"".htmlentities($row['contestname'])."\">".
 			htmlspecialchars($row['cid']).
 			"</td><td align=\"center\">".printyn($row['allow_submit']).

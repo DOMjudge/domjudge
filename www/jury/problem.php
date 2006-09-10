@@ -41,12 +41,12 @@ echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
 $data = $DB->q('TUPLE SELECT * FROM problem NATURAL JOIN contest WHERE probid = %s', $id);
 
 ?>
-
 <form action="<?=$pagename?>" method="post">
+<p>
 <input type="hidden" name="id" value="<?=$id?>" />
 <input type="hidden" name="val[toggle_judge]" value="<?=!$data['allow_judge']?>" />
 <input type="hidden" name="val[toggle_submit]" value="<?=!$data['allow_submit']?>" />
-
+</p>
 <table>
 <tr><td>ID:          </td><td><?=htmlspecialchars($data['probid'])?></td></tr>
 <tr><td>Name:        </td><td><?=htmlentities($data['name'])?></td></tr>

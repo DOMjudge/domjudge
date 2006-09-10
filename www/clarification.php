@@ -72,7 +72,7 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
 		if ( $isjury || ( $clar['sender']==$team || ( $clar['sender']==NULL &&
 			( $clar['recipient']==NULL || $clar['recipient']==$team ) ) ) ) {
 			putClar($clar,$isjury);
-			echo "<br />\n\n";
+			echo "<p></p>\n\n";
 		}
 	}
 }
@@ -150,7 +150,7 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 	
 	?>
 
-<script type="text/javascript" language="JavaScript">
+<script type="text/javascript">
 <!--
 function confirmClar() {
 	sendto = document.forms['sendclar'].sendto.value;
@@ -162,7 +162,7 @@ function confirmClar() {
 	  
 	<?php
 	  
-	echo '<form name="sendclar" action="' . addUrl(urlencode($action), $popupTag) .
+	echo '<form action="' . addUrl(urlencode($action), $popupTag) .
 		"\" method=\"post\">\n";
 
 

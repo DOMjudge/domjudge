@@ -11,22 +11,22 @@ require('menu.php');
 echo "<h1>DOMjudge Jury interface</h1>\n\n";
 
 if ( is_readable('DOMjudgelogo.png') ) {
-	echo "<img src=\"DOMjudgelogo.png\" id=\"djlogo\" alt=\"DOMjudge logo\" />\n\n";
+	echo "<p><img src=\"DOMjudgelogo.png\" id=\"djlogo\" alt=\"DOMjudge logo\" /></p>\n\n";
 }
 ?>
 
 <h3>Overviews:</h3>
 <ul>
-<li><a href="contests.php">Contests</a></li>
-<li><a href="submissions.php">Submissions</a></li>
 <li><a href="clarifications.php">Clarifications</a></li>
+<li><a href="contests.php">Contests</a></li>
 <li><a href="judgers.php">Judgers</a></li>
 <li><a href="languages.php">Languages</a></li>
 <li><a href="problems.php">Problems</a></li>
+<li><a href="scoreboard.php">Scoreboard</a></li>
+<li><a href="submissions.php">Submissions</a></li>
 <li><a href="teams.php">Teams</a></li>
 <li><a href="categories.php">Team Categories</a></li>
 <li><a href="affiliations.php">Team Affiliations</a></li>
-
 </ul>
 
 <h3>Administrator:</h3>
