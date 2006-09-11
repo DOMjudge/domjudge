@@ -45,7 +45,7 @@
 #   compile_<lang>.sh <source> <dest> <memlimit>
 #
 # where <dest> is the same filename as <source> but without extension.
-# The <memlimit> (in Kb) is passed to the compile script, to let
+# The <memlimit> (in kB) is passed to the compile script, to let
 # interpreted languages (read: Sun javac/java) be able to set the
 # internal maximum memory size.
 #
