@@ -35,9 +35,9 @@ There are three possible ways of configuring that IP-address:
 2) Supply the teams with a password with which to authenticate. Beforehand,
    generate passwords for each team in the jury interface. When the test
    session (or contest) starts and a team connects to the web interface
-   and are an unknown IP, they will be prompted for username and password.
+   and have an unknown IP, they will be prompted for username and password.
    Once supplied, the IP is stored and the password is not needed anymore
-   for the rest of the contest.
+   for the remainder of the contest.
    This is also a secure option, but requires a bit more hassle from the
    teams, and maybe from the organisers who have to distribute pieces of
    paper.
@@ -56,7 +56,8 @@ There are three possible ways of configuring that IP-address:
    The connect can happen during the test session, so during the real contest
    everything is fully available. This is also a secure way of authenticating
    teams, which requires no passwords or IP configuration, but teams must
-   submit before they can access their teampage.
+   submit via the command line submit client before they can access their
+   teampage.
 
 
 $Id$
