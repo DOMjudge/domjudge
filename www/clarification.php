@@ -148,7 +148,7 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 		$popupTag = NULL;
 	}
 	
-	?>
+?>
 
 <script type="text/javascript">
 <!--
@@ -160,9 +160,9 @@ function confirmClar() {
 // -->
 </script>
 	  
-	<?php
+<?php
 	  
-	echo '<form action="' . addUrl(urlencode($action), $popupTag) .
+	echo '<form id="sendclar" action="' . addUrl(urlencode($action), $popupTag) .
 		"\" method=\"post\">\n";
 
 
