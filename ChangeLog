@@ -1,16 +1,19 @@
 DOMjudge Programming Contest Judging System
 
-Version 1.2.1 - SVN
--------------------
- - Changed config option SUBM_VERIFY to VERIFICATION_REQUIRED and
-   disabled "off" choice.
+Version 1.3.0 Release Candidate 1 - 14 September 2006
+-----------------------------------------------------
+ - Added a separate script for extra setup of the chroot environment
+   and pass memory limit to Sun Java run script for better javac/java
+   support (Closes: #1508663).
+ - Added script to generate Java chroot environment from Debian sources.
  - Added toggle buttons in jury interface for allowing submission
    and judging per problem and language.
  - Added option to enter verifier's name in jury interface.
+ - Changed config option SUBM_VERIFY to VERIFICATION_REQUIRED and
+   disabled "off" choice.
+ - Fixed some more HTML to be fully XHTML 1.0 Strict compliant.
  - Included sources to comply with licences of included programs.
- - Added a separate script for extra setup of the chroot environment
-   and pass memory limit to Sun Java run script for better javac/java
-   support.
+ - Multiple other small fixes and enhancements.
 
 Version 1.2.0 - 26 June 2006
 ----------------------------
