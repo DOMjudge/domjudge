@@ -1,6 +1,6 @@
 DOMjudge Programming Contest Judging System
 
-Version 1.3.0 Release Candidate 1 - 14 September 2006
+Version 1.3.0 Release Candidate 1 - 15 September 2006
 -----------------------------------------------------
  - Added a separate script for extra setup of the chroot environment
    and pass memory limit to Sun Java run script for better javac/java
