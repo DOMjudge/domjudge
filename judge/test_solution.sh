@@ -137,7 +137,8 @@ OLDDIR="$PWD"
 cd "$TMPDIR"
 
 # Check whether we're going to run in a chroot environment:
-if [ ! "$USE_CHROOT" -o "$USE_CHROOT" -eq 0 ]; then
+if [ -z "$USE_CHROOT" ] || [ "$USE_CHROOT" -eq 0 ]; then
+# unset to allow shell default parameter substitution on USE_CHROOT:
 	unset USE_CHROOT
 	PREFIX=$PWD
 else
@@ -206,7 +207,7 @@ cp -p "$BASHSTATIC"            ./bin/bash
 chmod a+rx "$RUN_SCRIPT" bin/bash
 
 # Execute an optional chroot setup script:
-if [ "$USE_CHROOT" -ne 0 -a -n "$CHROOT_SCRIPT" ]; then
+if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
 	logmsg $LOG_DEBUG "executing chroot script: '$CHROOT_SCRIPT start'"
 	$CHROOT_SCRIPT start
 fi
@@ -226,7 +227,7 @@ logmsg $LOG_NOTICE "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 exitcode=$?
 
 # Execute an optional chroot destroy script:
-if [ "$USE_CHROOT" -ne 0 -a -n "$CHROOT_SCRIPT" ]; then
+if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
 	logmsg $LOG_DEBUG "executing chroot script: '$CHROOT_SCRIPT stop'"
 	$CHROOT_SCRIPT stop
 fi
