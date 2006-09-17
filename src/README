@@ -1,4 +1,5 @@
-In this directory can be found, the sources of programs that are
-included in the distribution of DOMjudge. These sources are _not_
-neccessary to build or run DOMjudge, but to comply with the licences
-of those programs.
+This directory contains the sources of programs that are included in
+the distribution of DOMjudge. These sources are _not_ necessary
+to build or run DOMjudge, but to comply with the licences of those
+programs (and for those who wish to adapt the binaries).
+
