@@ -44,7 +44,7 @@ The requirements for the deployment of this jury-system are:
 CONCEPTS
 --------
 
-DOMjudge has three different kind of hosts:
+DOMjudge has three different kinds of hosts:
 * Team computer: workstation for a team, where they develop their solutions
   and from which they submit them to the jury system. The only part of DOMjudge
   that runs here is the optional command-line submit client; the rest happens
@@ -71,11 +71,13 @@ SOFTWARE REQUIREMENTS
   preferably one that can generate statically linked stand-alone
   executables.
 
-- Apache web server with support for PHP >= 4.3.2
+- Apache web server with support for PHP >= 4.3.2 and the mysql
+  extension for PHP.
 
 - MySQL 3.23.x or higher database and client software
 
-- PHP >= 4.3.2, located in /usr/bin/php (command line interface)
+- PHP >= 4.3.2, located in /usr/bin/php (command line interface),
+  also with the mysql extension.
 
 - Bash >= 2, located in /bin/bash
 
