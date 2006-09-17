@@ -1,0 +1,42 @@
+DOMjudge Quick Installation Reference
+-------------------------------------
+
+NOTE: this document is not a replacement for the thorough INSTALL document,
+but more a cheat-sheet for those who've already installed DOMjudge before
+and need a few hints. When in doubt, always consult INSTALL.
+
+
+External software:
+- Install mysql-server and set root password for it.
+- Install Apache, PHP and phpMyAdmin.
+  [apt-get install mysql-server apache php4 php4-mysql php4-cli phpmyadmin]
+- Make sure PHP works for the webserver and the commandline client, and
+  that phpMyAdmin works.
+
+DOMjudge:
+- cd etc; vi global.cfg; make config; cd ..
+- Make sure that all of the domjudge stuff is in the dir set
+  as SYSTEM_ROOT, and from that dir, execute:
+- make
+- make install
+- Add etc/apache.conf to your Apache configuration, edit it,
+  reload webserver.
+- Check that the web interface works (/team, /public and /jury);
+  make sure phpMyAdmin also still works.
+- Access database with phpMyAdmin, add useful contest data.
+- Start the necessary daemons, each in their own terminal:
+  cd submit; ./submitdaemon
+  cd submit; ./websubmitdaemon.php
+
+- Next, setup the auto judgers on separate hosts:
+- useradd -d /nonexistent -g nobody -M -n -s /bin/false domtest
+  (check specific options of useradd, since these vary per system)
+- Start the judge daemon:
+  cd judge; ./judgedaemon.php
+
+- It should be done by now, submit the sources from the test-sources/
+  dir and compare their results with what they claim should happen.
+
+
+
+$Id$
