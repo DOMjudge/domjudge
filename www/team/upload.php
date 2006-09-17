@@ -115,6 +115,7 @@ if ( $destfile === FALSE ) {
 if ( ! move_uploaded_file($tmpfile, $destfile) ) {
 	error("Failed to move uploaded file '$tmpfile' to '$destfile'");
 }
+chmod($destfile, 0644);
 
 for($i=0; $i<$waitsubmit; $i++) {
 	sleep(1);
