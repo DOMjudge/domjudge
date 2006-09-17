@@ -153,9 +153,13 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 <script type="text/javascript">
 <!--
 function confirmClar() {
+<?php if ( $isjury ): ?>
 	sendto = document.forms['sendclar'].sendto.value;
 	if ( sendto=='' ) sendto = "ALL";
 	return confirm("Send clarification to " + sendto + "?");
+<?php else : ?>
+	return confirm("Send clarification to Jury?");
+<?php endif; ?>
 }
 // -->
 </script>
