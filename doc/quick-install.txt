@@ -37,6 +37,11 @@ DOMjudge:
 - It should be done by now, submit the sources from the test-sources/
   dir and compare their results with what they claim should happen.
 
+- Optionally:
+  - Install the submit client on the team workstations;
+  - Generate one-time passwords for all the teams;
+  - Further tighten the security of the system, e.g. by applying firewall
+    rules.
 
 
 $Id$
