@@ -138,7 +138,7 @@ cd "$TMPDIR"
 
 # Check whether we're going to run in a chroot environment:
 if [ ! "$USE_CHROOT" -o "$USE_CHROOT" -eq 0 ]; then
-	USE_CHROOT=0
+	unset USE_CHROOT
 	PREFIX=$PWD
 else
 	PREFIX=''
