@@ -99,10 +99,8 @@ if ( ! (VERIFICATION_REQUIRED && $jdata['verified']) ) {
 			echo "or <select name=\"verifier_selected\" id=\"verifier_selected\">\n";
 			echo "	<option value=\"\"></option>\n";
 			while ( $verifier = $verifiers->next() ) {
-				if ( ! empty($verifier['verifier']) ) {
-					echo '  <option value="' . htmlspecialchars($verifier['verifier']) .
-						'">' . htmlspecialchars($verifier['verifier']) . "</option>\n";
-				}
+				echo '  <option value="' . htmlspecialchars($verifier['verifier']) .
+					'">' . htmlspecialchars($verifier['verifier']) . "</option>\n";
 			}
 			echo "</select>\n";
 		}
