@@ -249,6 +249,7 @@ class db
 		    usage with LIKE
 		%i: integer
 		%f: floating point
+		%l: literal (no quoting/escaping)
 		%A?: array of type ?, comma separated
 		%S: array of key => ., becomes key=., comma separated
 
@@ -266,7 +267,7 @@ class db
 	function q() // queryf
 	{
 		$argv = func_get_args();
-		$format = array_shift($argv);
+		$format = trim(array_shift($argv));
 		list($key) = explode(' ', $format, 2);
 		$key = strtolower($key);
 		$maybe = false;
@@ -351,6 +352,7 @@ class db
 				case 'c':
 				case 'i':
 				case 'f':
+				case 'l':
 				case '.':
 					$val = array_shift($argv);
 					$query .= db__val2sql($val, $part{0});
@@ -382,7 +384,7 @@ class db
 			}
 			if ($res->count() > 1) {
 				error("$this->database query error ($key $query".
-					"): Query did return too many rows (".$res->count().")");
+					"): Query returned too many rows (".$res->count().")");
 			}
 			$row = $res->next();
 			if ($key == 'value') {
@@ -406,6 +408,7 @@ class db
 
 	function _execute($query)
 	{
+		$query = trim($query);
 		if(!$this->_connection)
 		{
 			$this->_connection=db__connect($this->database,$this->host,
@@ -434,6 +437,10 @@ class db
 			switch(mysql_errno($this->_connection)) {
 				case 1062:	// duplicate key
 				error("Item with this key already exists.\n".
+					mysql_error($this->_connection) );
+				case 1217:  // foreign key constraint
+				error("This operation would have brought the database in an ".
+					"inconsistent state.\n".
 					mysql_error($this->_connection) );
 				default:
 				error("SQL syntax-error ($query). Error#".
@@ -484,7 +491,7 @@ class db_result
 
 	function field($field)
 	{
-                $this->next();
+		$this->next();
 
 		if($this->tuple===FALSE)
 			return FALSE;
@@ -535,6 +542,17 @@ class db_result
 	function count()
 	{
 		return $this->_count;
+	}
+
+	function fieldname($i)
+	{
+		$data = $this->metadata();
+		return $data[$i]['name'];
+	}
+
+	function numfields()
+	{
+		return count( $this->metadata() );
 	}
 
 	function seek($i)

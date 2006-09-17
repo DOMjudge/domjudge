@@ -7,6 +7,7 @@ Version 1.3.0 - SVN
  - chmod uploaded files so the websubmitdaemon can handle them
    even if the webserver has a restrictive umask.
  - Auto-focus the clarification textarea.
+ - Bring lib.database.php up to date with latest upstream version.
 
 Version 1.3.0 Release Candidate 1 - 15 September 2006
 -----------------------------------------------------
