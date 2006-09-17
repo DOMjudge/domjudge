@@ -29,7 +29,7 @@ case "$1" in
 
 		for i in $SUBDIRMOUNTS ; do
 			mkdir $i
-			sudo mount --bind /chroot/domjudge-java/$i $i
+			sudo mount --bind $CHROOTORIGINAL/$i $i
 		done
 		;;
 
