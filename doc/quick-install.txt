@@ -9,40 +9,41 @@ and need a few hints. When in doubt, always consult INSTALL.
 External software:
 - Install mysql-server and set root password for it.
 - Install Apache, PHP and phpMyAdmin.
-  [apt-get install mysql-server apache php4 php4-mysql php4-cli phpmyadmin]
+  [`apt-get install mysql-server apache php4 php4-mysql php4-cli phpmyadmin`]
 - Make sure PHP works for the webserver and the commandline client, and
   that phpMyAdmin works.
+- Install necessary compilers on the judger hosts.
 
 DOMjudge:
-- cd etc; vi global.cfg; make config; cd ..
+- `cd etc; vi global.cfg; make config; cd ..`
 - Make sure that all of the domjudge stuff is in the dir set
-  as SYSTEM_ROOT, and from that dir, execute:
-- make
-- make install
+  as SYSTEM_ROOT, and from that dir:
+- `make`
+- `make install`
 - Add etc/apache.conf to your Apache configuration, edit it,
   reload webserver.
 - Check that the web interface works (/team, /public and /jury);
   make sure phpMyAdmin also still works.
 - Access database with phpMyAdmin, add useful contest data.
 - Start the necessary daemons, each in their own terminal:
-  cd submit; ./submitdaemon
-  cd submit; ./websubmitdaemon.php
+  `cd submit; ./submitdaemon`         (needed for commandline submit)
+  `cd submit; ./websubmitdaemon.php`  (needed for websubmit)
 
 - Next, setup the auto judgers on separate hosts:
-- useradd -d /nonexistent -g nobody -M -n -s /bin/false domtest
+- `useradd -d /nonexistent -g nobody -M -n -s /bin/false domtest`
   (check specific options of useradd, since these vary per system)
 - Start the judge daemon:
-  cd judge; ./judgedaemon.php
+  `cd judge; ./judgedaemon.php`
 
 - It should be done by now, submit the sources from the test-sources/
   dir and compare their results with what they claim should happen.
 
 - Optionally:
   - Install the submit client on the team workstations;
-  - Generate one-time passwords for all the teams;
+  - Generate one-time passwords for all the teams in the webinterface;
   - Further tighten the security of the system, e.g. by applying firewall
     rules.
-  - Start the balloon notification daemon: cd bin; ./balloons.php
+  - Start the balloon notification daemon: `cd bin; ./balloons.php`
 
 
 $Id$
