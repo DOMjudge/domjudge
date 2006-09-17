@@ -46,13 +46,13 @@ CONCEPTS
 
 DOMjudge has three different kinds of hosts:
 * Team computer: workstation for a team, where they develop their solutions
-  and from which they submit them to the jury system. The only part of DOMjudge
-  that runs here is the optional command-line submit client; the rest happens
-  via the web interface.
+  and from which they submit them to the jury system. The only part of
+  DOMjudge that runs here is the optional command-line submit client; the
+  rest happens via the web interface.
 * Jury system: a host that receives the submissions, runs the database and
-  serves the webpages. This host will run the DOMjudge submitdaemon, MySQL and
-  Apache. Optionally some of these tasks can be further split out to separate
-  machines, but that's not normally necessary.
+  serves the webpages. This host will run the DOMjudge submitdaemon(s),
+  MySQL and Apache. Optionally some of these tasks can be further split out
+  to separate machines, but that's not normally necessary.
 * Judgers: a number of hosts, at least one, that will retrieve submitted
   solutions from the main jury system, compile and run them and send the
   results back to the jury system. Since this is computationally intensive,
@@ -338,7 +338,7 @@ OTHER CONFIGURATION ISSUES
 For running solution programs under a non-privileged user, a user has
 to be added to the system(s) that act as judger. This user does not
 need a home-directory or password, so e.g. the following command would
-suffice to add a user 'test' with minimal privileges:
+suffice to add a user 'domtest' with minimal privileges:
 
 useradd -d /nonexistent -g nobody -M -n -s /bin/false domtest
 
