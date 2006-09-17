@@ -31,9 +31,12 @@ There are some options to support java as a language:
    necessary ingredients to let Sun java work within it. DOMjudge
    supports this with some manual setup.
 
-   First of all a chroot tree with java must be created. The script
-   bin/make_chroot.sh creates one from Debian GNU/Linux sources; run
-   that script without arguments for basic usage information. Next, 
+   First of all, a chroot tree with java support must be created. The
+   script bin/make_chroot.sh creates one from Debian GNU/Linux
+   sources; run that script without arguments for basic usage
+   information. Next, edit the script 'judge/chroot-startstop.sh' and
+   adapt it to work with your local system and uncomment the script in
+   'etc/global.cfg'.
 
 3. As an alternative the 'gcj' compiler from GNU can be used instead
    of Sun's version. This one generates true machine code and can link
