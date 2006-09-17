@@ -14,6 +14,7 @@ Version 1.3.0 - SVN
    JVM consumes 200 MB by itself.
  - Auto-focus the clarification textarea.
  - Bring lib.database.php up to date with latest upstream version.
+ - Remove obsolete references to 'make gen_passwd' (Closes: #1560107).
  - Some miscellaneous minor fixes.
 
 Version 1.3.0 Release Candidate 1 - 15 September 2006
