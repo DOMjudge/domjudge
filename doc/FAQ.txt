@@ -20,14 +20,39 @@ bit problematic. The Sun Java compiler 'javac' isn't even a real
 compiler: a bytecode interpreter 'java' is needed to run the binaries
 and thus this cannot simply run in a chroot environment.
 
-The alternative is the 'gcj' compiler from GNU. This one generates
-true machine code and can link statically. However a few function
-calls cannot be linked statically (see 'GCJ compiler warnings' in this
-FAQ). Secondly, the static library 'libgcj.a' doesn't seem to be
-included in all GNU/Linux distributions: at least not in RedHat
-Enterprise 4. A workaround has been created: one can disable the use
-of a chroot environment in the configuration. Note that this reduces
-security.
+There are some options to support java as a language:
+
+1. One can disable the chroot environment in 'etc/global.cfg' by
+   setting 'USE_CHROOT=0'. Disabling the chroot environment removes
+   this extra layer of security against submissions that attempt to
+   cheat, but it is a simple solution to getting java to work.
+
+2. Next, one can build a bigger chroot environment which contains all
+   necessary ingredients to let Sun java work within it. DOMjudge
+   supports this with some manual setup.
+
+   First of all a chroot tree with java must be created. The script
+   bin/make_chroot.sh creates one from Debian GNU/Linux sources; run
+   that script without arguments for basic usage information. Next, 
+
+3. As an alternative the 'gcj' compiler from GNU can be used instead
+   of Sun's version. This one generates true machine code and can link
+   statically. However a few function calls cannot be linked
+   statically (see 'GCJ compiler warnings' in this FAQ). Secondly, the
+   static library 'libgcj.a' doesn't seem to be included in all
+   GNU/Linux distributions: at least not in RedHat Enterprise 4.
+
+
+- The Sun Java virtual machine (jvm) and memory limits
+
+DOMjudge imposes memory limits on submitted solutions. These limits
+are imposed before the compiled submissions are started. On the other
+hand, the Sun jvm is started via a compile-time generated script which
+is run as a wrapper around the program. This means that the memory
+limits imposed by DOMjudge are for the jvm and the running program
+within it. As the jvm uses approximately 200MB, this reduces the limit
+by this significant amount. See judge/compile_java_javac.sh for the
+implementation details.
 
 
 - GCJ compiler warnings
@@ -46,7 +71,7 @@ are not allowed to use these functions anyways (and they are not
 accessible within the chroot-ed environment the program is run in).
 
 To filter these warnings, take a look at judge/compile_java_gcjmod.sh
-and replace judge/compile_java.sh by this file.
+and replace or symlink judge/compile_java.sh by/to this file.
 
 
 - Permissions for the webserver
