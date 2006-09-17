@@ -1,6 +1,8 @@
 DOMjudge INSTALLATION INSTRUCTIONS
 ==================================
 
+[doc/quick-install.txt contains a checklist as a summary of this document]
+
 
 SYSTEM REQUIREMENTS
 -------------------
@@ -315,6 +317,20 @@ and usage information). Then one must specify this <some-tag> in the
 special_run and/or special_compare fields of the problem entry in the
 MySQL database (NULL means that the default script should be used).
 
+
+WEBSERVER CONFIGURATION
+
+For the web interface, you need to have a webserver (e.g. Apache)
+installed on the jury system and made sure that PHP correctly works
+with it. Refer to the documentation of your webserver and PHP for
+details.
+
+To configure the webserver for DOMjudge, use the Apache configuration
+snippet from etc/apache.conf. In that file, replace 'SYSTEM_ROOT' with
+the SYSTEM_ROOT you specified in the config, i.e. where the DOMjudge
+files are located. Reload the webserver for the changes to take effect.
+
+
 OTHER CONFIGURATION ISSUES
 
 For running solution programs under a non-privileged user, a user has
@@ -327,7 +343,6 @@ useradd -d /nonexistent -g nobody -M -n -s /bin/false domtest
 This user must also be configured as the user under which programs run
 in SYSTEM_ROOT/etc/global.cfg.
 
-TODO: installation and configuration of webserver.
 
 
 BUILDING AND INSTALLING
