@@ -20,18 +20,18 @@ bit problematic. The Sun Java compiler 'javac' isn't even a real
 compiler: a bytecode interpreter 'java' is needed to run the binaries
 and thus this cannot simply run in a chroot environment.
 
-There are some options to support java as a language:
+There are some options to support Java as a language:
 
 1. One can disable the chroot environment in 'etc/global.cfg' by
    setting 'USE_CHROOT=0'. Disabling the chroot environment removes
    this extra layer of security against submissions that attempt to
-   cheat, but it is a simple solution to getting java to work.
+   cheat, but it is a simple solution to getting Java to work.
 
 2. Next, one can build a bigger chroot environment which contains all
-   necessary ingredients to let Sun java work within it. DOMjudge
+   necessary ingredients to let Sun Java work within it. DOMjudge
    supports this with some manual setup.
 
-   First of all, a chroot tree with java support must be created. The
+   First of all, a chroot tree with Java support must be created. The
    script bin/make_chroot.sh creates one from Debian GNU/Linux
    sources; run that script without arguments for basic usage
    information. Next, edit the script 'judge/chroot-startstop.sh' and

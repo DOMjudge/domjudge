@@ -45,7 +45,7 @@ DOMjudge:
   - Further tighten the security of the system, e.g. by applying firewall
     rules.
   - Start the balloon notification daemon: `cd bin; ./balloons.php`
-  - Setup the java chroot environmentto use Sun Java with chroot:
+  - Setup the Java chroot environment to use Sun Java with chroot:
     `bin/make_chroot.sh <installdir> <architecture>`
     `$EDITOR judge/chroot-startstop.sh`
     and enable the chroot-startstop.sh script in etc/global.cfg.
