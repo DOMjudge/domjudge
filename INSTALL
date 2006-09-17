@@ -420,8 +420,11 @@ Internal security of the system relies on users not being able to get
 to any vital data (jury input/output and users' solutions). Data is
 stored in two places: files on the jury account and in the SQL
 database. Files should be protected by preventing permission to the
-relevant directories. Database access is protected by passwords.
+relevant directories.
 
+Database access is protected by passwords. The default permissions allow
+connections from ALL hosts, so make sure you restrict this appropriately
+or choose strong enough passwords.
 NOTE: database passwords are stored in SYSTEM_ROOT/etc/passwords.php.
 This file has to be non-readable to teams, but has to be readable to
 the webserver to let the jury webinterface work. A solution is to

@@ -6,6 +6,9 @@ Version 1.3.0 - SVN
  - Add example etc/apache.conf.
  - chmod uploaded files so the websubmitdaemon can handle them
    even if the webserver has a restrictive umask.
+ - Default hostname in MySQL privileges to '%' (all hosts), making
+   sure that webinterface, command line and remote judgers can all
+   connect (Closes: #1560108).
  - Auto-focus the clarification textarea.
  - Bring lib.database.php up to date with latest upstream version.
 
