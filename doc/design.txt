@@ -21,7 +21,7 @@ write our own, new system for the following reasons:
   functioning, which might come in handy when problems arise during
   the contest. Studying and adapting other systems to our
   environment will probable take (almost) as much time as writing
-  our own system and therefor we chose the last option.
+  our own system and therefore we chose the last option.
   Specific reasons why we chose not to use the existing systems:
   - The Delft system (SZP) is a very complex system, consisting of
     more than 19.000 lines of C/C++ code. Also it implements complex

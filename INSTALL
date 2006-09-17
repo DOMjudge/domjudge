@@ -6,12 +6,11 @@ SYSTEM REQUIREMENTS
 -------------------
 
 This judging system was developed and tested on GNU/Linux systems,
-specifically on Debian Woody and RedHat 9. We have tried to use 
-standard UNIX utilities and libraries, so this system should be
-reasonably portable to other Unix systems, but we have not done any
-tests, so nothing guaranteed...
+specifically on Debian and CentOS (RedHat EL). We're using standard
+UNIX utilities and libraries wherever possible, so this system should
+be reasonably portable to other Unix systems.
 
-For the deployment of this jury-system, there are some requirements:
+The requirements for the deployment of this jury-system are:
 
 - A TCP/IP network which connects all jury and team computers.
   Extra network security which restricts internet access and access
@@ -38,6 +37,25 @@ For the deployment of this jury-system, there are some requirements:
   jury account should be installed on all team accounts to provide
   public-key access). This can be circumvented by providing access by
   other means, see 'submit/submit_copy.sh' for more details.
+
+
+CONCEPTS
+--------
+
+DOMjudge has three different kind of hosts:
+* Team computer: workstation for a team, where they develop their solutions
+  and from which they submit them to the jury system. The only part of DOMjudge
+  that runs here is the optional command-line submit client; the rest happens
+  via the web interface.
+* Jury system: a host that receives the submissions, runs the database and
+  serves the webpages. This host will run the DOMjudge submitdaemon, MySQL and
+  Apache. Optionally some of these tasks can be further split out to separate
+  machines, but that's not normally necessary.
+* Judgers: a number of hosts, at least one, that will retrieve submitted
+  solutions from the main jury system, compile and run them and send the
+  results back to the jury system. Since this is computationally intensive,
+  there should ideally be at least a couple of these. They will run the
+  judgedaemon from DOMjudge.
 
 
 SOFTWARE REQUIREMENTS
@@ -130,7 +148,7 @@ access to it. The install script also inserts some default/example
 data into the 'domjudge' database.
 
 The 'domjudge' database contains the following tables. Tables marked
-with a '*' have to be setup manually before running a contest
+with a '*' have to be manually filled with data before running a contest
 (e.g. with phpMyAdmin), the other tables are used automatically by the
 software:
 
@@ -150,13 +168,14 @@ software:
   scoreboard_public    separately, because of possibility of score freezing.
 
 Now follows a longer description (including fields) per table, that
-has to be setup manually. In general the reference ID's in each table
+has to be filled manually. In general the reference ID's in each table
 can be left untouched and auto incremented. These are used to
 reference to a specific element from other tables and internally in
 the software. For example a problem with 'cid = 2' would reference to
-the contest with it's 'cid' (contest ID) set to 2.
+the contest with its 'cid' (contest ID) set to 2.
 
-contest:
+contest: The contests that the software will run. E.g. a test session
+         and the live contest.
 'cid' is the reference ID.
 'starttime' and 'endtime' respectively are the start- and endtime of
 the contest: before and after that time, no submissions are accepted.
@@ -164,14 +183,14 @@ the contest: before and after that time, no submissions are accepted.
 scoreboard are not updated anymore (frozen). This is meant to make
 the last stages of the contest more thrilling, because no-one knows
 who has won... Setting this to 'NULL' disables this feature.
-'contestname' should be clear.
+'contestname' is a descriptive name used in the interface.
 
-judger:
+judger: List here the hosts that will be autojudging the submissions.
 'judgerid' is the hostname of a judger computer.
 'active' should be 0 or 1 and indicates whether this host should judge
 incoming submissions.
 
-language:
+language: Programming languages in which to accept and judge submissions.
 'langid' is a string of maximum length 8, which references the
 language. This reference is also used to call the correct compile
 script (SYSTEM_ROOT/judge/compile_c.sh, etc.), so when adding a new
@@ -182,17 +201,18 @@ to match the first extension as listed in the global configuration file.
 'allow_submit' (0 or 1) determines whether teams can submit using this
 language.
 'allow_judge' (0 or 1) determines whether judgers will judge
-submissions for this problem. This can for example be set to 0, to
+submissions for this problem. This can for example be set to 0 to
 temporarily hold judging, when a problem occurs with the judging of
-specific languages and after resolution of the problem be set to 1
-again.
-'time_factor' is the relative factor with which the timelimit is
+specific languages; after resolution of the problem this can be set to
+1 again.
+'time_factor' is the relative factor by which the timelimit is
 multiplied for solutions in this language. For example Java is known
 to be structurally slower than C/C++.
 
 problem:
 'probid' is the reference ID.
-'cid' is the contest ID this problem is (only) defined for.
+'cid' is the contest ID this problem is (only) defined for. A problem
+cannot be used in multiple contests.
 'name' is the full name of the problem.
 'allow_submit' (0 or 1) determines whether teams can submit solutions
 for this problem. Non-submittable problems are also not displayed on the
@@ -205,9 +225,9 @@ input/output testdata in files 'testdata.in' and 'testdata.out'.
 'timelimit' is the timelimit in seconds within which solutions for
 this problem have to run (taking into account 'time_factor' per
 language).
-'special_run' if not-NULL defines a custom run-script 'run_<special_run>.sh'
+'special_run' if not NULL defines a custom run-script 'run_<special_run>.sh'
 to run compiled submissions for this problem.
-'special_compare' if not-NULL defines a custom compare-script
+'special_compare' if not NULL defines a custom compare-script
 'compare_<special_compare>.sh' to compare output for this problem.
 
 team:
@@ -223,7 +243,7 @@ password or commandline submission. It has a length of 30 to allow
 for IPv6 addresses.
 'passwd' is a MD5-hash of a one-time password teams can use to
 authenticate and register their IP address.
-'room' is the room the team is located.
+'room' is the room the team is located, for display only.
 'comments' should be clear.
 'teampage_first_visited' is automatically updated when a team first
 visits their DOMjudge team page.
@@ -282,8 +302,8 @@ must run the interpreter on the source. See 'compile_perl.sh' and
 CONFIGURATION OF SPECIAL RUN OR JUDGE SCRIPTS
 
 To allow for problems that do not fit within the standard scheme of
-fixed input and/or output, there is the possibility to change the way
-that submissions are run and checked for correctness.
+fixed input and/or output, DOMjudge has the possibility to change the
+way submissions are run and checked for correctness.
 
 The backend script (test_solution.sh) that handles the compilation,
 running and checking of submissions, calls separate scripts for
@@ -302,7 +322,7 @@ to be added to the system(s) that act as judger. This user does not
 need a home-directory or password, so e.g. the following command would
 suffice to add a user 'test' with minimal privileges:
 
-useradd -d /nonexistent -g nobody -M -n -s /bin/false test
+useradd -d /nonexistent -g nobody -M -n -s /bin/false domtest
 
 This user must also be configured as the user under which programs run
 in SYSTEM_ROOT/etc/global.cfg.
@@ -355,7 +375,7 @@ goals in mind. To implement this rigorously in various aspects
 access to the submitted programs on the jury computers, etc...)
 requires root privileges to different parts of the whole contest
 environment. Also, security measures might depend on the environment.
-Therefor we have decided not to implement security measures which are
+Therefore we have decided not to implement security measures which are
 not directly related to the judging system itself. We do have some
 suggestions on how you can setup external security.
 
@@ -371,7 +391,7 @@ programs running on jury computers.
 We expect that chances are small that people are trying to cheat
 during a programming contest: you have to hack the system and make use
 of that within very limited time. And you have to not get caught and
-disqualified afterwards. Therefor passive security measures of warning
+disqualified afterwards. Therefore passive security measures of warning
 people of the consequences and only check (or probe) things will
 probably be enough.
 
@@ -421,7 +441,7 @@ jury. We do not have any control over these sources and do not want to
 rely on checking them manually or filtering on things like system
 calls (which can be obscured and are different per language).
 
-Therefor we decided to tackle this issue by running these programs in
+Therefore we decided to tackle this issue by running these programs in
 a environment as restrictive as possible. This is done by setting up a
 minimal chroot environment. For this, root privileges on the judging
 computers and statically compiled programs are needed. By also
@@ -437,7 +457,7 @@ The following security issues are NOT handled by DOMjudge, but left to
 the jury to set up.
 
 Network traffic between team- and jury-computers and the internet
-should be limited to what is allowed. Possible ways of enforcing this,
+should be limited to what is allowed. Possible ways of enforcing this
 might be: monitor traffic, modify firewall rules on team computers or
 (what we implemented with great satisfaction) put all team computers
 behind a firewalling router.
