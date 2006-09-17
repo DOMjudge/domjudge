@@ -15,7 +15,7 @@ External software:
 - Install necessary compilers on the judger hosts.
 
 DOMjudge:
-- `cd etc; vi global.cfg; make config; cd ..`
+- `cd etc; $EDITOR global.cfg; cd ..; make config`
 - Make sure that all of the domjudge stuff is in the dir set
   as SYSTEM_ROOT, and from that dir:
 - `make`
@@ -36,7 +36,8 @@ DOMjudge:
   `cd judge; ./judgedaemon.php`
 
 - It should be done by now, submit the sources from the test-sources/
-  dir and compare their results with what they claim should happen.
+  dir and compare their results with what they claim should happen:
+  `make check` and check all submissions in the jury webinterface.
 
 - Optionally:
   - Install the submit client on the team workstations;
@@ -44,6 +45,9 @@ DOMjudge:
   - Further tighten the security of the system, e.g. by applying firewall
     rules.
   - Start the balloon notification daemon: `cd bin; ./balloons.php`
-
+  - Setup the java chroot environmentto use Sun Java with chroot:
+    `bin/make_chroot.sh <installdir> <architecture>`
+    `$EDITOR judge/chroot-startstop.sh`
+    and enable the chroot-startstop.sh script in etc/global.cfg.
 
 $Id$
