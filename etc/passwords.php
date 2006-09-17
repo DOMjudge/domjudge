@@ -6,16 +6,9 @@
  *  THIS FILE SHOULD ALWAYS BE NON-READABLE!
  *  (because of database-login usernames/passwords)
  *
- *  Change these from the defaults below to something more difficult to
- *  guess! Also modify this in the MySQL database! This can be done
- *  automatically with 'make gen_passwd' in the SYSTEM_ROOT.
- *
- *  The 'domjudge_team' and 'domjudge_public' passwords can be set to
- *  random strings, because these are only used by internal scripts.
- *  The 'domjudge_jury' password you might want to set to something not
- *  too difficult to remember, because you need this password (or the
- *  MySQL root-password) to log into the MySQL database to change things
- *  there directly.
+ *  These passwords are initialised automatically when running
+ *  'make install' in the SYSTEM_ROOT and removed when running
+ *  'make distclean'.
  */
 
 $DBLOGIN = array (

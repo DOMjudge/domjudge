@@ -11,9 +11,9 @@
 USE mysql;
 
 -- Add users and passwords
--- Change these default passwords, and change them in etc/passwords.php
--- too! This can be done automatically with 'make gen_passwd' from the
--- SYSTEM_ROOT dir.
+-- These passwords are initialised automatically when running
+-- 'make install' in the SYSTEM_ROOT and removed when running
+-- 'make distclean'.
 -- NOTE: by default, access is allowed from ALL hosts, make sure you
 -- restrict this appropriately (or choose strong enough passwords).
 INSERT INTO user (Host, User, Password) VALUES ('%','domjudge_jury'  ,PASSWORD('DOMJUDGE_JURY_PASSWD'));
