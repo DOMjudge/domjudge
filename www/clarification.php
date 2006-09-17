@@ -231,6 +231,11 @@ if ( $respid ) {
 </tr>
 </table>
 </form>
+<script type="text/javascript">
+<!--
+document.forms['sendclar'].bodytext.focus();
+// -->
+</script>
 <?php
 
 }
