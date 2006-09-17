@@ -14,7 +14,7 @@ CXXFLAGS = -O2 -Wall
 CFLAGS = $(CXXFLAGS) -lm
 
 # How to execute a command as root:
-ROOTCMD=su root
+ROOTCMD=su root -c
 # alternatively:
 #ROOTCMD=sudo -u root /bin/bash -c
 
