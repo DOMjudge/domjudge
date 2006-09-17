@@ -42,6 +42,7 @@ DOMjudge:
   - Generate one-time passwords for all the teams;
   - Further tighten the security of the system, e.g. by applying firewall
     rules.
+  - Start the balloon notification daemon: cd bin; ./balloons.php
 
 
 $Id$
