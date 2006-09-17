@@ -75,7 +75,7 @@ if ( @$jdata['endtime'] ) {
 <tr><td>Verified:</td><td><?=printyn($jdata['verified'])?>
 <?php
 if ( $jdata['verified'] && ! empty($jdata['verifier']) ) {
-	echo " by " . htmlentities($jdata['verifier']);
+	echo ", by " . htmlentities($jdata['verifier']);
 } ?></td></tr>
 </table>
 
@@ -93,17 +93,19 @@ if ( ! (VERIFICATION_REQUIRED && $jdata['verified']) ) {
 <?php
 	if ( $val ) {
 		echo "by <input type=\"text\" size=\"10\" name=\"verifier_typed\" />\n";
-		echo "or <select name=\"verifier_selected\" id=\"verifier_selected\">\n";
-		echo "	<option value=\"\"></option>\n";
-		
-		$verifiers = $DB->q('SELECT DISTINCT verifier FROM judging ORDER BY verifier');
-		while ( $verifier = $verifiers->next() ) {
-			if ( ! empty($verifier['verifier']) ) {
-				echo '  <option value="' . htmlspecialchars($verifier['verifier']) .
-					'">' . htmlspecialchars($verifier['verifier']) . "</option>\n";
+		$verifiers = $DB->q('SELECT DISTINCT verifier FROM judging
+			WHERE verifier IS NOT NULL AND verifier != "" ORDER BY verifier');
+		if ( $verifiers->count() > 0 ) {
+			echo "or <select name=\"verifier_selected\" id=\"verifier_selected\">\n";
+			echo "	<option value=\"\"></option>\n";
+			while ( $verifier = $verifiers->next() ) {
+				if ( ! empty($verifier['verifier']) ) {
+					echo '  <option value="' . htmlspecialchars($verifier['verifier']) .
+						'">' . htmlspecialchars($verifier['verifier']) . "</option>\n";
+				}
 			}
+			echo "</select>\n";
 		}
-		echo "</select>\n";
 	}
 	
 	echo "</p></form>\n";
