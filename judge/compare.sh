@@ -66,7 +66,7 @@ fi
 
 # Generate a diff output in readable format:
 
-DIRSTDIFF=""
+FIRSTDIFF=""
 LINEMAXLEN=10
 LINEDIGITS=6
 
