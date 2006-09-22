@@ -10,14 +10,20 @@ if ( ! defined('SCRIPT_ID') ) {
 }
 
 // is this the webinterface or commandline?
-$is_web = isset($_SERVER['REMOTE_ADDR']);
+define('IS_WEB', isset($_SERVER['REMOTE_ADDR']));
 
-if ( ! $is_web && ! defined('STDERR') ) {
+if ( ! IS_WEB && ! defined('STDERR') ) {
 	define('STDERR', fopen('php://stderr', 'w'));
 }
 
 if ( defined('LOGFILE') ) {
-	define('STDLOG', fopen(LOGFILE, 'a'));
+	if ( $fp = @fopen(LOGFILE, 'a') ) {
+		define('STDLOG', $fp);
+	} else {
+		fwrite(STDERR, "Cannot open log file " . LOGFILE .
+			" for appending; continuing without logging.\n");
+	}
+	unset($fp);
 }
 
 // Default verbosity and loglevels:
@@ -25,11 +31,11 @@ $verbose  = LOG_NOTICE;
 $loglevel = LOG_DEBUG;
 
 function logmsg($msglevel, $string) {
-	global $verbose, $loglevel,$is_web;
+	global $verbose, $loglevel;
 	$msg = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . ": ". $string . "\n";
 	if ( $msglevel <= $verbose  ) {
 		// if this is the webinterface, print it to stdout, else to stderr
-		if ( $is_web ) {
+		if ( IS_WEB ) {
 			echo "<fieldset class=\"error\"><legend>Error</legend>\n" .
 				htmlspecialchars($msg) . "</fieldset>\n";
 		} else {
