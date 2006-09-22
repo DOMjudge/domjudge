@@ -59,13 +59,13 @@ while ( TRUE ) {
 			$prob = array ('name'   => $row['probname'],
 			               'probid' => $row['probid']);
 
-			logmsg(LOG_DEBUG,"New problem solved: ".$row['problem'].
+			logmsg(LOG_DEBUG,"New problem solved: ".$row['probid'].
 				   " by team ".$row['team']);
 			
 			if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
 				
 				logmsg(LOG_INFO,"Sending notification: team '".
-					   $row['team']."', problem '".$row['problem']."'.");
+					   $row['team']."', problem '".$row['probid']."'.");
 				
 				logmsg(LOG_DEBUG,"Running command: '".BALLOON_CMD."'");
 				
@@ -79,8 +79,8 @@ while ( TRUE ) {
 			}
 			
 			$DB->q('UPDATE scoreboard_public SET balloon=1
-			        WHERE cid = %i AND team = %s AND problem = %s',
-				   $row['cid'], $row['team'], $row['problem']);
+			        WHERE cid = %i AND team = %s AND probid = %s',
+				   $row['cid'], $row['team'], $row['probid']);
 		}
 		
 	} while ( $res->count()!=0 );
