@@ -23,7 +23,7 @@ function notification_text($team, $problem) {
 	return
 		"Notification of a problem solved:\n".
 		"\n".
-		(empty($team['room']) ? "" : "Room:    $team[room]\n" ) .
+		(empty($team['room']) ? "" : "Room:    ".$team['room']."\n" ) .
 		"Team:    ".$team['login'].": ".$team['name']."\n".
 		"Problem: ".$problem['probid'].": ".$problem['name']."\n";
 }
@@ -50,7 +50,7 @@ while ( TRUE ) {
 		               LEFT JOIN problem p USING(probid)
 		               LEFT JOIN team t ON (t.login = s.team)
 		               WHERE s.cid = %i AND s.is_correct = 1 AND s.balloon = 0',
-					  $cid);
+		               $cid);
 
 		while ( $row = $res->next() ) {
 			$team = array ('name'   => $row['teamname'],
