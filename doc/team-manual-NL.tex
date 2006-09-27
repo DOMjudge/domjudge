@@ -28,7 +28,7 @@ geconfigureerd is.
 
 Hieronder staat kort samengevat de belangrijkste informatie. Dit is
 bedoeld om snel aan de slag te kunnen. We raden echter ten zeerste
-aan, dat minstens iemand binnen je team de complete handleiding
+aan dat minstens iemand binnen je team de complete handleiding
 doorneemt, omdat daarin specifieke details van het jurysysteem staan,
 die ook van belang kunnen zijn op het moment dat niet alles perfect
 gaat (zoals een oplossing die fout is). \textbf{WEES GEWAARSCHUWD!!}
@@ -78,7 +78,7 @@ methodes beschreven.
 
 \textbf{Syntax:} \cmd{submit [opties] bestandsnaam.ext}
 
-Het submit programma haalt de naam (label) van het probleem uit
+Het submitprogramma haalt de naam (label) van het probleem uit
 \cmd{bestandsnaam} en de de programmeertaal uit de extensie
 \cmd{ext}. Dit kan handmatig aangepast worden met de opties
 \cmd{-p probleemnaam} en \cmd{-l taalextensie}. Zie
@@ -99,11 +99,11 @@ te sturen. Als alles goed gaat, zal \cmd{submit} een melding geven
 dat de inzending succesvol is. Indien niet, zal er een foutmelding
 verschijnen.
 
-Het submit programma maakt gebruik van een directory \cmd{\USERSUBMITDIR}
+Het submitprogramma maakt gebruik van een directory \cmd{\USERSUBMITDIR}
 in de homedirectory van het account. Hier slaat het tijdelijk
 bestanden op voor inzending en staat ook een logfile \cmd{submit.log}.
 Verwijder deze directory niet of pas hem niet aan, omdat anders het
-submit programma eventueel niet meer correct functioneert. Verder
+submitprogramma eventueel niet meer correct functioneert. Verder
 is een ``public ssh-key'' van de jury in de ssh configuratie
 toegevoegd. Deze is ook nodig voor het functioneren van \cmd{submit}.
 
@@ -126,7 +126,7 @@ lijst met inzendingen.
 Op de team-webpagina staat een overzicht van je inzendingen.
 Dit overzicht bevat alle relevante gegevens: de tijd van inzending, de
 programmeertaal, het probleem en de status. Het adres van je
-teampagina is \url{\WEBBASEURI team}. Hiervandaan kun je ook naar
+teampagina is \url{\WEBBASEURI team}. Hier vandaan kun je ook naar
 de publieke pagina, waarop de scores van alle teams vermeld staan.
 
 \subsection{Mogelijke uitslagen}
@@ -181,7 +181,7 @@ Je kan vragen aan de jury stellen door middel van het doen van een
 ``Clarification Request'', de link hiervoor bevindt zich onderaan de
 clarifications-pagina.  Je vraag zal alleen bij de jury aan komen, zij
 zullen deze zo snel mogelijk en adequaat beantwoorden. Antwoorden die
-voor iedereen relevant zijn zullen naar iedereen gestuurd worden.
+voor iedereen relevant kunnen zijn zullen naar iedereen gestuurd worden.
 
 Als je een clarification ontvangt van de jury, dan wordt dat
 automatisch gemeld door middel van een pop-up scherm. Hiervoor moet je
@@ -215,7 +215,7 @@ moet dat in principe geen probleem zijn, maar let wel op dat
 je geen compiler/systeem-specifieke dingen gebruikt (bij een
 compileerfout kun je altijd de foutmelding bekijken).
 
-Verder wordt door in het jurysysteem alles statisch gecompileerd, maar
+Verder wordt in het jurysysteem alles statisch gecompileerd, maar
 wat betreft foutmeldingen e.d. zou dit niet relevant moeten zijn.
 
 \subsection{Testen}
@@ -256,9 +256,10 @@ bij compileren levert dit ook een compileerfout op.
 \item[geheugen]
 Je programma heeft tijdens het draaien maximaal \MEMLIMIT\ kilobytes
 geheugen ter beschikking. Let op dat dit totaal geheugen is (inclusief
-programmacode, statisch en dynamisch gedefini\"eerde variabelen,
-stack, \dots)! Als je programma meer probeert te gebruiken, zal het
-waarschijnlijk afbreken, zodat dit een ``RUN-ERROR'' geeft.
+programmacode, eventuele virtual machine (Java), statisch en dynamisch
+gedefinieerde variabelen, stack, \dots)! Als je programma meer
+probeert te gebruiken, zal het afgebroken worden, zodat dit een
+``RUN-ERROR'' geeft.
 
 \item[bestandsgrootte]
 Hoewel je geen bestanden mag schrijven, wordt de standaard (fout)uitvoer
