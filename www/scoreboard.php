@@ -30,10 +30,15 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlentities($contdata['contestname']) . "</h1>\n\n";
 	echo "<h4>starts: " . printtime($contdata['starttime']) .
-	        " - ends: " . printtime($contdata['endtime']) . "</h4>\n\n";
+	        " - ends: " . printtime($contdata['endtime']) ;
+
+	if ( ! $isjury && isset($contdata['lastscoreupdate']) &&
+		strtotime($contdata['lastscoreupdate']) <= time() ) {
+		echo " (frozen since " . printtime($contdata['lastscoreupdate']) .")";
+	}
+	echo "</h4>\n\n";
 
 	echo '<table class="scoreboard" cellpadding="3">' . "\n";
-
 
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
