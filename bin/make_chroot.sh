@@ -94,8 +94,8 @@ echo "Running debootstrap to install base system, this may take a while..."
 /usr/sbin/debootstrap --include="$INCLUDEDEBS" --exclude="$EXCLUDEDEBS" \
 	--arch "$ARCH" sarge "$CHROOTDIR" "$DEBMIRROR"
 
-rm "$CHROOTDIR/etc/resolv.conf"
-cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc"
+rm -f "$CHROOTDIR/etc/resolv.conf"
+cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
 
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
