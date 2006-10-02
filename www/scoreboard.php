@@ -32,9 +32,13 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	echo "<h4>starts: " . printtime($contdata['starttime']) .
 	        " - ends: " . printtime($contdata['endtime']) ;
 
-	if ( ! $isjury && isset($contdata['lastscoreupdate']) &&
+	if ( isset($contdata['lastscoreupdate']) &&
 		strtotime($contdata['lastscoreupdate']) <= time() ) {
-		echo " (frozen since " . printtime($contdata['lastscoreupdate']) .")";
+		echo " (";
+		if ( $isjury ) {
+			echo "public scoreboard is ";
+		}
+		echo "frozen since " . printtime($contdata['lastscoreupdate']) .")";
 	}
 	echo "</h4>\n\n";
 
