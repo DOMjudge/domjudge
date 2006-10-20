@@ -4,7 +4,7 @@
  *
  * This program should fail with a COMPILER-ERROR due to a timeout.
  *
- * The program itself is recursively include via the preprocessor
+ * The program recursively includes itself via the preprocessor
  * directive '#include __FILE__' about 2^26 times (or more, I didn't
  * do a careful analysis).
  *
