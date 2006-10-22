@@ -23,9 +23,9 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 	global $DB;
 	
 	/* We need two kind of queries: one for all submissions, and one with
-	 * the results for the valid ones. When key & value are supplied we're
-	 * looking for the submissions of a specific team or judger, else the
-	 * complete list.
+	 * the results for the valid ones. When key & value are supplied we're 
+	 * looking for the submissions of a specific team, problem, etc., else
+	 * the complete list.
 	 */
 	$keyvalmatch = '';
 	if( $key && $value ) {
