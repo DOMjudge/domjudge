@@ -1,4 +1,4 @@
 $Id$
 
 This file tests stability of the submit client/server with regard
-to strange filename.
+to a strange filename.
