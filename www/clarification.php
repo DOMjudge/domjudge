@@ -41,7 +41,7 @@ function putClar($clar, $isjury = FALSE)
 		"</td></tr>\n";
 	echo '<tr><td valign="top"></td><td class="filename">' .
 		'<pre class="output_text">' .
-		wordwrap(htmlspecialchars($clar['body'])) . "</pre></td></tr>\n";
+		wordwrap(htmlspecialchars($clar['body']),80) . "</pre></td></tr>\n";
 	echo "</table>\n";
 
 	return;
@@ -221,7 +221,7 @@ function confirmClar() {
 <td valign="top"><b><label for="bodytext">Text</label>:</b></td>
 <td><textarea name="bodytext" cols="80" rows="10" id="bodytext"><?php
 if ( $respid ) {
-	$text = explode("\n",wordwrap(htmlspecialchars($clar['body'])));
+	$text = explode("\n",wordwrap(htmlspecialchars($clar['body']),70));
 	foreach($text as $line) {
 		echo "&gt; $line\n";
 	}
