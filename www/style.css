@@ -56,7 +56,6 @@ a:active          { color: red;    }
 	border-right: 1px solid gray; border-bottom: 1px solid gray;
 }
 
-
 .scoreboard			{ border-collapse: collapse;		}
 .scoreboard td		{ font-size: small;					}
 .scoreboard tr		{ border-bottom: 1px solid silver;	}
@@ -67,7 +66,7 @@ a:active          { color: red;    }
 .score_neutral		{ background: white;	}
 
 #scoresolv,#scoretotal { width: 5em; }
-.scorenc,.scorett { text-align: right; }
+.scorenc,.scorett,.scorepl { text-align: right; }
 .scoreprob { width: 7em; }
 
 #scoresummary {
