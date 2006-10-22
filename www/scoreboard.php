@@ -54,7 +54,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
                          ORDER BY probid', $cid);
 
 	// output table column groups (for the styles)
-	echo '<colgroup><col id="scoreteamname" /><col id="scoresolv" />' .
+	echo '<colgroup><col id="scoreplace" /><col id="scoreteamname" /><col id="scoresolv" />' .
 		'<col id="scoretotal" />' .
 		str_repeat('<col class="scoreprob" />', count($probs)) .
 		"</colgroup>\n";
@@ -128,10 +128,18 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			echo ' class="sortorderswitch"';
 			$prevsortorder = $totals['sortorder'];
 			$place = 0; // reset team position on switch to different categories
+			$prevscores = array(-1,-1);
 		}
 		$place++;
 		echo
-			'><td class="scorepl">' . $place . '</td>' .
+			'><td class="scorepl">';
+		if ( $prevscores[0] != $totals['num_correct'] ||
+			 $prevscores[1] != $totals['total_time'] ) {
+			echo $place;
+			$prevscores = array($totals['num_correct'], $totals['total_time']);
+		}
+		echo
+			'</td>' .
 			'<td class="scoretn category' . $totals['categoryid'] . '">' .
 			htmlentities($teams[$team]['name']) . '</td>' .
 			'<td class="scorenc">' . $totals['num_correct'] . '</td>' .
