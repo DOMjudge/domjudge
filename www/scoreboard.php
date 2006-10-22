@@ -60,7 +60,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		"</colgroup>\n";
 
 	// column headers
-	echo '<tr class="scoreheader"><th>team</th>';
+	echo '<tr class="scoreheader"><th>#</th><th>team</th>';
 	echo "<th>solved</th><th>time</th>\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="' . htmlentities($pr['name']). '">' .
@@ -127,9 +127,11 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		if ( $totals['sortorder'] != $prevsortorder ) {
 			echo ' class="sortorderswitch"';
 			$prevsortorder = $totals['sortorder'];
+			$place = 0; // reset team position on switch to different categories
 		}
+		$place++;
 		echo
-			'>' .
+			'><td class="scorepl">' . $place . '</td>' .
 			'<td class="scoretn category' . $totals['categoryid'] . '">' .
 			htmlentities($teams[$team]['name']) . '</td>' .
 			'<td class="scorenc">' . $totals['num_correct'] . '</td>' .
@@ -151,17 +153,17 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 				                 'time' => 0, 'penalty' => 0);
 			}
 
-			echo '<td class="';
+			echo '<td class=';
 			// CSS class for correct/incorrect/neutral results
 			if( $pdata['correct'] ) { 
-				echo 'score_correct';
+				echo '"score_correct"';
 			} elseif ( $pdata['submitted'] > 0 ) {
-				echo 'score_incorrect';
+				echo '"score_incorrect"';
 			} else {
-				echo 'score_neutral';
+				echo '"score_neutral"';
 			}
 			// number of submissions for this problem
-			echo '">' . $pdata['submitted'];
+			echo '>' . $pdata['submitted'];
 			// if correct, print time scored
 			if( ($pdata['time']+$pdata['penalty']) > 0) {
 				echo " (" . $pdata['time'] . ' + ' . $pdata['penalty'] . ")";
@@ -180,7 +182,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	}
 
 	// print a summaryline
-	echo "\n<tr id=\"scoresummary\" title=\"#submitted / #correct / fastest time\"><td title=\" \">Summary</td>";
+	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
+	     '<td></td><td title=" ">Summary</td>';
 	echo '<td class="scorenc" title="total solved">' . $SUMMARY['num_correct'] . '</td>' .
 	     '<td class="scorett" title="total time">' . $SUMMARY['total_time'] . '</td>';
 
