@@ -60,11 +60,13 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		"</colgroup>\n";
 
 	// column headers
-	echo '<tr class="scoreheader"><th>#</th><th>team</th>';
+	echo '<tr class="scoreheader"><th>#</th><th>' .
+		($isjury ? '<a href="teams.php">team</a>' : 'team' ) . '</th>';
 	echo "<th>solved</th><th>time</th>\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="' . htmlentities($pr['name']). '">' .
-			htmlentities($pr['probid']) . '</th>';
+			($isjury ? '<a href="problem.php?id=' . $pr['probid'] . '">' : '') .
+			htmlentities($pr['probid']) . ($isjury ? '</a>' : '') . '</th>';
 	}
 	echo "</tr>\n";
 
@@ -142,7 +144,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			'</td>' .
 			'<td class="scoretn category' . $totals['categoryid'] . '"' .
 			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
-			htmlentities($teams[$team]['name']) . '</td>' .
+			($isjury ? '<a href="team.php?id=' . $team . '">' : '') . 
+			htmlentities($teams[$team]['name']) .
+			($isjury ? '</a>' : '') . '</td>' .
 			'<td class="scorenc">' . $totals['num_correct'] . '</td>' .
 			'<td class="scorett">' . $totals['total_time'] . '</td>';
 
@@ -198,28 +202,28 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	foreach( $probs as $pr ) {
 		if ( !isset($SUMMARY[$pr['probid']]) ) {
-			echo '<td> 0 / 0 / -</td>';
-		} else {
-			echo '<td>' . $SUMMARY[$pr['probid']]['submissions'] . ' / ' .
-				$SUMMARY[$pr['probid']]['correct'] . ' / ' .
-				( isset($SUMMARY[$pr['probid']]['times']) ?
-				  min(@$SUMMARY[$pr['probid']]['times']) : '-' ) . "</td>";
+			$SUMMARY[$pr['probid']]['submissions'] = 0;
+			$SUMMARY[$pr['probid']]['correct'] = 0;
 		}
+		echo '<td>' . ($isjury ? '<a href="problem.php?id=' . $pr['probid'] . '">' : '') .
+			$SUMMARY[$pr['probid']]['submissions'] . ' / ' .
+			$SUMMARY[$pr['probid']]['correct'] . ' / ' .
+			( isset($SUMMARY[$pr['probid']]['times']) ?
+			  min(@$SUMMARY[$pr['probid']]['times']) : '-' ) .
+			($isjury ? '</a>' : '') . '</td>';
 	}
-	echo "</tr>\n\n";
-
-	echo "</table>\n\n";
+	echo "</tr>\n</table>\n\n";
 
 	$res = $DB->q('SELECT * FROM team_category ORDER BY categoryid');
 
 	// only print legend when there's more than one category
 	if ( $res->count() > 1 ) {
-		echo "<p><br /><br /></p>\n<table class=\"scoreboard\"><tr>" .
-			"<th>Legend</th></tr>\n";
+		echo "<p><br /><br /></p>\n<table class=\"scoreboard\">\n" .
+			"<tr><th>Legend</th></tr>\n";
 		while ( $row = $res->next() ) {
 			echo '<tr class="category' . $row['categoryid'] . '">' .
 				'<td align="center" class="scoretn">' .	$row['name'] .
-				"</td></tr>";
+				"</td></tr>\n";
 		}
 		echo "</table>\n\n";
 	}
