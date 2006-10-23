@@ -73,6 +73,8 @@ $data = $DB->q('TUPLE SELECT * FROM problem NATURAL JOIN contest WHERE probid = 
 <h2>Submissions for <?=htmlspecialchars($id)?></h2>
 
 <?php
-putSubmissions('probid', $id, TRUE);
+
+$restrictions = array( array( 'key' => 'probid', 'value' => $id ) );
+putSubmissions($restrictions, TRUE);
 
 require('../footer.php');

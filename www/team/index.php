@@ -19,6 +19,7 @@ putTeamRow($login);
 echo "</div>\n";
 
 // call putSubmissions function from common.php for this team.
-putSubmissions('team', $login);
+$restrictions = array( array( 'key' => 'team', 'value' => $login ) );
+putSubmissions($restrictions);
 
 require('../footer.php');

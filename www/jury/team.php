@@ -21,6 +21,13 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 	exit;
 }
 
+/* optional restriction of submissions list to specific problem, language, etc. */
+$restrictions = array();
+if ( isset($_REQUEST['restrict']) ) {
+	list($key, $value) = explode(":",$_REQUEST['restrict'],2);
+	$restrictions[] = array( 'key' => $key , 'value' => $value );
+}
+
 $row = $DB->q('TUPLE SELECT t.*,c.name as catname,a.name as affname FROM team t
                LEFT JOIN team_category c USING(categoryid)
 			   LEFT JOIN team_affiliation a ON(t.affilid=a.affilid)
@@ -41,8 +48,8 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 	' - '.htmlentities($row['catname'])?></td></tr>
 <?php if (!empty($row['affilid'])): ?>
 <tr><td>Affiliation:  </td><td><a href="affiliation.php?id=<?=
-	urlencode($row['affilid']) . "\">" .
-	htmlentities($row['affilid'] . " - " .
+	urlencode($row['affilid']) . '">' .
+	htmlentities($row['affilid'] . ' - ' .
 	$row['affname'])?></a></td></tr>
 <?php endif; ?>
 <tr><td>Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
@@ -63,10 +70,23 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 </p>
 </form>
 
-<h3>Submissions</h3>
-
 <?php
 
-putSubmissions('team', $id, TRUE);
+echo '<h3>Submissions';
+if ( isset($key) ) {
+	$keystr = "";
+	switch ( $key ) {
+	case 'team':     $keystr = "team";     break;
+	case 'probid':   $keystr = "problem";  break;
+	case 'langid':   $keystr = "language"; break;
+	case 'judgerid': $keystr = "judger";   break;
+	default:         $keystr = $key;
+	}
+	echo ' for ' . htmlspecialchars($keystr) . ': ' . htmlspecialchars($value);
+}
+echo "</h3>\n\n";
+
+$restrictions[] = array( 'key' => 'team' , 'value' => $id );
+putSubmissions($restrictions, TRUE);
 
 require('../footer.php');

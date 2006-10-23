@@ -71,6 +71,8 @@ $data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 <h2>Submissions in <?=htmlspecialchars($id)?></h2>
 
 <?php
-putSubmissions('langid', $id, TRUE);
+
+$restrictions = array( array( 'key' => 'langid', 'value' => $id ) );
+putSubmissions($restrictions, TRUE);
 
 require('../footer.php');

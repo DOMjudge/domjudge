@@ -14,6 +14,6 @@ require('menu.php');
 
 echo "<h1>Submissions</h1>\n\n";
 
-putSubmissions(null,null,TRUE);
+putSubmissions(null,TRUE);
 
 require('../footer.php');

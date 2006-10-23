@@ -18,18 +18,20 @@ function getBaseURI() {
  * match <key> = <value>. Output is always limited to the
  * current or last contest.
  */
-function putSubmissions($key = null, $value = null, $isjury = FALSE) {
+function putSubmissions($restrictions, $isjury = FALSE) {
 
 	global $DB;
 	
-	/* We need two kind of queries: one for all submissions, and one with
-	 * the results for the valid ones. When key & value are supplied we're 
-	 * looking for the submissions of a specific team, problem, etc., else
-	 * the complete list.
+	/* We need two kind of queries: one for all submissions, and one
+	 * with the results for the valid ones. Restrictions is an array
+	 * of key/value pairs, to which the complete list of submissions
+	 * is restricted.
 	 */
+	
 	$keyvalmatch = '';
-	if( $key && $value ) {
-		$keyvalmatch = " s.$key = \"" . mysql_escape_string($value) . '" AND ';
+	foreach ( $restrictions as $restriction ) {
+		$keyvalmatch .= ' s.' . $restriction['key'] . ' = "' .
+			mysql_escape_string($restriction['value']) . '" AND';
 	}
 
 	$contdata = getCurContest(TRUE);
@@ -41,7 +43,7 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 		LEFT JOIN team t ON(t.login=s.team)
 		LEFT JOIN problem p ON(p.probid=s.probid)
 		LEFT JOIN language l ON(l.langid=s.langid)
-		WHERE ' . $keyvalmatch . 's.cid = %i ORDER BY s.submittime DESC',$cid);
+		WHERE ' . $keyvalmatch . ' s.cid = %i ORDER BY s.submittime DESC',$cid);
 
 	// nothing found...
 	if( $res->count() == 0 ) {
@@ -50,21 +52,16 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 	}
 	
 	$resulttable = $DB->q('KEYTABLE SELECT j.*, submitid AS ARRAYKEY
-		FROM judging j WHERE valid = 1 AND cid = %i',$cid);
+	                       FROM judging j WHERE valid = 1 AND cid = %i',$cid);
 	
 	// print the table with the submissions. 
 	// table header; leave out the field that is our key (because it's the same
 	// for all rows)
-	echo "<table>\n<tr>" .
-		( $isjury ? "<th>ID</th>" : '' ) .
-		"<th>time</th>" .
-		($key != 'team'   ? "<th>team</th>"    : '') .
-		($key != 'probid' ? "<th>problem</th>" : '') .
-		($key != 'langid' ? "<th>lang</th>"    : '') .
-		"<th>status</th>" .
+	echo "<table>\n<tr><th>ID</th><th>time</th><th>team</th>" .
+		"<th>problem</th><th>lang</th><th>status</th>" .
 		($isjury ? "<th>verified</th>" : '') .
-		($isjury ? "<th>last<br />judge</th>" : '') .
-		"</tr>\n";
+		($isjury ? "<th>last<br />judge</th>" : '') . "</tr>\n";
+	
 	// print each row with links to detailed information
 	while( $row = $res->next() ) {
 		$sid = (int)$row['submitid'];
@@ -74,24 +71,15 @@ function putSubmissions($key = null, $value = null, $isjury = FALSE) {
 			echo "<td><a href=\"submission.php?id=$sid\">s$sid</a></td>";
 		}
 		echo "<td>" . printtime($row['submittime']) . "</td>";
-		if ( $key != 'team' ) {
-			echo '<td class="teamid" title="' . htmlentities($row['teamname']) . '">' .
-				( $isjury ? '<a href="team.php?id=' . $row['team'] . '">' : '' ) .
-				htmlspecialchars($row['team']) .
-				( $isjury ? '</a>' : '') . '</td>';
-		}
-		if ( $key != 'probid' ) {
-			echo '<td title="' . htmlentities($row['probname']) . '">' .
-				( $isjury ? '<a href="problem.php?id=' . $row['probid'] . '">' : '' ) .
-				htmlspecialchars($row['probid']) .
-				( $isjury ? '</a>' : '') . '</td>';
-		}
-		if ( $key != 'langid' ) {
-			echo '<td title="' . htmlentities($row['langname']) . '">' .
-				( $isjury ? '<a href="language.php?id=' . $row['langid'] . '">' : '' ) .
-				htmlspecialchars($row['langid']) .
-				( $isjury ? '</a>' : '') . '</td>';
-		}
+		echo '<td class="teamid" title="' . htmlentities($row['teamname']) . '">' .
+			( $isjury ? '<a href="team.php?id=' . $row['team'] . '">' : '' ) .
+			htmlspecialchars($row['team']) . ( $isjury ? '</a>' : '') . '</td>';
+		echo '<td title="' . htmlentities($row['probname']) . '">' .
+			( $isjury ? '<a href="problem.php?id=' . $row['probid'] . '">' : '' ) .
+			htmlspecialchars($row['probid']) . ( $isjury ? '</a>' : '') . '</td>';
+		echo '<td title="' . htmlentities($row['langname']) . '">' .
+			( $isjury ? '<a href="language.php?id=' . $row['langid'] . '">' : '' ) .
+			htmlspecialchars($row['langid']) . ( $isjury ? '</a>' : '') . '</td>';
 		echo "<td>";
 		if ( $isjury ) {
 			if ( ! @$resulttable[$sid]['result'] ) {
