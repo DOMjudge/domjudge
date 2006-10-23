@@ -97,10 +97,12 @@ int receive(int fd)
 	ssize_t nread;
 	int i;
 	
-	if ( (nread = read(fd, buffer, SOCKETBUFFERSIZE)) == -1 ) {
+	if ( (nread = read(fd, buffer, SOCKETBUFFERSIZE-2)) == -1 ) {
 		error(errno,"reading from socket");
 	}
 
+	buffer[nread] = 0;
+	
 	/* Check for end of file */
 	if ( nread==0 ) return 0;
 	
