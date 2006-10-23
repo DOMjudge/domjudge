@@ -5,8 +5,6 @@ body {
 	font-family: sans-serif;
 }
 
-td { padding-right: 1ex; }
-
 .sol { font-weight: bold; font-variant: small-caps; }
 .sol_correct          { color: green;  }
 .sol_incorrect        { color: red;    }
@@ -56,14 +54,24 @@ a:active          { color: red;    }
 	border-right: 1px solid gray; border-bottom: 1px solid gray;
 }
 
-.scoreboard			{ border-collapse: collapse;		}
-.scoreboard td		{ font-size: small;					}
-.scoreboard tr		{ border-bottom: 1px solid silver;	}
-.scoreboard td, .scoreboard th { border-right:  1px solid black;	}
+.scoreboard		{ border-collapse: collapse; }
+.scoreboard td		{ font-size: small; }
+.scoreboard tr		{ border-bottom: 1px solid silver; }
+.scoreboard td, .scoreboard th { border-right: 1px solid black; padding: 0px; }
 .scoreheader		{ border-bottom: 2px solid black; font-variant: small-caps; }
 .score_correct		{ background: #33FF66;	}
 .score_incorrect	{ background: #FF6666;	}
 .score_neutral		{ background: white;	}
+
+.scoreboard a {
+	display: block;
+	padding-left:   5px;
+	padding-right:  5px;
+	padding-top:    3px;
+	padding-bottom: 3px;
+	text-decoration: none;
+	color: black;
+}
 
 #scoresolv,#scoretotal { width: 5em; }
 .scorenc,.scorett,.scorepl { text-align: right; }
@@ -89,13 +97,15 @@ a:active          { color: red;    }
 	position: absolute; right: 1ex;
 }
 
-#teamscoresummary {	position: absolute; right: 1ex;	}
+#teamscoresummary { position: absolute; right: 1ex; }
+#teamscoresummary td { padding: 3px; }
+#teamscoresummary th { padding: 3px; }
 
 /* backgrounds for categories, define as you see fit */
 .category1 { background: white; }
 .category2 { background: #ffffcc; }
 .category3 { background: #ffccff; }
 .category4 { background: #99ccff; }
+
 /* between different sortorder-categories, print a thick line */
 .sortorderswitch { border-top: 2px solid black; }
-

@@ -60,13 +60,13 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		"</colgroup>\n";
 
 	// column headers
-	echo '<tr class="scoreheader"><th>#</th><th>' .
-		($isjury ? '<a href="teams.php">team</a>' : 'team' ) . '</th>';
-	echo "<th>solved</th><th>time</th>\n";
+	echo '<tr class="scoreheader"><th>#</th><th><a' .
+		($isjury ? ' href="teams.php"' : '') .'>team</a></th>';
+	echo "<th><a>solved</a></th><th><a>time</a></th>\n";
 	foreach( $probs as $pr ) {
-		echo '<th title="' . htmlentities($pr['name']). '">' .
-			($isjury ? '<a href="problem.php?id=' . $pr['probid'] . '">' : '') .
-			htmlentities($pr['probid']) . ($isjury ? '</a>' : '') . '</th>';
+		echo '<th title="' . htmlentities($pr['name']). '"><a' .
+			($isjury ? ' href="problem.php?id=' . $pr['probid'] . '"' : '') .
+			'>' . htmlentities($pr['probid']) . '</a></th>';
 	}
 	echo "</tr>\n";
 
@@ -134,21 +134,20 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		}
 		$place++;
 		echo
-			'><td class="scorepl">';
+			'><td class="scorepl"><a>';
 		if ( $prevscores[0] != $totals['num_correct'] ||
 			 $prevscores[1] != $totals['total_time'] ) {
 			echo $place;
 			$prevscores = array($totals['num_correct'], $totals['total_time']);
 		}
 		echo
-			'</td>' .
+			'</a></td>' .
 			'<td class="scoretn category' . $totals['categoryid'] . '"' .
-			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
-			($isjury ? '<a href="team.php?id=' . $team . '">' : '') . 
-			htmlentities($teams[$team]['name']) .
-			($isjury ? '</a>' : '') . '</td>' .
-			'<td class="scorenc">' . $totals['num_correct'] . '</td>' .
-			'<td class="scorett">' . $totals['total_time'] . '</td>';
+			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '><a' .
+			($isjury ? ' href="team.php?id=' . $team . '"' : '') . '>' .
+			htmlentities($teams[$team]['name']) . '</a></td>' .
+			'<td class="scorenc"><a>' . $totals['num_correct'] . '</a></td>' .
+			'<td class="scorett"><a>' . $totals['total_time']  . '</a></td>';
 
 		// keep summary statistics for the bottom row of our table
 		$SUMMARY['num_correct'] += $totals['num_correct'];
@@ -176,12 +175,14 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 				echo '"score_neutral"';
 			}
 			// number of submissions for this problem
-			echo '>' . $pdata['submitted'];
+			echo '><a' . ($isjury ? ' href="team.php?id=' . $team .
+			              '&amp;restrict=probid:' . $prob . '"' : '') .
+			     '>' . $pdata['submitted'];
 			// if correct, print time scored
 			if( ($pdata['time']+$pdata['penalty']) > 0) {
 				echo " (" . $pdata['time'] . ' + ' . $pdata['penalty'] . ")";
 			}
-			echo "</td>";
+			echo '</a></td>';
 			
 			// update summary data for the bottom row
 			@$SUMMARY[$prob]['submissions'] += $pdata['submitted'];
@@ -196,21 +197,21 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// print a summaryline
 	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
-	     '<td></td><td title=" ">Summary</td>';
-	echo '<td class="scorenc" title="total solved">' . $SUMMARY['num_correct'] . '</td>' .
-	     '<td class="scorett" title="total time">' . $SUMMARY['total_time'] . '</td>';
+	     '<td title="total teams"><a>' . count($teams) .
+		 '</a></td><td title=" "><a>Summary</a></td>';
+	echo '<td class="scorenc" title="total solved"><a>' . $SUMMARY['num_correct'] . '</a></td>' .
+	     '<td class="scorett" title="total time"><a>'   . $SUMMARY['total_time']  . '</a></td>';
 
 	foreach( $probs as $pr ) {
 		if ( !isset($SUMMARY[$pr['probid']]) ) {
 			$SUMMARY[$pr['probid']]['submissions'] = 0;
 			$SUMMARY[$pr['probid']]['correct'] = 0;
 		}
-		echo '<td>' . ($isjury ? '<a href="problem.php?id=' . $pr['probid'] . '">' : '') .
+		echo '<td><a' . ($isjury ? ' href="problem.php?id=' . $pr['probid'] . '"' : '') . '>' .
 			$SUMMARY[$pr['probid']]['submissions'] . ' / ' .
 			$SUMMARY[$pr['probid']]['correct'] . ' / ' .
 			( isset($SUMMARY[$pr['probid']]['times']) ?
-			  min(@$SUMMARY[$pr['probid']]['times']) : '-' ) .
-			($isjury ? '</a>' : '') . '</td>';
+			  min(@$SUMMARY[$pr['probid']]['times']) : '-' ) . '</a></td>';
 	}
 	echo "</tr>\n</table>\n\n";
 
