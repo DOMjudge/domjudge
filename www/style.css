@@ -14,6 +14,13 @@ a:link, a:visited { color: blue;   }
 a:hover           { color: purple; }
 a:active          { color: red;    }
 
+th	{
+	vertical-align: bottom;
+	border-bottom: 1px dashed gray;
+}
+
+hr	{ border: 0; height: 1px; background-color: gray; }
+
 .disabled         { color: silver; }
 .disabled a       { color: gray;   }
 
