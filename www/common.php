@@ -57,10 +57,12 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	// print the table with the submissions. 
 	// table header; leave out the field that is our key (because it's the same
 	// for all rows)
-	echo "<table>\n<tr><th>ID</th><th>time</th><th>team</th>" .
+	echo "<table>\n<tr>" .
+		($isjury ? "<th>ID</th>" : '') .
+		"<th>time</th><th>team</th>" .
 		"<th>problem</th><th>lang</th><th>status</th>" .
-		($isjury ? "<th>verified</th>" : '') .
-		($isjury ? "<th>last<br />judge</th>" : '') . "</tr>\n";
+		($isjury ? "<th>verified</th><th>last<br />judge</th>" : '') .
+		"</tr>\n";
 	
 	// print each row with links to detailed information
 	while( $row = $res->next() ) {
