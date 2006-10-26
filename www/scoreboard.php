@@ -42,7 +42,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	}
 	echo "</h4>\n\n";
 
-	echo '<table class="scoreboard" cellpadding="3">' . "\n";
+	echo '<table class="scoreboard' . ($isjury ? '_jury' : '') .
+	     '" cellpadding="3">' . "\n";
 
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
@@ -60,13 +61,15 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		"</colgroup>\n";
 
 	// column headers
-	echo '<tr class="scoreheader"><th>#</th><th><a' .
-		($isjury ? ' href="teams.php"' : '') .'>team</a></th>';
-	echo "<th><a>solved</a></th><th><a>time</a></th>\n";
+	echo '<tr class="scoreheader"><th>' .
+		jurylink(null,'#',$isjury) . '</th><th>' .
+		jurylink('teams.php','team',$isjury) . '</th><th>' .
+		jurylink(null,'solved',$isjury) . '</th><th>' .
+		jurylink(null,'time',$isjury) . "</th>\n";
 	foreach( $probs as $pr ) {
-		echo '<th title="' . htmlentities($pr['name']). '"><a' .
-			($isjury ? ' href="problem.php?id=' . $pr['probid'] . '"' : '') .
-			'>' . htmlentities($pr['probid']) . '</a></th>';
+		echo '<th title="' . htmlentities($pr['name']). '">' .
+			jurylink('problem.php?id=' . $pr['probid'],
+					 htmlentities($pr['probid']),$isjury) .	'</th>';
 	}
 	echo "</tr>\n";
 
@@ -134,20 +137,21 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		}
 		$place++;
 		echo
-			'><td class="scorepl"><a>';
+			'><td class="scorepl">';
 		if ( $prevscores[0] != $totals['num_correct'] ||
 			 $prevscores[1] != $totals['total_time'] ) {
-			echo $place;
+			echo jurylink(null,$place,$isjury);
 			$prevscores = array($totals['num_correct'], $totals['total_time']);
+		} else {
+			echo jurylink(null,'',$isjury);
 		}
 		echo
-			'</a></td>' .
-			'<td class="scoretn category' . $totals['categoryid'] . '"' .
-			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '><a' .
-			($isjury ? ' href="team.php?id=' . $team . '"' : '') . '>' .
-			htmlentities($teams[$team]['name']) . '</a></td>' .
-			'<td class="scorenc"><a>' . $totals['num_correct'] . '</a></td>' .
-			'<td class="scorett"><a>' . $totals['total_time']  . '</a></td>';
+			'</td><td class="scoretn category' . $totals['categoryid'] . '"' .
+			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
+			jurylink('"team.php?id=' . $team,
+			         htmlentities($teams[$team]['name']),$isjury) .	'</td>' .
+			'<td class="scorenc">' . jurylink(null,$totals['num_correct'],$isjury) . '</td>' .
+			'<td class="scorett">' . jurylink(null,$totals['total_time'], $isjury) . '</td>';
 
 		// keep summary statistics for the bottom row of our table
 		$SUMMARY['num_correct'] += $totals['num_correct'];
@@ -175,14 +179,13 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 				echo '"score_neutral"';
 			}
 			// number of submissions for this problem
-			echo '><a' . ($isjury ? ' href="team.php?id=' . $team .
-			              '&amp;restrict=probid:' . $prob . '"' : '') .
-			     '>' . $pdata['submitted'];
+			$str = $pdata['submitted'];
 			// if correct, print time scored
 			if( ($pdata['time']+$pdata['penalty']) > 0) {
-				echo " (" . $pdata['time'] . ' + ' . $pdata['penalty'] . ")";
+				$str .= ' (' . $pdata['time'] . ' + ' . $pdata['penalty'] . ')';
 			}
-			echo '</a></td>';
+			echo '>' . jurylink('team.php?id=' . $team . '&amp;restrict=probid:' . $prob,
+			                    $str,$isjury) . '</td>';
 			
 			// update summary data for the bottom row
 			@$SUMMARY[$prob]['submissions'] += $pdata['submitted'];
@@ -197,21 +200,26 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// print a summaryline
 	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
-	     '<td title="total teams"><a>' . count($teams) .
-		 '</a></td><td title=" "><a>Summary</a></td>';
-	echo '<td class="scorenc" title="total solved"><a>' . $SUMMARY['num_correct'] . '</a></td>' .
-	     '<td class="scorett" title="total time"><a>'   . $SUMMARY['total_time']  . '</a></td>';
+	     '<td title="total teams">' . jurylink(null,count($teams),$isjury) .
+		 '</td><td title=" ">' . jurylink(null,'Summary',$isjury) . '</td>';
+	echo '<td class="scorenc" title="total solved">' .
+	     jurylink(null,$SUMMARY['num_correct'],$isjury) . '</td>' .
+	     '<td class="scorett" title="total time">' .
+	     jurylink(null,$SUMMARY['total_time'],$isjury) . '</td>';
 
 	foreach( $probs as $pr ) {
 		if ( !isset($SUMMARY[$pr['probid']]) ) {
 			$SUMMARY[$pr['probid']]['submissions'] = 0;
 			$SUMMARY[$pr['probid']]['correct'] = 0;
 		}
-		echo '<td><a' . ($isjury ? ' href="problem.php?id=' . $pr['probid'] . '"' : '') . '>' .
-			$SUMMARY[$pr['probid']]['submissions'] . ' / ' .
-			$SUMMARY[$pr['probid']]['correct'] . ' / ' .
-			( isset($SUMMARY[$pr['probid']]['times']) ?
-			  min(@$SUMMARY[$pr['probid']]['times']) : '-' ) . '</a></td>';
+		$str = $SUMMARY[$pr['probid']]['submissions'] . ' / ' .
+		       $SUMMARY[$pr['probid']]['correct'] . ' / ';
+		if ( isset($SUMMARY[$pr['probid']]['times']) ) {
+			$str .= min(@$SUMMARY[$pr['probid']]['times']);
+		} else {
+			$str .= '-';
+		}
+		echo '<td>' . jurylink('problem.php?id=' . $pr['probid'],$str,$isjury) . '</td>';
 	}
 	echo "</tr>\n</table>\n\n";
 
@@ -320,6 +328,19 @@ function putTeamRow($teamid) {
 	echo "</table>\n\n";
 
 	return;
+}
+
+// function to generate links for jury only
+function jurylink($target, $content, $isjury) {
+
+	$res = "";
+	if ( $isjury ) {
+		$res .= '<a' . (isset($target) ? ' href="' . $target . '"' : '' ) . '>';
+	}
+	$res .= $content;
+	if ( $isjury ) $res .= '</a>';
+	
+	return $res;
 }
 
 // comparison function for scoreboard

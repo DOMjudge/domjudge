@@ -64,21 +64,24 @@ hr	{ border: 0; height: 1px; background-color: gray; }
 .scoreboard		{ border-collapse: collapse; }
 .scoreboard td		{ font-size: small; }
 .scoreboard tr		{ border-bottom: 1px solid silver; }
-.scoreboard td, .scoreboard th { border-right: 1px solid black; padding: 0px; }
+.scoreboard td, .scoreboard th { border-right: 1px solid black; }
+
+.scoreboard_jury	{ border-collapse: collapse; }
+.scoreboard_jury td	{ font-size: small; }
+.scoreboard_jury tr	{ border-bottom: 1px solid silver; }
+.scoreboard_jury td, .scoreboard_jury th { border-right: 1px solid black; padding: 0px; }
+
+.scoreboard_jury a {
+	display: block;
+	padding: 3px;
+	text-decoration: none;
+	color: black;
+}
+
 .scoreheader		{ border-bottom: 2px solid black; font-variant: small-caps; }
 .score_correct		{ background: #33FF66;	}
 .score_incorrect	{ background: #FF6666;	}
 .score_neutral		{ background: white;	}
-
-.scoreboard a {
-	display: block;
-	padding-left:   5px;
-	padding-right:  5px;
-	padding-top:    3px;
-	padding-bottom: 3px;
-	text-decoration: none;
-	color: black;
-}
 
 #scoresolv,#scoretotal { width: 5em; }
 .scorenc,.scorett,.scorepl { text-align: right; }
