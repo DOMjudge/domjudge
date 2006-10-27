@@ -4,11 +4,12 @@ Version 1.3.1 - SVN
 -------------------
  - Add numbering to scoreboard.
  - Make all cells in jury scoreboard links that refer to relevant
-   data for that cell.
+   data for that cell (Closes: #1582358).
  - Fix possible buffer overflow in submitcommon.cc; Thanks to
    Lennert Buytenhek for pointing out.
  - Fix clarification wrapping.
  - Fix some language typos.
+ - Improve webinterface layout (CSS modifications)
  - Tweak the webinterface even more.
 
 Version 1.3.0 - 6 October 2006

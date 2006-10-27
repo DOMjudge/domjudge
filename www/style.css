@@ -1,48 +1,82 @@
 /* $Id$ */
 
 body {
-	color: black; background-color: white;
+	color: black;
+	background-color: white;
 	font-family: sans-serif;
 }
 
-.sol { font-weight: bold; font-variant: small-caps; }
-.sol_correct          { color: green;  }
-.sol_incorrect        { color: red;    }
-.sol_queued           { color: gray;   }
+.sol {
+	font-weight: bold;
+	font-variant: small-caps;
+}
+
+.sol_correct      { color: green;  }
+.sol_incorrect    { color: red;    }
+.sol_queued       { color: gray;   }
 
 a:link, a:visited { color: blue;   }
 a:hover           { color: purple; }
 a:active          { color: red;    }
 
-th	{
+.disabled         { color: silver; }
+.disabled a       { color: gray;   }
+
+/* general table layout (not in scoreboard or lists) */
+table {
+	border-collapse: separate;
+	border-spacing: 2px;
+}
+
+th {
 	vertical-align: bottom;
 	border-bottom: 1px dashed gray;
 }
 
-hr	{ border: 0; height: 1px; background-color: gray; }
+hr {
+	border: 0;
+	height: 1px;
+	background-color: gray;
+}
 
-.disabled         { color: silver; }
-.disabled a       { color: gray;   }
+/* more spacing in lists of teams, submissions, etc. */
+.list { border-spacing: 0px; }
+.list td, .list th {
+	padding: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+	vertical-align: bottom;
+}
+
+.teamstatus { text-align: center; }
+.teamstatus img { vertical-align: middle; }
 
 .output_text {
 	border: 2px dotted #C0C0C0;
 	background-color: #F9F9F9;
-	margin: 0; padding: 5px;
+	margin: 0;
+	padding: 5px;
 	font-family: monospace;	
 }
 
 .teamid, .filename, .hostname { font-family: monospace; }
 
 #menutop a {
-	font-weight: bold; text-decoration: none;
+	font-weight: bold;
+	text-decoration: none;
 	background-color: #FFFFF0;
 	border: 1px solid black;
-	margin: 2px; padding: 2px; padding-left: 5px; padding-right: 5px;
+	margin: 2px;
+	padding: 2px;
+	padding-left: 5px;
+	padding-right: 5px;
 }
 #clock {
 	position: absolute; right: 1ex; top: 1ex;
-	font-size: small; font-family: monospace;
-	border: 1px dashed #ccc; padding: 4px;
+	font-size: small;
+	font-family: monospace;
+	border: 1px dashed #ccc;
+	padding: 4px;
 	color: gray;
 }
 
@@ -50,22 +84,30 @@ hr	{ border: 0; height: 1px; background-color: gray; }
 
 .error {
 	color: red;
-	font-weight: bold; font-family: monospace;
+	font-weight: bold;
+	font-family: monospace;
 	border: 1px dotted red;
-	margin-left: 1em; margin-right: 1em; padding: 1em;
+	margin-left: 1em;
+	margin-right: 1em;
+	padding: 1em;
 }
 
 .error legend {
-	font-variant: small-caps; font-size: x-large; font-weight: bold;
+	font-variant: small-caps;
+	font-size: x-large;
+	font-weight: bold;
 	padding: .1ex .5ex;
-	border-right: 1px solid gray; border-bottom: 1px solid gray;
+	border-right: 1px solid gray;
+	border-bottom: 1px solid gray;
 }
 
-.scoreboard		{ border-collapse: collapse; }
-.scoreboard td		{ font-size: small; }
-.scoreboard tr		{ border-bottom: 1px solid silver; }
+.scoreboard { border-collapse: collapse; }
+.scoreboard td { font-size: small; }
+.scoreboard tr { border-bottom: 1px solid silver; }
 .scoreboard td, .scoreboard th { border-right: 1px solid black; }
 
+/* set cell padding to 0 and <a> tag to 3 to make all of cell
+   clickable in the jury scoreboard */
 .scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
 .scoreboard_jury a {
 	display: block;
@@ -74,10 +116,13 @@ hr	{ border: 0; height: 1px; background-color: gray; }
 	color: black;
 }
 
-.scoreheader		{ border-bottom: 2px solid black; font-variant: small-caps; }
-.score_correct		{ background: #33FF66;	}
-.score_incorrect	{ background: #FF6666;	}
-.score_neutral		{ background: white;	}
+.scoreheader {
+	font-variant: small-caps;
+	border-bottom: 2px solid black;
+}
+.score_correct   { background: #33FF66; }
+.score_incorrect { background: #FF6666; }
+.score_neutral   { background: white;   }
 
 #scoresolv,#scoretotal { width: 5em; }
 .scorenc,.scorett,.scorepl { text-align: right; }
@@ -94,7 +139,8 @@ hr	{ border: 0; height: 1px; background-color: gray; }
 }
 
 #lastmod {
-	color: gray; font-size: x-small;
+	color: gray;
+	font-size: x-small;
 	position: absolute; right: 1ex; margin-top: 1em;
 }
 
