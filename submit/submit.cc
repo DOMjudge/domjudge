@@ -65,6 +65,7 @@ using namespace std;
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
 
 #define TIMEOUT 60  /* seconds before send/receive timeouts with an error */
+#define LINELEN 256 /* maximum length read from curl stdout lines */
 
 extern int errno;
 
@@ -79,6 +80,7 @@ char *progname;
 int port = SUBMITPORT;
 
 int quiet;
+int use_websubmit;
 int show_help;
 int show_version;
 
@@ -88,7 +90,10 @@ struct option const long_opts[] = {
 	{"server",   required_argument, NULL,         's'},
 	{"team",     required_argument, NULL,         't'},
 	{"port",     required_argument, NULL,         'P'},
-	{"verbose",  required_argument, NULL,         'v'},
+#if ENABLEWEBSUBMIT > 0
+	{"web",      no_argument,       NULL,         'w'},
+#endif
+	{"verbose",  optional_argument, NULL,         'v'},
 	{"quiet",    no_argument,       NULL,         'q'},
 	{"help",     no_argument,       &show_help,    1 },
 	{"version",  no_argument,       &show_version, 1 },
@@ -100,6 +105,8 @@ void usage();
 void usage2(int , char *, ...);
 void warnuser(char *);
 char readanswer(char *answers);
+int  websubmit();
+string remove_html_tags(string s);
 
 int nwarnings;
 
@@ -198,9 +205,10 @@ int main(int argc, char **argv)
 	}
 
 	/* Parse command-line options */
-	quiet =	show_help = show_version = 0;
+	quiet =	use_websubmit = 0;
+	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:s:t:P:v:q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"p:l:s:t:P:wv::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
@@ -216,10 +224,21 @@ int main(int argc, char **argv)
 				usage2(0,"invalid tcp port specified: `%s'",optarg);
 			}
 			break;
+		case 'w': /* websubmit option */
+#if ENABLEWEBSUBMIT > 0
+			use_websubmit = 1;
+#else
+			warnuser("websubmit is disabled");
+#endif
+			break;
 		case 'v': /* verbose option */
-			verbose = strtol(optarg,&ptr,10);
-			if ( *ptr!=0 || verbose<0 ) {
-				usage2(0,"invalid verbosity specified: `%s'",optarg);
+			if ( optarg!=NULL ) {
+				verbose = strtol(optarg,&ptr,10);
+				if ( *ptr!=0 || verbose<0 ) {
+					usage2(0,"invalid verbosity specified: `%s'",optarg);
+				}
+			} else {
+				verbose++;
 			}
 			break;
 		case 'q': /* quiet option */
@@ -323,6 +342,8 @@ int main(int argc, char **argv)
 		if ( c=='n' ) error(0,"submission aborted by user");
 	}
 
+	if ( use_websubmit ) return websubmit();
+	
 	/* Make tempfile to submit */
 	tempfile = allocstr("%s/%s.XXXXXX.%s",submitdir,
 	                    problem.c_str(),extension.c_str());
@@ -407,7 +428,7 @@ int main(int argc, char **argv)
 
 	logmsg(LOG_NOTICE,"submission successful");
 
-    return SUCCESS;
+    return 0;
 }
 
 void usage()
@@ -423,8 +444,11 @@ void usage()
 "  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
 "  -s, --server=SERVER      submit to server SERVER\n"
 "  -t, --team=TEAM          submit as team TEAM\n"
-"  -v, --verbose=LEVEL      set verbosity to LEVEL, where LEVEL must be\n"
-"                               numerically specified as in 'syslog.h'\n"
+#if ENABLEWEBSUBMIT > 0
+"  -w, --web                submit to the webinterface\n"
+#endif
+"  -v, --verbose[=LEVEL]    increase verbosity or set to LEVEL, where LEVEL\n"
+"                               must be numerically specified as in 'syslog.h'\n"
 "                               defaults to LOG_INFO without argument\n"
 "  -q, --quiet              set verbosity to LOG_ERR and suppress user\n"
 "                               input and warning/info messages\n"
@@ -531,6 +555,106 @@ char readanswer(char *answers)
 	tcsetattr(STDIN_FILENO,TCSANOW,&old_termio);
 
 	return c;
+}
+
+int websubmit()
+{
+	string cmdline, s;
+	char *cmd, *args[MAXARGS], *tmp;
+	char line[LINELEN];
+	int i, nargs, cpid, status;
+	int redir_fd[3];
+	FILE *rpipe;
+
+	/* Construct command and execute it */
+	cmd = allocstr("curl");
+	nargs = 0;
+	args[nargs++] = allocstr("-F");
+	args[nargs++] = allocstr("code=@%s",filename);
+	args[nargs++] = allocstr("-F");
+	args[nargs++] = allocstr("probid=%s",problem.c_str());
+	args[nargs++] = allocstr("-F");
+	args[nargs++] = allocstr("langext=%s",language.c_str());
+	args[nargs++] = allocstr("-F");
+	args[nargs++] = allocstr("submit=yes");
+	args[nargs++] = allocstr(WEBBASEURI "team/upload.php");
+
+	cmdline = string(cmd);
+	for(int i=0; i<nargs; i++) cmdline += ' ' + string(args[i]);
+
+	logmsg(LOG_INFO,"websubmit starting '%s'",cmdline.c_str());
+	
+	redir_fd[0] = 0;
+	redir_fd[1] = 1;
+	redir_fd[2] = 1;
+	
+	if ( (cpid = execute(cmd,args,nargs,redir_fd,1))<0 ) {
+		error(errno,"starting '%s'",cmdline.c_str());
+	}
+	
+	if ( (rpipe = fdopen(redir_fd[1],"r"))==NULL ) {
+		error(errno,"binding stdout to stream");
+	}
+
+	/* Read stdout/stderr and find upload status */
+	while ( fgets(line,LINELEN,rpipe)!=NULL ) {
+
+		/* Remove newlines from end of line */
+		i = strlen(line)-1;
+		while ( i>=0 && (line[i]=='\n' || line[i]=='\r') ) line[i--] = 0;
+
+		printf("curl: %s\n",line);
+		
+		/* Search line for upload status or errors */
+ 		if ( (tmp = strstr(line,ERRMATCH))!=NULL ) {
+			error(0,"webserver returned: %s",&tmp[strlen(ERRMATCH)]);
+ 		}
+		if ( strstr(line,"uploadstatus")!=NULL ) {
+			s = remove_html_tags(string(line));
+			if ( s.find("ERROR",0) !=string::npos ||
+				 s.find("failed",0)!=string::npos ) {
+				error(0,"webserver returned: %s",s.c_str());
+			}
+			logmsg(LOG_NOTICE,"webserver returned: %s",s.c_str());
+		}
+		
+	}
+
+	if ( fclose(rpipe)!=0 ) error(errno,"closing pipe");
+	if ( waitpid(cpid,&status,0)<0 ) error(errno,"waiting for '%s'",cmd);
+	
+	if ( WIFEXITED(status) && WEXITSTATUS(status)!=0 ) {
+		error(0,"'%s' failed with exitcode %d",cmd,WEXITSTATUS(status));
+	}
+
+	if ( ! WIFEXITED(status) ) {
+		if ( WIFSIGNALED(status) ) {
+			error(0,"'%s' terminated with signal %d",cmd,WTERMSIG(status));
+		}
+		if ( WIFSTOPPED(status) ) {
+			error(0,"'%s' stopped with signal %d",cmd,WSTOPSIG(status));
+		}
+		error(0,"'%s' aborted due to unknown error",cmd);
+	}
+	if ( status>0 ) error(0,"'%s' exited with exitcode %d",cmd,status);
+
+	free(cmd);
+	for(i=0; i<nargs; i++) free(args[i]);
+
+	return 0;
+}
+
+string remove_html_tags(string s)
+{
+	unsigned p1, p2;
+	
+	while ( (p1=s.find('<',0))!=string::npos ) {
+		p2 = s.find('>',p1);
+		if ( p2==string::npos ) break;
+		s.erase(p1,p2-p1+1);
+	}
+
+	return s;
 }
 
 //  vim:ts=4:sw=4:
