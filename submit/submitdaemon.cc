@@ -86,7 +86,7 @@ int show_version;
 
 struct option const long_opts[] = {
 	{"port",    required_argument, NULL,         'P'},
-	{"verbose", required_argument, NULL,         'v'},
+	{"verbose", optional_argument, NULL,         'v'},
 	{"help",    no_argument,       &show_help,    1 },
 	{"version", no_argument,       &show_version, 1 },
 	{ NULL,     0,                 NULL,          0 }
@@ -114,7 +114,7 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	/* Set logging levels & open logfile */
-	verbose  = LOG_DEBUG;
+	verbose  = LOG_INFO;
 	loglevel = LOG_DEBUG;
 	stdlog   = fopen(LOGFILE,"a");
 	if ( stdlog==NULL ) error(errno,"cannot open logfile `%s'",LOGFILE);
@@ -133,9 +133,13 @@ int main(int argc, char **argv)
 			}
 			break;
 		case 'v': /* verbose option */
-			verbose = strtol(optarg,&ptr,10);
-			if ( *ptr!=0 || verbose<0 ) {
-				error(0,"invalid verbosity specified: `%s'",optarg);
+			if ( optarg!=NULL ) {
+				verbose = strtol(optarg,&ptr,10);
+				if ( *ptr!=0 || verbose<0 ) {
+					error(0,"invalid verbosity specified: `%s'",optarg);
+				}
+			} else {
+				verbose++;
 			}
 			break;
 		case ':': /* getopt error */
