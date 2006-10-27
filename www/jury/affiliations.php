@@ -21,8 +21,8 @@ $res = $DB->q('SELECT a.*,count(login) as cnt FROM team_affiliation a
 if( $res->count() == 0 ) {
 	echo "<p><em>No affiliations defined</em></p>\n\n";
 } else {
-	echo "<table>
-	<tr><th>ID</th><th>name</th><th>country</th><th>#teams</th></tr>\n";
+	echo "<table class=\"list\">\n" .
+		"<tr><th>ID</th><th>name</th><th>country</th><th>#teams</th></tr>\n";
 	while($row = $res->next()) {
 		echo "<tr><td><a href=\"affiliation.php?id=" .
 			urlencode($row['affilid']) . "\">" .

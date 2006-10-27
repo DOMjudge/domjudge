@@ -18,7 +18,7 @@ $res = $DB->q('SELECT * FROM team_category ORDER BY sortorder,categoryid');
 if( $res->count() == 0 ) {
 	echo "<p><em>No categories defined</em></p>\n\n";
 } else {
-	echo "<table>\n".
+	echo "<table class=\"list\">\n" .
 		"<tr><th>ID</th><th>sort</th><th>name</th></tr>\n";
 	while($row = $res->next()) {
 		echo "<tr class=\"category". (int)$row['categoryid'] .

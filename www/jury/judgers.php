@@ -25,14 +25,12 @@ echo "<h1>Judgers</h1>\n\n";
 if( $res->count() == 0 ) {
 	echo "<p><em>No judgers defined</em></p>\n\n";
 } else {
-	echo "<table>
-	<tr><th>judgerid</th><th>active</th></tr>\n";
+	echo "<table class=\"list\">\n<tr><th>judgerid</th><th>active</th></tr>\n";
 	while($row = $res->next()) {
-		echo "<tr".
-			( $row['active'] ? '': ' class="disabled"').
-			"><td><a href=\"judger.php?id=".urlencode($row['judgerid']).'">'.printhost($row['judgerid']).'</a>'.
-			"</td><td align=\"center\">".printyn($row['active']).
-			"</td></tr>\n";
+		echo "<tr".( $row['active'] ? '': ' class="disabled"').
+			"><td><a href=\"judger.php?id=".urlencode($row['judgerid']).'">'.
+			printhost($row['judgerid']).'</a>'.
+			"</td><td align=\"center\">".printyn($row['active'])."</td></tr>\n";
 	}
 	echo "</table>\n\n";
 ?>

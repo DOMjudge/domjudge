@@ -18,10 +18,10 @@ $res = $DB->q('SELECT * FROM language ORDER BY name');
 if( $res->count() == 0 ) {
 	echo "<p><em>No languages defined</em></p>\n\n";
 } else {
-	echo "<table>
-	<tr><th>ID</th><th>name</th><th>extension</th>
-		<th>allow<br />submit</th><th>allow<br />judge</th>
-		<th>timefactor</th></tr>\n";
+	echo "<table class=\"list\">\n" .
+		"<tr><th>ID</th><th>name</th><th>extension</th>" .
+		"<th>allow<br />submit</th><th>allow<br />judge</th>" .
+		"<th>timefactor</th></tr>\n";
 	while($row = $res->next()) {
 		echo "<tr".
 			( $row['allow_judge'] && $row['allow_submit'] ? '': ' class="disabled"').

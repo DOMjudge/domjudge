@@ -93,7 +93,7 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 		$popupTag = NULL;
 	}
 
-	echo "<table>\n";
+	echo "<table class=\"list\">\n";
 	echo "<tr><th>ID</th><th>from</th><th>to</th>" .
 		"<th>time</th><th>text</th></tr>\n";
 

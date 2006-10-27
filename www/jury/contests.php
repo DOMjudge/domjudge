@@ -21,7 +21,7 @@ $res = $DB->q('TABLE SELECT *,
 if( count($res) == 0 ) {
 	echo "<p><em>No contests defined</em></p>\n\n";
 } else {
-	echo "<table>\n<tr><th>CID</th><th>starts</th><th>ends</th>" .
+	echo "<table class=\"list\">\n<tr><th>CID</th><th>starts</th><th>ends</th>" .
 		"<th>last<br />scoreupdate</th><th>name</th></tr>\n";
 	foreach($res as $row) {
 		echo "<tr" .

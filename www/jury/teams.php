@@ -34,7 +34,7 @@ echo "<h1>Teams</h1>\n\n";
 if( $teams->count() == 0 ) {
 	echo "<p><em>No teams defined</em></p>\n\n";
 } else {
-	echo "<table>\n" .
+	echo "<table class=\"list\">\n" .
 		"<tr><th>login</th><th>teamname</th><th>category</th>" .
 		"<th>affiliation</th><th>host</th><th>room</th><th>status</th></tr>\n";
 
