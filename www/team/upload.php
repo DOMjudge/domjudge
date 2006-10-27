@@ -19,11 +19,14 @@ if ( !isset($_POST['submit']) ) {
 
 // helper to output an error message.
 function err($string) {
-	echo "<font color=\"#FF0000\"><b><u>ERROR</u>: " .
-		htmlspecialchars($string) . "</b></font><br />\n";
+	echo "<div id=\"uploadstatus\"><font color=\"#FF0000\"><b><u>ERROR</u>: " .
+		htmlspecialchars($string) . "</b></font><br /></div>\n";
+	
 	require('../footer.php');
 	exit;
 }
+
+ini_set("upload_max_filesize", SOURCESIZE * 1024);
 
 $title = 'Submit';
 require('../header.php');
@@ -122,12 +125,16 @@ for($i=0; $i<$waitsubmit; $i++) {
 	if ( ! file_exists($destfile) ) break;
 }
 
+/* Print everything between the <div> tags on one line for
+   easier parsing by commandline submit to webinterface */
+echo '<div id="uploadstatus">';
 if ( file_exists($destfile) ) {
-	echo "<p>Upload not (yet) successful.</p>\n";
+	echo "<p>Upload not (yet) successful.</p>";
 } else if ( file_exists(INCOMINGDIR . "/rejected-" . basename($destfile)) ) {
-	echo "<p>Upload failed.</p>\n";
+	echo "<p>Upload failed.</p>";
 } else {
-	echo "<p>Upload successful.</p>\n";
+	echo "<p>Upload successful.</p>";
 }
+echo "</div>\n";
 
 require('../footer.php');
