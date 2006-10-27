@@ -23,7 +23,7 @@ function putJudgings($key, $value) {
 	if( $res->count() == 0 ) {
 		echo "<p><em>No judgings.</em></p>\n\n";
 	} else {
-		echo "<table>\n<tr><th>ID</th><th>start</th><th>end</th>";
+		echo "<table class=\"list\">\n<tr><th>ID</th><th>start</th><th>end</th>";
 		if ( $key != 'judge' ) echo "<th>judge</th>";
 		echo "<th>result</th><th>valid</th><th>verified</th>";
 		echo "</tr>\n";
