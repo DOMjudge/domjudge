@@ -42,7 +42,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	}
 	echo "</h4>\n\n";
 
-	echo '<table class="scoreboard' . ($isjury ? '_jury' : '') .
+	echo '<table class="scoreboard' . ($isjury ? ' scoreboard_jury' : '') .
 	     '" cellpadding="3">' . "\n";
 
 	// get the teams and problems

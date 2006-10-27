@@ -66,11 +66,7 @@ hr	{ border: 0; height: 1px; background-color: gray; }
 .scoreboard tr		{ border-bottom: 1px solid silver; }
 .scoreboard td, .scoreboard th { border-right: 1px solid black; }
 
-.scoreboard_jury	{ border-collapse: collapse; }
-.scoreboard_jury td	{ font-size: small; }
-.scoreboard_jury tr	{ border-bottom: 1px solid silver; }
-.scoreboard_jury td, .scoreboard_jury th { border-right: 1px solid black; padding: 0px; }
-
+.scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
 .scoreboard_jury a {
 	display: block;
 	padding: 3px;
