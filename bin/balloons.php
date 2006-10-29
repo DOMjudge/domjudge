@@ -25,7 +25,8 @@ function notification_text($team, $problem) {
 		"\n".
 		(empty($team['room']) ? "" : "Room:    ".$team['room']."\n" ) .
 		"Team:    ".$team['login'].": ".$team['name']."\n".
-		"Problem: ".$problem['probid'].": ".$problem['name']."\n";
+		"Problem: ".$problem['probid'].": ".$problem['name'].
+		(empty($problem['color']) ? "" : " (color: ".$problem['color'].")" ) . "\n";
 }
 
 $cid = getCurContest();
@@ -45,7 +46,7 @@ while ( TRUE ) {
 	}
 	
 	do {
-		$res = $DB->q('SELECT s.*,t.name as teamname,t.room,p.name as probname
+		$res = $DB->q('SELECT s.*,t.name as teamname,t.room,p.name as probname,p.color
 		               FROM scoreboard_public s
 		               LEFT JOIN problem p USING(probid)
 		               LEFT JOIN team t ON (t.login = s.team)
@@ -57,7 +58,8 @@ while ( TRUE ) {
 			               'room'   => $row['room'],
 				       'login'  => $row['team']);
 			$prob = array ('name'   => $row['probname'],
-			               'probid' => $row['probid']);
+			               'probid' => $row['probid'],
+			               'color'  => $row['color']);
 
 			logmsg(LOG_DEBUG,"New problem solved: ".$row['probid'].
 				   " by team ".$row['team']);

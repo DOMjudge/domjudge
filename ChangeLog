@@ -8,6 +8,8 @@ Version 1.3.1 - SVN
  - Fix possible buffer overflow in submitcommon.cc; Thanks to
    Lennert Buytenhek for pointing out.
  - Add option to commandline submit to use websubmit (Closes: #1582376).
+ - Add problem color to MySQL DB and show in scoreboard and balloon info.
+ - Add team summary to all main team pages.
  - Fix clarification wrapping.
  - Fix some language typos.
  - Improve webinterface layout (CSS modifications)

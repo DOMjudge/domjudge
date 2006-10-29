@@ -29,6 +29,7 @@ INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','submission','
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','submission','submitid'    ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','submission','submittime'  ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','submission','team'        ,NOW(),'Select');
+INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','problem'   ,'color'       ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','problem'   ,'allow_submit',NOW(),'Select');
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','problem'   ,'name'        ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','problem'   ,'cid'         ,NOW(),'Select');
@@ -37,6 +38,7 @@ INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','judging'   ,'
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','judging'   ,'result'      ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','judging'   ,'submitid'    ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','judging'   ,'judgingid'   ,NOW(),'Select');
+INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'problem'   ,'color'       ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'problem'   ,'allow_submit',NOW(),'Select');
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'problem'   ,'cid'         ,NOW(),'Select');
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'problem'   ,'name'        ,NOW(),'Select');

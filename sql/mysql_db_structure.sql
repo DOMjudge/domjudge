@@ -99,6 +99,7 @@ CREATE TABLE `problem` (
   `timelimit` mediumint(11) unsigned NOT NULL default '0',
   `special_run` varchar(8) default NULL,
   `special_compare` varchar(8) default NULL,
+  `color` varchar(25) default NULL,
   PRIMARY KEY  (`probid`)
 ) TYPE=MyISAM COMMENT='Problems the teams can submit solutions for';
 

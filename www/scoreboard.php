@@ -26,7 +26,16 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	$contdata = getCurContest(TRUE);
 	if ( empty( $contdata ) ) { echo "<p><em>No contests defined</em></p>\n"; return; }
 	$cid = $contdata['cid'];
-	
+
+	// get the teams and problems
+	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
+	                 login, team.name, team.categoryid, sortorder FROM team
+	                 LEFT JOIN team_category USING (categoryid)');
+	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
+	                 probid, name, color FROM problem
+	                 WHERE cid = %i AND allow_submit = 1
+	                 ORDER BY probid', $cid);
+
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlentities($contdata['contestname']) . "</h1>\n\n";
 	echo "<h4>starts: " . printtime($contdata['starttime']) .
@@ -45,15 +54,6 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	echo '<table class="scoreboard' . ($isjury ? ' scoreboard_jury' : '') .
 	     '" cellpadding="3">' . "\n";
 
-	// get the teams and problems
-	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
-	                 login, team.name, team.categoryid, sortorder FROM team
-	                 LEFT JOIN team_category USING (categoryid)');
-	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
-	                 probid, name FROM problem
-	                 WHERE cid = %i AND allow_submit = 1
-                         ORDER BY probid', $cid);
-
 	// output table column groups (for the styles)
 	echo '<colgroup><col id="scoreplace" /><col id="scoreteamname" /><col id="scoresolv" />' .
 		'<col id="scoretotal" />' .
@@ -67,9 +67,10 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		jurylink(null,'solved',$isjury) . '</th><th>' .
 		jurylink(null,'time',$isjury) . "</th>\n";
 	foreach( $probs as $pr ) {
-		echo '<th title="' . htmlentities($pr['name']). '">' .
+		echo '<th title="' . htmlentities($pr['name']) . '"' .
+			(isset($pr['color']) ? ' style="background: ' . $pr['color'] . ';"' : '' ) . '>' .
 			jurylink('problem.php?id=' . $pr['probid'],
-					 htmlentities($pr['probid']),$isjury) .	'</th>';
+			         htmlentities($pr['probid']),$isjury) . '</th>';
 	}
 	echo "</tr>\n";
 
@@ -148,7 +149,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		echo
 			'</td><td class="scoretn category' . $totals['categoryid'] . '"' .
 			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
-			jurylink('"team.php?id=' . $team,
+			jurylink('team.php?id=' . $team,
 			         htmlentities($teams[$team]['name']),$isjury) .	'</td>' .
 			'<td class="scorenc">' . jurylink(null,$totals['num_correct'],$isjury) . '</td>' .
 			'<td class="scorett">' . jurylink(null,$totals['total_time'], $isjury) . '</td>';
@@ -219,7 +220,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		} else {
 			$str .= '-';
 		}
-		echo '<td>' . jurylink('problem.php?id=' . $pr['probid'],$str,$isjury) . '</td>';
+		echo '<td' . (isset($pr['color']) ? ' style="background: ' .
+					  $pr['color'] . ';"' : '') . '>' .
+			jurylink('problem.php?id=' . $pr['probid'],$str,$isjury) . '</td>';
 	}
 	echo "</tr>\n</table>\n\n";
 
@@ -264,7 +267,7 @@ function putTeamRow($teamid) {
 	
 	echo '<table class="scoreboard" cellpadding="3">' . "\n";
 
-	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, name
+	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, name, color
 	                 FROM problem WHERE cid = %i AND allow_submit = 1
 	                 ORDER BY probid', $cid);
 
@@ -301,7 +304,9 @@ function putTeamRow($teamid) {
 			$pdata = array ( 'submitted' => 0, 'correct' => 0,
 			                 'time' => 0, 'penalty' => 0);
 		}
-		echo '<tr><td title="' . htmlentities($probdata['name']) . '">' .
+		echo '<tr><td title="' . htmlentities($probdata['name']) .
+			(isset($probdata['color']) ? '" style="background: ' .
+			       $probdata['color'] . ';' : '' ) . '">' .
 			htmlentities($prob) . '</td><td class="';
 		// CSS class for correct/incorrect/neutral results
 		if( $pdata['correct'] ) { 
