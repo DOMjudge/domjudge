@@ -149,7 +149,7 @@ hr {
 	position: absolute; right: 1ex;
 }
 
-#teamscoresummary { position: absolute; right: 1ex; }
+#teamscoresummary { position: absolute; right: 1ex; top: 6ex; }
 #teamscoresummary td { padding: 3px; }
 #teamscoresummary th { padding: 3px; }
 
