@@ -90,9 +90,7 @@ struct option const long_opts[] = {
 	{"server",   required_argument, NULL,         's'},
 	{"team",     required_argument, NULL,         't'},
 	{"port",     required_argument, NULL,         'P'},
-#if ENABLEWEBSUBMIT > 0
-	{"web",      no_argument,       NULL,         'w'},
-#endif
+	{"web",      optional_argument, NULL,         'w'},
 	{"verbose",  optional_argument, NULL,         'v'},
 	{"quiet",    no_argument,       NULL,         'q'},
 	{"help",     no_argument,       &show_help,    1 },
@@ -205,10 +203,10 @@ int main(int argc, char **argv)
 	}
 
 	/* Parse command-line options */
-	quiet =	use_websubmit = 0;
-	show_help = show_version = 0;
+	use_websubmit = ! ENABLECMDSUBMIT ;
+	quiet =	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:s:t:P:wv::q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"p:l:s:t:P:w::v::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
@@ -225,11 +223,12 @@ int main(int argc, char **argv)
 			}
 			break;
 		case 'w': /* websubmit option */
-#if ENABLEWEBSUBMIT > 0
-			use_websubmit = 1;
-#else
-			warnuser("websubmit is disabled");
-#endif
+			if ( optarg!=NULL ) {
+				use_websubmit = strtol(optarg,&ptr,10);
+				if ( *ptr!=0 ) usage2(0,"invalid value specified: `%s'",optarg);
+			} else {
+				use_websubmit = 1;
+			}
 			break;
 		case 'v': /* verbose option */
 			if ( optarg!=NULL ) {
@@ -253,6 +252,8 @@ int main(int argc, char **argv)
 			error(0,"getopt returned character code `%c' ??",c);
 		}
 	}
+
+	printf("websubmit = %d\n",use_websubmit);
 
 	if ( show_help ) usage();
 	if ( show_version ) version();
@@ -444,8 +445,9 @@ void usage()
 "  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
 "  -s, --server=SERVER      submit to server SERVER\n"
 "  -t, --team=TEAM          submit as team TEAM\n"
-#if ENABLEWEBSUBMIT > 0
-"  -w, --web                submit to the webinterface\n"
+#if (ENABLEWEBSUBMIT != 0 && ENABLECMDSUBMIT != 0)
+"  -w, --web[=0|1]          submit to the webinterface or toggle; defaults to\n"
+"                               no and and should normally not be necessary\n"
 #endif
 "  -v, --verbose[=LEVEL]    increase verbosity or set to LEVEL, where LEVEL\n"
 "                               must be numerically specified as in 'syslog.h'\n"
@@ -603,8 +605,6 @@ int websubmit()
 		i = strlen(line)-1;
 		while ( i>=0 && (line[i]=='\n' || line[i]=='\r') ) line[i--] = 0;
 
-		printf("curl: %s\n",line);
-		
 		/* Search line for upload status or errors */
  		if ( (tmp = strstr(line,ERRMATCH))!=NULL ) {
 			error(0,"webserver returned: %s",&tmp[strlen(ERRMATCH)]);
