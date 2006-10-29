@@ -10,6 +10,7 @@ Version 1.4.0 - SVN
  - Add option to commandline submit to use websubmit (Closes: #1582376).
  - Add problem color to MySQL DB and show in scoreboard and balloon info.
  - Add team summary to all main team pages.
+ - Add check_float program to compare floating point output.
  - Fix clarification wrapping.
  - Fix some language typos.
  - Improve webinterface layout (CSS modifications)

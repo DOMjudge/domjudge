@@ -3,8 +3,13 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-build:
+CFLAGS+=-std=c99
+
+TARGETS=check_float
+
+build: $(TARGETS)
 
 install:
 
 clean:
+	-rm -f $(TARGETS)
