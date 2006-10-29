@@ -2,7 +2,7 @@
 /**
  * Display the clarification responses
  *
- * $Id: clarification.php 468 2004-08-29 16:24:19Z nkp0405 $
+ * $Id$
  */
 
 require('init.php');
@@ -13,6 +13,11 @@ require('../clarification.php');
 require('menu.php');
 
 $cid = getCurContest();
+
+// Put overview of team submissions (like scoreboard)
+echo "<div id=\"teamscoresummary\">\n";
+putTeamRow($login);
+echo "</div>\n";
 
 echo "<h1>Clarifications team " . htmlentities($name) ."</h1>\n\n";
 

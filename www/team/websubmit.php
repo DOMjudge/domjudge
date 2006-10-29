@@ -24,6 +24,11 @@ if ( $cid === FALSE  ) {
 	exit;
 }
 
+// Put overview of team submissions (like scoreboard)
+echo "<div id=\"teamscoresummary\">\n";
+putTeamRow($login);
+echo "</div>\n";
+
 ?><h1>New Submission</h1>
 
 <form action="upload.php" method="post" enctype="multipart/form-data">
