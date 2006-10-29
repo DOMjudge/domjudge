@@ -38,7 +38,8 @@ The requirements for the deployment of this jury-system are:
   accessible via SSH on the jury computers (a SSH public key of the
   jury account should be installed on all team accounts to provide
   public-key access). This can be circumvented by providing access by
-  other means, see 'submit/submit_copy.sh' for more details.
+  other means, see below under SUBMISSION METHODS or the file
+  'submit/submit_copy.sh' for more details.
 
 
 CONCEPTS
@@ -318,6 +319,31 @@ SYSTEM_ROOT/judge directory (see run.sh and compare.sh for examples
 and usage information). Then one must specify this <some-tag> in the
 special_run and/or special_compare fields of the problem entry in the
 MySQL database (NULL means that the default script should be used).
+
+SUBMISSION METHODS
+
+DOMjudge supports essentially two submission methods: via the
+commandline submit program and via the webinterface. From experience,
+both methods have users that prefer the one above the other.
+
+The commandline submit method does place some requirements on the
+network environment however. It needs a shared filesystem or other
+means for the jury to access the files on the team accounts. Site
+specific adaptations can be made in 'submit/submit_copy.sh'.
+
+When commandline submit is disabled in the configuration, the
+commandline submit client/daemon will still be built, but the submit
+client will now default to try to connect to the websubmit interface
+using 'curl'. For this to work, 'curl' must be locally available and
+in the path for the teams.
+
+Although the commandline submit daemon is thus not strictly necessary,
+it does add an advantage: it is more secure than the webinterface
+because it uses a "callback" to authenticate the team (instead of IP
+address authetication). Furthermore, it allows for automatic IP
+address configuration with the configuration option 'STRICTIPCHECK=0',
+which removes the hassle of either preconfiguring that or handing
+passwords to the teams for their first authentication.
 
 
 WEBSERVER CONFIGURATION
