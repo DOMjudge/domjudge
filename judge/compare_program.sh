@@ -31,6 +31,9 @@
 # Check program, specify with absolute path or use `dirname $0`:
 CHECK_PROGRAM="`dirname $0`/check_diff.sh"
 
+# Options to pass to check program:
+CHECK_OPTIONS=""
+
 TESTIN="$1"
 PROGRAM="$2"
 TESTOUT="$3"
@@ -57,7 +60,7 @@ if [ ! -x "$CHECK_PROGRAM" ]; then
 fi
 
 # Run the program:
-"$CHECK_PROGRAM" "$TESTIN" "$PROGRAM" "$TESTOUT" > "$DIFFOUT"
+"$CHECK_PROGRAM" $OPTIONS "$TESTIN" "$PROGRAM" "$TESTOUT" > "$DIFFOUT"
 EXITCODE=$?
 
 # Exit with failure, when non-zero exitcode found:
