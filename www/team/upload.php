@@ -19,8 +19,8 @@ if ( !isset($_POST['submit']) ) {
 
 // helper to output an error message.
 function err($string) {
-	echo "<fieldset class=\"error\"><legend>Error</legend>" .
-		"ERROR: " . htmlspecialchars($string) . "</fieldset>\n";
+	echo '<div id="uploadstatus" class="error"><u>ERROR</u>: ' .
+		htmlspecialchars($string) . "</div>\n";
 	
 	require('../footer.php');
 	exit;
