@@ -190,12 +190,12 @@ int main(int argc, char **argv)
 		if ( ptr1==NULL && ptr2==NULL ) break;
 			
 		if ( ptr1==NULL && ptr2!=NULL ) {
-			printf("line %4d: file 1 ended before 2.\n",linenr);
+			printf("line %3d: file 1 ended before 2.\n",linenr);
 			diff++;
 			break;
 		}
 		if ( ptr1!=NULL && ptr2==NULL ) {
-			printf("line %4d: file 2 ended before 1.\n",linenr);
+			printf("line %3d: file 2 ended before 1.\n",linenr);
 			diff++;
 			break;
 		}
@@ -215,34 +215,39 @@ int main(int argc, char **argv)
 			if ( read1==EOF && read2==EOF ) break;
 			
 			if ( read1!=1 && read2==1 ) {
-				printf("line %4d: file 1 misses %dth float.\n",linenr,posnr);
+				printf("line %3d: file 1 misses %d-th float.\n",linenr,posnr);
 				diff++;
 				break;
 			}
 			if ( read1==1 && read2!=1 ) {
-				printf("line %4d: file 1 has excess %dth float.\n",linenr,posnr);
+				printf("line %3d: file 1 has excess %d-th float.\n",linenr,posnr);
 				diff++;
 				break;
 			}
 
 			if ( read1==0 ) {
-				printf("line %4d: file 1, %dth entry cannot be parsed as float.\n",linenr,posnr);
+				printf("line %3d: file 1, %d-th entry cannot be parsed as float.\n",
+				       linenr,posnr);
 				diff++;
 				break;
 			}
 			if ( read2==0 ) {
-				printf("line %4d: file 2, %dth entry cannot be parsed as float.\n",linenr,posnr);
+				printf("line %3d: file 2, %d-th entry cannot be parsed as float.\n",
+				       linenr,posnr);
 				diff++;
 				break;
 			}
 			
-			if ( !(read1==1 && read2==1) ) error(0,"error reading float on line %d",linenr);
+			if ( !(read1==1 && read2==1) ) {
+				error(0,"error reading float on line %d",linenr);
+			}
 
 			absdiff = fabsl(f1-f2);
 			reldiff = fabsl((f1-f2)/f2);
 
 			if ( absdiff > abs_prec && reldiff > rel_prec ) {
-				printf("line %4d: %dth float differs: %LE != %LE\n",linenr,posnr,f1,f2);
+				printf("line %3d: %d-th float differs: %LG != %LG\n",
+				       linenr,posnr,f1,f2);
 				diff++;
 			}
 		}
