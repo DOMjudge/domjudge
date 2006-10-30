@@ -74,10 +74,10 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 		}
 		echo "<td>" . printtime($row['submittime']) . "</td>";
 		echo '<td class="teamid" title="' . htmlentities($row['teamname']) . '">' .
-			( $isjury ? '<a href="team.php?id=' . $row['team'] . '">' : '' ) .
+			( $isjury ? '<a href="team.php?id=' . urlencode($row['team']) . '">' : '' ) .
 			htmlspecialchars($row['team']) . ( $isjury ? '</a>' : '') . '</td>';
 		echo '<td title="' . htmlentities($row['probname']) . '">' .
-			( $isjury ? '<a href="problem.php?id=' . $row['probid'] . '">' : '' ) .
+			( $isjury ? '<a href="problem.php?id=' . urlencode($row['probid']) . '">' : '' ) .
 			htmlspecialchars($row['probid']) . ( $isjury ? '</a>' : '') . '</td>';
 		echo '<td title="' . htmlentities($row['langname']) . '">' .
 			( $isjury ? '<a href="language.php?id=' . $row['langid'] . '">' : '' ) .
@@ -91,8 +91,8 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 					echo printresult(@$row['judgerid'] ? '' : 'queued', TRUE, TRUE);
 				}
 			} else {
-				echo '<a href="judging.php?id=' . $resulttable[$sid]['judgingid'] . '">';
-				echo printresult(@$resulttable[$sid]['result']) . '</a>';
+				echo '<a href="judging.php?id=' . urlencode($resulttable[$sid]['judgingid'])
+					. '">' . printresult(@$resulttable[$sid]['result']) . '</a>';
 			}
 		} else {
 			if ( ! @$resulttable[$sid]['result'] ||

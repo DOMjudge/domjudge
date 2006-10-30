@@ -176,7 +176,8 @@ function confirmClar() {
 		echo "<tr><td><b><label for=\"sendto\">Send to</label>:</b></td><td>\n";
 
 		if ( !empty($respid) ) {
-			echo '<input type="hidden" name="id" value="' . $respid . "\" />\n";
+			echo '<input type="hidden" name="id" value="' . htmlspecialchars($respid)
+				. "\" />\n";
 		}
 
 		echo "<select name=\"sendto\" id=\"sendto\">\n";

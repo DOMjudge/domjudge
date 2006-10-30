@@ -68,8 +68,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		jurylink(null,'time',$isjury) . "</th>\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="' . htmlentities($pr['name']) . '"' .
-			(isset($pr['color']) ? ' style="background: ' . $pr['color'] . ';"' : '' ) . '>' .
-			jurylink('problem.php?id=' . $pr['probid'],
+			(isset($pr['color']) ? ' style="background: ' . htmlspecialchars($pr['color']) . ';"' : '' ) . '>' .
+			jurylink('problem.php?id=' . urlencode($pr['probid']),
 			         htmlentities($pr['probid']),$isjury) . '</th>';
 	}
 	echo "</tr>\n";
@@ -147,9 +147,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			echo jurylink(null,'',$isjury);
 		}
 		echo
-			'</td><td class="scoretn category' . $totals['categoryid'] . '"' .
+			'</td><td class="scoretn category' . (int)$totals['categoryid'] . '"' .
 			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
-			jurylink('team.php?id=' . $team,
+			jurylink('team.php?id=' . urlencode($team),
 			         htmlentities($teams[$team]['name']),$isjury) .	'</td>' .
 			'<td class="scorenc">' . jurylink(null,$totals['num_correct'],$isjury) . '</td>' .
 			'<td class="scorett">' . jurylink(null,$totals['total_time'], $isjury) . '</td>';
@@ -185,7 +185,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			if( ($pdata['time']+$pdata['penalty']) > 0) {
 				$str .= ' (' . $pdata['time'] . ' + ' . $pdata['penalty'] . ')';
 			}
-			echo '>' . jurylink('team.php?id=' . $team . '&amp;restrict=probid:' . $prob,
+			echo '>' . jurylink('team.php?id=' . urlencode($team ) .
+								'&amp;restrict=probid:' . urlencode($prob),
 			                    $str,$isjury) . '</td>';
 			
 			// update summary data for the bottom row
@@ -222,7 +223,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		}
 		echo '<td' . (isset($pr['color']) ? ' style="background: ' .
 					  $pr['color'] . ';"' : '') . '>' .
-			jurylink('problem.php?id=' . $pr['probid'],$str,$isjury) . '</td>';
+			jurylink('problem.php?id=' . urlencode($pr['probid']),$str,$isjury) . '</td>';
 	}
 	echo "</tr>\n</table>\n\n";
 
@@ -233,8 +234,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		echo "<p><br /><br /></p>\n<table class=\"scoreboard\">\n" .
 			"<tr><th>Legend</th></tr>\n";
 		while ( $row = $res->next() ) {
-			echo '<tr class="category' . $row['categoryid'] . '">' .
-				'<td align="center" class="scoretn">' .	$row['name'] .
+			echo '<tr class="category' . (int)$row['categoryid'] . '">' .
+				'<td align="center" class="scoretn">' .	htmlspecialchars($row['name']) .
 				"</td></tr>\n";
 		}
 		echo "</table>\n\n";
@@ -306,7 +307,7 @@ function putTeamRow($teamid) {
 		}
 		echo '<tr><td title="' . htmlentities($probdata['name']) .
 			(isset($probdata['color']) ? '" style="background: ' .
-			       $probdata['color'] . ';' : '' ) . '">' .
+			       htmlspecialchars($probdata['color']) . ';' : '' ) . '">' .
 			htmlentities($prob) . '</td><td class="';
 		// CSS class for correct/incorrect/neutral results
 		if( $pdata['correct'] ) { 
