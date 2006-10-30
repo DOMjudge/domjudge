@@ -64,7 +64,7 @@ $data = $DB->q('TUPLE SELECT * FROM problem NATURAL JOIN contest WHERE probid = 
 <tr><td>Timelimit:   </td><td><?=(int)$data['timelimit']?></td></tr>
 <?php
 if ( isset($data['color']) ) {
-	echo '<tr><td>Color:       </td><td style="background: ' . $data['color'] .
+	echo '<tr><td>Colour:       </td><td style="background: ' . $data['color'] .
 		';">' . htmlspecialchars($data['color']) . "</td></tr>\n";
 }
 ?>
