@@ -66,14 +66,12 @@ FILE *file1, *file2;
 flt abs_prec;
 flt rel_prec;
 
-int quiet;
 int show_help;
 int show_version;
 
 struct option const long_opts[] = {
 	{"abs-prec", required_argument, NULL,         'a'},
 	{"rel-prec", required_argument, NULL,         'r'},
-	{"quiet",    no_argument,       NULL,         'q'},
 	{"help",     no_argument,       &show_help,    1 },
 	{"version",  no_argument,       &show_version, 1 },
 	{ NULL,      0,                 NULL,          0 }
@@ -98,7 +96,6 @@ void usage()
 	printf("\n");
 	printf("  -a, --abs-prec=PREC  use PREC as relative precision\n");
 	printf("  -r, --rel-prec=PREC  use PREC as absolute precision\n");
-	printf("  -q, --quiet          do not display files and precision used\n");
 	printf("      --help           display this help and exit\n");
 	printf("      --version        output version information and exit\n");
 	printf("\n");
@@ -138,7 +135,7 @@ int main(int argc, char **argv)
 	char line1[MAXLINELEN], line2[MAXLINELEN];
 	char *ptr1, *ptr2;
 	int pos1, pos2;
-	int read1, read2;
+	int read1, read2, n1, n2;
 	flt f1, f2;
 	flt absdiff, reldiff;
 	
@@ -147,9 +144,9 @@ int main(int argc, char **argv)
 	/* Parse command-line options */
 	abs_prec = default_abs_prec;
 	rel_prec = default_rel_prec;
-	quiet = show_help = show_version = 0;
+	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"a:r:q",long_opts,(int *) 0))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"a:r:",long_opts,(int *) 0))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
@@ -162,9 +159,6 @@ int main(int argc, char **argv)
 			rel_prec = strtold(optarg,&ptr);
 			if ( *ptr!=0 || ptr==(char *)&optarg )
 				error(errno,"incorrect relative precision specified");
-			break;
-		case 'q':
-			quiet = 1;
 			break;
 		case ':': /* getopt error */
 		case '?':
@@ -185,11 +179,6 @@ int main(int argc, char **argv)
 	if ( (file1 = fopen(file1name,"r"))==NULL ) error(errno,"cannot open '%s'",file1name);
 	if ( (file2 = fopen(file2name,"r"))==NULL ) error(errno,"cannot open '%s'",file2name);
 
-	if ( ! quiet ) {
-		printf("comparing files '%s' and '%s' ",file1name,file2name);
-		printf("with precision: abs = %.2LG and rel = %.2LG\n",abs_prec,rel_prec);
-	}
-	
 	linenr = 0;
 	diff = 0;
 	
@@ -215,11 +204,14 @@ int main(int argc, char **argv)
 		posnr = 0;
 		while ( 1 ) {
 			posnr++;
+		
 			read1 = sscanf(&line1[pos1],"%Lf",&f1);
 			read2 = sscanf(&line2[pos2],"%Lf",&f2);
-			sscanf(&line1[pos1],"%*f%n",&pos1);
-			sscanf(&line2[pos2],"%*f%n",&pos2);
-
+			sscanf(&line1[pos1],"%*f%n",&n1);
+			sscanf(&line2[pos2],"%*f%n",&n2);
+			pos1 += n1;
+			pos2 += n2;
+			
 			if ( read1==EOF && read2==EOF ) break;
 			
 			if ( read1!=1 && read2==1 ) {
@@ -259,8 +251,7 @@ int main(int argc, char **argv)
 	fclose(file1);
 	fclose(file2);
 
-	if ( diff > 0 )
-		return 1;
-	else
-		return 0;
+	if ( diff > 0 ) printf("Found %d differences!\n",diff);
+		
+	return 0;
 }
