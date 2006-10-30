@@ -51,7 +51,7 @@ if ( isset($_POST['forteam']) ) {
 	foreach($teams as $team) {
 		$pass = genrandpasswd();
 		$DB->q("UPDATE team SET passwd = %s WHERE login = %s", md5($pass), $team);
-		echo "Login:     $team\n";
+		echo "Login:     ".htmlspecialchars($team)."\n";
 		echo "Password:  $pass\n\n";
 	}
 	echo "</pre>\n";

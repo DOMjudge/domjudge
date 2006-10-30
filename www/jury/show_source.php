@@ -35,7 +35,7 @@ echo '<pre class="output_text">' .
 
 if ( $oldsource ) {
 	
-	$oldid = $oldsource['submitid'];
+	$oldid = (int)$oldsource['submitid'];
 
 	$oldfile = SUBMITDIR.'/'.$oldsource['sourcefile'];
 	$newfile = SUBMITDIR.'/'.$source['sourcefile'];

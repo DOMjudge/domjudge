@@ -78,7 +78,7 @@ while($cdata = $res->next()) {
 
 	$haserrors = FALSE;
 	
-	echo "<p><b>c".$cdata['cid']."</b>: ";
+	echo "<p><b>c".(int)$cdata['cid']."</b>: ";
 
 	// endtime is before starttime: impossible
 	if($cdata['end'] < $cdata['start']) {
@@ -103,7 +103,8 @@ while($cdata = $res->next()) {
 	
 	if(count($overlaps) > 0) {
 		$haserrors = TRUE;
-		err('This contest overlaps with the following contest(s): c'.implode(',c', $overlaps));
+		err('This contest overlaps with the following contest(s): c' . 
+			htmlspecialchars(implode(',c', $overlaps)));
 	}
 
 	if(!$haserrors) echo "OK";
@@ -121,8 +122,9 @@ $res = $DB->q('SELECT s.submitid,s.probid,s.cid FROM submission s LEFT OUTER JOI
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
-		err('Submission s' .  $row['submitid'] . ' is for problem "' .
-			$row['probid'] . '" while this problem is not found (in c'.$row['cid'].')!');
+		err('Submission s' .  (int)$row['submitid'] . ' is for problem "' .
+			htmlspecialchars($row['probid']) .
+			'" while this problem is not found (in c'.(int)$row['cid'].')!');
 	}
 }
 
@@ -132,7 +134,7 @@ $res = $DB->q('SELECT s.submitid FROM submission s LEFT OUTER JOIN judging j USI
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
-		err('Submission s' .  $row['submitid'] . ' has a judgerid but no entry in judgings!');
+		err('Submission s' . (int)$row['submitid'] . ' has a judgerid but no entry in judgings!');
 	}
 }
 
@@ -149,7 +151,7 @@ $res = $DB->q('SELECT s.submitid as s_submitid, j.submitid as j_submitid,
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
-		$err = 'Judging j' . $row['judgingid'] . '/s' . $row['j_submitid'] . ' ';
+		$err = 'Judging j' . (int)$row['judgingid'] . '/s' . (int)$row['j_submitid'] . ' ';
 		if(isset($row['endtime']) && $row['endtime'] < $row['starttime']) {
 			err($err.'ended before it started!');
 		}
@@ -157,11 +159,11 @@ if($res->count() > 0) {
 			err($err.'started before it was submitted!');
 		}
 		if(!isset($row['s_submitid'])) {
-			err($err .'has no corresponding submitid (in c'.$row['j_cid'] .')!');
+			err($err .'has no corresponding submitid (in c'.(int)$row['j_cid'] .')!');
 		}
 		if($row['s_cid'] != NULL && $row['s_cid'] != $row['j_cid']) {
-			err('Judging j'.$row['judgingid'].' is from a different contest (c' . $row['j_cid'] .
-				') than its submission s'.$row['j_submitid'] . ' (c' . $row['s_cid'] . ')!');
+			err('Judging j'.(int)$row['judgingid'].' is from a different contest (c' . (int)$row['j_cid'] .
+				') than its submission s'.(int)$row['j_submitid'] . ' (c' . (int)$row['s_cid'] . ')!');
 		}
 	}
 }

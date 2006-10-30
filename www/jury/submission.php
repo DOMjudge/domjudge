@@ -38,7 +38,7 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 require('../header.php');
 require('menu.php');
 
-echo "<h1>Submission ".htmlspecialchars($id)."</h1>\n\n";
+echo "<h1>Submission ".$id."</h1>\n\n";
 
 ?>
 
