@@ -23,8 +23,7 @@ if ( isset($_POST['unfreeze']) ) {
 		$docid);
 }
 
-$res = $DB->q('TABLE SELECT *
-               FROM contest ORDER BY starttime DESC');
+$res = $DB->q('TABLE SELECT * FROM contest ORDER BY starttime DESC');
 
 if( count($res) == 0 ) {
 	echo "<p><em>No contests defined</em></p>\n\n";
@@ -36,24 +35,24 @@ if( count($res) == 0 ) {
 	foreach($res as $row) {
 		echo "<tr" .
 			($row['cid'] == $curcont ? ' class="highlight"':'') . ">" .
-			"\t<td align=\"right\">c" . htmlentities($row['cid']) . "</td>\n" .
-			"\t<td title=\"" . htmlentities($row['starttime']) . "\">" .
+			"<td align=\"right\">c" . htmlentities($row['cid']) . "</td>\n" .
+			"<td title=\"" . htmlentities($row['starttime']) . "\">" .
 				printtime($row['starttime'])."</td>\n".
-			"\t<td title=\"".htmlentities($row['endtime']) . "\">" .
+			"<td title=\"".htmlentities($row['endtime']) . "\">" .
 				printtime($row['endtime'])."</td>\n".
-			"\t<td title=\"".htmlentities(@$row['lastscoreupdate']) . "\">" .
+			"<td title=\"".htmlentities(@$row['lastscoreupdate']) . "\">" .
 			( isset($row['lastscoreupdate']) ?
 			  printtime($row['lastscoreupdate']) : '-' ) . "</td>\n" .
-			"\t<td title=\"".htmlentities(@$row['unfreezetime']) . "\">" .
+			"<td title=\"".htmlentities(@$row['unfreezetime']) . "\">" .
 			( isset($row['unfreezetime']) ?
 			  printtime($row['unfreezetime']) : '-' ) . "</td>\n" .
-			"\t<td>" . htmlentities($row['contestname']) . "</td>\n";
+			"<td>" . htmlentities($row['contestname']) . "</td>\n";
 
 		// display an unfreeze scoreboard button, only for the current
 		// contest (unfreezing undisplayed scores makes no sense) and
 		// only if the contest has already finished, and the scores have
 		// not already been unfrozen.
-		echo "\t<td>";
+		echo "<td>";
 		if ( $row['cid'] == $curcont && isset($row['lastscoreupdate']) ) {
 			echo "<input type=\"submit\" name=\"unfreeze[" . $row['cid'] .
 				"]\" value=\"unfreeze scoreboard now\"" ;
