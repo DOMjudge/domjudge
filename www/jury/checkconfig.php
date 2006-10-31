@@ -72,7 +72,8 @@ echo "</p><p>Checking contests...</p>\n\n";
 
 // get all contests
 $res = $DB->q('SELECT UNIX_TIMESTAMP(starttime) as start, UNIX_TIMESTAMP(endtime) as end,
-	UNIX_TIMESTAMP(lastscoreupdate) as lastsu, cid FROM contest ORDER BY cid');
+	UNIX_TIMESTAMP(lastscoreupdate) as lastsu, UNIX_TIMESTAMP(unfreezetime) as unfreeze,
+	cid FROM contest ORDER BY cid');
 
 while($cdata = $res->next()) {
 
@@ -80,17 +81,29 @@ while($cdata = $res->next()) {
 	
 	echo "<p><b>c".(int)$cdata['cid']."</b>: ";
 
-	// endtime is before starttime: impossible
+	
+	// this must always hold (lastscoreupdate and unfreezetime are optional,
+	// but when set must also be in this range):
+	// starttime < lastscoreupdate < endtime < unfreezetime
 	if($cdata['end'] < $cdata['start']) {
 		$haserrors = TRUE;
 		err('Contest ends before it even starts!');
 	}
-
-	// the last score update time is not between start & endtime
 	if(isset($cdata['lastsu']) &&
 		($cdata['lastsu'] > $cdata['end'] || $cdata['lastsu'] < $cdata['start'] ) ) {
 		$haserrors = TRUE;
 		err('Lastscoreupdate is out of start/endtime range!');
+	}
+	if ( isset($cdata['unfreeze']) ) {
+		if ( !isset($cdata['lastsu']) ) {
+			$haserrors = TRUE;
+			err('Unfreezetime set but no freeze time. That makes no sense.');
+		}
+		if ( $cdata['unfreeze'] < $cdata['lastsu'] || $cdata['unfreeze'] < $cdata['start'] ||
+			$cdata['unfreeze'] < $cdata['end'] ) {
+			$haserrors = TRUE;
+			err('Unfreezetime must be larger than any of start/end/freezetimes.');
+		}
 	}
 
 	// a check whether this contest overlaps in time with any other, the

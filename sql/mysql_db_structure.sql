@@ -35,6 +35,7 @@ CREATE TABLE `contest` (
   `starttime` datetime NOT NULL default '0000-00-00 00:00:00',
   `lastscoreupdate` datetime default NULL,
   `endtime` datetime NOT NULL default '0000-00-00 00:00:00',
+  `unfreezetime` datetime default NULL,
   `contestname` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`cid`)
 ) TYPE=MyISAM COMMENT='Contests that will be run with this install';

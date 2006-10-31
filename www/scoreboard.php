@@ -36,20 +36,35 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	                 WHERE cid = %i AND allow_submit = 1
 	                 ORDER BY probid', $cid);
 
+	// show final scores if contest is over and unfreezetime has been
+	// reached, or if contest is over and no freezetime had been set
+	$showfinal  = ( !isset($contdata['lastscoreupdate']) &&
+		strtotime($contdata['endtime']) <= time() ) ||
+		( isset($contdata['unfreezetime']) &&
+		strtotime($contdata['unfreezetime']) <= time() );
+	// freeze scoreboard if lastscoreupdate time has been reached and
+	// we're not showing the final score yet
+	$showfrozen = !$showfinal && isset($contdata['lastscoreupdate']) &&
+		strtotime($contdata['lastscoreupdate']) <= time();
+
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlentities($contdata['contestname']) . "</h1>\n\n";
-	echo "<h4>starts: " . printtime($contdata['starttime']) .
-	        " - ends: " . printtime($contdata['endtime']) ;
 
-	if ( isset($contdata['lastscoreupdate']) &&
-		strtotime($contdata['lastscoreupdate']) <= time() ) {
-		echo " (";
-		if ( $isjury ) {
-			echo "public scoreboard is ";
+	if ( $showfinal ) {
+		echo "<h4>final standings</h4>\n\n";
+	} else {
+		echo "<h4>starts: " . printtime($contdata['starttime']) .
+				" - ends: " . printtime($contdata['endtime']) ;
+
+		if ( $showfrozen ) {
+			echo " (";
+			if ( $isjury ) {
+				echo "public scoreboard is ";
+			}
+			echo "frozen since " . printtime($contdata['lastscoreupdate']) .")";
 		}
-		echo "frozen since " . printtime($contdata['lastscoreupdate']) .")";
+		echo "</h4>\n\n";
 	}
-	echo "</h4>\n\n";
 
 	echo '<table class="scoreboard' . ($isjury ? ' scoreboard_jury' : '') .
 	     '" cellpadding="3">' . "\n";
@@ -78,15 +93,15 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	$THEMATRIX = $SCORES = array();
 	$SUMMARY = array('num_correct' => 0, 'total_time' => 0);
 
-	// Get all stuff from the cached table, but don't bother with outdated
-	// info from previous contests.
-	
-	if ( $isjury ) {
+	// scoreboard_jury is always up to date, scoreboard_public might be frozen.	
+	if ( $isjury || $showfinal ) {
 		$cachetable = 'scoreboard_jury';
 	} else {
 		$cachetable = 'scoreboard_public';
 	}
-	
+
+	// Get all stuff from the cached table, but don't bother with outdated
+	// info from previous contests.
 	$scoredata = $DB->q("SELECT * FROM $cachetable WHERE cid = %i", $cid);
 
 	// the SCORES table contains the totals for each team which we will
@@ -244,8 +259,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// last modified date, now if we are the jury, else include the
 	// lastscoreupdate time
-	if( ! $isjury && isset($contdata['lastscoreupdate']) ) {
-		$lastupdate = min(time(), strtotime($contdata['lastscoreupdate']));
+	if( ! $isjury && $showfrozen ) {
+		$lastupdate = strtotime($contdata['lastscoreupdate']);
 	} else {
 		$lastupdate = time();
 	}
@@ -278,7 +293,9 @@ function putTeamRow($teamid) {
 
 	// initialize the arrays we'll build from the data
 	$THEMATRIX = array();
-	
+
+	// for a team, we always display the "current" information, that is,
+	// from scoreboard_jury
 	$scoredata = $DB->q("SELECT * FROM scoreboard_jury WHERE cid = %i AND team = %s",
 		$cid, $teamid);
 

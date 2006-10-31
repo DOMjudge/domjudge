@@ -51,6 +51,7 @@ INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'team'      ,'
 INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'team'      ,'teampage_first_visited',NOW(),'Update');
 
 INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','scoreboard_public','domjudge@%',NOW(),'Select','');
+INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','scoreboard_jury'  ,'domjudge@%',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','team'             ,'domjudge@%',NOW(),'Select','');
 INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','submission'       ,'domjudge@%',NOW(),'','Select');
 INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','problem'          ,'domjudge@%',NOW(),'','Select');
