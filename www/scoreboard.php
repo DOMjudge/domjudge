@@ -66,8 +66,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		echo "</h4>\n\n";
 	}
 
-	echo '<table class="scoreboard' . ($isjury ? ' scoreboard_jury' : '') .
-	     '" cellpadding="3">' . "\n";
+	echo '<table class="scoreboard' . ($isjury ? ' scoreboard_jury' : '') . "\">\n";
 
 	// output table column groups (for the styles)
 	echo '<colgroup><col id="scoreplace" /><col id="scoreteamname" /><col id="scoresolv" />' .
@@ -282,7 +281,7 @@ function putTeamRow($teamid) {
 	if ( empty( $contdata ) ) return;
 	$cid = $contdata['cid'];
 	
-	echo '<table class="scoreboard" cellpadding="3">' . "\n";
+	echo '<table class="scoreboard">' . "\n";
 
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, name, color
 	                 FROM problem WHERE cid = %i AND allow_submit = 1
@@ -297,7 +296,7 @@ function putTeamRow($teamid) {
 	// for a team, we always display the "current" information, that is,
 	// from scoreboard_jury
 	$scoredata = $DB->q("SELECT * FROM scoreboard_jury WHERE cid = %i AND team = %s",
-		$cid, $teamid);
+	                    $cid, $teamid);
 
 	// loop all info the scoreboard cache and put it in our own datastructure
 	while ( $srow = $scoredata->next() ) {

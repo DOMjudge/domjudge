@@ -104,7 +104,10 @@ hr {
 .scoreboard { border-collapse: collapse; }
 .scoreboard td { font-size: small; }
 .scoreboard tr { border-bottom: 1px solid silver; }
-.scoreboard td, .scoreboard th { border-right: 1px solid black; }
+.scoreboard td, .scoreboard th {
+	border-right: 1px solid black;
+	padding: 3px;
+}
 
 /* set cell padding to 0 and <a> tag to 3 to make all of cell
    clickable in the jury scoreboard */
