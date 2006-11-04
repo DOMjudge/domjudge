@@ -48,7 +48,7 @@ INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_ju
 -- Dumping data for table `problem`
 -- 
 
-INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `testdata`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES ('hello', 1, 'Hello World', 1, 1, 'hello', 5, NULL, NULL, 'magenta');
+INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `testdata`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES ('hello', 2, 'Hello World', 1, 1, 'hello', 5, NULL, NULL, 'magenta');
 
 -- 
 -- Dumping data for table `scoreboard_jury`
