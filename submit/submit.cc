@@ -253,8 +253,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	printf("websubmit = %d\n",use_websubmit);
-
 	if ( show_help ) usage();
 	if ( show_version ) version();
 	
