@@ -11,13 +11,13 @@ Colours and sorting
 Each problem can be associated with a specific colour, e.g. the colour of the
 corresponding balloon that is handed out. DOMjudge can display this colour on
 the scoreboard, if you fill in the 'color' attribute in the 'problem' table;
-set it to a valid CSS colour value (e.g. "green" or "#ff0000").
+set it to a valid CSS colour value (e.g. "green" or "#ff0000", although a name
+is preferred for displaying colour names).
 
 It's possible to have different categories of teams participating, this is
 controlled through the 'team_category' table. Each category has its own
-background colour in the scoreboard. This colour can be set by changing the
-style.css under the DOMjudge webroot: CSS class ".category1" corresponds
-to the category with ID 1.
+background colour in the scoreboard. This colour can be set with the 'color'
+attribute to a valid CSS colour value.
 
 If you wish, you can also define a sortorder in the category table. This is
 the first field that the scoreboard is sorted on. If you wish regular teams
@@ -42,7 +42,8 @@ Freezing and defrosting
 DOMjudge has the option to "freeze" the public- and team scoreboards at some
 point during the contest. This means that scores are no longer updated and
 remain to be displayed as they were at the time of the freeze. This is often
-done to keep the last hour interesting for all.
+done to keep the last hour interesting for all. The scoreboard freeze time can
+be set with the 'lastscoreupdate' attribute in the contest table.
 
 If you do not set any freeze time, this option does nothing. If you set it,
 the public- and team scoreboards will not be updated anymore once this time
@@ -51,7 +52,7 @@ has arrived. The jury will however still see the actual scoreboard.
 Once the contest is over, the scores are not automatically "unfrozen". This
 is done to keep them secret until e.g. the prize ceremony. You can release
 the final scores to team- and public interfaces when the time is right. You
-can do this either by setting a predefined "unfreezetime" in the contest
+can do this either by setting a predefined 'unfreezetime' in the contest
 table, or you push the "unfreeze scores now" button in the jury webinterface,
 under contests.
 
@@ -59,20 +60,19 @@ under contests.
 Clickability
 ------------
 Almost every cell is clickable in the jury interface and gives detailed
-information relevant to that cell. This is (of course) not available at the
-teams and public scoreboards.
+information relevant to that cell. This is (of course) not available in the
+team and public scoreboards.
 
 
 Caching
 -------
 The scoreboard is not recalculated on every page load, but rather cached in
-the database. It should be safe for repeated reloads of many clients. In
+the database. It should be safe for repeated reloads from many clients. In
 exceptional situations (should never occur in normal operation, e.g. a bug
 in DOMjudge), the cache may become inaccurate. The jury administrator interface
-contains an option to recalculate a fresh version of entire scoreboard. You
+contains an option to recalculate a fresh version of the entire scoreboard. You
 should use this option only when actually necessary, since it puts quite a
 load on the database.
-
 
 
 $Id$
