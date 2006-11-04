@@ -82,6 +82,6 @@ INSERT INTO `team_affiliation` (`affilid`, `name`, `country`, `has_logo`, `comme
 -- Dumping data for table `team_category`
 -- 
 
-INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (1, 'Participants', 0);
-INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (2, 'Observers', 1);
-INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`) VALUES (3, 'Organisation', 1);
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`) VALUES (1, 'Participants', 0, NULL);
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`) VALUES (2, 'Observers', 1, "#FFFFCC");
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`) VALUES (3, 'Organisation', 1, "#FFCCFF");

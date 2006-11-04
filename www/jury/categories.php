@@ -24,11 +24,12 @@ if( $res->count() == 0 ) {
 	echo "<table class=\"list\">\n" .
 		"<tr><th>ID</th><th>sort</th><th>name</th><th>#teams</th></tr>\n";
 	while($row = $res->next()) {
-		echo "<tr class=\"category". (int)$row['categoryid'] .
-			"\"><td>" . (int)$row['categoryid'] .
-			"</td><td>" . (int)$row['sortorder'] .
-			"</td><td>" . htmlentities($row['name']) .
-			"</td><td align=\"right\">" . (int)$row['numteams'] .
+		echo '<tr' . (isset($row['color']) ? ' style="background: ' .
+		              $row['color'] . ';"' : '') .
+			'><td>' .     (int)$row['categoryid'] .
+			'</td><td>' . (int)$row['sortorder'] .
+			'</td><td>' . htmlentities($row['name']) .
+			'</td><td align="right">' . (int)$row['numteams'] .
 			"</td></tr>\n";
 	}
 	echo "</table>\n\n";

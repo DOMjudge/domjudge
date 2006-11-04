@@ -194,5 +194,6 @@ CREATE TABLE `team_category` (
   `categoryid` mediumint(8) unsigned NOT NULL auto_increment,
   `name` varchar(255) NOT NULL default '',
   `sortorder` tinyint(1) unsigned NOT NULL default '0',
+  `color` varchar(25) default NULL,
   PRIMARY KEY  (`categoryid`)
 ) TYPE=MyISAM COMMENT='Categories for teams (e.g.: participants, observers, ...)';

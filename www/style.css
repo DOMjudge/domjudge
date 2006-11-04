@@ -156,11 +156,5 @@ hr {
 #teamscoresummary td { padding: 3px; }
 #teamscoresummary th { padding: 3px; }
 
-/* backgrounds for categories, define as you see fit */
-.category1 { background: white; }
-.category2 { background: #ffffcc; }
-.category3 { background: #ffccff; }
-.category4 { background: #99ccff; }
-
 /* between different sortorder-categories, print a thick line */
 .sortorderswitch { border-top: 2px solid black; }

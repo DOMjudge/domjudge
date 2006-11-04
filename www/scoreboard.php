@@ -29,7 +29,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
-	                 login, team.name, team.categoryid, sortorder FROM team
+	                 login, team.name, team.categoryid, sortorder, color FROM team
 	                 LEFT JOIN team_category USING (categoryid)');
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
 	                 probid, name, color FROM problem
@@ -69,8 +69,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	echo '<table class="scoreboard' . ($isjury ? ' scoreboard_jury' : '') . "\">\n";
 
 	// output table column groups (for the styles)
-	echo '<colgroup><col id="scoreplace" /><col id="scoreteamname" /><col id="scoresolv" />' .
-		'<col id="scoretotal" />' .
+	echo '<colgroup><col id="scoreplace" /><col id="scoreteamname" />' .
+		'<col id="scoresolv" /><col id="scoretotal" />' .
 		str_repeat('<col class="scoreprob" />', count($probs)) .
 		"</colgroup>\n";
 
@@ -82,7 +82,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		jurylink(null,'time',$isjury) . "</th>\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="' . htmlentities($pr['name']) . '"' .
-			(isset($pr['color']) ? ' style="background: ' . htmlspecialchars($pr['color']) . ';"' : '' ) . '>' .
+			(isset($pr['color']) ? ' style="background: ' .
+			 htmlspecialchars($pr['color']) . ';"' : '' ) . '>' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),
 			         htmlentities($pr['probid']),$isjury) . '</th>';
 	}
@@ -142,17 +143,23 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	$prevsortorder = -1;
 	foreach( $SCORES as $team => $totals ) {
 
-		// team name, total correct, total time
-		echo '<tr' . ( @$myteamid == $team ? ' id="scorethisisme"' : '' ) ;
+		// place, team name, total correct, total time
+		echo '<tr';
 		if ( $totals['sortorder'] != $prevsortorder ) {
 			echo ' class="sortorderswitch"';
 			$prevsortorder = $totals['sortorder'];
-			$place = 0; // reset team position on switch to different categories
+			$place = 0; // reset team position on switch to different category
 			$prevscores = array(-1,-1);
 		}
 		$place++;
-		echo
-			'><td class="scorepl">';
+		// check whether this is us, otherwise use category colour
+		if ( @$myteamid == $team ) {
+			echo ' id="scorethisisme"';
+		} else {
+			$color = $teams[$team]['color'];
+		}
+		echo '><td class="scorepl">';
+		// Only print place when score is different from the previous team
 		if ( $prevscores[0] != $totals['num_correct'] ||
 			 $prevscores[1] != $totals['total_time'] ) {
 			echo jurylink(null,$place,$isjury);
@@ -161,7 +168,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			echo jurylink(null,'',$isjury);
 		}
 		echo
-			'</td><td class="scoretn category' . (int)$totals['categoryid'] . '"' .
+			'</td><td class="scoretn"' .
+			(isset($color) ? ' style="background: ' . $color . ';"' : '') .
 			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
 			jurylink('team.php?id=' . urlencode($team),
 			         htmlentities($teams[$team]['name']),$isjury) .	'</td>' .
@@ -241,17 +249,18 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	}
 	echo "</tr>\n</table>\n\n";
 
-	$res = $DB->q('SELECT * FROM team_category ORDER BY categoryid');
+	$categs = $DB->q('SELECT * FROM team_category ORDER BY categoryid');
 
 	// only print legend when there's more than one category
-	if ( $res->count() > 1 ) {
+	if ( $categs->count() > 1 ) {
 		echo "<p><br /><br /></p>\n<table class=\"scoreboard" .
 			($isjury ? ' scoreboard_jury' : '') . "\">\n" .
 			"<tr><th>" . jurylink('categories.php','Legend',$isjury) . "</th></tr>\n";
-		while ( $row = $res->next() ) {
-			echo '<tr class="category' . (int)$row['categoryid'] . '">' .
-				'<td align="center" class="scoretn">' .	htmlspecialchars($row['name']) .
-				"</td></tr>\n";
+		while ( $cat = $categs->next() ) {
+			echo '<tr' . (isset($cat['color']) ? ' style="background: ' .
+			              $cat['color'] . ';"' : '') . '>' .
+				'<td align="center" class="scoretn">' .
+				jurylink(null,htmlspecialchars($cat['name']),$isjury) .	"</td></tr>\n";
 		}
 		echo "</table>\n\n";
 	}
