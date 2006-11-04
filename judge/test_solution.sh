@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script to test (compile, run and compare) solutions.
-# Copyright (C) 2004 Jaap Eldering (eldering@a-eskwadraat.nl).
+# Copyright (C) 2004--2006 Jaap Eldering (eldering@a-eskwadraat.nl).
 #
 # $Id$
 #
@@ -50,11 +50,16 @@
 # internal maximum memory size.
 #
 # For running the solution a script 'run.sh' is called (default). For
-# usage of 'run.sh' see that script. Likewise, for comparing results,
-# a script 'compare.sh' is called by default. A submissions results
-# are counted as accepted when the compare script returns with zero
-# exitcode and the filesize of diff.out is zero; it does not use the
-# result.xml file (see compare.sh for more information).
+# usage of 'run.sh' see that script. Likewise, for comparing results, a
+# script 'compare.sh' is called by default.
+#
+# If 'xsltproc' is available, then the result is parsed from
+# 'result.xml' according to the ICPC Validator Interface Standard as
+# described in http://www.ecs.csus.edu/pc2/doc/valistandard.html.
+# Otherwise a submission is counted as accepted when the filesize of
+# compare.out is zero. In both cases, if the compare script returns with
+# nonzero exitcode, this is viewed as an internal error.
+
 
 # Global configuration
 source "`dirname $0`/../etc/config.sh"
@@ -148,11 +153,11 @@ fi
 # Make testing dir accessible for RUNUSER:
 chmod a+x $TMPDIR
 
-# Create files, which are expected to exist:
+# Create files which are expected to exist:
 touch compile.{out,time}   # Compiler output and runtime
 touch error.out            # Error output after compiler output
-touch diff.out             # Compare output
-touch result.xml           # Result of comparison
+touch compare.out          # Compare output
+touch result.{xml,out}     # Result of comparison (XML and plaintext version)
 touch program.{out,err}    # Program output and stderr (for extra information)
 touch program.{time,exit}  # Program runtime and exitcode
 
@@ -304,17 +309,36 @@ export PATH="$SYSTEM_ROOT/bin:$PATH"
 logmsg $LOG_INFO "starting script '$COMPARE_SCRIPT'"
 
 if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
-                       result.xml diff.out 2>diff.tmp ; then
+                       result.xml compare.out &>compare.tmp ; then
+	exitcode=$?
 	cat error.tmp >>error.out
-	error "diff: `cat diff.tmp`";
+	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
 fi
 
-if [ -s diff.out ]; then
-	echo "Wrong answer." >>error.out
+# Parse result.xml if 'xsltproc' is available, otherwise check for empty
+# compare output
+if [ -x `which xsltproc` ]; then
+	xsltproc $SCRIPTDIR/parse_result.xslt result.xml > result.out
+	result=`grep '^result='      result.out | cut -d = -f 2- | tr '[:upper:]' '[:lower:]'`
+	descrp=`grep '^description=' result.out | cut -d = -f 2-`
+else
+	if [ -s compare.out ]; then
+		result="wrong anser"
+	else
+		result="accepted"
+	fi
+fi
+descrp="${descrp:+ ($descrp)}"
+
+if [ "$result" == "accepted" ]; then
+	echo "Correct${descrp}! Runtime is `cat program.time` seconds." >>error.out
+	cat error.tmp >>error.out
+	exit $E_CORRECT
+else
+	echo "Wrong answer${descrp}." >>error.out
 	cat error.tmp >>error.out
 	exit $E_ANSWER
 fi
 
-echo "Correct! Runtime is `cat program.time` seconds." >>error.out
-cat error.tmp >>error.out
-exit $E_CORRECT
+# This should never be reached
+exit $E_INTERN

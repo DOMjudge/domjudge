@@ -158,7 +158,7 @@ while ( TRUE ) {
 		$result,
 		getFileContents( $tempdir . '/compile.out' ),
 		getFileContents( $tempdir . '/program.out' ),
-		getFileContents( $tempdir . '/diff.out' ),
+		getFileContents( $tempdir . '/compare.out' ),
 		getFileContents( $tempdir . '/error.out' ),
 		$judgingid, $myhost);
 

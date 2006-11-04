@@ -14,6 +14,7 @@ Version 1.4.0 - SVN
  - Add problem and team category colours to MySQL DB.
  - Add team summary to all main team pages.
  - Add check_float program to compare floating point output.
+ - Parse validator XML output if xsltproc is available (Closes: #1238454).
  - Fix clarification wrapping.
  - Fix some language typos.
  - Improve webinterface layout (CSS modifications)
