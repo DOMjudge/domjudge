@@ -65,9 +65,11 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 		"</tr>\n";
 	
 	// print each row with links to detailed information
+	$subcnt = $corcnt = 0;
 	while( $row = $res->next() ) {
 		$sid = (int)$row['submitid'];
 		$isfinished = ($isjury || ! @$resulttable[$sid]['result']);
+		
 		echo "<tr>";
 		if ( $isjury ) {
 			echo "<td><a href=\"submission.php?id=$sid\">s$sid</a></td>";
@@ -121,8 +123,15 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 			}
 		}
 		echo "</tr>\n";
+		
+		$subcnt++;
+		if ( @$resulttable[$sid]['result'] == 'correct' ) $corcnt++;
 	}
 	echo "</table>\n\n";
+
+	if ( $isjury ) {
+		echo "<p>Total correct: $corcnt, submitted: $subcnt</p>\n\n";
+	}
 
 	return;
 }
