@@ -36,16 +36,22 @@ if( $teams->count() == 0 ) {
 } else {
 	echo "<table class=\"list\">\n" .
 		"<tr><th>login</th><th>teamname</th><th>category</th>" .
-		"<th>affiliation</th><th>host</th><th>room</th><th>status</th></tr>\n";
+		"<th>affiliation</th><th>host</th><th>room</th><th colspan=\"2\">status</th></tr>\n";
 
 	while( $row = $teams->next() ) {
 
-		$status = 0;
+		$status = $numsub = $numcor = 0;
 		if ( isset($row['teampage_first_visited']) ) $status = 1;
 		if ( isset($nsubmits[$row['login']]) &&
-			 $nsubmits[$row['login']]['cnt']>0 ) $status = 2;
+			 $nsubmits[$row['login']]['cnt']>0 ) {
+			$status = 2;
+			$numsub = (int)$nsubmits[$row['login']]['cnt'];
+		}
 		if ( isset($ncorrect[$row['login']]) &&
-			 $ncorrect[$row['login']]['cnt']>0 ) $status = 3;
+			 $ncorrect[$row['login']]['cnt']>0 ) {
+			$status = 3;
+			$numcor = (int)$ncorrect[$row['login']]['cnt'];
+		}
 		
 		echo "<tr class=\"category" . (int)$row['categoryid'] . "\">".
 			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($row['login'])."\">".
@@ -80,7 +86,8 @@ if( $teams->count() == 0 ) {
 		case 3: echo 'src="green.png"  alt="green"  title="correct submission(s)"';
 			break;
 		}
-		echo " width=\"16\" height=\"16\" /></td></tr>\n";
+		echo " width=\"16\" height=\"16\" /></td>";
+		echo "<td align=\"right\" title=\"#correct / #submitted\">$numcor / $numsub</td></tr>\n";
 	}
 	echo "</table>\n\n";
 }
