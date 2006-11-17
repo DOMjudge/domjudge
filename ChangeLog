@@ -21,6 +21,7 @@ Version 1.4.0 - SVN
  - Improve webinterface layout (CSS modifications)
  - Tweak the webinterface even more.
 
+
 Version 1.3.0 - 6 October 2006
 ------------------------------
  - Fix balloons notification for new database layout introduced
