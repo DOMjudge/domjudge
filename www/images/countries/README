@@ -1,8 +1,8 @@
 These flags are downloaded from the CIA factbook, which can be found 
 at: https://www.cia.gov/cia/publications/factbook/
 
-The images are PNG files rescaled to a height of 26 pixels (half the 
-original size) and named after the 2-letter ISO 3166 code of the 
+The images are PNG files rescaled to a height of 18 pixels (one third
+the original size) and named after the 2-letter ISO 3166 code of the 
 country/region (instead of their FIPS code on the website), see the
 file codes.txt.
 
