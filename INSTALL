@@ -409,6 +409,23 @@ additionally also remove all traces of DOMjudge from the MySQL
 database, which is needed if you want to reinstall the database!
 
 
+UPGRADING
+---------
+
+Upgrading DOMjudge to a newer version is not (yet) well supported. In
+case you want to upgrade, be aware of the following problems.
+
+There might be database layout incompatibility problems. The first
+place to check for this is the ChangeLog. Simple additions to the
+structure can be integrated by running 'make upgrade' in
+SYSTEM_ROOT/sql of the new installation. This will (in principle, no
+guarantees) preserve the data in the database.
+
+Upgrading is probably best done by installing the new version in a
+separate place and transferring the configuration settings from the
+old version. 
+
+
 SECURITY
 --------
 
