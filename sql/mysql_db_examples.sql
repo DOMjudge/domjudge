@@ -76,7 +76,7 @@ INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `ipaddress`, `pass
 -- Dumping data for table `team_affiliation`
 -- 
 
-INSERT INTO `team_affiliation` (`affilid`, `name`, `country`, `has_logo`, `comments`) VALUES ('UU', 'Utrecht University', 'NL', 0, NULL);
+INSERT INTO `team_affiliation` (`affilid`, `name`, `country`, `comments`) VALUES ('UU', 'Utrecht University', 'NL', NULL);
 
 -- 
 -- Dumping data for table `team_category`
