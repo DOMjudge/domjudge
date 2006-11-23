@@ -76,11 +76,11 @@ echo '<h3>Submissions';
 if ( isset($key) ) {
 	$keystr = "";
 	switch ( $key ) {
-	case 'team':     $keystr = "team";     break;
-	case 'probid':   $keystr = "problem";  break;
-	case 'langid':   $keystr = "language"; break;
-	case 'judgerid': $keystr = "judger";   break;
-	default:         $keystr = $key;
+	case 'team':      $keystr = "team";      break;
+	case 'probid':    $keystr = "problem";   break;
+	case 'langid':    $keystr = "language";  break;
+	case 'judgehost': $keystr = "judgehost"; break;
+	default:          $keystr = $key;
 	}
 	echo ' for ' . htmlspecialchars($keystr) . ': ' . htmlspecialchars($value);
 }

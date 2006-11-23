@@ -38,7 +38,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	$cid = $contdata['cid'];
  
 	$res = $DB->q('SELECT s.submitid, s.team, s.probid, s.langid, s.submittime,
-		s.judgerid, t.name as teamname, p.name as probname, l.name as langname
+		s.judgehost, t.name as teamname, p.name as probname, l.name as langname
 		FROM submission s
 		LEFT JOIN team t ON(t.login=s.team)
 		LEFT JOIN problem p ON(p.probid=s.probid)
@@ -90,7 +90,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 				if ( $row['submittime'] > $contdata['endtime'] ) {
 					echo printresult('too-late', TRUE, TRUE);
 				} else {
-					echo printresult(@$row['judgerid'] ? '' : 'queued', TRUE, TRUE);
+					echo printresult(@$row['judgehost'] ? '' : 'queued', TRUE, TRUE);
 				}
 			} else {
 				echo '<a href="judging.php?id=' . urlencode($resulttable[$sid]['judgingid'])
@@ -114,12 +114,12 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 			echo "<td>" . printyn(@$resulttable[$sid]['verified']) . "</td>";
 		}
 		if ( $isjury ) {
-			$judger = @$resulttable[$sid]['judgerid'];
-			if ( empty($judger) ) {
+			$judgehost = @$resulttable[$sid]['judgehost'];
+			if ( empty($judgehost) ) {
 				echo '<td></td>';
 			} else {
-				echo '<td><a href="judger.php?id=' . urlencode($judger) . '">' .
-					printhost($judger) . '</a></td>';
+				echo '<td><a href="judgehost.php?id=' . urlencode($judgehost) . '">' .
+					printhost($judgehost) . '</a></td>';
 			}
 		}
 		echo "</tr>\n";

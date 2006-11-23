@@ -15,7 +15,7 @@ function putJudgings($key, $value) {
 
 	// get the judgings for a specific key and value pair
 	// select only specific fields to avoid retrieving large blobs
-	$res = $DB->q('SELECT judgingid,submitid,starttime,endtime,judgerid,result,verified,valid
+	$res = $DB->q('SELECT judgingid,submitid,starttime,endtime,judgehost,result,verified,valid
 	               FROM judging
 	               WHERE '.$key.' = %s AND cid = %i ORDER BY starttime DESC',
 	               $value, getCurContest() );
@@ -33,8 +33,8 @@ function putJudgings($key, $value) {
 				'">j' .	(int)$jud['judgingid'] . '</a></td>';
 			echo '<td>' . printtime($jud['starttime']) . '</td>';
 			echo '<td>' . printtime(@$jud['endtime'])  . '</td>';
-			echo '<td><a href="judger.php?id=' . urlencode(@$jud['judgerid']) .
-				'">' . printhost(@$jud['judgerid']) . '</a></td>';
+			echo '<td><a href="judgehost.php?id=' . urlencode(@$jud['judgehost']) .
+				'">' . printhost(@$jud['judgehost']) . '</a></td>';
 			echo '<td><a href="judging.php?id=' . (int)$jud['judgingid'] . '">' .
 				printresult(@$jud['result'], $jud['valid']) . '</a></td>';
 			echo '<td align="center">' . printyn($jud['valid']) . '</td>';
@@ -60,7 +60,7 @@ function rejudge($key, $value) {
 /*
 	$DB->q('UPDATE judging
 	        LEFT JOIN submission ON (submission.submitid=judging.submitid)
-	        SET valid = 0, judgerid = NULL, judgermark = NULL
+	        SET valid = 0, judgehost = NULL, judgemark = NULL
 	        WHERE '.$key.' = %s AND judging.cid = %i AND valid = 1 AND
 	        ( result IS NULL OR result != "correct" )',
 	       $value, $cid);
@@ -79,7 +79,7 @@ function rejudge($key, $value) {
 		$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
 		       $jud['judgingid']);
 
-		$DB->q('UPDATE submission SET judgerid = NULL, judgemark = NULL
+		$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
 		        WHERE submitid = %i', $jud['submitid']);
 
 		calcScoreRow($cid, $jud['team'], $jud['probid']);

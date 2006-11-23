@@ -54,7 +54,7 @@ DOMjudge has three different kinds of hosts:
   serves the webpages. This host will run the DOMjudge submitdaemon(s),
   MySQL and Apache. Optionally some of these tasks can be further split out
   to separate machines, but that's not normally necessary.
-* Judgers: a number of hosts, at least one, that will retrieve submitted
+* Judgehosts: a number of hosts, at least one, that will retrieve submitted
   solutions from the main jury system, compile and run them and send the
   results back to the jury system. Since this is computationally intensive,
   there should ideally be at least a couple of these. They will run the
@@ -161,7 +161,7 @@ software:
 
   clarification      Clarification requests/replies are stored here.
 * contest            Contest definitions with start/end time.
-* judger             Computers (hostnames) that function as judgers.
+* judgehost          Computers (hostnames) that function as judgehosts.
   judging            Judgings of submissions.
 * language           Definition of allowed submission languages.
 * problem            Definition of problems (name, corresponding contest, etc.)
@@ -190,8 +190,8 @@ the last stages of the contest more thrilling, because no-one knows
 who has won... Setting this to 'NULL' disables this feature.
 'contestname' is a descriptive name used in the interface.
 
-judger: List here the hosts that will be autojudging the submissions.
-'judgerid' is the hostname of a judger computer.
+judgehost: List here the hosts that will be autojudging the submissions.
+'hostname' is the (short) hostname of a judge computer.
 'active' should be 0 or 1 and indicates whether this host should judge
 incoming submissions.
 
@@ -205,7 +205,7 @@ language, check that these match.
 to match the first extension as listed in the global configuration file.
 'allow_submit' (0 or 1) determines whether teams can submit using this
 language.
-'allow_judge' (0 or 1) determines whether judgers will judge
+'allow_judge' (0 or 1) determines whether judgehosts will judge
 submissions for this problem. This can for example be set to 0 to
 temporarily hold judging, when a problem occurs with the judging of
 specific languages; after resolution of the problem this can be set to
@@ -223,7 +223,7 @@ cannot be used in multiple contests.
 for this problem. Non-submittable problems are also not displayed on the
 scoreboard. This can be used to define spare problems, which can then
 be added to the contest in a second.
-'allow_judge' (0 or 1) determines whether judgers will judge
+'allow_judge' (0 or 1) determines whether judgehosts will judge
 submissions for this problem. See also the explanation for language.
 'testdata' is the directory within INPUT_ROOT that contains the
 input/output testdata in files 'testdata.in' and 'testdata.out'.
@@ -362,7 +362,7 @@ files are located. Reload the webserver for the changes to take effect.
 OTHER CONFIGURATION ISSUES
 
 For running solution programs under a non-privileged user, a user has
-to be added to the system(s) that act as judger. This user does not
+to be added to the system(s) that act as judgehost. This user does not
 need a home-directory or password, so e.g. the following command would
 suffice to add a user 'domtest' with minimal privileges:
 

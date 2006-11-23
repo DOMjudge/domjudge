@@ -2,7 +2,7 @@
 <div id="menutop">
 <a href="index.php">home</a>
 <a href="problems.php">problems</a>
-<a href="judgers.php">judgers</a>
+<a href="judgehosts.php">judgehosts</a>
 <a href="teams.php">teams</a>
 <a href="clarifications.php">clarifications</a>
 <a href="submissions.php">submissions</a>

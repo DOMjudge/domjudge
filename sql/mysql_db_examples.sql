@@ -20,12 +20,12 @@ INSERT INTO `contest` (`cid`, `contestname`, `starttime`, `lastscoreupdate`, `en
 INSERT INTO `contest` (`cid`, `contestname`, `starttime`, `lastscoreupdate`, `endtime`, `unfreezetime`) VALUES (2, 'Demo contest', '2006-01-01 12:00:00', '2008-01-01 16:00:00', '2008-01-01 17:00:00', '2008-01-01 17:30:00');
 
 -- 
--- Dumping data for table `judger`
+-- Dumping data for table `judgehost`
 -- 
 
-INSERT INTO `judger` (`judgerid`, `active`) VALUES ('judgehost1', 1);
-INSERT INTO `judger` (`judgerid`, `active`) VALUES ('judgehost2', 1);
-INSERT INTO `judger` (`judgerid`, `active`) VALUES ('sparehost', 0);
+INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('judgehost1', 1);
+INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('judgehost2', 1);
+INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('sparehost', 0);
 
 -- 
 -- Dumping data for table `judging`

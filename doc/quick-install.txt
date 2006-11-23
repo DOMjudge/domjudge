@@ -12,7 +12,7 @@ External software:
   [`apt-get install mysql-server apache php4 php4-mysql php4-cli phpmyadmin`]
 - Make sure PHP works for the webserver and the commandline client, and
   that phpMyAdmin works.
-- Install necessary compilers on the judger hosts.
+- Install necessary compilers on the judgehosts.
 
 DOMjudge:
 - `cd etc; $EDITOR global.cfg; cd ..; make config`

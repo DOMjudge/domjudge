@@ -41,13 +41,13 @@ CREATE TABLE `contest` (
 ) TYPE=MyISAM COMMENT='Contests that will be run with this install';
 
 -- 
--- Table structure for table `judger`
+-- Table structure for table `judgehost`
 -- 
 
-CREATE TABLE `judger` (
-  `judgerid` varchar(50) NOT NULL default '',
+CREATE TABLE `judgehost` (
+  `hostname` varchar(50) NOT NULL default '',
   `active` tinyint(8) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`judgerid`)
+  PRIMARY KEY  (`hostname`)
 ) TYPE=MyISAM COMMENT='Hostnames of the autojudgers';
 
 -- 
@@ -60,7 +60,7 @@ CREATE TABLE `judging` (
   `submitid` mediumint(10) unsigned NOT NULL default '0',
   `starttime` datetime NOT NULL default '0000-00-00 00:00:00',
   `endtime` datetime default NULL,
-  `judgerid` varchar(50) NOT NULL default '',
+  `judgehost` varchar(50) NOT NULL default '',
   `result` enum('correct','compiler-error','timelimit','run-error','wrong-answer','no-output') default NULL,
   `verified` tinyint(1) unsigned NOT NULL default '0',
   `verifier` varchar(15) NOT NULL default '',
@@ -149,7 +149,7 @@ CREATE TABLE `submission` (
   `submittime` datetime NOT NULL default '0000-00-00 00:00:00',
   `sourcefile` varchar(255) NOT NULL default '',
   `sourcecode` text NOT NULL,
-  `judgerid` varchar(50) default NULL,
+  `judgehost` varchar(50) default NULL,
   `judgemark` varchar(255) default NULL,
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `judgemark` (`judgemark`)

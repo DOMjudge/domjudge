@@ -29,8 +29,8 @@ logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 list($usec, $sec) = explode( " ", microtime() );
 mt_srand( $sec * $usec );
 
-// Retrieve hostname and check database for judger entry
-$row = $DB->q('MAYBETUPLE SELECT * FROM judger WHERE judgerid = %s', $myhost);
+// Retrieve hostname and check database for judgehost entry
+$row = $DB->q('MAYBETUPLE SELECT * FROM judgehost WHERE hostname = %s', $myhost);
 if ( ! $row ) {
 	error("No database entry found for me ($myhost), exiting");
 }
@@ -47,7 +47,7 @@ $active = TRUE;
 while ( TRUE ) {
 
 	// Check that this judge is active, else wait and check again later
-	$row = $DB->q('TUPLE SELECT * FROM judger WHERE judgerid = %s', $myhost);
+	$row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $myhost);
 	if ( $row['active'] != 1 ) {
 		if ( $active ) {
 			logmsg(LOG_NOTICE, "Not active, waiting for activation...");
@@ -95,7 +95,7 @@ while ( TRUE ) {
 
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-		SET judgerid = %s, judgemark = %s WHERE judgerid IS NULL
+		SET judgehost = %s, judgemark = %s WHERE judgehost IS NULL
 		AND cid = %i AND langid IN (%As) AND probid IN (%As)
 		AND submittime <= %s LIMIT 1',
 		$myhost, $mark, $cid, $judgable_lang, $judgable_prob, $contdata['endtime']);
@@ -118,15 +118,14 @@ while ( TRUE ) {
 		p.testdata, p.special_run, p.special_compare
 		FROM submission s, problem p, language l
 		WHERE s.probid = p.probid AND s.langid = l.langid AND
-		judgemark = %s AND judgerid = %s', $mark, $myhost);
+		judgemark = %s AND judgehost = %s', $mark, $myhost);
 
 	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
 	       "($row[team]/$row[probid]/$row[langid])...");
 
 	// update the judging table with our ID and the starttime
-	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgerid)
-		VALUES (%i,%i,NOW(),%s)',
-		$row['submitid'], $cid, $myhost);
+	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)
+	                     VALUES (%i,%i,NOW(),%s)', $row['submitid'], $cid, $myhost);
 
 	// create tempdir for tempfiles
 	$tempdir = "$tempdirpath/c$cid-s$row[submitid]-j$judgingid";
@@ -151,16 +150,15 @@ while ( TRUE ) {
 
 	// NOTE: START TRANSACTION
 	// pop the result back into the judging table
-	$DB->q('UPDATE judging
-		SET endtime = NOW(), result = %s,
-			output_compile = %s, output_run = %s, output_diff = %s, output_error = %s
-		WHERE judgingid = %i AND judgerid = %s',
-		$result,
-		getFileContents( $tempdir . '/compile.out' ),
-		getFileContents( $tempdir . '/program.out' ),
-		getFileContents( $tempdir . '/compare.out' ),
-		getFileContents( $tempdir . '/error.out' ),
-		$judgingid, $myhost);
+	$DB->q('UPDATE judging SET endtime = NOW(), result = %s,
+	        output_compile = %s, output_run = %s, output_diff = %s, output_error = %s
+	        WHERE judgingid = %i AND judgehost = %s',
+	       $result,
+	       getFileContents( $tempdir . '/compile.out' ),
+	       getFileContents( $tempdir . '/program.out' ),
+	       getFileContents( $tempdir . '/compare.out' ),
+	       getFileContents( $tempdir . '/error.out' ),
+	       $judgingid, $myhost);
 
 	// recalculate the scoreboard cell (team,problem) after this judging
 	calcScoreRow($cid, $row['team'], $row['probid']);
@@ -180,5 +178,3 @@ while ( TRUE ) {
 
 	// restart the judging loop
 }
-
-

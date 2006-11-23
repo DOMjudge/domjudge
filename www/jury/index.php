@@ -19,7 +19,7 @@ if ( is_readable('DOMjudgelogo.png') ) {
 <ul>
 <li><a href="clarifications.php">Clarifications</a></li>
 <li><a href="contests.php">Contests</a></li>
-<li><a href="judgers.php">Judgers</a></li>
+<li><a href="judgehosts.php">Judgehosts</a></li>
 <li><a href="languages.php">Languages</a></li>
 <li><a href="problems.php">Problems</a></li>
 <li><a href="scoreboard.php">Scoreboard</a></li>

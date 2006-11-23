@@ -141,13 +141,13 @@ if($res->count() > 0) {
 	}
 }
 
-// check for submissions that have been marked by a judger but that have no judging-row
+// check for submissions that have been marked by a judgehost but that have no judging-row
 $res = $DB->q('SELECT s.submitid FROM submission s LEFT OUTER JOIN judging j USING(submitid)
-	WHERE j.submitid IS NULL AND s.judgerid IS NOT NULL');
+               WHERE j.submitid IS NULL AND s.judgehost IS NOT NULL');
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
-		err('Submission s' . (int)$row['submitid'] . ' has a judgerid but no entry in judgings!');
+		err('Submission s' . (int)$row['submitid'] . ' has a judgehost but no entry in judgings!');
 	}
 }
 

@@ -68,8 +68,8 @@ if ( @$jdata['endtime'] ) {
 	$sid?>"><?= htmlspecialchars($jdata['sourcefile']) ?></a></td></tr>
 <tr><td>Start:</td><td><?=htmlspecialchars($jdata['starttime'])?></td></tr>
 <tr><td>End:</td><td><?=$endtime?></td></tr>
-<tr><td>Judger:</td><td><a href="judger.php?id=<?=urlencode($jdata['judgerid']).'">'.
-	printhost($jdata['judgerid'])?></a></td></tr>
+<tr><td>Judgehost:</td><td><a href="judgehost.php?id=<?=urlencode($jdata['judgehost']).'">'.
+	printhost($jdata['judgehost'])?></a></td></tr>
 <tr><td>Result:</td><td><?=printresult(@$jdata['result'], $jdata['valid'])?></td></tr>
 <tr><td>Valid:</td><td><?=printyn($jdata['valid'])?></td></tr>
 <tr><td>Verified:</td><td><?=printyn($jdata['verified'])?>
