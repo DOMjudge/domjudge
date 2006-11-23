@@ -181,7 +181,6 @@ CREATE TABLE `team_affiliation` (
   `affilid` varchar(10) NOT NULL default '',
   `name` varchar(50) NOT NULL default '',
   `country` char(2) default NULL,
-  `has_logo` tinyint(1) unsigned NOT NULL default '0',
   `comments` text,
   PRIMARY KEY  (`affilid`)
 ) TYPE=MyISAM COMMENT='Affilitations for teams (e.g.: university, company)';
