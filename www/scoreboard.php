@@ -29,8 +29,10 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
-	                 login, team.name, team.categoryid, sortorder, color FROM team
-	                 LEFT JOIN team_category USING (categoryid)');
+	                 login, team.name, team.categoryid, team.affilid,
+	                 sortorder, color, country, team_affiliation.name AS affilname FROM team
+	                 LEFT JOIN team_category ON (team.categoryid = team_category.categoryid)
+	                 LEFT JOIN team_affiliation ON (team.affilid = team_affiliation.affilid)');
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
 	                 probid, name, color FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
@@ -69,14 +71,17 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	echo '<table class="scoreboard' . ($isjury ? ' scoreboard_jury' : '') . "\">\n";
 
 	// output table column groups (for the styles)
-	echo '<colgroup><col id="scoreplace" /><col id="scoreteamname" />' .
-		'<col id="scoresolv" /><col id="scoretotal" />' .
+	echo '<colgroup><col id="scoreplace" />' .
+		( SHOW_AFFILIATIONS ? '<col id="scoreaffil" />' : '' ) .
+		'<col id="scoreteamname" /><col id="scoresolv" /><col id="scoretotal" />' .
 		str_repeat('<col class="scoreprob" />', count($probs)) .
 		"</colgroup>\n";
 
 	// column headers
 	echo '<tr class="scoreheader"><th>' .
 		jurylink(null,'#',$isjury) . '</th><th>' .
+		( SHOW_AFFILIATIONS ? jurylink('affiliations.php','affil.',$isjury) .
+		  '</th><th>' : '' ) .
 		jurylink('teams.php','team',$isjury) . '</th><th>' .
 		jurylink(null,'solved',$isjury) . '</th><th>' .
 		jurylink(null,'time',$isjury) . "</th>\n";
@@ -167,8 +172,41 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		} else {
 			echo jurylink(null,'',$isjury);
 		}
+		echo '</td>';
+		if ( SHOW_AFFILIATIONS ) {
+			echo '<td>';
+			if ( isset($teams[$team]['affilid']) ) {
+				if ( $isjury ) {
+					echo '<a href="affiliation.php?id=' .
+						urlencode($teams[$team]['affilid']) . '">';
+				}
+				$affillogo = '../images/affiliations/' .
+					urlencode($teams[$team]['affilid']) . '.png';
+				if ( is_readable($affillogo) ) {
+					echo '<img src="' . $affillogo . '"' .
+						' alt="'   . htmlentities($teams[$team]['affilid']) . '"' .
+						' title="' . htmlentities($teams[$team]['affilname']) . '" />';
+				} else {
+					echo htmlentities($teams[$team]['affilid']);
+				}
+				if ( isset($teams[$team]['country']) ) {
+					$countryflag = '../images/countries/' .
+						urlencode($teams[$team]['country']) . '.png';
+					echo ' ';
+					if ( is_readable($countryflag) ) {
+						echo '<img src="' . $countryflag . '"' .
+							' alt="'   . htmlentities($teams[$team]['country']) . '"' .
+							' title="' . htmlentities($teams[$team]['country']) . '" />';
+					} else {
+						echo htmlentities($teams[$team]['country']);
+					}
+				}
+				if ( $isjury ) echo '</a>';
+			}
+			echo '</td>';	
+		}
 		echo
-			'</td><td class="scoretn"' .
+			'<td class="scoretn"' .
 			(isset($color) ? ' style="background: ' . $color . ';"' : '') .
 			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
 			jurylink('team.php?id=' . urlencode($team),
@@ -224,8 +262,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// print a summaryline
 	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
-	     '<td title="total teams">' . jurylink(null,count($teams),$isjury) .
-		 '</td><td title=" ">' . jurylink(null,'Summary',$isjury) . '</td>';
+	     '<td title="total teams">' . jurylink(null,count($teams),$isjury) . '</td>' .
+	     ( SHOW_AFFILIATIONS ? '<td title=" "></td>' : '' ) .
+	     '<td title=" ">' . jurylink(null,'Summary',$isjury) . '</td>';
 	echo '<td class="scorenc" title="total solved">' .
 	     jurylink(null,$SUMMARY['num_correct'],$isjury) . '</td>' .
 	     '<td class="scorett" title="total time">' .

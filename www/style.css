@@ -118,6 +118,7 @@ hr {
 	text-decoration: none;
 	color: black;
 }
+.scoreboard_jury img { border: 0px; }
 
 .scoreheader {
 	font-variant: small-caps;
