@@ -10,8 +10,9 @@ require('menu.php');
 
 echo "<h1>DOMjudge Jury interface</h1>\n\n";
 
-if ( is_readable('DOMjudgelogo.png') ) {
-	echo "<p><img src=\"DOMjudgelogo.png\" id=\"djlogo\" alt=\"DOMjudge logo\" /></p>\n\n";
+if ( is_readable('../images/DOMjudgelogo.png') ) {
+	echo "<p><img src=\"../images/DOMjudgelogo.png\" id=\"djlogo\"" .
+		" alt=\"DOMjudge logo\" /></p>\n\n";
 }
 ?>
 

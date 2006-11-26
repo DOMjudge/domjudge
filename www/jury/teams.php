@@ -77,13 +77,17 @@ if( $teams->count() == 0 ) {
 		echo "</td><td>".htmlentities($row['room'])."</td>";
 		echo "<td class=\"teamstatus\"><img ";
 		switch ( $status ) {
-		case 0: echo 'src="gray.png"   alt="gray"   title="no connections made"';
+		case 0: echo 'src="../images/gray.png"   alt="gray"' .
+				' title="no connections made"';
 			break;
-		case 1: echo 'src="red.png"    alt="red"    title="teampage viewed, no submissions"';
+		case 1: echo 'src="../images/red.png"    alt="red"' .
+				' title="teampage viewed, no submissions"';
 			break;
-		case 2: echo 'src="yellow.png" alt="yellow" title="submitted, none correct"';
+		case 2: echo 'src="../images/yellow.png" alt="yellow"' .
+				' title="submitted, none correct"';
 			break;
-		case 3: echo 'src="green.png"  alt="green"  title="correct submission(s)"';
+		case 3: echo 'src="../images/green.png"  alt="green"' .
+				' title="correct submission(s)"';
 			break;
 		}
 		echo " width=\"16\" height=\"16\" /></td>";
