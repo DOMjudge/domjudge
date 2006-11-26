@@ -19,23 +19,41 @@ require('menu.php');
 
 $data = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
 
+$affillogo = "../images/affiliations/" . urlencode($data['affilid']) . ".png";
+$countryflag = "../images/countries/" . urlencode($data['country']) . ".png";
+
 echo "<h1>Affiliation: ".htmlentities($data['name'])."</h1>\n\n";
 
 ?>
 <table>
 <tr><td>ID:          </td><td><?=htmlspecialchars($data['affilid'])?></td></tr>
 <tr><td>Name:        </td><td><?=htmlentities($data['name'])?></td></tr>
-<tr><td>Country:     </td><td><?=htmlspecialchars($data['country'])?></td></tr>
-<tr><td>Logo:        </td><td><?=printyn($data['has_logo'])?></td></tr>
-<?php if ( !empty($data['comments']) ): ?>
-<tr><td valign="top">Comments:</td><td><?=
-	nl2br(htmlentities($data['comments']))?></td></tr>
-<?php endif; ?>
-</table>
+<tr><td>Country:     </td><td><?php
 
-<h2>Teams from <?=htmlentities($data['name'])?></h2>
+echo htmlspecialchars($data['country']);
+if ( is_readable($countryflag) ) {
+	echo ' <img src="' . $countryflag . '" alt="' .
+		htmlspecialchars($data['country']) . "\" /></td></tr>\n";
+}
 
-<?php
+echo "</td></tr>\n";
+echo "<tr><td>Logo:        </td><td>";
+
+if ( is_readable($affillogo) ) {
+	echo '<img src="' . $affillogo . '" alt="' .
+		htmlspecialchars($data['affilid']) . "\" /></td></tr>\n";
+} else {
+	echo "not available</td></tr>\n";
+}
+
+if ( !empty($data['comments']) ) {
+	echo '<tr><td valign="top">Comments:</td><td>' .
+		nl2br(htmlentities($data['comments'])) . "</td></tr>\n";
+}
+
+echo "</table>\n\n";
+echo "<h2>Teams from " . htmlentities($data['name']) . "</h2>\n\n";
+
 $teams = $DB->q('SELECT login,name FROM team WHERE affilid = %s', $id);
 if ( $teams->count() == 0 ) {
 	echo "<p><em>no teams</em></p>\n\n";
@@ -49,4 +67,5 @@ if ( $teams->count() == 0 ) {
 	}
 	echo "</table>\n\n";
 }
+	 
 require('../footer.php');
