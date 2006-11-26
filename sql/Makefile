@@ -3,34 +3,42 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-# User to access the MySQL database (needs root privileges):
-MYSQLUSER=root
+# DOMjudge database name:
+DBNAME=domjudge
 
-define cleandb
-mysql -p -u $(MYSQLUSER) < mysql_clean.sql
-endef
+# User to access the MySQL database for install/remove (needs root privileges):
+MYSQL_INST_USER=root
+
+# User to access the MySQL database for upgrades (needs GRANT privileges):
+MYSQL_UPGR_USER=root
+
 
 build:
 
 install:
 # Install all sql files at once, so we have to ask the MySQL root
 # password only once:
-	cat mysql_privileges.sql   \
+	cat mysql_create.sql       \
 	    mysql_db_structure.sql \
-	    mysql_db_examples.sql | mysql -p -u $(MYSQLUSER)
+	    mysql_privileges.sql   \
+	    mysql_db_examples.sql  | mysql -p -u $(MYSQL_INST_USER) $(DBNAME)
+
+clean:
 
 distclean:
-	$(cleandb)
+# Remove the whole database and everything associated with it:
+	cat mysql_clean.sql  \
+	    mysql_remove.sql | mysql -p -u $(MYSQL_INST_USER) $(DBNAME)
 
 upgrade:
 # Upgrades the DB structure and permissions to current version.
 # Preserves data by first dumping that and importing after upgrade.
 	@echo "Upgrading database..."
-	mysqldump -p -u $(MYSQLUSER) -cntQ domjudge > mysql_upgrade_dump.sql
-	$(cleandb)
-	cat mysql_privileges.sql   \
+	mysqldump -p -u $(MYSQL_UPGR_USER) -cntQ $(DBNAME) > mysql_upgrade_dump.sql
+	cat mysql_clean.sql        \
 	    mysql_db_structure.sql \
-	    mysql_upgrade_dump.sql | mysql -p -u $(MYSQLUSER)
+	    mysql_privileges.sql   \
+	    mysql_upgrade_dump.sql | mysql -p -u $(MYSQL_UPGR_USER) $(DBNAME)
 	rm -f mysql_upgrade_dump.sql
 
 .PHONY: upgrade
