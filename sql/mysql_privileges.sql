@@ -1,74 +1,40 @@
 -- Privileges for the DOMjudge MySQL tables.
--- This assumes database name 'domjudge'
 --
--- You can pipe this file into the 'mysql' command to set these permissions.
---
--- THIS FILE SHOULD ALWAYS BE NON-READABLE!
--- (because of database-login usernames/passwords)
+-- You can pipe this file into the 'mysql' command to set these
+-- permissions. Database should be set externally (e.g. to
+-- 'domjudge'). 
 --
 -- $Id$
 
-USE mysql;
 
--- Add users and passwords
--- These passwords are initialised automatically when running
--- 'make install' in the SYSTEM_ROOT and removed when running
--- 'make distclean'.
--- NOTE: by default, access is allowed from ALL hosts, make sure you
--- restrict this appropriately (or choose strong enough passwords).
-INSERT INTO user (Host, User, Password) VALUES ('%','domjudge_jury'  ,PASSWORD('DOMJUDGE_JURY_PASSWD'));
-INSERT INTO user (Host, User, Password) VALUES ('%','domjudge_team'  ,PASSWORD('DOMJUDGE_TEAM_PASSWD'));
-INSERT INTO user (Host, User, Password) VALUES ('%','domjudge_public',PASSWORD('DOMJUDGE_PUBLIC_PASSWD'));
+-- Juryaccount can do anything to the data (but not modify the structure)
+GRANT SELECT, INSERT, UPDATE, DELETE ON * TO domjudge_jury;
 
--- Juryaccount can do anything to the database
-INSERT INTO db (Host, Db, User, Select_priv, Insert_priv, Update_priv, Delete_priv) VALUES ('%','domjudge','domjudge_jury','Y','Y','Y','Y');
+-- Team/public privileges on tables
+GRANT SELECT ON contest           TO domjudge_public;
+GRANT SELECT ON scoreboard_jury   TO domjudge_public;
+GRANT SELECT ON scoreboard_public TO domjudge_public;
+GRANT SELECT ON team              TO domjudge_public;
+GRANT SELECT ON team_category     TO domjudge_public;
+GRANT SELECT ON team_affiliation  TO domjudge_public;
 
--- Other privileges
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','submission','cid'         ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','submission','probid'      ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','submission','submitid'    ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','submission','submittime'  ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','submission','team'        ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','problem'   ,'color'       ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','problem'   ,'allow_submit',NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','problem'   ,'name'        ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','problem'   ,'cid'         ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','problem'   ,'probid'      ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','judging'   ,'valid'       ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','judging'   ,'result'      ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','judging'   ,'submitid'    ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_public','judging'   ,'judgingid'   ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'problem'   ,'color'       ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'problem'   ,'allow_submit',NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'problem'   ,'cid'         ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'problem'   ,'name'        ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'problem'   ,'probid'      ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'language'  ,'langid'      ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'language'  ,'name'        ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'language'  ,'extension'   ,NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'language'  ,'allow_submit',NOW(),'Select');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'team'      ,'ipaddress'   ,NOW(),'Update');
-INSERT INTO columns_priv VALUES ('%','domjudge','domjudge_team'  ,'team'      ,'teampage_first_visited',NOW(),'Update');
+GRANT SELECT ON contest           TO domjudge_team;
+GRANT SELECT ON clarification     TO domjudge_team;
+GRANT SELECT ON judging           TO domjudge_team;
+GRANT SELECT ON scoreboard_jury   TO domjudge_team;
+GRANT SELECT ON scoreboard_public TO domjudge_team;
+GRANT SELECT ON submission        TO domjudge_team;
+GRANT SELECT ON team              TO domjudge_team;
+GRANT SELECT ON team_category     TO domjudge_team;
+GRANT SELECT ON team_affiliation  TO domjudge_team;
+GRANT INSERT ON clarification     TO domjudge_team;
 
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','scoreboard_public','domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','scoreboard_jury'  ,'domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','team'             ,'domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','submission'       ,'domjudge@%',NOW(),'','Select');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','problem'          ,'domjudge@%',NOW(),'','Select');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','judging'          ,'domjudge@%',NOW(),'','Select');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','contest'          ,'domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','team_category'    ,'domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_public','team_affiliation' ,'domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_team'  ,'scoreboard_public','domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_team'  ,'scoreboard_jury'  ,'domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_team'  ,'clarification'    ,'domjudge@%',NOW(),'Select,Insert','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_team'  ,'team_category'    ,'domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_team'  ,'team_affiliation' ,'domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_team'  ,'language'         ,'domjudge@%',NOW(),'','Select');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_team'  ,'problem'          ,'domjudge@%',NOW(),'','Select');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_team'  ,'team'             ,'domjudge@%',NOW(),'Select','Update');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_team'  ,'contest'          ,'domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_team'  ,'submission'       ,'domjudge@%',NOW(),'Select','');
-INSERT INTO tables_priv  VALUES ('%','domjudge','domjudge_team'  ,'judging'          ,'domjudge@%',NOW(),'Select','');
+-- Team/public privileges on specific rows
+GRANT SELECT (judgingid, submitid, result, valid)      ON judging    TO domjudge_public;
+GRANT SELECT (probid, name, cid, allow_submit, color)  ON problem    TO domjudge_public;
+GRANT SELECT (submitid, cid, probid, team, submittime) ON submission TO domjudge_public;
 
-FLUSH PRIVILEGES;
+GRANT SELECT (langid, name, extension, allow_submit)   ON language   TO domjudge_team;
+GRANT SELECT (probid, name, cid, allow_submit, color)  ON problem    TO domjudge_team;
+
+GRANT UPDATE (ipaddress, teampage_first_visited)       ON team       TO domjudge_team;

@@ -7,6 +7,8 @@ Version 1.4.0 - SVN
  - Add numbering to scoreboard.
  - Make all cells in jury scoreboard links that refer to relevant
    data for that cell (Closes: #1582358).
+ - Adapt and split sql script files to allow for easier upgrading and
+   changing database name.
  - Fix possible buffer overflow in submitcommon.cc; Thanks to
    Lennert Buytenhek for pointing out.
  - Add option to commandline submit to use websubmit (Closes: #1582376).

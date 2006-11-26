@@ -1,14 +1,10 @@
 -- These are the database tables needed for DOMjudge
--- This assumes database name 'domjudge'
 --
 -- You can pipe this file into the 'mysql' command to create the
--- database and tables.
+-- database tables. This script assumes database name 'domjudge'.
 --
 -- $Id$
 
--- Create and use the database:
-CREATE DATABASE domjudge;
-USE domjudge;
 
 -- 
 -- Table structure for table `clarification`

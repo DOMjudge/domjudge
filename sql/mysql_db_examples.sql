@@ -1,11 +1,10 @@
 -- These are some example/default entries for the DOMjudge database.
--- This assumes database name 'domjudge'
 --
--- You can pipe this file into the 'mysql' command to insert this data.
+-- You can pipe this file into the 'mysql' command to insert this
+-- data. Database should be set externally (e.g. to 'domjudge').
 --
 -- $Id$
 
-USE domjudge;
 
 -- 
 -- Dumping data for table `clarification`
