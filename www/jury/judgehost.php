@@ -32,7 +32,6 @@ if ( isset($_POST['cmd']) ) {
 $row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $id);
 
 require('../header.php');
-require('menu.php');
 
 echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 

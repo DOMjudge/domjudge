@@ -34,7 +34,6 @@ if ( !empty($_POST['cmd']) ) {
 
 
 require('../header.php');
-require('menu.php');
 
 echo "<h1>Language ".htmlspecialchars($id)."</h1>\n\n";
 

@@ -5,11 +5,23 @@
  * $Id$
  */
 
+function setClarificationViewed($clar, $team)
+{
+	global $DB;
+	$DB->q("DELETE FROM `event`"
+		. " WHERE `evid` = %i"
+		. "   AND `type` = 'CLARIFICATION'"
+		. "   AND `team` = %s"
+		, $clar
+		, $team
+		);
+}
+
 /**
  * Output a single clarification.
  * Helperfunction for putClarification, do _not_ use directly!
  */
-function putClar($clar, $isjury = FALSE) 
+function putClar($clar, $isjury = false)
 {
 	if ( $clar['sender'] ) {
 		$from = '<span class="teamid">' . htmlspecialchars($clar['sender']) .
@@ -59,7 +71,7 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
 	global $DB;
 
 	$clar = $DB->q('TUPLE SELECT * FROM clarification WHERE clarid = %i', $id);
-
+	
 	$clarifications = $DB->q('SELECT c.*, t.name AS toname, f.name AS fromname
 		FROM clarification c
 		LEFT JOIN team t ON (t.login = c.recipient)
@@ -71,6 +83,7 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
 		// check permission to view this clarification
 		if ( $isjury || ( $clar['sender']==$team || ( $clar['sender']==NULL &&
 			( $clar['recipient']==NULL || $clar['recipient']==$team ) ) ) ) {
+			setClarificationViewed($clar['clarid'], $team);
 			putClar($clar,$isjury);
 			echo "<p></p>\n\n";
 		}
@@ -105,7 +118,12 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 				( $clar['sender']==$team ) ) ) continue;
 		}
 		$clar['clarid'] = (int)$clar['clarid'];
-		echo '<tr>';
+		
+		if(isset($clar['unread']))
+			echo '<tr class="unread">';
+		else
+			echo '<tr>';
+		
 		echo '<td><a href="' .
 			addUrl('clarification.php?id=' . $clar['clarid'], $popupTag) .
 			'">' . $clar['clarid'] . '</a></td>';

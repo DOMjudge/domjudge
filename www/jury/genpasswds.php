@@ -9,7 +9,6 @@
 require('init.php');
 $title = 'Generate Passwords';
 include('../header.php');
-include('menu.php');
 
 ?>
 

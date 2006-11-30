@@ -9,7 +9,6 @@ require('init.php');
 $title = 'Categories';
 
 require('../header.php');
-require('menu.php');
 
 echo "<h1>Categories</h1>\n\n";
 

@@ -14,7 +14,6 @@ if ( ! ENABLEWEBSUBMIT ) {
 
 $title = 'Submit';
 require('../header.php');
-require('menu.php');
 
 $cid = getCurContest();
 

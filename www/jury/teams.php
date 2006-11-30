@@ -27,7 +27,6 @@ $ncorrect = $DB->q('KEYTABLE SELECT team AS ARRAYKEY, COUNT(team) AS cnt
                     GROUP BY team', $cid);
 
 require('../header.php');
-require('menu.php');
 
 echo "<h1>Teams</h1>\n\n";
 

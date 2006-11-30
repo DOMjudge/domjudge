@@ -8,7 +8,6 @@
 require('init.php');
 $title = 'Show Source';
 require('../header.php');
-require('menu.php');
 
 $id = (int)$_GET['id'];
 

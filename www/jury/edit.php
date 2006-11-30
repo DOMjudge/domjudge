@@ -3,7 +3,7 @@
  * Start of functionality to edit data from this interface.
  * Does not work yet.
  *
- * $Id: contest.php 514 2004-09-15 22:40:29Z nkp0405 $
+ * $Id$
  */
 require('init.php');
 
@@ -15,7 +15,6 @@ if ( $l<1 ) $l = 1;
 
 $title = 'Edit - '.$t;
 require('../header.php');
-require('menu.php');
 
 if(isset($_REQUEST['submit'])) {
 	edit_table($t);

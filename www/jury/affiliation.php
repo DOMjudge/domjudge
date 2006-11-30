@@ -15,7 +15,6 @@ $title = "Affiliation: " .htmlspecialchars(@$id);
 if ( ! $id ) error("Missing or invalid affiliation id");
 
 require('../header.php');
-require('menu.php');
 
 $data = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
 

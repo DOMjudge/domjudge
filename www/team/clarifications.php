@@ -10,7 +10,6 @@ $refresh = '30;url=' . getBaseURI() . 'team/clarifications.php';
 $title = 'Clarifications';
 require('../header.php');
 require('../clarification.php');
-require('menu.php');
 
 $cid = getCurContest();
 
@@ -21,8 +20,7 @@ echo "</div>\n";
 
 echo "<h1>Clarifications team " . htmlentities($name) ."</h1>\n\n";
 
-echo '<p><a href="' . addUrl('clarification.php',$popupTag) .
-	"\">Request Clarification</a></p>\n";
+echo "<p><a href=\"clarification.php\">Request Clarification</a></p>\n";
 
 echo "<p><a href=\"#clarifications\">View Clarifications</a></p>\n";
 echo "<p><a href=\"#requests\">View Clarification Requests</a></p>\n\n";
@@ -31,11 +29,28 @@ $requests = $DB->q('SELECT * FROM clarification
 	WHERE cid = %i AND sender = %s
 	ORDER BY submittime DESC', $cid, $login);
 
-$clarifications = $DB->q('SELECT * FROM clarification
-	WHERE cid = %i AND sender IS NULL
-	AND ( recipient IS NULL OR recipient = %s )
-	ORDER BY submittime DESC', $cid, $login,
-	(isset($_REQUEST['stamp']) ? $_REQUEST['stamp'] : 0));
+/*
+SELECT c.*, e.read
+FROM clarification c
+	LEFT JOIN event e
+		ON ( c.clarid = e.clarid AND e.team = "escapade" )
+WHERE c.cid = 2
+	AND c.sender IS NULL
+	AND ( c.recipient IS NULL OR c.recipient = "escapade" )
+ORDER BY c.submittime DESC
+*/
+
+$clarifications = $DB->q(
+	'SELECT c.*, e.`type` AS `unread` '
+	.'FROM clarification AS c '
+	.'LEFT JOIN event AS e '
+	.		'ON ( c.`clarid` = e.`evid` AND e.`type` AND e.`team` = %s ) '
+	.'WHERE c.`cid` = %i '
+	.'  AND c.`sender` IS NULL'
+	.'  AND ( c.`recipient` IS NULL OR c.`recipient` = %s )'
+	.'ORDER BY c.`submittime` DESC'
+	, $login, $cid, $login
+	);
 
 echo '<h3><a name="clarifications"></a>' .
 	"Clarifications:</h3>\n";

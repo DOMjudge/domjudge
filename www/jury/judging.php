@@ -40,7 +40,6 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'verify' ) {
 }
 
 require('../header.php');
-require('menu.php');
 
 echo "<h1>Judging j$id / s$sid</h1>\n\n";
 

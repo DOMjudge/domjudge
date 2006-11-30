@@ -1,23 +1,27 @@
 <?php
 /**
- * $Id$
+ * Divide the page in two frames.
+ *
+ * $Id: $
  */
 
 require('init.php');
-$refresh = '30;url=' . getBaseURI() . 'team/';
-$title = 'Submissions';
-require('../header.php');
-include('menu.php');
 
-// Put overview of team submissions (like scoreboard)
-echo "<div id=\"teamscoresummary\">\n";
-putTeamRow($login);
-echo "</div>\n";
+echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 
-echo "<h1>Submissions team ".htmlentities($name)."</h1>\n\n";
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN"
+	"http://www.w3.org/TR/html4/frameset.dtd">
+<html lang="en">
+<head>
+	<!-- DOMjudge version <?= DOMJUDGE_VERSION ?> -->
+<title>DOMjudge v<?=DOMJUDGE_VERSION?></title>
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
 
-// call putSubmissions function from common.php for this team.
-$restrictions = array( array( 'key' => 'team', 'value' => $login ) );
-putSubmissions($restrictions);
+<frameset rows="35, *" border="0px">
+	<frame src="menu.php" name="menu">
+	<frame src="submissions.php" name="content">
+</frameset>
 
-require('../footer.php');
+</html>

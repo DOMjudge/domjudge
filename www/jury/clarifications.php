@@ -13,7 +13,6 @@ $cid = getCurContest();
 
 require('../header.php');
 require('../clarification.php');
-require('menu.php');
 
 echo "<h1>Clarifications</h1>\n\n";
 

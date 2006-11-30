@@ -33,19 +33,18 @@ if ( isset($_REQUEST['submit'])	&& !empty($_REQUEST['bodytext']) ) {
 		$cid, $login, $_REQUEST['bodytext']);
 
 	// redirect back to the original location
-	header('Location: ' .
-		addUrl(getBaseURI() . 'team/clarifications.php',$popupTag));
+	header('Location: '.getBaseURI().'team/clarifications.php');
 	exit;
 }
 
 $title = 'Clarifications';
 require('../header.php');
-require('menu.php');
 require('../clarification.php');
 
-if ( isset($_REQUEST['id']) ) {
+if ( isset($id) ) {
 	// display clarification thread
 	echo "<h1>Clarification $id</h1>\n\n";
+	
 	putClarification($respid, $login);
 } else {
 	// display a clarification request send box

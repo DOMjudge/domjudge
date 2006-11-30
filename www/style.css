@@ -39,6 +39,10 @@ hr {
 	background-color: gray;
 }
 
+tr.unread td {
+	font-weight: bold;
+}
+
 /* more spacing in lists of teams, submissions, etc. */
 .list { border-spacing: 0px; }
 .list td, .list th {
@@ -60,6 +64,7 @@ hr {
 }
 
 .teamid, .filename, .hostname { font-family: monospace; }
+.teamstatus { text-align: center; }
 
 #menutop a {
 	font-weight: bold;
@@ -70,6 +75,9 @@ hr {
 	padding: 2px;
 	padding-left: 5px;
 	padding-right: 5px;
+}
+#menutop a.new {
+	color: #FF0000;
 }
 #clock {
 	position: absolute; right: 1ex; top: 1ex;

@@ -18,7 +18,6 @@ if ( !empty($_POST['cmd']) ) {
 $res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
 
 require('../header.php');
-require('menu.php');
 
 echo "<h1>Judgehosts</h1>\n\n";
 

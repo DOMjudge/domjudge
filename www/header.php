@@ -14,26 +14,10 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 <html lang="en">
 <head>
 	<!-- DOMjudge version <?= DOMJUDGE_VERSION ?> -->
-<?php
-
-	if( isset($refresh) ) {
-		echo '<meta http-equiv="refresh" content="' .
-			( isset($popup) ? addUrl($refresh, $popupTag) : $refresh ) .
-			"\" />\n";
-	}
-	echo "<title>" . $title . "</title>\n";
-
-?>
+<title><?=$title?></title>
+<?	if(isset($refresh)) { ?>
+<meta http-equiv="refresh" content="<?=$refresh?>" />
+<?	}	?>
 <link rel="stylesheet" href="style.css" type="text/css" />
-<script type="text/javascript">
-function popUp(URL) {
-	var w = window.open(URL, 'ALERT', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=300,height=200');
-	w.focus();
-}
-</script>
 </head>
-<?php
-
-echo '<body';
-if( isset($popup) && $popup ) echo " onLoad=\"javascript:popUp('popup.php')\"";
-echo ">\n\n";
+<body>

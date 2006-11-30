@@ -34,7 +34,6 @@ $row = $DB->q('TUPLE SELECT t.*,c.name as catname,a.name as affname FROM team t
 			   WHERE login = %s', $id);
 
 require('../header.php');
-require('menu.php');
 
 echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 

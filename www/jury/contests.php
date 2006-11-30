@@ -8,7 +8,6 @@
 require('init.php');
 $title = 'Contests';
 require('../header.php');
-require('menu.php');
 
 echo "<h1>Contests</h1>\n\n";
 

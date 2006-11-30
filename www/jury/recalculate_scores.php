@@ -10,7 +10,6 @@
 require('init.php');
 $title = 'Recalculate Scoreboard Cache';
 include('../header.php');
-include('menu.php');
 require('../scoreboard.php');
 
 // no output buffering... we want to see what's going on real-time

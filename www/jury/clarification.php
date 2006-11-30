@@ -68,7 +68,6 @@ if ( isset($_REQUEST['submit']) && isset($_REQUEST['answered']) ) {
 }
 
 require('../header.php');
-require('menu.php');
 require('../clarification.php');
 
 if ( ! $isgeneral ) {

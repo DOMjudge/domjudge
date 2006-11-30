@@ -9,9 +9,9 @@
 require('init.php');
 $title = 'Submission details';
 include('../header.php');
-include('menu.php');
 
 $sid = (int)$_GET['id'];
+
 
 // select also on teamid so we can only select our own submissions
 $row = $DB->q('MAYBETUPLE SELECT p.probid, p.name as probname, submittime,
@@ -26,6 +26,15 @@ if( ! $row ) {
 	include('../footer.php');
 	exit;
 }
+
+// verwijder event
+$DB->q("DELETE FROM `event`"
+	. " WHERE `evid` = %i"
+	. "   AND `type` = 'SUBMISSION'"
+	. "   AND `team` = %s"
+	, $sid
+	, $login
+	);
 
 ?>
 <h1>Submission details</h1>

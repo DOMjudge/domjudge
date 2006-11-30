@@ -10,7 +10,6 @@
 require('init.php');
 $title = 'Config Checker';
 require('../header.php');
-require('menu.php');
 
 ob_implicit_flush();
 

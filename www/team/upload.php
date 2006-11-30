@@ -30,7 +30,6 @@ ini_set("upload_max_filesize", SOURCESIZE * 1024);
 
 $title = 'Submit';
 require('../header.php');
-require('menu.php');
 
 $waitsubmit = 5;
 
