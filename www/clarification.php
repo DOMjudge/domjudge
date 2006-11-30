@@ -8,8 +8,8 @@
 function setClarificationViewed($clar, $team)
 {
 	global $DB;
-	$DB->q("DELETE FROM `event`"
-		. " WHERE `evid` = %i"
+	$DB->q("DELETE FROM `team_unread`"
+		. " WHERE `mesgid` = %i"
 		. "   AND `type` = 'CLARIFICATION'"
 		. "   AND `team` = %s"
 		, $clar

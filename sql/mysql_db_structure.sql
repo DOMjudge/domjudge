@@ -192,3 +192,14 @@ CREATE TABLE `team_category` (
   `color` varchar(25) default NULL,
   PRIMARY KEY  (`categoryid`)
 ) TYPE=MyISAM COMMENT='Categories for teams (e.g.: participants, observers, ...)';
+
+-- 
+-- Table structure for table `team_unread`
+-- 
+
+CREATE TABLE `team_unread` (
+  `team` varchar(15) NOT NULL default '',
+  `mesgid` mediumint(8) unsigned NOT NULL default 0,
+  `type` enum('clarification','submission') NOT NULL default 'clarification',
+  PRIMARY KEY  (`team`,`mesgid`,`type`)
+) TYPE=MyISAM COMMENT='List of items a team has not viewed yet (e.g.: clarifications, submission results, ...)';

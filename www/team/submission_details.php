@@ -28,8 +28,8 @@ if( ! $row ) {
 }
 
 // verwijder event
-$DB->q("DELETE FROM `event`"
-	. " WHERE `evid` = %i"
+$DB->q("DELETE FROM `team_unread`"
+	. " WHERE `mesgid` = %i"
 	. "   AND `type` = 'SUBMISSION'"
 	. "   AND `team` = %s"
 	, $sid

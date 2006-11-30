@@ -27,7 +27,9 @@ GRANT SELECT ON submission        TO domjudge_team;
 GRANT SELECT ON team              TO domjudge_team;
 GRANT SELECT ON team_category     TO domjudge_team;
 GRANT SELECT ON team_affiliation  TO domjudge_team;
+GRANT SELECT ON team_unread       TO domjudge_team;
 GRANT INSERT ON clarification     TO domjudge_team;
+GRANT DELETE ON team_unread       TO domjudge_team;
 
 -- Team/public privileges on specific rows
 GRANT SELECT (judgingid, submitid, result, valid)      ON judging    TO domjudge_public;

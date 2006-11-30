@@ -35,7 +35,7 @@ if( isset($popup) && $popup )
 
 /* (new) clarification info */
 $res = $DB->q('KEYTABLE SELECT `type` AS ARRAYKEY, COUNT(*) AS `count`'
-			. ' FROM `event`'
+			. ' FROM `team_unread`'
 			. 'WHERE `team` = %s '
 			. 'GROUP BY `type`'
 			, $login
