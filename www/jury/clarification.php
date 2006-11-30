@@ -47,6 +47,20 @@ if ( isset($_REQUEST['submit'])	&& !empty($_REQUEST['bodytext']) ) {
 		$DB->q('UPDATE clarification SET answered = 1
 			WHERE clarid = %i', $respid);
 	}
+	
+	// mark the messages as unread for the team(s)
+	if( empty($_REQUEST['sendto']) ) {
+		$teams = $DB->q('COLUMN SELECT `login` FROM `team`');
+		foreach($teams as $login) {
+			$DB->q('INSERT INTO team_unread (`mesgid`, `type`, `team`)
+					VALUES (%i, %s, %s)',
+					$newid, 'CLARIFICATION', $login);
+		}
+	} else {
+		$DB->q('INSERT INTO team_unread (`mesgid`, `type`, `team`)
+				VALUES (%i, %s, %s)',
+				$newid, 'CLARIFICATION', $_REQUEST['sendto']);
+	}
 
 	// redirect back to the original location
 	if ( $isgeneral ) {
