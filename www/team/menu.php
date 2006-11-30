@@ -40,16 +40,15 @@ $res = $DB->q('KEYTABLE SELECT `type` AS ARRAYKEY, COUNT(*) AS `count`'
 			. 'GROUP BY `type`'
 			, $login
 			);
-
 ?>
 <div id="menutop">
-<?	if ( isset($res['SUBMISSION']) ) { ?>
-<a target="content" class="new" href="submissions.php">submissions (<?=$$res['SUBMISSION']['count']?>)</a>
+<?	if ( isset($res['submission']) ) { ?>
+<a target="content" class="new" href="submissions.php">submissions (<?=$res['submission']['count']?>)</a>
 <?	} else { ?>
 <a target="content" href="submissions.php">submissions</a>
 <?	}
-	if ( isset($res['CLARIFICATION']) ) {
-?><a target="content" class="new" href="clarifications.php">clarifications (<?=$res['CLARIFICATION']['count']?> new)</a>
+	if ( isset($res['clarification']) ) {
+?><a target="content" class="new" href="clarifications.php">clarifications (<?=$res['clarification']['count']?> new)</a>
 <?	} else { ?>
 <a target="content" href="clarifications.php">
 clarifications</a>
