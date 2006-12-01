@@ -27,7 +27,7 @@ if( ! $row ) {
 	exit;
 }
 
-// verwijder event
+// remove event of new submission
 $DB->q('DELETE FROM team_unread
         WHERE mesgid = %i AND type = "submission" AND team = %s', $sid, $login);
 
