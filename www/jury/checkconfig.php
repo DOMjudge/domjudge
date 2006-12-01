@@ -70,9 +70,12 @@ if($cid == null) {
 echo "</p><p>Checking contests...</p>\n\n";
 
 // get all contests
-$res = $DB->q('SELECT UNIX_TIMESTAMP(starttime) as start, UNIX_TIMESTAMP(endtime) as end,
-	UNIX_TIMESTAMP(lastscoreupdate) as lastsu, UNIX_TIMESTAMP(unfreezetime) as unfreeze,
-	cid FROM contest ORDER BY cid');
+$res = $DB->q('SELECT cid,
+               UNIX_TIMESTAMP(starttime)       AS start,
+               UNIX_TIMESTAMP(endtime)         AS end,
+               UNIX_TIMESTAMP(lastscoreupdate) AS lastsu,
+               UNIX_TIMESTAMP(unfreezetime)    AS unfreeze,
+               FROM contest ORDER BY cid');
 
 while($cdata = $res->next()) {
 
@@ -108,10 +111,11 @@ while($cdata = $res->next()) {
 	// a check whether this contest overlaps in time with any other, the
 	// system can only deal with exactly ONE current contest at any time.
 	$overlaps = $DB->q('COLUMN SELECT cid FROM contest WHERE
-		( (%i >= UNIX_TIMESTAMP(starttime) AND %i <= UNIX_TIMESTAMP(endtime)) OR
-		(%i >= UNIX_TIMESTAMP(endtime) AND %i <= UNIX_TIMESTAMP(endtime)) ) AND
-		cid != %i ORDER BY cid',
-		$cdata['start'], $cdata['start'], $cdata['end'], $cdata['end'], $cdata['cid']);
+	                    ( (%i >= UNIX_TIMESTAMP(starttime) AND %i <= UNIX_TIMESTAMP(endtime)) OR
+	                      (%i >= UNIX_TIMESTAMP(endtime)   AND %i <= UNIX_TIMESTAMP(endtime)) ) AND
+	                    cid != %i ORDER BY cid',
+	                   $cdata['start'], $cdata['start'], $cdata['end'],
+	                   $cdata['end'], $cdata['cid']);
 	
 	if(count($overlaps) > 0) {
 		$haserrors = TRUE;
@@ -128,9 +132,8 @@ while($cdata = $res->next()) {
 echo "<h2>Submissions</h2>\n\n<p>Checking submissions...<br />\n";
 
 // check for non-existent problem references
-$res = $DB->q('SELECT s.submitid,s.probid,s.cid FROM submission s LEFT OUTER JOIN problem p
-	USING(probid)
-	WHERE s.cid != p.cid');
+$res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
+               LEFT OUTER JOIN problem p USING (probid) WHERE s.cid != p.cid');
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
@@ -140,8 +143,10 @@ if($res->count() > 0) {
 	}
 }
 
-// check for submissions that have been marked by a judgehost but that have no judging-row
-$res = $DB->q('SELECT s.submitid FROM submission s LEFT OUTER JOIN judging j USING(submitid)
+// check for submissions that have been marked by a judgehost but that
+// have no judging-row
+$res = $DB->q('SELECT s.submitid FROM submission s
+               LEFT OUTER JOIN judging j USING (submitid)
                WHERE j.submitid IS NULL AND s.judgehost IS NOT NULL');
 
 if($res->count() > 0) {
@@ -154,12 +159,12 @@ if($res->count() > 0) {
 echo "</p>\n\n<h2>Judgings</h2>\n\n<p>Checking judgings...<br />\n";
 
 // check for start/endtime problems and contestids
-$res = $DB->q('SELECT s.submitid as s_submitid, j.submitid as j_submitid,
-	judgingid, starttime, endtime, submittime, s.cid AS s_cid, j.cid AS j_cid
-	FROM judging j LEFT OUTER JOIN submission s USING(submitid)
-	WHERE  (j.cid != s.cid) OR
-		(j.endtime IS NOT NULL AND j.endtime < j.starttime) OR (j.starttime < s.submittime) OR
-		(s.submitid IS NULL) ');
+$res = $DB->q('SELECT s.submitid AS s_submitid, j.submitid AS j_submitid,
+               judgingid, starttime, endtime, submittime, s.cid AS s_cid, j.cid AS j_cid
+               FROM judging j LEFT OUTER JOIN submission s USING (submitid)
+               WHERE (j.cid != s.cid) OR (s.submitid IS NULL) OR
+               (j.endtime IS NOT NULL AND j.endtime < j.starttime) OR
+               (j.starttime < s.submittime)');
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
@@ -174,8 +179,10 @@ if($res->count() > 0) {
 			err($err .'has no corresponding submitid (in c'.(int)$row['j_cid'] .')!');
 		}
 		if($row['s_cid'] != NULL && $row['s_cid'] != $row['j_cid']) {
-			err('Judging j'.(int)$row['judgingid'].' is from a different contest (c' . (int)$row['j_cid'] .
-				') than its submission s'.(int)$row['j_submitid'] . ' (c' . (int)$row['s_cid'] . ')!');
+			err('Judging j' .(int)$row['judgingid'] .
+			    ' is from a different contest (c' . (int)$row['j_cid'] .
+			    ') than its submission s' . (int)$row['j_submitid'] .
+			    ' (c' . (int)$row['s_cid'] . ')!');
 		}
 	}
 }

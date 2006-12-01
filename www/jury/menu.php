@@ -18,8 +18,9 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 $cid = getCurContest();
 
 $cnew = $DB->q('VALUE SELECT COUNT(*) FROM clarification
-	WHERE sender IS NOT NULL AND cid = %i AND answered = 0
-	ORDER BY submittime DESC', $cid);
+                WHERE sender IS NOT NULL AND cid = %i AND answered = 0
+                ORDER BY submittime DESC', $cid);
+
 ?>
 <div id="menutop">
 <a target="content" href="jury.php">home</a>

@@ -29,8 +29,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
-	                 login, team.name, team.categoryid, team.affilid,
-	                 sortorder, color, country, team_affiliation.name AS affilname FROM team
+	                 login, team.name, team.categoryid, team.affilid, sortorder,
+	                 color, country, team_affiliation.name AS affilname FROM team
 	                 LEFT JOIN team_category ON (team.categoryid = team_category.categoryid)
 	                 LEFT JOIN team_affiliation ON (team.affilid = team_affiliation.affilid)');
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
@@ -343,7 +343,7 @@ function putTeamRow($teamid) {
 
 	// for a team, we always display the "current" information, that is,
 	// from scoreboard_jury
-	$scoredata = $DB->q("SELECT * FROM scoreboard_jury WHERE cid = %i AND team = %s",
+	$scoredata = $DB->q('SELECT * FROM scoreboard_jury WHERE cid = %i AND team = %s',
 	                    $cid, $teamid);
 
 	// loop all info the scoreboard cache and put it in our own datastructure

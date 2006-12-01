@@ -37,13 +37,13 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	$contdata = getCurContest(TRUE);
 	$cid = $contdata['cid'];
  
-	$res = $DB->q('SELECT s.submitid, s.team, s.probid, s.langid, s.submittime,
-		s.judgehost, t.name as teamname, p.name as probname, l.name as langname
-		FROM submission s
-		LEFT JOIN team t ON(t.login=s.team)
-		LEFT JOIN problem p ON(p.probid=s.probid)
-		LEFT JOIN language l ON(l.langid=s.langid)
-		WHERE ' . $keyvalmatch . ' s.cid = %i ORDER BY s.submittime DESC',$cid);
+	$res = $DB->q('SELECT s.submitid, s.team, s.probid, s.langid, s.submittime, s.judgehost,
+	               t.name AS teamname, p.name AS probname, l.name AS langname
+	               FROM submission s
+	               LEFT JOIN team     t ON (t.login  = s.team)
+	               LEFT JOIN problem  p ON (p.probid = s.probid)
+	               LEFT JOIN language l ON (l.langid = s.langid)
+	               WHERE ' . $keyvalmatch . ' s.cid = %i ORDER BY s.submittime DESC',$cid);
 
 	// nothing found...
 	if( $res->count() == 0 ) {

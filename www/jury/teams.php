@@ -10,10 +10,10 @@ $title = 'Teams';
 
 $cid = getCurContest();
 
-$teams = $DB->q('SELECT t.*,c.name as catname,a.name as affname
+$teams = $DB->q('SELECT t.*,c.name AS catname,a.name AS affname
                  FROM team t
-                 LEFT JOIN team_category c USING(categoryid)
-                 LEFT JOIN team_affiliation a ON(t.affilid=a.affilid)
+                 LEFT JOIN team_category c USING (categoryid)
+                 LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
                  ORDER BY c.sortorder, t.name');
 
 $nsubmits = $DB->q('KEYTABLE SELECT team AS ARRAYKEY, COUNT(team) AS cnt
@@ -22,7 +22,7 @@ $nsubmits = $DB->q('KEYTABLE SELECT team AS ARRAYKEY, COUNT(team) AS cnt
 
 $ncorrect = $DB->q('KEYTABLE SELECT team AS ARRAYKEY, COUNT(team) AS cnt
                     FROM submission s
-                    LEFT JOIN judging j USING(submitid)
+                    LEFT JOIN judging j USING (submitid)
                     WHERE j.valid = 1 AND j.result = "correct" AND s.cid = %i
                     GROUP BY team', $cid);
 

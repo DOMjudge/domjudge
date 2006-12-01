@@ -15,7 +15,7 @@ if ( isset($_REQUEST['id']) ) {
 	if ( ! $id ) error("Missing clarification id");
 
 	$req = $DB->q('MAYBETUPLE SELECT * FROM clarification
-		WHERE cid = %i AND clarid = %i', $cid, $id);
+	               WHERE cid = %i AND clarid = %i', $cid, $id);
 	if ( ! $req ) error("clarification $id not found");
 	if ( ! ($req['sender']==$login || ($req['sender']==NULL &&
 		($req['recipient']==NULL || $req['recipient']==$login)) ) ) {
@@ -28,9 +28,9 @@ if ( isset($_REQUEST['id']) ) {
 // insert a request (if posted)
 if ( isset($_REQUEST['submit'])	&& !empty($_REQUEST['bodytext']) ) {
 	$newid = $DB->q('RETURNID INSERT INTO clarification
-		(cid, submittime, sender, body)
-		VALUES (%i, now(), %s, %s)',
-		$cid, $login, $_REQUEST['bodytext']);
+	                 (cid, submittime, sender, body)
+	                 VALUES (%i, now(), %s, %s)',
+	                $cid, $login, $_REQUEST['bodytext']);
 
 	// redirect back to the original location
 	header('Location: '.getBaseURI().'team/clarifications.php');

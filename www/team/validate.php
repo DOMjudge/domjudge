@@ -42,9 +42,8 @@ $name = $row['name'];
 
 // is this the first visit? record that in the team table
 if ( empty($row['teampage_first_visited']) ) {
-	$DB->q('UPDATE team SET teampage_first_visited = NOW() '.
-		'WHERE login = %s', $login);
+	$DB->q('UPDATE team SET teampage_first_visited = NOW()
+	        WHERE login = %s', $login);
 }
 
 unset($row);
-

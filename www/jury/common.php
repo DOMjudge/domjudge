@@ -15,10 +15,10 @@ function putJudgings($key, $value) {
 
 	// get the judgings for a specific key and value pair
 	// select only specific fields to avoid retrieving large blobs
-	$res = $DB->q('SELECT judgingid,submitid,starttime,endtime,judgehost,result,verified,valid
-	               FROM judging
-	               WHERE '.$key.' = %s AND cid = %i ORDER BY starttime DESC',
-	               $value, getCurContest() );
+	$res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
+	               result, verified, valid FROM judging
+	               WHERE ' . $key . ' = %s AND cid = %i ORDER BY starttime DESC',
+	              $value, getCurContest());
 
 	if( $res->count() == 0 ) {
 		echo "<p><em>No judgings.</em></p>\n\n";
@@ -59,9 +59,9 @@ function rejudge($key, $value) {
 	// Using MySQL >= 4.0.4:
 /*
 	$DB->q('UPDATE judging
-	        LEFT JOIN submission ON (submission.submitid=judging.submitid)
+	        LEFT JOIN submission ON (submission.submitid = judging.submitid)
 	        SET valid = 0, judgehost = NULL, judgemark = NULL
-	        WHERE '.$key.' = %s AND judging.cid = %i AND valid = 1 AND
+	        WHERE ' . $key . ' = %s AND judging.cid = %i AND valid = 1 AND
 	        ( result IS NULL OR result != "correct" )',
 	       $value, $cid);
 */
@@ -69,8 +69,8 @@ function rejudge($key, $value) {
 	// Using MySQL < 4.0.4:
 
 	$res = $DB->q('SELECT * FROM judging
-	               LEFT JOIN submission ON (submission.submitid=judging.submitid)
-	               WHERE '.$key.' = %s AND judging.cid = %i AND valid = 1 AND
+	               LEFT JOIN submission ON (submission.submitid = judging.submitid)
+	               WHERE ' . $key . ' = %s AND judging.cid = %i AND valid = 1 AND
 	               ( result IS NULL OR result != "correct" )',
 	              $value, $cid);
 

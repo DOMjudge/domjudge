@@ -14,11 +14,10 @@ $title = 'Judging j'.@$id;
 
 if ( ! $id ) error ("Missing judging id");
 
-$jdata = $DB->q('TUPLE SELECT j.*,s.*,t.*, c.contestname
-                 FROM judging j
-                 LEFT JOIN submission s USING(submitid)
-                 LEFT JOIN team t ON(t.login=s.team)
-                 LEFT JOIN contest c ON(c.cid=j.cid)
+$jdata = $DB->q('TUPLE SELECT j.*, s.*, t.*, c.contestname FROM judging j
+                 LEFT JOIN submission s USING (submitid)
+                 LEFT JOIN team    t ON (t.login = s.team)
+                 LEFT JOIN contest c ON (c.cid = j.cid)
                  WHERE judgingid = %i', $id);
 
 $sid = (int)$jdata['submitid'];
@@ -93,7 +92,8 @@ if ( ! (VERIFICATION_REQUIRED && $jdata['verified']) ) {
 	if ( $val ) {
 		echo "by <input type=\"text\" size=\"10\" name=\"verifier_typed\" />\n";
 		$verifiers = $DB->q('SELECT DISTINCT verifier FROM judging
-			WHERE verifier IS NOT NULL AND verifier != "" ORDER BY verifier');
+		                     WHERE verifier IS NOT NULL AND verifier != ""
+                             ORDER BY verifier');
 		if ( $verifiers->count() > 0 ) {
 			echo "or <select name=\"verifier_selected\" id=\"verifier_selected\">\n";
 			echo "	<option value=\"\"></option>\n";

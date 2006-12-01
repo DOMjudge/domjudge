@@ -33,7 +33,7 @@ function edit_table($table)
 	
 	$table = mysql_escape_string($table);
 	
-	$layout = $DB->q('TABLE SHOW COLUMNS FROM '.$table);
+	$layout = $DB->q('TABLE SHOW COLUMNS FROM ' . $table);
 	
 	if( is_array(@$_REQUEST['del']) )
 	{
@@ -58,7 +58,7 @@ function edit_table_show($table, $add_lines)
 	
 	$table = mysql_escape_string($table);
 	
-	$layout = $DB->q('TABLE SHOW COLUMNS FROM '.$table);
+	$layout = $DB->q('TABLE SHOW COLUMNS FROM ' . $table);
 	$data = $DB->q('TABLE SELECT * FROM ' . $table);
 	
 ?>

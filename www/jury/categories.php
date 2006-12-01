@@ -12,10 +12,9 @@ require('../header.php');
 
 echo "<h1>Categories</h1>\n\n";
 
-$res = $DB->q('SELECT team_category.*,count(login) as numteams
-	FROM team_category LEFT JOIN team USING(categoryid)
-	GROUP BY team.categoryid
-	ORDER BY sortorder,categoryid');
+$res = $DB->q('SELECT team_category.*, COUNT(login) AS numteams
+               FROM team_category LEFT JOIN team USING (categoryid)
+               GROUP BY team.categoryid ORDER BY sortorder, categoryid');
 
 if( $res->count() == 0 ) {
 	echo "<p><em>No categories defined</em></p>\n\n";

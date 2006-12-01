@@ -8,13 +8,9 @@
 function setClarificationViewed($clar, $team)
 {
 	global $DB;
-	$DB->q("DELETE FROM `team_unread`"
-		. " WHERE `mesgid` = %i"
-		. "   AND `type` = 'CLARIFICATION'"
-		. "   AND `team` = %s"
-		, $clar
-		, $team
-		);
+	$DB->q('DELETE FROM team_unread
+	        WHERE mesgid = %i AND type = "clarification" AND team = %s',
+	       $clar, $team);
 }
 
 /**
@@ -211,12 +207,11 @@ function confirmClar() {
 					htmlentities($team['name']) . "</option>\n";
 			}
 		} else {
-			$clar = $DB->q('MAYBETUPLE SELECT c.*,
-				t.name AS toname, f.name AS fromname
-				FROM clarification c
-				LEFT JOIN team t ON (t.login = c.recipient)
-				LEFT JOIN team f ON (f.login = c.sender)
-				WHERE c.clarid = %i', $respid);
+			$clar = $DB->q('MAYBETUPLE SELECT c.*, t.name AS toname, f.name AS fromname
+			                FROM clarification c
+			                LEFT JOIN team t ON (t.login = c.recipient)
+			                LEFT JOIN team f ON (f.login = c.sender)
+			                WHERE c.clarid = %i', $respid);
 			if ( $clar['sender'] ) {
 				echo '<option selected="selected" value="' .
 					htmlspecialchars($clar['sender']) . '">' .

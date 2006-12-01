@@ -17,8 +17,8 @@ $source = $DB->q('TUPLE SELECT * FROM submission
 $oldsource = $DB->q('MAYBETUPLE SELECT * FROM submission
                      WHERE team = %s AND probid = %s AND langid = %s AND
                      submittime < %s ORDER BY submittime DESC LIMIT 1',
-					$source['team'],$source['probid'],$source['langid'],
-					$source['submittime']);
+                    $source['team'],$source['probid'],$source['langid'],
+                    $source['submittime']);
 
 if ( $oldsource ) {
 	echo '<p><a href="#diff">Goto diff to previous submission</a></p>';

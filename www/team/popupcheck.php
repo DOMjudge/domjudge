@@ -18,12 +18,8 @@ if(!isset($_REQUEST['data'])) {
 }
 
 // do not throw a popup if stamp is not set
-$res = $DB->q('KEYTABLE SELECT `type` AS ARRAYKEY, COUNT(*) as `count` '
-			. 'FROM `team_unread` '
-			. 'WHERE `team` = %s '
-			. 'GROUP BY `type`'
-			, $login
-			);
+$res = $DB->q('KEYTABLE SELECT type AS ARRAYKEY, COUNT(*) AS count FROM team_unread
+               WHERE team = %s GROUP BY type', $login);
 
 if(!empty($res))
 {

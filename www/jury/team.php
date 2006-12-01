@@ -28,10 +28,10 @@ if ( isset($_REQUEST['restrict']) ) {
 	$restrictions[] = array( 'key' => $key , 'value' => $value );
 }
 
-$row = $DB->q('TUPLE SELECT t.*,c.name as catname,a.name as affname FROM team t
-               LEFT JOIN team_category c USING(categoryid)
-			   LEFT JOIN team_affiliation a ON(t.affilid=a.affilid)
-			   WHERE login = %s', $id);
+$row = $DB->q('TUPLE SELECT t.*, c.name AS catname, a.name AS affname FROM team t
+               LEFT JOIN team_category c USING (categoryid)
+               LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
+               WHERE login = %s', $id);
 
 require('../header.php');
 

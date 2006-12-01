@@ -14,14 +14,15 @@ $title = 'Submission '.@$id;
 
 if ( ! $id ) error("Missing or invalid submission id");
 
-$submdata = $DB->q('MAYBETUPLE SELECT s.team,s.probid,s.langid,s.submittime,s.sourcefile,
-	t.name as teamname, l.name as langname, p.name as probname, c.cid, c.contestname
-	FROM submission s
-	LEFT JOIN team     t ON (t.login=s.team)
-	LEFT JOIN problem  p ON (p.probid=s.probid)
-	LEFT JOIN language l ON (l.langid=s.langid)
-	LEFT JOIN contest  c ON (c.cid = s.cid)
-	WHERE submitid = %i', $id);
+$submdata = $DB->q('MAYBETUPLE SELECT s.team, s.probid, s.langid, s.submittime,
+                    s.sourcefile, c.cid, c.contestname,
+                    t.name AS teamname, l.name AS langname, p.name AS probname
+                    FROM submission s
+                    LEFT JOIN team     t ON (t.login  = s.team)
+                    LEFT JOIN problem  p ON (p.probid = s.probid)
+                    LEFT JOIN language l ON (l.langid = s.langid)
+                    LEFT JOIN contest  c ON (c.cid    = s.cid)
+                    WHERE submitid = %i', $id);
 
 if ( ! $submdata ) error ("Missing submission data");
 

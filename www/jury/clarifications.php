@@ -21,18 +21,18 @@ echo "<p><a href=\"#newrequests\">View New Clarification Requests</a></p>\n";
 echo "<p><a href=\"#oldrequests\">View Old Clarification Requests</a></p>\n";
 echo "<p><a href=\"#clarifications\">View General Clarifications</a></p>\n\n";
 
-$newrequests = $DB->q('SELECT * FROM clarification
-	WHERE sender IS NOT NULL AND cid = %i AND answered = 0
-	ORDER BY submittime DESC', $cid);
+$newrequests    = $DB->q('SELECT * FROM clarification
+                          WHERE sender IS NOT NULL AND cid = %i AND answered = 0
+                          ORDER BY submittime DESC', $cid);
 
-$oldrequests = $DB->q('SELECT * FROM clarification
-	WHERE sender IS NOT NULL AND cid = %i AND answered != 0
-	ORDER BY submittime DESC', $cid);
+$oldrequests    = $DB->q('SELECT * FROM clarification
+                          WHERE sender IS NOT NULL AND cid = %i AND answered != 0
+                          ORDER BY submittime DESC', $cid);
 
 $clarifications = $DB->q('SELECT * FROM clarification
-	WHERE sender IS NULL AND cid = %i
-	AND ( respid IS NULL OR recipient IS NULL )
-	ORDER BY submittime DESC', $cid);
+                          WHERE sender IS NULL AND cid = %i
+                          AND ( respid IS NULL OR recipient IS NULL )
+                          ORDER BY submittime DESC', $cid);
 
 echo '<h3><a name="newrequests"></a>' .
 	"New Requests:</h3>\n";

@@ -14,11 +14,11 @@ $sid = (int)$_GET['id'];
 
 
 // select also on teamid so we can only select our own submissions
-$row = $DB->q('MAYBETUPLE SELECT p.probid, p.name as probname, submittime,
-               l.name as langname, result, output_compile FROM judging j
-               LEFT JOIN submission s USING(submitid)
-               LEFT JOIN language l USING (langid)
-               LEFT JOIN problem p ON(p.probid=s.probid)
+$row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
+               l.name AS langname, result, output_compile FROM judging j
+               LEFT JOIN submission s USING (submitid)
+               LEFT JOIN language   l USING (langid)
+               LEFT JOIN problem    p ON (p.probid = s.probid)
                WHERE j.submitid = %i AND team = %s AND valid = 1',$sid,$login);
 
 if( ! $row ) {
@@ -28,13 +28,8 @@ if( ! $row ) {
 }
 
 // verwijder event
-$DB->q("DELETE FROM `team_unread`"
-	. " WHERE `mesgid` = %i"
-	. "   AND `type` = 'SUBMISSION'"
-	. "   AND `team` = %s"
-	, $sid
-	, $login
-	);
+$DB->q('DELETE FROM team_unread
+        WHERE mesgid = %i AND type = "submission" AND team = %s', $sid, $login);
 
 ?>
 <h1>Submission details</h1>

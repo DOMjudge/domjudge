@@ -18,8 +18,7 @@ if ( isset($_POST['unfreeze']) ) {
 	if ( $docid != $curcont['cid'] ) {
 		error("Can only unfreeze for current contest!");
 	}
-	$DB->q('UPDATE contest SET unfreezetime = NOW() WHERE cid = %i',
-		$docid);
+	$DB->q('UPDATE contest SET unfreezetime = NOW() WHERE cid = %i', $docid);
 }
 
 $res = $DB->q('TABLE SELECT * FROM contest ORDER BY starttime DESC');

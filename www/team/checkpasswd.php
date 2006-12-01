@@ -33,19 +33,20 @@ if ( empty($user) || empty($pass) ) {
 	exit;
 }
 
-$cnt = $DB->q("VALUE SELECT count(*) FROM team WHERE login = %s AND passwd = %s AND ipaddress IS NULL",
-	$user, md5($pass));
+$cnt = $DB->q('VALUE SELECT COUNT(*) FROM team
+               WHERE login = %s AND passwd = %s AND ipaddress IS NULL',
+              $user, md5($pass));
 
 if ( $cnt == 1 ) {
-	$DB->q("UPDATE team SET ipaddress = %s WHERE login = %s", $ip, $user);
+	$DB->q('UPDATE team SET ipaddress = %s WHERE login = %s', $ip, $user);
 	echo "<h1>Authenticated</h1>\n\n<p>Successfully authenticated as team " .
-		htmlspecialchars($user) . " on " . htmlspecialchars($ip) . ".</p>";
-	echo "<p><a href=\"./\">Continue to your team page</a>, and good luck!</p>\n\n";
+		htmlspecialchars($user) . " on " . htmlspecialchars($ip) . ".</p>" .
+		"<p><a href=\"./\">Continue to your team page</a>, and good luck!</p>\n\n";
 } else {
 	sleep(3);
 	echo "<h1>Not Authenticated</h1>\n\n";
-	echo "<p>Invalid username or password supplied. Please try again or contact a staff member.</p>\n\n";
+	echo "<p>Invalid username or password supplied. " .
+		"Please try again or contact a staff member.</p>\n\n";
 }
 
 include('../footer.php');
-

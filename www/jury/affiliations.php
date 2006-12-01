@@ -12,8 +12,8 @@ require('../header.php');
 
 echo "<h1>Affiliations</h1>\n\n";
 
-$res = $DB->q('SELECT a.*,count(login) as cnt FROM team_affiliation a
-               LEFT JOIN team USING(affilid)
+$res = $DB->q('SELECT a.*, COUNT(login) AS cnt FROM team_affiliation a
+               LEFT JOIN team USING (affilid)
                GROUP BY affilid ORDER BY name');
 
 if( $res->count() == 0 ) {

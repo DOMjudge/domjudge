@@ -41,7 +41,8 @@ if ( isset($_POST['forteam']) ) {
 		$teams = array($_POST['forteam']);
 	} else {
 		$teams = $DB->q('COLUMN SELECT login FROM team ' .
-			(isset($_POST['doallnull'])?'WHERE passwd IS NULL':'') . ' ORDER BY login');
+		                (isset($_POST['doallnull'])?'WHERE passwd IS NULL':'') .
+		                ' ORDER BY login');
 	}
 
 	srand( (double) microtime()*1000000);
@@ -49,8 +50,8 @@ if ( isset($_POST['forteam']) ) {
 	echo "<hr />\n\n<pre>";
 	foreach($teams as $team) {
 		$pass = genrandpasswd();
-		$DB->q("UPDATE team SET passwd = %s WHERE login = %s", md5($pass), $team);
-		echo "Login:     ".htmlspecialchars($team)."\n";
+		$DB->q('UPDATE team SET passwd = %s WHERE login = %s', md5($pass), $team);
+		echo "Login:     " . htmlspecialchars($team) . "\n";
 		echo "Password:  $pass\n\n";
 	}
 	echo "</pre>\n";
