@@ -13,11 +13,15 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en">
 <head>
-	<!-- DOMjudge version <?= DOMJUDGE_VERSION ?> -->
+	<!-- DOMjudge version <?=DOMJUDGE_VERSION?> -->
 <title><?=$title?></title>
-<?	if(isset($refresh)) { ?>
-<meta http-equiv="refresh" content="<?=$refresh?>" />
-<?	}	?>
+<?php
+
+if ( isset($refresh) ) {
+	echo '<meta http-equiv="refresh" content="' . $refresh . "\" />\n";
+}
+
+?>
 <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
 <body>
