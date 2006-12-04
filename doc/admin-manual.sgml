@@ -1,0 +1,45 @@
+<!doctype linuxdoc system>
+<!--
+ $Id $
+
+ DOMjudge Administrator's Manual
+ This manual is part of the DOMjudge Programming Contest Jury System.
+ Copyright (c) 2004-2006 DOMjudge team
+
+ DOMjudge is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ DOMjudge is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with DOMjudge; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ 02110-1301, USA
+-->
+<article>
+
+<title>DOMjudge Administrator's Manual
+<author>
+by the DOMjudge team
+<date>$Date$
+
+<abstract>
+This document provides information about DOMjudge installation,
+configuration and operation for the DOMjudge administrator. A separate
+manual is available for teams (and might be for jury members).
+</abstract>
+
+<toc>
+
+<p>
+Document version: $Rev$
+
+
+
+</article>
+
