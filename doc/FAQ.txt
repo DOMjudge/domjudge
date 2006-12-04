@@ -1,3 +1,6 @@
+
+[TODO: this is not really a FAQ. Move into manual]
+
 DOMjudge FAQ
 ============
 

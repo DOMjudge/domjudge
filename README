@@ -1,59 +1,15 @@
 This is the Programming Contest Jury System "DOMjudge" version 1.4.0
 
 
-Overview
---------
-
 DOMjudge is a system for running a programming contest, like the ACM
 regional and world championship programming contests.
 
-This means that teams are on-site and have a fixed time period (mostly
-5 hours) and one computer to solve a number of problems (mostly 6-10).
-Problems are solved by writing a program in one of the allowed
-languages, that reads input according to the problem input
-specification and writes the correct, corresponding output.
-
-The judging is done by submitting the source code of the solution to
-the jury. There the jury system compiles and runs the program and
-compares the program output with the expected output.
-
-This software can be used to handle the submission and judging during
-such contests. It also handles feedback to the teams and communication
-on problems (clarification requests). It has webinterfaces for the
-jury, the teams (their submissions and clarification requests) and the
-public (scoreboard).
-
-It supports the ICPC Validator Interface Standard, see doc/icpc-standard.txt
-for more information.
-
-
-Authors
--------
 
 DOMjudge was developed by Thijs Kinkhorst, Peter van de Werken and
 Jaap Eldering at Study Association "A-Eskwadraat", Utrecht University,
 The Netherlands.
 
-This software is partly based on code by other people. These
-acknowledgements are made in the respective files, but we would like
-to name them here too:
-
-- runguard.c is based on timeout from The Coroner's Toolkit
-  by Wietse Venema.
-- beep.c is made by Johnathan Nightingale.
-- bash is included from the Debian "bash-static" (i386) package
-  (copyright Free Software Foundation).
-- tempfile.c is included from the Debian "debianutils" package.
-- mkstemps.h and basename.h are modified versions from the
-  GNU libiberty library (copyright Free Software Foundation).
-- lib.database.php by Jeroen van Wolffelaar et al.
-- submit.c and submitdaemon.c are based on submit.pl and
-  submitdaemon.pl by Eelco Dolstra.
-- The DOMjudge logo is based on the NKP 2004 logo made by
-  Erik van Sebille.
-
-
-Copying
+Licence
 -------
 
 DOMjudge, including its documentation, is free software; you can redistribute
@@ -72,8 +28,8 @@ Files (partly) covered by other copyrights are:
 Further reading
 ---------------
 
-For more information on installation and requirements see INSTALL,
-and consult the files under doc/ for more specific information.
+For more information on installation and requirements see the
+documentation under the doc/ directory.
 
 
 Contact
