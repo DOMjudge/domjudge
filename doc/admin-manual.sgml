@@ -249,7 +249,7 @@ DOMjudge has three different kinds of hosts:
 
 <sect>Requirements
 <p>
-Before installing, make sure you have met all the requrements.
+Before installing, make sure you have met all the requirements.
 
 <sect1>System Requirements
 <p>
@@ -289,7 +289,7 @@ The requirements for the deployment of this jury-system are:
 </itemize>
 
 
-<sect1>Software Requements
+<sect1>Software Requirements
 <p>
 
 <itemize>
@@ -429,7 +429,7 @@ in the path for the teams.
 Although the commandline submit daemon is thus not strictly necessary,
 it does add an advantage: it is more secure than the webinterface
 because it uses a "callback" to authenticate the team (instead of IP
-address authetication). Furthermore, it allows for automatic IP
+address authentication). Furthermore, it allows for automatic IP
 address configuration with the configuration option 'STRICTIPCHECK=0',
 which removes the hassle of either preconfiguring that or handing
 passwords to the teams for their first authentication.
@@ -565,7 +565,7 @@ old version.
 <chapt>Setting up a contest
 <p>
 
-After installation is succesful, you want to run your contest! Configuring
+After installation is successful, you want to run your contest! Configuring
 DOMjudge to run a contest (or a number of them) involves the following steps:
 
 <itemize>
@@ -599,7 +599,7 @@ software:
 * problem            Definition of problems (name, corresponding contest, etc.)
   submission         Submissions of solutions to problems.
 * team               Definition of teams.
-* team_affiliation   Defintion of institutions a team can be affiliated with
+* team_affiliation   Definition of institutions a team can be affiliated with
 * team_category      Different category groups teams can be put in.
   scoreboard_jury    Cache of the scoreboards for public/teams and for the jury
   scoreboard_public    separately, because of possibility of score freezing.
@@ -689,8 +689,6 @@ team_affiliation:
 'affilid' is the reference ID.
 'name' is the name of the institution.
 'country' is the 2 character abbreviation of the country.
-'has_logo' is 0 or 1 whether the institution has a logo associated
-with it.
 'comments' should be clear.
 
 team_category:
@@ -716,11 +714,11 @@ of a submission.
 
 Authentication within the command line submitclient is fortified by the
 following process. When a client connects, it does not send the submission
-file, but only a reference to a randomized and not publicly visible file.
+file, but only a reference to a randomised and not publicly visible file.
 This file is then copied from server side with the submit_copy script. This
 makes it impossible for teams to spoof a submission for a different team: the
 server "calls back" the team the submitter identified himself as and checks
-for existence of the advertised file. Because filename are randomized and
+for existence of the advertised file. Because filename are randomised and
 invisible (within the $HOME/.submit directory by default), it is also
 impossible for someone to guess another team's filename and submit it for
 them.
@@ -757,7 +755,7 @@ There are three possible ways of configuring that IP-address.
    database.
 
 <sect1>Set IP upon first submission
-
+<p>
    Have DOMjudge configure the IP upon first submission with the command line
    submit client. This is option STRICTIPCHECK which should be set to 0 to
    activate. In that case, we (optionally) start out without IP's (and the web
@@ -776,11 +774,41 @@ There are three possible ways of configuring that IP-address.
 <p>
 <!-- TODO -->
 
+<sect>Start the daemons
+<p>
+
+Once everything is configured, you can start the daemons:
+<itemize>
+<item>The submitdaemon on the jury system;
+<item>The websubmitdaemon on the jury system;
+<item>One or more judgedaemons on the judgehosts;
+<item>Optionally the balloon notification daemon.
+</itemize>
+
 <sect>Check that everything works
 <p>
-<!-- TODO -->
+If the daemons have started without any problems, you've come a long way!
+Now to check that you're ready for a contest.
 
+First, go to the Jury Interface: http://www.your-domjudge-location/jury
+Look under all the menu items to see whether the displayed data looks sane.
+Use the config-checker under Admin Functions for some additional sanity
+checks on your configuration.
 
+Go to a team workstation and see if you can access the team page, and if
+you can submit solutions.
+
+Next, it is time to submit some test solutions. If you have the default
+Hello World problem enabled, you can submit some of the example sources
+from under the doc/ directory. They should give CORRECT.
+
+You can also try some (or all) of the sources under test-sources. Be warned
+that this is a real stress test, and many of them are supposed to give a
+wrong answer or will even crash a judger host. Examine the comments at the
+top of each source to see what the expected effect should be.
+
+When all this worked, you're quite ready for a contest. Or at least, the
+practice session of a contest.
 
 <chapt>The Scoreboard
 <p>
