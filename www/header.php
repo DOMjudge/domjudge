@@ -6,6 +6,10 @@
  * $Id$
  */
 
+if ( isset($refresh) ) {
+	header('Refresh: ' . $refresh);
+}
+
 echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 
 ?>
@@ -15,13 +19,6 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 <head>
 	<!-- DOMjudge version <?=DOMJUDGE_VERSION?> -->
 <title><?=$title?></title>
-<?php
-
-if ( isset($refresh) ) {
-	echo '<meta http-equiv="refresh" content="' . $refresh . "\" />\n";
-}
-
-?>
 <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
 <body>
