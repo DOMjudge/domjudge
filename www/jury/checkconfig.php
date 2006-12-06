@@ -74,7 +74,7 @@ $res = $DB->q('SELECT cid,
                UNIX_TIMESTAMP(starttime)       AS start,
                UNIX_TIMESTAMP(endtime)         AS end,
                UNIX_TIMESTAMP(lastscoreupdate) AS lastsu,
-               UNIX_TIMESTAMP(unfreezetime)    AS unfreeze,
+               UNIX_TIMESTAMP(unfreezetime)    AS unfreeze
                FROM contest ORDER BY cid');
 
 while($cdata = $res->next()) {
