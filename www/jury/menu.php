@@ -2,6 +2,8 @@
 
 require('init.php');
 
+header("Refresh: 30;url=" . getBaseURI() . "jury/menu.php");
+
 echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -9,8 +11,8 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 <html lang="en">
 <head>
 	<!-- DOMjudge version <?= DOMJUDGE_VERSION ?> -->
-<meta http-equiv="refresh" content="3;url=<?=getBaseURI()?>jury/menu.php" />
-<link rel="stylesheet" href="style.css" type="text/css" />
+	<link rel="stylesheet" href="style.css" type="text/css" />
+<title>DOMjudge menu</title>
 </head>
 <body>
 <?
