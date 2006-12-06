@@ -3,6 +3,11 @@
 require('init.php');
 require_once('popupcheck.php');
 
+$refresh = '30;url='.getBaseURI().'team/menu.php';
+$refresh = addUrl($refresh, $popupTag);
+
+header("Refresh: " . $refresh);
+
 echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -10,12 +15,8 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 <html lang="en">
 <head>
 	<!-- DOMjudge version <?= DOMJUDGE_VERSION ?> -->
-<?	$refresh = '3;url='.getBaseURI().'team/menu.php';
-	echo '<meta http-equiv="refresh" content="'
-		. addUrl($refresh, $popupTag)
-		. "\" />\n";
-?>
 <link rel="stylesheet" href="style.css" type="text/css" />
+<title>DOMjudge menu</title>
 <script type="text/javascript">
 	function popUp(URL) {
 		var w = window.open(URL, 'ALERT', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=300,height=200');
@@ -23,15 +24,16 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 	}
 </script>
 </head>
-<body>
 <?
 
 echo '<body';
-if( isset($popup) && $popup )
+if( !empty($popup) ) {
 	echo " onLoad=\"javascript:popUp('"
 		. addUrl('popup.php', $popup)
 		. "')\">\n\n";
-
+} else {
+	echo ">\n\n";
+}
 
 /* (new) clarification info */
 $res = $DB->q('KEYTABLE SELECT type AS ARRAYKEY, COUNT(*) AS count FROM team_unread
