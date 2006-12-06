@@ -469,6 +469,9 @@ snippet from etc/apache.conf. In that file, replace 'SYSTEM_ROOT' with
 the SYSTEM_ROOT you specified in the config, i.e. where the DOMjudge
 files are located. Reload the webserver for the changes to take effect.
 
+See also the section about webserver privileges under Security.
+<!-- TODO: link -->
+
 <sect>Configuration of Special Run of Judge Scripts
 <p>
 
@@ -538,6 +541,9 @@ the webserver. These are:
 <item> INCOMINGDIR must be writeable by the webserver to place websubmitted
   files there.
 </itemize>
+
+See also the section about webserver privileges under Security.
+<!-- TODO: link -->
 
 Should installation not succeed and re-installation be necessary, then
 you can clean all built files with 'make clean'. 'make distclean' will
@@ -976,6 +982,34 @@ hack or could crash the system.  However, a chroot environment does
 not restrict network access, so there lies a possible security risk
 that has to be handled separately.
 
+<sect>Filesystem Privileges
+<p>
+
+Of course you must make sure that the filesystem privileges are set
+such that there's no unauthorised access to sensitive data, like submitted
+solutions or passwords. This is quite system dependent. At least the
+INPUT_ROOT and OUTPUT_ROOT should not be readable by other users than
+DOMjudge.
+
+<sect1>Permissions for the webserver
+<p>
+
+Make sure that the webserver serving the DOMjudge webinterface pages
+has correct permissions to the SYSTEM_ROOT/{www,lib,etc} directory
+trees. The 'www' and 'lib' trees can safely set to be readable and
+accessible. Care should be taken with the 'etc' dir: 'config.php' and
+'passwords.php' should be readable, but 'passwords.php' should best
+not be readable by anyone else. This can be done for example by
+setting the SYSTEM_ROOT/etc directory to owner:group
+&lt;DOMjudge account&gt;:&lt;Webserver group&gt; and permissions <tt>drwxr-x---</tt>,
+denying users other than yourself and the webserver group access to the
+configuration and password files.
+
+Furthermore, the webserver must have write access to the INCOMINGDIR to
+place websubmissions (if used). This can also be done by making that
+directory group-owned and -writeable by the webserver group.
+
+
 <sect>External Security
 <p>
 
@@ -1000,6 +1034,98 @@ accomplished by modifying the iptables, adding a rule like:
 iptables -I OUTPUT -o &lt;network_interface&gt; -m owner --uid-owner &lt;testuser_uid&gt; -j REJECT
 </verb>
 
+
+
+<chapt>Common problems and their solutions
+<p>
+
+
+<sect>Java compilers and the chroot
+<p>
+Java is difficult to deal with in an automatic way. It is probably most
+preferable to use Sun Java, because that's the version contestants will be
+used to. The GNU Compiler for Java (GCJ) is easier to deal with but may lack
+some features.
+
+With the default config, submitted programs are run within a minimal
+chroot environment. For this the programs have to be statically
+linked, because they do not have access to shared libraries.
+
+For most languages compilers support this, but for Java, this is a
+bit problematic. The Sun Java compiler 'javac' isn't even a real
+compiler: a bytecode interpreter 'java' is needed to run the binaries
+and thus this cannot simply run in a chroot environment.
+
+There are some options to support Java as a language:
+<enum>
+<item> One can disable the chroot environment in 'etc/global.cfg' by
+   setting 'USE_CHROOT=0'. Disabling the chroot environment removes
+   this extra layer of security against submissions that attempt to
+   cheat, but it is a simple solution to getting Java to work.
+<item> Next, one can build a bigger chroot environment which contains all
+   necessary ingredients to let Sun Java work within it. DOMjudge
+   supports this with some manual setup.
+
+   First of all, a chroot tree with Java support must be created. The
+   script bin/make_chroot.sh creates one from Debian GNU/Linux
+   sources; run that script without arguments for basic usage
+   information. Next, edit the script 'judge/chroot-startstop.sh' and
+   adapt it to work with your local system and uncomment the script in
+   'etc/global.cfg'.
+<item> As an alternative the 'gcj' compiler from GNU can be used instead
+   of Sun's version. This one generates true machine code and can link
+   statically. However a few function calls cannot be linked
+   statically (see 'GCJ compiler warnings' in this FAQ). Secondly, the
+   static library 'libgcj.a' doesn't seem to be included in all
+   GNU/Linux distributions: at least not in RedHat Enterprise 4.
+</enum>
+
+<sect>The Sun Java virtual machine (jvm) and memory limits
+<p>
+DOMjudge imposes memory limits on submitted solutions. These limits
+are imposed before the compiled submissions are started. On the other
+hand, the Sun jvm is started via a compile-time generated script which
+is run as a wrapper around the program. This means that the memory
+limits imposed by DOMjudge are for the jvm and the running program
+within it. As the jvm uses approximately 200MB, this reduces the limit
+by this significant amount. See judge/compile_java_javac.sh for the
+implementation details.
+
+<sect>GCJ compiler warnings
+<p>
+When using the GNU GCJ compiler for compiling Java sources, it can
+give a whole lot of warning messages of the form
+
+<verb>
+/usr/lib/gcc-lib/i386-linux/3.2.3/libgcj.a(gc_dlopen.o)(.text+0xbc): In function `GC_dlopen':
+: Using 'dlopen' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+</verb>
+
+These are generated because you are trying to compile statically
+linked sources, but some functions can not be static, e.g. the
+`dlopen' function above. These are _warnings_ and can be safely
+ignored, because under normal programming contest conditions people
+are not allowed to use these functions anyways (and they are not
+accessible within the chroot-ed environment the program is run in).
+
+To filter these warnings, take a look at judge/compile_java_gcjmod.sh
+and replace or symlink judge/compile_java.sh by/to this file.
+
+
+
+<sect>Error: "submit_copy.sh failed with exitcode XX"
+<p>
+This error can have various causes. First of all: check the
+'submit.log' file for more complete error messages.
+
+Assuming the default configuration where submit_copy.sh uses 'scp', we
+have found that shell initialisation scripts might contain statements
+which generate errors: scp runs the user's default shell when copying
+submission files and when the shell dies (e.g. because of not having a
+terminal), the copying fails.
+
+Another cause might be that you do not have automatic access to the
+team's account (e.g. using ssh keys).
 
 
 <!-- TODO: how to make an appendix? -->
