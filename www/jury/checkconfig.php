@@ -187,6 +187,39 @@ if($res->count() > 0) {
 	}
 }
 
+echo "</p>\n\n<h2>Teams</h2>\n\n<p>Checking teams...<br />\n";
+
+if ( SHOW_AFFILIATIONS ) {
+	$res = $DB->q('SELECT affilid FROM team_affiliation ORDER BY affilid');
+
+	while ( $row = $res->next() ) {
+		$affillogo = '../images/affiliations/' .
+			urlencode($row['affilid']) . '.png';
+		if ( ! file_exists ( $affillogo ) ) {
+			err ("Affiliation " . $row['affilid'] .
+				" does not have a logo (looking for $affillogo).");
+		} elseif ( ! is_readable ( $affillogo ) ) {
+			err ("Affiliation " . $row['affilid'] .
+				" has a logo, but it's not readable ($affillogo).");
+		}
+	}
+	
+	$res = $DB->q('SELECT DISTINCT country FROM team_affiliation ORDER BY country');
+	while ( $row = $res->next() ) {
+		$cflag = '../images/countries/' .
+			urlencode($row['country']) . '.png';
+		if ( ! file_exists ( $cflag ) ) {
+			err ("Country " . $row['country'] .
+				" does not have a flag (looking for $cflag).");
+		} elseif ( ! is_readable ( $cflag ) ) {
+			err ("Country " . $row['country'] .
+				" has a flag, but it's not readable ($cflag).");
+		}
+	}
+
+}
+
+
 echo "</p>\n\n";
 
 echo "<p>End of config checker.</p>\n\n";

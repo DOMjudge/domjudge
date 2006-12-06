@@ -12,7 +12,7 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 <head>
 	<!-- DOMjudge version <?= DOMJUDGE_VERSION ?> -->
 	<link rel="stylesheet" href="style.css" type="text/css" />
-<title>DOMjudge menu</title>
+	<title>DOMjudge menu</title>
 </head>
 <body>
 <?
