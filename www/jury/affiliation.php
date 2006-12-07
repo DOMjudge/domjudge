@@ -23,20 +23,11 @@ $countryflag = "../images/countries/" . urlencode($data['country']) . ".png";
 
 echo "<h1>Affiliation: ".htmlentities($data['name'])."</h1>\n\n";
 
-?>
-<table>
-<tr><td>ID:          </td><td><?=htmlspecialchars($data['affilid'])?></td></tr>
-<tr><td>Name:        </td><td><?=htmlentities($data['name'])?></td></tr>
-<tr><td>Country:     </td><td><?php
+echo "<table>\n";
+echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['affilid']) . "</td></tr>\n";
+echo '<tr><td>Name:</td><td>' . htmlentities($data['name']) . "</td></tr>\n";
 
-echo htmlspecialchars($data['country']);
-if ( is_readable($countryflag) ) {
-	echo ' <img src="' . $countryflag . '" alt="' .
-		htmlspecialchars($data['country']) . "\" /></td></tr>\n";
-}
-
-echo "</td></tr>\n";
-echo "<tr><td>Logo:        </td><td>";
+echo '<tr><td>Logo:</td><td>';
 
 if ( is_readable($affillogo) ) {
 	echo '<img src="' . $affillogo . '" alt="' .
@@ -44,6 +35,14 @@ if ( is_readable($affillogo) ) {
 } else {
 	echo "not available</td></tr>\n";
 }
+
+echo '<tr><td>Country:</td><td>' . htmlspecialchars($data['country']);
+
+if ( is_readable($countryflag) ) {
+	echo ' <img src="' . $countryflag . '" alt="' .
+		htmlspecialchars($data['country']) . "\" /></td></tr>\n";
+}
+echo "</td></tr>\n";
 
 if ( !empty($data['comments']) ) {
 	echo '<tr><td valign="top">Comments:</td><td>' .
