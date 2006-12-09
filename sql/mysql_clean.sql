@@ -24,4 +24,5 @@ DROP TABLE IF EXISTS submission;
 DROP TABLE IF EXISTS team;
 DROP TABLE IF EXISTS team_affiliation;
 DROP TABLE IF EXISTS team_category;
+DROP TABLE IF EXISTS team_unread;
 DROP TABLE IF EXISTS contest;
