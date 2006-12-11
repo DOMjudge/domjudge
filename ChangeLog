@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 1.4.0 - SVN
 -------------------
+ - Minimum MySQL version required is now 4.1: simplify SQL privilege
+   removal.
  - [INCOMPATIBLE CHANGE] Renamed judger to judgehost everywhere to
    remove ambiguity between human judges and judge computers.
  - Add numbering to scoreboard.

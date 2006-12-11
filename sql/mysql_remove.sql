@@ -10,7 +10,4 @@
 DROP DATABASE IF EXISTS DOMJUDGE_DBNAME;
 
 -- Remove domjudge users:
-USE mysql;
-DELETE FROM `user` WHERE `User` = 'domjudge_jury';
-DELETE FROM `user` WHERE `User` = 'domjudge_team';
-DELETE FROM `user` WHERE `User` = 'domjudge_public';
+DROP USER domjudge_jury, domjudge_team, domjudge_public;

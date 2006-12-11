@@ -10,7 +10,7 @@
 
 
 -- Revoke privileges to domjudge database from domjudge users:
-REVOKE ALL PRIVILEGES ON *.* FROM domjudge_jury, domjudge_team, domjudge_public;
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM domjudge_jury, domjudge_team, domjudge_public;
 
 -- Drop all tables in domjudge database (needs fix to select tables by *):
 DROP TABLE IF EXISTS clarification;
