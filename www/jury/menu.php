@@ -25,7 +25,7 @@ $cnew = $DB->q('VALUE SELECT COUNT(*) FROM clarification
 
 ?>
 <div id="menutop">
-<a target="_TOP" href="jury.php">home</a>
+<a target="_TOP" href="index.php">home</a>
 <a target="_TOP" href="problems.php">problems</a>
 <a target="_TOP" href="judgehosts.php">judgehosts</a>
 <a target="_TOP" href="teams.php">teams</a>
