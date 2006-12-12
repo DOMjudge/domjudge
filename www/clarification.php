@@ -120,9 +120,8 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 		else
 			echo '<tr>';
 		
-		echo '<td><a href="' .
-			addUrl('clarification.php?id=' . $clar['clarid'], $popupTag) .
-			'">' . $clar['clarid'] . '</a></td>';
+		echo '<td><a href="clarification.php?id='.$clar['clarid'].'">'
+			. $clar['clarid'] . '</a></td>';
 		if ( $isjury ) {
 			echo '<td class="teamid">' . ( $clar['sender'] ?
 				'<a href="team.php?id=' . urlencode($clar['sender']) . '">' .
@@ -140,8 +139,7 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 				( $clar['sender'] ? 'Jury' : 'All') ) . '</td>';
 		}
 		echo '<td>' . printtime($clar['submittime']) . '</td>';
-		echo '<td><a href="' .
-			addUrl('clarification.php?id=' . $clar['clarid'], $popupTag) . '">' .
+		echo '<td><a href="clarification.php?id='.$clar['clarid'].'">' .
 			htmlspecialchars(str_cut($clar['body'],80)) . "</a></td></tr>\n";
 	}
 	echo "</table>\n\n";
@@ -154,14 +152,6 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 {
 	global $DB;
-
-	// insert the timestamp in links for teams to handle popups
-	if ( ! $isjury ) {
-		global $popupTag;
-	} else {
-		$popupTag = NULL;
-	}
-	
 ?>
 
 <script type="text/javascript">
@@ -180,9 +170,7 @@ function confirmClar() {
 	  
 <?php
 	  
-	echo '<form id="sendclar" action="' . addUrl(urlencode($action), $popupTag) .
-		"\" method=\"post\">\n";
-
+	echo '<form id="sendclar" action="'.$action."\" method=\"post\">\n";
 
 	echo "<table>\n";
 

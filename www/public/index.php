@@ -10,6 +10,7 @@ require('init.php');
 $title="Scoreboard";
 // set auto refresh
 $refresh="30;url=" . getBaseURI() . 'public/';
+$menu = false;
 require('../header.php');
 require('../scoreboard.php');
 

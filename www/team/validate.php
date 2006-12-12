@@ -14,6 +14,7 @@ $row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
 // not found in database
 if(!$row) {
 	$title = 'Not Authenticated';
+	$menu = false;
 	include('../header.php');
 	echo "<h1>Not Authenticated</h1>\n\n<p>Sorry, we're unable to identify you as a valid team (IP " .
 		htmlspecialchars($_SERVER['REMOTE_ADDR']) . ").</p>\n\n";

@@ -66,6 +66,12 @@ tr.unread td {
 .teamid, .filename, .hostname { font-family: monospace; }
 .teamstatus { text-align: center; }
 
+#menubox {
+	border-width: 0px;
+	width: 100%;
+	height: 2.5em;
+}
+
 #menutop a {
 	font-weight: bold;
 	text-decoration: none;
