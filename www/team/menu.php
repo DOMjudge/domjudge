@@ -28,19 +28,19 @@ $res = $DB->q('KEYTABLE SELECT type AS ARRAYKEY, COUNT(*) AS count FROM team_unr
 ?>
 <div id="menutop">
 <?	if ( isset($res['submission']) ) { ?>
-<a target="content" class="new" href="submissions.php">submissions (<?=$res['submission']['count']?>)</a>
+<a target="_TOP" class="new" href="index.php">submissions (<?=$res['submission']['count']?>)</a>
 <?	} else { ?>
-<a target="content" href="submissions.php">submissions</a>
+<a target="_TOP" href="index.php">submissions</a>
 <?	}
 	if ( isset($res['clarification']) ) {
-?><a target="content" class="new" href="clarifications.php">clarifications (<?=$res['clarification']['count']?> new)</a>
+?><a target="_TOP" class="new" href="clarifications.php">clarifications (<?=$res['clarification']['count']?> new)</a>
 <?	} else { ?>
-<a target="content" href="clarifications.php">
+<a target="_TOP" href="clarifications.php">
 clarifications</a>
 <?	} ?>
-<a target="content" href="scoreboard.php">scoreboard</a>
+<a target="_TOP" href="scoreboard.php">scoreboard</a>
 <? if ( ENABLEWEBSUBMIT ) { ?>
-<a target="content" href="websubmit.php">submit</a>
+<a target="_TOP" href="websubmit.php">submit</a>
 <? } ?>
 </div>
 
