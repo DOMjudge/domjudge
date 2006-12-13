@@ -75,7 +75,8 @@ function rejudge($key, $value) {
 	              $value, $cid);
 
 	while ( $jud = $res->next() ) {
-		// START TRANSACTION
+		$DB->q('START TRANSACTION');
+		
 		$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
 		       $jud['judgingid']);
 
@@ -83,6 +84,6 @@ function rejudge($key, $value) {
 		        WHERE submitid = %i', $jud['submitid']);
 
 		calcScoreRow($cid, $jud['team'], $jud['probid']);
-		// END TRANSACTION
+		$DB->q('COMMIT');
 	}
 }

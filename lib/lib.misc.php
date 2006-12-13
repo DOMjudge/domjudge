@@ -64,6 +64,9 @@ function addUrl($url, $keyvalue, $encode = TRUE)
  *
  * Given a contestid, teamid and a problemid,
  * (re)calculate the values for one row in the scoreboard.
+ *
+ * Due to current transactions usage, this function MUST NOT contain
+ * any START TRANSACTION or COMMIT statements.
  */
 function calcScoreRow($cid, $team, $prob) {
 	global $DB;
