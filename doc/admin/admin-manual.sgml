@@ -85,7 +85,7 @@ This is a (rough) list of the requirements for DOMjudge.
 <itemize>
 <item>At least one Linux-PC with local root access
 <item>Apache webserver with PHP (4.3.2 or newer) and PHP-command line interface
-<item>MySQL database server version 3.23 or newer
+<item>MySQL database server version 4.1.0 or newer
 <item>Compilers for the languages you want to support
 </itemize>
 
@@ -304,7 +304,7 @@ The requirements for the deployment of this jury-system are:
 <item> Apache web server with support for PHP >= 4.3.2 and the mysql
   extension for PHP.
 
-<item> MySQL 3.23.x or higher database and client software
+<item> MySQL 4.1.x or higher database and client software
 
 <item> PHP >= 4.3.2, located in /usr/bin/php (command line interface),
   also with the mysql extension.
@@ -455,6 +455,21 @@ to be manually filled with data before the contest can be run. See
 the relevant section of Configuration for details. <!-- TODO:
 link -->
 
+<sect1>MySQL table types
+<p>
+
+DOMjudge has optional transaction support built in: if your MySQL
+table type supports transactions, DOMjudge will make use of it to
+make it even more robust where that would be otherwise impossible.
+The <em>InnoDB</em> table type supports transactions; the default
+<em>MyISAM</em> does not; however, the latter is claimed to have a
+higher performance.
+
+When maximising performance is required, you can
+consider to use the <em>Memory</em> (formerly <em>Heap</em>) table
+for the scoreboard_public and scoreboard_jury tables. They will be
+lost in case of a full crash, but can be recalculated from the jury
+interface.
 
 <sect>Webserver Configuration
 <p>
