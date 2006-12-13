@@ -2,10 +2,14 @@
 // $Id$
 
 /******************************************************************************
+* lib.database.php version 1.1.0
+******************************************************************************/
+
+/******************************************************************************
 *    Licence                                                                  *
 *******************************************************************************
 
-Copyright (C) 2001-2005 Jeroen van Wolffelaar <jeroen@php.net>, et al.
+Copyright (C) 2001-2006 Jeroen van Wolffelaar <jeroen@php.net>, et al.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -25,6 +29,8 @@ this program; if not, write to the Free Software Foundation, Inc.,
 ******************************************************************************/
 
 if (!@define('INCLUDED_LIB_DATABASE',true)) return;
+
+//define('DEBUG'    , 0 );
 
 define('DB_EQ'    , '='        );
 define('DB_NEQ'   , '!='       );
@@ -77,6 +83,42 @@ function db_vw($kolom,$waarde,$mode=NULL)
 	return "$kolom $mode $waarde";
 }
 
+function db_and()
+{
+	return db__andor(func_get_args(),'AND','1');
+}
+
+function db_or() 
+{
+	return db__andor(func_get_args(),'OR','00');
+}
+
+/******************************************************************************
+*    Internal functions                                                       *
+******************************************************************************/
+// syntax:
+// [1] db_and( [string cond [, string cond [, string cond [...] ] ] ] )
+// [2] db_and( array conditions )
+// [3] db_and( string column, array values [, string compare_mode])
+// mode: one of DB_EQ (default), DB_NEQ , DB_LIKE
+
+function db__andor($params,$op,$default)
+{
+	// check for case [3]:
+	if (is_array(@$params[1])) {
+		@list ($col,$values,$mode) = $params;
+		if (!$values) return $default;
+		return implode(" $op ", array_map(
+			create_function('$value',
+			"return db_vw('$col',\$value,'$mode');"),$values));
+	}
+	
+	// let args be array-of-arguments, depending on [1] or [2]
+	$args = is_array(@$params[0]) ? $params[0] : $params;
+	return $args ? '('.implode(") $op (",$args).')' : $default;
+}
+
+
 /******************************************************************************
 *    (internal) Connection handling                                           *
 ******************************************************************************/
@@ -87,11 +129,13 @@ function db__connect($database,$host,$user,$pass,$persist=TRUE)
 	$con = $persist ? 'mysql_pconnect' : 'mysql_connect';
 	
 	$db__connection = $con($host,$user,$pass)
-		or error("Could not connect to database server ".
-			"(host=$host,user=$user,password=".ereg_replace('.','*',$pass).")" );
+		or user_error("Could not connect to database server ".
+			"(host=$host,user=$user,password=".ereg_replace('.','*',$pass).")",
+			E_USER_ERROR);
 	mysql_select_db($database,$db__connection)
 			or error("Could not select database '$database': ".
-				mysql_error($db__connection) );
+				mysql_error($db__connection),
+				E_USER_ERROR);
 	return $db__connection;
 }
 
@@ -111,9 +155,10 @@ function db__val2sql($val, $mode='.')
 		case 'i': return (int)$val;
 		case 's': return '"'.mysql_escape_string($val).'"';
 		case 'c': return '"%'.mysql_escape_string($val).'%"';
+		case 'l': return $val;
 		case '.': break;
 		default: 
-			error("Unknown mode: $mode");
+			user_error("Unknown mode: $mode", E_USER_ERROR);
 	}
 
 	switch (gettype($val))
@@ -129,10 +174,10 @@ function db__val2sql($val, $mode='.')
 		case 'object':
 			return '"'.mysql_escape_string(serialize($val)).'"';
 		case 'resource':
-			error('Cannot store a resource in database');
+			user_error('Cannot store a resource in database', E_USER_ERROR);
 			/* break missing intentionally */
 	}
-	error('Case failed in lib.database');
+	user_error('Case failed in lib.database', E_USER_ERROR);
 }
 
 function db__sql2val($val)
@@ -304,9 +349,14 @@ class db
 			case 'show':
 				$type = 'select';
 				break;
-
+			// transactions
+			case 'start':	// start transaction. Do not support BEGIN, it's deprecated
+			case 'commit':
+			case 'rollback':
+				$type = 'transaction';
+				break;
 			default:
-				error("SQL command/lib keyword '$key' unknown!");
+				user_error("SQL command/lib keyword '$key' unknown!", E_USER_ERROR);
 		}
 
 		$parts = explode('%', $format);
@@ -332,9 +382,9 @@ class db
 				case 'A':
 					$val = array_shift($argv);
 					if (!is_array($val) || !$val) {
-						error("%A in \$DATABASE->q() has to correspond to a "
+						user_error("%A in \$DATABASE->q() has to correspond to a "
 							."non-empty array, it's now a "
-							."'$val'!" );
+							."'$val'!", E_USER_ERROR );
 					}
 					$GLOBALS['MODE'] = $part{1};
 					$query .= implode(', ', array_map('db__val2sql', $val));
@@ -363,6 +413,11 @@ class db
 		}
 
 		$res = $this->_execute($query);
+		
+		// nothing left to do if transaction statement...
+		if ( $type == 'transaction' ) {
+			return null;
+		}
 
 		if ($type == 'update') {
 			if ($key == 'returnid') {
@@ -373,18 +428,19 @@ class db
 			}
 			return;
 		}
-
+		
 		$res = new db_result($res);
 
 		if ($key == 'tuple' || $key == 'value') {
 			if ($res->count() < 1) {
 				if ($maybe) return NULL;
-				error("$this->database query error ($key $query".
-					"): Query did not return any rows");
+				user_error("$this->database query error ($key $query".
+					"): Query did not return any rows", E_USER_ERROR);
 			}
 			if ($res->count() > 1) {
-				error("$this->database query error ($key $query".
-					"): Query returned too many rows (".$res->count().")");
+				user_error("$this->database query error ($key $query".
+					"): Query returned too many rows (".$res->count().")",
+					E_USER_ERROR);
 			}
 			$row = $res->next();
 			if ($key == 'value') {
@@ -436,16 +492,17 @@ class db
 			// switch error message depending on errornr.
 			switch(mysql_errno($this->_connection)) {
 				case 1062:	// duplicate key
-				error("Item with this key already exists.\n".
-					mysql_error($this->_connection) );
+				user_error("Item with this key already exists.\n".
+					mysql_error($this->_connection), E_USER_ERROR );
 				case 1217:  // foreign key constraint
-				error("This operation would have brought the database in an ".
+				user_error("This operation would have brought the database in an ".
 					"inconsistent state.\n".
-					mysql_error($this->_connection) );
+					mysql_error($this->_connection), E_USER_ERROR );
 				default:
-				error("SQL syntax-error ($query). Error#".
+				user_error("SQL syntax-error ($query). Error#".
 					mysql_errno($this->_connection).": ".
-					mysql_error($this->_connection) );
+					mysql_error($this->_connection),
+					E_USER_ERROR);
 			}
 		}
 
@@ -476,7 +533,7 @@ class db_result
 	{
 		// we've nexted over this result too many times already.
 		if(!isset($this->_result)) {
-			error('Result does not contain a valid resource.');
+			user_error('Result does not contain a valid resource.', E_USER_ERROR);
 		}  
 		$this->tuple = mysql_fetch_assoc($this->_result);
 		$this->_nextused = TRUE;
@@ -501,7 +558,8 @@ class db_result
 	function getcolumn($field=NULL)
 	{
 		if($this->_nextused) {
-			error('Getcolumn does not work if you\'ve already next()ed over the result!');
+			user_error('Getcolumn does not work if you\'ve already next()ed over the result!',
+				E_USER_ERROR);
 		}
 		$col = array();
 		while($this->next())
@@ -515,7 +573,8 @@ class db_result
 	function gettable()
 	{
 		if($this->_nextused) {
-			error('Gettable does not work if you\'ve already next()ed over the result!');
+			user_error('Gettable does not work if you\'ve already next()ed over the result!',
+				E_USER_ERROR);
 		}
 		$tabel = array();
 		while ($this->next())
@@ -530,7 +589,8 @@ class db_result
 	function getkeytable($key)
 	{
 		if($this->_nextused) {
-			error('Gettable does not work if you\'ve already next()ed over the result!');
+			user_error('Gettable does not work if you\'ve already next()ed over the result!',
+				E_USER_ERROR);
 		}
 		$tabel = array();
 		while ($this->next()) {
@@ -566,4 +626,3 @@ class db_result
 	}
 }
 
-// vim: ts=4 sw=4 smartindent tw=78
