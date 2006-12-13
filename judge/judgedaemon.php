@@ -95,10 +95,11 @@ while ( TRUE ) {
 
 	// update exactly one submission with our random string
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-		SET judgehost = %s, judgemark = %s WHERE judgehost IS NULL
-		AND cid = %i AND langid IN (%As) AND probid IN (%As)
-		AND submittime <= %s LIMIT 1',
-		$myhost, $mark, $cid, $judgable_lang, $judgable_prob, $contdata['endtime']);
+	                  SET judgehost = %s, judgemark = %s
+	                  WHERE judgehost IS NULL AND cid = %i AND langid IN (%As)
+	                  AND probid IN (%As) AND submittime <= %s LIMIT 1',
+	                 $myhost, $mark, $cid, $judgable_lang, $judgable_prob,
+	                 $contdata['endtime']);
 
 	// nothing updated -> no open submissions
 	if ( $numupd == 0 ) {
@@ -114,11 +115,11 @@ while ( TRUE ) {
 
 	// get max.runtime, path to submission and other params
 	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS runtime,
-		s.submitid, s.sourcefile, s.langid, s.team, s.probid,
-		p.testdata, p.special_run, p.special_compare
-		FROM submission s, problem p, language l
-		WHERE s.probid = p.probid AND s.langid = l.langid AND
-		judgemark = %s AND judgehost = %s', $mark, $myhost);
+	               s.submitid, s.sourcefile, s.langid, s.team, s.probid,
+	               p.testdata, p.special_run, p.special_compare
+	               FROM submission s, problem p, language l
+	               WHERE s.probid = p.probid AND s.langid = l.langid AND
+	               judgemark = %s AND judgehost = %s', $mark, $myhost);
 
 	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
 	       "($row[team]/$row[probid]/$row[langid])...");

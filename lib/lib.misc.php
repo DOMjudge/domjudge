@@ -72,18 +72,19 @@ function calcScoreRow($cid, $team, $prob) {
 	global $DB;
 
 	$result = $DB->q('SELECT result, verified, 
-		(UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 AS timediff,
-		(c.lastscoreupdate IS NOT NULL &&
-		 submittime >= c.lastscoreupdate) AS afterfreeze
-		FROM judging
-		LEFT JOIN submission s USING(submitid)
-		LEFT OUTER JOIN contest c ON(c.cid=s.cid)
-		WHERE team = %s AND probid = %s AND valid = 1 AND result IS NOT NULL
-		AND s.cid = %i ORDER BY submittime', $team, $prob, $cid);
+	                  (UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 AS timediff,
+	                  (c.lastscoreupdate IS NOT NULL && submittime >= c.lastscoreupdate) AS afterfreeze
+	                  FROM judging
+	                  LEFT JOIN submission s USING(submitid)
+	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
+	                  WHERE team = %s AND probid = %s AND valid = 1 AND
+	                  result IS NOT NULL AND s.cid = %i ORDER BY submittime',
+	                 $team, $prob, $cid);
 
 	$balloon = $DB->q('MAYBEVALUE SELECT balloon FROM scoreboard_public
                        WHERE cid = %i AND team = %s AND probid = %s',
-					  $cid, $team, $prob);
+	                  $cid, $team, $prob);
+	
 	if ( ! $balloon ) $balloon = 0;
 	
 	// reset vars
@@ -123,15 +124,15 @@ function calcScoreRow($cid, $team, $prob) {
 
 	// insert or update the values in the jury scores table
 	$DB->q('REPLACE INTO scoreboard_jury
-		(cid, team, probid, submissions, totaltime, penalty, is_correct)
-		VALUES (%i,%s,%s,%i,%i,%i,%i)',
-		$cid, $team, $prob, $submitted_j, $time_j, $penalty_j, $correct_j);
+	        (cid, team, probid, submissions, totaltime, penalty, is_correct)
+	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
+	       $cid, $team, $prob, $submitted_j, $time_j, $penalty_j, $correct_j);
 	
 	// insert or update the values in the public/team scores table
 	$DB->q('REPLACE INTO scoreboard_public
-		(cid, team, probid, submissions, totaltime, penalty, is_correct, balloon)
-		VALUES (%i,%s,%s,%i,%i,%i,%i,%i)',
-		$cid, $team, $prob, $submitted_p, $time_p, $penalty_p, $correct_p, $balloon);
+	        (cid, team, probid, submissions, totaltime, penalty, is_correct, balloon)
+	        VALUES (%i,%s,%s,%i,%i,%i,%i,%i)',
+	       $cid, $team, $prob, $submitted_p, $time_p, $penalty_p, $correct_p, $balloon);
 
 	return;
 }
