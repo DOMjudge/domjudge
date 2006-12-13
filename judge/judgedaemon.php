@@ -148,7 +148,9 @@ while ( TRUE ) {
 	}
 	$result = $EXITCODES[$retval];
 
-	// NOTE: START TRANSACTION
+	// Start a transaction. This will provide extra safety if the table type
+	// supports it.
+	$DB->q('START TRANSACTION');
 	// pop the result back into the judging table
 	$DB->q('UPDATE judging SET endtime = NOW(), result = %s,
 	        output_compile = %s, output_run = %s, output_diff = %s, output_error = %s
@@ -163,10 +165,7 @@ while ( TRUE ) {
 	// recalculate the scoreboard cell (team,problem) after this judging
 	calcScoreRow($cid, $row['team'], $row['probid']);
 
-	// END TRANSACTION
-	// this should really be a transaction. what if something crashes
-	// between the update and calcScoreRow? Then the scoreboard is in
-	// an inconsistent state compared to the submissions.
+	$DB->q('COMMIT');
 	
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");

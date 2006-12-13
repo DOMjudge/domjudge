@@ -27,6 +27,8 @@ Version 1.4.0 - SVN
  - Fix some language typos.
  - Improve webinterface layout (CSS modifications)
  - Tweak the webinterface even more.
+ - Add MySQL transactions; will provide extra safety when the table type
+   supports it (otherwise does nothing).
 
 Version 1.3.0 - 6 October 2006
 ------------------------------
