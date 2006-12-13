@@ -4,7 +4,7 @@
  */
 
 require('init.php');
-$refresh = '30;url=' . getBaseURI() . 'team/submissions.php';
+$refresh = '30;url=' . getBaseURI() . 'team/index.php';
 $title = 'Submissions';
 require('../header.php');
 
