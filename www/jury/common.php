@@ -54,6 +54,10 @@ function putJudgings($key, $value) {
 function rejudge($key, $value) {
 	global $DB;
 
+	if ( empty($key) || empty($value) ) {
+		error("no key or value passed for selection in rejudging");
+	}
+	
 	$cid = getCurContest();
 
 	// Using MySQL >= 4.0.4:
