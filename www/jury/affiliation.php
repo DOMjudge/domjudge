@@ -57,6 +57,7 @@ if ( $teams->count() == 0 ) {
 	echo "<p><em>no teams</em></p>\n\n";
 } else {
 	echo "<table>\n";
+	echo "<tr><th>login</th><th>teamname</th></tr>\n";
 	while ($team = $teams->next()) {
 		echo "<tr><td class=\"teamid\"><a href=\"team.php?id=" .
 			urlencode($team['login']) . "\">" .
