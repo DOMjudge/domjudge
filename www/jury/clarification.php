@@ -29,6 +29,13 @@ if ( isset($_REQUEST['id']) ) {
 
 // insert a new response (if posted)
 if ( isset($_REQUEST['submit'])	&& !empty($_REQUEST['bodytext']) ) {
+
+	// If database supports it, wrap this in a transaction so we
+	// either send the clarification AND mark it unread for everyone,
+	// or we don't. If no transaction support, we just have to hope
+	// this goes well.
+	$DB->q('START TRANSACTION');
+	
 	if ( $isgeneral ) {
 		$newid = $DB->q('RETURNID INSERT INTO clarification
 		                 (cid, submittime, recipient, body)
@@ -59,6 +66,8 @@ if ( isset($_REQUEST['submit'])	&& !empty($_REQUEST['bodytext']) ) {
 		$DB->q('INSERT INTO team_unread (mesgid, type, team)
 		        VALUES (%i, "clarification", %s)', $newid, $_REQUEST['sendto']);
 	}
+
+	$DB->q('COMMIT');
 
 	// redirect back to the original location
 	if ( $isgeneral ) {
