@@ -33,11 +33,11 @@ fi
 # Location of files:
 HTPASSWD="$SYSTEM_ROOT/.htpasswd"
 HTACCESS="$SYSTEM_ROOT/www/jury/.htaccess"
-SQLPRIVS="$SYSTEM_ROOT/sql/mysql_privileges.sql"
+SQLPASSWD="$SYSTEM_ROOT/sql/mysql_create.sql"
 PHPPASSWD="$SYSTEM_ROOT/etc/passwords.php"
 PASSWD_FILES="\
 $PHPPASSWD
-$SQLPRIVS"
+$SQLPASSWD"
 
 # Default passwords:
 DEF_PASSWD_JURY="DOMJUDGE_JURY_PASSWD"
@@ -123,10 +123,10 @@ string_replace "s!\('domjudge_jury'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1${1}!;\
                 s!\('domjudge_team'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1${2}!;\
                 s!\('domjudge_public'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1${3}!" "$PHPPASSWD"
 
-# Update password info in MySQL privileges file:
+# Update password info in MySQL file:
 string_replace "s!\('domjudge_jury'.*PASSWORD('\)[^']*!\1${1}!;\
                 s!\('domjudge_team'.*PASSWORD('\)[^']*!\1${2}!;\
-                s!\('domjudge_public'.*PASSWORD('\)[^']*!\1${3}!" "$SQLPRIVS"
+                s!\('domjudge_public'.*PASSWORD('\)[^']*!\1${3}!" "$SQLPASSWD"
 }
 
 function do_install()
