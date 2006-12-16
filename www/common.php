@@ -27,11 +27,13 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	 * of key/value pairs, to which the complete list of submissions
 	 * is restricted.
 	 */
-	
+
 	$keyvalmatch = '';
-	foreach ( $restrictions as $restriction ) {
-		$keyvalmatch .= ' s.' . $restriction['key'] . ' = "' .
-			mysql_escape_string($restriction['value']) . '" AND';
+	if ( !empty($restrictions) ) {
+		foreach ( $restrictions as $restriction ) {
+			$keyvalmatch .= ' s.' . $restriction['key'] . ' = "' .
+			                mysql_escape_string($restriction['value']) . '" AND';
+		}
 	}
 
 	$contdata = getCurContest(TRUE);
