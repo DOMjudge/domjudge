@@ -29,6 +29,7 @@ Version 1.4.0 - SVN
  - Tweak the webinterface even more.
  - Add MySQL transactions; will provide extra safety when the table type
    supports it (otherwise does nothing).
+ - Add IPv6 support to submit daemon/client. (Closes: #1576565).
 
 Version 1.3.0 - 6 October 2006
 ------------------------------

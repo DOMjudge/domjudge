@@ -30,10 +30,9 @@
 #include <syslog.h>
 #include <string.h>
 #include <sys/wait.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <netdb.h>
+#include <poll.h>
 #include <signal.h>
 #include <getopt.h>
 #include <pwd.h>
@@ -51,7 +50,7 @@ using namespace std;
 /* Logging and error functions */
 #include "../lib/lib.error.h"
 
-/* Include some functions, which are not always available */
+/* Include some functions which are not always available */
 #include "../lib/mkstemps.h"
 #include "../lib/basename.h"
 
@@ -63,19 +62,19 @@ using namespace std;
 #define PROGRAM "submitdaemon"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
 
-#define BACKLOG 32      /* how many pending connections queue will hold */
-#define LINELEN 256     /* maximum length read from submit_db stdout lines */
-
-/* Accepted characters in submission filenames (except for alphanumeric) */
-const char filename_chars[5] = ".-_ ";
-
-extern int errno;
-
 /* Variables defining logmessages verbosity to stderr/logfile */
 #define LOGFILE LOGDIR"/submit.log"
 
 extern int verbose;
 extern int loglevel;
+
+const int backlog = 32;  /* how many pending connections queue will hold */
+const int linelen = 256; /* maximum length read from submit_db stdout lines */
+
+/* Accepted characters in submission filenames (except for alphanumeric) */
+const char filename_chars[5] = ".-_ ";
+
+extern int errno;
 
 char *progname;
 
@@ -83,19 +82,28 @@ int port = SUBMITPORT;
 
 int show_help;
 int show_version;
+int inet4_only;
+int inet6_only;
 
 struct option const long_opts[] = {
-	{"port",    required_argument, NULL,         'P'},
-	{"verbose", optional_argument, NULL,         'v'},
-	{"help",    no_argument,       &show_help,    1 },
-	{"version", no_argument,       &show_version, 1 },
-	{ NULL,     0,                 NULL,          0 }
+	{"inet4-only", no_argument,       NULL,         '4'},
+	{"inet6-only", no_argument,       NULL,         '6'},
+	{"port",       required_argument, NULL,         'P'},
+	{"verbose",    optional_argument, NULL,         'v'},
+	{"help",       no_argument,       &show_help,    1 },
+	{"version",    no_argument,       &show_version, 1 },
+	{ NULL,        0,                 NULL,          0 }
 };
 
-int server_fd, client_fd;       /* server/client socket filedescriptors */
-struct sockaddr_in server_addr; /* server address information */
-struct sockaddr_in client_addr; /* client address information */
-socklen_t sin_size;
+/* server listen-socket filedescriptors (for each address) */
+const int max_server_nfds = 2;
+int server_nfds;
+struct pollfd server_fds[max_server_nfds];
+
+int  client_fd; /* client connection specific socket filedescriptor */
+char client_addr[NI_MAXHOST]; /* string of client IP address */
+struct sockaddr_storage client_sock; /* client socket information */
+socklen_t socklen = sizeof(sockaddr_storage);
 
 void version();
 void usage();
@@ -108,9 +116,9 @@ int main(int argc, char **argv)
 	struct sigaction sigchildaction;
 	int child_pid;
 	int exit_status;
-	int c;
+	int c, i, err;
 	char *ptr;
-	
+		
 	progname = argv[0];
 
 	/* Set logging levels & open logfile */
@@ -121,10 +129,17 @@ int main(int argc, char **argv)
 
 	/* Parse command-line options */
 	show_help = show_version = 0;
+	inet4_only = inet6_only = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"P:v:q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"46P:v:",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
-		case 0:   /* long-only option */
+		case 0:   /* this is a long-only option: nothing to do */
+			break;
+		case '4': /* inet4-only option */
+			inet4_only = 1;
+			break;
+		case '6': /* inet6-only option */
+			inet6_only = 1;
 			break;
 		case 'P': /* port option */
 			port = strtol(optarg,&ptr,10);
@@ -146,13 +161,17 @@ int main(int argc, char **argv)
 		case '?':
 			error(0,"unknown option or missing argument `%c'",optopt);
 			break;
-		default:
+		default: /* should not happen */
 			error(0,"getopt returned character code `%c' ??",c);
 		}
 	}
 
 	if ( show_help ) usage();
 	if ( show_version ) version();
+	
+	if ( inet4_only && inet6_only ) {
+		error(0,"both options `inet4-only' and `inet6-only' specified");
+	}
 	
 	if ( argc>optind ) error(0,"non-option arguments given");
 
@@ -170,43 +189,56 @@ int main(int argc, char **argv)
 	}
 	logmsg(LOG_DEBUG,"child signal handler installed");
 	
-    /* main accept() loop */
+    /* main accept() loop of incoming connections */
     while ( true ) {
-        sin_size = sizeof(struct sockaddr_in);
-		
-		if ( (client_fd = accept(server_fd, (struct sockaddr *) &client_addr,
-		                         &sin_size)) == -1 ) {
-			warning(errno,"accepting incoming connection");
-			continue;
+
+		if ( poll(server_fds,server_nfds,-1)<0 ) {
+			if ( errno==EINTR ) continue;
+			error(errno,"polling socket(s)");
 		}
-        
-		logmsg(LOG_INFO,"incoming connection, spawning child");
-        
-		switch ( child_pid = fork() ) {
-		case -1: /* error */
-			error(errno,"cannot fork");
+
+		for(i=0; i<server_nfds; i++) {
+			if ( !(server_fds[i].revents & POLLIN) ) continue;
 		
-		case  0: /* child thread */
-			close(server_fd); /* child doesn't need the listener */
-			signal(SIGCHLD,SIG_DFL); /* child should not listen to signals */
-			
-			logmsg(LOG_NOTICE,"connection from %s",inet_ntoa(client_addr.sin_addr));
-
-			exit_status = handle_client();
-
-			logmsg(LOG_INFO,"child exiting");
-			switch ( exit_status ) {
-			case SUCCESS: exit(SUCCESS_EXITCODE);
-			case WARNING: exit(WARNING_EXITCODE);
-			case FAILURE: exit(FAILURE_EXITCODE);
+			client_fd = accept(server_fds[i].fd,
+			                   (struct sockaddr *) &client_sock,&socklen);
+				
+			if ( client_fd<0 ) {
+				warning(errno,"accepting incoming connection");
+				continue;
 			}
-			exit(FAILURE_EXITCODE); /* Shouldn't happen */
+        
+			logmsg(LOG_INFO,"incoming connection, spawning child");
+			
+			switch ( child_pid = fork() ) {
+			case -1: /* error */
+				error(errno,"cannot fork");
+				
+			case  0: /* child thread */
+				signal(SIGCHLD,SIG_DFL); /* child should not listen to signals */
+				
+				err = getnameinfo((struct sockaddr *) &client_sock,socklen,
+				                  client_addr,sizeof(client_addr),NULL,0,NI_NUMERICHOST);
+					
+				if ( err!=0 ) error(0,"getnameinfo: %s",gai_strerror(err));
+				
+				logmsg(LOG_NOTICE,"connection from %s",client_addr);
+				
+				exit_status = handle_client();
+				
+				logmsg(LOG_INFO,"child exiting");
+				switch ( exit_status ) {
+				case SUCCESS: exit(SUCCESS_EXITCODE);
+				case WARNING: exit(WARNING_EXITCODE);
+				case FAILURE: exit(FAILURE_EXITCODE);
+				}
+				exit(FAILURE_EXITCODE); /* Shouldn't happen */
 
-		default: /* parent thread */
-			close(client_fd); /* parent doesn't need the client_fd */
-			logmsg(LOG_DEBUG,"spawned child, pid=%d", child_pid);
+			default: /* parent thread */
+				close(client_fd); /* parent doesn't need the client_fd */
+				logmsg(LOG_DEBUG,"spawned child, pid=%d", child_pid);
+			}
 		}
-
 	}
 
 	return FAILURE; /* This should never be reached */
@@ -228,6 +260,8 @@ void usage()
 "Usage: %s [OPTION]...\n"
 "Start the submitserver.\n"
 "\n"
+"  -4, --inet4-only      only bind to IPv4 addresses\n"
+"  -6, --inet6-only      only bind to IPv6 addresses\n"
 "  -P, --port=PORT       set TCP port to listen on to PORT (default: %i)\n"
 "  -v, --verbose=LEVEL   set verbosity to LEVEL (syslog levels)\n"
 "      --help            display this help and exit\n"
@@ -238,32 +272,79 @@ void usage()
 }
 
 /***
- *  Open a listening socket on the localhost.
+ *  Open listening socket(s) on this host.
  */
 void create_server()
 {
-	/* setsockopt needs a pointer to the value of the option to be set */
-	int enable = 1;
+	struct addrinfo hints;
+	struct addrinfo *res, *r;
+	char *port_str;
+	int err, fd;
 	
-	if ( (server_fd = socket(PF_INET,SOCK_STREAM,0)) == -1 ) {
-		error(errno,"cannot open server socket");
+	/* Set preferred network connection options: use both IPv4 and
+	   IPv6 by default */ 
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_flags    = AI_PASSIVE | AI_ADDRCONFIG;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	if ( inet4_only ) hints.ai_family = AF_INET;
+	if ( inet6_only ) hints.ai_family = AF_INET6;
+
+	/* Get all addresses (IPv4/6) associated with us */
+	port_str = allocstr("%d",port);
+	if ( (err = getaddrinfo(NULL,port_str,&hints,&res)) ) {
+		error(0,"getaddrinfo: %s",gai_strerror(err));
 	}
+	free(port_str);
 
-	if ( setsockopt(server_fd,SOL_SOCKET,SO_REUSEADDR,&enable,sizeof(int))!=0 ) {
-		error(errno,"cannot set socket options");
+	/* Try to open a socket for each local address */
+	server_nfds = 0;
+	for(r=res; r!=NULL && server_nfds<max_server_nfds; r=r->ai_next) {
+
+		char server_addr[NI_MAXHOST];
+		err = getnameinfo(r->ai_addr,r->ai_addrlen,server_addr,
+						  sizeof(server_addr),NULL,0,NI_NUMERICHOST);
+		if ( err!=0 ) error(0,"getnameinfo: %s",gai_strerror(err));
+		
+		logmsg(LOG_DEBUG,"trying to open listen socket on %s",server_addr);
+		
+		if ( (fd=socket(r->ai_family,r->ai_socktype,r->ai_protocol))<0 ) {
+			error(errno,"opening socket");
+		}
+			
+		/* setsockopt needs a pointer to the value of the option to be set */
+		int optval = 1;
+		if ( setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&optval,sizeof(int))!=0 ) {
+			error(errno,"cannot set socket options");
+		}
+
+		if ( bind(fd,r->ai_addr,r->ai_addrlen)!=0 ) {
+			/* Ignore address in use error: Linux does not allow
+			   us to bind to an IPv4 and IPv6 on the same port. */
+			if ( errno==EADDRINUSE ) {
+				logmsg(LOG_DEBUG,"not listening on %s: address in use",
+				       server_addr);
+				close(fd);
+				continue;
+			} else {
+				error(errno,"binding server socket");
+			}
+		}
+
+		if ( listen(fd,backlog)!=0 ) {
+			error(errno,"starting listening");
+		}
+		
+		/* Store successfully opened listen socket in server_fds */
+		server_fds[server_nfds].fd = fd;
+		server_fds[server_nfds].events = POLLIN;
+		server_nfds++;
+		logmsg(LOG_INFO,"listening on %s",server_addr);
 	}
-
-	server_addr.sin_family      = AF_INET;      /* address family                */
-	server_addr.sin_port        = htons(port);  /* port in network shortorder    */
-	server_addr.sin_addr.s_addr = INADDR_ANY;   /* automatically fill with my IP */
-
-	if ( bind(server_fd,(struct sockaddr *) &server_addr,
-	          sizeof(struct sockaddr))!=0 ) {
-		error(errno,"binding server socket");
-	}
-
-	if ( listen(server_fd,BACKLOG)!=0 ) {
-		error(errno,"starting listening");
+	
+	freeaddrinfo(res);
+	if ( server_nfds==0 ) {
+		error(0,"could not create server socket(s)");
 	}
 }
 
@@ -281,7 +362,7 @@ int handle_client()
 	int status;
 	pid_t cpid;
 	FILE *rpipe;
-	char line[LINELEN];
+	char line[linelen];
 	int i;
 	
 	sendit(client_fd,"+server ready");
@@ -380,7 +461,7 @@ int handle_client()
 	/* Check with database for correct parameters
 	   and then add a database entry for this file. */
 	args[0] = (char *) team.c_str();
-	args[1] = inet_ntoa(client_addr.sin_addr);
+	args[1] = client_addr;
 	args[2] = (char *) problem.c_str();
 	args[3] = (char *) language.c_str();
 	args[4] = gnu_basename(tempfile);
@@ -396,7 +477,7 @@ int handle_client()
 	}
 	
 	/* Read stdout/stderr and try to find errors */
-	while ( fgets(line,LINELEN,rpipe)!=NULL ) {
+	while ( fgets(line,linelen,rpipe)!=NULL ) {
 
 		/* Remove newlines from end of line */
 		i = strlen(line)-1;

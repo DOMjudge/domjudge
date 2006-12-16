@@ -34,7 +34,6 @@
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <netdb.h>
 #include <getopt.h>
 #include <termios.h>
@@ -64,8 +63,8 @@ using namespace std;
 #define PROGRAM "submit"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
 
-#define TIMEOUT 60  /* seconds before send/receive timeouts with an error */
-#define LINELEN 256 /* maximum length read from curl stdout lines */
+const int timeout_secs = 60; /* seconds before send/receive timeouts with an error */
+const int linelen = 256; /* maximum length read from curl stdout lines */
 
 extern int errno;
 
@@ -108,12 +107,10 @@ string remove_html_tags(string s);
 
 int nwarnings;
 
-int socket_fd;
+int socket_fd; /* filedescriptor of the connection to server socket */
 
-/* server name and adress information */
-struct sockaddr_in server_sockaddr;
-struct in_addr     server_inetaddr;
-struct hostent    *serverinfo;
+struct addrinfo *server_ais, *server_ai; /* server adress information */
+char server_addr[NI_MAXHOST];            /* server IP address string  */
 
 /* Submission information */
 string problem, language, extension, server, team;
@@ -137,6 +134,9 @@ int main(int argc, char **argv)
 	char *lang, *ext;
 	char *lang_ptr, *ext_ptr;
 	struct timeval timeout;
+	struct addrinfo hints;
+	char *port_str;
+	int err;
 
 	progname = argv[0];
 	stdlog = NULL;
@@ -266,9 +266,9 @@ int main(int argc, char **argv)
 
 	nwarnings = 0;
 
-	if ( ! (fstats.st_mode & S_IFREG) )    warnuser("file is not a regular file");
-	if ( ! (fstats.st_mode & S_IRUSR) )    warnuser("file is not readable");
-	if ( fstats.st_size==0 )               warnuser("file is empty");
+	if ( ! (fstats.st_mode & S_IFREG) ) warnuser("file is not a regular file");
+	if ( ! (fstats.st_mode & S_IRUSR) ) warnuser("file is not readable");
+	if ( fstats.st_size==0 )            warnuser("file is empty");
 	if ( fstats.st_size>=SOURCESIZE*1024 ) {
 		ptr = allocstr("file is larger than %d kB",SOURCESIZE);
 		warnuser(ptr);
@@ -369,12 +369,44 @@ int main(int argc, char **argv)
 	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",
 	       server.c_str(),port);
 	
-	if ( (socket_fd = socket(PF_INET,SOCK_STREAM,0)) == -1 ) {
-		error(errno,"cannot open socket");
+	/* Set preferred network connection options: use both IPv4 and
+ 	   IPv6 by default */
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_flags    = AI_ADDRCONFIG | AI_CANONNAME;
+	hints.ai_socktype = SOCK_STREAM;
+ 	hints.ai_protocol = IPPROTO_TCP;
+
+	port_str = allocstr("%d",port);
+	if ( (err = getaddrinfo(server.c_str(),port_str,&hints,&server_ais)) ) {
+		error(0,"getaddrinfo: %s",gai_strerror(err));
 	}
+	free(port_str);
+
+	/* Try to connect to addresses for server in given order */
+	socket_fd = -1;
+	for(server_ai=server_ais; server_ai!=NULL; server_ai=server_ai->ai_next) {
+		
+		err = getnameinfo(server_ai->ai_addr,server_ai->ai_addrlen,server_addr,
+		                  sizeof(server_addr),NULL,0,NI_NUMERICHOST);
+		if ( err!=0 ) error(0,"getnameinfo: %s",gai_strerror(err));
+
+		logmsg(LOG_DEBUG,"trying to connect to address `%s'",server_addr);
+	
+		socket_fd = socket(server_ai->ai_family,server_ai->ai_socktype,
+		                   server_ai->ai_protocol);
+		if ( socket_fd>=0 ) {
+			if ( connect(socket_fd,server_ai->ai_addr,server_ai->ai_addrlen)==0 ) {
+				break;
+			} else {
+				close(socket_fd);
+				socket_fd = -1;
+			}
+		}
+	}
+	if ( socket_fd<0 ) error(0,"cannot connect to the server");
 
 	/* Set socket timeout option on read/write */
-	timeout.tv_sec = TIMEOUT;
+	timeout.tv_sec  = timeout_secs;
 	timeout.tv_usec = 0;
 	
 	if ( setsockopt(socket_fd,SOL_SOCKET,SO_SNDTIMEO,&timeout,sizeof(timeout)) < 0) {
@@ -385,25 +417,7 @@ int main(int argc, char **argv)
 		error(errno,"setting socket option");
 	}
 
-	if ( (serverinfo = gethostbyaddr(server.c_str(),server.length(),AF_INET))==NULL ) {
-		if ( (serverinfo = gethostbyname(server.c_str()))==NULL ) {
-			error(0,"cannot get address of server");
-		}
-	}
-
-	server_inetaddr.s_addr = *((unsigned long int *) serverinfo->h_addr_list[0]);
-	
-	server_sockaddr.sin_family = AF_INET;
-	server_sockaddr.sin_port   = htons(port);
-	server_sockaddr.sin_addr   = server_inetaddr;
-	
-	/* Don't bind socket_fd, so a local port automatically is assigned */
-	if ( connect(socket_fd,(struct sockaddr *) &server_sockaddr,
-	             sizeof(struct sockaddr))!=0 ) {
-		error(errno,"cannot connect to the server");
-	}
-
-	logmsg(LOG_INFO,"connected, server-address: %s",inet_ntoa(server_inetaddr));
+	logmsg(LOG_INFO,"connected, server address is `%s'",server_addr);
 
 	receive(socket_fd);
 
@@ -425,6 +439,8 @@ int main(int argc, char **argv)
 		error(0,"connection closed unexpectedly");
 	}
 
+	freeaddrinfo(server_ais);
+	
 	logmsg(LOG_NOTICE,"submission successful");
 
     return 0;
@@ -561,7 +577,7 @@ int websubmit()
 {
 	string cmdline, s;
 	char *cmd, *args[MAXARGS], *tmp;
-	char line[LINELEN];
+	char line[linelen];
 	int i, nargs, cpid, status;
 	int redir_fd[3];
 	FILE *rpipe;
@@ -597,7 +613,7 @@ int websubmit()
 	}
 
 	/* Read stdout/stderr and find upload status */
-	while ( fgets(line,LINELEN,rpipe)!=NULL ) {
+	while ( fgets(line,linelen,rpipe)!=NULL ) {
 
 		/* Remove newlines from end of line */
 		i = strlen(line)-1;
