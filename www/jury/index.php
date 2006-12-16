@@ -10,8 +10,9 @@ require('../header.php');
 echo "<h1>DOMjudge Jury interface</h1>\n\n";
 
 if ( is_readable('../images/DOMjudgelogo.png') ) {
-	echo "<p><img src=\"../images/DOMjudgelogo.png\" id=\"djlogo\"" .
-		" alt=\"DOMjudge logo\" /></p>\n\n";
+	echo "<p><a href=\"http://domjudge.sourceforge.net/\">" .
+		"<img src=\"../images/DOMjudgelogo.png\" id=\"djlogo\" " .
+		"alt=\"DOMjudge logo\" /></a></p>\n\n";
 }
 ?>
 
