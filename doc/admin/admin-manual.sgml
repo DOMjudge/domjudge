@@ -487,6 +487,20 @@ for the scoreboard_public and scoreboard_jury tables. They will be
 lost in case of a full crash, but can be recalculated from the jury
 interface.
 
+<sect1>Setting up replication or backups
+<p>
+The MySQL server is the central place of information storage for
+DOMjudge. Think well about what to do if the MySQL
+host fails or loses your data.
+
+A very robust solution is to set up a replicating MySQL server on
+another host. This will be a hot copy of all data up to the second,
+and can take over immediately in the event of failure. The MySQL manual
+has more information about setting this up.
+
+Alternatively, you can make regular backups of your data to another host,
+for example with <tt>mysqldump</tt>, or use a RAID based system.
+
 <sect>Webserver Configuration
 <p>
 
