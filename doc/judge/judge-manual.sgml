@@ -1,0 +1,158 @@
+<!doctype linuxdoc system>
+<!--
+ $Id: admin-manual.sgml 1226 2006-12-16 02:31:29Z eldering $
+
+ DOMjudge Judger's Manual
+ This manual is part of the DOMjudge Programming Contest Jury System.
+ Copyright (c) 2004-2006 DOMjudge team
+
+ DOMjudge is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ DOMjudge is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with DOMjudge; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ 02110-1301, USA
+-->
+<book>
+
+<title>DOMjudge Judger's Manual
+<author>by the DOMjudge team
+<date>$Date: 2006-12-16 03:31:29 +0100 (Sat, 16 Dec 2006) $
+
+<abstract>
+This document provides information about DOMjudge for a judger
+operating the system during the contest. It provides information
+about viewing and checking submissions and working with clarification
+requests.
+
+A separate manual is available for teams and administrators.
+
+Document version: $Rev: 1226 $
+</abstract>
+
+<toc>
+
+<chapt>DOMjudge Overview
+<p>
+
+DOMjudge is a system for running a programming contest, like the ACM
+regional and world championship programming contests.
+
+This means that teams are on-site and have a fixed time period (mostly
+5 hours) and one computer to solve a number of problems (mostly 6-10).
+Problems are solved by writing a program in one of the allowed
+languages, that reads input according to the problem input
+specification and writes the correct, corresponding output.
+
+The judging is done by submitting the source code of the solution to
+the jury. There the jury system automatically compiles and runs the
+program and compares the program output with the expected output.
+
+This software can be used to handle the submission and judging during
+such contests. It also handles feedback to the teams and communication
+on problems (clarification requests). It has webinterfaces for the
+jury, the teams (their submissions and clarification requests) and the
+public (scoreboard).
+
+<sect>Features
+<p>
+
+A global overview of the features that DOMjudge provides:
+
+<itemize>
+<item>Automatic judging with distributed (scalable) judge hosts
+<item>Webinterface for portability and simplicity
+<item>Modular system for plugging in languages/compilers
+<item>Detailed jury information (submissions, judgings) and options
+      (rejudge, clarifications)
+<item>Designed with security in mind
+<item>Has been used in live contests
+<item>Open Source, Free Software
+</itemize>
+
+
+<sect>Copyright and licencing
+<p>
+
+DOMjudge was developed by Thijs Kinkhorst, Peter van de Werken and
+Jaap Eldering at Study Association <htmlurl name="A-Eskwadraat"
+url="http://www.a-eskwadraat.nl/">, <htmlurl name="Utrecht University"
+url="http://www.uu.nl/">, The Netherlands.
+
+It is Copyright (c) 2004 - 2006 by The DOMjudge Developers.
+
+DOMjudge, including its documentation, is free software; you can redistribute
+it and/or modify it under the terms of the <url name="GNU General Public License"
+url="http://www.gnu.org/copyleft/gpl.html"> as published by the Free Software
+Foundation; either version 2, or (at your option) any later version. See the
+file COPYING.
+
+Additionally, parts of this system are based on other programs, which
+are covered by other copyrights. This will be noted in the files
+themselves. Files (partly) covered by other copyrights are:
+<itemize>
+<item> bin/runguard.c is covered by the IBM public license.
+<item> lib/mkstemps.h and lib/basename.h are covered by the GNU Lesser
+Public License. See COPYING.lgpl.
+</itemize>  
+
+This software is partly based on code by other people. These
+acknowledgements are made in the respective files, but we would like
+to name them here too:
+
+<itemize>
+<item> runguard.c is based on timeout from The Coroner's Toolkit
+by Wietse Venema.
+<item> beep.c is made by Johnathan Nightingale.
+<item> bash is included from the Debian `bash-static' (i386) package
+(copyright Free Software Foundation).
+<item> tempfile.c is included from the Debian `debianutils' package.
+<item> mkstemps.h and basename.h are modified versions from the
+GNU libiberty library (copyright Free Software Foundation).
+<item> lib.database.php by Jeroen van Wolffelaar et al.
+<item> submit.c and submitdaemon.c are based on submit.pl and
+submitdaemon.pl by Eelco Dolstra.
+<item> The DOMjudge logo is based on the NKP 2004 logo made by
+Erik van Sebille.
+</itemize>
+
+<sect>Contact
+<p>
+The DOMjudge homepage can be found at:
+<htmlurl name="http://domjudge.sourceforge.net/"
+url="http://domjudge.sourceforge.net/">
+
+The authors can be reached at the following address:
+<htmlurl name="domjudge@a-eskwadraat.nl"
+url="mailto:domjudge@a-eskwadraat.nl">
+
+<chapt>General
+<p>
+
+
+
+<chapt>Before the contest
+<p>
+
+
+<chapt>During the contest
+<p>
+
+
+
+
+<chapt>After the contest
+<p>
+
+
+
+
+</book>
