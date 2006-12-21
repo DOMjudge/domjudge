@@ -32,6 +32,16 @@ TEMPFILE = $(TEMPFILEDIR)/tempfile
 $(TEMPFILE):
 	$(MAKE) -C $(TEMPFILEDIR) tempfile
 
+# Helper target to read DBNAME from config:
+finddbname: fixconfig
+	$(eval DBNAME=$(shell source $(TOPDIR)/etc/config.sh ; echo $$DBNAME))
+
+# Extra phony target to generate up-to-date config for finddbname.
+# Needed because running this in finddbname seems broken: old file
+# contents is used in the next command then.
+fixconfig:
+	$(MAKE) -C $(TOPDIR)/etc config.sh
+
 clean: clean-backupfiles
 
 distclean: clean
@@ -39,6 +49,6 @@ distclean: clean
 clean-backupfiles:
 	rm -rf *~
 
-.PHONY: all build config install check clean clean-backupfiles distclean
+.PHONY: all build config install check clean clean-backupfiles distclean finddbname fixconfig
 
 endif # GLOBALINCLUDED

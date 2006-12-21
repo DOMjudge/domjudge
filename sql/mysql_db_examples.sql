@@ -1,7 +1,8 @@
 -- These are some example/default entries for the DOMjudge database.
 --
 -- You can pipe this file into the 'mysql' command to insert this
--- data. Database should be set externally (e.g. to 'domjudge').
+-- data, but preferably use 'make install'. Database should be set
+-- externally (e.g. to 'domjudge').
 --
 -- $Id$
 

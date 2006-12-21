@@ -1,7 +1,7 @@
 -- Create script for the DOMjudge MySQL tables.
 --
--- You can pipe this file into the 'mysql' command to create domjudge
--- database and users.
+-- This script is meant to be run from 'make install' to create the
+-- DOMjudge database and users.
 --
 -- THIS FILE SHOULD ALWAYS BE NON-READABLE!
 -- (because of database-login usernames/passwords)

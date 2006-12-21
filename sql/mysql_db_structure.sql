@@ -1,8 +1,8 @@
 -- These are the database tables needed for DOMjudge
 --
 -- You can pipe this file into the 'mysql' command to create the
--- database tables. Database should be set externally (e.g. to
--- 'domjudge').
+-- database tables, but preferably use 'make install'. Database should
+-- be set externally (e.g. to 'domjudge').
 --
 -- $Id$
 
