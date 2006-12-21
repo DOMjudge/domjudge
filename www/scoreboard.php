@@ -114,6 +114,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	foreach ($teams as $login => $team ) {
 		$SCORES[$login]['num_correct'] = 0;
 		$SCORES[$login]['total_time']  = 0;
+		$SCORES[$login]['last_solved'] = 0;
 		$SCORES[$login]['teamname']    = $team['name'];
 		$SCORES[$login]['categoryid']  = $team['categoryid'];
 		$SCORES[$login]['sortorder']   = $team['sortorder'];
@@ -135,9 +136,15 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			'penalty' => $srow['penalty'] );
 
 		// calculate totals for this team
-		if ( $srow['is_correct'] ) $SCORES[$srow['team']]['num_correct']++;
-		$SCORES[$srow['team']]['total_time'] +=
-			$srow['totaltime'] + $srow['penalty'];
+		if ( $srow['is_correct'] ) {
+			$SCORES[$srow['team']]['num_correct']++;
+			if ( $srow['totaltime'] > $SCORES[$srow['team']]['last_solved'] ) {
+				$SCORES[$srow['team']]['last_solved'] =
+					$srow['totaltime'];
+			}
+			$SCORES[$srow['team']]['total_time'] +=
+				$srow['totaltime'] + $srow['penalty'];
+		}
 
 	}
 
@@ -154,7 +161,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			echo ' class="sortorderswitch"';
 			$prevsortorder = $totals['sortorder'];
 			$place = 0; // reset team position on switch to different category
-			$prevscores = array(-1,-1);
+			$prevteam = null;
 		}
 		$place++;
 		// check whether this is us, otherwise use category colour
@@ -165,13 +172,12 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 		}
 		echo '><td class="scorepl">';
 		// Only print place when score is different from the previous team
-		if ( $prevscores[0] != $totals['num_correct'] ||
-			 $prevscores[1] != $totals['total_time'] ) {
+		if ( !isset($prevteam) || cmpscore($SCORES[$prevteam], $totals)!=0 ) {
 			echo jurylink(null,$place,$isjury);
-			$prevscores = array($totals['num_correct'], $totals['total_time']);
 		} else {
 			echo jurylink(null,'',$isjury);
 		}
+		$prevteam = $team;
 		echo '</td>';
 		if ( SHOW_AFFILIATIONS ) {
 			echo '<td>';
@@ -242,7 +248,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			// number of submissions for this problem
 			$str = $pdata['submitted'];
 			// if correct, print time scored
-			if( ($pdata['time']+$pdata['penalty']) > 0) {
+			if( $pdata['correct'] ) {
 				$str .= ' (' . $pdata['time'] . ' + ' . $pdata['penalty'] . ')';
 			}
 			echo '>' . jurylink('team.php?id=' . urlencode($team ) .
@@ -414,12 +420,8 @@ function jurylink($target, $content, $isjury) {
 	return $res;
 }
 
-// comparison function for scoreboard
-function cmp ($a, $b) {
-	// first order by our predefined sortorder based on category
-	if ( $a['sortorder'] != $b['sortorder'] ) {
-		return $a['sortorder'] < $b['sortorder'] ? -1 : 1;
-	}
+// comparison function for team scoring
+function cmpscore($a, $b) {
 	// more correct than someone else means higher rank
 	if ( $a['num_correct'] != $b['num_correct'] ) {
 		return $a['num_correct'] > $b['num_correct'] ? -1 : 1;
@@ -428,6 +430,22 @@ function cmp ($a, $b) {
 	if ( $a['total_time'] != $b['total_time'] ) {
 		return $a['total_time'] < $b['total_time'] ? -1 : 1;
 	}
+	// else, fastest submission time for latest correct problem
+	if ( $a['last_solved'] != $b['last_solved'] ) {
+		return $a['last_solved'] < $b['last_solved'] ? -1 : 1;
+	}
+	return 0;
+}
+
+// comparison function including sorting on names (for scoreboard)
+function cmp($a, $b) {
+	// first order by our predefined sortorder based on category
+	if ( $a['sortorder'] != $b['sortorder'] ) {
+		return $a['sortorder'] < $b['sortorder'] ? -1 : 1;
+	}
+	// then compare scores
+	$scorecmp = cmpscore($a, $b);
+	if ( $scorecmp != 0 ) return $scorecmp;
 	// else, order by teamname alphabetically
 	if ( $a['teamname'] != $b['teamname'] ) {
 		return strcasecmp($a['teamname'],$b['teamname']);
