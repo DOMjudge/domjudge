@@ -37,7 +37,7 @@ Document version: $Rev$
 
 <toc>
 
-<chapt>DOMjudge Overview
+<chapt>DOMjudge Overview <label id="overview">
 <p>
 
 DOMjudge is a system for running a programming contest, like the ACM
@@ -160,7 +160,7 @@ The authors can be reached at the following address:
 url="mailto:domjudge@a-eskwadraat.nl">
 
 
-<chapt>Installation and Configuration
+<chapt>Installation and Configuration <label id="install_config">
 <p>
 This chapter details a fresh installation of DOMjudge. The first
 section is a Quick Installation Reference, but that should only be
@@ -226,7 +226,8 @@ DOMjudge:
   <item> Setup the Java chroot environment to use Sun Java with chroot:<newline>
          <tt>bin/make_chroot.sh &lt;installdir&gt; &lt;architecture&gt;</tt><newline>
          <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
-         and enable the chroot-startstop.sh script in etc/global.cfg.
+         and enable the <tt>chroot-startstop.sh</tt> script in
+         <tt>etc/global.cfg</tt>.
   </itemize>
 </itemize>
 
@@ -612,7 +613,7 @@ separate place and transferring the configuration settings from the
 old version.
 
 
-<chapt>Setting up a contest
+<chapt>Setting up a contest <label id="contestsetup">
 <p>
 
 After installation is successful, you want to run your contest! Configuring
@@ -646,8 +647,9 @@ x|problem          |Definition of problems (name, corresponding contest, etc.).@
 x|team             |Definition of teams.@
 x|team_affiliation |Definition of institutions a team can be affiliated with.@
 x|team_category    |Different category groups teams can be put in.@
- |scoreboard_jury  |Cache of the scoreboards for public/teams and for the jury@
- |scoreboard_public|separately, because of possibility of score freezing.
+ |scoreboard_jury<newline>
+  scoreboard_public|Cache of the scoreboards for public/teams and for the<newline>
+                    jury separately, because of possibility of score freezing.
 </tabular>
 
 Now follows a longer description (including fields) per table that has
@@ -670,7 +672,10 @@ are accepted. <tt>lastscoreupdate</tt> is the time after which the
 public and team scoreboard are not updated anymore (frozen). This is
 meant to make the last stages of the contest more thrilling, because
 no-one knows who has won... Setting this to <tt>NULL</tt> disables
-this feature.
+this feature. When using this feature, <tt>unfreezetime</tt> can be
+set to automatically `unfreeze' the scoreboard at that time. For a
+more elaborate description, see also section <ref
+id="scoreboard:freeze" name="Scoreboard: freezing and defrosting">.
 
 <tag>judgehost</tag>
 List here the hosts that will be autojudging the submissions.
@@ -693,7 +698,7 @@ configuration file.
 <tt>allow_submit</tt> (0 or 1) determines whether teams can submit
 using this language; <tt>allow_judge</tt> (0 or 1) determines whether
 judgehosts will judge submissions for this problem. This can for
-example be set to 0 to temporarily hold judging, when a problem occurs
+example be set to 0 to temporarily hold judging when a problem occurs
 with the judging of specific languages; after resolution of the
 problem this can be set to 1 again.
 
@@ -726,6 +731,10 @@ this problem and <tt>special_compare</tt> if not NULL defines a custom
 compare-script <tt>compare_&lt;special_compare&gt;.sh</tt> to compare
 output for this problem.
 
+The <tt>color</tt> tag can be filled with a CSS colour specification
+to associate with this problem; see also section <ref id="scoreboard:colours"
+name="Scoreboard: colours">.
+
 <tag>team</tag>
 Table of teams: <tt>login</tt> is the account/login-name of the team
 and <tt>name</tt> the displayed name of the team. <tt>categoryid</tt>
@@ -741,20 +750,36 @@ for IPv6 addresses. <tt>passwd</tt> is a MD5-hash of a one-time
 password teams can use to authenticate and register their IP address.
 
 <tt>room</tt> is the room the team is located, for display only;
-<tt>comments</tt> should be clear and <tt>teampage_first_visited</tt>
-is automatically updated when a team first visits their DOMjudge team
-page.
+<tt>comments</tt> can be filled with arbitrary useful information and
+<tt>teampage_first_visited</tt> is automatically updated when a team
+first visits their DOMjudge team page.
 
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the
-institution. <tt>country</tt> is the 2 character ISO abbreviation of
-the country and <tt>comments</tt> should be clear.
+institution. <tt>country</tt> should be the 2 character ISO
+abbreviation of the country and <tt>comments</tt> should be clear.
+
+Both for the country and the affiliation, a logo can be displayed on
+the scoreboard. For this to work, the <tt>affilid</tt> must match a
+logo picture located in
+<tt>SYSTEM_ROOT/www/images/affiliations/&lt;affilid&gt;.png</tt> and
+<tt>country</tt> must match a (flag) picture in
+<tt>SYSTEM_ROOT/www/images/countries/&lt;country&gt;.png</tt>. All
+country flags are present there, named with their 2-character ISO
+codes. See also <tt>SYSTEM_ROOT/www/images/countries/README</tt>. If
+either file is not present the respective ID string will be printed
+instead.
 
 <tag>team_category</tag>
 <tt>categoryid</tt> is the reference ID and <tt>name</tt> is a string:
 the name of the category. <tt>sortorder</tt> is the order at which
 this group must be sorted in the scoreboard, where a higher number
 sorts lower and equal sort depending on score.
+
+The <tt>color</tt> is again a CSS colour specification used to
+discern different categories easily. See also section <ref
+id="scoreboard:colours" name="Scoreboard: colours">.
+
 </descrip>
 
 <sect>Team Authentication
@@ -807,11 +832,13 @@ This is also a secure option, but requires a bit more hassle from the
 teams, and maybe from the organisers who have to distribute pieces of
 paper.
    
-Note: the web interface will only allow a team to authenticate
-themselves once. If an IP is set, a next authentication will be
-refused (to avoid trouble with lingering passwords). In order to fully
-re-authenticate a team, the IP address needs to be set to NULL in the
-database.
+<em>Note:</em> the web interface will only allow a team to
+authenticate themselves once. If an IP is set, a next authentication
+will be refused (to avoid trouble with lingering passwords). In order
+to fully re-authenticate a team, the IP address needs to be set to
+NULL in the database. Furthermore, a team must explicitly connect to
+the team interface, because with an unknown IP, the root DOMjudge
+website will redirect to the public interface.
 
 <sect1>Set IP upon first submission
 <p>
@@ -840,8 +867,7 @@ can access their teampage.
 
 Once everything is configured, you can start the daemons:
 <itemize>
-<item> The submitdaemon on the jury system;
-<item> The websubmitdaemon on the jury system;
+<item> The submitdaemon and/or the websubmitdaemon on the jury system;
 <item> One or more judgedaemons on the judgehosts;
 <item> Optionally the balloon notification daemon.
 </itemize>
@@ -874,14 +900,14 @@ what the expected effect should be.
 When all this worked, you're quite ready for a contest. Or at least,
 the practice session of a contest.
 
-<chapt>The Scoreboard
+<chapt>The Scoreboard <label id="scoreboard">
 <p>
 
 The scoreboard is the canonical overview for anyone interested in the
 contest, be it jury, teams or the general public. It deserves to get a
 section of its own.
 
-<sect>Colours and sorting
+<sect>Colours and sorting <label id="scoreboard:colours">
 <p>
 
 Each problem can be associated with a specific colour, e.g. the colour
@@ -913,7 +939,7 @@ the first second of a contest start time.
 When the contest ends, the scores will remain to be displayed, until a
 next contest starts.
 
-<sect>Freezing and defrosting
+<sect>Freezing and defrosting <label id="scoreboard:freeze">
 <p>
 
 DOMjudge has the option to `freeze' the public- and team scoreboards
@@ -1030,6 +1056,11 @@ then they would be able to view other teams' submission info (not
 their code) and clarifications. As this gives a team little advantage,
 we think that this suffices.
 
+<em>Note:</em> When enabling the websubmit feature (on by default),
+teams can also send in submissions with authentication purely based on
+IP. This means that care has to be taken e.g. that teams cannot simply
+login onto one anther's computer and spoof their identity.
+
 <sect>Root Privileges <label id="security_rootprivs">
 <p>
 
@@ -1102,7 +1133,7 @@ iptables -I OUTPUT -o &lt;network_interface&gt; -m owner --uid-owner &lt;testuse
 </verb>
 
 
-<chapt>Common problems and their solutions
+<chapt>Common problems and their solutions <label id="problems">
 <p>
 
 
@@ -1202,7 +1233,7 @@ team's account (e.g. using ssh keys).
 
 <appendix>
 
-<chapt>DOMjudge and the ICPC Validator Interface Standard
+<chapt>DOMjudge and the ICPC Validator Interface Standard <label id="validator">
 <p>
 DOMjudge supports the ICPC Validator Interface Standard, which can be
 found at: <htmlurl url="http://www.ecs.csus.edu/pc2/doc/valistandard.html">
