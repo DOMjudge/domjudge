@@ -158,7 +158,6 @@ function putTeam($login) {
 ?>
 
 <table>
-<tr><td>Login:   </td><td class="teamid"><?=$team['login']?></td></tr>
 <tr><td>Name:    </td><td><?=htmlentities($team['name'])?></td></tr>
 <tr><td>Category:</td><td><?=(int)$team['categoryid'].' - '.
 	htmlentities($team['catname'])?></td></tr>
