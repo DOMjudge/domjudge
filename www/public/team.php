@@ -19,6 +19,6 @@ require('../header.php');
 
 putTeam($id);
 
-echo "<p><a href=\"".getBaseURI()."public\">return to scoreboard</a></p>\n\n";
+echo "<p><a href=\"./\">return to scoreboard</a></p>\n\n";
 
 require('../footer.php');
