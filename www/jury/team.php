@@ -45,15 +45,21 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <tr><td>Has passwd:</td><td><?=(isset($row['passwd']) ? 'yes':'no')?></td></tr>
 <tr><td>Category:  </td><td><?=(int)$row['categoryid'].
 	' - '.htmlentities($row['catname'])?></td></tr>
+<?php if (!empty($row['members'])): ?>
+<tr><td valign="top">Members:   </td><td><?=
+	nl2br(htmlentities($row['members']))?></td></tr>
+<?php endif; ?>
 <?php if (!empty($row['affilid'])): ?>
-<tr><td>Affiliation:  </td><td><a href="affiliation.php?id=<?=
+<tr><td>Affiliation:</td><td><a href="affiliation.php?id=<?=
 	urlencode($row['affilid']) . '">' .
 	htmlentities($row['affilid'] . ' - ' .
 	$row['affname'])?></a></td></tr>
 <?php endif; ?>
 <tr><td>Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
 	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):''?></td></tr>
+<?php if (!empty($row['room'])): ?>
 <tr><td>Room:</td><td><?=htmlentities($row['room'])?></td></tr>
+<?php endif; ?>
 <?php if (!empty($row['comments'])): ?>
 <tr><td valign="top">Comments:</td><td><?=
 	nl2br(htmlentities($row['comments']))?></td></tr>

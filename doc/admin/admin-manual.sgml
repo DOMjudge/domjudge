@@ -749,10 +749,11 @@ via password or commandline submission. It has a length of 30 to allow
 for IPv6 addresses. <tt>passwd</tt> is a MD5-hash of a one-time
 password teams can use to authenticate and register their IP address.
 
-<tt>room</tt> is the room the team is located, for display only;
-<tt>comments</tt> can be filled with arbitrary useful information and
-<tt>teampage_first_visited</tt> is automatically updated when a team
-first visits their DOMjudge team page.
+<tt>members</tt> are the names of the team members, separated by
+newlines and <tt>room</tt> is the room the team is located, for
+display only; <tt>comments</tt> can be filled with arbitrary useful
+information and <tt>teampage_first_visited</tt> is automatically
+updated when a team first visits their DOMjudge team page.
 
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the

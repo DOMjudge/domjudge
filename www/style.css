@@ -122,16 +122,18 @@ tr.unread td {
 	border-right: 1px solid black;
 	padding: 3px;
 }
-
-/* set cell padding to 0 and <a> tag to 3 to make all of cell
-   clickable in the jury scoreboard */
-.scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
-.scoreboard_jury a {
+.scoreboard a {
 	display: block;
 	padding: 3px;
 	text-decoration: none;
 	color: black;
 }
+
+/* set cell padding to 0 and <a> tag to 3 to make all of cell
+   clickable in the jury scoreboard and for all team cells */
+.scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
+.scoreboard .scoretn { padding: 0px; }
+
 .scoreboard_jury img { border: 0px; }
 
 .scoreheader {

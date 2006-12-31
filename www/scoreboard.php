@@ -215,8 +215,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			'<td class="scoretn"' .
 			(isset($color) ? ' style="background: ' . $color . ';"' : '') .
 			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
-			jurylink('team.php?id=' . urlencode($team),
-			         htmlentities($teams[$team]['name']),$isjury) .	'</td>' .
+			'<a href="team.php?id=' . urlencode($team) . '">' .
+			htmlentities($teams[$team]['name']) . '</a></td>';
+		echo
 			'<td class="scorenc">' . jurylink(null,$totals['num_correct'],$isjury) . '</td>' .
 			'<td class="scorett">' . jurylink(null,$totals['total_time'], $isjury) . '</td>';
 

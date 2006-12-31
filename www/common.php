@@ -138,6 +138,64 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	return;
 }
 
+/**
+ * Output team information (for team and public interface)
+ */
+function putTeam($login) {
+
+	global $DB;
+
+	$team = $DB->q('TUPLE SELECT t.*, c.name AS catname,
+	                a.name AS affname, a.country FROM team t
+	                LEFT JOIN team_category c USING (categoryid)
+	                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
+	                WHERE login = %s', $login);
+
+	$affillogo = "../images/affiliations/" . urlencode($team['affilid']) . ".png";
+	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";
+
+	echo "<h1>Team ".htmlentities($team['name'])."</h1>\n\n";
+?>
+
+<table>
+<tr><td>Login:   </td><td class="teamid"><?=$team['login']?></td></tr>
+<tr><td>Name:    </td><td><?=htmlentities($team['name'])?></td></tr>
+<tr><td>Category:</td><td><?=(int)$team['categoryid'].' - '.
+	htmlentities($team['catname'])?></td></tr>
+<?php
+	 
+	if ( !empty($team['members']) ) {
+		echo '<tr><td valign="top">Members:</td><td>' .
+			nl2br(htmlentities($team['members'])) . "</td></tr>\n";
+	}
+	
+	if ( !empty($team['affilid']) ) {
+		echo '<tr><td>Affiliation:</td><td>';
+		if ( is_readable($affillogo) ) {
+			echo '<img src="' . $affillogo . '" alt="' .
+				htmlspecialchars($team['affilid']) . '" /> ';
+		} else {
+			echo htmlspecialchars($team['affilid']) . ' - ';
+		}
+		echo htmlentities($team['affname']);
+		echo "</td></tr>\n";
+		if ( !empty($team['country']) ) {
+			echo '<tr><td>Country:</td><td>';
+			if ( is_readable($countryflag) ) {
+				echo '<img src="' . $countryflag . '" alt="' .
+					htmlspecialchars($team['country']) . '" /> ';
+			}
+			echo htmlspecialchars($team['country']) . "</td></tr>\n";
+		}
+	}
+	
+	if ( !empty($team['room']) ) {
+		echo '<tr><td>Room:</td><td>' . htmlentities($team['room']) .
+			"</td></tr>\n";
+	}
+	
+	echo "</table>\n\n";
+}
 
 /**
  * Output clock
@@ -145,7 +203,6 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 function putClock() {
 	echo '<div id="clock">' . strftime('%a %e %b %Y %T') . "</div>\n\n";
 }
-
 
 /**
  * Output a footer for pages containing the DOMjudge version and server host/port.

@@ -1,4 +1,4 @@
--- These are the database tables needed for DOMjudge
+-- These are the database tables needed for DOMjudge.
 --
 -- You can pipe this file into the 'mysql' command to create the
 -- database tables, but preferably use 'make install'. Database should
@@ -163,6 +163,7 @@ CREATE TABLE `team` (
   `affilid` varchar(10) default NULL,
   `ipaddress` varchar(30) default NULL,
   `passwd` varchar(32) default NULL,
+  `members` text,
   `room` varchar(15) default NULL,
   `comments` text,
   `teampage_first_visited` datetime default NULL,
