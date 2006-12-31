@@ -159,8 +159,7 @@ function putTeam($login) {
 
 <table>
 <tr><td>Name:    </td><td><?=htmlentities($team['name'])?></td></tr>
-<tr><td>Category:</td><td><?=(int)$team['categoryid'].' - '.
-	htmlentities($team['catname'])?></td></tr>
+<tr><td>Category:</td><td><?=htmlentities($team['catname'])?></td></tr>
 <?php
 	 
 	if ( !empty($team['members']) ) {
