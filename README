@@ -5,6 +5,12 @@ DOMjudge is a system for running a programming contest, like the ACM
 regional and world championship programming contests.
 
 
+
+Copyright
+---------
+
+DOMjudge is Copyright (c) 2004 - 2007 by The DOMjudge Developers.
+
 DOMjudge was developed by Thijs Kinkhorst, Peter van de Werken and
 Jaap Eldering at Study Association "A-Eskwadraat", Utrecht University,
 The Netherlands.
@@ -18,8 +24,8 @@ published by the Free Software Foundation; either version 2, or (at your
 option) any later version. See the file COPYING.
 
 Additionally, parts of this system are based on other programs, which
-are covered by other copyrights. This will be noted in the files themselves.
-Files (partly) covered by other copyrights are:
+are covered by other copyrights and licences. This will be noted in the
+files themselves. Files (partly) covered by other copyrights are:
 - bin/runguard.c is covered by the IBM public license.
 - lib/mkstemps.h and lib/basename.h are covered by the GNU Lesser
   Public License. See COPYING.lgpl.
