@@ -176,7 +176,7 @@ following:
 <tag>gray  </tag>the team has not (yet) connected to the web interface at all;
 <tag>red   </tag>the team has connected but not submitted anything yet;
 <tag>yellow</tag>one or more submissions have been made, but none correct;
-<tag>green </tag>the team has submitted at least one solution that has
+<tag>green </tag>the team has made at least one submission that has
                  been judged as correct.
 </descrip>
 
@@ -189,70 +189,80 @@ difficulties.
 <sect>Judging Submissions
 <p>
 
-<sect1>Solution flow
+<sect1>Flow of submitted solutions 
 <p>
 
 The flow of an incoming submission is as follows.
 
 <enum>
 <item>Team submits solution. It will either be rejected after basic
-      checks, or accepted and stored.
+      checks, or accepted and stored as a <em>submission</em>.
 <item>The first available autojudger compiles, runs and checks the
-      solution. The outcome and outputs are stored.
-<item>If verification is not required, the team views the result and
-      the scoreboard is updated. A judge can inspect it.
-<item>If verification is required, a judge inspects the solution. Only
-      after it has been approved will the result be visible outside
-      the jury room.
+      submission. The outcome and outputs are stored as a
+      <em>judging</em> of this submission.
+<item>If verification is not required, the result is automatically
+      recorded and the team can view the result and the scoreboard is
+      updated (unless after the scoreboard freeze). A judge can
+      optionally inspect the submission and judging and mark it
+      verified.
+<item>If verification is required, a judge inspects the judging. Only
+      after it has been approved (marked as <em>verified</em>) will
+      the result be visible outside the jury room.
 </enum>
 
-<sect1>Solution status codes
+<sect1>Submission judging status codes
 <p>
-The interface for jury and teams shows the status of a solution with a code.
-
+The interface for jury and teams shows the status of a submission with
+a code.
 <descrip>
-<tag>QUEUED        </tag>solution accepted and awaiting an autojudger to process it *;
-<tag>JUDGING       </tag>an autojudger is currently compiling/running/testing the solution *;
-<tag>TOO-LATE      </tag>solution accepted but submitted after the contest ends;
-<tag>CORRECT       </tag>solution correct, problem solved;
+<tag>QUEUED/PENDING</tag>submission accepted and awaiting an autojudger to process it *;
+<tag>JUDGING       </tag>an autojudger is currently compiling/running/testing the submission *;
+<tag>TOO-LATE      </tag>submission accepted but submitted after the contest ends;
+<tag>CORRECT       </tag>submission correct, problem solved;
 <tag>COMPILER-ERROR</tag>the compiler gave an error while compiling the program;
 <tag>TIMELIMIT     </tag>program execution time exceeded the time defined for the problem;
-<tag>RUN-ERROR     </tag>a kind of problem while running the program occured, for example
-                         segmentation failt, devision by zero or exitcode unequal to 0.
+<tag>RUN-ERROR     </tag>a kind of problem while running the program occurred, for example
+                         segmentation fault, division by zero or exitcode unequal to 0.
 <tag>NO-OUTPUT     </tag>there was no output at all from the program;
 <tag>WRONG-ANSWER</tag> the output of the program did not exactly match the expected output;
 </descrip>
+* in the team interface a submission will only show as QUEUED to
+prevent leaking information of problem timelimits. The jury can see
+whether a submission is PENDING or JUDGING. In case of required
+verification, a submission will show as QUEUED to the team until the
+judging has been verified.
 
 Under the Submissions menu, you can see all submitted solutions, with
 the newest one at the top. Click on a submission id (a number starting
 with <em>s</em>, e.g. s123) for more details about the submission
-(team name, submittime etc) and the judgings for it. Click on a result
-code to jump straight to the judging details (runtime, outputs, diff
-with testdata, diff with previous solution).
+(team name, submittime etc) and the judging(s) for it. Click on a
+result code to jump straight to the judging details (runtime, outputs,
+diff with testdata, diff with previous submission).
 
 A submission can have multiple judgings, but only one valid one at any
-time. Multiple judgings happen with rejudging, see below
-<!-- LINK ME -->.
+time. Multiple judgings happen with rejudging, see <ref id="rejudging"
+name="Rejudging">.
 
-
-<sect1>Rejudging
+<sect1>Rejudging <label id="rejudging">
 <p>
-In some situations it is necessary to rejudge a submitted solution.
-This means that the solution will re-enter the flow as if it had not
-been judged before. The submittime will be the original time, but the
+In some situations it is necessary to rejudge a submission. This means
+that the submission will re-enter the flow as if it had not been
+judged before. The submittime will be the original time, but the
 program will be compiled, run and tested again.
 
 This can be useful when there was some kind of problem: a compiler
-that was broken and later fixed, or test data that was incorrect and
+that was broken and later fixed, or testdata that was incorrect and
 later changed. When a submission is rejudged, the old judging data is
 kept but marked as "invalid".
 
-You can rejudge a single submission by pressing the Rejudge button
+You can rejudge a single submission by pressing the "Rejudge" button
 when viewing the submission details. It is also possible to rejudge
-all submissions for a given language, or for a given problem.
+all submissions for a given language, problem, team or judgehost; to
+do so, go to the page of the respective language, problem, team or
+judgehost, press the "Rejudge all" button and confirm.
 
-Teams will not get explicit notification of rejudgings, other than a
-potentially changed outcome of their solution. It might be desirable
+Teams will not get explicit notifications of rejudgings, other than a
+potentially changed outcome of their submissions. It might be desirable
 to combine rejudging with a clarification to the team or all teams
 explaining what has been rejudged and why.
 
@@ -272,7 +282,7 @@ will be termed "general clarifications".
 
 <p>
 Under Clarifications, three lists are shown: new clarifications,
-answered clarifications and general clarfications. It lists the team
+answered clarifications and general clarifications. It lists the team
 login, the time and an excerpt. Click the excerpt for details about
 that clarification request.
 
