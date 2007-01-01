@@ -28,7 +28,7 @@
 <date>$Date$
 
 <abstract>
-This document provides information about DOMjudge for a judger
+This document provides information about DOMjudge aimed at a judger
 operating the system during the contest. It provides information
 about viewing and checking submissions and working with clarification
 requests.
@@ -147,12 +147,54 @@ url="mailto:domjudge@a-eskwadraat.nl">
 <p>
 
 
+<sect>Clarification Requests
+<p>
+Communication between teams and jury happens through Clarification Requests. Everything
+related to that happens under the Clarifications menu item.
+
+<p>
+Teams can use their web interface to send a clarification request to the jury. The jury
+can send a response to that team specifically, or send it to all teams. The latter is
+done to ensure that all teams have the same information about the problem set. The jury
+can also send a clarification that does not correspond to a specific request. These will
+be termed "general clarifications".
+
+<p>
+Under Clarifications, three lists are shown: new clarifications, answered clarifications
+and general clarfications. It lists the team login, the time and an excerpt. Click the
+excerpt for details about that clarification request.
+
+<p>
+Every incoming clarification request will initially be marked as unanswered. The menu
+bar shows the number of unanswered requests. A request will be marked as answered when
+a response has been sent. Additionally it's possible to mark a clarification request
+as answered with the button that can be found when viewing the request. The latter
+can be used when the request has been dealt with in some other way, for example by sending
+a general message to all teams.
+
+<p>
+Answering a clarification request happens by putting the text in the input box under the
+request text. The original text is quoted. You can choose to either send it to the team
+that requested the clarification, or to all teams. In the latter case, make sure you phrase
+it in such a way that it's understandable by itself, since the other teams do not know what
+the original question was.
+
+<p>
+
+
 
 
 <chapt>After the contest
 <p>
-
-
+Once the contest is over, the system will still accept submissions but will not judge
+them anymore. Teams will see this as a "too-late" response.
+<p>
+If the scoreboard was frozen, it will remain frozen until the time set as unfreeze time,
+as seen under Contests. It is possible to publish the final standings at any given moment
+by pressing the "unfreeze scoreboard now" button under contests.
+<p>
+There's not much more to be done after the contest has ended. The administrator will need
+to take care of backing up all system data and submissions, and the awards ceremony can start.
 
 
 </book>
