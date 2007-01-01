@@ -138,14 +138,111 @@ url="mailto:domjudge@a-eskwadraat.nl">
 <p>
 
 
+<sect>Scoreboard
+<p>
+The scoreboard, as the most important view on the contest, can be configured in quite
+some ways.
+
+Nearly everything on the scoreboard can be clicked to reveal more detailed information
+about the item in question: team names, specific solutions and problem headers.
 
 <chapt>Before the contest
 <p>
+Before the contest starts, a number of things will need to be configured.
+The contest start- and end time, the time at which the scoreboard will be frozen
+and unfrozen, the problem set(s) and time limits.
+
+
+
+<sect>Practice Session
+<p>
+If your contest as a test session or practice contest, use it also as a general rehearsal
+of the jury system: judge test submissions as you would do during the real contest and
+answer incoming clarification requests.
 
 
 <chapt>During the contest
 <p>
 
+<sect>Monitor teams
+<p>
+Under the Teams menu option, you can get a general impression of the status of each team:
+a traffic light will show either of the following:
+<itemize>
+<item>gray: the team has not connected to the web interface at all;
+<item>red: the team has connected but not submitted anything yet;
+<item>yellow: one or more submissions have been made, but none correct;
+<item>green: the team has submitted at least one solution that has been judged as correct.
+</itemize>
+
+This is especially useful during the practice session, where it is expected that every
+team can make at least one correct submission. A team with any other colour near the end
+of the session might be having difficulties.
+ 
+
+<sect>Judging Submissions
+<p>
+
+<sect1>Solution flow
+<p>
+
+The flow of an incoming submission is as follows.
+
+<enumerate>
+<item>Team submits solution. It will either be rejected after basic checks,
+or accepted and stored.
+<item>The first available autojudger compiles, runs and checks the solution.
+The outcome and outputs are stored.
+<item>If verification is not required, the team views the result and the
+scoreboard is updated. A judge can inspect it.
+<item>If verification is required, a judge inspects the solution. Only
+after it has been approved will the result be visible outside the jury room.
+</enumerate>
+
+<sect1>Solution status codes
+<p>
+The interface for jury and teams shows the status of a solution with a code.
+
+<itemize>
+<item>QUEUED: solution accepted and awaiting an autojudger to process it *;
+<item>JUDGING: an autojudger is currently compiling/running/testing the solution *;
+<item>TOO-LATE: solution accepted but submitted after the contest ends;
+<item>CORRECT: solution correct, problem solved;
+<item>COMPILER-ERROR: the compiler gave an error while compiling the program;
+<item>TIMELIMIT: program execution time exceeded the time defined for the problem;
+<item>RUN-ERROR: a kind of problem while running the program occured, for example
+  segmentation failt, devision by zero or exitcode unequal to 0.
+<item>NO-OUTPUT: there was no output at all from the program;
+<item>WRONG-ANSWER: the output of the program did not exactly match the expected output;
+</itemize>
+
+Under the Submissions menu, you can see all submitted solutions, with the newest one
+at the top. Click on a submission id (a number starting with <em>s</em>, e.g. s123) for more details
+about the submission (team name, submittime etc) and the judgings for it.
+Click on a result code to jump straight to the judging details (runtime, 
+outputs, diff with testdata, diff with previous solution).
+
+A submission can have multiple judgings, but only one valid one at any time. Multiple judgings
+happen with rejudging, see below <!-- LINK ME -->.
+
+
+<sect1>Rejudging
+<p>
+In some situations it is necessary to rejudge a submitted solution. This means that
+the solution will re-enter the flow as if it had not been judged before. The submittime
+will be the original time, but the program will be compiled, run and tested again.
+
+This can be useful when there was some kind of problem: a compiler that was broken and
+later fixed, or test data that was incorrect and later changed. When a submission is
+rejudged, the old judging data is kept but marked as "invalid".
+
+You can rejudge a single submission by pressing the Rejudge button when viewing the
+submission details. It is also possible to rejudge all submissions for a given language,
+or for a given problem.
+
+Teams will not get explicit notification of rejudgings, other than a potentially changed
+outcome of their solution. It might be desirable to combine rejudging with a clarification
+to the team or all teams explaining what has been rejudged and why.
 
 <sect>Clarification Requests
 <p>
