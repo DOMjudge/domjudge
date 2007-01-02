@@ -1,6 +1,6 @@
 DOMjudge Programming Contest Judging System
 
-Version 1.4.0 - SVN
+Version 2.0.0 - SVN
 -------------------
  - Minimum MySQL version required is now 4.1: simplify SQL privilege
    removal.
@@ -25,8 +25,7 @@ Version 1.4.0 - SVN
  - Add more summary data to tables.
  - Fix clarification wrapping.
  - Fix some language typos.
- - Improve webinterface layout (CSS modifications)
- - Tweak the webinterface even more.
+ - Improve webinterface layout.
  - Add MySQL transactions; will provide extra safety when the table type
    supports it (otherwise does nothing).
  - Add IPv6 support to submit daemon/client. (Closes: #1576565).
