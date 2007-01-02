@@ -111,10 +111,10 @@ url="mailto:domjudge@a-eskwadraat.nl">
 <chapt>General
 <p>
 The jury interface is accessed through a web browser. The first page
-has a list of various overviews, and the most important of those are
+shows a list of various overviews, and the most important of those are
 also included in the menu bar at the top. The menu bar will refresh
-occasionally to allow for new information to be presented. It also
-has the current "official" contest time in the top-right corner.
+occasionally to allow for new information to be presented. It also has
+the current `official' contest time in the top-right corner.
 
 Most pieces of information are clickable and bring up a new page with
 details. Many items also have tooltips that reveal extra information
@@ -122,9 +122,9 @@ when the mouse is hovered over them. Problem, language and team pages
 have lists with corresponding submissions for that problem, language
 or team.
 
-The most imporant pages are Submissions: the list of submitted solutions
-made by teams, sorted by newest first, and the Scoreboard: the canonical
-overview of current standings.
+The most important pages are `Submissions': the list of submitted
+solutions made by teams, sorted by newest first, and `Scoreboard': the
+canonical overview of current standings.
 
 <sect>Scoreboard
 <p>
@@ -163,18 +163,22 @@ problem sets, for example a practice session and the real contest.
 <sect>Problems and languages
 <p>
 
-The problem sets are listed under Problems. It is possible to change
-whether teams can submit solutions for that problem (allow submit),
-if not, a submission for that problem will be rejected. Allow judge will
-make DOMjudge accept submissions, but leave them queued. Timelimit is the
+The problem sets are listed under `Problems'. It is possible to change
+whether teams can submit solutions for that problem (using the toggle
+switch `allow submit'). If disallowed, submissions for that problem
+will be rejected, but more importantly, teams will not see that
+problem on the scoreboard! Disallow judge will make DOMjudge accept
+submissions, but leave them queued; this is useful in case an
+unexpected problem shows up with one of the problems. Timelimit is the
 maximum number of seconds a submission for this problem is allowed to
-run before a TIMELIMIT response is given (multiplied by the language
+run before a `TIMELIMIT' response is given (multiplied by the language
 factor).
 
-The Languages overview is quite the same. It has a timefactor column;
-submissions in a language that has time factor 2 will be allowed to
-run twice the time that has been specified under Problems. This is
-needed to compensate for slowness in some languages, e.g. Java.
+The `Languages' overview is quite the same. It has a timefactor
+column; submissions in a language that has time factor 2 will be
+allowed to run twice the time that has been specified under Problems.
+This is needed to compensate for slowness in some languages, e.g.
+Java.
 
 
 <sect>Practice Session
@@ -279,15 +283,15 @@ program will be compiled, run and tested again.
 This can be useful when there was some kind of problem: a compiler
 that was broken and later fixed, or testdata that was incorrect and
 later changed. When a submission is rejudged, the old judging data is
-kept but marked as "invalid".
+kept but marked as `invalid'.
 
-You can rejudge a single submission by pressing the "Rejudge" button
+You can rejudge a single submission by pressing the `Rejudge' button
 when viewing the submission details. It is also possible to rejudge
 all submissions for a given language, problem, team or judgehost; to
 do so, go to the page of the respective language, problem, team or
-judgehost, press the "Rejudge all" button and confirm.
+judgehost, press the `Rejudge all' button and confirm.
 
-Submissions that have been marked as "CORRECT" will not be rejudged.
+Submissions that have been marked as `CORRECT' will not be rejudged.
 
 Teams will not get explicit notifications of rejudgings, other than a
 potentially changed outcome of their submissions. It might be desirable
@@ -306,7 +310,7 @@ the jury. The jury can send a response to that team specifically, or
 send it to all teams. The latter is done to ensure that all teams have
 the same information about the problem set. The jury can also send a
 clarification that does not correspond to a specific request. These
-will be termed "general clarifications".
+will be termed `general clarifications'.
 
 <p>
 Under Clarifications, three lists are shown: new clarifications,
@@ -335,14 +339,14 @@ know what the original question was.
 <chapt>After the contest
 <p>
 Once the contest is over, the system will still accept submissions but
-will not judge them anymore. Teams will see this as a TOO-LATE
+will not judge them anymore. Teams will see this as a `TOO-LATE'
 response.
 
 <p>
 If the scoreboard was frozen, it will remain frozen until the time set
 as unfreeze time, as seen under Contests. It is possible to publish
-the final standings at any given moment by pressing the "unfreeze
-scoreboard now" button under contests.
+the final standings at any given moment by pressing the `unfreeze
+scoreboard now' button under contests.
 
 <p>
 There's not much more to be done after the contest has ended. The
