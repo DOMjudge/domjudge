@@ -96,33 +96,7 @@ Foundation; either version 2, or (at your option) any later version. See the
 file COPYING.
 
 Additionally, parts of this system are based on other programs, which
-are covered by other copyrights. This will be noted in the files
-themselves. Files (partly) covered by other copyrights are:
-<itemize>
-<item> bin/runguard.c is covered by the IBM public license.
-<item> lib/mkstemps.h and lib/basename.h are covered by the GNU Lesser
-Public License. See COPYING.lgpl.
-</itemize>  
-
-This software is partly based on code by other people. These
-acknowledgements are made in the respective files, but we would like
-to name them here too:
-
-<itemize>
-<item> runguard.c is based on timeout from The Coroner's Toolkit
-by Wietse Venema.
-<item> beep.c is made by Johnathan Nightingale.
-<item> bash is included from the Debian `bash-static' (i386) package
-(copyright Free Software Foundation).
-<item> tempfile.c is included from the Debian `debianutils' package.
-<item> mkstemps.h and basename.h are modified versions from the
-GNU libiberty library (copyright Free Software Foundation).
-<item> lib.database.php by Jeroen van Wolffelaar et al.
-<item> submit.c and submitdaemon.c are based on submit.pl and
-submitdaemon.pl by Eelco Dolstra.
-<item> The DOMjudge logo is based on the NKP 2004 logo made by
-Erik van Sebille.
-</itemize>
+are covered by other copyrights. See the file README for details.
 
 <sect>Contact
 <p>
@@ -226,10 +200,10 @@ a code.
 <tag>NO-OUTPUT     </tag>there was no output at all from the program;
 <tag>WRONG-ANSWER</tag> the output of the program did not exactly match the expected output;
 </descrip>
-* in the team interface a submission will only show as QUEUED to
+* in the team interface a submission will only show as PENDING to
 prevent leaking information of problem timelimits. The jury can see
-whether a submission is PENDING or JUDGING. In case of required
-verification, a submission will show as QUEUED to the team until the
+whether a submission is QUEUED or JUDGING. In case of required
+verification, a submission will show as PENDING to the team until the
 judging has been verified.
 
 Under the Submissions menu, you can see all submitted solutions, with
