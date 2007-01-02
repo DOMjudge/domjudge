@@ -110,12 +110,39 @@ url="mailto:domjudge@a-eskwadraat.nl">
 
 <chapt>General
 <p>
+The jury interface is accessed through a web browser. The first page
+has a list of various overviews, and the most important of those are
+also included in the menu bar at the top. The menu bar will refresh
+occasionally to allow for new information to be presented. It also
+has the current "official" contest time in the top-right corner.
 
+Most pieces of information are clickable and bring up a new page with
+details. Many items also have tooltips that reveal extra information
+when the mouse is hovered over them. Problem, language and team pages
+have lists with corresponding submissions for that problem, language
+or team.
+
+The most imporant pages are Submissions: the list of submitted solutions
+made by teams, sorted by newest first, and the Scoreboard: the canonical
+overview of current standings.
 
 <sect>Scoreboard
 <p>
-The scoreboard, as the most important view on the contest, can be
-configured in quite some ways.
+The scoreboard is the most important view on the contest.
+
+Before the contest has started, the scoreboard will not display
+anything (or, the standings from the previous contest, if any). It
+will become available in the first second after the contest started.
+
+It is possible to freeze the scoreboard at a given time, commonly
+one hour before the contest ends, to keep it interesting for all.
+From that time on, the public and team scoreboard will not be updated
+anymore (the jury scoreboard will) and indicate that they are frozen.
+It will be unfrozen at a specified time, or by a button click in the
+jury interface.
+
+The problem headings can take the colours of balloons associated with
+them, when set.
 
 Nearly everything on the scoreboard can be clicked to reveal more
 detailed information about the item in question: team names, specific
@@ -123,16 +150,36 @@ submissions and problem headers.
 
 <chapt>Before the contest
 <p>
-Before the contest starts, a number of things will need to be
-configured. The contest start- and end time, the time at which the
-scoreboard will be frozen and unfrozen, the problem set(s) and time
-limits.
 
+Before the contest starts, a number of things will need to be
+configured by the administrator. You can check that information,
+such as the problem set(s) and time limits, contest start- and
+end time, the time at which the scoreboard will be frozen and
+unfrozen all from the links from the front page.
+
+Note that multiple contests can be defined, with corresponding
+problem sets, for example a practice session and the real contest.
+
+<sect>Problems and languages
+<p>
+
+The problem sets are listed under Problems. It is possible to change
+whether teams can submit solutions for that problem (allow submit),
+if not, a submission for that problem will be rejected. Allow judge will
+make DOMjudge accept submissions, but leave them queued. Timelimit is the
+maximum number of seconds a submission for this problem is allowed to
+run before a TIMELIMIT response is given (multiplied by the language
+factor).
+
+The Languages overview is quite the same. It has a timefactor column;
+submissions in a language that has time factor 2 will be allowed to
+run twice the time that has been specified under Problems. This is
+needed to compensate for slowness in some languages, e.g. Java.
 
 
 <sect>Practice Session
 <p>
-If your contest as a test session or practice contest, use it also as
+If your contest has a test session or practice contest, use it also as
 a general rehearsal of the jury system: judge test submissions as you
 would do during the real contest and answer incoming clarification
 requests.
@@ -213,6 +260,11 @@ with <em>s</em>, e.g. s123) for more details about the submission
 result code to jump straight to the judging details (runtime, outputs,
 diff with testdata, diff with previous submission).
 
+Under the submission details the source filename can be clicked to inspect
+the source code. If the team has submitted something for this problem before,
+a diff output between the current and previous submission is also available
+there.
+
 A submission can have multiple judgings, but only one valid one at any
 time. Multiple judgings happen with rejudging, see <ref id="rejudging"
 name="Rejudging">.
@@ -234,6 +286,8 @@ when viewing the submission details. It is also possible to rejudge
 all submissions for a given language, problem, team or judgehost; to
 do so, go to the page of the respective language, problem, team or
 judgehost, press the "Rejudge all" button and confirm.
+
+Submissions that have been marked as "CORRECT" will not be rejudged.
 
 Teams will not get explicit notifications of rejudgings, other than a
 potentially changed outcome of their submissions. It might be desirable
@@ -281,7 +335,7 @@ know what the original question was.
 <chapt>After the contest
 <p>
 Once the contest is over, the system will still accept submissions but
-will not judge them anymore. Teams will see this as a "too-late"
+will not judge them anymore. Teams will see this as a TOO-LATE
 response.
 
 <p>
