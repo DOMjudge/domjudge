@@ -519,7 +519,7 @@ webserver for the changes to take effect.
 See also section <ref id="security_webprivs" name="Security: webserver
 privileges">.
 
-<sect>Configuration of Special Run of Judge Scripts
+<sect>Configuration of Special Run and Compare Scripts
 <p>
 
 To allow for problems that do not fit within the standard scheme of
