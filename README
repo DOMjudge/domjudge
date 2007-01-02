@@ -6,17 +6,14 @@ regional and world championship programming contests.
 
 
 
-Copyright
----------
+Copyright & Licencing
+---------------------
 
 DOMjudge is Copyright (c) 2004 - 2007 by The DOMjudge Developers.
 
 DOMjudge was developed by Thijs Kinkhorst, Peter van de Werken and
 Jaap Eldering at Study Association "A-Eskwadraat", Utrecht University,
 The Netherlands.
-
-Licence
--------
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the GNU General Public License as
@@ -25,7 +22,7 @@ option) any later version. See the file COPYING.
 
 Additionally, parts of this system are based on other programs, which
 are covered by other copyrights and licences. This will be noted in the
-files themselves. Files (partly) covered by other copyrights are:
+files themselves. Files (partly) covered by other licences are:
 - bin/runguard.c is covered by the IBM public license.
 - lib/mkstemps.h and lib/basename.h are covered by the GNU Lesser
   Public License. See COPYING.lgpl.
@@ -35,7 +32,8 @@ Further reading
 ---------------
 
 For more information on installation and requirements see the
-documentation under the doc/ directory.
+documentation under the doc/ directory. Run `make docs` there
+to create HTML and PDF versions of the available documentation.
 
 
 Contact
