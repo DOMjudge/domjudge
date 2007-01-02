@@ -9,7 +9,7 @@ admin-manual.pdf: admin-manual.sgml
 	linuxdoc -B latex -o pdf $<
 
 admin-manual.html: admin-manual.sgml
-	linuxdoc -B html $<
+	linuxdoc -B html --header=../docs_header.html $<
 
 distclean:
 	-rm -f admin-manual*.html admin-manual.pdf

@@ -33,6 +33,8 @@ Version 1.4.0 - SVN
  - Change scoreboard sorting to use ACM ICPC (tie-breaker) rules.
  - Added team information pages for teams and public and included team
    members field in the SQL 'team' table.
+ - Unify documentation into an administrator's manual, a judgers manual
+   and a team manual.
 
 Version 1.3.0 - 6 October 2006
 ------------------------------
