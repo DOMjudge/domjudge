@@ -21,7 +21,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  02110-1301, USA
 -->
-<book>
+<report>
 
 <title>DOMjudge Administrator's Manual
 <author>by the DOMjudge team
@@ -1289,4 +1289,4 @@ comparison of the program and jury output. Both scripts also generate
 XML compliant output, which is written to the result file specified in
 parameter 4 and fully complies with the validator standard.
 
-</book>
+</report>

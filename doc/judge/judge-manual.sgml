@@ -21,7 +21,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  02110-1301, USA
 -->
-<book>
+<report>
 
 <title>DOMjudge Judger's Manual
 <author>by the DOMjudge team
@@ -354,4 +354,4 @@ administrator will need to take care of backing up all system data and
 submissions, and the awards ceremony can start.
 
 
-</book>
+</report>
