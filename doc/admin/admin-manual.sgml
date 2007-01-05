@@ -442,12 +442,13 @@ non-standard environments.
 <item> In <tt>SYSTEM_ROOT/bin/make_chroot.sh</tt> some changes to
        variables can be made, most notably <tt>DEBMIRROR</tt> to
        select a Debian mirror site near you.
-<item> in <tt>SYSTEM_ROOT/sql/Makefile</tt>, you can set
+<item> In <tt>SYSTEM_ROOT/sql/Makefile</tt>, you can set
        <tt>MYSQL_UPGR_USER</tt> to a different user than root for
        database upgrades (this is not tested very thoroughly).
 <item> <tt>SYSTEM_ROOT/submit/submit_copy.sh</tt> and
        <tt>SYSTEM_ROOT/judge/chroot-startstop.sh</tt> can be modified
-       to suit your local environment. See comments in those files.
+       to suit your local environment. See comments in those files for
+       more information.
 </itemize>
 
 <sect>Submission Methods <label id="submissionmethods">
