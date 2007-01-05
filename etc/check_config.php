@@ -11,66 +11,74 @@
  *
  * $Id$
  */
-	require ('../etc/config.php');
 
-	define ('SCRIPT_ID', 'check_config');
-	define ('LOGFILE', LOGDIR.'/check_config.log');
+$nwarnings = 0;
 
-	require (SYSTEM_ROOT . '/lib/init.php');
-	
-	logmsg(LOG_NOTICE, "started [DOMjudge/" . DOMJUDGE_VERSION . "]");
+function warn($msg) {
+	$nwarnings++;
+	logmsg(LOG_WARNING, $msg);
+}
 
-	logmsg(LOG_DEBUG, "checking dirs");
-	// check some dirs for existence and read/writablility
-	$dirstocheck = array (
-		'SYSTEM_ROOT' => 'r',
-		'OUTPUT_ROOT' => 'rw',
-		'INPUT_ROOT' => 'r',
-		'LIBDIR' => 'r',
-		'INCOMINGDIR' => 'rw',
-		'SUBMITDIR' => 'rw',
-		'JUDGEDIR' => 'rw',
-		'LOGDIR' => 'rw',
-		'CHROOT_PREFIX' => 'r'
-		);
+require ('../etc/config.php');
 
-	foreach ( $dirstocheck as $dir => $ops ) {
-		$realdir = constant($dir);
-		if( ! file_exists ($realdir) )	{ logmsg(LOG_WARNING, "$dir [$realdir] does not exist!" ); continue; }
-		if( ! is_dir($realdir) )		{ logmsg(LOG_WARNING, "$dir [$realdir] is not a directory!" ); continue; }
-		if( strstr($ops,'r') &&
-			! is_readable ($realdir) )	{ logmsg(LOG_WARNING, "$dir [$realdir] is not readable!" ); continue; }
-		if( strstr($ops,'w') &&
-			! is_writable ($realdir) )	{ logmsg(LOG_WARNING, "$dir [$realdir] is not writable!" ); continue; }
-	}
+define ('SCRIPT_ID', 'check_config');
+define ('LOGFILE', LOGDIR.'/check_config.log');
 
-	logmsg(LOG_DEBUG, "checking users");
+require (SYSTEM_ROOT . '/lib/init.php');
 
-	// does our runuser even exist?
-	// In PHP 4.1.2 this crashes when the user doesn't exist, but the warning is output anyway.
-	if ( ! @posix_getpwnam( RUNUSER ) ) {
-		logmsg(LOG_WARNING, "RUNUSER [" . RUNUSER ."] does not exist!");
-	}
+logmsg(LOG_NOTICE, "started [DOMjudge/" . DOMJUDGE_VERSION . "]");
 
-	// check problems. 
-	logmsg(LOG_DEBUG, "checking problems");
+logmsg(LOG_DEBUG, "checking dirs");
+// check some dirs for existence and read/writablility
+define ('LIBDIR', SYSTEM_ROOT . '/lib');
+$dirstocheck = array (
+	'SYSTEM_ROOT' => 'r',
+	'OUTPUT_ROOT' => 'rw',
+	'INPUT_ROOT' => 'r',
+	'LIBDIR' => 'r',
+	'INCOMINGDIR' => 'rw',
+	'SUBMITDIR' => 'rw',
+	'JUDGEDIR' => 'rw',
+	'LOGDIR' => 'rw',
+	'CHROOT_PREFIX' => 'r'
+	);
 
-	global $DB;	
-	$probs = $DB->q('SELECT probid,testdata FROM problem ORDER BY cid,probid');
+foreach ( $dirstocheck as $dir => $ops ) {
+	$realdir = constant($dir);
+	if( ! file_exists($realdir) ) { warn("$dir [$realdir] does not exist!"); continue; }
+	if( ! is_dir($realdir) )      { warn("$dir [$realdir] is not a directory!"); continue; }
+	if( strstr($ops,'r') &&
+	    ! is_readable($realdir) ) { warn("$dir [$realdir] is not readable!"); continue; }
+	if( strstr($ops,'w') &&
+	    ! is_writable($realdir) ) { warn("$dir [$realdir] is not writable!"); continue; }
+}
 
-	// check whether the problem input/output is readable by me.
-	$inout = array('in','out');
-	while ( $row = $res->next() ) {
-		foreach($inout as $i) {
-			$testdata = INPUT_ROOT . '/' . $row['testdata'] . '/testdata.' . $i;
-			if ( ! file_exists ( $testdata ) ) {
-				logmsg(LOG_WARNING, "problem $row[probid] testdata.$i [$testdata] does not exist!");
-			} elseif ( ! is_readable ( $testdata ) ) {
-				logmsg(LOG_WARNING, "problem $row[probid] testdata.$i [$testdata] not readable!");
-			}
+logmsg(LOG_DEBUG, "checking users");
+
+// does our runuser even exist?
+// In PHP 4.1.2 this crashes when the user doesn't exist, but the
+// warning is output anyway.
+if ( ! @posix_getpwnam(RUNUSER) ) warn("RUNUSER [" . RUNUSER ."] does not exist!");
+
+// check problems. 
+logmsg(LOG_DEBUG, "checking problems");
+
+global $DB;	
+$probs = $DB->q('SELECT probid,testdata FROM problem ORDER BY cid,probid');
+
+// check whether the problem input/output is readable by me.
+$inout = array('in','out');
+while ( $row = $probs->next() ) {
+	foreach($inout as $i) {
+		$testdata = INPUT_ROOT . '/' . $row['testdata'] . '/testdata.' . $i;
+		if ( ! file_exists ( $testdata ) ) {
+			warn("problem $row[probid] testdata.$i [$testdata] does not exist!");
+		} elseif ( ! is_readable ( $testdata ) ) {
+			warn("problem $row[probid] testdata.$i [$testdata] not readable!");
 		}
 	}
+}
 
-	logmsg(LOG_NOTICE, "end");
+logmsg(LOG_NOTICE, 'end: ' . $nwarnings .' warnings');
 
-	exit;
+exit($nwarnings);
