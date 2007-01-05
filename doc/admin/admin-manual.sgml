@@ -256,6 +256,7 @@ DOMjudge has three different kinds of hosts:
        a couple of these. They will run the judgedaemon from DOMjudge.
 </itemize>
 
+
 <sect>Requirements
 <p>
 Before installing, make sure you have met all the requirements.
@@ -383,8 +384,6 @@ different roots).
 </descrip>
 
 
-
-
 <sect>Global configuration: <tt>global.cfg</tt>
 <p>
 
@@ -395,12 +394,15 @@ implement configuration changes, these settings should be converted to
 the different language-specific configuration-files, needed by
 different parts of the system. This is done by running <tt>make
 config</tt> in the <tt>SYSTEM_ROOT</tt> directory. After that, also
-all C/C++ programs should be rebuilt to implement these changes!
+all C/C++ programs should be rebuilt (if necessary) to implement these
+changes!
 
 The global configuration file has a ini-file like syntax, with some
 extensions to make it more flexible and to be able to correctly
 convert variables to all specific configuration files. See comments
-there for more information.
+there for more information. Also all configuration options are
+documented there.
+
 
 <sect>Configuration of Languages
 <p>
@@ -423,6 +425,30 @@ compilation step, which will function as the executable: the script
 must run the interpreter on the source. See <tt>compile_perl.sh</tt>
 and <tt>compile_java_javac.sh</tt> in <tt>SYSTEM_ROOT/judge</tt> for
 examples.
+
+
+<sect>Other configuration issues
+<p>
+
+There are a few more places where some configuration of the system can
+be made. These are not strictly necessary, but sometimes needed in
+non-standard environments.
+<itemize>
+<item> In <tt>SYSTEM_ROOT/Makefile.global</tt> the defines
+       <tt>ROOTCMD</tt> and <tt>SUIDINSTALLDIR</tt> can be modified to
+       use a different method of root-access in the install process
+       and specify a different place for set-uid root binaries
+       respectively.
+<item> In <tt>SYSTEM_ROOT/bin/make_chroot.sh</tt> some changes to
+       variables can be made, most notably <tt>DEBMIRROR</tt> to
+       select a Debian mirror site near you.
+<item> in <tt>SYSTEM_ROOT/sql/Makefile</tt>, you can set
+       <tt>MYSQL_UPGR_USER</tt> to a different user than root for
+       database upgrades (this is not tested very thoroughly).
+<item> <tt>SYSTEM_ROOT/submit/submit_copy.sh</tt> and
+       <tt>SYSTEM_ROOT/judge/chroot-startstop.sh</tt> can be modified
+       to suit your local environment. See comments in those files.
+</itemize>
 
 <sect>Submission Methods <label id="submissionmethods">
 <p>
