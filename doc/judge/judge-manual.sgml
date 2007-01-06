@@ -135,11 +135,11 @@ anything (or, the standings from the previous contest, if any). It
 will become available in the first second after the contest started.
 
 It is possible to freeze the scoreboard at a given time, commonly
-one hour before the contest ends, to keep it interesting for all.
-From that time on, the public and team scoreboard will not be updated
-anymore (the jury scoreboard will) and indicate that they are frozen.
-It will be unfrozen at a specified time, or by a button click in the
-jury interface.
+one hour before the contest ends, to keep the last hour interesting
+for all. From that time on, the public and team scoreboard will not
+be updated anymore (the jury scoreboard will) and indicate that they
+are frozen. It will be unfrozen at a specified time, or by a button
+click in the jury interface.
 
 The problem headings can take the colours of balloons associated with
 them, when set.
