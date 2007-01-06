@@ -175,10 +175,9 @@ jury. This request is only readable for the jury and they will
 try to respond as soon as possible. Answers that are relevant for
 everyone, will be sent to everyone.
 
-When you receive a new clarification from the jury, you will
-automatically be notified by a pop-up window. For this to work, you
-have to have the team page opened in a web browser and the browser must
-not block pop-up windows.
+When you receive a new clarification from the jury, this will
+automatically be displayed as ``(x NEW)'' after the clarification
+button in the menubar.
 
 \section{How are submissions being judged?}
 
@@ -187,11 +186,13 @@ interaction is necessary. The judging is done in the following way:
 
 \subsection{Submission}
 
-With the \cmd{submit} (see \ref{submit}) program, you can submit a
-solution to a problem. Note that you have to submit the source-code of
-your program (and not a compiled program or the output of your
-program). \cmd{submit} makes a connection to the submission server,
-which copies your program to the jury-computers.
+With the \cmd{submit} or the web-interface (see \ref{submit}) program,
+you can submit a solution to a problem. Note that you have to submit
+the source-code of your program (and not a compiled program or the
+output of your program). \cmd{submit} makes a connection to the
+submission server, which copies your program to the jury-computers,
+while in the web-interface it gets uploaded to the jury via the
+webserver.
 
 There your program enters a queue, awaiting being compiled, executed
 and the output tested on one of the jury-computers.
@@ -292,7 +293,7 @@ Sample input and output for this problem:
 \hline
 \end{tabular}
 
-Note that the number 3 on the first line indicates, that 3 testcases
+Note that the number 3 on the first line indicates that 3 testcases
 follow.
 
 A solution for this problem in C:

@@ -184,9 +184,8 @@ zullen deze zo snel mogelijk en adequaat beantwoorden. Antwoorden die
 voor iedereen relevant kunnen zijn zullen naar iedereen gestuurd worden.
 
 Als je een clarification ontvangt van de jury, dan wordt dat
-automatisch gemeld door middel van een pop-up scherm. Hiervoor moet je
-wel de teampagina open hebben staan in een webbrowser, die geen pop-up
-schermen blokkeert.
+automatisch gemeld door toevoeging van ``(x NEW)'' in de clarification
+knop in het menu.
 
 \section{Hoe worden opgaven beoordeeld?}
 
@@ -196,12 +195,13 @@ beoordeling. Het beoordelen gebeurt via de volgende stappen:
 
 \subsection{Insturen}
 
-Via het \cmd{submit} (zie \ref{submit}) programma kun je een
-oplossing voor een opgave insturen. Let op dat je de source-code van
-je programma moet insturen (en dus niet een gecompileerd programma of de
-uitvoer van je programma). \cmd{submit} maakt dan een verbinding
-met een server en die kopieert je programma dan naar de
-jury-computers.
+Via het \cmd{submit} programma of de web-interface (zie \ref{submit})
+kun je een oplossing voor een opgave insturen. Let op dat je de
+source-code van je programma moet insturen (en dus niet een
+gecompileerd programma of de uitvoer van je programma). \cmd{submit}
+maakt dan een verbinding met een server en die kopieert je programma
+dan naar de jury-computers, danwel het wordt via de web-interface
+ge-upload naar de jury.
 
 Dan komt je programma in de wachtrij te staan, om gecompileerd,
 uitgevoerd en de uitvoer getest te worden op \'e\'en van de
@@ -288,7 +288,7 @@ draait een gecompileerd programma in \'e\'en proces.
 
 Hieronder staan een aantal voorbeelden van code om de invoer van een
 probleem in te lezen en de uitvoer weg te schrijven. De manier van
-in- en uitvoer lezen en wegschrijven in deze opgave, is zoals dat bij
+in- en uitvoer lezen en wegschrijven in deze opgave is zoals dat bij
 veel programmeerwedstrijden gebeurt (o.a. de ACM regionals), maar kan
 bij jullie wedstrijd anders zijn.
 
@@ -306,7 +306,7 @@ Dit probleem zou de volgende in- en uitvoer kunnen hebben:
 \hline
 \end{tabular}
 
-Let op dat het op de eerste regel het getal 3 aangeeft, dat er 3
+Let op dat het getal 3 op de eerste regel aangeeft dat er 3
 testgevallen volgen.
 
 Een oplossing voor dit probleem in C:
