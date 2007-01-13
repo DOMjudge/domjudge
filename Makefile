@@ -5,8 +5,11 @@
 # From here all (subdir) Make targets can and _should_ be called to
 # ensure proper inclusion of globally defined variables.
 
+# Define TOPDIR from shell command and _not_ $(PWD) because that gives
+# pwd before changing to a 'make -C <dir>' <dir>:
+export TOPDIR = $(shell pwd)
+
 # Global Makefile definitions
-export TOPDIR = $(PWD)
 include $(TOPDIR)/Makefile.global
 
 # Subdirectories to recurse into for REC_TARGETS
