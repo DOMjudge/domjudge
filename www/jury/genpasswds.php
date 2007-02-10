@@ -34,14 +34,14 @@ include('../header.php');
 
 <?php
 
-if ( isset($_REQUEST['forteam']) ) {
+if ( isset($_POST['forteam']) ) {
 	ob_implicit_flush();
 
-	if ( isset($_REQUEST['doteam']) ) {
-		$teams = array($_REQUEST['forteam']);
+	if ( isset($_POST['doteam']) ) {
+		$teams = array($_POST['forteam']);
 	} else {
 		$teams = $DB->q('COLUMN SELECT login FROM team ' .
-		                (isset($_REQUEST['doallnull'])?'WHERE passwd IS NULL':'') .
+		                (isset($_POST['doallnull'])?'WHERE passwd IS NULL':'') .
 		                ' ORDER BY login');
 	}
 

@@ -17,12 +17,12 @@ if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
 	error("Missing or invalid judge hostname");
 }
 
-if ( isset($_REQUEST['cmd']) ) {
-	if ( $_REQUEST['cmd'] == 'activate' || $_REQUEST['cmd'] == 'deactivate' ) {
+if ( isset($_POST['cmd']) ) {
+	if ( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) {
 		$DB->q('UPDATE judgehost SET active = %i WHERE hostname = %s',
-		       ($_REQUEST['cmd'] == 'activate' ? 1 : 0), $id);
+		       ($_POST['cmd'] == 'activate' ? 1 : 0), $id);
 	}
-	if ( $_REQUEST['cmd'] == 'rejudge' ) {
+	if ( $_POST['cmd'] == 'rejudge' ) {
 		rejudge('judging.judgehost',$id);
 		header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
 		exit;

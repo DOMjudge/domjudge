@@ -20,8 +20,8 @@ require_once(SYSTEM_ROOT . '/lib/use_db_team.php');
 $ip = $_SERVER['REMOTE_ADDR'];
 $row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
 
-$user = trim($_REQUEST['login']);
-$pass = trim($_REQUEST['passwd']);
+$user = trim($_POST['login']);
+$pass = trim($_POST['passwd']);
 
 $title = 'Authenticate user';
 include('../header.php');
