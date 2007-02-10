@@ -68,15 +68,26 @@ using namespace std;
 #define PROGRAM "submit"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
 
-/* Disable websubmit if libcurl is not available */
+/* Convert COMPILE*=0/1 to ENABLE* being defined or not */
+#if    COMPILEWEBSUBMIT == 0
+#undef COMPILEWEBSUBMIT
+#endif
+#if    COMPILECMDSUBMIT == 0
+#undef COMPILECMDSUBMIT
+#endif
+
+/* Bail out if websubmit compilation requested but curl not available */
+#ifdef  COMPILEWEBSUBMIT
 #ifndef LIBCURL
-#undef  ENABLEWEBSUBMIT
-#define ENABLEWEBSUBMIT 0
+#error  "Websubmit requested, but libcURL not available. Disable websubmit compilation or install libcurl"
+#endif
 #endif
 
 /* Check that either commanddline or websubmit is available */
-#if (ENABLEWEBSUBMIT == 0) && (ENABLECMDSUBMIT == 0)
+#ifndef COMPILEWEBSUBMIT
+#ifndef COMPILECMDSUBMIT
 #error "Neither commandline nor websubmit can be used."
+#endif
 #endif
 
 const int timeout_secs = 60; /* seconds before send/receive timeouts with an error */
@@ -118,7 +129,7 @@ void usage();
 void usage2(int , char *, ...);
 void warnuser(char *);
 char readanswer(char *answers);
-#if (ENABLEWEBSUBMIT != 0)
+#ifdef COMPILEWEBSUBMIT
 int  websubmit();
 #endif
 
@@ -220,7 +231,11 @@ int main(int argc, char **argv)
 	}
 
 	/* Parse command-line options */
-	use_websubmit = ! ENABLECMDSUBMIT ;
+#ifdef COMPILECMDSUBMIT
+	use_websubmit = 0;
+#else
+	use_websubmit = 1;
+#endif
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
 	while ( (c = getopt_long(argc,argv,"p:l:s:t:P:w::v::q",long_opts,NULL))!=-1 ) {
@@ -359,7 +374,7 @@ int main(int argc, char **argv)
 	}
 
 	if ( use_websubmit ) {
-#if (ENABLEWEBSUBMIT != 0)
+#ifdef COMPILEWEBSUBMIT
 		return websubmit();
 #else
 		error(0,"websubmit requested, but not available");
@@ -482,9 +497,11 @@ void usage()
 "  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
 "  -s, --server=SERVER      submit to server SERVER\n"
 "  -t, --team=TEAM          submit as team TEAM\n"
-#if ( (ENABLEWEBSUBMIT != 0) && (ENABLECMDSUBMIT != 0) )
+#ifdef COMPILEWEBSUBMIT
+#ifdef COMPILECMDSUBMIT
 "  -w, --web[=0|1]          submit to the webinterface or toggle;\n"
 "                               should normally not be necessary\n"
+#endif
 #endif
 "  -v, --verbose[=LEVEL]    increase verbosity or set to LEVEL, where LEVEL\n"
 "                               must be numerically specified as in 'syslog.h'\n"
@@ -596,7 +613,7 @@ char readanswer(char *answers)
 	return c;
 }
 
-#if (ENABLEWEBSUBMIT != 0)
+#ifdef COMPILEWEBSUBMIT
 
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 {
@@ -713,6 +730,6 @@ int websubmit()
 	
 	return 0;
 }
-#endif /* ENABLEWEBSUBMIT != 0 */
+#endif /* ifdef COMPILEWEBSUBMIT */
 
 //  vim:ts=4:sw=4:
