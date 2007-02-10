@@ -11,7 +11,7 @@ if ( ! ENABLEWEBSUBMIT ) {
 	error("Websubmit disabled!");
 }
 
-if ( !isset($_POST['submit']) ) {
+if ( !isset($_REQUEST['submit']) ) {
 	header('Location: websubmit.php');
 	return;
 }
@@ -55,7 +55,7 @@ switch ( $_FILES['code']['error'] ) {
 
 $filename = $_FILES['code']['name'];
 
-/*	Determine the problem */
+/* Determine the problem */
 $probid = @$_REQUEST['probid'];
 
 if ( empty($probid) ) {
@@ -71,7 +71,7 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
 
 if ( ! isset($prob) ) err("Unable to find problem '$probid'");
 
-/*	Determine the language */
+/* Determine the language */
 $langext = @$_REQUEST['langext'];
 
 if ( empty($langext) ) {

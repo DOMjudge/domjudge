@@ -22,15 +22,15 @@ $jdata = $DB->q('TUPLE SELECT j.*, s.*, t.*, c.contestname FROM judging j
 
 $sid = (int)$jdata['submitid'];
 
-if ( isset($_POST['cmd']) && $_POST['cmd'] == 'verify' ) {
+if ( isset($_REQUEST['cmd']) && $_REQUEST['cmd'] == 'verify' ) {
 	$verifier = "";
-	if ( ! empty($_POST['verifier_selected']) ) $verifier = $_POST['verifier_selected'];
-	if ( ! empty($_POST['verifier_typed'])    ) $verifier = $_POST['verifier_typed'];
+	if ( ! empty($_REQUEST['verifier_selected']) ) $verifier = $_REQUEST['verifier_selected'];
+	if ( ! empty($_REQUEST['verifier_typed'])    ) $verifier = $_REQUEST['verifier_typed'];
 	
 	$DB->q('UPDATE judging SET verified = %i, verifier = %s WHERE judgingid = %i',
-		   $_POST['val'], $verifier, $id);
+	       $_REQUEST['val'], $verifier, $id);
 	
-	$jdata['verified'] = $_POST['val'];
+	$jdata['verified'] = $_REQUEST['val'];
 	$jdata['verifier'] = $verifier;
 	
 	if ( VERIFICATION_REQUIRED ) {

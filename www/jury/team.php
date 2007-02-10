@@ -15,7 +15,7 @@ $title = 'Team '.htmlspecialchars(@$id);
 
 if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
 
-if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
+if ( isset($_REQUEST['cmd']) && $_REQUEST['cmd'] == 'rejudge' ) {
 	rejudge('submission.team',$id);
 	header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
 	exit;

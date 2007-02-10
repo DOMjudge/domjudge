@@ -9,7 +9,7 @@ require('init.php');
 $title = 'Show Source';
 require('../header.php');
 
-$id = (int)$_GET['id'];
+$id = (int)$_REQUEST['id'];
 
 $source = $DB->q('TUPLE SELECT * FROM submission
                   WHERE submitid = %i',$id);

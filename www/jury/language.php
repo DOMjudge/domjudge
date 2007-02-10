@@ -14,21 +14,21 @@ $title = 'Language '.htmlspecialchars(@$id);
 
 if ( ! $id ) error("Missing or invalid language id");
 
-if ( !empty($_POST['cmd']) ) {
-	if ( isset($_POST['cmd']['rejudge']) ) {
+if ( !empty($_REQUEST['cmd']) ) {
+	if ( isset($_REQUEST['cmd']['rejudge']) ) {
 		rejudge('submission.langid',$id);
 		header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
 		exit;
 	}
 
-	if ( isset($_POST['cmd']['toggle_submit']) ) {
+	if ( isset($_REQUEST['cmd']['toggle_submit']) ) {
 		$DB->q('UPDATE language SET allow_submit = %i WHERE langid = %s',
-			   $_POST['val']['toggle_submit'], $id);
+		       $_REQUEST['val']['toggle_submit'], $id);
 	}
 
-	if ( isset($_POST['cmd']['toggle_judge']) ) {
+	if ( isset($_REQUEST['cmd']['toggle_judge']) ) {
 		$DB->q('UPDATE language SET allow_judge = %i WHERE langid = %s',
-			   $_POST['val']['toggle_judge'], $id);
+		       $_REQUEST['val']['toggle_judge'], $id);
 	}
 }
 

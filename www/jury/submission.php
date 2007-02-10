@@ -29,7 +29,7 @@ if ( ! $submdata ) error ("Missing submission data");
 $iscorrect = (bool)$DB->q('VALUE SELECT count(judgingid) FROM judging WHERE
                            submitid = %i AND valid = 1 AND result = "correct"', $id);
 
-if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
+if ( isset($_REQUEST['cmd']) && $_REQUEST['cmd'] == 'rejudge' ) {
 	if ( $iscorrect ) error("Submission already judged as valid, not rejudging.");
 	rejudge('submission.submitid',$id);
 	header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));

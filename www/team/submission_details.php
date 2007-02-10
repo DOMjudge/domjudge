@@ -10,7 +10,7 @@ require('init.php');
 $title = 'Submission details';
 include('../header.php');
 
-$sid = (int)$_GET['id'];
+$sid = (int)$_REQUEST['id'];
 
 
 // select also on teamid so we can only select our own submissions

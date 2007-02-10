@@ -8,10 +8,10 @@
 require('init.php');
 $title = 'Judgehosts';
 
-if ( !empty($_POST['cmd']) ) {
-	if ( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) {
+if ( !empty($_REQUEST['cmd']) ) {
+	if ( $_REQUEST['cmd'] == 'activate' || $_REQUEST['cmd'] == 'deactivate' ) {
 		$DB->q('UPDATE judgehost SET active = %i',
-		       ($_POST['cmd'] == 'activate' ? 1:0));
+		       ($_REQUEST['cmd'] == 'activate' ? 1:0));
 	}
 }
 

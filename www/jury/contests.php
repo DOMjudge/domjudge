@@ -13,8 +13,8 @@ echo "<h1>Contests</h1>\n\n";
 
 $curcont = getCurContest();
 
-if ( isset($_POST['unfreeze']) ) {
-	$docid = array_pop(array_keys($_POST['unfreeze']));
+if ( isset($_REQUEST['unfreeze']) ) {
+	$docid = array_pop(array_keys($_REQUEST['unfreeze']));
 	if ( $docid != $curcont['cid'] ) {
 		error("Can only unfreeze for current contest!");
 	}
