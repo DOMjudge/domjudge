@@ -38,6 +38,11 @@
 #include <getopt.h>
 #include <termios.h>
 
+#ifdef LIBCURL
+#include <curl/curl.h>
+#include <curl/easy.h>
+#endif
+
 /* C++ includes for easy string handling */
 using namespace std;
 #include <iostream>
@@ -62,6 +67,17 @@ using namespace std;
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
 #define PROGRAM "submit"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
+
+/* Disable websubmit if libcurl is not available */
+#ifndef LIBCURL
+#undef  ENABLEWEBSUBMIT
+#define ENABLEWEBSUBMIT 0
+#endif
+
+/* Check that either commanddline or websubmit is available */
+#if (ENABLEWEBSUBMIT == 0) && (ENABLECMDSUBMIT == 0)
+#error "Neither commandline nor websubmit can be used."
+#endif
 
 const int timeout_secs = 60; /* seconds before send/receive timeouts with an error */
 const int linelen = 256; /* maximum length read from curl stdout lines */
@@ -102,8 +118,9 @@ void usage();
 void usage2(int , char *, ...);
 void warnuser(char *);
 char readanswer(char *answers);
+#if (ENABLEWEBSUBMIT != 0)
 int  websubmit();
-string remove_html_tags(string s);
+#endif
 
 int nwarnings;
 
@@ -341,7 +358,13 @@ int main(int argc, char **argv)
 		if ( c=='n' ) error(0,"submission aborted by user");
 	}
 
-	if ( use_websubmit ) return websubmit();
+	if ( use_websubmit ) {
+#if (ENABLEWEBSUBMIT != 0)
+		return websubmit();
+#else
+		error(0,"websubmit requested, but not available");
+#endif
+	}
 	
 	/* Make tempfile to submit */
 	tempfile = allocstr("%s/%s.XXXXXX.%s",submitdir,
@@ -459,9 +482,9 @@ void usage()
 "  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
 "  -s, --server=SERVER      submit to server SERVER\n"
 "  -t, --team=TEAM          submit as team TEAM\n"
-#if (ENABLEWEBSUBMIT != 0 && ENABLECMDSUBMIT != 0)
-"  -w, --web[=0|1]          submit to the webinterface or toggle; defaults to\n"
-"                               no and and should normally not be necessary\n"
+#if ( (ENABLEWEBSUBMIT != 0) && (ENABLECMDSUBMIT != 0) )
+"  -w, --web[=0|1]          submit to the webinterface or toggle;\n"
+"                               should normally not be necessary\n"
 #endif
 "  -v, --verbose[=LEVEL]    increase verbosity or set to LEVEL, where LEVEL\n"
 "                               must be numerically specified as in 'syslog.h'\n"
@@ -573,89 +596,15 @@ char readanswer(char *answers)
 	return c;
 }
 
-int websubmit()
+#if (ENABLEWEBSUBMIT != 0)
+
+size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 {
-	string cmdline, s;
-	char *cmd, *args[MAXARGS], *tmp;
-	char line[linelen];
-	int i, nargs, cpid, status;
-	int redir_fd[3];
-	FILE *rpipe;
-
-	/* Construct command and execute it */
-	cmd = allocstr("curl");
-	nargs = 0;
-	args[nargs++] = allocstr("-F");
-	args[nargs++] = allocstr("code=@%s",filename);
-	args[nargs++] = allocstr("-F");
-	args[nargs++] = allocstr("probid=%s",problem.c_str());
-	args[nargs++] = allocstr("-F");
-	args[nargs++] = allocstr("langext=%s",language.c_str());
-	args[nargs++] = allocstr("-F");
-	args[nargs++] = allocstr("submit=yes");
-	args[nargs++] = allocstr(WEBBASEURI "team/upload.php");
-
-	cmdline = string(cmd);
-	for(int i=0; i<nargs; i++) cmdline += ' ' + string(args[i]);
-
-	logmsg(LOG_INFO,"websubmit starting '%s'",cmdline.c_str());
+	stringstream *s = (stringstream *) sptr;
 	
-	redir_fd[0] = 0;
-	redir_fd[1] = 1;
-	redir_fd[2] = 1;
+	*s << string((char *)ptr,size*nmemb);
 	
-	if ( (cpid = execute(cmd,args,nargs,redir_fd,1))<0 ) {
-		error(errno,"starting '%s'",cmdline.c_str());
-	}
-	
-	if ( (rpipe = fdopen(redir_fd[1],"r"))==NULL ) {
-		error(errno,"binding stdout to stream");
-	}
-
-	/* Read stdout/stderr and find upload status */
-	while ( fgets(line,linelen,rpipe)!=NULL ) {
-
-		/* Remove newlines from end of line */
-		i = strlen(line)-1;
-		while ( i>=0 && (line[i]=='\n' || line[i]=='\r') ) line[i--] = 0;
-
-		/* Search line for upload status or errors */
- 		if ( (tmp = strstr(line,ERRMATCH))!=NULL ) {
-			error(0,"webserver returned: %s",&tmp[strlen(ERRMATCH)]);
- 		}
-		if ( strstr(line,"uploadstatus")!=NULL ) {
-			s = remove_html_tags(string(line));
-			if ( s.find("ERROR",0) !=string::npos ||
-				 s.find("failed",0)!=string::npos ) {
-				error(0,"webserver returned: %s",s.c_str());
-			}
-			logmsg(LOG_NOTICE,"webserver returned: %s",s.c_str());
-		}
-		
-	}
-
-	if ( fclose(rpipe)!=0 ) error(errno,"closing pipe");
-	if ( waitpid(cpid,&status,0)<0 ) error(errno,"waiting for '%s'",cmd);
-	
-	if ( WIFEXITED(status) && WEXITSTATUS(status)!=0 ) {
-		error(0,"'%s' failed with exitcode %d",cmd,WEXITSTATUS(status));
-	}
-
-	if ( ! WIFEXITED(status) ) {
-		if ( WIFSIGNALED(status) ) {
-			error(0,"'%s' terminated with signal %d",cmd,WTERMSIG(status));
-		}
-		if ( WIFSTOPPED(status) ) {
-			error(0,"'%s' stopped with signal %d",cmd,WSTOPSIG(status));
-		}
-		error(0,"'%s' aborted due to unknown error",cmd);
-	}
-	if ( status>0 ) error(0,"'%s' exited with exitcode %d",cmd,status);
-
-	free(cmd);
-	for(i=0; i<nargs; i++) free(args[i]);
-
-	return 0;
+	return size*nmemb;
 }
 
 string remove_html_tags(string s)
@@ -670,5 +619,100 @@ string remove_html_tags(string s)
 
 	return s;
 }
+
+int websubmit()
+{
+	CURL *handle;
+	CURLcode res;
+	char curlerrormsg[CURL_ERROR_SIZE];
+	struct curl_httppost *post = NULL;
+	struct curl_httppost *last = NULL;
+	char *url;
+	stringstream curloutput;
+	string line;
+	unsigned pos;
+	int uploadstatus_read;
+
+	url = allocstr(WEBBASEURI "team/upload.php");
+	
+	curlerrormsg[0] = 0;
+	
+	handle = curl_easy_init();
+
+/* helper macro's to easily set curl options and fill forms */
+#define curlsetopt(opt,val) \
+	if ( curl_easy_setopt(handle, CURLOPT_ ## opt, val)!=CURLE_OK ) { \
+		warning(0,"setting curl option '" #opt "': %s, aborting download",curlerrormsg); \
+		curl_easy_cleanup(handle); \
+		return 0; }
+#define curlformadd(nametype,namecont,valtype,valcont) \
+	if ( curl_formadd(&post, &last, \
+			CURLFORM_ ## nametype, namecont, \
+			CURLFORM_ ## valtype, valcont, \
+			CURLFORM_END) != 0 ) \
+		error(0,"libcurl could not add form field '%s'='%s'",namecont,valcont)
+
+	/* Fill post form */
+	curlformadd(COPYNAME,"code",   FILE,        filename);
+	curlformadd(COPYNAME,"probid", COPYCONTENTS,problem.c_str());
+	curlformadd(COPYNAME,"langext",COPYCONTENTS,extension.c_str());
+	curlformadd(COPYNAME,"submit", COPYCONTENTS,"submit");
+
+	/* Set options for post */
+	curlsetopt(ERRORBUFFER,   curlerrormsg);
+	curlsetopt(FAILONERROR,   1);
+	curlsetopt(FOLLOWLOCATION,1);
+	curlsetopt(MAXREDIRS,     10);
+	curlsetopt(TIMEOUT,       timeout_secs);
+	curlsetopt(URL,           url);
+	curlsetopt(HTTPPOST,      post);
+	curlsetopt(HTTPGET,       0);
+	curlsetopt(WRITEFUNCTION, writesstream);
+	curlsetopt(WRITEDATA,     (void *)&curloutput);
+	
+ 	if ( verbose >= LOG_DEBUG ) {
+		curlsetopt(VERBOSE,   1);
+	} else {
+		curlsetopt(NOPROGRESS,1);
+	}
+
+	logmsg(LOG_NOTICE,"connecting to %s",url);
+	
+	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
+		warning(0,"downloading '%s': %s",url,curlerrormsg);
+		curl_easy_cleanup(handle);
+		return 0;
+	}
+
+#undef curlsetopt
+#undef curlformadd
+
+	curl_formfree(post);
+	curl_easy_cleanup(handle);
+
+	// Read curl output and find upload status
+	uploadstatus_read = 0;
+	while ( getline(curloutput,line) ) {
+
+		// Search line for upload status or errors
+ 		if ( (pos=line.find(ERRMATCH,0))!=string::npos ) {
+			error(0,"webserver returned: %s",line.substr(pos+strlen(ERRMATCH)).c_str());
+ 		}
+		if ( line.find("uploadstatus",0)!=string::npos ) {
+			line = remove_html_tags(line);
+			if ( line.find("ERROR",0) !=string::npos ||
+				 line.find("failed",0)!=string::npos ) {
+				error(0,"webserver returned: %s",line.c_str());
+			}
+			logmsg(LOG_NOTICE,"webserver returned: %s",line.c_str());
+			uploadstatus_read = 1;
+		}
+	}
+
+	if ( ! uploadstatus_read ) error(0,"no upload status or error reported by webserver");
+	
+	return 0;
+}
+#endif /* ENABLEWEBSUBMIT != 0 */
 
 //  vim:ts=4:sw=4:
