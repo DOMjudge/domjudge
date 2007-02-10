@@ -28,7 +28,7 @@ if ( isset($_REQUEST['id']) ) {
 }
 
 // insert a new response (if posted)
-if ( isset($_REQUEST['submit'])	&& !empty($_REQUEST['bodytext']) ) {
+if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
 	// If database supports it, wrap this in a transaction so we
 	// either send the clarification AND mark it unread for everyone,
@@ -41,22 +41,22 @@ if ( isset($_REQUEST['submit'])	&& !empty($_REQUEST['bodytext']) ) {
 		                 (cid, submittime, recipient, body)
 		                 VALUES (%i, now(), %s, %s)',
 		                $cid,
-		                ( empty($_REQUEST['sendto']) ? NULL : $_REQUEST['sendto'] ),
-		                $_REQUEST['bodytext']);
+		                ( empty($_POST['sendto']) ? NULL : $_POST['sendto'] ),
+		                $_POST['bodytext']);
 	} else {
 		$newid = $DB->q('RETURNID INSERT INTO clarification
 		                 (cid, respid, submittime, recipient, body)
 		                 VALUES (%i, %i, now(), %s, %s)',
 		                $cid, $respid,
-		                ( empty($_REQUEST['sendto']) ? NULL : $_REQUEST['sendto'] ),
-		                $_REQUEST['bodytext']);
+		                ( empty($_POST['sendto']) ? NULL : $_POST['sendto'] ),
+		                $_POST['bodytext']);
 	}
 	if ( ! $isgeneral ) {
 		$DB->q('UPDATE clarification SET answered = 1 WHERE clarid = %i', $respid);
 	}
 	
 	// mark the messages as unread for the team(s)
-	if( empty($_REQUEST['sendto']) ) {
+	if( empty($_POST['sendto']) ) {
 		$teams = $DB->q('COLUMN SELECT login FROM team');
 		foreach($teams as $login) {
 			$DB->q('INSERT INTO team_unread (mesgid, type, team)
@@ -64,7 +64,7 @@ if ( isset($_REQUEST['submit'])	&& !empty($_REQUEST['bodytext']) ) {
 		}
 	} else {
 		$DB->q('INSERT INTO team_unread (mesgid, type, team)
-		        VALUES (%i, "clarification", %s)', $newid, $_REQUEST['sendto']);
+		        VALUES (%i, "clarification", %s)', $newid, $_POST['sendto']);
 	}
 
 	$DB->q('COMMIT');
@@ -79,9 +79,9 @@ if ( isset($_REQUEST['submit'])	&& !empty($_REQUEST['bodytext']) ) {
 }
 
 // (un)set 'answered' (if posted)
-if ( isset($_REQUEST['submit']) && isset($_REQUEST['answered']) ) {
+if ( isset($_POST['submit']) && isset($_POST['answered']) ) {
 	$DB->q('UPDATE clarification SET answered = %i WHERE clarid = %i',
-	       (int)$_REQUEST['answered'], $respid);
+	       (int)$_POST['answered'], $respid);
 
 	// redirect back to the original location
 	header('Location: ' . getBaseURI() . 'jury/clarification.php?id=' . $id);

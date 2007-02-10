@@ -22,13 +22,13 @@ $jdata = $DB->q('TUPLE SELECT j.*, s.*, t.*, c.contestname FROM judging j
 
 $sid = (int)$jdata['submitid'];
 
-if ( isset($_POST['cmd']) && $_POST['cmd'] == 'verify' ) {
+if ( $_POST['cmd'] == 'verify' ) {
 	$verifier = "";
 	if ( ! empty($_POST['verifier_selected']) ) $verifier = $_POST['verifier_selected'];
 	if ( ! empty($_POST['verifier_typed'])    ) $verifier = $_POST['verifier_typed'];
 	
 	$DB->q('UPDATE judging SET verified = %i, verifier = %s WHERE judgingid = %i',
-		   $_POST['val'], $verifier, $id);
+	       $_POST['val'], $verifier, $id);
 	
 	$jdata['verified'] = $_POST['val'];
 	$jdata['verifier'] = $verifier;
@@ -93,7 +93,7 @@ if ( ! (VERIFICATION_REQUIRED && $jdata['verified']) ) {
 		echo "by <input type=\"text\" size=\"10\" name=\"verifier_typed\" />\n";
 		$verifiers = $DB->q('SELECT DISTINCT verifier FROM judging
 		                     WHERE verifier IS NOT NULL AND verifier != ""
-                             ORDER BY verifier');
+		                     ORDER BY verifier');
 		if ( $verifiers->count() > 0 ) {
 			echo "or <select name=\"verifier_selected\" id=\"verifier_selected\">\n";
 			echo "	<option value=\"\"></option>\n";

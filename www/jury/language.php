@@ -23,12 +23,12 @@ if ( !empty($_POST['cmd']) ) {
 
 	if ( isset($_POST['cmd']['toggle_submit']) ) {
 		$DB->q('UPDATE language SET allow_submit = %i WHERE langid = %s',
-			   $_POST['val']['toggle_submit'], $id);
+		       $_POST['val']['toggle_submit'], $id);
 	}
 
 	if ( isset($_POST['cmd']['toggle_judge']) ) {
 		$DB->q('UPDATE language SET allow_judge = %i WHERE langid = %s',
-			   $_POST['val']['toggle_judge'], $id);
+		       $_POST['val']['toggle_judge'], $id);
 	}
 }
 

@@ -55,8 +55,8 @@ switch ( $_FILES['code']['error'] ) {
 
 $filename = $_FILES['code']['name'];
 
-/*	Determine the problem */
-$probid = @$_REQUEST['probid'];
+/* Determine the problem */
+$probid = @$_POST['probid'];
 
 if ( empty($probid) ) {
 	if ( strpos($filename, '.') === false ) {
@@ -71,8 +71,8 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
 
 if ( ! isset($prob) ) err("Unable to find problem '$probid'");
 
-/*	Determine the language */
-$langext = @$_REQUEST['langext'];
+/* Determine the language */
+$langext = @$_POST['langext'];
 
 if ( empty($langext) ) {
 	if ( strrpos($filename, '.') === false ) {

@@ -23,8 +23,8 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 
 /* optional restriction of submissions list to specific problem, language, etc. */
 $restrictions = array();
-if ( isset($_REQUEST['restrict']) ) {
-	list($key, $value) = explode(":",$_REQUEST['restrict'],2);
+if ( isset($_GET['restrict']) ) {
+	list($key, $value) = explode(":",$_GET['restrict'],2);
 	$restrictions[] = array( 'key' => $key , 'value' => $value );
 }
 
