@@ -337,6 +337,13 @@ The requirements for the deployment of this jury-system are:
        for using the command-line submit program)
 
 <item> wget (optionally for downloading LaTeX packages for documentation)
+
+<item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html">
+       (optionally for <htmlurl name="ICPC validator standard"
+        url="http://www.ecs.csus.edu/pc2/doc/valistandard.html"> compatibility)
+
+<item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">
+       (optionally to use the commandline submit client with the webinterface)
 </itemize>
 
 
@@ -466,8 +473,10 @@ specific adaptations can be made in <tt>submit/submit_copy.sh</tt>.
 When commandline submit is disabled in the configuration, the
 commandline submit client/daemon will still be built, but the submit
 client will now default to try to connect to the websubmit interface
-using <tt>curl</tt>. For this to work, <tt>curl</tt> must be locally
-available and in the path for the teams.
+using <tt>libcurl</tt>. For this, the <tt>libcurl</tt> library
+development files must be available at compiletime (the submit client
+is statically linked to libcurl to avoid runtime dependencies on
+libcurl).
 
 Although the commandline submit daemon is thus not strictly necessary,
 it does add an advantage: it is more secure than the webinterface

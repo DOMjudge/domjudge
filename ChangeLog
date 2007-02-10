@@ -14,7 +14,8 @@ Version 2.0.0 - SVN
    changing database name.
  - Fix possible buffer overflow in submitcommon.cc; Thanks to
    Lennert Buytenhek for pointing out.
- - Add option to commandline submit to use websubmit (Closes: #1582376).
+ - Add option to commandline submit to use websubmit (Closes: #1582376)
+   and use libcurl for that (Closes: #1626222).
  - Add unfreezetime field to contests which allows to display the final
    standings to teams and public, and a button to unfreeze right away
    (Closes: #1582370).
