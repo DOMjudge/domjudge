@@ -68,30 +68,29 @@ using namespace std;
 #define PROGRAM "submit"
 #define AUTHORS "Peter van de Werken & Jaap Eldering"
 
-/* Convert COMPILE*=0/1 to ENABLE* being defined or not */
-#if    COMPILEWEBSUBMIT == 0
-#undef COMPILEWEBSUBMIT
+/* Check whether default submission method is available; bail out if not */
+#if ( SUBMITCLIENT_METHOD == 1 ) && ( ENABLE_CMDSUBMIT_SERVER != 1 )
+#error "Commandline default submission requested, but server not enabled."
 #endif
-#if    COMPILECMDSUBMIT == 0
-#undef COMPILECMDSUBMIT
+#if ( SUBMITCLIENT_METHOD == 2 ) && ( ENABLE_WEBSUBMIT_SERVER != 1 )
+#error "Webinterface default submission requested, but server not enabled."
+#endif
+#if ( SUBMITCLIENT_METHOD == 2 ) && ! defined( LIBCURL )
+#error "Webinterface default submission requested, but libcURL not available."
+#endif
+#if ( SUBMITCLIENT_METHOD != 1 ) && ( SUBMITCLIENT_METHOD != 2 )
+#error "Unknown submission method requested."
 #endif
 
-/* Bail out if websubmit compilation requested but curl not available */
-#ifdef  COMPILEWEBSUBMIT
-#ifndef LIBCURL
-#error  "Websubmit requested, but libcURL not available. Disable websubmit compilation or install libcurl"
+/* Define {CMD,WEB}SUBMIT as available */
+#if ( ENABLE_CMDSUBMIT_SERVER == 1 )
+#define CMDSUBMIT 1
 #endif
-#endif
-
-/* Check that either commanddline or websubmit is available */
-#ifndef COMPILEWEBSUBMIT
-#ifndef COMPILECMDSUBMIT
-#error "Neither commandline nor websubmit can be used."
-#endif
+#if ( ENABLE_WEBSUBMIT_SERVER == 1 && defined( LIBCURL ) )
+#define WEBSUBMIT 1
 #endif
 
 const int timeout_secs = 60; /* seconds before send/receive timeouts with an error */
-const int linelen = 256; /* maximum length read from curl stdout lines */
 
 extern int errno;
 
@@ -129,7 +128,11 @@ void usage();
 void usage2(int , char *, ...);
 void warnuser(char *);
 char readanswer(char *answers);
-#ifdef COMPILEWEBSUBMIT
+
+#ifdef CMDSUBMIT
+int  cmdsubmit();
+#endif
+#ifdef WEBSUBMIT
 int  websubmit();
 #endif
 
@@ -152,19 +155,13 @@ int main(int argc, char **argv)
 {
 	unsigned i,j;
 	int c;
-	int redir_fd[3];
 	char *ptr;
-	char *args[MAXARGS];
 	char *homedir;
 	struct stat fstats;
 	string filebase, fileext;
 	char *lang_exts;
 	char *lang, *ext;
 	char *lang_ptr, *ext_ptr;
-	struct timeval timeout;
-	struct addrinfo hints;
-	char *port_str;
-	int err;
 
 	progname = argv[0];
 	stdlog = NULL;
@@ -231,7 +228,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Parse command-line options */
-#ifdef COMPILECMDSUBMIT
+#if ( SUBMITCLIENT_METHOD == 1 )
 	use_websubmit = 0;
 #else
 	use_websubmit = 1;
@@ -374,114 +371,19 @@ int main(int argc, char **argv)
 	}
 
 	if ( use_websubmit ) {
-#ifdef COMPILEWEBSUBMIT
+#ifdef WEBSUBMIT
 		return websubmit();
 #else
 		error(0,"websubmit requested, but not available");
 #endif
-	}
-	
-	/* Make tempfile to submit */
-	tempfile = allocstr("%s/%s.XXXXXX.%s",submitdir,
-	                    problem.c_str(),extension.c_str());
-	temp_fd = mkstemps(tempfile,extension.length()+1);
-	if ( temp_fd<0 || strlen(tempfile)==0 ) {
-		error(errno,"mkstemps cannot create tempfile");
+	} else {
+#ifdef CMDSUBMIT
+		return cmdsubmit();
+#else
+		error(0,"cmdsubmit requested, but not available");
+#endif
 	}
 
-	/* Construct copy command and execute it */
-	args[0] = filename;
-	args[1] = tempfile;
-	redir_fd[0] = redir_fd[1] = redir_fd[2] = 0;
-	if ( execute(COPY_CMD,args,2,redir_fd,1)!=0 ) {
-		error(0,"cannot copy `%s' to `%s'",filename,tempfile);
-	}
-	
-	if ( chmod(tempfile,USERPERMFILE)!=0 ) {
-		error(errno,"setting permissions on `%s'",tempfile);
-	}
-
-	logmsg(LOG_INFO,"copied `%s' to tempfile `%s'",filename,tempfile);
-
-	/* Connect to the submission server */
-	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",
-	       server.c_str(),port);
-	
-	/* Set preferred network connection options: use both IPv4 and
- 	   IPv6 by default */
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_flags    = AI_ADDRCONFIG | AI_CANONNAME;
-	hints.ai_socktype = SOCK_STREAM;
- 	hints.ai_protocol = IPPROTO_TCP;
-
-	port_str = allocstr("%d",port);
-	if ( (err = getaddrinfo(server.c_str(),port_str,&hints,&server_ais)) ) {
-		error(0,"getaddrinfo: %s",gai_strerror(err));
-	}
-	free(port_str);
-
-	/* Try to connect to addresses for server in given order */
-	socket_fd = -1;
-	for(server_ai=server_ais; server_ai!=NULL; server_ai=server_ai->ai_next) {
-		
-		err = getnameinfo(server_ai->ai_addr,server_ai->ai_addrlen,server_addr,
-		                  sizeof(server_addr),NULL,0,NI_NUMERICHOST);
-		if ( err!=0 ) error(0,"getnameinfo: %s",gai_strerror(err));
-
-		logmsg(LOG_DEBUG,"trying to connect to address `%s'",server_addr);
-	
-		socket_fd = socket(server_ai->ai_family,server_ai->ai_socktype,
-		                   server_ai->ai_protocol);
-		if ( socket_fd>=0 ) {
-			if ( connect(socket_fd,server_ai->ai_addr,server_ai->ai_addrlen)==0 ) {
-				break;
-			} else {
-				close(socket_fd);
-				socket_fd = -1;
-			}
-		}
-	}
-	if ( socket_fd<0 ) error(0,"cannot connect to the server");
-
-	/* Set socket timeout option on read/write */
-	timeout.tv_sec  = timeout_secs;
-	timeout.tv_usec = 0;
-	
-	if ( setsockopt(socket_fd,SOL_SOCKET,SO_SNDTIMEO,&timeout,sizeof(timeout)) < 0) {
-		error(errno,"setting socket option");
-	}
-
-	if ( setsockopt(socket_fd,SOL_SOCKET,SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0) {
-		error(errno,"setting socket option");
-	}
-
-	logmsg(LOG_INFO,"connected, server address is `%s'",server_addr);
-
-	receive(socket_fd);
-
-	/* Send submission info */
-	logmsg(LOG_NOTICE,"sending data...");
-	sendit(socket_fd,"+team %s",team.c_str());
-	receive(socket_fd);
-	sendit(socket_fd,"+problem %s",problem.c_str());
-	receive(socket_fd);
-	sendit(socket_fd,"+language %s",extension.c_str());
-	receive(socket_fd);
-	sendit(socket_fd,"+filename %s",gnu_basename(tempfile));
-	receive(socket_fd);
-	sendit(socket_fd,"+done");
-
-	/* Keep reading until end of file, then check for errors */
-	while ( receive(socket_fd) );
-	if ( strncasecmp(lastmesg,"done",4)!=0 ) {
-		error(0,"connection closed unexpectedly");
-	}
-
-	freeaddrinfo(server_ais);
-	
-	logmsg(LOG_NOTICE,"submission successful");
-
-    return 0;
 }
 
 void usage()
@@ -497,11 +399,9 @@ void usage()
 "  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
 "  -s, --server=SERVER      submit to server SERVER\n"
 "  -t, --team=TEAM          submit as team TEAM\n"
-#ifdef COMPILEWEBSUBMIT
-#ifdef COMPILECMDSUBMIT
+#if defined( WEBSUBMIT ) && defined( CMDSUBMIT )
 "  -w, --web[=0|1]          submit to the webinterface or toggle;\n"
 "                               should normally not be necessary\n"
-#endif
 #endif
 "  -v, --verbose[=LEVEL]    increase verbosity or set to LEVEL, where LEVEL\n"
 "                               must be numerically specified as in 'syslog.h'\n"
@@ -613,7 +513,123 @@ char readanswer(char *answers)
 	return c;
 }
 
-#ifdef COMPILEWEBSUBMIT
+#ifdef CMDSUBMIT
+
+int cmdsubmit()
+{
+	int redir_fd[3];
+	char *args[MAXARGS];
+	struct timeval timeout;
+	struct addrinfo hints;
+	char *port_str;
+	int err;
+
+	/* Make tempfile to submit */
+	tempfile = allocstr("%s/%s.XXXXXX.%s",submitdir,
+	                    problem.c_str(),extension.c_str());
+	temp_fd = mkstemps(tempfile,extension.length()+1);
+	if ( temp_fd<0 || strlen(tempfile)==0 ) {
+		error(errno,"mkstemps cannot create tempfile");
+	}
+
+	/* Construct copy command and execute it */
+	args[0] = filename;
+	args[1] = tempfile;
+	redir_fd[0] = redir_fd[1] = redir_fd[2] = 0;
+	if ( execute(COPY_CMD,args,2,redir_fd,1)!=0 ) {
+		error(0,"cannot copy `%s' to `%s'",filename,tempfile);
+	}
+	
+	if ( chmod(tempfile,USERPERMFILE)!=0 ) {
+		error(errno,"setting permissions on `%s'",tempfile);
+	}
+
+	logmsg(LOG_INFO,"copied `%s' to tempfile `%s'",filename,tempfile);
+
+	/* Connect to the submission server */
+	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",
+	       server.c_str(),port);
+	
+	/* Set preferred network connection options: use both IPv4 and
+ 	   IPv6 by default */
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_flags    = AI_ADDRCONFIG | AI_CANONNAME;
+	hints.ai_socktype = SOCK_STREAM;
+ 	hints.ai_protocol = IPPROTO_TCP;
+
+	port_str = allocstr("%d",port);
+	if ( (err = getaddrinfo(server.c_str(),port_str,&hints,&server_ais)) ) {
+		error(0,"getaddrinfo: %s",gai_strerror(err));
+	}
+	free(port_str);
+
+	/* Try to connect to addresses for server in given order */
+	socket_fd = -1;
+	for(server_ai=server_ais; server_ai!=NULL; server_ai=server_ai->ai_next) {
+		
+		err = getnameinfo(server_ai->ai_addr,server_ai->ai_addrlen,server_addr,
+		                  sizeof(server_addr),NULL,0,NI_NUMERICHOST);
+		if ( err!=0 ) error(0,"getnameinfo: %s",gai_strerror(err));
+
+		logmsg(LOG_DEBUG,"trying to connect to address `%s'",server_addr);
+	
+		socket_fd = socket(server_ai->ai_family,server_ai->ai_socktype,
+		                   server_ai->ai_protocol);
+		if ( socket_fd>=0 ) {
+			if ( connect(socket_fd,server_ai->ai_addr,server_ai->ai_addrlen)==0 ) {
+				break;
+			} else {
+				close(socket_fd);
+				socket_fd = -1;
+			}
+		}
+	}
+	if ( socket_fd<0 ) error(0,"cannot connect to the server");
+
+	/* Set socket timeout option on read/write */
+	timeout.tv_sec  = timeout_secs;
+	timeout.tv_usec = 0;
+	
+	if ( setsockopt(socket_fd,SOL_SOCKET,SO_SNDTIMEO,&timeout,sizeof(timeout)) < 0) {
+		error(errno,"setting socket option");
+	}
+
+	if ( setsockopt(socket_fd,SOL_SOCKET,SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0) {
+		error(errno,"setting socket option");
+	}
+
+	logmsg(LOG_INFO,"connected, server address is `%s'",server_addr);
+
+	receive(socket_fd);
+
+	/* Send submission info */
+	logmsg(LOG_NOTICE,"sending data...");
+	sendit(socket_fd,"+team %s",team.c_str());
+	receive(socket_fd);
+	sendit(socket_fd,"+problem %s",problem.c_str());
+	receive(socket_fd);
+	sendit(socket_fd,"+language %s",extension.c_str());
+	receive(socket_fd);
+	sendit(socket_fd,"+filename %s",gnu_basename(tempfile));
+	receive(socket_fd);
+	sendit(socket_fd,"+done");
+
+	/* Keep reading until end of file, then check for errors */
+	while ( receive(socket_fd) );
+	if ( strncasecmp(lastmesg,"done",4)!=0 ) {
+		error(0,"connection closed unexpectedly");
+	}
+
+	freeaddrinfo(server_ais);
+	
+	logmsg(LOG_NOTICE,"submission successful");
+
+    return 0;
+}
+
+#endif /* CMDSUBMIT */
+
+#ifdef WEBSUBMIT
 
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 {
@@ -730,6 +746,6 @@ int websubmit()
 	
 	return 0;
 }
-#endif /* ifdef COMPILEWEBSUBMIT */
+#endif /* WEBSUBMIT */
 
 //  vim:ts=4:sw=4:

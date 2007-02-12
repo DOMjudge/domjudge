@@ -16,7 +16,7 @@ define ('LOGFILE', LOGDIR.'/submit.log');
 
 require (SYSTEM_ROOT . '/lib/init.php');
 
-if ( ! ENABLEWEBSUBMIT ) {
+if ( ! ENABLE_WEBSUBMIT_SERVER ) {
 	error("Websubmit disabled in config!");
 }
 

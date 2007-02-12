@@ -39,7 +39,7 @@ $res = $DB->q('KEYTABLE SELECT type AS ARRAYKEY, COUNT(*) AS count FROM team_unr
 clarifications</a>
 <?	} ?>
 <a target="_TOP" href="scoreboard.php">scoreboard</a>
-<? if ( ENABLEWEBSUBMIT ) { ?>
+<? if ( ENABLE_WEBSUBMIT_SERVER ) { ?>
 <a target="_TOP" href="websubmit.php">submit</a>
 <? } ?>
 </div>

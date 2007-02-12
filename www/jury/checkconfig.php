@@ -42,7 +42,7 @@ echo "</p>\n\n";
 
 <p>
 <?php 
-if ( ENABLEWEBSUBMIT ) {
+if ( ENABLE_WEBSUBMIT_SERVER ) {
 
 	echo "Checking for writeable incoming dir... ";
 	if ( ! is_writable(INCOMINGDIR) ) {

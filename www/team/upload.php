@@ -7,7 +7,7 @@
 
 require('init.php');
 
-if ( ! ENABLEWEBSUBMIT ) {
+if ( ! ENABLE_WEBSUBMIT_SERVER ) {
 	error("Websubmit disabled!");
 }
 
