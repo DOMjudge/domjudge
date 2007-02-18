@@ -22,7 +22,7 @@ $jdata = $DB->q('TUPLE SELECT j.*, s.*, t.*, c.contestname FROM judging j
 
 $sid = (int)$jdata['submitid'];
 
-if ( $_POST['cmd'] == 'verify' ) {
+if ( @$_POST['cmd'] == 'verify' ) {
 	$verifier = "";
 	if ( ! empty($_POST['verifier_selected']) ) $verifier = $_POST['verifier_selected'];
 	if ( ! empty($_POST['verifier_typed'])    ) $verifier = $_POST['verifier_typed'];
