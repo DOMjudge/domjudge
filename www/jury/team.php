@@ -85,7 +85,7 @@ if ( isset($key) ) {
 	case 'probid':    $keystr = "problem";   break;
 	case 'langid':    $keystr = "language";  break;
 	case 'judgehost': $keystr = "judgehost"; break;
-	default:          $keystr = $key;
+	default:          error("Restriction on $key not allowed.");
 	}
 	echo ' for ' . htmlspecialchars($keystr) . ': ' . htmlspecialchars($value);
 }

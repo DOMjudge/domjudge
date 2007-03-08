@@ -31,7 +31,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	$keyvalmatch = '';
 	if ( !empty($restrictions) ) {
 		foreach ( $restrictions as $restriction ) {
-			$keyvalmatch .= ' s.' . $restriction['key'] . ' = "' .
+			$keyvalmatch .= ' s.' . mysql_escape_string($restriction['key']) . ' = "' .
 			                mysql_escape_string($restriction['value']) . '" AND';
 		}
 	}
