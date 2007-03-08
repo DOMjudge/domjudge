@@ -2,7 +2,7 @@
 // $Id$
 
 /******************************************************************************
-* lib.database.php version 1.1.0
+* lib.database.php version 1.2.0
 ******************************************************************************/
 
 /******************************************************************************
@@ -295,6 +295,7 @@ class db
 		%i: integer
 		%f: floating point
 		%l: literal (no quoting/escaping)
+		%_: nothing, but do process one argument
 		%A?: array of type ?, comma separated
 		%S: array of key => ., becomes key=., comma separated
 
@@ -378,9 +379,12 @@ class db
 				$literal=true;
 				continue;
 			}
+			if (!$argv) {
+				user_error("Not enough arguments", E_USER_ERROR);
+			}
+			$val = array_shift($argv);
 			switch ($part{0}) {
 				case 'A':
-					$val = array_shift($argv);
 					if (!is_array($val) || !$val) {
 						user_error("%A in \$DATABASE->q() has to correspond to a "
 							."non-empty array, it's now a "
@@ -392,7 +396,6 @@ class db
 					$query .= substr($part,2);
 					break;
 				case 'S':
-					$val = array_shift($argv);
 					$query .= implode(', ', array_map(create_function(
 						'$key,$value', 'return db_vw($key, $value,
 						DB_SET);'),array_keys($val),$val));
@@ -404,12 +407,23 @@ class db
 				case 'f':
 				case 'l':
 				case '.':
-					$val = array_shift($argv);
 					$query .= db__val2sql($val, $part{0});
 					$query .= substr($part,1);
 					break;
+				case '_': // eat one argument
+					$query .= substr($part,1);
+					break;
+				default:
+					user_error("Unkown %-code: ".$part{0}, E_USER_ERROR);
 			}
 
+		}
+
+		if ($literal) {
+			user_error("Internal error in q()", E_USER_ERROR);
+		}
+		if ($argv) {
+			user_error("Not all arguments to q() are processed", E_USER_ERROR);
 		}
 
 		$res = $this->_execute($query);
