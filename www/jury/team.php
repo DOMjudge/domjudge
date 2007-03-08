@@ -10,7 +10,8 @@ $pagename = basename($_SERVER['PHP_SELF']);
 $id = $_REQUEST['id'];
 
 require('init.php');
-$refresh = '15;url='.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id);
+$refresh = '15;url='.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id).
+	(isset($_GET['restrict'])?'&restrict='.urlencode($_GET['restrict']):'');
 $title = 'Team '.htmlspecialchars(@$id);
 
 if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
