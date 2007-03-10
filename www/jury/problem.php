@@ -79,7 +79,7 @@ if ( isset($data['color']) ) {
 
 <?php
 
-$restrictions = array( array( 'key' => 'probid', 'value' => $id ) );
+$restrictions = array( 'probid' => $id );
 putSubmissions($restrictions, TRUE);
 
 require('../footer.php');

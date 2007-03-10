@@ -26,7 +26,7 @@ if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
 $restrictions = array();
 if ( isset($_GET['restrict']) ) {
 	list($key, $value) = explode(":",$_GET['restrict'],2);
-	$restrictions[] = array( 'key' => $key , 'value' => $value );
+	$restrictions[$key] = $value;
 }
 
 $row = $DB->q('TUPLE SELECT t.*, c.name AS catname, a.name AS affname FROM team t
@@ -92,7 +92,7 @@ if ( isset($key) ) {
 }
 echo "</h3>\n\n";
 
-$restrictions[] = array( 'key' => 'team' , 'value' => $id );
+$restrictions['team'] = $id;
 putSubmissions($restrictions, TRUE);
 
 require('../footer.php');

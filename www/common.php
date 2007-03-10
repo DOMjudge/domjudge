@@ -28,24 +28,23 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	 * is restricted.
 	 */
 
-	$keyvalmatch = '';
-	if ( !empty($restrictions) ) {
-		foreach ( $restrictions as $restriction ) {
-			$keyvalmatch .= ' s.' . mysql_escape_string($restriction['key']) . ' = "' .
-			                mysql_escape_string($restriction['value']) . '" AND';
-		}
-	}
-
 	$contdata = getCurContest(TRUE);
 	$cid = $contdata['cid'];
- 
+	
 	$res = $DB->q('SELECT s.submitid, s.team, s.probid, s.langid, s.submittime, s.judgehost,
 	               t.name AS teamname, p.name AS probname, l.name AS langname
 	               FROM submission s
 	               LEFT JOIN team     t ON (t.login  = s.team)
 	               LEFT JOIN problem  p ON (p.probid = s.probid)
 	               LEFT JOIN language l ON (l.langid = s.langid)
-	               WHERE ' . $keyvalmatch . ' s.cid = %i ORDER BY s.submittime DESC',$cid);
+	               WHERE s.cid = %i ' .
+	               (!empty($restrictions['team']) ? ' AND s.team = %s' : '%_') .
+	               (!empty($restrictions['probid']) ? ' AND s.probid = %s' : '%_') .
+	               (!empty($restrictions['langid']) ? ' AND s.langid = %s' : '%_') .
+	               (!empty($restrictions['judgehost']) ? ' AND s.judgehost = %s' : '%_') .
+	               'ORDER BY s.submittime DESC',
+	               $cid, @$restrictions['team'], @$restrictions['probid'],
+	               @$restrictions['langid'], @$restrictions['judgehost']);
 
 	// nothing found...
 	if( $res->count() == 0 ) {
