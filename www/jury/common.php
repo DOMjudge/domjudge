@@ -9,6 +9,8 @@
 
 /**
  * Outputs a list of judgings, limited by key=value
+ *
+ * Note that $key must never be from an untrusted source!
  */
 function putJudgings($key, $value) {
 	global $DB;
@@ -50,6 +52,8 @@ function putJudgings($key, $value) {
 /**
  * Marks a set of submissions for rejudging, limited by key=value
  * key has to be a full quantifier, e.g. "submission.team"
+ *
+ * Note that $key must never be from an untrusted source!
  */
 function rejudge($key, $value) {
 	global $DB;
