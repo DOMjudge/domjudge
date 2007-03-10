@@ -10,17 +10,24 @@
 /**
  * Outputs a list of judgings, limited by key=value
  *
- * Note that $key must never be from an untrusted source!
+ * $key can only be one of (submitid,judgehost)
  */
 function putJudgings($key, $value) {
 	global $DB;
+	
+	if ( empty($key) || empty($value) ) {
+		error("no key or value passed for selection in judging output");
+	}
 
 	// get the judgings for a specific key and value pair
 	// select only specific fields to avoid retrieving large blobs
 	$res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
 	               result, verified, valid FROM judging
-	               WHERE ' . $key . ' = %s AND cid = %i ORDER BY starttime DESC',
-	              $value, getCurContest());
+	               WHERE cid = %i AND ' .
+				   ( $key == 'submitid' ? 'submitid = %s' : '' ) .
+				   ( $key == 'judgehost' ? 'judgehost = %s' : '' ) .
+				   ' ORDER BY starttime DESC',
+	              getCurContest(), $value);
 
 	if( $res->count() == 0 ) {
 		echo "<p><em>No judgings.</em></p>\n\n";
@@ -53,7 +60,8 @@ function putJudgings($key, $value) {
  * Marks a set of submissions for rejudging, limited by key=value
  * key has to be a full quantifier, e.g. "submission.team"
  *
- * Note that $key must never be from an untrusted source!
+ * $key must be one of (judging.judgehost, submission.team, submission.probid,
+ * submission.langid, submission.submitid)
  */
 function rejudge($key, $value) {
 	global $DB;
@@ -69,18 +77,29 @@ function rejudge($key, $value) {
 	$DB->q('UPDATE judging
 	        LEFT JOIN submission ON (submission.submitid = judging.submitid)
 	        SET valid = 0, judgehost = NULL, judgemark = NULL
-	        WHERE ' . $key . ' = %s AND judging.cid = %i AND valid = 1 AND
-	        ( result IS NULL OR result != "correct" )',
-	       $value, $cid);
+	        WHERE judging.cid = %i AND valid = 1 AND
+	        ( result IS NULL OR result != "correct" ) AND ' .
+	        ( $key == 'judging.judgehost' ? 'judging.judgehost = %s' : '' ) .
+	        ( $key == 'submission.team' ? 'submission.team = %s' : '' ) .
+	        ( $key == 'submission.probid' ? 'submission.probid = %s' : '' ) .
+	        ( $key == 'submission.langid' ? 'submission.langid = %s' : '' ) .
+	        ( $key == 'submission.submitid' ? 'submission.submitid = %s' : '' );
+	       $cid, $value);
 */
 	
 	// Using MySQL < 4.0.4:
 
 	$res = $DB->q('SELECT * FROM judging
 	               LEFT JOIN submission ON (submission.submitid = judging.submitid)
-	               WHERE ' . $key . ' = %s AND judging.cid = %i AND valid = 1 AND
-	               ( result IS NULL OR result != "correct" )',
-	              $value, $cid);
+	               WHERE judging.cid = %i AND valid = 1 AND
+	               ( result IS NULL OR result != "correct" ) AND ' .
+	               ( $key == 'judging.judgehost' ? 'judging.judgehost = %s' : '' ) .
+	               ( $key == 'submission.team' ? 'submission.team = %s' : '' ) .
+	               ( $key == 'submission.probid' ? 'submission.probid = %s' : '' ) .
+	               ( $key == 'submission.langid' ? 'submission.langid = %s' : '' ) .
+	               ( $key == 'submission.submitid' ? 'submission.submitid = %s' : '' )
+				   ,
+	              $cid, $value);
 
 	while ( $jud = $res->next() ) {
 		$DB->q('START TRANSACTION');
