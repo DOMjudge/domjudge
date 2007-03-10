@@ -38,10 +38,10 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	               LEFT JOIN problem  p ON (p.probid = s.probid)
 	               LEFT JOIN language l ON (l.langid = s.langid)
 	               WHERE s.cid = %i ' .
-	               (!empty($restrictions['team']) ? ' AND s.team = %s' : '%_') .
-	               (!empty($restrictions['probid']) ? ' AND s.probid = %s' : '%_') .
-	               (!empty($restrictions['langid']) ? ' AND s.langid = %s' : '%_') .
-	               (!empty($restrictions['judgehost']) ? ' AND s.judgehost = %s' : '%_') .
+	               (!empty($restrictions['team']) ? 'AND s.team = %s ' : '%_') .
+	               (!empty($restrictions['probid']) ? 'AND s.probid = %s ' : '%_') .
+	               (!empty($restrictions['langid']) ? 'AND s.langid = %s ' : '%_') .
+	               (!empty($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') .
 	               'ORDER BY s.submittime DESC',
 	               $cid, @$restrictions['team'], @$restrictions['probid'],
 	               @$restrictions['langid'], @$restrictions['judgehost']);
