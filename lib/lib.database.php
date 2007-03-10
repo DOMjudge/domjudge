@@ -2,14 +2,14 @@
 // $Id$
 
 /******************************************************************************
-* lib.database.php version 1.2.0
+* lib.database.php version 1.2.1
 ******************************************************************************/
 
 /******************************************************************************
 *    Licence                                                                  *
 *******************************************************************************
 
-Copyright (C) 2001-2006 Jeroen van Wolffelaar <jeroen@php.net>, et al.
+Copyright (C) 2001-2007 Jeroen van Wolffelaar <jeroen@php.net>, et al.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -133,7 +133,7 @@ function db__connect($database,$host,$user,$pass,$persist=TRUE)
 			"(host=$host,user=$user,password=".ereg_replace('.','*',$pass).")",
 			E_USER_ERROR);
 	mysql_select_db($database,$db__connection)
-			or error("Could not select database '$database': ".
+			or user_error("Could not select database '$database': ".
 				mysql_error($db__connection),
 				E_USER_ERROR);
 	return $db__connection;
