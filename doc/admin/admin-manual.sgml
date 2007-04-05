@@ -1018,6 +1018,22 @@ only when actually necessary, since it puts quite a load on the
 database.
 
 
+<sect>Balloons
+<p>
+
+Although not strictly part of the scoreboard, many contests hand out balloons
+to teams that solve a particular problem. DOMjudge can help in this process:
+a balloons notification daemon is available that will notify the runners when
+a new balloon needs to be handed out.
+
+Use the BALLOON_CMD option to define how notifications are sent. Examples are
+to mail to a specific mailbox or to send prints to a printer. When configured,
+start <tt>bin/balloons.php</tt> and notification will start.
+
+Notifications will continue even after the scoreboard is frozen. Stop the balloons
+daemon when you don't want balloons to be handed out anymore.
+
+
 <chapt>Security <label id="security">
 <p>
 
