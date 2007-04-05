@@ -152,6 +152,13 @@ function putTeam($login) {
 
 	$affillogo = "../images/affiliations/" . urlencode($team['affilid']) . ".png";
 	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";
+	$teamimage = "../images/teams/" . urlencode($team['login']) . ".jpg";
+
+	if ( is_readable($teamimage) ) {
+		echo '<img id="teampicture" src="' . $teamimage .
+			'" alt="Picture of team ' .
+			htmlentities($team['name']) . '" />';
+	}
 
 	echo "<h1>Team ".htmlentities($team['name'])."</h1>\n\n";
 ?>
