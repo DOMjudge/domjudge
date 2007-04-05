@@ -35,6 +35,8 @@ Version 2.0.0 - SVN
    members field in the SQL 'team' table.
  - Unify documentation into an administrator's manual, a judgers manual
    and a team manual.
+ - Balloon notifications can continue after scoreboard freeze, and will
+   list all balloons a team is supposed to have.
 
 Version 1.3.0 - 6 October 2006
 ------------------------------
