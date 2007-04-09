@@ -23,7 +23,7 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 
 /* (new) clarification info */
 $res = $DB->q('KEYTABLE SELECT type AS ARRAYKEY, COUNT(*) AS count FROM team_unread
-               WHERE team = %s GROUP BY type', $login);
+               WHERE teamid = %s GROUP BY type', $login);
 
 ?>
 <div id="menutop">

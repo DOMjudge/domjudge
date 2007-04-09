@@ -58,9 +58,9 @@ function putJudgings($key, $value) {
 
 /**
  * Marks a set of submissions for rejudging, limited by key=value
- * key has to be a full quantifier, e.g. "submission.team"
+ * key has to be a full quantifier, e.g. "submission.teamid"
  *
- * $key must be one of (judging.judgehost, submission.team, submission.probid,
+ * $key must be one of (judging.judgehost, submission.teamid, submission.probid,
  * submission.langid, submission.submitid)
  */
 function rejudge($key, $value) {
@@ -80,7 +80,7 @@ function rejudge($key, $value) {
 	        WHERE judging.cid = %i AND valid = 1 AND
 	        ( result IS NULL OR result != "correct" ) AND ' .
 	        ( $key == 'judging.judgehost' ? 'judging.judgehost = %s' : '' ) .
-	        ( $key == 'submission.team' ? 'submission.team = %s' : '' ) .
+	        ( $key == 'submission.teamid' ? 'submission.teamid = %s' : '' ) .
 	        ( $key == 'submission.probid' ? 'submission.probid = %s' : '' ) .
 	        ( $key == 'submission.langid' ? 'submission.langid = %s' : '' ) .
 	        ( $key == 'submission.submitid' ? 'submission.submitid = %s' : '' );
@@ -94,7 +94,7 @@ function rejudge($key, $value) {
 	               WHERE judging.cid = %i AND valid = 1 AND
 	               ( result IS NULL OR result != "correct" ) AND ' .
 	               ( $key == 'judging.judgehost' ? 'judging.judgehost = %s' : '' ) .
-	               ( $key == 'submission.team' ? 'submission.team = %s' : '' ) .
+	               ( $key == 'submission.teamid' ? 'submission.teamid = %s' : '' ) .
 	               ( $key == 'submission.probid' ? 'submission.probid = %s' : '' ) .
 	               ( $key == 'submission.langid' ? 'submission.langid = %s' : '' ) .
 	               ( $key == 'submission.submitid' ? 'submission.submitid = %s' : '' )

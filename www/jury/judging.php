@@ -16,7 +16,7 @@ if ( ! $id ) error ("Missing judging id");
 
 $jdata = $DB->q('TUPLE SELECT j.*, s.*, t.*, c.contestname FROM judging j
                  LEFT JOIN submission s USING (submitid)
-                 LEFT JOIN team    t ON (t.login = s.team)
+                 LEFT JOIN team    t ON (t.login = s.teamid)
                  LEFT JOIN contest c ON (c.cid = j.cid)
                  WHERE judgingid = %i', $id);
 
@@ -34,7 +34,7 @@ if ( @$_POST['cmd'] == 'verify' ) {
 	$jdata['verifier'] = $verifier;
 	
 	if ( VERIFICATION_REQUIRED ) {
-		calcScoreRow($jdata['cid'], $jdata['team'], $jdata['probid']);
+		calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
 	}
 }
 
@@ -54,10 +54,10 @@ if ( @$jdata['endtime'] ) {
 <table>
 <tr><td>Submission:</td><td>
 <a href="submission.php?id=<?=$sid.'">s'.$sid.' / <span class="teamid">'.
-	$jdata['team'].	'</span> / '. htmlspecialchars($jdata['probid'].' / '.$jdata['langid'])?></a></td></tr>
+	$jdata['teamid'].	'</span> / '. htmlspecialchars($jdata['probid'].' / '.$jdata['langid'])?></a></td></tr>
 <tr><td>Contest:</td><td><?=htmlentities($jdata['contestname'])?></td></tr>
-<tr><td>Team:</td><td><a href="team.php?id=<?=urlencode($jdata['team']).
-	'"><span class="teamid">'. htmlspecialchars($jdata['team'])."</span>: ".
+<tr><td>Team:</td><td><a href="team.php?id=<?=urlencode($jdata['teamid']).
+	'"><span class="teamid">'. htmlspecialchars($jdata['teamid'])."</span>: ".
 	htmlentities($jdata['name'])?></a></td></tr>
 <tr><td>Submittime:</td><td><?= htmlspecialchars($jdata['submittime']) .' (queued for '.
 	printtimediff(strtotime($jdata['submittime']), $unix_start) .

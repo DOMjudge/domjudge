@@ -17,7 +17,7 @@ $title = 'Team '.htmlspecialchars(@$id);
 if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
 
 if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
-	rejudge('submission.team',$id);
+	rejudge('submission.teamid',$id);
 	header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
 	exit;
 }
@@ -82,7 +82,7 @@ echo '<h3>Submissions';
 if ( isset($key) ) {
 	$keystr = "";
 	switch ( $key ) {
-	case 'team':      $keystr = "team";      break;
+	case 'teamid':    $keystr = "team";      break;
 	case 'probid':    $keystr = "problem";   break;
 	case 'langid':    $keystr = "language";  break;
 	case 'judgehost': $keystr = "judgehost"; break;

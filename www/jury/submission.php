@@ -14,11 +14,11 @@ $title = 'Submission '.@$id;
 
 if ( ! $id ) error("Missing or invalid submission id");
 
-$submdata = $DB->q('MAYBETUPLE SELECT s.team, s.probid, s.langid, s.submittime,
+$submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid, s.submittime,
                     s.sourcefile, c.cid, c.contestname,
                     t.name AS teamname, l.name AS langname, p.name AS probname
                     FROM submission s
-                    LEFT JOIN team     t ON (t.login  = s.team)
+                    LEFT JOIN team     t ON (t.login  = s.teamid)
                     LEFT JOIN problem  p ON (p.probid = s.probid)
                     LEFT JOIN language l ON (l.langid = s.langid)
                     LEFT JOIN contest  c ON (c.cid    = s.cid)
@@ -45,8 +45,8 @@ echo "<h1>Submission ".$id."</h1>\n\n";
 <table>
 <tr><td>Contest:</td><td><?=htmlentities($submdata['contestname'])?></td></tr>
 <tr><td>Team:</td><td>
-	<a href="team.php?id=<?=urlencode($submdata['team'])?>">
-	<span class="teamid"><?=htmlspecialchars($submdata['team'])?></span>: 
+	<a href="team.php?id=<?=urlencode($submdata['teamid'])?>">
+	<span class="teamid"><?=htmlspecialchars($submdata['teamid'])?></span>: 
 	<?=htmlentities($submdata['teamname'])?></a></td></tr>
 <tr><td>Problem:</td><td>
 	<a href="problem.php?id=<?=$submdata['probid']?>">

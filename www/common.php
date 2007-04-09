@@ -31,19 +31,19 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	$contdata = getCurContest(TRUE);
 	$cid = $contdata['cid'];
 	
-	$res = $DB->q('SELECT s.submitid, s.team, s.probid, s.langid, s.submittime, s.judgehost,
+	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.submittime, s.judgehost,
 	               t.name AS teamname, p.name AS probname, l.name AS langname
 	               FROM submission s
-	               LEFT JOIN team     t ON (t.login  = s.team)
+	               LEFT JOIN teamid   t ON (t.login  = s.teamid)
 	               LEFT JOIN problem  p ON (p.probid = s.probid)
 	               LEFT JOIN language l ON (l.langid = s.langid)
 	               WHERE s.cid = %i ' .
-	               (!empty($restrictions['team']) ? 'AND s.team = %s ' : '%_') .
+	               (!empty($restrictions['teamid']) ? 'AND s.teamid = %s ' : '%_') .
 	               (!empty($restrictions['probid']) ? 'AND s.probid = %s ' : '%_') .
 	               (!empty($restrictions['langid']) ? 'AND s.langid = %s ' : '%_') .
 	               (!empty($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') .
 	               'ORDER BY s.submittime DESC',
-	               $cid, @$restrictions['team'], @$restrictions['probid'],
+	               $cid, @$restrictions['teamid'], @$restrictions['probid'],
 	               @$restrictions['langid'], @$restrictions['judgehost']);
 
 	// nothing found...
@@ -77,8 +77,8 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 		}
 		echo "<td>" . printtime($row['submittime']) . "</td>";
 		echo '<td class="teamid" title="' . htmlentities($row['teamname']) . '">' .
-			( $isjury ? '<a href="team.php?id=' . urlencode($row['team']) . '">' : '' ) .
-			htmlspecialchars($row['team']) . ( $isjury ? '</a>' : '') . '</td>';
+			( $isjury ? '<a href="team.php?id=' . urlencode($row['teamid']) . '">' : '' ) .
+			htmlspecialchars($row['teamid']) . ( $isjury ? '</a>' : '') . '</td>';
 		echo '<td title="' . htmlentities($row['probname']) . '">' .
 			( $isjury ? '<a href="problem.php?id=' . urlencode($row['probid']) . '">' : '' ) .
 			htmlspecialchars($row['probid']) . ( $isjury ? '</a>' : '') . '</td>';

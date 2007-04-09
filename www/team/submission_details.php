@@ -19,7 +19,7 @@ $row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
                LEFT JOIN submission s USING (submitid)
                LEFT JOIN language   l USING (langid)
                LEFT JOIN problem    p ON (p.probid = s.probid)
-               WHERE j.submitid = %i AND team = %s AND valid = 1',$sid,$login);
+               WHERE j.submitid = %i AND teamid = %s AND valid = 1',$sid,$login);
 
 if( ! $row ) {
 	echo "Submission not found for this team.\n";
@@ -29,7 +29,7 @@ if( ! $row ) {
 
 // remove event of new submission
 $DB->q('DELETE FROM team_unread
-        WHERE mesgid = %i AND type = "submission" AND team = %s', $sid, $login);
+        WHERE mesgid = %i AND type = "submission" AND teamid = %s', $sid, $login);
 
 ?>
 <h1>Submission details</h1>

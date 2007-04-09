@@ -115,14 +115,14 @@ while ( TRUE ) {
 
 	// get max.runtime, path to submission and other params
 	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS runtime,
-	               s.submitid, s.sourcefile, s.langid, s.team, s.probid,
+	               s.submitid, s.sourcefile, s.langid, s.teamid, s.probid,
 	               p.testdata, p.special_run, p.special_compare
 	               FROM submission s, problem p, language l
 	               WHERE s.probid = p.probid AND s.langid = l.langid AND
 	               judgemark = %s AND judgehost = %s', $mark, $myhost);
 
 	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
-	       "($row[team]/$row[probid]/$row[langid])...");
+	       "($row[teamid]/$row[probid]/$row[langid])...");
 
 	// update the judging table with our ID and the starttime
 	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)
@@ -164,8 +164,15 @@ while ( TRUE ) {
 	       $judgingid, $myhost);
 
 	// recalculate the scoreboard cell (team,problem) after this judging
-	calcScoreRow($cid, $row['team'], $row['probid']);
+	calcScoreRow($cid, $row['teamid'], $row['probid']);
 
+	// log to event table if successful
+	if ( $result == 'correct' ) {
+		$DB->q('INSERT INTO event (teamid, langid, probid, submitid, description)
+		        VALUES(%i, %s, %s, %i, "solved")',
+		       $row['teamid'], $row['langid'], $row['probid'], $row['submitid']);
+	}
+	
 	$DB->q('COMMIT');
 	
 	// done!

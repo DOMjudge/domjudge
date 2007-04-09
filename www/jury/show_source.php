@@ -15,9 +15,9 @@ $source = $DB->q('TUPLE SELECT * FROM submission
                   WHERE submitid = %i',$id);
 
 $oldsource = $DB->q('MAYBETUPLE SELECT * FROM submission
-                     WHERE team = %s AND probid = %s AND langid = %s AND
+                     WHERE teamid = %s AND probid = %s AND langid = %s AND
                      submittime < %s ORDER BY submittime DESC LIMIT 1',
-                    $source['team'],$source['probid'],$source['langid'],
+                    $source['teamid'],$source['probid'],$source['langid'],
                     $source['submittime']);
 
 if ( $oldsource ) {

@@ -56,10 +56,10 @@ echo "</pre>\n\n<p>Deleting irrelevant data...</p>\n\n";
 
 // drop all contests that are not current, teams and problems that do not exist
 $DB->q('DELETE FROM scoreboard_jury
-        WHERE cid != %i OR team NOT IN (%As) OR probid NOT IN (%As)',
+        WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%As)',
        $cid, $teams, $probs);
 $DB->q('DELETE FROM scoreboard_public
-        WHERE cid != %i OR team NOT IN (%As) OR probid NOT IN (%As)',
+        WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%As)',
        $cid, $teams, $probs);
 
 echo "<p>Finished.</p>\n\n";

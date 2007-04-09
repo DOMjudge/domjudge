@@ -107,14 +107,14 @@ CREATE TABLE `problem` (
 
 CREATE TABLE `scoreboard_jury` (
   `cid` mediumint(8) unsigned NOT NULL default '0',
-  `team` varchar(15) NOT NULL default '',
+  `teamid` varchar(15) NOT NULL default '',
   `probid` varchar(8) NOT NULL default '',
   `submissions` int(3) unsigned NOT NULL default '0',
   `totaltime` int(4) unsigned NOT NULL default '0',
   `penalty` int(4) unsigned NOT NULL default '0',
   `is_correct` tinyint(1) unsigned NOT NULL default '0',
   `balloon` tinyint(1) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`cid`,`team`,`probid`)
+  PRIMARY KEY  (`cid`,`teamid`,`probid`)
 ) TYPE=MyISAM COMMENT='Scoreboard cache (jury version)';
 
 -- 
@@ -123,14 +123,14 @@ CREATE TABLE `scoreboard_jury` (
 
 CREATE TABLE `scoreboard_public` (
   `cid` mediumint(8) unsigned NOT NULL default '0',
-  `team` varchar(15) NOT NULL default '',
+  `teamid` varchar(15) NOT NULL default '',
   `probid` varchar(8) NOT NULL default '',
   `submissions` int(3) unsigned NOT NULL default '0',
   `totaltime` int(4) unsigned NOT NULL default '0',
   `penalty` int(4) unsigned NOT NULL default '0',
   `is_correct` tinyint(1) unsigned NOT NULL default '0',
   `balloon` tinyint(1) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`cid`,`team`,`probid`)
+  PRIMARY KEY  (`cid`,`teamid`,`probid`)
 ) TYPE=MyISAM COMMENT='Scoreboard cache (public/team version)';
 
 -- 
@@ -140,7 +140,7 @@ CREATE TABLE `scoreboard_public` (
 CREATE TABLE `submission` (
   `submitid` mediumint(10) unsigned NOT NULL auto_increment,
   `cid` mediumint(2) NOT NULL default '0',
-  `team` varchar(15) NOT NULL default '',
+  `teamid` varchar(15) NOT NULL default '',
   `probid` varchar(8) NOT NULL default '',
   `langid` varchar(8) NOT NULL default '',
   `submittime` datetime NOT NULL default '0000-00-00 00:00:00',
@@ -200,7 +200,7 @@ CREATE TABLE `team_category` (
 -- 
 
 CREATE TABLE `team_unread` (
-  `team` varchar(15) NOT NULL default '',
+  `teamid` varchar(15) NOT NULL default '',
   `mesgid` mediumint(8) unsigned NOT NULL default 0,
   `type` enum('clarification','submission') NOT NULL default 'clarification',
   PRIMARY KEY  (`team`,`mesgid`,`type`)

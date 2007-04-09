@@ -31,8 +31,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
 	                 login, team.name, team.categoryid, team.affilid, sortorder,
 	                 color, country, team_affiliation.name AS affilname FROM team
-	                 LEFT JOIN team_category ON (team.categoryid = team_category.categoryid)
-	                 LEFT JOIN team_affiliation ON (team.affilid = team_affiliation.affilid)');
+	                 LEFT JOIN team_category    USING (categoryid)
+	                 LEFT JOIN team_affiliation USING (affilid)');
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
 	                 probid, name, color FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
@@ -124,12 +124,12 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	while ( $srow = $scoredata->next() ) {
 	
 		// skip this row if the team or problem is not known by us
-		if ( ! array_key_exists ( $srow['team'], $teams ) ||
+		if ( ! array_key_exists ( $srow['teamid'], $teams ) ||
 		     ! array_key_exists ( $srow['probid'], $probs ) ) continue;
 	
 		// fill our matrix with the scores from the database,
 		// we'll print this out later when we've sorted the teams
-		$THEMATRIX[$srow['team']][$srow['probid']] = array (
+		$THEMATRIX[$srow['teamid']][$srow['probid']] = array (
 			'correct' => (bool) $srow['is_correct'],
 			'submitted' => $srow['submissions'],
 			'time' => $srow['totaltime'],
@@ -137,13 +137,11 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 
 		// calculate totals for this team
 		if ( $srow['is_correct'] ) {
-			$SCORES[$srow['team']]['num_correct']++;
-			if ( $srow['totaltime'] > $SCORES[$srow['team']]['last_solved'] ) {
-				$SCORES[$srow['team']]['last_solved'] =
-					$srow['totaltime'];
+			$SCORES[$srow['teamid']]['num_correct']++;
+			if ( $srow['totaltime'] > $SCORES[$srow['teamid']]['last_solved'] ) {
+				$SCORES[$srow['teamid']]['last_solved'] = $srow['totaltime'];
 			}
-			$SCORES[$srow['team']]['total_time'] +=
-				$srow['totaltime'] + $srow['penalty'];
+			$SCORES[$srow['team']]['total_time'] +=	$srow['totaltime'] + $srow['penalty'];
 		}
 
 	}
@@ -350,7 +348,7 @@ function putTeamRow($teamid) {
 
 	// for a team, we always display the "current" information, that is,
 	// from scoreboard_jury
-	$scoredata = $DB->q('SELECT * FROM scoreboard_jury WHERE cid = %i AND team = %s',
+	$scoredata = $DB->q('SELECT * FROM scoreboard_jury WHERE cid = %i AND teamid = %s',
 	                    $cid, $teamid);
 
 	// loop all info the scoreboard cache and put it in our own datastructure

@@ -59,11 +59,11 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	if( empty($_POST['sendto']) ) {
 		$teams = $DB->q('COLUMN SELECT login FROM team');
 		foreach($teams as $login) {
-			$DB->q('INSERT INTO team_unread (mesgid, type, team)
+			$DB->q('INSERT INTO team_unread (mesgid, type, teamid)
 			        VALUES (%i, "clarification", %s)', $newid, $login);
 		}
 	} else {
-		$DB->q('INSERT INTO team_unread (mesgid, type, team)
+		$DB->q('INSERT INTO team_unread (mesgid, type, teamid)
 		        VALUES (%i, "clarification", %s)', $newid, $_POST['sendto']);
 	}
 

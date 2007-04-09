@@ -16,15 +16,15 @@ $teams = $DB->q('SELECT t.*,c.name AS catname,a.name AS affname
                  LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
                  ORDER BY c.sortorder, t.name');
 
-$nsubmits = $DB->q('KEYTABLE SELECT team AS ARRAYKEY, COUNT(team) AS cnt
+$nsubmits = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
                     FROM submission s
-                    WHERE cid = %i GROUP BY team', $cid);
+                    WHERE cid = %i GROUP BY teamid', $cid);
 
-$ncorrect = $DB->q('KEYTABLE SELECT team AS ARRAYKEY, COUNT(team) AS cnt
+$ncorrect = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
                     FROM submission s
                     LEFT JOIN judging j USING (submitid)
                     WHERE j.valid = 1 AND j.result = "correct" AND s.cid = %i
-                    GROUP BY team', $cid);
+                    GROUP BY teamid', $cid);
 
 require('../header.php');
 

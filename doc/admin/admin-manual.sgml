@@ -773,8 +773,9 @@ name="Scoreboard: colours">.
 
 <tag>team</tag>
 Table of teams: <tt>login</tt> is the account/login-name of the team
-and <tt>name</tt> the displayed name of the team. <tt>categoryid</tt>
-is the ID of the category the team is in; <tt>affilid</tt> is the
+(which is referenced to in other tables as <tt>teamid</tt>) and
+<tt>name</tt> the displayed name of the team. <tt>categoryid</tt> is
+the ID of the category the team is in; <tt>affilid</tt> is the
 affiliation ID of the team.
 
 <tt>ipaddress</tt> is the IP-address of the team. This is used to
