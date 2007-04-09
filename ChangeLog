@@ -39,6 +39,8 @@ Version 2.0.0 - SVN
    and a team manual.
  - Balloon notifications can continue after scoreboard freeze, and will
    list all balloons a team is supposed to have.
+ - Add event table to DB to store major events of the contest
+   (Working on: #1682761).
 
 Version 1.3.0 - 6 October 2006
 ------------------------------

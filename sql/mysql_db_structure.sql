@@ -38,6 +38,22 @@ CREATE TABLE `contest` (
 ) TYPE=MyISAM COMMENT='Contests that will be run with this install';
 
 -- 
+-- Table structure for table `event`
+-- 
+
+CREATE TABLE `event` (
+  `eventid` mediumint(9) unsigned NOT NULL auto_increment,
+  `eventtime` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `cid` mediumint(8) unsigned NOT NULL,
+  `teamid` varchar(15) default NULL,
+  `langid` varchar(8) default NULL,
+  `probid` varchar(8) default NULL,
+  `submitid` mediumint(9) unsigned default NULL,
+  `description` text NOT NULL,
+  PRIMARY KEY  (`eventid`)
+) ENGINE=MyISAM COMMENT='Log of all events during a contest';
+
+-- 
 -- Table structure for table `judgehost`
 -- 
 
