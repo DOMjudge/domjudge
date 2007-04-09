@@ -45,10 +45,11 @@ CREATE TABLE `event` (
   `eventid` mediumint(9) unsigned NOT NULL auto_increment,
   `eventtime` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `cid` mediumint(8) unsigned NOT NULL,
-  `teamid` varchar(15) default NULL,
+  `clarid` mediumint(8) unsigned default NULL,
   `langid` varchar(8) default NULL,
   `probid` varchar(8) default NULL,
   `submitid` mediumint(9) unsigned default NULL,
+  `teamid` varchar(15) default NULL,
   `description` text NOT NULL,
   PRIMARY KEY  (`eventid`)
 ) ENGINE=MyISAM COMMENT='Log of all events during a contest';
