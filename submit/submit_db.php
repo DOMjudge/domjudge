@@ -66,7 +66,7 @@ if( ! $lang = $DB->q('MAYBEVALUE SELECT langid FROM language WHERE
 if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',$team) ) {
 	error("Team '$team' not found in database.");
 }
-if( $teamrow['ipaddress'] != $ip ) {
+if( ! compareipaddr($teamrow['ipaddress'],$ip) ) {
 	if ( $teamrow['ipaddress'] == NULL && ! STRICTIPCHECK ) {
 		$DB->q('UPDATE team SET ipaddress = %s WHERE login = %s',$ip,$team);
 		logmsg (LOG_NOTICE, "Registered team '$team' at address '$ip'.");
