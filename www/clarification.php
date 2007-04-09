@@ -9,7 +9,7 @@ function setClarificationViewed($clar, $team)
 {
 	global $DB;
 	$DB->q('DELETE FROM team_unread
-	        WHERE mesgid = %i AND type = "clarification" AND team = %s',
+	        WHERE mesgid = %i AND type = "clarification" AND teamid = %s',
 	       $clar, $team);
 }
 
