@@ -20,6 +20,8 @@ $verbose = LOG_INFO;
 $waittime = 5;
 
 function notification_text($team, $problem, $probs_solved, $probs_data) {
+	global $cdata;
+	
 	$ret = 
 		"Notification of a problem solved:\n".
 		"\n".
@@ -34,10 +36,18 @@ function notification_text($team, $problem, $probs_solved, $probs_data) {
 			(empty($probs_data[$probid]['color']) ? "" : " (colour: ".$probs_data[$probid]['color'].")" )."\n";
 	}
 
+	if ( isset($cdata['lastscoreupdate']) &&
+	     time() > strtotime($cdata['lastscoreupdate']) ) {
+		$ret .= "\nWARNING: scoreboard is frozen!\n";
+	}
+
 	return $ret;
 }
 
 $cid = getCurContest();
+$cdata = getCurContest(TRUE);
+
+$infreeze = FALSE;
 
 logmsg(LOG_NOTICE, "Balloon notifications started [DOMjudge/".DOMJUDGE_VERSION."]");
 
@@ -51,6 +61,13 @@ while ( TRUE ) {
 		       (isset($oldcid) ? "c$oldcid" : "none" ) . " to " .
 		       (isset($newcid) ? "c$newcid" : "none" ) );
 		$cid = $newcid;
+		$cdata = getCurContest(TRUE);
+	}
+
+	if ( isset($cdata['lastscoreupdate']) && ! $infreeze &&
+	     time() > strtotime($cdata['lastscoreupdate']) ) {
+		$infreeze = TRUE;
+		logmsg(LOG_NOTICE, "Scoreboard is frozen since " . $cdata['lastscoreupdate']);
 	}
 	
 	do {
