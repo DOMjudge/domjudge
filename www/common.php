@@ -34,7 +34,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.submittime, s.judgehost,
 	               t.name AS teamname, p.name AS probname, l.name AS langname
 	               FROM submission s
-	               LEFT JOIN teamid   t ON (t.login  = s.teamid)
+	               LEFT JOIN team     t ON (t.login  = s.teamid)
 	               LEFT JOIN problem  p ON (p.probid = s.probid)
 	               LEFT JOIN language l ON (l.langid = s.langid)
 	               WHERE s.cid = %i ' .
