@@ -35,6 +35,14 @@ if ( @$_POST['cmd'] == 'verify' ) {
 	
 	if ( VERIFICATION_REQUIRED ) {
 		calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
+
+		// log to event table if successful (case of no verification
+		// required is handled in judge/judgedaemon.php)
+		if ( $jdata['result'] == 'correct' ) {
+		$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
+		        VALUES(%i, %i, %s, %s, %i, "problem solved")',
+		       $cid, $jdata['teamid'], $jdata['langid'], $jdata['probid'], $jdata['submitid']);
+		}
 	}
 }
 

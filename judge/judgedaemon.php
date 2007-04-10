@@ -166,11 +166,12 @@ while ( TRUE ) {
 	// recalculate the scoreboard cell (team,problem) after this judging
 	calcScoreRow($cid, $row['teamid'], $row['probid']);
 
-	// log to event table if successful
-	if ( $result == 'correct' ) {
-		$DB->q('INSERT INTO event (teamid, langid, probid, submitid, description)
-		        VALUES(%i, %s, %s, %i, "solved")',
-		       $row['teamid'], $row['langid'], $row['probid'], $row['submitid']);
+	// log to event table if no verification required and successful
+	// (case of verification required is handled in www/jury/judging.php)
+	if ( ! VERIFICATION_REQUIRED && $result == 'correct' ) {
+		$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
+		        VALUES(%i, %s, %s, %s, %i, "problem solved")',
+		       $cid, $row['teamid'], $row['langid'], $row['probid'], $row['submitid']);
 	}
 	
 	$DB->q('COMMIT');

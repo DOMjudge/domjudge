@@ -107,6 +107,11 @@ $id = $DB->q('RETURNID INSERT INTO submission
              $cid, $teamrow['login'], $probid, $lang, $tofile,
              getFileContents(SUBMITDIR."/".$tofile));
 
+// Log to event table
+$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
+        VALUES(%i, %s, %s, %s, %i, "problem submitted")',
+       $cid, $teamrow['login'], $lang, $probid, $id);
+
 logmsg (LOG_NOTICE, "submitted $team/$prob/$lang, file $tofile, id s$id/c$cid");
 
 exit;

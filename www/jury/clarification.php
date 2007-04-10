@@ -55,6 +55,12 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		$DB->q('UPDATE clarification SET answered = 1 WHERE clarid = %i', $respid);
 	}
 	
+	// log to event table if clarification to all teams 
+	if ( empty($_POST['sendto']) ) {
+		$DB->q('INSERT INTO event (cid, clarid, description)
+		        VALUES(%i, %i, "clarification")', $cid, $newid);
+	}
+	
 	// mark the messages as unread for the team(s)
 	if( empty($_POST['sendto']) ) {
 		$teams = $DB->q('COLUMN SELECT login FROM team');
