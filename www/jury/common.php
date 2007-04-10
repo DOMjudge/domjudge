@@ -78,26 +78,26 @@ function rejudge($key, $value) {
 	        LEFT JOIN submission ON (submission.submitid = judging.submitid)
 	        SET valid = 0, judgehost = NULL, judgemark = NULL
 	        WHERE judging.cid = %i AND valid = 1 AND
-	        ( result IS NULL OR result != "correct" ) AND ' .
-	        ( $key == 'judging.judgehost' ? 'judging.judgehost = %s' : '' ) .
-	        ( $key == 'submission.teamid' ? 'submission.teamid = %s' : '' ) .
-	        ( $key == 'submission.probid' ? 'submission.probid = %s' : '' ) .
-	        ( $key == 'submission.langid' ? 'submission.langid = %s' : '' ) .
-	        ( $key == 'submission.submitid' ? 'submission.submitid = %s' : '' );
+	        ( result IS NULL OR result != "correct" ) ' .
+	        ( $key == 'judging.judgehost' ? ' AND judging.judgehost = %s' : '' ) .
+	        ( $key == 'submission.teamid' ? ' AND submission.teamid = %s' : '' ) .
+	        ( $key == 'submission.probid' ? ' AND submission.probid = %s' : '' ) .
+	        ( $key == 'submission.langid' ? ' AND submission.langid = %s' : '' ) .
+	        ( $key == 'submission.submitid' ? ' AND submission.submitid = %s' : '' );
 	       $cid, $value);
 */
-	
+
 	// Using MySQL < 4.0.4:
 
 	$res = $DB->q('SELECT * FROM judging
-	               LEFT JOIN submission ON (submission.submitid = judging.submitid)
+	               LEFT JOIN submission USING (submitid)
 	               WHERE judging.cid = %i AND valid = 1 AND
-	               ( result IS NULL OR result != "correct" ) AND ' .
-	               ( $key == 'judging.judgehost' ? 'judging.judgehost = %s' : '' ) .
-	               ( $key == 'submission.teamid' ? 'submission.teamid = %s' : '' ) .
-	               ( $key == 'submission.probid' ? 'submission.probid = %s' : '' ) .
-	               ( $key == 'submission.langid' ? 'submission.langid = %s' : '' ) .
-	               ( $key == 'submission.submitid' ? 'submission.submitid = %s' : '' )
+	               ( result IS NULL OR result != "correct" ) ' .
+	               ( $key == 'judging.judgehost' ? ' AND judging.judgehost = %s' : '' ) .
+	               ( $key == 'submission.teamid' ? ' AND submission.teamid = %s' : '' ) .
+	               ( $key == 'submission.probid' ? ' AND submission.probid = %s' : '' ) .
+	               ( $key == 'submission.langid' ? ' AND submission.langid = %s' : '' ) .
+	               ( $key == 'submission.submitid' ? ' AND submission.submitid = %s' : '' )
 				   ,
 	              $cid, $value);
 
@@ -110,7 +110,7 @@ function rejudge($key, $value) {
 		$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
 		        WHERE submitid = %i', $jud['submitid']);
 
-		calcScoreRow($cid, $jud['team'], $jud['probid']);
+		calcScoreRow($cid, $jud['teamid'], $jud['probid']);
 		$DB->q('COMMIT');
 	}
 }

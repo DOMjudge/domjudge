@@ -73,28 +73,28 @@ while ( TRUE ) {
 	do {
 		$res = $DB->q('SELECT s.*,t.name as teamname,t.room
 		               FROM scoreboard_jury s
-		               LEFT JOIN team t ON (t.login = s.team)
+		               LEFT JOIN team t ON (t.login = s.teamid)
 		               WHERE s.cid = %i AND s.is_correct = 1 AND s.balloon = 0',
 		               $cid);
 
 		while ( $row = $res->next() ) {
 			$team = array ('name'   => $row['teamname'],
 			               'room'   => $row['room'],
-				       'login'  => $row['team']);
+			               'login'  => $row['teamid']);
 
 			logmsg(LOG_DEBUG,"New problem solved: ".$row['probid'].
-				   " by team ".$row['team']);
+				   " by team ".$row['teamid']);
 
 			if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
 			
 				$probs_solved = $DB->q('COLUMN SELECT probid FROM scoreboard_jury
-					WHERE cid = %i AND team = %s AND is_correct = 1',
-					$cid, $row['team']);
-				$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color FROM problem
-					WHERE cid = %i', $cid);
+				                        WHERE cid = %i AND teamid = %s AND is_correct = 1',
+				                       $cid, $row['teamid']);
+				$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
+				                      FROM problem WHERE cid = %i', $cid);
 				
 				logmsg(LOG_INFO,"Sending notification: team '".
-					   $row['team']."', problem '".$row['probid']."'.");
+					   $row['teamid']."', problem '".$row['probid']."'.");
 				
 				logmsg(LOG_DEBUG,"Running command: '".BALLOON_CMD."'");
 				
@@ -108,8 +108,8 @@ while ( TRUE ) {
 			}
 			
 			$DB->q('UPDATE scoreboard_jury SET balloon=1
-			        WHERE cid = %i AND team = %s AND probid = %s',
-				   $row['cid'], $row['team'], $row['probid']);
+			        WHERE cid = %i AND teamid = %s AND probid = %s',
+				   $row['cid'], $row['teamid'], $row['probid']);
 		}
 		
 	} while ( $res->count()!=0 );
