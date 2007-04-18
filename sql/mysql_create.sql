@@ -19,7 +19,7 @@ CREATE DATABASE DOMJUDGE_DBNAME;
 -- NOTE: by default, access is allowed from ALL hosts, make sure you
 -- restrict this appropriately (or choose strong enough passwords).
 USE mysql;
-REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_jury'  ,PASSWORD('efteling'));
-REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_team'  ,PASSWORD('ZeIFOEPZHDc6'));
-REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_public',PASSWORD('4RKrHoEf9UMH'));
+REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_jury'  ,PASSWORD('DOMJUDGE_JURY_PASSWD'));
+REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_team'  ,PASSWORD('DOMJUDGE_TEAM_PASSWD'));
+REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_public',PASSWORD('DOMJUDGE_PUBLIC_PASSWD'));
 FLUSH PRIVILEGES;
