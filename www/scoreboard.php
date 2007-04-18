@@ -141,7 +141,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			if ( $srow['totaltime'] > $SCORES[$srow['teamid']]['last_solved'] ) {
 				$SCORES[$srow['teamid']]['last_solved'] = $srow['totaltime'];
 			}
-			$SCORES[$srow['team']]['total_time'] +=	$srow['totaltime'] + $srow['penalty'];
+			$SCORES[$srow['teamid']]['total_time'] +=	$srow['totaltime'] + $srow['penalty'];
 		}
 
 	}
