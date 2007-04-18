@@ -207,7 +207,7 @@ DOMjudge:
 
 <item> Next, setup the auto judgers on separate hosts:
   <itemize>
-  <item> <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domtest</tt><newline>
+  <item> <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-test</tt><newline>
          (check specific options of useradd, since these vary per system)
   <item> Start the judge daemon: <tt>cd judge; ./judgedaemon.php</tt>
   </itemize>
@@ -581,9 +581,9 @@ used).
 For running solution programs under a non-privileged user, a user has
 to be added to the system(s) that act as judgehost. This user does not
 need a home-directory or password, so e.g. the following command would
-suffice to add a user `domtest' with minimal privileges:
+suffice to add a user `domjudge-test' with minimal privileges:
 <verb>
-useradd -d /nonexistent -g nobody -M -n -s /bin/false domtest
+useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-test
 </verb>
 This user must also be configured as the user under which programs run
 in <tt>SYSTEM_ROOT/etc/global.cfg</tt>.
