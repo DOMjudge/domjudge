@@ -1,5 +1,5 @@
 /*
- * tempfile -- utility to savely create temporary files
+ * tempfile -- utility to safely create temporary files
  *
  * Copied from the Debian GNU/Linux package debianutils.
  *
