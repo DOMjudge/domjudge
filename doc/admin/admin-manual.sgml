@@ -198,6 +198,7 @@ DOMjudge:
 <item> Check that the web interface works (/team, /public and /jury);
        make sure phpMyAdmin also still works.
 <item> Access database with phpMyAdmin, add useful contest data.
+<item> Make INCOMINGDIR writeable for the webserver (optionally, when using websubmit).
 <item> Start the necessary daemons, each in their own terminal:
   <itemize>
   <item> <tt>cd submit; ./submitdaemon</tt> (needed for commandline submit)
