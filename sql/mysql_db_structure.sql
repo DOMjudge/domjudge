@@ -220,5 +220,5 @@ CREATE TABLE `team_unread` (
   `teamid` varchar(15) NOT NULL default '',
   `mesgid` mediumint(8) unsigned NOT NULL default 0,
   `type` enum('clarification','submission') NOT NULL default 'clarification',
-  PRIMARY KEY  (`team`,`mesgid`,`type`)
+  PRIMARY KEY  (`teamid`,`mesgid`,`type`)
 ) TYPE=MyISAM COMMENT='List of items a team has not viewed yet (e.g.: clarifications, submission results, ...)';

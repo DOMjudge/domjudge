@@ -32,11 +32,11 @@ GRANT INSERT ON clarification     TO domjudge_team;
 GRANT DELETE ON team_unread       TO domjudge_team;
 
 -- Team/public privileges on specific rows
-GRANT SELECT (judgingid, submitid, result, valid)      ON judging    TO domjudge_public;
-GRANT SELECT (probid, name, cid, allow_submit, color)  ON problem    TO domjudge_public;
-GRANT SELECT (submitid, cid, probid, team, submittime) ON submission TO domjudge_public;
+GRANT SELECT (judgingid, submitid, result, valid)        ON judging    TO domjudge_public;
+GRANT SELECT (probid, name, cid, allow_submit, color)    ON problem    TO domjudge_public;
+GRANT SELECT (submitid, cid, probid, teamid, submittime) ON submission TO domjudge_public;
 
-GRANT SELECT (langid, name, extension, allow_submit)   ON language   TO domjudge_team;
-GRANT SELECT (probid, name, cid, allow_submit, color)  ON problem    TO domjudge_team;
+GRANT SELECT (langid, name, extension, allow_submit)     ON language   TO domjudge_team;
+GRANT SELECT (probid, name, cid, allow_submit, color)    ON problem    TO domjudge_team;
 
-GRANT UPDATE (ipaddress, teampage_first_visited)       ON team       TO domjudge_team;
+GRANT UPDATE (ipaddress, teampage_first_visited)         ON team       TO domjudge_team;
