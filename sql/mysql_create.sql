@@ -9,7 +9,8 @@
 -- $Id: mysql_create.sql 1170 2006-11-26 14:52:33Z eldering $
 
 -- Create the domjudge database:
-CREATE DATABASE IF NOT EXISTS DOMJUDGE_DBNAME;
+DROP DATABASE IF EXISTS DOMJUDGE_DBNAME;
+CREATE DATABASE DOMJUDGE_DBNAME;
 
 -- Add users and passwords
 -- These passwords are initialised automatically when running
@@ -18,7 +19,7 @@ CREATE DATABASE IF NOT EXISTS DOMJUDGE_DBNAME;
 -- NOTE: by default, access is allowed from ALL hosts, make sure you
 -- restrict this appropriately (or choose strong enough passwords).
 USE mysql;
-INSERT INTO user (Host, User, Password) VALUES ('%','domjudge_jury'  ,PASSWORD('DOMJUDGE_JURY_PASSWD'));
-INSERT INTO user (Host, User, Password) VALUES ('%','domjudge_team'  ,PASSWORD('DOMJUDGE_TEAM_PASSWD'));
-INSERT INTO user (Host, User, Password) VALUES ('%','domjudge_public',PASSWORD('DOMJUDGE_PUBLIC_PASSWD'));
+REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_jury'  ,PASSWORD('efteling'));
+REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_team'  ,PASSWORD('ZeIFOEPZHDc6'));
+REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_public',PASSWORD('4RKrHoEf9UMH'));
 FLUSH PRIVILEGES;
