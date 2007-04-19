@@ -9,7 +9,6 @@
 -- $Id: mysql_create.sql 1170 2006-11-26 14:52:33Z eldering $
 
 -- Create the domjudge database:
-DROP DATABASE IF EXISTS DOMJUDGE_DBNAME;
 CREATE DATABASE DOMJUDGE_DBNAME;
 
 -- Add users and passwords
