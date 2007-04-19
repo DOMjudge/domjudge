@@ -97,7 +97,7 @@ while ( TRUE ) {
 	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
 	                  SET judgehost = %s, judgemark = %s
 	                  WHERE judgehost IS NULL AND cid = %i AND langid IN (%As)
-	                  AND probid IN (%As) AND submittime <= %s LIMIT 1',
+	                  AND probid IN (%As) AND submittime < %s LIMIT 1',
 	                 $myhost, $mark, $cid, $judgable_lang, $judgable_prob,
 	                 $contdata['endtime']);
 

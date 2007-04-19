@@ -705,7 +705,11 @@ descriptive name used in the interface.
 
 <tt>starttime</tt> and <tt>endtime</tt> respectively are the start-
 and endtime of the contest: before and after that time, no submissions
-are accepted. <tt>lastscoreupdate</tt> is the time after which the
+are accepted<footnote>For a contest with starttime "12:00:00" and 
+endtime "17:00:00", the first submission will be accepted at
+12:00:00 and the last one at 16:59:59. A submission received at
+17:00:00 or later will be stored but not judged.</footnote>.
+<tt>lastscoreupdate</tt> is the time after which the
 public and team scoreboard are not updated anymore (frozen). This is
 meant to make the last stages of the contest more thrilling, because
 no-one knows who has won... Setting this to <tt>NULL</tt> disables

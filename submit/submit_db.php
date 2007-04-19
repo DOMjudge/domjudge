@@ -53,7 +53,7 @@ if( $contdata['starttime'] > $now ) {
 }
 // If the contest has already ended, accept the submission anyway but do not
 // process it.
-if( $contdata['endtime'] < $now ) {
+if( $contdata['endtime'] <= $now ) {
 	warning("The contest is closed, submission stored but not processed. [c$cid]");
 }
 

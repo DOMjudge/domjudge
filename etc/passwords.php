@@ -13,12 +13,12 @@
 
 $DBLOGIN = array (
 	'jury'   => array (	// s/i/u/d on each table
-		'user' => 'domjudge_jury', 'pass' => 'DOMJUDGE_JURY_PASSWD'
+		'user' => 'domjudge_jury', 'pass' => 'efteling'
 		),
 	'team'   => array (	// ...
-		'user' => 'domjudge_team', 'pass' => 'DOMJUDGE_TEAM_PASSWD'
+		'user' => 'domjudge_team', 'pass' => 'ZeIFOEPZHDc6'
 		),
 	'public' => array (	// Select on team,problem,submission,judging,contest
-		'user' => 'domjudge_public', 'pass' => 'DOMJUDGE_PUBLIC_PASSWD'
+		'user' => 'domjudge_public', 'pass' => '4RKrHoEf9UMH'
 		)
 	);
