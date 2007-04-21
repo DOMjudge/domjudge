@@ -43,6 +43,9 @@ Version 2.0.0 - SVN
    (Working on: #1682761).
  - Only judge submissions that are submitted strictly before the contest
    end time.
+ - Fix check_float testing for NaN and INF (thanks to Maks Verver).
+ - Fix variable type to work on 64 bit systems in submit.cc (thanks to
+   Maks Verver).
 
 Version 1.3.0 - 6 October 2006
 ------------------------------

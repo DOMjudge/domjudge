@@ -43,7 +43,7 @@
 #include <errno.h>
 
 #define PROGRAM "check_float"
-#define VERSION "0.1"
+#define VERSION "0.2"
 #define AUTHORS "Jaap Eldering"
 
 #define MAXLINELEN 1024
@@ -126,6 +126,30 @@ void error(int errnum, const char *format, ...)
 	exit(exit_failure);
 }
 
+/* Test two numbers for equality, accounting for +/-INF, NaN and precision */
+int equal(flt f1, flt f2)
+{
+	flt absdiff, reldiff;
+
+	/* Finite values are compared with some tolerance */
+	if ( isfinite(f1) && isfinite(f2) ) {
+		absdiff = fabsl(f1-f2);
+		reldiff = fabsl((f1-f2)/f2);
+		return !(absdiff > abs_prec && reldiff > rel_prec);
+	}
+
+	/* NaN is equal to NaN */
+	if ( isnan(f1) && isnan(f2) ) return 1;
+
+	/* Infinite values are equal if their sign matches */
+	if ( isinf(f1) && isinf(f2) ) {
+		return (f1 < 0 && f2 < 0) || (f1 > 0 && f2 > 0);
+	}
+
+	/* Values in different classes are always different. */
+	return 0;
+}
+
 
 int main(int argc, char **argv)
 {
@@ -137,7 +161,6 @@ int main(int argc, char **argv)
 	int pos1, pos2;
 	int read1, read2, n1, n2;
 	flt f1, f2;
-	flt absdiff, reldiff;
 	
 	progname = argv[0];
 
@@ -241,11 +264,9 @@ int main(int argc, char **argv)
 			if ( !(read1==1 && read2==1) ) {
 				error(0,"error reading float on line %d",linenr);
 			}
+                       
 
-			absdiff = fabsl(f1-f2);
-			reldiff = fabsl((f1-f2)/f2);
-
-			if ( absdiff > abs_prec && reldiff > rel_prec ) {
+			if ( ! equal(f1,f2) ) {
 				printf("line %3d: %d-th float differs: %LG != %LG\n",
 				       linenr,posnr,f1,f2);
 				diff++;

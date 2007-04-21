@@ -153,12 +153,13 @@ vector<vector<string> > languages;
 
 int main(int argc, char **argv)
 {
-	unsigned i,j;
+	size_t i,j;
 	int c;
 	char *ptr;
 	char *homedir;
 	struct stat fstats;
 	string filebase, fileext;
+	time_t fileage;
 	char *lang_exts;
 	char *lang, *ext;
 	char *lang_ptr, *ext_ptr;
@@ -303,9 +304,9 @@ int main(int argc, char **argv)
 		warnuser(ptr);
 		free(ptr);
 	}
-	
-	if ( (i=(time(NULL)-fstats.st_mtime))>WARN_MTIME*60 ) {
-		ptr = allocstr("file has not been modified for %d minutes",i/60);
+
+	if ( (fileage=(time(NULL)-fstats.st_mtime)/60)>WARN_MTIME ) {
+		ptr = allocstr("file has not been modified for %d minutes",fileage);
 		warnuser(ptr);
 		free(ptr);
 	}
@@ -388,7 +389,7 @@ int main(int argc, char **argv)
 
 void usage()
 {
-	unsigned i,j;
+	size_t i,j;
 	
 	printf("Usage: %s [OPTION]... FILENAME\n",progname);
 	printf(
@@ -642,7 +643,7 @@ size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 
 string remove_html_tags(string s)
 {
-	unsigned p1, p2;
+	size_t p1, p2;
 	
 	while ( (p1=s.find('<',0))!=string::npos ) {
 		p2 = s.find('>',p1);
@@ -663,7 +664,7 @@ int websubmit()
 	char *url;
 	stringstream curloutput;
 	string line;
-	unsigned pos;
+	size_t pos;
 	int uploadstatus_read;
 
 	url = allocstr(WEBBASEURI "team/upload.php");
