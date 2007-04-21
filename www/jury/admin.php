@@ -2,7 +2,6 @@
 /**
  * Administrator functionality (things not for general jury usage)
  *
- * bla
  * $Id$
  */
 
