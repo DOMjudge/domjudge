@@ -30,9 +30,12 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
 	                 login, team.name, team.categoryid, team.affilid, sortorder,
-	                 color, country, team_affiliation.name AS affilname FROM team
-	                 LEFT JOIN team_category    USING (categoryid)
-	                 LEFT JOIN team_affiliation USING (affilid)');
+	                 color, country, team_affiliation.name AS affilname
+					 FROM team
+	                 LEFT JOIN team_category
+					 		ON (team_category.categoryid = team.categoryid)
+	                 LEFT JOIN team_affiliation
+					 		ON (team_affiliation.affilid = team.affilid)');
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
 	                 probid, name, color FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
