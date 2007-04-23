@@ -44,7 +44,7 @@ if( $res->count() == 0 ) {
 <input type="submit" value="Stop all judgehosts!" />
 </p></form>
 
-<a href="judgehost-new.php">add new Judgehost</a>
+<a href="judgehost-new.php">add new judgehost</a>
 
 <?php
 }

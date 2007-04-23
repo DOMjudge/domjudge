@@ -8,7 +8,7 @@
 $pagename = basename($_SERVER['PHP_SELF']);
 
 require('init.php');
-$title = 'New Judgehost';
+$title = 'New judgehost';
 
 $id = @$_REQUEST['id'];
 if($id && ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
@@ -35,7 +35,7 @@ if(isset($errors)) {
 	echo "<div class=\"error\">$errors</div>\n\n";
 }
 
-echo "<h1>New Judgehost </h1>\n\n";
+echo "<h1>New judgehost</h1>\n\n";
 
 ?>
 
@@ -59,12 +59,12 @@ echo "<h1>New Judgehost </h1>\n\n";
 	<td></td>
 	<td><input type="checkbox" name="another" value="more"
 		<?=isset($_REQUEST['another'])?'checked="checked"':''?>/>
-		add another Judgehost
+		add another judgehost
 	</td>
 </tr>
 </table>
 
-<input type="submit" value="Add Judgehost" />
+<input type="submit" value="Add judgehost" />
 
 </form>
 
