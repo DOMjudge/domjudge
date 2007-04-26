@@ -10,7 +10,7 @@ $pagename = basename($_SERVER['PHP_SELF']);
 require('init.php');
 $title = 'New judgehost';
 
-$id = @$_REQUEST['id'];
+$id = @$_POST['id'];
 if($id && ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
 	$errors = "invalid judge hostname";
 	unset($id);
@@ -20,9 +20,9 @@ if(isset($id)) {
 	// TODO: graceful handling of insert failure
 	$DB->q('INSERT INTO judgehost (hostname, active) VALUES (%s , %i)'
 		, $id
-		, (isset($_REQUEST['active']) && $_REQUEST['active'] == 1 ? 1 : 0 )
+		, (isset($_POST['active']) && $_POST['active'] == 1 ? 1 : 0 )
 		);
-	if(!isset($_REQUEST['another'])) {
+	if(!isset($_POST['another'])) {
 		header('Location: ' . getBaseURI() . 'jury/judgehosts.php');
 		exit;
 	}
@@ -58,7 +58,7 @@ echo "<h1>New judgehost</h1>\n\n";
 <tr>
 	<td></td>
 	<td><input type="checkbox" name="another" value="more"
-		<?=isset($_REQUEST['another'])?'checked="checked"':''?>/>
+		<?=isset($_POST['another'])?'checked="checked"':''?>/>
 		add another judgehost
 	</td>
 </tr>
