@@ -46,6 +46,8 @@ Version 2.0.0 - SVN
  - Fix check_float testing for NaN and INF (thanks to Maks Verver).
  - Fix variable type to work on 64 bit systems in submit.cc (thanks to
    Maks Verver).
+ - New script: static_scoreboard.php. Outputs a scoreboard suitable
+   as a static HTML page.
 
 Version 1.3.0 - 6 October 2006
 ------------------------------

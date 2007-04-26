@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Produce a total score.
+ * Produce a total score. Call with parameter 'static' for
+ * output suitable for static HTML pages.
  *
  * $Id$
  */
@@ -15,7 +16,7 @@ require('../header.php');
 require('../scoreboard.php');
 
 // call the general putScoreBoard function from scoreboard.php
-putScoreBoard();
+putScoreBoard(null,null,@$_SERVER['argv'][1]=='static');
 
 require('../footer.php');
 

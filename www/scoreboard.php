@@ -18,8 +18,9 @@
  * 'scoreboard'. $myteamid can be passed to highlight a specific row.
  * $isjury set to true means the scoreboard will always be current,
  * regardless of the lastscoreupdate setting in the contesttable.
+ * $static omits output unsuitable for static html pages.
  */
-function putScoreBoard($myteamid = null, $isjury = FALSE) {
+function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 
 	global $DB;
 
@@ -216,8 +217,10 @@ function putScoreBoard($myteamid = null, $isjury = FALSE) {
 			'<td class="scoretn"' .
 			(isset($color) ? ' style="background: ' . $color . ';"' : '') .
 			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
-			'<a href="team.php?id=' . urlencode($team) . '">' .
-			htmlentities($teams[$team]['name']) . '</a></td>';
+			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
+			htmlentities($teams[$team]['name']) .
+			($static ? '' : '</a>') .
+			'</td>';
 		echo
 			'<td class="scorenc">' . jurylink(null,$totals['num_correct'],$isjury) . '</td>' .
 			'<td class="scorett">' . jurylink(null,$totals['total_time'], $isjury) . '</td>';
