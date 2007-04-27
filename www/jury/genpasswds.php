@@ -10,6 +10,7 @@ require('init.php');
 $title = 'Generate Passwords';
 include('../header.php');
 
+requireAdmin();
 ?>
 
 <h1>Generate passwords</h1>

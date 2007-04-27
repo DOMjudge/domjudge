@@ -17,7 +17,7 @@ if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
 	error("Missing or invalid judge hostname");
 }
 
-if ( isset($_POST['cmd']) ) {
+if ( IS_ADMIN && isset($_POST['cmd']) ) {
 	if ( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) {
 		$DB->q('UPDATE judgehost SET active = %i WHERE hostname = %s',
 		       ($_POST['cmd'] == 'activate' ? 1 : 0), $id);
@@ -42,7 +42,10 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 <tr><td>Active:</td><td><?=printyn($row['active'])?></td></tr>
 </table>
 
-<?php	$cmd = ($row['active'] == 1 ? 'deactivate' : 'activate'); ?>
+<?php
+if ( IS_ADMIN ) :
+
+$cmd = ($row['active'] == 1 ? 'deactivate' : 'activate'); ?>
 <form action="judgehost.php" method="post">
 <p>
 <input type="hidden" name="id" value="<?=htmlspecialchars($row['hostname'])?>" />
@@ -50,6 +53,7 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 <input type="submit" value=" <?=$cmd?> " />
 </p>
 </form>
+<?php endif; ?>
 
 <form action="<?=$pagename?>" method="post">
 <p>

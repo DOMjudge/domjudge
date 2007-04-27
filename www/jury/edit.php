@@ -6,6 +6,7 @@
  * $Id$
  */
 require('init.php');
+requireAdmin();
 
 $t = @$_REQUEST['table'];
 if(!$t)	error ("No table selected.");

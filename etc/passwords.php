@@ -22,3 +22,17 @@ $DBLOGIN = array (
 		'user' => 'domjudge_public', 'pass' => 'DOMJUDGE_PUBLIC_PASSWD'
 		)
 	);
+/**
+ * Which users to grant 'admin' status on the jury web interface.
+ * Judges can view all information, write clarifications, verify
+ * and rejudge submissions.
+ *
+ * Admins can do the same, plus update most of the contest- and
+ * system information.
+ *
+ * Defaults to 'domjudge_jury', so no difference between judges
+ * and admins, but if desired you can add extra accounts
+ * to the htaccess, and list here the ones you wish to have admin
+ * privilege.
+ */
+$DOMJUDGE_ADMINS = array ('domjudge_admin');

@@ -9,6 +9,7 @@ $pagename = basename($_SERVER['PHP_SELF']);
 
 require('init.php');
 $title = 'New judgehost';
+requireAdmin();
 
 $id = @$_POST['id'];
 if($id && ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {

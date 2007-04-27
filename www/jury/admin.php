@@ -8,6 +8,8 @@
 require('init.php');
 $title = 'Administrator Functions';
 require('../header.php');
+
+requireAdmin();
 ?>
 
 <h1>Administrator Functions</h1>

@@ -11,6 +11,8 @@ require('init.php');
 $title = 'Config Checker';
 require('../header.php');
 
+requireAdmin();
+
 ob_implicit_flush();
 
 // helper to output an error message.

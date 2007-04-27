@@ -8,7 +8,7 @@
 require('init.php');
 $title = 'Judgehosts';
 
-if ( !empty($_POST['cmd']) ) {
+if ( IS_ADMIN && !empty($_POST['cmd']) ) {
 	if ( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) {
 		$DB->q('UPDATE judgehost SET active = %i',
 		       ($_POST['cmd'] == 'activate' ? 1:0));
@@ -32,6 +32,8 @@ if( $res->count() == 0 ) {
 			"</td><td align=\"center\">".printyn($row['active'])."</td></tr>\n";
 	}
 	echo "</table>\n\n";
+
+if ( IS_ADMIN ) :
 ?>
 
 <form action="judgehosts.php" method="post"><p>
@@ -47,5 +49,7 @@ if( $res->count() == 0 ) {
 <a href="judgehost-new.php">add new judgehost</a>
 
 <?php
+endif;
+
 }
 require('../footer.php');

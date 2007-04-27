@@ -48,6 +48,9 @@ Version 2.0.0 - SVN
    Maks Verver).
  - New script: static_scoreboard.php. Outputs a scoreboard suitable
    as a static HTML page.
+ - Add DOMJUDGE_ADMINS variable in etc/passwords.php. This can be used
+   to differentiate between judges and admins for the web interface:
+   admins will be allowed to change more of the core data.
 
 Version 1.3.0 - 6 October 2006
 ------------------------------

@@ -1120,6 +1120,13 @@ teams can also send in submissions with authentication purely based on
 IP. This means that care has to be taken e.g. that teams cannot simply
 login onto one anther's computer and spoof their identity.
 
+The jury web interface is protected by HTTP Authentication. By default
+the <tt>domjudge_jury</tt> user will be given full access. You can choose
+to add more users to the htpasswd file. In etc/passwords.php you can provide
+a list of <em>admin users</em>. Most data-modification functions will then
+be restricted to only users in this list.
+
+
 <sect>Root Privileges <label id="security_rootprivs">
 <p>
 

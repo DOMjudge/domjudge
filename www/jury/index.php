@@ -38,11 +38,15 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <li><a href="doc/team/team-manual.pdf">Team manual</a> (PDF only)</li>
 </ul>
 
+<?php if ( IS_ADMIN ): ?>
+
 <h3>Administrator:</h3>
 
 <ul>
 <li><a href="admin.php">Admin functions</a></li>
 </ul>
+
+<?php endif; ?>
 
 <p><br /><br /><br /><br /></p>
 

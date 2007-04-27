@@ -215,3 +215,10 @@ function putDOMjudgeVersion() {
 	echo "<hr /><address>DOMjudge/" . DOMJUDGE_VERSION . 
 		" at ".$_SERVER['SERVER_NAME']." Port ".$_SERVER['SERVER_PORT']."</address>\n";
 }
+
+/**
+ * Check for DOMjudge admin level, and if not, error.
+ */
+function requireAdmin() {
+	if ( ! IS_ADMIN ) error ("This function is only accessible to administrators.");
+}

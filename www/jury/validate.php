@@ -18,3 +18,9 @@ if(FALSE) {
 	exit;
 }
 
+if ( !empty($_SERVER['REMOTE_USER']) && in_array($_SERVER['REMOTE_USER'], $DOMJUDGE_ADMINS) ) {
+	define('IS_ADMIN', true);
+} else {
+	define('IS_ADMIN', false);
+}
+
