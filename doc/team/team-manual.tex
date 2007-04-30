@@ -14,8 +14,8 @@
 \newpage
 \section{Introduction}
 
-This document describes these parts of the \DOMjudge jury-system, that
-are available to teams to submit solutions, view results and submit
+This document describes the \DOMjudge jury-system, that allows
+teams to submit solutions, view results and submit
 ``clarification requests''.
 
 All interaction with the system is done using a web-interface, except
@@ -29,7 +29,7 @@ Here follows a short summary of the system interface. This is meant as
 a quick introduction, to be able to start using the system. It is
 however strongly advised, that at least one of your team's members
 read all of this manual, because there are specific details of this
-jury-system, that might become of importance when you run into
+jury-system that might become of importance when you run into
 problems (like an incorrect solution). \textbf{BE WARNED!!}
 
 \subsection{Reading and writing}
@@ -58,7 +58,7 @@ from the extension, just as with the command-line submit.
 
 \subsection{Viewing scores, submissions, etc.}
 
-Viewing scores, submissions and submitting and reading clarification
+Viewing scores, submissions and sending and reading clarification
 requests is done through a web-interface. The address is
 \url{\WEBBASEURI team}. Usage of these webpages should be clear.
 
@@ -77,16 +77,16 @@ follows.
 
 The submit program takes the name (label) of the problem from
 \cmd{filename} and the programming language from the extension
-\cmd{ext}. This can be overruled by hand with the options
+\cmd{ext}. This can be overruled with the options
 \cmd{-p problemname} and \cmd{-l~languageextension}.
 See \cmd{submit --help} for a complete list of all options and
 extensions and some examples. Note that this help is quite long and
-might not fit on a screen. Then use for example
+might not fit on a screen. Use
 \cmd{submit~--help | more} to read everything.
 
 \cmd{submit} will check your file and warns you for some things:
 for example when the file has not been modified for a long time or
-when is is larger than the maximal source-code size.
+when is is larger than the maximum source-code size.
 
 Then \cmd{submit} displays a summary with all details of your
 submission and asks for confirmation. Check whether you are submitting
@@ -95,7 +95,7 @@ confirm. \cmd{submit} will report a successful submission or give
 an error message otherwise.
 
 The submit program uses a directory \cmd{\USERSUBMITDIR} in the
-home directory of your account. In there, it stores temporary files for
+home directory of your account where it stores temporary files for
 submission and also a log file \cmd{submit.log}. Do not remove or
 change this directory, or the \cmd{submit} program might fail to
 function correctly. Furthermore a ``public ssh-key'' of the jury has
@@ -124,8 +124,7 @@ scoreboard page with the scores of all teams.
 
 \subsection{Possible results}
 
-A submission can have a few different results. All possible results
-are listed here with a short description:
+A submission can have the following results:
 
 \begin{description}[\setleftmargin{4.5cm}]
 \item[CORRECT]
@@ -134,7 +133,7 @@ The submission was correct and you solved this problem!
 \item[COMPILER-ERROR]
 There was an error when compiling your program. You can view the
 submission details on your team page to see the exact error.
-Notice the compiler\emph{warnings} do not count as error, but can also
+Note that the compiler\emph{warnings} do not count as error, but can also
 be viewed in the submission details.
 
 \item[TIMELIMIT]
@@ -168,16 +167,16 @@ will not be processed anymore.
 
 All communication with the jury is to be done with clarifications.
 These can be found on your team page. Both clarification replies from
-the jury and requests sent by you are displayed  there.
+the jury and requests sent by you are displayed there.
 
 There is also a link to submit a new clarification request to the
 jury. This request is only readable for the jury and they will
-try to respond as soon as possible. Answers that are relevant for
+respond as soon as possible. Answers that are relevant for
 everyone, will be sent to everyone.
 
 When you receive a new clarification from the jury, this will
-automatically be displayed as ``(x NEW)'' after the clarification
-button in the menubar.
+automatically be displayed as ``(1 NEW)'' after the clarification
+button in the menu bar.
 
 \section{How are submissions being judged?}
 
@@ -186,7 +185,7 @@ interaction is necessary. The judging is done in the following way:
 
 \subsection{Submission}
 
-With the \cmd{submit} or the web-interface (see \ref{submit}) program,
+With the \cmd{submit} program or the web-interface (see \ref{submit}),
 you can submit a solution to a problem. Note that you have to submit
 the source-code of your program (and not a compiled program or the
 output of your program). \cmd{submit} makes a connection to the
@@ -200,7 +199,7 @@ and the output tested on one of the jury-computers.
 \subsection{Compilation}
 
 Your program will be compiled on a jury-computer running Linux.
-Using a different compiler or operating system than the jury, should
+Using a different compiler or operating system than the jury should
 not be a problem. Be careful however, not to use any special compiler
 and/or system specific things (you can always check compiler errors on
 the team page).
@@ -211,7 +210,7 @@ matter concerning generated errors.
 \subsection{Testing}
 
 After your program has compiled successfully, it will be executed and
-it's output compared to the output of jury. Before comparing the
+its output compared to the output of jury. Before comparing the
 output, the exit status of your program is checked: if your programs
 gives the correct answer, but exits with a nonzero exitcode, the
 result will be a run-error! There are some restrictions during
@@ -240,25 +239,24 @@ jury right away.
 
 \item[source size]
 The source-code of your program may not exceed \SOURCESIZE\ kilobytes.
-When submitting your program, you will already be warned for this, but
+When submitting your program you will already be warned for this, but
 during compilation this will result in a compile error.
 
 \item[memory]
-During execution of your program, there is \MEMLIMIT\ kilobytes memory
+During execution of your program, there are \MEMLIMIT\ kilobytes of memory
 available. This is the total amount of memory (including program code,
 statically and dynamically defined variables, stack, \dots)! If your
-program tries to use more memory, it will (probably) abort, resulting
-in a run error.
+program tries to use more memory, it will abort, resulting in a run error.
 
 \item[filesize]
 Although you are not allowed to write to files, standard (error)output
-are written to a file. The maximal size of these files is \FILELIMIT\
+are written to a file. The maximum size of these files is \FILELIMIT\
 kilobytes (per file).
 
 \item[number of processes]
 You are not supposed to create multiple processes (threads). This is
-to no avail anyways, because your program has exactly 1 processor fully
-at it's disposal. To increase stability of the jury-system, there is a
+to no avail anyway, because your program has exactly 1 processor fully
+at its disposal. To increase stability of the jury-system, there is a
 maximum of \PROCLIMIT\ processes that can be run simultaneously
 (including processes that started your program).
 

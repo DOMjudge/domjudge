@@ -29,8 +29,8 @@
 
 <abstract>
 This document provides information about DOMjudge aimed at a judger
-operating the system during the contest. It provides information
-about viewing and checking submissions and working with clarification
+operating the system during the contest:
+viewing and checking submissions and working with clarification
 requests.
 
 A separate manual is available for teams and administrators.
@@ -207,8 +207,8 @@ following:
 
 This is especially useful during the practice session, where it is
 expected that every team can make at least one correct submission. A
-team with any other colour near the end of the session might be having
-difficulties.
+team with any other colour than green near the end of the session
+might be having difficulties.
  
 
 <sect>Judging Submissions
@@ -249,7 +249,7 @@ a code.
 <tag>RUN-ERROR     </tag>a kind of problem while running the program occurred, for example
                          segmentation fault, division by zero or exitcode unequal to 0.
 <tag>NO-OUTPUT     </tag>there was no output at all from the program;
-<tag>WRONG-ANSWER</tag> the output of the program did not exactly match the expected output;
+<tag>WRONG-ANSWER</tag> the output of the program did not exactly match the expected output.
 </descrip>
 * in the team interface a submission will only show as PENDING to
 prevent leaking information of problem timelimits. The jury can see
