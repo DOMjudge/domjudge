@@ -14,6 +14,8 @@ REVOKE ALL PRIVILEGES, GRANT OPTION FROM domjudge_jury, domjudge_team, domjudge_
 
 -- Drop all tables in domjudge database (needs fix to select tables by *):
 DROP TABLE IF EXISTS clarification;
+DROP TABLE IF EXISTS contest;
+DROP TABLE IF EXISTS event;
 DROP TABLE IF EXISTS judgehost;
 DROP TABLE IF EXISTS judging;
 DROP TABLE IF EXISTS language;
@@ -25,4 +27,7 @@ DROP TABLE IF EXISTS team;
 DROP TABLE IF EXISTS team_affiliation;
 DROP TABLE IF EXISTS team_category;
 DROP TABLE IF EXISTS team_unread;
-DROP TABLE IF EXISTS contest;
+
+-- Also drop all old tables for correct upgrading:
+DROP TABLE IF EXISTS category;
+DROP TABLE IF EXISTS judger;
