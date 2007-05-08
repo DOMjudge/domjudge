@@ -90,7 +90,7 @@ if( $teams->count() == 0 ) {
 			break;
 		}
 		echo " width=\"16\" height=\"16\" /></td>";
-		echo "<td align=\"right\" title=\"#correct / #submitted\">$numcor / $numsub</td></tr>\n";
+		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$numcor / $numsub</td></tr>\n";
 	}
 	echo "</table>\n\n";
 }
