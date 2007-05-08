@@ -1197,6 +1197,12 @@ Furthermore, the webserver must have write access to the
 be done by making that directory group-owned and -writeable by the
 webserver group.
 
+You should take care not to serve any files over the web that
+are not under the DOMjudge 'www/' directory, because they might
+contain sensitive data (e.g. those under sql/). DOMjudge comes
+with .htaccess files that try to prevent this, but double-check
+that it's not accessible.
+
 <sect>External Security <label id="security_external">
 <p>
 
