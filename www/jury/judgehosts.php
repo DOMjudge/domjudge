@@ -8,18 +8,62 @@
 require('init.php');
 $title = 'Judgehosts';
 
-if ( IS_ADMIN && !empty($_POST['cmd']) ) {
-	if ( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) {
-		$DB->q('UPDATE judgehost SET active = %i',
-		       ($_POST['cmd'] == 'activate' ? 1:0));
+require('../header.php');
+
+echo "<h1>Judgehosts</h1>\n\n";
+
+if ( IS_ADMIN ) {
+	@$cmd = $_REQUEST['cmd'];
+	if ( !empty($cmd) ) {
+		if ( $cmd == 'activate' || $cmd == 'deactivate' ) {
+			$DB->q('UPDATE judgehost SET active = %i',
+			       ($cmd == 'activate' ? 1:0));
+		}
+		if ( $cmd == 'save' ) {
+			foreach($_POST['judgehost'] as $id => $judgehost) {
+				if ( !empty($judgehost) ) {
+					$DB->q("REPLACE INTO judgehost (hostname,active) VALUES (%s,%i)",
+						$judgehost, (@$_POST['active'][$id]?1:0));
+				}
+			}
+		}
+		if ( $cmd == 'add' || $cmd == 'edit' ) {
+			echo "<form action=\"judgehosts.php\" method=\"post\">\n<table>\n" .
+				"<tr><th>Hostname</th><th>Active</th></tr>\n";
+			if ( $cmd == 'add' ) {
+				for ($i=0; $i<10; ++$i) {
+					echo "<tr><td><input type=\"text\" name=\"judgehost[$i]\"".
+						"value=\"\" size=\"20\" maxlength=\"50\" /></td><td>".
+						"<input type=\"checkbox\" name=\"active[$i]\" value=\"1\" checked=\"checked\" />".
+						"</td></tr>\n";
+				}
+			} else {
+				$res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
+				$i = 0;
+				while ( $row = $res->next() ) {
+					echo "<tr><td><input type=\"text\" name=\"judgehost[$i]\"".
+						"value=\"" . htmlspecialchars($row['hostname']) . "\" ".
+						"size=\"20\" maxlength=\"50\" /></td><td>".
+						"<input type=\"checkbox\" name=\"active[$i]\" value=\"1\" ".
+						($row['active'] ?"checked=\"checked\" ":"") . "/>".
+						"</td></tr>\n";
+					++$i;
+				}
+
+			}
+			echo "</table>\n\n<br /><br />\n<input type=\"hidden\" name=\"cmd\" value=\"save\" />\n" .
+				"<input type=\"submit\" value=\"Save Judgehosts\" />\n</form>\n\n";
+
+			require('../footer.php');
+			exit;
+			
+		}
 	}
+
 }
 
 $res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
 
-require('../header.php');
-
-echo "<h1>Judgehosts</h1>\n\n";
 
 if( $res->count() == 0 ) {
 	echo "<p><em>No judgehosts defined</em></p>\n\n";
@@ -46,7 +90,8 @@ if ( IS_ADMIN ) :
 <input type="submit" value="Stop all judgehosts!" />
 </p></form>
 
-<a href="judgehost-new.php">add new judgehost</a>
+<p><a href="judgehosts.php?cmd=add">add new judgehosts</a><br />
+<a href="judgehosts.php?cmd=edit">edit judgehosts</a></p>
 
 <?php
 endif;
