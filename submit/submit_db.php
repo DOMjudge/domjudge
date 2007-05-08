@@ -11,6 +11,7 @@
  *
  * $Id$
  */
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
 require ('../etc/config.php');
 

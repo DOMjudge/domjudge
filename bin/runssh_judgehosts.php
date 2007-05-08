@@ -7,31 +7,33 @@
  *
  * $Id$
  */
-	require ('../etc/config.php');
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
-	define ('SCRIPT_ID', 'runssh_judgehosts');
-	define ('LOGFILE', LOGDIR.'/check.log');
+require ('../etc/config.php');
 
-	require (SYSTEM_ROOT . '/lib/init.php');
+define ('SCRIPT_ID', 'runssh_judgehosts');
+define ('LOGFILE', LOGDIR.'/check.log');
 
-	$argv = $_SERVER['argv'];
-	
-	$program = @$argv[1];
+require (SYSTEM_ROOT . '/lib/init.php');
 
-	if ( ! $program ) error("No program specified");
+$argv = $_SERVER['argv'];
 
-	logmsg(LOG_DEBUG, "running program '$program'");
+$program = @$argv[1];
 
-	$judgehosts = $DB->q('COLUMN SELECT hostname FROM judgehost');
+if ( ! $program ) error("No program specified");
 
-	foreach($judgehosts as $host) {
-		logmsg(LOG_DEBUG, "running on judgehost '$host'");
-		system("ssh $host $program",$exitcode);
-		if ( $exitcode != 0 ) {
-			logmsg(LOG_NOTICE, "on '$host': exitcode $exitcode");
-		}
+logmsg(LOG_DEBUG, "running program '$program'");
+
+$judgehosts = $DB->q('COLUMN SELECT hostname FROM judgehost');
+
+foreach($judgehosts as $host) {
+	logmsg(LOG_DEBUG, "running on judgehost '$host'");
+	system("ssh $host $program",$exitcode);
+	if ( $exitcode != 0 ) {
+		logmsg(LOG_NOTICE, "on '$host': exitcode $exitcode");
 	}
+}
 
-	logmsg(LOG_NOTICE, "finished");
+logmsg(LOG_NOTICE, "finished");
 
-	exit;
+exit;

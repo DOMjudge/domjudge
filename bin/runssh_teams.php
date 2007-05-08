@@ -7,31 +7,33 @@
  *
  * $Id$
  */
-	require ('../etc/config.php');
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
-	define ('SCRIPT_ID', 'runssh_teams');
-	define ('LOGFILE', LOGDIR.'/check.log');
+require ('../etc/config.php');
 
-	require (SYSTEM_ROOT . '/lib/init.php');
-	
-	$argv = $_SERVER['argv'];
+define ('SCRIPT_ID', 'runssh_teams');
+define ('LOGFILE', LOGDIR.'/check.log');
 
-	$program = @$argv[1];
+require (SYSTEM_ROOT . '/lib/init.php');
 
-	if ( ! $program ) error("No program specified");
+$argv = $_SERVER['argv'];
 
-	logmsg(LOG_DEBUG, "running program '$program'");
+$program = @$argv[1];
 
-	$teams = $DB->q('COLUMN SELECT login FROM team');
+if ( ! $program ) error("No program specified");
 
-	foreach($teams as $team) {
-		logmsg(LOG_DEBUG, "running on account '$team'");
-		system("ssh -l $team localhost $program",$exitcode);
-		if ( $exitcode != 0 ) {
-			logmsg(LOG_NOTICE, "on '$team': exitcode $exitcode");
-		}
+logmsg(LOG_DEBUG, "running program '$program'");
+
+$teams = $DB->q('COLUMN SELECT login FROM team');
+
+foreach($teams as $team) {
+	logmsg(LOG_DEBUG, "running on account '$team'");
+	system("ssh -l $team localhost $program",$exitcode);
+	if ( $exitcode != 0 ) {
+		logmsg(LOG_NOTICE, "on '$team': exitcode $exitcode");
 	}
+}
 
-	logmsg(LOG_NOTICE, "finished");
+logmsg(LOG_NOTICE, "finished");
 
-	exit;
+exit;
