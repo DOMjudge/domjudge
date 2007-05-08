@@ -8,4 +8,4 @@ if ( !defined('DBNAME') || !defined('DBSERVER')  || empty($DBLOGIN)) die ("DBNAM
 $DB = new db (DBNAME, DBSERVER, $DBLOGIN['jury']['user'], $DBLOGIN['jury']['pass']);
 
 // don't need this anymore
-unset ($DBDATA);
+unset ($DBLOGIN);
