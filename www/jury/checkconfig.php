@@ -13,6 +13,8 @@ require('../header.php');
 
 requireAdmin();
 
+require_once(SYSTEM_ROOT . '/lib/relations.php');
+
 ob_implicit_flush();
 
 // helper to output an error message.
@@ -220,9 +222,28 @@ if ( SHOW_AFFILIATIONS ) {
 	}
 
 }
-
-
 echo "</p>\n\n";
+
+
+
+echo "<h2>Referential Integrity</h2>\n\n";
+
+foreach ( $RELATIONS as $table => $foreign_keys ) {
+	$res = $DB->q('SELECT * FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
+	while ( $row = $res->next() ) {
+		foreach ( $foreign_keys as $foreign_key => $target ) {
+			if ( !empty($row[$foreign_key]) ) {
+				$f = explode('.', $target);
+				if ( $DB->q("VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
+						$row[$foreign_key]) < 1 ) {
+					err ("foreign key constraint fails for $table.$foreign_key = \"" .
+						htmlspecialchars($row[$foreign_key]) . "\" (not found in $target)");
+				}
+			}
+		}
+	}
+}
+
 
 echo "<p>End of config checker.</p>\n\n";
 
