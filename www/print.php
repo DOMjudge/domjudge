@@ -102,3 +102,15 @@ function str_cut ($str, $size) {
 
 	return substr($str, 0, $size) . '...';
 }
+
+/**
+ * Output an html "message box"
+ *
+ */
+function msgbox($caption, $message) {
+	return "<fieldset class=\"msgbox\"><legend>" .
+		"<img src=\"../images/huh.png\" width=\"16\" height=\"16\" alt=\"?\" /> " .
+		$caption . "</legend>\n" .
+		$message .
+		"</fieldset>\n\n";
+}

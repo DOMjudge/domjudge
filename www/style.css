@@ -96,24 +96,40 @@ tr.unread td {
 
 .highlight { background-color: yellow; }
 
-.error {
-	color: red;
-	font-weight: bold;
-	font-family: monospace;
-	border: 1px dotted red;
-	margin-left: 1em;
-	margin-right: 1em;
+fieldset {
+	margin: 2em;
 	padding: 1em;
 }
 
-.error legend {
+.error {
+	color: red;
+	font-family: monospace;
+	border: 1px dotted red;
+}
+
+legend {
 	font-variant: small-caps;
-	font-size: x-large;
 	font-weight: bold;
 	padding: .1ex .5ex;
+}
+
+.error legend {
+	font-size: x-large;
 	border-right: 1px solid gray;
 	border-bottom: 1px solid gray;
 }
+
+.msgbox {
+	background-color: #fffff0;
+	border: 1px solid #f2e93a;
+}
+
+.msgbox legend {
+	background-color: #fffff0;
+	border-right: 2px solid #f2e93a;
+	border-bottom: 2px solid #f2e93a;
+}
+
 
 .scoreboard { border-collapse: collapse; }
 .scoreboard td { font-size: small; }

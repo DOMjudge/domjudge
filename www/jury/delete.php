@@ -58,13 +58,13 @@ if (isset($_POST['zekerweten'] ) ) {
 		echo "<input type=\"hidden\" name=\"$key\" value=\"" . htmlspecialchars($val) ."\" />\n";
 	}
 
-	echo "<p>You're about to delete $t <strong>" .
-		htmlspecialchars(join(", ", array_values($k))) . "</strong>.</p>\n\n";
-
-	echo "<p>Are you sure?</p>\n\n";
-
-	echo "<p><input type=\"submit\" name=\"tochmaarniet\" value=\" Never mind... \" />\n" .
-		"<input type=\"submit\" name=\"zekerweten\" value=\" Yes I'm sure! \" /></p>\n\n";
+	echo msgbox ( 
+		"Really delete?",
+		"You're about to delete $t <strong>" .
+		htmlspecialchars(join(", ", array_values($k))) . "</strong>.<br /><br />\n\n" .
+		"Are you sure?<br /><br />\n\n" .
+		"<input type=\"submit\" name=\"tochmaarniet\" value=\" Never mind... \" />\n" .
+		"<input type=\"submit\" name=\"zekerweten\" value=\" Yes I'm sure! \" />\n");
 
 	echo "</form>\n\n";
 }
