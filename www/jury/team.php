@@ -76,7 +76,10 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 </p>
 </form>
 
-<?php
+<?php if ( IS_ADMIN ) : ?>
+<p><a href="delete.php?table=team&amp;login=<?=$id?>">delete this team</a></p>
+
+<?php endif;
 
 echo '<h3>Submissions';
 if ( isset($key) ) {

@@ -83,3 +83,24 @@ $RELATIONS['team_unread'] = array(
 	// can't check mesgid
 );
 
+/**
+ * Check whether some primary key is referenced in any
+ * table as a foreign key.
+ *
+ * Returns null or the table name if a match is found.
+ */
+function fk_check ($keyfield, $value) {
+	global $RELATIONS, $DB;
+
+	foreach ( $RELATIONS as $table => $keys ) {
+		foreach ( $keys as $key => $foreign ) {
+			if ( $foreign == $keyfield ) {
+				$c = $DB->q("VALUE SELECT count(*) FROM $table WHERE $key = %s",
+					$value);
+				if ( $c > 0 ) return $table;
+			}
+		}
+	}
+
+	return null;
+}
