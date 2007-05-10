@@ -85,7 +85,6 @@ echo '<h3>Submissions';
 if ( isset($key) ) {
 	$keystr = "";
 	switch ( $key ) {
-	case 'teamid':    $keystr = "team";      break;
 	case 'probid':    $keystr = "problem";   break;
 	case 'langid':    $keystr = "language";  break;
 	case 'judgehost': $keystr = "judgehost"; break;
@@ -95,7 +94,7 @@ if ( isset($key) ) {
 }
 echo "</h3>\n\n";
 
-$restrictions['team'] = $id;
+$restrictions['teamid'] = $id;
 putSubmissions($restrictions, TRUE);
 
 require('../footer.php');
