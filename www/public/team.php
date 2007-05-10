@@ -7,7 +7,7 @@
 
 $pagename = basename($_SERVER['PHP_SELF']);
 
-$id = $_GET['id'];
+$id = @$_GET['id'];
 
 require('init.php');
 
