@@ -2,7 +2,7 @@
 // $Id$
 
 /******************************************************************************
-* lib.database.php version 1.3.0
+* lib.database.php version 1.3.1
 ******************************************************************************/
 
 /******************************************************************************
@@ -636,7 +636,7 @@ class db_result
 
 		$tabel = array();
 		while ($this->next()) {
-			$tabel[$this->tuple[0]] = $this->tuple[1];
+			$tabel[array_shift($this->tuple)] = array_shift($this->tuple);
 		}
 		return $tabel;
 	}
