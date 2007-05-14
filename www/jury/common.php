@@ -72,23 +72,9 @@ function rejudge($key, $value) {
 	
 	$cid = getCurContest();
 
-	// Using MySQL >= 4.0.4:
-/*
-	$DB->q('UPDATE judging
-	        LEFT JOIN submission ON (submission.submitid = judging.submitid)
-	        SET valid = 0, judgehost = NULL, judgemark = NULL
-	        WHERE judging.cid = %i AND valid = 1 AND
-	        ( result IS NULL OR result != "correct" ) ' .
-	        ( $key == 'judging.judgehost' ? ' AND judging.judgehost = %s' : '' ) .
-	        ( $key == 'submission.teamid' ? ' AND submission.teamid = %s' : '' ) .
-	        ( $key == 'submission.probid' ? ' AND submission.probid = %s' : '' ) .
-	        ( $key == 'submission.langid' ? ' AND submission.langid = %s' : '' ) .
-	        ( $key == 'submission.submitid' ? ' AND submission.submitid = %s' : '' );
-	       $cid, $value);
-*/
-
-	// Using MySQL < 4.0.4:
-
+	// This can be done in one Update from MySQL 4.0.4 and up, but that wouldn't
+	// allow us to call calcScoreRow() for the right rows, so we'll just loop
+	// over the results one at a time.
 	$res = $DB->q('SELECT * FROM judging
 	               LEFT JOIN submission USING (submitid)
 	               WHERE judging.cid = %i AND valid = 1 AND
