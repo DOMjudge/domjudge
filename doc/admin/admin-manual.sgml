@@ -1015,6 +1015,11 @@ freeze. This is often done to keep the last hour interesting for all.
 The scoreboard freeze time can be set with the `lastscoreupdate'
 attribute in the contest table.
 
+The scoreboard freezing works by looking at the time a submission is
+made. Therefore it's possible that submissions from (just) before the
+freezetime but judged after it can still cause updates to the public
+scoreboard. A rejudging during the freeze may also cause such updates.
+
 If you do not set any freeze time, this option does nothing. If you
 set it, the public- and team scoreboards will not be updated anymore
 once this time has arrived. The jury will however still see the actual
