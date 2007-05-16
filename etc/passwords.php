@@ -35,4 +35,4 @@ $DBLOGIN = array (
  * to the htaccess, and list here the ones you wish to have admin
  * privilege.
  */
-$DOMJUDGE_ADMINS = array ('domjudge_admin');
+$DOMJUDGE_ADMINS = array ('domjudge_jury');
