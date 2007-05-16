@@ -31,7 +31,8 @@ Version 2.0.0 - SVN
  - Improve webinterface layout.
  - Add MySQL transactions; will provide extra safety when the table type
    supports it (otherwise does nothing).
- - Add IPv6 support to submit daemon/client. (Closes: #1576565).
+ - Rewrote submit daemon/client to use new networking code, which makes
+   transition to IPv6 compatibility easy. (Closes: #1576565).
  - Change scoreboard sorting to use ACM ICPC (tie-breaker) rules.
  - Added team information pages for teams and public and included team
    members field in the SQL 'team' table.
@@ -54,7 +55,8 @@ Version 2.0.0 - SVN
  - Bring lib.database.php up to date with latest upstream version.
  - Add Referential Integrity check to configchecker.
  - Add option to admin interface to delete data.
-
+ - Improved build process of submit client under Windows/Cygwin.
+	
 Version 1.3.0 - 6 October 2006
 ------------------------------
  - Fix balloons notification for new database layout introduced

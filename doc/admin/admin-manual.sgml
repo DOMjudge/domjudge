@@ -641,6 +641,25 @@ distclean</tt> will additionally also remove all traces of DOMjudge
 from the MySQL database, which is needed if you want to reinstall the
 database!
 
+<sect>Building the submit client under Windows/Cygwin
+<p>
+
+The submit client can also be built under Windows when the Cygwin
+environment is installed. First the <url name="Cygwin"
+url="http://cygwin.com/"> <url name="setup.exe"
+url="http://cygwin.com/setup.exe"> program must be downloaded and
+installed with GCC, curl-devel and maybe some more packages included.
+Furthermore, the cygwin-base package must be (re-)installed from the
+mirror <url url="http://cygwin.win6.jp/cygwin-ipv6/"> for support of
+the complete <tt>netdb.h</tt> headers (as this is currently not
+supported in the standard Cygwin tree yet).
+
+<p>
+When Cygwin is correctly installed with all necessary development
+tools, the submit binary can be created (after configuration) by
+running <tt>make submit.exe</tt> in the <tt>SYSTEM_ROOT/submit</tt>
+directory.
+
 <sect>Upgrading
 <p>
 
