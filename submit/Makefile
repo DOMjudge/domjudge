@@ -27,7 +27,7 @@ $(TARGETS): %: %.cc submitcommon.o $(TOPDIR)/etc/config.h $(LIBOBJECTS) $(LIBHEA
 submit.exe: %.exe: %.cc submitcommon.cygwin.o $(TOPDIR)/etc/config.h $(LIBOBJECTSCYGWIN) $(LIBHEADERS)
 	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLDEF) $(CURLLIBS)
 
-$(LIBOBJECTS):
+$(LIBOBJECTS) $(LIBOBJECTSCYGWIN):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
 submitcommon.o: %.o: %.cc %.h $(LIBHEADERS)

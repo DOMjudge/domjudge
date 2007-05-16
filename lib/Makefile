@@ -4,7 +4,7 @@ endif
 include $(TOPDIR)/Makefile.global
 
 OBJECTS = lib.error.o
-OBJECTSCYGWIN = $(LIBOBJECTS:.o=.cygwin.o)
+OBJECTSCYGWIN = $(OBJECTS:.o=.cygwin.o)
 
 build: $(OBJECTS)
 
