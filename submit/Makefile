@@ -8,6 +8,7 @@ TARGETS = submit submitdaemon
 LIBS = lib.error.o
 LIBOBJECTS = $(addprefix $(TOPDIR)/lib/,$(LIBS))
 LIBHEADERS = $(LIBOBJECTS:.o=.h)
+LIBOBJECTSCYGWIN = $(LIBOBJECTS:.o=.cygwin.o)
 
 LIBCURL    = $(shell curl-config --version | cut -d ' ' -f 2)
 CURLLIBS   = $(shell curl-config --libs)
@@ -23,15 +24,21 @@ install: build
 $(TARGETS): %: %.cc submitcommon.o $(TOPDIR)/etc/config.h $(LIBOBJECTS) $(LIBHEADERS)
 	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLDEF) $(CURLLIBS)
 
+submit.exe: %.exe: %.cc submitcommon.cygwin.o $(TOPDIR)/etc/config.h $(LIBOBJECTSCYGWIN) $(LIBHEADERS)
+	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLDEF) $(CURLLIBS)
+
 $(LIBOBJECTS):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
 submitcommon.o: %.o: %.cc %.h $(LIBHEADERS)
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
-submit: $(CURLSTATIC)
+submitcommon.cygwin.o: %.cygwin.o: %.cc %.h $(LIBHEADERS)
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+submit submit.exe: $(CURLSTATIC)
 
 clean:
-	-rm -f $(TARGETS) submitcommon.o
+	-rm -f $(TARGETS) submit.exe submitcommon.o submitcommon.cygwin.o
 
-.PHONY: checklibcurl
+.PHONY:

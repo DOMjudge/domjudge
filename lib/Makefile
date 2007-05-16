@@ -4,13 +4,17 @@ endif
 include $(TOPDIR)/Makefile.global
 
 OBJECTS = lib.error.o
+OBJECTSCYGWIN = $(LIBOBJECTS:.o=.cygwin.o)
 
 build: $(OBJECTS)
 
 $(OBJECTS): %.o: %.c %.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
+$(OBJECTSCYGWIN): %.cygwin.o: %.c %.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
 install:
 
 clean:
-	rm -rf $(OBJECTS)
+	rm -rf $(OBJECTS) $(OBJECTSCYGWIN)
