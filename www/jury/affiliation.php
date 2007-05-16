@@ -40,7 +40,7 @@ echo '<tr><td>Country:</td><td>' . htmlspecialchars($data['country']);
 
 if ( is_readable($countryflag) ) {
 	echo ' <img src="' . $countryflag . '" alt="' .
-		htmlspecialchars($data['country']) . "\" /></td></tr>\n";
+		htmlspecialchars($data['country']) . "\" />";
 }
 echo "</td></tr>\n";
 
