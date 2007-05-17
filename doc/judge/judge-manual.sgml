@@ -139,7 +139,9 @@ one hour before the contest ends, to keep the last hour interesting
 for all. From that time on, the public and team scoreboard will not
 be updated anymore (the jury scoreboard will) and indicate that they
 are frozen. It will be unfrozen at a specified time, or by a button
-click in the jury interface.
+click in the jury interface. Note that the way freezing works, a
+submission from before the freeze and judged after may still update
+the scoreboard even when frozen.
 
 The problem headings can take the colours of balloons associated with
 them, when set.
