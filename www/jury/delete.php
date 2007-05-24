@@ -1,6 +1,6 @@
 <?php
 /**
- * Start of functionality to delete data from this interface.
+ * Functionality to delete data from this interface.
  *
  * $Id$
  */
@@ -49,7 +49,9 @@ if (isset($_POST['zekerweten'] ) ) {
 
 	echo "<p>" . ucfirst($t) . " <strong>" . htmlspecialchars(implode(", ", $k)) . 
 		"</strong> has been deleted.</p>\n\n";
-	echo "<p><a href=\"" . $t . "s.php\">back to ${t}s</a></p>";
+	// one table falls outside the predictable filenames
+	$tablemulti = ($t == 'team_category' ? 'team_categories' : $t.'s');
+	echo "<p><a href=\"" . $tablemulti . ".php\">back to $tablemulti</a></p>";
 
 } else {
 	echo "<form action=\"delete.php\" method=\"post\">\n" .

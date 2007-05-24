@@ -100,3 +100,10 @@ function rejudge($key, $value) {
 		$DB->q('COMMIT');
 	}
 }
+
+function delLink($table, $field, $value)
+{
+	return "<a href=\"delete.php?table=" . urlencode($table) . "&amp;" .
+		$field . "=" . urlencode($value) ."\"><img src=\"../images/delete.png\"" .
+		"alt=\"delete\" class=\"editdel\" /></a>";
+}

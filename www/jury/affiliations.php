@@ -32,7 +32,11 @@ if( $res->count() == 0 ) {
 			htmlspecialchars($row['country']) .
 			'</td><td align="right">' .
 			(int)$row['cnt'] .
-			"</td></tr>\n";
+			"</td>";
+		if ( IS_ADMIN ) {
+			echo "<td>" . delLink('team_affiliation', 'affilid', $row['affilid']) . "</td>";
+		}
+		echo "</tr>\n";
 	}
 	echo "</table>\n\n";
 }
