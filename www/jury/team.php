@@ -51,7 +51,7 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 	nl2br(htmlentities($row['members']))?></td></tr>
 <?php endif; ?>
 <?php if (!empty($row['affilid'])): ?>
-<tr><td>Affiliation:</td><td><a href="affiliation.php?id=<?=
+<tr><td>Affiliation:</td><td><a href="team_affiliation.php?id=<?=
 	urlencode($row['affilid']) . '">' .
 	htmlentities($row['affilid'] . ' - ' .
 	$row['affname'])?></a></td></tr>

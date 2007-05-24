@@ -22,10 +22,10 @@ if( $res->count() == 0 ) {
 	echo "<table class=\"list\">\n" .
 		"<tr><th>ID</th><th>name</th><th>country</th><th>#teams</th></tr>\n";
 	while($row = $res->next()) {
-		echo '<tr><td><a href="affiliation.php?id=' .
+		echo '<tr><td><a href="team_affiliation.php?id=' .
 			urlencode($row['affilid']) . '">' .
 			htmlspecialchars($row['affilid']).
-			'</a></td><td><a href="affiliation.php?id=' .
+			'</a></td><td><a href="team_affiliation.php?id=' .
 			urlencode($row['affilid']) . '">' .
 			htmlentities($row['name']) .
 			'</a></td><td>' .

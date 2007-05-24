@@ -84,7 +84,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	// column headers
 	echo '<tr class="scoreheader"><th>' .
 		jurylink(null,'#',$isjury) . '</th><th>' .
-		( SHOW_AFFILIATIONS ? jurylink('affiliations.php','affil.',$isjury) .
+		( SHOW_AFFILIATIONS ? jurylink('team_affiliations.php','affil.',$isjury) .
 		  '</th><th>' : '' ) .
 		jurylink('teams.php','team',$isjury) . '</th><th>' .
 		jurylink(null,'solved',$isjury) . '</th><th>' .
@@ -185,7 +185,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 			echo '<td>';
 			if ( isset($teams[$team]['affilid']) ) {
 				if ( $isjury ) {
-					echo '<a href="affiliation.php?id=' .
+					echo '<a href="team_affiliation.php?id=' .
 						urlencode($teams[$team]['affilid']) . '">';
 				}
 				$affillogo = '../images/affiliations/' .
@@ -305,7 +305,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	if ( $categs->count() > 1 ) {
 		echo "<p><br /><br /></p>\n<table class=\"scoreboard" .
 			($isjury ? ' scoreboard_jury' : '') . "\">\n" .
-			"<tr><th>" . jurylink('categories.php','Legend',$isjury) . "</th></tr>\n";
+			"<tr><th>" . jurylink('team_categories.php','Legend',$isjury) . "</th></tr>\n";
 		while ( $cat = $categs->next() ) {
 			echo '<tr' . (isset($cat['color']) ? ' style="background: ' .
 			              $cat['color'] . ';"' : '') . '>' .
