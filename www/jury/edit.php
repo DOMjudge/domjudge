@@ -21,6 +21,8 @@ $keydata = @$_POST['keydata'];
 
 if ( empty($data) ) error ("No data.");
 
+require('checkers.php');
+
 foreach ($data as $i => $itemdata ) {
 	$fn = "check_$t";
 	if ( function_exists($fn) ) {
