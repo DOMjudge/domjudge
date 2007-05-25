@@ -31,8 +31,8 @@ foreach ($data as $i => $itemdata ) {
 	if ( $cmd == 'add' ) {
 		$newid = $DB->q("RETURNID INSERT INTO $t SET %S", $itemdata);
 		foreach($KEYS[$t] as $tablekey) {
-			if ( isset($itemdata[$i][$tablekey]) ) {
-				$newid = $itemdata[$i][$tablekey];
+			if ( isset($itemdata[$tablekey]) ) {
+				$newid = $itemdata[$tablekey];
 			}
 		}
 	} elseif ( $cmd == 'edit' ) {
