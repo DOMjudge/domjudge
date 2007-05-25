@@ -49,7 +49,9 @@ foreach ($data as $i => $itemdata ) {
 // back to the overview for that data, otherwise to the
 // page pertaining to the one item they added/edited.
 if ( count($data) > 1 ) {
-	header('Location: '.getBaseURI().'jury/'.$t.'s.php');
+	$tablemulti = ($t == 'team_category' ? 'team_categories' : $t.'s');
+	header('Location: '.getBaseURI().'jury/'.$tablemulti.'.php');
+
 } else {
 	if ( $cmd == 'add' ) {
 		header('Location: '.getBaseURI().'jury/'.$t.'.php?id=' .
