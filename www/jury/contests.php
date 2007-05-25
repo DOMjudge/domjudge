@@ -33,7 +33,8 @@ if( count($res) == 0 ) {
 	foreach($res as $row) {
 		echo "<tr" .
 			($row['cid'] == $curcont ? ' class="highlight"':'') . ">" .
-			"<td align=\"right\">c" . htmlentities($row['cid']) . "</td>\n" .
+			"<td align=\"right\"><a href=\"contest.php?id=" . urlencode($row['cid']) .
+			"\">c" . (int)$row['cid'] . "</a></td>\n" .
 			"<td title=\"" . htmlentities($row['starttime']) . "\">" .
 				printtime($row['starttime'])."</td>\n".
 			"<td title=\"".htmlentities($row['endtime']) . "\">" .
