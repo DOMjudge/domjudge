@@ -30,11 +30,17 @@ if( $res->count() == 0 ) {
 			'</td><td>' . htmlentities($row['name']) .
 			'</td><td align="right">' . (int)$row['numteams'] . "</td>";
 		if ( IS_ADMIN ) {
-			echo "<td>" . delLink('team_category', 'categoryid', $row['categoryid']) . "</td>";
+			echo "<td>" .
+				editLink('team_category', $row['categoryid']) . " " .
+				delLink('team_category', 'categoryid', $row['categoryid']) . "</td>";
 		}
 		echo "</tr>\n";
 	}
 	echo "</table>\n\n";
+}
+
+if ( IS_ADMIN ) {
+	echo "<p>" . addLink('team_category') . "</p>\n\n";
 }
 
 require('../footer.php');

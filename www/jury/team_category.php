@@ -5,12 +5,53 @@
  * $Id$
  */
 
-$id = (int)$_GET['id'];
+$id = (int)@$_GET['id'];
 
 require('init.php');
-$title = "Category: " .htmlspecialchars(@$id);
+
+$cmd = @$_GET['cmd'];
+
+if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
+
+	require('../forms.php');
+
+	$title = "Category: $cmd";
+
+	require('../header.php');
+	echo "<h2>" . ucfirst($cmd) . " category</h2>\n\n";
+
+	echo addForm('edit.php');
+
+	echo "<table>\n";
+
+	if ( $cmd == 'edit' ) {
+		echo "<tr><td>Category ID:</td><td>";
+		$row = $DB->q('TUPLE SELECT * FROM team_category WHERE categoryid = %i',
+			$_GET['id']);
+		echo addHidden('keydata[0][categoryid]', $row['categoryid']) .
+			htmlspecialchars($row['categoryid']) .
+			"</td></tr>\n";
+	}
+
+?>
+<tr><td>Description:</td><td><?=addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
+<tr><td>Sort order:</td><td><?=addInput('data[0][sortorder]', @$row['sortorder'], 2, 1)?></td></tr>
+<tr><td>Colour:</td><td><?=addInput('data[0][color]', @$row['color'], 8, 10)?></td></tr>
+</table>
+
+<?php
+echo addHidden('cmd', $cmd) .
+	addHidden('table','team_category') .
+	addSubmit('Save') .
+	addEndForm();
+
+	require('../footer.php');
+	exit;
+}
 
 if ( ! $id ) error("Missing or invalid category id");
+
+$title = "Category: " .htmlspecialchars(@$id);
 
 require('../header.php');
 
@@ -31,7 +72,9 @@ if ( isset($data['color']) ) {
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
-	echo "<p>" . delLink('team_category','categoryid',$data['categoryid']) . "</p>\n\n";
+	echo "<p>" .
+		editLink('team_category', $data['categoryid']) . " " .
+		delLink('team_category','categoryid',$data['categoryid']) . "</p>\n\n";
 }
 
 echo "<h2>Teams in " . htmlentities($data['name']) . "</h2>\n\n";

@@ -34,10 +34,17 @@ if( $res->count() == 0 ) {
 			(int)$row['cnt'] .
 			"</td>";
 		if ( IS_ADMIN ) {
-			echo "<td>" . delLink('team_affiliation', 'affilid', $row['affilid']) . "</td>";
+			echo "<td>" .
+				editLink('team_affiliation', $row['affilid']) . " " .
+				delLink('team_affiliation', 'affilid', $row['affilid']) . "</td>";
 		}
 		echo "</tr>\n";
 	}
 	echo "</table>\n\n";
 }
+
+if ( IS_ADMIN ) {
+	echo "<p>" . addLink('team_affiliation') . "</p>\n\n";
+}
+
 require('../footer.php');

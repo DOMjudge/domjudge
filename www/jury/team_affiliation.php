@@ -7,12 +7,58 @@
 
 $pagename = basename($_SERVER['PHP_SELF']);
 
-$id = $_GET['id'];
+$id = @$_GET['id'];
 
 require('init.php');
-$title = "Affiliation: " .htmlspecialchars(@$id);
+
+$cmd = @$_GET['cmd'];
+
+if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
+
+	require('../forms.php');
+
+	$title = "Affiliation: $cmd";
+
+	require('../header.php');
+	echo "<h2>" . ucfirst($cmd) . " affiliation</h2>\n\n";
+
+	echo addForm('edit.php');
+
+	echo "<table>\n";
+	echo "<tr><td>Affiliation ID:</td><td>";
+
+	if ( $cmd == 'edit' ) {
+		$row = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s',
+			$_GET['id']);
+		echo addHidden('keydata[0][affilid]', $row['affilid']) .
+			htmlspecialchars($row['affilid']);
+	} else {
+		echo addInput('data[0][affilid]', null, 11, 10);
+	}
+	echo "</td></tr>\n";
+
+?>
+<tr><td>Name:</td><td><?=addInput('data[0][name]', @$row['name'], 40, 50)?></td></tr>
+<tr><td>Country:</td><td><?=addInput('data[0][country]', @$row['country'], 3, 2)?></td></tr>
+<tr><td valign="top">Comments:</td><td><?=addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
+</table>
+
+<?php
+echo addHidden('cmd', $cmd) .
+	addHidden('table','team_affiliation') .
+	addSubmit('Save') .
+	addEndForm();
+
+	require('../footer.php');
+	exit;
+}
+
+
+
 
 if ( ! $id ) error("Missing or invalid affiliation id");
+$title = "Affiliation: " .htmlspecialchars(@$id);
+
 
 require('../header.php');
 
@@ -52,7 +98,9 @@ if ( !empty($data['comments']) ) {
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
-	echo "<p>" . delLink('team_affiliation', 'affilid', $data['affilid']) . "</p>\n\n";
+	echo "<p>" . 
+		editLink('team_affiliation', $data['affilid']) . " " .
+		delLink('team_affiliation', 'affilid', $data['affilid']) . "</p>\n\n";
 }
 
 echo "<h2>Teams from " . htmlentities($data['name']) . "</h2>\n\n";
