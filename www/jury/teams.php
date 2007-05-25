@@ -92,10 +92,17 @@ if( $teams->count() == 0 ) {
 		echo " width=\"16\" height=\"16\" /></td>";
 		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$numcor / $numsub</td>";
 		if ( IS_ADMIN ) {
-			echo "<td>" . delLink('team','login',$row['login']) . "</td>";
+			echo "<td>" .
+				editLink('team', $row['login']) . " " .
+				delLink('team','login',$row['login']) . "</td>";
 		}
 		echo "</tr>\n";
 	}
 	echo "</table>\n\n";
 }
+
+if ( IS_ADMIN ) {
+	echo "<p>" .addLink('team') . "</p>\n";
+}
+
 require('../footer.php');

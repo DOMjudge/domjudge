@@ -7,20 +7,84 @@
 
 $pagename = basename($_SERVER['PHP_SELF']);
 
-$id = $_REQUEST['id'];
+$id = @$_REQUEST['id'];
 
 require('init.php');
-$refresh = '15;url='.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id).
-	(isset($_GET['restrict'])?'&restrict='.urlencode($_GET['restrict']):'');
+
+if ( isset($_POST['cmd']) ) {
+	$pcmd = $_POST['cmd'];
+} elseif ( isset($_GET['cmd'] ) ) {
+	$cmd = $_GET['cmd'];
+} else {
+	$refresh = '15;url='.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id).
+		(isset($_GET['restrict'])?'&restrict='.urlencode($_GET['restrict']):'');
+}
+
 $title = 'Team '.htmlspecialchars(@$id);
 
-if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
 
-if ( isset($_POST['cmd']) && $_POST['cmd'] == 'rejudge' ) {
+if ( isset($pcmd) && $pcmd == 'rejudge' ) {
+	if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
 	rejudge('submission.teamid',$id);
 	header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
 	exit;
 }
+
+require('../header.php');
+
+if ( IS_ADMIN && !empty($cmd) ):
+
+	require('../forms.php');
+	
+	echo "<h2>" . ucfirst($cmd) . " team</h2>\n\n";
+
+	echo addForm('edit.php');
+
+	echo "<table>\n" .
+		"<tr><td>Login:</td><td class=\"teamid\">";
+
+	if ( $cmd == 'edit' ) {
+		$row = $DB->q('TUPLE SELECT * FROM team WHERE login = %s',
+			$_GET['id']);
+		echo addHidden('keydata[0][login]', $row['login']);
+		echo htmlspecialchars($row['login']);
+	} else {
+		echo addInput('data[0][login]', null, 8, 15);
+	}
+	echo "</td></tr>\n";
+
+?>
+<tr><td>Team name:</td><td><?=addInput('data[0][name]', @$row['name'], 35, 255)?></td></tr>
+<tr><td>Category:</td><td><?php
+$cmap = $DB->q("KEYVALUETABLE SELECT categoryid,name FROM team_category ORDER BY categoryid");
+echo addSelect('data[0][categoryid]', $cmap, @$row['categoryid'], true);
+?>
+</td></tr>
+<tr><td>Affiliation:</td><td><?php
+$amap = $DB->q("KEYVALUETABLE SELECT affilid,name FROM team_affiliation ORDER BY affilid");
+$amap[''] = 'none';
+echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
+?>
+</td></tr>
+<tr><td>IP address:</td><td><?=addInput('data[0][ipaddress]', @$row['ipaddress'], 35, 32)?></td></tr>
+<tr><td>Room:</td><td><?=addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
+<tr><td valign="top">Comments:</td><td><?=addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
+</table>
+
+<?php
+echo addHidden('cmd', $cmd) .
+	addHidden('table','team') .
+	addSubmit('Save') .
+	addEndForm();
+
+require('../footer.php');
+exit;
+
+endif;
+
+
+
+if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
 
 /* optional restriction of submissions list to specific problem, language, etc. */
 $restrictions = array();
@@ -34,7 +98,6 @@ $row = $DB->q('TUPLE SELECT t.*, c.name AS catname, a.name AS affname FROM team 
                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
                WHERE login = %s', $id);
 
-require('../header.php');
 
 echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 
@@ -77,7 +140,7 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <?php
 
 if ( IS_ADMIN ) {
-	echo delLink('team','login',$id);
+	echo editLink('team', $id). " " . delLink('team','login',$id);
 }
 
 echo "</p>\n</form>\n\n";
