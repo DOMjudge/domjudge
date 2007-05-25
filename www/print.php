@@ -109,7 +109,7 @@ function str_cut ($str, $size) {
  */
 function msgbox($caption, $message) {
 	return "<fieldset class=\"msgbox\"><legend>" .
-		"<img src=\"../images/huh.png\" width=\"16\" height=\"16\" alt=\"?\" /> " .
+		"<img src=\"../images/huh.png\" class=\"picto\" alt=\"?\" /> " .
 		$caption . "</legend>\n" .
 		$message .
 		"</fieldset>\n\n";
