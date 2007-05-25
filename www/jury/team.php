@@ -73,13 +73,14 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <input type="hidden" name="cmd" value="rejudge" />
 <input type="submit" value="REJUDGE ALL for team <?=$id?>"
  onclick="return confirm('Rejudge all submissions for this team?')" />
-</p>
-</form>
 
-<?php if ( IS_ADMIN ) : ?>
-<p><a href="delete.php?table=team&amp;login=<?=$id?>">delete this team</a></p>
+<?php
 
-<?php endif;
+if ( IS_ADMIN ) {
+	echo delLink('team','login',$id);
+}
+
+echo "</p>\n</form>\n\n";
 
 echo '<h3>Submissions';
 if ( isset($key) ) {

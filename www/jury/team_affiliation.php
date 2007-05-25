@@ -50,6 +50,11 @@ if ( !empty($data['comments']) ) {
 }
 
 echo "</table>\n\n";
+
+if ( IS_ADMIN ) {
+	echo "<p>" . delLink('team_affiliation', 'affilid', $data['affilid']) . "</p>\n\n";
+}
+
 echo "<h2>Teams from " . htmlentities($data['name']) . "</h2>\n\n";
 
 $teams = $DB->q('SELECT login,name FROM team WHERE affilid = %s', $id);

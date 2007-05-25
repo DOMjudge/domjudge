@@ -29,6 +29,11 @@ if ( isset($data['color']) ) {
 
 
 echo "</table>\n\n";
+
+if ( IS_ADMIN ) {
+	echo "<p>" . delLink('team_category','categoryid',$data['categoryid']) . "</p>\n\n";
+}
+
 echo "<h2>Teams in " . htmlentities($data['name']) . "</h2>\n\n";
 
 $teams = $DB->q('SELECT login,name FROM team WHERE categoryid = %i', $id);

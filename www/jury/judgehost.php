@@ -64,12 +64,12 @@ $cmd = ($row['active'] == 1 ? 'deactivate' : 'activate'); ?>
 </p>
 </form>
 
-<?php if ( IS_ADMIN ) : ?>
-<p><a href="delete.php?table=judgehost&amp;hostname=<?=$id?>">delete this judgehost</a></p>
-<?php endif; ?>
-
-<h3>Judgings by <?=printhost($row['hostname'])?></h3>
 <?php
+if ( IS_ADMIN ) {
+	echo "<p>" . delLink('judgehost','hostname',$id) . "</p>\n\n";
+}
+
+echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
 
 putJudgings('judgehost', $row['hostname']);
 

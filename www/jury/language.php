@@ -67,9 +67,11 @@ $data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 </p>
 </form>
 
-<h2>Submissions in <?=htmlspecialchars($id)?></h2>
-
 <?php
+if ( IS_ADMIN ) {
+	echo "<p>" . delLink('language','langid',$data['langid']) . "</p>\n\n";
+}
+echo "<h2>Submissions in " . htmlspecialchars($id) . "</h2>\n\n";
 
 $restrictions = array( 'langid' => $id );
 putSubmissions($restrictions, TRUE);
