@@ -5,14 +5,54 @@
  * $Id$
  */
 
-$id = (int)$_GET['id'];
+$id = (int)@$_GET['id'];
 
 require('init.php');
 $title = "Contest: " .htmlspecialchars(@$id);
 
+require('../header.php');
+
+if ( IS_ADMIN && !empty($_GET['cmd']) ):
+	$cmd = $_GET['cmd'];
+
+	require('../forms.php');
+	
+	echo "<h2>" . ucfirst($cmd) . " contest</h2>\n\n";
+
+	echo addForm('edit.php');
+
+	echo "<table>\n";
+
+	if ( $cmd == 'edit' ) {
+		echo "<tr><td>Contest ID:</td><td>";
+		$row = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %s',
+			$_GET['id']);
+		echo addHidden('keydata[0][cid]', $row['cid']) .
+			'c' . htmlspecialchars($row['cid']) .
+			"</td></tr>\n";
+	}
+
+?>
+<tr><td>Contest name:</td><td><?=addInput('data[0][contestname]', @$row['contestname'], 40, 255)?></td></tr>
+<tr><td>Start time:</td><td><?=addInput('data[0][starttime]', @$row['starttime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
+<tr><td>End time:</td><td><?=addInput('data[0][endtime]', @$row['endtime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
+<tr><td>Last score update:</td><td><?=addInput('data[0][lastscoreupdate]', @$row['lastscoreupdate'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
+<tr><td>Unfreeze time:</td><td><?=addInput('data[0][unfreezetime]', @$row['unfreezetime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
+</table>
+
+<?php
+echo addHidden('cmd', $cmd) .
+	addHidden('table','contest') .
+	addSubmit('Save') .
+	addEndForm();
+
+require('../footer.php');
+exit;
+
+endif;
+
 if ( ! $id ) error("Missing or invalid contest id");
 
-require('../header.php');
 
 $data = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $id);
 
@@ -32,7 +72,9 @@ echo '<tr><td>Scoreboard unfreeze:</td><td>' . (empty($data['unfreezetime']) ? "
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
-	echo "<p>" . delLink('contest','cid',$data['cid']) ."</p>\n\n";
+	echo "<p>" . 
+		editLink('contest',$data['cid']) . " " .
+		delLink('contest','cid',$data['cid']) ."</p>\n\n";
 }
 
 require('../footer.php');

@@ -26,3 +26,11 @@ function check_language($data)
 	return $data;
 }
 
+function check_contest($data)
+{
+	// FIXME: checkers for valid date/time formats and valid > > relationships	
+
+	if ( empty($data['lastscoreupdate']) ) unset($data['lastscoreupdate']);
+	if ( empty($data['unfreezetime']) ) unset($data['unfreezetime']);
+	return $data;
+}

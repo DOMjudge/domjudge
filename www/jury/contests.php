@@ -64,11 +64,17 @@ if( count($res) == 0 ) {
 		}
 		echo "</td>\n";
 		if ( IS_ADMIN ) {
-			echo "<td>" . delLink('contest','cid',$row['cid']) . "</td>\n";
+			echo "<td>" . 
+				editLink('contest', $row['cid']) . " " .
+				delLink('contest','cid',$row['cid']) . "</td>\n";
 		}
 		echo "</tr>\n";
 	}
 	echo "</table>\n</form>\n\n";
+}
+
+if ( IS_ADMIN ) {
+	echo "<p>" . addLink('contest') . "</p>\n\n";
 }
 
 require('../footer.php');
