@@ -41,9 +41,9 @@ if ( IS_ADMIN ) {
 				$res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
 				$i = 0;
 				while ( $row = $res->next() ) {
-					echo "<tr><td><input type=\"text\" name=\"judgehost[$i]\"".
+					echo "<tr><td><input type=\"hidden\" name=\"judgehost[$i]\"".
 						"value=\"" . htmlspecialchars($row['hostname']) . "\" ".
-						"size=\"20\" maxlength=\"50\" /></td><td>".
+						"/>" . htmlspecialchars($row['hostname']) . "</td><td>".
 						"<input type=\"checkbox\" name=\"active[$i]\" value=\"1\" ".
 						($row['active'] ?"checked=\"checked\" ":"") . "/>".
 						"</td></tr>\n";
@@ -73,7 +73,11 @@ if( $res->count() == 0 ) {
 		echo "<tr".( $row['active'] ? '': ' class="disabled"').
 			"><td><a href=\"judgehost.php?id=".urlencode($row['hostname']).'">'.
 			printhost($row['hostname']).'</a>'.
-			"</td><td align=\"center\">".printyn($row['active'])."</td></tr>\n";
+			"</td><td align=\"center\">".printyn($row['active'])."</td>";
+		if ( IS_ADMIN ) {
+			echo "<td>" . delLink('judgehost','hostname',$row['hostname']) ."</td>";
+		}
+		echo "</tr>\n";
 	}
 	echo "</table>\n\n";
 
