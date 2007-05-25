@@ -1,133 +1,67 @@
 <?php
 /**
- * Start of functionality to edit data from this interface.
- * Does not work yet.
+ * Functionality to edit data from this interface.
  *
  * $Id$
  */
 require('init.php');
 requireAdmin();
 
-$t = @$_REQUEST['table'];
+$cmd = $_POST['cmd'];
+if ( $cmd != 'add' && $cmd != 'edit' ) error ("Unknown action.");
+
+require(SYSTEM_ROOT . '/lib/relations.php');
+
+$t = @$_POST['table'];
 if(!$t)	error ("No table selected.");
+if(!in_array($t, array_keys($KEYS))) error ("Unknown table.");
 
-$l = (int)@$_REQUEST['add'];
-if ( $l<1 ) $l = 1;
+$data = $_POST['data'];
+$keydata = @$_POST['keydata'];
 
-$title = 'Edit - '.$t;
-require('../header.php');
+if ( empty($data) ) error ("No data.");
 
-if(isset($_REQUEST['submit'])) {
-	edit_table($t);
-}
-
-echo "<h1>Edit - $t</h1>\n\n";
-
-edit_table_show($t, $l);
-
-require('../footer.php');
-
-
-function edit_table($table)
-{
-	global $DB;
-	
-	$table = mysql_escape_string($table);
-	
-	$layout = $DB->q('TABLE SHOW COLUMNS FROM ' . $table);
-	
-	if( is_array(@$_REQUEST['del']) )
-	{
+foreach ($data as $i => $itemdata ) {
+	$fn = "check_$t";
+	if ( function_exists($fn) ) {
+		$itemdata = $fn($itemdata);
 	}
-	
-	echo "<pre>";
-	print_r($_REQUEST['new']);
-	echo "---\n";
-	print_r($_REQUEST['data']);
-	echo "---\n";
-	print_r($_REQUEST['old']);
-	echo "---\n";
-	print_r(@$_REQUEST['del']);
-	echo "---\n";
-	echo "</pre>";
-}
+	check_sane_keys($itemdata);
 
-
-function edit_table_show($table, $add_lines)
-{
-	global $DB;
-	
-	$table = mysql_escape_string($table);
-	
-	$layout = $DB->q('TABLE SHOW COLUMNS FROM ' . $table);
-	$data = $DB->q('TABLE SELECT * FROM ' . $table);
-	
-?>
-<form action="edit.php" method="post">
-<input type="hidden" name="table" value="<?=$table?>" />
-<table>
-	<tr>
-<?
-
-	foreach ($layout as $field)
-	{
-		echo "\t\t<th>".$field['Field']."</th>\n";
-	}
-	echo "\t\t<th>Delete</th>\n";
-
-	echo "\t</tr>";
-	
-	$i = 0;
-	foreach ($data as $row)
-	{
-		echo "\t<tr>\n";
-		foreach ($layout as $field)
-		{
-			$f = $field['Field'];
-			
-			echo "\t\t<td>\n";
-			
-			echo "<input type=\"hidden\" name=\"old[$i][$f]\" value=\"".$row[$f]."\" />\n";
-			
-			if($field['Extra'] == 'auto_increment') {
-				echo htmlentities($row[$f]);
-			} else {
-				echo "<input type=\"text\" name=\"data[$i][$f]\" value=\"".$row[$f]."\" />\n";
-			}
-			
-			echo "</td>\n";
-		}
-		echo "\t\t<td><input type=\"checkbox\" name=\"del[$i]\" /></td>\n";
-		echo "\t</tr>\n";
-
-		$i++;
-	}
-	
-	for($i = 0; $i < $add_lines; $i++)
-	{
-		echo "\t<tr>\n";
-		foreach ($layout as $field)
-		{
-			$f = $field['Field'];
-			
-			echo "\t\t<td>\n";
-			
-			if($field['Extra'] == 'auto_increment') {
-				echo "**";
-			} else {
-				echo "<input type=\"text\" name=\"new[$i][$f]\" />\n";
+	if ( $cmd == 'add' ) {
+		$newid = $DB->q("RETURNID INSERT INTO $t SET %S", $itemdata);
+		foreach($KEYS[$t] as $tablekey) {
+			if ( isset($itemdata[$i][$tablekey]) ) {
+				$newid = $itemdata[$i][$tablekey];
 			}
 		}
-		echo "\t</tr>\n";
+	} elseif ( $cmd == 'edit' ) {
+		foreach($KEYS[$t] as $tablekey) {
+				$prikey[$tablekey] = $keydata[$i][$tablekey];
+		}
+		check_sane_keys($prikey);
+
+		$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
 	}
-?>
-</table>
-<input type="Reset" /><br />
-<input type="Submit" name="submit" value="Edit" />
-</form>
-<pre>
-<?=print_r($layout)?>
-<?=print_r($data)?>
-</pre>
-<?
+}
+
+// when inserting/updating multiple rows, throw the user
+// back to the overview for that data, otherwise to the
+// page pertaining to the one item they added/edited.
+if ( count($data) > 1 ) {
+	header('Location: '.getBaseURI().'jury/'.$t.'s.php');
+} else {
+	if ( $cmd == 'add' ) {
+		header('Location: '.getBaseURI().'jury/'.$t.'.php?id=' .
+			urlencode($newid));
+	} else {
+		header('Location: '.getBaseUri().'jury/'.$t.'.php?id=' .
+			urlencode(array_shift($prikey)));
+	}	
+}
+
+function check_sane_keys($itemdata) {
+	foreach(array_keys($itemdata) as $key) {
+		if ( ! preg_match ('/^\w+$/', $key ) ) error ("Invalid characters in field name \"$key\".");
+	}
 }
