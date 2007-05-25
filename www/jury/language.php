@@ -12,28 +12,77 @@ $id = $_REQUEST['id'];
 require('init.php');
 $title = 'Language '.htmlspecialchars(@$id);
 
-if ( ! $id ) error("Missing or invalid language id");
+if ( isset($_POST['cmd']) ) {
+	$pcmd = $_POST['cmd'];
+} elseif ( isset($_GET['cmd'] ) ) {
+	$cmd = $_GET['cmd'];
+}
 
-if ( !empty($_POST['cmd']) ) {
-	if ( isset($_POST['cmd']['rejudge']) ) {
+if ( !empty($pcmd) ) {
+
+	if ( ! $id ) error("Missing or invalid language id");
+
+	if ( isset($pcmd['rejudge']) ) {
 		rejudge('submission.langid',$id);
 		header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
 		exit;
 	}
 
-	if ( isset($_POST['cmd']['toggle_submit']) ) {
+	if ( isset($pcmd['toggle_submit']) ) {
 		$DB->q('UPDATE language SET allow_submit = %i WHERE langid = %s',
 		       $_POST['val']['toggle_submit'], $id);
 	}
 
-	if ( isset($_POST['cmd']['toggle_judge']) ) {
+	if ( isset($pcmd['toggle_judge']) ) {
 		$DB->q('UPDATE language SET allow_judge = %i WHERE langid = %s',
 		       $_POST['val']['toggle_judge'], $id);
 	}
 }
 
-
 require('../header.php');
+
+if ( IS_ADMIN && !empty($cmd) ):
+
+	require('../forms.php');
+	
+	echo "<h2>" . ucfirst($cmd) . " language</h2>\n\n";
+
+	echo addForm('edit.php');
+
+	echo "<table>\n" .
+		"<tr><td>Language ID:</td><td>";
+
+	if ( $cmd == 'edit' ) {
+		$row = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s',
+			$_GET['id']);
+		echo addHidden('keydata[0][langid]', $row['langid']);
+		echo htmlspecialchars($row['langid']);
+	} else {
+		echo addInput('data[0][langid]', null, 8, 8);
+	}
+	echo "</td></tr>\n";
+
+?>
+<tr><td>Language name:</td><td><?=addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
+<tr><td>Extension:</td><td class="filename">.<?=addInput('data[0][extension]', @$row['extension'], 5, 5)?></td></tr>
+<tr><td>Allow submit:</td><td><?=addRadioBox('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> yes <?=addRadioBox('data[0][allow_submit]', (isset($row['allow_submit']) && !$row['allow_submit']), 0)?> no</td></tr>
+<tr><td>Allow judge:</td><td><?=addRadioBox('data[0][allow_judge]', (!isset($row['allow_judge']) || $row['allow_judge']), 1)?> yes <?=addRadioBox('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> no</td></tr>
+<tr><td>Time factor:</td><td><?=addInput('data[0][time_factor]', @$row['time_factor'], 5, 5)?> x</td></tr>
+</table>
+
+<?php
+echo addHidden('cmd', $cmd) .
+	addHidden('table','language') .
+	addSubmit('Save') .
+	addEndForm();
+
+require('../footer.php');
+exit;
+
+endif;
+
+if ( ! $id ) error("Missing or invalid language id");
+
 
 echo "<h1>Language ".htmlspecialchars($id)."</h1>\n\n";
 
@@ -58,7 +107,7 @@ $data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
  <input type="submit" name="cmd[toggle_judge]" value="toggle"
  onclick="return confirm('<?= $data['allow_judge'] ? 'Disallow' : 'Allow'?> judging for this language?')" />
 </td></tr>
-<tr><td>Time factor:  </td><td><?=htmlspecialchars($data['time_factor'])?></td></tr>
+<tr><td>Time factor:  </td><td><?=htmlspecialchars($data['time_factor'])?> x</td></tr>
 </table>
 
 <p>
@@ -69,7 +118,9 @@ $data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 
 <?php
 if ( IS_ADMIN ) {
-	echo "<p>" . delLink('language','langid',$data['langid']) . "</p>\n\n";
+	echo "<p>" . 
+		editLink('language', $data['langid']) . " " .
+		delLink('language','langid',$data['langid']) . "</p>\n\n";
 }
 echo "<h2>Submissions in " . htmlspecialchars($id) . "</h2>\n\n";
 

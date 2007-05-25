@@ -15,4 +15,14 @@ function check_problem($data)
 	return $data;
 }
 
+function check_language($data)
+{
+	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 0 ) {
+		error("Timelimit is not a valid positive factor!");
+	}
+	if ( strpos($data['extension'], '.') !== FALSE ) {
+		error("Do not include the dot (.) in the extension!");
+	}
+	return $data;
+}
 

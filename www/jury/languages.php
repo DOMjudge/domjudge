@@ -33,10 +33,18 @@ if( $res->count() == 0 ) {
 			"</td><td align=\"center\">".printyn($row['allow_judge']).
 			"</td><td>".htmlspecialchars($row['time_factor']);
 			if ( IS_ADMIN ) {
-				echo "</td><td>" . delLink('language','langid',$row['langid']);
+				echo "</td><td>" . 
+					editLink('language', $row['langid']) . " " .
+					delLink('language','langid',$row['langid']);
 			}
 			"</td></tr>\n";
 	}
 	echo "</table>\n\n";
 }
+
+if ( IS_ADMIN ) {
+	echo "<p>" . addLink('language') . "</p>\n\n";
+}
+
+
 require('../footer.php');
