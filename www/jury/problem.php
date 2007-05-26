@@ -43,34 +43,54 @@ if ( IS_ADMIN && !empty($cmd) ):
 
 	echo addForm('edit.php');
 
-	echo "<table>\n" .
-		"<tr><td>Problem ID:</td><td>";
+	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
+		echo "<tr><td>Problem ID:</td><td>";
 		$row = $DB->q('TUPLE SELECT * FROM problem WHERE probid = %s',
 			$_GET['id']);
 		echo addHidden('keydata[0][probid]', $row['probid']);
 		echo htmlspecialchars($row['probid']);
 	} else {
+		echo "<tr><td><label for=\"data_0__probid_\">Problem ID:</label></td><td>";
 		echo addInput('data[0][probid]', null, 8, 10);
 	}
 	echo "</td></tr>\n";
 
 ?>
-<tr><td>Contest:</td><td><?php
+<tr><td><label for="data_0__cid_">Contest:</label></td>
+<td><?php
 $cmap = $DB->q("KEYVALUETABLE SELECT cid,contestname FROM contest ORDER BY cid");
 echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 ?>
 </td></tr>
-<tr><td>Problem name:</td><td><?=addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
-<tr><td>Allow submit:</td><td><?=addRadioBox('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> yes <?=addRadioBox('data[0][allow_submit]', (isset($row['allow_submit']) && !$row['allow_submit']), 0)?> no</td></tr>
-<tr><td>Allow judge:</td><td><?=addRadioBox('data[0][allow_judge]', (!isset($row['allow_judge']) || $row['allow_judge']), 1)?> yes <?=addRadioBox('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> no</td></tr>
-<tr><td>Path to testdata:</td><td><?=addInput('data[0][testdata]', @$row['testdata'], 20, 255)?></td></tr>
-<tr><td>Timelimit:</td><td><?=addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
-<tr><td>Balloon colour:</td><td><?=addInput('data[0][color]', @$row['color'], 8, 10)?>
+
+<tr><td><label for="data_0__name_">Problem name:</label></td>
+<td><?=addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
+
+<tr><td>Allow submit:</td>
+<td><?=addRadioBox('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> <label for="data_0__allow_submit_1">yes</label>
+<?=addRadioBox('data[0][allow_submit]', (isset($row['allow_submit']) && !$row['allow_submit']), 0)?> <label for="data_0__allow_submit_0">no</label></td></tr>
+
+<tr><td>Allow judge:</td>
+<td><?=addRadioBox('data[0][allow_judge]', (!isset($row['allow_judge']) || $row['allow_judge']), 1)?> <label for="data_0__allow_judge_1">yes</label>
+<?=addRadioBox('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
+
+<tr><td><label for="data_0__testdata_">Path to testdata:</label></td>
+<td><?=addInput('data[0][testdata]', @$row['testdata'], 20, 255)?></td></tr>
+
+<tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
+<td><?=addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
+
+<tr><td><label for="data_0__color_">Balloon colour:</label></td>
+<td><?=addInput('data[0][color]', @$row['color'], 8, 10)?>
 <a href="http://www.w3schools.com/css/css_colornames.asp" target="_blank"><small>(help)</small></a></td></tr>
-<tr><td>Special run script:</td><td><?=addInput('data[0][special_run]', @$row['special_run'], 10, 8)?></td></tr>
-<tr><td>Special compare script:</td><td><?=addInput('data[0][special_compare]', @$row['special_compare'], 10, 8)?></td></tr>
+
+<tr><td><label for="data_0__special_run_">Special run script:"</label></td>
+<td><?=addInput('data[0][special_run]', @$row['special_run'], 10, 8)?></td></tr>
+
+<tr><td><label for="data_0__special_compare_">Special compare script:</label></td>
+<td><?=addInput('data[0][special_compare]', @$row['special_compare'], 10, 8)?></td></tr>
 </table>
 
 <?php
