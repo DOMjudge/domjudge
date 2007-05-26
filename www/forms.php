@@ -9,10 +9,17 @@
  * only by other functions below.
  */
 function addInputField($type, $name = null, $value = null, $attributes = '') {
+    if ( $name !== null && $type != 'hidden' ) {
+    	$id = ' id="' . htmlspecialchars(strtr($name,'[]','__'));
+	if ( $type == 'radio' ) $id .= htmlspecialchars($value);
+	$id .= '"';
+    } else {
+        $id = '';
+    }
+
     return '<input type="'.$type.'"'.
         ($name  !== null ? ' name="'.htmlspecialchars($name).'"' : '') .
-	($name  !== null && $type != 'hidden' ? ' id="' .
-		htmlspecialchars(strtr($name,'[]','__')).'"': '') .
+	$id .
         ($value !== null ? ' value="'.htmlspecialchars($value).'"' : '').
         $attributes . " />\n";
 }
