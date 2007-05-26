@@ -47,6 +47,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 	}
 	echo "</table>\n\n<br /><br />\n";
 	echo addHidden('cmd', $cmd) .
+		( $cmd == 'add' ? addHidden('skipwhenempty', 'hostname') : '' ) .
 		addHidden('table','judgehost') .
 		addSubmit('Save Judgehosts') .
 		addEndForm();

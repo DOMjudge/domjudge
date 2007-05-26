@@ -16,14 +16,19 @@ $t = @$_POST['table'];
 if(!$t)	error ("No table selected.");
 if(!in_array($t, array_keys($KEYS))) error ("Unknown table.");
 
-$data = $_POST['data'];
-$keydata = @$_POST['keydata'];
+$data          = $_POST['data'];
+$keydata       = @$_POST['keydata'];
+$skipwhenempty = @$_POST['skipwhenempty'];
 
 if ( empty($data) ) error ("No data.");
 
 require('checkers.php');
 
 foreach ($data as $i => $itemdata ) {
+	if ( !empty($skipwhenempty) && empty($itemdata[$skipwhenempty]) ) {
+		continue;
+	}
+
 	$fn = "check_$t";
 	if ( function_exists($fn) ) {
 		$itemdata = $fn($itemdata);
