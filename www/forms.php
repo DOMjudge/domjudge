@@ -10,7 +10,9 @@
  */
 function addInputField($type, $name = null, $value = null, $attributes = '') {
     return '<input type="'.$type.'"'.
-        ($name  !== null ? ' name="'.htmlspecialchars($name).'"'   : '').
+        ($name  !== null ? ' name="'.htmlspecialchars($name).'"' : '') .
+	($name  !== null && $type != 'hidden' ? ' id="' .
+		htmlspecialchars(strtr($name,'[]','__')).'"': '') .
         ($value !== null ? ' value="'.htmlspecialchars($value).'"' : '').
         $attributes . " />\n";
 }
@@ -80,7 +82,9 @@ function addSelect($name, $values, $default = null, $usekeys = false)
             htmlspecialchars($v) . "\n";
     }
 
-    $ret = '<select name="'.htmlspecialchars($name) . "\">\n";
+    $ret = '<select name="'.htmlspecialchars($name) .
+	'" id="' . htmlspecialchars(strtr($name,'[]','__')) .
+    	"\">\n";
     foreach ($values as $k => $v) {
         if(!$usekeys) $k = $v;
         $ret .= '<option value="' .
@@ -113,6 +117,7 @@ function addReset($value) {
 function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '') {
     return '<textarea name="'.htmlspecialchars($name).'" '.
         'rows="'.(int)$rows .'" cols="'.(int)$cols.'" '.
+	'id="' . htmlspecialchars(strtr($name,'[]','__')).'" ' .
         $attr . '>'.htmlspecialchars($text) ."</textarea>\n";
 }
 
