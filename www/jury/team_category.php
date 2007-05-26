@@ -36,7 +36,9 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 ?>
 <tr><td>Description:</td><td><?=addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
 <tr><td>Sort order:</td><td><?=addInput('data[0][sortorder]', @$row['sortorder'], 2, 1)?></td></tr>
-<tr><td>Colour:</td><td><?=addInput('data[0][color]', @$row['color'], 8, 10)?></td></tr>
+<tr><td>Colour:</td><td><?=addInput('data[0][color]', @$row['color'], 8, 10)?>
+<a href="http://www.w3schools.com/css/css_colornames.asp" target="_blank"><small>(help)</small></a>
+</td></tr>
 </table>
 
 <?php

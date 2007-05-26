@@ -67,7 +67,8 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <tr><td>Allow judge:</td><td><?=addRadioBox('data[0][allow_judge]', (!isset($row['allow_judge']) || $row['allow_judge']), 1)?> yes <?=addRadioBox('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> no</td></tr>
 <tr><td>Path to testdata:</td><td><?=addInput('data[0][testdata]', @$row['testdata'], 20, 255)?></td></tr>
 <tr><td>Timelimit:</td><td><?=addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
-<tr><td>Balloon colour:</td><td><?=addInput('data[0][color]', @$row['color'], 8, 10)?></td></tr>
+<tr><td>Balloon colour:</td><td><?=addInput('data[0][color]', @$row['color'], 8, 10)?>
+<a href="http://www.w3schools.com/css/css_colornames.asp" target="_blank"><small>(help)</small></a></td></tr>
 <tr><td>Special run script:</td><td><?=addInput('data[0][special_run]', @$row['special_run'], 10, 8)?></td></tr>
 <tr><td>Special compare script:</td><td><?=addInput('data[0][special_compare]', @$row['special_compare'], 10, 8)?></td></tr>
 </table>
