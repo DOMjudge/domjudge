@@ -108,8 +108,9 @@ function addSelect($name, $values, $default = null, $usekeys = false)
  * Form submission button
  * Note the switched value/name parameters!
  */
-function addSubmit($value, $name = null) {
-    return addInputField('submit', $name, $value);
+function addSubmit($value, $name = null, $onclick = null) {
+    return addInputField('submit', $name, $value,
+    	(empty($onclick)?null:' onclick="'.htmlspecialchars($onclick).'"'));
 }
 /**
  * Form reset button, $value = caption
@@ -131,10 +132,10 @@ function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '') {
 /**
  * Make a <form> start-tag.
  */
-function addForm($action, $method = 'post', $name = '', $enctype = '', $charset = '')
+function addForm($action, $method = 'post', $id = '', $enctype = '', $charset = '')
 {
-    if($name) {
-        $name = ' name="'.$name.'"';
+    if($id) {
+        $id = ' id="'.$id.'"';
     }
     if($enctype) {
         $enctype = ' enctype="'.$enctype.'"';
@@ -144,7 +145,7 @@ function addForm($action, $method = 'post', $name = '', $enctype = '', $charset 
     }
 
     return '<form action="'. $action .'" method="'. $method .'"'.
-        $enctype . $name . $charset . ">\n";
+        $enctype . $id . $charset . ">\n";
 }
 
 /**
@@ -159,6 +160,6 @@ function addEndForm()
  * File upload field
  */
 function addFileField($name, $size = null) {
-    return addInputField('file', $name , null, is_null($size)?null:"size=\"".(int)($size).'"');
+    return addInputField('file', $name , null, is_null($size)?null:" size=\"".(int)($size).'"');
 }
 
