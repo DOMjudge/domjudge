@@ -7,7 +7,7 @@
 
 $pagename = basename($_SERVER['PHP_SELF']);
 
-$id = $_REQUEST['id'];
+$id = @$_REQUEST['id'];
 
 require('init.php');
 $title = 'Language '.htmlspecialchars(@$id);

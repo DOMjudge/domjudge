@@ -12,54 +12,48 @@ require('../header.php');
 
 echo "<h1>Judgehosts</h1>\n\n";
 
-if ( IS_ADMIN ) {
-	@$cmd = $_REQUEST['cmd'];
-	if ( !empty($cmd) ) {
-		if ( $cmd == 'activate' || $cmd == 'deactivate' ) {
-			$DB->q('UPDATE judgehost SET active = %i',
-			       ($cmd == 'activate' ? 1:0));
+@$cmd = @$_REQUEST['cmd'];
+if ( IS_ADMIN && ($cmd == 'activate' || $cmd == 'deactivate') ) {
+	$DB->q('UPDATE judgehost SET active = %i',
+	       ($cmd == 'activate' ? 1:0));
+}
+if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
+	require ( '../forms.php' ) ;
+	echo addForm('edit.php');
+	echo "\n<table>\n" .
+		"<tr><th>Hostname</th><th>Active</th></tr>\n";
+	if ( $cmd == 'add' ) {
+		for ($i=0; $i<10; ++$i) {
+			echo "<tr><td>" .
+				addInput("data[$i][hostname]", null, 20, 50) .
+				"</td><td>" .
+				addSelect("data[$i][active]", 
+					array(1=>'yes',0=>'no'), '1', true) .
+				"</td></tr>\n";
 		}
-		if ( $cmd == 'save' ) {
-			foreach($_POST['judgehost'] as $id => $judgehost) {
-				if ( !empty($judgehost) ) {
-					$DB->q("REPLACE INTO judgehost (hostname,active) VALUES (%s,%i)",
-						$judgehost, (@$_POST['active'][$id]?1:0));
-				}
-			}
-		}
-		if ( $cmd == 'add' || $cmd == 'edit' ) {
-			echo "<form action=\"judgehosts.php\" method=\"post\">\n<table>\n" .
-				"<tr><th>Hostname</th><th>Active</th></tr>\n";
-			if ( $cmd == 'add' ) {
-				for ($i=0; $i<10; ++$i) {
-					echo "<tr><td><input type=\"text\" name=\"judgehost[$i]\"".
-						"value=\"\" size=\"20\" maxlength=\"50\" /></td><td>".
-						"<input type=\"checkbox\" name=\"active[$i]\" value=\"1\" checked=\"checked\" />".
-						"</td></tr>\n";
-				}
-			} else {
-				$res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
-				$i = 0;
-				while ( $row = $res->next() ) {
-					echo "<tr><td><input type=\"hidden\" name=\"judgehost[$i]\"".
-						"value=\"" . htmlspecialchars($row['hostname']) . "\" ".
-						"/>" . htmlspecialchars($row['hostname']) . "</td><td>".
-						"<input type=\"checkbox\" name=\"active[$i]\" value=\"1\" ".
-						($row['active'] ?"checked=\"checked\" ":"") . "/>".
-						"</td></tr>\n";
-					++$i;
-				}
-
-			}
-			echo "</table>\n\n<br /><br />\n<input type=\"hidden\" name=\"cmd\" value=\"save\" />\n" .
-				"<input type=\"submit\" value=\"Save Judgehosts\" />\n</form>\n\n";
-
-			require('../footer.php');
-			exit;
-			
+	} else {
+		$res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
+		$i = 0;
+		while ( $row = $res->next() ) {
+			echo "<tr><td>" .
+				addHidden("keydata[$i][hostname]", $row['hostname']) .
+				printhost($row['hostname']) .
+				"</td><td>" .
+				addSelect("data[$i][active]", 
+					array(1=>'yes',0=>'no'), $row['active'], true) .
+				"</td></tr>\n";
+			++$i;
 		}
 	}
+	echo "</table>\n\n<br /><br />\n";
+	echo addHidden('cmd', $cmd) .
+		addHidden('table','judgehost') .
+		addSubmit('Save Judgehosts') .
+		addEndForm();
 
+	require('../footer.php');
+	exit;
+	
 }
 
 $res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
