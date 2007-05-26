@@ -105,7 +105,7 @@ function rejudgeForm($table, $id)
 	// special case submission
 	if ( $table == 'submission' ) {
 		$ret .= "<input type=\"submit\" value=\"REJUDGE submission s" .
-			$id . "\"";
+			(int)$id . "\"";
 
 		global $DB;
 		$iscorrect = (bool)$DB->q('VALUE SELECT count(judgingid) FROM judging WHERE
@@ -113,13 +113,13 @@ function rejudgeForm($table, $id)
 
 		if ( !$iscorrect ) {
 			$ret .= " onclick=\"return confirm('Rejudge submission s" .
-				$id . "?')\" />\n";
+				(int)$id . "?')\" />\n";
 		} else {
 			$ret .= " disabled=\"disabled\" />\n";
 		}
 	} else {
 		$ret .= "<input type=\"submit\" value=\"REJUDGE ALL for " .
-			$table . " " . $id .
+			$table . " " . htmlspecialchars($id) .
 		"\" onclick=\"return confirm('Rejudge all submissions for this " .
 			$table . "?')\" />\n";
 	}
