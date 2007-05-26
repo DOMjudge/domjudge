@@ -19,19 +19,19 @@ function addInputField($type, $name = null, $value = null, $attributes = '') {
 
 /**
  * Password input field
- */
 function addPwField($name , $value = null) {
     return addInputField('password', $name , $value);
 }
+ */
 
 
 /**
  * Form checkbox
- */
 function addCheckBox($name, $checked = false, $value = null) {
     return addInputField('checkbox', $name, $value,
         ($checked ? ' checked="checked"' : ''));
 }
+ */
 
 /**
  * Form radio box
@@ -106,10 +106,10 @@ function addSubmit($value, $name = null) {
 }
 /**
  * Form reset button, $value = caption
- */
 function addReset($value) {
     return addInputField('reset', null, $value);
 }
+ */
 
 /**
  * Textarea form element.
@@ -147,3 +147,11 @@ function addEndForm()
 {
 	return "</form>\n\n";
 }
+
+/**
+ * File upload field
+ */
+function addFileField($name, $size = null) {
+    return addInputField('file', $name , null, is_null($size)?null:"size=\"".(int)($size).'"');
+}
+
