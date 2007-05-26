@@ -22,12 +22,6 @@ if ( isset($_POST['cmd']) ) {
 $title = 'Problem '.htmlspecialchars(@$id);
 
 if ( !empty($pcmd) ) {
-	if ( isset($pcmd['rejudge']) ) {
-		rejudge('submission.probid',$id);
-		header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
-		exit;
-	}
-
 	if ( isset($pcmd['toggle_submit']) ) {
 		$DB->q('UPDATE problem SET allow_submit = %i WHERE probid = %s',
 			   $_POST['val']['toggle_submit'], $id);
@@ -132,22 +126,17 @@ if ( isset($data['special_compare']) ) {
 }
 ?>
 </table>
-
-<p>
-<input type="submit" name="cmd[rejudge]" value="REJUDGE ALL for problem <?=$id?>"
- onclick="return confirm('Rejudge all submissions for this problem?')" />
-<?php
-if ( IS_ADMIN ) {
-	echo editLink('problem',$id) . " " .
-		delLink('problem','probid', $id);
-}
-?>
-</p>
 </form>
 
-<h2>Submissions for <?=htmlspecialchars($id)?></h2>
-
 <?php
+echo "<p>" . rejudgeForm('problem', $id) . "</p>\n\n";
+
+if ( IS_ADMIN ) {
+	echo "<p>" . editLink('problem',$id) . " " .
+		delLink('problem','probid', $id) . "</p>\n\n";
+}
+
+echo "<h2>Submissions for " . htmlspecialchars($id) . "</h2>\n\n";
 
 $restrictions = array( 'probid' => $id );
 putSubmissions($restrictions, TRUE);

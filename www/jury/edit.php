@@ -2,12 +2,16 @@
 /**
  * Functionality to edit data from this interface.
  *
+ * TODO:
+ *  - Does not support checkboxes yet, since these
+ *    return no value when not checked.
+ *
  * $Id$
  */
 require('init.php');
 requireAdmin();
 
-$cmd = $_POST['cmd'];
+$cmd = @$_POST['cmd'];
 if ( $cmd != 'add' && $cmd != 'edit' ) error ("Unknown action.");
 
 require(SYSTEM_ROOT . '/lib/relations.php');

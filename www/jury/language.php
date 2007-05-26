@@ -22,12 +22,6 @@ if ( !empty($pcmd) ) {
 
 	if ( ! $id ) error("Missing or invalid language id");
 
-	if ( isset($pcmd['rejudge']) ) {
-		rejudge('submission.langid',$id);
-		header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
-		exit;
-	}
-
 	if ( isset($pcmd['toggle_submit']) ) {
 		$DB->q('UPDATE language SET allow_submit = %i WHERE langid = %s',
 		       $_POST['val']['toggle_submit'], $id);
@@ -109,14 +103,11 @@ $data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 </td></tr>
 <tr><td>Time factor:  </td><td><?=htmlspecialchars($data['time_factor'])?> x</td></tr>
 </table>
-
-<p>
-<input type="submit" name="cmd[rejudge]" value="REJUDGE ALL for language <?=htmlentities($data['name'])?>"
- onclick="return confirm('Rejudge all submissions for this language?')" />
-</p>
 </form>
 
 <?php
+echo "<p>" . rejudgeForm('language',$data['langid']) . "</p>\n\n";
+
 if ( IS_ADMIN ) {
 	echo "<p>" . 
 		editLink('language', $data['langid']) . " " .

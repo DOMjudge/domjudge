@@ -5,28 +5,20 @@
  * $Id$
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
-$id = $_REQUEST['id'];
+$id = @$_REQUEST['id'];
 
 require('init.php');
-$refresh = '15;url='.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id);
+$refresh = '15;url='.getBaseURI().'jury/judgehost.php?id='.urlencode($id);
 $title = 'Judgehost '.htmlspecialchars(@$id);
 
 if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
 	error("Missing or invalid judge hostname");
 }
 
-if ( IS_ADMIN && isset($_POST['cmd']) ) {
-	if ( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) {
-		$DB->q('UPDATE judgehost SET active = %i WHERE hostname = %s',
-		       ($_POST['cmd'] == 'activate' ? 1 : 0), $id);
-	}
-	if ( $_POST['cmd'] == 'rejudge' ) {
-		rejudge('judging.judgehost',$id);
-		header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
-		exit;
-	}
+if ( IS_ADMIN && isset($_POST['cmd']) &&
+	( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) ) {
+	$DB->q('UPDATE judgehost SET active = %i WHERE hostname = %s',
+	       ($_POST['cmd'] == 'activate' ? 1 : 0), $id);
 }
 
 $row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $id);
@@ -53,18 +45,10 @@ $cmd = ($row['active'] == 1 ? 'deactivate' : 'activate'); ?>
 <input type="submit" value=" <?=$cmd?> " />
 </p>
 </form>
-<?php endif; ?>
+<?php endif;
 
-<form action="<?=$pagename?>" method="post">
-<p>
-<input type="hidden" name="id" value="<?=$id?>" />
-<input type="hidden" name="cmd" value="rejudge" />
-<input type="submit" value=" REJUDGE ALL for judgehost <?=$id?> "
- onclick="return confirm('Rejudge all submissions for this judgehost?')" />
-</p>
-</form>
+echo rejudgeForm('judgehost', $id);
 
-<?php
 if ( IS_ADMIN ) {
 	echo "<p>" . delLink('judgehost','hostname',$id) . "</p>\n\n";
 }

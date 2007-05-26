@@ -57,52 +57,6 @@ function putJudgings($key, $value) {
 }
 
 /**
- * Marks a set of submissions for rejudging, limited by key=value
- * key has to be a full quantifier, e.g. "submission.teamid"
- *
- * $key must be one of (judging.judgehost, submission.teamid, submission.probid,
- * submission.langid, submission.submitid)
- */
-function rejudge($key, $value) {
-	global $DB;
-
-	if ( empty($key) || empty($value) ) {
-		error("no key or value passed for selection in rejudging");
-	}
-	
-	$cid = getCurContest();
-
-	// This can be done in one Update from MySQL 4.0.4 and up, but that wouldn't
-	// allow us to call calcScoreRow() for the right rows, so we'll just loop
-	// over the results one at a time.
-	$res = $DB->q('SELECT * FROM judging
-	               LEFT JOIN submission USING (submitid)
-	               WHERE judging.cid = %i AND valid = 1 AND
-	               ( result IS NULL OR result != "correct" ) ' .
-	               ( $key == 'judging.judgehost' ? ' AND judging.judgehost = %s' : '' ) .
-	               ( $key == 'submission.teamid' ? ' AND submission.teamid = %s' : '' ) .
-	               ( $key == 'submission.probid' ? ' AND submission.probid = %s' : '' ) .
-	               ( $key == 'submission.langid' ? ' AND submission.langid = %s' : '' ) .
-	               ( $key == 'submission.submitid' ? ' AND submission.submitid = %s' : '' )
-				   ,
-	              $cid, $value);
-
-	while ( $jud = $res->next() ) {
-		$DB->q('START TRANSACTION');
-		
-		$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
-		       $jud['judgingid']);
-
-		$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
-		        WHERE submitid = %i', $jud['submitid']);
-
-		calcScoreRow($cid, $jud['teamid'], $jud['probid']);
-		$DB->q('COMMIT');
-	}
-}
-
-
-/**
  * Return a link to add a new row to a specific table.
  */
 function addLink($table, $multi = false)
@@ -139,3 +93,36 @@ function delLink($table, $field, $value)
 		"alt=\"delete\" title=\"delete this " . htmlspecialchars($table) . 
 		"\" class=\"picto\" /></a>";
 }
+
+function rejudgeForm($table, $id)
+{
+	require_once('../forms.php');
+
+	$ret = addForm('rejudge.php') .
+		addHidden('table', $table) .
+		addHidden('id', $id);
+
+	// special case submission
+	if ( $table == 'submission' ) {
+		$ret .= "<input type=\"submit\" value=\"REJUDGE submission s" .
+			$id . "\"";
+
+		global $DB;
+		$iscorrect = (bool)$DB->q('VALUE SELECT count(judgingid) FROM judging WHERE
+                           submitid = %i AND valid = 1 AND result = "correct"', $id);
+
+		if ( !$iscorrect ) {
+			$ret .= " onclick=\"return confirm('Rejudge submission s" .
+				$id . "?')\" />\n";
+		} else {
+			$ret .= " disabled=\"disabled\" />\n";
+		}
+	} else {
+		$ret .= "<input type=\"submit\" value=\"REJUDGE ALL for " .
+			$table . " " . $id .
+		"\" onclick=\"return confirm('Rejudge all submissions for this " .
+			$table . "?')\" />\n";
+	}
+	return $ret . addEndForm();
+}
+

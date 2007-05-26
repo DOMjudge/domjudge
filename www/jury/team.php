@@ -11,9 +11,7 @@ $id = @$_REQUEST['id'];
 
 require('init.php');
 
-if ( isset($_POST['cmd']) ) {
-	$pcmd = $_POST['cmd'];
-} elseif ( isset($_GET['cmd'] ) ) {
+if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
 } else {
 	$refresh = '15;url='.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id).
@@ -22,19 +20,10 @@ if ( isset($_POST['cmd']) ) {
 
 $title = 'Team '.htmlspecialchars(@$id);
 
-
-if ( isset($pcmd) && $pcmd == 'rejudge' ) {
-	if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
-	rejudge('submission.teamid',$id);
-	header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
-	exit;
-}
-
 require('../header.php');
+require('../forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
-
-	require('../forms.php');
 	
 	echo "<h2>" . ucfirst($cmd) . " team</h2>\n\n";
 
@@ -83,8 +72,6 @@ exit;
 
 endif;
 
-
-
 if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
 
 /* optional restriction of submissions list to specific problem, language, etc. */
@@ -131,20 +118,17 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <?php endif; ?>
 </table>
 
-<form action="<?=$pagename?>" method="post">
-<p>
-<input type="hidden" name="id" value="<?=$id?>" />
-<input type="hidden" name="cmd" value="rejudge" />
-<input type="submit" value="REJUDGE ALL for team <?=$id?>"
- onclick="return confirm('Rejudge all submissions for this team?')" />
 
 <?php
 
-if ( IS_ADMIN ) {
-	echo editLink('team', $id). " " . delLink('team','login',$id);
-}
+echo "<p>" . rejudgeForm('team', $id) . "</p>\n\n";
 
-echo "</p>\n</form>\n\n";
+if ( IS_ADMIN ) {
+	echo "<p>" .
+		editLink('team', $id). " " .
+		delLink('team','login',$id) .
+		"</p>\n\n";
+}
 
 echo '<h3>Submissions';
 if ( isset($key) ) {
