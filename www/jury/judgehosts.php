@@ -13,9 +13,9 @@ require('../header.php');
 echo "<h1>Judgehosts</h1>\n\n";
 
 @$cmd = @$_REQUEST['cmd'];
-if ( IS_ADMIN && ($cmd == 'activate' || $cmd == 'deactivate') ) {
+if ( IS_ADMIN && (isset($_POST['cmd-activate']) || isset($_POST['cmd-deactivate']) ) ) {
 	$DB->q('UPDATE judgehost SET active = %i',
-	       ($cmd == 'activate' ? 1:0));
+	       (isset($_POST['cmd-activate']) ? 1:0));
 }
 if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 	require ( '../forms.php' ) ;
@@ -75,25 +75,21 @@ if( $res->count() == 0 ) {
 		echo "</tr>\n";
 	}
 	echo "</table>\n\n";
+}
 
-if ( IS_ADMIN ) :
-?>
+if ( IS_ADMIN ) {
+	require('../forms.php');
 
-<form action="judgehosts.php" method="post"><p>
-<input type="hidden" name="cmd" value="activate" />
-<input type="submit" value="Start all judgehosts!" />
-</p></form>
-
-<form action="judgehosts.php" method="post"><p>
-<input type="hidden" name="cmd" value="deactivate" />
-<input type="submit" value="Stop all judgehosts!" />
-</p></form>
-
-<p><a href="judgehosts.php?cmd=add">add new judgehosts</a><br />
-<a href="judgehosts.php?cmd=edit">edit judgehosts</a></p>
-
-<?php
-endif;
+	echo addForm('judgehosts.php') .
+		"<p>" .
+		addSubmit('Start all judgehosts', 'cmd-activate') .
+		addSubmit('Stop all judgehosts', 'cmd-deactivate') .
+		"<br /><br />\n\n" .
+		addLink('judgehosts', true) . " " .
+		editLink('judgehosts', null, true) .
+		"</p>\n" .
+		addEndForm();
 
 }
+
 require('../footer.php');

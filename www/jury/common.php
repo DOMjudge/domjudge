@@ -105,22 +105,26 @@ function rejudge($key, $value) {
 /**
  * Return a link to add a new row to a specific table.
  */
-function addLink($table)
+function addLink($table, $multi = false)
 {
 	return "<a href=\"" . htmlspecialchars($table) . ".php?cmd=add\">" .
-		"<img src=\"../images/add.png\" alt=\"add\" title=\"add new " .
-		htmlspecialchars($table) . "\" class=\"picto\" /></a>";
+		"<img src=\"../images/add" . ($multi?"-multi":"") .
+		".png\" alt=\"add" . ($multi?" multiple":"") .
+		"\" title=\"add" .   ($multi?" multiple":"") .
+		" new " . htmlspecialchars($table) . "\" class=\"picto\" /></a>";
 }
 
 /**
  * Return a link to edit a specific data element from a given table.
  * Takes the table, the key field to match on and the value.
  */
-function editLink($table, $value)
+function editLink($table, $value, $multi = false)
 {
 	return "<a href=\"" . htmlspecialchars($table) . ".php?cmd=edit" .
-		"&amp;id=" . urlencode($value) . "\">" .
-		"<img src=\"../images/edit.png\" alt=\"edit\" title=\"edit this " .
+		($multi ? "" : "&amp;id=" . urlencode($value) ) . "\">" .
+		"<img src=\"../images/edit" . ($multi?"-multi":"") .
+		".png\" alt=\"edit" . ($multi?" multiple":"") .
+		"\" title=\"edit " .   ($multi?"multiple ":"this ") .
 		htmlspecialchars($table) . "\" class=\"picto\" /></a>";
 }
 
