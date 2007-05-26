@@ -126,6 +126,18 @@ The most important pages are `Submissions': the list of submitted
 solutions made by teams, sorted by newest first, and `Scoreboard': the
 canonical overview of current standings.
 
+<sect>Judges and Administrators
+<p>
+The DOMjudge system discerns between <em>judges</em> and <em>administrators</em>
+(admins). An administrator is responsible for the technical side of DOMjudge:
+installation and keeping it running. The jury web interface may be used by both.
+
+Depending on configuration, there may either be a separate administrator view or
+one is shared between judges and administrators. In the first case you will not
+have access to the admin-specific options. In the latter, you may see
+options directed at admins, like options to edit or delete data. Be careful not
+to touch these options unless an administrator agreed for you to do so.
+
 <sect>Scoreboard
 <p>
 The scoreboard is the most important view on the contest.
