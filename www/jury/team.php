@@ -29,36 +29,44 @@ if ( IS_ADMIN && !empty($cmd) ):
 
 	echo addForm('edit.php');
 
-	echo "<table>\n" .
-		"<tr><td>Login:</td><td class=\"teamid\">";
+	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
+		echo "<tr><td>Login:</td><td class=\"teamid\">";
 		$row = $DB->q('TUPLE SELECT * FROM team WHERE login = %s',
 			$_GET['id']);
 		echo addHidden('keydata[0][login]', $row['login']);
 		echo htmlspecialchars($row['login']);
 	} else {
+		echo "<tr><td><label for=\"data_0__login_\">Login:</label></td><td class=\"teamid\">";
 		echo addInput('data[0][login]', null, 8, 15);
 	}
 	echo "</td></tr>\n";
 
 ?>
-<tr><td>Team name:</td><td><?=addInput('data[0][name]', @$row['name'], 35, 255)?></td></tr>
-<tr><td>Category:</td><td><?php
+<tr><td><label for="data_0__name_">Team name:</label></td>
+<td><?=addInput('data[0][name]', @$row['name'], 35, 255)?></td></tr>
+<tr><td><label for="data_0__categoryid_">Category:</label></td>
+<td><?php
 $cmap = $DB->q("KEYVALUETABLE SELECT categoryid,name FROM team_category ORDER BY categoryid");
 echo addSelect('data[0][categoryid]', $cmap, @$row['categoryid'], true);
 ?>
 </td></tr>
-<tr><td valign="top">Members:</td><td><?=addTextArea('data[0][members]', @$row['members'], 40, 3)?></td></tr>
-<tr><td>Affiliation:</td><td><?php
+<tr><td valign="top"><label for="data_0__members_">Members:</label></td>
+<td><?=addTextArea('data[0][members]', @$row['members'], 40, 3)?></td></tr>
+<tr><td><label for="data_0__affilid_">Affiliation:</label></td>
+<td><?php
 $amap = $DB->q("KEYVALUETABLE SELECT affilid,name FROM team_affiliation ORDER BY affilid");
 $amap[''] = 'none';
 echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 ?>
 </td></tr>
-<tr><td>IP address:</td><td><?=addInput('data[0][ipaddress]', @$row['ipaddress'], 35, 32)?></td></tr>
-<tr><td>Room:</td><td><?=addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
-<tr><td valign="top">Comments:</td><td><?=addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
+<tr><td><label for="data_0__ipaddress_">IP address:</label></td>
+<td><?=addInput('data[0][ipaddress]', @$row['ipaddress'], 35, 32)?></td></tr>
+<tr><td><label for="data_0__room_">Room:</label></td>
+<td><?=addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
+<tr><td valign="top"><label for="data_0__comments_">Comments:</label></td>
+<td><?=addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
 </table>
 
 <?php
