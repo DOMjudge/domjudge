@@ -60,6 +60,7 @@ $cmap = $DB->q("KEYVALUETABLE SELECT categoryid,name FROM team_category ORDER BY
 echo addSelect('data[0][categoryid]', $cmap, @$row['categoryid'], true);
 ?>
 </td></tr>
+<tr><td valign="top">Members:</td><td><?=addTextArea('data[0][members]', @$row['members'], 40, 3)?></td></tr>
 <tr><td>Affiliation:</td><td><?php
 $amap = $DB->q("KEYVALUETABLE SELECT affilid,name FROM team_affiliation ORDER BY affilid");
 $amap[''] = 'none';
