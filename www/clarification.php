@@ -144,6 +144,8 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
  */
 function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 {
+	require_once('forms.php');
+
 	global $DB;
 ?>
 
@@ -162,31 +164,22 @@ function confirmClar() {
 </script>
 	  
 <?php
-	  
-	echo '<form id="sendclar" action="'.$action."\" method=\"post\">\n";
-
+	echo addForm($action, 'post', 'sendclar');
 	echo "<table>\n";
 
 	if ( $isjury ) { // list all possible recipients in the "sendto" box
 		echo "<tr><td><b><label for=\"sendto\">Send to</label>:</b></td><td>\n";
 
 		if ( !empty($respid) ) {
-			echo '<input type="hidden" name="id" value="' . htmlspecialchars($respid)
-				. "\" />\n";
+			echo addHidden('id',$respid);
 		}
 
-		echo "<select name=\"sendto\" id=\"sendto\">\n";
-		echo "<option value=\"\">ALL</option>\n";
-
+		$options = array('' => 'ALL');
 		if ( ! $respid ) {
-			$teams = $DB->q('SELECT login, name FROM team
+			$teams = $DB->q('KEYVALUETABLE SELECT login, CONCAT(login, ": ", name) as name
+			                 FROM team
 			                 ORDER BY categoryid ASC, name ASC');
-			while ( $team = $teams->next() ) {
-				echo '<option value="' .
-					htmlspecialchars($team['login']) . '">' .
-					htmlspecialchars($team['login']) . ': ' .
-					htmlentities($team['name']) . "</option>\n";
-			}
+			$options = array_merge($options,$teams);
 		} else {
 			$clar = $DB->q('MAYBETUPLE SELECT c.*, t.name AS toname, f.name AS fromname
 			                FROM clarification c
@@ -194,18 +187,14 @@ function confirmClar() {
 			                LEFT JOIN team f ON (f.login = c.sender)
 			                WHERE c.clarid = %i', $respid);
 			if ( $clar['sender'] ) {
-				echo '<option selected="selected" value="' .
-					htmlspecialchars($clar['sender']) . '">' .
-					htmlspecialchars($clar['sender']) . ': ' .
-					htmlentities($clar['fromname']) . "</option>\n";
+				$options[$clar['sender']] = $clar['sender'] .': '.
+					$clar['fromname'];
 			} else if ( $clar['recipient'] ) {
-				echo '<option selected="selected" value="' .
-					htmlspecialchars($clar['recipient']) . '">' .
-					htmlspecialchars($clar['recipient']) . ': ' .
-					htmlentities($clar['toname']) . "</option>\n";
+				$options[$clar['recipient']] = $clar['recipient'] .': '.
+					$clar['toname'];
 			}
 		}
-		echo "</select>\n";
+		echo addSelect('sendto', $options, null, true);
 		echo "</td></tr>\n";
 	} else {
 		echo "<tr><td><b>To:</b></td><td>Jury</td></tr>\n";
@@ -214,19 +203,20 @@ function confirmClar() {
 	?>
 <tr>
 <td valign="top"><b><label for="bodytext">Text</label>:</b></td>
-<td><textarea name="bodytext" cols="80" rows="10" id="bodytext"><?php
+<td><?php
+$body = "";
 if ( $respid ) {
-	$text = explode("\n",wordwrap(htmlspecialchars($clar['body']),70));
+	$text = explode("\n",wordwrap($clar['body']),70);
 	foreach($text as $line) {
-		echo "&gt; $line\n";
+		$body .= "> $line\n";
 	}
-	echo "\n";
+	$body .= "\n";
 }
-?></textarea></td>
-</tr>
+echo addTextArea('bodytext', $body, 80, 10);
+?></td></tr>
 <tr>
 <td>&nbsp;</td>
-<td><input type="submit" name="submit" value="Send" onclick="return confirmClar()" /></td>
+<td><?php echo addSubmit('Send', 'submit', 'return confirmClar()'); ?></td>
 </tr>
 </table>
 </form>

@@ -35,17 +35,17 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 </table>
 
 <?php
-if ( IS_ADMIN ) :
+if ( IS_ADMIN ) {
+	require_once('../forms.php');
 
-$cmd = ($row['active'] == 1 ? 'deactivate' : 'activate'); ?>
-<form action="judgehost.php" method="post">
-<p>
-<input type="hidden" name="id" value="<?=htmlspecialchars($row['hostname'])?>" />
-<input type="hidden" name="cmd" value="<?=$cmd?>" />
-<input type="submit" value=" <?=$cmd?> " />
-</p>
-</form>
-<?php endif;
+	$cmd = ($row['active'] == 1 ? 'deactivate' : 'activate'); 
+
+	echo addForm('judgehost.php') . "<p>\n" .
+		addHidden('id',  $row['hostname']) .
+		addHidden('cmd', $cmd) .
+		addSubmit($cmd) . "</p>\n" .
+		addEndForm();
+}
 
 echo rejudgeForm('judgehost', $id);
 

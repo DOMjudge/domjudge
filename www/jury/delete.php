@@ -54,10 +54,12 @@ if (isset($_POST['zekerweten'] ) ) {
 	echo "<p><a href=\"" . $tablemulti . ".php\">back to $tablemulti</a></p>";
 
 } else {
-	echo "<form action=\"delete.php\" method=\"post\">\n" .
-		"<input type=\"hidden\" name=\"table\" value=\"$t\" />\n";
+	require_once('../forms.php');
+
+	echo addForm('delete.php') .
+		addHidden('table', $t);
 	foreach ( $k as $key => $val ) {
-		echo "<input type=\"hidden\" name=\"$key\" value=\"" . htmlspecialchars($val) ."\" />\n";
+		echo addHidden($key, $val);
 	}
 
 	echo msgbox ( 
@@ -65,10 +67,9 @@ if (isset($_POST['zekerweten'] ) ) {
 		"You're about to delete $t <strong>" .
 		htmlspecialchars(join(", ", array_values($k))) . "</strong>.<br /><br />\n\n" .
 		"Are you sure?<br /><br />\n\n" .
-		"<input type=\"submit\" name=\"tochmaarniet\" value=\" Never mind... \" />\n" .
-		"<input type=\"submit\" name=\"zekerweten\" value=\" Yes I'm sure! \" />\n");
-
-	echo "</form>\n\n";
+		addSubmit(" Never mind... ", 'tochmaarniet') .
+		addSubmit(" Yes I'm sure! ", 'zekerweten') .
+		addEndForm() );
 }
 
 

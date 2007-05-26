@@ -34,10 +34,9 @@ if ( !empty($pcmd) ) {
 }
 
 require('../header.php');
+require('../forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
-
-	require('../forms.php');
 	
 	echo "<h2>" . ucfirst($cmd) . " problem</h2>\n\n";
 
@@ -110,25 +109,26 @@ echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
 
 $data = $DB->q('TUPLE SELECT * FROM problem NATURAL JOIN contest WHERE probid = %s', $id);
 
+echo addForm($pagename) . "<p>\n" .
+	addHidden('id', $id) .
+	addHidden('val[toggle_judge]',  !$data['allow_judge']) .
+	addHidden('val[toggle_submit]', !$data['allow_submit']).
+	"</p>\n";
 ?>
-<form action="<?=$pagename?>" method="post">
-<p>
-<input type="hidden" name="id" value="<?=$id?>" />
-<input type="hidden" name="val[toggle_judge]" value="<?=!$data['allow_judge']?>" />
-<input type="hidden" name="val[toggle_submit]" value="<?=!$data['allow_submit']?>" />
-</p>
 <table>
 <tr><td>ID:          </td><td><?=htmlspecialchars($data['probid'])?></td></tr>
 <tr><td>Name:        </td><td><?=htmlentities($data['name'])?></td></tr>
 <tr><td>Contest:     </td><td><?=htmlspecialchars($data['cid']).' - '.
                                  htmlentities($data['contestname'])?></td></tr>
-<tr><td>Allow submit:</td><td class="nobreak"><?=printyn($data['allow_submit'])?>
- <input type="submit" name="cmd[toggle_submit]" value="toggle"
- onclick="return confirm('<?= $data['allow_submit'] ? 'Disallow' : 'Allow' ?> submissions for this problem?')" />
+<tr><td>Allow submit:</td><td class="nobreak"><?=printyn($data['allow_submit']) . ' '.
+	addSubmit('toggle', 'cmd[toggle_submit]',
+		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
+		" submissions for this problem?')"); ?>
 </td></tr>
-<tr><td>Allow judge: </td><td><?=printyn($data['allow_judge'])?>
- <input type="submit" name="cmd[toggle_judge]" value="toggle"
- onclick="return confirm('<?= $data['allow_judge'] ? 'Disallow' : 'Allow'?> judging for this problem?')" />
+<tr><td>Allow judge: </td><td><?=printyn($data['allow_judge']) . ' '.
+	addSubmit('toggle', 'cmd[toggle_judge]',
+		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
+		" judging for this problem?')"); ?>
 </td></tr>
 <tr><td>Testdata:    </td><td class="filename"><?=htmlspecialchars($data['testdata'])?></td></tr>
 <tr><td>Timelimit:   </td><td><?=(int)$data['timelimit']?></td></tr>
@@ -145,11 +145,10 @@ if ( isset($data['special_compare']) ) {
 	echo '<tr><td>Special compare script:</td><td class="filename">' .
 		htmlspecialchars($data['special_compare']) . "</td></tr>\n";
 }
-?>
-</table>
-</form>
 
-<?php
+echo "</table>\n" .
+	addEndForm();
+
 echo "<p>" . rejudgeForm('problem', $id) . "</p>\n\n";
 
 if ( IS_ADMIN ) {

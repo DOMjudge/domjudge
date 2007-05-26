@@ -34,10 +34,9 @@ if ( !empty($pcmd) ) {
 }
 
 require('../header.php');
+require('../forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
-
-	require('../forms.php');
 	
 	echo "<h2>" . ucfirst($cmd) . " language</h2>\n\n";
 
@@ -94,30 +93,33 @@ echo "<h1>Language ".htmlspecialchars($id)."</h1>\n\n";
 
 $data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 
+echo addForm($pagename) . "<p>\n" .
+	addHidden('id', $id) .
+	addHidden('val[toggle_judge]',  !$data['allow_judge']) .
+	addHidden('val[toggle_submit]', !$data['allow_submit']).
+	"</p>\n";
+
 ?>
-<form action="<?=$pagename?>" method="post">
-<p>
-<input type="hidden" name="id" value="<?=$id?>" />
-<input type="hidden" name="val[toggle_judge]" value="<?=!$data['allow_judge']?>" />
-<input type="hidden" name="val[toggle_submit]" value="<?=!$data['allow_submit']?>" />
-</p>
 <table>
 <tr><td>ID:          </td><td><?=htmlspecialchars($data['langid'])?></td></tr>
 <tr><td>Name:        </td><td><?=htmlentities($data['name'])?></td></tr>
 <tr><td>Extension:   </td><td class="filename">.<?=htmlspecialchars($data['extension'])?></td></tr>
-<tr><td>Allow submit:</td><td><?=printyn($data['allow_submit'])?>
- <input type="submit" name="cmd[toggle_submit]" value="toggle"
- onclick="return confirm('<?= $data['allow_submit'] ? 'Disallow' : 'Allow' ?> submissions for this language?')" />
+<tr><td>Allow submit:</td><td><?=printyn($data['allow_submit']) . ' '.
+	addSubmit('toggle', 'cmd[toggle_submit]',
+		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
+		" submissions for this language?')"); ?>
 </td></tr>
-<tr><td>Allow judge: </td><td><?=printyn($data['allow_judge'])?>
- <input type="submit" name="cmd[toggle_judge]" value="toggle"
- onclick="return confirm('<?= $data['allow_judge'] ? 'Disallow' : 'Allow'?> judging for this language?')" />
+<tr><td>Allow judge: </td><td><?=printyn($data['allow_judge']) . ' ' .
+	addSubmit('toggle', 'cmd[toggle_judge]',
+		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
+		" judging for this language?')"); ?>
 </td></tr>
 <tr><td>Time factor:  </td><td><?=htmlspecialchars($data['time_factor'])?> x</td></tr>
 </table>
-</form>
 
 <?php
+echo addEndForm();
+
 echo "<p>" . rejudgeForm('language',$data['langid']) . "</p>\n\n";
 
 if ( IS_ADMIN ) {
