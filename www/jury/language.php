@@ -43,25 +43,37 @@ if ( IS_ADMIN && !empty($cmd) ):
 
 	echo addForm('edit.php');
 
-	echo "<table>\n" .
-		"<tr><td>Language ID:</td><td>";
+	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
+		echo "<tr><td>Language ID:</td><td>";
 		$row = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s',
 			$_GET['id']);
 		echo addHidden('keydata[0][langid]', $row['langid']);
 		echo htmlspecialchars($row['langid']);
 	} else {
+		echo "<tr><td><label for=\"data_0__langid_\">Language ID:</label></td><td>";
 		echo addInput('data[0][langid]', null, 8, 8);
 	}
 	echo "</td></tr>\n";
 
 ?>
-<tr><td>Language name:</td><td><?=addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
-<tr><td>Extension:</td><td class="filename">.<?=addInput('data[0][extension]', @$row['extension'], 5, 5)?></td></tr>
-<tr><td>Allow submit:</td><td><?=addRadioBox('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> yes <?=addRadioBox('data[0][allow_submit]', (isset($row['allow_submit']) && !$row['allow_submit']), 0)?> no</td></tr>
-<tr><td>Allow judge:</td><td><?=addRadioBox('data[0][allow_judge]', (!isset($row['allow_judge']) || $row['allow_judge']), 1)?> yes <?=addRadioBox('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> no</td></tr>
-<tr><td>Time factor:</td><td><?=addInput('data[0][time_factor]', @$row['time_factor'], 5, 5)?> x</td></tr>
+<tr><td><label for="data_0__name_">Language name:</label></td>
+<td><?=addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
+
+<tr><td><label for="data_0__extension_">Extension:</label></td>
+<td class="filename">.<?=addInput('data[0][extension]', @$row['extension'], 5, 5)?></td></tr>
+
+<tr><td>Allow submit:</td>
+<td><?=addRadioBox('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> <label for="data_0__allow_submit_1">yes</label>
+<?=addRadioBox('data[0][allow_submit]', (isset($row['allow_submit']) && !$row['allow_submit']), 0)?> <label for="data_0__allow_submit_0">no</label></td></tr>
+
+<tr><td>Allow judge:</td>
+<td><?=addRadioBox('data[0][allow_judge]', (!isset($row['allow_judge']) || $row['allow_judge']), 1)?> <label for="data_0__allow_judge_1">yes</label>
+<?=addRadioBox('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
+
+<tr><td><label for="data_0__time_factor_">Time factor:</label></td>
+<td><?=addInput('data[0][time_factor]', @$row['time_factor'], 5, 5)?> x</td></tr>
 </table>
 
 <?php

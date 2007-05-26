@@ -34,11 +34,18 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 	}
 
 ?>
-<tr><td>Description:</td><td><?=addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
-<tr><td>Sort order:</td><td><?=addInput('data[0][sortorder]', @$row['sortorder'], 2, 1)?></td></tr>
-<tr><td>Colour:</td><td><?=addInput('data[0][color]', @$row['color'], 8, 10)?>
+
+<tr><td><label for="data_0__name_">Description:</label></td>
+<td><?=addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
+
+<tr><td><label for="data_0__sortorder_">Sort order:</label></td>
+<td><?=addInput('data[0][sortorder]', @$row['sortorder'], 2, 1)?></td></tr>
+
+<tr><td><label for="data_0__color_">Colour:</label></td>
+<td><?=addInput('data[0][color]', @$row['color'], 8, 10)?>
 <a href="http://www.w3schools.com/css/css_colornames.asp" target="_blank"><small>(help)</small></a>
 </td></tr>
+
 </table>
 
 <?php

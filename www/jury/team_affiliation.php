@@ -25,22 +25,30 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 	echo addForm('edit.php');
 
 	echo "<table>\n";
-	echo "<tr><td>Affiliation ID:</td><td>";
 
 	if ( $cmd == 'edit' ) {
+		echo "<tr><td>Affiliation ID:</td><td>";
 		$row = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s',
 			$_GET['id']);
 		echo addHidden('keydata[0][affilid]', $row['affilid']) .
 			htmlspecialchars($row['affilid']);
 	} else {
+		echo "<tr><td><label for=\"data_0__affilid_\">Affiliation ID:</label></td><td>";
 		echo addInput('data[0][affilid]', null, 11, 10);
 	}
 	echo "</td></tr>\n";
 
 ?>
-<tr><td>Name:</td><td><?=addInput('data[0][name]', @$row['name'], 40, 50)?></td></tr>
-<tr><td>Country:</td><td><?=addInput('data[0][country]', @$row['country'], 3, 2)?></td></tr>
-<tr><td valign="top">Comments:</td><td><?=addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
+
+<tr><td><label for="data_0__name_">Name:</label></td>
+<td><?=addInput('data[0][name]', @$row['name'], 40, 50)?></td></tr>
+
+<tr><td><label for="data_0__country_">Country:</label></td>
+<td><?=addInput('data[0][country]', @$row['country'], 3, 2)?></td></tr>
+
+<tr><td valign="top"><label for="data_0__comments_">Comments:</label></td>
+<td><?=addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
+
 </table>
 
 <?php
