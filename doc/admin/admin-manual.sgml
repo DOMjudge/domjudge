@@ -181,11 +181,12 @@ consult the full installation instruction.
 External software:
 <itemize>
 <item> Install mysql-server and set root password for it.
-<item> Install Apache, PHP and phpMyAdmin. On Debian GNU/Linux:<newline>
-       <tt>apt-get install mysql-server apache php4 php4-mysql php4-cli phpmyadmin</tt>
+<item> Install Apache, PHP and phpMyAdmin.
 <item> Make sure PHP works for the webserver and the commandline
        client and that phpMyAdmin works.
 <item> Install necessary compilers on the judgehosts.
+<item> Example for Debian GNU/Linux:<newline>
+<tt>apt-get install mysql-server apache php5 php5-mysql php5-cli phpmyadmin linuxdoc-tools xsltproc</tt>
 </itemize>
 
 DOMjudge:
@@ -199,7 +200,7 @@ DOMjudge:
        it, reload webserver.
 <item> Check that the web interface works (/team, /public and /jury);
        make sure phpMyAdmin also still works.
-<item> Access database with phpMyAdmin, add useful contest data.
+<item> Add useful contest data through the jury web interface.
 <item> Make INCOMINGDIR writeable for the webserver (optionally, when using websubmit).
 <item> Start the necessary daemons, each in their own terminal:
   <itemize>
@@ -257,6 +258,8 @@ DOMjudge has three different kinds of hosts:
        them and send the results back to the jury system. Since this
        is computationally intensive, there should ideally be at least
        a couple of these. They will run the judgedaemon from DOMjudge.
+	   For security reasons it is highly recommended not to use the
+	   main jury system as a judgehost.
 </itemize>
 
 
@@ -335,6 +338,11 @@ The requirements for the deployment of this jury-system are:
 <item> sudo
 
 <item> htpasswd
+
+<item> phpMyAdmin, to be able to access the database in an emergency
+       or for data import/export
+
+<item> linuxdoc to build the documentation
 
 <item> OpenSSH/SCP (or a compatible ssh/scp client/daemon, optionally
        for using the command-line submit program)
@@ -684,23 +692,29 @@ After installation is successful, you want to run your contest! Configuring
 DOMjudge to run a contest (or a number of them) involves the following steps:
 
 <itemize>
-<item> Configure the database;
+<item> Configure the contest data;
 <item> Set up authentication for teams;
 <item> Supply in- and output testdata;
 <item> Check that everything works.
 </itemize>
 
-<sect>Database configuration
+<sect>Configure the contest data
 <label id="contestsetup:database">
 <p>
 
 DOMjudge stores and retrieves most of its data from the MySQL
 database. Some information must be filled in beforehand, other tables
-will be populated by DOMjudge. This section describes the meaning of
-each table and what you need to put into it. Tables marked with an `x'
-have to be manually filled with data before running a contest (e.g.
-with phpMyAdmin), the other tables are used automatically by the
-software:
+will be populated by DOMjudge.
+
+You can use the jury web interface to add, edit and delete most types
+of data described below. It's advised to keep a version of phpMyAdmin
+handy in case of emergencies, or for general database operations like
+import and export.
+
+This section describes the meaning of each table and what you need to
+put into it. Tables marked with an `x' are the ones you have to configure
+with contest data before running a contest (via the jury web interface),
+the other tables are used automatically by the software:
 <tabular ca="cll">
  |clarification    |Clarification requests/replies are stored here.@
  |contest          |Contest definitions with start/end time.@
@@ -718,11 +732,8 @@ x|team_category    |Different category groups teams can be put in.@
 </tabular>
 
 Now follows a longer description (including fields) per table that has
-to be filled manually. In general the reference ID's in each table can
-be left untouched and auto incremented. These are used to reference to
-a specific element from other tables and internally in the software.
-For example a problem with `cid = 2' would reference to the contest
-with its `cid' (contest ID) set to 2.
+to be filled manually. 
+
 <descrip>
 <tag>contest</tag>
 The contests that the software will run. E.g. a test session and the
@@ -749,8 +760,8 @@ id="scoreboard:freeze" name="Scoreboard: freezing and defrosting">.
 <tag>judgehost</tag>
 List here the hosts that will be autojudging the submissions.
 <tt>hostname</tt> is the (short) hostname of a judge computer.
-<tt>active</tt> should be 0 or 1 and indicates whether this host
-should judge incoming submissions.
+<tt>active</tt> indicates whether this host should judge incoming
+submissions.
 
 <tag>language</tag>
 Programming languages in which to accept and judge submissions.
@@ -764,12 +775,12 @@ a new language, check that these match.
 which has to match the first extension as listed in the global
 configuration file.
 
-<tt>allow_submit</tt> (0 or 1) determines whether teams can submit
-using this language; <tt>allow_judge</tt> (0 or 1) determines whether
+<tt>allow_submit</tt> determines whether teams can submit
+using this language; <tt>allow_judge</tt> determines whether
 judgehosts will judge submissions for this problem. This can for
-example be set to 0 to temporarily hold judging when a problem occurs
+example be set to no to temporarily hold judging when a problem occurs
 with the judging of specific languages; after resolution of the
-problem this can be set to 1 again.
+problem this can be set to yes again.
 
 <tt>time_factor</tt> is the relative factor by which the timelimit is
 multiplied for solutions in this language. For example Java is known
@@ -779,13 +790,13 @@ to be structurally slower than C/C++.
 This table contains the problem definitions. <tt>probid</tt> is the
 reference ID, <tt>cid</tt> is the contest ID this problem is (only)
 defined for: a problem cannot be used in multiple contests.
-<tt>name</tt> is the full name of the problem.
+<tt>name</tt> is the full name (description) of the problem.
 
-<tt>allow_submit</tt> (0 or 1) determines whether teams can submit
+<tt>allow_submit</tt> determines whether teams can submit
 solutions for this problem. Non-submittable problems are also not
 displayed on the scoreboard. This can be used to define spare
-problems, which can then be added to the contest in a second;
-<tt>allow_judge</tt> (0 or 1) determines whether judgehosts will judge
+problems, which can then be added to the contest quickly;
+<tt>allow_judge</tt> determines whether judgehosts will judge
 submissions for this problem. See also the explanation for language.
 
 <tt>testdata</tt> is the directory within <tt>INPUT_ROOT</tt> that
@@ -794,9 +805,9 @@ contains the input/output testdata in files <tt>testdata.in</tt> and
 within which solutions for this problem have to run (taking into
 account <tt>time_factor</tt> per language).
 
-<tt>special_run</tt> if not NULL defines a custom run-script
+<tt>special_run</tt> if not empty defines a custom run-script
 <tt>run_&lt;special_run&gt;.sh</tt> to run compiled submissions for
-this problem and <tt>special_compare</tt> if not NULL defines a custom
+this problem and <tt>special_compare</tt> if not empty defines a custom
 compare-script <tt>compare_&lt;special_compare&gt;.sh</tt> to compare
 output for this problem.
 
@@ -815,15 +826,15 @@ affiliation ID of the team.
 automatically identify the team in the webinterface and to check
 submission origin. A value of <tt>NULL</tt> results in the team being
 unable to submit or view its teampage, unless they first authenticate
-via password or commandline submission. It has a length of 30 to allow
-for IPv6 addresses. <tt>passwd</tt> is a MD5-hash of a one-time
-password teams can use to authenticate and register their IP address.
+via password or commandline submission. <tt>passwd</tt> is a
+MD5-hash of a one-time password teams can use to authenticate and
+register their IP address. It can be set under Administrator Functions:
+Generate Passwords.
 
 <tt>members</tt> are the names of the team members, separated by
 newlines and <tt>room</tt> is the room the team is located, for
 display only; <tt>comments</tt> can be filled with arbitrary useful
-information and <tt>teampage_first_visited</tt> is automatically
-updated when a team first visits their DOMjudge team page.
+information.
 
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the

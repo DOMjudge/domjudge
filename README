@@ -34,7 +34,10 @@ Further reading
 For more information on installation and requirements see the
 documentation under the doc/ directory. Run `make docs` there
 to create HTML and PDF versions of the available documentation.
+You will need `linuxdoc` for that to work. This is normally in
+the linuxdoc-tools package/rpm.
 
+It's also available online at the DOMjudge homepage (see below).
 
 Contact
 -------
