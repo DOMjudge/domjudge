@@ -258,8 +258,8 @@ DOMjudge has three different kinds of hosts:
        them and send the results back to the jury system. Since this
        is computationally intensive, there should ideally be at least
        a couple of these. They will run the judgedaemon from DOMjudge.
-	   For security reasons it is highly recommended not to use the
-	   main jury system as a judgehost.
+       For security and performance reasons it is highly recommended not
+       to use the main jury system as a judgehost.
 </itemize>
 
 
