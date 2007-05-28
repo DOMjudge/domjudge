@@ -185,8 +185,8 @@ External software:
 <item> Make sure PHP works for the webserver and the commandline
        client and that phpMyAdmin works.
 <item> Install necessary compilers on the judgehosts.
-<item> Example for Debian GNU/Linux:<newline>
-<tt>apt-get install mysql-server apache php5 php5-mysql php5-cli phpmyadmin linuxdoc-tools xsltproc</tt>
+<item> See also <ref
+       id="install_config:apt-getinstall" name="an example command line for Debian GNU/Linux">.
 </itemize>
 
 DOMjudge:
@@ -286,6 +286,8 @@ The requirements for the deployment of this jury-system are:
          default configuration with the command-line submitdaemon).
   <item> HTTP traffic from teams, the public and jury to the webserver.
   </itemize>
+       Each team computer needs to have a unique IP address from the
+       view of the jury system.
 
 <item> One jury account with a homedirectory which is shared between
        all jury-computers (e.g. via NFS, Samba).
@@ -342,7 +344,8 @@ The requirements for the deployment of this jury-system are:
 <item> phpMyAdmin, to be able to access the database in an emergency
        or for data import/export
 
-<item> linuxdoc to build the documentation
+<item> linuxdoc to build the documentation and LaTeX to build
+       the PDF-documentation
 
 <item> OpenSSH/SCP (or a compatible ssh/scp client/daemon, optionally
        for using the command-line submit program)
@@ -357,6 +360,39 @@ The requirements for the deployment of this jury-system are:
        (optionally to use the commandline submit client with the webinterface)
 </itemize>
 
+<label id="install_config:apt-getinstall">
+<sect1>Debian installation command
+<p>
+
+For your convenience, the following command will install needed software as mentioned
+above when using Debian GNU/Linux, or one of its derivate distributions. Most systems
+will have the bulk of these packages installed already.
+
+<code>
+apt-get install gcc make libcurl3-dev sudo \
+	mysql-server openssh-server openssh-client \
+	apache2 php5 php5-cli libapache2-php5 php5-mysql \
+	hostname coreutils grep diff mount bash-static \
+	openssh-server openssh-client \
+	phpmyadmin xsltproc \
+	wget linuxdoc-tools tetex-bin tetex-extra
+</code>
+
+This is for Debian 4.0 "Etch". For Debian 4.1 "Lenny",
+replace <tt/tetex-bin/ and <tt/tetex-extra/
+with <tt/texlive-latex-recommended/,
+and <tt/libcurl3-dev/ with <tt/libcurl4-dev/.
+
+On a judgehost, the following should be sufficient. The last line shows some example
+compilers to install for C, C++, Java (GNU), Java (Sun), Haskell and Pascal; change
+the list as appropriate.
+
+<code>
+apt-get install make sudo php5-cli php5-mysql \
+	hostname coreutils grep diff mount bash-static \
+	xsltproc \
+	gcc gcj sun-java5-jdk ghc fp-compiler
+</code>
 
 <sect>File Locations
 <p>
