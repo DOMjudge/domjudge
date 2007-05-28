@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 2.0.0 - SVN
--------------------
+Version 2.0.0 Release Candidate 1 - 28 May 2007
+-----------------------------------------------
  - Minimum MySQL version required is now 4.1: simplify SQL privilege
    removal.
  - [INCOMPATIBLE CHANGE] Renamed judger to judgehost everywhere to
@@ -56,7 +56,7 @@ Version 2.0.0 - SVN
  - Add Referential Integrity and HTTP Authentication check to configchecker.
  - Add option to admin interface to edit and delete most data types.
  - Improved build process of submit client under Windows/Cygwin.
-	
+
 Version 1.3.0 - 6 October 2006
 ------------------------------
  - Fix balloons notification for new database layout introduced
