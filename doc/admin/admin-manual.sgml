@@ -180,7 +180,8 @@ consult the full installation instruction.
 
 External software:
 <itemize>
-<item> Install mysql-server and set root password for it.
+<item> Install the MySQL-server, set a root password for it and
+       make it accessible from all judgehosts.
 <item> Install Apache, PHP and phpMyAdmin.
 <item> Make sure PHP works for the webserver and the commandline
        client and that phpMyAdmin works.
@@ -192,15 +193,17 @@ External software:
 DOMjudge:
 <itemize>
 <item> Configure the system:
-       <tt>cd etc; $EDITOR global.cfg; cd ..; make config</tt>
+       <tt>$EDITOR etc/global.cfg; make config</tt>
 <item> Make sure that all of the DOMjudge stuff is in the directory
        set as <tt>SYSTEM_ROOT</tt>, and from that directory:
        <tt>make ; make install</tt>
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it, reload webserver.
-<item> Check that the web interface works (/team, /public and /jury);
+<item> Check that the web interface works (/team, /public and /jury),
+       check that the jury interface is password protected,
        make sure phpMyAdmin also still works.
 <item> Add useful contest data through the jury web interface.
+<item> Use the config checker in the jury web interface.
 <item> Make INCOMINGDIR writeable for the webserver (optionally, when using websubmit).
 <item> Start the necessary daemons, each in their own terminal:
   <itemize>
@@ -350,7 +353,7 @@ The requirements for the deployment of this jury-system are:
 <item> OpenSSH/SCP (or a compatible ssh/scp client/daemon, optionally
        for using the command-line submit program)
 
-<item> wget (optionally for downloading LaTeX packages for documentation)
+<item> wget and unzip (optionally for downloading LaTeX packages for documentation)
 
 <item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html">
        (optionally for <htmlurl name="ICPC validator standard"
@@ -371,16 +374,16 @@ will have the bulk of these packages installed already.
 <code>
 apt-get install gcc make libcurl3-dev sudo \
 	mysql-server openssh-server openssh-client \
-	apache2 php5 php5-cli libapache2-php5 php5-mysql \
+	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
 	hostname coreutils grep diff mount bash-static \
 	openssh-server openssh-client \
 	phpmyadmin xsltproc \
-	wget linuxdoc-tools tetex-bin tetex-extra
+	wget linuxdoc-tools unzip tetex-bin tetex-extra
 </code>
 
 This is for Debian 4.0 "Etch". For Debian 4.1 "Lenny",
 replace <tt/tetex-bin/ and <tt/tetex-extra/
-with <tt/texlive-latex-recommended/,
+with <tt/texlive-latex-recommended/ and <tt/texlive-latex-extra/,
 and <tt/libcurl3-dev/ with <tt/libcurl4-dev/.
 
 On a judgehost, the following should be sufficient. The last line shows some example
@@ -539,7 +542,9 @@ authentication.
 <p>
 
 DOMjudge uses a MySQL database server for storage of contest status
-information.
+information. By default MySQL listens only on localhost for connections.
+Make sure it is reachable from all judgehosts (look for skip-networking
+or bind-address options in the MySQL configuration).
 
 The database structure and needed privileges are included in MySQL
 dump files in the sql subdirectory. The default database name is
