@@ -123,6 +123,9 @@ EOF
 
 mount -t proc proc "$CHROOTDIR/proc"
 
+# Prevent perl locale warnings in the chroot:
+export LC_ALL=C
+
 chroot "$CHROOTDIR" /bin/bash -c debconf-set-selections <<EOF
 passwd	passwd/root-password-crypted	password	
 passwd	passwd/user-password-crypted	password	
