@@ -79,7 +79,7 @@ function cleanexit ()
 	fi
 
 	# Remove copied bash-static to save disk space
-	[ -e "$TMPDIR/bin/bash" ] && rm -f "$TMPDIR/bin/bash"
+	rm -f "$TMPDIR/bin/bash"
 
 	logmsg $LOG_INFO "exiting"
 }
