@@ -6,7 +6,7 @@ include $(TOPDIR)/Makefile.global
 docs: admin-manual.pdf admin-manual.html
 
 admin-manual.pdf: admin-manual.sgml
-	linuxdoc -B latex -o pdf $<
+	linuxdoc -B latex -o pdf $< >/dev/null
 
 admin-manual.html: admin-manual.sgml
 	linuxdoc -B html --header=../docs_header.html $<

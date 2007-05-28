@@ -13,18 +13,16 @@ SUBDIRS = admin team judge
 REC_TARGETS = docs clean distclean
 
 $(LATEXPKGFILES): %.sty:
-	if [ ! -f $*.zip ]; then \
+	@if [ ! -f $*.zip ]; then \
 		wget -N -nv ftp://tug.ctan.org/pub/tex-archive/macros/latex/contrib/$*.zip || \
 		(echo "Couldn't download TeX package '$*': download manually." && exit 1) ; \
 	fi
-	unzip $*.zip
-	cd $* && latex $(LATEXFLAGS) $*.ins
+	unzip -q $*.zip
+	cd $* && latex $(LATEXFLAGS) $*.ins >/dev/null
 	ln -s $*/$*.sty .
 
 cleanlatexpackages:
-	for i in $(LATEXPACKAGES) ; do \
-		rm -rf $$i{,.sty,.zip} ; \
-	done
+	for i in $(LATEXPACKAGES) ; do rm -rf $$i{,.sty,.zip} ; done
 
 distclean: cleanlatexpackages
 
