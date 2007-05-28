@@ -14,10 +14,10 @@
 \newpage
 \section{Inleiding}
 
-Deze documentatie beschrijft de onderdelen van het \DOMjudge
-jurysysteem, die aan de teams ter beschikking staan om oplossingen in
-te sturen, uitslagen te bekijken en ``clarification requests'' te
-sturen.
+Deze documentatie beschrijft het \DOMjudge
+jurysysteem, waarmee teams oplossingen in kunnen
+sturen, uitslagen te bekijken en ``clarification requests'' lezen
+en verzenden.
 
 Het systeem is voor een groot deel gebaseerd op een web-interface. Het
 insturen van oplossingen kan via de web-interface ofwel een
@@ -28,8 +28,8 @@ geconfigureerd is.
 
 Hieronder staat kort samengevat de belangrijkste informatie. Dit is
 bedoeld om snel aan de slag te kunnen. We raden echter ten zeerste
-aan dat minstens iemand binnen je team de complete handleiding
-doorneemt, omdat daarin specifieke details van het jurysysteem staan,
+aan dat minstens \'e\'en iemand binnen je team de complete handleiding
+doorneemt, omdat daarin specifieke details van het jurysysteem staan
 die ook van belang kunnen zijn op het moment dat niet alles perfect
 gaat (zoals een oplossing die fout is). \textbf{WEES GEWAARSCHUWD!!}
 
@@ -47,15 +47,15 @@ Insturen van oplossingen gaat via het command-line programma
 \begin{description}[\breaklabel\setlabelstyle{\bfseries}]
 \item[Command-line] 
 Gebruik \cmd{submit <probleem>.<extensie>}, met \cmd{<probleem>} het
-label van het probleem en \cmd{<extensie>} een standaard extensie van
-je taal. Voor de complete documentatie en alle opties, zie \cmd{submit
+label van het probleem en \cmd{<extensie>} een standaard-extensie van
+de programmeertaal. Voor de complete documentatie en alle opties, zie \cmd{submit
 --help}.
 \item[Web-Interface]
 Vanaf je teampagina op \url{\WEBBASEURI team}, selecteer je
 \textbf{submit} en daar kun je een file selecteren en insturen.
 Standaard wordt het probleem uit het deel van de bestandsnaam voor de
-punt gehaald en de taal uit de extensie, net zoals bij de command-line
-submit.
+punt gehaald en de programmeertaal uit de extensie, net zoals bij de
+command-line submit.
 \end{description}
 
 \subsection{Bekijken van scores, inzendingen, e.d.}
@@ -85,8 +85,7 @@ Het submitprogramma haalt de naam (label) van het probleem uit
 \cmd{submit --help} voor een compleet overzicht van mogelijke
 opties en extensies en een aantal voorbeelden. Let op, dat deze
 helptekst redelijk lang is en misschien niet op \'e\'en scherm
-past. Gebruik dan bijvoorbeeld \cmd{submit --help | more} om alles
-te lezen.
+past. Gebruik \cmd{submit --help | more} om alles te lezen.
 
 \cmd{submit} zal het bestand controleren en eventueel
 waarschuwingen geven, zoals wanneer het bestand al lange tijd niet
@@ -126,8 +125,8 @@ lijst met inzendingen.
 Op de team-webpagina staat een overzicht van je inzendingen.
 Dit overzicht bevat alle relevante gegevens: de tijd van inzending, de
 programmeertaal, het probleem en de status. Het adres van je
-teampagina is \url{\WEBBASEURI team}. Hier vandaan kun je ook naar
-de publieke pagina, waarop de scores van alle teams vermeld staan.
+teampagina is \url{\WEBBASEURI team}. Hier vind je ook het scorebord
+met de resultaten van de andere teams.
 
 \subsection{Mogelijke uitslagen}
 
@@ -151,7 +150,7 @@ blijft hangen, of dat je oplossing niet effici\"ent genoeg is.
 
 \item[RUN-ERROR]
 Je programma gaf een fout tijdens het uitvoeren. Dit kan verschillende
-oorzaken hebben, zoals deling door nul, incorrecte geheugen adressering
+oorzaken hebben, zoals deling door nul, incorrecte geheugenadressering
 (segfault, bijvoorbeeld door arrays buiten bereik te indiceren), te
 veel geheugengebruik, enzovoort\dots\ 
 Let ook op, dat je programma met een exitcode 0 eindigt!
@@ -174,17 +173,17 @@ Je inzending is opgeslagen maar wordt niet verder behandeld.
 \section{Clarifications}
 
 Communicatie met de jury loopt door middel van clarifications, deze
-komen op je teampagina te staan.  Boven aan de pagina de gegeven
+komen op je teampagina te staan. Boven aan de pagina de gegeven
 clarifications, daar onder je requests.
 
 Je kan vragen aan de jury stellen door middel van het doen van een
 ``Clarification Request'', de link hiervoor bevindt zich onderaan de
-clarifications-pagina.  Je vraag zal alleen bij de jury aan komen, zij
+clarifications-pagina.  Je vraag zal alleen bij de jury aankomen, zij
 zullen deze zo snel mogelijk en adequaat beantwoorden. Antwoorden die
 voor iedereen relevant kunnen zijn zullen naar iedereen gestuurd worden.
 
 Als je een clarification ontvangt van de jury, dan wordt dat
-automatisch gemeld door toevoeging van ``(x NEW)'' in de clarification
+automatisch gemeld door toevoeging van ``(1 NEW)'' in de clarification
 knop in het menu.
 
 \section{Hoe worden opgaven beoordeeld?}
@@ -246,9 +245,9 @@ Je programma mag er maximaal \COMPILETIME\ seconden over doen om te
 compileren. Daarna wordt het compileren afgebroken en levert dit een
 compileerfout op. Dit zou in de praktijk nooit een probleem mogen
 opleveren. Mocht dit toch gebeuren bij een normaal programma, laat het
-dan de organisatie weten.
+dan de jury weten.
 
-\item[source grootte]
+\item[sourcegrootte]
 De sourcecode van je programma mag maximaal \SOURCESIZE\ kilobytes
 groot zijn. Bij het inzenden zul je hier al voor gewaarschuwd worden,
 bij compileren levert dit ook een compileerfout op.

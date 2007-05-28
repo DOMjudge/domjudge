@@ -102,7 +102,9 @@ For full support of the ICPC Validator Interface Standard:
 <item>xsltproc (from the GNOME XSLT library package)
 </itemize>
 
-A detailed list of requirements is contained in the Installation chapter.
+A <ref id="install_config:requirements" name="detailed list of requirements">
+is contained in the <ref id="install_config" name="Installation and Configuration">
+chapter.
 
 <sect>Copyright and licencing
 <p>
@@ -209,7 +211,7 @@ DOMjudge:
   <item> <tt>cd submit; ./websubmitdaemon.php</tt> (needed for websubmit)
   </itemize>
 
-<item> Next, setup the auto judgers on separate hosts:
+<item> Next, setup the autojudgers on separate hosts:
   <itemize>
   <item> <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
          (check specific options of useradd, since these vary per system)
@@ -265,8 +267,8 @@ DOMjudge has three different kinds of hosts:
 
 
 <sect>Requirements
+<label id="install_config:requirements">
 <p>
-Before installing, make sure you have met all the requirements.
 
 <sect1>System Requirements
 <p>
@@ -412,12 +414,13 @@ different roots).
 
 <tag><tt>INPUT_ROOT</tt></tag>
 	The problem input and output testdata should be put here. This
-	directory-tree is for input only, so (in principle) this directory
+	directory-tree is for input only, so this directory
 	tree can be read-only.
 
 	Each problem should have its own directory within
 	<tt>INPUT_ROOT</tt>, where input and output testdata have to
-	be placed.
+	be placed. See <ref id="contestsetup:testdata"
+	name="providing testdata">.
 
 <tag><tt>OUTPUT_ROOT</tt></tag>
 	Placed here are all submission files, logfiles and temporary
@@ -509,7 +512,7 @@ non-standard environments.
 <sect>Submission Methods <label id="submissionmethods">
 <p>
 
-DOMjudge supports essentially two submission methods: via the
+DOMjudge supports two submission methods: via the
 commandline submit program and via the webinterface. From experience,
 both methods have users that prefer the one above the other.
 
@@ -522,7 +525,7 @@ When commandline submit is disabled in the configuration, the
 commandline submit client/daemon will still be built, but the submit
 client will now default to try to connect to the websubmit interface
 using <tt>libcurl</tt>. For this, the <tt>libcurl</tt> library
-development files must be available at compiletime (the submit client
+development files must be available at compile time (the submit client
 is statically linked to libcurl to avoid runtime dependencies on
 libcurl).
 
@@ -545,7 +548,7 @@ or bind-address options in the MySQL configuration).
 
 The database structure and needed privileges are included in MySQL
 dump files in the sql subdirectory. The default database name is
-`domjudge'. This can in principle be changed manually in the
+`domjudge'. This can be changed manually in the
 configuration and SQL files, but we recommend not to do this.
 
 Installation of the database can be done with <tt>make install</tt>.
@@ -555,8 +558,8 @@ data into the domjudge database.
 
 The domjudge database contains a number of tables, some of which need
 to be manually filled with data before the contest can be run. See
-the relevant section of Configuration for details.
-<!-- TODO: link -->
+the <ref id="contestsetup:database" name="database section of Configuration">
+for details.
 
 <sect1>MySQL table types
 <p>
@@ -587,6 +590,11 @@ has more information about setting this up.
 
 Alternatively, you can make regular backups of your data to another host,
 for example with <tt>mysqldump</tt>, or use a RAID based system.
+
+Replication can also be used to improve performance, by directing all
+select-queries to one or more replicated slave servers, while updates
+will still be done to the master. This is not supported out of the box,
+and will require making changes to the DOMjudge source.
 
 <sect>Webserver Configuration
 <p>
@@ -732,6 +740,7 @@ DOMjudge to run a contest (or a number of them) involves the following steps:
 </itemize>
 
 <sect>Configure the contest data
+<label id="contestsetup:database">
 <p>
 
 DOMjudge stores and retrieves most of its data from the MySQL
@@ -759,8 +768,8 @@ x|problem          |Definition of problems (name, corresponding contest, etc.).@
 x|team             |Definition of teams.@
 x|team_affiliation |Definition of institutions a team can be affiliated with.@
 x|team_category    |Different category groups teams can be put in.@
- |scoreboard_jury<newline>
-  scoreboard_public|Cache of the scoreboards for public/teams and for the<newline>
+ |scoreboard&lowbar;jury<newline>
+  scoreboard&lowbar;public|Cache of the scoreboards for public/teams and for the<newline>
                     jury separately, because of possibility of score freezing.
 </tabular>
 
@@ -858,7 +867,7 @@ affiliation ID of the team.
 <tt>ipaddress</tt> is the IP-address of the team. This is used to
 automatically identify the team in the webinterface and to check
 submission origin. A value of <tt>NULL</tt> results in the team being
-unable to submit or view it's teampage, unless they first authenticate
+unable to submit or view its teampage, unless they first authenticate
 via password or commandline submission. <tt>passwd</tt> is a
 MD5-hash of a one-time password teams can use to authenticate and
 register their IP address. It can be set under Administrator Functions:
@@ -872,7 +881,8 @@ information.
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the
 institution. <tt>country</tt> should be the 2 character ISO
-abbreviation of the country and <tt>comments</tt> should be clear.
+abbreviation of the country and <tt>comments</tt> is a free form field
+that is displayed in the jury interface.
 
 Both for the country and the affiliation, a logo can be displayed on
 the scoreboard. For this to work, the <tt>affilid</tt> must match a
@@ -974,8 +984,20 @@ can access their teampage.
 
 
 <sect>Providing testdata
+<label id="contestsetup:testdata">
 <p>
-<!-- TODO -->
+Testdata is used to judge the problems: when a submission run is given the
+input testdata, the resulting output is compared to the reference output data.
+If they match exactly, the problem is judged to be correct.
+
+These files are placed under the <tt>INPUT_ROOT</tt>. A subdirectory under
+<tt>INPUT_ROOT</tt> must be created for each problem. The name of that subdirectory
+is listed in the <tt>testdata</tt> field on the <tt>problems</tt> table in the
+DOMjudge database.
+
+The input data is in the file <tt>testdata.in</tt>, and the output in <tt>testdata.out</tt>.
+These dirs and files can all be read-only.
+
 
 <sect>Start the daemons
 <p>
@@ -1028,7 +1050,8 @@ section of its own.
 Each problem can be associated with a specific colour, e.g. the colour
 of the corresponding balloon that is handed out. DOMjudge can display
 this colour on the scoreboard, if you fill in the `color' attribute in
-the `problem' table; set it to a valid CSS colour value (e.g. `green'
+the `problem' table; set it to a <url name="valid CSS colour value"
+url="http://www.w3.org/TR/REC-CSS1#color-units"> (e.g. `green'
 or `#ff0000', although a name is preferred for displaying colour
 names).
 
@@ -1038,7 +1061,7 @@ has its own background colour in the scoreboard. This colour can be
 set with the `color' attribute to a valid CSS colour value.
 
 If you wish, you can also define a sortorder in the category table.
-This is the first field that the scoreboard is sorted on. If you wish
+This is the first field that the scoreboard is sorted on. If you want
 regular teams to be sorted first, but after them you want to sort both
 spectator- and business teams equally, you define `0' for the regular
 category and `1' for the other categories.
@@ -1140,7 +1163,7 @@ Security considerations for a programming contest are a bit different
 from those in normal conditions: normally users only have to be
 protected from deliberately harming each other. During a contest we
 also have to restrict users from cooperatively communicating,
-accessing restricted resources (like internet) and restrict user
+accessing restricted resources (like the internet) and restrict user
 programs running on jury computers.
 
 We expect that chances are small that people are trying to cheat
@@ -1184,7 +1207,7 @@ Teams should not be able to fake the identity of another team. This is
 prevented in the submission system, by making use of temporary files
 in a world non-readable directory of the team account: during
 submission, the file is copied there with some random part and this
-file will be copied by the jury. An other team cannot guess filenames
+file will be copied by the jury. Another team cannot guess filenames
 there, so trying to send as a different team would only result in a
 copying error. During submission, the IP address is also checked. The
 team webinterface relies on authentication by IP address only: this
@@ -1254,6 +1277,12 @@ Furthermore, the webserver must have write access to the
 be done by making that directory group-owned and -writeable by the
 webserver group.
 
+You should take care not to serve any files over the web that
+are not under the DOMjudge 'www/' directory, because they might
+contain sensitive data (e.g. those under sql/). DOMjudge comes
+with .htaccess files that try to prevent this, but double-check
+that it's not accessible.
+
 <sect>External Security <label id="security_external">
 <p>
 
@@ -1291,12 +1320,12 @@ most preferable to use Sun Java, because that's the version
 contestants will be used to. The GNU Compiler for Java (GCJ) is easier
 to deal with but may lack some features.
 
-With the default config, submitted programs are run within a minimal
+With the default configuration, submitted programs are run within a minimal
 chroot environment. For this the programs have to be statically
 linked, because they do not have access to shared libraries.
 
 For most languages compilers support this, but for Java, this is a bit
-problematic. The Sun Java compiler `javac' isn't even a real compiler:
+problematic. The Sun Java compiler `javac' is not a real compiler:
 a bytecode interpreter `java' is needed to run the binaries and thus
 this cannot simply run in a chroot environment.
 
@@ -1354,7 +1383,7 @@ These are generated because you are trying to compile statically
 linked sources, but some functions can not be static, e.g. the
 `dlopen' function above. These are <em>warnings</em> and can be safely
 ignored, because under normal programming contest conditions people
-are not allowed to use these functions anyways (and they are not
+are not allowed to use these functions anyway (and they are not
 accessible within the chroot-ed environment the program is run in).
 
 To filter these warnings, take a look at
@@ -1393,7 +1422,7 @@ DOMjudge does only support the parsing of the result XML file (in the
 result interface) if `xsltproc' is available on the judge computers;
 this program is part of the <url name="GNOME libxslt package"
 url="http://www.xmlsoft.org/XSLT/">. If this is not available, then
-DOMjudge reports judging as correct, when the compare script
+DOMjudge reports judging as correct when the compare script
 difference output is empty. The exitcode of the validator program
 should also be zero, otherwise an internal error is generated.
 

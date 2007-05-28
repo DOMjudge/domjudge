@@ -5,6 +5,7 @@
  *
  * $Id$
  */
+if (!defined('DOMJUDGE_VERSION')) die("DOMJUDGE_VERSION not defined.");
 
 if ( isset($refresh) ) {
 	header('Refresh: ' . $refresh);

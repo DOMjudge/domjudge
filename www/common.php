@@ -144,11 +144,13 @@ function putTeam($login) {
 
 	global $DB;
 
-	$team = $DB->q('TUPLE SELECT t.*, c.name AS catname,
+	$team = $DB->q('MAYBETUPLE SELECT t.*, c.name AS catname,
 	                a.name AS affname, a.country FROM team t
 	                LEFT JOIN team_category c USING (categoryid)
 	                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
 	                WHERE login = %s', $login);
+
+	if ( empty($team) ) error ("No team found by this id.");
 
 	$affillogo = "../images/affiliations/" . urlencode($team['affilid']) . ".png";
 	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";

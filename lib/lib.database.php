@@ -2,7 +2,7 @@
 // $Id$
 
 /******************************************************************************
-* lib.database.php version 1.2.1
+* lib.database.php version 1.3.1
 ******************************************************************************/
 
 /******************************************************************************
@@ -309,6 +309,8 @@ class db
 		- column: return a list of a single attribute
 		- table: return complete result in one array
 		- keytable: same as table but arraykey is the field called ARRAYKEY
+		- keyvaluetable: select two columns, and this returns a map from the first
+		  field (key) to the second (exactly one value)
 	*/
 	function q() // queryf
 	{
@@ -342,6 +344,7 @@ class db
 			case 'column':
 			case 'table':
 			case 'keytable':
+			case 'keyvaluetable':
 			case 'tuple':
 			case 'value':
 				$format = substr($format,strlen($key)+1);
@@ -469,6 +472,9 @@ class db
 		if ($key == 'keytable') {
 			return $res->getkeytable('ARRAYKEY');
 		}
+		if ($key == 'keyvaluetable') {
+			return $res->getkeyvaluetable();
+		}
 		if ($key == 'column') {
 			return $res->getcolumn();
 		}
@@ -535,6 +541,7 @@ class db_result
 	{
 		$this->_result=$res;
 		$this->_count=mysql_num_rows($res);
+		$this->_fields=mysql_num_fields($res);
 	}
 
 	function free()
@@ -603,12 +610,33 @@ class db_result
 	function getkeytable($key)
 	{
 		if($this->_nextused) {
-			user_error('Gettable does not work if you\'ve already next()ed over the result!',
+			user_error('Getkeytable does not work if you\'ve already next()ed over the result!',
 				E_USER_ERROR);
 		}
 		$tabel = array();
 		while ($this->next()) {
 			$tabel[$this->tuple[$key]] = $this->tuple;
+		}
+		return $tabel;
+	}
+	
+	// returns an associative array containing the result, with the frirst
+	// column as the key and the second column as the value
+	function getkeyvaluetable()
+	{
+		if($this->_nextused) {
+			user_error('Getkeyvaluetable does not work if you\'ve already next()ed over the result!',
+				E_USER_ERROR);
+		}
+		
+		if($this->_fields!=2) {
+			user_error('Getkeyvaluetable only works on a table with exactly 2 columns!',
+				E_USER_ERROR);
+		}
+
+		$tabel = array();
+		while ($this->next()) {
+			$tabel[array_shift($this->tuple)] = array_shift($this->tuple);
 		}
 		return $tabel;
 	}

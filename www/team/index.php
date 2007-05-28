@@ -16,7 +16,7 @@ echo "</div>\n";
 echo "<h1>Submissions team ".htmlentities($name)."</h1>\n\n";
 
 // call putSubmissions function from common.php for this team.
-$restrictions = array( 'team' => $login );
+$restrictions = array( 'teamid' => $login );
 putSubmissions($restrictions);
 
 require('../footer.php');

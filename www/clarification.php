@@ -95,13 +95,6 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
-	// insert the timestamp in links for teams to handle popups
-	if ( ! $isjury ) {
-		global $popupTag;
-	} else {
-		$popupTag = NULL;
-	}
-
 	echo "<table class=\"list\">\n";
 	echo "<tr><th>ID</th><th>from</th><th>to</th>" .
 		"<th>time</th><th>text</th></tr>\n";

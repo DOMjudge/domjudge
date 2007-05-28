@@ -20,7 +20,7 @@ ARCH=$2
 ARCHLIST="alpha,arm,hppa,i386,ia64,m86k,mips,mipsel,powerpc,s390,sparc"
 
 # Debian packages to exclude during bootstrap process (comma separated):
-EXCLUDEDEBS="adduser,apt-utils,aptitude,at,base-config,bsdmainutils,console-common,console-data,console-tools,cron,dhcp-client,dmidecode,exim4,exim4-base,exim4-config,exim4-daemon-light,fdutils,groff-base,ifupdown,info,ipchains,iptables,iputils-ping,klogd,laptop-detect,libconsole,libdb4.2,libgnutls11,libgnutls13,libncursesw5,libnewt0.51,libopencdk8,libpcap0.7,libpcap0.8,libpci2,libpcre3,libpopt0,libsigc++-1.2-5c102,libsigc++-2.0-0c2a,libssl0.9.7,libtasn1-2,libwrap0,logrotate,mailx,makedev,man-db,manpages,modconf,modutils,nano,net-tools,netbase,netkit-inetd,nvi,pciutils,ppp,pppconfig,pppoe,pppoeconf,procps,psmisc,sysklogd,tasksel,tasksel-data,tcpd,telnet,wget,whiptail"
+EXCLUDEDEBS="adduser,apt-utils,aptitude,at,base-config,bsdmainutils,console-common,console-data,console-tools,cron,dhcp3-client,dhcp3-common,dmidecode,dselect,exim4,exim4-base,exim4-config,exim4-daemon-light,fdutils,groff-base,ifupdown,info,iptables,iputils-ping,klogd,laptop-detect,libconsole,libdb4.2,libdb4.3,libgnutls13,libncursesw5,libnewt0.52,libopencdk8,libpcap0.7,libpcap0.8,libpci2,libpcre3,libpopt0,libsigc++-1.2-5c2,libsigc++-2.0-0c2a,libssl0.9.7,libssl0.9.8,libtasn1-3,libwrap0,logrotate,mailx,makedev,man-db,manpages,modconf,modutils,nano,net-tools,netbase,netkit-inetd,nvi,openbsd-inetd,pciutils,ppp,pppconfig,pppoe,pppoeconf,procps,psmisc,sysklogd,tasksel,tasksel-data,tcpd,telnet,traceroute,wget,whiptail"
 
 # Debian packages to include during bootstrap process (comma separated):
 INCLUDEDEBS="debconf-utils"
@@ -29,8 +29,7 @@ INCLUDEDEBS="debconf-utils"
 INSTALLDEBS="sun-java5-jre"
 
 # Debian packages to remove after upgrade (space separated):
-REMOVEDEBS="gcc-3.3-base libstdc++5 libdb3 libgcrypt11 liblzo1 dselect"
-# initscripts lsb-base sysvinit util-linux login
+REMOVEDEBS="dselect"
 
 # Debian mirror, modify to match closest mirror
 DEBMIRROR="http://ftp.debian.org/debian"
@@ -80,7 +79,7 @@ else
 	mkdir "$CHROOTDIR/debootstrap"
 	cd "$CHROOTDIR/debootstrap"
 
-	DEBOOTDEB="debootstrap_0.2.45-0.2_${ARCH}.deb"
+	DEBOOTDEB="debootstrap_0.3.3.2_all.deb"
 	wget "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
 
 	ar -x "$DEBOOTDEB"
@@ -92,7 +91,7 @@ fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 /usr/sbin/debootstrap --include="$INCLUDEDEBS" --exclude="$EXCLUDEDEBS" \
-	--arch "$ARCH" sarge "$CHROOTDIR" "$DEBMIRROR"
+	--arch "$ARCH" etch "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
@@ -100,16 +99,16 @@ cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
 
-# Stable
-#deb $DEBMIRROR			stable		main non-free contrib
-#deb http://security.debian.org	stable/updates	main non-free contrib
+# Stable (etch)
+deb $DEBMIRROR			etch		main non-free contrib
+deb http://security.debian.org	etch/updates	main non-free contrib
 
 # Testing
 #deb $DEBMIRROR			testing		main non-free contrib
 #deb http://security.debian.org	testing/updates	main non-free contrib
 
 # Unstable
-deb $DEBMIRROR			unstable	main non-free contrib
+#deb $DEBMIRROR			unstable	main non-free contrib
 EOF
 
 cat > "$CHROOTDIR/etc/apt/apt.conf" <<EOF
