@@ -88,32 +88,32 @@ if ( $jdata['verified'] && ! empty($jdata['verifier']) ) {
 <?php
 
 if ( ! (VERIFICATION_REQUIRED && $jdata['verified']) ) {
+	require_once('../forms.php');
+
 	$val = ! $jdata['verified'];
-?>
-<form action="<?= $pagename.'?id='.$id ?>" method="post"><p>
-<input type="hidden" name="id" value="<?=$id?>" />
-<input type="hidden" name="cmd" value="verify" />
-<input type="hidden" name="val" value="<?=$val?>" />
-<input type="submit" value="<?= ($val ? '' : 'un')?>mark verified"<?=
-	( ! @$jdata['endtime'] ? ' disabled="disabled"' : '' )?> />
-<?php
+
+	echo addForm('judging.php?id=' . $id) .
+		addHidden('id',  $id) .
+		addHidden('cmd', 'verify') .
+		addHidden('val', $val) .
+		'<input type="submit" value="' .
+			($val ? '' : 'un') . 'mark verified"' .
+			( ! @$jdata['endtime'] ? ' disabled="disabled"' : '' ) .
+			" />\n";
 	if ( $val ) {
-		echo "by <input type=\"text\" size=\"10\" name=\"verifier_typed\" />\n";
-		$verifiers = $DB->q('SELECT DISTINCT verifier FROM judging
+		echo "by " .
+			addInput('verifier_typed', '', 10, 15);
+		$verifiers = $DB->q('COLUMN SELECT DISTINCT verifier FROM judging
 		                     WHERE verifier IS NOT NULL AND verifier != ""
 		                     ORDER BY verifier');
-		if ( $verifiers->count() > 0 ) {
-			echo "or <select name=\"verifier_selected\" id=\"verifier_selected\">\n";
-			echo "	<option value=\"\"></option>\n";
-			while ( $verifier = $verifiers->next() ) {
-				echo '  <option value="' . htmlspecialchars($verifier['verifier']) .
-					'">' . htmlspecialchars($verifier['verifier']) . "</option>\n";
-			}
-			echo "</select>\n";
+		if ( count($verifiers) > 0 ) {
+			$opts = array(0 => "");
+			$opts = array_merge($verifiers, $opts);
+			echo "or " .addSelect('verifier_selected', $opts);
 		}
 	}
 	
-	echo "</p></form>\n";
+	echo "</p>" . addEndForm();
 }
 
 echo "<h3>Output compile</h3>\n\n";

@@ -32,9 +32,19 @@ if( $res->count() == 0 ) {
 			"</td><td align=\"center\">".printyn($row['allow_submit']).
 			"</td><td align=\"center\">".printyn($row['allow_judge']).
 			"</td><td class=\"filename\">".htmlspecialchars($row['testdata']).
-			"</td><td>".(int)$row['timelimit'].
-			"</td></tr>\n";
+			"</td><td>".(int)$row['timelimit'];
+			if ( IS_ADMIN ) {
+				echo "</td><td>" . 
+					editLink('problem', $row['probid']) . " " . 
+					delLink('problem','probid',$row['probid']);
+			}
+			echo "</td></tr>\n";
 	}
 	echo "</table>\n\n";
 }
+
+if ( IS_ADMIN ) {
+	echo "<p>" . addLink('problem') . "</p>\n\n";
+}
+
 require('../footer.php');

@@ -23,9 +23,13 @@ pdf: $(TARGETSPDF)
 
 $(TARGETSPDF): %.pdf: %.tex $(CONFIGDIR)/config.tex team-manual-preamble.tex \
                             ../examples/example.* ../logos/DOMjudgelogo.* $(LATEXPKGFILES)
-	-$(LATEX) $(LATEXFLAGS) $< < /dev/null &> /dev/null
-	-$(LATEX) $(LATEXFLAGS) $< < /dev/null &> /dev/null
-	 $(LATEX) $(LATEXFLAGS) $< < /dev/null
+	@NRUNS=3 ; echo -n "Running $$NRUNS passes of '$(LATEX) $(LATEXFLAGS) $<'..." ; \
+	 for ((i=1; i<=NRUNS; i++)) ; do \
+		if ! $(LATEX) $(LATEXFLAGS) $< </dev/null &>/dev/null ; then \
+			echo -e "\nTeX-ing failed in run $$i, see '$*.log' for details." ; \
+			exit 1 ; \
+		else echo -n " $$i" ; fi ; \
+	 done ; echo ;
 
 $(CONFIGDIR)/config.tex:
 	$(MAKE) -C $(CONFIGDIR) config.tex

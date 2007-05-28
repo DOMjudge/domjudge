@@ -4,7 +4,7 @@
 # Script to generate a minimal chroot environment with Sun Java
 # support to allow for Java programs to run in a chroot.
 #
-# This script downloads and installs a Debian unstable base system.
+# This script downloads and installs a Debian base system.
 # Minimum requirements: a Linux system with glibc >= 2.3, wget, ar and
 # a POSIX shell in /bin/sh. About 250 MB disk space is needed. It must
 # be run as root and will install the Debian debootstrap package.
@@ -123,6 +123,9 @@ DPkg::Options {"--no-debsig";}
 EOF
 
 mount -t proc proc "$CHROOTDIR/proc"
+
+# Prevent perl locale warnings in the chroot:
+export LC_ALL=C
 
 chroot "$CHROOTDIR" /bin/bash -c debconf-set-selections <<EOF
 passwd	passwd/root-password-crypted	password	

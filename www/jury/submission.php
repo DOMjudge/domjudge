@@ -26,15 +26,6 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid, s.submittime
 
 if ( ! $submdata ) error ("Missing submission data");
 
-$iscorrect = (bool)$DB->q('VALUE SELECT count(judgingid) FROM judging WHERE
-                           submitid = %i AND valid = 1 AND result = "correct"', $id);
-
-if ( @$_POST['cmd'] == 'rejudge' ) {
-	if ( $iscorrect ) error("Submission already judged as valid, not rejudging.");
-	rejudge('submission.submitid',$id);
-	header('Location: '.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id));
-	exit;
-}
 
 require('../header.php');
 
@@ -60,18 +51,12 @@ echo "<h1>Submission ".$id."</h1>\n\n";
 	<?=htmlspecialchars($submdata['sourcefile'])?></a></td></tr>
 </table>
 
-<form action="<?=$pagename?>" method="post">
-<p>
-<input type="hidden" name="id" value="<?=$id?>" />
-<input type="hidden" name="cmd" value="rejudge" />
-<input type="submit" value=" REJUDGE! "
- <?=($iscorrect?'disabled="disabled "':'')?> />
-</p>
-</form>
-
-<h3>Judgings</h3>
-
 <?php
+
+echo "<p>" . rejudgeForm('submission', $id) . "</p>\n\n";
+
+echo "<h3>Judgings</h3>\n\n";
+
 putJudgings('submitid', $id);
 
 require('../footer.php');

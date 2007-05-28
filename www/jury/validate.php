@@ -18,7 +18,11 @@ if(FALSE) {
 	exit;
 }
 
-if ( !empty($_SERVER['REMOTE_USER']) && in_array($_SERVER['REMOTE_USER'], $DOMJUDGE_ADMINS) ) {
+/* Check whether the logged-in user is an administrator.
+ * When no REMOTE_USER is available, we're not using HTTP Authentication and so
+ * cannot discern between admins and non-admins.
+ */
+if ( !isset($_SERVER['REMOTE_USER']) || in_array($_SERVER['REMOTE_USER'], $DOMJUDGE_ADMINS) ) {
 	define('IS_ADMIN', true);
 } else {
 	define('IS_ADMIN', false);

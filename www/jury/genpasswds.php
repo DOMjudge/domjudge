@@ -9,7 +9,7 @@
 require('init.php');
 $title = 'Generate Passwords';
 include('../header.php');
-
+require('../forms.php');
 requireAdmin();
 ?>
 
@@ -17,23 +17,20 @@ requireAdmin();
 
 <p>Generate new password for:</p>
 
-<form action="genpasswds.php" method="post">
-<p>
-<input type="submit" name="doteam" value="a specific team:" /> <select name="forteam"><?php
-		$teams = $DB->q('SELECT login, name FROM team
-		                 ORDER BY categoryid ASC, name ASC');
-		while ( $team = $teams->next() ) {
-			echo '<option value="' .
-				htmlspecialchars($team['login']) . '">' .
-				htmlspecialchars($team['login']) . ': ' .
-				htmlentities($team['name']) . "</option>\n";
-		}
-?></select><br /></p>
-<p><input type="submit" name="doallnull" value="all teams without a password" /><br /></p>
-<p><input type="submit" name="doall" value="absolutely all teams" /><br /></p>
-</form>
-
 <?php
+$teams = $DB->q('KEYVALUETABLE SELECT login, name FROM team
+                 ORDER BY categoryid ASC, name ASC');
+
+echo addForm('genpasswds.php') .
+	"<p>\n" .
+	addSubmit('a specific team:', 'doteam') .
+	addSelect('forteam', $teams, null, true) .
+	"<br /></p>\n<p>" .
+	addSubmit('all teams without a password', 'doallnull') .
+	"<br /></p>\n<p>" .
+	addSubmit('absolutely all teams', 'doall') .
+	"<br /></p>\n" .
+	addEndForm();
 
 if ( isset($_POST['forteam']) ) {
 	ob_implicit_flush();

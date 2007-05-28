@@ -26,8 +26,8 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <li><a href="scoreboard.php">Scoreboard</a></li>
 <li><a href="submissions.php">Submissions</a></li>
 <li><a href="teams.php">Teams</a></li>
-<li><a href="categories.php">Team Categories</a></li>
-<li><a href="affiliations.php">Team Affiliations</a></li>
+<li><a href="team_categories.php">Team Categories</a></li>
+<li><a href="team_affiliations.php">Team Affiliations</a></li>
 </ul>
 
 <h3>Documentation:</h3>

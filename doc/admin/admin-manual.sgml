@@ -178,26 +178,30 @@ consult the full installation instruction.
 
 External software:
 <itemize>
-<item> Install mysql-server and set root password for it.
-<item> Install Apache, PHP and phpMyAdmin. On Debian GNU/Linux:<newline>
-       <tt>apt-get install mysql-server apache php4 php4-mysql php4-cli phpmyadmin</tt>
+<item> Install the MySQL-server, set a root password for it and
+       make it accessible from all judgehosts.
+<item> Install Apache, PHP and phpMyAdmin.
 <item> Make sure PHP works for the webserver and the commandline
        client and that phpMyAdmin works.
 <item> Install necessary compilers on the judgehosts.
+<item> See also <ref
+       id="install_config:apt-getinstall" name="an example command line for Debian GNU/Linux">.
 </itemize>
 
 DOMjudge:
 <itemize>
 <item> Configure the system:
-       <tt>cd etc; $EDITOR global.cfg; cd ..; make config</tt>
+       <tt>$EDITOR etc/global.cfg; make config</tt>
 <item> Make sure that all of the DOMjudge stuff is in the directory
        set as <tt>SYSTEM_ROOT</tt>, and from that directory:
        <tt>make ; make install</tt>
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it, reload webserver.
-<item> Check that the web interface works (/team, /public and /jury);
+<item> Check that the web interface works (/team, /public and /jury),
+       check that the jury interface is password protected,
        make sure phpMyAdmin also still works.
-<item> Access database with phpMyAdmin, add useful contest data.
+<item> Add useful contest data through the jury web interface.
+<item> Use the config checker in the jury web interface.
 <item> Make INCOMINGDIR writeable for the webserver (optionally, when using websubmit).
 <item> Start the necessary daemons, each in their own terminal:
   <itemize>
@@ -255,6 +259,8 @@ DOMjudge has three different kinds of hosts:
        them and send the results back to the jury system. Since this
        is computationally intensive, there should ideally be at least
        a couple of these. They will run the judgedaemon from DOMjudge.
+       For security and performance reasons it is highly recommended not
+       to use the main jury system as a judgehost.
 </itemize>
 
 
@@ -281,6 +287,8 @@ The requirements for the deployment of this jury-system are:
          default configuration with the command-line submitdaemon).
   <item> HTTP traffic from teams, the public and jury to the webserver.
   </itemize>
+       Each team computer needs to have a unique IP address from the
+       view of the jury system.
 
 <item> One jury account with a homedirectory which is shared between
        all jury-computers (e.g. via NFS, Samba).
@@ -334,10 +342,16 @@ The requirements for the deployment of this jury-system are:
 
 <item> htpasswd
 
+<item> phpMyAdmin, to be able to access the database in an emergency
+       or for data import/export
+
+<item> linuxdoc to build the documentation and LaTeX to build
+       the PDF-documentation
+
 <item> OpenSSH/SCP (or a compatible ssh/scp client/daemon, optionally
        for using the command-line submit program)
 
-<item> wget (optionally for downloading LaTeX packages for documentation)
+<item> wget and unzip (optionally for downloading LaTeX packages for documentation)
 
 <item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html">
        (optionally for <htmlurl name="ICPC validator standard"
@@ -347,6 +361,39 @@ The requirements for the deployment of this jury-system are:
        (optionally to use the commandline submit client with the webinterface)
 </itemize>
 
+<label id="install_config:apt-getinstall">
+<sect1>Debian installation command
+<p>
+
+For your convenience, the following command will install needed software as mentioned
+above when using Debian GNU/Linux, or one of its derivate distributions. Most systems
+will have the bulk of these packages installed already.
+
+<code>
+apt-get install gcc make libcurl3-dev sudo \
+	mysql-server openssh-server openssh-client \
+	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
+	hostname coreutils grep diff mount bash-static \
+	openssh-server openssh-client \
+	phpmyadmin xsltproc \
+	wget linuxdoc-tools unzip tetex-bin tetex-extra
+</code>
+
+This is for Debian 4.0 "Etch". For Debian 4.1 "Lenny",
+replace <tt/tetex-bin/ and <tt/tetex-extra/
+with <tt/texlive-latex-recommended/ and <tt/texlive-latex-extra/,
+and <tt/libcurl3-dev/ with <tt/libcurl4-dev/.
+
+On a judgehost, the following should be sufficient. The last line shows some example
+compilers to install for C, C++, Java (GNU), Java (Sun), Haskell and Pascal; change
+the list as appropriate.
+
+<code>
+apt-get install make sudo php5-cli php5-mysql \
+	hostname coreutils grep diff mount bash-static \
+	xsltproc \
+	gcc gcj sun-java5-jdk ghc fp-compiler
+</code>
 
 <sect>File Locations
 <p>
@@ -492,7 +539,9 @@ authentication.
 <p>
 
 DOMjudge uses a MySQL database server for storage of contest status
-information.
+information. By default MySQL listens only on localhost for connections.
+Make sure it is reachable from all judgehosts (look for skip-networking
+or bind-address options in the MySQL configuration).
 
 The database structure and needed privileges are included in MySQL
 dump files in the sql subdirectory. The default database name is
@@ -567,7 +616,7 @@ The backend script (<tt>test_solution.sh</tt>) that handles the
 compilation, running and checking of submissions, calls separate
 scripts for running and comparison of the results. These can be
 specialised and adapted to the requirements per problem. For this, one
-has to create script <tt>run_&lt;some-tag&gt;.sh</tt> and/or
+has to create scripts <tt>run_&lt;some-tag&gt;.sh</tt> and/or
 <tt>compare_&lt;some-tag&gt;.sh</tt> in the <tt>SYSTEM_ROOT/judge</tt>
 directory (see <tt>run.sh</tt> and <tt>compare.sh</tt> for examples
 and usage information). Then one must specify this &lt;some-tag&gt; in
@@ -633,6 +682,25 @@ distclean</tt> will additionally also remove all traces of DOMjudge
 from the MySQL database, which is needed if you want to reinstall the
 database!
 
+<sect>Building the submit client under Windows/Cygwin
+<p>
+
+The submit client can also be built under Windows when the Cygwin
+environment is installed. First the <url name="Cygwin"
+url="http://cygwin.com/"> <url name="setup.exe"
+url="http://cygwin.com/setup.exe"> program must be downloaded and
+installed with GCC, curl-devel and maybe some more packages included.
+Furthermore, the cygwin-base package must be (re-)installed from the
+mirror <url url="http://cygwin.win6.jp/cygwin-ipv6/"> for support of
+the complete <tt>netdb.h</tt> headers (as this is currently not
+supported in the standard Cygwin tree yet).
+
+<p>
+When Cygwin is correctly installed with all necessary development
+tools, the submit binary can be created (after configuration) by
+running <tt>make submit.exe</tt> in the <tt>SYSTEM_ROOT/submit</tt>
+directory.
+
 <sect>Upgrading
 <p>
 
@@ -657,25 +725,32 @@ After installation is successful, you want to run your contest! Configuring
 DOMjudge to run a contest (or a number of them) involves the following steps:
 
 <itemize>
-<item> Configure the database;
+<item> Configure the contest data;
 <item> Set up authentication for teams;
 <item> Supply in- and output testdata;
 <item> Check that everything works.
 </itemize>
 
-<sect>Database configuration
+<sect>Configure the contest data
 <p>
 
 DOMjudge stores and retrieves most of its data from the MySQL
 database. Some information must be filled in beforehand, other tables
-will be populated by DOMjudge. This section describes the meaning of
-each table and what you need to put into it. Tables marked with an `x'
-have to be manually filled with data before running a contest (e.g.
-with phpMyAdmin), the other tables are used automatically by the
-software:
+will be populated by DOMjudge.
+
+You can use the jury web interface to add, edit and delete most types
+of data described below. It's advised to keep a version of phpMyAdmin
+handy in case of emergencies, or for general database operations like
+import and export.
+
+This section describes the meaning of each table and what you need to
+put into it. Tables marked with an `x' are the ones you have to
+configure with contest data before running a contest (via the jury web
+interface or e.g. with phpMyAdmin), the other tables are used
+automatically by the software:
 <tabular ca="cll">
  |clarification    |Clarification requests/replies are stored here.@
- |contest          |Contest definitions with start/end time.@
+x|contest          |Contest definitions with start/end time.@
 x|judgehost        |Computers (hostnames) that function as judgehosts.@
  |judging          |Judgings of submissions.@
 x|language         |Definition of allowed submission languages.@
@@ -690,11 +765,8 @@ x|team_category    |Different category groups teams can be put in.@
 </tabular>
 
 Now follows a longer description (including fields) per table that has
-to be filled manually. In general the reference ID's in each table can
-be left untouched and auto incremented. These are used to reference to
-a specific element from other tables and internally in the software.
-For example a problem with `cid = 2' would reference to the contest
-with its `cid' (contest ID) set to 2.
+to be filled manually. 
+
 <descrip>
 <tag>contest</tag>
 The contests that the software will run. E.g. a test session and the
@@ -721,8 +793,8 @@ id="scoreboard:freeze" name="Scoreboard: freezing and defrosting">.
 <tag>judgehost</tag>
 List here the hosts that will be autojudging the submissions.
 <tt>hostname</tt> is the (short) hostname of a judge computer.
-<tt>active</tt> should be 0 or 1 and indicates whether this host
-should judge incoming submissions.
+<tt>active</tt> indicates whether this host should judge incoming
+submissions.
 
 <tag>language</tag>
 Programming languages in which to accept and judge submissions.
@@ -736,12 +808,12 @@ a new language, check that these match.
 which has to match the first extension as listed in the global
 configuration file.
 
-<tt>allow_submit</tt> (0 or 1) determines whether teams can submit
-using this language; <tt>allow_judge</tt> (0 or 1) determines whether
+<tt>allow_submit</tt> determines whether teams can submit
+using this language; <tt>allow_judge</tt> determines whether
 judgehosts will judge submissions for this problem. This can for
-example be set to 0 to temporarily hold judging when a problem occurs
+example be set to no to temporarily hold judging when a problem occurs
 with the judging of specific languages; after resolution of the
-problem this can be set to 1 again.
+problem this can be set to yes again.
 
 <tt>time_factor</tt> is the relative factor by which the timelimit is
 multiplied for solutions in this language. For example Java is known
@@ -751,13 +823,13 @@ to be structurally slower than C/C++.
 This table contains the problem definitions. <tt>probid</tt> is the
 reference ID, <tt>cid</tt> is the contest ID this problem is (only)
 defined for: a problem cannot be used in multiple contests.
-<tt>name</tt> is the full name of the problem.
+<tt>name</tt> is the full name (description) of the problem.
 
-<tt>allow_submit</tt> (0 or 1) determines whether teams can submit
+<tt>allow_submit</tt> determines whether teams can submit
 solutions for this problem. Non-submittable problems are also not
 displayed on the scoreboard. This can be used to define spare
-problems, which can then be added to the contest in a second;
-<tt>allow_judge</tt> (0 or 1) determines whether judgehosts will judge
+problems, which can then be added to the contest quickly;
+<tt>allow_judge</tt> determines whether judgehosts will judge
 submissions for this problem. See also the explanation for language.
 
 <tt>testdata</tt> is the directory within <tt>INPUT_ROOT</tt> that
@@ -766,9 +838,9 @@ contains the input/output testdata in files <tt>testdata.in</tt> and
 within which solutions for this problem have to run (taking into
 account <tt>time_factor</tt> per language).
 
-<tt>special_run</tt> if not NULL defines a custom run-script
+<tt>special_run</tt> if not empty defines a custom run-script
 <tt>run_&lt;special_run&gt;.sh</tt> to run compiled submissions for
-this problem and <tt>special_compare</tt> if not NULL defines a custom
+this problem and <tt>special_compare</tt> if not empty defines a custom
 compare-script <tt>compare_&lt;special_compare&gt;.sh</tt> to compare
 output for this problem.
 
@@ -787,15 +859,15 @@ affiliation ID of the team.
 automatically identify the team in the webinterface and to check
 submission origin. A value of <tt>NULL</tt> results in the team being
 unable to submit or view it's teampage, unless they first authenticate
-via password or commandline submission. It has a length of 30 to allow
-for IPv6 addresses. <tt>passwd</tt> is a MD5-hash of a one-time
-password teams can use to authenticate and register their IP address.
+via password or commandline submission. <tt>passwd</tt> is a
+MD5-hash of a one-time password teams can use to authenticate and
+register their IP address. It can be set under Administrator Functions:
+Generate Passwords.
 
 <tt>members</tt> are the names of the team members, separated by
 newlines and <tt>room</tt> is the room the team is located, for
 display only; <tt>comments</tt> can be filled with arbitrary useful
-information and <tt>teampage_first_visited</tt> is automatically
-updated when a team first visits their DOMjudge team page.
+information.
 
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the
@@ -992,6 +1064,11 @@ freeze. This is often done to keep the last hour interesting for all.
 The scoreboard freeze time can be set with the `lastscoreupdate'
 attribute in the contest table.
 
+The scoreboard freezing works by looking at the time a submission is
+made. Therefore it's possible that submissions from (just) before the
+freezetime but judged after it can still cause updates to the public
+scoreboard. A rejudging during the freeze may also cause such updates.
+
 If you do not set any freeze time, this option does nothing. If you
 set it, the public- and team scoreboards will not be updated anymore
 once this time has arrived. The jury will however still see the actual
@@ -1027,16 +1104,19 @@ database.
 <sect>Balloons
 <p>
 
-Although not strictly part of the scoreboard, many contests hand out balloons
-to teams that solve a particular problem. DOMjudge can help in this process:
-a balloons notification daemon is available that will notify the runners when
-a new balloon needs to be handed out.
+Although not strictly part of the scoreboard, in many contests
+balloons are handed out to teams that solve a particular problem.
+DOMjudge can help in this process: a balloons notification daemon is
+available that will notify the runners when a new balloon needs to be
+handed out.
 
-Use the BALLOON_CMD option to define how notifications are sent. Examples are
-to mail to a specific mailbox or to send prints to a printer. When configured,
-start <tt>bin/balloons.php</tt> and notification will start.
+Use the BALLOON_CMD option to define how notifications are sent.
+Examples are to mail to a specific mailbox or to send prints to a
+printer. When configured, start <tt>bin/balloons.php</tt> and
+notification will start.
 
-Notifications will continue even after the scoreboard is frozen. Stop the balloons
+Notifications will continue even after the scoreboard is frozen,
+although a warning is printed on the notification. Stop the balloons
 daemon when you don't want balloons to be handed out anymore.
 
 

@@ -84,16 +84,6 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	exit;
 }
 
-// (un)set 'answered' (if posted)
-if ( isset($_POST['submit']) && isset($_POST['answered']) ) {
-	$DB->q('UPDATE clarification SET answered = %i WHERE clarid = %i',
-	       (int)$_POST['answered'], $respid);
-
-	// redirect back to the original location
-	header('Location: ' . getBaseURI() . 'jury/clarification.php?id=' . $id);
-	exit;
-}
-
 require('../header.php');
 require('../clarification.php');
 
@@ -121,13 +111,14 @@ putClarification($id, NULL, TRUE);
 // Display button to (un)set request as 'answered'
 // Not relevant for 'general clarifications', ie those with sender=null
 if ( !empty($req['sender']) ) {
-	echo '<form action="clarification.php" method="post"><p>' . "\n";
-	echo '<input type="hidden" name="id" value="' . $id . "\" />\n";
-	echo '<input type="hidden" name="answered" value="' .
-		($req['answered'] ? '0' : '1') . "\" />\n";
-	echo '<input type="submit" name="submit" value="Set ' .
-		($req['answered'] ? 'unanswered' : 'answered') . "\" />\n";
-	echo "</p></form>\n";
+	require_once('../forms.php');
+	echo addForm('edit.php') .
+		addHidden('cmd', 'edit') .
+		addHidden('table', 'clarification') .
+		addHidden('keydata[0][clarid]', $id) .
+		addHidden('data[0][answered]', !$req['answered']) .
+		addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered')) .
+		addEndForm();
 }
 
 } // end if ( ! $isgeneral )

@@ -24,13 +24,23 @@ if( $res->count() == 0 ) {
 	while($row = $res->next()) {
 		echo '<tr' . (isset($row['color']) ? ' style="background: ' .
 		              $row['color'] . ';"' : '') .
-			'><td>' .     (int)$row['categoryid'] .
+			'><td><a href="team_category.php?id=' . (int)$row['categoryid'] .
+			'">' . (int)$row['categoryid'] .
 			'</td><td>' . (int)$row['sortorder'] .
 			'</td><td>' . htmlentities($row['name']) .
-			'</td><td align="right">' . (int)$row['numteams'] .
-			"</td></tr>\n";
+			'</td><td align="right">' . (int)$row['numteams'] . "</td>";
+		if ( IS_ADMIN ) {
+			echo "<td>" .
+				editLink('team_category', $row['categoryid']) . " " .
+				delLink('team_category', 'categoryid', $row['categoryid']) . "</td>";
+		}
+		echo "</tr>\n";
 	}
 	echo "</table>\n\n";
+}
+
+if ( IS_ADMIN ) {
+	echo "<p>" . addLink('team_category') . "</p>\n\n";
 }
 
 require('../footer.php');

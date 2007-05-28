@@ -22,18 +22,29 @@ if( $res->count() == 0 ) {
 	echo "<table class=\"list\">\n" .
 		"<tr><th>ID</th><th>name</th><th>country</th><th>#teams</th></tr>\n";
 	while($row = $res->next()) {
-		echo '<tr><td><a href="affiliation.php?id=' .
+		echo '<tr><td><a href="team_affiliation.php?id=' .
 			urlencode($row['affilid']) . '">' .
 			htmlspecialchars($row['affilid']).
-			'</a></td><td><a href="affiliation.php?id=' .
+			'</a></td><td><a href="team_affiliation.php?id=' .
 			urlencode($row['affilid']) . '">' .
 			htmlentities($row['name']) .
 			'</a></td><td>' .
 			htmlspecialchars($row['country']) .
 			'</td><td align="right">' .
 			(int)$row['cnt'] .
-			"</td></tr>\n";
+			"</td>";
+		if ( IS_ADMIN ) {
+			echo "<td>" .
+				editLink('team_affiliation', $row['affilid']) . " " .
+				delLink('team_affiliation', 'affilid', $row['affilid']) . "</td>";
+		}
+		echo "</tr>\n";
 	}
 	echo "</table>\n\n";
 }
+
+if ( IS_ADMIN ) {
+	echo "<p>" . addLink('team_affiliation') . "</p>\n\n";
+}
+
 require('../footer.php');

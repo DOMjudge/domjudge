@@ -78,6 +78,9 @@ function cleanexit ()
 		kill -9 $CATPID
 	fi
 
+	# Remove copied bash-static to save disk space
+	rm -f "$TMPDIR/bin/bash"
+
 	logmsg $LOG_INFO "exiting"
 }
 

@@ -29,11 +29,12 @@ if( count($res) == 0 ) {
 	echo "<form action=\"contests.php\" method=\"post\">\n";
 	echo "<table class=\"list\">\n<tr><th>CID</th><th>starts</th><th>ends</th>" .
 		"<th>freeze<br />scores</th><th>unfreeze<br />scores</th><th>name</th>" .
-		"<th>&nbsp;</th></tr>\n";
+		"</tr>\n";
 	foreach($res as $row) {
 		echo "<tr" .
 			($row['cid'] == $curcont ? ' class="highlight"':'') . ">" .
-			"<td align=\"right\">c" . htmlentities($row['cid']) . "</td>\n" .
+			"<td align=\"right\"><a href=\"contest.php?id=" . urlencode($row['cid']) .
+			"\">c" . (int)$row['cid'] . "</a></td>\n" .
 			"<td title=\"" . htmlentities($row['starttime']) . "\">" .
 				printtime($row['starttime'])."</td>\n".
 			"<td title=\"".htmlentities($row['endtime']) . "\">" .
@@ -45,6 +46,11 @@ if( count($res) == 0 ) {
 			( isset($row['unfreezetime']) ?
 			  printtime($row['unfreezetime']) : '-' ) . "</td>\n" .
 			"<td>" . htmlentities($row['contestname']) . "</td>\n";
+		if ( IS_ADMIN ) {
+			echo "<td>" . 
+				editLink('contest', $row['cid']) . " " .
+				delLink('contest','cid',$row['cid']) . "</td>\n";
+		}
 
 		// display an unfreeze scoreboard button, only for the current
 		// contest (unfreezing undisplayed scores makes no sense) and
@@ -61,9 +67,14 @@ if( count($res) == 0 ) {
 			}
 			echo " />";
 		}
-		echo "</td>\n</tr>\n";
+		echo "</td>\n";
+		echo "</tr>\n";
 	}
 	echo "</table>\n</form>\n\n";
+}
+
+if ( IS_ADMIN ) {
+	echo "<p>" . addLink('contest') . "</p>\n\n";
 }
 
 require('../footer.php');

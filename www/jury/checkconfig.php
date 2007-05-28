@@ -13,11 +13,16 @@ require('../header.php');
 
 requireAdmin();
 
+require_once(SYSTEM_ROOT . '/lib/relations.php');
+
 ob_implicit_flush();
 
-// helper to output an error message.
+// helper to output an error/warning message.
 function err ($string) {
 	echo "<b><u>ERROR</u>: ".htmlspecialchars($string)."</b><br />\n";
+}
+function warn ($string) {
+	echo "<b><u>WARNING</u>: ".htmlspecialchars($string)."</b><br />\n";
 }
 
 ?>
@@ -39,6 +44,20 @@ if( !function_exists('version_compare') || version_compare( '4.3.2',PHP_VERSION,
 }
 echo "</p>\n\n";
 ?>
+
+<h2>Authentication</h2>
+
+<p>Checking authentication...
+<?php
+if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
+	warn("You are not using HTTP Authentication for the Jury interface.\n" .
+		"Are you sure that the jury interface is adequately protected?\n");
+} else {
+	echo "OK, logged in as user <em>" . htmlspecialchars($_SERVER['REMOTE_USER']) .
+		"</em>.\n";
+}
+?>
+</p>
 
 <h2>Websubmit</h2>
 
@@ -220,7 +239,29 @@ if ( SHOW_AFFILIATIONS ) {
 	}
 
 }
+echo "</p>\n\n";
 
+
+
+echo "<h2>Referential Integrity</h2>\n\n";
+
+echo "<p>Checking integrity of inter-table relationships...";
+
+foreach ( $RELATIONS as $table => $foreign_keys ) {
+	$res = $DB->q('SELECT * FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
+	while ( $row = $res->next() ) {
+		foreach ( $foreign_keys as $foreign_key => $target ) {
+			if ( !empty($row[$foreign_key]) ) {
+				$f = explode('.', $target);
+				if ( $DB->q("VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
+						$row[$foreign_key]) < 1 ) {
+					err ("foreign key constraint fails for $table.$foreign_key = \"" .
+						htmlspecialchars($row[$foreign_key]) . "\" (not found in $target)");
+				}
+			}
+		}
+	}
+}
 
 echo "</p>\n\n";
 

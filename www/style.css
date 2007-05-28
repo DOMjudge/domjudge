@@ -177,3 +177,9 @@ tr.unread td {
 
 /* between different sortorder-categories, print a thick line */
 .sortorderswitch { border-top: 2px solid black; }
+
+img.picto {
+	border: 0;
+	width: 16;
+	height: 16;
+}

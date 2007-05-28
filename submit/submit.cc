@@ -78,7 +78,10 @@ using namespace std;
 #if ( SUBMITCLIENT_METHOD == 2 ) && ! defined( LIBCURL )
 #error "Webinterface default submission requested, but libcURL not available."
 #endif
-#if ( SUBMITCLIENT_METHOD != 1 ) && ( SUBMITCLIENT_METHOD != 2 )
+#if ( SUBMITCLIENT_METHOD == 0 )
+#warning "Commandline submit client disabled."
+#endif
+#if ( SUBMITCLIENT_METHOD < 0 ) || ( SUBMITCLIENT_METHOD > 2 )
 #error "Unknown submission method requested."
 #endif
 
@@ -166,6 +169,11 @@ int main(int argc, char **argv)
 
 	progname = argv[0];
 	stdlog = NULL;
+
+#if ( SUBMITCLIENT_METHOD == 0 )
+	printf("Submit client is disabled at compiletime.\n");
+	return -1;
+#endif
 
 	/* Parse LANGEXTS define into separate strings */
 	lang_exts = strdup(LANG_EXTS);
@@ -551,10 +559,11 @@ int cmdsubmit()
 	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",
 	       server.c_str(),port);
 	
-	/* Set preferred network connection options: use both IPv4 and
- 	   IPv6 by default */
+	/* Set preferred network connection options: use IPv4-only as
+	   IPv6 does not work in Cygwin yet */
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_flags    = AI_ADDRCONFIG | AI_CANONNAME;
+	hints.ai_family   = AF_INET;
+	hints.ai_flags    = AI_CANONNAME;
 	hints.ai_socktype = SOCK_STREAM;
  	hints.ai_protocol = IPPROTO_TCP;
 
