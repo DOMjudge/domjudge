@@ -10,10 +10,10 @@ LIBOBJECTS = $(addprefix $(TOPDIR)/lib/,$(LIBS))
 LIBHEADERS = $(LIBOBJECTS:.o=.h)
 LIBOBJECTSCYGWIN = $(LIBOBJECTS:.o=.cygwin.o)
 
+ifneq ($(shell which curl-config),)
 LIBCURL    = $(shell curl-config --version | cut -d ' ' -f 2)
 CURLLIBS   = $(shell curl-config --libs)
 CURLSTATIC = $(shell curl-config --prefix)/lib/libcurl.a
-ifdef LIBCURL
 CURLDEF = -DLIBCURL=$(LIBCURL)
 endif
 
