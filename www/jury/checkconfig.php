@@ -17,9 +17,12 @@ require_once(SYSTEM_ROOT . '/lib/relations.php');
 
 ob_implicit_flush();
 
-// helper to output an error message.
+// helper to output an error/warning message.
 function err ($string) {
 	echo "<b><u>ERROR</u>: ".htmlspecialchars($string)."</b><br />\n";
+}
+function warn ($string) {
+	echo "<b><u>WARNING</u>: ".htmlspecialchars($string)."</b><br />\n";
 }
 
 ?>
@@ -41,6 +44,20 @@ if( !function_exists('version_compare') || version_compare( '4.3.2',PHP_VERSION,
 }
 echo "</p>\n\n";
 ?>
+
+<h2>Authentication</h2>
+
+<p>Checking authentication...
+<?php
+if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
+	warn("You are not using HTTP Authentication for the Jury interface.\n" .
+		"Are you sure that the jury interface is adequately protected?\n");
+} else {
+	echo "OK, logged in as user <em>" . htmlspecialchars($_SERVER['REMOTE_USER']) .
+		"</em>.\n";
+}
+?>
+</p>
 
 <h2>Websubmit</h2>
 
@@ -228,6 +245,8 @@ echo "</p>\n\n";
 
 echo "<h2>Referential Integrity</h2>\n\n";
 
+echo "<p>Checking integrity of inter-table relationships...";
+
 foreach ( $RELATIONS as $table => $foreign_keys ) {
 	$res = $DB->q('SELECT * FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
 	while ( $row = $res->next() ) {
@@ -244,6 +263,7 @@ foreach ( $RELATIONS as $table => $foreign_keys ) {
 	}
 }
 
+echo "</p>\n\n";
 
 echo "<p>End of config checker.</p>\n\n";
 

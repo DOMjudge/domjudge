@@ -53,7 +53,7 @@ Version 2.0.0 - SVN
    to differentiate between judges and admins for the web interface:
    admins will be allowed to change more of the core data.
  - Bring lib.database.php up to date with latest upstream version.
- - Add Referential Integrity check to configchecker.
+ - Add Referential Integrity and HTTP Authentication check to configchecker.
  - Add option to admin interface to edit and delete most data types.
  - Improved build process of submit client under Windows/Cygwin.
 	
