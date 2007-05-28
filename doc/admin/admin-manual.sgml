@@ -619,7 +619,7 @@ The backend script (<tt>test_solution.sh</tt>) that handles the
 compilation, running and checking of submissions, calls separate
 scripts for running and comparison of the results. These can be
 specialised and adapted to the requirements per problem. For this, one
-has to create script <tt>run_&lt;some-tag&gt;.sh</tt> and/or
+has to create scripts <tt>run_&lt;some-tag&gt;.sh</tt> and/or
 <tt>compare_&lt;some-tag&gt;.sh</tt> in the <tt>SYSTEM_ROOT/judge</tt>
 directory (see <tt>run.sh</tt> and <tt>compare.sh</tt> for examples
 and usage information). Then one must specify this &lt;some-tag&gt; in
@@ -748,12 +748,13 @@ handy in case of emergencies, or for general database operations like
 import and export.
 
 This section describes the meaning of each table and what you need to
-put into it. Tables marked with an `x' are the ones you have to configure
-with contest data before running a contest (via the jury web interface),
-the other tables are used automatically by the software:
+put into it. Tables marked with an `x' are the ones you have to
+configure with contest data before running a contest (via the jury web
+interface or e.g. with phpMyAdmin), the other tables are used
+automatically by the software:
 <tabular ca="cll">
  |clarification    |Clarification requests/replies are stored here.@
- |contest          |Contest definitions with start/end time.@
+x|contest          |Contest definitions with start/end time.@
 x|judgehost        |Computers (hostnames) that function as judgehosts.@
  |judging          |Judgings of submissions.@
 x|language         |Definition of allowed submission languages.@
@@ -1121,16 +1122,19 @@ database.
 <sect>Balloons
 <p>
 
-Although not strictly part of the scoreboard, many contests hand out balloons
-to teams that solve a particular problem. DOMjudge can help in this process:
-a balloons notification daemon is available that will notify the runners when
-a new balloon needs to be handed out.
+Although not strictly part of the scoreboard, in many contests
+balloons are handed out to teams that solve a particular problem.
+DOMjudge can help in this process: a balloons notification daemon is
+available that will notify the runners when a new balloon needs to be
+handed out.
 
-Use the BALLOON_CMD option to define how notifications are sent. Examples are
-to mail to a specific mailbox or to send prints to a printer. When configured,
-start <tt>bin/balloons.php</tt> and notification will start.
+Use the BALLOON_CMD option to define how notifications are sent.
+Examples are to mail to a specific mailbox or to send prints to a
+printer. When configured, start <tt>bin/balloons.php</tt> and
+notification will start.
 
-Notifications will continue even after the scoreboard is frozen. Stop the balloons
+Notifications will continue even after the scoreboard is frozen,
+although a warning is printed on the notification. Stop the balloons
 daemon when you don't want balloons to be handed out anymore.
 
 
