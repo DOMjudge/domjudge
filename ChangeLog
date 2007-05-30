@@ -1,5 +1,9 @@
 DOMjudge Programming Contest Judging System
 
+Version 2.0.0 - SVN
+-------------------
+ - Small-time cleanups.
+
 Version 2.0.0 Release Candidate 1 - 28 May 2007
 -----------------------------------------------
  - Minimum MySQL version required is now 4.1: simplify SQL privilege

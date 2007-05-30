@@ -15,7 +15,7 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 	<title>DOMjudge menu</title>
 </head>
 <body>
-<?
+<?php
 
 $cid = getCurContest();
 
@@ -25,17 +25,17 @@ $cnew = $DB->q('VALUE SELECT COUNT(*) FROM clarification
 
 ?>
 <div id="menutop">
-<a target="_TOP" href="index.php">home</a>
-<a target="_TOP" href="problems.php">problems</a>
-<a target="_TOP" href="judgehosts.php">judgehosts</a>
-<a target="_TOP" href="teams.php">teams</a>
-<?	if ( $cnew ) { ?>
-<a target="_TOP" class="new" href="clarifications.php">clarifications (<?=$cnew?> new)</a>
-<?	} else { ?>
-<a target="_TOP" href="clarifications.php">clarifications</a>
-<?	} ?>
-<a target="_TOP" href="submissions.php">submissions</a>
-<a target="_TOP" href="scoreboard.php">scoreboard</a>
+<a target="_top" href="index.php">home</a>
+<a target="_top" href="problems.php">problems</a>
+<a target="_top" href="judgehosts.php">judgehosts</a>
+<a target="_top" href="teams.php">teams</a>
+<?php	if ( $cnew ) { ?>
+<a target="_top" class="new" href="clarifications.php">clarifications (<?=$cnew?> new)</a>
+<?php	} else { ?>
+<a target="_top" href="clarifications.php">clarifications</a>
+<?php	} ?>
+<a target="_top" href="submissions.php">submissions</a>
+<a target="_top" href="scoreboard.php">scoreboard</a>
 </div>
 
 <?php putClock();

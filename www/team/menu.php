@@ -18,33 +18,36 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 <title>DOMjudge menu</title>
 </head>
 <body>
-<?
+<?php
 
 
 /* (new) clarification info */
 $res = $DB->q('KEYTABLE SELECT type AS ARRAYKEY, COUNT(*) AS count FROM team_unread
                WHERE teamid = %s GROUP BY type', $login);
 
-?>
-<div id="menutop">
-<?	if ( isset($res['submission']) ) { ?>
-<a target="_TOP" class="new" href="index.php">submissions (<?=$res['submission']['count']?>)</a>
-<?	} else { ?>
-<a target="_TOP" href="index.php">submissions</a>
-<?	}
-	if ( isset($res['clarification']) ) {
-?><a target="_TOP" class="new" href="clarifications.php">clarifications (<?=$res['clarification']['count']?> new)</a>
-<?	} else { ?>
-<a target="_TOP" href="clarifications.php">
-clarifications</a>
-<?	} ?>
-<a target="_TOP" href="scoreboard.php">scoreboard</a>
-<? if ( ENABLE_WEBSUBMIT_SERVER ) { ?>
-<a target="_TOP" href="websubmit.php">submit</a>
-<? } ?>
-</div>
+echo "<div id=\"menutop\">\n";
 
-<?
+if ( isset($res['submission']) ) {
+	echo '<a target="_top" class="new" href="index.php">submissions (' .
+		(int)$res['submission']['count'] . " new)</a>\n";
+} else {
+	echo "<a target=\"_top\" href=\"index.php\">submissions</a>\n";
+}
+
+if ( isset($res['clarification']) ) {
+	echo '<a target="_top" class="new" href="clarifications.php">clarifications (' .
+		(int)$res['clarification']['count'] . " new)</a>\n";
+} else {
+	echo "<a target=\"_top\" href=\"clarifications.php\">clarifications</a>\n";
+}
+
+echo "<a target=\"_top\" href=\"scoreboard.php\">scoreboard</a>\n";
+
+if ( ENABLE_WEBSUBMIT_SERVER ) {
+	echo "<a target=\"_top\" href=\"websubmit.php\">submit</a>\n";
+}
+
+echo "\n</div>\n\n";
 
 putClock();
 
