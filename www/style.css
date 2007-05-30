@@ -6,6 +6,8 @@ body {
 	font-family: sans-serif;
 }
 
+img {	border: 0; }
+
 .sol {
 	font-weight: bold;
 	font-variant: small-caps;
@@ -150,8 +152,6 @@ legend {
 .scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
 .scoreboard .scoretn { padding: 0px; }
 
-.scoreboard_jury img { border: 0px; }
-
 .scoreheader {
 	font-variant: small-caps;
 	border-bottom: 2px solid black;
@@ -181,7 +181,6 @@ legend {
 }
 
 #djlogo {
-	border: 0;
 	position: absolute; right: 1ex;
 }
 
@@ -194,8 +193,4 @@ legend {
 /* between different sortorder-categories, print a thick line */
 .sortorderswitch { border-top: 2px solid black; }
 
-img.picto {
-	border: 0;
-	width: 16;
-	height: 16;
-}
+img.picto { width: 16; height: 16; }
