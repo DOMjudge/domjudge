@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 2.0.0 - SVN
 -------------------
  - Small-time cleanups.
+ - Use either wget or curl for downloading LaTeX packages.	
 
 Version 2.0.0 Release Candidate 1 - 28 May 2007
 -----------------------------------------------

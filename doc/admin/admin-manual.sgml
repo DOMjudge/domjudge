@@ -353,7 +353,7 @@ The requirements for the deployment of this jury-system are:
 <item> OpenSSH/SCP (or a compatible ssh/scp client/daemon, optionally
        for using the command-line submit program)
 
-<item> wget and unzip (optionally for downloading LaTeX packages for documentation)
+<item> wget/curl and unzip (optionally for downloading LaTeX packages for documentation)
 
 <item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html">
        (optionally for <htmlurl name="ICPC validator standard"
