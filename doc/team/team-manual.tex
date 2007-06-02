@@ -116,7 +116,7 @@ able to see the submission in your submissions list.
 
 \section{Viewing the results of submissions}
 
-There is a overview of your submissions on your team web page.
+There is an overview of your submissions on your team web page.
 It contains all relevant information: submission time, programming
 language, problem and status. The address of your team page is
 \url{\WEBBASEURI team}. From here you can also view the public
@@ -131,10 +131,11 @@ A submission can have the following results:
 The submission was correct and you solved this problem!
 
 \item[COMPILER-ERROR]
-There was an error when compiling your program. You can view the
-submission details on your team page to see the exact error.
-Note that the compiler\emph{warnings} do not count as error, but can also
-be viewed in the submission details.
+There was an error when compiling your program. Depending on the setup
+at your site, you can view the submission details on your team page to
+see the exact error. Note that the compiler\emph{warnings} do not
+count as error, but can also be viewed in the submission details
+(depending on setup).
 
 \item[TIMELIMIT]
 Your program took longer than the maximum allowed time for this
@@ -170,13 +171,13 @@ These can be found on your team page. Both clarification replies from
 the jury and requests sent by you are displayed there.
 
 There is also a link to submit a new clarification request to the
-jury. This request is only readable for the jury and they will
-respond as soon as possible. Answers that are relevant for
-everyone, will be sent to everyone.
+jury. This request is only readable for the jury and they will respond
+as soon as possible. Answers that are relevant for everyone, will be
+sent to everyone.
 
 When you receive a new clarification from the jury, this will
-automatically be displayed as ``(1 NEW)'' after the clarification
-button in the menu bar.
+automatically be displayed as ``(1 NEW)'' in the clarification button
+in the menu bar.
 
 \section{How are submissions being judged?}
 
@@ -185,13 +186,13 @@ interaction is necessary. The judging is done in the following way:
 
 \subsection{Submission}
 
-With the \cmd{submit} program or the web-interface (see \ref{submit}),
-you can submit a solution to a problem. Note that you have to submit
-the source-code of your program (and not a compiled program or the
-output of your program). \cmd{submit} makes a connection to the
-submission server, which copies your program to the jury-computers,
-while in the web-interface it gets uploaded to the jury via the
-webserver.
+With the \cmd{submit} program or the web-interface (see section
+\ref{submit}), you can submit a solution to a problem. Note that you
+have to submit the source-code of your program (and not a compiled
+program or the output of your program). \cmd{submit} makes a
+connection to the submission server, which copies your program to the
+jury-computers, while in the web-interface it gets uploaded to the
+jury via the webserver.
 
 There your program enters a queue, awaiting being compiled, executed
 and the output tested on one of the jury-computers.
@@ -215,7 +216,7 @@ output, the exit status of your program is checked: if your programs
 gives the correct answer, but exits with a nonzero exitcode, the
 result will be a run-error! There are some restrictions during
 execution. If your program violates these, it will also be aborted
-with a run-error, see (\ref{runlimits}).
+with a run-error, see section \ref{runlimits}.
 
 When comparing program output, it has to exactly match to output of
 the jury. So take care, that you follow the output specifications. In
@@ -232,8 +233,8 @@ submissions are subjected:
 \begin{description}[\setlabelphantom{number of processes}]
 \item[compile time]
 Compilation of your program may take no longer than \COMPILETIME\
-seconds. After that, compilation will be aborted and results in a
-compile error. In practice, this should never give rise to
+seconds. After that, compilation will be aborted and the result will
+be a compile error. In practice, this should never give rise to
 problems. Should this happen to a normal program, please inform the
 jury right away.
 
@@ -243,10 +244,11 @@ When submitting your program you will already be warned for this, but
 during compilation this will result in a compile error.
 
 \item[memory]
-During execution of your program, there are \MEMLIMIT\ kilobytes of memory
-available. This is the total amount of memory (including program code,
-statically and dynamically defined variables, stack, \dots)! If your
-program tries to use more memory, it will abort, resulting in a run error.
+During execution of your program, there are \MEMLIMIT\ kilobytes of
+memory available. This is the total amount of memory (including
+program code, statically and dynamically defined variables, stack,
+Java VM, \dots)! If your program tries to use more memory, it will
+abort, resulting in a run error.
 
 \item[filesize]
 Although you are not allowed to write to files, standard (error)output
