@@ -6,23 +6,38 @@ include $(TOPDIR)/Makefile.global
 LATEXFLAGS = --interaction=errorstopmode
 
 LATEXPACKAGES = svn expdlist
-LATEXPKGFILES = $(addsuffix .sty,$(LATEXPACKAGES))
+LATEXZIPFILES = $(addsuffix .zip,$(LATEXPACKAGES))
+LATEXSTYFILES = $(addsuffix .sty,$(LATEXPACKAGES))
+
+# Comprehensive TeX Archive Network path to packages:
+CTANPATH=ftp://tug.ctan.org/pub/tex-archive/macros/latex/contrib
 
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = admin team judge
 REC_TARGETS = docs clean distclean
 
-$(LATEXPKGFILES): %.sty:
-	@if [ ! -f $*.zip ]; then \
-		wget -N -nv ftp://tug.ctan.org/pub/tex-archive/macros/latex/contrib/$*.zip || \
-		(echo "Couldn't download TeX package '$*': download manually." && exit 1) ; \
+$(LATEXZIPFILES): %.zip:
+	@echo "Downloading LaTeX package '$*' from CTAN.org..." ; \
+	if which wget >/dev/null ; then \
+		wget -N -nv -T 60 $(CTANPATH)/$@ ; \
+	else if which curl >/dev/null ; then \
+		curl -f -O -m 120 $(CTANPATH)/$@ ; \
+	else \
+		echo -e "No wget or curl found, download manually from:\n\t$(CTANPATH)/$@"; \
+		exit 1 ; \
+	fi ; fi ; \
+	if [ ! -f $@ ]; then \
+		echo -e "Downloading failed, download manually from:\n\t$(CTANPATH)/$@"; \
+		exit 1 ; \
 	fi
+
+$(LATEXSTYFILES): %.sty: %.zip
 	unzip -q $*.zip
 	cd $* && latex $(LATEXFLAGS) $*.ins >/dev/null
 	ln -s $*/$*.sty .
 
 cleanlatexpackages:
-	for i in $(LATEXPACKAGES) ; do rm -rf $$i{,.sty,.zip} ; done
+	rm -rf $(LATEXPACKAGES) $(LATEXZIPFILES) $(LATEXSTYFILES)
 
 distclean: cleanlatexpackages
 
