@@ -128,15 +128,17 @@ canonical overview of current standings.
 
 <sect>Judges and Administrators
 <p>
-The DOMjudge system discerns between <em>judges</em> and <em>administrators</em>
-(admins). An administrator is responsible for the technical side of DOMjudge:
-installation and keeping it running. The jury web interface may be used by both.
+The DOMjudge system discerns between <em>judges</em> and
+<em>administrators</em> (admins). An administrator is responsible for
+the technical side of DOMjudge: installation and keeping it running.
+The jury web interface may be used by both.
 
-Depending on configuration, there may either be a separate administrator view or
-one is shared between judges and administrators. In the first case you will not
-have access to the admin-specific options. In the latter, you may see
-options directed at admins, like options to edit or delete data. Be careful not
-to touch these options unless an administrator agreed for you to do so.
+Depending on configuration, there may either be a separate
+administrator view or one is shared between judges and administrators.
+In the first case you will not have access to the admin-specific
+options. In the latter, you may see options directed at admins, like
+options to edit or delete data. Be careful changing these options
+unless an administrator agreed for you to do so.
 
 <sect>Scoreboard
 <p>
@@ -169,7 +171,7 @@ Before the contest starts, a number of things will need to be
 configured by the administrator. You can check that information,
 such as the problem set(s) and time limits, contest start- and
 end time, the time at which the scoreboard will be frozen and
-unfrozen all from the links from the front page.
+unfrozen, all from the links from the front page.
 
 Note that multiple contests can be defined, with corresponding
 problem sets, for example a practice session and the real contest.
@@ -191,8 +193,8 @@ factor).
 The `Languages' overview is quite the same. It has a timefactor
 column; submissions in a language that has time factor 2 will be
 allowed to run twice the time that has been specified under Problems.
-This is needed to compensate for slowness in some languages, e.g.
-Java.
+This can be used to compensate for the execution speed of a language,
+e.g. Java.
 
 
 <sect>Practice Session
@@ -236,8 +238,8 @@ The flow of an incoming submission is as follows.
 <enum>
 <item>Team submits solution. It will either be rejected after basic
       checks, or accepted and stored as a <em>submission</em>.
-<item>The first available autojudger compiles, runs and checks the
-      submission. The outcome and outputs are stored as a
+<item>The first available <em>judgehost</em> compiles, runs and checks
+      the submission. The outcome and outputs are stored as a
       <em>judging</em> of this submission.
 <item>If verification is not required, the result is automatically
       recorded and the team can view the result and the scoreboard is
@@ -256,7 +258,7 @@ a code.
 <descrip>
 <tag>QUEUED/PENDING</tag>submission accepted and awaiting an autojudger to process it *;
 <tag>JUDGING       </tag>an autojudger is currently compiling/running/testing the submission *;
-<tag>TOO-LATE      </tag>submission accepted but submitted after the contest ends;
+<tag>TOO-LATE      </tag>submission accepted but submitted after the contest ended;
 <tag>CORRECT       </tag>submission correct, problem solved;
 <tag>COMPILER-ERROR</tag>the compiler gave an error while compiling the program;
 <tag>TIMELIMIT     </tag>program execution time exceeded the time defined for the problem;
@@ -276,16 +278,16 @@ the newest one at the top. Click on a submission id (a number starting
 with <em>s</em>, e.g. s123) for more details about the submission
 (team name, submittime etc) and the judging(s) for it. Click on a
 result code to jump straight to the judging details (runtime, outputs,
-diff with testdata, diff with previous submission).
+diff with testdata).
 
-Under the submission details the source filename can be clicked to inspect
-the source code. If the team has submitted something for this problem before,
-a diff output between the current and previous submission is also available
-there.
+Under the submission details the source filename can be clicked to
+inspect the source code. If the team has submitted something for this
+problem before, a diff output between the current and previous
+submission is also available there.
 
-A submission can have multiple judgings, but only one valid one at any
-time. Multiple judgings happen with rejudging, see <ref id="rejudging"
-name="Rejudging">.
+A submission can have multiple judgings, but only one valid judging at
+any time. Multiple judgings occur when rejudging, see <ref
+id="rejudging" name="Rejudging">.
 
 <sect1>Rejudging <label id="rejudging">
 <p>
@@ -315,8 +317,8 @@ explaining what has been rejudged and why.
 <sect>Clarification Requests
 <p>
 Communication between teams and jury happens through Clarification
-Requests. Everything related to that happens under the Clarifications
-menu item.
+Requests. Everything related to that is handled under the
+Clarifications menu item.
 
 <p>
 Teams can use their web interface to send a clarification request to
@@ -342,12 +344,12 @@ can be used when the request has been dealt with in some other way,
 for example by sending a general message to all teams.
 
 <p>
-Answering a clarification request happens by putting the text in the
+An answer to a clarification request is made by putting the text in the
 input box under the request text. The original text is quoted. You can
 choose to either send it to the team that requested the clarification,
 or to all teams. In the latter case, make sure you phrase it in such a
-way that it's understandable by itself, since the other teams do not
-know what the original question was.
+way that the message is selfcontained, since the other teams cannot
+view the original question.
 
 
 <chapt>After the contest
