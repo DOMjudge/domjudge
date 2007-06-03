@@ -52,12 +52,6 @@ $now = date('Y-m-d H:i:s');
 if( $contdata['starttime'] > $now ) {
 	error("The contest is closed, no submissions accepted. [c$cid]");
 }
-// If the contest has already ended, accept the submission anyway but do not
-// process it.
-if( $contdata['endtime'] <= $now ) {
-	warning("The contest is closed, submission stored but not processed. [c$cid]");
-}
-
 
 // Check 2: valid parameters?
 if( ! $lang = $DB->q('MAYBEVALUE SELECT langid FROM language WHERE
@@ -112,6 +106,12 @@ $id = $DB->q('RETURNID INSERT INTO submission
 $DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
         VALUES(%i, %s, %s, %s, %i, "problem submitted")',
        $cid, $teamrow['login'], $lang, $probid, $id);
+
+// If the contest has already ended, accept the submission anyway but do not
+// process it and notify team.
+if( $contdata['endtime'] <= $now ) {
+	warning("The contest is closed, submission stored but not processed. [c$cid]");
+}
 
 logmsg (LOG_NOTICE, "submitted $team/$prob/$lang, file $tofile, id s$id/c$cid");
 

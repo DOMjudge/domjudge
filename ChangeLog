@@ -6,6 +6,7 @@ Version 2.0.0 - SVN
  - Use either wget or curl for downloading LaTeX packages.
  - Remove 'NOW()' from SQL update/insert queries to make replication
    time-independent.
+ - Fixed bug in submit_db: report errors before too-late submission.
 
 Version 2.0.0 Release Candidate 1 - 28 May 2007
 -----------------------------------------------
