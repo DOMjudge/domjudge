@@ -169,6 +169,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 		// check whether this is us, otherwise use category colour
 		if ( @$myteamid == $team ) {
 			echo ' id="scorethisisme"';
+			unset($color);
 		} else {
 			$color = $teams[$team]['color'];
 		}
