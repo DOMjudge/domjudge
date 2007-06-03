@@ -8,7 +8,7 @@ docs: admin-manual.pdf admin-manual.html
 admin-manual.pdf: admin-manual.sgml
 	linuxdoc -B latex -o pdf $< >/dev/null
 
-admin-manual.html: admin-manual.sgml
+admin-manual.html: admin-manual.sgml ../docs_header.html
 	linuxdoc -B html --header=../docs_header.html $<
 
 distclean:
