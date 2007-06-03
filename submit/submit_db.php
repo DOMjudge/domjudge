@@ -104,8 +104,8 @@ if ( ! copy(INCOMINGDIR."/$file", SUBMITDIR."/$tofile") ) {
 // Insert submission into the database
 $id = $DB->q('RETURNID INSERT INTO submission
               (cid,teamid,probid,langid,submittime,sourcefile,sourcecode)
-              VALUES (%i, %s, %s, %s, NOW(), %s, %s)',
-             $cid, $teamrow['login'], $probid, $lang, $tofile,
+              VALUES (%i, %s, %s, %s, %s, %s, %s)',
+             $cid, $teamrow['login'], $probid, $lang, now(), $tofile,
              getFileContents(SUBMITDIR."/".$tofile));
 
 // Log to event table

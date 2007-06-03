@@ -138,6 +138,15 @@ function calcScoreRow($cid, $team, $prob) {
 }
 
 /**
+ * Simulate MySQL NOW() function to create insert queries that do not
+ * change when replicated later.
+ */
+function now()
+{
+	return date('Y-m-d H-i-s');
+}
+
+/**
  * Create a unique file from a template string.
  *
  * Returns a full path to the filename or FALSE on failure.

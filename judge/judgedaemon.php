@@ -127,7 +127,7 @@ while ( TRUE ) {
 
 	// update the judging table with our ID and the starttime
 	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)
-	                     VALUES (%i,%i,NOW(),%s)', $row['submitid'], $cid, $myhost);
+	                     VALUES (%i,%i,%s,%s)', $row['submitid'], $cid, now(), $myhost);
 
 	// create tempdir for tempfiles
 	$tempdir = "$tempdirpath/c$cid-s$row[submitid]-j$judgingid";
@@ -154,10 +154,10 @@ while ( TRUE ) {
 	// supports it.
 	$DB->q('START TRANSACTION');
 	// pop the result back into the judging table
-	$DB->q('UPDATE judging SET endtime = NOW(), result = %s,
+	$DB->q('UPDATE judging SET endtime = %s, result = %s,
 	        output_compile = %s, output_run = %s, output_diff = %s, output_error = %s
 	        WHERE judgingid = %i AND judgehost = %s',
-	       $result,
+	       now(), $result,
 	       getFileContents( $tempdir . '/compile.out' ),
 	       getFileContents( $tempdir . '/program.out' ),
 	       getFileContents( $tempdir . '/compare.out' ),
