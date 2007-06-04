@@ -1,0 +1,17 @@
+% LaTeX extra preamble definitions for DOMjudge PDF manuals
+\setcounter{tocdepth}{1}
+
+% Redefined chapter title generation:
+\makeatletter
+\def\@makechapterhead#1{%
+%  \vspace*{10\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+        {\fontsize{40pt}{40pt}\selectfont\bfseries \thechapter~}
+    \fi
+    \Huge \bfseries #1\par\nobreak
+    \vskip 20\p@
+  }}
+\makeatother
+
+% end of extra preamble definitions
