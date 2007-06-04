@@ -355,11 +355,11 @@ The requirements for the deployment of this jury-system are:
 
 <item> wget/curl and unzip (optionally for downloading LaTeX packages for documentation)
 
-<item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html">
+<item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html">~
        (optionally for <htmlurl name="ICPC validator standard"
         url="http://www.ecs.csus.edu/pc2/doc/valistandard.html"> compatibility)
 
-<item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">
+<item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
        (optionally to use the commandline submit client with the webinterface)
 </itemize>
 
@@ -694,8 +694,7 @@ database!
 <p>
 
 The submit client can also be built under Windows when the Cygwin
-environment is installed. First the <url name="Cygwin"
-url="http://cygwin.com/"> <url name="setup.exe"
+environment is installed. First the Cygwin <url name="setup.exe"
 url="http://cygwin.com/setup.exe"> program must be downloaded and
 installed with GCC, curl-devel and maybe some more packages included.
 Furthermore, the cygwin-base package must be (re-)installed from the
@@ -768,9 +767,8 @@ x|problem          |Definition of problems (name, corresponding contest, etc.).@
 x|team             |Definition of teams.@
 x|team_affiliation |Definition of institutions a team can be affiliated with.@
 x|team_category    |Different category groups teams can be put in.@
- |scoreboard&lowbar;jury<newline>
-  scoreboard&lowbar;public|Cache of the scoreboards for public/teams and for the<newline>
-                    jury separately, because of possibility of score freezing.
+ |scoreboard&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
+ |scoreboard&lowbar;public|separately, because of possibility of score freezing.
 </tabular>
 
 Now follows a longer description (including fields) per table that has
@@ -1050,7 +1048,7 @@ section of its own.
 Each problem can be associated with a specific colour, e.g. the colour
 of the corresponding balloon that is handed out. DOMjudge can display
 this colour on the scoreboard, if you fill in the `color' attribute in
-the `problem' table; set it to a <url name="valid CSS colour value"
+the `problem' table; set it to a <htmlurl name="valid CSS colour value"
 url="http://www.w3.org/TR/REC-CSS1#color-units"> (e.g. `green'
 or `#ff0000', although a name is preferred for displaying colour
 names).
@@ -1411,7 +1409,7 @@ team's account (e.g. using ssh keys).
 <chapt>DOMjudge and the ICPC Validator Interface Standard <label id="validator">
 <p>
 DOMjudge supports the ICPC Validator Interface Standard, which can be
-found at: <htmlurl url="http://www.ecs.csus.edu/pc2/doc/valistandard.html">
+found at: <url url="http://www.ecs.csus.edu/pc2/doc/valistandard.html">
 
 The invocation code (<tt>judge/test_solution.h</tt>) adheres to the
 invocation interface. It passes as a 5th optional parameter to the
