@@ -137,8 +137,8 @@ Depending on configuration, there may either be a separate
 administrator view or one is shared between judges and administrators.
 In the first case you will not have access to the admin-specific
 options. In the latter, you may see options directed at admins, like
-options to edit or delete data. Be careful changing these options
-unless an administrator agreed for you to do so.
+options to edit or delete data. Only use these options if you're sure
+that it's correct to do so.
 
 <sect>Scoreboard
 <p>
