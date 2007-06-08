@@ -172,7 +172,7 @@ follows after that.
 
 <sect>Quick Installation
 <p>
-<em>NOTE:</em> this is not a replacement for the thorough installation
+<em>Note:</em> this is not a replacement for the thorough installation
 instructions below, but more a cheat-sheet for those who've already
 installed DOMjudge before and need a few hints. When in doubt, always
 consult the full installation instruction.
@@ -1188,7 +1188,7 @@ Database access is protected by passwords. The default permissions
 allow connections from <em>all</em> hosts, so make sure you restrict
 this appropriately or choose strong enough passwords.
 
-<em>NOTE:</em> database passwords are stored in
+<em>Note:</em> database passwords are stored in
 <tt>SYSTEM_ROOT/etc/passwords.php</tt>. This file has to be
 non-readable to teams, but has to be readable to the webserver to let
 the jury webinterface work. A solution is to make it readable to a
