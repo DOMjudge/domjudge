@@ -133,7 +133,7 @@ echo "<p>" . rejudgeForm('team', $id) . "</p>\n\n";
 
 if ( IS_ADMIN ) {
 	echo "<p>" .
-		editLink('team', $id). " " .
+		editLink('team', $id). "\n" .
 		delLink('team','login',$id) .
 		"</p>\n\n";
 }

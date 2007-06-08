@@ -84,7 +84,7 @@ echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
 	echo "<p>" . 
-		editLink('contest',$data['cid']) . " " .
+		editLink('contest',$data['cid']) . "\n" .
 		delLink('contest','cid',$data['cid']) ."</p>\n\n";
 }
 

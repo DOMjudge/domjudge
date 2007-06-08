@@ -124,7 +124,7 @@ echo "<p>" . rejudgeForm('language',$data['langid']) . "</p>\n\n";
 
 if ( IS_ADMIN ) {
 	echo "<p>" . 
-		editLink('language', $data['langid']) . " " .
+		editLink('language', $data['langid']) . "\n" .
 		delLink('language','langid',$data['langid']) . "</p>\n\n";
 }
 echo "<h2>Submissions in " . htmlspecialchars($id) . "</h2>\n\n";

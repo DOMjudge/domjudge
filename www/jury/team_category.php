@@ -82,7 +82,7 @@ echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
 	echo "<p>" .
-		editLink('team_category', $data['categoryid']) . " " .
+		editLink('team_category', $data['categoryid']) . "\n" .
 		delLink('team_category','categoryid',$data['categoryid']) . "</p>\n\n";
 }
 

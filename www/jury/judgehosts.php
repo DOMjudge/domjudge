@@ -85,7 +85,7 @@ if ( IS_ADMIN ) {
 		addSubmit('Start all judgehosts', 'cmd-activate') .
 		addSubmit('Stop all judgehosts', 'cmd-deactivate') .
 		"<br /><br />\n\n" .
-		addLink('judgehosts', true) . " " .
+		addLink('judgehosts', true) . "\n" .
 		editLink('judgehosts', null, true) .
 		"</p>\n" .
 		addEndForm();

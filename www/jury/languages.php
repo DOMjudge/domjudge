@@ -37,7 +37,7 @@ if( $res->count() == 0 ) {
 					editLink('language', $row['langid']) . " " .
 					delLink('language','langid',$row['langid']);
 			}
-			"</td></tr>\n";
+		echo "</td></tr>\n";
 	}
 	echo "</table>\n\n";
 }

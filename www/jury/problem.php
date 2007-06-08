@@ -152,7 +152,7 @@ echo "</table>\n" .
 echo "<p>" . rejudgeForm('problem', $id) . "</p>\n\n";
 
 if ( IS_ADMIN ) {
-	echo "<p>" . editLink('problem',$id) . " " .
+	echo "<p>" . editLink('problem',$id) . "\n" .
 		delLink('problem','probid', $id) . "</p>\n\n";
 }
 
