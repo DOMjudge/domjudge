@@ -1416,8 +1416,8 @@ invocation interface. It passes as a 5th optional parameter to the
 validator program the filename in which it expects a difference output
 between the program and jury output (parameters 2 and 3 respectively).
 
-DOMjudge does only support the parsing of the result XML file (in the
-result interface) if `xsltproc' is available on the judge computers;
+Parsing of the result XML file (in the result interface) is only
+supported if `xsltproc' is available on the judge computers;
 this program is part of the <url name="GNOME libxslt package"
 url="http://www.xmlsoft.org/XSLT/">. If this is not available, then
 DOMjudge reports judging as correct when the compare script
