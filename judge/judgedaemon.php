@@ -114,10 +114,10 @@ while ( TRUE ) {
 
 	$waiting = FALSE;
 
-	// get max.runtime, path to submission and other params
+	// get maximum runtime, source code and other parameters
 	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS runtime,
-	               s.submitid, s.sourcefile, s.langid, s.teamid, s.probid,
-	               p.testdata, p.special_run, p.special_compare
+	               s.submitid, s.sourcecode, s.langid, s.teamid, s.probid,
+	               p.testdata, p.special_run, p.special_compare, l.extension
 	               FROM submission s, problem p, language l
 	               WHERE s.probid = p.probid AND s.langid = l.langid AND
 	               judgemark = %s AND judgehost = %s', $mark, $myhost);
@@ -134,9 +134,23 @@ while ( TRUE ) {
 	system("mkdir -p $tempdir", $retval);
 	if ( $retval != 0 ) error("Could not create $tempdir");
 
+    // dump the source code in a tempfile
+    // :KLUDGE: In older versions, test_solution.sh creates a temporary copy
+    // of the original source file. Since this version doesn't use real source
+    // files (source code is submitted to the database), we choose to put the
+    // original source code in another temporary file for now, which is then
+    // copied by test_solution.sh.
+    $tempsrctpl = "/tmp/source.XXXXXX." . $row['extension'];
+    $tempsrcfile = mkstemps($tempsrctpl, strlen($row['extension'])+1);
+    // :NOTE: in PHP5, one could use file_put_contents().
+    $tempsrchandle = @fopen($tempsrcfile, 'w');
+    if ($tempsrchandle === FALSE) error("Could not create $tempsrcfile");
+    fwrite($tempsrchandle, $row['sourcecode']);
+    fclose($tempsrchandle);
+
 	// do the actual compile-run-test
 	system("./test_solution.sh " .
-			SUBMITDIR."/$row[sourcefile] $row[langid] " .
+			"$tempsrcfile $row[langid] " .
 			INPUT_ROOT."/$row[testdata]/testdata.in " .
 			INPUT_ROOT."/$row[testdata]/testdata.out " .
 		   "$row[runtime] $tempdir " .
