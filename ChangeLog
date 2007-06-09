@@ -7,8 +7,7 @@ Version 2.0.0 - SVN
  - Remove 'NOW()' from SQL update/insert queries to make replication
    time-independent.
  - Fixed bug in submit_db: report errors before too-late submission.
- - Improved portability to non-Linux systems.
- - Fixed compilation warnings on non-Linux systems (Closes: #1734046).
+ - Improved portability to non-Linux systems (Closes: #1734046).
 
 Version 2.0.0 Release Candidate 1 - 28 May 2007
 -----------------------------------------------
