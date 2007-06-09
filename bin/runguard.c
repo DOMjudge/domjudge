@@ -214,7 +214,7 @@ int main(int argc, char **argv)
 	char *valid_users;
 	char *ptr;
 	char  cwd[MAXPATHLEN+3];
-	char  c;
+	int   opt;
 	
 	progname = argv[0];
 
@@ -223,8 +223,8 @@ int main(int argc, char **argv)
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"+r:t:u:o:vq",long_opts,(int *) 0))!=-1 ) {
-		switch ( c ) {
+	while ( (opt = getopt_long(argc,argv,"+r:t:u:o:vq",long_opts,(int *) 0))!=-1 ) {
+		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
 		case 'r': /* rootdir option */
@@ -261,7 +261,7 @@ int main(int argc, char **argv)
 			error(0,"unknown option or missing argument `%c'",optopt);
 			break;
 		default:
-			error(0,"getopt returned character code `%c' ??",c);
+			error(0,"getopt returned character code `%c' ??",(char)opt);
 		}
 	}
 

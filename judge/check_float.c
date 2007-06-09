@@ -153,7 +153,7 @@ int equal(flt f1, flt f2)
 
 int main(int argc, char **argv)
 {
-	char c;
+	int opt;
 	char *ptr;
 	int linenr, posnr, diff;
 	char line1[MAXLINELEN], line2[MAXLINELEN];
@@ -169,8 +169,8 @@ int main(int argc, char **argv)
 	rel_prec = default_rel_prec;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"a:r:",long_opts,(int *) 0))!=-1 ) {
-		switch ( c ) {
+	while ( (opt = getopt_long(argc,argv,"a:r:",long_opts,(int *) 0))!=-1 ) {
+		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
 		case 'a': /* absolute precision */
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
 			error(0,"unknown option or missing argument `%c'",optopt);
 			break;
 		default:
-			error(0,"getopt returned character code `%c' ??",c);
+			error(0,"getopt returned character code `%c' ??",(char)opt);
 		}
 	}
 	if ( show_help ) usage();

@@ -108,15 +108,15 @@ int main(int argc, char **argv)
 	char *filebase;
 	char *ptr;
 	char *next;
-	char c;
+	int  opt;
 	
 	progname = argv[0];
 
 	/* Parse command-line options */
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"",long_opts,(int *) 0))!=-1 ) {
-		switch ( c ) {
+	while ( (opt = getopt_long(argc,argv,"",long_opts,(int *) 0))!=-1 ) {
+		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
 		case ':': /* getopt error */
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 			error(0,"unknown option or missing argument `%c'",optopt);
 			break;
 		default:
-			error(0,"getopt returned character code `%c' ??",c);
+			error(0,"getopt returned character code `%c' ??",(char)opt);
 		}
 	}
 
