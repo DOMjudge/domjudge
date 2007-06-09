@@ -22,8 +22,8 @@ Version 2.0.0 Release Candidate 1 - 28 May 2007
  - Add affiliation icons to scoreboard (configurable). (Closes: #1355814).
  - Adapt and split sql script files to allow for easier upgrading and
    changing database name.
- - Fix possible buffer overflow in submitcommon.cc; Thanks to
-   Lennert Buytenhek for pointing out.
+ - Fix possible buffer overflow in submitcommon.cc; thanks to
+   Lennert Buytenhek for pointing out [CVE-2007-2977].
  - Add option to commandline submit to use websubmit (Closes: #1582376)
    and use libcurl for that (Closes: #1626222).
  - Add unfreezetime field to contests which allows to display the final
