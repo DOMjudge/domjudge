@@ -24,9 +24,9 @@ install-setuid: $(SUIDBUILDS)
 	@echo $(SUIDINSTALLDIR)
 	mkdir -p $(SUIDINSTALLDIR)
 	cd $(SUIDINSTALLDIR) && rm -f $(SUIDTARGETS)
-	for i in $(SUIDTARGETS) ; do cp -a $$i.build $(SUIDINSTALLDIR)/$$i ; done
+	for i in $(SUIDTARGETS) ; do cp -p $$i.build $(SUIDINSTALLDIR)/$$i ; done
 	$(ROOTCMD) 'cd $(SUIDINSTALLDIR) && \
-	            chown root:root $(SUIDTARGETS) && \
+	            chown root $(SUIDTARGETS) && \
 	            chmod 4755 $(SUIDTARGETS)'
 # Make symlinks to setuid binaries when not located here:
 ifneq ($(SUIDINSTALLDIR),$(CURDIR))

@@ -214,7 +214,7 @@ function config_include ()
 	rm -f $TMPFILE
 }
 
-cp -a $TEMPLATE $CONFIG
+cp -p $TEMPLATE $CONFIG
 
 config_include $CONFHEADTAG $CONFIG $TMPHEAD
 config_include $CONFMAINTAG $CONFIG $TMPMAIN
