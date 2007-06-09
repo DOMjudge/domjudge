@@ -140,8 +140,7 @@ while ( TRUE ) {
     // files (source code is submitted to the database), we choose to put the
     // original source code in another temporary file for now, which is then
     // copied by test_solution.sh.
-    $tempsrctpl = "/tmp/source.XXXXXX." . $row['extension'];
-    $tempsrcfile = mkstemps($tempsrctpl, strlen($row['extension'])+1);
+    $tempsrcfile = "$tempdir/source.pulled.$row[extension]";
     // :NOTE: in PHP5, one could use file_put_contents().
     $tempsrchandle = @fopen($tempsrcfile, 'w');
     if ($tempsrchandle === FALSE) error("Could not create $tempsrcfile");
@@ -156,6 +155,8 @@ while ( TRUE ) {
 		   "$row[runtime] $tempdir " .
 		   "'$row[special_run]' '$row[special_compare]'",
 		$retval);
+
+    // :NOTE: the temporary copy could be removed, but since it's so small, we're not bothered
 
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {
