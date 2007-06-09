@@ -3,6 +3,7 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
+LATEX = latex
 LATEXFLAGS = --interaction=errorstopmode
 
 LATEXPACKAGES = svn expdlist
@@ -32,8 +33,8 @@ $(LATEXZIPFILES): %.zip:
 	fi
 
 $(LATEXSTYFILES): %.sty: %.zip
-	unzip -q $*.zip
-	cd $* && latex $(LATEXFLAGS) $*.ins >/dev/null
+	unzip -oq $*.zip
+	cd $* && $(LATEX) $(LATEXFLAGS) $*.ins >/dev/null
 	ln -s $*/$*.sty .
 
 cleanlatexpackages:
