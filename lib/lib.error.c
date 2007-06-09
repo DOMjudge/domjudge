@@ -74,8 +74,10 @@ char *errorstring(char *type, int errnum, char *mesg)
 	int buffersize;
 	char *buffer;
 	char *endptr; /* pointer to current end of buffer */
+#ifdef __GLIBC__
 	char *tmpstr;
 	int tmplen;
+#endif
 
 	if ( type==NULL ) {
 		type = strdup(ERRSTR);
