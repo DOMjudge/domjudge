@@ -11,10 +11,13 @@ LIBHEADERS = $(LIBOBJECTS:.o=.h)
 LIBOBJECTSCYGWIN = $(LIBOBJECTS:.o=.cygwin.o)
 
 ifneq ($(shell which curl-config),)
-LIBCURL    = $(shell curl-config --version | cut -d ' ' -f 2)
-CURLLIBS   = $(shell curl-config --libs)
-CURLSTATIC = $(shell curl-config --prefix)/lib/libcurl.a
-CURLDEF = -DLIBCURL=$(LIBCURL)
+LIBCURL     = $(shell curl-config --version | cut -d ' ' -f 2)
+CURLLIBS    = $(shell curl-config --libs)
+CURLPREFIX  = $(shell curl-config --prefix)
+CURLINCLUDE = $(CURLPREFIX)/include
+CURLSTATIC  = $(CURLPREFIX)/lib/libcurl.a
+CURLDEF     = -DLIBCURL=$(LIBCURL)
+CURLFLAGS   = $(CURLDEF) -I$(CURLINCLUDE) $(CURLLIBS)
 endif
 
 build: $(TARGETS)
@@ -22,10 +25,10 @@ build: $(TARGETS)
 install: build
 
 $(TARGETS): %: %.cc submitcommon.o $(TOPDIR)/etc/config.h $(LIBOBJECTS) $(LIBHEADERS)
-	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLDEF) $(CURLLIBS)
+	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLFLAGS)
 
 submit.exe: %.exe: %.cc submitcommon.cygwin.o $(TOPDIR)/etc/config.h $(LIBOBJECTSCYGWIN) $(LIBHEADERS)
-	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLDEF) $(CURLLIBS)
+	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLFLAGS)
 
 $(LIBOBJECTS) $(LIBOBJECTSCYGWIN):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
