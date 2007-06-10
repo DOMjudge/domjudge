@@ -15,7 +15,7 @@
 # Global configuration
 source "`dirname $0`/../etc/config.sh"
 
-function error()
+error()
 {
     echo "[`date '+%b %d %T'`] $0[$$]: $@"
 }

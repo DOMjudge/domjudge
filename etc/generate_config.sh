@@ -99,17 +99,17 @@ declare ATTR ATTR_STRING ATTR_EVAL
 LINENR=0
 while IFS='='; read VARDEF VALUE <&3; do
 	IFS=$OLDIFS
-	((LINENR++))
+	LINENR=$(($LINENR+1))
 	
 	# Ignore comments and whitespace only lines
-	if [[ "$VARDEF" == *([:space:]) || "$VARDEF" == '#'* ]]; then
+	if [[ "$VARDEF" = *([:space:]) || "$VARDEF" = '#'* ]]; then
 		continue
 	fi
 
 	ATTR_STRING=0
 	ATTR_EVAL=0
 	# Check for attributes
-	if [[ "$VARDEF" == *'['* ]]; then
+	if [[ "$VARDEF" = *'['* ]]; then
 		VARATTR=${VARDEF##*'['}
 		if [[ "$VARATTR" != +([a-z])*(,+([a-z]))']' ]]; then
 			echo "Parse error on line $LINENR!"
@@ -185,7 +185,7 @@ $COMMENT of the system directory.
 $COMMENT
 EOF
 
-function config_include ()
+config_include ()
 {
 	local TAG=$1
 	local CFGFILE=$2

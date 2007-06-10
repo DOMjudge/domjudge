@@ -40,7 +40,7 @@ TESTOUT="$3"
 RESULT="$4"
 DIFFOUT="$5"
 
-function writeresult()
+writeresult()
 {
     ( cat <<EOF
 <?xml version="1.0"?>

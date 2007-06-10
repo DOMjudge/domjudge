@@ -16,7 +16,7 @@ shopt -s extglob
 PROGRAM=$0
 TARGET=$1
 
-function error()
+error()
 {
 	echo "$PROGRAM: $@" >&2
 	exit 1
@@ -46,7 +46,7 @@ DEF_PASSWD_PUBLIC="DOMJUDGE_PUBLIC_PASSWD"
 
 # Function to generate a (semi) random password. These are meant to be
 # only used internally.
-function generate_passwd ()
+generate_passwd ()
 {
 	local PASSWD=""
 	local PASSWDLEN=12
@@ -64,7 +64,7 @@ function generate_passwd ()
 
 # Function to interactively ask a password from the user. Password
 # input and output is done on stdin/stdout, messages on stderr.
-function ask_passwd ()
+ask_passwd ()
 {
 	local PASSWD=""
 	local CONFIRM=""
@@ -99,7 +99,7 @@ function ask_passwd ()
 # Function to replace string(s) within a file using 'sed'. Arguments
 # must be a valid 'sed' script and the file to operate on. We use
 # 'cat' to copy the file's contents back to preserve file permissions.
-function string_replace ()
+string_replace ()
 {
 	SCRIPT=$1
 	FILE=$2
@@ -116,7 +116,7 @@ function string_replace ()
 
 # Function to set (clear-text) passwords in relevant files.
 # Arguments: hury password, team password, public password.
-function set_passwords()
+set_passwords()
 {
 # Update password info in php-config:
 string_replace "s!\('domjudge_jury'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1${1}!;\
@@ -129,7 +129,7 @@ string_replace "s!\('domjudge_jury'.*PASSWORD('\)[^']*!\1${1}!;\
                 s!\('domjudge_public'.*PASSWORD('\)[^']*!\1${3}!" "$SQLPASSWD"
 }
 
-function do_install()
+do_install()
 {
 	cat <<EOF
 

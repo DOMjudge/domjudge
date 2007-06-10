@@ -14,7 +14,7 @@ set -e
 PROGRAM=$0
 TARGET=$1
 
-function error()
+error()
 {
 	echo "$PROGRAM: $@" >&2
 	exit 1

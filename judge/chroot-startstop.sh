@@ -1,7 +1,7 @@
 #!/bin/bash
 # $Id$
 
-# Script to setup chroot environment extra's needed for Sun Java.
+# Script to setup chroot environment extras needed for Sun Java.
 #
 # Configure the use of this script in 'etc/global.cfg' when using the
 # chroot environment and Sun Java compiler/interpreter and adapt this
@@ -10,7 +10,7 @@
 #
 # This script will be called from test_solution.sh in the root
 # directory of the chroot environment with one parameter: either
-# 'start' or 'stop' to setup or destroy the chroot environment.
+# 'start' to setup, or 'stop' to destroy the chroot environment.
 
 # Exit on error:
 set -e

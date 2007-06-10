@@ -4,12 +4,12 @@
 #
 # $Id$
 
-function logdate ()
+logdate ()
 {
 	date '+%b %d %T'
 }
 
-function logmsg ()
+logmsg ()
 {
 	local msglevel msgstring
 	msglevel=$1; shift
@@ -18,7 +18,7 @@ function logmsg ()
 	if [ $msglevel -le "$LOGLEVEL" ]; then echo "$msgstring" >>$LOGFILE ; fi
 }
 
-function error ()
+error ()
 {
 	set +e
 	trap - ERR
@@ -32,7 +32,7 @@ function error ()
 	exit $E_INTERN
 }
 
-function warning ()
+warning ()
 {
 	logmsg $LOG_WARNING "warning: $@"
 }

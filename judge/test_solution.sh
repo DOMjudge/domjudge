@@ -69,7 +69,7 @@ set -e
 trap error ERR
 trap cleanexit EXIT
 
-function cleanexit ()
+cleanexit ()
 {
 	trap - EXIT
 
@@ -157,22 +157,22 @@ fi
 chmod a+x $TMPDIR
 
 # Create files which are expected to exist:
-touch compile.{out,time}   # Compiler output and runtime
-touch error.out            # Error output after compiler output
-touch compare.out          # Compare output
-touch result.{xml,out}     # Result of comparison (XML and plaintext version)
-touch program.{out,err}    # Program output and stderr (for extra information)
-touch program.{time,exit}  # Program runtime and exitcode
+touch compile.out compile.time   # Compiler output and runtime
+touch error.out                  # Error output after compiler output
+touch compare.out                # Compare output
+touch result.xml result.out      # Result of comparison (XML and plaintext version)
+touch program.out program.err    # Program output and stderr (for extra information)
+touch program.time program.exit  # Program runtime and exitcode
 
 # program.{out,err,time,exit} are written to by processes running as RUNUSER:
-chmod a+rw program.{out,err,time,exit}
+chmod a+rw program.out program.err program.time program.exit
 
 # Make source readable (for if it is interpreted):
 chmod a+r source.$EXT
 
 logmsg $LOG_NOTICE "starting compile"
 
-if [ `cat source.$EXT | wc -c` -gt $((SOURCESIZE*1024)) ]; then
+if [ `cat source.$EXT | wc -c` -gt $(($SOURCESIZE*1024)) ]; then
 	echo "Source-code is larger than $SOURCESIZE kB." >>compile.out
 	exit $E_COMPILE
 fi
@@ -333,7 +333,7 @@ else
 fi
 descrp="${descrp:+ ($descrp)}"
 
-if [ "$result" == "accepted" ]; then
+if [ "$result" = "accepted" ]; then
 	echo "Correct${descrp}! Runtime is `cat program.time` seconds." >>error.out
 	cat error.tmp >>error.out
 	exit $E_CORRECT

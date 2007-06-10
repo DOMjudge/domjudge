@@ -24,7 +24,7 @@ TESTOUT="$3"
 RESULT="$4"
 DIFFOUT="$5"
 
-function writeresult()
+writeresult()
 {
     ( cat <<EOF
 <?xml version="1.0"?>
@@ -79,7 +79,7 @@ exec 4<$TESTOUT
 
 LINE=0
 while true ; do
-	((LINE++))
+	LINE=$(($LINE+1))
 	
 	if ! read PROGLINE <&3 ; then
 		if read TESTLINE <&4 ; then
@@ -102,7 +102,7 @@ while true ; do
 done
 
 # Add 2 chars to line length to account for surrounding qoutes
-((LINEMAXLEN+=2))
+LINEMAXLEN=$(($LINEMAXLEN+2))
 
 exec 3<&-
 exec 4<&-
@@ -115,7 +115,7 @@ exec 4<$TESTOUT
 LINE=0
 SEPCHAR='?'
 while true ; do
-	((LINE++))
+	LINE=$(($LINE+1))
 	SEPCHAR='='
 	if ! read PROGLINE <&3 ; then
 		PROGLINE=""

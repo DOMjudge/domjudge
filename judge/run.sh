@@ -36,6 +36,6 @@ ulimit -u $PROCLIMIT  # max. no. processes
 $PROGRAM <$TESTIN >$OUTPUT 2>$ERROR
 exitcode=$?
 
-echo -n "$exitcode" >$EXITFILE
+printf "$exitcode" >$EXITFILE
 
 exit $exitcode

@@ -39,7 +39,7 @@ DEBMIRROR="http://ftp.debian.org/debian"
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
 
-function usage()
+usage()
 {
     echo "Usage: $0 <installdir> <architecture>"
     echo "Creates a chroot environment with Sun Java support using the"
@@ -50,7 +50,7 @@ function usage()
     echo "$ARCHLIST"
 }
 
-function error()
+error()
 {
     echo "Error: $@"
     echo
