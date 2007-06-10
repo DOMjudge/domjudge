@@ -162,7 +162,7 @@ CREATE TABLE `submission` (
   `langid` varchar(8) NOT NULL default '',
   `submittime` datetime NOT NULL default '0000-00-00 00:00:00',
   `sourcefile` varchar(255) NOT NULL default '',
-  `sourcecode` text NOT NULL,
+  `sourcecode` mediumblob NOT NULL,
   `judgehost` varchar(50) default NULL,
   `judgemark` varchar(255) default NULL,
   PRIMARY KEY  (`submitid`),

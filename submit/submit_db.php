@@ -100,7 +100,7 @@ $id = $DB->q('RETURNID INSERT INTO submission
               (cid,teamid,probid,langid,submittime,sourcefile,sourcecode)
               VALUES (%i, %s, %s, %s, %s, %s, %s)',
              $cid, $teamrow['login'], $probid, $lang, now(), $tofile,
-             getFileContents(SUBMITDIR."/".$tofile));
+             getFileContents(SUBMITDIR."/".$tofile, false));
 
 // Log to event table
 $DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
