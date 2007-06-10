@@ -280,8 +280,9 @@ The requirements for the deployment of this jury-system are:
 <item> A TCP/IP network which connects all jury and team computers.
        Extra network security which restricts internet access and
        access to other services (ssh, mail, talk, etc..) is advisable,
-       but not provided by this software. TCP/IP networking is used in
-       a few different ways:
+       but not provided by this software, see <ref
+       id="security_external" name="Security: external security"> for
+       more details. TCP/IP networking is used in a few different ways:
   <itemize>
   <item> The `submit' command-line client connects to the submitserver
          via a TCP connection on a configurable port.
@@ -341,7 +342,7 @@ The requirements for the deployment of this jury-system are:
        hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
        grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail
 
-<item> sudo
+<item> sudo (optionally to use a chroot judging environment with Sun Java)
 
 <item> htpasswd
 
