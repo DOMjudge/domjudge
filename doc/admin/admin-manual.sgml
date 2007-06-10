@@ -294,9 +294,6 @@ The requirements for the deployment of this jury-system are:
        Each team computer needs to have a unique IP address from the
        view of the jury system.
 
-<item> One jury account with a homedirectory which is shared between
-       all jury-computers (e.g. via NFS, Samba).
-
 <item> (Local) root access on the jury-computers (preferably also on
        the shared homedirectory) for installing some programs
        setuid-root and (un)mounting the proc filesystem. See <ref
@@ -1013,7 +1010,7 @@ These dirs and files can all be read-only.
 Once everything is configured, you can start the daemons:
 <itemize>
 <item> The submitdaemon and/or the websubmitdaemon on the jury system;
-<item> One or more judgedaemons on the judgehosts;
+<item> One or more judgedaemons, one on each judgehost;
 <item> Optionally the balloon notification daemon.
 </itemize>
 
