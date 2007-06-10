@@ -565,7 +565,6 @@ int cmdsubmit()
 	hints.ai_family   = AF_INET;
 	hints.ai_flags    = AI_CANONNAME;
 	hints.ai_socktype = SOCK_STREAM;
- 	hints.ai_protocol = IPPROTO_TCP;
 
 	port_str = allocstr("%d",port);
 	if ( (err = getaddrinfo(server.c_str(),port_str,&hints,&server_ais)) ) {

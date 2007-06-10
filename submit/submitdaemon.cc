@@ -274,7 +274,6 @@ void create_server()
 	hints.ai_family   = AF_INET;
 	hints.ai_flags    = AI_PASSIVE | AI_ADDRCONFIG;
 	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
 
 	/* Get all (IPv4-only) addresses associated with us */
 	port_str = allocstr("%d",port);
