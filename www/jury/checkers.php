@@ -19,7 +19,7 @@ function check_problem($data, $keydata = null)
 {
 	if ( ! is_numeric($data['timelimit']) || $data['timelimit'] < 0 ||
 			(int)$data['timelimit'] != $data['timelimit'] ) {
-		ch_error("Timelimit is not a valid positive integer!");
+		ch_error("Timelimit is not a valid positive integer");
 	}
 	return $data;
 }
@@ -27,10 +27,10 @@ function check_problem($data, $keydata = null)
 function check_language($data, $keydata = null)
 {
 	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 0 ) {
-		ch_error("Timelimit is not a valid positive factor!");
+		ch_error("Timelimit is not a valid positive factor");
 	}
 	if ( strpos($data['extension'], '.') !== FALSE ) {
-		ch_error("Do not include the dot (.) in the extension!");
+		ch_error("Do not include the dot (.) in the extension");
 	}
 	return $data;
 }
@@ -49,12 +49,12 @@ function check_contest($data, $keydata = null)
 
 	// are contest start/end times in order?
 	if($data['endtime'] <= $data['starttime']) {
-		ch_error('Contest ends before it even starts!');
+		ch_error('Contest ends before it even starts');
 	}
 	if(isset($data['lastscoreupdate']) &&
 		($data['lastscoreupdate'] > $data['endtime'] ||
 		$data['lastscoreupdate'] < $data['starttime'] ) ) {
-		ch_error('Lastscoreupdate is out of start/endtime range!');
+		ch_error('Lastscoreupdate is out of start/endtime range');
 	}
 	if ( isset($data['unfreezetime']) ) {
 		if ( !isset($data['lastscoreupdate']) ) {
@@ -159,10 +159,10 @@ function check_judging($data, $keydata = null)
 	}
 	
 	if(isset($data['endtime']) && $data['endtime'] < $data['starttime']) {
-		ch_error('Judging ended before it started!');
+		ch_error('Judging ended before it started');
 	}
 	if(isset($data['submittime']) && $data['starttime'] < $data['submittime']) {
-		ch_error('Judging started before it was submitted!');
+		ch_error('Judging started before it was submitted');
 	}
 
 	return $data;

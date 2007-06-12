@@ -69,7 +69,7 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 
 	echo "Checking for writeable incoming dir... ";
 	if ( ! is_writable(INCOMINGDIR) ) {
-		err("INCOMINGDIR '" . INCOMINGDIR . "' not writeable by webserver user!");
+		err("INCOMINGDIR '" . INCOMINGDIR . "' not writeable by webserver user");
 	} else {
 		echo "OK";
 	}
@@ -85,7 +85,7 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 $cid = getCurContest();
 if($cid == null) {
 	// we need a valid 'current contest' at any time to function correctly
-	err('No current contest found! System will not function.');
+	err('No current contest found. System will not function.');
 } else {
 	$cid = (int)$cid;
 	echo "<b>c$cid</b>";
@@ -155,7 +155,7 @@ if($res->count() > 0) {
 	while($row = $res->next()) {
 		err('Submission s' .  $row['submitid'] . ' is for problem "' .
 			$row['probid'] .
-			'" while this problem is not found (in c'. $row['cid'] . ')!');
+			'" while this problem is not found (in c'. $row['cid'] . ')');
 	}
 }
 
@@ -181,7 +181,7 @@ $res = $DB->q('SELECT s.submitid FROM submission s
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
-		err('Submission s' . $row['submitid'] . ' has a judgehost but no entry in judgings!');
+		err('Submission s' . $row['submitid'] . ' has a judgehost but no entry in judgings');
 	}
 }
 

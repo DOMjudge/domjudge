@@ -8,7 +8,7 @@
 require('init.php');
 
 if ( ! ENABLE_WEBSUBMIT_SERVER ) {
-	error("Websubmit disabled!");
+	error("Websubmit disabled.");
 }
 
 $title = 'Submit';
