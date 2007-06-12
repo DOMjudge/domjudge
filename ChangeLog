@@ -10,6 +10,8 @@ Version 2.0.0 - SVN
  - A shared file system between judgehosts and jury system is no
    longer required. The source is now communicated via the database.
  - Improved portability to non-Linux systems (Closes: #1734046).
+ - Improved error handling in team file uploads.
+ - Add more checking and verification to database input.
 
 Version 2.0.0 Release Candidate 1 - 28 May 2007
 -----------------------------------------------

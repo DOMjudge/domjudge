@@ -35,7 +35,7 @@ foreach ($data as $i => $itemdata ) {
 
 	$fn = "check_$t";
 	if ( function_exists($fn) ) {
-		$itemdata = $fn($itemdata);
+		$itemdata = $fn($itemdata, $keydata[$i]);
 	}
 	check_sane_keys($itemdata);
 
