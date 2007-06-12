@@ -15,7 +15,11 @@ if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
 $nwarnings = 0;
 
+/**
+ * Output/log a warning message and increment number of warnings.
+ */
 function warn($msg) {
+	global $nwarnings;
 	$nwarnings++;
 	logmsg(LOG_WARNING, $msg);
 }
