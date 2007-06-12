@@ -43,7 +43,7 @@ function logmsg($msglevel, $string) {
 		// if this is the webinterface, print it to stdout, else to stderr
 		if ( IS_WEB ) {
 			echo "<fieldset class=\"error\"><legend>Error</legend>\n" .
-				htmlspecialchars($msg) . "</fieldset>\n";
+				nl2br(htmlspecialchars($msg)) . "</fieldset>\n";
 		} else {
 			fwrite(STDERR, $msg);
 			fflush(STDERR);
