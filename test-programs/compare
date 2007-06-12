@@ -37,7 +37,7 @@ if [ "$1" ]; then
 fi
 
 if [ "$VERBOSE" ]; then
-	[[ "$VERBOSE" == [2-7] ]] || VERBOSE=7 # loglevel LOG_DEBUG
+	[[ "$VERBOSE" = [2-7] ]] || VERBOSE=7 # loglevel LOG_DEBUG
 	export VERBOSE
 fi
 
@@ -45,13 +45,13 @@ if [ "$DEBUG" ]; then
 	export DEBUG
 fi
 
-function test_sol ()
+test_sol ()
 {
 	local lang base="" file="$1" in="$2" out="$3"
 	# First determine language:
 	for ((i=0; i<NLANG; i++)); do
 		for ext in ${EXTS[$i]}; do
-			if [[ "$file" == *.$ext ]]; then
+			if [[ "$file" = *.$ext ]]; then
 				base="${file%.$ext}"
 				lang="$i"
 				break 2
@@ -68,7 +68,7 @@ function test_sol ()
 	exitcode=$?
 	if [ $exitcode -ne 0 ]; then
 		ALLOK=0
-		echo -n "Error: "
+		printf "Error: "
 		case $exitcode in
 		1) echo "compile";;
 		2) echo "timelimit";;
@@ -88,8 +88,8 @@ function test_sol ()
 [ -r "$SAMPLEIN"  ] || { echo "No input sample testdata found."; exit 1; }
 [ -r "$SAMPLEOUT" ] || { echo "No output sample testdata found."; exit 1; }
 
-echo -n "Supported languages:"
-for((i=0; i<NLANG; i++)); do echo -n " ${LANG[$i]},"; done
+printf "Supported languages:"
+for((i=0; i<NLANG; i++)); do printf " ${LANG[$i]},"; done
 echo
 
 # As extra information:
@@ -109,7 +109,7 @@ mkdir $TMPDIR
 # Loop through all solutions:
 FIRST=1
 for file in `ls | grep -E $FILEMATCH`; do
-	if [ $FIRST == 1 ]; then
+	if [ $FIRST = 1 ]; then
 		FIRST=0
 		printf '%-50s' "Testing sample testdata..."
 		[ "$VERBOSE" ] && echo

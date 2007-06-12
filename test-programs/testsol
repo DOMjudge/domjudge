@@ -17,7 +17,6 @@ shopt -s extglob
 NLANG=5
 LANG=('c' 'cpp'        'java' 'pascal'   'haskell')
 EXTS=('c' 'cpp cc c++' 'java' 'pas pp p' 'hs'     )
-ALLEXTS="${EXTS[@]}"
 
 TESTSOL=$HOME/system/judge/test_solution.sh
 
@@ -37,7 +36,7 @@ fi
 FILE="$1"
 
 if [ "$VERBOSE" ]; then
-	[[ "$VERBOSE" == [2-7] ]] || VERBOSE=7 # loglevel LOG_DEBUG
+	[[ "$VERBOSE" = [2-7] ]] || VERBOSE=7 # loglevel LOG_DEBUG
 	export VERBOSE
 fi
 
@@ -45,13 +44,13 @@ if [ "$DEBUG" ]; then
 	export DEBUG
 fi
 
-function test_sol ()
+test_sol ()
 {
 	local lang base="" file="$1" in="$2" out="$3"
 	# First determine language:
 	for ((i=0; i<NLANG; i++)); do
 		for ext in ${EXTS[$i]}; do
-			if [[ "$file" == *.$ext ]]; then
+			if [[ "$file" = *.$ext ]]; then
 				base="${file%.$ext}"
 				lang="$i"
 				break 2
@@ -67,7 +66,7 @@ function test_sol ()
 	$TESTSOL "$file" "${LANG[$lang]}" "$in" "$out" "$TIMELIMIT" "$TMPDIR/$file"
 	exitcode=$?
 	if [ $exitcode -ne 0 ]; then
-		echo -n "Error: "
+		printf "Error: "
 		case $exitcode in
 		1) echo "compile";;
 		2) echo "timelimit";;
