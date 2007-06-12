@@ -35,7 +35,14 @@ foreach ($data as $i => $itemdata ) {
 
 	$fn = "check_$t";
 	if ( function_exists($fn) ) {
+		$CHECKER_ERRORS = array();
 		$itemdata = $fn($itemdata, $keydata[$i]);
+		if ( count($CHECKER_ERRORS) ) {
+			error("Errors while processing $t " .
+				implode(', ', @$keydata[$i]) . ":\n" .
+				implode(";\n", $CHECKER_ERRORS));
+		}
+
 	}
 	check_sane_keys($itemdata);
 

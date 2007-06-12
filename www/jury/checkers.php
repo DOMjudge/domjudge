@@ -6,11 +6,20 @@
  * $Id$
  */
 
+/**
+ * Store an error from the checker functions below.
+ */
+function ch_error($string)
+{
+	global $CHECKER_ERRORS;
+	$CHECKER_ERRORS[] = $string;
+}
+
 function check_problem($data, $keydata = null)
 {
 	if ( ! is_numeric($data['timelimit']) || $data['timelimit'] < 0 ||
 			(int)$data['timelimit'] != $data['timelimit'] ) {
-		error("Timelimit is not a valid positive integer!");
+		ch_error("Timelimit is not a valid positive integer!");
 	}
 	return $data;
 }
@@ -18,10 +27,10 @@ function check_problem($data, $keydata = null)
 function check_language($data, $keydata = null)
 {
 	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 0 ) {
-		error("Timelimit is not a valid positive factor!");
+		ch_error("Timelimit is not a valid positive factor!");
 	}
 	if ( strpos($data['extension'], '.') !== FALSE ) {
-		error("Do not include the dot (.) in the extension!");
+		ch_error("Do not include the dot (.) in the extension!");
 	}
 	return $data;
 }
@@ -40,21 +49,21 @@ function check_contest($data, $keydata = null)
 
 	// are contest start/end times in order?
 	if($data['endtime'] <= $data['starttime']) {
-		error('Contest ends before it even starts!');
+		ch_error('Contest ends before it even starts!');
 	}
 	if(isset($data['lastscoreupdate']) &&
 		($data['lastscoreupdate'] > $data['endtime'] ||
 		$data['lastscoreupdate'] < $data['starttime'] ) ) {
-		error('Lastscoreupdate is out of start/endtime range!');
+		ch_error('Lastscoreupdate is out of start/endtime range!');
 	}
 	if ( isset($data['unfreezetime']) ) {
 		if ( !isset($data['lastscoreupdate']) ) {
-			error('Unfreezetime set but no freeze time. That makes no sense.');
+			ch_error('Unfreezetime set but no freeze time. That makes no sense.');
 		}
 		if ( $data['unfreezetime'] < $data['lastscoreupdate'] ||
 			$data['unfreezetime'] < $data['starttime'] ||
 			$data['unfreezetime'] < $data['endtime'] ) {
-			error('Unfreezetime must be larger than any of start/end/freezetimes.');
+			ch_error('Unfreezetime must be larger than any of start/end/freezetimes.');
 		}
 	}
 
@@ -78,8 +87,8 @@ function check_contest($data, $keydata = null)
 			   @$keydata['cid']);
 	
 	if(count($overlaps) > 0) {
-		error('This contest overlaps with the following contest(s): c' . 
-			htmlspecialchars(implode(',c', $overlaps)));
+		ch_error('This contest overlaps with the following contest(s): c' . 
+			implode(',c', $overlaps));
 	}
 	
 	return $data;
@@ -96,7 +105,7 @@ function check_datetime($datetime) {
 
 	// It must be 19 chars or we're wrong anyway.
 	if (strlen($datetime) != 19) {
-		error ("Cannot parse date, not length 19: " . htmlspecialchars($datetime));
+		ch_error ("Cannot parse date, not length 19: " . $datetime);
 	}
 	$y = substr($datetime, 0, 4);
 	$m = substr($datetime, 5, 2);
@@ -113,20 +122,20 @@ function check_datetime($datetime) {
 		// is this a sensible date?
 		$valid = checkdate($m,$d,$y);
 		if (!$valid) {
-			error ("Cannot parse date, not a valid date: " . htmlspecialchars($datetime));
+			ch_error ("Cannot parse date, not a valid date: " . $datetime);
 		}
 
 		if ( $hr < 0 || $hr > 23 ) {
-			error ("Cannot parse date, invalid hour: " . htmlspecialchars($datetime));
+			ch_error ("Cannot parse date, invalid hour: " . $datetime);
 		}
 		if ( $mi < 0 || $mi > 59 ) {
-			error ("Cannot parse date, invalid minute: " . htmlspecialchars($datetime));
+			ch_error ("Cannot parse date, invalid minute: " . $datetime);
 		}
 		if ( $se < 0 || $se > 59 ) {
-			error ("Cannot parse date, invalid second: " . htmlspecialchars($datetime));
+			ch_error ("Cannot parse date, invalid second: " . $datetime);
 		}
 	} else {
-		error ("Cannot parse date, params not numeric: " . htmlspecialchars($datetime));
+		ch_error ("Cannot parse date, params not numeric: " . $datetime);
 	}	
 	
 	return $datetime;

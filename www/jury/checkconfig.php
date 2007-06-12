@@ -14,6 +14,7 @@ require('../header.php');
 requireAdmin();
 
 require_once(SYSTEM_ROOT . '/lib/relations.php');
+require_once('checkers.php');
 
 ob_implicit_flush();
 
@@ -92,12 +93,7 @@ if($cid == null) {
 echo "</p><p>Checking contests...</p>\n\n";
 
 // get all contests
-$res = $DB->q('SELECT cid,
-               UNIX_TIMESTAMP(starttime)       AS start,
-               UNIX_TIMESTAMP(endtime)         AS end,
-               UNIX_TIMESTAMP(lastscoreupdate) AS lastsu,
-               UNIX_TIMESTAMP(unfreezetime)    AS unfreeze
-               FROM contest ORDER BY cid');
+$res = $DB->q('SELECT * FROM contest ORDER BY cid');
 
 while($cdata = $res->next()) {
 
@@ -105,47 +101,15 @@ while($cdata = $res->next()) {
 	
 	echo "<p><b>c".(int)$cdata['cid']."</b>: ";
 
-	
-	// this must always hold (lastscoreupdate and unfreezetime are optional,
-	// but when set must also be in this range):
-	// starttime < lastscoreupdate < endtime < unfreezetime
-	if($cdata['end'] < $cdata['start']) {
-		$haserrors = TRUE;
-		err('Contest ends before it even starts!');
-	}
-	if(isset($cdata['lastsu']) &&
-		($cdata['lastsu'] > $cdata['end'] || $cdata['lastsu'] < $cdata['start'] ) ) {
-		$haserrors = TRUE;
-		err('Lastscoreupdate is out of start/endtime range!');
-	}
-	if ( isset($cdata['unfreeze']) ) {
-		if ( !isset($cdata['lastsu']) ) {
-			$haserrors = TRUE;
-			err('Unfreezetime set but no freeze time. That makes no sense.');
+	$CHECKER_ERRORS = array();
+	check_contest($cdata, array('cid' => $cdata['cid']));
+	if ( count ( $CHECKER_ERRORS ) > 0 ) {
+		foreach($CHECKER_ERRORS as $chk_err) {
+			err($chk_err);
 		}
-		if ( $cdata['unfreeze'] < $cdata['lastsu'] || $cdata['unfreeze'] < $cdata['start'] ||
-			$cdata['unfreeze'] < $cdata['end'] ) {
-			$haserrors = TRUE;
-			err('Unfreezetime must be larger than any of start/end/freezetimes.');
-		}
+	} else {
+		echo "OK";
 	}
-
-	// a check whether this contest overlaps in time with any other, the
-	// system can only deal with exactly ONE current contest at any time.
-	$overlaps = $DB->q('COLUMN SELECT cid FROM contest WHERE
-	                    ( (%i >= UNIX_TIMESTAMP(starttime) AND %i <= UNIX_TIMESTAMP(endtime)) OR
-	                      (%i >= UNIX_TIMESTAMP(endtime)   AND %i <= UNIX_TIMESTAMP(endtime)) ) AND
-	                    cid != %i ORDER BY cid',
-	                   $cdata['start'], $cdata['start'], $cdata['end'],
-	                   $cdata['end'], $cdata['cid']);
-	
-	if(count($overlaps) > 0) {
-		$haserrors = TRUE;
-		err('This contest overlaps with the following contest(s): c' . 
-			htmlspecialchars(implode(',c', $overlaps)));
-	}
-
-	if(!$haserrors) echo "OK";
 
 	echo "</p>\n\n";
 }
