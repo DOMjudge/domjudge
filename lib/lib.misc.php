@@ -3,7 +3,9 @@
 /* $Id$ */
 
 /**
- * helperfunction to read 50,000 bytes from a file
+ * helperfunction to read all contents from a file.
+ * If $sizelimit is true (default), then only limit this to
+ * the first 50,000 bytes and attach a note saying so.
  */
 function getFileContents($filename, $sizelimit = true) {
 
@@ -55,16 +57,6 @@ function getCurContest($fulldata = FALSE) {
 	}
 	
 	return $retval;
-}
-
-/**
- * Add another key/value to a url
- */
-function addUrl($url, $keyvalue, $encode = TRUE)
-{
-	if ( empty($keyvalue) ) return $url;
-	$separator = (strrpos($url, '?')===False) ? '?' : ( $encode ? '&amp;' : '&');
-	return $url . $separator . $keyvalue;
 }
 
 /**

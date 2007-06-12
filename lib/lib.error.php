@@ -30,6 +30,12 @@ if ( defined('LOGFILE') ) {
 $verbose  = LOG_NOTICE;
 $loglevel = LOG_DEBUG;
 
+/**
+ * Log a message $string on the loglevel $msglevel.
+ * Prepends a timestamp and logg to the logfile.
+ * If this is the web interface: write to the screen with the right CSS class.
+ * If this is the command line: write to Standard Error.
+ */
 function logmsg($msglevel, $string) {
 	global $verbose, $loglevel;
 	$msg = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . ": ". $string . "\n";
@@ -49,11 +55,17 @@ function logmsg($msglevel, $string) {
 	}
 }
 
+/**
+ * Log an error at level LOG_ERROR and exit with exitcode 1.
+ */
 function error($string) {
 	logmsg(LOG_ERR, "error: $string");
 	exit(1);
 }
 
+/**
+ * Log a warning at level LOG_WARNING.
+ */
 function warning($string) {
 	logmsg(LOG_WARNING, "warning: $string");
 }

@@ -17,10 +17,11 @@ require_once(SYSTEM_ROOT . '/lib/relations.php');
 
 ob_implicit_flush();
 
-// helper to output an error/warning message.
+/** helper to output an error message */
 function err ($string) {
 	echo "<b><u>ERROR</u>: ".htmlspecialchars($string)."</b><br />\n";
 }
+/** helper to output a warning message */
 function warn ($string) {
 	echo "<b><u>WARNING</u>: ".htmlspecialchars($string)."</b><br />\n";
 }

@@ -413,7 +413,9 @@ function putTeamRow($teamid) {
 	return;
 }
 
-// function to generate links for jury only
+/**
+ * Generate scoreboard links for jury only.
+ */
 function jurylink($target, $content, $isjury) {
 
 	$res = "";
@@ -426,7 +428,14 @@ function jurylink($target, $content, $isjury) {
 	return $res;
 }
 
-// comparison function for team scoring
+/**
+ * Main score comparison function, called from the 'cmp' wrapper
+ * below. Scores two arrays, $a and $b, based on the following
+ * criteria:
+ * - highest number of correct solutions;
+ * - least amount of total time spent on these solutions;
+ * - fastest submission time for their most recent correct solution.
+ */
 function cmpscore($a, $b) {
 	// more correct than someone else means higher rank
 	if ( $a['num_correct'] != $b['num_correct'] ) {
@@ -443,7 +452,16 @@ function cmpscore($a, $b) {
 	return 0;
 }
 
-// comparison function including sorting on names (for scoreboard)
+/**
+ * Scoreboard sorting function. Given two arrays with team information
+ * $a and $b, decides on how to order these. It uses the following
+ * criteria:
+ * - First, use the sortorder override from the team_category table
+ *   (e.g. score regular contestants always over spectators);
+ * - Then, use the cmpscore function to determine the actual ordering
+ *   based on number of problems solved and the time it took;
+ * - If still equal, order on team name alphabetically.
+ */
 function cmp($a, $b) {
 	// first order by our predefined sortorder based on category
 	if ( $a['sortorder'] != $b['sortorder'] ) {

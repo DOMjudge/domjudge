@@ -12,6 +12,11 @@ $DEBUG_NUM_QUERIES = 0;
 global $DEBUG_TIMER_START;
 $DEBUG_TIMER_START = microtime();
 
+/**
+ * Displays the total time in milliseconds it took to execute the code
+ * and the number of SQL queries done. The time is measured starting at
+ * the moment lib.timer.php was included.
+ */
 function totaltime() {
 	global $DEBUG_NUM_QUERIES,$DEBUG_TIMER_START;
 

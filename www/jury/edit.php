@@ -73,6 +73,11 @@ if ( count($data) > 1 ) {
 	}	
 }
 
+/**
+ * Check an array with field->value data to make sure there's no
+ * strange characters in the field name, so we can use that safely
+ * in a SQL query.
+ */
 function check_sane_keys($itemdata) {
 	foreach(array_keys($itemdata) as $key) {
 		if ( ! preg_match ('/^\w+$/', $key ) ) error ("Invalid characters in field name \"$key\".");

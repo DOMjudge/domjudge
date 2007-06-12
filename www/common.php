@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Common functions shared between team/public/jury interface
  *
@@ -8,6 +7,10 @@
 
 /**
  * Return the base URI for the DOMjudge Webinterface.
+ * This is the full URL to the root of the 'www' dir,
+ * including the trailing slash. Examples:
+ * http://domjudge.example.com/
+ * http://www.example.edu/contest/domjudge/
  */
 function getBaseURI() {
 	return WEBBASEURI;
@@ -219,7 +222,8 @@ function putDOMjudgeVersion() {
 }
 
 /**
- * Check for DOMjudge admin level, and if not, error.
+ * Check whether the logged in user has DOMjudge administrator level,
+ * as defined in passwords.php. If not, error and stop further execution.
  */
 function requireAdmin() {
 	if ( ! IS_ADMIN ) error ("This function is only accessible to administrators.");

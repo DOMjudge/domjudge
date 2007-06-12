@@ -20,6 +20,9 @@ $verbose = LOG_INFO;
 
 $waittime = 5;
 
+/**
+ * Returns a text to be sent when notifying of a new balloon.
+ */
 function notification_text($team, $problem, $probs_solved, $probs_data) {
 	global $cdata;
 	

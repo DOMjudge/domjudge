@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Generate passwords for all users.
  *
@@ -59,6 +58,10 @@ if ( isset($_POST['forteam']) ) {
 
 include('../footer.php');
 
+/**
+ * Generate a random password of length 10 with alphanumeric characters,
+ * except I, o, O, 0 and 1 since these can be confusing.
+ */
 function genrandpasswd()
 {
 	$chars = array( 'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'f', 'F', 'g', 'G', 'h', 'H', 'i', 'j', 'J',  'k', 'K', 'L', 'm', 'M', 'n', 'N', 'p', 'P', 'q', 'Q', 'r', 'R', 's', 'S', 't', 'T',  'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', 'z', 'Z', '2', '3', '4', '5', '6', '7', '8', '9');

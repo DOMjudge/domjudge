@@ -5,6 +5,10 @@
  * $Id$
  */
 
+/**
+ * Marks a given clarification as viewed by a specific team,
+ * so it doesn't show up as "unread" anymore in their interface.
+ */
 function setClarificationViewed($clar, $team)
 {
 	global $DB;

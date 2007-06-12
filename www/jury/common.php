@@ -94,6 +94,11 @@ function delLink($table, $field, $value)
 		"\" class=\"picto\" /></a>";
 }
 
+/**
+ * Returns a form to rejudge all judgings based on a (table,id)
+ * pair. For example, to rejudge all for language 'java', call
+ * as rejudgeForm('language', 'java').
+ */
 function rejudgeForm($table, $id)
 {
 	require_once('../forms.php');
