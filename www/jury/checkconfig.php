@@ -97,8 +97,6 @@ $res = $DB->q('SELECT * FROM contest ORDER BY cid');
 
 while($cdata = $res->next()) {
 
-	$haserrors = FALSE;
-	
 	echo "<p><b>c".(int)$cdata['cid']."</b>: ";
 
 	$CHECKER_ERRORS = array();
@@ -114,6 +112,38 @@ while($cdata = $res->next()) {
 	echo "</p>\n\n";
 }
 
+echo "<h2>Problems</h2>\n\n<p>Checking problems...<br />\n";
+
+$res = $DB->q('SELECT * FROM problem ORDER BY probid');
+
+if($res->count() > 0) {
+	while($row = $res->next()) {
+		$CHECKER_ERRORS = array();
+		check_problem($row);
+		if ( count ( $CHECKER_ERRORS ) > 0 ) {
+			foreach($CHECKER_ERRORS as $chk_err) {
+				err($row['probid'].': ' . $chk_err);
+			}
+		}
+	}
+}
+
+echo "<h2>Languages</h2>\n\n<p>Checking languages...<br />\n";
+
+$res = $DB->q('SELECT * FROM language ORDER BY langid');
+
+if($res->count() > 0) {
+	while($row = $res->next()) {
+		$CHECKER_ERRORS = array();
+		check_language($row);
+		if ( count ( $CHECKER_ERRORS ) > 0 ) {
+			foreach($CHECKER_ERRORS as $chk_err) {
+				err($row['langid'].': ' . $chk_err);
+			}
+		}
+	}
+}
+
 
 echo "<h2>Submissions</h2>\n\n<p>Checking submissions...<br />\n";
 
@@ -123,9 +153,23 @@ $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
-		err('Submission s' .  (int)$row['submitid'] . ' is for problem "' .
-			htmlspecialchars($row['probid']) .
-			'" while this problem is not found (in c'.(int)$row['cid'].')!');
+		err('Submission s' .  $row['submitid'] . ' is for problem "' .
+			$row['probid'] .
+			'" while this problem is not found (in c'. $row['cid'] . ')!');
+	}
+}
+
+$res = $DB->q('SELECT * FROM submission ORDER BY submitid');
+
+if($res->count() > 0) {
+	while($row = $res->next()) {
+		$CHECKER_ERRORS = array();
+		check_submission($row);
+		if ( count ( $CHECKER_ERRORS ) > 0 ) {
+			foreach($CHECKER_ERRORS as $chk_err) {
+				err($row['submitid'].': ' . $chk_err);
+			}
+		}
 	}
 }
 
@@ -137,7 +181,7 @@ $res = $DB->q('SELECT s.submitid FROM submission s
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
-		err('Submission s' . (int)$row['submitid'] . ' has a judgehost but no entry in judgings!');
+		err('Submission s' . $row['submitid'] . ' has a judgehost but no entry in judgings!');
 	}
 }
 
@@ -154,21 +198,22 @@ $res = $DB->q('SELECT s.submitid AS s_submitid, j.submitid AS j_submitid,
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
-		$err = 'Judging j' . (int)$row['judgingid'] . '/s' . (int)$row['j_submitid'] . ' ';
-		if(isset($row['endtime']) && $row['endtime'] < $row['starttime']) {
-			err($err.'ended before it started!');
-		}
-		if($row['starttime'] < $row['submittime']) {
-			err($err.'started before it was submitted!');
-		}
+		$err = 'Judging j' . $row['judgingid'] . '/s' . $row['j_submitid'] . ' ';
+		$CHECKER_ERRORS = array();
 		if(!isset($row['s_submitid'])) {
-			err($err .'has no corresponding submitid (in c'.(int)$row['j_cid'] .')!');
+			$CHECKER_ERRORS[] = 'has no corresponding submitid (in c'.$row['j_cid'] .')';
 		}
 		if($row['s_cid'] != NULL && $row['s_cid'] != $row['j_cid']) {
-			err('Judging j' .(int)$row['judgingid'] .
-			    ' is from a different contest (c' . (int)$row['j_cid'] .
-			    ') than its submission s' . (int)$row['j_submitid'] .
-			    ' (c' . (int)$row['s_cid'] . ')!');
+			$CHEKCER_ERRORS[] = 'Judging j' .$row['judgingid'] .
+			    ' is from a different contest (c' . $row['j_cid'] .
+			    ') than its submission s' . $row['j_submitid'] .
+			    ' (c' . $row['s_cid'] . ')';
+		}
+		check_judging($row);
+		if ( count ( $CHECKER_ERRORS ) > 0 ) {
+			foreach($CHECKER_ERRORS as $chk_err) {
+				err($err.': ' . $chk_err);
+			}
 		}
 	}
 }
@@ -221,7 +266,7 @@ foreach ( $RELATIONS as $table => $foreign_keys ) {
 				if ( $DB->q("VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
 						$row[$foreign_key]) < 1 ) {
 					err ("foreign key constraint fails for $table.$foreign_key = \"" .
-						htmlspecialchars($row[$foreign_key]) . "\" (not found in $target)");
+						$row[$foreign_key] . "\" (not found in $target)");
 				}
 			}
 		}

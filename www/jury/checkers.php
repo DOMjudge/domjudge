@@ -100,7 +100,8 @@ function check_contest($data, $keydata = null)
  * Checks for the presence of the right parts, and whether the
  * date is sensible (e.g. not 31 February)
  */
-function check_datetime($datetime) {
+function check_datetime($datetime)
+{
 	$datetime = trim($datetime);
 
 	// It must be 19 chars or we're wrong anyway.
@@ -139,4 +140,30 @@ function check_datetime($datetime) {
 	}	
 	
 	return $datetime;
+}
+
+
+function check_submission($data, $keydata = null)
+{
+	check_datetime($data['submittime']);	
+
+	return $data;
+}
+
+function check_judging($data, $keydata = null)
+{
+	foreach(array('starttime','endtime') as $f) {
+		if ( !empty($data[$f]) ) {
+			check_datetime($data[$f]);
+		}
+	}
+	
+	if(isset($data['endtime']) && $data['endtime'] < $data['starttime']) {
+		ch_error('Judging ended before it started!');
+	}
+	if(isset($data['submittime']) && $data['starttime'] < $data['submittime']) {
+		ch_error('Judging started before it was submitted!');
+	}
+
+	return $data;
 }
