@@ -35,9 +35,10 @@ if ( isset($_POST['forteam']) ) {
 	ob_implicit_flush();
 
 	if ( isset($_POST['doteam']) ) {
-		$teams = array($_POST['forteam']);
+		$teams = $DB->q('TABLE SELECT login,name FROM team ' .
+				'WHERE login = %s', $_POST['forteam']);
 	} else {
-		$teams = $DB->q('COLUMN SELECT login FROM team ' .
+		$teams = $DB->q('TABLE SELECT login,name FROM team ' .
 		                (isset($_POST['doallnull'])?'WHERE passwd IS NULL':'') .
 		                ' ORDER BY login');
 	}
@@ -47,9 +48,10 @@ if ( isset($_POST['forteam']) ) {
 	echo "<hr />\n\n<pre>";
 	foreach($teams as $team) {
 		$pass = genrandpasswd();
-		$DB->q('UPDATE team SET passwd = %s WHERE login = %s', md5($pass), $team);
-		echo "Login:     " . htmlspecialchars($team) . "\n";
-		echo "Password:  $pass\n\n";
+		$DB->q('UPDATE team SET passwd = %s WHERE login = %s', md5($pass), $team['login']);
+		echo "Team:      " . htmlspecialchars($team['name']) . "\n";
+		echo "Login:     " . htmlspecialchars($team['login']) . "\n";
+		echo "Password:  $pass\n\n\n\n";
 	}
 	echo "</pre>\n";
 
