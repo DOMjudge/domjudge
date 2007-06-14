@@ -24,6 +24,7 @@ $user = trim($_POST['login']);
 $pass = trim($_POST['passwd']);
 
 $title = 'Authenticate user';
+$menu = false;
 include('../header.php');
 
 if ( empty($user) || empty($pass) ) {
