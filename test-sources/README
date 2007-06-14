@@ -9,12 +9,14 @@ judging backend funtions correctly for all languages, but also whether
 the submission system can handle some irregular cases.
 
 To test the system, run 'make check'. This will try to submit all
-sources. For this to work the system should be completely configured
-and the submit- and judgedaemons running. The default contest 'Demo
-contest' and problem 'Hello' can be used for testing: files named
-'test-hello.*' should give correct answers on these. All other files
-should fail for different reasons, which is described in these files
-respectively.
+sources (excluding the stress tests). For this to work the system
+should be completely configured and the submit- and judgedaemons
+running. The default contest 'Demo contest' and problem 'Hello' can be
+used for testing: files named 'test-hello.*' should give correct
+answers on these. All other files should fail for different reasons,
+which is described in these files respectively.
 
+'make test-stress' will submit the stress tests, which may break the
+system and require manual repair: be careful!
 
 $Id$
