@@ -20,8 +20,7 @@ function getFileContents($filename, $sizelimit = true) {
 	if ( $sizelimit && filesize($filename) > 50000 ) {
 		$fh = fopen($filename,'r');
 		if ( ! $fh ) error("Could not open $filename for reading");
-		$ret = fread($fh, 50000) . $note;
-		$ret .=  "\n[output truncated after 50,000 B]\n";
+		$ret = fread($fh, 50000) . "\n[output truncated after 50,000 B]\n";
 		fclose($fh);
 		return $ret;
 	}
