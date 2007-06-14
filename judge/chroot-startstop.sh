@@ -28,7 +28,7 @@ case "$1" in
 		sudo mount -n -t proc --bind /proc proc
 
 		for i in $SUBDIRMOUNTS ; do
-			mkdir $i
+			mkdir -p $i
 			sudo mount --bind $CHROOTORIGINAL/$i $i
 		done
 		;;
