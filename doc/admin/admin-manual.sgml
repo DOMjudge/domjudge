@@ -240,8 +240,10 @@ DOMjudge:
   <item> Setup the Java chroot environment to use Sun Java with chroot:<newline>
          <tt>bin/make_chroot.sh &lt;installdir&gt; &lt;architecture&gt;</tt><newline>
          <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
-         and enable the <tt>chroot-startstop.sh</tt> script in
-         <tt>etc/global.cfg</tt>.
+         enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/global.cfg</tt>
+         and add the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
+         domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc<newline>
+         domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc</tt>
   </itemize>
 </itemize>
 
@@ -287,7 +289,7 @@ The requirements for the deployment of this jury-system are:
        Extra network security which restricts internet access and
        access to other services (ssh, mail, talk, etc..) is advisable,
        but not provided by this software, see <ref
-       id="security_external" name="Security: external security"> for
+       id="security:external" name="Security: external security"> for
        more details. TCP/IP networking is used in a few different ways:
   <itemize>
   <item> The `submit' command-line client connects to the submitserver
@@ -303,7 +305,7 @@ The requirements for the deployment of this jury-system are:
 <item> (Local) root access on the jury-computers (preferably also on
        the shared homedirectory) for installing some programs
        setuid-root and (un)mounting the proc filesystem. See <ref
-       id="security_rootprivs" name="Security: root privileges"> for
+       id="security:rootprivs" name="Security: root privileges"> for
        more details.
 
 <item> For using the command-line submit program, team accounts which
@@ -311,8 +313,8 @@ The requirements for the deployment of this jury-system are:
        of the jury account should be installed on all team accounts to
        provide public-key access). This can be circumvented by
        providing access by other means, see below under <ref
-       id="submissionmethods" name="Submission methods"> or the file
-       <tt>submit/submit_copy.sh</tt> for more details.
+       id="install_config:submissionmethods" name="Submission methods">
+       or the file <tt>submit/submit_copy.sh</tt> for more details.
 </itemize>
 
 <sect1>Software Requirements
@@ -489,6 +491,34 @@ must run the interpreter on the source. See <tt>compile_perl.sh</tt>
 and <tt>compile_java_javac.sh</tt> in <tt>SYSTEM_ROOT/judge</tt> for
 examples.
 
+DOMjudge supports the use of Sun Java within a chroot environment. For
+this, a chroot environment which includes the Sun Java libraries must
+first be built. This can be accomplished with the included script
+<tt>bin/make_chroot.sh</tt>: run this as root and pass as arguments
+the target directory to build the chroot environment in and as second
+argument the target machine architecture. Start the script without
+arguments for usage information. See also sections
+<ref id="install_config:system" name="System Configuration">
+and <ref id="problems:java-chroot" name="Problems: Java & chroot">.
+
+<sect>Configuration of Special Run and Compare Scripts
+<p>
+
+To allow for problems that do not fit within the standard scheme of
+fixed input and/or output, DOMjudge has the possibility to change the
+way submissions are run and checked for correctness.
+
+The backend script (<tt>test_solution.sh</tt>) that handles the
+compilation, running and checking of submissions, calls separate
+scripts for running and comparison of the results. These can be
+specialised and adapted to the requirements per problem. For this, one
+has to create scripts <tt>run_&lt;some-tag&gt;.sh</tt> and/or
+<tt>compare_&lt;some-tag&gt;.sh</tt> in the <tt>SYSTEM_ROOT/judge</tt>
+directory (see <tt>run.sh</tt> and <tt>compare.sh</tt> for examples
+and usage information). Then one must specify this &lt;some-tag&gt; in
+the special_run and/or special_compare fields of the problem entry in
+the MySQL database (NULL means that the default script should be
+used).
 
 <sect>Other configuration issues
 <p>
@@ -514,7 +544,7 @@ non-standard environments.
        more information.
 </itemize>
 
-<sect>Submission Methods <label id="submissionmethods">
+<sect>Submission Methods <label id="install_config:submissionmethods">
 <p>
 
 DOMjudge supports two submission methods: via the
@@ -615,29 +645,10 @@ snippet from <tt>etc/apache.conf</tt>. In that file, replace
 config, i.e. where the DOMjudge files are located. Reload the
 webserver for the changes to take effect.
 
-See also section <ref id="security_webprivs" name="Security: webserver
+See also section <ref id="security:webprivs" name="Security: webserver
 privileges">.
 
-<sect>Configuration of Special Run and Compare Scripts
-<p>
-
-To allow for problems that do not fit within the standard scheme of
-fixed input and/or output, DOMjudge has the possibility to change the
-way submissions are run and checked for correctness.
-
-The backend script (<tt>test_solution.sh</tt>) that handles the
-compilation, running and checking of submissions, calls separate
-scripts for running and comparison of the results. These can be
-specialised and adapted to the requirements per problem. For this, one
-has to create scripts <tt>run_&lt;some-tag&gt;.sh</tt> and/or
-<tt>compare_&lt;some-tag&gt;.sh</tt> in the <tt>SYSTEM_ROOT/judge</tt>
-directory (see <tt>run.sh</tt> and <tt>compare.sh</tt> for examples
-and usage information). Then one must specify this &lt;some-tag&gt; in
-the special_run and/or special_compare fields of the problem entry in
-the MySQL database (NULL means that the default script should be
-used).
-
-<sect>Other Configuration Issues
+<sect>System Configuration Issues <label id="install_config:system">
 <p>
 
 For running solution programs under a non-privileged user, a user has
@@ -646,18 +657,20 @@ need a home-directory or password, so e.g. the following command would
 suffice to add a user `domjudge-run' with minimal privileges.
 
 On RedHat:
-<verb>
-useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run
-</verb>
+<verb>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</verb>
 On Debian:
-<verb>
-useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run
-</verb>
+<verb>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</verb>
 
 For other systems check the specifics of your useradd command.
 This user must also be configured as the user under which programs run
 in <tt>SYSTEM_ROOT/etc/global.cfg</tt>.
 
+If you use the default <tt>judge/chroot-startstop.sh</tt> script, then
+the following lines must be added to <tt>/etc/sudoers</tt>:
+<verb>
+domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
+domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
+</verb>
 
 <sect>Building and Installing
 <p>
@@ -694,7 +707,7 @@ the webserver. These are:
        place websubmitted files there.
 </itemize>
 
-See also section <ref id="security_webprivs" name="Security: webserver
+See also section <ref id="security:webprivs" name="Security: webserver
 privileges">.
 
 Should installation not succeed and re-installation be necessary, then
@@ -1188,7 +1201,7 @@ However we wanted the system to be as secure as possible within
 reason. Furthermore this software is open source, so users can try to
 find weak spots before the contest.
 
-<sect>Internal Security <label id="security_internal">
+<sect>Internal Security <label id="security:internal">
 <p>
 
 Internal security of the system relies on users not being able to get
@@ -1241,7 +1254,7 @@ a list of <em>admin users</em>. Most data-modification functions will then
 be restricted to only users in this list.
 
 
-<sect>Root Privileges <label id="security_rootprivs">
+<sect>Root Privileges <label id="security:rootprivs">
 <p>
 
 A difficult issue is the securing of submitted programs run by the
@@ -1259,7 +1272,7 @@ hack or could crash the system.  However, a chroot environment does
 not restrict network access, so there lies a possible security risk
 that has to be handled separately.
 
-<sect>Filesystem Privileges <label id="security_fileprivs">
+<sect>Filesystem Privileges <label id="security:fileprivs">
 <p>
 
 Of course you must make sure that the filesystem privileges are set
@@ -1268,7 +1281,7 @@ submitted solutions or passwords. This is quite system dependent. At
 least the <tt>INPUT_ROOT</tt> and <tt>OUTPUT_ROOT</tt> should not be
 readable by other users than DOMjudge.
 
-<sect1>Permissions for the webserver <label id="security_webprivs">
+<sect1>Permissions for the webserver <label id="security:webprivs">
 <p>
 
 Make sure that the webserver serving the DOMjudge webinterface pages
@@ -1294,7 +1307,7 @@ contain sensitive data (e.g. those under sql/). DOMjudge comes
 with .htaccess files that try to prevent this, but double-check
 that it's not accessible.
 
-<sect>External Security <label id="security_external">
+<sect>External Security <label id="security:external">
 <p>
 
 The following security issues are <em>not</em> handled by DOMjudge,
@@ -1323,7 +1336,7 @@ iptables -I OUTPUT -o &lt;network_interface&gt; -m owner --uid-owner &lt;testuse
 <p>
 
 
-<sect>Java compilers and the chroot
+<sect>Java compilers and the chroot <label id="problems:java-chroot">
 <p>
 
 Java is difficult to deal with in an automatic way. It is probably
