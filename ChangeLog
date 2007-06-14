@@ -14,7 +14,8 @@ Version 2.0.0 - SVN
  - Add more checking and verification to database input.
  - Upgrade bash to upstream Debian version 3.1dfsg and removed sources
    from package to website to reduce package size.
-
+ - Split test-sources in normal and stress tests (Closes: #1737421).
+	
 Version 2.0.0 Release Candidate 1 - 28 May 2007
 -----------------------------------------------
  - Minimum MySQL version required is now 4.1: simplify SQL privilege
