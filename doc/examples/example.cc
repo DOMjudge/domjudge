@@ -12,7 +12,7 @@ int main()
 
 	for(test=1; test<=ntests; test++) {
 		cin >> name;
-		cout << "Hello " << name << "!\n";
+		cout << "Hello " << name << "!" << endl;
 	}
 
 	return 0;

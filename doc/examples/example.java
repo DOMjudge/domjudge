@@ -13,7 +13,7 @@ class Main {
 
 		for(test=1; test<=ntests; test++) {
 			name = in.readLine();
-			System.out.print("Hello "+name+"!\n");
+			System.out.println("Hello "+name+"!");
 		}
 	}
 }
