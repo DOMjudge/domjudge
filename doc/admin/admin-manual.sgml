@@ -131,6 +131,12 @@ files themselves. Files (partly) covered by other licences are:
 Public License. See COPYING.lgpl.
 </itemize>  
 
+Furthermore, a binary version of the bash shell (statically compiled)
+is distributed with DOMjudge. This program is copyright by the Free
+Software Foundation and distributed under the GPL version 2 or later.
+Sources can be downloaded from:
+<url url="http://domjudge.sourceforge.net/bash-sources/">
+
 This software is partly based on code by other people. These
 acknowledgements are made in the respective files, but we would like
 to name them here too:

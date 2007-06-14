@@ -15,10 +15,11 @@ DOMjudge was developed by Thijs Kinkhorst, Peter van de Werken and
 Jaap Eldering at Study Association "A-Eskwadraat", Utrecht University,
 The Netherlands.
 
-DOMjudge, including its documentation, is free software; you can redistribute
-it and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2, or (at your
-option) any later version. See the file COPYING.
+DOMjudge, including its documentation, is free software; you can
+redistribute it and/or modify it under the terms of the GNU General
+Public License as published by the Free Software Foundation; either
+version 2, or (at your option) any later version. See the file
+COPYING.
 
 Additionally, parts of this system are based on other programs, which
 are covered by other copyrights and licences. This will be noted in the
@@ -27,6 +28,11 @@ files themselves. Files (partly) covered by other licences are:
 - lib/mkstemps.h and lib/basename.h are covered by the GNU Lesser
   Public License. See COPYING.lgpl.
 
+Furthermore, a binary version of the bash shell (statically compiled)
+is distributed with DOMjudge. This program is copyright by the Free
+Software Foundation and distributed under the GPL version 2 or later.
+Sources can be downloaded from:
+http://domjudge.sourceforge.net/bash-sources/
 
 Further reading
 ---------------
