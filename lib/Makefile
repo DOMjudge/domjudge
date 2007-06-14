@@ -14,7 +14,5 @@ $(OBJECTS): %.o: %.c %.h
 $(OBJECTSCYGWIN): %.cygwin.o: %.c %.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-install:
-
 clean:
 	rm -rf $(OBJECTS) $(OBJECTSCYGWIN)

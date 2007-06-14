@@ -9,7 +9,5 @@ TARGETS=check_float
 
 build: $(TARGETS)
 
-install:
-
 clean:
 	-rm -f $(TARGETS)
