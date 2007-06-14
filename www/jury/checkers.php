@@ -37,9 +37,6 @@ function check_language($data, $keydata = null)
 
 function check_contest($data, $keydata = null)
 {
-	if ( empty($data['lastscoreupdate']) ) $data['lastscoreupdate'] = null;
-	if ( empty($data['unfreezetime']) ) $data['unfreezetime'] = null;
-
 	// are these dates valid?
 	foreach(array('starttime','endtime','lastscoreupdate','unfreezetime') as $f) {
 		if ( !empty($data[$f]) ) {

@@ -33,6 +33,13 @@ foreach ($data as $i => $itemdata ) {
 		continue;
 	}
 
+	// set empty string to null
+	foreach ( $itemdata  as $k => $v ) {
+		if ( $v === "" ) {
+			$itemdata[$k] = null;
+		}
+	}
+
 	$fn = "check_$t";
 	if ( function_exists($fn) ) {
 		$CHECKER_ERRORS = array();
