@@ -6,9 +6,6 @@
  */
 
 require('init.php');
-$title = 'Show Source';
-$sourcecss = true;
-require('../header.php');
 
 $id = (int)$_GET['id'];
 
@@ -20,15 +17,6 @@ $oldsource = $DB->q('MAYBETUPLE SELECT * FROM submission
                      submittime < %s ORDER BY submittime DESC LIMIT 1',
                     $source['teamid'],$source['probid'],$source['langid'],
                     $source['submittime']);
-
-if ( $oldsource ) {
-	echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
-}
-
-echo '<h2 class="filename"><a name="source"></a>Submission ' .
-	"<a href=\"submission.php?id=$id\">s$id</a> source: " .
-	"<a href=\"show_source.php?id=$id\">" .
-	htmlspecialchars($source['sourcefile']) . "</a></h2>\n\n";
 
 // Use PEAR Text::Highlighter class if available
 if ( @include('Text/Highlighter.php' ) ) {
@@ -49,7 +37,20 @@ if ( @include('Text/Highlighter.php' ) ) {
 		$renderer = new Text_Highlighter_Renderer_Html(array("numbers" => HL_NUMBERS_TABLE, "tabsize" => 4));
 		$hl =& Text_Highlighter::factory(($source['langid'] == 'c'?'cpp':$source['langid']));
 	}
+	$sourcecss = true;
 }
+
+$title = 'Source: ' . htmlspecialchars($source['sourcefile']);
+require('../header.php');
+
+if ( $oldsource ) {
+	echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
+}
+
+echo '<h2 class="filename"><a name="source"></a>Submission ' .
+	"<a href=\"submission.php?id=$id\">s$id</a> source: " .
+	"<a href=\"show_source.php?id=$id\">" .
+	htmlspecialchars($source['sourcefile']) . "</a></h2>\n\n";
 
 if ( isset($hl) ) {
 	// We managed to set up the highligher
