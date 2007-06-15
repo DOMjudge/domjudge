@@ -7,6 +7,7 @@
 
 require('init.php');
 $title = 'Show Source';
+$sourcecss = true;
 require('../header.php');
 
 $id = (int)$_GET['id'];

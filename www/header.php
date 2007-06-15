@@ -16,7 +16,6 @@ echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
 if(!isset($menu)) {
 	$menu = true;
 }
-
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -25,10 +24,13 @@ if(!isset($menu)) {
 	<!-- DOMjudge version <?=DOMJUDGE_VERSION?> -->
 <title><?=$title?></title>
 <link rel="stylesheet" href="style.css" type="text/css" />
+<?php if (isset($sourcecss)) {  ?>
+<link rel="stylesheet" href="style_source.css" type="text/css" />
+<?php } ?>
 </head>
 <body>
 
-<?	if($menu) { ?>
+<?php	if($menu) { ?>
 <iframe id="menubox" src="menu.php"></iframe>
-<?	}	?>
+<?php	}	?>
 
