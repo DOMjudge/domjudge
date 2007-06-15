@@ -738,6 +738,25 @@ tools, the submit binary can be created (after configuration) by
 running <tt>make submit.exe</tt> in the <tt>SYSTEM_ROOT/submit</tt>
 directory.
 
+<sect>Optional features
+<p>
+
+<sect1>Source code syntax highlighting
+<p>
+
+To support coloured display of submitted source code in the jury
+interface, the <url name="PEAR" url="http://pear.php.net">
+<url name="Text_Highlighter class" url="http://pear.php.net/package/Text_Highlighter/">
+needs to be available in your PHP include path. This means that
+you can install this system wide with the PEAR-provided tools,
+like this: <tt>pear install Text_Highlighter</tt>.
+
+Alternatively you can download the source code from the
+Text_Highlighter website and unpack that under the <tt>www/jury</tt>
+directory. Rename the resulting <tt>Text_Highlighter-x.y.z</tt>
+dir to just <tt>Text</tt>.
+
+
 <sect>Upgrading
 <p>
 
