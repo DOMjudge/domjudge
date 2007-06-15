@@ -47,7 +47,7 @@ clean: clean-backupfiles
 distclean: clean
 
 clean-backupfiles:
-	rm -rf *~
+	rm -f *~
 
 .PHONY: all build config install check clean clean-backupfiles distclean finddbname fixconfig
 
