@@ -1,18 +1,17 @@
 import java.io.*;
 
-class Main {
+class Main
+{
 	public static BufferedReader in;
 
-	public static void main(String[] args) throws Exception {
-		int ntests, test;
-		String name;
-        
-		in = new BufferedReader( new InputStreamReader(System.in) );
+	public static void main(String[] args) throws IOException
+	{
+		in = new BufferedReader(new InputStreamReader(System.in));
 
-		ntests = Integer.parseInt(in.readLine());
+		int nTests = Integer.parseInt(in.readLine());
 
-		for(test=1; test<=ntests; test++) {
-			name = in.readLine();
+		for (int i=0; i < nTests; i++) {
+			String name = in.readLine();
 			System.out.println("Hello "+name+"!");
 		}
 	}
