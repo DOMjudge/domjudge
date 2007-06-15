@@ -62,16 +62,17 @@ include('../footer.php');
 
 /**
  * Generate a random password of length 10 with alphanumeric characters,
- * except I, o, O, 0 and 1 since these can be confusing.
+ * except o, 0, l and 1 since these can be confusing.
  */
 function genrandpasswd()
 {
-	$chars = array( 'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'f', 'F', 'g', 'G', 'h', 'H', 'i', 'j', 'J',  'k', 'K', 'L', 'm', 'M', 'n', 'N', 'p', 'P', 'q', 'Q', 'r', 'R', 's', 'S', 't', 'T',  'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', 'z', 'Z', '2', '3', '4', '5', '6', '7', '8', '9');
+	$chars = array('a','b','c','d','e','f','g','h','i','j','k','m','n','p','q','r',
+	               's','t','u','v','w','x','y','z','2','3','4','5','6','7','8','9');
 	
 	$max_chars = count($chars) - 1;
 	
 	$rand_str = '';
-	for($i = 0; $i < 10; ++$i) {
+	for($i = 0; $i < 6; ++$i) {
 		$rand_str = ( $i == 0 ) ? $chars[rand(0, $max_chars)] : $rand_str . $chars[rand(0, $max_chars)];
 	}
 
