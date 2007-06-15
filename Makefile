@@ -27,12 +27,16 @@ config:
 build: config
 
 # Interactively installs system as far as possible
-install: build install_scripts .installed
+install: build install_scripts
 	$(MAKE) -C bin install
 	$(MAKE) -C sql install
-
-.installed:
 	touch .installed
+
+check-installed:
+	@if [ ! -f .installed ]; then \
+		echo "System seems not installed, run 'make install'." ; \
+		exit 1 ; \
+	fi
 
 install_scripts: $(TEMPFILE)
 	bin/make_passwords.sh   install
@@ -43,7 +47,7 @@ docs: config
 	$(MAKE) -C doc docs
 
 # Perform some checks
-check: .installed
+check: check-installed
 
 # Restore system to completely fresh, uninstalled state
 # Be careful: removes all possible contest data!!
@@ -58,4 +62,4 @@ distclean_scripts: $(TEMPFILE)
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 
-.PHONY: dvi documentation install_scripts distclean_scripts
+.PHONY: dvi documentation install_scripts distclean_scripts check-installed
