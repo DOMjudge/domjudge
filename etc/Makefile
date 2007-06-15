@@ -7,7 +7,7 @@ EXTENSIONS = h sh php tex
 TEMPLATES  = $(addprefix config.template.,$(EXTENSIONS))
 CONFIGS    = $(addprefix config.,$(EXTENSIONS))
 
-.PHONY: config
+all: config
 
 config: $(CONFIGS)
 
@@ -18,3 +18,5 @@ check:
 	./check_config.php
 
 clean:
+
+.PHONY: config
