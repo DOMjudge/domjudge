@@ -10,6 +10,6 @@ begin
 	for test := 1 to ntests do
 	begin
 		readln(name);
-		writeln('Hello ',name,'!');
+		writeln('Hello ', name, '!');
 	end;
 end.

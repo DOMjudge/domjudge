@@ -10,7 +10,7 @@ class Main
 
 		int nTests = Integer.parseInt(in.readLine());
 
-		for (int i=0; i < nTests; i++) {
+		for (int test=1; test <= nTests; test++) {
 			String name = in.readLine();
 			System.out.println("Hello "+name+"!");
 		}

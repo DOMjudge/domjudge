@@ -10,7 +10,7 @@ int main()
 
 	cin >> ntests;
 
-	for(test=1; test<=ntests; test++) {
+	for (test=1; test <= ntests; test++) {
 		cin >> name;
 		cout << "Hello " << name << "!" << endl;
 	}
