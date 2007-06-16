@@ -61,8 +61,8 @@ if ( isset($_POST['forteam']) ) {
 include('../footer.php');
 
 /**
- * Generate a random password of length 10 with alphanumeric characters,
- * except o, 0, l and 1 since these can be confusing.
+ * Generate a random password of length 6 with lowercase alphanumeric
+ * characters, except o, 0, l and 1 since these can be confusing.
  */
 function genrandpasswd()
 {
@@ -73,7 +73,7 @@ function genrandpasswd()
 	
 	$rand_str = '';
 	for($i = 0; $i < 6; ++$i) {
-		$rand_str = ( $i == 0 ) ? $chars[rand(0, $max_chars)] : $rand_str . $chars[rand(0, $max_chars)];
+		$rand_str .= $chars[rand(0, $max_chars)];
 	}
 
 	return $rand_str;
