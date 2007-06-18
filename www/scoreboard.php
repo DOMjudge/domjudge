@@ -82,15 +82,15 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 		"</colgroup>\n";
 
 	// column headers
-	echo '<tr class="scoreheader"><th>' .
-		jurylink(null,'#',$isjury) . '</th><th>' .
-		( SHOW_AFFILIATIONS ? jurylink('team_affiliations.php','affil.',$isjury) .
-		  '</th><th>' : '' ) .
-		jurylink('teams.php','team',$isjury) . '</th><th>' .
-		jurylink(null,'solved',$isjury) . '</th><th>' .
-		jurylink(null,'time',$isjury) . "</th>\n";
+	echo '<tr class="scoreheader">' .
+		'<th title="place">' . jurylink(null,'#',$isjury) . '</th>' .
+		( SHOW_AFFILIATIONS ? '<th title="team affiliation">' .
+		jurylink('team_affiliations.php','affil.',$isjury) . '</th>' : '' ) .
+		'<th title="team name">' . jurylink('teams.php','team',$isjury) . '</th>' .
+		'<th title="problems solved">' . jurylink(null,'solved',$isjury) . '</th>' .
+		'<th title="penalty time">' . jurylink(null,'time',$isjury) . "</th>\n";
 	foreach( $probs as $pr ) {
-		echo '<th title="' . htmlentities($pr['name']) . '"' .
+		echo '<th title="problem \'' . htmlentities($pr['name']) . '\'"' .
 			(isset($pr['color']) ? ' style="background: ' .
 			 htmlspecialchars($pr['color']) . ';"' : '' ) . '>' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),
@@ -229,7 +229,13 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 		// keep summary statistics for the bottom row of our table
 		$SUMMARY['num_correct'] += $totals['num_correct'];
 		$SUMMARY['total_time']  += $totals['total_time'];
-
+		if ( SHOW_AFFILIATIONS ) {
+			if ( ! empty($teams[$team]['affilid']) )
+				@$SUMMARY['affils'][$teams[$team]['affilid']]++;
+			if ( ! empty($teams[$team]['country']) )
+				@$SUMMARY['countries'][$teams[$team]['country']]++;
+		}
+		
 		// for each problem
 		foreach ( array_keys($probs) as $prob ) {
 
@@ -274,13 +280,15 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 
 	// print a summaryline
 	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
-	     '<td title="total teams">' . jurylink(null,count($teams),$isjury) . '</td>' .
-	     ( SHOW_AFFILIATIONS ? '<td title=" "></td>' : '' ) .
-	     '<td title=" ">' . jurylink(null,'Summary',$isjury) . '</td>';
-	echo '<td class="scorenc" title="total solved">' .
-	     jurylink(null,$SUMMARY['num_correct'],$isjury) . '</td>' .
-	     '<td class="scorett" title="total time">' .
-	     jurylink(null,$SUMMARY['total_time'],$isjury) . '</td>';
+		'<td title="total teams">' . jurylink(null,count($teams),$isjury) . '</td>' .
+		( SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
+		  jurylink('team_affiliations.php',count($SUMMARY['affils']) . ' / ' .
+				   count($SUMMARY['countries']),$isjury) . '</td>' : '' ) .
+		'<td title=" ">' . jurylink(null,'Summary',$isjury) . '</td>' .
+		'<td class="scorenc" title="total solved">' .
+		jurylink(null,$SUMMARY['num_correct'],$isjury) . '</td>' .
+		'<td class="scorett" title="total time">' .
+		jurylink(null,$SUMMARY['total_time'],$isjury) . '</td>';
 
 	foreach( $probs as $pr ) {
 		if ( !isset($SUMMARY[$pr['probid']]) ) {

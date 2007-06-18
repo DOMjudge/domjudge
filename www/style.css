@@ -162,6 +162,7 @@ legend {
 #scoresolv,#scoretotal { width: 5em; }
 .scorenc,.scorett,.scorepl { text-align: right; }
 .scoreprob { width: 7em; }
+.scoreaffil { text-align: center; }
 
 #scoresummary {
 	border-top: 2px solid black;
