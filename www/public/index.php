@@ -15,6 +15,8 @@ $menu = false;
 require('../header.php');
 require('../scoreboard.php');
 
+putClock();
+
 // call the general putScoreBoard function from scoreboard.php
 putScoreBoard(null,null,@$_SERVER['argv'][1]=='static');
 
