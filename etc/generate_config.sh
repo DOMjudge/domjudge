@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # $Id$
 
 # Script to generate specific config files for different languages
@@ -134,8 +134,7 @@ while IFS='='; read VARDEF VALUE <&3; do
 	fi
 
 	# Escape quoting characters ' and ":
-	VALUE=${VALUE//\'/\\\'}
-	VALUE=${VALUE//\"/\\\"}
+	VALUE=$(echo "$VALUE" | sed "s!'!\\'!;"'s!"!\\"!' )
 
 	if [ $ATTR_EVAL -ne 0 ]; then
 		eval VALUE="$VALUE"
