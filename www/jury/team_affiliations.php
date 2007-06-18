@@ -20,19 +20,26 @@ if( $res->count() == 0 ) {
 	echo "<p><em>No affiliations defined</em></p>\n\n";
 } else {
 	echo "<table class=\"list\">\n" .
-		"<tr><th>ID</th><th>name</th><th>country</th><th>#teams</th></tr>\n";
+		"<tr><th>ID</th><th>name</th><th>logo</th><th>country</th><th>#teams</th></tr>\n";
 	while($row = $res->next()) {
+		$affillogo = "../images/affiliations/" . urlencode($row['affilid']) . ".png";
+		$countryflag = "../images/countries/" . urlencode($row['country']) . ".png";
 		echo '<tr><td><a href="team_affiliation.php?id=' .
 			urlencode($row['affilid']) . '">' .
 			htmlspecialchars($row['affilid']).
 			'</a></td><td><a href="team_affiliation.php?id=' .
 			urlencode($row['affilid']) . '">' .
 			htmlentities($row['name']) .
-			'</a></td><td>' .
+			'</a></td><td align="center">' .
+			( is_readable($affillogo) ? '<img src="' . $affillogo .
+			  '" alt="' . htmlspecialchars($row['name']) . '" />' : '' ) .
+			'</td><td align="center">' .
 			htmlspecialchars($row['country']) .
+			( is_readable($countryflag) ? ' <img src="' . $countryflag .
+			  '" alt="' . htmlspecialchars($row['country']) . '" />' : '' ) .
 			'</td><td align="right">' .
 			(int)$row['cnt'] .
-			"</td>";
+			'</td>';
 		if ( IS_ADMIN ) {
 			echo "<td>" .
 				editLink('team_affiliation', $row['affilid']) . " " .
