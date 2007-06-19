@@ -31,6 +31,6 @@ if(!isset($menu)) {
 <body>
 
 <?php	if($menu) { ?>
-<iframe id="menubox" src="menu.php"></iframe>
+<iframe id="menubox" frameborder="0" src="menu.php"></iframe>
 <?php	}	?>
 
