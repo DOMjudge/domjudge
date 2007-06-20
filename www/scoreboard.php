@@ -75,7 +75,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	echo '<table class="scoreboard' . ($isjury ? ' scoreboard_jury' : '') . "\">\n";
 
 	// output table column groups (for the styles)
-	echo '<colgroup><col id="scoreplace" />' .
+	echo '<colgroup><col id="scorerank" />' .
 		( SHOW_AFFILIATIONS ? '<col id="scoreaffil" />' : '' ) .
 		'<col id="scoreteamname" /><col id="scoresolv" /><col id="scoretotal" />' .
 		str_repeat('<col class="scoreprob" />', count($probs)) .
@@ -83,7 +83,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 
 	// column headers
 	echo '<tr class="scoreheader">' .
-		'<th title="place">' . jurylink(null,'#',$isjury) . '</th>' .
+		'<th title="rank">' . jurylink(null,'#',$isjury) . '</th>' .
 		( SHOW_AFFILIATIONS ? '<th title="team affiliation">' .
 		jurylink('team_affiliations.php','affil.',$isjury) . '</th>' : '' ) .
 		'<th title="team name">' . jurylink('teams.php','team',$isjury) . '</th>' .
@@ -157,15 +157,15 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	$prevsortorder = -1;
 	foreach( $SCORES as $team => $totals ) {
 
-		// place, team name, total correct, total time
+		// rank, team name, total correct, total time
 		echo '<tr';
 		if ( $totals['sortorder'] != $prevsortorder ) {
 			echo ' class="sortorderswitch"';
 			$prevsortorder = $totals['sortorder'];
-			$place = 0; // reset team position on switch to different category
+			$rank = 0; // reset team position on switch to different category
 			$prevteam = null;
 		}
-		$place++;
+		$rank++;
 		// check whether this is us, otherwise use category colour
 		if ( @$myteamid == $team ) {
 			echo ' id="scorethisisme"';
@@ -174,9 +174,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 			$color = $teams[$team]['color'];
 		}
 		echo '><td class="scorepl">';
-		// Only print place when score is different from the previous team
+		// Only print rank when score is different from the previous team
 		if ( !isset($prevteam) || cmpscore($SCORES[$prevteam], $totals)!=0 ) {
-			echo jurylink(null,$place,$isjury);
+			echo jurylink(null,$rank,$isjury);
 		} else {
 			echo jurylink(null,'',$isjury);
 		}
