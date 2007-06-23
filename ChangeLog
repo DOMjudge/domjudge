@@ -18,6 +18,7 @@ Version 2.0.0 - SVN
  - Use syntax highlighting in source code viewer when PEAR
    Text_Highlighter class is available.
  - Generated passwords only lowercase and length 6 (Closes: #1737142).
+ - Fix bug in diff display when no newline present (Closes: #1741625).
 
 Version 2.0.0 Release Candidate 1 - 28 May 2007
 -----------------------------------------------

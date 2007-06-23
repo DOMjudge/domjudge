@@ -37,14 +37,14 @@ EOF
     ) > "$RESULT"
 }
 
-# Test an exact match between program output and testdata output:
+# Test an exact match between program and testdata output:
 DIFFOUTPUT=`diff -U 0 $PROGRAM $TESTOUT`
 DIFFEXIT=$?
 if [ -z "$DIFFOUTPUT" ]; then
 	SOLVED=1
 fi
 
-# Exit with failure, when diff reports internal errors:
+# Exit with failure when diff reports internal errors:
 # Exitcode 1 means that differences were found!
 if [ $DIFFEXIT -ge 2 ]; then
 	writeresult "Internal error"
@@ -81,7 +81,7 @@ LINE=0
 while true ; do
 	LINE=$(($LINE+1))
 	
-	if ! read PROGLINE <&3 ; then
+	if ! read PROGLINE <&3 && [ -z "$PROGLINE" ] ; then
 		if read TESTLINE <&4 ; then
 			if [ -z "$FIRSTDIFF" ]; then FIRSTDIFF=$LINE ; fi
 		else
@@ -117,7 +117,7 @@ SEPCHAR='?'
 while true ; do
 	LINE=$(($LINE+1))
 	SEPCHAR='='
-	if ! read PROGLINE <&3 ; then
+	if ! read PROGLINE <&3 && [ -z "$PROGLINE" ] ; then
 		PROGLINE=""
 		if read TESTLINE <&4 ; then
 			SEPCHAR='>'
