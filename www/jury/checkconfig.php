@@ -188,6 +188,16 @@ if($res->count() > 0) {
 
 echo "</p>\n\n<h2>Judgings</h2>\n\n<p>Checking judgings...<br />\n";
 
+// check for more than one valid judging for a submission
+$res = $DB->q('SELECT submitid, SUM(valid) as numvalid
+	FROM judging GROUP BY submitid HAVING numvalid > 1');
+if ( $res->count() > 0 ) {
+	while($row = $res->next()) {
+		err('Submission s' . $row['submitid'] . ' has more than one valid judging (' .
+			$row['numvalid'] . ')');
+	}
+}
+
 // check for start/endtime problems and contestids
 $res = $DB->q('SELECT s.submitid AS s_submitid, j.submitid AS j_submitid,
                judgingid, starttime, endtime, submittime, s.cid AS s_cid, j.cid AS j_cid
