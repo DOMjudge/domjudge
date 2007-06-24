@@ -112,11 +112,12 @@ function rejudgeForm($table, $id)
 		$ret .= "<input type=\"submit\" value=\"REJUDGE submission s" .
 			(int)$id . "\"";
 
+		// disable the form button if there are no valid judgings anyway
+		// (nothing to rejudge) or if the result is already correct
 		global $DB;
-		$iscorrect = (bool)$DB->q('VALUE SELECT count(judgingid) FROM judging WHERE
-                           submitid = %i AND valid = 1 AND result = "correct"', $id);
-
-		if ( !$iscorrect ) {
+		$validresults = $DB->q('COLUMN SELECT result FROM judging WHERE
+                           submitid = %i AND valid = 1', $id);
+		if ( count($validresults) > 0 && !in_array('correct', $validresults) ) {
 			$ret .= " onclick=\"return confirm('Rejudge submission s" .
 				(int)$id . "?')\" />\n";
 		} else {
