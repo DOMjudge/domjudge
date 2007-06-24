@@ -55,6 +55,36 @@ if ( IS_ADMIN ) {
 
 echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
 
-putJudgings('judgehost', $row['hostname']);
+// get the judgings for a specific key and value pair
+// select only specific fields to avoid retrieving large blobs
+$res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
+			   result, verified, valid FROM judging
+			   WHERE cid = %i AND judgehost = %s
+			   ORDER BY starttime DESC',
+			   getCurContest(), $id);
+
+if( $res->count() == 0 ) {
+	echo "<p><em>No judgings.</em></p>\n\n";
+} else {
+	echo "<table class=\"list\">\n<tr><th>ID</th><th>start</th><th>end</th>";
+	echo "<th>result</th><th>valid</th><th>verified</th>";
+	echo "</tr>\n";
+	while( $jud = $res->next() ) {
+		$link = 'submission.php?id=' . (int)$jud['submitid'] .
+			'&amp;jid=' . (int)$jud['judgingid'];
+		echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
+		echo '<td><a href="' . $link . '">j' . (int)$jud['judgingid'] .
+			'</a></td>';
+		echo '<td>' . printtime($jud['starttime']) . '</td>';
+		echo '<td>' . printtime(@$jud['endtime'])  . '</td>';
+		echo '<td><a href="' . $link . '">' .
+			printresult(@$jud['result'], $jud['valid']) . '</a></td>';
+		echo '<td align="center">' . printyn($jud['valid']) . '</td>';
+		echo '<td align="center">' . printyn($jud['verified']) . '</td>';
+		echo "</tr>\n";
+	}
+	echo "</table>\n\n";
+}
+
 
 require('../footer.php');

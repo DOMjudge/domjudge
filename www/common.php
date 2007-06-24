@@ -71,6 +71,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	// print each row with links to detailed information
 	$subcnt = $corcnt = 0;
 	while( $row = $res->next() ) {
+		
 		$sid = (int)$row['submitid'];
 		$isfinished = ($isjury || ! @$resulttable[$sid]['result']);
 		
@@ -97,8 +98,8 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 					echo printresult(@$row['judgehost'] ? '' : 'queued', TRUE, TRUE);
 				}
 			} else {
-				echo '<a href="judging.php?id=' . urlencode($resulttable[$sid]['judgingid'])
-					. '">' . printresult(@$resulttable[$sid]['result']) . '</a>';
+				echo '<a href="submission.php?id=' . $sid . '">' .
+					printresult(@$resulttable[$sid]['result']) . '</a>';
 			}
 		} else {
 			if ( ! @$resulttable[$sid]['result'] ||

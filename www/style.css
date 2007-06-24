@@ -194,3 +194,6 @@ legend {
 .sortorderswitch { border-top: 2px solid black; }
 
 img.picto { width: 16px; height: 16px; }
+
+.judgetime { font-size: smaller; font-style: italic; }
+

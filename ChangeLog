@@ -2,23 +2,24 @@ DOMjudge Programming Contest Judging System
 
 Version 2.0.0 - SVN
 -------------------
- - Small-time cleanups.
- - Use either wget or curl for downloading LaTeX packages.
- - Remove 'NOW()' from SQL update/insert queries to make replication
-   time-independent.
- - Fixed bug in submit_db: report errors before too-late submission.
  - A shared file system between judgehosts and jury system is no
    longer required. The source is now communicated via the database.
+ - Merge judging information into submission page.
  - Improved portability to non-Linux systems (Closes: #1734046).
- - Improved error handling in team file uploads.
- - Add more checking and verification to database input.
- - Upgrade bash to upstream Debian version 3.1dfsg and removed sources
-   from package to website to reduce package size.
- - Split test-sources in normal and stress tests (Closes: #1737421).
  - Use syntax highlighting in source code viewer when PEAR
    Text_Highlighter class is available.
  - Generated passwords only lowercase and length 6 (Closes: #1737142).
+ - Split test-sources in normal and stress tests (Closes: #1737421).
+ - Remove 'NOW()' from SQL update/insert queries to make replication
+   time-independent.
+ - Fixed bug in submit_db: report errors before too-late submission.
  - Fix bug in diff display when no newline present (Closes: #1741625).
+ - Use either wget or curl for downloading LaTeX packages.
+ - Add more checking and verification to database input.
+ - Upgrade bash to upstream Debian version 3.1dfsg and removed sources
+   from package to website to reduce package size.
+ - Improved error handling in team file uploads.
+ - Small-time cleanups.
 
 Version 2.0.0 Release Candidate 1 - 28 May 2007
 -----------------------------------------------

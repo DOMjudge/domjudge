@@ -183,7 +183,7 @@ while ( TRUE ) {
 	calcScoreRow($cid, $row['teamid'], $row['probid']);
 
 	// log to event table if no verification required and successful
-	// (case of verification required is handled in www/jury/judging.php)
+	// (case of verification required is handled in www/jury/verify.php)
 	if ( ! VERIFICATION_REQUIRED && $result == 'correct' ) {
 		$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
 		        VALUES(%i, %s, %s, %s, %i, "problem solved")',
