@@ -4,7 +4,7 @@ Version 2.0.0 - SVN
 -------------------
  - A shared file system between judgehosts and jury system is no
    longer required. The source is now communicated via the database.
- - Merge judging information into submission page.
+ - Merge judging information into submission page (Closes: #1741620).
  - Improved portability to non-Linux systems (Closes: #1734046).
  - Use syntax highlighting in source code viewer when PEAR
    Text_Highlighter class is available.
