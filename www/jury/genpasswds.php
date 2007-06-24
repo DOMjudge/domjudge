@@ -23,7 +23,7 @@ $teams = $DB->q('KEYVALUETABLE SELECT login, name FROM team
 echo addForm('genpasswds.php') .
 	"<p>\n" .
 	addSubmit('a specific team:', 'doteam') .
-	addSelect('forteam', $teams, null, true) .
+	addSelect('forteam', $teams, @$_GET['forteam'], true) .
 	"<br /></p>\n<p>" .
 	addSubmit('all teams without a password', 'doallnull') .
 	"<br /></p>\n<p>" .

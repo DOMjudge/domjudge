@@ -102,7 +102,10 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <table>
 <tr><td>Login:     </td><td class="teamid"><?=$row['login']?></td></tr>
 <tr><td>Name:      </td><td><?=htmlentities($row['name'])?></td></tr>
-<tr><td>Has passwd:</td><td><?=(isset($row['passwd']) ? 'yes':'no')?></td></tr>
+<tr><td>Has passwd:</td><td><?=(isset($row['passwd']) ? 'yes':'no')?>
+	<a href="genpasswds.php?forteam=<?=$id?>"><img src="../images/edit.png"
+	alt="edit" title="set password" class="picto"></a>
+	</td></tr>
 <tr><td>Category:  </td><td><?=(int)$row['categoryid'].
 	' - '.htmlentities($row['catname'])?></td></tr>
 <?php if (!empty($row['members'])): ?>
