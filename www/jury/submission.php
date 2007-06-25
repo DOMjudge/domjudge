@@ -8,9 +8,7 @@
 $pagename = basename($_SERVER['PHP_SELF']);
 
 $id = (int)$_REQUEST['id'];
-if ( !empty($_GET['jid']) ) {
-	$selectedjudging = (int)$_GET['jid'];
-}
+if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
 
 require('init.php');
 $title = 'Submission s'.@$id;
@@ -33,11 +31,10 @@ require('../header.php');
 
 echo "<h1>Submission s".$id."</h1>\n\n";
 
-$jdata = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
-	               result, verified, valid FROM judging
-	               WHERE cid = %i AND submitid = %i
-				   ORDER BY starttime ASC',
-				   getCurContest(), $id);
+$jdata = $DB->q('KEYTABLE SELECT *, judgingid AS ARRAYKEY FROM judging
+                 WHERE cid = %i AND submitid = %i ORDER BY starttime ASC',
+                getCurContest(), $id);
+
 ?>
 <table width="100%">
 <tr><td valign="top">
@@ -63,7 +60,9 @@ $jdata = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
 
 </td><td valign="top">
 
-<?php if ( $jdata->count() > 0 ) { 
+<?php
+
+if ( count($jdata) > 0 ) { 
 	echo "<table class=\"list\">\n";
 	echo "<tr><td></td><th colspan=\"5\">Judgings</th></tr>\n";
 	echo "<tr><td></td><th>ID</th><th>start</th><th>judgehost</th>";
@@ -72,18 +71,17 @@ $jdata = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
 	// when there's no judging selected through the request, we find
 	// out what the best one should be. The valid one, or else the most
 	// recent invalid one.
-	if ( !isset($selectedjudging) ) {
-		$selectedjudging = $DB->q('VALUE SELECT judgingid FROM judging
-			WHERE submitid = %i ORDER BY valid DESC, starttime DESC LIMIT 1',
-			$id);
+	if ( ! isset($jid) ) {
+		$jid = $DB->q('VALUE SELECT judgingid FROM judging WHERE submitid = %i
+		               ORDER BY valid DESC, starttime DESC LIMIT 1', $id);
 	}
 
 	// print the judgings
-	while ( $jud = $jdata->next() ) {
+	foreach( $jdata as &$jud ) {
 
 		echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
 
-		if ( $jud['judgingid'] == $selectedjudging ) {
+		if ( $jud['judgingid'] == $jid ) {
 			echo '<td>&rarr;&nbsp;</td><td>j' . (int)$jud['judgingid'] . '</td>';
 		} else {
 			echo '<td>&nbsp;</td><td><a href="submission.php?id=' . $id .
@@ -101,51 +99,48 @@ $jdata = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
 	}
     echo "</table>\n\n";
 
+	echo "<br />\n" . rejudgeForm('submission', $id);
+	
 } else {
 	echo "<em>Not judged yet</em>";
 }
 
-echo "<br />\n" . rejudgeForm('submission', $id);
-
-
 echo "</td></tr>\n</table>\n\n";
-
 
 
 // Display the details of the selected judging
 
-if ( isset($selectedjudging) )  {
+if ( isset($jid) )  {
 
-	$jdata = $DB->q("TUPLE SELECT * FROM judging WHERE judgingid = %i",
-		$selectedjudging);
-	
-	echo "<h2>Judging j" . (int)$jdata['judgingid'] .
-		($jdata['valid'] == 1 ? '' : ' (INVALID)') . "</h2>\n\n";
+	$jud = $jdata[$jid];
+
+	echo "<h2>Judging j" . (int)$jud['judgingid'] .
+		($jud['valid'] == 1 ? '' : ' (INVALID)') . "</h2>\n\n";
 
 	// display verification data: verified, and by whom.
 	// only if this is a valid judging, otherwise irrelevant
-	if ( $jdata['valid'] ) {
-		if ( ! (VERIFICATION_REQUIRED && $jdata['verified']) ) {
+	if ( $jud['valid'] ) {
+		if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
 
 			require_once('../forms.php');
 
-			$val = ! $jdata['verified'];
+			$val = ! $jud['verified'];
 
 			echo addForm('verify.php') .
-				addHidden('id',  $jdata['judgingid']) .
+				addHidden('id',  $jud['judgingid']) .
 				addHidden('val', $val);
 		}
 
 		echo "<p>Verified: " .
-			"<strong>" . printyn($jdata['verified']) . "</strong>";
-		if ( $jdata['verified'] && ! empty($jdata['verifier']) ) {
-			echo ", by " . htmlentities($jdata['verifier']);
+			"<strong>" . printyn($jud['verified']) . "</strong>";
+		if ( $jud['verified'] && ! empty($jud['verifier']) ) {
+			echo ", by " . htmlentities($jud['verifier']);
 		}
 
-		if ( ! (VERIFICATION_REQUIRED && $jdata['verified']) ) {
+		if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
 			echo '; <input type="submit" value="' .
 					($val ? '' : 'un') . 'mark verified"' .
-					( ! @$jdata['endtime'] ? ' disabled="disabled"' : '' ) .
+					( ! @$jud['endtime'] ? ' disabled="disabled"' : '' ) .
 					" />\n";
 			if ( $val ) {
 				echo "by " .
@@ -169,57 +164,54 @@ if ( isset($selectedjudging) )  {
 
 	echo "<h3>Output compile</h3>\n\n";
 
-	if(@$jdata['output_compile']) {
+	if ( @$jud['output_compile'] ) {
 		echo "<pre class=\"output_text\">".
-			htmlspecialchars(@$jdata['output_compile'])."</pre>\n\n";
+			htmlspecialchars($jud['output_compile'])."</pre>\n\n";
 	} else {
 		echo "<p><em>There were no compiler errors or warnings.</em></p>\n";
 	}
 
 	echo "<h3>Output run</h3>\n\n";
 
-	if(@$jdata['output_run']) {
+	if ( @$jud['output_run'] ) {
 		echo "<pre class=\"output_text\">".
-			htmlspecialchars(@$jdata['output_run'])."</pre>\n\n";
+			htmlspecialchars($jud['output_run'])."</pre>\n\n";
 	} else {
 		echo "<p><em>There was no program output.</em></p>\n";
 	}
 
 	echo "<h3>Output diff</h3>\n\n";
 
-	if(@$jdata['output_diff']) {
+	if ( @$jud['output_diff'] ) {
 		echo "<pre class=\"output_text\">".
-			htmlspecialchars(@$jdata['output_diff'])."</pre>\n\n";
+			htmlspecialchars($jud['output_diff'])."</pre>\n\n";
 	} else {
 		echo "<p><em>There was no diff output.</em></p>\n";
 	}
 
 	echo "<h3>Output error</h3>\n\n";
 
-	if(@$jdata['output_error']) {
+	if ( @$jud['output_error'] ) {
 		echo "<pre class=\"output_text\">".
-			htmlspecialchars(@$jdata['output_error'])."</pre>\n\n";
+			htmlspecialchars($jud['output_error'])."</pre>\n\n";
 	} else {
 		echo "<p><em>There was no error output.</em></p>\n";
 	}
 	
-	
 	// Time (start, end, used)
 
+	echo "<p class=\"judgetime\">Started: " . htmlspecialchars($jud['starttime']);
 
-	echo "<p class=\"judgetime\">Started: " . htmlspecialchars($jdata['starttime']);
-
-	$unix_start = strtotime($jdata['starttime']);
-	if ( !empty($jdata['endtime']) ) {
-		echo ', ended: ' . htmlspecialchars($jdata['endtime']) .
+	$unix_start = strtotime($jud['starttime']);
+	if ( !empty($jud['endtime']) ) {
+		echo ', ended: ' . htmlspecialchars($jud['endtime']) .
 			' (judging took '.
-				printtimediff($unix_start, strtotime($jdata['endtime']) ) . ')';
-	} elseif ( $jdata['valid'] ) {
+				printtimediff($unix_start, strtotime($jud['endtime']) ) . ')';
+	} elseif ( $jud['valid'] ) {
 		echo ' [still judging - busy ' . printtimediff($unix_start) . ']';
 	} else {
-		echo ' [canceled]';
+		echo ' [aborted]';
 	}
-
 }
 
 // We're done!
