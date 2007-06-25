@@ -30,7 +30,7 @@ a quick introduction, to be able to start using the system. It is
 however strongly advised, that at least one of your team's members
 read all of this manual, because there are specific details of this
 jury-system that might become of importance when you run into
-problems (like an incorrect solution). \textbf{BE WARNED!!}
+problems (like an incorrect solution). \textbf{BE WARNED!}
 
 \subsection{Reading and writing}
 
@@ -60,7 +60,9 @@ from the extension, just as with the command-line submit.
 
 Viewing scores, submissions and sending and reading clarification
 requests is done through a web-interface. The address is
-\url{\WEBBASEURI team}. Usage of these webpages should be clear.
+\url{\WEBBASEURI team}.
+
+\emph{End of summary}
 
 \newpage
 \section{Submitting solutions}\label{submit}
@@ -79,14 +81,13 @@ The submit program takes the name (label) of the problem from
 \cmd{filename} and the programming language from the extension
 \cmd{ext}. This can be overruled with the options
 \cmd{-p problemname} and \cmd{-l~languageextension}.
-See \cmd{submit --help} for a complete list of all options and
-extensions and some examples. Note that this help is quite long and
-might not fit on a screen. Use
-\cmd{submit~--help | more} to read everything.
+See \cmd{submit --help} for a complete list of all options,
+extensions and some examples.  Use \cmd{submit~--help | more}
+when the help text does not fit on one screen.
 
-\cmd{submit} will check your file and warns you for some things:
+\cmd{submit} will check your file and warns you for some problems:
 for example when the file has not been modified for a long time or
-when is is larger than the maximum source-code size.
+when it's larger than the maximum source-code size.
 
 Then \cmd{submit} displays a summary with all details of your
 submission and asks for confirmation. Check whether you are submitting
@@ -99,8 +100,8 @@ home directory of your account where it stores temporary files for
 submission and also a log file \cmd{submit.log}. Do not remove or
 change this directory, or the \cmd{submit} program might fail to
 function correctly. Furthermore a ``public ssh-key'' of the jury has
-been added to the ssh configuration; this is also necessary for the
-functioning of \cmd{submit}.
+been added to the \textsc{ssh} configuration; this is also necessary
+for the functioning of \cmd{submit}.
 
 \subsection{Web-interface}
 
@@ -133,9 +134,8 @@ The submission was correct and you solved this problem!
 \item[COMPILER-ERROR]
 There was an error when compiling your program. Depending on the setup
 at your site, you can view the submission details on your team page to
-see the exact error. Note that the compiler\emph{warnings} do not
-count as error, but can also be viewed in the submission details
-(depending on setup).
+see the exact error, or you might be able to see just the
+compiler\emph{warnings}.
 
 \item[TIMELIMIT]
 Your program took longer than the maximum allowed time for this
@@ -147,7 +147,7 @@ enough.
 There was an error during the execution of your program. This can have
 a lot of different causes like division by zero, incorrectly
 addressing memory (e.g. by indexing arrays out of bounds), trying to
-use more memory than the limit, etc\dots\ 
+use more memory than the limit, etc. 
 Also check that your program exits with exitcode 0!
 
 \item[NO-OUTPUT]
@@ -155,9 +155,9 @@ Your program did not generate any output. Check that you write to
 standard out.
 
 \item[WRONG-ANSWER]
-The output of your program was incorrect. This can happen, simply
-because your solution is not correct, but also check that your output
-complies exactly with the specifications of the jury.
+The output of your program was incorrect. This can happen simply
+because your solution is not correct, but remember that your output
+must comply exactly with the specifications of the jury.
 
 \item[TOO-LATE]
 Bummer, you submitted after the contest ended! Your submission is stored but
@@ -176,7 +176,7 @@ as soon as possible. Answers that are relevant for everyone, will be
 sent to everyone.
 
 When you receive a new clarification from the jury, this will
-automatically be displayed as ``(1 NEW)'' in the clarification button
+automatically be displayed as ``(1 new)'' in the clarification button
 in the menu bar.
 
 \section{How are submissions being judged?}
@@ -214,19 +214,19 @@ After your program has compiled successfully, it will be executed and
 its output compared to the output of jury. Before comparing the
 output, the exit status of your program is checked: if your programs
 gives the correct answer, but exits with a nonzero exitcode, the
-result will be a run-error! There are some restrictions during
+result will be a \textsc{run-error}! There are some restrictions during
 execution. If your program violates these, it will also be aborted
-with a run-error, see section \ref{runlimits}.
+with a \textsc{run-error}, see section \ref{runlimits}.
 
 When comparing program output, it has to exactly match to output of
-the jury. So take care, that you follow the output specifications. In
+the jury. So take care that you follow the output specifications. In
 case of problem statements which do not have unique output (e.g. with
-floating point answers), the jury can have made a modified comparison
+floating point answers), the jury may use a modified comparison
 function.
 
 \subsection{Restrictions}\label{runlimits}
 
-To prevent hacking, keep the jury-system stable and give everyone
+To prevent abuse, keep the jury-system stable and give everyone
 clear and equal environments, there are some restrictions to which all
 submissions are subjected:
 
@@ -275,9 +275,7 @@ runs in one process.
 \section{Code examples}\label{codeexamples}
 
 Below are a few examples on how to read input and write output for a
-problem. The way of doing reading and writing input and output in this problem
-is like how it is done in a lot of programming contests (e.g. the ACM
-regionals), but can be different at your contest.
+problem.
 
 The examples are solutions for the problem: given a string with a name
 consisting of one word, output the string ``Hello $<$name$>$!''.
@@ -299,7 +297,7 @@ follow.
 A solution for this problem in C:
 \listinginput{1}{../examples/example.c}
 
-Notice the last \cmd{return 0;} to prevent a run-error!
+Notice the last \cmd{return 0;} to prevent a \textsc{run-error}!
 
 \newpage
 
