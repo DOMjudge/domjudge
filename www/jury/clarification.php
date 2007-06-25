@@ -35,34 +35,36 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	// or we don't. If no transaction support, we just have to hope
 	// this goes well.
 	$DB->q('START TRANSACTION');
-	
+
+	if ( empty($_POST['sendto']) ) {
+		$sendto = null;
+	} elseif ( $_POST['sendto'] == 'domjudge-must-select' ) {
+		error ( 'You must select somewhere to send the clarification to.' );
+	} else {
+		$sendto = $_POST['sendto'];
+	}
+
 	if ( $isgeneral ) {
 		$newid = $DB->q('RETURNID INSERT INTO clarification
 		                 (cid, submittime, recipient, body)
 		                 VALUES (%i, now(), %s, %s)',
-		                $cid,
-		                ( empty($_POST['sendto']) ? NULL : $_POST['sendto'] ),
-		                $_POST['bodytext']);
+		                 $cid, $sendto, $_POST['bodytext']);
 	} else {
 		$newid = $DB->q('RETURNID INSERT INTO clarification
 		                 (cid, respid, submittime, recipient, body)
 		                 VALUES (%i, %i, now(), %s, %s)',
-		                $cid, $respid,
-		                ( empty($_POST['sendto']) ? NULL : $_POST['sendto'] ),
-		                $_POST['bodytext']);
+		                 $cid, $respid, $sendto, $_POST['bodytext']);
 	}
 	if ( ! $isgeneral ) {
 		$DB->q('UPDATE clarification SET answered = 1 WHERE clarid = %i', $respid);
 	}
 	
-	// log to event table if clarification to all teams 
-	if ( empty($_POST['sendto']) ) {
+	if( is_null($sendto) ) {
+		// log to event table if clarification to all teams 
 		$DB->q('INSERT INTO event (cid, clarid, description)
 		        VALUES(%i, %i, "clarification")', $cid, $newid);
-	}
-	
-	// mark the messages as unread for the team(s)
-	if( empty($_POST['sendto']) ) {
+
+		// mark the messages as unread for the team(s)
 		$teams = $DB->q('COLUMN SELECT login FROM team');
 		foreach($teams as $login) {
 			$DB->q('INSERT INTO team_unread (mesgid, type, teamid)
@@ -70,7 +72,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		}
 	} else {
 		$DB->q('INSERT INTO team_unread (mesgid, type, teamid)
-		        VALUES (%i, "clarification", %s)', $newid, $_POST['sendto']);
+		        VALUES (%i, "clarification", %s)', $newid, $sendto);
 	}
 
 	$DB->q('COMMIT');

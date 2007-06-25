@@ -14,6 +14,7 @@ Version 2.0.0 - SVN
    time-independent.
  - Fixed bug in submit_db: report errors before too-late submission.
  - Fix bug in diff display when no newline present (Closes: #1741625).
+ - Select recipient explicitly on clarification send (Closes: #1741622).
  - Use either wget or curl for downloading LaTeX packages.
  - Add more checking and verification to database input.
  - Upgrade bash to upstream Debian version 3.1dfsg and removed sources

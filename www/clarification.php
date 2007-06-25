@@ -167,6 +167,10 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 function confirmClar() {
 <?php if ( $isjury ): ?>
 	sendto = document.forms['sendclar'].sendto.value;
+	if ( sendto=='domjudge-must-select' ) {
+		alert('You must select a recipient for this clarification.');
+		return false;
+	}
 	if ( sendto=='' ) sendto = "ALL";
 	return confirm("Send clarification to " + sendto + "?");
 <?php else : ?>
@@ -187,7 +191,7 @@ function confirmClar() {
 			echo addHidden('id',$respid);
 		}
 
-		$options = array('' => 'ALL');
+		$options = array('domjudge-must-select' => '(select...)', '' => 'ALL');
 		if ( ! $respid ) {
 			$teams = $DB->q('KEYVALUETABLE SELECT login, CONCAT(login, ": ", name) as name
 			                 FROM team
@@ -207,7 +211,7 @@ function confirmClar() {
 					$clar['toname'];
 			}
 		}
-		echo addSelect('sendto', $options, null, true);
+		echo addSelect('sendto', $options, 'domjudge-must-select', true);
 		echo "</td></tr>\n";
 	} else {
 		echo "<tr><td><b>To:</b></td><td>Jury</td></tr>\n";
