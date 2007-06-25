@@ -103,8 +103,10 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <tr><td>Login:     </td><td class="teamid"><?=$row['login']?></td></tr>
 <tr><td>Name:      </td><td><?=htmlentities($row['name'])?></td></tr>
 <tr><td>Has passwd:</td><td><?=(isset($row['passwd']) ? 'yes':'no')?>
+<?php if ( IS_ADMIN ): ?>
 	<a href="genpasswds.php?forteam=<?=$id?>"><img src="../images/edit.png"
 	alt="edit" title="set password" class="picto"></a>
+<?php endif; ?>
 	</td></tr>
 <tr><td>Category:  </td><td><?=(int)$row['categoryid'].
 	' - '.htmlentities($row['catname'])?></td></tr>
