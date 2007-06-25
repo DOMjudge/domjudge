@@ -47,13 +47,13 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	if ( $isgeneral ) {
 		$newid = $DB->q('RETURNID INSERT INTO clarification
 		                 (cid, submittime, recipient, body)
-		                 VALUES (%i, now(), %s, %s)',
-		                 $cid, $sendto, $_POST['bodytext']);
+		                 VALUES (%i, %s, %s, %s)',
+		                 $cid, now(), $sendto, $_POST['bodytext']);
 	} else {
 		$newid = $DB->q('RETURNID INSERT INTO clarification
 		                 (cid, respid, submittime, recipient, body)
-		                 VALUES (%i, %i, now(), %s, %s)',
-		                 $cid, $respid, $sendto, $_POST['bodytext']);
+		                 VALUES (%i, %i, %s, %s, %s)',
+		                 $cid, $respid, now(), $sendto, $_POST['bodytext']);
 	}
 	if ( ! $isgeneral ) {
 		$DB->q('UPDATE clarification SET answered = 1 WHERE clarid = %i', $respid);

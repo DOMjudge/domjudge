@@ -29,8 +29,8 @@ if ( isset($_REQUEST['id']) ) {
 if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, submittime, sender, body)
-	                 VALUES (%i, now(), %s, %s)',
-	                $cid, $login, $_POST['bodytext']);
+	                 VALUES (%i, %s, %s, %s)',
+	                 $cid, now(), $login, $_POST['bodytext']);
 
 	// redirect back to the original location
 	header('Location: '.getBaseURI().'team/clarifications.php');
