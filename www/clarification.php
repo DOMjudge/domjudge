@@ -136,8 +136,17 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 				( $clar['sender'] ? 'Jury' : 'All') ) . '</td>';
 		}
 		echo '<td>' . printtime($clar['submittime']) . '</td>';
-		echo '<td><a href="clarification.php?id='.$clar['clarid'].'">' .
-			htmlspecialchars(str_cut($clar['body'],80)) . "</a></td></tr>\n";
+		echo '<td><a href="clarification.php?id='.$clar['clarid'].'">';
+
+		// when making a summary, try to igonore the quoted text
+		$split = explode("\n", $clar['body']);
+		$newbody = '';
+		foreach($split as $line) {
+			if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line;
+		}
+		echo htmlspecialchars( str_cut( ( empty($newbody) ? $clar['body'] : $newbody ), 80) );
+		
+		echo "</a></td></tr>\n";
 	}
 	echo "</table>\n\n";
 }
