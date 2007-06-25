@@ -3,6 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
+all: docs
 docs: admin-manual.pdf admin-manual.html
 
 admin-manual.pdf: admin-manual.sgml ../docs_header.tex

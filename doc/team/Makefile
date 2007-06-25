@@ -15,6 +15,7 @@ LATEXPKGFILES = $(addprefix ../,$(addsuffix .sty,$(LATEXPACKAGES)))
 LATEX = pdflatex
 LATEXFLAGS = --interaction=errorstopmode
 
+all: docs
 docs: pdf
 
 pdf: $(TARGETSPDF)
