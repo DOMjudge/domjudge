@@ -16,12 +16,10 @@ require('../header.php');
 require('../scoreboard.php');
 
 $isstatic = @$_SERVER['argv'][1]=='static';
-if ( !$isstatic ) {
-	putClock();
-}
+
+if ( ! $isstatic ) putClock();
 
 // call the general putScoreBoard function from scoreboard.php
 putScoreBoard(null,null,$isstatic);
 
 require('../footer.php');
-

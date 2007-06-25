@@ -66,7 +66,7 @@ function rejudgeForm($table, $id)
 		// (nothing to rejudge) or if the result is already correct
 		global $DB;
 		$validresult = $DB->q('MAYBEVALUE SELECT result FROM judging WHERE
-                           submitid = %i AND valid = 1', $id);
+		                       submitid = %i AND valid = 1', $id);
 		if ( $validresult && $validresult != 'correct' ) {
 			$ret .= " onclick=\"return confirm('Rejudge submission s" .
 				(int)$id . "?')\" />\n";
@@ -74,11 +74,10 @@ function rejudgeForm($table, $id)
 			$ret .= " disabled=\"disabled\" />\n";
 		}
 	} else {
-		$ret .= "<input type=\"submit\" value=\"REJUDGE ALL for " .
-			$table . " " . htmlspecialchars($id) .
-		"\" onclick=\"return confirm('Rejudge all submissions for this " .
+		$ret .= '<input type="submit" value="REJUDGE ALL for ' .
+			$table . ' ' . htmlspecialchars($id) .
+			'" onclick="return confirm(\'Rejudge all submissions for this ' .
 			$table . "?')\" />\n";
 	}
 	return $ret . addEndForm();
 }
-
