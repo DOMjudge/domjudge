@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 2.0.0 - SVN
--------------------
+Version 2.0.0 Release Candidate 2 - 25 June 2007
+------------------------------------------------
  - A shared file system between judgehosts and jury system is no
    longer required. The source is now communicated via the database.
  - Merge judging information into submission page (Closes: #1741620).
