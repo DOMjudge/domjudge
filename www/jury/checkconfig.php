@@ -230,6 +230,20 @@ if($res->count() > 0) {
 
 echo "</p>\n\n<h2>Teams</h2>\n\n<p>Checking teams...<br />\n";
 
+$res = $DB->q('SELECT * FROM team ORDER BY login');
+
+if($res->count() > 0) {
+	while($row = $res->next()) {
+		$CHECKER_ERRORS = array();
+		check_team($row);
+		if ( count ( $CHECKER_ERRORS ) > 0 ) {
+			foreach($CHECKER_ERRORS as $chk_err) {
+				err($row['login'].': ' . $chk_err);
+			}
+		}
+	}
+}
+
 if ( SHOW_AFFILIATIONS ) {
 	$res = $DB->q('SELECT affilid FROM team_affiliation ORDER BY affilid');
 

@@ -62,7 +62,7 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 ?>
 </td></tr>
 <tr><td><label for="data_0__ipaddress_">IP address:</label></td>
-<td><?=addInput('data[0][ipaddress]', @$row['ipaddress'], 35, 32)?></td></tr>
+<td><?=addInput('data[0][ipaddress]', @$row['ipaddress'], 35, 32)?> (or hostname)</td></tr>
 <tr><td><label for="data_0__room_">Room:</label></td>
 <td><?=addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td valign="top"><label for="data_0__comments_">Comments:</label></td>
@@ -121,7 +121,7 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 	$row['affname'])?></a></td></tr>
 <?php endif; ?>
 <tr><td>Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
-	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):''?></td></tr>
+	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):'-'?></td></tr>
 <?php if (!empty($row['room'])): ?>
 <tr><td>Room:</td><td><?=htmlentities($row['room'])?></td></tr>
 <?php endif; ?>
