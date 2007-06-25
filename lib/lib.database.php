@@ -391,7 +391,7 @@ class db
 					if (!is_array($val) || !$val) {
 						user_error("%A in \$DATABASE->q() has to correspond to a "
 							."non-empty array, it's now a "
-							."'$val'!", E_USER_ERROR );
+							."'$val' (Query: '$key $query')!", E_USER_ERROR );
 					}
 					$GLOBALS['MODE'] = $part{1};
 					$query .= implode(', ', array_map('db__val2sql', $val));
@@ -597,12 +597,12 @@ class db_result
 			user_error('Gettable does not work if you\'ve already next()ed over the result!',
 				E_USER_ERROR);
 		}
-		$tabel = array();
+		$table = array();
 		while ($this->next())
 		{
-			$tabel[] = $this->tuple;
+			$table[] = $this->tuple;
 		}
-		return $tabel;
+		return $table;
 	}
 
 	// returns a 2-dim array containing the result, with a column as key
@@ -613,11 +613,11 @@ class db_result
 			user_error('Getkeytable does not work if you\'ve already next()ed over the result!',
 				E_USER_ERROR);
 		}
-		$tabel = array();
+		$table = array();
 		while ($this->next()) {
-			$tabel[$this->tuple[$key]] = $this->tuple;
+			$table[$this->tuple[$key]] = $this->tuple;
 		}
-		return $tabel;
+		return $table;
 	}
 	
 	// returns an associative array containing the result, with the frirst
@@ -634,11 +634,13 @@ class db_result
 				E_USER_ERROR);
 		}
 
-		$tabel = array();
+		$table = array();
 		while ($this->next()) {
-			$tabel[array_shift($this->tuple)] = array_shift($this->tuple);
+			$key = array_shift($this->tuple);
+			$value = array_shift($this->tuple);
+			$table[$key] = $value;
 		}
-		return $tabel;
+		return $table;
 	}
 
 	function count()

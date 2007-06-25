@@ -18,6 +18,7 @@ Version 2.0.0 - SVN
  - Add more checking and verification to database input.
  - Upgrade bash to upstream Debian version 3.1dfsg and removed sources
    from package to website to reduce package size.
+ - Bring lib.database.php up to date with latest upstream version.
  - Improved error handling in team file uploads.
  - Small-time cleanups.
 
