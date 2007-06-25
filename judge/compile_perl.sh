@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Perl compile wrapper-script for 'test_solution.sh'.
 # See that script for syntax and more info.
@@ -31,7 +31,7 @@ EXITCODE=$?
 
 # Write executing script:
 cat > $DEST <<EOF
-#!/bin/bash
+#!/bin/sh
 # Generated shell-script to execute perl interpreter on source.
 
 exec perl $SOURCE

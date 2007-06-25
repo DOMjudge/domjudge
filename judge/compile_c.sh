@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # C compile wrapper-script for 'test_solution.sh'.
 # See that script for syntax and more info.

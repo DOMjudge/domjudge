@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Java compile wrapper-script for 'test_solution.sh'.
 # See that script for syntax and more info.
@@ -43,7 +43,7 @@ MEMLIMITJAVA=$(($MEMLIMIT - 204800))
 # -Xrs: reduces usage signals by java, because that generates debug
 #       output when program is terminated on timelimit exceeded.
 cat > $DEST <<EOF
-#!/bin/bash
+#!/bin/sh
 # Generated shell-script to execute java interpreter on source.
 
 cd $SOURCEDIR

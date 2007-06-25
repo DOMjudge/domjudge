@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Bash compile wrapper-script for 'test_solution.sh'.
 # See that script for syntax and more info.
@@ -33,7 +33,7 @@ EXITCODE=$?
 
 # Write executing script:
 cat > $DEST <<EOF
-#!/bin/bash
+#!/bin/sh
 # Generated shell-script to execute bash interpreter on source.
 
 exec bash $RUNOPTIONS $SOURCE
