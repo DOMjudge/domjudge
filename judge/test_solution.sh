@@ -78,8 +78,8 @@ cleanexit ()
 		kill -9 $CATPID
 	fi
 
-	# Remove copied bash-static to save disk space
-	rm -f "$TMPDIR/bin/bash"
+	# Remove copied static shell to save disk space
+	rm -f "$TMPDIR/bin/sh"
 
 	logmsg $LOG_INFO "exiting"
 }
@@ -102,7 +102,7 @@ fi
 
 # Location of scripts/programs:
 SCRIPTDIR="$SYSTEM_ROOT/judge"
-BASHSTATIC="$SYSTEM_ROOT/bin/bash-static"
+STATICSHELL="$SYSTEM_ROOT/bin/bash-static"
 RUNGUARD="$SYSTEM_ROOT/bin/runguard"
 
 logmsg $LOG_NOTICE "starting '$0', PID = $$"
@@ -209,10 +209,10 @@ cd "$TMPDIR"
 chmod a+r testdata.in
 
 mkdir --mode=0711 bin dev proc
-# Copy the run-script and a statically compiled bash-shell:
+# Copy the run-script and a statically compiled shell:
 cp -p "$SCRIPTDIR/$RUN_SCRIPT" .
-cp -p "$BASHSTATIC"            ./bin/bash
-chmod a+rx "$RUN_SCRIPT" bin/bash
+cp -p "$STATICSHELL"           ./bin/sh
+chmod a+rx "$RUN_SCRIPT" bin/sh
 
 # Execute an optional chroot setup script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
