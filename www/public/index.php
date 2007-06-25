@@ -15,10 +15,13 @@ $menu = false;
 require('../header.php');
 require('../scoreboard.php');
 
-putClock();
+$isstatic = @$_SERVER['argv'][1]=='static';
+if ( !$isstatic ) {
+	putClock();
+}
 
 // call the general putScoreBoard function from scoreboard.php
-putScoreBoard(null,null,@$_SERVER['argv'][1]=='static');
+putScoreBoard(null,null,$isstatic);
 
 require('../footer.php');
 
