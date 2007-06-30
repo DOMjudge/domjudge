@@ -10,6 +10,14 @@
 #include <stdarg.h>
 #include <string>
 
+#define FAILURE 0
+#define SUCCESS 1
+#define WARNING 2
+
+#define FAILURE_EXITCODE -1
+#define SUCCESS_EXITCODE  0
+#define WARNING_EXITCODE  1
+
 #define SOCKETBUFFERSIZE 256
 
 /* Buffer where the last received message is stored */

@@ -10,26 +10,12 @@
 #include <stdarg.h>
 #include <sys/wait.h>
 
-/* Logging and error functions */
-// #include "lib.error.h"
-
-#define MAXARGS 10
-
-#define PIN  1
-#define POUT 0
-
 #ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
+extern "C" {
+#endif
 
-const int FAILURE = 0;
-const int SUCCESS = 1;
-const int WARNING = 2;
-
-const int FAILURE_EXITCODE = -1;
-const int SUCCESS_EXITCODE = 0;
-const int WARNING_EXITCODE = 1;
+/* Maximum arguments to execute() */
+#define MAXARGS 10
 
 char *allocstr(char *, ...);
 /* Create a c-string by allocating memory for it and writing to it,

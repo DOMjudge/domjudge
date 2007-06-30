@@ -19,9 +19,8 @@
 #define WARNMATCH WARNSTR": "
 
 #ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
+extern "C" {
+#endif
 
 extern const int exit_failure;
 

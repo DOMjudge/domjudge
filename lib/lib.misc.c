@@ -10,6 +10,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+/* Array indices for input/output file descriptors as used by pipe() */
+#define PIPE_IN  1
+#define PIPE_OUT 0
+
 char *allocstr(char *mesg, ...)
 {
 	va_list ap;
@@ -66,16 +70,16 @@ int execute(char *cmd, char **args, int nargs, int stdio_fd[3], int err2out)
 	case  0: /* child process */
 		/* Connect pipes to command stdin/stdout and close unneeded fd's */
 		if ( stdio_fd[0] ) {
-			if ( dup2(inpipe[POUT],STDIN_FILENO)<0 ) return -1;
-			if ( close(inpipe[PIN])!=0 ) return -1;
+			if ( dup2(inpipe[PIPE_OUT],STDIN_FILENO)<0 ) return -1;
+			if ( close(inpipe[PIPE_IN])!=0 ) return -1;
 		}
 		if ( stdio_fd[1] ) {
-			if ( dup2(outpipe[PIN],STDOUT_FILENO)<0 ) return -1;
-			if ( close(outpipe[POUT])!=0 ) return -1;
+			if ( dup2(outpipe[PIPE_IN],STDOUT_FILENO)<0 ) return -1;
+			if ( close(outpipe[PIPE_OUT])!=0 ) return -1;
 		}
 		if ( stdio_fd[2] ) {
-			if ( dup2(errpipe[PIN],STDERR_FILENO)<0 ) return -1;
-			if ( close(errpipe[POUT])!=0 ) return -1;
+			if ( dup2(errpipe[PIPE_IN],STDERR_FILENO)<0 ) return -1;
+			if ( close(errpipe[PIPE_OUT])!=0 ) return -1;
 		}
 		if ( err2out && dup2(STDOUT_FILENO,STDERR_FILENO)<0 ) return -1;
 		
@@ -86,16 +90,16 @@ int execute(char *cmd, char **args, int nargs, int stdio_fd[3], int err2out)
 	default: /* parent process */
 		/* Set and close file descriptors */
 		if ( stdio_fd[0] ) {
-			stdio_fd[0] = inpipe[PIN];
-			if ( close(inpipe[POUT])!=0 ) return -1;
+			stdio_fd[0] = inpipe[PIPE_IN];
+			if ( close(inpipe[PIPE_OUT])!=0 ) return -1;
 		}
 		if ( stdio_fd[1] ) {
-			stdio_fd[1] = outpipe[POUT];
-			if ( close(outpipe[PIN])!=0 ) return -1;
+			stdio_fd[1] = outpipe[PIPE_OUT];
+			if ( close(outpipe[PIPE_IN])!=0 ) return -1;
 		}
 		if ( stdio_fd[2] ) {
-			stdio_fd[2] = errpipe[POUT];
-			if ( close(errpipe[PIN])!=0 ) return -1;
+			stdio_fd[2] = errpipe[PIPE_OUT];
+			if ( close(errpipe[PIPE_IN])!=0 ) return -1;
 		}
 
 		/* Return if some IO is redirected to be able to read/write to child */
