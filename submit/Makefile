@@ -3,21 +3,20 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-LIBS = lib.error.o lib.misc.o
-LIBOBJECTS = $(addprefix $(TOPDIR)/lib/,$(LIBS))
-LIBHEADERS = $(LIBOBJECTS:.o=.h)
-
-SUBMITCOMMONBASE = submitcommon
-
 ifdef CYGWIN
 EXECSUFFIX = .exe
+OBJSUFFIX = .cygwin.o
 TARGETS = submit$(EXECSUFFIX)
-LIBOBJECTS = $(LIBOBJECTS:.o=.cygwin.o)
-SUBMITCOMMONOBJ = $(SUBMITCOMMONBASE).cygwin.o
 else
+OBJSUFFIX = .o
 TARGETS = submit submitdaemon
-SUBMITCOMMONOBJ = $(SUBMITCOMMONBASE).o
 endif
+
+LIBSBASE = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc)
+LIBHEADERS = $(addsuffix .h,$(LIBSBASE))
+LIBOBJECTS = $(addsuffix $(OBJSUFFIX),$(LIBSBASE))
+
+SUBMITCOMMONOBJ = submitcommon$(OBJSUFFIX)
 
 ifneq ($(shell which curl-config),)
 LIBCURL     = $(shell curl-config --version | cut -d ' ' -f 2)
@@ -40,7 +39,7 @@ $(TARGETS): %$(EXECSUFFIX): %.cc $(SUBMITCOMMONOBJ) $(TOPDIR)/etc/config.h \
 $(LIBOBJECTS):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
-$(SUBMITCOMMONOBJ): $(addprefix $(SUBMITCOMMONBASE),.cc .h) $(LIBHEADERS)
+$(SUBMITCOMMONOBJ): %$(OBJSUFFIX): %.cc %.h $(LIBHEADERS)
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 submit$(EXECSUFFIX): $(CURLSTATIC)

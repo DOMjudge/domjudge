@@ -17,7 +17,12 @@ SUBDIRS = bin etc lib doc submit judge www sql test-programs test-sources
 REC_TARGETS = build check clean distclean
 
 # Default targets
+ifdef CYGWIN
+default:
+	$(MAKE) -C submit build
+else
 default: config build docs
+endif
 
 # Generate language specific config files from global config
 config:
