@@ -4,13 +4,13 @@
  * $Id$
  */
 
-#ifndef _LIB_ERROR_
-#define _LIB_ERROR_
+#ifndef __LIB_ERROR_H
+#define __LIB_ERROR_H
 
 #include <stdarg.h>
 #include <stdio.h>
-#include <errno.h>
 #include <syslog.h>
+#include <errno.h>
 
 #define ERRSTR    "error"
 #define ERRMATCH  ERRSTR": "
@@ -23,7 +23,7 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-const int exit_failure = -1;
+extern const int exit_failure;
 
 /* Import from the main program for logging purposes */
 extern char *progname;
@@ -80,4 +80,4 @@ void vwarning (int, char *, va_list);
 }
 #endif
 
-#endif /* _LIB_ERROR_ */
+#endif /* __LIB_ERROR_H */

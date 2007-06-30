@@ -3,12 +3,21 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = submit submitdaemon
-
-LIBS = lib.error.o
+LIBS = lib.error.o lib.misc.o
 LIBOBJECTS = $(addprefix $(TOPDIR)/lib/,$(LIBS))
 LIBHEADERS = $(LIBOBJECTS:.o=.h)
-LIBOBJECTSCYGWIN = $(LIBOBJECTS:.o=.cygwin.o)
+
+SUBMITCOMMONBASE = submitcommon
+
+ifdef CYGWIN
+EXECSUFFIX = .exe
+TARGETS = submit$(EXECSUFFIX)
+LIBOBJECTS = $(LIBOBJECTS:.o=.cygwin.o)
+SUBMITCOMMONOBJ = $(SUBMITCOMMONBASE).cygwin.o
+else
+TARGETS = submit submitdaemon
+SUBMITCOMMONOBJ = $(SUBMITCOMMONBASE).o
+endif
 
 ifneq ($(shell which curl-config),)
 LIBCURL     = $(shell curl-config --version | cut -d ' ' -f 2)
@@ -20,26 +29,23 @@ CURLDEF     = -DLIBCURL=$(LIBCURL)
 CURLFLAGS   = $(CURLDEF) -I$(CURLINCLUDE) $(CURLLIBS)
 endif
 
+default: build
+
 build: $(TARGETS)
 
-$(TARGETS): %: %.cc submitcommon.o $(TOPDIR)/etc/config.h $(LIBOBJECTS) $(LIBHEADERS)
+$(TARGETS): %$(EXECSUFFIX): %.cc $(SUBMITCOMMONOBJ) $(TOPDIR)/etc/config.h \
+                            $(LIBOBJECTS) $(LIBHEADERS)
 	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLFLAGS)
 
-submit.exe: %.exe: %.cc submitcommon.cygwin.o $(TOPDIR)/etc/config.h $(LIBOBJECTSCYGWIN) $(LIBHEADERS)
-	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLFLAGS)
-
-$(LIBOBJECTS) $(LIBOBJECTSCYGWIN):
+$(LIBOBJECTS):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
-submitcommon.o: %.o: %.cc %.h $(LIBHEADERS)
+$(SUBMITCOMMONOBJ): $(addprefix $(SUBMITCOMMONBASE),.cc .h) $(LIBHEADERS)
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
-submitcommon.cygwin.o: %.cygwin.o: %.cc %.h $(LIBHEADERS)
-	$(CXX) -c $(CXXFLAGS) $< -o $@
-
-submit submit.exe: $(CURLSTATIC)
+submit$(EXECSUFFIX): $(CURLSTATIC)
 
 clean:
-	-rm -f $(TARGETS) submit.exe submitcommon.o submitcommon.cygwin.o
+	-rm -f $(TARGETS) $(SUBMITCOMMONOBJ)
 
 .PHONY:

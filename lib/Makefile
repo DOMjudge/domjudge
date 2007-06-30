@@ -3,18 +3,22 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-OBJECTS = lib.error.o
-OBJECTSCYGWIN = $(OBJECTS:.o=.cygwin.o)
+ifdef CYGWIN
+OBJSUFFIX = .cygwin.o
+else
+OBJSUFFIX = .o
+endif
+
+LIBSBASE = lib.error lib.misc
+
+OBJECTS = $(addsuffix $(OBJSUFFIX),$(LIBSBASE))
 
 default: build
 
 build: $(OBJECTS)
 
-$(OBJECTS): %.o: %.c %.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-$(OBJECTSCYGWIN): %.cygwin.o: %.c %.h
+$(OBJECTS): %$(OBJSUFFIX): %.c %.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf $(OBJECTS) $(OBJECTSCYGWIN)
+	rm -f $(OBJECTS)

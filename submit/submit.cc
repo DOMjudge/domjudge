@@ -1,6 +1,6 @@
 /*
    submit -- command-line submit program for solutions.
-   Copyright (C) 2004 Peter van de Werken, Jaap Eldering.
+   Copyright (C) 2004-2007 Peter van de Werken, Jaap Eldering.
 
    Based on submit.pl by Eelco Dolstra.
    
@@ -54,11 +54,14 @@ using namespace std;
 #include "../etc/config.h"
 
 /* Logging and error functions */
-#include "../lib/lib.error.h"
+#include "lib.error.h"
+
+/* Misc. other functions */
+#include "lib.misc.h"
 
 /* Include some functions, which are not always available */
-#include "../lib/mkstemps.h"
-#include "../lib/basename.h"
+#include "mkstemps.h"
+#include "basename.h"
 
 /* Common send/receive functions */
 #include "submitcommon.h"

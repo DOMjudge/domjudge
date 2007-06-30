@@ -14,12 +14,13 @@
  */
 
 #include "lib.error.h"
-#include <stdio.h>
+
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 #include <unistd.h>
 #include <time.h>
+
+const int exit_failure = -1;
 
 /* Variables defining logmessages verbosity to stderr/logfile */
 int  verbose      = LOG_NOTICE;
