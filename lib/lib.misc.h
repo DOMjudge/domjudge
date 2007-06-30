@@ -8,7 +8,7 @@
 #define __LIB_MISC_H
 
 #include <stdarg.h>
-#include <wait.h>
+#include <sys/wait.h>
 
 /* Logging and error functions */
 // #include "lib.error.h"
