@@ -17,7 +17,7 @@ CTANPATH=ftp://tug.ctan.org/pub/tex-archive/macros/latex/contrib
 SUBDIRS = admin team judge
 REC_TARGETS = docs clean distclean
 
-all: docs
+default: docs
 
 $(LATEXZIPFILES): %.zip:
 	@echo "Downloading LaTeX package '$*' from CTAN.org..." ; \

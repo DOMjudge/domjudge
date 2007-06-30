@@ -7,7 +7,7 @@ EXTENSIONS = h sh php tex
 TEMPLATES  = $(addprefix config.template.,$(EXTENSIONS))
 CONFIGS    = $(addprefix config.,$(EXTENSIONS))
 
-all: config
+default: config
 
 config: $(CONFIGS)
 
