@@ -22,54 +22,8 @@
 
  */
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <syslog.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <getopt.h>
-#include <termios.h>
-
-#ifdef LIBCURL
-#include <curl/curl.h>
-#include <curl/easy.h>
-#endif
-
-/* C++ includes for easy string handling */
-using namespace std;
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
-
 /* System/site specific config */
 #include "../etc/config.h"
-
-/* Logging and error functions */
-#include "lib.error.h"
-
-/* Misc. other functions */
-#include "lib.misc.h"
-
-/* Include some functions, which are not always available */
-#include "mkstemps.h"
-#include "basename.h"
-
-/* Common send/receive functions */
-#include "submitcommon.h"
-
-/* These defines are needed in 'version' */
-#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
-#define PROGRAM "submit"
-#define AUTHORS "Peter van de Werken & Jaap Eldering"
 
 /* Check whether default submission method is available; bail out if not */
 #if ( SUBMITCLIENT_METHOD == 1 ) && ( ENABLE_CMDSUBMIT_SERVER != 1 )
@@ -95,6 +49,54 @@ using namespace std;
 #if ( ENABLE_WEBSUBMIT_SERVER == 1 && defined( LIBCURL ) )
 #define WEBSUBMIT 1
 #endif
+
+/* Standard include headers */
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <syslog.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <getopt.h>
+#include <termios.h>
+#ifdef CMDSUBMIT
+#include <netinet/in.h>
+#include <netdb.h>
+#endif
+#ifdef WEBSUBMIT
+#include <curl/curl.h>
+#include <curl/easy.h>
+#endif
+
+/* C++ includes for easy string handling */
+using namespace std;
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+/* Logging and error functions */
+#include "lib.error.h"
+
+/* Misc. other functions */
+#include "lib.misc.h"
+
+/* Include some functions, which are not always available */
+#include "mkstemps.h"
+#include "basename.h"
+
+/* Common send/receive functions */
+#include "submitcommon.h"
+
+/* These defines are needed in 'version' */
+#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
+#define PROGRAM "submit"
+#define AUTHORS "Peter van de Werken & Jaap Eldering"
 
 const int timeout_secs = 60; /* seconds before send/receive timeouts with an error */
 
@@ -142,12 +144,14 @@ int  cmdsubmit();
 int  websubmit();
 #endif
 
-int nwarnings;
-
+#ifdef CMDSUBMIT
 int socket_fd; /* filedescriptor of the connection to server socket */
 
 struct addrinfo *server_ais, *server_ai; /* server adress information */
 char server_addr[NI_MAXHOST];            /* server IP address string  */
+#endif
+
+int nwarnings;
 
 /* Submission information */
 string problem, language, extension, server, team;
