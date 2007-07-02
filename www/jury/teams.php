@@ -89,7 +89,7 @@ if( $teams->count() == 0 ) {
 				' title="correct submission(s)"';
 			break;
 		}
-		echo " width=\"16\" height=\"16\" /></td>";
+		echo " class=\"picto\" /></td>";
 		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$numcor / $numsub</td>";
 		if ( IS_ADMIN ) {
 			echo "<td>" .

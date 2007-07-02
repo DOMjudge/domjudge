@@ -182,6 +182,7 @@ legend {
 
 #djlogo {
 	position: absolute; right: 1ex;
+	width: 93px; height: 196px;
 }
 
 #teamscoresummary { position: absolute; right: 2ex; top: 7ex; }
