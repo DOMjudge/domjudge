@@ -28,23 +28,26 @@ $res = $DB->q('KEYTABLE SELECT type AS ARRAYKEY, COUNT(*) AS count FROM team_unr
 echo "<div id=\"menutop\">\n";
 
 if ( isset($res['submission']) ) {
-	echo '<a target="_top" class="new" href="index.php">submissions (' .
+	echo '<a target="_top" class="new" href="index.php" accesskey="s">' .
+		'submissions (' .
 		(int)$res['submission']['count'] . " new)</a>\n";
 } else {
-	echo "<a target=\"_top\" href=\"index.php\">submissions</a>\n";
+	echo "<a target=\"_top\" href=\"index.php\" accesskey=\"s\">submissions</a>\n";
 }
 
 if ( isset($res['clarification']) ) {
-	echo '<a target="_top" class="new" href="clarifications.php">clarifications (' .
+	echo '<a target="_top" class="new" href="clarifications.php" ' .
+		'accesskey="c">clarifications (' .
 		(int)$res['clarification']['count'] . " new)</a>\n";
 } else {
-	echo "<a target=\"_top\" href=\"clarifications.php\">clarifications</a>\n";
+	echo '<a target="_top" href="clarifications.php" ' .
+		"accesskey=\"c\">clarifications</a>\n";
 }
 
-echo "<a target=\"_top\" href=\"scoreboard.php\">scoreboard</a>\n";
+echo "<a target=\"_top\" href=\"scoreboard.php\" accesskey=\"b\">scoreboard</a>\n";
 
 if ( ENABLE_WEBSUBMIT_SERVER ) {
-	echo "<a target=\"_top\" href=\"websubmit.php\">submit</a>\n";
+	echo "<a target=\"_top\" href=\"websubmit.php\" accesskey=\"u\">submit</a>\n";
 }
 
 echo "\n</div>\n\n";

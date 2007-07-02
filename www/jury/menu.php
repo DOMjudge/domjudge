@@ -25,17 +25,17 @@ $cnew = $DB->q('VALUE SELECT COUNT(*) FROM clarification
 
 ?>
 <div id="menutop">
-<a target="_top" href="index.php">home</a>
-<a target="_top" href="problems.php">problems</a>
-<a target="_top" href="judgehosts.php">judgehosts</a>
-<a target="_top" href="teams.php">teams</a>
+<a target="_top" href="index.php" accesskey="h">home</a>
+<a target="_top" href="problems.php" accesskey="p">problems</a>
+<a target="_top" href="judgehosts.php" accesskey="j">judgehosts</a>
+<a target="_top" href="teams.php" accesskey="t">teams</a>
 <?php	if ( $cnew ) { ?>
-<a target="_top" class="new" href="clarifications.php">clarifications (<?=$cnew?> new)</a>
+<a target="_top" class="new" href="clarifications.php" accesskey="c">clarifications (<?=$cnew?> new)</a>
 <?php	} else { ?>
-<a target="_top" href="clarifications.php">clarifications</a>
+<a target="_top" href="clarifications.php" accesskey="c">clarifications</a>
 <?php	} ?>
-<a target="_top" href="submissions.php">submissions</a>
-<a target="_top" href="scoreboard.php">scoreboard</a>
+<a target="_top" href="submissions.php" accesskey="s">submissions</a>
+<a target="_top" href="scoreboard.php" accesskey="b">scoreboard</a>
 </div>
 
 <?php putClock();
