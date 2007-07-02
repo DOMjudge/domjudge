@@ -19,8 +19,10 @@ $res = $DB->q('SELECT team_category.*, COUNT(login) AS numteams
 if( $res->count() == 0 ) {
 	echo "<p><em>No categories defined</em></p>\n\n";
 } else {
-	echo "<table class=\"list\">\n" .
-		"<tr><th>ID</th><th>sort</th><th>name</th><th>#teams</th></tr>\n";
+	echo "<table class=\"list\">\n<thead>\n" .
+		"<tr><th>ID</th><th>sort</th><th>name</th><th>#teams</th></tr>\n" .
+		"</thead>\n<tbody>\n";
+
 	while($row = $res->next()) {
 		echo '<tr' . (isset($row['color']) ? ' style="background: ' .
 		              $row['color'] . ';"' : '') .
@@ -36,7 +38,7 @@ if( $res->count() == 0 ) {
 		}
 		echo "</tr>\n";
 	}
-	echo "</table>\n\n";
+	echo "</tbody>\n</table>\n\n";
 }
 
 if ( IS_ADMIN ) {

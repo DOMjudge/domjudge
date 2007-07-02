@@ -82,6 +82,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 		"</colgroup>\n";
 
 	// column headers
+	echo "<thead>\n";
 	echo '<tr class="scoreheader">' .
 		'<th title="rank">' . jurylink(null,'#',$isjury) . '</th>' .
 		( SHOW_AFFILIATIONS ? '<th title="team affiliation">' .
@@ -96,7 +97,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 			jurylink('problem.php?id=' . urlencode($pr['probid']),
 			         htmlentities($pr['probid']),$isjury) . '</th>';
 	}
-	echo "</tr>\n";
+	echo "</tr>\n</thead>\n\n<tbody>\n";
 
 	// initialize the arrays we'll build from the data
 	$THEMATRIX = $SCORES = array();
@@ -275,8 +276,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 			}
 		}
 		echo "</tr>\n";
-
 	}
+	echo "</tbody>\n\n<tfoot>\n";
 
 	// print a summaryline
 	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
@@ -306,7 +307,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 					  $pr['color'] . ';"' : '') . '>' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),$str,$isjury) . '</td>';
 	}
-	echo "</tr>\n</table>\n\n";
+	echo "</tr>\n</tfoot>\n</table>\n\n";
 
 	$categs = $DB->q('SELECT * FROM team_category ORDER BY categoryid');
 

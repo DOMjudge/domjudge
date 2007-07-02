@@ -66,9 +66,11 @@ $res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
 if( $res->count() == 0 ) {
 	echo "<p><em>No judgings.</em></p>\n\n";
 } else {
-	echo "<table class=\"list\">\n<tr><th>ID</th><th>start</th><th>end</th>";
-	echo "<th>result</th><th>valid</th><th>verified</th>";
-	echo "</tr>\n";
+	echo "<table class=\"list\">\n<thead>\n" .
+	     "<tr><th>ID</th><th>start</th><th>end</th>" .
+	     "<th>result</th><th>valid</th><th>verified</th>" .
+	     "</tr>\n</thead>\n<tbody>\n";
+
 	while( $jud = $res->next() ) {
 		$link = 'submission.php?id=' . (int)$jud['submitid'] .
 			'&amp;jid=' . (int)$jud['judgingid'];
@@ -83,7 +85,7 @@ if( $res->count() == 0 ) {
 		echo '<td align="center">' . printyn($jud['verified']) . '</td>';
 		echo "</tr>\n";
 	}
-	echo "</table>\n\n";
+	echo "</tbody>\n</table>\n\n";
 }
 
 

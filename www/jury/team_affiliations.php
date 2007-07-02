@@ -19,8 +19,10 @@ $res = $DB->q('SELECT a.*, COUNT(login) AS cnt FROM team_affiliation a
 if( $res->count() == 0 ) {
 	echo "<p><em>No affiliations defined</em></p>\n\n";
 } else {
-	echo "<table class=\"list\">\n" .
-		"<tr><th>ID</th><th>name</th><th>logo</th><th>country</th><th>#teams</th></tr>\n";
+	echo "<table class=\"list\">\n<thead>\n" .
+		"<tr><th>ID</th><th>name</th><th>logo</th><th>country</th>" .
+		"<th>#teams</th></tr>\n</thead>\n<tbody>\n";
+
 	while($row = $res->next()) {
 		$affillogo = "../images/affiliations/" . urlencode($row['affilid']) . ".png";
 		$countryflag = "../images/countries/" . urlencode($row['country']) . ".png";
@@ -47,7 +49,7 @@ if( $res->count() == 0 ) {
 		}
 		echo "</tr>\n";
 	}
-	echo "</table>\n\n";
+	echo "</tbody>\n</table>\n\n";
 }
 
 if ( IS_ADMIN ) {

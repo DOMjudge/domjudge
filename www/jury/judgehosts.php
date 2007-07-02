@@ -63,7 +63,8 @@ $res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
 if( $res->count() == 0 ) {
 	echo "<p><em>No judgehosts defined</em></p>\n\n";
 } else {
-	echo "<table class=\"list\">\n<tr><th>hostname</th><th>active</th></tr>\n";
+	echo "<table class=\"list\">\n<thead>\n" .
+	     "<tr><th>hostname</th><th>active</th></tr>\n</thead>\n<tbody>\n";
 	while($row = $res->next()) {
 		echo "<tr".( $row['active'] ? '': ' class="disabled"').
 			"><td><a href=\"judgehost.php?id=".urlencode($row['hostname']).'">'.
@@ -74,7 +75,7 @@ if( $res->count() == 0 ) {
 		}
 		echo "</tr>\n";
 	}
-	echo "</table>\n\n";
+	echo "</tbody>\n</table>\n\n";
 }
 
 if ( IS_ADMIN ) {

@@ -63,10 +63,10 @@ $jdata = $DB->q('KEYTABLE SELECT *, judgingid AS ARRAYKEY FROM judging
 <?php
 
 if ( count($jdata) > 0 ) { 
-	echo "<table class=\"list\">\n";
+	echo "<table class=\"list\">\n<thead>\n";
 	echo "<tr><td></td><th colspan=\"5\">Judgings</th></tr>\n";
 	echo "<tr><td></td><th>ID</th><th>start</th><th>judgehost</th>";
-	echo "<th>result</th><th>valid</th></tr>\n";
+	echo "<th>result</th><th>valid</th></tr>\n</thead>\n<tbody>\n";
 
 	// when there's no judging selected through the request, we find
 	// out what the best one should be. The valid one, or else the most
@@ -97,7 +97,7 @@ if ( count($jdata) > 0 ) {
 		echo "</tr>\n";
 
 	}
-    echo "</table>\n\n";
+    echo "</tbody>\n</table>\n\n";
 
 	echo "<br />\n" . rejudgeForm('submission', $id);
 	

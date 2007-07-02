@@ -33,9 +33,10 @@ echo "<h1>Teams</h1>\n\n";
 if( $teams->count() == 0 ) {
 	echo "<p><em>No teams defined</em></p>\n\n";
 } else {
-	echo "<table class=\"list\">\n" .
+	echo "<table class=\"list\">\n<thead>\n" .
 		"<tr><th>login</th><th>teamname</th><th>category</th>" .
-		"<th>affiliation</th><th>host</th><th>room</th><th colspan=\"2\">status</th></tr>\n";
+		"<th>affiliation</th><th>host</th><th>room</th>" .
+		"<th colspan=\"2\">status</th></tr>\n</thead>\n<tbody>\n";
 
 	while( $row = $teams->next() ) {
 
@@ -98,7 +99,7 @@ if( $teams->count() == 0 ) {
 		}
 		echo "</tr>\n";
 	}
-	echo "</table>\n\n";
+	echo "</tbody>\n</table>\n\n";
 }
 
 if ( IS_ADMIN ) {

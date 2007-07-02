@@ -92,15 +92,15 @@ $teams = $DB->q('SELECT login,name FROM team WHERE categoryid = %i', $id);
 if ( $teams->count() == 0 ) {
 	echo "<p><em>no teams</em></p>\n\n";
 } else {
-	echo "<table>\n";
-	echo "<tr><th>login</th><th>teamname</th></tr>\n";
+	echo "<table>\n<thead>\n";
+	echo "<tr><th>login</th><th>teamname</th></tr>\n</thead>\n<tbody>\n";
 	while ($team = $teams->next()) {
 		echo "<tr><td class=\"teamid\"><a href=\"team.php?id=" .
 			urlencode($team['login']) . "\">" .
 			htmlspecialchars($team['login']) . "</a></td><td>" .
 			htmlentities($team['name']) . "</td></tr>\n";
 	}
-	echo "</table>\n\n";
+	echo "</tbody>\n</table>\n\n";
 }
 	 
 require('../footer.php');

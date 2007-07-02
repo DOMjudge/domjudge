@@ -99,9 +99,9 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
-	echo "<table class=\"list\">\n";
+	echo "<table class=\"list\">\n<thead>\n";
 	echo "<tr><th>ID</th><th>from</th><th>to</th>" .
-		"<th>time</th><th>text</th></tr>\n";
+		"<th>time</th><th>text</th></tr>\n</thead>\n<tbody>\n";
 
 	while ( $clar = $clars->next() ) {
 		// check viewing permission for teams
@@ -148,7 +148,7 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 		
 		echo "</a></td></tr>\n";
 	}
-	echo "</table>\n\n";
+	echo "</tbody>\n</table>\n\n";
 }
 
 /**

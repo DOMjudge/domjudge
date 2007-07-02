@@ -61,12 +61,12 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	// print the table with the submissions. 
 	// table header; leave out the field that is our key (because it's the same
 	// for all rows)
-	echo "<table class=\"list\">\n<tr>" .
+	echo "<table class=\"list\">\n<thead>\n<tr>" .
 		($isjury ? "<th>ID</th>" : '') .
 		"<th>time</th><th>team</th>" .
 		"<th>problem</th><th>lang</th><th>status</th>" .
 		($isjury ? "<th>verified</th><th>last<br />judge</th>" : '') .
-		"</tr>\n";
+		"</tr>\n</thead>\n<tbody>\n";
 	
 	// print each row with links to detailed information
 	$subcnt = $corcnt = 0;
@@ -132,7 +132,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 		$subcnt++;
 		if ( @$resulttable[$sid]['result'] == 'correct' ) $corcnt++;
 	}
-	echo "</table>\n\n";
+	echo "</tbody>\n</table>\n\n";
 
 	if ( $isjury ) {
 		echo "<p>Total correct: $corcnt, submitted: $subcnt</p>\n\n";

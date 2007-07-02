@@ -27,9 +27,11 @@ if( count($res) == 0 ) {
 	echo "<p><em>No contests defined</em></p>\n\n";
 } else {
 	echo "<form action=\"contests.php\" method=\"post\">\n";
-	echo "<table class=\"list\">\n<tr><th>CID</th><th>starts</th><th>ends</th>" .
-		"<th>freeze<br />scores</th><th>unfreeze<br />scores</th><th>name</th>" .
-		"</tr>\n";
+	echo "<table class=\"list\">\n<thead>\n" .
+	     "<tr><th>CID</th><th>starts</th><th>ends</th>" .
+	     "<th>freeze<br />scores</th><th>unfreeze<br />scores</th><th>name</th>" .
+	     "</tr>\n</thead>\n<tbody>\n";
+
 	foreach($res as $row) {
 		echo "<tr" .
 			($row['cid'] == $curcont ? ' class="highlight"':'') . ">" .
@@ -70,7 +72,7 @@ if( count($res) == 0 ) {
 		echo "</td>\n";
 		echo "</tr>\n";
 	}
-	echo "</table>\n</form>\n\n";
+	echo "</tbody>\n</table>\n</form>\n\n";
 }
 
 if ( IS_ADMIN ) {
