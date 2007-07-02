@@ -28,8 +28,9 @@ if( count($res) == 0 ) {
 } else {
 	echo "<form action=\"contests.php\" method=\"post\">\n";
 	echo "<table class=\"list\">\n<thead>\n" .
-	     "<tr><th>CID</th><th>starts</th><th>ends</th>" .
-	     "<th>freeze<br />scores</th><th>unfreeze<br />scores</th><th>name</th>" .
+	     "<tr><th scope=\"col\">CID</th><th scope=\"col\">starts</th>" .
+		 "<th scope=\"col\">ends</th><th scope=\"col\">freeze<br />scores</th>" .
+		 "<th scope=\"col\">unfreeze<br />scores</th><th scope=\"col\">name</th>" .
 	     "</tr>\n</thead>\n<tbody>\n";
 
 	foreach($res as $row) {

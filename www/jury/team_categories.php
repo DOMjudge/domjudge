@@ -20,7 +20,8 @@ if( $res->count() == 0 ) {
 	echo "<p><em>No categories defined</em></p>\n\n";
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
-		"<tr><th>ID</th><th>sort</th><th>name</th><th>#teams</th></tr>\n" .
+		"<tr><th scope=\"col\">ID</th><th scope=\"col\">sort</th>" .
+		"<th scope=\"col\">name</th><th scope=\"col\">#teams</th></tr>\n" .
 		"</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {

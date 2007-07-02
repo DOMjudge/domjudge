@@ -100,33 +100,33 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 ?>
 
 <table>
-<tr><td>Login:     </td><td class="teamid"><?=$row['login']?></td></tr>
-<tr><td>Name:      </td><td><?=htmlentities($row['name'])?></td></tr>
-<tr><td>Has passwd:</td><td><?=(isset($row['passwd']) ? 'yes':'no')?>
+<tr><td scope="row">Login:     </td><td class="teamid"><?=$row['login']?></td></tr>
+<tr><td scope="row">Name:      </td><td><?=htmlentities($row['name'])?></td></tr>
+<tr><td scope="row">Has passwd:</td><td><?=(isset($row['passwd']) ? 'yes':'no')?>
 <?php if ( IS_ADMIN ): ?>
 	<a href="genpasswds.php?forteam=<?=$id?>"><img src="../images/edit.png"
 	alt="edit" title="set password" class="picto"></a>
 <?php endif; ?>
 	</td></tr>
-<tr><td>Category:  </td><td><?=(int)$row['categoryid'].
+<tr><td scope="row">Category:  </td><td><?=(int)$row['categoryid'].
 	' - '.htmlentities($row['catname'])?></td></tr>
 <?php if (!empty($row['members'])): ?>
-<tr><td valign="top">Members:   </td><td><?=
+<tr><td valign="top" scope="row">Members:   </td><td><?=
 	nl2br(htmlentities($row['members']))?></td></tr>
 <?php endif; ?>
 <?php if (!empty($row['affilid'])): ?>
-<tr><td>Affiliation:</td><td><a href="team_affiliation.php?id=<?=
+<tr><td scope="row">Affiliation:</td><td><a href="team_affiliation.php?id=<?=
 	urlencode($row['affilid']) . '">' .
 	htmlentities($row['affilid'] . ' - ' .
 	$row['affname'])?></a></td></tr>
 <?php endif; ?>
-<tr><td>Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
+<tr><td scope="row">Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
 	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):'-'?></td></tr>
 <?php if (!empty($row['room'])): ?>
-<tr><td>Room:</td><td><?=htmlentities($row['room'])?></td></tr>
+<tr><td scope="row">Room:</td><td><?=htmlentities($row['room'])?></td></tr>
 <?php endif; ?>
 <?php if (!empty($row['comments'])): ?>
-<tr><td valign="top">Comments:</td><td><?=
+<tr><td valign="top" scope="row">Comments:</td><td><?=
 	nl2br(htmlentities($row['comments']))?></td></tr>
 <?php endif; ?>
 </table>

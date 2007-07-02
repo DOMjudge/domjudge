@@ -62,10 +62,11 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	// table header; leave out the field that is our key (because it's the same
 	// for all rows)
 	echo "<table class=\"list\">\n<thead>\n<tr>" .
-		($isjury ? "<th>ID</th>" : '') .
-		"<th>time</th><th>team</th>" .
-		"<th>problem</th><th>lang</th><th>status</th>" .
-		($isjury ? "<th>verified</th><th>last<br />judge</th>" : '') .
+		($isjury ? "<th scope=\"col\">ID</th>" : '') .
+		"<th scope=\"col\">time</th><th scope=\"col\">team</th>" .
+		"<th scope=\"col\">problem</th><th scope=\"col\">lang</th>" .
+		"<th scope=\"col\">status</th>" .
+		($isjury ? "<th scope=\"col\">verified</th><th scope=\"col\">last<br />judge</th>" : '') .
 		"</tr>\n</thead>\n<tbody>\n";
 	
 	// print each row with links to detailed information
@@ -170,17 +171,17 @@ function putTeam($login) {
 ?>
 
 <table>
-<tr><td>Name:    </td><td><?=htmlentities($team['name'])?></td></tr>
-<tr><td>Category:</td><td><?=htmlentities($team['catname'])?></td></tr>
+<tr><td scope="row">Name:    </td><td><?=htmlentities($team['name'])?></td></tr>
+<tr><td scope="row">Category:</td><td><?=htmlentities($team['catname'])?></td></tr>
 <?php
 	 
 	if ( !empty($team['members']) ) {
-		echo '<tr><td valign="top">Members:</td><td>' .
+		echo '<tr><td valign="top" scope="row">Members:</td><td>' .
 			nl2br(htmlentities($team['members'])) . "</td></tr>\n";
 	}
 	
 	if ( !empty($team['affilid']) ) {
-		echo '<tr><td>Affiliation:</td><td>';
+		echo '<tr><td scope="row">Affiliation:</td><td>';
 		if ( is_readable($affillogo) ) {
 			echo '<img src="' . $affillogo . '" alt="' .
 				htmlspecialchars($team['affilid']) . '" /> ';
@@ -190,7 +191,7 @@ function putTeam($login) {
 		echo htmlentities($team['affname']);
 		echo "</td></tr>\n";
 		if ( !empty($team['country']) ) {
-			echo '<tr><td>Country:</td><td>';
+			echo '<tr><td scope="row">Country:</td><td>';
 			if ( is_readable($countryflag) ) {
 				echo '<img src="' . $countryflag . '" alt="' .
 					htmlspecialchars($team['country']) . '" /> ';
@@ -200,8 +201,8 @@ function putTeam($login) {
 	}
 	
 	if ( !empty($team['room']) ) {
-		echo '<tr><td>Room:</td><td>' . htmlentities($team['room']) .
-			"</td></tr>\n";
+		echo '<tr><td scope="row">Room:</td><td>' .
+			htmlentities($team['room']) . "</td></tr>\n";
 	}
 	
 	echo "</table>\n\n";

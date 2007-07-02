@@ -35,6 +35,11 @@ th {
 	border-bottom: 1px dashed gray;
 }
 
+caption {
+	font-weight: bold;
+	margin-bottom: 1ex;
+}
+
 hr {
 	border: 0;
 	height: 1px;

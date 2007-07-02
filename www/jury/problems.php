@@ -19,8 +19,10 @@ if( $res->count() == 0 ) {
 	echo "<p><em>No problems defined</em></p>\n\n";
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
-		"<tr><th>ID</th><th>name</th><th>contest</th><th>allow<br />submit</th>" .
-		"<th>allow<br />judge</th><th>testdata</th><th>timelimit</th></tr>" .
+		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
+		"<th scope=\"col\">contest</th><th scope=\"col\">allow<br />submit</th>" .
+		"<th scope=\"col\">allow<br />judge</th><th scope=\"col\">testdata</th>" .
+		"<th scope=\"col\">timelimit</th></tr>" .
 		"</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {

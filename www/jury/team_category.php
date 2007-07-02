@@ -69,11 +69,12 @@ $data = $DB->q('TUPLE SELECT * FROM team_category WHERE categoryid = %s', $id);
 echo "<h1>Category: ".htmlentities($data['name'])."</h1>\n\n";
 
 echo "<table>\n";
-echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['categoryid']) . "</td></tr>\n";
-echo '<tr><td>Name:</td><td>' . htmlentities($data['name']) . "</td></tr>\n";
-echo '<tr><td>Sortorder:</td><td>' . htmlspecialchars($data['sortorder']) . "</td></tr>\n";
+echo '<tr><td scope="row">ID:</td><td>' . htmlspecialchars($data['categoryid']) . "</td></tr>\n";
+echo '<tr><td scope="row">Name:</td><td>' . htmlentities($data['name']) . "</td></tr>\n";
+echo '<tr><td scope="row">Sortorder:</td><td>' . htmlspecialchars($data['sortorder']) . "</td></tr>\n";
 if ( isset($data['color']) ) {
-	echo '<tr><td>Colour:       </td><td style="background: ' . htmlspecialchars($data['color']) .
+	echo '<tr><td scope="row">Colour:       </td><td style="background: ' .
+		htmlspecialchars($data['color']) .
 		';">' . htmlspecialchars($data['color']) . "</td></tr>\n";
 }
 
@@ -92,8 +93,9 @@ $teams = $DB->q('SELECT login,name FROM team WHERE categoryid = %i', $id);
 if ( $teams->count() == 0 ) {
 	echo "<p><em>no teams</em></p>\n\n";
 } else {
-	echo "<table>\n<thead>\n";
-	echo "<tr><th>login</th><th>teamname</th></tr>\n</thead>\n<tbody>\n";
+	echo "<table>\n<thead>\n" .
+		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th></tr>\n" .
+		"</thead>\n<tbody>\n";
 	while ($team = $teams->next()) {
 		echo "<tr><td class=\"teamid\"><a href=\"team.php?id=" .
 			urlencode($team['login']) . "\">" .

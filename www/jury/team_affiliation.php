@@ -78,10 +78,10 @@ $countryflag = "../images/countries/" . urlencode($data['country']) . ".png";
 echo "<h1>Affiliation: ".htmlentities($data['name'])."</h1>\n\n";
 
 echo "<table>\n";
-echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['affilid']) . "</td></tr>\n";
-echo '<tr><td>Name:</td><td>' . htmlentities($data['name']) . "</td></tr>\n";
+echo '<tr><td scope="row">ID:</td><td>' . htmlspecialchars($data['affilid']) . "</td></tr>\n";
+echo '<tr><td scope="row">Name:</td><td>' . htmlentities($data['name']) . "</td></tr>\n";
 
-echo '<tr><td>Logo:</td><td>';
+echo '<tr><td scope="row">Logo:</td><td>';
 
 if ( is_readable($affillogo) ) {
 	echo '<img src="' . $affillogo . '" alt="' .
@@ -90,7 +90,7 @@ if ( is_readable($affillogo) ) {
 	echo "not available</td></tr>\n";
 }
 
-echo '<tr><td>Country:</td><td>' . htmlspecialchars($data['country']);
+echo '<tr><td scope="row">Country:</td><td>' . htmlspecialchars($data['country']);
 
 if ( is_readable($countryflag) ) {
 	echo ' <img src="' . $countryflag . '" alt="' .
@@ -99,7 +99,7 @@ if ( is_readable($countryflag) ) {
 echo "</td></tr>\n";
 
 if ( !empty($data['comments']) ) {
-	echo '<tr><td valign="top">Comments:</td><td>' .
+	echo '<tr><td valign="top" scope="row">Comments:</td><td>' .
 		nl2br(htmlentities($data['comments'])) . "</td></tr>\n";
 }
 
@@ -117,8 +117,9 @@ $teams = $DB->q('SELECT login,name FROM team WHERE affilid = %s', $id);
 if ( $teams->count() == 0 ) {
 	echo "<p><em>no teams</em></p>\n\n";
 } else {
-	echo "<table>\n<thead>\n";
-	echo "<tr><th>login</th><th>teamname</th></tr>\n</thead>\n<tbody>\n";
+	echo "<table>\n<thead>\n" .
+		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th></tr>\n" .
+		"</thead>\n<tbody>\n";
 	while ($team = $teams->next()) {
 		echo "<tr><td class=\"teamid\"><a href=\"team.php?id=" .
 			urlencode($team['login']) . "\">" .

@@ -64,7 +64,8 @@ if( $res->count() == 0 ) {
 	echo "<p><em>No judgehosts defined</em></p>\n\n";
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
-	     "<tr><th>hostname</th><th>active</th></tr>\n</thead>\n<tbody>\n";
+	     "<tr><th scope=\"col\">hostname</th><th scope=\"col\">active</th></tr>\n" .
+		 "</thead>\n<tbody>\n";
 	while($row = $res->next()) {
 		echo "<tr".( $row['active'] ? '': ' class="disabled"').
 			"><td><a href=\"judgehost.php?id=".urlencode($row['hostname']).'">'.

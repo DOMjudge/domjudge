@@ -116,33 +116,34 @@ echo addForm($pagename) . "<p>\n" .
 	"</p>\n";
 ?>
 <table>
-<tr><td>ID:          </td><td><?=htmlspecialchars($data['probid'])?></td></tr>
-<tr><td>Name:        </td><td><?=htmlentities($data['name'])?></td></tr>
-<tr><td>Contest:     </td><td><?=htmlspecialchars($data['cid']).' - '.
+<tr><td scope="row">ID:          </td><td><?=htmlspecialchars($data['probid'])?></td></tr>
+<tr><td scope="row">Name:        </td><td><?=htmlentities($data['name'])?></td></tr>
+<tr><td scope="row">Contest:     </td><td><?=htmlspecialchars($data['cid']).' - '.
                                  htmlentities($data['contestname'])?></td></tr>
-<tr><td>Allow submit:</td><td class="nobreak"><?=printyn($data['allow_submit']) . ' '.
+<tr><td scope="row">Allow submit:</td><td class="nobreak"><?=printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
 		" submissions for this problem?')"); ?>
 </td></tr>
-<tr><td>Allow judge: </td><td><?=printyn($data['allow_judge']) . ' '.
+<tr><td scope="row">Allow judge: </td><td><?=printyn($data['allow_judge']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_judge]',
 		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
 		" judging for this problem?')"); ?>
 </td></tr>
-<tr><td>Testdata:    </td><td class="filename"><?=htmlspecialchars($data['testdata'])?></td></tr>
-<tr><td>Timelimit:   </td><td><?=(int)$data['timelimit']?></td></tr>
+<tr><td scope="row">Testdata:    </td><td class="filename"><?=htmlspecialchars($data['testdata'])?></td></tr>
+<tr><td scope="row">Timelimit:   </td><td><?=(int)$data['timelimit']?></td></tr>
 <?php
 if ( isset($data['color']) ) {
-	echo '<tr><td>Colour:       </td><td style="background: ' . htmlspecialchars($data['color']) .
+	echo '<tr><td scope="row">Colour:       </td><td style="background: ' .
+		htmlspecialchars($data['color']) .
 		';">' . htmlspecialchars($data['color']) . "</td></tr>\n";
 }
 if ( isset($data['special_run']) ) {
-	echo '<tr><td>Special run script:</td><td class="filename">' .
+	echo '<tr><td scope="row">Special run script:</td><td class="filename">' .
 		htmlspecialchars($data['special_run']) . "</td></tr>\n";
 }
 if ( isset($data['special_compare']) ) {
-	echo '<tr><td>Special compare script:</td><td class="filename">' .
+	echo '<tr><td scope="row">Special compare script:</td><td class="filename">' .
 		htmlspecialchars($data['special_compare']) . "</td></tr>\n";
 }
 

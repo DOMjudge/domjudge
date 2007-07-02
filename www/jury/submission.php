@@ -39,20 +39,20 @@ $jdata = $DB->q('KEYTABLE SELECT *, judgingid AS ARRAYKEY FROM judging
 <table width="100%">
 <tr><td valign="top">
 <table>
-<tr><th colspan="2">Submission</th></tr>
-<tr><td>Contest:</td><td><?=htmlentities($submdata['contestname'])?></td></tr>
-<tr><td>Team:</td><td>
+<caption>Submission</caption>
+<tr><td scope="row">Contest:</td><td><?=htmlentities($submdata['contestname'])?></td></tr>
+<tr><td scope="row">Team:</td><td>
 	<a href="team.php?id=<?=urlencode($submdata['teamid'])?>">
 	<span class="teamid"><?=htmlspecialchars($submdata['teamid'])?></span>: 
 	<?=htmlentities($submdata['teamname'])?></a></td></tr>
-<tr><td>Problem:</td><td>
+<tr><td scope="row">Problem:</td><td>
 	<a href="problem.php?id=<?=$submdata['probid']?>">
 	<?=htmlentities($submdata['probid'].": ".$submdata['probname'])?></a></td></tr>
-<tr><td>Language:</td><td>
+<tr><td scope="row">Language:</td><td>
 	<a href="language.php?id=<?=$submdata['langid']?>">
 	<?=htmlentities($submdata['langname'])?></a></td></tr>
-<tr><td>Submittime:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
-<tr><td>Source:</td><td class="filename">
+<tr><td scope="row">Submittime:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
+<tr><td scope="row">Source:</td><td class="filename">
 	<a href="show_source.php?id=<?=$id?>">
 	<?=htmlspecialchars($submdata['sourcefile'])?></a></td></tr>
 </table>
@@ -63,10 +63,11 @@ $jdata = $DB->q('KEYTABLE SELECT *, judgingid AS ARRAYKEY FROM judging
 <?php
 
 if ( count($jdata) > 0 ) { 
-	echo "<table class=\"list\">\n<thead>\n";
-	echo "<tr><td></td><th colspan=\"5\">Judgings</th></tr>\n";
-	echo "<tr><td></td><th>ID</th><th>start</th><th>judgehost</th>";
-	echo "<th>result</th><th>valid</th></tr>\n</thead>\n<tbody>\n";
+	echo "<table class=\"list\">\n" .
+		"<caption>Judgings</caption>\n<thead>\n" .
+		"<tr><td></td><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
+		"<th scope=\"col\">judgehost</th><th scope=\"col\">result</th>" .
+		"<th scope=\"col\">valid</th></tr>\n</thead>\n<tbody>\n";
 
 	// when there's no judging selected through the request, we find
 	// out what the best one should be. The valid one, or else the most
@@ -212,6 +213,7 @@ if ( isset($jid) )  {
 	} else {
 		echo ' [aborted]';
 	}
+	echo "</p>\n\n";
 }
 
 // We're done!

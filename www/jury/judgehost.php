@@ -30,8 +30,8 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 ?>
 
 <table>
-<tr><td>Name:  </td><td><?=printhost($row['hostname'], TRUE)?></td></tr>
-<tr><td>Active:</td><td><?=printyn($row['active'])?></td></tr>
+<tr><td scope="row">Name:  </td><td><?=printhost($row['hostname'], TRUE)?></td></tr>
+<tr><td scope="row">Active:</td><td><?=printyn($row['active'])?></td></tr>
 </table>
 
 <?php
@@ -67,8 +67,9 @@ if( $res->count() == 0 ) {
 	echo "<p><em>No judgings.</em></p>\n\n";
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
-	     "<tr><th>ID</th><th>start</th><th>end</th>" .
-	     "<th>result</th><th>valid</th><th>verified</th>" .
+	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
+		 "<th scope=\"col\">end</th><th scope=\"col\">result</th>" .
+		 "<th scope=\"col\">valid</th><th scope=\"col\">verified</th>" .
 	     "</tr>\n</thead>\n<tbody>\n";
 
 	while( $jud = $res->next() ) {

@@ -39,17 +39,17 @@ function putClar($clar, $isjury = false)
 	$tolink   = $isjury && $clar['recipient'];
 
 	echo "<table>\n";
-	echo '<tr><td>From:</td>' . 
+	echo '<tr><td scope="row">From:</td>' . 
 		'<td>' .
 		( $fromlink ? '<a href="team.php?id=' . urlencode($clar['sender']) .
 			'">' : '' ) .
 		$from . ( $fromlink ? '</a>' : '') . "</td></tr>\n";
-	echo  '<tr><td>To:</td>' .
+	echo  '<tr><td scope="row">To:</td>' .
 		'<td>' .
 		( $tolink ? '<a href="team.php?id=' . urlencode($clar['recipient']) .
 			'">' : '' ) .
 		$to . ( $tolink ? '</a>' : '') . "</td></tr>\n";
-	echo '<tr><td>Time:</td><td>' . printtime($clar['submittime']) .
+	echo '<tr><td scope="row">Time:</td><td>' . printtime($clar['submittime']) .
 		"</td></tr>\n";
 	echo '<tr><td valign="top"></td><td class="filename">' .
 		'<pre class="output_text">' .
@@ -100,8 +100,9 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 	}
 
 	echo "<table class=\"list\">\n<thead>\n";
-	echo "<tr><th>ID</th><th>from</th><th>to</th>" .
-		"<th>time</th><th>text</th></tr>\n</thead>\n<tbody>\n";
+	echo "<tr><th scope=\"col\">ID</th><th scope=\"col\">from</th>" .
+	     "<th scope=\"col\">to</th><th scope=\"col\">time</th>" .
+	     "<th scope=\"col\">text</th></tr>\n</thead>\n<tbody>\n";
 
 	while ( $clar = $clars->next() ) {
 		// check viewing permission for teams

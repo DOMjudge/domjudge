@@ -77,23 +77,24 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	// output table column groups (for the styles)
 	echo '<colgroup><col id="scorerank" />' .
 		( SHOW_AFFILIATIONS ? '<col id="scoreaffil" />' : '' ) .
-		'<col id="scoreteamname" /><col id="scoresolv" /><col id="scoretotal" />' .
+		'<col id="scoreteamname" /></colgroup><colgroup><col id="scoresolv" />' .
+		"<col id=\"scoretotal\" /></colgroup>\n<colgroup>" .
 		str_repeat('<col class="scoreprob" />', count($probs)) .
 		"</colgroup>\n";
 
 	// column headers
 	echo "<thead>\n";
 	echo '<tr class="scoreheader">' .
-		'<th title="rank">' . jurylink(null,'#',$isjury) . '</th>' .
-		( SHOW_AFFILIATIONS ? '<th title="team affiliation">' .
+		'<th title="rank" scope="col">' . jurylink(null,'#',$isjury) . '</th>' .
+		( SHOW_AFFILIATIONS ? '<th title="team affiliation" scope="col">' .
 		jurylink('team_affiliations.php','affil.',$isjury) . '</th>' : '' ) .
-		'<th title="team name">' . jurylink('teams.php','team',$isjury) . '</th>' .
-		'<th title="problems solved">' . jurylink(null,'solved',$isjury) . '</th>' .
-		'<th title="penalty time">' . jurylink(null,'time',$isjury) . "</th>\n";
+		'<th title="team name" scope="col">' . jurylink('teams.php','team',$isjury) . '</th>' .
+		'<th title="problems solved" scope="col">' . jurylink(null,'solved',$isjury) . '</th>' .
+		'<th title="penalty time" scope="col">' . jurylink(null,'time',$isjury) . "</th>\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="problem \'' . htmlentities($pr['name']) . '\'"' .
-			(isset($pr['color']) ? ' style="background: ' .
-			 htmlspecialchars($pr['color']) . ';"' : '' ) . '>' .
+			(!empty($pr['color']) ? ' style="background: ' .
+			 htmlspecialchars($pr['color']) . ';"' : '' ) . ' scope="col">' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),
 			         htmlentities($pr['probid']),$isjury) . '</th>';
 	}
@@ -217,7 +218,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 		}
 		echo
 			'<td class="scoretn"' .
-			(isset($color) ? ' style="background: ' . $color . ';"' : '') .
+			(!empty($color) ? ' style="background: ' . $color . ';"' : '') .
 			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
 			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
 			htmlentities($teams[$team]['name']) .
@@ -277,7 +278,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 		}
 		echo "</tr>\n";
 	}
-	echo "</tbody>\n\n<tfoot>\n";
+	echo "</tbody>\n\n<tbody>\n";
 
 	// print a summaryline
 	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
@@ -307,7 +308,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 					  $pr['color'] . ';"' : '') . '>' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),$str,$isjury) . '</td>';
 	}
-	echo "</tr>\n</tfoot>\n</table>\n\n";
+	echo "</tr>\n</tbody>\n</table>\n\n";
 
 	$categs = $DB->q('SELECT * FROM team_category ORDER BY categoryid');
 
@@ -315,14 +316,16 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	if ( $categs->count() > 1 ) {
 		echo "<p><br /><br /></p>\n<table class=\"scoreboard" .
 			($isjury ? ' scoreboard_jury' : '') . "\">\n" .
-			"<tr><th>" . jurylink('team_categories.php','Legend',$isjury) . "</th></tr>\n";
+			"<thead><tr><th scope=\"col\">" .
+			jurylink('team_categories.php','Legend',$isjury) .
+			"</th></tr></thead>\n<tbody>\n";
 		while ( $cat = $categs->next() ) {
-			echo '<tr' . (isset($cat['color']) ? ' style="background: ' .
+			echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
 			              $cat['color'] . ';"' : '') . '>' .
 				'<td align="center" class="scoretn">' .
 				jurylink(null,htmlspecialchars($cat['name']),$isjury) .	"</td></tr>\n";
 		}
-		echo "</table>\n\n";
+		echo "</tbody>\n</table>\n\n";
 	}
 
 	// last modified date, now if we are the jury, else include the

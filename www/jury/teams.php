@@ -34,9 +34,11 @@ if( $teams->count() == 0 ) {
 	echo "<p><em>No teams defined</em></p>\n\n";
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
-		"<tr><th>login</th><th>teamname</th><th>category</th>" .
-		"<th>affiliation</th><th>host</th><th>room</th>" .
-		"<th colspan=\"2\">status</th></tr>\n</thead>\n<tbody>\n";
+		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th>" .
+		"<th scope=\"col\">category</th><th scope=\"col\">affiliation</th>" .
+		"<th scope=\"col\">host</th><th scope=\"col\">room</th>" .
+		"<th colspan=\"2\" scope=\"col\">status</th></tr>\n</thead>\n" .
+		"<tbody>\n";
 
 	while( $row = $teams->next() ) {
 

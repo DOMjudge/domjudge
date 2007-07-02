@@ -18,9 +18,10 @@ if( $res->count() == 0 ) {
 	echo "<p><em>No languages defined</em></p>\n\n";
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
-		"<tr><th>ID</th><th>name</th><th>extension</th>" .
-		"<th>allow<br />submit</th><th>allow<br />judge</th>" .
-		"<th>timefactor</th></tr>\n</thead>\n<tbody>\n";
+		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
+		"<th scope=\"col\">extension</th><th scope=\"col\">allow<br />submit</th>" .
+		"<th scope=\"col\">allow<br />judge</th><th scope=\"col\">timefactor</th>" .
+		"</tr>\n</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
 		echo "<tr".

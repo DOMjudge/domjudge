@@ -74,12 +74,23 @@ if ( getCurContest() == $data['cid'] ) {
 }
 
 echo "<table>\n";
-echo '<tr><td>CID:</td><td>c' . (int)$data['cid'] . "</td></tr>\n";
-echo '<tr><td>Name:</td><td>' . htmlentities($data['contestname']) . "</td></tr>\n";
-echo '<tr><td>Starttime:</td><td>' . htmlspecialchars($data['starttime']) . "</td></tr>\n";
-echo '<tr><td>Last scoreboard update:</td><td>' . (empty($data['lastscoreupdate']) ? "-" : htmlspecialchars(@$data['lastscoreupdate'])) . "</td></tr>\n";
-echo '<tr><td>Endtime:</td><td>' . htmlspecialchars($data['endtime']) . "</td></tr>\n";
-echo '<tr><td>Scoreboard unfreeze:</td><td>' . (empty($data['unfreezetime']) ? "-" : htmlspecialchars(@$data['unfreezetime'])) . "</td></tr>\n";
+echo '<tr><td scope="row">CID:</td><td>c' .
+	(int)$data['cid'] . "</td></tr>\n";
+echo '<tr><td scope="row">Name:</td><td>' .
+	htmlentities($data['contestname']) .
+	"</td></tr>\n";
+echo '<tr><td scope="row">Starttime:</td><td>' .
+	htmlspecialchars($data['starttime']) .
+	"</td></tr>\n";
+echo '<tr><td scope="row">Last scoreboard update:</td><td>' . 
+	(empty($data['lastscoreupdate']) ? "-" : htmlspecialchars(@$data['lastscoreupdate'])) .
+	"</td></tr>\n";
+echo '<tr><td scope="row">Endtime:</td><td>' .
+	htmlspecialchars($data['endtime']) .
+	"</td></tr>\n";
+echo '<tr><td scope="row">Scoreboard unfreeze:</td><td>' .
+	(empty($data['unfreezetime']) ? "-" : htmlspecialchars(@$data['unfreezetime'])) .
+	"</td></tr>\n";
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
