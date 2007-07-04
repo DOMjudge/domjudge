@@ -1,7 +1,7 @@
 /*
  * Miscellaneous common functions for C/C++ programs.
  *
- * $Id: submitcommon.cc 1109 2006-10-23 20:57:56Z eldering $
+ * $Id$
  */
 
 #include "lib.misc.h"

@@ -1,7 +1,7 @@
 /*
  * Miscellaneous common functions for C/C++ programs.
  *
- * $Id: submitcommon.h 833 2005-08-19 20:40:33Z domjudge $
+ * $Id$
  */
 
 #ifndef __LIB_MISC_H
