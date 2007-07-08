@@ -37,7 +37,7 @@ Document version: $Rev$
 
 <toc>
 
-<chapt>DOMjudge Overview <label id="overview">
+<chapt>DOMjudge overview <label id="overview">
 <p>
 
 DOMjudge is a system for running a programming contest, like the ACM
@@ -168,7 +168,7 @@ The authors can be reached at the following address:
 url="mailto:domjudge@a-eskwadraat.nl">
 
 
-<chapt>Installation and Configuration <label id="install_config">
+<chapt>Installation and configuration <label id="install_config">
 <p>
 This chapter details a fresh installation of DOMjudge. The first
 section is a Quick Installation Reference, but that should only be
@@ -176,7 +176,7 @@ used by those already acquainted with the system. A detailed guide
 follows after that.
 
 
-<sect>Quick Installation
+<sect>Quick installation
 <p>
 <em>Note:</em> this is not a replacement for the thorough installation
 instructions below, but more a cheat-sheet for those who've already
@@ -280,7 +280,7 @@ DOMjudge has three different kinds of hosts:
 <label id="install_config:requirements">
 <p>
 
-<sect1>System Requirements
+<sect1>System requirements
 <p>
 
 The requirements for the deployment of this jury-system are:
@@ -318,7 +318,7 @@ The requirements for the deployment of this jury-system are:
        or the file <tt>submit/submit_copy.sh</tt> for more details.
 </itemize>
 
-<sect1>Software Requirements
+<sect1>Software requirements
 <p>
 
 <itemize>
@@ -412,7 +412,7 @@ apt-get install make sudo php5-cli php5-mysql ntp \
 	gcc gcj sun-java5-jdk ghc fp-compiler
 </code>
 
-<sect>File Locations
+<sect>File locations
 <p>
 
 There are three different directory trees which must be set up and
@@ -477,7 +477,7 @@ there for more information. Also all configuration options are
 documented there.
 
 
-<sect>Configuration of Languages
+<sect>Configuration of languages
 <p>
 
 Configuration of the compilers of the supported languages should be
@@ -509,7 +509,7 @@ arguments for usage information. See also sections
 <ref id="install_config:system" name="System Configuration">
 and <ref id="problems:java-chroot" name="Problems: Java & chroot">.
 
-<sect>Configuration of Special Run and Compare Scripts
+<sect>Configuration of special run and compare scripts
 <p>
 
 To allow for problems that do not fit within the standard scheme of
@@ -552,7 +552,7 @@ non-standard environments.
        more information.
 </itemize>
 
-<sect>Submission Methods <label id="install_config:submissionmethods">
+<sect>Submission methods <label id="install_config:submissionmethods">
 <p>
 
 DOMjudge supports two submission methods: via the
@@ -581,7 +581,7 @@ address configuration with the configuration option
 preconfiguring that or handing passwords to the teams for their first
 authentication.
 
-<sect>Database Installation
+<sect>Database installation
 <p>
 
 DOMjudge uses a MySQL database server for storage of contest status
@@ -639,7 +639,7 @@ select-queries to one or more replicated slave servers, while updates
 will still be done to the master. This is not supported out of the box,
 and will require making changes to the DOMjudge source.
 
-<sect>Webserver Configuration
+<sect>Webserver configuration
 <p>
 
 For the web interface, you need to have a webserver (e.g. Apache)
@@ -656,7 +656,7 @@ webserver for the changes to take effect.
 See also section <ref id="security:webprivs" name="Security: webserver
 privileges">.
 
-<sect>System Configuration Issues <label id="install_config:system">
+<sect>System configuration issues <label id="install_config:system">
 <p>
 
 For running solution programs under a non-privileged user, a user has
@@ -684,7 +684,7 @@ We advise to install an NTP-daemon (Network Time Protocol) to make sure
 the time between jury computer and judgehost (and team computers) is in
 sync.
 
-<sect>Building and Installing
+<sect>Building and installing
 <p>
 
 After you have configured the system, you can start installing the
@@ -905,8 +905,8 @@ account <tt>time_factor</tt> per language).
 <tt>special_run</tt> if not empty defines a custom run-script
 <tt>run_&lt;special_run&gt;.sh</tt> to run compiled submissions for
 this problem and <tt>special_compare</tt> if not empty defines a custom
-compare-script <tt>compare_&lt;special_compare&gt;.sh</tt> to compare
-output for this problem.
+compare-script <tt>compare_&lt;special_compare&gt;.sh</tt> to
+compare output for this problem.
 
 The <tt>color</tt> tag can be filled with a CSS colour specification
 to associate with this problem; see also section <ref id="scoreboard:colours"
@@ -962,7 +962,7 @@ id="scoreboard:colours" name="Scoreboard: colours">.
 
 </descrip>
 
-<sect>Team Authentication
+<sect>Team authentication
 <p>
 
 The jury system needs to know which team it is dealing with.
@@ -1092,7 +1092,7 @@ what the expected effect should be.
 When all this worked, you're quite ready for a contest. Or at least,
 the practice session of a contest.
 
-<chapt>The Scoreboard <label id="scoreboard">
+<chapt>The scoreboard <label id="scoreboard">
 <p>
 
 The scoreboard is the canonical overview for anyone interested in the
@@ -1232,7 +1232,7 @@ However we wanted the system to be as secure as possible within
 reason. Furthermore this software is open source, so users can try to
 find weak spots before the contest.
 
-<sect>Internal Security <label id="security:internal">
+<sect>Internal security <label id="security:internal">
 <p>
 
 Internal security of the system relies on users not being able to get
@@ -1285,7 +1285,7 @@ a list of <em>admin users</em>. Most data-modification functions will then
 be restricted to only users in this list.
 
 
-<sect>Root Privileges <label id="security:rootprivs">
+<sect>Root privileges <label id="security:rootprivs">
 <p>
 
 A difficult issue is the securing of submitted programs run by the
@@ -1303,7 +1303,7 @@ hack or could crash the system.  However, a chroot environment does
 not restrict network access, so there lies a possible security risk
 that has to be handled separately.
 
-<sect>Filesystem Privileges <label id="security:fileprivs">
+<sect>Filesystem privileges <label id="security:fileprivs">
 <p>
 
 Of course you must make sure that the filesystem privileges are set
@@ -1338,7 +1338,7 @@ contain sensitive data (e.g. those under sql/). DOMjudge comes
 with .htaccess files that try to prevent this, but double-check
 that it's not accessible.
 
-<sect>External Security <label id="security:external">
+<sect>External security <label id="security:external">
 <p>
 
 The following security issues are <em>not</em> handled by DOMjudge,
@@ -1463,9 +1463,9 @@ team's account (e.g. using ssh keys).
 
 <appendix>
 
-<chapt>DOMjudge and the ICPC Validator Interface Standard <label id="validator">
+<chapt>DOMjudge and the ICPC validator interface standard <label id="validator">
 <p>
-DOMjudge supports the ICPC Validator Interface Standard, which can be
+DOMjudge supports the ICPC validator interface standard, which can be
 found at: <url url="http://www.ecs.csus.edu/pc2/doc/valistandard.html">
 
 The invocation code (<tt>judge/test_solution.h</tt>) adheres to the
