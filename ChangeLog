@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 2.0.0 - SVN
 -------------------
  - Use correct last modified date of team manual (Closes: #1744121).
+ - Allow to set a specific new password for a team (Closes: #1737142).
  - Split general functions from submitcommon.cc to lib.misc.c and
    improved makefile structure and build process under Cygwin.
 

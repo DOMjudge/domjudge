@@ -14,7 +14,7 @@ requireAdmin();
 
 <h1>Administrator Functions</h1>
 
-<p><a href="genpasswds.php">Generate team passwords</a></p>
+<p><a href="genpasswds.php">Manage team passwords</a></p>
 
 <p><a href="checkconfig.php">Config checker</a></p>
 

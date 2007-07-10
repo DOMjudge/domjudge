@@ -1,6 +1,6 @@
 <?php
 /**
- * Generate passwords for all users.
+ * Manage passwords for all users.
  *
  * $Id$
  */
@@ -12,19 +12,24 @@ require('../forms.php');
 requireAdmin();
 ?>
 
-<h1>Generate passwords</h1>
+<h1>Manage team passwords</h1>
 
 <p>Generate new password for:</p>
 
 <?php
 $teams = $DB->q('KEYVALUETABLE SELECT login, name FROM team
                  ORDER BY categoryid ASC, name ASC');
+$teams = array_merge(array(''=>'(select one)'),$teams);
 
 echo addForm('genpasswds.php') .
-	"<p>\n" .
-	addSubmit('a specific team:', 'doteam') .
+	"<p>\nSet password for team " .
 	addSelect('forteam', $teams, @$_GET['forteam'], true) .
-	"<br /></p>\n<p>" .
+	" to " .
+	addInput('setpass', '', 10, 255) .
+	" (leave empty for random) " .
+	addSubmit('go', 'doteam') .
+	"</p>\n<p>" .
+	"Generate a random password for:</p>\n<p>\n" .
 	addSubmit('all teams without a password', 'doallnull') .
 	"<br /></p>\n<p>" .
 	addSubmit('absolutely all teams', 'doall') .
@@ -32,12 +37,21 @@ echo addForm('genpasswds.php') .
 	addEndForm();
 
 if ( isset($_POST['forteam']) ) {
+	// output each password once we're done
 	ob_implicit_flush();
 
 	if ( isset($_POST['doteam']) ) {
+		// one team only
+		if ( empty($_POST['forteam']) ) {
+			error("Please select a team to set this password for.");
+		}
 		$teams = $DB->q('TABLE SELECT login,name FROM team ' .
 				'WHERE login = %s', $_POST['forteam']);
+		if ( !empty($_POST['setpass']) ) {
+			$pass = $_POST['setpass'];
+		}
 	} else {
+		// all teams, or optionaly only those with null password
 		$teams = $DB->q('TABLE SELECT login,name FROM team ' .
 		                (isset($_POST['doallnull'])?'WHERE passwd IS NULL':'') .
 		                ' ORDER BY login');
@@ -47,11 +61,13 @@ if ( isset($_POST['forteam']) ) {
 
 	echo "<hr />\n\n<pre>";
 	foreach($teams as $team) {
-		$pass = genrandpasswd();
+		// generate a new password, only if it wasn't set in the interface
+		if ( !isset($pass) ) $pass = genrandpasswd();
+		// update the team table with a password
 		$DB->q('UPDATE team SET passwd = %s WHERE login = %s', md5($pass), $team['login']);
-		echo "Team:      " . htmlspecialchars($team['name']) . "\n";
-		echo "Login:     " . htmlspecialchars($team['login']) . "\n";
-		echo "Password:  $pass\n\n\n\n";
+		echo "Team:      " . htmlspecialchars($team['name']) . "\n" .
+		     "Login:     " . htmlspecialchars($team['login']) . "\n" .
+		     "Password:  $pass\n\n\n\n";
 	}
 	echo "</pre>\n";
 
