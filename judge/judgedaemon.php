@@ -26,10 +26,6 @@ $cid = getCurContest();
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
-// Seed the random generator
-list($usec, $sec) = explode( " ", microtime() );
-mt_srand( $sec * $usec );
-
 // Retrieve hostname and check database for judgehost entry
 $row = $DB->q('MAYBETUPLE SELECT * FROM judgehost WHERE hostname = %s', $myhost);
 if ( ! $row ) {

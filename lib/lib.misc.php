@@ -165,7 +165,7 @@ function mkstemps($template, $suffixlen)
 	umask(0133);
 	
 	for($try=0; $try<$TMP_MAX; $try++) {
-		$value = rand();
+		$value = mt_rand();
 
 		$filename = $template;
 		$pos = strlen($filename)-$suffixlen-6;

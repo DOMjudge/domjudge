@@ -57,8 +57,6 @@ if ( isset($_POST['forteam']) ) {
 		                ' ORDER BY login');
 	}
 
-	srand( (double) microtime()*1000000);
-
 	echo "<hr />\n\n<pre>";
 	foreach($teams as $team) {
 		// generate a new password, only if it wasn't set in the interface
@@ -89,7 +87,7 @@ function genrandpasswd()
 	
 	$rand_str = '';
 	for($i = 0; $i < 6; ++$i) {
-		$rand_str .= $chars[rand(0, $max_chars)];
+		$rand_str .= $chars[mt_rand(0, $max_chars)];
 	}
 
 	return $rand_str;
