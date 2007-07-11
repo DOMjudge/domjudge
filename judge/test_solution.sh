@@ -34,7 +34,7 @@
 # <special-run>     Extension name of specialized run or compare script to use.
 # <special-compare> Specify empty string for <special-run> if only
 #                   <special-compare> is to be used. The script
-#                   'run_<special-run>.sh' or 'compare_<special-compare>.sh'
+#                   'run_<special-run>' or 'compare_<special-compare>'
 #                   will be called if argument is non-empty.
 #
 # This script supports languages, by calling separate compile scripts
@@ -49,16 +49,16 @@
 # interpreted languages (read: Sun javac/java) be able to set the
 # internal maximum memory size.
 #
-# For running the solution a script 'run.sh' is called (default). For
-# usage of 'run.sh' see that script. Likewise, for comparing results, a
-# script 'compare.sh' is called by default.
+# For running the solution a script 'run' is called (default). For
+# usage of 'run' see that script. Likewise, for comparing results, a
+# program 'compare' is called by default.
 #
 # If 'xsltproc' is available, then the result is parsed from
 # 'result.xml' according to the ICPC Validator Interface Standard as
 # described in http://www.ecs.csus.edu/pc2/doc/valistandard.html.
 # Otherwise a submission is counted as accepted when the filesize of
-# compare.out is zero. In both cases, if the compare script returns with
-# nonzero exitcode, this is viewed as an internal error.
+# compare.out is zero. In both cases, if the compare program returns
+# with nonzero exitcode, this is viewed as an internal error.
 
 
 # Global configuration
@@ -120,8 +120,8 @@ logmsg $LOG_INFO "arguments: '$SOURCE' '$PROGLANG' '$TESTIN' '$TESTOUT' '$TIMELI
 logmsg $LOG_INFO "optionals: '$SPECIALRUN' '$SPECIALCOMPARE'"
 
 COMPILE_SCRIPT="$SCRIPTDIR/compile_$PROGLANG.sh"
-COMPARE_SCRIPT="$SCRIPTDIR/compare${SPECIALCOMPARE:+_$SPECIALCOMPARE}.sh"
-RUN_SCRIPT="run${SPECIALRUN:+_$SPECIALRUN}.sh"
+COMPARE_SCRIPT="$SCRIPTDIR/compare${SPECIALCOMPARE:+_$SPECIALCOMPARE}"
+RUN_SCRIPT="run${SPECIALRUN:+_$SPECIALRUN}"
 
 [ -r "$SOURCE"  ] || error "solution not found: $SOURCE"
 [ -r "$TESTIN"  ] || error "test-input not found: $TESTIN"
@@ -305,9 +305,6 @@ if [ ! -s program.out ]; then
 	cat error.tmp >>error.out
 	exit $E_OUTPUT
 fi
-
-# Add $SYSTEM_ROOT/bin to path for 'tempfile' (needed by compare.sh)
-export PATH="$SYSTEM_ROOT/bin:$PATH"
 
 logmsg $LOG_INFO "starting script '$COMPARE_SCRIPT'"
 

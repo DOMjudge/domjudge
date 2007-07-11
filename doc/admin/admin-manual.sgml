@@ -509,7 +509,7 @@ arguments for usage information. See also sections
 <ref id="install_config:system" name="System Configuration">
 and <ref id="problems:java-chroot" name="Problems: Java & chroot">.
 
-<sect>Configuration of special run and compare scripts
+<sect>Configuration of special run and compare programs
 <p>
 
 To allow for problems that do not fit within the standard scheme of
@@ -518,15 +518,14 @@ way submissions are run and checked for correctness.
 
 The backend script (<tt>test_solution.sh</tt>) that handles the
 compilation, running and checking of submissions, calls separate
-scripts for running and comparison of the results. These can be
+programs for running and comparison of the results. These can be
 specialised and adapted to the requirements per problem. For this, one
-has to create scripts <tt>run_&lt;some-tag&gt;.sh</tt> and/or
-<tt>compare_&lt;some-tag&gt;.sh</tt> in the <tt>SYSTEM_ROOT/judge</tt>
-directory (see <tt>run.sh</tt> and <tt>compare.sh</tt> for examples
-and usage information). Then one must specify this &lt;some-tag&gt; in
-the special_run and/or special_compare fields of the problem entry in
-the MySQL database (NULL means that the default script should be
-used).
+has to create programs or scripts <tt>run_&lt;some-tag&gt;</tt> and/or
+<tt>compare_&lt;some-tag&gt;</tt> in the <tt>SYSTEM_ROOT/judge</tt>
+directory (see <tt>run</tt> and <tt>compare</tt> for examples and
+usage information). Then one must specify this &lt;some-tag&gt; in the
+special_run and/or special_compare fields of the problem entry in the
+MySQL database (NULL means that the default script should be used).
 
 <sect>Other configuration issues
 <p>
@@ -902,10 +901,10 @@ contains the input/output testdata in files <tt>testdata.in</tt> and
 within which solutions for this problem have to run (taking into
 account <tt>time_factor</tt> per language).
 
-<tt>special_run</tt> if not empty defines a custom run-script
-<tt>run_&lt;special_run&gt;.sh</tt> to run compiled submissions for
-this problem and <tt>special_compare</tt> if not empty defines a custom
-compare-script <tt>compare_&lt;special_compare&gt;.sh</tt> to
+<tt>special_run</tt> if not empty defines a custom run program
+<tt>run_&lt;special_run&gt;</tt> to run compiled submissions for
+this problem and <tt>special_compare</tt> if not empty defines a
+custom compare program <tt>compare_&lt;special_compare&gt;</tt> to
 compare output for this problem.
 
 The <tt>color</tt> tag can be filled with a CSS colour specification
@@ -1477,18 +1476,18 @@ Parsing of the result XML file (in the result interface) is only
 supported if `xsltproc' is available on the judge computers;
 this program is part of the <url name="GNOME libxslt package"
 url="http://www.xmlsoft.org/XSLT/">. If this is not available, then
-DOMjudge reports judging as correct when the compare script
+DOMjudge reports judging as correct when the compare program
 difference output is empty. The exitcode of the validator program
 should also be zero, otherwise an internal error is generated.
 
-DOMjudge currently has two validator scripts:
-<tt>judge/compare.sh</tt> and <tt>judge/compare_program.sh</tt>. The
-first does a compare with a a plain diff, the second script calls an
-external program for checking (e.g. <tt>judge/check_float</tt> for
-comparison of floating point results). When passed a 5th parameter,
-this is interpreted as a filename to which these scripts will write a
-comparison of the program and jury output. Both scripts also generate
-XML compliant output, which is written to the result file specified in
-parameter 4 and fully complies with the validator standard.
+DOMjudge currently has two validator scripts: <tt>judge/compare</tt>
+and <tt>judge/compare_program</tt>. The first does a compare with a
+plain diff, the second script calls an external program for checking
+(e.g. <tt>judge/check_float</tt> for comparison of floating point
+results). When passed a 5th parameter, this is interpreted as a
+filename to which these scripts will write a comparison of the program
+and jury output. Both scripts also generate XML compliant output,
+which is written to the result file specified in parameter 4 and fully
+complies with the validator standard.
 
 </report>
