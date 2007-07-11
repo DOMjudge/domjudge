@@ -115,7 +115,7 @@ string_replace ()
 }
 
 # Function to set (clear-text) passwords in relevant files.
-# Arguments: hury password, team password, public password.
+# Arguments: jury password, team password, public password.
 set_passwords()
 {
 # Update password info in php-config:
