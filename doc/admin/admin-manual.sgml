@@ -378,6 +378,16 @@ The requirements for the deployment of this jury-system are:
        (optionally to use syntax highlighting in the Show Source section of the jury interface)
 </itemize>
 
+<sect1>Requirements for team workstations
+<p>
+
+In the most basic setup the team workstations only need (next to the tools needed
+for program development) a web browser. The web interface fully works with any
+known browser, with the exception of notification of new clarifications in the
+menu bar. That can be updated without reloading the page by using AJAX. This is
+supported by any reasonably current browser.
+
+
 <label id="install_config:apt-getinstall">
 <sect1>Debian installation command
 <p>

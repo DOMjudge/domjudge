@@ -7,6 +7,7 @@ Version 2.0.0 - SVN
  - Split general functions from submitcommon.cc to lib.misc.c and
    improved makefile structure and build process under Cygwin.
  - Replaced compare script by C program with better diff display.
+ - Use AJAX instead of iframe to notify team/jury of new clarifications.
 
 Version 2.0.0 Release Candidate 2 - 25 June 2007
 ------------------------------------------------

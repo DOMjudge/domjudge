@@ -351,6 +351,11 @@ or to all teams. In the latter case, make sure you phrase it in such a
 way that the message is selfcontained, since the other teams cannot
 view the original question.
 
+<p>
+The menu on every page of the jury interface will mention the number
+of unanswered clarification requests: ``(1 new)''. This number is
+automatically updated, even without reloading the page.
+
 
 <chapt>After the contest
 <p>
