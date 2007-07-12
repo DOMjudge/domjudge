@@ -26,11 +26,13 @@ if(!isset($menu)) {
 <link rel="stylesheet" href="style.css" type="text/css" />
 <?php if (isset($sourcecss)) {  ?>
 <link rel="stylesheet" href="style_source.css" type="text/css" />
-<?php } ?>
+<?php }
+if ($menu) {?>
+<script type="text/javascript" src="../ajax.js"></script>
+</head>
+<body onload="setInterval('updateClarifications()', 20000)">
+<?php include("menu.php");
+} else {?>
 </head>
 <body>
-
-<?php	if($menu) { ?>
-<iframe id="menubox" frameborder="0" src="menu.php"></iframe>
-<?php	}	?>
-
+<?php }
