@@ -105,7 +105,7 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <tr><td scope="row">Has passwd:</td><td><?=(isset($row['passwd']) ? 'yes':'no')?>
 <?php if ( IS_ADMIN ): ?>
 	<a href="genpasswds.php?forteam=<?=$id?>"><img src="../images/edit.png"
-	alt="edit" title="set password" class="picto"></a>
+	alt="edit" title="set password" class="picto" /></a>
 <?php endif; ?>
 	</td></tr>
 <tr><td scope="row">Category:  </td><td><?=(int)$row['categoryid'].
