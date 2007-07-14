@@ -30,7 +30,7 @@
 #include "../etc/config.h"
 
 #define PROGRAM "runguard"
-#define VERSION "0.2"
+#define VERSION "0.3"
 #define AUTHORS "Jaap Eldering"
 
 extern int errno;
@@ -215,6 +215,9 @@ int main(int argc, char **argv)
 	char *ptr;
 	char  cwd[MAXPATHLEN+3];
 	int   opt;
+
+	/* Clear environment to prevent all kinds of security holes */
+	if ( ! clearenv() ) error(0,"cannot clear environment");
 	
 	progname = argv[0];
 
@@ -306,7 +309,6 @@ int main(int argc, char **argv)
 	/* Set user-id (must be root for this). */
 	if ( use_user ) {
 		if ( setuid(runuid) ) error(errno,"cannot set user id to `%d'",runuid);
-		if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped");
 		verbose("using user id `%d'",runuid);
 	} else {
 		/* Reset effective uid to real uid, to increase security
@@ -314,6 +316,7 @@ int main(int argc, char **argv)
 		if ( setuid(getuid()) ) error(errno,"cannot set real user id");
 		verbose("using real uid `%d' as effective uid",getuid());
 	}
+	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped");
 
 	/* Open output file for writing running time to */
 	if ( use_output ) {
