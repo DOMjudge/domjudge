@@ -45,8 +45,8 @@ finddbname: fixconfig
 	$(eval DBNAME=$(shell source $(TOPDIR)/etc/config.sh ; echo $$DBNAME))
 
 # Extra phony target to generate up-to-date config for finddbname.
-# Needed because running this in finddbname seems broken: old file
-# contents is used in the next command then.
+# Needed because running this in finddbname seems broken: the old file
+# contents were being used in that case.
 fixconfig:
 	$(MAKE) -C $(TOPDIR)/etc config.sh
 
