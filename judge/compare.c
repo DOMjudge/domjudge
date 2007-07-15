@@ -300,8 +300,8 @@ void writediff()
 
 	}
 
-	/* If no differences found, the some error occurred */
-	if ( ! difffound ) error(0,"no differences found, but reported by 'diff'");
+	/* If no differences found, then some error occurred */
+	if ( ! difffound ) error(0,"differences reported by 'diff', but none found");
 	
 	fclose(diffoutfile);
 	fclose(inputfile[0]);
