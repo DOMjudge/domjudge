@@ -43,7 +43,7 @@ check-installed:
 		exit 1 ; \
 	fi
 
-install_scripts: $(TEMPFILE)
+install_scripts:
 	bin/make_passwords.sh   install
 	bin/make_directories.sh install
 
@@ -58,10 +58,9 @@ check: check-installed
 # Be careful: removes all possible contest data!!
 distclean: distclean_scripts
 
-distclean_scripts: $(TEMPFILE)
+distclean_scripts:
 	bin/make_passwords.sh   distclean
 	bin/make_directories.sh distclean
-	rm -f $(TEMPFILE)
 	rm -f .installed
 
 $(REC_TARGETS): %:

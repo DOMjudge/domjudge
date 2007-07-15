@@ -105,13 +105,11 @@ string_replace ()
 	FILE=$2
 
 	[ -r "$FILE" ] || return 1
-
-	TEMPFILE=`bin/tempfile`
 	
-	cat "$FILE" | sed "$SCRIPT" > "$TEMPFILE"
-	cat "$TEMPFILE" > "$FILE"
+	cat "$FILE" | sed "$SCRIPT" > "$FILE.sed.$$"
+	cat "$FILE.sed.$$" > "$FILE"
 
-	rm -f "$TEMPFILE"
+	rm -f "$FILE.sed.$$"
 }
 
 # Function to set (clear-text) passwords in relevant files.
