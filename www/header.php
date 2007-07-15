@@ -28,7 +28,7 @@ if(!isset($menu)) {
 <link rel="stylesheet" href="style_source.css" type="text/css" />
 <?php }
 if ($menu) {?>
-<script type="text/javascript" src="ajax.js" />
+<script type="text/javascript" src="ajax.js"></script>
 </head>
 <body onload="setInterval('updateClarifications()', 20000)">
 <?php include("menu.php");
