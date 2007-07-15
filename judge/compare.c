@@ -193,7 +193,7 @@ void writediff()
 	int endlinediff, normaldiff;
 	char diffchar;
 	char formatstr[256];
-	int difffound;
+	int difffound = 0;
 
 	if ( (diffoutfile =fopen(diffout,"w"))==NULL ) error(errno,"opening file '%s'",diffout);
 	if ( (inputfile[0]=fopen(progout,"r"))==NULL ) error(errno,"opening file '%s'",progout);
