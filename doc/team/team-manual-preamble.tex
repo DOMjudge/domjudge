@@ -1,4 +1,4 @@
-\documentclass[11pt,a4paper]{article}
+\documentclass[11pt,a4paper,titlepage]{article}
 
 % $Id$
 
@@ -25,13 +25,23 @@
 \newcommand{\cmd}[1]{\mbox{\texttt{#1}}}
 
 % Our titlepage
-\newcommand{\domjudgetitlepage}{%
-  \begin{titlepage}
-    \thispagestyle{empty}
-    \maketitle
-    \vspace{1cm}
-    \begin{figure}[htbp]
-      \centerline{\includegraphics[height=7cm]{../logos/DOMjudgelogo.pdf}}
-    \end{figure}
-  \end{titlepage}
+\makeatletter
+\def\maketitle{%
+  \null
+  \thispagestyle{empty}%
+  \vskip 2cm
+  \begin{center}\leavevmode
+    \normalfont
+    {\fontsize{30pt}{30pt}\selectfont \@title \par}%
+    \vskip 1cm
+    {\Large \@author \par}%
+    \vskip 1cm
+    {\Large \@date \par}%
+  \end{center}%
+  \vskip 2cm
+  \begin{figure}[htbp]
+    \centerline{\includegraphics[height=7cm]{../logos/DOMjudgelogo.pdf}}
+  \end{figure}
+  \vfill\null
 }
+\makeatother
