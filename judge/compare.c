@@ -114,7 +114,9 @@ int main(int argc, char **argv)
 	int status, differror;
 	char line[256];
 
-	/* read arguments */
+	/* Read arguments. Note that argc counts the number of arguments
+	   including the name of the executed program (argv[0]), thus
+	   (argc-1) is the real number of arguments. */
 	progname = argv[0];
 	if ( argc-1<4 ) error(0,"not enough arguments: %d given, 4 required",argc-1);
 	if ( argc-1>5 ) error(0,"too many arguments: %d given, max. 5 accepted",argc-1);
@@ -122,15 +124,15 @@ int main(int argc, char **argv)
 	progout = argv[2];
 	testout = argv[3];
 	result  = argv[4];
-	if ( argc==6 ) {
+	/* Check for optional diff.out filename. */
+	if ( (argc-1)==5 ) {
 		diffout = argv[5];
 	} else {
 		diffout = NULL;
 	}
-	printf("argc = %d, diffout = '%s'\n",argc,diffout);
 	
-	/* execute 'diff <diffoptions> progout testout' for exact match of
-	   program output */
+	/* Execute 'diff <diffoptions> progout testout' for exact match of
+	   program output. */
 	cmdargs[0] = diffoptions;
 	cmdargs[1] = progout;
 	cmdargs[2] = testout;
