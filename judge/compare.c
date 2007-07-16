@@ -221,7 +221,7 @@ void writediff()
 	/* Determine left/right printing length and construct format
 	   string for printf later */
 	for(i=0; i<2; i++) maxlinelen[0] = min(maxlinelen[0],maxprintlen);
-	sprintf(formatstr,"%%3d '%%-%ds %%c '%%s\n",maxlinelen[0]+1);
+	sprintf(formatstr,"%%3d '%%-%ds %%c '%%s\n",(int)maxlinelen[0]+1);
 	
 	/* Loop over all common lines to detect differences */
 	for(l=0; l<min(nlines[0],nlines[1]); l++) {
