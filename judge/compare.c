@@ -116,8 +116,8 @@ int main(int argc, char **argv)
 
 	/* read arguments */
 	progname = argv[0];
-	if ( argc-1<5 ) error(0,"not enough arguments: %d given, 4 required",argc-1);
-	if ( argc-1>6 ) error(0,"too many arguments: %d given, max. 5 accepted",argc-1);
+	if ( argc-1<4 ) error(0,"not enough arguments: %d given, 4 required",argc-1);
+	if ( argc-1>5 ) error(0,"too many arguments: %d given, max. 5 accepted",argc-1);
 	testin  = argv[1];
 	progout = argv[2];
 	testout = argv[3];
