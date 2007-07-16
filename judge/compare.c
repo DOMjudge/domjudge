@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 	int redir_fd[3];
 	char *cmdargs[MAXARGS];
 	pid_t cpid;
-	FILE *rpipe;
+	FILE *rpipe, *diffoutfile;
 	int status, differror;
 	char line[256];
 
@@ -170,6 +170,13 @@ int main(int argc, char **argv)
 	/* Exit when no diff output found (nothing to do anymore) */
 	if ( ! differror ) {
 		writeresult("Accepted");
+		/* write empty diff.out if requested */
+		if ( diffout != NULL ) {
+			if ( (diffoutfile=fopen(diffout,"w")) == NULL ) {
+				error(errno,"opening file '%s'",diffout);
+			}
+			fclose(diffoutfile);
+		}
 		return 0;
 	}
 
