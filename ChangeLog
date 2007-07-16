@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 2.1.0 - SVN
+-------------------
+
 Version 2.0.0 - SVN
 -------------------
  - Use correct last modified date of team manual (Closes: #1744121).
