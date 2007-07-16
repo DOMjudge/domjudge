@@ -8,6 +8,7 @@ $res = $DB->q('KEYTABLE SELECT type AS ARRAYKEY, COUNT(*) AS count FROM team_unr
 
 echo "<div id=\"menutop\">\n";
 
+// 'unread submission' does not work yet (and the AJAX code does not support it)
 if ( isset($res['submission']) ) {
 	echo '<a target="_top" class="new" href="index.php" accesskey="s">' .
 		'submissions (' .

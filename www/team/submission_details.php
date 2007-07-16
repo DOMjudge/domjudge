@@ -28,8 +28,9 @@ if( ! $row ) {
 }
 
 // remove event of new submission
-$DB->q('DELETE FROM team_unread
-        WHERE mesgid = %i AND type = "submission" AND teamid = %s', $sid, $login);
+// does not work yet
+//$DB->q('DELETE FROM team_unread
+//        WHERE mesgid = %i AND type = "submission" AND teamid = %s', $sid, $login);
 
 ?>
 <h1>Submission details</h1>
