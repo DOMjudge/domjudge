@@ -3,7 +3,7 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = runguard beep mkstemps tempfile
+TARGETS = runguard beep mkstemps
 
 # Some configuration of programs that need set-uid root permissions:
 SUIDTARGETS=runguard beep

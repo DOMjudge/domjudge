@@ -34,12 +34,6 @@ endif
 # no automatic targets when calling 'make' unless overridden.
 default:
 
-TEMPFILEDIR = $(TOPDIR)/bin
-TEMPFILE = $(TEMPFILEDIR)/tempfile
-
-$(TEMPFILE):
-	$(MAKE) -C $(TEMPFILEDIR) tempfile
-
 # Helper target to read DBNAME from config:
 finddbname: fixconfig
 	$(eval DBNAME=$(shell source $(TOPDIR)/etc/config.sh ; echo $$DBNAME))

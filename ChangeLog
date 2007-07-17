@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 2.1.0 - SVN
 -------------------
+ - Drop tempfile binary, is not necessary
 
 Version 2.0.0 - SVN
 -------------------

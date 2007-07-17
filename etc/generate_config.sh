@@ -41,9 +41,6 @@ set -e
 
 shopt -s extglob
 
-# Include '../bin' in path for 'tempfile'
-PATH=../bin:$PATH
-
 GLOBALCONF=global.cfg
 LANGCONF=config
 LANGTEMPLATE=config.template
@@ -82,8 +79,8 @@ if [ ! -r "$GLOBALCONF" ]; then
 fi
 
 # Store config generated from global config here
-TMPMAIN=`tempfile -p "main" -s ".$EXT"`
-TMPHEAD=`tempfile -p "head" -s ".$EXT"`
+TMPMAIN=main.$EXT.new
+TMPHEAD=head.$EXT.new
 
 COMMANDLINE="$0 $@"
 
@@ -190,7 +187,7 @@ config_include ()
 	local CFGFILE=$2
 	local TAGFILE=$3
 
-	local TMPFILE=`tempfile -p 'cfg' -s '.tmp'`
+	local TMPFILE=$CFGFILE.new
 
 	local NSTART NEND
 
@@ -208,9 +205,7 @@ config_include ()
 	grep -B $MAXLINES "$TAG START" $CFGFILE >$TMPFILE
 	cat $TAGFILE >>$TMPFILE
 	grep -A $MAXLINES "$TAG END"   $CFGFILE >>$TMPFILE
-	cp $TMPFILE $CFGFILE
-
-	rm -f $TMPFILE
+	mv $TMPFILE $CFGFILE
 }
 
 cp -p $TEMPLATE $CONFIG

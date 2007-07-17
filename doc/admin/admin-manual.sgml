@@ -147,7 +147,6 @@ by Wietse Venema.
 <item> beep.c is made by Johnathan Nightingale.
 <item> bash is included from the Debian `bash-static' (i386) package
 (copyright Free Software Foundation).
-<item> tempfile.c is included from the Debian `debianutils' package.
 <item> mkstemps.h and basename.h are modified versions from the
 GNU libiberty library (copyright Free Software Foundation).
 <item> lib.database.php by Jeroen van Wolffelaar et al.
