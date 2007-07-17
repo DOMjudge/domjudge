@@ -11,4 +11,4 @@
 
 echo "DOMjudge is not configured yet: edit 'etc/global.cfg' and then run 'make'."
 
-exit -1
+exit 1
