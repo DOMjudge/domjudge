@@ -16,21 +16,21 @@ define ('LOGFILE', LOGDIR.'/check.log');
 
 require (SYSTEM_ROOT . '/lib/init.php');
 
-$argv = $_SERVER['argv'];
-
-$program = @$argv[1];
+$program = @$_SERVER['argv'][1];
 
 if ( ! $program ) error("No program specified");
+$program = escapeshellarg($program);
 
-logmsg(LOG_DEBUG, "running program '$program'");
+logmsg(LOG_DEBUG, "running program $program");
 
-$teams = $DB->q('COLUMN SELECT login FROM team');
+$teams = $DB->q('COLUMN SELECT login FROM team ORDER BY login');
 
 foreach($teams as $team) {
-	logmsg(LOG_DEBUG, "running on account '$team'");
+	$team = escapeshellarg($team);
+	logmsg(LOG_DEBUG, "running on account $team");
 	system("ssh -l $team localhost $program",$exitcode);
 	if ( $exitcode != 0 ) {
-		logmsg(LOG_NOTICE, "on '$team': exitcode $exitcode");
+		logmsg(LOG_NOTICE, "on $team: exitcode $exitcode");
 	}
 }
 
