@@ -13,10 +13,10 @@
 // is this the webinterface or commandline?
 if ( isset($_SERVER['REMOTE_ADDR']) ) {
 	echo "<fieldset class=\"error\"><legend>Error</legend>\n" .
-		"DOMjudge is not configured yet: edit 'etc/global.cfg' and then run 'make'." .
+		"DOMjudge is not configured yet: edit 'etc/global.cfg' and then run 'make config'." .
 		"</fieldset>\n";
 } else {
-	echo "DOMjudge is not configured yet: edit 'etc/global.cfg' and then run 'make'.\n";
+	echo "DOMjudge is not configured yet: edit 'etc/global.cfg' and then run 'make config'.\n";
 }
 
 exit(1);

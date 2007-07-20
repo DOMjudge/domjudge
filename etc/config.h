@@ -8,4 +8,4 @@
  * $Id$
  */
 
-#error "DOMjudge is not configured yet: edit 'etc/global.cfg' and then run 'make'."
+#error "DOMjudge is not configured yet: edit 'etc/global.cfg' and then run 'make config'."

@@ -9,6 +9,6 @@
 #
 # $Id$
 
-echo "DOMjudge is not configured yet: edit 'etc/global.cfg' and then run 'make'."
+echo "DOMjudge is not configured yet: edit 'etc/global.cfg' and then run 'make config'."
 
 exit 1
