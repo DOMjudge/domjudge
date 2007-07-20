@@ -3,24 +3,28 @@
 require('init.php');
 
 /* (new) clarification info */
-$res = $DB->q('KEYTABLE SELECT type AS ARRAYKEY, COUNT(*) AS count FROM team_unread
-               WHERE teamid = %s GROUP BY type', $login);
+$cid = getCurContest();
+$unread_clarifications = (int) $DB->q('VALUE SELECT COUNT(*) FROM team_unread
+		LEFT JOIN clarification ON(mesgid=clarid)
+		WHERE type="clarification" AND teamid = %s
+		AND cid = %i', $login, $cid);
+
 
 echo "<div id=\"menutop\">\n";
 
 // 'unread submission' does not work yet (and the AJAX code does not support it)
-if ( isset($res['submission']) ) {
+/*if ( isset($res['submission']) ) {
 	echo '<a target="_top" class="new" href="index.php" accesskey="s">' .
 		'submissions (' .
 		(int)$res['submission']['count'] . " new)</a>\n";
-} else {
+} else { */
 	echo "<a target=\"_top\" href=\"index.php\" accesskey=\"s\">submissions</a>\n";
-}
+/*}*/
 
-if ( isset($res['clarification']) ) {
+if ( $unread_clarifications > 0 ) {
 	echo '<a target="_top" class="new" href="clarifications.php" ' .
 		'accesskey="c" id="clarifications">clarifications (' .
-		(int)$res['clarification']['count'] . " new)</a>\n";
+		$unread_clarifications . " new)</a>\n";
 } else {
 	echo '<a target="_top" href="clarifications.php" ' .
 		"accesskey=\"c\" id=\"clarifications\">clarifications</a>\n";

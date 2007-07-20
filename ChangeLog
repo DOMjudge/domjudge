@@ -12,6 +12,7 @@ Version 2.0.0 - SVN
  - Drop dependency on tempfile during distclean.
  - Fix compile errors/warnings in beep.c and compare.c (Closes: #1754218).
  - Improve runssh_* robustness.
+ - Fix team unread clarification count to work cross-contest.
 
 Version 2.0.0 Release Candidate 2 - 25 June 2007
 ------------------------------------------------
