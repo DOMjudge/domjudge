@@ -13,6 +13,24 @@
  * turn calls errorstring to generate the actual error message;
  */
 
+/* Check for GNU libc version of strerror_r, which doesn't comply with
+ * POSIX standards. From man-page: 
+ *   
+ *   char *strerror_r(int errnum, char *buf, size_t n);
+ * 
+ * is a GNU extension used by glibc (since 2.0), and must be regarded
+ * as obsolete in view of SUSv3.  The GNU version may, but need not,
+ * use the user-supplied buffer. If it does, the result may be
+ * truncated in case the supplied buffer is too small. The result is
+ * always NUL-terminated.
+ */
+#if defined(__GLIBC__) && __GLIBC__==2 && __GLIBC_MINOR__<=3
+#define GLIB_STRERROR 1
+#else
+/* In glibc >= 2.4 we have the POSIX version of 'strerror_r' when defining: */
+#define _XOPEN_SOURCE 600
+#endif
+
 #include "lib.error.h"
 
 #include <stdlib.h>
@@ -75,7 +93,7 @@ char *errorstring(char *type, int errnum, char *mesg)
 	int buffersize;
 	char *buffer;
 	char *endptr; /* pointer to current end of buffer */
-#ifdef __GLIBC__
+#ifdef GLIB_STRERROR
 	char *tmpstr;
 	int tmplen;
 #endif
@@ -101,17 +119,7 @@ char *errorstring(char *type, int errnum, char *mesg)
 	if ( errnum!=0 ) {
 		snprintf(endptr, buffersize-strlen(buffer), ": ");
 		endptr = strchr(endptr,0);
-#ifdef __GLIBC__
-/* glibc strerror_r doesn't comply with POSIX standards. From man-page:
- *   
- *   char *strerror_r(int errnum, char *buf, size_t n);
- * 
- * is a GNU extension used by glibc (since 2.0), and must be regarded
- * as obsolete in view of SUSv3.  The GNU version may, but need not,
- * use the user-supplied buffer. If it does, the result may be
- * truncated in case the supplied buffer is too small. The result is
- * always NUL-terminated.
- */
+#ifdef GLIB_STRERROR
 		tmplen = buffersize-strlen(buffer);
 		tmpstr = strerror_r(errnum, endptr, tmplen);
 		strncat(endptr, tmpstr, tmplen);
