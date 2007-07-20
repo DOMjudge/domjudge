@@ -11,7 +11,7 @@ default: config
 
 config: $(CONFIGS)
 
-$(CONFIGS): config.%: config.template.% global.cfg generate_config.sh $(TEMPFILE)
+$(CONFIGS): config.%: config.template.% global.cfg generate_config.sh
 	./generate_config.sh $*
 
 check:
