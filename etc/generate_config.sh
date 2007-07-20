@@ -61,11 +61,11 @@ TEMPLATE="$LANGTEMPLATE.$EXT"
 CONFIG="$LANGCONF.$EXT"
 
 case $EXT in
-	h)    COMMENT='//';;
-	sh)   COMMENT='#';;
-	php)  COMMENT='//';;
-	tex)  COMMENT='%';;
-	*)		echo "Filetype '$EXT' is not supported."; exit 1;;
+	h)	COMMENT='//';;
+	sh)	COMMENT='#';;
+	php)	COMMENT='//';;
+	tex)	COMMENT='%';;
+	*)	echo "Filetype '$EXT' is not supported."; exit 1;;
 esac
 
 if [ ! -r "$TEMPLATE" ]; then
@@ -118,8 +118,8 @@ while IFS='='; read VARDEF VALUE <&3; do
 			case "$ATTR" in
 			"string")	ATTR_STRING=1;;
 			"eval")		ATTR_EVAL=1;;
-			*)			echo "Unknown variable attribute '$ATTR' on line $LINENR!"
-						exit 1;;
+			*)		echo "Unknown variable attribute '$ATTR' on line $LINENR!"
+					exit 1;;
 			esac
 		done
 		IFS=$OLDIFS
