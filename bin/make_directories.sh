@@ -30,8 +30,8 @@ fi
 
 case "$TARGET" in
 	install)
-		mkdir -m 0711 -p $INPUT_ROOT $OUTPUT_ROOT
-		mkdir -m 0700 -p $INCOMINGDIR $SUBMITDIR $JUDGEDIR $LOGDIR
+		mkdir -m 0711 -p $INPUT_ROOT $OUTPUT_ROOT $JUDGEDIR
+		mkdir -m 0700 -p $INCOMINGDIR $SUBMITDIR $LOGDIR
 		cd $INPUT_ROOT && tar xzf $SYSTEM_ROOT/sample-data/input.tar.gz
 		;;
 	clean)
