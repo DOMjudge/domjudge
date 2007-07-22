@@ -16,15 +16,15 @@ install: build install-setuid
 $(SUIDTARGETS): %: %.build
 
 beep.build: %.build: %.c
-	-$(CXX) $(CXXFLAGS) $< -o $@
-	@if [ ! -x $@ ]; then \
+	-$(CXX) $(CXXFLAGS) $< -o beep
+	@if [ ! -x beep ]; then \
 		echo "Error building 'beep', probably because this is a non-Linux system." ; \
 		echo "Replacing 'beep' by '/bin/true'." ; \
-		cp /bin/true $@ ; \
+		cp /bin/true beep ; \
 	fi
 
 runguard.build: %.build: %.c $(TOPDIR)/etc/config.h
-	$(CXX) $(CXXFLAGS) $< -o $@
+	$(CXX) $(CXXFLAGS) $< -o runguard
 
 install-setuid: $(SUIDBUILDS)
 	@echo $(SUIDINSTALLDIR)
