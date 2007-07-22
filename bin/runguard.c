@@ -142,7 +142,7 @@ void usage()
 	printf("  -u, --user=USER     run COMMAND as user with username or id USER\n");
 	printf("  -o, --output=FILE   write running time to FILE\n");
 	printf("                        WARNING: FILE will be overwritten and written\n");
-	printf("                        to as USER, when using the `user' option\n");
+	printf("                        to as USER when using the `user' option\n");
 	printf("  -v, --verbose       display some extra warnings and information\n");
 	printf("  -q, --quiet         suppress all warnings and verbose output\n");
 	printf("      --help          display this help and exit\n");
@@ -331,7 +331,7 @@ int main(int argc, char **argv)
 		
 	case  0: /* run controlled command */
 		/* Run the command in a separate process group so that the command
-		   and all it's children can be killed off with one signal. */
+		   and all its children can be killed off with one signal. */
 		setsid();
 		execvp(cmdname,cmdargs);
 		error(errno,"cannot start `%s'",cmdname);
