@@ -29,7 +29,7 @@ if( $res->count() == 0 ) {
 		              $row['color'] . ';"' : '') .
 			'><td><a href="team_category.php?id=' . (int)$row['categoryid'] .
 			'">' . (int)$row['categoryid'] .
-			'</td><td>' . (int)$row['sortorder'] .
+			'</a></td><td>' . (int)$row['sortorder'] .
 			'</td><td>' . htmlentities($row['name']) .
 			'</td><td align="right">' . (int)$row['numteams'] . "</td>";
 		if ( IS_ADMIN ) {

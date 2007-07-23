@@ -134,7 +134,7 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 
 <?php
 
-echo "<p>" . rejudgeForm('team', $id) . "</p>\n\n";
+echo "<br />\n" . rejudgeForm('team', $id) . "\n\n";
 
 if ( IS_ADMIN ) {
 	echo "<p>" .

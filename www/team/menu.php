@@ -23,11 +23,11 @@ echo "<div id=\"menutop\">\n";
 
 if ( $unread_clarifications > 0 ) {
 	echo '<a target="_top" class="new" href="clarifications.php" ' .
-		'accesskey="c" id="clarifications">clarifications (' .
+		'accesskey="c" id="menu_clarifications">clarifications (' .
 		$unread_clarifications . " new)</a>\n";
 } else {
 	echo '<a target="_top" href="clarifications.php" ' .
-		"accesskey=\"c\" id=\"clarifications\">clarifications</a>\n";
+		"accesskey=\"c\" id=\"menu_clarifications\">clarifications</a>\n";
 }
 
 echo "<a target=\"_top\" href=\"scoreboard.php\" accesskey=\"b\">scoreboard</a>\n";

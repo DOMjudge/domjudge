@@ -150,7 +150,7 @@ if ( isset($data['special_compare']) ) {
 echo "</table>\n" .
 	addEndForm();
 
-echo "<p>" . rejudgeForm('problem', $id) . "</p>\n\n";
+echo "<br />\n" . rejudgeForm('problem', $id) . "\n\n";
 
 if ( IS_ADMIN ) {
 	echo "<p>" . editLink('problem',$id) . "\n" .
