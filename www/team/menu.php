@@ -7,7 +7,7 @@ $cid = getCurContest();
 $unread_clarifications = (int) $DB->q('VALUE SELECT COUNT(*) FROM team_unread
 		LEFT JOIN clarification ON(mesgid=clarid)
 		WHERE type="clarification" AND teamid = %s
-		AND cid = %i', $login, $cid);
+		AND clarification.cid = %i', $login, $cid);
 
 
 echo "<div id=\"menutop\">\n";
