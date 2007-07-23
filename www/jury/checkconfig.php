@@ -58,6 +58,12 @@ if( !function_exists('version_compare') || version_compare( '4.3.2',PHP_VERSION,
 }
 echo " <a href=\"?phpinfo\">(phpinfo)</a></p>\n\n";
 
+@include('Text/Highlighter.php');
+echo "<p>Optional PEAR Text_Highlighter class is ";
+echo class_exists('Text_Highlighter') ? "available" : "not available.\n" .
+	"Install it in PHP's include path to get better source syntax highlighting";
+echo ".</p>\n\n";
+
 ?>
 
 <h2>Authentication</h2>
