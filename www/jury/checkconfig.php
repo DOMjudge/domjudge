@@ -13,6 +13,20 @@ require('../header.php');
 
 requireAdmin();
 
+echo "<h1>Config Checker</h1>\n\n";
+
+/** Print the output of phpinfo(), which may be useful to check which settings
+ *  PHP is actually using. */
+if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
+	$ret = "<p><a href=\"./checkconfig.php\">return to config checker</a></p>\n\n";
+	echo $ret;
+	echo "<h2>PHP Information</h2>\n\n";
+	phpinfo();
+	echo $ret;
+	require('../footer.php');
+	exit;
+}
+
 require_once(SYSTEM_ROOT . '/lib/relations.php');
 require_once('checkers.php');
 
@@ -29,8 +43,6 @@ function warn ($string) {
 
 ?>
 
-<h1>Config Checker</h1>
-
 <h2>Software</h2>
 
 <?php
@@ -44,7 +56,8 @@ if( !function_exists('version_compare') || version_compare( '4.3.2',PHP_VERSION,
 } else {
 	echo "OK";
 }
-echo "</p>\n\n";
+echo " <a href=\"?phpinfo\">(phpinfo)</a></p>\n\n";
+
 ?>
 
 <h2>Authentication</h2>
