@@ -68,8 +68,9 @@ if (isset($_POST['zekerweten'] ) ) {
 		htmlspecialchars(join(", ", array_values($k))) . "</strong>.<br /><br />\n\n" .
 		"Are you sure?<br /><br />\n\n" .
 		addSubmit(" Never mind... ", 'tochmaarniet') .
-		addSubmit(" Yes I'm sure! ", 'zekerweten') .
-		addEndForm() );
+		addSubmit(" Yes I'm sure! ", 'zekerweten') );
+
+	echo addEndForm();
 }
 
 
