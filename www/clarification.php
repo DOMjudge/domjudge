@@ -85,7 +85,7 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
 			( $clar['recipient']==NULL || $clar['recipient']==$team ) ) ) ) {
 			setClarificationViewed($clar['clarid'], $team);
 			putClar($clar,$isjury);
-			echo "<p></p>\n\n";
+			echo "<br />\n\n";
 		}
 	}
 }

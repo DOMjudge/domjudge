@@ -120,7 +120,7 @@ echo addForm($pagename) . "<p>\n" .
 <?php
 echo addEndForm();
 
-echo "<p>" . rejudgeForm('language',$data['langid']) . "</p>\n\n";
+echo "<br />\n" . rejudgeForm('language',$data['langid']) . "\n\n";
 
 if ( IS_ADMIN ) {
 	echo "<p>" . 

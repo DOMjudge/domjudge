@@ -21,7 +21,7 @@ function updateClarifications()
 	}
 	handle.onreadystatechange = function() {
 		if (handle.readyState == 4) {
-			var elem = document.getElementById('clarifications');
+			var elem = document.getElementById('menu_clarifications');
 			var cnew = handle.responseText;
 			if (cnew == 0) {
 				elem.innerHTML = 'clarifications';

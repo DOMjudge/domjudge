@@ -19,11 +19,11 @@ if ( isset($res['submission']) ) {
 
 if ( isset($res['clarification']) ) {
 	echo '<a target="_top" class="new" href="clarifications.php" ' .
-		'accesskey="c" id="clarifications">clarifications (' .
+		'accesskey="c" id="menu_clarifications">clarifications (' .
 		(int)$res['clarification']['count'] . " new)</a>\n";
 } else {
 	echo '<a target="_top" href="clarifications.php" ' .
-		"accesskey=\"c\" id=\"clarifications\">clarifications</a>\n";
+		"accesskey=\"c\" id=\"menu_clarifications\">clarifications</a>\n";
 }
 
 echo "<a target=\"_top\" href=\"scoreboard.php\" accesskey=\"b\">scoreboard</a>\n";
