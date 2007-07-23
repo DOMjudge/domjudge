@@ -102,7 +102,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 
 	// initialize the arrays we'll build from the data
 	$THEMATRIX = $SCORES = array();
-	$SUMMARY = array('num_correct' => 0, 'total_time' => 0);
+	$SUMMARY = array('num_correct' => 0, 'total_time' => 0,
+		'affils' => array(), 'countries' => array() );
 
 	// scoreboard_jury is always up to date, scoreboard_public might be frozen.	
 	if ( $isjury || $showfinal ) {
