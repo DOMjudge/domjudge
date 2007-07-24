@@ -347,9 +347,7 @@ The requirements for the deployment of this jury-system are:
        hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
        grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail
 
-<item> sudo (optionally to use a chroot judging environment with Sun Java)
-
-<item> htpasswd
+<item> Apache htpasswd
 
 <item> phpMyAdmin, to be able to access the database in an emergency
        or for data import/export
@@ -357,24 +355,33 @@ The requirements for the deployment of this jury-system are:
 <item> linuxdoc to build the documentation and LaTeX to build
        the PDF-documentation
 
-<item> OpenSSH/SCP (or a compatible ssh/scp client/daemon, optionally
-       for using the command-line submit program)
+</itemize>
 
-<item> wget/curl and unzip (optionally for downloading LaTeX packages
+The following items are optional, but may be required to use certain
+functionality.
+
+<itemize>
+
+<item> sudo (to use a chroot judging environment with Sun Java)
+
+<item> OpenSSH/SCP or compatible (for using the command-line
+       submit program)
+
+<item> wget/curl and unzip (for downloading LaTeX packages
        for documentation)
 
-<item> An NTP daemon (optionally for keeping the clocks between jury
+<item> An NTP daemon (for keeping the clocks between jury
        system and judgehosts in sync)
 
 <item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html">~
-       (optionally for <htmlurl name="ICPC validator standard"
+       (for <htmlurl name="ICPC validator standard"
         url="http://www.ecs.csus.edu/pc2/doc/valistandard.html"> compatibility)
 
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
-       (optionally to use the commandline submit client with the webinterface)
+       (to use the commandline submit client with the webinterface)
 
 <item> <htmlurl name="PEAR Text_Highlighter class" url="http://pear.php.net/package/Text_Highlighter/">~
-       (optionally to use syntax highlighting in the Show Source section of the jury interface)
+       (to use syntax highlighting in the Show Source section of the jury interface)
 </itemize>
 
 <sect1>Requirements for team workstations
