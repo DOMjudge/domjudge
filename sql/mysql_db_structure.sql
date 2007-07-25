@@ -221,4 +221,4 @@ CREATE TABLE `team_unread` (
   `mesgid` mediumint(8) unsigned NOT NULL default 0,
   `type` enum('clarification','submission') NOT NULL default 'clarification',
   PRIMARY KEY  (`teamid`,`mesgid`,`type`)
-) ENGINE=MyISAM COMMENT='List of items a team has not viewed yet (e.g.: clarifications, submission results, ...)';
+) ENGINE=MyISAM COMMENT='List of items a team has not viewed yet';
