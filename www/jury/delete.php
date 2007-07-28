@@ -20,7 +20,7 @@ foreach($KEYS[$t] as $key) {
 	if ( !$k[$key] ) error ("I can't find my keys.");
 }
 
-if ( isset($_POST['tochmaarniet']) ) {
+if ( isset($_POST['cancel']) ) {
 
 	// this probably is not generic enough for the future, but
 	// works for all our current tables.
@@ -41,7 +41,7 @@ foreach($k as $key => $val) {
 	}
 }
 
-if (isset($_POST['zekerweten'] ) ) {
+if (isset($_POST['confirm'] ) ) {
 
 	// LIMIT 1 is a security measure to prevent our bugs from
 	// wiping a table by accident.
@@ -67,8 +67,8 @@ if (isset($_POST['zekerweten'] ) ) {
 		"You're about to delete $t <strong>" .
 		htmlspecialchars(join(", ", array_values($k))) . "</strong>.<br /><br />\n\n" .
 		"Are you sure?<br /><br />\n\n" .
-		addSubmit(" Never mind... ", 'tochmaarniet') .
-		addSubmit(" Yes I'm sure! ", 'zekerweten') );
+		addSubmit(" Never mind... ", 'cancel') .
+		addSubmit(" Yes I'm sure! ", 'confirm') );
 
 	echo addEndForm();
 }
