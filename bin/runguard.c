@@ -216,10 +216,10 @@ int main(int argc, char **argv)
 	char  cwd[MAXPATHLEN+3];
 	int   opt;
 
+	progname = argv[0];
+
 	/* Clear environment to prevent all kinds of security holes */
 	if ( ! clearenv() ) error(0,"cannot clear environment");
-	
-	progname = argv[0];
 
 	/* Parse command-line options */
 	use_root = use_time = use_user = use_output = 0;
