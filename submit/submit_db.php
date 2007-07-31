@@ -82,12 +82,10 @@ if( filesize(INCOMINGDIR."/$file") > SOURCESIZE*1024 ) {
 
 logmsg (LOG_INFO, "input verified");
 
-
 // Copy the submission to a (uniquely generated) file in SUBMITDIR
-$dummy = null;
-$tofile = exec(SYSTEM_ROOT."/bin/mkstemps ".
-               SUBMITDIR."/$team.$prob.XXXXXX.$langext", $dummy, $retval);
-if ( $retval != 0 ) error("Could not create tempfile.");
+$tofile = mkstemps(SUBMITDIR."/$team.$prob.XXXXXX.$langext", strlen($langext)+1);
+
+if ( $tofile === FALSE ) error("Could not create tempfile.");
 $tofile = basename($tofile);
 
 if ( ! copy(INCOMINGDIR."/$file", SUBMITDIR."/$tofile") ) {
