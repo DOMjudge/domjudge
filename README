@@ -24,7 +24,6 @@ COPYING.
 Additionally, parts of this system are based on other programs, which
 are covered by other copyrights and licences. This will be noted in the
 files themselves. Files (partly) covered by other licences are:
-- bin/runguard.c is covered by the IBM public license.
 - lib/mkstemps.h and lib/basename.h are covered by the GNU Lesser
   Public License. See COPYING.lgpl.
 
