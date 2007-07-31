@@ -86,7 +86,7 @@ if ( $oldsource ) {
 		// The PECL xdiff PHP-extension.
 		
 		$difftext = xdiff_string_diff($oldsource['sourcecode'],
-									  $source['sourcecode'],2);
+			$source['sourcecode'],2);
 		
 	} elseif ( is_readable($oldfile) && is_readable($newfile) ) {
 		// A direct diff on the sources in the SUBMITDIR.
@@ -94,13 +94,9 @@ if ( $oldsource ) {
 		$difftext = `diff -bBt -U 2 $oldfile $newfile 2>&1`;
 
 	} else {
-		// Write sources to tempfile and diff those.
-		// This does not work with safe_mode, which is a known
-		// limitation of tempnam. In safe_mode, this currently
-		// creates temp files that we cannot access nor remove...
-
-		if ( ! ($oldfile = tempnam("/tmp","source-old-s$oldid-")) ||
-			 ! ($newfile = tempnam("/tmp","source-new-s$id-"   )) ||
+		// FIXME: need a better tempdir location than hardcoding /tmp
+		if ( ! ($oldfile = mkstemps("/tmp/source-old-s$oldid-XXXXXX",0)) ||
+			 ! ($newfile = mkstemps("/tmp/source-new-s$id-XXXXXX",0)) ||
 			 ! ($oldhandle = fopen($oldfile,'w')) ||
 			 ! ($newhandle = fopen($newfile,'w')) ||
 			 ! fwrite($oldhandle,$oldsource['sourcecode']) ||
