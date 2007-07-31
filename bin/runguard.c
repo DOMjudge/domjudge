@@ -224,13 +224,17 @@ int main(int argc, char **argv)
 	int   exitcode;
 	char *valid_users;
 	char *ptr;
+	char *path;
 	char  cwd[MAXPATHLEN+3];
 	int   opt;
 
 	progname = argv[0];
 
-	/* Clear environment to prevent all kinds of security holes */
-	if ( ! clearenv() ) error(0,"cannot clear environment");
+	/* Clear environment to prevent all kinds of security holes, save PATH */
+	path = getenv("PATH");
+	environ[0] = NULL;
+	/* FIXME: Clean path before setting it again? */
+	if ( path!=NULL ) setenv("PATH",path,1);
 
 	/* Parse command-line options */
 	use_root = use_time = use_user = use_output = 0;
