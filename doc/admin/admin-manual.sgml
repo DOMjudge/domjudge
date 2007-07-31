@@ -127,8 +127,6 @@ acknowledgements are made in the respective files, but we would like
 to name them here too:
 
 <itemize>
-<item> runguard.c is based on timeout from The Coroner's Toolkit
-by Wietse Venema.
 <item> beep.c is made by Johnathan Nightingale.
 <item> bash is included from the Debian `bash-static' (i386) package
 (copyright Free Software Foundation).
@@ -137,6 +135,8 @@ GNU libiberty library (copyright Free Software Foundation).
 <item> lib.database.php by Jeroen van Wolffelaar et al.
 <item> submit.c and submitdaemon.c are based on submit.pl and
 submitdaemon.pl by Eelco Dolstra.
+<item> runguard.c was originally based on timeout from The
+Coroner's Toolkit by Wietse Venema.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
 Erik van Sebille.
 </itemize>
