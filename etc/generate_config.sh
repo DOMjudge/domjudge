@@ -35,6 +35,8 @@
 # as is to the config file. Here language specific configuration data
 # can be placed and other things you like...
 #
+# Part of the DOMjudge Programming Contest Jury System and licenced
+# under the GNU GPL. See README and COPYING for details.
 
 # Exit on any error:
 set -e

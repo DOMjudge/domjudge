@@ -1,25 +1,12 @@
 /*
-   submitdaemon -- server for the submit program.
-   Copyright (C) 2004-2007 Peter van de Werken, Jaap Eldering.
-
-   Based on submitdaemon.pl by Eelco Dolstra.
-   
-   $Id$
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+ * submitdaemon -- server for the submit program.
+ *
+ * Based on submitdaemon.pl by Eelco Dolstra.
+ *  
+ * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
  */
 
 #include <stdarg.h>
@@ -63,7 +50,6 @@ using namespace std;
 /* These defines are needed in 'version' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
 #define PROGRAM "submitdaemon"
-#define AUTHORS "Peter van de Werken & Jaap Eldering"
 
 /* Variables defining logmessages verbosity to stderr/logfile */
 #define LOGFILE LOGDIR"/submit.log"
@@ -236,7 +222,7 @@ int main(int argc, char **argv)
 
 void version()
 {
-	printf("%s %s\nWritten by %s\n\n",DOMJUDGE_PROGRAM,PROGRAM,AUTHORS);
+	printf("%s %s\n\n",DOMJUDGE_PROGRAM,PROGRAM);
 	printf(
 "%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
 "are welcome to redistribute it under certain conditions.  See the GNU\n"

@@ -3,6 +3,9 @@
  * Common functions shared between team/public/jury interface
  *
  * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
  */
 
 /**

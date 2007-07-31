@@ -10,6 +10,9 @@
  * Called: submit_db.php <team> <ip> <problem> <langext> <filename>
  *
  * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 

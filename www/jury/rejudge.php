@@ -1,11 +1,15 @@
 <?php
 /**
- * $Id$
  * Marks a set of submissions for rejudging, limited by key=value
  * key has to be a full quantifier, e.g. "submission.teamid"
  *
  * $key must be one of (judging.judgehost, submission.teamid, submission.probid,
  * submission.langid, submission.submitid)
+ *
+ * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
  */
 
 require('init.php');

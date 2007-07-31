@@ -8,6 +8,9 @@
 # Minimum requirements: a Linux system with glibc >= 2.3, wget, ar and
 # a POSIX shell in /bin/sh. About 250 MB disk space is needed. It must
 # be run as root and will install the Debian debootstrap package.
+#
+# Part of the DOMjudge Programming Contest Jury System and licenced
+# under the GNU GPL. See README and COPYING for details.
 
 # Abort when a single command fails:
 set -e

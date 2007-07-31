@@ -1,25 +1,13 @@
 /*
-   submit -- command-line submit program for solutions.
-   Copyright (C) 2004-2007 Peter van de Werken, Jaap Eldering.
-
-   Based on submit.pl by Eelco Dolstra.
-   
-   $Id$
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+ * submit -- command-line submit program for solutions.
+ *
+ * Based on submit.pl by Eelco Dolstra.
+ *  
+ * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ *
  */
 
 /* System/site specific config */
@@ -96,7 +84,6 @@ using namespace std;
 /* These defines are needed in 'version' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
 #define PROGRAM "submit"
-#define AUTHORS "Peter van de Werken & Jaap Eldering"
 
 const int timeout_secs = 60; /* seconds before send/receive timeouts with an error */
 
@@ -467,7 +454,7 @@ void usage()
 
 void version()
 {
-	printf("%s %s\nWritten by %s\n\n",DOMJUDGE_PROGRAM,PROGRAM,AUTHORS);
+	printf("%s %s\n\n",DOMJUDGE_PROGRAM,PROGRAM);
 	printf(
 "%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
 "are welcome to redistribute it under certain conditions.  See the GNU\n"

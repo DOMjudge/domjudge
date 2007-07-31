@@ -7,6 +7,9 @@
 #
 # Normally you don't want to run this script directly, but via 'make'
 # instead. It gets as first argument the make target.
+#
+# Part of the DOMjudge Programming Contest Jury System and licenced
+# under the GNU GPL. See README and COPYING for details.
 
 # Exit on any error:
 set -e

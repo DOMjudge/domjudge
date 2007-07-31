@@ -5,6 +5,9 @@
  * All output is HTML-safe, so input should not be escaped.
  *
  * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
  */
 
 /**

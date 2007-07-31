@@ -3,6 +3,9 @@
  * View team details
  *
  * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
  */
 
 $pagename = basename($_SERVER['PHP_SELF']);

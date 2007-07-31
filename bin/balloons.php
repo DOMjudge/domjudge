@@ -1,11 +1,13 @@
 #!/usr/bin/php -q
 <?php
-
 /**
  * Notify contest crew when there is a new, correct submission (for
  * which a balloon has to be handed out).
  *
  * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 

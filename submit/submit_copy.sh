@@ -11,6 +11,8 @@
 # what kind of filesystems do you have, how can you access the team
 # accounts, etc...  Rewrite to fit your needs.
 #
+# Part of the DOMjudge Programming Contest Jury System and licenced
+# under the GNU GPL. See README and COPYING for details.
 
 # Global configuration
 source "`dirname $0`/../etc/config.sh"

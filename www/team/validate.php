@@ -1,11 +1,13 @@
 <?php
-
 /**
  * This file is included to check whether this is a known team, and sets
  * the $login variable accordingly. It checks this by the IP from the
  * database, if not present it returns an error 403 (Forbidden).
  *
  * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
  */
 
 $ip = $_SERVER['REMOTE_ADDR'];

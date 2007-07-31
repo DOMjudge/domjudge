@@ -3,6 +3,9 @@
 /**
  * Switch a user to the right site based on IP (from database)
  * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
  */
 
 require_once('../etc/config.php');

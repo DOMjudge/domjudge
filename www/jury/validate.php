@@ -3,6 +3,9 @@
  * Make sure one's allowed to view the jury system
  *
  * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
  */
 
 $ip = $_SERVER['REMOTE_ADDR'];

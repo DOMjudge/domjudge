@@ -3,23 +3,9 @@
  $Id$
 
  DOMjudge Administrator's Manual
- This manual is part of the DOMjudge Programming Contest Jury System.
- Copyright (c) 2004-2007 The DOMjudge Developers
+ This manual is part of the DOMjudge Programming Contest Jury System
+ and licenced under the GNU GPL. See README and COPYING for details.
 
- DOMjudge is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
-
- DOMjudge is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with DOMjudge; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- 02110-1301, USA
 -->
 <report>
 
@@ -126,7 +112,6 @@ Additionally, parts of this system are based on other programs, which
 are covered by other copyrights and licences. This will be noted in the
 files themselves. Files (partly) covered by other licences are:
 <itemize>
-<item> bin/runguard.c is covered by the IBM public license.
 <item> lib/mkstemps.h and lib/basename.h are covered by the GNU Lesser
 Public License. See COPYING.lgpl.
 </itemize>  
