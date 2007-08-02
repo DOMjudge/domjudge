@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Error handling and logging functions
 #
 # $Id$
