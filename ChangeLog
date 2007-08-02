@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 2.0.1 - SVN
 -------------------
+ - Make etc/generate_config.sh and judge/run use !/bin/bash, since they
+   use bash-specific features and will break on a /bin/sh != bash system.
 
 Version 2.0.0 - 23 July 2007
 ----------------------------
