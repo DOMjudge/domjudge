@@ -119,6 +119,7 @@ APT::Get::Assume-Yes "true";
 APT::Get::Force-Yes "false";
 APT::Get::Purge "true";
 APT::Get::AllowUnauthenticated "true";
+APT::Install-Recommends "false";
 Acquire::Retries "3";
 Acquire::PDiffs "false";
 DPkg::Options {"--no-debsig";}
