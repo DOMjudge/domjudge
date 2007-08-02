@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # $Id$
 
 # Script to generate specific config files for different languages
@@ -34,6 +34,9 @@
 # Content in the configuration templates outside of any tags is copied
 # as is to the config file. Here language specific configuration data
 # can be placed and other things you like...
+#
+# This script is a bash script, because it uses bash-specific features,
+# most notably shopt extglob.
 #
 # Part of the DOMjudge Programming Contest Jury System and licenced
 # under the GNU GPL. See README and COPYING for details.

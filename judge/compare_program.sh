@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # $Id$
 
 # Compare wrapper-script for 'test_solution.sh'.

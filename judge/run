@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # $Id$
 
 # Run wrapper-script for 'test_solution.sh'.
@@ -15,6 +15,8 @@
 # <memlimit>  Maximum total memory usage in kB.
 # <filelimit> Maximum filesize in kB.
 # <proclimit> Maximum total no. processes (including this shell)
+#
+# This script is bash because it wants to use 'ulimit -u'.
 
 PROGRAM="$1";   shift
 TESTIN="$1";    shift

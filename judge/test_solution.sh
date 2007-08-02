@@ -43,10 +43,11 @@
 # Otherwise a submission is counted as accepted when the filesize of
 # compare.out is zero. In both cases, if the compare program returns
 # with nonzero exitcode, this is viewed as an internal error.
-
+#
+# This is a bash script because of the traps it uses.
 
 # Global configuration
-source "`dirname $0`/../etc/config.sh"
+. "`dirname $0`/../etc/config.sh"
 
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
@@ -69,7 +70,7 @@ cleanexit ()
 }
 
 # Error and logging functions
-source "$SYSTEM_ROOT/lib/lib.error.sh"
+. "$SYSTEM_ROOT/lib/lib.error.sh"
 
 # Logging:
 LOGFILE="$LOGDIR/judge.`hostname --short`.log"

@@ -7,6 +7,9 @@
 #
 # Normally you don't want to run this script directly, but via 'make'
 # instead. It gets as first argument the make target.
+#
+# This script uses bash, since it depends on bash globbing and
+# readline support.
 
 # Exit on any error:
 set -e
@@ -23,9 +26,9 @@ error()
 }
 
 if [ -f etc/config.sh ]; then
-	source etc/config.sh
+	. etc/config.sh
 elif [ -f ../etc/config.sh ]; then
-	source ../etc/config.sh
+	. ../etc/config.sh
 else
 	error "configuration not found: called from right dir?"
 fi
@@ -48,18 +51,8 @@ DEF_PASSWD_PUBLIC="DOMJUDGE_PUBLIC_PASSWD"
 # only used internally.
 generate_passwd ()
 {
-	local PASSWD=""
-	local PASSWDLEN=12
-	local ALPHABET="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	
-	for ((i=0; i<PASSWDLEN; i++)) ; do
-		PASSWD="$PASSWD${ALPHABET:(($RANDOM % ${#ALPHABET})):1}"
-	done
-
-	echo "$PASSWD"
-
-	# Clear password to reset memory (not sure how well this works...)
-	PASSWD="----------------------------"
+	printf `head -c12 /dev/random | uuencode -m dummy | tail -n +2 | head -c16`
+	printf "\n";
 }
 
 # Function to interactively ask a password from the user. Password

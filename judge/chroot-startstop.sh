@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # $Id$
 
 # Script to setup chroot environment extras needed for Sun Java.

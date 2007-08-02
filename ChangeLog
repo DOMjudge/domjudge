@@ -5,6 +5,8 @@ Version 2.1.0 - SVN
  - Drop tempfile and mkstemps binaries, they are not necessary.
  - Change runguard license to GPL 2 or higher. The current code
    is a different implementation of the original idea from timeout.
+ - Make shell scripts /bin/sh where possible, set them to bash
+   where we rely on bash-specific features.
 
 Version 2.0.0 - SVN
 -------------------

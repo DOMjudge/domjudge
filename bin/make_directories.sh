@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # $Id$
 
 # Script to create directories necessary for the DOMjudge system as
@@ -24,9 +24,9 @@ error()
 }
 
 if [ -f etc/config.sh ]; then
-	source etc/config.sh
+	. etc/config.sh
 elif [ -f ../etc/config.sh ]; then
-	source ../etc/config.sh
+	. ../etc/config.sh
 else
 	error "configuration not found: called from right dir?"
 fi

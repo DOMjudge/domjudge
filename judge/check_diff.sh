@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # $Id$
 
 # Simple program for compare_program.sh script: this just runs a diff

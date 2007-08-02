@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # $Id$
 
 # Script to copy a submission file from a team to judge account.
@@ -15,7 +15,7 @@
 # under the GNU GPL. See README and COPYING for details.
 
 # Global configuration
-source "`dirname $0`/../etc/config.sh"
+. "`dirname $0`/../etc/config.sh"
 
 error()
 {

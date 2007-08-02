@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # $Id$
 #
 # Script to generate a minimal chroot environment with Sun Java
@@ -159,11 +159,11 @@ sun-java5-bin	shared/error-sun-dlj-v1-1	error
 sun-java5-jre	shared/error-sun-dlj-v1-1	error	
 EOF
 
-chroot "$CHROOTDIR" /bin/bash -c "apt-get update && apt-get dist-upgrade"
-chroot "$CHROOTDIR" /bin/bash -c "apt-get clean"
-chroot "$CHROOTDIR" /bin/bash -c "apt-get install $INSTALLDEBS"
-chroot "$CHROOTDIR" /bin/bash -c "apt-get remove $REMOVEDEBS"
-chroot "$CHROOTDIR" /bin/bash -c "apt-get clean"
+chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
+chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
+chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
+chroot "$CHROOTDIR" /bin/sh -c "apt-get remove $REMOVEDEBS"
+chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 
 umount "$CHROOTDIR/proc"
 
