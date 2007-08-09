@@ -7,6 +7,8 @@ Version 2.0.1 - SVN
  - Fix notice on scoreboard when SHOW_AFFILIATIONS=1 but team_affiliations
    table empty. Thanks Maks Verver.
  - Drop obsolete style definition.
+ - Fixes to judge/compare.c for better handling of strange newlines and
+   printing first difference summary as first line.
 
 Version 2.0.0 - 23 July 2007
 ----------------------------

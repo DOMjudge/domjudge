@@ -48,7 +48,9 @@
 	 ! the lines are different
 	 < left contains additional lines not present right
 	 > vice versa
-     $ only end-of-lines characters differ (e.g. \n vs. \n\r)
+     $ only end-of-lines characters differ (e.g. LF vs. CR+LF); note
+       that only LF is considered to begin a newline and all CR
+       characters are stripped.
 	 
  */
 
@@ -76,12 +78,16 @@ char *progname;
 /* filenames of commandline arguments */
 char *testin, *testout, *progout, *result, *diffout;
 
-/* Strip end-of-line characters from string */
+/* Removes end-of-line characters (CR and LF) from string */
 char *stripendline(char *str)
 {
-	size_t pos = strlen(str)-1;
+	size_t i, j;
 	
-	while ( pos>=0 && (str[pos]=='\n' || str[pos]=='\r') ) str[pos--] = 0;
+	for(i=0, j=0; str[i]!=0; i++) {
+		if ( ! (str[i]=='\n' || str[i]=='\r') ) str[j++] = str[i];
+	}
+	
+	str[j] = 0;
 
 	return str;
 }
@@ -198,39 +204,61 @@ void writediff()
 	FILE *inputfile[2];
 	size_t maxlinelen[2], nlines[2];
 	char line[2][MAXLINELEN];
+	int endoffile[2];
 	int i, l;
 	int endlinediff, normaldiff;
-	char diffchar;
+	char diffchar, quotechar[2];
 	char formatstr[256];
-	int difffound = 0;
+	int firstdiff = -1;
 
 	if ( (diffoutfile =fopen(diffout,"w"))==NULL ) error(errno,"opening file '%s'",diffout);
 	if ( (inputfile[0]=fopen(progout,"r"))==NULL ) error(errno,"opening file '%s'",progout);
 	if ( (inputfile[1]=fopen(testout,"r"))==NULL ) error(errno,"opening file '%s'",testout);
 
 	/* Find maximum line length and no. lines per input file: */
-	for(i=0; i<2; i++) {
-		maxlinelen[i] = nlines[i] = 0;
-		
-		/* Read lines until end of file */
-		while ( fgets(line[i],MAXLINELEN,inputfile[i])!=NULL ) {
-			nlines[i]++;
+	for(i=0; i<2; i++) endoffile[i] = maxlinelen[i] = nlines[i] = 0;
 
-			stripendline(line[i]);
+	/* Read lines until end of file to find first difference and maxlinelen */
+	for(l=0; !(endoffile[0] && endoffile[1]); l++) {
 
-			if ( strlen(line[i])>maxlinelen[i] ) maxlinelen[i] = strlen(line[i]);
+		/* Read line of each input file if not already end of file */
+		for(i=0; i<2; i++) {
+			if ( endoffile[i] ) {
+				line[i][0] = 0;
+				continue;
+			}
+			if ( fgets(line[i],MAXLINELEN,inputfile[i])!=NULL && strlen(line[i])!=0 ) {
+				nlines[i]++;
+			} else {
+				endoffile[i] = 1;
+				line[i][0] = 0;
+			}
 		}
 
-		/* Reset file position to start */
-		rewind(inputfile[i]);
+		/* Check for differences: _one_ file ended or lines differ */
+		if ( firstdiff==-1 &&
+			 ( endoffile[0]^endoffile[1] ||
+			   strcmp(line[0],line[1])!=0 ) ) firstdiff = l;
+
+		/* Update maxlinelen with length of this line */
+		for(i=0; i<2; i++) {
+			stripendline(line[i]);
+			if ( strlen(line[i])>maxlinelen[i] ) maxlinelen[i] = strlen(line[i]);
+		}
 	}
+
+	/* Reset file position to start */
+	for(i=0; i<2; i++) rewind(inputfile[i]);
 
 	/* Determine left/right printing length and construct format
 	   string for printf later */
 	for(i=0; i<2; i++) maxlinelen[0] = min(maxlinelen[0],maxprintlen);
-	sprintf(formatstr,"%%3d '%%-%ds %%c '%%s\n",(int)maxlinelen[0]+1);
+	sprintf(formatstr,"%%3d %%c%%-%ds %%c %%c%%s\n",(int)maxlinelen[0]+1);
 	
-	/* Loop over all common lines to detect differences */
+	/* Print first differences found header at beginning of file */
+	fprintf(diffoutfile,"### DIFFERENCES FROM LINE %d ###\n",firstdiff+1);
+
+	/* Loop over all common lines for printing */
 	for(l=0; l<min(nlines[0],nlines[1]); l++) {
 
 		for(i=0; i<2; i++) fgets(line[i],MAXLINELEN,inputfile[i]);
@@ -238,12 +266,6 @@ void writediff()
 		/* Check for endline (or normal) character differences */
 		endlinediff = ( strcmp(line[0],line[1])!=0 );
 
-		/* Print header line if first diff found */
-		if ( endlinediff && ! difffound ) {
-			difffound = 1;
-			fprintf(diffoutfile,"### DIFFERENCES FROM LINE %d ###\n",l+1);
-		}
-		
 		/* Strip endline characters */
 		for(i=0; i<2; i++) stripendline(line[i]);
 
@@ -270,7 +292,7 @@ void writediff()
 			diffchar = '=';
 		}
 		
-		fprintf(diffoutfile,formatstr,l+1,line[0],diffchar,line[1]);
+		fprintf(diffoutfile,formatstr,l+1,'\'',line[0],diffchar,'\'',line[1]);
 	}
 
 	/* Print lines for single continuing file */
@@ -278,17 +300,15 @@ void writediff()
 		if ( nlines[0]>l ) {
 			i = 0;
 			diffchar = '<';
+			quotechar[0] = '\'';
+			quotechar[1] = ' ';
 		} else {
 			i = 1;
 			diffchar = '>';
+			quotechar[0] = ' ';
+			quotechar[1] = '\'';
 		}
 
-		/* Print header line if first diff found */
-		if ( ! difffound ) {
-			difffound = 1;
-			fprintf(diffoutfile,"### DIFFERENCES FROM LINE %d ###\n",l+1);
-		}
-		
 		for(; l<nlines[i]; l++) {
 			fgets(line[i],MAXLINELEN,inputfile[i]);
 
@@ -304,14 +324,14 @@ void writediff()
 
 			line[1-i][0] = 0;
 
-			fprintf(diffoutfile,formatstr,l+1,line[0],diffchar,line[1]);
+			fprintf(diffoutfile,formatstr,l+1,quotechar[0],line[0],
+			                         diffchar,quotechar[1],line[1]);
 		}
-
 	}
 
 	/* If no differences found, then some error occurred */
-	if ( ! difffound ) error(0,"differences reported by 'diff', but none found");
-	
+	if ( firstdiff==-1 ) error(0,"differences reported by 'diff', but none found");
+
 	fclose(diffoutfile);
 	fclose(inputfile[0]);
 	fclose(inputfile[1]);
