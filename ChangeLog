@@ -7,6 +7,8 @@ Version 2.1.0 - SVN
    is a different implementation of the original idea from timeout.
  - Make shell scripts /bin/sh where possible, set them to bash
    where we rely on bash-specific features.
+ - Fixes to judge/compare.c for better handling of strange newlines and
+   printing first difference summary as first line.
 
 Version 2.0.0 - SVN
 -------------------
