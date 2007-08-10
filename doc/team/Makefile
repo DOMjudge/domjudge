@@ -4,7 +4,6 @@ endif
 include $(TOPDIR)/Makefile.global
 
 CONFIGDIR = $(TOPDIR)/etc
-SHELL = /bin/bash
 
 TARGETS = team-manual team-manual-NL
 
@@ -27,11 +26,13 @@ pdf: $(TARGETSPDF)
 $(TARGETSPDF): %.pdf: %.tex $(CONFIGDIR)/config.tex team-manual-preamble.tex \
                             ../examples/example.* ../logos/DOMjudgelogo.* $(LATEXPKGFILES)
 	@NRUNS=3 ; printf "Running $$NRUNS passes of '$(LATEX) $(LATEXFLAGS) $<'..." ; \
-	 for ((i=1; i<=NRUNS; i++)) ; do \
-		if ! $(LATEX) $(LATEXFLAGS) $< </dev/null &>/dev/null ; then \
+	 i=1; \
+	 while [ $$i -le $$NRUNS ]; do \
+		if ! $(LATEX) $(LATEXFLAGS) $< </dev/null >/dev/null ; then \
 			printf "\nTeX-ing failed in run $$i, see '$*.log' for details.\n" ; \
 			exit 1 ; \
 		else printf " $$i" ; fi ; \
+		i=$$(($$i+1)); \
 	 done ; printf "\n" ;
 
 $(CONFIGDIR)/config.tex:
