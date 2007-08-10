@@ -26,11 +26,11 @@ $(LATEXZIPFILES): %.zip:
 	else if which curl >/dev/null ; then \
 		curl -f -O -m 120 $(CTANPATH)/$@ ; \
 	else \
-		echo -e "No wget or curl found, download manually from:\n\t$(CTANPATH)/$@"; \
+		printf "No wget or curl found, download manually from:\n\t$(CTANPATH)/$@\n"; \
 		exit 1 ; \
 	fi ; fi ; \
 	if [ ! -f $@ ]; then \
-		echo -e "Downloading failed, download manually from:\n\t$(CTANPATH)/$@"; \
+		printf "Downloading failed, download manually from:\n\t$(CTANPATH)/$@\n"; \
 		exit 1 ; \
 	fi
 
