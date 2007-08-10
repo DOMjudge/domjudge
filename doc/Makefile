@@ -37,7 +37,7 @@ $(LATEXZIPFILES): %.zip:
 $(LATEXSTYFILES): %.sty: %.zip
 	unzip -oq $*.zip
 	cd $* && $(LATEX) $(LATEXFLAGS) $*.ins >/dev/null
-	ln -s $*/$*.sty .
+	ln -sf $*/$*.sty .
 
 cleanlatexpackages:
 	rm -rf $(LATEXPACKAGES) $(LATEXZIPFILES) $(LATEXSTYFILES)
