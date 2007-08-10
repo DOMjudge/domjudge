@@ -3,6 +3,8 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
+SHELL = /bin/bash
+
 CONFIGDIR = $(TOPDIR)/etc
 
 TARGETS = team-manual team-manual-NL
