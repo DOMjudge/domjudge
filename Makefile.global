@@ -36,7 +36,7 @@ default:
 
 # Helper target to read DBNAME from config:
 finddbname: fixconfig
-	$(eval DBNAME=$(shell . $(TOPDIR)/etc/config.sh ; echo $$DBNAME))
+	$(eval DBNAME=$(shell source $(TOPDIR)/etc/config.sh ; echo $$DBNAME))
 
 # Extra phony target to generate up-to-date config for finddbname.
 # Needed because running this in finddbname seems broken: the old file
