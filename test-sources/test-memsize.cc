@@ -25,6 +25,10 @@ int main()
 	 */
 	for(i=0; 1; i++) {
 		a.resize(i*1024*1024,0);
+		if ( a.capacity()<i*1024*1024 ) {
+			cout << "resizing failed for " << i << " MB." << endl;
+			return 0;
+		}
 		cout << "memory allocated: " << i << " MB." << endl;
 	}
 
