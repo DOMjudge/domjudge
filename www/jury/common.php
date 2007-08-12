@@ -92,7 +92,9 @@ function rejudgeForm($table, $id)
 		$question = "Rejudge all submissions for this $table?";
 	}
 	
-	return '<input type="submit" value="' . htmlspecialchars($button) . '" ' .
+	$ret .= '<input type="submit" value="' . htmlspecialchars($button) . '" ' .
 		($disabled ? 'disabled="disabled"' : 'onclick="return confirm(\'' .
 		htmlspecialchars($question) . '\');"') . " />\n" . addEndForm();
+
+	return $ret;
 }
