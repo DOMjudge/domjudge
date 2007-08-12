@@ -60,40 +60,39 @@ function rejudgeForm($table, $id)
 		addHidden('table', $table) .
 		addHidden('id', $id);
 
+	$button = 'REJUDGE this submission';
+	$question = "Rejudge submission s$id?";
+	$disabled = false;
+	
 	// special case submission
 	if ( $table == 'submission' ) {
-		$ret .= "<input type=\"submit\" value=\"REJUDGE submission s" .
-			(int)$id . "\"";
-
+		
 		// disable the form button if there are no valid judgings anyway
 		// (nothing to rejudge) or if the result is already correct
 		global $DB;
 		$validresult = $DB->q('MAYBEVALUE SELECT result FROM judging WHERE
 		                       submitid = %i AND valid = 1', $id);
+
 		if ( IS_ADMIN ) {
 			if ( ! $validresult ) {
-				$ret .= " onclick=\"return confirm('Rejudge PENDING submission s" .
-					(int)$id . ", are you sure?')\" />\n";
+				$question = "Restart judging of PENDING submission s$id " .
+					'are you sure?';
+				$button = 'RESTART judging';
 			} elseif ( $validresult == 'correct' ) {
-				$ret .= " onclick=\"return confirm('Rejudge CORRECT submission s" .
-					(int)$id . ", are you sure?')\" />\n";
-			} else {
-				$ret .= " onclick=\"return confirm('Rejudge submission s" .
-					(int)$id . "?')\" />\n";
+				$question = "Rejudge CORRECT submission s$id, " .
+					'are you sure?';
 			}
 		} else {
-			if ( $validresult && $validresult != 'correct' ) {
-				$ret .= " onclick=\"return confirm('Rejudge submission s" .
-					(int)$id . "?')\" />\n";
-			} else {
-				$ret .= " disabled=\"disabled\" />\n";
+			if ( ! $validresult || $validresult == 'correct' ) {
+				$disabled = true;
 			}
 		}
 	} else {
-		$ret .= '<input type="submit" value="REJUDGE ALL for ' .
-			$table . ' ' . htmlspecialchars($id) .
-			'" onclick="return confirm(\'Rejudge all submissions for this ' .
-			$table . "?')\" />\n";
+		$button = "REJUDGE ALL for $table $id";
+		$question = "Rejudge all submissions for this $table?";
 	}
-	return $ret . addEndForm();
+	
+	return '<input type="submit" value="' . htmlspecialchars($button) . '" ' .
+		($disabled ? 'disabled="disabled"' : 'onclick="return confirm(\'' .
+		htmlspecialchars($question) . '\');"') . " />\n" . addEndForm();
 }
