@@ -70,11 +70,24 @@ function rejudgeForm($table, $id)
 		global $DB;
 		$validresult = $DB->q('MAYBEVALUE SELECT result FROM judging WHERE
 		                       submitid = %i AND valid = 1', $id);
-		if ( $validresult && $validresult != 'correct' ) {
-			$ret .= " onclick=\"return confirm('Rejudge submission s" .
-				(int)$id . "?')\" />\n";
+		if ( IS_ADMIN ) {
+			if ( ! $validresult ) {
+				$ret .= " onclick=\"return confirm('Rejudge PENDING submission s" .
+					(int)$id . ", are you sure?')\" />\n";
+			} elseif ( $validresult == 'correct' ) {
+				$ret .= " onclick=\"return confirm('Rejudge CORRECT submission s" .
+					(int)$id . ", are you sure?')\" />\n";
+			} else {
+				$ret .= " onclick=\"return confirm('Rejudge submission s" .
+					(int)$id . "?')\" />\n";
+			}
 		} else {
-			$ret .= " disabled=\"disabled\" />\n";
+			if ( $validresult && $validresult != 'correct' ) {
+				$ret .= " onclick=\"return confirm('Rejudge submission s" .
+					(int)$id . "?')\" />\n";
+			} else {
+				$ret .= " disabled=\"disabled\" />\n";
+			}
 		}
 	} else {
 		$ret .= '<input type="submit" value="REJUDGE ALL for ' .

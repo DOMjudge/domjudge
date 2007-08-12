@@ -40,11 +40,20 @@ $cid = getCurContest();
 // This can be done in one Update from MySQL 4.0.4 and up, but that wouldn't
 // allow us to call calcScoreRow() for the right rows, so we'll just loop
 // over the results one at a time.
-$res = $DB->q('SELECT * FROM judging
-               LEFT JOIN submission USING (submitid)
-               WHERE judging.cid = %i AND valid = 1 AND
-               ( result IS NULL OR result != "correct" ) AND ' .
-              $tablemap[$table] . ' = %s', $cid, $id);
+
+// Special case 'submission' for admin overrides
+if ( $table == 'submission' ) {
+	$res = $DB->q('SELECT * FROM judging
+	               LEFT JOIN submission USING (submitid)
+	               WHERE judging.cid = %i AND valid = 1 AND ' .
+	               $tablemap[$table] . ' = %s', $cid, $id);
+} else {
+	$res = $DB->q('SELECT * FROM judging
+	               LEFT JOIN submission USING (submitid)
+	               WHERE judging.cid = %i AND valid = 1 AND
+	               result != "correct" AND ' .
+	               $tablemap[$table] . ' = %s', $cid, $id);
+}
 
 while ( $jud = $res->next() ) {
 	$DB->q('START TRANSACTION');
@@ -62,4 +71,3 @@ while ( $jud = $res->next() ) {
 
 /** redirect back. */
 header('Location: '.getBaseURI().'jury/'.$table.'.php?id='.urlencode($id));
-
