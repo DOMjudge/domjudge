@@ -51,7 +51,7 @@ if ( IS_ADMIN && $table == 'submission' ) {
 	$res = $DB->q('SELECT * FROM judging
 	               LEFT JOIN submission USING (submitid)
 	               WHERE judging.cid = %i AND valid = 1 AND
-	               result != "correct" AND ' .
+	               result IS NOT NULL AND result != "correct" AND ' .
 	               $tablemap[$table] . ' = %s', $cid, $id);
 }
 
