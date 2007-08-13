@@ -150,7 +150,7 @@ void usage()
 	printf("Run COMMAND with restrictions.\n\n");
 	printf("  -r, --root=ROOT     run COMMAND with root directory set to ROOT\n");
 	printf("  -t, --time=TIME     kill COMMAND if still running after TIME seconds\n");
-	printf("  -u, --user=USER     run COMMAND as user with username or id USER\n");
+	printf("  -u, --user=USER     run COMMAND as user with username or ID USER\n");
 	printf("  -o, --output=FILE   write running time to FILE\n");
 	printf("                        WARNING: FILE will be overwritten and written\n");
 	printf("                        to as USER when using the `user' option\n");
@@ -160,8 +160,8 @@ void usage()
 	printf("      --version       output version information and exit\n");
 	printf("\n");
 	printf("Note that root privileges are needed for the `root' and `user' options.\n");
-	printf("When run setuid without the `user' option, the user id is set to the\n");
-	printf("real user id.\n");
+	printf("When run setuid without the `user' option, the user ID is set to the\n");
+	printf("real user ID.\n");
 	exit(0);
 }
 
@@ -261,7 +261,7 @@ int main(int argc, char **argv)
 			use_user = 1;
 			runuid = strtol(optarg,&ptr,10);
 			if ( *ptr!=0 ) runuid = userid(optarg);
-			if ( runuid<0 ) error(0,"invalid username or id specified: `%s'",optarg);
+			if ( runuid<0 ) error(0,"invalid username or ID specified: `%s'",optarg);
 			break;
 		case 'o': /* output option */
 			use_output = 1;
@@ -323,12 +323,12 @@ int main(int argc, char **argv)
 	
 	/* Set user-id (must be root for this). */
 	if ( use_user ) {
-		if ( setuid(runuid) ) error(errno,"cannot set user id to `%d'",runuid);
-		verbose("using user id `%d'",runuid);
+		if ( setuid(runuid) ) error(errno,"cannot set user ID to `%d'",runuid);
+		verbose("using user ID `%d'",runuid);
 	} else {
 		/* Reset effective uid to real uid, to increase security
 		   when program is run setuid */
-		if ( setuid(getuid()) ) error(errno,"cannot set real user id");
+		if ( setuid(getuid()) ) error(errno,"cannot set real user ID");
 		verbose("using real uid `%d' as effective uid",getuid());
 	}
 	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped");
