@@ -19,8 +19,13 @@ beep.build: %.build: %.c
 	-$(CXX) $(CXXFLAGS) $< -o $@
 	@if [ ! -x $@ ]; then \
 		echo "Error building 'beep', probably because this is a non-Linux system." ; \
-		echo "Replacing 'beep' by '/bin/true'." ; \
-		cp /bin/true $@ ; \
+		if [ -e /bin/true ]; then \
+			echo "Replacing 'beep' by '/bin/true'." ; \
+			cp /bin/true $@ ; \
+		elif [ -e /usr/bin/true ]; then \
+			echo "Replacing 'beep' by '/usr/bin/true'." ; \
+			cp /usr/bin/true $@ ; \
+		fi \
 	fi
 
 runguard.build: %.build: %.c $(TOPDIR)/etc/config.h
