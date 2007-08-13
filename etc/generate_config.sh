@@ -103,13 +103,13 @@ while IFS='='; read VARDEF VALUE <&3; do
 	ATTR_STRING=0
 	ATTR_EVAL=0
 	# Check for attributes
-	if [ "$VARDEF" != "${VARDEF%'['*}" ]; then
-		VARATTR=${VARDEF#*'['}
+	if [ "$VARDEF" != "${VARDEF%\[*}" ]; then
+		VARATTR=${VARDEF#*\[}
 		if ! echo "$VARATTR" | egrep '^[a-z]+(,[a-z]+)*]$' >/dev/null ; then
 			echo "Parse error on line $LINENR!"
 			exit 1
 		fi
-		VARATTR=${VARATTR%']'}
+		VARATTR=${VARATTR%\]}
 		IFS="$IFS,"
 		for ATTR in $VARATTR; do
 			case "$ATTR" in
@@ -121,7 +121,7 @@ while IFS='='; read VARDEF VALUE <&3; do
 		done
 		IFS=$OLDIFS
 	fi
-	VARNAME=${VARDEF%%'['*}
+	VARNAME=${VARDEF%%\[*}
 	if ! echo "$VARNAME" | egrep '^[A-Za-z][A-Za-z0-9_]*$' >/dev/null ; then
 		echo "Invalid variable name '$VARNAME' on line $LINENR!"
 		exit 1
