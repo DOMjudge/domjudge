@@ -293,6 +293,8 @@ do so, go to the page of the respective language, problem, team or
 judgehost, press the `Rejudge all' button and confirm.
 
 Submissions that have been marked as `CORRECT' will not be rejudged.
+Only DOMjudge admins can override this restriction for individual
+submissions.
 
 Teams will not get explicit notifications of rejudgings, other than a
 potentially changed outcome of their submissions. It might be desirable
