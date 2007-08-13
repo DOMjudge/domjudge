@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-# bash-shell script configuration file placeholder.
+# shell script configuration file placeholder.
 #
 # This should be replaced by a configuration file generated from
 # 'global.conf'. See that file for more information.

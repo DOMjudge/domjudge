@@ -1,4 +1,4 @@
-# Configuration file for bash-shell scripts
+# Configuration file for shell scripts
 # $Id$
 
 ### AUTOGENERATE HEADER START ###
