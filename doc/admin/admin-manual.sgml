@@ -1084,10 +1084,10 @@ Hello World problem enabled, you can submit some of the example sources
 from under the <tt>doc/</tt> directory. They should give `CORRECT'.
 
 You can also try some (or all) of the sources under
-<tt>test-sources</tt>. Be warned that this is a real stress test, and
-many of them are supposed to give a wrong answer or will even crash a
-judger host. Examine the comments at the top of each source to see
-what the expected effect should be.
+<tt>test-sources</tt>. Use <tt>make check</tt> to submit a variety
+of tests; check the source files of the expeceted answer of each test.
+There's also <tt>make stress-test</tt>, but be warned that these tests
+might crash a judgedaemon.
 
 When all this worked, you're quite ready for a contest. Or at least,
 the practice session of a contest.
