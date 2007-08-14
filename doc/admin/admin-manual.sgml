@@ -1092,14 +1092,45 @@ might crash a judgedaemon.
 When all this worked, you're quite ready for a contest. Or at least,
 the practice session of a contest.
 
-<chapt>The scoreboard <label id="scoreboard">
+<chapt>Web interface<label id="webinterface">
+<p>
+
+The web interface is the main point of interaction with the system.
+Here you can view submissions coming in, control judging,
+view the standings and edit data.
+
+<sect>Jury and Administrator view
+<p>
+
+The jury interface has two possible views: one for jury members,
+and one for DOMjudge administrators. The second view is the same as
+the jury view, but with more features added. Which to show is decided
+by using the HTTP authentication login used to access the web interface;
+you can list which HTTP user is an admin in <tt>etc/passwords.php</tt>.
+
+This separation is handy as a matter of security (jury members cannot
+(accidentally) modify things that shouldn't be) and clarity (jury members
+are not confused / distracted by options they don't need).
+
+Options offered to administrators only:
+<itemize>
+<item>Adding and editing any contest data
+<item>Managing team passwords
+<item>The config checker
+<item>Recalculating the scoreboard
+<item>Rejudge 'correct' submissions
+<item>Restart 'pending' judgings
+</itemize>
+
+
+<sect>The scoreboard <label id="scoreboard">
 <p>
 
 The scoreboard is the canonical overview for anyone interested in the
 contest, be it jury, teams or the general public. It deserves to get a
 section of its own.
 
-<sect>Colours and sorting <label id="scoreboard:colours">
+<sect1>Colours and sorting <label id="scoreboard:colours">
 <p>
 
 Each problem can be associated with a specific colour, e.g. the colour
@@ -1121,7 +1152,7 @@ regular teams to be sorted first, but after them you want to sort both
 spectator- and business teams equally, you define `0' for the regular
 category and `1' for the other categories.
 
-<sect>Starting and ending
+<sect1>Starting and ending
 <p>
 
 The displayed scoreboard will always be that of the most recently
@@ -1132,7 +1163,7 @@ the first second of a contest start time.
 When the contest ends, the scores will remain to be displayed, until a
 next contest starts.
 
-<sect>Freezing and defrosting <label id="scoreboard:freeze">
+<sect1>Freezing and defrosting <label id="scoreboard:freeze">
 <p>
 
 DOMjudge has the option to `freeze' the public- and team scoreboards
@@ -1159,14 +1190,14 @@ time is right. You can do this either by setting a predefined
 `unfreezetime' in the contest table, or you push the `unfreeze scores
 now' button in the jury webinterface, under contests.
 
-<sect>Clickability
+<sect1>Clickability
 <p>
 
 Almost every cell is clickable in the jury interface and gives
 detailed information relevant to that cell. This is (of course) not
 available in the team and public scoreboards.
 
-<sect>Caching
+<sect1>Caching
 <p>
 
 The scoreboard is not recalculated on every page load, but rather
@@ -1179,7 +1210,7 @@ only when actually necessary, since it puts quite a load on the
 database.
 
 
-<sect>Balloons
+<sect1>Balloons
 <p>
 
 Although not strictly part of the scoreboard, in many contests
