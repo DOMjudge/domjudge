@@ -10,6 +10,8 @@ Version 2.1.0 - SVN
  - Fixes to judge/compare.c for better handling of strange newlines and
    printing first difference summary as first line.
  - Allow admins to rejudge PENDING/CORRECT submissions (Closes: #1766222).
+ - Make config will now always generate all config files, reagardless
+   of modification times of individual files.
 
 Version 2.0.0 - SVN
 -------------------
