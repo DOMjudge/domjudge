@@ -46,6 +46,10 @@
 
 extern int errno;
 
+#ifndef _GNU_SOURCE
+extern char **environ;
+#endif
+
 const int exit_failure = -1;
 
 char  *progname;
