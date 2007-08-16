@@ -196,8 +196,8 @@ chmod a+r testdata.in
 mkdir --mode=0711 bin dev proc
 # Copy the run-script and a statically compiled shell:
 cp -p "$SCRIPTDIR/$RUN_SCRIPT" .
-cp -p "$STATICSHELL"           ./bin/sh
-chmod a+rx "$RUN_SCRIPT" bin/sh
+cp -p "$STATICSHELL"           ./bin/bash
+chmod a+rx "$RUN_SCRIPT" bin/bash
 
 # Execute an optional chroot setup script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
