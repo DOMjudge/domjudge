@@ -10,6 +10,7 @@ Version 2.0.1 - SVN
  - Fixes to judge/compare.c for better handling of strange newlines and
    printing first difference summary as first line.
  - Fix include test for Text_Highlighter to cope with missing PEAR.php.
+ - Fix password generation for more than one team.
 
 Version 2.0.0 - 23 July 2007
 ----------------------------

@@ -48,7 +48,7 @@ if ( isset($_POST['forteam']) ) {
 		$teams = $DB->q('TABLE SELECT login,name FROM team ' .
 				'WHERE login = %s', $_POST['forteam']);
 		if ( !empty($_POST['setpass']) ) {
-			$pass = $_POST['setpass'];
+			$setpass = $_POST['setpass'];
 		}
 	} else {
 		// all teams, or optionaly only those with null password
@@ -60,7 +60,11 @@ if ( isset($_POST['forteam']) ) {
 	echo "<hr />\n\n<pre>";
 	foreach($teams as $team) {
 		// generate a new password, only if it wasn't set in the interface
-		if ( !isset($pass) ) $pass = genrandpasswd();
+		if ( !isset($setpass) ) {
+			$pass = genrandpasswd();
+		} else {
+			$pass = $setpass;
+		}
 		// update the team table with a password
 		$DB->q('UPDATE team SET passwd = %s WHERE login = %s', md5($pass), $team['login']);
 		echo "Team:      " . htmlspecialchars($team['name']) . "\n" .
