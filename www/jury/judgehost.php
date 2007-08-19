@@ -63,7 +63,7 @@ echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
 $res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
 			   result, verified, valid FROM judging
 			   WHERE cid = %i AND judgehost = %s
-			   ORDER BY starttime DESC',
+			   ORDER BY starttime DESC, judgingid DESC',
 			   getCurContest(), $id);
 
 if( $res->count() == 0 ) {

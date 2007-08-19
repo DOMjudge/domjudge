@@ -80,7 +80,8 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
 		LEFT JOIN team t ON (t.login = c.recipient)
 		LEFT JOIN team f ON (f.login = c.sender)
 		WHERE c.respid = %i OR c.clarid = %i
-		ORDER BY c.submittime', $clar['clarid'], $clar['clarid']);
+		ORDER BY c.submittime, c.clarid',
+		$clar['clarid'], $clar['clarid']);
 
 	while ( $clar = $clarifications->next() ) {
 		// check permission to view this clarification

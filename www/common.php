@@ -48,7 +48,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	               (!empty($restrictions['probid']) ? 'AND s.probid = %s ' : '%_') .
 	               (!empty($restrictions['langid']) ? 'AND s.langid = %s ' : '%_') .
 	               (!empty($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') .
-	               'ORDER BY s.submittime DESC',
+	               'ORDER BY s.submittime DESC, s.submitid DESC',
 	               $cid, @$restrictions['teamid'], @$restrictions['probid'],
 	               @$restrictions['langid'], @$restrictions['judgehost']);
 

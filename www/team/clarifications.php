@@ -30,14 +30,15 @@ echo "<p><a href=\"#requests\">View Clarification Requests</a></p>\n\n";
 
 $requests = $DB->q('SELECT * FROM clarification
                     WHERE cid = %i AND sender = %s
-                    ORDER BY submittime DESC', $cid, $login);
+                    ORDER BY submittime DESC, clarid DESC', $cid, $login);
 
 $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
                           LEFT JOIN team_unread u ON
                           (c.clarid=u.mesgid AND u.type="clarification" AND u.teamid = %s)
                           WHERE c.cid = %i AND c.sender IS NULL
                           AND ( c.recipient IS NULL OR c.recipient = %s )
-                          ORDER BY c.submittime DESC', $login, $cid, $login);
+                          ORDER BY c.submittime DESC, c.clarid DESC',
+                          $login, $cid, $login);
 
 echo '<h3><a name="clarifications"></a>' .
 	"Clarifications:</h3>\n";

@@ -35,8 +35,9 @@ require('../header.php');
 echo "<h1>Submission s".$id."</h1>\n\n";
 
 $jdata = $DB->q('KEYTABLE SELECT *, judgingid AS ARRAYKEY FROM judging
-                 WHERE cid = %i AND submitid = %i ORDER BY starttime ASC',
-                getCurContest(), $id);
+                 WHERE cid = %i AND submitid = %i
+                 ORDER BY starttime ASC, judgingid ASC',
+                 getCurContest(), $id);
 
 ?>
 <table width="100%">
@@ -77,7 +78,8 @@ if ( count($jdata) > 0 ) {
 	// recent invalid one.
 	if ( ! isset($jid) ) {
 		$jid = $DB->q('VALUE SELECT judgingid FROM judging WHERE submitid = %i
-		               ORDER BY valid DESC, starttime DESC LIMIT 1', $id);
+		               ORDER BY valid DESC, starttime DESC, judgingid DESC LIMIT 1',
+                       $id);
 	}
 
 	// print the judgings
