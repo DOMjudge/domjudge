@@ -14,6 +14,7 @@ Version 2.1.0 - SVN
    of modification times of individual files.
  - Fix include test for Text_Highlighter to cope with missing PEAR.php.
  - Fix password generation for more than one team.
+ - Fix test-logic bug in judge/check_program.sh: reversing judging outcomes.
 
 Version 2.0.0 - SVN
 -------------------
