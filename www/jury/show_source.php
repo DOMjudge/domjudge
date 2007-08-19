@@ -55,7 +55,10 @@ echo '<h2 class="filename"><a name="source"></a>Submission ' .
 	"<a href=\"show_source.php?id=$id\">" .
 	htmlspecialchars($source['sourcefile']) . "</a></h2>\n\n";
 
-if ( isset($hl) ) {
+if ( strlen($source['sourcecode']) ) {
+	// Someone submitted an empty file. Cope gracefully.
+	echo "<p><em>empty file</em></p>\n\n";
+} elseif ( isset($hl) ) {
 	// We managed to set up the highligher
 	$hl->setRenderer($renderer);
 	echo $hl->highlight($source['sourcecode']);
@@ -99,8 +102,8 @@ if ( $oldsource ) {
 			 ! ($newfile = mkstemps("/tmp/source-new-s$id-XXXXXX",0)) ||
 			 ! ($oldhandle = fopen($oldfile,'w')) ||
 			 ! ($newhandle = fopen($newfile,'w')) ||
-			 ! fwrite($oldhandle,$oldsource['sourcecode']) ||
-			 ! fwrite($newhandle,   $source['sourcecode']) ||
+			 fwrite($oldhandle,$oldsource['sourcecode']) === FALSE ||
+			 fwrite($newhandle,   $source['sourcecode']) === FALSE ||
 			 ! fclose($oldhandle) ||
 			 ! fclose($newhandle) ) {
 			
