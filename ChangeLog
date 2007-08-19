@@ -17,6 +17,7 @@ Version 2.1.0 - SVN
  - Fix test-logic bug in judge/check_program.sh: reversing judging outcomes.
  - Make warning and error beeps default to something more noticeable.
  - Let show_source cope with empty file submissions gracefully.
+ - Abort startup of judgedaemon if processes of RUNUSER still found running.
 
 Version 2.0.0 - SVN
 -------------------

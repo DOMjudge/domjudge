@@ -24,6 +24,11 @@ require (SYSTEM_ROOT . '/lib/init.php');
 
 $verbose = LOG_INFO;
 
+system("pgrep -u ".RUNUSER, $retval);
+if ($retval != 1) {
+	error("Still some processes by ".RUNUSER." found, aborting");
+}
+
 $cid = getCurContest();
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
