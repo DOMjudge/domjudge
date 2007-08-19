@@ -64,6 +64,19 @@ function check_language($data, $keydata = null)
 	if ( strpos($data['extension'], '.') !== FALSE ) {
 		ch_error("Do not include the dot (.) in the extension");
 	}
+
+	$langs = preg_split("/\s+/", LANG_EXTS);
+	$langfound = FALSE;
+	foreach ($langs as $lang) {
+		$langdata = explode(',', $lang);
+		if ( $langdata[1] == $data['extension'] ) {
+			$langfound = TRUE;
+		}
+	}
+	if ( !$langfound ) {
+		ch_error("Language extension not found in LANG_EXTS from global.cfg");
+	}
+
 	return $data;
 }
 
