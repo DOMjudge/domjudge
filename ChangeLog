@@ -11,6 +11,7 @@ Version 2.0.1 - SVN
    printing first difference summary as first line.
  - Fix include test for Text_Highlighter to cope with missing PEAR.php.
  - Fix password generation for more than one team.
+ - Let show_source cope with empty file submissions gracefully.
 
 Version 2.0.0 - 23 July 2007
 ----------------------------
