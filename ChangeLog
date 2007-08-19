@@ -12,6 +12,7 @@ Version 2.0.1 - SVN
  - Fix include test for Text_Highlighter to cope with missing PEAR.php.
  - Fix password generation for more than one team.
  - Let show_source cope with empty file submissions gracefully.
+ - Add missing icon for delete confirmation.
 
 Version 2.0.0 - 23 July 2007
 ----------------------------
