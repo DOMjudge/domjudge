@@ -12,6 +12,7 @@ Version 2.1.0 - SVN
  - Allow admins to rejudge PENDING/CORRECT submissions (Closes: #1766222).
  - Make config will now always generate all config files, reagardless
    of modification times of individual files.
+ - Fix include test for Text_Highlighter to cope with missing PEAR.php.
 
 Version 2.0.0 - SVN
 -------------------

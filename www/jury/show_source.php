@@ -22,7 +22,7 @@ $oldsource = $DB->q('MAYBETUPLE SELECT * FROM submission
                     $source['submittime']);
 
 // Use PEAR Text::Highlighter class if available
-if ( @include('Text/Highlighter.php' ) ) {
+if ( include_highlighter() ) {
 	switch (strtolower($source['langid'])) {
 		case 'c':
 		case 'cpp':
