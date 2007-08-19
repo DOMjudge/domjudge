@@ -81,3 +81,22 @@ function rejudgeForm($table, $id)
 	}
 	return $ret . addEndForm();
 }
+
+/**
+ * Try to include the PEAR Text/Highlighter class.
+ * Returns bool indicating success.
+ */
+function include_highlighter()
+{
+	// Disable warning output so include can fail, but display fatal errors,
+	// since these will halt processing of the entire script.
+	$old_e_r = error_reporting();
+	error_reporting($old_e_r & ~ E_WARNING);
+
+	include('Text/Highlighter.php');
+
+	// Restore error reporting to the old level
+	error_reporting($old_e_r);
+
+	return class_exists('Text_Highlighter');
+}
