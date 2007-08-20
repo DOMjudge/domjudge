@@ -198,6 +198,7 @@ mkdir --mode=0711 bin dev proc
 cp -p "$SCRIPTDIR/$RUN_SCRIPT" .
 cp -p "$STATICSHELL"           ./bin/bash
 chmod a+rx "$RUN_SCRIPT" bin/bash
+ln -s bash ./bin/sh
 
 # Execute an optional chroot setup script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
