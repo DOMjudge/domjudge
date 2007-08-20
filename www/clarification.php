@@ -189,6 +189,14 @@ function confirmClar() {
 	echo addForm($action, 'post', 'sendclar');
 	echo "<table>\n";
 
+	if ( $respid ) {
+		$clar = $DB->q('MAYBETUPLE SELECT c.*, t.name AS toname, f.name AS fromname
+		                FROM clarification c
+		                LEFT JOIN team t ON (t.login = c.recipient)
+		                LEFT JOIN team f ON (f.login = c.sender)
+		                WHERE c.clarid = %i', $respid);
+	}
+
 	if ( $isjury ) { // list all possible recipients in the "sendto" box
 		echo "<tr><td><b><label for=\"sendto\">Send to</label>:</b></td><td>\n";
 
@@ -203,11 +211,6 @@ function confirmClar() {
 			                 ORDER BY categoryid ASC, name ASC');
 			$options = array_merge($options,$teams);
 		} else {
-			$clar = $DB->q('MAYBETUPLE SELECT c.*, t.name AS toname, f.name AS fromname
-			                FROM clarification c
-			                LEFT JOIN team t ON (t.login = c.recipient)
-			                LEFT JOIN team f ON (f.login = c.sender)
-			                WHERE c.clarid = %i', $respid);
 			if ( $clar['sender'] ) {
 				$options[$clar['sender']] = $clar['sender'] .': '.
 					$clar['fromname'];

@@ -49,6 +49,9 @@ if ( isset($id) ) {
 	echo "<h1>Clarification $id</h1>\n\n";
 	
 	putClarification($respid, $login);
+	
+	echo "<h1>Send Clarification Request</h1>\n\n";
+	putClarificationForm("clarification.php", false, $id);
 } else {
 	// display a clarification request send box
 	echo "<h1>Send Clarification Request</h1>\n\n";
