@@ -72,9 +72,9 @@ fi
 
 # Check result and write result file:
 if [ -s "$DIFFOUT" ]; then
-	writeresult "Accepted"
-else
 	writeresult "Wrong answer"
+else
+	writeresult "Accepted"
 fi
 
 exit 0
