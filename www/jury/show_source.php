@@ -34,8 +34,10 @@ if ( include_highlighter() ) {
 	}
 	if ( isset($lang) ) {
 		include('Text/Highlighter/Renderer/Html.php');
-		$renderer = new Text_Highlighter_Renderer_Html(array("numbers" => HL_NUMBERS_TABLE, "tabsize" => 4));
-		$hl =& Text_Highlighter::factory(($source['langid'] == 'c'?'cpp':$source['langid']));
+		$renderer = new Text_Highlighter_Renderer_Html(
+			array("numbers" => HL_NUMBERS_TABLE, "tabsize" => 4));
+		$hl =& Text_Highlighter::factory(
+			($source['langid'] == 'c' ? 'cpp' : $source['langid']));
 	}
 	$sourcecss = true;
 }
@@ -52,7 +54,7 @@ echo '<h2 class="filename"><a name="source"></a>Submission ' .
 	"<a href=\"show_source.php?id=$id\">" .
 	htmlspecialchars($source['sourcefile']) . "</a></h2>\n\n";
 
-if ( strlen($source['sourcecode']) ) {
+if ( strlen($source['sourcecode'])==0 ) {
 	// Someone submitted an empty file. Cope gracefully.
 	echo "<p><em>empty file</em></p>\n\n";
 } elseif ( isset($hl) ) {
@@ -86,7 +88,7 @@ if ( $oldsource ) {
 		// The PECL xdiff PHP-extension.
 		
 		$difftext = xdiff_string_diff($oldsource['sourcecode'],
-									  $source['sourcecode'],2);
+		                              $source['sourcecode'],2);
 		
 	} elseif ( is_readable($oldfile) && is_readable($newfile) ) {
 		// A direct diff on the sources in the SUBMITDIR.
