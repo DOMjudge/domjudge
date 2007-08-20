@@ -29,7 +29,7 @@
 # successful checking.
 
 # Check program, specify with absolute path or use `dirname $0`:
-CHECK_PROGRAM="`dirname $0`/check_diff.sh"
+CHECK_PROGRAM="`dirname $0`/check_float"
 
 # Options to pass to check program:
 CHECK_OPTIONS=""
