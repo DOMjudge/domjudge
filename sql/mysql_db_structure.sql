@@ -112,8 +112,8 @@ CREATE TABLE `problem` (
   `allow_judge` tinyint(1) unsigned NOT NULL default '1',
   `testdata` varchar(255) NOT NULL default '',
   `timelimit` mediumint(11) unsigned NOT NULL default '0',
-  `special_run` varchar(8) default NULL,
-  `special_compare` varchar(8) default NULL,
+  `special_run` varchar(25) default NULL,
+  `special_compare` varchar(25) default NULL,
   `color` varchar(25) default NULL,
   PRIMARY KEY  (`probid`)
 ) ENGINE=MyISAM COMMENT='Problems the teams can submit solutions for';

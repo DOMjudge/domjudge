@@ -89,10 +89,10 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <a href="http://www.w3schools.com/css/css_colornames.asp" target="_blank"><small>(help)</small></a></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>
-<td><?=addInput('data[0][special_run]', @$row['special_run'], 10, 8)?></td></tr>
+<td><?=addInput('data[0][special_run]', @$row['special_run'], 10, 25)?></td></tr>
 
 <tr><td><label for="data_0__special_compare_">Special compare script:</label></td>
-<td><?=addInput('data[0][special_compare]', @$row['special_compare'], 10, 8)?></td></tr>
+<td><?=addInput('data[0][special_compare]', @$row['special_compare'], 10, 25)?></td></tr>
 </table>
 
 <?php
