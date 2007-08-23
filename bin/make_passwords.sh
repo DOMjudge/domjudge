@@ -8,13 +8,10 @@
 # Normally you don't want to run this script directly, but via 'make'
 # instead. It gets as first argument the make target.
 #
-# This script uses bash, since it depends on bash globbing and
-# readline support.
+# This script uses bash, since it depends on bash readline support.
 
 # Exit on any error:
 set -e
-
-shopt -s extglob
 
 PROGRAM=$0
 TARGET=$1
@@ -34,7 +31,6 @@ else
 fi
 
 # Location of files:
-HTPASSWD_BINARY="htpasswd"
 HTPASSWD="$SYSTEM_ROOT/.htpasswd"
 HTACCESS="$SYSTEM_ROOT/www/jury/.htaccess"
 SQLPASSWD="$SYSTEM_ROOT/sql/mysql_create.sql"
@@ -44,13 +40,15 @@ $PHPPASSWD
 $SQLPASSWD"
 
 # which htpasswd version?
-if [ -x /usr/bin/htpasswd ]; then
-	HTPASSWD_BINARY="/usr/bin/htpasswd"
-elif [ -x /usr/bin/htpasswd2 ]; then
-	HTPASSWD_BINARY="/usr/bin/htpasswd2"
+if which htpasswd >/dev/null; then
+	HTPASSWD_BINARY="`which htpasswd`"
+elif which htpasswd2 >/dev/null; then
+	HTPASSWD_BINARY="`which htpasswd2`"
+else
+	error "no 'htpasswd' or 'htpasswd2' binary found."
 fi
 
-# Default passwords:
+# Unitialized password defaults (for restoring DOMjudge to uninstalled state):
 DEF_PASSWD_JURY="DOMJUDGE_JURY_PASSWD"
 DEF_PASSWD_TEAM="DOMJUDGE_TEAM_PASSWD"
 DEF_PASSWD_PUBLIC="DOMJUDGE_PUBLIC_PASSWD"
@@ -83,7 +81,7 @@ ask_passwd ()
 		echo "Password and confirmation do not match." >&2
 		continue
 	fi
-	if [[ "$PASSWD" != *([0-9a-zA-z]) ]]; then
+	if echo "$PASSWD" | grep '^[0-9a-zA-z]+$' >/dev/null; then
 		echo "Password must consist of only digits and lower/uppercase letters." >&2
 		continue
 	fi
