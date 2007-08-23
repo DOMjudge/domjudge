@@ -82,6 +82,9 @@ fi
 TMPMAIN=main.$EXT.new
 TMPHEAD=head.$EXT.new
 
+# Clean any previous tempfiles left:
+rm -f $TMPHEAD $TMPMAIN
+
 COMMANDLINE="$0 $@"
 
 
@@ -131,7 +134,7 @@ while IFS='='; read VARDEF VALUE <&3; do
 	VALUE=$(echo "$VALUE" | sed "s!'!\\'!;"'s!"!\\"!' )
 
 	if [ $ATTR_EVAL -ne 0 ]; then
-		eval VALUE="$VALUE"
+		eval VALUE="\"$VALUE\""
 	fi
 
 	if [ $ATTR_STRING -ne 0 ]; then
@@ -155,7 +158,7 @@ while IFS='='; read VARDEF VALUE <&3; do
 		exit 1
 	fi
 
-	eval $VARNAME="'$VALUE'"
+	eval $VARNAME="\"$VALUE\""
 done
 
 exec 3<&-
