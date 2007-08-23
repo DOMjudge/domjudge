@@ -34,6 +34,7 @@ else
 fi
 
 # Location of files:
+HTPASSWD_BINARY="htpasswd"
 HTPASSWD="$SYSTEM_ROOT/.htpasswd"
 HTACCESS="$SYSTEM_ROOT/www/jury/.htaccess"
 SQLPASSWD="$SYSTEM_ROOT/sql/mysql_create.sql"
@@ -41,6 +42,13 @@ PHPPASSWD="$SYSTEM_ROOT/etc/passwords.php"
 PASSWD_FILES="\
 $PHPPASSWD
 $SQLPASSWD"
+
+# which htpasswd version?
+if [ -x /usr/bin/htpasswd ]; then
+	HTPASSWD_BINARY="/usr/bin/htpasswd"
+elif [ -x /usr/bin/htpasswd2 ]; then
+	HTPASSWD_BINARY="/usr/bin/htpasswd2"
+fi
 
 # Default passwords:
 DEF_PASSWD_JURY="DOMJUDGE_JURY_PASSWD"
@@ -160,7 +168,7 @@ EOF
 
 	# Generate '.htpasswd' file for restricting access to jury
 	# webinterface and update it's location in '.htaccess':
-	htpasswd -b -c "$HTPASSWD" "domjudge_jury" "$PASSWD_JURY"
+	$HTPASSWD_BINARY -b -c "$HTPASSWD" "domjudge_jury" "$PASSWD_JURY"
 
 	string_replace "s!^AuthUserFile .*!AuthUserFile $HTPASSWD!" "$HTACCESS"
 	

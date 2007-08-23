@@ -20,6 +20,8 @@ Version 2.1.0 - SVN
  - Abort startup of judgedaemon if processes of RUNUSER still found running.
  - Added extra default problem 'fltcmp' for testing check_float and special
    run script code.
+ - Fix make_passwords.sh to cope with htpasswd2 instead of htpasswd. Thanks
+   Tobias Werth for the patch.
 
 Version 2.0.0 - SVN
 -------------------
