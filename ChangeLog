@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 2.0.1 - SVN
--------------------
+Version 2.0.1 - 23 August 2007
+------------------------------
  - Make etc/generate_config.sh and judge/run use !/bin/bash, since they
    use bash-specific features and will break on a /bin/sh != bash system.
  - Fix notice on scoreboard when SHOW_AFFILIATIONS=1 but team_affiliations
