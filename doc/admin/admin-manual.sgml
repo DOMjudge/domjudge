@@ -1057,7 +1057,10 @@ These dirs and files can all be read-only.
 <sect>Start the daemons
 <p>
 
-Once everything is configured, you can start the daemons:
+Once everything is configured, you can start the daemons.
+They all run as a normal user on the system. The needed root privileges
+are gained by the setuid-root programs only when required.
+
 <itemize>
 <item> The submitdaemon and/or the websubmitdaemon on the jury system;
 <item> One or more judgedaemons, one on each judgehost;
