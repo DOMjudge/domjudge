@@ -4,16 +4,14 @@ endif
 include $(TOPDIR)/Makefile.global
 
 EXTENSIONS = h sh php tex
+CONFIGS    = $(addprefix config.,$(EXTENSIONS))
 
 default: config
 
-config:
-	@printf "Generating config [ "; \
-	 for c in $(EXTENSIONS); do \
-	     ./generate_config.sh $$c; \
-	     printf "$$c ";\
-	 done; \
-	 printf "] done.\n"
+config: $(CONFIGS)
+
+$(CONFIGS): config.%: config.template.% global.cfg generate_config.sh
+	./generate_config.sh $*
 
 check:
 	./check_config.php
