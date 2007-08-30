@@ -312,7 +312,7 @@ if [ -x `which xsltproc` ]; then
 else
 	if [ -s compare.out ]; then
 		result="wrong answer"
-	else`
+	else
 		result="accepted"
 	fi
 fi
