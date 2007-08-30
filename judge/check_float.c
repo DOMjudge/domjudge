@@ -161,6 +161,7 @@ int main(int argc, char **argv)
 	int pos1, pos2;
 	int read1, read2, n1, n2;
 	flt f1, f2;
+	flt absdiff, reldiff;
 	
 	progname = argv[0];
 
@@ -267,9 +268,17 @@ int main(int argc, char **argv)
                        
 
 			if ( ! equal(f1,f2) ) {
-				printf("line %3d: %d-th float differs: %LG != %LG\n",
-				       linenr,posnr,f1,f2);
 				diff++;
+				printf("line %3d: %d-th float differs: %LG != %LG",
+				       linenr,posnr,f1,f2);
+				if ( isfinite(f1) && isfinite(f2) ) {
+					absdiff = fabsl(f1-f2);
+					reldiff = fabsl((f1-f2)/f2);
+					printf(":");
+					if ( absdiff>abs_prec ) printf(" absdiff = %LE",absdiff);
+					if ( reldiff>rel_prec ) printf(" reldiff = %LE",absdiff);
+				}
+				printf("\n");
 			}
 		}
 	}

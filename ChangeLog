@@ -23,6 +23,7 @@ Version 2.1.0 - SVN
  - Fix make_passwords.sh to cope with htpasswd2 instead of htpasswd. Thanks
    Tobias Werth for the patch.
  - Fix 2 generate_config.sh bugs: quoting error and tempfile cleanup.
+ - Print float abs/rel diffs in check_float (Closes: #1777195).
 
 Version 2.0.0 - SVN
 -------------------
