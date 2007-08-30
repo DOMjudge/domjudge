@@ -311,8 +311,8 @@ if [ -x `which xsltproc` ]; then
 	descrp=`grep '^description=' result.out | cut -d = -f 2-`
 else
 	if [ -s compare.out ]; then
-		result="wrong anser"
-	else
+		result="wrong answer"
+	else`
 		result="accepted"
 	fi
 fi
