@@ -276,7 +276,7 @@ int main(int argc, char **argv)
 					reldiff = fabsl((f1-f2)/f2);
 					printf(":");
 					if ( absdiff>abs_prec ) printf(" absdiff = %LE",absdiff);
-					if ( reldiff>rel_prec ) printf(" reldiff = %LE",absdiff);
+					if ( reldiff>rel_prec ) printf(" reldiff = %LE",reldiff);
 				}
 				printf("\n");
 			}
