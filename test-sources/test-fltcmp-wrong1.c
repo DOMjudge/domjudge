@@ -1,6 +1,7 @@
 /* $Id$
  *
- * This should give CORRECT on the problem 'fltcmp' (but WRONG ANSWER on 'hello').
+ * This should give WRONG ANSWER on the problem 'fltcmp' with 4
+ * (precision) errors on lines 2,3,4,5.
  */
 
 #include <stdio.h>
