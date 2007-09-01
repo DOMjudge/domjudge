@@ -269,14 +269,13 @@ int main(int argc, char **argv)
 
 			if ( ! equal(f1,f2) ) {
 				diff++;
-				printf("line %3d: %d-th float differs: %LG != %LG",
+				printf("line %3d: %d-th float differs: %8LG != %-8LG",
 				       linenr,posnr,f1,f2);
 				if ( isfinite(f1) && isfinite(f2) ) {
 					absdiff = fabsl(f1-f2);
 					reldiff = fabsl((f1-f2)/f2);
-					printf(":");
-					if ( absdiff>abs_prec ) printf(" absdiff = %LE",absdiff);
-					if ( reldiff>rel_prec ) printf(" reldiff = %LE",reldiff);
+					if ( absdiff>abs_prec ) printf("  absdiff = %8.3LE",absdiff);
+					if ( reldiff>rel_prec ) printf("  reldiff = %8.3LE",reldiff);
 				}
 				printf("\n");
 			}
@@ -286,7 +285,7 @@ int main(int argc, char **argv)
 	fclose(file1);
 	fclose(file2);
 
-	if ( diff > 0 ) printf("Found %d differences!\n",diff);
+	if ( diff > 0 ) printf("Found %d differences in %d lines\n",diff,linenr-1);
 		
 	return 0;
 }
