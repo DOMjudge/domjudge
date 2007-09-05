@@ -15,7 +15,7 @@ test-normal:
 
 test-fltcmp:
 	@echo "Submitting fltcmp test sources..." ; \
-		for i in $^ ; do \
+		for i in fltcmp-test-* ; do \
 		echo "Submitting '$$i'" ; \
 		$(TOPDIR)/submit/submit -q -p fltcmp "$$i" ; \
 		sleep 1 ; \
@@ -23,7 +23,7 @@ test-fltcmp:
 
 test-stress:
 	@echo "Submitting stress test sources..." ; \
-	for i in $^ ; do \
+	for i in stress-test-* ; do \
 		echo "Submitting '$$i'" ; \
 		$(TOPDIR)/submit/submit -q -p hello "$$i" ; \
 		sleep 1 ; \
