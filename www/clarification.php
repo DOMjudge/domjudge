@@ -171,7 +171,7 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 <!--
 function confirmClar() {
 <?php if ( $isjury ): ?>
-	sendto = document.forms['sendclar'].sendto.value;
+	var sendto = document.forms['sendclar'].sendto.value;
 	if ( sendto=='domjudge-must-select' ) {
 		alert('You must select a recipient for this clarification.');
 		return false;
