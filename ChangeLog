@@ -23,6 +23,8 @@ Version 2.1.0 - SVN
  - Fix 2 generate_config.sh bugs: quoting error and tempfile cleanup.
  - Print float abs/rel diffs in check_float (Closes: #1777195).
  - Allow teams to respond to received clarifications (Closes: #1777179).
+ - Check LANG_EXTS array for consistency with languages table in configtest
+   (Closes: #1777182).
 
 Version 2.0.0 - SVN
 -------------------
