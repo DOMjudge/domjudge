@@ -50,8 +50,7 @@ switch ( $_FILES['code']['error'] ) {
 	case UPLOAD_ERR_PARTIAL:
 		error('The uploaded file was only partially uploaded.');
 	case UPLOAD_ERR_NO_FILE:
-		warning('No file was uploaded.');
-		break;
+		error('No file was uploaded.');
 	case 6:	// UPLOAD_ERR_NO_TMP_DIR, constant doesn't exist in our minimal PHP version
 		error('Missing a temporary folder. Contact staff.');
 	case 7: // UPLOAD_ERR_CANT_WRITE
