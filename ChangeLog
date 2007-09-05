@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 2.1.1 - SVN
+-------------------
+
 Version 2.1.0 - 5 September 2007
 --------------------------------
  - Drop tempfile and mkstemps binaries, they are not necessary.
