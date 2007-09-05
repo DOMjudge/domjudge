@@ -5,15 +5,15 @@ include $(TOPDIR)/Makefile.global
 
 check: test-normal test-fltcmp
 
-test-normal: test-*
+test-normal:
 	@echo "Submitting normal test sources..." ; \
-	for i in $^ ; do \
+	for i in test-* ; do \
 		echo "Submitting '$$i'" ; \
 		$(TOPDIR)/submit/submit -q -p hello "$$i" ; \
 		sleep 1 ; \
 	done
 
-test-fltcmp: fltcmp-test-*
+test-fltcmp:
 	@echo "Submitting fltcmp test sources..." ; \
 		for i in $^ ; do \
 		echo "Submitting '$$i'" ; \
@@ -21,7 +21,7 @@ test-fltcmp: fltcmp-test-*
 		sleep 1 ; \
 	done
 
-test-stress: stress-test-*
+test-stress:
 	@echo "Submitting stress test sources..." ; \
 	for i in $^ ; do \
 		echo "Submitting '$$i'" ; \
