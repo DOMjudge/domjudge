@@ -16,7 +16,7 @@ LIBSBASE = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc)
 LIBHEADERS = $(addsuffix .h,$(LIBSBASE))
 LIBOBJECTS = $(addsuffix $(OBJSUFFIX),$(LIBSBASE))
 
-COMMONOBJ = submitcommon$(OBJSUFFIX) getaddrinfo$(OBJSUFFIX)
+SUBMITCOMMONOBJ = submitcommon$(OBJSUFFIX)
 
 ifneq ($(shell which curl-config),)
 LIBCURL     = $(shell curl-config --version | cut -d ' ' -f 2)
@@ -32,19 +32,19 @@ default: build
 
 build: $(TARGETS)
 
-$(TARGETS): %$(EXECSUFFIX): %.cc $(COMMONOBJ) $(TOPDIR)/etc/config.h \
+$(TARGETS): %$(EXECSUFFIX): %.cc $(SUBMITCOMMONOBJ) $(TOPDIR)/etc/config.h \
                             $(LIBOBJECTS) $(LIBHEADERS)
 	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLFLAGS)
 
 $(LIBOBJECTS):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
-$(COMMONOBJ): %$(OBJSUFFIX): %.cc %.h $(LIBHEADERS)
+$(SUBMITCOMMONOBJ): %$(OBJSUFFIX): %.cc %.h $(LIBHEADERS)
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 submit$(EXECSUFFIX): $(CURLSTATIC)
 
 clean:
-	-rm -f $(TARGETS) $(COMMONOBJ)
+	-rm -f $(TARGETS) $(SUBMITCOMMONOBJ)
 
 .PHONY:
