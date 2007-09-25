@@ -14,10 +14,12 @@ if ( ! defined('SCRIPT_ID') ) {
 // is this the webinterface or commandline?
 define('IS_WEB', isset($_SERVER['REMOTE_ADDR']));
 
+// Open standard error.
 if ( ! IS_WEB && ! defined('STDERR') ) {
 	define('STDERR', fopen('php://stderr', 'w'));
 }
 
+// Open log file.
 if ( defined('LOGFILE') ) {
 	if ( $fp = @fopen(LOGFILE, 'a') ) {
 		define('STDLOG', $fp);
@@ -26,6 +28,11 @@ if ( defined('LOGFILE') ) {
 			" for appending; continuing without logging.\n");
 	}
 	unset($fp);
+}
+
+// Open syslog connection.
+if ( defined('SYSLOG_FACILITY') && !empty(SYSLOG_FACILITY) ) {
+    openlog(FALSE, LOG_NDELAY, SYSLOG_FACILITY);
 }
 
 // Default verbosity and loglevels:
@@ -40,21 +47,25 @@ $loglevel = LOG_DEBUG;
  */
 function logmsg($msglevel, $string) {
 	global $verbose, $loglevel;
-	$msg = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . ": ". $string . "\n";
+    $msg = SCRIPT_ID . ": " . $string . "\n";
+    $stamp = "[" . date('M d H:i:s') . "] ";
 	if ( $msglevel <= $verbose  ) {
 		// if this is the webinterface, print it to stdout, else to stderr
 		if ( IS_WEB ) {
 			echo "<fieldset class=\"error\"><legend>Error</legend>\n" .
-				nl2br(htmlspecialchars($msg)) . "</fieldset>\n";
+				nl2br(htmlspecialchars($stamp . $msg)) . "</fieldset>\n";
 		} else {
-			fwrite(STDERR, $msg);
+			fwrite(STDERR, $stamp . $msg);
 			fflush(STDERR);
 		}
 	}
 	if ( $msglevel <= $loglevel && defined('STDLOG') ) {
-		fwrite(STDLOG, $msg);
+		fwrite(STDLOG, $stamp . $msg);
 		fflush(STDLOG);
 	}
+    if ( $msglevel <= $loglevel && defined('SYSLOG_FACILITY') && !empty(SYSLOG_FACILITY) ) {
+        syslog($msglevel, $msg);
+    }
 }
 
 /**

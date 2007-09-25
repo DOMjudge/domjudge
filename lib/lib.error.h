@@ -32,6 +32,9 @@ extern int  verbose;
 extern int  loglevel;
 extern FILE *stdlog;
 
+/* Nonzero if (v)logmsg should log to syslog as well. Nonzero by default. */
+extern int  logmsg_uses_syslog;
+
 void logmsg (int, char *, ...);
 void vlogmsg(int, char *, va_list);
 /* Logging functions (vlogmsg uses va_list instead of argument list):

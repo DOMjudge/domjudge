@@ -109,6 +109,7 @@ struct option const long_opts[] = {
 	{"language", required_argument, NULL,         'l'},
 	{"server",   required_argument, NULL,         's'},
 	{"team",     required_argument, NULL,         't'},
+	{"url",      required_argument, NULL,         'u'},
 	{"port",     required_argument, NULL,         'P'},
 	{"web",      optional_argument, NULL,         'w'},
 	{"verbose",  optional_argument, NULL,         'v'},
@@ -141,7 +142,7 @@ char server_addr[NI_MAXHOST];            /* server IP address string  */
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, server, team;
+string problem, language, extension, server, team, url;
 char *filename, *submitdir, *tempfile;
 int temp_fd;
 
@@ -163,6 +164,9 @@ int main(int argc, char **argv)
 
 	progname = argv[0];
 	stdlog = NULL;
+
+	/* Make sure we don't log to syslog */
+	logmsg_uses_syslog = 0;
 
 #if ( SUBMITCLIENT_METHOD == 0 )
 	printf("Submit client is disabled at compiletime.\n");
@@ -215,20 +219,27 @@ int main(int argc, char **argv)
 
 	logmsg(LOG_INFO,"started");
 	
-	/* Set defaults for server and team */
+	/* Set defaults for server, team and url */
 #ifdef SUBMITSERVER
 	server = string(SUBMITSERVER);
 #endif
-	if ( server.empty() && getenv("SUBMITSERVER")!=NULL ) {
+	if ( server.empty() && getenv("SUBMITSERVER")!=NULL )
 		server = string(getenv("SUBMITSERVER"));
-	}
-	if ( server.empty() ) server = string("localhost");
+	if ( server.empty() )
+		server = string("localhost");
 
-	if ( team.empty() && getenv("TEAM")!=NULL ) team = string(getenv("TEAM"));
-	if ( team.empty() && getenv("USER")!=NULL ) team = string(getenv("USER"));
-	if ( team.empty() && getenv("USERNAME")!=NULL ) {
+	if ( team.empty() && getenv("TEAM")!=NULL )
+		team = string(getenv("TEAM"));
+	if ( team.empty() && getenv("USER")!=NULL )
+		team = string(getenv("USER"));
+	if ( team.empty() && getenv("USERNAME")!=NULL )
 		team = string(getenv("USERNAME"));
-	}
+
+#ifdef WEBBASEURI
+	url = string(WEBBASEURI);
+#endif
+	if ( url.empty() )
+		url = string("http://localhost/");
 
 	/* Parse command-line options */
 #if ( SUBMITCLIENT_METHOD == 1 )
@@ -238,7 +249,7 @@ int main(int argc, char **argv)
 #endif
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:s:t:P:w::v::q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"p:l:s:t:u:P:w::v::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
@@ -247,6 +258,7 @@ int main(int argc, char **argv)
 		case 'l': extension = string(optarg); break;
 		case 's': server    = string(optarg); break;
 		case 't': team      = string(optarg); break;
+		case 'u': url       = string(optarg); break;
 			
 		case 'P': /* port option */
 			port = strtol(optarg,&ptr,10);
@@ -351,12 +363,27 @@ int main(int argc, char **argv)
 	if ( problem.empty()  ) usage2(0,"no problem specified");
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( team.empty()     ) usage2(0,"no team specified");
-	if ( server.empty()   ) usage2(0,"no server specified");
-	
+	if (use_websubmit)
+	{
+		if ( server.empty()   ) usage2(0,"no server specified");
+	}
+	else
+	{
+		if ( url.empty() ) usage2(0,"no url specified");
+	}
+
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
 	logmsg(LOG_DEBUG,"team is `%s'",team.c_str());
-	logmsg(LOG_DEBUG,"server is `%s'",server.c_str());
+	if (use_websubmit)
+	{
+		logmsg(LOG_DEBUG,"url is `%s'",url.c_str());
+	}
+	else
+	{
+		logmsg(LOG_DEBUG,"server is `%s'",server.c_str());
+	}
+
 
 	/* Ask user for confirmation */
 	if ( ! quiet ) {
@@ -365,7 +392,14 @@ int main(int argc, char **argv)
 		printf("  problem:    %s\n",problem.c_str());
 		printf("  language:   %s\n",language.c_str());
 		printf("  team:       %s\n",team.c_str());
-		printf("  server:     %s\n",server.c_str());
+		if (use_websubmit)
+		{
+			printf("  url:        %s\n",url.c_str());
+		}
+		else
+		{
+			printf("  server:     %s\n",server.c_str());
+		}
 		if ( nwarnings>0 ) printf("There are warnings for this submission!\a\n");
 		printf("Do you want to continue? (y/n) ");
 		c = readanswer("yn");
@@ -402,6 +436,7 @@ void usage()
 "  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
 "  -s, --server=SERVER      submit to server SERVER\n"
 "  -t, --team=TEAM          submit as team TEAM\n"
+"  -u, --url=URL            submit to webserver, use URL as the base address\n"
 #if defined( WEBSUBMIT ) && defined( CMDSUBMIT )
 "  -w, --web[=0|1]          submit to the webinterface or toggle;\n"
 "                               should normally not be necessary\n"
@@ -669,7 +704,7 @@ int websubmit()
 	size_t pos;
 	int uploadstatus_read;
 
-	url = allocstr(WEBBASEURI "team/upload.php");
+	url = allocstr((::url + "team/upload.php").c_str());
 	
 	curlerrormsg[0] = 0;
 	
@@ -744,6 +779,8 @@ int websubmit()
 			uploadstatus_read = 1;
 		}
 	}
+
+	free(url);
 
 	if ( ! uploadstatus_read ) error(0,"no upload status or error reported by webserver");
 	

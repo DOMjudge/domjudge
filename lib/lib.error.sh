@@ -9,11 +9,21 @@ logdate ()
 
 logmsg ()
 {
-	local msglevel msgstring
+	local msglevel msgstamp msgstring
 	msglevel=$1; shift
-	msgstring="[`logdate`] $PROGNAME[$$]: $@"
-	if [ $msglevel -le "$VERBOSE"  ]; then echo "$msgstring" >&2 ; fi
-	if [ $msglevel -le "$LOGLEVEL" ]; then echo "$msgstring" >>$LOGFILE ; fi
+	msgstamp="[`logdate`]"
+	msgstring="$PROGNAME[$$]: $@"
+	if [ $msglevel -le "$VERBOSE"  ]; then
+		echo "$msgstamp $msgstring" >&2
+	fi
+	if [ $msglevel -le "$LOGLEVEL" ]; then
+		if [ "$LOGFILE" ]; then
+			echo "$msgstamp $msgstring" >>$LOGFILE
+		fi
+		if [ "$SYSLOG_FACILITY" ]; then
+			logger -p ${SYSLOG_FACILITY#LOG_}.$msglevel "$msgstring" 2>& 1>/dev/null 
+		fi
+	fi
 }
 
 error ()
