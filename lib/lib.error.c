@@ -45,17 +45,9 @@ int  verbose      = LOG_NOTICE;
 int  loglevel     = LOG_DEBUG;
 FILE *stdlog      = NULL;
 
-/* Flag concerning the use of syslog. */
-int  logmsg_uses_syslog = 1;
-
 /* Main function that contains logging code */
 void vlogmsg(int msglevel, char *mesg, va_list ap)
 {
-#if defined(SYSLOG_FACILITY)
-    static int is_syslog_open = 0;
-    char *buffer_syslog;
-#endif
-
     time_t currtime;
     char timestring[128];
 	char *buffer;
@@ -82,20 +74,6 @@ void vlogmsg(int msglevel, char *mesg, va_list ap)
 	     stdlog!=NULL       ) { vfprintf(stdlog, buffer, ap); fflush(stdlog); }
 
 	free(buffer);
-
-#if defined(SYSLOG_FACILITY)
-    if (is_syslog_open == 0)
-    {
-        openlog(NULL, LOG_NDELAY | LOG_PID, SYSLOG_FACILITY);
-        is_syslog_open = 1;
-    }
-    if ( msglevel<=loglevel && logmsg_uses_syslog )
-    {
-        buffer_syslog = vallocstr(mesg, ap);
-        syslog(msglevel, buffer_syslog);
-        free(buffer_syslog);
-    }
-#endif
 }
 
 /* Argument-list wrapper function around vlogmsg */

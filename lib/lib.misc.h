@@ -18,15 +18,14 @@ extern "C" {
 #define MAXARGS 10
 
 char *allocstr(char *, ...);
-char *vallocstr(char *, va_list );
 /* Create a c-string by allocating memory for it and writing to it,
  * using printf type format characters.
  *
  * Arguments:
- * char *mesg      message to write, may include printf format characters '%'
- * ... or va_list  optional arguments for format characters
+ * char *mesg  message to write, may include printf format characters '%'
+ * ...         optional arguments for format characters
  *
- * Return a pointer to the allocated string
+ * Returns a pointer to the allocated string
  */
 
 int execute(char *, char **, int , int[3], int );

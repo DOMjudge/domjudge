@@ -17,6 +17,11 @@
 # Global configuration
 . "`dirname $0`/../etc/config.sh"
 
+error()
+{
+    echo "[`date '+%b %d %T'`] $0[$$]: $@"
+}
+
 [ $# -eq 3 ] || exit 1
 
 team=$1
@@ -27,9 +32,6 @@ output1=`scp -Bq "${team}@${SCP_HOST}:'${fromfile}'" "$tofile" 2>&1`
 if [ $? -eq 0 -a ${#output1} -eq 0 ]; then
 	exit 0
 fi
-
-# Error function
-. "`dirname $0`/../lib/lib.error.sh"
 
 error "$output1"
 exit 1
