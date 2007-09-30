@@ -10,14 +10,14 @@ logmsg ()
 	stamp="[`date '+%b %d %T'`] $PROGNAME[$$]:"
 	msg="$@"
 
-	if [ $msglevel -le "$VERBOSE"  ]; then
+	if [ $msglevel -le "${VERBOSE:-$LOG_ERROR}" ]; then
 		echo "$stamp $msg" >&2
 	fi
-	if [ $msglevel -le "$LOGLEVEL" ]; then
+	if [ $msglevel -le "${LOGLEVEL:-$LOG_DEBUG}" ]; then
 		if [ "$LOGFILE" ]; then
 			echo "$stamp $msg" >>$LOGFILE
 		fi
-		if [ "$SYSLOG"  ]; then
+		if [ "$SYSLOG" ]; then
 			logger -i -t "$PROGNAME" -p "${SYSLOG#LOG_}.$msglevel" "$msg" &> /dev/null
 		fi
 	fi
