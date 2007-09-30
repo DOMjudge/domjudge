@@ -17,10 +17,10 @@
 # Global configuration
 . "`dirname $0`/../etc/config.sh"
 
-error()
-{
-    echo "[`date '+%b %d %T'`] $0[$$]: $@"
-}
+# Error and logging functions
+. "$SYSTEM_ROOT/lib/lib.error.sh"
+
+PROGNAME="`basename $0`"
 
 [ $# -eq 3 ] || exit 1
 
@@ -28,10 +28,10 @@ team=$1
 fromfile=$2
 tofile=$3
 
-output1=`scp -Bq "${team}@${SCP_HOST}:'${fromfile}'" "$tofile" 2>&1`
-if [ $? -eq 0 -a ${#output1} -eq 0 ]; then
+output=`scp -Bq "${team}@${SCP_HOST}:'${fromfile}'" "$tofile" 2>&1`
+if [ $? -eq 0 -a ${#output} -eq 0 ]; then
 	exit 0
 fi
 
-error "$output1"
+error "$output"
 exit 1
