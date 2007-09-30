@@ -176,8 +176,8 @@ External software:
 <item> Make sure PHP works for the webserver and the commandline
        client and that phpMyAdmin works.
 <item> Install necessary compilers on the judgehosts.
-<item> See also <ref
-       id="install_config:apt-getinstall" name="an example command line for Debian GNU/Linux">.
+<item> See also <ref id="install_config:apt-getinstall"
+       name="an example command line for Debian GNU/Linux">.
 </itemize>
 
 DOMjudge:
@@ -365,7 +365,8 @@ functionality.
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
        (to use the commandline submit client with the webinterface)
 
-<item> <htmlurl name="PEAR Text_Highlighter class" url="http://pear.php.net/package/Text_Highlighter/">~
+<item> <htmlurl name="PEAR Text_Highlighter class"
+        url="http://pear.php.net/package/Text_Highlighter/">~
        (to use syntax highlighting in the Show Source section of the jury interface)
 </itemize>
 
@@ -507,8 +508,8 @@ first be built. This can be accomplished with the included script
 the target directory to build the chroot environment in and as second
 argument the target machine architecture. Start the script without
 arguments for usage information. See also sections
-<ref id="install_config:system" name="System Configuration">
-and <ref id="problems:java-chroot" name="Problems: Java & chroot">.
+<ref id="install_config:system" name="System Configuration"> and
+<ref id="problems:java-chroot" name="Problems: Java & chroot">.
 
 <sect>Configuration of special run and compare programs
 <p>
@@ -683,6 +684,34 @@ domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
 We advise to install an NTP-daemon (Network Time Protocol) to make sure
 the time between jury computer and judgehost (and team computers) is in
 sync.
+
+<sect>Logging &amp; debugging
+<p>
+
+All DOMjudge daemons and webinterface scripts support logging and
+debugging in a uniform manner via functions in <tt>lib.error.*</tt>.
+There are three ways in which information is logged:
+<itemize>
+<item>Directly to <tt>stderr</tt> for daemons or to the webpage for
+      webinterface scripts.
+<item>To a logfile set by the variable <tt>LOGFILE</tt>, which is set
+      in each program (unsetting this variable disables this method).
+<item>To syslog. This can be configured via the <tt>SYSLOG</tt>
+      configuration variable in the global config. This option allows
+	  one for all the flexibility of syslog such as remote logging:
+	  see the syslog(daemon) documentation for more information.
+</itemize>
+Each script also defines a default threshold level for messages to be
+logged to stderr (<tt>VERBOSE</tt>: defaults to <tt>LOG_INFO</tt> in
+daemons and <tt>LOG_ERROR</tt> in the webinterface) and for
+logfile/syslog (<tt>LOGLEVEL</tt>: defaults to <tt>LOG_DEBUG</tt>).
+
+In case of problems, it is advisable to always check the logs for
+clues. Furthermore, extra debugging information can be obtained by
+setting the config option <tt>DEBUG</tt>. As of current versions, this
+will generate extra SQL query and timing information in the
+webinterface, but this feature will probably be expanded in future
+versions.
 
 <sect>Building and installing
 <p>

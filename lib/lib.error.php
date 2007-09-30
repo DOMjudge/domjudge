@@ -11,13 +11,19 @@ if ( ! defined('SCRIPT_ID') ) {
 	define('SCRIPT_ID', basename($_SERVER['PHP_SELF'], '.php'));
 }
 
-// is this the webinterface or commandline?
+// Default verbosity and loglevels:
+$verbose  = LOG_NOTICE;
+$loglevel = LOG_DEBUG;
+
+// Is this the webinterface or commandline?
 define('IS_WEB', isset($_SERVER['REMOTE_ADDR']));
 
+// Open standard error:
 if ( ! IS_WEB && ! defined('STDERR') ) {
 	define('STDERR', fopen('php://stderr', 'w'));
 }
 
+// Open log file:
 if ( defined('LOGFILE') ) {
 	if ( $fp = @fopen(LOGFILE, 'a') ) {
 		define('STDLOG', $fp);
@@ -28,9 +34,11 @@ if ( defined('LOGFILE') ) {
 	unset($fp);
 }
 
-// Default verbosity and loglevels:
-$verbose  = LOG_NOTICE;
-$loglevel = LOG_DEBUG;
+// Open syslog connection:
+if ( defined('SYSLOG')  ) {
+//	echo 'SYSLOG = ' . SYSLOG;
+	openlog(SCRIPT_ID, LOG_NDELAY | LOG_PID, SYSLOG);
+}
 
 /**
  * Log a message $string on the loglevel $msglevel.
@@ -40,20 +48,28 @@ $loglevel = LOG_DEBUG;
  */
 function logmsg($msglevel, $string) {
 	global $verbose, $loglevel;
-	$msg = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . ": ". $string . "\n";
+
+	$stamp = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . "[" . posix_getpid() . "]: ";
+	$msg = $string . "\n";
+	
 	if ( $msglevel <= $verbose  ) {
 		// if this is the webinterface, print it to stdout, else to stderr
 		if ( IS_WEB ) {
 			echo "<fieldset class=\"error\"><legend>Error</legend>\n" .
-				nl2br(htmlspecialchars($msg)) . "</fieldset>\n";
+				nl2br(htmlspecialchars($stamp . $msg)) . "</fieldset>\n";
 		} else {
-			fwrite(STDERR, $msg);
+			fwrite(STDERR, $stamp . $msg);
 			fflush(STDERR);
 		}
 	}
-	if ( $msglevel <= $loglevel && defined('STDLOG') ) {
-		fwrite(STDLOG, $msg);
-		fflush(STDLOG);
+	if ( $msglevel <= $loglevel ) {
+		if ( defined('STDLOG') ) {
+			fwrite(STDLOG, $stamp . $msg);
+			fflush(STDLOG);
+		}
+		if ( defined('SYSLOG') ) {
+			syslog($msglevel, $msg);
+		}
 	}
 }
 

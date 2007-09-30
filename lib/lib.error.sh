@@ -2,18 +2,25 @@
 #
 # $Id$
 
-logdate ()
-{
-	date '+%b %d %T'
-}
-
 logmsg ()
 {
-	local msglevel msgstring
+	local msglevel stamp msg
+
 	msglevel=$1; shift
-	msgstring="[`logdate`] $PROGNAME[$$]: $@"
-	if [ $msglevel -le "$VERBOSE"  ]; then echo "$msgstring" >&2 ; fi
-	if [ $msglevel -le "$LOGLEVEL" ]; then echo "$msgstring" >>$LOGFILE ; fi
+	stamp="[`date '+%b %d %T'`] $PROGNAME[$$]:"
+	msg="$@"
+
+	if [ $msglevel -le "$VERBOSE"  ]; then
+		echo "$stamp $msg" >&2
+	fi
+	if [ $msglevel -le "$LOGLEVEL" ]; then
+		if [ "$LOGFILE" ]; then
+			echo "$stamp $msg" >>$LOGFILE
+		fi
+		if [ "$SYSLOG"  ]; then
+			logger -i -t "$PROGNAME" -p "${SYSLOG#LOG_}.$msglevel" "$msg" &> /dev/null
+		fi
+	fi
 }
 
 error ()
