@@ -411,7 +411,7 @@ the list as appropriate.
 apt-get install make sudo php5-cli php5-mysql ntp \
 	hostname coreutils grep diff mount bash-static \
 	xsltproc \
-	gcc gcj sun-java5-jdk ghc fp-compiler
+	gcc g++ gcj sun-java5-jdk ghc fp-compiler
 </code>
 
 <sect>File locations
