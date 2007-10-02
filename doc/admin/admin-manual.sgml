@@ -322,7 +322,7 @@ The requirements for the deployment of this jury-system are:
 <p>
 
 <itemize>
-<item> gcc with standard libraries
+<item> gcc and g++ with standard libraries
 
 <item> make
 
@@ -397,7 +397,7 @@ above when using Debian GNU/Linux, or one of its derivate distributions. Most sy
 will have the bulk of these packages installed already.
 
 <code>
-apt-get install gcc make libcurl3-dev sudo \
+apt-get install gcc g++ make libcurl3-dev sudo \
 	mysql-server openssh-server openssh-client ntp \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
 	hostname coreutils grep diff mount bash-static \
