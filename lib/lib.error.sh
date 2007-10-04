@@ -10,7 +10,6 @@ logmsg ()
 	stamp="[`date '+%b %d %T'`] $PROGNAME[$$]:"
 	msg="$@"
 
-	echo "'$msglevel' '${VERBOSE:-$LOG_ERROR}' '$LOG_ERR'"
 	if [ "$msglevel" -le "${VERBOSE:-$LOG_ERR}" ]; then
 		echo "$stamp $msg" >&2
 	fi
