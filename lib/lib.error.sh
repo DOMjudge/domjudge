@@ -6,14 +6,15 @@ logmsg ()
 {
 	local msglevel stamp msg
 
-	msglevel=$1; shift
+	msglevel="$1"; shift
 	stamp="[`date '+%b %d %T'`] $PROGNAME[$$]:"
 	msg="$@"
 
-	if [ $msglevel -le "${VERBOSE:-$LOG_ERROR}" ]; then
+	echo "'$msglevel' '${VERBOSE:-$LOG_ERROR}' '$LOG_ERR'"
+	if [ "$msglevel" -le "${VERBOSE:-$LOG_ERR}" ]; then
 		echo "$stamp $msg" >&2
 	fi
-	if [ $msglevel -le "${LOGLEVEL:-$LOG_DEBUG}" ]; then
+	if [ "$msglevel" -le "${LOGLEVEL:-$LOG_DEBUG}" ]; then
 		if [ "$LOGFILE" ]; then
 			echo "$stamp $msg" >>$LOGFILE
 		fi
