@@ -82,6 +82,9 @@ function logmsg($msglevel, $string) {
  * Log an error at level LOG_ERROR and exit with exitcode 1.
  */
 function error($string) {
+	if (NONINTERACTIVE) {
+		echo "\n<!-- @@@ERROR-$string@@@ -->\n";
+	}
 	logmsg(LOG_ERR, "error: $string");
 	exit(1);
 }
@@ -90,5 +93,8 @@ function error($string) {
  * Log a warning at level LOG_WARNING.
  */
 function warning($string) {
+	if (NONINTERACTIVE) {
+		echo "\n<!-- @@@WARNING-$string@@@ -->\n";
+	}
 	logmsg(LOG_WARNING, "warning: $string");
 }
