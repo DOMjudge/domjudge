@@ -31,7 +31,7 @@ function err($string) {
 	if (NONINTERACTIVE) error($string);
 
 	echo '<div id="uploadstatus" class="error">';
-	logmsg($string, LOG_WARNING);
+	logmsg(LOG_WARNING, $string);
 	echo '</div>';
 	
 	require('../footer.php');
