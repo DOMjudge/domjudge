@@ -15,6 +15,7 @@ $row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
 
 // not found in database
 if(!$row) {
+	if (NONINTERACTIVE) error("Not authenticated");
 	$title = 'Not Authenticated';
 	$menu = false;
 	include('../header.php');

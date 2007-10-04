@@ -18,6 +18,11 @@ $loglevel = LOG_DEBUG;
 // Is this the webinterface or commandline?
 define('IS_WEB', isset($_SERVER['REMOTE_ADDR']));
 
+// used for the commandline websubmit client
+if ( !defined('NONINTERACTIVE') ) {
+	define('NONINTERACTIVE', false);
+}
+
 // Open standard error:
 if ( ! IS_WEB && ! defined('STDERR') ) {
 	define('STDERR', fopen('php://stderr', 'w'));

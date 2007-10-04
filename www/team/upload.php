@@ -8,6 +8,11 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+/* for easy parsing of the status by the commandline websubmit client */
+if ( isset($_REQUEST['noninteractive']) ) {
+	define("NONINTERACTIVE", true);
+}
+
 require('init.php');
 
 if ( ! ENABLE_WEBSUBMIT_SERVER ) {
@@ -15,6 +20,7 @@ if ( ! ENABLE_WEBSUBMIT_SERVER ) {
 }
 
 if ( !isset($_POST['submit']) ) {
+	if (NONINTERACTIVE) error("No 'submit' done.");
 	header('Location: websubmit.php');
 	return;
 }
@@ -22,6 +28,7 @@ if ( !isset($_POST['submit']) ) {
 
 /** helper to output an error message. */
 function err($string) {
+	if (NONINTERACTIVE) error($string);
 	echo '<div id="uploadstatus" class="error"><u>ERROR</u>: ' .
 		htmlspecialchars($string) . "</div>\n";
 	
@@ -133,14 +140,15 @@ for($i=0; $i<$waitsubmit; $i++) {
 	if ( ! file_exists($destfile) ) break;
 }
 
-/* Print everything between the <div> tags on one line for
-   easier parsing by commandline submit to webinterface */
 echo '<div id="uploadstatus">';
 if ( file_exists($destfile) ) {
+	if (NONINTERACTIVE) error("Upload not (yet) successful.");
 	echo "<p>Upload not (yet) successful.</p>";
 } else if ( file_exists(INCOMINGDIR . "/rejected-" . basename($destfile)) ) {
+	if (NONINTERACTIVE) error("Upload failed.");
 	echo "<p>Upload failed.</p>";
 } else {
+	if (NONINTERACTIVE) echo '<!-- noninteractive-upload-successful -->';
 	echo "<p>Upload successful.</p>";
 }
 echo "</div>\n";
