@@ -28,6 +28,8 @@ team=$1
 fromfile=$2
 tofile=$3
 
+logmsg $LOG_INFO "executing: 'scp -Bq ${team}@${SCP_HOST}:'${fromfile}' $tofile'"
+
 output=`scp -Bq "${team}@${SCP_HOST}:'${fromfile}'" "$tofile" 2>&1`
 if [ $? -eq 0 -a ${#output} -eq 0 ]; then
 	exit 0
