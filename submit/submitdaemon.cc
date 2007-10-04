@@ -22,7 +22,6 @@
 #include <poll.h>
 #include <signal.h>
 #include <getopt.h>
-#include <pwd.h>
 #include <libgen.h>
 
 /* C++ includes for easy string handling */
@@ -330,7 +329,6 @@ int handle_client()
 	string command, argument;
 	string team, problem, language, filename;
 	char *fromfile, *tempfile, *tmp, *tmp2;
-	struct passwd *userinfo;
 	char *args[MAXARGS];
 	int redir_fd[3];
 	int status;
@@ -401,13 +399,8 @@ int handle_client()
 		if ( !( isalnum(filename[i]) || strchr(filename_chars,filename[i]) ) )
 			senderror(client_fd,0,"illegal character '%c' in filename",filename[i]);
 	}
-	
-	if ( (userinfo = getpwnam(team.c_str()))==NULL ) {
-		senderror(client_fd,0,"cannot find team username");
-	}
 
-	fromfile = allocstr("%s/%s/%s",userinfo->pw_dir,USERSUBMITDIR,
-	                    filename.c_str());
+	fromfile = allocstr("%s/%s",USERSUBMITDIR,filename.c_str());
 	
 	tempfile = allocstr("%s/cmdsubmit.%s.%s.XXXXXX.%s",INCOMINGDIR,
 	                    problem.c_str(),team.c_str(),language.c_str());
