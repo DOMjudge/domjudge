@@ -78,7 +78,7 @@ if ( count($jdata) > 0 ) {
 	}
 
 	// print the judgings
-	foreach( $jdata as &$jud ) {
+	foreach( $jdata as $jud ) {
 
 		echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
 

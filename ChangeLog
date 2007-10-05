@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 2.0.2 - SVN
 -------------------
+ - Fix bug in jury/submission.php, thanks mhil@fmf.nl (Closes: #1808259).
 
 Version 2.0.1 - 23 August 2007
 ------------------------------
