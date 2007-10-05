@@ -17,7 +17,7 @@ $menu = false;
 require('../header.php');
 require('../scoreboard.php');
 
-$isstatic = @$_SERVER['argv'][1]=='static';
+$isstatic = @$_SERVER['argv'][1] == 'static' || isset($_REQUEST['static']);
 
 if ( ! $isstatic ) putClock();
 
