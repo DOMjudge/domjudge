@@ -705,8 +705,10 @@ int websubmit()
 	curlsetopt(HTTPGET,       0);
 	curlsetopt(WRITEFUNCTION, writesstream);
 	curlsetopt(WRITEDATA,     (void *)&curloutput);
-	
- 	if ( verbose >= LOG_DEBUG ) {
+	curlsetopt(SSL_VERIFYPEER,0);
+	curlsetopt(SSL_VERIFYHOST,0);
+
+	if ( verbose >= LOG_DEBUG ) {
 		curlsetopt(VERBOSE,   1);
 	} else {
 		curlsetopt(NOPROGRESS,1);
