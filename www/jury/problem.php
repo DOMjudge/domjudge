@@ -85,7 +85,7 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <td><?=addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
 
 <tr><td><label for="data_0__color_">Balloon colour:</label></td>
-<td><?=addInput('data[0][color]', @$row['color'], 8, 10)?>
+<td><?=addInput('data[0][color]', @$row['color'], 8, 25)?>
 <a href="http://www.w3schools.com/css/css_colornames.asp" target="_blank"><small>(help)</small></a></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>

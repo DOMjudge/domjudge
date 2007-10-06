@@ -6,6 +6,7 @@ Version 2.1.1 - SVN
  - Fix bug in jury/submission.php, thanks mhil@fmf.nl (Closes: #1808259).
  - Fix team unread clarification count to work cross-contest.
  - correctly freeze scoreboard
+ - jury problem color input size matches varchar size in db
 
 Version 2.1.0 - 5 September 2007
 --------------------------------
