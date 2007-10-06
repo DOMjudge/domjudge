@@ -189,7 +189,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 		$prevteam = $team;
 		echo '</td>';
 		if ( SHOW_AFFILIATIONS ) {
-			echo '<td>';
+			echo '<td><nobr>';
 			if ( isset($teams[$team]['affilid']) ) {
 				if ( $isjury ) {
 					echo '<a href="team_affiliation.php?id=' .
@@ -218,7 +218,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 				}
 				if ( $isjury ) echo '</a>';
 			}
-			echo '</td>';	
+			echo '</nobr></td>';	
 		}
 		echo
 			'<td class="scoretn"' .
