@@ -67,8 +67,8 @@ function getCurContest($fulldata = FALSE) {
 /**
  * Scoreboard calculation
  *
- * This is here because it needs to be called by the submit_db script
- * as well.  
+ * This is here because it needs to be called by the judgedaemon script
+ * as well.
  *
  * Given a contestid, teamid and a problemid,
  * (re)calculate the values for one row in the scoreboard.
@@ -116,6 +116,7 @@ function calcScoreRow($cid, $team, $prob) {
 				$correct_p = 1;
 				$time_p = round((int)@$row['timediff']);
 			}
+			// if correct, we don't add penalty time for any later submissions
 			break;
 		}
 
