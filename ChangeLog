@@ -7,6 +7,7 @@ Version 2.1.1 - SVN
  - Fix team unread clarification count to work cross-contest.
  - correctly freeze scoreboard
  - jury problem color input size matches varchar size in db
+ - The colors of the problems are now shown in the jury problems overview
 
 Version 2.1.0 - 5 September 2007
 --------------------------------
