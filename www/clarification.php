@@ -175,7 +175,7 @@ function confirmClar() {
 	if ( sendto=='' ) sendto = "ALL";
 	return confirm("Send clarification to " + sendto + "?");
 <?php else : ?>
-	return confirm("Send clarification to Jury?");
+	return confirm("Send clarification request to Jury?");
 <?php endif; ?>
 }
 // -->

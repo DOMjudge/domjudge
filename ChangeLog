@@ -2,8 +2,10 @@ DOMjudge Programming Contest Judging System
 
 Version 2.0.2 - SVN
 -------------------
- - Fix bug in jury/submission.php, thanks mhil@fmf.nl (Closes: #1808259).
- - correctly freeze scoreboard
+ - Fix typo in jury/submission.php causing a parse error when using
+   PHP4 (Closes: #1808259, thanks mhil@fmf.nl).
+ - Update not the public, but the jury scoreboard after freeze.
+ - Fix text of "send clarification?" popup for teams.
 
 Version 2.0.1 - 23 August 2007
 ------------------------------
