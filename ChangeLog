@@ -2,11 +2,12 @@ DOMjudge Programming Contest Judging System
 
 Version 2.1.1 - SVN
 -------------------
- - Implement syslog logging (for PHP and shell-script).
- - Fix bug in jury/submission.php, thanks mhil@fmf.nl (Closes: #1808259).
+ - Implement syslog logging (for PHP and shell scripts).
+ - Fix typo in jury/submission.php causing a parse error when using
+   PHP4 (Closes: #1808259, thanks mhil@fmf.nl).
  - Fix team unread clarification count to work cross-contest.
- - correctly freeze scoreboard
- - jury problem color input size matches varchar size in db
+ - Update not the public, but the jury scoreboard after freeze.
+ - Fix poblem colour input field to match its size in the database.
  - The colors of the problems are now shown in the jury problems overview
    (Closes: #1808308).
 
