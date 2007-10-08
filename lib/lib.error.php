@@ -18,11 +18,6 @@ $loglevel = LOG_DEBUG;
 // Is this the webinterface or commandline?
 define('IS_WEB', isset($_SERVER['REMOTE_ADDR']));
 
-// used for the commandline websubmit client
-if ( !defined('NONINTERACTIVE') ) {
-	define('NONINTERACTIVE', false);
-}
-
 // Open standard error:
 if ( ! IS_WEB && ! defined('STDERR') ) {
 	define('STDERR', fopen('php://stderr', 'w'));
@@ -62,6 +57,9 @@ function logmsg($msglevel, $string) {
 		if ( IS_WEB ) {
 			echo "<fieldset class=\"error\"><legend>Error</legend>\n" .
 				nl2br(htmlspecialchars($stamp . $msg)) . "</fieldset>\n";
+			// Add strings for non-interactive parsing:
+			if ( $msglevel == LOG_ERR     ) echo "\n<!-- @@@ERROR-$string@@@ -->\n";
+			if ( $msglevel == LOG_WARNING ) echo "\n<!-- @@@WARNING-$string@@@ -->\n";
 		} else {
 			fwrite(STDERR, $stamp . $msg);
 			fflush(STDERR);
@@ -82,9 +80,6 @@ function logmsg($msglevel, $string) {
  * Log an error at level LOG_ERROR and exit with exitcode 1.
  */
 function error($string) {
-	if (NONINTERACTIVE) {
-		echo "\n<!-- @@@ERROR-$string@@@ -->\n";
-	}
 	logmsg(LOG_ERR, "error: $string");
 	exit(1);
 }
@@ -93,8 +88,5 @@ function error($string) {
  * Log a warning at level LOG_WARNING.
  */
 function warning($string) {
-	if (NONINTERACTIVE) {
-		echo "\n<!-- @@@WARNING-$string@@@ -->\n";
-	}
 	logmsg(LOG_WARNING, "warning: $string");
 }

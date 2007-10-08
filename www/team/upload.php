@@ -144,8 +144,8 @@ for($i=0; $i<$waitsubmit; $i++) {
 
 echo '<div id="uploadstatus">';
 if ( file_exists($destfile) ) {
-	if (NONINTERACTIVE) error("Upload not (yet) successful.");
-	echo "<p>Upload not (yet) successful.</p>";
+	if (NONINTERACTIVE) error("Upload not yet completed: contact staff.");
+	echo "<p>Upload not yet completed: contact staff.</p>";
 } else if ( file_exists(INCOMINGDIR . "/rejected-" . basename($destfile)) ) {
 	if (NONINTERACTIVE) error("Upload failed.");
 	echo "<p>Upload failed.</p>";
