@@ -89,8 +89,9 @@ logmsg (LOG_INFO, "input verified");
 $template = SUBMITDIR."/$team.$prob.XXXXXX.$langext";
 $tofile = mkstemps($template, strlen($langext)+1);
 
-if ( $tofile === FALSE ) error("Could not create tempfile from template: " .
-	$template);
+if ( $tofile === FALSE ) {
+	error("Could not create tempfile from template: " . $template);
+}
 $tofile = basename($tofile);
 
 if ( ! copy(INCOMINGDIR."/$file", SUBMITDIR."/$tofile") ) {
