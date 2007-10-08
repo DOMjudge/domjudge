@@ -6,6 +6,7 @@ Version 2.0.2 - SVN
    PHP4 (Closes: #1808259, thanks mhil@fmf.nl).
  - Update not the public, but the jury scoreboard after freeze.
  - Fix text of "send clarification?" popup for teams.
+ - Fix poblem colour input field to match its size in the database.
 
 Version 2.0.1 - 23 August 2007
 ------------------------------
