@@ -24,6 +24,7 @@ if ( isset($_REQUEST['id']) ) {
 		($req['recipient']==NULL || $req['recipient']==$login)) ) ) {
 		error("Permission denied");
 	}
+	$irequested = ( $req['sender'] == $login );
 
 	$respid = empty($req['respid']) ? $id : $req['respid'];
 }
@@ -46,11 +47,14 @@ require('../clarification.php');
 
 if ( isset($id) ) {
 	// display clarification thread
-	echo "<h1>Clarification $id</h1>\n\n";
-	
+	if ( $irequested ) {
+		echo "<h1>Clarification Request</h1>\n\n";
+	} else {
+		echo "<h1>Clarification</h1>\n\n";
+	}
 	putClarification($respid, $login);
 	
-	echo "<h1>Send Clarification Request</h1>\n\n";
+	echo "<h2>Send Clarification Request</h2>\n\n";
 	putClarificationForm("clarification.php", false, $id);
 } else {
 	// display a clarification request send box
