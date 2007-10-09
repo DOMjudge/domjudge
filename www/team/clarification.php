@@ -24,7 +24,7 @@ if ( isset($_REQUEST['id']) ) {
 		($req['recipient']==NULL || $req['recipient']==$login)) ) ) {
 		error("Permission denied");
 	}
-	$irequested = ( $req['sender'] == $login );
+	$myrequest = ( $req['sender'] == $login );
 
 	$respid = empty($req['respid']) ? $id : $req['respid'];
 }
@@ -47,7 +47,7 @@ require('../clarification.php');
 
 if ( isset($id) ) {
 	// display clarification thread
-	if ( $irequested ) {
+	if ( $myrequest ) {
 		echo "<h1>Clarification Request</h1>\n\n";
 	} else {
 		echo "<h1>Clarification</h1>\n\n";
