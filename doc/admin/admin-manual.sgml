@@ -582,6 +582,18 @@ address configuration with the configuration option
 preconfiguring that or handing passwords to the teams for their first
 authentication.
 
+The figure below is a graphical representation of the flow of a
+submission. Arrows with filled lines indicate the flow of the
+submission file, while dot-dash lines indicate flow of metadata about
+the submission. Each line where no protocol of data transfer is given,
+are just filesystem operations. Squares are programs and rounded
+squares are storage locations.
+<figure loc="h">
+<eps file="submitflow.eps">
+<img src="submitflow.png">
+<caption>Submission flow diagram.
+</figure>
+
 <sect>Database installation
 <p>
 
