@@ -65,14 +65,6 @@ INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `
 -- Dumping data for table `submission`
 -- 
 
-
--- 
--- Dumping data for table `team`
--- 
-
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `ipaddress`, `passwd`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 3, 'UU', '127.0.0.1', NULL, NULL, NULL, NULL);
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `ipaddress`, `passwd`, `room`, `comments`, `teampage_first_visited`) VALUES ('team01', 'Some very cool teamname!', 1, NULL, NULL, MD5('mypassword'), NULL, NULL, NULL);
-
 -- 
 -- Dumping data for table `team_affiliation`
 -- 
@@ -86,3 +78,12 @@ INSERT INTO `team_affiliation` (`affilid`, `name`, `country`, `comments`) VALUES
 INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`) VALUES (1, 'Participants', 0, NULL);
 INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`) VALUES (2, 'Observers', 1, "#ffcc33");
 INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`) VALUES (3, 'Organisation', 1, "#ff99cc");
+
+
+-- 
+-- Dumping data for table `team`
+-- 
+
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `ipaddress`, `passwd`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 3, 'UU', '127.0.0.1', NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `ipaddress`, `passwd`, `room`, `comments`, `teampage_first_visited`) VALUES ('team01', 'Some very cool teamname!', 1, NULL, NULL, MD5('mypassword'), NULL, NULL, NULL);
+
