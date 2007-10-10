@@ -10,6 +10,7 @@ Version 2.1.1 - SVN
  - Fix poblem colour input field to match its size in the database.
  - The colors of the problems are now shown in the jury problems overview
    (Closes: #1808308).
+ - Improve contrast of default team category colours.
 
 Version 2.1.0 - 5 September 2007
 --------------------------------
