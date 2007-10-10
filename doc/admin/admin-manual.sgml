@@ -697,21 +697,20 @@ There are three ways in which information is logged:
 <item>To a logfile set by the variable <tt>LOGFILE</tt>, which is set
       in each program (unsetting this variable disables this method).
 <item>To syslog. This can be configured via the <tt>SYSLOG</tt>
-      configuration variable in the global config. This option allows
-	  one for all the flexibility of syslog such as remote logging:
-	  see the syslog(daemon) documentation for more information.
+      configuration variable in the global config. This option gives
+	  the flexibility of syslog, such as remote logging.
+	  See the syslog(daemon) documentation for more information.
 </itemize>
 Each script also defines a default threshold level for messages to be
 logged to stderr (<tt>VERBOSE</tt>: defaults to <tt>LOG_INFO</tt> in
 daemons and <tt>LOG_ERROR</tt> in the webinterface) and for
 logfile/syslog (<tt>LOGLEVEL</tt>: defaults to <tt>LOG_DEBUG</tt>).
 
-In case of problems, it is advisable to always check the logs for
-clues. Furthermore, extra debugging information can be obtained by
-setting the config option <tt>DEBUG</tt>. As of current versions, this
+In case of problems, it is advisable to check the logs for clues.
+Extra debugging information can be obtained by
+setting the config option <tt>DEBUG</tt>, which
 will generate extra SQL query and timing information in the
-webinterface, but this feature will probably be expanded in future
-versions.
+webinterface.
 
 <sect>Building and installing
 <p>
