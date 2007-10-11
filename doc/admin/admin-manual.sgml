@@ -395,7 +395,7 @@ apt-get install gcc g++ make libcurl3-dev sudo \
 	hostname coreutils grep diff mount bash-static \
 	openssh-server openssh-client \
 	phpmyadmin xsltproc \
-	wget linuxdoc-tools unzip tetex-bin tetex-extra
+	wget linuxdoc-tools unzip tetex-bin tetex-extra transfig
 </code>
 
 This is for Debian 4.0 "Etch". For Debian 4.1 "Lenny",
