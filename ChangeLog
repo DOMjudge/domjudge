@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 2.0.3 - SVN
+-------------------
+
 Version 2.0.2 - 13 October 2007
 -------------------------------
  - Fix typo in jury/submission.php causing a parse error when using
