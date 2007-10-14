@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 2.2.0 - SVN
 -------------------
  - Do not install domjudge straight in $HOME by default
+ - Do not download stuff from external websites without asking
 
 Version 2.1.1 - SVN
 -------------------
