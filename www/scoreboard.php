@@ -34,7 +34,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
 	                 login, team.name, team.categoryid, team.affilid, sortorder,
-	                 color, country, team_affiliation.name AS affilname
+	                 color, invisible, country, team_affiliation.name AS affilname
 	                 FROM team
 	                 LEFT JOIN team_category
 	                        ON (team_category.categoryid = team.categoryid)
@@ -122,19 +122,21 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	// the SCORES table contains the totals for each team which we will
 	// use for determining the ranking. Initialise them here
 	foreach ($teams as $login => $team ) {
-		$SCORES[$login]['num_correct'] = 0;
-		$SCORES[$login]['total_time']  = 0;
-		$SCORES[$login]['last_solved'] = 0;
-		$SCORES[$login]['teamname']    = $team['name'];
-		$SCORES[$login]['categoryid']  = $team['categoryid'];
-		$SCORES[$login]['sortorder']   = $team['sortorder'];
+		if ($isjury || !$team['invisible']) {
+			$SCORES[$login]['num_correct'] = 0;
+			$SCORES[$login]['total_time']  = 0;
+			$SCORES[$login]['last_solved'] = 0;
+			$SCORES[$login]['teamname']    = $team['name'];
+			$SCORES[$login]['categoryid']  = $team['categoryid'];
+			$SCORES[$login]['sortorder']   = $team['sortorder'];
+		}
 	}
 
 	// loop all info the scoreboard cache and put it in our own datastructure
 	while ( $srow = $scoredata->next() ) {
 	
-		// skip this row if the team or problem is not known by us
-		if ( ! array_key_exists ( $srow['teamid'], $teams ) ||
+		// skip this row if we're don't know or care about the team or problem is not known by us
+		if ( ! array_key_exists ( $srow['teamid'], $SCORES ) ||
 		     ! array_key_exists ( $srow['probid'], $probs ) ) continue;
 	
 		// fill our matrix with the scores from the database,
@@ -324,10 +326,12 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 			jurylink('team_categories.php','Legend',$isjury) .
 			"</th></tr></thead>\n<tbody>\n";
 		while ( $cat = $categs->next() ) {
-			echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
-			              $cat['color'] . ';"' : '') . '>' .
-				'<td align="center" class="scoretn">' .
-				jurylink(null,htmlspecialchars($cat['name']),$isjury) .	"</td></tr>\n";
+			if ($isjury || !$cat['invisible']) {
+				echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
+				              $cat['color'] . ';"' : '') . '>' .
+					'<td align="center" class="scoretn">' .
+					jurylink(null,htmlspecialchars($cat['name']),$isjury) .	"</td></tr>\n";
+			}
 		}
 		echo "</tbody>\n</table>\n\n";
 	}
