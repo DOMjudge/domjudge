@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 2.1.1 - SVN
--------------------
+Version 2.1.1 - 16 October 2007
+-------------------------------
  - Implement syslog logging (for PHP and shell scripts).
  - Fix typo in jury/submission.php causing a parse error when using
    PHP4 (Closes: #1808259, thanks mhil@fmf.nl).
