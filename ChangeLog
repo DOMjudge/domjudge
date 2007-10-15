@@ -12,6 +12,12 @@ Version 2.1.1 - SVN
    (Closes: #1808308).
  - Improve contrast of default team category colours.
  - Some improvements to admin manual including submission diagram.
+ - Fix in scoreboard to disable linebreak between affiliation/country icons.
+ - Do not try to check SSL certificates in submitclient to webinterface.
+ - Fix homedir lookup problem in submitdaemon when team passwd data is not
+   available locally.
+ - Add better machine parsing support in websubmit interface.
+ - Lowered syslog levels in test_solution.sh.
 
 Version 2.1.0 - 5 September 2007
 --------------------------------
