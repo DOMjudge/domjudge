@@ -68,7 +68,7 @@ cleanexit ()
 		rm -f "$TMPDIR/bin/sh"
 	fi
 
-	logmsg $LOG_INFO "exiting"
+	logmsg $LOG_DEBUG "exiting"
 }
 
 # Error and logging functions
@@ -92,7 +92,7 @@ SCRIPTDIR="$SYSTEM_ROOT/judge"
 STATICSHELL="$SYSTEM_ROOT/bin/bash-static"
 RUNGUARD="$SYSTEM_ROOT/bin/runguard"
 
-logmsg $LOG_NOTICE "starting '$0', PID = $$"
+logmsg $LOG_INFO "starting '$0', PID = $$"
 
 [ $# -ge 6 ] || error "not enough of arguments. see script-code for usage."
 SOURCE="$1";    shift
@@ -103,8 +103,8 @@ TIMELIMIT="$1"; shift
 TMPDIR="$1";    shift
 SPECIALRUN="$1";
 SPECIALCOMPARE="$2";
-logmsg $LOG_INFO "arguments: '$SOURCE' '$PROGLANG' '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$TMPDIR'"
-logmsg $LOG_INFO "optionals: '$SPECIALRUN' '$SPECIALCOMPARE'"
+logmsg $LOG_DEBUG "arguments: '$SOURCE' '$PROGLANG' '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$TMPDIR'"
+logmsg $LOG_DEBUG "optionals: '$SPECIALRUN' '$SPECIALCOMPARE'"
 
 COMPILE_SCRIPT="$SCRIPTDIR/compile_$PROGLANG.sh"
 COMPARE_SCRIPT="$SCRIPTDIR/compare${SPECIALCOMPARE:+_$SPECIALCOMPARE}"
@@ -119,11 +119,11 @@ RUN_SCRIPT="run${SPECIALRUN:+_$SPECIALRUN}"
 [ -r "$COMPARE_SCRIPT" ] || error "compare script not found: $COMPARE_SCRIPT"
 [ -r "$SCRIPTDIR/$RUN_SCRIPT" ] || error "run script not found: $RUN_SCRIPT"
 
-logmsg $LOG_NOTICE "setting resource limits"
+logmsg $LOG_INFO "setting resource limits"
 ulimit -HS -c 0     # Do not write core-dumps
 ulimit -HS -f 65536 # Maximum filesize in kB
 
-logmsg $LOG_NOTICE "creating input/output files"
+logmsg $LOG_INFO "creating input/output files"
 EXT="${SOURCE##*.}"
 [ "$EXT" ] || error "source-file does not have an extension: $SOURCE"
 cp "$SOURCE" "$TMPDIR/source.$EXT"
@@ -157,7 +157,7 @@ chmod a+rw program.out program.err program.time program.exit
 # Make source readable (for if it is interpreted):
 chmod a+r source.$EXT
 
-logmsg $LOG_NOTICE "starting compile"
+logmsg $LOG_INFO "starting compile"
 
 if [ `cat source.$EXT | wc -c` -gt $(($SOURCESIZE*1024)) ]; then
 	echo "Source-code is larger than $SOURCESIZE kB." >>compile.out
@@ -187,7 +187,7 @@ fi
 cat compile.tmp >>compile.out
 
 
-logmsg $LOG_NOTICE "setting up testing (chroot) environment"
+logmsg $LOG_INFO "setting up testing (chroot) environment"
 
 # Copy the testdata input (only after compilation to prevent information leakage)
 cd "$OLDDIR"
@@ -215,7 +215,7 @@ CATPID=$!
 disown $CATPID
 
 # Run the solution program (within a restricted environment):
-logmsg $LOG_NOTICE "running program (USE_CHROOT = ${USE_CHROOT:-0})"
+logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 ( "$RUNGUARD" ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" -t $TIMELIMIT -o program.time -- \
 	$PREFIX/$RUN_SCRIPT $PREFIX/program testdata.in program.out program.err program.exit \
@@ -281,7 +281,7 @@ fi
 #fi
 
 
-logmsg $LOG_NOTICE "comparing output"
+logmsg $LOG_INFO "comparing output"
 
 # Copy testdata output (first cd to olddir to correctly resolve relative paths)
 cd "$OLDDIR"
@@ -294,7 +294,7 @@ if [ ! -s program.out ]; then
 	exit $E_OUTPUT
 fi
 
-logmsg $LOG_INFO "starting script '$COMPARE_SCRIPT'"
+logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
 
 if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
                        result.xml compare.out &>compare.tmp ; then
