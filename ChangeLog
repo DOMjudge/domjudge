@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 2.1.2 - SVN
+-------------------
+
 Version 2.1.1 - 16 October 2007
 -------------------------------
  - Implement syslog logging (for PHP and shell scripts).
