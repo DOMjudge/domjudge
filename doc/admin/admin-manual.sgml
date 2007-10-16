@@ -315,7 +315,9 @@ The requirements for the deployment of this jury-system are:
        executables.
 
 <item> Apache web server with support for PHP &gt;= 4.3.2 and the mysql
-       extension for PHP.
+       extension for PHP. We recommend PHP 5 since DOMjudge on PHP 4 gets
+       a lot less testing nowadays; we also recommend the posix extension
+       for extra debugging information.
 
 <item> MySQL &gt;= 4.1.x database and client software
 
@@ -330,7 +332,7 @@ The requirements for the deployment of this jury-system are:
 
 <item> A lot of standard (GNU) programs, a probably incomplete list:
        hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
-       grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail
+       grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail, pgrep
 
 <item> Apache htpasswd
 
@@ -392,7 +394,7 @@ will have the bulk of these packages installed already.
 apt-get install gcc g++ make libcurl3-dev sudo \
 	mysql-server openssh-server openssh-client ntp \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
-	hostname coreutils grep diff mount bash-static \
+	hostname coreutils procps grep diff mount bash-static \
 	openssh-server openssh-client \
 	phpmyadmin xsltproc \
 	wget linuxdoc-tools unzip tetex-bin tetex-extra transfig
@@ -409,7 +411,7 @@ the list as appropriate.
 
 <code>
 apt-get install make sudo php5-cli php5-mysql ntp \
-	hostname coreutils grep diff mount bash-static \
+	hostname coreutils procps grep diff mount bash-static \
 	xsltproc \
 	gcc g++ gcj sun-java5-jdk ghc fp-compiler
 </code>

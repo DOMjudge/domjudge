@@ -66,7 +66,12 @@ logmsg(LOG_DEBUG, "checking users");
 // does our runuser even exist?
 // In PHP 4.1.2 this crashes when the user doesn't exist, but the
 // warning is output anyway.
-if ( ! @posix_getpwnam(RUNUSER) ) warn("RUNUSER [" . RUNUSER ."] does not exist!");
+if ( ! function_exists('posix_getpwnam') ) {
+	warn ("PHP posix functions not available, cannot test if RUNUSER '" .
+		RUNUSER . "' exists.");
+} elseif ( ! @posix_getpwnam(RUNUSER) ) {
+	warn("RUNUSER [" . RUNUSER ."] does not exist!");
+}
 
 // check problems. 
 logmsg(LOG_DEBUG, "checking problems");

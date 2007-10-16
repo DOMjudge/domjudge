@@ -49,7 +49,9 @@ if ( defined('SYSLOG')  ) {
 function logmsg($msglevel, $string) {
 	global $verbose, $loglevel;
 
-	$stamp = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . "[" . posix_getpid() . "]: ";
+	$stamp = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . 
+		(function_exists('posix_getpid') ? "[" . posix_getpid() . "]" : "") .
+		": ";
 	$msg = $string . "\n";
 	
 	if ( $msglevel <= $verbose  ) {
