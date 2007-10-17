@@ -122,21 +122,19 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	// the SCORES table contains the totals for each team which we will
 	// use for determining the ranking. Initialise them here
 	foreach ($teams as $login => $team ) {
-		if ($isjury || !$team['invisible']) {
-			$SCORES[$login]['num_correct'] = 0;
-			$SCORES[$login]['total_time']  = 0;
-			$SCORES[$login]['last_solved'] = 0;
-			$SCORES[$login]['teamname']    = $team['name'];
-			$SCORES[$login]['categoryid']  = $team['categoryid'];
-			$SCORES[$login]['sortorder']   = $team['sortorder'];
-		}
+		$SCORES[$login]['num_correct'] = 0;
+		$SCORES[$login]['total_time']  = 0;
+		$SCORES[$login]['last_solved'] = 0;
+		$SCORES[$login]['teamname']    = $team['name'];
+		$SCORES[$login]['categoryid']  = $team['categoryid'];
+		$SCORES[$login]['sortorder']   = $team['sortorder'];
 	}
 
 	// loop all info the scoreboard cache and put it in our own datastructure
 	while ( $srow = $scoredata->next() ) {
 	
-		// skip this row if we're don't know or care about the team or problem is not known by us
-		if ( ! array_key_exists ( $srow['teamid'], $SCORES ) ||
+		// skip this row if the team or problem is not known by us
+		if ( ! array_key_exists ( $srow['teamid'], $teams ) ||
 		     ! array_key_exists ( $srow['probid'], $probs ) ) continue;
 	
 		// fill our matrix with the scores from the database,
@@ -165,6 +163,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	$prevsortorder = -1;
 	foreach( $SCORES as $team => $totals ) {
 
+		if ( ! $isjury && $teams[$team]['invisible'] ) continue;
+		
 		// rank, team name, total correct, total time
 		echo '<tr';
 		if ( $totals['sortorder'] != $prevsortorder ) {
@@ -316,7 +316,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	}
 	echo "</tr>\n</tbody>\n</table>\n\n";
 
-	$categs = $DB->q('SELECT * FROM team_category ORDER BY categoryid');
+	$categs = $DB->q('SELECT * FROM team_category
+	                  WHERE invisible = 0 ORDER BY categoryid');
 
 	// only print legend when there's more than one category
 	if ( $categs->count() > 1 ) {
@@ -326,12 +327,10 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 			jurylink('team_categories.php','Legend',$isjury) .
 			"</th></tr></thead>\n<tbody>\n";
 		while ( $cat = $categs->next() ) {
-			if ($isjury || !$cat['invisible']) {
-				echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
-				              $cat['color'] . ';"' : '') . '>' .
-					'<td align="center" class="scoretn">' .
-					jurylink(null,htmlspecialchars($cat['name']),$isjury) .	"</td></tr>\n";
-			}
+			echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
+				          $cat['color'] . ';"' : '') . '>' .
+				'<td align="center" class="scoretn">' .
+				jurylink(null,htmlspecialchars($cat['name']),$isjury) .	"</td></tr>\n";
 		}
 		echo "</tbody>\n</table>\n\n";
 	}
