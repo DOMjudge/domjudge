@@ -316,8 +316,9 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	}
 	echo "</tr>\n</tbody>\n</table>\n\n";
 
-	$categs = $DB->q('SELECT * FROM team_category
-	                  WHERE invisible = 0 ORDER BY categoryid');
+	$categs = $DB->q('SELECT * FROM team_category ' .
+	                 ($isjury ? '' : 'WHERE invisible = 0 ' ) .
+	                 'ORDER BY categoryid');
 
 	// only print legend when there's more than one category
 	if ( $categs->count() > 1 ) {
