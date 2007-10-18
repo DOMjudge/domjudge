@@ -36,15 +36,16 @@ if ( empty($user) || empty($pass) ) {
 	exit;
 }
 
-$cnt = $DB->q('VALUE SELECT COUNT(*) FROM team
+$cnt = $DB->q('RETURNAFFECTED UPDATE team SET ipaddress = %s
                WHERE login = %s AND passwd = %s AND ipaddress IS NULL',
-              $user, md5($pass));
+              $ip, $user, md5($pass));
 
 if ( $cnt == 1 ) {
-	$DB->q('UPDATE team SET ipaddress = %s WHERE login = %s', $ip, $user);
 	echo "<h1>Authenticated</h1>\n\n<p>Successfully authenticated as team " .
 		htmlspecialchars($user) . " on " . htmlspecialchars($ip) . ".</p>" .
 		"<p><a href=\"./\">Continue to your team page</a>, and good luck!</p>\n\n";
+} else if ( $cnt > 1 ) {
+	error("multiple database entries that match with team '$user'");
 } else {
 	sleep(3);
 	echo "<h1>Not Authenticated</h1>\n\n";
