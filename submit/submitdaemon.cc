@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	/* Set logging levels & open logfile */
-	verbose  = LOG_INFO;
+	verbose  = LOG_NOTICE;
 	loglevel = LOG_DEBUG;
 	stdlog   = fopen(LOGFILE,"a");
 	if ( stdlog==NULL ) error(errno,"cannot open logfile `%s'",LOGFILE);
