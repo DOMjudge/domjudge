@@ -93,17 +93,33 @@ while ( TRUE ) {
 	}
 	$judgable_lang = array_unique(array_values($langs));
 
-	// Generate (unique) random string to mark submission to be judged
-	list($usec, $sec) = explode(" ", microtime());
-	$mark = $myhost.'@'.($sec+$usec).'#'.md5( uniqid( mt_rand(), true ) );
-
-	// update exactly one submission with our random string
-	$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-	                  SET judgehost = %s, judgemark = %s
+	// First, use a select to see whether there are any judgeable
+	// submissions. This query is query-cacheable, and doing a select
+	// first prevents a write-lock on the submission table if nothing is
+	// to be judged, and also prevents throwing away the query cache every
+	// single time
+	$numopen = $DB->q('VALUE SELECT COUNT(*) FROM submission
 	                  WHERE judgehost IS NULL AND cid = %i AND langid IN (%As)
-	                  AND probid IN (%As) AND submittime < %s LIMIT 1',
+	                  AND probid IN (%As) AND submittime < %s',
 	                 $myhost, $mark, $cid, $judgable_lang, $judgable_prob,
 	                 $contdata['endtime']);
+
+	$numupd = 0;
+	if ($numopen) {
+		// Generate (unique) random string to mark submission to be judged
+		list($usec, $sec) = explode(" ", microtime());
+		$mark = $myhost.'@'.($sec+$usec).'#'.md5( uniqid( mt_rand(), true ) );
+
+		// update exactly one submission with our random string
+		// Note: this might still return 0 if another judgehost beat
+		// us to it
+		$numupd = $DB->q('RETURNAFFECTED UPDATE submission
+				  SET judgehost = %s, judgemark = %s
+				  WHERE judgehost IS NULL AND cid = %i AND langid IN (%As)
+				  AND probid IN (%As) AND submittime < %s LIMIT 1',
+				 $myhost, $mark, $cid, $judgable_lang, $judgable_prob,
+				 $contdata['endtime']);
+	}
 
 	// nothing updated -> no open submissions
 	if ( $numupd == 0 ) {

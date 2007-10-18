@@ -168,8 +168,9 @@ CREATE TABLE `submission` (
   `judgehost` varchar(50) default NULL,
   `judgemark` varchar(255) default NULL,
   PRIMARY KEY  (`submitid`),
-  UNIQUE KEY `judgemark` (`judgemark`)
-  KEY `cid` (`cid`,`teamid`)
+  UNIQUE KEY `judgemark` (`judgemark`),
+  KEY `teamid` (`cid`,`teamid`),
+  KEY `judgehost` (`cid`,`judgehost`)
 ) ENGINE=MyISAM COMMENT='All incoming submissions';
 
 -- 
