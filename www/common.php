@@ -37,12 +37,15 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	$contdata = getCurContest(TRUE);
 	$cid = $contdata['cid'];
 	
-	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.submittime, s.judgehost,
-	               t.name AS teamname, p.name AS probname, l.name AS langname
+	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid,
+				   s.submittime, s.judgehost, t.name AS teamname,
+				   p.name AS probname, l.name AS langname,
+				   j.result, j.judgehost, j.verified
 	               FROM submission s
-	               LEFT JOIN team     t ON (t.login  = s.teamid)
-	               LEFT JOIN problem  p ON (p.probid = s.probid)
-	               LEFT JOIN language l ON (l.langid = s.langid)
+	               LEFT JOIN team     t ON (t.login    = s.teamid)
+	               LEFT JOIN problem  p ON (p.probid   = s.probid)
+	               LEFT JOIN language l ON (l.langid   = s.langid)
+				   LEFT JOIN judging  j ON (s.submitid = j.submitid AND valid=1)
 	               WHERE s.cid = %i ' .
 	               (!empty($restrictions['teamid']) ? 'AND s.teamid = %s ' : '%_') .
 	               (!empty($restrictions['probid']) ? 'AND s.probid = %s ' : '%_') .
@@ -57,9 +60,6 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 		echo "<p><em>No submissions</em></p>\n\n";
 		return;
 	}
-	
-	$resulttable = $DB->q('KEYTABLE SELECT j.*, submitid AS ARRAYKEY
-	                       FROM judging j WHERE valid = 1 AND cid = %i',$cid);
 	
 	// print the table with the submissions. 
 	// table header; leave out the field that is our key (because it's the same
@@ -77,7 +77,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	while( $row = $res->next() ) {
 		
 		$sid = (int)$row['submitid'];
-		$isfinished = ($isjury || ! @$resulttable[$sid]['result']);
+		$isfinished = ($isjury || ! $row['result']);
 		
 		echo "<tr>";
 		if ( $isjury ) {
@@ -95,19 +95,19 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 			htmlspecialchars($row['langid']) . ( $isjury ? '</a>' : '') . '</td>';
 		echo "<td>";
 		if ( $isjury ) {
-			if ( ! @$resulttable[$sid]['result'] ) {
+			if ( ! $row['result'] ) {
 				if ( $row['submittime'] > $contdata['endtime'] ) {
 					echo printresult('too-late', TRUE, TRUE);
 				} else {
-					echo printresult(@$row['judgehost'] ? '' : 'queued', TRUE, TRUE);
+					echo printresult($row['judgehost'] ? '' : 'queued', TRUE, TRUE);
 				}
 			} else {
 				echo '<a href="submission.php?id=' . $sid . '">' .
-					printresult(@$resulttable[$sid]['result']) . '</a>';
+					printresult($row['result']) . '</a>';
 			}
 		} else {
-			if ( ! @$resulttable[$sid]['result'] ||
-				 ( VERIFICATION_REQUIRED && ! @$resulttable[$sid]['verified'] ) ) {
+			if ( ! $row['result'] ||
+				 ( VERIFICATION_REQUIRED && ! $row['verified'] ) ) {
 				if ( $row['submittime'] > $contdata['endtime'] ) {
 					echo printresult('too-late');
 				} else {
@@ -115,15 +115,15 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 				}
 			} else {
 				echo '<a href="submission_details.php?id=' . $sid . '">';
-				echo printresult(@$resulttable[$sid]['result']) . '</a>';
+				echo printresult($row['result']) . '</a>';
 			}
 		}
 		echo "</td>";
-		if ( $isjury && isset($resulttable[$sid]['verified']) ) {
-			echo "<td>" . printyn(@$resulttable[$sid]['verified']) . "</td>";
+		if ( $isjury && isset($row['verified']) ) {
+			echo "<td>" . printyn($row['verified']) . "</td>";
 		}
 		if ( $isjury ) {
-			$judgehost = @$resulttable[$sid]['judgehost'];
+			$judgehost = $row['judgehost'];
 			if ( empty($judgehost) ) {
 				echo '<td></td>';
 			} else {
@@ -134,7 +134,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 		echo "</tr>\n";
 		
 		$subcnt++;
-		if ( @$resulttable[$sid]['result'] == 'correct' ) $corcnt++;
+		if ( $row['result'] == 'correct' ) $corcnt++;
 	}
 	echo "</tbody>\n</table>\n\n";
 
