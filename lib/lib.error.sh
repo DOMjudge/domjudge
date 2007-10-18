@@ -2,6 +2,10 @@
 #
 # $Id$
 
+# Default verbosity and loglevels:
+VERBOSE=$LOG_NOTICE
+LOGLEVEL=$LOG_DEBUG
+
 logmsg ()
 {
 	local msglevel stamp msg
