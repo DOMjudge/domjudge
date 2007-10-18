@@ -15,28 +15,34 @@ if ( empty($id) ) {
 	error("No ID passed for to mark as verified.");
 }
 
-$jdata = $DB->q('TUPLE SELECT j.*, s.* FROM judging j
-                 LEFT JOIN submission s USING (submitid)
-                 WHERE judgingid = %i', $id);
+$verifier = "";
+if ( ! empty($_POST['verifier_selected']) )
+	$verifier = $_POST['verifier_selected'];
+if ( ! empty($_POST['verifier_typed']) )
+	$verifier = $_POST['verifier_typed'];
+	
+$cnt = $DB->q('RETURNAFFECTED UPDATE judging
+			   SET verified = %i, verifier = %s WHERE judgingid = %i'
+			 , $val, $verifier, $id);
 
-if ( empty($jdata) ) {
+if ( $cnt == 0 ) {
 	error("Judging not found.");
+} else if ( $cnt > 1 ) {
+	error("Validated more than one judging.");
 }
 
-$verifier = "";
-if ( ! empty($_POST['verifier_selected']) ) $verifier = $_POST['verifier_selected'];
-if ( ! empty($_POST['verifier_typed'])    ) $verifier = $_POST['verifier_typed'];
-	
-$DB->q('UPDATE judging SET verified = %i, verifier = %s WHERE judgingid = %i',
-       $val, $verifier, $id);
-	
+$jdata = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid
+				 FROM judging j
+				 LEFT JOIN submission s USING (submitid)
+				 WHERE judgingid = %i', $id);
+
 if ( VERIFICATION_REQUIRED ) {
 	calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
 
 	// log to event table if successful (case of no verification
 	// required is handled in judge/judgedaemon.php)
 	if ( $jdata['result'] == 'correct' ) {
-	$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
+	$DB->q('INSERT INTO event (cid,teamid,langid,probid,submitid,description)
 	        VALUES(%i, %i, %s, %s, %i, "problem solved")',
 	       $jdata['cid'], $jdata['teamid'], $jdata['langid'],
 		   $jdata['probid'], $jdata['submitid']);
