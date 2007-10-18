@@ -84,6 +84,7 @@ if ( isset($data['color']) ) {
 		htmlspecialchars($data['color']) .
 		';">' . htmlspecialchars($data['color']) . "</td></tr>\n";
 }
+echo '<tr><td scope="row">Invisible:</td><td>' . printyn($data['invisible']) . "</td></tr>\n";
 
 
 echo "</table>\n\n";
