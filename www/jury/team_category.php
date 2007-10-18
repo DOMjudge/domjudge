@@ -49,6 +49,10 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 <a href="http://www.w3schools.com/css/css_colornames.asp" target="_blank"><small>(help)</small></a>
 </td></tr>
 
+<tr><td>Invisible:</td>
+<td><?=addRadioBox('data[0][invisible]', (!isset($row['invisible']) || $row['invisible']), 1)?> <label for="data_0__invisible_1">yes</label>
+<?=addRadioBox('data[0][invisible]', (isset($row['invisible']) && !$row['invisible']), 0)?> <label for="data_0__invisible_0">no</label></td></tr>
+
 </table>
 
 <?php
