@@ -18,4 +18,4 @@ $cid = getCurContest();
 echo (int) $DB->q('VALUE SELECT COUNT(*) FROM team_unread
                    LEFT JOIN clarification ON(mesgid=clarid)
                    WHERE type="clarification" AND teamid = %s
-                   AND clarification.cid = %i', $login, $cid);
+                   AND team_unread.cid = %i', $login, $cid);

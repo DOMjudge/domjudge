@@ -21,6 +21,7 @@ CREATE TABLE `clarification` (
   `body` text NOT NULL,
   `answered` tinyint(4) unsigned NOT NULL default '0',
   PRIMARY KEY  (`clarid`)
+  KEY `cid` (`cid`,`answered`,`submittime`)
 ) ENGINE=MyISAM COMMENT='Clarification requests by teams and responses by the jury';
 
 -- 
@@ -84,6 +85,7 @@ CREATE TABLE `judging` (
   `output_diff` text,
   `output_error` text,
   PRIMARY KEY  (`judgingid`)
+  KEY `submitid` (`submitid`)
 ) ENGINE=MyISAM COMMENT='Result of judging a submission';
 
 -- 
@@ -167,6 +169,7 @@ CREATE TABLE `submission` (
   `judgemark` varchar(255) default NULL,
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `judgemark` (`judgemark`)
+  KEY `cid` (`cid`,`teamid`)
 ) ENGINE=MyISAM COMMENT='All incoming submissions';
 
 -- 
@@ -186,6 +189,7 @@ CREATE TABLE `team` (
   `teampage_first_visited` datetime default NULL,
   PRIMARY KEY  (`login`),
   UNIQUE KEY `ipaddress` (`ipaddress`)
+  KEY `name` (`name`),
 ) ENGINE=MyISAM COMMENT='All teams participating in the contest';
 
 -- 
@@ -211,6 +215,7 @@ CREATE TABLE `team_category` (
   `color` varchar(25) default NULL,
   `invisible` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`categoryid`)
+  KEY `sortorder` (`sortorder`)
 ) ENGINE=MyISAM COMMENT='Categories for teams (e.g.: participants, observers, ...)';
 
 -- 
@@ -221,5 +226,5 @@ CREATE TABLE `team_unread` (
   `teamid` varchar(15) NOT NULL default '',
   `mesgid` mediumint(8) unsigned NOT NULL default 0,
   `type` enum('clarification','submission') NOT NULL default 'clarification',
-  PRIMARY KEY  (`teamid`,`mesgid`,`type`)
+  PRIMARY KEY  (`cid`,`teamid`,`type`,`mesgid`)
 ) ENGINE=MyISAM COMMENT='List of items a team has not viewed yet';
