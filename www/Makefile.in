@@ -1,0 +1,13 @@
+install-jury:
+	install -d @jurywww_path@
+	cp -a *.js *.css *.php images @jurywww_path@
+	cp -a public team jury @jurywww_path@
+
+clean:
+	rm -f Makefile configure.php
+	ln -s ../run-configure Makefile
+	-rm -f `find $(PWD) -name \*~`
+
+distclean:
+	rm -f Makefile
+

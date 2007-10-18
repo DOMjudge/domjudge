@@ -1,0 +1,9 @@
+<?
+
+// configure.php is generated from configure.php.in by ../configure
+
+define('DOMJUDGE_VERSION', '@DOMJUDGE_VERSION@');
+
+define('WWWROOT',     '@jurywww_path@');
+define('WWWLIB_PATH', '@jurylib_path@');
+define('WWWETC_PATH', '@juryconf_path@');

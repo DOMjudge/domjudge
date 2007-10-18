@@ -1,0 +1,42 @@
+# Main Makefile
+#
+# $Id: Makefile 1549 2007-07-15 20:16:38Z kink $
+
+default:
+	@echo "No default target"
+	@echo
+	@echo "Try:"
+	@echo " - make jury"
+	@echo " - make judgehost"
+	@echo " - make db"
+	@echo " - make submitclient"
+	@echo or
+	@echo " - make install-jury"
+	@echo " - make install-judgehost"
+	@echo " - make install-db"
+	@echo " - make install-submitclient"
+	@echo or
+	@echo " - make clean"
+	@echo " - make distclean"
+	@exit 1
+
+# MAIN TARGETS
+team: submitclient
+jury:
+install-jury: jury
+
+# List all targets that exist in subdirs too, and list in which subdirs they
+# are
+REC_TARGETS=submitclient jury install-jury
+submitclient: SUBDIRS=submit
+jury:         SUBDIRS=etc
+install-jury: SUBDIRS=www etc lib
+#
+
+# Global dependencies:
+#submitclient: config
+
+$(REC_TARGETS): %:
+	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
+
+.PHONY: jury team submit install-jury
