@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 2.1.2 - SVN
 -------------------
+ - Reduced verbose level in submitdaemon.
 
 Version 2.1.1 - 16 October 2007
 -------------------------------
