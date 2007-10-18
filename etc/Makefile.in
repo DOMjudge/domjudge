@@ -1,0 +1,15 @@
+jury: apache.conf
+
+apache.conf: apache.conf.in Makefile
+	cat apache.conf.in | \
+		sed '1i # Warning: this file is generated from apache.conf' | \
+		sed '1a # by make. Edit apache.conf.in instead.' | \
+		sed 's,@jurywww_path[@],@jurywww_path@,g'  | \
+		sed 's,@jury_hostname[@],@jury_hostname@,g' > \
+		apache.conf
+
+install-jury:
+	install -d @juryconf_path@
+	install apache.conf @juryconf_path@
+
+.PHONY: install-jury
