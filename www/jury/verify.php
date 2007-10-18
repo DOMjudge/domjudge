@@ -16,11 +16,9 @@ if ( empty($id) ) {
 }
 
 $verifier = "";
-if ( ! empty($_POST['verifier_selected']) )
-	$verifier = $_POST['verifier_selected'];
-if ( ! empty($_POST['verifier_typed']) )
-	$verifier = $_POST['verifier_typed'];
-	
+if ( ! empty($_POST['verifier_selected']) ) $verifier = $_POST['verifier_selected'];
+if ( ! empty($_POST['verifier_typed']) )    $verifier = $_POST['verifier_typed'];
+
 $cnt = $DB->q('RETURNAFFECTED UPDATE judging
 			   SET verified = %i, verifier = %s WHERE judgingid = %i'
 			 , $val, $verifier, $id);
@@ -32,9 +30,9 @@ if ( $cnt == 0 ) {
 }
 
 $jdata = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid
-				 FROM judging j
-				 LEFT JOIN submission s USING (submitid)
-				 WHERE judgingid = %i', $id);
+                 FROM judging j
+                 LEFT JOIN submission s USING (submitid)
+                 WHERE judgingid = %i', $id);
 
 if ( VERIFICATION_REQUIRED ) {
 	calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
@@ -45,7 +43,7 @@ if ( VERIFICATION_REQUIRED ) {
 	$DB->q('INSERT INTO event (cid,teamid,langid,probid,submitid,description)
 	        VALUES(%i, %i, %s, %s, %i, "problem solved")',
 	       $jdata['cid'], $jdata['teamid'], $jdata['langid'],
-		   $jdata['probid'], $jdata['submitid']);
+	       $jdata['probid'], $jdata['submitid']);
 	}
 }
 
