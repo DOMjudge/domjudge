@@ -25,7 +25,7 @@ ifneq ($(DOWNLOADCPAN), 1)
 	@echo "About to download $(CTANPATH)/$@. Press return to continue,"
 	@echo "or ctrl+c to abort and do so manually"
 	@echo
-	@read
+	@read _
 endif
 	@echo "Downloading LaTeX package '$*' from CTAN.org..." ; \
 	if which wget >/dev/null ; then \
