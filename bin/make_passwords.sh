@@ -57,8 +57,7 @@ DEF_PASSWD_PUBLIC="DOMJUDGE_PUBLIC_PASSWD"
 # only used internally.
 generate_passwd ()
 {
-	printf `head -c12 /dev/random | uuencode -m dummy | tail -n +2 | head -c16`
-	printf "\n";
+	head -c12 /dev/random | uuencode -m dummy | tail -n +2 | head -c16
 }
 
 # Function to interactively ask a password from the user. Password
