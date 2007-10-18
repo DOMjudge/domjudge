@@ -22,8 +22,9 @@ default: docs
 $(LATEXZIPFILES): %.zip:
 ifneq ($(DOWNLOADCPAN), 1)
 	@echo
-	@echo "About to download $(CTANPATH)/$@. Press return to continue,"
-	@echo "or ctrl+c to abort and do so manually"
+	@echo "About to download"
+	@echo  $(CTANPATH)/$@
+	@echo "Press return to continue, or Ctrl+C to abort and do so manually."
 	@echo
 	@read _
 endif
