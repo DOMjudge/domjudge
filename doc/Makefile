@@ -20,9 +20,6 @@ REC_TARGETS = docs clean distclean
 default: docs
 
 $(LATEXZIPFILES): %.zip:
-	@echo "About to download $(CTANPATH)/$@. Press return to continue,"
-	@echo "or ctrl+c to abort and do so manually"
-	@read
 	@echo "Downloading LaTeX package '$*' from CTAN.org..." ; \
 	if which wget >/dev/null ; then \
 		wget -N -nv -T 60 $(CTANPATH)/$@ ; \
