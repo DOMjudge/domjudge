@@ -16,12 +16,14 @@ if ( empty($id) ) {
 }
 
 $verifier = "";
-if ( ! empty($_POST['verifier_selected']) ) $verifier = $_POST['verifier_selected'];
-if ( ! empty($_POST['verifier_typed']) )    $verifier = $_POST['verifier_typed'];
+if ( ! empty($_POST['verifier_selected']) )
+	$verifier = $_POST['verifier_selected'];
+if ( ! empty($_POST['verifier_typed']) )
+	$verifier = $_POST['verifier_typed'];
 
 $cnt = $DB->q('RETURNAFFECTED UPDATE judging
-			   SET verified = %i, verifier = %s WHERE judgingid = %i'
-			 , $val, $verifier, $id);
+		   SET verified = %i, verifier = %s WHERE judgingid = %i',
+		   $val, $verifier, $id);
 
 if ( $cnt == 0 ) {
 	error("Judging not found.");
@@ -40,8 +42,9 @@ if ( VERIFICATION_REQUIRED ) {
 	// log to event table if successful (case of no verification
 	// required is handled in judge/judgedaemon.php)
 	if ( $jdata['result'] == 'correct' ) {
-	$DB->q('INSERT INTO event (cid,teamid,langid,probid,submitid,description)
-	        VALUES(%i, %i, %s, %s, %i, "problem solved")',
+	$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid,
+		description)
+	        VALUES (%i, %i, %s, %s, %i, "problem solved")',
 	       $jdata['cid'], $jdata['teamid'], $jdata['langid'],
 	       $jdata['probid'], $jdata['submitid']);
 	}
