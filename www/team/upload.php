@@ -11,6 +11,8 @@
 /* for easy parsing of the status by the commandline websubmit client */
 if ( isset($_REQUEST['noninteractive']) ) {
 	define("NONINTERACTIVE", true);
+} else {
+	define("NONINTERACTIVE", false);
 }
 
 require('init.php');
