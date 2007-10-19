@@ -1,3 +1,0 @@
-# this is some evil php function that ruins everything
-php_flag magic_quotes_gpc off
-php_flag magic_quotes_runtime off

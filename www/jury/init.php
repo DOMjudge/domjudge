@@ -10,7 +10,7 @@
 
 // Sanity check whether .htaccess basic authentication is configured correctly
 if (!$_SERVER['REMOTE_USER'] || $_SERVER['AUTH_TYPE'] != "Basic") {
-	die("Authentication not enabled, check .htaccess and AllowOverride");
+	die("Authentication not enabled, check webserver config");
 }
 
 require_once('../../etc/config.php');

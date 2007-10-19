@@ -2,11 +2,14 @@ DOMjudge Programming Contest Judging System
 
 Version 2.2.0 - SVN
 -------------------
- - Do not install domjudge straight in $HOME by default
- - Add sanity check in jury interface whether basic authentication is enabled
+ - Do not install domjudge straight in $HOME by default (Jeroen)
+ - [security] Add sanity check in jury interface whether basic authentication
+   is enabled, and lock down jury inferface also for non-GET/POST requests
+   (Jeroen)
  - Fix racecondition in team password check (Stijn)
  - Improved two queries related to the verification of judgings (Stijn)
- - Improved mysql query performance
+ - Improved mysql query performance (Jeroen & Peter)
+ - Move .htaccess config to apache config (Jeroen)
 
 Version 2.1.1 - SVN
 -------------------
