@@ -51,7 +51,7 @@ while ( TRUE ) {
 
 	$dir = opendir(INCOMINGDIR);
 	if ( $dir === FALSE ) {
-		system(BEEP_CMD." ".BEEP_ERROR." &");
+		beep(BEEP_ERROR);
 		error("Cannot read '" . INCOMINGDIR . "'");
 	}
 
@@ -78,18 +78,18 @@ while ( TRUE ) {
 
 		if ( $retval!=0 ) {
 			logmsg(LOG_WARNING,"error: submit_db returned exitcode $retval");
-			system(BEEP_CMD." ".BEEP_WARNING." &");
+			beep(BEEP_WARNING);
 
 			if ( ! rename($filefull,INCOMINGDIR . "/rejected-" . $file) ) {
-				system(BEEP_CMD." ".BEEP_ERROR." &");
+				beep(BEEP_ERROR);
 				error("could not rename '$file'");
 			}
 		} else {
 			logmsg(LOG_INFO,"added submission to database");
-			system(BEEP_CMD." ".BEEP_SUBMIT." &");
+			beep(BEEP_SUBMIT);
 			
 			if ( ! unlink($filefull) ) {
-				system(BEEP_CMD." ".BEEP_ERROR." &");
+				beep(BEEP_ERROR);
 				error("could not delete '$file'");
 			}
 		}

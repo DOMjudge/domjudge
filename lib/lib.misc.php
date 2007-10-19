@@ -144,6 +144,14 @@ function now()
 }
 
 /**
+ * Wrapper function to call beep with one of the predefined settings.
+ */
+function beep($beeptype)
+{
+	system(BEEP_CMD . " " . $beeptype . " &");
+}
+
+/**
  * Create a unique file from a template string.
  *
  * Returns a full path to the filename or FALSE on failure.

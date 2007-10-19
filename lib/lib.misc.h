@@ -17,6 +17,9 @@ extern "C" {
 /* Maximum arguments to execute() */
 #define MAXARGS 10
 
+/* Wrapper to call beep with one of the predefined settings. */
+#define beep(BEEPTYPE) system(BEEP_CMD" "BEEPTYPE" &")
+
 char *allocstr(char *, ...);
 /* Create a c-string by allocating memory for it and writing to it,
  * using printf type format characters.

@@ -512,7 +512,7 @@ void sigchld_handler(int sig)
 		   due to childs from 'system' call */
 		if ( errno==ECHILD ) return;
 		warning(errno,"waiting for child, pid = %d, exitcode = %d",pid,exitcode);
-		system(SYSTEM_ROOT"/bin/beep "BEEP_ERROR" &");
+		beep(BEEP_ERROR);
 		return;
 	}
 	
@@ -521,16 +521,16 @@ void sigchld_handler(int sig)
 	/* Audibly report submission status with beeps */
 	switch ( exitcode ) {
 	case SUCCESS_EXITCODE:
-		system(BEEP_CMD" "BEEP_SUBMIT" &");
+		beep(BEEP_SUBMIT);
 		break;
 
 	case WARNING_EXITCODE:
-		system(BEEP_CMD" "BEEP_WARNING" &");
+		beep(BEEP_WARNING);
 		break;
 
 	case FAILURE_EXITCODE:
 	default:
-		system(BEEP_CMD" "BEEP_ERROR" &");
+		beep(BEEP_ERROR);
 	}
 }
 

@@ -179,7 +179,7 @@ while ( TRUE ) {
 
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {
-		system(BEEP_CMD." ".BEEP_ERROR." &");
+		beep(BEEP_ERROR);
 		error("s$row[submitid] Unknown exitcode from test_solution.sh: $retval");
 	}
 	$result = $EXITCODES[$retval];
@@ -214,9 +214,9 @@ while ( TRUE ) {
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
 	if ( $result == 'correct' ) {
-		system(BEEP_CMD." ".BEEP_ACCEPT." &");
+		beep(BEEP_ACCEPT);
 	} else {
-		system(BEEP_CMD." ".BEEP_REJECT." &");
+		beep(BEEP_REJECT);
 	}
 
 	// restart the judging loop
