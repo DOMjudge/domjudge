@@ -36,4 +36,3 @@ $DBLOGIN = array (
  * privilege.
  */
 $DOMJUDGE_ADMINS = array ('domjudge_jury');
-

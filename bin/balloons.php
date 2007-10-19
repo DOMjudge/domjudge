@@ -9,8 +9,7 @@
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
-if ( isset($_SERVER['REMOTE_ADDR']) )
-	die ("Commandline use only");
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
 require ('../etc/config.php');
 
@@ -28,7 +27,7 @@ $waittime = 5;
  */
 function notification_text($team, $problem, $probs_solved, $probs_data) {
 	global $cdata;
-
+	
 	$ret = 
 		"Notification of a problem solved:\n".
 		"\n".
@@ -38,7 +37,7 @@ function notification_text($team, $problem, $probs_solved, $probs_data) {
 		(empty($probs_data[$problem]['color']) ? "" : " (colour: ".$probs_data[$problem]['color'].")" ) . "\n\n" .
 		"Current balloon status:\n";
 
-	foreach ($probs_solved as $probid) {
+	foreach($probs_solved as $probid) {
 		$ret .= " - " . $probid .": " . $probs_data[$probid]['name'] .
 			(empty($probs_data[$probid]['color']) ? "" : " (colour: ".$probs_data[$probid]['color'].")" )."\n";
 	}
@@ -60,6 +59,7 @@ logmsg(LOG_NOTICE, "Balloon notifications started [DOMjudge/".DOMJUDGE_VERSION."
 
 // Constantly check database for new correct submissions
 while ( TRUE ) {
+
 	$newcid = getCurContest();
 	$oldcid = $cid;
 	if ( $oldcid !== $newcid ) {
@@ -75,7 +75,7 @@ while ( TRUE ) {
 		$infreeze = TRUE;
 		logmsg(LOG_NOTICE, "Scoreboard is frozen since " . $cdata['lastscoreupdate']);
 	}
-
+	
 	do {
 		$res = $DB->q('SELECT s.*,t.name as teamname,t.room
 		               FROM scoreboard_jury s
@@ -92,6 +92,7 @@ while ( TRUE ) {
 				   " by team ".$row['teamid']);
 
 			if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
+			
 				$probs_solved = $DB->q('COLUMN SELECT probid FROM scoreboard_jury
 				                        WHERE cid = %i AND teamid = %s AND is_correct = 1',
 				                       $cid, $row['teamid']);
@@ -104,10 +105,9 @@ while ( TRUE ) {
 				logmsg(LOG_DEBUG,"Running command: '".BALLOON_CMD."'");
 				
 				$handle = popen(BALLOON_CMD, 'w');
-				if ( ! $handle )
-					error("Could not run command '".BALLOON_CMD."'");
+				if ( ! $handle ) error("Could not run command '".BALLOON_CMD."'");
 				
-				fwrite($handle, notification_text($team, $row['probid'], $probs_solved, $probs_data));
+				fwrite($handle,notification_text($team,$row['probid'],$probs_solved, $probs_data));
 				if ( ($exitcode = pclose($handle))!=0 ) {
 					warning("Notification command exited with exitcode $exitcode");
 				}
@@ -117,8 +117,8 @@ while ( TRUE ) {
 			        WHERE cid = %i AND teamid = %s AND probid = %s',
 				   $row['cid'], $row['teamid'], $row['probid']);
 		}
-	} while ( $res->count() != 0 );
+		
+	} while ( $res->count()!=0 );
 
 	sleep($waittime);
 }
-

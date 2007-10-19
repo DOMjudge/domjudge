@@ -19,12 +19,12 @@ error_reporting(E_ALL);
 
 /** Possible exitcodes from testsol and their meaning */
 $EXITCODES = array (
-	0	=> 'correct',
-	101	=> 'compiler-error',
-	102	=> 'timelimit',
-	103	=> 'run-error',
-	104	=> 'no-output',
-	105	=> 'wrong-answer'
+	0	=>	'correct',
+	101	=>	'compiler-error',
+	102	=>	'timelimit',
+	103	=>	'run-error',
+	104	=>	'no-output',
+	105	=>	'wrong-answer'
 	);
 
 /** Include MySQL database passwords from a separate file */

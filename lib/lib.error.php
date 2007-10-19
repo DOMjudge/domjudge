@@ -54,16 +54,14 @@ function logmsg($msglevel, $string) {
 		": ";
 	$msg = $string . "\n";
 	
-	if ( $msglevel <= $verbose ) {
+	if ( $msglevel <= $verbose  ) {
 		// if this is the webinterface, print it to stdout, else to stderr
 		if ( IS_WEB ) {
 			echo "<fieldset class=\"error\"><legend>Error</legend>\n" .
 				nl2br(htmlspecialchars($stamp . $msg)) . "</fieldset>\n";
 			// Add strings for non-interactive parsing:
-			if ( $msglevel == LOG_ERR )
-				echo "\n<!-- @@@ERROR-$string@@@ -->\n";
-			if ( $msglevel == LOG_WARNING )
-				echo "\n<!-- @@@WARNING-$string@@@ -->\n";
+			if ( $msglevel == LOG_ERR     ) echo "\n<!-- @@@ERROR-$string@@@ -->\n";
+			if ( $msglevel == LOG_WARNING ) echo "\n<!-- @@@WARNING-$string@@@ -->\n";
 		} else {
 			fwrite(STDERR, $stamp . $msg);
 			fflush(STDERR);
@@ -94,4 +92,3 @@ function error($string) {
 function warning($string) {
 	logmsg(LOG_WARNING, "warning: $string");
 }
-
