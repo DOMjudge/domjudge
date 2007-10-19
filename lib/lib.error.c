@@ -24,7 +24,7 @@
  * truncated in case the supplied buffer is too small. The result is
  * always NUL-terminated.
  */
-#if defined(__GLIBC__) && __GLIBC__==2 && __GLIBC_MINOR__<=3
+#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ <= 3
 #define GLIB_STRERROR 1
 #else
 /* In glibc >= 2.4 we have the POSIX version of 'strerror_r' when defining: */
@@ -51,27 +51,33 @@ void vlogmsg(int msglevel, char *mesg, va_list ap)
     time_t currtime;
     char timestring[128];
 	char *buffer;
-	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
+	int mesglen = (mesg == NULL ? 0 : strlen(mesg));
 	int bufferlen;
 
 	/* Try to open logfile if it is defined */
 #ifdef LOGFILE
-	if ( stdlog==NULL ) stdlog = fopen(LOGFILE,"a");
+	if ( stdlog == NULL )
+		stdlog = fopen(LOGFILE, "a");
 #endif
 	
-	currtime  = time(NULL);
+	currtime = time(NULL);
 	strftime(timestring, sizeof(timestring), "%b %d %H:%M:%S", localtime(&currtime));
 
-	bufferlen = strlen(timestring)+strlen(progname)+mesglen+20;
+	bufferlen = strlen(timestring) + strlen(progname) + mesglen + 20;
 	buffer = (char *)malloc(bufferlen);
-	if ( buffer==NULL ) abort();
+	if ( buffer == NULL )
+		abort();
 
 	snprintf(buffer, bufferlen, "[%s] %s[%d]: %s\n",
 	         timestring, progname, getpid(), mesg);
 	
-	if ( msglevel<=verbose  ) { vfprintf(stderr, buffer, ap); fflush(stderr); }
-	if ( msglevel<=loglevel &&
-	     stdlog!=NULL       ) { vfprintf(stdlog, buffer, ap); fflush(stdlog); }
+	if ( msglevel <= verbose  ) {
+		vfprintf(stderr, buffer, ap); fflush(stderr);
+	}
+
+	if ( msglevel <= loglevel && stdlog != NULL ) {
+		vfprintf(stdlog, buffer, ap); fflush(stdlog);
+	}
 
 	free(buffer);
 }
@@ -98,39 +104,41 @@ char *errorstring(char *type, int errnum, char *mesg)
 	int tmplen;
 #endif
 
-	if ( type==NULL ) {
+	if ( type == NULL ) {
 		type = strdup(ERRSTR);
-		if ( type==NULL ) abort();
+		if ( type == NULL )
+			abort();
 	}
 
 	/* 256 > maxlength strerror() */
-	buffersize = strlen(type) + (mesg==NULL ? 0 : strlen(mesg)) + 256;
+	buffersize = strlen(type) + (mesg == NULL ? 0 : strlen(mesg)) + 256;
 
 	endptr = buffer = (char *) malloc(buffersize);
-	if ( buffer==NULL ) abort();
+	if ( buffer == NULL ) abort();
 
-	sprintf(buffer,type);
-	endptr = strchr(endptr,0);
+	sprintf(buffer, type);
+	endptr = strchr(endptr, 0);
 	
-	if ( mesg!=NULL ) {
-		snprintf(endptr, buffersize-strlen(buffer), ": %s", mesg);
-		endptr = strchr(endptr,0);
-	}		
-	if ( errnum!=0 ) {
-		snprintf(endptr, buffersize-strlen(buffer), ": ");
-		endptr = strchr(endptr,0);
+	if ( mesg != NULL ) {
+		snprintf(endptr, buffersize - strlen(buffer), ": %s", mesg);
+		endptr = strchr(endptr, 0);
+	}
+
+	if ( errnum != 0 ) {
+		snprintf(endptr, buffersize - strlen(buffer), ": ");
+		endptr = strchr(endptr, 0);
 #ifdef GLIB_STRERROR
-		tmplen = buffersize-strlen(buffer);
+		tmplen = buffersize - strlen(buffer);
 		tmpstr = strerror_r(errnum, endptr, tmplen);
 		strncat(endptr, tmpstr, tmplen);
 #else
-		strerror_r(errnum, endptr, buffersize-strlen(buffer));
+		strerror_r(errnum, endptr, buffersize - strlen(buffer));
 #endif
-		endptr = strchr(endptr,0);
+		endptr = strchr(endptr, 0);
 	}
-	if ( mesg==NULL && errnum==0 ) {
-		sprintf(endptr,": unknown error");
-		endptr = strchr(endptr,0);
+	if ( mesg == NULL && errnum == 0 ) {
+		sprintf(endptr, ": unknown error");
+		endptr = strchr(endptr, 0);
 	}
 
 	return buffer;
@@ -198,3 +206,4 @@ void warning(int errnum, char *mesg, ...)
 
 	va_end(ap);
 }
+

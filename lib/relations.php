@@ -97,10 +97,12 @@ function fk_check ($keyfield, $value) {
 			if ( $foreign == $keyfield ) {
 				$c = $DB->q("VALUE SELECT count(*) FROM $table WHERE $key = %s",
 					$value);
-				if ( $c > 0 ) return $table;
+				if ( $c > 0 )
+					return $table;
 			}
 		}
 	}
 
 	return null;
 }
+
