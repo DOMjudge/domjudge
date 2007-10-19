@@ -43,25 +43,13 @@ function getFileContents($filename, $sizelimit = true) {
 function getCurContest($fulldata = FALSE) {
 
 	global $DB;
-	$now = $DB->q('SELECT * FROM contest
-	               WHERE starttime <= NOW() AND endtime >= NOW()');
-	
-	if ( $now->count() == 1 ) {
-		$row = $now->next();
-		$retval = ( $fulldata ? $row : $row['cid'] );
-	}
-	if ( $now->count() == 0 ) {
-		$prev = $DB->q('SELECT * FROM contest
-		                WHERE endtime <= NOW() ORDER BY endtime DESC LIMIT 1');
-		if ( $prev->count() == 0 ) return FALSE;
-		$row = $prev->next();
-		$retval = ( $fulldata ? $row : $row['cid'] );
-	}
-	if ( $now->count() > 1 ) {
-		error("Contests table contains overlapping contests");
-	}
-	
-	return $retval;
+	$now = $DB->q('MAYBETUPLE SELECT * FROM contest
+	               WHERE starttime <= NOW() ORDER BY starttime DESC LIMIT 1');
+
+	if ($now == NULL)
+		return FALSE;
+	else
+		return ( $fulldata ? $now : $now['cid'] );
 }
 
 /**
