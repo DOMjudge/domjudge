@@ -10,6 +10,7 @@ Version 2.2.0 - SVN
  - Improved two queries related to the verification of judgings (Stijn)
  - Improved mysql query performance (Jeroen & Peter)
  - Move .htaccess config to apache config (Jeroen)
+ - Fix 'NONINTERACTIVE' undefined (Closes: #1814594, thanks Maks Verver)
 
 Version 2.1.1 - SVN
 -------------------
