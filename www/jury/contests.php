@@ -15,7 +15,7 @@ $curcont = getCurContest();
 
 if ( isset($_POST['unfreeze']) ) {
 	$docid = array_pop(array_keys($_POST['unfreeze']));
-	if ( $docid != $curcont['cid'] ) {
+	if ( $docid != $curcont ) {
 		error("Can only unfreeze for current contest");
 	}
 	$DB->q('UPDATE contest SET unfreezetime = %s WHERE cid = %i', now(), $docid);
