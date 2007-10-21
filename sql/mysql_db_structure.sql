@@ -158,7 +158,7 @@ CREATE TABLE `scoreboard_public` (
 
 CREATE TABLE `submission` (
   `submitid` mediumint(10) unsigned NOT NULL auto_increment,
-  `cid` mediumint(2) NOT NULL default '0',
+  `cid` mediumint(2) unsigned NOT NULL default '0',
   `teamid` varchar(15) NOT NULL default '',
   `probid` varchar(8) NOT NULL default '',
   `langid` varchar(8) NOT NULL default '',
@@ -224,9 +224,9 @@ CREATE TABLE `team_category` (
 -- 
 
 CREATE TABLE `team_unread` (
-  `cid` mediumint(2) NOT NULL default '0',
+  `cid` mediumint(2) unsigned NOT NULL default '0',
   `teamid` varchar(15) NOT NULL default '',
-  `mesgid` mediumint(8) unsigned NOT NULL default 0,
+  `mesgid` mediumint(8) unsigned NOT NULL default '0',
   `type` enum('clarification','submission') NOT NULL default 'clarification',
   PRIMARY KEY  (`cid`,`teamid`,`type`,`mesgid`)
 ) ENGINE=MyISAM COMMENT='List of items a team has not viewed yet';
