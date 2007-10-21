@@ -25,8 +25,7 @@ if ( ! ENABLE_WEBSUBMIT_SERVER ) {
 }
 
 $waittime = 1;
-
-$cid = getCurContest();
+$cid = null;
 
 logmsg(LOG_NOTICE, "Websubmit server started [DOMjudge/".DOMJUDGE_VERSION."]");
 

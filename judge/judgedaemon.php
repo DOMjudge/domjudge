@@ -29,8 +29,6 @@ if ($retval != 1) {
 	error("Still some processes by ".RUNUSER." found, aborting");
 }
 
-$cid = getCurContest();
-
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
 // Retrieve hostname and check database for judgehost entry
@@ -46,6 +44,7 @@ if ( $retval != 0 ) error("Could not create $tempdirpath");
 
 $waiting = FALSE;
 $active = TRUE;
+$cid = null;
 
 // Constantly check database for unjudged submissions
 while ( TRUE ) {

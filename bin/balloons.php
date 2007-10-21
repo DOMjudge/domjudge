@@ -50,9 +50,7 @@ function notification_text($team, $problem, $probs_solved, $probs_data) {
 	return $ret;
 }
 
-$cid = getCurContest();
-$cdata = getCurContest(TRUE);
-
+$cid = null;
 $infreeze = FALSE;
 
 logmsg(LOG_NOTICE, "Balloon notifications started [DOMjudge/".DOMJUDGE_VERSION."]");
@@ -60,14 +58,15 @@ logmsg(LOG_NOTICE, "Balloon notifications started [DOMjudge/".DOMJUDGE_VERSION."
 // Constantly check database for new correct submissions
 while ( TRUE ) {
 
-	$newcid = getCurContest();
+	$newcdata = getCurContest(TRUE);
+	$newcid = $newcdata['cid'];
 	$oldcid = $cid;
 	if ( $oldcid !== $newcid ) {
 		logmsg(LOG_NOTICE, "Contest has changed from " .
 		       (isset($oldcid) ? "c$oldcid" : "none" ) . " to " .
 		       (isset($newcid) ? "c$newcid" : "none" ) );
 		$cid = $newcid;
-		$cdata = getCurContest(TRUE);
+		$cdata = $newcdata;
 	}
 
 	if ( isset($cdata['lastscoreupdate']) && ! $infreeze &&
