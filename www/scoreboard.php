@@ -331,7 +331,8 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 			echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
 				          $cat['color'] . ';"' : '') . '>' .
 				'<td align="center" class="scoretn">' .
-				jurylink(null,htmlspecialchars($cat['name']),$isjury) .	"</td></tr>\n";
+				jurylink('team_category.php?id=' . urlencode($cat['categoryid']),
+					htmlspecialchars($cat['name']),$isjury) .	"</td></tr>\n";
 		}
 		echo "</tbody>\n</table>\n\n";
 	}
