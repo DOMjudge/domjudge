@@ -3,7 +3,7 @@
  * Tool to coordinate the handing out of balloons to teams that solved
  * a problem. Similar to the balloons-daemon, but web-based.
  *
- * $Id: checkconfig.php 1802 2007-10-21 15:45:16Z kink $
+ * $Id$
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
