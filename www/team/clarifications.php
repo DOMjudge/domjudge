@@ -32,7 +32,7 @@ $requests = $DB->q('SELECT * FROM clarification
 
 $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
                           LEFT JOIN team_unread u ON
-                          (c.cid=u.cid AND c.clarid=u.mesgid AND u.type="clarification" AND u.teamid = %s)
+                          (c.clarid=u.mesgid AND u.type="clarification" AND u.teamid = %s)
                           WHERE c.cid = %i AND c.sender IS NULL
                           AND ( c.recipient IS NULL OR c.recipient = %s )
                           ORDER BY c.submittime DESC, c.clarid DESC',

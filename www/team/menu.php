@@ -4,7 +4,7 @@
 $unread_clarifications = (int) $DB->q('VALUE SELECT COUNT(*) FROM team_unread
 		LEFT JOIN clarification ON(mesgid=clarid)
 		WHERE type="clarification" AND teamid = %s
-		AND team_unread.cid = %i', $login, $cid);
+		AND cid = %i', $login, $cid);
 
 echo "<div id=\"menutop\">\n";
 
