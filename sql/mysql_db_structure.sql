@@ -20,7 +20,7 @@ CREATE TABLE `clarification` (
   `recipient` varchar(15) default NULL,
   `body` text NOT NULL,
   `answered` tinyint(4) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`clarid`)
+  PRIMARY KEY  (`clarid`),
   KEY `cid` (`cid`,`answered`,`submittime`)
 ) ENGINE=MyISAM COMMENT='Clarification requests by teams and responses by the jury';
 
@@ -84,7 +84,7 @@ CREATE TABLE `judging` (
   `output_run` text,
   `output_diff` text,
   `output_error` text,
-  PRIMARY KEY  (`judgingid`)
+  PRIMARY KEY  (`judgingid`),
   KEY `submitid` (`submitid`)
 ) ENGINE=MyISAM COMMENT='Result of judging a submission';
 
@@ -189,8 +189,8 @@ CREATE TABLE `team` (
   `comments` text,
   `teampage_first_visited` datetime default NULL,
   PRIMARY KEY  (`login`),
-  UNIQUE KEY `ipaddress` (`ipaddress`)
-  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `ipaddress` (`ipaddress`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM COMMENT='All teams participating in the contest';
 
 -- 
@@ -215,7 +215,7 @@ CREATE TABLE `team_category` (
   `sortorder` tinyint(1) unsigned NOT NULL default '0',
   `color` varchar(25) default NULL,
   `invisible` tinyint(1) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`categoryid`)
+  PRIMARY KEY  (`categoryid`),
   KEY `sortorder` (`sortorder`)
 ) ENGINE=MyISAM COMMENT='Categories for teams (e.g.: participants, observers, ...)';
 
@@ -224,6 +224,7 @@ CREATE TABLE `team_category` (
 -- 
 
 CREATE TABLE `team_unread` (
+  `cid` mediumint(2) NOT NULL default '0',
   `teamid` varchar(15) NOT NULL default '',
   `mesgid` mediumint(8) unsigned NOT NULL default 0,
   `type` enum('clarification','submission') NOT NULL default 'clarification',
