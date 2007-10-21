@@ -1264,10 +1264,14 @@ DOMjudge can help in this process: a balloons notification daemon is
 available that will notify the runners when a new balloon needs to be
 handed out.
 
-Use the BALLOON_CMD option to define how notifications are sent.
-Examples are to mail to a specific mailbox or to send prints to a
-printer. When configured, start <tt>bin/balloons.php</tt> and
-notification will start.
+Alternatively you can use a web based tool in the jury interface,
+reachable from the main page, where each balloon has to be checked off
+by the person handing it out.
+
+For the daemon, use the BALLOON_CMD option to define how notifications
+are sent. Examples are to mail to a specific mailbox or to send
+prints to a printer. When configured, start <tt>bin/balloons.php</tt>
+and notification will start.
 
 Notifications will continue even after the scoreboard is frozen,
 although a warning is printed on the notification. Stop the balloons

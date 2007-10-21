@@ -2,7 +2,9 @@
 <?php
 /**
  * Notify contest crew when there is a new, correct submission (for
- * which a balloon has to be handed out).
+ * which a balloon has to be handed out). Alternatively there's also
+ * a web based tool in the jury interface. This daemon and that tool
+ * cannot be used at the same time.
  *
  * $Id$
  *
