@@ -189,8 +189,8 @@ CREATE TABLE `team` (
   `comments` text,
   `teampage_first_visited` datetime default NULL,
   PRIMARY KEY  (`login`),
-  UNIQUE KEY `ipaddress` (`ipaddress`),
-  UNIQUE KEY `name` (`name`)
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `ipaddress` (`ipaddress`)
 ) ENGINE=MyISAM COMMENT='All teams participating in the contest';
 
 -- 
