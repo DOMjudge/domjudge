@@ -21,6 +21,7 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 
 <h3>Overviews:</h3>
 <ul>
+<li><a href="balloons.php">Balloon Status</a></li>
 <li><a href="clarifications.php">Clarifications</a></li>
 <li><a href="contests.php">Contests</a></li>
 <li><a href="judgehosts.php">Judgehosts</a></li>
@@ -36,9 +37,12 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <h3>Documentation:</h3>
 
 <ul>
-<li><a href="doc/judge/judge-manual.html">Judge manual</a> (also <a href="doc/judge/judge-manual.pdf">PDF</a>)</li>
-<li><a href="doc/admin/admin-manual.html">Administrator manual</a> (also <a href="doc/admin/admin-manual.pdf">PDF</a>)</li>
-<li><a href="doc/team/team-manual.pdf">Team manual</a> (PDF only)</li>
+<li><a href="doc/judge/judge-manual.html">Judge manual</a>
+	(also <a href="doc/judge/judge-manual.pdf">PDF</a>)</li>
+<li><a href="doc/admin/admin-manual.html">Administrator manual</a>
+	(also <a href="doc/admin/admin-manual.pdf">PDF</a>)</li>
+<li><a href="doc/team/team-manual.pdf">Team manual</a>
+	(PDF only)</li>
 </ul>
 
 <?php if ( IS_ADMIN ): ?>
