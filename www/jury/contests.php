@@ -39,17 +39,17 @@ if( count($res) == 0 ) {
 			($row['cid'] === $cid ? ' class="highlight"':'') . ">" .
 			"<td align=\"right\"><a href=\"contest.php?id=" . urlencode($row['cid']) .
 			"\">c" . (int)$row['cid'] . "</a></td>\n" .
-			"<td title=\"" . htmlentities($row['starttime']) . "\">" .
+			"<td title=\"" . htmlspecialchars($row['starttime']) . "\">" .
 				printtime($row['starttime'])."</td>\n".
-			"<td title=\"".htmlentities($row['endtime']) . "\">" .
+			"<td title=\"".htmlspecialchars($row['endtime']) . "\">" .
 				printtime($row['endtime'])."</td>\n".
-			"<td title=\"".htmlentities(@$row['lastscoreupdate']) . "\">" .
+			"<td title=\"".htmlspecialchars(@$row['lastscoreupdate']) . "\">" .
 			( isset($row['lastscoreupdate']) ?
 			  printtime($row['lastscoreupdate']) : '-' ) . "</td>\n" .
-			"<td title=\"".htmlentities(@$row['unfreezetime']) . "\">" .
+			"<td title=\"".htmlspecialchars(@$row['unfreezetime']) . "\">" .
 			( isset($row['unfreezetime']) ?
 			  printtime($row['unfreezetime']) : '-' ) . "</td>\n" .
-			"<td>" . htmlentities($row['contestname']) . "</td>\n";
+			"<td>" . htmlspecialchars($row['contestname']) . "</td>\n";
 		if ( IS_ADMIN ) {
 			echo "<td>" . 
 				editLink('contest', $row['cid']) . " " .

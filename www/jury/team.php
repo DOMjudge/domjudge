@@ -98,13 +98,13 @@ $row = $DB->q('TUPLE SELECT t.*, c.name AS catname, a.name AS affname FROM team 
                WHERE login = %s', $id);
 
 
-echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
+echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 
 ?>
 
 <table>
 <tr><td scope="row">Login:     </td><td class="teamid"><?=$row['login']?></td></tr>
-<tr><td scope="row">Name:      </td><td><?=htmlentities($row['name'])?></td></tr>
+<tr><td scope="row">Name:      </td><td><?=htmlspecialchars($row['name'])?></td></tr>
 <tr><td scope="row">Has passwd:</td><td><?=(isset($row['passwd']) ? 'yes':'no')?>
 <?php if ( IS_ADMIN ): ?>
 	<a href="genpasswds.php?forteam=<?=$id?>"><img src="../images/edit.png"
@@ -112,25 +112,25 @@ echo "<h1>Team ".htmlentities($row['name'])."</h1>\n\n";
 <?php endif; ?>
 	</td></tr>
 <tr><td scope="row">Category:  </td><td><?=(int)$row['categoryid'].
-	' - '.htmlentities($row['catname'])?></td></tr>
+	' - '.htmlspecialchars($row['catname'])?></td></tr>
 <?php if (!empty($row['members'])): ?>
 <tr><td valign="top" scope="row">Members:   </td><td><?=
-	nl2br(htmlentities($row['members']))?></td></tr>
+	nl2br(htmlspecialchars($row['members']))?></td></tr>
 <?php endif; ?>
 <?php if (!empty($row['affilid'])): ?>
 <tr><td scope="row">Affiliation:</td><td><a href="team_affiliation.php?id=<?=
 	urlencode($row['affilid']) . '">' .
-	htmlentities($row['affilid'] . ' - ' .
+	htmlspecialchars($row['affilid'] . ' - ' .
 	$row['affname'])?></a></td></tr>
 <?php endif; ?>
 <tr><td scope="row">Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
 	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):'-'?></td></tr>
 <?php if (!empty($row['room'])): ?>
-<tr><td scope="row">Room:</td><td><?=htmlentities($row['room'])?></td></tr>
+<tr><td scope="row">Room:</td><td><?=htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>
 <?php if (!empty($row['comments'])): ?>
 <tr><td valign="top" scope="row">Comments:</td><td><?=
-	nl2br(htmlentities($row['comments']))?></td></tr>
+	nl2br(htmlspecialchars($row['comments']))?></td></tr>
 <?php endif; ?>
 </table>
 

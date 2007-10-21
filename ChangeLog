@@ -11,6 +11,7 @@ Version 2.2.0 - SVN
  - Move .htaccess config to apache config (Jeroen)
  - Fix 'NONINTERACTIVE' undefined (Closes: #1814594, thanks Maks Verver)
  - Moved beep system call to separate function in lib.misc.{c,php}.
+ - Switch to UTF-8 for output (Thijs)
 
 Version 2.1.1 - SVN
 -------------------

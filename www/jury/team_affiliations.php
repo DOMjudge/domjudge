@@ -34,7 +34,7 @@ if( $res->count() == 0 ) {
 			htmlspecialchars($row['affilid']).
 			'</a></td><td><a href="team_affiliation.php?id=' .
 			urlencode($row['affilid']) . '">' .
-			htmlentities($row['name']) .
+			htmlspecialchars($row['name']) .
 			'</a></td><td align="center">' .
 			( is_readable($affillogo) ? '<img src="' . $affillogo .
 			  '" alt="' . htmlspecialchars($row['name']) . '" />' : '' ) .

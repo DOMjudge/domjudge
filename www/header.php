@@ -14,7 +14,7 @@ if ( isset($refresh) ) {
 	header('Refresh: ' . $refresh);
 }
 
-echo '<?xml version="1.0" encoding="iso-8859-1" ?>' . "\n";
+echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
 
 if(!isset($menu)) {
 	$menu = true;
@@ -22,7 +22,7 @@ if(!isset($menu)) {
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 	<!-- DOMjudge version <?=DOMJUDGE_VERSION?> -->
 <title><?=$title?></title>

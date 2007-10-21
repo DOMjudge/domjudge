@@ -45,17 +45,17 @@ $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime
 <tr><td valign="top">
 <table>
 <caption>Submission</caption>
-<tr><td scope="row">Contest:</td><td><?=htmlentities($submdata['contestname'])?></td></tr>
+<tr><td scope="row">Contest:</td><td><?=htmlspecialchars($submdata['contestname'])?></td></tr>
 <tr><td scope="row">Team:</td><td>
 	<a href="team.php?id=<?=urlencode($submdata['teamid'])?>">
 	<span class="teamid"><?=htmlspecialchars($submdata['teamid'])?></span>: 
-	<?=htmlentities($submdata['teamname'])?></a></td></tr>
+	<?=htmlspecialchars($submdata['teamname'])?></a></td></tr>
 <tr><td scope="row">Problem:</td><td>
 	<a href="problem.php?id=<?=$submdata['probid']?>">
-	<?=htmlentities($submdata['probid'].": ".$submdata['probname'])?></a></td></tr>
+	<?=htmlspecialchars($submdata['probid'].": ".$submdata['probname'])?></a></td></tr>
 <tr><td scope="row">Language:</td><td>
 	<a href="language.php?id=<?=$submdata['langid']?>">
-	<?=htmlentities($submdata['langname'])?></a></td></tr>
+	<?=htmlspecialchars($submdata['langname'])?></a></td></tr>
 <tr><td scope="row">Submittime:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
 <tr><td scope="row">Source:</td><td class="filename">
 	<a href="show_source.php?id=<?=$id?>">
@@ -141,7 +141,7 @@ if ( isset($jid) )  {
 		echo "<p>Verified: " .
 			"<strong>" . printyn($jud['verified']) . "</strong>";
 		if ( $jud['verified'] && ! empty($jud['verifier']) ) {
-			echo ", by " . htmlentities($jud['verifier']);
+			echo ", by " . htmlspecialchars($jud['verifier']);
 		}
 
 		if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {

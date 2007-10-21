@@ -19,7 +19,7 @@ echo "<div id=\"teamscoresummary\">\n";
 putTeamRow($cdata, $login);
 echo "</div>\n";
 
-echo "<h1>Clarifications team " . htmlentities($name) ."</h1>\n\n";
+echo "<h1>Clarifications team " . htmlspecialchars($name) ."</h1>\n\n";
 
 echo "<p><a href=\"clarification.php\">Request Clarification</a></p>\n";
 

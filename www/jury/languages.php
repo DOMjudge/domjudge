@@ -32,7 +32,7 @@ if( $res->count() == 0 ) {
 			"><td><a href=\"language.php?id=".urlencode($row['langid'])."\">".
 				htmlspecialchars($row['langid'])."</a>".
 			"</td><td><a href=\"language.php?id=".urlencode($row['langid'])."\">".
-				htmlentities($row['name'])."</a>".
+				htmlspecialchars($row['name'])."</a>".
 			"</td><td class=\"filename\">.".htmlspecialchars($row['extension']).
 			"</td><td align=\"center\">".printyn($row['allow_submit']).
 			"</td><td align=\"center\">".printyn($row['allow_judge']).

@@ -56,7 +56,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		strtotime($cdata['lastscoreupdate']) <= time();
 
 	// page heading with contestname and start/endtimes
-	echo "<h1>Scoreboard " . htmlentities($cdata['contestname']) . "</h1>\n\n";
+	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
 
 	if ( $showfinal ) {
 		echo "<h4>final standings</h4>\n\n";
@@ -94,11 +94,11 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		'<th title="problems solved" scope="col">' . jurylink(null,'solved',$isjury) . '</th>' .
 		'<th title="penalty time" scope="col">' . jurylink(null,'time',$isjury) . "</th>\n";
 	foreach( $probs as $pr ) {
-		echo '<th title="problem \'' . htmlentities($pr['name']) . '\'"' .
+		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'"' .
 			(!empty($pr['color']) ? ' style="background: ' .
 			 htmlspecialchars($pr['color']) . ';"' : '' ) . ' scope="col">' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),
-			         htmlentities($pr['probid']),$isjury) . '</th>';
+			         htmlspecialchars($pr['probid']),$isjury) . '</th>';
 	}
 	echo "</tr>\n</thead>\n\n<tbody>\n";
 
@@ -200,10 +200,10 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 					urlencode($teams[$team]['affilid']) . '.png';
 				if ( is_readable($affillogo) ) {
 					echo '<img src="' . $affillogo . '"' .
-						' alt="'   . htmlentities($teams[$team]['affilid']) . '"' .
-						' title="' . htmlentities($teams[$team]['affilname']) . '" />';
+						' alt="'   . htmlspecialchars($teams[$team]['affilid']) . '"' .
+						' title="' . htmlspecialchars($teams[$team]['affilname']) . '" />';
 				} else {
-					echo htmlentities($teams[$team]['affilid']);
+					echo htmlspecialchars($teams[$team]['affilid']);
 				}
 				if ( isset($teams[$team]['country']) ) {
 					$countryflag = '../images/countries/' .
@@ -211,10 +211,10 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 					echo ' ';
 					if ( is_readable($countryflag) ) {
 						echo '<img src="' . $countryflag . '"' .
-							' alt="'   . htmlentities($teams[$team]['country']) . '"' .
-							' title="' . htmlentities($teams[$team]['country']) . '" />';
+							' alt="'   . htmlspecialchars($teams[$team]['country']) . '"' .
+							' title="' . htmlspecialchars($teams[$team]['country']) . '" />';
 					} else {
-						echo htmlentities($teams[$team]['country']);
+						echo htmlspecialchars($teams[$team]['country']);
 					}
 				}
 				if ( $isjury ) echo '</a>';
@@ -226,7 +226,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 			(!empty($color) ? ' style="background: ' . $color . ';"' : '') .
 			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
 			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
-			htmlentities($teams[$team]['name']) .
+			htmlspecialchars($teams[$team]['name']) .
 			($static ? '' : '</a>') .
 			'</td>';
 		echo
@@ -401,10 +401,10 @@ function putTeamRow($cdata, $teamid) {
 			$pdata = array ( 'submitted' => 0, 'correct' => 0,
 			                 'time' => 0, 'penalty' => 0);
 		}
-		echo '<tr><td title="' . htmlentities($probdata['name']) .
+		echo '<tr><td title="' . htmlspecialchars($probdata['name']) .
 			(isset($probdata['color']) ? '" style="background: ' .
 			       htmlspecialchars($probdata['color']) . ';' : '' ) . '">' .
-			htmlentities($prob) . '</td><td class="';
+			htmlspecialchars($prob) . '</td><td class="';
 		// CSS class for correct/incorrect/neutral results
 		if( $pdata['correct'] ) { 
 			echo 'score_correct';

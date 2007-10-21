@@ -105,7 +105,7 @@ echo addForm($pagename) . "<p>\n" .
 ?>
 <table>
 <tr><td scope="row">ID:          </td><td><?=htmlspecialchars($data['langid'])?></td></tr>
-<tr><td scope="row">Name:        </td><td><?=htmlentities($data['name'])?></td></tr>
+<tr><td scope="row">Name:        </td><td><?=htmlspecialchars($data['name'])?></td></tr>
 <tr><td scope="row">Extension:   </td><td class="filename">.<?=htmlspecialchars($data['extension'])?></td></tr>
 <tr><td scope="row">Allow submit:</td><td><?=printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',

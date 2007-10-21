@@ -78,11 +78,11 @@ $data = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
 $affillogo = "../images/affiliations/" . urlencode($data['affilid']) . ".png";
 $countryflag = "../images/countries/" . urlencode($data['country']) . ".png";
 
-echo "<h1>Affiliation: ".htmlentities($data['name'])."</h1>\n\n";
+echo "<h1>Affiliation: ".htmlspecialchars($data['name'])."</h1>\n\n";
 
 echo "<table>\n";
 echo '<tr><td scope="row">ID:</td><td>' . htmlspecialchars($data['affilid']) . "</td></tr>\n";
-echo '<tr><td scope="row">Name:</td><td>' . htmlentities($data['name']) . "</td></tr>\n";
+echo '<tr><td scope="row">Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
 
 echo '<tr><td scope="row">Logo:</td><td>';
 
@@ -103,7 +103,7 @@ echo "</td></tr>\n";
 
 if ( !empty($data['comments']) ) {
 	echo '<tr><td valign="top" scope="row">Comments:</td><td>' .
-		nl2br(htmlentities($data['comments'])) . "</td></tr>\n";
+		nl2br(htmlspecialchars($data['comments'])) . "</td></tr>\n";
 }
 
 echo "</table>\n\n";
@@ -114,7 +114,7 @@ if ( IS_ADMIN ) {
 		delLink('team_affiliation', 'affilid', $data['affilid']) . "</p>\n\n";
 }
 
-echo "<h2>Teams from " . htmlentities($data['name']) . "</h2>\n\n";
+echo "<h2>Teams from " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $teams = $DB->q('SELECT login,name FROM team WHERE affilid = %s', $id);
 if ( $teams->count() == 0 ) {
@@ -127,7 +127,7 @@ if ( $teams->count() == 0 ) {
 		echo "<tr><td class=\"teamid\"><a href=\"team.php?id=" .
 			urlencode($team['login']) . "\">" .
 			htmlspecialchars($team['login']) . "</a></td><td>" .
-			htmlentities($team['name']) . "</td></tr>\n";
+			htmlspecialchars($team['name']) . "</td></tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
 }

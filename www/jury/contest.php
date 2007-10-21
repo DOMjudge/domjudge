@@ -70,7 +70,7 @@ if ( ! $id ) error("Missing or invalid contest id");
 
 $data = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $id);
 
-echo "<h1>Contest: ".htmlentities($data['contestname'])."</h1>\n\n";
+echo "<h1>Contest: ".htmlspecialchars($data['contestname'])."</h1>\n\n";
 
 if ( $cid === $data['cid'] ) {
 	echo "<p><em>This is the current contest.</em></p>\n\n";
@@ -80,7 +80,7 @@ echo "<table>\n";
 echo '<tr><td scope="row">CID:</td><td>c' .
 	(int)$data['cid'] . "</td></tr>\n";
 echo '<tr><td scope="row">Name:</td><td>' .
-	htmlentities($data['contestname']) .
+	htmlspecialchars($data['contestname']) .
 	"</td></tr>\n";
 echo '<tr><td scope="row">Starttime:</td><td>' .
 	htmlspecialchars($data['starttime']) .

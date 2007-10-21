@@ -60,11 +60,11 @@ if( $teams->count() == 0 ) {
 			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($row['login'])."\">".
 				htmlspecialchars($row['login'])."</a></td>".
 			"<td><a href=\"team.php?id=".htmlspecialchars($row['login'])."\">".
-				htmlentities($row['name'])."</a></td>".
+				htmlspecialchars($row['name'])."</a></td>".
 			"<td title=\"catid ".(int)$row['categoryid']."\">".
-				htmlentities($row['catname'])."</td>".
+				htmlspecialchars($row['catname'])."</td>".
 			"<td title=\"affilid ".htmlspecialchars($row['affilid'])."\">".
-				htmlentities($row['affname'])."</td><td title=\"";
+				htmlspecialchars($row['affname'])."</td><td title=\"";
 		
 		if ( @$row['ipaddress'] ) {
 			$host = htmlspecialchars(gethostbyaddr($row['ipaddress']));
@@ -77,7 +77,7 @@ if( $teams->count() == 0 ) {
 		} else {
 			echo "\">-";
 		}
-		echo "</td><td>".htmlentities($row['room'])."</td>";
+		echo "</td><td>".htmlspecialchars($row['room'])."</td>";
 		echo "<td class=\"teamstatus\"><img ";
 		switch ( $status ) {
 		case 0: echo 'src="../images/gray.png"   alt="gray"' .

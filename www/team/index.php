@@ -16,7 +16,7 @@ echo "<div id=\"teamscoresummary\">\n";
 putTeamRow($cdata, $login);
 echo "</div>\n";
 
-echo "<h1>Submissions team ".htmlentities($name)."</h1>\n\n";
+echo "<h1>Submissions team ".htmlspecialchars($name)."</h1>\n\n";
 
 // call putSubmissions function from common.php for this team.
 $restrictions = array( 'teamid' => $login );

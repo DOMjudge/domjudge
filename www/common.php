@@ -83,13 +83,13 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 			echo "<td><a href=\"submission.php?id=$sid\">s$sid</a></td>";
 		}
 		echo "<td>" . printtime($row['submittime']) . "</td>";
-		echo '<td class="teamid" title="' . htmlentities($row['teamname']) . '">' .
+		echo '<td class="teamid" title="' . htmlspecialchars($row['teamname']) . '">' .
 			( $isjury ? '<a href="team.php?id=' . urlencode($row['teamid']) . '">' : '' ) .
 			htmlspecialchars($row['teamid']) . ( $isjury ? '</a>' : '') . '</td>';
-		echo '<td title="' . htmlentities($row['probname']) . '">' .
+		echo '<td title="' . htmlspecialchars($row['probname']) . '">' .
 			( $isjury ? '<a href="problem.php?id=' . urlencode($row['probid']) . '">' : '' ) .
 			htmlspecialchars($row['probid']) . ( $isjury ? '</a>' : '') . '</td>';
-		echo '<td title="' . htmlentities($row['langname']) . '">' .
+		echo '<td title="' . htmlspecialchars($row['langname']) . '">' .
 			( $isjury ? '<a href="language.php?id=' . $row['langid'] . '">' : '' ) .
 			htmlspecialchars($row['langid']) . ( $isjury ? '</a>' : '') . '</td>';
 		echo "<td>";
@@ -166,20 +166,20 @@ function putTeam($login) {
 	if ( is_readable($teamimage) ) {
 		echo '<img id="teampicture" src="' . $teamimage .
 			'" alt="Picture of team ' .
-			htmlentities($team['name']) . '" />';
+			htmlspecialchars($team['name']) . '" />';
 	}
 
-	echo "<h1>Team ".htmlentities($team['name'])."</h1>\n\n";
+	echo "<h1>Team ".htmlspecialchars($team['name'])."</h1>\n\n";
 ?>
 
 <table>
-<tr><td scope="row">Name:    </td><td><?=htmlentities($team['name'])?></td></tr>
-<tr><td scope="row">Category:</td><td><?=htmlentities($team['catname'])?></td></tr>
+<tr><td scope="row">Name:    </td><td><?=htmlspecialchars($team['name'])?></td></tr>
+<tr><td scope="row">Category:</td><td><?=htmlspecialchars($team['catname'])?></td></tr>
 <?php
 	 
 	if ( !empty($team['members']) ) {
 		echo '<tr><td valign="top" scope="row">Members:</td><td>' .
-			nl2br(htmlentities($team['members'])) . "</td></tr>\n";
+			nl2br(htmlspecialchars($team['members'])) . "</td></tr>\n";
 	}
 	
 	if ( !empty($team['affilid']) ) {
@@ -190,7 +190,7 @@ function putTeam($login) {
 		} else {
 			echo htmlspecialchars($team['affilid']) . ' - ';
 		}
-		echo htmlentities($team['affname']);
+		echo htmlspecialchars($team['affname']);
 		echo "</td></tr>\n";
 		if ( !empty($team['country']) ) {
 			echo '<tr><td scope="row">Country:</td><td>';
@@ -204,7 +204,7 @@ function putTeam($login) {
 	
 	if ( !empty($team['room']) ) {
 		echo '<tr><td scope="row">Room:</td><td>' .
-			htmlentities($team['room']) . "</td></tr>\n";
+			htmlspecialchars($team['room']) . "</td></tr>\n";
 	}
 	
 	echo "</table>\n\n";

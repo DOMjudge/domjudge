@@ -39,11 +39,11 @@ if( ! $row ) {
 
 <table>
 <tr><td scope="row">Problem:</td>
-	<td><?=htmlentities($row['probname'].' ['.$row['probid'].']')?></td></tr>
+	<td><?=htmlspecialchars($row['probname'].' ['.$row['probid'].']')?></td></tr>
 <tr><td scope="row">Submittime:</td>
 	<td><?=printtime($row['submittime'])?></td></tr>
 <tr><td scope="row">Language:</td>
-	<td><?=htmlentities($row['langname'])?></td></tr>
+	<td><?=htmlspecialchars($row['langname'])?></td></tr>
 </table>
 
 <p>Status: <?=printresult($row['result'], TRUE, TRUE)?></p>

@@ -120,8 +120,8 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
 if ( ! isset($lang) ) err("Unable to find language '$langext'");
 
 echo "<table>\n" .
-	"<tr><td>Problem: </td><td><i>".htmlentities($prob['name'])."</i></td></tr>\n" .
-	"<tr><td>Language:</td><td><i>".htmlentities($lang['name'])."</i></td></tr>\n" .
+	"<tr><td>Problem: </td><td><i>".htmlspecialchars($prob['name'])."</i></td></tr>\n" .
+	"<tr><td>Language:</td><td><i>".htmlspecialchars($lang['name'])."</i></td></tr>\n" .
 	"</table>\n";
 
 $ipstr = str_replace(".","-",$ip);

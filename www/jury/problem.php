@@ -120,9 +120,9 @@ echo addForm($pagename) . "<p>\n" .
 ?>
 <table>
 <tr><td scope="row">ID:          </td><td><?=htmlspecialchars($data['probid'])?></td></tr>
-<tr><td scope="row">Name:        </td><td><?=htmlentities($data['name'])?></td></tr>
+<tr><td scope="row">Name:        </td><td><?=htmlspecialchars($data['name'])?></td></tr>
 <tr><td scope="row">Contest:     </td><td><?=htmlspecialchars($data['cid']).' - '.
-                                 htmlentities($data['contestname'])?></td></tr>
+                                 htmlspecialchars($data['contestname'])?></td></tr>
 <tr><td scope="row">Allow submit:</td><td class="nobreak"><?=printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
