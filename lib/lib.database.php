@@ -502,7 +502,7 @@ class db
 
 		if ( DEBUG ) {
 			global $DEBUG_NUM_QUERIES;
-			printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>",
+			printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>\n",
 				htmlspecialchars($query));
 			$DEBUG_NUM_QUERIES++;
 		}
