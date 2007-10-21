@@ -18,6 +18,6 @@ require('../scoreboard.php');
 
 // call the general putScoreBoard function from scoreboard.php
 // and pass that we're the jury so we can view the current scores anytime.
-putScoreBoard(null, TRUE);
+putScoreBoard($cdata, null, TRUE);
 
 include('../footer.php');

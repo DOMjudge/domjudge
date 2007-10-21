@@ -12,8 +12,6 @@
 require('init.php');
 $title = 'Clarifications';
 
-$cid = getCurContest();
-
 if ( isset($_REQUEST['id']) ) {
 	$id = (int)$_REQUEST['id'];
 	if ( ! $id ) error("Missing clarification id");

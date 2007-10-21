@@ -11,8 +11,6 @@
 require('init.php');
 $title = 'Teams';
 
-$cid = getCurContest();
-
 $teams = $DB->q('SELECT t.*,c.name AS catname,a.name AS affname
                  FROM team t
                  LEFT JOIN team_category c USING (categoryid)

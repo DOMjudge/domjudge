@@ -38,7 +38,7 @@ $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime
                  FROM judging
                  WHERE cid = %i AND submitid = %i
                  ORDER BY starttime ASC, judgingid ASC',
-                 getCurContest(), $id);
+                 $cid, $id);
 
 ?>
 <table width="100%">

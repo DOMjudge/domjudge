@@ -22,6 +22,6 @@ $isstatic = @$_SERVER['argv'][1] == 'static' || isset($_REQUEST['static']);
 if ( ! $isstatic ) putClock();
 
 // call the general putScoreBoard function from scoreboard.php
-putScoreBoard(null,null,$isstatic);
+putScoreBoard(getCurContest(), null, null, $isstatic);
 
 require('../footer.php');

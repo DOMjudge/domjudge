@@ -72,7 +72,7 @@ $data = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $id);
 
 echo "<h1>Contest: ".htmlentities($data['contestname'])."</h1>\n\n";
 
-if ( getCurContest() == $data['cid'] ) {
+if ( $cid === $data['cid'] ) {
 	echo "<p><em>This is the current contest.</em></p>\n\n";
 }
 

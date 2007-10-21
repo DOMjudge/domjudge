@@ -103,7 +103,7 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 <h2>Contests</h2>
 
 <p>Current contest: <?php 
-$cid = getCurContest();
+
 if($cid == null) {
 	// we need a valid 'current contest' at any time to function correctly
 	err('No current contest found. System will not function.');

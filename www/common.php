@@ -24,7 +24,7 @@ function getBaseURI() {
  * match <key> = <value>. Output is always limited to the
  * current or last contest.
  */
-function putSubmissions($restrictions, $isjury = FALSE) {
+function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 
 	global $DB;
 	
@@ -34,8 +34,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 	 * is restricted.
 	 */
 
-	$contdata = getCurContest(TRUE);
-	$cid = $contdata['cid'];
+	$cid = $cdata['cid'];
 	
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid,
 	               s.submittime, s.judgehost, t.name AS teamname,
@@ -96,7 +95,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 		echo "<td>";
 		if ( $isjury ) {
 			if ( ! $row['result'] ) {
-				if ( $row['submittime'] > $contdata['endtime'] ) {
+				if ( $row['submittime'] > $cdata['endtime'] ) {
 					echo printresult('too-late', TRUE, TRUE);
 				} else {
 					echo printresult($row['judgehost'] ? '' : 'queued', TRUE, TRUE);
@@ -108,7 +107,7 @@ function putSubmissions($restrictions, $isjury = FALSE) {
 		} else {
 			if ( ! $row['result'] ||
 			     ( VERIFICATION_REQUIRED && ! $row['verified'] ) ) {
-				if ( $row['submittime'] > $contdata['endtime'] ) {
+				if ( $row['submittime'] > $cdata['endtime'] ) {
 					echo printresult('too-late');
 				} else {
 					echo printresult('', TRUE, FALSE);

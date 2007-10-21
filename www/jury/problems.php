@@ -16,7 +16,6 @@ require('../header.php');
 echo "<h1>Problems</h1>\n\n";
 
 $res = $DB->q('SELECT * FROM problem NATURAL JOIN contest ORDER BY problem.cid, probid');
-$curcid = getCurContest();
 
 if( $res->count() == 0 ) {
 	echo "<p><em>No problems defined</em></p>\n\n";
@@ -30,7 +29,7 @@ if( $res->count() == 0 ) {
 		"</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
-		echo "<tr" . ($row['cid'] == $curcid ? '' : ' class="disabled"').
+		echo "<tr" . ($row['cid'] == $cid ? '' : ' class="disabled"').
 			"><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".
 				htmlspecialchars($row['probid'])."</a>".
 			"</td><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".

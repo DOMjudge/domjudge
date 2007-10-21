@@ -18,8 +18,6 @@ $title = 'Submit';
 require('../header.php');
 require('../forms.php');
 
-$cid = getCurContest();
-
 if ( $cid === FALSE  ) {
 	echo "<p><em>No contests defined!</em></p>\n";
 	require('../footer.php');
@@ -28,7 +26,7 @@ if ( $cid === FALSE  ) {
 
 // Put overview of team submissions (like scoreboard)
 echo "<div id=\"teamscoresummary\">\n";
-putTeamRow($login);
+putTeamRow($cdata, $login);
 echo "</div>\n";
 
 echo "<h1>New Submission</h1>\n\n";

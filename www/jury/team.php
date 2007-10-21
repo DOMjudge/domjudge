@@ -160,6 +160,6 @@ if ( isset($key) ) {
 echo "</h3>\n\n";
 
 $restrictions['teamid'] = $id;
-putSubmissions($restrictions, TRUE);
+putSubmissions($cdata, $restrictions, TRUE);
 
 require('../footer.php');

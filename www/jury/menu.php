@@ -1,9 +1,5 @@
 <?php
 
-require('init.php');
-
-$cid = getCurContest();
-
 $cnew = $DB->q('VALUE SELECT COUNT(*) FROM clarification
                 WHERE sender IS NOT NULL AND cid = %i AND answered = 0',
                 $cid);

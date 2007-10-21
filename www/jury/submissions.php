@@ -16,6 +16,6 @@ require('../header.php');
 
 echo "<h1>Submissions</h1>\n\n";
 
-putSubmissions(null,TRUE);
+putSubmissions($cdata, null,TRUE);
 
 require('../footer.php');

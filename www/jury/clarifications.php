@@ -12,8 +12,6 @@ require('init.php');
 $refresh = '15;url='.getBaseURI().'jury/clarifications.php';
 $title = 'Clarification Requests';
 
-$cid = getCurContest();
-
 require('../header.php');
 require('../clarification.php');
 

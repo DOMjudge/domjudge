@@ -14,6 +14,6 @@ $title = 'Scoreboard';
 include('../header.php');
 
 // call the general putScoreBoard function from scoreboad.php
-putScoreBoard($login);
+putScoreBoard($cdata, $login);
 
 include('../footer.php');

@@ -23,13 +23,12 @@
  * regardless of the lastscoreupdate setting in the contesttable.
  * $static omits output unsuitable for static html pages.
  */
-function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
+function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALSE) {
 
 	global $DB;
 
-	$contdata = getCurContest(TRUE);
-	if ( empty( $contdata ) ) { echo "<p><em>No contests defined</em></p>\n"; return; }
-	$cid = $contdata['cid'];
+	if ( empty( $cdata ) ) { echo "<p><em>No contests defined</em></p>\n"; return; }
+	$cid = $cdata['cid'];
 
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
@@ -47,30 +46,30 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 
 	// show final scores if contest is over and unfreezetime has been
 	// reached, or if contest is over and no freezetime had been set
-	$showfinal  = ( !isset($contdata['lastscoreupdate']) &&
-		strtotime($contdata['endtime']) <= time() ) ||
-		( isset($contdata['unfreezetime']) &&
-		strtotime($contdata['unfreezetime']) <= time() );
+	$showfinal  = ( !isset($cdata['lastscoreupdate']) &&
+		strtotime($cdata['endtime']) <= time() ) ||
+		( isset($cdata['unfreezetime']) &&
+		strtotime($cdata['unfreezetime']) <= time() );
 	// freeze scoreboard if lastscoreupdate time has been reached and
 	// we're not showing the final score yet
-	$showfrozen = !$showfinal && isset($contdata['lastscoreupdate']) &&
-		strtotime($contdata['lastscoreupdate']) <= time();
+	$showfrozen = !$showfinal && isset($cdata['lastscoreupdate']) &&
+		strtotime($cdata['lastscoreupdate']) <= time();
 
 	// page heading with contestname and start/endtimes
-	echo "<h1>Scoreboard " . htmlentities($contdata['contestname']) . "</h1>\n\n";
+	echo "<h1>Scoreboard " . htmlentities($cdata['contestname']) . "</h1>\n\n";
 
 	if ( $showfinal ) {
 		echo "<h4>final standings</h4>\n\n";
 	} else {
-		echo "<h4>starts: " . printtime($contdata['starttime']) .
-				" - ends: " . printtime($contdata['endtime']) ;
+		echo "<h4>starts: " . printtime($cdata['starttime']) .
+				" - ends: " . printtime($cdata['endtime']) ;
 
 		if ( $showfrozen ) {
 			echo " (";
 			if ( $isjury ) {
 				echo "public scoreboard is ";
 			}
-			echo "frozen since " . printtime($contdata['lastscoreupdate']) .")";
+			echo "frozen since " . printtime($cdata['lastscoreupdate']) .")";
 		}
 		echo "</h4>\n\n";
 	}
@@ -340,7 +339,7 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
 	// last modified date, now if we are the jury, else include the
 	// lastscoreupdate time
 	if( ! $isjury && $showfrozen ) {
-		$lastupdate = strtotime($contdata['lastscoreupdate']);
+		$lastupdate = strtotime($cdata['lastscoreupdate']);
 	} else {
 		$lastupdate = time();
 	}
@@ -354,13 +353,12 @@ function putScoreBoard($myteamid = null, $isjury = FALSE, $static = FALSE) {
  * Output a team row from the scoreboard based on the cached data in
  * table 'scoreboard'.
  */
-function putTeamRow($teamid) {
+function putTeamRow($cdata, $teamid) {
 
 	global $DB;
 
-	$contdata = getCurContest(TRUE);
-	if ( empty( $contdata ) ) return;
-	$cid = $contdata['cid'];
+	if ( empty( $cdata ) ) return;
+	$cid = $cdata['cid'];
 	
 	echo '<table class="scoreboard">' . "\n";
 

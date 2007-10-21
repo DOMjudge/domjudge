@@ -14,11 +14,9 @@ $title = 'Clarifications';
 require('../header.php');
 require('../clarification.php');
 
-$cid = getCurContest();
-
 // Put overview of team submissions (like scoreboard)
 echo "<div id=\"teamscoresummary\">\n";
-putTeamRow($login);
+putTeamRow($cdata, $login);
 echo "</div>\n";
 
 echo "<h1>Clarifications team " . htmlentities($name) ."</h1>\n\n";

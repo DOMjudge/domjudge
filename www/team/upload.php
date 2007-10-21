@@ -87,7 +87,7 @@ if ( empty($probid) ) {
 
 $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
                 WHERE allow_submit = 1 AND probid = %s AND cid = %i',
-               $probid, getCurContest());
+               $probid, $cid);
 
 if ( ! isset($prob) ) err("Unable to find problem '$probid'");
 

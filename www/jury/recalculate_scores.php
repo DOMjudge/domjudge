@@ -23,7 +23,6 @@ ob_implicit_flush();
 echo "<h1>Recalculate Scoreboard Cache</h1>\n\n";
 
 // get the contest, teams and problems
-$cid = getCurContest();
 $teams = $DB->q('COLUMN SELECT login FROM team ORDER BY login');
 $probs = $DB->q('COLUMN SELECT probid FROM problem
                  WHERE cid = %i ORDER BY probid', $cid);

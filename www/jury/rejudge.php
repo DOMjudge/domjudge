@@ -34,9 +34,6 @@ if ( empty($table) || empty($id) ) {
 
 global $DB;
 
-$cid = getCurContest();
-
-
 // This can be done in one Update from MySQL 4.0.4 and up, but that wouldn't
 // allow us to call calcScoreRow() for the right rows, so we'll just loop
 // over the results one at a time.

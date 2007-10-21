@@ -133,6 +133,6 @@ if ( IS_ADMIN ) {
 echo "<h2>Submissions in " . htmlspecialchars($id) . "</h2>\n\n";
 
 $restrictions = array( 'langid' => $id );
-putSubmissions($restrictions, TRUE);
+putSubmissions($cdata, $restrictions, TRUE);
 
 require('../footer.php');

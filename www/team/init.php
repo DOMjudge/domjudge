@@ -23,3 +23,6 @@ require_once('../common.php');
 require_once('../print.php');
 require_once('../scoreboard.php');
 require_once('validate.php');
+
+$cdata = getCurContest(TRUE);
+$cid = $cdata['cid'];

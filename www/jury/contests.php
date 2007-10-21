@@ -14,11 +14,9 @@ require('../header.php');
 
 echo "<h1>Contests</h1>\n\n";
 
-$curcont = getCurContest();
-
 if ( isset($_POST['unfreeze']) ) {
 	$docid = array_pop(array_keys($_POST['unfreeze']));
-	if ( $docid != $curcont['cid'] ) {
+	if ( $docid !== $cid ) {
 		error("Can only unfreeze for current contest");
 	}
 	$DB->q('UPDATE contest SET unfreezetime = %s WHERE cid = %i', now(), $docid);
@@ -38,7 +36,7 @@ if( count($res) == 0 ) {
 
 	foreach($res as $row) {
 		echo "<tr" .
-			($row['cid'] == $curcont ? ' class="highlight"':'') . ">" .
+			($row['cid'] === $cid ? ' class="highlight"':'') . ">" .
 			"<td align=\"right\"><a href=\"contest.php?id=" . urlencode($row['cid']) .
 			"\">c" . (int)$row['cid'] . "</a></td>\n" .
 			"<td title=\"" . htmlentities($row['starttime']) . "\">" .
@@ -63,7 +61,7 @@ if( count($res) == 0 ) {
 		// only if the contest has already finished, and the scores have
 		// not already been unfrozen.
 		echo "<td>";
-		if ( $row['cid'] == $curcont && isset($row['lastscoreupdate']) ) {
+		if ( $row['cid'] === $cid && isset($row['lastscoreupdate']) ) {
 			echo "<input type=\"submit\" name=\"unfreeze[" . $row['cid'] .
 				"]\" value=\"unfreeze scoreboard now\"" ;
 			if ( strtotime($row['endtime']) > time() ||
