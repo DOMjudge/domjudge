@@ -9,7 +9,7 @@
 -- $Id: mysql_create.sql 1170 2006-11-26 14:52:33Z eldering $
 
 -- Create the domjudge database:
-CREATE DATABASE DOMJUDGE_DBNAME;
+CREATE DATABASE DOMJUDGE_DBNAME CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 -- Add users and passwords
 -- These passwords are initialised automatically when running
