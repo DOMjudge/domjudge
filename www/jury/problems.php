@@ -41,9 +41,10 @@ if( $res->count() == 0 ) {
 			"</td><td class=\"filename\">".htmlspecialchars($row['testdata']).
 			"</td><td>".(int)$row['timelimit'].
 			"</td>".
-			( isset($row['color'])
-			? '<td style="background: '.htmlspecialchars($row['color']).';">'.
-			  htmlspecialchars($row['color'])
+			( !empty($row['color'])
+			? '<td style="color: ' . htmlspecialchars($row['color']) . ';" ' .
+			  'title="' . htmlspecialchars($row['color']) . '">' .
+			  BALLOON_SYM
 			: '<td>' );
 			if ( IS_ADMIN ) {
 				echo "</td><td>" . 

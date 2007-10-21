@@ -136,16 +136,17 @@ echo addForm($pagename) . "<p>\n" .
 <tr><td scope="row">Testdata:    </td><td class="filename"><?=htmlspecialchars($data['testdata'])?></td></tr>
 <tr><td scope="row">Timelimit:   </td><td><?=(int)$data['timelimit']?></td></tr>
 <?php
-if ( isset($data['color']) ) {
-	echo '<tr><td scope="row">Colour:       </td><td style="background: ' .
+if ( !empty($data['color']) ) {
+	echo '<tr><td scope="row">Colour:       </td><td style="color: ' .
 		htmlspecialchars($data['color']) .
-		';">' . htmlspecialchars($data['color']) . "</td></tr>\n";
+		';">' . BALLOON_SYM . ' ' . htmlspecialchars($data['color']) .
+		"</td></tr>\n";
 }
-if ( isset($data['special_run']) ) {
+if ( !empty($data['special_run']) ) {
 	echo '<tr><td scope="row">Special run script:</td><td class="filename">' .
 		htmlspecialchars($data['special_run']) . "</td></tr>\n";
 }
-if ( isset($data['special_compare']) ) {
+if ( !empty($data['special_compare']) ) {
 	echo '<tr><td scope="row">Special compare script:</td><td class="filename">' .
 		htmlspecialchars($data['special_compare']) . "</td></tr>\n";
 }

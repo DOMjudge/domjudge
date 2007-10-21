@@ -8,6 +8,9 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+/** Symbol used in output to represent a balloon */
+define('BALLOON_SYM', '&#9673;');
+
 /**
  * Return the base URI for the DOMjudge Webinterface.
  * This is the full URL to the root of the 'www' dir,

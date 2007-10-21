@@ -94,11 +94,13 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		'<th title="problems solved" scope="col">' . jurylink(null,'solved',$isjury) . '</th>' .
 		'<th title="penalty time" scope="col">' . jurylink(null,'time',$isjury) . "</th>\n";
 	foreach( $probs as $pr ) {
-		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'"' .
-			(!empty($pr['color']) ? ' style="background: ' .
-			 htmlspecialchars($pr['color']) . ';"' : '' ) . ' scope="col">' .
+		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),
-			         htmlspecialchars($pr['probid']),$isjury) . '</th>';
+				htmlspecialchars($pr['probid']) . 
+				(!empty($pr['color']) ? ' <span style="color: ' .
+				htmlspecialchars($pr['color']) . ';">' . BALLOON_SYM . '</span>' : '' ) 
+			, $isjury) .
+			'</th>';
 	}
 	echo "</tr>\n</thead>\n\n<tbody>\n";
 
@@ -309,9 +311,9 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		} else {
 			$str .= '-';
 		}
-		echo '<td' . (isset($pr['color']) ? ' style="background: ' .
-					  $pr['color'] . ';"' : '') . '>' .
-			jurylink('problem.php?id=' . urlencode($pr['probid']),$str,$isjury) . '</td>';
+		echo '<td>' .
+			jurylink('problem.php?id=' . urlencode($pr['probid']),$str,$isjury) .
+			'</td>';
 	}
 	echo "</tr>\n</tbody>\n</table>\n\n";
 
@@ -401,9 +403,10 @@ function putTeamRow($cdata, $teamid) {
 			$pdata = array ( 'submitted' => 0, 'correct' => 0,
 			                 'time' => 0, 'penalty' => 0);
 		}
-		echo '<tr><td title="' . htmlspecialchars($probdata['name']) .
-			(isset($probdata['color']) ? '" style="background: ' .
-			       htmlspecialchars($probdata['color']) . ';' : '' ) . '">' .
+		echo '<tr><td title="' . htmlspecialchars($probdata['name']) . '">' .
+			(!empty($probdata['color']) ? '<span style="color: ' .
+			       htmlspecialchars($probdata['color']) . ';">' .
+			       BALLOON_SYM . '</span> ' : '' ) .
 			htmlspecialchars($prob) . '</td><td class="';
 		// CSS class for correct/incorrect/neutral results
 		if( $pdata['correct'] ) { 
