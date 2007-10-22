@@ -15,6 +15,8 @@ if( DEBUG ) {
 	include_once (SYSTEM_ROOT . '/lib/lib.timer.php');
 }
 
+if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
+
 require_once(SYSTEM_ROOT . '/lib/lib.error.php');
 require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
 require_once(SYSTEM_ROOT . '/lib/use_db_team.php');
