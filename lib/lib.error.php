@@ -35,8 +35,7 @@ if ( defined('LOGFILE') ) {
 }
 
 // Open syslog connection:
-if ( defined('SYSLOG')  ) {
-//	echo 'SYSLOG = ' . SYSLOG;
+if ( defined('SYSLOG') ) {
 	openlog(SCRIPT_ID, LOG_NDELAY | LOG_PID, SYSLOG);
 }
 
