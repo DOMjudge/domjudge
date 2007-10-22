@@ -27,7 +27,7 @@ require('../forms.php');
 
 echo "<h1>Balloon Status</h1>\n\n";
 
-if ( isset($cdata['lastscoreupdate']) && ! $infreeze &&
+if ( isset($cdata['lastscoreupdate']) &&
      time() > strtotime($cdata['lastscoreupdate']) ) {
 	echo "<h4>Scoreboard is now frozen.</h4>\n\n";
 }
