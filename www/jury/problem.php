@@ -137,9 +137,9 @@ echo addForm($pagename) . "<p>\n" .
 <tr><td scope="row">Timelimit:   </td><td><?=(int)$data['timelimit']?></td></tr>
 <?php
 if ( !empty($data['color']) ) {
-	echo '<tr><td scope="row">Colour:       </td><td style="color: ' .
+	echo '<tr><td scope="row">Colour:       </td><td><span style="color: ' .
 		htmlspecialchars($data['color']) .
-		';">' . BALLOON_SYM . ' ' . htmlspecialchars($data['color']) .
+		';">' . BALLOON_SYM . '</span> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
 }
 if ( !empty($data['special_run']) ) {
