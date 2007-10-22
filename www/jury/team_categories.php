@@ -25,7 +25,7 @@ if( $res->count() == 0 ) {
 	echo "<table class=\"list\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">sort</th>" .
 		"<th scope=\"col\">name</th><th scope=\"col\">#teams</th>" .
-		"<th scope=\"col\">invisible</th></tr>\n" .
+		"<th scope=\"col\">visible</th></tr>\n" .
 		"</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
@@ -36,7 +36,7 @@ if( $res->count() == 0 ) {
 			'</a></td><td>' . (int)$row['sortorder'] .
 			'</td><td>' . htmlspecialchars($row['name']) .
 			'</td><td align="right">' . (int)$row['numteams'] .
-			'</td><td align="center">' . printyn($row['invisible']) .
+			'</td><td align="center">' . printyn($row['visible']) .
 			"</td>";
 		if ( IS_ADMIN ) {
 			echo "<td>" .

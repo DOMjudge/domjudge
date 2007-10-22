@@ -33,7 +33,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
 	                 login, team.name, team.categoryid, team.affilid, sortorder,
-	                 color, invisible, country, team_affiliation.name AS affilname
+	                 color, visible, country, team_affiliation.name AS affilname
 	                 FROM team
 	                 LEFT JOIN team_category
 	                        ON (team_category.categoryid = team.categoryid)
@@ -164,7 +164,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	$prevsortorder = -1;
 	foreach( $SCORES as $team => $totals ) {
 
-		if ( ! $isjury && $teams[$team]['invisible'] ) continue;
+		if ( ! ( $isjury || $teams[$team]['visible'] ) ) continue;
 		
 		// rank, team name, total correct, total time
 		echo '<tr';
@@ -318,7 +318,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	echo "</tr>\n</tbody>\n</table>\n\n";
 
 	$categs = $DB->q('SELECT * FROM team_category ' .
-	                 ($isjury ? '' : 'WHERE invisible = 0 ' ) .
+	                 ($isjury ? '' : 'WHERE visible = 1 ' ) .
 	                 'ORDER BY categoryid');
 
 	// only print legend when there's more than one category
