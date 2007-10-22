@@ -4,6 +4,7 @@ Version 2.1.2 - 22 October 2007
 -------------------------------
  - Reduced verbose level in submitdaemon.
  - Fix 'NONINTERACTIVE' undefined (Closes: #1814594, thanks Maks Verver)
+ - Fix bug in contests.php in unfreezing scoreboard.
 
 Version 2.1.1 - 16 October 2007
 -------------------------------
