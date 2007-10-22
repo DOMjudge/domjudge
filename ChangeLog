@@ -13,7 +13,7 @@ Version 2.2.0 - SVN
  - Moved beep system call to separate function in lib.misc.{c,php}.
  - Switch to UTF-8 for output. (Thijs)
  - Represent balloon colours with a symbol rather than filling the background,
-   making the scoreboard less cacophonic. (Thijs)
+   making the scoreboard less cacophonic. (Closes: #1808561, Thijs)
  - Add a web based tool for tracking balloon handouts. (Thijs)
 
 Version 2.1.1 - SVN
