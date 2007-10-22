@@ -12,14 +12,14 @@
 -- 
 
 CREATE TABLE `clarification` (
-  `clarid` mediumint(8) unsigned NOT NULL auto_increment,
-  `cid` mediumint(8) unsigned NOT NULL default '0',
-  `respid` mediumint(8) unsigned default NULL,
+  `clarid` int(4) unsigned NOT NULL auto_increment,
+  `cid` int(4) unsigned NOT NULL default '0',
+  `respid` int(4) unsigned default NULL,
   `submittime` datetime NOT NULL default '0000-00-00 00:00:00',
   `sender` varchar(15) default NULL,
   `recipient` varchar(15) default NULL,
   `body` text NOT NULL,
-  `answered` tinyint(4) unsigned NOT NULL default '0',
+  `answered` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`clarid`),
   KEY `cid` (`cid`,`answered`,`submittime`)
 ) ENGINE=MyISAM COMMENT='Clarification requests by teams and responses by the jury';
@@ -29,7 +29,7 @@ CREATE TABLE `clarification` (
 -- 
 
 CREATE TABLE `contest` (
-  `cid` mediumint(8) unsigned NOT NULL auto_increment,
+  `cid` int(4) unsigned NOT NULL auto_increment,
   `contestname` varchar(255) NOT NULL default '',
   `starttime` datetime NOT NULL default '0000-00-00 00:00:00',
   `lastscoreupdate` datetime default NULL,
@@ -43,13 +43,13 @@ CREATE TABLE `contest` (
 -- 
 
 CREATE TABLE `event` (
-  `eventid` mediumint(9) unsigned NOT NULL auto_increment,
+  `eventid` int(4) unsigned NOT NULL auto_increment,
   `eventtime` timestamp NOT NULL default CURRENT_TIMESTAMP,
-  `cid` mediumint(8) unsigned NOT NULL,
-  `clarid` mediumint(8) unsigned default NULL,
+  `cid` int(4) unsigned NOT NULL,
+  `clarid` int(4) unsigned default NULL,
   `langid` varchar(8) default NULL,
   `probid` varchar(8) default NULL,
-  `submitid` mediumint(9) unsigned default NULL,
+  `submitid` int(4) unsigned default NULL,
   `teamid` varchar(15) default NULL,
   `description` text NOT NULL,
   PRIMARY KEY  (`eventid`)
@@ -61,7 +61,7 @@ CREATE TABLE `event` (
 
 CREATE TABLE `judgehost` (
   `hostname` varchar(50) NOT NULL default '',
-  `active` tinyint(8) unsigned NOT NULL default '1',
+  `active` tinyint(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`hostname`)
 ) ENGINE=MyISAM COMMENT='Hostnames of the autojudgers';
 
@@ -70,9 +70,9 @@ CREATE TABLE `judgehost` (
 -- 
 
 CREATE TABLE `judging` (
-  `judgingid` mediumint(10) unsigned NOT NULL auto_increment,
-  `cid` mediumint(2) unsigned NOT NULL default '0',
-  `submitid` mediumint(10) unsigned NOT NULL default '0',
+  `judgingid` int(4) unsigned NOT NULL auto_increment,
+  `cid` int(4) unsigned NOT NULL default '0',
+  `submitid` int(4) unsigned NOT NULL default '0',
   `starttime` datetime NOT NULL default '0000-00-00 00:00:00',
   `endtime` datetime default NULL,
   `judgehost` varchar(50) NOT NULL default '',
@@ -108,12 +108,12 @@ CREATE TABLE `language` (
 
 CREATE TABLE `problem` (
   `probid` varchar(8) NOT NULL default '',
-  `cid` mediumint(10) unsigned NOT NULL default '0',
+  `cid` int(4) unsigned NOT NULL default '0',
   `name` varchar(255) NOT NULL default '',
   `allow_submit` tinyint(1) unsigned NOT NULL default '0',
   `allow_judge` tinyint(1) unsigned NOT NULL default '1',
   `testdata` varchar(255) NOT NULL default '',
-  `timelimit` mediumint(11) unsigned NOT NULL default '0',
+  `timelimit` int(4) unsigned NOT NULL default '0',
   `special_run` varchar(25) default NULL,
   `special_compare` varchar(25) default NULL,
   `color` varchar(25) default NULL,
@@ -125,10 +125,10 @@ CREATE TABLE `problem` (
 -- 
 
 CREATE TABLE `scoreboard_jury` (
-  `cid` mediumint(8) unsigned NOT NULL default '0',
+  `cid` int(4) unsigned NOT NULL default '0',
   `teamid` varchar(15) NOT NULL default '',
   `probid` varchar(8) NOT NULL default '',
-  `submissions` int(3) unsigned NOT NULL default '0',
+  `submissions` int(4) unsigned NOT NULL default '0',
   `totaltime` int(4) unsigned NOT NULL default '0',
   `penalty` int(4) unsigned NOT NULL default '0',
   `is_correct` tinyint(1) unsigned NOT NULL default '0',
@@ -141,10 +141,10 @@ CREATE TABLE `scoreboard_jury` (
 -- 
 
 CREATE TABLE `scoreboard_public` (
-  `cid` mediumint(8) unsigned NOT NULL default '0',
+  `cid` int(4) unsigned NOT NULL default '0',
   `teamid` varchar(15) NOT NULL default '',
   `probid` varchar(8) NOT NULL default '',
-  `submissions` int(3) unsigned NOT NULL default '0',
+  `submissions` int(4) unsigned NOT NULL default '0',
   `totaltime` int(4) unsigned NOT NULL default '0',
   `penalty` int(4) unsigned NOT NULL default '0',
   `is_correct` tinyint(1) unsigned NOT NULL default '0',
@@ -157,8 +157,8 @@ CREATE TABLE `scoreboard_public` (
 -- 
 
 CREATE TABLE `submission` (
-  `submitid` mediumint(10) unsigned NOT NULL auto_increment,
-  `cid` mediumint(2) unsigned NOT NULL default '0',
+  `submitid` int(4) unsigned NOT NULL auto_increment,
+  `cid` int(4) unsigned NOT NULL default '0',
   `teamid` varchar(15) NOT NULL default '',
   `probid` varchar(8) NOT NULL default '',
   `langid` varchar(8) NOT NULL default '',
@@ -180,7 +180,7 @@ CREATE TABLE `submission` (
 CREATE TABLE `team` (
   `login` varchar(15) NOT NULL default '',
   `name` varchar(255) NOT NULL default '',
-  `categoryid` mediumint(4) unsigned NOT NULL default '0',
+  `categoryid` int(4) unsigned NOT NULL default '0',
   `affilid` varchar(10) default NULL,
   `ipaddress` varchar(50) default NULL,
   `passwd` varchar(32) default NULL,
@@ -210,7 +210,7 @@ CREATE TABLE `team_affiliation` (
 -- 
 
 CREATE TABLE `team_category` (
-  `categoryid` mediumint(8) unsigned NOT NULL auto_increment,
+  `categoryid` int(4) unsigned NOT NULL auto_increment,
   `name` varchar(255) NOT NULL default '',
   `sortorder` tinyint(1) unsigned NOT NULL default '0',
   `color` varchar(25) default NULL,
@@ -225,7 +225,7 @@ CREATE TABLE `team_category` (
 
 CREATE TABLE `team_unread` (
   `teamid` varchar(15) NOT NULL default '',
-  `mesgid` mediumint(8) unsigned NOT NULL default '0',
+  `mesgid` int(4) unsigned NOT NULL default '0',
   `type` enum('clarification','submission') NOT NULL default 'clarification',
   PRIMARY KEY  (`teamid`,`type`,`mesgid`)
 ) ENGINE=MyISAM COMMENT='List of items a team has not viewed yet';
