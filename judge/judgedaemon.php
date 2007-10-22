@@ -98,10 +98,9 @@ while ( TRUE ) {
 	// to be judged, and also prevents throwing away the query cache every
 	// single time
 	$numopen = $DB->q('VALUE SELECT COUNT(*) FROM submission
-	                  WHERE judgehost IS NULL AND cid = %i AND langid IN (%As)
-	                  AND probid IN (%As) AND submittime < %s',
-	                 $myhost, $mark, $cid, $judgable_lang, $judgable_prob,
-	                 $contdata['endtime']);
+	                   WHERE judgehost IS NULL AND cid = %i AND langid IN (%As)
+	                   AND probid IN (%As) AND submittime < %s',
+	                  $cid, $judgable_lang, $judgable_prob, $contdata['endtime']);
 
 	$numupd = 0;
 	if ($numopen) {
