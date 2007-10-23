@@ -43,12 +43,14 @@ $cid = getCurContest();
 
 // Special case 'submission' for admin overrides
 if ( IS_ADMIN && $table == 'submission' ) {
-	$res = $DB->q('SELECT * FROM judging
+	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid
+	               FROM judging
 	               LEFT JOIN submission USING (submitid)
 	               WHERE judging.cid = %i AND valid = 1 AND ' .
 	               $tablemap[$table] . ' = %s', $cid, $id);
 } else {
-	$res = $DB->q('SELECT * FROM judging
+	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid
+	               FROM judging
 	               LEFT JOIN submission USING (submitid)
 	               WHERE judging.cid = %i AND valid = 1 AND
 	               result IS NOT NULL AND result != "correct" AND ' .

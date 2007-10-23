@@ -34,7 +34,8 @@ require('../header.php');
 
 echo "<h1>Submission s".$id."</h1>\n\n";
 
-$jdata = $DB->q('KEYTABLE SELECT *, judgingid AS ARRAYKEY FROM judging
+$jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime, judgehost
+                 FROM judging
                  WHERE cid = %i AND submitid = %i
                  ORDER BY starttime ASC, judgingid ASC',
                  getCurContest(), $id);
@@ -83,16 +84,15 @@ if ( count($jdata) > 0 ) {
 	}
 
 	// print the judgings
-	foreach( $jdata as $jud ) {
+	foreach( $jdata as $judgingid => $jud ) {
 
 		echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
 
-		if ( $jud['judgingid'] == $jid ) {
-			echo '<td>&rarr;&nbsp;</td><td>j' . (int)$jud['judgingid'] . '</td>';
+		if ( $judgingid == $jid ) {
+			echo '<td>&rarr;&nbsp;</td><td>j' . $judgingid . '</td>';
 		} else {
 			echo '<td>&nbsp;</td><td><a href="submission.php?id=' . $id .
-				'&amp;jid=' . (int)$jud['judgingid'] .  '">j' .
-				(int)$jud['judgingid'] .  '</a></td>';
+				'&amp;jid=' . $judgingid .  '">j' . $judgingid . '</a></td>';
 		}
 
 		echo '<td>' . printtime($jud['starttime']) . '</td>';
@@ -118,7 +118,8 @@ echo "</td></tr>\n</table>\n\n";
 
 if ( isset($jid) )  {
 
-	$jud = $jdata[$jid];
+	$jud = $DB->q('TUPLE SELECT *, judgingid AS ARRAYKEY FROM judging
+	               WHERE judgingid = %i', $jid);
 
 	echo "<h2>Judging j" . (int)$jud['judgingid'] .
 		($jud['valid'] == 1 ? '' : ' (INVALID)') . "</h2>\n\n";

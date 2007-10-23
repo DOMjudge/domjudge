@@ -20,7 +20,8 @@ CREATE TABLE `clarification` (
   `recipient` varchar(15) default NULL,
   `body` text NOT NULL,
   `answered` tinyint(4) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`clarid`)
+  PRIMARY KEY  (`clarid`),
+  KEY `cid` (`cid`,`answered`,`submittime`)
 ) ENGINE=MyISAM COMMENT='Clarification requests by teams and responses by the jury';
 
 -- 
@@ -83,7 +84,8 @@ CREATE TABLE `judging` (
   `output_run` text,
   `output_diff` text,
   `output_error` text,
-  PRIMARY KEY  (`judgingid`)
+  PRIMARY KEY  (`judgingid`),
+  KEY `submitid` (`submitid`)
 ) ENGINE=MyISAM COMMENT='Result of judging a submission';
 
 -- 
@@ -166,7 +168,9 @@ CREATE TABLE `submission` (
   `judgehost` varchar(50) default NULL,
   `judgemark` varchar(255) default NULL,
   PRIMARY KEY  (`submitid`),
-  UNIQUE KEY `judgemark` (`judgemark`)
+  UNIQUE KEY `judgemark` (`judgemark`),
+  KEY `teamid` (`cid`,`teamid`),
+  KEY `judgehost` (`cid`,`judgehost`)
 ) ENGINE=MyISAM COMMENT='All incoming submissions';
 
 -- 
@@ -185,7 +189,8 @@ CREATE TABLE `team` (
   `comments` text,
   `teampage_first_visited` datetime default NULL,
   PRIMARY KEY  (`login`),
-  UNIQUE KEY `ipaddress` (`ipaddress`)
+  UNIQUE KEY `ipaddress` (`ipaddress`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM COMMENT='All teams participating in the contest';
 
 -- 
@@ -209,7 +214,8 @@ CREATE TABLE `team_category` (
   `name` varchar(255) NOT NULL default '',
   `sortorder` tinyint(1) unsigned NOT NULL default '0',
   `color` varchar(25) default NULL,
-  PRIMARY KEY  (`categoryid`)
+  PRIMARY KEY  (`categoryid`),
+  KEY `sortorder` (`sortorder`)
 ) ENGINE=MyISAM COMMENT='Categories for teams (e.g.: participants, observers, ...)';
 
 -- 
@@ -220,5 +226,5 @@ CREATE TABLE `team_unread` (
   `teamid` varchar(15) NOT NULL default '',
   `mesgid` mediumint(8) unsigned NOT NULL default 0,
   `type` enum('clarification','submission') NOT NULL default 'clarification',
-  PRIMARY KEY  (`teamid`,`mesgid`,`type`)
+  PRIMARY KEY  (`teamid`,`type`,`mesgid`)
 ) ENGINE=MyISAM COMMENT='List of items a team has not viewed yet';
