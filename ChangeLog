@@ -11,7 +11,7 @@ Version 2.2.0 - SVN
  - Move .htaccess config to apache config (Jeroen)
  - Fix 'NONINTERACTIVE' undefined (Closes: #1814594, thanks Maks Verver)
  - Moved beep system call to separate function in lib.misc.{c,php}.
- - Switch to UTF-8 for output. (Thijs)
+ - Switch to UTF-8 for output. (Closes: #1742460, Thijs)
  - Represent balloon colours with a symbol rather than filling the background,
    making the scoreboard less cacophonic. (Closes: #1808561, Thijs)
  - Add a web based tool for tracking balloon handouts. (Thijs)
