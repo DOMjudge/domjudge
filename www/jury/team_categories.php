@@ -24,7 +24,8 @@ if( $res->count() == 0 ) {
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">sort</th>" .
-		"<th scope=\"col\">name</th><th scope=\"col\">#teams</th></tr>\n" .
+		"<th scope=\"col\">name</th><th scope=\"col\">#teams</th>" .
+		"<th scope=\"col\">visible</th></tr>\n" .
 		"</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
@@ -34,7 +35,9 @@ if( $res->count() == 0 ) {
 			'">' . (int)$row['categoryid'] .
 			'</a></td><td>' . (int)$row['sortorder'] .
 			'</td><td>' . htmlentities($row['name']) .
-			'</td><td align="right">' . (int)$row['numteams'] . "</td>";
+			'</td><td align="right">' . (int)$row['numteams'] .
+			'</td><td align="center">' . printyn($row['visible']) .
+			"</td>";
 		if ( IS_ADMIN ) {
 			echo "<td>" .
 				editLink('team_category', $row['categoryid']) . " " .

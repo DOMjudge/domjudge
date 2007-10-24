@@ -49,6 +49,10 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 <a href="http://www.w3schools.com/css/css_colornames.asp" target="_blank"><small>(help)</small></a>
 </td></tr>
 
+<tr><td>Visible:</td>
+<td><?=addRadioBox('data[0][visible]', (!isset($row['visible']) || $row['visible']), 1)?> <label for="data_0__visible_1">yes</label>
+<?=addRadioBox('data[0][visible]', (isset($row['visible']) && !$row['visible']), 0)?> <label for="data_0__visible_0">no</label></td></tr>
+
 </table>
 
 <?php
@@ -80,6 +84,7 @@ if ( isset($data['color']) ) {
 		htmlspecialchars($data['color']) .
 		';">' . htmlspecialchars($data['color']) . "</td></tr>\n";
 }
+echo '<tr><td scope="row">Visible:</td><td>' . printyn($data['visible']) . "</td></tr>\n";
 
 
 echo "</table>\n\n";
