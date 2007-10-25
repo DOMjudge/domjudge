@@ -42,7 +42,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 <td><?=addInput('data[0][name]', @$row['name'], 15, 255)?></td></tr>
 
 <tr><td><label for="data_0__sortorder_">Sort order:</label></td>
-<td><?=addInput('data[0][sortorder]', @$row['sortorder'], 2, 1)?></td></tr>
+<td><?=addInput('data[0][sortorder]', (empty($row['sortorder'])?0:$row['sortorder']), 2, 1)?></td></tr>
 
 <tr><td><label for="data_0__color_">Colour:</label></td>
 <td><?=addInput('data[0][color]', @$row['color'], 15, 25)?>
