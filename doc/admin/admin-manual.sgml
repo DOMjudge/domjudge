@@ -147,9 +147,12 @@ The DOMjudge homepage can be found at:
 <htmlurl name="http://domjudge.sourceforge.net/"
 url="http://domjudge.sourceforge.net/">
 
-The authors can be reached at the following address:
-<htmlurl name="domjudge@a-eskwadraat.nl"
-url="mailto:domjudge@a-eskwadraat.nl">
+The authors can be reached through the development mailinglist:
+<htmlurl name="domjudge-devel@a-eskwadraat.nl"
+url="mailto:domjudge-devel@a-eskwadraat.nl">. See
+<htmlurl name="the list information page"
+url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
+for details.
 
 
 <chapt>Installation and configuration <label id="install_config">
