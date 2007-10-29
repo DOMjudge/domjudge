@@ -107,7 +107,8 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	// initialize the arrays we'll build from the data
 	$THEMATRIX = $SCORES = array();
 	$SUMMARY = array('num_correct' => 0, 'total_time' => 0,
-		'affils' => array(), 'countries' => array() );
+		'affils' => array(), 'countries' => array(),
+		'visible_teams' => count($teams));
 
 	// scoreboard_jury is always up to date, scoreboard_public might be frozen.	
 	if ( $isjury || $showfinal ) {
@@ -164,7 +165,11 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	$prevsortorder = -1;
 	foreach( $SCORES as $team => $totals ) {
 
-		if ( ! ( $isjury || $teams[$team]['visible'] ) ) continue;
+		// skip displaying if this is an invisible team (except for jury sb)
+		if ( ! $isjury && ! $teams[$team]['visible'] ) {
+			$SUMMARY['visible_teams']--;
+			continue;
+		}
 		
 		// rank, team name, total correct, total time
 		echo '<tr';
@@ -286,10 +291,11 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		echo "</tr>\n";
 	}
 	echo "</tbody>\n\n<tbody>\n";
-
+	
 	// print a summaryline
 	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
-		'<td title="total teams">' . jurylink(null,count($teams),$isjury) . '</td>' .
+		'<td title="total teams">' .
+		jurylink(null,$SUMMARY['visible_teams'],$isjury) . '</td>' .
 		( SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
 		  jurylink('team_affiliations.php',count($SUMMARY['affils']) . ' / ' .
 				   count($SUMMARY['countries']),$isjury) . '</td>' : '' ) .
