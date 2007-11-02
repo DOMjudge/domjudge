@@ -46,7 +46,7 @@ int  loglevel     = LOG_DEBUG;
 FILE *stdlog      = NULL;
 
 /* Main function that contains logging code */
-void vlogmsg(int msglevel, char *mesg, va_list ap)
+void vlogmsg(int msglevel, const char *mesg, va_list ap)
 {
     time_t currtime;
     char timestring[128];
@@ -77,7 +77,7 @@ void vlogmsg(int msglevel, char *mesg, va_list ap)
 }
 
 /* Argument-list wrapper function around vlogmsg */
-void logmsg(int msglevel, char *mesg, ...)
+void logmsg(int msglevel, const char *mesg, ...)
 {
 	va_list ap;
 	va_start(ap, mesg);
@@ -88,7 +88,7 @@ void logmsg(int msglevel, char *mesg, ...)
 }
 
 /* Function to generate error/warning string */
-char *errorstring(char *type, int errnum, char *mesg)
+char *errorstring(const char *type, int errnum, const char *mesg)
 {
 	int buffersize;
 	char *buffer;
@@ -137,7 +137,7 @@ char *errorstring(char *type, int errnum, char *mesg)
 }
 
 /* Function to generate and write error logmessage (using vlogmsg) */
-void vlogerror(int errnum, char *mesg, va_list ap)
+void vlogerror(int errnum, const char *mesg, va_list ap)
 {
 	char *buffer;
 
@@ -149,7 +149,7 @@ void vlogerror(int errnum, char *mesg, va_list ap)
 }
 
 /* Argument-list wrapper function around vlogerror */
-void logerror(int errnum, char *mesg, ...)
+void logerror(int errnum, const char *mesg, ...)
 {
 	va_list ap;
 	va_start(ap, mesg);
@@ -160,7 +160,7 @@ void logerror(int errnum, char *mesg, ...)
 }
 
 /* Logs an error message and exit with non-zero exitcode */
-void verror(int errnum, char *mesg, va_list ap)
+void verror(int errnum, const char *mesg, va_list ap)
 {
 	vlogerror(errnum, mesg, ap);
 
@@ -168,7 +168,7 @@ void verror(int errnum, char *mesg, va_list ap)
 }
 
 /* Argument-list wrapper function around verror */
-void error(int errnum, char *mesg, ...)
+void error(int errnum, const char *mesg, ...)
 {
 	va_list ap;
 	va_start(ap, mesg);
@@ -177,7 +177,7 @@ void error(int errnum, char *mesg, ...)
 }
 
 /* Logs a warning message */
-void vwarning(int errnum, char *mesg, va_list ap)
+void vwarning(int errnum, const char *mesg, va_list ap)
 {
 	char *buffer;
 
@@ -189,7 +189,7 @@ void vwarning(int errnum, char *mesg, va_list ap)
 }
 
 /* Argument-list wrapper function around vwarning */
-void warning(int errnum, char *mesg, ...)
+void warning(int errnum, const char *mesg, ...)
 {
 	va_list ap;
 	va_start(ap, mesg);

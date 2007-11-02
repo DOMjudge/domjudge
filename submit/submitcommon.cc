@@ -17,7 +17,7 @@
 
 char lastmesg[SOCKETBUFFERSIZE];
 
-void vsendit(int fd, char *mesg, va_list ap)
+void vsendit(int fd, const char *mesg, va_list ap)
 {
 	char buffer[SOCKETBUFFERSIZE];
 	ssize_t nwrite;
@@ -33,7 +33,7 @@ void vsendit(int fd, char *mesg, va_list ap)
 	if ( nwrite<(int)strlen(buffer) ) error(0,"message sent incomplete");
 }
 
-void sendit(int fd, char *mesg, ...)
+void sendit(int fd, const char *mesg, ...)
 {
 	va_list ap;
 
@@ -42,7 +42,7 @@ void sendit(int fd, char *mesg, ...)
 	va_end(ap);
 }
 
-void senderror(int fd, int errnum, char *mesg, ...)
+void senderror(int fd, int errnum, const char *mesg, ...)
 {
 	va_list ap;
 	char *buf, *tmp;
@@ -68,7 +68,7 @@ void senderror(int fd, int errnum, char *mesg, ...)
 	verror(errnum,mesg,ap);
 }
 
-void sendwarning(int fd, int errnum, char *mesg, ...)
+void sendwarning(int fd, int errnum, const char *mesg, ...)
 {
 	va_list ap;
 	char *buf, *tmp;

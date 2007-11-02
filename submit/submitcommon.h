@@ -23,8 +23,8 @@
 /* Buffer where the last received message is stored */
 extern char lastmesg[];
 
-void vsendit(int, char *, va_list);
-void  sendit(int, char *, ...);
+void vsendit(int, const char *, va_list);
+void  sendit(int, const char *, ...);
 /* Send a message over a socket and log it (va_list and argument list versions).
  *
  * Arguments:
@@ -33,8 +33,8 @@ void  sendit(int, char *, ...);
  * va_list or ...  optional arguments for format characters
  */
 
-void senderror  (int fd, int errnum, char *mesg, ...);
-void sendwarning(int fd, int errnum, char *mesg, ...);
+void senderror  (int fd, int errnum, const char *mesg, ...);
+void sendwarning(int fd, int errnum, const char *mesg, ...);
 /* Send an error/warning message over a socket using sendit, close the
  * socket and generate an error/warning.
  *

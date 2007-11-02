@@ -14,7 +14,7 @@
 #define PIPE_IN  1
 #define PIPE_OUT 0
 
-char *allocstr(char *mesg, ...)
+char *allocstr(const char *mesg, ...)
 {
 	va_list ap;
 	char *str;
@@ -36,7 +36,7 @@ char *allocstr(char *mesg, ...)
 	return str;
 }
 
-int execute(char *cmd, char **args, int nargs, int stdio_fd[3], int err2out)
+int execute(const char *cmd, char **args, int nargs, int stdio_fd[3], int err2out)
 {
 	pid_t pid, child_pid;
 	int redirect;

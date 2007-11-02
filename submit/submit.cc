@@ -120,9 +120,9 @@ struct option const long_opts[] = {
 
 void version();
 void usage();
-void usage2(int , char *, ...);
-void warnuser(char *);
-char readanswer(char *answers);
+void usage2(int , const char *, ...);
+void warnuser(const char *);
+char readanswer(const char *answers);
 
 #ifdef CMDSUBMIT
 int  cmdsubmit();
@@ -462,7 +462,7 @@ void version()
 	exit(0);
 }
 
-void usage2(int errnum, char *mesg, ...)
+void usage2(int errnum, const char *mesg, ...)
 {
 	va_list ap;
 	va_start(ap,mesg);
@@ -475,7 +475,7 @@ void usage2(int errnum, char *mesg, ...)
 	exit(1);
 }
 
-void warnuser(char *warning)
+void warnuser(const char *warning)
 {
 	nwarnings++;
 
@@ -484,7 +484,7 @@ void warnuser(char *warning)
 	if ( ! quiet ) printf("WARNING: %s!\n",warning);
 }
 
-char readanswer(char *answers)
+char readanswer(const char *answers)
 {
 	struct termios old_termio, new_termio;
 	char c;

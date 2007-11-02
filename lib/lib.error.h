@@ -32,8 +32,8 @@ extern int  verbose;
 extern int  loglevel;
 extern FILE *stdlog;
 
-void logmsg (int, char *, ...);
-void vlogmsg(int, char *, va_list);
+void logmsg (int, const char *, ...);
+void vlogmsg(int, const char *, va_list);
 /* Logging functions (vlogmsg uses va_list instead of argument list):
  * Logs a message to stderr and/or logfile, including date and program name,
  * depending on the loglevel treshold values.
@@ -44,7 +44,7 @@ void vlogmsg(int, char *, va_list);
  * ... or va_list  optional arguments for format characters
  */
 
-char *errorstring(char *, int, char *);
+char *errorstring(const char *, int, const char *);
 /* Error string generating function:
  * Returns a pointer to a dynamically allocated string containing the error
  * message.
@@ -57,12 +57,12 @@ char *errorstring(char *, int, char *);
  * Returns a char pointer to the allocated string.
  */
 
-void logerror (int, char *, ...);
-void error    (int, char *, ...);
-void warning  (int, char *, ...);
-void vlogerror(int, char *, va_list);
-void verror   (int, char *, va_list);
-void vwarning (int, char *, va_list);
+void logerror (int, const char *, ...);
+void error    (int, const char *, ...);
+void warning  (int, const char *, ...);
+void vlogerror(int, const char *, va_list);
+void verror   (int, const char *, va_list);
+void vwarning (int, const char *, va_list);
 /* Error and warning functions (v.. uses va_list instead of argument list):
  * Logs an error message including error string from 'errno'.
  *   logerror   only logs the error message (non-fatal error)
