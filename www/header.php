@@ -10,11 +10,13 @@
  */
 if (!defined('DOMJUDGE_VERSION')) die("DOMJUDGE_VERSION not defined.");
 
+header('Content-Type: text/html; charset=' . DJ_CHARACTER_SET);
+
 if ( isset($refresh) ) {
 	header('Refresh: ' . $refresh);
 }
 
-echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
+echo '<?xml version="1.0" encoding="' . DJ_CHARACTER_SET . '" ?>' . "\n";
 
 if(!isset($menu)) {
 	$menu = true;
