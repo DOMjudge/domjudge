@@ -15,6 +15,7 @@ Version 2.2.0 - SVN
  - Represent balloon colours with a symbol rather than filling the background,
    making the scoreboard less cacophonic. (Closes: #1808561, Thijs)
  - Add a web based tool for tracking balloon handouts. (Thijs)
+ - Fix C compiler warnings by using 'const char *'.
 
 Version 2.1.1 - SVN
 -------------------

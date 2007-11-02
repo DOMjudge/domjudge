@@ -52,7 +52,7 @@ int execute(const char *cmd, char **args, int nargs, int stdio_fd[3], int err2ou
 	redirect = ( stdio_fd[0] || stdio_fd[1] || stdio_fd[2] );
 	
 	/* Build the complete argument list for execvp */
-	argv[0] = cmd;
+	argv[0] = (char *) cmd;
 	for(i=0; i<nargs; i++) argv[i+1] = args[i];
 	argv[nargs+1] = NULL;
 

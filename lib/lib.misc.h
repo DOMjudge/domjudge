@@ -31,7 +31,7 @@ char *allocstr(const char *, ...);
  * Returns a pointer to the allocated string
  */
 
-int execute(const char *, char **, int , int[3], int );
+int execute(const char *, char **, int, int[3], int);
 /* Execute a subprocess using fork and execvp and optionally perform
  * IO redirection of stdin/stdout/stderr.
  *
