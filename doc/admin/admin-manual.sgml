@@ -603,9 +603,7 @@ squares are storage locations.
 <p>
 
 DOMjudge uses a MySQL database server for storage of contest status
-information. By default MySQL listens only on localhost for connections.
-Make sure it is reachable from all judgehosts (look for skip-networking
-or bind-address options in the MySQL configuration).
+information.
 
 The database structure and needed privileges are included in MySQL
 dump files in the sql subdirectory. The default database name is
@@ -621,6 +619,23 @@ The domjudge database contains a number of tables, some of which need
 to be manually filled with data before the contest can be run. See
 the <ref id="contestsetup:database" name="database section of Configuration">
 for details.
+
+<sect1>Finetuning settings
+<p>
+
+It may be desirable or even necessary to finetune some MySQL default settings:
+
+<itemize>
+<item><tt>max_connections</tt>: The default 100 is too low, because of the
+connection caching by Apache threads. 1000 is more appropriate.
+<item><tt>skip-networking</tt> or <tt>bind-address</tt>: By default MySQL
+only listens on a local socket, but judgehosts need to connect remotely to
+it. When enabling remote connections, you may want to limit it to only the
+IP's of judgehosts in the MySQL user configuration (or with firewall rules).
+<item>Root password: MySQL does not have a password for the root user
+by default. It's very desirable to set one.
+</itemize>
+
 
 <sect1>MySQL table types
 <p>
