@@ -8,8 +8,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-/** DOMjudge character set */
-define('DJ_CHARACTER_SET', 'utf-8');
 /** Symbol used in output to represent a balloon */
 define('BALLOON_SYM', '&#9679;');
 

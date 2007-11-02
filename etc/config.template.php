@@ -17,6 +17,9 @@
 define_syslog_variables();
 error_reporting(E_ALL);
 
+/** Character set */
+define('DJ_CHARACTER_SET', 'utf-8');
+
 /** Possible exitcodes from testsol and their meaning */
 $EXITCODES = array (
 	0	=>	'correct',
