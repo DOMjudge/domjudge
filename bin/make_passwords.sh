@@ -31,8 +31,7 @@ else
 fi
 
 # Location of files:
-HTPASSWD="$SYSTEM_ROOT/.htpasswd"
-HTACCESS="$SYSTEM_ROOT/www/jury/.htaccess"
+HTPASSWD="$SYSTEM_ROOT/etc/htpasswd-jury"
 SQLPASSWD="$SYSTEM_ROOT/sql/mysql_create.sql"
 PHPPASSWD="$SYSTEM_ROOT/etc/passwords.php"
 PASSWD_FILES="\
@@ -137,7 +136,7 @@ plain-text in the following files:
 $PASSWD_FILES
 
 Protect these files carefully with the correct permissions and do
-not choose a password equal to a sensitive existing one!
+not choose a password equal to a valuable existing one!
 
 EOF
 
@@ -157,17 +156,15 @@ EOF
 
 Please enter a password for the DOMjudge jury account.
 This password will be needed for getting access to the jury part of
-the webinterface and to the MySQL domjudge database. The accountname
+the webinterface and to the MySQL domjudge database. The account name
 in both cases is 'domjudge_jury'.
 EOF
 
 	PASSWD_JURY=`ask_passwd`
 
-	# Generate '.htpasswd' file for restricting access to jury
-	# webinterface and update it's location in '.htaccess':
+	# Generate 'htpasswd' file for restricting access to jury
+	# webinterface:
 	$HTPASSWD_BINARY -b -c "$HTPASSWD" "domjudge_jury" "$PASSWD_JURY"
-
-	string_replace "s!^AuthUserFile .*!AuthUserFile $HTPASSWD!" "$HTACCESS"
 	
 	set_passwords "$PASSWD_JURY" "$PASSWD_TEAM" "$PASSWD_PUBLIC"
 }
