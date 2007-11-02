@@ -11,7 +11,7 @@
 /** DOMjudge character set */
 define('DJ_CHARACTER_SET', 'utf-8');
 /** Symbol used in output to represent a balloon */
-define('BALLOON_SYM', '&#9673;');
+define('BALLOON_SYM', '&#9679;');
 
 /**
  * Return the base URI for the DOMjudge Webinterface.
