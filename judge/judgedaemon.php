@@ -25,8 +25,11 @@ require (SYSTEM_ROOT . '/lib/init.php');
 $verbose = LOG_INFO;
 
 system("pgrep -u ".RUNUSER, $retval);
-if ($retval != 1) {
+if ($retval == 0) {
 	error("Still some processes by ".RUNUSER." found, aborting");
+}
+if ($retval == 2) {
+	error("Error while checking processes for user " . RUNUSER);
 }
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
