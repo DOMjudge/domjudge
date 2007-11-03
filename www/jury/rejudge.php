@@ -16,11 +16,11 @@ require('init.php');
 
 /** These are the tables that we can deal with */
 $tablemap = array (
-	'judgehost'  => 'judging.judgehost',
-	'language'   => 'submission.langid',
-	'problem'    => 'submission.probid',
-	'submission' => 'submission.submitid',
-	'team'       => 'submission.teamid'
+	'judgehost'  => 'j.judgehost',
+	'language'   => 's.langid',
+	'problem'    => 's.probid',
+	'submission' => 's.submitid',
+	'team'       => 's.teamid'
 	);
 
 $table = @$_POST['table'];
@@ -41,15 +41,15 @@ global $DB;
 // Special case 'submission' for admin overrides
 if ( IS_ADMIN && $table == 'submission' ) {
 	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid
-	               FROM judging
-	               LEFT JOIN submission USING (submitid)
-	               WHERE judging.cid = %i AND valid = 1 AND ' .
+	               FROM judging j
+	               LEFT JOIN submission s USING (submitid)
+	               WHERE j.cid = %i AND valid = 1 AND ' .
 	               $tablemap[$table] . ' = %s', $cid, $id);
 } else {
 	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid
-	               FROM judging
-	               LEFT JOIN submission USING (submitid)
-	               WHERE judging.cid = %i AND valid = 1 AND
+	               FROM judging j
+	               LEFT JOIN submission s USING (submitid)
+	               WHERE j.cid = %i AND valid = 1 AND
 	               result IS NOT NULL AND result != "correct" AND ' .
 	               $tablemap[$table] . ' = %s', $cid, $id);
 }
