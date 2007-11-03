@@ -28,7 +28,7 @@ system("pgrep -u ".RUNUSER, $retval);
 if ($retval == 0) {
 	error("Still some processes by ".RUNUSER." found, aborting");
 }
-if ($retval == 2) {
+if ($retval != 1) {
 	error("Error while checking processes for user " . RUNUSER);
 }
 
