@@ -71,6 +71,7 @@ tr.unread td {
 }
 
 .teamid, .filename, .hostname { font-family: monospace; }
+.probid, .langid { font-variant: small-caps; }
 
 #menutop a {
 	font-weight: bold;

@@ -68,7 +68,8 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 	// for all rows)
 	echo "<table class=\"list\">\n<thead>\n<tr>" .
 		($isjury ? "<th scope=\"col\">ID</th>" : '') .
-		"<th scope=\"col\">time</th><th scope=\"col\">team</th>" .
+		"<th scope=\"col\">time</th>" .
+		($isjury ? "<th scope=\"col\">team</th>" : '') .
 		"<th scope=\"col\">problem</th><th scope=\"col\">lang</th>" .
 		"<th scope=\"col\">status</th>" .
 		($isjury ? "<th scope=\"col\">verified</th><th scope=\"col\">last<br />judge</th>" : '') .
@@ -86,13 +87,15 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 			echo "<td><a href=\"submission.php?id=$sid\">s$sid</a></td>";
 		}
 		echo "<td>" . printtime($row['submittime']) . "</td>";
-		echo '<td class="teamid" title="' . htmlspecialchars($row['teamname']) . '">' .
-			( $isjury ? '<a href="team.php?id=' . urlencode($row['teamid']) . '">' : '' ) .
-			htmlspecialchars($row['teamid']) . ( $isjury ? '</a>' : '') . '</td>';
-		echo '<td title="' . htmlspecialchars($row['probname']) . '">' .
+		if ( $isjury ) {
+			echo '<td class="teamid" title="' . htmlspecialchars($row['teamname']) . '">' .
+			     '<a href="team.php?id=' . urlencode($row['teamid']) . '">' .
+			     htmlspecialchars($row['teamid']) . '</a></td>';
+		}
+		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
 			( $isjury ? '<a href="problem.php?id=' . urlencode($row['probid']) . '">' : '' ) .
 			htmlspecialchars($row['probid']) . ( $isjury ? '</a>' : '') . '</td>';
-		echo '<td title="' . htmlspecialchars($row['langname']) . '">' .
+		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
 			( $isjury ? '<a href="language.php?id=' . $row['langid'] . '">' : '' ) .
 			htmlspecialchars($row['langid']) . ( $isjury ? '</a>' : '') . '</td>';
 		echo "<td>";

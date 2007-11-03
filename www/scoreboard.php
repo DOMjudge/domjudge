@@ -409,7 +409,8 @@ function putTeamRow($cdata, $teamid) {
 			$pdata = array ( 'submitted' => 0, 'correct' => 0,
 			                 'time' => 0, 'penalty' => 0);
 		}
-		echo '<tr><td title="' . htmlspecialchars($probdata['name']) . '">' .
+		echo '<tr><td class="probid" title="' .
+			htmlspecialchars($probdata['name']) . '">' .
 			(!empty($probdata['color']) ? '<span style="color: ' .
 			       htmlspecialchars($probdata['color']) . ';">' .
 			       BALLOON_SYM . '</span> ' : '' ) .

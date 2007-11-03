@@ -29,8 +29,9 @@ if( $res->count() == 0 ) {
 		"</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
-		echo "<tr" . ($row['cid'] == $cid ? '' : ' class="disabled"').
-			"><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".
+		echo "<tr" . ($row['cid'] == $cid ? '' : ' class="disabled"') .
+			"><td class=\"probid\"><a href=\"problem.php?id=" . 
+				htmlspecialchars($row['probid'])."\">".
 				htmlspecialchars($row['probid'])."</a>".
 			"</td><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".
 			htmlspecialchars($row['name'])."</a>".

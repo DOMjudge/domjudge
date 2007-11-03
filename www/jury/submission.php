@@ -48,15 +48,16 @@ $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime
 <tr><td scope="row">Contest:</td><td><?=htmlspecialchars($submdata['contestname'])?></td></tr>
 <tr><td scope="row">Team:</td><td>
 	<a href="team.php?id=<?=urlencode($submdata['teamid'])?>">
-	<span class="teamid"><?=htmlspecialchars($submdata['teamid'])?></span>: 
+	<span class="teamid"><?=htmlspecialchars($submdata['teamid'])?></span>:
 	<?=htmlspecialchars($submdata['teamname'])?></a></td></tr>
 <tr><td scope="row">Problem:</td><td>
 	<a href="problem.php?id=<?=$submdata['probid']?>">
-	<?=htmlspecialchars($submdata['probid'].": ".$submdata['probname'])?></a></td></tr>
+	<span class="probid"><?=htmlspecialchars($submdata['probid'])?></span>:
+	<?=htmlspecialchars($submdata['probname'])?></a></td></tr>
 <tr><td scope="row">Language:</td><td>
 	<a href="language.php?id=<?=$submdata['langid']?>">
 	<?=htmlspecialchars($submdata['langname'])?></a></td></tr>
-<tr><td scope="row">Submittime:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
+<tr><td scope="row">Submitted:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
 <tr><td scope="row">Source:</td><td class="filename">
 	<a href="show_source.php?id=<?=$id?>">
 	<?=htmlspecialchars($submdata['sourcefile'])?></a></td></tr>
@@ -72,7 +73,7 @@ if ( count($jdata) > 0 ) {
 		"<caption>Judgings</caption>\n<thead>\n" .
 		"<tr><td></td><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
 		"<th scope=\"col\">judgehost</th><th scope=\"col\">result</th>" .
-		"<th scope=\"col\">valid</th></tr>\n</thead>\n<tbody>\n";
+		"</tr>\n</thead>\n<tbody>\n";
 
 	// when there's no judging selected through the request, we find
 	// out what the best one should be. The valid one, or else the most
@@ -99,7 +100,6 @@ if ( count($jdata) > 0 ) {
 		echo '<td><a href="judgehost.php?id=' . urlencode(@$jud['judgehost']) .
 			'">' . printhost(@$jud['judgehost']) . '</a></td>';
 		echo '<td>' . printresult(@$jud['result'], $jud['valid']) . '</td>';
-		echo '<td align="center">' . printyn($jud['valid']) . '</td>';
 		echo "</tr>\n";
 
 	}

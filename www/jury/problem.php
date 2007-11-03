@@ -48,7 +48,7 @@ if ( IS_ADMIN && !empty($cmd) ):
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Problem ID:</td><td>";
+		echo "<tr><td>Problem ID:</td><td class=\"probid\">";
 		$row = $DB->q('TUPLE SELECT * FROM problem WHERE probid = %s',
 			$_GET['id']);
 		echo addHidden('keydata[0][probid]', $row['probid']);
@@ -119,7 +119,7 @@ echo addForm($pagename) . "<p>\n" .
 	"</p>\n";
 ?>
 <table>
-<tr><td scope="row">ID:          </td><td><?=htmlspecialchars($data['probid'])?></td></tr>
+<tr><td scope="row">ID:          </td><td class="probid"><?=htmlspecialchars($data['probid'])?></td></tr>
 <tr><td scope="row">Name:        </td><td><?=htmlspecialchars($data['name'])?></td></tr>
 <tr><td scope="row">Contest:     </td><td><?=htmlspecialchars($data['cid']).' - '.
                                  htmlspecialchars($data['contestname'])?></td></tr>

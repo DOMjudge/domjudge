@@ -39,8 +39,9 @@ if( ! $row ) {
 
 <table>
 <tr><td scope="row">Problem:</td>
-	<td><?=htmlspecialchars($row['probname'].' ['.$row['probid'].']')?></td></tr>
-<tr><td scope="row">Submittime:</td>
+	<td><?=htmlspecialchars($row['probname'])?> [<span class="probid"><?=
+	htmlspecialchars($row['probid']) ?></span>]</td></tr>
+<tr><td scope="row">Submitted:</td>
 	<td><?=printtime($row['submittime'])?></td></tr>
 <tr><td scope="row">Language:</td>
 	<td><?=htmlspecialchars($row['langname'])?></td></tr>
