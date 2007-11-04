@@ -55,6 +55,7 @@ foreach ( $dirstocheck as $dir => $ops ) {
 	$realdir = constant($dir);
 	if( ! file_exists($realdir) ) { warn("$dir [$realdir] does not exist!"); continue; }
 	if( ! is_dir($realdir) )      { warn("$dir [$realdir] is not a directory!"); continue; }
+	if( strstr($realdir, '//') )  { warn("$dir [$realdir] contains repeated slashes (//). This may confuse some programs."); }
 	if( strstr($ops,'r') &&
 	    ! is_readable($realdir) ) { warn("$dir [$realdir] is not readable!"); continue; }
 	if( strstr($ops,'w') &&
