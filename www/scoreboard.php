@@ -27,7 +27,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 
 	global $DB;
 
-	if ( empty( $cdata ) ) { echo "<p><em>No contests defined</em></p>\n"; return; }
+	if ( empty( $cdata ) ) { echo "<p><em>No active contest</em></p>\n"; return; }
 	$cid = $cdata['cid'];
 
 	// get the teams and problems

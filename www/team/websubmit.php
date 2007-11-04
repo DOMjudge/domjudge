@@ -18,8 +18,8 @@ $title = 'Submit';
 require('../header.php');
 require('../forms.php');
 
-if ( $cid === FALSE  ) {
-	echo "<p><em>No contests defined!</em></p>\n";
+if ( is_null($cid)  ) {
+	echo "<p><em>No active contest</em></p>\n";
 	require('../footer.php');
 	exit;
 }
