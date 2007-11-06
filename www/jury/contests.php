@@ -16,7 +16,7 @@ echo "<h1>Contests</h1>\n\n";
 
 if ( isset($_POST['unfreeze']) ) {
 	$docid = array_pop(array_keys($_POST['unfreeze']));
-	if ( $docid !== $cid ) {
+	if ( $docid != $cid ) {
 		error("Can only unfreeze for current contest");
 	}
 	$DB->q('UPDATE contest SET unfreezetime = %s WHERE cid = %i', now(), $docid);
