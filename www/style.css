@@ -59,6 +59,13 @@ tr.unread td {
 	vertical-align: bottom;
 }
 
+.balloons td {
+	padding-right: 2ex;
+	padding-bottom: 2ex;
+	border-bottom: solid 1px silver;
+	vertical-align: middle;
+}
+
 .teamstatus { text-align: center; }
 .teamstatus img { vertical-align: middle; }
 

@@ -57,21 +57,43 @@ while ( $row = $res->next() ) {
 	$TOTAL_BALLOONS[$row['login']][] = $row['probid'];
 }
 
+$conteststart  = strtotime($cdata['starttime']);
+if ( !empty($cdata['lastscoreupdate']) ) {
+	$contestfreeze = strtotime($cdata['lastscoreupdate']);
+}
+
 if ( !empty($BALLOONS) ) {
 	echo addForm('balloons.php');
 
-	echo "<table>\n" .
-		"<tr><th colspan=\"2\">Team</th><th>Room</th><th>Solved</th><th>Total</th></tr>\n";
+	echo "<table class=\"list balloons\">\n" .
+		"<tr><th>Time</th><th>Solved</th><th colspan=\"2\">Team</th>\n" .
+		"<th>Room</th><th>Total</th><th></th></tr>\n";
 
 	foreach ( $BALLOONS as $row ) {
 
+		// start a new row, 'disable' if balloon has been handed out already
 		echo '<tr'  . ( $row['balloon'] == 1 ? ' class="disabled"' : '' ) . '>';
+
+		// time the balloon was earned (contest start + total time (in minutes))
+		// display an "F" after the time if this is after the freeze.
+		$balloontime = $conteststart + ($row['totaltime']*60);
+		$frozen = (isset($contestfreeze) && $balloontime >= $contestfreeze ?
+			' <span title="After Scoreboard Freeze">F</span>' : '');
+		
+		echo '<td>' . printtime( date('Y-m-d H:i:s', $balloontime) ) .
+			$frozen . '</td>';
+
+		// the balloon earned
+		echo '<td class="probid">' . htmlspecialchars($row['probid']) . 
+			' <span style="color: ' . htmlspecialchars($probs_data[$row['probid']]['color']) .
+			'">' . BALLOON_SYM . '</span></td>';
+
+		// team name and room
 		echo '<td class="teamid">' . htmlspecialchars($row['login']) . '</td><td>' .
 			htmlspecialchars($row['teamname']) . '</td><td>' .
-			htmlspecialchars($row['room']) . '</td><td>' .
-			$row['probid'] . ' <span style="color: ' . 
-			htmlspecialchars($probs_data[$row['probid']]['color']) .
-			'">' . BALLOON_SYM . '</span></td><td>';
+			htmlspecialchars($row['room']) . '</td><td>';
+
+		// list of balloons for this team
 		sort($TOTAL_BALLOONS[$row['login']]);
 		foreach($TOTAL_BALLOONS[$row['login']] as $prob_solved) {
 			echo '<span title="' .
@@ -81,6 +103,8 @@ if ( !empty($BALLOONS) ) {
 				'">' . BALLOON_SYM . '</span> ';
 		}
 		echo '</td><td>';
+
+		// 'done' button when balloon has yet to be handed out
 		if ( $row['balloon'] == 0 ) {
 			echo '<input type="submit" name="done[' .
 				htmlspecialchars($row['probid']) . ';' .
