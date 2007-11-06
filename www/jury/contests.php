@@ -65,8 +65,8 @@ if( count($res) == 0 ) {
 			echo "<input type=\"submit\" name=\"unfreeze[" . $row['cid'] .
 				"]\" value=\"unfreeze scoreboard now\"" ;
 			$now = now();
-			if ( $row['endtime'] > $now ||
-				(isset($row['unfreezetime']) && $row['unfreezetime'] <= $now)
+			if ( strcmp($row['endtime'],$now) > 0 ||
+				(isset($row['unfreezetime']) && strcmp($row['unfreezetime'], $now) <= 0)
 				) {
 				echo " disabled=\"disabled\"";
 			}

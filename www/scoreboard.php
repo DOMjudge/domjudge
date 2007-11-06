@@ -49,13 +49,13 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	// We can compare $now and the dbfields stringwise.
 	$now = now();
 	$showfinal  = ( !isset($cdata['lastscoreupdate']) &&
-		$cdata['endtime'] <= $now ) ||
+		strcmp($cdata['endtime'],$now) <= 0 ) ||
 		( isset($cdata['unfreezetime']) &&
-		$cdata['unfreezetime'] <= $now );
+		strcmp($cdata['unfreezetime'], $now) <= 0 );
 	// freeze scoreboard if lastscoreupdate time has been reached and
 	// we're not showing the final score yet
 	$showfrozen = !$showfinal && isset($cdata['lastscoreupdate']) &&
-		$cdata['lastscoreupdate'] <= $now;
+		strcmp($cdata['lastscoreupdate'],$now) <= 0;
 
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
