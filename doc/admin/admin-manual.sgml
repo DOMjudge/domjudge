@@ -1136,8 +1136,9 @@ way! Now to check that you're ready for a contest.
 First, go to the Jury Interface:
 <tt>http://www.your-domjudge-location/jury</tt>. Look under all the
 menu items to see whether the displayed data looks sane. Use the
-config-checker under `Admin Functions' for some additional sanity
-checks on your configuration.
+config-checker under `Admin Functions',
+and <tt>make check</tt> under the <tt>etc/</tt> directory
+for some additional sanity checks on your configuration.
 
 Go to a team workstation and see if you can access the team page, and if
 you can submit solutions.
