@@ -140,7 +140,7 @@ function calcScoreRow($cid, $team, $prob) {
  */
 function now()
 {
-	return date('Y-m-d H-i-s');
+	return date('Y-m-d H:i:s');
 }
 
 /**
