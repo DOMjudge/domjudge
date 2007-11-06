@@ -64,8 +64,9 @@ if( count($res) == 0 ) {
 		if ( $row['cid'] === $cid && isset($row['lastscoreupdate']) ) {
 			echo "<input type=\"submit\" name=\"unfreeze[" . $row['cid'] .
 				"]\" value=\"unfreeze scoreboard now\"" ;
-			if ( strtotime($row['endtime']) > time() ||
-				(isset($row['unfreezetime']) && strtotime($row['unfreezetime']) <= time())
+			$now = now();
+			if ( $row['endtime'] > $now ||
+				(isset($row['unfreezetime']) && $row['unfreezetime'] <= $now)
 				) {
 				echo " disabled=\"disabled\"";
 			}
