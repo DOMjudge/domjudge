@@ -51,7 +51,7 @@ $contdata = getCurContest(TRUE);
 $cid = $contdata['cid'];
 
 // If no contest has started yet, refuse submissions.
-$now = date('Y-m-d H:i:s');
+$now = now();
 if( $contdata['starttime'] > $now ) {
 	error("The contest is closed, no submissions accepted. [c$cid]");
 }
@@ -103,7 +103,7 @@ if ( ! copy(INCOMINGDIR."/$file", SUBMITDIR."/$tofile") ) {
 $id = $DB->q('RETURNID INSERT INTO submission
               (cid,teamid,probid,langid,submittime,sourcefile,sourcecode)
               VALUES (%i, %s, %s, %s, %s, %s, %s)',
-             $cid, $teamrow['login'], $probid, $lang, now(), $tofile,
+             $cid, $teamrow['login'], $probid, $lang, $now, $tofile,
              getFileContents(SUBMITDIR."/".$tofile, false));
 
 // Log to event table
