@@ -199,7 +199,7 @@ CREATE TABLE `team` (
 
 CREATE TABLE `team_affiliation` (
   `affilid` varchar(10) NOT NULL default '',
-  `name` varchar(50) NOT NULL default '',
+  `name` varchar(255) NOT NULL default '',
   `country` char(2) default NULL,
   `comments` text,
   PRIMARY KEY  (`affilid`)
