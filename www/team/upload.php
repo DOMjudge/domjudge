@@ -28,7 +28,7 @@ if ( !isset($_POST['submit']) ) {
 function err($string) {
 	if (NONINTERACTIVE) error($string);
 
-	echo '<div id="uploadstatus" class="error">';
+	echo '<div id="uploadstatus">';
 	logmsg(LOG_WARNING, $string);
 	echo '</div>';
 	
