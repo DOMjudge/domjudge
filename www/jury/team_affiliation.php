@@ -44,7 +44,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 ?>
 
 <tr><td><label for="data_0__name_">Name:</label></td>
-<td><?=addInput('data[0][name]', @$row['name'], 40, 50)?></td></tr>
+<td><?=addInput('data[0][name]', @$row['name'], 40, 255)?></td></tr>
 
 <tr><td><label for="data_0__country_">Country:</label></td>
 <td><?=addInput('data[0][country]', @$row['country'], 3, 2)?></td></tr>
