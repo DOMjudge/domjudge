@@ -32,7 +32,7 @@ fi
 
 # Location of files:
 HTPASSWD="$SYSTEM_ROOT/etc/htpasswd-jury"
-SQLPASSWD="$SYSTEM_ROOT/sql/mysql_create.sql"
+SQLPASSWD="$SYSTEM_ROOT/sql/mysql_create_db.sql"
 PHPPASSWD="$SYSTEM_ROOT/etc/passwords.php"
 PASSWD_FILES="\
 $PHPPASSWD

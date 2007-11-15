@@ -17,7 +17,7 @@ build:
 install: finddbname
 # Install all sql files at once, so we have to ask the MySQL root
 # password only once:
-	( $(call subst_db,$(DBNAME)) mysql_create.sql ; \
+	( $(call subst_db,$(DBNAME)) mysql_create_db.sql ; \
 	  echo 'USE $(DBNAME);' ;    \
 	  cat mysql_db_structure.sql \
 	      mysql_privileges.sql   \
