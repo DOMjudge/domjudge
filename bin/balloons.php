@@ -31,13 +31,13 @@ function notification_text($team, $problem, $probs_solved, $probs_data) {
 	global $cdata;
 	
 	$ret = 
-		"Notification of a problem solved:\n".
+		"A problem has been solved:\n".
 		"\n".
 		(empty($team['room']) ? "" : "Room:    ".$team['room']."\n" ) .
 		"Team:    ".$team['login'].": ".$team['name']."\n".
 		"Problem: ".$problem.": ".$probs_data[$problem]['name'].
 		(empty($probs_data[$problem]['color']) ? "" : " (colour: ".$probs_data[$problem]['color'].")" ) . "\n\n" .
-		"Current balloon status:\n";
+		"Current balloon status for this team:\n";
 
 	foreach($probs_solved as $probid) {
 		$ret .= " - " . $probid .": " . $probs_data[$probid]['name'] .

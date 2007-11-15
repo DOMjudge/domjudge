@@ -27,7 +27,7 @@ void usage(char *error)
   if ( error!=NULL ) printf("Error: %s.\n\n",error);
   
   printf("Usage: %s <file>\n",progname);
-  printf("Checks <file> for correctness as testinput.\n");
+  printf("Checks testinput file <file> for anomalies.\n");
 }
 
 int check()
@@ -112,7 +112,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  if ( (ok=check()) ) printf("File has correct testdata input format.\n");
+  if ( (ok=check()) ) printf("No problems in testdata input format found.\n");
   
   fclose(f);
   
