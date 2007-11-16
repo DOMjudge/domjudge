@@ -29,7 +29,10 @@
 \def\maketitle{%
   \null
   \thispagestyle{empty}%
-  \vskip 2cm
+  \begin{figure}[htbp]
+    \centerline{\includegraphics[height=5cm]{ICPClogo-normal}}
+  \end{figure}
+  \vskip 1cm
   \begin{center}\leavevmode
     \normalfont
     {\fontsize{30pt}{30pt}\selectfont \@title \par}%
@@ -38,9 +41,9 @@
     \vskip 1cm
     {\Large \@date \par}%
   \end{center}%
-  \vskip 2cm
+  \vskip 1cm
   \begin{figure}[htbp]
-    \centerline{\includegraphics[height=7cm]{../logos/DOMjudgelogo.pdf}}
+    \centerline{\includegraphics[height=6cm]{../logos/DOMjudgelogo.pdf}}
   \end{figure}
   \vfill\null
 }

@@ -5,7 +5,7 @@
 % For inclusion of the correct date (last modified)
 \SVNdate $Date$
 
-\title{Team manual \DOMjudge\\(version \DOMJUDGE_VERSION)}
+\title{Team manual NWERC 2007\\ \DOMjudge \& computer systems}
 
 \begin{document}
 
@@ -21,7 +21,8 @@
 
 This document describes the \DOMjudge jury-system, that allows
 teams to submit solutions, view results and submit
-``clarification requests''.
+``clarification requests''. Furthermore, a short introduction to the
+computer systems used during the NWERC is included.
 
 All interaction with the system is done using a web-interface, except
 (optionally) the submission of solutions: this is done either in the
@@ -70,6 +71,44 @@ requests is done through a web-interface. The address is
 \emph{End of summary}
 
 \newpage
+
+\section{Computer systems}
+
+During the NWERC, the computer systems of the Computer Science
+department of Utrecht University will be used. Each team has been
+given the choice of Windows 2000 or Linux for operating system. Please
+check that you have been assigned the correct O/S as specified in the
+registration webform in the NWERC website.
+
+\subsection{Account and logging in}
+
+Each team has been provided an account \cmd{nwercXX}, but no password.
+Logging in will be done by the organization and \emph{you should not
+  log out}: it might take some time before someone arrives to log you
+in again.
+
+The \DOMjudge team webinterface does not require authentication: you
+should be able to view your teampage just by visiting \url{\WEBBASEURI
+  team} in your browser.
+
+Your account will be cleaned and restored to it's original state
+between the saturday testsession and the contest on sunday.
+
+\subsection{Windows}
+
+On your desktop is a folder \cmd{NWERC}, which should contain (almost)
+everything you need: documentation, browsers, editors and a Cygwin
+shell. The Cygwin shell must be used to run the commandline submit
+client and can be used to lookup C-function manual pages with \cmd{man
+  <pagename>}. You can also use it to compile with \cmd{gcc} and
+\cmd{g++} for C and C++ respectively.
+
+\subsection{Linux}
+
+Under Linux, the documen
+
+\newpage
+
 \section{Submitting solutions}\label{submit}
 
 Submitting solutions can be done in two ways: with the command-line
