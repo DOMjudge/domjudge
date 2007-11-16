@@ -60,7 +60,7 @@ if [ ! -x "$CHECK_PROGRAM" ]; then
 fi
 
 # Run the program:
-"$CHECK_PROGRAM" $OPTIONS "$TESTIN" "$PROGRAM" "$TESTOUT" > "$DIFFOUT"
+"$CHECK_PROGRAM" $CHECK_OPTIONS "$TESTIN" "$PROGRAM" "$TESTOUT" > "$DIFFOUT"
 EXITCODE=$?
 
 # Exit with failure, when non-zero exitcode found:
