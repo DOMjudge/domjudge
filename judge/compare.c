@@ -56,7 +56,7 @@
 
 const int maxprintlen = 80;
 
-char *diffoptions = "-U0";
+char *diffoptions = "-a -U0";
 
 char *progname;
 
