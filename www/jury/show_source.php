@@ -60,7 +60,7 @@ echo '<h2 class="filename"><a name="source"></a>Submission ' .
 if ( strlen($source['sourcecode'])==0 ) {
 	// Someone submitted an empty file. Cope gracefully.
 	echo "<p><em>empty file</em></p>\n\n";
-} elseif ( strlen($source['sourcecode']) < 5 * 1024 && $hl) ) {
+} elseif ( strlen($source['sourcecode']) < 5 * 1024 && isset($hl) ) {
 	// We managed to set up the highligher
 	$hl->setRenderer($renderer);
 	echo $hl->highlight($source['sourcecode']);
