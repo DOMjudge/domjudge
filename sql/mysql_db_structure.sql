@@ -148,7 +148,6 @@ CREATE TABLE `scoreboard_public` (
   `totaltime` int(4) unsigned NOT NULL default '0',
   `penalty` int(4) unsigned NOT NULL default '0',
   `is_correct` tinyint(1) unsigned NOT NULL default '0',
-  `balloon` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (public/team version)';
 

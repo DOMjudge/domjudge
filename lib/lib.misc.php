@@ -119,13 +119,13 @@ function calcScoreRow($cid, $team, $prob) {
 	if ( $correct_j == 0 ) $penalty_j = 0;
 	if ( $correct_p == 0 ) $penalty_p = 0;
 
-	// insert or update the values in the jury scores table
-	$DB->q('REPLACE INTO scoreboard_public
-	        (cid, teamid, probid, submissions, totaltime, penalty, is_correct, balloon)
-	        VALUES (%i,%s,%s,%i,%i,%i,%i,%i)',
-	       $cid, $team, $prob, $submitted_p, $time_p, $penalty_p, $correct_p, $balloon);
-
 	// insert or update the values in the public/team scores table
+	$DB->q('REPLACE INTO scoreboard_public
+	        (cid, teamid, probid, submissions, totaltime, penalty, is_correct)
+	        VALUES (%i,%s,%s,%i,%i,%i,%i,%i)',
+	       $cid, $team, $prob, $submitted_p, $time_p, $penalty_p, $correct_p);
+
+	// insert or update the values in the jury scores table
 	$DB->q('REPLACE INTO scoreboard_jury
 	        (cid, teamid, probid, submissions, totaltime, penalty, is_correct, balloon)
 	        VALUES (%i,%s,%s,%i,%i,%i,%i,%i)',
