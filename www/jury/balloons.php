@@ -84,9 +84,9 @@ if ( !empty($BALLOONS) ) {
 			$frozen . '</td>';
 
 		// the balloon earned
-		echo '<td class="probid">' . htmlspecialchars($row['probid']) . 
-			' <span style="color: ' . htmlspecialchars($probs_data[$row['probid']]['color']) .
-			'">' . BALLOON_SYM . '</span></td>';
+		echo '<td class="probid">' .
+			'<span style="color: ' . htmlspecialchars($probs_data[$row['probid']]['color']) .
+			'">' . BALLOON_SYM . '</span> ' . htmlspecialchars($row['probid']) . '</td>';
 
 		// team name and room
 		echo '<td class="teamid">' . htmlspecialchars($row['login']) . '</td><td>' .
