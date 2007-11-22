@@ -39,8 +39,7 @@ if ( include_highlighter() ) {
 		include('Text/Highlighter/Renderer/Html.php');
 		$renderer = new Text_Highlighter_Renderer_Html(
 			array("numbers" => HL_NUMBERS_TABLE, "tabsize" => 4));
-		$hl =& Text_Highlighter::factory(
-			($source['langid'] == 'c' ? 'cpp' : $source['langid']));
+		$hl =& Text_Highlighter::factory($lang);
 	}
 	$sourcecss = true;
 }
@@ -60,8 +59,8 @@ echo '<h2 class="filename"><a name="source"></a>Submission ' .
 if ( strlen($source['sourcecode'])==0 ) {
 	// Someone submitted an empty file. Cope gracefully.
 	echo "<p><em>empty file</em></p>\n\n";
-} elseif ( strlen($source['sourcecode']) < 5 * 1024 && isset($hl) ) {
-	// We managed to set up the highligher
+} elseif ( isset($hl) && strlen($source['sourcecode']) < 5 * 1024 ) {
+	// Highligher available and source < 5Kb (otherwise Highlighter has trouble)
 	$hl->setRenderer($renderer);
 	echo $hl->highlight($source['sourcecode']);
 } else {
