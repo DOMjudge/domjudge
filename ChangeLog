@@ -5,13 +5,13 @@ Version 2.1.3 - SVN
  - Fix query bug causing max 1 category with 0 participants to be
    displayed (Closes: #1819621, thanks Maks Verver)
  - Fix bug in judge/compare.c: always compare files as ascii.
+ - Fix variable name in judge/compare_program.sh.
 
 Version 2.1.2 - 22 October 2007
 -------------------------------
  - Reduced verbose level in submitdaemon.
  - Fix 'NONINTERACTIVE' undefined (Closes: #1814594, thanks Maks Verver)
  - Fix bug in contests.php in unfreezing scoreboard.
- - Fix variable name in judge/compare_program.sh.
 
 Version 2.1.1 - 16 October 2007
 -------------------------------
