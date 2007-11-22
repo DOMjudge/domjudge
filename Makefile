@@ -14,7 +14,7 @@ include $(TOPDIR)/Makefile.global
 
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = bin etc lib doc submit judge www sql test-programs test-sources
-REC_TARGETS = build check clean distclean
+REC_TARGETS = build check clean dist distclean
 
 # Default targets
 ifdef CYGWIN

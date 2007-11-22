@@ -23,7 +23,9 @@ admin-manual.pdf: admin-manual.sgml ../docs_header.tex $(FIGSPNG) $(FIGSEPS)
 admin-manual.html: admin-manual.sgml ../docs_header.html $(FIGSPNG) $(FIGSEPS)
 	linuxdoc -B html --header=../docs_header.html $<
 
+dist: $(FIGSPNG) $(FIGSEPS)
+
 distclean:
-	-rm -f admin-manual*.html admin-manual.pdf
+	-rm -f admin-manual*.html admin-manual.pdf $(FIGSPNG) $(FIGSEPS)
 
 .PHONY: docs

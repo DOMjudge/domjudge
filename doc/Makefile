@@ -15,7 +15,7 @@ CTANPATH=ftp://tug.ctan.org/pub/tex-archive/macros/latex/contrib
 
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = admin team judge
-REC_TARGETS = docs clean distclean
+REC_TARGETS = docs clean dist distclean
 
 default: docs
 
@@ -49,6 +49,8 @@ $(LATEXSTYFILES): %.sty: %.zip
 
 cleanlatexpackages:
 	rm -rf $(LATEXPACKAGES) $(LATEXZIPFILES) $(LATEXSTYFILES)
+
+dist:
 
 distclean: cleanlatexpackages
 

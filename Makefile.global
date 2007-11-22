@@ -51,7 +51,7 @@ distclean: clean
 clean-backupfiles:
 	rm -f *~
 
-.PHONY: default build config install check clean clean-backupfiles distclean \
-        finddbname fixconfig
+.PHONY: default build config install check clean clean-backupfiles \
+        dist distclean finddbname fixconfig
 
 endif # GLOBALINCLUDED

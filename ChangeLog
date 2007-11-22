@@ -19,6 +19,7 @@ Version 2.2.0 - SVN
  - Fix noninteractive/logging code in websubmit to restore submitclient
    error parsing (Closes: #1829621).
  - Fix variable name in judge/compare_program.sh.
+ - Added make dist target and removed generated figures.
 
 Version 2.1.1 - SVN
 -------------------
