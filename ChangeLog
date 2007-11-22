@@ -4,6 +4,7 @@ Version 2.1.3 - SVN
 -------------------
  - Fix query bug causing max 1 category with 0 participants to be
    displayed (Closes: #1819621, thanks Maks Verver)
+ - Fix bug in judge/compare.c: always compare files as ascii.
 
 Version 2.1.2 - 22 October 2007
 -------------------------------

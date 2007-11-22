@@ -56,8 +56,6 @@
 
 const int maxprintlen = 80;
 
-char *diffoptions = "-U0";
-
 char *progname;
 
 /* filenames of commandline arguments */
@@ -124,13 +122,14 @@ int main(int argc, char **argv)
 	
 	/* Execute 'diff <diffoptions> progout testout' for exact match of
 	   program output. */
-	cmdargs[0] = diffoptions;
-	cmdargs[1] = progout;
-	cmdargs[2] = testout;
+	cmdargs[0] = "-a";
+	cmdargs[1] = "-U0";
+	cmdargs[2] = progout;
+	cmdargs[3] = testout;
 	redir_fd[0] = 0;
 	redir_fd[1] = 1;
 	redir_fd[2] = 0;
-	if ( (cpid = execute("diff",cmdargs,3,redir_fd,1))<0 ) {
+	if ( (cpid = execute("diff",cmdargs,4,redir_fd,1))<0 ) {
 		error(errno,"running diff");
 	}
 
