@@ -15,7 +15,7 @@ TESTIN="$1"
 PROGRAM="$2"
 TESTOUT="$3"
 
-diff "$PROGRAM" "$TESTOUT"
+diff -a "$PROGRAM" "$TESTOUT"
 EXITCODE=$?
 
 # EXITCODE = 1 indicates differences, others errors:
