@@ -13,6 +13,8 @@ $pagename = basename($_SERVER['PHP_SELF']);
 $id = (int)$_REQUEST['id'];
 if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
 
+$lastverifier = @$_COOKIE['lastverifier'];
+
 require('init.php');
 $title = 'Submission s'.@$id;
 
@@ -158,7 +160,11 @@ if ( isset($jid) )  {
 				if ( count($verifiers) > 0 ) {
 					$opts = array(0 => "");
 					$opts = array_merge($verifiers, $opts);
-					echo "or " .addSelect('verifier_selected', $opts);
+					$default = null;
+					if ( in_array($lastverifier,$verifiers) ) {
+						$default = $lastverifier;
+					}
+					echo "or " .addSelect('verifier_selected', $opts, $default);
 				}
 			}
 			
