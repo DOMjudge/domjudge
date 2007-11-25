@@ -152,8 +152,7 @@ if ( isset($jid) )  {
 					( ! @$jud['endtime'] ? ' disabled="disabled"' : '' ) .
 					" />\n";
 			if ( $val ) {
-				echo "by " .
-					addInput('verifier_typed', '', 10, 15);
+				echo "by " .addInput('verifier_typed', '', 10, 15);
 				$verifiers = $DB->q('COLUMN SELECT DISTINCT verifier FROM judging
 									 WHERE verifier IS NOT NULL AND verifier != ""
 									 ORDER BY verifier');

@@ -22,8 +22,8 @@ if ( ! empty($_POST['verifier_typed']) )
 	$verifier = $_POST['verifier_typed'];
 
 $cnt = $DB->q('RETURNAFFECTED UPDATE judging
-		   SET verified = %i, verifier = %s WHERE judgingid = %i',
-		   $val, $verifier, $id);
+               SET verified = %i, verifier = %s WHERE judgingid = %i',
+              $val, $verifier, $id);
 
 if ( $cnt == 0 ) {
 	error("Judging not found.");
