@@ -51,7 +51,7 @@ if ( VERIFICATION_REQUIRED ) {
 }
 
 /* Set cookie of last verifier, expiry defaults to end of session. */
-if ( $verifier ) setcookie('lastverifier', $verifier);
+if ( $verifier ) setcookie('domjudge_lastverifier', $verifier);
 
 /* redirect back. */
 header('Location: '.getBaseURI().'jury/submission.php?id=' . 

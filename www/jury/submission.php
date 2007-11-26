@@ -13,7 +13,7 @@ $pagename = basename($_SERVER['PHP_SELF']);
 $id = (int)$_REQUEST['id'];
 if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
 
-$lastverifier = @$_COOKIE['lastverifier'];
+$lastverifier = @$_COOKIE['domjudge_lastverifier'];
 
 require('init.php');
 $title = 'Submission s'.@$id;
