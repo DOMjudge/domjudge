@@ -33,12 +33,13 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
 	                 login, team.name, team.categoryid, team.affilid, sortorder,
-	                 color, visible, country, team_affiliation.name AS affilname
+	                 color, country, team_affiliation.name AS affilname
 	                 FROM team
 	                 LEFT JOIN team_category
 	                        ON (team_category.categoryid = team.categoryid)
 	                 LEFT JOIN team_affiliation
-	                        ON (team_affiliation.affilid = team.affilid)');
+	                        ON (team_affiliation.affilid = team.affilid)' .
+			( $isjury ? '' : ' WHERE visible = 1' ) );
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
 	                 probid, name, color FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
@@ -109,8 +110,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	// initialize the arrays we'll build from the data
 	$THEMATRIX = $SCORES = array();
 	$SUMMARY = array('num_correct' => 0, 'total_time' => 0,
-		'affils' => array(), 'countries' => array(),
-		'visible_teams' => count($teams));
+		'affils' => array(), 'countries' => array());
 
 	// scoreboard_jury is always up to date, scoreboard_public might be frozen.	
 	if ( $isjury || $showfinal ) {
@@ -155,7 +155,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 			if ( $srow['totaltime'] > $SCORES[$srow['teamid']]['last_solved'] ) {
 				$SCORES[$srow['teamid']]['last_solved'] = $srow['totaltime'];
 			}
-			$SCORES[$srow['teamid']]['total_time'] +=	$srow['totaltime'] + $srow['penalty'];
+			$SCORES[$srow['teamid']]['total_time'] += $srow['totaltime'] + $srow['penalty'];
 		}
 
 	}
@@ -167,12 +167,6 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	$prevsortorder = -1;
 	foreach( $SCORES as $team => $totals ) {
 
-		// skip displaying if this is an invisible team (except for jury sb)
-		if ( ! $isjury && ! $teams[$team]['visible'] ) {
-			$SUMMARY['visible_teams']--;
-			continue;
-		}
-		
 		// rank, team name, total correct, total time
 		echo '<tr';
 		if ( $totals['sortorder'] != $prevsortorder ) {
@@ -228,7 +222,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 				}
 				if ( $isjury ) echo '</a>';
 			}
-			echo '</td>';	
+			echo '</td>';
 		}
 		echo
 			'<td class="scoretn"' .
@@ -297,7 +291,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	// print a summaryline
 	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
 		'<td title="total teams">' .
-		jurylink(null,$SUMMARY['visible_teams'],$isjury) . '</td>' .
+		jurylink(null,count($teams),$isjury) . '</td>' .
 		( SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
 		  jurylink('team_affiliations.php',count($SUMMARY['affils']) . ' / ' .
 				   count($SUMMARY['countries']),$isjury) . '</td>' : '' ) .
