@@ -6,6 +6,9 @@ Version 2.1.3 - SVN
    displayed (Closes: #1819621, thanks Maks Verver)
  - Fix bug in judge/compare.c: always compare files as ascii.
  - Fix variable name in judge/compare_program.sh.
+ - Fix buglet in time representation and comparison.
+ - Fix printresult() displaying PENDING instead of QUEUED or JUDGING
+   on some jury pages.
 
 Version 2.1.2 - 22 October 2007
 -------------------------------
