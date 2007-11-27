@@ -98,7 +98,7 @@ if ( count($jdata) > 0 ) {
 		echo '<td>' . printtime($jud['starttime']) . '</td>';
 		echo '<td><a href="judgehost.php?id=' . urlencode(@$jud['judgehost']) .
 			'">' . printhost(@$jud['judgehost']) . '</a></td>';
-		echo '<td>' . printresult(@$jud['result'], $jud['valid']) . '</td>';
+		echo '<td>' . printresult(@$jud['result'], $jud['valid'], TRUE) . '</td>';
 		echo '<td align="center">' . printyn($jud['valid']) . '</td>';
 		echo "</tr>\n";
 

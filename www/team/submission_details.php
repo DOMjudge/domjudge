@@ -46,7 +46,7 @@ if( ! $row ) {
 	<td><?=htmlentities($row['langname'])?></td></tr>
 </table>
 
-<p>Status: <?=printresult($row['result'], TRUE, TRUE)?></p>
+<p>Status: <?=printresult($row['result'], TRUE)?></p>
 <?php
 
 if ( (SHOW_COMPILE == 2) ||

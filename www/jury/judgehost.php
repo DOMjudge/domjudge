@@ -84,7 +84,7 @@ if( $res->count() == 0 ) {
 		echo '<td>' . printtime($jud['starttime']) . '</td>';
 		echo '<td>' . printtime(@$jud['endtime'])  . '</td>';
 		echo '<td><a href="' . $link . '">' .
-			printresult(@$jud['result'], $jud['valid']) . '</a></td>';
+			printresult(@$jud['result'], $jud['valid'], TRUE) . '</a></td>';
 		echo '<td align="center">' . printyn($jud['valid']) . '</td>';
 		echo '<td align="center">' . printyn($jud['verified']) . '</td>';
 		echo "</tr>\n";
