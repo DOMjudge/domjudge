@@ -241,8 +241,8 @@ The flow of an incoming submission is as follows.
 The interface for jury and teams shows the status of a submission with
 a code.
 <descrip>
-<tag>QUEUED/PENDING</tag>submission accepted and awaiting an autojudger to process it *;
-<tag>JUDGING       </tag>an autojudger is currently compiling/running/testing the submission *;
+<tag>QUEUED/PENDING</tag>submission accepted and awaiting a judgehost to process it *;
+<tag>JUDGING       </tag>a judgehost is currently compiling/running/testing the submission *;
 <tag>TOO-LATE      </tag>submission accepted but submitted after the contest ended;
 <tag>CORRECT       </tag>submission correct, problem solved;
 <tag>COMPILER-ERROR</tag>the compiler gave an error while compiling the program;
@@ -259,11 +259,10 @@ verification, a submission will show as PENDING to the team until the
 judging has been verified.
 
 Under the Submissions menu, you can see all submitted solutions, with
-the newest one at the top. Click on a submission id (a number starting
-with <em>s</em>, e.g. s123) for more details about the submission
-(team name, submittime etc) and the judging(s) for it. Click on a
-result code to jump straight to the judging details (runtime, outputs,
-diff with testdata).
+the newest one at the top. Click on a submission id or result code
+for more details about the submission (team name, submittime etc),
+a list of judgings and the details for the most recent judging
+(runtime, outputs, diff with testdata).
 
 Under the submission details the source filename can be clicked to
 inspect the source code. If the team has submitted something for this
