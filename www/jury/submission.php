@@ -126,6 +126,11 @@ if ( isset($jid) )  {
 	echo "<h2>Judging j" . (int)$jud['judgingid'] .
 		($jud['valid'] == 1 ? '' : ' (INVALID)') . "</h2>\n\n";
 
+	$judging_ended = !empty($jud['endtime']);
+
+	// display following data only when the judging has been completed
+	if ( $judging_ended ) {
+
 	// display verification data: verified, and by whom.
 	// only if this is a valid judging, otherwise irrelevant
 	if ( $jud['valid'] ) {
@@ -149,7 +154,6 @@ if ( isset($jid) )  {
 		if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
 			echo '; <input type="submit" value="' .
 					($val ? '' : 'un') . 'mark verified"' .
-					( ! @$jud['endtime'] ? ' disabled="disabled"' : '' ) .
 					" />\n";
 			if ( $val ) {
 				echo "by " .addInput('verifier_typed', '', 10, 15);
@@ -210,12 +214,14 @@ if ( isset($jid) )  {
 		echo "<p><em>There was no error output.</em></p>\n";
 	}
 	
-	// Time (start, end, used)
+	} // if ($judging_ended)
 
+
+	// Time (start, end, used)
 	echo "<p class=\"judgetime\">Started: " . htmlspecialchars($jud['starttime']);
 
 	$unix_start = strtotime($jud['starttime']);
-	if ( !empty($jud['endtime']) ) {
+	if ( $judging_ended ) {
 		echo ', ended: ' . htmlspecialchars($jud['endtime']) .
 			' (judging took '.
 				printtimediff($unix_start, strtotime($jud['endtime']) ) . ')';
