@@ -52,7 +52,7 @@ $cid = $contdata['cid'];
 
 // If no contest has started yet, refuse submissions.
 $now = now();
-if( $contdata['starttime'] > $now ) {
+if( strcmp($contdata['starttime'], $now) > 0 ) {
 	error("The contest is closed, no submissions accepted. [c$cid]");
 }
 
@@ -113,7 +113,7 @@ $DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
 
 // If the contest has already ended, accept the submission anyway but do not
 // process it and notify team.
-if( $contdata['endtime'] <= $now ) {
+if( strcmp($contdata['endtime'], $now) <= 0 ) {
 	warning("The contest is closed, submission stored but not processed. [c$cid]");
 }
 
