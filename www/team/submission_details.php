@@ -47,7 +47,7 @@ if( ! $row ) {
 	<td><?=htmlspecialchars($row['langname'])?></td></tr>
 </table>
 
-<p>Result: <?=printresult($row['result'], TRUE, TRUE)?></p>
+<p>Result: <?=printresult($row['result'], TRUE)?></p>
 <?php
 
 if ( (SHOW_COMPILE == 2) ||
