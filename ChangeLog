@@ -21,6 +21,7 @@ Version 2.2.0 - SVN
  - Fix variable name in judge/compare_program.sh.
  - Added make dist target and removed generated figures.
  - Added cookie for last verifier in jury webinterface.
+ - Added option to only show non-verified submissions in jury interface.
 
 Version 2.1.1 - SVN
 -------------------

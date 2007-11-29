@@ -49,13 +49,15 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 	               LEFT JOIN language l ON (l.langid   = s.langid)
 	               LEFT JOIN judging  j ON (s.submitid = j.submitid AND valid=1)
 	               WHERE s.cid = %i ' .
-	               (!empty($restrictions['teamid']) ? 'AND s.teamid = %s ' : '%_') .
-	               (!empty($restrictions['probid']) ? 'AND s.probid = %s ' : '%_') .
-	               (!empty($restrictions['langid']) ? 'AND s.langid = %s ' : '%_') .
-	               (!empty($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') .
+	               (isset($restrictions['teamid']) ? 'AND s.teamid = %s ' : '%_') .
+	               (isset($restrictions['probid']) ? 'AND s.probid = %s ' : '%_') .
+	               (isset($restrictions['langid']) ? 'AND s.langid = %s ' : '%_') .
+	               (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') .
+	               (isset($restrictions['verified'])  ? 'AND j.verified  = %s ' : '%_') .
 	               'ORDER BY s.submittime DESC, s.submitid DESC',
-	               $cid, @$restrictions['teamid'], @$restrictions['probid'],
-	               @$restrictions['langid'], @$restrictions['judgehost']);
+	              $cid, @$restrictions['teamid'], @$restrictions['probid'],
+	              @$restrictions['langid'], @$restrictions['judgehost'],
+				  @$restrictions['verified']);
 
 	// nothing found...
 	if( $res->count() == 0 ) {
