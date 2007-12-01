@@ -87,6 +87,16 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	exit;
 }
 
+// (un)set 'answered' (if posted)
+if ( isset($_POST['submit']) && isset($_POST['answered']) ) {
+	$DB->q('UPDATE clarification SET answered = %i WHERE clarid = %i',
+	       (int)$_POST['answered'], $respid);
+
+	// redirect back to the original location
+	header('Location: ' . getBaseURI() . 'jury/clarification.php?id=' . $id);
+	exit;
+}
+
 require('../header.php');
 require('../clarification.php');
 
@@ -115,12 +125,11 @@ putClarification($id, NULL, TRUE);
 // Not relevant for 'general clarifications', ie those with sender=null
 if ( !empty($req['sender']) ) {
 	require_once('../forms.php');
-	echo addForm('edit.php') .
-		addHidden('cmd', 'edit') .
-		addHidden('table', 'clarification') .
-		addHidden('keydata[0][clarid]', $id) .
-		addHidden('data[0][answered]', !$req['answered']) .
-		addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered')) .
+	
+	echo addForm('clarification.php') .
+		addHidden('id', $id) .
+		addHidden('answered', !$req['answered']) .
+		addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered'), 'submit') .
 		addEndForm();
 }
 

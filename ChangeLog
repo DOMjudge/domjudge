@@ -22,6 +22,7 @@ Version 2.2.0 - SVN
  - Added make dist target and removed generated figures.
  - Added cookie for last verifier in jury webinterface (Closes: #1742044).
  - Added option to only show non-verified submissions in jury interface.
+ - Fix bug that jury was not allowed to set clarifications (un)answered.
 
 Version 2.1.1 - SVN
 -------------------
