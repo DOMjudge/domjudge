@@ -74,8 +74,8 @@ This is a (rough) list of the requirements for DOMjudge.
 <item>Compilers for the languages you want to support
 </itemize>
 
-If you want to use the commandline submit client (next to / instead of
-the web submit client):
+If you want to use the command line submit client (next to / instead
+of the web submit client):
 
 <itemize>
 <item>A shared filesystem with the team computers (e.g. NFS)
@@ -176,7 +176,7 @@ External software:
 <item> Install the MySQL-server, set a root password for it and
        make it accessible from all judgehosts.
 <item> Install Apache, PHP and phpMyAdmin.
-<item> Make sure PHP works for the webserver and the commandline
+<item> Make sure PHP works for the webserver and the command line
        client and that phpMyAdmin works.
 <item> Install necessary compilers on the judgehosts.
 <item> See also <ref id="install_config:apt-getinstall"
@@ -200,7 +200,7 @@ DOMjudge:
 <item> Make INCOMINGDIR writeable for the webserver (optionally, when using websubmit).
 <item> Start the necessary daemons, each in their own terminal:
   <itemize>
-  <item> <tt>cd submit; ./submitdaemon</tt> (needed for commandline submit)
+  <item> <tt>cd submit; ./submitdaemon</tt> (needed for command line submit)
   <item> <tt>cd submit; ./websubmitdaemon.php</tt> (needed for websubmit)
   </itemize>
 
@@ -247,7 +247,8 @@ DOMjudge has three different kinds of hosts:
 <item> Team computer: workstation for a team, where they develop their
        solutions and from which they submit them to the jury system.
        The only part of DOMjudge that runs here is the optional
-       command-line submit client; the rest happens via the web interface.
+       command line submit client; the rest happens via the web
+	   interface.
 <item> Jury system: a host that receives the submissions, runs the
        database and serves the webpages. This host will run the
        DOMjudge submitdaemon(s), MySQL and Apache. Optionally some of
@@ -280,11 +281,11 @@ The requirements for the deployment of this jury-system are:
        id="security:external" name="Security: external security"> for
        more details. TCP/IP networking is used in a few different ways:
   <itemize>
-  <item> The `submit' command-line client connects to the submitserver
+  <item> The `submit' command line client connects to the submitserver
          via a TCP connection on a configurable port.
   <item> The jury computers use TCP/IP connections to connect to the
          MySQL database, for copying submissions with scp (in the
-         default configuration with the command-line submitdaemon).
+         default configuration with the command line submitdaemon).
   <item> HTTP traffic from teams, the public and jury to the webserver.
   </itemize>
        Each team computer needs to have a unique IP address from the
@@ -296,7 +297,7 @@ The requirements for the deployment of this jury-system are:
        id="security:rootprivs" name="Security: root privileges"> for
        more details.
 
-<item> For using the command-line submit program, team accounts which
+<item> For using the command line submit program, team accounts which
        are accessible via SSH on the jury computers (a SSH public key
        of the jury account should be installed on all team accounts to
        provide public-key access). This can be circumvented by
@@ -339,9 +340,6 @@ The requirements for the deployment of this jury-system are:
 
 <item> Apache htpasswd
 
-<item> phpMyAdmin, to be able to access the database in an emergency
-       or for data import/export
-
 <item> linuxdoc to build the documentation and LaTeX to build
        the PDF-documentation
 
@@ -354,11 +352,14 @@ functionality.
 
 <item> sudo (to use a chroot judging environment with Sun Java)
 
-<item> OpenSSH/SCP or compatible (for using the command-line
+<item> OpenSSH/SCP or compatible (for using the command line
        submit program)
 
 <item> wget/curl and unzip (for downloading LaTeX packages
        for documentation)
+
+<item> phpMyAdmin, to be able to access the database in an emergency
+       or for data import/export
 
 <item> An NTP daemon (for keeping the clocks between jury
        system and judgehosts in sync)
@@ -368,7 +369,7 @@ functionality.
         url="http://www.ecs.csus.edu/pc2/doc/valistandard.html"> compatibility)
 
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
-       (to use the commandline submit client with the webinterface)
+       (to use the command line submit client with the webinterface)
 
 <item> <htmlurl name="PEAR Text_Highlighter class"
         url="http://pear.php.net/package/Text_Highlighter/">~
@@ -430,9 +431,11 @@ different roots).
 
 <descrip>
 <tag><tt>SYSTEM_ROOT</tt></tag>
-	The judging system itself is contained in this directory tree. All
-	programs needed for the judging system are located here alongside
-	some extra utilities and the configuration of the system.
+	This must be set to the directory tree where the DOMjudge sources
+	are installed. The required compiled programs will be installed in
+	place within this directory tree. All programs needed for the
+	judging system are located here alongside some extra utilities and
+	the configuration of the system.
 
 <tag><tt>INPUT_ROOT</tt></tag>
 	The problem input and output testdata should be put here. This
@@ -530,9 +533,10 @@ specialised and adapted to the requirements per problem. For this, one
 has to create programs or scripts <tt>run_&lt;some-tag&gt;</tt> and/or
 <tt>compare_&lt;some-tag&gt;</tt> in the <tt>SYSTEM_ROOT/judge</tt>
 directory (see <tt>run</tt> and <tt>compare</tt> for examples and
-usage information). Then one must specify this &lt;some-tag&gt; in the
-special_run and/or special_compare fields of the problem entry in the
-MySQL database (NULL means that the default script should be used).
+usage information). Then one must specify this
+<tt>&lt;some-tag&gt;</tt> in the special_run and/or special_compare
+fields of the problem entry in the MySQL database (empty means that
+the default script should be used).
 
 <sect>Other configuration issues
 <p>
@@ -562,23 +566,23 @@ non-standard environments.
 <p>
 
 DOMjudge supports two submission methods: via the
-commandline submit program and via the webinterface. From experience,
+command line submit program and via the webinterface. From experience,
 both methods have users that prefer the one above the other.
 
-The commandline submit method does place some requirements on the
+The command line submit method does place some requirements on the
 network environment however. It needs a shared filesystem or other
 means for the jury to access the files on the team accounts. Site
 specific adaptations can be made in <tt>submit/submit_copy.sh</tt>.
 
-When commandline submit is disabled in the configuration, the
-commandline submit client/daemon will still be built, but the submit
+When command line submit is disabled in the configuration, the
+command line submit client/daemon will still be built, but the submit
 client will now default to try to connect to the websubmit interface
 using <tt>libcurl</tt>. For this, the <tt>libcurl</tt> library
 development files must be available at compile time (the submit client
 is statically linked to libcurl to avoid runtime dependencies on
 libcurl).
 
-Although the commandline submit daemon is thus not strictly necessary,
+Although the command line submit daemon is thus not strictly necessary,
 it does add an advantage: it is more secure than the webinterface
 because it uses a `callback' to authenticate the team (instead of IP
 address authentication). Furthermore, it allows for automatic IP
@@ -795,10 +799,12 @@ The submit client can also be built under Windows when the Cygwin
 environment is installed. First the Cygwin <url name="setup.exe"
 url="http://cygwin.com/setup.exe"> program must be downloaded and
 installed with GCC, curl-devel and maybe some more packages included.
-Furthermore, the cygwin-base package must be (re-)installed from the
-mirror <url url="http://cygwin.win6.jp/cygwin-ipv6/"> for support of
-the complete <tt>netdb.h</tt> headers (as this is currently not
-supported in the standard Cygwin tree yet).
+Furthermore, for submitting to the command line submitdaemon (next to
+the webinterface), you need to have Windows XP and the cygwin-base
+package must be (re-)installed from the mirror
+<url url="http://cygwin.win6.jp/cygwin-ipv6/"> for support of the
+complete <tt>netdb.h</tt> headers (as this is currently not supported
+in the standard Cygwin tree yet).
 
 <p>
 When Cygwin is correctly installed with all necessary development
@@ -882,8 +888,8 @@ x|language         |Definition of allowed submission languages.@
 x|problem          |Definition of problems (name, corresponding contest, etc.).@
  |submission       |Submissions of solutions to problems.@
 x|team             |Definition of teams.@
-x|team_affiliation |Definition of institutions a team can be affiliated with.@
-x|team_category    |Different category groups teams can be put in.@
+x|team&lowbar;affiliation |Definition of institutions a team can be affiliated with.@
+x|team&lowbar;category    |Different category groups teams can be put in.@
  |scoreboard&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
  |scoreboard&lowbar;public|separately, because of possibility of score freezing.
 </tabular>
@@ -901,10 +907,10 @@ descriptive name used in the interface.
 
 <tt>starttime</tt> and <tt>endtime</tt> respectively are the start-
 and endtime of the contest: before and after that time, no submissions
-are accepted<footnote>For a contest with starttime "12:00:00" and 
+are accepted.<footnote>For a contest with starttime "12:00:00" and 
 endtime "17:00:00", the first submission will be accepted at
 12:00:00 and the last one at 16:59:59. A submission received at
-17:00:00 or later will be stored but not judged.</footnote>.
+17:00:00 or later will be stored but not judged.</footnote>
 <tt>lastscoreupdate</tt> is the time after which the
 public and team scoreboard are not updated anymore (frozen). This is
 meant to make the last stages of the contest more thrilling, because
@@ -983,7 +989,7 @@ affiliation ID of the team.
 automatically identify the team in the webinterface and to check
 submission origin. A value of <tt>NULL</tt> results in the team being
 unable to submit or view its teampage, unless they first authenticate
-via password or commandline submission. <tt>passwd</tt> is a
+via password or command line submission. <tt>passwd</tt> is a
 MD5-hash of a one-time password teams can use to authenticate and
 register their IP address. It can be set under Administrator Functions:
 Generate Passwords.
@@ -991,7 +997,9 @@ Generate Passwords.
 <tt>members</tt> are the names of the team members, separated by
 newlines and <tt>room</tt> is the room the team is located, for
 display only; <tt>comments</tt> can be filled with arbitrary useful
-information.
+information and is only visible to the jury.
+The timestamp <tt>teampage_first_visited</tt> indicates when/whether a
+team visited its team webinterface.
 
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the
@@ -1020,6 +1028,10 @@ The <tt>color</tt> is again a CSS colour specification used to
 discern different categories easily. See also section <ref
 id="scoreboard:colours" name="Scoreboard: colours">.
 
+The <tt>visible</tt> flag determines whether teams in this category
+are displayed on the public/team scoreboard. This feature can be used
+to remove teams from the public scoreboard by assigning them to a
+separate, invisible category.
 </descrip>
 
 <sect>Team authentication
@@ -1041,12 +1053,12 @@ visible file. This file is then copied from server side with the
 submit_copy script. This makes it impossible for teams to spoof a
 submission for a different team: the server `calls back' the team the
 submitter identified himself as and checks for existence of the
-advertised file. Because filename are randomised and invisible (within
-the <tt>$HOME/.submit</tt> directory by default), it is also
+advertised file. Because filenames are randomised and invisible
+(within the <tt>$HOME/.submit</tt> directory by default), it is also
 impossible for someone to guess another team's filename and submit it
 for them.
 
-There are three possible ways of configuring that IP-address.
+There are three possible ways of configuring team IP-addresses.
 
 <sect1>Supply it beforehand
 <p>
@@ -1066,7 +1078,7 @@ Beforehand, generate passwords for each team in the jury interface.
 When the test session (or contest) starts and a team connects to the
 web interface and have an unknown IP, they will be prompted for
 username and password. Once supplied, the IP is stored and the
-password is not needed anymore for the remainder of the contest.
+password is not needed anymore.
 	   
 This is also a secure option, but requires a bit more hassle from the
 teams, and maybe from the organisers who have to distribute pieces of
@@ -1094,8 +1106,8 @@ and everything works as normal.
 The connect can happen during the test session, so during the real
 contest everything is fully available. This is also a secure way of
 authenticating teams, which requires no passwords or IP configuration,
-but teams must submit via the command line submit client before they
-can access their teampage.
+but teams must submit via the command line submit client to the
+command line deamon before they can access their teampage.
 
 
 <sect>Providing testdata
@@ -1112,6 +1124,12 @@ DOMjudge database.
 
 The input data is in the file <tt>testdata.in</tt>, and the output in <tt>testdata.out</tt>.
 These dirs and files can all be read-only.
+
+For problems with a special compare script, things are a bit
+different: testdata should still be provided as above, but the
+correctness depends on the output of the custom compare script. Please
+check the documentation in
+<tt>SYSTEM_ROOT/judge/compare_program.sh</tt> when using this feature.
 
 
 <sect>Start the daemons
@@ -1140,18 +1158,20 @@ config-checker under `Admin Functions',
 and <tt>make check</tt> under the <tt>etc/</tt> directory
 for some additional sanity checks on your configuration.
 
-Go to a team workstation and see if you can access the team page, and if
-you can submit solutions.
+Go to a team workstation and see if you can access the team page and
+if you can submit solutions.
 
 Next, it is time to submit some test solutions. If you have the default
 Hello World problem enabled, you can submit some of the example sources
 from under the <tt>doc/</tt> directory. They should give `CORRECT'.
 
 You can also try some (or all) of the sources under
-<tt>test-sources</tt>. Use <tt>make check</tt> to submit a variety
-of tests; check the source files of the expeceted answer of each test.
-There's also <tt>make stress-test</tt>, but be warned that these tests
-might crash a judgedaemon.
+<tt>test-sources</tt>. Use <tt>make check</tt> to submit a variety of
+tests; this should work when the submit client is available and the
+default example problems are in the active contest. Check the source
+files for the expected answer of each test. There's also <tt>make
+stress-test</tt>, but be warned that these tests might crash a
+judgedaemon.
 
 When all this worked, you're quite ready for a contest. Or at least,
 the practice session of a contest.
@@ -1185,7 +1205,8 @@ Options offered to administrators only:
 <item>Rejudge 'correct' submissions
 <item>Restart 'pending' judgings
 </itemize>
-
+Furthermore, some quick link menu items might differ according to
+usefulness for jury or admins.
 
 <sect>The scoreboard <label id="scoreboard">
 <p>
@@ -1214,7 +1235,10 @@ If you wish, you can also define a sortorder in the category table.
 This is the first field that the scoreboard is sorted on. If you want
 regular teams to be sorted first, but after them you want to sort both
 spectator- and business teams equally, you define `0' for the regular
-category and `1' for the other categories.
+category and `1' for the other categories. To completely remove a
+category from the public (but not the jury) scoreboard, the category
+visible flag can be set to `0'.
+
 
 <sect1>Starting and ending
 <p>

@@ -262,12 +262,13 @@ Under the Submissions menu, you can see all submitted solutions, with
 the newest one at the top. Click on a submission id or result code
 for more details about the submission (team name, submittime etc),
 a list of judgings and the details for the most recent judging
-(runtime, outputs, diff with testdata).
+(runtime, outputs, diff with testdata). There is also a switch
+available to only view unverified submissions.
 
 Under the submission details the source filename can be clicked to
-inspect the source code. If the team has submitted something for this
-problem before, a diff output between the current and previous
-submission is also available there.
+inspect the source code. If the team has submitted code in the same
+language for this problem before, a diff output between the current
+and previous submission is also available there.
 
 A submission can have multiple judgings, but only one valid judging at
 any time. Multiple judgings occur when rejudging, see <ref
