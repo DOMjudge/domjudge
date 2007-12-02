@@ -5,7 +5,6 @@ DOMjudge is a system for running a programming contest, like the ACM
 regional and world championship programming contests.
 
 
-
 Copyright & Licencing
 ---------------------
 
@@ -42,7 +41,7 @@ You will need `linuxdoc` for that to work (this is normally in
 the linuxdoc-tools package/rpm) and a reasonably complete LaTeX
 installation.
 
-The documentaion is also available online at the DOMjudge
+The documentation is also available online at the DOMjudge
 homepage (see below).
 
 Contact
