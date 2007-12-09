@@ -65,7 +65,7 @@ cleanexit ()
 
 	# Remove copied static shell to save disk space
 	if [ "$TMPDIR" ]; then
-		rm -f "$TMPDIR/bin/sh"
+		rm -f "$TMPDIR/bin/sh" "$TMPDIR/bin/bash"
 	fi
 
 	logmsg $LOG_DEBUG "exiting"
