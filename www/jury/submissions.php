@@ -21,7 +21,7 @@ $title = 'Submissions';
 
 require('../header.php');
 
-echo "<h1>Submissions</h1>\n\n";
+echo "<h1>Submissions" . ( $showverified ? '' : ' (only unverified)' ) . "</h1>\n\n";
 
 $restrictions = array();
 if ( !$showverified ) $restrictions['verified'] = 0;
