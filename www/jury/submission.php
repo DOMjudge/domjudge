@@ -177,8 +177,13 @@ if ( isset($jid) )  {
 		}
 	}
 
+	echo '<p>Go to output of ' .
+		'<a href="#compile">compile</a>, ' .
+		'<a href="#run">run</a>, ' .
+		'<a href="#diff">diff</a> or ' .
+		'<a href="#error">error</a>.' . "</p>\n\n";
 
-	echo "<h3>Output compile</h3>\n\n";
+	echo "<h3><a name=\"compile\"></a>Output compile</h3>\n\n";
 
 	if ( @$jud['output_compile'] ) {
 		echo "<pre class=\"output_text\">".
@@ -187,7 +192,7 @@ if ( isset($jid) )  {
 		echo "<p><em>There were no compiler errors or warnings.</em></p>\n";
 	}
 
-	echo "<h3>Output run</h3>\n\n";
+	echo "<h3><a name=\"run\"></a>Output run</h3>\n\n";
 
 	if ( @$jud['output_run'] ) {
 		echo "<pre class=\"output_text\">".
@@ -196,7 +201,7 @@ if ( isset($jid) )  {
 		echo "<p><em>There was no program output.</em></p>\n";
 	}
 
-	echo "<h3>Output diff</h3>\n\n";
+	echo "<h3><a name=\"diff\"></a>Output diff</h3>\n\n";
 
 	if ( @$jud['output_diff'] ) {
 		echo "<pre class=\"output_text\">".
@@ -205,7 +210,7 @@ if ( isset($jid) )  {
 		echo "<p><em>There was no diff output.</em></p>\n";
 	}
 
-	echo "<h3>Output error</h3>\n\n";
+	echo "<h3><a name=\"error\"></a>Output error</h3>\n\n";
 
 	if ( @$jud['output_error'] ) {
 		echo "<pre class=\"output_text\">".
