@@ -23,6 +23,8 @@ Version 2.2.0 - SVN
  - Added cookie for last verifier in jury webinterface (Closes: #1742044).
  - Added option to only show non-verified submissions in jury interface.
  - Fix bug that jury was not allowed to set clarifications (un)answered.
+ - Fix problem that runguard ignored SIGARLM on some distributions (thanks
+   Tobias Werth).
 
 Version 2.1.1 - SVN
 -------------------

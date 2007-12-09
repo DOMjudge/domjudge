@@ -223,6 +223,7 @@ int userid(char *name)
 
 int main(int argc, char **argv)
 {
+	sigset_t oldmask, newmask;
 	pid_t pid;
 	int   status;
 	int   exitcode;
@@ -357,7 +358,13 @@ int main(int argc, char **argv)
 		
 	default: /* become watchdog */
 		if ( gettimeofday(&starttime,NULL) ) error(errno,"getting time");
-		
+
+		/* unmask all signals */
+		memset(&newmask, 0, sizeof(newmask));
+		if ( sigprocmask(SIG_SETMASK, &newmask, &oldmask)!=0 ) {
+			error(errno,"unmasking signals");
+		}
+
 		signal(SIGTERM,terminate);
 		
 		if ( use_time ) {
