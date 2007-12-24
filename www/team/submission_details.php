@@ -24,7 +24,7 @@ $row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
                WHERE j.submitid = %i AND teamid = %s AND valid = 1',$sid,$login);
 
 if( ! $row ) {
-	echo "Submission not found for this team.\n";
+	echo "<p>Submission not found for this team.</p>\n";
 	include('../footer.php');
 	exit;
 }
