@@ -17,20 +17,21 @@ if ( isset($_REQUEST['showverified']) ) {
 require('init.php');
 $refresh = '15;url=' . getBaseURI() . 'jury/submissions.php?showverified=' .
 	$showverified;
-$title = 'Submissions';
+
+$title = 'Submissions' . ( $showverified ? '' : ' (only unverified)' );
 
 require('../header.php');
 
-echo "<h1>Submissions" . ( $showverified ? '' : ' (only unverified)' ) . "</h1>\n\n";
+echo "<h1>$title</h1>\n\n";
 
 $restrictions = array();
 if ( !$showverified ) $restrictions['verified'] = 0;
 
 require_once('../forms.php');
 
-echo addForm('submissions.php') . "<p>\n" .
-	addHidden('showverified', !$showverified) .
-	addSubmit(($showverified ? 'show only non-verified' : 'show all')) . "</p>\n" .
+echo addForm('submissions.php', 'get') . "<p>\n" .
+	addHidden('showverified', (int)!$showverified) .
+	addSubmit(($showverified ? 'show only unverified' : 'show all')) . "</p>\n" .
 	addEndForm();
 
 putSubmissions($cdata, $restrictions, TRUE);

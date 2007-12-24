@@ -21,7 +21,7 @@ Version 2.2.0 - SVN
  - Fix variable name in judge/compare_program.sh.
  - Added make dist target and removed generated figures.
  - Added cookie for last verifier in jury webinterface (Closes: #1742044).
- - Added option to only show non-verified submissions in jury interface.
+ - Added option to only show unverified submissions in jury interface.
  - Fix bug that jury was not allowed to set clarifications (un)answered.
  - Fix problem that runguard ignored SIGARLM on some distributions (thanks
    Tobias Werth).
