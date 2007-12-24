@@ -48,7 +48,7 @@
 #endif
 
 #define VERSION_STRING "beep-1.2.2"
-char *copyright = 
+const char *copyright = 
 "Copyright (C) Johnathan Nightingale, 2002.  "
 "Use and Distribution subject to GPL.  "
 "For information: http://www.gnu.org/copyleft/.";
