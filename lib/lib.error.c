@@ -74,7 +74,7 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 	       	va_copy(aq, ap);
 	       	vfprintf(stderr, buffer, aq);
 	       	fflush(stderr);
-		val_end(aq);
+		va_end(aq);
        	}
 	if ( msglevel<=loglevel &&
 	     stdlog!=NULL       ) {
@@ -82,7 +82,7 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 	       	va_copy(aq, ap);
 	       	vfprintf(stdlog, buffer, aq);
 	       	fflush(stdlog);
-		val_end(aq);
+		va_end(aq);
        	}
 
 	free(buffer);
