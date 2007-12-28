@@ -69,9 +69,9 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 	snprintf(buffer, bufferlen, "[%s] %s[%d]: %s\n",
 	         timestring, progname, getpid(), mesg);
 	
-	if ( msglevel<=verbose  ) { vfprintf(stderr, buffer, ap); fflush(stderr); }
+	if ( msglevel<=verbose  ) { va_list aq; va_copy(aq, ap); vfprintf(stderr, buffer, aq); fflush(stderr); }
 	if ( msglevel<=loglevel &&
-	     stdlog!=NULL       ) { vfprintf(stdlog, buffer, ap); fflush(stdlog); }
+	     stdlog!=NULL       ) { va_list aq; va_copy(aq, ap); vfprintf(stdlog, buffer, aq); fflush(stdlog); }
 
 	free(buffer);
 }
