@@ -109,7 +109,7 @@ while ( TRUE ) {
 	if ($numopen) {
 		// Generate (unique) random string to mark submission to be judged
 		list($usec, $sec) = explode(" ", microtime());
-		$mark = $myhost.'@'.($sec+$usec).'#'.md5( uniqid( mt_rand(), true ) );
+		$mark = $myhost.'@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
 
 		// update exactly one submission with our random string
 		// Note: this might still return 0 if another judgehost beat
