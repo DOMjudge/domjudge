@@ -30,20 +30,6 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	if ( empty( $cdata ) ) { echo "<p><em>No active contest</em></p>\n"; return; }
 	$cid = $cdata['cid'];
 
-	// get the teams and problems
-	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
-	                 login, team.name, team.categoryid, team.affilid, sortorder,
-	                 color, country, team_affiliation.name AS affilname
-	                 FROM team
-	                 LEFT JOIN team_category
-	                        ON (team_category.categoryid = team.categoryid)
-	                 LEFT JOIN team_affiliation
-	                        ON (team_affiliation.affilid = team.affilid)' .
-			( $isjury ? '' : ' WHERE visible = 1' ) );
-	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
-	                 probid, name, color FROM problem
-	                 WHERE cid = %i AND allow_submit = 1
-	                 ORDER BY probid', $cid);
 
 	// Show final scores if contest is over and unfreezetime has been
 	// reached, or if contest is over and no freezetime had been set.
@@ -83,6 +69,21 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		}
 		echo "</h4>\n\n";
 	}
+	
+	// get the teams and problems
+	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
+	                 login, team.name, team.categoryid, team.affilid, sortorder,
+	                 color, country, team_affiliation.name AS affilname
+	                 FROM team
+	                 LEFT JOIN team_category
+	                        ON (team_category.categoryid = team.categoryid)
+	                 LEFT JOIN team_affiliation
+	                        ON (team_affiliation.affilid = team.affilid)' .
+			( $isjury ? '' : ' WHERE visible = 1' ) );
+	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
+	                 probid, name, color FROM problem
+	                 WHERE cid = %i AND allow_submit = 1
+	                 ORDER BY probid', $cid);
 
 	echo '<table class="scoreboard' . ($isjury ? ' scoreboard_jury' : '') . "\">\n";
 
