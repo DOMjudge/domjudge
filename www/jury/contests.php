@@ -22,6 +22,7 @@ if ( isset($_POST['unfreeze']) ) {
 	$DB->q('UPDATE contest SET unfreezetime = %s WHERE cid = %i', now(), $docid);
 }
 
+// Get data. Starttime seems most logical sort criterion.
 $res = $DB->q('TABLE SELECT * FROM contest ORDER BY starttime DESC');
 
 if( count($res) == 0 ) {
@@ -29,16 +30,19 @@ if( count($res) == 0 ) {
 } else {
 	echo "<form action=\"contests.php\" method=\"post\">\n";
 	echo "<table class=\"list\">\n<thead>\n" .
-	     "<tr><th scope=\"col\">CID</th><th scope=\"col\">starts</th>" .
-		 "<th scope=\"col\">ends</th><th scope=\"col\">freeze<br />scores</th>" .
-		 "<th scope=\"col\">unfreeze<br />scores</th><th scope=\"col\">name</th>" .
-	     "</tr>\n</thead>\n<tbody>\n";
+	     "<tr><th scope=\"col\">CID</th><th scope=\"col\">active</th>" .
+	     "<th scope=\"col\">starts</th><th scope=\"col\">ends</th>" .
+	     "<th scope=\"col\">freeze<br />scores</th>" .
+	     "<th scope=\"col\">unfreeze<br />scores</th>" .
+	     "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
 
 	foreach($res as $row) {
 		echo "<tr" .
 			($row['cid'] === $cid ? ' class="highlight"':'') . ">" .
 			"<td align=\"right\"><a href=\"contest.php?id=" . urlencode($row['cid']) .
 			"\">c" . (int)$row['cid'] . "</a></td>\n" .
+			"<td title=\"".htmlspecialchars(@$row['activatetime']) . "\">" .
+				printtime($row['activatetime']) . "</td>\n" .
 			"<td title=\"" . htmlspecialchars($row['starttime']) . "\">" .
 				printtime($row['starttime'])."</td>\n".
 			"<td title=\"".htmlspecialchars($row['endtime']) . "\">" .

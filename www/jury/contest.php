@@ -39,15 +39,18 @@ if ( IS_ADMIN && !empty($_GET['cmd']) ):
 
 <tr><td><label for="data_0__contestname_">Contest name:</label></td>
 <td><?=addInput('data[0][contestname]', @$row['contestname'], 40, 255)?></td></tr>
+<tr><td><label for="data_0__activatetime_">Activate time:</label></td>
+<td><?=addInput('data[0][activatetime]', @$row['activatetime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
 
 <tr><td><label for="data_0__starttime_">Start time:</label></td>
 <td><?=addInput('data[0][starttime]', @$row['starttime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
 
+<tr><td><label for="data_0__lastscoreupdate_">Last score update:</label></td>
+<td><?=addInput('data[0][lastscoreupdate]', @$row['lastscoreupdate'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
+
 <tr><td><label for="data_0__endtime_">End time:</label></td>
 <td><?=addInput('data[0][endtime]', @$row['endtime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
 
-<tr><td><label for="data_0__lastscoreupdate_">Last score update:</label></td>
-<td><?=addInput('data[0][lastscoreupdate]', @$row['lastscoreupdate'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
 
 <tr><td><label for="data_0__unfreezetime_">Unfreeze time:</label></td>
 <td><?=addInput('data[0][unfreezetime]', @$row['unfreezetime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
@@ -81,6 +84,9 @@ echo '<tr><td scope="row">CID:</td><td>c' .
 	(int)$data['cid'] . "</td></tr>\n";
 echo '<tr><td scope="row">Name:</td><td>' .
 	htmlspecialchars($data['contestname']) .
+	"</td></tr>\n";
+echo '<tr><td scope="row">Activate time:</td><td>' .
+	htmlspecialchars(@$data['activatetime']) .
 	"</td></tr>\n";
 echo '<tr><td scope="row">Starttime:</td><td>' .
 	htmlspecialchars($data['starttime']) .

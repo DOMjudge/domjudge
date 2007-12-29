@@ -905,20 +905,12 @@ live contest.
 <tt>cid</tt> is the reference ID and <tt>contestname</tt> is a
 descriptive name used in the interface.
 
-<tt>starttime</tt> and <tt>endtime</tt> respectively are the start-
-and endtime of the contest: before and after that time, no submissions
-are accepted.<footnote>For a contest with starttime "12:00:00" and 
-endtime "17:00:00", the first submission will be accepted at
-12:00:00 and the last one at 16:59:59. A submission received at
-17:00:00 or later will be stored but not judged.</footnote>
-<tt>lastscoreupdate</tt> is the time after which the
-public and team scoreboard are not updated anymore (frozen). This is
-meant to make the last stages of the contest more thrilling, because
-no-one knows who has won... Setting this to <tt>NULL</tt> disables
-this feature. When using this feature, <tt>unfreezetime</tt> can be
-set to automatically `unfreeze' the scoreboard at that time. For a
-more elaborate description, see also section <ref
-id="scoreboard:freeze" name="Scoreboard: freezing and defrosting">.
+<tt>activatetime</tt>, <tt>starttime</tt> and <tt>endtime</tt>
+are required fields and specify when this contest is active and
+open for submissions. Optional <tt>lastscoreupdate</tt> and
+<tt>unfreezetime</tt> control scoreboard freezing. For a
+detailed treating of these, see section <ref
+id="contestsetup:milestones" name="Contest milestones">.
 
 <tag>judgehost</tag>
 List here the hosts that will be autojudging the submissions.
@@ -1033,6 +1025,52 @@ are displayed on the public/team scoreboard. This feature can be used
 to remove teams from the public scoreboard by assigning them to a
 separate, invisible category.
 </descrip>
+
+
+<sect>Contest milestones<label id="contestsetup:milestones">
+<p>
+
+The <tt>contest</tt> table specifies timestamps for each contest
+that mark specific milestones in the course of the contest.
+
+The triplet <em>activatetime</em>, <em>starttime</em> and <em>endtime</em>
+define when the contest runs and are required fields (activatetime and
+starttime may be equal).
+
+activatetime is the moment when a contest first becomes
+visible to the public and teams (potentially replacing a previous contest
+that was displayed before). Nothing can be submitted yet and the
+problemset is not revealed. Clarifications can be viewed and sent.
+
+At starttime, the scoreboard is displayed and submissions are accepted.
+At endtime the contest stops. New incoming submissions will be stored
+but not processed; unjudged submissions received before endtime will
+still be judged.
+
+<em>lastscoreupdate</em> and <em>unfreezetime</em> control scoreboard
+freezing. lastscoreupdate is the time after which the public and team
+scoreboard are not updated anymore (frozen). This is meant to make the
+last stages of the contest more thrilling, because no-one knows who has
+won. Leaving them empty disables this feature. When using this feature,
+unfreezetime can be set to automatically `unfreeze' the scoreboard at
+that time. For a more elaborate description, see also section <ref
+id="scoreboard:freeze" name="Scoreboard: freezing and defrosting">.
+
+The scoreboard, results and clarifications will remain to be displayed
+to team and public after a contest, until an activatetime of a later
+contest passes.
+
+All events happen at the first moment of the defined time. That is:
+for a contest with starttime "12:00:00" and endtime "17:00:00", the
+first submission will be accepted at 12:00:00 and the last one at
+16:59:59.
+
+The following ordering must always hold: activatetime &lt;=
+starttime &lt; (lastscoreupdate &lt;=) endtime (&lt;= unfreezetime).
+No two contests may have overlap: there's always at most one active
+contest at any time.
+
+
 
 <sect>Team authentication
 <p>

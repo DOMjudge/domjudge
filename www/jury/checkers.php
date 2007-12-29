@@ -83,49 +83,55 @@ function check_language($data, $keydata = null)
 function check_contest($data, $keydata = null)
 {
 	// are these dates valid?
-	foreach(array('starttime','endtime','lastscoreupdate','unfreezetime') as $f) {
+	foreach(array('starttime','endtime','lastscoreupdate',
+		'unfreezetime','activatetime') as $f) {
 		if ( !empty($data[$f]) ) {
 			check_datetime($data[$f]);
 		}
 	}
 
+	// the ordering of times is:
+	// activatetime <= starttime <= lastscoreupdate < endtime <= unfreezetime
+
 	// are contest start/end times in order?
-	if($data['endtime'] <= $data['starttime']) {
+	if(strcmp($data['endtime'], $data['starttime']) <= 0) {
 		ch_error('Contest ends before it even starts');
 	}
-	if(isset($data['lastscoreupdate']) &&
-		($data['lastscoreupdate'] > $data['endtime'] ||
-		$data['lastscoreupdate'] < $data['starttime'] ) ) {
-		ch_error('Lastscoreupdate is out of start/endtime range');
+	if(!empty($data['lastscoreupdate'])) {
+		if ( strcmp($data['lastscoreupdate'], $data['endtime']) > 0 ||
+			strcmp($data['lastscoreupdate'], $data['starttime']) < 0 ) {
+			ch_error('Lastscoreupdate is out of start/endtime range');
+		}
 	}
-	if ( isset($data['unfreezetime']) ) {
-		if ( !isset($data['lastscoreupdate']) ) {
+	if( strcmp($data['activatetime'], $data['starttime']) > 0 ) {
+		ch_error('Activate time is later than starttime');
+	}
+	if ( !empty($data['unfreezetime']) ) {
+		if ( empty($data['lastscoreupdate']) ) {
 			ch_error('Unfreezetime set but no freeze time. That makes no sense.');
 		}
-		if ( $data['unfreezetime'] < $data['lastscoreupdate'] ||
-			$data['unfreezetime'] < $data['starttime'] ||
-			$data['unfreezetime'] < $data['endtime'] ) {
-			ch_error('Unfreezetime must be larger than any of start/end/freezetimes.');
+		if ( strcmp($data['unfreezetime'], $data['endtime']) < 0 ) {
+			ch_error('Unfreezetime must be larger than endtime.');
 		}
 	}
 
 	// a check whether this contest overlaps in time with any other, the
 	// system can only deal with exactly ONE current contest at any time.
-	// A new contest N overlaps with an existing contest E if the start- or
+	// A new contest N overlaps with an existing contest E if the activate- or
 	// end time or N is inside E (N is (partially) contained in E), or if
-	// the starttime is before E and the end time after E (E is completely
+	// the activatetime is before E and the end time after E (E is completely
 	// contained in N).
 	global $DB;
 	$overlaps = $DB->q('COLUMN SELECT cid FROM contest WHERE
-	                    ( (%s >= starttime AND %s <= endtime) OR
-	                      (%s >= starttime AND %s <= endtime) OR
-			      (%s <= starttime AND %s >= endtime)
+	                    ( (%s >= activatetime AND %s <= endtime) OR
+	                      (%s >= activatetime AND %s <= endtime) OR
+			      (%s <= activatetime AND %s >= endtime)
 			    ) ' .
 			    (isset($keydata['cid'])?'AND cid != %i ':'%_') .
 			    'ORDER BY cid',
-	                   $data['starttime'], $data['starttime'],
+	                   $data['activatetime'], $data['activatetime'],
 			   $data['endtime'], $data['endtime'],
-			   $data['starttime'], $data['endtime'],
+			   $data['activatetime'], $data['endtime'],
 			   @$keydata['cid']);
 	
 	if(count($overlaps) > 0) {
@@ -200,11 +206,11 @@ function check_judging($data, $keydata = null)
 		}
 	}
 	
-	if(isset($data['endtime']) && $data['endtime'] < $data['starttime']) {
+	if(!empty($data['endtime']) && strcmp($data['endtime'], $data['starttime']) < 0) {
 		ch_error('Judging ended before it started');
 	}
-	if(isset($data['submittime']) && $data['starttime'] < $data['submittime']) {
-		ch_error('Judging started before it was submitted');
+	if(!empty($data['submittime']) && strcmp($data['starttime'], $data['submittime']) < 0) {
+		ch_error('Judging started before it was submitted (clocks unsynched?)');
 	}
 
 	return $data;

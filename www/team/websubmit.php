@@ -18,11 +18,17 @@ $title = 'Submit';
 require('../header.php');
 require('../forms.php');
 
-if ( is_null($cid)  ) {
+if ( is_null($cid) ) {
 	echo "<p><em>No active contest</em></p>\n";
 	require('../footer.php');
 	exit;
 }
+if ( strcmp($cdata['starttime'], now()) > 0 ) {
+	echo "<p><em>Contest has not yet started.</em></p>\n";
+	require('../footer.php');
+	exit;
+}
+
 
 // Put overview of team submissions (like scoreboard)
 echo "<div id=\"teamscoresummary\">\n";

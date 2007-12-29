@@ -57,12 +57,19 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	// we're not showing the final score yet
 	$showfrozen = !$showfinal && isset($cdata['lastscoreupdate']) &&
 		strcmp($cdata['lastscoreupdate'],$now) <= 0;
+	// contest is active but has not yet started
+	$cstarted = strcmp($cdata['starttime'],$now) <= 0;
 
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
 
 	if ( $showfinal ) {
 		echo "<h4>final standings</h4>\n\n";
+	} elseif ( ! $cstarted ) {
+		echo "<h4>scheduled to start at " . printtime($cdata['starttime']) . "</h4>\n\n";
+		// Stop here (do not leak problem number, descriptions etc).
+		// Alternatively we could only display the list of teams?
+		if ( ! $isjury ) return;
 	} else {
 		echo "<h4>starts: " . printtime($cdata['starttime']) .
 				" - ends: " . printtime($cdata['endtime']) ;
@@ -361,7 +368,7 @@ function putTeamRow($cdata, $teamid) {
 
 	global $DB;
 
-	if ( empty( $cdata ) ) return;
+	if ( empty( $cdata )  || strcmp($cdata['starttime'],now()) > 0 ) return;
 	$cid = $cdata['cid'];
 	
 	echo '<table class="scoreboard">' . "\n";

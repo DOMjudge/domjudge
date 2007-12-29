@@ -22,6 +22,16 @@ if ( !isset($_POST['submit']) ) {
 	header('Location: websubmit.php');
 	return;
 }
+if ( is_null($cid) ) {
+	echo "<p><em>No active contest</em></p>\n";
+	require('../footer.php');
+	exit;
+}
+if ( strcmp($cdata['starttime'], now()) > 0 ) {
+	echo "<p><em>Contest has not yet started.</em></p>\n";
+	require('../footer.php');
+	exit;
+}
 
 
 /** helper to output an error message. */
