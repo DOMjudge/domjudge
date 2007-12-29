@@ -69,7 +69,7 @@ if ( isset($_POST['forteam']) ) {
 			$pass = $setpass;
 		}
 		// update the team table with a password
-		$DB->q('UPDATE team SET passwd = %s WHERE login = %s', md5($pass), $team['login']);
+		$DB->q('UPDATE team SET passwd = %s WHERE login = %s', md5($team['login'].'#'.$pass), $team['login']);
 		echo "Team:      " . htmlspecialchars($team['name']) . "\n" .
 		     "Login:     " . htmlspecialchars($team['login']) . "\n" .
 		     "Password:  $pass\n\n\n\n";

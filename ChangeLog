@@ -30,6 +30,7 @@ Version 2.2.0 - SVN
    the second before a contest starts (Closes: #1825555).
  - Rename contest.lastscoreupdate to freezetime to be more clear
    and in line with other table attributes.
+ - Salt passwords stored with md5 hashes.
 
 Version 2.1.1 - SVN
 -------------------
