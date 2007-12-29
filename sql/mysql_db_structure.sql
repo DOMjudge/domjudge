@@ -12,14 +12,14 @@
 -- 
 
 CREATE TABLE `clarification` (
-  `clarid` int(4) unsigned NOT NULL auto_increment,
-  `cid` int(4) unsigned NOT NULL default '0',
-  `respid` int(4) unsigned default NULL,
-  `submittime` datetime NOT NULL default '0000-00-00 00:00:00',
-  `sender` varchar(15) default NULL,
-  `recipient` varchar(15) default NULL,
-  `body` text NOT NULL,
-  `answered` tinyint(1) unsigned NOT NULL default '0',
+  `clarid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `respid` int(4) unsigned default NULL COMMENT 'In reply to clarification ID',
+  `submittime` datetime NOT NULL COMMENT 'Time sent',
+  `sender` varchar(15) default NULL COMMENT 'Team login, null means jury',
+  `recipient` varchar(15) default NULL COMMENT 'Team login, null means to jury or to all',
+  `body` text NOT NULL COMMENT 'Clarification text',
+  `answered` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),
   KEY `cid` (`cid`,`answered`,`submittime`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Clarification requests by teams and responses by the jury';
@@ -29,13 +29,13 @@ CREATE TABLE `clarification` (
 -- 
 
 CREATE TABLE `contest` (
-  `cid` int(4) unsigned NOT NULL auto_increment,
-  `contestname` varchar(255) NOT NULL default '',
-  `activatetime` datetime NOT NULL,
-  `starttime` datetime NOT NULL,
-  `freezetime` datetime default NULL,
-  `endtime` datetime NOT NULL,
-  `unfreezetime` datetime default NULL,
+  `cid` int(4) unsigned NOT NULL auto_increment COMMENT 'Contest ID',
+  `contestname` varchar(255) NOT NULL COMMENT 'Descriptive name',
+  `activatetime` datetime NOT NULL COMMENT 'Time contest becomes visible in team/public views',
+  `starttime` datetime NOT NULL COMMENT 'Time contest starts, submissions accepted',
+  `freezetime` datetime default NULL COMMENT 'Time scoreboard is frozen',
+  `endtime` datetime NOT NULL COMMENT 'Time after which no more submissions are accepted',
+  `unfreezetime` datetime default NULL COMMENT 'Unfreeze a frozen scoreboard at this time',
   PRIMARY KEY  (`cid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';
 
@@ -44,15 +44,15 @@ CREATE TABLE `contest` (
 -- 
 
 CREATE TABLE `event` (
-  `eventid` int(4) unsigned NOT NULL auto_increment,
-  `eventtime` timestamp NOT NULL default CURRENT_TIMESTAMP,
-  `cid` int(4) unsigned NOT NULL,
-  `clarid` int(4) unsigned default NULL,
-  `langid` varchar(8) default NULL,
-  `probid` varchar(8) default NULL,
-  `submitid` int(4) unsigned default NULL,
-  `teamid` varchar(15) default NULL,
-  `description` text NOT NULL,
+  `eventid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
+  `eventtime` timestamp NOT NULL default CURRENT_TIMESTAMP COMMENT 'When the event occurred',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `clarid` int(4) unsigned default NULL COMMENT 'Clarification ID',
+  `langid` varchar(8) default NULL COMMENT 'Language ID',
+  `probid` varchar(8) default NULL COMMENT 'Problem ID',
+  `submitid` int(4) unsigned default NULL COMMENT 'Submission ID',
+  `teamid` varchar(15) default NULL COMMENT 'Team login',
+  `description` text NOT NULL COMMENT 'Event description',
   PRIMARY KEY  (`eventid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Log of all events during a contest';
 
@@ -61,8 +61,8 @@ CREATE TABLE `event` (
 -- 
 
 CREATE TABLE `judgehost` (
-  `hostname` varchar(50) NOT NULL default '',
-  `active` tinyint(1) unsigned NOT NULL default '1',
+  `hostname` varchar(50) NOT NULL COMMENT 'Resolvable hostname of judgehost',
+  `active` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Should this host take on judgings?',
   PRIMARY KEY  (`hostname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Hostnames of the autojudgers';
 
@@ -71,20 +71,20 @@ CREATE TABLE `judgehost` (
 -- 
 
 CREATE TABLE `judging` (
-  `judgingid` int(4) unsigned NOT NULL auto_increment,
-  `cid` int(4) unsigned NOT NULL default '0',
-  `submitid` int(4) unsigned NOT NULL default '0',
-  `starttime` datetime NOT NULL default '0000-00-00 00:00:00',
-  `endtime` datetime default NULL,
-  `judgehost` varchar(50) NOT NULL default '',
-  `result` enum('correct','compiler-error','timelimit','run-error','wrong-answer','no-output') default NULL,
-  `verified` tinyint(1) unsigned NOT NULL default '0',
-  `verifier` varchar(15) NOT NULL default '',
-  `valid` tinyint(1) unsigned NOT NULL default '1',
-  `output_compile` text,
-  `output_run` text,
-  `output_diff` text,
-  `output_error` text,
+  `judgingid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
+  `cid` int(4) unsigned NOT NULL default '0' COMMENT 'Contest ID',
+  `submitid` int(4) unsigned NOT NULL COMMENT 'Submission ID being judged',
+  `starttime` datetime NOT NULL COMMENT 'Time judging started',
+  `endtime` datetime default NULL COMMENT 'Time judging ended, null = still busy',
+  `judgehost` varchar(50) NOT NULL COMMENT 'Judgehost that performed the judging',
+  `result` enum('correct','compiler-error','timelimit','run-error','wrong-answer','no-output') default NULL COMMENT 'Result',
+  `verified` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Result verified by jury member?',
+  `verifier` varchar(15) NOT NULL default '' COMMENT 'Name of jury member who verified this',
+  `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Old judging is marked as invalid when rejudging',
+  `output_compile` text COMMENT 'Output of the compiling the program',
+  `output_run` text COMMENT 'Output of running the program',
+  `output_diff` text COMMENT 'Diffing the program output and testdata output',
+  `output_error` text COMMENT 'Standard error output of the program',
   PRIMARY KEY  (`judgingid`),
   KEY `submitid` (`submitid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Result of judging a submission';
@@ -94,12 +94,12 @@ CREATE TABLE `judging` (
 -- 
 
 CREATE TABLE `language` (
-  `langid` varchar(8) NOT NULL default '',
-  `name` varchar(255) NOT NULL default '',
-  `extension` varchar(5) NOT NULL default '',
-  `allow_submit` tinyint(1) unsigned NOT NULL default '1',
-  `allow_judge` tinyint(1) unsigned NOT NULL default '1',
-  `time_factor` float NOT NULL default '1',
+  `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
+  `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
+  `extension` varchar(5) NOT NULL COMMENT 'Filename extension for this language',
+  `allow_submit` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Are submissions accepted in this language?',
+  `allow_judge` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Are submissions in this language judged?',
+  `time_factor` float NOT NULL default '1' COMMENT 'Language-specific factor multiplied by problem run times',
   PRIMARY KEY  (`langid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Programming languages in which teams can submit solutions';
 
@@ -108,16 +108,16 @@ CREATE TABLE `language` (
 -- 
 
 CREATE TABLE `problem` (
-  `probid` varchar(8) NOT NULL default '',
-  `cid` int(4) unsigned NOT NULL default '0',
-  `name` varchar(255) NOT NULL default '',
-  `allow_submit` tinyint(1) unsigned NOT NULL default '0',
-  `allow_judge` tinyint(1) unsigned NOT NULL default '1',
-  `testdata` varchar(255) NOT NULL default '',
-  `timelimit` int(4) unsigned NOT NULL default '0',
-  `special_run` varchar(25) default NULL,
-  `special_compare` varchar(25) default NULL,
-  `color` varchar(25) default NULL,
+  `probid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
+  `allow_submit` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Are submissions accepted for this problem?',
+  `allow_judge` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Are submissions for this problem judged?',
+  `testdata` varchar(255) NOT NULL COMMENT 'Filesystem path to find jury testdata',
+  `timelimit` int(4) unsigned NOT NULL default '0' COMMENT 'Maximum run time for this problem',
+  `special_run` varchar(25) default NULL COMMENT 'Script to run submissions for this problem',
+  `special_compare` varchar(25) default NULL COMMENT 'Script to compare problem and jury output for this problem',
+  `color` varchar(25) default NULL COMMENT 'Balloon colour to display on the scoreboard',
   PRIMARY KEY  (`probid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
 
@@ -126,14 +126,14 @@ CREATE TABLE `problem` (
 -- 
 
 CREATE TABLE `scoreboard_jury` (
-  `cid` int(4) unsigned NOT NULL default '0',
-  `teamid` varchar(15) NOT NULL default '',
-  `probid` varchar(8) NOT NULL default '',
-  `submissions` int(4) unsigned NOT NULL default '0',
-  `totaltime` int(4) unsigned NOT NULL default '0',
-  `penalty` int(4) unsigned NOT NULL default '0',
-  `is_correct` tinyint(1) unsigned NOT NULL default '0',
-  `balloon` tinyint(1) unsigned NOT NULL default '0',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
+  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `submissions` int(4) unsigned NOT NULL default '0' COMMENT 'Number of submissions made',
+  `totaltime` int(4) unsigned NOT NULL default '0' COMMENT 'Total time spent',
+  `penalty` int(4) unsigned NOT NULL default '0' COMMENT 'Penalty time scored',
+  `is_correct` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has there been a correct submission?',
+  `balloon` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has a balloon been handed out?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (jury version)';
 
@@ -142,13 +142,13 @@ CREATE TABLE `scoreboard_jury` (
 -- 
 
 CREATE TABLE `scoreboard_public` (
-  `cid` int(4) unsigned NOT NULL default '0',
-  `teamid` varchar(15) NOT NULL default '',
-  `probid` varchar(8) NOT NULL default '',
-  `submissions` int(4) unsigned NOT NULL default '0',
-  `totaltime` int(4) unsigned NOT NULL default '0',
-  `penalty` int(4) unsigned NOT NULL default '0',
-  `is_correct` tinyint(1) unsigned NOT NULL default '0',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
+  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `submissions` int(4) unsigned NOT NULL default '0' COMMENT 'Number of submissions made',
+  `totaltime` int(4) unsigned NOT NULL default '0' COMMENT 'Total time spent',
+  `penalty` int(4) unsigned NOT NULL default '0' COMMENT 'Penalty time scored',
+  `is_correct` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has there been a correct submission?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (public/team version)';
 
@@ -157,16 +157,16 @@ CREATE TABLE `scoreboard_public` (
 -- 
 
 CREATE TABLE `submission` (
-  `submitid` int(4) unsigned NOT NULL auto_increment,
-  `cid` int(4) unsigned NOT NULL default '0',
-  `teamid` varchar(15) NOT NULL default '',
-  `probid` varchar(8) NOT NULL default '',
-  `langid` varchar(8) NOT NULL default '',
-  `submittime` datetime NOT NULL default '0000-00-00 00:00:00',
-  `sourcefile` varchar(255) NOT NULL default '',
-  `sourcecode` mediumblob NOT NULL,
-  `judgehost` varchar(50) default NULL,
-  `judgemark` varchar(255) default NULL,
+  `submitid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
+  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `langid` varchar(8) NOT NULL COMMENT 'Language ID',
+  `submittime` datetime NOT NULL COMMENT 'Time submitted',
+  `sourcefile` varchar(255) NOT NULL COMMENT 'Name of source file on filesystem',
+  `sourcecode` mediumblob NOT NULL COMMENT 'Full source code',
+  `judgehost` varchar(50) default NULL COMMENT 'Current/last judgehost judging this submission',
+  `judgemark` varchar(255) default NULL COMMENT 'Unique identifier for taking a submission by a judgehost' ,
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `judgemark` (`judgemark`),
   KEY `teamid` (`cid`,`teamid`),
@@ -178,16 +178,16 @@ CREATE TABLE `submission` (
 -- 
 
 CREATE TABLE `team` (
-  `login` varchar(15) NOT NULL default '',
-  `name` varchar(255) NOT NULL default '',
-  `categoryid` int(4) unsigned NOT NULL default '0',
-  `affilid` varchar(10) default NULL,
-  `ipaddress` varchar(50) default NULL,
-  `passwd` varchar(32) default NULL,
-  `members` text,
-  `room` varchar(15) default NULL,
-  `comments` text,
-  `teampage_first_visited` datetime default NULL,
+  `login` varchar(15) NOT NULL COMMENT 'Team login name',
+  `name` varchar(255) NOT NULL COMMENT 'Team name',
+  `categoryid` int(4) unsigned NOT NULL default '0' COMMENT 'Team category ID',
+  `affilid` varchar(10) default NULL COMMENT 'Team affiliation ID',
+  `ipaddress` varchar(50) default NULL COMMENT 'IP address of team workstation',
+  `passwd` varchar(32) default NULL COMMENT 'Team password (md5 hash)',
+  `members` text COMMENT 'Team member names (freeform)',
+  `room` varchar(15) default NULL COMMENT 'Physical location of team',
+  `comments` text COMMENT 'Comments about this team',
+  `teampage_first_visited` datetime default NULL COMMENT 'Time of first teampage view',
   PRIMARY KEY  (`login`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `ipaddress` (`ipaddress`)
@@ -198,10 +198,10 @@ CREATE TABLE `team` (
 -- 
 
 CREATE TABLE `team_affiliation` (
-  `affilid` varchar(10) NOT NULL default '',
-  `name` varchar(255) NOT NULL default '',
-  `country` char(2) default NULL,
-  `comments` text,
+  `affilid` varchar(10) NOT NULL COMMENT 'Unique ID',
+  `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
+  `country` char(2) default NULL COMMENT 'ISO country code',
+  `comments` text COMMENT 'Comments',
   PRIMARY KEY  (`affilid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Affilitations for teams (e.g.: university, company)';
 
@@ -210,11 +210,11 @@ CREATE TABLE `team_affiliation` (
 -- 
 
 CREATE TABLE `team_category` (
-  `categoryid` int(4) unsigned NOT NULL auto_increment,
-  `name` varchar(255) NOT NULL default '',
-  `sortorder` tinyint(1) unsigned NOT NULL default '0',
-  `color` varchar(25) default NULL,
-  `visible` tinyint(1) unsigned NOT NULL default '1',
+  `categoryid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
+  `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
+  `sortorder` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Where to sort this category on the scoreboard',
+  `color` varchar(25) default NULL COMMENT 'Background colour on the scoreboard',
+  `visible` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Are teams in this category visible?',
   PRIMARY KEY  (`categoryid`),
   KEY `sortorder` (`sortorder`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Categories for teams (e.g.: participants, observers, ...)';
@@ -224,8 +224,8 @@ CREATE TABLE `team_category` (
 -- 
 
 CREATE TABLE `team_unread` (
-  `teamid` varchar(15) NOT NULL default '',
-  `mesgid` int(4) unsigned NOT NULL default '0',
-  `type` enum('clarification','submission') NOT NULL default 'clarification',
+  `teamid` varchar(15) NOT NULL default '' COMMENT 'Team login',
+  `mesgid` int(4) unsigned NOT NULL default '0' COMMENT 'Clarification ID or Submission ID',
+  `type` enum('clarification','submission') NOT NULL default 'clarification' COMMENT 'Type of message',
   PRIMARY KEY  (`teamid`,`type`,`mesgid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='List of items a team has not viewed yet';
