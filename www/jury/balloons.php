@@ -27,8 +27,8 @@ require('../forms.php');
 
 echo "<h1>Balloon Status</h1>\n\n";
 
-if ( isset($cdata['lastscoreupdate']) &&
-     time() > strtotime($cdata['lastscoreupdate']) ) {
+if ( isset($cdata['freezetime']) &&
+     time() > strtotime($cdata['freezetime']) ) {
 	echo "<h4>Scoreboard is now frozen.</h4>\n\n";
 }
 
@@ -58,8 +58,8 @@ while ( $row = $res->next() ) {
 }
 
 $conteststart  = strtotime($cdata['starttime']);
-if ( !empty($cdata['lastscoreupdate']) ) {
-	$contestfreeze = strtotime($cdata['lastscoreupdate']);
+if ( !empty($cdata['freezetime']) ) {
+	$contestfreeze = strtotime($cdata['freezetime']);
 }
 
 if ( !empty($BALLOONS) ) {

@@ -20,7 +20,7 @@
  * Output the general scoreboard based on the cached data in table
  * 'scoreboard'. $myteamid can be passed to highlight a specific row.
  * $isjury set to true means the scoreboard will always be current,
- * regardless of the lastscoreupdate setting in the contesttable.
+ * regardless of the freezetime setting in the contesttable.
  * $static omits output unsuitable for static html pages.
  */
 function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALSE) {
@@ -35,14 +35,14 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	// reached, or if contest is over and no freezetime had been set.
 	// We can compare $now and the dbfields stringwise.
 	$now = now();
-	$showfinal  = ( !isset($cdata['lastscoreupdate']) &&
+	$showfinal  = ( !isset($cdata['freezetime']) &&
 		strcmp($cdata['endtime'],$now) <= 0 ) ||
 		( isset($cdata['unfreezetime']) &&
 		strcmp($cdata['unfreezetime'], $now) <= 0 );
-	// freeze scoreboard if lastscoreupdate time has been reached and
+	// freeze scoreboard if freeze time has been reached and
 	// we're not showing the final score yet
-	$showfrozen = !$showfinal && isset($cdata['lastscoreupdate']) &&
-		strcmp($cdata['lastscoreupdate'],$now) <= 0;
+	$showfrozen = !$showfinal && isset($cdata['freezetime']) &&
+		strcmp($cdata['freezetime'],$now) <= 0;
 	// contest is active but has not yet started
 	$cstarted = strcmp($cdata['starttime'],$now) <= 0;
 
@@ -65,7 +65,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 			if ( $isjury ) {
 				echo "public scoreboard is ";
 			}
-			echo "frozen since " . printtime($cdata['lastscoreupdate']) .")";
+			echo "frozen since " . printtime($cdata['freezetime']) .")";
 		}
 		echo "</h4>\n\n";
 	}
@@ -349,9 +349,9 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	}
 
 	// last modified date, now if we are the jury, else include the
-	// lastscoreupdate time
+	// freeze time
 	if( ! $isjury && $showfrozen ) {
-		$lastupdate = strtotime($cdata['lastscoreupdate']);
+		$lastupdate = strtotime($cdata['freezetime']);
 	} else {
 		$lastupdate = time();
 	}

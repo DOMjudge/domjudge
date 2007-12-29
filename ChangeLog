@@ -29,6 +29,8 @@ Version 2.2.0 - SVN
    team/public displays start to display this contest, but no submissions
    accepted yet. Solves the problem of testsession data still displayed upto
    the second before a contest starts (Closes: #1825555).
+ - Rename contest.lastscoreupdate to freezetime to be more clear
+   and in line with other table attributes.
 
 Version 2.1.1 - SVN
 -------------------

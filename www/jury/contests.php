@@ -47,9 +47,9 @@ if( count($res) == 0 ) {
 				printtime($row['starttime'])."</td>\n".
 			"<td title=\"".htmlspecialchars($row['endtime']) . "\">" .
 				printtime($row['endtime'])."</td>\n".
-			"<td title=\"".htmlspecialchars(@$row['lastscoreupdate']) . "\">" .
-			( isset($row['lastscoreupdate']) ?
-			  printtime($row['lastscoreupdate']) : '-' ) . "</td>\n" .
+			"<td title=\"".htmlspecialchars(@$row['freezetime']) . "\">" .
+			( isset($row['freezetime']) ?
+			  printtime($row['freezetime']) : '-' ) . "</td>\n" .
 			"<td title=\"".htmlspecialchars(@$row['unfreezetime']) . "\">" .
 			( isset($row['unfreezetime']) ?
 			  printtime($row['unfreezetime']) : '-' ) . "</td>\n" .
@@ -65,7 +65,7 @@ if( count($res) == 0 ) {
 		// only if the contest has already finished, and the scores have
 		// not already been unfrozen.
 		echo "<td>";
-		if ( $row['cid'] === $cid && isset($row['lastscoreupdate']) ) {
+		if ( $row['cid'] == $cid && isset($row['freezetime']) ) {
 			echo "<input type=\"submit\" name=\"unfreeze[" . $row['cid'] .
 				"]\" value=\"unfreeze scoreboard now\"" ;
 			$now = now();

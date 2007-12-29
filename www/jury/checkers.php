@@ -83,7 +83,7 @@ function check_language($data, $keydata = null)
 function check_contest($data, $keydata = null)
 {
 	// are these dates valid?
-	foreach(array('starttime','endtime','lastscoreupdate',
+	foreach(array('starttime','endtime','freezetime',
 		'unfreezetime','activatetime') as $f) {
 		if ( !empty($data[$f]) ) {
 			check_datetime($data[$f]);
@@ -91,23 +91,23 @@ function check_contest($data, $keydata = null)
 	}
 
 	// the ordering of times is:
-	// activatetime <= starttime <= lastscoreupdate < endtime <= unfreezetime
+	// activatetime <= starttime <= freezetime < endtime <= unfreezetime
 
 	// are contest start/end times in order?
 	if(strcmp($data['endtime'], $data['starttime']) <= 0) {
 		ch_error('Contest ends before it even starts');
 	}
-	if(!empty($data['lastscoreupdate'])) {
-		if ( strcmp($data['lastscoreupdate'], $data['endtime']) > 0 ||
-			strcmp($data['lastscoreupdate'], $data['starttime']) < 0 ) {
-			ch_error('Lastscoreupdate is out of start/endtime range');
+	if(!empty($data['freezetime'])) {
+		if ( strcmp($data['freezetime'], $data['endtime']) > 0 ||
+			strcmp($data['freezetime'], $data['starttime']) < 0 ) {
+			ch_error('Freezetime is out of start/endtime range');
 		}
 	}
 	if( strcmp($data['activatetime'], $data['starttime']) > 0 ) {
 		ch_error('Activate time is later than starttime');
 	}
 	if ( !empty($data['unfreezetime']) ) {
-		if ( empty($data['lastscoreupdate']) ) {
+		if ( empty($data['freezetime']) ) {
 			ch_error('Unfreezetime set but no freeze time. That makes no sense.');
 		}
 		if ( strcmp($data['unfreezetime'], $data['endtime']) < 0 ) {

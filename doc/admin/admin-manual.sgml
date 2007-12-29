@@ -907,7 +907,7 @@ descriptive name used in the interface.
 
 <tt>activatetime</tt>, <tt>starttime</tt> and <tt>endtime</tt>
 are required fields and specify when this contest is active and
-open for submissions. Optional <tt>lastscoreupdate</tt> and
+open for submissions. Optional <tt>freezetime</tt> and
 <tt>unfreezetime</tt> control scoreboard freezing. For a
 detailed treating of these, see section <ref
 id="contestsetup:milestones" name="Contest milestones">.
@@ -1047,8 +1047,8 @@ At endtime the contest stops. New incoming submissions will be stored
 but not processed; unjudged submissions received before endtime will
 still be judged.
 
-<em>lastscoreupdate</em> and <em>unfreezetime</em> control scoreboard
-freezing. lastscoreupdate is the time after which the public and team
+<em>freezetime</em> and <em>unfreezetime</em> control scoreboard
+freezing. freezetime is the time after which the public and team
 scoreboard are not updated anymore (frozen). This is meant to make the
 last stages of the contest more thrilling, because no-one knows who has
 won. Leaving them empty disables this feature. When using this feature,
@@ -1066,7 +1066,7 @@ first submission will be accepted at 12:00:00 and the last one at
 16:59:59.
 
 The following ordering must always hold: activatetime &lt;=
-starttime &lt; (lastscoreupdate &lt;=) endtime (&lt;= unfreezetime).
+starttime &lt; (freezetime &lt;=) endtime (&lt;= unfreezetime).
 No two contests may have overlap: there's always at most one active
 contest at any time.
 
@@ -1296,7 +1296,7 @@ DOMjudge has the option to `freeze' the public- and team scoreboards
 at some point during the contest. This means that scores are no longer
 updated and remain to be displayed as they were at the time of the
 freeze. This is often done to keep the last hour interesting for all.
-The scoreboard freeze time can be set with the `lastscoreupdate'
+The scoreboard freeze time can be set with the `freezetime'
 attribute in the contest table.
 
 The scoreboard freezing works by looking at the time a submission is

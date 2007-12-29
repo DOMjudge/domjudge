@@ -44,8 +44,8 @@ function notification_text($team, $problem, $probs_solved, $probs_data) {
 			(empty($probs_data[$probid]['color']) ? "" : " (colour: ".$probs_data[$probid]['color'].")" )."\n";
 	}
 
-	if ( isset($cdata['lastscoreupdate']) &&
-	     strcmp(now(), $cdata['lastscoreupdate']) > 0 ) {
+	if ( isset($cdata['freezetime']) &&
+	     strcmp(now(), $cdata['freezetime']) > 0 ) {
 		$ret .= "\nWARNING: scoreboard is frozen!\n";
 	}
 
@@ -71,10 +71,10 @@ while ( TRUE ) {
 		$cdata = $newcdata;
 	}
 
-	if ( isset($cdata['lastscoreupdate']) && ! $infreeze &&
-	     strcmp(now(), $cdata['lastscoreupdate']) > 0 ) {
+	if ( isset($cdata['freezetime']) && ! $infreeze &&
+	     strcmp(now(), $cdata['freezetime']) > 0 ) {
 		$infreeze = TRUE;
-		logmsg(LOG_NOTICE, "Scoreboard is frozen since " . $cdata['lastscoreupdate']);
+		logmsg(LOG_NOTICE, "Scoreboard is frozen since " . $cdata['freezetime']);
 	}
 	
 	do {

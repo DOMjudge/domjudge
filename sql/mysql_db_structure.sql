@@ -31,10 +31,10 @@ CREATE TABLE `clarification` (
 CREATE TABLE `contest` (
   `cid` int(4) unsigned NOT NULL auto_increment,
   `contestname` varchar(255) NOT NULL default '',
-  `activatetime` datetime NOT NULL default '0000-00-00 00:00:00',
-  `starttime` datetime NOT NULL default '0000-00-00 00:00:00',
-  `lastscoreupdate` datetime default NULL,
-  `endtime` datetime NOT NULL default '0000-00-00 00:00:00',
+  `activatetime` datetime NOT NULL,
+  `starttime` datetime NOT NULL,
+  `freezetime` datetime default NULL,
+  `endtime` datetime NOT NULL,
   `unfreezetime` datetime default NULL,
   PRIMARY KEY  (`cid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';

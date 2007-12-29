@@ -45,14 +45,14 @@ if ( IS_ADMIN && !empty($_GET['cmd']) ):
 <tr><td><label for="data_0__starttime_">Start time:</label></td>
 <td><?=addInput('data[0][starttime]', @$row['starttime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
 
-<tr><td><label for="data_0__lastscoreupdate_">Last score update:</label></td>
-<td><?=addInput('data[0][lastscoreupdate]', @$row['lastscoreupdate'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
+<tr><td><label for="data_0__freezetime_">Scoreboard freeze time:</label></td>
+<td><?=addInput('data[0][freezetime]', @$row['freezetime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
 
 <tr><td><label for="data_0__endtime_">End time:</label></td>
 <td><?=addInput('data[0][endtime]', @$row['endtime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
 
 
-<tr><td><label for="data_0__unfreezetime_">Unfreeze time:</label></td>
+<tr><td><label for="data_0__unfreezetime_">Scoreboard unfreeze time:</label></td>
 <td><?=addInput('data[0][unfreezetime]', @$row['unfreezetime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
 
 </table>
@@ -88,13 +88,13 @@ echo '<tr><td scope="row">Name:</td><td>' .
 echo '<tr><td scope="row">Activate time:</td><td>' .
 	htmlspecialchars(@$data['activatetime']) .
 	"</td></tr>\n";
-echo '<tr><td scope="row">Starttime:</td><td>' .
+echo '<tr><td scope="row">Start time:</td><td>' .
 	htmlspecialchars($data['starttime']) .
 	"</td></tr>\n";
-echo '<tr><td scope="row">Last scoreboard update:</td><td>' . 
-	(empty($data['lastscoreupdate']) ? "-" : htmlspecialchars(@$data['lastscoreupdate'])) .
+echo '<tr><td scope="row">Scoreboard freeze:</td><td>' . 
+	(empty($data['freezetime']) ? "-" : htmlspecialchars(@$data['freezetime'])) .
 	"</td></tr>\n";
-echo '<tr><td scope="row">Endtime:</td><td>' .
+echo '<tr><td scope="row">End time:</td><td>' .
 	htmlspecialchars($data['endtime']) .
 	"</td></tr>\n";
 echo '<tr><td scope="row">Scoreboard unfreeze:</td><td>' .
