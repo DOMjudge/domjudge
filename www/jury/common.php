@@ -75,7 +75,7 @@ function rejudgeForm($table, $id)
 
 		if ( IS_ADMIN ) {
 			if ( ! $validresult ) {
-				$question = "Restart judging of PENDING submission s$id " .
+				$question = "Restart judging of PENDING submission s$id, " .
 					'are you sure?';
 				$button = 'RESTART judging';
 			} elseif ( $validresult == 'correct' ) {
