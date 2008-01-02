@@ -100,7 +100,7 @@ Jaap Eldering at Study Association <htmlurl name="A-Eskwadraat"
 url="http://www.a-eskwadraat.nl/">, <htmlurl name="Utrecht University"
 url="http://www.uu.nl/">, The Netherlands.
 
-It is Copyright (c) 2004 - 2007 by The DOMjudge Developers.
+It is Copyright (c) 2004 - 2008 by The DOMjudge Developers.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the <url name="GNU General Public License"
@@ -597,6 +597,7 @@ submission file, while dot-dash lines indicate flow of metadata about
 the submission. Each line where no protocol of data transfer is given,
 are just filesystem operations. Squares are programs and rounded
 squares are storage locations.
+
 <figure loc="h">
 <eps file="submitflow.eps">
 <img src="submitflow.png">
