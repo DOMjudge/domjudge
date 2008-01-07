@@ -31,6 +31,7 @@ Version 2.2.0 - SVN
  - Rename contest.lastscoreupdate to freezetime to be more clear
    and in line with other table attributes.
  - Salt passwords stored with md5 hashes.
+ - Move setting resource limit from run script to runguard.
 
 Version 2.1.1 - SVN
 -------------------

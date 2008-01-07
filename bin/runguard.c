@@ -1,6 +1,6 @@
 /*
-   runguard -- run command with optional restrictions: time, root, user
-   Copyright (C) 2004-2007 Jaap Eldering (eldering@a-eskwadraat.nl).
+   runguard -- run command with restrictions.
+   Copyright (C) 2004-2008 Jaap Eldering (eldering@a-eskwadraat.nl).
 
    Based on an idea from the timeout program, written by Wietse Venema
    as part of The Coroner's Toolkit.
@@ -27,6 +27,7 @@
 #include <sys/wait.h>
 #include <sys/param.h>
 #include <sys/time.h>
+#include <sys/resource.h>
 #include <errno.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -37,11 +38,13 @@
 #include <getopt.h>
 #include <pwd.h>
 
-/* Some system/site specific config */
+/* Some system/site specific config: VALID_USERS and CHROOT_PREFIX are
+ * used, maybe include here for standalone executable?
+ */
 #include "../etc/config.h"
 
 #define PROGRAM "runguard"
-#define VERSION "0.3"
+#define VERSION "0.9"
 #define AUTHORS "Jaap Eldering"
 
 extern int errno;
@@ -65,10 +68,15 @@ int use_root;
 int use_time;
 int use_user;
 int use_output;
+int no_coredump;
 int be_verbose;
 int be_quiet;
 int show_help;
 int show_version;
+
+rlim_t memsize;
+rlim_t filesize;
+rlim_t nproc;
 
 pid_t child_pid;
 
@@ -78,6 +86,10 @@ struct option const long_opts[] = {
 	{"root",    required_argument, NULL,         'r'},
 	{"time",    required_argument, NULL,         't'},
 	{"user",    required_argument, NULL,         'u'},
+	{"memsize", required_argument, NULL,         'm'},
+	{"filesize",required_argument, NULL,         'f'},
+	{"nproc",   required_argument, NULL,         'p'},
+	{"no-core", no_argument,       NULL,         'c'},
 	{"output",  required_argument, NULL,         'o'},
 	{"verbose", no_argument,       NULL,         'v'},
 	{"quiet",   no_argument,       NULL,         'q'},
@@ -152,16 +164,20 @@ void usage()
 {
 	printf("Usage: %s [OPTION]... COMMAND...\n",progname);
 	printf("Run COMMAND with restrictions.\n\n");
-	printf("  -r, --root=ROOT     run COMMAND with root directory set to ROOT\n");
-	printf("  -t, --time=TIME     kill COMMAND if still running after TIME seconds\n");
-	printf("  -u, --user=USER     run COMMAND as user with username or ID USER\n");
-	printf("  -o, --output=FILE   write running time to FILE\n");
-	printf("                        WARNING: FILE will be overwritten and written\n");
-	printf("                        to as USER when using the `user' option\n");
-	printf("  -v, --verbose       display some extra warnings and information\n");
-	printf("  -q, --quiet         suppress all warnings and verbose output\n");
-	printf("      --help          display this help and exit\n");
-	printf("      --version       output version information and exit\n");
+	printf("  -r, --root=ROOT      run COMMAND with root directory set to ROOT\n");
+	printf("  -t, --time=TIME      kill COMMAND if still running after TIME seconds\n");
+	printf("  -u, --user=USER      run COMMAND as user with username or ID USER\n");
+	printf("  -m, --memsize=SIZE   set all (total, stack, etc) memory limits to SIZE kB\n");
+	printf("  -f, --filesize=SIZE  set maximum created filesize to SIZE kB\n");
+	printf("  -p, --nproc=N        set maximum no. processes to N\n");
+	printf("  -c, --no-core        disable core dumps\n");
+	printf("  -o, --output=FILE    write running time to FILE\n");
+	printf("                         WARNING: FILE will be overwritten and written\n");
+	printf("                         to as USER when using the `user' option\n");
+	printf("  -v, --verbose        display some extra warnings and information\n");
+	printf("  -q, --quiet          suppress all warnings and verbose output\n");
+	printf("      --help           display this help and exit\n");
+	printf("      --version        output version information and exit\n");
 	printf("\n");
 	printf("Note that root privileges are needed for the `root' and `user' options.\n");
 	printf("When run setuid without the `user' option, the user ID is set to the\n");
@@ -171,17 +187,17 @@ void usage()
 
 void outputtime()
 {
-	int timediff; /* in milliseconds */
+	double timediff; /* in seconds */
 
 	if ( gettimeofday(&endtime,NULL) ) error(errno,"getting time");
 	
-	timediff = (endtime.tv_sec  - starttime.tv_sec )*1000 +
-	           (endtime.tv_usec - starttime.tv_usec)/1000;
+	timediff = (endtime.tv_sec  - starttime.tv_sec ) +
+	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
 	
-	verbose("runtime is %d.%03d seconds",timediff/1000,timediff%1000);
+	verbose("runtime is %.3lf seconds",timediff);
 
 	if ( use_output ) {
-		if ( fprintf(outputfile,"%d.%03d\n",timediff/1000,timediff%1000)==0 ) {
+		if ( fprintf(outputfile,"%.3lf\n",timediff)==0 ) {
 			error(0,"cannot write to file `%s'",outputfile);
 		}
 		if ( fclose(outputfile) ) error(errno,"closing file `%s'",outputfile);
@@ -201,8 +217,8 @@ void terminate(int sig)
 	}
 
 	/* First try to kill graciously, then hard */
-	verbose("sending signal QUIT");
-	killpg(child_pid,SIGQUIT);
+	verbose("sending signal TERM");
+	killpg(child_pid,SIGTERM);
 	
 	sleep(1);
 
@@ -232,7 +248,9 @@ int main(int argc, char **argv)
 	char *path;
 	char  cwd[MAXPATHLEN+3];
 	int   opt;
-
+	
+	struct rlimit lim;
+		
 	progname = argv[0];
 
 	/* Clear environment to prevent all kinds of security holes, save PATH */
@@ -242,11 +260,12 @@ int main(int argc, char **argv)
 	if ( path!=NULL ) setenv("PATH",path,1);
 
 	/* Parse command-line options */
-	use_root = use_time = use_user = use_output = 0;
+	use_root = use_time = use_user = use_output = no_coredump = 0;
+	memsize = filesize = nproc = RLIM_INFINITY;
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:t:u:o:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:t:u:m:f:p:co:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -267,6 +286,39 @@ int main(int argc, char **argv)
 			runuid = strtol(optarg,&ptr,10);
 			if ( *ptr!=0 ) runuid = userid(optarg);
 			if ( runuid<0 ) error(0,"invalid username or ID specified: `%s'",optarg);
+			break;
+		case 'm': /* memsize option */
+			memsize = (rlim_t) strtol(optarg,&ptr,10);
+			if ( *ptr!=0 || memsize<=0 ) {
+				error(0,"invalid memory limit specified: `%s'",optarg);
+			}
+			/* Convert limit from kB to bytes and check for overflow */
+			if ( memsize!=(memsize*1024)/1024 ) {
+				memsize = RLIM_INFINITY;
+			} else {
+				memsize *= 1024;
+			}
+			break;
+		case 'f': /* filesize option */
+			filesize = (rlim_t) strtol(optarg,&ptr,10);
+			if ( *ptr!=0 || filesize<=0 ) {
+				error(0,"invalid filesize limit specified: `%s'",optarg);
+			}
+			/* Convert limit from kB to bytes and check for overflow */
+			if ( filesize!=(filesize*1024)/1024 ) {
+				filesize = RLIM_INFINITY;
+			} else {
+				filesize *= 1024;
+			}
+			break;
+		case 'p': /* nproc option */
+			nproc = (rlim_t) strtol(optarg,&ptr,10);
+			if ( *ptr!=0 || nproc<=0 ) {
+				error(0,"invalid process limit specified: `%s'",optarg);
+			}
+			break;
+		case 'c': /* no-core option */
+			no_coredump = 1;
 			break;
 		case 'o': /* output option */
 			use_output = 1;
@@ -307,6 +359,48 @@ int main(int argc, char **argv)
 		if ( ptr==NULL || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
 	}
 
+	/* Set resource limits: must be root to raise hard limits.
+	   Note that limits can thus be raised from the systems defaults! */
+	
+	/* First define shorthand macro function */
+#define setlim(type) \
+	if ( setrlimit(RLIMIT_ ## type, &lim)!=0 ) { \
+		if ( errno==EPERM ) { \
+			warning("no permission to set resource RLIMIT_" #type); \
+		} else { \
+			error(errno,"setting resource RLIMIT_" #type); \
+		} \
+	}
+
+	if ( memsize!=RLIM_INFINITY ) {
+		verbose("setting memory limits to %d bytes",(int)memsize);
+	}
+	lim.rlim_cur = lim.rlim_max = memsize;
+	setlim(AS);
+	setlim(DATA);
+	setlim(STACK);
+	setlim(MEMLOCK);
+	
+	if ( filesize!=RLIM_INFINITY ) {
+		verbose("setting filesize limit to %d bytes",(int)filesize);
+	}
+	lim.rlim_cur = lim.rlim_max = filesize;
+	setlim(FSIZE);
+	
+	if ( nproc!=RLIM_INFINITY ) {
+		verbose("setting process limit to %d",(int)nproc);
+	}
+	lim.rlim_cur = lim.rlim_max = nproc;
+	setlim(NPROC);
+
+#undef setlim
+	
+	if ( no_coredump ) {
+		verbose("disabling core dumps");
+		lim.rlim_cur = lim.rlim_max = 0;
+		if ( setrlimit(RLIMIT_CORE,&lim)!=0 ) error(errno,"disabling core dumps");
+	}
+	
 	/* Set root-directory and change directory to there. */
 	if ( use_root ) {
 		/* Small security issue: when running setuid-root, people can find

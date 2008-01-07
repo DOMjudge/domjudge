@@ -166,7 +166,7 @@ fi
 
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
-( "$RUNGUARD" -t $COMPILETIME -o compile.time \
+( "$RUNGUARD" -t $COMPILETIME -o compile.time -- \
 	"$COMPILE_SCRIPT" "source.$EXT" source "$MEMLIMIT" ) &>compile.tmp
 exitcode=$?
 if [ -f source ]; then
@@ -217,9 +217,10 @@ disown $CATPID
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
-( "$RUNGUARD" ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" -t $TIMELIMIT -o program.time -- \
+( "$RUNGUARD" ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" -t $TIMELIMIT \
+	-m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
 	$PREFIX/$RUN_SCRIPT $PREFIX/program testdata.in program.out program.err program.exit \
-		$MEMLIMIT $FILELIMIT $PROCLIMIT ) &>error.tmp
+) &>error.tmp
 exitcode=$?
 
 # Execute an optional chroot destroy script:
