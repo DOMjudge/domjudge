@@ -1510,7 +1510,7 @@ Network traffic between team- and jury-computers and the internet
 should be limited to what is allowed. Possible ways of enforcing this
 might be: monitor traffic, modify firewall rules on team computers or
 (what we implemented with great satisfaction) put all team computers
-behind a firewalling router.
+behind a firewalling bridge.
 
 Solutions are run within a restricted (chroot) environment on the
 judge computers. This however does not restrict network access, so a
