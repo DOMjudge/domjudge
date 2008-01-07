@@ -34,9 +34,21 @@ logmsg(LOG_NOTICE, "Websubmit server started [DOMjudge/".DOMJUDGE_VERSION."]");
 $file_pregex = '/^websubmit\.([[:alnum:]]+\.){2}([[:alnum:]:-]){7,29}\.' .
                '[[:alnum:]]{6}\.[a-zA-Z0-9+-]+$/';
 
+// Tick use required as of PHP 4.3.0 for handling signals, must be
+// declared globally.
+declare(ticks = 1);
+$exitsignalled = FALSE;
+initsignals();
+
 // Constantly check incoming dir for new websubmissions
 while ( TRUE ) {
 	$newsubmission = FALSE;
+
+	// Check whether we have received an exit signal
+	if ( $exitsignalled ) {
+		logmsg(LOG_NOTICE, "Received signal, exiting.");
+		exit;
+	}
 
 	$contdata = getCurContest(TRUE);
 	$newcid = $contdata['cid'];

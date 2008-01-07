@@ -32,6 +32,8 @@ Version 2.2.0 - SVN
    and in line with other table attributes.
  - Salt passwords stored with md5 hashes.
  - Move setting resource limit from run script to runguard.
+ - Added signal detection to daemons for graceful shutdown (PHP scripts
+   only, Working: #1808478).
 
 Version 2.1.1 - SVN
 -------------------

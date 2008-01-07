@@ -198,3 +198,36 @@ function compareipaddr($ip1, $ip2)
 {
 	return $ip1==$ip2;
 }
+
+/**
+ * Functions to support graceful shutdown of daemons upon receiving a signal
+ */
+function sig_handler($signal)
+{
+	global $exitsignalled;
+
+	logmsg(LOG_DEBUG, "Signal $signal received");
+	
+	switch ( $signal ) {
+	case SIGTERM:
+	case SIGHUP:
+	case SIGINT:
+		$exitsignalled = TRUE;
+	}
+}
+
+function initsignals()
+{
+	global $exitsignalled;
+
+	$exitsignalled = FALSE;
+
+	logmsg(LOG_DEBUG, "Installing signal handlers");
+
+	// Install signal handler for TERMINATE, HANGUP and INTERRUPT
+	// signals. The sleep() call will automatically return on
+	// receiving a signal.
+	pcntl_signal(SIGTERM,"sig_handler");
+	pcntl_signal(SIGHUP, "sig_handler");
+	pcntl_signal(SIGINT, "sig_handler");
+}

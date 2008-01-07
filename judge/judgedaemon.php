@@ -49,9 +49,21 @@ $waiting = FALSE;
 $active = TRUE;
 $cid = null;
 
+// Tick use required as of PHP 4.3.0 for handling signals, must be
+// declared globally.
+declare(ticks = 1);
+$exitsignalled = FALSE;
+initsignals();
+
 // Constantly check database for unjudged submissions
 while ( TRUE ) {
 
+	// Check whether we have received an exit signal
+	if ( $exitsignalled ) {
+		logmsg(LOG_NOTICE, "Received signal, exiting.");
+		exit;
+	}
+	
 	// Check that this judge is active, else wait and check again later
 	$row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $myhost);
 	if ( $row['active'] != 1 ) {
