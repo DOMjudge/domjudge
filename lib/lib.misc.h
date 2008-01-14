@@ -59,6 +59,13 @@ int execute(const char *, char **, int, int[3], int);
  * with the process-ID of the child command.
  */
 
+void initsignals();
+/* Installs a signal handler to gracefully terminate daemon programs
+ * upon receiving TERMINATE, HANGUP and INTERRUPT signals which sets
+ * 'extern int exitsignalled = 1'. The sleep() call will automatically
+ * return on receiving a signal.
+  */
+
 #ifdef __cplusplus
 }
 #endif

@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 /* Array indices for input/output file descriptors as used by pipe() */
 #define PIPE_IN  1
@@ -121,3 +122,42 @@ int execute(const char *cmd, char **args, int nargs, int stdio_fd[3], int err2ou
 	/* This should never be reached */
 	return -2;
 }
+
+int exitsignalled;
+
+void sig_handler(int sig)
+{
+	logmsg(LOG_DEBUG, "Signal %d received", sig);
+
+	switch ( sig ) {
+	case SIGTERM:
+	case SIGHUP:
+	case SIGINT:
+		exitsignalled = 1;
+		break;
+	}
+}
+	
+void initsignals()
+{
+	struct sigaction sa;
+	sigset_t newmask, oldmask;
+	
+	exitsignalled = 0;
+	
+	/* unmask all signals */
+	memset(&newmask, 0, sizeof(newmask));
+	if ( sigprocmask(SIG_SETMASK, &newmask, &oldmask)!=0 ) {
+		error(errno,"unmasking signals");
+	}
+
+	logmsg(LOG_DEBUG, "Installing signal handlers");
+
+	sa.sa_handler = &sig_handler;
+	sa.sa_mask = newmask;
+	sa.sa_flags = 0;
+	
+	if ( sigaction(SIGTERM,&sa,NULL)!=0 ) error(errno,"installing signal handler");
+	if ( sigaction(SIGHUP ,&sa,NULL)!=0 ) error(errno,"installing signal handler");
+	if ( sigaction(SIGINT ,&sa,NULL)!=0 ) error(errno,"installing signal handler");
+}	

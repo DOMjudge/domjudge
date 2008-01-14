@@ -56,6 +56,8 @@ using namespace std;
 extern int verbose;
 extern int loglevel;
 
+extern int exitsignalled;
+
 const int backlog = 32;  /* how many pending connections queue will hold */
 const int linelen = 256; /* maximum length read from submit_db stdout lines */
 
@@ -163,10 +165,19 @@ int main(int argc, char **argv)
 		error(errno,"setting child signal handler");
 	}
 	logmsg(LOG_DEBUG,"child signal handler installed");
+
+	/* Setup graceful shutdown signal handlers */
+	initsignals();
 	
     /* main accept() loop of incoming connections */
     while ( true ) {
 
+		// Check whether we have received an exit signal
+		if ( exitsignalled ) {
+			logmsg(LOG_NOTICE, "Received signal, exiting.");
+			return 0;
+		}
+		
 		if ( poll(server_fds,server_nfds,-1)<0 ) {
 			if ( errno==EINTR ) continue;
 			error(errno,"polling socket(s)");
