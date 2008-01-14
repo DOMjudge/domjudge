@@ -7,13 +7,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+const int mb   = 1024*1024;
+
 void recurse_malloc(int depth)
 {
-	char a[1024*1024];
+	char a[mb];
+	int i, j;
 	
 	depth++;
+
+	/* Here we do some random array reads and writes to prevent the
+	 * compiler from optimizing away the array a. */
+	i = rand() % mb;
+	j = rand() % mb;
+	a[i] = depth;
 	
-	printf("Allocated %3d MB stack memory.\n",depth);
+	printf("Allocated %3d MB stack memory, foo = %d.\n",depth,a[j]);
 
 	fflush(stdout);
 	

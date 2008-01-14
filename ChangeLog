@@ -34,6 +34,8 @@ Version 2.2.0 - SVN
  - Move setting resource limit from run script to runguard.
  - Added signal detection to daemons for graceful shutdown (PHP scripts
    only, Working: #1808478).
+ - Fixed bug in test-stacksize.c due to compiler optimization
+   (Closes: #1788820).
 
 Version 2.1.1 - SVN
 -------------------
