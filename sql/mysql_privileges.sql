@@ -39,4 +39,7 @@ GRANT SELECT (submitid, cid, probid, teamid, submittime) ON submission TO domjud
 GRANT SELECT (langid, name, extension, allow_submit)     ON language   TO domjudge_team;
 GRANT SELECT (probid, name, cid, allow_submit, color)    ON problem    TO domjudge_team;
 
+GRANT INSERT (cid, teamid, probid, langid, submittime, sourcefile, sourcecode) ON submission TO domjudge_team;
+GRANT INSERT (cid, langid, probid, submitid, teamid, description) ON event TO domjudge_team;
+
 GRANT UPDATE (ipaddress, teampage_first_visited)         ON team       TO domjudge_team;

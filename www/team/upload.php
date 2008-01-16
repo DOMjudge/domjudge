@@ -27,7 +27,8 @@ if ( is_null($cid) ) {
 	require('../footer.php');
 	exit;
 }
-if ( strcmp($cdata['starttime'], now()) > 0 ) {
+$now = now();
+if ( strcmp($cdata['starttime'], $now) > 0 ) {
 	echo "<p><em>Contest has not yet started.</em></p>\n";
 	require('../footer.php');
 	exit;
@@ -134,33 +135,25 @@ $ipstr = str_replace(".","-",$ip);
 
 $tmpfile = $_FILES['code']['tmp_name'];
 
-$desttemp = INCOMINGDIR . "/websubmit.$probid.$login.$ipstr.XXXXXX.$langext";
-$destfile = mkstemps($desttemp,strlen($langext)+1);
-if ( $destfile === FALSE ) {
-	error("Failed to create file from template '". basename($desttemp) . "'");
-}
+// Insert submission into the database
+$id = $DB->q('RETURNID INSERT INTO submission
+              (cid, teamid, probid, langid, submittime, sourcefile, sourcecode)
+              VALUES (%i, %s, %s, %s, %s, %s, %s)',
+             $cid, $login, $probid, $lang['langid'], $now, $tmpfile,
+             getFileContents($tmpfile, false));
 
-if ( ! move_uploaded_file($tmpfile, $destfile) ) {
-	error("Failed to move uploaded file '$tmpfile' to '$destfile'");
-}
-chmod($destfile, 0644);
+// Log to event table
+$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
+        VALUES(%i, %s, %s, %s, %i, "problem submitted")',
+       $cid, $login, $lang['langid'], $probid, $id);
 
-for($i=0; $i<$waitsubmit; $i++) {
-	sleep(1);
-	if ( ! file_exists($destfile) ) break;
+if( strcmp($cdata['endtime'], $now) <= 0 ) {
+	err("The contest is closed, submission stored but not processed. [c$cid]");
 }
 
 echo '<div id="uploadstatus">';
-if ( file_exists($destfile) ) {
-	if (NONINTERACTIVE) error("Upload not yet completed: contact staff.");
-	echo "<p>Upload not yet completed: contact staff.</p>";
-} else if ( file_exists(INCOMINGDIR . "/rejected-" . basename($destfile)) ) {
-	if (NONINTERACTIVE) error("Upload failed.");
-	echo "<p>Upload failed.</p>";
-} else {
-	if (NONINTERACTIVE) echo '<!-- noninteractive-upload-successful -->';
-	echo "<p>Upload successful.</p>";
-}
+if (NONINTERACTIVE) echo '<!-- noninteractive-upload-successful -->';
+echo "<p>Upload successful.</p>";
 echo "</div>\n";
 
 require('../footer.php');
