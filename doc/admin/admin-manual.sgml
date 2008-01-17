@@ -197,12 +197,8 @@ DOMjudge:
        make sure phpMyAdmin also still works.
 <item> Add useful contest data through the jury web interface.
 <item> Use the config checker in the jury web interface.
-<item> Make INCOMINGDIR writeable for the webserver (optionally, when using websubmit).
-<item> Start the necessary daemons, each in their own terminal:
-  <itemize>
-  <item> <tt>cd submit; ./submitdaemon</tt> (needed for command line submit)
-  <item> <tt>cd submit; ./websubmitdaemon.php</tt> (needed for websubmit)
-  </itemize>
+<item> Start the commandline submit daemon, when using this functionality:
+		<tt>cd submit; ./submitdaemon</tt>
 
 <item> Next, setup the autojudgers on separate hosts:
   <itemize>
@@ -780,8 +776,6 @@ the webserver. These are:
 <itemize>
 <item> <tt>SYSTEM_ROOT/etc/passwords.php</tt> must be readable by the
        webserver, but (best) not world readable.
-<item> <tt>INCOMINGDIR</tt> must be writeable by the webserver to
-       place websubmitted files there.
 </itemize>
 
 See also section <ref id="security:webprivs" name="Security: webserver
@@ -1179,8 +1173,8 @@ They all run as a normal user on the system. The needed root privileges
 are gained by the setuid-root programs only when required.
 
 <itemize>
-<item> The submitdaemon and/or the websubmitdaemon on the jury system;
 <item> One or more judgedaemons, one on each judgehost;
+<item> Optionally the submitdaemon on the jury system;
 <item> Optionally the balloon notification daemon.
 </itemize>
 
@@ -1488,11 +1482,6 @@ readable by anyone else. This can be done for example by setting the
 account&gt;:&lt;Webserver group&gt; and permissions
 <tt>drwxr-x---</tt>, denying users other than yourself and the
 webserver group access to the configuration and password files.
-
-Furthermore, the webserver must have write access to the
-<tt>INCOMINGDIR</tt> to place websubmissions (if used). This can also
-be done by making that directory group-owned and -writeable by the
-webserver group.
 
 You should take care not to serve any files over the web that
 are not under the DOMjudge 'www/' directory, because they might
