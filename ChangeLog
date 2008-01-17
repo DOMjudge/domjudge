@@ -32,9 +32,11 @@ Version 2.2.0 - SVN
    and in line with other table attributes.
  - Salt passwords stored with md5 hashes.
  - Move setting resource limit from run script to runguard.
- - Added signal detection to daemons for graceful shutdown (Closed: #1808478).
+ - Added signal detection to daemons for graceful shutdown (Closes: #1808478).
  - Fixed bug in test-stacksize.c due to compiler optimization
    (Closes: #1788820).
+ - Add some rudimentary tests.
+ - Remove websubmitdaemon, submit directly to database (Closes: #1737229).
 
 Version 2.1.1 - SVN
 -------------------

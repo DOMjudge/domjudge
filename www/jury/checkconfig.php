@@ -82,23 +82,6 @@ if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
 ?>
 </p>
 
-<h2>Websubmit</h2>
-
-<p>
-<?php 
-if ( ENABLE_WEBSUBMIT_SERVER ) {
-
-	echo "Checking for writeable incoming dir... ";
-	if ( ! is_writable(INCOMINGDIR) ) {
-		err("INCOMINGDIR '" . INCOMINGDIR . "' not writeable by webserver user");
-	} else {
-		echo "OK";
-	}
-} else {
-	echo "Websubmit disabled in config.";
-} ?>
-</p>
-
 
 <h2>Contests</h2>
 

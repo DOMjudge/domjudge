@@ -451,8 +451,8 @@ different roots).
 	<tag><tt>LOGDIR</tt></tag>
 		contains all logfiles.
 	<tag><tt>INCOMINGDIR</tt></tag>
-		contains submission files, being submitted or where a
-		submission error has occurred.
+		contains submission files from the commandline client, being
+		submitted or where a submission error has occurred.
 	<tag><tt>SUBMITDIR</tt></tag>
 		contains all correctly submitted files.
 	<tag><tt>JUDGEDIR</tt></tag>
