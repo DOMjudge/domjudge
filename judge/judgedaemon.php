@@ -52,7 +52,6 @@ $cid = null;
 // Tick use required as of PHP 4.3.0 for handling signals, must be
 // declared globally.
 declare(ticks = 1);
-$exitsignalled = FALSE;
 initsignals();
 
 // Constantly check database for unjudged submissions

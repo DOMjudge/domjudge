@@ -60,7 +60,6 @@ logmsg(LOG_NOTICE, "Balloon notifications started [DOMjudge/".DOMJUDGE_VERSION."
 // Tick use required as of PHP 4.3.0 for handling signals, must be
 // declared globally.
 declare(ticks = 1);
-$exitsignalled = FALSE;
 initsignals();
 
 // Constantly check database for new correct submissions
