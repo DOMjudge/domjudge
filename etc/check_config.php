@@ -74,6 +74,12 @@ if ( ! function_exists('posix_getpwnam') ) {
 	warn("RUNUSER [" . RUNUSER ."] does not exist!");
 }
 
+// check for signal handling in PHP.
+if ( ! function_exists('pcntl_signal') ) {
+	warn("PHP signal handling is not available. Compile PHP's pcntl module " .
+		"in to get graceful signal handling for daemons.");
+}
+
 // check problems. 
 logmsg(LOG_DEBUG, "checking problems");
 

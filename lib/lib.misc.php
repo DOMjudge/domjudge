@@ -221,6 +221,11 @@ function initsignals()
 	global $exitsignalled;
 
 	$exitsignalled = FALSE;
+	
+	if ( ! function_exists('pcntl_signal') ) {
+		logmsg(LOG_INFO, "Signal handling not available");
+		return;
+	}
 
 	logmsg(LOG_DEBUG, "Installing signal handlers");
 
