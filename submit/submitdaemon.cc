@@ -33,6 +33,10 @@ using namespace std;
 /* System/site specific config */
 #include "../etc/config.h"
 
+/* These defines are needed in 'version' and 'logmsg' */
+#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
+#define PROGRAM "submitdaemon"
+
 /* Logging and error functions */
 #include "lib.error.h"
 
@@ -45,10 +49,6 @@ using namespace std;
 
 /* Common send/receive functions */
 #include "submitcommon.h"
-
-/* These defines are needed in 'version' */
-#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
-#define PROGRAM "submitdaemon"
 
 /* Variables defining logmessages verbosity to stderr/logfile */
 #define LOGFILE LOGDIR"/submit.log"

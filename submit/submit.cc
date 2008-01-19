@@ -30,6 +30,9 @@
 #error "Unknown submission method requested."
 #endif
 
+/* Make sure we don't log to syslog */
+#undef SYSLOG
+
 /* Define {CMD,WEB}SUBMIT as available */
 #if ( ENABLE_CMDSUBMIT_SERVER == 1 )
 #define CMDSUBMIT 1
@@ -68,6 +71,10 @@ using namespace std;
 #include <string>
 #include <vector>
 
+/* These defines are needed in 'version' and 'logmsg' */
+#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
+#define PROGRAM "submit"
+
 /* Logging and error functions */
 #include "lib.error.h"
 
@@ -80,10 +87,6 @@ using namespace std;
 
 /* Common send/receive functions */
 #include "submitcommon.h"
-
-/* These defines are needed in 'version' */
-#define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
-#define PROGRAM "submit"
 
 const int timeout_secs = 60; /* seconds before send/receive timeouts with an error */
 

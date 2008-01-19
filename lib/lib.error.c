@@ -38,12 +38,23 @@
 #include <unistd.h>
 #include <time.h>
 
+/* For SYSLOG config variable */
+#include "../etc/config.h"
+
+/* Use program name in syslogging if defined */
+#ifndef PROGRAM
+#define PROGRAM NULL
+#endif
+
 const int exit_failure = -1;
 
 /* Variables defining logmessages verbosity to stderr/logfile */
 int  verbose      = LOG_NOTICE;
 int  loglevel     = LOG_DEBUG;
+
+/* Variables for tracking logging facilities */
 FILE *stdlog      = NULL;
+int  syslog_open  = 0;
 
 /* Main function that contains logging code */
 void vlogmsg(int msglevel, const char *mesg, va_list ap)
@@ -53,13 +64,22 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 	char *buffer;
 	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
 	int bufferlen;
-
+	va_list aq;
+	
 	/* Try to open logfile if it is defined */
 #ifdef LOGFILE
 	if ( stdlog==NULL ) stdlog = fopen(LOGFILE,"a");
 #endif
-	
-	currtime  = time(NULL);
+
+	/* Try to open syslog if it is defined */
+#ifdef SYSLOG
+	if ( ! syslog_open ) {
+		openlog(PROGRAM, LOG_NDELAY | LOG_PID, SYSLOG);
+		syslog_open = 1;
+	}
+#endif
+
+	currtime = time(NULL);
 	strftime(timestring, sizeof(timestring), "%b %d %H:%M:%S", localtime(&currtime));
 
 	bufferlen = strlen(timestring)+strlen(progname)+mesglen+20;
@@ -69,23 +89,28 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 	snprintf(buffer, bufferlen, "[%s] %s[%d]: %s\n",
 	         timestring, progname, getpid(), mesg);
 	
-	if ( msglevel<=verbose  ) {
-	       	va_list aq;
-	       	va_copy(aq, ap);
-	       	vfprintf(stderr, buffer, aq);
-	       	fflush(stderr);
+	if ( msglevel<=verbose ) {
+		va_copy(aq, ap);
+		vfprintf(stderr, buffer, aq);
+		fflush(stderr);
 		va_end(aq);
-       	}
-	if ( msglevel<=loglevel &&
-	     stdlog!=NULL       ) {
-	       	va_list aq;
-	       	va_copy(aq, ap);
-	       	vfprintf(stdlog, buffer, aq);
-	       	fflush(stdlog);
+	}
+	if ( msglevel<=loglevel && stdlog!=NULL ) {
+		va_copy(aq, ap);
+		vfprintf(stdlog, buffer, aq);
+		fflush(stdlog);
 		va_end(aq);
-       	}
+	}
 
 	free(buffer);
+
+#ifdef SYSLOG
+	if ( msglevel<=loglevel ) {
+		buffer = vallocstr(mesg, ap);
+		syslog(msglevel, buffer);
+		free(buffer);
+	}
+#endif
 }
 
 /* Argument-list wrapper function around vlogmsg */

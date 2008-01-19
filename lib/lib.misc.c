@@ -15,25 +15,37 @@
 #define PIPE_IN  1
 #define PIPE_OUT 0
 
+char *vallocstr(const char *mesg, va_list ap)
+{
+	char *str;
+	char tmp[2];
+	int len, n;
+	va_list aq;
+
+	va_copy(aq,ap);
+	len = vsnprintf(tmp,1,mesg,aq);
+	va_end(aq);
+
+	if ( (str = (char *) malloc(len+1))==NULL ) error(errno,"allocating string");
+
+	va_copy(aq,ap);
+	n = vsnprintf(str,len+1,mesg,aq);
+	va_end(aq);
+
+	if ( n==-1 || n>len ) error(0,"cannot write all of string");
+
+	return str;
+}
+
 char *allocstr(const char *mesg, ...)
 {
 	va_list ap;
 	char *str;
-	char tmp[2];
-	int len, n;
 
 	va_start(ap,mesg);
-	len = vsnprintf(tmp,1,mesg,ap);
+	str = vallocstr(mesg,ap);
 	va_end(ap);
 	
-	if ( (str = (char *) malloc(len+1))==NULL ) error(errno,"allocating string");
-
-	va_start(ap,mesg);
-	n = vsnprintf(str,len+1,mesg,ap);
-	va_end(ap);
-
-	if ( n==-1 || n>len ) error(0,"cannot write all of string");
-
 	return str;
 }
 

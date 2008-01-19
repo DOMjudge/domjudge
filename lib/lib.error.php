@@ -41,7 +41,7 @@ if ( defined('SYSLOG') ) {
 
 /**
  * Log a message $string on the loglevel $msglevel.
- * Prepends a timestamp and logg to the logfile.
+ * Prepends a timestamp and log to the logfile.
  * If this is the web interface: write to the screen with the right CSS class.
  * If this is the command line: write to Standard Error.
  */

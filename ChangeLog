@@ -38,6 +38,7 @@ Version 2.2.0 - SVN
  - Add some rudimentary tests.
  - Remove websubmitdaemon, submit directly to database (Closes: #1737229).
  - Add script to restore submission table from SUBMITDIR files.
+ - Complete implementation of syslog logging (now also for C/C++).
 
 Version 2.1.1 - SVN
 -------------------
