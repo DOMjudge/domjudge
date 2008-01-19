@@ -86,7 +86,7 @@ if( filesize(INCOMINGDIR."/$file") > SOURCESIZE*1024 ) {
 logmsg (LOG_INFO, "input verified");
 
 // Copy the submission to a (uniquely generated) file in SUBMITDIR
-$template = SUBMITDIR."/$team.$prob.XXXXXX.$langext";
+$template = SUBMITDIR."/c$cid.$team.$prob.XXXXXX.$langext";
 $tofile = mkstemps($template, strlen($langext)+1);
 
 if ( $tofile === FALSE ) {
