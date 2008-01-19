@@ -98,6 +98,7 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <?php
 echo addHidden('cmd', $cmd) .
 	addHidden('table','problem') .
+	addHidden('referer', @$_SERVER['HTTP_REFERER']) .
 	addSubmit('Save') .
 	addEndForm();
 

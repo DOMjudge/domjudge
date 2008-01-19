@@ -26,6 +26,7 @@ if(!in_array($t, array_keys($KEYS))) error ("Unknown table.");
 $data          = $_POST['data'];
 $keydata       = @$_POST['keydata'];
 $skipwhenempty = @$_POST['skipwhenempty'];
+$referer       = @$_POST['referer'];
 
 if ( empty($data) ) error ("No data.");
 
@@ -73,21 +74,13 @@ foreach ($data as $i => $itemdata ) {
 	}
 }
 
-// when inserting/updating multiple rows, throw the user
-// back to the overview for that data, otherwise to the
-// page pertaining to the one item they added/edited.
-if ( count($data) > 1 ) {
+// Throw the user back to the page he came from, if not available to
+// the overview for the edited data.
+if ( $referer ) {
+	header('Location: '.$referer);
+} else {
 	$tablemulti = ($t == 'team_category' ? 'team_categories' : $t.'s');
 	header('Location: '.getBaseURI().'jury/'.$tablemulti.'.php');
-
-} else {
-	if ( $cmd == 'add' ) {
-		header('Location: '.getBaseURI().'jury/'.$t.'.php?id=' .
-			urlencode($newid));
-	} else {
-		header('Location: '.getBaseUri().'jury/'.$t.'.php?id=' .
-			urlencode(array_shift($prikey)));
-	}	
 }
 
 /**
@@ -97,6 +90,8 @@ if ( count($data) > 1 ) {
  */
 function check_sane_keys($itemdata) {
 	foreach(array_keys($itemdata) as $key) {
-		if ( ! preg_match ('/^\w+$/', $key ) ) error ("Invalid characters in field name \"$key\".");
+		if ( ! preg_match ('/^\w+$/', $key ) ) {
+			error ("Invalid characters in field name \"$key\".");
+		}
 	}
 }

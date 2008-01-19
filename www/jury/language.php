@@ -81,6 +81,7 @@ if ( IS_ADMIN && !empty($cmd) ):
 <?php
 echo addHidden('cmd', $cmd) .
 	addHidden('table','language') .
+	addHidden('referer', @$_SERVER['HTTP_REFERER']) .
 	addSubmit('Save') .
 	addEndForm();
 
