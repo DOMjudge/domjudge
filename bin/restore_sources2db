@@ -69,9 +69,10 @@ while ( ($src = readdir($dh))!==FALSE ) {
 
 closedir($dh);
 
-// sort submissions on datetime
+// sort submissions on sid
 function cmpsid($a, $b) {
-	return strcmp($a['sid'], $b['sid']);
+	if ($a['sid'] == $b['sid']) return 0;
+	return ($a['sid'] < $b['sid']) ? -1 : 1;
 }
 usort($submissions, 'cmpsid');
 
