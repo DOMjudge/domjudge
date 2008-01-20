@@ -5,8 +5,12 @@
  * on the filesystem. Can be useful in case of a database crash.
  *
  * Does not do any checking on valid parameters (team, problem, etc.)
- * and inserts all validly-named source files for all contests. The
- * file modification times are used as submittime.
+ * and inserts all validly-named source files for all contests. Using
+ * InnoDB tables will provide some basic foreign key checks.
+ *
+ * The file modification times are used as submittime, as Unix does
+ * not have file creation timestamps. Therefore it is advisable not to
+ * touch the sources in SUBMITDIR.
  * 
  * $Id$
  *
@@ -26,13 +30,13 @@ $sourcesdir = SUBMITDIR;
 
 logmsg(LOG_NOTICE, "started, sources dir = '$sourcesdir'");
 
-if ( ($filelist = scandir($sourcesdir))===FALSE ) {
+if ( !($dh = @opendir($sourcesdir)) ) {
 	error("cannot read directory '$sourcesdir'");
 }
 
 $submissions = array();
 
-foreach ( $filelist as $src ) {
+while ( ($src = readdir($dh))!==FALSE ) {
 
 	$f = $sourcesdir . '/' . $src;
 
@@ -60,6 +64,8 @@ foreach ( $filelist as $src ) {
 	                       'langid'     => $langid,
 	                       'submittime' => $submittime);
 }
+
+closedir($dh);
 
 // sort submissions on datetime
 function cmpsubmittime($a, $b) {
