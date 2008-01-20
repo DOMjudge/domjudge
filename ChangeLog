@@ -42,6 +42,7 @@ Version 2.2.0 - SVN
  - Send jury user back to referer page after edits (Closes: #1821543).
  - Remove .php extensions from commandline scripts.
  - Higher displayed precision in float compare.
+ - Fix submit_copy to use bash.
 
 Version 2.1.1 - SVN
 -------------------
