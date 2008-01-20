@@ -255,6 +255,10 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 	if( empty($langext) ) error("No value for Language.");
 	if( empty($file)    ) error("No value for Filename.");
 
+	if ( ! is_uploaded_file($file) && dirname($file) != INCOMINGDIR ) {
+		error("'$file' is not an uploaded file, nor is it located in INCOMINGDIR '" . INCOMINGDIR . "'");
+	}
+
 	global $cdata,$cid, $DB;
 
 	// If no contest has started yet, refuse submissions.
