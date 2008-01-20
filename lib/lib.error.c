@@ -237,3 +237,39 @@ void warning(int errnum, const char *mesg, ...)
 
 	va_end(ap);
 }
+
+/* Allocates a string with variable arguments */
+char *vallocstr(const char *mesg, va_list ap)
+{
+	char *str;
+	char tmp[2];
+	int len, n;
+	va_list aq;
+
+	va_copy(aq,ap);
+	len = vsnprintf(tmp,1,mesg,aq);
+	va_end(aq);
+
+	if ( (str = (char *) malloc(len+1))==NULL ) error(errno,"allocating string");
+
+	va_copy(aq,ap);
+	n = vsnprintf(str,len+1,mesg,aq);
+	va_end(aq);
+
+	if ( n==-1 || n>len ) error(0,"cannot write all of string");
+
+	return str;
+}
+
+/* Argument-list wrapper function around vallocstr */
+char *allocstr(const char *mesg, ...)
+{
+	va_list ap;
+	char *str;
+
+	va_start(ap,mesg);
+	str = vallocstr(mesg,ap);
+	va_end(ap);
+	
+	return str;
+}

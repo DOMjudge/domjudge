@@ -32,7 +32,7 @@ extern int  verbose;
 extern int  loglevel;
 extern FILE *stdlog;
 
-void logmsg (int, const char *, ...);
+void  logmsg(int, const char *, ...);
 void vlogmsg(int, const char *, va_list);
 /* Logging functions (vlogmsg uses va_list instead of argument list):
  * Logs a message to stderr and/or logfile, including date and program name,
@@ -73,6 +73,18 @@ void vwarning (int, const char *, va_list);
  * int errnum      'errno' value to use for error string output, set 0 to skip
  * char *mesg      message, may include printf output format characters '%'
  * ... or va_list  optional arguments for format characters
+ */
+
+char  *allocstr(const char *, ...);
+char *vallocstr(const char *, va_list);
+/* Create a c-string by allocating memory for it and writing to it,
+ * using printf type format characters.
+ *
+ * Arguments:
+ * char *mesg      message, may include printf output format characters '%'
+ * ... or va_list  optional arguments for format characters
+ *
+ * Returns a pointer to the allocated string
  */
 
 #ifdef __cplusplus

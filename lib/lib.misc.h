@@ -20,18 +20,6 @@ extern "C" {
 /* Wrapper to call beep with one of the predefined settings. */
 #define beep(BEEPTYPE) system(BEEP_CMD" "BEEPTYPE" &")
 
-char  *allocstr(const char *, ...);
-char *vallocstr(const char *, va_list);
-/* Create a c-string by allocating memory for it and writing to it,
- * using printf type format characters.
- *
- * Arguments:
- * char *mesg      message to write, may include printf format characters '%'
- * ... or va_list  optional arguments for format characters
- *
- * Returns a pointer to the allocated string
- */
-
 int execute(const char *, char **, int, int[3], int);
 /* Execute a subprocess using fork and execvp and optionally perform
  * IO redirection of stdin/stdout/stderr.
