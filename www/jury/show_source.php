@@ -44,7 +44,10 @@ if ( include_highlighter() ) {
 	$sourcecss = true;
 }
 
-$title = 'Source: ' . htmlspecialchars($source['sourcefile']);
+$sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],
+	$source['probid'],$source['langid']);
+
+$title = 'Source: ' . htmlspecialchars($sourcefile);
 require('../header.php');
 
 if ( $oldsource ) {
@@ -53,8 +56,7 @@ if ( $oldsource ) {
 
 echo '<h2 class="filename"><a name="source"></a>Submission ' .
 	"<a href=\"submission.php?id=$id\">s$id</a> source: " .
-	"<a href=\"show_source.php?id=$id\">" .
-	htmlspecialchars($source['sourcefile']) . "</a></h2>\n\n";
+	htmlspecialchars($sourcefile) . "</h2>\n\n";
 
 if ( strlen($source['sourcecode'])==0 ) {
 	// Someone submitted an empty file. Cope gracefully.
@@ -80,9 +82,12 @@ if ( strlen($source['sourcecode'])==0 ) {
 
 // show diff to old source
 if ( $oldsource ) {
+
+	$oldsourcefile = getSourceFilename($oldsource['cid'],$oldsource['submitid'],
+		$oldsource['teamid'],$oldsource['probid'],$oldsource['langid']);
 	
-	$oldfile = SUBMITDIR.'/'.$oldsource['sourcefile'];
-	$newfile = SUBMITDIR.'/'.$source['sourcefile'];
+	$oldfile = SUBMITDIR.'/'.$oldsourcefile;
+	$newfile = SUBMITDIR.'/'.$sourcefile;
 	$oldid = (int)$oldsource['submitid'];
 
 	// Try different ways of diffing, in order of preference.
@@ -123,7 +128,7 @@ if ( $oldsource ) {
 	echo '<h2 class="filename"><a name="diff"></a>Diff to submission ' .
 		"<a href=\"submission.php?id=$oldid\">s$oldid</a> source: " .
 		"<a href=\"show_source.php?id=$oldid\">" .
-		htmlspecialchars($oldsource['sourcefile']) . "</a></h2>\n\n";
+		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n";
 
 	echo '<pre class="output_text">' .
 		htmlspecialchars($difftext) . "</pre>\n\n";

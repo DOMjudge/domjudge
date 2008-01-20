@@ -163,7 +163,6 @@ CREATE TABLE `submission` (
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
   `langid` varchar(8) NOT NULL COMMENT 'Language ID',
   `submittime` datetime NOT NULL COMMENT 'Time submitted',
-  `sourcefile` varchar(255) NOT NULL COMMENT 'Name of source file on filesystem',
   `sourcecode` mediumblob NOT NULL COMMENT 'Full source code',
   `judgehost` varchar(50) default NULL COMMENT 'Current/last judgehost judging this submission',
   `judgemark` varchar(255) default NULL COMMENT 'Unique identifier for taking a submission by a judgehost' ,

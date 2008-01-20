@@ -21,7 +21,7 @@ $title = 'Submission s'.@$id;
 if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid, s.submittime,
-                    s.sourcefile, c.cid, c.contestname,
+                    c.cid, c.contestname,
                     t.name AS teamname, l.name AS langname, p.name AS probname
                     FROM submission s
                     LEFT JOIN team     t ON (t.login  = s.teamid)
@@ -62,7 +62,8 @@ $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime
 <tr><td scope="row">Submitted:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
 <tr><td scope="row">Source:</td><td class="filename">
 	<a href="show_source.php?id=<?=$id?>">
-	<?=htmlspecialchars($submdata['sourcefile'])?></a></td></tr>
+	<?=htmlspecialchars(getSourceFilename($submdata['cid'],$id,$submdata['teamid'],
+		$submdata['probid'],$submdata['langid']))?></a></td></tr>
 </table>
 
 

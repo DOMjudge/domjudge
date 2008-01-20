@@ -241,3 +241,98 @@ function initsignals()
 	pcntl_signal(SIGHUP, "sig_handler");
 	pcntl_signal(SIGINT, "sig_handler");
 }
+
+/**
+ * This function takes a temporary file of a submission,
+ * validates it and puts it into the database. Additionally it
+ * moves it to a backup storage.
+ */
+function submit_solution($team, $ip, $prob, $langext, $file)
+{
+	if( empty($team)    ) error("No value for Team.");
+	if( empty($ip)      ) error("No value for IP.");
+	if( empty($prob)    ) error("No value for Problem.");
+	if( empty($langext) ) error("No value for Language.");
+	if( empty($file)    ) error("No value for Filename.");
+
+	global $cdata,$cid, $DB;
+
+	// If no contest has started yet, refuse submissions.
+	$now = now();
+	
+	if( strcmp($cdata['starttime'], $now) > 0 ) {
+		error("The contest is closed, no submissions accepted. [c$cid]");
+	}
+
+	// Check 2: valid parameters?
+	if( ! $lang = $DB->q('MAYBEVALUE SELECT langid FROM language WHERE
+						  extension = %s AND allow_submit = 1', $langext) ) {
+		error("Language '$langext' not found in database or not submittable.");
+	}
+	if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',$team) ) {
+		error("Team '$team' not found in database.");
+	}
+	if( ! compareipaddr($teamrow['ipaddress'],$ip) ) {
+		if ( $teamrow['ipaddress'] == NULL && ! STRICTIPCHECK ) {
+			$DB->q('UPDATE team SET ipaddress = %s WHERE login = %s',$ip,$team);
+			logmsg (LOG_NOTICE, "Registered team '$team' at address '$ip'.");
+		} else {
+			error("Team '$team' not registered at this IP address.");
+		}
+	}
+	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem WHERE probid = %s
+							AND cid = %i AND allow_submit = "1"', $prob, $cid) ) {
+		error("Problem '$prob' not found in database or not submittable [c$cid].");
+	}
+	if( ! is_readable($file) ) {
+		error("File '$file' not found (or not readable).");
+	}
+	if( filesize($file) > SOURCESIZE*1024 ) {
+		error("Submission file is larger than ".SOURCESIZE." kB."); 
+	}
+
+	logmsg (LOG_INFO, "input verified");
+
+	// Insert submission into the database
+	$id = $DB->q('RETURNID INSERT INTO submission
+				  (cid, teamid, probid, langid, submittime, sourcecode)
+				  VALUES (%i, %s, %s, %s, %s, %s)',
+				 $cid, $team, $prob, $langext, $now,
+				 getFileContents($file, false));
+
+	// Log to event table
+	$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
+			VALUES(%i, %s, %s, %s, %i, "problem submitted")',
+		   $cid, $team, $langext, $prob, $id);
+
+	$tofile = getSourceFilename($cid,$id,$team,$prob,$langext);
+	$topath = SUBMITDIR . "/$tofile";
+
+	if ( is_writable ( SUBMITDIR ) ) {
+		// Copy the submission to SUBMITDIR for safe-keeping
+		if ( ! copy($file, $topath) ) {
+			error("Could not copy '" . $file.
+				  "' to '" . $topath . "'");
+		}
+		$writtenfile = ", file $tofile";
+	} else {
+		logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
+		$writtenfile = "";
+	}
+
+	if( strcmp($cdata['endtime'], $now) <= 0 ) {
+		warning("The contest is closed, submission stored but not processed. [c$cid]");
+	}
+
+	logmsg (LOG_NOTICE, "submitted $team/$prob/$lang$writtenfile, id s$id/c$cid");
+}
+
+/**
+ * Compute the filename of a given submission.
+ */
+function getSourceFilename($cid,$sid,$team,$prob,$langext)
+{
+	return "c$cid.s$sid.$team.$prob.$langext";
+}
+
+

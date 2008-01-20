@@ -131,25 +131,7 @@ echo "<table>\n" .
 	"<tr><td>Language:</td><td><i>".htmlspecialchars($lang['name'])."</i></td></tr>\n" .
 	"</table>\n";
 
-$ipstr = str_replace(".","-",$ip);
-
-$tmpfile = $_FILES['code']['tmp_name'];
-
-// Insert submission into the database
-$id = $DB->q('RETURNID INSERT INTO submission
-              (cid, teamid, probid, langid, submittime, sourcefile, sourcecode)
-              VALUES (%i, %s, %s, %s, %s, %s, %s)',
-             $cid, $login, $probid, $lang['langid'], $now, $tmpfile,
-             getFileContents($tmpfile, false));
-
-// Log to event table
-$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
-        VALUES(%i, %s, %s, %s, %i, "problem submitted")',
-       $cid, $login, $lang['langid'], $probid, $id);
-
-if( strcmp($cdata['endtime'], $now) <= 0 ) {
-	err("The contest is closed, submission stored but not processed. [c$cid]");
-}
+submit_solution($login, $ip, $probid, $langext, $_FILES['code']['tmp_name']); 
 
 echo '<div id="uploadstatus">';
 if (NONINTERACTIVE) echo '<!-- noninteractive-upload-successful -->';

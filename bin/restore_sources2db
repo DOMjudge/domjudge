@@ -51,14 +51,16 @@ while ( ($src = readdir($dh))!==FALSE ) {
 		logmsg(LOG_DEBUG, "skipping '$src': does not match pattern");
 		continue;
 	}
-	list($cid, $login, $probid, $foo, $langid) = $fdata;
+	list($cid, $sid, $login, $probid, $langid) = $fdata;
 	$cid = substr($cid,1);
+	$sid = substr($sid,1);
 
 	$submittime = date(MYSQL_DATETIME_FORMAT,filemtime($f));
 
 	// Store in array for later sorting
 	$submissions[] = array('file'       => $f,
 	                       'cid'        => $cid,
+	                       'sid'        => $sid,
 	                       'login'      => $login,
 	                       'probid'     => $probid,
 	                       'langid'     => $langid,
@@ -68,32 +70,33 @@ while ( ($src = readdir($dh))!==FALSE ) {
 closedir($dh);
 
 // sort submissions on datetime
-function cmpsubmittime($a, $b) {
-	return strcmp($a['submittime'], $b['submittime']);
+function cmpsid($a, $b) {
+	return strcmp($a['sid'], $b['sid']);
 }
-usort($submissions, 'cmpsubmittime');
+usort($submissions, 'cmpsid');
 
 foreach ( $submissions as $s ) {
 	
 	$cid    = $s['cid'];
+	$sid	= $s['sid'];
 	$login  = $s['login'];
 	$probid = $s['probid'];
 	$langid = $s['langid'];
 	$src    = basename($s['file']);
 	
 	// Insert submissions into the database
-	$id = $DB->q('RETURNID INSERT INTO submission
-	              (cid,teamid,probid,langid,submittime,sourcefile,sourcecode)
-	              VALUES (%i, %s, %s, %s, %s, %s, %s)',
-	             $cid, $login, $probid, $langid, $s['submittime'], $src,
+	$DB->q('INSERT INTO submission
+	              (submitid,cid,teamid,probid,langid,submittime,sourcecode)
+	              VALUES (%i, %i, %s, %s, %s, %s, %s)',
+	             $sid, $cid, $login, $probid, $langid, $s['submittime'],
 	             getFileContents($s['file'], false));
 
 	// Log to event table
 	$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
 	        VALUES(%i, %s, %s, %s, %i, "problem submitted")',
-	       $cid, $login, $langid, $probid, $id);
+	       $cid, $login, $langid, $probid, $sid);
 
-	logmsg(LOG_DEBUG, "inserted $login/$probid/$langid, file $src, id s$id/c$cid");
+	logmsg(LOG_DEBUG, "inserted $login/$probid/$langid, file $src, id s$sid/c$cid");
 }
 
 logmsg(LOG_NOTICE, "finished");
