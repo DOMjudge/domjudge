@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # $Id$
 
 # Script to copy a submission file from a team to judge account.
@@ -10,6 +10,8 @@
 # This script will depend very much on the setup of your system:
 # what kind of filesystems do you have, how can you access the team
 # accounts, etc...  Rewrite to fit your needs.
+#
+# Needs bash because it includes lib.error.sh
 #
 # Part of the DOMjudge Programming Contest Jury System and licenced
 # under the GNU GPL. See README and COPYING for details.
