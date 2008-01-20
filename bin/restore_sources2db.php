@@ -50,7 +50,7 @@ foreach ( $filelist as $src ) {
 	list($cid, $login, $probid, $foo, $langid) = $fdata;
 	$cid = substr($cid,1);
 
-	$submittime = date('Y-m-d H:i:s',filemtime($f));
+	$submittime = date(MYSQL_DATETIME_FORMAT,filemtime($f));
 
 	// Store in array for later sorting
 	$submissions[] = array('file'       => $f,

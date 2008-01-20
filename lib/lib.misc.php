@@ -8,6 +8,11 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+
+/** Constant to define MySQL datetime format in PHP date() function notation. */
+define('MYSQL_DATETIME_FORMAT', 'Y-m-d H:i:s');
+
+
 /**
  * helperfunction to read all contents from a file.
  * If $sizelimit is true (default), then only limit this to
@@ -140,7 +145,7 @@ function calcScoreRow($cid, $team, $prob) {
  */
 function now()
 {
-	return date('Y-m-d H:i:s');
+	return date(MYSQL_DATETIME_FORMAT);
 }
 
 /**

@@ -80,7 +80,7 @@ if ( !empty($BALLOONS) ) {
 		$frozen = (isset($contestfreeze) && $balloontime >= $contestfreeze ?
 			' <span title="After Scoreboard Freeze">F</span>' : '');
 		
-		echo '<td>' . printtime( date('Y-m-d H:i:s', $balloontime) ) .
+		echo '<td>' . printtime( date(MYSQL_DATETIME_FORMAT, $balloontime) ) .
 			$frozen . '</td>';
 
 		// the balloon earned
