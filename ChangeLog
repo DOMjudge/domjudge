@@ -40,6 +40,7 @@ Version 2.2.0 - SVN
  - Add script to restore submission table from SUBMITDIR files.
  - Complete implementation of syslog logging (now also for C/C++).
  - Send jury user back to referer page after edits (Working: #1821543).
+ - Remove .php extensions from commandline scripts.
 
 Version 2.1.1 - SVN
 -------------------
