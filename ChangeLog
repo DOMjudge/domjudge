@@ -41,6 +41,7 @@ Version 2.2.0 - SVN
  - Complete implementation of syslog logging (now also for C/C++).
  - Send jury user back to referer page after edits (Closes: #1821543).
  - Remove .php extensions from commandline scripts.
+ - Higher displayed precision in float compare.
 
 Version 2.1.1 - SVN
 -------------------

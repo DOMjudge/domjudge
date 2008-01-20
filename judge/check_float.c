@@ -274,8 +274,8 @@ int main(int argc, char **argv)
 				if ( isfinite(f1) && isfinite(f2) ) {
 					absdiff = fabsl(f1-f2);
 					reldiff = fabsl((f1-f2)/f2);
-					if ( absdiff>abs_prec ) printf("  absdiff = %8.3LE",absdiff);
-					if ( reldiff>rel_prec ) printf("  reldiff = %8.3LE",reldiff);
+					if ( absdiff>abs_prec ) printf("  absdiff = %9.5LE",absdiff);
+					if ( reldiff>rel_prec ) printf("  reldiff = %9.5LE",reldiff);
 				}
 				printf("\n");
 			}
