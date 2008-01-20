@@ -75,7 +75,7 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <?php
 echo addHidden('cmd', $cmd) .
 	addHidden('table','team') .
-	addHidden('referer', @$_SERVER['HTTP_REFERER']) .
+	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
 	addEndForm();
 

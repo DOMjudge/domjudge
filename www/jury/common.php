@@ -24,11 +24,16 @@ function addLink($table, $multi = false)
 /**
  * Return a link to edit a specific data element from a given table.
  * Takes the table, the key field to match on and the value.
+ * Includes a referrer field, which notes the page on which this function
+ * was called, so edit.php can return us back here.
  */
 function editLink($table, $value, $multi = false)
 {
 	return "<a href=\"" . htmlspecialchars($table) . ".php?cmd=edit" .
-		($multi ? "" : "&amp;id=" . urlencode($value) ) . "\">" .
+		($multi ? "" : "&amp;id=" . urlencode($value) ) . 
+		"&amp;referrer=" . urlencode(basename($_SERVER['SCRIPT_NAME']) .
+		(empty($_GET['id']) ? '' : '?id=' . urlencode($_GET['id']))) .
+		"\">" .
 		"<img src=\"../images/edit" . ($multi?"-multi":"") .
 		".png\" alt=\"edit" . ($multi?" multiple":"") .
 		"\" title=\"edit " .   ($multi?"multiple ":"this ") .

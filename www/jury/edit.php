@@ -23,10 +23,10 @@ $t = @$_POST['table'];
 if(!$t)	error ("No table selected.");
 if(!in_array($t, array_keys($KEYS))) error ("Unknown table.");
 
-$data          = $_POST['data'];
+$data          =  $_POST['data'];
 $keydata       = @$_POST['keydata'];
 $skipwhenempty = @$_POST['skipwhenempty'];
-$referer       = @$_POST['referer'];
+$referrer      = @$_POST['referrer'];
 
 if ( empty($data) ) error ("No data.");
 
@@ -74,14 +74,15 @@ foreach ($data as $i => $itemdata ) {
 	}
 }
 
-// Throw the user back to the page he came from, if not available to
-// the overview for the edited data.
-if ( $referer ) {
-	header('Location: '.$referer);
+// Throw the user back to the page he came from, if not available
+// to the overview for the edited data.
+if ( !empty($referrer) ) {
+	$returnto = $referrer;
 } else {
-	$tablemulti = ($t == 'team_category' ? 'team_categories' : $t.'s');
-	header('Location: '.getBaseURI().'jury/'.$tablemulti.'.php');
+	$returnto = ($t == 'team_category' ? 'team_categories' : $t.'s'). '.php';
 }
+
+header('Location: '.getBaseURI().'jury/'.$returnto);
 
 /**
  * Check an array with field->value data to make sure there's no

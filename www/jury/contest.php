@@ -60,7 +60,7 @@ if ( IS_ADMIN && !empty($_GET['cmd']) ):
 <?php
 echo addHidden('cmd', $cmd) .
 	addHidden('table','contest') .
-	addHidden('referer', @$_SERVER['HTTP_REFERER']) .
+	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
 	addEndForm();
 

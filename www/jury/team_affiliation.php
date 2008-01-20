@@ -57,7 +57,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 <?php
 echo addHidden('cmd', $cmd) .
 	addHidden('table','team_affiliation') .
-	addHidden('referer', @$_SERVER['HTTP_REFERER']) .
+	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
 	addEndForm();
 
