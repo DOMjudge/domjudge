@@ -205,7 +205,7 @@ DOMjudge:
   <item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
          Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
          (check specific options of useradd, since these vary per system)
-  <item> Start the judge daemon: <tt>cd judge; ./judgedaemon.php</tt>
+  <item> Start the judge daemon: <tt>cd judge; ./judgedaemon</tt>
   </itemize>
 
 <item> It should be done by now, submit the sources from the
@@ -219,7 +219,7 @@ DOMjudge:
   <item> Generate one-time passwords for all the teams in the webinterface;
   <item> Further tighten the security of the system, e.g. by applying
          firewall rules.
-  <item> Start the balloon notification daemon: <tt>cd bin; ./balloons.php</tt>
+  <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>
   <item> Setup the Java chroot environment to use Sun Java with chroot:<newline>
          <tt>bin/make_chroot.sh &lt;installdir&gt; &lt;architecture&gt;</tt><newline>
          <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>

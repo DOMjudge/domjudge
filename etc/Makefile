@@ -14,7 +14,7 @@ $(CONFIGS): config.%: config.template.% global.cfg generate_config.sh
 	./generate_config.sh $*
 
 check:
-	./check_config.php
+	./check_config
 
 clean:
 

@@ -40,7 +40,7 @@ if ( VERIFICATION_REQUIRED ) {
 	calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
 
 	// log to event table if successful (case of no verification
-	// required is handled in judge/judgedaemon.php)
+	// required is handled in judge/judgedaemon)
 	if ( $jdata['result'] == 'correct' ) {
 	$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid,
 		description)

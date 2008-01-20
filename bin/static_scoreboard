@@ -11,7 +11,7 @@
  * a very scalable public view. In the latter case, do something
  * like this:
  *
- * while true; do ./static_scoreboard.php > scores.html; sleep 30; done
+ * while true; do ./static_scoreboard > scores.html; sleep 30; done
  *
  * $Id$
  *
