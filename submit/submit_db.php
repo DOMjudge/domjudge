@@ -37,6 +37,8 @@ logmsg(LOG_DEBUG, "arguments: '$team' '$ip' '$prob' '$langext' '$file'");
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];
 
-submit_solution($team, $ip, $prob, $langext, INCOMINGDIR."/$file");
+$sid = submit_solution($team, $ip, $prob, $langext, INCOMINGDIR."/$file");
+	
+logmsg(LOG_NOTICE, "submitted $team/$prob/$langext, id s$sid/c$cid");
 
 exit;

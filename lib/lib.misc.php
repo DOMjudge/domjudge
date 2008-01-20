@@ -318,17 +318,15 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 			error("Could not copy '" . $file.
 				  "' to '" . $topath . "'");
 		}
-		$writtenfile = ", file $tofile";
 	} else {
 		logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
-		$writtenfile = "";
 	}
 
 	if( strcmp($cdata['endtime'], $now) <= 0 ) {
 		warning("The contest is closed, submission stored but not processed. [c$cid]");
 	}
 
-	logmsg (LOG_NOTICE, "submitted $team/$prob/$lang$writtenfile, id s$id/c$cid");
+	return $id;
 }
 
 /**
