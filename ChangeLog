@@ -43,6 +43,7 @@ Version 2.2.0 - SVN
  - Remove .php extensions from commandline scripts.
  - Higher displayed precision in float compare.
  - Fix submit_copy to use bash.
+ - Make it easier to return custom result codes for a judging.
 
 Version 2.1.1 - SVN
 -------------------

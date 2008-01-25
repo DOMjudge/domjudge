@@ -202,6 +202,19 @@ if ( $res->count() > 0 ) {
 	}
 }
 
+// check for unknown result strings
+$res = $DB->q('SELECT judgingid, submitid, result
+	FROM judging WHERE result IS NOT NULL AND result NOT IN (%As)',
+	$EXITCODES);
+if ( $res->count() > 0 ) {
+	while($row = $res->next()) {
+		err('Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
+			' has an unknown result code "' .
+			htmlspecialchars($row['result']) . '"');
+	}
+}
+
+
 // check for start/endtime problems and contestids
 $res = $DB->q('SELECT s.submitid AS s_submitid, j.submitid AS j_submitid,
                judgingid, starttime, endtime, submittime, s.cid AS s_cid, j.cid AS j_cid

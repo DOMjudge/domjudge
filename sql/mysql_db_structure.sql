@@ -77,7 +77,7 @@ CREATE TABLE `judging` (
   `starttime` datetime NOT NULL COMMENT 'Time judging started',
   `endtime` datetime default NULL COMMENT 'Time judging ended, null = still busy',
   `judgehost` varchar(50) NOT NULL COMMENT 'Judgehost that performed the judging',
-  `result` enum('correct','compiler-error','timelimit','run-error','wrong-answer','no-output') default NULL COMMENT 'Result',
+  `result` varchar(25) COMMENT 'Result string as defined in config.php',
   `verified` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Result verified by jury member?',
   `verifier` varchar(15) NOT NULL default '' COMMENT 'Name of jury member who verified this',
   `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Old judging is marked as invalid when rejudging',
