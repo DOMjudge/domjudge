@@ -52,8 +52,6 @@ ini_set("upload_max_filesize", SOURCESIZE * 1024);
 $title = 'Submit';
 require('../header.php');
 
-$waitsubmit = 5;
-
 echo "<h2>Submit - upload status</h2>\n\n";
 
 ob_implicit_flush();
