@@ -6,11 +6,13 @@
  *
  * Does not do any checking on valid parameters (team, problem, etc.)
  * and inserts all validly-named source files for all contests. Using
- * InnoDB tables will provide some basic foreign key checks.
+ * InnoDB tables will provide some basic, foreign key checks.
  *
  * The file modification times are used as submittime, as Unix does
  * not have file creation timestamps. Therefore it is advisable not to
- * touch the sources in SUBMITDIR.
+ * touch the sources in SUBMITDIR. This script tries to insert the
+ * sources with the original submission ID's, so the submissions table
+ * should be clean before running this script.
  * 
  * $Id$
  *
@@ -87,10 +89,10 @@ foreach ( $submissions as $s ) {
 	
 	// Insert submissions into the database
 	$DB->q('INSERT INTO submission
-	              (submitid,cid,teamid,probid,langid,submittime,sourcecode)
-	              VALUES (%i, %i, %s, %s, %s, %s, %s)',
-	             $sid, $cid, $login, $probid, $langid, $s['submittime'],
-	             getFileContents($s['file'], false));
+	        (submitid,cid,teamid,probid,langid,submittime,sourcecode)
+	        VALUES (%i, %i, %s, %s, %s, %s, %s)',
+	       $sid, $cid, $login, $probid, $langid, $s['submittime'],
+	       getFileContents($s['file'], false));
 
 	// Log to event table
 	$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
