@@ -112,6 +112,7 @@ struct option const long_opts[] = {
 	{"language", required_argument, NULL,         'l'},
 	{"server",   required_argument, NULL,         's'},
 	{"team",     required_argument, NULL,         't'},
+	{"url",      required_argument, NULL,         'u'},
 	{"port",     required_argument, NULL,         'P'},
 	{"web",      optional_argument, NULL,         'w'},
 	{"verbose",  optional_argument, NULL,         'v'},
@@ -144,7 +145,7 @@ char server_addr[NI_MAXHOST];            /* server IP address string  */
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, server, team;
+string problem, language, extension, server, team, baseurl;
 char *filename, *submitdir, *tempfile;
 int temp_fd;
 
@@ -218,7 +219,7 @@ int main(int argc, char **argv)
 
 	logmsg(LOG_INFO,"started");
 	
-	/* Set defaults for server and team */
+	/* Set defaults for server, team and baseurl */
 #ifdef SUBMITSERVER
 	server = string(SUBMITSERVER);
 #endif
@@ -233,6 +234,11 @@ int main(int argc, char **argv)
 		team = string(getenv("USERNAME"));
 	}
 
+#ifdef WEBBASEURI
+	baseurl = string(WEBBASEURI);
+#endif
+	if ( baseurl.empty() ) baseurl = string("http://localhost/");
+
 	/* Parse command-line options */
 #if ( SUBMITCLIENT_METHOD == 1 )
 	use_websubmit = 0;
@@ -241,7 +247,7 @@ int main(int argc, char **argv)
 #endif
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:s:t:P:w::v::q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"p:l:s:t:u:P:w::v::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
@@ -250,6 +256,7 @@ int main(int argc, char **argv)
 		case 'l': extension = string(optarg); break;
 		case 's': server    = string(optarg); break;
 		case 't': team      = string(optarg); break;
+		case 'u': baseurl   = string(optarg); break;
 			
 		case 'P': /* port option */
 			port = strtol(optarg,&ptr,10);
@@ -354,21 +361,35 @@ int main(int argc, char **argv)
 	if ( problem.empty()  ) usage2(0,"no problem specified");
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( team.empty()     ) usage2(0,"no team specified");
-	if ( server.empty()   ) usage2(0,"no server specified");
 	
+	if (use_websubmit) {
+		if ( server.empty()  ) usage2(0,"no server specified");
+	} else {
+		if ( baseurl.empty() ) usage2(0,"no url specified");
+	}
+
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
 	logmsg(LOG_DEBUG,"team is `%s'",team.c_str());
-	logmsg(LOG_DEBUG,"server is `%s'",server.c_str());
+	if (use_websubmit) {
+		logmsg(LOG_DEBUG,"url is `%s'",baseurl.c_str());
+	} else {
+		logmsg(LOG_DEBUG,"server is `%s'",server.c_str());
+	}
 
 	/* Ask user for confirmation */
 	if ( ! quiet ) {
 		printf("Submission information:\n");
-		printf("  filename:   %s\n",filename);
-		printf("  problem:    %s\n",problem.c_str());
-		printf("  language:   %s\n",language.c_str());
-		printf("  team:       %s\n",team.c_str());
-		printf("  server:     %s\n",server.c_str());
+		printf("  filename:    %s\n",filename);
+		printf("  problem:     %s\n",problem.c_str());
+		printf("  language:    %s\n",language.c_str());
+		printf("  team:        %s\n",team.c_str());
+		if (use_websubmit) {
+			printf("  url:         %s\n",baseurl.c_str());
+		} else {
+			printf("  server/port: %s/%d\n",server.c_str(),port);
+		}
+		
 		if ( nwarnings>0 ) printf("There are warnings for this submission!\a\n");
 		printf("Do you want to continue? (y/n) ");
 		c = readanswer("yn");
@@ -403,19 +424,27 @@ void usage()
 "Options (see below for more information)\n"
 "  -p, --problem=PROBLEM    submit for problem PROBLEM\n"
 "  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
-"  -s, --server=SERVER      submit to server SERVER\n"
-"  -t, --team=TEAM          submit as team TEAM\n"
-#if defined( WEBSUBMIT ) && defined( CMDSUBMIT )
-"  -w, --web[=0|1]          submit to the webinterface or toggle;\n"
-"                               should normally not be necessary\n"
-#endif
 "  -v, --verbose[=LEVEL]    increase verbosity or set to LEVEL, where LEVEL\n"
 "                               must be numerically specified as in 'syslog.h'\n"
 "                               defaults to LOG_INFO without argument\n"
 "  -q, --quiet              set verbosity to LOG_ERR and suppress user\n"
 "                               input and warning/info messages\n"
 "      --help               display this help and exit\n"
-"      --version            output version information and exit\n\n"
+"      --version            output version information and exit\n"
+"\n"
+"The following option(s) should not be necessary for normal use\n"
+#if defined( CMDSUBMIT )
+"  -t, --team=TEAM          submit as team TEAM\n"
+"  -s, --server=SERVER      submit to server SERVER\n"
+"  -P, --port=PORT          connect to SERVER on tcp-port PORT\n"
+#endif
+#if defined( WEBSUBMIT )
+"  -u, --url=URL            submit to webserver with base address URL\n"
+#endif
+#if defined( WEBSUBMIT ) && defined( CMDSUBMIT )
+"  -w, --web[=0|1]          toggle or set submit to the webinterface\n"
+#endif
+"\n"
 "Explanation of submission options:\n"
 "\n"
 "For PROBLEM use the ID of the problem (letter, number or short name)\n"
@@ -442,16 +471,24 @@ void usage()
 	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
 	       "    %s -p hello -l C HelloWorld.java\n\n",progname);
 	printf(
-"The following options should normally not be needed:\n"
+"The following options should not be necessary for normal use:\n"
+"\n"
+"For TEAM use the login of the account, you want to submit for.\n"
+"The default value for TEAM is taken from the environment variable\n"
+"'TEAM' or your login name if 'TEAM' is not defined.\n"
 "\n"
 "For SERVER use the servername or IP-address of the submit-server.\n"
 "The default value for SERVER is defined internally or otherwise\n"
 "taken from the environment variable 'SUBMITSERVER', or 'localhost'\n"
-"if 'SUBMITSERVER' is not defined.\n"
+"if 'SUBMITSERVER' is not defined; PORT can be used to set an alternative\n"
+"TCP port to connect to.\n"
 "\n"
-"For TEAM use the login of the account, you want to submit for.\n"
-"The default value for TEAM is taken from the environment variable\n"
-"'TEAM' or your login name if 'TEAM' is not defined.\n");
+"For URL use the base address of the webinterface without the\n"
+"'team/upload.php' suffix.\n"
+"\n"
+"The TEAM/SERVER/PORT and URL options are only used when submitting to the\n"
+"commandline daemon or webinterface respectively. If both are enabled,\n"
+"this can be toggled with the '-w' option, but the default should work fine.\n");
 	exit(0);
 }
 
@@ -672,7 +709,7 @@ int websubmit()
 	size_t pos;
 	int uploadstatus_read;
 
-	url = allocstr(WEBBASEURI "team/upload.php");
+	url = allocstr((baseurl+"team/upload.php").c_str());
 	
 	curlerrormsg[0] = 0;
 	
@@ -730,6 +767,8 @@ int websubmit()
 
 	curl_formfree(post);
 	curl_easy_cleanup(handle);
+
+	free(url);
 
 	// Read curl output and find upload status
 	uploadstatus_read = 0;
