@@ -248,15 +248,19 @@ a code.
 <tag>COMPILER-ERROR</tag>the compiler gave an error while compiling the program;
 <tag>TIMELIMIT     </tag>program execution time exceeded the time defined for the problem;
 <tag>RUN-ERROR     </tag>a kind of problem while running the program occurred, for example
-                         segmentation fault, division by zero or exitcode unequal to 0.
+                         segmentation fault, division by zero or exitcode unequal to 0;
 <tag>NO-OUTPUT     </tag>there was no output at all from the program;
-<tag>WRONG-ANSWER</tag> the output of the program did not exactly match the expected output.
+<tag>WRONG-ANSWER</tag> the output of the program did not exactly match the expected output;
+<tag>PRESENTATION-ERROR</tag> the submission only had difference in whitespace with the reference output **.
 </descrip>
 * in the team interface a submission will only show as PENDING to
 prevent leaking information of problem timelimits. The jury can see
 whether a submission is QUEUED or JUDGING. In case of required
 verification, a submission will show as PENDING to the team until the
 judging has been verified.
+
+** This is disabled by default and must be enabled explicitly by the
+DOMjudge administrator. It will be counted as an incorrect submission.
 
 Under the Submissions menu, you can see all submitted solutions, with
 the newest one at the top. Click on a submission id or result code

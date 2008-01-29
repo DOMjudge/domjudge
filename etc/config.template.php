@@ -27,7 +27,8 @@ $EXITCODES = array (
 	102	=>	'timelimit',
 	103	=>	'run-error',
 	104	=>	'no-output',
-	105	=>	'wrong-answer'
+	105	=>	'wrong-answer',
+	106	=>	'presentation-error'
 	);
 
 /** Include MySQL database passwords from a separate file */

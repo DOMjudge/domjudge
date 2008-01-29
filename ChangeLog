@@ -44,6 +44,8 @@ Version 2.2.0 - SVN
  - Higher displayed precision in float compare.
  - Fix submit_copy to use bash.
  - Make it easier to return custom result codes for a judging.
+ - Optionally return presentation-error for submissions having
+   only the whitespace wrong.
 
 Version 2.1.1 - SVN
 -------------------

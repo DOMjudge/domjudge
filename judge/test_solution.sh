@@ -326,6 +326,12 @@ if [ "$result" = "accepted" ]; then
 else
 	echo "Wrong answer${descrp}." >>error.out
 	cat error.tmp >>error.out
+
+# Uncomment the following block to enable presentation-error
+#	# It was wrong... but maybe just a presentation error
+#	if diff -abBwq program.out testdata.out > /dev/null ; then
+#		exit $E_PRESENTATION
+#	fi
 	exit $E_ANSWER
 fi
 
