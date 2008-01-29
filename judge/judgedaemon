@@ -165,18 +165,18 @@ while ( TRUE ) {
 	system("mkdir -p $tempdir", $retval);
 	if ( $retval != 0 ) error("Could not create $tempdir");
 
-    // dump the source code in a tempfile
-    // :KLUDGE: In older versions, test_solution.sh creates a temporary copy
-    // of the original source file. Since this version doesn't use real source
-    // files (source code is submitted to the database), we choose to put the
-    // original source code in another temporary file for now, which is then
-    // copied by test_solution.sh.
-    $tempsrcfile = "$tempdir/source.pulled.$row[extension]";
-    // :NOTE: in PHP5, one could use file_put_contents().
-    $tempsrchandle = @fopen($tempsrcfile, 'w');
-    if ($tempsrchandle === FALSE) error("Could not create $tempsrcfile");
-    fwrite($tempsrchandle, $row['sourcecode']);
-    fclose($tempsrchandle);
+	// dump the source code in a tempfile
+	// :KLUDGE: In older versions, test_solution.sh creates a temporary copy
+	// of the original source file. Since this version doesn't use real source
+	// files (source code is submitted to the database), we choose to put the
+	// original source code in another temporary file for now, which is then
+	// copied by test_solution.sh.
+	$tempsrcfile = "$tempdir/source.pulled.$row[extension]";
+	// :NOTE: in PHP5, one could use file_put_contents().
+	$tempsrchandle = @fopen($tempsrcfile, 'w');
+	if ($tempsrchandle === FALSE) error("Could not create $tempsrcfile");
+	fwrite($tempsrchandle, $row['sourcecode']);
+	fclose($tempsrchandle);
 
 	// do the actual compile-run-test
 	system("./test_solution.sh " .
@@ -187,7 +187,7 @@ while ( TRUE ) {
 		   "'$row[special_run]' '$row[special_compare]'",
 		$retval);
 
-    // :NOTE: the temporary copy could be removed, but since it's so small, we're not bothered
+	// :NOTE: the temporary copy could be removed, but since it's so small, we're not bothered
 
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {

@@ -4,7 +4,7 @@
    $Id$
 
    This program is a compare wrapper-script for 'test_solution.sh'.
-   See that script for syntax and more info. This script is written to
+   See that script for syntax and more info. This program is written to
    comply with the ICPC Validator Interface Standard as described in
    http://www.ecs.csus.edu/pc2/doc/valistandard.html.
    
