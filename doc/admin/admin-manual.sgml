@@ -537,9 +537,10 @@ the default script should be used).
 The shipped <tt>test_solution.sh</tt> has support for enabling a
 presentation-error to be returned as a judging result. For this to
 work, you need to uncomment the marked lines near the bottom of
-this script. A presentation error occurs when the output only
-differs in whitespace from the reference output. This is counted
-as an incorrect submission.
+this script; it only works when using the standard comparision
+of program output with a static file of testdata. A presentation error
+occurs when the output only differs in whitespace from the
+reference output. This is counted as an incorrect submission.
 
 <sect>Other configuration issues
 <p>
