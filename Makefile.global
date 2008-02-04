@@ -13,7 +13,7 @@ GLOBALINCLUDED=1
 #MAKEFLAGS += --no-print-directory
 
 # Default C/C++ compiler flags
-CXXFLAGS = -O2 -Wall -I$(TOPDIR)/lib -I$(TOPDIR)/etc
+CXXFLAGS = -O2 -Wall -fstack-protector -fPIE -pie -z relro -Wformat -Wformat-security -I$(TOPDIR)/lib -I$(TOPDIR)/etc
 CFLAGS = $(CXXFLAGS) -lm
 
 # How to execute a command as root:

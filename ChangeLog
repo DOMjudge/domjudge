@@ -46,6 +46,7 @@ Version 2.2.0 - SVN
  - Make it easier to return custom result codes for a judging.
  - Optionally return presentation-error for submissions having
    only the whitespace wrong.
+ - Enable GCC security features for compiling DOMjudge helper programs.
 
 Version 2.1.1 - SVN
 -------------------
