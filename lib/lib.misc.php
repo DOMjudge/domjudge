@@ -256,7 +256,8 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 	if( empty($file)    ) error("No value for Filename.");
 
 	if ( ! is_uploaded_file($file) && dirname($file) != INCOMINGDIR ) {
-		error("'$file' is not an uploaded file, nor is it located in INCOMINGDIR '" . INCOMINGDIR . "'");
+		error("'$file' is not an uploaded file, nor is it located in " .
+		      "INCOMINGDIR '" . INCOMINGDIR . "'");
 	}
 
 	global $cdata,$cid, $DB;
@@ -312,11 +313,10 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 	$tofile = getSourceFilename($cid,$id,$team,$prob,$langext);
 	$topath = SUBMITDIR . "/$tofile";
 
-	if ( is_writable ( SUBMITDIR ) ) {
+	if ( is_writable( SUBMITDIR ) ) {
 		// Copy the submission to SUBMITDIR for safe-keeping
-		if ( ! copy($file, $topath) ) {
-			error("Could not copy '" . $file.
-				  "' to '" . $topath . "'");
+		if ( ! @copy($file, $topath) ) {
+			warning("Could not copy '" . $file . "' to '" . $topath . "'");
 		}
 	} else {
 		logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
@@ -336,5 +336,3 @@ function getSourceFilename($cid,$sid,$team,$prob,$langext)
 {
 	return "c$cid.s$sid.$team.$prob.$langext";
 }
-
-
