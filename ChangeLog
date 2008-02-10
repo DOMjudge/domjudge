@@ -47,6 +47,7 @@ Version 2.2.0 - SVN
  - Optionally return presentation-error for submissions having
    only the whitespace wrong.
  - Enable GCC security features for compiling DOMjudge helper programs.
+ - Automatically generate apache.conf from global.conf (Closes: #1778059).
 
 Version 2.1.1 - SVN
 -------------------
