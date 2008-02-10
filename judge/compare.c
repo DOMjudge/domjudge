@@ -54,7 +54,7 @@
 
 #define MAXLINELEN 65536
 
-const int maxprintlen = 80;
+const size_t maxprintlen = 80;
 
 char *progname;
 
@@ -189,7 +189,8 @@ void writediff()
 	size_t maxlinelen[2], nlines[2];
 	char line[2][MAXLINELEN];
 	int endoffile[2];
-	int i, l;
+	int i;
+	size_t l;
 	int endlinediff, normaldiff;
 	char diffchar, quotechar[2];
 	char formatstr[256];
