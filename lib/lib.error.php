@@ -57,8 +57,12 @@ function logmsg($msglevel, $string) {
 		// if this is the webinterface, print it to stdout, else to stderr
 		if ( IS_WEB ) {
 			// string 'ERROR' parsed by submit client, don't modify!
-			echo "<fieldset class=\"error\"><legend>ERROR</legend> " .
-				htmlspecialchars($msg) . "</fieldset>\n";
+			if ( $msglevel == LOG_ERR ) {
+				echo "<fieldset class=\"error\"><legend>ERROR</legend> " .
+					htmlspecialchars($msg) . "</fieldset>\n";
+			} else {
+				echo "<p>" . htmlspecialchars($msg) . "</p>\n";
+			}
 			// Add strings for non-interactive parsing:
 			if ( $msglevel == LOG_ERR     ) echo "\n<!-- @@@ERROR-$string@@@ -->\n";
 			if ( $msglevel == LOG_WARNING ) echo "\n<!-- @@@WARNING-$string@@@ -->\n";
