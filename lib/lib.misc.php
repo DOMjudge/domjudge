@@ -149,6 +149,17 @@ function now()
 }
 
 /**
+ * Returns >0, =0, <0 when $time1 >, =, < $time2 respectively.
+ * This function currently uses string-based compare on the MySQL
+ * format (see above), but is abstracted here for possible changes,
+ * e.g. a C-like implementation with a numeric representation.
+ */
+function difftime($time1, $time2)
+{
+	return strcmp($time1, $time2);
+}
+
+/**
  * Wrapper function to call beep with one of the predefined settings.
  */
 function beep($beeptype)
@@ -265,7 +276,7 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 	// If no contest has started yet, refuse submissions.
 	$now = now();
 	
-	if( strcmp($cdata['starttime'], $now) > 0 ) {
+	if( difftime($cdata['starttime'], $now) > 0 ) {
 		error("The contest is closed, no submissions accepted. [c$cid]");
 	}
 
@@ -322,7 +333,7 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 		logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
 	}
 
-	if( strcmp($cdata['endtime'], $now) <= 0 ) {
+	if( difftime($cdata['endtime'], $now) <= 0 ) {
 		warning("The contest is closed, submission stored but not processed. [c$cid]");
 	}
 

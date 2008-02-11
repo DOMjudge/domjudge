@@ -28,7 +28,7 @@ if ( is_null($cid) ) {
 	exit;
 }
 $now = now();
-if ( strcmp($cdata['starttime'], $now) > 0 ) {
+if ( difftime($cdata['starttime'], $now) > 0 ) {
 	echo "<p><em>Contest has not yet started.</em></p>\n";
 	require('../footer.php');
 	exit;

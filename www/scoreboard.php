@@ -36,15 +36,15 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	// We can compare $now and the dbfields stringwise.
 	$now = now();
 	$showfinal  = ( !isset($cdata['freezetime']) &&
-		strcmp($cdata['endtime'],$now) <= 0 ) ||
+		difftime($cdata['endtime'],$now) <= 0 ) ||
 		( isset($cdata['unfreezetime']) &&
-		strcmp($cdata['unfreezetime'], $now) <= 0 );
+		difftime($cdata['unfreezetime'], $now) <= 0 );
 	// freeze scoreboard if freeze time has been reached and
 	// we're not showing the final score yet
 	$showfrozen = !$showfinal && isset($cdata['freezetime']) &&
-		strcmp($cdata['freezetime'],$now) <= 0;
+		difftime($cdata['freezetime'],$now) <= 0;
 	// contest is active but has not yet started
-	$cstarted = strcmp($cdata['starttime'],$now) <= 0;
+	$cstarted = difftime($cdata['starttime'],$now) <= 0;
 
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
@@ -369,7 +369,7 @@ function putTeamRow($cdata, $teamid) {
 
 	global $DB;
 
-	if ( empty( $cdata )  || strcmp($cdata['starttime'],now()) > 0 ) return;
+	if ( empty( $cdata )  || difftime($cdata['starttime'],now()) > 0 ) return;
 	$cid = $cdata['cid'];
 	
 	echo '<table class="scoreboard">' . "\n";

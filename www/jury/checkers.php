@@ -94,23 +94,23 @@ function check_contest($data, $keydata = null)
 	// activatetime <= starttime <= freezetime < endtime <= unfreezetime
 
 	// are contest start/end times in order?
-	if(strcmp($data['endtime'], $data['starttime']) <= 0) {
+	if ( difftime($data['endtime'], $data['starttime']) <= 0 ) {
 		ch_error('Contest ends before it even starts');
 	}
-	if(!empty($data['freezetime'])) {
-		if ( strcmp($data['freezetime'], $data['endtime']) > 0 ||
-			strcmp($data['freezetime'], $data['starttime']) < 0 ) {
+	if ( !empty($data['freezetime']) ) {
+		if ( difftime($data['freezetime'], $data['endtime']) > 0 ||
+		     difftime($data['freezetime'], $data['starttime']) < 0 ) {
 			ch_error('Freezetime is out of start/endtime range');
 		}
 	}
-	if( strcmp($data['activatetime'], $data['starttime']) > 0 ) {
+	if ( difftime($data['activatetime'], $data['starttime']) > 0 ) {
 		ch_error('Activate time is later than starttime');
 	}
 	if ( !empty($data['unfreezetime']) ) {
 		if ( empty($data['freezetime']) ) {
 			ch_error('Unfreezetime set but no freeze time. That makes no sense.');
 		}
-		if ( strcmp($data['unfreezetime'], $data['endtime']) < 0 ) {
+		if ( difftime($data['unfreezetime'], $data['endtime']) < 0 ) {
 			ch_error('Unfreezetime must be larger than endtime.');
 		}
 	}
@@ -206,10 +206,10 @@ function check_judging($data, $keydata = null)
 		}
 	}
 	
-	if(!empty($data['endtime']) && strcmp($data['endtime'], $data['starttime']) < 0) {
+	if ( !empty($data['endtime']) && difftime($data['endtime'], $data['starttime']) < 0 ) {
 		ch_error('Judging ended before it started');
 	}
-	if(!empty($data['submittime']) && strcmp($data['starttime'], $data['submittime']) < 0) {
+	if ( !empty($data['submittime']) && difftime($data['starttime'], $data['submittime']) < 0) {
 		ch_error('Judging started before it was submitted (clocks unsynched?)');
 	}
 
