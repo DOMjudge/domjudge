@@ -208,8 +208,8 @@ config_include ()
 
 cp -p $TEMPLATE $CONFIG
 
-config_include $CONFHEADTAG $CONFIG $TMPHEAD
-config_include $CONFMAINTAG $CONFIG $TMPMAIN
+config_include "$CONFHEADTAG" $CONFIG $TMPHEAD
+config_include "$CONFMAINTAG" $CONFIG $TMPMAIN
 
 rm -f $TMPHEAD $TMPMAIN
 
