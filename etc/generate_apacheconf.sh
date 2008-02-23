@@ -13,7 +13,7 @@ CONFIG=apache.conf
 TEMPLATE=apache.template.conf
 
 COMMENT="#"
-CONFHEADTAG="AUTOGENERATE HEADER"
+TAG="AUTOGENERATE HEADER"
 
 if [ ! -r "$TEMPLATE" ]; then
 	echo "Template '$TEMPLATE' does not exist."
@@ -29,12 +29,18 @@ COMMANDLINE="$0 $@"
 WEBSUBDIR=`echo "$WEBBASEURI" | sed "s!^.*$WEBSERVER[^/]*/\(.*\)/!\1!"`
 
 TMPFILE=$CONFIG.new
+	
+if [[ `sed -n "/$TAG START/,/$TAG END/ p" $TEMPLATE | wc -l` -lt 2 ]];
+then
+	echo "Template '$TEMPLATE' has no '$TAG' block"
+	exit 1
+fi
 
 # This is where the variable replacement magic happens:
 eval echo "\"`cat $TEMPLATE`\"" > $TMPFILE
 
 # Update the autogenereate header:
-sed -n "0,/$CONFHEADTAG START/ p" $TMPFILE > $CONFIG
+sed -n "0,/$TAG START/ p" $TMPFILE > $CONFIG
 cat >>$CONFIG <<EOF
 $COMMENT
 $COMMENT This configuration file was automatically generated
@@ -45,6 +51,6 @@ $COMMENT Edit this file to suit your need; see $TEMPLATE
 $COMMENT for more information.
 $COMMENT
 EOF
-sed -n "/$CONFHEADTAG END/,// p" $TMPFILE >> $CONFIG
+sed -n "/$TAG END/,$ p" $TMPFILE >> $CONFIG
 
 rm -f $TMPFILE
