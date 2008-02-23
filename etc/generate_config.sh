@@ -48,9 +48,6 @@ LANGTEMPLATE=config.template
 CONFHEADTAG="AUTOGENERATE HEADER"
 CONFMAINTAG="GLOBAL CONFIG INCLUDE"
 
-# Maximum number of lines in config files
-MAXLINES=1000
-
 if [ -z "$1" ]; then
 	echo "Usage: $0 <filename> | <extension>"
 	exit 1
@@ -187,22 +184,16 @@ config_include ()
 	CFGFILE=$2
 	TAGFILE=$3
 
+	if [[ `sed -n "/$TAG START/,/$TAG END/ p" $CFGFILE | wc -l` -lt 2 ]];
+	then
+		echo "Template '$TEMPLATE' has no '$TAG' block"
+		exit 1
+	fi
+	
 	TMPFILE=$CFGFILE.new
-
-	NSTART=`grep "$TAG START" $CFGFILE | wc -l`
-	NEND=`  grep "$TAG END"   $CFGFILE | wc -l`
-	if [ $NSTART -ne 1 -o $NEND -ne 1 ]; then
-		echo "Incorrect number of '$TAG' START and/or END tags in $CFGFILE!"
-		exit 1
-	fi
-	if [ `grep -A $MAXLINES "$TAG START" $CFGFILE | grep "$TAG END" | wc -l` -ne 1 ]; then
-		echo "'$TAG' END tag does not close START tag in $CFGFILE!"
-		exit 1
-	fi
-
-	grep -B $MAXLINES "$TAG START" $CFGFILE >$TMPFILE
+	sed -n "0,/$TAG START/ p" $CFGFILE > $TMPFILE
 	cat $TAGFILE >>$TMPFILE
-	grep -A $MAXLINES "$TAG END"   $CFGFILE >>$TMPFILE
+	sed -n "/$TAG END/,$ p" $CFGFILE >> $TMPFILE
 	mv $TMPFILE $CFGFILE
 }
 
