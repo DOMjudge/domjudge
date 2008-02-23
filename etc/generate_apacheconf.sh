@@ -15,19 +15,10 @@ TEMPLATE=apache.template.conf
 COMMENT="#"
 CONFHEADTAG="AUTOGENERATE HEADER"
 
-# Maximum number of lines in config files
-MAXLINES=1000
-
 if [ ! -r "$TEMPLATE" ]; then
 	echo "Template '$TEMPLATE' does not exist."
 	exit 1
 fi
-
-# Store config generated from global config here
-TMPHEAD=head.apache.new
-
-# Clean any previous tempfiles left:
-rm -f $TMPHEAD
 
 COMMANDLINE="$0 $@"
 
@@ -37,8 +28,14 @@ COMMANDLINE="$0 $@"
 # Parse DOMjudge sub-directory location from WEBBASEURI:
 WEBSUBDIR=`echo "$WEBBASEURI" | sed "s!^.*$WEBSERVER[^/]*/\(.*\)/!\1!"`
 
-# Generate header tags include
-cat >>$TMPHEAD <<EOF
+TMPFILE=$CONFIG.new
+
+# This is where the variable replacement magic happens:
+eval echo "\"`cat $TEMPLATE`\"" > $TMPFILE
+
+# Update the autogenereate header:
+sed -n "0,/$CONFHEADTAG START/ p" $TMPFILE > $CONFIG
+cat >>$CONFIG <<EOF
 $COMMENT
 $COMMENT This configuration file was automatically generated
 $COMMENT with command '$COMMANDLINE'
@@ -48,36 +45,6 @@ $COMMENT Edit this file to suit your need; see $TEMPLATE
 $COMMENT for more information.
 $COMMENT
 EOF
+sed -n "/$CONFHEADTAG END/,// p" $TMPFILE >> $CONFIG
 
-config_include ()
-{
-	TAG=$1
-	CFGFILE=$2
-	TAGFILE=$3
-
-	TMPFILE=$CFGFILE.new
-
-	NSTART=`grep "$TAG START" $CFGFILE | wc -l`
-	NEND=`  grep "$TAG END"   $CFGFILE | wc -l`
-	if [ $NSTART -ne 1 -o $NEND -ne 1 ]; then
-		echo "Incorrect number of '$TAG' START and/or END tags in $CFGFILE!"
-		exit 1
-	fi
-	if [ `grep -A $MAXLINES "$TAG START" $CFGFILE | grep "$TAG END" | wc -l` -ne 1 ]; then
-		echo "'$TAG' END tag does not close START tag in $CFGFILE!"
-		exit 1
-	fi
-
-	grep -B $MAXLINES "$TAG START" $CFGFILE >$TMPFILE
-	cat $TAGFILE >>$TMPFILE
-	grep -A $MAXLINES "$TAG END"   $CFGFILE >>$TMPFILE
-	mv $TMPFILE $CFGFILE
-}
-
-eval echo "\"`cat $TEMPLATE`\"" > $CONFIG
-
-config_include "$CONFHEADTAG" $CONFIG $TMPHEAD
-
-rm -f $TMPHEAD
-
-exit 0
+rm -f $TMPFILE
