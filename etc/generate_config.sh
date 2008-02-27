@@ -184,9 +184,9 @@ config_include ()
 	CFGFILE=$2
 	TAGFILE=$3
 
-	if [[ `sed -n "/$TAG START/,/$TAG END/ p" $CFGFILE | wc -l` -lt 2 ]];
+	if [ `sed -n "/$TAG START/,/$TAG END/ p" $CFGFILE | wc -l` -ne 2 ];
 	then
-		echo "Template '$TEMPLATE' has no '$TAG' block"
+		echo "Template '$TEMPLATE' has not exactly one '$TAG' block"
 		exit 1
 	fi
 	
