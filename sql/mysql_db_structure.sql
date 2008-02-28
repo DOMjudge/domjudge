@@ -224,7 +224,7 @@ CREATE TABLE `team_category` (
 
 CREATE TABLE `team_unread` (
   `teamid` varchar(15) NOT NULL default '' COMMENT 'Team login',
-  `mesgid` int(4) unsigned NOT NULL default '0' COMMENT 'Clarification ID or Submission ID',
-  `type` varchar(25) NOT NULL default 'clarification' COMMENT 'Type of message',
+  `mesgid` int(4) unsigned NOT NULL default '0' COMMENT 'Clarification ID',
+  `type` varchar(25) NOT NULL default 'clarification' COMMENT 'Type of message (now always "clarification")',
   PRIMARY KEY  (`teamid`,`type`,`mesgid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='List of items a team has not viewed yet';
