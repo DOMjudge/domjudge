@@ -30,7 +30,7 @@ WEBSUBDIR=`echo "$WEBBASEURI" | sed "s!^.*$WEBSERVER[^/]*/\(.*\)/!\1!"`
 
 TMPFILE=$CONFIG.new
 	
-if [ `sed -n "/$TAG START/,/$TAG END/ p" $TEMPLATE | wc -l` -ne 2 ];
+if [ `sed -n "/$TAG START/,/$TAG END/ p" $TEMPLATE | grep -c "$TAG"` -ne 2 ];
 then
 	echo "Template '$TEMPLATE' has not exactly one '$TAG' block"
 	exit 1
