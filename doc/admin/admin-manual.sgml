@@ -454,7 +454,8 @@ different roots).
 		contains submission files from the commandline client, being
 		submitted or where a submission error has occurred.
 	<tag><tt>SUBMITDIR</tt></tag>
-		contains all correctly submitted files.
+		(optionally) contains all correctly submitted files: the
+		database is the authorative source.
 	<tag><tt>JUDGEDIR</tt></tag>
 		place where submissions are tested, each in its own
 		subdirectory. The system needs root access to this
@@ -589,7 +590,7 @@ libcurl).
 Although the command line submit daemon is thus not strictly necessary,
 it does add an advantage: it is more secure than the webinterface
 because it uses a `callback' to authenticate the team (instead of IP
-address authentication). Furthermore, it allows for automatic IP
+address authentication). Furthermore, it allows for automatic team IP
 address configuration with the configuration option
 <tt>STRICTIPCHECK=0</tt>, which removes the hassle of either
 preconfiguring that or handing passwords to the teams for their first
@@ -607,6 +608,15 @@ squares are storage locations.
 <img src="submitflow.png">
 <caption>Submission flow diagram.
 </figure>
+
+The database is the authorative version for submission sources;
+filesystem storage is available for historic reasons, as an easy way
+to access the source files and as backup. The program
+<tt>bin/restore_sources2db</tt> is available to recover the submission
+table in the database from these files. The commandline daemon will
+automatically store sources on the filesystem; the webserver needs
+write permissions on <tt>SUBMITDIR</tt> and ignores filesystem storage
+if these permissions are not set.
 
 <sect>Database installation
 <p>
@@ -1490,6 +1500,11 @@ readable by anyone else. This can be done for example by setting the
 account&gt;:&lt;Webserver group&gt; and permissions
 <tt>drwxr-x---</tt>, denying users other than yourself and the
 webserver group access to the configuration and password files.
+
+If you want the webserver to also store incoming submission sources on
+the filesystem (next to the database), then <tt>SUBMITDIR</tt> must be
+writable for the webserver, see also <ref
+id="install_config:submissionmethods" name="submission methods">.
 
 You should take care not to serve any files over the web that
 are not under the DOMjudge 'www/' directory, because they might
