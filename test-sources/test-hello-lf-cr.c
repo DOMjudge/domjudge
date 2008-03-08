@@ -2,6 +2,7 @@
  *
  * This should give CORRECT or WRONG-ANSWER on the default problem
  * 'hello' depending on whether lf-cr line ending is ok.
+ * Can also return PRESENTATION-ERROR if enabled.
  */
 
 #include <stdio.h>

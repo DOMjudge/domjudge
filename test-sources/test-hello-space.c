@@ -1,8 +1,9 @@
 /* $Id$
  *
- * This should give CORRECT or WRONG-ANSWER on the default problem
- * 'hello' depending on how strict white space is checked for.
- */
+ * This should give CORRECT, WRONG-ANSWER or PRESENTATION-ERROR on the
+ * default problem 'hello' depending on how strict white space is
+ * checked for.
+  */
 
 #include <stdio.h>
 
