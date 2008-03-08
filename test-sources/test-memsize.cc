@@ -15,7 +15,7 @@ vector<char> a;
 
 int main()
 {
-	int i;
+	int p, i;
 
 	/*
 	  Watch out: resizing of a vector allocates AT LEAST that much memory!
@@ -23,13 +23,16 @@ int main()
 	  allocated, so e.g. when you have 64 MB memory available, already when
 	  resizing to more than 32 MB, you run out of memory.
 	 */
-	for(i=0; 1; i++) {
-		a.resize(i*1024*1024,0);
-		if ( a.capacity()<i*1024*1024 ) {
-			cout << "resizing failed for " << i << " MB." << endl;
-			return 0;
+	for(p=4; 1; p*=2) {
+		for(i=p/2; i<p; i+=p/4) {
+			cout << "trying to allocate " << i << " MB... ";
+			a.resize(i*1024*1024,0);
+			if ( a.capacity()<i*1024*1024 ) {
+				cout << "resizing failed." << endl;
+				return 0;
+			}
+			cout << "allocated: " << a.capacity()/1024/1024 << " MB." << endl;
 		}
-		cout << "memory allocated: " << i << " MB." << endl;
 	}
 
 	return 0;
