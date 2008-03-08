@@ -39,15 +39,12 @@ $jdata = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid
 if ( VERIFICATION_REQUIRED ) {
 	calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
 
-	// log to event table if successful (case of no verification
-	// required is handled in judge/judgedaemon)
-	if ( $jdata['result'] == 'correct' ) {
-	$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid,
-		description)
-	        VALUES (%i, %i, %s, %s, %i, "problem solved")',
+	// log to event table (case of no verification required is handled
+	// in judge/judgedaemon)
+	$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
+	        VALUES (%i, %i, %s, %s, %i, "problem judged")',
 	       $jdata['cid'], $jdata['teamid'], $jdata['langid'],
 	       $jdata['probid'], $jdata['submitid']);
-	}
 }
 
 /* Set cookie of last verifier, expiry defaults to end of session. */
