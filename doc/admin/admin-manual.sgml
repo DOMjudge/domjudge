@@ -794,6 +794,10 @@ the webserver. These are:
 <itemize>
 <item> <tt>SYSTEM_ROOT/etc/passwords.php</tt> must be readable by the
        webserver, but (best) not world readable.
+<item> <tt>SUBMITDIR</tt> can optionally be set writable for the
+       webserver, to store websubmitted sources there (next to the
+	   database), see <ref id="install_config:submissionmethods"
+	   name="submission methods"> for more information.
 </itemize>
 
 See also section <ref id="security:webprivs" name="Security: webserver
