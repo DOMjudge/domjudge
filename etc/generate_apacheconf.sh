@@ -23,7 +23,7 @@ fi
 COMMANDLINE="$0 $@"
 
 # Include (shell-version) of config for substitution of variables:
-. config.sh
+. ./config.sh
 
 # Parse DOMjudge sub-directory location from WEBBASEURI:
 WEBSUBDIR=`echo "$WEBBASEURI" | sed "s!^.*$WEBSERVER[^/]*/\(.*\)/!\1!"`
