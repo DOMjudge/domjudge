@@ -8,7 +8,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-// Sanity check whether .htaccess basic authentication is configured correctly
+// Sanity check whether webserver basic authentication (e.g in
+// apache.conf) is configured correctly
 if (!$_SERVER['REMOTE_USER'] || $_SERVER['AUTH_TYPE'] != "Basic") {
 	die("Authentication not enabled, check webserver config");
 }
