@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/** For each table specify the set of attributes that together
+ *  are considered the primary key / superkey. */
 $KEYS = array();
 $KEYS['clarification'] = array('clarid');
 $KEYS['contest'] = array('cid');
@@ -21,6 +23,9 @@ $KEYS['team_affiliation'] = array('affilid');
 $KEYS['team_category'] = array('categoryid');
 $KEYS['team_unread'] = array('teamid','mesgid','type');
 
+
+/** For each table, list all attributes that reference foreign keys
+ *  and specify the source of that key. */
 $RELATIONS = array();
 
 $RELATIONS['clarification'] = array ( 
