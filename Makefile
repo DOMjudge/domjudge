@@ -54,6 +54,10 @@ docs: config
 # Perform some checks
 check: check-installed
 
+# Run code testsuite
+test:
+	cd tests && ./syntax && ./tests
+
 # Restore system to completely fresh, uninstalled state
 # Be careful: removes all possible contest data!!
 distclean: distclean_scripts

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# Run some Syntax checking tests on PHP and Shell scripts
+
+if [ -x /usr/bin/php ]; then
+	for i in `find .. -name *.php`; do
+		php -l $i | grep -v "^No syntax errors detected in "
+	done
+
+	for i in `grep -rl "#\!.*php" ..|grep -v \/\.svn\/|grep -v \.php`; do
+		php -l $i | grep -v "^No syntax errors detected in "
+	done
+else
+	echo "PHP not found in /usr/bin/php"
+fi
+
+if [ -x /usr/bin/checkbashisms ]; then
+	checkbashisms `grep -rl "#\!.*/bin/sh" ..|grep -v \.svn`
+else
+	echo "checkbashisms not found in /usr/bin/checkbashisms"
+fi
