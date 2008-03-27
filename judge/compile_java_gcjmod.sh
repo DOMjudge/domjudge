@@ -15,7 +15,7 @@ TMPFILE=`mktemp /tmp/domjudge_gcj_output.XXXXXX`
 
 # -Wall:	Report all warnings
 # -static:	Static link with all libraries
-gcj -Wall -O2 -static --main=Main -o $DEST $SOURCE &> $TMPFILE
+gcj -Wall -O2 -static --main=Main -o $DEST $SOURCE > $TMPFILE 2>&1
 exitcode=$?
 grep -vE 'requires at runtime the shared libraries|libgcj\.a' $TMPFILE
 rm -f $TMPFILE
