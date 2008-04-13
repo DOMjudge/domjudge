@@ -22,7 +22,7 @@ Version 2.2.0 - SVN
  - Added cookie for last verifier in jury webinterface (Closes: #1742044).
  - Added option to only show unverified submissions in jury interface.
  - Fix bug that jury was not allowed to set clarifications (un)answered.
- - Fix problem that runguard ignored SIGARLM on some distributions (thanks
+ - Fix problem that runguard ignored SIGALRM on some distributions (thanks
    Tobias Werth).
  - New required activatetime field for a contest: defines the moment the
    team/public displays start to display this contest, but no submissions
@@ -30,7 +30,7 @@ Version 2.2.0 - SVN
    the second before a contest starts (Closes: #1825555).
  - Rename contest.lastscoreupdate to freezetime to be more clear
    and in line with other table attributes.
- - Salt passwords stored with md5 hashes.
+ - Add salt to passwords' md5 hashes.
  - Move setting resource limit from run script to runguard.
  - Added signal detection to daemons for graceful shutdown (Closes: #1808478).
  - Fixed bug in test-stacksize.c due to compiler optimization
