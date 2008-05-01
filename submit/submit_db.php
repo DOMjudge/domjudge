@@ -1,13 +1,12 @@
 #!/usr/bin/php -q
 <?php
 /**
- * Called by commandline/web submitdaemon.
- * Given the details of a submission, check the parameters for validity
- * (is the contest open? is the problem valid? is this really the team?)
- * and if ok, copy the file from INCOMING to SUBMIT and add a database
- * entry.
+ * Called by commandline submitdaemon; wrapper around
+ * 'submit_solution' to add the submission to the database and store a
+ * copy of the source in SUBMITDIR.
  *
  * Called: submit_db.php <team> <ip> <problem> <langext> <filename>
+ * Returns exitcode != 0 on failure.
  *
  * $Id$
  *
@@ -38,7 +37,7 @@ $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];
 
 $sid = submit_solution($team, $ip, $prob, $langext, INCOMINGDIR."/$file");
-	
+
 logmsg(LOG_NOTICE, "submitted $team/$prob/$langext, id s$sid/c$cid");
 
 exit;
