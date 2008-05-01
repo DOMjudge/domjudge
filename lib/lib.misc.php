@@ -347,3 +347,16 @@ function getSourceFilename($cid,$sid,$team,$prob,$langext)
 {
 	return "c$cid.s$sid.$team.$prob.$langext";
 }
+
+/**
+ * Output generic version information and exit.
+ */
+function version()
+{
+	echo SCRIPT_ID . " -- part of DOMjudge version " . DOMJUDGE_VERSION . "\n" .
+		"Written by the DOMjudge developers\n\n" .
+		"DOMjudge comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n" .
+		"are welcome to redistribute it under certain conditions.  See the GNU\n" .
+		"General Public Licence for details.\n";
+	exit(0);
+}
