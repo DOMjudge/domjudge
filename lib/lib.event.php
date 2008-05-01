@@ -9,10 +9,12 @@
  */
 
 define('FIELD_SEP', '|');
+define('RECORD_SEP', '\n');
 
 /**
  * Encodes a string for output with URL-like encoding.
- * Don't use PHP 'urlencode' here because it encodes too much.
+ * Don't use PHP 'rawurlencode' here because it encodes all
+ * non-alphanumeric characters.
  */
 function encode_field($str)
 {
@@ -35,7 +37,7 @@ function encode_field($str)
  */
 function decode_field($str)
 {
-	return urldecode($str);
+	return rawurldecode($str);
 }
 
 /**
@@ -43,9 +45,7 @@ function decode_field($str)
  */
 function encode_line($data)
 {
-	foreach( $data AS $i => $str ) $data[$i] = encode_field($str);
-
-	return implode(FIELD_SEP, $data);
+	return implode(FIELD_SEP, array_map("encode_field", $data)) . RECORD_SEP;
 }
 
 /**
@@ -53,9 +53,7 @@ function encode_line($data)
  */
 function decode_line($line)
 {
-	$data = explode(FIELD_SEP, $line);
-
-	foreach( $data AS $i => $str ) $data[$i] = decode_field($str);
+	$data = array_map("decode_field", explode(FIELD_SEP, $line));
 
 	// Add text keys for default fields
 	$data['description'] = $data[0];
@@ -73,5 +71,7 @@ function read_decode_line()
 {
 	if ( feof(STDIN) || !($line = fgets(STDIN)) ) return FALSE;
 
+	// Here we strip trailing linefeed and carriage return characters
+	// and ignore the RECORD_SEP (assumed to be '\n').
 	return decode_line(rtrim($line,"\r\n\0"));
 }
