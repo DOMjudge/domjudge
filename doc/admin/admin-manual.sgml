@@ -244,7 +244,7 @@ DOMjudge has three different kinds of hosts:
        solutions and from which they submit them to the jury system.
        The only part of DOMjudge that runs here is the optional
        command line submit client; the rest happens via the web
-	   interface.
+       interface.
 <item> Jury system: a host that receives the submissions, runs the
        database and serves the webpages. This host will run the
        DOMjudge submitdaemon(s), MySQL and Apache. Optionally some of
@@ -1526,7 +1526,7 @@ Network traffic between team- and jury-computers and the internet
 should be limited to what is allowed. Possible ways of enforcing this
 might be: monitor traffic, modify firewall rules on team computers or
 (what we implemented with great satisfaction) put all team computers
-behind a firewalling bridge.
+behind a firewalling router.
 
 Solutions are run within a restricted (chroot) environment on the
 judge computers. This however does not restrict network access, so a
