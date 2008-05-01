@@ -1231,6 +1231,30 @@ judgedaemon.
 When all this worked, you're quite ready for a contest. Or at least,
 the practice session of a contest.
 
+<chapt>Team Workstations<label id="teamworkstations">
+<p>
+
+Here's a quick checklist for configuring the team workstations. Of course,
+when hosting many teams, it makes sense to generate a preconfigured account that
+has these features and can be distributed over the workstations.
+
+<enum>
+<item> The central tool team interaction with DOMjudge is the web browser.
+  <itemize>
+  <item> If possible, set the Home Page to <tt>your.domjudge.location/team/</tt>
+  <item> Go to the team page and check if this team is correctly identified.
+  <item> If using https and a self signed certificate, add this certificate
+  to the browser certificate list to prevent annoying dialogs.
+  </itemize>
+<item> Make sure compilers for the supported languages are installed and working.
+<item> Provide teams with the commandline submit client and check that it works.
+<item> Make the sample in- and output data from the problemset available.
+<item> Add your SSH key to their authorized_keys file, so you can always access
+their account for wiping, emergencies and to make the submit commandline client
+work when it doesn't use the cURL interface.
+<item> Check that internet access is blocked.
+</enum>
+
 <chapt>Web interface<label id="webinterface">
 <p>
 
