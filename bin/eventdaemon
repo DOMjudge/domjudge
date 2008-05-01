@@ -1,0 +1,254 @@
+#!/usr/bin/php -q
+<?php
+/**
+ * Event daemon to connect arbitrary external plugins to, which
+ * receive all relevant contest data. See docs/eventd-proto.txt for
+ * protocol specification.
+ *
+ * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+
+require('../etc/config.php');
+
+define('SCRIPT_ID', 'eventd');
+define('LOGFILE', LOGDIR.'/eventd.log');
+
+require(SYSTEM_ROOT . '/lib/init.php');
+require(SYSTEM_ROOT . '/lib/lib.event.php');
+
+$waittime = 5;
+
+$cid = NULL;
+$lastid = -1;
+
+// Debugging:
+$verbose  = LOG_DEBUG;
+
+$isjury = FALSE;
+
+$doscoreboard = FALSE;
+
+// Tick use required as of PHP 4.3.0 for handling signals, must be
+// declared globally.
+declare(ticks = 1);
+initsignals();
+
+function usage()
+{
+	echo "Usage: " . basename($_SERVER['PHP_SELF']) . " [OPTION]...\n" .
+		"Start event daemon to connect plugin to.\n\n" .
+		"  -n, --new[=LASTID]   only output new events or with optional argument\n" .
+		"                         events with ID greater than LASTID\n" .
+		"  -j, --jury           output events only visible to the jury\n" .
+		"  -s, --scoreboard     output scoreboard after each cycle\n" .
+		"  -q, --quiet          suppress all warnings and verbose output\n" .
+		"  -h, --help           display this help and exit\n" .
+		"  -v, --version        output version information and exit\n";
+	exit(0);
+}
+	
+// Read and parse options
+$options = getopt('n::jsqhv', array("new::","jury","scoreboard","quiet","help","version"));
+
+if ( array_key_exists("help",   $options) ||
+     array_key_exists("h   ",   $options) ) usage();
+if ( array_key_exists("version",$options) ||
+     array_key_exists("v      ",$options) ) version();
+
+foreach ( $options AS $opt => $val ) {
+	logmsg(LOG_DEBUG, "parsing option '$opt': '$val'");
+
+	switch ( $opt ) {
+	case 'q':
+	case 'quiet':
+		$verbose = LOG_ERR;
+		break;
+
+	case 'n':
+	case 'new':
+		if ( $val ) {
+			if ( $val == (string)(int)$val ) {
+				$lastid = (int) $val;
+			} else {
+				logmsg(LOG_NOTICE, "option '$opt': unparsable argument '$val'");
+			}
+		} else {
+			$lastid = NULL;
+		}
+		break;
+
+	case 'j':
+	case 'jury':
+		$isjury = TRUE;
+		break;
+
+	case 's':
+	case 'scoreboard':
+		$doscoreboard = TRUE;
+		break;
+		
+	default:
+		logmsg(LOG_NOTICE, "unknown option '$opt'");
+	}
+}
+
+// Output startup message after optional 'quiet' option set
+logmsg(LOG_NOTICE, "Event daemon started [DOMjudge/".DOMJUDGE_VERSION."]");
+
+// Obtain last eventid to retrieve only new events
+if ( $lastid === NULL ) {
+	$lastid = $DB->q('VALUE SELECT eventid FROM event ORDER BY eventid DESC LIMIT 1');
+	if ( $lastid != (string)(int)$lastid ) $lastid = -1;
+}
+if ( $lastid != -1 ) logmsg(LOG_DEBUG, "retrieving eventid > $lastid");
+
+// Constantly check database for new events
+while ( TRUE ) {
+
+	// Check whether we have received an exit signal
+	if ( $exitsignalled ) {
+		logmsg(LOG_NOTICE, "Received signal, exiting.");
+		exit;
+	}
+
+	$now = now();
+	
+	$newcdata = getCurContest(TRUE);
+	$newcid = $newcdata['cid'];
+	$oldcid = $cid;
+	if ( $oldcid !== $newcid ) {
+		logmsg(LOG_NOTICE, "Contest has changed from " .
+		       (isset($oldcid) ? "c$oldcid" : "none" ) . " to " .
+		       (isset($newcid) ? "c$newcid" : "none" ) );
+		$cid = $newcid;
+		$cdata = $newcdata;
+		$cstarted = FALSE;
+		$cfrozen  = FALSE;
+		$cended   = FALSE;
+
+		// Output change of contest event
+		echo encode_line(array('contest changed',
+		                       $cdata['activatetime'],
+		                       '-1',
+		                       (string) $cid,
+		                       $cdata['contestname'],
+		                       $cdata['starttime'],
+		                       $cdata['endtime'])) . "\n";
+	}
+	
+	// Check and output contest start event
+	if ( ! $cstarted && difftime($now, $cdata['starttime'])>0 ) {
+		$cstarted = TRUE;
+		echo encode_line(array('contest started',
+		                       $cdata['starttime'],
+		                       '-1',
+		                       (string) $cid,
+		                       $cdata['contestname'],
+		                       $cdata['starttime'],
+		                       $cdata['endtime'])) . "\n";
+	}
+	
+	// Check and output contest end event
+	if ( $cstarted && ! $cended && difftime($now, $cdata['endtime'])>0 ) {
+		$cended = TRUE;
+		echo encode_line(array('contest ended',
+		                       $cdata['endtime'],
+		                       '-1',
+		                       (string) $cid,
+		                       $cdata['contestname'],
+		                       $cdata['starttime'],
+		                       $cdata['endtime'])) . "\n";
+	}
+	
+	// Check and output scoreboard freeze event
+	if ( ! $cfrozen && ! empty($cdata['freezetime']) &&
+		 difftime($now, $cdata['freezetime'])>0 ) {
+		$cfrozen = TRUE;
+		echo encode_line(array('scoreboard frozen',
+		                       $cdata['freezetime'],
+		                       '-1',
+		                       (string) $cid,
+		                       $cdata['contestname'],
+		                       $cdata['starttime'],
+		                       $cdata['endtime'])) . "\n";
+	}
+
+	// Check and output scoreboard unfreeze event
+	if ( $cfrozen && ! empty($cdata['unfreezetime']) &&
+		 difftime($now, $cdata['unfreezetime'])>0 ) {
+		$cfrozen = FALSE;
+		echo encode_line(array('scoreboard unfrozen',
+		                       $cdata['unfreezetime'],
+		                       '-1',
+		                       (string) $cid,
+		                       $cdata['contestname'],
+		                       $cdata['starttime'],
+		                       $cdata['endtime'])) . "\n";
+	}
+
+	// Query new events
+	$res = $DB->q('SELECT * FROM event WHERE eventid > %i ORDER BY eventid', $lastid);
+	logmsg(LOG_DEBUG, 'read ' . $res->count() . ' events');
+	
+	while ( $row = $res->next() ) {
+
+		$skip = FALSE;
+
+		// General info outputted for each event:
+		$output = array();
+		$output[] =          $row['description'];
+		$output[] =          $row['eventtime'];
+		$output[] = (string) $row['eventid'];
+		$output[] = (string) $row['cid'];
+
+		switch ( $row['description'] ) {
+		case 'problem submitted':
+		case 'problem judged':
+			if ( !$isjury && $cfrozen ) {
+				$skip = TRUE;
+				break;
+			}
+			$data = $DB->q('MAYBETUPLE SELECT s.submittime, j.result,
+			                                  t.name AS teamname, t.room,
+			                                  p.name AS probname, p.color,
+			                                  l.name AS langname FROM submission s
+			                LEFT JOIN judging  j ON (j.submitid = s.submitid AND valid = 1)
+			                LEFT JOIN team     t ON (t.login    = s.teamid)
+			                LEFT JOIN problem  p ON (p.probid   = s.probid)
+			                LEFT JOIN language l ON (l.langid   = s.langid)
+			                WHERE s.submitid = %i', $row['submitid']);
+
+			$output[] = (string) $row['submitid'];
+			$output[] = (string) $row['teamid'];
+			$output[] = (string) $row['probid'];
+			$output[] = (string) $row['langid'];
+			$output[] = (string) $data['teamname'];
+			$output[] = (string) $data['probname'];
+			$output[] = (string) $data['langname'];
+			$output[] = (string) $data['room'];
+			$output[] = (string) $data['color'];
+			
+			if ( $row['description']=='problem judged' ) {
+				$output[] = (string) $data['submittime'];
+				$output[] = (string) $data['result'];
+			}
+			break;
+
+		case 'clarification':
+			$clar = $DB->q('TUPLE SELECT * FROM clarification
+			                WHERE clarid = %i', $row['clarid']);
+			
+			$output[] = str_replace("\r",'',$clar['body']);
+		}
+
+		if ( !$skip ) echo encode_line($output) . "\n";
+
+		$lastid = $row['eventid'];
+	}
+
+	sleep($waittime);
+}

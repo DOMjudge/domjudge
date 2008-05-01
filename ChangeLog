@@ -48,6 +48,7 @@ Version 2.2.0 - SVN
    only the whitespace wrong.
  - Enable GCC security features for compiling DOMjudge helper programs.
  - Automatically generate apache.conf from global.conf (Closes: #1778059).
+ - Added work-in-progress code for eventdaemon (Working on: #1682761).
 
 Version 2.1.1 - SVN
 -------------------
