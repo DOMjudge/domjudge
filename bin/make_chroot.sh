@@ -23,10 +23,10 @@ ARCH=$2
 ARCHLIST="alpha,amd64,arm,hppa,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 
 # Debian packages to exclude during bootstrap process (comma separated):
-EXCLUDEDEBS="adduser,apt-utils,aptitude,at,base-config,bsdmainutils,console-common,console-data,console-tools,cron,dhcp3-client,dhcp3-common,dmidecode,dselect,exim4,exim4-base,exim4-config,exim4-daemon-light,fdutils,groff-base,ifupdown,info,iptables,iputils-ping,klogd,laptop-detect,libconsole,libdb4.2,libdb4.3,libgnutls13,libncursesw5,libnewt0.52,libopencdk8,libpcap0.7,libpcap0.8,libpci2,libpcre3,libpopt0,libsigc++-1.2-5c2,libsigc++-2.0-0c2a,libssl0.9.7,libssl0.9.8,libtasn1-3,libwrap0,logrotate,mailx,makedev,man-db,manpages,modconf,modutils,nano,net-tools,netbase,netkit-inetd,nvi,openbsd-inetd,pciutils,ppp,pppconfig,pppoe,pppoeconf,procps,psmisc,sysklogd,tasksel,tasksel-data,tcpd,telnet,traceroute,wget,whiptail"
+EXCLUDEDEBS="adduser,apt-utils,aptitude,at,base-config,bsdmainutils,console-common,console-data,console-tools,cron,dhcp3-client,dhcp3-common,dmidecode,dselect,exim4,exim4-base,exim4-config,exim4-daemon-light,fdutils,groff-base,ifupdown,info,iptables,iputils-ping,klogd,laptop-detect,libconsole,libdb4.2,libdb4.3,libgnutls13,libncursesw5,libnewt0.52,libopencdk8,libpcap0.7,libpcap0.8,libpci2,libpcre3,libpopt0,libsigc++-1.2-5c2,libsigc++-2.0-0c2a,libssl0.9.7,libssl0.9.8,libtasn1-3,libwrap0,logrotate,mailx,makedev,man-db,manpages,modconf,modutils,nano,net-tools,netbase,netcat,netkit-inetd,nvi,openbsd-inetd,pciutils,ppp,pppconfig,pppoe,pppoeconf,procps,psmisc,sysklogd,tasksel,tasksel-data,tcpd,telnet,traceroute,wget,whiptail"
 
 # Debian packages to include during bootstrap process (comma separated):
-INCLUDEDEBS="debconf-utils"
+INCLUDEDEBS=""
 
 # Debian packages to install after upgrade (space separated):
 INSTALLDEBS="sun-java5-jre"
@@ -73,23 +73,25 @@ mkdir -p "$CHROOTDIR"
 cd "$CHROOTDIR"
 CHROOTDIR="$PWD"
 
-if [ -f /etc/debian_version ]; then
+if [ ! -x /usr/sbin/debootstrap ]; then
+	if [ -f /etc/debian_version ]; then
 
-	cd /
-	apt-get install debootstrap
+		cd /
+		apt-get install debootstrap
 
-else
-	mkdir "$CHROOTDIR/debootstrap"
-	cd "$CHROOTDIR/debootstrap"
+	else
+		mkdir "$CHROOTDIR/debootstrap"
+		cd "$CHROOTDIR/debootstrap"
 
-	DEBOOTDEB="debootstrap_0.3.3.2etch1_all.deb"
-	wget "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
+		DEBOOTDEB="debootstrap_0.3.3.2etch1_all.deb"
+		wget "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
 
-	ar -x "$DEBOOTDEB"
-	cd /
-	zcat "$CHROOTDIR/debootstrap/data.tar.gz" | tar xv
+		ar -x "$DEBOOTDEB"
+		cd /
+		zcat "$CHROOTDIR/debootstrap/data.tar.gz" | tar xv
 
-	rm -rf "$CHROOTDIR/debootstrap"
+		rm -rf "$CHROOTDIR/debootstrap"
+	fi
 fi
 
 echo "Running debootstrap to install base system, this may take a while..."
@@ -165,6 +167,13 @@ chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get remove $REMOVEDEBS"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
+
+# Remove unnecessary setuid bits
+chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
+	/usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
+	/usr/bin/gpasswd /usr/bin/passwd /usr/bin/gpg /usr/lib/pt_chown \
+	/bin/su /bin/mount /bin/umount /sbin/unix_chkpwd"
+
 
 umount "$CHROOTDIR/proc"
 
