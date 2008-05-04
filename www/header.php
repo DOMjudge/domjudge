@@ -32,6 +32,9 @@ if(!isset($menu)) {
 <?php if (isset($sourcecss)) {  ?>
 <link rel="stylesheet" href="style_source.css" type="text/css" />
 <?php }
+      if (isset($printercss)) { ?>
+<link rel="stylesheet" href="style_printer.css" type="text/css" media="print" />
+<?php }
 if ($menu) {?>
 <script type="text/javascript" src="ajax.js"></script>
 </head>

@@ -333,7 +333,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 
 	// only print legend when there's more than one category
 	if ( $categs->count() > 1 ) {
-		echo "<p><br /><br /></p>\n<table class=\"scoreboard" .
+		echo "<p><br /><br /></p>\n<table id=\"legend\" class=\"scoreboard" .
 			($isjury ? ' scoreboard_jury' : '') . "\">\n" .
 			"<thead><tr><th scope=\"col\">" .
 			jurylink('team_categories.php','Legend',$isjury) .

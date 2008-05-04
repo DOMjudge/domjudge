@@ -12,6 +12,7 @@
 require('init.php');
 $refresh = '30;url=' . getBaseURI() . 'jury/scoreboard.php';
 $title = 'Scoreboard';
+$printercss = TRUE;
 
 include('../header.php');
 require('../scoreboard.php');
