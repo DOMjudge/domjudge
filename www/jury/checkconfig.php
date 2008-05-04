@@ -66,6 +66,25 @@ echo "<p>Optional PEAR Text_Highlighter class is ";
 echo $t_h ? "available" : "not available.\n" .
 	"Install it in PHP's include path to get better source syntax highlighting";
 echo ".</p>\n\n";
+
+$mysqldatares = $DB->q('SHOW variables WHERE
+	Variable_name="max_connections" OR Variable_name = "version"');
+while($row = $mysqldatares->next()) {
+	$mysqldata[$row['Variable_name']] = $row['Value'];
+}
+echo "<p>MySQL server version " .
+	htmlspecialchars($mysqldata['version']) .
+	".</p>\n\n";
+if (version_compare('4.1', $mysqldata['version'], '>=')) {
+	err('You need at least MySQL version 4.1.');
+}
+if ( $mysqldata['max_connections'] < 300 ) {
+	warn('MySQL\'s max_connections is set to ' .
+		$mysqldata['max_connections'] . ', which is in our experience ' .
+		'too low for a moderately sized contest. Consider increasing it '.
+		'to 1000 to prevent connection refusal during the contest.');
+}
+
 ?>
 
 <h2>Authentication</h2>
