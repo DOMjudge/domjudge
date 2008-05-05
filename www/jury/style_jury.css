@@ -50,6 +50,11 @@ img.picto { width: 16px; height: 16px; }
 .configcheck { width: 95%; }
 .configcheck th { text-align: left; padding-top: 1ex; }
 
+.team-nocon { color: #AAA; }
+.team-nosub { color: red; }
+.team-nocor { color: yellow; }
+.team-ok    { color: green; }
+
 
 /* $Id$ */
 

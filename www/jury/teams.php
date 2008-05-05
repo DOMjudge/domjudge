@@ -78,18 +78,18 @@ if( $teams->count() == 0 ) {
 			echo "\">-";
 		}
 		echo "</td><td>".htmlspecialchars($row['room'])."</td>";
-		echo "<td style=\"color: ";
+		echo "<td class=\"";
 		switch ( $status ) {
-		case 0: echo 'gray;" title="no connections made"';
+		case 0: echo 'team-nocon" title="no connections made"';
 			break;
-		case 1: echo 'red;" title="teampage viewed, no submissions"';
+		case 1: echo 'team-nosub" title="teampage viewed, no submissions"';
 			break;
-		case 2: echo 'yellow;" title="submitted, none correct"';
+		case 2: echo 'team-nocor" title="submitted, none correct"';
 			break;
-		case 3: echo 'green;" title="correct submission(s)"';
+		case 3: echo 'team-ok" title="correct submission(s)"';
 			break;
 		}
-		echo ">&#9679;</td>";
+		echo ">".BALLOON_SYM."</td>";
 		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$numcor / $numsub</td>";
 		if ( IS_ADMIN ) {
 			echo "<td>" .
