@@ -16,10 +16,27 @@ require('../header.php');
 
 requireAdmin();
 
-echo "<h1>Config Checker</h1>\n\n";
+?>
+<script type="text/javascript" language="JavaScript">
+<!--
+function collapse(x){
+  var oTemp=document.getElementById("detail"+x) ;
+  if (oTemp.style.display=="block") {
+    oTemp.style.display="none";
+  } else {
+    oTemp.style.display="block";
+  }
+}
+// -->
+</script>
+
+<h1>Config Checker</h1>
+
+<?php
 
 /** Print the output of phpinfo(), which may be useful to check which settings
  *  PHP is actually using. */
+ // FIXME
 if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
 	$ret = "<p><a href=\"./checkconfig.php\">return to config checker</a></p>\n\n";
 	echo $ret;
@@ -33,152 +50,226 @@ if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
 require_once(SYSTEM_ROOT . '/lib/relations.php');
 require_once('checkers.php');
 
-ob_implicit_flush();
 
-/** helper to output an error message */
-function err ($string) {
-	echo "<b><u>ERROR</u>: ".htmlspecialchars($string)."</b><br />\n";
+$RESULTS = array();
+
+function result($section, $item, $result, $details, $details_html = '') {
+	global $RESULTS;
+
+	$RESULTS[] = array('section' => $section,
+		'item' => $item,
+		'result' => $result,
+		'details' => $details,
+		'details_html' => $details_html);
 }
-/** helper to output a warning message */
-function warn ($string) {
-	echo "<b><u>WARNING</u>: ".htmlspecialchars($string)."</b><br />\n";
-}
 
-?>
 
-<h2>Software</h2>
 
-<?php
+// SOFTWARE
 
-echo "<p>You are using DOMjudge version " . htmlspecialchars(DOMJUDGE_VERSION) . "<br />\n" .
-"PHP version " . htmlspecialchars(PHP_VERSION) . " ";
-
-// are we using the right php version?
 if( !function_exists('version_compare') || version_compare( '4.3.2',PHP_VERSION,'>=') ) {
-	err('You need at least PHP version 4.3.2.');
+	result('software', 'PHP version', 'E', 
+		'You have PHP ' . PHP_VERSION . ', but need at least 4.3.2.',
+		'See <a href="?phpinfo">phpinfo</a> for details.');
 } else {
-	echo "OK";
+	result('software', 'PHP version', 'O', 
+		'You have PHP ' . PHP_VERSION . '.',
+		'See <a href="?phpinfo">phpinfo</a> for details.');
 }
-echo " <a href=\"?phpinfo\">(phpinfo)</a></p>\n\n";
 
-$t_h = include_highlighter();
-echo "<p>Optional PEAR Text_Highlighter class is ";
-echo $t_h ? "available" : "not available.\n" .
-	"Install it in PHP's include path to get better source syntax highlighting";
-echo ".</p>\n\n";
+if ( include_highlighter() ) {
+	result('software', 'PHP Highlighter class',
+		'O', 'Optional PHP PEAR Text_Highlighter class is available.');
+} else {
+	result('software', 'PHP Highlighter class',
+		'W', 'Optionally, install the PHP PEAR Text_Highlighter class '.
+		'for better source syntax highlighting.',
+		'<a href="http://pear.php.net/package/Text_Highlighter/">more information</a>');
+}
 
 $mysqldatares = $DB->q('SHOW variables WHERE
 	Variable_name="max_connections" OR Variable_name = "version"');
 while($row = $mysqldatares->next()) {
 	$mysqldata[$row['Variable_name']] = $row['Value'];
 }
-echo "<p>MySQL server version " .
+
+result('software', 'MySQL version', 
+	version_compare('4.1', $mysqldata['version'], '>=') ? 'E':'O',
+	'Connected to ' . mysql_get_host_info().",\n".
+	'MySQL server version ' .
 	htmlspecialchars($mysqldata['version']) .
-	".</p>\n\n";
-if (version_compare('4.1', $mysqldata['version'], '>=')) {
-	err('You need at least MySQL version 4.1.');
-}
-if ( $mysqldata['max_connections'] < 300 ) {
-	warn('MySQL\'s max_connections is set to ' .
-		$mysqldata['max_connections'] . ', which is in our experience ' .
-		'too low for a moderately sized contest. Consider increasing it '.
-		'to 1000 to prevent connection refusal during the contest.');
-}
+	'. Minimum required is 4.1.');
 
-?>
+result('software', 'MySQL maximum connections',
+	$mysqldata['max_connections'] < 300 ? 'W':'O',
+	'MySQL\'s max_connections is set to ' .
+	(int)$mysqldata['max_connections'] . '. In our experience ' .
+	'you need at least 300, but better 1000 connections to ' .
+	'prevent connection refusal during the contest.');
 
-<h2>Authentication</h2>
 
-<p>Checking authentication...
-<?php
+// SECURITY
+
+
 if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
-	warn("You are not using HTTP Authentication for the Jury interface.\n" .
+	result('security', 'Protected Jury interface', 'W',
+		"You are not using HTTP Authentication for the Jury interface. " .
 		"Are you sure that the jury interface is adequately protected?\n");
 } else {
-	echo "OK, logged in as user <em>" . htmlspecialchars($_SERVER['REMOTE_USER']) .
-		"</em>.\n";
+	result('security', 'Protected Jury interface', 'O',
+		'Logged in as user ' .
+		htmlspecialchars($_SERVER['REMOTE_USER']) .
+		".");
 }
-?>
-</p>
 
-
-<h2>Contests</h2>
-
-<p>Current contest: <?php 
+// CONTESTS
 
 if($cid == null) {
-	// we need a valid 'current contest' at any time to function correctly
-	err('No current contest found. System will not function.');
+	result('contests', 'Active contest', 'E',
+		'No current contest found. System will not function.');
 } else {
-	$cid = (int)$cid;
-	echo "<b>c$cid</b>";
+	result('contests', 'Active contest', 'O',
+		'Current contest: c'.(int)$cid);
 }
-echo "</p><p>Checking contests...</p>\n\n";
 
 // get all contests
 $res = $DB->q('SELECT * FROM contest ORDER BY cid');
 
+$detail = '';
+$has_errors = FALSE;
 while($cdata = $res->next()) {
 
-	echo "<p><b>c".(int)$cdata['cid']."</b>: ";
+	$detail .=  "c".(int)$cdata['cid'].": ";
 
 	$CHECKER_ERRORS = array();
 	check_contest($cdata, array('cid' => $cdata['cid']));
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
-		foreach($CHECKER_ERRORS as $chk_err) {
-			err($chk_err);
-		}
+		$detail .= $chk_err;
+		$has_errors = TRUE;
 	} else {
-		echo "OK";
+		$detail .= "OK";
 	}
 
-	echo "</p>\n\n";
+	$detail .= "\n";
 }
 
-echo "<h2>Problems</h2>\n\n<p>Checking problems...<br />\n";
+result('contests', 'Contests integrity',
+	$has_errors ? 'E' : 'O',
+	$detail);
+
+// PROBLEMS
 
 $res = $DB->q('SELECT * FROM problem ORDER BY probid');
 
+$details = '';
 if($res->count() > 0) {
 	while($row = $res->next()) {
 		$CHECKER_ERRORS = array();
 		check_problem($row);
 		if ( count ( $CHECKER_ERRORS ) > 0 ) {
 			foreach($CHECKER_ERRORS as $chk_err) {
-				err($row['probid'].': ' . $chk_err);
+				$details .= $row['probid'].': ' . $chk_err."\n";
 			}
 		}
 	}
 }
 
-echo "<h2>Languages</h2>\n\n<p>Checking languages...<br />\n";
+result('problems, languages, teams', 'Problems integrity',
+	$details == '' ? 'O':'E',
+	$details);
+
+// LANGUAGES
 
 $res = $DB->q('SELECT * FROM language ORDER BY langid');
 
+$details = '';
 if($res->count() > 0) {
 	while($row = $res->next()) {
 		$CHECKER_ERRORS = array();
 		check_language($row);
 		if ( count ( $CHECKER_ERRORS ) > 0 ) {
 			foreach($CHECKER_ERRORS as $chk_err) {
-				err($row['langid'].': ' . $chk_err);
+				$details .= $row['langid'].': ' . $chk_err ."\n";
 			}
 		}
 	}
 }
 
+result('problems, languages, teams',
+	'Languages integrity',
+	$details == '' ? 'O': 'E',
+	$details);
 
-echo "<h2>Submissions</h2>\n\n<p>Checking submissions...<br />\n";
+
+
+$res = $DB->q('SELECT * FROM team ORDER BY login');
+
+$details = '';
+if($res->count() > 0) {
+	while($row = $res->next()) {
+		$CHECKER_ERRORS = array();
+		check_team($row);
+		if ( count ( $CHECKER_ERRORS ) > 0 ) {
+			foreach($CHECKER_ERRORS as $chk_err) {
+				$details .= $row['login'].': ' . $chk_err . "\n";
+			}
+		}
+	}
+}
+
+result('problems, languages, teams', 'Team integrity',
+	$details == '' ? 'O': 'E', $details);
+
+$details = '';
+if ( SHOW_AFFILIATIONS ) {
+	$res = $DB->q('SELECT affilid FROM team_affiliation ORDER BY affilid');
+
+	while ( $row = $res->next() ) {
+		$affillogo = '../images/affiliations/' .
+			urlencode($row['affilid']) . '.png';
+		if ( ! file_exists ( $affillogo ) ) {
+			$details .= "Affiliation " . $row['affilid'] .
+				" does not have a logo (looking for $affillogo).\n";
+		} elseif ( ! is_readable ( $affillogo ) ) {
+			$details .= "Affiliation " . $row['affilid'] .
+				" has a logo, but it's not readable ($affillogo).\n";
+		}
+	}
+	
+	$res = $DB->q('SELECT DISTINCT country FROM team_affiliation ORDER BY country');
+	while ( $row = $res->next() ) {
+		$cflag = '../images/countries/' .
+			urlencode($row['country']) . '.png';
+		if ( ! file_exists ( $cflag ) ) {
+			$details .= "Country " . $row['country'] .
+				" does not have a flag (looking for $cflag).\n";
+		} elseif ( ! is_readable ( $cflag ) ) {
+			$details .= "Country " . $row['country'] .
+				" has a flag, but it's not readable ($cflag).\n";
+		}
+	}
+
+	result('problems, languages, teams', 'Team affiliation icons',
+		($details == '') ? 'O' : 'E', $details);
+
+} else {
+	result('problems, languages, teams', 'Team affiliation icons',
+		'O', 'Affiliation icons disabled in config.');
+}
+
+
+// SUBMISSIONS, JUDINGS
 
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
                LEFT OUTER JOIN problem p USING (probid) WHERE s.cid != p.cid');
 
+$details = '';
 if($res->count() > 0) {
 	while($row = $res->next()) {
-		err('Submission s' .  $row['submitid'] . ' is for problem "' .
+		$details .= 'Submission s' .  $row['submitid'] . ' is for problem "' .
 			$row['probid'] .
-			'" while this problem is not found (in c'. $row['cid'] . ')');
+			'" while this problem is not found (in c'. $row['cid'] . ")\n";
 	}
 }
 
@@ -190,7 +281,7 @@ if($res->count() > 0) {
 		check_submission($row);
 		if ( count ( $CHECKER_ERRORS ) > 0 ) {
 			foreach($CHECKER_ERRORS as $chk_err) {
-				err($row['submitid'].': ' . $chk_err);
+				$details .= $row['submitid'].': ' . $chk_err ."\n";
 			}
 		}
 	}
@@ -204,20 +295,22 @@ $res = $DB->q('SELECT s.submitid FROM submission s
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
-		err('Submission s' . $row['submitid'] . ' has a judgehost but no entry in judgings');
+		$details .= 'Submission s' . $row['submitid'] . " has a judgehost but no entry in judgings\n";
 	}
 }
 
+result('submissions and judgings', 'Submission integrity',
+	($details == '' ? 'O':'E'), $details);
 
-echo "</p>\n\n<h2>Judgings</h2>\n\n<p>Checking judgings...<br />\n";
 
+$details = '';
 // check for more than one valid judging for a submission
 $res = $DB->q('SELECT submitid, SUM(valid) as numvalid
 	FROM judging GROUP BY submitid HAVING numvalid > 1');
 if ( $res->count() > 0 ) {
 	while($row = $res->next()) {
-		err('Submission s' . $row['submitid'] . ' has more than one valid judging (' .
-			$row['numvalid'] . ')');
+		$details .= 'Submission s' . $row['submitid'] . ' has more than one valid judging (' .
+			$row['numvalid'] . ")\n";
 	}
 }
 
@@ -227,9 +320,9 @@ $res = $DB->q('SELECT judgingid, submitid, result
 	$EXITCODES);
 if ( $res->count() > 0 ) {
 	while($row = $res->next()) {
-		err('Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
+		$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
 			' has an unknown result code "' .
-			htmlspecialchars($row['result']) . '"');
+			$row['result'] . "\"\n";
 	}
 }
 
@@ -244,7 +337,7 @@ $res = $DB->q('SELECT s.submitid AS s_submitid, j.submitid AS j_submitid,
 
 if($res->count() > 0) {
 	while($row = $res->next()) {
-		$err = 'Judging j' . $row['judgingid'] . '/s' . $row['j_submitid'] . ' ';
+		$err = 'Judging j' . $row['judgingid'] . '/s' . $row['j_submitid'] . '';
 		$CHECKER_ERRORS = array();
 		if(!isset($row['s_submitid'])) {
 			$CHECKER_ERRORS[] = 'has no corresponding submitid (in c'.$row['j_cid'] .')';
@@ -258,65 +351,20 @@ if($res->count() > 0) {
 		check_judging($row);
 		if ( count ( $CHECKER_ERRORS ) > 0 ) {
 			foreach($CHECKER_ERRORS as $chk_err) {
-				err($err.': ' . $chk_err);
+				$details .= $err.': ' . $chk_err ."\n";
 			}
 		}
 	}
 }
 
-echo "</p>\n\n<h2>Teams</h2>\n\n<p>Checking teams...<br />\n";
-
-$res = $DB->q('SELECT * FROM team ORDER BY login');
-
-if($res->count() > 0) {
-	while($row = $res->next()) {
-		$CHECKER_ERRORS = array();
-		check_team($row);
-		if ( count ( $CHECKER_ERRORS ) > 0 ) {
-			foreach($CHECKER_ERRORS as $chk_err) {
-				err($row['login'].': ' . $chk_err);
-			}
-		}
-	}
-}
-
-if ( SHOW_AFFILIATIONS ) {
-	$res = $DB->q('SELECT affilid FROM team_affiliation ORDER BY affilid');
-
-	while ( $row = $res->next() ) {
-		$affillogo = '../images/affiliations/' .
-			urlencode($row['affilid']) . '.png';
-		if ( ! file_exists ( $affillogo ) ) {
-			err ("Affiliation " . $row['affilid'] .
-				" does not have a logo (looking for $affillogo).");
-		} elseif ( ! is_readable ( $affillogo ) ) {
-			err ("Affiliation " . $row['affilid'] .
-				" has a logo, but it's not readable ($affillogo).");
-		}
-	}
-	
-	$res = $DB->q('SELECT DISTINCT country FROM team_affiliation ORDER BY country');
-	while ( $row = $res->next() ) {
-		$cflag = '../images/countries/' .
-			urlencode($row['country']) . '.png';
-		if ( ! file_exists ( $cflag ) ) {
-			err ("Country " . $row['country'] .
-				" does not have a flag (looking for $cflag).");
-		} elseif ( ! is_readable ( $cflag ) ) {
-			err ("Country " . $row['country'] .
-				" has a flag, but it's not readable ($cflag).");
-		}
-	}
-
-}
-echo "</p>\n\n";
+result('submissions and judgings', 'Judging integrity',
+	($details == '' ? 'O':'E'), $details);
 
 
 
-echo "<h2>Referential Integrity</h2>\n\n";
+// REFERENTIAL INTEGRITY
 
-echo "<p>Checking integrity of inter-table relationships...";
-
+$details = '';
 foreach ( $RELATIONS as $table => $foreign_keys ) {
 	$res = $DB->q('SELECT * FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
 	while ( $row = $res->next() ) {
@@ -325,16 +373,59 @@ foreach ( $RELATIONS as $table => $foreign_keys ) {
 				$f = explode('.', $target);
 				if ( $DB->q("VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
 						$row[$foreign_key]) < 1 ) {
-					err ("foreign key constraint fails for $table.$foreign_key = \"" .
-						$row[$foreign_key] . "\" (not found in $target)");
+					$details .= "foreign key constraint fails for $table.$foreign_key = \"" .
+						$row[$foreign_key] . "\" (not found in $target)\n";
 				}
 			}
 		}
 	}
 }
 
-echo "</p>\n\n";
+// problems found are of level warning, because the severity may be different depending
+// on which table it is.
+result('referential integrity', 'Inter-table relationships',
+	($details == '' ? 'O':'W'), $details);
 
-echo "<p>End of config checker.</p>\n\n";
+
+
+// DISPLAY RESULTS
+
+echo "<table class=\"configcheck\">\n";
+
+$lastsection = false; $i = 0;
+
+foreach($RESULTS as $row) {
+
+	if ( empty($row['details']) ) $row['details'] = 'No issues found.';
+
+	if ( $row['section'] != $lastsection ) {
+		echo "<tr><th colspan=\"2\">" .
+			htmlspecialchars(ucfirst($row['section'])) .
+			"</th></tr>\n";
+		$lastsection = $row['section'];
+	}
+
+	echo "<tr class=\"result " . htmlspecialchars($row['result']) .
+		"\"><td class=\"resulticon\"><img src=\"../images/s_";
+	switch($row['result']) {
+		case 'O': echo "okay"; break;
+		case 'W': echo "warn"; break;
+		case 'E': echo "error"; break;
+		default: error("Unknown config checker result: ".$row['result']);
+	}
+	echo ".png\" alt=\"" . $row['result'] . "\" class=\"picto\" /></td><td>" .
+		htmlspecialchars($row['item']) ." " .
+		"<a href=\"javascript:collapse($i)\"><img src=\"../images/b_help.png\" " .
+		"alt=\"?\" title=\"show details\"></a>\n" .
+		"<div class=\"details\" id=\"detail$i\">" .
+		nl2br(htmlspecialchars(trim($row['details']))."\n") . $row['details_html'] .
+		"</div></td></tr>\n";
+
+	++$i;
+}
+
+echo "</table>\n\n";
+
+echo "<p>Config checker completed.</p>\n\n";
 
 require('../footer.php');

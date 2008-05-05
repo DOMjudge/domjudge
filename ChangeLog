@@ -50,7 +50,7 @@ Version 2.2.0 - SVN
  - Automatically generate apache.conf from global.conf (Closes: #1778059).
  - Added work-in-progress code for eventdaemon (Working on: #1682761).
  - Added printer friendly version of jury scoreboard.
- - Also check MySQL version and max_connections in configchecker.
+ - Restyle configchecker and also check MySQL version and max_connections.
  - Explicitly use DBSERVER host with mysql install (Closes: #1955439).
 
 Version 2.1.1 - SVN

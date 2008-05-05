@@ -206,3 +206,14 @@ img.picto { width: 16px; height: 16px; }
 
 .judgetime { font-size: smaller; font-style: italic; }
 
+.details { display: none;
+	margin-left: 2em; padding-left: 1ex;
+	border-left: dotted 1px gray; 
+	margin-top: 1ex; margin-bottom: 1ex;}
+.O { background-color: #ccfbcc; }
+.W { background-color: #f0e68c; }
+.E { background-color: #fa9972; }
+.resulticon { text-align: center; vertical-align: top; width: 48px; }
+.configcheck { width: 95%; }
+.configcheck th { text-align: left; padding-top: 1ex; }
+
