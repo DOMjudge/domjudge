@@ -162,14 +162,12 @@ result('contests', 'Contests integrity',
 $res = $DB->q('SELECT * FROM problem ORDER BY probid');
 
 $details = '';
-if($res->count() > 0) {
-	while($row = $res->next()) {
-		$CHECKER_ERRORS = array();
-		check_problem($row);
-		if ( count ( $CHECKER_ERRORS ) > 0 ) {
-			foreach($CHECKER_ERRORS as $chk_err) {
-				$details .= $row['probid'].': ' . $chk_err."\n";
-			}
+while($row = $res->next()) {
+	$CHECKER_ERRORS = array();
+	check_problem($row);
+	if ( count ( $CHECKER_ERRORS ) > 0 ) {
+		foreach($CHECKER_ERRORS as $chk_err) {
+			$details .= $row['probid'].': ' . $chk_err."\n";
 		}
 	}
 }
@@ -183,14 +181,12 @@ result('problems, languages, teams', 'Problems integrity',
 $res = $DB->q('SELECT * FROM language ORDER BY langid');
 
 $details = '';
-if($res->count() > 0) {
-	while($row = $res->next()) {
-		$CHECKER_ERRORS = array();
-		check_language($row);
-		if ( count ( $CHECKER_ERRORS ) > 0 ) {
-			foreach($CHECKER_ERRORS as $chk_err) {
-				$details .= $row['langid'].': ' . $chk_err ."\n";
-			}
+while($row = $res->next()) {
+	$CHECKER_ERRORS = array();
+	check_language($row);
+	if ( count ( $CHECKER_ERRORS ) > 0 ) {
+		foreach($CHECKER_ERRORS as $chk_err) {
+			$details .= $row['langid'].': ' . $chk_err ."\n";
 		}
 	}
 }
@@ -205,14 +201,12 @@ result('problems, languages, teams',
 $res = $DB->q('SELECT * FROM team ORDER BY login');
 
 $details = '';
-if($res->count() > 0) {
-	while($row = $res->next()) {
-		$CHECKER_ERRORS = array();
-		check_team($row);
-		if ( count ( $CHECKER_ERRORS ) > 0 ) {
-			foreach($CHECKER_ERRORS as $chk_err) {
-				$details .= $row['login'].': ' . $chk_err . "\n";
-			}
+while($row = $res->next()) {
+	$CHECKER_ERRORS = array();
+	check_team($row);
+	if ( count ( $CHECKER_ERRORS ) > 0 ) {
+		foreach($CHECKER_ERRORS as $chk_err) {
+			$details .= $row['login'].': ' . $chk_err . "\n";
 		}
 	}
 }
@@ -265,24 +259,20 @@ $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
                LEFT OUTER JOIN problem p USING (probid) WHERE s.cid != p.cid');
 
 $details = '';
-if($res->count() > 0) {
-	while($row = $res->next()) {
-		$details .= 'Submission s' .  $row['submitid'] . ' is for problem "' .
-			$row['probid'] .
-			'" while this problem is not found (in c'. $row['cid'] . ")\n";
-	}
+while($row = $res->next()) {
+	$details .= 'Submission s' .  $row['submitid'] . ' is for problem "' .
+		$row['probid'] .
+		'" while this problem is not found (in c'. $row['cid'] . ")\n";
 }
 
 $res = $DB->q('SELECT * FROM submission ORDER BY submitid');
 
-if($res->count() > 0) {
-	while($row = $res->next()) {
-		$CHECKER_ERRORS = array();
-		check_submission($row);
-		if ( count ( $CHECKER_ERRORS ) > 0 ) {
-			foreach($CHECKER_ERRORS as $chk_err) {
-				$details .= $row['submitid'].': ' . $chk_err ."\n";
-			}
+while($row = $res->next()) {
+	$CHECKER_ERRORS = array();
+	check_submission($row);
+	if ( count ( $CHECKER_ERRORS ) > 0 ) {
+		foreach($CHECKER_ERRORS as $chk_err) {
+			$details .= $row['submitid'].': ' . $chk_err ."\n";
 		}
 	}
 }
@@ -293,10 +283,8 @@ $res = $DB->q('SELECT s.submitid FROM submission s
                LEFT OUTER JOIN judging j USING (submitid)
                WHERE j.submitid IS NULL AND s.judgehost IS NOT NULL');
 
-if($res->count() > 0) {
-	while($row = $res->next()) {
-		$details .= 'Submission s' . $row['submitid'] . " has a judgehost but no entry in judgings\n";
-	}
+while($row = $res->next()) {
+	$details .= 'Submission s' . $row['submitid'] . " has a judgehost but no entry in judgings\n";
 }
 
 result('submissions and judgings', 'Submission integrity',
@@ -307,23 +295,19 @@ $details = '';
 // check for more than one valid judging for a submission
 $res = $DB->q('SELECT submitid, SUM(valid) as numvalid
 	FROM judging GROUP BY submitid HAVING numvalid > 1');
-if ( $res->count() > 0 ) {
-	while($row = $res->next()) {
-		$details .= 'Submission s' . $row['submitid'] . ' has more than one valid judging (' .
-			$row['numvalid'] . ")\n";
-	}
+while($row = $res->next()) {
+	$details .= 'Submission s' . $row['submitid'] . ' has more than one valid judging (' .
+		$row['numvalid'] . ")\n";
 }
 
 // check for unknown result strings
 $res = $DB->q('SELECT judgingid, submitid, result
 	FROM judging WHERE result IS NOT NULL AND result NOT IN (%As)',
 	$EXITCODES);
-if ( $res->count() > 0 ) {
-	while($row = $res->next()) {
-		$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
-			' has an unknown result code "' .
-			$row['result'] . "\"\n";
-	}
+while($row = $res->next()) {
+	$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
+		' has an unknown result code "' .
+		$row['result'] . "\"\n";
 }
 
 
@@ -335,24 +319,22 @@ $res = $DB->q('SELECT s.submitid AS s_submitid, j.submitid AS j_submitid,
                (j.endtime IS NOT NULL AND j.endtime < j.starttime) OR
                (j.starttime < s.submittime)');
 
-if($res->count() > 0) {
-	while($row = $res->next()) {
-		$err = 'Judging j' . $row['judgingid'] . '/s' . $row['j_submitid'] . '';
-		$CHECKER_ERRORS = array();
-		if(!isset($row['s_submitid'])) {
-			$CHECKER_ERRORS[] = 'has no corresponding submitid (in c'.$row['j_cid'] .')';
-		}
-		if($row['s_cid'] != NULL && $row['s_cid'] != $row['j_cid']) {
-			$CHEKCER_ERRORS[] = 'Judging j' .$row['judgingid'] .
-			    ' is from a different contest (c' . $row['j_cid'] .
-			    ') than its submission s' . $row['j_submitid'] .
-			    ' (c' . $row['s_cid'] . ')';
-		}
-		check_judging($row);
-		if ( count ( $CHECKER_ERRORS ) > 0 ) {
-			foreach($CHECKER_ERRORS as $chk_err) {
-				$details .= $err.': ' . $chk_err ."\n";
-			}
+while($row = $res->next()) {
+	$err = 'Judging j' . $row['judgingid'] . '/s' . $row['j_submitid'] . '';
+	$CHECKER_ERRORS = array();
+	if(!isset($row['s_submitid'])) {
+		$CHECKER_ERRORS[] = 'has no corresponding submitid (in c'.$row['j_cid'] .')';
+	}
+	if($row['s_cid'] != NULL && $row['s_cid'] != $row['j_cid']) {
+		$CHEKCER_ERRORS[] = 'Judging j' .$row['judgingid'] .
+		    ' is from a different contest (c' . $row['j_cid'] .
+		    ') than its submission s' . $row['j_submitid'] .
+		    ' (c' . $row['s_cid'] . ')';
+	}
+	check_judging($row);
+	if ( count ( $CHECKER_ERRORS ) > 0 ) {
+		foreach($CHECKER_ERRORS as $chk_err) {
+			$details .= $err.': ' . $chk_err ."\n";
 		}
 	}
 }
