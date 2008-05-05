@@ -39,6 +39,7 @@ img.picto { width: 16px; height: 16px; }
 
 .judgetime { font-size: smaller; font-style: italic; }
 
+/* configchecker */
 .details { display: none;
 	margin-left: 2em; padding-left: 1ex;
 	border-left: dotted 1px gray; 
@@ -50,14 +51,13 @@ img.picto { width: 16px; height: 16px; }
 .configcheck { width: 95%; }
 .configcheck th { text-align: left; padding-top: 1ex; }
 
+/* team connect status in teams overview */
 .team-nocon { color: #AAA; }
 .team-nosub { color: red; }
 .team-nocor { color: yellow; }
 .team-ok    { color: green; }
 
-
-/* $Id$ */
-
+/* source code highlighting */
 .hl-default {
     color: Black;
 }
