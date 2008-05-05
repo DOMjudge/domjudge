@@ -348,19 +348,20 @@ result('submissions and judgings', 'Judging integrity',
 
 $details = '';
 foreach ( $RELATIONS as $table => $foreign_keys ) {
-	if(empty($foreign_keys)) {
+	if ( empty($foreign_keys) ) {
 		continue;
 	}
 	$res = $DB->q('SELECT * FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
 	while ( $row = $res->next() ) {
 		foreach ( $foreign_keys as $foreign_key => $target ) {
-			if ( !empty($row[$foreign_key]) ) {
-				$f = explode('.', $target);
-				if ( $DB->q("VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
-						$row[$foreign_key]) < 1 ) {
-					$details .= "foreign key constraint fails for $table.$foreign_key = \"" .
-						$row[$foreign_key] . "\" (not found in $target)\n";
-				}
+			if ( empty($row[$foreign_key]) ) {
+				continue;
+			}
+			$f = explode('.', $target);
+			if ( $DB->q("VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
+					$row[$foreign_key]) < 1 ) {
+				$details .= "foreign key constraint fails for $table.$foreign_key = \"" .
+					$row[$foreign_key] . "\" (not found in $target)\n";
 			}
 		}
 	}
