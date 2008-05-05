@@ -34,12 +34,13 @@ endif
 # no automatic targets when calling 'make' unless overridden.
 default:
 
-# Helper target to read DBNAME from config:
-finddbname: fixconfig
-	$(eval DBNAME=$(shell . $(TOPDIR)/etc/config.sh ; echo $$DBNAME))
+# Helper target to read DBNAME, DBSERVER from config:
+getdbinfo: fixconfig
+	$(eval DBNAME=$(shell   . $(TOPDIR)/etc/config.sh ; echo $$DBNAME))
+	$(eval DBSERVER=$(shell . $(TOPDIR)/etc/config.sh ; echo $$DBSERVER))
 
-# Extra phony target to generate up-to-date config for finddbname.
-# Needed because running this in finddbname seems broken: the old file
+# Extra phony target to generate up-to-date config for getdbinfo.
+# Needed because running this in getdbinfo seems broken: the old file
 # contents were being used in that case.
 fixconfig:
 	$(MAKE) -C $(TOPDIR)/etc config.sh
@@ -52,6 +53,6 @@ clean-backupfiles:
 	rm -f *~
 
 .PHONY: default build config install check clean clean-backupfiles \
-        dist distclean finddbname fixconfig
+        dist distclean getdbinfo fixconfig
 
 endif # GLOBALINCLUDED

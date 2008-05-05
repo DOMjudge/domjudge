@@ -14,24 +14,24 @@ subst_db = sed 's/DOMJUDGE_DBNAME/$(1)/'
 
 build:
 
-install: finddbname
+install: getdbinfo
 # Install all sql files at once, so we have to ask the MySQL root
 # password only once:
 	( $(call subst_db,$(DBNAME)) mysql_create_db.sql ; \
 	  echo 'USE $(DBNAME);' ;    \
 	  cat mysql_db_structure.sql \
 	      mysql_privileges.sql   \
-	      mysql_db_examples.sql ; ) | mysql -p -u $(MYSQL_INST_USER)
+	      mysql_db_examples.sql ; ) | mysql -h $(DBSERVER) -p -u $(MYSQL_INST_USER)
 
 clean:
 
-distclean: finddbname
+distclean: getdbinfo
 # Remove the whole database and everything associated with it:
 	( $(call subst_db,$(DBNAME)) mysql_clean.sql ;    \
 	  $(call subst_db,$(DBNAME)) mysql_remove.sql ; ) \
-		| mysql -p -u $(MYSQL_INST_USER) $(DBNAME)
+		| mysql -h $(DBSERVER) -p -u $(MYSQL_INST_USER) $(DBNAME)
 
-upgrade: finddbname
+upgrade: getdbinfo
 # Upgrades the DB structure and permissions to current version.
 # Preserves data by first dumping that and importing after upgrade.
 	@echo "Upgrading database..."
@@ -40,7 +40,7 @@ upgrade: finddbname
 	  cat                        mysql_db_structure.sql     \
 	                             mysql_privileges.sql   \
 	                             mysql_upgrade_dump.sql ; ) \
-		| mysql -p -u $(MYSQL_UPGR_USER) $(DBNAME)
+		| mysql -h $(DBSERVER) -p -u $(MYSQL_UPGR_USER) $(DBNAME)
 	rm -f mysql_upgrade_dump.sql
 
 .PHONY: upgrade

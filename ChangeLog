@@ -51,6 +51,7 @@ Version 2.2.0 - SVN
  - Added work-in-progress code for eventdaemon (Working on: #1682761).
  - Added printer friendly version of jury scoreboard.
  - Also check MySQL version and max_connections in configchecker.
+ - Explicitly use DBSERVER host with mysql install (Closes: #1955439).
 
 Version 2.1.1 - SVN
 -------------------
