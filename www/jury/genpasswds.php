@@ -17,11 +17,16 @@ requireAdmin();
 
 <h1>Manage team passwords</h1>
 
-<p>Generate new password for:</p>
-
 <?php
 $teams = $DB->q('KEYVALUETABLE SELECT login, name FROM team
                  ORDER BY categoryid ASC, name ASC');
+
+if ( empty($teams) ) {
+	echo "<p><em>No teams defined.</em></p>\n\n";
+	include('../footer.php');
+	exit;
+}
+
 $teams = array_merge(array(''=>'(select one)'),$teams);
 
 echo addForm('genpasswds.php') .
