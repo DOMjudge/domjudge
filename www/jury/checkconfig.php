@@ -348,6 +348,9 @@ result('submissions and judgings', 'Judging integrity',
 
 $details = '';
 foreach ( $RELATIONS as $table => $foreign_keys ) {
+	if(empty($foreign_keys)) {
+		continue;
+	}
 	$res = $DB->q('SELECT * FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
 	while ( $row = $res->next() ) {
 		foreach ( $foreign_keys as $foreign_key => $target ) {
