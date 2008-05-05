@@ -34,6 +34,18 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <li><a href="team_affiliations.php">Team Affiliations</a></li>
 </ul>
 
+<?php if ( IS_ADMIN ): ?>
+
+<h3>Administrator:</h3>
+
+<ul>
+<li><a href="checkconfig.php">Config checker</a></li>
+<li><a href="genpasswds.php">Manage team passwords</a></li>
+<li><a href="recalculate_scores.php">Recalculate the cached scoreboard</a></li>
+</ul>
+
+<?php endif; ?>
+
 <h3>Documentation:</h3>
 
 <ul>
@@ -45,15 +57,6 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 	(PDF only)</li>
 </ul>
 
-<?php if ( IS_ADMIN ): ?>
-
-<h3>Administrator:</h3>
-
-<ul>
-<li><a href="admin.php">Admin functions</a></li>
-</ul>
-
-<?php endif; ?>
 
 <p><br /><br /><br /><br /></p>
 
