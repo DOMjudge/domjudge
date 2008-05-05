@@ -1,0 +1,112 @@
+/* $Id$ */
+
+.balloons td {
+	padding-right: 2ex;
+	padding-bottom: 2ex;
+	border-bottom: solid 1px silver;
+	vertical-align: middle;
+}
+
+.teamstatus { text-align: center; }
+.teamstatus img { vertical-align: middle; }
+
+.filename, .hostname { font-family: monospace; }
+
+.highlight { background-color: yellow; }
+
+.msgbox {
+	background-color: #fffff0;
+	border: 1px solid #f2e93a;
+}
+
+.msgbox legend {
+	background-color: #fffff0;
+	border-right: 2px solid #f2e93a;
+	border-bottom: 2px solid #f2e93a;
+}
+
+/* set cell padding to 0 and <a> tag to 3 to make all of cell
+   clickable in the jury scoreboard and for all team cells */
+.scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
+
+#djlogo {
+	position: absolute; right: 1ex;
+	width: 93px; height: 196px;
+}
+
+img.picto { width: 16px; height: 16px; }
+
+
+.judgetime { font-size: smaller; font-style: italic; }
+
+.details { display: none;
+	margin-left: 2em; padding-left: 1ex;
+	border-left: dotted 1px gray; 
+	margin-top: 1ex; margin-bottom: 1ex;}
+.O { background-color: #ccfbcc; }
+.W { background-color: #f0e68c; }
+.E { background-color: #fa9972; }
+.resulticon { text-align: center; vertical-align: top; width: 48px; }
+.configcheck { width: 95%; }
+.configcheck th { text-align: left; padding-top: 1ex; }
+
+
+/* $Id$ */
+
+.hl-default {
+    color: Black;
+}
+.hl-code {
+    color: Gray;
+}
+.hl-brackets {
+    color: Olive;
+}
+.hl-comment {
+    color: Orange;
+}
+.hl-quotes {
+    color: Red;
+}
+.hl-string {
+    color: Red;
+}
+.hl-identifier {
+    color: Blue;
+}
+.hl-builtin {
+    color: Teal;
+}
+.hl-reserved {
+    color: Green;
+}
+.hl-inlinedoc {
+    color: Blue;
+}
+.hl-var {
+    color: Navy;
+}
+.hl-url {
+    color: Blue;
+}
+.hl-special {
+    color: Navy;
+}
+.hl-number {
+    color: Maroon;
+}
+.hl-inlinetags {
+    color: Blue;
+}
+.hl-main {
+    background-color: White;
+}
+.hl-gutter {
+    background-color: #999999;
+    color: White
+}
+.hl-table {
+    font-family: courier, monospace;
+    font-size: 12px;
+    border: solid 1px silver;
+}

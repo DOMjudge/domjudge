@@ -15,7 +15,6 @@ header('Content-Type: text/html; charset=' . DJ_CHARACTER_SET);
 if ( isset($refresh) ) {
 	header('Refresh: ' . $refresh);
 }
-
 echo '<?xml version="1.0" encoding="' . DJ_CHARACTER_SET . '" ?>' . "\n";
 
 if(!isset($menu)) {
@@ -29,12 +28,14 @@ if(!isset($menu)) {
 	<!-- DOMjudge version <?=DOMJUDGE_VERSION?> -->
 <title><?=$title?></title>
 <link rel="stylesheet" href="style.css" type="text/css" />
-<?php if (isset($sourcecss)) {  ?>
-<link rel="stylesheet" href="style_source.css" type="text/css" />
-<?php }
-      if (isset($printercss)) { ?>
-<link rel="stylesheet" href="style_printer.css" type="text/css" media="print" />
-<?php }
+<?php
+if (defined('IS_JURY')) {
+	echo "<link rel=\"stylesheet\" href=\"style_jury.css\" type=\"text/css\" />\n";
+	if (isset($printercss)) {
+		echo "<link rel=\"stylesheet\" href=\"style_printer.css\" type=\"text/css\" media=\"print\" />\n";
+	}
+}
+
 if ($menu) {?>
 <script type="text/javascript" src="ajax.js"></script>
 </head>

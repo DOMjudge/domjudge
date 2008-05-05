@@ -41,7 +41,6 @@ if ( include_highlighter() ) {
 			array("numbers" => HL_NUMBERS_TABLE, "tabsize" => 4));
 		$hl =& Text_Highlighter::factory($lang);
 	}
-	$sourcecss = true;
 }
 
 $sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],

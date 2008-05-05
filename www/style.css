@@ -59,16 +59,6 @@ tr.unread td {
 	vertical-align: bottom;
 }
 
-.balloons td {
-	padding-right: 2ex;
-	padding-bottom: 2ex;
-	border-bottom: solid 1px silver;
-	vertical-align: middle;
-}
-
-.teamstatus { text-align: center; }
-.teamstatus img { vertical-align: middle; }
-
 .output_text {
 	border: 2px dotted #C0C0C0;
 	background-color: #F9F9F9;
@@ -77,7 +67,7 @@ tr.unread td {
 	font-family: monospace;	
 }
 
-.teamid, .filename, .hostname { font-family: monospace; }
+.teamid { font-family: monospace; }
 .probid, .langid { font-variant: small-caps; }
 
 #menutop a {
@@ -102,7 +92,6 @@ tr.unread td {
 	color: gray;
 }
 
-.highlight { background-color: yellow; }
 
 fieldset {
 	margin: 2em;
@@ -127,17 +116,6 @@ legend {
 	border-bottom: 1px solid gray;
 }
 
-.msgbox {
-	background-color: #fffff0;
-	border: 1px solid #f2e93a;
-}
-
-.msgbox legend {
-	background-color: #fffff0;
-	border-right: 2px solid #f2e93a;
-	border-bottom: 2px solid #f2e93a;
-}
-
 
 .scoreboard { border-collapse: collapse; }
 .scoreboard td { font-size: small; }
@@ -153,9 +131,6 @@ legend {
 	color: black;
 }
 
-/* set cell padding to 0 and <a> tag to 3 to make all of cell
-   clickable in the jury scoreboard and for all team cells */
-.scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
 .scoreboard .scoretn { padding: 0px; }
 .scoreboard .scoreaf { white-space: nowrap; }
 
@@ -188,11 +163,6 @@ legend {
 	position: absolute; right: 1ex; margin-top: 1em;
 }
 
-#djlogo {
-	position: absolute; right: 1ex;
-	width: 93px; height: 196px;
-}
-
 #teamscoresummary { position: absolute; right: 2ex; top: 7ex; }
 #teamscoresummary td { padding: 3px; }
 #teamscoresummary th { padding: 3px; }
@@ -201,19 +171,4 @@ legend {
 
 /* between different sortorder-categories, print a thick line */
 .sortorderswitch { border-top: 2px solid black; }
-
-img.picto { width: 16px; height: 16px; }
-
-.judgetime { font-size: smaller; font-style: italic; }
-
-.details { display: none;
-	margin-left: 2em; padding-left: 1ex;
-	border-left: dotted 1px gray; 
-	margin-top: 1ex; margin-bottom: 1ex;}
-.O { background-color: #ccfbcc; }
-.W { background-color: #f0e68c; }
-.E { background-color: #fa9972; }
-.resulticon { text-align: center; vertical-align: top; width: 48px; }
-.configcheck { width: 95%; }
-.configcheck th { text-align: left; padding-top: 1ex; }
 
