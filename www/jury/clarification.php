@@ -20,7 +20,7 @@ if ( isset($_REQUEST['id']) ) {
 	               LEFT JOIN team t ON (t.login = q.sender)
 	               WHERE q.cid = %i AND q.clarid = %i', $cid, $id);
 	
-	if ( ! $req ) error("clarification $id not found");
+	if ( ! $req ) error("clarification $id not found, cid = $cid");
 
 	$respid = (int) (empty($req['respid']) ? $id : $req['respid']);
 	$isgeneral = FALSE;

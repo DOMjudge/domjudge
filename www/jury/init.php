@@ -32,5 +32,5 @@ require_once('validate.php');
 require_once('common.php');
 
 $cdata = getCurContest(TRUE);
-$cid = $cdata['cid'];
+$cid = (int)$cdata['cid'];
 

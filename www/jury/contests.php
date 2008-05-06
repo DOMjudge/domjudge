@@ -38,7 +38,7 @@ if( count($res) == 0 ) {
 
 	foreach($res as $row) {
 		echo "<tr" .
-			($row['cid'] === $cid ? ' class="highlight"':'') . ">" .
+			($row['cid'] == $cid ? ' class="highlight"':'') . ">" .
 			"<td align=\"right\"><a href=\"contest.php?id=" . urlencode($row['cid']) .
 			"\">c" . (int)$row['cid'] . "</a></td>\n" .
 			"<td title=\"".htmlspecialchars(@$row['activatetime']) . "\">" .

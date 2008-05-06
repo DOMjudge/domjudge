@@ -76,7 +76,7 @@ $data = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $id);
 
 echo "<h1>Contest: ".htmlspecialchars($data['contestname'])."</h1>\n\n";
 
-if ( $cid === $data['cid'] ) {
+if ( $cid == $data['cid'] ) {
 	echo "<p><em>This is the current contest.</em></p>\n\n";
 }
 

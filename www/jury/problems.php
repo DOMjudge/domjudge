@@ -35,7 +35,7 @@ if( $res->count() == 0 ) {
 				htmlspecialchars($row['probid'])."</a>".
 			"</td><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".
 			htmlspecialchars($row['name'])."</a>".
-			"</td><td title=\"".htmlspecialchars($row['contestname'])."\">".
+			"</td><td title=\"".htmlspecialchars($row['contestname'])."\">c".
 			htmlspecialchars($row['cid']).
 			"</td><td align=\"center\">".printyn($row['allow_submit']).
 			"</td><td align=\"center\">".printyn($row['allow_judge']).
