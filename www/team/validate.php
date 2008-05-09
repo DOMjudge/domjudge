@@ -28,8 +28,8 @@ Please supply team credentials below, or contact a staff member for assistance.
 
 <form action="checkpasswd.php" method="post">
 <table>
-<tr><td><label for="login">Login:</label></td><td><input type="text" name="login" value="" size="15" maxlength="15" accesskey="l" /></td></tr>
-<tr><td><label for="passwd">Password:</label></td><td><input type="password" name="passwd" value="" size="15" maxlength="15" accesskey="p" /></td></tr>
+<tr><td><label for="login">Login:</label></td><td><input type="text" id="login" name="login" value="" size="15" maxlength="15" accesskey="l" /></td></tr>
+<tr><td><label for="passwd">Password:</label></td><td><input type="password" id="passwd" name="passwd" value="" size="15" maxlength="255" accesskey="p" /></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" value="Login" /></td></tr>
 </table>
 </form>
