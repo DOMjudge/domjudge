@@ -44,7 +44,9 @@ hr {
 	border: 0;
 	height: 1px;
 	background-color: gray;
+	margin-top: 2em;
 }
+address { font-size: smaller; }
 
 tr.unread td {
 	font-weight: bold;
