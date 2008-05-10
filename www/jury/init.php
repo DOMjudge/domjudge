@@ -10,7 +10,7 @@
 
 // Sanity check whether webserver basic authentication (e.g in
 // apache.conf) is configured correctly
-if (!$_SERVER['REMOTE_USER'] || $_SERVER['AUTH_TYPE'] != "Basic") {
+if (empty($_SERVER['REMOTE_USER']) || $_SERVER['AUTH_TYPE'] != "Basic") {
 	die("Authentication not enabled, check webserver config");
 }
 
