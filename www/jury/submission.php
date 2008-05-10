@@ -32,7 +32,7 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid, s.submittime
 
 if ( ! $submdata ) error ("Missing submission data");
 
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 echo "<h1>Submission s".$id."</h1>\n\n";
 
@@ -137,7 +137,7 @@ if ( isset($jid) )  {
 	if ( $jud['valid'] ) {
 		if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
 
-			require_once('../forms.php');
+			require_once(SYSTEM_ROOT . '/lib/www/forms.php');
 
 			$val = ! $jud['verified'];
 
@@ -241,4 +241,4 @@ if ( isset($jid) )  {
 
 // We're done!
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

@@ -26,7 +26,7 @@ if ( IS_ADMIN && isset($_POST['cmd']) &&
 
 $row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $id);
 
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 
@@ -39,7 +39,7 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 
 <?php
 if ( IS_ADMIN ) {
-	require_once('../forms.php');
+	require_once(SYSTEM_ROOT . '/lib/www/forms.php');
 
 	$cmd = ($row['active'] == 1 ? 'deactivate' : 'activate'); 
 
@@ -93,4 +93,4 @@ if( $res->count() == 0 ) {
 }
 
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

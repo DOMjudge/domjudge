@@ -11,7 +11,7 @@
 require('init.php');
 $title = 'Judgehosts';
 
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 echo "<h1>Judgehosts</h1>\n\n";
 
@@ -21,7 +21,7 @@ if ( IS_ADMIN && (isset($_POST['cmd-activate']) || isset($_POST['cmd-deactivate'
 	       (isset($_POST['cmd-activate']) ? 1:0));
 }
 if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
-	require ( '../forms.php' ) ;
+	require ( SYSTEM_ROOT . '/lib/www/forms.php' ) ;
 	echo addForm('edit.php');
 	echo "\n<table>\n" .
 		"<tr><th>Hostname</th><th>Active</th></tr>\n";
@@ -55,7 +55,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 		addSubmit('Save Judgehosts') .
 		addEndForm();
 
-	require('../footer.php');
+	require(SYSTEM_ROOT . '/lib/www/footer.php');
 	exit;
 	
 }
@@ -83,7 +83,7 @@ if( $res->count() == 0 ) {
 }
 
 if ( IS_ADMIN ) {
-	require('../forms.php');
+	require(SYSTEM_ROOT . '/lib/www/forms.php');
 
 	echo addForm('judgehosts.php') .
 		"<p>" .
@@ -97,4 +97,4 @@ if ( IS_ADMIN ) {
 
 }
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

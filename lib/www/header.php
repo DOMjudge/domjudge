@@ -27,7 +27,7 @@ if(!isset($menu)) {
 <head>
 	<!-- DOMjudge version <?=DOMJUDGE_VERSION?> -->
 <title><?=$title?></title>
-<link rel="stylesheet" href="style.css" type="text/css" />
+<link rel="stylesheet" href="<?=getBaseURI()?>style.css" type="text/css" />
 <?php
 if (defined('IS_JURY')) {
 	echo "<link rel=\"stylesheet\" href=\"style_jury.css\" type=\"text/css\" />\n";
@@ -36,8 +36,11 @@ if (defined('IS_JURY')) {
 	}
 }
 
+/* NOTE: here a local menu.php is included
+ *       both jury and team have their own menu.php
+ */
 if ($menu) {?>
-<script type="text/javascript" src="ajax.js"></script>
+<script type="text/javascript" src="<?=getBaseURI()?>ajax.js"></script>
 </head>
 <body onload="setInterval('updateClarifications()', 20000)">
 <?php include("menu.php");

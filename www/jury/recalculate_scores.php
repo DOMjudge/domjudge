@@ -12,8 +12,8 @@
 
 require('init.php');
 $title = 'Recalculate Scoreboard Cache';
-include('../header.php');
-require('../scoreboard.php');
+include(SYSTEM_ROOT . '/lib/www/header.php');
+require(SYSTEM_ROOT . '/lib/www/scoreboard.php');
 
 requireAdmin();
 
@@ -33,12 +33,12 @@ echo "<p>Recalculating all values for the scoreboard cache (" .
 
 if ( count($teams) == 0 ) {
 	echo "No teams defined, doing nothing.</pre>\n\n";
-	include('../footer.php');
+	include(SYSTEM_ROOT . '/lib/www/footer.php');
 	exit;
 }
 if ( count($probs) == 0 ) {
 	echo "No problems defined, doing nothing.</pre>\n\n";
-	include('../footer.php');
+	include(SYSTEM_ROOT . '/lib/www/footer.php');
 	exit;
 }
 
@@ -68,4 +68,4 @@ $DB->q('DELETE FROM scoreboard_public
 
 echo "<p>Finished.</p>\n\n";
 
-include('../footer.php');
+include(SYSTEM_ROOT . '/lib/www/footer.php');

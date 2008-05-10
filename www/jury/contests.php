@@ -10,7 +10,7 @@
 
 require('init.php');
 $title = 'Contests';
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 echo "<h1>Contests</h1>\n\n";
 
@@ -86,4 +86,4 @@ if ( IS_ADMIN ) {
 	echo "<p>" . addLink('contest') . "</p>\n\n";
 }
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

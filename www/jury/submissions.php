@@ -20,14 +20,14 @@ $refresh = '15;url=' . getBaseURI() . 'jury/submissions.php?showverified=' .
 
 $title = 'Submissions' . ( $showverified ? '' : ' (only unverified)' );
 
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 echo "<h1>$title</h1>\n\n";
 
 $restrictions = array();
 if ( !$showverified ) $restrictions['verified'] = 0;
 
-require_once('../forms.php');
+require_once(SYSTEM_ROOT . '/lib/www/forms.php');
 
 echo addForm('submissions.php', 'get') . "<p>\n" .
 	addHidden('showverified', (int)!$showverified) .
@@ -36,4 +36,4 @@ echo addForm('submissions.php', 'get') . "<p>\n" .
 
 putSubmissions($cdata, $restrictions, TRUE);
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

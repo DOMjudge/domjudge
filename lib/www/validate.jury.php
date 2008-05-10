@@ -14,10 +14,10 @@ $ip = $_SERVER['REMOTE_ADDR'];
 if(FALSE) {
 	header('HTTP/1.1 403 Forbidden');
 	$title = '403 Forbidden';
-	include('../header.php');
+	include(SYSTEM_ROOT . '/lib/www/header.php');
 	echo "<h1>403 Forbidden</h1>\n\nSorry, no access.";
 	putDOMjudgeVersion();
-	include('../footer.php');
+	include(SYSTEM_ROOT . '/lib/www/footer.php');
 	exit;
 }
 

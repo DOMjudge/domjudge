@@ -36,8 +36,8 @@ if ( !empty($pcmd) ) {
 	}
 }
 
-require('../header.php');
-require('../forms.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
+require(SYSTEM_ROOT . '/lib/www/forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
 	
@@ -102,7 +102,7 @@ echo addHidden('cmd', $cmd) .
 	addSubmit('Save') .
 	addEndForm();
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');
 exit;
 
 endif;
@@ -167,4 +167,4 @@ echo "<h2>Submissions for " . htmlspecialchars($id) . "</h2>\n\n";
 $restrictions = array( 'probid' => $id );
 putSubmissions($cdata, $restrictions, TRUE);
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

@@ -11,7 +11,7 @@
 require('init.php');
 $title = 'Categories';
 
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 echo "<h1>Categories</h1>\n\n";
 
@@ -52,4 +52,4 @@ if ( IS_ADMIN ) {
 	echo "<p>" . addLink('team_category') . "</p>\n\n";
 }
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

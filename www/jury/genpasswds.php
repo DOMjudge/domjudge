@@ -10,8 +10,8 @@
 
 require('init.php');
 $title = 'Generate Passwords';
-include('../header.php');
-require('../forms.php');
+include(SYSTEM_ROOT . '/lib/www/header.php');
+require(SYSTEM_ROOT . '/lib/www/forms.php');
 requireAdmin();
 ?>
 
@@ -23,7 +23,7 @@ $teams = $DB->q('KEYVALUETABLE SELECT login, name FROM team
 
 if ( empty($teams) ) {
 	echo "<p><em>No teams defined.</em></p>\n\n";
-	include('../footer.php');
+	include(SYSTEM_ROOT . '/lib/www/footer.php');
 	exit;
 }
 
@@ -84,7 +84,7 @@ if ( isset($_POST['forteam']) ) {
 	echo "<hr />\n\n<p>Done.</p>\n\n";
 }
 
-include('../footer.php');
+include(SYSTEM_ROOT . '/lib/www/footer.php');
 
 /**
  * Generate a random password of length 6 with lowercase alphanumeric

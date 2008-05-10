@@ -97,8 +97,8 @@ if ( isset($_POST['submit']) && isset($_POST['answered']) ) {
 	exit;
 }
 
-require('../header.php');
-require('../clarification.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
+require(SYSTEM_ROOT . '/lib/www/clarification.php');
 
 if ( ! $isgeneral ) {
 
@@ -124,7 +124,7 @@ putClarification($id, NULL, TRUE);
 // Display button to (un)set request as 'answered'
 // Not relevant for 'general clarifications', ie those with sender=null
 if ( !empty($req['sender']) ) {
-	require_once('../forms.php');
+	require_once(SYSTEM_ROOT . '/lib/www/forms.php');
 	
 	echo addForm('clarification.php') .
 		addHidden('id', $id) .
@@ -145,4 +145,4 @@ if ( $isgeneral ) {
 	putClarificationForm("clarification.php", TRUE, $respid);
 }
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

@@ -47,7 +47,7 @@ $sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],
 	$source['probid'],$source['langid']);
 
 $title = 'Source: ' . htmlspecialchars($sourcefile);
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 if ( $oldsource ) {
 	echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
@@ -139,4 +139,4 @@ if ( $oldsource ) {
 		htmlspecialchars($difftext) . "</pre>\n\n";
 }
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

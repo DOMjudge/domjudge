@@ -8,7 +8,7 @@
 
 require('init.php');
 $title = 'Jury interface';
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 echo "<h1>DOMjudge Jury interface</h1>\n\n";
 
@@ -63,4 +63,4 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <?php
 putDOMjudgeVersion();
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

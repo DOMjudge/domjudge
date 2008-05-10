@@ -26,10 +26,11 @@ require_once(SYSTEM_ROOT . '/lib/lib.error.php');
 require_once(SYSTEM_ROOT . '/lib/use_db_jury.php');
 require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
 
-require_once('../common.php');
-require_once('../print.php');
-require_once('validate.php');
-require_once('common.php');
+require_once(SYSTEM_ROOT . '/lib/www/common.php');
+require_once(SYSTEM_ROOT . '/lib/www/print.php');
+
+require_once(SYSTEM_ROOT . '/lib/www/validate.jury.php');
+require_once(SYSTEM_ROOT . '/lib/www/common.jury.php');
 
 $cdata = getCurContest(TRUE);
 $cid = (int)$cdata['cid'];

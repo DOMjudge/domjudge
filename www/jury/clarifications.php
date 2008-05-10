@@ -12,8 +12,8 @@ require('init.php');
 $refresh = '15;url='.getBaseURI().'jury/clarifications.php';
 $title = 'Clarification Requests';
 
-require('../header.php');
-require('../clarification.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
+require(SYSTEM_ROOT . '/lib/www/clarification.php');
 
 echo "<h1>Clarifications</h1>\n\n";
 
@@ -59,4 +59,4 @@ if ( $clarifications->count() == 0 ) {
 	putClarificationList($clarifications,NULL,TRUE);
 }
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

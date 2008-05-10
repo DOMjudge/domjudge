@@ -12,7 +12,7 @@
 
 require('init.php');
 $title = 'Config Checker';
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 requireAdmin();
 
@@ -43,7 +43,7 @@ if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
 	echo "<h2>PHP Information</h2>\n\n";
 	phpinfo();
 	echo $ret;
-	require('../footer.php');
+	require(SYSTEM_ROOT . '/lib/www/footer.php');
 	exit;
 }
 
@@ -414,4 +414,4 @@ echo "</table>\n\n";
 
 echo "<p>Config checker completed.</p>\n\n";
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

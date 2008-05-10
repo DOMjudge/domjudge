@@ -18,11 +18,11 @@ $cmd = @$_GET['cmd'];
 
 if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 
-	require('../forms.php');
+	require(SYSTEM_ROOT . '/lib/www/forms.php');
 
 	$title = "Affiliation: $cmd";
 
-	require('../header.php');
+	require(SYSTEM_ROOT . '/lib/www/header.php');
 	echo "<h2>" . ucfirst($cmd) . " affiliation</h2>\n\n";
 
 	echo addForm('edit.php');
@@ -61,7 +61,7 @@ echo addHidden('cmd', $cmd) .
 	addSubmit('Save') .
 	addEndForm();
 
-	require('../footer.php');
+	require(SYSTEM_ROOT . '/lib/www/footer.php');
 	exit;
 }
 
@@ -72,7 +72,7 @@ if ( ! $id ) error("Missing or invalid affiliation id");
 $title = "Affiliation: " .htmlspecialchars(@$id);
 
 
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 $data = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
 
@@ -132,5 +132,5 @@ if ( $teams->count() == 0 ) {
 	}
 	echo "</tbody>\n</table>\n\n";
 }
-	 
-require('../footer.php');
+
+require(SYSTEM_ROOT . '/lib/www/footer.php');

@@ -23,8 +23,8 @@ if ( isset($_GET['cmd'] ) ) {
 
 $title = 'Team '.htmlspecialchars(@$id);
 
-require('../header.php');
-require('../forms.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
+require(SYSTEM_ROOT . '/lib/www/forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
 	
@@ -79,7 +79,7 @@ echo addHidden('cmd', $cmd) .
 	addSubmit('Save') .
 	addEndForm();
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');
 exit;
 
 endif;
@@ -163,4 +163,4 @@ echo "</h3>\n\n";
 $restrictions['teamid'] = $id;
 putSubmissions($cdata, $restrictions, TRUE);
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

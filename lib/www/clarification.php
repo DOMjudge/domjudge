@@ -8,8 +8,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
-
 /**
  * Marks a given clarification as viewed by a specific team,
  * so it doesn't show up as "unread" anymore in their interface.
@@ -40,26 +38,26 @@ function putClar($clar, $isjury = false)
 	} else {
 		$to = ( $from == 'Jury' ) ? 'All' : 'Jury' ;
 	}
+	$fromlink = $isjury && $clar['sender'];
+	$tolink   = $isjury && $clar['recipient'];
 
 	echo "<table>\n";
-
-	echo '<tr><td scope="row">From:</td><td>';
-	echo make_link($from, "team.php?id=" . urlencode($clar['sender']), $isjury && $clar['sender']);
-	echo "</td></tr>\n";
-
-	echo '<tr><td scope="row">To:</td><td>';
-	echo make_link($to, "team.php?id=" . urlencode($clar['recipient']), $isjury && $clar['recipient']);
-	echo "</td></tr>\n";
-
-	echo '<tr><td scope="row">Time:</td><td>';
-	echo printtime($clar['submittime']);
-	echo "</td></tr>\n";
-
-	echo '<tr><td valign="top"></td><td class="filename">';
-	echo '<pre class="output_text">' . wordwrap(htmlspecialchars($clar['body']),80) . "</pre>";
-	echo "</td></tr>\n";
-
-	echo '</table>\n';
+	echo '<tr><td scope="row">From:</td>' . 
+		'<td>' .
+		( $fromlink ? '<a href="team.php?id=' . urlencode($clar['sender']) .
+			'">' : '' ) .
+		$from . ( $fromlink ? '</a>' : '') . "</td></tr>\n";
+	echo  '<tr><td scope="row">To:</td>' .
+		'<td>' .
+		( $tolink ? '<a href="team.php?id=' . urlencode($clar['recipient']) .
+			'">' : '' ) .
+		$to . ( $tolink ? '</a>' : '') . "</td></tr>\n";
+	echo '<tr><td scope="row">Time:</td><td>' . printtime($clar['submittime']) .
+		"</td></tr>\n";
+	echo '<tr><td valign="top"></td><td class="filename">' .
+		'<pre class="output_text">' .
+		wordwrap(htmlspecialchars($clar['body']),80) . "</pre></td></tr>\n";
+	echo "</table>\n";
 
 	return;
 }
@@ -87,31 +85,13 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
 
 	while ( $clar = $clarifications->next() ) {
 		// check permission to view this clarification
-		if ($isjury
-		 || $clar['sender'] == $team
-		 || $clar['recipient'] == $team
-		 || ($clar['sender'] == NULL && $clar['recipient'] == NULL)
-		) {
+		if ( $isjury || ( $clar['sender']==$team || ( $clar['sender']==NULL &&
+			( $clar['recipient']==NULL || $clar['recipient']==$team ) ) ) ) {
 			setClarificationViewed($clar['clarid'], $team);
-			putClar($clar, $isjury);
+			putClar($clar,$isjury);
 			echo "<br />\n\n";
 		}
 	}
-}
-
-/**
- * Summarize a clarification.
- * Helper function for putClarificationList.
- */
-function summarizeClarification($body)
-{
-	// when making a summary, try to igonore the quoted text
-	$split = explode("\n", $clar['body']);
-	$newbody = '';
-	foreach($split as $line) {
-		if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line;
-	}
-	echo htmlspecialchars( str_cut( ( empty($newbody) ? $clar['body'] : $newbody ), 80) );
 }
 
 /**
@@ -142,33 +122,35 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 		else
 			echo '<tr>';
 		
-		echo '<td>' . make_link($clar['clarid'], "clarification.php?id=".$clar['clarid']) . '</a></td>';
-
-		$sender = $clar['sender'];
-		$recipient = $clar['recipient'];
-
-		if ($sender == NULL && $recipient == NULL) {
-			$sender = 'Jury';
-			$recipient = 'All';
+		echo '<td><a href="clarification.php?id='.$clar['clarid'].'">'
+			. $clar['clarid'] . '</a></td>';
+		if ( $isjury ) {
+			echo '<td class="teamid">' . ( $clar['sender'] ?
+				'<a href="team.php?id=' . urlencode($clar['sender']) . '">' .
+				htmlspecialchars($clar['sender']) . '</a>' :
+				'Jury' ) . '</td>';
+			echo '<td class="teamid">' . ( $clar['recipient'] ?
+				'<a href="team.php?id=' . urlencode($clar['recipient']) . '">' .
+				htmlspecialchars($clar['recipient']) . '</a>' :
+				( $clar['sender'] ? 'Jury' : 'All') ) . '</td>';
 		} else {
-			if ($sender == NULL)
-				$sender = 'Jury';
-			else
-				$sender = make_link($sender, "team.php?id=" . urlencode($clar['sender']), $isjury);
-
-			if ($recipient == NULL)
-				$recipient = 'Jury';
-			else
-				$recipient = make_link($sender, "team.php?id=" . urlencode($clar['recipient']), $isjury);
+			echo '<td class="teamid">' . ( $clar['sender'] ?
+				htmlspecialchars($clar['sender']) : 'Jury' ) . '</td>';
+			echo '<td class="teamid">' . ( $clar['recipient'] ?
+				htmlspecialchars($clar['recipient']) :
+				( $clar['sender'] ? 'Jury' : 'All') ) . '</td>';
 		}
-
-
-		echo '<td class="teamid">' . $sender . '</td>';
-		echo '<td class="teamid">' . $recipient . '</td>';
-
 		echo '<td>' . printtime($clar['submittime']) . '</td>';
-		echo '<td><a href="clarification.php?id=' . $clar['clarid'] . '">';
-		echo summarizeClarification($clar['body']);
+		echo '<td><a href="clarification.php?id='.$clar['clarid'].'">';
+
+		// when making a summary, try to igonore the quoted text
+		$split = explode("\n", $clar['body']);
+		$newbody = '';
+		foreach($split as $line) {
+			if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line;
+		}
+		echo htmlspecialchars( str_cut( ( empty($newbody) ? $clar['body'] : $newbody ), 80) );
+		
 		echo "</a></td></tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";

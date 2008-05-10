@@ -11,7 +11,7 @@
 require('init.php');
 $title = 'Languages';
 
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 echo "<h1>Languages</h1>\n\n";
 
@@ -52,4 +52,4 @@ if ( IS_ADMIN ) {
 }
 
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

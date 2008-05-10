@@ -22,8 +22,8 @@ if ( isset($_POST['done']) ) {
 }
 
 $refresh = '30;url=' . getBaseURI() . 'jury/balloons.php';
-require('../header.php');
-require('../forms.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
+require(SYSTEM_ROOT . '/lib/www/forms.php');
 
 echo "<h1>Balloon Status</h1>\n\n";
 
@@ -120,4 +120,4 @@ if ( !empty($BALLOONS) ) {
 }
 
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');
