@@ -17,7 +17,8 @@ $sid = (int)@$_GET['id'];
 
 // select also on teamid so we can only select our own submissions
 $row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
-               l.name AS langname, result, output_compile FROM judging j
+               s.ignore, l.name AS langname, result, output_compile
+			   FROM judging j
                LEFT JOIN submission s USING (submitid)
                LEFT JOIN language   l USING (langid)
                LEFT JOIN problem    p ON (p.probid = s.probid)
@@ -31,6 +32,16 @@ if( ! $row ) {
 
 ?>
 <h1>Submission details</h1>
+
+<?
+if( $row['ignore'] ) {
+?>
+<p>This submission is being ignored.<br />
+It is not used in the determining your score.
+</p>
+<?
+}
+?>
 
 <table>
 <tr><td scope="row">Problem:</td>

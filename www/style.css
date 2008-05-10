@@ -17,6 +17,10 @@ img {	border: 0; }
 .sol_incorrect    { color: red;    }
 .sol_queued       { color: gray;   }
 
+tr.sub_ignore td {
+	text-decoration: line-through;
+}
+
 a:link, a:visited { color: blue;   }
 a:hover           { color: purple; }
 a:active          { color: red;    }

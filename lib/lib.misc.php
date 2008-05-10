@@ -79,7 +79,8 @@ function calcScoreRow($cid, $team, $prob) {
 	                  LEFT JOIN submission s USING(submitid)
 	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
 	                  WHERE teamid = %s AND probid = %s AND valid = 1 AND
-	                  result IS NOT NULL AND s.cid = %i ORDER BY submittime',
+	                  result IS NOT NULL AND s.cid = %i AND s.ignore = 0
+					  ORDER BY submittime',
 	                 $team, $prob, $cid);
 
 	$balloon = $DB->q('MAYBEVALUE SELECT balloon FROM scoreboard_jury

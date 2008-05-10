@@ -113,7 +113,7 @@ while ( TRUE ) {
 	// single time
 	$numopen = $DB->q('VALUE SELECT COUNT(*) FROM submission
 	                   WHERE judgehost IS NULL AND cid = %i AND langid IN (%As)
-	                   AND probid IN (%As) AND submittime < %s',
+	                   AND probid IN (%As) AND submittime < %s AND ignore = 0',
 	                  $cid, $judgable_lang, $judgable_prob, $contdata['endtime']);
 
 	$numupd = 0;
@@ -128,7 +128,8 @@ while ( TRUE ) {
 		$numupd = $DB->q('RETURNAFFECTED UPDATE submission
 				  SET judgehost = %s, judgemark = %s
 				  WHERE judgehost IS NULL AND cid = %i AND langid IN (%As)
-				  AND probid IN (%As) AND submittime < %s LIMIT 1',
+				  AND probid IN (%As) AND submittime < %s AND ignore = 0
+				  LIMIT 1',
 				 $myhost, $mark, $cid, $judgable_lang, $judgable_prob,
 				 $contdata['endtime']);
 	}

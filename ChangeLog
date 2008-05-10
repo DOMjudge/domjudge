@@ -54,6 +54,7 @@ Version 2.2.0 - SVN
  - Explicitly use DBSERVER host with mysql install (Closes: #1955439).
  - Display time left to end of contest on every page (Closes: #1960940).
  - Move php files that shouldn't be server to lib/www (Closes: #1957891).
+ - The admin can excluded submissions from a teams score (Closes: #1742043).
 
 Version 2.1.1 - SVN
 -------------------

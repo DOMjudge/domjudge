@@ -43,7 +43,7 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 	$cid = $cdata['cid'];
 	
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid,
-	               s.submittime, s.judgehost, t.name AS teamname,
+	               s.submittime, s.judgehost, s.ignore, t.name AS teamname,
 	               p.name AS probname, l.name AS langname,
 	               j.result, j.judgehost, j.verified
 	               FROM submission s
@@ -85,13 +85,19 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 		"</tr>\n</thead>\n<tbody>\n";
 	
 	// print each row with links to detailed information
-	$subcnt = $corcnt = 0;
+	$subcnt = $corcnt = $igncnt = 0;
 	while( $row = $res->next() ) {
 		
 		$sid = (int)$row['submitid'];
 		$isfinished = ($isjury || ! $row['result']);
 		
-		echo "<tr>";
+		if ( $row['ignore'] ) {
+			$igncnt++;
+			echo '<tr class="sub_ignore">';
+		} else {
+			$subcnt++;
+			echo "<tr>";
+		}
 		if ( $isjury ) {
 			echo "<td><a href=\"submission.php?id=$sid\">s$sid</a></td>";
 		}
@@ -147,13 +153,14 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 		}
 		echo "</tr>\n";
 		
-		$subcnt++;
 		if ( $row['result'] == 'correct' ) $corcnt++;
 	}
 	echo "</tbody>\n</table>\n\n";
 
 	if ( $isjury ) {
-		echo "<p>Total correct: $corcnt, submitted: $subcnt</p>\n\n";
+		echo "<p>Total correct: $corcnt, submitted: $subcnt";
+		if($igncnt > 0) echo ", ignored: $igncnt";
+		echo "</p>\n\n";
 	}
 
 	return;

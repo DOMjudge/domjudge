@@ -16,12 +16,14 @@ if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
 $lastverifier = @$_COOKIE['domjudge_lastverifier'];
 
 require('init.php');
+require_once(SYSTEM_ROOT . '/lib/www/forms.php');
+
 $title = 'Submission s'.@$id;
 
 if ( ! $id ) error("Missing or invalid submission id");
 
-$submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid, s.submittime,
-                    c.cid, c.contestname,
+$submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
+					s.submittime, s.ignore, c.cid, c.contestname,
                     t.name AS teamname, l.name AS langname, p.name AS probname
                     FROM submission s
                     LEFT JOIN team     t ON (t.login  = s.teamid)
@@ -34,7 +36,14 @@ if ( ! $submdata ) error ("Missing submission data");
 
 require(SYSTEM_ROOT . '/lib/www/header.php');
 
-echo "<h1>Submission s".$id."</h1>\n\n";
+echo "<h1>Submission s".$id;
+if ( ! $submdata['ignore'] ) {
+	echo "</h1>\n\n";
+} else {
+	echo " (ignored)</h1>\n\n";
+	echo "<p>This submission is not used during the scoreboard
+		  calculations.</p>\n\n";
+}
 
 $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime, judgehost
                  FROM judging
@@ -64,6 +73,22 @@ $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime
 	<a href="show_source.php?id=<?=$id?>">
 	<?=htmlspecialchars(getSourceFilename($submdata['cid'],$id,$submdata['teamid'],
 		$submdata['probid'],$submdata['langid']))?></a></td></tr>
+<?
+
+if ( IS_ADMIN )
+{
+?>
+<tr><td scope="row" colspan="2"><?
+	$val = ! $submdata['ignore'];
+	echo addForm('ignore.php') .
+			addHidden('id',  $id) .
+			addHidden('val', $val) .
+				'<input type="submit" value="'.($val ? '' : 'un').
+				'ignore this submission" />';
+			?></td></tr>
+<?
+}
+?>
 </table>
 
 
@@ -136,8 +161,6 @@ if ( isset($jid) )  {
 	// only if this is a valid judging, otherwise irrelevant
 	if ( $jud['valid'] ) {
 		if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
-
-			require_once(SYSTEM_ROOT . '/lib/www/forms.php');
 
 			$val = ! $jud['verified'];
 
