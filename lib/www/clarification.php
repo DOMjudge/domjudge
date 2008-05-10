@@ -23,6 +23,18 @@ function setClarificationViewed($clar, $team)
 }
 
 /**
+ * Returns wether a team is allowed to view a clarification.
+ */
+function canViewClarification($team, $clar)
+{
+	return (
+		   $clar['sender'] == $team
+		|| $clar['recipient'] == $team
+		|| ($clar['sender'] == NULL && $clar['recipient'] == NULL)
+		);
+}
+
+/**
  * Output a single clarification.
  * Helperfunction for putClarification, do _not_ use directly!
  */
@@ -87,11 +99,7 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
 
 	while ( $clar = $clarifications->next() ) {
 		// check permission to view this clarification
-		if ($isjury
-		 || $clar['sender'] == $team
-		 || $clar['recipient'] == $team
-		 || ($clar['sender'] == NULL && $clar['recipient'] == NULL)
-		) {
+		if ($isjury || canViewClarification($team, $clar)) {
 			setClarificationViewed($clar['clarid'], $team);
 			putClar($clar, $isjury);
 			echo "<br />\n\n";
@@ -130,11 +138,9 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 
 	while ( $clar = $clars->next() ) {
 		// check viewing permission for teams
-		if ( ! $isjury ) {
-			if ( ! ( ($clar['sender']==NULL &&
-				( $clar['recipient']==NULL || $clar['recipient']==$team ) ) ||
-				( $clar['sender']==$team ) ) ) continue;
-		}
+		if ( !$isjury && !canViewClarification($team, $clar))
+			continue;
+
 		$clar['clarid'] = (int)$clar['clarid'];
 		
 		if(isset($clar['unread']))
@@ -142,7 +148,7 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 		else
 			echo '<tr>';
 		
-		echo '<td>' . make_link($clar['clarid'], "clarification.php?id=".$clar['clarid']) . '</a></td>';
+		echo '<td>' . make_link($clar['clarid'], "clarification.php?id=" . urlencode($clar['recipient'])) . '</td>';
 
 		$sender = $clar['sender'];
 		$recipient = $clar['recipient'];
@@ -167,7 +173,7 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 		echo '<td class="teamid">' . $recipient . '</td>';
 
 		echo '<td>' . printtime($clar['submittime']) . '</td>';
-		echo '<td><a href="clarification.php?id=' . $clar['clarid'] . '">';
+		echo '<td><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">';
 		echo summarizeClarification($clar['body']);
 		echo "</a></td></tr>\n";
 	}
