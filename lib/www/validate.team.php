@@ -9,7 +9,7 @@
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
-/*
+
 $ip = $_SERVER['REMOTE_ADDR'];
 $row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
 
@@ -51,8 +51,4 @@ if ( empty($row['teampage_first_visited']) ) {
 }
 
 unset($row);
-*/
-// OVERRIDE FOR DEMO SITE
-$login = 'nwerc70';
-$name = 'DOMjudge testteam';
 

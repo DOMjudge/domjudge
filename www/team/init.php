@@ -24,7 +24,7 @@ require_once(SYSTEM_ROOT . '/lib/use_db_team.php');
 require_once(SYSTEM_ROOT . '/lib/www/common.php');
 require_once(SYSTEM_ROOT . '/lib/www/print.php');
 require_once(SYSTEM_ROOT . '/lib/www/scoreboard.php');
-require_once('validate.php');
+require_once(SYSTEM_ROOT . '/lib/www/validate.team.php');
 
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];
