@@ -364,9 +364,12 @@ function version()
 /**
  * Links helper.
  */
-function make_link($name, $url, $condition = TRUE)
+function make_link($name, $url, $condition = TRUE, $raw = FALSE)
 {
-	$result = htmlspecialchars($name);
+	$result = $name;
+
+	if (!$raw)
+		$result = htmlspecialchars($result);
 
 	if ($condition && ($url != NULL)) {
 		$result = '<a href="' . htmlspecialchars($url) . '">' . $result . '</a>';

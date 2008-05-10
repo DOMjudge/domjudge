@@ -56,11 +56,11 @@ function putClar($clar, $isjury = false)
 	echo "<table>\n";
 
 	echo '<tr><td scope="row">From:</td><td>';
-	echo make_link($from, "team.php?id=" . urlencode($clar['sender']), $isjury && $clar['sender']);
+	echo make_link($from, "team.php?id=" . urlencode($clar['sender']), $isjury && $clar['sender'], TRUE);
 	echo "</td></tr>\n";
 
 	echo '<tr><td scope="row">To:</td><td>';
-	echo make_link($to, "team.php?id=" . urlencode($clar['recipient']), $isjury && $clar['recipient']);
+	echo make_link($to, "team.php?id=" . urlencode($clar['recipient']), $isjury && $clar['recipient'], TRUE);
 	echo "</td></tr>\n";
 
 	echo '<tr><td scope="row">Time:</td><td>';
