@@ -71,7 +71,7 @@ function putClar($clar, $isjury = false)
 	echo '<pre class="output_text">' . wordwrap(htmlspecialchars($clar['body']),80) . "</pre>";
 	echo "</td></tr>\n";
 
-	echo '</table>\n';
+	echo "</table>\n";
 
 	return;
 }
@@ -111,15 +111,15 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
  * Summarize a clarification.
  * Helper function for putClarificationList.
  */
-function summarizeClarification($clar)
+function summarizeClarification($body)
 {
 	// when making a summary, try to igonore the quoted text
-	$split = explode("\n", $clar['body']);
+	$split = explode("\n", $body);
 	$newbody = '';
 	foreach($split as $line) {
 		if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line;
 	}
-	echo htmlspecialchars( str_cut( ( empty($newbody) ? $clar['body'] : $newbody ), 80) );
+	return htmlspecialchars( str_cut( ( empty($newbody) ? $body : $newbody ), 80) );
 }
 
 /**
