@@ -368,8 +368,8 @@ function make_link($name, $url, $condition = TRUE)
 {
 	$result = htmlspecialchars($name);
 
-	if ($condition) {
-		$result = '<a href="' . htmlspecialchars($url) . '>' . $result . '</a>';
+	if ($condition && ($url != NULL)) {
+		$result = '<a href="' . htmlspecialchars($url) . '">' . $result . '</a>';
 	}
 
 	return $result;
