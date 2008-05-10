@@ -35,6 +35,7 @@
 }
 
 img.picto { width: 16px; height: 16px; }
+img.smallpicto { width: 11px; height: 11px; }
 
 
 .judgetime { font-size: smaller; font-style: italic; }
