@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="1">
+                <xs:element name="events" type="eventsType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="eventsType">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="event"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="event">
+        <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element name="clarification" type="clarificationType"/>
+            <xs:element name="submission" type="submissionType"/>
+            <xs:element name="judging" type="judgingType"/>
+        </xs:choice>
+	<xs:attributeGroup ref="identifier"/>
+    </xs:complexType>
+    <xs:complexType name="clarificationType">
+		<xs:attributeGroup ref="identifier"/>
+    </xs:complexType>
+    <xs:complexType name="submissionType">
+        <xs:all>
+            <xs:element name="team">
+                <xs:complexType>
+                    <xs:attributeGroup ref="identifier"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="problem">
+                <xs:complexType>
+                    <xs:attributeGroup ref="identifier"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="language">
+                <xs:complexType>
+                    <xs:attributeGroup ref="identifier"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+		<xs:attributeGroup ref="identifier"/>
+    </xs:complexType>
+    <xs:complexType name="judgingType">
+		<xs:attributeGroup ref="identifier"/>
+    </xs:complexType>
+    <xs:attributeGroup name="identifier">
+		<xs:attribute name="id" type="xs:integer" use="required"/>
+    </xs:attributeGroup>
+</xs:schema>

@@ -108,6 +108,10 @@ while ( $row = $res->next() ) {
 	$events->appendChild($event);
 }
 
+if (!$xml->schemaValidate('events.xsd')) {
+	error('XML file not valid.');
+}
+
 header('Content-Type: text/xml; charset=' . DJ_CHARACTER_SET);
 
 $xml->formatOutput = true;
