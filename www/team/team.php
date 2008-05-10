@@ -17,8 +17,8 @@ require('init.php');
 if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
 
 $title = 'Team '.htmlspecialchars(@$id);
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 putTeam($id);
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

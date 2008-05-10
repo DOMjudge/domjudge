@@ -21,9 +21,9 @@ require_once(SYSTEM_ROOT . '/lib/lib.error.php');
 require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
 require_once(SYSTEM_ROOT . '/lib/use_db_team.php');
 
-require_once('../common.php');
-require_once('../print.php');
-require_once('../scoreboard.php');
+require_once(SYSTEM_ROOT . '/lib/www/common.php');
+require_once(SYSTEM_ROOT . '/lib/www/print.php');
+require_once(SYSTEM_ROOT . '/lib/www/scoreboard.php');
 require_once('validate.php');
 
 $cdata = getCurContest(TRUE);

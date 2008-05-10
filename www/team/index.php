@@ -9,7 +9,7 @@
 require('init.php');
 $refresh = '30;url=' . getBaseURI() . 'team/index.php';
 $title = 'Submissions';
-require('../header.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
 
 // Put overview of team submissions (like scoreboard)
 echo "<div id=\"teamscoresummary\">\n";
@@ -22,4 +22,4 @@ echo "<h1>Submissions team ".htmlspecialchars($name)."</h1>\n\n";
 $restrictions = array( 'teamid' => $login );
 putSubmissions($cdata, $restrictions);
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

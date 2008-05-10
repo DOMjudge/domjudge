@@ -10,7 +10,7 @@
 
 require('init.php');
 $title = 'Submission details';
-include('../header.php');
+include(SYSTEM_ROOT . '/lib/www/header.php');
 
 $sid = (int)@$_GET['id'];
 
@@ -25,7 +25,7 @@ $row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
 
 if( ! $row ) {
 	echo "<p>Submission not found for this team.</p>\n";
-	include('../footer.php');
+	include(SYSTEM_ROOT . '/lib/www/footer.php');
 	exit;
 }
 
@@ -58,4 +58,4 @@ if ( (SHOW_COMPILE == 2) ||
 	}
 }
 
-include('../footer.php');
+include(SYSTEM_ROOT . '/lib/www/footer.php');

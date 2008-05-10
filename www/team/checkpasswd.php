@@ -27,12 +27,12 @@ $pass = trim($_POST['passwd']);
 
 $title = 'Authenticate user';
 $menu = false;
-include('../header.php');
+include(SYSTEM_ROOT . '/lib/www/header.php');
 
 if ( empty($user) || empty($pass) ) {
 	echo "<h1>Not Authenticated</h1>\n\n";
 	echo "<p>Please supply a username and password.</p>\n\n";
-	include('../footer.php');
+	include(SYSTEM_ROOT . '/lib/www/footer.php');
 	exit;
 }
 

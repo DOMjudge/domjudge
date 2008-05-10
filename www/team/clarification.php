@@ -40,8 +40,8 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 }
 
 $title = 'Clarifications';
-require('../header.php');
-require('../clarification.php');
+require(SYSTEM_ROOT . '/lib/www/header.php');
+require(SYSTEM_ROOT . '/lib/www/clarification.php');
 
 if ( isset($id) ) {
 	// display clarification thread

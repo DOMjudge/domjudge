@@ -18,7 +18,7 @@ if(!$row) {
 	if (NONINTERACTIVE) error("Not authenticated");
 	$title = 'Not Authenticated';
 	$menu = false;
-	include('../header.php');
+	include(SYSTEM_ROOT . '/lib/www/header.php');
 	echo "<h1>Not Authenticated</h1>\n\n<p>Sorry, we're unable to identify you as a valid team (IP " .
 		htmlspecialchars($_SERVER['REMOTE_ADDR']) . ").</p>\n\n";
 		?>
@@ -36,7 +36,7 @@ Please supply team credentials below, or contact a staff member for assistance.
 
 	<?php
 	putDOMjudgeVersion();
-	include('../footer.php');
+	include(SYSTEM_ROOT . '/lib/www/footer.php');
 	exit;
 }
 
