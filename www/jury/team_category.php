@@ -50,8 +50,8 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 </td></tr>
 
 <tr><td>Visible:</td>
-<td><?=addRadioBox('data[0][visible]', (!isset($row['visible']) || $row['visible']), 1)?> <label for="data_0__visible_1">yes</label>
-<?=addRadioBox('data[0][visible]', (isset($row['visible']) && !$row['visible']), 0)?> <label for="data_0__visible_0">no</label></td></tr>
+<td><?=addRadioButton('data[0][visible]', (!isset($row['visible']) || $row['visible']), 1)?> <label for="data_0__visible_1">yes</label>
+<?=addRadioButton('data[0][visible]', (isset($row['visible']) && !$row['visible']), 0)?> <label for="data_0__visible_0">no</label></td></tr>
 
 </table>
 

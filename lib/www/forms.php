@@ -43,9 +43,9 @@ function addCheckBox($name, $checked = false, $value = null) {
  */
 
 /**
- * Form radio box
+ * Form radio button
  */
-function addRadioBox($name, $checked = false, $value = null) {
+function addRadioButton($name, $checked = false, $value = null) {
 	return addInputField('radio', $name, $value,
 	                     ($checked ? ' checked="checked"' : ''));
 }
