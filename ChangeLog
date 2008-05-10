@@ -52,7 +52,7 @@ Version 2.2.0 - SVN
  - Added printer friendly version of jury scoreboard.
  - Restyle configchecker and also check MySQL version and max_connections.
  - Explicitly use DBSERVER host with mysql install (Closes: #1955439).
- - Display time left to end of contest on every page.
+ - Display time left to end of contest on every page (Closes: #1960940).
 
 Version 2.1.1 - SVN
 -------------------
