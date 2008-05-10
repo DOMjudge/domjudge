@@ -24,9 +24,6 @@ if ( isset($_REQUEST['toid']) ) {
 
 $now = now();
 
-$cdata = getCurContest(TRUE);
-$cid = $cdata['cid'];
-
 $cstarted = difftime($now, $cdata['starttime'])>0;
 $cended   = difftime($now, $cdata['endtime'])  >0;
 
