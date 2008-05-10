@@ -93,7 +93,9 @@ tr.unread td {
 	border: 1px dashed #ccc;
 	padding: 4px;
 	color: gray;
+	text-align: right;
 }
+#timeleft { color: #800080;}
 
 
 fieldset {
