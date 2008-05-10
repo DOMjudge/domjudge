@@ -9,7 +9,7 @@
  */
 
 /** Include lib/lib.misc.php for make_link **/
-require_once('../lib/lib.misc.php');
+require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
 
 /** Symbol used in output to represent a balloon */
 define('BALLOON_SYM', '&#9679;');
