@@ -63,8 +63,8 @@ if( $teams->count() == 0 ) {
 				htmlspecialchars($row['name'])."</a></td>".
 			"<td title=\"catid ".(int)$row['categoryid']."\">".
 				htmlspecialchars($row['catname'])."</td>".
-			"<td title=\"affilid ".htmlspecialchars($row['affilid'])."\">".
-				htmlspecialchars($row['affname'])."</td><td title=\"";
+			"<td title=\"".htmlspecialchars($row['affname'])."\">".
+				htmlspecialchars($row['affilid'])."</td><td title=\"";
 		
 		if ( @$row['ipaddress'] ) {
 			$host = htmlspecialchars(gethostbyaddr($row['ipaddress']));
