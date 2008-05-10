@@ -111,7 +111,7 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
  * Summarize a clarification.
  * Helper function for putClarificationList.
  */
-function summarizeClarification($body)
+function summarizeClarification($clar)
 {
 	// when making a summary, try to igonore the quoted text
 	$split = explode("\n", $clar['body']);
