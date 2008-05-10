@@ -400,7 +400,7 @@ apt-get install gcc g++ make libcurl3-dev sudo \
 	wget linuxdoc-tools unzip tetex-bin tetex-extra transfig
 </code>
 
-This is for Debian 4.0 "Etch". For Debian 4.1 "Lenny",
+This is for Debian 4.0 "Etch". For Debian 5.0 "Lenny",
 replace <tt/tetex-bin/ and <tt/tetex-extra/
 with <tt/texlive-latex-recommended/ and <tt/texlive-latex-extra/,
 and <tt/libcurl3-dev/ with <tt/libcurl4-dev/.
