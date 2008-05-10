@@ -8,6 +8,9 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+/** Include lib/lib.misc.php for make_link **/
+require_once('../lib/lib.misc.php');
+
 /** Symbol used in output to represent a balloon */
 define('BALLOON_SYM', '&#9679;');
 
@@ -69,12 +72,16 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 	// table header; leave out the field that is our key (because it's the same
 	// for all rows)
 	echo "<table class=\"list\">\n<thead>\n<tr>" .
+
 		($isjury ? "<th scope=\"col\">ID</th>" : '') .
 		"<th scope=\"col\">time</th>" .
 		($isjury ? "<th scope=\"col\">team</th>" : '') .
-		"<th scope=\"col\">problem</th><th scope=\"col\">lang</th>" .
+		"<th scope=\"col\">problem</th>" . 
+		"<th scope=\"col\">lang</th>" .
 		"<th scope=\"col\">status</th>" .
-		($isjury ? "<th scope=\"col\">verified</th><th scope=\"col\">last<br />judge</th>" : '') .
+		($isjury ? "<th scope=\"col\">verified</th>" : '') .
+		($isjury ? "<th scope=\"col\">last<br />judge</th>" : '') .
+
 		"</tr>\n</thead>\n<tbody>\n";
 	
 	// print each row with links to detailed information
@@ -91,15 +98,15 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 		echo "<td>" . printtime($row['submittime']) . "</td>";
 		if ( $isjury ) {
 			echo '<td class="teamid" title="' . htmlspecialchars($row['teamname']) . '">' .
-			     '<a href="team.php?id=' . urlencode($row['teamid']) . '">' .
-			     htmlspecialchars($row['teamid']) . '</a></td>';
+				make_link($row['teamid'], "team.php?id=" . urlencode($row['teamid']), $isjury) .
+				'</td>';
 		}
 		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
-			( $isjury ? '<a href="problem.php?id=' . urlencode($row['probid']) . '">' : '' ) .
-			htmlspecialchars($row['probid']) . ( $isjury ? '</a>' : '') . '</td>';
+			make_link($row['probid'], "problem.php?id=" . urlencode($row['probid']), $isjury) .
+			'</td>';
 		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
-			( $isjury ? '<a href="language.php?id=' . $row['langid'] . '">' : '' ) .
-			htmlspecialchars($row['langid']) . ( $isjury ? '</a>' : '') . '</td>';
+			make_link($row['langid'], "language.php?id=" . urlencode($row['langid']), $isjury) .
+			'</td>';
 		echo "<td>";
 		if ( $isjury ) {
 			if ( ! $row['result'] ) {
