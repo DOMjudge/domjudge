@@ -30,7 +30,7 @@ $referrer      = @$_POST['referrer'];
 
 if ( empty($data) ) error ("No data.");
 
-require(SYSTEM_ROOT . '/lib/checkers.php');
+require(SYSTEM_ROOT . '/lib/www/checkers.jury.php');
 
 foreach ($data as $i => $itemdata ) {
 	if ( !empty($skipwhenempty) && empty($itemdata[$skipwhenempty]) ) {

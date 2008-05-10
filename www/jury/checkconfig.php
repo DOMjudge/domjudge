@@ -48,7 +48,7 @@ if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
 }
 
 require_once(SYSTEM_ROOT . '/lib/relations.php');
-require_once('checkers.php');
+require_once(SYSTEM_ROOT . '/lib/www/checkers.jury.php');
 
 
 $RESULTS = array();
