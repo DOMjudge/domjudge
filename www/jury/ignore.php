@@ -1,6 +1,6 @@
 <?php
 /**
- * Change the ingore status of a given submission.
+ * Change the valid status of a given submission.
  *
  * $Id$
  *
@@ -17,11 +17,11 @@ if ( ! IS_ADMIN ) {
 $id    = @$_POST['id'];
 $val   = @$_POST['val'];
 if ( empty($id) ) {
-	error("No ID passed for to mark as ignored.");
+	error("No ID passed for to mark as invalid.");
 }
 
 $cnt = $DB->q('RETURNAFFECTED UPDATE submission s
-               SET s.ignore = %i WHERE s.submitid = %i',
+               SET s.valid = %i WHERE s.submitid = %i',
               $val, $id);
 
 if ( $cnt == 0 ) {

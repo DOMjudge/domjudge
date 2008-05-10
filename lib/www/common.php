@@ -43,14 +43,14 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 	$cid = $cdata['cid'];
 	
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid,
-	               s.submittime, s.judgehost, s.ignore, t.name AS teamname,
+	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
 	               p.name AS probname, l.name AS langname,
 	               j.result, j.judgehost, j.verified
 	               FROM submission s
 	               LEFT JOIN team     t ON (t.login    = s.teamid)
 	               LEFT JOIN problem  p ON (p.probid   = s.probid)
 	               LEFT JOIN language l ON (l.langid   = s.langid)
-	               LEFT JOIN judging  j ON (s.submitid = j.submitid AND valid=1)
+	               LEFT JOIN judging  j ON (s.submitid = j.submitid AND s.valid=1)
 	               WHERE s.cid = %i ' .
 	               (isset($restrictions['teamid']) ? 'AND s.teamid = %s ' : '%_') .
 	               (isset($restrictions['probid']) ? 'AND s.probid = %s ' : '%_') .
@@ -91,12 +91,12 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 		$sid = (int)$row['submitid'];
 		$isfinished = ($isjury || ! $row['result']);
 		
-		if ( $row['ignore'] ) {
-			$igncnt++;
-			echo '<tr class="sub_ignore">';
-		} else {
+		if ( $row['valid'] ) {
 			$subcnt++;
 			echo "<tr>";
+		} else {
+			$igncnt++;
+			echo '<tr class="sub_ignore">';
 		}
 		if ( $isjury ) {
 			echo "<td><a href=\"submission.php?id=$sid\">s$sid</a></td>";

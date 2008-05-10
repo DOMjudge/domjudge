@@ -166,7 +166,7 @@ CREATE TABLE `submission` (
   `sourcecode` mediumblob NOT NULL COMMENT 'Full source code',
   `judgehost` varchar(50) default NULL COMMENT 'Current/last judgehost judging this submission',
   `judgemark` varchar(255) default NULL COMMENT 'Unique identifier for taking a submission by a judgehost' ,
-  `ignore` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Ignore this submission in all scoreboard calculations' ,
+  `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'If false ignore this submission in all scoreboard calculations' ,
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `judgemark` (`judgemark`),
   KEY `teamid` (`cid`,`teamid`),

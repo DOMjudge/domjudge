@@ -79,7 +79,7 @@ function calcScoreRow($cid, $team, $prob) {
 	                  LEFT JOIN submission s USING(submitid)
 	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
 	                  WHERE teamid = %s AND probid = %s AND valid = 1 AND
-	                  result IS NOT NULL AND s.cid = %i AND s.ignore = 0
+	                  result IS NOT NULL AND s.cid = %i AND s.valid = 1
 					  ORDER BY submittime',
 	                 $team, $prob, $cid);
 
