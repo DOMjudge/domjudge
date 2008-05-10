@@ -360,3 +360,18 @@ function version()
 		"General Public Licence for details.\n";
 	exit(0);
 }
+
+/**
+ * Links helper.
+ */
+function make_link($name, $url, $condition = TRUE)
+{
+	$result = htmlspecialchars($name);
+
+	if ($condition) {
+		$result = '<a href="' . htmlspecialchars($url) . '>' . $result . '</a>';
+	}
+
+	return $result;
+}
+
