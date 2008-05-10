@@ -122,10 +122,10 @@ if ( $oldsource ) {
 					$difftext = `diff -bBt -U 2 $oldfile $newfile 2>&1`;
 				}
 			}
+			if( $oldhandle )	fclose($oldhandle);
+			if( $newhandle )	fclose($newhandle);
 		}
 
-		if( $oldhandle )	fclose($oldhandle);
-		if( $newhandle )	fclose($newhandle);
 		if( $oldfile )		unlink($oldfile);
 		if( $newfile )		unlink($newfile);
 	}
