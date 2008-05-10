@@ -53,4 +53,4 @@ if ( $cnt == 1 ) {
 		"Please try again or contact a staff member.</p>\n\n";
 }
 
-include('../footer.php');
+include(SYSTEM_ROOT . '/lib/www/footer.php');

@@ -136,4 +136,4 @@ if (NONINTERACTIVE) echo '<!-- noninteractive-upload-successful -->';
 echo "<p>Upload successful.</p>";
 echo "</div>\n";
 
-require('../footer.php');
+require(SYSTEM_ROOT . '/lib/www/footer.php');

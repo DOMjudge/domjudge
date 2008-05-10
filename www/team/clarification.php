@@ -60,4 +60,4 @@ if ( isset($id) ) {
 	putClarificationForm("clarification.php");
 }
 
-include('../footer.php');
+include(SYSTEM_ROOT . '/lib/www/footer.php');
