@@ -103,25 +103,31 @@ if ( $oldsource ) {
 
 	} else {
 		// FIXME: need a better tempdir location than hardcoding /tmp
-		if ( ! ($oldfile = mkstemps("/tmp/source-old-s$oldid-XXXXXX",0)) ||
-			 ! ($newfile = mkstemps("/tmp/source-new-s$id-XXXXXX",0)) ||
-			 ! ($oldhandle = fopen($oldfile,'w')) ||
-			 ! ($newhandle = fopen($newfile,'w')) ||
-			 fwrite($oldhandle,$oldsource['sourcecode']) === FALSE ||
-			 fwrite($newhandle,   $source['sourcecode']) === FALSE ||
-			 ! fclose($oldhandle) ||
-			 ! fclose($newhandle) ) {
-			
+		$oldfile = mkstemps("/tmp/source-old-s$oldid-XXXXXX",0);
+		$newfile = mkstemps("/tmp/source-new-s$id-XXXXXX",0);
+
+		if( ! $oldfile || ! $newfile ) {
 			$difftext = "DOMjudge: error generating temporary files for diff.";
-			
 		} else {
+			$oldhandle = fopen($oldfile,'w');
+			$newhandle = fopen($newfile,'w');
 
-			$difftext = `diff -bBt -U 2 $oldfile $newfile 2>&1`;
-
+			if( ! $oldhandle || ! $newhandle ) {
+				$difftext = "DOMjudge: error opening temporary files for diff.";
+			} else {
+				if ( (fwrite($oldhandle,$oldsource['sourcecode']) === FALSE)
+				  || (fwrite($newhandle,   $source['sourcecode']) === FALSE)) {
+					$difftext = "DOMjudge: error writing temporary files for diff.";
+				} else {
+					$difftext = `diff -bBt -U 2 $oldfile $newfile 2>&1`;
+				}
+			}
 		}
 
-		unlink($oldfile);
-		unlink($newfile);
+		if( $oldhandle )	fclose($oldhandle);
+		if( $newhandle )	fclose($newhandle);
+		if( $oldfile )		unlink($oldfile);
+		if( $newfile )		unlink($newfile);
 	}
 	
 	echo '<h2 class="filename"><a name="diff"></a>Diff to submission ' .
