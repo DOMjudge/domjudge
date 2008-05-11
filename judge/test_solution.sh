@@ -116,8 +116,9 @@ RUN_SCRIPT="run${SPECIALRUN:+_$SPECIALRUN}"
 [ -d "$TMPDIR" -a -w "$TMPDIR" -a -x "$TMPDIR" ] || \
 	error "Tempdir not found or not writable: $TMPDIR"
 [ -r "$COMPILE_SCRIPT" ] || error "compile script not found: $COMPILE_SCRIPT"
-[ -r "$COMPARE_SCRIPT" ] || error "compare script not found: $COMPARE_SCRIPT"
+[ -x "$COMPARE_SCRIPT" ] || error "compare script not found or not executable: $COMPARE_SCRIPT"
 [ -r "$SCRIPTDIR/$RUN_SCRIPT" ] || error "run script not found: $RUN_SCRIPT"
+[ -x "$RUNGUARD" ] || error "runguard not found or not executable: $RUNGUARD"
 
 logmsg $LOG_INFO "setting resource limits"
 ulimit -HS -c 0     # Do not write core-dumps
@@ -236,12 +237,14 @@ if ps -u "$RUNUSER" &>/dev/null; then
 fi
 
 # Append (heading/trailing) program stderr to error.tmp:
-if [ `cat program.err | wc -l` -gt 20 ]; then
+errlines=`cat program.err | wc -l`
+
+if [ $errlines -gt 20 ]; then
 	echo "*** Program stderr output following (first and last 10 lines) ***" >>error.tmp
 	head -n 10 program.err >>error.tmp
 	echo "*** <snip> ***"  >>error.tmp
 	tail -n 10 program.err >>error.tmp
-else
+elif [ $errlines -gt 0 ]; then
 	echo "*** Program stderr output following ***" >>error.tmp
 	cat program.err >>error.tmp
 fi
