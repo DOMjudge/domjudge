@@ -148,11 +148,11 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 		else
 			echo '<tr>';
 		
-		echo '<td>' . make_link($clar['clarid'], "clarification.php?id=" . urlencode($clar['recipient'])) . '</td>';
+	echo '<td>' . make_link($clar['clarid'], "clarification.php?id=" . urlencode($clar['clarid'])) . '</td>';
 
 		$sender = $clar['sender'];
 		$recipient = $clar['recipient'];
-
+		
 		if ($sender == NULL && $recipient == NULL) {
 			$sender = 'Jury';
 			$recipient = 'All';
@@ -165,7 +165,7 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 			if ($recipient == NULL)
 				$recipient = 'Jury';
 			else
-				$recipient = make_link($sender, "team.php?id=" . urlencode($clar['recipient']), $isjury);
+				$recipient = make_link($recipient, "team.php?id=" . urlencode($clar['recipient']), $isjury);
 		}
 
 

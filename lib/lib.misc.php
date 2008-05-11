@@ -75,10 +75,10 @@ function calcScoreRow($cid, $team, $prob) {
 	$result = $DB->q('SELECT result, verified, 
 	                  (UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 AS timediff,
 	                  (c.freezetime IS NOT NULL && submittime >= c.freezetime) AS afterfreeze
-	                  FROM judging
+	                  FROM judging j
 	                  LEFT JOIN submission s USING(submitid)
 	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
-	                  WHERE teamid = %s AND probid = %s AND valid = 1 AND
+	                  WHERE teamid = %s AND probid = %s AND j.valid = 1 AND
 	                  result IS NOT NULL AND s.cid = %i AND s.valid = 1
 					  ORDER BY submittime',
 	                 $team, $prob, $cid);

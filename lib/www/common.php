@@ -50,7 +50,7 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 	               LEFT JOIN team     t ON (t.login    = s.teamid)
 	               LEFT JOIN problem  p ON (p.probid   = s.probid)
 	               LEFT JOIN language l ON (l.langid   = s.langid)
-	               LEFT JOIN judging  j ON (s.submitid = j.submitid AND s.valid=1)
+	               LEFT JOIN judging  j ON (s.submitid = j.submitid AND j.valid=1)
 	               WHERE s.cid = %i ' .
 	               (isset($restrictions['teamid']) ? 'AND s.teamid = %s ' : '%_') .
 	               (isset($restrictions['probid']) ? 'AND s.probid = %s ' : '%_') .

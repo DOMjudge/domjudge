@@ -43,13 +43,13 @@ if ( IS_ADMIN && $table == 'submission' ) {
 	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid
 	               FROM judging j
 	               LEFT JOIN submission s USING (submitid)
-	               WHERE j.cid = %i AND valid = 1 AND ' .
+	               WHERE j.cid = %i AND j.valid = 1 AND ' .
 	               $tablemap[$table] . ' = %s', $cid, $id);
 } else {
 	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid
 	               FROM judging j
 	               LEFT JOIN submission s USING (submitid)
-	               WHERE j.cid = %i AND valid = 1 AND
+	               WHERE j.cid = %i AND j.valid = 1 AND
 	               result IS NOT NULL AND result != "correct" AND ' .
 	               $tablemap[$table] . ' = %s', $cid, $id);
 }
