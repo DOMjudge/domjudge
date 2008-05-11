@@ -188,7 +188,9 @@ while ( TRUE ) {
 		   "'$row[special_run]' '$row[special_compare]'",
 		$retval);
 
-	// :NOTE: the temporary copy could be removed, but since it's so small, we're not bothered
+	// :NOTE: the temporary copy could be removed, but since it's so
+	// small, we're not bothered
+	
 
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {
@@ -217,7 +219,8 @@ while ( TRUE ) {
 	// log to event table if no verification required
 	// (case of verification required is handled in www/jury/verify.php)
 	if ( ! VERIFICATION_REQUIRED ) {
-		$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, judgingid, description)
+		$DB->q('INSERT INTO event (cid, teamid, langid, probid,
+		                           submitid, judgingid, description)
 		        VALUES(%i, %s, %s, %s, %i, %i, "problem judged")',
 		       $cid, $row['teamid'], $row['langid'], $row['probid'],
 		       $row['submitid'], $judgingid);
