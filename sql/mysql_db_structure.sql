@@ -51,6 +51,7 @@ CREATE TABLE `event` (
   `langid` varchar(8) default NULL COMMENT 'Language ID',
   `probid` varchar(8) default NULL COMMENT 'Problem ID',
   `submitid` int(4) unsigned default NULL COMMENT 'Submission ID',
+  `judgingid` int(4) unsigned default NULL COMMENT 'Judging ID',
   `teamid` varchar(15) default NULL COMMENT 'Team login',
   `description` text NOT NULL COMMENT 'Event description',
   PRIMARY KEY  (`eventid`)
