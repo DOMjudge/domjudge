@@ -270,8 +270,8 @@ fi
 
 ############################################################
 ### Checks for other runtime errors:                     ###
-### Removed, because these are not consistently reported ###
-### the same way by all different compilers.             ###
+### Disabled, because these are not consistently         ###
+### reported the same way by all different compilers.    ###
 ############################################################
 #if grep  'Floating point exception' error.tmp &>/dev/null; then
 #	echo "Floating point exception." >>error.out
@@ -281,7 +281,11 @@ fi
 #	echo "Segmentation fault." >>tee error.out
 #	exit $E_RUNERROR
 #fi
-
+#if grep  'File size limit exceeded' error.tmp &>/dev/null; then
+#	echo "File size limit exceeded." >>error.out
+#	cat error.tmp >>error.out
+#	exit $E_OUTPUTLIMIT
+#fi
 
 logmsg $LOG_INFO "comparing output"
 
@@ -305,34 +309,28 @@ if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
 	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
 fi
 
-# Parse result.xml if 'xsltproc' is available, otherwise check for empty
-# compare output
-if [ -x `which xsltproc` ]; then
-	xsltproc $SCRIPTDIR/parse_result.xslt result.xml > result.out
-	result=`grep '^result='      result.out | cut -d = -f 2- | tr '[:upper:]' '[:lower:]'`
-	descrp=`grep '^description=' result.out | cut -d = -f 2-`
-else
-	if [ -s compare.out ]; then
-		result="wrong answer"
-	else
-		result="accepted"
-	fi
-fi
+# Parse result.xml with xsltproc
+xsltproc $SCRIPTDIR/parse_result.xslt result.xml > result.out
+result=`grep '^result='      result.out | cut -d = -f 2- | tr '[:upper:]' '[:lower:]'`
+descrp=`grep '^description=' result.out | cut -d = -f 2-`
 descrp="${descrp:+ ($descrp)}"
 
 if [ "$result" = "accepted" ]; then
 	echo "Correct${descrp}! Runtime is `cat program.time` seconds." >>error.out
 	cat error.tmp >>error.out
 	exit $E_CORRECT
-else
+# Uncomment lines below to enable "Presentation error" results.
+#elif [ "$result" = "presentation error" ]; then
+#	echo "Presentation error${descrp}." >>error.out
+#	cat error.tmp >>error.out
+#	exit $E_PRESENTATION
+elif [ "$result" = "wrong answer" ]; then
 	echo "Wrong answer${descrp}." >>error.out
 	cat error.tmp >>error.out
-
-# Uncomment the following block to enable presentation-error
-#	# It was wrong... but maybe just a presentation error
-#	if diff -abBwq program.out testdata.out > /dev/null ; then
-#		exit $E_PRESENTATION
-#	fi
+	exit $E_ANSWER
+else
+	echo "Unknown result: Wrong answer${descrp}." >>error.out
+	cat error.tmp >>error.out
 	exit $E_ANSWER
 fi
 

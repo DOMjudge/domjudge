@@ -92,17 +92,14 @@ void writeresult(char *msg)
 	fclose(resultfile);
 }
 
-void writediff(); /* Definition below */
+/* Definitions below */
+int execdiff(int);
+void writediff();
 
 int main(int argc, char **argv)
 {
-	int redir_fd[3];
-	char *cmdargs[MAXARGS];
-	pid_t cpid;
-	FILE *rpipe, *diffoutfile;
-	int status, differror;
-	char line[256];
-
+	FILE *diffoutfile;
+	
 	/* Read arguments. Note that argc counts the number of arguments
 	   including the name of the executed program (argv[0]), thus
 	   (argc-1) is the real number of arguments. */
@@ -120,9 +117,52 @@ int main(int argc, char **argv)
 		diffout = NULL;
 	}
 	
-	/* Execute 'diff <diffoptions> progout testout' for exact match of
-	   program output. */
-	cmdargs[0] = "-a";
+	/* Exit when no diff output found (nothing to do anymore) */
+	if ( execdiff(0)==0 ) {
+		writeresult("Accepted");
+		/* write empty diff.out if requested */
+		if ( diffout != NULL ) {
+			if ( (diffoutfile=fopen(diffout,"w")) == NULL ) {
+				error(errno,"opening file '%s'",diffout);
+			}
+			fclose(diffoutfile);
+		}
+		return 0;
+	}
+
+	/* Check presentation error */
+	if ( execdiff(1)==0 ) {
+		writeresult("Presentation error");
+	} else {
+		/* We are left with the case of a wrong answer */
+		writeresult("Wrong answer");
+	}
+	
+	/* Exit when no 'diffout' file specified (nothing to do anymore) */
+	if ( diffout==NULL || strlen(diffout)==0 ) return 0;
+
+	writediff();
+	
+	return 0;
+}
+
+/* Calls 'diff' and returns whether progout and testout differ.
+   Set ignore_ws for ignoring whitespace differences. */
+int execdiff(int ignore_ws)
+{
+	int redir_fd[3];
+	char *cmdargs[MAXARGS];
+	pid_t cpid;
+	FILE *rpipe;
+	int status, differror;
+	char line[256];
+
+	/* Execute 'diff <diffoptions> progout testout'. */
+	if ( ignore_ws ) {
+		cmdargs[0] = "-abBE";
+	} else {
+		cmdargs[0] = "-a";
+	}
 	cmdargs[1] = "-U0";
 	cmdargs[2] = progout;
 	cmdargs[3] = testout;
@@ -157,28 +197,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	/* Exit when no diff output found (nothing to do anymore) */
-	if ( ! differror ) {
-		writeresult("Accepted");
-		/* write empty diff.out if requested */
-		if ( diffout != NULL ) {
-			if ( (diffoutfile=fopen(diffout,"w")) == NULL ) {
-				error(errno,"opening file '%s'",diffout);
-			}
-			fclose(diffoutfile);
-		}
-		return 0;
-	}
-
-	/* Thus we are left with the case of a wrong answer */
-	writeresult("Wrong answer");
-	
-	/* Exit when no 'diffout' file specified (nothing to do anymore) */
-	if ( diffout==NULL || strlen(diffout)==0 ) return 0;
-
-	writediff();
-	
-	return 0;
+	return differror;
 }
 
 /* Writes a readable diff output to 'diffout' */

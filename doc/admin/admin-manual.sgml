@@ -82,12 +82,6 @@ of the web submit client):
 <item>SSH/SCP
 </itemize>
 
-For full support of the ICPC Validator Interface Standard:
-
-<itemize>
-<item>xsltproc (from the GNOME XSLT library package)
-</itemize>
-
 A <ref id="install_config:requirements" name="detailed list of requirements">
 is contained in the <ref id="install_config" name="Installation and Configuration">
 chapter.
@@ -336,6 +330,9 @@ The requirements for the deployment of this jury-system are:
 
 <item> Apache htpasswd
 
+<item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html"> 
+       from the GNOME XSLT library package.
+
 <item> linuxdoc to build the documentation and LaTeX to build
        the PDF-documentation
 
@@ -359,10 +356,6 @@ functionality.
 
 <item> An NTP daemon (for keeping the clocks between jury
        system and judgehosts in sync)
-
-<item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html">~
-       (for <htmlurl name="ICPC validator standard"
-        url="http://www.ecs.csus.edu/pc2/doc/valistandard.html"> compatibility)
 
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
        (to use the command line submit client with the webinterface)
@@ -536,12 +529,14 @@ fields of the problem entry in the MySQL database (empty means that
 the default script should be used).
 
 The shipped <tt>test_solution.sh</tt> has support for enabling a
-presentation-error to be returned as a judging result. For this to
-work, you need to uncomment the marked lines near the bottom of
-this script; it only works when using the standard comparision
-of program output with a static file of testdata. A presentation error
-occurs when the output only differs in whitespace from the
-reference output. This is counted as an incorrect submission.
+presentation-error to be returned as a judging result. This is counted
+as an incorrect submission. For this to work, you need to uncomment
+the marked lines near the bottom of this script. The validator used
+should also support returning presentation error results; the shipped
+<tt>compare</tt> supports this and reports presentation-error when the
+output only differs in whitespace from the reference output. The
+script <tt>compare_program.sh</tt> does not presentation error
+results.
 
 <sect>Other configuration issues
 <p>
@@ -1677,16 +1672,14 @@ invocation interface. It passes as a 5th optional parameter to the
 validator program the filename in which it expects a difference output
 between the program and jury output (parameters 2 and 3 respectively).
 
-Parsing of the result XML file (in the result interface) is only
-supported if `xsltproc' is available on the judge computers;
-this program is part of the <url name="GNOME libxslt package"
-url="http://www.xmlsoft.org/XSLT/">. If this is not available, then
-DOMjudge reports judging as correct when the compare program
-difference output is empty. The exitcode of the validator program
-should also be zero, otherwise an internal error is generated.
+Parsing of the result XML file (in the result interface) is done with
+the `xsltproc' program, which is part of the
+<url name="GNOME libxslt package" url="http://www.xmlsoft.org/XSLT/">.
+<em>The exitcode of the validator program should be zero, otherwise
+an internal error is generated.</em>
 
 DOMjudge currently has two validator scripts: <tt>judge/compare</tt>
-and <tt>judge/compare_program</tt>. The first does a compare with a
+and <tt>judge/compare_program.sh</tt>. The first does a compare with a
 plain diff, the second script calls an external program for checking
 (e.g. <tt>judge/check_float</tt> for comparison of floating point
 results). When passed a 5th parameter, this is interpreted as a

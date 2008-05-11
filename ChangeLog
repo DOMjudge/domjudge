@@ -44,8 +44,7 @@ Version 2.2.0 - SVN
  - Higher displayed precision in float compare.
  - Fix submit_copy to use bash.
  - Make it easier to return custom result codes for a judging.
- - Optionally return presentation-error for submissions having
-   only the whitespace wrong.
+ - Added support for "presentation error" results.
  - Enable GCC security features for compiling DOMjudge helper programs.
  - Automatically generate apache.conf from global.conf (Closes: #1778059).
  - Added work-in-progress code for eventdaemon (Working on: #1682761).
