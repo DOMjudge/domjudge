@@ -19,7 +19,7 @@ if ( isset($_REQUEST['fromid']) ) {
 if ( isset($_REQUEST['toid']) ) {
 	$toid = (int) $_REQUEST['toid'];
 } else {
-	$toid = 2147483647;
+	$toid = 2147483647; // This should be something like MAX_INT
 }
 
 $now = now();
@@ -38,18 +38,14 @@ function infreeze($time) {
 $res = $DB->q('SELECT * FROM event WHERE eventid >= %i AND eventid < %i
                ORDER BY eventid', $fromid, $toid);
 
-$xml = new DOMDocument('1.0', DJ_CHARACTER_SET);
+$xmldoc = new DOMDocument('1.0', DJ_CHARACTER_SET);
 
-$root = $xml->createElement('root');
-$xml->appendChild($root);
-
-$events = $xml->createElement('events');
-$root->appendChild($events);
+$root   = XMLaddnode($xmldoc, 'root');
+$events = XMLaddnode($root, 'events');
 
 while ( $row = $res->next() ) {
 	
-	$event = $xml->createElement('event');
-	$event->setAttribute('id', $row['eventid']);
+	$event = XMLaddnode($events, 'event', NULL, array('id' => $row['eventid']));
 
 	switch ( $row['description'] ) {
 
@@ -64,20 +60,12 @@ while ( $row = $res->next() ) {
 		                LEFT JOIN language l ON (l.langid   = s.langid)
 		                WHERE s.submitid = %i', $row['submitid']);
 
-		$elem = $xml->createElement('submission');
-		$elem->setAttribute('id', $row['submitid']);
+		
+		$elem = XMLaddnode($event, 'submission', NULL, array('id' => $row['submitid']));
 
-		$subelem = $xml->createElement('team', htmlspecialchars($data['teamname']));
-		$subelem->setAttribute('id', $row['teamid']);
-		$elem->appendChild($subelem);
-		
-		$subelem = $xml->createElement('problem', htmlspecialchars($data['probname']));
-		$subelem->setAttribute('id', $row['probid']);
-		$elem->appendChild($subelem);
-		
-		$subelem = $xml->createElement('language', htmlspecialchars($data['langname']));
-		$subelem->setAttribute('id', $row['langid']);
-		$elem->appendChild($subelem);
+		XMLaddnode($elem, 'team',     $data['teamname'], array('id' => $row['teamid']));
+		XMLaddnode($elem, 'problem',  $data['probname'], array('id' => $row['probid']));
+		XMLaddnode($elem, 'language', $data['langname'], array('id' => $row['langid']));
 		break;
 		
 	case 'problem judged':
@@ -87,32 +75,21 @@ while ( $row = $res->next() ) {
 
 		if ( !IS_JURY && infreeze($data['submittime']) ) continue(2);
 
-
-		$elem = $xml->createElement('judging', htmlspecialchars($data['result']));
-		$elem->setAttribute('id', $row['judgingid']);
-		
+		XMLaddnode($event, 'judging', $data['result'], array('id' => $row['judgingid']));
 		break;
 			
 	case 'clarification':
 		$data = $DB->q('TUPLE SELECT * FROM clarification
 		                WHERE clarid = %i', $row['clarid']);
 		
-		$elem = $xml->createElement('clarification', htmlspecialchars($data['body']));
-		$elem->setAttribute('id', $row['clarid']);
-
+		XMLaddnode($event, 'clarification', $data['body'], array('id' => $row['clarid']));
 		break;
 	}
-	
-	$event->appendChild($elem);
-	
-	$events->appendChild($event);
 }
 
-if (!$xml->schemaValidate('events.xsd')) {
-	error('XML file not valid.');
-}
+if ( !$xmldoc->schemaValidate('events.xsd') ) error('XML file not valid.');
 
 header('Content-Type: text/xml; charset=' . DJ_CHARACTER_SET);
 
-$xml->formatOutput = true;
-echo $xml->saveXML();
+$xmldoc->formatOutput = true;
+echo $xmldoc->saveXML();

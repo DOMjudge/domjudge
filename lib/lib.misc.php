@@ -379,3 +379,32 @@ function make_link($name, $url, $condition = TRUE, $raw = FALSE)
 	return $result;
 }
 
+/**
+ * DOM XML tree helper functions (PHP 5).
+ * The XML tree is assumed to be named '$xmldoc'.
+ */
+
+/**
+ * Create node and add below $paren.
+ * $value is an optional element value and $attrs an array whose
+ * key,value pairs are added as node attributes. All strings are htmlspecialchars
+ */
+function XMLaddnode($paren, $name, $value = NULL, $attrs = NULL)
+{
+	global $xmldoc;
+
+	if ( $value === NULL ) {
+		$node = $xmldoc->createElement(htmlspecialchars($name));
+	} else {
+		$node = $xmldoc->createElement(htmlspecialchars($name), htmlspecialchars($value));
+	}
+
+	if ( count($attrs) > 0 ) {
+		foreach( $attrs as $key => $value ) {
+			$node->setAttribute(htmlspecialchars($key), htmlspecialchars($value));
+		}
+	}
+
+	$paren->appendChild($node);
+	return $node;
+}
