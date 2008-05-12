@@ -61,7 +61,8 @@ if ( strlen($source['sourcecode'])==0 ) {
 	// Someone submitted an empty file. Cope gracefully.
 	echo "<p><em>empty file</em></p>\n\n";
 } elseif ( isset($hl) && strlen($source['sourcecode']) < 5 * 1024 ) {
-	// Highligher available and source < 5Kb (otherwise Highlighter has trouble)
+	// Highlighter available and source < 5Kb (for longer source code,
+	// Highlighter tends to take very long time or timeout)
 	$hl->setRenderer($renderer);
 	echo $hl->highlight($source['sourcecode']);
 } else {
