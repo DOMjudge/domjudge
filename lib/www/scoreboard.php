@@ -17,6 +17,176 @@
 
 
 /**
+ * Generate scoreboard data based on the cached data in table
+ * 'scoreboard_{public,jury}'. $isjury set to true means the
+ * scoreboard will always be current, regardless of the freezetime
+ * setting in the contesttable.
+ *
+ * This function returns an array (scores, summary, matrix)
+ * containing the following:
+ *
+ * scores[login](num_correct, total_time, solve_times[], rank,
+ *               teamname, categoryid, sortorder, country, affilid)
+ *
+ * matrix[login][probid](is_correct, num_submissions, time, penalty)
+ *
+ * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid])
+ *    probid(num_submissions, num_correct, best_time)
+ */
+function genScoreBoard($cdata, $isjury = FALSE) {
+
+	global $DB;
+
+	$cid = $cdata['cid'];
+
+	// Show final scores if contest is over and unfreezetime has been
+	// reached, or if contest is over and no freezetime had been set.
+	// We can compare $now and the dbfields stringwise.
+	$now = now();
+	$showfinal  = ( !isset($cdata['freezetime']) &&
+		difftime($cdata['endtime'],$now) <= 0 ) ||
+		( isset($cdata['unfreezetime']) &&
+		difftime($cdata['unfreezetime'], $now) <= 0 );
+	// contest is active but has not yet started
+	$cstarted = difftime($cdata['starttime'],$now) <= 0;
+
+	// Don't leak information before start of contest
+	if ( ! $cstarted && ! $isjury ) return;
+	
+	// get the teams and problems
+	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY, login, team.name,
+	                 team.categoryid, team.affilid, country, sortorder
+	                 FROM team
+	                 LEFT JOIN team_category
+	                        ON (team_category.categoryid = team.categoryid)
+	                 LEFT JOIN team_affiliation
+	                        ON (team_affiliation.affilid = team.affilid)' .
+	                ( $isjury ? '' : ' WHERE visible = 1' ) );
+	
+	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid FROM problem
+	                 WHERE cid = %i AND allow_submit = 1
+	                 ORDER BY probid', $cid);
+
+	// initialize the arrays we'll build from the data
+	$MATRIX = $SCORES = array();
+	$SUMMARY = array('num_correct' => 0, 'total_time' => 0,
+	                 'affils' => array(), 'countries' => array(),
+					 'problems' => array());
+
+	// scoreboard_jury is always up to date, scoreboard_public might be frozen.	
+	if ( $isjury || $showfinal ) {
+		$cachetable = 'scoreboard_jury';
+	} else {
+		$cachetable = 'scoreboard_public';
+	}
+
+	// Get all stuff from the cached table, but don't bother with outdated
+	// info from previous contests.
+	$scoredata = $DB->q("SELECT * FROM $cachetable WHERE cid = %i", $cid);
+
+	// the SCORES table contains the totals for each team which we will
+	// use for determining the ranking. Initialise them here
+	foreach ($teams as $login => $team ) {
+		$SCORES[$login]['num_correct'] = 0;
+		$SCORES[$login]['total_time']  = 0;
+		$SCORES[$login]['solve_times'] = array();
+		$SCORES[$login]['rank']        = 0;
+		$SCORES[$login]['teamname']    = $team['name'];
+		$SCORES[$login]['categoryid']  = $team['categoryid'];
+		$SCORES[$login]['sortorder']   = $team['sortorder'];
+		$SCORES[$login]['affilid']     = $team['affilid'];
+		$SCORES[$login]['country']     = $team['country'];
+	}
+
+	// loop all info the scoreboard cache and put it in our own datastructure
+	while ( $srow = $scoredata->next() ) {
+	
+		// skip this row if the team or problem is not known by us
+		if ( ! array_key_exists ( $srow['teamid'], $teams ) ||
+		     ! array_key_exists ( $srow['probid'], $probs ) ) continue;
+	
+		// fill our matrix with the scores from the database
+		$MATRIX[$srow['teamid']][$srow['probid']] = array (
+			'is_correct'      => (bool) $srow['is_correct'],
+			'num_submissions' => $srow['submissions'],
+			'time'            => $srow['totaltime'],
+			'penalty'         => $srow['penalty'] );
+
+		// calculate totals for this team
+		if ( $srow['is_correct'] ) {
+			$SCORES[$srow['teamid']]['num_correct']++;
+			$SCORES[$srow['teamid']]['solve_times'][] = $srow['totaltime'];
+			$SCORES[$srow['teamid']]['total_time'] += $srow['totaltime'] + $srow['penalty'];
+		}
+	}
+
+	// sort the array using our custom comparison function
+	uasort($SCORES, 'cmp');
+
+	// loop over all teams to calculate ranks and totals
+	$prevsortorder = -1;
+	foreach( $SCORES as $team => $totals ) {
+
+		// rank, team name, total correct, total time
+		if ( $totals['sortorder'] != $prevsortorder ) {
+			$prevsortorder = $totals['sortorder'];
+			$rank = 0; // reset team position on switch to different category
+			$prevteam = null;
+		}
+		$rank++;
+		// Use previous' team rank when scores are equal
+		if ( isset($prevteam) && cmpscore($SCORES[$prevteam], $totals)==0 ) {
+			$SCORES[$team]['rank'] = $SCORES[$prevteam]['rank'];
+		} else {
+			$SCORES[$team]['rank'] = $rank;
+		}
+		$prevteam = $team;
+
+		// keep summary statistics for the bottom row of our table
+		$SUMMARY['num_correct'] += $totals['num_correct'];
+		$SUMMARY['total_time']  += $totals['total_time'];
+		if ( ! empty($teams[$team]['affilid']) ) @$SUMMARY['affils'][$totals['affilid']]++;
+		if ( ! empty($teams[$team]['country']) ) @$SUMMARY['countries'][$totals['country']]++;
+		
+		// for each problem
+		foreach ( array_keys($probs) as $prob ) {
+
+			// if we have scores, use them, else, provide the defaults
+			// (happens when nothing submitted for this team,problem yet)
+			if ( isset ( $MATRIX[$team][$prob] ) ) {
+				$pdata = $MATRIX[$team][$prob];
+			} else {
+				$pdata = array ( 'submitted' => 0, 'is_correct' => 0,
+				                 'time' => 0, 'penalty' => 0);
+			}
+
+			// update summary data for the bottom row
+			@$SUMMARY['problems'][$prob]['num_submissions'] += $pdata['num_submissions'];
+			@$SUMMARY['problems'][$prob]['num_correct'] += ($pdata['is_correct'] ? 1 : 0);
+			if ( $pdata['is_correct'] ) {
+				@$SUMMARY['problems'][$prob]['times'][] = $pdata['time'];
+			}
+		}
+	}
+
+	// Fill all problems with data if not set already
+	foreach( array_keys($probs) as $prob ) {
+		if ( !isset($SUMMARY['problems'][$prob]) ) {
+			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
+			$SUMMARY['problems'][$prob]['num_correct'] = 0;
+		}
+		if ( isset($SUMMARY['problems'][$prob]['times']) ) {
+			$SUMMARY['problems'][$prob]['best_time'] = min(@$SUMMARY['problems'][$prob]['times']);
+		} else {
+			$SUMMARY['problems'][$prob]['best_time'] = NULL;
+		}
+		
+	}
+
+	return array( 'matrix' => $MATRIX, 'scores' => $SCORES, 'summary' => $SUMMARY );
+}
+
+/**
  * Output the general scoreboard based on the cached data in table
  * 'scoreboard'. $myteamid can be passed to highlight a specific row.
  * $isjury set to true means the scoreboard will always be current,
@@ -30,6 +200,12 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	if ( empty( $cdata ) ) { echo "<p><em>No active contest</em></p>\n"; return; }
 	$cid = $cdata['cid'];
 
+	$tmp = @genScoreBoard($cdata, $isjury);
+	if ( !empty($tmp) ) {
+		$SCORES  = $tmp['scores'];
+		$MATRIX  = $tmp['matrix'];
+		$SUMMARY = $tmp['summary'];
+	}
 
 	// Show final scores if contest is over and unfreezetime has been
 	// reached, or if contest is over and no freezetime had been set.
@@ -115,63 +291,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	}
 	echo "</tr>\n</thead>\n\n<tbody>\n";
 
-	// initialize the arrays we'll build from the data
-	$THEMATRIX = $SCORES = array();
-	$SUMMARY = array('num_correct' => 0, 'total_time' => 0,
-		'affils' => array(), 'countries' => array());
-
-	// scoreboard_jury is always up to date, scoreboard_public might be frozen.	
-	if ( $isjury || $showfinal ) {
-		$cachetable = 'scoreboard_jury';
-	} else {
-		$cachetable = 'scoreboard_public';
-	}
-
-	// Get all stuff from the cached table, but don't bother with outdated
-	// info from previous contests.
-	$scoredata = $DB->q("SELECT * FROM $cachetable WHERE cid = %i", $cid);
-
-	// the SCORES table contains the totals for each team which we will
-	// use for determining the ranking. Initialise them here
-	foreach ($teams as $login => $team ) {
-		$SCORES[$login]['num_correct'] = 0;
-		$SCORES[$login]['total_time']  = 0;
-		$SCORES[$login]['last_solved'] = 0;
-		$SCORES[$login]['teamname']    = $team['name'];
-		$SCORES[$login]['categoryid']  = $team['categoryid'];
-		$SCORES[$login]['sortorder']   = $team['sortorder'];
-	}
-
-	// loop all info the scoreboard cache and put it in our own datastructure
-	while ( $srow = $scoredata->next() ) {
-	
-		// skip this row if the team or problem is not known by us
-		if ( ! array_key_exists ( $srow['teamid'], $teams ) ||
-		     ! array_key_exists ( $srow['probid'], $probs ) ) continue;
-	
-		// fill our matrix with the scores from the database,
-		// we'll print this out later when we've sorted the teams
-		$THEMATRIX[$srow['teamid']][$srow['probid']] = array (
-			'correct' => (bool) $srow['is_correct'],
-			'submitted' => $srow['submissions'],
-			'time' => $srow['totaltime'],
-			'penalty' => $srow['penalty'] );
-
-		// calculate totals for this team
-		if ( $srow['is_correct'] ) {
-			$SCORES[$srow['teamid']]['num_correct']++;
-			if ( $srow['totaltime'] > $SCORES[$srow['teamid']]['last_solved'] ) {
-				$SCORES[$srow['teamid']]['last_solved'] = $srow['totaltime'];
-			}
-			$SCORES[$srow['teamid']]['total_time'] += $srow['totaltime'] + $srow['penalty'];
-		}
-
-	}
-
-	// sort the array using our custom comparison function
-	uasort($SCORES, 'cmp');
-
-	// print the whole thing
+	// print the main scoreboard rows
 	$prevsortorder = -1;
 	foreach( $SCORES as $team => $totals ) {
 
@@ -180,10 +300,8 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		if ( $totals['sortorder'] != $prevsortorder ) {
 			echo ' class="sortorderswitch"';
 			$prevsortorder = $totals['sortorder'];
-			$rank = 0; // reset team position on switch to different category
 			$prevteam = null;
 		}
-		$rank++;
 		// check whether this is us, otherwise use category colour
 		if ( @$myteamid == $team ) {
 			echo ' id="scorethisisme"';
@@ -193,8 +311,8 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		}
 		echo '><td class="scorepl">';
 		// Only print rank when score is different from the previous team
-		if ( !isset($prevteam) || cmpscore($SCORES[$prevteam], $totals)!=0 ) {
-			echo jurylink(null,$rank,$isjury);
+		if ( !isset($prevteam) || $SCORES[$prevteam]['rank']!=$totals['rank'] ) {
+			echo jurylink(null,$totals['rank'],$isjury);
 		} else {
 			echo jurylink(null,'',$isjury);
 		}
@@ -244,53 +362,28 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 			'<td class="scorenc">' . jurylink(null,$totals['num_correct'],$isjury) . '</td>' .
 			'<td class="scorett">' . jurylink(null,$totals['total_time'], $isjury) . '</td>';
 
-		// keep summary statistics for the bottom row of our table
-		$SUMMARY['num_correct'] += $totals['num_correct'];
-		$SUMMARY['total_time']  += $totals['total_time'];
-		if ( SHOW_AFFILIATIONS ) {
-			if ( ! empty($teams[$team]['affilid']) )
-				@$SUMMARY['affils'][$teams[$team]['affilid']]++;
-			if ( ! empty($teams[$team]['country']) )
-				@$SUMMARY['countries'][$teams[$team]['country']]++;
-		}
-		
 		// for each problem
 		foreach ( array_keys($probs) as $prob ) {
 
-			// if we have scores, use them, else, provide the defaults
-			// (happens when nothing submitted for this problem,team yet)
-			if ( isset ( $THEMATRIX[$team][$prob] ) ) {
-				$pdata = $THEMATRIX[$team][$prob];
-			} else {
-				$pdata = array ( 'submitted' => 0, 'correct' => 0,
-				                 'time' => 0, 'penalty' => 0);
-			}
-
 			echo '<td class=';
 			// CSS class for correct/incorrect/neutral results
-			if( $pdata['correct'] ) { 
+			if( $MATRIX[$team][$prob]['is_correct'] ) { 
 				echo '"score_correct"';
-			} elseif ( $pdata['submitted'] > 0 ) {
+			} elseif ( $MATRIX[$team][$prob]['num_submissions'] > 0 ) {
 				echo '"score_incorrect"';
 			} else {
 				echo '"score_neutral"';
 			}
 			// number of submissions for this problem
-			$str = $pdata['submitted'];
+			$str = $MATRIX[$team][$prob]['num_submissions'];
 			// if correct, print time scored
-			if( $pdata['correct'] ) {
-				$str .= ' (' . $pdata['time'] . ' + ' . $pdata['penalty'] . ')';
+			if( $MATRIX[$team][$prob]['is_correct'] ) {
+				$str .= ' (' . $MATRIX[$team][$prob]['time'] . ' + ' .
+				               $MATRIX[$team][$prob]['penalty'] . ')';
 			}
-			echo '>' . jurylink('team.php?id=' . urlencode($team ) .
+			echo '>' . jurylink('team.php?id=' . urlencode($team) .
 								'&amp;restrict=probid:' . urlencode($prob),
 			                    $str,$isjury) . '</td>';
-			
-			// update summary data for the bottom row
-			@$SUMMARY[$prob]['submissions'] += $pdata['submitted'];
-			@$SUMMARY[$prob]['correct'] += ($pdata['correct'] ? 1 : 0);
-			if( $pdata['time'] > 0 ) {
-				@$SUMMARY[$prob]['times'][] = $pdata['time'];
-			}
 		}
 		echo "</tr>\n";
 	}
@@ -309,20 +402,13 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		'<td class="scorett" title="total time">' .
 		jurylink(null,$SUMMARY['total_time'],$isjury) . '</td>';
 
-	foreach( $probs as $pr ) {
-		if ( !isset($SUMMARY[$pr['probid']]) ) {
-			$SUMMARY[$pr['probid']]['submissions'] = 0;
-			$SUMMARY[$pr['probid']]['correct'] = 0;
-		}
-		$str = $SUMMARY[$pr['probid']]['submissions'] . ' / ' .
-		       $SUMMARY[$pr['probid']]['correct'] . ' / ';
-		if ( isset($SUMMARY[$pr['probid']]['times']) ) {
-			$str .= min(@$SUMMARY[$pr['probid']]['times']);
-		} else {
-			$str .= '-';
-		}
+	foreach( array_keys($probs) as $prob ) {
+		$str = $SUMMARY['problems'][$prob]['num_submissions'] . ' / ' .
+		       $SUMMARY['problems'][$prob]['num_correct'] . ' / ' .
+			   ( isset($SUMMARY['problems'][$prob]['best_time']) ? 
+				 $SUMMARY['problems'][$prob]['best_time'] : '-' );
 		echo '<td>' .
-			jurylink('problem.php?id=' . urlencode($pr['probid']),$str,$isjury) .
+			jurylink('problem.php?id=' . urlencode($prob),$str,$isjury) .
 			'</td>';
 	}
 	echo "</tr>\n</tbody>\n</table>\n\n";
@@ -382,7 +468,7 @@ function putTeamRow($cdata, $teamid) {
 	echo "<tr class=\"scoreheader\"><th>problem</th><th>score</th></tr>\n";
 
 	// initialize the arrays we'll build from the data
-	$THEMATRIX = array();
+	$MATRIX = array();
 
 	// for a team, we always display the "current" information, that is,
 	// from scoreboard_jury
@@ -395,11 +481,11 @@ function putTeamRow($cdata, $teamid) {
 		if ( ! array_key_exists ( $srow['probid'], $probs ) ) continue;
 	
 		// fill our matrix with the scores from the database,
-		$THEMATRIX[$srow['probid']] = array (
-			'correct' => (bool) $srow['is_correct'],
-			'submitted' => $srow['submissions'],
-			'time' => $srow['totaltime'],
-			'penalty' => $srow['penalty'] );
+		$MATRIX[$srow['probid']] = array (
+			'is_correct'      => (bool) $srow['is_correct'],
+			'num_submissions' => $srow['submissions'],
+			'time'            => $srow['totaltime'],
+			'penalty'         => $srow['penalty'] );
 	}
 
 	$SUMMARY = array('num_correct' => 0, 'total_time' => 0);
@@ -407,10 +493,10 @@ function putTeamRow($cdata, $teamid) {
 	foreach ( $probs as $prob => $probdata ) {
 		// if we have scores, use them, else, provide the defaults
 		// (happens when nothing submitted for this problem,team yet)
-		if ( isset ( $THEMATRIX[$prob] ) ) {
-			$pdata = $THEMATRIX[$prob];
+		if ( isset ( $MATRIX[$prob] ) ) {
+			$pdata = $MATRIX[$prob];
 		} else {
-			$pdata = array ( 'submitted' => 0, 'correct' => 0,
+			$pdata = array ( 'num_submissions' => 0, 'is_correct' => 0,
 			                 'time' => 0, 'penalty' => 0);
 		}
 		echo '<tr><td class="probid" title="' .
@@ -420,15 +506,15 @@ function putTeamRow($cdata, $teamid) {
 			       BALLOON_SYM . '</span> ' : '' ) .
 			htmlspecialchars($prob) . '</td><td class="';
 		// CSS class for correct/incorrect/neutral results
-		if( $pdata['correct'] ) { 
+		if( $pdata['is_correct'] ) { 
 			echo 'score_correct';
-		} elseif ( $pdata['submitted'] > 0 ) {
+		} elseif ( $pdata['num_submissions'] > 0 ) {
 			echo 'score_incorrect';
 		} else {
 			echo 'score_neutral';
 		}
 		// number of submissions for this problem
-		echo '">' . $pdata['submitted'];
+		echo '">' . $pdata['num_submissions'];
 		// if correct, print time scored
 		if( ($pdata['time']+$pdata['penalty']) > 0) {
 			echo " (" . $pdata['time'] . ' + ' . $pdata['penalty'] . ")";
@@ -478,9 +564,13 @@ function cmpscore($a, $b) {
 	if ( $a['total_time'] != $b['total_time'] ) {
 		return $a['total_time'] < $b['total_time'] ? -1 : 1;
 	}
-	// else, fastest submission time for latest correct problem
-	if ( $a['last_solved'] != $b['last_solved'] ) {
-		return $a['last_solved'] < $b['last_solved'] ? -1 : 1;
+	// else tie-breaker rule: fastest submission time for latest
+	// correct problem, when times are equal, compare one-to-latest,
+	// etc...
+	$atimes = rsort($a['solve_times']);
+	$btimes = rsort($b['solve_times']);
+	for($i = 0; $i < count($atimes); $i++) {
+		if ( $atimes[$i] != $b[$i] ) return $atimes[$i] < $b[$i] ? -1 : 1;
 	}
 	return 0;
 }
@@ -510,4 +600,3 @@ function cmp($a, $b) {
 	// undecided, should never happen in practice
 	return 0;
 }
-
