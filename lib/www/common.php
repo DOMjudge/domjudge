@@ -41,7 +41,15 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 	 */
 
 	$cid = $cdata['cid'];
-	
+
+	if ( isset($restrictions['verified'] ) {
+		if ( $restrictions['verified'] ) {
+			$verifyclause = '(j.verified = 1) ';
+		} else {
+			$verifyclause = '(j.verified = 0 OR s.judgehost IS NULL) ';
+		}
+	}
+
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid,
 	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
 	               p.name AS probname, l.name AS langname,
@@ -56,11 +64,10 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 	               (isset($restrictions['probid']) ? 'AND s.probid = %s ' : '%_') .
 	               (isset($restrictions['langid']) ? 'AND s.langid = %s ' : '%_') .
 	               (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') .
-	               (isset($restrictions['verified'])  ? 'AND j.verified  = %s ' : '%_') .
+	               (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '') .
 	               'ORDER BY s.submittime DESC, s.submitid DESC',
 	              $cid, @$restrictions['teamid'], @$restrictions['probid'],
-	              @$restrictions['langid'], @$restrictions['judgehost'],
-				  @$restrictions['verified']);
+	              @$restrictions['langid'], @$restrictions['judgehost']);
 
 	// nothing found...
 	if( $res->count() == 0 ) {
