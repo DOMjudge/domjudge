@@ -42,7 +42,7 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE) {
 
 	$cid = $cdata['cid'];
 
-	if ( isset($restrictions['verified'] ) {
+	if ( isset($restrictions['verified']) ) {
 		if ( $restrictions['verified'] ) {
 			$verifyclause = '(j.verified = 1) ';
 		} else {
