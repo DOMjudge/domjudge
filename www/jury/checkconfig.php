@@ -144,8 +144,10 @@ while($cdata = $res->next()) {
 	$CHECKER_ERRORS = array();
 	check_contest($cdata, array('cid' => $cdata['cid']));
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
-		$detail .= $chk_err;
-		$has_errors = TRUE;
+		foreach($CHECKER_ERRORS as $chk_err) {
+			$detail .= $chk_err . "\n";
+			$has_errors = TRUE;
+		}
 	} else {
 		$detail .= "OK";
 	}
