@@ -13,24 +13,6 @@
  * turn calls errorstring to generate the actual error message;
  */
 
-/* Check for GNU libc version of strerror_r, which doesn't comply with
- * POSIX standards. From man-page: 
- *   
- *   char *strerror_r(int errnum, char *buf, size_t n);
- * 
- * is a GNU extension used by glibc (since 2.0), and must be regarded
- * as obsolete in view of SUSv3.  The GNU version may, but need not,
- * use the user-supplied buffer. If it does, the result may be
- * truncated in case the supplied buffer is too small. The result is
- * always NUL-terminated.
- */
-#if defined(__GLIBC__) && __GLIBC__==2 && __GLIBC_MINOR__<=3
-#define GLIB_STRERROR 1
-#else
-/* In glibc >= 2.4 we have the POSIX version of 'strerror_r' when defining: */
-#define _XOPEN_SOURCE 600
-#endif
-
 #include "lib.error.h"
 
 #include <stdlib.h>
@@ -127,48 +109,40 @@ void logmsg(int msglevel, const char *mesg, ...)
 /* Function to generate error/warning string */
 char *errorstring(const char *type, int errnum, const char *mesg)
 {
-	int buffersize;
-	char *buffer;
-	char *endptr; /* pointer to current end of buffer */
-#ifdef GLIB_STRERROR
-	char *tmpstr;
-	int tmplen;
-#endif
+	size_t buffersize;
+	char *errtype, *errdescr, *buffer;
 
-	if ( type==NULL ) {
-		type = strdup(ERRSTR);
-		if ( type==NULL ) abort();
+	errtype = (char *)type;
+	if ( errtype==NULL ) {
+		errtype = strdup(ERRSTR);
+		if ( errtype==NULL ) abort();
 	}
 
-	/* 256 > maxlength strerror() */
-	buffersize = strlen(type) + (mesg==NULL ? 0 : strlen(mesg)) + 256;
-
-	endptr = buffer = (char *) malloc(buffersize);
-	if ( buffer==NULL ) abort();
-
-	sprintf(buffer,type);
-	endptr = strchr(endptr,0);
-	
-	if ( mesg!=NULL ) {
-		snprintf(endptr, buffersize-strlen(buffer), ": %s", mesg);
-		endptr = strchr(endptr,0);
-	}		
-	if ( errnum!=0 ) {
-		snprintf(endptr, buffersize-strlen(buffer), ": ");
-		endptr = strchr(endptr,0);
-#ifdef GLIB_STRERROR
-		tmplen = buffersize-strlen(buffer);
-		tmpstr = strerror_r(errnum, endptr, tmplen);
-		strncat(endptr, tmpstr, tmplen);
-#else
-		strerror_r(errnum, endptr, buffersize-strlen(buffer));
-#endif
-		endptr = strchr(endptr,0);
+	errdescr = NULL;
+	if ( errnum != 0 ) {
+		errdescr = strerror(errno);
+	} else if ( mesg == NULL ) {
+		errdescr = strdup("unknown error");
 	}
-	if ( mesg==NULL && errnum==0 ) {
-		sprintf(endptr,": unknown error");
-		endptr = strchr(endptr,0);
-	}
+
+	// buffer = errtype . ": " . mesg . errdescr . "\0"
+	buffersize = strlen(errtype)
+				+ (errdescr == NULL ? 0 : strlen(errdescr))
+				+ (mesg == NULL     ? 0 : strlen(mesg))
+				+ 3;
+
+	buffer = (char *)malloc(sizeof(char) * buffersize);
+	if ( buffer==NULL )		abort();
+	buffer[0] = '\0';
+
+	strcat(buffer, errtype);
+	strcat(buffer, ": ");
+
+	if ( mesg != NULL )     strcat(buffer, mesg);
+	if ( errdescr != NULL )	strcat(buffer, errdescr);
+
+	if ( type == NULL )     free(errtype);
+	if ( errdescr != NULL ) free(errdescr);
 
 	return buffer;
 }
