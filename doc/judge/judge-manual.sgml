@@ -250,8 +250,9 @@ a code.
 <tag>RUN-ERROR     </tag>a kind of problem while running the program occurred, for example
                          segmentation fault, division by zero or exitcode unequal to 0;
 <tag>NO-OUTPUT     </tag>there was no output at all from the program;
-<tag>WRONG-ANSWER</tag> the output of the program did not exactly match the expected output;
-<tag>PRESENTATION-ERROR</tag> the submission only had difference in whitespace with the reference output **.
+<tag>WRONG-ANSWER  </tag>the output of the program did not exactly match the expected output;
+<tag>PRESENTATION-ERROR</tag>the submission only had presentation errors; e.g. difference
+                             in whitespace with the reference output **.
 </descrip>
 * in the team interface a submission will only show as PENDING to
 prevent leaking information of problem timelimits. The jury can see
