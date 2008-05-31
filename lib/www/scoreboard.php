@@ -69,7 +69,7 @@ function genScoreBoard($cdata, $isjury = FALSE) {
 
 	// initialize the arrays we'll build from the data
 	$MATRIX = $SCORES = array();
-	$SUMMARY = array('num_correct' => 0, 'total_time' => 0,
+	$SUMMARY = array('num_correct' => 0, 
 	                 'affils' => array(), 'countries' => array(),
 					 'problems' => array());
 
@@ -144,7 +144,6 @@ function genScoreBoard($cdata, $isjury = FALSE) {
 
 		// keep summary statistics for the bottom row of our table
 		$SUMMARY['num_correct'] += $totals['num_correct'];
-		$SUMMARY['total_time']  += $totals['total_time'];
 		if ( ! empty($teams[$team]['affilid']) ) @$SUMMARY['affils'][$totals['affilid']]++;
 		if ( ! empty($teams[$team]['country']) ) @$SUMMARY['countries'][$totals['country']]++;
 		
@@ -395,7 +394,8 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		( SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
 		  jurylink('team_affiliations.php',count($SUMMARY['affils']) . ' / ' .
 				   count($SUMMARY['countries']),$isjury) . '</td>' : '' ) .
-		'<td title=" " colspan="3">' . jurylink(null,'Summary',$isjury) . '</td>';
+		'<td title=" ">' . jurylink(null,'Summary',$isjury) . '</td>' .
+		'<td title="total solved" colspan="2">' . jurylink(null,$SUMMARY['num_correct'],$isjury)  . '</td>';
 
 	foreach( array_keys($probs) as $prob ) {
 		$str = $SUMMARY['problems'][$prob]['num_submissions'] . ' / ' .
