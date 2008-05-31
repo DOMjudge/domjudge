@@ -15,7 +15,7 @@
 
 /** Loglevels */
 define_syslog_variables();
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_NOTICE);
 
 /** Character set */
 define('DJ_CHARACTER_SET', 'utf-8');
@@ -37,3 +37,6 @@ require('passwords.php');
 
 /*** GLOBAL CONFIG INCLUDE START ***/
 /*** GLOBAL CONFIG INCLUDE END ***/
+
+/** Set error reporting to all in debugging mode */
+if ( DEBUG & DEBUG_PHP_NOTICE ) error_reporting(E_ALL);

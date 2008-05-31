@@ -18,7 +18,7 @@ if ( @$_SERVER['REMOTE_USER'] == "jury" ) {
 	require_once(SYSTEM_ROOT . '/lib/use_db_team.php');
 }
 
-if( DEBUG ) {
+if( DEBUG & DEBUG_TIMINGS ) {
 	include_once (SYSTEM_ROOT . '/lib/lib.timer.php');
 }
 

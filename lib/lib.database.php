@@ -30,8 +30,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 if (!@define('INCLUDED_LIB_DATABASE',true)) return;
 
-//define('DEBUG'    , 0 );
-
 define('DB_EQ'    , '='        );
 define('DB_NEQ'   , '!='       );
 define('DB_LIKE'  , 'like'     );
@@ -500,7 +498,7 @@ class db
 		list($micros2, $secs2) = explode(' ',microtime());
 		$elapsed_ms = round(1000*(($secs2 - $secs) + ($micros2 - $micros)));
 
-		if ( DEBUG ) {
+		if ( DEBUG & DEBUG_SQL ) {
 			global $DEBUG_NUM_QUERIES;
 			printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>\n",
 				htmlspecialchars($query));

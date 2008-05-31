@@ -11,7 +11,7 @@
 // please keep any includes synchronised with checkpasswd.php
 require_once('../../etc/config.php');
 
-if( DEBUG ) {
+if( DEBUG & DEBUG_TIMINGS ) {
 	include_once (SYSTEM_ROOT . '/lib/lib.timer.php');
 }
 

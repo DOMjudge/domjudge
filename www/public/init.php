@@ -10,7 +10,7 @@
 
 require_once('../../etc/config.php');
 
-if( DEBUG ) {
+if( DEBUG & DEBUG_TIMINGS ) {
 	include_once (SYSTEM_ROOT . '/lib/lib.timer.php');
 }
 
