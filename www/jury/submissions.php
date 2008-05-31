@@ -8,48 +8,41 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-if ( isset($_REQUEST['showverified']) ) {
-	$showverified = $_REQUEST['showverified'] ? 1 : 0;
-} else {
-	$showverified = 1;
+$show = 0;
+if ( isset($_REQUEST['show']) ) {
+	$show = (int)$_REQUEST['show'];
+	if($show < 0 || $show > 3)	$show = 0;
 }
-if ( isset($_REQUEST['showall']) ) {
-	$showall = $_REQUEST['showall'] ? 1 : 0;
-} else {
-	$showall = 0;
+if ( isset($_REQUEST['view']) ) {
+	switch( $_REQUEST['view'] ) {
+		case 'unverified':	$show = 2;	break;
+		case 'all':			$show = 1;	break;
+		case 'first+50':
+		default:			$show = 0;	break;
+	}
 }
 
 require('init.php');
-$refresh = '15;url=' . getBaseURI() . 'jury/submissions.php?showverified=' .
-	$showverified .  '&showall=' . $showall;
-
-$title = 'Submissions' . ( $showverified ? '' : ' (only unverified)' );
+$refresh = '15;url=' . getBaseURI() . 'jury/submissions.php?show=' . $show;
+$title = 'Submissions';
 
 require(SYSTEM_ROOT . '/lib/www/header.php');
 
 echo "<h1>$title</h1>\n\n";
 
 $restrictions = array();
-if ( !$showverified ) $restrictions['verified'] = 0;
+if ( $show == 2 ) $restrictions['verified'] = 0;
 
 require_once(SYSTEM_ROOT . '/lib/www/forms.php');
 
-echo "<p>\n";
-if(!$showall) {
-	echo addForm('submissions.php', 'get') .
-		 addHidden('showverified', (int)!$showverified) .
-		 addHidden('showall', (int)$showall) .
-		 addSubmit(($showverified ? 'show only unverified' : 'back')) .
-		 addEndForm();
-}
-if($showverified) {
-	echo addForm('submissions.php', 'get') .
-		 addHidden('showall', (int)!$showall) .
-		 addSubmit((!$showall ? 'show all submissions' : 'back')) .
-		 addEndForm();
-}
-echo "</p>\n" ;
+echo addForm('submissions.php', 'get')
+	. "<p>\n"
+	. addSubmit('first 50',   'view', null, ($show != 0))
+	. addSubmit('all',        'view', null, ($show != 1))
+	. addSubmit('unverified', 'view', null, ($show != 2))
+	. "</p>\n"
+	. addEndForm();
 
-putSubmissions($cdata, $restrictions, TRUE, ($showall ? 0 : 50));
+putSubmissions($cdata, $restrictions, TRUE, ($show == 0 ? 50 : 0));
 
 require(SYSTEM_ROOT . '/lib/www/footer.php');
