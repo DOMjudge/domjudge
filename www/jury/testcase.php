@@ -14,6 +14,8 @@ $probid = @$_REQUEST['probid'];
 
 require('init.php');
 
+requireAdmin();
+
 $result = '';
 if ( isset($_POST['probid']) ) {
 	foreach(array('input','output') as $inout) {

@@ -138,11 +138,17 @@ echo addForm($pagename) . "<p>\n" .
 	$tc = $DB->q("MAYBETUPLE SELECT md5sum_input, md5sum_output FROM testcase WHERE probid = %s",
 		$data['probid']);
 	foreach(array('input','output') as $inout) {
-		echo $inout . ": <a href=\"testcase.php?probid=" .
+		echo $inout . ": ";
+		if ( IS_ADMIN ( "<a href=\"testcase.php?probid=" .
 			urlencode($data['probid']) . "\">" .
 			($tc['md5sum_' .$inout]?
 				htmlspecialchars($tc['md5sum_'.$inout]):'none') .
-			"</a><br />";
+			"</a>";
+		else {
+			echo ($tc['md5sum_' .$inout]?
+				htmlspecialchars($tc['md5sum_'.$inout]):'none')
+		}
+		echo "<br />\n";
 	}
 
 ?></td></tr>
