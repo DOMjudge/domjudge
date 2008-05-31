@@ -54,6 +54,7 @@ Version 2.2.0 - SVN
  - Display time left to end of contest on every page (Closes: #1960940).
  - Move php files that shouldn't be served to lib/www (Closes: #1957891).
  - The admin can exclude submissions from a teams score (Closes: #1742043).
+ - Limit jury submissions page by default to 50 submissions (Closes: #1964747).
 
 Version 2.1.1 - SVN
 -------------------
