@@ -18,6 +18,7 @@ if( DEBUG & DEBUG_TIMINGS ) {
 require_once(SYSTEM_ROOT . '/lib/lib.error.php');
 require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
 require_once(SYSTEM_ROOT . '/lib/use_db_team.php');
+require_once(SYSTEM_ROOT . '/lib/www/common.php');
 
 $ip = $_SERVER['REMOTE_ADDR'];
 $row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
