@@ -13,10 +13,15 @@ if ( isset($_REQUEST['showverified']) ) {
 } else {
 	$showverified = 1;
 }
+if ( isset($_REQUEST['showall']) ) {
+	$showall = $_REQUEST['showall'] ? 1 : 0;
+} else {
+	$showall = 0;
+}
 
 require('init.php');
 $refresh = '15;url=' . getBaseURI() . 'jury/submissions.php?showverified=' .
-	$showverified;
+	$showverified .  '&showall=' . $showall;
 
 $title = 'Submissions' . ( $showverified ? '' : ' (only unverified)' );
 
@@ -29,11 +34,22 @@ if ( !$showverified ) $restrictions['verified'] = 0;
 
 require_once(SYSTEM_ROOT . '/lib/www/forms.php');
 
-echo addForm('submissions.php', 'get') . "<p>\n" .
-	addHidden('showverified', (int)!$showverified) .
-	addSubmit(($showverified ? 'show only unverified' : 'show all')) . "</p>\n" .
-	addEndForm();
+echo "<p>\n";
+if(!$showall) {
+	echo addForm('submissions.php', 'get') .
+		 addHidden('showverified', (int)!$showverified) .
+		 addHidden('showall', (int)$showall) .
+		 addSubmit(($showverified ? 'show only unverified' : 'back')) .
+		 addEndForm();
+}
+if($showverified) {
+	echo addForm('submissions.php', 'get') .
+		 addHidden('showall', (int)!$showall) .
+		 addSubmit((!$showall ? 'show all submissions' : 'back')) .
+		 addEndForm();
+}
+echo "</p>\n" ;
 
-putSubmissions($cdata, $restrictions, TRUE);
+putSubmissions($cdata, $restrictions, TRUE, ($showall ? 0 : 50));
 
 require(SYSTEM_ROOT . '/lib/www/footer.php');
