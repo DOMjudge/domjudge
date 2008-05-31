@@ -140,7 +140,7 @@ legend {
 	color: black;
 }
 
-.scoreboard .scoretn { padding: 0px; }
+.scoreboard .scoretn { padding: 0px; width: 25ex; }
 .scoreboard .scoreaf { white-space: nowrap; }
 
 .scoreheader {
@@ -152,7 +152,9 @@ legend {
 .score_neutral   { background: white;   }
 
 #scoresolv,#scoretotal { width: 5em; }
-.scorenc,.scorett,.scorepl { text-align: right; }
+.scorenc,.scorett,.scorepl { text-align: right; width: 2ex; }
+td.scorenc { border-color: silver; }
+
 .scoreprob { width: 7em; }
 .scoreaffil { text-align: center; }
 

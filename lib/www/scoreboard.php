@@ -278,8 +278,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		( SHOW_AFFILIATIONS ? '<th title="team affiliation" scope="col">' .
 		jurylink('team_affiliations.php','affil.',$isjury) . '</th>' : '' ) .
 		'<th title="team name" scope="col">' . jurylink('teams.php','team',$isjury) . '</th>' .
-		'<th title="problems solved" scope="col">' . jurylink(null,'solved',$isjury) . '</th>' .
-		'<th title="penalty time" scope="col">' . jurylink(null,'time',$isjury) . "</th>\n";
+		'<th title="# solved / penalty time" colspan="2" scope="col">' . jurylink(null,'score',$isjury) . "</th>\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),
@@ -396,11 +395,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		( SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
 		  jurylink('team_affiliations.php',count($SUMMARY['affils']) . ' / ' .
 				   count($SUMMARY['countries']),$isjury) . '</td>' : '' ) .
-		'<td title=" ">' . jurylink(null,'Summary',$isjury) . '</td>' .
-		'<td class="scorenc" title="total solved">' .
-		jurylink(null,$SUMMARY['num_correct'],$isjury) . '</td>' .
-		'<td class="scorett" title="total time">' .
-		jurylink(null,$SUMMARY['total_time'],$isjury) . '</td>';
+		'<td title=" " colspan="3">' . jurylink(null,'Summary',$isjury) . '</td>';
 
 	foreach( array_keys($probs) as $prob ) {
 		$str = $SUMMARY['problems'][$prob]['num_submissions'] . ' / ' .
