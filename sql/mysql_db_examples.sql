@@ -87,3 +87,10 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `ipaddress`, `passwd`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 3, 'UU', '127.0.0.1', NULL, NULL, NULL, NULL);
 INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `ipaddress`, `passwd`, `room`, `comments`, `teampage_first_visited`) VALUES ('team01', 'Some very cool teamname!', 1, NULL, NULL, MD5('mypassword'), NULL, NULL, NULL);
 
+-- 
+-- Dumping data for table `testcase`
+-- 
+
+INSERT INTO `testcase` (`id`, `md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `description`) VALUES (1, 'b026324c6904b2a9cb4b88d6d61c81d1', '59ca0efa9f5633cb0371bbc0355478d8', 0x310a, 0x48656c6c6f20776f726c64210a, 'hello', NULL);
+INSERT INTO `testcase` (`id`, `md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `description`) VALUES (2, '2c14f1fc7da58c19226ad10f0270ee25', '0286d435ce63a624d8c6e7bab5ae1002', 0x380a2b300a312e300a3245300a330a342e303030303030303030303030300a352e303030303030303030303030310a496e660a6e616e0a, 0x696e660a312e300a302e35303030303030303030310a332e333333333333333333452d310a302e32350a32452d310a300a4e614e0a, 'fltcmp', NULL);
+
