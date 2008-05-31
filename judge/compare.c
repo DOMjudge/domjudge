@@ -256,7 +256,7 @@ void writediff()
 
 	/* Determine left/right printing length and construct format
 	   string for printf later */
-	for(i=0; i<2; i++) maxlinelen[0] = min(maxlinelen[0],maxprintlen);
+	for(i=0; i<2; i++) maxlinelen[i] = min(maxlinelen[i],maxprintlen);
 	sprintf(formatstr,"%%3d %%c%%-%ds %%c %%c%%s\n",(int)maxlinelen[0]+1);
 	
 	/* Print first differences found header at beginning of file */
