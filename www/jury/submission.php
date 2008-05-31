@@ -8,6 +8,37 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+function parseDiff($difftext){
+	$line = strtok($difftext,"\n"); //first line
+	sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff);
+	$return = sprintf("### DIFFERENCES FROM LINE <strong>%d</strong> ###\n", $firstdiff);
+	$line = strtok("\n");
+	$loc = (strlen($line) - 5) / 2;
+	while(strlen($line) != 0){
+		$lineno = substr($line,0,4);
+		$diffline = substr($line,4);
+		$midchar = $diffline[$loc];
+		switch($midchar){
+			case '=':
+				$formdiffline = "<span class='correct'>".$diffline."</span>";
+				break;
+			case '!':
+				$formdiffline = "<span class='differ'>".$diffline."</span>";
+				break;
+			case '$':
+				$formdiffline = "<span class='endline'>".$diffline."</span>";
+				break;
+			case '>':
+			case '<':
+				$formdiffline = "<span class='extra'>".$diffline."</span>";
+				break;
+		}
+		$return = $return . $lineno . " " . $formdiffline . "\n";
+		$line = strtok("\n");
+	}
+	return $return;
+}
+
 $pagename = basename($_SERVER['PHP_SELF']);
 
 $id = (int)$_REQUEST['id'];
@@ -23,7 +54,7 @@ $title = 'Submission s'.@$id;
 if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
-					s.submittime, s.valid, c.cid, c.contestname,
+					s.submittime, s.valid, c.cid, c.contestname, p.special_compare, 
                     t.name AS teamname, l.name AS langname, p.name AS probname
                     FROM submission s
                     LEFT JOIN team     t ON (t.login  = s.teamid)
@@ -225,8 +256,13 @@ if ( isset($jid) )  {
 	echo "<h3><a name=\"diff\"></a>Output diff</h3>\n\n";
 
 	if ( @$jud['output_diff'] ) {
-		echo "<pre class=\"output_text\">".
-			htmlspecialchars($jud['output_diff'])."</pre>\n\n";
+		echo "<pre class=\"output_text\">";
+		if(!empty($submdata['special_compare'])){
+			echo htmlspecialchars($jud['output_diff']);
+		} else {
+			echo parseDiff(htmlspecialchars($jud['output_diff']));
+		}
+		echo "</pre>\n\n";
 	} else {
 		echo "<p><em>There was no diff output.</em></p>\n";
 	}

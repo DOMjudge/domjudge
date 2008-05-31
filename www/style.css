@@ -74,6 +74,18 @@ tr.unread td {
 	font-family: monospace;	
 }
 
+span.differ {
+	color: Red;
+}
+
+span.endline {
+	color: Orange;
+}
+
+span.extra {
+	color: Red;
+}
+
 .teamid { font-family: monospace; }
 .probid, .langid { font-variant: small-caps; }
 

@@ -139,14 +139,16 @@ echo addForm($pagename) . "<p>\n" .
 		$data['probid']);
 	foreach(array('input','output') as $inout) {
 		echo $inout . ": ";
-		if ( IS_ADMIN ( "<a href=\"testcase.php?probid=" .
-			urlencode($data['probid']) . "\">" .
-			($tc['md5sum_' .$inout]?
-				htmlspecialchars($tc['md5sum_'.$inout]):'none') .
-			"</a>";
+		if ( IS_ADMIN )
+			echo '<a href="testcase.php?probid='.urlencode($data['probid']).'">'
+				. ($tc['md5sum_'.$inout]
+					? htmlspecialchars($tc['md5sum_'.$inout])
+					:'none')
+				. '</a>';
 		else {
-			echo ($tc['md5sum_' .$inout]?
-				htmlspecialchars($tc['md5sum_'.$inout]):'none')
+			echo ($tc['md5sum_' .$inout]
+					? htmlspecialchars($tc['md5sum_'.$inout])
+					: 'none');
 		}
 		echo "<br />\n";
 	}
