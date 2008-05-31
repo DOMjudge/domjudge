@@ -58,9 +58,11 @@ if ( isset($cdata['freezetime']) ) {
 // Don't output anything if before start of contest
 if ( ! empty($MATRIX) ) {
 
+	$rows = XMLaddnode($scoreboard, 'rows');
+
 	foreach( $SCORES as $team => $totals ) {
 
-		$row = XMLaddnode($scoreboard, 'row', NULL, array('rank' => $totals['rank']));
+		$row = XMLaddnode($rows, 'row', NULL, array('rank' => $totals['rank']));
 
 		XMLaddnode($row, 'team', $totals['teamname'],
 		           array('id' => $team, 'categoryid' => $totals['categoryid'],
@@ -69,10 +71,12 @@ if ( ! empty($MATRIX) ) {
 		XMLaddnode($row, 'num_solved', $totals['num_correct']);
 		XMLaddnode($row, 'totaltime',  $totals['total_time']);
 		
+		$problems = XMLaddnode($row, 'problems');
+
 		foreach( $MATRIX[$team] as $prob => $score ) {
 			
-			$elem = XMLaddnode($row, 'problem', NULL,
-			                   array('id' => $prob, 'is_correct' => $score['is_correct']));
+			$elem = XMLaddnode($problems, 'problem', NULL,
+			                   array('id' => $prob, 'correct' => ($score['is_correct']?'true':'false')));
 			
 			XMLaddnode($elem, 'num_submissions', $score['num_submissions']);
 			
@@ -90,8 +94,10 @@ if ( ! empty($MATRIX) ) {
 	XMLaddnode($summary, 'num_solved', $SUMMARY['num_correct']);
 
 	// Summary per problem
+	$problems = XMLaddnode($summary, 'problems');
+
 	foreach( $SUMMARY['problems'] as $prob => $data ) {
-		$elem = XMLaddnode($summary, 'problem', NULL, array('id' => $prob));
+		$elem = XMLaddnode($problems, 'problem', NULL, array('id' => $prob));
 
 		XMLaddnode($elem, 'num_submissions', $data['num_submissions']);
 		XMLaddnode($elem, 'num_solved', $data['num_correct']);
@@ -117,6 +123,8 @@ if ( ! empty($MATRIX) ) {
 		           array('id' => $categ, 'color' => $data['color']));
 	}
 }
+
+if ( !$xmldoc->schemaValidate('scoreboard.xsd') ) error('XML file not valid.');
 
 header('Content-Type: text/xml; charset=' . DJ_CHARACTER_SET);
 

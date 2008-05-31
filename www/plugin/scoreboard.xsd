@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="1">
+                <xs:element name="scoreboard" type="scoreboardType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="scoreboardType">
+		<xs:all minOccurs="0">
+			<xs:element name="contest" minOccurs="1">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="id" type="xs:integer" use="required"/>
+							<xs:attribute name="start" type="xs:token" use="required"/>
+							<xs:attribute name="end" type="xs:token" use="required"/>
+							<xs:attribute name="freeze" type="xs:token"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="rows" type="rowsType"/>
+			<xs:element name="summary" type="summaryType"/>
+			<xs:element name="problem_legend" type="problem_legendType"/>
+			<xs:element name="affiliation_legend" type="affiliation_legendType"/>
+			<xs:element name="category_legend" type="category_legendType"/>
+		</xs:all>
+    </xs:complexType>
+    <xs:complexType name="summaryType">
+		<xs:all>
+			<xs:element name="num_solved" type="xs:integer"/>
+			<xs:element name="problems" type="summaryProblemsType"/>
+		</xs:all>
+	</xs:complexType>
+    <xs:complexType name="summaryProblemsType">
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="problem">
+				<xs:complexType>
+					<xs:all>
+						<xs:element name="num_submissions" type="xs:integer"/>
+						<xs:element name="num_solved" type="xs:integer"/>
+						<xs:element name="best_time" type="xs:string"/>
+					</xs:all>
+					<xs:attribute name="id" type="xs:string" use="required"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+    <xs:complexType name="problem_legendType">
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="problem">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="id" type="xs:string" use="required"/>
+							<xs:attribute name="color" type="xs:token" use="required"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+    <xs:complexType name="affiliation_legendType">
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="affiliation">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="id" type="xs:string" use="required"/>
+							<xs:attribute name="country" type="xs:string" use="required"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+    <xs:complexType name="category_legendType">
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="category">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="id" type="xs:integer" use="required"/>
+							<xs:attribute name="color" type="xs:token" use="required"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+    <xs:complexType name="rowsType">
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="row" type="rowType"/>
+		</xs:sequence>
+	</xs:complexType>
+    <xs:complexType name="rowType">
+		<xs:all>
+			<xs:element name="team" type="teamType"/>
+			<xs:element name="num_solved" type="xs:integer"/>
+			<xs:element name="totaltime" type="xs:integer"/>
+			<xs:element name="problems" type="problemsType"/>
+		</xs:all>
+		<xs:attribute name="rank" type="xs:integer" use="required"/>
+    </xs:complexType>
+    <xs:complexType name="teamType">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="id" type="xs:string" use="required"/>
+				<xs:attribute name="categoryid" type="xs:integer" use="required"/>
+				<xs:attribute name="affilid" type="xs:string" use="required"/>
+				<xs:attribute name="country" type="xs:string" use="required"/>
+			</xs:extension>
+		</xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="problemsType">
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="problem" type="problemType"/>
+		</xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="problemType">
+		<xs:all>
+			<xs:element name="num_submissions" type="xs:integer"/>
+			<xs:element name="time" type="xs:integer" minOccurs="0"/>
+			<xs:element name="penalty" type="xs:string" minOccurs="0"/>
+		</xs:all>
+		<xs:attribute name="id" type="xs:string" use="required"/>
+		<xs:attribute name="correct" type="xs:boolean" use="required"/>
+    </xs:complexType>
+</xs:schema>
