@@ -10,18 +10,6 @@
 
 require('init.php');
 
-if ( isset($_REQUEST['fromid']) ) {
-	$fromid = (int) $_REQUEST['fromid'];
-} else {
-	$fromid = -1;
-}
-
-if ( isset($_REQUEST['toid']) ) {
-	$toid = (int) $_REQUEST['toid'];
-} else {
-	$toid = 2147483647; // This should be something like MAX_INT
-}
-
 $now = now();
 
 $cstarted = difftime($now, $cdata['starttime'])>0;
@@ -35,8 +23,11 @@ function infreeze($time) {
 	return FALSE;
 }
 
-$res = $DB->q('SELECT * FROM event WHERE eventid >= %i AND eventid < %i
-               ORDER BY eventid', $fromid, $toid);
+$res = $DB->q('SELECT *	FROM event WHERE '
+			. (isset($_REQUEST['fromid']) ? 'eventid >= %i ' : 'TRUE %_ ')
+			. 'AND '
+			. (isset($_REQUEST['toid']) ? 'eventid < %i ' : 'TRUE %_ ')
+			.'ORDER BY eventid', $_REQUEST['fromid'], $_REQUEST['toid']);
 
 $xmldoc = new DOMDocument('1.0', DJ_CHARACTER_SET);
 

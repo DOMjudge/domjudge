@@ -9,18 +9,7 @@
     </xs:element>
     <xs:complexType name="scoreboardType">
 		<xs:all minOccurs="0">
-			<xs:element name="contest" minOccurs="1">
-				<xs:complexType>
-					<xs:simpleContent>
-						<xs:extension base="xs:string">
-							<xs:attribute name="id" type="xs:integer" use="required"/>
-							<xs:attribute name="start" type="xs:token" use="required"/>
-							<xs:attribute name="end" type="xs:token" use="required"/>
-							<xs:attribute name="freeze" type="xs:token"/>
-						</xs:extension>
-					</xs:simpleContent>
-				</xs:complexType>
-			</xs:element>
+			<xs:element name="contest" type="contestType" minOccurs="1"/>
 			<xs:element name="rows" type="rowsType"/>
 			<xs:element name="summary" type="summaryType"/>
 			<xs:element name="problem_legend" type="problem_legendType"/>
@@ -28,9 +17,16 @@
 			<xs:element name="category_legend" type="category_legendType"/>
 		</xs:all>
     </xs:complexType>
+	<xs:complexType name="contestType">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attributeGroup ref="contestAttributes"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
     <xs:complexType name="summaryType">
 		<xs:all>
-			<xs:element name="num_solved" type="xs:integer"/>
+			<xs:element name="num_solved" type="xs:nonNegativeInteger"/>
 			<xs:element name="problems" type="summaryProblemsType"/>
 		</xs:all>
 	</xs:complexType>
@@ -39,11 +35,11 @@
 			<xs:element name="problem">
 				<xs:complexType>
 					<xs:all>
-						<xs:element name="num_submissions" type="xs:integer"/>
-						<xs:element name="num_solved" type="xs:integer"/>
-						<xs:element name="best_time" type="xs:string"/>
+						<xs:element name="num_submissions" type="xs:nonNegativeInteger"/>
+						<xs:element name="num_solved" type="xs:nonNegativeInteger"/>
+						<xs:element name="best_time" type="xs:nonNegativeInteger"/>
 					</xs:all>
-					<xs:attribute name="id" type="xs:string" use="required"/>
+					<xs:attributeGroup ref="problemIdAttribute"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
@@ -54,8 +50,8 @@
 				<xs:complexType>
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
-							<xs:attribute name="id" type="xs:string" use="required"/>
-							<xs:attribute name="color" type="xs:token" use="required"/>
+							<xs:attributeGroup ref="problemIdAttribute"/>
+							<xs:attributeGroup ref="colorAttribute"/>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
@@ -69,7 +65,7 @@
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
 							<xs:attribute name="id" type="xs:string" use="required"/>
-							<xs:attribute name="country" type="xs:string" use="required"/>
+							<xs:attributeGroup ref="countryAttribute"/>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
@@ -83,7 +79,7 @@
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
 							<xs:attribute name="id" type="xs:integer" use="required"/>
-							<xs:attribute name="color" type="xs:token" use="required"/>
+							<xs:attributeGroup ref="colorAttribute"/>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
@@ -98,11 +94,11 @@
     <xs:complexType name="rowType">
 		<xs:all>
 			<xs:element name="team" type="teamType"/>
-			<xs:element name="num_solved" type="xs:integer"/>
-			<xs:element name="totaltime" type="xs:integer"/>
+			<xs:element name="num_solved" type="xs:nonNegativeInteger"/>
+			<xs:element name="totaltime" type="xs:nonNegativeInteger"/>
 			<xs:element name="problems" type="problemsType"/>
 		</xs:all>
-		<xs:attribute name="rank" type="xs:integer" use="required"/>
+		<xs:attribute name="rank" type="xs:positiveInteger" use="required"/>
     </xs:complexType>
     <xs:complexType name="teamType">
 		<xs:simpleContent>
@@ -110,7 +106,7 @@
 				<xs:attribute name="id" type="xs:string" use="required"/>
 				<xs:attribute name="categoryid" type="xs:integer" use="required"/>
 				<xs:attribute name="affilid" type="xs:string" use="required"/>
-				<xs:attribute name="country" type="xs:string" use="required"/>
+				<xs:attributeGroup ref="countryAttribute"/>
 			</xs:extension>
 		</xs:simpleContent>
     </xs:complexType>
@@ -121,11 +117,27 @@
     </xs:complexType>
     <xs:complexType name="problemType">
 		<xs:all>
-			<xs:element name="num_submissions" type="xs:integer"/>
-			<xs:element name="time" type="xs:integer" minOccurs="0"/>
-			<xs:element name="penalty" type="xs:string" minOccurs="0"/>
+			<xs:element name="num_submissions" type="xs:nonNegativeInteger"/>
+			<xs:element name="time" type="xs:nonNegativeInteger" minOccurs="0"/>
+			<xs:element name="penalty" type="xs:nonNegativeInteger" minOccurs="0"/>
 		</xs:all>
-		<xs:attribute name="id" type="xs:string" use="required"/>
+		<xs:attributeGroup ref="problemIdAttribute"/>
 		<xs:attribute name="correct" type="xs:boolean" use="required"/>
     </xs:complexType>
+	<xs:attributeGroup name="contestAttributes">
+		<xs:attribute name="id" type="xs:integer" use="required"/>
+		<xs:attribute name="start" type="xs:token" use="required"/>
+		<xs:attribute name="end" type="xs:token" use="required"/>
+		<xs:attribute name="freeze" type="xs:token"/>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="problemIdAttribute">
+		<xs:attribute name="id" type="xs:string" use="required"/>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="countryAttribute">
+		<xs:attribute name="country" type="xs:string" use="required"/>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="colorAttribute">
+		<xs:attribute name="color" type="xs:string" use="required"/>
+	</xs:attributeGroup>
+
 </xs:schema>
