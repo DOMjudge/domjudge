@@ -88,7 +88,6 @@ if ( ! empty($MATRIX) ) {
 	$summary = XMLaddnode($scoreboard, 'summary');
 
 	XMLaddnode($summary, 'num_solved', $SUMMARY['num_correct']);
-	XMLaddnode($summary, 'total_time', $SUMMARY['total_time']);
 
 	// Summary per problem
 	foreach( $SUMMARY['problems'] as $prob => $data ) {
