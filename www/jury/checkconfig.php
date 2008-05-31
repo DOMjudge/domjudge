@@ -172,6 +172,15 @@ while($row = $res->next()) {
 			$details .= $row['probid'].': ' . $chk_err."\n";
 		}
 	}
+	if ( ! $DB->q("MAYBEVALUE SELECT count(id) FROM testcase WHERE input IS NOT NULL AND output IS NOT NULL AND probid = %s", $row['probid']) ) {
+		$details .= $row['probid'].": missing in/output testcase.\n";
+	}
+}
+foreach(array('input','output') as $inout) {
+	$mismatch = $DB->q("SELECT probid FROM testcase WHERE md5($inout) != md5sum_$inout");
+	while($r = $mismatch->next()) {
+		$details .= $r['probid'] . ": testcase MD5 sum mismatch between $inout and md5sum_$inout\n";
+	}
 }
 
 result('problems, languages, teams', 'Problems integrity',
