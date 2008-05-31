@@ -103,7 +103,7 @@ echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 
 ?>
 
-<table>
+<div class="col1"><table>
 <tr><td scope="row">Login:     </td><td class="teamid"><?=$row['login']?></td></tr>
 <tr><td scope="row">Name:      </td><td><?=htmlspecialchars($row['name'])?></td></tr>
 <tr><td scope="row">Has passwd:</td><td><?=(isset($row['passwd']) ? 'yes':'no')?>
@@ -112,33 +112,31 @@ echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 	alt="edit" title="set password" class="picto" /></a>
 <?php endif; ?>
 	</td></tr>
-<tr><td scope="row">Category:  </td><td><?=(int)$row['categoryid'].
-	' - '.htmlspecialchars($row['catname'])?></td></tr>
-<?php if (!empty($row['members'])): ?>
-<tr><td valign="top" scope="row">Members:   </td><td><?=
-	nl2br(htmlspecialchars($row['members']))?></td></tr>
-<?php endif; ?>
-<?php if (!empty($row['affilid'])): ?>
-<tr><td scope="row">Affiliation:</td><td><a href="team_affiliation.php?id=<?=
-	urlencode($row['affilid']) . '">' .
-	htmlspecialchars($row['affilid'] . ' - ' .
-	$row['affname'])?></a></td></tr>
-<?php endif; ?>
 <tr><td scope="row">Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
 	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):'-'?></td></tr>
 <?php if (!empty($row['room'])): ?>
 <tr><td scope="row">Room:</td><td><?=htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>
+</table></div>
+
+<div class="col2"><table>
+<tr><td scope="row">Category:  </td><td><?=htmlspecialchars($row['catname'])?></td></tr>
+<?php if (!empty($row['affilid'])): ?>
+<tr><td scope="row">Affiliation:</td><td><a href="team_affiliation.php?id=<?=
+	urlencode($row['affilid']) . '">' .
+	htmlspecialchars($row['affname'])?></a></td></tr>
+<?php endif; ?>
+<?php if (!empty($row['members'])): ?>
+<tr><td valign="top" scope="row">Members:   </td><td><?=
+	nl2br(htmlspecialchars($row['members']))?></td></tr>
+<?php endif; ?>
 <?php if (!empty($row['comments'])): ?>
 <tr><td valign="top" scope="row">Comments:</td><td><?=
 	nl2br(htmlspecialchars($row['comments']))?></td></tr>
 <?php endif; ?>
-</table>
-
+</table></div>
 
 <?php
-
-echo "<br />\n" . rejudgeForm('team', $id) . "\n\n";
 
 if ( IS_ADMIN ) {
 	echo "<p>" .
@@ -146,6 +144,9 @@ if ( IS_ADMIN ) {
 		delLink('team','login',$id) .
 		"</p>\n\n";
 }
+
+echo "<br />\n" . rejudgeForm('team', $id) . "\n\n";
+
 
 echo '<h3>Submissions';
 if ( isset($key) ) {
