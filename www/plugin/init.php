@@ -10,13 +10,7 @@
 
 require_once('../../etc/config.php');
 
-if ( @$_SERVER['REMOTE_USER'] == "jury" ) {
-	define('IS_JURY', 1);
-	require_once(SYSTEM_ROOT . '/lib/use_db_jury.php');
-} else {
-	define('IS_JURY', 0);
-	require_once(SYSTEM_ROOT . '/lib/use_db_team.php');
-}
+define('IS_JURY', (@$_SERVER['REMOTE_USER'] == "jury"));
 
 if( DEBUG & DEBUG_TIMINGS ) {
 	include_once (SYSTEM_ROOT . '/lib/lib.timer.php');
@@ -24,6 +18,7 @@ if( DEBUG & DEBUG_TIMINGS ) {
 
 require_once(SYSTEM_ROOT . '/lib/lib.error.php');
 require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
+require_once(SYSTEM_ROOT . '/lib/use_db_plugin.php');
 
 require_once(SYSTEM_ROOT . '/lib/www/common.php');
 require_once(SYSTEM_ROOT . '/lib/www/print.php');

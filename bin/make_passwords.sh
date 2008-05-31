@@ -31,7 +31,7 @@ else
 fi
 
 # Location of files:
-HTPASSWD="$SYSTEM_ROOT/etc/htpasswd-jury"
+HTPASSWD="$SYSTEM_ROOT/etc/htpasswd"
 SQLPASSWD="$SYSTEM_ROOT/sql/mysql_create_db.sql"
 PHPPASSWD="$SYSTEM_ROOT/etc/passwords.php"
 PASSWD_FILES="\
@@ -51,6 +51,7 @@ fi
 DEF_PASSWD_JURY="DOMJUDGE_JURY_PASSWD"
 DEF_PASSWD_TEAM="DOMJUDGE_TEAM_PASSWD"
 DEF_PASSWD_PUBLIC="DOMJUDGE_PUBLIC_PASSWD"
+DEF_PASSWD_PLUGIN="DOMJUDGE_PLUGIN_PASSWD"
 
 # Function to generate a (semi) random password. These are meant to be
 # only used internally.
@@ -110,18 +111,20 @@ string_replace ()
 }
 
 # Function to set (clear-text) passwords in relevant files.
-# Arguments: jury password, team password, public password.
+# Arguments: jury password, team password, public, plugin password.
 set_passwords()
 {
 # Update password info in php-config:
 string_replace "s!\('domjudge_jury'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1${1}!;\
                 s!\('domjudge_team'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1${2}!;\
-                s!\('domjudge_public'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1${3}!" "$PHPPASSWD"
+                s!\('domjudge_public'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1${3}!;\
+                s!\('domjudge_plugin'.*'pass'[ \t]*=>[ \t]*'\)[^']*!\1${4}!" "$PHPPASSWD"
 
 # Update password info in MySQL file:
 string_replace "s!\('domjudge_jury'.*PASSWORD('\)[^']*!\1${1}!;\
                 s!\('domjudge_team'.*PASSWORD('\)[^']*!\1${2}!;\
-                s!\('domjudge_public'.*PASSWORD('\)[^']*!\1${3}!" "$SQLPASSWD"
+                s!\('domjudge_public'.*PASSWORD('\)[^']*!\1${3}!;\
+                s!\('domjudge_plugin'.*PASSWORD('\)[^']*!\1${4}!" "$SQLPASSWD"
 }
 
 do_install()
@@ -151,6 +154,8 @@ EOF
 	PASSWD_TEAM=`generate_passwd`
 	echo "Generating 'domjudge_public' password..."
 	PASSWD_PUBLIC=`generate_passwd`
+	echo "Generating 'domjudge_plugin' password..."
+	PASSWD_PLUGIN=`generate_passwd`
 
 	cat <<EOF
 
@@ -162,11 +167,14 @@ EOF
 
 	PASSWD_JURY=`ask_passwd`
 
-	# Generate 'htpasswd' file for restricting access to jury
-	# webinterface:
-	$HTPASSWD_BINARY -b -c "$HTPASSWD" "domjudge_jury" "$PASSWD_JURY"
+	# Generate htpasswd file for restricting access to jury webinterface:
+	$HTPASSWD_BINARY -b -c "$HTPASSWD-jury" "domjudge_jury" "$PASSWD_JURY"
 	
-	set_passwords "$PASSWD_JURY" "$PASSWD_TEAM" "$PASSWD_PUBLIC"
+	# Generate htpasswd file for restricting access to plugin webinterface:
+	$HTPASSWD_BINARY -b -c "$HTPASSWD-plugin" "public" "public"
+	$HTPASSWD_BINARY -b -c "$HTPASSWD-plugin" "jury" "$PASSWD_JURY"
+	
+	set_passwords "$PASSWD_JURY" "$PASSWD_TEAM" "$PASSWD_PUBLIC" "$PASSWD_PLUGIN"
 }
 
 case "$TARGET" in
@@ -177,7 +185,8 @@ case "$TARGET" in
 		;;
 	distclean)
 		rm -f $HTPASSWD
-		set_passwords "$DEF_PASSWD_JURY" "$DEF_PASSWD_TEAM" "$DEF_PASSWD_PUBLIC"
+		set_passwords "$DEF_PASSWD_JURY" "$DEF_PASSWD_TEAM" \
+		              "$DEF_PASSWD_PUBLIC" "$DEF_PASSWD_PLUGIN"
 		;;
 	*) error "unknown target: '$TARGET'." ;;
 esac

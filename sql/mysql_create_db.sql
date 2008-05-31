@@ -21,4 +21,5 @@ USE mysql;
 REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_jury'  ,PASSWORD('DOMJUDGE_JURY_PASSWD'));
 REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_team'  ,PASSWORD('DOMJUDGE_TEAM_PASSWD'));
 REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_public',PASSWORD('DOMJUDGE_PUBLIC_PASSWD'));
+REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_plugin',PASSWORD('DOMJUDGE_PLUGIN_PASSWD'));
 FLUSH PRIVILEGES;

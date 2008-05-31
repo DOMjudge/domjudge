@@ -36,8 +36,9 @@ then
 	exit 1
 fi
 
-# This is where the variable replacement magic happens:
-eval echo "\"`cat $TEMPLATE`\"" > $TMPFILE
+# This is where the variable replacement magic happens;
+# We temporarily replace " -> % to avoid problems with bash quoting.
+eval echo "\"`cat $TEMPLATE | sed 's/\"/%/g'`\"" | sed 's/%/"/g' > $TMPFILE
 
 # Update the autogenerate header:
 sed -n "0,/$TAG START/ p" $TMPFILE > $CONFIG
