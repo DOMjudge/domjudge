@@ -68,7 +68,7 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 </td></tr>
 
 <tr><td><label for="data_0__name_">Problem name:</label></td>
-<td><?=addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
+<td><?=addInput('data[0][name]', @$row['name'], 30, 255)?></td></tr>
 
 <tr><td>Allow submit:</td>
 <td><?=addRadioButton('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> <label for="data_0__allow_submit_1">yes</label>
@@ -79,7 +79,7 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <?=addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
 
 <tr><td><label for="data_0__testdata_">Path to testdata:</label></td>
-<td><?=addInput('data[0][testdata]', @$row['testdata'], 20, 255)?></td></tr>
+<td><?=addInput('data[0][testdata]', @$row['testdata'], 30, 255)?></td></tr>
 
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
 <td><?=addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
@@ -91,10 +91,10 @@ href="http://www.w3schools.com/css/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?"></a></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>
-<td><?=addInput('data[0][special_run]', @$row['special_run'], 10, 25)?></td></tr>
+<td><?=addInput('data[0][special_run]', @$row['special_run'], 30, 25)?></td></tr>
 
 <tr><td><label for="data_0__special_compare_">Special compare script:</label></td>
-<td><?=addInput('data[0][special_compare]', @$row['special_compare'], 10, 25)?></td></tr>
+<td><?=addInput('data[0][special_compare]', @$row['special_compare'], 30, 25)?></td></tr>
 </table>
 
 <?php
