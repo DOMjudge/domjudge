@@ -17,7 +17,7 @@ if ( isset($_REQUEST['view']) ) {
 	switch( $_REQUEST['view'] ) {
 		case 'unverified':	$show = 2;	break;
 		case 'all':			$show = 1;	break;
-		case 'first+50':
+		case 'newest':
 		default:			$show = 0;	break;
 	}
 }
@@ -37,7 +37,7 @@ require_once(SYSTEM_ROOT . '/lib/www/forms.php');
 
 echo addForm('submissions.php', 'get')
 	. "<p>\n"
-	. addSubmit('first 50',   'view', null, ($show != 0))
+	. addSubmit('newest',     'view', null, ($show != 0))
 	. addSubmit('all',        'view', null, ($show != 1))
 	. addSubmit('unverified', 'view', null, ($show != 2))
 	. "</p>\n"
