@@ -154,9 +154,9 @@ submissions and problem headers.
 
 Before the contest starts, a number of things will need to be
 configured by the administrator. You can check that information,
-such as the problem set(s) and time limits, contest start- and
-end time, the time at which the scoreboard will be frozen and
-unfrozen, all from the links from the front page.
+such as the problem set(s), testdata and time limits, contest
+start- and end time, the time at which the scoreboard will be
+frozen and unfrozen, all from the links from the front page.
 
 Note that multiple contests can be defined, with corresponding
 problem sets, for example a practice session and the real contest.

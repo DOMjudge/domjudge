@@ -42,7 +42,6 @@ define ('LIBDIR', SYSTEM_ROOT . '/lib');
 $dirstocheck = array (
 	'SYSTEM_ROOT' => 'r',
 	'OUTPUT_ROOT' => 'rw',
-	'INPUT_ROOT' => 'r',
 	'LIBDIR' => 'r',
 	'INCOMINGDIR' => 'rw',
 	'SUBMITDIR' => 'rw',
@@ -80,24 +79,6 @@ if ( ! function_exists('pcntl_signal') ) {
 		"in to get graceful signal handling for daemons.");
 }
 
-// check problems. 
-logmsg(LOG_DEBUG, "checking problems");
-
-global $DB;	
-$probs = $DB->q('SELECT probid,testdata FROM problem ORDER BY cid,probid');
-
-// check whether the problem input/output is readable by me.
-$inout = array('in','out');
-while ( $row = $probs->next() ) {
-	foreach($inout as $i) {
-		$testdata = INPUT_ROOT . '/' . $row['testdata'] . '/testdata.' . $i;
-		if ( ! file_exists ( $testdata ) ) {
-			warn("problem $row[probid] testdata.$i [$testdata] does not exist!");
-		} elseif ( ! is_readable ( $testdata ) ) {
-			warn("problem $row[probid] testdata.$i [$testdata] not readable!");
-		}
-	}
-}
 
 logmsg(LOG_NOTICE, 'end: ' . $nwarnings .' warnings');
 

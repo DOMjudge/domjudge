@@ -426,16 +426,6 @@ different roots).
 	judging system are located here alongside some extra utilities and
 	the configuration of the system.
 
-<tag><tt>INPUT_ROOT</tt></tag>
-	The problem input and output testdata should be put here. This
-	directory-tree is for input only, so this directory
-	tree can be read-only.
-
-	Each problem should have its own directory within
-	<tt>INPUT_ROOT</tt>, where input and output testdata have to
-	be placed. See <ref id="contestsetup:testdata"
-	name="providing testdata">.
-
 <tag><tt>OUTPUT_ROOT</tt></tag>
 	Placed here are all submission files, logfiles and temporary
 	files, made while testing submissions. The following directories
@@ -447,8 +437,8 @@ different roots).
 		contains submission files from the commandline client, being
 		submitted or where a submission error has occurred.
 	<tag><tt>SUBMITDIR</tt></tag>
-		(optionally) contains all correctly submitted files: the
-		database is the authorative source.
+		(optionally) contains all correctly submitted files: as backup
+		only, the database is the authorative source.
 	<tag><tt>JUDGEDIR</tt></tag>
 		place where submissions are tested, each in its own
 		subdirectory. The system needs root access to this
@@ -966,9 +956,7 @@ problems, which can then be added to the contest quickly;
 <tt>allow_judge</tt> determines whether judgehosts will judge
 submissions for this problem. See also the explanation for language.
 
-<tt>testdata</tt> is the directory within <tt>INPUT_ROOT</tt> that
-contains the input/output testdata in files <tt>testdata.in</tt> and
-<tt>testdata.out</tt>. <tt>timelimit</tt> is the timelimit in seconds
+<tt>timelimit</tt> is the timelimit in seconds
 within which solutions for this problem have to run (taking into
 account <tt>time_factor</tt> per language).
 
@@ -1169,13 +1157,11 @@ Testdata is used to judge the problems: when a submission run is given the
 input testdata, the resulting output is compared to the reference output data.
 If they match exactly, the problem is judged to be correct.
 
-These files are placed under the <tt>INPUT_ROOT</tt>. A subdirectory under
-<tt>INPUT_ROOT</tt> must be created for each problem. The name of that subdirectory
-is listed in the <tt>testdata</tt> field on the <tt>problems</tt> table in the
-DOMjudge database.
-
-The input data is in the file <tt>testdata.in</tt>, and the output in <tt>testdata.out</tt>.
-These dirs and files can all be read-only.
+The database has a separate table named testcase, which can be manipulated
+from the web interface. Under a problem, click on the testcase link. There
+the files can be uploaded. The judger caches a copy based on MD5 sum, so if
+you need to make changes later, reupload the data in the web interface and
+it will automatically be picked up.
 
 For problems with a special compare script, things are a bit
 different: testdata should still be provided as above, but the
@@ -1508,8 +1494,8 @@ that has to be handled separately.
 Of course you must make sure that the filesystem privileges are set
 such that there's no unauthorised access to sensitive data, like
 submitted solutions or passwords. This is quite system dependent. At
-least the <tt>INPUT_ROOT</tt> and <tt>OUTPUT_ROOT</tt> should not be
-readable by other users than DOMjudge.
+least the <tt>OUTPUT_ROOT</tt> should not be readable by other users
+than DOMjudge.
 
 <sect1>Permissions for the webserver <label id="security:webprivs">
 <p>
