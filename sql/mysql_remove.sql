@@ -3,7 +3,7 @@
 -- This script is meant to be run from 'make install' to remove the
 -- domjudge database and the users associated with it. USE WITH CARE!!!
 --
--- $Id: mysql_remove.sql 1170 2006-11-26 14:52:33Z eldering $
+-- $Id$
 
 
 -- Remove the whole 'domjudge' database:

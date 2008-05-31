@@ -6,7 +6,7 @@
 -- THIS FILE SHOULD ALWAYS BE NON-READABLE!
 -- (because of database-login usernames/passwords)
 --
--- $Id: mysql_create.sql 1170 2006-11-26 14:52:33Z eldering $
+-- $Id$
 
 -- Create the domjudge database:
 CREATE DATABASE DOMJUDGE_DBNAME CHARACTER SET utf8 COLLATE utf8_unicode_ci;
