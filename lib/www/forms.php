@@ -106,9 +106,10 @@ function addSelect($name, $values, $default = null, $usekeys = false)
  * Form submission button
  * Note the switched value/name parameters!
  */
-function addSubmit($value, $name = null, $onclick = null) {
+function addSubmit($value, $name = null, $onclick = null, $enable = true) {
 	return addInputField('submit', $name, $value,
-		(empty($onclick) ? null : ' onclick="'.htmlspecialchars($onclick).'"'));
+		(empty($onclick) ? null : ' onclick="'.htmlspecialchars($onclick).'"') .
+		($enable ? '' : ' disabled'));
 }
 /**
  * Form reset button, $value = caption
