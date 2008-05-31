@@ -11,11 +11,14 @@
 function parseDiff($difftext){
 	$line = strtok($difftext,"\n"); //first line
 	sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff);
-	$return = sprintf("### DIFFERENCES FROM LINE <strong>%d</strong> ###\n", $firstdiff);
+	$return = sprintf("### DIFFERENCES FROM <a href='#firstdiff'>LINE %d</a> ###\n", $firstdiff);
 	$line = strtok("\n");
 	$loc = (strlen($line) - 5) / 2;
 	while(strlen($line) != 0){
-		$lineno = substr($line,0,4);
+		$linenostr = substr($line,0,4);
+		if($firstdiff == (int)$linenostr) {
+			$linenostr = "<a id='firstdiff'></a>".$linenostr;
+		}
 		$diffline = substr($line,4);
 		$midchar = $diffline[$loc];
 		switch($midchar){
@@ -33,7 +36,7 @@ function parseDiff($difftext){
 				$formdiffline = "<span class='extra'>".$diffline."</span>";
 				break;
 		}
-		$return = $return . $lineno . " " . $formdiffline . "\n";
+		$return = $return . $linenostr . " " . $formdiffline . "\n";
 		$line = strtok("\n");
 	}
 	return $return;

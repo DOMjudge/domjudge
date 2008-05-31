@@ -57,6 +57,7 @@ Version 2.2.0 - SVN
  - Limit jury submissions page by default to 50 submissions (Closes: #1964747).
  - More flexible debugging settings with a bitmask (Closes: #1759103).
  - Store testdata in database.
+ - Add an anchor to the first changed line in the diff (Closes: #1818874).
 
 Version 2.1.1 - SVN
 -------------------
