@@ -20,6 +20,9 @@ $DBLOGIN = array (
 		),
 	'public' => array (	// Select on team,problem,submission,judging,contest
 		'user' => 'domjudge_public', 'pass' => 'DOMJUDGE_PUBLIC_PASSWD'
+		),
+	'plugin' => array (	// Select on event,scoreboard_{jury,public}
+		'user' => 'domjudge_plugin', 'pass' => 'DOMJUDGE_PLUGIN_PASSWD'
 		)
 	);
 /**
