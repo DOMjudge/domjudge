@@ -256,6 +256,28 @@ if ( SHOW_AFFILIATIONS ) {
 
 // SUBMISSIONS, JUDINGS
 
+if ( ENABLE_CMDSUBMIT_SERVER ) {
+	result('submissions and judgings', 'Commandline submit',
+		'O', 'No issues found.');
+} else {
+	result('submissions and judgings', 'Commandline submit',
+		(ENABLE_WEBSUBMIT_SERVER ? 'W' : 'E'),
+		'Commandline submit is disabled');
+}
+
+if ( ENABLE_WEBSUBMIT_SERVER ) {
+	if ( ! is_writable(SUBMITDIR) ) {
+		result('submissions and judgings', 'Websubmit', 'W',
+			'The webserver has no write access to SUBMITDIR, and thus will not be able to make backup copies of submissions.');
+	} else {
+		result('submissions and judgings', 'Websubmit',
+			'O', 'No issues found.');
+	}
+} else {
+	result('submissions and judgings', 'Websubmit',
+		(ENABLE_WEBSUBMIT_SERVER ? 'W' : 'E'), 'Websubmit is disabled');
+}
+
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
                LEFT OUTER JOIN problem p USING (probid) WHERE s.cid != p.cid');
@@ -343,7 +365,6 @@ while($row = $res->next()) {
 
 result('submissions and judgings', 'Judging integrity',
 	($details == '' ? 'O':'E'), $details);
-
 
 
 // REFERENTIAL INTEGRITY
