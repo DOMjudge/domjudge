@@ -175,6 +175,7 @@ int main(int argc, char **argv)
 		// Check whether we have received an exit signal
 		if ( exitsignalled ) {
 			logmsg(LOG_NOTICE, "Received signal, exiting.");
+			fclose(stdlog);
 			return 0;
 		}
 		
