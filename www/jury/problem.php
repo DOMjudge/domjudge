@@ -78,9 +78,6 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <td><?=addRadioButton('data[0][allow_judge]', (!isset($row['allow_judge']) || $row['allow_judge']), 1)?> <label for="data_0__allow_judge_1">yes</label>
 <?=addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
 
-<tr><td><label for="data_0__testdata_">Path to testdata:</label></td>
-<td><?=addInput('data[0][testdata]', @$row['testdata'], 30, 255)?></td></tr>
-
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
 <td><?=addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
 
@@ -137,7 +134,18 @@ echo addForm($pagename) . "<p>\n" .
 		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
 		" judging for this problem?')"); ?>
 </td></tr>
-<tr><td scope="row">Testdata:    </td><td class="filename"><?=htmlspecialchars($data['testdata'])?></td></tr>
+<tr><td scope="row" valign="top">Testcase:    </td><td><?php
+	$tc = $DB->q("MAYBETUPLE SELECT md5sum_input, md5sum_output FROM testcase WHERE probid = %s",
+		$data['probid']);
+	foreach(array('input','output') as $inout) {
+		echo $inout . ": <a href=\"testcase.php?probid=" .
+			urlencode($data['probid']) . "\">" .
+			($tc['md5sum_' .$inout]?
+				htmlspecialchars($tc['md5sum_'.$inout]):'none') .
+			"</a><br />";
+	}
+
+?></td></tr>
 <tr><td scope="row">Timelimit:   </td><td><?=(int)$data['timelimit']?></td></tr>
 <?php
 if ( !empty($data['color']) ) {

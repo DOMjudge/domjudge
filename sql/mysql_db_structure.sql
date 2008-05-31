@@ -84,7 +84,7 @@ CREATE TABLE `judging` (
   `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Old judging is marked as invalid when rejudging',
   `output_compile` text COMMENT 'Output of the compiling the program',
   `output_run` text COMMENT 'Output of running the program',
-  `output_diff` text COMMENT 'Diffing the program output and testdata output',
+  `output_diff` text COMMENT 'Diffing the program output and testcase output',
   `output_error` text COMMENT 'Standard error output of the program',
   PRIMARY KEY  (`judgingid`),
   KEY `submitid` (`submitid`)
@@ -114,7 +114,6 @@ CREATE TABLE `problem` (
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `allow_submit` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Are submissions for this problem judged?',
-  `testdata` varchar(255) NOT NULL COMMENT 'Filesystem path to find jury testdata',
   `timelimit` int(4) unsigned NOT NULL default '0' COMMENT 'Maximum run time for this problem',
   `special_run` varchar(25) default NULL COMMENT 'Script to run submissions for this problem',
   `special_compare` varchar(25) default NULL COMMENT 'Script to compare problem and jury output for this problem',
@@ -230,3 +229,19 @@ CREATE TABLE `team_unread` (
   `type` varchar(25) NOT NULL default 'clarification' COMMENT 'Type of message (now always "clarification")',
   PRIMARY KEY  (`teamid`,`type`,`mesgid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='List of items a team has not viewed yet';
+
+-- 
+-- Table structure for table `testcase`
+-- 
+
+CREATE TABLE `testcase` (
+  `id` int(11) NOT NULL auto_increment COMMENT 'Unique identifier',
+  `md5sum_input` char(32) collate utf8_unicode_ci default NULL COMMENT 'Checksum of input data',
+  `md5sum_output` char(32) collate utf8_unicode_ci default NULL COMMENT 'Checksum of output data',
+  `input` longblob COMMENT 'Input data',
+  `output` longblob COMMENT 'Output data',
+  `probid` varchar(8) collate utf8_unicode_ci NOT NULL COMMENT 'Corresponding problem ID',
+  `description` varchar(32) collate utf8_unicode_ci default NULL COMMENT 'Description of this testcase',
+  PRIMARY KEY  (`id`),
+  KEY `probid` (`probid`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';

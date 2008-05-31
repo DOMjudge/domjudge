@@ -42,7 +42,7 @@ if ( ! $row ) {
 
 // Create directory where to test submissions
 $tempdirpath = JUDGEDIR . "/$myhost";
-system("mkdir -p $tempdirpath", $retval);
+system("mkdir -p $tempdirpath/testcase", $retval);
 if ( $retval != 0 ) error("Could not create $tempdirpath");
 
 $waiting = FALSE;
@@ -149,7 +149,7 @@ while ( TRUE ) {
 	// get maximum runtime, source code and other parameters
 	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS runtime,
 	               s.submitid, s.sourcecode, s.langid, s.teamid, s.probid,
-	               p.testdata, p.special_run, p.special_compare, l.extension
+	               p.special_run, p.special_compare, l.extension
 	               FROM submission s, problem p, language l
 	               WHERE s.probid = p.probid AND s.langid = l.langid AND
 	               judgemark = %s AND judgehost = %s', $mark, $myhost);
@@ -178,20 +178,53 @@ while ( TRUE ) {
 	if ($tempsrchandle === FALSE) error("Could not create $tempsrcfile");
 	fwrite($tempsrchandle, $row['sourcecode']);
 	fclose($tempsrchandle);
+	unset($row['sourcecode']);
+
+
+	// Fetch testcases from database.
+	// We currently support exactly one row per problem.
+	$tcdata = $DB->q("MAYBETUPLE SELECT id, md5sum_input, md5sum_output FROM testcase WHERE probid = %s",
+		$row['probid']);
+	if ( empty($tcdata) ) {
+		error("No testcase found for problem " . $row['probid']);
+	}
+
+	// Get both in- and output files, only if we didn't have them already.
+	// FIXME: make these files not readable by the compiling process since it doesn't
+	// need to read them.
+	foreach(array('input','output') as $inout) {
+		$tcfile = "$tempdirpath/testcase/testcase.$inout." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_'.$inout];
+		if ( !file_exists($tcfile) ) {
+			$content = $DB->q("VALUE SELECT " . $inout . " FROM testcase WHERE probid = %s",
+				$row['probid']);
+			$fh = @fopen("$tcfile.new", 'w');
+			if ($fh === FALSE) error("Could not create $tcfile.new");
+			fwrite($fh, $content);
+			fclose($fh);
+			unset($content);
+			if ( md5_file("$tcfile.new") == $tcdata['md5sum_'.$inout]) {
+				rename("$tcfile.new",$tcfile);
+			} else {
+				error ("File corrupted during download.");
+			}
+			logmsg(LOG_NOTICE, "Fetched new $inout testcase for problem " . $row['probid']);
+		}
+		// sanity check
+		if ( md5_file($tcfile) != $tcdata['md5sum_' . $inout] ) {
+			error("File corrupted: md5sum mismatch: " . $tcfile);
+		}
+	}
 
 	// do the actual compile-run-test
 	system("./test_solution.sh " .
 			"$tempsrcfile $row[langid] " .
-			INPUT_ROOT."/$row[testdata]/testdata.in " .
-			INPUT_ROOT."/$row[testdata]/testdata.out " .
+			"$tempdirpath/testcase/testcase.input." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_input'] . ' ' .
+			"$tempdirpath/testcase/testcase.output." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_output'] . ' ' .
 		   "$row[runtime] $tempdir " .
 		   "'$row[special_run]' '$row[special_compare]'",
 		$retval);
 
-	// :NOTE: the temporary copy could be removed, but since it's so
-	// small, we're not bothered
-	
-
+	// leave the temporary copy for reference
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {
 		beep(BEEP_ERROR);

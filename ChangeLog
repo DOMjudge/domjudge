@@ -56,6 +56,7 @@ Version 2.2.0 - SVN
  - The admin can exclude submissions from a teams score (Closes: #1742043).
  - Limit jury submissions page by default to 50 submissions (Closes: #1964747).
  - More flexible debugging settings with a bitmask (Closes: #1759103).
+ - Store testdata in database.
 
 Version 2.1.1 - SVN
 -------------------

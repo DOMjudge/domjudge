@@ -23,7 +23,7 @@ if( $res->count() == 0 ) {
 	echo "<table class=\"list\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
 		"<th scope=\"col\">contest</th><th scope=\"col\">allow<br />submit</th>" .
-		"<th scope=\"col\">allow<br />judge</th><th scope=\"col\">testdata</th>" .
+		"<th scope=\"col\">allow<br />judge</th>" .
 		"<th scope=\"col\">timelimit</th>" .
 		"<th scope=\"col\">colour</th></tr>" .
 		"</thead>\n<tbody>\n";
