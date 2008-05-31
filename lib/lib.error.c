@@ -65,7 +65,7 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
 	int bufferlen;
 	va_list aq;
-	
+
 	/* Try to open logfile if it is defined */
 #ifdef LOGFILE
 	if ( stdlog==NULL ) stdlog = fopen(LOGFILE,"a");
@@ -88,7 +88,7 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 
 	snprintf(buffer, bufferlen, "[%s] %s[%d]: %s\n",
 	         timestring, progname, getpid(), mesg);
-	
+
 	if ( msglevel<=verbose ) {
 		va_copy(aq, ap);
 		vfprintf(stderr, buffer, aq);
@@ -107,7 +107,7 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 #ifdef SYSLOG
 	if ( msglevel<=loglevel ) {
 		buffer = vallocstr(mesg, ap);
-		syslog(msglevel, buffer);
+		syslog(msglevel, "%s", buffer);
 		free(buffer);
 	}
 #endif
@@ -270,6 +270,6 @@ char *allocstr(const char *mesg, ...)
 	va_start(ap,mesg);
 	str = vallocstr(mesg,ap);
 	va_end(ap);
-	
+
 	return str;
 }
