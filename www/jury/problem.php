@@ -88,7 +88,7 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <td><?=addInput('data[0][color]', @$row['color'], 8, 25)?>
 <a target="_blank"
 href="http://www.w3schools.com/css/css_colornames.asp"><img
-src="../images/b_help.png" class="smallpicto" alt="?"></a></td></tr>
+src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>
 <td><?=addInput('data[0][special_run]', @$row['special_run'], 30, 25)?></td></tr>
@@ -102,6 +102,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','problem') .
 	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
+	addSubmit('Cancel', 'cancel') .
 	addEndForm();
 
 require(SYSTEM_ROOT . '/lib/www/footer.php');

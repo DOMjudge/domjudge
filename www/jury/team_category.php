@@ -48,7 +48,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 <td><?=addInput('data[0][color]', @$row['color'], 15, 25)?>
 <a target="_blank"
 href="http://www.w3schools.com/css/css_colornames.asp"><img
-src="../images/b_help.png" class="smallpicto" alt="?"></a></td></tr>
+src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 </td></tr>
 
 <tr><td>Visible:</td>
@@ -62,6 +62,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','team_category') .
 	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
+	addSubmit('Cancel', 'cancel') .
 	addEndForm();
 
 	require(SYSTEM_ROOT . '/lib/www/footer.php');

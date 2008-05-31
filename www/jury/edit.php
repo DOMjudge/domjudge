@@ -32,45 +32,47 @@ if ( empty($data) ) error ("No data.");
 
 require(SYSTEM_ROOT . '/lib/www/checkers.jury.php');
 
-foreach ($data as $i => $itemdata ) {
-	if ( !empty($skipwhenempty) && empty($itemdata[$skipwhenempty]) ) {
-		continue;
-	}
-
-	// set empty string to null
-	foreach ( $itemdata  as $k => $v ) {
-		if ( $v === "" ) {
-			$itemdata[$k] = null;
-		}
-	}
-
-	$fn = "check_$t";
-	if ( function_exists($fn) ) {
-		$CHECKER_ERRORS = array();
-		$itemdata = $fn($itemdata, $keydata[$i]);
-		if ( count($CHECKER_ERRORS) ) {
-			error("Errors while processing $t " .
-				implode(', ', @$keydata[$i]) . ":\n" .
-				implode(";\n", $CHECKER_ERRORS));
+if ( ! isset($_POST['cancel']) ) {
+	foreach ($data as $i => $itemdata ) {
+		if ( !empty($skipwhenempty) && empty($itemdata[$skipwhenempty]) ) {
+			continue;
 		}
 
-	}
-	check_sane_keys($itemdata);
-
-	if ( $cmd == 'add' ) {
-		$newid = $DB->q("RETURNID INSERT INTO $t SET %S", $itemdata);
-		foreach($KEYS[$t] as $tablekey) {
-			if ( isset($itemdata[$tablekey]) ) {
-				$newid = $itemdata[$tablekey];
+		// set empty string to null
+		foreach ( $itemdata  as $k => $v ) {
+			if ( $v === "" ) {
+				$itemdata[$k] = null;
 			}
 		}
-	} elseif ( $cmd == 'edit' ) {
-		foreach($KEYS[$t] as $tablekey) {
-				$prikey[$tablekey] = $keydata[$i][$tablekey];
-		}
-		check_sane_keys($prikey);
 
-		$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
+		$fn = "check_$t";
+		if ( function_exists($fn) ) {
+			$CHECKER_ERRORS = array();
+			$itemdata = $fn($itemdata, $keydata[$i]);
+			if ( count($CHECKER_ERRORS) ) {
+				error("Errors while processing $t " .
+					implode(', ', @$keydata[$i]) . ":\n" .
+					implode(";\n", $CHECKER_ERRORS));
+			}
+
+		}
+		check_sane_keys($itemdata);
+
+		if ( $cmd == 'add' ) {
+			$newid = $DB->q("RETURNID INSERT INTO $t SET %S", $itemdata);
+			foreach($KEYS[$t] as $tablekey) {
+				if ( isset($itemdata[$tablekey]) ) {
+					$newid = $itemdata[$tablekey];
+				}
+			}
+		} elseif ( $cmd == 'edit' ) {
+			foreach($KEYS[$t] as $tablekey) {
+					$prikey[$tablekey] = $keydata[$i][$tablekey];
+			}
+			check_sane_keys($prikey);
+
+			$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
+		}
 	}
 }
 

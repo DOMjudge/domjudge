@@ -50,7 +50,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 <td><?=addInput('data[0][country]', @$row['country'], 3, 2)?>
 <a target="_blank"
 href="http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm"><img
-src="../images/b_help.png" class="smallpicto" alt="?"></a></td></tr>
+src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td valign="top"><label for="data_0__comments_">Comments:</label></td>
 <td><?=addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
@@ -62,6 +62,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','team_affiliation') .
 	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
+	addSubmit('Cancel', 'cancel') .
 	addEndForm();
 
 	require(SYSTEM_ROOT . '/lib/www/footer.php');

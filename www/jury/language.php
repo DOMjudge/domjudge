@@ -83,6 +83,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','language') .
 	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
+	addSubmit('Cancel', 'cancel') .
 	addEndForm();
 
 require(SYSTEM_ROOT . '/lib/www/footer.php');
