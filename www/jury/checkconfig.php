@@ -36,7 +36,6 @@ function collapse(x){
 
 /** Print the output of phpinfo(), which may be useful to check which settings
  *  PHP is actually using. */
- // FIXME
 if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
 	$ret = "<p><a href=\"./checkconfig.php\">return to config checker</a></p>\n\n";
 	echo $ret;
