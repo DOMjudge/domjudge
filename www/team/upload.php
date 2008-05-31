@@ -54,8 +54,6 @@ require(SYSTEM_ROOT . '/lib/www/header.php');
 
 echo "<h2>Submit - upload status</h2>\n\n";
 
-ob_implicit_flush();
-
 switch ( $_FILES['code']['error'] ) {
 	case UPLOAD_ERR_OK: // everything ok!
 		break;
