@@ -236,12 +236,12 @@ CREATE TABLE `team_unread` (
 
 CREATE TABLE `testcase` (
   `id` int(11) NOT NULL auto_increment COMMENT 'Unique identifier',
-  `md5sum_input` char(32) collate utf8_unicode_ci default NULL COMMENT 'Checksum of input data',
-  `md5sum_output` char(32) collate utf8_unicode_ci default NULL COMMENT 'Checksum of output data',
+  `md5sum_input` char(32) default NULL COMMENT 'Checksum of input data',
+  `md5sum_output` char(32) default NULL COMMENT 'Checksum of output data',
   `input` longblob COMMENT 'Input data',
   `output` longblob COMMENT 'Output data',
-  `probid` varchar(8) collate utf8_unicode_ci NOT NULL COMMENT 'Corresponding problem ID',
-  `description` varchar(32) collate utf8_unicode_ci default NULL COMMENT 'Description of this testcase',
+  `probid` varchar(8) NOT NULL COMMENT 'Corresponding problem ID',
+  `description` varchar(255) default NULL COMMENT 'Description of this testcase',
   PRIMARY KEY  (`id`),
   KEY `probid` (`probid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';
