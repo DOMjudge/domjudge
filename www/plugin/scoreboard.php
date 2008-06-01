@@ -128,5 +128,5 @@ if ( !$xmldoc->schemaValidate('scoreboard.xsd') ) error('XML file not valid.');
 
 header('Content-Type: text/xml; charset=' . DJ_CHARACTER_SET);
 
-$xmldoc->formatOutput = true;
+$xmldoc->formatOutput = false;
 echo $xmldoc->saveXML();

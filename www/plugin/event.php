@@ -82,5 +82,5 @@ if ( !$xmldoc->schemaValidate('events.xsd') ) error('XML file not valid.');
 
 header('Content-Type: text/xml; charset=' . DJ_CHARACTER_SET);
 
-$xmldoc->formatOutput = true;
+$xmldoc->formatOutput = false;
 echo $xmldoc->saveXML();
