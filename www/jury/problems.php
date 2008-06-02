@@ -39,7 +39,6 @@ if( $res->count() == 0 ) {
 			htmlspecialchars($row['cid']).
 			"</td><td align=\"center\">".printyn($row['allow_submit']).
 			"</td><td align=\"center\">".printyn($row['allow_judge']).
-			"</td><td class=\"filename\">".htmlspecialchars($row['testdata']).
 			"</td><td>".(int)$row['timelimit'].
 			"</td>".
 			( !empty($row['color'])
