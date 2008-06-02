@@ -23,11 +23,10 @@ function infreeze($time) {
 	return FALSE;
 }
 
-$res = $DB->q('SELECT *	FROM event WHERE '
-			. (isset($_REQUEST['fromid']) ? 'eventid >= %i ' : 'TRUE %_ ')
-			. 'AND '
-			. (isset($_REQUEST['toid']) ? 'eventid < %i ' : 'TRUE %_ ')
-			.'ORDER BY eventid', $_REQUEST['fromid'], $_REQUEST['toid']);
+$res = $DB->q('SELECT *	FROM event WHERE ' .
+              (isset($_REQUEST['fromid']) ? 'eventid >= %i ' : 'TRUE %_ ') . 'AND ' .
+              (isset($_REQUEST['toid'])   ? 'eventid <  %i ' : 'TRUE %_ ') .
+              'ORDER BY eventid', (int)@$_REQUEST['fromid'], (int)@$_REQUEST['toid']);
 
 $xmldoc = new DOMDocument('1.0', DJ_CHARACTER_SET);
 
