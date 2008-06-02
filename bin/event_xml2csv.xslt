@@ -13,12 +13,9 @@
 </xsl:text>
 </xsl:template>
 
-<xsl:template match="/root/scoreboard"><!-- xml:space="preserve" -->
-  <xsl:for-each select="rows/row">
-    <xsl:value-of select="@rank"/><xsl:call-template name="fieldsep"/>
-    <xsl:value-of select="num_solved"/><xsl:call-template name="fieldsep"/>
-    <xsl:value-of select="totaltime"/><xsl:call-template name="fieldsep"/>
-    <xsl:value-of select="team"/>
+<xsl:template match="/root/events"><!-- xml:space="preserve" -->
+  <xsl:for-each select="event">
+    <xsl:value-of select="@id"/><xsl:call-template name="fieldsep"/>
     <xsl:call-template name="recordsep"/>
   </xsl:for-each>
 </xsl:template>
