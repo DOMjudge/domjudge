@@ -5,12 +5,11 @@ using namespace std;
 
 int main()
 {
-	int ntests, test;
+	int i, n;
 	string name;
 
-	cin >> ntests;
-
-	for (test=1; test <= ntests; test++) {
+	cin >> n;
+	for (i = 0; i < n; i++) {
 		cin >> name;
 		cout << "Hello " << name << "!" << endl;
 	}
