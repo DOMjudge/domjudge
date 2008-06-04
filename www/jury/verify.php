@@ -48,7 +48,15 @@ if ( VERIFICATION_REQUIRED ) {
 }
 
 /* Set cookie of last verifier, expiry defaults to end of session. */
-if ( $verifier ) setcookie('domjudge_lastverifier', $verifier);
+if ( $verifier ) {
+	if  (version_compare(PHP_VERSION, '5.2') >= 0) {
+		// HTTPOnly Cookie, while this cookie is not security critical
+		// it's a good habit to get into.
+		setcookie('domjudge_lastverifier', $verifier, null, null, null, null, true);
+	} else {
+		setcookie('domjudge_lastverifier', $verifier);
+	}
+}
 
 /* redirect back. */
 header('Location: '.getBaseURI().'jury/submission.php?id=' . 
