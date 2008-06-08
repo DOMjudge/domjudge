@@ -54,27 +54,7 @@ require(SYSTEM_ROOT . '/lib/www/header.php');
 
 echo "<h2>Submit - upload status</h2>\n\n";
 
-switch ( $_FILES['code']['error'] ) {
-	case UPLOAD_ERR_OK: // everything ok!
-		break;
-	case UPLOAD_ERR_INI_SIZE:
-		error('The uploaded file is too large (exceeds the upload_max_filesize directive).');
-	case UPLOAD_ERR_FORM_SIZE:
-		error('The uploaded file is too large (exceeds the MAX_FILE_SIZE directive).');
-	case UPLOAD_ERR_PARTIAL:
-		error('The uploaded file was only partially uploaded.');
-	case UPLOAD_ERR_NO_FILE:
-		error('No file was uploaded.');
-	case 6:	// UPLOAD_ERR_NO_TMP_DIR, constant doesn't exist in our minimal PHP version
-		error('Missing a temporary folder. Contact staff.');
-	case 7: // UPLOAD_ERR_CANT_WRITE
-		error('Failed to write file to disk. Contact staff.');
-	case 8: // UPLOAD_ERR_EXTENSION
-		error('File upload stopped by extension. Contact staff.');
-	default:
-		error('Unknown error while uploading: '. $_FILES['code']['error'] .
-			'. Contact staff.');
-}
+checkFileUpload($_FILES['code']['error']);
 
 $filename = $_FILES['code']['name'];
 
