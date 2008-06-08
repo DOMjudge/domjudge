@@ -33,7 +33,7 @@ function check_team($data, $keydata = null)
 			 (  function_exists('inet_pton') && !@inet_pton($data['ipaddress']) )
 			  // cheap way to guess if it's an IPv6 address
 			  && strpos(':', $data['ipaddress']) === FALSE
-		    ) {
+			) {
 				$ip = gethostbyname($data['ipaddress']);
 				if ( $ip == $data['ipaddress'] ) {
 					ch_error("Cannot get IP address for '" . $ip ."'");
@@ -41,6 +41,14 @@ function check_team($data, $keydata = null)
 					$data['ipaddress'] = $ip;
 				}
 			}
+		}
+		// lookup hostname for in hostname cache field;
+		// if result is the same as IP address, the lookup failed.
+		$host = gethostbyaddr($data['ipaddress']);
+		if ( $host != $data['ipaddress'] ) {
+			$data['hostname'] = $host;
+		} else {
+			$data['hostname'] = '';
 		}
 	}
 	

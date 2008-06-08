@@ -114,7 +114,7 @@ echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 <?php endif; ?>
 	</td></tr>
 <tr><td scope="row">Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
-	' - '.printhost(gethostbyaddr($row['ipaddress']), TRUE):'-'?></td></tr>
+	' - '.(@$row['hostname'] ? printhost($row['hostname'], TRUE):''):'-'?></td></tr>
 <?php if (!empty($row['room'])): ?>
 <tr><td scope="row">Room:</td><td><?=htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>
