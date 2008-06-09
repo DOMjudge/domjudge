@@ -314,13 +314,13 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 	$id = $DB->q('RETURNID INSERT INTO submission
 				  (cid, teamid, probid, langid, submittime, sourcecode)
 				  VALUES (%i, %s, %s, %s, %s, %s)',
-				 $cid, $team, $prob, $langext, $now,
+				 $cid, $team, $prob, $lang, $now,
 				 getFileContents($file, false));
 
 	// Log to event table
 	$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
 			VALUES(%i, %s, %s, %s, %i, "problem submitted")',
-		   $cid, $team, $langext, $prob, $id);
+		   $cid, $team, $lang, $prob, $id);
 
 	$tofile = getSourceFilename($cid,$id,$team,$prob,$langext);
 	$topath = SUBMITDIR . "/$tofile";
