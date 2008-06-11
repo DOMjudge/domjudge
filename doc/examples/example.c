@@ -2,12 +2,12 @@
 
 int main()
 {
-	int n;
+	int i, ntests;
 	char name[100];
 
-	scanf("%d\n", &n);
+	scanf("%d\n", &ntests);
 
-	while (n-- > 0) {
+	for(i=0; i<ntests; i++) {
 		scanf("%s\n", name);
 		printf("Hello %s!\n", name);
 	}
