@@ -10,7 +10,8 @@
 
 function parseDiff($difftext){
 	$line = strtok($difftext,"\n"); //first line
-	sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff);
+	if(sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1)
+		return htmlspecialchars($difftext);
 	$return = sprintf("### DIFFERENCES FROM <a href='#firstdiff'>LINE %d</a> ###\n", $firstdiff);
 	$line = strtok("\n");
 	$loc = (strlen($line) - 5) / 2;
@@ -20,21 +21,23 @@ function parseDiff($difftext){
 			$linenostr = "<a id='firstdiff'></a>".$linenostr;
 		}
 		$diffline = substr($line,4);
-		$midchar = $diffline[$loc];
-		switch($midchar){
-			case '=':
-				$formdiffline = "<span class='correct'>".$diffline."</span>";
+		$mid = substr($diffline, $loc-1, 3);
+		switch($mid){
+			case ' = ':
+				$formdiffline = "<span class='correct'>".htmlspecialchars($diffline)."</span>";
 				break;
-			case '!':
-				$formdiffline = "<span class='differ'>".$diffline."</span>";
+			case ' ! ':
+				$formdiffline = "<span class='differ'>".htmlspecialchars($diffline)."</span>";
 				break;
-			case '$':
-				$formdiffline = "<span class='endline'>".$diffline."</span>";
+			case ' $ ':
+				$formdiffline = "<span class='endline'>".htmlspecialchars($diffline)."</span>";
 				break;
-			case '>':
-			case '<':
-				$formdiffline = "<span class='extra'>".$diffline."</span>";
+			case ' > ':
+			case ' < ':
+				$formdiffline = "<span class='extra'>".htmlspecialchars($diffline)."</span>";
 				break;
+			default:
+				$formdiffline = htmlspecialchars($diffline);
 		}
 		$return = $return . $linenostr . " " . $formdiffline . "\n";
 		$line = strtok("\n");
@@ -57,8 +60,8 @@ $title = 'Submission s'.@$id;
 if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
-					s.submittime, s.valid, c.cid, c.contestname, p.special_compare, 
-                    t.name AS teamname, l.name AS langname, p.name AS probname
+					s.submittime, s.valid, c.cid, c.contestname, 
+          t.name AS teamname, l.name AS langname, p.name AS probname
                     FROM submission s
                     LEFT JOIN team     t ON (t.login  = s.teamid)
                     LEFT JOIN problem  p ON (p.probid = s.probid)
@@ -260,11 +263,7 @@ if ( isset($jid) )  {
 
 	if ( @$jud['output_diff'] ) {
 		echo "<pre class=\"output_text\">";
-		if(!empty($submdata['special_compare'])){
-			echo htmlspecialchars($jud['output_diff']);
-		} else {
-			echo parseDiff(htmlspecialchars($jud['output_diff']));
-		}
+		echo parseDiff($jud['output_diff']);
 		echo "</pre>\n\n";
 	} else {
 		echo "<p><em>There was no diff output.</em></p>\n";
