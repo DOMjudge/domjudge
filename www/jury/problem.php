@@ -154,7 +154,7 @@ echo addForm($pagename) . "<p>\n" .
 	}
 
 ?></td></tr>
-<tr><td scope="row">Timelimit:   </td><td><?=(int)$data['timelimit']?></td></tr>
+<tr><td scope="row">Timelimit:   </td><td><?=(int)$data['timelimit']?> sec</td></tr>
 <?php
 if ( !empty($data['color']) ) {
 	echo '<tr><td scope="row">Colour:       </td><td><span style="color: ' .
