@@ -32,7 +32,7 @@ t('IP2', compareipaddr('127.0.0.1','127.0.0.2'), FALSE);
 t('IP3', compareipaddr('127.0.0.1','127.0.0.'), FALSE);
 t('IP4', compareipaddr('127.0.0.1','127.0.0.1 '), FALSE);
 
-require('../www/print.php');
+require('../lib/www/print.php');
 
 t('printyn1', printyn(true), 'yes');
 t('printyn2', printyn(false), 'no');
@@ -41,7 +41,7 @@ t('printyn4', printyn(0), 'no');
 
 t('printtime1', printtime(now()), date('H:i'));
 
-require('../www/jury/checkers.php');
+require('../lib/www/checkers.jury.php');
 
 t('datetime1', check_datetime(now()), now());
 
