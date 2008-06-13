@@ -9,8 +9,10 @@
 ifndef GLOBALINCLUDED
 GLOBALINCLUDED=1
 
-# Uncomment to disable 'Entering/Leaving directory' messages:
-#MAKEFLAGS += --no-print-directory
+# Check for QUIET environment variable:
+ifneq ($(QUIET),)
+MAKEFLAGS += --no-print-directory --quiet
+endif
 
 # Default C/C++ compiler flags
 CXXFLAGS = -O2 -Wall -fstack-protector -fPIE -pie -Wformat -Wformat-security -I$(TOPDIR)/lib -I$(TOPDIR)/etc

@@ -20,7 +20,7 @@ REC_TARGETS = docs clean dist distclean
 default: docs
 
 $(LATEXZIPFILES): %.zip:
-ifneq ($(DOWNLOADCPAN), 1)
+ifeq ($(DOWNLOADCPAN),)
 	@echo
 	@echo "About to download"
 	@echo  $(CTANPATH)/$@
@@ -28,11 +28,13 @@ ifneq ($(DOWNLOADCPAN), 1)
 	@echo
 	@read _
 endif
-	@echo "Downloading LaTeX package '$*' from CTAN.org..." ; \
-	if which wget >/dev/null ; then \
-		wget -N -nv -T 60 $(CTANPATH)/$@ ; \
+ifeq ($(QUIET),)
+	@echo "Downloading LaTeX package '$*' from CTAN.org..."
+endif
+	@if which wget >/dev/null ; then \
+		wget $${QUIET:+-q} -N -nv -T 60 $(CTANPATH)/$@ ; \
 	else if which curl >/dev/null ; then \
-		curl -f -O -m 120 $(CTANPATH)/$@ ; \
+		curl $${QUIET:+-s} -f -O -m 120 $(CTANPATH)/$@ ; \
 	else \
 		printf "No wget or curl found, download manually from:\n\t$(CTANPATH)/$@\n"; \
 		exit 1 ; \

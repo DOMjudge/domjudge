@@ -25,15 +25,15 @@ pdf: $(TARGETSPDF)
 
 $(TARGETSPDF): %.pdf: %.tex $(CONFIGDIR)/config.tex team-manual-preamble.tex \
                             ../examples/example.* ../logos/DOMjudgelogo.* $(LATEXPKGFILES)
-	@NRUNS=3 ; printf "Running $$NRUNS passes of '$(LATEX) $(LATEXFLAGS) $<'..." ; \
+	@NRUNS=3 ; [ "$(QUIET)" ] || printf "Running $$NRUNS passes of '$(LATEX) $(LATEXFLAGS) $<'..." ; \
 	 i=1; \
 	 while [ $$i -le $$NRUNS ]; do \
 		if ! $(LATEX) $(LATEXFLAGS) $< </dev/null >/dev/null ; then \
 			printf "\nTeX-ing failed in run $$i, see '$*.log' for details.\n" ; \
 			exit 1 ; \
-		else printf " $$i" ; fi ; \
+		else [ "$(QUIET)" ] || printf " $$i" ; fi ; \
 		i=$$(($$i+1)); \
-	 done ; printf "\n" ;
+	 done ; [ "$(QUIET)" ] || printf "\n" ;
 
 $(CONFIGDIR)/config.tex:
 	$(MAKE) -C $(CONFIGDIR) config.tex
