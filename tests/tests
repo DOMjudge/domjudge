@@ -8,17 +8,19 @@
  */
 
 $done=$failed=0;
+$silent = (@$_SERVER['argv'][1] == "-q");
 
 function t($n, $t, $r)
 {
-	global $done, $failed;
+	global $done, $failed, $silent;
 
-	echo "TEST $n: ";
 	$done++;
 	if ( $t === $r ) {
-		echo "OK\n";
+		if ( !$silent ) {
+			echo "TEST $n: OK\n";
+		}
 	} else {
-		echo "FAIL\n";
+		echo "TEST $n: FAIL\n";
 		$failed++;
 		var_dump($t);
 		var_dump($r);
