@@ -109,7 +109,7 @@ function addSelect($name, $values, $default = null, $usekeys = false)
 function addSubmit($value, $name = null, $onclick = null, $enable = true) {
 	return addInputField('submit', $name, $value,
 		(empty($onclick) ? null : ' onclick="'.htmlspecialchars($onclick).'"') .
-		($enable ? '' : ' disabled'));
+		($enable ? '' : ' disabled="disabled"'));
 }
 /**
  * Form reset button, $value = caption
