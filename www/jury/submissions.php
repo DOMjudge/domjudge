@@ -8,21 +8,19 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$show = 0;
-if ( isset($_REQUEST['show']) ) {
-	$show = (int)$_REQUEST['show'];
-	if($show < 0 || $show > 3)	$show = 0;
-}
+$viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'all');
 
+$view = 0;
 if ( isset($_REQUEST['view']) ) {
 	// did someone press any of the three view buttons?
-	for ($i=0; $i<=2; ++$i) {
-		if ( isset($_REQUEST['view'][$i]) ) $show = $i;
+	for ($i=0; $i<count($viewtypes); ++$i) {
+		if ( isset($_REQUEST['view'][$i]) ) $view = $i;
 	}
 }
 
 require('init.php');
-$refresh = '15;url=' . getBaseURI() . 'jury/submissions.php?show=' . $show;
+$refresh = '15;url=' . getBaseURI() . 'jury/submissions.php?' . 
+	htmlspecialchars('view[' . $view . ']=' . $viewtypes[$view]);
 $title = 'Submissions';
 
 require(SYSTEM_ROOT . '/lib/www/header.php');
@@ -30,18 +28,16 @@ require(SYSTEM_ROOT . '/lib/www/header.php');
 echo "<h1>$title</h1>\n\n";
 
 $restrictions = array();
-if ( $show == 2 ) $restrictions['verified'] = 0;
+if ( $viewtypes[$view] == 'unverified' ) $restrictions['verified'] = 0;
 
 require_once(SYSTEM_ROOT . '/lib/www/forms.php');
 
-echo addForm('submissions.php', 'get')
-	. "<p>\n"
-	. addSubmit('newest',     'view[0]', null, ($show != 0))
-	. addSubmit('all',        'view[1]', null, ($show != 1))
-	. addSubmit('unverified', 'view[2]', null, ($show != 2))
-	. "</p>\n"
-	. addEndForm();
+echo addForm('submissions.php', 'get') . "<p>\n";
+for($i=0; $i<count($viewtypes); ++$i) {
+	echo addSubmit($viewtypes[$i], 'view['.$i.']', null, ($view != $i));
+}
+echo "</p>\n" . addEndForm();
 
-putSubmissions($cdata, $restrictions, TRUE, ($show == 0 ? 50 : 0));
+putSubmissions($cdata, $restrictions, TRUE, ($viewtypes[$view] == 'newest' ? 50 : 0));
 
 require(SYSTEM_ROOT . '/lib/www/footer.php');
