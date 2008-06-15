@@ -20,7 +20,7 @@ if ( isset($_REQUEST['view']) ) {
 
 require('init.php');
 $refresh = '15;url=' . getBaseURI() . 'jury/submissions.php?' . 
-	htmlspecialchars('view[' . $view . ']=' . $viewtypes[$view]);
+	urlencode('view[' . $view . ']=' . $viewtypes[$view]);
 $title = 'Submissions';
 
 require(SYSTEM_ROOT . '/lib/www/header.php');
