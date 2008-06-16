@@ -13,14 +13,14 @@ $viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'all');
 $view = 0;
 if ( isset($_REQUEST['view']) ) {
 	// did someone press any of the three view buttons?
-	for ($i=0; $i<count($viewtypes); ++$i) {
+	foreach ($viewtypes as $i => $name) {
 		if ( isset($_REQUEST['view'][$i]) ) $view = $i;
 	}
 }
 
 require('init.php');
 $refresh = '15;url=' . getBaseURI() . 'jury/submissions.php?' . 
-	urlencode('view[' . $view . ']') . '=' . $viewtypes[$view];
+	urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view]);
 $title = 'Submissions';
 
 require(SYSTEM_ROOT . '/lib/www/header.php');
