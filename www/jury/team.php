@@ -140,13 +140,13 @@ echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 <?php
 
 if ( IS_ADMIN ) {
-	echo "<p>" .
+	echo "<p class=\"nomorecol\">" .
 		editLink('team', $id). "\n" .
 		delLink('team','login',$id) .
 		"</p>\n\n";
 }
 
-echo "<br />\n" . rejudgeForm('team', $id) . "\n\n";
+echo rejudgeForm('team', $id) . "\n\n";
 
 
 echo '<h3>Submissions';
