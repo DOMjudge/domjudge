@@ -119,3 +119,4 @@ img.smallpicto { width: 11px; height: 11px; }
 
 .col1 { float: left;  width: 50%; }
 .col2 { float: right; width: 50%; }
+.nomorecol { clear: left; }
