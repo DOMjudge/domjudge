@@ -291,7 +291,9 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 	}
 	if( ! compareipaddr($teamrow['ipaddress'],$ip) ) {
 		if ( $teamrow['ipaddress'] == NULL && ! STRICTIPCHECK ) {
-			$DB->q('UPDATE team SET ipaddress = %s WHERE login = %s',$ip,$team);
+			$hostname = gethostbyaddr($ip);
+			if ( $hostname == $ip ) $hostname = NULL;
+			$DB->q('UPDATE team SET ipaddress = %s, hostname = %s WHERE login = %s',$ip,$hostname,$team);
 			logmsg (LOG_NOTICE, "Registered team '$team' at address '$ip'.");
 		} else {
 			error("Team '$team' not registered at this IP address.");

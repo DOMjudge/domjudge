@@ -37,9 +37,12 @@ if ( empty($user) || empty($pass) ) {
 	exit;
 }
 
-$cnt = $DB->q('RETURNAFFECTED UPDATE team SET ipaddress = %s
+$hostname = gethostbyaddr($ip);
+if ( $hostname == $ip ) $hostname = NULL;
+
+$cnt = $DB->q('RETURNAFFECTED UPDATE team SET ipaddress = %s, hostname = %s
                WHERE login = %s AND passwd = %s AND ipaddress IS NULL',
-              $ip, $user, md5($user."#".$pass));
+              $ip, $hostname, $user, md5($user."#".$pass));
 
 if ( $cnt == 1 ) {
 	echo "<h1>Authenticated</h1>\n\n<p>Successfully authenticated as team " .
