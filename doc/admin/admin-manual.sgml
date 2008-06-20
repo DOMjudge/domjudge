@@ -986,6 +986,11 @@ MD5-hash of a one-time password teams can use to authenticate and
 register their IP address. It can be set under Administrator Functions:
 Generate Passwords.
 
+The <tt>hostname</tt> field is automatically filled in when team data
+is added or changed based on a reverse DNS lookup of the IP address.
+If this cache becomes inaccurate for some reason, it can be refreshed
+under the Administrator functions on the main page.
+
 <tt>members</tt> are the names of the team members, separated by
 newlines and <tt>room</tt> is the room the team is located, for
 display only; <tt>comments</tt> can be filled with arbitrary useful
@@ -1263,7 +1268,7 @@ Options offered to administrators only:
 <item>Adding and editing any contest data
 <item>Managing team passwords
 <item>The config checker
-<item>Recalculating the scoreboard
+<item>Refreshing the scoreboard & hostname caches
 <item>Rejudge 'correct' submissions
 <item>Restart 'pending' judgings
 </itemize>
