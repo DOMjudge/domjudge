@@ -67,13 +67,23 @@ if( $res->count() == 0 ) {
 	echo "<p><em>No judgehosts defined</em></p>\n\n";
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
-	     "<tr><th scope=\"col\">hostname</th><th scope=\"col\">active</th></tr>\n" .
+	     "<tr><th scope=\"col\">hostname</th><th scope=\"col\">active</th><th>status</th></tr>\n" .
 		 "</thead>\n<tbody>\n";
 	while($row = $res->next()) {
 		echo "<tr".( $row['active'] ? '': ' class="disabled"').
 			"><td><a href=\"judgehost.php?id=".urlencode($row['hostname']).'">'.
 			printhost($row['hostname']).'</a>'.
 			"</td><td align=\"center\">".printyn($row['active'])."</td>";
+		$reltime = time() - strtotime($row['polltime']);
+		echo "<td align=\"center\" class=\"";
+		if ( $reltime < 30 ) {
+			echo "judgehost-ok";
+		} else if ( $reltime < 120 ) {
+			echo "judgehost-warn";
+		} else {
+			echo "judgehost-err";
+		}
+		echo "\" title =\"last checked in $reltime seconds ago\">".BALLOON_SYM."</td>";
 		if ( IS_ADMIN ) {
 			echo "<td>" . delLink('judgehost','hostname',$row['hostname']) ."</td>";
 		}

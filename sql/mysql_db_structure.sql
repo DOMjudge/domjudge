@@ -64,6 +64,7 @@ CREATE TABLE `event` (
 CREATE TABLE `judgehost` (
   `hostname` varchar(50) NOT NULL COMMENT 'Resolvable hostname of judgehost',
   `active` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Should this host take on judgings?',
+  `polltime` datetime default NULL COMMENT 'Time of last poll by autojudger', 
   PRIMARY KEY  (`hostname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Hostnames of the autojudgers';
 
