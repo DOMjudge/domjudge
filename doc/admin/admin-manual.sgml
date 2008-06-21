@@ -169,9 +169,9 @@ External software:
 <itemize>
 <item> Install the MySQL-server, set a root password for it and
        make it accessible from all judgehosts.
-<item> Install Apache, PHP and phpMyAdmin.
+<item> Install Apache, PHP and (recommended) phpMyAdmin.
 <item> Make sure PHP works for the webserver and the command line
-       client and that phpMyAdmin works.
+       client.
 <item> Install necessary compilers on the judgehosts.
 <item> See also <ref id="install_config:apt-getinstall"
        name="an example command line for Debian GNU/Linux">.
@@ -186,14 +186,13 @@ DOMjudge:
        <tt>make ; make install</tt>
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it, reload webserver.
-<item> Check that the web interface works (/team, /public and /jury),
-       check that the jury interface is password protected,
-       make sure phpMyAdmin also still works.
-<item> Add useful contest data through the jury web interface.
-<item> Use the config checker in the jury web interface.
-<item> Start the commandline submit daemon, when using this functionality:
-		<tt>cd submit; ./submitdaemon</tt>
-
+<item> Check that the web interface works (/team, /public and /jury)
+       and check that the jury interface is password protected.
+<item> Add useful contest data through the jury web interface or with
+       phpMyAdmin.
+<item> Run the config checker in the jury web interface.
+<item> Start the commandline submit daemon, when using this
+       functionality: <tt>cd submit; ./submitdaemon</tt>
 <item> Next, setup the autojudgers on separate hosts:
   <itemize>
   <item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
@@ -310,7 +309,7 @@ The requirements for the deployment of this jury-system are:
 
 <item> Apache web server with support for PHP &gt;= 4.3.2 and the mysql
        extension for PHP. We recommend PHP 5 since DOMjudge on PHP 4 gets
-       a lot less testing nowadays; we also recommend the posix extension
+       a lot less testing nowadays; we also recommend the POSIX extension
        for extra debugging information.
 
 <item> MySQL &gt;= 4.1.x database and client software
@@ -434,8 +433,9 @@ different roots).
 	<tag><tt>LOGDIR</tt></tag>
 		contains all logfiles.
 	<tag><tt>INCOMINGDIR</tt></tag>
-		contains submission files from the commandline client, being
-		submitted or where a submission error has occurred.
+		contains temporary submission files from the
+		commandline client, being submitted or where a
+		submission error has occurred. 
 	<tag><tt>SUBMITDIR</tt></tag>
 		(optionally) contains all correctly submitted files: as backup
 		only, the database is the authorative source.
@@ -525,15 +525,14 @@ the marked lines near the bottom of this script. The validator used
 should also support returning presentation error results; the shipped
 <tt>compare</tt> supports this and reports presentation-error when the
 output only differs in whitespace from the reference output. The
-script <tt>compare_program.sh</tt> does not presentation error
+script <tt>compare_program.sh</tt> does not support presentation error
 results.
 
 <sect>Other configuration issues
 <p>
 
 There are a few more places where some configuration of the system can
-be made. These are not strictly necessary, but sometimes needed in
-non-standard environments.
+be made. These are sometimes needed in non-standard environments.
 <itemize>
 <item> In <tt>SYSTEM_ROOT/Makefile.global</tt> the defines
        <tt>ROOTCMD</tt> and <tt>SUIDINSTALLDIR</tt> can be modified to
@@ -555,9 +554,9 @@ non-standard environments.
 <sect>Submission methods <label id="install_config:submissionmethods">
 <p>
 
-DOMjudge supports two submission methods: via the
-command line submit program and via the webinterface. From experience,
-both methods have users that prefer the one above the other.
+DOMjudge supports two submission methods: via the command line submit
+program and via the webinterface. From experience, both methods have
+users that prefer the one above the other.
 
 The command line submit method does place some requirements on the
 network environment however. It needs a shared filesystem or other
@@ -1152,7 +1151,7 @@ The connect can happen during the test session, so during the real
 contest everything is fully available. This is also a secure way of
 authenticating teams, which requires no passwords or IP configuration,
 but teams must submit via the command line submit client to the
-command line deamon before they can access their teampage.
+command line daemon before they can access their teampage.
 
 
 <sect>Providing testdata
