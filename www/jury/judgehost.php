@@ -37,14 +37,19 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 <tr><td scope="row">Active:</td><td><?=printyn($row['active'])?></td></tr>
 <tr><td scope="row">Status:</td><td>
 <?php
-$reltime = time() - strtotime($row['polltime']);
-if ( $reltime < 30 ) {
-	echo "OK";
-} else if ( $reltime < 120 ) {
-	echo "Warning";
-} else
-	echo "Error";
-echo ", judgehost last checked in ". $reltime . " seconds ago.";
+if ( empty($row['polltime']) ) {
+	echo "Judgehost never checked in.";
+} else {
+	$reltime = time() - strtotime($row['polltime']);
+	if ( $reltime < 30 ) {
+		echo "OK";
+	} else if ( $reltime < 120 ) {
+		echo "Warning";
+	} else {
+		echo "Error";
+	}
+	echo ", judgehost last checked in ". $reltime . " seconds ago.";
+}
 ?>
 </td></tr>
 </table>
