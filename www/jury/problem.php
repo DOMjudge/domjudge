@@ -139,16 +139,15 @@ echo addForm($pagename) . "<p>\n" .
 		$data['probid']);
 	foreach(array('input','output') as $inout) {
 		echo $inout . ": ";
-		if ( IS_ADMIN )
-			echo '<a href="testcase.php?probid='.urlencode($data['probid']).'">'
-				. ($tc['md5sum_'.$inout]
-					? htmlspecialchars($tc['md5sum_'.$inout])
-					:'none')
-				. '</a>';
-		else {
-			echo ($tc['md5sum_' .$inout]
-					? htmlspecialchars($tc['md5sum_'.$inout])
-					: 'none');
+		if ( $tc['md5sum_' . $inout] ) {
+			echo htmlspecialchars($tc['md5sum_'.$inout]) . " ";
+			if ( IS_ADMIN ) {
+				echo '<a href="testcase.php?probid='.urlencode($data['probid']).'">details</a> | ';
+			}
+			echo "<a href=\"testcase.php?probid=" . urlencode($data['probid']) . "&amp;fetch=" .
+				$inout . "\">download</a>";
+		} else {
+			echo "none";
 		}
 		echo "<br />\n";
 	}

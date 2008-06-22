@@ -14,7 +14,6 @@ $probid = @$_REQUEST['probid'];
 
 require('init.php');
 
-requireAdmin();
 
 $INOROUT = array('input','output');
 
@@ -46,6 +45,8 @@ $title = 'Testcase for problem '.htmlspecialchars(@$probid);
 
 require(SYSTEM_ROOT . '/lib/www/header.php');
 require(SYSTEM_ROOT . '/lib/www/forms.php');
+
+requireAdmin();
 
 if ( ! $probid ) error("Missing or invalid problem id");
 
