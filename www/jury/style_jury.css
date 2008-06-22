@@ -53,10 +53,10 @@ img.smallpicto { width: 11px; height: 11px; }
 .configcheck th { text-align: left; padding-top: 1ex; }
 
 /* team connect status/judgehost poll status */
-.team-nocon { color: #AAA; }
-.team-nosub, .judgehost-err  { color: red; }
-.team-nocor, .judgehost-warn { color: yellow; }
-.team-ok,    .judgehost-ok   { color: green; }
+.team-nocon, .judgehost-nocon { color: #AAA; }
+.team-nosub, .judgehost-err   { color: red; }
+.team-nocor, .judgehost-warn  { color: yellow; }
+.team-ok,    .judgehost-ok    { color: green; }
 
 /* source code highlighting */
 .hl-default {

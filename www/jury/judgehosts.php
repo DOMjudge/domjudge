@@ -74,16 +74,22 @@ if( $res->count() == 0 ) {
 			"><td><a href=\"judgehost.php?id=".urlencode($row['hostname']).'">'.
 			printhost($row['hostname']).'</a>'.
 			"</td><td align=\"center\">".printyn($row['active'])."</td>";
-		$reltime = time() - strtotime($row['polltime']);
 		echo "<td align=\"center\" class=\"";
-		if ( $reltime < 30 ) {
-			echo "judgehost-ok";
-		} else if ( $reltime < 120 ) {
-			echo "judgehost-warn";
+		if ( empty($row['polltime'] ) ) {
+			echo "judgehost-nocon";
+			echo "\" title =\"never checked in\">";
 		} else {
-			echo "judgehost-err";
+			$reltime = time() - strtotime($row['polltime']);
+			if ( $reltime < 30 ) {
+				echo "judgehost-ok";
+			} else if ( $reltime < 120 ) {
+				echo "judgehost-warn";
+			} else {
+				echo "judgehost-err";
+			}
+			echo "\" title =\"last checked in $reltime seconds ago\">";
 		}
-		echo "\" title =\"last checked in $reltime seconds ago\">".BALLOON_SYM."</td>";
+		echo BALLOON_SYM."</td>";
 		if ( IS_ADMIN ) {
 			echo "<td>" . delLink('judgehost','hostname',$row['hostname']) ."</td>";
 		}
