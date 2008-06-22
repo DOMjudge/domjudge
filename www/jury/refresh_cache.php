@@ -30,7 +30,7 @@ $teams = $DB->q('TABLE SELECT login,ipaddress FROM team ORDER BY login');
 $probs = $DB->q('COLUMN SELECT probid FROM problem
                  WHERE cid = %i ORDER BY probid', $cid);
 
-echo "<p>Recalculating all values for the scoreboard cache (" .
+echo "<p>Recalculating all values for the hostname and scoreboard cache (" .
 	count($teams) . " teams, " . count($probs) ." problems, contest c" .
 	htmlspecialchars($cid) . ")...</p>\n\n<pre>\n";
 
