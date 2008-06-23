@@ -66,7 +66,7 @@ function genScoreBoard($cdata, $isjury = FALSE) {
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
 	                 ORDER BY probid', $cid);
-
+	
 	// initialize the arrays we'll build from the data
 	$MATRIX = $SCORES = array();
 	$SUMMARY = array('num_correct' => 0, 
@@ -97,10 +97,10 @@ function genScoreBoard($cdata, $isjury = FALSE) {
 		$SCORES[$login]['affilid']     = $team['affilid'];
 		$SCORES[$login]['country']     = $team['country'];
 	}
-
+	
 	// loop all info the scoreboard cache and put it in our own datastructure
 	while ( $srow = $scoredata->next() ) {
-	
+		
 		// skip this row if the team or problem is not known by us
 		if ( ! array_key_exists ( $srow['teamid'], $teams ) ||
 		     ! array_key_exists ( $srow['probid'], $probs ) ) continue;
@@ -150,14 +150,12 @@ function genScoreBoard($cdata, $isjury = FALSE) {
 		// for each problem
 		foreach ( array_keys($probs) as $prob ) {
 
-			// if we have scores, use them, else, provide the defaults
-			// (happens when nothing submitted for this team,problem yet)
-			if ( isset ( $MATRIX[$team][$prob] ) ) {
-				$pdata = $MATRIX[$team][$prob];
-			} else {
-				$pdata = array ( 'submitted' => 0, 'is_correct' => 0,
-				                 'time' => 0, 'penalty' => 0);
+			// provide default scores when nothing submitted for this team,problem yet
+			if ( ! isset ( $MATRIX[$team][$prob] ) ) {
+				$MATRIX[$team][$prob] = array ( 'num_submissions' => 0, 'is_correct' => 0,
+				                                'time' => 0, 'penalty' => 0);
 			}
+			$pdata = $MATRIX[$team][$prob];
 
 			// update summary data for the bottom row
 			@$SUMMARY['problems'][$prob]['num_submissions'] += $pdata['num_submissions'];
