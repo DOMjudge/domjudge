@@ -20,7 +20,7 @@ REC_TARGETS = docs clean dist distclean
 default: docs
 
 $(LATEXZIPFILES): %.zip:
-ifeq ($(DOWNLOADCPAN),)
+ifeq ($(DOWNLOADCTAN),)
 	@echo
 	@echo "About to download"
 	@echo  $(CTANPATH)/$@
