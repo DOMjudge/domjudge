@@ -20,10 +20,9 @@ version 2, or (at your option) any later version. See the file
 COPYING.
 
 Additionally, parts of this system are based on other programs, which
-are covered by other copyrights and licences. This will be noted in the
-files themselves. Files (partly) covered by other licences are:
-- lib/mkstemps.h and lib/basename.h are covered by the GNU Lesser
-  Public License. See COPYING.lgpl.
+are covered by other copyrights. This will be noted in the files
+themselves and these copyrights/attributions can also be found in the
+administrator manual.
 
 Furthermore, a binary version of the bash shell (statically compiled)
 is distributed with DOMjudge. This program is copyright by the Free
