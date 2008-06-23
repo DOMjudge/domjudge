@@ -197,13 +197,6 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	if ( empty( $cdata ) ) { echo "<p><em>No active contest</em></p>\n"; return; }
 	$cid = $cdata['cid'];
 
-	$tmp = @genScoreBoard($cdata, $isjury);
-	if ( !empty($tmp) ) {
-		$SCORES  = $tmp['scores'];
-		$MATRIX  = $tmp['matrix'];
-		$SUMMARY = $tmp['summary'];
-	}
-
 	// Show final scores if contest is over and unfreezetime has been
 	// reached, or if contest is over and no freezetime had been set.
 	// We can compare $now and the dbfields stringwise.
@@ -286,6 +279,15 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 			'</th>';
 	}
 	echo "</tr>\n</thead>\n\n<tbody>\n";
+	
+	// now get the real scoreboard data
+	$tmp = genScoreBoard($cdata, $isjury);
+	if ( !empty($tmp) ) {
+		$SCORES  = $tmp['scores'];
+		$MATRIX  = $tmp['matrix'];
+		$SUMMARY = $tmp['summary'];
+	}
+	unset($tmp);
 
 	// print the main scoreboard rows
 	$prevsortorder = -1;
