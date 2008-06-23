@@ -309,7 +309,7 @@ The requirements for the deployment of this jury-system are:
 
 <item> Apache web server with support for PHP &gt;= 4.3.2 and the mysql
        extension for PHP. We recommend PHP 5 since DOMjudge on PHP 4 gets
-       a lot less testing nowadays; we also recommend the POSIX extension
+       a lot less testing nowadays; we also recommend the posix extension
        for extra debugging information.
 
 <item> MySQL &gt;= 4.1.x database and client software
