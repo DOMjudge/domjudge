@@ -11,7 +11,7 @@ LATEXZIPFILES = $(addsuffix .zip,$(LATEXPACKAGES))
 LATEXSTYFILES = $(addsuffix .sty,$(LATEXPACKAGES))
 
 # Comprehensive TeX Archive Network path to packages:
-CTANPATH=ftp://tug.ctan.org/pub/tex-archive/macros/latex/contrib
+CTANPATH=http://mirror.ctan.org/macros/latex/contrib
 
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = admin team judge
