@@ -269,13 +269,13 @@ if ( isset($jid) )  {
 		echo "<p><em>There was no diff output.</em></p>\n";
 	}
 
-	echo "<h3><a name=\"error\"></a>Output error</h3>\n\n";
+	echo "<h3><a name=\"error\"></a>Output stderr (info/debug/errors)</h3>\n\n";
 
 	if ( @$jud['output_error'] ) {
 		echo "<pre class=\"output_text\">".
 			htmlspecialchars($jud['output_error'])."</pre>\n\n";
 	} else {
-		echo "<p><em>There was no error output.</em></p>\n";
+		echo "<p><em>There was no stderr output.</em></p>\n";
 	}
 	
 	} // if ($judging_ended)

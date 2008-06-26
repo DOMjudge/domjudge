@@ -58,8 +58,10 @@ It is not used in the determining your score.
 
 if ( (SHOW_COMPILE == 2) ||
      (SHOW_COMPILE == 1 && $row['result'] == 'compiler-error') ) {
-	
-	echo "<h2>Compiler output:</h2>\n\n";
+	 
+	echo "<h2>Compiler output: (compilation " .
+		( $row['result']=='compiler-error' ? 'failed' : 'successful' ) .
+		")</h2>\n\n";
 
 	if(@$row['output_compile']) {
 		echo "<pre class=\"output_text\">\n".
@@ -67,6 +69,8 @@ if ( (SHOW_COMPILE == 2) ||
 	} else {
 		echo "<p><em>There were no compiler errors or warnings.</em></p>\n";
 	}
+} else {
+	echo "<p><em>Compilation output is disabled.</em></p>\n";
 }
 
 include(SYSTEM_ROOT . '/lib/www/footer.php');
