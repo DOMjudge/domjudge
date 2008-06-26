@@ -11,6 +11,12 @@
 $viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'all');
 
 $view = 0;
+
+// Restore most recent view from cookie (overridden by explicit selection)
+if ( isset($_COOKIE['domjudge_submissionview']) ) {
+	$view = $_COOKIE['domjudge_submissionview'];
+}
+
 if ( isset($_REQUEST['view']) ) {
 	// did someone press any of the three view buttons?
 	foreach ($viewtypes as $i => $name) {
@@ -22,6 +28,15 @@ require('init.php');
 $refresh = '15;url=' . getBaseURI() . 'jury/submissions.php?' . 
 	urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view]);
 $title = 'Submissions';
+
+// Set cookie of submission view type, expiry defaults to end of session.
+if ( version_compare(PHP_VERSION, '5.2') >= 0 ) {
+	// HTTPOnly Cookie, while this cookie is not security critical
+	// it's a good habit to get into.
+	setcookie('domjudge_submissionview', $view, null, null, null, null, true);
+} else {
+	setcookie('domjudge_submissionview', $view);
+}
 
 require(SYSTEM_ROOT . '/lib/www/header.php');
 

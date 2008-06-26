@@ -62,6 +62,7 @@ Version 2.2.0 - SVN
  - Cache hostname in team table to prevent slowdown on hosts without
    working reverse.
  - Removed LGPL licence by relicencing 2 files to GPL.
+ - Add cookie to store most recent view type of jury submissions page.
 
 Version 2.1.1 - SVN
 -------------------
