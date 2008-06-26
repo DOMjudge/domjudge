@@ -37,7 +37,7 @@ if( ! $row ) {
 if( ! $row['valid'] ) {
 ?>
 <p>This submission is being ignored.<br />
-It is not used in the determining your score.
+It is not used in determining your score.
 </p>
 <?
 }
