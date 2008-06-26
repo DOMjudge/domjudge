@@ -562,10 +562,12 @@ function cmpscore($a, $b) {
 	// else tie-breaker rule: fastest submission time for latest
 	// correct problem, when times are equal, compare one-to-latest,
 	// etc...
-	$atimes = rsort($a['solve_times']);
-	$btimes = rsort($b['solve_times']);
+	$atimes = $a['solve_times'];
+	$btimes = $b['solve_times'];
+	rsort($atimes);
+	rsort($btimes);
 	for($i = 0; $i < count($atimes); $i++) {
-		if ( $atimes[$i] != $b[$i] ) return $atimes[$i] < $b[$i] ? -1 : 1;
+		if ( $atimes[$i] != $btimes[$i] ) return $atimes[$i] < $btimes[$i] ? -1 : 1;
 	}
 	return 0;
 }
