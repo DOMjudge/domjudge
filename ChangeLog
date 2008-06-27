@@ -54,15 +54,15 @@ Version 2.2.0 - SVN
  - Display time left to end of contest on every page (Closes: #1960940).
  - Move php files that shouldn't be served to lib/www (Closes: #1957891).
  - The admin can exclude submissions from a team's score (Closes: #1742043).
- - Limit jury submissions page by default to 50 submissions (Closes: #1964747).
+ - Added choice of view types to submissions page, default to 50 most recent
+   submissions (Closes: #1964747). Choice is remembered in a cookie.
  - More flexible debugging settings with a bitmask (Closes: #1759103).
- - Store testdata in database.
+ - Store testdata in database and add interface to view/update it.
  - Add an anchor to the first changed line in the diff (Closes: #1818874).
  - Added 'domjudge_plugin' mysql user for the plugin webinterface.
  - Cache hostname in team table to prevent slowdown on hosts without
    working reverse.
  - Removed LGPL licence by relicencing 2 files to GPL.
- - Add cookie to store most recent view type of jury submissions page.
 
 Version 2.1.1 - SVN
 -------------------
