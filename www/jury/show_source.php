@@ -12,8 +12,22 @@ require('init.php');
 
 $id = (int)$_GET['id'];
 
-$source = $DB->q('TUPLE SELECT * FROM submission
+$source = $DB->q('MAYBETUPLE SELECT * FROM submission
                   WHERE submitid = %i',$id);
+if ( empty($source) ) error ("Submission $id not found");
+
+$sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],
+	$source['probid'],$source['langid']);
+
+// Download was requested
+if ( isset($_GET['fetch']) ) {
+	header("Content-Type: text/plain; name=\"$sourcefile\"; charset=" . DJ_CHARACTER_SET);
+	header("Content-Disposition: inline; filename=\"$sourcefile\"");
+	header("Content-Length: " . strlen($source['sourcecode']));
+
+	echo $source['sourcecode'];
+	exit;
+}
 
 $oldsource = $DB->q('MAYBETUPLE SELECT * FROM submission
                      WHERE teamid = %s AND probid = %s AND langid = %s AND
@@ -43,8 +57,6 @@ if ( include_highlighter() ) {
 	}
 }
 
-$sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],
-	$source['probid'],$source['langid']);
 
 $title = 'Source: ' . htmlspecialchars($sourcefile);
 require(SYSTEM_ROOT . '/lib/www/header.php');
@@ -55,7 +67,8 @@ if ( $oldsource ) {
 
 echo '<h2 class="filename"><a name="source"></a>Submission ' .
 	"<a href=\"submission.php?id=$id\">s$id</a> source: " .
-	htmlspecialchars($sourcefile) . "</h2>\n\n";
+	htmlspecialchars($sourcefile) . " (<a " .
+	"href=\"show_source.php?id=$id&amp;fetch=1\">download</a>)</h2>\n\n";
 
 if ( strlen($source['sourcecode'])==0 ) {
 	// Someone submitted an empty file. Cope gracefully.
