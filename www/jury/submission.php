@@ -93,7 +93,9 @@ $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime
 <tr><td valign="top">
 <table>
 <caption>Submission</caption>
-<tr><td scope="row">Contest:</td><td><?=htmlspecialchars($submdata['contestname'])?></td></tr>
+<tr><td scope="row">Contest:</td><td>
+	<a href="contest.php?id=<?=urlencode($submdata['cid'])?>">
+	<?=htmlspecialchars($submdata['contestname'])?></td></tr>
 <tr><td scope="row">Team:</td><td>
 	<a href="team.php?id=<?=urlencode($submdata['teamid'])?>">
 	<span class="teamid"><?=htmlspecialchars($submdata['teamid'])?></span>:
