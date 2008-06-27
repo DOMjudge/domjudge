@@ -13,7 +13,7 @@ $viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'all');
 $view = 0;
 
 // Restore most recent view from cookie (overridden by explicit selection)
-if ( isset($_COOKIE['domjudge_submissionview']) ) {
+if ( isset($_COOKIE['domjudge_submissionview']) && isset($viewtypes[$_COOKIE['domjudge_submissionview']]) ) {
 	$view = $_COOKIE['domjudge_submissionview'];
 }
 
