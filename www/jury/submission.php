@@ -106,10 +106,8 @@ $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime
 	<a href="language.php?id=<?=$submdata['langid']?>">
 	<?=htmlspecialchars($submdata['langname'])?></a></td></tr>
 <tr><td scope="row">Submitted:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
-<tr><td scope="row">Source:</td><td class="filename">
-	<a href="show_source.php?id=<?=$id?>">
-	<?=htmlspecialchars(getSourceFilename($submdata['cid'],$id,$submdata['teamid'],
-		$submdata['probid'],$submdata['langid']))?></a></td></tr>
+<tr><td scope="row">Source:</td><td>
+	<a href="show_source.php?id=<?=$id?>">view source code</a></td></tr>
 </table>
 
 
