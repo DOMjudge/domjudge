@@ -14,10 +14,10 @@ if ( ! IS_ADMIN ) {
 	error("Admin privileges are required for this operation.");
 }
 
-$id    = @$_POST['id'];
-$val   = @$_POST['val'];
+$id  = @$_POST['id'];
+$val = @$_POST['val'];
 if ( empty($id) ) {
-	error("No ID passed for to mark as invalid.");
+	error("No submission ID passed to mark as (in)valid.");
 }
 
 $cnt = $DB->q('RETURNAFFECTED UPDATE submission s
@@ -25,9 +25,9 @@ $cnt = $DB->q('RETURNAFFECTED UPDATE submission s
               $val, $id);
 
 if ( $cnt == 0 ) {
-	error("Submission not found.");
+	error("Submission s$id not found.");
 } else if ( $cnt > 1 ) {
-	error("Ignored more than one judging.");
+	error("Ignored more than one submission.");
 }
 
 $sdata = $DB->q('TUPLE SELECT submitid, cid, teamid, probid

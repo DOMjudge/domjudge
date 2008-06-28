@@ -168,9 +168,8 @@ if ( IS_ADMIN ) {
 		addHidden('id',  $id) .
 		addHidden('val', $val) .
 			'<input type="submit" value="' . $unornot .
-			'ignore this submission" onclick="return confirm(\'Really ' . $unornot . 
-			'ignore this submission?\');" /></form>' .
-			"\n";
+			'IGNORE this submission" onclick="return confirm(\'Really ' . $unornot . 
+			"ignore submission s$id?');\" /></form>\n";
 }
 
 echo "</td></tr>\n</table>\n\n";
