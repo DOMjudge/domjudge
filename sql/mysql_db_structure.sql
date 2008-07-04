@@ -237,7 +237,7 @@ CREATE TABLE `team_unread` (
 -- 
 
 CREATE TABLE `testcase` (
-  `id` int(11) NOT NULL auto_increment COMMENT 'Unique identifier',
+  `id` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique identifier',
   `md5sum_input` char(32) default NULL COMMENT 'Checksum of input data',
   `md5sum_output` char(32) default NULL COMMENT 'Checksum of output data',
   `input` longblob COMMENT 'Input data',
