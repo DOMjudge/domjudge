@@ -511,7 +511,7 @@ function putTeamRow($cdata, $teamid) {
 		// number of submissions for this problem
 		echo '">' . $pdata['num_submissions'];
 		// if correct, print time scored
-		if( ($pdata['time']+$pdata['penalty']) > 0) {
+		if( $pdata['is_correct'] ) {
 			echo " (" . $pdata['time'] . ' + ' . $pdata['penalty'] . ")";
 			$SUMMARY['num_correct'] ++;
 			$SUMMARY['total_time'] += $pdata['time'] + $pdata['penalty'];
