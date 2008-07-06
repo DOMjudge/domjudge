@@ -411,10 +411,17 @@ int main(int argc, char **argv)
 		if ( getcwd(cwd,MAXPATHLEN)==NULL ) error(errno,"cannot get directory");
 		if ( cwd[strlen(cwd)-1]!='/' ) strcat(cwd,"/");
 
-		/* Check that we are within prescribed path. */
-		if ( strncmp(cwd,CHROOT_PREFIX,strlen(CHROOT_PREFIX))!=0 ) {
-			error(0,"invalid root: must be within `%s'",CHROOT_PREFIX);
+		/* Canonicalize CHROOT_PREFIX: the use of NULL below is a GNU
+		   extension, recommended for security */
+		if ( (path = realpath(CHROOT_PREFIX,NULL))==NULL ) {
+			error(errno,"cannot canonicalize path '%s'",CHROOT_PREFIX);
 		}
+		
+		/* Check that we are within prescribed path. */
+		if ( strncmp(cwd,path,strlen(path))!=0 ) {
+			error(0,"invalid root: must be within `%s'",path);
+		}
+		free(path);
 		
 		if ( chroot(".") ) error(errno,"cannot change root to `%s'",cwd);
 		verbose("using root-directory `%s'",cwd);
