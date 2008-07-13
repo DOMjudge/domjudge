@@ -13,6 +13,7 @@
 			<xs:element name="rows" type="rowsType"/>
 			<xs:element name="summary" type="summaryType"/>
 			<xs:element name="problem_legend" type="problem_legendType"/>
+			<xs:element name="language_legend" type="language_legendType"/>
 			<xs:element name="affiliation_legend" type="affiliation_legendType"/>
 			<xs:element name="category_legend" type="category_legendType"/>
 		</xs:all>
@@ -52,6 +53,19 @@
 						<xs:extension base="xs:string">
 							<xs:attributeGroup ref="problemIdAttribute"/>
 							<xs:attributeGroup ref="colorAttribute"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="language_legendType">
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="language">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attributeGroup ref="problemIdAttribute"/>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>

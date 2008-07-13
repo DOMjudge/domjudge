@@ -32,9 +32,12 @@ if ( ! empty($tmp) ) {
 	$SUMMARY = $tmp['summary'];
 }
 
-// Get problems, affiliations and categories for legend
+// Get problems, languages, affiliations and categories for legend
 $probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, color FROM problem
                  WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
+
+$langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name FROM language
+                 WHERE allow_submit = 1 ORDER BY langid');
 
 $affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, name, country
                   FROM team_affiliation ORDER BY name');
@@ -104,11 +107,17 @@ if ( ! empty($MATRIX) ) {
 		XMLaddnode($elem, 'best_time', $data['best_time']);
 	}
 
-	// Add legends for problems, affiliations and categories
+	// Add legends for problems, languages, affiliations and categories
 	$problegend = XMLaddnode($scoreboard, 'problem_legend');
 	foreach( $probs as $prob => $data ) {
 		XMLaddnode($problegend, 'problem', $data['name'],
 		           array('id' => $prob, 'color' => $data['color']));
+	}
+
+	$langlegend = XMLaddnode($scoreboard, 'language_legend');
+	foreach( $langs as $lang => $data ) {
+		XMLaddnode($langlegend, 'language', $data['name'],
+		           array('id' => $lang));
 	}
 
 	$affillegend = XMLaddnode($scoreboard, 'affiliation_legend');
