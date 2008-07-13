@@ -19,6 +19,7 @@
 			<xs:element name="judging" type="judgingType"/>
 		</xs:choice>
 		<xs:attributeGroup ref="identifier"/>
+		<xs:attribute name="time" type="xs:token" use="required"/>
 	</xs:complexType>
 	<xs:complexType name="clarificationType">
 		<xs:attributeGroup ref="identifier"/>
@@ -45,6 +46,7 @@
 	</xs:complexType>
 	<xs:complexType name="judgingType">
 		<xs:attributeGroup ref="identifier"/>
+		<xs:attribute name="submitid" type="xs:integer" use="required"/>
 	</xs:complexType>
 	<xs:attributeGroup name="identifier">
 		<xs:attribute name="id" type="xs:integer" use="required"/>
