@@ -35,7 +35,8 @@ $events = XMLaddnode($root, 'events');
 
 while ( $row = $res->next() ) {
 	
-	$event = XMLaddnode($events, 'event', NULL, array('id' => $row['eventid']));
+	$event = XMLaddnode($events, 'event', NULL,
+	                    array('id' => $row['eventid'], 'time' => $row['eventtime']));
 
 	switch ( $row['description'] ) {
 
@@ -65,7 +66,8 @@ while ( $row = $res->next() ) {
 
 		if ( !IS_JURY && infreeze($data['submittime']) ) continue(2);
 
-		XMLaddnode($event, 'judging', $data['result'], array('id' => $row['judgingid']));
+		XMLaddnode($event, 'judging', $data['result'],
+		           array('id' => $row['judgingid'], 'submitid' => $row['submitid']));
 		break;
 			
 	case 'clarification':
