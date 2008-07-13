@@ -35,6 +35,7 @@ build: $(TARGETS)
 $(TARGETS): %$(EXECSUFFIX): %.cc $(SUBMITCOMMONOBJ) $(TOPDIR)/etc/config.h \
                             $(LIBOBJECTS) $(LIBHEADERS)
 	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLFLAGS)
+	$(STRIP) $@
 
 $(LIBOBJECTS):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)

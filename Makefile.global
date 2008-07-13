@@ -17,6 +17,7 @@ endif
 # Default C/C++ compiler flags
 CXXFLAGS = -O2 -Wall -fstack-protector -fPIE -pie -Wformat -Wformat-security -I$(TOPDIR)/lib -I$(TOPDIR)/etc
 CFLAGS = $(CXXFLAGS) -lm
+STRIP = strip --remove-section=.comment --remove-section=.note
 
 # How to execute a command as root:
 ROOTCMD=su root -c

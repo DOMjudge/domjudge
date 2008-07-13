@@ -18,9 +18,11 @@ $(LIBOBJECTS):
 
 compare: %: %.c $(LIBOBJECTS) $(LIBHEADERS)
 	$(CC) $(CFLAGS) $(patsubst %.h,,$^) -o $@
+	$(STRIP) $@
 
 check_float: %: %.c
 	$(CC) -std=c99 $(CFLAGS) $^ -o $@
+	$(STRIP) $@
 
 clean:
 	-rm -f $(TARGETS)

@@ -27,9 +27,11 @@ beep.build: %.build: %.c
 			cp /usr/bin/true $@ ; \
 		fi \
 	fi
+	$(STRIP) $@
 
 runguard.build: %.build: %.c $(TOPDIR)/etc/config.h
 	$(CXX) $(CXXFLAGS) $< -o $@
+	$(STRIP) $@
 
 install-setuid: $(SUIDBUILDS)
 	@echo $(SUIDINSTALLDIR)
