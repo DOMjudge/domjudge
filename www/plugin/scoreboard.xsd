@@ -65,7 +65,7 @@
 				<xs:complexType>
 					<xs:simpleContent>
 						<xs:extension base="xs:string">
-							<xs:attributeGroup ref="problemIdAttribute"/>
+							<xs:attributeGroup ref="languageIdAttribute"/>
 						</xs:extension>
 					</xs:simpleContent>
 				</xs:complexType>
@@ -145,6 +145,9 @@
 		<xs:attribute name="freeze" type="xs:token"/>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="problemIdAttribute">
+		<xs:attribute name="id" type="xs:string" use="required"/>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="languageIdAttribute">
 		<xs:attribute name="id" type="xs:string" use="required"/>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="countryAttribute">
