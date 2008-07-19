@@ -41,7 +41,7 @@ compares the program output with the expected output.
 
 This software can be used to handle the submission and judging during
 such contests. It also handles feedback to the teams and communication
-on problems (clarification requests). It has webinterfaces for the
+on problems (clarification requests). It has web interfaces for the
 jury, the teams (their submissions and clarification requests) and the
 public (scoreboard).
 
@@ -52,7 +52,7 @@ A global overview of the features that DOMjudge provides:
 
 <itemize>
 <item>Automatic judging with distributed (scalable) judge hosts
-<item>Webinterface for portability and simplicity
+<item>Web interface for portability and simplicity
 <item>Modular system for plugging in languages/compilers
 <item>Detailed jury information (submissions, judgings) and options
       (rejudge, clarifications)
@@ -69,7 +69,7 @@ This is a (rough) list of the requirements for DOMjudge.
 
 <itemize>
 <item>At least one Linux-PC with local root access
-<item>Apache webserver with PHP (4.3.2 or newer) and PHP-command line interface
+<item>Apache web server with PHP (4.3.2 or newer) and PHP-command line interface
 <item>MySQL database server version 4.1.0 or newer
 <item>Compilers for the languages you want to support
 </itemize>
@@ -78,7 +78,7 @@ If you want to use the command line submit client (next to / instead
 of the web submit client):
 
 <itemize>
-<item>A shared filesystem with the team computers (e.g. NFS)
+<item>A shared file system with the team computers (e.g. NFS)
 <item>SSH/SCP
 </itemize>
 
@@ -133,7 +133,7 @@ The DOMjudge homepage can be found at:
 <htmlurl name="http://domjudge.sourceforge.net/"
 url="http://domjudge.sourceforge.net/">
 
-The authors can be reached through the development mailinglist:
+The authors can be reached through the development mailing list:
 <htmlurl name="domjudge-devel@lists.a-eskwadraat.nl"
 url="mailto:domjudge-devel@lists.a-eskwadraat.nl">. See
 <htmlurl name="the list information page"
@@ -162,7 +162,7 @@ External software:
 <item> Install the MySQL-server, set a root password for it and
        make it accessible from all judgehosts.
 <item> Install Apache, PHP and (recommended) phpMyAdmin.
-<item> Make sure PHP works for the webserver and the command line
+<item> Make sure PHP works for the web server and the command line
        client.
 <item> Install necessary compilers on the judgehosts.
 <item> See also <ref id="install_config:apt-getinstall"
@@ -177,15 +177,15 @@ DOMjudge:
        set as <tt>SYSTEM_ROOT</tt>, and from that directory:
        <tt>make ; make install</tt>
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
-       it, reload webserver.
+       it, reload web server.
 <item> Check that the web interface works (/team, /public and /jury)
        and check that the jury interface is password protected.
 <item> Add useful contest data through the jury web interface or with
        phpMyAdmin.
 <item> Run the config checker in the jury web interface.
-<item> Start the commandline submit daemon, when using this
+<item> Start the command line submit daemon, when using this
        functionality: <tt>cd submit; ./submitdaemon</tt>
-<item> Next, setup the autojudgers on separate hosts:
+<item> Next, setup the judgehosts on separate hosts:
   <itemize>
   <item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
          Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
@@ -196,12 +196,12 @@ DOMjudge:
 <item> It should be done by now, submit the sources from the
        test-sources/ directory and compare their results with what
        they claim should happen: <tt>make check</tt> and check all
-       submissions in the jury webinterface.
+       submissions in the jury web interface.
 
 <item>Optionally:
   <itemize>
   <item> Install the submit client on the team workstations;
-  <item> Generate one-time passwords for all the teams in the webinterface;
+  <item> Generate one-time passwords for all the teams in the web interface;
   <item> Further tighten the security of the system, e.g. by applying
          firewall rules.
   <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>
@@ -231,7 +231,7 @@ DOMjudge has three different kinds of hosts:
        command line submit client; the rest happens via the web
        interface.
 <item> DOMjudge server: a host that receives the submissions, runs the
-       database and serves the webpages. This host will run the
+       database and serves the web pages. This host will run the
        DOMjudge submitdaemon(s), MySQL and Apache. Optionally some of
        these tasks can be further split out to separate machines, but
        that's not normally necessary.
@@ -246,7 +246,7 @@ DOMjudge has three different kinds of hosts:
 
 Note that the judges (persons) are not required and not recommended to
 work on any of the DOMjudge server or judgehosts, as they access the
-system via the jury webinterface. the judges not
+system via the jury web interface.
 
 <sect>Requirements
 <label id="install_config:requirements">
@@ -270,14 +270,14 @@ The requirements for the deployment of this jury-system are:
   <item> The jury computers use TCP/IP connections to connect to the
          MySQL database, for copying submissions with scp (in the
          default configuration with the command line submitdaemon).
-  <item> HTTP traffic from teams, the public and jury to the webserver.
+  <item> HTTP traffic from teams, the public and jury to the web server.
   </itemize>
        Each team computer needs to have a unique IP address from the
        view of the jury system.
 
 <item> (Local) root access on the jury-computers (preferably also on
-       the shared homedirectory) for installing some programs
-       setuid-root and (un)mounting the proc filesystem. See <ref
+       the shared home directory) for installing some programs
+       setuid-root and (un)mounting the proc file system. See <ref
        id="security:rootprivs" name="Security: root privileges"> for
        more details.
 
@@ -356,7 +356,7 @@ functionality.
        system and judgehosts in sync)
 
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
-       (to use the command line submit client with the webinterface)
+       (to use the command line submit client with the web interface)
 
 <item> <htmlurl name="PEAR Text_Highlighter class"
         url="http://pear.php.net/package/Text_Highlighter/">~
@@ -426,19 +426,19 @@ different roots).
 	the configuration of the system.
 
 <tag><tt>OUTPUT_ROOT</tt></tag>
-	Placed here are all submission files, logfiles and temporary
+	Placed here are all submission files, log files and temporary
 	files, made while testing submissions. The following directories
 	should be present within <tt>OUTPUT_ROOT</tt>:
 	<descrip>
 	<tag><tt>LOGDIR</tt></tag>
-		contains all logfiles.
+		contains all log files.
 	<tag><tt>INCOMINGDIR</tt></tag>
 		contains temporary submission files from the
-		commandline client, being submitted or where a
+		command line client, being submitted or where a
 		submission error has occurred. 
 	<tag><tt>SUBMITDIR</tt></tag>
 		(optionally) contains all correctly submitted files: as backup
-		only, the database is the authorative source.
+		only, the database is the authoritative source.
 	<tag><tt>JUDGEDIR</tt></tag>
 		place where submissions are tested, each in its own
 		subdirectory. The system needs root access to this
@@ -506,7 +506,7 @@ To allow for problems that do not fit within the standard scheme of
 fixed input and/or output, DOMjudge has the possibility to change the
 way submissions are run and checked for correctness.
 
-The backend script (<tt>test_solution.sh</tt>) that handles the
+The back-end script (<tt>test_solution.sh</tt>) that handles the
 compilation, running and checking of submissions, calls separate
 programs for running and comparison of the results. These can be
 specialised and adapted to the requirements per problem. For this, one
@@ -555,11 +555,11 @@ be made. These are sometimes needed in non-standard environments.
 <p>
 
 DOMjudge supports two submission methods: via the command line submit
-program and via the webinterface. From experience, both methods have
+program and via the web interface. From experience, both methods have
 users that prefer the one above the other.
 
 The command line submit method does place some requirements on the
-network environment however. It needs a shared filesystem or other
+network environment however. It needs a shared file system or other
 means for the jury to access the files on the team accounts. Site
 specific adaptations can be made in <tt>submit/submit_copy.sh</tt>.
 
@@ -573,7 +573,7 @@ libcurl).
 
 Although the command line submit daemon is thus not strictly
 necessary, it does add an advantage: it is more secure than the
-webinterface because it uses a `callback' to authenticate the team
+web interface because it uses a `callback' to authenticate the team
 (instead of IP address authentication). Furthermore, it allows for
 automatic team IP address configuration with the configuration option
 <tt>STRICTIPCHECK=0</tt>, which removes the hassle of either
@@ -584,7 +584,7 @@ The figure below is a graphical representation of the flow of a
 submission. Arrows with filled lines indicate the flow of the
 submission file, while dot-dash lines indicate flow of metadata about
 the submission. Each line where no protocol of data transfer is given,
-are just filesystem operations. Squares are programs and rounded
+are just file system operations. Squares are programs and rounded
 squares are storage locations.
 
 <figure loc="h">
@@ -593,13 +593,13 @@ squares are storage locations.
 <caption>Submission flow diagram.
 </figure>
 
-The database is the authorative version for submission sources;
-filesystem storage is available for historic reasons, as an easy way
+The database is the authoritative version for submission sources;
+file system storage is available for historic reasons, as an easy way
 to access the source files and as backup. The program
 <tt>bin/restore_sources2db</tt> is available to recover the submission
-table in the database from these files. The commandline daemon will
-automatically store sources on the filesystem; the webserver needs
-write permissions on <tt>SUBMITDIR</tt> and ignores filesystem storage
+table in the database from these files. The command line daemon will
+automatically store sources on the file system; the web server needs
+write permissions on <tt>SUBMITDIR</tt> and ignores file system storage
 if these permissions are not set.
 
 <sect>Database installation
@@ -623,10 +623,10 @@ to be manually filled with data before the contest can be run. See
 the <ref id="contestsetup:database" name="database section of Configuration">
 for details.
 
-<sect1>Finetuning settings
+<sect1>Fine tuning settings
 <p>
 
-It may be desirable or even necessary to finetune some MySQL default settings:
+It may be desirable or even necessary to fine tune some MySQL default settings:
 
 <itemize>
 <item><tt>max_connections</tt>: The default 100 is too low, because of the
@@ -675,19 +675,19 @@ select-queries to one or more replicated slave servers, while updates
 will still be done to the master. This is not supported out of the box,
 and will require making changes to the DOMjudge source.
 
-<sect>Webserver configuration
+<sect>Web server configuration
 <p>
 
-For the web interface, you need to have a webserver (e.g. Apache)
+For the web interface, you need to have a web server (e.g. Apache)
 installed on the jury system and made sure that PHP correctly works
-with it. Refer to the documentation of your webserver and PHP for
+with it. Refer to the documentation of your web server and PHP for
 details.
 
-To configure the webserver for DOMjudge, use the Apache configuration
+To configure the web server for DOMjudge, use the Apache configuration
 snippet from <tt>etc/apache.conf</tt>. In that file, replace
 `SYSTEM_ROOT' with the <tt>SYSTEM_ROOT</tt> you specified in the
 config, i.e. where the DOMjudge files are located. Reload the
-webserver for the changes to take effect.
+web server for the changes to take effect.
 
 See also section <ref id="security:webprivs" name="Security: webserver
 privileges">.
@@ -723,13 +723,13 @@ sync.
 <sect>Logging &amp; debugging
 <p>
 
-All DOMjudge daemons and webinterface scripts support logging and
+All DOMjudge daemons and web interface scripts support logging and
 debugging in a uniform manner via functions in <tt>lib.error.*</tt>.
 There are three ways in which information is logged:
 <itemize>
-<item>Directly to <tt>stderr</tt> for daemons or to the webpage for
-      webinterface scripts (only on serious issues).
-<item>To a logfile set by the variable <tt>LOGFILE</tt>, which is set
+<item>Directly to <tt>stderr</tt> for daemons or to the web page for
+      web interface scripts (only on serious issues).
+<item>To a log file set by the variable <tt>LOGFILE</tt>, which is set
       in each program (unsetting this variable disables this method).
 <item>To syslog. This can be configured via the <tt>SYSLOG</tt>
       configuration variable in the global config. This option gives
@@ -738,14 +738,14 @@ There are three ways in which information is logged:
 </itemize>
 Each script also defines a default threshold level for messages to be
 logged to stderr (<tt>VERBOSE</tt>: defaults to <tt>LOG_INFO</tt> in
-daemons and <tt>LOG_ERROR</tt> in the webinterface) and for
-logfile/syslog (<tt>LOGLEVEL</tt>: defaults to <tt>LOG_DEBUG</tt>).
+daemons and <tt>LOG_ERROR</tt> in the web interface) and for
+log file/syslog (<tt>LOGLEVEL</tt>: defaults to <tt>LOG_DEBUG</tt>).
 
 In case of problems, it is advisable to check the logs for clues.
 Extra debugging information can be obtained by setting the config
 option <tt>DEBUG</tt> to a bitwise or of the available
 <tt>DEBUG_*</tt> flags in <tt>global.cfg</tt>, to e.g. generate extra
-SQL query and timing information in the webinterface.
+SQL query and timing information in the web interface.
 
 <sect>Building and installing
 <p>
@@ -765,21 +765,21 @@ the <tt>SYSTEM_ROOT</tt> directory. This will first run <tt>make
 config</tt> and <tt>make build</tt> if necessary. This command is
 interactive: it will ask for a few different passwords:
 <itemize>
-<item> a password which will be set on the jury webinterface.
+<item> a password which will be set on the jury web interface.
 <item> the system root password to install some programs set-uid root.
 <item> the MySQL database root password to install the DOMjudge database.
 </itemize>
 It does also automatically generate and set passwords for the team and
-public webinterface: these are only used internally in the system and
+public web interface: these are only used internally in the system and
 are best left untouched.
 
-There are some files/directories that have to be readable/writeable by
-the webserver. These are:
+There are some files/directories that have to be readable/writable by
+the web server. These are:
 <itemize>
 <item> <tt>SYSTEM_ROOT/etc/passwords.php</tt> must be readable by the
-       webserver, but (best) not world readable.
+       web server, but (best) not world readable.
 <item> <tt>SUBMITDIR</tt> can optionally be set writable for the
-       webserver, to store websubmitted sources there (next to the
+       web server, to store websubmitted sources there (next to the
 	   database), see <ref id="install_config:submissionmethods"
 	   name="submission methods"> for more information.
 </itemize>
@@ -801,7 +801,7 @@ environment is installed. First the Cygwin <url name="setup.exe"
 url="http://cygwin.com/setup.exe"> program must be downloaded and
 installed with GCC, curl-devel and maybe some more packages included.
 Furthermore, for submitting to the command line submitdaemon (next to
-the webinterface), you need to have Windows XP and the cygwin-base
+the web interface), you need to have Windows XP and the cygwin-base
 package must be (re-)installed from the mirror
 <url url="http://cygwin.win6.jp/cygwin-ipv6/"> for support of the
 complete <tt>netdb.h</tt> headers (as this is currently not supported
@@ -829,13 +829,13 @@ like this: <tt>pear install Text_Highlighter</tt>.
 Alternatively you can download the source code from the
 Text_Highlighter website and unpack that under the <tt>www/jury</tt>
 directory. Rename the resulting <tt>Text_Highlighter-x.y.z</tt>
-dir to just <tt>Text</tt>.
+directory to just <tt>Text</tt>.
 
-<sect1>The plugin webinterface
+<sect1>The plugin web interface
 <p>
 
-Next to the public, team and jury webinterfaces, DOMjudge also
-provides a <em>plugin</em> webinterface. This webinterface is still in
+Next to the public, team and jury web interfaces, DOMjudge also
+provides a <em>plugin</em> web interface. This web interface is still in
 development so subject to change. The interface provides contest data
 from DOMjudge in XML format and is meant to provide external programs
 (plugins) with data on the contest. This allows for all kinds of
@@ -848,7 +848,7 @@ provided, the exact specification of this interface may change. Also,
 we are especially interested in feedback and ideas.
 
 There are currently two data-sets provided within the <tt>plugin</tt>
-subdirectory of the DOMjudge webinterface, both in XML format:
+subdirectory of the DOMjudge web interface, both in XML format:
 <descrip>
 <tag><tt>scoreboard.php</tt></tag>
 	This page provides a representation of the scoreboard.
@@ -949,7 +949,7 @@ detailed treating of these, see section <ref
 id="contestsetup:milestones" name="Contest milestones">.
 
 <tag>judgehost</tag>
-List here the hosts that will be autojudging the submissions.
+List here the hosts that will be judging the submissions.
 <tt>hostname</tt> is the (short) hostname of a judge computer.
 <tt>active</tt> indicates whether this host should judge incoming
 submissions. <tt>polltime</tt> is an internally used variable to
@@ -1013,9 +1013,9 @@ the ID of the category the team is in; <tt>affilid</tt> is the
 affiliation ID of the team.
 
 <tt>ipaddress</tt> is the IP-address of the team. This is used to
-automatically identify the team in the webinterface and to check
+automatically identify the team in the web interface and to check
 submission origin. A value of <tt>NULL</tt> results in the team being
-unable to submit or view its teampage, unless they first authenticate
+unable to submit or view its team page, unless they first authenticate
 via password or command line submission. <tt>passwd</tt> is a
 MD5-hash of a one-time password teams can use to authenticate and
 register their IP address. It can be set under Administrator Functions:
@@ -1031,7 +1031,7 @@ newlines and <tt>room</tt> is the room the team is located, both for
 display only; <tt>comments</tt> can be filled with arbitrary useful
 information and is only visible to the jury.
 The timestamp <tt>teampage_first_visited</tt> indicates when/whether a
-team visited its team webinterface.
+team visited its team web interface.
 
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the
@@ -1092,7 +1092,7 @@ starttime may be equal).
 activatetime is the moment when a contest first becomes
 visible to the public and teams (potentially replacing a previous contest
 that was displayed before). Nothing can be submitted yet and the
-problemset is not revealed. Clarifications can be viewed and sent.
+problem set is not revealed. Clarifications can be viewed and sent.
 
 At starttime, the scoreboard is displayed and submissions are accepted.
 At endtime the contest stops. New incoming submissions will be stored
@@ -1210,7 +1210,7 @@ If they match exactly, the problem is judged to be correct.
 The database has a separate table named testcase, which can be manipulated
 from the web interface. Under a problem, click on the testcase link. There
 the files can be uploaded. The judger caches a copy based on MD5 sum, so if
-you need to make changes later, reupload the data in the web interface and
+you need to make changes later, re-upload the data in the web interface and
 it will automatically be picked up.
 
 For problems with a special compare script, things are a bit
@@ -1280,10 +1280,10 @@ has these features and can be distributed over the workstations.
   to the browser certificate list to prevent annoying dialogs.
   </itemize>
 <item> Make sure compilers for the supported languages are installed and working.
-<item> Provide teams with the commandline submit client and check that it works.
-<item> Make the sample in- and output data from the problemset available.
+<item> Provide teams with the command line submit client and check that it works.
+<item> Make the sample in- and output data from the problem set available.
 <item> Add your SSH key to their authorized_keys file, so you can always access
-their account for wiping, emergencies and to make the submit commandline client
+their account for wiping, emergencies and to make the submit command line client
 work when it doesn't use the cURL interface.
 <item> Check that internet access is blocked.
 </enum>
@@ -1388,7 +1388,7 @@ This is done to keep them secret until e.g. the prize ceremony. You
 can release the final scores to team- and public interfaces when the
 time is right. You can do this either by setting a predefined
 `unfreezetime' in the contest table, or you push the `unfreeze scores
-now' button in the jury webinterface, under contests.
+now' button in the jury web interface, under contests.
 
 <sect1>Clickability
 <p>
@@ -1482,9 +1482,9 @@ this appropriately or choose strong enough passwords.
 
 <em>Note:</em> database passwords are stored in
 <tt>SYSTEM_ROOT/etc/passwords.php</tt>. This file has to be
-non-readable to teams, but has to be readable to the webserver to let
-the jury webinterface work. A solution is to make it readable to a
-special group the webserver runs as.
+non-readable to teams, but has to be readable to the web server to let
+the jury web interface work. A solution is to make it readable to a
+special group the web server runs as.
 
 Secondly, the files submitted should not be interceptable by other
 teams (even though that, if these would be sent clear-text, a team
@@ -1500,7 +1500,7 @@ submission, the file is copied there with some random part and this
 file will be copied by the jury. Another team cannot guess filenames
 there, so trying to send as a different team would only result in a
 copying error. During submission, the IP address is also checked. The
-team webinterface relies on authentication by IP address only: this
+team web interface relies on authentication by IP address only: this
 has the advantage for teams that they do not have to fill in yet
 another user/password combination. Only if teams are able to spoof
 their IP (for which they normally need root/administrator privileges),
@@ -1511,7 +1511,7 @@ we think that this suffices.
 <em>Note:</em> When enabling the websubmit feature (on by default),
 teams can also send in submissions with authentication purely based on
 IP. This means that care has to be taken e.g. that teams cannot simply
-login onto one anther's computer and spoof their identity.
+login onto one another's computer and spoof their identity.
 
 The jury web interface is protected by HTTP Authentication. By default
 the <tt>domjudge_jury</tt> user will be given full access. You can choose
@@ -1538,19 +1538,19 @@ hack or could crash the system.  However, a chroot environment does
 not restrict network access, so there lies a possible security risk
 that has to be handled separately.
 
-<sect>Filesystem privileges <label id="security:fileprivs">
+<sect>File system privileges <label id="security:fileprivs">
 <p>
 
-Of course you must make sure that the filesystem privileges are set
+Of course you must make sure that the file system privileges are set
 such that there's no unauthorised access to sensitive data, like
 submitted solutions or passwords. This is quite system dependent. At
 least the <tt>OUTPUT_ROOT</tt> should not be readable by other users
 than DOMjudge.
 
-<sect1>Permissions for the webserver <label id="security:webprivs">
+<sect1>Permissions for the web server <label id="security:webprivs">
 <p>
 
-Make sure that the webserver serving the DOMjudge webinterface pages
+Make sure that the web server serving the DOMjudge web interface pages
 has correct permissions to the <tt>SYSTEM_ROOT/{www,lib,etc}</tt>
 directory trees. The <tt>www</tt> and <tt>lib</tt> trees can safely
 set to be readable and accessible. Care should be taken with the
@@ -1558,13 +1558,13 @@ set to be readable and accessible. Care should be taken with the
 should be readable, but <tt>passwords.php</tt> should best not be
 readable by anyone else. This can be done for example by setting the
 <tt>SYSTEM_ROOT/etc</tt> directory to owner:group &lt;DOMjudge
-account&gt;:&lt;Webserver group&gt; and permissions
+account&gt;:&lt;Web server group&gt; and permissions
 <tt>drwxr-x---</tt>, denying users other than yourself and the
-webserver group access to the configuration and password files.
+web server group access to the configuration and password files.
 
-If you want the webserver to also store incoming submission sources on
-the filesystem (next to the database), then <tt>SUBMITDIR</tt> must be
-writable for the webserver, see also <ref
+If you want the web server to also store incoming submission sources on
+the file system (next to the database), then <tt>SUBMITDIR</tt> must be
+writable for the web server, see also <ref
 id="install_config:submissionmethods" name="submission methods">.
 
 You should take care not to serve any files over the web that
