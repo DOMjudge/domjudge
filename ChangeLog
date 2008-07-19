@@ -64,6 +64,7 @@ Version 2.2.0 - SVN
    working reverse.
  - Removed LGPL licence by relicencing 2 files to GPL.
  - Added ability to download source code for jury.
+ - Allow bash-static to be replaced by any static POSIX shell.
 
 Version 2.1.1 - SVN
 -------------------

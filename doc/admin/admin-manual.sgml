@@ -317,9 +317,13 @@ The requirements for the deployment of this jury-system are:
 <item> PHP &gt;= 4.3.2, located in <tt>/usr/bin/php</tt> (command line
        interface), also with the mysql extension.
 
-<item> Bash &gt;= 2, located in <tt>/bin/bash</tt>.
+<item> Bash &gt;= 2, located in <tt>/bin/bash</tt>
 
-<item> Statically compiled Bash &gt;= 2 (included for Linux IA32)
+<item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash)
+
+<item> A statically compiled POSIX shell, located in
+       <tt>SYSTEM_ROOT/bin/sh-static</tt> (bash 3 is included for
+       Linux IA32)
 
 <item> glibc &gt;= 2.1
 
@@ -471,7 +475,7 @@ documented there.
 <p>
 
 Configuration of the compilers of the supported languages should be
-done separately. For each supported language a bash shell-script named
+done separately. For each supported language a shell-script named
 <tt>compile_&lt;lang&gt;.sh</tt> should be made and placed in
 <tt>SYSTEM_ROOT/judge</tt>, where &lt;lang&gt; is the ID of the
 language as specified in the database. For more information, see for
