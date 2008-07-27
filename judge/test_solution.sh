@@ -79,10 +79,11 @@ LOGFILE="$LOGDIR/judge.`hostname --short`.log"
 LOGLEVEL=$LOG_DEBUG
 PROGNAME="`basename $0`"
 
-# Set this for extra verbosity:
-#VERBOSE=$LOG_DEBUG
-if [ "$VERBOSE" ]; then
-	export VERBOSE
+# Check for judge backend debugging:
+if [ "$DEBUG" -a $((DEBUG & DEBUG_JUDGE)) -ne 0 ]; then
+	DO_DEBUG=1
+	export VERBOSE=$LOG_DEBUG
+	logmsg $LOG_NOTICE "debugging enabled, DEBUG='$DEBUG'"
 else
 	export VERBOSE=$LOG_ERR
 fi
@@ -167,7 +168,7 @@ fi
 
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
-( "$RUNGUARD" -t $COMPILETIME -o compile.time -- \
+( "$RUNGUARD" ${DO_DEBUG:+-v} -t $COMPILETIME -o compile.time -- \
 	"$COMPILE_SCRIPT" "source.$EXT" source "$MEMLIMIT" ) &>compile.tmp
 exitcode=$?
 if [ -f source ]; then
@@ -217,8 +218,8 @@ disown $CATPID
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
-( "$RUNGUARD" ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" -t $TIMELIMIT \
-	-m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
+( "$RUNGUARD" ${DO_DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
+	-t $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
 	$PREFIX/$RUN_SCRIPT $PREFIX/program testdata.in program.out program.err program.exit \
 ) &>error.tmp
 exitcode=$?
