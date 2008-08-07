@@ -384,7 +384,7 @@ will have the bulk of these packages installed already.
 
 <code>
 apt-get install gcc g++ make libcurl3-dev sudo \
-	mysql-server openssh-server openssh-client ntp \
+	mysql-server ntp \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
 	hostname coreutils procps grep diff mount bash-static \
 	openssh-server openssh-client \
@@ -395,7 +395,7 @@ apt-get install gcc g++ make libcurl3-dev sudo \
 This is for Debian 4.0 "Etch". For Debian 5.0 "Lenny",
 replace <tt/tetex-bin/ and <tt/tetex-extra/
 with <tt/texlive-latex-recommended/ and <tt/texlive-latex-extra/,
-and <tt/libcurl3-dev/ with <tt/libcurl4-dev/.
+and <tt/libcurl3-dev/ with <tt/libcurl4-gnutls-dev/.
 
 On a judgehost, the following should be sufficient. The last line shows some example
 compilers to install for C, C++, Java (GNU), Java (Sun), Haskell and Pascal; change
