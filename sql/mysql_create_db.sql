@@ -18,8 +18,23 @@ CREATE DATABASE DOMJUDGE_DBNAME CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 -- NOTE: by default, access is allowed from ALL hosts, make sure you
 -- restrict this appropriately (or choose strong enough passwords).
 USE mysql;
-REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_jury'  ,PASSWORD('DOMJUDGE_JURY_PASSWD'));
-REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_team'  ,PASSWORD('DOMJUDGE_TEAM_PASSWD'));
-REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_public',PASSWORD('DOMJUDGE_PUBLIC_PASSWD'));
-REPLACE INTO user (Host, User, Password) VALUES ('%','domjudge_plugin',PASSWORD('DOMJUDGE_PLUGIN_PASSWD'));
+REPLACE INTO user (Host, User, Password)
+	VALUES ('%','domjudge_jury'  ,PASSWORD('DOMJUDGE_JURY_PASSWD'));
+REPLACE INTO user (Host, User, Password)
+	VALUES ('%','domjudge_team'  ,PASSWORD('DOMJUDGE_TEAM_PASSWD'));
+REPLACE INTO user (Host, User, Password)
+	VALUES ('%','domjudge_public',PASSWORD('DOMJUDGE_PUBLIC_PASSWD'));
+REPLACE INTO user (Host, User, Password)
+	VALUES ('%','domjudge_plugin',PASSWORD('DOMJUDGE_PLUGIN_PASSWD'));
+-- Need to add both '%' and 'localhost' as entries, because a default
+-- fresh MySQL installation has a Host='localhost',User='' entry which
+-- is more specific than Host='%' and thus leads to Access Denied errors.
+REPLACE INTO user (Host, User, Password)
+	VALUES ('localhost','domjudge_jury'  ,PASSWORD('DOMJUDGE_JURY_PASSWD'));
+REPLACE INTO user (Host, User, Password)
+	VALUES ('localhost','domjudge_team'  ,PASSWORD('DOMJUDGE_TEAM_PASSWD'));
+REPLACE INTO user (Host, User, Password)
+	VALUES ('localhost','domjudge_public',PASSWORD('DOMJUDGE_PUBLIC_PASSWD'));
+REPLACE INTO user (Host, User, Password)
+	VALUES ('localhost','domjudge_plugin',PASSWORD('DOMJUDGE_PLUGIN_PASSWD'));
 FLUSH PRIVILEGES;

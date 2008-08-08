@@ -65,6 +65,8 @@ Version 2.2.0 - SVN
  - Removed LGPL licence by relicencing 2 files to GPL.
  - Added ability to download source code for jury.
  - Allow bash-static to be replaced by any static POSIX shell.
+ - In MySQL privileges table, add 'localhost' entries next to '%' entries
+   to prevent Access Denied when DB is on localhost.
 
 Version 2.1.1 - SVN
 -------------------
