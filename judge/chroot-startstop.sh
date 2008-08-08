@@ -15,11 +15,11 @@
 # Exit on error:
 set -e
 
-# Chroot subdirs needed:
+# Chroot subdirs needed: (add 'lib64' for amd64 architecture)
 SUBDIRMOUNTS="etc lib usr"
 
 # Location where to bind mount from:
-CHROOTORIGINAL="/chroot/domjudge-java"
+CHROOTORIGINAL="/chroot/domjudge"
 
 case "$1" in
 	start)
@@ -29,7 +29,7 @@ case "$1" in
 
 		for i in $SUBDIRMOUNTS ; do
 			mkdir -p $i
-			sudo mount --bind $CHROOTORIGINAL/$i $i
+			sudo mount --bind "$CHROOTORIGINAL/$i" $i
 		done
 		;;
 
@@ -41,7 +41,7 @@ case "$1" in
 		sudo umount "$PWD/proc"
 		
 		for i in $SUBDIRMOUNTS ; do
-			sudo umount $i
+			sudo umount "$PWD/$i"
 		done
 		;;
 
