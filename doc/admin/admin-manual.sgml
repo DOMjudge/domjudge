@@ -496,8 +496,8 @@ first be built. This can be accomplished with the included script
 the target directory to build the chroot environment in and as second
 argument the target machine architecture. Start the script without
 arguments for usage information. See also sections
-<ref id="install_config:system" name="System Configuration"> and
-<ref id="problems:java-chroot" name="Problems: Java & chroot">.
+<ref id="install_config:judgehost" name="Installation of a judgehost">
+and <ref id="problems:java-chroot" name="Problems: Java & chroot">.
 
 <sect>Configuration of special run and compare programs
 <p>
@@ -692,34 +692,6 @@ web server for the changes to take effect.
 See also section <ref id="security:webprivs" name="Security: webserver
 privileges">.
 
-<sect>System configuration issues <label id="install_config:system">
-<p>
-
-For running solution programs under a non-privileged user, a user has
-to be added to the system(s) that act as judgehost. This user does not
-need a home-directory or password, so e.g. the following command would
-suffice to add a user `domjudge-run' with minimal privileges.
-
-On RedHat:
-<verb>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</verb>
-On Debian:
-<verb>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</verb>
-
-For other systems check the specifics of your useradd command.
-This user must also be configured as the user under which programs run
-in <tt>SYSTEM_ROOT/etc/global.cfg</tt>.
-
-If you use the default <tt>judge/chroot-startstop.sh</tt> script, then
-the following lines must be added to <tt>/etc/sudoers</tt>:
-<verb>
-domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
-domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
-</verb>
-
-We advise to install an NTP-daemon (Network Time Protocol) to make sure
-the time between jury computer and judgehost (and team computers) is in
-sync.
-
 <sect>Logging &amp; debugging
 <p>
 
@@ -793,6 +765,49 @@ distclean</tt> will additionally also remove all traces of DOMjudge
 from the MySQL database, which is needed if you want to reinstall the
 database!
 
+<sect>Installation of a judgehost<label id="install_config:judgehost">
+<p>
+
+On a judgehost the installation procedure is a bit different and
+actually not really polished yet. The basic configuration can be taken
+the same as on a the main server, but a webserver and mysql database
+need not be set up. After configuring DOMjudge, run <tt>make
+config</tt> and <tt>make build</tt>, but <em>not</em> <tt>make
+install</tt> as this would also try to install the DOMjudge database.
+Instead the following steps have to be performed:
+<itemize>
+<item> copy <tt>etc/passwords.php</tt> from the main server,
+<item> run <tt>make -C bin install</tt>,
+<item> run <tt>bin/make_directories.sh install</tt>.
+</itemize>
+
+For running solution programs under a non-privileged user, a user has
+to be added to the system(s) that act as judgehost. This user does not
+need a home-directory or password, so e.g. the following command would
+suffice to add a user `domjudge-run' with minimal privileges.
+
+On RedHat:
+<verb>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</verb>
+On Debian:
+<verb>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</verb>
+
+For other systems check the specifics of your useradd command.
+This user must also be configured as the user under which programs run
+in <tt>SYSTEM_ROOT/etc/global.cfg</tt>.
+
+If you use the default <tt>judge/chroot-startstop.sh</tt> script, then
+the following lines must be added to <tt>/etc/sudoers</tt>:
+<verb>
+domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
+domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
+domjudge ALL=(root) NOPASSWD: /bin/mount --bind CHROOTORIGDIR/*
+domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*
+</verb>
+Here the user <tt>domjudge</tt> must be replaced by the user you
+intend to run the judgedaemon as, <tt>CHROOTORIGDIR</tt> by the path
+the chroot environment was installed to and <tt>JUDGEDIR</tt> by the
+value of this variable as in <tt>global.cfg</tt>.
+
 <sect>Building the submit client under Windows/Cygwin
 <p>
 
@@ -830,6 +845,13 @@ Alternatively you can download the source code from the
 Text_Highlighter website and unpack that under the <tt>www/jury</tt>
 directory. Rename the resulting <tt>Text_Highlighter-x.y.z</tt>
 directory to just <tt>Text</tt>.
+
+<sect1>NTP time synchronisation
+<p>
+
+We advise to install an NTP-daemon (Network Time Protocol) to make
+sure the time between jury computer and judgehost (and team computers)
+is in sync.
 
 <sect1>The plugin web interface
 <p>
