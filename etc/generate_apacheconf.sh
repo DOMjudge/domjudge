@@ -27,6 +27,7 @@ COMMANDLINE="$0 $@"
 
 # Parse DOMjudge sub-directory location from WEBBASEURI:
 WEBSUBDIR=`echo "$WEBBASEURI" | sed "s!^.*$WEBSERVER[^/]*/\(.*\)!\1!"`
+[ "$WEBSUBDIR" ] || WEBSUBDIR="/"
 if [ "$WEBSUBDIR" = "$WEBBASEURI" -o "$WEBSUBDIR" = "${WEBSUBDIR%/}" ];
 then
 	echo "Failed to parse WEBSUBDIR from WEBBASEURI."
