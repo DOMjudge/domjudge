@@ -43,7 +43,7 @@ program and compares the program output with the expected output.
 
 This software can be used to handle the submission and judging during
 such contests. It also handles feedback to the teams and communication
-on problems (clarification requests). It has webinterfaces for the
+on problems (clarification requests). It has web-interfaces for the
 jury, the teams (their submissions and clarification requests) and the
 public (scoreboard).
 
@@ -54,7 +54,7 @@ A global overview of the features that DOMjudge provides:
 
 <itemize>
 <item>Automatic judging with distributed (scalable) judge hosts
-<item>Webinterface for portability and simplicity
+<item>Web-interface for portability and simplicity
 <item>Modular system for plugging in languages/compilers
 <item>Detailed jury information (submissions, judgings) and options
       (rejudge, clarifications)
@@ -154,7 +154,7 @@ submissions and problem headers.
 
 Before the contest starts, a number of things will need to be
 configured by the administrator. You can check that information,
-such as the problem set(s), testdata and time limits, contest
+such as the problem set(s), test data and time limits, contest
 start- and end time, the time at which the scoreboard will be
 frozen and unfrozen, all from the links from the front page.
 
@@ -255,7 +255,7 @@ a code.
                              in whitespace with the reference output **.
 </descrip>
 * in the team interface a submission will only show as PENDING to
-prevent leaking information of problem timelimits. The jury can see
+prevent leaking information of problem time limits. The jury can see
 whether a submission is QUEUED or JUDGING. In case of required
 verification, a submission will show as PENDING to the team until the
 judging has been verified.
@@ -340,7 +340,7 @@ An answer to a clarification request is made by putting the text in the
 input box under the request text. The original text is quoted. You can
 choose to either send it to the team that requested the clarification,
 or to all teams. In the latter case, make sure you phrase it in such a
-way that the message is selfcontained, since the other teams cannot
+way that the message is self-contained, since the other teams cannot
 view the original question.
 
 <p>
