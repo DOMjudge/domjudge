@@ -107,15 +107,22 @@ result('software', 'MySQL maximum connections',
 	'prevent connection refusal during the contest.');
 
 
-// SECURITY
+// CONFIGURATION
 
+if ( DEBUG == 0 ) {
+	result('configuration', 'Debugging', 'O', 'Debugging disabled.');
+} else {
+	result('configuration', 'Debugging', 'W',
+		'Debug information enabled (level ' . htmlspecialchars(DEBUG).").\n" .
+		'Should not be enabled on live systems.');
+}
 
 if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
-	result('security', 'Protected Jury interface', 'W',
+	result('configuration', 'Protected Jury interface', 'W',
 		"You are not using HTTP Authentication for the Jury interface. " .
 		"Are you sure that the jury interface is adequately protected?\n");
 } else {
-	result('security', 'Protected Jury interface', 'O',
+	result('configuration', 'Protected Jury interface', 'O',
 		'Logged in as user ' .
 		htmlspecialchars($_SERVER['REMOTE_USER']) .
 		".");
@@ -444,5 +451,11 @@ foreach($RESULTS as $row) {
 echo "</table>\n\n";
 
 echo "<p>Config checker completed.</p>\n\n";
+
+echo "<p>Legend:
+<img src=\"../images/s_okay.png\"  alt=\"O\" class=\"picto\" /> OK
+<img src=\"../images/s_warn.png\"  alt=\"W\" class=\"picto\" /> Warning
+<img src=\"../images/s_error.png\" alt=\"E\" class=\"picto\" /> Error
+</p>\n";
 
 require(SYSTEM_ROOT . '/lib/www/footer.php');
