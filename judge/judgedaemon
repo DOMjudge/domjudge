@@ -65,8 +65,8 @@ while ( TRUE ) {
 	
 	// Check that this judge is active, else wait and check again later
 	$row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $myhost);
-	$DB->q('UPDATE LOW_PRIORITY judgehost SET polltime = %s
-	       WHERE hostname = %s', now(), $myhost);
+	$DB->q('UPDATE LOW_PRIORITY judgehost SET polltime = NOW()
+	       WHERE hostname = %s', $myhost);
 	if ( $row['active'] != 1 ) {
 		if ( $active ) {
 			logmsg(LOG_NOTICE, "Not active, waiting for activation...");
