@@ -395,7 +395,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		  jurylink('team_affiliations.php',count($SUMMARY['affils']) . ' / ' .
 				   count($SUMMARY['countries']),$isjury) . '</td>' : '' ) .
 		'<td title=" ">' . jurylink(null,'Summary',$isjury) . '</td>' .
-		'<td title="total solved" colspan="2">' . jurylink(null,$SUMMARY['num_correct'],$isjury)  . '</td>';
+		'<td title="total solved" class="scorenc">' . jurylink(null,$SUMMARY['num_correct'],$isjury)  . '</td><td title=" "></td>';
 
 	foreach( array_keys($probs) as $prob ) {
 		$str = $SUMMARY['problems'][$prob]['num_submissions'] . ' / ' .
