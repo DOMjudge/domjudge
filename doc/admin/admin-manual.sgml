@@ -200,8 +200,8 @@ DOMjudge:
 
 <item>Optionally:
   <itemize>
-  <item> Install the submit client on the team workstations;
-  <item> Generate one-time passwords for all the teams in the web interface;
+  <item> Install the submit client on the team workstations.
+  <item> Generate one-time passwords for all the teams in the web interface.
   <item> Further tighten the security of the system, e.g. by applying
          firewall rules.
   <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>
@@ -231,10 +231,10 @@ DOMjudge has three different kinds of hosts:
        command line submit client; the rest happens via the web
        interface.
 <item> DOMjudge server: a host that receives the submissions, runs the
-       database and serves the web pages. This host will run the
-       DOMjudge submitdaemon(s), MySQL and Apache. Optionally some of
+       database and serves the web pages. This host will run Apache,
+       MySQL and perhaps the submitdaemon. Optionally some of
        these tasks can be further split out to separate machines, but
-       that's not normally necessary.
+       that's normally not necessary.
 <item> Judgehosts: a number of hosts, at least one, that will retrieve
        submitted solutions from the main jury system, compile and run
        them and send the results back to the jury system. Since this
@@ -265,12 +265,12 @@ The requirements for the deployment of this jury-system are:
        id="security:external" name="Security: external security"> for
        more details. TCP/IP networking is used in a few different ways:
   <itemize>
+  <item> The judgehosts use TCP/IP connections to connect to the
+         MySQL database on port 3306.
+  <item> HTTP traffic from teams, the public and jury to the web server,
+         port 80 or 443.
   <item> The `submit' command line client connects to the submitserver
          via a TCP connection on a configurable port.
-  <item> The jury computers use TCP/IP connections to connect to the
-         MySQL database, for copying submissions with scp (in the
-         default configuration with the command line submitdaemon).
-  <item> HTTP traffic from teams, the public and jury to the web server.
   </itemize>
        Each team computer needs to have a unique IP address from the
        view of the jury system.
@@ -371,7 +371,7 @@ In the most basic setup the team workstations only need (next to the tools neede
 for program development) a web browser. The web interface fully works with any
 known browser, with the exception of notification of new clarifications in the
 menu bar. That can be updated without reloading the page by using AJAX. This is
-supported by any reasonably current browser.
+supported by any reasonably current browser with JavaScript enabled.
 
 
 <label id="install_config:apt-getinstall">
@@ -681,10 +681,9 @@ with it. Refer to the documentation of your web server and PHP for
 details.
 
 To configure the web server for DOMjudge, use the Apache configuration
-snippet from <tt>etc/apache.conf</tt>. In that file, replace
-`SYSTEM_ROOT' with the <tt>SYSTEM_ROOT</tt> you specified in the
-config, i.e. where the DOMjudge files are located. Reload the
-web server for the changes to take effect.
+snippet from <tt>etc/apache.conf</tt>. Some values are prefilled from
+global.cfg but may need to be changed. Reload the web server for the
+changes to take effect.
 
 See also section <ref id="security:webprivs" name="Security: webserver
 privileges">.
@@ -712,7 +711,7 @@ log file/syslog (<tt>LOGLEVEL</tt>: defaults to <tt>LOG_DEBUG</tt>).
 
 In case of problems, it is advisable to check the logs for clues.
 Extra debugging information can be obtained by setting the config
-option <tt>DEBUG</tt> to a bitwise or of the available
+option <tt>DEBUG</tt> to a bitwise-or of the available
 <tt>DEBUG_*</tt> flags in <tt>global.cfg</tt>, to e.g. generate extra
 SQL query and timing information in the web interface.
 
