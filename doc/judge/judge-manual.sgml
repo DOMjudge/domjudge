@@ -142,7 +142,7 @@ click in the jury interface. Note that the way freezing works, a
 submission from before the freeze and judged after may still update
 the scoreboard even when frozen.
 
-The problem headings can take the colours of balloons associated with
+The problem headings can display the colours of balloons associated with
 them, when set.
 
 Nearly everything on the scoreboard can be clicked to reveal more
@@ -168,7 +168,7 @@ The problem sets are listed under `Problems'. It is possible to change
 whether teams can submit solutions for that problem (using the toggle
 switch `allow submit'). If disallowed, submissions for that problem
 will be rejected, but more importantly, teams will not see that
-problem on the scoreboard! Disallow judge will make DOMjudge accept
+problem on the scoreboard. Disallow judge will make DOMjudge accept
 submissions, but leave them queued; this is useful in case an
 unexpected problem shows up with one of the problems. Timelimit is the
 maximum number of seconds a submission for this problem is allowed to
@@ -210,7 +210,7 @@ This is especially useful during the practice session, where it is
 expected that every team can make at least one correct submission. A
 team with any other colour than green near the end of the session
 might be having difficulties.
- 
+
 
 <sect>Judging Submissions
 <p>
@@ -241,9 +241,9 @@ The flow of an incoming submission is as follows.
 The interface for jury and teams shows the status of a submission with
 a code.
 <descrip>
-<tag>QUEUED/PENDING</tag>submission accepted and awaiting a judgehost to process it *;
+<tag>QUEUED/PENDING</tag>submission received and awaiting a judgehost to process it *;
 <tag>JUDGING       </tag>a judgehost is currently compiling/running/testing the submission *;
-<tag>TOO-LATE      </tag>submission accepted but submitted after the contest ended;
+<tag>TOO-LATE      </tag>submission received but submitted after the contest ended;
 <tag>CORRECT       </tag>submission correct, problem solved;
 <tag>COMPILER-ERROR</tag>the compiler gave an error while compiling the program;
 <tag>TIMELIMIT     </tag>program execution time exceeded the time defined for the problem;
@@ -263,12 +263,12 @@ judging has been verified.
 ** This is disabled by default and must be enabled explicitly by the
 DOMjudge administrator. It will be counted as an incorrect submission.
 
-Under the Submissions menu, you can see all submitted solutions, with
+Under the Submissions menu, you can see submitted solutions, with
 the newest one at the top. Click on a submission id or result code
 for more details about the submission (team name, submittime etc),
 a list of judgings and the details for the most recent judging
 (runtime, outputs, diff with testdata). There is also a switch
-available to only view unverified submissions.
+available between newest 50, only unverified or all submissions.
 
 Under the submission details the source filename can be clicked to
 inspect the source code. If the team has submitted code in the same
