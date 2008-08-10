@@ -26,13 +26,14 @@ COMMANDLINE="$0 $@"
 . ./config.sh
 
 # Parse DOMjudge sub-directory location from WEBBASEURI:
-WEBSUBDIR=`echo "$WEBBASEURI" | sed "s!^.*$WEBSERVER[^/]*/\(.*\)/!\1!"`
-if [ "$WEBSUBDIR" = "$WEBBASEURI" ];
+WEBSUBDIR=`echo "$WEBBASEURI" | sed "s!^.*$WEBSERVER[^/]*/\(.*\)!\1!"`
+if [ "$WEBSUBDIR" = "$WEBBASEURI" -o "$WEBSUBDIR" = "${WEBSUBDIR%/}" ];
 then
 	echo "Failed to parse WEBSUBDIR from WEBBASEURI."
 	echo "Perhaps WEBBASEURI doesn't end in a slash, which it should?"
 	exit 1
 fi
+WEBSUBDIR="${WEBSUBDIR%/}"
 
 TMPFILE=$CONFIG.new
 	
