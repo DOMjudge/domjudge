@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 2.2.0 - SVN
--------------------
+Version 2.2.0 - 11 August 2008
+------------------------------
  - Do not install domjudge straight in $HOME by default.
  - [security] Add sanity check in jury interface whether basic authentication
    is enabled, and lock down jury inferface also for non-GET/POST requests
