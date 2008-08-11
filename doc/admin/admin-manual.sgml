@@ -400,9 +400,9 @@ compilers to install for C, C++, Java (GNU), Java (Sun), Haskell and Pascal; cha
 the list as appropriate.
 
 <code>
-apt-get install make sudo php5-cli php5-mysql ntp \
+apt-get install make sudo php5-cli php5-mysql ntp xsltproc \
 	hostname coreutils procps grep diff mount bash-static \
-	xsltproc gcc g++ gcj sun-java5-jdk ghc fp-compiler
+	gcc g++ gcj sun-java5-jdk ghc fp-compiler
 </code>
 
 <sect>File locations
@@ -765,8 +765,8 @@ database!
 <p>
 
 On a judgehost the installation procedure is a bit different and
-actually not really polished yet. The basic configuration can be taken
-the same as on a the main server, but a webserver and mysql database
+actually not really polished yet. <tt>global.cfg</tt> can be taken
+from the main server, but a webserver and MySQL database
 need not be set up. After configuring DOMjudge, run <tt>make
 config</tt> and <tt>make build</tt>, but <em>not</em> <tt>make
 install</tt> as this would also try to install the DOMjudge database.
@@ -779,7 +779,7 @@ Instead the following steps have to be performed:
 
 For running solution programs under a non-privileged user, a user has
 to be added to the system(s) that act as judgehost. This user does not
-need a home-directory or password, so e.g. the following command would
+need a home-directory or password, so the following command would
 suffice to add a user `domjudge-run' with minimal privileges.
 
 On RedHat:
