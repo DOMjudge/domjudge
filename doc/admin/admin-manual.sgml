@@ -385,8 +385,8 @@ will have the bulk of these packages installed already.
 <code>
 apt-get install gcc g++ make libcurl3-dev sudo mysql-server ntp \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
-	hostname coreutils procps grep diff mount bash-static \
-	openssh-server openssh-client phpmyadmin xsltproc \
+	hostname coreutils procps grep diff mount sharutils \
+	openssh-server openssh-client bash-static phpmyadmin xsltproc \
 	wget linuxdoc-tools unzip tetex-bin tetex-extra transfig
 </code>
 
