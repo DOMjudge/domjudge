@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 2.2.1 - SVN
+-------------------
+
 Version 2.2.0 - 11 August 2008
 ------------------------------
  - Do not install domjudge straight in $HOME by default.
