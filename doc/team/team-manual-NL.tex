@@ -14,38 +14,27 @@
 \end{titlepage}
 
 \newpage
-\tableofcontents
 
-\newpage
-\section{Inleiding}
+\section*{Samenvatting}
 
-Deze documentatie beschrijft het \DOMjudge
-jurysysteem, waarmee teams oplossingen in kunnen
-sturen, uitslagen te bekijken en ``clarification requests'' lezen
-en verzenden.
-
-Het systeem is voor een groot deel gebaseerd op een web-interface. Het
-insturen van oplossingen kan via de web-interface of via een
-command-line programma, afhankelijk van hoe dit door de jury
-ingesteld is.
-
-\section{Samenvatting}
-
-Hieronder staat kort samengevat de belangrijkste informatie. Dit is
+Hieronder staat de belangrijkste informatie kort samengevat. Dit is
 bedoeld om snel aan de slag te kunnen. We raden echter ten zeerste
 aan dat minstens \'e\'en iemand binnen je team de complete handleiding
 doorneemt, omdat daarin specifieke details van het jurysysteem staan
 die ook van belang kunnen zijn op het moment dat niet alles perfect
 gaat (zoals een oplossing die fout is). \textbf{WEES GEWAARSCHUWD!}
 
-\subsection{Inlezen en wegschrijven}
+DOMjudge werkt via een web-interface die je kunt vinden op \\
+\url{\WEBBASEURI team}.
+
+\subsection*{Inlezen en wegschrijven}
 
 Oplossingen moeten invoer en uitvoer lezen van `standard in'
 (toetsenbord) en wegschrijven naar `standard out' (beeldscherm).
 Je hoeft dus nooit een bestand te openen. Zie bijlage
 \ref{codeexamples} voor een aantal voorbeelden hiervan.
 
-\subsection{Insturen van oplossingen}
+\subsection*{Insturen van oplossingen}
 
 Insturen van oplossingen gaat via het command-line programma
 \cmd{submit} dan wel de web-interface:
@@ -59,17 +48,21 @@ de programmeertaal. Voor de complete documentatie en alle opties, zie \cmd{submi
 Vanaf je teampagina op \url{\WEBBASEURI team}, selecteer je
 \textbf{submit} en daar kun je een bestand selecteren en insturen.
 Standaard wordt het probleem uit het deel van de bestandsnaam v\'o\'or de
-punt gehaald en de programmeertaal uit de extensie, net zoals bij de
-command-line submit.
+punt gehaald en de programmeertaal uit de extensie.
+
 \end{description}
 
-\subsection{Bekijken van scores, inzendingen, e.d.}
+\subsection*{Bekijken van scores, inzendingen, e.d.}
 
 Het bekijken van inzendingen, scores en sturen en lezen van
-``clarification requests'' gaat via een web-interface. Het adres is
-\url{\WEBBASEURI team}.
+``clarification requests'' gaat via de web-interface. De knoppen op
+\url{\WEBBASEURI team} spreken voor zich.
 
 \emph{Einde samenvatting.}
+
+\newpage
+
+\tableofcontents
 
 \newpage
 \section{Oplossingen insturen}\label{submit}
@@ -130,8 +123,7 @@ lijst met inzendingen.
 
 Op de team-webpagina staat een overzicht van je inzendingen.
 Dit overzicht bevat alle relevante gegevens: de tijd van inzending, de
-programmeertaal, het probleem en de status. Het adres van je
-teampagina is \url{\WEBBASEURI team}. Hier vind je ook het scorebord
+programmeertaal, het probleem en de status. Hier vind je ook het scorebord
 met de resultaten van de andere teams.
 
 \subsection{Mogelijke uitslagen}
@@ -168,7 +160,7 @@ output schrijft!
 De uitvoer van je programma was niet correct. Het kan zijn dat je
 oplossing niet correct is, maar let ook goed op dat je de antwoorden
 precies zoals beschreven uitvoert: de uitvoer moet exact kloppen met
-de antwoorden van de jury!
+de specificatie van de jury!
 
 \item[PRESENTATION-ERROR]
 De uitvoer van je programma verschilde slechts in presentatie met de
@@ -206,16 +198,13 @@ beoordeling. Het beoordelen gebeurt via de volgende stappen:
 \subsection{Insturen}
 
 Via het \cmd{submit} programma of de web-interface (zie sectie
-\ref{submit}) kun je een oplossing voor een opgave insturen. Let op
-dat je de source-code van je programma moet insturen (en dus niet een
-gecompileerd programma of de uitvoer van je programma). \cmd{submit}
-maakt dan een verbinding met een server en die kopieert je programma
-dan naar de jury-computers, danwel wordt hij via de web-interface
-ge\"upload naar de jury.
+\ref{submit}) kun je een oplossing voor een opgave insturen, zodat
+hij ge\"upload wordt naar de jury. Let op dat je de source-code van
+je programma moet insturen (en dus niet een gecompileerd programma
+of de uitvoer van je programma).
 
 Dan komt je programma in de wachtrij te staan, om gecompileerd,
-uitgevoerd en de uitvoer getest te worden op \'e\'en van de
-jury-computers.
+uitgevoerd en getest te worden op \'e\'en van de jury-computers.
 
 \subsection{Compileren}
 
@@ -299,11 +288,11 @@ draait een gecompileerd programma in \'e\'en proces.
 Hieronder staan een aantal voorbeelden van code om de invoer van een
 probleem in te lezen en de uitvoer weg te schrijven.
 
-De code hoort bij de volgende probleembeschrijving: op de eerste regel
-van de invoer staat een getal: het aantal testgevallen. Daarna voor
-ieder testgeval \'e\'en regel met daarop een naam (\'e\'en woord) van
-ten hoogste 99 karakters. Voer voor ieder testgeval op een losse regel
-de string ``Hello $<$naam$>$!'' uit.
+De code hoort bij de volgende probleembeschrijving: 
+De invoer bestaat uit \'e\'en regel met daarop het aantal testgevallen.
+Daarna volgt voor elk testgeval een regel met daarop een naam (\'e\'en
+woord). Print voor elke naam de string ``Hello $<$naam$>$!''. Een naam
+is maximaal 99 karakters lang.
 
 Dit probleem zou de volgende in- en uitvoer kunnen hebben:
 
