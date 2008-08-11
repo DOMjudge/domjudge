@@ -14,37 +14,27 @@
 \end{titlepage}
 
 \newpage
-\tableofcontents
 
-\newpage
-\section{Introduction}
-
-This document describes the \DOMjudge jury-system, that allows
-teams to submit solutions, view results and submit
-``clarification requests''.
-
-All interaction with the system is done using a web-interface, except
-(optionally) the submission of solutions: this is done either in the
-web-interface or with a command-line program. Availability of either
-may depend on the configuration by the jury.
-
-\section{Summary}
+\section*{Summary}
 
 Here follows a short summary of the system interface. This is meant as
 a quick introduction, to be able to start using the system. It is
-however strongly advised, that at least one of your team's members
-read all of this manual, because there are specific details of this
+however strongly advised that at least one of your team's members
+read all of this manual. There are specific details of this
 jury-system that might become of importance when you run into
 problems (like an incorrect solution). \textbf{BE WARNED!}
 
-\subsection{Reading and writing}
+DOMjudge works through a web-interface that can be found at\\
+\url{\WEBBASEURI team}.
+
+\subsection*{Reading and writing}
 
 Solutions have to read all input from `standard in' and write all
 output to `standard out' (also known as console). You will never have
 to open (other) files. See appendix \ref{codeexamples} for some
 examples.
 
-\subsection{Submission of solutions}
+\subsection*{Submitting solution}
 
 You can submit solutions with the command-line program \cmd{submit} or
 by the web-interface:
@@ -58,18 +48,21 @@ see \cmd{submit --help}.
 From your teampage \url{\WEBBASEURI team}, browse to
 \textbf{submit} and select the file you want to submit. By default,
 the problem is selected from the base of the filename and the language
-from the extension, just as with the command-line submit.
+from the extension.
 \end{description}
 
-\subsection{Viewing scores, submissions, etc.}
+\subsection*{Viewing scores, submissions, etc.}
 
 Viewing scores, submissions and sending and reading clarification
-requests is done through a web-interface. The address is
-\url{\WEBBASEURI team}.
+requests is done through the web-interface. The menu buttons at
+\url{\WEBBASEURI team} speak for themselves.
 
 \emph{End of summary}
 
 \newpage
+\tableofcontents
+\newpage
+
 \section{Submitting solutions}\label{submit}
 
 Submitting solutions can be done in two ways: with the command-line
@@ -194,18 +187,15 @@ the page.
 The \DOMjudge jury-system is fully automated. In principle no human
 interaction is necessary. The judging is done in the following way:
 
-\subsection{Submission}
+\subsection{Submitting solutions}
 
 With the \cmd{submit} program or the web-interface (see section
-\ref{submit}), you can submit a solution to a problem. Note that you
-have to submit the source-code of your program (and not a compiled
-program or the output of your program). \cmd{submit} makes a
-connection to the submission server, which copies your program to the
-jury-computers, while in the web-interface it gets uploaded to the
-jury via the webserver.
+\ref{submit}), you can submit a solution to a problem to the jury.
+Note that you have to submit the source-code of your program
+(and not a compiled program or the output of your program).
 
 There your program enters a queue, awaiting being compiled, executed
-and the output tested on one of the jury-computers.
+and tested on one of the jury-computers.
 
 \subsection{Compilation}
 
@@ -287,7 +277,7 @@ runs in one process.
 Below are a few examples on how to read input and write output for a
 problem.
 
-The examples are solutions for the following problem: the first line
+The examples are solutions for the following problem: The first line
 of the input contains the number of testcases. Then each testcase
 consists of a line containing a name (a single word) of at most 99
 characters. For each testcase output the string ``Hello $<$name$>$!''
