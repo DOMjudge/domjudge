@@ -147,7 +147,7 @@ echo addForm($pagename) . "<p>\n" .
 			echo "<a href=\"testcase.php?probid=" . urlencode($data['probid']) . "&amp;fetch=" .
 				$inout . "\">download</a>";
 		} else {
-			echo "none";
+			echo '<a href="testcase.php?probid='.urlencode($data['probid']).'">add</a>';
 		}
 		echo "<br />\n";
 	}
