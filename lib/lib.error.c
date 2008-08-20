@@ -106,7 +106,14 @@ void logmsg(int msglevel, const char *mesg, ...)
 	va_end(ap);
 }
 
-/* Function to generate error/warning string */
+/* Function to generate error/warning string:
+   - allocates memory for string (needs freeing later) 
+   - generates message of the form:
+       errtype . ": " . mesg . ": " . errdescr
+     where 'errtype' can be "WARNING" / "ERROR"
+	 'mesg' is a program generated message (or NULL)
+	 'errnum' is the last system call's errno (or zero)
+*/
 char *errorstring(const char *type, int errnum, const char *mesg)
 {
 	size_t buffersize;
@@ -125,20 +132,23 @@ char *errorstring(const char *type, int errnum, const char *mesg)
 		errdescr = strdup("unknown error");
 	}
 
-	// buffer = errtype . ": " . mesg . errdescr . "\0"
 	buffersize = strlen(errtype)
-				+ (errdescr == NULL ? 0 : strlen(errdescr))
-				+ (mesg == NULL     ? 0 : strlen(mesg))
-				+ 3;
+	            + (errdescr == NULL ? 0 : strlen(errdescr))
+	            + (mesg == NULL     ? 0 : strlen(mesg))
+	            + 5;
 
 	buffer = (char *)malloc(sizeof(char) * buffersize);
-	if ( buffer==NULL )		abort();
+	if ( buffer==NULL ) abort();
 	buffer[0] = '\0';
 
 	strcat(buffer, errtype);
 	strcat(buffer, ": ");
 
 	if ( mesg != NULL )     strcat(buffer, mesg);
+	
+	if ( mesg != NULL &&
+	     errdescr != NULL ) strcat(buffer, ": ");
+	
 	if ( errdescr != NULL )	strcat(buffer, errdescr);
 
 	if ( type == NULL )     free(errtype);
