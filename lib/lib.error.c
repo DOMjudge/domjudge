@@ -112,10 +112,12 @@ char *errorstring(const char *type, int errnum, const char *mesg)
 	size_t buffersize;
 	char *errtype, *errdescr, *buffer;
 
-	errtype = (char *)type;
-	if ( errtype==NULL ) {
+	/* Set errtype to given string or default to 'ERROR' */
+	if ( type==NULL ) {
 		errtype = strdup(ERRSTR);
 		if ( errtype==NULL ) abort();
+	} else {
+		errtype = (char *)type;
 	}
 
 	errdescr = NULL;
@@ -141,8 +143,7 @@ char *errorstring(const char *type, int errnum, const char *mesg)
 	if ( mesg != NULL )     strcat(buffer, mesg);
 	if ( errdescr != NULL )	strcat(buffer, errdescr);
 
-	if ( type == NULL )     free(errtype);
-	if ( errdescr != NULL ) free(errdescr);
+	if ( type == NULL ) free(errtype);
 
 	return buffer;
 }
