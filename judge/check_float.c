@@ -92,10 +92,11 @@ void usage()
 	printf("Usage: %s [OPTION]... <IGNORED> <FILE1> <FILE2>\n",progname);
 	printf("Compare program output in file <FILE1> with reference output in\n");
 	printf("file <FILE2> for floating point numbers with finite precision.\n");
+	printf("When one <FILE> is given as `-', it is read from standard input.\n");
 	printf("The first argument <IGNORED> is ignored, but needed for compatibility.\n");
 	printf("\n");
-	printf("  -a, --abs-prec=PREC  use PREC as relative precision\n");
-	printf("  -r, --rel-prec=PREC  use PREC as absolute precision\n");
+	printf("  -a, --abs-prec=PREC  use PREC as relative precision (default: 1E-7)\n");
+	printf("  -r, --rel-prec=PREC  use PREC as absolute precision (default: 1E-7)\n");
 	printf("      --help           display this help and exit\n");
 	printf("      --version        output version information and exit\n");
 	printf("\n");
@@ -199,9 +200,21 @@ int main(int argc, char **argv)
 
 	file1name = argv[optind+1];
 	file2name = argv[optind+2];
+
+	if ( strcmp(file1name,"-")==0 && strcmp(file2name,"-")==0 ) {
+		error(0,"both files specified as standard input");
+	}
 	
-	if ( (file1 = fopen(file1name,"r"))==NULL ) error(errno,"cannot open '%s'",file1name);
-	if ( (file2 = fopen(file2name,"r"))==NULL ) error(errno,"cannot open '%s'",file2name);
+	if ( strcmp(file1name,"-")==0 ) {
+		file1 = stdin;
+	} else {
+		if ( (file1 = fopen(file1name,"r"))==NULL ) error(errno,"cannot open '%s'",file1name);
+	}
+	if ( strcmp(file2name,"-")==0 ) {
+		file2 = stdin;
+	} else {
+		if ( (file2 = fopen(file2name,"r"))==NULL ) error(errno,"cannot open '%s'",file2name);
+	}
 
 	linenr = 0;
 	diff = 0;
