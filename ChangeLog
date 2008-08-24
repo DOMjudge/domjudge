@@ -2,9 +2,9 @@ DOMjudge Programming Contest Judging System
 
 Version 2.2.1 - SVN
 -------------------
- - Revise team manual.
- - Add missing link to add testcases to a new problem.
+ - Add missing link for adding testcases to a new problem.
  - Fix bug causing segfaults of submitdaemon. (Closes: #2046031)
+ - Various documentation updates including revised team manual.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------
