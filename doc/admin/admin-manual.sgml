@@ -162,8 +162,7 @@ External software:
 <item> Install the MySQL-server, set a root password for it and
        make it accessible from all judgehosts.
 <item> Install Apache, PHP and (recommended) phpMyAdmin.
-<item> Make sure PHP works for the web server and the command line
-       client.
+<item> Make sure PHP works for the web server and command line scripts.
 <item> Install necessary compilers on the judgehosts.
 <item> See also <ref id="install_config:apt-getinstall"
        name="an example command line for Debian GNU/Linux">.
