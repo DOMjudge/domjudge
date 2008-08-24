@@ -1,0 +1,80 @@
+#!/usr/bin/php -q
+<?php
+/**
+ * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+
+require ('../etc/config.php');
+
+$waittime = 5;
+
+define ('SCRIPT_ID', 'identifydaemon');
+define ('LOGFILE', LOGDIR.'/identify.log');
+
+require (SYSTEM_ROOT . '/lib/init.php');
+
+$verbose = LOG_INFO;
+
+logmsg(LOG_NOTICE, "Identify started [DOMjudge/".DOMJUDGE_VERSION."]");
+
+// Constantly check database for queued requests
+while ( TRUE ) {
+
+	// Check whether we have received an exit signal
+	if ( $exitsignalled ) {
+		logmsg(LOG_NOTICE, "Received signal, exiting.");
+		exit;
+	}
+	
+	// try to get one
+	$row = $DB->q('MAYBETUPLE SELECT * FROM team_identify
+			   WHERE status = "new" ORDER BY timestamp ASC LIMIT 1');
+
+	if ( $row ) {
+		$login = $row['login'];
+		$ipaddress = $row['ipaddress'];
+
+		# TODO: check login and ipadress for sanity.
+
+		logmsg(LOG_INFO, "Starting identification of team %s at %s", $login, $ipaddress);
+		$DB->q('UPDATE team_identify SET status = "working", timestamp = NOW()
+			WHERE login = %s AND ipaddress = %s AND status = "new"',
+			$login, $ipaddress);
+
+		// run-callback-script login ip
+		system("./user_callback.sh $login $ipaddress", $retval);
+
+		if ( $retval == 0 ) {
+			$hostname = gethostbyaddr($ipaddress);
+			$DB->q('UPDATE team SET ip = %s, host = %s
+				WHERE login = %s', $ipaddress, $hostname, $login);
+
+			$DB->q('UPDATE team_identify SET status = "done", timestamp = NOW()
+			WHERE login = %s AND ipaddress = %s AND status = "busy"',
+			$login, $ipaddress);
+			logmsg(LOG_INFO, "Identified team %s at %s", $login, $ipaddress);
+		} else {
+			$DB->q('UPDATE team_identify SET status = "failed", timestamp = NOW()
+			WHERE login = %s AND ipaddress = %s AND status = "busy"',
+			$login, $ipaddress);
+			logmsg(LOG_WARN, "Failed to identify team %s at %s (returned %i)",
+				$login, $ipaddress, $retval);
+		}
+	} else {
+		if ( ! $waiting ) {
+			logmsg(LOG_INFO, "No submissions in queue, waiting...");
+			$waiting = TRUE;
+		}
+		sleep($waittime);
+		continue;
+	}
+
+	$waiting = FALSE;
+
+
+	// restart the loop
+}

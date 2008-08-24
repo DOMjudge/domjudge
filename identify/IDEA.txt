@@ -1,0 +1,50 @@
+STATUS:
+proof of concept
+
+PROBLEM:
+one advantage of submit+submitdaemon is to set the team IP address by way of
+an scp callback function. However, this function is conceptually not tied to
+submitting anything, and it can be desirable to have the IP address set even
+without a solution to a problem. For example clarifications can't be read or
+placed if no IP is known. This proof of concept tries to separate out the 
+identification part of submitdaemon which is unrelated to submission of
+solutions.
+
+USE CASES:
+- team placings are unknown but one can trust that users login to their system
+  accounts. One needs a secure way to map an ipadress to a username.
+- preparing the team workstations, contest staff logs in to every workplace
+  and wants to run a simple command that registers the correct IP address with
+  DOMjudge.
+
+SOLUTION:
+Implement the set-IP-through-scp-callback function separately from submission.
+
+DESIGN:
+The client creates some temporary file on their accounts invisible to others,
+then pings the domserver with its account name and the name of that file. The
+domserver accesses the claimed account and checks for file presence. If so,
+it registers the IP that originated the request into the database.
+
+IMPLEMENTATION:
+For the protocol we use HTTP. This has the advantage of being usable with the
+webserver already required for DOMjudge. It is also trival to parse would we
+choose to use their a separate server for this service.
+
+The client can be very simple:
+1) Create a dir which is only executable to the current user.
+2) Create a file in that with unguessable filename.
+3) Send the ping to the server with username and filename.
+Because it's so simple, it's probably easier to implement it separately for
+each platform, e.g. a shell script for UNIX. Since it's so simple it can even
+be implemented as an option to the existing submitclient (`submit --identify`).
+
+For now I've implemented the server in two parts: the part that receives the
+data and queues it, and the part that does the callback. This is because it
+may be desirable to run the callback on a separate user account.
+
+The receiver parses the user-supplied data, sanitises it, checks the username
+whether it's known to exist and then puts it into a queue.
+The callback daemon continuously checks the queue and runs the verification script
+on any unprocessed entries; when successful updates the team table.
+
