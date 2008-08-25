@@ -62,7 +62,8 @@ function printtime($datetime) {
  */
 function printhost($hostname, $full = FALSE) {
 	if( ! $full ) {
-		$hostname = array_shift(explode('.', $hostname));
+		$expl = explode('.', $hostname);
+		$hostname = array_shift($expl);
 	}
 
 	return "<span class=\"hostname\">".htmlspecialchars($hostname)."</span>";
