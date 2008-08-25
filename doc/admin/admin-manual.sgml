@@ -186,6 +186,7 @@ DOMjudge:
        functionality: <tt>cd submit; ./submitdaemon</tt>
 <item> Next, setup the judgehosts on separate hosts:
   <itemize>
+	 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
   <item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
          Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
          (check specific options of useradd, since these vary per system)
@@ -209,8 +210,11 @@ DOMjudge:
          <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
          enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/global.cfg</tt>
          and add the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
+	 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
          domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc<newline>
-         domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc</tt>
+         domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
+         domjudge ALL=(root) NOPASSWD: /bin/mount --bind CHROOTORIGDIR/*<newline>
+         domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*</tt>
   <item> Install the PEAR Text_Highlighter class for source syntax highlighting.
   </itemize>
 </itemize>
@@ -781,6 +785,7 @@ to be added to the system(s) that act as judgehost. This user does not
 need a home-directory or password, so the following command would
 suffice to add a user `domjudge-run' with minimal privileges.
 
+<!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
 On RedHat:
 <verb>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</verb>
 On Debian:
@@ -792,6 +797,7 @@ in <tt>SYSTEM_ROOT/etc/global.cfg</tt>.
 
 If you use the default <tt>judge/chroot-startstop.sh</tt> script, then
 the following lines must be added to <tt>/etc/sudoers</tt>:
+<!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
 <verb>
 domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
 domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
