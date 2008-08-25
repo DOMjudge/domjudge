@@ -113,7 +113,7 @@ to name them here too:
 <item> mkstemps.h and basename.h are modified versions from the
 GNU libiberty library (copyright Free Software Foundation).
 <item> lib.database.php by Jeroen van Wolffelaar et al.
-<item> submit.c and submitdaemon.c are based on submit.pl and
+<item> submit.cc and submitdaemon.cc are based on submit.pl and
 submitdaemon.pl by Eelco Dolstra.
 <item> runguard.c was originally based on timeout from The
 Coroner's Toolkit by Wietse Venema.
