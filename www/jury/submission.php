@@ -181,6 +181,11 @@ if ( isset($jid) )  {
 
 	$jud = $DB->q('TUPLE SELECT *, judgingid AS ARRAYKEY FROM judging
 	               WHERE judgingid = %i', $jid);
+	
+	// sanity check
+	if ($jud['submitid'] != $id) error(
+		sprintf("judingid j%d belongs to submitid s%d, not s%d",
+			$jid, $jud['submitid'], $id));
 
 	echo "<h2>Judging j" . (int)$jud['judgingid'] .
 		($jud['valid'] == 1 ? '' : ' (INVALID)') . "</h2>\n\n";
