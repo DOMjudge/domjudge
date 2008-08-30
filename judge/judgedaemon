@@ -165,6 +165,9 @@ while ( TRUE ) {
 
 	// create tempdir for tempfiles
 	$tempdir = "$tempdirpath/c$cid-s$row[submitid]-j$judgingid";
+	
+	logmsg(LOG_NOTICE, "Working directory $tempdir");
+
 	system("mkdir -p $tempdir", $retval);
 	if ( $retval != 0 ) error("Could not create $tempdir");
 
