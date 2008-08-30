@@ -1,8 +1,24 @@
 This is the Programming Contest Jury System "DOMjudge" version 3.0.0SVN
 
-
 DOMjudge is a system for running a programming contest, like the ACM
 regional and world championship programming contests.
+
+
+Documentation
+-------------
+
+For more information on installation and requirements see the
+documentation under the doc/ directory. Run `make docs` there
+to create HTML and PDF versions of the available documentation.
+
+To get started with the Administrator documentation, this should
+work on a Debian/Ubuntu system:
+$ sudo apt-get install linuxdoc-tools make transfig texlive-latex-recommended
+$ cd doc/admin
+$ make
+
+The documentation is also available online at the DOMjudge homepage:
+http://domjudge.sourceforge.net/#documentation
 
 
 Copyright & Licencing
@@ -30,18 +46,6 @@ Software Foundation and distributed under the GPL version 2 or later.
 Sources can be downloaded from:
 http://domjudge.sourceforge.net/bash-sources/
 
-Further reading
----------------
-
-For more information on installation and requirements see the
-documentation under the doc/ directory. Run `make docs` there
-to create HTML and PDF versions of the available documentation.
-You will need `linuxdoc` for that to work (this is normally in
-the linuxdoc-tools package/rpm) and a reasonably complete LaTeX
-installation.
-
-The documentation is also available online at the DOMjudge
-homepage (see below).
 
 Contact
 -------
