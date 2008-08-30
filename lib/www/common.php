@@ -152,8 +152,13 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE, $limit = 0)
 		}
 		echo "</td>";
 		if ( $isjury && isset($row['verified']) ) {
-			if( ! $row['verified'] ) $vercnt++;
-			echo "<td>" . printyn($row['verified']) . "</td>";
+			// only display verification if we're done with judging
+			if ( $row['result'] ) {
+				if( ! $row['verified'] ) $vercnt++;
+				echo "<td>" . printyn($row['verified']) . "</td>";
+			} else {
+				echo "<td></td>";
+			}
 		}
 		if ( $isjury ) {
 			$judgehost = $row['judgehost'];
