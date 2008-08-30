@@ -23,9 +23,7 @@
 #if ( SUBMITCLIENT_METHOD == 2 ) && ! defined( LIBCURL )
 #error "Webinterface default submission requested, but libcURL not available."
 #endif
-#if ( SUBMITCLIENT_METHOD == 0 )
-#warning "Commandline submit client disabled."
-#endif
+/* '0' is also acceptable as a legacy no-op */
 #if ( SUBMITCLIENT_METHOD < 0 ) || ( SUBMITCLIENT_METHOD > 2 )
 #error "Unknown submission method requested."
 #endif
@@ -167,11 +165,6 @@ int main(int argc, char **argv)
 
 	progname = argv[0];
 	stdlog = NULL;
-
-#if ( SUBMITCLIENT_METHOD == 0 )
-	printf("Submit client is disabled at compiletime.\n");
-	return -1;
-#endif
 
 	/* Parse LANGEXTS define into separate strings */
 	lang_exts = strdup(LANG_EXTS);
