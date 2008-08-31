@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# - status: check current status
+# 
+# - install: genpasswords if not existing, create database + contents if not
+#   existing, create users if not existing
+# - genpass: generate passwords
+# - setup:  create database, setup users and permissions
+# - create: create tables etc
+
+. "`dirname $0`/paths.sh"
+
+function parseconfig
+{
+	OLDIFS="$IFS"
+	IFS="$IFS="
+	. $DBETC_PATH/database.ini
+}
+
