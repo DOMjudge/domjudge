@@ -1,1 +1,15 @@
 .svn
+*.swp
+
+/autom4te.cache
+/Makefile
+/configure
+/config.log
+/config.status
+/www/configure.php
+/lib/Makefile
+/sql/Makefile
+/www/Makefile
+/etc/Makefile
+/etc/apache.conf
+/etc/config.h
