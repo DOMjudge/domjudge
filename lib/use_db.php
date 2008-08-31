@@ -7,15 +7,18 @@ function setup_database_connection($privlevel)
 {
 
 	if (!defined('DBPRIVLEVEL')) {
-		errorbla(Je moet het level aangeven van de privileges;
+		user_error("Privilege level required",
+			E_USER_ERROR);
+		exit();
 	}
 
-	$credentials = file( LIB_PATH . '/database-credentials.csv' );
+	$credentials = file( WWWETC_PATH . '/database-credentials.csv' );
 
 	global $DB;
 
 	if ($DB) {
-		user_error("DB al geset");
+		user_error("There already is a database-connection",
+			E_USER_ERROR);
 		exit();
 	}
 
@@ -28,7 +31,9 @@ function setup_database_connection($privlevel)
 	}
 
 	if (!$DB) {
-		user_error(sprintf("Privilege level '%s' not supported", $privlevel));
+		user_error(sprintf("Privilege level '%s' not supported",
+			$privlevel), E_USER_ERROR);
+		exit();
 	}
 }
 
