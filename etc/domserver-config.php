@@ -2,6 +2,8 @@
 
 // Default config
 
+define('DJ_CHARACTER_SET', 'utf-8');
+
 // Set DEBUG as a bitmask of the following settings.
 // Of course never to be used on live systems!
 //
