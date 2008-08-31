@@ -41,7 +41,7 @@
 /* Some system/site specific config: VALID_USERS and CHROOT_PREFIX are
  * used, maybe include here for standalone executable?
  */
-#include "../etc/config.h"
+#include "../etc/judgehost-config.h"
 
 #define PROGRAM "runguard"
 #define VERSION "0.9"
