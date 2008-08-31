@@ -8,7 +8,9 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-require_once('../../etc/config.php');
+
+
+require_once('../configure.php');
 
 define('IS_JURY', (@$_SERVER['REMOTE_USER'] == "jury"));
 
@@ -18,7 +20,9 @@ if( DEBUG & DEBUG_TIMINGS ) {
 
 require_once(LIBDIR . '/lib.error.php');
 require_once(LIBDIR . '/lib.misc.php');
-require_once(LIBDIR . '/use_db_plugin.php');
+require_once(LIBDIR . '/use_db.php');
+
+setup_database_connection('plugin');
 
 require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/print.php');
