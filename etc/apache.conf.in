@@ -25,22 +25,66 @@ Alias /domjudge @domserver_wwwdir@
 # This section applies to both options above.
 
 <Directory @domserver_wwwdir@>
+allow from all
+
 Options Indexes FollowSymlinks
 DirectoryIndex index.php
-AllowOverride All
 
-# this is some evil php function that ruins everything
+# Disable some evil PHP magic
+<IfModule mod_php5.c>
 php_flag magic_quotes_gpc off
 php_flag magic_quotes_runtime off
+</IfModule>
+<IfModule mod_php4.c>
+php_flag magic_quotes_gpc off
+php_flag magic_quotes_runtime off
+</IfModule>
+
 </Directory>
 
+# Require authentication to jury webinterface
 <Directory @domserver_wwwdir@/jury>
-AuthName "Jury-members Only Area"
 AuthType Basic
+AuthName "DOMjudge Jury Interface"
 Require valid-user
-AuthType Basic
-AuthName "DOMjudge"
 AuthUserFile @domserver_etcdir@/jurymembers.htpasswd
+
+# Optionally restrict access to just the jury computers:
+# deny from all
+# allow from 192.168.1.0/24
+
+# Allow large file uploads for testcases
+<IfModule mod_php5.c>
+php_value upload_max_filesize 16M
+php_value post_max_size       16M
+php_value memory_limit        32M
+</IfModule>
+<IfModule mod_php4.c>
+php_value upload_max_filesize 16M
+php_value post_max_size       16M
+php_value memory_limit        32M
+</IfModule>
+
+</Directory>
+
+# Optionally enable IP-restrictions for teams, recommended if you know the
+# IP range the teams will be on.
+#<Directory @domserver_wwwdir@/team>
+# deny from all
+# allow from 10.20.30.0/24
+#</Directory>
+
+
+# Require authentication to plugin interface
+<Directory @domserver_wwwdir@/plugin>
+AuthType Basic
+AuthName "DOMjudge Plugin Interface"
+Require valid-user
+AuthUserFile @domserver_etcdir@/htpasswd-plugin
+
+# Optionally restrict access to just the relevant hosts:
+# deny from all
+# allow from 172.30.20.0/24
 </Directory>
 
 # $Id$
