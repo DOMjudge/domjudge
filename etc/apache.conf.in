@@ -1,0 +1,29 @@
+
+# Apache configuration for DOMjudge
+
+# Use this VirtualHost block if you want DOMjudge to live in
+# the root of your webserver. See the Apache documentation for
+# virtualhosts for more information.
+NameVirtualHost *
+<VirtualHost *>
+ServerName @jury_hostname@
+DocumentRoot @jurywww_path@
+</VirtualHost>
+
+# Alternatively, use this instead of the VirtualHost above when you don't
+# want DOMjudge in the root, but only occupy a subdir, like this:
+# www.example.com/domjudge
+
+#Alias /domjudge @jurywww_path@
+
+
+# This section applies to both options above.
+
+<Directory @jurywww_path@>
+Options Indexes FollowSymlinks
+DirectoryIndex index.php
+AllowOverride All
+</Directory>
+
+# vim: syntax=apachestyle
+# $Id: apache.conf 1298 2007-04-18 16:38:31Z kink $
