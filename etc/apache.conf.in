@@ -10,7 +10,7 @@
 # If you put DOMjudge in your DocumentRoot, change WEBBASEURI in
 # etc/domserver-config.php to '/'
 #ServerName _default_
-#DocumentRoot @domserverwww_path@
+#DocumentRoot @domserver_wwwdir@
 #</VirtualHost>
 
 # Alternatively, use this instead of the VirtualHost above when you don't
@@ -19,12 +19,12 @@
 
 # If you change the Alias path, change WEBBASEURI in
 # etc/domserver-config.php accordingly
-Alias /domjudge @domserverwww_path@
+Alias /domjudge @domserver_wwwdir@
 
 
 # This section applies to both options above.
 
-<Directory @domserverwww_path@>
+<Directory @domserver_wwwdir@>
 Options Indexes FollowSymlinks
 DirectoryIndex index.php
 AllowOverride All
@@ -34,14 +34,17 @@ php_flag magic_quotes_gpc off
 php_flag magic_quotes_runtime off
 </Directory>
 
-<Directory @domserverwww_path@/jury>
+<Directory @domserver_wwwdir@/jury>
 AuthName "Jury-members Only Area"
 AuthType Basic
 Require valid-user
 AuthType Basic
 AuthName "DOMjudge"
-AuthUserFile @domserveretc_path@/jurymembers.htpasswd
+AuthUserFile @domserver_etcdir@/jurymembers.htpasswd
 </Directory>
 
-# vim: syntax=apachestyle
 # $Id$
+
+# vim: syntax=apachestyle
+# Local Variables:
+# mode: apache
