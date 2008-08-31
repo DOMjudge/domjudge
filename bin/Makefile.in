@@ -9,6 +9,7 @@ build: $(TARGETS)
 
 runguard: %: %.c $(TOPDIR)/etc/config.h
 	$(CXX) $(CXXFLAGS) $< -o $@
+	$(STRIP) $@
 
 judgehost: build
 

@@ -15,8 +15,8 @@ apache.conf: apache.conf.in
 	cat apache.conf.in | \
 		sed '1i # Warning: this file is generated from apache.conf.in' | \
 		sed '1a # by make. Edit apache.conf.in instead.' | \
-		sed 's,@domserverwwwdir[@],@domserverwwwdir@,g'  | \
-		sed 's,@domserveretcdir[@],@domserveretcdir@,g'  | \
+		sed 's,@domserver_wwwdir[@],@domserver_wwwdir@,g'  | \
+		sed 's,@domserver_etcdir[@],@domserver_etcdir@,g'  | \
 		sed 's,@domserver_hostname[@],@domserver_hostname@,g' > \
 		apache.conf
 
