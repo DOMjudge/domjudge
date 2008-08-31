@@ -1,7 +1,7 @@
 <?php
 // $Id$
-if ( !defined('SYSTEM_ROOT') ) die ("SYSTEM_ROOT not defined.");
+if ( !defined('LIBDIR') ) die ("LIBDIR not defined.");
 
-require(SYSTEM_ROOT . '/lib/use_db_jury.php');
-require(SYSTEM_ROOT . '/lib/lib.error.php');
-require(SYSTEM_ROOT . '/lib/lib.misc.php');
+require(LIBDIR . '/use_db.php');
+require(LIBDIR . '/lib.error.php');
+require(LIBDIR . '/lib.misc.php');

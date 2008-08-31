@@ -1,3 +1,30 @@
+ifndef TOPDIR
+TOPDIR=..
+endif
+include $(TOPDIR)/Makefile.global
+
+ifdef CYGWIN
+OBJSUFFIX = .cygwin.o
+else
+OBJSUFFIX = .o
+endif
+
+LIBSBASE = lib.error lib.misc
+
+OBJECTS = $(addsuffix $(OBJSUFFIX),$(LIBSBASE))
+
+build: $(OBJECTS)
+
+$(OBJECTS): %$(OBJSUFFIX): %.c %.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+clean:
+	rm -f $(OBJECTS)
+
 install-domserver:
-	install -d @domserverlib_path@
-	cp -a *.php @domserverlib_path@
+	install -d @domserver_libdir@
+	cp -a *.php @domserver_libdir@
+
+install-judgehost:
+	install -d @judgehost_libdir@
+	cp -a *.php *.sh @judgehost_libdir@

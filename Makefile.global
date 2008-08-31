@@ -14,39 +14,26 @@ ifneq ($(QUIET),)
 MAKEFLAGS += --no-print-directory --quiet
 endif
 
+# Define the 'default' target here: because of inclusion of this file,
+# it will be the default target in all subdirectories and we default to
+# no automatic targets when calling 'make' unless overridden.
+default:
+
 # Default C/C++ compiler flags
 CXXFLAGS = -O2 -Wall -fstack-protector -fPIE -pie -Wformat -Wformat-security -I$(TOPDIR)/lib -I$(TOPDIR)/etc
 CFLAGS = $(CXXFLAGS) -lm
 STRIP = strip --remove-section=.comment --remove-section=.note
-
-# How to execute a command as root:
-ROOTCMD=su root -c
-# alternatively:
-#ROOTCMD=sudo -u root /bin/sh -c
-
-# Where to install setuid root binaries: (default: own directory)
-SUIDINSTALLDIR=$(CURDIR)
 
 # Check whether we are running under Cygwin:
 ifneq ($(findstring CYGWIN,$(shell uname)),)
 CYGWIN = 1
 endif
 
-# Define the 'default' target here: because of inclusion of this file,
-# it will be the default target in all subdirectories and we default to
-# no automatic targets when calling 'make' unless overridden.
-default:
-
-# Helper target to read DBNAME, DBSERVER from config:
-getdbinfo: fixconfig
-	$(eval DBNAME=$(shell   . $(TOPDIR)/etc/config.sh ; echo $$DBNAME))
-	$(eval DBSERVER=$(shell . $(TOPDIR)/etc/config.sh ; echo $$DBSERVER))
-
 # Extra phony target to generate up-to-date config for getdbinfo.
 # Needed because running this in getdbinfo seems broken: the old file
 # contents were being used in that case.
-fixconfig:
-	$(MAKE) -C $(TOPDIR)/etc config.sh
+#fixconfig:
+#	$(MAKE) -C $(TOPDIR)/etc config.sh
 
 clean: clean-backupfiles
 
@@ -55,7 +42,7 @@ distclean: clean
 clean-backupfiles:
 	rm -f *~
 
-.PHONY: default build config install check clean clean-backupfiles \
-        dist distclean getdbinfo fixconfig
+.PHONY: default build domserver domserver-install judgehost judgehost-install \
+        check clean clean-backupfiles distclean submitclient docs
 
 endif # GLOBALINCLUDED

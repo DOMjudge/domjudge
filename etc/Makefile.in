@@ -1,28 +1,36 @@
+ifndef TOPDIR
+TOPDIR=..
+endif
+include $(TOPDIR)/Makefile.global
+
 domserver: apache.conf dbpasswords.secret
 
 dbpasswords.secret:
 	echo "Randomly generated on host `hostname`, `date`" > dbpasswords.secret
 	chmod go= dbpasswords.secret
-	./gendbpasswords > dbpasswords.secret
+	./gendbpasswords >> dbpasswords.secret
 
 apache.conf: apache.conf.in
 	cat apache.conf.in | \
 		sed '1i # Warning: this file is generated from apache.conf.in' | \
 		sed '1a # by make. Edit apache.conf.in instead.' | \
-		sed 's,@domserverwww_path[@],@domserverwww_path@,g'  | \
-		sed 's,@domserveretc_path[@],@domserveretc_path@,g'  | \
+		sed 's,@domserverwwwdir[@],@domserverwwwdir@,g'  | \
+		sed 's,@domserveretcdir[@],@domserveretcdir@,g'  | \
 		sed 's,@domserver_hostname[@],@domserver_hostname@,g' > \
 		apache.conf
 
 install-domserver:
-	install -d @domserveretc_path@
-	install apache.conf @domserveretc_path@
-	install domserver-config.php @domserveretc_path@
-	install -m go= dbpasswords.secret @domserveretc_path@
+	install -d @domserver_etcdir@
+	install apache.conf @domserver_etcdir@
+	install domserver-static.php domserver-config.php @domserver_etcdir@
+	install -m u=rw,go= dbpasswords.secret @domserver_etcdir@
+
+install-judgehost:
+	install -d @judgehost_etcdir@
+	install judgehost-static.php judgehost-config.php @judgehost_etcdir@
+	install -m u=rw,go= dbpasswords.secret @judgehost_etcdir@
 
 permissions-domserver:
-	ensurepermission group @webservergroup@ @domserveretc_path@/dbpasswords.secret
-	ensurepermission perm g=r,o=            @domserveretc_path@/dbpasswords.secret
+	ensurepermission group @webservergroup@ @domserver_etcdir@/dbpasswords.secret
+	ensurepermission perm g=r,o=            @domserver_etcdir@/dbpasswords.secret
 
-
-.PHONY: domserver install-domserver

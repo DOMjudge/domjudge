@@ -9,7 +9,7 @@ LIBSBASE = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc)
 LIBHEADERS = $(addsuffix .h,$(LIBSBASE))
 LIBOBJECTS = $(addsuffix .o,$(LIBSBASE))
 
-default: build
+judgehost: build
 
 build: $(TARGETS)
 
@@ -23,6 +23,14 @@ compare: %: %.c $(LIBOBJECTS) $(LIBHEADERS)
 check_float: %: %.c
 	$(CC) -std=c99 $(CFLAGS) $^ -o $@
 	$(STRIP) $@
+
+install-judgehost:
+	install -d @judgehost_libjudgedir@ @judgehost_bindir@
+	cp -a compile_*.sh parse_result.xslt test_solution.sh run \
+	      compare check_diff.sh check_float chroot-startstop.sh \
+	      @judgehost_libjudgedir@
+	cp -a judgedaemon.php @judgehost_bindir@
+	chmod a+x @judgehost_bindir@/judgedaemon.php
 
 clean:
 	-rm -f $(TARGETS)

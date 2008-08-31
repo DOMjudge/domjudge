@@ -2,6 +2,13 @@
 #
 # $Id: Makefile 1549 2007-07-15 20:16:38Z kink $
 
+# Define TOPDIR from shell command and _not_ $(PWD) because that gives
+# pwd before changing to a 'make -C <dir>' <dir>:
+export TOPDIR = $(shell pwd)
+
+# Global Makefile definitions
+include $(TOPDIR)/Makefile.global
+
 default:
 	@echo "No default target"
 	@echo
@@ -10,6 +17,7 @@ default:
 	@echo " - make judgehost"
 	@echo " - make db"
 	@echo " - make submitclient"
+	@echo " - make docs"
 	@echo or
 	@echo " - make install-domserver"
 	@echo " - make install-judgehost"
@@ -22,16 +30,24 @@ default:
 
 # MAIN TARGETS
 team: submitclient
+doc: docs
 domserver:
 install-domserver: domserver
+judgehost:
+install-judgehost: judgehost
 
-# List all targets that exist in subdirs too, and list in which subdirs they
-# are
-REC_TARGETS=submitclient domserver install-domserver
-submitclient: SUBDIRS=submit
+# List all targets that exist in subdirs too, and optionally list in
+# which subdirs they are overriding default.
+REC_TARGETS=domserver install-domserver judgehost install-judgehost \
+            submitclient docs clean distclean
+SUBDIRS=bin doc etc judge lib sql submit www test-programs test-sources
+
+submitclient:      SUBDIRS=submit
+docs:              SUBDIRS=doc
 domserver:         SUBDIRS=etc
-install-domserver: SUBDIRS=www etc lib
-#
+install-domserver: SUBDIRS=etc lib www
+judgehost:         SUBDIRS=judge
+install-judgehost: SUBDIRS=etc judge lib
 
 # Global dependencies:
 #submitclient: config
@@ -39,4 +55,4 @@ install-domserver: SUBDIRS=www etc lib
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 
-.PHONY: domserver team submit install-domserver
+.PHONY: team doc

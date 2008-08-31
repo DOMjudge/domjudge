@@ -11,8 +11,14 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
-define('JUDGEHOSTETC_PATH', @JUDGEHOSTETC_PATH@);
-require ('../etc/config.php');
+require('@judgehost_etcdir@/judgehost-static.php');
+require(ETCDIR . '/judgehost-config.php');
+
+// Set environment variables for passing path configuration to called programs
+putenv('DJ_JUDGEHOST_ETCDIR=' . ETCDIR);
+putenv('DJ_JUDGEHOST_BINDIR=' . BINDIR);
+putenv('DJ_JUDGEHOST_LIBDIR=' . LIBDIR);
+putenv('DJ_JUDGEHOST_LIBJUDGEDIR=' . LIBJUDGEDIR);
 
 $waittime = 5;
 
@@ -21,7 +27,9 @@ $myhost = trim(`hostname --short`);
 define ('SCRIPT_ID', 'judgedaemon');
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 
-require (SYSTEM_ROOT . '/lib/init.php');
+require(LIBDIR . '/init.php');
+
+setup_database_connection('jury');
 
 $verbose = LOG_INFO;
 
@@ -45,9 +53,6 @@ if ( ! $row ) {
 $tempdirpath = JUDGEDIR . "/$myhost";
 system("mkdir -p $tempdirpath/testcase", $retval);
 if ( $retval != 0 ) error("Could not create $tempdirpath");
-
-// Set environment variables for passing configuration to called programs
-putenv('DJ_JUDGEHOSTETC_PATH='.JUDGEHOSTETC_PATH);
 
 $waiting = FALSE;
 $active = TRUE;

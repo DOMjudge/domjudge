@@ -47,7 +47,7 @@
 # This is a bash script because of the traps it uses.
 
 # Global configuration
-. "$DJ_JUDGEHOSTETC_PATH/config.sh"
+. "$DJ_JUDGEHOST_ETCDIR/judgehost-config.sh"
 
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
@@ -72,7 +72,7 @@ cleanexit ()
 }
 
 # Error and logging functions
-. "$SYSTEM_ROOT/lib/lib.error.sh"
+. "$DJ_JUDGEHOST_LIBDIR/lib.error.sh"
 
 # Logging:
 LOGFILE="$LOGDIR/judge.`hostname --short`.log"
@@ -89,9 +89,9 @@ else
 fi
 
 # Location of scripts/programs:
-SCRIPTDIR="$SYSTEM_ROOT/judge"
-STATICSHELL="$SYSTEM_ROOT/bin/sh-static"
-RUNGUARD="$SYSTEM_ROOT/bin/runguard"
+SCRIPTDIR="$DJ_JUDGEHOST_LIBJUDGEDIR"
+STATICSHELL="$DJ_JUDGEHOST_BINDIR/bin/sh-static"
+RUNGUARD="$DJ_JUDGEHOST_BINDIR/bin/runguard"
 
 logmsg $LOG_INFO "starting '$0', PID = $$"
 

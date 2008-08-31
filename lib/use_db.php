@@ -6,9 +6,9 @@ require('lib.database.php');
 function setup_database_connection($privlevel)
 {
 
-	$credentials = @file( WWWETC_PATH . '/database-credentials.csv' );
+	$credentials = @file(ETCDIR . '/database-credentials.csv');
 	if (!$credentials) {
-		user_error("Cannot find database-credentials file in ".WWWETC_PATH,
+		user_error("Cannot find database-credentials file in " . ETCDIR,
 			E_USER_ERROR);
 		exit();
 	}

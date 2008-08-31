@@ -2,15 +2,18 @@
 *.swp
 
 /autom4te.cache
-/Makefile
 /configure
 /config.log
 /config.status
 /www/configure.php
+/etc/domserver-static.php
+/etc/judgehost-static.php
+/Makefile
 /lib/Makefile
 /sql/Makefile
 /www/Makefile
 /etc/Makefile
+/judge/Makefile
 /etc/apache.conf
 /etc/config.h
 /judge/compare
