@@ -23,7 +23,11 @@
 /sql/Makefile
 /www/Makefile
 
+/bin/runguard
+/judge/check_float
 /judge/compare
 /judge/judgedaemon
+/lib/lib.error.o
+/lib/lib.misc.o
 /submit/submit
 /submit/submitdaemon
