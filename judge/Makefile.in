@@ -25,12 +25,11 @@ check_float: %: %.c
 	$(STRIP) $@
 
 install-judgehost:
-	install -d @judgehost_libjudgedir@ @judgehost_bindir@
 	cp -a compile_*.sh parse_result.xslt test_solution.sh run \
 	      compare check_diff.sh check_float chroot-startstop.sh \
 	      @judgehost_libjudgedir@
-	cp -a judgedaemon.php @judgehost_bindir@
-	chmod a+x @judgehost_bindir@/judgedaemon.php
+	cp -a judgedaemon @judgehost_bindir@
+	chmod a+x @judgehost_bindir@/judgedaemon
 
 clean:
 	-rm -f $(TARGETS)

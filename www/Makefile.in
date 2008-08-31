@@ -1,7 +1,6 @@
 install-domserver:
-	install -d @domserverwww_path@
-	cp -a *.js *.css *.php images @domserverwww_path@
-	cp -a public team jury @domserverwww_path@
+	cp -a *.js *.css *.php images @domserver_wwwdir@
+	cp -a public team jury @domserver_wwwdir@
 
 clean:
 	rm -f Makefile configure.php

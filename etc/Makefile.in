@@ -4,6 +4,7 @@ endif
 include $(TOPDIR)/Makefile.global
 
 domserver: apache.conf dbpasswords.secret
+judgehost: dbpasswords.secret
 
 dbpasswords.secret:
 	echo "Randomly generated on host `hostname`, `date`" > dbpasswords.secret
@@ -21,13 +22,12 @@ apache.conf: apache.conf.in
 
 install-domserver:
 	install -d @domserver_etcdir@
-	install apache.conf @domserver_etcdir@
-	install domserver-static.php domserver-config.php @domserver_etcdir@
+	install -t @domserver_etcdir@ apache.conf domserver-static.php domserver-config.php
 	install -m u=rw,go= dbpasswords.secret @domserver_etcdir@
 
 install-judgehost:
 	install -d @judgehost_etcdir@
-	install judgehost-static.php judgehost-config.php @judgehost_etcdir@
+	install -t @judgehost_etcdir@ judgehost-static.php judgehost-config.php judgehost-config.sh
 	install -m u=rw,go= dbpasswords.secret @judgehost_etcdir@
 
 permissions-domserver:

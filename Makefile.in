@@ -46,8 +46,21 @@ submitclient:      SUBDIRS=submit
 docs:              SUBDIRS=doc
 domserver:         SUBDIRS=etc
 install-domserver: SUBDIRS=etc lib www
-judgehost:         SUBDIRS=judge
-install-judgehost: SUBDIRS=etc judge lib
+judgehost:         SUBDIRS=bin etc judge
+install-judgehost: SUBDIRS=bin etc judge lib
+
+install-domserver: domserver-create-dirs
+install-judgehost: judgehost-create-dirs
+
+domserver-create-dirs:
+	install -d @domserver_etcdir@    @domserver_libdir@ \
+	           @domserver_libwwwdir@ @domserver_wwwdir@ \
+	           @domserver_logdir@    @domserver_tmpdir@
+
+judgehost-create-dirs:
+	install -d @judgehost_bindir@   @judgehost_etcdir@ \
+	           @judgehost_libdir@   @judgehost_libjudgedir@ \
+	           @judgehost_judgedir@ @judgehost_logdir@
 
 # Global dependencies:
 #submitclient: config
