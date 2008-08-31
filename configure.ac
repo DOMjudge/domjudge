@@ -31,7 +31,7 @@ AC_SUBST(domserverusername, domjudge)
 AC_SUBST(webservergroup, www-data)
 
 AC_PATH(domserverroot, [foo bar], [$prefix/domserver])
-AC_PATH(domserverconf, [foo bar], [$domserverroot_path/etc])
+AC_PATH(domserveretc, [foo bar], [$domserverroot_path/etc])
 AC_PATH(domserverwww, [foo bar], [$domserverroot_path/www])
 AC_PATH(domserverlib, [foo bar], [$domserverroot_path/lib])
 AC_PATH(domserverbin, [foo bar], [$domserverroot_path/bin])
