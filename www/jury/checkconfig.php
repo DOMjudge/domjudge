@@ -12,7 +12,7 @@
 
 require('init.php');
 $title = 'Config Checker';
-require(SYSTEM_ROOT . '/lib/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 requireAdmin();
 
@@ -42,12 +42,12 @@ if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
 	echo "<h2>PHP Information</h2>\n\n";
 	phpinfo();
 	echo $ret;
-	require(SYSTEM_ROOT . '/lib/www/footer.php');
+	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
-require_once(WWWLIB_PATH."/.." . '/lib/relations.php');
-require_once(WWWLIB_PATH."/.." . '/lib/www/checkers.jury.php');
+require_once(LIBDIR . '/relations.php');
+require_once(LIBWWWDIR . '/checkers.jury.php');
 
 
 $RESULTS = array();
@@ -458,4 +458,4 @@ echo "<p>Legend:
 <img src=\"../images/s_error.png\" alt=\"E\" class=\"picto\" /> Error
 </p>\n";
 
-require(WWWLIB_PATH."/.." . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

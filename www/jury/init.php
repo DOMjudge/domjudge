@@ -17,19 +17,22 @@ if (empty($_SERVER['REMOTE_USER']) || $_SERVER['AUTH_TYPE'] != "Basic") {
 define('IS_JURY', 1);
 
 require_once('../configure.php');
-require_once(WWWETC_PATH.'/domserver-config.php');
 
 if( DEBUG & DEBUG_TIMINGS ) {
-	include_once (WWWLIB_PATH."/.." . '/lib/lib.timer.php');
+	include_once (LIBDIR . '/lib.timer.php');
 }
 
-require_once(WWWLIB_PATH."/.." . '/lib/lib.error.php');
-require_once(WWWLIB_PATH."/.." . '/lib/use_db.php');
-setup_database_connection('jury');
-require_once(WWWLIB_PATH."/.." . '/lib/lib.misc.php');
+require_once(LIBDIR . '/lib.error.php');
+require_once(LIBDIR . '/lib.misc.php');
+require_once(LIBDIR . '/use_db.php');
 
-require_once(WWWLIB_PATH."/.." . '/lib/www/validate.jury.php');
-require_once(WWWLIB_PATH."/.." . '/lib/www/common.jury.php');
+setup_database_connection('jury');
+
+require_once(LIBWWWDIR . '/common.php');
+require_once(LIBWWWDIR . '/print.php');
+
+require_once(LIBWWWDIR . '/validate.jury.php');
+require_once(LIBWWWDIR . '/common.jury.php');
 
 $cdata = getCurContest(TRUE);
 $cid = (int)$cdata['cid'];

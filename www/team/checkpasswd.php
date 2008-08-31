@@ -11,18 +11,17 @@
 
 // please keep any includes synchronised with init.php
 require_once('../configure.php');
-require_once(WWWETC_PATH.'/domserver-config.php');
 
 if( DEBUG & DEBUG_TIMINGS ) {
-	include_once (WWWLIB_PATH."/.." . '/lib/lib.timer.php');
+	include_once (LIBDIR . '/lib.timer.php');
 }
 
-require_once(WWWLIB_PATH."/.." . '/lib/lib.error.php');
-require_once(WWWLIB_PATH."/.." . '/lib/lib.misc.php');
-require_once(WWWLIB_PATH."/.." . '/lib/use_db.php');
-setup_database_connection('team');
+require_once(LIBDIR . '/lib.error.php');
+require_once(LIBDIR . '/lib.misc.php');
+require_once(LIBDIR . '/use_db.php');
+require_once(LIBWWWDIR . '/common.php');
 
-require_once(WWWLIB_PATH."/.." . '/lib/www/common.php');
+setup_database_connection('team');
 
 $ip = $_SERVER['REMOTE_ADDR'];
 $row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
@@ -32,12 +31,12 @@ $pass = trim($_POST['passwd']);
 
 $title = 'Authenticate user';
 $menu = false;
-include(WWWLIB_PATH."/.." . '/lib/www/header.php');
+include(LIBDIR . '/www/header.php');
 
 if ( empty($user) || empty($pass) ) {
 	echo "<h1>Not Authenticated</h1>\n\n";
 	echo "<p>Please supply a username and password.</p>\n\n";
-	include(WWWLIB_PATH."/.." . '/lib/www/footer.php');
+	include(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
@@ -61,4 +60,4 @@ if ( $cnt == 1 ) {
 		"Please try again or contact a staff member.</p>\n\n";
 }
 
-include(WWWLIB_PATH."/.." . '/lib/www/footer.php');
+include(LIBWWWDIR . '/footer.php');

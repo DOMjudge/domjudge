@@ -10,23 +10,23 @@
 
 // please keep any includes synchronised with checkpasswd.php
 require_once('../configure.php');
-require_once(WWWETC_PATH.'/domserver-config.php');
 
 if( DEBUG & DEBUG_TIMINGS ) {
-	include_once (WWWLIB_PATH."/.." . '/lib/lib.timer.php');
+	include_once (LIBDIR . '/lib.timer.php');
 }
 
 if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
 
-require_once(WWWLIB_PATH."/.." . '/lib/lib.error.php');
-require_once(WWWLIB_PATH."/.." . '/lib/lib.misc.php');
-require_once(WWWLIB_PATH."/.." . '/lib/use_db.php');
+require_once(LIBDIR . '/lib.error.php');
+require_once(LIBDIR . '/lib.misc.php');
+require_once(LIBDIR . '/use_db.php');
+
 setup_database_connection('team');
 
-require_once(WWWLIB_PATH."/.." . '/lib/www/common.php');
-require_once(WWWLIB_PATH."/.." . '/lib/www/print.php');
-require_once(WWWLIB_PATH."/.." . '/lib/www/scoreboard.php');
-require_once(WWWLIB_PATH."/.." . '/lib/www/validate.team.php');
+require_once(LIBWWWDIR . '/common.php');
+require_once(LIBWWWDIR . '/print.php');
+require_once(LIBWWWDIR . '/scoreboard.php');
+require_once(LIBWWWDIR . '/validate.team.php');
 
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];
