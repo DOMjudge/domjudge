@@ -11,7 +11,9 @@
 require_once('configure.php');
 
 require_once(LIBDIR . '/lib.error.php');
-require_once(LIBDIR . '/use_db_public.php');
+require_once(LIBDIR . '/use_db.php');
+setup_database_connection('public');
+
 require_once(LIBWWWDIR . '/common.php');
 
 $ip = $_SERVER['REMOTE_ADDR'];
