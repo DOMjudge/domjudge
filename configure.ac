@@ -90,6 +90,7 @@ AC_DEFINE_UNQUOTED(SUBMITCLIENT_METHOD, 0, [foo])
 AC_CONFIG_FILES([
 	Makefile
 	etc/Makefile
+	lib/Makefile
 	www/Makefile
 
 	www/configure.php
