@@ -59,7 +59,7 @@ function delLink($table, $field, $value)
  */
 function rejudgeForm($table, $id)
 {
-	require_once(SYSTEM_ROOT . '/lib/www/forms.php');
+	require_once(LIBWWWDIR . '/forms.php');
 
 	$ret = addForm('rejudge.php') .
 		addHidden('table', $table) .

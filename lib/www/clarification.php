@@ -8,7 +8,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
+require_once(LIBDIR . '/lib.misc.php');
 
 /**
  * Marks a given clarification as viewed by a specific team,
