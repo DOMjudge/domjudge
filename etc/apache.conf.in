@@ -47,7 +47,7 @@ php_flag magic_quotes_runtime off
 AuthType Basic
 AuthName "DOMjudge Jury Interface"
 Require valid-user
-AuthUserFile @domserver_etcdir@/jurymembers.htpasswd
+AuthUserFile @domserver_etcdir@/htpasswd-jury
 
 # Optionally restrict access to just the jury computers:
 # deny from all
