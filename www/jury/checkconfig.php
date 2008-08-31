@@ -46,8 +46,8 @@ if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
 	exit;
 }
 
-require_once(SYSTEM_ROOT . '/lib/relations.php');
-require_once(SYSTEM_ROOT . '/lib/www/checkers.jury.php');
+require_once(WWWLIB_PATH."/.." . '/lib/relations.php');
+require_once(WWWLIB_PATH."/.." . '/lib/www/checkers.jury.php');
 
 
 $RESULTS = array();
@@ -458,4 +458,4 @@ echo "<p>Legend:
 <img src=\"../images/s_error.png\" alt=\"E\" class=\"picto\" /> Error
 </p>\n";
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(WWWLIB_PATH."/.." . '/lib/www/footer.php');

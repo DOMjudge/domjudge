@@ -11,11 +11,11 @@
 require_once('../../etc/config.php');
 
 if( DEBUG & DEBUG_TIMINGS ) {
-	include_once (SYSTEM_ROOT . '/lib/lib.timer.php');
+	include_once (WWWLIB_PATH."/.." . '/lib/lib.timer.php');
 }
 
-require_once(SYSTEM_ROOT . '/lib/lib.error.php');
-require_once(SYSTEM_ROOT . '/lib/use_db_public.php');
-require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
-require_once(SYSTEM_ROOT . '/lib/www/common.php');
-require_once(SYSTEM_ROOT . '/lib/www/print.php');
+require_once(WWWLIB_PATH."/.." . '/lib/lib.error.php');
+require_once(WWWLIB_PATH."/.." . '/lib/use_db_public.php');
+require_once(WWWLIB_PATH."/.." . '/lib/lib.misc.php');
+require_once(WWWLIB_PATH."/.." . '/lib/www/common.php');
+require_once(WWWLIB_PATH."/.." . '/lib/www/print.php');

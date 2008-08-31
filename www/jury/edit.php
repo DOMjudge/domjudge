@@ -17,7 +17,7 @@ requireAdmin();
 $cmd = @$_POST['cmd'];
 if ( $cmd != 'add' && $cmd != 'edit' ) error ("Unknown action.");
 
-require(SYSTEM_ROOT . '/lib/relations.php');
+require(WWWLIB_PATH."/.." . '/lib/relations.php');
 
 $t = @$_POST['table'];
 if(!$t)	error ("No table selected.");

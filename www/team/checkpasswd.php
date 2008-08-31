@@ -12,13 +12,13 @@
 require_once('../../etc/config.php');
 
 if( DEBUG & DEBUG_TIMINGS ) {
-	include_once (SYSTEM_ROOT . '/lib/lib.timer.php');
+	include_once (WWWLIB_PATH."/.." . '/lib/lib.timer.php');
 }
 
-require_once(SYSTEM_ROOT . '/lib/lib.error.php');
-require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
-require_once(SYSTEM_ROOT . '/lib/use_db_team.php');
-require_once(SYSTEM_ROOT . '/lib/www/common.php');
+require_once(WWWLIB_PATH."/.." . '/lib/lib.error.php');
+require_once(WWWLIB_PATH."/.." . '/lib/lib.misc.php');
+require_once(WWWLIB_PATH."/.." . '/lib/use_db_team.php');
+require_once(WWWLIB_PATH."/.." . '/lib/www/common.php');
 
 $ip = $_SERVER['REMOTE_ADDR'];
 $row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
@@ -28,12 +28,12 @@ $pass = trim($_POST['passwd']);
 
 $title = 'Authenticate user';
 $menu = false;
-include(SYSTEM_ROOT . '/lib/www/header.php');
+include(WWWLIB_PATH."/.." . '/lib/www/header.php');
 
 if ( empty($user) || empty($pass) ) {
 	echo "<h1>Not Authenticated</h1>\n\n";
 	echo "<p>Please supply a username and password.</p>\n\n";
-	include(SYSTEM_ROOT . '/lib/www/footer.php');
+	include(WWWLIB_PATH."/.." . '/lib/www/footer.php');
 	exit;
 }
 
@@ -57,4 +57,4 @@ if ( $cnt == 1 ) {
 		"Please try again or contact a staff member.</p>\n\n";
 }
 
-include(SYSTEM_ROOT . '/lib/www/footer.php');
+include(WWWLIB_PATH."/.." . '/lib/www/footer.php');

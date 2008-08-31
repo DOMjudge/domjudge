@@ -12,19 +12,19 @@
 require_once('../../etc/config.php');
 
 if( DEBUG & DEBUG_TIMINGS ) {
-	include_once (SYSTEM_ROOT . '/lib/lib.timer.php');
+	include_once (WWWLIB_PATH."/.." . '/lib/lib.timer.php');
 }
 
 if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
 
-require_once(SYSTEM_ROOT . '/lib/lib.error.php');
-require_once(SYSTEM_ROOT . '/lib/lib.misc.php');
-require_once(SYSTEM_ROOT . '/lib/use_db_team.php');
+require_once(WWWLIB_PATH."/.." . '/lib/lib.error.php');
+require_once(WWWLIB_PATH."/.." . '/lib/lib.misc.php');
+require_once(WWWLIB_PATH."/.." . '/lib/use_db_team.php');
 
-require_once(SYSTEM_ROOT . '/lib/www/common.php');
-require_once(SYSTEM_ROOT . '/lib/www/print.php');
-require_once(SYSTEM_ROOT . '/lib/www/scoreboard.php');
-require_once(SYSTEM_ROOT . '/lib/www/validate.team.php');
+require_once(WWWLIB_PATH."/.." . '/lib/www/common.php');
+require_once(WWWLIB_PATH."/.." . '/lib/www/print.php');
+require_once(WWWLIB_PATH."/.." . '/lib/www/scoreboard.php');
+require_once(WWWLIB_PATH."/.." . '/lib/www/validate.team.php');
 
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];

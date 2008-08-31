@@ -10,9 +10,9 @@
 
 require_once('../etc/config.php');
 
-require_once(SYSTEM_ROOT . '/lib/lib.error.php');
-require_once(SYSTEM_ROOT . '/lib/use_db_public.php');
-require_once(SYSTEM_ROOT . '/lib/www/common.php');
+require_once(WWWLIB_PATH."/.." . '/lib/lib.error.php');
+require_once(WWWLIB_PATH."/.." . '/lib/use_db_public.php');
+require_once(WWWLIB_PATH."/.." . '/lib/www/common.php');
 
 $ip = $_SERVER['REMOTE_ADDR'];
 $res = $DB->q('SELECT ipaddress FROM team WHERE ipaddress = %s', $ip);
