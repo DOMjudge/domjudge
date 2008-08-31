@@ -1,0 +1,3 @@
+install-jury:
+	install -d @jurylib_path@
+	cp -a *.php @jurylib_path@
