@@ -24,6 +24,7 @@ function setup_database_connection($privlevel)
 		if ($priv != $privlevel) continue;
 
 		$DB = new db ($db, $host, $user, $pass);
+		break;
 	}
 
 	if (!$DB) {

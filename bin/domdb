@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # - status: check current status
 # 
@@ -8,12 +8,52 @@
 # - setup:  create database, setup users and permissions
 # - create: create tables etc
 
-. "`dirname $0`/paths.sh"
+set -e
 
-function parseconfig
+for path in "@DBLIB_PATH@" "`dirname $0`"; do
+	if [ -e "$path" ]; then
+		. "$path/paths.sh"
+	fi
+done
+
+function query
 {
-	OLDIFS="$IFS"
-	IFS="$IFS="
-	. $DBETC_PATH/database.ini
+	mysql --silent --skip-column-names -e "$@"
 }
+
+case "$1" in
+
+status)
+	echo -n "Trying to connect to the database: "
+	if [ ! query 'select "Success!";' ]; then
+		echo "Could not connect to the MySQL server."
+		echo "Make sure that you configured the MySQL client"
+		echo "correctly, see /etc/mysql/my.cnf or ~/.my.cnf"
+		echo ""
+		echo "Specifically, ensure you configure "
+	fi
+
+	#echo -n "MySQL server version: "
+	#query 'select version();'
+	;;
+
+genpass)
+	$DBETC_PATH/gendbpass > /dev/null
+	;;
+
+setup)
+	# Needed: host, database, rootuser, rootpass
+
+	;;
+*)
+	echo "Unknown subcommand" >&2
+	echo "Usage:"
+	echo "domdb <cmd> [<database> [<mysql_options>]]"
+	echo 
+	echo "Commands:"
+	echo "- status: Check status"
+	exit 1
+	;;
+
+esac
 
