@@ -1,12 +1,9 @@
+ifndef TOPDIR
+TOPDIR=..
+endif
+include $(TOPDIR)/Makefile.global
+
 install-domserver:
 	cp -a *.js *.css *.php images @domserver_wwwdir@
 	cp -a public team jury @domserver_wwwdir@
-
-clean:
-	rm -f Makefile configure.php
-	ln -s ../run-configure Makefile
-	-rm -f `find $(PWD) -name \*~`
-
-distclean:
-	rm -f Makefile
-
+	install -t @domserver_wwwdir@ configure.php

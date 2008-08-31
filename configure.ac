@@ -104,6 +104,7 @@ AC_CONFIG_FILES([
 	lib/Makefile
 	www/Makefile
 
+	www/configure.php
 	judge/judgedaemon
 	etc/domserver-static.php
 	etc/judgehost-static.php

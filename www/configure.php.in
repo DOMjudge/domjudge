@@ -2,8 +2,6 @@
 
 // configure.php is generated from configure.php.in by ../configure
 
-define('DOMJUDGE_VERSION', '@DOMJUDGE_VERSION@');
+require_once('@domserver_etcdir@/domserver-static.php');
 
-define('WWWROOT',     '@domserverwww_path@');
-define('WWWLIB_PATH', '@domserverlib_path@');
-define('WWWETC_PATH', '@domserveretc_path@');
+require_once(ETCDIR . '/domserver-config.php');
