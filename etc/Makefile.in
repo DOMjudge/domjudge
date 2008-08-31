@@ -1,8 +1,13 @@
-jury: apache.conf
+jury: apache.conf dbpasswords.secret
 
-apache.conf: apache.conf.in Makefile
+dbpasswords.secret:
+	echo "Randomly generated on host `hostname`, `date`" > dbpasswords.secret
+	chmod go= dbpasswords.secret
+	./gendbpasswords > dbpasswords.secret
+
+apache.conf: apache.conf.in
 	cat apache.conf.in | \
-		sed '1i # Warning: this file is generated from apache.conf' | \
+		sed '1i # Warning: this file is generated from apache.conf.in' | \
 		sed '1a # by make. Edit apache.conf.in instead.' | \
 		sed 's,@jurywww_path[@],@jurywww_path@,g'  | \
 		sed 's,@jury_hostname[@],@jury_hostname@,g' > \
@@ -11,5 +16,11 @@ apache.conf: apache.conf.in Makefile
 install-jury:
 	install -d @juryconf_path@
 	install apache.conf @juryconf_path@
+	install -m go= dbpasswords.secret @juryconf_path@
 
-.PHONY: install-jury
+permissions-jury:
+	ensurepermission group @webservergroup@ @juryconf_path@/dbpasswords.secret
+	ensurepermission perm g=r,o=            @juryconf_path@/dbpasswords.secret
+
+
+.PHONY: jury install-jury
