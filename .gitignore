@@ -8,6 +8,8 @@
 /www/configure.php
 /etc/domserver-static.php
 /etc/judgehost-static.php
+/etc/database-credentials.csv
+/etc/dbpasswords.secret
 /Makefile
 /lib/Makefile
 /sql/Makefile
