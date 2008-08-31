@@ -9,7 +9,8 @@
  */
 
 // please keep any includes synchronised with checkpasswd.php
-require_once('../../etc/config.php');
+require_once('../configure.php');
+require_once(WWWETC_PATH.'/domserver-config.php');
 
 if( DEBUG & DEBUG_TIMINGS ) {
 	include_once (WWWLIB_PATH."/.." . '/lib/lib.timer.php');
@@ -19,7 +20,8 @@ if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
 
 require_once(WWWLIB_PATH."/.." . '/lib/lib.error.php');
 require_once(WWWLIB_PATH."/.." . '/lib/lib.misc.php');
-require_once(WWWLIB_PATH."/.." . '/lib/use_db_team.php');
+require_once(WWWLIB_PATH."/.." . '/lib/use_db.php');
+setup_database_connection('team');
 
 require_once(WWWLIB_PATH."/.." . '/lib/www/common.php');
 require_once(WWWLIB_PATH."/.." . '/lib/www/print.php');

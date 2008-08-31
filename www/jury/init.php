@@ -16,14 +16,16 @@ if (empty($_SERVER['REMOTE_USER']) || $_SERVER['AUTH_TYPE'] != "Basic") {
 
 define('IS_JURY', 1);
 
-require_once('../../etc/config.php');
+require_once('../configure.php');
+require_once(WWWETC_PATH.'/domserver-config.php');
 
 if( DEBUG & DEBUG_TIMINGS ) {
 	include_once (WWWLIB_PATH."/.." . '/lib/lib.timer.php');
 }
 
 require_once(WWWLIB_PATH."/.." . '/lib/lib.error.php');
-require_once(WWWLIB_PATH."/.." . '/lib/use_db_jury.php');
+require_once(WWWLIB_PATH."/.." . '/lib/use_db.php');
+setup_database_connection('jury');
 require_once(WWWLIB_PATH."/.." . '/lib/lib.misc.php');
 
 require_once(WWWLIB_PATH."/.." . '/lib/www/validate.jury.php');
