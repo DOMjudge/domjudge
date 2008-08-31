@@ -4,6 +4,6 @@
 
 define('DOMJUDGE_VERSION', '@DOMJUDGE_VERSION@');
 
-define('WWWROOT',     '@jurywww_path@');
-define('WWWLIB_PATH', '@jurylib_path@');
-define('WWWETC_PATH', '@juryconf_path@');
+define('WWWROOT',     '@domserverwww_path@');
+define('WWWLIB_PATH', '@domserverlib_path@');
+define('WWWETC_PATH', '@domserverconf_path@');

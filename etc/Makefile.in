@@ -1,4 +1,4 @@
-jury: apache.conf dbpasswords.secret
+domserver: apache.conf dbpasswords.secret
 
 dbpasswords.secret:
 	echo "Randomly generated on host `hostname`, `date`" > dbpasswords.secret
@@ -9,19 +9,19 @@ apache.conf: apache.conf.in
 	cat apache.conf.in | \
 		sed '1i # Warning: this file is generated from apache.conf.in' | \
 		sed '1a # by make. Edit apache.conf.in instead.' | \
-		sed 's,@jurywww_path[@],@jurywww_path@,g'  | \
-		sed 's,@jury_hostname[@],@jury_hostname@,g' > \
+		sed 's,@domserverwww_path[@],@domserverwww_path@,g'  | \
+		sed 's,@domserver_hostname[@],@domserver_hostname@,g' > \
 		apache.conf
 
-install-jury:
-	install -d @juryconf_path@
-	install apache.conf @juryconf_path@
-	install domserver-config.php @juryconf_path@
-	install -m go= dbpasswords.secret @juryconf_path@
+install-domserver:
+	install -d @domserverconf_path@
+	install apache.conf @domserverconf_path@
+	install domserver-config.php @domserverconf_path@
+	install -m go= dbpasswords.secret @domserverconf_path@
 
-permissions-jury:
-	ensurepermission group @webservergroup@ @juryconf_path@/dbpasswords.secret
-	ensurepermission perm g=r,o=            @juryconf_path@/dbpasswords.secret
+permissions-domserver:
+	ensurepermission group @webservergroup@ @domserverconf_path@/dbpasswords.secret
+	ensurepermission perm g=r,o=            @domserverconf_path@/dbpasswords.secret
 
 
-.PHONY: jury install-jury
+.PHONY: domserver install-domserver

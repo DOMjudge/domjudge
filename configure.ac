@@ -23,23 +23,23 @@ if test -z "$version"; then
 fi
 AC_SUBST(DOMJUDGE_VERSION, $version)
 
-# {{{ Jurystuff (webserver, etc)
-AC_ARG_WITH(jury-hostname,,AC_SUBST(jury_hostname,$withval),
-	AC_SUBST(jury_hostname,domjudge.example.org))
+# {{{ Domserverstuff (webserver, etc)
+AC_ARG_WITH(domserver-hostname,,AC_SUBST(domserver_hostname,$withval),
+	AC_SUBST(domserver_hostname,domjudge.example.org))
 
-AC_SUBST(juryusername, domjudge)
+AC_SUBST(domserverusername, domjudge)
 AC_SUBST(webservergroup, www-data)
 
-AC_PATH(juryroot, [foo bar], [$prefix/jury])
-AC_PATH(juryconf, [foo bar], [$juryroot_path/etc])
-AC_PATH(jurywww, [foo bar], [$juryroot_path/www])
-AC_PATH(jurylib, [foo bar], [$juryroot_path/lib])
-AC_PATH(jurybin, [foo bar], [$juryroot_path/bin])
-AC_PATH(jurylog, [foo bar], [$juryroot_path/log])
-AC_PATH(jurytmp, [foo bar], [$juryroot_path/tmp])
-AC_PATH(jurywwwtmp, [foo bar], [$juryroot_path/wwwtmp])
+AC_PATH(domserverroot, [foo bar], [$prefix/domserver])
+AC_PATH(domserverconf, [foo bar], [$domserverroot_path/etc])
+AC_PATH(domserverwww, [foo bar], [$domserverroot_path/www])
+AC_PATH(domserverlib, [foo bar], [$domserverroot_path/lib])
+AC_PATH(domserverbin, [foo bar], [$domserverroot_path/bin])
+AC_PATH(domserverlog, [foo bar], [$domserverroot_path/log])
+AC_PATH(domservertmp, [foo bar], [$domserverroot_path/tmp])
+AC_PATH(domserverwwwtmp, [foo bar], [$domserverroot_path/wwwtmp])
 
-# Jury bits en/disable: use chmod on $jurywww_path/{jury,public,team}
+# domserver bits en/disable: use chmod on $domserverwww_path/{domserver,public,team}
 
 # }}}
 

@@ -1,7 +1,7 @@
-install-jury:
-	install -d @jurywww_path@
-	cp -a *.js *.css *.php images @jurywww_path@
-	cp -a public team jury @jurywww_path@
+install-domserver:
+	install -d @domserverwww_path@
+	cp -a *.js *.css *.php images @domserverwww_path@
+	cp -a public team jury @domserverwww_path@
 
 clean:
 	rm -f Makefile configure.php

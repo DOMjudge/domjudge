@@ -6,20 +6,20 @@
 # virtualhosts for more information.
 NameVirtualHost *
 <VirtualHost *>
-ServerName @jury_hostname@
-DocumentRoot @jurywww_path@
+ServerName @domserver_hostname@
+DocumentRoot @domserverwww_path@
 </VirtualHost>
 
 # Alternatively, use this instead of the VirtualHost above when you don't
 # want DOMjudge in the root, but only occupy a subdir, like this:
 # www.example.com/domjudge
 
-#Alias /domjudge @jurywww_path@
+#Alias /domjudge @domserverwww_path@
 
 
 # This section applies to both options above.
 
-<Directory @jurywww_path@>
+<Directory @domserverwww_path@>
 Options Indexes FollowSymlinks
 DirectoryIndex index.php
 AllowOverride All
@@ -29,13 +29,13 @@ php_flag magic_quotes_gpc off
 php_flag magic_quotes_runtime off
 </Directory>
 
-<Directory @jurywww_path@/jury>
-AuthName "Jury Only Area"
+<Directory @domserverwww_path@/jury>
+AuthName "Jury-members Only Area"
 AuthType Basic
 Require valid-user
 AuthType Basic
 AuthName "DOMjudge"
-AuthUserFile @juryetc_path@/jurymembers.htpasswd
+AuthUserFile @domserveretc_path@/jurymembers.htpasswd
 </Directory>
 
 # vim: syntax=apachestyle

@@ -6,12 +6,12 @@ default:
 	@echo "No default target"
 	@echo
 	@echo "Try:"
-	@echo " - make jury"
+	@echo " - make domserver"
 	@echo " - make judgehost"
 	@echo " - make db"
 	@echo " - make submitclient"
 	@echo or
-	@echo " - make install-jury"
+	@echo " - make install-domserver"
 	@echo " - make install-judgehost"
 	@echo " - make install-db"
 	@echo " - make install-submitclient"
@@ -22,15 +22,15 @@ default:
 
 # MAIN TARGETS
 team: submitclient
-jury:
-install-jury: jury
+domserver:
+install-domserver: domserver
 
 # List all targets that exist in subdirs too, and list in which subdirs they
 # are
-REC_TARGETS=submitclient jury install-jury
+REC_TARGETS=submitclient domserver install-domserver
 submitclient: SUBDIRS=submit
-jury:         SUBDIRS=etc
-install-jury: SUBDIRS=www etc lib
+domserver:         SUBDIRS=etc
+install-domserver: SUBDIRS=www etc lib
 #
 
 # Global dependencies:
@@ -39,4 +39,4 @@ install-jury: SUBDIRS=www etc lib
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 
-.PHONY: jury team submit install-jury
+.PHONY: domserver team submit install-domserver
