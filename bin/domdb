@@ -21,6 +21,28 @@ function query
 	mysql --silent --skip-column-names -e "$@"
 }
 
+function parsedbini
+{
+	local OLDIFS="$IFS"
+	IFS="$IFS="
+	grep "^[^# \t]" database.ini | \
+	while read key value; do
+		case key in
+		host)           DBHOST="$value" ;;
+		database)       DBNAME="$value" ;;
+		user.domserver) DBUSER_DOMSERVER="$value" ;;
+		user.team)      DBUSER_TEAM="$value" ;;
+		user.public)    DBUSER_PUBLIC="$value" ;;
+		user.judgehost) DBUSER_JUDGEHOST="$value" ;;
+		*)
+			echo "Parse error: Unknown key '$key' in database.ini" >&2
+			exit 1
+			;;
+		esac
+	done
+	IFS="$OLDIFS"
+}
+
 case "$1" in
 
 status)
