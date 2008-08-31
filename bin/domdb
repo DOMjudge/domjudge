@@ -25,15 +25,17 @@ function parsedbini
 {
 	local OLDIFS="$IFS"
 	IFS="$IFS="
-	grep "^[^# \t]" database.ini | \
+	# grep all non-empty lines that do not start with # as the first
+	# non-whitespace character
+	egrep '^[[:space:]]*[^#[:space:]]' database.ini | \
 	while read key value; do
-		case key in
-		host)           DBHOST="$value" ;;
-		database)       DBNAME="$value" ;;
-		user.domserver) DBUSER_DOMSERVER="$value" ;;
-		user.team)      DBUSER_TEAM="$value" ;;
-		user.public)    DBUSER_PUBLIC="$value" ;;
-		user.judgehost) DBUSER_JUDGEHOST="$value" ;;
+		case "$key" in
+		host)        DBHOST="$value" ;;
+		database)    DBNAME="$value" ;;
+		user.jury)   DBUSER_JURY="$value" ;;
+		user.team)   DBUSER_TEAM="$value" ;;
+		user.public) DBUSER_PUBLIC="$value" ;;
+		user.worker) DBUSER_JUDGEHOST="$value" ;;
 		*)
 			echo "Parse error: Unknown key '$key' in database.ini" >&2
 			exit 1
@@ -46,7 +48,12 @@ function parsedbini
 case "$1" in
 
 status)
-	echo -n "Trying to connect to the database: "
+	parsedbini
+	for user in jury team public judgehost; do
+		eval 'theuser=$DBUSER_'$user
+		echo -n "Trying to connect to the server with user $theuser for role $user:"
+		mysql -u $user -p
+	done
 	if [ ! query 'select "Success!";' ]; then
 		echo "Could not connect to the MySQL server."
 		echo "Make sure that you configured the MySQL client"
