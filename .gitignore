@@ -13,3 +13,6 @@
 /etc/Makefile
 /etc/apache.conf
 /etc/config.h
+/judge/compare
+/submit/submit
+/submit/submitdaemon
