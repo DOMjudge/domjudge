@@ -44,4 +44,4 @@ AuthUserFile @domserveretc_path@/jurymembers.htpasswd
 </Directory>
 
 # vim: syntax=apachestyle
-# $Id: apache.conf 1298 2007-04-18 16:38:31Z kink $
+# $Id$

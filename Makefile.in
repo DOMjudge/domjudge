@@ -1,6 +1,6 @@
 # Main Makefile
 #
-# $Id: Makefile 1549 2007-07-15 20:16:38Z kink $
+# $Id$
 
 # Define TOPDIR from shell command and _not_ $(PWD) because that gives
 # pwd before changing to a 'make -C <dir>' <dir>:
