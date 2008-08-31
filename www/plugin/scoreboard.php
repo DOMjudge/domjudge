@@ -10,7 +10,7 @@
 
 require('init.php');
 
-require(SYSTEM_ROOT . '/lib/www/scoreboard.php');
+require(LIBWWWDIR . '/scoreboard.php');
 
 $now = now();
 

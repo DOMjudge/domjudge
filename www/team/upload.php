@@ -24,13 +24,13 @@ if ( !isset($_POST['submit']) ) {
 }
 if ( is_null($cid) ) {
 	echo "<p><em>No active contest</em></p>\n";
-	require(SYSTEM_ROOT . '/lib/www/footer.php');
+	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 $now = now();
 if ( difftime($cdata['starttime'], $now) > 0 ) {
 	echo "<p><em>Contest has not yet started.</em></p>\n";
-	require(SYSTEM_ROOT . '/lib/www/footer.php');
+	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
@@ -43,14 +43,14 @@ function err($string) {
 	logmsg(LOG_WARNING, $string);
 	echo '</div>';
 	
-	require(SYSTEM_ROOT . '/lib/www/footer.php');
+	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
 ini_set("upload_max_filesize", SOURCESIZE * 1024);
 
 $title = 'Submit';
-require(SYSTEM_ROOT . '/lib/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 echo "<h2>Submit - upload status</h2>\n\n";
 
@@ -114,4 +114,4 @@ if (NONINTERACTIVE) echo '<!-- noninteractive-upload-successful -->';
 echo "<p>Upload successful.</p>";
 echo "</div>\n";
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

@@ -11,7 +11,7 @@
 require('init.php');
 $title = 'Affiliations';
 
-require(SYSTEM_ROOT . '/lib/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Affiliations</h1>\n\n";
 
@@ -59,4 +59,4 @@ if ( IS_ADMIN ) {
 	echo "<p>" . addLink('team_affiliation') . "</p>\n\n";
 }
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

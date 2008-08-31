@@ -15,17 +15,17 @@ if ( ! ENABLE_WEBSUBMIT_SERVER ) {
 }
 
 $title = 'Submit';
-require(SYSTEM_ROOT . '/lib/www/header.php');
-require(SYSTEM_ROOT . '/lib/www/forms.php');
+require(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/forms.php');
 
 if ( is_null($cid) ) {
 	echo "<p><em>No active contest</em></p>\n";
-	require(SYSTEM_ROOT . '/lib/www/footer.php');
+	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 if ( difftime($cdata['starttime'], now()) > 0 ) {
 	echo "<p><em>Contest has not yet started.</em></p>\n";
-	require(SYSTEM_ROOT . '/lib/www/footer.php');
+	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
@@ -86,4 +86,4 @@ echo addSelect('langext', $langs, '', true);
 
 echo addEndForm();
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

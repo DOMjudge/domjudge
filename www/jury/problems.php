@@ -11,7 +11,7 @@
 require('init.php');
 $title = 'Problems';
 
-require(SYSTEM_ROOT . '/lib/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Problems</h1>\n\n";
 
@@ -60,4 +60,4 @@ if ( IS_ADMIN ) {
 	echo "<p>" . addLink('problem') . "</p>\n\n";
 }
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

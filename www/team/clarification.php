@@ -40,8 +40,8 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 }
 
 $title = 'Clarifications';
-require(SYSTEM_ROOT . '/lib/www/header.php');
-require(SYSTEM_ROOT . '/lib/www/clarification.php');
+require(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/clarification.php');
 
 if ( isset($id) ) {
 	// display clarification thread
@@ -60,4 +60,4 @@ if ( isset($id) ) {
 	putClarificationForm("clarification.php");
 }
 
-include(SYSTEM_ROOT . '/lib/www/footer.php');
+include(LIBWWWDIR . '/footer.php');

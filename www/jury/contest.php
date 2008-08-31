@@ -13,12 +13,12 @@ $id = (int)@$_GET['id'];
 require('init.php');
 $title = "Contest: " .htmlspecialchars(@$id);
 
-require(SYSTEM_ROOT . '/lib/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 if ( IS_ADMIN && !empty($_GET['cmd']) ):
 	$cmd = $_GET['cmd'];
 
-	require(SYSTEM_ROOT . '/lib/www/forms.php');
+	require(LIBWWWDIR . '/forms.php');
 	
 	echo "<h2>" . ucfirst($cmd) . " contest</h2>\n\n";
 
@@ -65,7 +65,7 @@ echo addHidden('cmd', $cmd) .
 	addSubmit('Cancel', 'cancel') .
 	addEndForm();
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');
 exit;
 
 endif;
@@ -110,4 +110,4 @@ if ( IS_ADMIN ) {
 		delLink('contest','cid',$data['cid']) ."</p>\n\n";
 }
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

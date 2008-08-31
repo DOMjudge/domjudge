@@ -14,8 +14,8 @@ $title="Scoreboard";
 // set auto refresh
 $refresh="30;url=" . getBaseURI() . 'public/';
 $menu = false;
-require(SYSTEM_ROOT . '/lib/www/header.php');
-require(SYSTEM_ROOT . '/lib/www/scoreboard.php');
+require(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/scoreboard.php');
 
 $isstatic = @$_SERVER['argv'][1] == 'static' || isset($_REQUEST['static']);
 
@@ -24,4 +24,4 @@ if ( ! $isstatic ) putClock();
 // call the general putScoreBoard function from scoreboard.php
 putScoreBoard(getCurContest(TRUE), null, null, $isstatic);
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

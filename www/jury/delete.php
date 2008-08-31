@@ -35,7 +35,7 @@ if ( isset($_POST['cancel']) ) {
 // Send headers here, because we need to be able to redirect above this point.
 
 $title = 'Delete from ' . $t;
-require(SYSTEM_ROOT . '/lib/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 // Check if we can really delete this.
 foreach($k as $key => $val) {
@@ -57,7 +57,7 @@ if (isset($_POST['confirm'] ) ) {
 	echo "<p><a href=\"" . $tablemulti . ".php\">back to $tablemulti</a></p>";
 
 } else {
-	require_once(SYSTEM_ROOT . '/lib/www/forms.php');
+	require_once(LIBWWWDIR . '/forms.php');
 
 	echo addForm('delete.php') .
 		addHidden('table', $t);
@@ -77,4 +77,4 @@ if (isset($_POST['confirm'] ) ) {
 }
 
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

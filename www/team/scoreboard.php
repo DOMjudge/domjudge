@@ -11,9 +11,9 @@
 require('init.php');
 $refresh = '30;url=' . getBaseURI() . 'team/scoreboard.php';
 $title = 'Scoreboard';
-include(SYSTEM_ROOT . '/lib/www/header.php');
+include(LIBWWWDIR . '/header.php');
 
 // call the general putScoreBoard function from scoreboad.php
 putScoreBoard($cdata, $login);
 
-include(SYSTEM_ROOT . '/lib/www/footer.php');
+include(LIBWWWDIR . '/footer.php');

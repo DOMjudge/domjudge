@@ -15,8 +15,8 @@
 
 require('init.php');
 $title = 'Refresh Cache';
-include(SYSTEM_ROOT . '/lib/www/header.php');
-require(SYSTEM_ROOT . '/lib/www/scoreboard.php');
+include(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/scoreboard.php');
 
 requireAdmin();
 
@@ -36,12 +36,12 @@ echo "<p>Recalculating all values for the hostname and scoreboard cache (" .
 
 if ( count($teams) == 0 ) {
 	echo "No teams defined, doing nothing.</pre>\n\n";
-	include(SYSTEM_ROOT . '/lib/www/footer.php');
+	include(LIBWWWDIR . '/footer.php');
 	exit;
 }
 if ( count($probs) == 0 ) {
 	echo "No problems defined, doing nothing.</pre>\n\n";
-	include(SYSTEM_ROOT . '/lib/www/footer.php');
+	include(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
@@ -86,4 +86,4 @@ $DB->q('DELETE FROM scoreboard_public
 
 echo "<p>Finished.</p>\n\n";
 
-include(SYSTEM_ROOT . '/lib/www/footer.php');
+include(LIBWWWDIR . '/footer.php');

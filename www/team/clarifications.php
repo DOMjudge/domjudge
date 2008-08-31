@@ -11,8 +11,8 @@
 require('init.php');
 $refresh = '30;url=' . getBaseURI() . 'team/clarifications.php';
 $title = 'Clarifications';
-require(SYSTEM_ROOT . '/lib/www/header.php');
-require(SYSTEM_ROOT . '/lib/www/clarification.php');
+require(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/clarification.php');
 
 // Put overview of team submissions (like scoreboard)
 echo "<div id=\"teamscoresummary\">\n";
@@ -54,4 +54,4 @@ if ( $requests->count() == 0 ) {
 	putClarificationList($requests,$login);
 }
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

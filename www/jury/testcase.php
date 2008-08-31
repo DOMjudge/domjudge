@@ -43,8 +43,8 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 
 $title = 'Testcase for problem '.htmlspecialchars(@$probid);
 
-require(SYSTEM_ROOT . '/lib/www/header.php');
-require(SYSTEM_ROOT . '/lib/www/forms.php');
+require(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/forms.php');
 
 requireAdmin();
 
@@ -114,4 +114,4 @@ echo "<p>" . addSubmit('Change testcases') . "</p>\n";
 echo "<p><a href=\"problem.php?id=" . urlencode($probid) . ">back to problem " .
 	htmlspecialchars($probid) . "</a></p>\n\n";
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

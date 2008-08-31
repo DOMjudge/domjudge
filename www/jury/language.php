@@ -36,8 +36,8 @@ if ( !empty($pcmd) ) {
 	}
 }
 
-require(SYSTEM_ROOT . '/lib/www/header.php');
-require(SYSTEM_ROOT . '/lib/www/forms.php');
+require(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
 	
@@ -86,7 +86,7 @@ echo addHidden('cmd', $cmd) .
 	addSubmit('Cancel', 'cancel') .
 	addEndForm();
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');
 exit;
 
 endif;
@@ -137,4 +137,4 @@ echo "<h2>Submissions in " . htmlspecialchars($id) . "</h2>\n\n";
 $restrictions = array( 'langid' => $id );
 putSubmissions($cdata, $restrictions, TRUE);
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

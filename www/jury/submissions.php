@@ -38,14 +38,14 @@ if ( version_compare(PHP_VERSION, '5.2') >= 0 ) {
 	setcookie('domjudge_submissionview', $view);
 }
 
-require(SYSTEM_ROOT . '/lib/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 echo "<h1>$title</h1>\n\n";
 
 $restrictions = array();
 if ( $viewtypes[$view] == 'unverified' ) $restrictions['verified'] = 0;
 
-require_once(SYSTEM_ROOT . '/lib/www/forms.php');
+require_once(LIBWWWDIR . '/forms.php');
 
 echo addForm('submissions.php', 'get') . "<p>\n";
 for($i=0; $i<count($viewtypes); ++$i) {
@@ -55,4 +55,4 @@ echo "</p>\n" . addEndForm();
 
 putSubmissions($cdata, $restrictions, TRUE, ($viewtypes[$view] == 'newest' ? 50 : 0));
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

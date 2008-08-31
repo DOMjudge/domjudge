@@ -16,11 +16,11 @@ $cmd = @$_GET['cmd'];
 
 if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 
-	require(SYSTEM_ROOT . '/lib/www/forms.php');
+	require(LIBWWWDIR . '/forms.php');
 
 	$title = "Category: $cmd";
 
-	require(SYSTEM_ROOT . '/lib/www/header.php');
+	require(LIBWWWDIR . '/header.php');
 	echo "<h2>" . ucfirst($cmd) . " category</h2>\n\n";
 
 	echo addForm('edit.php');
@@ -65,7 +65,7 @@ echo addHidden('cmd', $cmd) .
 	addSubmit('Cancel', 'cancel') .
 	addEndForm();
 
-	require(SYSTEM_ROOT . '/lib/www/footer.php');
+	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
@@ -73,7 +73,7 @@ if ( ! $id ) error("Missing or invalid category id");
 
 $title = "Category: " .htmlspecialchars(@$id);
 
-require(SYSTEM_ROOT . '/lib/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 $data = $DB->q('TUPLE SELECT * FROM team_category WHERE categoryid = %s', $id);
 
@@ -117,4 +117,4 @@ if ( $teams->count() == 0 ) {
 	echo "</tbody>\n</table>\n\n";
 }
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

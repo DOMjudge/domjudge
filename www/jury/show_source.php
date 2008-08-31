@@ -59,7 +59,7 @@ if ( include_highlighter() ) {
 
 
 $title = 'Source: ' . htmlspecialchars($sourcefile);
-require(SYSTEM_ROOT . '/lib/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 if ( $oldsource ) {
 	echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
@@ -153,4 +153,4 @@ if ( $oldsource ) {
 		htmlspecialchars($difftext) . "</pre>\n\n";
 }
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

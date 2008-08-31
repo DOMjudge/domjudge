@@ -27,7 +27,7 @@ $ncorrect = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
                     WHERE j.valid = 1 AND j.result = "correct" AND s.cid = %i
                     GROUP BY teamid', $cid);
 
-require(SYSTEM_ROOT . '/lib/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Teams</h1>\n\n";
 
@@ -106,4 +106,4 @@ if ( IS_ADMIN ) {
 	echo "<p>" .addLink('team') . "</p>\n";
 }
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');

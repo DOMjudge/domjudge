@@ -30,7 +30,7 @@ $referrer      = @$_POST['referrer'];
 
 if ( empty($data) ) error ("No data.");
 
-require(SYSTEM_ROOT . '/lib/www/checkers.jury.php');
+require(LIBWWWDIR . '/checkers.jury.php');
 
 if ( ! isset($_POST['cancel']) ) {
 	foreach ($data as $i => $itemdata ) {

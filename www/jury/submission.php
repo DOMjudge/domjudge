@@ -53,7 +53,7 @@ if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
 $lastverifier = @$_COOKIE['domjudge_lastverifier'];
 
 require('init.php');
-require_once(SYSTEM_ROOT . '/lib/www/forms.php');
+require_once(LIBWWWDIR . '/forms.php');
 
 $title = 'Submission s'.@$id;
 
@@ -71,7 +71,7 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
 
 if ( ! $submdata ) error ("Missing submission data");
 
-require(SYSTEM_ROOT . '/lib/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Submission s".$id;
 if ( $submdata['valid'] ) {
@@ -303,4 +303,4 @@ if ( isset($jid) )  {
 
 // We're done!
 
-require(SYSTEM_ROOT . '/lib/www/footer.php');
+require(LIBWWWDIR . '/footer.php');
