@@ -23,6 +23,19 @@ DocumentRoot @jurywww_path@
 Options Indexes FollowSymlinks
 DirectoryIndex index.php
 AllowOverride All
+
+# this is some evil php function that ruins everything
+php_flag magic_quotes_gpc off
+php_flag magic_quotes_runtime off
+</Directory>
+
+<Directory @jurywww_path@/jury>
+AuthName "Jury Only Area"
+AuthType Basic
+Require valid-user
+AuthType Basic
+AuthName "DOMjudge"
+AuthUserFile @juryetc_path@/jurymembers.htpasswd
 </Directory>
 
 # vim: syntax=apachestyle
