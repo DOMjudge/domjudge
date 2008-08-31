@@ -6,13 +6,12 @@ require('lib.database.php');
 function setup_database_connection($privlevel)
 {
 
-	if (!defined('DBPRIVLEVEL')) {
-		user_error("Privilege level required",
+	$credentials = @file( WWWETC_PATH . '/database-credentials.csv' );
+	if (!$credentials) {
+		user_error("Cannot find database-credentials file in ".WWWETC_PATH,
 			E_USER_ERROR);
 		exit();
 	}
-
-	$credentials = file( WWWETC_PATH . '/database-credentials.csv' );
 
 	global $DB;
 
@@ -22,8 +21,9 @@ function setup_database_connection($privlevel)
 		exit();
 	}
 
-	for ($credentials as $credential) {
-		list ($priv, $host, $db, $user, $pass) = explode(':', trim($credential)));
+	foreach ($credentials as $credential) {
+		list ($priv, $host, $db, $user, $pass) =
+			explode(':', trim($credential));
 		if ($priv != $privlevel) continue;
 
 		$DB = new db ($db, $host, $user, $pass);
