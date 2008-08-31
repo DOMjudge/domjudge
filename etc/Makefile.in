@@ -16,6 +16,7 @@ apache.conf: apache.conf.in
 install-jury:
 	install -d @juryconf_path@
 	install apache.conf @juryconf_path@
+	install domserver-config.php @juryconf_path@
 	install -m go= dbpasswords.secret @juryconf_path@
 
 permissions-jury:
