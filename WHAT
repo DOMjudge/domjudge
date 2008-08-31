@@ -1,0 +1,20 @@
+COMMON:
+- genpasswords
+  requirements:
+  - secret random generation
+  - readable by:
+    - webinterface: jury/public/team (php)
+    - judgehosts (php)
+    - sql creation stuff (shell?)
+
+DB:
+- createdatabase and users
+- createtables
+
+WEB
+- JURY
+- PUBLIC
+- TEAM
+
+SUBM:
+
