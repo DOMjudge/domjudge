@@ -47,7 +47,7 @@
 # This is a bash script because of the traps it uses.
 
 # Global configuration
-. "`dirname $0`/../etc/config.sh"
+. "$DJ_JUDGEHOSTETC_PATH/config.sh"
 
 # Exit automatically, whenever a simple command fails and trap it:
 set -e

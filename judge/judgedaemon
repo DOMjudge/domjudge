@@ -11,6 +11,7 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
+define('JUDGEHOSTETC_PATH', @JUDGEHOSTETC_PATH@);
 require ('../etc/config.php');
 
 $waittime = 5;
@@ -44,6 +45,9 @@ if ( ! $row ) {
 $tempdirpath = JUDGEDIR . "/$myhost";
 system("mkdir -p $tempdirpath/testcase", $retval);
 if ( $retval != 0 ) error("Could not create $tempdirpath");
+
+// Set environment variables for passing configuration to called programs
+putenv('DJ_JUDGEHOSTETC_PATH='.JUDGEHOSTETC_PATH);
 
 $waiting = FALSE;
 $active = TRUE;
