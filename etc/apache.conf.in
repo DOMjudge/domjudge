@@ -4,17 +4,17 @@
 # Use this VirtualHost block if you want DOMjudge to live in
 # the root of your webserver. See the Apache documentation for
 # virtualhosts for more information.
-NameVirtualHost *
-<VirtualHost *>
-ServerName @domserver_hostname@
-DocumentRoot @domserverwww_path@
-</VirtualHost>
+#NameVirtualHost *
+#<VirtualHost *>
+#ServerName _default_
+#DocumentRoot @domserverwww_path@
+#</VirtualHost>
 
 # Alternatively, use this instead of the VirtualHost above when you don't
 # want DOMjudge in the root, but only occupy a subdir, like this:
 # www.example.com/domjudge
 
-#Alias /domjudge @domserverwww_path@
+Alias /domjudge @domserverwww_path@
 
 
 # This section applies to both options above.
