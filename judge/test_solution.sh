@@ -46,9 +46,6 @@
 #
 # This is a bash script because of the traps it uses.
 
-# Global configuration
-. "$DJ_JUDGEHOST_ETCDIR/judgehost-config.sh"
-
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
 trap error ERR
@@ -71,11 +68,14 @@ cleanexit ()
 	logmsg $LOG_DEBUG "exiting"
 }
 
+# Global configuration
+. "$DJ_ETCDIR/judgehost-config.sh"
+
 # Error and logging functions
-. "$DJ_JUDGEHOST_LIBDIR/lib.error.sh"
+. "$DJ_LIBDIR/lib.error.sh"
 
 # Logging:
-LOGFILE="$LOGDIR/judge.`hostname --short`.log"
+LOGFILE="$DJ_LOGDIR/judge.`hostname --short`.log"
 LOGLEVEL=$LOG_DEBUG
 PROGNAME="`basename $0`"
 
@@ -89,9 +89,9 @@ else
 fi
 
 # Location of scripts/programs:
-SCRIPTDIR="$DJ_JUDGEHOST_LIBJUDGEDIR"
-STATICSHELL="$DJ_JUDGEHOST_BINDIR/bin/sh-static"
-RUNGUARD="$DJ_JUDGEHOST_BINDIR/bin/runguard"
+SCRIPTDIR="$DJ_LIBJUDGEDIR"
+STATICSHELL="$DJ_BINDIR/sh-static"
+RUNGUARD="$DJ_BINDIR/runguard"
 
 logmsg $LOG_INFO "starting '$0', PID = $$"
 
@@ -206,7 +206,7 @@ chmod a+rx "$RUN_SCRIPT" bin/sh
 # Execute an optional chroot setup script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
 	logmsg $LOG_DEBUG "executing chroot script: '$CHROOT_SCRIPT start'"
-	$CHROOT_SCRIPT start
+	$SCRIPTDIR/$CHROOT_SCRIPT start
 fi
 
 logmsg $LOG_DEBUG "making a fifo-buffer link to /dev/null"
@@ -227,7 +227,7 @@ exitcode=$?
 # Execute an optional chroot destroy script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
 	logmsg $LOG_DEBUG "executing chroot script: '$CHROOT_SCRIPT stop'"
-	$CHROOT_SCRIPT stop
+	$SCRIPTDIR/$CHROOT_SCRIPT stop
 fi
 
 # Check for still running processes (first wait for all exiting processes):

@@ -15,10 +15,12 @@ require('@judgehost_etcdir@/judgehost-static.php');
 require(ETCDIR . '/judgehost-config.php');
 
 // Set environment variables for passing path configuration to called programs
-putenv('DJ_JUDGEHOST_ETCDIR=' . ETCDIR);
-putenv('DJ_JUDGEHOST_BINDIR=' . BINDIR);
-putenv('DJ_JUDGEHOST_LIBDIR=' . LIBDIR);
-putenv('DJ_JUDGEHOST_LIBJUDGEDIR=' . LIBJUDGEDIR);
+putenv('DJ_BINDIR='      . BINDIR);
+putenv('DJ_ETCDIR='      . ETCDIR);
+putenv('DJ_JUDGEDIR='    . JUDGEDIR);
+putenv('DJ_LIBDIR='      . LIBDIR);
+putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
+putenv('DJ_LOGDIR='      . LOGDIR);
 
 $waittime = 5;
 
@@ -33,6 +35,7 @@ setup_database_connection('jury');
 
 $verbose = LOG_INFO;
 
+/* Temporarily disabled due to config overhaul: passing RUNUSER config needs fix
 system("pgrep -u ".RUNUSER, $retval);
 if ($retval == 0) {
 	error("Still some processes by ".RUNUSER." found, aborting");
@@ -40,6 +43,7 @@ if ($retval == 0) {
 if ($retval != 1) {
 	error("Error while checking processes for user " . RUNUSER);
 }
+*/
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
@@ -230,7 +234,7 @@ while ( TRUE ) {
 	}
 
 	// do the actual compile-run-test
-	system("./test_solution.sh " .
+	system(LIBJUDGEDIR . "/test_solution.sh " .
 			"$tempsrcfile $row[langid] " .
 			"$tempdirpath/testcase/testcase.input." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_input'] . ' ' .
 			"$tempdirpath/testcase/testcase.output." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_output'] . ' ' .
