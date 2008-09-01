@@ -68,7 +68,7 @@ A global overview of the features that DOMjudge provides:
 This is a (rough) list of the requirements for DOMjudge.
 
 <itemize>
-<item>At least one Linux-PC with local root access
+<item>At least one machine running Linux, with local root access
 <item>Apache web server with PHP (4.3.2 or newer) and PHP-command line interface
 <item>MySQL database server version 4.1.0 or newer
 <item>Compilers for the languages you want to support
