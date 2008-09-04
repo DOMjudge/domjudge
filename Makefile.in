@@ -44,8 +44,8 @@ SUBDIRS=bin doc etc judge lib sql submit www test-programs test-sources
 
 submitclient:      SUBDIRS=submit
 docs:              SUBDIRS=doc
-domserver:         SUBDIRS=etc
-install-domserver: SUBDIRS=etc lib www
+domserver:         SUBDIRS=etc submit
+install-domserver: SUBDIRS=etc lib submit www
 judgehost:         SUBDIRS=bin etc judge
 install-judgehost: SUBDIRS=bin etc judge lib
 
