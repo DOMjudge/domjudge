@@ -33,6 +33,9 @@ using namespace std;
 /* System/site specific static config (paths, etc.) */
 #include "../etc/domserver-static.h"
 
+/* and config stuff that should be non-compile-time */
+#include "../etc/domserver-config.h"
+
 /* These defines are needed in 'version' and 'logmsg' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
 #define PROGRAM "submitdaemon"
@@ -412,9 +415,9 @@ int handle_client()
 			senderror(client_fd,0,"illegal character '%c' in filename",filename[i]);
 	}
 
-	fromfile = allocstr("%s/%s",USERSUBMITDIR,filename.c_str());
+	fromfile = allocstr("%s/%s",USERDIR,filename.c_str());
 	
-	tempfile = allocstr("%s/cmdsubmit.%s.%s.XXXXXX.%s",INCOMINGDIR,
+	tempfile = allocstr("%s/cmdsubmit.%s.%s.XXXXXX.%s",TMPDIR,
 	                    problem.c_str(),team.c_str(),language.c_str());
 	
 	if ( mkstemps(tempfile,language.length()+1)<0 || strlen(tempfile)==0 ) {
