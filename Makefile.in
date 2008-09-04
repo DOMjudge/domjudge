@@ -37,7 +37,7 @@ judgehost:
 install-judgehost: judgehost
 
 # List all targets that exist in subdirs too, and optionally list in
-# which subdirs they are overriding default.
+# which subdirs they are, overriding default SUBDIRS list.
 REC_TARGETS=domserver install-domserver judgehost install-judgehost \
             submitclient docs clean distclean
 SUBDIRS=bin doc etc judge lib sql submit www test-programs test-sources
@@ -68,4 +68,4 @@ judgehost-create-dirs:
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 
-.PHONY: team doc
+.PHONY: team doc domserver-create-dirs judgehost-create-dirs
