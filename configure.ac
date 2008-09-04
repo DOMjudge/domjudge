@@ -102,6 +102,7 @@ AC_CONFIG_FILES([
 	etc/Makefile
 	judge/Makefile
 	lib/Makefile
+	submit/Makefile
 	www/Makefile
 
 	www/configure.php

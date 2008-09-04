@@ -28,7 +28,9 @@ CURLDEF     = -DLIBCURL=$(LIBCURL)
 CURLFLAGS   = $(CURLDEF) -I$(CURLINCLUDE) $(CURLLIBS)
 endif
 
-default: build
+domserver: submitdaemon
+
+submitclient: submit$(EXECSUFFIX)
 
 build: $(TARGETS)
 
@@ -44,6 +46,10 @@ $(SUBMITCOMMONOBJ): %$(OBJSUFFIX): %.cc %.h $(LIBHEADERS)
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 submit$(EXECSUFFIX): $(CURLSTATIC)
+
+install-domserver:
+	cp -a submitdaemon @domserver_bindir@
+	chmod a+x @domserver_bindir@/submitdaemon
 
 clean:
 	-rm -f $(TARGETS) $(SUBMITCOMMONOBJ)
