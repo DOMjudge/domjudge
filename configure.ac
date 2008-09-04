@@ -108,6 +108,7 @@ AC_CONFIG_FILES([
 	www/configure.php
 	judge/judgedaemon
 	etc/domserver-static.php
+	etc/domserver-static.h
 	etc/judgehost-static.php
 	etc/judgehost-config.h
 	])
