@@ -2,6 +2,8 @@
  *
  * This allocates stack memory and should fail with RUN-ERROR due to
  * running out of memory, which is restricted.
+ *
+ * @EXPECTED_RESULTS@: RUN-ERROR
  */
 
 #include <stdio.h>

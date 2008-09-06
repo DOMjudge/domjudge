@@ -4,6 +4,8 @@
  * is restricted. The amount allocated may seem to be half of the
  * available, but that is because (GNU implementation) STL vectors by
  * default allocate double the amount of memory requested.
+ *
+ * @EXPECTED_RESULTS@: RUN-ERROR
  */
 
 using namespace std;

@@ -1,6 +1,8 @@
 /* $Id$
  *
  * This should fail with a COMPILER-ERROR
+ *
+ * @EXPECTED_RESULTS@: COMPILER-ERROR
  */
 
 #include <stdio.h>

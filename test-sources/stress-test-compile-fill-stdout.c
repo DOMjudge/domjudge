@@ -12,6 +12,8 @@
  *
  * This program is valid ANSI C and should in principle compile in a
  * very, very long time without any errors, but a lot of warnings.
+ *
+ * @EXPECTED_RESULTS@: COMPILER-ERROR
  */
 #endif
 #warning "This message will fill stdout..."

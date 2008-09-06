@@ -5,6 +5,10 @@ include $(TOPDIR)/Makefile.global
 
 check: test-normal test-fltcmp
 
+verify:
+	chmod a+x check-judgings
+	./check-judgings
+
 test-normal:
 	@echo "Submitting normal test sources..." ; \
 	for i in test-* ; do \
@@ -29,4 +33,4 @@ test-stress:
 		sleep 1 ; \
 	done
 
-.PHONY: test-normal test-fltcmp test-stress
+.PHONY: test-normal test-fltcmp test-stress verify

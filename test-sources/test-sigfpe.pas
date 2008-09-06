@@ -1,6 +1,8 @@
 (* $Id$
  *
  * This should fail with RUN-ERROR due to a segmentation fault.
+ *
+ * @EXPECTED_RESULTS@: RUN-ERROR
  *)
 
 program sigfpe(input, output);

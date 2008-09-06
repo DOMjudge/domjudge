@@ -3,6 +3,8 @@
  * Output answers slowly, should give TIMELIMIT with some output
  * However it doesn't give output: GNU C seems not to flush buffers
  * when it receives a signal.
+ *
+ * @EXPECTED_RESULTS@: TIMELIMIT,WRONG-ANSWER
  */
 
 #include <stdio.h>

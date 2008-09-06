@@ -9,6 +9,8 @@
  * should be disqualified anyways. Furthermore only this judging
  * daemon is affected and can be restarted easily. It aborts on
  * purpose to force checking of the reasons of a crash.
+ *
+ * @EXPECTED_RESULTS@: NONE-JUDGEDAEMON-CRASHES
  */
 
 #include <unistd.h>

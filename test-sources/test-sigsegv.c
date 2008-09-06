@@ -2,6 +2,8 @@
  *
  * This should fail with RUN-ERROR due to a segmentation fault,
  * giving an exitcode 139.
+ *
+ * @EXPECTED_RESULTS@: RUN-ERROR
  */
 
 int main()

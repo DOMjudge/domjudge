@@ -1,0 +1,73 @@
+#!/usr/bin/php -q
+<?php
+/**
+ * This file can be run and will automatically verify results of
+ * submitted test-sources in this directory. Note that it will only
+ * verify those sources which have a unique expected result; there are
+ * a few sources which have results depending on configuration.
+ *
+ * $Id$
+ */
+
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+
+require('@domserver_etcdir@/domserver-static.php');
+
+define('SCRIPT_ID', 'check-judgings');
+define('LOGFILE', LOGDIR.'/check.log');
+
+require(LIBDIR . '/init.php');
+
+setup_database_connection('jury');
+
+logmsg(LOG_NOTICE,"started automatic judging checker");
+
+$nchecked = 0;
+$nverified = 0;
+$nmanual = 0;
+$nerrors = 0;
+
+$matchstring = '@EXPECTED_RESULTS@: ';
+
+$res = $DB->q('SELECT s.*, j.judgingid, j.result, j.verified, j.verifier
+               FROM submission s
+               LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
+               WHERE s.probid = \'hello\' OR s.probid = \'fltcmp\'');
+
+while( $row = $res->next() ) {
+	if ( $pos = strpos($row['sourcecode'],$matchstring) ) {
+		$nchecked++;
+		
+		$beginpos = $pos + strlen($matchstring);
+		$endpos = strpos($row['sourcecode'],"\n",$beginpos);
+		$results = explode(',',substr($row['sourcecode'],$beginpos,$endpos-$beginpos));
+
+		$sid = $row['submitid'];
+		$result = strtoupper($row['result']);
+		
+		if ( !in_array($result,$results) ) {
+			logmsg(LOG_WARNING,"submission $sid has unexpected result '$result'");
+			$nerrors++;
+		} else if ( count($results)>1 ) {
+			logmsg(LOG_NOTICE,"submission $sid has multiple possible outcomes, " .
+			       "check manually");
+			$nmanual++;
+		} else {
+			// Judging result is as expected, set judging to verified:
+			if ( $row['verified']!=1 ) {
+				$DB->q('UPDATE judging SET verified = 1, verifier = \'auto-verifier\'
+				        WHERE judgingid = %i', $row['judgingid']);
+				logmsg(LOG_INFO,"verified submission $sid as '$result'");
+				$nverified++;
+			}
+		}
+	}
+}
+
+logmsg(LOG_NOTICE,"finished: checked " . $res->count() . " submissions: " .
+	   "$nverified automatically verified, $nmanual to check manually, " .
+	   "$nerrors unexpected results");
+
+if ( $nerrors!=0 ) exit(1);
+
+exit(0);

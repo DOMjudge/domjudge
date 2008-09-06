@@ -6,7 +6,10 @@
  *
  * The result should be a TIMELIMIT and the running forked programs
  * killed by test_solution.
+ *
+ * @EXPECTED_RESULTS@: TIMELIMIT
  */
+
 #include <unistd.h>
 
 int main()

@@ -10,6 +10,8 @@
  *
  * This program is valid ANSI C and should in principle compile in a
  * very, very long time without any errors or warnings.
+ *
+ * @EXPECTED_RESULTS@: COMPILER-ERROR
  */
 #endif
 #ifndef A1

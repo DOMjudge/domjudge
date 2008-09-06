@@ -2,6 +2,8 @@
  *
  * This should give WRONG ANSWER on the problem 'fltcmp' with 4
  * (precision) errors on lines 2,3,4,5.
+ *
+ * @EXPECTED_RESULTS@: WRONG-ANSWER
  */
 
 #include <stdio.h>

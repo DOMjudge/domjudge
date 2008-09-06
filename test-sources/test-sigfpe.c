@@ -2,6 +2,8 @@
  *
  * This should fail with RUN-ERROR due to integer division by zero,
  * giving an exitcode 136.
+ *
+ * @EXPECTED_RESULTS@: RUN-ERROR
  */
 
 #include <stdio.h>
