@@ -2,7 +2,7 @@ AC_INIT([domjudge], [UNKNOWN], [domjudge-devel@lists.A-Eskwadraat.nl])
 AC_CONFIG_HEADERS([etc/config.h])
 AC_CONFIG_SRCDIR([Makefile.global])
 
-AC_ARG_ENABLE(fhs,AC_HELP_STRING([--enable-fhs],[use FHS directories]))
+AC_ARG_ENABLE(fhs,AS_HELP_STRING([--enable-fhs],[use FHS directories]))
 
 if test "x$prefix" = xNONE && test "x$enable_fhs" = x; then
 	AC_MSG_ERROR([Use either --prefix=/installation/path or --enable-fhs])
