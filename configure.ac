@@ -13,7 +13,7 @@ fi
 
 AC_DEFUN([AC_PATH], [
 	AC_ARG_WITH($1,
-		AS_HELP_STRING([--with-$1],[$2 (default: $3)]),
+		AC_HELP_STRING([--with-$1],[$2 (default: $3)]),
 		[AC_SUBST($1, $withval)],
 		[AC_SUBST($1, $3)])
 	])
@@ -96,6 +96,41 @@ AC_DEFINE_UNQUOTED(SUBMITCLIENT_METHOD, 0, [foo])
 ###])
 ###AC_SUBST(WWWETC_PATH, $wwwetc)
 # }}}
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_CPP
+#AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+
+# Checks for libraries.
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h termios.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_HEADER_TIME
+AC_HEADER_STDBOOL
+
+# Checks for library functions.
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_FORK
+AC_PROG_GCC_TRADITIONAL
+AC_FUNC_MALLOC
+AC_FUNC_SETVBUF_REVERSED
+AC_TYPE_SIGNAL
+AC_FUNC_STAT
+AC_FUNC_STRFTIME
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS([alarm dup2 getcwd gettimeofday memset mkdir realpath setenv socket strchr strdup strerror strncasecmp strrchr strstr strtol])
 
 AC_CONFIG_FILES([
 	Makefile
