@@ -24,6 +24,7 @@ default:
 	@echo " - make install-db"
 	@echo " - make install-submitclient"
 	@echo or
+	@echo " - make test"
 	@echo " - make clean"
 	@echo " - make distclean"
 	@exit 1
@@ -39,7 +40,7 @@ install-judgehost: judgehost
 # List all targets that exist in subdirs too, and optionally list in
 # which subdirs they are, overriding default SUBDIRS list.
 REC_TARGETS=domserver install-domserver judgehost install-judgehost \
-            submitclient docs clean distclean
+            submitclient docs clean distclean test
 #SUBDIRS=bin doc etc judge lib sql submit www test-programs test-sources
 SUBDIRS=bin doc etc judge lib submit www test-programs test-sources
 
@@ -49,6 +50,7 @@ domserver:         SUBDIRS=etc submit
 install-domserver: SUBDIRS=etc lib submit www
 judgehost:         SUBDIRS=bin etc judge
 install-judgehost: SUBDIRS=bin etc judge lib
+test:              SUBDIRS=tests
 
 install-domserver: domserver-create-dirs
 install-judgehost: judgehost-create-dirs

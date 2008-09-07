@@ -15,7 +15,7 @@ else
 fi
 
 if [ -x /usr/bin/checkbashisms ]; then
-	checkbashisms `grep -rsl "#\!.*/bin/sh" ..|grep -v \.svn`
+	checkbashisms `grep -rsl "#\!.*/bin/sh" ..|grep -v \.svn|grep -v '^\.\./config'|grep -v '^\.\./autom4te'`
 else
 	echo "checkbashisms not found in /usr/bin/checkbashisms"
 fi

@@ -1,0 +1,3 @@
+test:
+	./syntax
+	./tests
