@@ -1,4 +1,4 @@
-AC_INIT([domjudge], [UNKNOWN], [domjudge@A-Eskwadraat.nl])
+AC_INIT([domjudge], [UNKNOWN], [domjudge-devel@lists.A-Eskwadraat.nl])
 AC_CONFIG_HEADERS([etc/config.h])
 AC_CONFIG_SRCDIR([Makefile.global])
 
