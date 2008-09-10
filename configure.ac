@@ -39,7 +39,6 @@ AC_PATH(domserver_libdir,      [DIR], [$domserver_root/lib])
 AC_PATH(domserver_libwwwdir,   [DIR], [$domserver_root/lib/www])
 AC_PATH(domserver_logdir,      [DIR], [$domserver_root/log])
 AC_PATH(domserver_tmpdir,      [DIR], [$domserver_root/tmp])
-AC_PATH(domserver_wwwtmp,      [DIR], [$domserver_root/wwwtmp])
 
 AC_PATH(judgehost_root,        [DIR], [$prefix/judgehost])
 AC_PATH(judgehost_bindir,      [DIR], [$judgehost_root/bin])
@@ -54,47 +53,31 @@ AC_PATH(judgehost_logdir,      [DIR], [$judgehost_root/log])
 # }}}
 
 # {{{ submitclient
-AC_ARG_WITH([],[],[],[])
-AC_ARG_WITH([],[SUBMIT CLIENT],[],[])
 
-with_submitclient_protocols=http,dolstra
-AC_ARG_WITH(submitclient-protocols,
-[   --with-submitclient-protocols=http,dolstra Protocol list for binary submit
-client.  Supported are 'http' and 'dolstra', the first named will be
-		default],
-[], [])
+def_submitclient_protocols="http,dolstra"
 
-AC_DEFINE_UNQUOTED(SUBMITCLIENT_METHOD, 0, [foo])
+AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--enable-submitclient@<:@=ARG@:>@],
+[enable submit client binary; set ARG to protocol list to support, where the
+first will be default. Supported protocols are in default order 'http,dolstra'.]),
+[
+if test "x$enableval" = xyes ; then
+	submitclient_protocols=$def_submitclient_protocols
+else
+	submitclient_protocols="$enableval"
+fi
+],
+[submitclient_protocols=''])
 
-# }}}
+submitclient_method=0
+case `echo "x$submitclient_protocols" | sed 's/,.*//'` in
+	xdolstra) submitclient_method=1 ;;
+	xhttp)    submitclient_method=2 ;;
+	*)        submitclient_method=0 ;;
+esac
 
-# {{{ crap
-###AC_ARG_WITH(wwwroot,
-###[  --with-wwwroot   Override the wwwroot for website (default: DATAROOTDIR/domjudge/www)]
-###,[
-###	wwwroot=$withval
-###],[
-###	eval wwwroot=$datarootdir/domjudge/www
-###])
-###AC_SUBST(WWWROOT, $wwwroot)
-###
-###AC_ARG_WITH(wwwlib-path,
-###[  --with-wwwlib-path   Override etc-path for website (default: DATAROOTDIR/domjudge)]
-###,[
-###	wwwlib=$withval
-###],[
-###	eval wwwlib=$datarootdir/domjudge
-###])
-###AC_SUBST(WWWLIB_PATH, $wwwlib)
-###
-###AC_ARG_WITH(wwwetc-path,
-###[  --with-wwwetc-path   Override etc-path for website (default: SYSCONFDIR/domjudge)]
-###,[
-###	wwwetc=$withval
-###],[
-###	eval wwwetc=$sysconfdir/domjudge
-###])
-###AC_SUBST(WWWETC_PATH, $wwwetc)
+AC_DEFINE_UNQUOTED(SUBMITCLIENT_METHOD, $submitclient_method,
+[Default submission protocol: 1 = 'dolstra', 2 = 'http'])
+
 # }}}
 
 # Checks for programs.
