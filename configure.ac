@@ -1,4 +1,6 @@
-AC_INIT([domjudge], [UNKNOWN], [domjudge-devel@lists.A-Eskwadraat.nl])
+AC_INIT([DOMjudge],
+        m4_esyscmd([sed -n '1s/^.*version //p' README | tr -d '\n']),
+        [domjudge-devel@lists.A-Eskwadraat.nl])
 AC_CONFIG_HEADERS([etc/config.h])
 AC_CONFIG_SRCDIR([Makefile.global])
 
@@ -18,11 +20,10 @@ AC_DEFUN([AC_PATH], [
 		[AC_SUBST($1, $3)])
 	])
 
-version=`sed -n '3s/^Version //p' ChangeLog`
-if test -z "$version"; then
-	AC_MSG_ERROR([Could not find version on line 3 of changelog])
+if test -z "$PACKAGE_VERSION"; then
+	AC_MSG_ERROR([Could not find version on first line of README file.])
 fi
-AC_SUBST(DOMJUDGE_VERSION, $version)
+AC_SUBST(DOMJUDGE_VERSION, $PACKAGE_VERSION)
 
 # {{{ Domserverstuff (webserver, etc)
 AC_ARG_WITH(domserver-hostname,,AC_SUBST(domserver_hostname,$withval),
