@@ -123,10 +123,9 @@ AC_CONFIG_FILES([
 	lib/Makefile
 	submit/Makefile
 	www/Makefile
+	test-sources/Makefile
 
 	www/configure.php
-	judge/judgedaemon
-	test-sources/check-judgings
 	etc/domserver-static.php
 	etc/domserver-static.h
 	etc/judgehost-static.php
