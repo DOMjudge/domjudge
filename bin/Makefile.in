@@ -14,7 +14,7 @@ runguard: %: %.c $(TOPDIR)/etc/config.h
 judgehost: build
 
 install-judgehost:
-	install -t @judgehost_bindir@ bash-static
+	install -t @judgehost_bindir@ sh-static
 #	install -o root -m u=rwxs,go=rx -t @judgehost_bindir@ runguard
 	install -t @judgehost_bindir@ runguard
 
