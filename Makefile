@@ -38,7 +38,8 @@ install-judgehost: judgehost
 # List all targets that exist in subdirs too, and optionally list in
 # which subdirs they are, overriding default SUBDIRS list.
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            docs install-docs submitclient clean distclean test
+            docs install-docs submitclient clean distclean maintainer-clean \
+            test
 SUBDIRS=bin doc etc judge lib submit www test-programs test-sources
 
 domserver:         SUBDIRS=etc submit
@@ -62,4 +63,10 @@ judgehost-create-dirs:
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 
-.PHONY: domserver-create-dirs judgehost-create-dirs
+maintainer-clean: clean-autoconf
+
+clean-autoconf:
+	-rm -f config.status config.cache config.log \
+		configure paths.mk etc/Makefile
+
+.PHONY: domserver-create-dirs judgehost-create-dirs clean-autoconf

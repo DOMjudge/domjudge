@@ -31,4 +31,7 @@ dist: $(FIGSPNG) $(FIGSEPS)
 clean:
 	-rm -f admin-manual*.html admin-manual.pdf
 
+maintainer-clean:
+	-rm -f $(FIGSPNG) $(FIGSEPS)
+
 .PHONY:

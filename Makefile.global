@@ -36,10 +36,13 @@ clean: clean-backupfiles
 
 distclean: clean
 
+maintainer-clean: distclean
+
 clean-backupfiles:
 	rm -f *~
 
 .PHONY: default build domserver install-domserver judgehost install-judgehost \
-        docs install-docs submitclient check clean clean-backupfiles distclean
+        docs install-docs submitclient check clean clean-backupfiles distclean \
+        maintainer-clean
 
 endif # GLOBALINCLUDED
