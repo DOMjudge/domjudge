@@ -15,9 +15,14 @@ CTANPATH=http://mirror.ctan.org/macros/latex/contrib
 
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = admin team judge
-REC_TARGETS = docs clean dist distclean
+REC_TARGETS = docs install-docs clean dist distclean
 
 default: docs
+
+install-docs: create-docs-dirs
+
+create-docs-dirs:
+	install -d $(domjudge_docdir)
 
 $(LATEXZIPFILES): %.zip:
 ifeq ($(DOWNLOADCTAN),)
@@ -59,4 +64,4 @@ distclean: cleanlatexpackages
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 
-.PHONY: docs cleanlatexpackages
+.PHONY: create-docs-dirs cleanlatexpackages

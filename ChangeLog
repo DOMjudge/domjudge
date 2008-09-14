@@ -9,6 +9,7 @@ Version 3.0.0 - SVN
  - Added script to check results of submitted test-sources.
  - Add support for FHS directory structure installation.
  - Move all configure paths to globally included paths.mk file.
+ - Repair broken documentation build/install system.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------

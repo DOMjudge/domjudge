@@ -17,15 +17,18 @@ default: docs
 
 docs: admin-manual.pdf admin-manual.html
 
+install-docs: docs
+	cp -a -t $(domjudge_docdir) admin-manual.pdf admin-manual*.html $(FIGSPNG)
+
 admin-manual.pdf: admin-manual.sgml ../docs_header.tex $(FIGSPNG) $(FIGSEPS)
 	linuxdoc -B latex -o pdf -P "`cat ../docs_header.tex`" $< >/dev/null
 
-admin-manual.html: admin-manual.sgml ../docs_header.html $(FIGSPNG) $(FIGSEPS)
+admin-manual.html: admin-manual.sgml ../docs_header.html $(FIGSPNG)
 	linuxdoc -B html --header=../docs_header.html $< >/dev/null
 
 dist: $(FIGSPNG) $(FIGSEPS)
 
-distclean:
-	-rm -f admin-manual*.html admin-manual.pdf $(FIGSPNG) $(FIGSEPS)
+clean:
+	-rm -f admin-manual*.html admin-manual.pdf
 
-.PHONY: docs
+.PHONY:

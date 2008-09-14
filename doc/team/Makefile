@@ -3,8 +3,6 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-CONFIGDIR = $(TOPDIR)/etc
-
 TARGETS = team-manual team-manual-NL
 
 TARGETSPDF = $(addsuffix .pdf,$(TARGETS))
@@ -19,11 +17,14 @@ default: docs
 
 docs: pdf
 
+install-docs: $(TARGETSPDF)
+	cp -a -t $(domjudge_docdir) $^
+
 pdf: $(TARGETSPDF)
 # Clean-up generated tex-files afterwards:
 	$(MAKE) texclean
 
-$(TARGETSPDF): %.pdf: %.tex $(CONFIGDIR)/config.tex team-manual-preamble.tex \
+$(TARGETSPDF): %.pdf: %.tex team-manual-preamble.tex \
                             ../examples/example.* ../logos/DOMjudgelogo.* $(LATEXPKGFILES)
 	@NRUNS=3 ; [ "$(QUIET)" ] || printf "Running $$NRUNS passes of '$(LATEX) $(LATEXFLAGS) $<'..." ; \
 	 i=1; \
@@ -35,9 +36,6 @@ $(TARGETSPDF): %.pdf: %.tex $(CONFIGDIR)/config.tex team-manual-preamble.tex \
 		i=$$(($$i+1)); \
 	 done ; [ "$(QUIET)" ] || printf "\n" ;
 
-$(CONFIGDIR)/config.tex:
-	$(MAKE) -C $(CONFIGDIR) config.tex
-
 $(LATEXPKGFILES): ../%:
 	$(MAKE) -C .. $*
 
@@ -48,8 +46,6 @@ texclean:
 	       systemconfig.aux
 
 clean: texclean
-
-distclean:
 	-rm -f $(TARGETSPDF)
 
-.PHONY: docs pdf texclean
+.PHONY: pdf texclean
