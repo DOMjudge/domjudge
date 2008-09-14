@@ -10,8 +10,11 @@
  *
  */
 
-/* System/site specific config */
-#include "../etc/config.h"
+/* System/site specific static config (paths, etc.) */
+#include "../etc/domserver-static.h"
+
+/* and config stuff that should be non-compile-time */
+#include "../etc/domserver-config.h"
 
 /* Check whether default submission method is available; bail out if not */
 #if ( SUBMITCLIENT_METHOD == 1 ) && ( ENABLE_CMDSUBMIT_SERVER != 1 )
@@ -187,8 +190,8 @@ int main(int argc, char **argv)
 	if ( getenv("HOME")==NULL ) error(0,"environment variable `HOME' not set");
 	homedir = getenv("HOME");
 	
-	/* Check for USERSUBMITDIR and create it if nessary */
-	submitdir = allocstr("%s/%s",homedir,USERSUBMITDIR);
+	/* Check for USERDIR and create it if nessary */
+	submitdir = allocstr("%s/%s",homedir,USERDIR);
 	if ( stat(submitdir,&fstats)!=0 ) {
 		if ( mkdir(submitdir,USERPERMDIR)!=0 ) {
 			error(errno,"creating directory `%s'",submitdir);
@@ -466,6 +469,7 @@ void usage()
 	printf(
 "The following options should not be necessary for normal use:\n"
 "\n"
+#if defined( CMDSUBMIT )
 "For TEAM use the login of the account, you want to submit for.\n"
 "The default value for TEAM is taken from the environment variable\n"
 "'TEAM' or your login name if 'TEAM' is not defined.\n"
@@ -476,9 +480,12 @@ void usage()
 "if 'SUBMITSERVER' is not defined; PORT can be used to set an alternative\n"
 "TCP port to connect to.\n"
 "\n"
+#endif
+#if defined( WEBSUBMIT )
 "For URL use the base address of the webinterface without the\n"
 "'team/upload.php' suffix.\n"
 "\n"
+#endif
 "The TEAM/SERVER/PORT and URL options are only used when submitting to the\n"
 "commandline daemon or webinterface respectively. If both are enabled,\n"
 "this can be toggled with the '-w' option, but the default should work fine.\n");
