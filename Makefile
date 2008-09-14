@@ -42,6 +42,7 @@ REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
             test
 SUBDIRS=bin doc etc judge lib submit www test-programs test-sources
 
+build:             SUBDIRS=bin lib judge submit test-sources test-programs
 domserver:         SUBDIRS=etc submit
 install-domserver: SUBDIRS=etc lib submit www
 judgehost:         SUBDIRS=bin etc judge
