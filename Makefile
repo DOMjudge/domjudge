@@ -22,7 +22,6 @@ default:
 	@echo " - make install-domserver"
 	@echo " - make install-judgehost"
 	@echo " - make install-db"
-	@echo " - make install-submitclient"
 	@echo or
 	@echo " - make test"
 	@echo " - make clean"
@@ -37,7 +36,7 @@ install-judgehost: judgehost
 
 # List all targets that exist in subdirs too, and optionally list in
 # which subdirs they are, overriding default SUBDIRS list.
-REC_TARGETS=domserver install-domserver judgehost install-judgehost \
+REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
             submitclient docs clean distclean test
 #SUBDIRS=bin doc etc judge lib sql submit www test-programs test-sources
 SUBDIRS=bin doc etc judge lib submit www test-programs test-sources
@@ -54,14 +53,10 @@ install-domserver: domserver-create-dirs
 install-judgehost: judgehost-create-dirs
 
 domserver-create-dirs:
-	install -d @domserver_etcdir@    @domserver_libdir@ \
-	           @domserver_libwwwdir@ @domserver_wwwdir@ \
-	           @domserver_logdir@    @domserver_tmpdir@
+	install -d $(domserver_dirs)
 
 judgehost-create-dirs:
-	install -d @judgehost_bindir@   @judgehost_etcdir@ \
-	           @judgehost_libdir@   @judgehost_libjudgedir@ \
-	           @judgehost_judgedir@ @judgehost_logdir@
+	install -d $(judgehost_dirs)
 
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done

@@ -7,6 +7,8 @@ Version 3.0.0 - SVN
  - Add missing link to add testcases to a new problem.
  - Fix bug causing segfaults of submitdaemon. (Closes: #2046031)
  - Added script to check results of submitted test-sources.
+ - Add support for FHS directory structure installation.
+ - Move all configure paths to globally included paths.mk file.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------

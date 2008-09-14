@@ -17,11 +17,10 @@ $(LIBOBJECTS):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
 judgedaemon: judgedaemon.in Makefile
-# Do copy to preserve file permissions (executable bit)
-	cp $< $@
 	cat $< | \
-	sed -e "s|@configure_input[@]|Generated from '$<', do not edit by hand.|g" \
-	    -e "s,@judgehost_etcdir[@],@judgehost_etcdir@,g" > $@
+	sed -e "s|@configure_input@|Generated from '$<', do not edit by hand.|g" \
+	    -e "s,@judgehost_etcdir@,$(judgehost_etcdir),g" > $@
+	chmod a+x $@
 
 compare: %: %.c $(LIBOBJECTS) $(LIBHEADERS)
 	$(CC) $(CFLAGS) $(patsubst %.h,,$^) -o $@
@@ -32,11 +31,10 @@ check_float: %: %.c
 	$(STRIP) $@
 
 install-judgehost:
-	cp -a compile_*.sh parse_result.xslt test_solution.sh run \
-	      compare check_diff.sh check_float chroot-startstop.sh \
-	      @judgehost_libjudgedir@
-	cp -a judgedaemon @judgehost_bindir@
-	chmod a+x @judgehost_bindir@/judgedaemon
+	cp -P -t $(judgehost_libjudgedir) \
+		compile_*.sh parse_result.xslt test_solution.sh run \
+		compare check_diff.sh check_float chroot-startstop.sh
+	install -t $(judgehost_bindir) judgedaemon
 
 clean:
 	-rm -f $(TARGETS)

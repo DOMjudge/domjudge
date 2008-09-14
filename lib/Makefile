@@ -22,8 +22,8 @@ clean:
 	rm -f $(OBJECTS)
 
 install-domserver:
-	cp -a *.php @domserver_libdir@
-	cp -a www/*.php @domserver_libwwwdir@
+	cp -a *.php $(domserver_libdir)
+	cp -a www/*.php $(domserver_libwwwdir)
 
 install-judgehost:
-	cp -a *.php *.sh @judgehost_libdir@
+	cp -a *.php *.sh $(judgehost_libdir)

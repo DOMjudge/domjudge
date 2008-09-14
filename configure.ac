@@ -1,10 +1,9 @@
+# Process this file with autoconf to produce a configure script.
 AC_INIT([DOMjudge],
         m4_esyscmd([sed -n '1s/^.*version //p' README | tr -d '\n']),
         [domjudge-devel@lists.A-Eskwadraat.nl])
 AC_CONFIG_HEADERS([etc/config.h])
 AC_CONFIG_SRCDIR([Makefile.global])
-
-AC_ARG_ENABLE(fhs,AS_HELP_STRING([--enable-fhs],[use FHS directories]))
 
 if test "x$prefix" = xNONE && test "x$enable_fhs" = x; then
 	AC_MSG_ERROR([Use either --prefix=/installation/path or --enable-fhs])
@@ -12,13 +11,6 @@ fi
 if test "x$prefix" = xNONE; then
 	prefix=$ac_default_prefix
 fi
-
-AC_DEFUN([AC_PATH], [
-	AC_ARG_WITH($1,
-		AC_HELP_STRING([--with-$1],[$2 (default: $3)]),
-		[AC_SUBST($1, $withval)],
-		[AC_SUBST($1, $3)])
-	])
 
 if test -z "$PACKAGE_VERSION"; then
 	AC_MSG_ERROR([Could not find version on first line of README file.])
@@ -32,24 +24,72 @@ AC_ARG_WITH(domserver-hostname,,AC_SUBST(domserver_hostname,$withval),
 AC_SUBST(domserver_username, domjudge)
 AC_SUBST(webserver_group, www-data)
 
-AC_PATH(domserver_root,        [DIR], [$prefix/domserver])
-AC_PATH(domserver_bindir,      [DIR], [$domserver_root/bin])
-AC_PATH(domserver_etcdir,      [DIR], [$domserver_root/etc])
-AC_PATH(domserver_wwwdir,      [DIR], [$domserver_root/www])
-AC_PATH(domserver_libdir,      [DIR], [$domserver_root/lib])
-AC_PATH(domserver_libwwwdir,   [DIR], [$domserver_root/lib/www])
-AC_PATH(domserver_logdir,      [DIR], [$domserver_root/log])
-AC_PATH(domserver_tmpdir,      [DIR], [$domserver_root/tmp])
-
-AC_PATH(judgehost_root,        [DIR], [$prefix/judgehost])
-AC_PATH(judgehost_bindir,      [DIR], [$judgehost_root/bin])
-AC_PATH(judgehost_etcdir,      [DIR], [$judgehost_root/etc])
-AC_PATH(judgehost_judgedir,    [DIR], [$judgehost_root/judging])
-AC_PATH(judgehost_libdir,      [DIR], [$judgehost_root/lib])
-AC_PATH(judgehost_libjudgedir, [DIR], [$judgehost_root/lib/judge])
-AC_PATH(judgehost_logdir,      [DIR], [$judgehost_root/log])
-
 # domserver bits en/disable: use chmod on $domserver_wwwdir/{domserver,public,team}
+
+# }}}
+
+# {{{ non-FHS directory structure (the default)
+# This is a dirty hack to allow non-standard pathname configuration
+# within the autoconf framework.
+AC_DEFUN([AX_PATH], [
+	AC_ARG_WITH($1,[  --with-$1=DIR   	(default: $2)],
+		[AC_SUBST($1, $withval)],
+		[AC_SUBST($1, $2)])
+	])
+AC_DEFUN([AX_PATH_COMMENT], [
+	AC_ARG_WITH(foo$1,[$2],[],[])
+	])
+
+AX_PATH_COMMENT(1,[Fine tuning of installation when FHS is disabled (the default):])
+AX_PATH(domserver_root,         [$prefix/domserver])
+AX_PATH(judgehost_root,         [$prefix/judgehost])
+AX_PATH(domjudge_docdir,        [$prefix/doc])
+AX_PATH_COMMENT(2,[ ])
+AX_PATH(domserver_bindir,       [$domserver_root/bin])
+AX_PATH(domserver_etcdir,       [$domserver_root/etc])
+AX_PATH(domserver_wwwdir,       [$domserver_root/www])
+AX_PATH(domserver_libdir,       [$domserver_root/lib])
+AX_PATH(domserver_libwwwdir,    [$domserver_root/lib/www])
+AX_PATH(domserver_libsubmitdir, [$domserver_root/lib/submit])
+AX_PATH(domserver_logdir,       [$domserver_root/log])
+AX_PATH(domserver_tmpdir,       [$domserver_root/tmp])
+AX_PATH(domserver_submitdir,    [$domserver_root/submissions])
+AX_PATH_COMMENT(3,[  ])
+AX_PATH(judgehost_bindir,       [$judgehost_root/bin])
+AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
+AX_PATH(judgehost_libdir,       [$judgehost_root/lib])
+AX_PATH(judgehost_libjudgedir,  [$judgehost_root/lib/judge])
+AX_PATH(judgehost_logdir,       [$judgehost_root/log])
+AX_PATH(judgehost_tmpdir,       [$judgehost_root/tmp])
+AX_PATH(judgehost_judgedir,     [$judgehost_root/judgings])
+
+# }}}
+
+# {{{ FHS directory structure
+AC_ARG_ENABLE(fhs,AS_HELP_STRING([--enable-fhs],
+[use FHS directories (default: no), see below under "Optional
+ Packages" for path configuration when FHS is disabled.]))
+
+if test "x$enable_fhs" = xyes ; then
+	AC_SUBST(domserver_bindir,      $bindir)
+	AC_SUBST(domserver_etcdir,      $sysconfdir)
+	AC_SUBST(domserver_wwwdir,      $datadir/${PACKAGE_TARNAME}/www)
+	AC_SUBST(domserver_libdir,      $libdir/${PACKAGE_TARNAME})
+	AC_SUBST(domserver_libsubmitdir,$libdir/${PACKAGE_TARNAME}/submit)
+	AC_SUBST(domserver_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
+	AC_SUBST(domserver_tmpdir,      /tmp)
+	AC_SUBST(domserver_submitdir,   $localstatedir/lib/${PACKAGE_TARNAME}/submissions)
+
+	AC_SUBST(judgehost_bindir,      $bindir)
+	AC_SUBST(judgehost_etcdir,      $sysconfdir)
+	AC_SUBST(judgehost_libdir,      $libdir/${PACKAGE_TARNAME})
+	AC_SUBST(judgehost_libjudgedir, $libdir/${PACKAGE_TARNAME}/judge)
+	AC_SUBST(judgehost_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
+	AC_SUBST(judgehost_tmpdir,      /tmp)
+	AC_SUBST(judgehost_judgedir,    $localstatedir/lib/${PACKAGE_TARNAME}/judgings)
+
+	AC_SUBST(domjudge_docdir,       $docdir)
+fi
 
 # }}}
 
@@ -117,14 +157,9 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([alarm dup2 getcwd gettimeofday memset mkdir realpath setenv socket strchr strdup strerror strncasecmp strrchr strstr strtol])
 
 AC_CONFIG_FILES([
-	Makefile
-	bin/Makefile
+	paths.mk
 	etc/Makefile
 	judge/Makefile
-	lib/Makefile
-	submit/Makefile
-	www/Makefile
-	test-sources/Makefile
 
 	www/configure.php
 	etc/domserver-static.php

@@ -1,0 +1,67 @@
+# Variables (mostly paths) set by configure.
+# This file is globally included via Makefile.global.
+
+# General package variables
+PACKAGE = @PACKAGE_TARNAME@
+VERSION = @PACKAGE_VERSION@
+
+PACKAGE_NAME      = @PACKAGE_NAME@
+PACKAGE_VERSION   = @PACKAGE_VERSION@
+PACKAGE_STRING    = @PACKAGE_STRING@
+PACKAGE_TARNAME   = @PACKAGE_TARNAME@
+PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
+
+# Autoconf prefixes and paths
+prefix         = @prefix@
+exec_prefix    = @exec_prefix@
+
+bindir         = @bindir@
+sbindir        = @sbindir@
+libexecdir     = @libexecdir@
+sysconfdir     = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir  = @localstatedir@
+libdir         = @libdir@
+includedir     = @includedir@
+oldincludedir  = @oldincludedir@
+datarootdir    = @datarootdir@
+datadir        = @datadir@
+infodir        = @infodir@
+localedir      = @localedir@
+mandir         = @mandir@
+docdir         = @docdir@
+htmldir        = @htmldir@
+dvidir         = @dvidir@
+pdfdir         = @pdfdir@
+psdir          = @psdir@
+
+# Installation paths
+domserver_bindir       = @domserver_bindir@
+domserver_etcdir       = @domserver_etcdir@
+domserver_wwwdir       = @domserver_wwwdir@
+domserver_libdir       = @domserver_libdir@
+domserver_libwwwdir    = @domserver_libwwwdir@
+domserver_libsubmitdir = @domserver_libsubmitdir@
+domserver_logdir       = @domserver_logdir@
+domserver_tmpdir       = @domserver_tmpdir@
+domserver_submitdir    = @domserver_submitdir@
+
+judgehost_bindir       = @judgehost_bindir@
+judgehost_etcdir       = @judgehost_etcdir@
+judgehost_libdir       = @judgehost_libdir@
+judgehost_libjudgedir  = @judgehost_libjudgedir@
+judgehost_logdir       = @judgehost_logdir@
+judgehost_tmpdir       = @judgehost_tmpdir@
+judgehost_judgedir     = @judgehost_judgedir@
+
+domjudge_docdir        = @domjudge_docdir@
+
+domserver_dirs = $(domserver_bindir) $(domserver_etcdir) $(domserver_wwwdir) \
+                 $(domserver_libdir) $(domserver_libsubmitdir) \
+                 $(domserver_libwwwdir) $(domserver_logdir) \
+                 $(domserver_tmpdir) $(domserver_submitdir)
+# TODO: remove submitdir when dolstra protocol disabled?
+
+judgehost_dirs = $(judgehost_bindir) $(judgehost_etcdir) $(judgehost_libdir) \
+                 $(judgehost_libjudgedir) $(judgehost_logdir) \
+                 $(judgehost_tmpdir) $(judgehost_judgedir)

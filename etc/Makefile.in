@@ -14,21 +14,20 @@ dbpasswords.secret:
 apache.conf: apache.conf.in Makefile
 	cat $< | \
 	sed -e "s|@configure_input[@]|Generated from '$<', do not edit by hand.|g" \
-	    -e "s,@domserver_wwwdir[@],@domserver_wwwdir@,g" \
-	    -e "s,@domserver_etcdir[@],@domserver_etcdir@,g" \
+	    -e "s,@domserver_wwwdir[@],$(domserver_wwwdir),g" \
+	    -e "s,@domserver_etcdir[@],$(domserver_etcdir),g" \
 	    -e "s,@domserver_hostname[@],@domserver_hostname@,g" > $@
 
 install-domserver:
-	install -d @domserver_etcdir@
-	install -t @domserver_etcdir@ apache.conf domserver-static.php domserver-config.php
-	install -m u=rw,go= dbpasswords.secret @domserver_etcdir@
+	install -d $(domserver_etcdir)
+	install -t $(domserver_etcdir) apache.conf domserver-static.php domserver-config.php
+	install -m u=rw,go= dbpasswords.secret $(domserver_etcdir)
 
 install-judgehost:
-	install -d @judgehost_etcdir@
-	install -t @judgehost_etcdir@ judgehost-static.php judgehost-config.php judgehost-config.sh
-	install -m u=rw,go= dbpasswords.secret @judgehost_etcdir@
+	install -d $(judgehost_etcdir)
+	install -t $(judgehost_etcdir) judgehost-static.php judgehost-config.php judgehost-config.sh
+	install -m u=rw,go= dbpasswords.secret $(judgehost_etcdir)
 
 permissions-domserver:
-	ensurepermission group @webservergroup@ @domserver_etcdir@/dbpasswords.secret
-	ensurepermission perm g=r,o=            @domserver_etcdir@/dbpasswords.secret
-
+	ensurepermission group $(webservergroup) $(domserver_etcdir)/dbpasswords.secret
+	ensurepermission perm g=r,o=             $(domserver_etcdir)/dbpasswords.secret

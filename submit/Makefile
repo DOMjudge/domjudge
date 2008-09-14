@@ -48,10 +48,9 @@ $(SUBMITCOMMONOBJ): %$(OBJSUFFIX): %.cc %.h $(LIBHEADERS)
 submit$(EXECSUFFIX): $(CURLSTATIC)
 
 install-domserver:
-	install -d @domserver_bindir@ @domserver_libdir@
-	install -m u=rwx,go=rx -t @domserver_bindir@ submitdaemon
-	install -m u=rwx,go=rx -t @domserver_libdir@ submit_copy.sh
-	install -m u=rw,go=r   -t @domserver_libdir@ submit_db.php
+	install -m u=rwx,go=rx -t $(domserver_bindir) submitdaemon
+	install -m u=rwx,go=rx -t $(domserver_libdir) submit_copy.sh
+	install -m u=rw,go=r   -t $(domserver_libdir) submit_db.php
 
 clean:
 	-rm -f $(TARGETS) $(SUBMITCOMMONOBJ)

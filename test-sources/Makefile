@@ -8,11 +8,10 @@ TARGETS = check-judgings
 build: $(TARGETS)
 
 check-judgings: check-judgings.in Makefile
-# Do copy to preserve file permissions (executable bit)
-	cp $< $@
 	cat $< | \
-	sed -e "s|@configure_input[@]|Generated from '$<', do not edit by hand.|g" \
-	    -e "s,@domserver_etcdir[@],@domserver_etcdir@,g" > $@
+	sed -e "s|@configure_input@|Generated from '$<', do not edit by hand.|g" \
+	    -e "s,@domserver_etcdir@,$(domserver_etcdir),g" > $@
+	chmod a+x $@
 
 check: test-normal test-fltcmp
 

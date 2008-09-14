@@ -19,6 +19,9 @@ endif
 # no automatic targets when calling 'make' unless overridden.
 default:
 
+# Include variables set by configure:
+include $(TOPDIR)/paths.mk
+
 # Default C/C++ compiler flags
 CXXFLAGS = -O2 -Wall -fstack-protector -fPIE -pie -Wformat -Wformat-security -I$(TOPDIR)/lib -I$(TOPDIR)/etc
 CFLAGS = $(CXXFLAGS) -lm
@@ -36,7 +39,7 @@ distclean: clean
 clean-backupfiles:
 	rm -f *~
 
-.PHONY: default build domserver domserver-install judgehost judgehost-install \
-        check clean clean-backupfiles distclean submitclient docs
+.PHONY: default build domserver install-domserver judgehost install-judgehost \
+        docs submitclient check clean clean-backupfiles distclean
 
 endif # GLOBALINCLUDED
