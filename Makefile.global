@@ -20,7 +20,9 @@ endif
 default:
 
 # Include variables set by configure:
+ifneq ($(wildcard $(TOPDIR)/paths.mk),)
 include $(TOPDIR)/paths.mk
+endif
 
 # Default C/C++ compiler flags
 CXXFLAGS = -O2 -Wall -fstack-protector -fPIE -pie -Wformat -Wformat-security -I$(TOPDIR)/lib -I$(TOPDIR)/etc

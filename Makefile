@@ -50,6 +50,7 @@ docs:              SUBDIRS=doc
 install-docs:      SUBDIRS=doc
 submitclient:      SUBDIRS=submit
 test:              SUBDIRS=tests
+maintainer-clean:  SUBDIRS=doc
 
 install-domserver: domserver-create-dirs
 install-judgehost: judgehost-create-dirs

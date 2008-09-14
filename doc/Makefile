@@ -15,7 +15,7 @@ CTANPATH=http://mirror.ctan.org/macros/latex/contrib
 
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = admin team judge
-REC_TARGETS = docs install-docs clean dist distclean
+REC_TARGETS = docs install-docs clean dist distclean maintainer-clean
 
 default: docs
 
