@@ -63,9 +63,6 @@ judgehost-create-dirs:
 	           @judgehost_libdir@   @judgehost_libjudgedir@ \
 	           @judgehost_judgedir@ @judgehost_logdir@
 
-# Global dependencies:
-#submitclient: config
-
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 

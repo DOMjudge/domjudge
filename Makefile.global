@@ -29,12 +29,6 @@ ifneq ($(findstring CYGWIN,$(shell uname)),)
 CYGWIN = 1
 endif
 
-# Extra phony target to generate up-to-date config for getdbinfo.
-# Needed because running this in getdbinfo seems broken: the old file
-# contents were being used in that case.
-#fixconfig:
-#	$(MAKE) -C $(TOPDIR)/etc config.sh
-
 clean: clean-backupfiles
 
 distclean: clean
