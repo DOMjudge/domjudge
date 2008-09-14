@@ -229,12 +229,26 @@ void terminate(int sig)
 int userid(char *name)
 {
 	struct passwd *pwd;
-	
+
+	errno = 0; /* per the linux GETPWNAM(3) man-page */
 	pwd = getpwnam(name);
 
-	if ( pwd==NULL ) return -1;
+	if ( pwd==NULL || errno ) return -1;
+
+	return (int) pwd->pw_uid;
+}
+
+inline long readoptarg(const char *desc, long minval, long maxval)
+{
+	long arg;
+	char *ptr;
 	
-	return pwd->pw_uid;
+	arg = strtol(optarg,&ptr,10);
+	if ( errno || *ptr!='\0' || arg<minval || arg>maxval ) {
+		error(errno,"invalid %s specified: `%s'",desc,optarg);
+	}
+
+	return arg;
 }
 
 int main(int argc, char **argv)
@@ -276,22 +290,16 @@ int main(int argc, char **argv)
 			break;
 		case 't': /* time option */
 			use_time = 1;
-			runtime = strtol(optarg,&ptr,10);
-			if ( *ptr!=0 || runtime<=0 ) {
-				error(0,"invalid time specified: `%s'",optarg);
-			}
+			runtime = readoptarg("time",1,LONG_MAX);
 			break;
-		case 'u': /* user option */
+		case 'u': /* user option: uid or string */
 			use_user = 1;
 			runuid = strtol(optarg,&ptr,10);
-			if ( *ptr!=0 ) runuid = userid(optarg);
+			if ( errno || *ptr!='\0' ) runuid = userid(optarg);
 			if ( runuid<0 ) error(0,"invalid username or ID specified: `%s'",optarg);
 			break;
 		case 'm': /* memsize option */
-			memsize = (rlim_t) strtol(optarg,&ptr,10);
-			if ( *ptr!=0 || memsize<=0 ) {
-				error(0,"invalid memory limit specified: `%s'",optarg);
-			}
+			memsize = (rlim_t) readoptarg("memory limit",1,LONG_MAX);
 			/* Convert limit from kB to bytes and check for overflow */
 			if ( memsize!=(memsize*1024)/1024 ) {
 				memsize = RLIM_INFINITY;
@@ -300,10 +308,7 @@ int main(int argc, char **argv)
 			}
 			break;
 		case 'f': /* filesize option */
-			filesize = (rlim_t) strtol(optarg,&ptr,10);
-			if ( *ptr!=0 || filesize<=0 ) {
-				error(0,"invalid filesize limit specified: `%s'",optarg);
-			}
+			filesize = (rlim_t) readoptarg("filesize limit",1,LONG_MAX);
 			/* Convert limit from kB to bytes and check for overflow */
 			if ( filesize!=(filesize*1024)/1024 ) {
 				filesize = RLIM_INFINITY;
@@ -312,10 +317,7 @@ int main(int argc, char **argv)
 			}
 			break;
 		case 'p': /* nproc option */
-			nproc = (rlim_t) strtol(optarg,&ptr,10);
-			if ( *ptr!=0 || nproc<=0 ) {
-				error(0,"invalid process limit specified: `%s'",optarg);
-			}
+			nproc = (rlim_t) readoptarg("process limit",1,LONG_MAX);
 			break;
 		case 'c': /* no-core option */
 			no_coredump = 1;
