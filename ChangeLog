@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.0.0 - SVN
 -------------------
+ - Replace included static bash by dash shell.
  - Revise team manual.
  - Add missing link to add testcases to a new problem.
  - Fix bug causing segfaults of submitdaemon. (Closes: #2046031)
