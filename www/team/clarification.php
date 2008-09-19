@@ -18,8 +18,7 @@ if ( isset($_REQUEST['id']) ) {
 	$req = $DB->q('MAYBETUPLE SELECT * FROM clarification
 	               WHERE cid = %i AND clarid = %i', $cid, $id);
 	if ( ! $req ) error("clarification $id not found");
-	if ( ! ($req['sender']==$login || ($req['sender']==NULL &&
-		($req['recipient']==NULL || $req['recipient']==$login)) ) ) {
+	if ( ! canViewClarification($login, $req) ) {
 		error("Permission denied");
 	}
 	$myrequest = ( $req['sender'] == $login );
