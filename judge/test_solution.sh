@@ -90,7 +90,7 @@ fi
 
 # Location of scripts/programs:
 SCRIPTDIR="$DJ_LIBJUDGEDIR"
-STATICSHELL="$DJ_BINDIR/sh-static"
+STATICSHELL="$DJ_LIBJUDGEDIR/sh-static"
 RUNGUARD="$DJ_BINDIR/runguard"
 
 logmsg $LOG_INFO "starting '$0', PID = $$"
