@@ -30,93 +30,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 if (!@define('INCLUDED_LIB_DATABASE',true)) return;
 
-define('DB_EQ'    , '='        );
-define('DB_NEQ'   , '!='       );
-define('DB_LIKE'  , 'like'     );
-define('DB_CONT'  , 'cont'     );
-define('DB_NLIKE' , 'not like' );
-//define('DB_NCONT' , 'ncont'    );
-define('DB_REGEX' , 'regex'    );
-define('DB_NREGEX', 'not regex');
-
-// Special sentinel for set, because it should always use '=', and never 'is'
-// (e.g. with null)
-define('DB_SET', 'DB_SET');
-
-/******************************************************************************
-*    Helperfunctions
-******************************************************************************/
-
-function db_vw($kolom,$waarde,$mode=NULL)
-{
-	if (!$mode) $mode = DB_EQ; // not in the header because you can also pass
-				// NULL explicitly
-	
-	if ($waarde === NULL) {
-		switch ($mode) {
-			case DB_EQ: $mode = 'is'; break;
-			case DB_NEQ: $mode = 'is not'; break;
-		}
-	}
-
-	// if set, then escape
-	if ($mode === DB_SET) {
-		$mode='=';
-		$waarde = db__val2sql($waarde);
-	// like
-	} elseif ($mode === DB_CONT) {
-		$waarde = db__val2sql((string)$waarde);
-		$waarde = '"%'.substr($waarde,1, -1).'%"';
-		$mode = 'LIKE';
-	// this is also a condition
-	} elseif ( is_array($waarde) ) {
-		$mode = 'in';
-		$waarde = array_map('db__val2sql', $waarde);
-		$waarde = '('. implode(',', $waarde) . ')';
-	// else just escape, because is a condition
-	} else {
-		$waarde = db__val2sql($waarde);
-	}
-
-	return "$kolom $mode $waarde";
-}
-
-function db_and()
-{
-	return db__andor(func_get_args(),'AND','1');
-}
-
-function db_or() 
-{
-	return db__andor(func_get_args(),'OR','00');
-}
-
-/******************************************************************************
-*    Internal functions                                                       *
-******************************************************************************/
-// syntax:
-// [1] db_and( [string cond [, string cond [, string cond [...] ] ] ] )
-// [2] db_and( array conditions )
-// [3] db_and( string column, array values [, string compare_mode])
-// mode: one of DB_EQ (default), DB_NEQ , DB_LIKE
-
-function db__andor($params,$op,$default)
-{
-	// check for case [3]:
-	if (is_array(@$params[1])) {
-		@list ($col,$values,$mode) = $params;
-		if (!$values) return $default;
-		return implode(" $op ", array_map(
-			create_function('$value',
-			"return db_vw('$col',\$value,'$mode');"),$values));
-	}
-	
-	// let args be array-of-arguments, depending on [1] or [2]
-	$args = is_array(@$params[0]) ? $params[0] : $params;
-	return $args ? '('.implode(") $op (",$args).')' : $default;
-}
-
-
 /******************************************************************************
 *    (internal) Connection handling                                           *
 ******************************************************************************/
@@ -397,9 +310,12 @@ class db
 					$query .= substr($part,2);
 					break;
 				case 'S':
-					$query .= implode(', ', array_map(create_function(
-						'$key,$value', 'return db_vw($key, $value,
-						DB_SET);'),array_keys($val),$val));
+					$parts = array();
+					foreach ( $val as $key => $value ) {
+						$parts[] = $key . ' = ' . db__val2sql($value);
+					}
+					$query .= implode(', ', $parts);
+					unset($parts);
 					$query .= substr($part,1);
 					break;
 				case 's':
