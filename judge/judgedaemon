@@ -15,7 +15,7 @@ require ('../etc/config.php');
 
 $waittime = 5;
 
-$myhost = trim(`hostname --short`);
+list($myhost,) = explode('.',trim(`hostname`));
 
 define ('SCRIPT_ID', 'judgedaemon');
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
