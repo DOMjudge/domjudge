@@ -7,9 +7,6 @@ TARGETS = team-manual team-manual-NL
 
 TARGETSPDF = $(addsuffix .pdf,$(TARGETS))
 
-LATEXPACKAGES = svn expdlist
-LATEXPKGFILES = $(addprefix ../,$(addsuffix .sty,$(LATEXPACKAGES)))
-
 LATEX = pdflatex
 LATEXFLAGS = --interaction=errorstopmode
 
@@ -25,7 +22,7 @@ pdf: $(TARGETSPDF)
 	$(MAKE) texclean
 
 $(TARGETSPDF): %.pdf: %.tex team-manual-preamble.tex \
-                            ../examples/example.* ../logos/DOMjudgelogo.* $(LATEXPKGFILES)
+                            ../examples/example.* ../logos/DOMjudgelogo.*
 	@NRUNS=3 ; [ "$(QUIET)" ] || printf "Running $$NRUNS passes of '$(LATEX) $(LATEXFLAGS) $<'..." ; \
 	 i=1; \
 	 while [ $$i -le $$NRUNS ]; do \
@@ -35,9 +32,6 @@ $(TARGETSPDF): %.pdf: %.tex team-manual-preamble.tex \
 		else [ "$(QUIET)" ] || printf " $$i" ; fi ; \
 		i=$$(($$i+1)); \
 	 done ; [ "$(QUIET)" ] || printf "\n" ;
-
-$(LATEXPKGFILES): ../%:
-	$(MAKE) -C .. $*
 
 texclean:
 	-rm -f $(addsuffix .aux,$(TARGETS)) \

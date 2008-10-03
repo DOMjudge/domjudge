@@ -4,11 +4,11 @@ DOMjudge is a system for running a programming contest, like the ACM
 regional and world championship programming contests.
 
 
-Documentation
--------------
+Administrator documentation
+---------------------------
 
 For more information on installation and requirements see the
-documentation under the doc/ directory. Run `make docs` there
+documentation under the doc/admin directory. Run `make` there
 to create HTML and PDF versions of the available documentation.
 
 To get started with the Administrator documentation, this should
@@ -19,6 +19,27 @@ $ make
 
 The documentation is also available online at the DOMjudge homepage:
 http://domjudge.sourceforge.net/#documentation
+
+
+User documentation
+------------------
+
+The doc/ directory also contains documentation for users of DOMjudge,
+namely for jury members (under doc/judge) and teams (under doc/team).
+
+The requirements to build the jury documentation are the same as the
+requirements for building the administrator documentation (linuxdoc,
+make, transfig and LaTeX).
+
+To build the team documentation, DOMjudge has to be properly configured
+first, as parts of the configuration are used in it (e.g. the URL to the
+team interface of DOMjudge).
+
+Additionally, the LaTeX packages `svn` and `expdlist` are also required
+to build the team documentation. These packages can be installed as part
+of LaTeX distributions such as TeX Live. On Debian-like systems, they can
+be installed with:
+$ sudo apt-get install texlive-latex-extra
 
 
 Copyright & Licencing
