@@ -51,7 +51,7 @@ if ( ! isset($_POST['cancel']) ) {
 			$itemdata = $fn($itemdata, $keydata[$i]);
 			if ( count($CHECKER_ERRORS) ) {
 				error("Errors while processing $t " .
-					implode(', ', @$keydata[$i]) . ":\n" .
+					@implode(', ', @$keydata[$i]) . ":\n" .
 					implode(";\n", $CHECKER_ERRORS));
 			}
 
