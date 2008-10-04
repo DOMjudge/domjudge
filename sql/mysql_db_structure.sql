@@ -183,7 +183,7 @@ CREATE TABLE `submission` (
   KEY `probid` (`probid`),
   KEY `langid` (`langid`),
   KEY `judgehost_2` (`judgehost`),
-  CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judging` (`judgehost`),
+  CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`),
   CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`),
   CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`),
   CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`),
@@ -267,5 +267,5 @@ CREATE TABLE `testcase` (
   `description` varchar(255) default NULL COMMENT 'Description of this testcase',
   PRIMARY KEY  (`id`),
   KEY `probid` (`probid`),
-  CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `testcase` (`probid`) ON DELETE CASCADE
+  CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';
