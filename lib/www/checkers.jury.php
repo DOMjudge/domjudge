@@ -61,9 +61,6 @@ function check_problem($data, $keydata = null)
 			(int)$data['timelimit'] != $data['timelimit'] ) {
 		ch_error("Timelimit is not a valid positive integer");
 	}
-	if ( ! isset($data['color']) ) {
-		ch_error("No color specified");
-	}
 	return $data;
 }
 
