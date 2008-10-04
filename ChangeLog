@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 2.2.2 - SVN
 -------------------
+ - Use db values instead of the userinput. (Closes #2144718)
 
 Version 2.2.1 - 31 August 2008
 ------------------------------

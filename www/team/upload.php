@@ -102,6 +102,7 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
                 WHERE extension = %s AND allow_submit = 1', $langext);
 
 if ( ! isset($lang) ) err("Unable to find language '$langext'");
+$langext = $lang['extension'];
 
 echo "<table>\n" .
 	"<tr><td>Problem: </td><td><i>".htmlspecialchars($prob['name'])."</i></td></tr>\n" .
