@@ -189,8 +189,14 @@ foreach(array('input','output') as $inout) {
 	}
 }
 
+$has_errors = $details != '';
+$probs = $DB->q("COLUMN SELECT probid FROM problem WHERE color IS NULL");
+foreach($probs as $probid) {
+       $details .= $probid . ": has no color\n";
+}
+
 result('problems, languages, teams', 'Problems integrity',
-	$details == '' ? 'O':'E',
+	$details == '' ? 'O':($has_errors?'E':'W'),
 	$details);
 
 // LANGUAGES
