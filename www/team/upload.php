@@ -73,6 +73,7 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
                $probid, $cid);
 
 if ( ! isset($prob) ) err("Unable to find problem '$probid'");
+$probid = $prob['probid'];
 
 /* Determine the language */
 $langext = @$_POST['langext'];
@@ -107,7 +108,7 @@ echo "<table>\n" .
 	"<tr><td>Language:</td><td><i>".htmlspecialchars($lang['name'])."</i></td></tr>\n" .
 	"</table>\n";
 
-submit_solution($login, $ip, $probid['probid'], $langext, $_FILES['code']['tmp_name']); 
+submit_solution($login, $ip, $probid, $langext, $_FILES['code']['tmp_name']); 
 
 echo '<div id="uploadstatus">';
 if (NONINTERACTIVE) echo '<!-- noninteractive-upload-successful -->';
