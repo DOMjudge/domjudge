@@ -289,6 +289,7 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 	if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',$team) ) {
 		error("Team '$team' not found in database.");
 	}
+	$team = $teamrow['login'];
 	if( ! compareipaddr($teamrow['ipaddress'],$ip) ) {
 		if ( $teamrow['ipaddress'] == NULL && ! STRICTIPCHECK ) {
 			$hostname = gethostbyaddr($ip);
@@ -316,7 +317,7 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 	$id = $DB->q('RETURNID INSERT INTO submission
 				  (cid, teamid, probid, langid, submittime, sourcecode)
 				  VALUES (%i, %s, %s, %s, %s, %s)',
-				 $cid, $team, $prob, $lang, $now,
+				 $cid, $team, $probid, $lang, $now,
 				 getFileContents($file, false));
 
 	// Log to event table

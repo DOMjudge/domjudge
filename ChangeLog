@@ -12,6 +12,7 @@ Version 3.0.0 - SVN
  - Repair broken documentation build/install system.
  - MySQL table types are now InnoDB. Define foreign key relations
    between tables (Closes: #2144325).
+ - Use db values instead of the userinput. (Closes #2144718)
 
 Version 2.2.0 - 11 August 2008
 ------------------------------

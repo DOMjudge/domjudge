@@ -73,6 +73,7 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
                $probid, $cid);
 
 if ( ! isset($prob) ) err("Unable to find problem '$probid'");
+$probid = $prob['probid'];
 
 /* Determine the language */
 $langext = @$_POST['langext'];
@@ -97,10 +98,11 @@ if ( empty($langext) ) {
 	if ( empty($langext) ) err("Unable to find language for extension '$fileext'");
 }
 
-$lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
+$lang = $DB->q('MAYBETUPLE SELECT langid, name, extension FROM language
                 WHERE extension = %s AND allow_submit = 1', $langext);
 
 if ( ! isset($lang) ) err("Unable to find language '$langext'");
+$langext = $lang['extension'];
 
 echo "<table>\n" .
 	"<tr><td>Problem: </td><td><i>".htmlspecialchars($prob['name'])."</i></td></tr>\n" .
