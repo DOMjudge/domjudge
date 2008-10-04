@@ -6,7 +6,7 @@
  *
  * Does not do any checking on valid parameters (team, problem, etc.)
  * and inserts all validly-named source files for all contests. Using
- * InnoDB tables will provide some basic, foreign key checks.
+ * InnoDB tables will provide foreign key checks.
  *
  * The file modification times are used as submittime, as Unix does
  * not have file creation timestamps. Therefore it is advisable not to

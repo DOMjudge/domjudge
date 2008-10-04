@@ -638,24 +638,12 @@ it. When enabling remote connections, you may want to limit it to only the
 IP's of judgehosts in the MySQL user configuration (or with firewall rules).
 <item>Root password: MySQL does not have a password for the root user
 by default. It's very desirable to set one.
-</itemize>
-
-
-<sect1>MySQL table types
-<p>
-
-DOMjudge has optional transaction support built in: if your MySQL
-table type supports transactions, DOMjudge will make use of it to
-make it even more robust where that would be otherwise impossible.
-The <em>InnoDB</em> table type supports transactions; the default
-<em>MyISAM</em> does not; however, the latter is claimed to have a
-higher performance.
-
-When maximising performance is required, you can
+<item>When maximising performance is required, you can
 consider to use the <em>Memory</em> (formerly <em>Heap</em>) table
 for the scoreboard_public and scoreboard_jury tables. They will be
 lost in case of a full crash, but can be recalculated from the jury
 interface.
+</itemize>
 
 <sect1>Setting up replication or backups
 <p>

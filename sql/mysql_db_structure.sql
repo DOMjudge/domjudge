@@ -22,7 +22,7 @@ CREATE TABLE `clarification` (
   `answered` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),
   KEY `cid` (`cid`,`answered`,`submittime`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Clarification requests by teams and responses by the jury';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Clarification requests by teams and responses by the jury';
 
 -- 
 -- Table structure for table `contest`
@@ -37,7 +37,7 @@ CREATE TABLE `contest` (
   `endtime` datetime NOT NULL COMMENT 'Time after which no more submissions are accepted',
   `unfreezetime` datetime default NULL COMMENT 'Unfreeze a frozen scoreboard at this time',
   PRIMARY KEY  (`cid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';
 
 -- 
 -- Table structure for table `event`
@@ -55,7 +55,7 @@ CREATE TABLE `event` (
   `teamid` varchar(15) default NULL COMMENT 'Team login',
   `description` text NOT NULL COMMENT 'Event description',
   PRIMARY KEY  (`eventid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Log of all events during a contest';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Log of all events during a contest';
 
 -- 
 -- Table structure for table `judgehost`
@@ -66,7 +66,7 @@ CREATE TABLE `judgehost` (
   `active` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Should this host take on judgings?',
   `polltime` datetime default NULL COMMENT 'Time of last poll by autojudger', 
   PRIMARY KEY  (`hostname`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Hostnames of the autojudgers';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Hostnames of the autojudgers';
 
 -- 
 -- Table structure for table `judging`
@@ -89,7 +89,7 @@ CREATE TABLE `judging` (
   `output_error` text COMMENT 'Standard error output of the program',
   PRIMARY KEY  (`judgingid`),
   KEY `submitid` (`submitid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Result of judging a submission';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Result of judging a submission';
 
 -- 
 -- Table structure for table `language`
@@ -103,7 +103,7 @@ CREATE TABLE `language` (
   `allow_judge` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Are submissions in this language judged?',
   `time_factor` float NOT NULL default '1' COMMENT 'Language-specific factor multiplied by problem run times',
   PRIMARY KEY  (`langid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Programming languages in which teams can submit solutions';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Programming languages in which teams can submit solutions';
 
 -- 
 -- Table structure for table `problem`
@@ -120,7 +120,7 @@ CREATE TABLE `problem` (
   `special_compare` varchar(25) default NULL COMMENT 'Script to compare problem and jury output for this problem',
   `color` varchar(25) default NULL COMMENT 'Balloon colour to display on the scoreboard',
   PRIMARY KEY  (`probid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
 
 -- 
 -- Table structure for table `scoreboard_jury`
@@ -136,7 +136,7 @@ CREATE TABLE `scoreboard_jury` (
   `is_correct` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has there been a correct submission?',
   `balloon` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has a balloon been handed out?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (jury version)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (jury version)';
 
 -- 
 -- Table structure for table `scoreboard_public`
@@ -151,7 +151,7 @@ CREATE TABLE `scoreboard_public` (
   `penalty` int(4) unsigned NOT NULL default '0' COMMENT 'Penalty time scored',
   `is_correct` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has there been a correct submission?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (public/team version)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (public/team version)';
 
 -- 
 -- Table structure for table `submission`
@@ -172,7 +172,7 @@ CREATE TABLE `submission` (
   UNIQUE KEY `judgemark` (`judgemark`),
   KEY `teamid` (`cid`,`teamid`),
   KEY `judgehost` (`cid`,`judgehost`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='All incoming submissions';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All incoming submissions';
 
 -- 
 -- Table structure for table `team`
@@ -193,7 +193,7 @@ CREATE TABLE `team` (
   PRIMARY KEY  (`login`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `ipaddress` (`ipaddress`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='All teams participating in the contest';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All teams participating in the contest';
 
 -- 
 -- Table structure for table `team_affiliation`
@@ -205,7 +205,7 @@ CREATE TABLE `team_affiliation` (
   `country` char(2) default NULL COMMENT 'ISO country code',
   `comments` text COMMENT 'Comments',
   PRIMARY KEY  (`affilid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Affilitations for teams (e.g.: university, company)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Affilitations for teams (e.g.: university, company)';
 
 -- 
 -- Table structure for table `team_category`
@@ -219,7 +219,7 @@ CREATE TABLE `team_category` (
   `visible` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Are teams in this category visible?',
   PRIMARY KEY  (`categoryid`),
   KEY `sortorder` (`sortorder`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Categories for teams (e.g.: participants, observers, ...)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Categories for teams (e.g.: participants, observers, ...)';
 
 -- 
 -- Table structure for table `team_unread`
@@ -230,7 +230,7 @@ CREATE TABLE `team_unread` (
   `mesgid` int(4) unsigned NOT NULL default '0' COMMENT 'Clarification ID',
   `type` varchar(25) NOT NULL default 'clarification' COMMENT 'Type of message (now always "clarification")',
   PRIMARY KEY  (`teamid`,`type`,`mesgid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='List of items a team has not viewed yet';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='List of items a team has not viewed yet';
 
 -- 
 -- Table structure for table `testcase`
@@ -246,4 +246,4 @@ CREATE TABLE `testcase` (
   `description` varchar(255) default NULL COMMENT 'Description of this testcase',
   PRIMARY KEY  (`id`),
   KEY `probid` (`probid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';
