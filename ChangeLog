@@ -10,7 +10,8 @@ Version 3.0.0 - SVN
  - Add support for FHS directory structure installation.
  - Move all configure paths to globally included paths.mk file.
  - Repair broken documentation build/install system.
- - MySQL table types are now InnoDB.
+ - MySQL table types are now InnoDB. Define foreign key relations
+   between tables (Closes: #2144325).
 
 Version 2.2.0 - 11 August 2008
 ------------------------------

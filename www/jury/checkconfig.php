@@ -382,7 +382,8 @@ result('submissions and judgings', 'Judging integrity',
 	($details == '' ? 'O':'E'), $details);
 
 
-// REFERENTIAL INTEGRITY
+// REFERENTIAL INTEGRITY. This may be obsolete now that we have defined
+// foreign key relations between our tables.
 
 $details = '';
 foreach ( $RELATIONS as $table => $foreign_keys ) {

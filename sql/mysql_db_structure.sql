@@ -6,10 +6,9 @@
 --
 -- $Id$
 
-
--- 
+--
 -- Table structure for table `clarification`
--- 
+--
 
 CREATE TABLE `clarification` (
   `clarid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
@@ -21,12 +20,13 @@ CREATE TABLE `clarification` (
   `body` text NOT NULL COMMENT 'Clarification text',
   `answered` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),
-  KEY `cid` (`cid`,`answered`,`submittime`)
+  KEY `cid` (`cid`,`answered`,`submittime`),
+  CONSTRAINT `clarification_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Clarification requests by teams and responses by the jury';
 
--- 
+--
 -- Table structure for table `contest`
--- 
+--
 
 CREATE TABLE `contest` (
   `cid` int(4) unsigned NOT NULL auto_increment COMMENT 'Contest ID',
@@ -39,9 +39,9 @@ CREATE TABLE `contest` (
   PRIMARY KEY  (`cid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';
 
--- 
+--
 -- Table structure for table `event`
--- 
+--
 
 CREATE TABLE `event` (
   `eventid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
@@ -57,20 +57,20 @@ CREATE TABLE `event` (
   PRIMARY KEY  (`eventid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Log of all events during a contest';
 
--- 
+--
 -- Table structure for table `judgehost`
--- 
+--
 
 CREATE TABLE `judgehost` (
   `hostname` varchar(50) NOT NULL COMMENT 'Resolvable hostname of judgehost',
   `active` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Should this host take on judgings?',
-  `polltime` datetime default NULL COMMENT 'Time of last poll by autojudger', 
+  `polltime` datetime default NULL COMMENT 'Time of last poll by autojudger',
   PRIMARY KEY  (`hostname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Hostnames of the autojudgers';
 
--- 
+--
 -- Table structure for table `judging`
--- 
+--
 
 CREATE TABLE `judging` (
   `judgingid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
@@ -88,12 +88,17 @@ CREATE TABLE `judging` (
   `output_diff` text COMMENT 'Diffing the program output and testcase output',
   `output_error` text COMMENT 'Standard error output of the program',
   PRIMARY KEY  (`judgingid`),
-  KEY `submitid` (`submitid`)
+  KEY `submitid` (`submitid`),
+  KEY `judgehost` (`judgehost`),
+  KEY `cid` (`cid`),
+  CONSTRAINT `judging_ibfk_9` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`),
+  CONSTRAINT `judging_ibfk_7` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`),
+  CONSTRAINT `judging_ibfk_8` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Result of judging a submission';
 
--- 
+--
 -- Table structure for table `language`
--- 
+--
 
 CREATE TABLE `language` (
   `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
@@ -105,9 +110,9 @@ CREATE TABLE `language` (
   PRIMARY KEY  (`langid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Programming languages in which teams can submit solutions';
 
--- 
+--
 -- Table structure for table `problem`
--- 
+--
 
 CREATE TABLE `problem` (
   `probid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
@@ -119,12 +124,14 @@ CREATE TABLE `problem` (
   `special_run` varchar(25) default NULL COMMENT 'Script to run submissions for this problem',
   `special_compare` varchar(25) default NULL COMMENT 'Script to compare problem and jury output for this problem',
   `color` varchar(25) default NULL COMMENT 'Balloon colour to display on the scoreboard',
-  PRIMARY KEY  (`probid`)
+  PRIMARY KEY  (`probid`),
+  KEY `cid` (`cid`),
+  CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
 
--- 
+--
 -- Table structure for table `scoreboard_jury`
--- 
+--
 
 CREATE TABLE `scoreboard_jury` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
@@ -138,9 +145,9 @@ CREATE TABLE `scoreboard_jury` (
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (jury version)';
 
--- 
+--
 -- Table structure for table `scoreboard_public`
--- 
+--
 
 CREATE TABLE `scoreboard_public` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
@@ -153,9 +160,9 @@ CREATE TABLE `scoreboard_public` (
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (public/team version)';
 
--- 
+--
 -- Table structure for table `submission`
--- 
+--
 
 CREATE TABLE `submission` (
   `submitid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
@@ -166,17 +173,26 @@ CREATE TABLE `submission` (
   `submittime` datetime NOT NULL COMMENT 'Time submitted',
   `sourcecode` mediumblob NOT NULL COMMENT 'Full source code',
   `judgehost` varchar(50) default NULL COMMENT 'Current/last judgehost judging this submission',
-  `judgemark` varchar(255) default NULL COMMENT 'Unique identifier for taking a submission by a judgehost' ,
-  `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'If false ignore this submission in all scoreboard calculations' ,
+  `judgemark` varchar(255) default NULL COMMENT 'Unique identifier for taking a submission by a judgehost',
+  `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'If false ignore this submission in all scoreboard calculations',
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `judgemark` (`judgemark`),
   KEY `teamid` (`cid`,`teamid`),
-  KEY `judgehost` (`cid`,`judgehost`)
+  KEY `judgehost` (`cid`,`judgehost`),
+  KEY `teamid_2` (`teamid`),
+  KEY `probid` (`probid`),
+  KEY `langid` (`langid`),
+  KEY `judgehost_2` (`judgehost`),
+  CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judging` (`judgehost`),
+  CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`),
+  CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`),
+  CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`),
+  CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All incoming submissions';
 
--- 
+--
 -- Table structure for table `team`
--- 
+--
 
 CREATE TABLE `team` (
   `login` varchar(15) NOT NULL COMMENT 'Team login name',
@@ -192,12 +208,16 @@ CREATE TABLE `team` (
   `teampage_first_visited` datetime default NULL COMMENT 'Time of first teampage view',
   PRIMARY KEY  (`login`),
   UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `ipaddress` (`ipaddress`)
+  UNIQUE KEY `ipaddress` (`ipaddress`),
+  KEY `affilid` (`affilid`),
+  KEY `categoryid` (`categoryid`),
+  CONSTRAINT `team_ibfk_2` FOREIGN KEY (`affilid`) REFERENCES `team_affiliation` (`affilid`),
+  CONSTRAINT `team_ibfk_1` FOREIGN KEY (`categoryid`) REFERENCES `team_category` (`categoryid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All teams participating in the contest';
 
--- 
+--
 -- Table structure for table `team_affiliation`
--- 
+--
 
 CREATE TABLE `team_affiliation` (
   `affilid` varchar(10) NOT NULL COMMENT 'Unique ID',
@@ -207,9 +227,9 @@ CREATE TABLE `team_affiliation` (
   PRIMARY KEY  (`affilid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Affilitations for teams (e.g.: university, company)';
 
--- 
+--
 -- Table structure for table `team_category`
--- 
+--
 
 CREATE TABLE `team_category` (
   `categoryid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
@@ -221,20 +241,21 @@ CREATE TABLE `team_category` (
   KEY `sortorder` (`sortorder`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Categories for teams (e.g.: participants, observers, ...)';
 
--- 
+--
 -- Table structure for table `team_unread`
--- 
+--
 
 CREATE TABLE `team_unread` (
   `teamid` varchar(15) NOT NULL default '' COMMENT 'Team login',
   `mesgid` int(4) unsigned NOT NULL default '0' COMMENT 'Clarification ID',
   `type` varchar(25) NOT NULL default 'clarification' COMMENT 'Type of message (now always "clarification")',
-  PRIMARY KEY  (`teamid`,`type`,`mesgid`)
+  PRIMARY KEY  (`teamid`,`type`,`mesgid`),
+  CONSTRAINT `team_unread_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='List of items a team has not viewed yet';
 
--- 
+--
 -- Table structure for table `testcase`
--- 
+--
 
 CREATE TABLE `testcase` (
   `id` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique identifier',
@@ -245,5 +266,6 @@ CREATE TABLE `testcase` (
   `probid` varchar(8) NOT NULL COMMENT 'Corresponding problem ID',
   `description` varchar(255) default NULL COMMENT 'Description of this testcase',
   PRIMARY KEY  (`id`),
-  KEY `probid` (`probid`)
+  KEY `probid` (`probid`),
+  CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `testcase` (`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';
