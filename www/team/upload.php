@@ -107,7 +107,7 @@ echo "<table>\n" .
 	"<tr><td>Language:</td><td><i>".htmlspecialchars($lang['name'])."</i></td></tr>\n" .
 	"</table>\n";
 
-submit_solution($login, $ip, $probid, $langext, $_FILES['code']['tmp_name']); 
+submit_solution($login, $ip, $probid['probid'], $langext, $_FILES['code']['tmp_name']); 
 
 echo '<div id="uploadstatus">';
 if (NONINTERACTIVE) echo '<!-- noninteractive-upload-successful -->';
