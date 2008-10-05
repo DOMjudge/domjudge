@@ -32,10 +32,8 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 	header("Content-Disposition: inline; filename=\"$filename\"");
 	header("Content-Length: $size");
 
-	// Todo: add some more metainformation to headers?
-
-	// is this good enough for large testsets? Or do we need to stream
-	// them directly from the database query result (is that even possible?
+	// This may not be good enough for large testsets, but streaming them
+	// directly from the database query result seems overkill to implement.
 	echo $DB->q("VALUE SELECT $fetch FROM testcase WHERE probid = %s", $probid);
 
 	exit(0);
