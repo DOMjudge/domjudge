@@ -225,6 +225,8 @@ function putTeam($login) {
 	$affillogo = "../images/affiliations/" . urlencode($team['affilid']) . ".png";
 	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";
 	$teamimage = "../images/teams/" . urlencode($team['login']) . ".jpg";
+	
+	echo "<h1>Team ".htmlspecialchars($team['name'])."</h1>\n\n";
 
 	if ( is_readable($teamimage) ) {
 		echo '<img id="teampicture" src="' . $teamimage .
@@ -232,7 +234,6 @@ function putTeam($login) {
 			htmlspecialchars($team['name']) . '" />';
 	}
 
-	echo "<h1>Team ".htmlspecialchars($team['name'])."</h1>\n\n";
 ?>
 
 <table>
