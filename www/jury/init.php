@@ -14,7 +14,7 @@ if (empty($_SERVER['REMOTE_USER']) || $_SERVER['AUTH_TYPE'] != "Basic") {
 	die("Authentication not enabled, check webserver config");
 }
 
-define('IS_JURY', 1);
+define('IS_JURY', TRUE);
 
 require_once('../configure.php');
 
