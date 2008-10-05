@@ -5,10 +5,10 @@ require('lib.database.php');
 
 function setup_database_connection($privlevel)
 {
-
-	$credentials = @file(ETCDIR . '/database-credentials.csv');
+	$credfile = ETCDIR . '/dbpasswords.secret';
+	$credentials = @file($credfile);
 	if (!$credentials) {
-		user_error("Cannot find database-credentials file in " . ETCDIR,
+		user_error("Cannot read database credentials file " . $credfile,
 			E_USER_ERROR);
 		exit();
 	}
@@ -22,10 +22,11 @@ function setup_database_connection($privlevel)
 	}
 
 	foreach ($credentials as $credential) {
+		if ( $credential{0} == '#' ) continue;
 		list ($priv, $host, $db, $user, $pass) =
 			explode(':', trim($credential));
 		if ($priv != $privlevel) continue;
-
+		
 		$DB = new db ($db, $host, $user, $pass);
 		break;
 	}

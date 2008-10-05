@@ -7,7 +7,7 @@ domserver: apache.conf dbpasswords.secret
 judgehost: dbpasswords.secret
 
 dbpasswords.secret:
-	echo "Randomly generated on host `hostname`, `date`" > dbpasswords.secret
+	echo "# Randomly generated on host `hostname`, `date`" > dbpasswords.secret
 	chmod go= dbpasswords.secret
 	./gendbpasswords >> dbpasswords.secret
 
