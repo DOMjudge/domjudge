@@ -12,7 +12,6 @@ $id = @$_REQUEST['id'];
 
 require('init.php');
 $refresh = '15;url='.getBaseURI().'jury/judgehost.php?id='.urlencode($id);
-$title = 'Judgehost '.htmlspecialchars(@$id);
 
 if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
 	error("Missing or invalid judge hostname");
@@ -25,6 +24,8 @@ if ( IS_ADMIN && isset($_POST['cmd']) &&
 }
 
 $row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $id);
+
+$title = 'Judgehost '.htmlspecialchars($row['hostname']);
 
 require(LIBWWWDIR . '/header.php');
 
@@ -67,10 +68,10 @@ if ( IS_ADMIN ) {
 		addEndForm();
 }
 
-echo rejudgeForm('judgehost', $id);
+echo rejudgeForm('judgehost', $row['hostname']);
 
 if ( IS_ADMIN ) {
-	echo "<p>" . delLink('judgehost','hostname',$id) . "</p>\n\n";
+	echo "<p>" . delLink('judgehost','hostname',$row['hostname']) . "</p>\n\n";
 }
 
 echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
@@ -81,7 +82,7 @@ $res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
 			   result, verified, valid FROM judging
 			   WHERE cid = %i AND judgehost = %s
 			   ORDER BY starttime DESC, judgingid DESC',
-			   $cid, $id);
+			   $cid, $row['hostname']);
 
 if( $res->count() == 0 ) {
 	echo "<p><em>No judgings.</em></p>\n\n";
