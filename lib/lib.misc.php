@@ -18,25 +18,41 @@ define('MYSQL_DATETIME_FORMAT', 'Y-m-d H:i:s');
  * If $sizelimit is true (default), then only limit this to
  * the first 50,000 bytes and attach a note saying so.
  */
-function getFileContents($filename, $sizelimit = true) {
+if( !function_exists('version_compare') || version_compare( '5.1.0',PHP_VERSION,'>') ) {
 
-	if ( ! file_exists($filename) ) {
-		return '';
-	}
-	if ( ! is_readable($filename) ) {
-		error("Could not open $filename for reading: not readable");
+	function getFileContents($filename, $sizelimit = true) {
+		if ( ! file_exists($filename) ) {
+			return '';
+		}
+		if ( ! is_readable($filename) ) {
+			error("Could not open $filename for reading: not readable");
+		}
+
+		if ( $sizelimit && filesize($filename) > 50000 ) {
+			$fh = fopen($filename,'r');
+			if ( ! $fh ) error("Could not open $filename for reading");
+			$ret = fread($fh, 50000) . "\n[output truncated after 50,000 B]\n";
+			fclose($fh);
+			return $ret;
+		}
+
+		return file_get_contents($filename);
 	}
 
-	// in PHP 5.1.0+ we can just use file_get_contents() with the maxlen parameter.
-	if ( $sizelimit && filesize($filename) > 50000 ) {
-		$fh = fopen($filename,'r');
-		if ( ! $fh ) error("Could not open $filename for reading");
-		$ret = fread($fh, 50000) . "\n[output truncated after 50,000 B]\n";
-		fclose($fh);
-		return $ret;
+} else {
+
+	function getFileContents($filename, $sizelimit = true) {
+		if ( ! file_exists($filename) ) {
+			return '';
+		}
+		if ( ! is_readable($filename) ) {
+			error("Could not open $filename for reading: not readable");
+		}
+
+		// The maxlen parameter for file_get_contents was introduced in PHP 5.1.0.
+		return file_get_contents($filename, FILE_BINARY, NULL, 0, 50000);
 	}
 
-	return file_get_contents($filename);
 }
 
 /**
