@@ -6,10 +6,12 @@
 --
 -- $Id$
 
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+
+
 --
 -- Table structure for table `clarification`
 --
-
 CREATE TABLE `clarification` (
   `clarid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
@@ -269,3 +271,5 @@ CREATE TABLE `testcase` (
   KEY `probid` (`probid`),
   CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';
+
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
