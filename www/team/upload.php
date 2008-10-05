@@ -73,7 +73,7 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
                $probid, $cid);
 
 if ( ! isset($prob) ) err("Unable to find problem '$probid'");
-+$probid = $prob['probid'];
+$probid = $prob['probid'];
 
 /* Determine the language */
 $langext = @$_POST['langext'];
