@@ -38,7 +38,7 @@ function canViewClarification($team, $clar)
  * Output a single clarification.
  * Helperfunction for putClarification, do _not_ use directly!
  */
-function putClar($clar, $isjury = false)
+function putClar($clar)
 {
 	if ( $clar['sender'] ) {
 		$from = '<span class="teamid">' . htmlspecialchars($clar['sender']) .
@@ -56,11 +56,11 @@ function putClar($clar, $isjury = false)
 	echo "<table>\n";
 
 	echo '<tr><td scope="row">From:</td><td>';
-	echo make_link($from, "team.php?id=" . urlencode($clar['sender']), $isjury && $clar['sender'], TRUE);
+	echo make_link($from, "team.php?id=" . urlencode($clar['sender']), IS_JURY && $clar['sender'], TRUE);
 	echo "</td></tr>\n";
 
 	echo '<tr><td scope="row">To:</td><td>';
-	echo make_link($to, "team.php?id=" . urlencode($clar['recipient']), $isjury && $clar['recipient'], TRUE);
+	echo make_link($to, "team.php?id=" . urlencode($clar['recipient']), IS_JURY && $clar['recipient'], TRUE);
 	echo "</td></tr>\n";
 
 	echo '<tr><td scope="row">Time:</td><td>';
@@ -79,9 +79,9 @@ function putClar($clar, $isjury = false)
 /**
  * Output a clarification (and thread) for id $id.
  */
-function putClarification($id,  $team = NULL, $isjury = FALSE)
+function putClarification($id,  $team = NULL)
 {
-	if ( $team==NULL && ! $isjury ) {
+	if ( $team==NULL && ! IS_JURY ) {
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
@@ -99,9 +99,9 @@ function putClarification($id,  $team = NULL, $isjury = FALSE)
 
 	while ( $clar = $clarifications->next() ) {
 		// check permission to view this clarification
-		if ($isjury || canViewClarification($team, $clar)) {
+		if (IS_JURY || canViewClarification($team, $clar)) {
 			setClarificationViewed($clar['clarid'], $team);
-			putClar($clar, $isjury);
+			putClar($clar);
 			echo "<br />\n\n";
 		}
 	}
@@ -125,9 +125,9 @@ function summarizeClarification($body)
 /**
  * Print a list of clarifications in a table with links to the clarifications.
  */
-function putClarificationList($clars, $team = NULL, $isjury = FALSE)
+function putClarificationList($clars, $team = NULL)
 {
-	if ( $team==NULL && ! $isjury ) {
+	if ( $team==NULL && ! IS_JURY ) {
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
@@ -138,7 +138,7 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 
 	while ( $clar = $clars->next() ) {
 		// check viewing permission for teams
-		if ( !$isjury && !canViewClarification($team, $clar))
+		if ( ! IS_JURY && !canViewClarification($team, $clar))
 			continue;
 
 		$clar['clarid'] = (int)$clar['clarid'];
@@ -160,12 +160,12 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
 			if ($sender == NULL)
 				$sender = 'Jury';
 			else
-				$sender = make_link($sender, "team.php?id=" . urlencode($clar['sender']), $isjury);
+				$sender = make_link($sender, "team.php?id=" . urlencode($clar['sender']), IS_JURY);
 
 			if ($recipient == NULL)
 				$recipient = 'Jury';
 			else
-				$recipient = make_link($recipient, "team.php?id=" . urlencode($clar['recipient']), $isjury);
+				$recipient = make_link($recipient, "team.php?id=" . urlencode($clar['recipient']), IS_JURY);
 		}
 
 
@@ -184,7 +184,7 @@ function putClarificationList($clars, $team = NULL, $isjury = FALSE)
  * Output a form to send a new clarification.
  * Set team to a login, to make only that team (or ALL) selectable.
  */
-function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
+function putClarificationForm($action, $respid = NULL)
 {
 	require_once('forms.php');
 
@@ -194,7 +194,7 @@ function putClarificationForm($action, $isjury = FALSE, $respid = NULL)
 <script type="text/javascript">
 <!--
 function confirmClar() {
-<?php if ( $isjury ): ?>
+<?php if ( IS_JURY ): ?>
 	var sendto = document.forms['sendclar'].sendto.value;
 	if ( sendto=='domjudge-must-select' ) {
 		alert('You must select a recipient for this clarification.');
@@ -221,7 +221,7 @@ function confirmClar() {
 		                WHERE c.clarid = %i', $respid);
 	}
 
-	if ( $isjury ) { // list all possible recipients in the "sendto" box
+	if ( IS_JURY ) { // list all possible recipients in the "sendto" box
 		echo "<tr><td><b><label for=\"sendto\">Send to</label>:</b></td><td>\n";
 
 		if ( !empty($respid) ) {

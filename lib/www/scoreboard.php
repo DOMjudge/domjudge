@@ -13,14 +13,15 @@
 /** 
  * The calcScoreRow is in lib/lib.misc.php because it's used by other
  * parts of the system aswell.
+ * lib/lib.misc.php also defines make_link().
  */
-
+<?php require(LIBDIR . '/lib.misc.php'); ?>
 
 /**
  * Generate scoreboard data based on the cached data in table
- * 'scoreboard_{public,jury}'. $isjury set to true means the
- * scoreboard will always be current, regardless of the freezetime
- * setting in the contesttable.
+ * 'scoreboard_{public,jury}'. If the function is called while
+ * IS_JURY is defined, the scoreboard will always be current,
+ * regardless of the freezetime setting in the contesttable.
  *
  * This function returns an array (scores, summary, matrix)
  * containing the following:
@@ -33,7 +34,7 @@
  * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid])
  *    probid(num_submissions, num_correct, best_time)
  */
-function genScoreBoard($cdata, $isjury = FALSE) {
+function genScoreBoard($cdata) {
 
 	global $DB;
 
@@ -51,7 +52,7 @@ function genScoreBoard($cdata, $isjury = FALSE) {
 	$cstarted = difftime($cdata['starttime'],$now) <= 0;
 
 	// Don't leak information before start of contest
-	if ( ! $cstarted && ! $isjury ) return;
+	if ( ! $cstarted && ! IS_JURY ) return;
 	
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY, login, team.name,
@@ -61,7 +62,7 @@ function genScoreBoard($cdata, $isjury = FALSE) {
 	                        ON (team_category.categoryid = team.categoryid)
 	                 LEFT JOIN team_affiliation
 	                        ON (team_affiliation.affilid = team.affilid)' .
-	                ( $isjury ? '' : ' WHERE visible = 1' ) );
+	                ( IS_JURY ? '' : ' WHERE visible = 1' ) );
 	
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
@@ -74,7 +75,7 @@ function genScoreBoard($cdata, $isjury = FALSE) {
 					 'problems' => array());
 
 	// scoreboard_jury is always up to date, scoreboard_public might be frozen.	
-	if ( $isjury || $showfinal ) {
+	if ( IS_JURY || $showfinal ) {
 		$cachetable = 'scoreboard_jury';
 	} else {
 		$cachetable = 'scoreboard_public';
@@ -186,11 +187,11 @@ function genScoreBoard($cdata, $isjury = FALSE) {
 /**
  * Output the general scoreboard based on the cached data in table
  * 'scoreboard'. $myteamid can be passed to highlight a specific row.
- * $isjury set to true means the scoreboard will always be current,
- * regardless of the freezetime setting in the contesttable.
- * $static omits output unsuitable for static html pages.
+ * If this function is called while IS_JURY is defined, the scoreboard
+ * will always be current, regardless of the freezetime setting in the
+ * contesttable. $static omits output unsuitable for static html pages.
  */
-function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALSE) {
+function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 
 	global $DB;
 
@@ -221,14 +222,14 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		echo "<h4>scheduled to start at " . printtime($cdata['starttime']) . "</h4>\n\n";
 		// Stop here (do not leak problem number, descriptions etc).
 		// Alternatively we could only display the list of teams?
-		if ( ! $isjury ) return;
+		if ( ! IS_JURY ) return;
 	} else {
 		echo "<h4>starts: " . printtime($cdata['starttime']) .
 				" - ends: " . printtime($cdata['endtime']) ;
 
 		if ( $showfrozen ) {
 			echo " (";
-			if ( $isjury ) {
+			if ( IS_JURY ) {
 				echo "public scoreboard is ";
 			}
 			echo "frozen since " . printtime($cdata['freezetime']) .")";
@@ -245,13 +246,13 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	                        ON (team_category.categoryid = team.categoryid)
 	                 LEFT JOIN team_affiliation
 	                        ON (team_affiliation.affilid = team.affilid)' .
-			( $isjury ? '' : ' WHERE visible = 1' ) );
+			( IS_JURY ? '' : ' WHERE visible = 1' ) );
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
 	                 probid, name, color FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
 	                 ORDER BY probid', $cid);
 
-	echo '<table class="scoreboard' . ($isjury ? ' scoreboard_jury' : '') . "\">\n";
+	echo '<table class="scoreboard' . (IS_JURY ? ' scoreboard_jury' : '') . "\">\n";
 
 	// output table column groups (for the styles)
 	echo '<colgroup><col id="scorerank" />' .
@@ -264,24 +265,24 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	// column headers
 	echo "<thead>\n";
 	echo '<tr class="scoreheader">' .
-		'<th title="rank" scope="col">' . jurylink(null,'#',$isjury) . '</th>' .
+		'<th title="rank" scope="col">' . jurylink(null,'#') . '</th>' .
 		( SHOW_AFFILIATIONS ? '<th title="team affiliation" scope="col">' .
-		jurylink('team_affiliations.php','affil.',$isjury) . '</th>' : '' ) .
-		'<th title="team name" scope="col">' . jurylink('teams.php','team',$isjury) . '</th>' .
-		'<th title="# solved / penalty time" colspan="2" scope="col">' . jurylink(null,'score',$isjury) . "</th>\n";
+		jurylink('team_affiliations.php','affil.') . '</th>' : '' ) .
+		'<th title="team name" scope="col">' . jurylink('teams.php','team') . '</th>' .
+		'<th title="# solved / penalty time" colspan="2" scope="col">' . jurylink(null,'score') . "</th>\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),
 				htmlspecialchars($pr['probid']) . 
 				(!empty($pr['color']) ? ' <span style="color: ' .
 				htmlspecialchars($pr['color']) . ';">' . BALLOON_SYM . '</span>' : '' ) 
-			, $isjury) .
+			) .
 			'</th>';
 	}
 	echo "</tr>\n</thead>\n\n<tbody>\n";
 	
 	// now get the real scoreboard data
-	$tmp = genScoreBoard($cdata, $isjury);
+	$tmp = genScoreBoard($cdata);
 	if ( !empty($tmp) ) {
 		$SCORES  = $tmp['scores'];
 		$MATRIX  = $tmp['matrix'];
@@ -310,16 +311,16 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 		echo '><td class="scorepl">';
 		// Only print rank when score is different from the previous team
 		if ( !isset($prevteam) || $SCORES[$prevteam]['rank']!=$totals['rank'] ) {
-			echo jurylink(null,$totals['rank'],$isjury);
+			echo jurylink(null,$totals['rank']);
 		} else {
-			echo jurylink(null,'',$isjury);
+			echo jurylink(null,'');
 		}
 		$prevteam = $team;
 		echo '</td>';
 		if ( SHOW_AFFILIATIONS ) {
 			echo '<td class="scoreaf">';
 			if ( isset($teams[$team]['affilid']) ) {
-				if ( $isjury ) {
+				if ( IS_JURY ) {
 					echo '<a href="team_affiliation.php?id=' .
 						urlencode($teams[$team]['affilid']) . '">';
 				}
@@ -344,21 +345,21 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 						echo htmlspecialchars($teams[$team]['country']);
 					}
 				}
-				if ( $isjury ) echo '</a>';
+				if ( IS_JURY ) echo '</a>';
 			}
 			echo '</td>';
 		}
 		echo
 			'<td class="scoretn"' .
 			(!empty($color) ? ' style="background: ' . $color . ';"' : '') .
-			($isjury ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
+			(IS_JURY ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
 			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
 			htmlspecialchars($teams[$team]['name']) .
 			($static ? '' : '</a>') .
 			'</td>';
 		echo
-			'<td class="scorenc">' . jurylink(null,$totals['num_correct'],$isjury) . '</td>' .
-			'<td class="scorett">' . jurylink(null,$totals['total_time'], $isjury) . '</td>';
+			'<td class="scorenc">' . jurylink(null,$totals['num_correct']) . '</td>' .
+			'<td class="scorett">' . jurylink(null,$totals['total_time'] ) . '</td>';
 
 		// for each problem
 		foreach ( array_keys($probs) as $prob ) {
@@ -381,7 +382,7 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 			}
 			echo '>' . jurylink('team.php?id=' . urlencode($team) .
 								'&amp;restrict=probid:' . urlencode($prob),
-			                    $str,$isjury) . '</td>';
+			                    $str) . '</td>';
 		}
 		echo "</tr>\n";
 	}
@@ -390,12 +391,12 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 	// print a summaryline
 	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
 		'<td title="total teams">' .
-		jurylink(null,count($teams),$isjury) . '</td>' .
+		jurylink(null,count($teams)) . '</td>' .
 		( SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
 		  jurylink('team_affiliations.php',count($SUMMARY['affils']) . ' / ' .
-				   count($SUMMARY['countries']),$isjury) . '</td>' : '' ) .
-		'<td title=" ">' . jurylink(null,'Summary',$isjury) . '</td>' .
-		'<td title="total solved" class="scorenc">' . jurylink(null,$SUMMARY['num_correct'],$isjury)  . '</td><td title=" "></td>';
+				   count($SUMMARY['countries'])) . '</td>' : '' ) .
+		'<td title=" ">' . jurylink(null,'Summary') . '</td>' .
+		'<td title="total solved" class="scorenc">' . jurylink(null,$SUMMARY['num_correct'])  . '</td><td title=" "></td>';
 
 	foreach( array_keys($probs) as $prob ) {
 		$str = $SUMMARY['problems'][$prob]['num_submissions'] . ' / ' .
@@ -403,35 +404,35 @@ function putScoreBoard($cdata, $myteamid = null, $isjury = FALSE, $static = FALS
 			   ( isset($SUMMARY['problems'][$prob]['best_time']) ? 
 				 $SUMMARY['problems'][$prob]['best_time'] : '-' );
 		echo '<td>' .
-			jurylink('problem.php?id=' . urlencode($prob),$str,$isjury) .
+			jurylink('problem.php?id=' . urlencode($prob),$str) .
 			'</td>';
 	}
 	echo "</tr>\n</tbody>\n</table>\n\n";
 
 	$categs = $DB->q('SELECT * FROM team_category ' .
-	                 ($isjury ? '' : 'WHERE visible = 1 ' ) .
+	                 (IS_JURY ? '' : 'WHERE visible = 1 ' ) .
 	                 'ORDER BY categoryid');
 
 	// only print legend when there's more than one category
 	if ( $categs->count() > 1 ) {
 		echo "<p><br /><br /></p>\n<table id=\"legend\" class=\"scoreboard" .
-			($isjury ? ' scoreboard_jury' : '') . "\">\n" .
+			(IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
 			"<thead><tr><th scope=\"col\">" .
-			jurylink('team_categories.php','Legend',$isjury) .
+			jurylink('team_categories.php','Legend') .
 			"</th></tr></thead>\n<tbody>\n";
 		while ( $cat = $categs->next() ) {
 			echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
 				          $cat['color'] . ';"' : '') . '>' .
 				'<td align="center" class="scoretn">' .
 				jurylink('team_category.php?id=' . urlencode($cat['categoryid']),
-					htmlspecialchars($cat['name']),$isjury) .	"</td></tr>\n";
+					htmlspecialchars($cat['name'])) .	"</td></tr>\n";
 		}
 		echo "</tbody>\n</table>\n\n";
 	}
 
 	// last modified date, now if we are the jury, else include the
 	// freeze time
-	if( ! $isjury && $showfrozen ) {
+	if( ! IS_JURY && $showfrozen ) {
 		$lastupdate = strtotime($cdata['freezetime']);
 	} else {
 		$lastupdate = time();
@@ -530,16 +531,9 @@ function putTeamRow($cdata, $teamid) {
 /**
  * Generate scoreboard links for jury only.
  */
-function jurylink($target, $content, $isjury) {
+function jurylink($target, $content) {
 
-	$res = "";
-	if ( $isjury ) {
-		$res .= '<a' . (isset($target) ? ' href="' . $target . '"' : '' ) . '>';
-	}
-	$res .= $content;
-	if ( $isjury ) $res .= '</a>';
-	
-	return $res;
+	return make_link($content, $target, IS_JURY, TRUE);
 }
 
 /**

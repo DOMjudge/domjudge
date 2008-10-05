@@ -30,7 +30,7 @@ function getBaseURI() {
  * match <key> = <value>. Output is always limited to the
  * current or last contest.
  */
-function putSubmissions($cdata, $restrictions, $isjury = FALSE, $limit = 0)
+function putSubmissions($cdata, $restrictions, $limit = 0)
 {
 	global $DB;
 
@@ -85,14 +85,14 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE, $limit = 0)
 	// for all rows)
 	echo "<table class=\"list\">\n<thead>\n<tr>" .
 
-		($isjury ? "<th scope=\"col\">ID</th>" : '') .
+		(IS_JURY ? "<th scope=\"col\">ID</th>" : '') .
 		"<th scope=\"col\">time</th>" .
-		($isjury ? "<th scope=\"col\">team</th>" : '') .
+		(IS_JURY ? "<th scope=\"col\">team</th>" : '') .
 		"<th scope=\"col\">problem</th>" . 
 		"<th scope=\"col\">lang</th>" .
 		"<th scope=\"col\">status</th>" .
-		($isjury ? "<th scope=\"col\">verified</th>" : '') .
-		($isjury ? "<th scope=\"col\">last<br />judge</th>" : '') .
+		(IS_JURY ? "<th scope=\"col\">verified</th>" : '') .
+		(IS_JURY ? "<th scope=\"col\">last<br />judge</th>" : '') .
 
 		"</tr>\n</thead>\n<tbody>\n";
 	
@@ -101,7 +101,7 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE, $limit = 0)
 	while( $row = $res->next() ) {
 		
 		$sid = (int)$row['submitid'];
-		$isfinished = ($isjury || ! $row['result']);
+		$isfinished = (IS_JURY || ! $row['result']);
 		
 		if ( $row['valid'] ) {
 			$subcnt++;
@@ -110,28 +110,28 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE, $limit = 0)
 			$igncnt++;
 			echo '<tr class="sub_ignore">';
 		}
-		if ( $isjury ) {
+		if ( IS_JURY ) {
 			echo "<td><a href=\"submission.php?id=$sid\">s$sid</a></td>";
 		}
 		echo "<td>" . printtime($row['submittime']) . "</td>";
-		if ( $isjury ) {
+		if ( IS_JURY ) {
 			echo '<td class="teamid" title="' . htmlspecialchars($row['teamname']) . '">' .
-				make_link($row['teamid'], "team.php?id=" . urlencode($row['teamid']), $isjury) .
+				make_link($row['teamid'], "team.php?id=" . urlencode($row['teamid']), IS_JURY) .
 				'</td>';
 		}
 		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
-			make_link($row['probid'], "problem.php?id=" . urlencode($row['probid']), $isjury) .
+			make_link($row['probid'], "problem.php?id=" . urlencode($row['probid']), IS_JURY) .
 			'</td>';
 		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
-			make_link($row['langid'], "language.php?id=" . urlencode($row['langid']), $isjury) .
+			make_link($row['langid'], "language.php?id=" . urlencode($row['langid']), IS_JURY) .
 			'</td>';
 		echo "<td>";
-		if ( $isjury ) {
+		if ( IS_JURY ) {
 			if ( ! $row['result'] ) {
 				if ( $row['submittime'] > $cdata['endtime'] ) {
-					echo printresult('too-late', TRUE, TRUE);
+					echo printresult('too-late', TRUE);
 				} else {
-					echo printresult($row['judgehost'] ? '' : 'queued', TRUE, TRUE);
+					echo printresult($row['judgehost'] ? '' : 'queued', TRUE);
 				}
 			} else {
 				echo '<a href="submission.php?id=' . $sid . '">' .
@@ -143,7 +143,7 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE, $limit = 0)
 				if ( $row['submittime'] > $cdata['endtime'] ) {
 					echo printresult('too-late');
 				} else {
-					echo printresult('', TRUE, FALSE);
+					echo printresult('', TRUE);
 				}
 			} else {
 				echo '<a href="submission_details.php?id=' . $sid . '">';
@@ -151,7 +151,7 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE, $limit = 0)
 			}
 		}
 		echo "</td>";
-		if ( $isjury && isset($row['verified']) ) {
+		if ( IS_JURY && isset($row['verified']) ) {
 			// only display verification if we're done with judging
 			if ( $row['result'] ) {
 				if( ! $row['verified'] ) $vercnt++;
@@ -160,7 +160,7 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE, $limit = 0)
 				echo "<td></td>";
 			}
 		}
-		if ( $isjury ) {
+		if ( IS_JURY ) {
 			$judgehost = $row['judgehost'];
 			if ( empty($judgehost) ) {
 				echo '<td></td>';
@@ -175,7 +175,7 @@ function putSubmissions($cdata, $restrictions, $isjury = FALSE, $limit = 0)
 	}
 	echo "</tbody>\n</table>\n\n";
 
-	if ( $isjury ) {
+	if ( IS_JURY ) {
 		if( $limit > 0 ) {
 		$subcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
 					, $cid, @$restrictions['teamid'], @$restrictions['probid']

@@ -40,7 +40,7 @@ echo '<h3><a name="newrequests"></a>' .
 if ( $newrequests->count() == 0 ) {
 	echo "<p><em>No new clarification requests.</em></p>\n\n";
 } else {
-	putClarificationList($newrequests,NULL,TRUE);
+	putClarificationList($newrequests,NULL);
 }
 
 echo '<h3><a name="oldrequests"></a>' .
@@ -48,7 +48,7 @@ echo '<h3><a name="oldrequests"></a>' .
 if ( $oldrequests->count() == 0 ) {
 	echo "<p><em>No old clarification requests.</em></p>\n\n";
 } else {
-	putClarificationList($oldrequests,NULL,TRUE);
+	putClarificationList($oldrequests,NULL);
 }
 
 echo '<h3><a name="clarifications"></a>' .
@@ -56,7 +56,7 @@ echo '<h3><a name="clarifications"></a>' .
 if ( $clarifications->count() == 0 ) {
 	echo "<p><em>No general clarifications.</em></p>\n\n";
 } else {
-	putClarificationList($clarifications,NULL,TRUE);
+	putClarificationList($clarifications,NULL);
 }
 
 require(LIBWWWDIR . '/footer.php');

@@ -25,7 +25,7 @@ function infreeze($time) {
 	return FALSE;
 }
 
-$tmp = @genScoreBoard($cdata, IS_JURY);
+$tmp = @genScoreBoard($cdata);
 if ( ! empty($tmp) ) {
 	$MATRIX  = $tmp['matrix'];
 	$SCORES  = $tmp['scores'];

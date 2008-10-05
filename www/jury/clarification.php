@@ -119,7 +119,7 @@ if ( ! empty ( $req['respid'] ) ) {
 
 }
 
-putClarification($id, NULL, TRUE);
+putClarification($id, NULL);
 
 // Display button to (un)set request as 'answered'
 // Not relevant for 'general clarifications', ie those with sender=null
@@ -139,10 +139,10 @@ if ( !empty($req['sender']) ) {
 // display a clarification send box
 if ( $isgeneral ) {
 	echo "<h1>Send Clarification</h1>\n\n";
-	putClarificationForm("clarification.php", TRUE);
+	putClarificationForm("clarification.php");
 } else {
 	echo "<h1>Send Response</h1>\n\n";
-	putClarificationForm("clarification.php", TRUE, $respid);
+	putClarificationForm("clarification.php", $respid);
 }
 
 require(LIBWWWDIR . '/footer.php');

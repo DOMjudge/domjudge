@@ -13,7 +13,7 @@
 /**
  * prints result with correct style, '' -> judging
  */
-function printresult($result, $valid = TRUE, $isjury = FALSE) {
+function printresult($result, $valid = TRUE) {
 
 	$start = '<span class="sol ';
 	$end   = '</span>';
@@ -26,7 +26,7 @@ function printresult($result, $valid = TRUE, $isjury = FALSE) {
 			$result = 'judging';
 		case 'judging':
 		case 'queued':
-			if ( ! $isjury ) $result = 'pending';
+			if ( ! IS_JURY ) $result = 'pending';
 			$style = 'sol_queued';
 			break;
 		case 'correct':
