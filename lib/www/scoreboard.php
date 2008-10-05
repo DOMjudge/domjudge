@@ -15,7 +15,7 @@
  * parts of the system aswell.
  * lib/lib.misc.php also defines make_link().
  */
-<?php require(LIBDIR . '/lib.misc.php'); ?>
+require_once(LIBDIR . '/lib.misc.php')
 
 /**
  * Generate scoreboard data based on the cached data in table
