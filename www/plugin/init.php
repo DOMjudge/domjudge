@@ -12,6 +12,9 @@
 
 require_once('../configure.php');
 
+/* :FIXME: This is completely wrong, especially since domjudge_jury is
+ * the default jury user.
+ */
 define('IS_JURY', (@$_SERVER['REMOTE_USER'] == "jury"));
 
 if( DEBUG & DEBUG_TIMINGS ) {
