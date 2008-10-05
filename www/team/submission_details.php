@@ -30,16 +30,11 @@ if( ! $row ) {
 	exit;
 }
 
-?>
-<h1>Submission details</h1>
+echo "<h1>Submission details</h1>\n";
 
-<?
 if( ! $row['valid'] ) {
-?>
-<p>This submission is being ignored.<br />
-It is not used in determining your score.
-</p>
-<?
+	echo "<p>This submission is being ignored.<br />\n" .
+		"It is not used in determining your score.</p>\n\n";
 }
 ?>
 
