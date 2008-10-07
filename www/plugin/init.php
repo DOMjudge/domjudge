@@ -12,8 +12,8 @@
 
 require_once('../configure.php');
 
-/* :FIXME: This is completely wrong, especially since domjudge_jury is
- * the default jury user.
+/* For plugins to have jury access rights to the DB, they should
+ * successfully authenticate as user 'jury'.
  */
 define('IS_JURY', (@$_SERVER['REMOTE_USER'] == "jury"));
 
