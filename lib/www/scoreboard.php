@@ -411,7 +411,7 @@ function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 
 	$categs = $DB->q('SELECT * FROM team_category ' .
 	                 (IS_JURY ? '' : 'WHERE visible = 1 ' ) .
-	                 'ORDER BY categoryid');
+	                 'ORDER BY sortorder,name,categoryid');
 
 	// only print legend when there's more than one category
 	if ( $categs->count() > 1 ) {
