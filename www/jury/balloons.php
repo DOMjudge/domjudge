@@ -19,6 +19,7 @@ if ( isset($_POST['done']) ) {
 			WHERE probid = %s AND teamid = %s AND cid = %i',
 			$parts[0], $parts[1], $parts[2]);
 	}
+	header('Location: ' . getBaseURI() . 'jury/balloons.php');
 }
 
 $refresh = '30;url=' . getBaseURI() . 'jury/balloons.php';
