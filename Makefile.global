@@ -32,6 +32,9 @@ STRIP = strip --remove-section=.comment --remove-section=.note
 # Check whether we are running under Cygwin:
 ifneq ($(findstring CYGWIN,$(shell uname)),)
 CYGWIN = 1
+# These compiler flags don't work under Cygwin:
+CXXFLAGS := $(filter-out -fstack-protector,$(CXXFLAGS))
+CFLAGS   := $(filter-out -fstack-protector,$(CFLAGS))
 endif
 
 clean: clean-backupfiles
