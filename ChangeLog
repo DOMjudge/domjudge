@@ -10,6 +10,7 @@ Version 2.2.2 - SVN
  - Add a FLUSH PRIVILEGES statement after user grants during
    installation, as this may be necessary to have MySQL pick up
    all changes correctly.
+ - Don't use -fstack-protector under Cygwin. (Closes: #2144713)
 
 Version 2.2.1 - 31 August 2008
 ------------------------------
