@@ -6,6 +6,9 @@ Version 2.2.2 - SVN
  - Use db values instead of the userinput to canonicalise
    any IDs. Solves an issue with blank cells in the scoreboard.
    (Closes #2144718)
+ - Add a FLUSH PRIVILEGES statement after user grants during
+   installation, as this may be necessary to have MySQL pick up
+   all changes correctly.
 
 Version 2.2.1 - 31 August 2008
 ------------------------------
