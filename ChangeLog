@@ -13,6 +13,9 @@ Version 3.0.0 - SVN
  - MySQL table types are now InnoDB. Define foreign key relations
    between tables (Closes: #2144325).
  - Use db values instead of the userinput. (Closes #2144718)
+ - Add a FLUSH PRIVILEGES statement after user grants during
+   installation, as this may be necessary to have MySQL pick up
+   all changes correctly.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------
