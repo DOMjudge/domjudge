@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 2.2.2 - SVN
--------------------
+Version 2.2.2 - 8 October 2008
+------------------------------
  - Delete testcases when a problem is deleted. (Closes: #2144325)
  - Fix for Apache config generation when installing into webroot.
  - Use db values instead of the userinput to canonicalise
