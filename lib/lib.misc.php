@@ -286,10 +286,10 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 						  extension = %s AND allow_submit = 1', $langext) ) {
 		error("Language '$langext' not found in database or not submittable.");
 	}
-	$team = $teamrow['login'];
 	if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',$team) ) {
 		error("Team '$team' not found in database.");
 	}
+	$team = $teamrow['login'];
 	if( ! compareipaddr($teamrow['ipaddress'],$ip) ) {
 		if ( $teamrow['ipaddress'] == NULL && ! STRICTIPCHECK ) {
 			$hostname = gethostbyaddr($ip);
