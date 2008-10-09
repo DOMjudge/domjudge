@@ -138,7 +138,11 @@ legend {
 }
 
 
-.scoreboard { border-collapse: collapse; }
+.scoreboard {
+	border-collapse: collapse;
+	background: white url('images/slinger.png') no-repeat center;
+}
+#legend { background: white; }
 .scoreboard td { font-size: small; }
 .scoreboard tr { border-bottom: 1px solid silver; }
 .scoreboard td, .scoreboard th {
@@ -161,7 +165,7 @@ legend {
 }
 .score_correct   { background: #33FF66; }
 .score_incorrect { background: #FF6666; }
-.score_neutral   { background: white;   }
+.score_neutral   { background: inherit; }
 
 #scoresolv,#scoretotal { width: 5em; }
 .scorenc,.scorett,.scorepl { text-align: right; width: 2ex; }
