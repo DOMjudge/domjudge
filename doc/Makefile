@@ -14,10 +14,6 @@ install-docs: create-docs-dirs
 create-docs-dirs:
 	install -d $(domjudge_docdir)
 
-dist:
-
-distclean:
-
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 

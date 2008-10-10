@@ -818,6 +818,56 @@ tools, the submit binary can be created (after configuration) by
 running <tt>make submit.exe</tt> in the <tt>SYSTEM_ROOT/submit</tt>
 directory.
 
+<sect>(Re)generating documentation and the team manual
+<p>
+
+There are three sets of documentation available under the <tt>doc</tt>
+directory in DOMjudge:
+<descrip>
+<tag>the admin-manual</tag>
+for administrators of the system (this document),
+<tag>the judge-manual</tag>
+for judges, describing the jury web interface and giving some general
+information about this system,
+<tag>the team-manual</tag>
+for teams, explaining how to use the system and what restrictions
+there are.
+</descrip>
+
+<p>
+The administrator's and judge's manuals are available in PDF and HTML
+format and prebuilt from SGML sources. To rebuild these,
+<tt>linuxdoc</tt> must be installed, but rebuilding should normally
+not be necessary. On a Debian-like system, the following commands
+should rebuild these docs (if outdated):
+<code>
+sudo apt-get install linuxdoc-tools make transfig texlive-latex-recommended
+make -C doc/admin
+make -C doc/judge
+</code>
+
+<p>
+The team manual is only available in PDF format and must be built from
+the LaTeX sources in <tt>doc/team</tt> after configuration of the
+system. The team manual is not prebuilt, because it includes
+site-specific configuration settings such as the team web interface
+URL and judging settings such as the memory limit. Besides a standard
+LaTeX installation, the team manual also requires the <tt>svn</tt> and
+<tt>expdlist</tt> packages. These are available in TeX Live in the
+<tt>texlive-latex-extra</tt> package in any modern Linux distribution.
+Alternatively, you can download and install them manually from their
+respective subdirectories in
+<url url="http://mirror.ctan.org/macros/latex/contrib">.
+On Debian-like systems the team manual can be built with:
+<code>
+sudo apt-get install texlive-latex-extra
+make -C doc/team
+</code>
+
+<p>
+The team manual is currently available in two languages: English and
+Dutch. We welcome any translations to other languages.
+
 <sect>Optional features
 <p>
 

@@ -16,7 +16,9 @@ judge-manual.pdf: judge-manual.sgml ../docs_header.tex
 judge-manual.html: judge-manual.sgml ../docs_header.html
 	linuxdoc -B html --header=../docs_header.html $< >/dev/null
 
-distclean:
+dist: docs
+
+maintainer-clean:
 	-rm -f judge-manual*.html judge-manual.pdf
 
 .PHONY:
