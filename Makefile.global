@@ -30,6 +30,9 @@ SUIDINSTALLDIR=$(CURDIR)
 # Check whether we are running under Cygwin:
 ifneq ($(findstring CYGWIN,$(shell uname)),)
 CYGWIN = 1
+# These compiler flags don't work under Cygwin:
+CXXFLAGS := $(filter-out -fstack-protector,$(CXXFLAGS))
+CFLAGS   := $(filter-out -fstack-protector,$(CFLAGS))
 endif
 
 # Define the 'default' target here: because of inclusion of this file,

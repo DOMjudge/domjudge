@@ -46,6 +46,12 @@ foreach($k as $key => $val) {
 
 if (isset($_POST['confirm'] ) ) {
 
+	// Workaround to delete associated testcases when a problem is
+	// deleted. Solved by cascade in 3.0.
+	if ( $t == 'problem' ) {
+		$DB->q("DELETE FROM testcase WHERE probid = %s", $k);
+	}
+
 	// LIMIT 1 is a security measure to prevent our bugs from
 	// wiping a table by accident.
 	$DB->q("DELETE FROM $t WHERE %S LIMIT 1", $k);

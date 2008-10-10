@@ -98,7 +98,7 @@ if ( empty($langext) ) {
 	if ( empty($langext) ) err("Unable to find language for extension '$fileext'");
 }
 
-$lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
+$lang = $DB->q('MAYBETUPLE SELECT langid, name, extension FROM language
                 WHERE extension = %s AND allow_submit = 1', $langext);
 
 if ( ! isset($lang) ) err("Unable to find language '$langext'");

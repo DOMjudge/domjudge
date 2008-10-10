@@ -1,8 +1,22 @@
 DOMjudge Programming Contest Judging System
 
-Version 2.2.2 - SVN
+Version NWERC2008 - SVN
 -------------------
- - Use db values instead of the userinput. (Closes #2144718)
+ - Add A-Eskwadraat branding to scoreboard.
+ - Modify configuration to NWERC needs.
+
+Version 2.2.2 - 8 October 2008
+------------------------------
+ - Delete testcases when a problem is deleted. (Closes: #2144325)
+ - Fix for Apache config generation when installing into webroot.
+ - Use db values instead of the userinput to canonicalise
+   any IDs. Solves an issue with blank cells in the scoreboard.
+   (Closes #2144718)
+ - Add a FLUSH PRIVILEGES statement after user grants during
+   installation, as this may be necessary to have MySQL pick up
+   all changes correctly.
+ - Don't use -fstack-protector under Cygwin. (Closes: #2144713)
+ - Add check for colourless problems.
 
 Version 2.2.1 - 31 August 2008
 ------------------------------

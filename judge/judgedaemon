@@ -15,7 +15,7 @@ require ('../etc/config.php');
 
 $waittime = 5;
 
-list($myhost,) = explode('.',trim(`hostname`));
+$myhost = trim(`hostname --short`);
 
 define ('SCRIPT_ID', 'judgedaemon');
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
@@ -39,6 +39,7 @@ $row = $DB->q('MAYBETUPLE SELECT * FROM judgehost WHERE hostname = %s', $myhost)
 if ( ! $row ) {
 	error("No database entry found for me ($myhost), exiting");
 }
+$myhost = $row['hostname'];
 
 // Create directory where to test submissions
 $tempdirpath = JUDGEDIR . "/$myhost";
