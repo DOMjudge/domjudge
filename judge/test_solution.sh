@@ -75,7 +75,7 @@ cleanexit ()
 . "$SYSTEM_ROOT/lib/lib.error.sh"
 
 # Logging:
-LOGFILE="$LOGDIR/judge.`hostname --short`.log"
+LOGFILE="$LOGDIR/judge.`hostname`.log"
 LOGLEVEL=$LOG_DEBUG
 PROGNAME="`basename $0`"
 

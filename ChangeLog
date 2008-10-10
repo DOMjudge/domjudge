@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version NWERC2008 - SVN
 -------------------
  - Add A-Eskwadraat branding to scoreboard.
+ - Work around 'hostname --short' returning empty string.
  - Modify configuration to NWERC needs.
 
 Version 2.2.2 - 8 October 2008
