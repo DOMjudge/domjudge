@@ -39,7 +39,7 @@ install-judgehost: judgehost
 # which subdirs they are, overriding default SUBDIRS list.
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
             docs install-docs submitclient clean distclean maintainer-clean \
-            test
+            test dist
 SUBDIRS=bin doc etc judge lib submit www test-programs test-sources
 
 build:             SUBDIRS=bin lib judge submit test-sources test-programs
@@ -52,6 +52,7 @@ install-docs:      SUBDIRS=doc
 submitclient:      SUBDIRS=submit
 test:              SUBDIRS=tests
 maintainer-clean:  SUBDIRS=doc
+dist:              SUBDIRS=doc
 
 install-domserver: domserver-create-dirs
 install-judgehost: judgehost-create-dirs

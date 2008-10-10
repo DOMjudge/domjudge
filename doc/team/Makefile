@@ -42,4 +42,8 @@ texclean:
 clean: texclean
 	-rm -f $(TARGETSPDF)
 
+distclean:
+
+dist:
+
 .PHONY: pdf texclean
