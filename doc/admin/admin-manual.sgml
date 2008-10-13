@@ -683,6 +683,12 @@ installed on the jury system and made sure that PHP correctly works
 with it. Refer to the documentation of your web server and PHP for
 details.
 
+If you want to upload large testcases in the jury web interface,
+it may be necessary to raise some PHP limits or you'll get
+"memory exhausted" errors. Make sure that the parameters
+<tt>memory_limit</tt>, <tt>upload_max_filesize</tt> and <tt>post_max_size</tt>
+in <tt>php.ini</tt> are all well above the size of your largest testcase.
+
 To configure the web server for DOMjudge, use the Apache configuration
 snippet from <tt>etc/apache.conf</tt>. Some values are prefilled from
 global.cfg but may need to be changed. Reload the web server for the
