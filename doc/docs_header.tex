@@ -1,6 +1,12 @@
 % LaTeX extra preamble definitions for DOMjudge PDF manuals
 \setcounter{tocdepth}{1}
 
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead[LE,LO]{\slshape \leftmark}
+\fancyhead[RE,RO]{\slshape \thepage}
+\fancyfoot[C]{}
+
 % Redefined chapter title generation:
 \makeatletter
 \def\@makechapterhead#1{%
