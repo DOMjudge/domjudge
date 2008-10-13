@@ -350,9 +350,6 @@ functionality.
 <item> OpenSSH/SCP or compatible (for using the command line
        submit program)
 
-<item> wget/curl and unzip (for downloading LaTeX packages
-       for documentation)
-
 <item> phpMyAdmin, to be able to access the database in an emergency
        or for data import/export
 
@@ -391,13 +388,12 @@ apt-get install gcc g++ make libcurl3-dev sudo mysql-server ntp \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
 	hostname coreutils procps grep diff mount sharutils \
 	openssh-server openssh-client phpmyadmin xsltproc \
-	wget linuxdoc-tools unzip tetex-bin tetex-extra transfig
+	linuxdoc-tools transfig \
+	texlive-latex-recommended texlive-latex-extra
 </code>
 
 This is for Debian 4.0 "Etch". For Debian 5.0 "Lenny",
-replace <tt/tetex-bin/ and <tt/tetex-extra/
-with <tt/texlive-latex-recommended/ and <tt/texlive-latex-extra/,
-and <tt/libcurl3-dev/ with <tt/libcurl4-gnutls-dev/.
+replace <tt/libcurl3-dev/ with <tt/libcurl4-gnutls-dev/.
 
 On a judgehost, the following should be sufficient. The last line shows some example
 compilers to install for C, C++, Java (GNU), Java (Sun), Haskell and Pascal; change
@@ -671,6 +667,12 @@ For the web interface, you need to have a web server (e.g. Apache)
 installed on the jury system and made sure that PHP correctly works
 with it. Refer to the documentation of your web server and PHP for
 details.
+
+If you want to upload large testcases in the jury web interface,
+it may be necessary to raise some PHP limits or you'll get
+"memory exhausted" errors. Make sure that the parameters
+<tt>memory_limit</tt>, <tt>upload_max_filesize</tt> and <tt>post_max_size</tt>
+in <tt>php.ini</tt> are all well above the size of your largest testcase.
 
 To configure the web server for DOMjudge, use the Apache configuration
 snippet from <tt>etc/apache.conf</tt>. Some values are prefilled from
