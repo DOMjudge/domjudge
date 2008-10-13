@@ -1,4 +1,4 @@
-\documentclass[11pt,a4paper,titlepage]{article}
+\documentclass[11pt,a4paper]{article}
 
 % $Id$
 
@@ -8,6 +8,7 @@
 \usepackage{a4wide}
 \usepackage{moreverb}
 \usepackage{graphicx}
+\usepackage{wrapfig}
 \usepackage{expdlist}
 \usepackage{svn}
 
@@ -24,24 +25,36 @@
 % Display commands, arguments, etc. in texttt font and don't break those.
 \newcommand{\cmd}[1]{\mbox{\texttt{#1}}}
 
-% Our titlepage
+% Our titlepage, should be called at start of team manual document
+% Argument list:
+% #1 - DOMjudge version
+% #2 - Document revision
+% #3 - Last modified date
+% #4 - Generated date
+% Also define the following words for language overrides:
+\newcommand{\versionrevison}{Version/revision}
+\newcommand{\lastmodified}{Last modified}
+\newcommand{\generated}{Generated}
 \makeatletter
-\def\maketitle{%
-  \null
-  \thispagestyle{empty}%
-  \vskip 2cm
-  \begin{center}\leavevmode
+\newcommand{\titlestuff}[4]{%
+  \vspace*{-3cm}
+  \parbox[t]{\linewidth}{
+    \begin{wrapfigure}[10]{r}{2cm}
+      \vspace*{-1cm}\hfill
+      \includegraphics[height=4cm]{../logos/DOMjudgelogo.pdf}
+    \end{wrapfigure}
     \normalfont
-    {\fontsize{30pt}{30pt}\selectfont \@title \par}%
-    \vskip 1cm
-    {\Large \@author \par}%
-    \vskip 1cm
-    {\Large \@date \par}%
-  \end{center}%
-  \vskip 2cm
-  \begin{figure}[htbp]
-    \centerline{\includegraphics[height=7cm]{../logos/DOMjudgelogo.pdf}}
-  \end{figure}
-  \vfill\null
+    {\usefont{T1}{phv}{m}{n}\fontsize{26pt}{26pt}\selectfont
+      \bfseries \@title\footnotemark \par}
+    \vskip 0.3cm
+  }% end parbox
+    \footnotetext{
+    \begin{tabular}[t]{ll}
+      \versionrevison: & #1 / #2 \\
+      \lastmodified:   & #3 \\
+      \generated:      & #4 \\
+    \end{tabular}
+    }
+  \vskip 1.5cm
 }
 \makeatother

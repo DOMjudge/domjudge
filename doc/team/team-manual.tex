@@ -3,17 +3,14 @@
 \usepackage[english]{babel}
 
 % For inclusion of the correct date (last modified)
-\SVNdate $Date$
+\SVN $Date$
+\SVN $Revision$
 
-\title{Team manual \DOMjudge\\(version \DOMJUDGE_VERSION)}
+\title{\DOMjudge team manual}
 
 \begin{document}
 
-\begin{titlepage}
-\maketitle
-\end{titlepage}
-
-\newpage
+\titlestuff{\DOMJUDGE_VERSION}{}{\SVNDate}{\today}
 
 \section*{Summary}
 
@@ -59,8 +56,6 @@ requests is done through the web-interface. The menu buttons at
 
 \emph{End of summary}
 
-\newpage
-\tableofcontents
 \newpage
 
 \section{Submitting solutions}\label{submit}

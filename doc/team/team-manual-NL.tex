@@ -2,18 +2,20 @@
 
 \usepackage[dutch]{babel}
 
-% For inclusion of the correct date (last modified)
-\SVNdate $Date$
+% Redefine words for date/versioning:
+\renewcommand{\versionrevison}{Versie/revisie}
+\renewcommand{\lastmodified}{Laast gewijzigd}
+\renewcommand{\generated}{Gegenereerd}
 
-\title{Teamhandleiding \DOMjudge\\(versie \DOMJUDGE_VERSION)}
+% For inclusion of the correct lastmod date and revision:
+\SVN $Date$
+\SVN $Revision$
+
+\title{\DOMjudge teamhandleiding}
 
 \begin{document}
 
-\begin{titlepage}
-\maketitle
-\end{titlepage}
-
-\newpage
+\titlestuff{\DOMJUDGE_VERSION}{\SVNRevision}{\SVNDate}{\today}
 
 \section*{Samenvatting}
 
@@ -62,9 +64,6 @@ Het bekijken van inzendingen, scores en sturen en lezen van
 
 \newpage
 
-\tableofcontents
-
-\newpage
 \section{Oplossingen insturen}\label{submit}
 
 Het insturen van oplossingen voor problemen kan op twee verschillende
