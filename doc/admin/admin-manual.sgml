@@ -668,12 +668,6 @@ installed on the jury system and made sure that PHP correctly works
 with it. Refer to the documentation of your web server and PHP for
 details.
 
-If you want to upload large testcases in the jury web interface,
-it may be necessary to raise some PHP limits or you'll get
-"memory exhausted" errors. Make sure that the parameters
-<tt>memory_limit</tt>, <tt>upload_max_filesize</tt> and <tt>post_max_size</tt>
-in <tt>php.ini</tt> are all well above the size of your largest testcase.
-
 To configure the web server for DOMjudge, use the Apache configuration
 snippet from <tt>etc/apache.conf</tt>. Some values are prefilled from
 global.cfg but may need to be changed. Reload the web server for the
@@ -1662,6 +1656,8 @@ iptables -I OUTPUT -o &lt;network_interface&gt; -m owner --uid-owner &lt;testuse
 </verb>
 
 
+<appendix>
+
 <chapt>Common problems and their solutions <label id="problems">
 <p>
 
@@ -1759,8 +1755,23 @@ terminal), the copying fails.
 Another cause might be that you do not have automatic access to the
 team's account (e.g. using ssh keys).
 
+<sect>Memory limit errors in the webinterface
+<p>
 
-<appendix>
+E.g. when uploading large testdata files, one can run into an error in
+the jury web interface of the form:
+<verb>
+*Fatal error*: Allowed memory size of XX bytes exhausted (tried to
+allocate YY bytes) in */home/domjudge/system/lib/lib.database.php*
+on line *154*
+</verb>
+This means that the PHP engine has run out of memory. The solution is
+to raise the memory limits for PHP. This can be done by either editing
+<tt>etc/apache.conf</tt> and raising the <tt>memory_limit</tt>,
+<tt>upload_max_filesize</tt> and <tt>post_max_size</tt> values under
+the jury directory or by directly editing the global Apache or
+<tt>php.ini</tt> configuration.
+
 
 <chapt>DOMjudge and the ICPC validator interface standard <label id="validator">
 <p>
