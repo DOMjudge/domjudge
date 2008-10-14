@@ -36,7 +36,7 @@ $(TARGETSPDF): %.pdf: %.tex team-manual-preamble.tex \
 texclean:
 	-rm -f $(addsuffix .aux,$(TARGETS)) \
 	       $(addsuffix .log,$(TARGETS)) \
-	       $(addsuffix .toc,$(TARGETS)) \
+	       $(addsuffix .out,$(TARGETS)) \
 	       systemconfig.aux
 
 clean: texclean
