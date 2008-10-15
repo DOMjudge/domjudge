@@ -1,4 +1,4 @@
-\documentclass[11pt,a4paper]{article}
+\documentclass[11pt,a4paper,twoside]{article}
 
 % $Id$
 
@@ -11,8 +11,13 @@
 \usepackage{wrapfig}
 \usepackage{expdlist}
 \usepackage{svn}
-\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{color}
+\usepackage[colorlinks=true,urlcolor=blue,linkcolor=blue]{hyperref}
 
+\pagestyle{fancy}
+\renewcommand{\sectionmark}[1]{\markboth{\thesection.\ #1}{}}
 
 % Begin new paragraphs without indentation but vertical space.
 \setlength{\parindent}{0pt}
@@ -35,24 +40,41 @@
 \newcommand{\generated}{Generated}
 \makeatletter
 \newcommand{\titlestuff}[4]{%
+
+  \thispagestyle{plain}
   \vspace*{-3cm}
-  \parbox[t]{\linewidth}{
-    \begin{wrapfigure}[10]{r}{2cm}
+  \parbox[t]{\linewidth}{%
+    \begin{wrapfigure}[1]{r}{2cm}
       \vspace*{-1cm}\hfill
       \includegraphics[height=4cm]{../logos/DOMjudgelogo.pdf}
     \end{wrapfigure}
-    \normalfont
-    {\usefont{T1}{phv}{m}{n}\fontsize{26pt}{26pt}\selectfont
-      \bfseries \@title\footnotemark \par}
-    \vskip 0.3cm
-  }% end parbox
-    \footnotetext{
-    \begin{tabular}[t]{ll}
-      \versionrevison: & #1 / #2 \\
-      \lastmodified:   & #3 \\
-      \generated:      & #4 \\
-    \end{tabular}
+    {\fontfamily{phv}\fontseries{b}\fontsize{26pt}{28pt}\selectfont \@title \par}
+  }
+  \vskip 2cm
+
+  % Setup fancy headers/footers (here because we need SVN stuff defined)
+  \def\setupfancystuff{%
+    \fancyhead{}
+    \fancyfoot{}
+    \fancyfoot[RO,LE]{\thepage}
+    \fancyfoot[LO,RE]{%
+      \color[gray]{0.5}\vspace{-0.3cm}
+      \begin{tabular}{ll}
+        \versionrevison: & #1 / #2 \\
+        \lastmodified:   & #3 \\
+        \generated:      & #4 \\
+      \end{tabular}
     }
-  \vskip 1.5cm
+  }
+
+  % First for fancy page style:
+  \setupfancystuff
+  \fancyhead[RO,LE]{\slshape \firstleftmark}
+  
+  % No headers for plain page style (titlepage):
+  \fancypagestyle{plain}{%
+    \setupfancystuff
+    \renewcommand{\headrulewidth}{0pt}
+  }
 }
 \makeatother
