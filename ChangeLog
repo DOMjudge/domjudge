@@ -19,6 +19,7 @@ Version 3.0.0 - SVN
  - Don't use -fstack-protector under Cygwin. (Closes: #2144713)
  - Distribute prebuilt versions of the admin and judge manuals and
    remove svn,expdlist downloads for the team manual.
+ - New compactified layout of team manual.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------
