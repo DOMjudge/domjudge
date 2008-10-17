@@ -139,3 +139,16 @@ void initsignals()
 	if ( sigaction(SIGHUP ,&sa,NULL)!=0 ) error(errno,"installing signal handler");
 	if ( sigaction(SIGINT ,&sa,NULL)!=0 ) error(errno,"installing signal handler");
 }	
+
+char *stripendline(char *str)
+{
+	size_t i, j;
+	
+	for(i=0, j=0; str[i]!=0; i++) {
+		if ( ! (str[i]=='\n' || str[i]=='\r') ) str[j++] = str[i];
+	}
+	
+	str[j] = 0;
+
+	return str;
+}

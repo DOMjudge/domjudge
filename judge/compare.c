@@ -61,20 +61,6 @@ char *progname;
 /* filenames of commandline arguments */
 char *testin, *testout, *progout, *result, *diffout;
 
-/* Removes end-of-line characters (CR and LF) from string */
-char *stripendline(char *str)
-{
-	size_t i, j;
-	
-	for(i=0, j=0; str[i]!=0; i++) {
-		if ( ! (str[i]=='\n' || str[i]=='\r') ) str[j++] = str[i];
-	}
-	
-	str[j] = 0;
-
-	return str;
-}
-
 /* Write an XML result file with result message */
 void writeresult(char *msg)
 {

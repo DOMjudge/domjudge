@@ -53,8 +53,12 @@ void initsignals();
  * upon receiving TERMINATE, HANGUP and INTERRUPT signals which sets
  * 'extern int exitsignalled = 1'. The sleep() call will automatically
  * return on receiving a signal.
-  */
+ */
 
+char *stripendline(char *);
+/* Removes end-of-line characters (CR and LF) from string. Returns the
+ * original pointer to the modified string. */
+	
 #ifdef __cplusplus
 }
 #endif
