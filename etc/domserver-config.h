@@ -3,6 +3,18 @@
 
 #include "domserver-static.h"
 
+#define ENABLE_CMDSUBMIT_SERVER 1
+#define ENABLE_WEBSUBMIT_SERVER 1
+#define SUBMITCLIENT_METHOD     1
+
+/* Define the command to copy files to the user submit directory in the
+   submit client differently under Windows and Linux */
+#if defined(__CYGWIN__) || defined(__CYGWIN32__)
+#define COPY_CMD "c:/cygwin/bin/cp"
+#else
+#define COPY_CMD "cp"
+#endif
+
 #define SUBMITPORT   9147
 #define USERDIR      ".domjudge"
 #define USERPERMDIR  0700
