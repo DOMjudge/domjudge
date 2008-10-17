@@ -562,6 +562,7 @@ char readanswer(const char *answers)
 
 int file_istext(char *filename)
 {
+	const char cmd[5] = "file";
 	char *args[MAXARGS];
 	int redir_fd[3];
 	FILE *rpipe;
@@ -571,33 +572,43 @@ int file_istext(char *filename)
 	int texttype;
 
 	/* Try to detect file type by running 'file', if available */
+	logmsg(LOG_DEBUG,"trying to check file type with '%s'",cmd);
+	
 	args[0] = filename;
 	redir_fd[0] = redir_fd[2] = 0;
 	redir_fd[1] = 1;
-	if ( (cpid = execute("file",args,1,redir_fd,1))<0 ) {
-		logmsg(LOG_DEBUG,"cannot execute 'file' to detect file type, skipping");
-		texttype = 1;
+	texttype = 0;
+	if ( (cpid = execute(cmd,args,1,redir_fd,1))<0 ) {
+		error(errno,"executing '%s %s'",cmd,args[0]);
 	} else {
-		logmsg(LOG_DEBUG,"checking file type with 'file'");
-		
+
 		/* Bind file stdout/stderr to pipe */
 		if ( (rpipe = fdopen(redir_fd[1],"r"))==NULL ) {
-			error(errno,"opening pipe from file output");
+			error(errno,"opening pipe from '%s' output",cmd);
 		}
 	
 		/* Read stdout and check file type */
-		texttype = 0;
 		while ( fgets(line,255,rpipe)!=NULL ) {
+			stripendline(line);
+			logmsg(LOG_DEBUG,"%s output: '%s'",cmd,line);
 			if ( strstr(line,"text")!=NULL ) texttype = 1;
 		}
 		
-		if ( fclose(rpipe)!=0 ) error(errno,"closing pipe from file output");
+		if ( fclose(rpipe)!=0 ) error(errno,"closing pipe from '%s' output",cmd);
 	
-		if ( waitpid(cpid,&status,0)<0 ) error(errno,"waiting for file");
+		if ( waitpid(cpid,&status,0)<0 ) error(errno,"waiting for '%s'",cmd);
 
 		/* Check file exitcode (should be zero) */
 		if ( WIFEXITED(status) && WEXITSTATUS(status)!=0 ) {
-			error(0,"file exited with exitcode %d",WEXITSTATUS(status));
+			warning(0,"'%s' exited with exitcode %d, last line of output:\n%s",
+			        cmd,WEXITSTATUS(status),line);
+			return 1;
+		}
+
+		/* Abnormal command termination, probably 'file' not available */
+		if ( ! WIFEXITED(status) ) {
+			logmsg(LOG_DEBUG,"cannot execute '%s' to detect file type, skipping",cmd);
+			return 1;
 		}
 	}
 
