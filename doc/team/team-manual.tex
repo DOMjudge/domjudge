@@ -270,6 +270,15 @@ runs in one process.
 
 \end{description}
 
+\subsection{Java class naming}
+
+Java submissions should adhere to a strict naming scheme for the main
+class. The main class should be ``\verb!Main!'', with method
+``\verb!public static void main(String args[])!'', see also the Java
+code example in appendix \ref{codeexamples}. The reason is that Sun
+Java compiler (which is used by default) generates a class file
+dependent on the main class name and there is unfortunately no robust
+way to detect that main class name.
 
 \newpage
 \appendix
