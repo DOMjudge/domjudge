@@ -128,6 +128,7 @@ void usage();
 void usage2(int , const char *, ...);
 void warnuser(const char *);
 char readanswer(const char *answers);
+int  file_istext(char *filename);
 
 #ifdef CMDSUBMIT
 int  cmdsubmit();
@@ -302,6 +303,7 @@ int main(int argc, char **argv)
 	if ( stat(filename,&fstats)!=0 ) usage2(errno,"cannot find `%s'",filename);
 	logmsg(LOG_DEBUG,"submission file is %s",filename);
 
+	/* Do some sanity checks on submission file and warn user */
 	nwarnings = 0;
 
 	if ( ! (fstats.st_mode & S_IFREG) ) warnuser("file is not a regular file");
@@ -318,6 +320,8 @@ int main(int argc, char **argv)
 		warnuser(ptr);
 		free(ptr);
 	}
+
+	if ( !file_istext(filename) ) warnuser("file is detected as binary/data");
 	
 	/* Try to parse problem and language from filename */
 	filebase = string(gnu_basename(filename));
@@ -554,6 +558,50 @@ char readanswer(const char *answers)
 	tcsetattr(STDIN_FILENO,TCSANOW,&old_termio);
 
 	return c;
+}
+
+int file_istext(char *filename)
+{
+	char *args[MAXARGS];
+	int redir_fd[3];
+	FILE *rpipe;
+	pid_t cpid;
+	int status;
+	char line[256];
+	int texttype;
+
+	/* Try to detect file type by running 'file', if available */
+	args[0] = filename;
+	redir_fd[0] = redir_fd[2] = 0;
+	redir_fd[1] = 1;
+	if ( (cpid = execute("file",args,1,redir_fd,1))<0 ) {
+		logmsg(LOG_DEBUG,"cannot execute 'file' to detect file type, skipping");
+		texttype = 1;
+	} else {
+		logmsg(LOG_DEBUG,"checking file type with 'file'");
+		
+		/* Bind file stdout/stderr to pipe */
+		if ( (rpipe = fdopen(redir_fd[1],"r"))==NULL ) {
+			error(errno,"opening pipe from file output");
+		}
+	
+		/* Read stdout and check file type */
+		texttype = 0;
+		while ( fgets(line,255,rpipe)!=NULL ) {
+			if ( strstr(line,"text")!=NULL ) texttype = 1;
+		}
+		
+		if ( fclose(rpipe)!=0 ) error(errno,"closing pipe from file output");
+	
+		if ( waitpid(cpid,&status,0)<0 ) error(errno,"waiting for file");
+
+		/* Check file exitcode (should be zero) */
+		if ( WIFEXITED(status) && WEXITSTATUS(status)!=0 ) {
+			error(0,"file exited with exitcode %d",WEXITSTATUS(status));
+		}
+	}
+
+	return texttype;
 }
 
 #ifdef CMDSUBMIT
