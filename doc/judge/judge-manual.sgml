@@ -180,9 +180,20 @@ allowed to run twice the time that has been specified under Problems.
 This can be used to compensate for the execution speed of a language,
 e.g. Java.
 
+<sect>Testing jury solutions
+<p>
+
+Before a contest, you will want to have tested your reference
+solutions on the system to see whether those are judged as expected
+and maybe use their runtimes to set timelimits for the problems.
+There is no special method to test such solutions; the easiest way is
+to submit these as a special team before the contest. This requires
+some special care and coordination with the contest administrator. See
+the administrator's manual for more details.
 
 <sect>Practice Session
 <p>
+
 If your contest has a test session or practice contest, use it also as
 a general rehearsal of the jury system: judge test submissions as you
 would do during the real contest and answer incoming clarification
