@@ -64,7 +64,7 @@ int execute(const char *cmd, char **args, int nargs, int stdio_fd[3], int err2ou
 		
 		/* Replace child with command */
 		execvp(cmd,argv);
-		return -1;
+		abort();
 		
 	default: /* parent process */
 		/* Set and close file descriptors */
