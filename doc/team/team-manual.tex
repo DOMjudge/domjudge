@@ -21,10 +21,10 @@ Here follows a short summary of the system interface. This is meant as
 a quick introduction, to be able to start using the system. It is
 however strongly advised that at least one of your team's members
 read all of this manual. There are specific details of this
-jury-system that might become of importance when you run into
+jury system that might become of importance when you run into
 problems (like an incorrect solution). \textbf{BE WARNED!}
 
-DOMjudge works through a web-interface that can be found at\\
+DOMjudge works through a web interface that can be found at\\
 \url{\WEBBASEURI team}.
 
 \subsection*{Reading and writing}
@@ -37,15 +37,15 @@ examples.
 \subsection*{Submitting solutions}
 
 You can submit solutions with the command-line program \cmd{submit} or
-by the web-interface:
+by the web interface:
 \begin{description}[\breaklabel\setlabelstyle{\bfseries}]
 \item[Command-line]
 Use \cmd{submit <problem>.<extension>}, where \cmd{<problem>} is the
 label of the problem and \cmd{<extension>} is a standard extension for
 your language.  For a complete reference of all options and examples,
 see \cmd{submit --help}.
-\item[Web-interface]
-From your teampage \url{\WEBBASEURI team}, browse to
+\item[Web interface]
+From your team page \url{\WEBBASEURI team}, browse to
 \textbf{submit} and select the file you want to submit. By default,
 the problem is selected from the base of the filename and the language
 from the extension.
@@ -54,7 +54,7 @@ from the extension.
 \subsection*{Viewing scores, submissions, etc.}
 
 Viewing scores, submissions and sending and reading clarification
-requests is done through the web-interface. The menu buttons at
+requests is done through the web interface. The menu buttons at
 \url{\WEBBASEURI team} speak for themselves.
 
 \emph{End of summary}
@@ -66,7 +66,7 @@ requests is done through the web-interface. The menu buttons at
 \section{Submitting solutions}\label{submit}
 
 Submitting solutions can be done in two ways: with the command-line
-program \cmd{submit} or using the web-interface. One of the
+program \cmd{submit} or using the web interface. One of the
 interfaces might not be available, depending on the system
 configuration by the jury. A description of both methods follows.
 
@@ -84,7 +84,7 @@ when the help text does not fit on one screen.
 
 \cmd{submit} will check your file and warns you for some problems:
 for example when the file has not been modified for a long time or
-when it's larger than the maximum source-code size.
+when it's larger than the maximum source code size.
 
 Then \cmd{submit} displays a summary with all details of your
 submission and asks for confirmation. Check whether you are submitting
@@ -100,9 +100,9 @@ function correctly. Furthermore a ``public ssh-key'' of the jury has
 been added to the \textsc{ssh} configuration; this is also necessary
 for the functioning of \cmd{submit}.
 
-\subsection{Web-interface}
+\subsection{Web interface}
 
-Solutions can be submitted from the web-interface at \url{\WEBBASEURI team}.
+Solutions can be submitted from the web interface at \url{\WEBBASEURI team}.
 Navigate to \textbf{submit}, there you can select a file for
 submission and the problem and language. These can also be left on the
 default `automatic' setting; then the problem and language will be
@@ -129,10 +129,9 @@ A submission can have the following results:
 The submission passed all tests: you solved this problem!
 
 \item[COMPILER-ERROR]
-There was an error when compiling your program. Depending on the setup
-at your site, you can view the submission details on your team page to
-see the exact error, or you might be able to see just the
-compiler\emph{warnings}.
+There was an error when compiling your program. On the submission
+details page, you can inspect the exact error (this option might be
+disabled).
 
 \item[TIMELIMIT]
 Your program took longer than the maximum allowed time for this
@@ -145,7 +144,7 @@ There was an error during the execution of your program. This can have
 a lot of different causes like division by zero, incorrectly
 addressing memory (e.g. by indexing arrays out of bounds), trying to
 use more memory than the limit, etc. 
-Also check that your program exits with exitcode 0!
+Also check that your program exits with exit code 0!
 
 \item[NO-OUTPUT]
 Your program did not generate any output. Check that you write to
@@ -162,8 +161,8 @@ correct results. This will, like WRONG-ANSWER, count as an incorrect
 submission. This result is optional and might be disabled.
 
 \item[TOO-LATE]
-Bummer, you submitted after the contest ended! Your submission is stored but
-will not be processed anymore.
+Bummer, you submitted after the contest ended! Your submission is
+stored but will not be processed anymore.
 \end{description}
 
 \section{Clarifications}
@@ -184,28 +183,28 @@ the page.
 
 \section{How are submissions being judged?}
 
-The \DOMjudge jury-system is fully automated. In principle no human
+The \DOMjudge jury system is fully automated. In principle no human
 interaction is necessary. The judging is done in the following way:
 
 \subsection{Submitting solutions}
 
-With the \cmd{submit} program or the web-interface (see section
+With the \cmd{submit} program or the web interface (see section
 \ref{submit}), you can submit a solution to a problem to the jury.
-Note that you have to submit the source-code of your program
+Note that you have to submit the source code of your program
 (and not a compiled program or the output of your program).
 
 There your program enters a queue, awaiting being compiled, executed
-and tested on one of the jury-computers.
+and tested on one of the jury computers.
 
 \subsection{Compilation}
 
-Your program will be compiled on a jury-computer running Linux.
+Your program will be compiled on a jury computer running Linux.
 Using a different compiler or operating system than the jury should
 not be a problem. Be careful however, not to use any special compiler
 and/or system specific things (you may be able to check compiler errors
 on the team page).
 
-The jury-system compiles all programs statically. This should not
+The jury system compiles all programs statically. This should not
 matter concerning generated errors.
 
 \subsection{Testing}
@@ -213,7 +212,7 @@ matter concerning generated errors.
 After your program has compiled successfully, it will be executed and
 its output compared to the output of jury. Before comparing the
 output, the exit status of your program is checked: if your programs
-gives the correct answer, but exits with a nonzero exitcode, the
+gives the correct answer, but exits with a nonzero exit code, the
 result will be a \textsc{run-error}! There are some restrictions during
 execution. If your program violates these, it will also be aborted
 with a \textsc{run-error}, see section \ref{runlimits}.
@@ -226,7 +225,7 @@ function.
 
 \subsection{Restrictions}\label{runlimits}
 
-To prevent abuse, keep the jury-system stable and give everyone
+To prevent abuse, keep the jury system stable and give everyone
 clear and equal environments, there are some restrictions to which all
 submissions are subjected:
 
@@ -239,7 +238,7 @@ problems. Should this happen to a normal program, please inform the
 jury right away.
 
 \item[source size]
-The source-code of your program may not exceed \SOURCESIZE\ kilobytes.
+The source code of your program may not exceed \SOURCESIZE\ kilobytes.
 When submitting your program you will already be warned for this, but
 during compilation this will result in a compile error.
 
@@ -258,7 +257,7 @@ kilobytes (per file).
 \item[number of processes]
 You are not supposed to create multiple processes (threads). This is
 to no avail anyway, because your program has exactly 1 processor fully
-at its disposal. To increase stability of the jury-system, there is a
+at its disposal. To increase stability of the jury system, there is a
 maximum of \PROCLIMIT\ processes that can be run simultaneously
 (including processes that started your program).
 
@@ -268,6 +267,15 @@ runs in one process.
 
 \end{description}
 
+\subsection{Java class naming}
+
+Java submissions should adhere to a strict naming scheme for the main
+class. The main class should be ``\verb!Main!'', with method
+``\verb!public static void main(String args[])!'', see also the Java
+code example in appendix \ref{codeexamples}. The reason is that Sun
+Java compiler (which is used by default) generates a class file
+dependent on the main class name and there is unfortunately no robust
+way to detect that main class name.
 
 \newpage
 \appendix
@@ -285,7 +293,7 @@ on a separate line.
 
 Sample input and output for this problem:
 
-\begin{tabular}{|p{0.5\textwidth}|p{0.5\textwidth}|}
+\begin{tabular}{|p{0.47\textwidth}|p{0.47\textwidth}|}
 \hline
 \textbf{Input} & \textbf{Output} \\
 \hline
