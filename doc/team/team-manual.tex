@@ -3,17 +3,21 @@
 \usepackage[english]{babel}
 
 % For inclusion of the correct date (last modified)
-\SVNdate $Date$
+\SVN $Date$
+\SVN $Revision$
 
-\title{Team manual \DOMjudge\\(version \DOMJUDGE_VERSION)}
+\title{\DOMjudge team manual}
+
+\hypersetup{
+	pdftitle={DOMjudge team manual},
+	pdfauthor={DOMjudge Developers: domjudge-devel at lists.a-eskwadraat.nl},
+	pdfsubject={Instruction for teams using the interface of the DOMjudge jury system during a programming contest},
+	pdfkeywords={DOMjudge,manual,team,judge,jury,programming,contest,icpc,acm}
+}
 
 \begin{document}
 
-\begin{titlepage}
-\maketitle
-\end{titlepage}
-
-\newpage
+\titlestuff{\DOMJUDGE_VERSION}{\SVNRevision}{\SVNDate}{\today}
 
 \section*{Summary}
 
@@ -59,8 +63,6 @@ requests is done through the web-interface. The menu buttons at
 
 \emph{End of summary}
 
-\newpage
-\tableofcontents
 \newpage
 
 \section{Submitting solutions}\label{submit}
@@ -285,7 +287,7 @@ on a separate line.
 
 Sample input and output for this problem:
 
-\begin{tabular}{|p{0.5\textwidth}|p{0.5\textwidth}|}
+\begin{tabular}{|p{0.47\textwidth}|p{0.47\textwidth}|}
 \hline
 \textbf{Input} & \textbf{Output} \\
 \hline
