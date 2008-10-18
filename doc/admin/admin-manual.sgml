@@ -1235,10 +1235,11 @@ paper.
 <em>Note:</em> the web interface will only allow a team to
 authenticate themselves once. If an IP is set, a next authentication
 will be refused (to avoid trouble with lingering passwords). In order
-to fully re-authenticate a team, the IP address needs to be set to
-NULL in the database. Furthermore, a team must explicitly connect to
-the team interface, because with an unknown IP, the root DOMjudge
-website will redirect to the public interface.
+to fully re-authenticate a team, the IP address needs to be unset. You
+might also want to generate a new password for this specific team.
+Furthermore, a team must explicitly connect to the team interface,
+because with an unknown IP, the root DOMjudge website will redirect to
+the public interface.
 
 <sect1>Set IP upon first submission
 <p>
@@ -1321,6 +1322,39 @@ judgedaemon.
 
 When all this worked, you're quite ready for a contest. Or at least,
 the practice session of a contest.
+
+<sect>
+<p>
+
+Before running a real contest, the you and/or the jury will want to
+test their reference solutions on the system.
+
+There is no special feature for testing there solutions under
+DOMjudge. The simplest approach is to submit these solutions as a
+special team. This method requires a few steps and some carefullness
+to prevent a possible information leak about the problems. It is
+assumed that you have completely configured the system and contest and
+all testdata is provided. To submit the jury solutions the following
+steps have to be taken:
+<itemize>
+<item> change the contest time to make the contest currently active;
+<item> setup a special team at a local computer;
+<item> submit the jury solutions as that team;
+<item> check that all solutions are judged as expected in the jury
+       interface;
+<item> revert the contest to the original times.
+</itemize>
+Note that while the contest time is changed to the current time,
+anyone might be able to access the public or team web-interface:
+there's not too much there, but on the scoreboard the number of
+problems and their titles can be read. To prevent this information
+leak, one could disconnect the DOMjudge server, judgehosts and
+temporary local team computer from the rest of the network.
+
+Furthermore, you should make sure that the team you submit the
+solutions as, is in a category which is set to invisible, so that it
+doesn't show up on the public and team scoreboard.
+
 
 <chapt>Team Workstations<label id="teamworkstations">
 <p>
