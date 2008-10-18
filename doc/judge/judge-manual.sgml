@@ -2,21 +2,20 @@
 <!--
  $Id$
 
- DOMjudge Judger's Manual
+ DOMjudge Jury Manual
  This manual is part of the DOMjudge Programming Contest Jury System
  and licenced under the GNU GPL. See README and COPYING for details.
 -->
 <report>
 
-<title>DOMjudge Judger's Manual
+<title>DOMjudge Jury Manual
 <author>by the DOMjudge team
 <date>$Date$
 
 <abstract>
-This document provides information about DOMjudge aimed at a judger
-operating the system during the contest:
-viewing and checking submissions and working with clarification
-requests.
+This document provides information about DOMjudge aimed at a jury
+member operating the system during the contest: viewing and checking
+submissions and working with clarification requests.
 
 A separate manual is available for teams and administrators.
 
@@ -95,7 +94,7 @@ url="mailto:domjudge-devel@lists.a-eskwadraat.nl">
 
 <chapt>General
 <p>
-The jury interface is accessed through a web browser. The first page
+The jury interface is accessed through a web browser. The main page
 shows a list of various overviews, and the most important of those are
 also included in the menu bar at the top. The menu bar will refresh
 occasionally to allow for new information to be presented. It also has
@@ -129,9 +128,9 @@ that it's correct to do so.
 <p>
 The scoreboard is the most important view on the contest.
 
-Before the contest has started, the scoreboard will not display
-anything (or, the standings from the previous contest, if any). It
-will become available in the first second after the contest started.
+The scoreboard will display an upcoming contest from a given
+`activatetime'; only at first second of the real start of the contest
+it will show the problems however.
 
 It is possible to freeze the scoreboard at a given time, commonly
 one hour before the contest ends, to keep the last hour interesting
@@ -181,9 +180,20 @@ allowed to run twice the time that has been specified under Problems.
 This can be used to compensate for the execution speed of a language,
 e.g. Java.
 
+<sect>Testing jury solutions
+<p>
+
+Before a contest, you will want to have tested your reference
+solutions on the system to see whether those are judged as expected
+and maybe use their runtimes to set timelimits for the problems.
+There is no special method to test such solutions; the easiest way is
+to submit these as a special team before the contest. This requires
+some special care and coordination with the contest administrator. See
+the administrator's manual for more details.
 
 <sect>Practice Session
 <p>
+
 If your contest has a test session or practice contest, use it also as
 a general rehearsal of the jury system: judge test submissions as you
 would do during the real contest and answer incoming clarification
@@ -233,7 +243,7 @@ The flow of an incoming submission is as follows.
       verified.
 <item>If verification is required, a judge inspects the judging. Only
       after it has been approved (marked as <em>verified</em>) will
-      the result be visible outside the jury room.
+      the result be visible outside the jury interface.
 </enum>
 
 <sect1>Submission judging status codes
