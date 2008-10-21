@@ -2,37 +2,30 @@
 
 # Java compile wrapper-script for 'test_solution.sh'.
 # See that script for syntax and more info.
-#
-# This script byte-compiles with the Sun javac compiler and generates
-# a shell script to run it with the java interpreter later.
-#
-# NOTICE: this compiler script cannot be used with the USE_CHROOT
-# configuration option turned on, unless proper preconfiguration of
-# the chroot environment has been taken care of!
 
 SOURCE="$1"
 DEST="$2"
 MEMLIMIT="$3"
-
-# Sun java needs filename to match main class:
 MAINCLASS=""
 
 # Byte-compile:
-javac $SOURCE
+javac -d . $SOURCE
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
 # Look for class that has the 'main' function:
-for fn in *.class; do
-	cn=$(basename $fn .class)
-	if [ -n "$(javap -public $cn | grep 'public static void main(java.lang.String\[\])')" ]; then
+for cn in $(find * -type f -regex '^.*\.class$' \
+		| sed -e 's/\.class$//' -e 's/\//./'); do
+	javap -public "$cn" \
+	| grep -q 'public static void main(java.lang.String\[\])' \
+	&& {
 		if [ -n "$MAINCLASS" ]; then
-			echo "Warning: found another 'main' in class $vn"
+			echo "Warning: found another 'main' in '$cn'"
 		else
-			echo "Info: using 'main' from class $cn"
+			echo "Info: using 'main' from '$cn'"
 			MAINCLASS=$cn
 		fi
-	fi
+	}
 done
 if [ -z "$MAINCLASS" ]; then
 	echo "Error: no 'main' found in any class file."
