@@ -1,0 +1,73 @@
+#!/usr/bin/php -q
+<?php
+/**
+ * Extracts all the submissions from the db.
+ *
+ * Things to fix:
+ * - requires php 5.0 (due to file_put_contents)
+ * - everything is dumped in the current dir.
+ * - add logging that IS useful
+ *
+ * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+
+require ('../etc/config.php');
+
+define ('SCRIPT_ID', 'extractor');
+define ('LOGFILE', LOGDIR.'/extractor.log');
+
+require (SYSTEM_ROOT . '/lib/init.php');
+
+$verbose = LOG_INFO;
+
+logmsg(LOG_NOTICE, "Submission extractor [DOMjudge/".DOMJUDGE_VERSION."]");
+
+$tbl = $DB->q('TABLE SELECT `cid`, `probid` '.
+				'FROM `problem` '.
+				'ORDER BY `cid`, `probid`');
+
+foreach($tbl as $tbline)
+{
+	$cid    = $tbline['cid'];
+	$probid = $tbline['probid'];
+
+	$cases = $DB->q('TABLE SELECT id, input, output '.
+					'FROM testcase '.
+					'WHERE probid = %i'
+					, $probid
+					);
+	if(empty($cases)) {
+		echo "cid $cid: problid $probid has no testcase(s)!\n";
+	}
+	foreach($cases as $case)
+	{
+		file_put_contents($cid	.'_'.$probid
+								.'_'.$case['id']
+								.'_input.bin'
+							, $case['input']);
+		file_put_contents($cid	.'_'.$probid
+								.'_'.$case['id']
+								.'_output.bin'
+							, $case['output']);
+	}
+
+	$res = $DB->q('SELECT s.*, l.extension ' .
+					'FROM submission s, language l '.
+					'WHERE s.langid = l.langid AND s.cid = %i '
+					, $cid
+					);
+	while(($row = $res->next()))
+	{
+		file_put_contents($cid	.'_'.$row['submitid']
+								.'_'.strtotime($row['submittime'])
+								.'_'.$row['teamid']
+								.'_'.$row['probid']
+								.'.'.$row['extension']
+						, $row['sourcecode']);
+	}
+}
+
