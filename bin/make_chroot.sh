@@ -186,6 +186,8 @@ chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
 	/usr/bin/gpasswd /usr/bin/passwd /usr/bin/gpg /usr/lib/pt_chown \
 	/bin/su /bin/mount /bin/umount /sbin/unix_chkpwd"
 
+# Disable root account
+sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
 
 umount "$CHROOTDIR/proc"
 
