@@ -273,3 +273,5 @@ CREATE TABLE `testcase` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';
 
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+
+-- vim:tw=0:
