@@ -93,9 +93,9 @@ CREATE TABLE `judging` (
   KEY `submitid` (`submitid`),
   KEY `judgehost` (`judgehost`),
   KEY `cid` (`cid`),
-  CONSTRAINT `judging_ibfk_9` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`),
-  CONSTRAINT `judging_ibfk_7` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`),
-  CONSTRAINT `judging_ibfk_8` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`)
+  CONSTRAINT `judging_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`),
+  CONSTRAINT `judging_ibfk_2` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`),
+  CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Result of judging a submission';
 
 --
@@ -185,11 +185,11 @@ CREATE TABLE `submission` (
   KEY `probid` (`probid`),
   KEY `langid` (`langid`),
   KEY `judgehost_2` (`judgehost`),
-  CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`),
   CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`),
   CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`),
   CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`),
-  CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`)
+  CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`),
+  CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All incoming submissions';
 
 --
@@ -213,8 +213,8 @@ CREATE TABLE `team` (
   UNIQUE KEY `ipaddress` (`ipaddress`),
   KEY `affilid` (`affilid`),
   KEY `categoryid` (`categoryid`),
-  CONSTRAINT `team_ibfk_2` FOREIGN KEY (`affilid`) REFERENCES `team_affiliation` (`affilid`),
-  CONSTRAINT `team_ibfk_1` FOREIGN KEY (`categoryid`) REFERENCES `team_category` (`categoryid`)
+  CONSTRAINT `team_ibfk_1` FOREIGN KEY (`categoryid`) REFERENCES `team_category` (`categoryid`),
+  CONSTRAINT `team_ibfk_2` FOREIGN KEY (`affilid`) REFERENCES `team_affiliation` (`affilid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All teams participating in the contest';
 
 --
