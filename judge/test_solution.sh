@@ -161,11 +161,6 @@ chmod a+r source.$EXT
 
 logmsg $LOG_INFO "starting compile"
 
-if [ `cat source.$EXT | wc -c` -gt $(($SOURCESIZE*1024)) ]; then
-	echo "Source-code is larger than $SOURCESIZE kB." >>compile.out
-	exit $E_COMPILE
-fi
-
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
 ( "$RUNGUARD" ${DO_DEBUG:+-v} -t $COMPILETIME -o compile.time -- \

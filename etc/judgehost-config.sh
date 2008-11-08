@@ -16,11 +16,6 @@ CHROOT_SCRIPT=chroot-startstop.sh
 # Maximum seconds available for compiling
 COMPILETIME=30
 
-# Maximum size of solution source code in kB
-# This must not be greater than the submission.sourcecode field
-# in the database (normally MEDIUMBLOB = 16MB)
-SOURCESIZE=256
-
 # Maximum memory usage by RUNUSER in kB
 # This includes the shell which starts the compiled solution and 
 # also any interpreter like Sun 'java', which takes 200MB away!
