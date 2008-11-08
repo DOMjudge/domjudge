@@ -10,7 +10,7 @@
 require('init.php');
 requireAdmin();
 
-require(WWWLIB_PATH."/.." . '/lib/relations.php');
+require(LIBDIR . '/relations.php');
 
 $t = @$_REQUEST['table'];
 
