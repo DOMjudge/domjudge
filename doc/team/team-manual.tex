@@ -65,6 +65,56 @@ requests is done through the web interface. The menu buttons at
 
 \newpage
 
+\section{Computer systems}
+
+During the NWERC, the computer systems of the Computer Science
+department of Utrecht University will be used. Each team has been
+given the choice of Windows 2000 or Linux as operating system. Please
+check that you have been assigned the correct O/S as specified in the
+registration webform on the NWERC website.
+
+\subsection{Account and logging in}
+
+Each team has been provided an account \cmd{nwercXX}, but no password.
+Logging in will be done by the organization and \emph{you should not
+  log out}: it might take some time before someone arrives to log you
+in again.
+
+The \DOMjudge team web interface does not require authentication: you
+should be able to view your team page just by visiting \url{\WEBBASEURI
+  team} in your browser.
+
+Your account will be cleaned and restored to its original state
+between the Saturday test session and the contest on Sunday.
+
+\subsection{Windows}
+
+On your desktop is a folder \cmd{NWERC}, which should contain (almost)
+everything you need: documentation, browsers, editors and a Cygwin shell.
+
+The Cygwin shell must be used to run the command line submit client and can be
+used to look up C-function manual pages with \cmd{man <pagename>}. You can also
+use it to compile with \cmd{gcc} and \cmd{g++} for C and C++ respectively.
+
+As browser you can use either Internet Explorer or Firefox. Unfortunately the
+default home page of IE is wrong.
+
+To print you should use the default printer called \cmd{MS Publisher
+Imagesetter on printhost.nwerc.eu}.
+
+Store your solutions in your homedrive (H:\textbackslash).
+
+\subsection{Linux}
+
+Under Linux, the documentation can be found in the folder
+\cmd{NWERC-documentation} on your desktop. We support Firefox as the browser.
+
+Printing is done by using the \cmd{lpr} or \cmd{a2ps} commands.
+
+The keyboard layout can be changed using the \cmd{Keyboard applet} in the top
+right corner (the \emph{USA} label).
+
+
 \section{Submitting solutions}\label{submit}
 
 Submitting solutions can be done in two ways: with the command-line
@@ -317,15 +367,7 @@ Notice the last \cmd{return 0;} to prevent a \textsc{run-error}!
 A solution in C++:
 \listinginput{1}{../examples/example.cc}
 
-A solution in Pascal:
-\listinginput{1}{../examples/example.pas}
-
-\newpage
-
 A solution in Java:
 \listinginput{1}{../examples/example.java}
-
-And finally a solution in Haskell:
-\listinginput{1}{../examples/example.hs}
 
 \end{document}
