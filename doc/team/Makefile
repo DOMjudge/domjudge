@@ -5,7 +5,7 @@ include $(TOPDIR)/Makefile.global
 
 CONFIGDIR = $(TOPDIR)/etc
 
-TARGETS = team-manual team-manual-NL
+TARGETS = team-manual
 
 TARGETSPDF = $(addsuffix .pdf,$(TARGETS))
 
