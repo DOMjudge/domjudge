@@ -8,6 +8,7 @@ Version NWERC2008 - SVN
  - Merge team manual restyle from trunk.
  - Merge team manual updates from 2.2 branch r2460 (originally from trunk).
  - Merge judge,admin manual improvements from trunk r2454-2457.
+ - Fix error in XML validation schema.
 
 Version 2.2.2 - 8 October 2008
 ------------------------------
