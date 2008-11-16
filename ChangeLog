@@ -6,6 +6,7 @@ Version 2.2.3 - SVN
  - Merge team manual content improvements from trunk revisions:
    2442 (partial), 2445, 2446, 2453. (Closes: #2153189)
  - Merge judge,admin manual improvements from trunk r2454-2457.
+ - Fix error in XML validation schema.
 
 Version 2.2.2 - 8 October 2008
 ------------------------------
