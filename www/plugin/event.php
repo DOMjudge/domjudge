@@ -52,7 +52,8 @@ while ( $row = $res->next() ) {
 		                WHERE s.submitid = %i', $row['submitid']);
 
 		
-		$elem = XMLaddnode($event, 'submission', NULL, array('id' => $row['submitid']));
+		$elem = XMLaddnode($event, 'submission', NULL,
+		                   array('id' => $row['submitid'], 'cid' => $row['cid']));
 
 		XMLaddnode($elem, 'team',     $data['teamname'], array('id' => $row['teamid']));
 		XMLaddnode($elem, 'problem',  $data['probname'], array('id' => $row['probid']));
@@ -67,7 +68,8 @@ while ( $row = $res->next() ) {
 		if ( !IS_JURY && infreeze($data['submittime']) ) continue(2);
 
 		XMLaddnode($event, 'judging', $data['result'],
-		           array('id' => $row['judgingid'], 'submitid' => $row['submitid']));
+		           array('id' => $row['judgingid'], 'cid' => $row['cid'],
+		                 'submitid' => $row['submitid']));
 		break;
 			
 	case 'clarification':
