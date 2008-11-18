@@ -33,7 +33,7 @@ EXCLUDEDEBS="adduser,apt-utils,aptitude,at,base-config,bsdmainutils,console-comm
 INCLUDEDEBS=""
 
 # Debian packages to install after upgrade (space separated):
-INSTALLDEBS="sun-java5-jre"
+INSTALLDEBS="sun-java6-jre"
 
 # Debian packages to remove after upgrade (space separated):
 REMOVEDEBS="dselect"
@@ -127,6 +127,9 @@ deb http://security.debian.org	etch/updates	main non-free contrib
 
 # Unstable
 #deb $DEBMIRROR			unstable	main non-free contrib
+
+# Backports for Java6
+deb http://www.backports.org/debian etch-backports main contrib non-free
 EOF
 
 cat > "$CHROOTDIR/etc/apt/apt.conf" <<EOF
@@ -175,6 +178,7 @@ sun-java5-jre	shared/error-sun-dlj-v1-1	error
 EOF
 
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
+chroot "$CHROOTDIR" /bin/sh -c "apt-get -y --allow-unauthenticated install debian-backports-keyring"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get remove $REMOVEDEBS"
