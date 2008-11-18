@@ -203,20 +203,24 @@ result('problems, languages, teams', 'Problems integrity',
 
 $res = $DB->q('SELECT * FROM language ORDER BY langid');
 
-$details = '';
+$details = ''; $langseverity = 'W';
 while($row = $res->next()) {
 	$CHECKER_ERRORS = array();
 	check_language($row);
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
 		foreach($CHECKER_ERRORS as $chk_err) {
-			$details .= $row['langid'].': ' . $chk_err ."\n";
+			$details .= $row['langid'].': ' . $chk_err;
+			// if this language is set to 'submittable', it's an error
+			if ( $row['allow_submit'] == 1 ) $langseverity = 'E';
+			else $details .= ' (but is not submittable)';
+			$details .= "\n";
 		}
 	}
 }
 
 result('problems, languages, teams',
 	'Languages integrity',
-	$details == '' ? 'O': 'E',
+	$details == '' ? 'O': $langseverity,
 	$details);
 
 
