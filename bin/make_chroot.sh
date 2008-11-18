@@ -179,6 +179,7 @@ EOF
 
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get -y --allow-unauthenticated install debian-backports-keyring"
+chroot "$CHROOTDIR" /bin/sh -c "apt-get update"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get remove $REMOVEDEBS"
