@@ -8,24 +8,10 @@ DEST="$2"
 MEMLIMIT="$3"
 MAINCLASS=""
 
-TMPFILE=`mktemp /tmp/domjudge_gcj_output.XXXXXX`
-
 # Byte-compile:
-javac -d . "$SOURCE" 2> "$TMPFILE"
+javac -d . "$SOURCE"
 EXITCODE=$?
-if [ "$EXITCODE" -ne 0 ]; then
-	# Let's see if should have named the .java differently
-	PUBLICCLASS=$(sed  -n '/class .* is public, should be declared in a file named /{s/.*named.//;s/.java.*//;p;q}' "$TMPFILE")
-	if [ -z "$PUBLICCLASS" ]; then
-		cat $TMPFILE
-		exit $EXITCODE
-	fi
-	echo "Info: renaming source to '$PUBLICCLASS.java'"
-	mv "$SOURCE" "$PUBLICCLASS.java"
-	javac -d . "$PUBLICCLASS.java"
-	EXITCODE=$?
-	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
-fi
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
 # Look for class that has the 'main' function:
 for cn in $(find * -type f -regex '^.*\.class$' \
