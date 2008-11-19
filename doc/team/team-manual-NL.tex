@@ -258,10 +258,10 @@ gedefinieerde variabelen, stack, \dots)! Als je programma meer
 probeert te gebruiken, zal het afgebroken worden, zodat dit een
 ``\textsc{run-error}'' geeft.
 
-\item[bestandsgrootte]
-Hoewel je geen bestanden mag schrijven, wordt de standaard (fout)uitvoer
-(stout/stderr) wel naar een bestand geschreven. De maximale grootte
-van deze bestanden is \FILELIMIT\ kilobytes (per bestand).
+\item[uitvoergrootte]
+Het is niet toegestaan meer dan \FILELIMIT\ kilobytes te schrijven naar
+standard out of naar standard error. Als je deze limiet overschrijdt,
+krijg je een \textsc{run-error}.
 
 \item[aantal processen]
 Het is niet de bedoeling dat je programma meerdere processen (threads)
