@@ -2,6 +2,8 @@
 
 \usepackage[english]{babel}
 
+\newcommand\NWERC{\textsc{nwerc}}
+
 % For inclusion of the correct date (last modified)
 \SVN $Date$
 \SVN $Revision$
@@ -26,7 +28,7 @@ a quick introduction, to be able to start using the system. It is
 however strongly advised that at least one of your team's members
 read all of this manual. There are specific details of this
 jury system that might become of importance when you run into
-problems (like an incorrect solution). \textbf{BE WARNED!}
+problems. \textbf{BE WARNED!}
 
 DOMjudge works through a web interface that can be found at\\
 \url{\WEBBASEURI team}.
@@ -67,11 +69,11 @@ requests is done through the web interface. The menu buttons at
 
 \section{Computer systems}
 
-During the NWERC, the computer systems of the Computer Science
+During the \NWERC, the computer systems of the Computer Science
 department of Utrecht University will be used. Each team has been
 given the choice of Windows XP or Linux as operating system. Please
 check that you have been assigned the correct O/S as specified in the
-registration webform on the NWERC website.
+registration webform on the \NWERC website.
 
 \subsection{Account and logging in}
 
@@ -102,8 +104,8 @@ default home page of IE is wrong.
 To print you should use the printer `nwerc-windows on \ldots'.
 
 Store your solutions in your homedrive (H:\textbackslash). On your homedrive
-you will also find a folder sampledata containing the sample data metioned in
-the problem set.
+you will also find a folder \verb!sampledata! containing the sample
+input/output data metioned in the problem set.
 
 To change your keyboard layout: Open the 'Keyboard Settings' shortcut on your
 desktop. Select the 'Languages' tab and click on 'Details\ldots'. Pick your
@@ -116,8 +118,8 @@ to restart these after switching.
 Under Linux, the documentation can be found in the folder
 \cmd{NWERC-documentation} on your desktop. We support Firefox as the browser.
 
-The sample data of the problem set can also be found in the folder
-\verb!~/testdata!.
+The sample input/output data of the problem set can also be found in the folder
+\verb!~/sampledata!.
 
 Printing is done by using the \cmd{lpr} or \cmd{a2ps} commands.
 
@@ -128,10 +130,9 @@ The keyboard layout can be changed by selecting 'Desktop' $\Rightarrow$
 
 \section{Submitting solutions}\label{submit}
 
-Submitting solutions can be done in two ways: with the command-line
-program \cmd{submit} or using the web interface. One of the
-interfaces might not be available, depending on the system
-configuration by the jury. A description of both methods follows.
+Submitting solutions can be done in two ways: with the command-line program
+\cmd{submit} or using the web interface.  A description of both methods
+follows.
 
 \subsection{Command-line: \cmd{submit}}
 
@@ -193,8 +194,7 @@ The submission passed all tests: you solved this problem!
 
 \item[COMPILER-ERROR]
 There was an error when compiling your program. On the submission
-details page, you can inspect the exact error (this option might be
-disabled).
+details page, you can inspect the exact error.
 
 \item[TIMELIMIT]
 Your program took longer than the maximum allowed time for this
@@ -259,8 +259,7 @@ and tested on one of the jury computers.
 Your program will be compiled on a jury computer running Linux.
 Using a different compiler or operating system than the jury should
 not be a problem. Be careful however, not to use any special compiler
-and/or system specific things (you may be able to check compiler errors
-on the team page).
+and/or system specific things.
 
 The jury system compiles all programs statically. This should not
 matter concerning generated errors.
@@ -297,8 +296,6 @@ jury right away.
 
 \item[source size]
 The source code of your program may not exceed \SOURCESIZE\ kilobytes.
-When submitting your program you will already be warned for this, but
-during compilation this will result in a compile error.
 
 \item[memory]
 During execution of your program, there are \MEMLIMIT\ kilobytes of
@@ -307,7 +304,7 @@ program code, statically and dynamically defined variables, stack,
 Java VM, \dots)! If your program tries to use more memory, it will
 abort, resulting in a run error.
 
-\item[filesize]
+\item[outputsize]
 Although you are not allowed to write to files, standard (error)output
 are written to a file. The maximum size of these files is \FILELIMIT\
 kilobytes (per file).
