@@ -69,7 +69,7 @@ requests is done through the web interface. The menu buttons at
 
 During the NWERC, the computer systems of the Computer Science
 department of Utrecht University will be used. Each team has been
-given the choice of Windows 2000 or Linux as operating system. Please
+given the choice of Windows XP or Linux as operating system. Please
 check that you have been assigned the correct O/S as specified in the
 registration webform on the NWERC website.
 
@@ -89,7 +89,7 @@ between the Saturday test session and the contest on Sunday.
 
 \subsection{Windows}
 
-On your desktop is a folder \cmd{NWERC doc}, which contains the C(++) and Java
+On your desktop is a folder \cmd{NWERC Doc}, which contains the C(++) and Java
 documentation.
 
 The Cygwin shell must be used to run the command line submit client and can be
@@ -99,10 +99,11 @@ use it to compile with \cmd{gcc} and \cmd{g++} for C and C++ respectively.
 As browser you can use either Internet Explorer or Firefox. Unfortunately the
 default home page of IE is wrong.
 
-To print you should use the default printer called \cmd{MS Publisher
-Imagesetter on printhost.nwerc.eu}.
+To print you should use the printer `nwerc-windows on \ldots'.
 
-Store your solutions in your homedrive (H:\textbackslash).
+Store your solutions in your homedrive (H:\textbackslash). On your homedrive
+you will also find a folder sampledata containing the sample data metioned in
+the problem set.
 
 To change your keyboard layout: Open the 'Keyboard Settings' shortcut on your
 desktop. Select the 'Languages' tab and click on 'Details\ldots'. Pick your
@@ -115,10 +116,13 @@ to restart these after switching.
 Under Linux, the documentation can be found in the folder
 \cmd{NWERC-documentation} on your desktop. We support Firefox as the browser.
 
+The sample data of the problem set can also be found in the folder
+\verb!~/testdata!.
+
 Printing is done by using the \cmd{lpr} or \cmd{a2ps} commands.
 
-The keyboard layout can be changed by selecting 'Desktop' -> 'Settings' ->
-'Keyboard' from the top panel.
+The keyboard layout can be changed by selecting 'Desktop' $\Rightarrow$
+'Settings' $\Rightarrow$ 'Keyboard' from the top panel.
 
 \newpage
 
@@ -213,11 +217,6 @@ standard out.
 The output of your program was incorrect. This can happen simply
 because your solution is not correct, but remember that your output
 must comply exactly with the specifications of the jury.
-
-\item[PRESENTATION-ERROR]
-The output of your program has differences in presentation with the
-correct results. This will, like WRONG-ANSWER, count as an incorrect
-submission. This result is optional and might be disabled.
 
 \item[TOO-LATE]
 Bummer, you submitted after the contest ended! Your submission is
@@ -326,15 +325,12 @@ runs in one process.
 
 \end{description}
 
-\subsection{Java class naming}
+\subsection{Java classes}
 
-Java submissions should adhere to a strict naming scheme for the main
-class. The main class should be ``\verb!Main!'', with method
-``\verb!public static void main(String args[])!'', see also the Java
-code example in appendix \ref{codeexamples}. The reason is that Sun
-Java compiler (which is used by default) generates a class file
-dependent on the main class name and there is unfortunately no robust
-way to detect that main class name.
+Do not declare any of your classes as ``\verb!public!''.
+Java submissions should have exactly one class with method
+``\verb!public static void main(String args[])!'',
+see also the Java code example in appendix \ref{codeexamples}.
 
 \newpage
 \appendix

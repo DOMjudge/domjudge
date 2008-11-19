@@ -1,6 +1,6 @@
 import java.io.*;
 
-class Main
+class MyClassName
 {
 	public static BufferedReader in;
 
