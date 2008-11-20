@@ -304,10 +304,10 @@ program code, statically and dynamically defined variables, stack,
 Java VM, \dots)! If your program tries to use more memory, it will
 abort, resulting in a run error.
 
-\item[output size]
-Although you are not allowed to write to files, standard (error)output
-are written to a file. The maximum size of these files is \FILELIMIT\
-kilobytes (per file).
+\item[program output]
+You are not allowed to output more than \FILELIMIT\ kilobytes
+on either standard out or standard error, and will get a run error
+if you exceed this limit.
 
 \item[number of processes]
 You are not supposed to create multiple processes (threads). This is
