@@ -1,0 +1,23 @@
+# Allow large file uploads for testcases
+<IfModule mod_php5.c>
+php_value upload_max_filesize 16M
+php_value post_max_size       16M
+php_value memory_limit        32M
+</IfModule>
+<IfModule mod_php4.c>
+php_value upload_max_filesize 16M
+php_value post_max_size       16M
+php_value memory_limit        32M
+</IfModule>
+
+Satisfy All
+
+require valid-user
+AuthType Basic
+AuthName "DOMjudge Jury Interface"
+AuthUserFile /srv/domjudge/system/etc/htpasswd-balloon
+
+order deny,allow
+deny from all
+# printhost
+allow from kats.students.cs.uu.nl
