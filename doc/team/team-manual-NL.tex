@@ -100,7 +100,7 @@ verschijnen.
 Het submitprogramma maakt gebruik van een directory \cmd{\USERSUBMITDIR}
 in de homedirectory van het account. Hier slaat het tijdelijk
 bestanden op voor inzending en staat ook een logfile \cmd{submit.log}.
-Verwijder deze directory niet of pas hem niet aan, omdat anders het
+Verwijder deze directory niet en pas hem niet aan, omdat anders het
 submitprogramma niet meer correct functioneert. Verder is een
 ``public ssh-key'' van de jury in de \textsc{ssh}-configuratie
 toegevoegd. Ook deze is nodig voor het functioneren van \cmd{submit}.
@@ -135,9 +135,9 @@ Voor een ingestuurde oplossing zijn de volgende uitslagen mogelijk:
 Je oplossing heeft alle tests weerstaan: je hebt dit probleem opgelost!
 
 \item[COMPILER-ERROR]
-Het compileren van je programma gaf een fout. Op de inzendingsdetails
-pagina kun je de precieze foutmelding inzien (deze optie kan uitgezet
-zijn).
+Het compileren van je programma gaf een fout. Bij de details
+van deze inzending kun je de precieze foutmelding inzien
+(deze optie kan uitgezet zijn).
 
 \item[TIMELIMIT]
 Je programma draaide langer dan de maximaal toegestane tijd en is
@@ -162,9 +162,10 @@ precies zoals beschreven uitvoert: de uitvoer moet exact kloppen met
 de specificatie van de jury!
 
 \item[PRESENTATION-ERROR]
-De uitvoer van je programma verschilde slechts in presentatie met de
-correcte uitvoer. Dit wordt net als WRONG-ANSWER niet correct
-gerekend. Deze uitslag is optioneel en mogelijk niet aangezet.
+De uitvoer van je programma verschilde slechts in presentatie
+(bijvoorbeeld: de hoeveelheid witruimte) met de correcte uitvoer.
+Dit wordt net als WRONG-ANSWER niet correct gerekend. Deze uitslag
+is optioneel en mogelijk niet aangezet.
 
 \item[TOO-LATE]
 Helaas, je hebt ingestuurd nadat de wedstrijd al afgelopen was!
@@ -277,14 +278,14 @@ draait een gecompileerd programma in \'e\'en proces.
 
 \end{description}
 
-\subsection{Java klasse naamgeving}
+\subsection{Java klassenaamgeving}
 
-Java inzendingen moeten een strikte naamgeving van de hoofdklasse
+Java-inzendingen moeten een strikte naamgeving van de hoofdklasse
 aanhouden: deze moet ``\verb!Main!'' heten en een methode
 ``\verb!public static void main(String args[])!'' hebben. Zie ook het
 Java codevoorbeeld in appendix \ref{codeexamples}. De reden is dat
-Java compiler van Sun (die standaard gebruikt wordt) een class bestand
-genereert, waarvan de naam afhangt van de hoofdklasse. Er is helaas
+Java compiler van Sun (die standaard gebruikt wordt) een class-bestand
+genereert waarvan de naam afhangt van de hoofdklasse. Er is helaas
 geen robuuste manier om de hoofdklasse naam uit te lezen.
 
 \newpage
