@@ -34,7 +34,8 @@ if( $res->count() == 0 ) {
 			'><td><a href="team_category.php?id=' . (int)$row['categoryid'] .
 			'">' . (int)$row['categoryid'] .
 			'</a></td><td>' . (int)$row['sortorder'] .
-			'</td><td>' . htmlspecialchars($row['name']) .
+			'</td><td><a href="team_category.php?id=' . (int)$row['categoryid'] .
+			'">' . htmlspecialchars($row['name']) .
 			'</td><td align="right">' . (int)$row['numteams'] .
 			'</td><td align="center">' . printyn($row['visible']) .
 			"</td>";
