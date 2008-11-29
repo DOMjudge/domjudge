@@ -2,18 +2,27 @@
 
 \usepackage[dutch]{babel}
 
-% For inclusion of the correct date (last modified)
-\SVNdate $Date$
+% Redefine words for date/versioning:
+\renewcommand{\versionrevison}{Versie/revisie}
+\renewcommand{\lastmodified}{Laatst gewijzigd}
+\renewcommand{\generated}{Gegenereerd}
 
-\title{Teamhandleiding \DOMjudge\\(versie \DOMJUDGE_VERSION)}
+% For inclusion of the correct lastmod date and revision:
+\SVN $Date$
+\SVN $Revision: 2523 $
+
+\title{\DOMjudge teamhandleiding}
+
+\hypersetup{
+	pdftitle={DOMjudge teamhandleiding},
+	pdfauthor={DOMjudge Developers: domjudge-devel at lists.a-eskwadraat.nl},
+	pdfsubject={Instructie voor teams die de interface van het DOMjudge jurysysteem gebruiken tijdens een programmeerwedstrijd},
+	pdfkeywords={DOMjudge,manual,team,handleiding,judge,jury,programmeren,wedstrijd,programmeerwedstrijd,icpc,acm}
+}
 
 \begin{document}
 
-\begin{titlepage}
-\maketitle
-\end{titlepage}
-
-\newpage
+\titlestuff{\DOMJUDGE_VERSION}{\SVNRevision}{\SVNDate}{\today}
 
 \section*{Samenvatting}
 
@@ -62,9 +71,6 @@ Het bekijken van inzendingen, scores en sturen en lezen van
 
 \newpage
 
-\tableofcontents
-
-\newpage
 \section{Oplossingen insturen}\label{submit}
 
 Het insturen van oplossingen voor problemen kan op twee verschillende
@@ -327,13 +333,13 @@ Let op de \cmd{return 0;} aan het einde, zodat we geen
 Een oplossing in C++ kan als volgt:
 \listinginput{1}{../examples/example.cc}
 
-Een oplossing in Pascal:
-\listinginput{1}{../examples/example.pas}
+Een oplossing in Java:
+\listinginput{1}{../examples/example.java}
 
 \newpage
 
-Een oplossing in Java:
-\listinginput{1}{../examples/example.java}
+Een oplossing in Pascal:
+\listinginput{1}{../examples/example.pas}
 
 En tenslotte een oplossing in Haskell:
 \listinginput{1}{../examples/example.hs}

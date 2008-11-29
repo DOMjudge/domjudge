@@ -3,17 +3,21 @@
 \usepackage[english]{babel}
 
 % For inclusion of the correct date (last modified)
-\SVNdate $Date$
+\SVN $Date$
+\SVN $Revision: 2526 $
 
-\title{Team manual \DOMjudge\\(version \DOMJUDGE_VERSION)}
+\title{\DOMjudge team manual}
+
+\hypersetup{
+	pdftitle={DOMjudge team manual},
+	pdfauthor={DOMjudge Developers: domjudge-devel at lists.a-eskwadraat.nl},
+	pdfsubject={Instruction for teams using the interface of the DOMjudge jury system during a programming contest},
+	pdfkeywords={DOMjudge,manual,team,judge,jury,programming,contest,icpc,acm}
+}
 
 \begin{document}
 
-\begin{titlepage}
-\maketitle
-\end{titlepage}
-
-\newpage
+\titlestuff{\DOMJUDGE_VERSION}{\SVNRevision}{\SVNDate}{\today}
 
 \section*{Summary}
 
@@ -59,8 +63,6 @@ requests is done through the web interface. The menu buttons at
 
 \emph{End of summary}
 
-\newpage
-\tableofcontents
 \newpage
 
 \section{Submitting solutions}\label{submit}
@@ -315,13 +317,13 @@ Notice the last \cmd{return 0;} to prevent a \textsc{run-error}!
 A solution in C++:
 \listinginput{1}{../examples/example.cc}
 
-A solution in Pascal:
-\listinginput{1}{../examples/example.pas}
+A solution in Java:
+\listinginput{1}{../examples/example.java}
 
 \newpage
 
-A solution in Java:
-\listinginput{1}{../examples/example.java}
+A solution in Pascal:
+\listinginput{1}{../examples/example.pas}
 
 And finally a solution in Haskell:
 \listinginput{1}{../examples/example.hs}

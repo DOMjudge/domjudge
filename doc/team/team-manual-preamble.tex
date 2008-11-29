@@ -1,4 +1,4 @@
-\documentclass[11pt,a4paper,titlepage]{article}
+\documentclass[11pt,a4paper,twoside]{article}
 
 % $Id$
 
@@ -8,8 +8,16 @@
 \usepackage{a4wide}
 \usepackage{moreverb}
 \usepackage{graphicx}
+\usepackage{wrapfig}
 \usepackage{expdlist}
 \usepackage{svn}
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{color}
+\usepackage[colorlinks=true,urlcolor=blue,linkcolor=blue]{hyperref}
+
+\pagestyle{fancy}
+\renewcommand{\sectionmark}[1]{\markboth{\thesection.\ #1}{}}
 
 % Begin new paragraphs without indentation but vertical space.
 \setlength{\parindent}{0pt}
@@ -17,31 +25,56 @@
 
 \newcommand{\DOMjudge}{\textsc{DOM}judge }
 
-% We define our own \url command, because the one in the url package
-% doesn't expand defines (present in systemconfig.tex).
-\newcommand{\url}[1]{\texttt{#1}}
-
 % Display commands, arguments, etc. in texttt font and don't break those.
 \newcommand{\cmd}[1]{\mbox{\texttt{#1}}}
 
-% Our titlepage
+% Our titlepage, should be called at start of team manual document
+% Argument list:
+% #1 - DOMjudge version
+% #2 - Document revision
+% #3 - Last modified date
+% #4 - Generated date
+% Also define the following words for language overrides:
+\newcommand{\versionrevison}{Version/revision}
+\newcommand{\lastmodified}{Last modified}
+\newcommand{\generated}{Generated}
 \makeatletter
-\def\maketitle{%
-  \null
-  \thispagestyle{empty}%
+\newcommand{\titlestuff}[4]{%
+
+  \thispagestyle{plain}
+  \vspace*{-3cm}
+  \parbox[t]{\linewidth}{%
+    \begin{wrapfigure}[1]{r}{2cm}
+      \vspace*{-1cm}\hfill
+      \includegraphics[height=4cm]{../logos/DOMjudgelogo.pdf}
+    \end{wrapfigure}
+    {\fontfamily{phv}\fontseries{b}\fontsize{26pt}{28pt}\selectfont \@title \par}
+  }
   \vskip 2cm
-  \begin{center}\leavevmode
-    \normalfont
-    {\fontsize{30pt}{30pt}\selectfont \@title \par}%
-    \vskip 1cm
-    {\Large \@author \par}%
-    \vskip 1cm
-    {\Large \@date \par}%
-  \end{center}%
-  \vskip 2cm
-  \begin{figure}[htbp]
-    \centerline{\includegraphics[height=7cm]{../logos/DOMjudgelogo.pdf}}
-  \end{figure}
-  \vfill\null
+
+  % Setup fancy headers/footers (here because we need SVN stuff defined)
+  \def\setupfancystuff{%
+    \fancyhead{}
+    \fancyfoot{}
+    \fancyfoot[RO,LE]{\thepage}
+    \fancyfoot[LO,RE]{%
+      \color[gray]{0.5}\vspace{-0.3cm}
+      \begin{tabular}{ll}
+        \versionrevison: & #1 / #2 \\
+        \lastmodified:   & #3 \\
+        \generated:      & #4 \\
+      \end{tabular}
+    }
+  }
+
+  % First for fancy page style:
+  \setupfancystuff
+  \fancyhead[RO,LE]{\slshape \firstleftmark}
+  
+  % No headers for plain page style (titlepage):
+  \fancypagestyle{plain}{%
+    \setupfancystuff
+    \renewcommand{\headrulewidth}{0pt}
+  }
 }
 \makeatother
