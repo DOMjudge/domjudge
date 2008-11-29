@@ -34,6 +34,8 @@ if (defined('IS_JURY')) {
 	if (isset($printercss)) {
 		echo "<link rel=\"stylesheet\" href=\"style_printer.css\" type=\"text/css\" media=\"print\" />\n";
 	}
+	echo "<script type=\"text/javascript\" src=\"" .
+		getBaseURI() . "sorttable.js\"></script>\n";
 }
 
 /* NOTE: here a local menu.php is included

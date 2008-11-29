@@ -22,7 +22,7 @@ $res = $DB->q('SELECT a.*, COUNT(login) AS cnt FROM team_affiliation a
 if( $res->count() == 0 ) {
 	echo "<p><em>No affiliations defined</em></p>\n\n";
 } else {
-	echo "<table class=\"list\">\n<thead>\n" .
+	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th>ID</th><th>name</th><th>logo</th><th>country</th>" .
 		"<th>#teams</th></tr>\n</thead>\n<tbody>\n";
 

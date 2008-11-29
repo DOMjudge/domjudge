@@ -34,7 +34,7 @@ echo "<h1>Teams</h1>\n\n";
 if( $teams->count() == 0 ) {
 	echo "<p><em>No teams defined</em></p>\n\n";
 } else {
-	echo "<table class=\"list\">\n<thead>\n" .
+	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th>" .
 		"<th scope=\"col\">category</th><th scope=\"col\">affiliation</th>" .
 		"<th scope=\"col\">host</th><th scope=\"col\">room</th>" .

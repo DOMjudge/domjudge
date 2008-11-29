@@ -22,6 +22,7 @@ Version 3.0.0 - SVN
  - New compactified layout of team manual.
  - Add note about Java class naming in team manual. (Closes: #2153189)
  - Add binary file check in commandline submit. (Closes: #2046017)
+ - Make HTML tables sortable in the jury view.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------

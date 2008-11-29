@@ -131,7 +131,7 @@ function putClarificationList($clars, $team = NULL)
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
-	echo "<table class=\"list\">\n<thead>\n";
+	echo "<table class=\"list sortable\">\n<thead>\n";
 	echo "<tr><th scope=\"col\">ID</th><th scope=\"col\">from</th>" .
 	     "<th scope=\"col\">to</th><th scope=\"col\">time</th>" .
 	     "<th scope=\"col\">text</th></tr>\n</thead>\n<tbody>\n";
@@ -148,7 +148,7 @@ function putClarificationList($clars, $team = NULL)
 		else
 			echo '<tr>';
 		
-	echo '<td>' . make_link($clar['clarid'], "clarification.php?id=" . urlencode($clar['clarid'])) . '</td>';
+		echo '<td>' . make_link($clar['clarid'], "clarification.php?id=" . urlencode($clar['clarid'])) . '</td>';
 
 		$sender = $clar['sender'];
 		$recipient = $clar['recipient'];

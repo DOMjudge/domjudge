@@ -83,7 +83,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 	// print the table with the submissions. 
 	// table header; leave out the field that is our key (because it's the same
 	// for all rows)
-	echo "<table class=\"list\">\n<thead>\n<tr>" .
+	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
 
 		(IS_JURY ? "<th scope=\"col\">ID</th>" : '') .
 		"<th scope=\"col\">time</th>" .

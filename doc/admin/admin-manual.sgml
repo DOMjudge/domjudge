@@ -117,6 +117,8 @@ GNU libiberty library (copyright Free Software Foundation).
 submitdaemon.pl by Eelco Dolstra.
 <item> runguard.c was originally based on timeout from The
 Coroner's Toolkit by Wietse Venema.
+<item> sorttable.js by Stuart Langridge is licenced under
+the X11 licence: http://www.kryogenix.org/code/browser/licence.html
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
 Erik van Sebille.
 </itemize>

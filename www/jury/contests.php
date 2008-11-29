@@ -29,7 +29,7 @@ if( count($res) == 0 ) {
 	echo "<p><em>No contests defined</em></p>\n\n";
 } else {
 	echo "<form action=\"contests.php\" method=\"post\">\n";
-	echo "<table class=\"list\">\n<thead>\n" .
+	echo "<table class=\"list sortable\">\n<thead>\n" .
 	     "<tr><th scope=\"col\">CID</th><th scope=\"col\">active</th>" .
 	     "<th scope=\"col\">starts</th><th scope=\"col\">ends</th>" .
 	     "<th scope=\"col\">freeze<br />scores</th>" .

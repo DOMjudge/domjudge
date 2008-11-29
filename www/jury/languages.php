@@ -20,7 +20,7 @@ $res = $DB->q('SELECT * FROM language ORDER BY name');
 if( $res->count() == 0 ) {
 	echo "<p><em>No languages defined</em></p>\n\n";
 } else {
-	echo "<table class=\"list\">\n<thead>\n" .
+	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
 		"<th scope=\"col\">extension</th><th scope=\"col\">allow<br />submit</th>" .
 		"<th scope=\"col\">allow<br />judge</th><th scope=\"col\">timefactor</th>" .
