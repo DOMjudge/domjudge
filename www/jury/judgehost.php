@@ -87,7 +87,7 @@ $res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
 if( $res->count() == 0 ) {
 	echo "<p><em>No judgings.</em></p>\n\n";
 } else {
-	echo "<table class=\"list\">\n<thead>\n" .
+	echo "<table class=\"list sortable\">\n<thead>\n" .
 	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
 		 "<th scope=\"col\">end</th><th scope=\"col\">result</th>" .
 		 "<th scope=\"col\">valid</th><th scope=\"col\">verified</th>" .
