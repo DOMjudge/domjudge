@@ -10,6 +10,8 @@ Version 2.2.3 - SVN
  - Set User-Agent in submit commandline client.
  - Add necessary privileges for plugin DB user and cid field in XML output.
  - Fix bug of submittime==endtime not showing as too-late, thanks Tobias Werth.
+ - Removed "feature" of only allowing alnum chars in filename base
+   for submit client problem parsing.
 
 Version 2.2.2 - 8 October 2008
 ------------------------------

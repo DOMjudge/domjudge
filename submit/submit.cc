@@ -329,14 +329,7 @@ int main(int argc, char **argv)
 		fileext = filebase.substr(filebase.rfind('.')+1);
 		filebase.erase(filebase.find('.'));
 
-		/* Check for only alphanumeric characters in problem */
-		for(i=0; i<filebase.length(); i++) {
-			if ( ! isalnum(filebase[i]) ) break;
-		}
-		if ( i>=filebase.length() && filebase.length()>0 && problem.empty() ) {
-			problem = filebase;
-		}
-
+		if ( problem.empty()   ) problem   = filebase;
 		if ( extension.empty() ) extension = fileext;
 	}
 	
