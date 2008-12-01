@@ -18,7 +18,6 @@ require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
 // call the general putScoreBoard function from scoreboard.php
-// and pass that we're the jury so we can view the current scores anytime.
-putScoreBoard($cdata, null, TRUE);
+putScoreBoard($cdata);
 
 require(LIBWWWDIR . '/footer.php');
