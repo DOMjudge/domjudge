@@ -115,9 +115,10 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		}
 		echo "<td>" . printtime($row['submittime']) . "</td>";
 		if ( IS_JURY ) {
-			echo '<td class="teamid" title="' . htmlspecialchars($row['teamname']) . '">' .
-				make_link($row['teamid'], "team.php?id=" . urlencode($row['teamid']), IS_JURY) .
-				'</td>';
+			echo '<td class="teamid" title="' .
+				htmlspecialchars($row['teamid'].': '.$row['teamname']) . '">' .
+				make_link(trunc_string($row['teamname'],20), "team.php?id=" .
+				          urlencode($row['teamid']), IS_JURY) . '</td>';
 		}
 		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
 			make_link($row['probid'], "problem.php?id=" . urlencode($row['probid']), IS_JURY) .

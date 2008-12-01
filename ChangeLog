@@ -25,6 +25,7 @@ Version 3.0.0 - SVN
  - Make HTML tables sortable in the jury view.
  - Removed "feature" of only allowing alnum chars in filename base
    for submit client problem parsing.
+ - Show truncated team names instead of logins in submissions overview.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------
