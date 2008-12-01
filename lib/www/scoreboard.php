@@ -13,7 +13,6 @@
 /** 
  * The calcScoreRow is in lib/lib.misc.php because it's used by other
  * parts of the system aswell.
- * lib/lib.misc.php also defines make_link().
  */
 require_once(LIBDIR . '/lib.misc.php');
 
@@ -533,7 +532,14 @@ function putTeamRow($cdata, $teamid) {
  */
 function jurylink($target, $content) {
 
-	return make_link($content, $target, IS_JURY, TRUE);
+	$res = "";
+	if ( IS_JURY ) {
+		$res .= '<a' . (isset($target) ? ' href="' . $target . '"' : '' ) . '>';
+	}
+	$res .= $content;
+	if ( $isjury ) $res .= '</a>';
+	
+	return $res;
 }
 
 /**
