@@ -40,7 +40,6 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
 $title = 'Clarifications';
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/clarification.php');
 
 if ( isset($id) ) {
 	// display clarification thread

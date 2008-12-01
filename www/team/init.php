@@ -25,6 +25,7 @@ setup_database_connection('team');
 
 require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/print.php');
+require_once(LIBWWWDIR . '/clarification.php');
 require_once(LIBWWWDIR . '/scoreboard.php');
 require_once(LIBWWWDIR . '/validate.team.php');
 

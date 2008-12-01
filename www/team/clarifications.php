@@ -12,7 +12,6 @@ require('init.php');
 $refresh = '30;url=' . getBaseURI() . 'team/clarifications.php';
 $title = 'Clarifications';
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/clarification.php');
 
 // Put overview of team submissions (like scoreboard)
 echo "<div id=\"teamscoresummary\">\n";
