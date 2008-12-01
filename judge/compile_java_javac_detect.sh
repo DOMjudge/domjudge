@@ -8,14 +8,14 @@ DEST="$2"
 MEMLIMIT="$3"
 MAINCLASS=""
 
-TMPFILE=`mktemp /tmp/domjudge_gcj_output.XXXXXX`
+TMPFILE=`mktemp /tmp/domjudge_javac_output.XXXXXX`
 
 # Byte-compile:
 javac -d . "$SOURCE" 2> "$TMPFILE"
 EXITCODE=$?
 if [ "$EXITCODE" -ne 0 ]; then
 	# Let's see if should have named the .java differently
-	PUBLICCLASS=$(sed  -n '/class .* is public, should be declared in a file named /{s/.*named.//;s/.java.*//;p;q}' "$TMPFILE")
+	PUBLICCLASS=$(sed  -n '/class .* is public, should be declared in a file named /{s/.*file named //;s/\.java.*//;p;q}' "$TMPFILE")
 	if [ -z "$PUBLICCLASS" ]; then
 		cat $TMPFILE
 		exit $EXITCODE

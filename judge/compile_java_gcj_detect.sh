@@ -15,7 +15,7 @@ gcj -d . -Wall -C "$SOURCE" 2> "$TMPFILE"
 EXITCODE=$?
 if [ "$EXITCODE" -ne 0 ]; then
 	# Let's see if should have named the .java differently
-	PUBLICCLASS=$(sed  -n '/Public class ‘.*’ must be defined in a file called/{s/.*called..//;s/.java.*//;p;q}' "$TMPFILE")
+	PUBLICCLASS=$(sed  -n "/Public class '.*' must be defined in a file called /{s/.*file called '//;s/\.java'.*//;p;q}" "$TMPFILE")
 	if [ -z "$PUBLICCLASS" ]; then
 		cat $TMPFILE
 		exit $EXITCODE
@@ -31,7 +31,7 @@ fi
 # Look for class that has the 'main' function:
 for cn in $(find * -type f -regex '^.*\.class$' \
 		| sed -e 's/\.class$//' -e 's/\//./'); do
-	jcf-dump -javap $cn \
+	jcf-dump -javap "$cn" \
 	| grep -q 'public static void "main"(java.lang.String\[\])' \
 	&& {
 		if [ -n "$MAINCLASS" ]; then
