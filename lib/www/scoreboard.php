@@ -537,7 +537,7 @@ function jurylink($target, $content) {
 		$res .= '<a' . (isset($target) ? ' href="' . $target . '"' : '' ) . '>';
 	}
 	$res .= $content;
-	if ( $isjury ) $res .= '</a>';
+	if ( IS_JURY ) $res .= '</a>';
 	
 	return $res;
 }
