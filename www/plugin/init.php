@@ -8,8 +8,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-
-
 require_once('../configure.php');
 
 /* For plugins to have jury access rights to the DB, they should

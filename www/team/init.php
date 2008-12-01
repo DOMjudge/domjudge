@@ -11,11 +11,13 @@
 // please keep any includes synchronised with checkpasswd.php
 require_once('../configure.php');
 
+define('IS_JURY', false);
+
+if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
+
 if( DEBUG & DEBUG_TIMINGS ) {
 	require_once(LIBDIR . '/lib.timer.php');
 }
-
-if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
 
 require_once(LIBDIR . '/lib.error.php');
 require_once(LIBDIR . '/lib.misc.php');

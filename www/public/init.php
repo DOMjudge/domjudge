@@ -10,6 +10,8 @@
 
 require_once('../configure.php');
 
+define('IS_JURY', false);
+
 if( DEBUG & DEBUG_TIMINGS ) {
 	require_once(LIBDIR . '/lib.timer.php');
 }
