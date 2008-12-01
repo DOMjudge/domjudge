@@ -129,7 +129,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		echo "<td>";
 		if ( IS_JURY ) {
 			if ( ! $row['result'] ) {
-				if ( $row['submittime'] > $cdata['endtime'] ) {
+				if ( $row['submittime'] >= $cdata['endtime'] ) {
 					echo printresult('too-late', TRUE);
 				} else {
 					echo printresult($row['judgehost'] ? '' : 'queued', TRUE);
@@ -141,7 +141,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		} else {
 			if ( ! $row['result'] ||
 			     ( VERIFICATION_REQUIRED && ! $row['verified'] ) ) {
-				if ( $row['submittime'] > $cdata['endtime'] ) {
+				if ( $row['submittime'] >= $cdata['endtime'] ) {
 					echo printresult('too-late');
 				} else {
 					echo printresult('', TRUE);

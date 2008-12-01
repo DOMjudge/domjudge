@@ -26,6 +26,7 @@ Version 3.0.0 - SVN
  - Removed "feature" of only allowing alnum chars in filename base
    for submit client problem parsing.
  - Show truncated team names instead of logins in submissions overview.
+ - Fix bug of submittime==endtime not showing as too-late, thanks Tobias Werth.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------
