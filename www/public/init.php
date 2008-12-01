@@ -11,7 +11,7 @@
 require_once('../configure.php');
 
 if( DEBUG & DEBUG_TIMINGS ) {
-	include_once(LIBDIR . '/lib.timer.php');
+	require_once(LIBDIR . '/lib.timer.php');
 }
 
 require_once(LIBDIR . '/lib.error.php');

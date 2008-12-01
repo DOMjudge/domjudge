@@ -18,7 +18,7 @@ require_once('../configure.php');
 define('IS_JURY', (@$_SERVER['REMOTE_USER'] == "jury"));
 
 if( DEBUG & DEBUG_TIMINGS ) {
-	include_once (LIBDIR . '/lib.timer.php');
+	require_once(LIBDIR . '/lib.timer.php');
 }
 
 require_once(LIBDIR . '/lib.error.php');

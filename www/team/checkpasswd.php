@@ -13,7 +13,7 @@
 require_once('../configure.php');
 
 if( DEBUG & DEBUG_TIMINGS ) {
-	include_once (LIBDIR . '/lib.timer.php');
+	require_once (LIBDIR . '/lib.timer.php');
 }
 
 require_once(LIBDIR . '/lib.error.php');
@@ -31,12 +31,12 @@ $pass = trim($_POST['passwd']);
 
 $title = 'Authenticate user';
 $menu = false;
-include(LIBDIR . '/www/header.php');
+require(LIBDIR . '/www/header.php');
 
 if ( empty($user) || empty($pass) ) {
 	echo "<h1>Not Authenticated</h1>\n\n";
 	echo "<p>Please supply a username and password.</p>\n\n";
-	include(LIBWWWDIR . '/footer.php');
+	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
@@ -60,4 +60,4 @@ if ( $cnt == 1 ) {
 		"Please try again or contact a staff member.</p>\n\n";
 }
 
-include(LIBWWWDIR . '/footer.php');
+require(LIBWWWDIR . '/footer.php');

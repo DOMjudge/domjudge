@@ -10,7 +10,7 @@
 
 require('init.php');
 $title = 'Submission details';
-include(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/header.php');
 
 $sid = (int)@$_GET['id'];
 
@@ -26,7 +26,7 @@ $row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
 
 if( ! $row ) {
 	echo "<p>Submission not found for this team.</p>\n";
-	include(LIBWWWDIR . '/footer.php');
+	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
@@ -70,4 +70,4 @@ if ( (SHOW_COMPILE == 2) ||
 	echo "<p><em>Compilation output is disabled.</em></p>\n";
 }
 
-include(LIBWWWDIR . '/footer.php');
+require(LIBWWWDIR . '/footer.php');

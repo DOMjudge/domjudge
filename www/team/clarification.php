@@ -59,4 +59,4 @@ if ( isset($id) ) {
 	putClarificationForm("clarification.php");
 }
 
-include(LIBWWWDIR . '/footer.php');
+require(LIBWWWDIR . '/footer.php');
