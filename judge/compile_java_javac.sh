@@ -47,7 +47,7 @@ cat > $DEST <<EOF
 # Generated shell-script to execute java interpreter on source.
 
 cd $SOURCEDIR
-exec java -Xrs -Xmx${MEMLIMITJAVA}k $MAINCLASS
+exec java -Xrs -Xss8m -Xmx${MEMLIMITJAVA}k $MAINCLASS
 EOF
 
 chmod a+x $DEST
