@@ -9,6 +9,7 @@ Version 2.2.3 - SVN
  - Fix error in XML validation schema.
  - Set User-Agent in submit commandline client.
  - Add necessary privileges for plugin DB user and cid field in XML output.
+ - Fix bug of submittime==endtime not showing as too-late, thanks Tobias Werth.
 
 Version 2.2.2 - 8 October 2008
 ------------------------------
