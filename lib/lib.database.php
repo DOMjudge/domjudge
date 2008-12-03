@@ -416,9 +416,13 @@ class db
 
 		if ( DEBUG & DEBUG_SQL ) {
 			global $DEBUG_NUM_QUERIES;
-			printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>\n",
-				htmlspecialchars($query));
 			$DEBUG_NUM_QUERIES++;
+			if ( isset($_SERVER['REMOTE_ADDR']) ) {
+				printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>\n",
+				       htmlspecialchars($query));
+			} else {
+				printf("SQL: $this->database: %s ({$elapsed_ms}ms)\n",$query);
+			}
 		}
 
 		if (!$res)
