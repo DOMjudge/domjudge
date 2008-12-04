@@ -10,7 +10,7 @@
 
 require('init.php');
 $refresh = '15;url='.getBaseURI().'jury/clarifications.php';
-$title = 'Clarification Requests';
+$title = 'Clarification Requests'.($nunread_clars ? ' ('.$nunread_clars.' new)' : '');
 
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/clarification.php');

@@ -37,3 +37,6 @@ require_once(LIBWWWDIR . '/common.jury.php');
 $cdata = getCurContest(TRUE);
 $cid = (int)$cdata['cid'];
 
+$nunread_clars = $DB->q('VALUE SELECT COUNT(*) FROM clarification
+                         WHERE sender IS NOT NULL AND cid = %i
+                         AND answered = 0', $cid);

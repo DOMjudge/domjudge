@@ -1,10 +1,3 @@
-<?php
-
-$cnew = $DB->q('VALUE SELECT COUNT(*) FROM clarification
-                WHERE sender IS NOT NULL AND cid = %i AND answered = 0',
-                $cid);
-
-?>
 <div id="menutop">
 <a href="index.php" accesskey="h">home</a>
 <a href="problems.php" accesskey="p">problems</a>
@@ -12,8 +5,8 @@ $cnew = $DB->q('VALUE SELECT COUNT(*) FROM clarification
 <a href="judgehosts.php" accesskey="j">judgehosts</a>
 <?php   } ?>
 <a href="teams.php" accesskey="t">teams</a>
-<?php	if ( $cnew ) { ?>
-<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications (<?=$cnew?> new)</a>
+<?php	if ( $nunread_clars > 0 ) { ?>
+<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications (<?=$nunread_clars?> new)</a>
 <?php	} else { ?>
 <a href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications</a>
 <?php	} ?>

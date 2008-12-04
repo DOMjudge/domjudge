@@ -33,3 +33,8 @@ require_once(LIBWWWDIR . '/validate.team.php');
 
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];
+
+$nunread_clars = $DB->q('VALUE SELECT COUNT(*) FROM team_unread
+                         LEFT JOIN clarification ON(mesgid=clarid)
+                         WHERE type="clarification" AND teamid = %s
+                         AND cid = %i', $login, $cid);

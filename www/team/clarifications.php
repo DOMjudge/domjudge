@@ -10,7 +10,7 @@
 
 require('init.php');
 $refresh = '30;url=' . getBaseURI() . 'team/clarifications.php';
-$title = 'Clarifications';
+$title = 'Clarifications'.($nunread_clars ? ' ('.$nunread_clars.' new)' : '');
 require(LIBWWWDIR . '/header.php');
 
 // Put overview of team submissions (like scoreboard)
