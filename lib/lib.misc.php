@@ -384,16 +384,6 @@ function make_link($name, $url, $condition = TRUE, $raw = FALSE)
 }
 
 /**
- * Truncate string to given length, appending '...' when truncated.
- */
-function trunc_string($string, $length)
-{
-	if ( strlen($string)<=$length ) return $string;
-
-	return substr($string,0,$length) . '...';
-}
-
-/**
  * DOM XML tree helper functions (PHP 5).
  * The XML tree is assumed to be named '$xmldoc'.
  */
