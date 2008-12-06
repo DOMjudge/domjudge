@@ -99,12 +99,12 @@ function printtimediff($start, $end = null) {
  */
 function str_cut ($str, $size) {
 	// is the string already short enough?
-	// we count '...' for 2 'regular' chars.
-	if( strlen($str) <= $size+2 ) {
+	// we count '…' for 1 extra chars.
+	if( strlen($str) <= $size+1 ) {
 		return $str;
 	}
 
-	return substr($str, 0, $size) . '...';
+	return substr($str, 0, $size) . '…';
 }
 
 /**
