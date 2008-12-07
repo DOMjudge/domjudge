@@ -60,8 +60,9 @@ $title = 'Submission s'.@$id;
 if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
-					s.submittime, s.valid, c.cid, c.contestname, 
-          t.name AS teamname, l.name AS langname, p.name AS probname
+                    s.submittime, s.valid, c.cid, c.contestname, 
+                    t.name AS teamname, l.name AS langname, p.name AS probname,
+                    CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
                     LEFT JOIN team     t ON (t.login  = s.teamid)
                     LEFT JOIN problem  p ON (p.probid = s.probid)
@@ -110,6 +111,8 @@ $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime
 <tr><td scope="row">Submitted:</td><td><?= htmlspecialchars($submdata['submittime']) ?></td></tr>
 <tr><td scope="row">Source:</td><td>
 	<a href="show_source.php?id=<?=$id?>">view source code</a></td></tr>
+<tr><td scope="row">Max runtime:</td><td>
+	<?= htmlspecialchars($submdata['maxruntime']) ?> sec</a></td></tr>
 </table>
 
 

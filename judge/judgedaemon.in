@@ -165,7 +165,7 @@ while ( TRUE ) {
 	$waiting = FALSE;
 
 	// get maximum runtime, source code and other parameters
-	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS runtime,
+	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS maxruntime,
 	               s.submitid, s.sourcecode, s.langid, s.teamid, s.probid,
 	               p.special_run, p.special_compare, l.extension
 	               FROM submission s, problem p, language l
@@ -241,7 +241,7 @@ while ( TRUE ) {
 			"$tempsrcfile $row[langid] " .
 			"$tempdirpath/testcase/testcase.input." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_input'] . ' ' .
 			"$tempdirpath/testcase/testcase.output." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_output'] . ' ' .
-		   "$row[runtime] $tempdir " .
+		   "$row[maxruntime] $tempdir " .
 		   "'$row[special_run]' '$row[special_compare]'",
 		$retval);
 
