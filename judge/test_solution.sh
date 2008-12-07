@@ -75,7 +75,7 @@ cleanexit ()
 . "$DJ_LIBDIR/lib.error.sh"
 
 # Logging:
-LOGFILE="$DJ_LOGDIR/judge.`hostname --short`.log"
+LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`.log"
 LOGLEVEL=$LOG_DEBUG
 PROGNAME="`basename $0`"
 
