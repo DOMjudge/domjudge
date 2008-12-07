@@ -12,6 +12,7 @@ Version 2.2.3 - SVN
  - Fix bug of submittime==endtime not showing as too-late, thanks Tobias Werth.
  - Removed "feature" of only allowing alnum chars in filename base
    for submit client problem parsing.
+ - Replace 'hostname --short' option, fixing inconsistent results.
 
 Version 2.2.2 - 8 October 2008
 ------------------------------
