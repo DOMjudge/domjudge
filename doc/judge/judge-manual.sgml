@@ -104,7 +104,7 @@ Most pieces of information are clickable and bring up a new page with
 details. Many items also have tooltips that reveal extra information
 when the mouse is hovered over them. Problem, language and team pages
 have lists with corresponding submissions for that problem, language
-or team.
+or team. Tables can be sorted by clicking on the column headers.
 
 The most important pages are `Submissions': the list of submitted
 solutions made by teams, sorted by newest first, and `Scoreboard': the
