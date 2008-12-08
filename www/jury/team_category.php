@@ -71,13 +71,13 @@ echo addHidden('cmd', $cmd) .
 
 if ( ! $id ) error("Missing or invalid category id");
 
-$title = "Category: " .htmlspecialchars(@$id);
+$data = $DB->q('TUPLE SELECT * FROM team_category WHERE categoryid = %s', $id);
+
+$title = "Category: " . htmlspecialchars($data['name']);
 
 require(LIBWWWDIR . '/header.php');
 
-$data = $DB->q('TUPLE SELECT * FROM team_category WHERE categoryid = %s', $id);
-
-echo "<h1>Category: ".htmlspecialchars($data['name'])."</h1>\n\n";
+echo "<h1>$title</h1>\n\n";
 
 echo "<table>\n";
 echo '<tr><td scope="row">ID:</td><td>' . htmlspecialchars($data['categoryid']) . "</td></tr>\n";
