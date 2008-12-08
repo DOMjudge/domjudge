@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 2.2.3 - SVN
--------------------
+Version 2.2.3 - 8 December 2008
+-------------------------------
  - Fix bug in lib.misc.c where a failed execvp would not correctly abort.
  - Merge team manual content improvements from trunk revisions:
    2442 (partial), 2445, 2446, 2453. (Closes: #2153189)
