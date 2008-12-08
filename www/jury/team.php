@@ -121,7 +121,9 @@ echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 </table></div>
 
 <div class="col2"><table>
-<tr><td scope="row">Category:  </td><td><?=htmlspecialchars($row['catname'])?></td></tr>
+<tr><td scope="row">Category:  </td><td><a href="team_category.php?id=<?=
+	urlencode($row['categoryid']) . '">' .
+	htmlspecialchars($row['catname'])?></td></tr>
 <?php if (!empty($row['affilid'])): ?>
 <tr><td scope="row">Affiliation:</td><td><a href="team_affiliation.php?id=<?=
 	urlencode($row['affilid']) . '">' .

@@ -61,9 +61,10 @@ if( $teams->count() == 0 ) {
 				htmlspecialchars($row['login'])."</a></td>".
 			"<td><a href=\"team.php?id=".htmlspecialchars($row['login'])."\">".
 				htmlspecialchars($row['name'])."</a></td>".
-			"<td title=\"catid ".(int)$row['categoryid']."\">".
-				htmlspecialchars($row['catname'])."</td>".
+			"<td><a href=\"team_category.php?id=".urlencode($row['categoryid'])."\">".
+				htmlspecialchars($row['catname'])."</a></td>".
 			"<td title=\"".htmlspecialchars($row['affname'])."\">".
+				"<a href=\"team_affiliation.php?id=".urlencode($row['affilid'])."\">".
 				htmlspecialchars($row['affilid'])."</td><td title=\"";
 		
 		if ( @$row['ipaddress'] ) {

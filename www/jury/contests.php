@@ -53,7 +53,8 @@ if( count($res) == 0 ) {
 			"<td title=\"".htmlspecialchars(@$row['unfreezetime']) . "\">" .
 			( isset($row['unfreezetime']) ?
 			  printtime($row['unfreezetime']) : '-' ) . "</td>\n" .
-			"<td>" . htmlspecialchars($row['contestname']) . "</td>\n";
+			"<td><a href=\"contest.php?id=" . urlencode($row['cid']) . "\">" .
+			htmlspecialchars($row['contestname']) . "</a></td>\n";
 		if ( IS_ADMIN ) {
 			echo "<td>" . 
 				editLink('contest', $row['cid']) . " " .
