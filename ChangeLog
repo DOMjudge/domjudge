@@ -28,6 +28,7 @@ Version 3.0.0 - SVN
  - Show truncated team names instead of logins in submissions overview.
  - Fix bug of submittime==endtime not showing as too-late, thanks Tobias Werth.
  - Replace 'hostname --short' option, fixing inconsistent results.
+ - Merge changes in ipv6 branch to trunk, IPv6 comparison not yet functional.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------

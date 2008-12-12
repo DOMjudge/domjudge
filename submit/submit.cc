@@ -645,11 +645,10 @@ int cmdsubmit()
 	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",
 	       server.c_str(),port);
 	
-	/* Set preferred network connection options: use IPv4-only as
-	   IPv6 does not work in Cygwin yet */
+	/* Set preferred network connection options: use both IPv4 and
+ 	   IPv6 by default */
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_family   = AF_INET;
-	hints.ai_flags    = AI_CANONNAME;
+	hints.ai_flags    = AI_ADDRCONFIG | AI_CANONNAME;
 	hints.ai_socktype = SOCK_STREAM;
 
 	port_str = allocstr("%d",port);

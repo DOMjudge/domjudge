@@ -79,6 +79,8 @@ int inet4_only;
 int inet6_only;
 
 struct option const long_opts[] = {
+	{"inet4-only", no_argument,       NULL,         '4'},
+	{"inet6-only", no_argument,       NULL,         '6'},
 	{"port",       required_argument, NULL,         'P'},
 	{"verbose",    optional_argument, NULL,         'v'},
 	{"help",       no_argument,       &show_help,    1 },
@@ -120,10 +122,17 @@ int main(int argc, char **argv)
 
 	/* Parse command-line options */
 	show_help = show_version = 0;
+	inet4_only = inet6_only = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"P:v:",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"46P:v:",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* this is a long-only option: nothing to do */
+			break;
+		case '4': /* inet4-only option */
+			inet4_only = 1;
+			break;
+		case '6': /* inet6-only option */
+			inet6_only = 1;
 			break;
 		case 'P': /* port option */
 			port = strtol(optarg,&ptr,10);
@@ -152,6 +161,10 @@ int main(int argc, char **argv)
 
 	if ( show_help ) usage();
 	if ( show_version ) version();
+	
+	if ( inet4_only && inet6_only ) {
+		error(0,"both options `inet4-only' and `inet6-only' specified");
+	}
 	
 	if ( argc>optind ) error(0,"non-option arguments given");
 
@@ -274,11 +287,12 @@ void create_server()
 	/* Set preferred network connection options: use both IPv4 and
 	   IPv6 by default */ 
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_family   = AF_INET;
 	hints.ai_flags    = AI_PASSIVE | AI_ADDRCONFIG;
 	hints.ai_socktype = SOCK_STREAM;
+	if ( inet4_only ) hints.ai_family = AF_INET;
+	if ( inet6_only ) hints.ai_family = AF_INET6;
 
-	/* Get all (IPv4-only) addresses associated with us */
+	/* Get all addresses (IPv4/6) associated with us */
 	port_str = allocstr("%d",port);
 	if ( (err = getaddrinfo(NULL,port_str,&hints,&res)) ) {
 		error(0,"getaddrinfo: %s",gai_strerror(err));
