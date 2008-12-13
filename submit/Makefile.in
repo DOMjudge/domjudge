@@ -28,6 +28,8 @@ CURLDEF     = -DLIBCURL=$(LIBCURL)
 CURLFLAGS   = $(CURLDEF) -I$(CURLINCLUDE) $(CURLLIBS)
 endif
 
+LIBMAGIC = @libmagic@
+
 domserver: submitdaemon
 
 submitclient: submit$(EXECSUFFIX)
@@ -45,7 +47,7 @@ $(LIBOBJECTS):
 $(SUBMITCOMMONOBJ): %$(OBJSUFFIX): %.cc %.h $(LIBHEADERS)
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
-submit$(EXECSUFFIX): $(CURLSTATIC)
+submit$(EXECSUFFIX): $(CURLSTATIC) $(LIBMAGIC)
 
 install-domserver:
 	install -m u=rwx,go=rx -t $(domserver_bindir) submitdaemon

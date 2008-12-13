@@ -16,6 +16,8 @@
 /* and config stuff that should be non-compile-time */
 #include "../etc/domserver-config.h"
 
+#include "../etc/config.h"
+
 /* Check whether default submission method is available; bail out if not */
 #if ( SUBMITCLIENT_METHOD == 1 ) && ( ENABLE_CMDSUBMIT_SERVER != 1 )
 #error "Commandline default submission requested, but server not enabled."
@@ -35,7 +37,7 @@
 #undef SYSLOG
 
 /* Define {CMD,WEB}SUBMIT as available */
-#if ( ENABLE_CMDSUBMIT_SERVER == 1 )
+#if ( ENABLE_CMDSUBMIT_SERVER == 1 && HAVE_NETDB_H && HAVE_NETINET_IN_H )
 #define CMDSUBMIT 1
 #endif
 #if ( ENABLE_WEBSUBMIT_SERVER == 1 && defined( LIBCURL ) )
@@ -63,6 +65,10 @@
 #ifdef WEBSUBMIT
 #include <curl/curl.h>
 #include <curl/easy.h>
+#endif
+
+#ifdef HAVE_MAGIC_H
+#include <magic.h>
 #endif
 
 /* C++ includes for easy string handling */
@@ -128,7 +134,9 @@ void usage();
 void usage2(int , const char *, ...);
 void warnuser(const char *);
 char readanswer(const char *answers);
+#ifdef HAVE_MAGIC_H
 int  file_istext(char *filename);
+#endif
 
 #ifdef CMDSUBMIT
 int  cmdsubmit();
@@ -321,8 +329,10 @@ int main(int argc, char **argv)
 		free(ptr);
 	}
 
+#ifdef HAVE_MAGIC_H
 	if ( !file_istext(filename) ) warnuser("file is detected as binary/data");
-	
+#endif
+
 	/* Try to parse problem and language from filename */
 	filebase = string(gnu_basename(filename));
 	if ( filebase.find('.')!=string::npos ) {
@@ -553,60 +563,32 @@ char readanswer(const char *answers)
 	return c;
 }
 
+#ifdef HAVE_MAGIC_H
+
 int file_istext(char *filename)
 {
-	const char cmd[5] = "file";
-	char *args[MAXARGS];
-	int redir_fd[3];
-	FILE *rpipe;
-	pid_t cpid;
-	int status;
-	char line[256];
-	int texttype;
+	magic_t cookie;
+	const char *filetype;
 
-	/* Try to detect file type by running 'file', if available */
-	logmsg(LOG_DEBUG,"trying to check file type with '%s'",cmd);
+	if ( (cookie = magic_open(MAGIC_MIME))==NULL ) goto error;
+
+	if ( magic_load(cookie,NULL)!=0 ) goto error;
 	
-	args[0] = filename;
-	redir_fd[0] = redir_fd[2] = 0;
-	redir_fd[1] = 1;
-	texttype = 0;
-	if ( (cpid = execute(cmd,args,1,redir_fd,1))<0 ) {
-		error(errno,"executing '%s %s'",cmd,args[0]);
-	} else {
+	if ( (filetype = magic_file(cookie,filename))==NULL ) goto error;
 
-		/* Bind file stdout/stderr to pipe */
-		if ( (rpipe = fdopen(redir_fd[1],"r"))==NULL ) {
-			error(errno,"opening pipe from '%s' output",cmd);
-		}
+	logmsg(LOG_DEBUG,"mime-type of '%s'",filetype);
 	
-		/* Read stdout and check file type */
-		while ( fgets(line,255,rpipe)!=NULL ) {
-			stripendline(line);
-			logmsg(LOG_DEBUG,"%s output: '%s'",cmd,line);
-			if ( strstr(line,"text")!=NULL ) texttype = 1;
-		}
-		
-		if ( fclose(rpipe)!=0 ) error(errno,"closing pipe from '%s' output",cmd);
-	
-		if ( waitpid(cpid,&status,0)<0 ) error(errno,"waiting for '%s'",cmd);
+	magic_close(cookie);
 
-		/* Check file exitcode (should be zero) */
-		if ( WIFEXITED(status) && WEXITSTATUS(status)!=0 ) {
-			warning(0,"'%s' exited with exitcode %d, last line of output:\n%s",
-			        cmd,WEXITSTATUS(status),line);
-			return 1;
-		}
+	return strncmp(filetype,"text/",5)==0;
 
-		/* Abnormal command termination, probably 'file' not available */
-		if ( ! WIFEXITED(status) ) {
-			logmsg(LOG_DEBUG,"cannot execute '%s' to detect file type, skipping",cmd);
-			return 1;
-		}
-	}
+error:
+	warning(magic_errno(cookie),magic_error(cookie));
 
-	return texttype;
+	return 1; // return 'text' by default on error
 }
+
+#endif /* HAVE_MAGIC_H */
 
 #ifdef CMDSUBMIT
 
