@@ -1,0 +1,18 @@
+Everything in this directory is not part of the core of DOMjudge; it
+is not required for DOMjudge to function, but these are add-ons and
+other programs, etc. which might be useful when using DOMjudge and
+included in the distribution for that reason.
+
+A short description of the contents of this directory follows. Note
+that these programs might not be completely uptodate with the DOMjudge
+core, so some manual hacking might be nessecary to use these.
+
+
+* checkinput checkinput.awk fixinput.awk
+
+The 'checkinput' programs are meant to check testdata input (and
+optionally also output). There's both a C program and AWK script which
+do essentially the same thing. See 'checkinput.c' for details. All
+scripts take a testdata file as argument. The 'fixinput.awk' script
+corrects some problems, that these programs check for, e.g. trailing
+whitespace.
