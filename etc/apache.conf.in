@@ -2,27 +2,58 @@
 
 # Apache configuration for DOMjudge
 
+
+### VirtualHost config ###
+#
 # Use this VirtualHost block if you want DOMjudge to live in
 # the root of your webserver. See the Apache documentation for
 # virtualhosts for more information.
+#
+# If you put DOMjudge in your DocumentRoot, change WEBBASEURI in
+# etc/domserver-config.php to '/'
+
+# Using HTTP:
 
 #NameVirtualHost *
 #<VirtualHost *>
-# If you put DOMjudge in your DocumentRoot, change WEBBASEURI in
-# etc/domserver-config.php to '/'
 #ServerName _default_
 #DocumentRoot @domserver_wwwdir@
 #</VirtualHost>
 
+# Alternatively, use HTTPS and redirect HTTP to HTTPS:
+
+#Listen 443
+#
+#<VirtualHost *:80>
+#RewriteEngine ON
+#RewriteRule .* @domserver-hostname@$0
+#</VirtualHost>
+#
+#<VirtualHost *>
+#ServerName _default_
+#DocumentRoot @domserver_wwwdir@
+#
+#SSLEngine on
+#SSLCipherSuite ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP:+eNULL
+#SSLCertificateFile    /path/to/your/SSL-certificate.crt
+#SSLCertificateKeyFile /path/to/your/SSL-key.key
+#</VirtualHost>
+
+
+### Alias config ###
+#
 # Alternatively, use this instead of the VirtualHost above when you don't
 # want DOMjudge in the root, but only occupy a subdir, like this:
 # www.example.com/domjudge
-
+#
 # If you change the Alias path, change WEBBASEURI in
 # etc/domserver-config.php accordingly
+
 Alias /domjudge @domserver_wwwdir@
 
 
+### General options ###
+#
 # This section applies to both options above.
 
 <Directory @domserver_wwwdir@>
