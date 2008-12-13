@@ -51,3 +51,7 @@ clean-backupfiles:
         maintainer-clean
 
 endif # GLOBALINCLUDED
+
+# Local Variables:
+# mode: makefile
+# end:
