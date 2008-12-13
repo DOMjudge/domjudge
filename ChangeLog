@@ -29,6 +29,8 @@ Version 3.0.0 - SVN
  - Fix bug of submittime==endtime not showing as too-late, thanks Tobias Werth.
  - Replace 'hostname --short' option, fixing inconsistent results.
  - Merge changes in ipv6 branch to trunk, IPv6 comparison not yet functional.
+ - Show unread clafications in the title of the team clarifications page.
+   (Closes: #2148054)
 
 Version 2.2.0 - 11 August 2008
 ------------------------------
