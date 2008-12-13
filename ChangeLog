@@ -31,6 +31,7 @@ Version 3.0.0 - SVN
  - Merge changes in ipv6 branch to trunk, IPv6 comparison not yet functional.
  - Show unread clafications in the title of the team clarifications page.
    (Closes: #2148054)
+ - Added test sources for java class name, network and root user.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------
