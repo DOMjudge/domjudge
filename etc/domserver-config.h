@@ -3,10 +3,13 @@
 
 #include "domserver-static.h"
 
+// This should go into compile-time configuration:
 #define ENABLE_CMDSUBMIT_SERVER 1
 #define ENABLE_WEBSUBMIT_SERVER 1
-#define SUBMITCLIENT_METHOD     1
 
+/* FIXME: "Configuration" below is also needed by submit client and
+   therefore not easily converted into runtime config options. */
+ 
 /* Define the command to copy files to the user submit directory in the
    submit client differently under Windows and Linux */
 #if defined(__CYGWIN__) || defined(__CYGWIN32__)
@@ -19,12 +22,16 @@
 #define USERDIR      ".domjudge"
 #define USERPERMDIR  0700
 #define USERPERMFILE 0600
-#define BEEP_CMD     BINDIR"/beep"
 
 #define WARN_MTIME   5
 #define SOURCESIZE   256
 #define LANG_EXTS    "C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl Bash,sh"
 
+/* End of config required by submit client */
+
+// This stuff should be removed when feature request #1878083 is solved:
+
+#define BEEP_CMD     BINDIR"/beep"
 #define BEEP_ERROR   "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n "\
                      "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n "\
                      "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n "\

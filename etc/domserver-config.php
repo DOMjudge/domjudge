@@ -1,10 +1,16 @@
 <?php
 
-// Default config
+// Default config: should go into runtime configuration file.
 
 define('DJ_CHARACTER_SET', 'utf-8');
 
 define('VERIFICATION_REQUIRED', false);
+
+define('WEBBASEURI', '/domjudge/');
+
+define('DEBUG', 1);
+
+// What to do with stuff below?
 
 // Set DEBUG as a bitmask of the following settings.
 // Of course never to be used on live systems!
@@ -17,9 +23,6 @@ define('DEBUG_TIMINGS', 2);
 //
 // Display SQL queries on webpages
 define('DEBUG_SQL', 4);
-
-define('DEBUG', 1);
-define('WEBBASEURI', '/domjudge/');
 
 // Specify here which of the users in htpasswd-jury should have admin 
 // rights on top of their jury rights
