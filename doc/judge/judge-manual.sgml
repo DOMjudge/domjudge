@@ -129,8 +129,8 @@ that it's correct to do so.
 The scoreboard is the most important view on the contest.
 
 The scoreboard will display an upcoming contest from a given
-`activatetime'; only at first second of the real start of the contest
-it will show the problems however.
+`activatetime'; only at the first second of the real start of the
+contest it will show the problems however.
 
 It is possible to freeze the scoreboard at a given time, commonly
 one hour before the contest ends, to keep the last hour interesting
