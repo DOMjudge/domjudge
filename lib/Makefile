@@ -9,7 +9,7 @@ else
 OBJSUFFIX = .o
 endif
 
-LIBSBASE = lib.error lib.misc
+LIBSBASE = lib.error lib.misc lib.config
 
 OBJECTS = $(addsuffix $(OBJSUFFIX),$(LIBSBASE))
 
