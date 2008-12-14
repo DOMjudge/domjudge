@@ -9,6 +9,8 @@
 #define COPY_CMD "cp"
 #endif
 
+/* Put this into runtime or compile-time configuration? */
+
 #define CHROOT_PREFIX "@judgehost_judgedir@"
 #define VALID_USERS "domjudge-run"
 
