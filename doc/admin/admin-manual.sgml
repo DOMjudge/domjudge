@@ -1818,6 +1818,21 @@ to raise the memory limits for PHP. This can be done by either editing
 the jury directory or by directly editing the global Apache or
 <tt>php.ini</tt> configuration.
 
+<sect>Compiler errors: `runguard: root privileges not dropped'
+<p>
+
+<verb>
+Compiling failed with exitcode 255, compiler output:
+/home/domjudge/system/bin/runguard: root privileges not dropped
+</verb>
+When the above error occurs on submitting any source, this indicates
+that you are running the <tt>judgedaemon</tt> as root user. You should
+not run any part of DOMjudge as root. Either run it as yourself or
+e.g. create a user <tt>domjudge</tt> under which to install and run
+everything. Also do not confuse this with the <tt>domjudge-run</tt>
+user: this is a special user to run submissions as and should also not
+be used to run normal DOMjudge processes; this user is only for
+internal use.
 
 <chapt>DOMjudge and the ICPC validator interface standard <label id="validator">
 <p>
