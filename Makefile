@@ -24,6 +24,7 @@ default:
 	@echo " - make install-db"
 	@echo " - make install-docs"
 	@echo or
+	@echo " - make build"
 	@echo " - make test"
 	@echo " - make clean"
 	@echo " - make distclean"
@@ -42,7 +43,7 @@ REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
             test dist
 SUBDIRS=bin doc etc judge lib submit www test-programs test-sources
 
-build:             SUBDIRS=bin lib judge submit test-sources test-programs
+build:             SUBDIRS=bin lib judge submit test-sources misc-tools
 domserver:         SUBDIRS=etc submit
 install-domserver: SUBDIRS=etc lib submit www
 judgehost:         SUBDIRS=bin etc judge
