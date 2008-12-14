@@ -490,6 +490,33 @@ function make_link($name, $url, $condition = TRUE, $raw = FALSE)
 }
 
 /**
+ * Word wrap only unquoted text.
+ */
+function wrap_unquoted($text, $width = 75, $quote = '>')
+{
+	$lines = explode("\n", $text);
+
+	$result = '';
+	$unquoted = '';
+
+	foreach( $lines as $line ) {
+		// Check for quoted lines
+		if ( strspn($line,$quote)>0 ) {
+			// First append unquoted text wrapped, then quoted line:
+			$result .= wordwrap($unquoted,$width);
+			$unquoted = '';
+			$result .= $line . "\n";
+		} else {
+			$unquoted .= $line . "\n";
+		}
+	}
+
+	$result .= wordwrap(rtrim($unquoted),$width);
+
+	return $result;
+}
+
+/**
  * DOM XML tree helper functions (PHP 5).
  * The XML tree is assumed to be named '$xmldoc'.
  */

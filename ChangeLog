@@ -32,6 +32,7 @@ Version 3.0.0 - SVN
  - Show unread clafications in the title of the team clarifications page.
    (Closes: #2148054)
  - Added test sources for java class name, network and root user.
+ - Only wrap unquoted lines in clarification texts. (Closes: #2244652)
 
 Version 2.2.0 - 11 August 2008
 ------------------------------

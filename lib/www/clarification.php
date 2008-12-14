@@ -56,11 +56,13 @@ function putClar($clar)
 	echo "<table>\n";
 
 	echo '<tr><td scope="row">From:</td><td>';
-	echo make_link($from, "team.php?id=" . urlencode($clar['sender']), IS_JURY && $clar['sender'], TRUE);
+	echo make_link($from, "team.php?id=" . urlencode($clar['sender']),
+	               IS_JURY && $clar['sender'], TRUE);
 	echo "</td></tr>\n";
 
 	echo '<tr><td scope="row">To:</td><td>';
-	echo make_link($to, "team.php?id=" . urlencode($clar['recipient']), IS_JURY && $clar['recipient'], TRUE);
+	echo make_link($to, "team.php?id=" . urlencode($clar['recipient']),
+	               IS_JURY && $clar['recipient'], TRUE);
 	echo "</td></tr>\n";
 
 	echo '<tr><td scope="row">Time:</td><td>';
@@ -68,7 +70,7 @@ function putClar($clar)
 	echo "</td></tr>\n";
 
 	echo '<tr><td valign="top"></td><td class="filename">';
-	echo '<pre class="output_text">' . wordwrap(htmlspecialchars($clar['body']),80) . "</pre>";
+	echo '<pre class="output_text">' . htmlspecialchars(wrap_unquoted($clar['body'],80)) . "</pre>";
 	echo "</td></tr>\n";
 
 	echo "</table>\n";
@@ -255,11 +257,8 @@ function confirmClar() {
 <td><?php
 $body = "";
 if ( $respid ) {
-	$text = explode("\n",wordwrap($clar['body']),70);
-	foreach($text as $line) {
-		$body .= "> $line\n";
-	}
-	$body .= "\n";
+	$text = explode("\n",wrap_unquoted($clar['body']),75);
+	foreach($text as $line) $body .= "> $line\n";
 }
 echo addTextArea('bodytext', $body, 80, 10);
 ?></td></tr>
