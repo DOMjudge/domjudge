@@ -41,7 +41,7 @@ install-judgehost: judgehost
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
             docs install-docs submitclient clean distclean maintainer-clean \
             test dist
-SUBDIRS=bin doc etc judge lib submit www test-programs test-sources
+SUBDIRS=bin doc etc judge lib submit www test-sources misc-tools
 
 build:             SUBDIRS=bin lib judge submit test-sources misc-tools
 domserver:         SUBDIRS=etc submit
