@@ -24,7 +24,6 @@ $EXITCODES = array (
 	108	=>	'output-limit'
 	);
 
-define('BEEP_CMD', '/usr/bin/beep');
 define('BEEP_ERROR', '-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n -l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n -l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n -l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n -l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000');
 define('BEEP_WARNING', '-l 1000 -d 500 -f 300 -n -l 1000 -d 500 -f 200 -n -l 1000 -d 500 -f 300 -n -l 1000 -d 500 -f 200');
 define('BEEP_SUBMIT', '-f 400 -l 100 -n -f 400 -l 70');
