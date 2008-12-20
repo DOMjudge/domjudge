@@ -11,6 +11,8 @@ define('DJ_CHARACTER_SET', 'utf-8');
 
 define('VERIFICATION_REQUIRED', false);
 
+define('PENALTY_TIME', 20);
+
 /** Possible exitcodes from testsol and their meaning */
 $EXITCODES = array (
 	0	=>	'correct',
@@ -41,6 +43,9 @@ define('DEBUG_TIMINGS', 2);
 //
 // Display SQL queries on webpages
 define('DEBUG_SQL', 4);
+//
+// Display judging backend scripts
+define('DEBUG_JUDGE', 8);
 
 define('DEBUG', 1);
 
