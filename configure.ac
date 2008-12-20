@@ -19,7 +19,7 @@ AC_SUBST(DOMJUDGE_VERSION, $PACKAGE_VERSION)
 
 # {{{ Domserverstuff (webserver, etc)
 AC_ARG_WITH(domserver-hostname,,AC_SUBST(domserver_hostname,$withval),
-	AC_SUBST(domserver_hostname,domjudge.example.org))
+            AC_SUBST(domserver_hostname,domjudge.example.org))
 
 AC_SUBST(domserver_username, domjudge)
 AC_SUBST(webserver_group, www-data)
@@ -62,6 +62,7 @@ AX_PATH(judgehost_libjudgedir,  [$judgehost_root/lib/judge])
 AX_PATH(judgehost_logdir,       [$judgehost_root/log])
 AX_PATH(judgehost_tmpdir,       [$judgehost_root/tmp])
 AX_PATH(judgehost_judgedir,     [$judgehost_root/judgings])
+AX_PATH_COMMENT(4,[  ])
 
 # }}}
 
@@ -146,6 +147,13 @@ AC_PROG_CPP
 #AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
+
+AX_WITH_PROG(BEEP,beep,[none])
+if test "x$BEEP" = "xnone" ; then
+	AC_MSG_WARN([command `beep' not available])
+else
+	AC_DEFINE_UNQUOTED(BEEP_CMD,"$BEEP",[Path of the `beep' command.])
+fi
 
 # Checks for libraries.
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(libmagic,[-lmagic]))

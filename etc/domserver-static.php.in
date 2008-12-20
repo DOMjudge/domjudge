@@ -11,3 +11,5 @@ define('WWWDIR',      '@domserver_wwwdir@');
 define('LIBDIR',      '@domserver_libdir@');
 define('LIBWWWDIR',   '@domserver_libwwwdir@');
 define('LOGDIR',      '@domserver_logdir@');
+
+define('BEEP_CMD',    '@BEEP@');

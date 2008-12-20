@@ -166,7 +166,9 @@ function difftime($time1, $time2)
  */
 function beep($beeptype)
 {
-	system(BEEP_CMD . " " . $beeptype . " &");
+	if ( is_executable(BEEP_CMD) ) {
+		system(BEEP_CMD . " " . $beeptype . " &");
+	}
 }
 
 /**

@@ -27,7 +27,6 @@
 
 // This stuff should be removed when feature request #1878083 is solved:
 
-#define BEEP_CMD     BINDIR"/beep"
 #define BEEP_ERROR   "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n "\
                      "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n "\
                      "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n "\

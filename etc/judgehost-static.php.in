@@ -12,3 +12,5 @@ define('JUDGEDIR',    '@judgehost_judgedir@');
 define('LIBDIR',      '@judgehost_libdir@');
 define('LIBJUDGEDIR', '@judgehost_libjudgedir@');
 define('LOGDIR',      '@judgehost_logdir@');
+
+define('BEEP_CMD',    '@BEEP@');
