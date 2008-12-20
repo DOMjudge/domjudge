@@ -98,26 +98,44 @@ fi
 def_submitclient_protocols="http,dolstra"
 
 AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--enable-submitclient@<:@=ARG@:>@],
-[enable submit client binary; set ARG to protocol list to support, where the
-first will be default. Supported protocols are in default order 'http,dolstra'.]),
+[enable submit client binary (default: yes); set ARG to protocol list
+to support, where the first will be default. Supported protocols are
+in default order 'http,dolstra'.]),
 [
 if test "x$enableval" = xyes ; then
 	submitclient_protocols=$def_submitclient_protocols
+elif test "x$enableval" = xno ; then
+	submitclient_protocols=''
 else
 	submitclient_protocols="$enableval"
 fi
 ],
-[submitclient_protocols=''])
+[submitclient_protocols=$def_submitclient_protocols])
 
-submitclient_method=0
+submit_default=0
 case `echo "x$submitclient_protocols" | sed 's/,.*//'` in
-	xdolstra) submitclient_method=1 ;;
-	xhttp)    submitclient_method=2 ;;
-	*)        submitclient_method=0 ;;
+	xdolstra) submit_default=1 ;;
+	xhttp)    submit_default=2 ;;
+	*)        submit_default=0 ;;
 esac
 
-AC_DEFINE_UNQUOTED(SUBMITCLIENT_METHOD, $submitclient_method,
+submit_enabledolstra=0
+submit_enablehttp=0
+for i in `echo "$submitclient_protocols" | sed 's/,/ /g'` ; do
+    eval submit_enable$i=1
+done
+
+AC_SUBST(          SUBMIT_DEFAULT, $submit_default)
+AC_DEFINE_UNQUOTED(SUBMIT_DEFAULT, $submit_default,
 [Default submission protocol: 1 = 'dolstra', 2 = 'http'])
+
+AC_SUBST(          SUBMIT_ENABLE_CMD, $submit_enabledolstra)
+AC_DEFINE_UNQUOTED(SUBMIT_ENABLE_CMD, $submit_enabledolstra,
+[Enable submission via 'dolstra' protocol.])
+
+AC_SUBST(          SUBMIT_ENABLE_WEB, $submit_enablehttp)
+AC_DEFINE_UNQUOTED(SUBMIT_ENABLE_WEB, $submit_enablehttp,
+[Enable submission via 'http' protocol.])
 
 # }}}
 

@@ -6,13 +6,21 @@ include $(TOPDIR)/Makefile.global
 ifdef CYGWIN
 EXECSUFFIX = .exe
 OBJSUFFIX = .cygwin.o
+ifneq ($(SUBMIT_DEFAULT),0)
 TARGETS = submit$(EXECSUFFIX)
-else
+endif
+else # no CYGWIN
 OBJSUFFIX = .o
-TARGETS = submit submitdaemon
+ifneq ($(SUBMIT_DEFAULT),0)
+TARGETS = submit$(EXECSUFFIX)
+endif
+ifeq ($(SUBMIT_ENABLE_CMD),1)
+TARGETS += submitdaemon
+domserver: submitdaemon
+endif
 endif
 
-LIBSBASE = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc)
+LIBSBASE = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc lib.config)
 LIBHEADERS = $(addsuffix .h,$(LIBSBASE))
 LIBOBJECTS = $(addsuffix $(OBJSUFFIX),$(LIBSBASE))
 
@@ -29,8 +37,6 @@ CURLFLAGS   = $(CURLDEF) -I$(CURLINCLUDE) $(CURLLIBS)
 endif
 
 LIBMAGIC = @libmagic@
-
-domserver: submitdaemon
 
 submitclient: submit$(EXECSUFFIX)
 
@@ -50,7 +56,9 @@ $(SUBMITCOMMONOBJ): %$(OBJSUFFIX): %.cc %.h $(LIBHEADERS)
 submit$(EXECSUFFIX): $(CURLSTATIC) $(LIBMAGIC)
 
 install-domserver:
+ifeq ($(SUBMIT_ENABLE_CMD),1)
 	install -m u=rwx,go=rx -t $(domserver_bindir) submitdaemon
+endif
 	install -m u=rwx,go=rx -t $(domserver_libdir) submit_copy.sh
 	install -m u=rw,go=r   -t $(domserver_libdir) submit_db.php
 

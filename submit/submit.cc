@@ -19,30 +19,25 @@
 #include "../etc/config.h"
 
 /* Check whether default submission method is available; bail out if not */
-#if ( SUBMITCLIENT_METHOD == 1 ) && ( ENABLE_CMDSUBMIT_SERVER != 1 )
+#if ( SUBMIT_DEFAULT == 1 ) && ( SUBMIT_ENABLE_CMD != 1 )
 #error "Commandline default submission requested, but server not enabled."
 #endif
-#if ( SUBMITCLIENT_METHOD == 2 ) && ( ENABLE_WEBSUBMIT_SERVER != 1 )
+#if ( SUBMIT_DEFAULT == 2 ) && ( SUBMIT_ENABLE_WEB != 1 )
 #error "Webinterface default submission requested, but server not enabled."
 #endif
-#if ( SUBMITCLIENT_METHOD == 2 ) && ! defined( LIBCURL )
-#error "Webinterface default submission requested, but libcURL not available."
-#endif
-/* '0' is also acceptable as a legacy no-op */
-#if ( SUBMITCLIENT_METHOD < 0 ) || ( SUBMITCLIENT_METHOD > 2 )
+#if ( SUBMIT_DEFAULT < 1 ) || ( SUBMIT_DEFAULT > 2 )
 #error "Unknown submission method requested."
+#endif
+/* Check whether submission method dependencies are available */
+#if ( SUBMIT_ENABLE_CMD && ! ( HAVE_NETDB_H && HAVE_NETINET_IN_H ) )
+#error "Commandline submission requested, but network headers not available."
+#endif
+#if ( SUBMIT_ENABLE_WEB && ! defined( LIBCURL ) )
+#error "Webinterface submission requested, but libcURL not available."
 #endif
 
 /* Make sure we don't log to syslog */
 #undef SYSLOG
-
-/* Define {CMD,WEB}SUBMIT as available */
-#if ( ENABLE_CMDSUBMIT_SERVER == 1 && HAVE_NETDB_H && HAVE_NETINET_IN_H )
-#define CMDSUBMIT 1
-#endif
-#if ( ENABLE_WEBSUBMIT_SERVER == 1 && defined( LIBCURL ) )
-#define WEBSUBMIT 1
-#endif
 
 /* Standard include headers */
 #include <stdarg.h>
@@ -58,15 +53,14 @@
 #include <sys/socket.h>
 #include <getopt.h>
 #include <termios.h>
-#ifdef CMDSUBMIT
+#if ( SUBMIT_ENABLE_CMD )
 #include <netinet/in.h>
 #include <netdb.h>
 #endif
-#ifdef WEBSUBMIT
+#if ( SUBMIT_ENABLE_WEB )
 #include <curl/curl.h>
 #include <curl/easy.h>
 #endif
-
 #ifdef HAVE_MAGIC_H
 #include <magic.h>
 #endif
@@ -138,14 +132,14 @@ char readanswer(const char *answers);
 int  file_istext(char *filename);
 #endif
 
-#ifdef CMDSUBMIT
+#if ( SUBMIT_ENABLE_CMD )
 int  cmdsubmit();
 #endif
-#ifdef WEBSUBMIT
+#if ( SUBMIT_ENABLE_WEB )
 int  websubmit();
 #endif
 
-#ifdef CMDSUBMIT
+#if ( SUBMIT_ENABLE_CMD )
 int socket_fd; /* filedescriptor of the connection to server socket */
 
 struct addrinfo *server_ais, *server_ai; /* server adress information */
@@ -245,7 +239,7 @@ int main(int argc, char **argv)
 	if ( baseurl.empty() ) baseurl = string("http://localhost/");
 
 	/* Parse command-line options */
-#if ( SUBMITCLIENT_METHOD == 1 )
+#if ( SUBMIT_DEFAULT == 1 )
 	use_websubmit = 0;
 #else
 	use_websubmit = 1;
@@ -401,13 +395,13 @@ int main(int argc, char **argv)
 	}
 
 	if ( use_websubmit ) {
-#ifdef WEBSUBMIT
+#if ( SUBMIT_ENABLE_WEB )
 		return websubmit();
 #else
 		error(0,"websubmit requested, but not available");
 #endif
 	} else {
-#ifdef CMDSUBMIT
+#if ( SUBMIT_ENABLE_CMD )
 		return cmdsubmit();
 #else
 		error(0,"cmdsubmit requested, but not available");
@@ -436,15 +430,15 @@ void usage()
 "      --version            output version information and exit\n"
 "\n"
 "The following option(s) should not be necessary for normal use\n"
-#if defined( CMDSUBMIT )
+#if ( SUBMIT_ENABLE_CMD )
 "  -t, --team=TEAM          submit as team TEAM\n"
 "  -s, --server=SERVER      submit to server SERVER\n"
 "  -P, --port=PORT          connect to SERVER on tcp-port PORT\n"
 #endif
-#if defined( WEBSUBMIT )
+#if ( SUBMIT_ENABLE_WEB )
 "  -u, --url=URL            submit to webserver with base address URL\n"
 #endif
-#if defined( WEBSUBMIT ) && defined( CMDSUBMIT )
+#if ( SUBMIT_ENABLE_WEB && SUBMIT_ENABLE_CMD )
 "  -w, --web[=0|1]          toggle or set submit to the webinterface\n"
 #endif
 "\n"
@@ -476,7 +470,7 @@ void usage()
 	printf(
 "The following options should not be necessary for normal use:\n"
 "\n"
-#if defined( CMDSUBMIT )
+#if ( SUBMIT_ENABLE_CMD )
 "For TEAM use the login of the account, you want to submit for.\n"
 "The default value for TEAM is taken from the environment variable\n"
 "'TEAM' or your login name if 'TEAM' is not defined.\n"
@@ -488,14 +482,16 @@ void usage()
 "TCP port to connect to.\n"
 "\n"
 #endif
-#if defined( WEBSUBMIT )
+#if ( SUBMIT_ENABLE_WEB )
 "For URL use the base address of the webinterface without the\n"
 "'team/upload.php' suffix.\n"
 "\n"
 #endif
+#if ( SUBMIT_ENABLE_WEB && SUBMIT_ENABLE_CMD )
 "The TEAM/SERVER/PORT and URL options are only used when submitting to the\n"
-"commandline daemon or webinterface respectively. If both are enabled,\n"
-"this can be toggled with the '-w' option, but the default should work fine.\n");
+"commandline daemon or webinterface respectively.\n"
+#endif
+	);
 	exit(0);
 }
 
@@ -590,7 +586,7 @@ error:
 
 #endif /* HAVE_MAGIC_H */
 
-#ifdef CMDSUBMIT
+#if ( SUBMIT_ENABLE_CMD )
 
 int cmdsubmit()
 {
@@ -703,9 +699,9 @@ int cmdsubmit()
     return 0;
 }
 
-#endif /* CMDSUBMIT */
+#endif /* SUBMIT_ENABLE_CMD */
 
-#ifdef WEBSUBMIT
+#if ( SUBMIT_ENABLE_WEB )
 
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 {
@@ -827,6 +823,6 @@ int websubmit()
 	
 	return 0;
 }
-#endif /* WEBSUBMIT */
+#endif /* SUBMIT_ENABLE_WEB */
 
 //  vim:ts=4:sw=4:

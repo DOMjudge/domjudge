@@ -3,10 +3,6 @@
 
 #include "domserver-static.h"
 
-// This should go into compile-time configuration:
-#define ENABLE_CMDSUBMIT_SERVER 1
-#define ENABLE_WEBSUBMIT_SERVER 1
-
 /* FIXME: "Configuration" below is also needed by submit client and
    therefore not easily converted into runtime config options. */
  

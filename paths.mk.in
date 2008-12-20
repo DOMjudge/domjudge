@@ -11,6 +11,11 @@ PACKAGE_STRING    = @PACKAGE_STRING@
 PACKAGE_TARNAME   = @PACKAGE_TARNAME@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 
+# Submit protocols
+SUBMIT_DEFAULT    = @SUBMIT_DEFAULT@
+SUBMIT_ENABLE_CMD = @SUBMIT_ENABLE_CMD@
+SUBMIT_ENABLE_WEB = @SUBMIT_ENABLE_WEB@
+
 # Autoconf prefixes and paths
 prefix         = @prefix@
 exec_prefix    = @exec_prefix@
