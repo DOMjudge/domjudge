@@ -28,7 +28,7 @@ admin-manual.html: admin-manual.sgml ../docs_header.html $(FIGSPNG)
 
 dist: docs
 
-maintainer-clean:
+maintainer-clean-l:
 	-rm -f $(FIGSPNG) $(FIGSEPS) admin-manual*.html admin-manual.pdf
 
 .PHONY:

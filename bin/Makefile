@@ -18,5 +18,5 @@ install-judgehost:
 #	install -o root -m u=rwxs,go=rx -t $(judgehost_bindir) runguard
 	install -t $(judgehost_bindir) runguard
 
-clean:
+clean-l:
 	rm -f $(TARGETS)

@@ -18,7 +18,7 @@ judge-manual.html: judge-manual.sgml ../docs_header.html
 
 dist: docs
 
-maintainer-clean:
+maintainer-clean-l:
 	-rm -f judge-manual*.html judge-manual.pdf
 
 .PHONY:

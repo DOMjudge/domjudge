@@ -37,18 +37,26 @@ CXXFLAGS := $(filter-out -fstack-protector,$(CXXFLAGS))
 CFLAGS   := $(filter-out -fstack-protector,$(CFLAGS))
 endif
 
-clean: clean-backupfiles
+clean-l:
+clean-r: clean-l
+clean: clean-r
 
-distclean: clean
+distclean-l: clean-l clean-backupfiles
+distclean-r: distclean-l
+distclean: distclean-r
 
-maintainer-clean: distclean
+maintainer-clean-l: distclean-l
+maintainer-clean-r: maintainer-clean-l
+maintainer-clean: maintainer-clean-r
 
 clean-backupfiles:
 	rm -f *~
 
 .PHONY: default build domserver install-domserver judgehost install-judgehost \
-        docs install-docs submitclient check clean clean-backupfiles distclean \
-        maintainer-clean
+        docs install-docs submitclient check clean-backupfiles \
+        clean clean-r clean-l distclean distclean-r distclean-l \
+        maintainer-clean maintainer-clean-l maintainer-clean-r \
+        maintainer-conf
 
 endif # GLOBALINCLUDED
 

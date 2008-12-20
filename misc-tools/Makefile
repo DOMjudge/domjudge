@@ -9,5 +9,5 @@ build: $(TARGETS)
 
 install:
 
-clean:
+clean-l:
 	-rm -f $(TARGETS)

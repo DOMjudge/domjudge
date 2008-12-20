@@ -36,5 +36,5 @@ install-judgehost:
 		compare check_diff.sh check_float chroot-startstop.sh
 	install -t $(judgehost_bindir) judgedaemon
 
-clean:
+clean-l:
 	-rm -f $(TARGETS)

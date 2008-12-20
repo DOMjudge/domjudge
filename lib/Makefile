@@ -18,7 +18,7 @@ build: $(OBJECTS)
 $(OBJECTS): %$(OBJSUFFIX): %.c %.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-clean:
+clean-l:
 	rm -f $(OBJECTS)
 
 install-domserver:

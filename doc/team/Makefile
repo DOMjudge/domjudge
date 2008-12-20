@@ -39,10 +39,8 @@ texclean:
 	       $(addsuffix .out,$(TARGETS)) \
 	       systemconfig.aux
 
-clean: texclean
+clean-l: texclean
 	-rm -f $(TARGETSPDF)
-
-distclean:
 
 dist:
 

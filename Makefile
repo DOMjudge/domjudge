@@ -39,8 +39,8 @@ install-judgehost: judgehost
 # List all targets that exist in subdirs too, and optionally list in
 # which subdirs they are, overriding default SUBDIRS list.
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            docs install-docs submitclient clean distclean maintainer-clean \
-            test dist
+            docs install-docs submitclient test dist \
+            clean-r distclean-r maintainer-clean-r
 SUBDIRS=bin doc etc judge lib submit www test-sources misc-tools
 
 build:             SUBDIRS=bin lib judge submit test-sources misc-tools
@@ -67,10 +67,26 @@ judgehost-create-dirs:
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 
+# Run aclocal separately from autoreconf, which doesn't pass -I option.
+aclocal.m4: configure.ac $(wildcard m4/*.m4)
+	aclocal -I m4
+
+configure: configure.ac aclocal.m4
+	autoreconf
+
+# Configure for running in source tree, not meant for normal use:
+maintainer-conf: configure
+	./configure --prefix=$(PWD) \
+	            --with-domserver_root=$(PWD) \
+	            --with-judgehost_root=$(PWD) \
+	            --with-domserver_logdir=$(PWD)/output/log \
+	            --with-judgehost_logdir=$(PWD)/output/log \
+	            --with-judgehost_judgedir=$(PWD)/output/judging
+
 maintainer-clean: clean-autoconf
 
 clean-autoconf:
-	-rm -f config.status config.cache config.log \
+	-rm -rf config.status config.cache config.log autom4te.cache \
 		configure paths.mk etc/Makefile
 
 .PHONY: domserver-create-dirs judgehost-create-dirs clean-autoconf
