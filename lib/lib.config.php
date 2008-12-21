@@ -71,8 +71,6 @@ function config_readfile($filename)
 		// Strip optional enclosing quotes from value
 		$value = preg_replace('/^"(.*)"$/', "$1", $value);
 
-		var_dump($option,$value);
-
 		config_setvalue($option, $value);
 	}
 
