@@ -6,18 +6,17 @@ include $(TOPDIR)/Makefile.global
 ifdef CYGWIN
 EXECSUFFIX = .exe
 OBJSUFFIX = .cygwin.o
-ifneq ($(SUBMIT_DEFAULT),0)
-TARGETS = submit$(EXECSUFFIX)
-endif
 else # no CYGWIN
 OBJSUFFIX = .o
-ifneq ($(SUBMIT_DEFAULT),0)
-TARGETS = submit$(EXECSUFFIX)
-endif
 ifeq ($(SUBMIT_ENABLE_CMD),1)
 TARGETS += submitdaemon
 domserver: submitdaemon
 endif
+endif
+
+ifneq ($(SUBMIT_DEFAULT),0)
+SUBMITCLIENT = submit$(EXECSUFFIX)
+TARGETS += $(SUBMITCLIENT)
 endif
 
 LIBSBASE = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc lib.config)
@@ -26,34 +25,19 @@ LIBOBJECTS = $(addsuffix $(OBJSUFFIX),$(LIBSBASE))
 
 SUBMITCOMMONOBJ = submitcommon$(OBJSUFFIX)
 
-ifneq ($(shell which curl-config),)
-LIBCURL     = $(shell curl-config --version | cut -d ' ' -f 2)
-CURLLIBS    = $(shell curl-config --libs)
-CURLPREFIX  = $(shell curl-config --prefix)
-CURLINCLUDE = $(CURLPREFIX)/include
-CURLSTATIC  = $(CURLPREFIX)/lib/libcurl.a
-CURLDEF     = -DLIBCURL=$(LIBCURL)
-CURLFLAGS   = $(CURLDEF) -I$(CURLINCLUDE) $(CURLLIBS)
-endif
-
-LIBMAGIC = @libmagic@
-
-submitclient: submit$(EXECSUFFIX)
-
 build: $(TARGETS)
 
 $(TARGETS): %$(EXECSUFFIX): %.cc $(SUBMITCOMMONOBJ) $(TOPDIR)/etc/config.h \
                             $(LIBOBJECTS) $(LIBHEADERS)
-	$(CXX) $(CXXFLAGS) $(patsubst %.h,,$^) -o $@ $(CURLFLAGS)
-	$(STRIP) $@
 
 $(LIBOBJECTS):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
 $(SUBMITCOMMONOBJ): %$(OBJSUFFIX): %.cc %.h $(LIBHEADERS)
-	$(CXX) -c $(CXXFLAGS) $< -o $@
 
-submit$(EXECSUFFIX): $(CURLSTATIC) $(LIBMAGIC)
+$(SUBMITCLIENT): $(CURL_PREFIX)/lib/libcurl.a $(LIBMAGIC)
+$(SUBMITCLIENT): LDFLAGS += $(CURL_LIBS)
+$(SUBMITCLIENT): CXXFLAGS += $(CURL_CFLAGS)
 
 install-domserver:
 ifeq ($(SUBMIT_ENABLE_CMD),1)

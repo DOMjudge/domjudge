@@ -156,7 +156,12 @@ else
 fi
 
 # Checks for libraries.
-AC_CHECK_LIB(magic,magic_open,AC_SUBST(libmagic,[-lmagic]))
+AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
+
+if test "$submit_enablehttp" = "1" ; then
+	AC_CHECK_CURL([7.9.7])
+ 	AC_CHECK_HEADERS([curl/curl.h])
+fi
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -186,7 +191,6 @@ AC_CHECK_FUNCS([alarm dup2 getcwd gettimeofday memset mkdir realpath setenv sock
 AC_CONFIG_FILES([
 	paths.mk
 	etc/Makefile
-	submit/Makefile
 
 	www/configure.php
 	etc/domserver-static.php

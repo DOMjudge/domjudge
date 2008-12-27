@@ -32,7 +32,7 @@
 #if ( SUBMIT_ENABLE_CMD && ! ( HAVE_NETDB_H && HAVE_NETINET_IN_H ) )
 #error "Commandline submission requested, but network headers not available."
 #endif
-#if ( SUBMIT_ENABLE_WEB && ! defined( LIBCURL ) )
+#if ( SUBMIT_ENABLE_WEB && ! HAVE_CURL_CURL_H )
 #error "Webinterface submission requested, but libcURL not available."
 #endif
 

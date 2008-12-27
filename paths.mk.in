@@ -16,6 +16,14 @@ SUBMIT_DEFAULT    = @SUBMIT_DEFAULT@
 SUBMIT_ENABLE_CMD = @SUBMIT_ENABLE_CMD@
 SUBMIT_ENABLE_WEB = @SUBMIT_ENABLE_WEB@
 
+# libmagic
+LIBMAGIC = @LIBMAGIC@
+
+# libcURL
+CURL_CFLAGS = @CURL_CFLAGS@
+CURL_LIBS   = @CURL_LIBS@
+CURL_PREFIX = @CURL_PREFIX@
+
 # Autoconf prefixes and paths
 prefix         = @prefix@
 exec_prefix    = @exec_prefix@
