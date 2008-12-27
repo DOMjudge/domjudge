@@ -86,7 +86,7 @@ maintainer-conf: configure
 maintainer-clean: clean-autoconf
 
 clean-autoconf:
-	-rm -rf config.status config.cache config.log autom4te.cache \
-		configure paths.mk etc/Makefile
+	-rm -rf config.status config.cache config.log autom4te.cache
+	-for i in `find . -name \*.in` ; do rm -f $${i%.in} ; done
 
 .PHONY: domserver-create-dirs judgehost-create-dirs clean-autoconf
