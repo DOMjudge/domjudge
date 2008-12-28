@@ -19,12 +19,20 @@ require (SYSTEM_ROOT . '/lib/init.php');
 
 $verbose = LOG_INFO;
 
+// Tick use required between PHP 4.3.0 and 5.3.0 for handling signals,
+// must be declared globally.
+if ( version_compare(PHP_VERSION, '5.3', '<' ) ) {
+	declare(ticks = 1);
+}
+initsignals();
+
 logmsg(LOG_NOTICE, "Identify started [DOMjudge/".DOMJUDGE_VERSION."]");
 
 // Constantly check database for queued requests
 while ( TRUE ) {
 
 	// Check whether we have received an exit signal
+	if ( function_exists('pcntl_signal_dispatch') ) pcntl_signal_dispatch();
 	if ( $exitsignalled ) {
 		logmsg(LOG_NOTICE, "Received signal, exiting.");
 		exit;
