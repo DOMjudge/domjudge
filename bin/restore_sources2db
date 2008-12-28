@@ -11,8 +11,9 @@
  * The file modification times are used as submittime, as Unix does
  * not have file creation timestamps. Therefore it is advisable not to
  * touch the sources in SUBMITDIR. This script tries to insert the
- * sources with the original submission ID's, so the submissions table
- * should be clean before running this script.
+ * sources with the original submission ID's, so to restore the
+ * original state, the submissions table should be empty before
+ * running this script.
  * 
  * $Id$
  *
@@ -21,14 +22,22 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
-require('../etc/config.php');
+require('@domserver_etcdir@/domserver-static.php');
+require(ETCDIR . '/domserver-config.php');
 
 define('SCRIPT_ID', 'restore_sources2db');
 define('LOGFILE', LOGDIR.'/auxiliary.log');
 
-require(SYSTEM_ROOT . '/lib/init.php');
+require(LIBDIR . '/init.php');
+
+setup_database_connection('jury');
 
 $sourcesdir = SUBMITDIR;
+if ( ! empty($_SERVER['argv'][1]) ) $sourcesdir = $_SERVER['argv'][1];
+
+if ( !(is_dir($sourcesdir) && is_readable($sourcesdir)) ) {
+	error("'$sourcesdir' is no directory or not readable");
+}
 
 logmsg(LOG_NOTICE, "started, sources dir = '$sourcesdir'");
 
@@ -37,6 +46,8 @@ if ( !($dh = @opendir($sourcesdir)) ) {
 }
 
 $submissions = array();
+
+$langs = $DB->q('KEYTABLE SELECT extension AS ARRAYKEY, langid FROM language');
 
 while ( ($src = readdir($dh))!==FALSE ) {
 
@@ -53,7 +64,7 @@ while ( ($src = readdir($dh))!==FALSE ) {
 		logmsg(LOG_DEBUG, "skipping '$src': does not match pattern");
 		continue;
 	}
-	list($cid, $sid, $login, $probid, $langid) = $fdata;
+	list($cid, $sid, $login, $probid, $langext) = $fdata;
 	$cid = substr($cid,1);
 	$sid = substr($sid,1);
 
@@ -65,7 +76,7 @@ while ( ($src = readdir($dh))!==FALSE ) {
 	                       'sid'        => $sid,
 	                       'login'      => $login,
 	                       'probid'     => $probid,
-	                       'langid'     => $langid,
+	                       'langid'     => $langs[$langext]['langid'],
 	                       'submittime' => $submittime);
 }
 
