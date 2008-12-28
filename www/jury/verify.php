@@ -41,9 +41,9 @@ if ( VERIFICATION_REQUIRED ) {
 
 	// log to event table (case of no verification required is handled
 	// in judge/judgedaemon)
-	$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
-	        VALUES (%i, %i, %s, %s, %i, "problem judged")',
-	       $jdata['cid'], $jdata['teamid'], $jdata['langid'],
+	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
+	        VALUES (%s, %i, %i, %s, %s, %i, "problem judged")',
+	       now(), $jdata['cid'], $jdata['teamid'], $jdata['langid'],
 	       $jdata['probid'], $jdata['submitid']);
 }
 

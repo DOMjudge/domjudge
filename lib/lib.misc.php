@@ -430,9 +430,9 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 				 getFileContents($file, false));
 
 	// Log to event table
-	$DB->q('INSERT INTO event (cid, teamid, langid, probid, submitid, description)
-			VALUES(%i, %s, %s, %s, %i, "problem submitted")',
-		   $cid, $team, $lang, $prob, $id);
+	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
+			VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
+		   now(), $cid, $team, $lang, $prob, $id);
 
 	$tofile = getSourceFilename($cid,$id,$team,$prob,$langext);
 	$topath = SUBMITDIR . "/$tofile";

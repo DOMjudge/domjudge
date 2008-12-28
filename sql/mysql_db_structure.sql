@@ -47,7 +47,7 @@ CREATE TABLE `contest` (
 
 CREATE TABLE `event` (
   `eventid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
-  `eventtime` timestamp NOT NULL default CURRENT_TIMESTAMP COMMENT 'When the event occurred',
+  `eventtime` datetime NOT NULL COMMENT 'When the event occurred',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `clarid` int(4) unsigned default NULL COMMENT 'Clarification ID',
   `langid` varchar(8) default NULL COMMENT 'Language ID',

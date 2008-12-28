@@ -62,8 +62,8 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	
 	if( is_null($sendto) ) {
 		// log to event table if clarification to all teams 
-		$DB->q('INSERT INTO event (cid, clarid, description)
-		        VALUES(%i, %i, "clarification")', $cid, $newid);
+		$DB->q('INSERT INTO event (eventtime, cid, clarid, description)
+		        VALUES(%s, %i, %i, "clarification")', now(), $cid, $newid);
 
 		// mark the messages as unread for the team(s)
 		$teams = $DB->q('COLUMN SELECT login FROM team');

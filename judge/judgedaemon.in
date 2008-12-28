@@ -276,10 +276,10 @@ while ( TRUE ) {
 	// log to event table if no verification required
 	// (case of verification required is handled in www/jury/verify.php)
 	if ( ! VERIFICATION_REQUIRED ) {
-		$DB->q('INSERT INTO event (cid, teamid, langid, probid,
+		$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
 		                           submitid, judgingid, description)
-		        VALUES(%i, %s, %s, %s, %i, %i, "problem judged")',
-		       $cid, $row['teamid'], $row['langid'], $row['probid'],
+		        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
+		       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
 		       $row['submitid'], $judgingid);
 	}
 	
