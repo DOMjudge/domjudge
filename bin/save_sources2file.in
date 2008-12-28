@@ -1,6 +1,8 @@
 #!/usr/bin/php -q
 <?php
 /**
+ * @configure_input@
+ *
  * Saves all submissions from the database. This can be used to later
  * restore them with 'restore_sources2db'.
  *

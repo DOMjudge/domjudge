@@ -1,6 +1,8 @@
 #!/usr/bin/php -q
 <?php
 /**
+ * @configure_input@
+ *
  * Program to rebuild the DB submissions table from submitted sources
  * on the filesystem. Can be useful in case of a database crash.
  *

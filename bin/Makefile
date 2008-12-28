@@ -3,13 +3,19 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = runguard
+TARGETS = runguard save_sources2file restore_sources2db
 
 build: $(TARGETS)
 
 runguard: %: %.c $(TOPDIR)/etc/config.h
 	$(CXX) $(CXXFLAGS) $< -o $@
 	$(STRIP) $@
+
+save_sources2file restore_sources2db: %: %.in ../paths.mk
+	cat $< | \
+	sed -e "s|@configure_input@|Generated from '$<', do not edit by hand.|g" \
+	    -e "s,@domserver_etcdir@,$(domserver_etcdir),g" > $@
+	chmod a+x $@
 
 judgehost: build
 
