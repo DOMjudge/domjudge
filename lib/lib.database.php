@@ -2,7 +2,7 @@
 // $Id$
 
 /******************************************************************************
-* lib.database.php version 1.3.1
+* lib.database.php version 1.3.2
 ******************************************************************************/
 
 /******************************************************************************
@@ -41,7 +41,7 @@ function db__connect($database,$host,$user,$pass,$persist=TRUE)
 	
 	$db__connection = $con($host,$user,$pass)
 		or user_error("Could not connect to database server ".
-			"(host=$host,user=$user,password=".ereg_replace('.','*',$pass).")",
+			"(host=$host,user=$user,password=".str_repeat('*', strlen($pass)).")",
 			E_USER_ERROR);
 	mysql_select_db($database,$db__connection)
 			or user_error("Could not select database '$database': ".
