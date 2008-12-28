@@ -290,7 +290,7 @@ function expandipaddr($addr)
 	}
 	$addr = strtoupper(substr($addr,1));
 
-	if ( ! ereg('^([0-9A-F]{4}:){7}[0-9A-F]{4}$',$addr) ) return NULL;
+	if ( ! preg_match('/^([0-9A-F]{4}:){7}[0-9A-F]{4}$/',$addr) ) return NULL;
 
 	return $addr;
 }
@@ -307,10 +307,10 @@ function compareipaddr($ip1, $ip2)
 	if ( empty($ip1) || empty($ip2) ) return FALSE;
 
 	// Replace IPv4 IPv6-mapped by IPv4-compatible address
-	if ( ereg('^0000:0000:0000:0000:0000:FFFF:',$ip1) ) {
+	if ( substr($ip1, 0, 30) == '0000:0000:0000:0000:0000:FFFF:' ) {
 		$ip1 = '0000:0000:0000:0000:0000:0000:'.substr($ip1,30);
 	}
-	if ( ereg('^0000:0000:0000:0000:0000:FFFF:',$ip2) ) {
+	if ( substr($ip2, 0, 30) == '0000:0000:0000:0000:0000:FFFF:' ) {
 		$ip2 = '0000:0000:0000:0000:0000:0000:'.substr($ip2,30);
 	}
 
