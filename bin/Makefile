@@ -7,9 +7,7 @@ TARGETS = runguard save_sources2file restore_sources2db
 
 build: $(TARGETS)
 
-runguard: %: %.c $(TOPDIR)/etc/config.h
-	$(CXX) $(CXXFLAGS) $< -o $@
-	$(STRIP) $@
+runguard: $(TOPDIR)/etc/config.h
 
 save_sources2file restore_sources2db: %: %.in ../paths.mk
 	cat $< | \
