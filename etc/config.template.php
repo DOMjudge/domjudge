@@ -14,7 +14,6 @@
 /*** AUTOGENERATE HEADER END ***/
 
 /** Loglevels */
-define_syslog_variables();
 error_reporting(E_ALL & ~E_NOTICE);
 
 /** Character set */
