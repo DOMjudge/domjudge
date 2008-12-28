@@ -19,12 +19,8 @@ extern "C" {
 /* Maximum arguments to execute() */
 #define MAXARGS 10
 
-/* Wrapper to call beep with one of the predefined settings. */
-#ifdef BEEP_CMD
-#define beep(BEEPTYPE) system(BEEP_CMD" "BEEPTYPE" &")
-#else
-#define beep(BEEPTYPE) {}
-#endif
+/* Wrapper function to call beep with one of the predefined settings. */
+void beep(const char *beeptype);
 
 int execute(const char *, char **, int, int[3], int);
 /* Execute a subprocess using fork and execvp and optionally perform

@@ -15,6 +15,20 @@
 #define PIPE_IN  1
 #define PIPE_OUT 0
 
+void beep(const char *beeptype)
+{
+#ifdef BEEP_CMD
+	char *cmd;
+	
+	if ( strcmp(BEEP_CMD,"none")!=0 ) {
+		cmd = allocstr(BEEP_CMD" %s &",beeptype);
+		logmsg(LOG_INFO,"executing '%s'",cmd);
+		system(cmd);
+		free(cmd);
+	}
+#endif
+}
+
 int execute(const char *cmd, char **args, int nargs, int stdio_fd[3], int err2out)
 {
 	pid_t pid, child_pid;
