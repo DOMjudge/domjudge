@@ -35,6 +35,7 @@ domserver:
 install-domserver: domserver
 judgehost:
 install-judgehost: judgehost
+dist: configure maintainer-clean
 
 # List all targets that exist in subdirs too, and optionally list in
 # which subdirs they are, overriding default SUBDIRS list.
