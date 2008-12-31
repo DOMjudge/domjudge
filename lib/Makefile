@@ -16,7 +16,6 @@ OBJECTS = $(addsuffix $(OBJSUFFIX),$(LIBSBASE))
 build: $(OBJECTS)
 
 $(OBJECTS): %$(OBJSUFFIX): %.c %.h
-	$(CC) -c $(CFLAGS) $< -o $@
 
 clean-l:
 	rm -f $(OBJECTS)

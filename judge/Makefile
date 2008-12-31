@@ -22,13 +22,9 @@ judgedaemon: judgedaemon.in ../paths.mk
 	    -e "s,@judgehost_etcdir@,$(judgehost_etcdir),g" > $@
 	chmod a+x $@
 
-compare: %: %.c $(LIBOBJECTS) $(LIBHEADERS)
-	$(CC) $(CFLAGS) $(patsubst %.h,,$^) -o $@
-	$(STRIP) $@
+compare: $(LIBOBJECTS) $(LIBHEADERS)
 
-check_float: %: %.c
-	$(CC) -std=c99 $(CFLAGS) $^ -o $@
-	$(STRIP) $@
+check_float: CFLAGS += -std=c99
 
 install-judgehost:
 	cp -P -t $(judgehost_libjudgedir) \
