@@ -65,7 +65,7 @@ if( $teams->count() == 0 ) {
 				htmlspecialchars($row['catname'])."</a></td>".
 			"<td title=\"".htmlspecialchars($row['affname'])."\">".
 				"<a href=\"team_affiliation.php?id=".urlencode($row['affilid'])."\">".
-				htmlspecialchars($row['affilid'])."</td><td title=\"";
+				htmlspecialchars($row['affilid'])."</a></td><td title=\"";
 		
 		if ( @$row['ipaddress'] ) {
 			$host = (empty($row['hostname'])?'':$row['hostname']);

@@ -112,7 +112,7 @@ $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime
 <tr><td scope="row">Source:</td><td>
 	<a href="show_source.php?id=<?=$id?>">view source code</a></td></tr>
 <tr><td scope="row">Max runtime:</td><td>
-	<?= htmlspecialchars($submdata['maxruntime']) ?> sec</a></td></tr>
+	<?= htmlspecialchars($submdata['maxruntime']) ?> sec</td></tr>
 </table>
 
 
