@@ -82,7 +82,8 @@ maintainer-conf: configure
 	            --with-judgehost_root=$(PWD) \
 	            --with-domserver_logdir=$(PWD)/output/log \
 	            --with-judgehost_logdir=$(PWD)/output/log \
-	            --with-judgehost_judgedir=$(PWD)/output/judging
+	            --with-judgehost_judgedir=$(PWD)/output/judging \
+	            $(CONFIGURE_FLAGS)
 
 maintainer-clean: clean-autoconf
 
