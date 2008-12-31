@@ -123,7 +123,7 @@ echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 <div class="col2"><table>
 <tr><td scope="row">Category:  </td><td><a href="team_category.php?id=<?=
 	urlencode($row['categoryid']) . '">' .
-	htmlspecialchars($row['catname'])?></td></tr>
+	htmlspecialchars($row['catname'])?></a></td></tr>
 <?php if (!empty($row['affilid'])): ?>
 <tr><td scope="row">Affiliation:</td><td><a href="team_affiliation.php?id=<?=
 	urlencode($row['affilid']) . '">' .
