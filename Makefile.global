@@ -11,6 +11,7 @@ GLOBALINCLUDED=1
 
 # Check for QUIET environment variable:
 ifneq ($(QUIET),)
+QUIET=1
 MAKEFLAGS += --no-print-directory --quiet
 endif
 
@@ -32,11 +33,15 @@ STRIP = strip --remove-section=.comment --remove-section=.note
 # Check whether we are running under Cygwin:
 ifneq ($(findstring CYGWIN,$(shell uname)),)
 CYGWIN = 1
-# These compiler flags don't work under Cygwin:
+# These compiler flags give compiler errors under Cygwin:
 CXXFLAGS := $(filter-out -fstack-protector,$(CXXFLAGS))
 CFLAGS   := $(filter-out -fstack-protector,$(CFLAGS))
 endif
 
+# Recursive clean-* targets: there are three flavors to allow
+# distclean (and maintainer-clean) to depend on clean without
+# duplicate recursion: clean is the normal target for the user,
+# clean-l the non-recursive variant and clean-r the recursor.
 clean-l:
 clean-r: clean-l
 clean: clean-r

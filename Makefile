@@ -77,7 +77,7 @@ configure: configure.ac aclocal.m4
 
 # Configure for running in source tree, not meant for normal use:
 maintainer-conf: configure
-	./configure --prefix=$(PWD) \
+	./configure $(subst 1,-q,$(QUIET)) --prefix=$(PWD) \
 	            --with-domserver_root=$(PWD) \
 	            --with-judgehost_root=$(PWD) \
 	            --with-domserver_logdir=$(PWD)/output/log \
