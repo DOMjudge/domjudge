@@ -83,6 +83,9 @@ maintainer-conf: configure
 	            --with-domserver_logdir=$(PWD)/output/log \
 	            --with-judgehost_logdir=$(PWD)/output/log \
 	            --with-judgehost_judgedir=$(PWD)/output/judging \
+	            CFLAGS='-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security' \
+	            CXXFLAGS='-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security' \
+	            LDFLAGS='-pie' \
 	            $(CONFIGURE_FLAGS)
 
 maintainer-clean: clean-autoconf
