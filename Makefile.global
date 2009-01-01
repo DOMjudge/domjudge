@@ -25,17 +25,11 @@ ifneq ($(wildcard $(TOPDIR)/paths.mk),)
 include $(TOPDIR)/paths.mk
 endif
 
-# Default C/C++ compiler flags
-CXXFLAGS = -O2 -Wall -fstack-protector -fPIE -pie -Wformat -Wformat-security -I$(TOPDIR)/lib -I$(TOPDIR)/etc
-CFLAGS = $(CXXFLAGS) -lm
 STRIP = strip --remove-section=.comment --remove-section=.note
 
 # Check whether we are running under Cygwin:
 ifneq ($(findstring CYGWIN,$(shell uname)),)
 CYGWIN = 1
-# These compiler flags give compiler errors under Cygwin:
-CXXFLAGS := $(filter-out -fstack-protector,$(CXXFLAGS))
-CFLAGS   := $(filter-out -fstack-protector,$(CFLAGS))
 endif
 
 # Recursive clean-* targets: there are three flavors to allow
