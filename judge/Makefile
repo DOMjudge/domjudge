@@ -5,16 +5,9 @@ include $(TOPDIR)/Makefile.global
 
 TARGETS = check_float compare judgedaemon
 
-LIBSBASE = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc)
-LIBHEADERS = $(addsuffix .h,$(LIBSBASE))
-LIBOBJECTS = $(addsuffix .o,$(LIBSBASE))
-
 judgehost: build
 
 build: $(TARGETS)
-
-$(LIBOBJECTS):
-	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
 judgedaemon: judgedaemon.in ../paths.mk
 	cat $< | \
@@ -22,7 +15,7 @@ judgedaemon: judgedaemon.in ../paths.mk
 	    -e "s,@judgehost_etcdir@,$(judgehost_etcdir),g" > $@
 	chmod a+x $@
 
-compare: $(LIBOBJECTS) $(LIBHEADERS)
+compare: $(LIBFILES)
 
 check_float: CFLAGS += -std=c99
 

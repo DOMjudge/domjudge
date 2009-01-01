@@ -3,11 +3,7 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-ifdef CYGWIN
-EXECSUFFIX = .exe
-OBJSUFFIX = .cygwin.o
-else # no CYGWIN
-OBJSUFFIX = .o
+ifndef CYGWIN
 ifeq ($(SUBMIT_ENABLE_CMD),1)
 TARGETS += submitdaemon
 domserver: submitdaemon
@@ -15,25 +11,17 @@ endif
 endif
 
 ifneq ($(SUBMIT_DEFAULT),0)
-SUBMITCLIENT = submit$(EXECSUFFIX)
+SUBMITCLIENT = submit$(EXEEXT)
 TARGETS += $(SUBMITCLIENT)
 endif
 
-LIBSBASE = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc lib.config)
-LIBHEADERS = $(addsuffix .h,$(LIBSBASE))
-LIBOBJECTS = $(addsuffix $(OBJSUFFIX),$(LIBSBASE))
-
-SUBMITCOMMONOBJ = submitcommon$(OBJSUFFIX)
+SUBMITCOMMONOBJ = submitcommon$(OBJEXT)
 
 build: $(TARGETS)
 
-$(TARGETS): %$(EXECSUFFIX): %.cc $(SUBMITCOMMONOBJ) $(TOPDIR)/etc/config.h \
-                            $(LIBOBJECTS) $(LIBHEADERS)
+$(TARGETS): %$(EXEEXT): %.cc $(SUBMITCOMMONOBJ) $(TOPDIR)/etc/config.h $(LIBFILES)
 
-$(LIBOBJECTS):
-	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
-
-$(SUBMITCOMMONOBJ): %$(OBJSUFFIX): %.cc %.h $(LIBHEADERS)
+$(SUBMITCOMMONOBJ): %$(OBJEXT): %.cc %.h $(LIBHEADERS)
 
 $(SUBMITCLIENT): $(CURL_PREFIX)/lib/libcurl.a $(LIBMAGIC)
 $(SUBMITCLIENT): LDFLAGS += $(CURL_LIBS)

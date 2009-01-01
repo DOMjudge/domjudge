@@ -32,6 +32,17 @@ ifneq ($(findstring CYGWIN,$(shell uname)),)
 CYGWIN = 1
 endif
 
+# Library objects required in multiple places:
+LIBSBASE   = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc lib.config)
+LIBHEADERS = $(addsuffix .h,$(LIBSBASE))
+LIBOBJECTS = $(addsuffix $(OBJEXT),$(LIBSBASE))
+LIBFILES   = $(LIBOBJECTS) $(LIBHEADERS)
+CFLAGS   += -I$(TOPDIR)/lib
+CXXFLAGS += -I$(TOPDIR)/lib
+
+$(LIBOBJECTS):
+	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
+
 # Recursive clean-* targets: there are three flavors to allow
 # distclean (and maintainer-clean) to depend on clean without
 # duplicate recursion: clean is the normal target for the user,
