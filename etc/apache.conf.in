@@ -59,7 +59,7 @@ Alias /domjudge @domserver_wwwdir@
 <Directory @domserver_wwwdir@>
 allow from all
 
-Options Indexes FollowSymlinks
+Options -Indexes FollowSymlinks
 DirectoryIndex index.php
 
 # Disable some evil PHP magic
