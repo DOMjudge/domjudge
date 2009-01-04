@@ -29,7 +29,7 @@ if(!isset($menu)) {
 <title><?=$title?></title>
 <link rel="stylesheet" href="<?=getBaseURI()?>style.css" type="text/css" />
 <?php
-if (defined('IS_JURY')) {
+if ( IS_JURY ) {
 	echo "<link rel=\"stylesheet\" href=\"style_jury.css\" type=\"text/css\" />\n";
 	if (isset($printercss)) {
 		echo "<link rel=\"stylesheet\" href=\"style_printer.css\" type=\"text/css\" media=\"print\" />\n";
