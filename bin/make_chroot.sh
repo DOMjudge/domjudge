@@ -22,13 +22,6 @@ ARCH=$2
 # List of possible architectures to install chroot for:
 ARCHLIST="alpha,amd64,arm,armel,hppa,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 
-# Debian packages to exclude during bootstrap process (comma separated):
-# Note: Debian lenny and up have a debootstrap that allows to install only
-# a much smaller chroot with essential packages (--variant=minbase), to
-# which we could add our required packages instead of removing unwanted ones
-# after installing them first. We can change this once lenny is stable.
-EXCLUDEDEBS="adduser,apt-utils,aptitude,at,base-config,bsdmainutils,console-common,console-data,console-tools,cron,dhcp3-client,dhcp3-common,dmidecode,dselect,exim4,exim4-base,exim4-config,exim4-daemon-light,fdutils,groff-base,ifupdown,info,iptables,iputils-ping,klogd,laptop-detect,libconsole,libdb4.2,libdb4.3,libgnutls13,libncursesw5,libnewt0.52,libopencdk8,libpcap0.7,libpcap0.8,libpci2,libpcre3,libpopt0,libsigc++-1.2-5c2,libsigc++-2.0-0c2a,libssl0.9.7,libssl0.9.8,libtasn1-3,libwrap0,logrotate,mailx,makedev,man-db,manpages,modconf,modutils,nano,net-tools,netbase,netcat,netkit-inetd,nvi,openbsd-inetd,pciutils,ppp,pppconfig,pppoe,pppoeconf,procps,psmisc,sysklogd,tasksel,tasksel-data,tcpd,telnet,traceroute,wget,whiptail"
-
 # Debian packages to include during bootstrap process (comma separated):
 INCLUDEDEBS=""
 
@@ -109,7 +102,7 @@ fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 /usr/sbin/debootstrap $INCLUDEOPT $EXCLUDEOPT \
-	--arch "$ARCH" lenny "$CHROOTDIR" "$DEBMIRROR"
+	--variant=minbase --arch "$ARCH" lenny "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
