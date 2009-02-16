@@ -20,7 +20,7 @@ CHROOTDIR=$1
 ARCH=$2
 
 # List of possible architectures to install chroot for:
-ARCHLIST="alpha,amd64,arm,hppa,i386,ia64,mips,mipsel,powerpc,s390,sparc"
+ARCHLIST="alpha,amd64,arm,armel,hppa,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 
 # Debian packages to exclude during bootstrap process (comma separated):
 # Note: Debian lenny and up have a debootstrap that allows to install only
@@ -33,7 +33,7 @@ EXCLUDEDEBS="adduser,apt-utils,aptitude,at,base-config,bsdmainutils,console-comm
 INCLUDEDEBS=""
 
 # Debian packages to install after upgrade (space separated):
-INSTALLDEBS="sun-java5-jre"
+INSTALLDEBS="sun-java6-jre"
 
 # Debian packages to remove after upgrade (space separated):
 REMOVEDEBS="dselect"
@@ -87,7 +87,7 @@ if [ ! -x /usr/sbin/debootstrap ]; then
 		mkdir "$CHROOTDIR/debootstrap"
 		cd "$CHROOTDIR/debootstrap"
 
-		DEBOOTDEB="debootstrap_0.3.3.2etch1_all.deb"
+		DEBOOTDEB="debootstrap_1.0.10lenny1_all.deb"
 		wget "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
 
 		ar -x "$DEBOOTDEB"
@@ -117,9 +117,9 @@ cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
 
-# Stable (etch)
-deb $DEBMIRROR			etch		main non-free contrib
-deb http://security.debian.org	etch/updates	main non-free contrib
+# Stable (lenny)
+deb $DEBMIRROR			lenny		main non-free contrib
+deb http://security.debian.org	lenny/updates	main non-free contrib
 
 # Testing
 #deb $DEBMIRROR			testing		main non-free contrib
@@ -164,14 +164,14 @@ debconf	debconf/priority	select	high
 debconf	debconf/frontend	select	Noninteractive
 locales	locales/locales_to_be_generated	multiselect	
 locales	locales/default_environment_locale	select	None
-sun-java5-jre	sun-java5-jre/jcepolicy		note	
-sun-java5-bin	shared/accepted-sun-dlj-v1-1	boolean	true
-sun-java5-jre	shared/accepted-sun-dlj-v1-1	boolean	true
-sun-java5-jre	sun-java5-jre/stopthread	boolean	true
-sun-java5-bin	shared/present-sun-dlj-v1-1	note	
-sun-java5-jre	shared/present-sun-dlj-v1-1	note	
-sun-java5-bin	shared/error-sun-dlj-v1-1	error	
-sun-java5-jre	shared/error-sun-dlj-v1-1	error	
+sun-java6-jre	sun-java6-jre/jcepolicy		note	
+sun-java6-bin	shared/accepted-sun-dlj-v1-1	boolean	true
+sun-java6-jre	shared/accepted-sun-dlj-v1-1	boolean	true
+sun-java6-jre	sun-java6-jre/stopthread	boolean	true
+sun-java6-bin	shared/present-sun-dlj-v1-1	note	
+sun-java6-jre	shared/present-sun-dlj-v1-1	note	
+sun-java6-bin	shared/error-sun-dlj-v1-1	error	
+sun-java6-jre	shared/error-sun-dlj-v1-1	error	
 EOF
 
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
@@ -183,7 +183,7 @@ chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 # Remove unnecessary setuid bits
 chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
 	/usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
-	/usr/bin/gpasswd /usr/bin/passwd /usr/bin/gpg /usr/lib/pt_chown \
+	/usr/bin/gpasswd /usr/bin/passwd /usr/lib/pt_chown \
 	/bin/su /bin/mount /bin/umount /sbin/unix_chkpwd"
 
 # Disable root account
