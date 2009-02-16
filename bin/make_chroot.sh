@@ -36,7 +36,7 @@ INCLUDEDEBS=""
 INSTALLDEBS="sun-java6-jre"
 
 # Debian packages to remove after upgrade (space separated):
-REMOVEDEBS="dselect"
+REMOVEDEBS=""
 
 # Debian mirror, modify to match closest mirror
 #DEBMIRROR="http://ftp.us.debian.org/debian"
@@ -109,7 +109,7 @@ fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 /usr/sbin/debootstrap $INCLUDEOPT $EXCLUDEOPT \
-	--arch "$ARCH" etch "$CHROOTDIR" "$DEBMIRROR"
+	--arch "$ARCH" lenny "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
