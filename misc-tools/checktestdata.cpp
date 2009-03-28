@@ -161,21 +161,21 @@ bool smaller(string a, string b)
 {
 	int signa, signb, sign, fr;
 
-	fr=0;
+	fr = 0;
 	signa = 1;
 	if      ( a[0]=='+' ) { signa =  1; fr++; }
 	else if ( a[0]=='-' ) { signa = -1; fr++; }
 
-	while (fr<a.size() && a[fr]=='0') fr++;
-	a=a.substr(fr);
+	while ( fr<a.size() && a[fr]=='0' ) fr++;
+	a = a.substr(fr);
 	if ( a.size()==0 ) signa = 0;
 
-	fr=0;
+	fr = 0;
 	signb = 1;
 	if      ( b[0]=='+' ) { signb =  1; fr++; }
 	else if ( b[0]=='-' ) { signb = -1; fr++; }
-	while (fr<b.size() && b[fr]=='0') fr++;
-	b=b.substr(fr);
+	while ( fr<b.size() && b[fr]=='0' ) fr++;
+	b = b.substr(fr);
 	if ( b.size()==0 ) signb = 0;
 
 	if ( signa!=signb ) return signa<signb;
