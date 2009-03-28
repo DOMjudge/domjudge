@@ -212,16 +212,20 @@ void checktoken(vector<string> cmd)
 	}
 
 	else if ( cmd[0]=="int" ) {
-		// Accepts format (+|-)?[0-9]+ without leading zero's
+		// Accepts format (0|-?[1-9][0-9]*), i.e. no leading zero's
+		// and no '-0' accepted.
 		string num;
 		while ( datanr<data.size() &&
 		        (isdigit(data[datanr]) ||
-		         (num.size()==0 && (data[datanr]=='-' || data[datanr]=='+'))) ) {
+		         (num.size()==0 && data[datanr]=='-')) ) {
 			num += data[datanr++];
 			charnr++;
 		}
 
+		if ( num.size()==0 ) error();
 		if ( num.size()>=2 && num[0]=='0' ) error();
+		if ( num.size()>=1 && num[0]=='-' &&
+		     (num.size()==1 || num[1]=='0') ) error();
 
 		if ( cmd.size()>=2 && smaller(num,value(cmd[1])) ) error();
 		if ( cmd.size()>=3 && smaller(value(cmd[2]),num) ) error();
