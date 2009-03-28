@@ -16,3 +16,10 @@ do essentially the same thing. See 'checkinput.c' for details. All
 scripts take a testdata file as argument. The 'fixinput.awk' script
 corrects some problems, that these programs check for, e.g. trailing
 whitespace.
+
+* checktestdata
+
+This program can be used as a more advanced replacement of checkinput.
+It allows you to not only check on simple (spacing) layout errors, but
+a simple grammar file must be specified for the testdata, according to
+which the testdata is checked.
