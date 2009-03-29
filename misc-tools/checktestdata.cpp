@@ -23,6 +23,7 @@
 
 using namespace std;
 
+#include <getopt.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -32,11 +33,51 @@ using namespace std;
 
 const int DISPLAYONERROR = 50;
 
-int prognr, datanr, linenr, charnr;
+size_t prognr, datanr, linenr, charnr;
 string data;
 vector<string> prog;
 vector<vector<string> > parsedprog;
 map<string,string> values;
+
+#define PROGRAM "checktestdata"
+#define AUTHORS "Jan Kuipers, Jaap Eldering"
+
+char *progname;
+char *progfile;
+char *datafile;
+
+int be_verbose;
+int be_quiet;
+int show_help;
+int show_version;
+
+struct option const long_opts[] = {
+	{"help",    no_argument,       &show_help,    1 },
+	{"version", no_argument,       &show_version, 1 },
+	{ NULL,     0,                 NULL,          0 }
+};
+
+void version()
+{
+	printf("%s -- written by %s\n\n",PROGRAM,AUTHORS);
+	printf(
+"%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
+"are welcome to redistribute it under certain conditions.  See the GNU\n"
+"General Public Licence for details.\n",PROGRAM);
+}
+
+void usage()
+{
+	printf(
+"Usage: %s [OPTION]... PROGRAM TESTDATA\n"
+"Check TESTDATA file according to specification in PROGRAM file.\n"
+"\n"
+"  -v, --verbose      enable extra verbosity\n"
+"  -q, --quiet        disable all output except errors\n"
+"      --help         display this help and exit\n"
+"      --version      output version information and exit\n"
+"\n",progname);
+}
 
 void readprogram(char *filename)
 {
@@ -95,7 +136,7 @@ void readtestdata(char *filename)
 
 void error()
 {
-	int to = datanr; while (to>data.size()) to--;
+	int to = datanr; while ( to>(int)data.size() ) to--;
 	int fr = max(0,to-DISPLAYONERROR);
 
 	cout << data.substr(fr,to-fr) << endl;
@@ -113,7 +154,7 @@ vector<string> parsecommand(string cmd)
 
 	vector<string> res(1,"");
 
-	int i=0;
+	size_t i=0;
 	while ( i<cmd.size() && isalpha(cmd[i]) ) res.back() += cmd[i++];
 	if ( i==cmd.size() ) return res;
 
@@ -159,7 +200,8 @@ bool my_xor(bool a, bool b) { return (a && !b) || (!a && b); }
 
 bool smaller(string a, string b)
 {
-	int signa, signb, sign, fr;
+	int signa, signb, sign;
+	size_t fr;
 
 	fr = 0;
 	signa = 1;
@@ -193,7 +235,7 @@ string value(string x)
 {
 	if ( values.count(x) ) return values[x];
 
-	for(int i=0; i<x.size(); i++) if ( !isdigit(x[i]) ) error();
+	for(size_t i=0; i<x.size(); i++) if ( !isdigit(x[i]) ) error();
 
 	return x;
 }
@@ -233,7 +275,7 @@ void checktoken(vector<string> cmd)
 	}
 
 	else if ( cmd[0]=="string" ) {
-		for(int i=0; i<cmd[1].size(); i++) {
+		for(size_t i=0; i<cmd[1].size(); i++) {
 			if ( datanr>=data.size() || data[datanr++]!=cmd[1][i] ) error();
 			charnr++;
 			if ( cmd[1][i]=='\n' ) linenr++, charnr=0;
@@ -250,7 +292,7 @@ void checktoken(vector<string> cmd)
 		                          res,regexstr,flags) ) {
 			error();
 		} else {
-			for(; datanr<(res[0].second-data.begin()); datanr++) {
+			for(; datanr<size_t(res[0].second-data.begin()); datanr++) {
 				charnr++;
 				if ( data[datanr]=='\n') linenr++, charnr=0;
 			}
@@ -311,16 +353,50 @@ void checktestdata()
 
 int main(int argc, char **argv)
 {
-	if ( argc!=3 ) {
-		printf("usage: %s <testdata.dat> <testdata.in>\n", argv[0]);
-		return 1;
+	int opt;
+
+	progname = argv[0];
+
+	/* Parse command-line options */
+	be_verbose = be_quiet = 0;
+	show_help = show_version = 0;
+	opterr = 0;
+	while ( (opt = getopt_long(argc,argv,"+",long_opts,(int *) 0))!=-1 ) {
+		switch ( opt ) {
+		case 0:   /* long-only option */
+			break;
+		case ':': /* getopt error */
+		case '?':
+			printf("unknown option or missing argument `%c'",optopt);
+			return 1;
+		default:
+			printf("getopt returned character code `%c' ??",(char)opt);
+			return 1;
+		}
 	}
 
-	readprogram(argv[1]);
-	readtestdata(argv[2]);
+	if ( show_help    ) { usage();   return 0; }
+	if ( show_version ) { version(); return 0; }
+
+	if ( argc<=optind ) {
+		printf("Error: no PROGRAM file specified.\n");
+		usage();
+		return 1;
+	}
+	progfile = argv[optind];
+
+	if ( argc<=optind+1 ) {
+		printf("Error: no TESTDATA file specified.\n");
+		usage();
+		return 1;
+	}
+	datafile = argv[optind+1];
+
+	readprogram(progfile);
+	readtestdata(datafile);
 
 	parsedprog = vector<vector<string> >(prog.size());
-	for(int i=0; i<prog.size(); i++) {
+	for(size_t i=0; i<prog.size(); i++) {
 		parsedprog[i] = parsecommand(prog[i]);
 	}
 
