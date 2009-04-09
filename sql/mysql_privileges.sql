@@ -11,6 +11,7 @@
 GRANT SELECT, INSERT, UPDATE, DELETE ON * TO domjudge_jury;
 
 -- Team/public/plugin read privileges on tables
+GRANT SELECT ON configuration     TO domjudge_public, domjudge_plugin, domjudge_team;
 GRANT SELECT ON contest           TO domjudge_public, domjudge_plugin, domjudge_team;
 GRANT SELECT ON scoreboard_jury   TO domjudge_public, domjudge_plugin, domjudge_team;
 GRANT SELECT ON scoreboard_public TO domjudge_public, domjudge_plugin, domjudge_team;

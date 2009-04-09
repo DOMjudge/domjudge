@@ -11,6 +11,11 @@
 -- Dumping data for table `clarification`
 -- 
 
+-- 
+-- Dumping data for table `configuration`
+-- 
+
+INSERT INTO `configuration` (`name`, `value`) VALUES ('show_affiliations', '1');
 
 -- 
 -- Dumping data for table `contest`

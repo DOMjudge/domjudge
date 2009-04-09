@@ -27,6 +27,17 @@ CREATE TABLE `clarification` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Clarification requests by teams and responses by the jury';
 
 --
+-- Table structure for table `configuration`
+--
+
+CREATE TABLE `configuration` (
+  `name` varchar(25) NOT NULL COMMENT 'Name of the configuration variable',
+  `value` varchar(255) NOT NULL COMMENT 'Content of the configuration variable',
+  PRIMARY KEY  (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Global configuration variables';
+
+
+--
 -- Table structure for table `contest`
 --
 
