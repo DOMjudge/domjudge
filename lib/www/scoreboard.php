@@ -236,7 +236,10 @@ function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 		echo "</h4>\n\n";
 	}
 	
-	// get the teams and problems
+	// configuration
+	$SHOW_AFFILIATIONS = dbconfig_get('show_affiliations', 1);
+	
+        // get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
 	                 login, team.name, team.categoryid, team.affilid, sortorder,
 	                 color, country, team_affiliation.name AS affilname
@@ -255,7 +258,7 @@ function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 
 	// output table column groups (for the styles)
 	echo '<colgroup><col id="scorerank" />' .
-		( SHOW_AFFILIATIONS ? '<col id="scoreaffil" />' : '' ) .
+		( $SHOW_AFFILIATIONS ? '<col id="scoreaffil" />' : '' ) .
 		'<col id="scoreteamname" /></colgroup><colgroup><col id="scoresolv" />' .
 		"<col id=\"scoretotal\" /></colgroup>\n<colgroup>" .
 		str_repeat('<col class="scoreprob" />', count($probs)) .
@@ -265,7 +268,7 @@ function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 	echo "<thead>\n";
 	echo '<tr class="scoreheader">' .
 		'<th title="rank" scope="col">' . jurylink(null,'#') . '</th>' .
-		( SHOW_AFFILIATIONS ? '<th title="team affiliation" scope="col">' .
+		( $SHOW_AFFILIATIONS ? '<th title="team affiliation" scope="col">' .
 		jurylink('team_affiliations.php','affil.') . '</th>' : '' ) .
 		'<th title="team name" scope="col">' . jurylink('teams.php','team') . '</th>' .
 		'<th title="# solved / penalty time" colspan="2" scope="col">' . jurylink(null,'score') . "</th>\n";
@@ -316,7 +319,7 @@ function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 		}
 		$prevteam = $team;
 		echo '</td>';
-		if ( SHOW_AFFILIATIONS ) {
+		if ( $SHOW_AFFILIATIONS ) {
 			echo '<td class="scoreaf">';
 			if ( isset($teams[$team]['affilid']) ) {
 				if ( IS_JURY ) {
@@ -391,7 +394,7 @@ function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
 		'<td title="total teams">' .
 		jurylink(null,count($teams)) . '</td>' .
-		( SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
+		( $SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
 		  jurylink('team_affiliations.php',count($SUMMARY['affils']) . ' / ' .
 				   count($SUMMARY['countries'])) . '</td>' : '' ) .
 		'<td title=" ">' . jurylink(null,'Summary') . '</td>' .

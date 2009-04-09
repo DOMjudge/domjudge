@@ -242,7 +242,7 @@ result('problems, languages, teams', 'Team integrity',
 	$details == '' ? 'O': 'E', $details);
 
 $details = '';
-if ( SHOW_AFFILIATIONS ) {
+if ( dbconfig_get('show_affiliations', 1) ) {
 	$res = $DB->q('SELECT affilid FROM team_affiliation ORDER BY affilid');
 
 	while ( $row = $res->next() ) {

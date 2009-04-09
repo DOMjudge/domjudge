@@ -24,6 +24,7 @@ if( DEBUG & DEBUG_TIMINGS ) {
 
 require_once(LIBDIR . '/lib.error.php');
 require_once(LIBDIR . '/lib.misc.php');
+require_once(LIBDIR . '/lib.dbconfig.php');
 require_once(LIBDIR . '/use_db.php');
 
 setup_database_connection('jury');
