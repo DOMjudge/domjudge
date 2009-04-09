@@ -3,13 +3,18 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-domserver: apache.conf dbpasswords.secret
+domserver: apache.conf dbpasswords.secret htpasswd-jury
 judgehost: dbpasswords.secret
 
 dbpasswords.secret:
 	echo "# Randomly generated on host `hostname`, `date`" > dbpasswords.secret
 	chmod go= dbpasswords.secret
 	./gendbpasswords >> dbpasswords.secret
+
+htpasswd-jury: dbpasswords.secret
+	touch htpasswd-jury
+	chmod go= htpasswd-jury
+	htpasswd -b htpasswd-jury domjudge_jury `grep '^jury:' dbpasswords.secret | cut -d : -f 5`
 
 apache.conf: apache.conf.in Makefile
 	cat $< | \
@@ -21,7 +26,7 @@ apache.conf: apache.conf.in Makefile
 install-domserver:
 	install -d $(domserver_etcdir)
 	install -t $(domserver_etcdir) apache.conf domserver-static.php domserver-config.php
-	install -m u=rw,go= dbpasswords.secret $(domserver_etcdir)
+	install -m u=rw,go= dbpasswords.secret htpasswd-jury $(domserver_etcdir)
 
 install-judgehost:
 	install -d $(judgehost_etcdir)
