@@ -14,32 +14,32 @@
  * interface consistent with the C interface.
  */
 
-$options = array();
+$LIBCONFIGOPTIONS = array();
 
 function config_isset($option)
 {
-	global $options;
+	global $LIBCONFIGOPTIONS;
 	
-	return isset($options[$option]);
+	return isset($LIBCONFIGOPTIONS[$option]);
 }
 
 function config_getvalue($option)
 {
-	global $options;
+	global $LIBCONFIGOPTIONS;
 	
-	return $options[$option];
+	return $LIBCONFIGOPTIONS[$option];
 }
 
 function config_setvalue($option, $value)
 {
-	global $options;
+	global $LIBCONFIGOPTIONS;
 	
-	$options[$option] = $value;
+	$LIBCONFIGOPTIONS[$option] = $value;
 }
 
 function config_readfile($filename)
 {
-	global $options;
+	global $LIBCONFIGOPTIONS;
 	
 	if ( !($fd = fopen($filename, 'r')) ) error("could not open '$filename'");
 
