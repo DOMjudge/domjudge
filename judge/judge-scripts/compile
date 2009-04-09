@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# ENV[DJ_COMPILETIMEOUT]: compile timeout in seconds
+# $1: submission language code
+# $2: absolute path to submitted source file
+# $3: absolute path to directory where to put compilation results
+# $4: absolute path to file where to put compile warnings/errors/info
+# stdin: do not touch
+# stdout: compile result ("OK" or "COMPILE-ERROR")
+# stderr: Internal errors (will cause daemon to crash)
+# exit code: 0 unless internal error
