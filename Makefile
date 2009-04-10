@@ -35,7 +35,7 @@ domserver:
 install-domserver: domserver
 judgehost:
 install-judgehost: judgehost
-dist: maintainer-clean
+dist: configure maintainer-clean
 
 # List all targets that exist in subdirs too, and optionally list in
 # which subdirs they are, overriding default SUBDIRS list.
@@ -68,9 +68,12 @@ judgehost-create-dirs:
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 
-configure: configure.ac $(wildcard m4/*.m4)
-	# you really should call ./autogen.sh yourself ...
-	./autogen.sh
+# Run aclocal separately from autoreconf, which doesn't pass -I option.
+aclocal.m4: configure.ac $(wildcard m4/*.m4)
+	aclocal -I m4
+
+configure: configure.ac aclocal.m4
+	autoreconf
 
 # Configure for running in source tree, not meant for normal use:
 maintainer-conf: configure
