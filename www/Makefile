@@ -17,9 +17,9 @@ install-domserver:
 	cp -a plugin/*.xsd $(domserver_wwwdir)/plugin
 	cp -a jury/*.css   $(domserver_wwwdir)/jury
 	cp -a *.js *.css *.php $(domserver_wwwdir)
+	ln -sfT $(domjudge_docdir) $(domserver_wwwdir)/jury/doc
 
 install-docs:
 	mkdir -p $(domjudge_docdir)
-	ln -sf $(domjudge_docdir) $(domserver_wwwdir)/jury/doc
 	cp -a images/countries/README    $(domjudge_docdir)/README.country_flags
 	cp -a images/countries/codes.txt $(domjudge_docdir)/country_codes.txt
