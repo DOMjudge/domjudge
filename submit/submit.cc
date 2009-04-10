@@ -10,13 +10,9 @@
  *
  */
 
-/* System/site specific static config (paths, etc.) */
-#include "../etc/domserver-static.h"
-
-/* and config stuff that should be non-compile-time */
-#include "../etc/domserver-config.h"
-
 #include "../etc/config.h"
+
+#include "../etc/submit-config.h"
 
 /* Check whether default submission method is available; bail out if not */
 #if ( SUBMIT_DEFAULT == 1 ) && ( SUBMIT_ENABLE_CMD != 1 )

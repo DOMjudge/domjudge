@@ -220,7 +220,7 @@ AC_CONFIG_FILES([
 	etc/domserver-static.php
 	etc/domserver-static.h
 	etc/judgehost-static.php
-	etc/judgehost-config.h
+	etc/runguard-config.h
 	])
 AC_OUTPUT
 

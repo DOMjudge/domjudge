@@ -38,10 +38,8 @@
 #include <getopt.h>
 #include <pwd.h>
 
-/* Some system/site specific config: VALID_USERS and CHROOT_PREFIX are
- * used, maybe include here for standalone executable?
- */
-#include "../etc/judgehost-config.h"
+/* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
+#include "../etc/runguard-config.h"
 
 #define PROGRAM "runguard"
 #define VERSION "0.9"

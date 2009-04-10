@@ -32,9 +32,10 @@ using namespace std;
 
 /* System/site specific static config (paths, etc.) */
 #include "../etc/domserver-static.h"
-
-/* and config stuff that should be non-compile-time */
 #include "../etc/domserver-config.h"
+
+/* and submit specific config */
+#include "../etc/submit-config.h"
 
 /* These defines are needed in 'version' and 'logmsg' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
