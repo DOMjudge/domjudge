@@ -30,7 +30,7 @@ install-domserver:
 
 install-judgehost:
 	install -d $(judgehost_etcdir)
-	install -t $(judgehost_etcdir) judgehost-static.php judgehost-config.php judgehost-config.sh
+	install -t $(judgehost_etcdir) judgehost-static.php judgehost-config.php
 	install -m u=rw,go= dbpasswords.secret $(judgehost_etcdir)
 
 permissions-domserver:
