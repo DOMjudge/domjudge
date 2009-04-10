@@ -16,6 +16,8 @@ if test -z "$PACKAGE_VERSION"; then
 	AC_MSG_ERROR([Could not find version on first line of README file.])
 fi
 AC_SUBST(DOMJUDGE_VERSION, $PACKAGE_VERSION)
+AC_DEFINE_UNQUOTED(DOMJUDGE_VERSION, "$PACKAGE_VERSION",
+[DOMjudge version number (alias for PACKAGE_VERSION)])
 
 # Set default {C,CXX,LD}FLAGS. This might screw up portability, but
 # adds important security. Only set these flags when none are supplied

@@ -2,8 +2,6 @@
 // ../configure at compile-time. Do not edit unless you know what you
 // are doing!
 
-#define DOMJUDGE_VERSION "@DOMJUDGE_VERSION@"
-
 #define BINDIR    "@domserver_bindir@"
 #define ETCDIR    "@domserver_etcdir@"
 #define WWWDIR    "@domserver_wwwdir@"
