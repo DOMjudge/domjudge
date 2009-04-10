@@ -24,6 +24,20 @@ putenv('DJ_LIBDIR='      . LIBDIR);
 putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
 putenv('DJ_LOGDIR='      . LOGDIR);
 
+// Set other configuration variables for called programs
+putenv('RUNUSER='       . RUNUSER);
+putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
+putenv('CHROOT_SCRIPT=' . CHROOT_SCRIPT);
+putenv('COMPILETIME='   . COMPILETIME);
+putenv('MEMLIMIT='      . MEMLIMIT);
+putenv('FILELIMIT='     . FILELIMIT);
+putenv('PROCLIMIT='     . PROCLIMIT);
+
+foreach ( $EXITCODES as $code => $name ) {
+	$var = 'E_' . strtoupper(str_replace('-','_',$name));
+	putenv($var . '=' . $code);
+}
+
 $waittime = 5;
 
 $myhost = trim(`hostname | cut -d . -f 1`);
@@ -37,7 +51,6 @@ setup_database_connection('jury');
 
 $verbose = LOG_INFO;
 
-/* Temporarily disabled due to config overhaul: passing RUNUSER config needs fix
 system("pgrep -u ".RUNUSER, $retval);
 if ($retval == 0) {
 	error("Still some processes by ".RUNUSER." found, aborting");
@@ -45,7 +58,6 @@ if ($retval == 0) {
 if ($retval != 1) {
 	error("Error while checking processes for user " . RUNUSER);
 }
-*/
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 

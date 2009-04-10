@@ -69,7 +69,7 @@ cleanexit ()
 }
 
 # Global configuration
-. "$DJ_ETCDIR/judgehost-config.sh"
+#. "$DJ_ETCDIR/judgehost-config.sh"
 
 # Error and logging functions
 . "$DJ_LIBDIR/lib.error.sh"
@@ -174,12 +174,12 @@ fi
 logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep 'timelimit reached: aborting command' compile.tmp &>/dev/null; then
 	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
-	exit $E_COMPILE
+	exit $E_COMPILER_ERROR
 fi
 if [ $exitcode -ne 0 -o ! -e program ]; then
 	echo "Compiling failed with exitcode $exitcode, compiler output:" >compile.out
 	cat compile.tmp >>compile.out
-	exit $E_COMPILE
+	exit $E_COMPILER_ERROR
 fi
 cat compile.tmp >>compile.out
 
@@ -256,7 +256,7 @@ fi
 if [ "`cat program.exit`" != "0" ]; then
 	echo "Non-zero exitcode `cat program.exit`" >>error.out
 	cat error.tmp >>error.out
-	exit $E_RUNERROR
+	exit $E_RUN_ERROR
 fi
 if [ $exitcode -ne 0 ]; then
 	cat error.tmp >>error.out
@@ -270,16 +270,16 @@ fi
 ############################################################
 #if grep  'Floating point exception' error.tmp &>/dev/null; then
 #	echo "Floating point exception." >>error.out
-#	exit $E_RUNERROR
+#	exit $E_RUN_ERROR
 #fi
 #if grep  'Segmentation fault' error.tmp &>/dev/null; then
 #	echo "Segmentation fault." >>tee error.out
-#	exit $E_RUNERROR
+#	exit $E_RUN_ERROR
 #fi
 #if grep  'File size limit exceeded' error.tmp &>/dev/null; then
 #	echo "File size limit exceeded." >>error.out
 #	cat error.tmp >>error.out
-#	exit $E_OUTPUTLIMIT
+#	exit $E_OUTPUT_LIMIT
 #fi
 
 logmsg $LOG_INFO "comparing output"
@@ -292,7 +292,7 @@ cd "$TMPDIR"
 if [ ! -s program.out ]; then
 	echo "Program produced no output." >>error.out
 	cat error.tmp >>error.out
-	exit $E_OUTPUT
+	exit $E_NO_OUTPUT
 fi
 
 logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
@@ -322,12 +322,12 @@ if [ "$result" = "accepted" ]; then
 elif [ "$result" = "wrong answer" ]; then
 	echo "Wrong answer${descrp}." >>error.out
 	cat error.tmp >>error.out
-	exit $E_ANSWER
+	exit $E_WRONG_ANSWER
 else
 	echo "Unknown result: Wrong answer${descrp}." >>error.out
 	cat error.tmp >>error.out
-	exit $E_ANSWER
+	exit $E_WRONG_ANSWER
 fi
 
 # This should never be reached
-exit $E_INTERN
+exit $E_INTERNAL_ERROR

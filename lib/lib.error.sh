@@ -48,7 +48,7 @@ error ()
 		logmsg $LOG_ERR "unexpected error, aborting!"
 	fi
 
-	exit $E_INTERN
+	exit 127
 }
 
 warning ()
