@@ -1,0 +1,144 @@
+DOMjudge project coding style guideline
+=======================================
+
+
+Introduction
+============
+
+This document describes the coding style within DOMjudge. The
+specified style is not always applicable to all different languages
+used within DOMjudge, as it is formulated mostly for C-like languages,
+of which C/C++ and PHP are used within this project.
+
+The coding style outlined here is a guideline: we do not strictly
+enforce it, but it has a (strong) preference. Where sensible,
+deviations are ok, but any committer is requested to globally follow
+these guidelines to make the code more consistent, hence more readable.
+
+
+General style
+=============
+
+Generally, we adapt the K&R coding style, which means that braces '{}'
+opening and closing function blocks go on separate lines without extra
+indentation. Braces for control construct start on the same line as
+the control construct and end on a separate line.
+
+The preferred maximum line length is 80 chars to allow others to use
+multiple 80 char-width terminals alongside eachother.
+
+
+Indentation
+===========
+
+We use tabs for indentation. Tab size should equal indent size and has
+a preferred value of 4 spaces. It is preferred to use tabs for
+_indentation_ but spaces for _alignment_, see advocacy below; this
+makes correct code display independent of the choice of tab/indent
+size. Empty lines should preferably not contain any whitespace.
+
+
+Spacing
+=======
+
+Internal spacing within code:
+
+* A space between control constructs (for, if, while,...) and the
+  opening parenthesis '('.
+* Spaces between test condition outer parentheses and test.
+* No space between negation operator '!' and operand.
+* A space after comma separating arguments in function calls and
+  function definitions.
+* The ternary operator '(x ? a : b)' must be put within parentheses.
+  Use this operator carefully as it can reduce readability.
+* Spaces around the PHP string concatenation operator '.'.
+
+for (int i=0; i<10; i++) {
+	if ( !test ) do_something(a, b, c);
+	x = (test ? 1 : 0);
+}
+
+
+Miscellaneous
+=============
+
+We use K&R style for braces placement. This means function opening
+braces on a separate new line as an exception, but all other braces
+are placed on the same line as their accompanying control constructs.
+Short statements can be placed on the same line following a control
+construct without braces. Longer or multi-statements should go on
+separate lines within braces.
+
+Multiple declarations and (short) statement are allowed on one line.
+Vertical alignment of code is encouraged when this increases
+readability.
+
+int main(int argc, char **argv)
+{
+	int a, b, a1, b1;
+
+	a =  0; a1 =  1;
+	b = 10; b1 = 11;
+
+	if ( test ) {
+		do_a();
+	} else {
+		do_b();
+	}
+	for (int i=0; i<10; i++) do_something(i);
+
+	return 0;
+}
+
+
+GNU indent options
+==================
+
+Here is a (non-exhaustive) list of the GNU indent options we prefer:
+
+--use-tabs
+
+--blank-lines-after-procedures
+--no-blank-lines-after-commas
+
+--braces-after-func-def-line
+--braces-on-struct-decl-line
+--braces-on-if-line
+--cuddle-do-while
+--cuddle-else
+
+--dont-break-function-decl-args
+--dont-break-procedure-type
+
+--space-after-for
+--space-after-if
+--space-after-while
+--no-space-after-function-call-gnames
+
+--continue-at-parentheses
+--break-after-boolean-operator
+
+
+Indentation/alignment with tabs/spaces
+======================================
+
+The use of spaces or tabs to indent code is a hotly debated argument.
+Here, I, Jaap Eldering, would like to advocate the use of a style to
+use tabs for indentation and spaces for alignment. Some references
+explaining this style and its merits:
+
+http://stianse.wordpress.com/2008/11/17/indent-with-tabs-align-with-spaces/
+http://boredzo.org/blog/archives/2007-05-07/tabs-vs-spaces
+http://www.vim.org/scripts/script.php?script_id=231
+
+The first and third reference also contain code to implement this
+style in Emacs and Vim respectively. The code layout will be as
+follows ('--->' denotes a tab and '.' spaces):
+
+int main()
+{
+--->if ( some_long_conditional &&
+--->.....and_a_second ) {
+--->--->statement;
+--->}
+}
