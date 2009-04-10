@@ -105,6 +105,8 @@ int receive(int fd)
 		error(errno,"reading from socket");
 	}
 
+	/* GCC warning: "array subscript is below array bounds" is not
+	   applicable, as nread==-1 will exit with error() */
 	buffer[nread] = 0;
 	
 	/* Check for end of file */
