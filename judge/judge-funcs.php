@@ -26,7 +26,7 @@ function processSubmission($probleminfo, $submissioninfo)
 	$tmpdir = createSomeTemporaryDirectory();
 
 	$compileres = executePluginscript( 'compile', array(
-		$submissioninfo->language()
+		$submissioninfo->language(),
 		$submissioninfo->sourcefilePath(),
 		"$tmpdir/compiled",
 		"$tmpdir/compiler-output"));
@@ -36,7 +36,7 @@ function processSubmission($probleminfo, $submissioninfo)
 	}
 
 	storeInDb( "$tmpdir/compiler-output" );
-		
+
 	$result = $RES_NO_TESTCASES;
 
 	$testcasedir = updateTestcasesFromDb( $probleminfo );
