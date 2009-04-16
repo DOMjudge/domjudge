@@ -30,8 +30,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 if (!@define('INCLUDED_LIB_DATABASE',true)) return;
 
-define('DEBUG', 0);
-
 /**
  * To be used with or without constructor. Without constructor, a simple
  * extend is possible:
@@ -326,11 +324,15 @@ class db
 		list($micros2, $secs2) = explode(' ',microtime());
 		$elapsed_ms = round(1000*(($secs2 - $secs) + ($micros2 - $micros)));
 
-		if ( DEBUG ) {
+		if ( DEBUG & DEBUG_SQL ) {
 			global $DEBUG_NUM_QUERIES;
-			printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>",
-				htmlspecialchars($query));
 			$DEBUG_NUM_QUERIES++;
+			if ( isset($_SERVER['REMOTE_ADDR']) ) {
+				printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>\n",
+				       htmlspecialchars($query));
+			} else {
+				printf("SQL: $this->database: %s ({$elapsed_ms}ms)\n",$query);
+			}
 		}
 
 		if($res) return $res;
