@@ -1,15 +1,15 @@
-<?php 
+<?php
 // $Id$
 
 /******************************************************************************
-* lib.database.php version 1.3.2
+* lib.database.php version 1.4.0
 ******************************************************************************/
 
 /******************************************************************************
 *    Licence                                                                  *
 *******************************************************************************
 
-Copyright (C) 2001-2007 Jeroen van Wolffelaar <jeroen@php.net>, et al.
+Copyright (C) 2001-2009 Jeroen van Wolffelaar <jeroen@php.net>, et al.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -30,125 +30,17 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 if (!@define('INCLUDED_LIB_DATABASE',true)) return;
 
-/******************************************************************************
-*    (internal) Connection handling                                           *
-******************************************************************************/
+define('DEBUG', 0);
 
-// connects to a db-server if not yet connected
-function db__connect($database,$host,$user,$pass,$persist=TRUE)
-{
-	$con = $persist ? 'mysql_pconnect' : 'mysql_connect';
-	
-	$db__connection = $con($host,$user,$pass)
-		or user_error("Could not connect to database server ".
-			"(host=$host,user=$user,password=".str_repeat('*', strlen($pass)).")",
-			E_USER_ERROR);
-	mysql_select_db($database,$db__connection)
-			or user_error("Could not select database '$database': ".
-				mysql_error($db__connection),
-				E_USER_ERROR);
-	return $db__connection;
-}
-
-
-/******************************************************************************
-*    (internal) Type conversion                                               *
-******************************************************************************/
-// transform a php variable into one that can be put directly into a query
-function db__val2sql($val, $mode='.')
-{
-	if (isset($GLOBALS['MODE'])) {
-		$mode = $GLOBALS['MODE'];
-	}
-	if (!isset($val)) return 'null';
-	switch ($mode) {
-		case 'f': return (float)$val;
-		case 'i': return (int)$val;
-		case 's': return '"'.mysql_escape_string($val).'"';
-		case 'c': return '"%'.mysql_escape_string($val).'%"';
-		case 'l': return $val;
-		case '.': break;
-		default: 
-			user_error("Unknown mode: $mode", E_USER_ERROR);
-	}
-
-	switch (gettype($val))
-	{
-		case 'boolean':
-			return (int) $val;
-		case 'integer':
-		case 'double':
-			return $val;
-		case 'string':
-			return '"'.mysql_escape_string($val).'"';
-		case 'array':
-		case 'object':
-			return '"'.mysql_escape_string(serialize($val)).'"';
-		case 'resource':
-			user_error('Cannot store a resource in database', E_USER_ERROR);
-			/* break missing intentionally */
-	}
-	user_error('Case failed in lib.database', E_USER_ERROR);
-}
-
-function db__sql2val($val)
-{
-	$t = @unserialize($val);
-	return $t !== false ? $t : $val;
-}
-
-/**
- * usage:
- * - $wat is a string, "<table>", with $db being the database
- * - $db is a db_result
- *
- * $result[]:
- *   [0]["table"]  table name
- *   [0]["name"]   field name
- *   [0]["type"]   field type
- *   [0]["len"]    field length
- *   [0]["flags"]  field flags
- */
-function db__metadata(&$db,$table=null)
-{
-    $count = 0;
-    $id    = 0;
-    $res   = array();
-
-	if($table)
-	{
-		$id=@mysql_list_fields($db->database,$table);
-	}
-	else
-	{
-		$id=$db->_result;
-	}
- 
-	$count = @mysql_num_fields($id);
-
-    // made this IF due to performance (one if is faster than $count if's)
-	for ($i=0; $i<$count; $i++) {
-		$res[$i]["table"] = @mysql_field_table ($id, $i);
-		$res[$i]["name"]  = @mysql_field_name  ($id, $i);
-		$res[$i]["type"]  = @mysql_field_type  ($id, $i);
-		$res[$i]["len"]   = @mysql_field_len   ($id, $i);
-		$res[$i]["flags"] = @mysql_field_flags ($id, $i);
-	}
-
-	// free the result only if we were called on a table
-	if ($table) @mysql_free_result($id);
-	return $res;
-}
-			
 /**
  * To be used with or without constructor. Without constructor, a simple
  * extend is possible:
  *
  * class fake_db extends db
  * {
- * 		function my_db()
- * 		{
- * 			$this->db('dilithium','localhost','nobody','<password>',TRUE);
+ *		function my_db()
+ *		{
+ *			$this->db('dilithium','localhost','nobody','<password>',TRUE);
  *			// for faking another db
  *			$this->setprefix('fake');
  *		}
@@ -156,42 +48,63 @@ function db__metadata(&$db,$table=null)
  * This uses the real database 'dilithium' to fake the database 'fake'.
  * In 'dilithium', the tables from 'fake' have the prefix 'fake_'.
  * So if you want to fake the table 'myfake' from 'fake':
- * 		$fake_db->insert('mytable',array('name'=>'me, myself and I'));
+ *		$fake_db->insert('mytable',array('name'=>'me, myself and I'));
  * then this will be mapped to the following query on 'dilithium':
- * 		INSERT fake_mytable SET name='me, myself and I';
+ *		INSERT fake_mytable SET name='me, myself and I';
  */
 class db
 {
-	var $host;
-	var $database;
-	var $user;
-	var $password;
-	var $persist;
+	private $host;
+	private $database;
+	private $user;
+	private $password;
+	private $persist;
 
-	var $_connection=FALSE;
-	var $_prefix = '';
-	var $_cached_metadata;
+	private $_connection=FALSE;
+	private $_prefix = '';
+	private $_cached_metadata;
 
-	function db($database,$host,$user,$password,$persist=TRUE)
+	function __construct($database, $host, $user, $password, $persist=TRUE)
 	{
-		$this->database=$database;
-		$this->host=$host;
-		$this->user=$user;
-		$this->password=$password;
-		$this->persist=$persist;
+		$this->database = $database;
+		$this->host     = $host;
+		$this->user     = $user;
+		$this->password = $password;
+		$this->persist  = $persist;
 
+		$this->_connection = FALSE;
+		$this->_prefix = '';
+		$this->_cached_metadata = array();
 	}
 
-	function setprefix($prefix)
+	public function setprefix($prefix)
 	{
-		$this->_prefix=$prefix;
+		$this->_prefix = $prefix;
 	}
 
-	function metadata($table)
+	public function metadata($table)
 	{
-		if(!@$this->_cached_metadata[$table])
-			$this->_cached_metadata[$table]=db__metadata($this,$table);
+		if(!isset($this->_cached_metadata[$table])) {
+			$res  = mysql_list_fields($this->database, $table);
+			$this->_cached_metadata[$table] = db::metadataData($res);
+			mysql_free_result($res);
+		}
 		return $this->_cached_metadata[$table];
+	}
+
+	// Helper method, is also used by db_result->metadata()
+	public static function metadataData($res)
+	{
+		$count = mysql_num_fields($res);
+		$data  = array();
+		for ($i=0; $i<$count; $i++) {
+			$data[$i]["table"] = mysql_field_table($res, $i);
+			$data[$i]["name"]  = mysql_field_name ($res, $i);
+			$data[$i]["type"]  = mysql_field_type ($res, $i);
+			$data[$i]["len"]   = mysql_field_len  ($res, $i);
+			$data[$i]["flags"] = mysql_field_flags($res, $i);
+		}
+		return $data;
 	}
 
 	/**
@@ -223,8 +136,10 @@ class db
 		- keyvaluetable: select two columns, and this returns a map from the first
 		  field (key) to the second (exactly one value)
 	*/
-	function q() // queryf
+	public function q() // queryf
 	{
+		$this->connect();
+
 		$argv = func_get_args();
 		$format = trim(array_shift($argv));
 		list($key) = explode(' ', $format, 2);
@@ -305,14 +220,16 @@ class db
 							."'$val' (Query: '$key $query')!", E_USER_ERROR );
 					}
 					$GLOBALS['MODE'] = $part{1};
-					$query .= implode(', ', array_map('db__val2sql', $val));
+					$query .= implode( ', '
+					                 , array_map( array($this, 'val2sql')
+					                            , $val));
 					unset($GLOBALS['MODE']);
 					$query .= substr($part,2);
 					break;
 				case 'S':
 					$parts = array();
-					foreach ( $val as $key => $value ) {
-						$parts[] = $key . ' = ' . db__val2sql($value);
+					foreach ( $val as $field => $value ) {
+						$parts[] = $field.' = '.$this->val2sql($value);
 					}
 					$query .= implode(', ', $parts);
 					unset($parts);
@@ -324,7 +241,7 @@ class db
 				case 'f':
 				case 'l':
 				case '.':
-					$query .= db__val2sql($val, $part{0});
+					$query .= $this->val2sql($val, $part{0});
 					$query .= substr($part,1);
 					break;
 				case '_': // eat one argument
@@ -343,8 +260,8 @@ class db
 			user_error("Not all arguments to q() are processed", E_USER_ERROR);
 		}
 
-		$res = $this->_execute($query);
-		
+		$res = $this->execute($query);
+
 		// nothing left to do if transaction statement...
 		if ( $type == 'transaction' ) {
 			return null;
@@ -359,7 +276,7 @@ class db
 			}
 			return;
 		}
-		
+
 		$res = new db_result($res);
 
 		if ($key == 'tuple' || $key == 'value') {
@@ -396,14 +313,9 @@ class db
 		return $res;
 	}
 
-	function _execute($query)
+	private function execute($query)
 	{
 		$query = trim($query);
-		if(!$this->_connection)
-		{
-			$this->_connection=db__connect($this->database,$this->host,
-										   $this->user,$this->password,$this->persist);
-		}
 
 		// reselect DB, could have been changed by some bad php/mysql
 		// implementation.
@@ -414,78 +326,132 @@ class db
 		list($micros2, $secs2) = explode(' ',microtime());
 		$elapsed_ms = round(1000*(($secs2 - $secs) + ($micros2 - $micros)));
 
-		if ( DEBUG & DEBUG_SQL ) {
+		if ( DEBUG ) {
 			global $DEBUG_NUM_QUERIES;
+			printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>",
+				htmlspecialchars($query));
 			$DEBUG_NUM_QUERIES++;
-			if ( isset($_SERVER['REMOTE_ADDR']) ) {
-				printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>\n",
-				       htmlspecialchars($query));
-			} else {
-				printf("SQL: $this->database: %s ({$elapsed_ms}ms)\n",$query);
-			}
 		}
 
-		if (!$res)
+		if($res) return $res;
+
+		// switch error message depending on errornr.
+		switch(mysql_errno($this->_connection)) {
+			case 1062:	// duplicate key
+			user_error("Item with this key already exists.\n".
+				mysql_error($this->_connection), E_USER_ERROR );
+			case 1217:  // foreign key constraint
+			user_error("This operation would have brought the database in an ".
+				"inconsistent state.\n".
+				mysql_error($this->_connection), E_USER_ERROR );
+			default:
+			user_error("SQL syntax-error ($query). Error#".
+				mysql_errno($this->_connection).": ".
+				mysql_error($this->_connection),
+				E_USER_ERROR);
+		}
+	}
+
+	// connects to a db-server if not yet connected
+	private function connect()
+	{
+		if($this->_connection) return;
+
+		$con = $this->persist ? 'mysql_pconnect' : 'mysql_connect';
+
+		$this->_connection = $con($this->host, $this->user, $this->password);
+		if(!$this->_connection) {
+			user_error( "Could not connect to database server "
+			          . "(host=$this->host,user=$this->user,password="
+			          . str_repeat('*', strlen($this->password)) . ")"
+			          , E_USER_ERROR );
+		}
+		if(!mysql_select_db($this->database, $this->_connection)) {
+			user_error( "Could not select database '$database': "
+			          . mysql_error($this->_connection)
+			          , E_USER_ERROR );
+		}
+	}
+
+	// transform a php variable into one that can be put directly into a query
+	private function val2sql($val, $mode='.')
+	{
+		if (isset($GLOBALS['MODE'])) {
+			$mode = $GLOBALS['MODE'];
+		}
+		if (!isset($val)) return 'null';
+		switch ($mode)
 		{
-			// switch error message depending on errornr.
-			switch(mysql_errno($this->_connection)) {
-				case 1062:	// duplicate key
-				user_error("Item with this key already exists.\n".
-					mysql_error($this->_connection), E_USER_ERROR );
-				case 1217:  // foreign key constraint
-				user_error("This operation would have brought the database in an ".
-					"inconsistent state.\n".
-					mysql_error($this->_connection), E_USER_ERROR );
-				default:
-				user_error("SQL syntax-error ($query). Error#".
-					mysql_errno($this->_connection).": ".
-					mysql_error($this->_connection),
-					E_USER_ERROR);
-			}
+			case 'f': return (float)$val;
+			case 'i': return (int)$val;
+			case 's': return '"'.mysql_real_escape_string($val, $this->_connection).'"';
+			case 'c': return '"%'.mysql_real_escape_string($val, $this->_connection).'%"';
+			case 'l': return $val;
+			case '.': break;
+			default: user_error("Unknown mode: $mode", E_USER_ERROR);
 		}
 
-		return $res;
+		switch (gettype($val))
+		{
+			case 'boolean':
+				return (int) $val;
+			case 'integer':
+			case 'double':
+				return $val;
+			case 'string':
+				return '"'.mysql_escape_string($val).'"';
+			case 'array':
+			case 'object':
+				return '"'.mysql_escape_string(serialize($val)).'"';
+			case 'resource':
+				user_error('Cannot store a resource in database', E_USER_ERROR);
+		}
+		user_error('Case failed in lib.database', E_USER_ERROR);
 	}
 }
 
 class db_result
 {
-	var $_result = FALSE;
-	var $_count = 0;
-	var $_tuple;
-	var $_nextused = FALSE;
+	private $_result;
+	private $_count;
+	private $_tuple;
+	private $_nextused;
+	private $_cached_metadata;
 
-	function db_result($res)
+	function __construct($res)
 	{
-		$this->_result=$res;
-		$this->_count=mysql_num_rows($res);
-		$this->_fields=mysql_num_fields($res);
+		$this->_result = $res;
+		$this->_count  = mysql_num_rows($res);
+		$this->_fields = mysql_num_fields($res);
+
+		$this->_nextused = FALSE;
+		$this->_cached_metadata = FALSE;
 	}
 
-	function free()
+	public function free()
 	{
-		return @mysql_free_result($this->_result);
+		mysql_free_result($this->_result);
+		$this->_result = null;
 	}
 
 	// return an assoc array that is a result row
-	function next()
+	public function next()
 	{
 		// we've nexted over this result too many times already.
 		if(!isset($this->_result)) {
 			user_error('Result does not contain a valid resource.', E_USER_ERROR);
-		}  
+		}
 		$this->tuple = mysql_fetch_assoc($this->_result);
 		$this->_nextused = TRUE;
 		if ($this->tuple === FALSE)
 		{
-			// garbage collection
-			$this->_result = null;
+			$this->free();
 			return FALSE;
 		}
-		return $this->tuple = array_map('db__sql2val',$this->tuple);
+		return $this->tuple = array_map('db_result::sql2val',$this->tuple);
 	}
 
-	function field($field)
+	public function field($field)
 	{
 		$this->next();
 
@@ -494,7 +460,7 @@ class db_result
 		return $this->tuple[$field];
 	}
 
-	function getcolumn($field=NULL)
+	public function getcolumn($field=NULL)
 	{
 		if($this->_nextused) {
 			user_error('Getcolumn does not work if you\'ve already next()ed over the result!',
@@ -509,7 +475,7 @@ class db_result
 	}
 
 	// returns a 2-dim array containing the result
-	function gettable()
+	public function gettable()
 	{
 		if($this->_nextused) {
 			user_error('Gettable does not work if you\'ve already next()ed over the result!',
@@ -525,7 +491,7 @@ class db_result
 
 	// returns a 2-dim array containing the result, with a column as key
 	// (separate function for performance reasons)
-	function getkeytable($key)
+	public function getkeytable($key)
 	{
 		if($this->_nextused) {
 			user_error('Getkeytable does not work if you\'ve already next()ed over the result!',
@@ -537,16 +503,16 @@ class db_result
 		}
 		return $table;
 	}
-	
+
 	// returns an associative array containing the result, with the frirst
 	// column as the key and the second column as the value
-	function getkeyvaluetable()
+	public function getkeyvaluetable()
 	{
 		if($this->_nextused) {
 			user_error('Getkeyvaluetable does not work if you\'ve already next()ed over the result!',
 				E_USER_ERROR);
 		}
-		
+
 		if($this->_fields!=2) {
 			user_error('Getkeyvaluetable only works on a table with exactly 2 columns!',
 				E_USER_ERROR);
@@ -561,30 +527,39 @@ class db_result
 		return $table;
 	}
 
-	function count()
+	public function count()
 	{
 		return $this->_count;
 	}
 
-	function fieldname($i)
+	public function fieldname($i)
 	{
 		$data = $this->metadata();
 		return $data[$i]['name'];
 	}
 
-	function numfields()
+	public function numfields()
 	{
 		return count( $this->metadata() );
 	}
 
-	function seek($i)
+	public function seek($i)
 	{
 		return mysql_data_seek($this->_result, $i);
 	}
 
-	function metadata()
+	public function metadata()
 	{
-		return db__metadata($this);
+		if(!$this->_cached_metadata)
+			$this->_cached_metadata = db::metadataData($this->_result);
+		return $this->_cached_metadata;
+	}
+
+	// inverse of db->val2sql
+	private static function sql2val($val)
+	{
+		$t = @unserialize($val);
+		return $t !== false ? $t : $val;
 	}
 }
 
