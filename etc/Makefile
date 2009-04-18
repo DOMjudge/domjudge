@@ -21,7 +21,7 @@ apache.conf: apache.conf.in Makefile
 	sed -e "s|@configure_input[@]|Generated from '$<', do not edit by hand.|g" \
 	    -e "s,@domserver_wwwdir[@],$(domserver_wwwdir),g" \
 	    -e "s,@domserver_etcdir[@],$(domserver_etcdir),g" \
-	    -e "s,@domserver_hostname[@],@domserver_hostname@,g" > $@
+	    -e "s,@domserver_hostname[@],$(domserver_hostname),g" > $@
 
 install-domserver:
 	install -d $(domserver_etcdir)

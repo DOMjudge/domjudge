@@ -37,6 +37,9 @@ CURL_CFLAGS = @CURL_CFLAGS@
 CURL_LIBS   = @CURL_LIBS@
 CURL_PREFIX = @CURL_PREFIX@
 
+# Hostname etc. for webserver
+domserver_hostname = @domserver_hostname@
+
 # Autoconf prefixes and paths
 prefix         = @prefix@
 exec_prefix    = @exec_prefix@
