@@ -6,8 +6,8 @@
 #ifndef _RUNGUARD_CONFIG_
 #define _RUNGUARD_CONFIG_
 
-#define VALID_USERS "domjudge-run"
+#define VALID_USERS "@RUNUSER@"
 
-#define CHROOT_PREFIX "@judgehost_judgedir@"
+#define CHROOT_PREFIX "@CHROOTDIR@"
 
 #endif /* _RUNGUARD_CONFIG_ */

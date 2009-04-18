@@ -86,7 +86,7 @@ AX_PATH(judgehost_libjudgedir,  [$judgehost_root/lib/judge])
 AX_PATH(judgehost_logdir,       [$judgehost_root/log])
 AX_PATH(judgehost_tmpdir,       [$judgehost_root/tmp])
 AX_PATH(judgehost_judgedir,     [$judgehost_root/judgings])
-AX_PATH_COMMENT(4,[  ])
+AX_PATH_COMMENT(4,[   ])
 
 # }}}
 
@@ -161,6 +161,20 @@ AC_DEFINE_UNQUOTED(SUBMIT_ENABLE_CMD, $submit_enabledolstra,
 AC_SUBST(          SUBMIT_ENABLE_WEB, $submit_enablehttp)
 AC_DEFINE_UNQUOTED(SUBMIT_ENABLE_WEB, $submit_enablehttp,
 [Enable submission via 'http' protocol.])
+
+# }}}
+
+# {{{ runguard
+
+if test "x$RUNUSER" = x ; then
+	RUNUSER='domjudge-run'
+fi
+AC_ARG_VAR(RUNUSER,[Unprivileged user under which to run submissions (default: domjudge-run).])
+
+if test "x$CHROOTDIR" = x ; then
+	CHROOTDIR=$judgehost_judgedir
+fi
+AC_ARG_VAR(CHROOTDIR,[Directory within which chroot-ing is allowed (default: $judgehost_judgedir).])
 
 # }}}
 

@@ -14,9 +14,6 @@ define('PENALTY_TIME', 20);
 
 /** Restrictions during testing */
 
-// User under which to run solutions (ID or name)
-define('RUNUSER', 'domjudge-run');
-
 // Run solutions in a chroot environment? (gives better security)
 define('USE_CHROOT', true);
 
