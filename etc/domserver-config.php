@@ -8,6 +8,10 @@ define('VERIFICATION_REQUIRED', false);
 
 define('WEBBASEURI', '/domjudge/');
 
+define('SOURCESIZE', 256);
+
+define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl Bash,sh');
+
 define('DEBUG', 1);
 
 // What to do with stuff below?
