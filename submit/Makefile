@@ -19,6 +19,8 @@ SUBMITCOMMONOBJ = submitcommon$(OBJEXT)
 
 build: $(TARGETS)
 
+submitclient: $(SUBMITCLIENT)
+
 $(TARGETS): %$(EXEEXT): %.cc $(SUBMITCOMMONOBJ) $(TOPDIR)/etc/config.h $(LIBFILES)
 
 $(SUBMITCOMMONOBJ): %$(OBJEXT): %.cc %.h $(LIBHEADERS)
@@ -37,4 +39,4 @@ endif
 clean-l:
 	-rm -f $(TARGETS) $(SUBMITCOMMONOBJ)
 
-.PHONY:
+.PHONY: submitclient
