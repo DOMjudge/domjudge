@@ -25,12 +25,12 @@ apache.conf: apache.conf.in Makefile
 
 install-domserver:
 	install -d $(domserver_etcdir)
-	install -t $(domserver_etcdir) apache.conf domserver-static.php domserver-config.php
+	install -t $(domserver_etcdir) apache.conf domserver-static.php domserver-config.php common-config.php
 	install -m u=rw,go= dbpasswords.secret htpasswd-jury $(domserver_etcdir)
 
 install-judgehost:
 	install -d $(judgehost_etcdir)
-	install -t $(judgehost_etcdir) judgehost-static.php judgehost-config.php
+	install -t $(judgehost_etcdir) judgehost-static.php judgehost-config.php common-config.php
 	install -m u=rw,go= dbpasswords.secret $(judgehost_etcdir)
 
 permissions-domserver:
