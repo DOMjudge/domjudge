@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # $Id$
 
 # Script to copy a submission file from a team to judge account.
@@ -11,26 +11,26 @@
 # what kind of filesystems do you have, how can you access the team
 # accounts, etc...  Rewrite to fit your needs.
 #
-# Needs bash because it includes lib.error.sh
-#
 # Part of the DOMjudge Programming Contest Jury System and licenced
 # under the GNU GPL. See README and COPYING for details.
 
-# Global configuration
-. "`dirname $0`/../etc/config.sh"
-
-# Error and logging functions
-. "$SYSTEM_ROOT/lib/lib.error.sh"
-
 PROGNAME="`basename $0`"
 
-[ $# -eq 3 ] || exit 1
+SCP_HOST=localhost
+
+error ()
+{
+	echo "$PROGNAME: error: $@"
+	exit 127
+}
+
+[ $# -eq 3 ] || error  "invalid number of arguments"
 
 team=$1
 fromfile=$2
 tofile=$3
 
-logmsg $LOG_INFO "executing: 'scp -Bq ${team}@${SCP_HOST}:'${fromfile}' $tofile'"
+#echo "executing: 'scp -Bq ${team}@${SCP_HOST}:${fromfile} $tofile'"
 
 output=`scp -Bq "${team}@${SCP_HOST}:'${fromfile}'" "$tofile" 2>&1`
 if [ $? -eq 0 -a ${#output} -eq 0 ]; then
@@ -38,4 +38,3 @@ if [ $? -eq 0 -a ${#output} -eq 0 ]; then
 fi
 
 error "$output"
-exit 1
