@@ -7,11 +7,14 @@
 
 define('DOMJUDGE_VERSION', '@DOMJUDGE_VERSION@');
 
+define('BINDIR',      '@domserver_bindir@');
 define('ETCDIR',      '@domserver_etcdir@');
 define('WWWDIR',      '@domserver_wwwdir@');
 define('LIBDIR',      '@domserver_libdir@');
 define('LIBWWWDIR',   '@domserver_libwwwdir@');
+define('LIBSUBMITDIR','@domserver_libsubmitdir@');
 define('LOGDIR',      '@domserver_logdir@');
+define('TMPDIR',      '@domserver_tmpdir@');
 define('SUBMITDIR',   '@domserver_submitdir@');
 
 define('BEEP_CMD',    '@BEEP@');
