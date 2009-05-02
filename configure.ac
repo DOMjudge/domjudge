@@ -100,6 +100,7 @@ if test "x$enable_fhs" = xyes ; then
 	AC_SUBST(domserver_etcdir,      $sysconfdir)
 	AC_SUBST(domserver_wwwdir,      $datadir/${PACKAGE_TARNAME}/www)
 	AC_SUBST(domserver_libdir,      $libdir/${PACKAGE_TARNAME})
+	AC_SUBST(domserver_libwwwdir,   $libdir/${PACKAGE_TARNAME}/www)
 	AC_SUBST(domserver_libsubmitdir,$libdir/${PACKAGE_TARNAME}/submit)
 	AC_SUBST(domserver_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_tmpdir,      /tmp)
