@@ -82,13 +82,36 @@ maintainer-conf: configure
 	            --with-judgehost_root=$(PWD) \
 	            --with-domserver_logdir=$(PWD)/output/log \
 	            --with-judgehost_logdir=$(PWD)/output/log \
+	            --with-domserver_tmpdir=$(PWD)/output/tmp \
+	            --with-judgehost_tmpdir=$(PWD)/output/tmp \
 	            --with-judgehost_judgedir=$(PWD)/output/judging \
+	            --with-domserver_submitdir=$(PWD)/output/submissions \
 	            CFLAGS='-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security' \
 	            CXXFLAGS='-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security' \
 	            LDFLAGS='-pie' \
 	            $(CONFIGURE_FLAGS)
 
 maintainer-clean: clean-autoconf
+
+# Install the system in place: don't really copy stuff, but create
+# symlinks where necessary to let it work from the source tree.
+# This stuff is a hack!
+maintainer-install: domserver judgehost docs submitclient \
+                    domserver-create-dirs judgehost-create-dirs
+# Replace libjudgedir with symlink to judge/, preventing lots of symlinks:
+	rmdir $(judgehost_libjudgedir)
+	ln -s $(PWD)/judge $(judgehost_libjudgedir)
+	ln -s -t $(domserver_libsubmitdir) $(PWD)/submit/submit_copy.sh \
+	                                   $(PWD)/submit/submit_db.php 
+	ln -s -t $(judgehost_libjudgedir)  $(PWD)/bin/runguard \
+	                                   $(PWD)/bin/sh-static
+	su -c "chown root.root bin/runguard ; chmod u+s bin/runguard"
+
+# Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
+maintainer-uninstall:
+	rm -rf $(domserver_libsubmitdir)
+	rm -f $(judgehost_libjudgedir)
+	rm -f judge/runguard judge/sh-static
 
 clean-autoconf:
 	-rm -rf config.status config.cache config.log autom4te.cache
