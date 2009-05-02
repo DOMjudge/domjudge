@@ -55,14 +55,57 @@ $RESULTS = array();
 function result($section, $item, $result, $details, $details_html = '') {
 	global $RESULTS;
 
-	$RESULTS[] = array('section' => $section,
+	$RESULTS[] = array(
+		'section' => $section,
 		'item' => $item,
 		'result' => $result,
 		'details' => $details,
-		'details_html' => $details_html);
+		'details_html' => $details_html,
+		'flushed' => false);
 }
 
+$lastsection = false; $resultno = 0;
 
+function flushresults() {
+	global $RESULTS, $lastsection, $resultno;
+
+	foreach($RESULTS as &$row) {
+
+		if ( $row['flushed'] ) continue;
+		$row['flushed'] = TRUE;
+
+		if ( empty($row['details']) ) $row['details'] = 'No issues found.';
+
+		if ( $row['section'] != $lastsection ) {
+			echo "<tr><th colspan=\"2\">" .
+			    htmlspecialchars(ucfirst($row['section'])) .
+			    "</th></tr>\n";
+			$lastsection = $row['section'];
+		}
+
+		echo "<tr class=\"result " . htmlspecialchars($row['result']) .
+		    "\"><td class=\"resulticon\"><img src=\"../images/s_";
+		switch($row['result']) {
+		case 'O': echo "okay"; break;
+		case 'W': echo "warn"; break;
+		case 'E': echo "error"; break;
+		default: error("Unknown config checker result: ".$row['result']);
+		}
+		echo ".png\" alt=\"" . $row['result'] . "\" class=\"picto\" /></td><td>" .
+		    htmlspecialchars($row['item']) ." " .
+		    "<a href=\"javascript:collapse($resultno)\"><img src=\"../images/b_help.png\" " .
+		    "alt=\"?\" title=\"show details\" class=\"smallpicto\" /></a>\n" .
+		    "<div class=\"details\" id=\"detail$resultno\">" .
+		    nl2br(htmlspecialchars(trim($row['details']))."\n") . $row['details_html'] .
+		    "</div></td></tr>\n";
+
+		++$resultno;
+	}
+
+	flush();
+}
+
+echo "<table class=\"configcheck\">\n";
 
 // SOFTWARE
 
@@ -106,6 +149,7 @@ result('software', 'MySQL maximum connections',
 	'you need at least 300, but better 1000 connections to ' .
 	'prevent connection refusal during the contest.');
 
+flushresults();
 
 // CONFIGURATION
 
@@ -127,6 +171,8 @@ if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
 		htmlspecialchars($_SERVER['REMOTE_USER']) .
 		".");
 }
+
+flushresults();
 
 // CONTESTS
 
@@ -165,6 +211,8 @@ result('contests', 'Contests integrity',
 	$has_errors ? 'E' : 'O',
 	$detail);
 
+flushresults();
+
 // PROBLEMS
 
 $res = $DB->q('SELECT * FROM problem ORDER BY probid');
@@ -198,6 +246,8 @@ foreach($probs as $probid) {
 result('problems, languages, teams', 'Problems integrity',
 	$details == '' ? 'O':($has_errors?'E':'W'),
 	$details);
+
+flushresults();
 
 // LANGUAGES
 
@@ -278,6 +328,7 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 		'O', 'Affiliation icons disabled in config.');
 }
 
+flushresults();
 
 // SUBMISSIONS, JUDINGS
 
@@ -391,6 +442,7 @@ while($row = $res->next()) {
 result('submissions and judgings', 'Judging integrity',
 	($details == '' ? 'O':'E'), $details);
 
+flushresults();
 
 // REFERENTIAL INTEGRITY. This may be obsolete now that we have defined
 // foreign key relations between our tables.
@@ -422,42 +474,7 @@ result('referential integrity', 'Inter-table relationships',
 	($details == '' ? 'O':'W'), $details);
 
 
-
-// DISPLAY RESULTS
-
-echo "<table class=\"configcheck\">\n";
-
-$lastsection = false; $i = 0;
-
-foreach($RESULTS as $row) {
-
-	if ( empty($row['details']) ) $row['details'] = 'No issues found.';
-
-	if ( $row['section'] != $lastsection ) {
-		echo "<tr><th colspan=\"2\">" .
-			htmlspecialchars(ucfirst($row['section'])) .
-			"</th></tr>\n";
-		$lastsection = $row['section'];
-	}
-
-	echo "<tr class=\"result " . htmlspecialchars($row['result']) .
-		"\"><td class=\"resulticon\"><img src=\"../images/s_";
-	switch($row['result']) {
-		case 'O': echo "okay"; break;
-		case 'W': echo "warn"; break;
-		case 'E': echo "error"; break;
-		default: error("Unknown config checker result: ".$row['result']);
-	}
-	echo ".png\" alt=\"" . $row['result'] . "\" class=\"picto\" /></td><td>" .
-		htmlspecialchars($row['item']) ." " .
-		"<a href=\"javascript:collapse($i)\"><img src=\"../images/b_help.png\" " .
-		"alt=\"?\" title=\"show details\" class=\"smallpicto\" /></a>\n" .
-		"<div class=\"details\" id=\"detail$i\">" .
-		nl2br(htmlspecialchars(trim($row['details']))."\n") . $row['details_html'] .
-		"</div></td></tr>\n";
-
-	++$i;
-}
+flushresults();
 
 echo "</table>\n\n";
 

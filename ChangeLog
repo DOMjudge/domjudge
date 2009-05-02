@@ -34,6 +34,7 @@ Version 3.0.0 - SVN
  - Added test sources for java class name, network and root user.
  - Only wrap unquoted lines in clarification texts. (Closes: #2244652)
  - Only build submit client/daemon on request via configure. (Closes: #2046029)
+ - Flush results in config checker for better feedback.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------
