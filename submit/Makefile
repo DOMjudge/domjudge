@@ -21,6 +21,8 @@ TARGETS = $(SUBMIT_PROGS) submit_db.php
 
 build: $(TARGETS)
 
+domserver: submit_db.php
+
 submitclient: $(SUBMITCLIENT)
 
 submit_db.php: submit_db.php.in ../paths.mk
