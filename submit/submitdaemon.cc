@@ -447,7 +447,7 @@ int handle_client()
 	args[1] = fromfile;
 	args[2] = tempfile;
 	redir_fd[0] = redir_fd[1] = redir_fd[2] = 0;
-	switch ( (status = execute(LIBDIR"/submit_copy.sh",args,3,redir_fd,1)) ) {
+	switch ( (status = execute(LIBSUBMITDIR"/submit_copy.sh",args,3,redir_fd,1)) ) {
 	case  0: break;
 	case -1: senderror(client_fd,errno,"starting submit_copy");
 	case -2: senderror(client_fd,0,"starting submit_copy: internal error");
@@ -466,7 +466,7 @@ int handle_client()
 	redir_fd[0] = 0;
 	redir_fd[1] = 1;
 	redir_fd[2] = 0;
-	if ( (cpid = execute(LIBDIR"/submit_db.php",args,5,redir_fd,1))<0 ) {
+	if ( (cpid = execute(LIBSUBMITDIR"/submit_db.php",args,5,redir_fd,1))<0 ) {
 		senderror(client_fd,errno,"starting submit_db");
 	}
 

@@ -43,8 +43,8 @@ install-domserver:
 ifeq ($(SUBMIT_ENABLE_CMD),1)
 	install -m u=rwx,go=rx -t $(domserver_bindir) submitdaemon
 endif
-	install -m u=rwx,go=rx -t $(domserver_libdir) submit_copy.sh
-	install -m u=rw,go=r   -t $(domserver_libdir) submit_db.php
+	install -m u=rwx,go=rx -t $(domserver_libsubmitdir) submit_copy.sh
+	install -m u=rw,go=r   -t $(domserver_libsubmitdir) submit_db.php
 
 clean-l:
 	-rm -f $(TARGETS) $(SUBMITCOMMONOBJ)
