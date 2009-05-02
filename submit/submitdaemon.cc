@@ -440,7 +440,7 @@ int handle_client()
 		senderror(client_fd,errno,"mkstemps cannot create tempfile");
 	}
 	
-	logmsg(LOG_INFO,"created tempfile: `%s'",gnu_basename(tempfile));
+	logmsg(LOG_INFO,"created tempfile: `%s'",tempfile);
 	
 	/* Copy the source-file */
 	args[0] = (char *) team.c_str();
@@ -462,7 +462,7 @@ int handle_client()
 	args[1] = client_addr;
 	args[2] = (char *) problem.c_str();
 	args[3] = (char *) language.c_str();
-	args[4] = gnu_basename(tempfile);
+	args[4] = tempfile;
 	redir_fd[0] = 0;
 	redir_fd[1] = 1;
 	redir_fd[2] = 0;

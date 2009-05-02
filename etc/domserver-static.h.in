@@ -10,3 +10,4 @@
 #define LIBWWWDIR "@domserver_libwwwdir@"
 #define LOGDIR    "@domserver_logdir@"
 #define TMPDIR    "@domserver_tmpdir@"
+#define SUBMITDIR "@domserver_submitdir@"

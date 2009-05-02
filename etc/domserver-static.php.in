@@ -12,5 +12,6 @@ define('WWWDIR',      '@domserver_wwwdir@');
 define('LIBDIR',      '@domserver_libdir@');
 define('LIBWWWDIR',   '@domserver_libwwwdir@');
 define('LOGDIR',      '@domserver_logdir@');
+define('SUBMITDIR',   '@domserver_submitdir@');
 
 define('BEEP_CMD',    '@BEEP@');
