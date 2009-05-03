@@ -17,6 +17,7 @@
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
 require('@domserver_etcdir@/domserver-static.php');
+require(ETCDIR . '/domserver-config.php');
 
 define('SCRIPT_ID', 'check-judgings');
 define('LOGFILE', LOGDIR.'/check.log');
@@ -42,14 +43,14 @@ $res = $DB->q('SELECT s.*, j.judgingid, j.result, j.verified, j.verifier
 while( $row = $res->next() ) {
 	if ( $pos = strpos($row['sourcecode'],$matchstring) ) {
 		$nchecked++;
-		
+
 		$beginpos = $pos + strlen($matchstring);
 		$endpos = strpos($row['sourcecode'],"\n",$beginpos);
 		$results = explode(',',substr($row['sourcecode'],$beginpos,$endpos-$beginpos));
 
 		$sid = $row['submitid'];
 		$result = strtoupper($row['result']);
-		
+
 		if ( !in_array($result,$results) ) {
 			logmsg(LOG_WARNING,"submission $sid has unexpected result '$result'");
 			$nerrors++;
@@ -62,14 +63,14 @@ while( $row = $res->next() ) {
 			if ( $row['verified']!=1 ) {
 				$DB->q('UPDATE judging SET verified = 1, verifier = \'auto-verifier\'
 				        WHERE judgingid = %i', $row['judgingid']);
-				logmsg(LOG_INFO,"verified submission $sid as '$result'");
-				$nverified++;
 			}
+			logmsg(LOG_INFO,"verified submission $sid as '$result'");
+			$nverified++;
 		}
 	}
 }
 
-logmsg(LOG_NOTICE,"finished: checked " . $res->count() . " submissions: " .
+logmsg(LOG_NOTICE,"finished: checked $nchecked submissions: " .
 	   "$nverified automatically verified, $nmanual to check manually, " .
 	   "$nerrors unexpected results");
 
