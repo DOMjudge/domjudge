@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 
-#define size = 512;
+#define size 512
 
 char a[size*1024*1024];
 
@@ -18,6 +18,6 @@ int main()
 	a[10] = 1;
 
 	printf("Statically allocated %d MB.\n",size);
-	
+
 	return 0;
 }
