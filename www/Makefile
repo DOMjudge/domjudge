@@ -3,6 +3,13 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
+configure.php: configure.php.in ../paths.mk
+	cat $< | \
+	sed -e "s|@configure_input@|Generated from '$<', do not edit by hand.|g" \
+	    -e "s,@domserver_etcdir@,$(domserver_etcdir),g" > $@
+
+domserver: configure.php
+
 install-domserver:
 	for d in affiliations countries ; do \
 		mkdir -p               $(domserver_wwwdir)/images/$$d ; \

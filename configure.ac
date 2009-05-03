@@ -230,7 +230,6 @@ AC_CHECK_FUNCS([alarm dup2 getcwd gettimeofday memset mkdir realpath setenv sock
 AC_CONFIG_FILES([
 	paths.mk
 
-	www/configure.php
 	etc/domserver-static.php
 	etc/domserver-static.h
 	etc/judgehost-static.php
