@@ -306,20 +306,27 @@ void create_server()
 	for(r=res; r!=NULL && server_nfds<max_server_nfds; r=r->ai_next) {
 
 		char server_addr[NI_MAXHOST];
+		string addr_family_name("unknown");
+
 		err = getnameinfo(r->ai_addr,r->ai_addrlen,server_addr,
-						  sizeof(server_addr),NULL,0,NI_NUMERICHOST);
+		                  sizeof(server_addr),NULL,0,NI_NUMERICHOST);
 		if ( err!=0 ) error(0,"getnameinfo: %s",gai_strerror(err));
-		
-		logmsg(LOG_DEBUG,"trying to open listen socket on %s",server_addr);
-		
+
+		if ( r->ai_family==AF_INET  ) addr_family_name = string("IPv4");
+		if ( r->ai_family==AF_INET6 ) addr_family_name = string("IPv6");
+
+		logmsg(LOG_DEBUG,"trying to open %s listen socket",addr_family_name.c_str());
+
 		if ( (fd=socket(r->ai_family,r->ai_socktype,r->ai_protocol))<0 ) {
-			error(errno,"opening socket");
+			warning(errno,"opening %s socket",addr_family_name.c_str());
+			continue;
 		}
-			
+
 		/* setsockopt needs a pointer to the value of the option to be set */
 		int optval = 1;
 		if ( setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&optval,sizeof(int))!=0 ) {
-			error(errno,"cannot set socket options");
+			warning(errno,"cannot set %s socket options",addr_family_name.c_str());
+			continue;
 		}
 
 		if ( bind(fd,r->ai_addr,r->ai_addrlen)!=0 ) {
@@ -331,12 +338,14 @@ void create_server()
 				close(fd);
 				continue;
 			} else {
-				error(errno,"binding server socket");
+				warning(errno,"binding server %s socket",addr_family_name.c_str());
+				continue;
 			}
 		}
 
 		if ( listen(fd,backlog)!=0 ) {
-			error(errno,"starting listening");
+			warning(errno,"starting listening via %s",addr_family_name.c_str());
+			continue;
 		}
 		
 		/* Store successfully opened listen socket in server_fds */
