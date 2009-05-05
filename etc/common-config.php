@@ -31,6 +31,9 @@ $EXITCODES = array (
 
 /** Loglevels and debugging */
 
+// Log to syslog facility; leave empty to disable.
+define('SYSLOG', 'LOG_LOCAL0');
+
 // Set DEBUG as a bitmask of the following settings.
 // Of course never to be used on live systems!
 
