@@ -12,3 +12,6 @@
 #define LOGDIR       "@domserver_logdir@"
 #define TMPDIR       "@domserver_tmpdir@"
 #define SUBMITDIR    "@domserver_submitdir@"
+
+// The following are defined in config.h:
+// BEEP_CMD, ENABLE_CMDSUBMIT_SERVER, ENABLE_WEBSUBMIT_SERVER

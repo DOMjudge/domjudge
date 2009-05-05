@@ -18,3 +18,6 @@ define('TMPDIR',      '@domserver_tmpdir@');
 define('SUBMITDIR',   '@domserver_submitdir@');
 
 define('BEEP_CMD',    '@BEEP@');
+
+define('ENABLE_CMDSUBMIT_SERVER', @SUBMIT_ENABLE_CMD@);
+define('ENABLE_WEBSUBMIT_SERVER', @SUBMIT_ENABLE_WEB@);
