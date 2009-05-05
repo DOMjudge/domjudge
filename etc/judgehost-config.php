@@ -29,7 +29,7 @@ define('FILELIMIT', 4096);
 
 // Maximum no. processes running as RUNUSER (including shell and
 // possibly interpreters)
-define('PROCLIMIT', 8);
+define('PROCLIMIT', 10);
 
 /** Priority of results for determining final result with multiple
     testcases. Lower number means higher priority, thus is used first
