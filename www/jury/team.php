@@ -94,13 +94,22 @@ if ( isset($_GET['restrict']) ) {
 	$restrictions[$key] = $value;
 }
 
-$row = $DB->q('TUPLE SELECT t.*, c.name AS catname, a.name AS affname FROM team t
+$row = $DB->q('TUPLE SELECT t.*, a.country, c.name AS catname, a.name AS affname
+               FROM team t
                LEFT JOIN team_category c USING (categoryid)
                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
                WHERE login = %s', $id);
 
+$affillogo   = "../images/affiliations/" . urlencode($row['affilid']) . ".png";
+$countryflag = "../images/countries/"    . urlencode($row['country']) . ".png";
+$teamimage   = "../images/teams/"        . urlencode($row['login'])   . ".jpg";
 
 echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
+
+if ( is_readable($teamimage) ) {
+	echo '<img id="teampicture" src="' . $teamimage .
+		'" alt="Picture of team ' . htmlspecialchars($row['name']) . '" />';
+}
 
 ?>
 
@@ -121,25 +130,40 @@ echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 </table></div>
 
 <div class="col2"><table>
-<tr><td scope="row">Category:  </td><td><a href="team_category.php?id=<?=
-	urlencode($row['categoryid']) . '">' .
-	htmlspecialchars($row['catname'])?></a></td></tr>
-<?php if (!empty($row['affilid'])): ?>
-<tr><td scope="row">Affiliation:</td><td><a href="team_affiliation.php?id=<?=
-	urlencode($row['affilid']) . '">' .
-	htmlspecialchars($row['affname'])?></a></td></tr>
-<?php endif; ?>
-<?php if (!empty($row['members'])): ?>
-<tr><td valign="top" scope="row">Members:   </td><td><?=
-	nl2br(htmlspecialchars($row['members']))?></td></tr>
-<?php endif; ?>
-<?php if (!empty($row['comments'])): ?>
-<tr><td valign="top" scope="row">Comments:</td><td><?=
-	nl2br(htmlspecialchars($row['comments']))?></td></tr>
-<?php endif; ?>
-</table></div>
-
 <?php
+
+echo '<tr><td scope="row">Category:</td><td><a href="team_category.php?id=' .
+	urlencode($row['categoryid']) . '">' .
+	htmlspecialchars($row['catname']) . "</a></td></tr>\n";
+
+if ( !empty($row['affilid']) ) {
+	echo '<tr><td scope="row">Affiliation:</td><td>';
+	if ( is_readable($affillogo) ) {
+		echo '<img src="' . $affillogo . '" alt="' .
+			htmlspecialchars($row['affilid']) . '" /> ';
+	} else {
+		echo htmlspecialchars($row['affilid']) . ' - ';
+	}
+	echo '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">' .
+		htmlspecialchars($row['affname']) . "</a></td></tr>\n";
+}
+if ( !empty($row['country']) ) {
+	echo '<tr><td scope="row">Country:</td><td>';
+	if ( is_readable($countryflag) ) {
+		echo '<img src="' . $countryflag . '" alt="' .
+			htmlspecialchars($row['country']) . '" /> ';
+	}
+	echo htmlspecialchars($row['country']) . "</td></tr>\n";
+}
+if ( !empty($row['members']) ) {
+	echo '<tr><td valign="top" scope="row">Members:   </td><td>' .
+		nl2br(htmlspecialchars($row['members'])) . "</td></tr>\n";
+}
+if ( !empty($row['comments']) ) {
+	echo '<tr><td valign="top" scope="row">Comments:</td><td>' .
+		nl2br(htmlspecialchars($row['comments'])) . "</td></tr>\n";
+}
+echo "</table></div>\n";
 
 if ( IS_ADMIN ) {
 	echo "<p class=\"nomorecol\">" .
