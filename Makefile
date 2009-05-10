@@ -45,7 +45,7 @@ REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
 SUBDIRS=bin doc etc judge lib submit www test-sources misc-tools
 
 build:             SUBDIRS=bin lib judge submit test-sources misc-tools
-domserver:         SUBDIRS=etc submit
+domserver:         SUBDIRS=etc submit www
 install-domserver: SUBDIRS=etc lib submit www
 judgehost:         SUBDIRS=bin etc judge
 install-judgehost: SUBDIRS=bin etc judge lib
@@ -99,12 +99,13 @@ maintainer-clean: clean-autoconf
 maintainer-install: domserver judgehost docs submitclient \
                     domserver-create-dirs judgehost-create-dirs
 # Replace libjudgedir with symlink to judge/, preventing lots of symlinks:
-	rmdir $(judgehost_libjudgedir)
-	ln -s $(PWD)/judge $(judgehost_libjudgedir)
-	ln -s -t $(domserver_libsubmitdir) $(PWD)/submit/submit_copy.sh \
-	                                   $(PWD)/submit/submit_db.php 
-	ln -s -t $(judgehost_libjudgedir)  $(PWD)/bin/runguard \
-	                                   $(PWD)/bin/sh-static
+	-rmdir $(judgehost_libjudgedir)
+	-rm -f $(judgehost_libjudgedir)
+	ln -sf $(PWD)/judge $(judgehost_libjudgedir)
+	ln -sf -t $(domserver_libsubmitdir) $(PWD)/submit/submit_copy.sh \
+	                                    $(PWD)/submit/submit_db.php 
+	ln -sf -t $(judgehost_libjudgedir)  $(PWD)/bin/runguard \
+	                                    $(PWD)/bin/sh-static
 	su -c "chown root.root bin/runguard ; chmod u+s bin/runguard"
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
