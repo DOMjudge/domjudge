@@ -781,11 +781,9 @@ int websubmit()
 	}
 
 	logmsg(LOG_NOTICE,"connecting to %s",url);
-	
+
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
-		warning(0,"downloading '%s': %s",url,curlerrormsg);
-		curl_easy_cleanup(handle);
-		return 0;
+		error(0,"downloading '%s': %s",url,curlerrormsg);
 	}
 
 #undef curlsetopt
