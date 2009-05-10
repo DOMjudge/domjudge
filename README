@@ -54,6 +54,10 @@ people under the BSD licence and a part under the GNU GPL version 2,
 see doc/dash.copyright for more details.
 Sources can be downloaded from: http://domjudge.sourceforge.net/sources/
 
+The sorttable.js script is copyright by Stuart Langridge and licenced
+under the MIT/X11 licence, see COPYING.MIT. This software was
+downloaded from: http://www.kryogenix.org/code/browser/sorttable/
+
 
 Contact
 -------
