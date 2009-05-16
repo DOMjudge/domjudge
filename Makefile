@@ -32,8 +32,9 @@ default:
 
 # MAIN TARGETS
 build domserver judgehost: config
-install-domserver: domserver
-install-judgehost: judgehost
+install-domserver: domserver domserver-create-dirs
+install-judgehost: judgehost judgehost-create-dirs
+install-docs: docs-create-dirs
 dist: configure maintainer-clean
 
 # List all targets that exist in subdirs too, and optionally list in
@@ -55,17 +56,17 @@ test:              SUBDIRS=tests
 maintainer-clean:  SUBDIRS=doc
 dist:              SUBDIRS=doc
 
-install-domserver: domserver-create-dirs
-install-judgehost: judgehost-create-dirs
-
 config:
 	$(MAKE) -C etc config
 
 domserver-create-dirs:
-	install -d $(domserver_dirs)
+	mkdir -p $(domserver_dirs)
 
 judgehost-create-dirs:
-	install -d $(judgehost_dirs)
+	mkdir -p $(judgehost_dirs)
+
+docs-create-dirs:
+	mkdir -p $(domjudge_docdir)
 
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
@@ -120,5 +121,5 @@ clean-autoconf:
 	-rm -rf config.status config.cache config.log autom4te.cache
 	-for i in `find . -name \*.in` ; do rm -f $${i%.in} ; done
 
-.PHONY: domserver-create-dirs judgehost-create-dirs \
+.PHONY: domserver-create-dirs judgehost-create-dirs docs-create-dirs \
         config clean-autoconf
