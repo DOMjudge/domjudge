@@ -11,7 +11,8 @@ configure.php: configure.php.in ../paths.mk
 domserver: configure.php
 
 install-domserver:
-	for d in affiliations countries ; do \
+# FIXME: DOMjudgelogo.png symlink wordt niet goed gekopieerd.
+	for d in . affiliations countries ; do \
 		mkdir -p               $(domserver_wwwdir)/images/$$d ; \
 		cp -a images/$$d/*.png $(domserver_wwwdir)/images/$$d ; \
 	done
@@ -20,10 +21,10 @@ install-domserver:
 		cp -a $$d/*.php $(domserver_wwwdir)/$$d ; \
 	done
 	mkdir -p $(domserver_wwwdir)/images/teams
-	cp -a images/teams/*.jpg $(domserver_wwwdir)/images/teams
-	cp -a plugin/*.xsd $(domserver_wwwdir)/plugin
-	cp -a jury/*.css   $(domserver_wwwdir)/jury
-	cp -a *.js *.css *.php $(domserver_wwwdir)
+	cp -a images/teams/*.jpg   $(domserver_wwwdir)/images/teams
+	cp -a plugin/*.xsd         $(domserver_wwwdir)/plugin
+	cp -a jury/*.css           $(domserver_wwwdir)/jury
+	cp -a *.js *.css *.php     $(domserver_wwwdir)
 	ln -sfT $(domjudge_docdir) $(domserver_wwwdir)/jury/doc
 
 install-docs:
