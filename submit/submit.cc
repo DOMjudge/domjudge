@@ -214,25 +214,15 @@ int main(int argc, char **argv)
 
 	logmsg(LOG_INFO,"started");
 	
-	/* Set defaults for server, team and baseurl */
-#ifdef SUBMITSERVER
-	server = string(SUBMITSERVER);
-#endif
-	if ( server.empty() && getenv("SUBMITSERVER")!=NULL ) {
-		server = string(getenv("SUBMITSERVER"));
-	}
-	if ( server.empty() ) server = string("localhost");
+	/* Read defaults for server, team and baseurl from environment */
+	server = string("localhost");
+	baseurl = string("http://localhost/domjudge/");
 
-	if ( team.empty() && getenv("TEAM")!=NULL ) team = string(getenv("TEAM"));
-	if ( team.empty() && getenv("USER")!=NULL ) team = string(getenv("USER"));
-	if ( team.empty() && getenv("USERNAME")!=NULL ) {
-		team = string(getenv("USERNAME"));
-	}
+	if ( getenv("SUBMITSERVER") !=NULL ) server  = string(getenv("SUBMITSERVER"));
+	if ( getenv("SUBMITBASEURL")!=NULL ) baseurl = string(getenv("SUBMITBASEURL"));
 
-#ifdef WEBBASEURI
-	baseurl = string(WEBBASEURI);
-#endif
-	if ( baseurl.empty() ) baseurl = string("http://localhost/");
+	if ( getenv("USER")!=NULL ) team = string(getenv("USER"));
+	if ( getenv("TEAM")!=NULL ) team = string(getenv("TEAM"));
 
 	/* Parse command-line options */
 #if ( SUBMIT_DEFAULT == 1 )
