@@ -3,7 +3,18 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
+SUBST_CONFIGS = apache.conf domserver-static.php domserver-static.h \
+                judgehost-static.php runguard-config.h submit-config.h
+
+$(SUBST_CONFIGS): %: %.in ../paths.mk
+	@echo "Substituting configure variables in '$@'."
+	@cat $< | $(substconfigvars) > $@
+
+config: domserver-static.php domserver-static.h \
+        judgehost-static.php runguard-config.h submit-config.h
+
 domserver: apache.conf dbpasswords.secret htpasswd-jury
+
 judgehost: dbpasswords.secret
 
 dbpasswords.secret:
@@ -15,13 +26,6 @@ htpasswd-jury: dbpasswords.secret
 	touch htpasswd-jury
 	chmod go= htpasswd-jury
 	htpasswd -b htpasswd-jury domjudge_jury `grep '^jury:' dbpasswords.secret | cut -d : -f 5`
-
-apache.conf: apache.conf.in Makefile
-	cat $< | \
-	sed -e "s|@configure_input[@]|Generated from '$<', do not edit by hand.|g" \
-	    -e "s,@domserver_wwwdir[@],$(domserver_wwwdir),g" \
-	    -e "s,@domserver_etcdir[@],$(domserver_etcdir),g" \
-	    -e "s,@domserver_hostname[@],$(domserver_hostname),g" > $@
 
 install-domserver:
 	install -d $(domserver_etcdir)
@@ -36,3 +40,5 @@ install-judgehost:
 permissions-domserver:
 	ensurepermission group $(webservergroup) $(domserver_etcdir)/dbpasswords.secret
 	ensurepermission perm g=r,o=             $(domserver_etcdir)/dbpasswords.secret
+
+.PHONY: config

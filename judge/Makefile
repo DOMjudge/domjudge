@@ -10,9 +10,8 @@ judgehost: build
 build: $(TARGETS)
 
 judgedaemon: judgedaemon.in ../paths.mk
-	cat $< | \
-	sed -e "s|@configure_input@|Generated from '$<', do not edit by hand.|g" \
-	    -e "s,@judgehost_etcdir@,$(judgehost_etcdir),g" > $@
+	@echo "Substituting configure variables in '$@'."
+	@cat $< | $(substconfigvars) > $@
 	chmod a+x $@
 
 compare: $(LIBFILES)

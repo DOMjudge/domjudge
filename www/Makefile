@@ -4,9 +4,8 @@ endif
 include $(TOPDIR)/Makefile.global
 
 configure.php: configure.php.in ../paths.mk
-	cat $< | \
-	sed -e "s|@configure_input@|Generated from '$<', do not edit by hand.|g" \
-	    -e "s,@domserver_etcdir@,$(domserver_etcdir),g" > $@
+	@echo "Substituting configure variables in '$@'."
+	@cat $< | $(substconfigvars) > $@
 
 domserver: configure.php
 

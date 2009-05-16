@@ -26,12 +26,12 @@ domserver: submit_db.php
 submitclient: $(SUBMITCLIENT)
 
 submit_db.php: submit_db.php.in ../paths.mk
-	cat $< | \
-	sed -e "s|@configure_input@|Generated from '$<', do not edit by hand.|g" \
-	    -e "s,@domserver_etcdir@,$(domserver_etcdir),g" > $@
+	@echo "Substituting configure variables in '$@'."
+	@cat $< | $(substconfigvars) > $@
 	chmod a+x $@
 
-$(SUBMIT_PROGS): %$(EXEEXT): %.cc $(SUBMITCOMMONOBJ) $(TOPDIR)/etc/config.h $(LIBFILES)
+$(SUBMIT_PROGS): %$(EXEEXT): %.cc $(SUBMITCOMMONOBJ) $(LIBFILES) \
+                             $(TOPDIR)/etc/config.h $(TOPDIR)/etc/submit-config.h
 
 $(SUBMITCOMMONOBJ): %$(OBJEXT): %.cc %.h $(LIBHEADERS)
 

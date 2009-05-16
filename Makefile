@@ -31,9 +31,8 @@ default:
 	@exit 1
 
 # MAIN TARGETS
-domserver:
+build domserver judgehost: config
 install-domserver: domserver
-judgehost:
 install-judgehost: judgehost
 dist: configure maintainer-clean
 
@@ -58,6 +57,9 @@ dist:              SUBDIRS=doc
 
 install-domserver: domserver-create-dirs
 install-judgehost: judgehost-create-dirs
+
+config:
+	$(MAKE) -C etc config
 
 domserver-create-dirs:
 	install -d $(domserver_dirs)
@@ -118,4 +120,5 @@ clean-autoconf:
 	-rm -rf config.status config.cache config.log autom4te.cache
 	-for i in `find . -name \*.in` ; do rm -f $${i%.in} ; done
 
-.PHONY: domserver-create-dirs judgehost-create-dirs clean-autoconf
+.PHONY: domserver-create-dirs judgehost-create-dirs \
+        config clean-autoconf

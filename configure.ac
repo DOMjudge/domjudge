@@ -151,17 +151,9 @@ for i in `echo "$submitclient_protocols" | sed 's/,/ /g'` ; do
     eval submit_enable$i=1
 done
 
-AC_SUBST(          SUBMIT_DEFAULT, $submit_default)
-AC_DEFINE_UNQUOTED(SUBMIT_DEFAULT, $submit_default,
-[Default submission protocol: 1 = 'dolstra', 2 = 'http'])
-
-AC_SUBST(          SUBMIT_ENABLE_CMD, $submit_enabledolstra)
-AC_DEFINE_UNQUOTED(SUBMIT_ENABLE_CMD, $submit_enabledolstra,
-[Enable submission via 'dolstra' protocol.])
-
-AC_SUBST(          SUBMIT_ENABLE_WEB, $submit_enablehttp)
-AC_DEFINE_UNQUOTED(SUBMIT_ENABLE_WEB, $submit_enablehttp,
-[Enable submission via 'http' protocol.])
+AC_SUBST(SUBMIT_DEFAULT,    $submit_default)
+AC_SUBST(SUBMIT_ENABLE_CMD, $submit_enabledolstra)
+AC_SUBST(SUBMIT_ENABLE_WEB, $submit_enablehttp)
 
 # }}}
 
@@ -190,8 +182,6 @@ AC_PROG_MAKE_SET
 AX_WITH_PROG(BEEP,beep,[none])
 if test "x$BEEP" = "xnone" ; then
 	AC_MSG_WARN([command `beep' not available])
-else
-	AC_DEFINE_UNQUOTED(BEEP_CMD,"$BEEP",[Path of the `beep' command.])
 fi
 
 # Checks for libraries.
@@ -227,14 +217,7 @@ AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([alarm dup2 getcwd gettimeofday memset mkdir realpath setenv socket strchr strdup strerror strncasecmp strrchr strstr strtol])
 
-AC_CONFIG_FILES([
-	paths.mk
-
-	etc/domserver-static.php
-	etc/domserver-static.h
-	etc/judgehost-static.php
-	etc/runguard-config.h
-	])
+AC_CONFIG_FILES([paths.mk])
 AC_OUTPUT
 
 # vim: fdm=marker

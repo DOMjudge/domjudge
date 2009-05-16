@@ -12,10 +12,9 @@ SUBMIT = \
 
 build: $(TARGETS)
 
-check-judgings: check-judgings.in Makefile
-	cat $< | \
-	sed -e "s|@configure_input@|Generated from '$<', do not edit by hand.|g" \
-	    -e "s,@domserver_etcdir@,$(domserver_etcdir),g" > $@
+check-judgings: check-judgings.in ../paths.mk
+	@echo "Substituting configure variables in '$@'."
+	@cat $< | $(substconfigvars) > $@
 	chmod a+x $@
 
 check: test-normal test-fltcmp
