@@ -26,8 +26,7 @@ domserver: submit_db.php
 submitclient: $(SUBMITCLIENT)
 
 submit_db.php: submit_db.php.in ../paths.mk
-	@echo "Substituting configure variables in '$@'."
-	@cat $< | $(substconfigvars) > $@
+	$(substconfigvars)
 	chmod a+x $@
 
 $(SUBMIT_PROGS): %$(EXEEXT): %.cc $(SUBMITCOMMONOBJ) $(LIBFILES) \

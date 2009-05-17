@@ -13,8 +13,7 @@ SUBMIT = \
 build: $(TARGETS)
 
 check-judgings: check-judgings.in ../paths.mk
-	@echo "Substituting configure variables in '$@'."
-	@cat $< | $(substconfigvars) > $@
+	$(substconfigvars)
 	chmod a+x $@
 
 check: test-normal test-fltcmp

@@ -10,8 +10,7 @@ judgehost: build
 build: $(TARGETS)
 
 judgedaemon: judgedaemon.in ../paths.mk
-	@echo "Substituting configure variables in '$@'."
-	@cat $< | $(substconfigvars) > $@
+	$(substconfigvars)
 	chmod a+x $@
 
 compare: $(LIBFILES)

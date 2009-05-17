@@ -99,7 +99,9 @@ judgehost_dirs = $(judgehost_bindir) $(judgehost_etcdir) $(judgehost_libdir) \
 # Defined in makefile to allow for expansion of ${prefix} etc. during
 # build and install, conforming to the GNU coding standards, see:
 # http://www.gnu.org/software/hello/manual/autoconf/Installation-Directory-Variables.html
-substconfigvars = sed \
+define substconfigvars
+@[ -n "$(QUIET)" ] || echo "Substituting configure variables in '$@'."
+@cat $< | sed \
 	-e "s|@configure_input[@]|Generated from '$<' on `date`.|g" \
 	-e 's,@DOMJUDGE_VERSION[@],@DOMJUDGE_VERSION@,g' \
 	-e 's,@domserver_bindir[@],@domserver_bindir@,g' \
@@ -124,4 +126,6 @@ substconfigvars = sed \
 	-e 's,@CHROOTDIR[@],@CHROOTDIR@,g' \
 	-e 's,@SUBMIT_DEFAULT[@],@SUBMIT_DEFAULT@,g' \
 	-e 's,@SUBMIT_ENABLE_CMD[@],@SUBMIT_ENABLE_CMD@,g' \
-	-e 's,@SUBMIT_ENABLE_WEB[@],@SUBMIT_ENABLE_WEB@,g'
+	-e 's,@SUBMIT_ENABLE_WEB[@],@SUBMIT_ENABLE_WEB@,g' \
+	> $@
+endef

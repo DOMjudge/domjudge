@@ -4,8 +4,7 @@ endif
 include $(TOPDIR)/Makefile.global
 
 configure.php: configure.php.in ../paths.mk
-	@echo "Substituting configure variables in '$@'."
-	@cat $< | $(substconfigvars) > $@
+	$(substconfigvars)
 
 domserver: configure.php
 

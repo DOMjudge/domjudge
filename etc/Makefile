@@ -7,8 +7,7 @@ SUBST_CONFIGS = apache.conf domserver-static.php domserver-static.h \
                 judgehost-static.php runguard-config.h submit-config.h
 
 $(SUBST_CONFIGS): %: %.in ../paths.mk
-	@echo "Substituting configure variables in '$@'."
-	@cat $< | $(substconfigvars) > $@
+	$(substconfigvars)
 
 config: domserver-static.php domserver-static.h \
         judgehost-static.php runguard-config.h submit-config.h
