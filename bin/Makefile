@@ -10,9 +10,7 @@ build: $(TARGETS)
 runguard: $(TOPDIR)/etc/config.h $(TOPDIR)/etc/runguard-config.h
 
 save_sources2file restore_sources2db: %: %.in ../paths.mk
-	cat $< | \
-	sed -e "s|@configure_input@|Generated from '$<', do not edit by hand.|g" \
-	    -e "s,@domserver_etcdir@,$(domserver_etcdir),g" > $@
+	$(substconfigvars)
 	chmod a+x $@
 
 judgehost: build
