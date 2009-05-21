@@ -1,0 +1,34 @@
+#!/usr/bin/php -q
+<?php
+/**
+ * @configure_input@
+ *
+ * This script outputs configuration settings in TeX format for
+ * inclusion in the team manual.
+ *
+ * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+
+require('@domserver_etcdir@/domserver-static.php');
+require(ETCDIR . '/domserver-config.php');
+
+define('SCRIPT_ID', 'gentexconfig');
+
+require(LIBDIR . '/init.php');
+
+echo '\def\DOMJUDGE_VERSION{' . DOMJUDGE_VERSION . "}\n";
+echo '\def\SOURCESIZE{' . SOURCESIZE . "}\n";
+echo '\def\WEBBASEURI{' . WEBBASEURI . "}\n";
+
+// FIXME: needs judgehost and compile-time config:
+echo '\def\COMPILETIME{' . '30' . "}\n";
+echo '\def\MEMLIMIT{' . '524288' . "}\n";
+echo '\def\FILELIMIT{' . '4096' . "}\n";
+echo '\def\PROCLIMIT{' . '10' . "}\n";
+echo '\def\USERSUBMITDIR{' . '.domjudge' . "}\n";
+
+exit(0);
