@@ -17,27 +17,27 @@ domserver: apache.conf dbpasswords.secret htpasswd-jury
 judgehost: dbpasswords.secret
 
 dbpasswords.secret:
-	echo "# Randomly generated on host `hostname`, `date`" > dbpasswords.secret
-	chmod go= dbpasswords.secret
-	./gendbpasswords >> dbpasswords.secret
+	echo "# Randomly generated on host `hostname`, `date`" > $@
+	chmod go= $@
+	./gendbpasswords >> $@
 
 htpasswd-jury: dbpasswords.secret
-	touch htpasswd-jury
-	chmod go= htpasswd-jury
-	htpasswd -b htpasswd-jury domjudge_jury `grep '^jury:' dbpasswords.secret | cut -d : -f 5`
+	touch $@
+	chmod go= $@
+	htpasswd -b $@ domjudge_jury `grep '^jury:' $< | cut -d : -f 5`
 
 install-domserver:
-	install -d $(domserver_etcdir)
-	install -t $(domserver_etcdir) apache.conf domserver-static.php domserver-config.php common-config.php
-	install -m u=rw,go= dbpasswords.secret htpasswd-jury $(domserver_etcdir)
+	$(INSTALL_DIR)     $(domserver_etcdir)
+	$(INSTALL_DATA) -t $(domserver_etcdir) apache.conf domserver-static.php domserver-config.php common-config.php
+
+install-perm-domserver:
+	$(INSTALL_PRIVATE) -t $(domserver_etcdir) dbpasswords.secret htpasswd-jury
 
 install-judgehost:
-	install -d $(judgehost_etcdir)
-	install -t $(judgehost_etcdir) judgehost-static.php judgehost-config.php common-config.php
-	install -m u=rw,go= dbpasswords.secret $(judgehost_etcdir)
+	$(INSTALL_DIR)     $(judgehost_etcdir)
+	$(INSTALL_DATA) -t $(judgehost_etcdir) judgehost-static.php judgehost-config.php common-config.php
 
-permissions-domserver:
-	ensurepermission group $(webservergroup) $(domserver_etcdir)/dbpasswords.secret
-	ensurepermission perm g=r,o=             $(domserver_etcdir)/dbpasswords.secret
+install-perm-judgehost:
+	$(INSTALL_PRIVATE) -t $(judgehost_etcdir) dbpasswords.secret
 
 .PHONY: config

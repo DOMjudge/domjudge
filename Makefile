@@ -60,13 +60,18 @@ config:
 	$(MAKE) -C etc config
 
 domserver-create-dirs:
-	mkdir -p $(domserver_dirs)
+	$(INSTALL_DIR) $(domserver_dirs)
 
 judgehost-create-dirs:
-	mkdir -p $(judgehost_dirs)
+	$(INSTALL_DIR) $(judgehost_dirs)
 
 docs-create-dirs:
-	mkdir -p $(domjudge_docdir)
+	$(INSTALL_DIR) $(docs_dirs)
+
+install-docs: install-docs-l
+
+install-docs-l:
+	$(INSTALL_DATA) -t $(domjudge_docdir) README ChangeLog COPYING*
 
 $(REC_TARGETS): %:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
@@ -83,6 +88,7 @@ maintainer-conf: configure
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(PWD) \
 	            --with-domserver_root=$(PWD) \
 	            --with-judgehost_root=$(PWD) \
+	            --with-domjudge_docdir=$(PWD)/doc \
 	            --with-domserver_logdir=$(PWD)/output/log \
 	            --with-judgehost_logdir=$(PWD)/output/log \
 	            --with-domserver_tmpdir=$(PWD)/output/tmp \
@@ -106,14 +112,16 @@ maintainer-install: domserver judgehost docs submitclient \
 	-rm -f $(judgehost_libjudgedir)
 	ln -sf $(PWD)/judge $(judgehost_libjudgedir)
 	ln -sf -t $(domserver_libsubmitdir) $(PWD)/submit/submit_copy.sh \
-	                                    $(PWD)/submit/submit_db.php 
+	                                    $(PWD)/submit/submit_db.php
 	ln -sf -t $(judgehost_libjudgedir)  $(PWD)/bin/runguard \
 	                                    $(PWD)/bin/sh-static
+	ln -sf -t $(domserver_wwwdir)/jury/doc $(PWD)/doc
 	su -c "chown root.root bin/runguard ; chmod u+s bin/runguard"
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 maintainer-uninstall:
 	rm -rf $(domserver_libsubmitdir)
+	rm -f $(domserver_wwwdir)/jury/doc
 	rm -f $(judgehost_libjudgedir)
 	rm -f judge/runguard judge/sh-static
 
@@ -122,4 +130,4 @@ clean-autoconf:
 	-for i in `find . -name \*.in` ; do rm -f $${i%.in} ; done
 
 .PHONY: domserver-create-dirs judgehost-create-dirs docs-create-dirs \
-        config clean-autoconf
+        config clean-autoconf install-docs-l

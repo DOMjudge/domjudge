@@ -6,9 +6,9 @@ include $(TOPDIR)/Makefile.global
 docs: gentexconfig
 
 install-docs:
-	cp -a -t $(domjudge_docdir) gentexconfig genteammanuals
-	cp -t $(domjudge_docdir) team-manual*.tex
-	cp README $(domjudge_docdir)/README.teammanual
+	$(INSTALL_SCRIPT) -t $(domjudge_docdir)/team gentexconfig genteammanuals
+	$(INSTALL_DATA)   -t $(domjudge_docdir)/team team-manual*.tex
+	$(INSTALL_DATA)   -T README $(domjudge_docdir)/README.teammanual
 
 gentexconfig: gentexconfig.in ../../paths.mk
 	$(substconfigvars)

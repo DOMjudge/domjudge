@@ -11,21 +11,17 @@ domserver: configure.php
 install-domserver:
 # FIXME: DOMjudgelogo.png symlink wordt niet goed gekopieerd.
 	for d in . affiliations countries ; do \
-		mkdir -p               $(domserver_wwwdir)/images/$$d ; \
-		cp -a images/$$d/*.png $(domserver_wwwdir)/images/$$d ; \
+		$(INSTALL_DATA) -t $(domserver_wwwdir)/images/$$d images/$$d/*.png ; \
 	done
 	for d in public team jury plugin ; do \
-		mkdir -p        $(domserver_wwwdir)/$$d ; \
-		cp -a $$d/*.php $(domserver_wwwdir)/$$d ; \
+		$(INSTALL_DATA) -t $(domserver_wwwdir)/$$d $$d/*.php ; \
 	done
-	mkdir -p $(domserver_wwwdir)/images/teams
-	cp -a images/teams/*.jpg   $(domserver_wwwdir)/images/teams
-	cp -a plugin/*.xsd         $(domserver_wwwdir)/plugin
-	cp -a jury/*.css           $(domserver_wwwdir)/jury
-	cp -a *.js *.css *.php     $(domserver_wwwdir)
+	$(INSTALL_DATA) -t $(domserver_wwwdir)/images/teams images/teams/*.jpg
+	$(INSTALL_DATA) -t $(domserver_wwwdir)/plugin       plugin/*.xsd
+	$(INSTALL_DATA) -t $(domserver_wwwdir)/jury         jury/*.css
+	$(INSTALL_DATA) -t $(domserver_wwwdir)              *.js *.css *.php
 	ln -sfT $(domjudge_docdir) $(domserver_wwwdir)/jury/doc
 
 install-docs:
-	mkdir -p $(domjudge_docdir)
-	cp -a images/countries/README    $(domjudge_docdir)/README.country_flags
-	cp -a images/countries/codes.txt $(domjudge_docdir)/country_codes.txt
+	$(INSTALL_DATA) -T images/countries/README    $(domjudge_docdir)/README.country_flags
+	$(INSTALL_DATA) -T images/countries/codes.txt $(domjudge_docdir)/country_codes.txt

@@ -13,8 +13,8 @@ clean-l:
 	rm -f $(OBJECTS)
 
 install-domserver:
-	cp -a *.php $(domserver_libdir)
-	cp -a www/*.php $(domserver_libwwwdir)
+	$(INSTALL_DATA) -t $(domserver_libdir) *.php
+	$(INSTALL_DATA) -t $(domserver_libwwwdir) www/*.php 
 
 install-judgehost:
-	cp -a *.php *.sh $(judgehost_libdir)
+	$(INSTALL_DATA) -t $(judgehost_libdir) *.php *.sh 

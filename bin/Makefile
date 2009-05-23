@@ -16,9 +16,10 @@ save_sources2file restore_sources2db: %: %.in ../paths.mk
 judgehost: build
 
 install-judgehost:
-	install -t $(judgehost_libjudgedir) sh-static
-#	install -o root -m u=rwxs,go=rx -t $(judgehost_bindir) runguard
-	install -t $(judgehost_bindir) runguard
+	$(INSTALL_PROG) -t $(judgehost_libjudgedir) sh-static
+
+install-perm-judgehost:
+	$(INSTALL_PROG) -o root -m u=rwxs,go=rx -t $(judgehost_bindir) runguard
 
 clean-l:
 	rm -f $(TARGETS)

@@ -18,11 +18,12 @@ compare: $(LIBFILES)
 check_float: CFLAGS += -std=c99
 
 install-judgehost:
-	cp -P -t $(judgehost_libjudgedir) \
-		compile_*.sh parse_result.xslt test_solution.sh run \
+	$(INSTALL_SCRIPT) -t $(judgehost_libjudgedir) \
+		compile_*.sh test_solution.sh run \
 		compare check_diff.sh check_float chroot-startstop.sh \
 		judgedaemon.main.php
-	install -t $(judgehost_bindir) judgedaemon
+	$(INSTALL_DATA)   -t $(judgehost_libjudgedir) parse_result.xslt
+	$(INSTALL_SCRIPT) -t $(judgehost_bindir) judgedaemon
 
 clean-l:
 	-rm -f $(TARGETS)
