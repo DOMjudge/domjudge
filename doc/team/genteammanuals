@@ -40,7 +40,7 @@ for f in $SOURCES ; do
 	[ "$QUIET" ] || printf "Running $NRUNS passes of '$LATEX $LATEXFLAGS $f'..."
 	run=1
 	while [ $run -le $NRUNS ]; do
-		( ./gentexconfig ; echo '\\'"input{$f}" ) | \
+		( ./gentexconfig ; echo \\"input{$f}" ) | \
 			$LATEX $LATEXFLAGS -jobname ${f%.tex} -output-directory "$OUTPUTDIR" >/dev/null
 		if [ $? -ne 0 ]; then
 			printf "\nTeX-ing failed in run $run, see '${f%tex}log' for details.\n"
