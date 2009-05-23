@@ -43,30 +43,28 @@ CXXFLAGS += -I$(TOPDIR)/lib
 $(LIBOBJECTS):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
-# Recursive clean-* targets: there are three flavors to allow
-# distclean (and maintainer-clean) to depend on clean without
-# duplicate recursion: clean is the normal target for the user,
-# clean-l the non-recursive variant and clean-r the recursor.
+# Recursive rule, runs in depth-first traversal. TARGET-l is the local
+# variant that is called after traversing all subdirectories.
+$(REC_TARGETS): %:
+	@echo "Recursing target \`$@' into: $(SUBDIRS)"
+	@for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
+	$(MAKE) $@-l
+
+clean: clean-l
 clean-l:
-clean-r: clean-l
-clean: clean-r
 
+distclean: distclean-l
 distclean-l: clean-l clean-backupfiles
-distclean-r: distclean-l
-distclean: distclean-r
 
+maintainer-clean: maintainer-clean-l
 maintainer-clean-l: distclean-l
-maintainer-clean-r: maintainer-clean-l
-maintainer-clean: maintainer-clean-r
 
 clean-backupfiles:
 	rm -f *~
 
-.PHONY: default build domserver install-domserver judgehost install-judgehost \
-        docs install-docs submitclient check clean-backupfiles \
-        clean clean-r clean-l distclean distclean-r distclean-l \
-        maintainer-clean maintainer-clean-l maintainer-clean-r \
-        maintainer-conf
+.PHONY: default $(REC_TARGETS) $(addsuffix -l,$(REC_TARGETS)) \
+        check config clean-backupfiles \
+        clean clean-l distclean distclean-l maintainer-clean maintainer-clean-l
 
 endif # GLOBALINCLUDED
 

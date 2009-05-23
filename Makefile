@@ -6,6 +6,11 @@
 # pwd before changing to a 'make -C <dir>' <dir>:
 export TOPDIR = $(shell pwd)
 
+REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
+            install-perm-domserver install-perm-judgehost \
+            docs install-docs config submitclient test dist \
+            clean distclean maintainer-clean
+
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
 
@@ -35,13 +40,10 @@ install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
 dist: configure
 
-# List all targets that exist in subdirs too, and optionally list in
-# which subdirs they are, overriding default SUBDIRS list.
-REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            docs install-docs submitclient test dist \
-            clean-r distclean-r maintainer-clean-r
+# List of default SUBDIRS for recursive targets; override below.
 SUBDIRS=bin doc etc judge lib submit www test-sources misc-tools
 
+config:            SUBDIRS=bin etc doc www judge submit test-sources
 build:             SUBDIRS=bin lib judge submit test-sources misc-tools
 domserver:         SUBDIRS=etc submit www
 install-domserver: SUBDIRS=etc lib submit www
@@ -53,9 +55,10 @@ submitclient:      SUBDIRS=submit
 test:              SUBDIRS=tests
 maintainer-clean:  SUBDIRS=doc
 dist:              SUBDIRS=doc
-
-config:
-	$(MAKE) -C etc config
+clean:
+distclean:
+install-perm-domserver: SUBDIRS=etc
+install-perm-judgehost: SUBDIRS=etc bin
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(domserver_dirs)
@@ -66,13 +69,22 @@ judgehost-create-dirs:
 docs-create-dirs:
 	$(INSTALL_DIR) $(docs_dirs)
 
-install-docs: install-docs-l
-
 install-docs-l:
 	$(INSTALL_DATA) -t $(domjudge_docdir) README ChangeLog COPYING*
 
-$(REC_TARGETS): %:
-	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
+install-perm-domserver install-perm-judgehost: check-root
+
+check-root:
+	@if [ -z "$(OVERRIDE_ROOTCHECK)" -a  `id -u` -ne 0 ]; then \
+		echo "**************************************************************" ; \
+		echo "You do not seem to have root privileges, which are needed" ; \
+		echo "to install some parts of the system." ; \
+		echo "Override this check by passing 'OVERRIDE_ROOTCHECK=1' to make," ; \
+		echo "and optionally set 'INSTALL_PRIVATE' to an install command not" ; \
+		echo "requiring root privileges to change ownership or permissions." ; \
+		echo "**************************************************************" ; \
+		exit 1 ; \
+	fi
 
 # Run aclocal separately from autoreconf, which doesn't pass -I option.
 aclocal.m4: configure.ac $(wildcard m4/*.m4)
@@ -121,9 +133,11 @@ maintainer-uninstall:
 	rm -f $(judgehost_libjudgedir)
 	rm -f judge/runguard judge/sh-static
 
+distclean-l: clean-autoconf
+	-rm -f paths.mk
+
 clean-autoconf:
 	-rm -rf config.status config.cache config.log autom4te.cache
-	-for i in `find . -name \*.in` ; do rm -f $${i%.in} ; done
 
-.PHONY: domserver-create-dirs judgehost-create-dirs docs-create-dirs \
-        config clean-autoconf install-docs-l
+.PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
+        clean-autoconf $(addprefix maintainer-,conf install uninstall)

@@ -6,6 +6,8 @@ include $(TOPDIR)/Makefile.global
 configure.php: configure.php.in ../paths.mk
 	$(substconfigvars)
 
+config: configure.php
+
 domserver: configure.php
 
 install-domserver:
@@ -25,3 +27,6 @@ install-domserver:
 install-docs:
 	$(INSTALL_DATA) -T images/countries/README    $(domjudge_docdir)/README.country_flags
 	$(INSTALL_DATA) -T images/countries/codes.txt $(domjudge_docdir)/country_codes.txt
+
+distclean-l:
+	-rm -f configure.php

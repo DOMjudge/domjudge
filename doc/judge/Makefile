@@ -3,8 +3,6 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-default: docs
-
 docs: judge-manual.pdf judge-manual.html
 
 install-docs: docs
@@ -20,5 +18,3 @@ dist: docs
 
 maintainer-clean-l:
 	-rm -f judge-manual*.html judge-manual.pdf
-
-.PHONY:

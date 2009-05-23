@@ -3,12 +3,12 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = check-judgings
-
 SUBMIT = \
 	echo -n "Submitting '$$i' " ; \
 	$(TOPDIR)/submit/submit -q -p $(PROBLEM) "$$i" ; \
 	echo ; sleep 1
+
+config: check-judgings
 
 build: $(TARGETS)
 
@@ -20,6 +20,9 @@ check: test-normal test-fltcmp
 
 verify: check-judgings
 	./check-judgings
+
+distclean-l:
+	-rm -f check-judgings
 
 PROBLEM=hello
 test-fltcmp: PROBLEM=fltcmp

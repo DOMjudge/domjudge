@@ -7,8 +7,6 @@ FIGS = submitflow
 FIGSPNG = $(addsuffix .png,$(FIGS))
 FIGSEPS = $(addsuffix .eps,$(FIGS))
 
-default: docs
-
 %.png: %.fig
 	fig2dev -L png $< $@
 
@@ -30,5 +28,3 @@ dist: docs
 
 maintainer-clean-l:
 	-rm -f $(FIGSPNG) $(FIGSEPS) admin-manual*.html admin-manual.pdf
-
-.PHONY:

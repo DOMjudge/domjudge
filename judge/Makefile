@@ -3,9 +3,11 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = check_float compare judgedaemon
+TARGETS = check_float compare
 
 judgehost: build
+
+config: judgedaemon
 
 build: $(TARGETS)
 
@@ -27,3 +29,6 @@ install-judgehost:
 
 clean-l:
 	-rm -f $(TARGETS)
+
+distclean-l:
+	-rm -f judgedaemon

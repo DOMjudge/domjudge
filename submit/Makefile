@@ -17,7 +17,9 @@ endif
 
 SUBMITCOMMONOBJ = submitcommon$(OBJEXT)
 
-TARGETS = $(SUBMIT_PROGS) submit_db.php
+TARGETS = $(SUBMIT_PROGS)
+
+config: submit_db.php
 
 build: $(TARGETS)
 
@@ -46,5 +48,8 @@ endif
 
 clean-l:
 	-rm -f $(TARGETS) $(SUBMITCOMMONOBJ)
+
+distclean-l:
+	-rm -f submit_db.php
 
 .PHONY: submitclient

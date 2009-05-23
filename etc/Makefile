@@ -9,8 +9,7 @@ SUBST_CONFIGS = apache.conf domserver-static.php domserver-static.h \
 $(SUBST_CONFIGS): %: %.in ../paths.mk
 	$(substconfigvars)
 
-config: domserver-static.php domserver-static.h \
-        judgehost-static.php runguard-config.h submit-config.h
+config: $(SUBST_CONFIGS)
 
 domserver: apache.conf dbpasswords.secret htpasswd-jury
 
@@ -40,4 +39,5 @@ install-judgehost:
 install-perm-judgehost:
 	$(INSTALL_PRIVATE) -t $(judgehost_etcdir) dbpasswords.secret
 
-.PHONY: config
+distclean-l:
+	-rm -f $(SUBST_CONFIGS)

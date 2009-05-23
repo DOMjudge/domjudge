@@ -3,7 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-docs: gentexconfig
+config: gentexconfig
 
 install-docs:
 	$(INSTALL_SCRIPT) -t $(domjudge_docdir)/team gentexconfig genteammanuals
@@ -16,4 +16,5 @@ gentexconfig: gentexconfig.in ../../paths.mk
 
 dist:
 
-.PHONY:
+distclean-l:
+	-rm -f gentexconfig

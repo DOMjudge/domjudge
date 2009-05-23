@@ -3,11 +3,14 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = runguard save_sources2file restore_sources2db
+TARGETS = runguard
+
+config: save_sources2file restore_sources2db
 
 build: $(TARGETS)
 
-runguard: $(TOPDIR)/etc/config.h $(TOPDIR)/etc/runguard-config.h
+runguard: runguard.c $(TOPDIR)/etc/config.h $(TOPDIR)/etc/runguard-config.h
+	$(CC) $(CFLAGS) $< -o $@
 
 save_sources2file restore_sources2db: %: %.in ../paths.mk
 	$(substconfigvars)
@@ -23,3 +26,6 @@ install-perm-judgehost:
 
 clean-l:
 	rm -f $(TARGETS)
+
+distclean-l:
+	-rm -f save_sources2file restore_sources2db
