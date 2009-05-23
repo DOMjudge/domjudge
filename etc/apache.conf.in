@@ -26,7 +26,7 @@
 #
 #<VirtualHost *:80>
 #RewriteEngine ON
-#RewriteRule .* @domserver_hostname@$0
+#RewriteRule .* domjudge.example.com$0
 #</VirtualHost>
 #
 #<VirtualHost *>

@@ -41,14 +41,17 @@ test "x$enable_CFLAGS_setting"   = xyes && AC_SUBST(CFLAGS,   $DEF_CXFLAGS)
 test "x$enable_CXXFLAGS_setting" = xyes && AC_SUBST(CXXFLAGS, $DEF_CXFLAGS)
 test "x$enable_LDFLAGS_setting"  = xyes && AC_SUBST(LDFLAGS,  $DEF_LDFLAGS)
 
-# {{{ Domserverstuff (webserver, etc)
-AC_ARG_WITH(domserver-hostname,,AC_SUBST(domserver_hostname,$withval),
-            AC_SUBST(domserver_hostname,domjudge.example.org))
+# {{{ File ownership for e.g. password files.
 
-AC_SUBST(domserver_username, domjudge)
-AC_SUBST(webserver_group, www-data)
+if test "x$DOMJUDGE_USER" = x ; then
+	DOMJUDGE_USER="$USER"
+fi
+AC_ARG_VAR(DOMJUDGE_USER,[User that owns password files (default: current user).])
 
-# domserver bits en/disable: use chmod on $domserver_wwwdir/{domserver,public,team}
+if test "x$WEBSERVER_GROUP" = x ; then
+	WEBSERVER_GROUP='www-data'
+fi
+AC_ARG_VAR(WEBSERVER_GROUP,[Webserver group for password files (default: www-data).])
 
 # }}}
 
