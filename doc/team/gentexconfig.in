@@ -4,7 +4,10 @@
  * @configure_input@
  *
  * This script outputs configuration settings in TeX format for
- * inclusion in the team manual.
+ * inclusion in the team manual. When the system is still
+ * unconfigured, it tries to get the configuration from a direct path
+ * inclusion or reverts to defaults; this allows a team manual to be
+ * included in the source distribution.
  *
  * $Id$
  *
@@ -13,22 +16,32 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
-require('@domserver_etcdir@/domserver-static.php');
-require(ETCDIR . '/domserver-config.php');
+$config = '@domserver_etcdir@/domserver-static.php';
 
-define('SCRIPT_ID', 'gentexconfig');
+if ( is_readable($config) ) {
+	require($config);
+	require(ETCDIR . '/domserver-config.php');
+	@include(ETCDIR . '/judgehost-config.php');
+} else {
+	@include('../../etc/domserver-config.php');
+	@include('../../etc/judgehost-config.php');
+	define('DOMJUDGE_VERSION', `sed -n '1s/.*version //p' ../../README | tr -d '\n'`);
+}
 
-require(LIBDIR . '/init.php');
+$configvars = array(
+	'DOMJUDGE_VERSION' => 'unknown',
+	'SOURCESIZE'       => 256,
+	'WEBBASEURI'       => 'http://domjudge.example.com/',
+	'COMPILETIME'      => 30,
+	'MEMLIMIT'         => 524288,
+	'FILELIMIT'        => 4096,
+	'PROCLIMIT'        => 10,
+	'USERSUBMITDIR'    => '.domjudge'
+	);
 
-echo '\def\DOMJUDGE_VERSION{' . DOMJUDGE_VERSION . "}\n";
-echo '\def\SOURCESIZE{' . SOURCESIZE . "}\n";
-echo '\def\WEBBASEURI{' . WEBBASEURI . "}\n";
-
-// FIXME: needs judgehost and compile-time config:
-echo '\def\COMPILETIME{' . '30' . "}\n";
-echo '\def\MEMLIMIT{' . '524288' . "}\n";
-echo '\def\FILELIMIT{' . '4096' . "}\n";
-echo '\def\PROCLIMIT{' . '10' . "}\n";
-echo '\def\USERSUBMITDIR{' . '.domjudge' . "}\n";
+foreach ($configvars as $var => $default) {
+	$value = defined($var) ? constant($var) : $default;
+	echo '\\def\\' . $var . '{' . $value . "}\n";
+}
 
 exit(0);
