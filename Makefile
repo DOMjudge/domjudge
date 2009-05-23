@@ -15,13 +15,11 @@ default:
 	@echo "Try:"
 	@echo " - make domserver"
 	@echo " - make judgehost"
-	@echo " - make db"
 	@echo " - make docs"
 	@echo " - make submitclient"
 	@echo or
 	@echo " - make install-domserver"
 	@echo " - make install-judgehost"
-	@echo " - make install-db"
 	@echo " - make install-docs"
 	@echo or
 	@echo " - make build"
@@ -35,7 +33,7 @@ build domserver judgehost: config
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure maintainer-clean
+dist: configure
 
 # List all targets that exist in subdirs too, and optionally list in
 # which subdirs they are, overriding default SUBDIRS list.
@@ -99,8 +97,6 @@ maintainer-conf: configure
 	            CXXFLAGS='-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security' \
 	            LDFLAGS='-pie' \
 	            $(CONFIGURE_FLAGS)
-
-maintainer-clean: clean-autoconf
 
 # Install the system in place: don't really copy stuff, but create
 # symlinks where necessary to let it work from the source tree.
