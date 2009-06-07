@@ -369,7 +369,7 @@ class db
 			          , E_USER_ERROR );
 		}
 		if(!mysql_select_db($this->database, $this->_connection)) {
-			user_error( "Could not select database '$database': "
+			user_error( "Could not select database '$this->database': "
 			          . mysql_error($this->_connection)
 			          , E_USER_ERROR );
 		}
