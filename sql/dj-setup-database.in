@@ -1,0 +1,229 @@
+#!/bin/bash
+# @configure_input@
+# $Id$
+
+# This script allows one to perform DOMjudge database setup actions.
+# See usage below for possible commands and options.
+
+set -e
+shopt -s extglob
+
+ETCDIR="@domserver_etcdir@"
+SQLDIR="@domserver_sqldir@"
+
+PASSWDFILE="$ETCDIR/dbpasswords.secret"
+
+ROLES='jury team public plugin'
+
+# Wrapper around mysql command to allow settings options, user, etc.
+function mysql()
+{
+	local user pass
+	if [ -n "$DBUSER" ]; then
+		user="-u $DBUSER"
+	else
+		user="${DBA_USER:+-u ${DBA_USER}}"
+	fi
+	if [ -n "$PASSWD" ]; then
+		pass="-p$PASSWD"
+	else
+		pass=""
+		[ -n "$PROMPT_PASSWD" ] && pass="-p"
+		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
+	fi
+#	echo "$DBNAME@$DBHOST '$user' '$pass'"
+	command mysql $user $pass -h $DBHOST --silent --skip-column-names "$@"
+}
+
+function read_dbpasswords()
+{
+	local OLDIFS="$IFS"
+	IFS=":"
+	# Don't pipe $PASSWDFILE into this while loop as that spawns a
+	# subshell and then variables are not retained in the original shell.
+	while read role host db user passwd; do
+		# Skip lines with '#' as first non-whitespace character
+		[[ "$role" == ?( 	)#* ]] && continue
+		eval "${role}_DBHOST=$host"
+		eval "${role}_DBNAME=$db"
+		eval "${role}_DBUSER=$user"
+		eval "${role}_PASSWD=$passwd"
+		if [ "x$role" = xjury ]; then
+			DBHOST=$host
+			DBNAME=$db
+		fi
+	done < "$PASSWDFILE"
+	IFS="$OLDIFS"
+	if [ -z "$jury_PASSWD" -o -z "$team_PASSWD" -o -z "$public_PASSWD" ]; then
+		echo "Error: no login info found for one of jury, team, public users."
+		return 1
+	fi
+}
+
+function status()
+{
+	if [ ! -r "$PASSWDFILE" ]; then
+		echo "Error: cannot read database passwords file '$PASSWDFILE'."
+		return 1
+	fi
+	read_dbpasswords || return 1
+
+	echo -n "Trying to connect to the server as DB admin: "
+	mysql -e 'SELECT "success.";' || return 1
+
+	for role in $ROLES ; do
+		eval "user=\$${role}_DBUSER"
+		eval "pass=\$${role}_PASSWD"
+		echo -n "Trying to connect to the server with role '$role': "
+		DBUSER=$user PASSWD=$pass mysql -e 'SELECT "success.";' || return 1
+	done
+
+	echo -n "Searching for database '$DBNAME': "
+	mysql -e "USE $DBNAME; SELECT 'found.';" || return 1
+
+	echo -n "Searching for data in database: "
+	DBUSER=$jury_DBUSER PASSWD=$jury_PASSWD \
+		mysql -e "USE $DBNAME; SELECT name FROM problem WHERE probid = 'hello';" || return 1
+
+	echo -n "MySQL server version: "
+	mysql -e 'SELECT version();'
+}
+
+function create_db_users()
+{
+	local user pass
+	(
+	echo "CREATE DATABASE $DBNAME CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
+	for role in $ROLES ; do
+		eval "user=\$${role}_DBUSER"
+		eval "pass=\$${role}_PASSWD"
+# Need to add both '%' and 'localhost' as entries, because a default
+# fresh MySQL installation has a Host='localhost',User='' entry which
+# is more specific than Host='%' and thus leads to Access Denied errors.
+		echo "INSERT INTO user (Host, User, Password) VALUES ('%',        '$user',PASSWORD('$pass'));"
+		echo "INSERT INTO user (Host, User, Password) VALUES ('localhost','$user',PASSWORD('$pass'));"
+	done
+	echo "FLUSH PRIVILEGES;"
+	) | mysql -D mysql
+}
+
+function remove_db_users()
+{
+	local user pass
+	(
+	echo "DROP DATABASE IF EXISTS $DBNAME;"
+	for role in $ROLES ; do
+		eval "user=\$${role}_DBUSER"
+# In MySQL < 5.0.2, 'DROP USER' only removes the user, not its privileges:
+		echo "REVOKE ALL PRIVILEGES, GRANT OPTION FROM $user;"
+		echo "DROP USER '$user'@'%', '$user'@'localhost';"
+	done
+	echo "FLUSH PRIVILEGES;"
+	) | mysql
+}
+
+### Script starts here ###
+
+# Parse command-line options:
+while getopts ':u:p:r' OPT ; do
+	case "$OPT" in
+		u)
+			DBA_USER=$OPTARG
+			;;
+		p)
+			DBA_PASSWD=$OPTARG
+			;;
+		r)
+			PROMPT_PASSWD=1
+			;;
+		:)
+			echo "Error: option '$OPTARG' requires an argument."
+			exit 1
+			;;
+		?)
+			echo "Error: unknown option '$OPTARG'."
+			exit 1
+			;;
+		*)
+			echo "Error: unknown error reading option '$OPT', value '$OPTARG'."
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND-1))
+
+case "$1" in
+
+status)
+	if status ; then
+		echo "Database check successful: database and users present and accessible."
+		exit 0
+	else
+		echo "Database status check failed."
+		exit 1
+	fi
+	;;
+
+genpass)
+	if [ -f "$PASSWDFILE" ]; then
+		echo "Error: password file '$PASSWDFILE' already exists."
+		exit 1
+	fi
+	echo "Running '$ETCDIR/gendbpasswords'..."
+	$ETCDIR/gendbpasswords > "$PASSWDFILE"
+	echo "Passwords file '$PASSWDFILE' created."
+	;;
+
+install)
+	read_dbpasswords
+	create_db_users
+	TMPFILE=`mktemp -t`
+	cp $SQLDIR/mysql_privileges.sql $TMPFILE
+	for role in $ROLES ; do
+		eval "user=\$${role}_DBUSER"
+		sed -i "s/domjudge_$role/$user/g" $TMPFILE
+	done
+ 	cat $SQLDIR/mysql_db_structure.sql \
+ 	    $SQLDIR/mysql_db_examples.sql \
+	    $TMPFILE | mysql -D $DBNAME
+	rm -f $TMPFILE
+	;;
+
+uninstall)
+	read_dbpasswords
+	remove_db_users
+	;;
+
+# Upgrades the DB structure and permissions to current version.
+# Preserves data by first dumping that and importing after upgrade.
+#         @echo "Upgrading database..."
+#         mysqldump -p -u $(MYSQL_UPGR_USER) -cntQ $(DBNAME) > mysql_upgrade_dump.sql
+#         ( $(call subst_db,$(DBNAME)) mysql_clean.sql ;          \
+#           cat                        mysql_db_structure.sql     \
+#                                      mysql_privileges.sql   \
+#                                      mysql_upgrade_dump.sql ; ) \
+#                 | mysql -h $(DBSERVER) -p -u $(MYSQL_UPGR_USER) $(DBNAME)
+#         rm -f mysql_upgrade_dump.sql
+
+
+	*)
+	cat <<EOF
+Unknown subcommand '$1'
+Usage: $0 [option]... <command>
+
+Commands:
+  status     check database installation status
+  genpass    generate passwords
+  install    create database, contents and users if not existing
+  uninstall  remove database users and database, INCLUDING ALL DATA!
+
+Options:
+  -u <user>  connect to MySQL with DB admin <user>
+  -p <pass>  use password <pass> for DB admin user
+  -r         read DB admin password from prompt
+
+EOF
+	exit 1
+	;;
+
+esac

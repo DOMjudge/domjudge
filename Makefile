@@ -41,12 +41,12 @@ install-docs: docs-create-dirs
 dist: configure
 
 # List of default SUBDIRS for recursive targets; override below.
-SUBDIRS=bin doc etc judge lib submit www test-sources misc-tools
+SUBDIRS=bin doc etc judge lib submit sql www test-sources misc-tools
 
-config:            SUBDIRS=bin etc doc www judge submit test-sources
+config:            SUBDIRS=bin etc doc sql www judge submit test-sources
 build:             SUBDIRS=bin lib judge submit test-sources misc-tools
 domserver:         SUBDIRS=etc submit www
-install-domserver: SUBDIRS=etc lib submit www
+install-domserver: SUBDIRS=etc lib submit sql www
 judgehost:         SUBDIRS=bin etc judge
 install-judgehost: SUBDIRS=bin etc judge lib
 docs:              SUBDIRS=doc

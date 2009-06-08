@@ -78,6 +78,7 @@ psdir          = @psdir@
 domserver_bindir       = @domserver_bindir@
 domserver_etcdir       = @domserver_etcdir@
 domserver_wwwdir       = @domserver_wwwdir@
+domserver_sqldir       = @domserver_sqldir@
 domserver_libdir       = @domserver_libdir@
 domserver_libwwwdir    = @domserver_libwwwdir@
 domserver_libsubmitdir = @domserver_libsubmitdir@
@@ -98,7 +99,7 @@ domjudge_docdir        = @domjudge_docdir@
 domserver_dirs = $(domserver_bindir) $(domserver_etcdir) $(domserver_wwwdir) \
                  $(domserver_libdir) $(domserver_libsubmitdir) \
                  $(domserver_libwwwdir) $(domserver_logdir) \
-                 $(domserver_tmpdir) $(domserver_submitdir) \
+                 $(domserver_tmpdir) $(domserver_submitdir) $(domserver_sqldir) \
                  $(addprefix $(domserver_wwwdir)/images/,affiliations countries teams) \
                  $(addprefix $(domserver_wwwdir)/,public team jury plugin)
 
@@ -120,6 +121,7 @@ define substconfigvars
 	-e 's,@domserver_bindir[@],@domserver_bindir@,g' \
 	-e 's,@domserver_etcdir[@],@domserver_etcdir@,g' \
 	-e 's,@domserver_wwwdir[@],@domserver_wwwdir@,g' \
+	-e 's,@domserver_sqldir[@],@domserver_sqldir@,g' \
 	-e 's,@domserver_libdir[@],@domserver_libdir@,g' \
 	-e 's,@domserver_libwwwdir[@],@domserver_libwwwdir@,g' \
 	-e 's,@domserver_libsubmitdir[@],@domserver_libsubmitdir@,g' \
