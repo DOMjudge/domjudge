@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # @configure_input@
 # $Id$
 
@@ -6,7 +6,6 @@
 # See usage below for possible commands and options.
 
 set -e
-shopt -s extglob
 
 ETCDIR="@domserver_etcdir@"
 SQLDIR="@domserver_sqldir@"
@@ -16,7 +15,7 @@ PASSWDFILE="$ETCDIR/dbpasswords.secret"
 ROLES='jury team public plugin'
 
 # Wrapper around mysql command to allow settings options, user, etc.
-function mysql()
+mysql()
 {
 	local user pass
 	if [ -n "$DBUSER" ]; then
@@ -31,19 +30,18 @@ function mysql()
 		[ -n "$PROMPT_PASSWD" ] && pass="-p"
 		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
 	fi
-#	echo "$DBNAME@$DBHOST '$user' '$pass'"
 	command mysql $user $pass -h $DBHOST --silent --skip-column-names "$@"
 }
 
-function read_dbpasswords()
+read_dbpasswords()
 {
 	local OLDIFS="$IFS"
 	IFS=":"
 	# Don't pipe $PASSWDFILE into this while loop as that spawns a
 	# subshell and then variables are not retained in the original shell.
 	while read role host db user passwd; do
-		# Skip lines with '#' as first non-whitespace character
-		[[ "$role" == ?( 	)#* ]] && continue
+		# Skip lines beginning with a '#'
+		[ "x$role" != "x${role###}" ] && continue
 		eval "${role}_DBHOST=$host"
 		eval "${role}_DBNAME=$db"
 		eval "${role}_DBUSER=$user"
@@ -60,7 +58,7 @@ function read_dbpasswords()
 	fi
 }
 
-function status()
+status()
 {
 	if [ ! -r "$PASSWDFILE" ]; then
 		echo "Error: cannot read database passwords file '$PASSWDFILE'."
@@ -89,7 +87,7 @@ function status()
 	mysql -e 'SELECT version();'
 }
 
-function create_db_users()
+create_db_users()
 {
 	local user pass
 	(
@@ -107,7 +105,7 @@ function create_db_users()
 	) | mysql -D mysql
 }
 
-function remove_db_users()
+remove_db_users()
 {
 	local user pass
 	(
