@@ -21,6 +21,7 @@ Version 3.0.0 - SVN
    remove svn,expdlist downloads for the team manual.
  - New compactified layout of team manual.
  - Add note about Java class naming in team manual. (Closes: #2153189)
+ - Add Java compile script that autodetects class name. (Closes: #1964765)
  - Add binary file check in commandline submit. (Closes: #2046017)
  - Make HTML tables sortable in the jury view.
  - Removed "feature" of only allowing alnum chars in filename base
