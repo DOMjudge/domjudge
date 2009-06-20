@@ -53,8 +53,8 @@ docs:              SUBDIRS=doc
 install-docs:      SUBDIRS=doc www
 submitclient:      SUBDIRS=submit
 test:              SUBDIRS=tests
-maintainer-clean:  SUBDIRS=doc
-dist:              SUBDIRS=doc
+maintainer-clean:  SUBDIRS=doc misc-tools
+dist:              SUBDIRS=doc misc-tools
 clean:
 distclean:
 install-perm-domserver: SUBDIRS=etc

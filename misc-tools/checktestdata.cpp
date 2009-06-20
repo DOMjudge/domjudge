@@ -21,46 +21,48 @@
 
  */
 
-using namespace std;
-
-#include <getopt.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <string>
 #include <map>
+#include <ctype.h>
+#include <getopt.h>
 #include <boost/regex.hpp>
+
+#include "parser.h"
+
+using namespace std;
+
+#define PROGRAM "checktestdata"
+#define AUTHORS "Jan Kuipers, Jaap Eldering"
 
 const int DISPLAYONERROR = 50;
 
 size_t prognr, datanr, linenr, charnr;
-string data;
-vector<string> prog;
-vector<vector<string> > parsedprog;
-map<string,string> values;
 
-#define PROGRAM "checktestdata"
-#define AUTHORS "Jan Kuipers, Jaap Eldering"
+string data;
+vector<command> program;
+map<string,string> variable;
 
 char *progname;
 char *progfile;
 char *datafile;
 
-int be_verbose;
-int be_quiet;
 int show_help;
 int show_version;
 
 struct option const long_opts[] = {
-	{"help",    no_argument,       &show_help,    1 },
-	{"version", no_argument,       &show_version, 1 },
-	{ NULL,     0,                 NULL,          0 }
+        {"help",    no_argument,       &show_help,    1 },
+        {"version", no_argument,       &show_version, 1 },
+        { NULL,     0,                 NULL,          0 }
 };
 
 void version()
 {
-	printf("%s -- written by %s\n\n",PROGRAM,AUTHORS);
-	printf(
+        printf("%s -- written by %s\n\n",PROGRAM,AUTHORS);
+        printf(
 "%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
 "are welcome to redistribute it under certain conditions.  See the GNU\n"
 "General Public Licence for details.\n",PROGRAM);
@@ -68,132 +70,83 @@ void version()
 
 void usage()
 {
-	printf(
+        printf(
 "Usage: %s [OPTION]... PROGRAM TESTDATA\n"
 "Check TESTDATA file according to specification in PROGRAM file.\n"
 "\n"
-"  -v, --verbose      enable extra verbosity\n"
-"  -q, --quiet        disable all output except errors\n"
 "      --help         display this help and exit\n"
 "      --version      output version information and exit\n"
 "\n",progname);
 }
 
-void readprogram(char *filename)
+void readprogram(const char *filename)
 {
-	FILE *in = fopen(filename,"rt");
+	ifstream in(filename);
+	Parser parseprog(in);
 
-	if ( in==NULL ) {
-		cout <<  "error opening " << filename << endl;
+	if ( !in ) {
+		cerr << "error opening " << filename << endl;
 		exit(1);
 	}
 
-	while ( !feof(in) ) {
-		string cmd;
-		char c=0;
-		bool withinquotes=false;
-
-		while ( !feof(in) && (withinquotes || !isspace(c)) ) {
-			c = fgetc(in);
-
-			if ( c!=EOF ) {
-				if ( withinquotes || !isspace(c) ) cmd += c;
-				if ( c=='"' ) withinquotes = !withinquotes;
-				if ( c=='\\' ) {
-					c = fgetc(in);
-					cmd += c;
-					c = '\\';
-				}
-			}
-		}
-
-		if ( cmd!="" ) prog.push_back(cmd);
+	if ( parseprog.parse()!=0 ) {
+		cerr << "parse error reading " << filename << endl;
+		exit(1);
 	}
 
-	prog.push_back("eof");
+	in.close();
 
-	fclose (in);
+	// Add (implicit) EOF command at end of input
+	program.push_back(command("EOF"));
+
+	// Check for correct REP ... END nesting
+	int replevel = 0;
+	for (size_t i=0; i<program.size(); i++) {
+		if ( program[i].name()=="REP" ) replevel++;
+		if ( program[i].name()=="END" ) replevel--;
+		if ( replevel<0 ) {
+			cerr << "unbalanced REP/END statements" << endl;
+			exit(1);
+		}
+	}
+	if ( replevel!=0 ) {
+		cerr << "unbalanced REP/END statements" << endl;
+		exit(1);
+	}
 }
 
-void readtestdata(char *filename)
+void readtestdata(const char *filename)
 {
-	FILE *in = fopen(filename,"rt");
+	ifstream in(filename);
+	stringstream ss;
 
-	if ( in==NULL ) {
-		cout <<  "error opening " << filename << endl;
+	if ( !in ) {
+		cerr <<  "error opening " << filename << endl;
 		exit(1);
 	}
 
-	data = "";
-
-	while ( !feof(in) ) {
-		char c = fgetc(in);
-		if ( c!=EOF ) data+=c;
+	if ( !(ss << in.rdbuf()) ) {
+		cerr << "error reading " << filename << endl;
+		exit(1);
 	}
 
-	fclose(in);
+ 	data = ss.str();
+
+	in.close();
 }
 
 void error()
 {
-	int to = datanr; while ( to>(int)data.size() ) to--;
-	int fr = max(0,to-DISPLAYONERROR);
+	size_t to = datanr; while ( to>data.size() ) to--;
+	size_t fr = max(0,int(to-DISPLAYONERROR));
 
 	cout << data.substr(fr,to-fr) << endl;
 	cout << string(charnr,' ') << "^" << endl << endl;
 
 	cout << "ERROR: line " << linenr << " character " << charnr;
-	cout << " of testdata doesn't match " << prog[prognr] << endl << endl;
+	cout << " of testdata doesn't match " << program[prognr] << endl << endl;
 
 	exit(1);
-}
-
-vector<string> parsecommand(string cmd)
-{
-	string parseerror = "ERROR: can't parse " + cmd + "\n";
-
-	vector<string> res(1,"");
-
-	size_t i=0;
-	while ( i<cmd.size() && isalpha(cmd[i]) ) res.back() += cmd[i++];
-	if ( i==cmd.size() ) return res;
-
-	if ( cmd[i]!='(' || cmd[cmd.size()-1]!=')' ) {
-		cout << parseerror;
-		exit(1);
-	}
-
-	bool withinquotes=false;
-
-	while ( withinquotes || cmd[i]!=')' ) {
-		if ( !withinquotes && (cmd[i]=='(' || cmd[i]==',') ) res.push_back("");
-		else if ( withinquotes && cmd[i]=='\\' ) {
-			i++;
-			res.back() += cmd[i];
-		}
-		else if ( cmd[i]=='"' ) {
-			if ( !withinquotes )
-				if ( res.back().size()>0 ) {
-					cout<<parseerror;
-					exit(1);
-				}
-				else
-					withinquotes=true;
-			else
-				if ( cmd[i+1]!=')' && cmd[i+1]!=',' ) {
-					cout<<parseerror;
-					exit(1);
-				}
-				else
-					withinquotes=false;
-		}
-		else
-			res.back() += cmd[i];
-
-		i++;
-	}
-
-	return res;
 }
 
 bool my_xor(bool a, bool b) { return (a && !b) || (!a && b); }
@@ -216,6 +169,7 @@ bool smaller(string a, string b)
 	signb = 1;
 	if      ( b[0]=='+' ) { signb =  1; fr++; }
 	else if ( b[0]=='-' ) { signb = -1; fr++; }
+
 	while ( fr<b.size() && b[fr]=='0' ) fr++;
 	b = b.substr(fr);
 	if ( b.size()==0 ) signb = 0;
@@ -233,27 +187,29 @@ bool smaller(string a, string b)
 
 string value(string x)
 {
-	if ( values.count(x) ) return values[x];
-
-	for(size_t i=0; i<x.size(); i++) if ( !isdigit(x[i]) ) error();
+	if ( isalpha(x[0]) ) {
+		if ( variable.count(x) ) return variable[x];
+		cerr << "variable " << x << " undefined in " << program[prognr] << endl;
+		exit(1);
+	}
 
 	return x;
 }
 
-void checktoken(vector<string> cmd)
+void checktoken(command cmd)
 {
-	if ( cmd[0]=="space" ) {
+	if ( cmd.name()=="SPACE" ) {
 		if ( datanr>=data.size() || data[datanr++]!=' ' ) error();
 		charnr++;
 	}
 
-	else if ( cmd[0]=="newline" ) {
+	else if ( cmd.name()=="NEWLINE" ) {
 		if ( datanr>=data.size() || data[datanr++]!='\n' ) error();
 		linenr++;
 		charnr=0;
 	}
 
-	else if ( cmd[0]=="int" ) {
+	else if ( cmd.name()=="INT" ) {
 		// Accepts format (0|-?[1-9][0-9]*), i.e. no leading zero's
 		// and no '-0' accepted.
 		string num;
@@ -269,32 +225,33 @@ void checktoken(vector<string> cmd)
 		if ( num.size()>=1 && num[0]=='-' &&
 		     (num.size()==1 || num[1]=='0') ) error();
 
-		if ( cmd.size()>=2 && smaller(num,value(cmd[1])) ) error();
-		if ( cmd.size()>=3 && smaller(value(cmd[2]),num) ) error();
-		if ( cmd.size()>=4 ) values[cmd[3]] = num;
+		if ( cmd.nargs()>=1 && smaller(num,value(cmd.args[0])) ) error();
+		if ( cmd.nargs()>=2 && smaller(value(cmd.args[1]),num) ) error();
+		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = num;
 	}
 
-	else if ( cmd[0]=="string" ) {
-		for(size_t i=0; i<cmd[1].size(); i++) {
-			if ( datanr>=data.size() || data[datanr++]!=cmd[1][i] ) error();
+	else if ( cmd.name()=="STRING" ) {
+		string str = cmd.args[0];
+		for (size_t i=0; i<str.size(); i++) {
+			if ( datanr>=data.size() || data[datanr++]!=str[i] ) error();
 			charnr++;
-			if ( cmd[1][i]=='\n' ) linenr++, charnr=0;
+			if ( str[i]=='\n' ) linenr++, charnr=0;
 		}
 	}
 
-	else if ( cmd[0]=="regex" ) {
-		boost::regex regexstr(cmd[1]);
+	else if ( cmd.name()=="REGEX" ) {
+		boost::regex regexstr(string(cmd.args[0]));
 		boost::match_results<string::const_iterator> res;
 		boost::match_flag_type flags = boost::match_default | boost::match_continuous;
 
 		if ( !boost::regex_search((string::const_iterator)&data[datanr],
 		                          (string::const_iterator)data.end(),
-		                          res,regexstr,flags) ) {
+								  res,regexstr,flags) ) {
 			error();
 		} else {
-			for(; datanr<size_t(res[0].second-data.begin()); datanr++) {
+			for (; datanr<size_t(res[0].second-data.begin()); datanr++) {
 				charnr++;
-				if ( data[datanr]=='\n') linenr++, charnr=0;
+				if ( data[datanr]=='\n' ) linenr++, charnr=0;
 			}
 		}
 	}
@@ -307,39 +264,37 @@ void checktoken(vector<string> cmd)
 void checktestdata()
 {
 	while ( true ) {
-		vector<string> cmd = parsedprog[prognr];
+		command cmd = program[prognr];
 
-		if ( cmd[0]=="eof" ) {
-			if (datanr++ != data.size()) error();
+		if ( cmd.name()=="EOF" ) {
+			if ( datanr++!=data.size() ) error();
 			return;
 		}
 
-		else if ( cmd[0]=="rep" ) {
-			int times = atoi(value(cmd[1]).c_str());
+		else if ( cmd.name()=="REP" ) {
+			long long times = atoll(value(cmd.args[0]).c_str());
 
-			if (times==0) {
-				int countrep=0;
+			if ( times==0 ) {
+				int replevel = 0;
 				do {
-					vector<string> cmd = parsedprog[prognr++];
-					if ( cmd[0]=="rep" ) countrep++;
-					if ( cmd[0]=="end" ) countrep--;
+					command cmd = program[prognr++];
+					if ( cmd.name()=="REP" ) replevel++;
+					if ( cmd.name()=="END" ) replevel--;
 				}
-				while (countrep);
+				while ( replevel>0 );
 			}
 			else {
 				int loopstart = prognr+1;
-				vector<string> sep;
-				if ( cmd.size()>=3 ) sep=vector<string>(cmd.begin()+2,cmd.end());
 
 				while ( times-- ) {
 					prognr = loopstart;
 					checktestdata();
-					if ( times && sep.size() ) checktoken(sep);
+					if ( times && cmd.nargs()>=2 ) checktoken(cmd.args[1]);
 				}
 			}
 		}
 
-		else if ( cmd[0]=="end" ) {
+		else if ( cmd.name()=="END" ) {
 			prognr++;
 			return;
 		}
@@ -358,7 +313,6 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	/* Parse command-line options */
-	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
 	while ( (opt = getopt_long(argc,argv,"+",long_opts,(int *) 0))!=-1 ) {
@@ -394,11 +348,6 @@ int main(int argc, char **argv)
 
 	readprogram(progfile);
 	readtestdata(datafile);
-
-	parsedprog = vector<vector<string> >(prog.size());
-	for(size_t i=0; i<prog.size(); i++) {
-		parsedprog[i] = parsecommand(prog[i]);
-	}
 
 	linenr = charnr = 0;
 	datanr = prognr = 0;

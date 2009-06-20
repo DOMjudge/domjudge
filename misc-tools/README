@@ -5,7 +5,7 @@ included in the distribution for that reason.
 
 A short description of the contents of this directory follows. Note
 that these programs might not be completely uptodate with the DOMjudge
-core, so some manual hacking might be nessecary to use these.
+core, so some manual hacking might be necessary to use these.
 
 
 * checkinput checkinput.awk fixinput.awk
@@ -22,4 +22,5 @@ whitespace.
 This program can be used as a more advanced replacement of checkinput.
 It allows you to not only check on simple (spacing) layout errors, but
 a simple grammar file must be specified for the testdata, according to
-which the testdata is checked.
+which the testdata is checked. See 'checktestdata.y' for a grammar
+specification and files in the 'tests' subdirectory for some examples.
