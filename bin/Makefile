@@ -18,13 +18,15 @@ save_sources2file restore_sources2db: %: %.in ../paths.mk
 
 judgehost: build
 
+install-domserver:
+	$(INSTALL_SCRIPT) -t $(domserver_libdir) alert
+
 install-judgehost:
 	$(INSTALL_PROG) -t $(judgehost_libjudgedir) sh-static
 	$(INSTALL_SCRIPT) -t $(judgehost_libdir) alert
 
 install-perm-judgehost:
 	$(INSTALL_PROG) -o root -m u=rwxs,go=rx -t $(judgehost_bindir) runguard
-	$(INSTALL_SCRIPT) -t $(domserver_libdir) alert
 
 clean-l:
 	rm -f $(TARGETS)
