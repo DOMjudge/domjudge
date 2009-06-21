@@ -74,13 +74,10 @@ This is a (rough) list of the requirements for DOMjudge.
 <item>Compilers for the languages you want to support
 </itemize>
 
-If you want to use the command line submit client (next to / instead
-of the web submit client):
-
-<itemize>
-<item>A shared file system with the team computers (e.g. NFS)
-<item>SSH/SCP
-</itemize>
+If you want to use the commandline submit client (next to / instead of
+the web submit client), then a shared filesystem with the team
+computers (e.g. NFS) and SSH/SCP is recommended, but this method can
+be adapted to the environment.
 
 A <ref id="install_config:requirements" name="detailed list of requirements">
 is contained in the <ref id="install_config" name="Installation and Configuration">
@@ -107,7 +104,7 @@ acknowledgements are made in the respective files, but we would like
 to name them here too:
 
 <itemize>
-<item> dash is included from the Debian `dash-udeb' (i386) package
+<item> dash (i386) is included, built from the Debian dash sources
 (copyright various people, see <tt>doc/dash.copyright</tt>).
 <item> mkstemps.h and basename.h are modified versions from the
 GNU libiberty library (copyright Free Software Foundation).
@@ -120,6 +117,9 @@ Coroner's Toolkit by Wietse Venema.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
 Erik van Sebille.
 </itemize>
+
+<sect1>Non-GPL licenced parts of DOMjudge
+<p>
 
 A binary version of the dash shell (statically compiled)
 is distributed with DOMjudge. This program is copyright by various
@@ -232,30 +232,34 @@ DOMjudge:
 This manual assumes you are aware of some of the concepts used within
 DOMjudge. Here's an overview.
 
-DOMjudge has three different kinds of hosts:
-<itemize>
-<item> Team computer: workstation for a team, where they develop their
+DOMjudge discerns three different kinds of hosts:
+<descrip>
+<tag>Team computer</tag>
+       Workstation for a team, where they develop their
        solutions and from which they submit them to the jury system.
        The only part of DOMjudge that runs here is the optional
-       command line submit client; the rest happens via the web
-       interface.
-<item> DOMjudge server: a host that receives the submissions, runs the
+       command line submit client; All other interaction by teams is
+       done with a browser via the web interface.
+<tag>DOMjudge server</tag>
+       A host that receives the submissions, runs the
        database and serves the web pages. This host will run Apache,
        MySQL and perhaps the submitdaemon. Optionally some of
        these tasks can be further split out to separate machines, but
-       that's normally not necessary.
-<item> Judgehosts: a number of hosts, at least one, that will retrieve
-       submitted solutions from the main jury system, compile and run
-       them and send the results back to the jury system. Since this
+       that's normally not necessary and not supported out of the box.
+<tag>Judgehosts</tag>
+       A number of hosts, at least one, that will retrieve
+       submitted solutions from the DOMjudge server, compile and run
+       them and send the results back to the server. Since this
        is computationally intensive, there should ideally be at least
        a couple of these. They will run the judgedaemon from DOMjudge.
        For security and performance reasons it is highly recommended not
-       to use the main jury system as a judgehost.
-</itemize>
+       to use the server as a judgehost.
+</descrip>
 
 Note that the judges (persons) are not required and not recommended to
-work on any of the DOMjudge server or judgehosts, as they access the
-system via the jury web interface.
+work on any of the DOMjudge server or judgehosts. They can just access
+the system via the jury web interface and working e.g. on judgehosts
+can interfere with system stability.
 
 <sect>Requirements
 <label id="install_config:requirements">
@@ -264,7 +268,7 @@ system via the jury web interface.
 <sect1>System requirements
 <p>
 
-The requirements for the deployment of this jury-system are:
+The requirements for the deployment of DOMjudge are:
 
 <itemize>
 <item> A TCP/IP network which connects all jury and team computers.
@@ -278,25 +282,27 @@ The requirements for the deployment of this jury-system are:
          MySQL database on port 3306.
   <item> HTTP traffic from teams, the public and jury to the web server,
          port 80 or 443.
-  <item> The `submit' command line client connects to the submitserver
-         via a TCP connection on a configurable port.
+  <item> The `submit' command line client connects to the submitdaemon
+         on the server via a TCP connection on a configurable port
+         and/or to the web interface.
   </itemize>
        Each team computer needs to have a unique IP address from the
-       view of the jury system.
+       view of the DOMjudge server.
 
-<item> (Local) root access on the jury-computers (preferably also on
-       the shared home directory) for installing some programs
-       setuid-root and (un)mounting the proc file system. See <ref
+<item> (Local) root access on the jury computers for installing some
+       programs setuid-root, some files with restricted permissions
+       and for (un)mounting the proc file system. See <ref
        id="security:rootprivs" name="Security: root privileges"> for
        more details.
 
 <item> For using the command line submit program, team accounts which
        are accessible via SSH on the jury computers (a SSH public key
        of the jury account should be installed on all team accounts to
-       provide public-key access). This can be circumvented by
-       providing access by other means, see below under <ref
-       id="install_config:submissionmethods" name="Submission methods">
-       or the file <tt>submit/submit_copy.sh</tt> for more details.
+       provide public-key access). Alternatively, another means of
+       providing access from the server can be configured, see below
+       under <ref id="install_config:submissionmethods"
+       name="Submission methods"> or the file
+       <tt>submit/submit_copy.sh</tt> for more details.
 </itemize>
 
 <sect1>Software requirements
@@ -368,6 +374,10 @@ functionality.
         url="http://pear.php.net/package/Text_Highlighter/">~
        (to use syntax highlighting in the Show Source section of the
         jury interface)
+
+<item> The <htmlurl name="Boost" url="http://www.boost.org/"> regular
+       expression library to build the <tt>checktestdata</tt> program
+       for advanced checking of input/output data correctness.
 </itemize>
 
 <sect1>Requirements for team workstations
@@ -394,8 +404,8 @@ apt-get install gcc g++ make libcurl4-gnutls-dev sudo mysql-server ntp \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
 	hostname coreutils procps grep diff mount sharutils \
 	openssh-server openssh-client phpmyadmin xsltproc \
-	linuxdoc-tools transfig \
-	texlive-latex-recommended texlive-latex-extra
+	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra \
+        libboost-regex-dev
 </code>
 
 This is for Debian 5.0 "Lenny", for Debian 4.0 "Etch",
@@ -1003,7 +1013,7 @@ x|testcase         |Definition of testdata for each problem.@
 </tabular>
 
 Now follows a longer description (including fields) per table that has
-to be filled manually. 
+to be filled manually.
 
 <descrip>
 <tag>contest</tag>
@@ -1241,11 +1251,11 @@ When the test session (or contest) starts and a team connects to the
 web interface and have an unknown IP, they will be prompted for
 username and password. Once supplied, the IP is stored and the
 password is not needed anymore.
-	   
+
 This is also a secure option, but requires a bit more hassle from the
 teams, and maybe from the organisers who have to distribute pieces of
 paper.
-   
+
 <em>Note:</em> the web interface will only allow a team to
 authenticate themselves once. If an IP is set, a next authentication
 will be refused (to avoid trouble with lingering passwords). In order
