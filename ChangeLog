@@ -38,6 +38,7 @@ Version 3.0.0 - SVN
  - Only build submit client/daemon on request via configure. (Closes: #2046029)
  - Flush results in config checker for better feedback.
  - Fixed DB installation support with script 'dj-setup-database'.
+ - Update included dash shell to version 0.5.5.1-2 (Debian upstream).
 
 Version 2.2.0 - 11 August 2008
 ------------------------------
