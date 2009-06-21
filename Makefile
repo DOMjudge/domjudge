@@ -123,6 +123,7 @@ maintainer-install: domserver judgehost docs submitclient \
 	                                    $(PWD)/submit/submit_db.php
 	ln -sf -t $(judgehost_libjudgedir)  $(PWD)/bin/runguard \
 	                                    $(PWD)/bin/sh-static
+	ln -sf -t $(judgehost_libdir)       $(PWD)/bin/alert
 	ln -sfT $(PWD)/doc $(domserver_wwwdir)/jury/doc
 	su -c "chown root.root bin/runguard ; chmod u+s bin/runguard"
 
@@ -131,7 +132,7 @@ maintainer-uninstall:
 	rm -rf $(domserver_libsubmitdir)
 	rm -f $(domserver_wwwdir)/jury/doc
 	rm -f $(judgehost_libjudgedir)
-	rm -f judge/runguard judge/sh-static
+	rm -f judge/runguard judge/sh-static lib/alert
 
 distclean-l: clean-autoconf
 	-rm -f paths.mk
