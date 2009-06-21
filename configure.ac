@@ -184,11 +184,6 @@ AC_PROG_CPP
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
-AX_WITH_PROG(BEEP,beep,[none])
-if test "x$BEEP" = "xnone" ; then
-	AC_MSG_WARN([command `beep' not available])
-fi
-
 # Checks for libraries.
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 

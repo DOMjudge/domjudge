@@ -15,18 +15,17 @@
 #define PIPE_IN  1
 #define PIPE_OUT 0
 
-void beep(const char *beeptype)
+void _alert(const char *libdir, const char *msgtype, const char *description)
 {
-#ifdef BEEP_CMD
+	static char none[1] = "";
 	char *cmd;
-	
-	if ( strcmp(BEEP_CMD,"none")!=0 ) {
-		cmd = allocstr(BEEP_CMD" %s &",beeptype);
-		logmsg(LOG_INFO,"executing '%s'",cmd);
-		system(cmd);
-		free(cmd);
-	}
-#endif
+
+	if ( description==NULL ) description = none;
+
+	cmd = allocstr("%s/alert '%s' '%s' &",libdir,msgtype,description);
+	logmsg(LOG_INFO,"executing '%s'",cmd);
+	system(cmd);
+	free(cmd);
 }
 
 int execute(const char *cmd, char **args, int nargs, int stdio_fd[3], int err2out)

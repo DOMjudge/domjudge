@@ -552,25 +552,25 @@ void sigchld_handler(int sig)
 		   due to childs from 'system' call */
 		if ( errno==ECHILD ) return;
 		warning(errno,"waiting for child, pid = %d, exitcode = %d",pid,exitcode);
-		beep(BEEP_ERROR);
+		alert("error","error waiting for child process");
 		return;
 	}
 	
 	logmsg(LOG_INFO,"child process %d exited with exitcode %d",pid,exitcode);
 
-	/* Audibly report submission status with beeps */
+	/* Report submission status via alert plugin. */
 	switch ( exitcode ) {
 	case SUCCESS_EXITCODE:
-		beep(BEEP_SUBMIT);
+		alert("submit",NULL);
 		break;
 
 	case WARNING_EXITCODE:
-		beep(BEEP_WARNING);
+		alert("warning",NULL);
 		break;
 
 	case FAILURE_EXITCODE:
 	default:
-		beep(BEEP_ERROR);
+		alert("error",NULL);
 	}
 }
 

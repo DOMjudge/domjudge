@@ -22,6 +22,15 @@ extern "C" {
 /* Wrapper function to call beep with one of the predefined settings. */
 void beep(const char *beeptype);
 
+/* Define wrapper around true function '_alert' to allow passing
+ * LIBDIR as defined in calling program. */
+#define alert(msgtype,description) _alert(LIBDIR,msgtype,description)
+
+void _alert(const char *libdir, const char *msgtype, const char *description);
+/* Execute 'alert' plugin program to perform user configurable action
+ * on important system events. See default alert script for more details.
+ */
+
 int execute(const char *, char **, int, int[3], int);
 /* Execute a subprocess using fork and execvp and optionally perform
  * IO redirection of stdin/stdout/stderr.

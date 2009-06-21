@@ -162,13 +162,12 @@ function difftime($time1, $time2)
 }
 
 /**
- * Wrapper function to call beep with one of the predefined settings.
+ * Call alert plugin program to perform user configurable action on
+ * important system events. See default alert script for more details.
  */
-function beep($beeptype)
+function alert($msgtype, $description = '')
 {
-	if ( is_executable(BEEP_CMD) ) {
-		system(BEEP_CMD . " " . $beeptype . " &");
-	}
+	system(LIBDIR . "/alert '$msgtype' '$description' &");
 }
 
 /**

@@ -107,7 +107,6 @@ acknowledgements are made in the respective files, but we would like
 to name them here too:
 
 <itemize>
-<item> beep.c is made by Johnathan Nightingale.
 <item> dash is included from the Debian `dash-udeb' (i386) package
 (copyright various people, see <tt>doc/dash.copyright</tt>).
 <item> mkstemps.h and basename.h are modified versions from the
