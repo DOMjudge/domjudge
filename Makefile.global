@@ -50,6 +50,9 @@ $(REC_TARGETS): %:
 	@for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 	$(MAKE) $@-l
 
+dist: dist-l
+dist-l:
+
 clean: clean-l
 clean-l:
 
