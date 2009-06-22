@@ -172,23 +172,6 @@ done
 AC_SUBST(SUBMIT_DEFAULT,    $submit_default)
 AC_SUBST(SUBMIT_ENABLE_CMD, $submit_enabledolstra)
 AC_SUBST(SUBMIT_ENABLE_WEB, $submit_enablehttp)
-submit_default=0
-case `echo "x$submitclient_protocols" | sed 's/,.*//'` in
-	xdolstra) submit_default=1 ;;
-	xhttp)    submit_default=2 ;;
-	*)        submit_default=0 ;;
-esac
-
-submit_enabledolstra=0
-submit_enablehttp=0
-for i in `echo "$submitclient_protocols" | sed 's/,/ /g'` ; do
-    eval submit_enable$i=1
-done
-
-AC_SUBST(SUBMIT_DEFAULT,    $submit_default)
-AC_SUBST(SUBMIT_ENABLE_CMD, $submit_enabledolstra)
-AC_SUBST(SUBMIT_ENABLE_WEB, $submit_enablehttp)
-
 # }}}
 
 # {{{ runguard user
