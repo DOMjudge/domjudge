@@ -67,6 +67,7 @@ AC_DEFUN([AX_PATH_COMMENT], [
 	AC_ARG_WITH(foo$1,[$2],[],[])
 	])
 
+AX_PATH_COMMENT(0,[])
 AX_PATH_COMMENT(1,[Fine tuning of installation when FHS is disabled (the default):])
 AX_PATH(domserver_root,         [$prefix/domserver])
 AX_PATH(judgehost_root,         [$prefix/judgehost])
@@ -90,7 +91,6 @@ AX_PATH(judgehost_libjudgedir,  [$judgehost_root/lib/judge])
 AX_PATH(judgehost_logdir,       [$judgehost_root/log])
 AX_PATH(judgehost_tmpdir,       [$judgehost_root/tmp])
 AX_PATH(judgehost_judgedir,     [$judgehost_root/judgings])
-AX_PATH_COMMENT(4,[   ])
 
 # }}}
 
