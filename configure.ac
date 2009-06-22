@@ -43,15 +43,27 @@ test "x$enable_LDFLAGS_setting"  = xyes && AC_SUBST(LDFLAGS,  $DEF_LDFLAGS)
 
 # {{{ File ownership for e.g. password files.
 
-if test "x$DOMJUDGE_USER" = x ; then
-	DOMJUDGE_USER="$USER"
-fi
-AC_ARG_VAR(DOMJUDGE_USER,[User that owns password files (default: current user).])
+AC_MSG_CHECKING([domjudge_user])
+AC_ARG_ENABLE([domjudge_user], [AS_HELP_STRING([--enable-domjudge_user@<:@=USER@:>@], [User that owns password files (default: current user).])], [], [])
 
-if test "x$WEBSERVER_GROUP" = x ; then
-	WEBSERVER_GROUP='www-data'
+if test "x$enableval" = x; then
+	AC_SUBST(DOMJUDGE_USER,$USER)
+	AC_MSG_RESULT([$DOMJUDGE_USER (default: current user)])
+else
+	AC_SUBST(DOMJUDGE_USER,$enableval)
+	AC_MSG_RESULT([$DOMJUDGE_USER])
 fi
-AC_ARG_VAR(WEBSERVER_GROUP,[Webserver group for password files (default: www-data).])
+
+AC_MSG_CHECKING([webserver_group])
+AC_ARG_ENABLE([webserver_group], [AS_HELP_STRING([--with-webserver_group@<:@=GROUP@:>@], [Webserver group for password files (default: www-data).])], [], [])
+
+if test "x$enableval" = x; then
+	AC_SUBST(WEBSERVER_GROUP,"www-data")
+	AC_MSG_RESULT([$WEBSERVER_GROUP (default)])
+else
+	AC_SUBST(WEBSERVER_GROUP,$enableval)
+	AC_MSG_RESULT([$WEBSERVER_GROUP])
+fi
 
 # }}}
 
@@ -143,6 +155,23 @@ fi
 ],
 [submitclient_protocols=$def_submitclient_protocols])
 
+AC_MSG_CHECKING(submitclient)
+submit_default=0
+case `echo "x$submitclient_protocols" | sed 's/,.*//'` in
+	xdolstra) submit_default=1; AC_MSG_RESULT([enabled (dolstra)]) ;;
+	xhttp)    submit_default=2; AC_MSG_RESULT([enabled (http)])  ;;
+	*)        submit_default=0; AC_MSG_RESULT([disabled]) ;;
+esac
+
+submit_enabledolstra=0
+submit_enablehttp=0
+for i in `echo "$submitclient_protocols" | sed 's/,/ /g'` ; do
+    eval submit_enable$i=1
+done
+
+AC_SUBST(SUBMIT_DEFAULT,    $submit_default)
+AC_SUBST(SUBMIT_ENABLE_CMD, $submit_enabledolstra)
+AC_SUBST(SUBMIT_ENABLE_WEB, $submit_enablehttp)
 submit_default=0
 case `echo "x$submitclient_protocols" | sed 's/,.*//'` in
 	xdolstra) submit_default=1 ;;
@@ -162,18 +191,17 @@ AC_SUBST(SUBMIT_ENABLE_WEB, $submit_enablehttp)
 
 # }}}
 
-# {{{ runguard
+# {{{ runguard user
+AC_MSG_CHECKING([runuser])
+AC_ARG_ENABLE([runuser], [AS_HELP_STRING([--enable-runuser@<:@=USER@:>@], [Unprivileged user under which to run submissions (default: domjudge-run).])], [], [])
 
-if test "x$RUNUSER" = x ; then
-	RUNUSER='domjudge-run'
+if test "x$enableval" = x; then
+	AC_SUBST(RUNUSER,"domjudge-run")
+	AC_MSG_RESULT($RUNUSER (default))
+else
+	AC_SUBST(RUNUSER,$enableval)
+	AC_MSG_RESULT($RUNUSER)
 fi
-AC_ARG_VAR(RUNUSER,[Unprivileged user under which to run submissions (default: domjudge-run).])
-
-if test "x$CHROOTDIR" = x ; then
-	CHROOTDIR=$judgehost_judgedir
-fi
-AC_ARG_VAR(CHROOTDIR,[Directory within which chroot-ing is allowed (default: $judgehost_judgedir).])
-
 # }}}
 
 # Checks for programs.
