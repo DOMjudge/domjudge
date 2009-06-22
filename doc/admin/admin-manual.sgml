@@ -74,7 +74,7 @@ This is a (rough) list of the requirements for DOMjudge.
 <item>Compilers for the languages you want to support
 </itemize>
 
-If you want to use the commandline submit client (next to / instead of
+If you want to use the command line submit client (next to / instead of
 the web submit client), then a shared filesystem with the team
 computers (e.g. NFS) and SSH/SCP is recommended, but this method can
 be adapted to the environment.
@@ -176,13 +176,21 @@ External software:
 
 DOMjudge:
 <itemize>
-<item> Configure the system:
-       <tt>$EDITOR etc/global.cfg; make config</tt>
-<item> Make sure that all of the DOMjudge stuff is in the directory
-       set as <tt>SYSTEM_ROOT</tt>, and from that directory:
-       <tt>make ; make install</tt>
+<item> Extract the source tarball and run <tt>./configure
+       [--enable-fhs] --prefix=&lt;basepath&gt;</tt>.
+<item> Run <tt>make domserver judgehost docs</tt> or just those
+       targets you want installed on the current host.
+<item> Run <tt>make install-{domserver,judgehost,docs}</tt>
+       to install the system.
+<item> With root privileges run <tt>make install-perm-{domserver,judgehost}</tt>
+       to install password files and the setuid-root program
+       <tt>runguard</tt>.
+</itemize>
+On the domserver host:
+<itemize>
+<item> Install the mysql database using <tt>dj-setup-database</tt>.
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
-       it, reload web server.
+       it to your needs, reload web server.
 <item> Check that the web interface works (/team, /public and /jury)
        and check that the jury interface is password protected.
 <item> Add useful contest data through the jury web interface or with
@@ -190,39 +198,38 @@ DOMjudge:
 <item> Run the config checker in the jury web interface.
 <item> Start the command line submit daemon, when using this
        functionality: <tt>cd submit; ./submitdaemon</tt>
-<item> Next, setup the judgehosts on separate hosts:
-  <itemize>
-	 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
-  <item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
-         Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
-         (check specific options of useradd, since these vary per system)
-  <item> Start the judge daemon: <tt>cd judge; ./judgedaemon</tt>
-  </itemize>
+</itemize>
+On the judgehosts:
+<itemize>
+<!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
+<item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
+       Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
+       (check specific options of useradd, since these vary per system)
+<item> Start the judge daemon: <tt>cd judge; ./judgedaemon</tt>
+</itemize>
+It should be done by now, submit the sources from the test-sources/
+directory and compare their results with what they claim should
+happen: <tt>make check</tt> and check all submissions in the jury web
+interface. (FIXME: use of <tt>test-sources/check-judgings</tt>)
 
-<item> It should be done by now, submit the sources from the
-       test-sources/ directory and compare their results with what
-       they claim should happen: <tt>make check</tt> and check all
-       submissions in the jury web interface.
-
-<item>Optionally:
-  <itemize>
-  <item> Install the submit client on the team workstations.
-  <item> Generate one-time passwords for all the teams in the web interface.
-  <item> Further tighten the security of the system, e.g. by applying
-         firewall rules.
-  <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>
-  <item> Setup the Java chroot environment to use Sun Java with chroot:<newline>
-         <tt>bin/make_chroot.sh &lt;installdir&gt; &lt;architecture&gt;</tt><newline>
-         <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
-         enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/global.cfg</tt>
-         and add the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
-	 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
-         domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc<newline>
-         domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
-         domjudge ALL=(root) NOPASSWD: /bin/mount --bind CHROOTORIGDIR/*<newline>
-         domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*</tt>
-  <item> Install the PEAR Text_Highlighter class for source syntax highlighting.
-  </itemize>
+Optionally:
+<itemize>
+<item> Install the submit client on the team workstations.
+<item> Generate one-time passwords for all the teams in the web interface.
+<item> Further tighten the security of the system, e.g. by applying
+       firewall rules.
+<item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>
+<item> Setup the Java chroot environment to use Sun Java with chroot:<newline>
+       <tt>bin/make_chroot.sh &lt;installdir&gt; &lt;architecture&gt;</tt><newline>
+       <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
+       enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
+       and add the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
+<!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
+       domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc<newline>
+       domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
+       domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;installdir&gt/*<newline>
+       domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*</tt>
+<item> Install the PEAR Text_Highlighter class for source syntax highlighting.
 </itemize>
 
 
@@ -284,7 +291,7 @@ The requirements for the deployment of DOMjudge are:
          port 80 or 443.
   <item> The `submit' command line client connects to the submitdaemon
          on the server via a TCP connection on a configurable port
-         and/or to the web interface.
+         (default: 9147) and/or to the web interface.
   </itemize>
        Each team computer needs to have a unique IP address from the
        view of the DOMjudge server.
@@ -375,6 +382,10 @@ functionality.
        (to use syntax highlighting in the Show Source section of the
         jury interface)
 
+<item> <htmlurl name="beep" url="http://www.johnath.com/beep/"> for
+       audible notification of errors, submissions and judgings, when
+       using the default <tt>alert</tt> script.
+
 <item> The <htmlurl name="Boost" url="http://www.boost.org/"> regular
        expression library to build the <tt>checktestdata</tt> program
        for advanced checking of input/output data correctness.
@@ -394,10 +405,10 @@ supported by any reasonably current browser with JavaScript enabled.
 <sect1>Debian installation command
 <p>
 
-For your convenience, the following command will install needed software as
-mentioned above when using Debian GNU/Linux, or one of its derivate
-distributions. Most systems will have the bulk of these packages installed
-already.
+For your convenience, the following command will install needed
+software on the DOMjudge server as mentioned above when using Debian
+GNU/Linux, or one of its derivate distributions. Most systems will
+have the bulk of these packages installed already.
 
 <code>
 apt-get install gcc g++ make libcurl4-gnutls-dev sudo mysql-server ntp \
@@ -421,63 +432,107 @@ apt-get install make sudo php5-cli php5-mysql ntp xsltproc \
 	gcc g++ gcj sun-java5-jdk ghc fp-compiler
 </code>
 
-<sect>File locations
+<sect>Installation system
 <p>
 
-There are three different directory trees which must be set up and
-configured. The root paths of these directory trees should be set in
-the main config file. Directories in uppercase are configuration
-variables, which can be set to different locations (even within
-different roots).
+The DOMjudge build/install system consists of a <tt>configure</tt>
+script and makefiles, but when installing it, some more care has to be
+taken than simply running '<tt>./configure &amp;&amp; make &amp;&amp;
+make install</tt>'. DOMjudge needs to be installed both on the server
+and on the judgehosts. These require different parts of the complete
+system to be present and can be installed separately. Within the build
+system these parts are referred to as <tt>domserver, judgehost</tt>
+and additionally <tt>docs</tt> for all documentation. These parts can
+be separately built and installed respectively by running:
+<code>
+make domserver &amp;&amp; make install-domserver
+make judgehost &amp;&amp; make install-judgehost
+make docs      &amp;&amp; make install-docs
+</code>
+For a list of basic make targets, run <tt>make</tt> in the source root
+directory without arguments.
 
+There are three different ways to install DOMjudge:
 <descrip>
-<tag><tt>SYSTEM_ROOT</tt></tag>
-	This must be set to the directory tree where the DOMjudge sources
-	are installed. The required compiled programs will be installed in
-	place within this directory tree. All programs needed for the
-	judging system are located here alongside some extra utilities and
-	the configuration of the system.
+<tag>Single directory tree</tag>
+	With this method all DOMjudge related files and programs are
+	installed in a single directory tree which is specified by the
+	prefix option of configure, like
+<code>
+./configure --prefix=$HOME/domjudge
+</code>
+	This will install each of the <tt>domserver, judgehost,
+	docs</tt> parts in a subdirectory
+	<tt>$HOME/domjudge/domserver</tt> etc. Note that these
+	subdirectories can be overridden from the defaults with options
+	like <tt>--with-domserver_root=DIR</tt>, see <tt>configure
+	--help</tt> for a complete list.
 
-<tag><tt>OUTPUT_ROOT</tt></tag>
-	Placed here are all submission files, log files and temporary
-	files, made while testing submissions. The following directories
-	should be present within <tt>OUTPUT_ROOT</tt>:
+	Besides the installed files, there will also be directories
+	for logging, temporary files, submitted sources and judging
+	data:
 	<descrip>
-	<tag><tt>LOGDIR</tt></tag>
-		contains all log files.
-	<tag><tt>INCOMINGDIR</tt></tag>
-		contains temporary submission files from the
-		command line client, being submitted or where a
-		submission error has occurred. 
-	<tag><tt>SUBMITDIR</tt></tag>
-		(optionally) contains all correctly submitted files: as backup
-		only, the database is the authoritative source.
-	<tag><tt>JUDGEDIR</tt></tag>
-		place where submissions are tested, each in its own
-		subdirectory. The system needs root access to this
-		directory! (for chroot and mounting of proc-fs).
+		<tag><tt>log</tt></tag> contains all log files.
+		<tag><tt>tmp</tt></tag> contains temporary files.
+		<tag><tt>submissions</tt></tag>
+		(optionally) on the domserver contains all correctly
+		submitted files: as backup only, the database is the
+		authoritative source. Note that this directory must be
+		writable by the web server for this feature to work.
+		<tag><tt>judgings</tt></tag>
+		location on judgehosts where submissions are tested,
+		each in its own subdirectory. The system needs root
+		access to this directory! (for chroot and mounting of
+		proc-fs).
 	</descrip>
+
+	This method of installation is the default and probably most
+	practical for normal purposes as it keeps all files together,
+	hence easily found.
+
+<tag>FHS compliant</tag>
+	This method installs DOMjudge in directories according to the
+	<htmlurl name="Filesystem Hierarchy Standard"
+	url="http://www.pathname.com/fhs/">. It can be enabled by
+	passing the option <tt>--enable-fhs</tt> to <tt>configure</tt>
+	and the prefix defaults to <tt>/usr/local</tt> as usual. Files
+	will be placed e.g. in <tt>PREFIX/share/domjudge, /var/log,
+	/tmp, /etc/domjudge</tt>.
+
+<tag>Maintainer install</tag>
+	The last installation method is meant for
+	developers/maintainers of DOMjudge and does an in-place
+	installation within the source tree. This allows one to
+	immediately see effects when modifying code.
+
+	This method requires some special steps which can most easily
+	be run via makefile rules as follows:
+<code>
+make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
+make maintainer-install
+</code>
+	Note that these targets have to be executed
+	<em>separately</em> and the latter needs root privileges.
 </descrip>
 
+Note that installation of default password files is done via separate
+<tt>install-perm-{domserver,judgehost}</tt> targets. The
+<tt>install-perm-judgehost</tt> target also installs the
+<tt>runguard</tt> program with set-uid bit set as root.
 
-<sect>Global configuration: <tt>global.cfg</tt>
+
+<sect>Configuration
 <p>
 
-Configuration of the judge system is mostly done by editing the global
-configuration file in <tt>SYSTEM_ROOT/etc/global.cfg</tt>. This file
-contains the configuration data for all programs within the system. To
-implement configuration changes, these settings should be converted to
-the different language-specific configuration-files, needed by
-different parts of the system. This is done by running <tt>make
-config</tt> in the <tt>SYSTEM_ROOT</tt> directory. After that, also
-all C/C++ programs should be rebuilt (if necessary) to implement these
-changes!
+Configuration of the judge system is mostly done by editing the
+configuration file(s) in <tt>etc</tt>: <tt>domserver-config.php,
+judgehost-config.php, common-config.php</tt> for the configuration
+options of the domserver, judgehost and shared configuration options
+respectively. The latter should be syncronised between domserver and
+judgehosts. Descriptions of settings are included in these files.
 
-The global configuration file has a ini-file like syntax, with some
-extensions to make it more flexible and to be able to correctly
-convert variables to all specific configuration files. See comments
-there for more information. Also all configuration options are
-documented there.
+Besides these settings, there are a few other places where changes can
+be made to the system... FIXME
 
 
 <sect>Configuration of languages
@@ -486,10 +541,11 @@ documented there.
 Configuration of the compilers of the supported languages should be
 done separately. For each supported language a shell-script named
 <tt>compile_&lt;lang&gt;.sh</tt> should be made and placed in
-<tt>SYSTEM_ROOT/judge</tt>, where &lt;lang&gt; is the ID of the
-language as specified in the database. For more information, see for
-example <tt>compile_c.sh</tt> and <tt>test_solution.sh</tt> in
-<tt>SYSTEM_ROOT/judge</tt> for syntax.
+<tt>lib/judge</tt>, where &lt;lang&gt; is the ID of the language as
+specified in the database. For more information, see for example
+<tt>compile_c.sh</tt> and <tt>test_solution.sh</tt> in
+<tt>lib/judge</tt> for syntax. Note that compile scripts are included
+for the most common languages already.
 
 Interpreted languages and non-statically linked binaries can in
 principle also be used, but then the option <tt>USE_CHROOT</tt> should
@@ -499,7 +555,7 @@ do not need a compilation step. However, to be able to use interpreted
 languages (also Sun's Java), a script must be generated during the
 compilation step, which will function as the executable: the script
 must run the interpreter on the source. See <tt>compile_perl.sh</tt>
-and <tt>compile_java_javac.sh</tt> in <tt>SYSTEM_ROOT/judge</tt> for
+and <tt>compile_java_javac.sh</tt> in <tt>lib/judge</tt> for
 examples.
 
 DOMjudge supports the use of Sun Java within a chroot environment. For
@@ -524,7 +580,7 @@ compilation, running and checking of submissions, calls separate
 programs for running and comparison of the results. These can be
 specialised and adapted to the requirements per problem. For this, one
 has to create programs or scripts <tt>run_&lt;some-tag&gt;</tt> and/or
-<tt>compare_&lt;some-tag&gt;</tt> in the <tt>SYSTEM_ROOT/judge</tt>
+<tt>compare_&lt;some-tag&gt;</tt> in the <tt>lib/judge</tt>
 directory (see <tt>run</tt> and <tt>compare</tt> for examples and
 usage information). Then one must specify this
 <tt>&lt;some-tag&gt;</tt> in the special_run and/or special_compare
@@ -547,19 +603,14 @@ not support presentation error results.
 There are a few more places where some configuration of the system can
 be made. These are sometimes needed in non-standard environments.
 <itemize>
-<item> In <tt>SYSTEM_ROOT/Makefile.global</tt> the defines
-       <tt>ROOTCMD</tt> and <tt>SUIDINSTALLDIR</tt> can be modified to
-       use a different method of root-access in the install process
-       and specify a different place for set-uid root binaries
-       respectively.
-<item> In <tt>SYSTEM_ROOT/bin/make_chroot.sh</tt> some changes to
+<item> In <tt>SOURCEDIR/bin/make_chroot.sh</tt> some changes to
        variables can be made, most notably <tt>DEBMIRROR</tt> to
        select a Debian mirror site near you.
 <item> In <tt>SYSTEM_ROOT/sql/Makefile</tt>, you can set
        <tt>MYSQL_UPGR_USER</tt> to a different user than root for
        database upgrades (upgrading is not well tested!).
-<item> <tt>SYSTEM_ROOT/submit/submit_copy.sh</tt> and
-       <tt>SYSTEM_ROOT/judge/chroot-startstop.sh</tt> can be modified
+<item> <tt>submit/submit_copy.sh</tt> and
+       <tt>lib/judge/chroot-startstop.sh</tt> can be modified
        to suit your local environment. See comments in those files for
        more information.
 </itemize>
