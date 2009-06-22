@@ -9,7 +9,7 @@
  * match the _public_ class name 'foo'. It is preferred to not define
  * classes public.
  *
- * @EXPECTED_RESULTS@: CORRECT,COMPILER_ERROR
+ * @EXPECTED_RESULTS@: CORRECT,COMPILER-ERROR
  */
 
 import java.io.*;
