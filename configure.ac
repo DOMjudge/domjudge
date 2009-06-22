@@ -41,6 +41,44 @@ test "x$enable_CFLAGS_setting"   = xyes && AC_SUBST(CFLAGS,   $DEF_CXFLAGS)
 test "x$enable_CXXFLAGS_setting" = xyes && AC_SUBST(CXXFLAGS, $DEF_CXFLAGS)
 test "x$enable_LDFLAGS_setting"  = xyes && AC_SUBST(LDFLAGS,  $DEF_LDFLAGS)
 
+# {{{ submitclient
+
+def_submitclient_protocols="http,dolstra"
+
+AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--enable-submitclient@<:@=ARG@:>@],
+[enable submit client binary (default: yes); set ARG to protocol list
+to support, where the first will be default. Supported protocols are
+in default order 'http,dolstra'.]),
+[
+if test "x$enableval" = xyes ; then
+	submitclient_protocols=$def_submitclient_protocols
+elif test "x$enableval" = xno ; then
+	submitclient_protocols=''
+else
+	submitclient_protocols="$enableval"
+fi
+],
+[submitclient_protocols=$def_submitclient_protocols])
+
+AC_MSG_CHECKING(submitclient)
+submit_default=0
+case `echo "x$submitclient_protocols" | sed 's/,.*//'` in
+	xdolstra) submit_default=1; AC_MSG_RESULT([enabled (dolstra)]) ;;
+	xhttp)    submit_default=2; AC_MSG_RESULT([enabled (http)])  ;;
+	*)        submit_default=0; AC_MSG_RESULT([disabled]) ;;
+esac
+
+submit_enabledolstra=0
+submit_enablehttp=0
+for i in `echo "$submitclient_protocols" | sed 's/,/ /g'` ; do
+    eval submit_enable$i=1
+done
+
+AC_SUBST(SUBMIT_DEFAULT,    $submit_default)
+AC_SUBST(SUBMIT_ENABLE_CMD, $submit_enabledolstra)
+AC_SUBST(SUBMIT_ENABLE_WEB, $submit_enablehttp)
+# }}}
+
 # {{{ File ownership for e.g. password files.
 
 AC_MSG_CHECKING([domjudge_user])
@@ -65,6 +103,19 @@ else
 	AC_MSG_RESULT([$WEBSERVER_GROUP])
 fi
 
+# }}}
+
+# {{{ runguard user
+AC_MSG_CHECKING([runuser])
+AC_ARG_ENABLE([runuser], [AS_HELP_STRING([--enable-runuser@<:@=USER@:>@], [Unprivileged user under which to run submissions (default: domjudge-run).])], [], [])
+
+if test "x$enableval" = x; then
+	AC_SUBST(RUNUSER,"domjudge-run")
+	AC_MSG_RESULT($RUNUSER (default))
+else
+	AC_SUBST(RUNUSER,$enableval)
+	AC_MSG_RESULT($RUNUSER)
+fi
 # }}}
 
 # {{{ non-FHS directory structure (the default)
@@ -134,57 +185,6 @@ if test "x$enable_fhs" = xyes ; then
 	AC_SUBST(domjudge_docdir,       $docdir)
 fi
 
-# }}}
-
-# {{{ submitclient
-
-def_submitclient_protocols="http,dolstra"
-
-AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--enable-submitclient@<:@=ARG@:>@],
-[enable submit client binary (default: yes); set ARG to protocol list
-to support, where the first will be default. Supported protocols are
-in default order 'http,dolstra'.]),
-[
-if test "x$enableval" = xyes ; then
-	submitclient_protocols=$def_submitclient_protocols
-elif test "x$enableval" = xno ; then
-	submitclient_protocols=''
-else
-	submitclient_protocols="$enableval"
-fi
-],
-[submitclient_protocols=$def_submitclient_protocols])
-
-AC_MSG_CHECKING(submitclient)
-submit_default=0
-case `echo "x$submitclient_protocols" | sed 's/,.*//'` in
-	xdolstra) submit_default=1; AC_MSG_RESULT([enabled (dolstra)]) ;;
-	xhttp)    submit_default=2; AC_MSG_RESULT([enabled (http)])  ;;
-	*)        submit_default=0; AC_MSG_RESULT([disabled]) ;;
-esac
-
-submit_enabledolstra=0
-submit_enablehttp=0
-for i in `echo "$submitclient_protocols" | sed 's/,/ /g'` ; do
-    eval submit_enable$i=1
-done
-
-AC_SUBST(SUBMIT_DEFAULT,    $submit_default)
-AC_SUBST(SUBMIT_ENABLE_CMD, $submit_enabledolstra)
-AC_SUBST(SUBMIT_ENABLE_WEB, $submit_enablehttp)
-# }}}
-
-# {{{ runguard user
-AC_MSG_CHECKING([runuser])
-AC_ARG_ENABLE([runuser], [AS_HELP_STRING([--enable-runuser@<:@=USER@:>@], [Unprivileged user under which to run submissions (default: domjudge-run).])], [], [])
-
-if test "x$enableval" = x; then
-	AC_SUBST(RUNUSER,"domjudge-run")
-	AC_MSG_RESULT($RUNUSER (default))
-else
-	AC_SUBST(RUNUSER,$enableval)
-	AC_MSG_RESULT($RUNUSER)
-fi
 # }}}
 
 # Checks for programs.
