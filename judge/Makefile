@@ -21,7 +21,7 @@ check_float: CFLAGS += -std=c99
 
 install-judgehost:
 	$(INSTALL_SCRIPT) -t $(judgehost_libjudgedir) \
-		compile_*.sh test_solution.sh run \
+		compile_*.sh test_solution.sh run compare_program.sh \
 		compare check_diff.sh check_float chroot-startstop.sh \
 		judgedaemon.main.php
 	$(INSTALL_DATA)   -t $(judgehost_libjudgedir) parse_result.xslt
