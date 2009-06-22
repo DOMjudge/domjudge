@@ -103,10 +103,9 @@ int receive(int fd)
 	
 	if ( (nread = read(fd, buffer, SOCKETBUFFERSIZE-2)) == -1 ) {
 		error(errno,"reading from socket");
+		return -1;	// never reached, but removes gcc warning
 	}
 
-	/* GCC warning: "array subscript is below array bounds" is not
-	   applicable, as nread==-1 will exit with error() */
 	buffer[nread] = 0;
 	
 	/* Check for end of file */
