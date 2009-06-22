@@ -31,6 +31,7 @@ install-domserver:
 
 install-perm-domserver:
 	$(INSTALL_PRIVATE) -t $(domserver_etcdir) dbpasswords.secret htpasswd-jury
+	$(INSTALL_PRIVATE) -m 0770 -d $(domserver_submitdir)
 
 install-judgehost:
 	$(INSTALL_DIR)     $(judgehost_etcdir)
