@@ -235,6 +235,7 @@ AC_CONFIG_FILES([paths.mk])
 AC_OUTPUT
 
 # summary {{{
+if test "x$QUIET" = x ; then
 echo ""
 echo "Summary:"
 echo " * project.............: $PACKAGE_NAME $PACKAGE_VERSION"
@@ -290,6 +291,7 @@ echo "    - log..............: $judgehost_logdir"
 echo "    - tmp..............: $judgehost_tmpdir"
 echo "    - judge............: $judgehost_judgedir"
 echo "    - chroot...........: $judgehost_chrootdir"
+fi # !QUIET
 # }}}
 
 # vim: fdm=marker
