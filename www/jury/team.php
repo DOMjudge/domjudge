@@ -92,7 +92,7 @@ if ( isset($_GET['restrict']) ) {
 	$restrictions[$key] = $value;
 }
 
-$row = $DB->q('MAYVETUPLE
+$row = $DB->q('MAYBETUPLE
                SELECT t.*, a.country, c.name AS catname, a.name AS affname
                FROM team t
                LEFT JOIN team_category c USING (categoryid)
