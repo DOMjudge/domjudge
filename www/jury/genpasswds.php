@@ -53,14 +53,14 @@ if ( isset($_POST['forteam']) ) {
 		if ( empty($_POST['forteam']) ) {
 			error("Please select a team to set this password for.");
 		}
-		$teams = $DB->q('TABLE SELECT login,name FROM team ' .
+		$teams = $DB->q('TABLE SELECT login,name,members FROM team ' .
 				'WHERE login = %s', $_POST['forteam']);
 		if ( !empty($_POST['setpass']) ) {
 			$setpass = $_POST['setpass'];
 		}
 	} else {
 		// all teams, or optionaly only those with null password
-		$teams = $DB->q('TABLE SELECT login,name FROM team ' .
+		$teams = $DB->q('TABLE SELECT login,name,members FROM team ' .
 		                (isset($_POST['doallnull'])?'WHERE passwd IS NULL':'') .
 		                ' ORDER BY login');
 	}
@@ -75,7 +75,9 @@ if ( isset($_POST['forteam']) ) {
 		}
 		// update the team table with a password
 		$DB->q('UPDATE team SET passwd = %s WHERE login = %s', md5($team['login'].'#'.$pass), $team['login']);
+		$members = str_replace(array("\r\n","\n","\r")," & ", $team['members']);
 		echo "Team:      " . htmlspecialchars($team['name']) . "\n" .
+		     "Members:   " . htmlspecialchars($members) . "\n" .
 		     "Login:     " . htmlspecialchars($team['login']) . "\n" .
 		     "Password:  $pass\n\n\n\n";
 	}
