@@ -1,10 +1,10 @@
 /*
    runguard -- run command with restrictions.
-   Copyright (C) 2004-2008 Jaap Eldering (eldering@a-eskwadraat.nl).
+   Copyright (C) 2004-2009 Jaap Eldering (eldering@a-eskwadraat.nl).
 
    Based on an idea from the timeout program, written by Wietse Venema
    as part of The Coroner's Toolkit.
-   
+
    $Id$
 
    This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,21 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-   
+
+
+   Program specifications:
+
+   This program will run the specified command in a separate process
+   group (session) and apply the restrictions as specified before
+   forking and executing the command.
+
+   The stdin and stdout streams are passed to the command and runguard
+   does not read or write to these. Error and verbose messages from
+   runguard are by default written to stderr, hence mixed with stderr
+   output of the command.
+
+   The command and its children are sent a SIGTERM after the runtime
+   has passed, followed by a SIGKILL after 'killdelay'.
  */
 
 #include <sys/types.h>
@@ -42,7 +56,7 @@
 #include "../etc/runguard-config.h"
 
 #define PROGRAM "runguard"
-#define VERSION "0.9"
+#define VERSION "$Rev$"
 #define AUTHORS "Jaap Eldering"
 
 extern int errno;
@@ -102,11 +116,11 @@ void warning(const char *format, ...)
 	va_start(ap,format);
 
 	if ( ! be_quiet ) {
-	    fprintf(stderr,"%s: warning: ",progname);
+		fprintf(stderr,"%s: warning: ",progname);
 		vfprintf(stderr,format,ap);
 		fprintf(stderr,"\n");
 	}
-	
+
 	va_end(ap);
 }
 
@@ -116,11 +130,11 @@ void verbose(const char *format, ...)
 	va_start(ap,format);
 
 	if ( ! be_quiet && be_verbose ) {
-	    printf("%s: verbose: ",progname);
-		vprintf(format,ap);
-		printf("\n");
+		fprintf(stderr,"%s: verbose: ",progname);
+		vfprintf(stderr,format,ap);
+		fprintf(stderr,"\n");
 	}
-	
+
 	va_end(ap);
 }
 
@@ -128,9 +142,9 @@ void error(int errnum, const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
-	
+
 	fprintf(stderr,"%s",progname);
-	
+
 	if ( format!=NULL ) {
 		fprintf(stderr,": ");
 		vfprintf(stderr,format,ap);
@@ -141,45 +155,48 @@ void error(int errnum, const char *format, ...)
 	if ( format==NULL && errnum==0 ) {
 		fprintf(stderr,": unknown error");
 	}
-	
+
 	fprintf(stderr,"\nTry `%s --help' for more information.\n",progname);
 	va_end(ap);
-	
+
 	exit(exit_failure);
 }
 
 void version()
 {
-	printf("%s -- version %s\n",PROGRAM,VERSION);
-	printf("Written by %s\n\n",AUTHORS);
-	printf("%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n",PROGRAM);
-	printf("are welcome to redistribute it under certain conditions.  See the GNU\n");
-	printf("General Public Licence for details.\n");
+	printf("\
+%s -- version %s\n\
+Written by %s\n\n\
+%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n\
+are welcome to redistribute it under certain conditions.  See the GNU\n\
+General Public Licence for details.\n",PROGRAM,VERSION,AUTHORS,PROGRAM);
 	exit(0);
 }
 
 void usage()
 {
-	printf("Usage: %s [OPTION]... COMMAND...\n",progname);
-	printf("Run COMMAND with restrictions.\n\n");
-	printf("  -r, --root=ROOT      run COMMAND with root directory set to ROOT\n");
-	printf("  -t, --time=TIME      kill COMMAND if still running after TIME seconds\n");
-	printf("  -u, --user=USER      run COMMAND as user with username or ID USER\n");
-	printf("  -m, --memsize=SIZE   set all (total, stack, etc) memory limits to SIZE kB\n");
-	printf("  -f, --filesize=SIZE  set maximum created filesize to SIZE kB\n");
-	printf("  -p, --nproc=N        set maximum no. processes to N\n");
-	printf("  -c, --no-core        disable core dumps\n");
-	printf("  -o, --output=FILE    write running time to FILE\n");
-	printf("                         WARNING: FILE will be overwritten and written\n");
-	printf("                         to as USER when using the `user' option\n");
-	printf("  -v, --verbose        display some extra warnings and information\n");
-	printf("  -q, --quiet          suppress all warnings and verbose output\n");
-	printf("      --help           display this help and exit\n");
-	printf("      --version        output version information and exit\n");
-	printf("\n");
-	printf("Note that root privileges are needed for the `root' and `user' options.\n");
-	printf("When run setuid without the `user' option, the user ID is set to the\n");
-	printf("real user ID.\n");
+	printf("\
+Usage: %s [OPTION]... COMMAND...\n\
+Run COMMAND with restrictions.\n\
+\n\
+  -r, --root=ROOT      run COMMAND with root directory set to ROOT\n\
+  -t, --time=TIME      kill COMMAND if still running after TIME seconds\n\
+  -u, --user=USER      run COMMAND as user with username or ID USER\n\
+  -m, --memsize=SIZE   set all (total, stack, etc) memory limits to SIZE kB\n\
+  -f, --filesize=SIZE  set maximum created filesize to SIZE kB\n\
+  -p, --nproc=N        set maximum no. processes to N\n\
+  -c, --no-core        disable core dumps\n\
+  -o, --output=FILE    write running time to FILE\n\
+                         WARNING: FILE will be overwritten and written\n\
+                         to as USER when using the `user' option\n\
+  -v, --verbose        display some extra warnings and information\n\
+  -q, --quiet          suppress all warnings and verbose output\n\
+      --help           display this help and exit\n\
+      --version        output version information and exit\n\
+\n\
+Note that root privileges are needed for the `root' and `user' options.\n\
+When run setuid without the `user' option, the user ID is set to the\n\
+real user ID.\n",progname);
 	exit(0);
 }
 
@@ -188,10 +205,10 @@ void outputtime()
 	double timediff; /* in seconds */
 
 	if ( gettimeofday(&endtime,NULL) ) error(errno,"getting time");
-	
+
 	timediff = (endtime.tv_sec  - starttime.tv_sec ) +
 	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
-	
+
 	verbose("runtime is %.3lf seconds",timediff);
 
 	if ( use_output ) {
@@ -207,7 +224,7 @@ void terminate(int sig)
 	/* Reset signal handlers to default */
 	signal(SIGTERM,SIG_DFL);
 	signal(SIGALRM,SIG_DFL);
-	
+
 	if ( sig==SIGALRM ) {
 		warning("timelimit reached: aborting command");
 	} else {
@@ -217,7 +234,7 @@ void terminate(int sig)
 	/* First try to kill graciously, then hard */
 	verbose("sending signal TERM");
 	killpg(child_pid,SIGTERM);
-	
+
 	sleep(1);
 
 	verbose("sending signal KILL");
@@ -240,7 +257,7 @@ inline long readoptarg(const char *desc, long minval, long maxval)
 {
 	long arg;
 	char *ptr;
-	
+
 	arg = strtol(optarg,&ptr,10);
 	if ( errno || *ptr!='\0' || arg<minval || arg>maxval ) {
 		error(errno,"invalid %s specified: `%s'",desc,optarg);
@@ -260,9 +277,9 @@ int main(int argc, char **argv)
 	char *path;
 	char  cwd[MAXPATHLEN+3];
 	int   opt;
-	
+
 	struct rlimit lim;
-		
+
 	progname = argv[0];
 
 	/* Clear environment to prevent all kinds of security holes, save PATH */
@@ -342,7 +359,7 @@ int main(int argc, char **argv)
 
 	if ( show_help ) usage();
 	if ( show_version ) version();
-	
+
 	if ( argc<=optind ) error(0,"no command specified");
 
 	/* Command to be executed */
@@ -361,7 +378,7 @@ int main(int argc, char **argv)
 
 	/* Set resource limits: must be root to raise hard limits.
 	   Note that limits can thus be raised from the systems defaults! */
-	
+
 	/* First define shorthand macro function */
 #define setlim(type) \
 	if ( setrlimit(RLIMIT_ ## type, &lim)!=0 ) { \
@@ -380,13 +397,13 @@ int main(int argc, char **argv)
 	setlim(DATA);
 	setlim(STACK);
 	setlim(MEMLOCK);
-	
+
 	if ( filesize!=RLIM_INFINITY ) {
 		verbose("setting filesize limit to %d bytes",(int)filesize);
 	}
 	lim.rlim_cur = lim.rlim_max = filesize;
 	setlim(FSIZE);
-	
+
 	if ( nproc!=RLIM_INFINITY ) {
 		verbose("setting process limit to %d",(int)nproc);
 	}
@@ -394,13 +411,13 @@ int main(int argc, char **argv)
 	setlim(NPROC);
 
 #undef setlim
-	
+
 	if ( no_coredump ) {
 		verbose("disabling core dumps");
 		lim.rlim_cur = lim.rlim_max = 0;
 		if ( setrlimit(RLIMIT_CORE,&lim)!=0 ) error(errno,"disabling core dumps");
 	}
-	
+
 	/* Set root-directory and change directory to there. */
 	if ( use_root ) {
 		/* Small security issue: when running setuid-root, people can find
@@ -416,17 +433,17 @@ int main(int argc, char **argv)
 		if ( (path = realpath(CHROOT_PREFIX,NULL))==NULL ) {
 			error(errno,"cannot canonicalize path '%s'",CHROOT_PREFIX);
 		}
-		
+
 		/* Check that we are within prescribed path. */
 		if ( strncmp(cwd,path,strlen(path))!=0 ) {
 			error(0,"invalid root: must be within `%s'",path);
 		}
 		free(path);
-		
+
 		if ( chroot(".") ) error(errno,"cannot change root to `%s'",cwd);
 		verbose("using root-directory `%s'",cwd);
 	}
-	
+
 	/* Set user-id (must be root for this). */
 	if ( use_user ) {
 		if ( setuid(runuid) ) error(errno,"cannot set user ID to `%d'",runuid);
@@ -434,7 +451,7 @@ int main(int argc, char **argv)
 	} else {
 		/* Reset effective uid to real uid, to increase security
 		   when program is run setuid */
-		if ( setuid(getuid()) ) error(errno,"cannot set real user ID");
+		if ( setuid(getuid()) ) error(errno,"cannot reset real user ID");
 		verbose("using real uid `%d' as effective uid",getuid());
 	}
 	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped");
@@ -445,18 +462,18 @@ int main(int argc, char **argv)
 		if ( outputfile==NULL ) error(errno,"cannot open `%s'",outputfilename);
 		verbose("using file `%s' to write runtime to",outputfilename);
 	}
-	
+
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
 		error(errno,"cannot fork");
-		
+
 	case  0: /* run controlled command */
 		/* Run the command in a separate process group so that the command
 		   and all its children can be killed off with one signal. */
 		setsid();
 		execvp(cmdname,cmdargs);
 		error(errno,"cannot start `%s'",cmdname);
-		
+
 	default: /* become watchdog */
 		if ( gettimeofday(&starttime,NULL) ) error(errno,"getting time");
 
@@ -467,7 +484,7 @@ int main(int argc, char **argv)
 		}
 
 		signal(SIGTERM,terminate);
-		
+
 		if ( use_time ) {
 			signal(SIGALRM,terminate);
 			alarm(runtime);
@@ -492,11 +509,11 @@ int main(int argc, char **argv)
 			}
 			error(0,"command exit status unknown: %d",status);
 		}
-		
+
 		/* Return the exitstatus of the command */
 		exitcode = WEXITSTATUS(status);
 		if ( exitcode!=0 ) verbose("command exited with exitcode %d",exitcode);
-		return exitcode; 
+		return exitcode;
 	}
 
 	/* This should never be reached */
