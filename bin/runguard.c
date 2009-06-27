@@ -37,6 +37,9 @@
    has passed, followed by a SIGKILL after 'killdelay'.
  */
 
+/* For having access to finite() macro in math.h */
+#define _BSD_SOURCE
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/param.h>
@@ -51,6 +54,9 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <pwd.h>
+#include <grp.h>
+#include <time.h>
+#include <math.h>
 
 /* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
 #include "../etc/runguard-config.h"
@@ -58,6 +64,8 @@
 #define PROGRAM "runguard"
 #define VERSION "$Rev$"
 #define AUTHORS "Jaap Eldering"
+
+const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
 
 extern int errno;
 
@@ -75,10 +83,11 @@ char  *outputfilename;
 FILE  *outputfile;
 
 int runuid;
-int runtime;
+int rungid;
 int use_root;
 int use_time;
 int use_user;
+int use_group;
 int use_output;
 int no_coredump;
 int be_verbose;
@@ -86,6 +95,8 @@ int be_quiet;
 int show_help;
 int show_version;
 
+long long runtime; /* in microseconds */
+rlim_t cputime;
 rlim_t memsize;
 rlim_t filesize;
 rlim_t nproc;
@@ -96,8 +107,10 @@ struct timeval starttime, endtime;
 
 struct option const long_opts[] = {
 	{"root",    required_argument, NULL,         'r'},
-	{"time",    required_argument, NULL,         't'},
 	{"user",    required_argument, NULL,         'u'},
+	{"group",   required_argument, NULL,         'g'},
+	{"time",    required_argument, NULL,         't'},
+	{"cputime", required_argument, NULL,         'C'},
 	{"memsize", required_argument, NULL,         'm'},
 	{"filesize",required_argument, NULL,         'f'},
 	{"nproc",   required_argument, NULL,         'p'},
@@ -180,8 +193,10 @@ Usage: %s [OPTION]... COMMAND...\n\
 Run COMMAND with restrictions.\n\
 \n\
   -r, --root=ROOT      run COMMAND with root directory set to ROOT\n\
-  -t, --time=TIME      kill COMMAND if still running after TIME seconds\n\
   -u, --user=USER      run COMMAND as user with username or ID USER\n\
+  -g, --group=GROUP    run COMMAND under group with name or ID GROUP\n\
+  -t, --time=TIME      kill COMMAND if still running after TIME seconds (float)\n\
+  -C, --cputime=TIME   set maximum CPU time to TIME seconds (integer)\n\
   -m, --memsize=SIZE   set all (total, stack, etc) memory limits to SIZE kB\n\
   -f, --filesize=SIZE  set maximum created filesize to SIZE kB\n\
   -p, --nproc=N        set maximum no. processes to N\n\
@@ -232,13 +247,15 @@ void terminate(int sig)
 	}
 
 	/* First try to kill graciously, then hard */
-	verbose("sending signal TERM");
-	killpg(child_pid,SIGTERM);
+	verbose("sending SIGTERM");
+	if ( kill(-child_pid,SIGTERM)!=0 ) error(errno,"sending SIGTERM to command");
 
-	sleep(1);
+	/* Prefer nanosleep over sleep because of higher resolution and
+	   it does not interfere with signals. */
+	nanosleep(&killdelay,NULL);
 
-	verbose("sending signal KILL");
-	killpg(child_pid,SIGKILL);
+	verbose("sending SIGKILL");
+	if ( kill(-child_pid,SIGKILL)!=0 ) error(errno,"sending SIGKILL to command");
 }
 
 int userid(char *name)
@@ -251,6 +268,18 @@ int userid(char *name)
 	if ( pwd==NULL || errno ) return -1;
 
 	return (int) pwd->pw_uid;
+}
+
+int groupid(char *name)
+{
+	struct group *grp;
+
+	errno = 0; /* per the linux GETGRNAM(3) man-page */
+	grp = getgrnam(name);
+
+	if ( grp==NULL || errno ) return -1;
+
+	return (int) grp->gr_gid;
 }
 
 inline long readoptarg(const char *desc, long minval, long maxval)
@@ -277,8 +306,10 @@ int main(int argc, char **argv)
 	char *path;
 	char  cwd[MAXPATHLEN+3];
 	int   opt;
+	double runtime_d;
 
 	struct rlimit lim;
+	struct itimerval itimer;
 
 	progname = argv[0];
 
@@ -290,11 +321,11 @@ int main(int argc, char **argv)
 
 	/* Parse command-line options */
 	use_root = use_time = use_user = use_output = no_coredump = 0;
-	memsize = filesize = nproc = RLIM_INFINITY;
+	cputime = memsize = filesize = nproc = RLIM_INFINITY;
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:t:u:m:f:p:co:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:co:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -303,15 +334,28 @@ int main(int argc, char **argv)
 			rootdir = (char *) malloc(strlen(optarg)+2);
 			strcpy(rootdir,optarg);
 			break;
-		case 't': /* time option */
-			use_time = 1;
-			runtime = readoptarg("time",1,LONG_MAX);
-			break;
 		case 'u': /* user option: uid or string */
 			use_user = 1;
 			runuid = strtol(optarg,&ptr,10);
 			if ( errno || *ptr!='\0' ) runuid = userid(optarg);
 			if ( runuid<0 ) error(0,"invalid username or ID specified: `%s'",optarg);
+			break;
+		case 'g': /* group option: gid or string */
+			use_group = 1;
+			rungid = strtol(optarg,&ptr,10);
+			if ( errno || *ptr!='\0' ) rungid = groupid(optarg);
+			if ( rungid<0 ) error(0,"invalid groupname or ID specified: `%s'",optarg);
+			break;
+		case 't': /* time option */
+			use_time = 1;
+			runtime_d = strtod(optarg,&ptr);
+			if ( errno || *ptr!='\0' || !finite(runtime_d) || runtime_d<=0 ) {
+				error(errno,"invalid runtime specified: `%s'",optarg);
+			}
+			runtime = (int)(runtime_d*1E6);
+			break;
+		case 'C': /* CPU time option */
+			cputime = (rlim_t) readoptarg("CPU-time limit",1,LONG_MAX);
 			break;
 		case 'm': /* memsize option */
 			memsize = (rlim_t) readoptarg("memory limit",1,LONG_MAX);
@@ -339,8 +383,7 @@ int main(int argc, char **argv)
 			break;
 		case 'o': /* output option */
 			use_output = 1;
-			outputfilename = (char *) malloc(strlen(optarg)+2);
-			strcpy(outputfilename,optarg);
+			outputfilename = strdup(optarg);
 			break;
 		case 'v': /* verbose option */
 			be_verbose = 1;
@@ -388,6 +431,12 @@ int main(int argc, char **argv)
 			error(errno,"setting resource RLIMIT_" #type); \
 		} \
 	}
+
+	if ( cputime!=RLIM_INFINITY ) {
+		verbose("setting CPU-time limit to %d seconds",(int)cputime);
+	}
+	lim.rlim_cur = lim.rlim_max = cputime;
+	setlim(CPU);
 
 	if ( memsize!=RLIM_INFINITY ) {
 		verbose("setting memory limits to %d bytes",(int)memsize);
@@ -444,6 +493,11 @@ int main(int argc, char **argv)
 		verbose("using root-directory `%s'",cwd);
 	}
 
+	/* Set group-id (must be root for this, so before setting user). */
+	if ( use_group ) {
+		if ( setgid(rungid) ) error(errno,"cannot set group ID to `%d'",rungid);
+		verbose("using group ID `%d'",rungid);
+	}
 	/* Set user-id (must be root for this). */
 	if ( use_user ) {
 		if ( setuid(runuid) ) error(errno,"cannot set user ID to `%d'",runuid);
@@ -483,12 +537,20 @@ int main(int argc, char **argv)
 			error(errno,"unmasking signals");
 		}
 
+		/* Kill child command when we receive SIGTERM */
 		signal(SIGTERM,terminate);
 
 		if ( use_time ) {
 			signal(SIGALRM,terminate);
-			alarm(runtime);
-			verbose("using timelimit of %d seconds",runtime);
+
+			/* Trigger SIGALRM via setitimer:  */
+			itimer.it_interval.tv_sec  = 0;
+			itimer.it_interval.tv_usec = 0;
+			itimer.it_value.tv_sec  = runtime / 1000000;
+			itimer.it_value.tv_usec = runtime % 1000000;
+
+			setitimer(ITIMER_REAL,&itimer,NULL);
+			verbose("using timelimit of %.3lf seconds",runtime*1E-6);
 		}
 
 		/* Wait for the child command to finish */
