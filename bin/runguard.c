@@ -243,9 +243,12 @@ void outputtime()
 
 void terminate(int sig)
 {
+	struct sigaction sigact;
+
 	/* Reset signal handlers to default */
-	signal(SIGTERM,SIG_DFL);
-	signal(SIGALRM,SIG_DFL);
+	sigact.sa_handler = SIG_DFL;
+	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) warning("error restoring signal handler");
+	if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) warning("error restoring signal handler");
 
 	if ( sig==SIGALRM ) {
 		warning("timelimit reached: aborting command");
@@ -412,7 +415,7 @@ void setrestrictions()
 
 int main(int argc, char **argv)
 {
-	sigset_t oldmask, newmask;
+	sigset_t sigmask;
 	pid_t pid;
 	int   status;
 	int   exitcode;
@@ -422,6 +425,7 @@ int main(int argc, char **argv)
 	double runtime_d;
 
 	struct itimerval itimer;
+	struct sigaction sigact;
 
 	progname = argv[0];
 
@@ -554,16 +558,30 @@ int main(int argc, char **argv)
 		if ( gettimeofday(&starttime,NULL) ) error(errno,"getting time");
 
 		/* unmask all signals */
-		memset(&newmask, 0, sizeof(newmask));
-		if ( sigprocmask(SIG_SETMASK, &newmask, &oldmask)!=0 ) {
+		if ( sigemptyset(&sigmask)!=0 ) error(errno,"creating signal mask");
+		if ( sigprocmask(SIG_SETMASK, &sigmask, NULL)!=0 ) {
 			error(errno,"unmasking signals");
 		}
 
+		/* Construct one-time signal handler to terminate() for TERM
+		   and ALRM signals. */
+		if ( sigaddset(&sigmask,SIGALRM)!=0 ||
+		     sigaddset(&sigmask,SIGTERM)!=0 ) error(errno,"setting signal mask");
+
+		sigact.sa_handler = terminate;
+		sigact.sa_flags   = SA_RESETHAND | SA_RESTART;
+		sigact.sa_mask    = sigmask;
+
 		/* Kill child command when we receive SIGTERM */
-		signal(SIGTERM,terminate);
+		if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
+			error(errno,"installing signal handler");
+		}
 
 		if ( use_time ) {
-			signal(SIGALRM,terminate);
+			/* Kill child when we receive SIGALRM */
+			if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) {
+				error(errno,"installing signal handler");
+			}
 
 			/* Trigger SIGALRM via setitimer:  */
 			itimer.it_interval.tv_sec  = 0;
@@ -571,7 +589,9 @@ int main(int argc, char **argv)
 			itimer.it_value.tv_sec  = runtime / 1000000;
 			itimer.it_value.tv_usec = runtime % 1000000;
 
-			setitimer(ITIMER_REAL,&itimer,NULL);
+			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
+				error(errno,"setting timer");
+			}
 			verbose("using timelimit of %.3lf seconds",runtime*1E-6);
 		}
 
