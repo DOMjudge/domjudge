@@ -200,9 +200,7 @@ Run COMMAND with restrictions.\n\
   -f, --filesize=SIZE  set maximum created filesize to SIZE kB\n\
   -p, --nproc=N        set maximum no. processes to N\n\
   -c, --no-core        disable core dumps\n\
-  -o, --output=FILE    write running time to FILE\n\
-                         WARNING: FILE will be overwritten and written\n\
-                         to as USER when using the `user' option\n\
+  -o, --output=FILE    write actual runtime to FILE\n\
   -v, --verbose        display some extra warnings and information\n\
   -q, --quiet          suppress all warnings and verbose output\n\
       --help           display this help and exit\n\
