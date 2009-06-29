@@ -116,9 +116,8 @@ if ( $oldsource ) {
 		$difftext = `diff -bBt -U 2 $oldfile $newfile 2>&1`;
 
 	} else {
-		// FIXME: need a better tempdir location than hardcoding /tmp
-		$oldfile = mkstemps("/tmp/source-old-s$oldid-XXXXXX",0);
-		$newfile = mkstemps("/tmp/source-new-s$id-XXXXXX",0);
+		$oldfile = mkstemps(TMPDIR."/source-old-s$oldid-XXXXXX",0);
+		$newfile = mkstemps(TMPDIR."/source-new-s$id-XXXXXX",0);
 
 		if( ! $oldfile || ! $newfile ) {
 			$difftext = "DOMjudge: error generating temporary files for diff.";
