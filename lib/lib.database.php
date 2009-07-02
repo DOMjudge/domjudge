@@ -140,7 +140,7 @@ class db
 
 		$argv = func_get_args();
 		$format = trim(array_shift($argv));
-		list($key) = explode(' ', $format, 2);
+		list($key) = preg_split('/\s+/', $format, 2);
 		$key = strtolower($key);
 		$maybe = false;
 		switch ($key) {
@@ -401,10 +401,10 @@ class db
 			case 'double':
 				return $val;
 			case 'string':
-				return '"'.mysql_escape_string($val).'"';
+				return '"'.mysql_real_escape_string($val, $this->_connection).'"';
 			case 'array':
 			case 'object':
-				return '"'.mysql_escape_string(serialize($val)).'"';
+				return '"'.mysql_real_escape_string(serialize($val), $this->_connection).'"';
 			case 'resource':
 				user_error('Cannot store a resource in database', E_USER_ERROR);
 		}
