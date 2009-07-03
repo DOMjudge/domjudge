@@ -10,6 +10,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdarg.h>
+#include <signal.h>
+#include <sys/wait.h>
+
+#include "../etc/config.h"
+
 
 /* Array indices for input/output file descriptors as used by pipe() */
 #define PIPE_IN  1

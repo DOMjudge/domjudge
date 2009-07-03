@@ -7,11 +7,6 @@
 #ifndef __LIB_MISC_H
 #define __LIB_MISC_H
 
-#include <stdarg.h>
-#include <sys/wait.h>
-
-#include "../etc/config.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
