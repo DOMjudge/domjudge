@@ -175,7 +175,7 @@ genpass)
 install)
 	read_dbpasswords
 	create_db_users
-	TMPFILE=`mktemp -t`
+	TMPFILE=`mktemp /tmp/domjudge-sql.XXXXXX`
 	cp $SQLDIR/mysql_privileges.sql $TMPFILE
 	for role in $ROLES ; do
 		eval "user=\$${role}_DBUSER"
