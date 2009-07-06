@@ -396,9 +396,11 @@ Software required for building DOMjudge from distributed sources.
 
 <item> GNU make
 
-<item> The <htmlurl name="Boost" url="http://www.boost.org/"> regular
-       expression library to build the <tt>checktestdata</tt> program
-       for advanced checking of input/output data correctness.
+<item> The <htmlurl name="Boost" url="http://www.boost.org/">
+       <htmlurl name="regular expression library"
+        url="http://www.boost.org/doc/libs/release/libs/regex/">
+       to build the <tt>checktestdata</tt> program for advanced
+       checking of input/output data correctness.
 </itemize>
 
 Additional software required for building DOMjudge from a Subversion
