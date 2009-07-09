@@ -13,6 +13,14 @@ endif
 ifneq ($(SUBMIT_DEFAULT),0)
 SUBMITCLIENT = submit$(EXEEXT)
 SUBMIT_PROGS += $(SUBMITCLIENT)
+ifneq ($(LIBMAGIC),)
+$(SUBMITCLIENT): $(LIBMAGIC)
+endif
+ifneq ($(SUBMIT_ENABLE_WEB),0)
+$(SUBMITCLIENT): $(CURL_PREFIX)/lib/libcurl.a
+$(SUBMITCLIENT): LDFLAGS += $(CURL_LIBS)
+$(SUBMITCLIENT): CXXFLAGS += $(CURL_CFLAGS)
+endif
 endif
 
 SUBMITCOMMONOBJ = submitcommon$(OBJEXT)
@@ -35,10 +43,6 @@ $(SUBMIT_PROGS): %$(EXEEXT): %.cc $(SUBMITCOMMONOBJ) $(LIBFILES) \
                              $(TOPDIR)/etc/config.h $(TOPDIR)/etc/submit-config.h
 
 $(SUBMITCOMMONOBJ): %$(OBJEXT): %.cc %.h $(LIBHEADERS)
-
-$(SUBMITCLIENT): $(CURL_PREFIX)/lib/libcurl.a $(LIBMAGIC)
-$(SUBMITCLIENT): LDFLAGS += $(CURL_LIBS)
-$(SUBMITCLIENT): CXXFLAGS += $(CURL_CFLAGS)
 
 install-domserver:
 ifeq ($(SUBMIT_ENABLE_CMD),1)
