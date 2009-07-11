@@ -8,14 +8,17 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
-require ('../etc/config.php');
-
-$waittime = 5;
+require('@domserver_etcdir@/domserver-static.php');
+require(ETCDIR . '/domserver-config.php');
 
 define ('SCRIPT_ID', 'identifydaemon');
 define ('LOGFILE', LOGDIR.'/identify.log');
 
-require (SYSTEM_ROOT . '/lib/init.php');
+require(LIBDIR . '/init.php');
+
+setup_database_connection('jury');
+
+$waittime = 5;
 
 $verbose = LOG_INFO;
 
@@ -37,40 +40,43 @@ while ( TRUE ) {
 		logmsg(LOG_NOTICE, "Received signal, exiting.");
 		exit;
 	}
-	
+
 	// try to get one
 	$row = $DB->q('MAYBETUPLE SELECT * FROM team_identify
-			   WHERE status = "new" ORDER BY timestamp ASC LIMIT 1');
+	               WHERE status = "new" ORDER BY timestamp ASC LIMIT 1');
 
 	if ( $row ) {
-		$login = $row['login'];
+		$login     = $row['login'];
 		$ipaddress = $row['ipaddress'];
+		$filename  = $row['filename'];
 
 		# TODO: check login and ipadress for sanity.
 
 		logmsg(LOG_INFO, "Starting identification of team %s at %s", $login, $ipaddress);
+
 		$DB->q('UPDATE team_identify SET status = "working", timestamp = NOW()
-			WHERE login = %s AND ipaddress = %s AND status = "new"',
-			$login, $ipaddress);
+		        WHERE login = %s AND ipaddress = %s AND status = "new"',
+		       $login, $ipaddress);
 
 		// run-callback-script login ip
-		system("./user_callback.sh $login $ipaddress", $retval);
+		$file = USERDIR . '/' . basename($filename);
+		system(LIBDIR . "/user_callback.sh $login $file", $retval);
 
 		if ( $retval == 0 ) {
 			$hostname = gethostbyaddr($ipaddress);
 			$DB->q('UPDATE team SET ip = %s, host = %s
-				WHERE login = %s', $ipaddress, $hostname, $login);
+			        WHERE login = %s', $ipaddress, $hostname, $login);
 
 			$DB->q('UPDATE team_identify SET status = "done", timestamp = NOW()
-			WHERE login = %s AND ipaddress = %s AND status = "busy"',
-			$login, $ipaddress);
+			        WHERE login = %s AND ipaddress = %s AND status = "busy"',
+			       $login, $ipaddress);
 			logmsg(LOG_INFO, "Identified team %s at %s", $login, $ipaddress);
 		} else {
 			$DB->q('UPDATE team_identify SET status = "failed", timestamp = NOW()
-			WHERE login = %s AND ipaddress = %s AND status = "busy"',
-			$login, $ipaddress);
+			        WHERE login = %s AND ipaddress = %s AND status = "busy"',
+			       $login, $ipaddress);
 			logmsg(LOG_WARN, "Failed to identify team %s at %s (returned %i)",
-				$login, $ipaddress, $retval);
+			       $login, $ipaddress, $retval);
 		}
 	} else {
 		if ( ! $waiting ) {
