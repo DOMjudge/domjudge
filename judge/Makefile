@@ -17,7 +17,7 @@ judgedaemon: judgedaemon.in ../paths.mk
 
 compare: $(LIBFILES)
 
-check_float: CFLAGS += -std=c99
+check_float: -lm
 
 install-judgehost:
 	$(INSTALL_SCRIPT) -t $(judgehost_libjudgedir) \

@@ -34,6 +34,9 @@
 
  */
 
+/* For having access to isfinite() macro in math.h */
+#define _ISOC99_SOURCE
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>

@@ -9,8 +9,7 @@ config: save_sources2file restore_sources2db
 
 build: $(TARGETS)
 
-runguard: runguard.c $(TOPDIR)/etc/config.h $(TOPDIR)/etc/runguard-config.h
-	$(CC) $(CFLAGS) $< -o $@
+runguard: runguard.c $(TOPDIR)/etc/config.h $(TOPDIR)/etc/runguard-config.h -lm
 
 save_sources2file restore_sources2db: %: %.in ../paths.mk
 	$(substconfigvars)

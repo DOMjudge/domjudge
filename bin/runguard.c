@@ -37,7 +37,8 @@
    has passed, followed by a SIGKILL after 'killdelay'.
  */
 
-/* For having access to finite() macro in math.h */
+/* For having access to isfinite() macro in math.h and some functions. */
+#define _ISOC99_SOURCE
 #define _BSD_SOURCE
 
 #include <sys/types.h>
@@ -306,7 +307,7 @@ inline long readoptarg(const char *desc, long minval, long maxval)
 void setrestrictions()
 {
 	char *path;
-	char  cwd[MAXPATHLEN+3];
+	char  cwd[PATH_MAX+1];
 
 	struct rlimit lim;
 
@@ -371,12 +372,14 @@ void setrestrictions()
 		if ( chdir(rootdir) ) error(errno,"cannot chdir to `%s'",rootdir);
 
 		/* Get absolute pathname of rootdir, by reading it. */
-		if ( getcwd(cwd,MAXPATHLEN)==NULL ) error(errno,"cannot get directory");
+		if ( getcwd(cwd,PATH_MAX)==NULL ) error(errno,"cannot get directory");
 		if ( cwd[strlen(cwd)-1]!='/' ) strcat(cwd,"/");
 
-		/* Canonicalize CHROOT_PREFIX: the use of NULL below is a GNU
-		   extension, recommended for security */
-		if ( (path = realpath(CHROOT_PREFIX,NULL))==NULL ) {
+		/* Canonicalize CHROOT_PREFIX. */
+		if ( (path = (char *) malloc(PATH_MAX+1))==NULL ) {
+			error(errno,"allocating memory");
+		}
+		if ( realpath(CHROOT_PREFIX,path)==NULL ) {
 			error(errno,"cannot canonicalize path '%s'",CHROOT_PREFIX);
 		}
 
@@ -457,7 +460,7 @@ int main(int argc, char **argv)
 		case 't': /* time option */
 			use_time = 1;
 			runtime_d = strtod(optarg,&ptr);
-			if ( errno || *ptr!='\0' || !finite(runtime_d) || runtime_d<=0 ) {
+			if ( errno || *ptr!='\0' || !isfinite(runtime_d) || runtime_d<=0 ) {
 				error(errno,"invalid runtime specified: `%s'",optarg);
 			}
 			runtime = (int)(runtime_d*1E6);
