@@ -334,10 +334,9 @@ The following software is required for running DOMjudge.
 
 <item> MySQL &gt;= 4.1.x database and client software
 
-<item> PHP &gt;= 4.3.2, located in <tt>/usr/bin/php</tt> (command line
-       interface), also with the mysql extension.
+<item> PHP &gt;= 4.3.2, with command line interface and the mysql extension.
 
-<item> Bash &gt;= 2, located in <tt>/bin/bash</tt>
+<item> Bash &gt;= 2
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash)
 
