@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # $Id$
 
 # Needs bash because it includes lib.error.sh
