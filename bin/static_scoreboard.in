@@ -20,11 +20,11 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
-require ('../etc/config.php');
+require('@domserver_etcdir@/domserver-static.php');
+require(ETCDIR . '/domserver-config.php');
 
 define ('SCRIPT_ID', 'static_scoreboard');
 
-chdir(SYSTEM_ROOT . '/www/public/');
+chdir(WWWDIR . '/public/');
 
 passthru("php ./index.php static");
-

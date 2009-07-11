@@ -5,13 +5,16 @@ include $(TOPDIR)/Makefile.global
 
 TARGETS = runguard
 
-config: save_sources2file restore_sources2db
+SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
+              runssh_judgehosts runssh_teams balloons
+
+config: $(SUBST_FILES)
 
 build: $(TARGETS)
 
 runguard: runguard.c $(TOPDIR)/etc/config.h $(TOPDIR)/etc/runguard-config.h -lm
 
-save_sources2file restore_sources2db: %: %.in ../paths.mk
+$(SUBST_FILES): %: %.in ../paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
