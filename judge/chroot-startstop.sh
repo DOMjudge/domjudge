@@ -3,10 +3,10 @@
 
 # Script to setup chroot environment extras needed for Sun Java.
 #
-# Configure the use of this script in 'etc/global.cfg' when using the
-# chroot environment and Sun Java compiler/interpreter and adapt this
-# script to your environment. See also bin/dj_make_chroot for a script
-# to generate a minimal chroot environment with Sun Java.
+# Configure the use of this script in 'etc/judgehost-config.php' when
+# using the chroot environment and Sun Java compiler/interpreter and
+# adapt this script to your environment. See also bin/dj_make_chroot.sh
+# for a script to generate a minimal chroot environment with Sun Java.
 #
 # This script will be called from test_solution.sh in the root
 # directory of the chroot environment with one parameter: either
@@ -23,7 +23,7 @@ CHROOTORIGINAL="/chroot/domjudge"
 
 case "$1" in
 	start)
-	
+
 # Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
 		sudo -S mount -n -t proc --bind /proc proc < /dev/null
 
@@ -37,9 +37,9 @@ case "$1" in
 
 # Wait a second to assure that no files are accessed anymore:
 		sleep 1
-		
+
 		sudo -S umount "$PWD/proc" < /dev/null
-		
+
 		for i in $SUBDIRMOUNTS ; do
 			sudo -S umount "$PWD/$i" < /dev/null
 		done
