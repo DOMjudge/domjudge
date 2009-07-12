@@ -32,6 +32,13 @@ default:
 	@echo " - make distclean"
 	@exit 1
 
+install:
+	@echo "Try:"
+	@echo " - make install-domserver"
+	@echo " - make install-judgehost"
+	@echo " - make install-docs"
+	@exit 1
+
 # MAIN TARGETS
 build domserver judgehost: config
 install-domserver: domserver domserver-create-dirs
