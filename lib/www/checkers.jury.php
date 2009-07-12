@@ -55,7 +55,7 @@ function check_team($data, $keydata = null)
 		$team = $DB->q("MAYBEVALUE SELECT `login` FROM `team`"
 					. " WHERE `ipaddress` = %s"
 					, $data['ipaddress']);
-		if($team && $team != $data['login']) {
+		if($team && $team != $keydata['login']) {
 			ch_error("IP address '".$data['ipaddress']."' already in use "
 					."by team '".$team."'");
 		}
