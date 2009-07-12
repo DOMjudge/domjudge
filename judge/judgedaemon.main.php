@@ -66,9 +66,9 @@ if ( ! $row ) {
 $myhost = $row['hostname'];
 
 // Create directory where to test submissions
-$tempdirpath = JUDGEDIR . "/$myhost";
-system("mkdir -p $tempdirpath/testcase", $retval);
-if ( $retval != 0 ) error("Could not create $tempdirpath");
+$workdirpath = JUDGEDIR . "/$myhost";
+system("mkdir -p $workdirpath/testcase", $retval);
+if ( $retval != 0 ) error("Could not create $workdirpath");
 
 $waiting = FALSE;
 $active = TRUE;
@@ -191,13 +191,13 @@ while ( TRUE ) {
 	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)
 	                     VALUES (%i,%i,%s,%s)', $row['submitid'], $cid, now(), $myhost);
 
-	// create tempdir for tempfiles
-	$tempdir = "$tempdirpath/c$cid-s$row[submitid]-j$judgingid";
-	
-	logmsg(LOG_INFO, "Working directory: $tempdir");
+	// create workdir for judging
+	$workdir = "$workdirpath/c$cid-s$row[submitid]-j$judgingid";
 
-	system("mkdir -p $tempdir", $retval);
-	if ( $retval != 0 ) error("Could not create $tempdir");
+	logmsg(LOG_INFO, "Working directory: $workdir");
+
+	system("mkdir -p $workdir", $retval);
+	if ( $retval != 0 ) error("Could not create $workdir");
 
 	// dump the source code in a tempfile
 	// :KLUDGE: In older versions, test_solution.sh creates a temporary copy
@@ -205,7 +205,7 @@ while ( TRUE ) {
 	// files (source code is submitted to the database), we choose to put the
 	// original source code in another temporary file for now, which is then
 	// copied by test_solution.sh.
-	$tempsrcfile = "$tempdir/source.pulled.$row[extension]";
+	$tempsrcfile = "$workdir/source.pulled.$row[extension]";
 	if ( file_put_contents($tempsrcfile, $row['sourcecode']) === FALSE ) {
 		error("Could not create $tempsrcfile");
 	}
@@ -224,7 +224,7 @@ while ( TRUE ) {
 	// FIXME: make these files not readable by the compiling process since it doesn't
 	// need to read them.
 	foreach(array('input','output') as $inout) {
-		$tcfile = "$tempdirpath/testcase/testcase.$inout." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_'.$inout];
+		$tcfile = "$workdirpath/testcase/testcase.$inout." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_'.$inout];
 		if ( !file_exists($tcfile) ) {
 			$content = $DB->q("VALUE SELECT " . $inout . " FROM testcase WHERE probid = %s",
 				$row['probid']);
@@ -248,12 +248,11 @@ while ( TRUE ) {
 
 	// do the actual compile-run-test
 	system(LIBJUDGEDIR . "/test_solution.sh " .
-			"$tempsrcfile $row[langid] " .
-			"$tempdirpath/testcase/testcase.input." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_input'] . ' ' .
-			"$tempdirpath/testcase/testcase.output." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_output'] . ' ' .
-		   "$row[maxruntime] $tempdir " .
-		   "'$row[special_run]' '$row[special_compare]'",
-		$retval);
+	       "$tempsrcfile $row[langid] " .
+	       "$workdirpath/testcase/testcase.input." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_input'] . ' ' .
+	       "$workdirpath/testcase/testcase.output." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_output'] . ' ' .
+	       "$row[maxruntime] $workdir " .
+	       "'$row[special_run]' '$row[special_compare]'", $retval);
 
 	// leave the temporary copy for reference
 	// what does the exitcode mean?
@@ -271,10 +270,10 @@ while ( TRUE ) {
 	        output_compile = %s, output_run = %s, output_diff = %s, output_error = %s
 	        WHERE judgingid = %i AND judgehost = %s',
 	       now(), $result,
-	       getFileContents( $tempdir . '/compile.out' ),
-	       getFileContents( $tempdir . '/program.out' ),
-	       getFileContents( $tempdir . '/compare.out' ),
-	       getFileContents( $tempdir . '/error.out' ),
+	       getFileContents( $workdir . '/compile.out' ),
+	       getFileContents( $workdir . '/program.out' ),
+	       getFileContents( $workdir . '/compare.out' ),
+	       getFileContents( $workdir . '/error.out' ),
 	       $judgingid, $myhost);
 
 	// recalculate the scoreboard cell (team,problem) after this judging
