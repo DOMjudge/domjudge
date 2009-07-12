@@ -5,11 +5,12 @@ AC_INIT([DOMjudge],
 AC_CONFIG_HEADERS([etc/config.h])
 AC_CONFIG_SRCDIR([Makefile.global])
 
-if test "x$prefix" = xNONE && test "x$enable_fhs" = x; then
-	AC_MSG_ERROR([Use either --prefix=/installation/path or --enable-fhs])
-fi
 if test "x$prefix" = xNONE; then
-	prefix=$ac_default_prefix
+	if test "x$enable_fhs" = x; then
+		prefix="/opt/domjudge"
+	else
+		prefix=$ac_default_prefix
+	fi
 fi
 
 if test -z "$PACKAGE_VERSION"; then
@@ -203,7 +204,7 @@ AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
 if test "$submit_enablehttp" = "1" ; then
 	AC_CHECK_CURL([7.9.7])
- 	AC_CHECK_HEADERS([curl/curl.h])
+	AC_CHECK_HEADERS([curl/curl.h])
 fi
 
 # Checks for header files.
