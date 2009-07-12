@@ -169,6 +169,7 @@ AC_ARG_ENABLE(fhs,AS_HELP_STRING([--enable-fhs],
  Packages" for path configuration when FHS is disabled.]))
 
 if test "x$enable_fhs" = xyes ; then
+	AC_SUBST(fhs_enabled,           yes)
 	AC_SUBST(domserver_bindir,      $bindir)
 	AC_SUBST(domserver_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_wwwdir,      $datadir/${PACKAGE_TARNAME}/www)

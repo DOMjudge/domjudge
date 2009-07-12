@@ -51,6 +51,7 @@ INSTALL_PRIVATE = $(INSTALL) -o $(DOMJUDGE_USER) -g $(WEBSERVER_GROUP) -m 0640
 INSTALL_DIR     = mkdir -p
 
 # Autoconf prefixes and paths
+fhs_enabled    = @fhs_enabled@
 prefix         = @prefix@
 exec_prefix    = @exec_prefix@
 
