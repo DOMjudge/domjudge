@@ -46,19 +46,19 @@ install-docs: docs-create-dirs
 dist: configure
 
 # List of default SUBDIRS for recursive targets; override below.
-SUBDIRS=bin doc etc judge lib submit sql www test-sources misc-tools
+SUBDIRS =                  etc doc lib sql www judge submit tests misc-tools
 
-config:            SUBDIRS=etc doc sql www judge submit tests misc-tools
-build:             SUBDIRS=lib judge submit tests misc-tools
-domserver:         SUBDIRS=etc submit www
-install-domserver: SUBDIRS=etc lib submit sql www
-judgehost:         SUBDIRS=etc judge
-install-judgehost: SUBDIRS=etc judge lib misc-tools
-docs:              SUBDIRS=doc
-install-docs:      SUBDIRS=doc www
-submitclient:      SUBDIRS=submit
-maintainer-clean:  SUBDIRS=doc misc-tools
-dist:              SUBDIRS=doc misc-tools
+config:
+build:             SUBDIRS=        lib         judge submit tests misc-tools
+domserver:         SUBDIRS=etc             www       submit
+install-domserver: SUBDIRS=etc     lib sql www       submit
+judgehost:         SUBDIRS=etc                 judge
+install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
+docs:              SUBDIRS=    doc
+install-docs:      SUBDIRS=    doc         www
+submitclient:      SUBDIRS=                          submit
+maintainer-clean:  SUBDIRS=    doc                                misc-tools
+dist:              SUBDIRS=    doc                                misc-tools
 clean:
 distclean:
 
@@ -120,22 +120,18 @@ maintainer-conf: configure
 # This stuff is a hack!
 maintainer-install: domserver judgehost docs submitclient \
                     domserver-create-dirs judgehost-create-dirs
-# Replace libjudgedir with symlink to judge/, preventing lots of symlinks:
-	-rmdir $(judgehost_libjudgedir)
-	-rm -f $(judgehost_libjudgedir)
-	ln -sf $(PWD)/judge $(judgehost_libjudgedir)
-	ln -sf $(PWD)/submit/submit_copy.sh $(PWD)/submit/submit_db.php $(domserver_libsubmitdir)
-	ln -sf $(PWD)/bin/runguard $(PWD)/bin/sh-static $(judgehost_libjudgedir)
-	ln -sf $(PWD)/bin/alert $(judgehost_libdir)
+# Replace lib{judge,submit}dir with symlink to prevent lots of symlinks:
+	-rmdir $(judgehost_libjudgedir) $(domserver_libsubmitdir)
+	-rm -f $(judgehost_libjudgedir) $(domserver_libsubmitdir)
+	ln -sf $(PWD)/judge  $(judgehost_libjudgedir)
+	ln -sf $(PWD)/submit $(domserver_libsubmitdir)
 	ln -sfn $(PWD)/doc $(domserver_wwwdir)/jury/doc
 	su -c "chown root.root bin/runguard ; chmod u+s bin/runguard"
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 maintainer-uninstall:
-	rm -rf $(domserver_libsubmitdir)
+	rm -f $(judgehost_libjudgedir) $(domserver_libsubmitdir)
 	rm -f $(domserver_wwwdir)/jury/doc
-	rm -f $(judgehost_libjudgedir)
-	rm -f judge/runguard judge/sh-static lib/alert
 
 distclean-l: clean-autoconf
 	-rm -f paths.mk
