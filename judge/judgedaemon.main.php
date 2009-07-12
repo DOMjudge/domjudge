@@ -288,9 +288,12 @@ while ( TRUE ) {
 		       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
 		       $row['submitid'], $judgingid);
 	}
-	
+
 	$DB->q('COMMIT');
-	
+
+	// Remove extra copy of source code
+	unlink($tempsrcfile);
+
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
 	if ( $result == 'correct' ) {

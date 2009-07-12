@@ -60,9 +60,17 @@ cleanexit ()
 		kill -9 $CATPID
 	fi
 
-	# Remove copied static shell to save disk space
+	# Remove some copied files to save disk space
 	if [ "$WORKDIR" ]; then
 		rm -f "$WORKDIR/bin/sh"
+		if [ -f "$WORKDIR/testdata.in" ]; then
+			rm -f "$WORKDIR/testdata.in"
+			ln -s "$TESTIN" "$WORKDIR/testdata.in"
+		fi
+		if [ -f "$WORKDIR/testdata.out" ]; then
+			rm -f "$WORKDIR/testdata.out"
+			ln -s "$TESTIN" "$WORKDIR/testdata.out"
+		fi
 	fi
 
 	logmsg $LOG_DEBUG "exiting"
