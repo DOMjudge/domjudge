@@ -10,9 +10,10 @@ require_once("common-config.php");
 define('USE_CHROOT', true);
 
 // Optional script to run for creating/destroying chroot environment,
-// leave empty to disable. The default script can be used to support
+// leave empty to disable. This example script can be used to support
 // Sun Java with a chroot (edit the script first!).
-define('CHROOT_SCRIPT', 'chroot-startstop.sh');
+// define('CHROOT_SCRIPT', 'chroot-startstop.sh');
+define('CHROOT_SCRIPT', '');
 
 // Maximum seconds available for compiling
 define('COMPILETIME', 30);
