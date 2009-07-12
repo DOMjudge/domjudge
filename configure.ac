@@ -90,7 +90,8 @@ AC_SUBST(SUBMIT_ENABLE_CMD, $submit_enabledolstra)
 AX_WITH_COMMENT(0,[])
 AX_WITH_COMMENT(1,[Fine tuning of file ownership:])
 AC_MSG_CHECKING([domjudge-user])
-AC_ARG_WITH([domjudge-user], [AS_HELP_STRING([--with-domjudge-user@<:@=USER@:>@], [User that owns password files (default: current user).])], [], [])
+AC_ARG_WITH([domjudge-user], [AS_HELP_STRING([--with-domjudge-user=USER],
+[User that owns password files (default: current user).])], [], [])
 
 if test "x$with_domjudge_user" = x; then
 	AC_SUBST(DOMJUDGE_USER,$USER)
@@ -101,7 +102,8 @@ else
 fi
 
 AC_MSG_CHECKING([webserver-group])
-AC_ARG_WITH([webserver-group], [AS_HELP_STRING([--with-webserver-group@<:@=GROUP@:>@], [Webserver group for password files (default: www-data).])], [], [])
+AC_ARG_WITH([webserver-group], [AS_HELP_STRING([--with-webserver-group=GROUP],
+[Webserver group for password files (default: www-data).])], [], [])
 
 if test "x$with_webserver_group" = x; then
 	AC_SUBST(WEBSERVER_GROUP,"www-data")
@@ -115,7 +117,8 @@ fi
 
 # {{{ runguard user
 AC_MSG_CHECKING([runuser])
-AC_ARG_WITH([runuser], [AS_HELP_STRING([--with-runuser@<:@=USER@:>@], [Unprivileged user under which to run submissions (default: domjudge-run).])], [], [])
+AC_ARG_WITH([runuser], [AS_HELP_STRING([--with-runuser=USER],
+[Unprivileged user under which to run submissions (default: domjudge-run).])], [], [])
 
 if test "x$with_runuser" = x; then
 	AC_SUBST(RUNUSER,"domjudge-run")
@@ -135,7 +138,7 @@ AC_DEFUN([AX_PATH], [
 		[AC_SUBST($1, $2)])
 	])
 
-AX_WITH_COMMENT(2,[])
+AX_WITH_COMMENT(2,[ ])
 AX_WITH_COMMENT(3,[Fine tuning of installation when FHS is disabled (the default):])
 AX_PATH(domserver_root,         [$prefix/domserver])
 AX_PATH(judgehost_root,         [$prefix/judgehost])
