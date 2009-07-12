@@ -67,7 +67,9 @@ if( $res->count() == 0 ) {
 	echo "<p><em>No judgehosts defined</em></p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-	     "<tr><th scope=\"col\">hostname</th><th scope=\"col\">active</th><th>status</th></tr>\n" .
+	     "<tr><th scope=\"col\">hostname</th>" .
+		 "<th scope=\"col\">active</th>" .
+		 "<th class=\"sorttable_nosort\">status</th></tr>\n" .
 		 "</thead>\n<tbody>\n";
 	while($row = $res->next()) {
 		echo "<tr".( $row['active'] ? '': ' class="disabled"').

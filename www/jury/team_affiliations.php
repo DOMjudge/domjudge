@@ -23,7 +23,10 @@ if( $res->count() == 0 ) {
 	echo "<p><em>No affiliations defined</em></p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-		"<tr><th>ID</th><th>name</th><th>logo</th><th>country</th>" .
+		"<tr><th>ID</th>" .
+		"<th>name</th>" .
+		"<th class=\"sorttable_nosort\">logo</th>" .
+		"<th>country</th>" .
 		"<th>#teams</th></tr>\n</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {

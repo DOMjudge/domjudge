@@ -25,7 +25,7 @@ if( $res->count() == 0 ) {
 		"<th scope=\"col\">contest</th><th scope=\"col\">allow<br />submit</th>" .
 		"<th scope=\"col\">allow<br />judge</th>" .
 		"<th scope=\"col\">timelimit</th>" .
-		"<th scope=\"col\">colour</th></tr>" .
+		"<th class=\"sorttable_nosort\" scope=\"col\">colour</th></tr>" .
 		"</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
