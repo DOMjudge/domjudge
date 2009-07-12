@@ -4,7 +4,7 @@
 #
 # $Id$
 
-# Usage: $0 <source> <lang> <testdata.in> <testdata.out> <timelimit> <tmpdir>
+# Usage: $0 <source> <lang> <testdata.in> <testdata.out> <timelimit> <workdir>
 #           [<special-run> [<special-compare>]]
 #
 # <source>          File containing source-code.
@@ -12,7 +12,7 @@
 # <testdata.in>     File containing test-input.
 # <testdata.out>    File containing test-output.
 # <timelimit>       Timelimit in seconds.
-# <tmpdir>          Directory where to execute solution in a chroot-ed
+# <workdir>         Directory where to execute solution in a chroot-ed
 #                   environment. For best security leave it as empty as possible.
 #                   Certainly do not place output-files there!
 # <special-run>     Extension name of specialized run or compare script to use.
@@ -61,8 +61,8 @@ cleanexit ()
 	fi
 
 	# Remove copied static shell to save disk space
-	if [ "$TMPDIR" ]; then
-		rm -f "$TMPDIR/bin/sh"
+	if [ "$WORKDIR" ]; then
+		rm -f "$WORKDIR/bin/sh"
 	fi
 
 	logmsg $LOG_DEBUG "exiting"
@@ -101,10 +101,10 @@ PROGLANG="$1";  shift
 TESTIN="$1";    shift
 TESTOUT="$1";   shift
 TIMELIMIT="$1"; shift
-TMPDIR="$1";    shift
+WORKDIR="$1";    shift
 SPECIALRUN="$1";
 SPECIALCOMPARE="$2";
-logmsg $LOG_DEBUG "arguments: '$SOURCE' '$PROGLANG' '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$TMPDIR'"
+logmsg $LOG_DEBUG "arguments: '$SOURCE' '$PROGLANG' '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$WORKDIR'"
 logmsg $LOG_DEBUG "optionals: '$SPECIALRUN' '$SPECIALCOMPARE'"
 
 COMPILE_SCRIPT="$SCRIPTDIR/compile_$PROGLANG.sh"
@@ -114,8 +114,8 @@ RUN_SCRIPT="run${SPECIALRUN:+_$SPECIALRUN}"
 [ -r "$SOURCE"  ] || error "solution not found: $SOURCE"
 [ -r "$TESTIN"  ] || error "test-input not found: $TESTIN"
 [ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT"
-[ -d "$TMPDIR" -a -w "$TMPDIR" -a -x "$TMPDIR" ] || \
-	error "Tempdir not found or not writable: $TMPDIR"
+[ -d "$WORKDIR" -a -w "$WORKDIR" -a -x "$WORKDIR" ] || \
+	error "Workdir not found or not writable: $WORKDIR"
 [ -x "$COMPILE_SCRIPT" ] || error "compile script not found or not executable: $COMPILE_SCRIPT"
 [ -x "$COMPARE_SCRIPT" ] || error "compare script not found or not executable: $COMPARE_SCRIPT"
 [ -x "$SCRIPTDIR/$RUN_SCRIPT" ] || error "run script not found or not executable: $RUN_SCRIPT"
@@ -128,10 +128,10 @@ ulimit -HS -f 65536 # Maximum filesize in kB
 logmsg $LOG_INFO "creating input/output files"
 EXT="${SOURCE##*.}"
 [ "$EXT" ] || error "source-file does not have an extension: $SOURCE"
-cp "$SOURCE" "$TMPDIR/source.$EXT"
+cp "$SOURCE" "$WORKDIR/source.$EXT"
 
 OLDDIR="$PWD"
-cd "$TMPDIR"
+cd "$WORKDIR"
 
 # Check whether we're going to run in a chroot environment:
 if [ -z "$USE_CHROOT" ] || [ "$USE_CHROOT" -eq 0 ]; then
@@ -143,7 +143,7 @@ else
 fi
 
 # Make testing dir accessible for RUNUSER:
-chmod a+x $TMPDIR
+chmod a+x $WORKDIR
 
 # Create files which are expected to exist:
 touch compile.out compile.time   # Compiler output and runtime
@@ -188,8 +188,8 @@ logmsg $LOG_INFO "setting up testing (chroot) environment"
 
 # Copy the testdata input (only after compilation to prevent information leakage)
 cd "$OLDDIR"
-cp "$TESTIN" "$TMPDIR/testdata.in"
-cd "$TMPDIR"
+cp "$TESTIN" "$WORKDIR/testdata.in"
+cd "$WORKDIR"
 chmod a+r testdata.in
 
 mkdir --mode=0711 bin dev proc
@@ -286,8 +286,8 @@ logmsg $LOG_INFO "comparing output"
 
 # Copy testdata output (first cd to olddir to correctly resolve relative paths)
 cd "$OLDDIR"
-cp "$TESTOUT" "$TMPDIR/testdata.out"
-cd "$TMPDIR"
+cp "$TESTOUT" "$WORKDIR/testdata.out"
+cd "$WORKDIR"
 
 if [ ! -s program.out ]; then
 	echo "Program produced no output." >>error.out
