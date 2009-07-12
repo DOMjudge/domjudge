@@ -1103,6 +1103,7 @@ automatically by the software:
 <tabular ca="cll">
  |clarification    |Clarification requests/replies are stored here.@
 x|contest          |Contest definitions with start/end time.@
+ |event            |Log of events during contests.@
 x|judgehost        |Computers (hostnames) that function as judgehosts.@
  |judging          |Judgings of submissions.@
 x|language         |Definition of allowed submission languages.@
@@ -1111,6 +1112,7 @@ x|problem          |Definition of problems (name, corresponding contest, etc.).@
 x|team             |Definition of teams.@
 x|team&lowbar;affiliation |Definition of institutions a team can be affiliated with.@
 x|team&lowbar;category    |Different category groups teams can be put in.@
+ |team&lowbar;unread      |Records which clarifications are read by which team.@
 x|testcase         |Definition of testdata for each problem.@
  |scoreboard&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
  |scoreboard&lowbar;public|separately, because of possibility of score freezing.
@@ -1319,10 +1321,10 @@ The IP-address of a workstation is the primary means of
 authentication. The system assumes that someone coming from a specific
 IP is the team with that IP listed in the team table. When a team
 browses to the web interface, this is checked and the appropriate team
-page is presented. The submitclient also checks this IP for the origin
-of a submission.
+page is presented. The command line submitdaemon also checks this IP
+for the origin of a submission.
 
-Authentication within the command line submitclient is fortified by
+Authentication within the command line submitdaemon is fortified by
 the following process. When a client connects, it does not send the
 submission file, but only a reference to a randomised and not publicly
 visible file. This file is then copied from server side with the
@@ -1330,7 +1332,7 @@ submit_copy script. This makes it impossible for teams to spoof a
 submission for a different team: the server `calls back' the team the
 submitter identified himself as and checks for existence of the
 advertised file. Because filenames are randomised and invisible
-(within the <tt>$HOME/.submit</tt> directory by default), it is also
+(within the <tt>$HOME/.domjudge</tt> directory by default), it is also
 impossible for someone to guess another team's filename and submit it
 for them.
 
@@ -1346,7 +1348,7 @@ configuration (except when teams switch workplaces). If possible, this
 is the recommended modus operandi, because it's the least hassle just
 before and during the contest.
 
-<sect1>Use one-time usernames and passwords
+<sect1>Use one-time passwords
 <p>
 
 Supply the teams with a password with which to authenticate.
@@ -1374,12 +1376,12 @@ the public interface.
 
 Have DOMjudge configure the IP upon first submission with the command
 line submit client. To activate this, option <tt>STRICTIPCHECK</tt>
-should be set to 0. In that case, we (optionally) start out
-without IP's (and the web interface will not be accessible), but as
-soon as a team connects with the command line client, they are
-authenticated by correctly submitting a file and the IP is registered
-and everything works as normal.
-   
+should be set to 0. In that case, we (optionally) start out without
+IP's (and the web interface will not be accessible), but as soon as a
+team connects with the command line submit client <em>to the
+submitdaemon</em>, they are authenticated by correctly submitting a
+file and the IP is registered and everything works as normal.
+
 The connect can happen during the test session, so during the real
 contest everything is fully available. This is also a secure way of
 authenticating teams, which requires no passwords or IP configuration,
@@ -1416,7 +1418,7 @@ are gained by the setuid-root programs only when required.
 
 <itemize>
 <item> One or more judgedaemons, one on each judgehost;
-<item> Optionally the submitdaemon on the jury system;
+<item> Optionally the submitdaemon on the domserver;
 <item> Optionally the balloon notification daemon.
 </itemize>
 
@@ -1426,27 +1428,31 @@ are gained by the setuid-root programs only when required.
 If the daemons have started without any problems, you've come a long
 way! Now to check that you're ready for a contest.
 
-First, go to the Jury Interface:
+First, go to the jury interface:
 <tt>http://www.your-domjudge-location/jury</tt>. Look under all the
 menu items to see whether the displayed data looks sane. Use the
-config-checker under `Admin Functions',
-and <tt>make check</tt> under the <tt>etc/</tt> directory
-for some additional sanity checks on your configuration.
+config-checker under `Admin Functions' for some sanity checks on your
+configuration.
 
 Go to a team workstation and see if you can access the team page and
 if you can submit solutions.
 
 Next, it is time to submit some test solutions. If you have the default
 Hello World problem enabled, you can submit some of the example sources
-from under the <tt>doc/</tt> directory. They should give `CORRECT'.
+from under the <tt>doc/examples</tt> directory. They should give `CORRECT'.
 
 You can also try some (or all) of the sources under
 <tt>test-sources</tt>. Use <tt>make check</tt> to submit a variety of
 tests; this should work when the submit client is available and the
-default example problems are in the active contest. Check the source
-files for the expected answer of each test. There's also <tt>make
-stress-test</tt>, but be warned that these tests might crash a
-judgedaemon.
+default example problems are in the active contest. There's also
+<tt>make stress-test</tt>, but be warned that these tests might crash
+a judgedaemon. The results can be checked in the web interface; each
+source file specifies the expected outcome with some explanations. For
+convenience, there is also a script <tt>check-judgings</tt>; this will
+automaticallly check whether submitted sources from the
+<tt>test-sources</tt> directory were judged as expected. Note that a
+few sources have multiple possible outcomes: these must be verified
+manually.
 
 When all this worked, you're quite ready for a contest. Or at least,
 the practice session of a contest.
@@ -1494,19 +1500,19 @@ when hosting many teams, it makes sense to generate a preconfigured account that
 has these features and can be distributed over the workstations.
 
 <enum>
-<item> The central tool team interaction with DOMjudge is the web browser.
+<item> The central tool teams use to interact with DOMjudge is the web browser.
   <itemize>
   <item> If possible, set the Home Page to <tt>your.domjudge.location/team/</tt>
   <item> Go to the team page and check if this team is correctly identified.
   <item> If using https and a self signed certificate, add this certificate
-  to the browser certificate list to prevent annoying dialogs.
+         to the browser certificate list to prevent annoying dialogs.
   </itemize>
 <item> Make sure compilers for the supported languages are installed and working.
 <item> Provide teams with the command line submit client and check that it works.
 <item> Make the sample in- and output data from the problem set available.
 <item> Add your SSH key to their authorized_keys file, so you can always access
 their account for wiping, emergencies and to make the submit command line client
-work when it doesn't use the cURL interface.
+work when it doesn't use the http/cURL submit method.
 <item> Check that internet access is blocked.
 </enum>
 
@@ -1524,7 +1530,7 @@ The jury interface has two possible views: one for jury members,
 and one for DOMjudge administrators. The second view is the same as
 the jury view, but with more features added. Which to show is decided
 by using the HTTP authentication login used to access the web interface;
-you can list which HTTP user is an admin in <tt>etc/passwords.php</tt>.
+you can list which HTTP users are admin in <tt>etc/passwords.php</tt>.
 
 This separation is handy as a matter of security (jury members cannot
 (accidentally) modify things that shouldn't be) and clarity (jury members
@@ -1541,6 +1547,13 @@ Options offered to administrators only:
 </itemize>
 Furthermore, some quick link menu items might differ according to
 usefulness for jury or admins.
+
+<em>A note on rejudging:</em> it is policy within the DOMjudge system
+that a correct solution cannot be reverted to incorrect. Therefore,
+administrator rights are required to rejudge correct or pending
+(hence, possibly correct) submissions. For some more details on
+rejudging, see the jury manual.
+
 
 <sect>The scoreboard <label id="scoreboard">
 <p>
@@ -1617,7 +1630,9 @@ now' button in the jury web interface, under contests.
 
 Almost every cell is clickable in the jury interface and gives
 detailed information relevant to that cell. This is (of course) not
-available in the team and public scoreboards.
+available in the team and public scoreboards, except that in the team
+and public interface the team name cell links to a page with some more
+information and optionally a team picture.
 
 <sect1>Caching
 <p>
