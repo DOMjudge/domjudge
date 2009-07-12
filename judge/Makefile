@@ -22,9 +22,9 @@ check_float: -lm
 install-judgehost:
 	$(INSTALL_SCRIPT) -t $(judgehost_libjudgedir) \
 		compile_*.sh test_solution.sh run compare_program.sh \
-		compare check_diff.sh check_float chroot-startstop.sh \
-		judgedaemon.main.php
-	$(INSTALL_DATA)   -t $(judgehost_libjudgedir) parse_result.xslt
+		compare check_diff.sh check_float chroot-startstop.sh
+	$(INSTALL_DATA)   -t $(judgehost_libjudgedir) judgedaemon.main.php \
+		parse_result.xslt
 	$(INSTALL_SCRIPT) -t $(judgehost_bindir) judgedaemon
 
 clean-l:
