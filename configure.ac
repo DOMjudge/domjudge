@@ -296,6 +296,11 @@ echo "    - log..............: $judgehost_logdir"
 echo "    - tmp..............: $judgehost_tmpdir"
 echo "    - judge............: $judgehost_judgedir"
 echo "    - chroot...........: $judgehost_chrootdir"
+echo ""
+echo "now type:"
+echo ""
+echo "    make domserver judgehost docs"
+echo ""
 fi # !QUIET
 # }}}
 
