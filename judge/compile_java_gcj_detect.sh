@@ -18,8 +18,10 @@ if [ "$EXITCODE" -ne 0 ]; then
 	PUBLICCLASS=$(sed  -n "/Public class '.*' must be defined in a file called /{s/.*file called '//;s/\.java'.*//;p;q}" "$TMPFILE")
 	if [ -z "$PUBLICCLASS" ]; then
 		cat $TMPFILE
+		rm -f $TMPFILE
 		exit $EXITCODE
 	fi
+	rm -f $TMPFILE
 	echo "Info: renaming source to '$PUBLICCLASS.java'"
 	mv "$SOURCE" "$PUBLICCLASS.java"
 	SOURCE="$PUBLICCLASS.java"
@@ -27,6 +29,8 @@ if [ "$EXITCODE" -ne 0 ]; then
 	EXITCODE=$?
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi
+
+rm -f $TMPFILE
 
 # Look for class that has the 'main' function:
 for cn in $(find * -type f -regex '^.*\.class$' \
