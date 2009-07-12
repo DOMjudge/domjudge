@@ -27,18 +27,15 @@ htpasswd-jury: dbpasswords.secret
 
 install-domserver:
 	$(INSTALL_DIR)     $(domserver_etcdir)
-	$(INSTALL_DATA) -t $(domserver_etcdir) apache.conf domserver-static.php domserver-config.php common-config.php
-
-install-perm-domserver:
-	$(INSTALL_PRIVATE) -t $(domserver_etcdir) dbpasswords.secret htpasswd-jury
-	$(INSTALL_PRIVATE) -m 0770 -d $(domserver_submitdir)
+	$(INSTALL_DATA) -t $(domserver_etcdir) apache.conf domserver-static.php
+	-$(INSTALL_PRIVATE) -m 0600 -t $(domserver_etcdir) domserver-config.php common-config.php
+	-$(INSTALL_WEBSITE) -m 0640 -t $(domserver_etcdir) dbpasswords.secret htpasswd-jury
 
 install-judgehost:
 	$(INSTALL_DIR)     $(judgehost_etcdir)
-	$(INSTALL_DATA) -t $(judgehost_etcdir) judgehost-static.php judgehost-config.php common-config.php
-
-install-perm-judgehost:
-	$(INSTALL_PRIVATE) -t $(judgehost_etcdir) dbpasswords.secret
+	$(INSTALL_DATA) -t $(judgehost_etcdir) judgehost-static.php
+	-$(INSTALL_PRIVATE) -m 0600 -t $(judgehost_etcdir) judgehost-config.php common-config.php
+	-$(INSTALL_WEBSITE) -m 0640 -t $(judgehost_etcdir) dbpasswords.secret
 
 distclean-l:
 	-rm -f $(SUBST_CONFIGS)

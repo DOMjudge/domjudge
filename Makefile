@@ -7,7 +7,6 @@
 export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            install-perm-domserver install-perm-judgehost \
             docs install-docs config submitclient test dist \
             clean distclean maintainer-clean
 
@@ -57,14 +56,22 @@ maintainer-clean:  SUBDIRS=doc misc-tools
 dist:              SUBDIRS=doc misc-tools
 clean:
 distclean:
-install-perm-domserver: SUBDIRS=etc
-install-perm-judgehost: SUBDIRS=etc bin
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(domserver_dirs)
+ifneq "$(fhs_enabled)" "yes"
+	-$(INSTALL_PRIVATE) -m 0700 -d $(domserver_logdir)
+	-$(INSTALL_WEBSITE) -m 0770 -d $(domserver_tmpdir)
+	-$(INSTALL_WEBSITE) -m 0770 -d $(domserver_submitdir)
+endif
 
 judgehost-create-dirs:
 	$(INSTALL_DIR) $(judgehost_dirs)
+ifneq "$(fhs_enabled)" "yes"
+	-$(INSTALL_PRIVATE) -m 0700 -d $(judgehost_tmpdir)
+	-$(INSTALL_PRIVATE) -m 0700 -d $(judgehost_logdir)
+	-$(INSTALL_PRIVATE) -m 0700 -d $(judgehost_judgedir)
+endif
 
 docs-create-dirs:
 	$(INSTALL_DIR) $(docs_dirs)
@@ -72,18 +79,11 @@ docs-create-dirs:
 install-docs-l:
 	$(INSTALL_DATA) -t $(domjudge_docdir) README ChangeLog COPYING*
 
-install-perm-domserver install-perm-judgehost: check-root
-
-check-root:
-	@if [ -z "$(OVERRIDE_ROOTCHECK)" -a  `id -u` -ne 0 ]; then \
+install-domserver-l install-judgehost-l:
+	@if [ `id -u` -ne 0 ]; then \
 		echo "**************************************************************" ; \
 		echo "You do not seem to have root privileges, which are needed" ; \
-		echo "to install some parts of the system." ; \
-		echo "Override this check by passing 'OVERRIDE_ROOTCHECK=1' to make," ; \
-		echo "and optionally set 'INSTALL_PRIVATE' to an install command not" ; \
-		echo "requiring root privileges to change ownership or permissions." ; \
 		echo "**************************************************************" ; \
-		exit 1 ; \
 	fi
 
 # Run aclocal separately from autoreconf, which doesn't pass -I option.
