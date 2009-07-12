@@ -8,7 +8,7 @@ DEST="$2"
 MEMLIMIT="$3"
 MAINCLASS=""
 
-TMPFILE=`mktemp $DJ_TMPDIR/domjudge_javac_output.XXXXXX` || exit 1
+TMPFILE=`mktemp /tmp/domjudge_javac_output.XXXXXX`
 
 # Byte-compile:
 javac -d . "$SOURCE" 2> "$TMPFILE"

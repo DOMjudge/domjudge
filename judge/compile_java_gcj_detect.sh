@@ -7,7 +7,7 @@ SOURCE="$1"
 DEST="$2"
 MAINCLASS=""
 
-TMPFILE=`mktemp $DJ_TMPDIR/domjudge_gcj_output.XXXXXX` || exit 1
+TMPFILE=`mktemp /tmp/domjudge_gcj_output.XXXXXX`
 
 # Byte-compile:
 #   -Wall:  Report all warnings

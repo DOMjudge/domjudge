@@ -11,7 +11,7 @@
 SOURCE="$1"
 DEST="$2"
 
-TMPFILE=`mktemp $DJ_TMPDIR/domjudge_gcj_output.XXXXXX` || exit 1
+TMPFILE=`mktemp /tmp/domjudge_gcj_output.XXXXXX`
 
 # -Wall:	Report all warnings
 # -static:	Static link with all libraries

@@ -19,7 +19,6 @@ putenv('DJ_JUDGEDIR='    . JUDGEDIR);
 putenv('DJ_LIBDIR='      . LIBDIR);
 putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
 putenv('DJ_LOGDIR='      . LOGDIR);
-putenv('DJ_TMPDIR='      . TMPDIR);
 
 // Set other configuration variables for called programs
 putenv('RUNUSER='       . RUNUSER);
