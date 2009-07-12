@@ -119,6 +119,22 @@ if( !function_exists('version_compare') || version_compare( '5.0.0',PHP_VERSION,
 		'See <a href="?phpinfo">phpinfo</a> for details.');
 }
 
+if ( (bool) ini_get('register_globals') &&
+     strtolower(ini_get('register_globals'))!='off' ) {
+	result('software', 'PHP register_globals', 'W',
+	       'PHP register_globals is on. This obsolete feature should be disabled');
+} else {
+	result('software', 'PHP register_globals', 'O', 'PHP register_globals off');
+}
+
+if ( function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()==1 ) {
+	result('software', 'PHP magic quotes', 'E',
+	       'PHP magic quotes enabled. This will result in overquoted ' .
+	       'entries in the database.');
+} else {
+	result('software', 'PHP magic quotes', 'O', 'PHP magic quotes disabled.');
+}
+
 if ( include_highlighter() ) {
 	result('software', 'PHP Highlighter class',
 		'O', 'Optional PHP PEAR Text_Highlighter class is available.');
@@ -130,12 +146,13 @@ if ( include_highlighter() ) {
 }
 
 $mysqldatares = $DB->q('SHOW variables WHERE
-	Variable_name="max_connections" OR Variable_name = "version"');
+                        Variable_name="max_connections" OR
+                        Variable_name = "version"');
 while($row = $mysqldatares->next()) {
 	$mysqldata[$row['Variable_name']] = $row['Value'];
 }
 
-result('software', 'MySQL version', 
+result('software', 'MySQL version',
 	version_compare('4.1', $mysqldata['version'], '>=') ? 'E':'O',
 	'Connected to ' . mysql_get_host_info().",\n".
 	'MySQL server version ' .
