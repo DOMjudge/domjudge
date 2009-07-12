@@ -82,25 +82,25 @@ AC_SUBST(SUBMIT_ENABLE_WEB, $submit_enablehttp)
 
 # {{{ File ownership for e.g. password files.
 
-AC_MSG_CHECKING([domjudge_user])
-AC_ARG_ENABLE([domjudge_user], [AS_HELP_STRING([--enable-domjudge_user@<:@=USER@:>@], [User that owns password files (default: current user).])], [], [])
+AC_MSG_CHECKING([domjudge-user])
+AC_ARG_WITH([domjudge-user], [AS_HELP_STRING([--with-domjudge-user@<:@=USER@:>@], [User that owns password files (default: current user).])], [], [])
 
-if test "x$enable_domjudge_user" = x; then
+if test "x$with_domjudge_user" = x; then
 	AC_SUBST(DOMJUDGE_USER,$USER)
 	AC_MSG_RESULT([$DOMJUDGE_USER (default: current user)])
 else
-	AC_SUBST(DOMJUDGE_USER,$enable_domjudge_user)
+	AC_SUBST(DOMJUDGE_USER,$with_domjudge_user)
 	AC_MSG_RESULT([$DOMJUDGE_USER])
 fi
 
-AC_MSG_CHECKING([webserver_group])
-AC_ARG_ENABLE([webserver_group], [AS_HELP_STRING([--with-webserver_group@<:@=GROUP@:>@], [Webserver group for password files (default: www-data).])], [], [])
+AC_MSG_CHECKING([webserver-group])
+AC_ARG_WITH([webserver-group], [AS_HELP_STRING([--with-webserver-group@<:@=GROUP@:>@], [Webserver group for password files (default: www-data).])], [], [])
 
-if test "x$enable_webserver_group" = x; then
+if test "x$with_webserver_group" = x; then
 	AC_SUBST(WEBSERVER_GROUP,"www-data")
 	AC_MSG_RESULT([$WEBSERVER_GROUP (default)])
 else
-	AC_SUBST(WEBSERVER_GROUP,$enable_webserver_group)
+	AC_SUBST(WEBSERVER_GROUP,$with_webserver_group)
 	AC_MSG_RESULT([$WEBSERVER_GROUP])
 fi
 
@@ -108,13 +108,13 @@ fi
 
 # {{{ runguard user
 AC_MSG_CHECKING([runuser])
-AC_ARG_ENABLE([runuser], [AS_HELP_STRING([--enable-runuser@<:@=USER@:>@], [Unprivileged user under which to run submissions (default: domjudge-run).])], [], [])
+AC_ARG_WITH([runuser], [AS_HELP_STRING([--with-runuser@<:@=USER@:>@], [Unprivileged user under which to run submissions (default: domjudge-run).])], [], [])
 
-if test "x$enable_runuser" = x; then
+if test "x$with_runuser" = x; then
 	AC_SUBST(RUNUSER,"domjudge-run")
 	AC_MSG_RESULT($RUNUSER (default))
 else
-	AC_SUBST(RUNUSER,$enable_runuser)
+	AC_SUBST(RUNUSER,$with_runuser)
 	AC_MSG_RESULT($RUNUSER)
 fi
 # }}}
