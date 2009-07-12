@@ -40,7 +40,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 usage()
 {
-    echo "Usage: $0 <installdir> <architecture>"
+    echo "Usage: $0 <targetdir> <architecture>"
     echo "Creates a chroot environment with Sun Java support using the"
     echo "Debian GNU/Linux distribution."
     echo
@@ -131,7 +131,6 @@ Acquire::Retries "3";
 Acquire::PDiffs "false";
 EOF
 
-# FIXME: do we also want to mount /sys?
 mount -t proc proc "$CHROOTDIR/proc"
 
 # Prevent perl locale warnings in the chroot:

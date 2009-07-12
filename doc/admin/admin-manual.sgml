@@ -186,7 +186,7 @@ DOMjudge:
 </itemize>
 On the domserver host:
 <itemize>
-<item> Install the mysql database using <tt>dj-setup-database</tt>.
+<item> Install the MySQL database using <tt>sql/dj-setup-database -u root -r install</tt>.
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it to your needs, reload web server.
 <item> Check that the web interface works (/team, /public and /jury)
@@ -194,8 +194,6 @@ On the domserver host:
 <item> Add useful contest data through the jury web interface or with
        phpMyAdmin.
 <item> Run the config checker in the jury web interface.
-<item> Start the command line submit daemon, when using this
-       functionality: <tt>cd submit; ./submitdaemon</tt>
 </itemize>
 On the judgehosts:
 <itemize>
@@ -203,7 +201,7 @@ On the judgehosts:
 <item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
        Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
        (check specific options of useradd, since these vary per system)
-<item> Start the judge daemon: <tt>cd judge; ./judgedaemon</tt>
+<item> Start the judge daemon: <tt>bin/judgedaemon</tt>
 </itemize>
 It should be done by now. As a check that (almost) everything works,
 the set of test sources can be submitted:
@@ -226,14 +224,14 @@ Optionally:
 <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
        or use the balloon web interface.
 <item> Setup the Java chroot environment to use Sun Java with chroot:<newline>
-       <tt>bin/dj_make_chroot &lt;installdir&gt; &lt;architecture&gt;</tt><newline>
+       <tt>bin/dj_make_chroot &lt;targetdir&gt; &lt;architecture&gt;</tt><newline>
        <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
        and add the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
        domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
-       domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;installdir&gt/*<newline>
+       domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;targetdir&gt/*<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*</tt>
 <item> Install the PEAR Text_Highlighter class for source syntax highlighting,
        and the PHP xdiff PECL extention for diffs between submissions.
