@@ -42,6 +42,7 @@ Version 3.0.0 - SVN
  - Update included dash shell to version 0.5.5.1-2 (Debian upstream).
  - Replace beep by alert plugin program. (Closes: #1878083)
  - Add functionality and fix security issue in runguard, thanks Thomas Rast.
+ - Check for safe_mode before diff-ing tempfiles. (Closes: #1808354)
 
 Version 2.2.0 - 11 August 2008
 ------------------------------
