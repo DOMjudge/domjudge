@@ -43,6 +43,9 @@ Version 3.0.0 - SVN
  - Replace beep by alert plugin program. (Closes: #1878083)
  - Add functionality and fix security issue in runguard, thanks Thomas Rast.
  - Check for safe_mode before diff-ing tempfiles. (Closes: #1808354)
+ - Proper error message when entering a team ip that's already in use.
+ - Remove javascript sorting from table columns where it doesn't make sense.
+ - Commandline submitclient supports only http by default now.
  - Remove redundant copies of testdata by symlinks. (Closes #2805385)
  - Java chroot script now uses Sun's OpenJDK-headless, allowing for a leaner
    chroot and more supported architectures.
