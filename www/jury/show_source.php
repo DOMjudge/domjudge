@@ -112,7 +112,7 @@ if ( $oldsource ) {
 		                              $source['sourcecode'],2);
 
 	} elseif ( !(bool) ini_get('safe_mode') ||
-		       strtolower(ini_get('safe_mod'))=='off' ) {
+		       strtolower(ini_get('safe_mode'))=='off' ) {
 		// Only try executing diff when safe_mode is off, otherwise
 		// the shell_exec will fail.
 
