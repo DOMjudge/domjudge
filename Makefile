@@ -126,12 +126,15 @@ maintainer-install: domserver judgehost docs submitclient \
 	ln -sf $(PWD)/judge  $(judgehost_libjudgedir)
 	ln -sf $(PWD)/submit $(domserver_libsubmitdir)
 	ln -sfn $(PWD)/doc $(domserver_wwwdir)/jury/doc
-	su -c "chown root.root bin/runguard ; chmod u+s bin/runguard"
+	mkdir -p $(judgehost_bindir)
+	ln -sf $(PWD)/judge/runguard $(judgehost_bindir)
+	su -c "chown root.root judge/runguard ; chmod u+s judge/runguard"
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 maintainer-uninstall:
 	rm -f $(judgehost_libjudgedir) $(domserver_libsubmitdir)
 	rm -f $(domserver_wwwdir)/jury/doc
+	rm -rf $(judgehost_bindir)
 
 distclean-l: clean-autoconf
 	-rm -f paths.mk
