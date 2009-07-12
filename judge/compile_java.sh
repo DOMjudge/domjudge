@@ -1,1 +1,1 @@
-compile_java_javac.sh
+compile_java_javac_detect.sh

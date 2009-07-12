@@ -1878,6 +1878,31 @@ within it. As the jvm uses approximately 200MB, this reduces the limit
 by this significant amount. See <tt>judge/compile_java_javac.sh</tt>
 for the implementation details.
 
+<sect>Java class naming
+<p>
+
+Java requires a specific naming of the main class. When declaring the
+main class <tt>public</tt>, the filename must match the class name.
+Therefore one should <em>not</em> declare the main class public; from
+experience however, many teams do so. Secondly, the Java compiler
+generates a bytecode file depending on the class name. There are two
+ways to handle this.
+
+The simplest Java compile script <tt>compile_java_javac.sh</tt>
+requires the main class to be named <tt>Main</tt> with method
+<code>
+public static void main(String args[])
+</code>
+
+The alternative (and default) is to use the script
+<tt>compile_java_javac_detect.sh</tt>, which automatically detects the
+main class and even corrects the source filename when it is declared
+public.
+
+When using the GNU gcj compiler, the same holds and two similar
+scripts <tt>compile_java_gcj.sh</tt> and
+<tt>compile_java_gcj_detect.sh</tt> are available.
+
 <sect>GCJ compiler warnings
 <p>
 
