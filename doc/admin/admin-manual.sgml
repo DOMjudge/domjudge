@@ -235,7 +235,8 @@ Optionally:
        domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
        domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;installdir&gt/*<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*</tt>
-<item> Install the PEAR Text_Highlighter class for source syntax highlighting.
+<item> Install the PEAR Text_Highlighter class for source syntax highlighting,
+       and the PHP xdiff PECL extention for diffs between submissions.
 </itemize>
 
 
@@ -329,7 +330,7 @@ The following software is required for running DOMjudge.
 
 <item> Apache web server with support for PHP &gt;= 5.0.0 and the mysql
        extension for PHP. We also recommend the posix extension for extra
-	   debugging information.
+       debugging information.
 
 <item> MySQL &gt;= 4.1.x database and client software
 
@@ -382,6 +383,11 @@ functionality.
         url="http://pear.php.net/package/Text_Highlighter/">~
        (to use syntax highlighting in the Show Source section of the
         jury interface)
+
+<item> <htmlurl name="PECL xdiff extension"
+        url="http://pecl.php.net/package/xdiff">~
+       (to reliably make diffs between submissions, DOMjudge will try
+        alternative approaches if it's not available)
 
 <item> <htmlurl name="beep" url="http://www.johnath.com/beep/"> for
        audible notification of errors, submissions and judgings, when
