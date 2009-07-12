@@ -26,6 +26,7 @@ install-domserver:
 install-judgehost:
 	$(INSTALL_PROG) -t $(judgehost_libjudgedir) sh-static
 	$(INSTALL_SCRIPT) -t $(judgehost_libdir) alert
+	$(INSTALL_PROG) -t $(judgehost_bindir) dj_make_chroot
 
 install-perm-judgehost:
 	$(INSTALL_PROG) -o root -m u=rwxs,go=rx -t $(judgehost_bindir) runguard

@@ -226,7 +226,7 @@ Optionally:
 <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
        or use the balloon web interface.
 <item> Setup the Java chroot environment to use Sun Java with chroot:<newline>
-       <tt>bin/make_chroot.sh &lt;installdir&gt; &lt;architecture&gt;</tt><newline>
+       <tt>bin/dj_make_chroot &lt;installdir&gt; &lt;architecture&gt;</tt><newline>
        <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
        and add the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
@@ -602,7 +602,7 @@ examples.
 DOMjudge supports the use of Sun Java within a chroot environment. For
 this, a chroot environment which includes the Sun Java libraries must
 first be built. This can be accomplished with the included script
-<tt>make_chroot.sh</tt>: run this as root and pass as arguments
+<tt>dj_make_chroot</tt>: run this as root and pass as arguments
 the target directory to build the chroot environment in and as second
 argument the target machine architecture. Start the script without
 arguments for usage information. See also sections
@@ -659,7 +659,7 @@ software like Nagios, etc. For more details, see the script
 There are a few more places where some configuration of the system can
 be made. These are sometimes needed in non-standard environments.
 <itemize>
-<item> In <tt>SOURCEDIR/bin/make_chroot.sh</tt> some changes to
+<item> In <tt>SOURCEDIR/bin/dj_make_chroot</tt> some changes to
        variables can be made, most notably <tt>DEBMIRROR</tt> to
        select a Debian mirror site near you.
 <item> <tt>submit/submit_copy.sh</tt> and
@@ -1857,7 +1857,7 @@ There are some options to support Java as a language:
        DOMjudge supports this with some manual setup.
 
        First of all, a chroot tree with Java support must be created.
-       The script bin/make_chroot.sh creates one from Debian GNU/Linux
+       The script <tt>bin/dj_make_chroot</tt> creates one from Debian GNU/Linux
        sources; run that script without arguments for basic usage
        information. Next, edit the script <tt>judge/chroot-startstop.sh</tt>
        and adapt it to work with your local system and uncomment the

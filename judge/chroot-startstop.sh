@@ -5,7 +5,7 @@
 #
 # Configure the use of this script in 'etc/global.cfg' when using the
 # chroot environment and Sun Java compiler/interpreter and adapt this
-# script to your environment. See also bin/make_chroot.sh for a script
+# script to your environment. See also bin/dj_make_chroot for a script
 # to generate a minimal chroot environment with Sun Java.
 #
 # This script will be called from test_solution.sh in the root
