@@ -76,9 +76,6 @@ cleanexit ()
 	logmsg $LOG_DEBUG "exiting"
 }
 
-# Global configuration
-#. "$DJ_ETCDIR/judgehost-config.sh"
-
 # Error and logging functions
 . "$DJ_LIBDIR/lib.error.sh"
 
