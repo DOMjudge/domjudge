@@ -32,7 +32,6 @@ using namespace std;
 
 /* System/site specific static config (paths, etc.) */
 #include "../etc/domserver-static.h"
-#include "../etc/domserver-config.h"
 #include "../etc/config.h"
 
 /* and submit specific config */

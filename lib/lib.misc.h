@@ -14,9 +14,6 @@ extern "C" {
 /* Maximum arguments to execute() */
 #define MAXARGS 10
 
-/* Wrapper function to call beep with one of the predefined settings. */
-void beep(const char *beeptype);
-
 /* Define wrapper around true function '_alert' to allow passing
  * LIBDIR as defined in calling program. */
 #define alert(msgtype,description) _alert(LIBDIR,msgtype,description)
