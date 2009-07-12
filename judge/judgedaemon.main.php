@@ -206,11 +206,9 @@ while ( TRUE ) {
 	// original source code in another temporary file for now, which is then
 	// copied by test_solution.sh.
 	$tempsrcfile = "$tempdir/source.pulled.$row[extension]";
-	// :NOTE: in PHP5, one could use file_put_contents().
-	$tempsrchandle = @fopen($tempsrcfile, 'w');
-	if ($tempsrchandle === FALSE) error("Could not create $tempsrcfile");
-	fwrite($tempsrchandle, $row['sourcecode']);
-	fclose($tempsrchandle);
+	if ( file_put_contents($tempsrcfile, $row['sourcecode']) === FALSE ) {
+		error("Could not create $tempsrcfile");
+	}
 	unset($row['sourcecode']);
 
 

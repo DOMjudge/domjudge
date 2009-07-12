@@ -26,8 +26,8 @@ function check_team($data, $keydata = null)
 	if ( !empty($data['ipaddress']) ) {
 		$data['ipaddress'] = trim($data['ipaddress']);
 		$ip2l = ip2long($data['ipaddress']);
-		// IPv4?   PHP4       PHP5
-		if ( $ip2l == -1 || $ip2l === FALSE ) {
+		// IPv4?
+		if ( $ip2l === FALSE ) {
 			if ( 		
 				// IPv6? PHP >= 5.1 (!Windows)
 			 (  function_exists('inet_pton') && !@inet_pton($data['ipaddress']) )

@@ -68,7 +68,7 @@ This is a (rough) list of the requirements for DOMjudge.
 
 <itemize>
 <item>At least one machine running Linux, with local root access
-<item>Apache web server with PHP (4.3.2 or newer) and PHP-command line interface
+<item>Apache web server with PHP 5 and PHP-command line interface
 <item>MySQL database server version 4.1.0 or newer
 <item>Compilers for the languages you want to support
 </itemize>
@@ -327,14 +327,13 @@ The following software is required for running DOMjudge.
        preferably one that can generate statically linked stand-alone
        executables.
 
-<item> Apache web server with support for PHP &gt;= 4.3.2 and the mysql
-       extension for PHP. We recommend PHP 5 since DOMjudge on PHP 4 gets
-       a lot less testing nowadays; we also recommend the posix extension
-       for extra debugging information.
+<item> Apache web server with support for PHP &gt;= 5.0.0 and the mysql
+       extension for PHP. We also recommend the posix extension for extra
+	   debugging information.
 
 <item> MySQL &gt;= 4.1.x database and client software
 
-<item> PHP &gt;= 4.3.2, with command line interface and the mysql extension.
+<item> PHP &gt;= 5.0.0 command line interface and the mysql extension.
 
 <item> Bash &gt;= 2
 
@@ -441,7 +440,7 @@ apt-get install gcc g++ make libcurl4-gnutls-dev sudo mysql-server ntp \
 	hostname coreutils procps grep diff mount sharutils \
 	openssh-server openssh-client phpmyadmin xsltproc \
 	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra \
-        libboost-regex-dev
+	libboost-regex-dev
 </code>
 
 This is for Debian 5.0 "Lenny", for Debian 4.0 "Etch",

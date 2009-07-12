@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.0.0 - SVN
 -------------------
+ - Raise required PHP version to 5.
  - Replace included static bash by dash shell.
  - Revise team manual.
  - Add missing link to add testcases to a new problem.
