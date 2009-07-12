@@ -42,6 +42,7 @@ case "$1" in
 
 		for i in $SUBDIRMOUNTS ; do
 			sudo -S umount "$PWD/$i" < /dev/null
+			rmdir $i || true
 		done
 		;;
 
