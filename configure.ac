@@ -49,10 +49,10 @@ test "x$enable_LDFLAGS_setting"  = xyes && AC_SUBST(LDFLAGS,  $DEF_LDFLAGS)
 
 # {{{ submitclient
 
-def_submitclient_protocols="http,dolstra"
+def_submitclient_protocols="http"
 
 AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--enable-submitclient@<:@=ARG@:>@],
-[enable submit client binary (default: yes); set ARG to protocol list
+[enable submit client binary (default: http); set ARG to protocol list
 to support, where the first will be default. Supported protocols are
 in default order 'http,dolstra'.]),
 [
@@ -81,8 +81,8 @@ for i in `echo "$submitclient_protocols" | sed 's/,/ /g'` ; do
 done
 
 AC_SUBST(SUBMIT_DEFAULT,    $submit_default)
-AC_SUBST(SUBMIT_ENABLE_CMD, $submit_enabledolstra)
 AC_SUBST(SUBMIT_ENABLE_WEB, $submit_enablehttp)
+AC_SUBST(SUBMIT_ENABLE_CMD, $submit_enabledolstra)
 # }}}
 
 # {{{ File ownership for e.g. password files.
@@ -257,19 +257,19 @@ if test $SUBMIT_DEFAULT -eq 0 ; then # {{{
 	echo " * submitclient........: disabled"
 else
 	echo " * submitclient........: enabled"
-	if test $SUBMIT_ENABLE_CMD -eq 0 ; then
-		echo "    - dolstra..........: no"
-	elif test $SUBMIT_DEFAULT -eq 1 ; then
-		echo "    - dolstra..........: yes (preferred)"
-	else
-		echo "    - dolstra..........: yes"
-	fi
 	if test $SUBMIT_ENABLE_WEB -eq 0 ; then
 		echo "    - http.............: no"
 	elif test $SUBMIT_DEFAULT -eq 2 ; then
 		echo "    - http.............: yes (preferred)"
 	else
 		echo "    - http.............: yes"
+	fi
+	if test $SUBMIT_ENABLE_CMD -eq 0 ; then
+		echo "    - dolstra..........: no"
+	elif test $SUBMIT_DEFAULT -eq 1 ; then
+		echo "    - dolstra..........: yes (preferred)"
+	else
+		echo "    - dolstra..........: yes"
 	fi
 fi # }}}
 echo ""
