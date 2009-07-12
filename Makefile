@@ -119,12 +119,10 @@ maintainer-install: domserver judgehost docs submitclient \
 	-rmdir $(judgehost_libjudgedir)
 	-rm -f $(judgehost_libjudgedir)
 	ln -sf $(PWD)/judge $(judgehost_libjudgedir)
-	ln -sf -t $(domserver_libsubmitdir) $(PWD)/submit/submit_copy.sh \
-	                                    $(PWD)/submit/submit_db.php
-	ln -sf -t $(judgehost_libjudgedir)  $(PWD)/bin/runguard \
-	                                    $(PWD)/bin/sh-static
-	ln -sf -t $(judgehost_libdir)       $(PWD)/bin/alert
-	ln -sfT $(PWD)/doc $(domserver_wwwdir)/jury/doc
+	ln -sf $(PWD)/submit/submit_copy.sh $(PWD)/submit/submit_db.php $(domserver_libsubmitdir)
+	ln -sf $(PWD)/bin/runguard $(PWD)/bin/sh-static $(judgehost_libjudgedir)
+	ln -sf $(PWD)/bin/alert $(judgehost_libdir)
+	ln -sfn $(PWD)/doc $(domserver_wwwdir)/jury/doc
 	su -c "chown root.root bin/runguard ; chmod u+s bin/runguard"
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
