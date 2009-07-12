@@ -25,4 +25,26 @@ or run 'make verify' which will execute 'check-judgings' to
 automatically verify the results using the '@EXPECTED_RESULTS@:'
 header in the sources.
 
+
+Description of sample problems
+==============================
+
+Problem "hello" is included in the default "Demo Contest".
+
+The input consists of one line '1' (the number of testcases).
+The output should be the string 'Hello world!' literally, without quotes.
+
+
+Problem "fltcmp" is included in the default "Demo Contest".
+
+The input consists of one line with an integer 'n': the number of testcases.
+On the following n lines on each line one floating point number 'x'.
+
+The output should be for each input, a line with a floating point
+number y = 1/x with relative or absolute precision better than 1E-6.
+
+This sample problem tests a special compare script, namely the
+compare_program.sh script which calls check_float.
+
+
 $Id$

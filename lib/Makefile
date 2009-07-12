@@ -15,6 +15,8 @@ clean-l:
 install-domserver:
 	$(INSTALL_DATA) -t $(domserver_libdir) *.php
 	$(INSTALL_DATA) -t $(domserver_libwwwdir) www/*.php 
+	$(INSTALL_SCRIPT) -t $(domserver_libdir) alert
 
 install-judgehost:
 	$(INSTALL_DATA) -t $(judgehost_libdir) *.php *.sh 
+	$(INSTALL_SCRIPT) -t $(domserver_libdir) alert

@@ -27,7 +27,6 @@ default:
 	@echo " - make install-docs"
 	@echo or
 	@echo " - make build"
-	@echo " - make test"
 	@echo " - make clean"
 	@echo " - make distclean"
 	@exit 1
@@ -49,16 +48,15 @@ dist: configure
 # List of default SUBDIRS for recursive targets; override below.
 SUBDIRS=bin doc etc judge lib submit sql www test-sources misc-tools
 
-config:            SUBDIRS=bin etc doc sql www judge submit test-sources
-build:             SUBDIRS=bin lib judge submit test-sources misc-tools
+config:            SUBDIRS=etc doc sql www judge submit tests misc-tools
+build:             SUBDIRS=lib judge submit tests misc-tools
 domserver:         SUBDIRS=etc submit www
-install-domserver: SUBDIRS=bin etc lib submit sql www
-judgehost:         SUBDIRS=bin etc judge
-install-judgehost: SUBDIRS=bin etc judge lib
+install-domserver: SUBDIRS=etc lib submit sql www
+judgehost:         SUBDIRS=etc judge
+install-judgehost: SUBDIRS=etc judge lib misc-tools
 docs:              SUBDIRS=doc
 install-docs:      SUBDIRS=doc www
 submitclient:      SUBDIRS=submit
-test:              SUBDIRS=tests
 maintainer-clean:  SUBDIRS=doc misc-tools
 dist:              SUBDIRS=doc misc-tools
 clean:

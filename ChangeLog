@@ -49,6 +49,7 @@ Version 3.0.0 - SVN
  - Remove redundant copies of testdata by symlinks. (Closes #2805385)
  - Java chroot script now uses Sun's OpenJDK-headless, allowing for a leaner
    chroot and more supported architectures.
+ - Reorder source tree: removed bin dir, move test-sources to tests, cleanup.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------

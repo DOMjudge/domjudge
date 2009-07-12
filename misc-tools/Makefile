@@ -5,7 +5,16 @@ include $(TOPDIR)/Makefile.global
 
 TARGETS = checkinput checktestdata
 
+SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
+              runssh_judgehosts runssh_teams balloons
+
+config: $(SUBST_FILES)
+
 build: $(TARGETS)
+
+$(SUBST_FILES): %: %.in ../paths.mk
+	$(substconfigvars)
+	chmod a+x $@
 
 checktestdata: checktestdata.cpp yylex.cc parse.cc -lboost_regex
 
@@ -30,12 +39,17 @@ check: checktestdata
 		for prog in tests/testprog$$n.err* ; do $(checkfail) ; done ; \
 	done || true
 
-install:
+
+install-judgehost:
+	$(INSTALL_PROG) -t $(judgehost_bindir) dj_make_chroot
 
 dist-l: yylex.cc parse.cc
 
 clean-l:
 	-rm -f $(TARGETS)
+
+distclean-l:
+	-rm -f $(SUBST_FILES)
 
 maintainer-clean-l:
 	-rm -f parse.cc yylex.cc parser.ih parserbase.h
