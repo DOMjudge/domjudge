@@ -26,7 +26,7 @@ ARCHLIST="alpha,amd64,arm,armel,hppa,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 INCLUDEDEBS=""
 
 # Debian packages to install after upgrade (space separated):
-INSTALLDEBS="sun-java6-jre"
+INSTALLDEBS="openjdk-6-jre-headless"
 
 # Debian packages to remove after upgrade (space separated):
 REMOVEDEBS=""
@@ -44,7 +44,7 @@ usage()
     echo "Creates a chroot environment with Sun Java support using the"
     echo "Debian GNU/Linux distribution."
     echo
-    echo "This script must be run as root, <installdir> the non-existing target"
+    echo "This script must be run as root, <targetdir> the non-existing target"
     echo "location of the chroot and <architecture> one of the following:"
     echo "$ARCHLIST"
 }
@@ -63,7 +63,6 @@ fi
 
 [ -z "$CHROOTDIR" ] && error "No installation directory given."
 [ -z "$ARCH" ]      && error "No architecture given."
-# TODO: test whether $ARCH is in $ARCHLIST? Maybe just warn?
 [ -e "$CHROOTDIR" ] && error "'$CHROOTDIR' already exists, remove manually."
 
 mkdir -p "$CHROOTDIR"
@@ -111,15 +110,15 @@ cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
 
 # Stable (lenny)
-deb $DEBMIRROR			lenny		main non-free contrib
-deb http://security.debian.org	lenny/updates	main non-free contrib
+deb $DEBMIRROR			lenny		main
+deb http://security.debian.org	lenny/updates	main
 
 # Testing
-#deb $DEBMIRROR			testing		main non-free contrib
-#deb http://security.debian.org	testing/updates	main non-free contrib
+#deb $DEBMIRROR			testing		main
+#deb http://security.debian.org	testing/updates	main
 
 # Unstable
-#deb $DEBMIRROR			unstable	main non-free contrib
+#deb $DEBMIRROR			unstable	main
 EOF
 
 cat > "$CHROOTDIR/etc/apt/apt.conf" <<EOF
@@ -156,14 +155,6 @@ debconf	debconf/priority	select	high
 debconf	debconf/frontend	select	Noninteractive
 locales	locales/locales_to_be_generated	multiselect	
 locales	locales/default_environment_locale	select	None
-sun-java6-jre	sun-java6-jre/jcepolicy		note	
-sun-java6-bin	shared/accepted-sun-dlj-v1-1	boolean	true
-sun-java6-jre	shared/accepted-sun-dlj-v1-1	boolean	true
-sun-java6-jre	sun-java6-jre/stopthread	boolean	true
-sun-java6-bin	shared/present-sun-dlj-v1-1	note	
-sun-java6-jre	shared/present-sun-dlj-v1-1	note	
-sun-java6-bin	shared/error-sun-dlj-v1-1	error	
-sun-java6-jre	shared/error-sun-dlj-v1-1	error	
 EOF
 
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"

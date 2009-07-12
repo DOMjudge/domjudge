@@ -44,6 +44,8 @@ Version 3.0.0 - SVN
  - Add functionality and fix security issue in runguard, thanks Thomas Rast.
  - Check for safe_mode before diff-ing tempfiles. (Closes: #1808354)
  - Remove redundant copies of testdata by symlinks. (Closes #2805385)
+ - Java chroot script now uses Sun's OpenJDK-headless, allowing for a leaner
+   chroot and more supported architectures.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------
