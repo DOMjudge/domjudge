@@ -5,6 +5,11 @@ AC_INIT([DOMjudge],
 AC_CONFIG_HEADERS([etc/config.h])
 AC_CONFIG_SRCDIR([Makefile.global])
 
+# Helper...
+AC_DEFUN([AX_WITH_COMMENT], [
+	AC_ARG_WITH(foo$1,[$2],[],[])
+	])
+
 if test "x$prefix" = xNONE; then
 	if test "x$enable_fhs" = x; then
 		prefix="/opt/domjudge"
@@ -82,6 +87,8 @@ AC_SUBST(SUBMIT_ENABLE_WEB, $submit_enablehttp)
 
 # {{{ File ownership for e.g. password files.
 
+AX_WITH_COMMENT(0,[])
+AX_WITH_COMMENT(1,[Fine tuning of file ownership:])
 AC_MSG_CHECKING([domjudge-user])
 AC_ARG_WITH([domjudge-user], [AS_HELP_STRING([--with-domjudge-user@<:@=USER@:>@], [User that owns password files (default: current user).])], [], [])
 
@@ -127,16 +134,13 @@ AC_DEFUN([AX_PATH], [
 		[AC_SUBST($1, $withval)],
 		[AC_SUBST($1, $2)])
 	])
-AC_DEFUN([AX_PATH_COMMENT], [
-	AC_ARG_WITH(foo$1,[$2],[],[])
-	])
 
-AX_PATH_COMMENT(0,[])
-AX_PATH_COMMENT(1,[Fine tuning of installation when FHS is disabled (the default):])
+AX_WITH_COMMENT(2,[])
+AX_WITH_COMMENT(3,[Fine tuning of installation when FHS is disabled (the default):])
 AX_PATH(domserver_root,         [$prefix/domserver])
 AX_PATH(judgehost_root,         [$prefix/judgehost])
 AX_PATH(domjudge_docdir,        [$prefix/doc])
-AX_PATH_COMMENT(2,[ ])
+AX_WITH_COMMENT(4,[ ])
 AX_PATH(domserver_bindir,       [$domserver_root/bin])
 AX_PATH(domserver_etcdir,       [$domserver_root/etc])
 AX_PATH(domserver_wwwdir,       [$domserver_root/www])
@@ -147,7 +151,7 @@ AX_PATH(domserver_libsubmitdir, [$domserver_root/lib/submit])
 AX_PATH(domserver_logdir,       [$domserver_root/log])
 AX_PATH(domserver_tmpdir,       [$domserver_root/tmp])
 AX_PATH(domserver_submitdir,    [$domserver_root/submissions])
-AX_PATH_COMMENT(3,[  ])
+AX_WITH_COMMENT(5,[  ])
 AX_PATH(judgehost_bindir,       [$judgehost_root/bin])
 AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
 AX_PATH(judgehost_libdir,       [$judgehost_root/lib])
