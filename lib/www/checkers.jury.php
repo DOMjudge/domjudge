@@ -51,6 +51,9 @@ function check_team($data, $keydata = null)
 			$data['hostname'] = '';
 		}
 
+		if(!$keydata) {
+			$keydata['login'] = $data['login'];
+		}
 		global $DB;
 		$team = $DB->q("MAYBEVALUE SELECT `login` FROM `team`"
 					. " WHERE `ipaddress` = %s"
