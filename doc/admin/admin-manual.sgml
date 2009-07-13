@@ -73,11 +73,6 @@ This is a (rough) list of the requirements for DOMjudge.
 <item>Compilers for the languages you want to support
 </itemize>
 
-If you want to use the command line submit client (next to / instead of
-the web submit client), then a shared filesystem with the team
-computers (e.g. NFS) and SSH/SCP is recommended, but this method can
-be adapted to the environment.
-
 A <ref id="install_config:requirements" name="detailed list of requirements">
 is contained in the <ref id="install_config" name="Installation and Configuration">
 chapter.
@@ -206,7 +201,7 @@ On the judgehosts:
 It should be done by now. As a check that (almost) everything works,
 the set of test sources can be submitted:
 <code>
-cd test-sources
+cd tests
 make check
 ./check-judgings
 </code>
@@ -250,12 +245,12 @@ DOMjudge discerns three different kinds of hosts:
        Workstation for a team, where they develop their
        solutions and from which they submit them to the jury system.
        The only part of DOMjudge that runs here is the optional
-       command line submit client; All other interaction by teams is
+       command line submit client; all other interaction by teams is
        done with a browser via the web interface.
 <tag>DOMjudge server</tag>
        A host that receives the submissions, runs the
        database and serves the web pages. This host will run Apache,
-       MySQL and perhaps the submitdaemon. Optionally some of
+       and MySQL. Optionally
        these tasks can be further split out to separate machines, but
        that's normally not necessary and not supported out of the box.
 <tag>Judgehosts</tag>
@@ -294,9 +289,8 @@ The requirements for the deployment of DOMjudge are:
          MySQL database on port 3306.
   <item> HTTP traffic from teams, the public and jury to the web server,
          port 80 or 443.
-  <item> The `submit' command line client connects to the submitdaemon
-         on the server via a TCP connection on a configurable port
-         (default: 9147) and/or to the web interface.
+  <item> The `submit' command line client connects to the web server also
+         via HTTP.
   </itemize>
        Each team computer needs to have a unique IP address from the
        view of the DOMjudge server.
@@ -307,14 +301,6 @@ The requirements for the deployment of DOMjudge are:
        See <ref id="security:rootprivs" name="Security: root privileges">
        for more details.
 
-<item> For using the command line submit program, team accounts which
-       are accessible via SSH on the jury computers (a SSH public key
-       of the jury account should be installed on all team accounts to
-       provide public-key access). Alternatively, another means of
-       providing access from the server can be configured, see below
-       under <ref id="install_config:submissionmethods"
-       name="Submission methods"> or the file
-       <tt>submit/submit_copy.sh</tt> for more details.
 </itemize>
 
 <sect1>Software requirements
@@ -361,9 +347,6 @@ The following items are optional, but may be required to use certain
 functionality.
 <itemize>
 <item> sudo (to use a chroot judging environment with Sun Java)
-
-<item> OpenSSH/SCP or compatible (for using the command line
-       submit program in the default configuration)
 
 <item> phpMyAdmin, to be able to access the database in an emergency
        or for data import/export
@@ -442,9 +425,8 @@ have the bulk of these packages installed already.
 apt-get install gcc g++ make libcurl4-gnutls-dev sudo mysql-server ntp \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
 	hostname coreutils procps grep diff mount sharutils \
-	openssh-server openssh-client phpmyadmin xsltproc \
-	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra \
-	libboost-regex-dev
+	phpmyadmin xsltproc libboost-regex-dev \
+	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra
 </code>
 
 This is for Debian 5.0 "Lenny", for Debian 4.0 "Etch",
@@ -457,7 +439,7 @@ Pascal; change the list as appropriate.
 <code>
 apt-get install make sudo php5-cli php5-mysql ntp xsltproc \
 	hostname coreutils procps grep diff mount \
-	gcc g++ gcj sun-java5-jdk ghc fp-compiler
+	gcc g++ gcj openjdk-6-jre ghc fp-compiler
 </code>
 
 <sect>Installation system
@@ -473,7 +455,7 @@ system to be present and can be installed separately. Within the build
 system these parts are referred to as <tt>domserver, judgehost</tt>
 and additionally <tt>docs</tt> for all documentation.
 
-When installing from a subversion checkout, the configure/build system
+When installing from a Subversion checkout, the configure/build system
 first has to be bootstrapped. This can be done by running <tt>make
 dist</tt>, which creates the <tt>configure</tt> script and generates
 documentation from SGML/LaTeX sources. Note that this requires
@@ -571,7 +553,8 @@ respectively. The latter should be synchronised between domserver and
 judgehosts. Descriptions of settings are included in these files.
 
 Besides these settings, there are a few other places where changes can
-be made to the system... FIXME
+be made to the system, dee <ref id="install_config:configurablescrits"
+name="other configurable scripts">.
 
 
 <sect>Configuration of languages
@@ -651,7 +634,7 @@ modified to send a mail on specific issues, connect to monitoring
 software like Nagios, etc. For more details, see the script
 <tt>lib/alert</tt>.
 
-<sect>Other configuration issues
+<sect>Other configurable scripts<label id="install_config:configurablescripts">
 <p>
 
 There are a few more places where some configuration of the system can
@@ -660,7 +643,7 @@ be made. These are sometimes needed in non-standard environments.
 <item> In <tt>SOURCEDIR/bin/dj_make_chroot</tt> some changes to
        variables can be made, most notably <tt>DEBMIRROR</tt> to
        select a Debian mirror site near you.
-<item> <tt>submit/submit_copy.sh</tt> and
+<item> Optional scripts <tt>submit/submit_copy.sh</tt> and
        <tt>lib/judge/chroot-startstop.sh</tt> can be modified
        to suit your local environment. See comments in those files for
        more information.
@@ -674,22 +657,12 @@ program and via the web interface. From experience, both methods have
 users that prefer the one above the other.
 
 The command line submit client can send submissions by either using
-the web interface internally (<em>http</em> protocol), or using a
-special command line submit protocol, called <em>dolstra</em>. When
-<ref id="install_config:installsystem" name="installing">, you can
-pass options to <tt>configure</tt> to choose which methods will be
-enabled and which will be the default.
-
-The command line protocol does place some requirements on the network
-environment. It needs a shared file system or other means for the jury
-to access the files on the team accounts. Site specific adaptations
-can be made in <tt>submit/submit_copy.sh</tt>. On the other hand it
-uses a more secure call-back mechanism, not only relying on the IP
-address for team authentication. This mechanism also allows automatic
-team IP address configuration with the configuration option
-<tt>STRICTIPCHECK=0</tt>, which removes the hassle of either
-preconfiguring team--IP mappings or handing passwords to the teams for
-their first authentication.
+the web interface internally (<em>http</em> protocol, the default),
+or using a special command line submit protocol, called
+<em>Dolstra</em>. The latter has some special features but is not
+usually needed. See <ref id="dolstra" name="Submitdaemon and the
+Dolstra protocol"> for
+details on this.
 
 Using the http protocol with the submit client requires the libcURL
 library development files at compile time (the submit client is
@@ -709,7 +682,7 @@ squares are storage locations.
 </figure>
 
 The database is the authoritative version for submission sources;
-file system storage is available for historic reasons, as an easy way
+file system storage is available as an easy way
 to access the source files and as backup. The program
 <tt>bin/restore_sources2db</tt> is available to recover the submission
 table in the database from these files. The command line daemon will
@@ -907,15 +880,15 @@ value of <tt>judgehost_judgedir</tt> specified by <tt>configure</tt>.
 The submit client can be built with <tt>make submitclient</tt>. There
 is no make target to install the submit client, as its location will
 very much depend on the environment. You might e.g. want to copy it to
-all team computer or make it available on a network filesystem. Note
+all team computers or make it available on a network filesystem. Note
 that if the team computers run a different (version of the) operating
-system than the jury systems, then you might want to build the submit
-client on that OS.
+system than the jury systems, then you need to build the submit
+client for that OS.
 
-The submit client needs to know the address of the domserver. These
-can be passed as command line options or environment variables. The
+The submit client needs to know the address of the domserver. This
+can be passed as a command line option or environment variable. The
 latter option makes for easier usage. A sample script
-<tt>submit_wrapper.sh</tt> is included, which sets these variables.
+<tt>submit_wrapper.sh</tt> is included, which sets this variable.
 See that script for more details on how to set this up.
 
 <sect1>The submit client under Windows/Cygwin
@@ -925,13 +898,6 @@ The submit client can also be built under Windows when the Cygwin
 environment is installed. First the Cygwin <url name="setup.exe"
 url="http://cygwin.com/setup.exe"> program must be downloaded and
 installed with GCC, curl-devel and maybe some more packages included.
-Furthermore, for submitting to the command line submitdaemon (next to
-the web interface), you need to have Windows XP and the cygwin-base
-package must be (re-)installed from the mirror
-<url url="http://cygwin.win6.jp/cygwin-ipv6/"> for support of the
-complete <tt>netdb.h</tt> headers (as this is currently not supported
-in the standard Cygwin tree yet; the currently beta version 1.7 should
-include this).
 
 <p>
 When Cygwin is correctly installed with all necessary development
@@ -1158,9 +1124,9 @@ configuration file.
 <tt>allow_submit</tt> determines whether teams can submit
 using this language; <tt>allow_judge</tt> determines whether
 judgehosts will judge submissions for this problem. This can for
-example be set to no to temporarily hold judging when a problem occurs
+example be set to <em>no</em> to temporarily hold judging when a problem occurs
 with the judging of a specific language; after resolution of the
-problem this can be set to yes again.
+problem this can be set to <em>yes</em> again.
 
 <tt>time_factor</tt> is the relative factor by which the timelimit is
 multiplied for solutions in this language. For example Java is/was
@@ -1321,20 +1287,8 @@ The IP-address of a workstation is the primary means of
 authentication. The system assumes that someone coming from a specific
 IP is the team with that IP listed in the team table. When a team
 browses to the web interface, this is checked and the appropriate team
-page is presented. The command line submitdaemon also checks this IP
-for the origin of a submission.
-
-Authentication within the command line submitdaemon is fortified by
-the following process. When a client connects, it does not send the
-submission file, but only a reference to a randomised and not publicly
-visible file. This file is then copied from server side with the
-submit_copy script. This makes it impossible for teams to spoof a
-submission for a different team: the server `calls back' the team the
-submitter identified himself as and checks for existence of the
-advertised file. Because filenames are randomised and invisible
-(within the <tt>$HOME/.domjudge</tt> directory by default), it is also
-impossible for someone to guess another team's filename and submit it
-for them.
+page is presented. The submitclient via the same method also checks this
+IP for the origin of a submission.
 
 There are three possible ways of configuring team IP-addresses.
 
@@ -1374,20 +1328,12 @@ the public interface.
 <sect1>Set IP upon first submission
 <p>
 
-Have DOMjudge configure the IP upon first submission with the command
-line submit client. To activate this, option <tt>STRICTIPCHECK</tt>
-should be set to 0. In that case, we (optionally) start out without
-IP's (and the web interface will not be accessible), but as soon as a
-team connects with the command line submit client <em>to the
-submitdaemon</em>, they are authenticated by correctly submitting a
-file and the IP is registered and everything works as normal.
-
-The connect can happen during the test session, so during the real
-contest everything is fully available. This is also a secure way of
-authenticating teams, which requires no passwords or IP configuration,
-but teams must submit via the command line submit client to the
-command line daemon before they can access their teampage.
-
+This is only possible with the
+<ref id="dolstra" name="Dolstra protocol">. The advantage is that no
+prior mapping needs to be configured, but the disadvantage is that
+the team interface cannot be viewed until at least one submission  
+was made; there are also more constraints on the system.
+See the section on the Dolstra protocol for details.
 
 <sect>Providing testdata
 <label id="contestsetup:testdata">
@@ -1418,7 +1364,6 @@ are gained by the setuid-root programs only when required.
 
 <itemize>
 <item> One or more judgedaemons, one on each judgehost;
-<item> Optionally the submitdaemon on the domserver;
 <item> Optionally the balloon notification daemon.
 </itemize>
 
@@ -1442,15 +1387,15 @@ Hello World problem enabled, you can submit some of the example sources
 from under the <tt>doc/examples</tt> directory. They should give `CORRECT'.
 
 You can also try some (or all) of the sources under
-<tt>test-sources</tt>. Use <tt>make check</tt> to submit a variety of
+<tt>tests</tt>. Use <tt>make check</tt> to submit a variety of
 tests; this should work when the submit client is available and the
 default example problems are in the active contest. There's also
 <tt>make stress-test</tt>, but be warned that these tests might crash
 a judgedaemon. The results can be checked in the web interface; each
 source file specifies the expected outcome with some explanations. For
 convenience, there is also a script <tt>check-judgings</tt>; this will
-automaticallly check whether submitted sources from the
-<tt>test-sources</tt> directory were judged as expected. Note that a
+automatically check whether submitted sources from the
+<tt>tests</tt> directory were judged as expected. Note that a
 few sources have multiple possible outcomes: these must be verified
 manually.
 
@@ -1463,7 +1408,7 @@ the practice session of a contest.
 Before running a real contest, you and/or the jury will want to test
 the jury's reference solutions on the system.
 
-There is no special feature for testing there solutions under
+There is no special feature for testing their solutions under
 DOMjudge. The simplest approach is to submit these solutions as a
 special team. This method requires a few steps and some carefulness to
 prevent a possible information leak of the problemset. It is assumed
@@ -1511,8 +1456,7 @@ has these features and can be distributed over the workstations.
 <item> Provide teams with the command line submit client and check that it works.
 <item> Make the sample in- and output data from the problem set available.
 <item> Add your SSH key to their authorized_keys file, so you can always access
-their account for wiping, emergencies and to make the submit command line client
-work when it doesn't use the http/cURL submit method.
+their account for wiping and emergencies.
 <item> Check that internet access is blocked.
 </enum>
 
@@ -1726,29 +1670,18 @@ special group the web server runs as.
 Secondly, the files submitted should not be interceptable by other
 teams (even though that, if these would be sent clear-text, a team
 would normally have to be root/administrator on their computer to
-intercept this). By default this is accomplished by transferring these
-files with ssh (and even locally on the jury-computers). See
-<tt>SYSTEM_ROOT/submit/submit_copy.sh</tt> for more information.
+intercept this). This can be accomplished by using HTTPS for the
+web interface.
 
-Teams should not be able to fake the identity of another team. This is
-prevented in the submission system, by making use of temporary files
-in a world non-readable directory of the team account: during
-submission, the file is copied there with some random part and this
-file will be copied by the jury. Another team cannot guess filenames
-there, so trying to send as a different team would only result in a
-copying error. During submission, the IP address is also checked. The
-team web interface relies on authentication by IP address only: this
-has the advantage for teams that they do not have to fill in yet
+The team web interface relies on authentication by IP address only:
+this has the advantage for teams that they do not have to fill in yet
 another user/password combination. Only if teams are able to spoof
 their IP (for which they normally need root/administrator privileges),
 then they would be able to view other teams' submission info (not
-their code) and clarifications. As this gives a team little advantage,
-we think that this suffices.
+their code) and clarifications and submit as that team.
 
-<em>Note:</em> When enabling the websubmit feature (on by default),
-teams can also send in submissions with authentication purely based on
-IP. This means that care has to be taken e.g. that teams cannot simply
-login onto one another's computer and spoof their identity.
+<em>Note:</em> This means that care has to be taken e.g. that teams
+cannot simply login onto one another's computer and spoof their identity.
 
 The jury web interface is protected by HTTP Authentication. By default
 the <tt>domjudge_jury</tt> user will be given full access. You can choose
@@ -1827,8 +1760,8 @@ judge computers. This however does not restrict network access, so a
 team could try to send in a solution that tries to send input testdata
 back to them, access the internet, etc... A solution to this problem
 is to disallow all network traffic for the test user on the judge
-computers. On Linux with kernel 2.4 and higher, this can be
-accomplished by modifying the iptables, adding a rule like:
+computers. On Linux, this can be accomplished by modifying the
+iptables, adding a rule like:
 
 <verb>
 iptables -I OUTPUT -o &lt;network_interface&gt; -m owner --uid-owner &lt;testuser_uid&gt; -j REJECT
@@ -2017,5 +1950,70 @@ filename to which these scripts will write a comparison of the program
 and jury output. Both scripts also generate XML compliant output,
 which is written to the result file specified in parameter 4 and fully
 complies with the validator standard.
+
+<chapt>Submitdaemon and the Dolstra protocol <label id="dolstra">
+<p>
+
+In the default situation, teams can submit their solutions either
+via browsing to the web interface, or by using the command line
+submit client, which behind the scenes employs the same web
+interface to actually make the submission. This setup suffices for
+many environments.
+
+The Dolstra protocol is different in that it uses a submitdaemon
+running on the domserver. One advantage is that submissions can be
+made before the IP address of the team is known.
+This authentication is fortified by
+the following process. When a client connects, it does not send the
+submission file, but only a reference to a randomised and not publicly
+visible file. This file is then copied from server side with the
+submit_copy script. This makes it impossible for teams to spoof a
+submission for a different team: the server `calls back' the team the
+submitter identified himself as and checks for existence of the
+advertised file. Because filenames are randomised and invisible
+(within the <tt>$HOME/.domjudge</tt> directory by default), it is also
+impossible for someone to guess another team's filename and submit it
+for them.
+
+
+To have DOMjudge configure the IP upon first submission in this way,
+set option <tt>STRICTIPCHECK</tt> to 0. In that case, we start out without
+IP's (and the web interface will not be accessible), but as soon as a
+team connects with the command line submit client <em>to the
+submitdaemon</em>, they are authenticated by correctly submitting a
+file and the IP is registered and everything works as normal.
+
+The connect can happen during the test session, so during the real
+contest everything is fully available. This is a secure way of
+authenticating teams, which requires no passwords or IP configuration,
+but teams must submit via the command line submit client to the
+command line daemon before they can access their teampage.
+
+<sect>Dolstra protocol requirements
+
+If you want to use the Dolstra submit method (next to / instead of
+the HTTP functionality) you need to satisfy the following requirements.
+
+The submitdaemon needs to run at the domserver, and receive connections
+on a configurable TCP port, default 9147.
+
+Team accounts need to be
+accessible via SSH on the jury computers (a SSH public key
+of the jury account should be installed on all team accounts to
+provide key-based access), and a shared filesystem (e.g. NFS)
+is needed between the team computers and the domserver.
+Alternatively, another means of
+providing access from the server can be configured, see below
+the file
+<tt>submit/submit_copy.sh</tt> for more details.
+
+
+For the command line client you need to have Windows XP and the cygwin-base
+package must be (re-)installed from the mirror
+<url url="http://cygwin.win6.jp/cygwin-ipv6/"> for support of the
+complete <tt>netdb.h</tt> headers (as this is currently not supported
+in the standard Cygwin tree yet; the currently beta version 1.7 should
+include this).
+
 
 </report>
