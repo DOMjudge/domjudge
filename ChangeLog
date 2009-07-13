@@ -5,6 +5,8 @@ Version 2.2.4 - SVN
  - Remove deprecated define_syslog_variables() and ereg_replace()
    function calls.
  - Merge r2744,2746,2747 from trunk: fix too restrictive team ID.
+ - Merge r2760 from trunk: chroot-startstop.sh fails if sudo requires a
+   password.
 
 Version 2.2.3 - 8 December 2008
 -------------------------------

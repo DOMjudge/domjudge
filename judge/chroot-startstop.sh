@@ -25,11 +25,11 @@ case "$1" in
 	start)
 	
 # Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
-		sudo mount -n -t proc --bind /proc proc
+		sudo -S mount -n -t proc --bind /proc proc < /dev/null
 
 		for i in $SUBDIRMOUNTS ; do
 			mkdir -p $i
-			sudo mount --bind "$CHROOTORIGINAL/$i" $i
+			sudo -S mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null
 		done
 		;;
 
@@ -38,10 +38,10 @@ case "$1" in
 # Wait a second to assure that no files are accessed anymore:
 		sleep 1
 		
-		sudo umount "$PWD/proc"
+		sudo -S umount "$PWD/proc" < /dev/null
 		
 		for i in $SUBDIRMOUNTS ; do
-			sudo umount "$PWD/$i"
+			sudo -S umount "$PWD/$i" < /dev/null
 		done
 		;;
 
