@@ -46,6 +46,10 @@ require(LIBDIR . '/init.php');
 setup_database_connection('jury');
 
 $verbose = LOG_INFO;
+if ( DEBUG & DEBUG_JUDGE ) {
+	$verbose = LOG_DEBUG;
+	putenv('DEBUG=1');
+}
 
 system("pgrep -u ".RUNUSER, $retval);
 if ($retval == 0) {

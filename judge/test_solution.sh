@@ -85,8 +85,7 @@ LOGLEVEL=$LOG_DEBUG
 PROGNAME="`basename $0`"
 
 # Check for judge backend debugging:
-if [ "$DEBUG" -a $((DEBUG & DEBUG_JUDGE)) -ne 0 ]; then
-	DO_DEBUG=1
+if [ "$DEBUG" ]; then
 	export VERBOSE=$LOG_DEBUG
 	logmsg $LOG_NOTICE "debugging enabled, DEBUG='$DEBUG'"
 else
@@ -168,7 +167,7 @@ logmsg $LOG_INFO "starting compile"
 
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
-( "$RUNGUARD" ${DO_DEBUG:+-v} -t $COMPILETIME -o compile.time -- \
+( "$RUNGUARD" ${DEBUG:+-v} -t $COMPILETIME -o compile.time -- \
 	"$COMPILE_SCRIPT" "source.$EXT" source "$MEMLIMIT" ) &>compile.tmp
 exitcode=$?
 if [ -f source ]; then
