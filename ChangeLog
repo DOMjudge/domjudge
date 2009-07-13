@@ -51,6 +51,7 @@ Version 3.0.0 - SVN
    chroot and more supported architectures.
  - Reorder source tree: removed bin dir, move test-sources to tests, cleanup.
  - Fix DEBUG_JUDGE option for debugging judging backend.
+ - FreeBSD porting fixes, making DOMjudge more POSIX compliant.
 
 Version 2.2.0 - 11 August 2008
 ------------------------------

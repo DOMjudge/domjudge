@@ -179,7 +179,7 @@ install)
 	cp $SQLDIR/mysql_privileges.sql $TMPFILE
 	for role in $ROLES ; do
 		eval "user=\$${role}_DBUSER"
-		sed -i "s/domjudge_$role/$user/g" $TMPFILE
+		sed -i -e "s/domjudge_$role/$user/g" $TMPFILE
 	done
  	cat $SQLDIR/mysql_db_structure.sql \
  	    $SQLDIR/mysql_db_examples.sql \

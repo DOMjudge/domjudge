@@ -15,7 +15,7 @@ gcj -d . -Wall -C "$SOURCE" 2> "$TMPFILE"
 EXITCODE=$?
 if [ "$EXITCODE" -ne 0 ]; then
 	# Let's see if should have named the .java differently
-	PUBLICCLASS=$(sed  -n "/Public class '.*' must be defined in a file called /{s/.*file called '//;s/\.java'.*//;p;q}" "$TMPFILE")
+	PUBLICCLASS=$(sed -n -e "/Public class '.*' must be defined in a file called /{s/.*file called '//;s/\.java'.*//;p;q}" "$TMPFILE")
 	if [ -z "$PUBLICCLASS" ]; then
 		cat $TMPFILE
 		rm -f $TMPFILE

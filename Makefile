@@ -126,6 +126,7 @@ maintainer-install: domserver judgehost docs submitclient \
 	ln -sfn $(PWD)/doc $(domserver_wwwdir)/jury/doc
 	mkdir -p $(judgehost_bindir)
 	ln -sf $(PWD)/judge/runguard $(judgehost_bindir)
+# This doesn't work in FreeBSD:
 	su -c "chown root.root judge/runguard ; chmod u+s judge/runguard"
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.

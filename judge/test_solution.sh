@@ -55,7 +55,7 @@ cleanexit ()
 {
 	trap - EXIT
 
-	if [ "$CATPID" ] && ps --pid $CATPID &>/dev/null; then
+	if [ "$CATPID" ] && ps -p $CATPID &>/dev/null; then
 		logmsg $LOG_DEBUG "killing $CATPID (cat-pipe to /dev/null)"
 		kill -9 $CATPID
 	fi
@@ -196,7 +196,7 @@ cp "$TESTIN" "$WORKDIR/testdata.in"
 cd "$WORKDIR"
 chmod a+r testdata.in
 
-mkdir --mode=0711 bin dev proc
+mkdir -m 0711 bin dev proc
 # Copy the run-script and a statically compiled shell:
 cp -p  "$SCRIPTDIR/$RUN_SCRIPT" .
 cp -pL "$STATICSHELL"           ./bin/sh
