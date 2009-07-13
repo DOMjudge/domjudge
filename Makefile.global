@@ -27,6 +27,15 @@ endif
 
 STRIP = strip --remove-section=.comment --remove-section=.note
 
+# Install settings
+INSTALL         = install
+INSTALL_PROG    = $(INSTALL)
+INSTALL_SCRIPT  = $(INSTALL)
+INSTALL_DATA    = $(INSTALL) -m 0644
+INSTALL_USER    = $(INSTALL) -o $(DOMJUDGE_USER)
+INSTALL_WEBSITE = $(INSTALL) -o $(DOMJUDGE_USER) -g $(WEBSERVER_GROUP)
+INSTALL_DIR     = mkdir -p
+
 # Check whether we are running under Cygwin:
 ifneq ($(findstring CYGWIN,$(shell uname)),)
 CYGWIN = 1

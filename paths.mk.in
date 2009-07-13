@@ -42,15 +42,6 @@ CURL_PREFIX = @CURL_PREFIX@
 DOMJUDGE_USER   = @DOMJUDGE_USER@
 WEBSERVER_GROUP = @WEBSERVER_GROUP@
 
-# Install settings
-INSTALL = install
-INSTALL_PROG    = $(INSTALL)
-INSTALL_SCRIPT  = $(INSTALL)
-INSTALL_DATA    = $(INSTALL) -m 0644
-INSTALL_PRIVATE = $(INSTALL) -o $(DOMJUDGE_USER)
-INSTALL_WEBSITE = $(INSTALL) -o $(DOMJUDGE_USER) -g $(WEBSERVER_GROUP)
-INSTALL_DIR     = mkdir -p
-
 # Autoconf prefixes and paths
 fhs_enabled    = @fhs_enabled@
 prefix         = @prefix@
