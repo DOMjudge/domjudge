@@ -55,10 +55,10 @@ install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
 docs:              SUBDIRS=    doc
 install-docs:      SUBDIRS=    doc         www
 submitclient:      SUBDIRS=                          submit
-maintainer-clean:  SUBDIRS=    doc                                misc-tools
 dist:              SUBDIRS=    doc                                misc-tools
 clean:             SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 distclean:         SUBDIRS=etc doc lib sql www judge submit tests misc-tools
+maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(domserver_dirs)
