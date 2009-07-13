@@ -69,7 +69,7 @@ cleanexit ()
 		fi
 		if [ -f "$WORKDIR/testdata.out" ]; then
 			rm -f "$WORKDIR/testdata.out"
-			ln -s "$TESTIN" "$WORKDIR/testdata.out"
+			ln -s "$TESTOUT" "$WORKDIR/testdata.out"
 		fi
 	fi
 
