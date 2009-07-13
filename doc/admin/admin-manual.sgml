@@ -553,7 +553,7 @@ respectively. The latter should be synchronised between domserver and
 judgehosts. Descriptions of settings are included in these files.
 
 Besides these settings, there are a few other places where changes can
-be made to the system, dee <ref id="install_config:configurablescrits"
+be made to the system, see <ref id="install_config:configurablescripts"
 name="other configurable scripts">.
 
 
@@ -1975,7 +1975,6 @@ advertised file. Because filenames are randomised and invisible
 impossible for someone to guess another team's filename and submit it
 for them.
 
-
 To have DOMjudge configure the IP upon first submission in this way,
 set option <tt>STRICTIPCHECK</tt> to 0. In that case, we start out without
 IP's (and the web interface will not be accessible), but as soon as a
@@ -1990,6 +1989,7 @@ but teams must submit via the command line submit client to the
 command line daemon before they can access their teampage.
 
 <sect>Dolstra protocol requirements
+<p>
 
 If you want to use the Dolstra submit method (next to / instead of
 the HTTP functionality) you need to satisfy the following requirements.
