@@ -73,7 +73,7 @@ judgehost-create-dirs:
 ifneq "$(fhs_enabled)" "yes"
 	-$(INSTALL_USER) -m 0700 -d $(judgehost_tmpdir)
 	-$(INSTALL_USER) -m 0700 -d $(judgehost_logdir)
-	-$(INSTALL_USER) -m 0700 -d $(judgehost_judgedir)
+	-$(INSTALL_USER) -m 0711 -d $(judgehost_judgedir)
 endif
 
 docs-create-dirs:
