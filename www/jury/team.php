@@ -85,8 +85,6 @@ exit;
 
 endif;
 
-if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
-
 /* optional restriction of submissions list to specific problem, language, etc. */
 $restrictions = array();
 if ( isset($_GET['restrict']) ) {
@@ -94,11 +92,13 @@ if ( isset($_GET['restrict']) ) {
 	$restrictions[$key] = $value;
 }
 
-$row = $DB->q('TUPLE SELECT t.*, c.name AS catname, a.name AS affname FROM team t
+$row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname, a.name AS affname
+               FROM team t
                LEFT JOIN team_category c USING (categoryid)
                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
                WHERE login = %s', $id);
 
+if ( ! $row ) error("Missing or invalid team id");
 
 echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 

@@ -4,6 +4,7 @@ Version 2.2.4 - SVN
 -------------------
  - Remove deprecated define_syslog_variables() and ereg_replace()
    function calls.
+ - Merge r2744,2746,2747 from trunk: fix too restrictive team ID.
 
 Version 2.2.3 - 8 December 2008
 -------------------------------
