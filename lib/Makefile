@@ -19,4 +19,4 @@ install-domserver:
 
 install-judgehost:
 	$(INSTALL_DATA) -t $(judgehost_libdir) *.php *.sh 
-	$(INSTALL_SCRIPT) -t $(domserver_libdir) alert
+	$(INSTALL_SCRIPT) -t $(judgehost_libdir) alert
