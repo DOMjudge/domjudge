@@ -7,7 +7,7 @@
 export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            docs install-docs config submitclient test dist \
+            docs install-docs config submitclient dist \
             clean distclean maintainer-clean
 
 # Global Makefile definitions
@@ -45,10 +45,8 @@ install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
 dist: configure
 
-# List of default SUBDIRS for recursive targets; override below.
-SUBDIRS =                  etc doc lib sql www judge submit tests misc-tools
-
-config:
+# List of SUBDIRS for recursive targets:
+config:            SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 build:             SUBDIRS=        lib         judge submit tests misc-tools
 domserver:         SUBDIRS=etc             www       submit
 install-domserver: SUBDIRS=etc     lib sql www       submit
@@ -59,8 +57,8 @@ install-docs:      SUBDIRS=    doc         www
 submitclient:      SUBDIRS=                          submit
 maintainer-clean:  SUBDIRS=    doc                                misc-tools
 dist:              SUBDIRS=    doc                                misc-tools
-clean:
-distclean:
+clean:             SUBDIRS=etc doc lib sql www judge submit tests misc-tools
+distclean:         SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(domserver_dirs)
