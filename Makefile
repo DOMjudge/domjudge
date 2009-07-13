@@ -63,7 +63,7 @@ distclean:         SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 domserver-create-dirs:
 	$(INSTALL_DIR) $(domserver_dirs)
 ifneq "$(fhs_enabled)" "yes"
-	-$(INSTALL_PRIVATE) -m 0700 -d $(domserver_logdir)
+	-$(INSTALL_USER)    -m 0700 -d $(domserver_logdir)
 	-$(INSTALL_WEBSITE) -m 0770 -d $(domserver_tmpdir)
 	-$(INSTALL_WEBSITE) -m 0770 -d $(domserver_submitdir)
 endif
@@ -71,9 +71,9 @@ endif
 judgehost-create-dirs:
 	$(INSTALL_DIR) $(judgehost_dirs)
 ifneq "$(fhs_enabled)" "yes"
-	-$(INSTALL_PRIVATE) -m 0700 -d $(judgehost_tmpdir)
-	-$(INSTALL_PRIVATE) -m 0700 -d $(judgehost_logdir)
-	-$(INSTALL_PRIVATE) -m 0700 -d $(judgehost_judgedir)
+	-$(INSTALL_USER) -m 0700 -d $(judgehost_tmpdir)
+	-$(INSTALL_USER) -m 0700 -d $(judgehost_logdir)
+	-$(INSTALL_USER) -m 0700 -d $(judgehost_judgedir)
 endif
 
 docs-create-dirs:
