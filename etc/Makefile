@@ -33,7 +33,7 @@ install-domserver:
 install-judgehost:
 	$(INSTALL_DATA) -t $(judgehost_etcdir) judgehost-static.php
 	-$(INSTALL_USER) -t $(judgehost_etcdir) judgehost-config.php common-config.php
-	-$(INSTALL_WEBSITE) -m 0640 -t $(judgehost_etcdir) dbpasswords.secret
+	-$(INSTALL_USER) -m 0600 -t $(judgehost_etcdir) dbpasswords.secret
 
 distclean-l:
 	-rm -f $(SUBST_CONFIGS)
