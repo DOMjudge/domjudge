@@ -27,6 +27,7 @@ if(!isset($menu)) {
 <head>
 	<!-- DOMjudge version <?=DOMJUDGE_VERSION?> -->
 <title><?=$title?></title>
+<link rel="shortcut icon" href="<?=getBaseURI()?>images/favicon.png" type="image/png" />
 <link rel="stylesheet" href="<?=getBaseURI()?>style.css" type="text/css" />
 <?php
 if ( IS_JURY ) {
