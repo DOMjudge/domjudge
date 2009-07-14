@@ -174,10 +174,7 @@ DOMjudge:
 <item> Run <tt>make domserver judgehost docs</tt> or just those
        targets you want installed on the current host.
 <item> Run <tt>make install-{domserver,judgehost,docs}</tt>
-       to install the system.
-<item> With root privileges run <tt>make install-perm-{domserver,judgehost}</tt>
-       to install password files and the setuid-root program
-       <tt>runguard</tt>.
+       as root to install the system.
 </itemize>
 On the domserver host:
 <itemize>
@@ -229,7 +226,7 @@ Optionally:
        domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;targetdir&gt/*<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*</tt>
 <item> Install the PEAR Text_Highlighter class for source syntax highlighting,
-       and the PHP xdiff PECL extention for diffs between submissions.
+       and the PHP xdiff PECL extension for diffs between submissions.
 </itemize>
 
 
@@ -325,8 +322,7 @@ The following software is required for running DOMjudge.
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash)
 
 <item> A statically compiled POSIX shell, located in
-       <tt>SYSTEM_ROOT/bin/sh-static</tt> (dash is included for
-       Linux IA32)
+       <tt>lib/judge/sh-static</tt> (dash is included for Linux IA32)
 
 <item> glibc &gt;= 2.1
 
@@ -476,7 +472,8 @@ There are three different methods for installing DOMjudge:
 	<tt>$HOME/domjudge/domserver</tt> etc. Note that these
 	subdirectories can be overridden from the defaults with options
 	like <tt>--with-domserver_root=DIR</tt>, see <tt>configure
-	--help</tt> for a complete list.
+	--help</tt> for a complete list. The prefix defaults to
+	<tt>/opt/domjudge</tt>.
 
 	Besides the installed files, there will also be directories
 	for logging, temporary files, submitted sources and judging
@@ -505,9 +502,9 @@ There are three different methods for installing DOMjudge:
 	<htmlurl name="Filesystem Hierarchy Standard"
 	url="http://www.pathname.com/fhs/">. It can be enabled by
 	passing the option <tt>--enable-fhs</tt> to <tt>configure</tt>
-	and the prefix defaults to <tt>/usr/local</tt> as usual. Files
-	will be placed e.g. in <tt>PREFIX/share/domjudge, /var/log,
-	/tmp, /etc/domjudge</tt>.
+	and in this case the prefix defaults to <tt>/usr/local</tt>.
+	Files will be placed e.g. in <tt>PREFIX/share/domjudge,
+	PREFIX/bin, /var/log, /tmp, /etc/domjudge</tt>.
 
 <tag>Maintainer install</tag>
 	The last installation method is meant for
@@ -522,24 +519,26 @@ make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
 make maintainer-install
 </code>
 	Note that these targets have to be executed
-	<em>separately</em> and the latter needs root privileges.
+	<em>separately</em> and the latter requests root privileges
+	via <tt>su</tt>.
 </descrip>
 
 After running the <tt>configure</tt> script, the system can be built
 and installed. Each of the <tt>domserver, judgehost, docs</tt> parts
 can be built and installed separately, respectively by:
 <code>
-make domserver &amp;&amp; make install-domserver
-make judgehost &amp;&amp; make install-judgehost
-make docs      &amp;&amp; make install-docs
+make domserver &amp;&amp; sudo make install-domserver
+make judgehost &amp;&amp; sudo make install-judgehost
+make docs &amp;&amp; make install-docs
 </code>
+Note that even when installing e.g. in your own home directory, root
+privileges are still required for domserver and judgehost
+installation, because user and group ownership of password files, some
+directories and the setuid-root program <tt>runguard</tt> have to be
+set.
+
 For a list of basic make targets, run <tt>make</tt> in the source root
 directory without arguments.
-
-Note that installation of default password files is done via separate
-<tt>install-perm-{domserver,judgehost}</tt> targets. These targets
-also install some other files and/or directories with special
-permissions and require root privileges.
 
 
 <sect>Configuration
@@ -812,6 +811,8 @@ option <tt>DEBUG</tt> to a bitwise-or of the available
 <tt>DEBUG_*</tt> flags in <tt>etc/common-config.php</tt>, to e.g.
 generate extra SQL query and timing information in the web interface.
 
+<!-- This needs to be cleaned up and possibly merged in other places:
+
 <sect>Building and installing
 <p>
 
@@ -837,6 +838,7 @@ the web server. These are:
 
 See also section <ref id="security:webprivs" name="Security: webserver
 privileges">.
+-->
 
 <sect>Installation of a judgehost<label id="install_config:judgehost">
 <p>
@@ -859,6 +861,13 @@ For other systems check the specifics of your useradd command.
 This user must also be configured as the user under which programs run
 via <tt>configure --enable-runuser=USER</tt>; the default is
 <tt>domjudge-run</tt>.
+
+When the chroot setting is enabled (default), a static POSIX shell has
+to be available for copying it to the chroot environment. For Linux
+i386, a static Dash shell is included, which works out of the box. For
+other architectures or operating systems, a shell has to be added
+manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
+file.
 
 If you use the default <tt>chroot-startstop.sh</tt> script, then
 the following lines must be added to <tt>/etc/sudoers</tt>:
@@ -1113,7 +1122,7 @@ detect whether a judgedaemon is running on the host.
 Programming languages in which to accept and judge submissions.
 <tt>langid</tt> is a string of maximum length 8, which references the
 language. This reference is also used to call the correct compile
-script (<tt>SYSTEM_ROOT/judge/compile_c.sh</tt>, etc.), so when adding
+script (<tt>lib/judge/compile_c.sh</tt>, etc.), so when adding
 a new language, check that these match.
 
 <tt>name</tt> is the displayed name of the language;
@@ -1198,11 +1207,11 @@ that is displayed in the jury interface.
 Both for the country and the affiliation, a logo can be displayed on
 the scoreboard. For this to work, the <tt>affilid</tt> must match a
 logo picture located in
-<tt>SYSTEM_ROOT/www/images/affiliations/&lt;affilid&gt;.png</tt> and
+<tt>www/images/affiliations/&lt;affilid&gt;.png</tt> and
 <tt>country</tt> must match a (flag) picture in
-<tt>SYSTEM_ROOT/www/images/countries/&lt;country&gt;.png</tt>. All
+<tt>www/images/countries/&lt;country&gt;.png</tt>. All
 country flags are present there, named with their 2-character ISO
-codes. See also <tt>SYSTEM_ROOT/www/images/countries/README</tt>. If
+codes. See also <tt>www/images/countries/README</tt>. If
 either file is not present the respective ID string will be printed
 instead.
 
@@ -1352,7 +1361,7 @@ For problems with a special compare script, things are a bit
 different: testdata should still be provided as above, but the
 correctness depends on the output of the custom compare script. Please
 check the documentation in
-<tt>SYSTEM_ROOT/judge/compare_program.sh</tt> when using this feature.
+<tt>judge/compare_program.sh</tt> when using this feature.
 
 
 <sect>Start the daemons
@@ -1604,9 +1613,10 @@ Alternatively you can use a web based tool in the jury interface,
 reachable from the main page, where each balloon has to be checked off
 by the person handing it out.
 
-For the daemon, use the BALLOON_CMD option to define how notifications
+For the daemon, set the BALLOON_CMD in <tt>bin/balloons</tt> to define
+how notifications
 are sent. Examples are to mail to a specific mailbox or to send
-prints to a printer. When configured, start <tt>bin/balloons.php</tt>
+prints to a printer. When configured, start <tt>bin/balloons</tt>
 and notification will start.
 
 Notifications will continue even after the scoreboard is frozen,
@@ -1662,7 +1672,7 @@ allow connections from <em>all</em> hosts, so make sure you restrict
 this appropriately or choose strong enough passwords.
 
 <em>Note:</em> database passwords are stored in
-<tt>SYSTEM_ROOT/etc/passwords.php</tt>. This file has to be
+<tt>etc/passwords.php</tt>. This file has to be
 non-readable to teams, but has to be readable to the web server to let
 the jury web interface work. A solution is to make it readable to a
 special group the web server runs as.
@@ -1684,10 +1694,12 @@ their code) and clarifications and submit as that team.
 cannot simply login onto one another's computer and spoof their identity.
 
 The jury web interface is protected by HTTP Authentication. By default
-the <tt>domjudge_jury</tt> user will be given full access. You can choose
-to add more users to the htpasswd file. In etc/passwords.php you can provide
-a list of <em>admin users</em>. Most data-modification functions will then
-be restricted to only users in this list.
+the <tt>domjudge_jury</tt> user will be given full access. You can
+choose to add more users to the htpasswd file. In
+<tt>etc/domserver-config.php</tt> you can add these users to the list
+<tt>DOMJUDGE_ADMINS</tt>. Most data-modification functions are
+restricted to only users in this list. See also the judge manual for
+some more details.
 
 
 <sect>Root privileges <label id="security:rootprivs">
@@ -1714,20 +1726,26 @@ that has to be handled separately.
 Of course you must make sure that the file system privileges are set
 such that there's no unauthorised access to sensitive data, like
 submitted solutions or passwords. This is quite system dependent. At
-least the <tt>OUTPUT_ROOT</tt> should not be readable by other users
+least <tt>JUDGEDIR</tt> should not be readable by other users
 than DOMjudge.
 
 <sect1>Permissions for the web server <label id="security:webprivs">
 <p>
 
+<!--
+FIXME: check that permissions are set as laid out here, and modify
+this text to say that these things are set correctly by default.
+-->
 Make sure that the web server serving the DOMjudge web interface pages
-has correct permissions to the <tt>SYSTEM_ROOT/{www,lib,etc}</tt>
+has correct permissions to the <tt>www, lib, etc</tt>
 directory trees. The <tt>www</tt> and <tt>lib</tt> trees can safely
 set to be readable and accessible. Care should be taken with the
-<tt>etc</tt> dir: <tt>config.php</tt> and <tt>passwords.php</tt>
-should be readable, but <tt>passwords.php</tt> should best not be
+<tt>etc</tt> dir: the <tt>domserver-{config,static}.php</tt>,
+<tt>htpasswd-*</tt> and <tt>dbpasswords.secret</tt> files
+should all be readable, but <tt>dbpasswords.secret</tt> and the
+htpasswd files should not be
 readable by anyone else. This can be done for example by setting the
-<tt>SYSTEM_ROOT/etc</tt> directory to owner:group &lt;DOMjudge
+<tt>etc</tt> directory to owner:group &lt;DOMjudge
 account&gt;:&lt;Web server group&gt; and permissions
 <tt>drwxr-x---</tt>, denying users other than yourself and the
 web server group access to the configuration and password files.
@@ -1794,7 +1812,7 @@ this cannot simply run in a chroot environment.
 There are some options to support Java as a language:
 <enum>
 <item> One can disable the chroot environment in
-       <tt>etc/global.cfg</tt> by setting <tt>USE_CHROOT=0</tt>.
+       <tt>etc/judgehost-config.php</tt> by setting <tt>USE_CHROOT=0</tt>.
        Disabling the chroot environment removes this extra layer of
        security against submissions that attempt to
        cheat, but it is a simple solution to getting Java to work.
@@ -1805,9 +1823,9 @@ There are some options to support Java as a language:
        First of all, a chroot tree with Java support must be created.
        The script <tt>bin/dj_make_chroot</tt> creates one from Debian GNU/Linux
        sources; run that script without arguments for basic usage
-       information. Next, edit the script <tt>judge/chroot-startstop.sh</tt>
+       information. Next, edit the script <tt>lib/judge/chroot-startstop.sh</tt>
        and adapt it to work with your local system and uncomment the
-       script in <tt>etc/global.cfg</tt>.
+       script in <tt>etc/judgehost-config.php</tt>.
 <item> As an alternative the <tt>gcj</tt> compiler from GNU can be
        used instead of Sun's version. This one generates true machine
        code and can link statically. However a few function calls
