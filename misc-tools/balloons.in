@@ -23,6 +23,13 @@ require(LIBDIR . '/init.php');
 
 setup_database_connection('jury');
 
+/* Set this to a notification command, which receives the notification
+ * text on stdin. Examples below for notification by mail or prints.
+ */
+//define('BALLOON_CMD', 'mail -s Balloon_notification domjudge@localhost');
+//define('BALLOON_CMD', 'lpr');
+define('BALLOON_CMD', '');
+
 $verbose = LOG_INFO;
 
 $waittime = 5;
@@ -32,8 +39,8 @@ $waittime = 5;
  */
 function notification_text($team, $problem, $probs_solved, $probs_data) {
 	global $cdata;
-	
-	$ret = 
+
+	$ret =
 		"A problem has been solved:\n".
 		"\n".
 		(empty($team['room']) ? "" : "Room:    ".$team['room']."\n" ) .
@@ -93,7 +100,7 @@ while ( TRUE ) {
 		$infreeze = TRUE;
 		logmsg(LOG_NOTICE, "Scoreboard is frozen since " . $cdata['freezetime']);
 	}
-	
+
 	do {
 		$res = $DB->q('SELECT s.*,t.name as teamname,t.room
 		               FROM scoreboard_jury s
@@ -110,32 +117,32 @@ while ( TRUE ) {
 				   " by team ".$row['teamid']);
 
 			if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
-			
+
 				$probs_solved = $DB->q('COLUMN SELECT probid FROM scoreboard_jury
 				                        WHERE cid = %i AND teamid = %s AND is_correct = 1',
 				                       $cid, $row['teamid']);
 				$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
 				                      FROM problem WHERE cid = %i', $cid);
-				
+
 				logmsg(LOG_INFO,"Sending notification: team '".
 					   $row['teamid']."', problem '".$row['probid']."'.");
-				
+
 				logmsg(LOG_DEBUG,"Running command: '".BALLOON_CMD."'");
-				
+
 				$handle = popen(BALLOON_CMD, 'w');
 				if ( ! $handle ) error("Could not run command '".BALLOON_CMD."'");
-				
+
 				fwrite($handle,notification_text($team,$row['probid'],$probs_solved, $probs_data));
 				if ( ($exitcode = pclose($handle))!=0 ) {
 					warning("Notification command exited with exitcode $exitcode");
 				}
 			}
-			
+
 			$DB->q('UPDATE scoreboard_jury SET balloon=1
 			        WHERE cid = %i AND teamid = %s AND probid = %s',
 				   $row['cid'], $row['teamid'], $row['probid']);
 		}
-		
+
 	} while ( $res->count()!=0 );
 
 	sleep($waittime);
