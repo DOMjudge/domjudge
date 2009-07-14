@@ -180,7 +180,13 @@ On the domserver host:
 <itemize>
 <item> Install the MySQL database using <tt>sql/dj-setup-database -u root -r install</tt>.
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
-       it to your needs, reload web server.
+       it to your needs, reload web server:
+       <tt>
+       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf
+       apache2ctl graceful
+       </tt>
+
+
 <item> Check that the web interface works (/team, /public and /jury)
        and check that the jury interface is password protected.
 <item> Add useful contest data through the jury web interface or with
@@ -639,7 +645,7 @@ software like Nagios, etc. For more details, see the script
 There are a few more places where some configuration of the system can
 be made. These are sometimes needed in non-standard environments.
 <itemize>
-<item> In <tt>SOURCEDIR/bin/dj_make_chroot</tt> some changes to
+<item> In <tt>bin/dj_make_chroot</tt> on a judgehost some changes to
        variables can be made, most notably <tt>DEBMIRROR</tt> to
        select a Debian mirror site near you.
 <item> Optional scripts <tt>submit/submit_copy.sh</tt> and
@@ -667,19 +673,6 @@ Using the http protocol with the submit client requires the libcURL
 library development files at compile time (the submit client is
 statically linked to libcURL to avoid a runtime dependency).
 
-The figure below is a graphical representation of the flow of a
-submission. Arrows with filled lines indicate the flow of the
-submission file, while dot-dash lines indicate flow of metadata about
-the submission. Each line where no protocol of data transfer is given,
-are just file system operations. Squares are programs and rounded
-squares are storage locations.
-
-<figure loc="h">
-<eps file="submitflow.eps">
-<img src="submitflow.png">
-<caption>Submission flow diagram.
-</figure>
-
 The database is the authoritative version for submission sources;
 file system storage is available as an easy way
 to access the source files and as backup. The program
@@ -700,7 +693,7 @@ dump files in the sql subdirectory. The default database name is
 <tt>etc/dbpasswords.secret</tt> file: the database name as specified
 for the <tt>jury</tt> user will be used when installing.
 
-Installation of the database is done with <tt>dj-setup-database</tt>.
+Installation of the database is done with <tt>sql/dj-setup-database</tt>.
 For this, you need an installed and configured MySQL server and
 administrator access to it. Run
 <code>
@@ -1992,6 +1985,20 @@ advertised file. Because filenames are randomised and invisible
 (within the <tt>$HOME/.domjudge</tt> directory by default), it is also
 impossible for someone to guess another team's filename and submit it
 for them.
+
+The figure below is a graphical representation of the flow of a
+submission. Arrows with filled lines indicate the flow of the
+submission file, while dot-dash lines indicate flow of metadata about
+the submission. Each line where no protocol of data transfer is given,
+are just file system operations. Squares are programs and rounded
+squares are storage locations.
+
+<figure loc="h">
+<eps file="submitflow.eps">
+<img src="submitflow.png">
+<caption>Submission flow diagram including Dolstra protocol.
+</figure>
+
 
 To have DOMjudge configure the IP upon first submission in this way,
 set option <tt>STRICTIPCHECK</tt> to 0. In that case, we start out without
