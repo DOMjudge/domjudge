@@ -9,6 +9,7 @@ Version 2.2.4 - SVN
    password.
  - Merge r2752,2750(partial) from trunk: security fix in runguard,
    thanks Thomas Rast.
+ - Set PHP short_open_tag to On in apache.conf; we use it.
 
 Version 2.2.3 - 8 December 2008
 -------------------------------
