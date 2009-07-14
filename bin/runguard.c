@@ -20,7 +20,21 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-   
+
+
+   Program specifications:
+
+   This program will run the specified command in a separate process
+   group (session) and apply the restrictions as specified after
+   forking, before executing the command.
+
+   The stdin and stdout streams are passed to the command and runguard
+   does not read or write to these. Error and verbose messages from
+   runguard are by default written to stderr, hence mixed with stderr
+   output of the command.
+
+   The command and its children are sent a SIGTERM after the runtime
+   has passed, followed by a SIGKILL after one second.
  */
 
 #include <sys/types.h>
@@ -44,7 +58,7 @@
 #include "../etc/config.h"
 
 #define PROGRAM "runguard"
-#define VERSION "0.9"
+#define VERSION "0.9.1"
 #define AUTHORS "Jaap Eldering"
 
 extern int errno;
@@ -60,7 +74,6 @@ char  *cmdname;
 char **cmdargs;
 char  *rootdir;
 char  *outputfilename;
-FILE  *outputfile;
 
 int runuid;
 int runtime;
@@ -104,7 +117,7 @@ void warning(const char *format, ...)
 	va_start(ap,format);
 
 	if ( ! be_quiet ) {
-	    fprintf(stderr,"%s: warning: ",progname);
+		fprintf(stderr,"%s: warning: ",progname);
 		vfprintf(stderr,format,ap);
 		fprintf(stderr,"\n");
 	}
@@ -118,9 +131,9 @@ void verbose(const char *format, ...)
 	va_start(ap,format);
 
 	if ( ! be_quiet && be_verbose ) {
-	    printf("%s: verbose: ",progname);
-		vprintf(format,ap);
-		printf("\n");
+		fprintf(stderr,"%s: verbose: ",progname);
+		vfprintf(stderr,format,ap);
+		fprintf(stderr,"\n");
 	}
 	
 	va_end(ap);
@@ -187,6 +200,7 @@ void usage()
 
 void outputtime()
 {
+	FILE  *outputfile;
 	double timediff; /* in seconds */
 
 	if ( gettimeofday(&endtime,NULL) ) error(errno,"getting time");
@@ -197,10 +211,17 @@ void outputtime()
 	verbose("runtime is %.3lf seconds",timediff);
 
 	if ( use_output ) {
+		verbose("writing runtime to file `%s'",outputfilename);
+
+		if ( (outputfile = fopen(outputfilename,"w"))==NULL ) {
+			error(errno,"cannot open `%s'",outputfilename);
+		}
 		if ( fprintf(outputfile,"%.3lf\n",timediff)==0 ) {
 			error(0,"cannot write to file `%s'",outputfile);
 		}
-		if ( fclose(outputfile) ) error(errno,"closing file `%s'",outputfile);
+		if ( fclose(outputfile) ) {
+			error(errno,"closing file `%s'",outputfilename);
+		}
 	}
 }
 
@@ -237,6 +258,103 @@ int userid(char *name)
 	return pwd->pw_uid;
 }
 
+void setrestrictions()
+{
+	char *path;
+	char  cwd[MAXPATHLEN+3];
+
+	struct rlimit lim;
+
+	/* Clear environment to prevent all kinds of security holes, save PATH */
+	path = getenv("PATH");
+	environ[0] = NULL;
+	/* FIXME: Clean path before setting it again? */
+	if ( path!=NULL ) setenv("PATH",path,1);
+
+	/* Set resource limits: must be root to raise hard limits.
+	   Note that limits can thus be raised from the systems defaults! */
+
+	/* First define shorthand macro function */
+#define setlim(type) \
+	if ( setrlimit(RLIMIT_ ## type, &lim)!=0 ) { \
+		if ( errno==EPERM ) { \
+			warning("no permission to set resource RLIMIT_" #type); \
+		} else { \
+			error(errno,"setting resource RLIMIT_" #type); \
+		} \
+	}
+
+	if ( memsize!=RLIM_INFINITY ) {
+		verbose("setting memory limits to %d bytes",(int)memsize);
+	}
+	lim.rlim_cur = lim.rlim_max = memsize;
+	setlim(AS);
+	setlim(DATA);
+	setlim(STACK);
+	setlim(MEMLOCK);
+
+	if ( filesize!=RLIM_INFINITY ) {
+		verbose("setting filesize limit to %d bytes",(int)filesize);
+	}
+	lim.rlim_cur = lim.rlim_max = filesize;
+	setlim(FSIZE);
+
+	if ( nproc!=RLIM_INFINITY ) {
+		verbose("setting process limit to %d",(int)nproc);
+	}
+	lim.rlim_cur = lim.rlim_max = nproc;
+	setlim(NPROC);
+
+#undef setlim
+
+	if ( no_coredump ) {
+		verbose("disabling core dumps");
+		lim.rlim_cur = lim.rlim_max = 0;
+		if ( setrlimit(RLIMIT_CORE,&lim)!=0 ) error(errno,"disabling core dumps");
+	}
+
+	/* Set root-directory and change directory to there. */
+	if ( use_root ) {
+		/* Small security issue: when running setuid-root, people can find
+		   out which directories exist from error message. */
+		if ( chdir(rootdir) ) error(errno,"cannot chdir to `%s'",rootdir);
+
+		/* Get absolute pathname of rootdir, by reading it. */
+		if ( getcwd(cwd,MAXPATHLEN)==NULL ) error(errno,"cannot get directory");
+		if ( cwd[strlen(cwd)-1]!='/' ) strcat(cwd,"/");
+
+		/* Canonicalize CHROOT_PREFIX: the use of NULL below is a GNU
+		   extension, recommended for security */
+		if ( (path = realpath(CHROOT_PREFIX,NULL))==NULL ) {
+			error(errno,"cannot canonicalize path '%s'",CHROOT_PREFIX);
+		}
+
+		/* Check that we are within prescribed path. */
+		if ( strncmp(cwd,path,strlen(path))!=0 ) {
+			error(0,"invalid root: must be within `%s'",path);
+		}
+		free(path);
+
+		if ( chroot(".") ) error(errno,"cannot change root to `%s'",cwd);
+		verbose("using root-directory `%s'",cwd);
+	}
+
+	/* Set user-id (must be root for this). */
+	if ( use_user ) {
+		if ( setuid(runuid) ) error(errno,"cannot set user ID to `%d'",runuid);
+		verbose("using user ID `%d' for command",runuid);
+	} else {
+		/* Permanently reset effective uid to real uid, to prevent
+		   child command from having root privileges.
+		   Note that this means that the child runs as the same user
+		   as the watchdog process and can thus manipulate it, e.g. by
+		   sending SIGSTOP/SIGCONT! */
+		if ( setuid(getuid()) ) error(errno,"cannot reset real user ID");
+		verbose("reset user ID to `%d' for command",getuid());
+	}
+	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped");
+}
+
 int main(int argc, char **argv)
 {
 	sigset_t oldmask, newmask;
@@ -245,19 +363,9 @@ int main(int argc, char **argv)
 	int   exitcode;
 	char *valid_users;
 	char *ptr;
-	char *path;
-	char  cwd[MAXPATHLEN+3];
 	int   opt;
 	
-	struct rlimit lim;
-		
 	progname = argv[0];
-
-	/* Clear environment to prevent all kinds of security holes, save PATH */
-	path = getenv("PATH");
-	environ[0] = NULL;
-	/* FIXME: Clean path before setting it again? */
-	if ( path!=NULL ) setenv("PATH",path,1);
 
 	/* Parse command-line options */
 	use_root = use_time = use_user = use_output = no_coredump = 0;
@@ -359,93 +467,6 @@ int main(int argc, char **argv)
 		if ( ptr==NULL || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
 	}
 
-	/* Set resource limits: must be root to raise hard limits.
-	   Note that limits can thus be raised from the systems defaults! */
-	
-	/* First define shorthand macro function */
-#define setlim(type) \
-	if ( setrlimit(RLIMIT_ ## type, &lim)!=0 ) { \
-		if ( errno==EPERM ) { \
-			warning("no permission to set resource RLIMIT_" #type); \
-		} else { \
-			error(errno,"setting resource RLIMIT_" #type); \
-		} \
-	}
-
-	if ( memsize!=RLIM_INFINITY ) {
-		verbose("setting memory limits to %d bytes",(int)memsize);
-	}
-	lim.rlim_cur = lim.rlim_max = memsize;
-	setlim(AS);
-	setlim(DATA);
-	setlim(STACK);
-	setlim(MEMLOCK);
-	
-	if ( filesize!=RLIM_INFINITY ) {
-		verbose("setting filesize limit to %d bytes",(int)filesize);
-	}
-	lim.rlim_cur = lim.rlim_max = filesize;
-	setlim(FSIZE);
-	
-	if ( nproc!=RLIM_INFINITY ) {
-		verbose("setting process limit to %d",(int)nproc);
-	}
-	lim.rlim_cur = lim.rlim_max = nproc;
-	setlim(NPROC);
-
-#undef setlim
-	
-	if ( no_coredump ) {
-		verbose("disabling core dumps");
-		lim.rlim_cur = lim.rlim_max = 0;
-		if ( setrlimit(RLIMIT_CORE,&lim)!=0 ) error(errno,"disabling core dumps");
-	}
-	
-	/* Set root-directory and change directory to there. */
-	if ( use_root ) {
-		/* Small security issue: when running setuid-root, people can find
-		   out which directories exist from error message. */
-		if ( chdir(rootdir) ) error(errno,"cannot chdir to `%s'",rootdir);
-
-		/* Get absolute pathname of rootdir, by reading it. */
-		if ( getcwd(cwd,MAXPATHLEN)==NULL ) error(errno,"cannot get directory");
-		if ( cwd[strlen(cwd)-1]!='/' ) strcat(cwd,"/");
-
-		/* Canonicalize CHROOT_PREFIX: the use of NULL below is a GNU
-		   extension, recommended for security */
-		if ( (path = realpath(CHROOT_PREFIX,NULL))==NULL ) {
-			error(errno,"cannot canonicalize path '%s'",CHROOT_PREFIX);
-		}
-		
-		/* Check that we are within prescribed path. */
-		if ( strncmp(cwd,path,strlen(path))!=0 ) {
-			error(0,"invalid root: must be within `%s'",path);
-		}
-		free(path);
-		
-		if ( chroot(".") ) error(errno,"cannot change root to `%s'",cwd);
-		verbose("using root-directory `%s'",cwd);
-	}
-	
-	/* Set user-id (must be root for this). */
-	if ( use_user ) {
-		if ( setuid(runuid) ) error(errno,"cannot set user ID to `%d'",runuid);
-		verbose("using user ID `%d'",runuid);
-	} else {
-		/* Reset effective uid to real uid, to increase security
-		   when program is run setuid */
-		if ( setuid(getuid()) ) error(errno,"cannot set real user ID");
-		verbose("using real uid `%d' as effective uid",getuid());
-	}
-	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped");
-
-	/* Open output file for writing running time to */
-	if ( use_output ) {
-		outputfile = fopen(outputfilename,"w");
-		if ( outputfile==NULL ) error(errno,"cannot open `%s'",outputfilename);
-		verbose("using file `%s' to write runtime to",outputfilename);
-	}
-	
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
 		error(errno,"cannot fork");
@@ -453,11 +474,26 @@ int main(int argc, char **argv)
 	case  0: /* run controlled command */
 		/* Run the command in a separate process group so that the command
 		   and all its children can be killed off with one signal. */
-		setsid();
+		if ( setsid()==-1 ) error(errno,"setsid failed");
+
+		/* Apply all restrictions for child process. */
+		setrestrictions();
+
+		/* And execute child command. */
 		execvp(cmdname,cmdargs);
 		error(errno,"cannot start `%s'",cmdname);
 		
 	default: /* become watchdog */
+
+		/* Shed privileges, only if not using a separate child uid,
+		   because in that case we may need root privileges to kill
+		   the child process. Do not use Linux specific setresuid()
+		   call with saved set-user-ID. */
+		if ( !use_user ) {
+			if ( setuid(getuid())!=0 ) error(errno, "setting watchdog uid");
+			verbose("watchdog using user ID `%d'",getuid());
+		}
+
 		if ( gettimeofday(&starttime,NULL) ) error(errno,"getting time");
 
 		/* unmask all signals */
@@ -477,6 +513,9 @@ int main(int argc, char **argv)
 		/* Wait for the child command to finish */
 		while ( (pid = wait(&status))!=-1 && pid!=child_pid );
 		if ( pid!=child_pid ) error(errno,"waiting on child");
+
+		/* Drop root before writing to output file. */
+		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
 
 		outputtime();
 

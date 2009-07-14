@@ -7,6 +7,7 @@ Version 2.2.4 - SVN
  - Merge r2744,2746,2747 from trunk: fix too restrictive team ID.
  - Merge r2760 from trunk: chroot-startstop.sh fails if sudo requires a
    password.
+ - Merge r2752,2750(partial) from trunk: security fix in runguard.
 
 Version 2.2.3 - 8 December 2008
 -------------------------------
