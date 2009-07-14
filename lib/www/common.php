@@ -238,8 +238,8 @@ function putTeam($login) {
 ?>
 
 <table>
-<tr><td scope="row">Name:    </td><td><?=htmlspecialchars($team['name'])?></td></tr>
-<tr><td scope="row">Category:</td><td><?=htmlspecialchars($team['catname'])?></td></tr>
+<tr><td scope="row">Name:    </td><td><?php echo htmlspecialchars($team['name'])?></td></tr>
+<tr><td scope="row">Category:</td><td><?php echo htmlspecialchars($team['catname'])?></td></tr>
 <?php
 	 
 	if ( !empty($team['members']) ) {

@@ -25,10 +25,10 @@ if(!isset($menu)) {
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-	<!-- DOMjudge version <?=DOMJUDGE_VERSION?> -->
-<title><?=$title?></title>
-<link rel="shortcut icon" href="<?=getBaseURI()?>images/favicon.png" type="image/png" />
-<link rel="stylesheet" href="<?=getBaseURI()?>style.css" type="text/css" />
+	<!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
+<title><?php echo $title?></title>
+<link rel="shortcut icon" href="<?php echo getBaseURI()?>images/favicon.png" type="image/png" />
+<link rel="stylesheet" href="<?php echo getBaseURI()?>style.css" type="text/css" />
 <?php
 if ( IS_JURY ) {
 	echo "<link rel=\"stylesheet\" href=\"style_jury.css\" type=\"text/css\" />\n";
@@ -43,7 +43,7 @@ if ( IS_JURY ) {
  *       both jury and team have their own menu.php
  */
 if ($menu) {?>
-<script type="text/javascript" src="<?=getBaseURI()?>ajax.js"></script>
+<script type="text/javascript" src="<?php echo getBaseURI()?>ajax.js"></script>
 </head>
 <body onload="setInterval('updateClarifications()', 20000)">
 <?php include("menu.php");

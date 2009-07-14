@@ -68,30 +68,30 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 </td></tr>
 
 <tr><td><label for="data_0__name_">Problem name:</label></td>
-<td><?=addInput('data[0][name]', @$row['name'], 30, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 30, 255)?></td></tr>
 
 <tr><td>Allow submit:</td>
-<td><?=addRadioButton('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> <label for="data_0__allow_submit_1">yes</label>
-<?=addRadioButton('data[0][allow_submit]', (isset($row['allow_submit']) && !$row['allow_submit']), 0)?> <label for="data_0__allow_submit_0">no</label></td></tr>
+<td><?php echo addRadioButton('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> <label for="data_0__allow_submit_1">yes</label>
+<?php echo addRadioButton('data[0][allow_submit]', (isset($row['allow_submit']) && !$row['allow_submit']), 0)?> <label for="data_0__allow_submit_0">no</label></td></tr>
 
 <tr><td>Allow judge:</td>
-<td><?=addRadioButton('data[0][allow_judge]', (!isset($row['allow_judge']) || $row['allow_judge']), 1)?> <label for="data_0__allow_judge_1">yes</label>
-<?=addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
+<td><?php echo addRadioButton('data[0][allow_judge]', (!isset($row['allow_judge']) || $row['allow_judge']), 1)?> <label for="data_0__allow_judge_1">yes</label>
+<?php echo addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
 
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
-<td><?=addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
+<td><?php echo addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
 
 <tr><td><label for="data_0__color_">Balloon colour:</label></td>
-<td><?=addInput('data[0][color]', @$row['color'], 8, 25)?>
+<td><?php echo addInput('data[0][color]', @$row['color'], 8, 25)?>
 <a target="_blank"
 href="http://www.w3schools.com/css/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>
-<td><?=addInput('data[0][special_run]', @$row['special_run'], 30, 25)?></td></tr>
+<td><?php echo addInput('data[0][special_run]', @$row['special_run'], 30, 25)?></td></tr>
 
 <tr><td><label for="data_0__special_compare_">Special compare script:</label></td>
-<td><?=addInput('data[0][special_compare]', @$row['special_compare'], 30, 25)?></td></tr>
+<td><?php echo addInput('data[0][special_compare]', @$row['special_compare'], 30, 25)?></td></tr>
 </table>
 
 <?php
@@ -120,16 +120,16 @@ echo addForm($pagename) . "<p>\n" .
 	"</p>\n";
 ?>
 <table>
-<tr><td scope="row">ID:          </td><td class="probid"><?=htmlspecialchars($data['probid'])?></td></tr>
-<tr><td scope="row">Name:        </td><td><?=htmlspecialchars($data['name'])?></td></tr>
-<tr><td scope="row">Contest:     </td><td><?=htmlspecialchars($data['contestname']) .
+<tr><td scope="row">ID:          </td><td class="probid"><?php echo htmlspecialchars($data['probid'])?></td></tr>
+<tr><td scope="row">Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
+<tr><td scope="row">Contest:     </td><td><?php echo htmlspecialchars($data['contestname']) .
 									' (c' . htmlspecialchars($data['cid']) .')'?></td></tr>
-<tr><td scope="row">Allow submit:</td><td class="nobreak"><?=printyn($data['allow_submit']) . ' '.
+<tr><td scope="row">Allow submit:</td><td class="nobreak"><?php echo printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
 		" submissions for this problem?')"); ?>
 </td></tr>
-<tr><td scope="row">Allow judge: </td><td><?=printyn($data['allow_judge']) . ' '.
+<tr><td scope="row">Allow judge: </td><td><?php echo printyn($data['allow_judge']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_judge]',
 		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
 		" judging for this problem?')"); ?>
@@ -153,7 +153,7 @@ echo addForm($pagename) . "<p>\n" .
 	}
 
 ?></td></tr>
-<tr><td scope="row">Timelimit:   </td><td><?=(int)$data['timelimit']?> sec</td></tr>
+<tr><td scope="row">Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
 <?php
 if ( !empty($data['color']) ) {
 	echo '<tr><td scope="row">Colour:       </td><td><span style="color: ' .

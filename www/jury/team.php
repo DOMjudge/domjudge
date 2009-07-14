@@ -48,7 +48,7 @@ if ( IS_ADMIN && !empty($cmd) ):
 
 ?>
 <tr><td><label for="data_0__name_">Team name:</label></td>
-<td><?=addInput('data[0][name]', @$row['name'], 35, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 35, 255)?></td></tr>
 <tr><td><label for="data_0__categoryid_">Category:</label></td>
 <td><?php
 $cmap = $DB->q("KEYVALUETABLE SELECT categoryid,name FROM team_category ORDER BY categoryid");
@@ -56,7 +56,7 @@ echo addSelect('data[0][categoryid]', $cmap, @$row['categoryid'], true);
 ?>
 </td></tr>
 <tr><td valign="top"><label for="data_0__members_">Members:</label></td>
-<td><?=addTextArea('data[0][members]', @$row['members'], 40, 3)?></td></tr>
+<td><?php echo addTextArea('data[0][members]', @$row['members'], 40, 3)?></td></tr>
 <tr><td><label for="data_0__affilid_">Affiliation:</label></td>
 <td><?php
 $amap = $DB->q("KEYVALUETABLE SELECT affilid,name FROM team_affiliation ORDER BY affilid");
@@ -65,11 +65,11 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 ?>
 </td></tr>
 <tr><td><label for="data_0__ipaddress_">IP address:</label></td>
-<td><?=addInput('data[0][ipaddress]', @$row['ipaddress'], 35, 32)?> (or hostname)</td></tr>
+<td><?php echo addInput('data[0][ipaddress]', @$row['ipaddress'], 35, 32)?> (or hostname)</td></tr>
 <tr><td><label for="data_0__room_">Room:</label></td>
-<td><?=addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
+<td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td valign="top"><label for="data_0__comments_">Comments:</label></td>
-<td><?=addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
+<td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
 </table>
 
 <?php
@@ -114,18 +114,18 @@ if ( is_readable($teamimage) ) {
 ?>
 
 <div class="col1"><table>
-<tr><td scope="row">Login:     </td><td class="teamid"><?=$row['login']?></td></tr>
-<tr><td scope="row">Name:      </td><td><?=htmlspecialchars($row['name'])?></td></tr>
-<tr><td scope="row">Has passwd:</td><td><?=(isset($row['passwd']) ? 'yes':'no')?>
+<tr><td scope="row">Login:     </td><td class="teamid"><?php echo $row['login']?></td></tr>
+<tr><td scope="row">Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
+<tr><td scope="row">Has passwd:</td><td><?php echo (isset($row['passwd']) ? 'yes':'no')?>
 <?php if ( IS_ADMIN ): ?>
-	<a href="genpasswds.php?forteam=<?=$id?>"><img src="../images/edit.png"
+	<a href="genpasswds.php?forteam=<?php echo $id?>"><img src="../images/edit.png"
 	alt="edit" title="set password" class="picto" /></a>
 <?php endif; ?>
 	</td></tr>
-<tr><td scope="row">Host:</td><td><?=@$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
+<tr><td scope="row">Host:</td><td><?php echo @$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
 	' - '.(@$row['hostname'] ? printhost($row['hostname'], TRUE):''):'-'?></td></tr>
 <?php if (!empty($row['room'])): ?>
-<tr><td scope="row">Room:</td><td><?=htmlspecialchars($row['room'])?></td></tr>
+<tr><td scope="row">Room:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>
 </table></div>
 

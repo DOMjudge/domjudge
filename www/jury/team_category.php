@@ -39,21 +39,21 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 ?>
 
 <tr><td><label for="data_0__name_">Description:</label></td>
-<td><?=addInput('data[0][name]', @$row['name'], 15, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 15, 255)?></td></tr>
 
 <tr><td><label for="data_0__sortorder_">Sort order:</label></td>
-<td><?=addInput('data[0][sortorder]', (empty($row['sortorder'])?0:$row['sortorder']), 2, 1)?></td></tr>
+<td><?php echo addInput('data[0][sortorder]', (empty($row['sortorder'])?0:$row['sortorder']), 2, 1)?></td></tr>
 
 <tr><td><label for="data_0__color_">Colour:</label></td>
-<td><?=addInput('data[0][color]', @$row['color'], 15, 25)?>
+<td><?php echo addInput('data[0][color]', @$row['color'], 15, 25)?>
 <a target="_blank"
 href="http://www.w3schools.com/css/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 </td></tr>
 
 <tr><td>Visible:</td>
-<td><?=addRadioButton('data[0][visible]', (!isset($row['visible']) || $row['visible']), 1)?> <label for="data_0__visible_1">yes</label>
-<?=addRadioButton('data[0][visible]', (isset($row['visible']) && !$row['visible']), 0)?> <label for="data_0__visible_0">no</label></td></tr>
+<td><?php echo addRadioButton('data[0][visible]', (!isset($row['visible']) || $row['visible']), 1)?> <label for="data_0__visible_1">yes</label>
+<?php echo addRadioButton('data[0][visible]', (isset($row['visible']) && !$row['visible']), 0)?> <label for="data_0__visible_0">no</label></td></tr>
 
 </table>
 

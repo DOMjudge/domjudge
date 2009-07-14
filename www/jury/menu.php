@@ -6,7 +6,7 @@
 <?php   } ?>
 <a href="teams.php" accesskey="t">teams</a>
 <?php	if ( $nunread_clars > 0 ) { ?>
-<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications (<?=$nunread_clars?> new)</a>
+<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications (<?php echo $nunread_clars?> new)</a>
 <?php	} else { ?>
 <a href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications</a>
 <?php	} ?>

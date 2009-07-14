@@ -40,15 +40,15 @@ if( ! $row['valid'] ) {
 
 <table>
 <tr><td scope="row">Problem:</td>
-	<td><?=htmlspecialchars($row['probname'])?> [<span class="probid"><?=
+	<td><?php echo htmlspecialchars($row['probname'])?> [<span class="probid"><?php echo 
 	htmlspecialchars($row['probid']) ?></span>]</td></tr>
 <tr><td scope="row">Submitted:</td>
-	<td><?=printtime($row['submittime'])?></td></tr>
+	<td><?php echo printtime($row['submittime'])?></td></tr>
 <tr><td scope="row">Language:</td>
-	<td><?=htmlspecialchars($row['langname'])?></td></tr>
+	<td><?php echo htmlspecialchars($row['langname'])?></td></tr>
 </table>
 
-<p>Result: <?=printresult($row['result'], TRUE)?></p>
+<p>Result: <?php echo printresult($row['result'], TRUE)?></p>
 <?php
 
 if ( (SHOW_COMPILE == 2) ||
