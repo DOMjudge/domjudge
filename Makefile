@@ -89,6 +89,9 @@ install-domserver-l install-judgehost-l:
 		echo "**************************************************************" ; \
 	fi
 
+dist-l:
+	$(MAKE) clean-autoconf
+
 # Run aclocal separately from autoreconf, which doesn't pass -I option.
 aclocal.m4: configure.ac $(wildcard m4/*.m4)
 	aclocal -I m4
@@ -127,7 +130,7 @@ maintainer-install: domserver judgehost docs submitclient \
 	mkdir -p $(judgehost_bindir)
 	ln -sf $(PWD)/judge/runguard $(judgehost_bindir)
 # This doesn't work in FreeBSD:
-	su -c "chown root.root judge/runguard ; chmod u+s judge/runguard"
+	su -c "chown root.root judge/runguard ; chmod u+s,a+x judge/runguard"
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 maintainer-uninstall:
