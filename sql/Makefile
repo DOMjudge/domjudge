@@ -10,8 +10,8 @@ dj-setup-database: %: %.in ../paths.mk
 	chmod a+x $@
 
 install-domserver:
-	$(INSTALL_PROG) -t $(domserver_bindir) dj-setup-database
-	$(INSTALL_DATA) -t $(domserver_sqldir) \
+	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) dj-setup-database
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir) \
 		mysql_db_structure.sql mysql_db_examples.sql \
 		mysql_privileges.sql
 

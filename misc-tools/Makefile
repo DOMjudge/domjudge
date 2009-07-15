@@ -41,7 +41,7 @@ check: checktestdata
 
 
 install-judgehost:
-	$(INSTALL_PROG) -t $(judgehost_bindir) dj_make_chroot
+	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) dj_make_chroot
 
 dist-l: yylex.cc parse.cc
 

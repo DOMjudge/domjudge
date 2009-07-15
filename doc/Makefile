@@ -12,5 +12,5 @@ SUBDIRS = admin team judge
 config: SUBDIRS=team
 
 install-docs-l:
-	$(INSTALL_DATA) -t $(domjudge_docdir)/logos logos/DOMjudgelogo.pdf logos/DOMjudgelogo.png
-	$(INSTALL_DATA) -t $(domjudge_docdir)/examples examples/example.*
+	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/logos logos/DOMjudgelogo.pdf logos/DOMjudgelogo.png
+	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples examples/example.*

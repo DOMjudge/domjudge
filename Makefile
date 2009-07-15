@@ -63,24 +63,24 @@ maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 domserver-create-dirs:
 	$(INSTALL_DIR) $(domserver_dirs)
 ifneq "$(fhs_enabled)" "yes"
-	-$(INSTALL_USER)    -m 0700 -d $(domserver_logdir)
-	-$(INSTALL_WEBSITE) -m 0770 -d $(domserver_tmpdir)
-	-$(INSTALL_WEBSITE) -m 0770 -d $(domserver_submitdir)
+	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
+	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
+	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_submitdir)
 endif
 
 judgehost-create-dirs:
 	$(INSTALL_DIR) $(judgehost_dirs)
 ifneq "$(fhs_enabled)" "yes"
-	-$(INSTALL_USER) -m 0700 -d $(judgehost_tmpdir)
-	-$(INSTALL_USER) -m 0700 -d $(judgehost_logdir)
-	-$(INSTALL_USER) -m 0711 -d $(judgehost_judgedir)
+	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_tmpdir)
+	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_logdir)
+	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_judgedir)
 endif
 
 docs-create-dirs:
 	$(INSTALL_DIR) $(docs_dirs)
 
 install-docs-l:
-	$(INSTALL_DATA) -t $(domjudge_docdir) README ChangeLog COPYING*
+	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir) README ChangeLog COPYING*
 
 install-domserver-l install-judgehost-l:
 	@if [ `id -u` -ne 0 ]; then \

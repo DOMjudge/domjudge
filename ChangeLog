@@ -53,6 +53,7 @@ Version 3.0.0 - SVN
  - Fix DEBUG_JUDGE option for debugging judging backend.
  - FreeBSD porting fixes, making DOMjudge more POSIX compliant.
  - Make DOMjudge work when PHP's short_open_tag = Off.
+ - Add support for staged installs (DESTDIR).
 
 Version 2.2.0 - 11 August 2008
 ------------------------------

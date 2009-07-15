@@ -26,14 +26,20 @@ htpasswd-jury: dbpasswords.secret
 	htpasswd -b $@ domjudge_jury `grep '^jury:' $< | cut -d : -f 5`
 
 install-domserver:
-	$(INSTALL_DATA) -t $(domserver_etcdir) apache.conf domserver-static.php
-	-$(INSTALL_USER) -t $(domserver_etcdir) domserver-config.php common-config.php
-	-$(INSTALL_WEBSITE) -m 0640 -t $(domserver_etcdir) dbpasswords.secret htpasswd-jury
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
+		apache.conf domserver-static.php
+	-$(INSTALL_USER) -t $(DESTDIR)$(domserver_etcdir) \
+		domserver-config.php common-config.php
+	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
+		dbpasswords.secret htpasswd-jury
 
 install-judgehost:
-	$(INSTALL_DATA) -t $(judgehost_etcdir) judgehost-static.php
-	-$(INSTALL_USER) -t $(judgehost_etcdir) judgehost-config.php common-config.php
-	-$(INSTALL_USER) -m 0600 -t $(judgehost_etcdir) dbpasswords.secret
+	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
+		judgehost-static.php
+	-$(INSTALL_USER) -t $(DESTDIR)$(judgehost_etcdir) \
+		judgehost-config.php common-config.php
+	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \
+		dbpasswords.secret
 
 distclean-l:
 	-rm -f $(SUBST_CONFIGS)

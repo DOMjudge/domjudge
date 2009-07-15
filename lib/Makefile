@@ -13,10 +13,10 @@ clean-l:
 	rm -f $(OBJECTS)
 
 install-domserver:
-	$(INSTALL_DATA) -t $(domserver_libdir) *.php
-	$(INSTALL_DATA) -t $(domserver_libwwwdir) www/*.php 
-	$(INSTALL_SCRIPT) -t $(domserver_libdir) alert
+	$(INSTALL_DATA)   -t $(DESTDIR)$(domserver_libdir)    *.php
+	$(INSTALL_DATA)   -t $(DESTDIR)$(domserver_libwwwdir) www/*.php 
+	$(INSTALL_SCRIPT) -t $(DESTDIR)$(domserver_libdir)    alert
 
 install-judgehost:
-	$(INSTALL_DATA) -t $(judgehost_libdir) *.php *.sh 
-	$(INSTALL_SCRIPT) -t $(judgehost_libdir) alert
+	$(INSTALL_DATA)   -t $(DESTDIR)$(judgehost_libdir)    *.php *.sh 
+	$(INSTALL_SCRIPT) -t $(DESTDIR)$(judgehost_libdir)    alert

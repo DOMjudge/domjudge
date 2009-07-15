@@ -6,7 +6,8 @@ include $(TOPDIR)/Makefile.global
 docs: judge-manual.pdf judge-manual.html
 
 install-docs: docs
-	$(INSTALL_DATA) -t $(domjudge_docdir)/judge judge-manual.pdf judge-manual*.html
+	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/judge \
+		judge-manual.pdf judge-manual*.html
 
 judge-manual.pdf: judge-manual.sgml ../docs_header.tex
 	linuxdoc -B latex -o pdf -P "`cat ../docs_header.tex`" $< >/dev/null

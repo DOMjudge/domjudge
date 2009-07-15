@@ -8,9 +8,11 @@ config: gentexconfig
 docs: team-manual.pdf
 
 install-docs:
-	$(INSTALL_SCRIPT) -t $(domjudge_docdir)/team gentexconfig genteammanuals
-	$(INSTALL_DATA)   -t $(domjudge_docdir)/team team-manual*.tex team-manual*.pdf
-	$(INSTALL_DATA)   -T README $(domjudge_docdir)/README.teammanual
+	$(INSTALL_SCRIPT) -t $(DESTDIR)$(domjudge_docdir)/team \
+		gentexconfig genteammanuals
+	$(INSTALL_DATA)   -t $(DESTDIR)$(domjudge_docdir)/team \
+		team-manual*.tex team-manual*.pdf
+	$(INSTALL_DATA) -T README $(DESTDIR)$(domjudge_docdir)/README.teammanual
 
 gentexconfig: gentexconfig.in ../../paths.mk
 	$(substconfigvars)
