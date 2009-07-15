@@ -217,7 +217,7 @@ disown $CATPID
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
-( "$RUNGUARD" ${DO_DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
+( "$RUNGUARD" ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
 	-t $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
 	$PREFIX/$RUN_SCRIPT $PREFIX/program testdata.in program.out program.err program.exit \
 ) &>error.tmp
