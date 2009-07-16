@@ -5,8 +5,6 @@ require_once("common-config.php");
 define('WEBSERVER', 'localhost');
 define('WEBBASEURI', 'http://' . WEBSERVER . '/domjudge/');
 
-define('SHOW_AFFILIATIONS', true);
-
 // Show compile output in team webinterface.
 // Note that this might give teams the possibility to gain information
 // about the judging system; e.g. which functions are usable or
