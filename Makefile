@@ -141,6 +141,9 @@ maintainer-uninstall:
 distclean-l: clean-autoconf
 	-rm -f paths.mk
 
+maintainer-clean-l:
+	-rm -f configure aclocal.m4
+
 clean-autoconf:
 	-rm -rf config.status config.cache config.log autom4te.cache
 

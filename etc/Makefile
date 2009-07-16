@@ -43,3 +43,6 @@ install-judgehost:
 
 distclean-l:
 	-rm -f $(SUBST_CONFIGS)
+
+maintainer-clean-l:
+	-rm -f etc/config.h.in
