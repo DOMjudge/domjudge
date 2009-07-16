@@ -62,18 +62,20 @@ maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(domserver_dirs)
+# Fix permissions for special directories (don't touch tmpdir when FHS enabled):
+	-$(INSTALL_DIR) -o $(DOMJUDGE_USER) -m 0700 $(domserver_logdir)
+	-$(INSTALL_DIR) -o $(DOMJUDGE_USER) -g $(WEBSERVER_GROUP) -m 0770 $(domserver_submitdir)
 ifneq "$(fhs_enabled)" "yes"
-	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
-	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
-	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_submitdir)
+	-$(INSTALL_DIR) -o $(DOMJUDGE_USER) -g $(WEBSERVER_GROUP) -m 0770 $(domserver_tmpdir)
 endif
 
 judgehost-create-dirs:
 	$(INSTALL_DIR) $(judgehost_dirs)
+# Fix permissions for special directories (don't touch tmpdir when FHS enabled):
+	-$(INSTALL_DIR) -o $(DOMJUDGE_USER) -m 0700 $(judgehost_logdir)
+	-$(INSTALL_DIR) -o $(DOMJUDGE_USER) -m 0711 $(judgehost_judgedir)
 ifneq "$(fhs_enabled)" "yes"
-	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_tmpdir)
-	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_logdir)
-	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_judgedir)
+	-$(INSTALL_DIR) -o $(DOMJUDGE_USER) -m 0700 $(judgehost_tmpdir)
 endif
 
 docs-create-dirs:

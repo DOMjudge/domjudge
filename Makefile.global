@@ -32,9 +32,9 @@ INSTALL         = install
 INSTALL_PROG    = $(INSTALL)
 INSTALL_SCRIPT  = $(INSTALL)
 INSTALL_DATA    = $(INSTALL) -m 0644
-INSTALL_USER    = $(INSTALL) -o $(DOMJUDGE_USER)
-INSTALL_WEBSITE = $(INSTALL) -o $(DOMJUDGE_USER) -g $(WEBSERVER_GROUP)
-INSTALL_DIR     = mkdir -p
+INSTALL_USER    = $(INSTALL) -m 0644 -o $(DOMJUDGE_USER)
+INSTALL_WEBSITE = $(INSTALL) -m 0644 -o $(DOMJUDGE_USER) -g $(WEBSERVER_GROUP)
+INSTALL_DIR     = $(INSTALL) -d
 
 # Check whether we are running under Cygwin:
 ifneq ($(findstring CYGWIN,$(shell uname)),)
@@ -55,7 +55,7 @@ $(LIBOBJECTS):
 # Recursive rule, runs in depth-first traversal. TARGET-l is the local
 # variant that is called after traversing all subdirectories.
 $(REC_TARGETS): %:
-	@[ -n "$(QUIET)" ] || echo "Recursing target \`$@' into: $(SUBDIRS)"
+	@[ -n "$(QUIET)" ] || echo "Recursing target \`$@' into:" $(SUBDIRS)
 	@for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 	$(MAKE) $@-l
 
