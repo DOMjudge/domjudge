@@ -39,7 +39,7 @@ install:
 	@exit 1
 
 # MAIN TARGETS
-build domserver judgehost: config
+build domserver judgehost: paths.mk config
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
@@ -100,6 +100,11 @@ aclocal.m4: configure.ac $(wildcard m4/*.m4)
 
 configure: configure.ac aclocal.m4
 	autoreconf
+
+paths.mk:
+	@echo "The file 'paths.mk' is not available. Probably you"
+	@echo "have not run './configure' yet, aborting..."
+	@exit 1
 
 # Configure for running in source tree, not meant for normal use:
 maintainer-conf: configure
