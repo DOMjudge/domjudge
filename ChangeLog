@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.0.0 - SVN
 -------------------
+ - Fix directory install permissions.
 
 Version 3.0.0 Release Candidate 1 - 16 June 2009
 ------------------------------------------------
