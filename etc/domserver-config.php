@@ -2,8 +2,9 @@
 
 require_once("common-config.php");
 
-define('WEBSERVER', 'localhost');
-define('WEBBASEURI', 'http://' . WEBSERVER . '/domjudge/');
+// Base URI where the DOMjudge webinterface is located.
+// Always end this URI with a slash!!!
+define('WEBBASEURI', 'http://example.com/domjudge/');
 
 // Show compile output in team webinterface.
 // Note that this might give teams the possibility to gain information

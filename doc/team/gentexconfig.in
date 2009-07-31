@@ -31,7 +31,7 @@ if ( is_readable($config) ) {
 $configvars = array(
 	'DOMJUDGE_VERSION' => 'unknown',
 	'SOURCESIZE'       => 256,
-	'WEBBASEURI'       => 'http://domjudge.example.com/',
+	'WEBBASEURI'       => 'http://example.com/domjudge/',
 	'COMPILETIME'      => 30,
 	'MEMLIMIT'         => 524288,
 	'FILELIMIT'        => 4096,
