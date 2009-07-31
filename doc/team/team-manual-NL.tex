@@ -39,9 +39,9 @@ DOMjudge werkt via een web-interface die je kunt vinden op \\
 \subsection*{Inlezen en wegschrijven}
 
 Oplossingen moeten invoer en uitvoer lezen van `standard in'
-(toetsenbord) en wegschrijven naar `standard out' (beeldscherm).
-Je hoeft dus nooit een bestand te openen. Zie bijlage
-\ref{codeexamples} voor een aantal voorbeelden hiervan.
+(toetsenbord) en wegschrijven naar `standard out' (beeldscherm). Je
+hoeft dus nooit een bestand te openen. Zie bijlage~\ref{codeexamples}
+voor een aantal voorbeelden hiervan.
 
 \subsection*{Insturen van oplossingen}
 
@@ -107,9 +107,9 @@ Het submitprogramma maakt gebruik van een directory \cmd{\USERSUBMITDIR}
 in de homedirectory van het account. Hier slaat het tijdelijk
 bestanden op voor inzending en staat ook een logfile \cmd{submit.log}.
 Verwijder deze directory niet en pas hem niet aan, omdat anders het
-submitprogramma niet meer correct functioneert. Verder is een
+submitprogramma niet meer correct functioneert. Verder kan er een
 ``public ssh-key'' van de jury in de \textsc{ssh}-configuratie
-toegevoegd. Ook deze is nodig voor het functioneren van \cmd{submit}.
+toegevoegd zijn. Ook deze is nodig voor het functioneren van \cmd{submit}.
 
 \subsection{Web-interface}
 
@@ -203,10 +203,10 @@ beoordeling. Het beoordelen gebeurt via de volgende stappen:
 
 \subsection{Insturen}
 
-Via het \cmd{submit} programma of de web-interface (zie sectie
-\ref{submit}) kun je een oplossing voor een opgave insturen, zodat
-hij ge\"upload wordt naar de jury. Let op dat je de source-code van
-je programma moet insturen (en dus niet een gecompileerd programma
+Via het \cmd{submit} programma of de web-interface (zie
+sectie~\ref{submit}) kun je een oplossing voor een opgave insturen,
+zodat hij ge\"upload wordt naar de jury. Let op dat je de source-code
+van je programma moet insturen (en dus niet een gecompileerd programma
 of de uitvoer van je programma).
 
 Dan komt je programma in de wachtrij te staan, om gecompileerd,
@@ -228,7 +228,7 @@ gecontroleerd of je programma correct ge\"eindigd is: als je programma
 met een fout eindigt en het goede antwoord geeft, krijg je toch een
 \textsc{run-error}! Er zijn een aantal beperkingen die aan je programma
 opgelegd worden. Als je programma die overschrijdt, wordt het ook
-afgebroken met een fout, zie (\ref{runlimits}).
+afgebroken met een fout, zie sectie~\ref{runlimits}.
 
 Verder moet de uitvoer van jouw programma exact overeenkomen met de
 uitvoer van de jury. Let dus goed op, dat je de uitvoerspecificatie
@@ -283,13 +283,16 @@ draait een gecompileerd programma in \'e\'en proces.
 
 \subsection{Java klassenaamgeving}
 
-Java-inzendingen moeten een strikte naamgeving van de hoofdklasse
-aanhouden: deze moet ``\verb!Main!'' heten en een methode
-``\verb!public static void main(String args[])!'' hebben. Zie ook het
-Java codevoorbeeld in appendix \ref{codeexamples}. De reden is dat
-Java compiler van Sun (die standaard gebruikt wordt) een class-bestand
-genereert waarvan de naam afhangt van de hoofdklasse. Er is helaas
-geen robuuste manier om de hoofdklasse naam uit te lezen.
+Het compileren van Java broncode wordt gecompliceerd door de
+klassenaamgeving van Java: er is geen vast startpunt van de code;
+iedere klasse kan een methode \texttt{main} bevatten. Een klasse die
+\texttt{public} gedeclareerd is, moet verder in een bestand met
+dezelfde naam staan.
+
+In de standaard configuratie detecteert DOMjudge automatisch de
+hoofdklasse. Anders moet de hoofdklasse ``\verb!Main!'' heten en een
+methode ``\verb!public static void main(String args[])!'' hebben. Zie
+ook het Java codevoorbeeld in appendix~\ref{codeexamples}.
 
 \newpage
 \appendix

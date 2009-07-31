@@ -35,7 +35,7 @@ DOMjudge works through a web interface that can be found at\\
 
 Solutions have to read all input from `standard in' and write all
 output to `standard out' (also known as console). You will never have
-to open (other) files. See appendix \ref{codeexamples} for some
+to open (other) files. See appendix~\ref{codeexamples} for some
 examples.
 
 \subsection*{Submitting solutions}
@@ -98,7 +98,7 @@ The submit program uses a directory \cmd{\USERSUBMITDIR} in the
 home directory of your account where it stores temporary files for
 submission and also a log file \cmd{submit.log}. Do not remove or
 change this directory, otherwise the \cmd{submit} program might fail to
-function correctly. Furthermore a ``public ssh-key'' of the jury has
+function correctly. Furthermore a ``public ssh-key'' of the jury might have
 been added to the \textsc{ssh} configuration; this is also necessary
 for the functioning of \cmd{submit}.
 
@@ -191,9 +191,9 @@ interaction is necessary. The judging is done in the following way:
 
 \subsection{Submitting solutions}
 
-With the \cmd{submit} program or the web interface (see section
-\ref{submit}) you can submit a solution to a problem to the jury.
-Note that you have to submit the source code of your program
+With the \cmd{submit} program or the web interface (see
+section~\ref{submit}) you can submit a solution to a problem to the
+jury. Note that you have to submit the source code of your program
 (and not a compiled program or the output of your program).
 
 There your program enters a queue, awaiting compilation, execution
@@ -215,7 +215,7 @@ output, the exit status of your program is checked: if your program
 gives the correct answer, but exits with a non-zero exit code, the
 result will be a \textsc{run-error}! There are some restrictions during
 execution. If your program violates these it will also be aborted
-with a \textsc{run-error}, see section \ref{runlimits}.
+with a \textsc{run-error}, see section~\ref{runlimits}.
 
 When comparing program output, it has to exactly match to output of
 the jury. So take care that you follow the output specifications. In
@@ -268,13 +268,16 @@ runs in one process.
 
 \subsection{Java class naming}
 
-Java submissions should adhere to a strict naming scheme for the main
-class. The main class should be ``\verb!Main!'', with method
+Compilation of Java sources is somewhat complicated by the class
+naming conventions used: there is no fixed entry point; any class can
+contain a method \texttt{main}. Furthermore, a class declared
+\texttt{public} must be located in an indentically named file.
+
+In the default configuration of DOMjudge this is worked around by
+autodetecting the main class. When this feature is not used, then
+the main class should be ``\verb!Main!'', with method
 ``\verb!public static void main(String args[])!'', see also the Java
-code example in appendix \ref{codeexamples}. The reason is that Sun
-Java compiler (which is used by default) generates a class file
-dependent on the main class name and there is unfortunately no robust
-way to detect that main class name.
+code example in appendix~\ref{codeexamples}.
 
 \newpage
 \appendix
