@@ -28,7 +28,7 @@ if( $res->count() == 0 ) {
 
 	while($row = $res->next()) {
 		echo "<tr".
-			( $row['allow_judge'] && $row['allow_submit'] ? '': ' class="disabled"').
+			( $row['allow_submit'] ? '': ' class="disabled"').
 			"><td><a href=\"language.php?id=".urlencode($row['langid'])."\">".
 				htmlspecialchars($row['langid'])."</a>".
 			"</td><td><a href=\"language.php?id=".urlencode($row['langid'])."\">".
