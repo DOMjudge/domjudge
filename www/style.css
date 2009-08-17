@@ -57,7 +57,10 @@ tr.unread td {
 }
 
 /* more spacing in lists of teams, submissions, etc. */
-.list { border-spacing: 0px; }
+.list {
+	border-collapse: collapse;
+	border-spacing: 0px;
+}
 .list td, .list th {
 	padding: 3px;
 	padding-left: 5px;
@@ -195,3 +198,5 @@ td.scorenc { border-color: silver; }
 /* between different sortorder-categories, print a thick line */
 .sortorderswitch { border-top: 2px solid black; }
 
+/* between different contests, print a thin line */
+.contestswitch { border-top: 1px solid black; }

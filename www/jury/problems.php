@@ -28,9 +28,17 @@ if( $res->count() == 0 ) {
 		"<th class=\"sorttable_nosort\" scope=\"col\">colour</th></tr>" .
 		"</thead>\n<tbody>\n";
 
+	$lastcid = -1;
+
 	while($row = $res->next()) {
-		echo "<tr" . ($row['cid'] == $cid ? '' : ' class="disabled"') .
-			"><td class=\"probid\"><a href=\"problem.php?id=" . 
+		$classes = array();
+		if ( $row['cid'] != $cid ) $classes[] = 'disabled';
+		if ( $row['cid'] != $lastcid ) {
+			if ( $lastcid != -1 ) $classes[] = 'contestswitch';
+			$lastcid = $row['cid'];
+		}
+		echo "<tr class=\"" . implode(' ',$classes) .
+		    "\"><td class=\"probid\"><a href=\"problem.php?id=" . 
 				htmlspecialchars($row['probid'])."\">".
 				htmlspecialchars($row['probid'])."</a>".
 			"</td><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".
