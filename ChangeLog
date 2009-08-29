@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 2.2.4 - SVN
--------------------
+Version 2.2.4 - 29 August 2009
+------------------------------
  - Remove deprecated define_syslog_variables() and ereg_replace()
    function calls.
  - Merge r2744,2746,2747 from trunk: fix too restrictive team ID.
