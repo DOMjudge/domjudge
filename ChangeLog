@@ -3,6 +3,9 @@ DOMjudge Programming Contest Judging System
 Version 3.0.0 - SVN
 -------------------
  - Fix directory install permissions.
+ - Only show languages that are not submitable as 'disabled'
+   and show a separator between contests on the problems page.
+ - Minor updates to team manual.
 
 Version 3.0.0 Release Candidate 1 - 16 June 2009
 ------------------------------------------------
