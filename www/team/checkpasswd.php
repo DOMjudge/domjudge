@@ -1,7 +1,7 @@
 <?php
 /**
- * This page checks a user's credentials against the database, and when successful,
- * adds that IP to that team.
+ * This page checks a user's credentials against the database, and
+ * when successful, adds that IP to that team or starts a new PHP session.
  *
  * $Id$
  *
@@ -25,41 +25,53 @@ require_once(LIBWWWDIR . '/common.php');
 
 setup_database_connection('team');
 
-$ip = $_SERVER['REMOTE_ADDR'];
-$row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
-
 $user = trim($_POST['login']);
 $pass = trim($_POST['passwd']);
 
 $title = 'Authenticate user';
 $menu = false;
-require(LIBDIR . '/www/header.php');
 
 if ( empty($user) || empty($pass) ) {
+	require(LIBDIR . '/www/header.php');
 	echo "<h1>Not Authenticated</h1>\n\n";
 	echo "<p>Please supply a username and password.</p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
+$ip = $_SERVER['REMOTE_ADDR'];
 $hostname = gethostbyaddr($ip);
 if ( $hostname == $ip ) $hostname = NULL;
 
-$cnt = $DB->q('RETURNAFFECTED UPDATE team SET ipaddress = %s, hostname = %s
-               WHERE login = %s AND passwd = %s AND ipaddress IS NULL',
-              $ip, $hostname, $user, md5($user."#".$pass));
+$row = $DB->q('MAYBETUPLE SELECT * FROM team
+               WHERE login = %s AND passwd = %s' .
+              (PHP_SESSIONS ? '' : ' AND ipaddress IS NULL'),
+              $user, md5($user."#".$pass));
 
-if ( $cnt == 1 ) {
-	echo "<h1>Authenticated</h1>\n\n<p>Successfully authenticated as team " .
-		htmlspecialchars($user) . " on " . htmlspecialchars($ip) . ".</p>" .
-		"<p><a href=\"./\">Continue to your team page</a>, and good luck!</p>\n\n";
-} else if ( $cnt > 1 ) {
-	error("multiple database entries that match with team '$user'");
-} else {
+if ( !$row ) {
 	sleep(3);
+	require(LIBDIR . '/www/header.php');
 	echo "<h1>Not Authenticated</h1>\n\n";
 	echo "<p>Invalid username or password supplied. " .
 		"Please try again or contact a staff member.</p>\n\n";
+	require(LIBWWWDIR . '/footer.php');
+	exit;
 }
+
+if ( PHP_SESSIONS ) {
+	session_start();
+	$_SESSION['teamid'] = $user;
+}
+
+$cnt = $DB->q('RETURNAFFECTED UPDATE team SET ipaddress = %s, hostname = %s
+	           WHERE login = %s', $ip, $hostname, $user);
+
+if ( $cnt != 1 ) error("cannot set IP/hostname for user '$user'");
+
+require(LIBDIR . '/www/header.php');
+
+echo "<h1>Authenticated</h1>\n\n<p>Successfully authenticated as team " .
+	htmlspecialchars($user) . " on " . htmlspecialchars($ip) . ".</p>" .
+	"<p><a href=\"./\">Continue to your team page</a>, and good luck!</p>\n\n";
 
 require(LIBWWWDIR . '/footer.php');

@@ -24,6 +24,9 @@ define('SHOW_COMPILE', 2);
 // addresses have to be configured beforehand.
 define('STRICTIPCHECK', false);
 
+// Authentication per php session handling?
+define('PHP_SESSIONS', true);
+
 define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl Bash,sh');
 
 // Specify here which of the users in htpasswd-jury should have admin 

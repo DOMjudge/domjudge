@@ -2,7 +2,7 @@
 /**
  * This file is included to check whether this is a known team, and sets
  * the $login variable accordingly. It checks this by the IP from the
- * database, if not present it returns an error 403 (Forbidden).
+ * database or the PHP session ID.
  *
  * $Id$
  *
@@ -10,12 +10,19 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$ip = $_SERVER['REMOTE_ADDR'];
-$row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
+if ( PHP_SESSIONS ) {
+	session_start();
+	if ( isset($_SESSION['teamid']) ) {
+		$row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',
+		              $_SESSION['teamid']);
+	}
+} else {
+	$ip = $_SERVER['REMOTE_ADDR'];
+	$row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
+}
 
-// not found in database
-if(!$row) {
-	if (NONINTERACTIVE) error("Not authenticated");
+if ( !isset($row) ) { // not found in database
+	if ( NONINTERACTIVE ) error("Not authenticated");
 	$title = 'Not Authenticated';
 	$menu = false;
 	include(LIBWWWDIR . '/header.php');
@@ -51,4 +58,3 @@ if ( empty($row['teampage_first_visited']) ) {
 }
 
 unset($row);
-
