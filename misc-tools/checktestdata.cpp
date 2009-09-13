@@ -19,6 +19,47 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+
+   Grammar and command syntax below. All commands are uppercase, while
+   variables are lowercase with non-leading digits.
+
+   integer  := 0|-?[1-9][0-9]*
+   variable := [a-z][a-z0-9]*
+   value    := <integer> | <variable>
+   string   := .*
+
+   command  :=
+
+   SPACE / NEWLINE
+
+      No-argument commands matching a single space (0x20) or newline
+      respectively.
+
+   EOF
+
+      Matches end-of-file. This implicitly added at the end of each
+      program and must match exactly: no extra data may be present.
+
+   INT(<value> min, <value> max [, <variable> name])
+
+      Match an arbitrary sized integer value in the interval [min,max]
+      and optionally assign the value read to variable 'name'.
+
+   STRING(<string> str)
+
+      Match the literal string 'str'.
+
+   REGEX(<string> str)
+
+      Match the extended regular expression 'str'. Matching is
+      performed greedily.
+
+   REP(<value> count [,<command> separator]) [<command>...] END
+
+      Repeat the commands between the 'REP() ... END' statements count
+      times and optionally match 'separator' command (count-1) times
+      in between.
+
  */
 
 #include <iostream>

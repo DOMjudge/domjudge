@@ -1,5 +1,5 @@
-int(1,100,N) newline
-rep(N)
-	regex("(Inf|nan|(\\+|-)?([0-9\.])+((E|e)(\\+|-)?[0-9]+)?)") newline
-end
-eof
+INT(1,100,n) NEWLINE
+REP(n)
+	REGEX("(Inf|nan|(\\+|-)?([0-9\.])+((E|e)(\\+|-)?[0-9]+)?)") NEWLINE
+END
+EOF
