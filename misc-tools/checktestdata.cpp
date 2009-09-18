@@ -123,13 +123,12 @@ void usage()
 void readprogram(const char *filename)
 {
 	ifstream in(filename);
-	Parser parseprog(in);
-
 	if ( !in ) {
 		cerr << "error opening " << filename << endl;
 		exit(1);
 	}
 
+	Parser parseprog(in);
 	if ( parseprog.parse()!=0 ) {
 		cerr << "parse error reading " << filename << endl;
 		exit(1);
