@@ -21,7 +21,8 @@
 
 
    Grammar and command syntax below. All commands are uppercase, while
-   variables are lowercase with non-leading digits.
+   variables are lowercase with non-leading digits. Lines starting
+   with '#' are comments and ignored.
 
    integer  := 0|-?[1-9][0-9]*
    variable := [a-z][a-z0-9]*

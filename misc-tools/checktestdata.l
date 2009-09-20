@@ -33,57 +33,56 @@ END      { return Parser::CMD_END; }
 	return Parser::INTEGER;
 }
 
- /* Below copied from https://numexp.org/svn/numexp-core/trunk/parser/specification.l, GPL */
- /**** parse strings -- adapted from flex's man page ****/
+ /* String parsing -- adapted from the flex manual page */
 
- /* start of string */
 \"	{
+    /* start of string */
     str_buf.clear();
     BEGIN(string);
 }
 
- /* end of string */
-<string>\"	{
+<string>{
+\"	{
+    /* end of string */
     BEGIN(INITIAL);
 	yytext = strdup(str_buf.c_str());
     return Parser::STRING;
 }
 
-<string>\n	{
-//    nxp_parser_error(N_("unterminated string."));
+\n	{
+    /* error: unterminated string constant */
 }
 
-<string>\\[0-7]{1,3} {
+\\[0-7]{1,3} {
     /* octal escape sequence */
     int result;
 
     (void) sscanf(yytext+1,"%o",&result);
 
-//	if ( result > 0xff )
-//		nxp_parser_warning(N_("string escape sequence is out-of-bounds."));
+    /* should check for bounds of escape sequence: result < 256 */
     str_buf += (char) result;
 }
 
-<string>\\[0-9]+ {
-//    nxp_parser_warning(N_("bad escape sequence in string."));
+\\[0-9]+ {
+    /* error: bad escape sequence */
 }
 
-<string>{
-    \\n  str_buf += '\n';
-    \\t  str_buf += '\t';
-    \\r  str_buf += '\r';
-    \\b  str_buf += '\b';
-    \\f  str_buf += '\f';
-}
+\\n         str_buf += '\n';
+\\t         str_buf += '\t';
+\\r         str_buf += '\r';
+\\b         str_buf += '\b';
+\\f         str_buf += '\f';
+\\(.|\n)	str_buf += yytext[1];
+[^\\\n\"]+	str_buf += yytext;
 
-<string>\\(.|\n)	str_buf += yytext[1];
-<string>[^\\\n\"]+	str_buf += yytext;
-
- /**** end of string parsing  *****/
-
+} /* end of string parsing */
 
 [ \t\r\n]+ {
 	/* ignore whitespace and newlines */
+}
+
+^#.*\n {
+	/* ignore comment lines starting with '#' */
 }
 
 . {
