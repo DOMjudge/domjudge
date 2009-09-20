@@ -42,6 +42,7 @@ struct parse_t {
 	size_t       nargs() const { return args.size(); }
 
 	operator std::string() { return val; }
+	const char *c_str() { return val.c_str(); }
 };
 
 inline std::ostream &operator<<(std::ostream &out, const parse_t &obj)

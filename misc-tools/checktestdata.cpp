@@ -71,6 +71,7 @@
 #include <map>
 #include <ctype.h>
 #include <getopt.h>
+#include <stdarg.h>
 #include <boost/regex.hpp>
 
 #include "parser.h"
@@ -80,9 +81,11 @@ using namespace std;
 #define PROGRAM "checktestdata"
 #define AUTHORS "Jan Kuipers, Jaap Eldering"
 
-const int DISPLAYONERROR = 50;
+const int display_before_error = 100;
+const int display_after_error  = 10;
 
 size_t prognr, datanr, linenr, charnr;
+command currcmd;
 
 string data;
 vector<command> program;
@@ -92,13 +95,15 @@ char *progname;
 char *progfile;
 char *datafile;
 
+int debugging;
 int show_help;
 int show_version;
 
 struct option const long_opts[] = {
-        {"help",    no_argument,       &show_help,    1 },
-        {"version", no_argument,       &show_version, 1 },
-        { NULL,     0,                 NULL,          0 }
+	{"debug",   no_argument,       NULL,         'd'},
+	{"help",    no_argument,       &show_help,    1 },
+	{"version", no_argument,       &show_version, 1 },
+	{ NULL,     0,                 NULL,          0 }
 };
 
 void version()
@@ -119,6 +124,26 @@ void usage()
 "      --help         display this help and exit\n"
 "      --version      output version information and exit\n"
 "\n",progname);
+}
+
+void debug(const char *format, ...)
+{
+	va_list ap;
+	va_start(ap,format);
+
+	if ( debugging ) {
+		fprintf(stderr,"debug: ");
+
+        if ( format!=NULL ) {
+			vfprintf(stderr,format,ap);
+        } else {
+			fprintf(stderr,"<no debug data??>");
+        }
+
+		fprintf(stderr,"\n");
+	}
+
+	va_end(ap);
 }
 
 void readprogram(const char *filename)
@@ -178,14 +203,14 @@ void readtestdata(const char *filename)
 
 void error()
 {
-	size_t to = datanr; while ( to>data.size() ) to--;
-	size_t fr = max(0,int(to-DISPLAYONERROR));
+	size_t fr = max(0,int(datanr)-display_before_error);
+	size_t to = min(data.size(),datanr+display_after_error);
 
 	cout << data.substr(fr,to-fr) << endl;
 	cout << string(charnr,' ') << "^" << endl << endl;
 
 	cout << "ERROR: line " << linenr << " character " << charnr;
-	cout << " of testdata doesn't match " << program[prognr] << endl << endl;
+	cout << " of testdata doesn't match " << currcmd << endl << endl;
 
 	exit(1);
 }
@@ -239,6 +264,9 @@ string value(string x)
 
 void checktoken(command cmd)
 {
+	currcmd = cmd;
+	debug("checking token %s at %d,%d",cmd.name().c_str(),linenr,charnr);
+
 	if ( cmd.name()=="SPACE" ) {
 		if ( datanr>=data.size() || data[datanr++]!=' ' ) error();
 		charnr++;
@@ -261,6 +289,9 @@ void checktoken(command cmd)
 			charnr++;
 		}
 
+		debug("%s <= %s <= %s",cmd.args[0].c_str(),num.c_str(),cmd.args[1].c_str());
+		if ( cmd.nargs()>=3 ) debug("'%s' = '%s'",cmd.args[2].c_str(),num.c_str());
+
 		if ( num.size()==0 ) error();
 		if ( num.size()>=2 && num[0]=='0' ) error();
 		if ( num.size()>=1 && num[0]=='-' &&
@@ -278,23 +309,30 @@ void checktoken(command cmd)
 			charnr++;
 			if ( str[i]=='\n' ) linenr++, charnr=0;
 		}
+
+		debug("'%s' = '%s'",str.c_str(),cmd.args[0].c_str());
 	}
 
 	else if ( cmd.name()=="REGEX" ) {
 		boost::regex regexstr(string(cmd.args[0]));
 		boost::match_results<string::const_iterator> res;
 		boost::match_flag_type flags = boost::match_default | boost::match_continuous;
+		string matchstr;
 
 		if ( !boost::regex_search((string::const_iterator)&data[datanr],
 		                          (string::const_iterator)data.end(),
 								  res,regexstr,flags) ) {
 			error();
 		} else {
-			for (; datanr<size_t(res[0].second-data.begin()); datanr++) {
+			size_t matchend = size_t(res[0].second-data.begin());
+			matchstr = string(data.begin()+datanr,data.begin()+matchend);
+			for (; datanr<matchend; datanr++) {
 				charnr++;
 				if ( data[datanr]=='\n' ) linenr++, charnr=0;
 			}
 		}
+
+		debug("'%s' = '%s'",matchstr.c_str(),cmd.args[0].c_str());
 	}
 
 	else {
@@ -305,7 +343,7 @@ void checktoken(command cmd)
 void checktestdata()
 {
 	while ( true ) {
-		command cmd = program[prognr];
+		command cmd = currcmd = program[prognr];
 
 		if ( cmd.name()=="EOF" ) {
 			if ( datanr++!=data.size() ) error();
@@ -354,11 +392,14 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	/* Parse command-line options */
-	show_help = show_version = 0;
+	debugging = show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+d",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
+			break;
+		case 'd':
+			debugging = 1;
 			break;
 		case ':': /* getopt error */
 		case '?':
