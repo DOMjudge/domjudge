@@ -81,7 +81,7 @@ using namespace std;
 #define PROGRAM "checktestdata"
 #define AUTHORS "Jan Kuipers, Jaap Eldering"
 
-const int display_before_error = 100;
+const int display_before_error = 65;
 const int display_after_error  = 10;
 
 size_t prognr, datanr, linenr, charnr;
@@ -206,16 +206,16 @@ void error()
 	size_t fr = max(0,int(datanr)-display_before_error);
 	size_t to = min(data.size(),datanr+display_after_error);
 
+	debug("error at datanr = %d, %d - %d\n",(int)datanr,(int)fr,(int)to);
+
 	cout << data.substr(fr,to-fr) << endl;
-	cout << string(charnr,' ') << "^" << endl << endl;
+	cout << string(min(charnr,(size_t)display_before_error),' ') << "^" << endl << endl;
 
 	cout << "ERROR: line " << linenr << " character " << charnr;
 	cout << " of testdata doesn't match " << currcmd << endl << endl;
 
 	exit(1);
 }
-
-bool my_xor(bool a, bool b) { return (a && !b) || (!a && b); }
 
 bool smaller(string a, string b)
 {
@@ -245,9 +245,10 @@ bool smaller(string a, string b)
 
 	if ( sign==0 ) return false;
 	if ( a.size()!=b.size() ) {
-		return my_xor(a.size() < b.size(),sign < 0);
+		return ((a.size()<b.size() && sign > 0) ||
+		        (a.size()>b.size() && sign < 0));
 	} else {
-		return my_xor(a<b,sign < 0);
+		return (a<b && sign > 0) || (b<a && sign < 0);
 	}
 }
 
@@ -282,11 +283,12 @@ void checktoken(command cmd)
 		// Accepts format (0|-?[1-9][0-9]*), i.e. no leading zero's
 		// and no '-0' accepted.
 		string num;
+		size_t len = 0;
 		while ( datanr<data.size() &&
-		        (isdigit(data[datanr]) ||
-		         (num.size()==0 && data[datanr]=='-')) ) {
-			num += data[datanr++];
-			charnr++;
+		        (isdigit(data[datanr+len]) ||
+		         (num.size()==0 && data[datanr+len]=='-')) ) {
+			num += data[datanr+len];
+			len++;
 		}
 
 		debug("%s <= %s <= %s",cmd.args[0].c_str(),num.c_str(),cmd.args[1].c_str());
@@ -300,6 +302,9 @@ void checktoken(command cmd)
 		if ( cmd.nargs()>=1 && smaller(num,value(cmd.args[0])) ) error();
 		if ( cmd.nargs()>=2 && smaller(value(cmd.args[1]),num) ) error();
 		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = num;
+
+		datanr += len;
+		charnr += len;
 	}
 
 	else if ( cmd.name()=="STRING" ) {
