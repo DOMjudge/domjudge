@@ -27,7 +27,18 @@
    integer  := 0|-?[1-9][0-9]*
    variable := [a-z][a-z0-9]*
    value    := <integer> | <variable>
-   string   := .*
+   string   := ".*"
+
+      Within a string, the backslash acts as escape character for the
+      following expressions:
+
+      * \[0-7]{1,3} denotes an octal escape for a character
+      * \n, \t, \r, \b denote linefeed, tab, carriage return and backspace
+      * \" and \\ denote " and \
+      * an escaped newline is ignored (line continuation)
+
+      A backslash preceding any other character is treated as a
+      literal backslash.
 
    command  :=
 
