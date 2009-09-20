@@ -148,7 +148,7 @@ void debug(const char *format, ...)
         if ( format!=NULL ) {
 			vfprintf(stderr,format,ap);
         } else {
-			fprintf(stderr,"<no debug data??>");
+			fprintf(stderr,"<no debug data?>");
         }
 
 		fprintf(stderr,"\n");
