@@ -165,6 +165,8 @@ void readprogram(const char *filename)
 		exit(1);
 	}
 
+	debug("parsing script...");
+
 	Parser parseprog(in);
 	if ( parseprog.parse()!=0 ) {
 		cerr << "parse error reading " << filename << endl;
@@ -206,6 +208,8 @@ void readtestdata(const char *filename)
 		cerr << "error reading " << filename << endl;
 		exit(1);
 	}
+
+	debug("reading testdata...");
 
  	data = ss.str();
 
@@ -382,6 +386,7 @@ void checktestdata()
 				int loopstart = prognr+1;
 
 				while ( times-- ) {
+					debug("REP times = %lld",times+1);
 					prognr = loopstart;
 					checktestdata();
 					if ( times && cmd.nargs()>=2 ) checktoken(cmd.args[1]);
@@ -443,6 +448,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	datafile = argv[optind+1];
+
+	debug("debugging enabled");
 
 	readprogram(progfile);
 	readtestdata(datafile);
