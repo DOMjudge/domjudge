@@ -160,7 +160,6 @@ void debug(const char *format, ...)
 void readprogram(const char *filename)
 {
 	ifstream in(filename);
-	Parser parseprog(in);
 
 	if ( !in ) {
 		cerr << "error opening " << filename << endl;
