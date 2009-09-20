@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 3.0.0 - SVN
 -------------------
  - Fix specification of checktestdata script syntax.
+ - Small bugfixes and improvements to checktestdata program.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------

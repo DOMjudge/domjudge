@@ -33,57 +33,68 @@ END      { return Parser::CMD_END; }
 	return Parser::INTEGER;
 }
 
- /* Below copied from https://numexp.org/svn/numexp-core/trunk/parser/specification.l, GPL */
- /**** parse strings -- adapted from flex's man page ****/
+ /* String parsing -- adapted from the flex manual page */
 
- /* start of string */
-\"	{
-    str_buf.clear();
-    BEGIN(string);
-}
-
- /* end of string */
-<string>\"	{
-    BEGIN(INITIAL);
-	yytext = strdup(str_buf.c_str());
-    return Parser::STRING;
-}
-
-<string>\n	{
-//    nxp_parser_error(N_("unterminated string."));
-}
-
-<string>\\[0-7]{1,3} {
-    /* octal escape sequence */
-    int result;
-
-    (void) sscanf(yytext+1,"%o",&result);
-
-//	if ( result > 0xff )
-//		nxp_parser_warning(N_("string escape sequence is out-of-bounds."));
-    str_buf += (char) result;
-}
-
-<string>\\[0-9]+ {
-//    nxp_parser_warning(N_("bad escape sequence in string."));
+\" {
+	/* start of string */
+	str_buf.clear();
+	BEGIN(string);
 }
 
 <string>{
-    \\n  str_buf += '\n';
-    \\t  str_buf += '\t';
-    \\r  str_buf += '\r';
-    \\b  str_buf += '\b';
-    \\f  str_buf += '\f';
+\" {
+	/* end of string */
+	BEGIN(INITIAL);
+	yytext = strdup(str_buf.c_str());
+	return Parser::STRING;
 }
 
-<string>\\(.|\n)	str_buf += yytext[1];
-<string>[^\\\n\"]+	str_buf += yytext;
+\n {
+	/* allow string constants to span multiple lines */
+	str_buf += '\n';
+}
 
- /**** end of string parsing  *****/
+\\[0-7]{1,3} {
+	/* octal escape sequence */
+	int result;
 
+	(void) sscanf(yytext+1,"%o",&result);
+
+	/* should check for bounds of escape sequence: result < 256 */
+	str_buf += (char) result;
+}
+
+\\[0-9]+ {
+	/* error: bad escape sequence */
+}
+
+	/* Escape sequences for some special characters */
+\\n         str_buf += '\n';
+\\t         str_buf += '\t';
+\\r         str_buf += '\r';
+\\b         str_buf += '\b';
+\\f         str_buf += '\f';
+\\\"        str_buf += '"';
+\\\\        str_buf += '\\';
+
+\\\n {
+	/* ignore escaped newlines */
+}
+
+	/* treat all other backslashes normally */
+\\.         str_buf += yytext;
+
+	/* Fast match any text not containing special characters */
+[^\\\n\"]+ str_buf += yytext;
+
+} /* end of string parsing */
 
 [ \t\r\n]+ {
 	/* ignore whitespace and newlines */
+}
+
+^#.*\n {
+	/* ignore comment lines starting with '#' */
 }
 
 . {
