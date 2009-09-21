@@ -132,6 +132,7 @@ void usage()
 "Usage: %s [OPTION]... PROGRAM TESTDATA\n"
 "Check TESTDATA file according to specification in PROGRAM file.\n"
 "\n"
+"  -d, --debug        enable extra debugging output\n"
 "      --help         display this help and exit\n"
 "      --version      output version information and exit\n"
 "\n",progname);
