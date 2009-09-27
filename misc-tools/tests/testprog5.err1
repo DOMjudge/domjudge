@@ -1,0 +1,5 @@
+INT(1,100,n) NEWLINE
+REP(n-1+(1**1-1))
+	INT(0,10)
+	NEWLINE
+END

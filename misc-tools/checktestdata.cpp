@@ -226,6 +226,7 @@ void error()
 
 mpz_class value(string x)
 {
+	debug("value '%s'",x.c_str());
 	if ( isalpha(x[0]) ) {
 		if ( variable.count(x) ) return variable[x];
 		cerr << "variable " << x << " undefined in " << program[prognr] << endl;
@@ -237,6 +238,7 @@ mpz_class value(string x)
 
 mpz_class eval(expr e)
 {
+	debug("eval op='%c', val='%s', #args=%d",e.op,e.val.c_str(),(int)e.args.size());
 	switch ( e.op ) {
 	case 'n': return -eval(e.args[0]);
 	case '(': return eval(e.args[0]);

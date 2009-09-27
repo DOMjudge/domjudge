@@ -21,31 +21,24 @@ struct parse_t {
 	char op;
 
 	parse_t(): val(), args(), op('~') {};
-	parse_t(val_t str): val(str), args(), op(' ') {};
 	parse_t(args_t _args): val(), args(_args), op(' ') {};
 	parse_t(val_t _val, args_t _args): val(_val), args(_args), op(' ') {};
-	parse_t(val_t _val, parse_t arg1, parse_t arg2 = parse_t(), parse_t arg3 = parse_t())
+
+	parse_t(val_t _val, parse_t arg1 = parse_t(),
+	                    parse_t arg2 = parse_t(),
+	                    parse_t arg3 = parse_t())
 	: val(_val), args(), op(' ')
 	{
-		args.push_back(arg1);
+		if ( arg1.op!='~' ) args.push_back(arg1);
 		if ( arg2.op!='~' ) args.push_back(arg2);
 		if ( arg3.op!='~' ) args.push_back(arg3);
 	};
-	parse_t(char _op, parse_t arg1, parse_t arg2 = parse_t()): val(), args(), op(_op)
+
+	parse_t(char _op, parse_t arg1 = parse_t(), parse_t arg2 = parse_t())
+	: val(), args(), op(_op)
 	{
-		switch ( op ) {
-		case '(':
-			args.push_back(arg1);
-			break;
-		case '+':
-		case '-':
-		case '*':
-		case '/':
-		case '%':
-			args.push_back(arg1);
-			args.push_back(arg2);
-			break;
-		}
+		if ( arg1.op!='~' ) args.push_back(arg1);
+		if ( arg2.op!='~' ) args.push_back(arg2);
 	}
 
 	const val_t& name()  const { return val; }
