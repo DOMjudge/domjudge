@@ -95,6 +95,7 @@ using namespace std;
 
 #define PROGRAM "checktestdata"
 #define AUTHORS "Jan Kuipers, Jaap Eldering"
+#define VERSION "$Rev$"
 
 const int display_before_error = 65;
 const int display_after_error  = 10;
@@ -123,7 +124,8 @@ struct option const long_opts[] = {
 
 void version()
 {
-        printf("%s -- written by %s\n\n",PROGRAM,AUTHORS);
+        printf("%s -- written by %s\n",PROGRAM,AUTHORS);
+        printf("Version %s, included with DOMjudge.\n\n",VERSION);
         printf(
 "%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
 "are welcome to redistribute it under certain conditions.  See the GNU\n"
@@ -133,8 +135,9 @@ void version()
 void usage()
 {
         printf(
-"Usage: %s [OPTION]... PROGRAM TESTDATA\n"
-"Check TESTDATA file according to specification in PROGRAM file.\n"
+"Usage: %s [OPTION]... PROGRAM [TESTDATA]\n"
+"Check TESTDATA according to specification in PROGRAM file.\n"
+"If TESTDATA is '-' or not specified, read from stdin.\n"
 "\n"
 "  -d, --debug        enable extra debugging output\n"
 "      --help         display this help and exit\n"
@@ -162,23 +165,15 @@ void debug(const char *format, ...)
 	va_end(ap);
 }
 
-void readprogram(const char *filename)
+void readprogram(istream &in)
 {
-	ifstream in(filename);
-	if ( !in ) {
-		cerr << "error opening " << filename << endl;
-		exit(1);
-	}
-
 	debug("parsing script...");
 
 	Parser parseprog(in);
 	if ( parseprog.parse()!=0 ) {
-		cerr << "parse error reading " << filename << endl;
+		cerr << "parse error reading " << progfile << endl;
 		exit(1);
 	}
-
-	in.close();
 
 	// Add (implicit) EOF command at end of input
 	program.push_back(command("EOF"));
@@ -199,26 +194,18 @@ void readprogram(const char *filename)
 	}
 }
 
-void readtestdata(const char *filename)
+void readtestdata(istream &in)
 {
-	ifstream in(filename);
-	stringstream ss;
-
-	if ( !in ) {
-		cerr <<  "error opening " << filename << endl;
-		exit(1);
-	}
-
-	if ( !(ss << in.rdbuf()) ) {
-		cerr << "error reading " << filename << endl;
-		exit(1);
-	}
-
 	debug("reading testdata...");
 
- 	data = ss.str();
+	stringstream ss;
+	ss << in.rdbuf();
+	if ( in.fail() ) {
+		cerr << "error reading " << datafile << endl;
+		exit(1);
+	}
 
-	in.close();
+ 	data = ss.str();
 }
 
 void error()
@@ -429,24 +416,40 @@ int main(int argc, char **argv)
 	if ( show_help    ) { usage();   return 0; }
 	if ( show_version ) { version(); return 0; }
 
+	debug("debugging enabled");
+
 	if ( argc<=optind ) {
 		printf("Error: no PROGRAM file specified.\n");
 		usage();
 		return 1;
 	}
 	progfile = argv[optind];
+	ifstream prog(progfile);
+	if ( prog.fail() ) {
+		cerr << "error opening " << progfile << endl;
+		exit(1);
+	}
+	readprogram(prog);
+	prog.close();
 
 	if ( argc<=optind+1 ) {
-		printf("Error: no TESTDATA file specified.\n");
-		usage();
-		return 1;
+		datafile = strdup("-");
+	} else {
+		datafile = argv[optind+1];
 	}
-	datafile = argv[optind+1];
 
-	debug("debugging enabled");
-
-	readprogram(progfile);
-	readtestdata(datafile);
+	if ( strcmp(datafile,"-")==0 ) {
+		// No TESTDATA file specified, read from stdin
+		readtestdata(cin);
+	} else {
+		ifstream fin(datafile);
+		if ( fin.fail() ) {
+			cerr << "error opening " << datafile << endl;
+			exit(1);
+		}
+		readtestdata(fin);
+		fin.close();
+	}
 
 	linenr = charnr = 0;
 	datanr = prognr = 0;
