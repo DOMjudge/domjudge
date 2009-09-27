@@ -24,9 +24,12 @@
    variables are lowercase with non-leading digits. Lines starting
    with '#' are comments and ignored.
 
-   integer  := 0|-?[1-9][0-9]*
+   integer  := [0-9]+
    variable := [a-z][a-z0-9]*
    value    := <integer> | <variable>
+   expr     := <term> | <expr> [+-] <term>
+   term     := <value> | '-' <term> | '(' <expr> ')' | <term> [*%/] <term>
+
    string   := ".*"
 
       Within a string, the backslash acts as escape character for the
@@ -52,7 +55,7 @@
       Matches end-of-file. This implicitly added at the end of each
       program and must match exactly: no extra data may be present.
 
-   INT(<value> min, <value> max [, <variable> name])
+   INT(<expr> min, <expr> max [, <variable> name])
 
       Match an arbitrary sized integer value in the interval [min,max]
       and optionally assign the value read to variable 'name'.
@@ -66,11 +69,11 @@
       Match the extended regular expression 'str'. Matching is
       performed greedily.
 
-   REP(<value> count [,<command> separator]) [<command>...] END
+   REP(<expr> count [,<command> separator]) [<command>...] END
 
       Repeat the commands between the 'REP() ... END' statements count
       times and optionally match 'separator' command (count-1) times
-      in between.
+      in between. The value of count must fit in a unsigned 32 bit int.
 
  */
 
@@ -84,6 +87,7 @@
 #include <getopt.h>
 #include <stdarg.h>
 #include <boost/regex.hpp>
+#include <gmpxx.h>
 
 #include "parser.h"
 
@@ -100,7 +104,7 @@ command currcmd;
 
 string data;
 vector<command> program;
-map<string,string> variable;
+map<string,mpz_class> variable;
 
 char *progname;
 char *progfile;
@@ -233,42 +237,7 @@ void error()
 	exit(1);
 }
 
-bool smaller(string a, string b)
-{
-	int signa, signb, sign;
-	size_t fr;
-
-	fr = 0;
-	signa = 1;
-	if      ( a[0]=='+' ) { signa =  1; fr++; }
-	else if ( a[0]=='-' ) { signa = -1; fr++; }
-
-	while ( fr<a.size() && a[fr]=='0' ) fr++;
-	a = a.substr(fr);
-	if ( a.size()==0 ) signa = 0;
-
-	fr = 0;
-	signb = 1;
-	if      ( b[0]=='+' ) { signb =  1; fr++; }
-	else if ( b[0]=='-' ) { signb = -1; fr++; }
-
-	while ( fr<b.size() && b[fr]=='0' ) fr++;
-	b = b.substr(fr);
-	if ( b.size()==0 ) signb = 0;
-
-	if ( signa!=signb ) return signa<signb;
-	sign = signa; // == signb;
-
-	if ( sign==0 ) return false;
-	if ( a.size()!=b.size() ) {
-		return ((a.size()<b.size() && sign > 0) ||
-		        (a.size()>b.size() && sign < 0));
-	} else {
-		return (a<b && sign > 0) || (b<a && sign < 0);
-	}
-}
-
-string value(string x)
+mpz_class value(string x)
 {
 	if ( isalpha(x[0]) ) {
 		if ( variable.count(x) ) return variable[x];
@@ -276,7 +245,21 @@ string value(string x)
 		exit(1);
 	}
 
-	return x;
+	return mpz_class(x);
+}
+
+mpz_class eval(expr e)
+{
+	switch ( e.op ) {
+	case 'n': return -eval(e.args[0]);
+	case '(': return eval(e.args[0]);
+	case '+': return eval(e.args[0]) + eval(e.args[1]);
+	case '-': return eval(e.args[0]) - eval(e.args[1]);
+	case '*': return eval(e.args[0]) * eval(e.args[1]);
+	case '/': return eval(e.args[0]) / eval(e.args[1]);
+	case '%': return eval(e.args[0]) % eval(e.args[1]);
+	default:  return value(e.val);
+	}
 }
 
 void checktoken(command cmd)
@@ -307,7 +290,10 @@ void checktoken(command cmd)
 			len++;
 		}
 
-		debug("%s <= %s <= %s",cmd.args[0].c_str(),num.c_str(),cmd.args[1].c_str());
+		mpz_class lo = eval(cmd.args[0]);
+		mpz_class hi = eval(cmd.args[1]);
+
+		debug("%s <= %s <= %s",lo.get_str().c_str(),num.c_str(),hi.get_str().c_str());
 		if ( cmd.nargs()>=3 ) debug("'%s' = '%s'",cmd.args[2].c_str(),num.c_str());
 
 		if ( num.size()==0 ) error();
@@ -315,9 +301,10 @@ void checktoken(command cmd)
 		if ( num.size()>=1 && num[0]=='-' &&
 		     (num.size()==1 || num[1]=='0') ) error();
 
-		if ( cmd.nargs()>=1 && smaller(num,value(cmd.args[0])) ) error();
-		if ( cmd.nargs()>=2 && smaller(value(cmd.args[1]),num) ) error();
-		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = num;
+		mpz_class n(num);
+
+		if ( n<lo || n>hi ) error();
+		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = n;
 
 		datanr += len;
 		charnr += len;
@@ -372,7 +359,13 @@ void checktestdata()
 		}
 
 		else if ( cmd.name()=="REP" ) {
-			long long times = atoll(value(cmd.args[0]).c_str());
+			mpz_class n = eval(cmd.args[0]);
+			if ( !n.fits_ulong_p() ) {
+				cerr << "'" << n << "' does not fit in unsigned long in "
+				     << program[prognr] << endl;
+				exit(1);
+			}
+			long long times = n.get_ui();
 
 			if ( times==0 ) {
 				int replevel = 0;

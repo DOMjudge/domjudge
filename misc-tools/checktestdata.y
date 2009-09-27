@@ -12,6 +12,9 @@
 %token CMD_SPACE CMD_NEWLINE CMD_EOF CMD_INT CMD_STRING CMD_REGEX CMD_REP CMD_END
 %token VARIABLE INTEGER STRING
 
+%left '+' '-'
+%left '*' '/' '%'
+
 %%
 
 commands:
@@ -37,16 +40,31 @@ command_noargs:
 ;
 
 command_args:
-	CMD_INT '(' value ',' value ')'              { $$ = parse_t($1,$3,$5); }
-|	CMD_INT '(' value ',' value ',' VARIABLE ')' { $$ = parse_t($1,$3,$5,$7); }
-|	CMD_STRING '(' STRING ')'                    { $$ = parse_t($1,$3); }
-|	CMD_REGEX  '(' STRING ')'                    { $$ = parse_t($1,$3); }
-| 	CMD_REP '(' value ')'                        { $$ = parse_t($1,$3); }
-| 	CMD_REP '(' value ',' command ')'            { $$ = parse_t($1,$3,$5); }
+	CMD_INT '(' expr ',' expr ')'              { $$ = parse_t($1,$3,$5); }
+|	CMD_INT '(' expr ',' expr ',' VARIABLE ')' { $$ = parse_t($1,$3,$5,$7); }
+|	CMD_STRING '(' STRING ')'                  { $$ = parse_t($1,$3); }
+|	CMD_REGEX  '(' STRING ')'                  { $$ = parse_t($1,$3); }
+| 	CMD_REP '(' expr ')'                       { $$ = parse_t($1,$3); }
+| 	CMD_REP '(' expr ',' command ')'           { $$ = parse_t($1,$3,$5); }
 ;
 
 value:
 	INTEGER
 |
 	VARIABLE
+;
+
+expr:
+	term          { $$ = parse_t('(',$1); }
+|	expr '+' term { $$ = parse_t('+',$1,$3); }
+|	expr '-' term { $$ = parse_t('-',$1,$3); }
+;
+
+term:
+	value         { $$ = parse_t('(',$1); }
+|	'-' term      { $$ = parse_t('n',$2); }
+|	'(' expr ')'  { $$ = parse_t('(',$2); }
+|	term '*' term { $$ = parse_t('*',$1,$3); }
+|	term '/' term { $$ = parse_t('/',$1,$3); }
+|	term '%' term { $$ = parse_t('%',$1,$3); }
 ;

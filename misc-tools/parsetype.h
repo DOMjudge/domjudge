@@ -11,32 +11,42 @@ typedef std::string val_t;
 typedef std::vector<parse_t> args_t;
 
 typedef parse_t command;
+typedef parse_t expr;
 
 extern std::vector<command> program;
 
 struct parse_t {
 	val_t val;
 	args_t args;
+	char op;
 
-	parse_t(): val(), args() {};
-	parse_t(val_t str): val(str), args() {};
-	parse_t(args_t _args): val(), args(_args) {};
-	parse_t(val_t _val, args_t _args): val(_val), args(_args) {};
-	parse_t(val_t _val, parse_t arg1): val(_val), args()
+	parse_t(): val(), args(), op('~') {};
+	parse_t(val_t str): val(str), args(), op(' ') {};
+	parse_t(args_t _args): val(), args(_args), op(' ') {};
+	parse_t(val_t _val, args_t _args): val(_val), args(_args), op(' ') {};
+	parse_t(val_t _val, parse_t arg1, parse_t arg2 = parse_t(), parse_t arg3 = parse_t())
+	: val(_val), args(), op(' ')
 	{
 		args.push_back(arg1);
+		if ( arg2.op!='~' ) args.push_back(arg2);
+		if ( arg3.op!='~' ) args.push_back(arg3);
 	};
-	parse_t(val_t _val, parse_t arg1, parse_t arg2): val(_val), args()
+	parse_t(char _op, parse_t arg1, parse_t arg2 = parse_t()): val(), args(), op(_op)
 	{
-		args.push_back(arg1);
-		args.push_back(arg2);
-	};
-	parse_t(val_t _val, parse_t arg1, parse_t arg2, parse_t arg3): val(_val), args()
-	{
-		args.push_back(arg1);
-		args.push_back(arg2);
-		args.push_back(arg3);
-	};
+		switch ( op ) {
+		case '(':
+			args.push_back(arg1);
+			break;
+		case '+':
+		case '-':
+		case '*':
+		case '/':
+		case '%':
+			args.push_back(arg1);
+			args.push_back(arg2);
+			break;
+		}
+	}
 
 	const val_t& name()  const { return val; }
 	size_t       nargs() const { return args.size(); }
