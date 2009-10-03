@@ -16,12 +16,12 @@ $(SUBST_FILES): %: %.in ../paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
-checktestdata: checktestdata.cpp yylex.cc parse.cc -lboost_regex
+checktestdata: checktestdata.cpp yylex.cc parse.cc -lboost_regex -lgmp -lgmpxx
 
-yylex.cc: checktestdata.l
+yylex.cc: checktestdata.l parsetype.h
 	flex++ $<
 
-parse.cc: checktestdata.y
+parse.cc: checktestdata.y parsetype.h
 	bisonc++ $<
 
 checksucc = ./checktestdata $$prog $$data >/dev/null 2>&1 || \

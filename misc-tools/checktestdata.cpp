@@ -24,9 +24,12 @@
    variables are lowercase with non-leading digits. Lines starting
    with '#' are comments and ignored.
 
-   integer  := 0|-?[1-9][0-9]*
+   integer  := [0-9]+
    variable := [a-z][a-z0-9]*
    value    := <integer> | <variable>
+   expr     := <term> | <expr> [+-] <term>
+   term     := <value> | '-' <term> | '(' <expr> ')' | <term> [*%/] <term>
+
    string   := ".*"
 
       Within a string, the backslash acts as escape character for the
@@ -52,7 +55,7 @@
       Matches end-of-file. This implicitly added at the end of each
       program and must match exactly: no extra data may be present.
 
-   INT(<value> min, <value> max [, <variable> name])
+   INT(<expr> min, <expr> max [, <variable> name])
 
       Match an arbitrary sized integer value in the interval [min,max]
       and optionally assign the value read to variable 'name'.
@@ -66,11 +69,11 @@
       Match the extended regular expression 'str'. Matching is
       performed greedily.
 
-   REP(<value> count [,<command> separator]) [<command>...] END
+   REP(<expr> count [,<command> separator]) [<command>...] END
 
       Repeat the commands between the 'REP() ... END' statements count
       times and optionally match 'separator' command (count-1) times
-      in between.
+      in between. The value of count must fit in a unsigned 32 bit int.
 
  */
 
@@ -84,6 +87,7 @@
 #include <getopt.h>
 #include <stdarg.h>
 #include <boost/regex.hpp>
+#include <gmpxx.h>
 
 #include "parser.h"
 
@@ -91,6 +95,7 @@ using namespace std;
 
 #define PROGRAM "checktestdata"
 #define AUTHORS "Jan Kuipers, Jaap Eldering"
+#define VERSION "$Rev$"
 
 const int display_before_error = 65;
 const int display_after_error  = 10;
@@ -100,7 +105,7 @@ command currcmd;
 
 string data;
 vector<command> program;
-map<string,string> variable;
+map<string,mpz_class> variable;
 
 char *progname;
 char *progfile;
@@ -119,7 +124,8 @@ struct option const long_opts[] = {
 
 void version()
 {
-        printf("%s -- written by %s\n\n",PROGRAM,AUTHORS);
+        printf("%s -- written by %s\n",PROGRAM,AUTHORS);
+        printf("Version %s, included with DOMjudge.\n\n",VERSION);
         printf(
 "%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
 "are welcome to redistribute it under certain conditions.  See the GNU\n"
@@ -129,8 +135,9 @@ void version()
 void usage()
 {
         printf(
-"Usage: %s [OPTION]... PROGRAM TESTDATA\n"
-"Check TESTDATA file according to specification in PROGRAM file.\n"
+"Usage: %s [OPTION]... PROGRAM [TESTDATA]\n"
+"Check TESTDATA according to specification in PROGRAM file.\n"
+"If TESTDATA is '-' or not specified, read from stdin.\n"
 "\n"
 "  -d, --debug        enable extra debugging output\n"
 "      --help         display this help and exit\n"
@@ -158,24 +165,15 @@ void debug(const char *format, ...)
 	va_end(ap);
 }
 
-void readprogram(const char *filename)
+void readprogram(istream &in)
 {
-	ifstream in(filename);
-
-	if ( !in ) {
-		cerr << "error opening " << filename << endl;
-		exit(1);
-	}
-
 	debug("parsing script...");
 
 	Parser parseprog(in);
 	if ( parseprog.parse()!=0 ) {
-		cerr << "parse error reading " << filename << endl;
+		cerr << "parse error reading " << progfile << endl;
 		exit(1);
 	}
-
-	in.close();
 
 	// Add (implicit) EOF command at end of input
 	program.push_back(command("EOF"));
@@ -196,26 +194,18 @@ void readprogram(const char *filename)
 	}
 }
 
-void readtestdata(const char *filename)
+void readtestdata(istream &in)
 {
-	ifstream in(filename);
-	stringstream ss;
-
-	if ( !in ) {
-		cerr <<  "error opening " << filename << endl;
-		exit(1);
-	}
-
-	if ( !(ss << in.rdbuf()) ) {
-		cerr << "error reading " << filename << endl;
-		exit(1);
-	}
-
 	debug("reading testdata...");
 
- 	data = ss.str();
+	stringstream ss;
+	ss << in.rdbuf();
+	if ( in.fail() ) {
+		cerr << "error reading " << datafile << endl;
+		exit(1);
+	}
 
-	in.close();
+ 	data = ss.str();
 }
 
 void error()
@@ -234,50 +224,31 @@ void error()
 	exit(1);
 }
 
-bool smaller(string a, string b)
+mpz_class value(string x)
 {
-	int signa, signb, sign;
-	size_t fr;
-
-	fr = 0;
-	signa = 1;
-	if      ( a[0]=='+' ) { signa =  1; fr++; }
-	else if ( a[0]=='-' ) { signa = -1; fr++; }
-
-	while ( fr<a.size() && a[fr]=='0' ) fr++;
-	a = a.substr(fr);
-	if ( a.size()==0 ) signa = 0;
-
-	fr = 0;
-	signb = 1;
-	if      ( b[0]=='+' ) { signb =  1; fr++; }
-	else if ( b[0]=='-' ) { signb = -1; fr++; }
-
-	while ( fr<b.size() && b[fr]=='0' ) fr++;
-	b = b.substr(fr);
-	if ( b.size()==0 ) signb = 0;
-
-	if ( signa!=signb ) return signa<signb;
-	sign = signa; // == signb;
-
-	if ( sign==0 ) return false;
-	if ( a.size()!=b.size() ) {
-		return ((a.size()<b.size() && sign > 0) ||
-		        (a.size()>b.size() && sign < 0));
-	} else {
-		return (a<b && sign > 0) || (b<a && sign < 0);
-	}
-}
-
-string value(string x)
-{
+	debug("value '%s'",x.c_str());
 	if ( isalpha(x[0]) ) {
 		if ( variable.count(x) ) return variable[x];
 		cerr << "variable " << x << " undefined in " << program[prognr] << endl;
 		exit(1);
 	}
 
-	return x;
+	return mpz_class(x);
+}
+
+mpz_class eval(expr e)
+{
+	debug("eval op='%c', val='%s', #args=%d",e.op,e.val.c_str(),(int)e.args.size());
+	switch ( e.op ) {
+	case 'n': return -eval(e.args[0]);
+	case '(': return eval(e.args[0]);
+	case '+': return eval(e.args[0]) + eval(e.args[1]);
+	case '-': return eval(e.args[0]) - eval(e.args[1]);
+	case '*': return eval(e.args[0]) * eval(e.args[1]);
+	case '/': return eval(e.args[0]) / eval(e.args[1]);
+	case '%': return eval(e.args[0]) % eval(e.args[1]);
+	default:  return value(e.val);
+	}
 }
 
 void checktoken(command cmd)
@@ -308,7 +279,10 @@ void checktoken(command cmd)
 			len++;
 		}
 
-		debug("%s <= %s <= %s",cmd.args[0].c_str(),num.c_str(),cmd.args[1].c_str());
+		mpz_class lo = eval(cmd.args[0]);
+		mpz_class hi = eval(cmd.args[1]);
+
+		debug("%s <= %s <= %s",lo.get_str().c_str(),num.c_str(),hi.get_str().c_str());
 		if ( cmd.nargs()>=3 ) debug("'%s' = '%s'",cmd.args[2].c_str(),num.c_str());
 
 		if ( num.size()==0 ) error();
@@ -316,9 +290,10 @@ void checktoken(command cmd)
 		if ( num.size()>=1 && num[0]=='-' &&
 		     (num.size()==1 || num[1]=='0') ) error();
 
-		if ( cmd.nargs()>=1 && smaller(num,value(cmd.args[0])) ) error();
-		if ( cmd.nargs()>=2 && smaller(value(cmd.args[1]),num) ) error();
-		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = num;
+		mpz_class n(num);
+
+		if ( n<lo || n>hi ) error();
+		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = n;
 
 		datanr += len;
 		charnr += len;
@@ -373,7 +348,13 @@ void checktestdata()
 		}
 
 		else if ( cmd.name()=="REP" ) {
-			long long times = atoll(value(cmd.args[0]).c_str());
+			mpz_class n = eval(cmd.args[0]);
+			if ( !n.fits_ulong_p() ) {
+				cerr << "'" << n << "' does not fit in unsigned long in "
+				     << program[prognr] << endl;
+				exit(1);
+			}
+			long long times = n.get_ui();
 
 			if ( times==0 ) {
 				int replevel = 0;
@@ -437,24 +418,40 @@ int main(int argc, char **argv)
 	if ( show_help    ) { usage();   return 0; }
 	if ( show_version ) { version(); return 0; }
 
+	debug("debugging enabled");
+
 	if ( argc<=optind ) {
 		printf("Error: no PROGRAM file specified.\n");
 		usage();
 		return 1;
 	}
 	progfile = argv[optind];
+	ifstream prog(progfile);
+	if ( prog.fail() ) {
+		cerr << "error opening " << progfile << endl;
+		exit(1);
+	}
+	readprogram(prog);
+	prog.close();
 
 	if ( argc<=optind+1 ) {
-		printf("Error: no TESTDATA file specified.\n");
-		usage();
-		return 1;
+		datafile = strdup("-");
+	} else {
+		datafile = argv[optind+1];
 	}
-	datafile = argv[optind+1];
 
-	debug("debugging enabled");
-
-	readprogram(progfile);
-	readtestdata(datafile);
+	if ( strcmp(datafile,"-")==0 ) {
+		// No TESTDATA file specified, read from stdin
+		readtestdata(cin);
+	} else {
+		ifstream fin(datafile);
+		if ( fin.fail() ) {
+			cerr << "error opening " << datafile << endl;
+			exit(1);
+		}
+		readtestdata(fin);
+		fin.close();
+	}
 
 	linenr = charnr = 0;
 	datanr = prognr = 0;

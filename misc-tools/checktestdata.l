@@ -29,7 +29,7 @@ END      { return Parser::CMD_END; }
 	return Parser::VARIABLE;
 }
 
-0|-?[1-9][0-9]* {
+[0-9]+ {
 	return Parser::INTEGER;
 }
 
@@ -98,6 +98,7 @@ END      { return Parser::CMD_END; }
 }
 
 . {
+	/* return all others characters as-is. */
 	return yytext[0];
 }
 
