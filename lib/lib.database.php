@@ -450,7 +450,8 @@ class db_result
 			$this->free();
 			return FALSE;
 		}
-		return $this->tuple = array_map('db_result::sql2val',$this->tuple);
+		return $this->tuple = array_map( array('db_result', 'sql2val')
+		                               , $this->tuple);
 	}
 
 	public function field($field)
