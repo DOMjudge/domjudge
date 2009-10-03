@@ -229,7 +229,7 @@ Optionally:
 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
        domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
-       domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt/*<newline>
+       domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*</tt>
 <item> Install the PEAR Text_Highlighter class for source syntax highlighting,
        and the PHP xdiff PECL extension for diffs between submissions.
@@ -868,13 +868,19 @@ the following lines must be added to <tt>/etc/sudoers</tt>:
 <verb>
 domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
 domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
-domjudge ALL=(root) NOPASSWD: /bin/mount --bind CHROOTDIR/*
+domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*
 domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*
 </verb>
 Here the user <tt>domjudge</tt> must be replaced by the user you
-intend to run the judgedaemon as, <tt>CHROOTDIR</tt> by the path
+intend to run the judgedaemon as, <tt>&lt;chrootdir&gt;</tt> by the path
 the chroot environment was installed to and <tt>JUDGEDIR</tt> by the
 value of <tt>judgehost_judgedir</tt> specified by <tt>configure</tt>.
+Note that <tt>&lt;chrootdir&gt;</tt> is different from
+<tt>CHROOTDIR</tt> as specified in <tt>configure</tt>; the first is
+the tree from which bind-mounts are made when Sun Java is used, the
+latter the directory under which judgings are allowed to be executed
+in a chroot environment, and this path is by default set to
+<tt>judgehost_judgedir</tt>.
 
 <sect>Building and installing the submit client
 <p>
