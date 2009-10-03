@@ -222,14 +222,14 @@ Optionally:
 <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
        or use the balloon web interface.
 <item> Setup the Java chroot environment to use Sun Java with chroot:<newline>
-       <tt>bin/dj_make_chroot &lt;targetdir&gt; &lt;architecture&gt;</tt><newline>
+       <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
        <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
        and add the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
        domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
-       domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;targetdir&gt/*<newline>
+       domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt/*<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*</tt>
 <item> Install the PEAR Text_Highlighter class for source syntax highlighting,
        and the PHP xdiff PECL extension for diffs between submissions.
@@ -440,7 +440,7 @@ Pascal; change the list as appropriate.
 
 <code>
 apt-get install make sudo php5-cli php5-mysql ntp xsltproc \
-	hostname coreutils procps grep diff mount \
+	hostname coreutils procps grep diff mount sharutils \
 	gcc g++ gcj openjdk-6-jre ghc fp-compiler
 </code>
 
@@ -868,11 +868,11 @@ the following lines must be added to <tt>/etc/sudoers</tt>:
 <verb>
 domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
 domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
-domjudge ALL=(root) NOPASSWD: /bin/mount --bind CHROOTORIGDIR/*
+domjudge ALL=(root) NOPASSWD: /bin/mount --bind CHROOTDIR/*
 domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*
 </verb>
 Here the user <tt>domjudge</tt> must be replaced by the user you
-intend to run the judgedaemon as, <tt>CHROOTORIGDIR</tt> by the path
+intend to run the judgedaemon as, <tt>CHROOTDIR</tt> by the path
 the chroot environment was installed to and <tt>JUDGEDIR</tt> by the
 value of <tt>judgehost_judgedir</tt> specified by <tt>configure</tt>.
 
