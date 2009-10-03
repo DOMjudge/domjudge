@@ -4,9 +4,9 @@ Version 3.1.0 - SVN
 -------------------
  - Add PHP session support as alternative to IP address authentication.
    Backport from patches by Tobias Werth.
- - Fix specification of checktestdata script syntax.
- - Small bugfixes and improvements to checktestdata program.
+ - Bugfixes and improvements to checktestdata program.
  - Fix error trapping in subshells, thanks Jan Jergus. (Closes: #2866430)
+ - Fix bug in lib.database.php with array_map "class::method" notation.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------
