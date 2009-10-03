@@ -385,9 +385,10 @@ Software required for building DOMjudge from distributed sources.
 
 <item> The <htmlurl name="Boost" url="http://www.boost.org/">
        <htmlurl name="regular expression library"
-        url="http://www.boost.org/doc/libs/release/libs/regex/">
-       to build the <tt>checktestdata</tt> program for advanced
-       checking of input/output data correctness.
+        url="http://www.boost.org/doc/libs/release/libs/regex/"> and
+       the GNU <htmlurl name="Multiple Precision library"
+       url="http://gmplib.org/"> to build the <tt>checktestdata</tt>
+       program for advanced checking of input/output data correctness.
 </itemize>
 
 Additional software required for building DOMjudge from a Subversion
@@ -427,7 +428,7 @@ have the bulk of these packages installed already.
 apt-get install gcc g++ make libcurl4-gnutls-dev sudo mysql-server ntp \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
 	hostname coreutils procps grep diff mount sharutils \
-	phpmyadmin xsltproc libboost-regex-dev \
+	phpmyadmin xsltproc libboost-regex-dev libgmp3-dev \
 	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra
 </code>
 
