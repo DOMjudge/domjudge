@@ -3,9 +3,11 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
+SUBMITCMD = $(TOPDIR)/submit/submit
+
 SUBMIT = \
 	echo -n "Submitting '$$i' " ; \
-	$(TOPDIR)/submit/submit -q -p $(PROBLEM) "$$i" ; \
+	$(SUBMITCMD) -q -w1 -p $(PROBLEM) "$$i" ; \
 	echo ; sleep 1
 
 config: check-judgings
@@ -30,16 +32,19 @@ distclean-l:
 PROBLEM=hello
 test-fltcmp: PROBLEM=fltcmp
 
-test-normal:
+test-normal: $(SUBMITCMD)
 	@echo "Submitting normal test sources..." ; \
 	for i in test-* ; do $(SUBMIT) ; done
 
-test-fltcmp:
+test-fltcmp: $(SUBMITCMD)
 	@echo "Submitting fltcmp test sources..." ; \
 	for i in fltcmp-test-* ; do $(SUBMIT) ; done
 
-test-stress:
+test-stress: $(SUBMITCMD)
 	@echo "Submitting stress test sources..." ; \
 	for i in stress-test-* ; do $(SUBMIT) ;	done
+
+$(SUBMITCMD):
+	$(MAKE) -C $(TOPDIR)/submit submit
 
 .PHONY: test-normal test-fltcmp test-stress verify
