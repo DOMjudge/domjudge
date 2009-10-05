@@ -615,6 +615,25 @@ usage information). Then one must specify this
 fields of the problem entry in the MySQL database (empty means that
 the default script should be used).
 
+Implementing a special compare script, also called a
+<em>validator</em>, can be done in two ways: either write a program
+that is called directly (by <tt>test_solution.sh</tt>) or use (a copy
+of) the <tt>compare_program.sh</tt> script. The latter generates the
+XML result file and handles redirection of input/output for you. When
+using this wrapper (the easiest method), the jury should write a
+checker program which can be called as
+<code>
+$CHECK_PROGRAM <testdata.in> <program.out> <testdata.out>
+</code>
+and this program should write some kind of difference to stdout. No
+output results in a <em>correct</em> verdict and a nonzero exitcode in
+an internal (system) error. The script <tt>compare_program.sh</tt> as
+shipped is configured to call <tt>check_float</tt>, which compares
+floating point numbers. For more details, see the comments at the top
+of the files <tt>test_solution.sh</tt>, <tt>compare_program.sh</tt>
+and (when not using the wrapper) the appendix on the
+<ref id="validator" name="ICPC validator interface">.
+
 The shipped <tt>test_solution.sh</tt> has support for enabling
 <tt>presentation-error</tt> to be returned as a judging result. This
 is counted as an incorrect submission. For this to work, you need to
