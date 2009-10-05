@@ -50,7 +50,8 @@ function getCurContest($fulldata = FALSE) {
 
 	global $DB;
 	$now = $DB->q('MAYBETUPLE SELECT * FROM contest
-	               WHERE activatetime <= NOW() ORDER BY activatetime DESC LIMIT 1');
+	               WHERE enabled = 1 AND activatetime <= NOW()
+	               ORDER BY activatetime DESC LIMIT 1');
 
 	if ($now == NULL)
 		return FALSE;

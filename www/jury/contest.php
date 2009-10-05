@@ -51,9 +51,12 @@ if ( IS_ADMIN && !empty($_GET['cmd']) ):
 <tr><td><label for="data_0__endtime_">End time:</label></td>
 <td><?php echo addInput('data[0][endtime]', @$row['endtime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
 
-
 <tr><td><label for="data_0__unfreezetime_">Scoreboard unfreeze time:</label></td>
 <td><?php echo addInput('data[0][unfreezetime]', @$row['unfreezetime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
+
+<tr><td>Enabled:</td><td>
+<?php echo addRadioButton('data[0][enabled]', (!isset($row['enabled']) ||  $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>
+<?php echo addRadioButton('data[0][enabled]', ( isset($row['enabled']) && !$row['enabled']), 0)?> <label for="data_0__enabled_0">no</label></td></tr>
 
 </table>
 
@@ -79,6 +82,9 @@ echo "<h1>Contest: ".htmlspecialchars($data['contestname'])."</h1>\n\n";
 
 if ( $cid == $data['cid'] ) {
 	echo "<p><em>This is the current contest.</em></p>\n\n";
+}
+if ( !$data['enabled'] ) {
+	echo "<p><em>This contest is disabled.</em></p>\n\n";
 }
 
 echo "<table>\n";

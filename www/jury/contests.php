@@ -38,6 +38,7 @@ if( count($res) == 0 ) {
 
 	foreach($res as $row) {
 		echo "<tr" .
+			(!$row['enabled']    ? ' class="disabled"' :'') .
 			($row['cid'] == $cid ? ' class="highlight"':'') . ">" .
 			"<td align=\"right\"><a href=\"contest.php?id=" . urlencode($row['cid']) .
 			"\">c" . (int)$row['cid'] . "</a></td>\n" .

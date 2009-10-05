@@ -1111,6 +1111,10 @@ open for submissions. Optional <tt>freezetime</tt> and
 detailed treating of these, see section <ref
 id="contestsetup:milestones" name="Contest milestones">.
 
+The <tt>enabled</tt> field can be unset to allow for easier editing of
+contest times, as disabled contests are not checked to overlap with
+other contests. A disabled contest will also not become active.
+
 <tag>judgehost</tag>
 List here the hosts that will be judging the submissions.
 <tt>hostname</tt> is the (short) hostname of a judge computer.

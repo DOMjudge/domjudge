@@ -7,6 +7,7 @@ Version 3.1.0 - SVN
  - Bugfixes and improvements to checktestdata program.
  - Fix error trapping in subshells, thanks Jan Jergus. (Closes: #2866430)
  - Fix bug in lib.database.php with array_map "class::method" notation.
+ - Add 'enabled' field to contest to allow for easier editing.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------

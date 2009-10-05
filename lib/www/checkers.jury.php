@@ -141,24 +141,26 @@ function check_contest($data, $keydata = null)
 	// end time or N is inside E (N is (partially) contained in E), or if
 	// the activatetime is before E and the end time after E (E is completely
 	// contained in N).
-	global $DB;
-	$overlaps = $DB->q('COLUMN SELECT cid FROM contest WHERE
-	                    ( (%s >= activatetime AND %s <= endtime) OR
-	                      (%s >= activatetime AND %s <= endtime) OR
-			      (%s <= activatetime AND %s >= endtime)
-			    ) ' .
-			    (isset($keydata['cid'])?'AND cid != %i ':'%_') .
-			    'ORDER BY cid',
-	                   $data['activatetime'], $data['activatetime'],
-			   $data['endtime'], $data['endtime'],
-			   $data['activatetime'], $data['endtime'],
-			   @$keydata['cid']);
-	
-	if(count($overlaps) > 0) {
-		ch_error('This contest overlaps with the following contest(s): c' . 
-			implode(',c', $overlaps));
+	if ( $data['enabled'] ) {
+		global $DB;
+		$overlaps = $DB->q('COLUMN SELECT cid FROM contest WHERE
+	                        enabled = 1 AND
+		                    ( (%s >= activatetime AND %s <= endtime) OR
+		                      (%s >= activatetime AND %s <= endtime) OR
+		                      (%s <= activatetime AND %s >= endtime) ) ' .
+		                   (isset($keydata['cid'])?'AND cid != %i ':'%_') .
+		                   'ORDER BY cid',
+		                   $data['activatetime'], $data['activatetime'],
+		                   $data['endtime'], $data['endtime'],
+		                   $data['activatetime'], $data['endtime'],
+		                   @$keydata['cid']);
+
+		if(count($overlaps) > 0) {
+			ch_error('This contest overlaps with the following contest(s): c' . 
+			         implode(',c', $overlaps));
+		}
 	}
-	
+
 	return $data;
 }
 
@@ -178,7 +180,7 @@ function check_datetime($datetime)
 	}
 	$y = substr($datetime, 0, 4);
 	$m = substr($datetime, 5, 2);
-	$d = substr($datetime, 8, 2);			
+	$d = substr($datetime, 8, 2);
 	$hr = substr($datetime, 11, 2);
 	$mi = substr($datetime, 14, 2);
 	$se = substr($datetime, 17, 2);
