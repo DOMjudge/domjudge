@@ -178,7 +178,7 @@ DOMjudge:
 </itemize>
 On the domserver host:
 <itemize>
-<item> Install the MySQL database using <tt>sql/dj-setup-database -u root -r install</tt>.
+<item> Install the MySQL database using <tt>bin/dj-setup-database -u root -r install</tt>.
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it to your needs, reload web server:
        <tt>
@@ -542,7 +542,12 @@ Note that even when installing e.g. in your own home directory, root
 privileges are still required for domserver and judgehost
 installation, because user and group ownership of password files, some
 directories and the setuid-root program <tt>runguard</tt> have to be
-set.
+set. One should <em>not</em> run DOMjudge programs under the root user
+however, but under a normal user: <tt>runguard</tt> is specifically
+installed setuid-root to make this unnecessary and running as root
+will give rise to problems, see <ref id="runguard-rootprivs"
+name="runguard: root privileges not dropped"> in the common problems
+section.
 
 For a list of basic make targets, run <tt>make</tt> in the source root
 directory without arguments.
@@ -713,7 +718,7 @@ dump files in the sql subdirectory. The default database name is
 <tt>etc/dbpasswords.secret</tt> file: the database name as specified
 for the <tt>jury</tt> user will be used when installing.
 
-Installation of the database is done with <tt>sql/dj-setup-database</tt>.
+Installation of the database is done with <tt>bin/dj-setup-database</tt>.
 For this, you need an installed and configured MySQL server and
 administrator access to it. Run
 <code>
@@ -739,6 +744,9 @@ It may be desirable or even necessary to fine tune some MySQL default settings:
 <itemize>
 <item><tt>max_connections</tt>: The default 100 is too low, because of the
 connection caching by Apache threads. 1000 is more appropriate.
+<item><tt>max_allowed_packet</tt>: The default of 16MB might be too
+low when using large testcases. This should be changed both in the
+mysql server and client configuration.
 <item><tt>skip-networking</tt> or <tt>bind-address</tt>: By default MySQL
 only listens on a local socket, but judgehosts need to connect remotely to
 it. When enabling remote connections, you may want to limit it to only the
@@ -794,7 +802,9 @@ virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
 
 See also section <ref id="security:webprivs" name="Security: webserver
-privileges">.
+privileges"> for some details on file permissions for the
+<tt>etc/dbpasswords.secret</tt> and
+<tt>etc/htpasswd-{jury,plugin}</tt> files.
 
 <sect>Logging &amp; debugging
 <p>
@@ -1951,6 +1961,7 @@ the jury directory or by directly editing the global Apache or
 <tt>php.ini</tt> configuration.
 
 <sect>Compiler errors: `runguard: root privileges not dropped'
+<label id="runguard-rootprivs">
 <p>
 
 <verb>
