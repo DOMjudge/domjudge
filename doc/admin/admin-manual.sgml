@@ -178,7 +178,7 @@ DOMjudge:
 </itemize>
 On the domserver host:
 <itemize>
-<item> Install the MySQL database using <tt>sql/dj-setup-database -u root -r install</tt>.
+<item> Install the MySQL database using <tt>bin/dj-setup-database -u root -r install</tt>.
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it to your needs, reload web server:
        <tt>
@@ -222,14 +222,14 @@ Optionally:
 <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
        or use the balloon web interface.
 <item> Setup the Java chroot environment to use Sun Java with chroot:<newline>
-       <tt>bin/dj_make_chroot &lt;targetdir&gt; &lt;architecture&gt;</tt><newline>
+       <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
        <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
        and add the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
        domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
-       domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;targetdir&gt/*<newline>
+       domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*</tt>
 <item> Install the PEAR Text_Highlighter class for source syntax highlighting,
        and the PHP xdiff PECL extension for diffs between submissions.
@@ -385,9 +385,10 @@ Software required for building DOMjudge from distributed sources.
 
 <item> The <htmlurl name="Boost" url="http://www.boost.org/">
        <htmlurl name="regular expression library"
-        url="http://www.boost.org/doc/libs/release/libs/regex/">
-       to build the <tt>checktestdata</tt> program for advanced
-       checking of input/output data correctness.
+        url="http://www.boost.org/doc/libs/release/libs/regex/"> and
+       the GNU <htmlurl name="Multiple Precision library"
+       url="http://gmplib.org/"> to build the <tt>checktestdata</tt>
+       program for advanced checking of input/output data correctness.
 </itemize>
 
 Additional software required for building DOMjudge from a Subversion
@@ -427,7 +428,7 @@ have the bulk of these packages installed already.
 apt-get install gcc g++ make libcurl4-gnutls-dev sudo mysql-server ntp \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
 	hostname coreutils procps grep diff mount sharutils \
-	phpmyadmin xsltproc libboost-regex-dev \
+	phpmyadmin xsltproc libboost-regex-dev libgmp3-dev \
 	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra
 </code>
 
@@ -440,7 +441,7 @@ Pascal; change the list as appropriate.
 
 <code>
 apt-get install make sudo php5-cli php5-mysql ntp xsltproc \
-	hostname coreutils procps grep diff mount \
+	hostname coreutils procps grep diff mount sharutils \
 	gcc g++ gcj openjdk-6-jre ghc fp-compiler
 </code>
 
@@ -541,7 +542,12 @@ Note that even when installing e.g. in your own home directory, root
 privileges are still required for domserver and judgehost
 installation, because user and group ownership of password files, some
 directories and the setuid-root program <tt>runguard</tt> have to be
-set.
+set. One should <em>not</em> run DOMjudge programs under the root user
+however, but under a normal user: <tt>runguard</tt> is specifically
+installed setuid-root to make this unnecessary and running as root
+will give rise to problems, see <ref id="runguard-rootprivs"
+name="runguard: root privileges not dropped"> in the common problems
+section.
 
 For a list of basic make targets, run <tt>make</tt> in the source root
 directory without arguments.
@@ -613,6 +619,25 @@ usage information). Then one must specify this
 <tt>&lt;some-tag&gt;</tt> in the special_run and/or special_compare
 fields of the problem entry in the MySQL database (empty means that
 the default script should be used).
+
+Implementing a special compare script, also called a
+<em>validator</em>, can be done in two ways: either write a program
+that is called directly (by <tt>test_solution.sh</tt>) or use (a copy
+of) the <tt>compare_program.sh</tt> script. The latter generates the
+XML result file and handles redirection of input/output for you. When
+using this wrapper (the easiest method), the jury should write a
+checker program which can be called as
+<code>
+$CHECK_PROGRAM <testdata.in> <program.out> <testdata.out>
+</code>
+and this program should write some kind of difference to stdout. No
+output results in a <em>correct</em> verdict and a nonzero exitcode in
+an internal (system) error. The script <tt>compare_program.sh</tt> as
+shipped is configured to call <tt>check_float</tt>, which compares
+floating point numbers. For more details, see the comments at the top
+of the files <tt>test_solution.sh</tt>, <tt>compare_program.sh</tt>
+and (when not using the wrapper) the appendix on the
+<ref id="validator" name="ICPC validator interface">.
 
 The shipped <tt>test_solution.sh</tt> has support for enabling
 <tt>presentation-error</tt> to be returned as a judging result. This
@@ -693,7 +718,7 @@ dump files in the sql subdirectory. The default database name is
 <tt>etc/dbpasswords.secret</tt> file: the database name as specified
 for the <tt>jury</tt> user will be used when installing.
 
-Installation of the database is done with <tt>sql/dj-setup-database</tt>.
+Installation of the database is done with <tt>bin/dj-setup-database</tt>.
 For this, you need an installed and configured MySQL server and
 administrator access to it. Run
 <code>
@@ -719,6 +744,9 @@ It may be desirable or even necessary to fine tune some MySQL default settings:
 <itemize>
 <item><tt>max_connections</tt>: The default 100 is too low, because of the
 connection caching by Apache threads. 1000 is more appropriate.
+<item><tt>max_allowed_packet</tt>: The default of 16MB might be too
+low when using large testcases. This should be changed both in the
+mysql server and client configuration.
 <item><tt>skip-networking</tt> or <tt>bind-address</tt>: By default MySQL
 only listens on a local socket, but judgehosts need to connect remotely to
 it. When enabling remote connections, you may want to limit it to only the
@@ -774,7 +802,9 @@ virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
 
 See also section <ref id="security:webprivs" name="Security: webserver
-privileges">.
+privileges"> for some details on file permissions for the
+<tt>etc/dbpasswords.secret</tt> and
+<tt>etc/htpasswd-{jury,plugin}</tt> files.
 
 <sect>Logging &amp; debugging
 <p>
@@ -868,13 +898,19 @@ the following lines must be added to <tt>/etc/sudoers</tt>:
 <verb>
 domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
 domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
-domjudge ALL=(root) NOPASSWD: /bin/mount --bind CHROOTORIGDIR/*
+domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*
 domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*
 </verb>
 Here the user <tt>domjudge</tt> must be replaced by the user you
-intend to run the judgedaemon as, <tt>CHROOTORIGDIR</tt> by the path
+intend to run the judgedaemon as, <tt>&lt;chrootdir&gt;</tt> by the path
 the chroot environment was installed to and <tt>JUDGEDIR</tt> by the
 value of <tt>judgehost_judgedir</tt> specified by <tt>configure</tt>.
+Note that <tt>&lt;chrootdir&gt;</tt> is different from
+<tt>CHROOTDIR</tt> as specified in <tt>configure</tt>; the first is
+the tree from which bind-mounts are made when Sun Java is used, the
+latter the directory under which judgings are allowed to be executed
+in a chroot environment, and this path is by default set to
+<tt>judgehost_judgedir</tt>.
 
 <sect>Building and installing the submit client
 <p>
@@ -1921,6 +1957,7 @@ the jury directory or by directly editing the global Apache or
 <tt>php.ini</tt> configuration.
 
 <sect>Compiler errors: `runguard: root privileges not dropped'
+<label id="runguard-rootprivs">
 <p>
 
 <verb>

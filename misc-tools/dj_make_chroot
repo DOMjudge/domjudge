@@ -40,11 +40,11 @@ export DEBIAN_FRONTEND=noninteractive
 
 usage()
 {
-    echo "Usage: $0 <targetdir> <architecture>"
+    echo "Usage: $0 <chrootdir> <architecture>"
     echo "Creates a chroot environment with Sun Java support using the"
     echo "Debian GNU/Linux distribution."
     echo
-    echo "This script must be run as root, <targetdir> the non-existing target"
+    echo "This script must be run as root, <chrootdir> the non-existing target"
     echo "location of the chroot and <architecture> one of the following:"
     echo "$ARCHLIST"
 }
