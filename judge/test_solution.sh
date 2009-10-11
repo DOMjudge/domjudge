@@ -71,6 +71,17 @@ cleanexit ()
 	logmsg $LOG_DEBUG "exiting"
 }
 
+# Runs command without error trapping and check exitcode
+runcheck ()
+{
+	set +e
+	trap - ERR
+	$@
+	exitcode=$?
+	set -e
+	trap error ERR
+}
+
 # Error and logging functions
 . "$SYSTEM_ROOT/lib/lib.error.sh"
 
@@ -168,9 +179,8 @@ fi
 
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
-( "$RUNGUARD" ${DO_DEBUG:+-v} -t $COMPILETIME -o compile.time -- \
-	"$COMPILE_SCRIPT" "source.$EXT" source "$MEMLIMIT" ) &>compile.tmp
-exitcode=$?
+runcheck "$RUNGUARD" ${DEBUG:+-v} -t $COMPILETIME -f $FILELIMIT -o compile.time -- \
+	"$COMPILE_SCRIPT" "source.$EXT" source "$MEMLIMIT" &>compile.tmp
 if [ -f source ]; then
     mv -f source program
     chmod a+rx program
@@ -218,11 +228,10 @@ disown $CATPID
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
-( "$RUNGUARD" ${DO_DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
+runcheck "$RUNGUARD" ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
 	-t $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
 	$PREFIX/$RUN_SCRIPT $PREFIX/program testdata.in program.out program.err program.exit \
-) &>error.tmp
-exitcode=$?
+	&>error.tmp
 
 # Execute an optional chroot destroy script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then

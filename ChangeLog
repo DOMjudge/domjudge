@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 2.2.5 - SVN
 -------------------
+ - Fix error trapping in subshells, thanks Jan Jergus. (Closes: #2866430)
 
 Version 2.2.4 - 29 August 2009
 ------------------------------
