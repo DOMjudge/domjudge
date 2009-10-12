@@ -41,7 +41,7 @@ $configvars = array(
 
 foreach ($configvars as $var => $default) {
 	$value = defined($var) ? constant($var) : $default;
-	echo '\\def\\' . $var . '{' . $value . "}\n";
+	echo '\\def\\' . str_replace('_', '', $var) . '{' . $value . "}\n";
 }
 
 exit(0);
