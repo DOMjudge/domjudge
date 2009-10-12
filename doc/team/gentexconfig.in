@@ -36,8 +36,8 @@ $configvars = array(
 	'MEMLIMIT'                  => 524288,
 	'FILELIMIT'                 => 4096,
 	'PROCLIMIT'                 => 10,
-	'USERSUBMITDIR'             => '.domjudge'
-	'ENABLE_CMDSUBMIT_SERVER'   => '0'
+	'USERSUBMITDIR'             => '.domjudge',
+	'ENABLE_CMDSUBMIT_SERVER'   => '0',
 	'ENABLE_WEBSUBMIT_SERVER'   => '1'
 	);
 
