@@ -73,12 +73,15 @@ Het bekijken van inzendingen, scores en sturen en lezen van
 
 \section{Oplossingen insturen}\label{submit}
 
+\ifcmdsubmit{\ifwebsubmit{
 Het insturen van oplossingen voor problemen kan op twee verschillende
 manieren: via een command-line interface (het programma \cmd{submit}),
 of via de web-interface. Het kan zijn dat een van beide niet beschikbaar
 is, afhankelijk van de configuratie van het systeem door de jury.
 Hieronder worden beide methodes beschreven.
+}}
 
+\ifcmdsubmit{
 \subsection{Command-line: \cmd{submit}}
 
 \textbf{Syntax:} \cmd{submit [opties] bestandsnaam.ext}
@@ -110,7 +113,9 @@ Verwijder deze directory niet en pas hem niet aan, omdat anders het
 submitprogramma niet meer correct functioneert. Verder kan er een
 ``public ssh-key'' van de jury in de \textsc{ssh}-configuratie
 toegevoegd zijn. Ook deze is nodig voor het functioneren van \cmd{submit}.
+}
 
+\ifwebsubmit{
 \subsection{Web-interface}
 
 Vanaf je teampagina \url{\WEBBASEURI team} kun je oplossingen insturen
@@ -124,6 +129,7 @@ respectievelijk de basis en de extensie van de bestandsnaam te halen.
 Nadat je op de submitknop geklikt hebt en dit bevestigd hebt, wordt
 aangegeven of je inzending goed aangekomen is. Daarna staat deze in je
 lijst met inzendingen.
+}
 
 \section{De uitslag bekijken van inzendingen}
 
@@ -203,11 +209,14 @@ beoordeling. Het beoordelen gebeurt via de volgende stappen:
 
 \subsection{Insturen}
 
-Via het \cmd{submit} programma of de web-interface (zie
-sectie~\ref{submit}) kun je een oplossing voor een opgave insturen,
-zodat hij ge\"upload wordt naar de jury. Let op dat je de source-code
-van je programma moet insturen (en dus niet een gecompileerd programma
-of de uitvoer van je programma).
+Via
+\ifcmdsubmit{het \cmd{submit} programma}
+\ifcmdsubmit{\ifwebsubmit{of}}
+\ifwebsubmit{de web-interface}
+(zie sectie~\ref{submit}) kun je een oplossing voor een opgave
+insturen, zodat hij ge\"upload wordt naar de jury. Let op dat je de
+source-code van je programma moet insturen (en dus niet een
+gecompileerd programma of de uitvoer van je programma)
 
 Dan komt je programma in de wachtrij te staan, om gecompileerd,
 uitgevoerd en getest te worden op \'e\'en van de jury-computers.

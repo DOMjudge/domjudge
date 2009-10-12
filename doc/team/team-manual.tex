@@ -67,11 +67,14 @@ requests is done through the web interface. The menu buttons at
 
 \section{Submitting solutions}\label{submit}
 
+\ifcmdsubmit{\ifwebsubmit{
 Submitting solutions can be done in two ways: with the command-line
 program \cmd{submit} or using the web interface. One of the
 interfaces might not be available, depending on the system
 configuration by the jury. A description of both methods follows.
+}}
 
+\ifcmdsubmit{
 \subsection{Command-line: \cmd{submit}}
 
 \textbf{Syntax:} \cmd{submit [options] filename.ext}
@@ -101,7 +104,9 @@ change this directory, otherwise the \cmd{submit} program might fail to
 function correctly. Furthermore a ``public ssh-key'' of the jury might have
 been added to the \textsc{ssh} configuration; this is also necessary
 for the functioning of \cmd{submit}.
+}
 
+\ifwebsubmit{
 \subsection{Web interface}
 
 Solutions can be submitted from the web interface at \url{\WEBBASEURI team}.
@@ -113,6 +118,7 @@ determined from the base and extension of the filename respectively.
 After you hit the submit button and confirm the submission, a page is
 shown with a confirmation of successful upload. Next, you should be
 able to see the submission in your submissions list.
+}
 
 \section{Viewing the results of submissions}
 
@@ -191,9 +197,12 @@ interaction is necessary. The judging is done in the following way:
 
 \subsection{Submitting solutions}
 
-With the \cmd{submit} program or the web interface (see
-section~\ref{submit}) you can submit a solution to a problem to the
-jury. Note that you have to submit the source code of your program
+With
+\ifcmdsubmit{the \cmd{submit} program}
+\ifcmdsubmit{\ifwebsubmit{or}}
+\ifwebsubmit{the web interface}
+(see section~\ref{submit}) you can submit a solution to a problem to
+the jury. Note that you have to submit the source code of your program
 (and not a compiled program or the output of your program).
 
 There your program enters a queue, awaiting compilation, execution

@@ -29,14 +29,16 @@ if ( is_readable($config) ) {
 }
 
 $configvars = array(
-	'DOMJUDGE_VERSION' => 'unknown',
-	'SOURCESIZE'       => 256,
-	'WEBBASEURI'       => 'http://example.com/domjudge/',
-	'COMPILETIME'      => 30,
-	'MEMLIMIT'         => 524288,
-	'FILELIMIT'        => 4096,
-	'PROCLIMIT'        => 10,
-	'USERSUBMITDIR'    => '.domjudge'
+	'DOMJUDGE_VERSION'          => 'unknown',
+	'SOURCESIZE'                => 256,
+	'WEBBASEURI'                => 'http://example.com/domjudge/',
+	'COMPILETIME'               => 30,
+	'MEMLIMIT'                  => 524288,
+	'FILELIMIT'                 => 4096,
+	'PROCLIMIT'                 => 10,
+	'USERSUBMITDIR'             => '.domjudge'
+	'ENABLE_CMDSUBMIT_SERVER'   => '0'
+	'ENABLE_WEBSUBMIT_SERVER'   => '1'
 	);
 
 foreach ($configvars as $var => $default) {

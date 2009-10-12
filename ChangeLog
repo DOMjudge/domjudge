@@ -7,6 +7,7 @@ Version 3.0.0 - SVN
  - Fix bug in lib.database.php with array_map "class::method" notation.
  - Multiple admin manual improvements.
  - Added 'make check' dependency on submitclient.
+ - Only show the configured submission methods in the team manual.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------
