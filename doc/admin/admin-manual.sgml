@@ -56,7 +56,7 @@ A global overview of the features that DOMjudge provides:
 <item>Detailed jury information (submissions, judgings) and options
       (rejudge, clarifications)
 <item>Designed with security in mind
-<item>Has been used in live contests
+<item>Has been used in many live contests
 <item>Open Source, Free Software
 </itemize>
 
@@ -182,8 +182,8 @@ On the domserver host:
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it to your needs, reload web server:
        <tt>
-       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf
-       apache2ctl graceful
+       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf &&
+       sudo apache2ctl graceful
        </tt>
 
 
@@ -959,18 +959,6 @@ there are.
 </descrip>
 
 <p>
-The administrator's and judge's manuals are available in PDF and HTML
-format and prebuilt from SGML sources. To rebuild these,
-<tt>linuxdoc</tt> must be installed, but rebuilding should normally
-not be necessary. On a Debian-like system, the following commands
-should rebuild these docs (if outdated):
-<code>
-sudo apt-get install linuxdoc-tools make transfig texlive-latex-recommended
-make -C doc/admin docs
-make -C doc/judge docs
-</code>
-
-<p>
 The team manual is only available in PDF format and must be built from
 the LaTeX sources in <tt>doc/team</tt> after configuration of the
 system. A prebuilt team manual is included, but note that it contains
@@ -981,7 +969,7 @@ site-specific settings and also to revise it to reflect your contest
 specific environment and rules.
 
 <p>
-Besides a standard LaTeX installation, the team manual also
+Besides a standard LaTeX installation, the team manual
 requires the <tt>svn</tt> and <tt>expdlist</tt> packages. These are
 available in TeX Live in the <tt>texlive-latex-extra</tt> package in
 any modern Linux distribution. Alternatively, you can download and
@@ -992,11 +980,28 @@ url="http://mirror.ctan.org/macros/latex/contrib">.
 When the <tt>docs</tt> part of DOMjudge is installed and site-specific
 configuration set, the team manual can be generated with the command
 <tt>genteammanual</tt>. The PDF document will be placed in the current
-directory or a directory given as argument.
+directory or a directory given as argument. The following should do
+it on a Debian-like system:
+<code>
+sudo apt-get install make transfig texlive-latex-extra texlive-latex-recommended
+./genteammanual
+</code>
 
 <p>
 The team manual is currently available in two languages: English and
 Dutch. We welcome any translations to other languages.
+
+<p>
+The administrator's and judge's manuals are available in PDF and HTML
+format and prebuilt from SGML sources. Rebuilding these is not normally
+necessary. To rebuild them on a Debian-like system, the following commands
+should do it:
+<code>
+sudo apt-get install linuxdoc-tools make transfig texlive-latex-recommended
+make -C doc/admin docs
+make -C doc/judge docs
+</code>
+
 
 <sect>Optional features
 <p>
@@ -1861,7 +1866,7 @@ There are some options to support Java as a language:
        cannot be linked statically (see `GCJ compiler warnings' in
        this FAQ). Secondly, the static library <tt>libgcj.a</tt>
        doesn't seem to be included in all GNU/Linux distributions: at
-       least not in RedHat Enterprise 4.
+       least not in RedHat Enterprise Linux 4.
 </enum>
 
 <sect>The Sun Java virtual machine (jvm) and memory limits
