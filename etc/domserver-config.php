@@ -25,7 +25,7 @@ define('SHOW_COMPILE', 2);
 define('STRICTIPCHECK', false);
 
 // Authentication per php session handling?
-define('PHP_SESSIONS', true);
+define('PHP_SESSIONS', false);
 
 define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl Bash,sh');
 
