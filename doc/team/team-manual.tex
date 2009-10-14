@@ -40,14 +40,17 @@ examples.
 
 \subsection*{Submitting solutions}
 
-You can submit solutions with the command-line program \cmd{submit} or
-by the web interface:
+You can submit solutions with%
+\ifcmdsubmit{ the command-line program \cmd{submit} or by}
+the web interface:
 \begin{description}[\breaklabel\setlabelstyle{\bfseries}]
+\ifcmdsubmit{
 \item[Command-line]
 Use \cmd{submit <problem>.<extension>}, where \cmd{<problem>} is the
 label of the problem and \cmd{<extension>} is a standard extension for
 your language.  For a complete reference of all options and examples,
 see \cmd{submit --help}.
+}
 \item[Web interface]
 From your team page, \url{\WEBBASEURI team}, browse to
 \textbf{submit} and select the file you want to submit. By default,
@@ -67,14 +70,12 @@ requests is done through the web interface. The menu buttons at
 
 \section{Submitting solutions}\label{submit}
 
-\ifcmdsubmit{\ifwebsubmit{
+\ifcmdsubmit{
 Submitting solutions can be done in two ways: with the command-line
 program \cmd{submit} or using the web interface. One of the
 interfaces might not be available, depending on the system
 configuration by the jury. A description of both methods follows.
-}}
 
-\ifcmdsubmit{
 \subsection{Command-line: \cmd{submit}}
 
 \textbf{Syntax:} \cmd{submit [options] filename.ext}
@@ -106,19 +107,17 @@ been added to the \textsc{ssh} configuration; this is also necessary
 for the functioning of \cmd{submit}.
 }
 
-\ifwebsubmit{
 \subsection{Web interface}
 
 Solutions can be submitted from the web interface at \url{\WEBBASEURI team}.
-Navigate to \textbf{submit} to select the file for
-submission, and the problem and language. These can also be left on the
-default `automatic' setting; then the problem and language will be
-determined from the base and extension of the filename respectively.
+Navigate to \textbf{submit} to select the file for submission, and the
+problem and language. These can also be left on the default
+`automatic' setting; then the problem and language will be determined
+from the base and extension of the filename respectively.
 
 After you hit the submit button and confirm the submission, a page is
 shown with a confirmation of successful upload. Next, you should be
 able to see the submission in your submissions list.
-}
 
 \section{Viewing the results of submissions}
 
@@ -151,7 +150,7 @@ enough.
 There was an error during the execution of your program. This can have
 a lot of different causes like division by zero, incorrectly
 addressing memory (e.g. by indexing arrays out of bounds), trying to
-use more memory than the limit, etc. 
+use more memory than the limit, etc.
 Also check that your program exits with exit code 0!
 
 \item[NO-OUTPUT]
@@ -197,13 +196,12 @@ interaction is necessary. The judging is done in the following way:
 
 \subsection{Submitting solutions}
 
-With
-\ifcmdsubmit{the \cmd{submit} program}
-\ifcmdsubmit{\ifwebsubmit{or}}
-\ifwebsubmit{the web interface}
-(see section~\ref{submit}) you can submit a solution to a problem to
-the jury. Note that you have to submit the source code of your program
-(and not a compiled program or the output of your program).
+With%
+\ifcmdsubmit{ the \cmd{submit} program or}
+the web interface (see section~\ref{submit}) you can submit a solution
+to a problem to the jury. Note that you have to submit the source code
+of your program (and not a compiled program or the output of your
+program).
 
 There your program enters a queue, awaiting compilation, execution
 and testing on one of the jury computers.
@@ -258,7 +256,7 @@ Java VM, \dots)! If your program tries to use more memory, it will
 abort, resulting in a run error.
 
 \item[program output]
-You are not allowed to output more than \FILELIMIT\ kilobytes 
+You are not allowed to output more than \FILELIMIT\ kilobytes
 on either standard out or standard error, and will get a run error
 if you exceed this limit.
 

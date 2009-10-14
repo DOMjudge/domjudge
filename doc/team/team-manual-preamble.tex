@@ -26,10 +26,8 @@
 % Display commands, arguments, etc. in texttt font and don't break those.
 \newcommand{\cmd}[1]{\mbox{\texttt{#1}}}
 
-% Only show text if configured with a feature
-\newcommand{\ifthen}[2]{\ifthenelse{\equal{#1}{1}}{#2}{}}
-\newcommand{\ifcmdsubmit}[1]{\ifthen{\ENABLECMDSUBMITSERVER}{#1}}
-\newcommand{\ifwebsubmit}[1]{\ifthen{\ENABLEWEBSUBMITSERVER}{#1}}
+% Only show text if the submitclient is configured
+\newcommand{\ifcmdsubmit}[1]{\ifthenelse{\equal{\SUBMITDEFAULT}{0}}{}{#1}}
 
 % Our titlepage, should be called at start of team manual document
 % Argument list:
