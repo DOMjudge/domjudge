@@ -28,6 +28,8 @@ htpasswd-jury: dbpasswords.secret
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
 		apache.conf domserver-static.php
+	$(INSTALL_SCRIPT) -t $(DESTDIR)$(domserver_etcdir) \
+		gendbpasswords
 	-$(INSTALL_USER) -t $(DESTDIR)$(domserver_etcdir) \
 		domserver-config.php common-config.php
 	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
