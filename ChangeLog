@@ -8,7 +8,7 @@ Version 3.0.0 - SVN
  - Multiple admin manual improvements.
  - Added 'make check' dependency on submitclient.
  - Only show the configured submission methods in the team manual.
- - Fix install of gendbpasswords.
+ - Fix install of gendbpasswords and use /dev/urandom.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------
