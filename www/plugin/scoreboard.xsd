@@ -26,7 +26,7 @@
 		</xs:simpleContent>
 	</xs:complexType>
 	<xs:complexType name="summaryType">
-		<xs:all>
+		<xs:all minOccurs="0" maxOccurs="1">
 			<xs:element name="num_solved" type="xs:nonNegativeInteger"/>
 			<xs:element name="problems" type="summaryProblemsType"/>
 		</xs:all>

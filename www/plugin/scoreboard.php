@@ -54,14 +54,21 @@ $contest    = XMLaddnode($scoreboard, 'contest', $cdata['contestname'],
                                'start' => $cdata['starttime'],
                                'end'   => $cdata['endtime'] ));
 
+// Add scoreboard subnodes here, so they are also present when the
+// contest has not started yet.
+$rows        = XMLaddnode($scoreboard, 'rows');
+$summary     = XMLaddnode($scoreboard, 'summary');
+$problegend  = XMLaddnode($scoreboard, 'problem_legend');
+$langlegend  = XMLaddnode($scoreboard, 'language_legend');
+$affillegend = XMLaddnode($scoreboard, 'affiliation_legend');
+$categlegend = XMLaddnode($scoreboard, 'category_legend');
+
 if ( isset($cdata['freezetime']) ) {
 	$contest->setAttribute('freeze', $cdata['freezetime']);
 }
 
 // Don't output anything if before start of contest
 if ( ! empty($MATRIX) ) {
-
-	$rows = XMLaddnode($scoreboard, 'rows');
 
 	foreach( $SCORES as $team => $totals ) {
 
@@ -73,27 +80,24 @@ if ( ! empty($MATRIX) ) {
 
 		XMLaddnode($row, 'num_solved', $totals['num_correct']);
 		XMLaddnode($row, 'totaltime',  $totals['total_time']);
-		
+
 		$problems = XMLaddnode($row, 'problems');
 
 		foreach( $MATRIX[$team] as $prob => $score ) {
-			
+
 			$elem = XMLaddnode($problems, 'problem', NULL,
 			                   array('id' => $prob, 'correct' => ($score['is_correct']?'true':'false')));
-			
+
 			XMLaddnode($elem, 'num_submissions', $score['num_submissions']);
-			
+
 			if ( $score['is_correct'] ) {
 				XMLaddnode($elem, 'time', $score['time']);
 				XMLaddnode($elem, 'penalty', $score['penalty']);
 			}
 		}
-		
 	}
 
 	// Add summary data
-	$summary = XMLaddnode($scoreboard, 'summary');
-
 	XMLaddnode($summary, 'num_solved', $SUMMARY['num_correct']);
 
 	// Summary per problem
@@ -108,25 +112,21 @@ if ( ! empty($MATRIX) ) {
 	}
 
 	// Add legends for problems, languages, affiliations and categories
-	$problegend = XMLaddnode($scoreboard, 'problem_legend');
 	foreach( $probs as $prob => $data ) {
 		XMLaddnode($problegend, 'problem', $data['name'],
 		           array('id' => $prob, 'color' => $data['color']));
 	}
 
-	$langlegend = XMLaddnode($scoreboard, 'language_legend');
 	foreach( $langs as $lang => $data ) {
 		XMLaddnode($langlegend, 'language', $data['name'],
 		           array('id' => $lang));
 	}
 
-	$affillegend = XMLaddnode($scoreboard, 'affiliation_legend');
 	foreach( $affils as $affil => $data ) {
 		XMLaddnode($affillegend, 'affiliation', $data['name'],
 		           array('id' => $affil, 'country' => $data['country']));
 	}
 
-	$categlegend = XMLaddnode($scoreboard, 'category_legend');
 	foreach( $categs as $categ => $data ) {
 		XMLaddnode($categlegend, 'category', $data['name'],
 		           array('id' => $categ, 'color' => $data['color']));
