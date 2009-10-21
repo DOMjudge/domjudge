@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.0.0 - SVN
--------------------
+Version 3.0.0 - 21 October 2009
+-------------------------------
  - Bugfixes and improvements to checktestdata program.
  - Fix error trapping in subshells, thanks Jan Jergus. (Closes: #2866430)
  - Fix bug in lib.database.php with array_map "class::method" notation.
