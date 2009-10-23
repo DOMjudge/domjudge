@@ -425,9 +425,9 @@ GNU/Linux, or one of its derivate distributions. Most systems will
 have the bulk of these packages installed already.
 
 <code>
-apt-get install gcc g++ make libcurl4-gnutls-dev sudo mysql-server ntp \
+apt-get install gcc g++ make libcurl4-gnutls-dev mysql-server \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
-	hostname coreutils procps grep diff mount sharutils \
+	ntp sudo procps sharutils \
 	phpmyadmin xsltproc libboost-regex-dev libgmp3-dev \
 	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra
 </code>
@@ -440,8 +440,7 @@ example compilers to install for C, C++, Java (GNU), Java (Sun), Haskell and
 Pascal; change the list as appropriate.
 
 <code>
-apt-get install make sudo php5-cli php5-mysql ntp xsltproc \
-	hostname coreutils procps grep diff mount sharutils \
+apt-get install make sudo php5-cli php5-mysql ntp xsltproc procps sharutils \
 	gcc g++ gcj openjdk-6-jre ghc fp-compiler
 </code>
 
