@@ -7,7 +7,7 @@ config: gentexconfig
 
 docs: team-manual.pdf
 
-install-docs:
+install-docs: docs
 	$(INSTALL_SCRIPT) -t $(DESTDIR)$(domjudge_docdir)/team \
 		gentexconfig genteammanuals
 	$(INSTALL_DATA)   -t $(DESTDIR)$(domjudge_docdir)/team \
