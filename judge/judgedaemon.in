@@ -15,4 +15,4 @@ if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
 require('@judgehost_etcdir@/judgehost-static.php');
 
-include(LIBDIR . '/judge/judgedaemon.main.php');
+include(LIBJUDGEDIR . '/judgedaemon.main.php');
