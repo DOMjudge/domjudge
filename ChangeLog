@@ -10,6 +10,7 @@ Version 3.1.0 - SVN
  - Add 'enabled' field to contest to allow for easier editing.
  - Only show the configured submission methods in the team manual.
  - Fix install of gendbpasswords and use /dev/urandom.
+ - Add documentation on static_scoreboard.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------

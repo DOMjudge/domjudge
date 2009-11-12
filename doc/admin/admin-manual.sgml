@@ -1636,19 +1636,29 @@ fresh version of the entire scoreboard. You should use this option
 only when actually necessary, since it puts quite a load on the
 database.
 
-
-<sect1>Balloons
+<sect1>Exporting to an external website
 <p>
 
-Although not strictly part of the scoreboard, in many contests
-balloons are handed out to teams that solve a particular problem.
-DOMjudge can help in this process: a balloons notification daemon is
-available that will notify the runners when a new balloon needs to be
-handed out.
+In many cases you might want to create a copy of the scoreboard for
+external viewing from the internet. The command
+<tt>bin/static_scoreboard</tt> is provided just for that. It writes to
+stdout a version of the scoreboard with refresh meta-tags and links to
+team pages removed. This command can for example be run every minute
+and the output be placed as static content on a publicly reachable
+webserver.
 
-Alternatively you can use a web based tool in the jury interface,
-reachable from the main page, where each balloon has to be checked off
-by the person handing it out.
+<sect>Balloons
+<p>
+
+In many contests balloons are handed out to teams that solve a
+particular problem. DOMjudge can help in this process: both a web
+interface and a notification daemon are available to notify that a new
+balloon needs to be handed out. Note that only one should be used at a
+time.
+
+The web based tool is reachable from the main page in the jury
+interface, where each balloon has to be checked off by the person
+handing it out.
 
 For the daemon, set the BALLOON_CMD in <tt>bin/balloons</tt> to define
 how notifications
