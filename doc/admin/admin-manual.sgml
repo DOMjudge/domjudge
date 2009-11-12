@@ -126,6 +126,21 @@ licenced under the MIT/X11 licence, see <tt>COPYING.MIT</tt>. This
 software was downloaded from:
 <url url="http://www.kryogenix.org/code/browser/sorttable/">
 
+<sect1>About the name and logo
+<p>
+
+The name of this judging system is inspired by a very important and
+well known landmark in the city of Utrecht: the dome tower, called the
+`Dom' in Dutch. The original logo of the 2004 Dutch Programming
+Championships (for which this system was originally developed) depicts
+a represention of the Dom in zeros and ones. We based the name and
+logo of DOMjudge on that.
+
+We would like to thank Erik van Sebille, the original creator of the
+logo. The logo is under a GPL licence, but Erik suggested a "free as
+in beer" licence first: you're allowed to use it, but you owe Erik a
+free beer in case might you encounter him.
+
 <sect>Contact
 <p>
 The DOMjudge homepage can be found at:
