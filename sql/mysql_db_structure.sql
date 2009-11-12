@@ -51,7 +51,8 @@ CREATE TABLE `contest` (
   `endtime` datetime NOT NULL COMMENT 'Time after which no more submissions are accepted',
   `unfreezetime` datetime default NULL COMMENT 'Unfreeze a frozen scoreboard at this time',
   `enabled` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Whether this contest can be active',
-  PRIMARY KEY  (`cid`)
+  PRIMARY KEY (`cid`),
+  KEY `cid` (`cid`,`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';
 
 --
