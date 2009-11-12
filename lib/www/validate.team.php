@@ -10,6 +10,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+$ip = $_SERVER['REMOTE_ADDR'];
+
 if ( PHP_SESSIONS ) {
 	session_start();
 	if ( isset($_SESSION['teamid']) ) {
@@ -17,7 +19,6 @@ if ( PHP_SESSIONS ) {
 		              $_SESSION['teamid']);
 	}
 } else {
-	$ip = $_SERVER['REMOTE_ADDR'];
 	$row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
 }
 
