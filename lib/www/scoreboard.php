@@ -188,7 +188,7 @@ function genScoreBoard($cdata) {
  * 'scoreboard'. $myteamid can be passed to highlight a specific row.
  * If this function is called while IS_JURY is defined, the scoreboard
  * will always be current, regardless of the freezetime setting in the
- * contesttable. $static omits output unsuitable for static html pages.
+ * contesttable. $static omits output suitable for static html pages.
  */
 function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 
