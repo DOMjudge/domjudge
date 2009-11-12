@@ -19,6 +19,7 @@ CREATE TABLE `clarification` (
   `submittime` datetime NOT NULL COMMENT 'Time sent',
   `sender` varchar(15) default NULL COMMENT 'Team login, null means jury',
   `recipient` varchar(15) default NULL COMMENT 'Team login, null means to jury or to all',
+  `probid` varchar(8) default NULL COMMENT 'Problem associated to this clarification',
   `body` text NOT NULL COMMENT 'Clarification text',
   `answered` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),

@@ -65,6 +65,17 @@ function putClar($clar)
 	               IS_JURY && $clar['recipient'], TRUE);
 	echo "</td></tr>\n";
 
+	echo '<tr><td scope="row">Subject:</td><td>';
+	if ( is_null($clar['probid']) ) {
+		echo "General issue";
+	} else {
+		echo "Problem " .
+			make_link($clar['probid'].": ".$clar['probname'],
+			          "problem.php?id=" . urlencode($clar['probid']),
+			          IS_JURY, TRUE);
+	}
+	echo "</td></tr>\n";
+
 	echo '<tr><td scope="row">Time:</td><td>';
 	echo printtime($clar['submittime']);
 	echo "</td></tr>\n";
@@ -91,15 +102,16 @@ function putClarification($id,  $team = NULL)
 
 	$clar = $DB->q('TUPLE SELECT * FROM clarification WHERE clarid = %i', $id);
 	
-	$clarifications = $DB->q('SELECT c.*, t.name AS toname, f.name AS fromname
-		FROM clarification c
-		LEFT JOIN team t ON (t.login = c.recipient)
-		LEFT JOIN team f ON (f.login = c.sender)
-		WHERE c.respid = %i OR c.clarid = %i
-		ORDER BY c.submittime, c.clarid',
-		$clar['clarid'], $clar['clarid']);
+	$clars = $DB->q('SELECT c.*, p.name AS probname, t.name AS toname, f.name AS fromname
+	                 FROM clarification c
+	                 LEFT JOIN problem p USING (probid)
+	                 LEFT JOIN team t ON (t.login = c.recipient)
+	                 LEFT JOIN team f ON (f.login = c.sender)
+	                 WHERE c.respid = %i OR c.clarid = %i
+	                 ORDER BY c.submittime, c.clarid',
+	                $clar['clarid'], $clar['clarid']);
 
-	while ( $clar = $clarifications->next() ) {
+	while ( $clar = $clars->next() ) {
 		// check permission to view this clarification
 		if (IS_JURY || canViewClarification($team, $clar)) {
 			setClarificationViewed($clar['clarid'], $team);
@@ -135,7 +147,8 @@ function putClarificationList($clars, $team = NULL)
 
 	echo "<table class=\"list sortable\">\n<thead>\n";
 	echo "<tr><th scope=\"col\">ID</th><th scope=\"col\">from</th>" .
-	     "<th scope=\"col\">to</th><th scope=\"col\">time</th>" .
+	     "<th scope=\"col\">to</th><th scope=\"col\">subject</th>" .
+	     "<th scope=\"col\">time</th>" .
 	     "<th scope=\"col\">text</th></tr>\n</thead>\n<tbody>\n";
 
 	while ( $clar = $clars->next() ) {
@@ -174,6 +187,14 @@ function putClarificationList($clars, $team = NULL)
 		echo '<td class="teamid">' . $sender . '</td>';
 		echo '<td class="teamid">' . $recipient . '</td>';
 
+		if ( is_null($clar['probid']) ) {
+			echo "<td>general</td>";
+		} else {
+			echo "<td>" .
+				make_link("problem ".$clar['probid'],
+				          "problem.php?id=" . urlencode($clar['probid']),
+				          IS_JURY) . "</td>";
+		}
 		echo '<td>' . printtime($clar['submittime']) . '</td>';
 		echo '<td><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">';
 		echo summarizeClarification($clar['body']);
@@ -186,7 +207,7 @@ function putClarificationList($clars, $team = NULL)
  * Output a form to send a new clarification.
  * Set team to a login, to make only that team (or ALL) selectable.
  */
-function putClarificationForm($action, $respid = NULL)
+function putClarificationForm($action, $cid, $respid = NULL)
 {
 	require_once('forms.php');
 
@@ -210,7 +231,7 @@ function confirmClar() {
 }
 // -->
 </script>
-	  
+
 <?php
 	echo addForm($action, 'post', 'sendclar');
 	echo "<table>\n";
@@ -250,6 +271,14 @@ function confirmClar() {
 	} else {
 		echo "<tr><td><b>To:</b></td><td>Jury</td></tr>\n";
 	}
+
+	// Select box for a specific problem or general issue
+	$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid, ": ", name) as name
+	                 FROM problem WHERE cid = %i ORDER BY probid ASC', $cid);
+	$options = array_merge(array('general' => 'General issue'), $probs);
+	echo "<tr><td><b>Subject:</b></td><td>\n" .
+	     addSelect('problem', $options, ($respid ? $clar['probid'] : 'general'), true) .
+	     "</td></tr>\n";
 
 	?>
 <tr>

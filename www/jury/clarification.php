@@ -47,14 +47,18 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
 	if ( $isgeneral ) {
 		$newid = $DB->q('RETURNID INSERT INTO clarification
-		                 (cid, submittime, recipient, body)
-		                 VALUES (%i, %s, %s, %s)',
-		                 $cid, now(), $sendto, $_POST['bodytext']);
+		                 (cid, submittime, recipient, probid, body)
+		                 VALUES (%i, %s, %s, %s, %s)',
+		                $cid, now(), $sendto,
+		                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
+		                $_POST['bodytext']);
 	} else {
 		$newid = $DB->q('RETURNID INSERT INTO clarification
-		                 (cid, respid, submittime, recipient, body)
-		                 VALUES (%i, %i, %s, %s, %s)',
-		                 $cid, $respid, now(), $sendto, $_POST['bodytext']);
+		                 (cid, respid, submittime, recipient, probid, body)
+		                 VALUES (%i, %i, %s, %s, %s, %s)',
+		                $cid, $respid, now(), $sendto,
+		                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
+		                $_POST['bodytext']);
 	}
 	if ( ! $isgeneral ) {
 		$DB->q('UPDATE clarification SET answered = 1 WHERE clarid = %i', $respid);
@@ -139,10 +143,10 @@ if ( !empty($req['sender']) ) {
 // display a clarification send box
 if ( $isgeneral ) {
 	echo "<h1>Send Clarification</h1>\n\n";
-	putClarificationForm("clarification.php");
+	putClarificationForm("clarification.php", $cdata['cid']);
 } else {
 	echo "<h1>Send Response</h1>\n\n";
-	putClarificationForm("clarification.php", $respid);
+	putClarificationForm("clarification.php", $cdata['cid'], $respid);
 }
 
 require(LIBWWWDIR . '/footer.php');

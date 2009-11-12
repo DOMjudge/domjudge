@@ -11,6 +11,7 @@ Version 3.1.0 - SVN
  - Only show the configured submission methods in the team manual.
  - Fix install of gendbpasswords and use /dev/urandom.
  - Add documentation on static_scoreboard.
+ - Add problem subject to clarifications, idea from DomJudge@FAU.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------

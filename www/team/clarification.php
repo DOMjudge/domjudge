@@ -29,9 +29,11 @@ if ( isset($_REQUEST['id']) ) {
 // insert a request (if posted)
 if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	$newid = $DB->q('RETURNID INSERT INTO clarification
-	                 (cid, submittime, sender, body)
-	                 VALUES (%i, %s, %s, %s)',
-	                 $cid, now(), $login, $_POST['bodytext']);
+	                 (cid, submittime, sender, probid, body)
+	                 VALUES (%i, %s, %s, %s, %s)',
+	                $cid, now(), $login,
+	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
+	                $_POST['bodytext']);
 
 	// redirect back to the original location
 	header('Location: '.getBaseURI().'team/clarifications.php');
@@ -49,13 +51,13 @@ if ( isset($id) ) {
 		echo "<h1>Clarification</h1>\n\n";
 	}
 	putClarification($respid, $login);
-	
+
 	echo "<h2>Send Clarification Request</h2>\n\n";
-	putClarificationForm("clarification.php", $id);
+	putClarificationForm("clarification.php", $cdata['cid'], $id);
 } else {
 	// display a clarification request send box
 	echo "<h1>Send Clarification Request</h1>\n\n";
-	putClarificationForm("clarification.php");
+	putClarificationForm("clarification.php", $cdata['cid']);
 }
 
 require(LIBWWWDIR . '/footer.php');
