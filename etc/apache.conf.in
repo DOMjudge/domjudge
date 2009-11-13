@@ -34,7 +34,6 @@
 #DocumentRoot @domserver_wwwdir@
 #
 #SSLEngine on
-#SSLCipherSuite ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP:+eNULL
 #SSLCertificateFile    /path/to/your/SSL-certificate.crt
 #SSLCertificateKeyFile /path/to/your/SSL-key.key
 #</VirtualHost>
