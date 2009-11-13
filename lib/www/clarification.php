@@ -101,10 +101,10 @@ function putClarification($id,  $team = NULL)
 	global $DB;
 
 	$clar = $DB->q('TUPLE SELECT * FROM clarification WHERE clarid = %i', $id);
-	
+
 	$clars = $DB->q('SELECT c.*, p.name AS probname, t.name AS toname, f.name AS fromname
 	                 FROM clarification c
-	                 LEFT JOIN problem p USING (probid)
+	                 LEFT JOIN problem p ON (c.probid = p.probid AND p.allow_submit = 1)
 	                 LEFT JOIN team t ON (t.login = c.recipient)
 	                 LEFT JOIN team f ON (f.login = c.sender)
 	                 WHERE c.respid = %i OR c.clarid = %i
@@ -274,7 +274,8 @@ function confirmClar() {
 
 	// Select box for a specific problem or general issue
 	$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid, ": ", name) as name
-	                 FROM problem WHERE cid = %i ORDER BY probid ASC', $cid);
+	                 FROM problem WHERE cid = %i AND allow_submit = 1
+	                 ORDER BY probid ASC', $cid);
 	$options = array_merge(array('general' => 'General issue'), $probs);
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options, ($respid ? $clar['probid'] : 'general'), true) .
