@@ -25,17 +25,18 @@
 #Listen 443
 #
 #<VirtualHost *:80>
-#RewriteEngine ON
-#RewriteRule .* domjudge.example.com$0
+#ServerName _default_
+#Redirect permanent / https://domjudge.example.com/
 #</VirtualHost>
 #
-#<VirtualHost *>
+#<VirtualHost *:443>
 #ServerName _default_
 #DocumentRoot @domserver_wwwdir@
 #
 #SSLEngine on
 #SSLCertificateFile    /path/to/your/SSL-certificate.crt
 #SSLCertificateKeyFile /path/to/your/SSL-key.key
+#SSLCertificateChainFile /path/to/your/certificate-chain.pem
 #</VirtualHost>
 
 
