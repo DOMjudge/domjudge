@@ -53,7 +53,4 @@ $RESULTS_REMAP = array(
 //	'presentation-error' => 'wrong-answer',
 //	'presentation-error' => 'correct',
 //	'no-output'          => 'wrong-answer',
-	
-/* sentinel allowing trailing comma's on all previous lines: */
-	'correct'            => 'correct'
 	);
