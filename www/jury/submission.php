@@ -128,11 +128,9 @@ if ( count($jdata) > 0 ) {
 		"</tr>\n</thead>\n<tbody>\n";
 
 	// when there's no judging selected through the request, we find
-	// out what the best one should be. The valid one, or else the most
-	// recent invalid one.
+	// out if there's a valid one: display that.
 	if ( ! isset($jid) ) {
-		$jid = $DB->q('VALUE SELECT judgingid FROM judging WHERE submitid = %i
-		               ORDER BY valid DESC, starttime DESC, judgingid DESC LIMIT 1',
+		$jid = $DB->q('MAYBEVALUE SELECT judgingid FROM judging WHERE submitid = %i AND valid = 1',
                        $id);
 	}
 
