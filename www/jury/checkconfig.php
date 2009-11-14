@@ -361,7 +361,9 @@ if ( ENABLE_CMDSUBMIT_SERVER ) {
 if ( ENABLE_WEBSUBMIT_SERVER ) {
 	if ( ! is_writable(SUBMITDIR) ) {
 		result('submissions and judgings', 'Websubmit', 'W',
-			'The webserver has no write access to SUBMITDIR, and thus will not be able to make backup copies of submissions.');
+			'The webserver has no write access to SUBMITDIR (' .
+			htmlspecialchars(SUBMITDIR) . 
+			'), and thus will not be able to make backup copies of submissions.');
 	} else {
 		result('submissions and judgings', 'Websubmit',
 			'O', 'No issues found.');
