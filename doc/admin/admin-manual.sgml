@@ -1125,6 +1125,7 @@ interface or e.g. with phpMyAdmin), the other tables are used
 automatically by the software:
 <tabular ca="cll">
  |clarification    |Clarification requests/replies are stored here.@
+x|configuration    |Runtime configuration settings.@
 x|contest          |Contest definitions with start/end time.@
  |event            |Log of events during contests.@
 x|judgehost        |Computers (hostnames) that function as judgehosts.@
@@ -1145,6 +1146,10 @@ Now follows a longer description (including fields) per table that has
 to be filled manually.
 
 <descrip>
+<tag>configuration</tag>
+This table contains configuration settings and is work in progress.
+These entries are simply stored as <tt>name, value</tt> pairs.
+
 <tag>contest</tag>
 The contests that the software will run. E.g. a test session and the
 live contest.
