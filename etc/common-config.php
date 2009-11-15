@@ -26,7 +26,12 @@ $EXITCODES = array (
 	106 => 'presentation-error',
 	107 => 'memory-limit',
 	108 => 'output-limit',
-	127 => 'internal-error'
+/* Uncomment the next line to accept internal errors in the judging
+ * backend as outcome. WARNING: it is highly discouraged to enable
+ * this, as the judgehost may be in an inconsistent state after an
+ * internal error occurred and it is recommended to inspect manually.
+ */
+//	127 => 'internal-error'
 	);
 
 /** Loglevels and debugging */
