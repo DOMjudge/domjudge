@@ -138,6 +138,7 @@ int limit_streamsize;
 int outputmeta;
 int outputtimetype;
 int no_coredump;
+int preserve_environment;
 int be_verbose;
 int be_quiet;
 int show_help;
@@ -177,6 +178,7 @@ struct option const long_opts[] = {
 	{"stdout",     required_argument, NULL,         'o'},
 	{"stderr",     required_argument, NULL,         'e'},
 	{"streamsize", required_argument, NULL,         's'},
+	{"environment",no_argument,       NULL,         'E'},
 	{"outmeta",    required_argument, NULL,         'M'},
 	{"verbose",    no_argument,       NULL,         'v'},
 	{"quiet",      no_argument,       NULL,         'q'},
@@ -297,6 +299,7 @@ Run COMMAND with restrictions.\n\
   -o, --stdout=FILE      redirect COMMAND stdout output to FILE\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
   -s, --streamsize=SIZE  truncate COMMAND stdout/stderr streams at SIZE kB\n\
+  -E, --environment      preserve environment variables (default only PATH)\n\
   -M, --outmeta=FILE     write metadata (runtime, exitcode, etc.) to FILE\n");
 	printf("\
   -v, --verbose          display some extra warnings and information\n\
@@ -638,10 +641,12 @@ void setrestrictions()
 	struct rlimit lim;
 
 	/* Clear environment to prevent all kinds of security holes, save PATH */
-	path = getenv("PATH");
-	environ[0] = NULL;
-	/* FIXME: Clean path before setting it again? */
-	if ( path!=NULL ) setenv("PATH",path,1);
+	if ( !preserve_environment ) {
+		path = getenv("PATH");
+		environ[0] = NULL;
+		/* FIXME: Clean path before setting it again? */
+		if ( path!=NULL ) setenv("PATH",path,1);
+	}
 
 	/* Set resource limits: must be root to raise hard limits.
 	   Note that limits can thus be raised from the systems defaults! */
@@ -795,12 +800,13 @@ int main(int argc, char **argv)
 	use_root = use_walltime = use_cputime = use_user = no_coredump = 0;
 	outputmeta = walllimit_reached = cpulimit_reached = 0;
 	outputtimetype = CPU_TIME_TYPE;
+	preserve_environment = 0;
 	memsize = filesize = nproc = RLIM_INFINITY;
 	redir_stdout = redir_stderr = limit_streamsize = 0;
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:M:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:EM:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -885,6 +891,9 @@ int main(int argc, char **argv)
 			} else {
 				streamsize *= 1024;
 			}
+			break;
+		case 'E': /* environment option */
+			preserve_environment = 1;
 			break;
 		case 'M': /* outputmeta option */
 			outputmeta = 1;
