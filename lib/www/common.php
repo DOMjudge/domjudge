@@ -90,7 +90,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		(IS_JURY ? "<th scope=\"col\">team</th>" : '') .
 		"<th scope=\"col\">problem</th>" . 
 		"<th scope=\"col\">lang</th>" .
-		"<th scope=\"col\">status</th>" .
+		"<th scope=\"col\">result</th>" .
 		(IS_JURY ? "<th scope=\"col\">verified</th>" : '') .
 		(IS_JURY ? "<th scope=\"col\">last<br />judge</th>" : '') .
 
