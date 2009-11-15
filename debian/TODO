@@ -1,0 +1,28 @@
+General
+-------
+Domserver and judgedaemon cannot be installed on the same host,
+because of /etc/domjudge/common-config.php that is in both.
+How to solve this? Create /etc/domjudge/{judgehost,domserver}/
+dirs? Is it worthwhile to make a domjudge-common package containing
+all overlapping files?
+
+
+Domserver
+---------
+- Using dbconfig-common seems a lot better than to set things up
+  ourselves with dj-setup-database, but is it flexible enough? 
+  Current way is fragile and asks for mysql root pw in inconvenient
+  / illegal way.
+- Move not-directly-called stuff out of PATH or /etc.
+- Apache configuration.
+
+Judgehost
+---------
+- Add compilers to debian/control
+- How to deal with Java chroot. Plan: test if exists, if not,
+  ask to create now or provide instruction to create later
+- Place correct database configuration
+- Is there a sensible way for the init script to stop judgedaemon?
+- Whole initscript-business is suboptimal as it can't detect errors.
+- Why is runguard in /usr/bin? It's never called directly.
+- We really should use dbconfig-common to set up the database.

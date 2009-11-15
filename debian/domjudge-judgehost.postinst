@@ -1,0 +1,22 @@
+#!/bin/sh -e
+
+adduser --quiet --system domjudge --group --home /nonexistant --no-create-home
+adduser --quiet --system domjudge-run --home /nonexistant --no-create-home
+
+# Make sure that only 'domjudge' can run runguard
+chown root:domjudge /usr/bin/runguard
+chmod 4750 /usr/bin/runguard
+# Passwords only readable for judgedaemon
+if [ ! -f /etc/domjudge/dbpasswords.secret ]; then
+	cp /usr/share/doc/domjudge-judgehost/examples/dbpasswords.secret.judgehost \
+		/etc/domjudge/dbpasswords.secret
+fi
+chown root:domjudge /etc/domjudge/dbpasswords.secret
+chmod 0640 /etc/domjudge/dbpasswords.secret
+# Allow judgedaemon to write here, and only somewhat privileged users
+# (ones that may also read syslog) to inspect the logs and judgings
+chown domjudge:adm /var/log/domjudge /var/lib/domjudge /var/lib/domjudge/judgings
+chmod 0750 /var/log/domjudge /var/lib/domjudge
+
+#DEBHELPER#
+

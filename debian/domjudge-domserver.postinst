@@ -1,0 +1,24 @@
+#!/bin/sh -e
+
+# Let the webserver save backups of submissons to this dir
+chgrp www-data /var/lib/domjudge/submissions
+chmod 0770 /var/lib/domjudge/submissions
+
+if ! grep -q ^team: /etc/domjudge/dbpasswords.secret; then
+	rm -f /etc/domjudge/dbpasswords.secret
+	dj-setup-database genpass
+	chmod 0640 /etc/domjudge/dbpasswords.secret
+	chgrp www-data /etc/domjudge/dbpasswords.secret
+fi
+if [ ! -f /etc/domjudge/htpasswd-jury ]; then
+	htpasswd -c -b /etc/domjudge/htpasswd-jury domjudge_jury `grep '^jury:' /etc/domjudge/dbpasswords.secret | cut -d : -f 5`
+	chmod 0640 /etc/domjudge/htpasswd-jury
+	chgrp www-data /etc/domjudge/htpasswd-jury
+fi
+
+if ! dj-setup-database status; then
+	echo "Installing database, please supply MySQL root password."
+	dj-setup-database -r install
+fi
+
+#DEBHELPER#

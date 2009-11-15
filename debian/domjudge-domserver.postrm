@@ -1,0 +1,12 @@
+#! /bin/sh -e
+
+if [ "$1" = "purge" ]; then
+	if [ -x /usr/bin/dj-setup-database ]; then
+		dj-setup-database -r uninstall || true
+	fi
+	rm -rf /etc/domjudge /var/lib/domjudge /var/log/domjudge
+fi
+
+#DEBHELPER#
+
+exit 0
