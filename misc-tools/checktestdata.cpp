@@ -97,6 +97,9 @@ using namespace std;
 #define AUTHORS "Jan Kuipers, Jaap Eldering"
 #define VERSION "$Rev$"
 
+const int exit_testdata = 1;
+const int exit_failure  = 2;
+
 const int display_before_error = 65;
 const int display_after_error  = 10;
 
@@ -112,6 +115,7 @@ char *progfile;
 char *datafile;
 
 int debugging;
+int quiet;
 int show_help;
 int show_version;
 
@@ -140,6 +144,7 @@ void usage()
 "If TESTDATA is '-' or not specified, read from stdin.\n"
 "\n"
 "  -d, --debug        enable extra debugging output\n"
+"  -q, --quiet        don't display testdata error messages: test exitcode\n"
 "      --help         display this help and exit\n"
 "      --version      output version information and exit\n"
 "\n",progname);
@@ -172,7 +177,7 @@ void readprogram(istream &in)
 	Parser parseprog(in);
 	if ( parseprog.parse()!=0 ) {
 		cerr << "parse error reading " << progfile << endl;
-		exit(1);
+		exit(exit_failure);
 	}
 
 	// Add (implicit) EOF command at end of input
@@ -185,12 +190,12 @@ void readprogram(istream &in)
 		if ( program[i].name()=="END" ) replevel--;
 		if ( replevel<0 ) {
 			cerr << "unbalanced REP/END statements" << endl;
-			exit(1);
+			exit(exit_failure);
 		}
 	}
 	if ( replevel!=0 ) {
 		cerr << "unbalanced REP/END statements" << endl;
-		exit(1);
+		exit(exit_failure);
 	}
 }
 
@@ -202,7 +207,7 @@ void readtestdata(istream &in)
 	ss << in.rdbuf();
 	if ( in.fail() ) {
 		cerr << "error reading " << datafile << endl;
-		exit(1);
+		exit(exit_failure);
 	}
 
  	data = ss.str();
@@ -215,13 +220,15 @@ void error()
 
 	debug("error at datanr = %d, %d - %d\n",(int)datanr,(int)fr,(int)to);
 
-	cout << data.substr(fr,to-fr) << endl;
-	cout << string(min(charnr,(size_t)display_before_error),' ') << "^" << endl << endl;
+	if ( !quiet ) {
+		cout << data.substr(fr,to-fr) << endl;
+		cout << string(min(charnr,(size_t)display_before_error),' ') << "^" << endl << endl;
 
-	cout << "ERROR: line " << linenr << " character " << charnr;
-	cout << " of testdata doesn't match " << currcmd << endl << endl;
+		cout << "ERROR: line " << linenr << " character " << charnr;
+		cout << " of testdata doesn't match " << currcmd << endl << endl;
+	}
 
-	exit(1);
+	exit(exit_testdata);
 }
 
 mpz_class value(string x)
@@ -230,7 +237,7 @@ mpz_class value(string x)
 	if ( isalpha(x[0]) ) {
 		if ( variable.count(x) ) return variable[x];
 		cerr << "variable " << x << " undefined in " << program[prognr] << endl;
-		exit(1);
+		exit(exit_failure);
 	}
 
 	return mpz_class(x);
@@ -333,7 +340,8 @@ void checktoken(command cmd)
 	}
 
 	else {
-		error();
+		cerr << "unknown command " << program[prognr] << endl;
+		exit(exit_failure);
 	}
 }
 
@@ -352,7 +360,7 @@ void checktestdata()
 			if ( !n.fits_ulong_p() ) {
 				cerr << "'" << n << "' does not fit in unsigned long in "
 				     << program[prognr] << endl;
-				exit(1);
+				exit(exit_failure);
 			}
 			long long times = n.get_ui();
 
@@ -396,22 +404,25 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	/* Parse command-line options */
-	debugging = show_help = show_version = 0;
+	debugging = quiet = show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+d",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+dq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
 		case 'd':
 			debugging = 1;
 			break;
+		case 'q':
+			quiet = 1;
+			break;
 		case ':': /* getopt error */
 		case '?':
 			printf("unknown option or missing argument `%c'",optopt);
-			return 1;
+			exit(exit_failure);
 		default:
 			printf("getopt returned character code `%c' ??",(char)opt);
-			return 1;
+			exit(exit_failure);
 		}
 	}
 
@@ -423,13 +434,13 @@ int main(int argc, char **argv)
 	if ( argc<=optind ) {
 		printf("Error: no PROGRAM file specified.\n");
 		usage();
-		return 1;
+		return exit_failure;
 	}
 	progfile = argv[optind];
 	ifstream prog(progfile);
 	if ( prog.fail() ) {
 		cerr << "error opening " << progfile << endl;
-		exit(1);
+		exit(exit_failure);
 	}
 	readprogram(prog);
 	prog.close();
@@ -447,7 +458,7 @@ int main(int argc, char **argv)
 		ifstream fin(datafile);
 		if ( fin.fail() ) {
 			cerr << "error opening " << datafile << endl;
-			exit(1);
+			exit(exit_failure);
 		}
 		readtestdata(fin);
 		fin.close();
@@ -458,7 +469,7 @@ int main(int argc, char **argv)
 
 	checktestdata();
 
-	cout << "testdata ok!" << endl;
+	if ( !quiet ) cout << "testdata ok!" << endl;
 
 	return 0;
 }
