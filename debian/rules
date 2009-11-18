@@ -16,7 +16,7 @@ build-stamp:
 	# may not exist at all on the build system. We chown the
 	# files in postinst.
 	./configure \
-		--with-domjudge_docdir=/usr/share/doc/domjudge \
+		--with-domjudge_docdir=/usr/share/doc/domjudge-doc \
 		\
 		--with-domserver_bindir=/usr/bin \
 		--with-domserver_etcdir=/etc/domjudge \
@@ -69,7 +69,7 @@ install: build
 	# clean up tmpdirs
 	rmdir $(DJDS)/tmp $(DJJH)/tmp
 	# clean up docs
-	cd $(DJDC)/usr/share/doc/domjudge && \
+	cd $(DJDC)/usr/share/doc/domjudge-doc && \
 		rm COPYING* README README.country_flags ChangeLog logos/DOMjudgelogo.png
 	# This must be shipped in domjudge-common
 	rm $(DJDS)/etc/domjudge/common-config.php $(DJJH)/etc/domjudge/common-config.php \
@@ -101,8 +101,8 @@ binary-indep: build install
 	dh_installchangelogs -p domjudge-common -p domjudge-domserver -X ChangeLog
 	dh_installdocs
 	dh_link -i
-	dh_compress -i
-	dh_fixperms -i
+	dh_compress -i -X .tex -X .pdf
+	dh_fixperms -i -X genteammanuals -X gentexconfig
 	dh_installdeb -i
 	dh_gencontrol -i
 	dh_md5sums -i
@@ -121,8 +121,7 @@ binary-arch: build install
 	dh_strip -a
 	dh_link -a
 	dh_compress -a
-	dh_fixperms -a
-	chmod 4755 $(DJJH)/usr/bin/runguard
+	dh_fixperms -a -X usr/bin/runguard
 	dh_installdeb -a
 	dh_shlibdeps -a
 	dh_gencontrol -a
