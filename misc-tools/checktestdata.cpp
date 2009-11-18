@@ -27,8 +27,12 @@
    integer  := [0-9]+
    variable := [a-z][a-z0-9]*
    value    := <integer> | <variable>
+   compare  := '<' | '>' | '<=' | '>=' | '==' | '!='
    expr     := <term> | <expr> [+-] <term>
    term     := <value> | '-' <term> | '(' <expr> ')' | <term> [*%/] <term>
+   test     := '!' <test> | <expr> <compare> <expr> | ISEOF
+
+      ISEOF is a special keyword that returns whether end-of-line has been reached.
 
    string   := ".*"
 
@@ -74,6 +78,10 @@
       Repeat the commands between the 'REP() ... END' statements count
       times and optionally match 'separator' command (count-1) times
       in between. The value of count must fit in a unsigned 32 bit int.
+
+   WHILE(<test> condition) [<command>...] END
+
+      Repeat the commands as long as 'condition' is true.
 
  */
 
@@ -186,15 +194,16 @@ void readprogram(istream &in)
 	// Check for correct REP ... END nesting
 	int replevel = 0;
 	for (size_t i=0; i<program.size(); i++) {
-		if ( program[i].name()=="REP" ) replevel++;
+		if ( program[i].name()=="WHILE" ||
+		     program[i].name()=="REP" ) replevel++;
 		if ( program[i].name()=="END" ) replevel--;
 		if ( replevel<0 ) {
-			cerr << "unbalanced REP/END statements" << endl;
+			cerr << "unbalanced WHILE/REP/END statements" << endl;
 			exit(exit_failure);
 		}
 	}
 	if ( replevel!=0 ) {
-		cerr << "unbalanced REP/END statements" << endl;
+		cerr << "unbalanced WHILE/REP/END statements" << endl;
 		exit(exit_failure);
 	}
 }
@@ -255,6 +264,36 @@ mpz_class eval(expr e)
 	case '/': return eval(e.args[0]) / eval(e.args[1]);
 	case '%': return eval(e.args[0]) % eval(e.args[1]);
 	default:  return value(e.val);
+	}
+}
+
+bool compare(args_t cmp)
+{
+	string op = cmp[0].val;
+	mpz_class l = eval(cmp[1]);
+	mpz_class r = eval(cmp[2]);
+
+	if ( op=="<"  ) return l<r;
+	if ( op==">"  ) return l>r;
+	if ( op=="<=" ) return l<=r;
+	if ( op==">=" ) return l>=r;
+	if ( op=="==" ) return l==r;
+	if ( op=="!=" ) return l!=r;
+
+	cerr << "unknown compare operator " << op << " in " << program[prognr] << endl;
+	exit(exit_failure);
+}
+
+bool dotest(test t)
+{
+	debug("test op='%c', #args=%d",t.op,(int)t.args.size());
+	switch ( t.op ) {
+	case '!': return !dotest(t.args[0]);
+	case 'E': return datanr>=data.size();
+	case '?': return compare(t.args);
+	default:
+		cerr << "invalid test in " << program[prognr] << endl;
+		exit(exit_failure);
 	}
 }
 
@@ -368,7 +407,8 @@ void checktestdata()
 				int replevel = 0;
 				do {
 					command cmd = program[prognr++];
-					if ( cmd.name()=="REP" ) replevel++;
+					if ( cmd.name()=="WHILE" ||
+					     cmd.name()=="REP" ) replevel++;
 					if ( cmd.name()=="END" ) replevel--;
 				}
 				while ( replevel>0 );
@@ -381,6 +421,28 @@ void checktestdata()
 					prognr = loopstart;
 					checktestdata();
 					if ( times && cmd.nargs()>=2 ) checktoken(cmd.args[1]);
+				}
+			}
+		}
+
+		else if ( cmd.name()=="WHILE" ) {
+
+			if ( !dotest(cmd.args[0]) ) {
+				int replevel = 0;
+				do {
+					command cmd = program[prognr++];
+					if ( cmd.name()=="WHILE" ||
+					     cmd.name()=="REP" ) replevel++;
+					if ( cmd.name()=="END" ) replevel--;
+				}
+				while ( replevel>0 );
+			}
+			else {
+				int loopstart = prognr+1;
+
+				while ( dotest(cmd.args[0]) ) {
+					prognr = loopstart;
+					checktestdata();
 				}
 			}
 		}

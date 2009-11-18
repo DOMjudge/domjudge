@@ -9,7 +9,10 @@
 
 %stype parse_t
 
-%token CMD_SPACE CMD_NEWLINE CMD_EOF CMD_INT CMD_STRING CMD_REGEX CMD_REP CMD_END
+%token TEST_EOF
+%token CMP_LT CMP_GT CMP_LE CMP_GE CMP_EQ CMP_NE
+%token CMD_SPACE CMD_NEWLINE CMD_EOF CMD_INT CMD_STRING CMD_REGEX
+%token CMD_REP CMD_WHILE CMD_END
 %token VARIABLE INTEGER STRING
 
 %left '+' '-'
@@ -46,13 +49,12 @@ command_args:
 |	CMD_REGEX  '(' STRING ')'                  { $$ = parse_t($1,$3); }
 | 	CMD_REP '(' expr ')'                       { $$ = parse_t($1,$3); }
 | 	CMD_REP '(' expr ',' command ')'           { $$ = parse_t($1,$3,$5); }
+| 	CMD_WHILE '(' test ')'                     { $$ = parse_t($1,$3); }
 ;
 
-value:
-	INTEGER
-|
-	VARIABLE
-;
+value: INTEGER | VARIABLE ;
+
+compare: CMP_LT | CMP_GT | CMP_LE | CMP_GE | CMP_EQ | CMP_NE ;
 
 expr:
 	term          { $$ = parse_t('(',$1); }
@@ -67,4 +69,10 @@ term:
 |	term '*' term { $$ = parse_t('*',$1,$3); }
 |	term '/' term { $$ = parse_t('/',$1,$3); }
 |	term '%' term { $$ = parse_t('%',$1,$3); }
+;
+
+test:
+	'!' test      { $$ = parse_t('!',$2); }
+|	TEST_EOF      { $$ = parse_t('E'); }
+|	expr compare expr { $$ = parse_t('?',$2,$1,$3); }
 ;

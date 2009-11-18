@@ -16,6 +16,14 @@
 
 %%
 
+ISEOF    { return Parser::TEST_EOF; }
+\<       { return Parser::CMP_LT; }
+>        { return Parser::CMP_GT; }
+\<=      { return Parser::CMP_LE; }
+>=       { return Parser::CMP_GE; }
+==       { return Parser::CMP_EQ; }
+!=       { return Parser::CMP_NE; }
+
 SPACE    { return Parser::CMD_SPACE; }
 NEWLINE  { return Parser::CMD_NEWLINE; }
 EOF      { return Parser::CMD_EOF; }
@@ -23,6 +31,7 @@ INT      { return Parser::CMD_INT; }
 STRING   { return Parser::CMD_STRING; }
 REGEX    { return Parser::CMD_REGEX; }
 REP      { return Parser::CMD_REP; }
+WHILE    { return Parser::CMD_WHILE; }
 END      { return Parser::CMD_END; }
 
 [a-z][a-z0-9]* {

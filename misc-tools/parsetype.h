@@ -12,6 +12,7 @@ typedef std::vector<parse_t> args_t;
 
 typedef parse_t command;
 typedef parse_t expr;
+typedef parse_t test;
 
 extern std::vector<command> program;
 
@@ -34,11 +35,14 @@ struct parse_t {
 		if ( arg3.op!='~' ) args.push_back(arg3);
 	};
 
-	parse_t(char _op, parse_t arg1 = parse_t(), parse_t arg2 = parse_t())
+	parse_t(char _op, parse_t arg1 = parse_t(),
+	                  parse_t arg2 = parse_t(),
+	                  parse_t arg3 = parse_t())
 	: val(), args(), op(_op)
 	{
 		if ( arg1.op!='~' ) args.push_back(arg1);
 		if ( arg2.op!='~' ) args.push_back(arg2);
+		if ( arg3.op!='~' ) args.push_back(arg3);
 	}
 
 	const val_t& name()  const { return val; }

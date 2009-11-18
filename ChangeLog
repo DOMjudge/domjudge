@@ -12,6 +12,7 @@ Version 3.1.0 - SVN
  - Fix install of gendbpasswords and use /dev/urandom.
  - Add documentation on static_scoreboard.
  - Add problem subject to clarifications, idea from DomJudge@FAU.
+ - Add WHILE command and tests to checktestdata syntax.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------
