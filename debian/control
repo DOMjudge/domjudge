@@ -19,7 +19,8 @@ Description: common files for the DOMjudge programming contest jury system
 Package: domjudge-domserver
 Architecture: all
 Depends: domjudge-common, apache2 | httpd, ${misc:Depends}, mysql-client,
- libapache2-mod-php5 | php5-cgi | php5, php5-mysql, php5-cli, xsltproc
+ libapache2-mod-php5 | php5-cgi | php5, php5-mysql, php5-cli, xsltproc,
+ sharutils
 Recommends: ntp, mysql-server, phpmyadmin
 Description: programming contest jury system (server)
  DOMjudge is a jury system for running a programming contest. It allows
