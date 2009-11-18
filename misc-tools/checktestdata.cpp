@@ -129,6 +129,7 @@ int show_version;
 
 struct option const long_opts[] = {
 	{"debug",   no_argument,       NULL,         'd'},
+	{"quiet",   no_argument,       NULL,         'q'},
 	{"help",    no_argument,       &show_help,    1 },
 	{"version", no_argument,       &show_version, 1 },
 	{ NULL,     0,                 NULL,          0 }
