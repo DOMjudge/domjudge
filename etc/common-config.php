@@ -9,9 +9,6 @@ define('VERIFICATION_REQUIRED', false);
 // Maximum allowed size in KB of source submissions.
 define('SOURCESIZE', 256);
 
-// Penalty time in minutes per wrong submission (if finally solved).
-define('PENALTY_TIME', 20);
-
 // Internal and output character set used, don't change.
 define('DJ_CHARACTER_SET', 'utf-8');
 

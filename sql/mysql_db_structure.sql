@@ -155,7 +155,6 @@ CREATE TABLE `scoreboard_jury` (
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL default '0' COMMENT 'Number of submissions made',
   `totaltime` int(4) unsigned NOT NULL default '0' COMMENT 'Total time spent',
-  `penalty` int(4) unsigned NOT NULL default '0' COMMENT 'Penalty time scored',
   `is_correct` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has there been a correct submission?',
   `balloon` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has a balloon been handed out?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
@@ -171,7 +170,6 @@ CREATE TABLE `scoreboard_public` (
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL default '0' COMMENT 'Number of submissions made',
   `totaltime` int(4) unsigned NOT NULL default '0' COMMENT 'Total time spent',
-  `penalty` int(4) unsigned NOT NULL default '0' COMMENT 'Penalty time scored',
   `is_correct` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has there been a correct submission?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (public/team version)';

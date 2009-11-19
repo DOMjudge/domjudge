@@ -33,3 +33,6 @@ define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Pe
 // rights on top of their jury rights
 $DOMJUDGE_ADMINS = array('domjudge_jury', 'admin');
 
+// Penalty time in minutes per wrong submission (if finally solved).
+define('PENALTY_TIME', 20);
+

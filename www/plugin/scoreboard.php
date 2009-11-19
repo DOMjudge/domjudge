@@ -92,7 +92,7 @@ if ( ! empty($MATRIX) ) {
 
 			if ( $score['is_correct'] ) {
 				XMLaddnode($elem, 'time', $score['time']);
-				XMLaddnode($elem, 'penalty', $score['penalty']);
+				XMLaddnode($elem, 'penalty', calcPenaltyTime($score['is_correct'],$score['num_submissions']));
 			}
 		}
 	}

@@ -17,6 +17,31 @@
 require_once(LIBDIR . '/lib.misc.php');
 
 /**
+ * Calculate the penalty time.
+ *
+ * This expects bool $solved (whether there was at least one correct
+ * submission by this team for this problem) and int $num_submissions
+ * (the total number of tries for this problem by this team)
+ * as input, uses the constant PENALTY_TIME and outputs the number
+ * of penalty minutes.
+ *
+ * The current formula is as follows:
+ * - Penalty time is only counted for problems that the team finally
+ *   solved. Yet unsolved problems always have zero penalty minutes.
+ * - The penalty is PENALTY_TIME (usually 20 minutes) for each
+ *   unsuccessful try. By definition, the number of unsuccessful
+ *   tries is the number of submissions for a problem minus 1: the
+ *   final, correct one.
+ */
+
+function calcPenaltyTime($solved, $num_submissions)
+{
+	if ( ! $solved ) return 0;
+
+	return ( $num_submissions - 1 ) * PENALTY_TIME;
+}
+
+/**
  * Generate scoreboard data based on the cached data in table
  * 'scoreboard_{public,jury}'. If the function is called while
  * IS_JURY is defined, the scoreboard will always be current,
@@ -104,19 +129,21 @@ function genScoreBoard($cdata) {
 		// skip this row if the team or problem is not known by us
 		if ( ! array_key_exists ( $srow['teamid'], $teams ) ||
 		     ! array_key_exists ( $srow['probid'], $probs ) ) continue;
+
+		$penalty = calcPenaltyTime( $srow['is_correct'], $srow['submissions'] );
 	
 		// fill our matrix with the scores from the database
 		$MATRIX[$srow['teamid']][$srow['probid']] = array (
 			'is_correct'      => (bool) $srow['is_correct'],
 			'num_submissions' => $srow['submissions'],
 			'time'            => $srow['totaltime'],
-			'penalty'         => $srow['penalty'] );
+			'penalty'         => $penalty );
 
 		// calculate totals for this team
 		if ( $srow['is_correct'] ) {
 			$SCORES[$srow['teamid']]['num_correct']++;
 			$SCORES[$srow['teamid']]['solve_times'][] = $srow['totaltime'];
-			$SCORES[$srow['teamid']]['total_time'] += $srow['totaltime'] + $srow['penalty'];
+			$SCORES[$srow['teamid']]['total_time'] += $srow['totaltime'] + $penalty;
 		}
 	}
 
@@ -477,13 +504,15 @@ function putTeamRow($cdata, $teamid) {
 	while ( $srow = $scoredata->next() ) {
 		// skip this row if the problem is not known by us
 		if ( ! array_key_exists ( $srow['probid'], $probs ) ) continue;
+		
+		$penalty = calcPenaltyTime( $srow['is_correct'], $srow['submissions'] );
 	
 		// fill our matrix with the scores from the database,
 		$MATRIX[$srow['probid']] = array (
 			'is_correct'      => (bool) $srow['is_correct'],
 			'num_submissions' => $srow['submissions'],
 			'time'            => $srow['totaltime'],
-			'penalty'         => $srow['penalty'] );
+			'penalty'         => $penalty );
 	}
 
 	$SUMMARY = array('num_correct' => 0, 'total_time' => 0);

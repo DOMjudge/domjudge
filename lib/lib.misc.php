@@ -92,8 +92,8 @@ function calcScoreRow($cid, $team, $prob) {
 	if ( ! $balloon ) $balloon = 0;
 	
 	// reset vars
-	$submitted_j = $penalty_j = $time_j = $correct_j = 0;
-	$submitted_p = $penalty_p = $time_p = $correct_p = 0;
+	$submitted_j = $time_j = $correct_j = 0;
+	$submitted_p = $time_p = $correct_p = 0;
 
 	// for each submission
 	while( $row = $result->next() ) {
@@ -112,32 +112,22 @@ function calcScoreRow($cid, $team, $prob) {
 				$correct_p = 1;
 				$time_p = round((int)@$row['timediff']);
 			}
-			// if correct, we don't add penalty time for any later submissions
+			// stop counting after a first correct submission
 			break;
 		}
-
-		// extra penalty minutes for each submission
-		// (will only be counted if this problem is correctly solved)
-		$penalty_j += PENALTY_TIME;
-		if ( ! $row['afterfreeze'] ) $penalty_p += PENALTY_TIME;
-		
 	}
-
-	// calculate penalty time: only when correct add it to the total
-	if ( $correct_j == 0 ) $penalty_j = 0;
-	if ( $correct_p == 0 ) $penalty_p = 0;
 
 	// insert or update the values in the public/team scores table
 	$DB->q('REPLACE INTO scoreboard_public
-	        (cid, teamid, probid, submissions, totaltime, penalty, is_correct)
-	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
-	       $cid, $team, $prob, $submitted_p, $time_p, $penalty_p, $correct_p);
+	        (cid, teamid, probid, submissions, totaltime, is_correct)
+	        VALUES (%i,%s,%s,%i,%i,%i)',
+	       $cid, $team, $prob, $submitted_p, $time_p, $correct_p);
 
 	// insert or update the values in the jury scores table
 	$DB->q('REPLACE INTO scoreboard_jury
-	        (cid, teamid, probid, submissions, totaltime, penalty, is_correct, balloon)
-	        VALUES (%i,%s,%s,%i,%i,%i,%i,%i)',
-	       $cid, $team, $prob, $submitted_j, $time_j, $penalty_j, $correct_j, $balloon);
+	        (cid, teamid, probid, submissions, totaltime, is_correct, balloon)
+	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
+	       $cid, $team, $prob, $submitted_j, $time_j, $correct_j, $balloon);
 
 	return;
 }
