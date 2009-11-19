@@ -5,6 +5,9 @@ These packages make some assumptions about the system you want to install.
 The domserver package assumes the database server is on localhost and that
 you want to configure it automatically.
 
+Currently, when you install the domserver and judgehost on one system,
+you may still get some errors you need to manually resolve.
+
 DOMserver
 ---------
 After installation, take these steps:
@@ -29,7 +32,8 @@ it as follows:
 # su domjudge -s /bin/sh -c /usr/bin/judgedaemon
 
 You probably want to use the separate chroot for Sun Java judging.
-Create this chroot by running 'dj_make_chroot' as root.
+Create this chroot by running 'dj_make_chroot' as root. Then edit
+/etc/sudoers according to the administrator manual.
 Note that when you apply Debian security updates to your system, the
 chroot is not automatically updated aswell. To upgrade it, use the
 command 'dj_upgrade_chroot'.
