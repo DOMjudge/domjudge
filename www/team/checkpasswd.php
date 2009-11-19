@@ -32,7 +32,7 @@ $title = 'Authenticate user';
 $menu = false;
 
 if ( empty($user) || empty($pass) ) {
-	require(LIBDIR . '/www/header.php');
+	require(LIBWWWDIR . '/header.php');
 	echo "<h1>Not Authenticated</h1>\n\n";
 	echo "<p>Please supply a username and password.</p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
@@ -50,7 +50,7 @@ $row = $DB->q('MAYBETUPLE SELECT * FROM team
 
 if ( !$row ) {
 	sleep(3);
-	require(LIBDIR . '/www/header.php');
+	require(LIBWWWDIR . '/header.php');
 	echo "<h1>Not Authenticated</h1>\n\n";
 	echo "<p>Invalid username or password supplied. " .
 		"Please try again or contact a staff member.</p>\n\n";
@@ -68,7 +68,7 @@ $cnt = $DB->q('RETURNAFFECTED UPDATE team SET ipaddress = %s, hostname = %s
 
 if ( $cnt != 1 ) error("cannot set IP/hostname for user '$user'");
 
-require(LIBDIR . '/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Authenticated</h1>\n\n<p>Successfully authenticated as team " .
 	htmlspecialchars($user) . " on " . htmlspecialchars($ip) . ".</p>" .
