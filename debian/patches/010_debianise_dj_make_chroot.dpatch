@@ -13,7 +13,7 @@ diff -urNad domjudge-3.0.0~/etc/judgehost-config.php domjudge-3.0.0/etc/judgehos
  // Sun Java with a chroot (edit the script first!).
  // define('CHROOT_SCRIPT', 'chroot-startstop.sh');
 -define('CHROOT_SCRIPT', '');
-+define('CHROOT_SCRIPT', '/usr/lib/domjudge/chroot-startstop.sh');
++define('CHROOT_SCRIPT', 'chroot-startstop.sh');
  
  // Maximum seconds available for compiling
  define('COMPILETIME', 30);
