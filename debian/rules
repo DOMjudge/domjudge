@@ -31,7 +31,7 @@ build-stamp:
 		\
 		--with-judgehost_bindir=/usr/bin \
 		--with-judgehost_etcdir=/etc/domjudge \
-		--with-judgehost_libdir=/usr/lib/domjudge \
+		--with-judgehost_libdir=/usr/share/domjudge \
 		--with-judgehost_libjudgedir=/usr/lib/domjudge \
 		--with-judgehost_logdir=/var/log/domjudge \
 		--with-judgehost_tmpdir=/tmp \
@@ -72,9 +72,11 @@ install: build
 	cd $(DJDC)/usr/share/doc/domjudge-doc && \
 		rm COPYING* README README.country_flags ChangeLog logos/DOMjudgelogo.png
 	# This must be shipped in domjudge-common
-	rm $(DJDS)/etc/domjudge/common-config.php $(DJJH)/etc/domjudge/common-config.php \
-		$(DJDS)/usr/share/domjudge/*.php $(DJJH)/usr/lib/domjudge/*.php \
-		$(DJDS)/usr/share/domjudge/alert $(DJJH)/usr/lib/domjudge/alert
+	rm $(DJDS)/etc/domjudge/common-config.php \
+		$(DJDS)/usr/share/domjudge/*.php $(DJDS)/usr/share/domjudge/alert
+	# FIXME: collateral damage: lib.error.sh is still needed. We now reinstall it
+	# through domjudge-judgehost.install but that needs to be done better.
+	rm -r $(DJJH)/usr/share/domjudge $(DJJH)/etc/domjudge/common-config.php
 	# We'd like these to be amendable by the admin
 	cd $(DJDS)/usr/share/domjudge/www/images/ && \
 		mv teams affiliations ../../../../../var/lib/domjudge/images/

@@ -1,1 +1,2 @@
 debian/dj_upgrade_chroot usr/sbin
+lib/lib.error.sh	usr/share/domjudge
