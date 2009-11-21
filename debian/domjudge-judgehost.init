@@ -11,7 +11,7 @@
 ### END INIT INFO
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/bin/judgedaemon
+DAEMON=/usr/sbin/judgedaemon
 NAME=judgedaemon
 PIDFILE=/var/run/$NAME.pid
 DESC="DOMjudge Judgedaemon"

@@ -29,7 +29,7 @@ It runs under the 'domjudge' username and will log things to syslog and
 
 If you want to start the judgedaemon by hand, not as a daemon, start
 it as follows:
-# su domjudge -s /bin/sh -c /usr/bin/judgedaemon
+# su domjudge -s /bin/sh -c /usr/sbin/judgedaemon
 This may also be helpful to diagnose errors.
 
 You probably want to use the separate chroot for Sun Java judging.

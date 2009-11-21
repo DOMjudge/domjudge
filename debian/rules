@@ -29,7 +29,7 @@ build-stamp:
 		--with-domserver_tmpdir=/tmp \
 		--with-domserver_submitdir=/var/lib/domjudge/submissions \
 		\
-		--with-judgehost_bindir=/usr/bin \
+		--with-judgehost_bindir=/usr/sbin \
 		--with-judgehost_etcdir=/etc/domjudge \
 		--with-judgehost_libdir=/usr/share/domjudge \
 		--with-judgehost_libjudgedir=/usr/lib/domjudge \
@@ -87,7 +87,7 @@ install: build
 	rm $(DJJH)/etc/domjudge/dbpasswords.secret \
 		$(DJDS)/etc/domjudge/dbpasswords.secret \
 		$(DJDS)/etc/domjudge/htpasswd-jury
-	# TODO: Why is runguard in /usr/bin? It's never called directly?
+	# TODO: Why is runguard in /usr/sbin? It's never called directly?
 	# Doesn't really hurt currently.
 	#
 	# Needs to be web-writable:
@@ -126,7 +126,7 @@ binary-arch: build install
 	dh_strip -a
 	dh_link -a
 	dh_compress -a
-	dh_fixperms -a -X usr/bin/runguard -X etc/sudoers.d/domjudge
+	dh_fixperms -a -X usr/sbin/runguard -X etc/sudoers.d/domjudge
 	dh_installdeb -a
 	dh_shlibdeps -a
 	dh_gencontrol -a

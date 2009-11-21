@@ -4,8 +4,8 @@ adduser --quiet --system domjudge --group --home /nonexistant --no-create-home
 adduser --quiet --system domjudge-run --home /nonexistant --no-create-home
 
 # Make sure that only 'domjudge' can run runguard
-chown root:domjudge /usr/bin/runguard
-chmod 4750 /usr/bin/runguard
+chown root:domjudge /usr/sbin/runguard
+chmod 4750 /usr/sbin/runguard
 # Passwords only readable for judgedaemon
 if [ ! -f /etc/domjudge/dbpasswords.secret ]; then
 	cp /usr/share/doc/domjudge-judgehost/examples/dbpasswords.secret.judgehost \
