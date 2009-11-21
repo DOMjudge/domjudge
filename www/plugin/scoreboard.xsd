@@ -38,7 +38,7 @@
 					<xs:all>
 						<xs:element name="num_submissions" type="xs:nonNegativeInteger"/>
 						<xs:element name="num_solved" type="xs:nonNegativeInteger"/>
-						<xs:element name="best_time" type="xs:nonNegativeInteger"/>
+						<xs:element name="best_time" type="xs:string"/>
 					</xs:all>
 					<xs:attributeGroup ref="problemIdAttribute"/>
 				</xs:complexType>

@@ -31,6 +31,7 @@ if ( ! empty($tmp) ) {
 	$SCORES  = $tmp['scores'];
 	$SUMMARY = $tmp['summary'];
 }
+unset($tmp);
 
 // Get problems, languages, affiliations and categories for legend
 $probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, color FROM problem
