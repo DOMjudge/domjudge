@@ -2,7 +2,7 @@
 # $Id: dj_make_chroot 2903 2009-10-09 07:42:22Z eldering $
 
 # Read command-line parameters:
-CHROOTDIR=/var/lib/domjudge/javachroot.new
+CHROOTDIR=/var/lib/domjudge/javachroot
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
 
