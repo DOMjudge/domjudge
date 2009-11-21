@@ -74,8 +74,9 @@ install: build
 	# This must be shipped in domjudge-common
 	rm $(DJDS)/etc/domjudge/common-config.php \
 		$(DJDS)/usr/share/domjudge/*.php $(DJDS)/usr/share/domjudge/alert
-	# FIXME: collateral damage: lib.error.sh is still needed. We now reinstall it
-	# through domjudge-judgehost.install but that needs to be done better.
+	# Saviour lib.error.sh before we trash /u/s/d
+	mv $(DJJH)/usr/share/domjudge/lib.error.sh $(DJJH)/usr/lib/domjudge
+	# This is in common-config
 	rm -r $(DJJH)/usr/share/domjudge $(DJJH)/etc/domjudge/common-config.php
 	# We'd like these to be amendable by the admin
 	cd $(DJDS)/usr/share/domjudge/www/images/ && \
