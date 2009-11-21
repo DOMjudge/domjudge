@@ -6,7 +6,7 @@ include $(TOPDIR)/Makefile.global
 TARGETS = checkinput checktestdata
 
 SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
-              runssh_judgehosts runssh_teams balloons
+              combined_scoreboard runssh_judgehosts runssh_teams balloons
 
 config: $(SUBST_FILES)
 

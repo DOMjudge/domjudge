@@ -1,0 +1,184 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Generates a combined scoreboard aggregated from multiple sites.
+ * The scoreboard is static, i.e. without automatic refresh, and with
+ * no links to subpages. It does depend on the style.css.
+ *
+ * Use this when you run a contest with multiple sites and you want to
+ * have a combined scoreboard of all participating teams.
+ *
+ * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+
+// List sites here from which to combine scoreboards
+$sites = array(
+	array('url' => "http://example.com/domjudge/", 'username' => "", 'password' => ""),
+	);
+
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+
+require('@domserver_etcdir@/domserver-static.php');
+require(ETCDIR . '/domserver-config.php');
+
+define('SCRIPT_ID', 'combined_scoreboard');
+
+// FIXME: need to read from command-line args?
+define('IS_JURY', FALSE);
+
+// Needed for accessing contest ID from database:
+require_once(LIBDIR . '/init.php');
+require_once(LIBDIR . '/use_db.php');
+
+setup_database_connection('public');
+
+require_once(LIBWWWDIR . '/scoreboard.php');
+require_once(LIBWWWDIR . '/common.php');
+require_once(LIBWWWDIR . '/print.php');
+
+$scores = array();
+$matrix = array();
+$summary = array('num_correct' => 0, 'affils' => array(),
+                 'countries' => array(), 'problems' => array());
+
+$teams  = array();
+$probs  = array();
+$categs = array();
+
+// These are only needed to lookup affilname for in $teams
+$affils = array();
+
+foreach($sites as $site) {
+//	$body = http_parse_message(
+//		http_get($site['url'].'/plugin/scoreboard.php',
+//		         array('httpauth' => $site['username'].':'.$site['password'])));
+	$body = file_get_contents($site['url'].'/plugin/scoreboard.php');
+
+	$xmldoc = new DOMDocument('1.0', DJ_CHARACTER_SET);
+	$xmldoc->loadXML($body);
+
+	$xpath = new DOMXPath($xmldoc);
+
+	foreach($xpath->query('/root/scoreboard/problem_legend/problem') as $node) {
+		$probid = XMLgetattr($node,'id');
+		$probs[$probid] = array('probid' => $probid,
+		                        'name'   => $node->nodeValue,
+		                        'color'  => XMLgetattr($node,'color'));
+		$summary['problems'][$probid] = array('num_submitted' => 0, 'num_correct' => 0);
+	}
+
+	foreach($xpath->query('/root/scoreboard/category_legend/category') as $node) {
+		$catid = XMLgetattr($node,'id');
+		$categs[$catid] = array('categoryid' => $catid,
+		                        'name'       => $node->nodeValue,
+		                        'color'      => XMLgetattr($node,'color'));
+	}
+
+	foreach($xpath->query('/root/scoreboard/affiliation_legend/affiliation') as $node) {
+		$affilid = XMLgetattr($node,'id');
+		$affils[$affilid] = array('affilid' => $affilid,
+		                          'name'    => $node->nodeValue,
+		                          'country' => XMLgetattr($node,'country'));
+	}
+
+	foreach($xpath->query('/root/scoreboard/rows/row') as $node) {
+		$teamnode = XMLgetnode('team',$node);
+		$teamid = XMLgetattr($teamnode,'id');
+		$team = array('num_correct' => XMLgetnode('num_solved',$node)->nodeValue,
+		              'total_time'  => XMLgetnode('totaltime', $node)->nodeValue,
+		              'teamname'    => $teamnode->nodeValue,
+		              'categoryid'  => XMLgetattr($teamnode,'categoryid'),
+		              'affilid'     => XMLgetattr($teamnode,'affilid'),
+		              'country'     => XMLgetattr($teamnode,'country'),
+		              'rank'        => 0,
+		              'solve_times' => array(),
+		              'sortorder'   => 0);
+		$teams[$teamid] = array('login'      => $teamid,
+		                        'name'       => $team['teamname'],
+		                        'categoryid' => $team['categoryid'],
+		                        'affilid'    => $team['affilid'],
+		                        'affilname'  => @$affils[$team['affilid']]['name'],
+		                        'country'    => $team['country'],
+		                        'color'      => $categs[$team['categoryid']]['color'],
+		                        'sortorder'  => 0);
+		$scores[$teamid] = $team;
+		$matrix[$teamid] = array();
+		$summary['num_correct'] += $team['num_correct'];
+		if ( !empty($team['affilid']) ) @$summary['affils'][$team['affilid']]++;
+		if ( !empty($team['country']) ) @$summary['countries'][$team['country']]++;
+
+		foreach($xpath->query('problems/problem',$node) as $probnode) {
+			$probid = XMLgetattr($probnode,'id');
+			$prob = array('is_correct'      => XMLgetattr($probnode,'correct')=='true',
+			              'num_submissions' => XMLgetnode('num_submissions',$probnode)->nodeValue,
+			              'time'            => 0,
+			              'penalty'         => 0);
+			if ( $prob['is_correct'] ) {
+				$prob['time']    = XMLgetnode('time',   $probnode)->nodeValue;
+				$prob['penalty'] = XMLgetnode('penalty',$probnode)->nodeValue;
+				$summary['problems'][$probid]['num_correct']++;
+				$summary['problems'][$probid]['times'][] = $prob['time'];
+			}
+			$matrix[$teamid][$probid] = $prob;
+			@$summary['problems'][$probid]['num_submissions'] += $prob['num_submissions'];
+		}
+	}
+}
+
+// sort the merged scores using our custom comparison function
+// FIXME: sortorder is not retrievable via the plugin XML interface.
+uasort($scores, 'cmp');
+
+// Calculate ranks
+$prevsortorder = -1;
+foreach( $scores as $team => $totals ) {
+
+	// rank, team name, total correct, total time
+	if ( $totals['sortorder'] != $prevsortorder ) {
+		$prevsortorder = $totals['sortorder'];
+		$rank = 0; // reset team position on switch to different category
+		$prevteam = null;
+	}
+	$rank++;
+	// Use previous' team rank when scores are equal
+	if ( isset($prevteam) && cmpscore($scores[$prevteam], $totals)==0 ) {
+		$scores[$team]['rank'] = $scores[$prevteam]['rank'];
+	} else {
+		$scores[$team]['rank'] = $rank;
+	}
+	$prevteam = $team;
+}
+
+// Calculate best submission times per problem
+foreach( $summary['problems'] as &$prob ) {
+	if ( isset($prob['times']) ) {
+		$prob['best_time'] = min(@$prob['times']);
+	} else {
+		$prob['best_time'] = null;
+	}
+}
+
+$sdata = array('scores'     => $scores,
+               'matrix'     => $matrix,
+               'summary'    => $summary,
+               'problems'   => $probs,
+               'teams'      => $teams,
+               'categories' => $categs);
+
+$cdata = getCurContest(TRUE);
+
+// Change dir to get correct relative path to affiliation/country images
+chdir(WWWDIR . '/public/');
+
+// Start the output
+
+$title="Scoreboard";
+$menu = false;
+require(LIBWWWDIR . '/header.php');
+
+renderScoreBoard($cdata, $sdata, null, TRUE);
+
+require(LIBWWWDIR . '/footer.php');
