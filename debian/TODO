@@ -14,7 +14,6 @@ Domserver
 
 Judgehost
 ---------
-- Add compilers to debian/control
 - Do we need to deal with Java chroot differently?
 - Place correct database configuration.
 - Is there a sensible way for the init script to stop judgedaemon?

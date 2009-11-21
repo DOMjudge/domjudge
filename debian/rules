@@ -76,7 +76,7 @@ install: build
 		$(DJDS)/usr/share/domjudge/*.php $(DJDS)/usr/share/domjudge/alert
 	# Saviour lib.error.sh before we trash /u/s/d
 	mv $(DJJH)/usr/share/domjudge/lib.error.sh $(DJJH)/usr/lib/domjudge
-	# This is in common-config
+	# This is in domjudge-common
 	rm -r $(DJJH)/usr/share/domjudge $(DJJH)/etc/domjudge/common-config.php
 	# We'd like these to be amendable by the admin
 	cd $(DJDS)/usr/share/domjudge/www/images/ && \
