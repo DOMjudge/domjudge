@@ -12,6 +12,7 @@ Standards-Version: 3.8.3
 Package: domjudge-common
 Architecture: all
 Depends: ${misc:Depends}
+Recommends: beep
 Description: common files for the DOMjudge programming contest jury system
  This package contains files common to the elements, and is only necessary
  as a dependency of domjudge-domserver and domjudge-judgehost.
@@ -37,7 +38,7 @@ Package: domjudge-judgehost
 Architecture: any
 Depends: domjudge-common, php5-cli, php5-mysql, xsltproc, procps,
  ${shlibs:Depends}, bash-static, adduser, lsb-base, ${misc:Depends}
-Recommends: ntp, sudo, debootstrap, gcc, g++
+Recommends: ntp, sudo, debootstrap, gcc, g++, openjdk-6-jre-headless
 Suggests: ghc, fp-compiler
 Description: programming contest jury system (judgehost)
  DOMjudge is a jury system for running a programming contest. It allows
