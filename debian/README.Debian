@@ -30,11 +30,14 @@ It runs under the 'domjudge' username and will log things to syslog and
 If you want to start the judgedaemon by hand, not as a daemon, start
 it as follows:
 # su domjudge -s /bin/sh -c /usr/bin/judgedaemon
+This may also be helpful to diagnose errors.
 
 You probably want to use the separate chroot for Sun Java judging.
-Create this chroot by running 'dj_make_chroot' as root. Then edit
-/etc/sudoers according to the administrator manual.
+To create this chroot, take the following steps:
+* Bootstrap the chroot by running 'dj_make_chroot' as root.
+* Then edit /etc/sudoers and add "#includedir /etc/sudoers.d/"
+  if that's not already present.
 Note that when you apply Debian security updates to your system, the
-chroot is not automatically updated aswell. To upgrade it, use the
-command 'dj_upgrade_chroot'.
+chroot is not automatically updated. To upgrade it, use the command
+'dj_upgrade_chroot'.
 

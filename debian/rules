@@ -94,6 +94,8 @@ install: build
 		$(DJDS)/var/log/domjudge
 	chmod g+w $(DJDS)/var/lib/domjudge/submissions \
 		$(DJDS)/var/log/domjudge
+	cp debian/domjudge-judgehost.sudoers $(DJJH)/etc/sudoers.d/domjudge
+	chmod 0440 $(DJJH)/etc/sudoers.d/domjudge
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -123,7 +125,7 @@ binary-arch: build install
 	dh_strip -a
 	dh_link -a
 	dh_compress -a
-	dh_fixperms -a -X usr/bin/runguard
+	dh_fixperms -a -X usr/bin/runguard -X etc/sudoers.d/domjudge
 	dh_installdeb -a
 	dh_shlibdeps -a
 	dh_gencontrol -a

@@ -3,7 +3,6 @@ General
 - Handtweaking is still necesary when installing domserver and
   judgedaemon on the same host. Fix that.
 
-
 Domserver
 ---------
 - Using dbconfig-common seems a lot better than to set things up
@@ -23,5 +22,4 @@ Judgehost
   Judgedaemon should be a proper daemon? Possible with php?
 - Why is runguard in /usr/bin? It's never called directly.
 - We really should use dbconfig-common to set up the database.
-- Do something with sudo configuration.
 
