@@ -9,9 +9,6 @@ define('VERIFICATION_REQUIRED', false);
 // Maximum allowed size in KB of source submissions.
 define('SOURCESIZE', 256);
 
-// Internal and output character set used, don't change.
-define('DJ_CHARACTER_SET', 'utf-8');
-
 // Possible exitcodes from test_solution.sh and their meaning
 $EXITCODES = array (
 	0   => 'correct',
