@@ -381,7 +381,7 @@ class db
 	// reconnect to a db-server
 	public function reconnect()
 	{
-		if(!$this->persist $this->_connection)
+		if(!$this->persist && $this->_connection)
 			mysql_close($this->_connection);
 
 		$this->_connection = NULL;
