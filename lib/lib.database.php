@@ -184,7 +184,8 @@ class db
 				$type = 'transaction';
 				break;
 			default:
-				user_error("SQL command/lib keyword '$key' unknown!", E_USER_ERROR);
+				throw new InvalidArgumentException(
+				    "SQL command/lib keyword '$key' unknown!");
 		}
 
 		$parts = explode('%', $format);
@@ -207,15 +208,16 @@ class db
 				continue;
 			}
 			if (!$argv) {
-				user_error("Not enough arguments", E_USER_ERROR);
+				throw new BadMethodCallException("Not enough arguments");
 			}
 			$val = array_shift($argv);
 			switch ($part{0}) {
 				case 'A':
 					if (!is_array($val) || !$val) {
-						user_error("%A in \$DATABASE->q() has to correspond to a "
-							."non-empty array, it's now a "
-							."'$val' (Query: '$key $query')!", E_USER_ERROR );
+						throw new InvalidArgumentException(
+							"%A in \$DATABASE->q() has to correspond to a "
+							. "non-empty array, it's" . " now a '$val' (Query:"
+							. "'$key $query')!");
 					}
 					$GLOBALS['MODE'] = $part{1};
 					$query .= implode( ', '
@@ -246,7 +248,8 @@ class db
 					$query .= substr($part,1);
 					break;
 				default:
-					user_error("Unkown %-code: ".$part{0}, E_USER_ERROR);
+					throw new InvalidArgumentException(
+					    "Unkown %-code: " . $part{0});
 			}
 
 		}
@@ -255,7 +258,8 @@ class db
 			user_error("Internal error in q()", E_USER_ERROR);
 		}
 		if ($argv) {
-			user_error("Not all arguments to q() are processed", E_USER_ERROR);
+			throw new BadMethodCallException("Not all arguments to q() are"
+			    . " processed");
 		}
 
 		$res = $this->execute($query);
@@ -280,13 +284,13 @@ class db
 		if ($key == 'tuple' || $key == 'value') {
 			if ($res->count() < 1) {
 				if ($maybe) return NULL;
-				user_error("$this->database query error ($key $query".
-					"): Query did not return any rows", E_USER_ERROR);
+				throw new UnexpectedValueException("$this->database query error"
+				    . " ($key $query): Query did not return any rows");
 			}
 			if ($res->count() > 1) {
-				user_error("$this->database query error ($key $query".
-					"): Query returned too many rows (".$res->count().")",
-					E_USER_ERROR);
+				throw new UnexpectedValueException("$this->database query error"
+				    . "($key $query): Query returned too many rows"
+					. "(".$res->count().")");
 			}
 			$row = $res->next();
 			if ($key == 'value') {
@@ -317,7 +321,7 @@ class db
 
 		// reselect DB, could have been changed by some bad php/mysql
 		// implementation.
-		mysql_select_db($this->database,$this->_connection);
+		mysql_select_db($this->database, $this->_connection);
 
 		list($micros, $secs) = explode(' ',microtime());
 		$res = @mysql_query($query,$this->_connection);
@@ -340,17 +344,18 @@ class db
 		// switch error message depending on errornr.
 		switch(mysql_errno($this->_connection)) {
 			case 1062:	// duplicate key
-			user_error("Item with this key already exists.\n".
-				mysql_error($this->_connection), E_USER_ERROR );
+			throw new UnexpectedValueException("Item with this key already"
+			    . " exists.\n" . mysql_error($this->_connection));
 			case 1217:  // foreign key constraint
-			user_error("This operation would have brought the database in an ".
-				"inconsistent state.\n".
-				mysql_error($this->_connection), E_USER_ERROR );
+			throw new UnexpectedValueException("This operation would have"
+			    . " brought the database in an inconsistent state.\n"
+			    . mysql_error($this->_connection));
+			case 2006:	// MySQL server has gone away
+			throw new RuntimeException("MySQL server has gone away");
 			default:
-			user_error("SQL syntax-error ($query). Error#".
-				mysql_errno($this->_connection).": ".
-				mysql_error($this->_connection),
-				E_USER_ERROR);
+			throw new RuntimeException("SQL syntax-error ($query). Error#"
+			    . mysql_errno($this->_connection) . ": "
+				. mysql_error($this->_connection));
 		}
 	}
 
@@ -361,17 +366,15 @@ class db
 
 		$con = $this->persist ? 'mysql_pconnect' : 'mysql_connect';
 
-		$this->_connection = $con($this->host, $this->user, $this->password);
+		$this->_connection = @$con($this->host, $this->user, $this->password);
 		if(!$this->_connection) {
-			user_error( "Could not connect to database server "
-			          . "(host=$this->host,user=$this->user,password="
-			          . str_repeat('*', strlen($this->password)) . ")"
-			          , E_USER_ERROR );
+			throw new RuntimeException("Could not connect to database server "
+			    . "(host=$this->host,user=$this->user,password="
+			    . str_repeat('*', strlen($this->password)) . ")");
 		}
 		if(!mysql_select_db($this->database, $this->_connection)) {
-			user_error( "Could not select database '$this->database': "
-			          . mysql_error($this->_connection)
-			          , E_USER_ERROR );
+			throw new RuntimeException("Could not select database '"
+			    . $this->database . "': " . mysql_error($this->_connection));
 		}
 	}
 
@@ -390,7 +393,8 @@ class db
 			case 'c': return '"%'.mysql_real_escape_string($val, $this->_connection).'%"';
 			case 'l': return $val;
 			case '.': break;
-			default: user_error("Unknown mode: $mode", E_USER_ERROR);
+			default:
+				throw new InvalidArgumentException("Unknown mode: $mode");
 		}
 
 		switch (gettype($val))
@@ -406,7 +410,8 @@ class db
 			case 'object':
 				return '"'.mysql_real_escape_string(serialize($val), $this->_connection).'"';
 			case 'resource':
-				user_error('Cannot store a resource in database', E_USER_ERROR);
+				throw new InvalidArgumentException(
+				    'Cannot store a resource in database');
 		}
 		user_error('Case failed in lib.database', E_USER_ERROR);
 	}
@@ -441,7 +446,8 @@ class db_result
 	{
 		// we've nexted over this result too many times already.
 		if(!isset($this->_result)) {
-			user_error('Result does not contain a valid resource.', E_USER_ERROR);
+			throw new BadMethodCallException(
+			    'Result does not contain a valid resource.');
 		}
 		$this->tuple = mysql_fetch_assoc($this->_result);
 		$this->_nextused = TRUE;
@@ -466,8 +472,8 @@ class db_result
 	public function getcolumn($field=NULL)
 	{
 		if($this->_nextused) {
-			user_error('Getcolumn does not work if you\'ve already next()ed over the result!',
-				E_USER_ERROR);
+			throw new BadMethodCallException('getcolumn does not work if'
+			    . ' you\'ve already next()ed over the result!');
 		}
 		$col = array();
 		while($this->next())
@@ -481,8 +487,8 @@ class db_result
 	public function gettable()
 	{
 		if($this->_nextused) {
-			user_error('Gettable does not work if you\'ve already next()ed over the result!',
-				E_USER_ERROR);
+			throw new BadMethodCallException('gettable does not work if'
+			    . ' you\'ve already next()ed over the result!');
 		}
 		$table = array();
 		while ($this->next())
@@ -497,8 +503,8 @@ class db_result
 	public function getkeytable($key)
 	{
 		if($this->_nextused) {
-			user_error('Getkeytable does not work if you\'ve already next()ed over the result!',
-				E_USER_ERROR);
+			throw new BadMethodCallException('getkeytable does not work if'
+			    . ' you\'ve already next()ed over the result!');
 		}
 		$table = array();
 		while ($this->next()) {
@@ -507,18 +513,18 @@ class db_result
 		return $table;
 	}
 
-	// returns an associative array containing the result, with the frirst
+	// returns an associative array containing the result, with the first
 	// column as the key and the second column as the value
 	public function getkeyvaluetable()
 	{
 		if($this->_nextused) {
-			user_error('Getkeyvaluetable does not work if you\'ve already next()ed over the result!',
-				E_USER_ERROR);
+			throw new BadMethodCallException('getkeyvaluetable does not work if'
+			    . ' you\'ve already next()ed over the result!');
 		}
 
 		if($this->_fields!=2) {
-			user_error('Getkeyvaluetable only works on a table with exactly 2 columns!',
-				E_USER_ERROR);
+			throw new BadMethodCallException('getkeyvaluetable only works on a'
+			    . 'table with exactly 2 columns!');
 		}
 
 		$table = array();
