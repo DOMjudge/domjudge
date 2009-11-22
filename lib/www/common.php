@@ -83,7 +83,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 	// print the table with the submissions. 
 	// table header; leave out the field that is our key (because it's the same
 	// for all rows)
-	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
+	echo "<table class=\"list sortable\">\n<thead>\n<tr class=\"heading\">" .
 
 		(IS_JURY ? "<th scope=\"col\">ID</th>" : '') .
 		"<th scope=\"col\">time</th>" .
@@ -97,37 +97,44 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		"</tr>\n</thead>\n<tbody>\n";
 	
 	// print each row with links to detailed information
-	$subcnt = $corcnt = $igncnt = $vercnt = 0;
+	$iseven = $subcnt = $corcnt = $igncnt = $vercnt = 0;
 	while( $row = $res->next() ) {
 		
 		$sid = (int)$row['submitid'];
 		$isfinished = (IS_JURY || ! $row['result']);
+		$link = 'submission.php?id=' . $sid;
 		
+		echo "<tr class=\"" .
+			( $iseven ? 'roweven': 'rowodd' );
+		$iseven = !$iseven;
+
 		if ( $row['valid'] ) {
 			$subcnt++;
-			echo "<tr>";
 		} else {
 			$igncnt++;
-			echo '<tr class="sub_ignore">';
+			echo ' sub_ignore';
 		}
+		echo '">';
+		
 		if ( IS_JURY ) {
 			echo "<td><a href=\"submission.php?id=$sid\">s$sid</a></td>";
 		}
-		echo "<td>" . printtime($row['submittime']) . "</td>";
+		echo "<td>" . 
+			make_link(printtime($row['submittime']), $link, IS_JURY) . "</td>";
 		if ( IS_JURY ) {
-			echo '<td class="teamid" title="' .
+			echo '<td title="' .
 				htmlspecialchars($row['teamid'].': '.$row['teamname']) . '">' .
-				make_link(str_cut($row['teamname'],20), "team.php?id=" .
-				          urlencode($row['teamid']), IS_JURY) . '</td>';
+				make_link(str_cut($row['teamname'],20), $link, IS_JURY) . '</td>';
 		}
 		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
-			make_link($row['probid'], "problem.php?id=" . urlencode($row['probid']), IS_JURY) .
+			make_link($row['probid'], $link, IS_JURY) .
 			'</td>';
 		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
-			make_link($row['langid'], "language.php?id=" . urlencode($row['langid']), IS_JURY) .
+			make_link($row['langid'], $link, IS_JURY) .
 			'</td>';
-		echo "<td>";
+		echo '<td>';
 		if ( IS_JURY ) {
+			echo '<a href="'.$link. '">';
 			if ( ! $row['result'] ) {
 				if ( $row['submittime'] >= $cdata['endtime'] ) {
 					echo printresult('too-late', TRUE);
@@ -135,9 +142,9 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 					echo printresult($row['judgehost'] ? '' : 'queued', TRUE);
 				}
 			} else {
-				echo '<a href="submission.php?id=' . $sid . '">' .
-					printresult($row['result']) . '</a>';
+					echo printresult($row['result']);
 			}
+			echo '</a>';
 		} else {
 			if ( ! $row['result'] ||
 			     ( VERIFICATION_REQUIRED && ! $row['verified'] ) ) {
@@ -152,21 +159,21 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 			}
 		}
 		echo "</td>";
-		if ( IS_JURY && isset($row['verified']) ) {
+
+		if ( IS_JURY ) {
 			// only display verification if we're done with judging
-			if ( $row['result'] ) {
+			if (isset($row['verified']) && $row['result'] ) {
 				if( ! $row['verified'] ) $vercnt++;
-				echo "<td>" . printyn($row['verified']) . "</td>";
+				echo "<td><a href=\"$link\">" . printyn($row['verified']) . "</a></td>";
 			} else {
 				echo "<td></td>";
 			}
-		}
-		if ( IS_JURY ) {
+		
 			$judgehost = $row['judgehost'];
 			if ( empty($judgehost) ) {
 				echo '<td></td>';
 			} else {
-				echo '<td><a href="judgehost.php?id=' . urlencode($judgehost) . '">' .
+				echo '<td><a href="' . $link . '">' .
 					printhost($judgehost) . '</a></td>';
 			}
 		}

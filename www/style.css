@@ -36,7 +36,6 @@ table {
 
 th {
 	vertical-align: bottom;
-	border-bottom: 1px dashed gray;
 }
 
 caption {
@@ -66,6 +65,16 @@ tr.unread td {
 	padding-left: 5px;
 	padding-right: 5px;
 	vertical-align: bottom;
+}
+
+.list tr { border-bottom: 1px solid silver; }
+.list tr.roweven { background: #ededed; }
+.list tr:hover { background: #ffffcc; }
+.list tr.heading:hover { background: white; }
+.list a {
+	text-decoration: none;
+	color: black;
+	display: block;
 }
 
 .output_text {
@@ -200,3 +209,5 @@ td.scorenc { border-color: silver; }
 
 /* between different contests, print a thin line */
 .contestswitch { border-top: 1px solid black; }
+
+
