@@ -20,6 +20,9 @@ echo '<?xml version="1.0" encoding="' . DJ_CHARACTER_SET . '" ?>' . "\n";
 if(!isset($menu)) {
 	$menu = true;
 }
+if(!isset($ajaxtitle)) {
+	$ajaxtitle = '';
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -45,7 +48,7 @@ if ( IS_JURY ) {
 if ($menu) {?>
 <script type="text/javascript" src="<?php echo getBaseURI()?>ajax.js"></script>
 </head>
-<body onload="setInterval('updateClarifications()', 20000)">
+<body onload="setInterval('updateClarifications(\'<?php echo $ajaxtitle?>\')', 20000)">
 <?php include("menu.php");
 } else {?>
 </head>

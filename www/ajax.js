@@ -13,7 +13,7 @@ function XMLHttpHandle()
 	return ajaxRequest;
 }
 
-function updateClarifications()
+function updateClarifications(ajaxtitle)
 {
 	var handle = XMLHttpHandle();
 	if (!handle) {
@@ -23,12 +23,16 @@ function updateClarifications()
 		if (handle.readyState == 4) {
 			var elem = document.getElementById('menu_clarifications');
 			var cnew = handle.responseText;
+			var newstr = ''
 			if (cnew == 0) {
-				elem.innerHTML = 'clarifications';
 				elem.className = null;
 			} else {
-				elem.innerHTML = 'clarifications ('+cnew+' new)';
+				newstr = ' ('+cnew+' new)';
 				elem.className = 'new';
+			}
+			elem.innerHTML = 'clarifications' + newstr;
+			if(ajaxtitle) {
+				document.title = ajaxtitle + newstr;
 			}
 		}
 	}
