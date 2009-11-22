@@ -100,9 +100,6 @@ CREATE TABLE `judging` (
   `verifier` varchar(15) NOT NULL default '' COMMENT 'Name of jury member who verified this',
   `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Old judging is marked as invalid when rejudging',
   `output_compile` text COMMENT 'Output of the compiling the program',
-  `output_run` text COMMENT 'Output of running the program',
-  `output_diff` text COMMENT 'Diffing the program output and testcase output',
-  `output_error` text COMMENT 'Standard error output of the program',
   PRIMARY KEY  (`judgingid`),
   KEY `submitid` (`submitid`),
   KEY `judgehost` (`judgehost`),
@@ -111,6 +108,22 @@ CREATE TABLE `judging` (
   CONSTRAINT `judging_ibfk_2` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`),
   CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Result of judging a submission';
+
+--
+-- Table structure for table `judging_run`
+--
+
+CREATE TABLE `judging_run` (
+  `runid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique identifier',
+  `judgingid` int(4) unsigned NOT NULL COMMENT 'Judging ID',
+  `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
+  `runresult` varchar(25) default NULL COMMENT 'Result of this run, NULL if not finished yet',
+  `output_run` text COMMENT 'Output of running the program',
+  `output_diff` text COMMENT 'Diffing the program output and testcase output',
+  `output_error` text COMMENT 'Standard error output of the program',
+  PRIMARY KEY  (`runid`),
+  UNIQUE KEY `testcaseid` (`judgingid`, `testcaseid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Result of a testcase run within a judging';
 
 --
 -- Table structure for table `language`
@@ -272,14 +285,15 @@ CREATE TABLE `team_unread` (
 --
 
 CREATE TABLE `testcase` (
-  `id` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique identifier',
+  `testcaseid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique identifier',
   `md5sum_input` char(32) default NULL COMMENT 'Checksum of input data',
   `md5sum_output` char(32) default NULL COMMENT 'Checksum of output data',
   `input` longblob COMMENT 'Input data',
   `output` longblob COMMENT 'Output data',
   `probid` varchar(8) NOT NULL COMMENT 'Corresponding problem ID',
+  `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
   `description` varchar(255) default NULL COMMENT 'Description of this testcase',
-  PRIMARY KEY  (`id`),
+  PRIMARY KEY  (`testcaseid`),
   KEY `probid` (`probid`),
   CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';

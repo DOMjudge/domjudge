@@ -133,6 +133,50 @@ function calcScoreRow($cid, $team, $prob) {
 }
 
 /**
+ * Determines final result for a judging given an ordered array of
+ * testcase results. Testcase results can have value NULL if not run
+ * yet. A return value of NULL means that a final result cannot be
+ * determined yet; this may only occur when not all testcases have
+ * been run yet.
+ */
+function getFinalResult($runresults)
+{
+	global $RESULTS_PRIO;
+
+	// Whether we have NULL results
+	$havenull = FALSE;
+
+	// This stores the current result and priority to be returned:
+	$bestres  = NULL;
+	$bestprio = 999999999;
+
+	// Find first highest priority result:
+	foreach ( $runresults as $tc => $res ) {
+		if ( $res===NULL ) {
+			$havenull = TRUE;
+		} else {
+			$prio = $RESULTS_PRIO[$res];
+			if ( empty($prio) ) error("Unknown result '$res' found.");
+			if ( $prio<$bestprio ) {
+				$bestres  = $res;
+				$bestprio = $prio;
+			}
+		}
+	}
+
+	if ( !$havenull ) return $bestres;
+
+	// If we have NULL results, check whether the "best" result has
+	// maximal priority, hence can already be returned as final:
+	sort($RESULTS_PRIO);
+	$maxprio = reset($RESULTS_PRIO);
+
+	if ( $bestprio==$maxprio ) return $bestres;
+
+	return NULL;
+}
+
+/**
  * Simulate MySQL NOW() function to create insert queries that do not
  * change when replicated later.
  */

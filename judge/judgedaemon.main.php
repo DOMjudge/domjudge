@@ -214,6 +214,7 @@ while ( TRUE ) {
 		continue;
 	}
 
+	// we have marked a submission for judging
 	$waiting = FALSE;
 
 	// get maximum runtime, source code and other parameters
@@ -231,91 +232,136 @@ while ( TRUE ) {
 	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
 	       "($row[teamid]/$row[probid]/$row[langid]), id j$judgingid...");
 
+	judge($mark, $row, $judgingid);
+
+	// restart the judging loop
+}
+
+function judge($mark, $row, $judgingid)
+{
+	global $EXITCODES, $DB, $cid, $myhost, $workdirpath;
 
 	// create workdir for judging
 	$workdir = "$workdirpath/c$cid-s$row[submitid]-j$judgingid";
 
 	logmsg(LOG_INFO, "Working directory: $workdir");
 
-	system("mkdir -p $workdir", $retval);
-	if ( $retval != 0 ) error("Could not create $workdir");
+	system("mkdir -p '$workdir/compile'", $retval);
+	if ( $retval != 0 ) error("Could not create '$workdir/compile'");
 
-	// dump the source code in a tempfile
-	// :KLUDGE: In older versions, test_solution.sh creates a temporary copy
-	// of the original source file. Since this version doesn't use real source
-	// files (source code is submitted to the database), we choose to put the
-	// original source code in another temporary file for now, which is then
-	// copied by test_solution.sh.
-	$tempsrcfile = "$workdir/source.pulled.$row[extension]";
-	if ( file_put_contents($tempsrcfile, $row['sourcecode']) === FALSE ) {
-		error("Could not create $tempsrcfile");
+	// Get the source code from the DB and store in a file
+	$srcfile = "$workdir/compile/source.$row[extension]";
+	if ( file_put_contents($srcfile, $row['sourcecode']) === FALSE ) {
+		error("Could not create $srcfile");
 	}
 	unset($row['sourcecode']);
 
+	// Compile the program.
+	system(LIBJUDGEDIR . "/compile.sh $row[extension] $row[langid] " .
+	       "'$workdir'", $retval);
 
-	// Fetch testcases from database.
-	// We currently support exactly one row per problem.
-	$tcdata = $DB->q("MAYBETUPLE SELECT id, md5sum_input, md5sum_output FROM testcase WHERE probid = %s",
-		$row['probid']);
-	if ( empty($tcdata) ) {
-		error("No testcase found for problem " . $row['probid']);
-	}
-
-	// Get both in- and output files, only if we didn't have them already.
-	// FIXME: make these files not readable by the compiling process since it doesn't
-	// need to read them.
-	foreach(array('input','output') as $inout) {
-		$tcfile = "$workdirpath/testcase/testcase.$inout." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_'.$inout];
-		if ( !file_exists($tcfile) ) {
-			$content = $DB->q("VALUE SELECT " . $inout . " FROM testcase WHERE probid = %s",
-				$row['probid']);
-			$fh = @fopen("$tcfile.new", 'w');
-			if ($fh === FALSE) error("Could not create $tcfile.new");
-			fwrite($fh, $content);
-			fclose($fh);
-			unset($content);
-			if ( md5_file("$tcfile.new") == $tcdata['md5sum_'.$inout]) {
-				rename("$tcfile.new",$tcfile);
-			} else {
-				error ("File corrupted during download.");
-			}
-			logmsg(LOG_NOTICE, "Fetched new $inout testcase for problem " . $row['probid']);
-		}
-		// sanity check
-		if ( md5_file($tcfile) != $tcdata['md5sum_' . $inout] ) {
-			error("File corrupted: md5sum mismatch: " . $tcfile);
-		}
-	}
-
-	// do the actual compile-run-test
-	system(LIBJUDGEDIR . "/test_solution.sh " .
-	       "$tempsrcfile $row[langid] " .
-	       "$workdirpath/testcase/testcase.input." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_input'] . ' ' .
-	       "$workdirpath/testcase/testcase.output." . $row['probid'] . "." . $tcdata['id'] . "." . $tcdata['md5sum_output'] . ' ' .
-	       "$row[maxruntime] $workdir " .
-	       "'$row[special_run]' '$row[special_compare]'", $retval);
-
-	// leave the temporary copy for reference
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {
 		alert('error');
-		error("s$row[submitid] Unknown exitcode from test_solution.sh: $retval");
+		error("Unknown exitcode from compile.sh for s$row[submitid]: $retval");
 	}
-	$result = $EXITCODES[$retval];
+
+	// pop the compilation result back into the judging table
+	$DB->q('UPDATE judging SET output_compile = %s
+	        WHERE judgingid = %i AND judgehost = %s',
+	       getFileContents( $workdir . '/compile.out' ), $judgingid, $myhost);
+
+	// Only continue running testcases when compilation was successful.
+	// FIXME(?): result is still returned as in EXITCODES.
+	if ( ($result = $EXITCODES[$retval])=='correct' ) {
+
+	// Fetch testcases from database.
+	$testcases = $DB->q("KEYTABLE SELECT rank AS ARRAYKEY,
+ 	                     testcaseid, md5sum_input, md5sum_output, probid, rank
+	                     FROM testcase WHERE probid = %s ORDER BY rank", $row['probid']);
+	if ( count($testcases)==0 ) {
+		error("No testcase found for problem " . $row['probid']);
+	}
+
+	$runresults = array_fill_keys(array_keys($testcases), NULL);
+
+	foreach ( $testcases as $tc ) {
+
+	$testcasedir = $workdir . "/testcase" . sprintf('%03d', $tc['rank']);
+
+	// Get both in- and output files, only if we didn't have them already.
+	$tcfile = array();
+	foreach(array('input','output') as $inout) {
+		$tcfile[$inout] = "$workdirpath/testcase/testcase.$tc[probid].$tc[rank]." .
+		    $tc['md5sum_'.$inout] . "." . substr($inout, 0, -3);
+
+		if ( !file_exists($tcfile[$inout]) ) {
+			$content = $DB->q("VALUE SELECT $inout FROM testcase
+	 		                   WHERE testcaseid = %i", $tc['testcaseid']);
+			if ( file_put_contents($tcfile[$inout] . ".new", $content) === FALSE ) {
+				error("Could not create $tcfile[$inout].new");
+			}
+			unset($content);
+			if ( md5_file("$tcfile[$inout].new") == $tc['md5sum_'.$inout]) {
+				rename("$tcfile[$inout].new",$tcfile[$inout]);
+			} else {
+				error("File corrupted during download.");
+			}
+			logmsg(LOG_NOTICE, "Fetched new $inout testcase $tc[rank] for " .
+			       "problem $row[probid]");
+		}
+		// sanity check (FIXME: maybe too big performance impact?)
+		if ( md5_file($tcfile[$inout]) != $tc['md5sum_' . $inout] ) {
+			error("File corrupted: md5sum mismatch: " . $tcfile[$inout]);
+		}
+	}
+
+	// Copy program (with all possible additional files to testcase
+	// dir. Use hardlinks to preserve space with big executables.
+	system("mkdir -p '$testcasedir'", $retval);
+	if ( $retval!=0 ) error("Could not create directory '$testcasedir'");
+
+	system("cp -dpl '$workdir'/compile/* '$testcasedir'", $retval);
+	if ( $retval!=0 ) error("Could not copy program to '$testcasedir'");
+
+	// do the actual test-run
+	system(LIBJUDGEDIR . "/testcase_run.sh $tcfile[input] $tcfile[output] " .
+	       "$row[maxruntime] '$testcasedir' " .
+	       "'$row[special_run]' '$row[special_compare]'", $retval);
+
+	// what does the exitcode mean?
+	if( ! isset($EXITCODES[$retval]) ) {
+		alert('error');
+		error("Unknown exitcode from testcase_run.sh for s$row[submitid], " .
+		      "testcase $tc[rank]: $retval");
+	}
+	$runresults[$tc['rank']] = $EXITCODES[$retval];
+
+	$DB->q('INSERT INTO judging_run (judgingid, testcaseid, runresult,
+ 	        output_run, output_diff, output_error)
+	        VALUES (%i, %i, %s, %s, %s, %s)',
+	       $judgingid, $tc['probid'], $runresults[$tc['rank']],
+	       getFileContents($testcasedir . '/program.out'),
+	       getFileContents($testcasedir . '/compare.out'),
+	       getFileContents($testcasedir . '/error.out'));
+
+	// Optimization: stop judging when the result is already known.
+	// This should report a final result when all runresults are non-null!
+	if ( ($result = getFinalResult($runresults))!==NULL ) break;
+
+	} // end: for each testcase
+
+	} // end: if compile result==0
+
+	if ( $result==NULL ) error("No final result obtained");
 
 	// Start a transaction. This will provide extra safety if the table type
 	// supports it.
 	$DB->q('START TRANSACTION');
 	// pop the result back into the judging table
-	$DB->q('UPDATE judging SET endtime = %s, result = %s,
-	        output_compile = %s, output_run = %s, output_diff = %s, output_error = %s
+	$DB->q('UPDATE judging SET endtime = %s, result = %s
 	        WHERE judgingid = %i AND judgehost = %s',
-	       now(), $result,
-	       getFileContents( $workdir . '/compile.out' ),
-	       getFileContents( $workdir . '/program.out' ),
-	       getFileContents( $workdir . '/compare.out' ),
-	       getFileContents( $workdir . '/error.out' ),
-	       $judgingid, $myhost);
+	       now(), $result, $judgingid, $myhost);
 
 	// recalculate the scoreboard cell (team,problem) after this judging
 	calcScoreRow($cid, $row['teamid'], $row['probid']);
@@ -332,9 +378,6 @@ while ( TRUE ) {
 
 	$DB->q('COMMIT');
 
-	// Remove extra copy of source code
-	unlink($tempsrcfile);
-
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
 	if ( $result == 'correct' ) {
@@ -342,8 +385,6 @@ while ( TRUE ) {
 	} else {
 		alert('reject');
 	}
-
-	// restart the judging loop
 }
 
 function database_retry_connect()

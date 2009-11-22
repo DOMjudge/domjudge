@@ -32,19 +32,20 @@ define('FILELIMIT', 4096);
 // possibly interpreters)
 define('PROCLIMIT', 15);
 
-/** Priority of results for determining final result with multiple
-    testcases. Lower number means higher priority, thus is used first
-    as final result. With equal priority, the first occurring result
-    determines the final result. */
+// Priority of results for determining final result with multiple
+// testcases. Lower number means higher priority, thus is used first
+// as final result. With equal priority, the first occurring result
+// determines the final result.
+// The default below tries to simulate single testcase behaviour.
 $RESULTS_PRIO = array(
-	1  => 'memory-limit',
-	1  => 'output-limit',
-	2  => 'run-error',
-	3  => 'timelimit',
-	4  => 'wrong-answer',
-	5  => 'no-output',
-	6  => 'presentation-error',
-	99 => 'correct',
+	'memory-limit'       =>  1,
+	'output-limit'       =>  1,
+	'run-error'          =>  1,
+	'timelimit'          =>  1,
+	'wrong-answer'       => 11,
+	'presentation-error' => 12,
+	'no-output'          => 13,
+	'correct'            => 99,
 	);
 
 /** Remap results, e.g. to disable a specific result. Some possible

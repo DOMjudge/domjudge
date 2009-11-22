@@ -1,18 +1,16 @@
 #!/usr/bin/env bash
 
-# Script to test (compile, run and compare) solutions.
+# Script to test (run and compare) submissions
 #
 # $Id$
 
-# Usage: $0 <source> <lang> <testdata.in> <testdata.out> <timelimit> <workdir>
+# Usage: $0 <testdata.in> <testdata.out> <timelimit> <workdir>
 #           [<special-run> [<special-compare>]]
 #
-# <source>          File containing source-code.
-# <lang>            Language of the source, see config-file for details.
 # <testdata.in>     File containing test-input.
 # <testdata.out>    File containing test-output.
 # <timelimit>       Timelimit in seconds.
-# <workdir>         Directory where to execute solution in a chroot-ed
+# <workdir>         Directory where to execute submission in a chroot-ed
 #                   environment. For best security leave it as empty as possible.
 #                   Certainly do not place output-files there!
 # <special-run>     Extension name of specialized run or compare script to use.
@@ -20,18 +18,6 @@
 #                   <special-compare> is to be used. The script
 #                   'run_<special-run>' or 'compare_<special-compare>'
 #                   will be called if argument is non-empty.
-#
-# This script supports languages, by calling separate compile scripts
-# depending on <lang>, namely 'compile_<lang>.sh'. These compile scripts
-# should compile the source to a statically linked, standalone executable!
-# Syntax for these compile scripts is:
-#
-#   compile_<lang>.sh <source> <dest> <memlimit>
-#
-# where <dest> is the same filename as <source> but without extension.
-# The <memlimit> (in kB) is passed to the compile script, to let
-# interpreted languages (read: Sun javac/java) be able to set the
-# internal maximum memory size.
 #
 # For running the solution a script 'run' is called (default). For
 # usage of 'run' see that script. Likewise, for comparing results, a
@@ -110,40 +96,27 @@ RUNGUARD="$DJ_BINDIR/runguard"
 
 logmsg $LOG_INFO "starting '$0', PID = $$"
 
-[ $# -ge 6 ] || error "not enough of arguments. see script-code for usage."
-SOURCE="$1";    shift
-PROGLANG="$1";  shift
+[ $# -ge 4 ] || error "not enough of arguments. see script-code for usage."
 TESTIN="$1";    shift
 TESTOUT="$1";   shift
 TIMELIMIT="$1"; shift
 WORKDIR="$1";   shift
 SPECIALRUN="$1";
 SPECIALCOMPARE="$2";
-logmsg $LOG_DEBUG "arguments: '$SOURCE' '$PROGLANG' '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$WORKDIR'"
+logmsg $LOG_DEBUG "arguments: '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$WORKDIR'"
 logmsg $LOG_DEBUG "optionals: '$SPECIALRUN' '$SPECIALCOMPARE'"
 
-COMPILE_SCRIPT="$SCRIPTDIR/compile_$PROGLANG.sh"
 COMPARE_SCRIPT="$SCRIPTDIR/compare${SPECIALCOMPARE:+_$SPECIALCOMPARE}"
 RUN_SCRIPT="run${SPECIALRUN:+_$SPECIALRUN}"
 
-[ -r "$SOURCE"  ] || error "solution not found: $SOURCE"
 [ -r "$TESTIN"  ] || error "test-input not found: $TESTIN"
 [ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT"
 [ -d "$WORKDIR" -a -w "$WORKDIR" -a -x "$WORKDIR" ] || \
 	error "Workdir not found or not writable: $WORKDIR"
-[ -x "$COMPILE_SCRIPT" ] || error "compile script not found or not executable: $COMPILE_SCRIPT"
-[ -x "$COMPARE_SCRIPT" ] || error "compare script not found or not executable: $COMPARE_SCRIPT"
+[ -x "$WORKDIR/program" ] || error "submission program not found or not executable"
+[ -x "$COMPARE_SCRIPT"  ] || error "compare script not found or not executable: $COMPARE_SCRIPT"
 [ -x "$SCRIPTDIR/$RUN_SCRIPT" ] || error "run script not found or not executable: $RUN_SCRIPT"
 [ -x "$RUNGUARD" ] || error "runguard not found or not executable: $RUNGUARD"
-
-logmsg $LOG_INFO "setting resource limits"
-ulimit -HS -c 0     # Do not write core-dumps
-ulimit -HS -f 65536 # Maximum filesize in kB
-
-logmsg $LOG_INFO "creating input/output files"
-EXT="${SOURCE##*.}"
-[ "$EXT" ] || error "source-file does not have an extension: $SOURCE"
-cp "$SOURCE" "$WORKDIR/source.$EXT"
 
 OLDDIR="$PWD"
 cd "$WORKDIR"
@@ -158,11 +131,10 @@ else
 fi
 
 # Make testing dir accessible for RUNUSER:
-chmod a+x $WORKDIR
+chmod a+x "$WORKDIR"
 
 # Create files which are expected to exist:
-touch compile.out compile.time   # Compiler output and runtime
-touch error.out                  # Error output after compiler output
+touch error.out                  # Error output
 touch compare.out                # Compare output
 touch result.xml result.out      # Result of comparison (XML and plaintext version)
 touch program.out program.err    # Program output and stderr (for extra information)
@@ -171,36 +143,9 @@ touch program.time program.exit  # Program runtime and exitcode
 # program.{out,err,time,exit} are written to by processes running as RUNUSER:
 chmod a+rw program.out program.err program.time program.exit
 
-# Make source readable (for if it is interpreted):
-chmod a+r source.$EXT
-
-logmsg $LOG_INFO "starting compile"
-
-# First compile to 'source' then rename to 'program' to avoid problems with
-# the compiler writing to different filenames and deleting intermediate files.
-runcheck "$RUNGUARD" ${DEBUG:+-v} -t $COMPILETIME -f $FILELIMIT -o compile.time -- \
-	"$COMPILE_SCRIPT" "source.$EXT" source "$MEMLIMIT" &>compile.tmp
-if [ -f source ]; then
-    mv -f source program
-    chmod a+rx program
-fi
-
-logmsg $LOG_DEBUG "checking compilation exit-status"
-if grep 'timelimit reached: aborting command' compile.tmp &>/dev/null; then
-	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
-	exit $E_COMPILER_ERROR
-fi
-if [ $exitcode -ne 0 -o ! -e program ]; then
-	echo "Compiling failed with exitcode $exitcode, compiler output:" >compile.out
-	cat compile.tmp >>compile.out
-	exit $E_COMPILER_ERROR
-fi
-cat compile.tmp >>compile.out
-
-
 logmsg $LOG_INFO "setting up testing (chroot) environment"
 
-# Copy the testdata input (only after compilation to prevent information leakage)
+# Copy the testdata input
 cd "$OLDDIR"
 cp "$TESTIN" "$WORKDIR/testdata.in"
 cd "$WORKDIR"
@@ -218,6 +163,8 @@ if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
 	$SCRIPTDIR/$CHROOT_SCRIPT start
 fi
 
+# Add a fifo buffer to have /dev/null (indirectly) available in the
+# chroot environment:
 logmsg $LOG_DEBUG "making a fifo-buffer link to /dev/null"
 mkfifo -m a+rw ./dev/null
 cat < ./dev/null >/dev/null &
@@ -327,11 +274,10 @@ if [ "$result" = "accepted" ]; then
 	echo "Correct${descrp}! Runtime is `cat program.time` seconds." >>error.out
 	cat error.tmp >>error.out
 	exit $E_CORRECT
-# Uncomment lines below to enable "Presentation error" results.
-#elif [ "$result" = "presentation error" ]; then
-#	echo "Presentation error${descrp}." >>error.out
-#	cat error.tmp >>error.out
-#	exit $E_PRESENTATION
+elif [ "$result" = "presentation error" ]; then
+	echo "Presentation error${descrp}." >>error.out
+	cat error.tmp >>error.out
+	exit $E_PRESENTATION
 elif [ "$result" = "wrong answer" ]; then
 	echo "Wrong answer${descrp}." >>error.out
 	cat error.tmp >>error.out
