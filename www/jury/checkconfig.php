@@ -243,7 +243,9 @@ while($row = $res->next()) {
 			$details .= $row['probid'].': ' . $chk_err."\n";
 		}
 	}
-	if ( ! $DB->q("MAYBEVALUE SELECT count(id) FROM testcase WHERE input IS NOT NULL AND output IS NOT NULL AND probid = %s", $row['probid']) ) {
+	if ( ! $DB->q("MAYBEVALUE SELECT count(testcaseid) FROM testcase
+ 	               WHERE input IS NOT NULL AND output IS NOT NULL AND
+ 	               probid = %s", $row['probid']) ) {
 		$details .= $row['probid'].": missing in/output testcase.\n";
 	}
 }

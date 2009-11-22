@@ -60,7 +60,8 @@ if ( isset($_POST['probid']) ) {
 			checkFileUpload ( $_FILES['update_'.$inout]['error'] );
 
 			$content = file_get_contents($_FILES['update_'.$inout]['tmp_name']);
-			if ( $DB->q("VALUE SELECT count(id) FROM testcase WHERE probid = %s", $probid) ) {
+			if ( $DB->q("VALUE SELECT count(testcaseid)
+ 			             FROM testcase WHERE probid = %s", $probid) ) {
 				$DB->q("UPDATE testcase SET md5sum_$inout = %s, $inout = %s
 				        WHERE probid = %s",
 				       md5($content), $content, $probid);
