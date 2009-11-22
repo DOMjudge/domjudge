@@ -61,12 +61,43 @@ if ($retval != 1) {
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
-// Retrieve hostname and check database for judgehost entry
-$row = $DB->q('MAYBETUPLE SELECT * FROM judgehost WHERE hostname = %s', $myhost);
-if ( ! $row ) {
-	error("No database entry found for me ($myhost), exiting");
+// Tick use required between PHP 4.3.0 and 5.3.0 for handling signals,
+// must be declared globally.
+if ( version_compare(PHP_VERSION, '5.3', '<' ) ) {
+	declare(ticks = 1);
 }
-$myhost = $row['hostname'];
+initsignals();
+
+database_retry_connect($waittime);
+
+$first = True;
+while( !$exitsignalled )
+{
+	try {
+		// Retrieve hostname and check database for judgehost entry
+		$row = $DB->q('MAYBETUPLE SELECT * FROM judgehost WHERE hostname = %s'
+		             , $myhost);
+		if ( ! $row ) {
+			if($first)
+				logmsg(LOG_WARNING, "No database entry found for me ($myhost)");
+			$first = False;
+			sleep($waittime);
+			continue;
+		}
+		$myhost = $row['hostname'];
+		unset($first);
+		break;
+	}
+	catch( Exception $e ) {
+		$msg = "MySQL server has gone away";
+		if( ! strncmp($e->getMessage(), $msg, strlen($msg)) ) {
+			logmsg(LOG_WARNING, $msg);
+			database_retry_connect();
+			continue;
+		}
+		throw $e;
+	}
+}
 
 // Create directory where to test submissions
 $workdirpath = JUDGEDIR . "/$myhost";
@@ -77,13 +108,6 @@ $waiting = FALSE;
 $active = TRUE;
 $cid = null;
 
-// Tick use required between PHP 4.3.0 and 5.3.0 for handling signals,
-// must be declared globally.
-if ( version_compare(PHP_VERSION, '5.3', '<' ) ) {
-	declare(ticks = 1);
-}
-initsignals();
-
 // Constantly check database for unjudged submissions
 while ( TRUE ) {
 
@@ -93,11 +117,24 @@ while ( TRUE ) {
 		logmsg(LOG_NOTICE, "Received signal, exiting.");
 		exit;
 	}
-	
-	// Check that this judge is active, else wait and check again later
-	$row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $myhost);
-	$DB->q('UPDATE LOW_PRIORITY judgehost SET polltime = NOW()
-	       WHERE hostname = %s', $myhost);
+
+	try {
+		// Check that this judge is active, else wait and check again later
+		$row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s'
+		             , $myhost);
+		$DB->q('UPDATE LOW_PRIORITY judgehost SET polltime = NOW()
+		       WHERE hostname = %s', $myhost);
+	}
+	catch( Exception $e ) {
+		$msg = "MySQL server has gone away";
+		if( ! strncmp($e->getMessage(), $msg, strlen($msg)) ) {
+			logmsg(LOG_WARNING, $msg);
+			database_retry_connect();
+			continue;
+		}
+		throw $e;
+	}
+
 	if ( $row['active'] != 1 ) {
 		if ( $active ) {
 			logmsg(LOG_NOTICE, "Not active, waiting for activation...");
@@ -307,4 +344,29 @@ while ( TRUE ) {
 	}
 
 	// restart the judging loop
+}
+
+function database_retry_connect()
+{
+	global $DB, $exitsignalled, $waittime;
+
+	$first = True;
+	while( !$exitsignalled )
+	{
+		try {
+			$DB->reconnect();
+			logmsg(LOG_INFO, "Connected to database");
+			break;
+		}
+		catch( Exception $e ) {
+			$msg = "Could not connect to database server";
+			if( ! strncmp($e->getMessage(), $msg, strlen($msg)) ) {
+				if($first) logmsg(LOG_WARNING, $msg);
+				$first = False;
+				sleep($waittime);
+				continue;
+			}
+			throw $e;
+		}
+	}
 }
