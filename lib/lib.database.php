@@ -360,7 +360,7 @@ class db
 	}
 
 	// connects to a db-server if not yet connected
-	private function connect()
+	public function connect()
 	{
 		if($this->_connection) return;
 
