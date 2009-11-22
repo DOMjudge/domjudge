@@ -19,7 +19,7 @@ if( DEBUG & DEBUG_TIMINGS ) {
 require_once(LIBDIR . '/lib.error.php');
 if ( !defined('WEBBASEURI') || WEBBASEURI == "" || stristr(WEBBASEURI, 'example.com') !== FALSE ) {
 	error('WEBBASEURI not configured. ' .
-		'Please set the WEBBASEURI in ' . htmlspecialchars(ETCDIR . '/domserver-config.php') .
+		'Please set the WEBBASEURI in ' . htmlspecialchars('domserver-config.php') .
 		' to the full URI to your DOMjudge installation.');
 }
 require_once(LIBDIR . '/lib.misc.php');
