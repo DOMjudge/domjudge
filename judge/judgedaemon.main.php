@@ -186,13 +186,14 @@ while ( TRUE ) {
 	               FROM submission s, problem p, language l
 	               WHERE s.probid = p.probid AND s.langid = l.langid AND
 	               judgemark = %s AND judgehost = %s', $mark, $myhost);
-
-	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
-	       "($row[teamid]/$row[probid]/$row[langid])...");
-
+	
 	// update the judging table with our ID and the starttime
 	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)
 	                     VALUES (%i,%i,%s,%s)', $row['submitid'], $cid, now(), $myhost);
+
+	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
+	       "($row[teamid]/$row[probid]/$row[langid]), id j$judgingid...");
+
 
 	// create workdir for judging
 	$workdir = "$workdirpath/c$cid-s$row[submitid]-j$judgingid";
