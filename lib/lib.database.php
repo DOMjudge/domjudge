@@ -378,6 +378,16 @@ class db
 		}
 	}
 
+	// reconnect to a db-server
+	public function reconnect()
+	{
+		if(!$this->persist $this->_connection)
+			mysql_close($this->_connection);
+
+		$this->_connection = NULL;
+		$this->connect();
+	}
+
 	// transform a php variable into one that can be put directly into a query
 	private function val2sql($val, $mode='.')
 	{
