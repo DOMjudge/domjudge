@@ -73,7 +73,7 @@ RUNGUARD="$DJ_BINDIR/runguard"
 
 logmsg $LOG_INFO "starting '$0', PID = $$"
 
-[ $# -ge 3 ] || error "not enough of arguments. see script-code for usage."
+[ $# -ge 3 ] || error "not enough arguments. See script-code for usage."
 EXT="$1";     shift
 LANG="$1";    shift
 WORKDIR="$1"; shift
@@ -98,7 +98,7 @@ cd "$WORKDIR"
 # Create files which are expected to exist: compiler output and runtime
 touch compile.out compile.time
 
-# Make source readable (for if it is interpreted):
+# Make source readable (in case it is interpreted):
 chmod a+r "$SOURCE"
 
 logmsg $LOG_INFO "starting compile"

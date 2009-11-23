@@ -96,7 +96,7 @@ RUNGUARD="$DJ_BINDIR/runguard"
 
 logmsg $LOG_INFO "starting '$0', PID = $$"
 
-[ $# -ge 4 ] || error "not enough of arguments. see script-code for usage."
+[ $# -ge 4 ] || error "not enough arguments. See script-code for usage."
 TESTIN="$1";    shift
 TESTOUT="$1";   shift
 TIMELIMIT="$1"; shift
