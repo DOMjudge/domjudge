@@ -1,8 +1,8 @@
 -- Privileges for the DOMjudge MySQL tables.
 --
 -- You can pipe this file into the 'mysql' command to set these
--- permissions. Database should be set externally (e.g. to
--- 'domjudge'). 
+-- permissions, but preferably use 'dj-setup-database'. Database
+-- should be set externally (e.g. to 'domjudge').
 --
 -- $Id$
 

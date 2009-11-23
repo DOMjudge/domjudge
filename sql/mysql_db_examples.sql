@@ -1,15 +1,11 @@
 -- These are some example/default entries for the DOMjudge database.
 --
 -- You can pipe this file into the 'mysql' command to insert this
--- data, but preferably use 'make install'. Database should be set
+-- data, but preferably use 'dj-setup-database'. Database should be set
 -- externally (e.g. to 'domjudge').
 --
 -- $Id$
 
-
--- 
--- Dumping data for table `clarification`
--- 
 
 -- 
 -- Dumping data for table `configuration`
@@ -33,11 +29,6 @@ INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('judgehost2', 1);
 INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('sparehost', 0);
 
 -- 
--- Dumping data for table `judging`
--- 
-
-
--- 
 -- Dumping data for table `language`
 -- 
 
@@ -55,20 +46,6 @@ INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_ju
 
 INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES ('hello', 2, 'Hello World', 1, 1, 5, NULL, NULL, 'magenta');
 INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES ('fltcmp', 2, 'Float special compare test', 1, 1, 5, NULL, 'program.sh', 'yellow');
-
--- 
--- Dumping data for table `scoreboard_jury`
--- 
-
-
--- 
--- Dumping data for table `scoreboard_public`
--- 
-
-
--- 
--- Dumping data for table `submission`
--- 
 
 -- 
 -- Dumping data for table `team_affiliation`
