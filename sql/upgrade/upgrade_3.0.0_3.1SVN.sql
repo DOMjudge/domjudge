@@ -35,6 +35,8 @@ ALTER TABLE `testcase`
 
 GRANT SELECT (langid, name, extension, allow_submit) ON language TO domjudge_plugin;
 
+FLUSH PRIVILEGES;
+
 --
 -- Now transfer data from old to new structure
 --
