@@ -11,7 +11,7 @@ if [ ! -f /etc/domjudge/dbpasswords.secret ]; then
 	cp /usr/share/doc/domjudge-judgehost/examples/dbpasswords.secret.judgehost \
 		/etc/domjudge/dbpasswords.secret
 fi
-chown root:domjudge /etc/domjudge/dbpasswords.secret
+chown domjudge /etc/domjudge/dbpasswords.secret
 chmod 0640 /etc/domjudge/dbpasswords.secret
 # Allow judgedaemon to write here, and only somewhat privileged users
 # (ones that may also read syslog) to inspect the logs and judgings

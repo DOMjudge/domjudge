@@ -8,8 +8,9 @@ if ! grep -q ^team: /etc/domjudge/dbpasswords.secret; then
 	rm -f /etc/domjudge/dbpasswords.secret
 	dj-setup-database genpass
 	chmod 0640 /etc/domjudge/dbpasswords.secret
-	chgrp www-data /etc/domjudge/dbpasswords.secret
 fi
+chgrp www-data /etc/domjudge/dbpasswords.secret
+
 if [ ! -f /etc/domjudge/htpasswd-jury ]; then
 	htpasswd -c -b /etc/domjudge/htpasswd-jury domjudge_jury `grep '^jury:' /etc/domjudge/dbpasswords.secret | cut -d : -f 5`
 	chmod 0640 /etc/domjudge/htpasswd-jury
