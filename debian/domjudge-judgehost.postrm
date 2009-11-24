@@ -4,7 +4,10 @@ umount /var/lib/domjudge/javachroot/proc || true
 umount /var/lib/domjudge/javachroot.new/proc || true
 
 if [ "$1" = "purge" ]; then
-	rm -rf /etc/domjudge /var/lib/domjudge /var/log/domjudge
+	# do not purge entire /v/l/domjudge, because domjudge-domserver
+	# may still remain installed
+	rm -rf /var/log/domjudge/judge.*.log /var/lib/domjudge/judgings \
+		/var/lib/domjudge/javachroot /var/lib/domjudge/javachroot.new
 fi
 
 #DEBHELPER#

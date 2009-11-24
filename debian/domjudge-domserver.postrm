@@ -4,7 +4,9 @@ if [ "$1" = "purge" ]; then
 	if [ -x /usr/bin/dj-setup-database ]; then
 		dj-setup-database -r uninstall || true
 	fi
-	rm -rf /etc/domjudge /var/lib/domjudge /var/log/domjudge
+	# do not purge entire /v/l/domjudge, because domjudge-judgehost
+	# may still remain installed
+	rm -rf /var/lib/domjudge/submissions /var/log/domjudge/images
 fi
 
 #DEBHELPER#
