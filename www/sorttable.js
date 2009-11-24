@@ -91,6 +91,16 @@ sorttable = {
 	      headrow[i].sorttable_tbody = table.tBodies[0];
 	      dean_addEvent(headrow[i],"click", function(e) {
 
+          /* DOMjudge: cancel out alternating row colours when sorting.
+           * This may be improved by not doing it for all 'tr' but only
+           * the current table? Or even better: that the row colour remains
+           * alternating.
+           */
+          var cells = document.getElementsByTagName("tr"); 
+          for (var i = 0; i < cells.length; i++) { 
+              cells[i].style.background='white';
+          }
+          /* END DOMjudge */
           if (this.className.search(/\bsorttable_sorted\b/) != -1) {
             // if we're already sorted by this column, just 
             // reverse the table, which is quicker

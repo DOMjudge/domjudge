@@ -70,12 +70,14 @@ tr.unread td {
 .list tr { border-bottom: 1px solid silver; }
 .list tr.roweven { background: #ededed; }
 .list tr:hover { background: #ffffcc; }
+.list tr.heading { border-bottom-color: black; }
 .list tr.heading:hover { background: white; }
 .list a {
 	text-decoration: none;
 	color: black;
 	display: block;
 }
+.list .disabled a       { color: silver;   }
 
 .output_text {
 	border-top: 1px dotted #C0C0C0;

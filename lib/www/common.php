@@ -161,21 +161,24 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		echo "</td>";
 
 		if ( IS_JURY ) {
+			echo "<td><a href=\"$link\">";
 			// only display verification if we're done with judging
 			if (isset($row['verified']) && $row['result'] ) {
 				if( ! $row['verified'] ) $vercnt++;
-				echo "<td><a href=\"$link\">" . printyn($row['verified']) . "</a></td>";
+				echo printyn($row['verified']);
 			} else {
-				echo "<td></td>";
+				echo '&nbsp;';
 			}
+			echo '</a></td>';
+			echo "<td><a href=\"$link\">";
 		
 			$judgehost = $row['judgehost'];
-			if ( empty($judgehost) ) {
-				echo '<td></td>';
+			if ( !empty($judgehost) ) {
+					echo printhost($judgehost);
 			} else {
-				echo '<td><a href="' . $link . '">' .
-					printhost($judgehost) . '</a></td>';
+				echo '&nbsp;';
 			}
+			echo '</a></td>';
 		}
 		echo "</tr>\n";
 		
