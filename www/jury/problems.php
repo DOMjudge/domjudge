@@ -55,7 +55,7 @@ if( $res->count() == 0 ) {
 			  BALLOON_SYM
 			: '<td>' );
 			if ( IS_ADMIN ) {
-				echo "</td><td>" . 
+				echo "</td><td class=\"editdel\">" .
 					editLink('problem', $row['probid']) . " " . 
 					delLink('problem','probid',$row['probid']);
 			}

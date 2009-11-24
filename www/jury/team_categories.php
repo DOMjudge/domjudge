@@ -40,7 +40,7 @@ if( $res->count() == 0 ) {
 			'</td><td align="center">' . printyn($row['visible']) .
 			"</td>";
 		if ( IS_ADMIN ) {
-			echo "<td>" .
+			echo "<td class=\"editdel\">" .
 				editLink('team_category', $row['categoryid']) . " " .
 				delLink('team_category', 'categoryid', $row['categoryid']) . "</td>";
 		}

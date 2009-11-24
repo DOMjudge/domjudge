@@ -95,7 +95,7 @@ if( $teams->count() == 0 ) {
 		echo ">".BALLOON_SYM."</td>";
 		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$numcor / $numsub</td>";
 		if ( IS_ADMIN ) {
-			echo "<td>" .
+			echo "<td class=\"editdel\">" .
 				editLink('team', $row['login']) . " " .
 				delLink('team','login',$row['login']) . "</td>";
 		}

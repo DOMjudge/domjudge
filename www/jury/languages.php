@@ -38,7 +38,7 @@ if( $res->count() == 0 ) {
 			"</td><td align=\"center\">".printyn($row['allow_judge']).
 			"</td><td>".htmlspecialchars($row['time_factor']);
 			if ( IS_ADMIN ) {
-				echo "</td><td>" . 
+				echo "</td><td class=\"editdel\">" . 
 					editLink('language', $row['langid']) . " " .
 					delLink('language','langid',$row['langid']);
 			}

@@ -36,10 +36,13 @@ if( count($res) == 0 ) {
 	     "<th scope=\"col\">unfreeze<br />scores</th>" .
 	     "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
 
+	$iseven = false;
 	foreach($res as $row) {
-		echo "<tr" .
-			(!$row['enabled']    ? ' class="disabled"' :'') .
-			($row['cid'] == $cid ? ' class="highlight"':'') . ">" .
+
+		echo '<tr class="' .
+			( $iseven ? 'roweven': 'rowodd' ) . 
+			(!$row['enabled']    ? ' disabled' :'') .
+			($row['cid'] == $cid ? ' highlight':'') . '">' .
 			"<td align=\"right\"><a href=\"contest.php?id=" . urlencode($row['cid']) .
 			"\">c" . (int)$row['cid'] . "</a></td>\n" .
 			"<td title=\"".htmlspecialchars(@$row['activatetime']) . "\">" .
@@ -56,8 +59,10 @@ if( count($res) == 0 ) {
 			  printtime($row['unfreezetime']) : '-' ) . "</td>\n" .
 			"<td><a href=\"contest.php?id=" . urlencode($row['cid']) . "\">" .
 			htmlspecialchars($row['contestname']) . "</a></td>\n";
+		$iseven = ! $iseven;
+
 		if ( IS_ADMIN ) {
-			echo "<td>" . 
+			echo "<td class=\"editdel\">" .
 				editLink('contest', $row['cid']) . " " .
 				delLink('contest','cid',$row['cid']) . "</td>\n";
 		}
