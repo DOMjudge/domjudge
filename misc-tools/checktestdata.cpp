@@ -30,9 +30,12 @@
    compare  := '<' | '>' | '<=' | '>=' | '==' | '!='
    expr     := <term> | <expr> [+-] <term>
    term     := <value> | '-' <term> | '(' <expr> ')' | <term> [*%/] <term>
-   test     := '!' <test> | <expr> <compare> <expr> | ISEOF
+   test     := '!' <test> | '(' <test> ')' | <test> [&|] <test> |
+               <expr> <compare> <expr> | 'MATCH(' <string> str ')' | 'ISEOF'
 
-      ISEOF is a special keyword that returns whether end-of-line has been reached.
+      MATCH and ISEOF are special keyword that return whether the next
+      character matches any of 'str', respectively if end-of-file has
+      been reached.
 
    string   := ".*"
 
@@ -79,9 +82,10 @@
       times and optionally match 'separator' command (count-1) times
       in between. The value of count must fit in a unsigned 32 bit int.
 
-   WHILE(<test> condition) [<command>...] END
+   WHILE(<test> condition [,<command> separator]) [<command>...] END
 
-      Repeat the commands as long as 'condition' is true.
+      Repeat the commands as long as 'condition' is true. Optionally
+      match 'separator' command between two consecutive iterations.
 
  */
 
@@ -91,6 +95,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <set>
 #include <ctype.h>
 #include <getopt.h>
 #include <stdarg.h>
@@ -117,6 +122,8 @@ command currcmd;
 string data;
 vector<command> program;
 map<string,mpz_class> variable;
+set<string> loop_cmds;
+// List of loop starting commands like REP, initialized in main().
 
 char *progname;
 char *progfile;
@@ -294,7 +301,10 @@ bool dotest(test t)
 	debug("test op='%c', #args=%d",t.op,(int)t.args.size());
 	switch ( t.op ) {
 	case '!': return !dotest(t.args[0]);
+	case '&': return dotest(t.args[0]) && dotest(t.args[1]);
+	case '|': return dotest(t.args[0]) || dotest(t.args[1]);
 	case 'E': return datanr>=data.size();
+	case 'M': return datanr<data.size() && t.args[0].val.find(data[datanr])!=string::npos;
 	case '?': return compare(t.args);
 	default:
 		cerr << "unknown test " << t.op << " in " << program[prognr] << endl;
@@ -399,57 +409,49 @@ void checktestdata()
 			return;
 		}
 
-		else if ( cmd.name()=="REP" ) {
-			mpz_class n = eval(cmd.args[0]);
-			if ( !n.fits_ulong_p() ) {
-				cerr << "'" << n << "' does not fit in unsigned long in "
-				     << program[prognr] << endl;
-				exit(exit_failure);
-			}
-			long long times = n.get_ui();
+		else if ( cmd.name()=="REP" ||
+		          cmd.name()=="WHILE" ) {
 
-			if ( times==0 ) {
-				int replevel = 0;
-				do {
-					command cmd = program[prognr++];
-					if ( cmd.name()=="WHILE" ||
-					     cmd.name()=="REP" ) replevel++;
-					if ( cmd.name()=="END" ) replevel--;
+			// Current and maximum loop iterations.
+			unsigned long long i = 0, times = ULLONG_MAX;
+
+			if ( cmd.name()=="REP" ) {
+				mpz_class n = eval(cmd.args[0]);
+				if ( !n.fits_ulong_p() ) {
+					cerr << "'" << n << "' does not fit in an unsigned long in "
+						 << program[prognr] << endl;
+					exit(exit_failure);
 				}
-				while ( replevel>0 );
+				times = n.get_ui();
 			}
-			else {
-				int loopstart = prognr+1;
 
-				while ( times-- ) {
-					debug("REP times = %lld",times+1);
-					prognr = loopstart;
-					checktestdata();
-					if ( times && cmd.nargs()>=2 ) checktoken(cmd.args[1]);
-				}
+			// Begin and end of loop commands
+			int loopbegin, loopend;
+
+			loopbegin = loopend = prognr + 1;
+
+			for(int looplevel=1; looplevel>0; ++loopend) {
+				string cmdstr = program[loopend].name();
+				if ( loop_cmds.count(cmdstr) ) looplevel++;
+				if ( cmdstr=="END" ) looplevel--;
 			}
-		}
 
-		else if ( cmd.name()=="WHILE" ) {
+			// Run loop...
+			debug("running %s loop, commands %d - %d, max. times = %lld",
+			      cmd.name().c_str(),loopbegin,loopend,times);
 
-			if ( !dotest(cmd.args[0]) ) {
-				int replevel = 0;
-				do {
-					command cmd = program[prognr++];
-					if ( cmd.name()=="WHILE" ||
-					     cmd.name()=="REP" ) replevel++;
-					if ( cmd.name()=="END" ) replevel--;
-				}
-				while ( replevel>0 );
+			while ( (cmd.name()=="REP"   && i<times) ||
+			        (cmd.name()=="WHILE" && dotest(cmd.args[0])) ) {
+
+				debug("loop iteration %lld/%lld",i+1,times);
+				prognr = loopbegin;
+				if ( i>0 && cmd.nargs()>=2 ) checktoken(cmd.args[1]);
+				checktestdata();
+				i++;
 			}
-			else {
-				int loopstart = prognr+1;
 
-				while ( dotest(cmd.args[0]) ) {
-					prognr = loopstart;
-					checktestdata();
-				}
-			}
+			// And skip to end of loop
+			prognr = loopend;
 		}
 
 		else if ( cmd.name()=="END" ) {
@@ -533,6 +535,11 @@ int main(int argc, char **argv)
 
 	linenr = charnr = 0;
 	datanr = prognr = 0;
+
+	// Initialize loop_cmds here, as a set cannot be initialized on
+	// declaration.
+	loop_cmds.insert("REP");
+	loop_cmds.insert("WHILE");
 
 	checktestdata();
 

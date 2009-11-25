@@ -17,6 +17,8 @@
 %%
 
 ISEOF    { return Parser::TEST_EOF; }
+MATCH    { return Parser::TEST_MATCH; }
+
 \<       { return Parser::CMP_LT; }
 >        { return Parser::CMP_GT; }
 \<=      { return Parser::CMP_LE; }
