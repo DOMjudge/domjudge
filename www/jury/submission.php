@@ -120,7 +120,7 @@ $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime
 
 <?php
 
-if ( count($jdata) > 0 ) { 
+if ( count($jdata) > 0 ) {
 	echo "<table class=\"list\">\n" .
 		"<caption>Judgings</caption>\n<thead>\n" .
 		"<tr><td></td><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
@@ -130,8 +130,8 @@ if ( count($jdata) > 0 ) {
 	// when there's no judging selected through the request, we find
 	// out if there's a valid one: display that.
 	if ( ! isset($jid) ) {
-		$jid = $DB->q('MAYBEVALUE SELECT judgingid FROM judging WHERE submitid = %i AND valid = 1',
-                       $id);
+		$jid = $DB->q('MAYBEVALUE SELECT judgingid FROM judging
+ 		               WHERE submitid = %i AND valid = 1', $id);
 	}
 
 	// print the judgings
@@ -157,7 +157,6 @@ if ( count($jdata) > 0 ) {
 
 	echo "<br />\n" . rejudgeForm('submission', $id);
 
-	
 } else {
 	echo "<em>Not judged yet</em>";
 }
@@ -180,9 +179,8 @@ echo "</td></tr>\n</table>\n\n";
 
 if ( isset($jid) )  {
 
-	$jud = $DB->q('TUPLE SELECT *, judgingid AS ARRAYKEY FROM judging
-	               WHERE judgingid = %i', $jid);
-	
+	$jud = $DB->q('TUPLE SELECT * FROM judging WHERE judgingid = %i', $jid);
+
 	// sanity check
 	if ($jud['submitid'] != $id) error(
 		sprintf("judingid j%d belongs to submitid s%d, not s%d",
@@ -196,98 +194,54 @@ if ( isset($jid) )  {
 	// display following data only when the judging has been completed
 	if ( $judging_ended ) {
 
-	// display verification data: verified, and by whom.
-	// only if this is a valid judging, otherwise irrelevant
-	if ( $jud['valid'] ) {
-		if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
+		// display verification data: verified, and by whom.
+		// only if this is a valid judging, otherwise irrelevant
+		if ( $jud['valid'] ) {
+			if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
 
-			$val = ! $jud['verified'];
+				$val = ! $jud['verified'];
 
-			echo addForm('verify.php') .
-				addHidden('id',  $jud['judgingid']) .
-				addHidden('val', $val);
-		}
+				echo addForm('verify.php') .
+				    addHidden('id',  $jud['judgingid']) .
+				    addHidden('val', $val);
+			}
 
-		echo "<p>Verified: " .
-			"<strong>" . printyn($jud['verified']) . "</strong>";
-		if ( $jud['verified'] && ! empty($jud['verifier']) ) {
-			echo ", by " . htmlspecialchars($jud['verifier']);
-		}
+			echo "<p>Verified: " .
+			    "<strong>" . printyn($jud['verified']) . "</strong>";
+			if ( $jud['verified'] && ! empty($jud['verifier']) ) {
+				echo ", by " . htmlspecialchars($jud['verifier']);
+			}
 
-		if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
-			echo '; <input type="submit" value="' .
-					($val ? '' : 'un') . 'mark verified"' .
-					" />\n";
-			if ( $val ) {
-				echo "by " .addInput('verifier_typed', '', 10, 15);
-				$verifiers = $DB->q('COLUMN SELECT DISTINCT verifier FROM judging
+			if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
+				echo '; <input type="submit" value="' .
+				    ($val ? '' : 'un') . 'mark verified"' .
+				    " />\n";
+				if ( $val ) {
+					echo "by " .addInput('verifier_typed', '', 10, 15);
+					$verifiers = $DB->q('COLUMN SELECT DISTINCT verifier FROM judging
 									 WHERE verifier IS NOT NULL AND verifier != ""
 									 ORDER BY verifier');
-				if ( count($verifiers) > 0 ) {
-					$opts = array(0 => "");
-					$opts = array_merge($verifiers, $opts);
-					$default = null;
-					if ( in_array($lastverifier,$verifiers) ) {
-						$default = $lastverifier;
+					if ( count($verifiers) > 0 ) {
+						$opts = array(0 => "");
+						$opts = array_merge($verifiers, $opts);
+						$default = null;
+						if ( in_array($lastverifier,$verifiers) ) {
+							$default = $lastverifier;
+						}
+						echo "or " .addSelect('verifier_selected', $opts, $default);
 					}
-					echo "or " .addSelect('verifier_selected', $opts, $default);
 				}
+				echo "</p>" . addEndForm();
+			} else {
+				echo "</p>\n";
 			}
-			
-			echo "</p>" . addEndForm();
-		} else {
-			echo "</p>\n";
 		}
+	} else { // judging not ended yet
+			echo "<p><b>Judging is not finished yet!</b></p>\n";
 	}
-
-	echo '<p>Go to output of ' .
-		'<a href="#compile">compile</a>, ' .
-		'<a href="#run">run</a>, ' .
-		'<a href="#diff">diff</a> or ' .
-		'<a href="#error">error</a>.' . "</p>\n\n";
-
-	echo "<h3><a name=\"compile\"></a>Output compile</h3>\n\n";
-
-	if ( @$jud['output_compile'] ) {
-		echo "<pre class=\"output_text\">".
-			htmlspecialchars($jud['output_compile'])."</pre>\n\n";
-	} else {
-		echo "<p><em>There were no compiler errors or warnings.</em></p>\n";
-	}
-
-	echo "<h3><a name=\"run\"></a>Output run</h3>\n\n";
-
-	if ( @$jud['output_run'] ) {
-		echo "<pre class=\"output_text\">".
-			htmlspecialchars($jud['output_run'])."</pre>\n\n";
-	} else {
-		echo "<p><em>There was no program output.</em></p>\n";
-	}
-
-	echo "<h3><a name=\"diff\"></a>Output diff</h3>\n\n";
-
-	if ( @$jud['output_diff'] ) {
-		echo "<pre class=\"output_text\">";
-		echo parseDiff($jud['output_diff']);
-		echo "</pre>\n\n";
-	} else {
-		echo "<p><em>There was no diff output.</em></p>\n";
-	}
-
-	echo "<h3><a name=\"error\"></a>Output stderr (info/debug/errors)</h3>\n\n";
-
-	if ( @$jud['output_error'] ) {
-		echo "<pre class=\"output_text\">".
-			htmlspecialchars($jud['output_error'])."</pre>\n\n";
-	} else {
-		echo "<p><em>There was no stderr output.</em></p>\n";
-	}
-	
-	} // if ($judging_ended)
-
 
 	// Time (start, end, used)
-	echo "<p class=\"judgetime\">Started: " . htmlspecialchars($jud['starttime']);
+	echo "<p class=\"judgetime\">Judging started: " . htmlspecialchars($jud['starttime']);
 
 	$unix_start = strtotime($jud['starttime']);
 	if ( $judging_ended ) {
@@ -300,6 +254,108 @@ if ( isset($jid) )  {
 		echo ' [aborted]';
 	}
 	echo "</p>\n\n";
+
+	echo "<h3><a name=\"compile\"></a>Compilation output</h3>\n\n";
+
+	if ( @$jud['output_compile'] ) {
+		echo "<pre class=\"output_text\">".
+			htmlspecialchars($jud['output_compile'])."</pre>\n\n";
+	} elseif ( $jud['output_compile']===NULL ) {
+		echo "<p><em>Compilation not finished yet.</em></p>\n";
+	} else {
+		echo "<p><em>There were no compiler errors or warnings.</em></p>\n";
+	}
+
+	// If compilation failed, there's no more info to show, so stop here
+	if ( @$jud['result']=='compiler-error' ) {
+		require(LIBWWWDIR . '/footer.php');
+		exit(0);
+	}
+
+	// Display testcase runs
+	$runs = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
+	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
+	                                             r.judgingid = %i )
+	                WHERE t.probid = %s ORDER BY rank',
+	               $jid, $submdata['probid']);
+
+	echo "<h3><a name=\"testcases\"></a>Testcase runs</h3>\n\n";
+
+	echo "<table class=\"list\">\n<thead>\n" .
+		"<tr><th scope=\"col\">#</th><th scope=\"col\">runtime</th>" .
+	    "<th scope=\"col\">result</th><th scope=\"col\">description</th>" .
+	    "</tr>\n</thead>\n<tbody>\n";
+
+	while ( $run = $runs->next() ) {
+		$link = '#run-' . $run['rank'];
+		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
+		    "<td><a href=\"$link\">$run[runtime]</a></td>" .
+		    "<td><a href=\"$link\"><span class=\"sol ";
+		switch ( $run['runresult'] ) {
+		case 'correct':
+			echo 'sol_correct'; break;
+		case NULL:
+			echo 'disabled'; break;
+		default:
+			echo 'sol_incorrect';
+		}
+		echo "\">$run[runresult]</span></a></td>" .
+		    "<td><a href=\"$link\">" .
+		    htmlspecialchars(str_cut($run['description'],20)) . "</a></td>" .
+			"</tr>\n";
+	}
+	echo "</tbody>\n</table>\n\n";
+
+	// FIXME: this repeated query should be replaced by something like
+	//$runs->reset();
+	$runs = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
+	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
+	                                             r.judgingid = %i )
+	                WHERE t.probid = %s ORDER BY rank',
+	               $jid, $submdata['probid']);
+	while ( $run = $runs->next() ) {
+
+		echo "<h4><a name=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
+
+		if ( $run['runresult']===NULL ) {
+			echo "<p><em>Run not finished yet.</em></p>\n";
+			continue;
+		}
+
+		echo "<table>\n" .
+		    "<tr><td>Description:</td><td>" .
+		    htmlspecialchars($run['description']) . "</td></tr>" .
+		    "<tr><td>Runtime:</td><td>$run[runtime] sec</td></tr>" .
+		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
+		    ( $run['runresult']=='correct' ? '' : 'in' ) .
+		    "correct\">$run[runresult]</span></td></tr>" .
+		    "</table>\n\n";
+
+		echo "<h5>Program output</h5>\n";
+		if ( @$run['output_run'] ) {
+			echo "<pre class=\"output_text\">".
+			    htmlspecialchars($run['output_run'])."</pre>\n\n";
+		} else {
+			echo "<p><em>There was no program output.</em></p>\n";
+		}
+
+		echo "<h5>Diff output</h5>\n";
+		if ( @$run['output_diff'] ) {
+			echo "<pre class=\"output_text\">";
+			echo parseDiff($run['output_diff']);
+			echo "</pre>\n\n";
+		} else {
+			echo "<p><em>There was no diff output.</em></p>\n";
+		}
+
+		echo "<h5>Error output (info/debug/errors)</h5>\n";
+		if ( @$run['output_error'] ) {
+			echo "<pre class=\"output_text\">".
+			    htmlspecialchars($run['output_error'])."</pre>\n\n";
+		} else {
+			echo "<p><em>There was no stderr output.</em></p>\n";
+		}
+	}
 }
 
 // We're done!
