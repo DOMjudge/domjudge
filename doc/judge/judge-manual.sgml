@@ -207,6 +207,11 @@ which the testdata is checked. This allows e.g. for bounds checking.
 See 'checktestdata.cpp' for a grammar specification. Two sample
 scripts 'checktestdata.{hello,fltcmp}' are provided for the sample
 problems 'hello' and 'fltcmp'.
+
+This program can also be useful as a syntax checker for a special
+compare script: it can easily handle the tedious task of verifying
+that a team's submission output is syntactically valid, leaving just
+the task of semantic validation to another program.
 </descrip>
 
 <sect>Testing jury solutions
