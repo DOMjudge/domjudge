@@ -167,9 +167,12 @@ function getFinalResult($runresults)
 	if ( !$havenull ) return $bestres;
 
 	// If we have NULL results, check whether the "best" result has
-	// maximal priority, hence can already be returned as final:
-	sort($RESULTS_PRIO);
-	$maxprio = reset($RESULTS_PRIO);
+	// maximal priority, hence can already be returned as final.
+	// Use a local copy of the RESULTS_PRIO array, keeping the
+	// original untouched.
+	$tmp = $RESULTS_PRIO;
+	sort($tmp);
+	$maxprio = reset($tmp);
 
 	if ( $bestprio==$maxprio ) return $bestres;
 
