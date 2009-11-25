@@ -56,7 +56,7 @@
 
    EOF
 
-      Matches end-of-file. This implicitly added at the end of each
+      Matches end-of-file. This is implicitly added at the end of each
       program and must match exactly: no extra data may be present.
 
    INT(<expr> min, <expr> max [, <variable> name])
@@ -257,14 +257,17 @@ mpz_class eval(expr e)
 {
 	debug("eval op='%c', val='%s', #args=%d",e.op,e.val.c_str(),(int)e.args.size());
 	switch ( e.op ) {
+	case ' ': return value(e.val);
 	case 'n': return -eval(e.args[0]);
-	case '(': return eval(e.args[0]);
 	case '+': return eval(e.args[0]) + eval(e.args[1]);
 	case '-': return eval(e.args[0]) - eval(e.args[1]);
 	case '*': return eval(e.args[0]) * eval(e.args[1]);
 	case '/': return eval(e.args[0]) / eval(e.args[1]);
 	case '%': return eval(e.args[0]) % eval(e.args[1]);
-	default:  return value(e.val);
+	default:
+		cerr << "unknown arithmetic operator " << e.op << " in "
+		     << program[prognr] << endl;
+		exit(exit_failure);
 	}
 }
 
@@ -281,7 +284,8 @@ bool compare(args_t cmp)
 	if ( op=="==" ) return l==r;
 	if ( op=="!=" ) return l!=r;
 
-	cerr << "unknown compare operator " << op << " in " << program[prognr] << endl;
+	cerr << "unknown compare operator " << op << " in "
+	     << program[prognr] << endl;
 	exit(exit_failure);
 }
 
@@ -293,7 +297,7 @@ bool dotest(test t)
 	case 'E': return datanr>=data.size();
 	case '?': return compare(t.args);
 	default:
-		cerr << "invalid test in " << program[prognr] << endl;
+		cerr << "unknown test " << t.op << " in " << program[prognr] << endl;
 		exit(exit_failure);
 	}
 }

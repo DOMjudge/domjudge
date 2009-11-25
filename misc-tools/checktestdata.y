@@ -57,15 +57,15 @@ value: INTEGER | VARIABLE ;
 compare: CMP_LT | CMP_GT | CMP_LE | CMP_GE | CMP_EQ | CMP_NE ;
 
 expr:
-	term          { $$ = parse_t('(',$1); }
+	term          { $$ = parse_t($1); }
 |	expr '+' term { $$ = parse_t('+',$1,$3); }
 |	expr '-' term { $$ = parse_t('-',$1,$3); }
 ;
 
 term:
-	value         { $$ = parse_t('(',$1); }
+	value         { $$ = parse_t($1); }
 |	'-' term      { $$ = parse_t('n',$2); }
-|	'(' expr ')'  { $$ = parse_t('(',$2); }
+|	'(' expr ')'  { $$ = parse_t($2); }
 |	term '*' term { $$ = parse_t('*',$1,$3); }
 |	term '/' term { $$ = parse_t('/',$1,$3); }
 |	term '%' term { $$ = parse_t('%',$1,$3); }
