@@ -211,7 +211,19 @@ problems 'hello' and 'fltcmp'.
 This program can also be useful as a syntax checker for a special
 compare script: it can easily handle the tedious task of verifying
 that a team's submission output is syntactically valid, leaving just
-the task of semantic validation to another program.
+the task of semantic validation to another program. When you want to
+support `presentation error' as a verdict, also in variable output
+problems, the option <tt>--whitespace-ok</tt> can be useful. This
+allows any non-empty sequence of whitespace (no newlines though) where
+the <tt>SPACE</tt> command is used, as well as leading and trailing
+whitespace on lines (when using the <tt>NEWLINE</tt> command). Please
+note that whitespace matching is greedy, so the script code
+<code>
+INT(1,2) SPACE SPACE INT(1,2)
+</code>
+does <em>not</em> match <tt>1__2</tt> (where the two underscores
+represent spaces), because the first <tt>SPACE</tt> command already
+matches both, so the second cannot match anything.
 </descrip>
 
 <sect>Testing jury solutions

@@ -116,7 +116,7 @@ const int exit_failure  = 2;
 const int display_before_error = 65;
 const int display_after_error  = 10;
 
-size_t prognr, datanr, linenr, charnr;
+size_t prognr, datanr, linenr, charnr, extra_ws;
 command currcmd;
 
 string data;
@@ -129,12 +129,14 @@ char *progname;
 char *progfile;
 char *datafile;
 
+int whitespace_ok;
 int debugging;
 int quiet;
 int show_help;
 int show_version;
 
 struct option const long_opts[] = {
+	{"whitespace-ok", no_argument, NULL,         'w'},
 	{"debug",   no_argument,       NULL,         'd'},
 	{"quiet",   no_argument,       NULL,         'q'},
 	{"help",    no_argument,       &show_help,    1 },
@@ -159,10 +161,13 @@ void usage()
 "Check TESTDATA according to specification in PROGRAM file.\n"
 "If TESTDATA is '-' or not specified, read from stdin.\n"
 "\n"
-"  -d, --debug        enable extra debugging output\n"
-"  -q, --quiet        don't display testdata error messages: test exitcode\n"
-"      --help         display this help and exit\n"
-"      --version      output version information and exit\n"
+"  -w, --whitespace-ok  whitespace changes are accepted, including heading\n"
+"                         and trailing whitespace, but not newlines;\n"
+"                         be careful: extra whitespace matches greedily!\n"
+"  -d, --debug          enable extra debugging output\n"
+"  -q, --quiet          don't display testdata error messages: test exitcode\n"
+"      --help           display this help and exit\n"
+"      --version        output version information and exit\n"
 "\n",progname);
 }
 
@@ -312,21 +317,55 @@ bool dotest(test t)
 	}
 }
 
+int isspace_notnewline(char c) { return isspace(c) && c!='\n'; }
+
+void readwhitespace()
+{
+	while ( datanr<data.size() && isspace_notnewline(data[datanr]) ) {
+		datanr++;
+		charnr++;
+		extra_ws++;
+	}
+}
+
+void checkspace()
+{
+	if ( datanr>=data.size() ) error();
+
+	if ( whitespace_ok ) {
+		// First check at least one space-like character
+		if ( !isspace_notnewline(data[datanr++]) ) error();
+		charnr++;
+		// Then greedily read non-newline whitespace
+		readwhitespace();
+	} else {
+		if ( data[datanr++]!=' ' ) error();
+		charnr++;
+	}
+}
+
+void checknewline()
+{
+	// Trailing whitespace before newline
+	if ( whitespace_ok ) readwhitespace();
+
+	if ( datanr>=data.size() || data[datanr++]!='\n' ) error();
+	linenr++;
+	charnr=0;
+
+	// Leading whitespace after newline
+	if ( whitespace_ok ) readwhitespace();
+
+}
+
 void checktoken(command cmd)
 {
 	currcmd = cmd;
 	debug("checking token %s at %d,%d",cmd.name().c_str(),linenr,charnr);
 
-	if ( cmd.name()=="SPACE" ) {
-		if ( datanr>=data.size() || data[datanr++]!=' ' ) error();
-		charnr++;
-	}
+	if ( cmd.name()=="SPACE" ) checkspace();
 
-	else if ( cmd.name()=="NEWLINE" ) {
-		if ( datanr>=data.size() || data[datanr++]!='\n' ) error();
-		linenr++;
-		charnr=0;
-	}
+	else if ( cmd.name()=="NEWLINE" ) checknewline();
 
 	else if ( cmd.name()=="INT" ) {
 		// Accepts format (0|-?[1-9][0-9]*), i.e. no leading zero's
@@ -473,11 +512,15 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	/* Parse command-line options */
+	whitespace_ok = 0;
 	debugging = quiet = show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+dq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+wdq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
+			break;
+		case 'w':
+			whitespace_ok = 1;
 			break;
 		case 'd':
 			debugging = 1;
@@ -535,11 +578,16 @@ int main(int argc, char **argv)
 
 	linenr = charnr = 0;
 	datanr = prognr = 0;
+	extra_ws = 0;
 
 	// Initialize loop_cmds here, as a set cannot be initialized on
 	// declaration.
 	loop_cmds.insert("REP");
 	loop_cmds.insert("WHILE");
+
+	// If we ignore whitespace, skip leading whitespace on first line
+	// as a special case; other lines are handled by checknewline().
+	if ( whitespace_ok ) readwhitespace();
 
 	checktestdata();
 

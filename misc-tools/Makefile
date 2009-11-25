@@ -24,10 +24,10 @@ yylex.cc: checktestdata.l parsetype.h
 parse.cc: checktestdata.y parsetype.h
 	bisonc++ $<
 
-checksucc = ./checktestdata $$prog $$data >/dev/null 2>&1 || \
-		{ echo "Checking '$$prog' '$$data' did not succeed..." ; exit 1; }
-checkfail = ./checktestdata $$prog $$data >/dev/null 2>&1 && \
-		{ echo "Checking '$$prog' '$$data' did not fail..."    ; exit 1; }
+checksucc = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 || \
+		{ echo "Running ./checktestdata $$opts '$$prog' '$$data' did not succeed..." ; exit 1; }
+checkfail = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 && \
+		{ echo "Running ./checktestdata $$opts '$$prog' '$$data' did not fail..."    ; exit 1; }
 
 check: checktestdata
 	@for i in tests/testprog*.in ; do \
@@ -38,7 +38,16 @@ check: checktestdata
 		data=tests/testdata$$n.in ; \
 		for prog in tests/testprog$$n.err* ; do $(checkfail) ; done ; \
 	done || true
-
+# Some additional tests with --whitespace-ok option enabled:
+	@opts=-w ; \
+	for i in tests/testwsprog*.in ; do \
+		n=$${i#tests/testwsprog} ; n=$${n%.in} ; \
+		prog=$$i ; \
+		for data in tests/testwsdata$$n.in*  ; do $(checksucc) ; done ; \
+		for data in tests/testwsdata$$n.err* ; do $(checkfail) ; done ; \
+		data=tests/testwsdata$$n.in ; \
+		for prog in tests/testwsprog$$n.err* ; do $(checkfail) ; done ; \
+	done || true
 
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) dj_make_chroot
