@@ -16,6 +16,7 @@ CREATE TABLE `judging_run` (
   `judgingid` int(4) unsigned NOT NULL COMMENT 'Judging ID',
   `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
   `runresult` varchar(25) default NULL COMMENT 'Result of this run, NULL if not finished yet',
+  `runtime` float DEFAULT NULL COMMENT 'Submission running time on this testcase',
   `output_run` text COMMENT 'Output of running the program',
   `output_diff` text COMMENT 'Diffing the program output and testcase output',
   `output_error` text COMMENT 'Standard error output of the program',
@@ -27,7 +28,8 @@ ALTER TABLE `testcase`
   CHANGE COLUMN `id` `testcaseid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique identifier',
   ADD COLUMN `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
   DROP PRIMARY KEY,
-  ADD PRIMARY KEY (`testcaseid`);
+  ADD PRIMARY KEY (`testcaseid`),
+  ADD UNIQUE KEY `rank` (`probid`,`rank`);
 
 --
 -- Add/remove privileges

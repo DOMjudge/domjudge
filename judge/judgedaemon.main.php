@@ -337,10 +337,16 @@ function judge($mark, $row, $judgingid)
 	}
 	$runresults[$tc['rank']] = $EXITCODES[$retval];
 
+	// Try to read runtime from file
+	$runtime = NULL;
+	if ( is_readable($testcasedir . '/program.time') ) {
+		$runtime = getFileContents($testcasedir . '/program.time');
+	}
+
 	$DB->q('INSERT INTO judging_run (judgingid, testcaseid, runresult,
- 	        output_run, output_diff, output_error)
-	        VALUES (%i, %i, %s, %s, %s, %s)',
-	       $judgingid, $tc['probid'], $runresults[$tc['rank']],
+ 	        runtime, output_run, output_diff, output_error)
+	        VALUES (%i, %i, %s, %f, %s, %s, %s)',
+	       $judgingid, $tc['testcaseid'], $runresults[$tc['rank']], $runtime,
 	       getFileContents($testcasedir . '/program.out'),
 	       getFileContents($testcasedir . '/compare.out'),
 	       getFileContents($testcasedir . '/error.out'));

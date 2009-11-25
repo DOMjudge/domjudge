@@ -118,6 +118,7 @@ CREATE TABLE `judging_run` (
   `judgingid` int(4) unsigned NOT NULL COMMENT 'Judging ID',
   `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
   `runresult` varchar(25) default NULL COMMENT 'Result of this run, NULL if not finished yet',
+  `runtime` float DEFAULT NULL COMMENT 'Submission running time on this testcase',
   `output_run` text COMMENT 'Output of running the program',
   `output_diff` text COMMENT 'Diffing the program output and testcase output',
   `output_error` text COMMENT 'Standard error output of the program',
@@ -294,6 +295,7 @@ CREATE TABLE `testcase` (
   `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
   `description` varchar(255) default NULL COMMENT 'Description of this testcase',
   PRIMARY KEY  (`testcaseid`),
+  UNIQUE KEY `rank` (`probid`,`rank`),
   KEY `probid` (`probid`),
   CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';
