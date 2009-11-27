@@ -3,6 +3,16 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
+# Note:
+# Although dbpasswords.secret and htpasswd-jury are generated during
+# building/installing, we only remove them with 'distclean', for in
+# maintainer-install mode it's inconvenient to have these regenerated
+# with different passwords from those in the database.
+#
+# These files should probably not be generated in the source tree
+# anyways, but it is more convenient to be able to share the passwords
+# between domserver and judgehost installs.
+
 SUBST_CONFIGS = apache.conf domserver-static.php domserver-static.h \
                 judgehost-static.php runguard-config.h submit-config.h
 
@@ -43,11 +53,9 @@ install-judgehost:
 	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \
 		dbpasswords.secret
 
-clean-l:
-	-rm -f dbpasswords.secret htpasswd-jury
-
 distclean-l:
-	-rm -f $(SUBST_CONFIGS) config.h
+	-rm -f $(SUBST_CONFIGS) config.h \
+		dbpasswords.secret htpasswd-jury
 
 maintainer-clean-l:
 	-rm -f etc/config.h.in
