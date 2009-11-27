@@ -43,8 +43,11 @@ install-judgehost:
 	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \
 		dbpasswords.secret
 
+clean-l:
+	-rm -f dbpasswords.secret htpasswd-jury
+
 distclean-l:
-	-rm -f $(SUBST_CONFIGS)
+	-rm -f $(SUBST_CONFIGS) config.h
 
 maintainer-clean-l:
 	-rm -f etc/config.h.in
