@@ -61,9 +61,6 @@ tr.unread td {
 	border-spacing: 0px;
 }
 .list td, .list th {
-	padding: 3px;
-	padding-left: 5px;
-	padding-right: 5px;
 	vertical-align: bottom;
 }
 
@@ -76,6 +73,9 @@ tr.unread td {
 	text-decoration: none;
 	color: black;
 	display: block;
+	padding: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
 }
 .list .disabled a  { color: silver;   }
 .list .editdel  a  { display: inline; }
