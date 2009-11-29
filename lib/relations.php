@@ -13,6 +13,7 @@ $KEYS['contest'] = array('cid');
 $KEYS['event'] = array('eventid');
 $KEYS['judgehost'] = array('hostname');
 $KEYS['judging'] = array('judgingid');
+$KEYS['judging_run'] = array('runid');
 $KEYS['language'] = array('langid');
 $KEYS['problem'] = array('probid');
 $KEYS['scoreboard_jury'] = array('cid','teamid','probid');
@@ -22,13 +23,14 @@ $KEYS['team'] = array('login');
 $KEYS['team_affiliation'] = array('affilid');
 $KEYS['team_category'] = array('categoryid');
 $KEYS['team_unread'] = array('teamid','mesgid','type');
+$KEYS['testcase'] = array('testcaseid');
 
 
 /** For each table, list all attributes that reference foreign keys
  *  and specify the source of that key. */
 $RELATIONS = array();
 
-$RELATIONS['clarification'] = array ( 
+$RELATIONS['clarification'] = array (
 	'cid' => 'contest.cid',
 	'respid' => 'clarification.clarid',
 	'sender' => 'team.login',
@@ -52,6 +54,11 @@ $RELATIONS['judging'] = array (
 	'cid' => 'contest.cid',
 	'submitid' => 'submission.submitid',
 	'judgehost' => 'judgehost.hostname'
+);
+
+$RELATIONS['judging_run'] = array (
+	'judgingid' => 'judging.judgingid',
+	'testcaseid' => 'testcase.testcaseid'
 );
 
 $RELATIONS['language'] = array();
@@ -86,6 +93,10 @@ $RELATIONS['team_category'] = array();
 $RELATIONS['team_unread'] = array(
 	'teamid' => 'team.login'
 	// can't check mesgid
+);
+
+$RELATIONS['testcase'] = array(
+	'probid' => 'problem.probid'
 );
 
 /**

@@ -1130,6 +1130,7 @@ x|contest          |Contest definitions with start/end time.@
  |event            |Log of events during contests.@
 x|judgehost        |Computers (hostnames) that function as judgehosts.@
  |judging          |Judgings of submissions.@
+ |judging_run      |Result of one testcase within a judging.@
 x|language         |Definition of allowed submission languages.@
 x|problem          |Definition of problems (name, corresponding contest, etc.).@
  |submission       |Submissions of solutions to problems.@
@@ -1288,14 +1289,15 @@ to remove teams from the public scoreboard by assigning them to a
 separate, invisible category.
 
 <tag>testcase</tag>
-The testcase table contains testdata for each problem; <tt>id</tt> is
-a unique identifier, <tt>input</tt> and <tt>output</tt> contain the
-testcase input/output and <tt>md5sum_input</tt>,
-<tt>md5sum_output</tt> their respective md5 hashes to check for
-up-to-date-ness of cached versions by the judgehosts. <tt>probid</tt>
-is the corresponding problem and <tt>description</tt> an optional
-description for this testcase.
-See also <ref id="contestsetup:testdata" name="providing testdata">.
+The testcase table contains testdata for each problem;
+<tt>testcaseid</tt> is a unique identifier, <tt>input</tt> and
+<tt>output</tt> contain the testcase input/output and
+<tt>md5sum_input</tt>, <tt>md5sum_output</tt> their respective md5
+hashes to check for up-to-date-ness of cached versions by the
+judgehosts. <tt>probid</tt> is the corresponding problem and
+<tt>rank</tt> determines the order of the testcases for one problem.
+<tt>description</tt> is an optional description for this testcase. See
+also <ref id="contestsetup:testdata" name="providing testdata">.
 
 </descrip>
 
