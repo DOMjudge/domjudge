@@ -46,7 +46,10 @@
 
 .testmd5 { font-family: monospace; }
 
-.testdesc { border-bottom: 0; }
+.testdesc {
+	border-left: 1px solid silver;
+	max-width: 400px;
+}
 
 /* set cell padding to 0 and <a> tag to 3 to make all of cell
    clickable in the jury scoreboard and for all team cells */
