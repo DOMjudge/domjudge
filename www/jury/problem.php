@@ -111,7 +111,11 @@ if ( ! $id ) error("Missing or invalid problem id");
 
 echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
 
-$data = $DB->q('TUPLE SELECT * FROM problem NATURAL JOIN contest WHERE probid = %s', $id);
+$data = $DB->q('TUPLE SELECT p.*, c.contestname, count(rank) AS ntestcases
+                FROM problem p
+                NATURAL JOIN contest c
+                LEFT JOIN testcase USING (probid)
+                WHERE probid = %s GROUP BY probid', $id);
 
 echo addForm($pagename) . "<p>\n" .
 	addHidden('id', $id) .
@@ -134,24 +138,13 @@ echo addForm($pagename) . "<p>\n" .
 		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
 		" judging for this problem?')"); ?>
 </td></tr>
-<tr><td scope="row" valign="top">Testcase:    </td><td><?php
-	$tc = $DB->q("MAYBETUPLE SELECT md5sum_input, md5sum_output FROM testcase WHERE probid = %s",
-		$data['probid']);
-	foreach(array('input','output') as $inout) {
-		echo $inout . ": ";
-		if ( $tc['md5sum_' . $inout] ) {
-			echo htmlspecialchars($tc['md5sum_'.$inout]) . " ";
-			if ( IS_ADMIN ) {
-				echo '<a href="testcase.php?probid='.urlencode($data['probid']).'">details</a> | ';
-			}
-			echo "<a href=\"testcase.php?probid=" . urlencode($data['probid']) . "&amp;fetch=" .
-				$inout . "\">download</a>";
-		} else {
-			echo '<a href="testcase.php?probid='.urlencode($data['probid']).'">add</a>';
-		}
-		echo "<br />\n";
+<tr><td scope="row">Testcases:   </td><td><?php
+    if ( $data['ntestcases']==0 ) {
+		echo '<em>no testcases</em>';
+	} else {
+		echo (int)$data['ntestcases'];
 	}
-
+	echo ' <a href="testcase.php?probid='.urlencode($data['probid']).'">details</a>';
 ?></td></tr>
 <tr><td scope="row">Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
 <?php

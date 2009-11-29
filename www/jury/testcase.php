@@ -1,6 +1,6 @@
 <?php
 /**
- * View/edit testcase
+ * View/edit testcases
  *
  * $Id$
  *
@@ -14,16 +14,17 @@ $probid = @$_REQUEST['probid'];
 
 require('init.php');
 
-
 $INOROUT = array('input','output');
 
 // Download testcase
 if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
+	$rank  = $_GET['rank'];
 	$fetch = $_GET['fetch'];
-	$filename = $probid . "." . $fetch;
+	$filename = $probid . $rank . "." . substr($fetch,0,-3);
 
 	$size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH($fetch)
-		FROM testcase WHERE probid = %s", $probid);
+	                FROM testcase WHERE probid = %s AND rank = %i",
+	               $probid, $rank);
 
 	// sanity check before we start to output headers
 	if ( empty($size) || !is_numeric($size)) error ("Problem while fetching testcase");
@@ -34,12 +35,57 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 
 	// This may not be good enough for large testsets, but streaming them
 	// directly from the database query result seems overkill to implement.
-	echo $DB->q("VALUE SELECT $fetch FROM testcase WHERE probid = %s", $probid);
+	echo $DB->q("VALUE SELECT $fetch FROM testcase
+	             WHERE probid = %s AND rank = %i", $probid, $rank);
 
 	exit(0);
 }
 
-$title = 'Testcase for problem '.htmlspecialchars(@$probid);
+$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank, description,
+                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
+                OCTET_LENGTH(output) AS size_output, md5sum_output
+                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+
+// Reorder testcases
+if ( isset ($_GET['move']) ) {
+	$move = $_GET['move'];
+	$rank = (int)$_GET['rank'];
+
+	// First find testcase to switch with
+	$last = NULL;
+	$other = NULL;
+	foreach( $data as $curr => $row ) {
+		if ( $curr==$rank && $move=='up' ) {
+			$other = $last;
+			break;
+		}
+		if ( $rank==$last && $move=='down' && $last!==NULL ) {
+			$other = $curr;
+			break;
+		}
+		$last = $curr;
+	}
+
+	if ( $other!==NULL ) {
+		// (probid, rank) is a unique key, so we must switch via a
+		// temporary rank, and use a transaction.
+		$tmprank = 999999;
+//		$DB->q('START TRANSACTION');
+		$DB->q('UPDATE testcase SET rank = %i
+		        WHERE probid = %s AND rank = %i', $tmprank, $probid, $other);
+		$DB->q('UPDATE testcase SET rank = %i
+		        WHERE probid = %s AND rank = %i', $other, $probid, $rank);
+		$DB->q('UPDATE testcase SET rank = %i
+		        WHERE probid = %s AND rank = %i', $rank, $probid, $tmprank);
+//		$DB->q('COMMIT');
+	}
+
+	// Redirect to the original page to prevent accidental redo's
+	header('Location: testcase.php?probid=' . urlencode($probid));
+	return;
+}
+
+$title = 'Testcases for problem '.htmlspecialchars(@$probid);
 
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
@@ -52,65 +98,143 @@ echo "<h1>" . $title ."</h1>\n\n";
 
 $result = '';
 if ( isset($_POST['probid']) ) {
+
+	$maxrank = 0;
+	foreach($data as $rank => $row)
 	foreach($INOROUT as $inout) {
 
-		if ( !empty($_FILES['update_'.$inout]['name']) ) {
+		if ( $rank>$maxrank ) $maxrank = $rank;
+
+		$fileid = 'update_'.$inout;
+		if ( !empty($_FILES[$fileid]['name'][$rank]) ) {
 
 			// Check for upload errors:
-			checkFileUpload ( $_FILES['update_'.$inout]['error'] );
+			checkFileUpload ( $_FILES[$fileid]['error'][$rank] );
 
-			$content = file_get_contents($_FILES['update_'.$inout]['tmp_name']);
+			$content = file_get_contents($_FILES[$fileid]['tmp_name'][$rank]);
 			if ( $DB->q("VALUE SELECT count(testcaseid)
- 			             FROM testcase WHERE probid = %s", $probid) ) {
+ 			             FROM testcase WHERE probid = %s AND rank = %i",
+			            $probid, $rank) ) {
 				$DB->q("UPDATE testcase SET md5sum_$inout = %s, $inout = %s
-				        WHERE probid = %s",
-				       md5($content), $content, $probid);
+				        WHERE probid = %s AND rank = %i",
+				       md5($content), $content, $probid, $rank);
 			} else {
-				$DB->q("INSERT INTO testcase (probid,md5sum_$inout,$inout)
-				        VALUES (%s,%s,%s)",
-				       $probid, md5($content), $content);
+				$DB->q("INSERT INTO testcase (probid,rank,md5sum_$inout,$inout)
+				        VALUES (%s,%i,%s,%s)",
+				       $probid, $rank, md5($content), $content);
 			}
-			$result .= "<li> Updated $inout from " .
-				htmlspecialchars($_FILES['update_'.$inout]['name']) .
-				" (" . htmlspecialchars($_FILES['update_'.$inout]['size']) .
+			$result .= "<li>Updated $inout for testcase $rank from " .
+			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
+				" (" . htmlspecialchars($_FILES[$fileid]['size'][$rank]) .
 				" B)</li>\n";
 		}
 	}
 
+	if ( !empty($_FILES['add_input']['name']) ||
+		 !empty($_FILES['add_output']['name']) ) {
+
+		$content = array();
+		$rank = $maxrank + 1;
+		foreach($INOROUT as $inout) {
+			if ( empty($_FILES['add_'.$inout]['name']) ) {
+				warning("No $inout file specified for new testcase, ignoring.");
+			} else {
+				checkFileUpload ( $_FILES['add_'.$inout]['error'] );
+				$content[$inout] = file_get_contents($_FILES['add_'.$inout]['tmp_name']);
+			}
+		}
+
+		if ( !empty($content['input']) && !empty($content['output']) ) {
+			$DB->q("INSERT INTO testcase
+			        (probid,rank,md5sum_input,md5sum_output,input,output,description)
+			        VALUES (%s,%i,%s,%s,%s,%s,%s)",
+			       $probid, $rank, md5(@$content['input']), md5(@$content['output']),
+			       @$content['input'], @$content['output'], @$_POST['add_desc']);
+
+			$result .= "<li>Added new testcase $rank from " .
+			    htmlspecialchars($_FILES['add_input']['name']) .
+			    " (" . htmlspecialchars($_FILES['add_input']['size']) . " B) and " .
+			    htmlspecialchars($_FILES['add_output']['name']) .
+			    " (" . htmlspecialchars($_FILES['add_output']['size']) . " B)</li>\n";
+		}
+	}
 }
-if ( !empty($result) ) echo "<ul>\n$result</ul>\n\n";
+if ( !empty($result) ) {
+	echo "<ul>\n$result</ul>\n\n";
 
+	// Reload testcase data after updates
+	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank, description,
+	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
+	                OCTET_LENGTH(output) AS size_output, md5sum_output
+	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+}
 
-$data = $DB->q('MAYBETUPLE SELECT 
-	OCTET_LENGTH(input) AS size_input, md5sum_input,
-	OCTET_LENGTH(output) AS size_output, md5sum_output
-	FROM testcase WHERE probid = %s', $probid);
+echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem " .
+	htmlspecialchars($probid) . "</a></p>\n\n";
 
-echo addForm('', 'post', null, 'multipart/form-data') . 
-	addHidden('probid', $probid);
+echo addForm('', 'post', null, 'multipart/form-data') .
+    addHidden('probid', $probid);
 
-foreach($INOROUT as $inout) {
+if ( count($data)==0 ) {
+	echo "<p><em>No testcase(s) yet.</em></p>\n";
+} else {
+	?>
+<table class="list testcases">
+        <!--
+<colgroup>
+<col id="testrank" /><col class="filename" /><col id="testupload" />
+<col id="testsize" /><col id="testmd5" /><col id="testdesc" />
+</colgroup>
+        -->
+<thead><tr>
+<th scope="col">#</th><th scope="col">download</th>
+<th scope="col">size</th><th scope="col">md5</th>
+<th scope="col">upload new</th><th scope="col">description</th>
+</tr></thead>
+<tbody>
+<?php
+}
 
-	echo "<h2>" . ucfirst($inout) . "</h2>\n\n";
-	if ( isset($data['size_'.$inout]) ) {
-		echo "<table>\n<tr><td>Size:</td><td>" . htmlspecialchars($data['size_' . $inout]) . " bytes</td></tr>\n";
-		echo "<tr><td>MD5 sum:</td><td>" . htmlspecialchars($data['md5sum_' . $inout]) . "</td></tr>\n";
-		echo "<tr><td>Download:</td><td class=\"filename\"><a href=\"./testcase.php?probid=" .
-			urlencode($probid) . "&amp;fetch=" . $inout . "\">" .
-			htmlspecialchars($probid) . "." . $inout . "</a></td>\n";
-		echo "<tr><td>Replace with:</td><td>" . addFileField('update_'.$inout) . "</td></tr>\n";
-
-		echo "</table>\n";
-	} else {
-		echo "<p>No testcase yet.</p>\n";
-		echo "<p>Create new: " . addFileField('update_'.$inout) . "</p>";
+foreach( $data as $rank => $row ) {
+	foreach($INOROUT as $inout) {
+		echo "<tr>";
+		if ( $inout=='input' ) {
+			echo "<td rowspan=\"2\" class=\"testrank\">" .
+			    "<a href=\"./testcase.php?probid=" . urlencode($probid) .
+			    "&amp;rank=$rank&amp;move=up\">&uarr;</a>$rank" .
+			    "<a href=\"./testcase.php?probid=" . urlencode($probid) .
+			    "&amp;rank=$rank&amp;move=down\">&darr;</a></td>";
+		}
+		echo "<td class=\"filename\"><a href=\"./testcase.php?probid=" .
+		    urlencode($probid) . "&amp;rank=$rank&amp;fetch=" . $inout . "\">" .
+		    htmlspecialchars($probid) . $rank . "." . substr($inout,0,-3) . "</a></td>" .
+		    "<td class=\"testsize\">" . htmlspecialchars($row["size_$inout"]) . "&nbsp;B</td>" .
+		    "<td class=\"testmd5\">" . htmlspecialchars($row["md5sum_$inout"]) . "</td>" .
+		    "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";
+		if ( $inout=='input' ) {
+			echo "<td rowspan=\"2\" class=\"testdesc\">" .
+			    htmlspecialchars($row['description']) . "</td>" .
+			    "<td rowspan=\"2\" class=\"editdel\">" .
+			    "<a href=\"delete.php?table=testcase&amp;testcaseid=$row[testcaseid]\">" .
+			    "<img src=\"../images/delete.png\" alt=\"delete\"" .
+			    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
+		}
+		echo "</tr>\n";
 	}
 }
 
-echo "<p>" . addSubmit('Change testcases') . "</p>\n";
-	addEndForm() ;
+if ( count($data)!=0 ) echo "</tbody>\n</table>\n";
 
-echo "<p><a href=\"problem.php?id=" . urlencode($probid) . ">back to problem " .
-	htmlspecialchars($probid) . "</a></p>\n\n";
+?>
+<h3>Create new testcase</h3>
+
+<table>
+<tr><td>Input testdata: </td><td><?php echo addFileField('add_input')  ?></td></tr>
+<tr><td>Output testdata:</td><td><?php echo addFileField('add_output') ?></td></tr>
+<tr><td>Description:    </td><td><?php echo addInput('add_desc','',30); ?></td></tr>
+</table>
+<?php
+
+echo "<br />" . addSubmit('Submit all changes') . addEndForm();
 
 require(LIBWWWDIR . '/footer.php');

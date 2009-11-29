@@ -25,6 +25,29 @@
 	border-bottom: 2px solid #f2e93a;
 }
 
+.testcases tr:hover { background: #ffffff; }
+.testcases a { color: blue; }
+.testcases td {
+	vertical-align: middle;
+	padding: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.testrank {
+	line-height: 0.9;
+	border-right: 1px solid silver;
+}
+
+.testsize {
+	text-align: right;
+	font-family: monospace;
+}
+
+.testmd5 { font-family: monospace; }
+
+.testdesc { border-bottom: 0; }
+
 /* set cell padding to 0 and <a> tag to 3 to make all of cell
    clickable in the jury scoreboard and for all team cells */
 .scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
