@@ -1130,7 +1130,7 @@ x|contest          |Contest definitions with start/end time.@
  |event            |Log of events during contests.@
 x|judgehost        |Computers (hostnames) that function as judgehosts.@
  |judging          |Judgings of submissions.@
- |judging_run      |Result of one testcase within a judging.@
+ |judging&lowbar;run      |Result of one testcase within a judging.@
 x|language         |Definition of allowed submission languages.@
 x|problem          |Definition of problems (name, corresponding contest, etc.).@
  |submission       |Submissions of solutions to problems.@
