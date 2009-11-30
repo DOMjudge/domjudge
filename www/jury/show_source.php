@@ -68,7 +68,8 @@ if ( $oldsource ) {
 echo '<h2 class="filename"><a name="source"></a>Submission ' .
 	"<a href=\"submission.php?id=$id\">s$id</a> source: " .
 	htmlspecialchars($sourcefile) . " (<a " .
-	"href=\"show_source.php?id=$id&amp;fetch=1\">download</a>)</h2>\n\n";
+	"href=\"show_source.php?id=$id&amp;fetch=1\">download</a>, <a " .
+	"href=\"edit_source.php?id=$id\">edit</a>)</h2>\n\n";
 
 if ( strlen($source['sourcecode'])==0 ) {
 	// Someone submitted an empty file. Cope gracefully.
