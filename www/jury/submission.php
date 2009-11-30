@@ -255,7 +255,7 @@ if ( isset($jid) )  {
 	}
 	echo "</p>\n\n";
 
-	echo "<h3><a name=\"compile\"></a>Compilation output</h3>\n\n";
+	echo "<h3 id=\"compile\">Compilation output</h3>\n\n";
 
 	if ( @$jud['output_compile'] ) {
 		echo "<pre class=\"output_text\">".
@@ -279,7 +279,7 @@ if ( isset($jid) )  {
 	                WHERE t.probid = %s ORDER BY rank',
 	               $jid, $submdata['probid']);
 
-	echo "<h3><a name=\"testcases\"></a>Testcase runs</h3>\n\n";
+	echo "<h3 id=\"testcases\">Testcase runs</h3>\n\n";
 
 	echo "<table class=\"list\">\n<thead>\n" .
 		"<tr><th scope=\"col\">#</th><th scope=\"col\">runtime</th>" .
@@ -315,7 +315,7 @@ if ( isset($jid) )  {
 	               $jid, $submdata['probid']);
 	while ( $run = $runs->next() ) {
 
-		echo "<h4><a name=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
+		echo "<h4 id=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
 
 		if ( $run['runresult']===NULL ) {
 			echo "<p><em>Run not finished yet.</em></p>\n";
