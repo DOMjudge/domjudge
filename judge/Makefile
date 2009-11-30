@@ -23,7 +23,7 @@ runguard: runguard.c $(TOPDIR)/etc/config.h $(TOPDIR)/etc/runguard-config.h -lm
 
 install-judgehost:
 	$(INSTALL_SCRIPT) -t $(DESTDIR)$(judgehost_libjudgedir) \
-		compile_*.sh test_solution.sh run compare_program.sh \
+		compile*.sh testcase_run.sh run compare_program.sh \
 		compare check_diff.sh check_float chroot-startstop.sh
 	$(INSTALL_DATA)   -t $(DESTDIR)$(judgehost_libjudgedir) \
 		judgedaemon.main.php parse_result.xslt
