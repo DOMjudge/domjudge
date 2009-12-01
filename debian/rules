@@ -86,7 +86,9 @@ install: build
 	# Makes no sense to include passwords generated on .deb build host
 	rm $(DJJH)/etc/domjudge/dbpasswords.secret \
 		$(DJDS)/etc/domjudge/dbpasswords.secret \
-		$(DJDS)/etc/domjudge/htpasswd-jury
+		$(DJDS)/etc/domjudge/htpasswd-jury \
+		$(DJDS)/etc/domjudge/gendbpasswords \
+		$(DJDS)/usr/bin/dj-setup-database
 	# TODO: Why is runguard in /usr/sbin? It's never called directly?
 	# Doesn't really hurt currently.
 	#
@@ -97,11 +99,15 @@ install: build
 		$(DJDS)/var/log/domjudge
 	cp debian/domjudge-judgehost.sudoers $(DJJH)/etc/sudoers.d/domjudge
 	chmod 0440 $(DJJH)/etc/sudoers.d/domjudge
+	# Database configuration
+	cat sql/mysql_db_structure.sql sql/mysql_db_examples.sql > $(DJDS)/usr/share/dbconfig-common/data/domjudge-domserver/install/mysql
+
 
 # Build architecture-independent files here.
 binary-indep: build install
 	dh_testdir -i
 	dh_testroot -i
+	dh_installdebconf -i
 	dh_installchangelogs -p domjudge-doc
 	dh_installchangelogs -p domjudge-common -p domjudge-domserver -X ChangeLog
 	dh_installdocs -i

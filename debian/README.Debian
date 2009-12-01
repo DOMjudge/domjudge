@@ -17,15 +17,11 @@ After installation, take these steps:
 
 Judgehost
 ---------
-On the judgehosts, you need to change /etc/domjudge/dbpasswords.secret
-and add the jury password there that you can find in the same file on
-the DOMserver.
-
 The judgedaemon is started automatically. To stop and restart it, use
 the /etc/init.d/domjudge-judgehost script like with other daemons.
 It runs under the 'domjudge' username and will log things to syslog and
-/var/log/domjudge. Judgings and their results will be stored in
-/var/lib/domjudge.
+/var/log/domjudge/judge.<hostname>.log. Judgings and their results will
+be stored under /var/lib/domjudge.
 
 If you want to start the judgedaemon by hand, not as a daemon, start
 it as follows:

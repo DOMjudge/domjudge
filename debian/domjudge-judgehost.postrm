@@ -1,14 +1,28 @@
 #! /bin/sh -e
 
-umount /var/lib/domjudge/javachroot/proc || true
-umount /var/lib/domjudge/javachroot.new/proc || true
+if [ -d /var/lib/domjudge/javachroot/proc ]; then
+	umount /var/lib/domjudge/javachroot/proc || true
+fi
+if [ -d /var/lib/domjudge/javachroot.new/proc ]; then
+	umount /var/lib/domjudge/javachroot.new/proc || true
+fi
+
+if [ -f /usr/share/debconf/confmodule ]; then
+	. /usr/share/debconf/confmodule
+fi
+if [ -f /usr/share/dbconfig-common/dpkg/frontend.postrm.mysql ]; then
+	. /usr/share/dbconfig-common/dpkg/frontend.postrm.mysql
+	dbc_go domjudge-judgehost $@
+fi
 
 if [ "$1" = "purge" ]; then
-	# do not purge entire /v/l/domjudge, because domjudge-domserver
-	# may still remain installed
-	rm -rf /var/log/domjudge/judge.*.log /var/lib/domjudge/judgings \
-		/var/lib/domjudge/javachroot /var/lib/domjudge/javachroot.new
+        rm -f /etc/domjudge/judgedaemon.dbconfig.php
+        if which ucf >/dev/null 2>&1; then
+                ucf --purge /etc/domjudge/judgedaemon.dbconfig.php
+        fi
+	rm -f /var/log/domjudge/judge.*.log
 fi
+
 
 #DEBHELPER#
 

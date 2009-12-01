@@ -1,13 +1,21 @@
 #! /bin/sh -e
 
-if [ "$1" = "purge" ]; then
-	if [ -x /usr/bin/dj-setup-database ]; then
-		dj-setup-database -r uninstall || true
-	fi
-	# do not purge entire /v/l/domjudge, because domjudge-judgehost
-	# may still remain installed
-	rm -rf /var/lib/domjudge/submissions /var/log/domjudge/images
+if [ -f /usr/share/debconf/confmodule ]; then
+    . /usr/share/debconf/confmodule
 fi
+if [ -f /usr/share/dbconfig-common/dpkg/postrm.mysql ]; then
+    . /usr/share/dbconfig-common/dpkg/postrm.mysql
+    dbc_go domjudge-domserver $@
+fi
+
+
+if [ "$1" = "purge" ]; then
+	# Purge accumulated files (not entire /var/lib/domjudge
+	# since domjudge-judgehost may remain installed)
+	rm -rf /var/lib/domjudge/images /var/lib/domjudge/submissions \
+		/etc/domjudge/htpasswd-jury /etc/domjudge/dbpasswords.secret 
+fi
+
 
 #DEBHELPER#
 
