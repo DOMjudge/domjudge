@@ -26,7 +26,7 @@ CREATE TABLE `judging_run` (
 
 ALTER TABLE `testcase`
   CHANGE COLUMN `id` `testcaseid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique identifier',
-  ADD COLUMN `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
+  ADD COLUMN `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging' AFTER `probid`,
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`testcaseid`),
   ADD UNIQUE KEY `rank` (`probid`,`rank`);
