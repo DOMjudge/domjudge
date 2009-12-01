@@ -104,7 +104,8 @@ binary-indep: build install
 	dh_testroot -i
 	dh_installchangelogs -p domjudge-doc
 	dh_installchangelogs -p domjudge-common -p domjudge-domserver -X ChangeLog
-	dh_installdocs
+	dh_installdocs -i
+	dh_installlogrotate -i
 	dh_link -i
 	dh_compress -i -X .tex -X .pdf
 	dh_fixperms -i -X genteammanuals -X gentexconfig

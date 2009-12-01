@@ -1,0 +1,15 @@
+Document: domjudge-judge
+Title: DOMjudge Jury Manual
+Author: The DOMjudge Developers
+Abstract: This document provides information about DOMjudge aimed at a jury
+ member operating the system during the contest: viewing and checking
+ submissions and working with clarification requests.
+Section: Education
+
+Format: HTML
+Index: /usr/share/doc/domjudge-doc/judge/judge-manual.html
+Files: /usr/share/doc/domjudge-doc/judge/judge-manual*.html
+
+Format: PDF
+Files: /usr/share/doc/domjudge-doc/judge/judge-manual.pdf
+
