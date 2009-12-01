@@ -1,5 +1,5 @@
 <?php
-/* $Id: use_db.php 2403 2008-10-05 11:55:06Z kink $ */
+/* $Id$ */
 
 	$credfile = ETCDIR . '/judgedaemon.dbconfig.php';
 	if (!include($credfile)) {
