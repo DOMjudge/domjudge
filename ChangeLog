@@ -18,6 +18,7 @@ Version 3.1.0 - SVN
  - Add combined_scoreboard script to view scoreboard of multiple sites.
  - Error out when WEBBASEURI not set.
  - The judgedaemon now tries to restore a lost db connection (Closes: #2897130)
+ - Fix: check for both htpasswd{,2} binaries in configure.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------
