@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: dj_make_chroot 2903 2009-10-09 07:42:22Z eldering $
+# $Id$
 
 # Read command-line parameters:
 CHROOTDIR=/var/lib/domjudge/javachroot
