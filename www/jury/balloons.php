@@ -104,7 +104,7 @@ if ( !empty($BALLOONS) ) {
 				htmlspecialchars($probs_data[$prob_solved]['color']) .
 				';" alt="problem colour ' .
 				htmlspecialchars($probs_data[$row['probid']]['color']) .
-				'" src="../images/circle.png"> ';
+				'" src="../images/circle.png" /> ';
 		}
 		echo '</td><td>';
 
