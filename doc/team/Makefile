@@ -14,11 +14,11 @@ install-docs:
 		team-manual*.tex team-manual*.pdf
 	$(INSTALL_DATA) -T README $(DESTDIR)$(domjudge_docdir)/README.teammanual
 
-gentexconfig: gentexconfig.in ../../paths.mk
+gentexconfig: gentexconfig.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
-team-manual.pdf: team-manual.tex team-manual-preamble.tex ../../etc/domserver-config.php
+team-manual.pdf: team-manual.tex team-manual-preamble.tex $(TOPDIR)/etc/domserver-config.php
 	./genteammanuals
 
 dist: team-manual.pdf
