@@ -151,7 +151,8 @@ echo addForm($pagename) . "<p>\n" .
 if ( !empty($data['color']) ) {
 	echo '<tr><td scope="row">Colour:</td><td><img style="background-color: ' .
 		htmlspecialchars($data['color']) .
-		';" src="../images/circle.png"> ' . htmlspecialchars($data['color']) .
+		';" alt="problem colour ' . htmlspecialchars($data['color']) .
+		'" src="../images/circle.png" /> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
 }
 if ( !empty($data['special_run']) ) {

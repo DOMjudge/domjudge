@@ -318,9 +318,10 @@ function renderScoreBoard($cdata, $sdata, $myteamid = null, $static = FALSE) {
 	foreach( $probs as $pr ) {
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),
-				htmlspecialchars($pr['probid']) . 
+				htmlspecialchars($pr['probid']) .
 				(!empty($pr['color']) ? ' <img style="background-color: ' .
-				htmlspecialchars($pr['color']) . ';" src="../images/circle.png">' : '' ) 
+				htmlspecialchars($pr['color']) . ';" alt="problem colour ' .
+				htmlspecialchars($pr['color']) . '" src="../images/circle.png" />' : '' )
 			) .
 			'</th>';
 	}
@@ -518,9 +519,9 @@ function putTeamRow($cdata, $teamid) {
 	while ( $srow = $scoredata->next() ) {
 		// skip this row if the problem is not known by us
 		if ( ! array_key_exists ( $srow['probid'], $probs ) ) continue;
-		
+
 		$penalty = calcPenaltyTime( $srow['is_correct'], $srow['submissions'] );
-	
+
 		// fill our matrix with the scores from the database,
 		$MATRIX[$srow['probid']] = array (
 			'is_correct'      => (bool) $srow['is_correct'],
@@ -543,11 +544,12 @@ function putTeamRow($cdata, $teamid) {
 		echo '<tr><td class="probid" title="' .
 			htmlspecialchars($probdata['name']) . '">' .
 			( !empty($probdata['color']) ?
-		      '<img style="background-color: ' . htmlspecialchars($probdata['color']) .
-		      ';" src="../images/circle.png"> ' : '' ) .
-		    htmlspecialchars($prob) . '</td><td class="';
+			  '<img style="background-color: ' . htmlspecialchars($probdata['color']) .
+			  ';" alt="problem colour ' . htmlspecialchars($probdata['color']) .
+			  '" src="../images/circle.png" /> ' : '' ) .
+			htmlspecialchars($prob) . '</td><td class="';
 		// CSS class for correct/incorrect/neutral results
-		if( $pdata['is_correct'] ) { 
+		if( $pdata['is_correct'] ) {
 			echo 'score_correct';
 		} elseif ( $pdata['num_submissions'] > 0 ) {
 			echo 'score_incorrect';

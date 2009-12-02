@@ -52,7 +52,8 @@ if( $res->count() == 0 ) {
 			( !empty($row['color'])
 			? '<td title="' . htmlspecialchars($row['color']) .
 		      '"><img style="background-color: ' . htmlspecialchars($row['color']) .
-		      ';" src="../images/circle.png">'
+		      ';" alt="problem colour ' . htmlspecialchars($row['color']) .
+		      '" src="../images/circle.png" />'
 			: '<td>' );
 			if ( IS_ADMIN ) {
 				echo "</td><td class=\"editdel\">" .

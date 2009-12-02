@@ -88,7 +88,8 @@ if ( !empty($BALLOONS) ) {
 		echo '<td class="probid">' .
 			'<img style="background-color: ' .
 		    htmlspecialchars($probs_data[$row['probid']]['color']) .
-			'" src="../images/circle.png"> ' . htmlspecialchars($row['probid']) . '</td>';
+			';" alt="problem colour ' . htmlspecialchars($probs_data[$row['probid']]['color']) .
+		    '" src="../images/circle.png" /> ' . htmlspecialchars($row['probid']) . '</td>';
 
 		// team name and room
 		echo '<td class="teamid">' . htmlspecialchars($row['login']) . '</td><td>' .
@@ -101,6 +102,8 @@ if ( !empty($BALLOONS) ) {
 			echo '<img title="' . htmlspecialchars($prob_solved) .
 				'" style="background-color: ' .
 				htmlspecialchars($probs_data[$prob_solved]['color']) .
+				';" alt="problem colour ' .
+				htmlspecialchars($probs_data[$row['probid']]['color']) .
 				'" src="../images/circle.png"> ';
 		}
 		echo '</td><td>';
