@@ -11,8 +11,8 @@
 /** Include lib/lib.misc.php for make_link **/
 require_once(LIBDIR . '/lib.misc.php');
 
-/** Symbol used in output to represent a balloon */
-define('BALLOON_SYM', '&#9679;');
+/** Text symbol used in output to represent a circle */
+define('CIRCLE_SYM', '&#9679;');
 
 /**
  * Return the base URI for the DOMjudge Webinterface.

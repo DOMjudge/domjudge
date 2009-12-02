@@ -92,7 +92,7 @@ if( $teams->count() == 0 ) {
 		case 3: echo 'team-ok" title="correct submission(s)"';
 			break;
 		}
-		echo ">".BALLOON_SYM."</td>";
+		echo ">".CIRCLE_SYM."</td>";
 		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$numcor / $numsub</td>";
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .

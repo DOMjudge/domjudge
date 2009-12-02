@@ -319,8 +319,8 @@ function renderScoreBoard($cdata, $sdata, $myteamid = null, $static = FALSE) {
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),
 				htmlspecialchars($pr['probid']) . 
-				(!empty($pr['color']) ? ' <span style="color: ' .
-				htmlspecialchars($pr['color']) . ';">' . BALLOON_SYM . '</span>' : '' ) 
+				(!empty($pr['color']) ? ' <img style="background-color: ' .
+				htmlspecialchars($pr['color']) . ';" src="../images/circle.png">' : '' ) 
 			) .
 			'</th>';
 	}
@@ -542,10 +542,10 @@ function putTeamRow($cdata, $teamid) {
 		}
 		echo '<tr><td class="probid" title="' .
 			htmlspecialchars($probdata['name']) . '">' .
-			(!empty($probdata['color']) ? '<span style="color: ' .
-			       htmlspecialchars($probdata['color']) . ';">' .
-			       BALLOON_SYM . '</span> ' : '' ) .
-			htmlspecialchars($prob) . '</td><td class="';
+			( !empty($probdata['color']) ?
+		      '<img style="background-color: ' . htmlspecialchars($probdata['color']) .
+		      ';" src="../images/circle.png"> ' : '' ) .
+		    htmlspecialchars($prob) . '</td><td class="';
 		// CSS class for correct/incorrect/neutral results
 		if( $pdata['is_correct'] ) { 
 			echo 'score_correct';

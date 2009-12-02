@@ -50,9 +50,9 @@ if( $res->count() == 0 ) {
 			"</td><td>".(int)$row['timelimit'].
 			"</td>".
 			( !empty($row['color'])
-			? '<td style="color: ' . htmlspecialchars($row['color']) . ';" ' .
-			  'title="' . htmlspecialchars($row['color']) . '">' .
-			  BALLOON_SYM
+			? '<td title="' . htmlspecialchars($row['color']) .
+		      '"><img style="background-color: ' . htmlspecialchars($row['color']) .
+		      ';" src="../images/circle.png">'
 			: '<td>' );
 			if ( IS_ADMIN ) {
 				echo "</td><td class=\"editdel\">" .

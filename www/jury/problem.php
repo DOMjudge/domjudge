@@ -149,9 +149,9 @@ echo addForm($pagename) . "<p>\n" .
 <tr><td scope="row">Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
 <?php
 if ( !empty($data['color']) ) {
-	echo '<tr><td scope="row">Colour:       </td><td><span style="color: ' .
+	echo '<tr><td scope="row">Colour:</td><td><img style="background-color: ' .
 		htmlspecialchars($data['color']) .
-		';">' . BALLOON_SYM . '</span> ' . htmlspecialchars($data['color']) .
+		';" src="../images/circle.png"> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
 }
 if ( !empty($data['special_run']) ) {
