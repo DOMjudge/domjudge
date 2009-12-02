@@ -12,7 +12,7 @@ require('init.php');
 
 // submit code
 if ( isset($_POST['submitter']) ) {
-	if ( ($tmpfname = mkstemps(TMPDIR."/edit_source-XXXXXX",0))===NULL ) {
+	if ( !($tmpfname = mkstemps(TMPDIR."/edit_source-XXXXXX",0)) ) {
 		error("Could not create temporary file.");
 	}
 
