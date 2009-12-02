@@ -12,14 +12,18 @@ require('init.php');
 
 // submit code
 if ( isset($_POST['submitter']) ) {
-	$tmpfname = tempnam(INCOMINGDIR, "edit_source.");
-	$fh = fopen($tmpfname, 'w');
-	fwrite($fh, $_POST['source']);
-	fclose($fh);
-	$ip = $DB->q('VALUE SELECT ipaddress FROM team t
-			WHERE t.login = %s', $_POST['teamid']);
+	if ( ($tmpfname = mkstemps(TMPDIR."/edit_source-XXXXXX",0))===NULL ) {
+		error("Could not create temporary file.");
+	}
+
+	file_put_contents($tmpfname, $_POST['source']);
+
+	$ip = $DB->q('VALUE SELECT ipaddress FROM team
+	              WHERE login = %s', $_POST['submitter']);
+
 	submit_solution($_POST['submitter'], $ip, $_POST['probid'], $_POST['langid'], $tmpfname);
 	unlink($tmpfname);
+
 	header('Location: '.getBaseURI().'jury/submissions.php');
 	exit;
 }
@@ -29,7 +33,7 @@ $source = $DB->q('MAYBETUPLE SELECT * FROM submission WHERE submitid = %i',$id);
 if ( empty($source) ) error ("Submission $id not found");
 
 $sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],
-	                        $source['probid'],$source['langid']);
+                                $source['probid'],$source['langid']);
 
 $title = 'Source: ' . htmlspecialchars($sourcefile);
 require(LIBWWWDIR . '/header.php');
@@ -44,13 +48,14 @@ echo addTextArea('source', $source['sourcecode'], 120, 40) . "<br />\n";
 
 $probs = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem WHERE
                  allow_submit = 1 AND cid = %i ORDER BY name', $cid);
-$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language WHERE 
+$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language WHERE
                  allow_submit = 1 ORDER BY name');
+
 echo addSelect('probid', $probs, $source['probid'], true);
 echo addSelect('langid', $langs, $source['langid'], true);
 
-echo addHidden('teamid', $source['teamid']); 
-echo addHidden('submitter', 'domjudge'); 
+echo addHidden('teamid', $source['teamid']);
+echo addHidden('submitter', 'domjudge');
 echo addSubmit('submit');
 
 echo addEndForm();
