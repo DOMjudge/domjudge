@@ -20,6 +20,7 @@ Version 3.1.0 - SVN
  - The judgedaemon now tries to restore a lost db connection (Closes: #2897130)
  - Fix: check for both htpasswd{,2} binaries in configure.
  - Fix white problem colour by adding a circle image with black border.
+ - Ports from ETH tree: use pipes with wc and gcc.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------

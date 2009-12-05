@@ -52,5 +52,9 @@ if [ -z "$MAINCLASS" ]; then
 fi
 
 #Compile source to stand-alone app
-gcj -Wall -O2 -static-libgcj --main=$MAINCLASS -o $DEST $SOURCE
+# -Wall:	Report all warnings
+# -O2:		Level 2 optimizations (default for speed)
+# -static:	Static link with all libraries
+# -pipe:	Use pipes for communication between stages of compilation
+gcj -Wall -O2 -static-libgcj -pipe --main=$MAINCLASS -o $DEST $SOURCE
 exit $?

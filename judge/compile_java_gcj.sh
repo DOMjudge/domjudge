@@ -9,6 +9,8 @@ SOURCE="$1"
 DEST="$2"
 
 # -Wall:	Report all warnings
+# -O2:		Level 2 optimizations (default for speed)
 # -static:	Static link with all libraries
-gcj -Wall -O2 -static --main=Main -o $DEST $SOURCE
+# -pipe:	Use pipes for communication between stages of compilation
+gcj -Wall -O2 -static -pipe --main=Main -o $DEST $SOURCE
 exit $?

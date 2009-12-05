@@ -191,7 +191,7 @@ if ps -u "$RUNUSER" &>/dev/null; then
 fi
 
 # Append (heading/trailing) program stderr to error.tmp:
-if [ `cat program.err | wc -l` -gt 20 ]; then
+if [ `wc -l < program.err` -gt 20 ]; then
 	echo "*** Program stderr output following (first and last 10 lines) ***" >>error.tmp
 	head -n 10 program.err >>error.tmp
 	echo "*** <snip> ***"  >>error.tmp
