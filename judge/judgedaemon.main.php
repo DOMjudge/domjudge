@@ -246,6 +246,16 @@ function judge($mark, $row, $judgingid)
 
 	logmsg(LOG_INFO, "Working directory: $workdir");
 
+	// If a database gets reset without removing the judging
+	// directories, we might hit an old directory: rename it.
+	if ( file_exists($workdir) ) {
+		$oldworkdir = $workdir . '-old-' . getmypid() . '-' . now();
+		if ( !rename($workdir, $oldworkdir) ) {
+			error("Could not rename stale working directory to '$oldworkdir'");
+		}
+		warning("Found stale working directory; renamed to '$oldworkdir'");
+	}
+
 	system("mkdir -p '$workdir/compile'", $retval);
 	if ( $retval != 0 ) error("Could not create '$workdir/compile'");
 
