@@ -118,12 +118,12 @@ cd "$WORKDIR"
 logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep 'timelimit reached: aborting command' compile.tmp &>/dev/null; then
 	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
-	exit $E_COMPILER_ERROR
+	exit ${E_COMPILER_ERROR:--1}
 fi
 if [ $exitcode -ne 0 -o ! -e compile/program ]; then
 	echo "Compiling failed with exitcode $exitcode, compiler output:" >compile.out
 	cat compile.tmp >>compile.out
-	exit $E_COMPILER_ERROR
+	exit ${E_COMPILER_ERROR:--1}
 fi
 cat compile.tmp >>compile.out
 

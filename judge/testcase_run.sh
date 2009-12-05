@@ -159,7 +159,7 @@ chmod a+rx "$RUN_SCRIPT" bin/sh
 # Execute an optional chroot setup script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
 	logmsg $LOG_DEBUG "executing chroot script: '$CHROOT_SCRIPT start'"
-	$SCRIPTDIR/$CHROOT_SCRIPT start
+	"$SCRIPTDIR/$CHROOT_SCRIPT" start
 fi
 
 # Add a fifo buffer to have /dev/null (indirectly) available in the
@@ -181,7 +181,7 @@ runcheck "$RUNGUARD" ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
 # Execute an optional chroot destroy script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
 	logmsg $LOG_DEBUG "executing chroot script: '$CHROOT_SCRIPT stop'"
-	$SCRIPTDIR/$CHROOT_SCRIPT stop
+	"$SCRIPTDIR/$CHROOT_SCRIPT" stop
 fi
 
 # Check for still running processes (first wait for all exiting processes):
@@ -206,7 +206,7 @@ logmsg $LOG_DEBUG "checking program run exit-status"
 if grep  'timelimit reached: aborting command' error.tmp &>/dev/null; then
 	echo "Timelimit exceeded." >>error.out
 	cat error.tmp >>error.out
-	exit $E_TIMELIMIT
+	exit ${E_TIMELIMIT:--1}
 fi
 if [ ! -r program.exit ]; then
 	cat error.tmp >>error.out
@@ -215,7 +215,7 @@ fi
 if [ "`cat program.exit`" != "0" ]; then
 	echo "Non-zero exitcode `cat program.exit`" >>error.out
 	cat error.tmp >>error.out
-	exit $E_RUN_ERROR
+	exit ${E_RUN_ERROR:--1}
 fi
 if [ $exitcode -ne 0 ]; then
 	cat error.tmp >>error.out
@@ -229,16 +229,16 @@ fi
 ############################################################
 #if grep  'Floating point exception' error.tmp &>/dev/null; then
 #	echo "Floating point exception." >>error.out
-#	exit $E_RUN_ERROR
+#	exit ${E_RUN_ERROR:--1}
 #fi
 #if grep  'Segmentation fault' error.tmp &>/dev/null; then
 #	echo "Segmentation fault." >>tee error.out
-#	exit $E_RUN_ERROR
+#	exit ${E_RUN_ERROR:--1}
 #fi
 #if grep  'File size limit exceeded' error.tmp &>/dev/null; then
 #	echo "File size limit exceeded." >>error.out
 #	cat error.tmp >>error.out
-#	exit $E_OUTPUT_LIMIT
+#	exit ${E_OUTPUT_LIMIT:--1}
 #fi
 
 logmsg $LOG_INFO "comparing output"
@@ -258,7 +258,7 @@ if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
 fi
 
 # Parse result.xml with xsltproc
-xsltproc $SCRIPTDIR/parse_result.xslt result.xml > result.out
+xsltproc "$SCRIPTDIR"/parse_result.xslt result.xml > result.out
 result=`grep '^result='      result.out | cut -d = -f 2- | tr '[:upper:]' '[:lower:]'`
 descrp=`grep '^description=' result.out | cut -d = -f 2-`
 descrp="${descrp:+ ($descrp)}"
@@ -266,24 +266,24 @@ descrp="${descrp:+ ($descrp)}"
 if [ "$result" = "accepted" ]; then
 	echo "Correct${descrp}! Runtime is `cat program.time` seconds." >>error.out
 	cat error.tmp >>error.out
-	exit $E_CORRECT
+	exit ${E_CORRECT:--1}
 elif [ "$result" = "presentation error" ]; then
 	echo "Presentation error${descrp}." >>error.out
 	cat error.tmp >>error.out
-	exit $E_PRESENTATION
+	exit ${E_PRESENTATION_ERROR:--1}
 elif [ ! -s program.out ]; then
 	echo "Program produced no output." >>error.out
 	cat error.tmp >>error.out
-	exit $E_NO_OUTPUT
+	exit ${E_NO_OUTPUT:--1}
 elif [ "$result" = "wrong answer" ]; then
 	echo "Wrong answer${descrp}." >>error.out
 	cat error.tmp >>error.out
-	exit $E_WRONG_ANSWER
+	exit ${E_WRONG_ANSWER:--1}
 else
 	echo "Unknown result: Wrong answer${descrp}." >>error.out
 	cat error.tmp >>error.out
-	exit $E_WRONG_ANSWER
+	exit ${E_WRONG_ANSWER:--1}
 fi
 
 # This should never be reached
-exit $E_INTERNAL_ERROR
+exit ${E_INTERNAL_ERROR:--1}
