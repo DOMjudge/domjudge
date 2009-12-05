@@ -23,6 +23,7 @@ Version 3.1.0 - SVN
  - Ports from ETH tree: use pipes with wc and gcc.
  - Fix bug: typo in presentation-error exitcode, and add safeguard.
  - Add security: check for stale judging directories (port from ETH tree).
+ - Bugfix: allow zero size testcases (port from ETH tree).
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------
