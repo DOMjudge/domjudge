@@ -5,7 +5,7 @@ DJDS=`pwd`/debian/domjudge-domserver
 DJJH=`pwd`/debian/domjudge-judgehost
 DJDC=`pwd`/debian/domjudge-doc
 
-include /usr/share/dpatch/dpatch.make
+include /usr/share/quilt/quilt.make
 
 build: patch build-stamp
 build-stamp:

@@ -1,13 +1,7 @@
-#! /bin/sh /usr/share/dpatch/dpatch-run
-## 010_debianise_dj_make_chroot by Thijs Kinkhorst <thijs@debian.org>
-##
-## All lines beginning with `## DP:' are a description of the patch.
-## DP: Update script to replace choices with Debian values
-
-@DPATCH@
-diff -urNad domjudge-3.0.0~/etc/judgehost-config.php domjudge-3.0.0/etc/judgehost-config.php
---- domjudge-3.0.0~/etc/judgehost-config.php	2009-11-10 18:38:59.000000000 +0100
-+++ domjudge-3.0.0/etc/judgehost-config.php	2009-11-15 15:18:37.000000000 +0100
+Author: 
+Description: Update script to replace choices with Debian values
+--- trunk.orig/etc/judgehost-config.php
++++ trunk/etc/judgehost-config.php
 @@ -13,7 +13,7 @@
  // leave empty to disable. This example script can be used to support
  // Sun Java with a chroot (edit the script first!).
@@ -17,9 +11,8 @@ diff -urNad domjudge-3.0.0~/etc/judgehost-config.php domjudge-3.0.0/etc/judgehos
  
  // Maximum seconds available for compiling
  define('COMPILETIME', 30);
-diff -urNad domjudge-3.0.0~/judge/chroot-startstop.sh domjudge-3.0.0/judge/chroot-startstop.sh
---- domjudge-3.0.0~/judge/chroot-startstop.sh	2009-07-12 19:27:50.000000000 +0200
-+++ domjudge-3.0.0/judge/chroot-startstop.sh	2009-11-15 15:18:37.000000000 +0100
+--- trunk.orig/judge/chroot-startstop.sh
++++ trunk/judge/chroot-startstop.sh
 @@ -19,7 +19,7 @@
  SUBDIRMOUNTS="etc lib usr"
  
@@ -29,9 +22,8 @@ diff -urNad domjudge-3.0.0~/judge/chroot-startstop.sh domjudge-3.0.0/judge/chroo
  
  case "$1" in
  	start)
-diff -urNad domjudge-3.0.0~/misc-tools/dj_make_chroot domjudge-3.0.0/misc-tools/dj_make_chroot
---- domjudge-3.0.0~/misc-tools/dj_make_chroot	2009-11-15 15:12:43.000000000 +0100
-+++ domjudge-3.0.0/misc-tools/dj_make_chroot	2009-11-15 15:19:43.000000000 +0100
+--- trunk.orig/misc-tools/dj_make_chroot
++++ trunk/misc-tools/dj_make_chroot
 @@ -16,8 +16,8 @@
  set -e
  
