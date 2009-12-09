@@ -21,10 +21,10 @@ requireAdmin();
 <!--
 function collapse(x){
   var oTemp=document.getElementById("detail"+x) ;
-  if (oTemp.style.display=="block") {
-    oTemp.style.display="none";
-  } else {
+  if (oTemp.style.display=="none") {
     oTemp.style.display="block";
+  } else {
+    oTemp.style.display="none";
   }
 }
 // -->
@@ -498,6 +498,15 @@ result('referential integrity', 'Inter-table relationships',
 flushresults();
 
 echo "</table>\n\n";
+// collapse all details; they are not collapsed in the default
+// style sheet to keep things working with JavaScript disabled.
+echo "<script type=\"text/javascript\" language=\"JavaScript\">
+<!--
+for (var i = 0; i < $resultno; i++) { 
+    collapse(i);
+}
+// -->
+</script>\n\n";
 
 echo "<p>Config checker completed.</p>\n\n";
 

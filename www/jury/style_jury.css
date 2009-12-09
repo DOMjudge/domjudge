@@ -72,7 +72,7 @@ img.smallpicto { width: 11px; height: 11px; }
 .judgetime { font-size: smaller; font-style: italic; }
 
 /* configchecker */
-.details { display: none;
+.details {
 	margin-left: 2em; padding-left: 1ex;
 	border-left: dotted 1px gray; 
 	margin-top: 1ex; margin-bottom: 1ex;}
