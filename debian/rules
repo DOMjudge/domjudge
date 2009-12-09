@@ -54,6 +54,7 @@ clean-patched:
 	rm -f build-stamp 
 	$(MAKE) distclean
 	dh_clean
+	cp /usr/share/doc/quilt/README.source debian/
 
 install:
 install: build
