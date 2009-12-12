@@ -16,6 +16,8 @@ require(LIBWWWDIR . '/header.php');
 
 requireAdmin();
 
+$time_start = microtime(TRUE);
+
 ?>
 <script type="text/javascript" language="JavaScript">
 <!--
@@ -511,7 +513,9 @@ flushresults();
 
 echo "</table>\n\n";
 
-echo "<p>Config checker completed.</p>\n\n";
+$time_end = microtime(TRUE);
+
+echo "<p>Config checker completed in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
 
 echo "<p>Legend:
 <img src=\"../images/s_okay.png\"  alt=\"O\" class=\"picto\" /> OK
