@@ -149,14 +149,18 @@ if ( function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()==1 ) {
 	result('software', 'PHP magic quotes', 'O', 'PHP magic quotes disabled.');
 }
 
-if ( include_highlighter() ) {
-	result('software', 'PHP Highlighter class',
-		'O', 'Optional PHP PEAR Text_Highlighter class is available.');
+require ( LIBWWWDIR . '/highlight.php');
+$highlighter = highlighter_init();
+
+if ( $highlighter == 'native' ) {
+	result('software', 'Sourcecode syntax highlighting',
+		'W', 'Optionally, install one of the supported source code ' .
+		'syntax highlighters for use when displaying the submitted ' .
+		'source code. See the manual for details.');
 } else {
-	result('software', 'PHP Highlighter class',
-		'W', 'Optionally, install the PHP PEAR Text_Highlighter class '.
-		'for better source syntax highlighting.',
-		'<a href="http://pear.php.net/package/Text_Highlighter/">more information</a>');
+	result('software', 'Sourcecode syntax highlighting',
+		'O', 'Will format sourcecode for display with "' . 
+			htmlspecialchars($highlighter) .'".');
 }
 
 $mysqldatares = $DB->q('SHOW variables WHERE

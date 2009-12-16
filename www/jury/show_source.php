@@ -35,31 +35,9 @@ $oldsource = $DB->q('MAYBETUPLE SELECT * FROM submission
                     $source['teamid'],$source['probid'],$source['langid'],
                     $source['submittime']);
 
-// Use PEAR Text::Highlighter class if available
-if ( include_highlighter() ) {
-	switch (strtolower($source['langid'])) {
-		case 'c':
-		case 'cpp':
-			$lang = 'cpp';
-			break;
-		case 'java';
-		case 'perl':
-		case 'ruby':
-		case 'php':
-		case 'python':
-			$lang = $source['langid'];
-	}
-	if ( isset($lang) ) {
-		include('Text/Highlighter/Renderer/Html.php');
-		$renderer = new Text_Highlighter_Renderer_Html(
-			array("numbers" => HL_NUMBERS_TABLE, "tabsize" => 4));
-		$hl =& Text_Highlighter::factory($lang);
-	}
-}
-
-
 $title = 'Source: ' . htmlspecialchars($sourcefile);
 require(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/highlight.php');
 
 if ( $oldsource ) {
 	echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
@@ -68,29 +46,18 @@ if ( $oldsource ) {
 echo '<h2 class="filename"><a name="source"></a>Submission ' .
 	"<a href=\"submission.php?id=$id\">s$id</a> source: " .
 	htmlspecialchars($sourcefile) . " (<a " .
-	"href=\"show_source.php?id=$id&amp;fetch=1\">download</a>, <a " .
-	"href=\"edit_source.php?id=$id\">edit</a>)</h2>\n\n";
+	"href=\"show_source.php?id=$id&amp;fetch=1\">download</a>)</h2>\n\n";
 
 if ( strlen($source['sourcecode'])==0 ) {
 	// Someone submitted an empty file. Cope gracefully.
 	echo "<p><em>empty file</em></p>\n\n";
-} elseif ( isset($hl) && strlen($source['sourcecode']) < 5 * 1024 ) {
-	// Highlighter available and source < 5Kb (for longer source code,
-	// Highlighter tends to take very long time or timeout)
-	$hl->setRenderer($renderer);
-	echo $hl->highlight($source['sourcecode']);
+} elseif ( strlen($source['sourcecode']) < 10 * 1024 ) {
+	// Source < 10kB (for longer source code,
+	// highlighter tends to take very long time or timeout)
+	highlight($source['sourcecode'], $source['langid']);
 } else {
-	// else display it ourselves
-	$sourcelines = explode("\n", $source['sourcecode']);
-	echo '<pre class="output_text">';
-	$i = 1;
-	$lnlen = strlen(count($sourcelines));
-	foreach ($sourcelines as $line ) {
-		echo "<span class=\"lineno\">" . str_pad($i, $lnlen, ' ', STR_PAD_LEFT) .
-			"</span>  " . htmlspecialchars($line) . "\n";
-		$i++;
-	}
-	echo "</pre>\n\n";
+	// Fall back to built-in simple formatter
+	highlight_native($source['sourcecode'], $source['langid']);
 }
 
 
@@ -160,6 +127,7 @@ if ( $oldsource ) {
 		"<a href=\"show_source.php?id=$oldid\">" .
 		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n";
 
+	// TODO: do we want to use syntax highlighter to colour the diff?
 	echo '<pre class="output_text">' .
 		htmlspecialchars($difftext) . "</pre>\n\n";
 }

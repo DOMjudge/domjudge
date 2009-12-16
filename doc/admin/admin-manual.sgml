@@ -246,8 +246,9 @@ Optionally:
        domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
        domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*</tt>
-<item> Install the PEAR Text_Highlighter class for source syntax highlighting,
-       and the PHP xdiff PECL extension for diffs between submissions.
+<item> Install GeSHI or the PEAR Text_Highlighter class for source syntax
+       highlighting, and the PHP xdiff PECL extension for diffs between
+       submissions.
 </itemize>
 
 
@@ -378,7 +379,9 @@ functionality.
 <item> <htmlurl name="libmagic" url="http://www.darwinsys.com/file/">~
        (for command line submit client to detect binary file submissions)
 
-<item> <htmlurl name="PEAR Text_Highlighter class"
+<item> <htmlurl name="GeSHi" url="http://qbnz.com/highlighter">~
+	or
+        <htmlurl name="PEAR Text_Highlighter class"
         url="http://pear.php.net/package/Text_Highlighter/">~
        (to use syntax highlighting in the Show Source section of the
         jury interface)
@@ -442,7 +445,7 @@ have the bulk of these packages installed already.
 
 <code>
 apt-get install gcc g++ make libcurl4-gnutls-dev mysql-server \
-	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
+	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql php-geshi \
 	ntp sudo procps sharutils \
 	phpmyadmin xsltproc libboost-regex-dev libgmp3-dev \
 	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra
@@ -1025,16 +1028,30 @@ make -C doc/judge docs
 <p>
 
 To support coloured display of submitted source code in the jury
-interface, the <url name="PEAR" url="http://pear.php.net">
-<url name="Text_Highlighter class" url="http://pear.php.net/package/Text_Highlighter/">
-needs to be available in your PHP include path. This means that
-you can install this system wide with the PEAR-provided tools,
-like this: <tt>pear install Text_Highlighter</tt>.
+interface, two external classes of syntax highlighters are supported:
+<url name="GeSHi" url="http://qbnz.com/highlighter"> and the
+<url name="PEAR" url="http://pear.php.net">
+<url name="Text_Highlighter class" url="http://pear.php.net/package/Text_Highlighter/">. DOMjudge tries to find either of those in your PHP include
+path. When none are found, DOMjudge falls back to source code display
+without highlighting.
+
+<sect2>GeSHi
+<p>
+If you run a Debian-like system, you can simply install the 
+<tt>php-geshi</tt> package. If not, download GeSHi and place 
+<tt>geshi.php</tt> and the <tt>geshi/</tt> directory in
+DOMjudge's <tt>LIBWWWDIR</tt>
+(see domserver-static.php for the exact path).
+
+<sect2>PEAR Text Highlighter
+<p>
+You can install the Text Highlighter system wide with the
+PEAR-provided tools, like this: <tt>pear install Text_Highlighter</tt>.
 
 Alternatively you can download the source code from the
-Text_Highlighter website and unpack that under the <tt>www/jury</tt>
-directory. Rename the resulting <tt>Text_Highlighter-x.y.z</tt>
-directory to just <tt>Text</tt>.
+Text_Highlighter website and unpack that under the <tt>LIBWWWDIR</tt>
+directory (see domserver-static.php for the exact path). Rename the
+resulting <tt>Text_Highlighter-x.y.z</tt> directory to just <tt>Text</tt>. 
 
 <sect1>NTP time synchronisation
 <p>

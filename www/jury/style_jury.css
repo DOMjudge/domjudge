@@ -148,6 +148,8 @@ img.smallpicto { width: 11px; height: 11px; }
     border: solid 1px silver;
 }
 
+.lineno { color: gray; }
+
 .col1 { float: left;  width: 30%; }
 .col2 { float: right; width: 70%; }
 .nomorecol { clear: left; }
