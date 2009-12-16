@@ -87,7 +87,7 @@ if ( $oldsource ) {
 		if ( is_readable($oldfile) && is_readable($newfile) ) {
 			// A direct diff on the sources in the SUBMITDIR.
 
-			$difftext = `diff -bBt -U 2 $oldfile $newfile 2>&1`;
+			$difftext = `diff -Bt -U 2 $oldfile $newfile 2>&1`;
 
 		} else {
 			// Try generating temporary files for executing diff.
@@ -108,7 +108,7 @@ if ( $oldsource ) {
 					     (fwrite($newhandle,   $source['sourcecode'])===FALSE) ) {
 						$difftext = "DOMjudge: error writing temporary files for diff.";
 					} else {
-						$difftext = `diff -bBt -U 2 $oldfile $newfile 2>&1`;
+						$difftext = `diff -Bt -U 2 $oldfile $newfile 2>&1`;
 					}
 				}
 				if ( $oldhandle ) fclose($oldhandle);
