@@ -365,7 +365,8 @@ functionality.
 <itemize>
 <item> sudo (to use a chroot judging environment with Sun Java)
 
-<item> phpMyAdmin, to be able to access the database in an emergency
+<item> <htmlurl name="phpMyAdmin" url="http://www.phpmyadmin.net/">,
+       to be able to access the database in an emergency
        or for data import/export
 
 <item> An NTP daemon (for keeping the clocks between jury
@@ -374,7 +375,7 @@ functionality.
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
        (to use the command line submit client with the web interface)
 
-<item> <htmlurl name="libmagic" url="http://">~
+<item> <htmlurl name="libmagic" url="http://www.darwinsys.com/file/">~
        (for command line submit client to detect binary file submissions)
 
 <item> <htmlurl name="PEAR Text_Highlighter class"
