@@ -94,7 +94,7 @@ function check_language($data, $keydata = null)
 		}
 	}
 	if ( !$langfound ) {
-		ch_error("Language extension not found in LANG_EXTS from global.cfg");
+		ch_error("Language extension not found in LANG_EXTS from domserver-config.php");
 	}
 
 	return $data;

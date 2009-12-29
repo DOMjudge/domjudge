@@ -15,7 +15,7 @@ echo "<h1>DOMjudge Jury interface</h1>\n\n";
 if ( is_readable('../images/DOMjudgelogo.png') ) {
 	echo "<p><a href=\"http://domjudge.sourceforge.net/\">" .
 		"<img src=\"../images/DOMjudgelogo.png\" id=\"djlogo\" " .
-		"alt=\"DOMjudge logo\" /></a></p>\n\n";
+		"alt=\"DOMjudge logo\" title=\"The DOMjudge logo: free as in beer!\" /></a></p>\n\n";
 }
 ?>
 

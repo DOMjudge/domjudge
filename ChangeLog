@@ -2,6 +2,16 @@ DOMjudge Programming Contest Judging System
 
 Version 3.0.1 - SVN
 -------------------
+ - Many small documentation improvements.
+ - Fix include paths when defining custom LIBWWWDIR, LIBJUDGEDIRs.
+ - Plugin interface: correct SQL privileges for domjudge_plugin user.
+ - Plugin interface: correct type of best_time to string and unset
+   large variable after use.
+ - Plugin interface: also generate required XML elements when no
+   contest active.
+ - Remove dbpasswords.secret and htpasswd-jury in distclean target.
+ - Also support htpasswd2 as program name for Apache's htpasswd.
+ - Bugfix: allow zero size testcases (port from ETH tree).
 
 Version 3.0.0 - 21 October 2009
 -------------------------------
@@ -12,6 +22,7 @@ Version 3.0.0 - 21 October 2009
  - Added 'make check' dependency on submitclient.
  - Only show the configured submission methods in the team manual.
  - Fix install of gendbpasswords and use /dev/urandom.
+ - Fix: check for both htpasswd{,2} binaries in configure.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------

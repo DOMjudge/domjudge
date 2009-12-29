@@ -126,6 +126,21 @@ licenced under the MIT/X11 licence, see <tt>COPYING.MIT</tt>. This
 software was downloaded from:
 <url url="http://www.kryogenix.org/code/browser/sorttable/">
 
+<sect1>About the name and logo
+<p>
+
+The name of this judging system is inspired by a very important and
+well known landmark in the city of Utrecht: the dome tower, called the
+`Dom' in Dutch. The original logo of the 2004 Dutch Programming
+Championships (for which this system was originally developed) depicts
+a represention of the Dom in zeros and ones. We based the name and
+logo of DOMjudge on that.
+
+We would like to thank Erik van Sebille, the original creator of the
+logo. The logo is under a GPL licence, but Erik suggested a "free as
+in beer" licence first: you're allowed to use it, but you owe Erik a
+free beer in case might you encounter him.
+
 <sect>Contact
 <p>
 The DOMjudge homepage can be found at:
@@ -350,7 +365,8 @@ functionality.
 <itemize>
 <item> sudo (to use a chroot judging environment with Sun Java)
 
-<item> phpMyAdmin, to be able to access the database in an emergency
+<item> <htmlurl name="phpMyAdmin" url="http://www.phpmyadmin.net/">,
+       to be able to access the database in an emergency
        or for data import/export
 
 <item> An NTP daemon (for keeping the clocks between jury
@@ -359,7 +375,7 @@ functionality.
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
        (to use the command line submit client with the web interface)
 
-<item> <htmlurl name="libmagic" url="http://">~
+<item> <htmlurl name="libmagic" url="http://www.darwinsys.com/file/">~
        (for command line submit client to detect binary file submissions)
 
 <item> <htmlurl name="PEAR Text_Highlighter class"
@@ -425,9 +441,9 @@ GNU/Linux, or one of its derivate distributions. Most systems will
 have the bulk of these packages installed already.
 
 <code>
-apt-get install gcc g++ make libcurl4-gnutls-dev sudo mysql-server ntp \
+apt-get install gcc g++ make libcurl4-gnutls-dev mysql-server \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql \
-	hostname coreutils procps grep diff mount sharutils \
+	ntp sudo procps sharutils \
 	phpmyadmin xsltproc libboost-regex-dev libgmp3-dev \
 	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra
 </code>
@@ -440,8 +456,7 @@ example compilers to install for C, C++, Java (GNU), Java (Sun), Haskell and
 Pascal; change the list as appropriate.
 
 <code>
-apt-get install make sudo php5-cli php5-mysql ntp xsltproc \
-	hostname coreutils procps grep diff mount sharutils \
+apt-get install make sudo php5-cli php5-mysql ntp xsltproc procps sharutils \
 	gcc g++ gcj openjdk-6-jre ghc fp-compiler
 </code>
 
@@ -1111,6 +1126,7 @@ interface or e.g. with phpMyAdmin), the other tables are used
 automatically by the software:
 <tabular ca="cll">
  |clarification    |Clarification requests/replies are stored here.@
+x|configuration    |Runtime configuration settings.@
 x|contest          |Contest definitions with start/end time.@
  |event            |Log of events during contests.@
 x|judgehost        |Computers (hostnames) that function as judgehosts.@
@@ -1131,6 +1147,10 @@ Now follows a longer description (including fields) per table that has
 to be filled manually.
 
 <descrip>
+<tag>configuration</tag>
+This table contains configuration settings and is work in progress.
+These entries are simply stored as <tt>name, value</tt> pairs.
+
 <tag>contest</tag>
 The contests that the software will run. E.g. a test session and the
 live contest.
@@ -1633,19 +1653,29 @@ fresh version of the entire scoreboard. You should use this option
 only when actually necessary, since it puts quite a load on the
 database.
 
-
-<sect1>Balloons
+<sect1>Exporting to an external website
 <p>
 
-Although not strictly part of the scoreboard, in many contests
-balloons are handed out to teams that solve a particular problem.
-DOMjudge can help in this process: a balloons notification daemon is
-available that will notify the runners when a new balloon needs to be
-handed out.
+In many cases you might want to create a copy of the scoreboard for
+external viewing from the internet. The command
+<tt>bin/static_scoreboard</tt> is provided just for that. It writes to
+stdout a version of the scoreboard with refresh meta-tags and links to
+team pages removed. This command can for example be run every minute
+and the output be placed as static content on a publicly reachable
+webserver.
 
-Alternatively you can use a web based tool in the jury interface,
-reachable from the main page, where each balloon has to be checked off
-by the person handing it out.
+<sect>Balloons
+<p>
+
+In many contests balloons are handed out to teams that solve a
+particular problem. DOMjudge can help in this process: both a web
+interface and a notification daemon are available to notify that a new
+balloon needs to be handed out. Note that only one should be used at a
+time.
+
+The web based tool is reachable from the main page in the jury
+interface, where each balloon has to be checked off by the person
+handing it out.
 
 For the daemon, set the BALLOON_CMD in <tt>bin/balloons</tt> to define
 how notifications

@@ -207,6 +207,9 @@ AC_PROG_CPP
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
+# check for htpasswd/htpasswd2
+AC_CHECK_PROGS(HTPASSWD,[htpasswd htpasswd2],[no htpasswd binary found])
+
 # Checks for libraries.
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
@@ -276,6 +279,8 @@ else
 		echo "    - dolstra..........: yes"
 	fi
 fi # }}}
+echo ""
+echo " * htpasswd............: $HTPASSWD"
 echo ""
 echo " * documentation.......: $domjudge_docdir"
 echo ""

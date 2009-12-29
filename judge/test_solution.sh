@@ -37,12 +37,11 @@
 # usage of 'run' see that script. Likewise, for comparing results, a
 # program 'compare' is called by default.
 #
-# If 'xsltproc' is available, then the result is parsed from
+# The program 'xsltproc' is used to parse the result from
 # 'result.xml' according to the ICPC Validator Interface Standard as
 # described in http://www.ecs.csus.edu/pc2/doc/valistandard.html.
-# Otherwise a submission is counted as accepted when the filesize of
-# compare.out is zero. In both cases, if the compare program returns
-# with nonzero exitcode, this is viewed as an internal error.
+# If the compare program returns with nonzero exitcode however, this
+# is viewed as an internal error.
 #
 # This is a bash script because of the traps it uses.
 

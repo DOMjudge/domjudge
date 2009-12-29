@@ -1,7 +1,7 @@
 This is the Programming Contest Jury System "DOMjudge" version 3.0.1SVN
 
-DOMjudge is a system for running a programming contest, like the ACM
-regional and world championship programming contests.
+DOMjudge is a system for running a programming contest, like the
+ACM ICPC regional and world championship programming contests.
 
 
 Documentation
@@ -16,12 +16,13 @@ namely for jury members (under doc/judge) and teams (under doc/team).
 
 The jury documentation is also available in HTML and PDF format.
 
-The team documentation is _not_ available prebuilt: DOMjudge has to be
-properly configured first, as parts of the configuration are used in
-it (e.g. the URL to the team interface of DOMjudge). A LaTeX
-installation including the packages `svn` and `expdlist` is required
-to build the PDF format team documentation. For more information, see
-the administrator documentation.
+The team documentation is available prebuilt in PDF format, but it
+contains default/example settings. To include the correct settings for
+your local environment, DOMjudge has to be properly configured first,
+as parts of the configuration are used in it (e.g. the URL to the team
+interface of DOMjudge). A LaTeX installation including the packages
+`svn` and `expdlist` is required to rebuild the team documentation.
+For more information, see the administrator documentation.
 
 All documentation is also available online at the DOMjudge homepage:
 	http://domjudge.sourceforge.net/#documentation

@@ -26,7 +26,7 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 		FROM testcase WHERE probid = %s", $probid);
 
 	// sanity check before we start to output headers
-	if ( empty($size) || !is_numeric($size)) error ("Problem while fetching testcase");
+	if ( $size===NULL || !is_numeric($size)) error("Problem while fetching testcase");
 
 	header("Content-Type: application/octet-stream; name=\"$filename\"");
 	header("Content-Disposition: inline; filename=\"$filename\"");
