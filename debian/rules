@@ -90,6 +90,8 @@ install: build
 		$(DJDS)/etc/domjudge/htpasswd-jury \
 		$(DJDS)/etc/domjudge/gendbpasswords \
 		$(DJDS)/usr/bin/dj-setup-database
+	# Now emtpy
+	rmdir $(DJDS)/usr/bin
 	# TODO: Why is runguard in /usr/sbin? It's never called directly?
 	# Doesn't really hurt currently.
 	#
