@@ -49,8 +49,10 @@ if ( IS_ADMIN && !empty($cmd) ):
 
 	if ( $cmd == 'edit' ) {
 		echo "<tr><td>Problem ID:</td><td class=\"probid\">";
-		$row = $DB->q('TUPLE SELECT * FROM problem WHERE probid = %s',
-			$_GET['id']);
+		$row = $DB->q('TUPLE SELECT p.*, COUNT(testcaseid) AS testcases
+		               FROM problem p
+		               LEFT JOIN testcase USING (probid)
+		               WHERE probid = %s', $_GET['id']);
 		echo addHidden('keydata[0][probid]', $row['probid']);
 		echo htmlspecialchars($row['probid']);
 	} else {
@@ -77,6 +79,11 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <tr><td>Allow judge:</td>
 <td><?php echo addRadioButton('data[0][allow_judge]', (!isset($row['allow_judge']) || $row['allow_judge']), 1)?> <label for="data_0__allow_judge_1">yes</label>
 <?php echo addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
+
+<tr><td>Testcases:</td>
+<td><?php
+	echo $row['testcases'] . ' <a href="testcase.php?probid=' .
+		urlencode($row['probid']) . '">details/edit</a>'; ?></td></tr>
 
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
 <td><?php echo addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
@@ -144,7 +151,7 @@ echo addForm($pagename) . "<p>\n" .
 	} else {
 		echo (int)$data['ntestcases'];
 	}
-	echo ' <a href="testcase.php?probid='.urlencode($data['probid']).'">details</a>';
+	echo ' <a href="testcase.php?probid='.urlencode($data['probid']).'">details/edit</a>';
 ?></td></tr>
 <tr><td scope="row">Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
 <?php
