@@ -166,15 +166,17 @@ function getFinalResult($runresults)
 
 	if ( !$havenull ) return $bestres;
 
-	// If we have NULL results, check whether the "best" result has
-	// maximal priority, hence can already be returned as final.
-	// Use a local copy of the RESULTS_PRIO array, keeping the
-	// original untouched.
-	$tmp = $RESULTS_PRIO;
-	sort($tmp);
-	$maxprio = reset($tmp);
+	if ( LAZY_EVAL_RESULTS ) {
+		// If we have NULL results, check whether the highest priority
+		// result has maximal priority, hence can already be returned
+		// as final. Use a local copy of the RESULTS_PRIO array,
+		// keeping the original untouched.
+		$tmp = $RESULTS_PRIO;
+		sort($tmp);
+		$maxprio = reset($tmp);
 
-	if ( $bestprio==$maxprio ) return $bestres;
+		if ( $bestprio==$maxprio ) return $bestres;
+	}
 
 	return NULL;
 }

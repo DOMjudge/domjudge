@@ -48,8 +48,16 @@ $RESULTS_PRIO = array(
 	'correct'            => 99,
 	);
 
-/** Remap results, e.g. to disable a specific result. Some possible
-    options are shown commented below. */
+// Lazy evaluation of results? If enabled, returns final result as
+// soon as a highest priority result is found, otherwise only return
+// final result when all testcases are judged.
+// Note that may especially speed up judging when timelimit has
+// highest priority and a solution would otherwise timeout on a lot of
+// testcases.
+define('LAZY_EVAL_RESULTS', true);
+
+// Remap results, e.g. to disable a specific result. Some possible
+// options are shown commented below. FIXME: not implemented yet!
 $RESULTS_REMAP = array(
 //	'presentation-error' => 'wrong-answer',
 //	'presentation-error' => 'correct',
