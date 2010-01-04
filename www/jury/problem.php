@@ -52,7 +52,8 @@ if ( IS_ADMIN && !empty($cmd) ):
 		$row = $DB->q('TUPLE SELECT p.*, COUNT(testcaseid) AS testcases
 		               FROM problem p
 		               LEFT JOIN testcase USING (probid)
-		               WHERE probid = %s', $_GET['id']);
+		               WHERE probid = %s
+			       GROUP BY probid', $_GET['id']);
 		echo addHidden('keydata[0][probid]', $row['probid']);
 		echo htmlspecialchars($row['probid']);
 	} else {
