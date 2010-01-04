@@ -43,7 +43,7 @@ if ( IS_ADMIN && !empty($cmd) ):
 	
 	echo "<h2>" . ucfirst($cmd) . " problem</h2>\n\n";
 
-	echo addForm('edit.php');
+	echo addForm('edit.php', 'post', null, 'multipart/form-data');
 
 	echo "<table>\n";
 
@@ -100,6 +100,11 @@ src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__special_compare_">Special compare script:</label></td>
 <td><?php echo addInput('data[0][special_compare]', @$row['special_compare'], 30, 25)?></td></tr>
+
+<?php if (class_exists("ZipArchive")): ?>
+<tr><td><label for="data_0__archive_">Upload problem archive:</label></td>
+<td><?php echo addFileField('data[0][archive]')?></td></tr>
+<?php endif; ?>
 </table>
 
 <?php

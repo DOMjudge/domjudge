@@ -104,3 +104,45 @@ function rejudgeForm($table, $id)
 	return $ret;
 }
 
+
+/**
+ * Returns TRUE iff string $haystack ends with string $needle
+ */
+function ends_with($haystack, $needle) {
+	return substr( $haystack, strlen( $haystack ) - strlen( $needle ) )
+       		=== $needle;
+}
+
+/**
+ * tries to open corresponding zip archive
+ */
+function openZipFile($filename) {
+	$zip = new ZipArchive;
+	$res = $zip->open($filename, ZIPARCHIVE::CHECKCONS);
+	if ($res === ZIPARCHIVE::ER_NOZIP || $res === ZIPARCHIVE::ER_INCONS) {
+		error("no valid zip archive given");
+	} else if ($res === ZIPARCHIVE::ER_MEMORY) {
+		error("not enough memory to extract zip archive");
+	} else if ($res !== TRUE) {
+		error("unknown error while extracting zip archive");
+	}
+
+	return $zip;
+}
+
+/**
+ * Parse a configuration string
+ * (needed if PHP version < 5.3)
+ */
+if (!function_exists('parse_ini_string')) {
+	function parse_ini_string($ini, $process_sections = false, $scanner_mode = null) {
+		# Generate a temporary file.
+		$tempname = tempnam('/tmp', 'ini');
+		$fp = fopen($tempname, 'w');
+		fwrite($fp, $ini);
+		$ini = parse_ini_file($tempname, !empty($process_sections));
+		fclose($fp);
+		@unlink($tempname);
+		return $ini;
+	}
+}
