@@ -39,3 +39,16 @@ function updateClarifications(ajaxtitle)
 	handle.open("GET", "update_clarifications.php", true);
 	handle.send(null); 
 }
+
+function editTcDesc(descid)
+{
+	var node = document.getElementById('tcdesc_' + descid);
+	var elem = document.createElement('textarea');
+	elem.innerHTML = node.innerHTML;
+	elem.setAttribute("cols", 50);
+	elem.setAttribute("rows", 2);
+	elem.setAttribute("name","description[" + descid + "]");
+	node.innerHTML = "";
+	node.setAttribute("onclick", "");
+	node.appendChild(elem);
+}

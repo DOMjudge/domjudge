@@ -100,7 +100,7 @@ $result = '';
 if ( isset($_POST['probid']) ) {
 
 	$maxrank = 0;
-	foreach($data as $rank => $row)
+	foreach($data as $rank => $row) {
 	foreach($INOROUT as $inout) {
 
 		if ( $rank>$maxrank ) $maxrank = $rank;
@@ -129,6 +129,15 @@ if ( isset($_POST['probid']) ) {
 				" B)</li>\n";
 		}
 	}
+
+	if ( !empty($_POST['description'][$rank]) ) {
+		$DB->q('UPDATE testcase SET description = %s WHERE probid = %s
+		        AND rank = %i', $_POST['description'][$rank], $probid, $rank);
+
+		$result .= "<li>Updated description for testcase $rank</li>\n";
+	}
+
+	} // end: foreach $data
 
 	if ( !empty($_FILES['add_input']['name']) ||
 		 !empty($_FILES['add_output']['name']) ) {
@@ -212,7 +221,7 @@ foreach( $data as $rank => $row ) {
 		    "<td class=\"testmd5\">" . htmlspecialchars($row["md5sum_$inout"]) . "</td>" .
 		    "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";
 		if ( $inout=='input' ) {
-			echo "<td rowspan=\"2\" class=\"testdesc\">" .
+			echo "<td rowspan=\"2\" class=\"testdesc\" id=\"tcdesc_$rank\" onclick=\"editTcDesc($rank)\">" . 
 			    htmlspecialchars($row['description']) . "</td>" .
 			    "<td rowspan=\"2\" class=\"editdel\">" .
 			    "<a href=\"delete.php?table=testcase&amp;testcaseid=$row[testcaseid]\">" .
