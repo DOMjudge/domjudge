@@ -14,8 +14,9 @@ Architecture: all
 Depends: ${misc:Depends}
 Recommends: beep
 Description: common files for the DOMjudge programming contest jury system
- This package contains files common to the elements, and is only necessary
- as a dependency of domjudge-domserver and domjudge-judgehost.
+ This package contains files common to the elements of the DOMjudge
+ programming contest jury system, and is only necessary as a dependency
+ of domjudge-domserver and domjudge-judgehost.
 
 Package: domjudge-domserver
 Architecture: all

@@ -31,7 +31,8 @@ licenced under the MIT/X11 licence:
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 A binary version of the dash shell (statically compiled)
-is distributed with the DOMjudge source.
+is distributed with the DOMjudge source (but not installed into
+any of the binary packages).
 The dash shell was taken from the Debian package dash-udeb version
 0.5.3-7, see http://packages.debian.org/etch/dash-udeb. The sources
 can be (re-)obtained from: http://domjudge.sourceforce.net/sources/
