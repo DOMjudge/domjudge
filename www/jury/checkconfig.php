@@ -164,7 +164,7 @@ if ( $highlighter == 'native' ) {
 }
 
 $mysqldatares = $DB->q('SHOW variables WHERE
-                        Variable_name="max_connections" OR
+                        Variable_name = "max_connections" OR
                         Variable_name = "version"');
 while($row = $mysqldatares->next()) {
 	$mysqldata[$row['Variable_name']] = $row['Value'];
@@ -199,12 +199,21 @@ if ( DEBUG == 0 ) {
 if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
 	result('configuration', 'Protected Jury interface', 'W',
 		"You are not using HTTP Authentication for the Jury interface. " .
-		"Are you sure that the jury interface is adequately protected?\n");
+		"Are you sure that the jury interface is adequately protected?");
 } else {
 	result('configuration', 'Protected Jury interface', 'O',
 		'Logged in as user ' .
 		htmlspecialchars($_SERVER['REMOTE_USER']) .
 		".");
+}
+
+if ( !is_writable(TMPDIR) ) {
+       result('configuration', 'TMPDIR writable', 'W',
+              'TMPDIR is not writable by the webserver; ' .
+              'Showing diffs and editing of submissions may not work.');
+} else {
+       result('configuration', 'TMPDIR writable', 'O',
+              'TMPDIR can be used to store temporary files for submission diffs and edits.');
 }
 
 flushresults();
@@ -343,7 +352,7 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 				" has a logo, but it's not readable ($affillogo).\n";
 		}
 	}
-	
+
 	$res = $DB->q('SELECT DISTINCT country FROM team_affiliation ORDER BY country');
 	while ( $row = $res->next() ) {
 		$cflag = '../images/countries/' .
@@ -358,7 +367,7 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 	}
 
 	result('problems, languages, teams', 'Team affiliation icons',
-		($details == '') ? 'O' : 'E', $details);
+		($details == '') ? 'O' : 'W', $details);
 
 } else {
 	result('problems, languages, teams', 'Team affiliation icons',
