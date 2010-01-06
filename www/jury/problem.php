@@ -80,12 +80,13 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <tr><td>Allow judge:</td>
 <td><?php echo addRadioButton('data[0][allow_judge]', (!isset($row['allow_judge']) || $row['allow_judge']), 1)?> <label for="data_0__allow_judge_1">yes</label>
 <?php echo addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
-
-<tr><td>Testcases:</td>
-<td><?php
-	echo $row['testcases'] . ' <a href="testcase.php?probid=' .
-		urlencode($row['probid']) . '">details/edit</a>'; ?></td></tr>
-
+<?php
+    if ( !empty($row['probid']) ) {
+		echo '<tr><td>Testcases:</td><td>' .
+			$row['testcases'] . ' <a href="testcase.php?probid=' .
+			urlencode($row['probid']) . "\">details/edit</a></td></tr>\n";
+	}
+?>
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
 <td><?php echo addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
 
