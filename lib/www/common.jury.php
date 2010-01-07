@@ -146,3 +146,65 @@ if (!function_exists('parse_ini_string')) {
 		return $ini;
 	}
 }
+
+function importZippedProblem($probid, $zip) {
+	# update testcases
+	global $DB;
+	$maxrank = 1 + $DB->q('VALUE SELECT max(rank)
+			       FROM testcase WHERE probid = %s',
+			       $probid);
+	for ($j = 0; $j < $zip->numFiles; $j++) {  
+		$filename = $zip->getNameIndex($j);
+		if ( ends_with($filename, ".in") ) {
+			$basename = basename($filename, ".in");
+			$fileout = $basename . ".out";
+			$testout = $zip->getFromName($fileout);
+			if ($testout !== FALSE) {
+				$testin = $zip->getFromIndex($j);
+
+				$DB->q('INSERT INTO testcase
+					(probid,rank,md5sum_input,
+					md5sum_output,input,output,
+					description)
+					VALUES (%s,%i,%s,%s,%s,%s,%s)',
+					$probid,
+					$maxrank,
+					md5($testin), md5($testout),
+					$testin, $testout, $basename);
+				$maxrank++;
+			}
+		}
+	} 
+
+	# update problem properties
+	$properties = $zip->getFromName("properties.ini");
+	if ($properties !== FALSE) {
+		$ini_array = parse_ini_string($properties);
+		if ($ini_array !== FALSE) {
+			$row = $DB->q('TUPLE SELECT * FROM problem
+				       WHERE probid = %s',
+				      $probid);
+			$ini_keys = array('timelimit', 'name',
+					'color', 'special_run',
+					'special_compare', 'cid',
+					'allow_submit', 'allow_judge');
+			foreach ($ini_keys as $ini_key) {
+				if (isset($ini_array[$ini_key])) {
+					$row[$ini_key] = $ini_array[$ini_key];
+				}
+			}
+
+			$DB->q('UPDATE problem SET timelimit=%i,
+				name=%s, color=%s,special_run=%i,
+				special_compare=%i, cid=%i,
+				allow_submit=%i, allow_judge=%i
+				WHERE probid=%s',
+				$row['timelimit'], $row['name'],
+				$row['color'], $row['special_run'],
+				$row['special_compare'], $row['cid'],
+				$row['allow_submit'], $row['allow_judge'],
+				$probid
+			);
+		}
+	}
+}
