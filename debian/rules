@@ -104,6 +104,9 @@ install: build
 	chmod 0440 $(DJJH)/etc/sudoers.d/domjudge
 	# Database configuration
 	cat sql/mysql_db_structure.sql sql/mysql_db_examples.sql > $(DJDS)/usr/share/dbconfig-common/data/domjudge-domserver/install/mysql
+	sed 's/ ON / ON domjudge./' sql/mysql_privileges.sql >> $(DJDS)/usr/share/dbconfig-common/data/domjudge-domserver/install/mysql
+	cp debian/src/dbc_create_aux_users $(DJDS)/usr/share/dbconfig-common/scripts/domjudge-domserver/install/mysql
+	cp debian/src/db_clean.sql $(DJDS)/usr/share/dbconfig-common/data/domjudge-domserver/remove/mysql
 
 
 # Build architecture-independent files here.

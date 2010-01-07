@@ -11,16 +11,6 @@ dbc_go domjudge-domserver $@
 
 . /etc/dbconfig-common/domjudge-domserver.conf
 
-if [ ! -f /etc/domjudge/dbpasswords.secret ]; then
-	touch /etc/domjudge/dbpasswords.secret
-	chgrp www-data /etc/domjudge/dbpasswords.secret
-	chmod 0640 /etc/domjudge/dbpasswords.secret
-	echo "jury:$dbc_dbserver:$dbc_dbname:$dbc_dbuser:$dbc_dbpass" >> /etc/domjudge/dbpasswords.secret
-	echo "team:$dbc_dbserver:$dbc_dbname:$dbc_dbuser:$dbc_dbpass" >> /etc/domjudge/dbpasswords.secret
-	echo "public:$dbc_dbserver:$dbc_dbname:$dbc_dbuser:$dbc_dbpass" >> /etc/domjudge/dbpasswords.secret
-	echo "plugin:$dbc_dbserver:$dbc_dbname:$dbc_dbuser:$dbc_dbpass" >> /etc/domjudge/dbpasswords.secret
-fi
-
 if [ ! -f /etc/domjudge/htpasswd-jury ]; then
 	htpasswd -c -b /etc/domjudge/htpasswd-jury domjudge_jury $dbc_dbpass
 	chmod 0640 /etc/domjudge/htpasswd-jury

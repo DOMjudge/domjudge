@@ -1,8 +1,5 @@
 Domserver
 ---------
-- We currently only install a domjudge_jury MySQL user, while we
-  should use the jury,team,public,plugin set for added security.
-- How to ensure that remote judgedaemons can connect?
 - Move not-directly-called stuff out of PATH or /etc.
 - Do some apache configuration.
 
