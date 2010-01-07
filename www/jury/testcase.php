@@ -221,12 +221,18 @@ foreach( $data as $rank => $row ) {
 		    "<td class=\"testmd5\">" . htmlspecialchars($row["md5sum_$inout"]) . "</td>" .
 		    "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";
 		if ( $inout=='input' ) {
-			echo "<td rowspan=\"2\" class=\"testdesc\" id=\"tcdesc_$rank\" onclick=\"editTcDesc($rank)\">" . 
-			    htmlspecialchars($row['description']) . "</td>" .
+			echo "<td rowspan=\"2\" class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
+			    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"2\">" . 
+			    htmlspecialchars($row['description']) . "</textarea></td>" .
 			    "<td rowspan=\"2\" class=\"editdel\">" .
 			    "<a href=\"delete.php?table=testcase&amp;testcaseid=$row[testcaseid]\">" .
 			    "<img src=\"../images/delete.png\" alt=\"delete\"" .
 			    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
+
+			    // hide edit field if javascript is enabled
+			    echo "<script type=\"text/javascript\" language=\"JavaScript\">\n
+			    	  hideTcDescEdit($rank);\n
+			    	  </script>\n\n";
 		}
 		echo "</tr>\n";
 	}

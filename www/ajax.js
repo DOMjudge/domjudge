@@ -40,15 +40,24 @@ function updateClarifications(ajaxtitle)
 	handle.send(null); 
 }
 
+// make corresponding testcase description editable
 function editTcDesc(descid)
 {
 	var node = document.getElementById('tcdesc_' + descid);
-	var elem = document.createElement('textarea');
-	elem.innerHTML = node.innerHTML;
-	elem.setAttribute("cols", 50);
-	elem.setAttribute("rows", 2);
-	elem.setAttribute("name","description[" + descid + "]");
-	node.innerHTML = "";
-	node.setAttribute("onclick", "");
-	node.appendChild(elem);
+	node.parentNode.setAttribute('onclick', '');
+	node.parentNode.removeChild(node.nextSibling);
+	node.style.display = 'block';
+	node.setAttribute('name', 'description[' + descid + ']');
+}
+
+// hides edit field if javascript is enabled
+function hideTcDescEdit(descid)
+{
+	var node = document.getElementById('tcdesc_' + descid);
+	node.style.display = 'none';
+	node.setAttribute('name', 'invalid');
+	
+	var span = document.createElement('span');
+	span.innerHTML = node.innerHTML;
+	node.parentNode.appendChild(span);
 }
