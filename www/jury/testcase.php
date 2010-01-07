@@ -130,7 +130,7 @@ if ( isset($_POST['probid']) ) {
 		}
 	}
 
-	if ( !empty($_POST['description'][$rank]) ) {
+	if ( isset($_POST['description'][$rank]) ) {
 		$DB->q('UPDATE testcase SET description = %s WHERE probid = %s
 		        AND rank = %i', $_POST['description'][$rank], $probid, $rank);
 
