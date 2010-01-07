@@ -98,11 +98,12 @@ create_db_users()
 # Need to add both '%' and 'localhost' as entries, because a default
 # fresh MySQL installation has a Host='localhost',User='' entry which
 # is more specific than Host='%' and thus leads to Access Denied errors.
-		echo "INSERT INTO user (Host, User, Password) VALUES ('%',        '$user',PASSWORD('$pass'));"
-		echo "INSERT INTO user (Host, User, Password) VALUES ('localhost','$user',PASSWORD('$pass'));"
+		echo "CREATE USER
+			'$user'@'%' IDENTIFIED BY '$pass',
+			'$user'@'localhost' IDENTIFIED BY '$pass';"
 	done
 	echo "FLUSH PRIVILEGES;"
-	) | mysql -D mysql
+	) | mysql
 }
 
 remove_db_users()
@@ -113,8 +114,10 @@ remove_db_users()
 	for role in $ROLES ; do
 		eval "user=\$${role}_DBUSER"
 # In MySQL < 5.0.2, 'DROP USER' only removes the user, not its privileges:
-		echo "REVOKE ALL PRIVILEGES, GRANT OPTION FROM $user;"
-		echo "DROP USER '$user'@'%', '$user'@'localhost';"
+		echo "REVOKE ALL PRIVILEGES, GRANT OPTION FROM
+			'$user'@'%', '$user'@'localhost'";
+		echo "DROP USER
+			'$user'@'%', '$user'@'localhost';"
 	done
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
