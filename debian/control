@@ -20,9 +20,9 @@ Description: common files for the DOMjudge programming contest jury system
 
 Package: domjudge-domserver
 Architecture: all
-Depends: domjudge-common, apache2 | httpd, ${misc:Depends}, mysql-client,
+Depends: domjudge-common (= ${source:Version}), apache2 | httpd,
  libapache2-mod-php5 | php5-cgi | php5, php5-mysql, php5-cli, xsltproc,
- dbconfig-common
+ dbconfig-common, mysql-client, ${misc:Depends}
 Recommends: ntp, mysql-server, phpmyadmin
 Description: programming contest jury system (server)
  DOMjudge is a jury system for running a programming contest. It allows
@@ -37,9 +37,9 @@ Description: programming contest jury system (server)
 
 Package: domjudge-judgehost
 Architecture: any
-Depends: domjudge-common, php5-cli, php5-mysql, xsltproc, procps,
- ${shlibs:Depends}, bash-static, adduser, lsb-base, ${misc:Depends},
- dbconfig-common, mysql-client
+Depends: domjudge-common (= ${source:Version}), php5-cli, php5-mysql,
+ xsltproc, procps, bash-static, adduser, lsb-base, dbconfig-common,
+ mysql-client, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ntp, sudo, debootstrap, gcc, g++, openjdk-6-jre-headless
 Suggests: ghc, fp-compiler
 Description: programming contest jury system (judgehost)
