@@ -115,7 +115,7 @@ remove_db_users()
 		eval "user=\$${role}_DBUSER"
 # In MySQL < 5.0.2, 'DROP USER' only removes the user, not its privileges:
 		echo "REVOKE ALL PRIVILEGES, GRANT OPTION FROM
-			'$user'@'%', '$user'@'localhost'";
+			'$user'@'%', '$user'@'localhost';"
 		echo "DROP USER
 			'$user'@'%', '$user'@'localhost';"
 	done
