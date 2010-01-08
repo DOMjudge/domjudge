@@ -196,7 +196,7 @@ function importZippedProblem($probid, $zip) {
 
 			$DB->q('UPDATE problem SET timelimit=%i,
 				name=%s, color=%s,special_run=%i,
-				special_compare=%i, cid=%i,
+				special_compare=%i, cid=%s,
 				allow_submit=%i, allow_judge=%i
 				WHERE probid=%s',
 				$row['timelimit'], $row['name'],
