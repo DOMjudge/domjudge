@@ -230,9 +230,8 @@ foreach( $data as $rank => $row ) {
 			    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
 
 			    // hide edit field if javascript is enabled
-			    echo "<script type=\"text/javascript\" language=\"JavaScript\">\n
-			    	  hideTcDescEdit($rank);\n
-			    	  </script>\n\n";
+			    echo "<script type=\"text/javascript\" language=\"JavaScript\">" .
+			    	"hideTcDescEdit($rank);</script>";
 		}
 		echo "</tr>\n";
 	}
