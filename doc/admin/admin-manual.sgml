@@ -594,7 +594,7 @@ done separately. For each supported language a shell-script named
 <tt>compile_&lt;lang&gt;.sh</tt> should be created and placed in
 <tt>lib/judge</tt> on the judgehosts, where &lt;lang&gt; is the ID of
 the language as specified in the database. For more information, see
-for example <tt>compile_c.sh</tt> and <tt>test_solution.sh</tt> in
+for example <tt>compile_c.sh</tt>, and <tt>compile.sh</tt> in
 <tt>lib/judge</tt> for syntax. Note that compile scripts are included
 for the most common languages already.
 
@@ -626,8 +626,9 @@ To allow for problems that do not fit within the standard scheme of
 fixed input and/or output, DOMjudge has the possibility to change the
 way submissions are run and checked for correctness.
 
-The back-end script (<tt>test_solution.sh</tt>) that handles the
-compilation, running and checking of submissions, calls separate
+The back-end scripts (<tt>compile.sh</tt>, <tt>testcase_run.sh</tt>)
+that handle the
+compilation, running and checking of submissions, call separate
 programs for running and comparison of the results. These can be
 specialised and adapted to the requirements per problem. For this, one
 has to create programs or scripts <tt>run_&lt;some-tag&gt;</tt> and/or
@@ -1560,7 +1561,8 @@ The jury interface has two possible views: one for jury members,
 and one for DOMjudge administrators. The second view is the same as
 the jury view, but with more features added. Which to show is decided
 by using the HTTP authentication login used to access the web interface;
-you can list which HTTP users are admin in <tt>etc/passwords.php</tt>.
+you can list which HTTP users are admin with the variable
+<tt>DOMJUDGE_ADMINS</tt> in <tt>etc/domserver-config.php</tt>.
 
 This separation is handy as a matter of security (jury members cannot
 (accidentally) modify things that shouldn't be) and clarity (jury members
@@ -2127,13 +2129,9 @@ providing access from the server can be configured, see below
 the file
 <tt>submit/submit_copy.sh</tt> for more details.
 
-
-For the command line client you need to have Windows XP and the cygwin-base
-package must be (re-)installed from the mirror
-<url url="http://cygwin.win6.jp/cygwin-ipv6/"> for support of the
-complete <tt>netdb.h</tt> headers (as this is currently not supported
-in the standard Cygwin tree yet; the currently beta version 1.7 should
-include this).
+For the command line client you need to have at least Windows XP and
+cygwin version 1.7 for support of the complete <tt>netdb.h</tt>
+headers.
 
 
 </report>

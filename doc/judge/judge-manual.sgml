@@ -217,7 +217,8 @@ problems, the option <tt>--whitespace-ok</tt> can be useful. This
 allows any non-empty sequence of whitespace (no newlines though) where
 the <tt>SPACE</tt> command is used, as well as leading and trailing
 whitespace on lines (when using the <tt>NEWLINE</tt> command). Please
-note that whitespace matching is greedy, so the script code
+note that with this option enabled, whitespace matching is greedy, so
+the script code
 <code>
 INT(1,2) SPACE SPACE INT(1,2)
 </code>
@@ -308,16 +309,13 @@ a code.
 <tag>NO-OUTPUT     </tag>there was no output at all from the program;
 <tag>WRONG-ANSWER  </tag>the output of the program did not exactly match the expected output;
 <tag>PRESENTATION-ERROR</tag>the submission only had presentation errors; e.g. difference
-                             in whitespace with the reference output **.
+                             in whitespace with the reference output.
 </descrip>
 * in the team interface a submission will only show as PENDING to
 prevent leaking information of problem time limits. The jury can see
 whether a submission is QUEUED or JUDGING. In case of required
 verification, a submission will show as PENDING to the team until the
 judging has been verified.
-
-** This is disabled by default and must be enabled explicitly by the
-DOMjudge administrator. It will be counted as an incorrect submission.
 
 Under the Submissions menu, you can see submitted solutions, with
 the newest one at the top. Click on a submission id or result code
