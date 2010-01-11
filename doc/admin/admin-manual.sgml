@@ -641,7 +641,7 @@ the default script should be used).
 
 Implementing a special compare script, also called a
 <em>validator</em>, can be done in two ways: either write a program
-that is called directly (by <tt>test_solution.sh</tt>) or use (a copy
+that is called directly (by <tt>testcase_run.sh</tt>) or use (a copy
 of) the <tt>compare_program.sh</tt> script. The latter generates the
 XML result file and handles redirection of input/output for you. When
 using this wrapper (the easiest method), the jury should write a
@@ -658,15 +658,11 @@ of the files <tt>test_solution.sh</tt>, <tt>compare_program.sh</tt>
 and (when not using the wrapper) the appendix on the
 <ref id="validator" name="ICPC validator interface">.
 
-The shipped <tt>test_solution.sh</tt> has support for enabling
-<tt>presentation-error</tt> to be returned as a judging result. This
-is counted as an incorrect submission. For this to work, you need to
-uncomment the marked lines near the bottom of this script. The
-validator used should also support returning presentation error
-results; the shipped <tt>compare</tt> supports this and reports
-<tt>presentation-error</tt> when the output only differs in whitespace
-from the reference output. The script <tt>compare_program.sh</tt> does
-not support presentation error results.
+DOMjudge supports a <tt>presentation-error</tt> result. The default
+<tt>compare</tt> program returns this results when output only differs
+by whitespace; this is counted as an incorrect submission. The wrapper
+script <tt>compare_program.sh</tt> does not support presentation error
+results however.
 
 <sect>Alerting system
 <p>
