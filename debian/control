@@ -7,7 +7,7 @@ Build-Depends: libcurl4-gnutls-dev, libboost-regex-dev, libgmp3-dev,
 Build-Depends-Indep: linuxdoc-tools, transfig,
  texlive-latex-recommended, texlive-latex-extra
 Homepage: http://domjudge.sourceforge.net/
-Standards-Version: 3.8.3
+Standards-Version: 3.8.4
 
 Package: domjudge-common
 Architecture: all
