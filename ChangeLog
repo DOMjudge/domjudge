@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.0.1 - SVN
--------------------
+Version 3.0.1 - 28 January 2010
+-------------------------------
  - Many small documentation improvements.
  - Fix include paths when defining custom LIBWWWDIR, LIBJUDGEDIRs.
  - Plugin interface: correct SQL privileges for domjudge_plugin user.
