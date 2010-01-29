@@ -33,7 +33,7 @@ $pass = trim($_POST['passwd']);
 
 $title = 'Authenticate user';
 $menu = false;
-require(LIBWWWDIR . '/www/header.php');
+require(LIBWWWDIR . '/header.php');
 
 if ( empty($user) || empty($pass) ) {
 	echo "<h1>Not Authenticated</h1>\n\n";
