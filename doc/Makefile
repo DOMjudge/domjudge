@@ -7,7 +7,7 @@ REC_TARGETS = config dist docs install-docs clean distclean maintainer-clean
 include $(TOPDIR)/Makefile.global
 
 # Subdirectories to recurse into for REC_TARGETS
-SUBDIRS = admin team judge example
+SUBDIRS = admin team judge examples
 
 config: SUBDIRS=team
 

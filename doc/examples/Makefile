@@ -6,7 +6,7 @@ include $(TOPDIR)/Makefile.global
 BASE = hello fltcmp
 PDF = $(BASE:=.pdf)
 
-docs: hello.pdf fltcmp.pdf
+docs: dist
 
 install-docs:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples example.*
@@ -14,8 +14,7 @@ install-docs:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples fltcmp.pdf fltcmp.in fltcmp.out
 
 $(PDF): %.pdf: %.tex %.in %.out ../logos/DOMjudgelogo.pdf
-	pdflatex $<
-	rm -f $(@:.pdf=.aux) $(@:.pdf=.log)
+	pdflatex -interaction=nonstopmode $< > /dev/null
 
 dist: $(PDF)
 	$(MAKE) clean-l
