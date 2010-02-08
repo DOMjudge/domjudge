@@ -330,7 +330,7 @@ if [ "$result" = "accepted" ]; then
 #elif [ "$result" = "presentation error" ]; then
 #	echo "Presentation error${descrp}." >>error.out
 #	cat error.tmp >>error.out
-#	exit $E_PRESENTATION
+#	exit $E_PRESENTATION_ERROR
 elif [ "$result" = "wrong answer" ]; then
 	echo "Wrong answer${descrp}." >>error.out
 	cat error.tmp >>error.out
