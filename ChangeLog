@@ -27,6 +27,7 @@ Version 3.1.0 - SVN
  - Show config checker runtime (port from ETH tree).
  - Make syntax highlighting more modular, and add support for the
    GeSHi syntax highlighter.
+ - Add sample PDF problem texts for inclusion in the database.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------

@@ -1,0 +1,50 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[scale={0.75,0.77}]{geometry}
+\usepackage[british]{babel}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{verbatim}
+
+\begin{document}
+
+\begin{wrapfigure}[1]{r}{1cm}
+  \includegraphics[height=4cm]{../logos/DOMjudgelogo.pdf}
+\end{wrapfigure}
+~\\
+\begin{center}
+  \Large\bf \textsc{DOM}judge sample problem\\
+  \texttt{fltcmp} -- `Floating point compare text'
+\end{center}
+~\\
+
+\section*{Problem description}
+
+This program tests the special floating point compare script
+accompanying \textsc{DOM}judge. The problem input consists of first a
+line with a single integer, then that many lines, with on each line a
+floating point number (possibly also \texttt{$\pm$ inf} or
+\texttt{nan}). For each floating point number, a line should be
+written containing the reciprocal of the number, within $10^{-6}$
+precision.
+
+\section*{Sample input/output}
+
+Sample input and output for this problem:
+
+~\\
+\begin{tabular}{|p{0.47\textwidth}|p{0.47\textwidth}|}
+\hline
+\textbf{Input} & \textbf{Output} \\
+\hline
+\verbatiminput{fltcmp.in} &
+\verbatiminput{fltcmp.out} \\
+\hline
+\end{tabular}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
