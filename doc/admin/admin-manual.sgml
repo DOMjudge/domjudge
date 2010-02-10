@@ -193,7 +193,8 @@ DOMjudge:
 </itemize>
 On the domserver host:
 <itemize>
-<item> Install the MySQL database using <tt>sql/dj-setup-database -u root -r install</tt>.
+<item> Install the MySQL database using <tt>bin/dj-setup-database -u root -r
+       install</tt> in the domserver directory.
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it to your needs, reload web server:
        <tt>
