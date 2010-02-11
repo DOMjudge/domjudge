@@ -15,6 +15,13 @@
 #include "lib.error.h"
 #include "lib.config.h"
 
+#define CONFIG_MAXLEN 255
+
+typedef struct {
+	char name[CONFIG_MAXLEN+1];
+	char value[CONFIG_MAXLEN+1];
+} config_option;
+
 config_option *options = NULL;
 size_t noptions = 0, options_size = 0;
 
@@ -27,21 +34,21 @@ void config_init()
 
 int config_getindex(const char *option)
 {
-	int i;
+	size_t i;
 	for(i=0; i<noptions; i++) {
 		if ( strcmp(options[i].name,option)==0 ) return i;
 	}
 	return -1;
 }
 
-int config_newindex()
+int config_newindex(void)
 {
 	if ( noptions<options_size ) return noptions++;
 
 	// dynamically resize exponentially
 	options_size = 2*options_size+1;
 
-	options = (config_option *) realloc((void *)options,options_size*sizeof(config_option));
+	options = (config_option *) realloc((void *)options,options_size*sizeof *options);
 	if ( options==NULL ) abort();
 
 	return noptions++;
@@ -52,7 +59,7 @@ int config_isset(const char *option)
 	return config_getindex(option)>=0;
 }
 
-char *config_getvalue(const char *option)
+const char *config_getvalue(const char *option)
 {
 	int i = config_getindex(option);
 	if ( i<0 ) return NULL;
@@ -62,10 +69,13 @@ char *config_getvalue(const char *option)
 void config_setvalue(const char *option, const char *value)
 {
 	int i = config_getindex(option);
-	if ( i<0 ) i = config_newindex();
-	
-	strncpy(options[i].name, option, CONFIG_MAXLEN);
+	if ( i<0 ) {
+		i = config_newindex();
+		strncpy(options[i].name, option, CONFIG_MAXLEN);
+		options[i].name[CONFIG_MAXLEN] = 0;
+	}
 	strncpy(options[i].value, value, CONFIG_MAXLEN);
+	options[i].value[CONFIG_MAXLEN] = 0;
 }
 
 int config_readfile(const char *filename)
@@ -73,14 +83,15 @@ int config_readfile(const char *filename)
 	char line[2*CONFIG_MAXLEN+10];
 	char *option, *value, *tmp;
 	FILE *in;
-	int i, lineno = 0;
+	size_t i;
+	int lineno = 0;
 
 	if ( (in = fopen(filename,"rt"))==NULL ) error(errno,"opening '%s'",filename);
 
 	// read line by line
 	while ( fgets(line,2*CONFIG_MAXLEN+8,in)!=NULL ) {
 		lineno++;
-		
+
 		// Search first non-whitespace char
 		option = line;
 		while ( isspace(*option) ) option++;

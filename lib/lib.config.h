@@ -4,25 +4,16 @@
  * $Id$
  */
 
-#ifndef __LIB_CONFIG_H
-#define __LIB_CONFIG_H
-
-#include <stdlib.h>
+#ifndef LIB_CONFIG_H
+#define LIB_CONFIG_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define CONFIG_MAXLEN 255
-
-typedef struct {
-	char name[CONFIG_MAXLEN+1];
-	char value[CONFIG_MAXLEN+1];
-} config_option;
-
-void  config_init();
+void  config_init(void);
 int   config_isset(const char *);
-char *config_getvalue(const char *);
+const char *config_getvalue(const char *);
 void  config_setvalue(const char *, const char *);
 int   config_readfile(const char *);
 
@@ -30,4 +21,4 @@ int   config_readfile(const char *);
 }
 #endif
 
-#endif // __LIB_CONFIG_H
+#endif // LIB_CONFIG_H
