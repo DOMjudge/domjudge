@@ -147,6 +147,10 @@ The DOMjudge homepage can be found at:
 <htmlurl name="http://domjudge.sourceforge.net/"
 url="http://domjudge.sourceforge.net/">
 
+We have a low volume <htmlurl name="mailing list for announcements"
+url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
+of new releases.
+
 The authors can be reached through the development mailing list:
 <htmlurl name="domjudge-devel@lists.a-eskwadraat.nl"
 url="mailto:domjudge-devel@lists.a-eskwadraat.nl">. See
