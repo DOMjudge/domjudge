@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 3.0.3 - SVN
+-------------------
+
 Version 3.0.2 - 13 February 2010
 --------------------------------
  - Re-fix an incorrect LIBWWWDIR path.

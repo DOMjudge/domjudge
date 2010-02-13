@@ -42,7 +42,7 @@ define('DEBUG_TIMINGS',    2); // Display timings for loading webpages
 define('DEBUG_SQL',        4); // Display SQL queries on webpages
 define('DEBUG_JUDGE',      8); // Display judging scripts debug info
 
-define('DEBUG', 0);
+define('DEBUG', 1);
 
 // By default report all PHP errors, except notices.
 error_reporting(E_ALL & ~E_NOTICE);
