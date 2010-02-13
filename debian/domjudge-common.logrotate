@@ -1,8 +1,0 @@
-/var/log/domjudge/*.log {
-	weekly
-	missingok
-	rotate 6
-	compress
-	delaycompress
-	notifempty
-}

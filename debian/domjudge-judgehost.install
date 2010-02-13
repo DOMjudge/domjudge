@@ -1,2 +1,0 @@
-debian/src/dj_upgrade_chroot usr/sbin
-debian/src/debian-database.php usr/lib/domjudge

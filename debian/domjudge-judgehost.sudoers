@@ -1,8 +1,0 @@
-# Installed by domjudge-judgehost
-# User domjudge needs these commands to work with the chroot for Sun Java
- 
-domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
-domjudge ALL=(root) NOPASSWD: /bin/umount /var/lib/domjudge/javachroot*/proc
-domjudge ALL=(root) NOPASSWD: /bin/mount --bind /var/lib/domjudge/javachroot*/*
-domjudge ALL=(root) NOPASSWD: /bin/umount /var/lib/domjudge/judgings/*
-

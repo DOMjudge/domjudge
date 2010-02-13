@@ -1,3 +1,0 @@
-etc/common-config.php	etc/domjudge
-lib/*.php		usr/share/domjudge
-lib/alert		usr/share/domjudge

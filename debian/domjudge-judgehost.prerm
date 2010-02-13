@@ -1,8 +1,0 @@
-#!/bin/sh -e
-
-. /usr/share/debconf/confmodule
-. /usr/share/dbconfig-common/dpkg/frontend.prerm.mysql
-dbc_go domjudge-judgehost $@
-
-#DEBHELPER#
-
