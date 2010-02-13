@@ -8,9 +8,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-/** Include lib/lib.misc.php for make_link **/
-require_once(LIBDIR . '/lib.misc.php');
-
 /** Text symbol used in output to represent a circle */
 define('CIRCLE_SYM', '&#9679;');
 
@@ -101,8 +98,16 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 	while( $row = $res->next() ) {
 		
 		$sid = (int)$row['submitid'];
-		$isfinished = (IS_JURY || ! $row['result']);
-		$link = 'submission.php?id=' . $sid;
+		// always provide link if this is Jury. For team, provide link
+		// to a different page, provided that the result is actually
+		// present and valid.
+		if ( IS_JURY ) {
+			$link = ' href="submission.php?id=' . $sid . '"';
+		} elseif ( $row['result'] && $row['valid'] ) {
+			$link = ' href="submission_details.php?id=' . $sid . '"';
+		} else {
+			$link = '';
+		}
 		
 		echo "<tr class=\"" .
 			( $iseven ? 'roweven': 'rowodd' );
@@ -117,24 +122,21 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		echo '">';
 		
 		if ( IS_JURY ) {
-			echo "<td><a href=\"submission.php?id=$sid\">s$sid</a></td>";
+			echo "<td><a$link>s$sid</a></td>";
 		}
-		echo "<td>" . 
-			make_link(printtime($row['submittime']), $link, IS_JURY) . "</td>";
+		echo "<td><a$link>" . printtime($row['submittime']) . "</a></td>";
 		if ( IS_JURY ) {
 			echo '<td title="' .
 				htmlspecialchars($row['teamid'].': '.$row['teamname']) . '">' .
-				make_link(str_cut($row['teamname'],20), $link, IS_JURY) . '</td>';
+				"<a$link>" . str_cut($row['teamname'],20) . '</a></td>';
 		}
 		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
-			make_link($row['probid'], $link, IS_JURY) .
-			'</td>';
+			"<a$link>" . $row['probid'] . '</a></td>';
 		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
-			make_link($row['langid'], $link, IS_JURY) .
-			'</td>';
+			"<a$link>" . $row['langid'] . '</a></td>';
 		echo '<td>';
 		if ( IS_JURY ) {
-			echo '<a href="'.$link. '">';
+			echo "<a$link>";
 			if ( ! $row['result'] ) {
 				if ( $row['submittime'] >= $cdata['endtime'] ) {
 					echo printresult('too-late', TRUE);
@@ -149,19 +151,19 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 			if ( ! $row['result'] ||
 			     ( VERIFICATION_REQUIRED && ! $row['verified'] ) ) {
 				if ( $row['submittime'] >= $cdata['endtime'] ) {
-					echo printresult('too-late');
+					echo "<a>" . printresult('too-late') . "</a>";
 				} else {
-					echo printresult('', TRUE);
+					echo "<a>" . printresult('', TRUE) . "</a>";
 				}
 			} else {
-				echo '<a href="submission_details.php?id=' . $sid . '">';
+				echo "<a$link>";
 				echo printresult($row['result']) . '</a>';
 			}
 		}
 		echo "</td>";
 
 		if ( IS_JURY ) {
-			echo "<td><a href=\"$link\">";
+			echo "<td><a$link>";
 			// only display verification if we're done with judging
 			if (isset($row['verified']) && $row['result'] ) {
 				if( ! $row['verified'] ) $vercnt++;
@@ -170,7 +172,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 				echo '&nbsp;';
 			}
 			echo '</a></td>';
-			echo "<td><a href=\"$link\">";
+			echo "<td><a$link>";
 		
 			$judgehost = $row['judgehost'];
 			if ( !empty($judgehost) ) {

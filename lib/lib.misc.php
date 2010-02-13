@@ -509,23 +509,6 @@ function version()
 }
 
 /**
- * Links helper.
- */
-function make_link($name, $url, $condition = TRUE, $raw = FALSE)
-{
-	$result = $name;
-
-	if (!$raw)
-		$result = htmlspecialchars($result);
-
-	if ($condition && ($url != NULL)) {
-		$result = '<a href="' . htmlspecialchars($url) . '">' . $result . '</a>';
-	}
-
-	return $result;
-}
-
-/**
  * Word wrap only unquoted text.
  */
 function wrap_unquoted($text, $width = 75, $quote = '>')

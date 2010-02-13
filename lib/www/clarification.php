@@ -56,23 +56,33 @@ function putClar($clar)
 	echo "<table>\n";
 
 	echo '<tr><td scope="row">From:</td><td>';
-	echo make_link($from, "team.php?id=" . urlencode($clar['sender']),
-	               IS_JURY && $clar['sender'], TRUE);
+	if ( IS_JURY && $clar['sender']) {
+		echo '<a href="team.php?id=' . urlencode($clar['sender']) . '">' .
+			$from . '</a>';
+	} else {
+		echo $from;
+	}
 	echo "</td></tr>\n";
 
 	echo '<tr><td scope="row">To:</td><td>';
-	echo make_link($to, "team.php?id=" . urlencode($clar['recipient']),
-	               IS_JURY && $clar['recipient'], TRUE);
+	if ( IS_JURY && $clar['recipient']) {
+		echo '<a href="team.php?id=' . urlencode($clar['recipient']) . '">' .
+			$to . '</a>';
+	} else {
+		echo $to;
+	}
 	echo "</td></tr>\n";
 
 	echo '<tr><td scope="row">Subject:</td><td>';
 	if ( is_null($clar['probid']) ) {
 		echo "General issue";
 	} else {
-		echo "Problem " .
-			make_link($clar['probid'].": ".$clar['probname'],
-			          "problem.php?id=" . urlencode($clar['probid']),
-			          IS_JURY, TRUE);
+		if ( IS_JURY ) {
+			echo '<a href="problem.php?id=' . urlencode($clar['probid']) . '">' .
+				'Problem ' . $clar['probid'].": ".$clar['probname'] . '</a>';
+		} else {
+			echo 'Problem ' . $clar['probid'].": ".$clar['probname'];
+		}
 	}
 	echo "</td></tr>\n";
 
@@ -163,7 +173,8 @@ function putClarificationList($clars, $team = NULL)
 		else
 			echo '<tr>';
 		
-		echo '<td>' . make_link($clar['clarid'], "clarification.php?id=" . urlencode($clar['clarid'])) . '</td>';
+		echo '<td><a href="clarification.php?id=' . urlencode($clar['clarid'])  . '">' .
+			$clar['clarid'] . '</a></td>';
 
 		$sender = $clar['sender'];
 		$recipient = $clar['recipient'];
@@ -174,28 +185,27 @@ function putClarificationList($clars, $team = NULL)
 		} else {
 			if ($sender == NULL)
 				$sender = 'Jury';
-			else
-				$sender = make_link($sender, "team.php?id=" . urlencode($clar['sender']), IS_JURY);
 
 			if ($recipient == NULL)
 				$recipient = 'Jury';
-			else
-				$recipient = make_link($recipient, "team.php?id=" . urlencode($clar['recipient']), IS_JURY);
 		}
 
 
-		echo '<td class="teamid">' . $sender . '</td>';
-		echo '<td class="teamid">' . $recipient . '</td>';
+		echo '<td class="teamid"><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">' .
+			 $sender . '</a></td>';
+		echo '<td class="teamid"><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">' .
+			 $recipient . '</a></td>';
 
+		echo '<td><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">';
 		if ( is_null($clar['probid']) ) {
-			echo "<td>general</td>";
+			echo "general";
 		} else {
-			echo "<td>" .
-				make_link("problem ".$clar['probid'],
-				          "problem.php?id=" . urlencode($clar['probid']),
-				          IS_JURY) . "</td>";
+			echo "problem ".$clar['probid'];
 		}
-		echo '<td>' . printtime($clar['submittime']) . '</td>';
+		echo "</a></td>";
+		
+		echo '<td><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">';
+		echo printtime($clar['submittime']) . '</a></td>';
 		echo '<td><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">';
 		echo summarizeClarification($clar['body']);
 		echo "</a></td></tr>\n";
