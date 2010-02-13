@@ -40,7 +40,12 @@ echo "<h1>New Submission</h1>\n\n";
 echo addForm('upload.php','post',null,'multipart/form-data');
 
 ?>
+
 <table>
+<tr><td><label for="code">File</label>:</td>
+<td><input type="file" name="code" id="code" size="40" onChange='detectProblemLanguage(document.getElementById("code").value);' /></td>
+</tr>
+<tr><td colspan="2">&nbsp;</td></tr>
 <tr><td><label for="probid">Problem</label>:</td>
     <td><?php
 
@@ -71,9 +76,6 @@ $langs = array_merge(array(''=>'by extension'), $langs);
 echo addSelect('langext', $langs, '', true);
 
 ?></td>
-</tr>
-<tr><td><label for="code">File</label>:</td>
-    <td><?php echo addFileField('code', 40); ?></td>
 </tr>
 <tr><td colspan="2">&nbsp;</td></tr>
 <tr><td></td>

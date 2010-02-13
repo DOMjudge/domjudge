@@ -61,3 +61,23 @@ function hideTcDescEdit(descid)
 	span.innerHTML = node.innerHTML;
 	node.parentNode.appendChild(span);
 }
+
+// Autodetection of problem, language in websubmit
+function detectProblemLanguage(filename)
+{
+	var parts = filename.toLowerCase().split('.').reverse();
+	if ( parts.length < 2 ) return;
+
+	tryToSetChoiceForElement('langext', parts[0]);
+	tryToSetChoiceForElement('probid', parts[1]);
+}
+
+function tryToSetChoiceForElement(element, needle)
+{
+	var elt=document.getElementById(element);
+	for (i=0;i<elt.length;i++) {
+		if ( elt.options[i].value == needle ) {
+			elt.selectedIndex = i;
+		}
+	}
+}
