@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.0.2 - SVN
--------------------
+Version 3.0.2 - 13 February 2010
+--------------------------------
  - Re-fix an incorrect LIBWWWDIR path.
  - Correct presentation error exit code in test_solution.sh.
 
