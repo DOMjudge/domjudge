@@ -16,7 +16,7 @@ install-docs:
 $(PDF): %.pdf: %.tex %.in %.out ../logos/DOMjudgelogo.pdf
 	pdflatex -interaction=nonstopmode $< > /dev/null
 
-dist: $(PDF)
+dist-l: $(PDF)
 	$(MAKE) clean-l
 
 clean-l:

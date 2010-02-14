@@ -7,8 +7,7 @@
 export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            docs install-docs config submitclient dist \
-            clean distclean maintainer-clean
+            docs install-docs config submitclient
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global

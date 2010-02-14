@@ -50,23 +50,25 @@ CXXFLAGS += -I$(TOPDIR)/lib
 $(LIBOBJECTS):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
+# Default recursive targets; these should always at least call the
+# TARGET-l variant:
+REC_TARGETS += dist clean distclean maintainer-clean
+
 # Recursive rule, runs in depth-first traversal. TARGET-l is the local
 # variant that is called after traversing all subdirectories.
 $(REC_TARGETS): %:
-	@[ -n "$(QUIET)" ] || echo "Recursing target \`$@' into:" $(SUBDIRS)
+	@[ -n "$(QUIET)" -o -z "$(SUBDIRS)" ] || echo "Recursing target \`$@' into:" $(SUBDIRS)
 	@for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
 	$(MAKE) $@-l
 
-dist: dist-l
+# Predefine local variants of recursive targets, so that they are
+# available from the above call:
 dist-l:
 
-clean: clean-l
 clean-l:
 
-distclean: distclean-l
 distclean-l: clean-l clean-backupfiles
 
-maintainer-clean: maintainer-clean-l
 maintainer-clean-l: distclean-l
 
 clean-backupfiles:

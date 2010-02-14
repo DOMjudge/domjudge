@@ -575,6 +575,28 @@ section.
 For a list of basic make targets, run <tt>make</tt> in the source root
 directory without arguments.
 
+<sect1>Makefile structure
+<p>
+
+The following information is meant for developers or other people who
+want to make changes to the sources.
+
+The Makefiles in the source tree use a recursion mechanism to run make
+targets within the relevant subdirectories. The recursion is handled
+by the <tt>REC_TARGETS</tt> and <tt>SUBDIRS</tt> variables and the
+recursion step is executed in <tt>Makefile.global</tt>. Any target
+added to the <tt>REC_TARGETS</tt> list will be recursively called in
+all directories in <tt>SUBDIRS</tt>. Moreover, a local variant of the
+target with <tt>-l</tt> appended is called after recursing into the
+subdirectories, so recursion is depth-first.
+
+The targets <tt>dist, clean, distclean, maintainer-clean</tt> are
+recursive by default, which means that these call their local
+<tt>-l</tt> variants in all directories containing a Makefile. This
+allows for true depth-first traversal, which is necessary to correctly
+run the <tt>*clean</tt> targets: otherwise e.g. <tt>paths.mk</tt> will
+be deleted before subdirectory <tt>*clean</tt> targets are called that
+depend on information in it.
 
 <sect>Configuration
 <p>

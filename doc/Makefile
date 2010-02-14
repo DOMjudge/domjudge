@@ -2,7 +2,7 @@ ifndef TOPDIR
 TOPDIR=..
 endif
 
-REC_TARGETS = config dist docs install-docs clean distclean maintainer-clean
+REC_TARGETS = config docs install-docs
 
 include $(TOPDIR)/Makefile.global
 
