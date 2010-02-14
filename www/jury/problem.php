@@ -40,7 +40,7 @@ require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
-	
+
 	echo "<h2>" . ucfirst($cmd) . " problem</h2>\n\n";
 
 	echo addForm('edit.php', 'post', null, 'multipart/form-data');
@@ -52,8 +52,7 @@ if ( IS_ADMIN && !empty($cmd) ):
 		$row = $DB->q('TUPLE SELECT p.*, COUNT(testcaseid) AS testcases
 		               FROM problem p
 		               LEFT JOIN testcase USING (probid)
-		               WHERE probid = %s
-			       GROUP BY probid', $_GET['id']);
+		               WHERE probid = %s GROUP BY probid', $id);
 		echo addHidden('keydata[0][probid]', $row['probid']);
 		echo htmlspecialchars($row['probid']);
 	} else {
