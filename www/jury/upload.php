@@ -2,7 +2,7 @@
 /**
  * Upload a new problem in a zip archive
  *
- * $Id: upload.php 3062 2010-01-07 22:43:13Z werth $
+ * $Id$
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
