@@ -92,7 +92,8 @@ echo addSelect('langext', $langs, '', true);
 <tr><td colspan="2">&nbsp;</td></tr>
 <tr><td></td>
     <td><?php echo addSubmit('Submit solution', 'submit',
-               "return confirm('Make submission?')"); ?></td>
+               "return confirm(getUploadConfirmString());"); ?></td>
+
 </tr>
 </table>
 

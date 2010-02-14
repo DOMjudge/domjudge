@@ -95,3 +95,18 @@ function detectProblemLanguage(filename)
 
 }
 
+function getUploadConfirmString()
+{
+	var langelt = document.getElementById("langext");
+	var language = langelt.options[langelt.selectedIndex].text;
+	var fileelt = document.getElementById("code");
+	var filename = fileelt.value;
+	var probelt = document.getElementById("probid");
+	var problem = probelt.options[probelt.selectedIndex].text;
+	var question = 
+		'Filename: ' + filename + '\n\n' +
+		'Problem: ' + problem + '\n'+
+		'Language: ' + language + '\n' +
+		'\nMake submission?';
+	return question;
+}
