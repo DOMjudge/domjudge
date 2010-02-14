@@ -176,8 +176,8 @@ function putClarificationList($clars, $team = NULL)
 		echo '<td><a href="clarification.php?id=' . urlencode($clar['clarid'])  . '">' .
 			$clar['clarid'] . '</a></td>';
 
-		$sender = $clar['sender'];
-		$recipient = $clar['recipient'];
+		$sender = htmlspecialchars($clar['sender']);
+		$recipient = htmlspecialchars($clar['recipient']);
 		
 		if ($sender == NULL && $recipient == NULL) {
 			$sender = 'Jury';

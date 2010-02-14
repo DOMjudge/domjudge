@@ -128,12 +128,12 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		if ( IS_JURY ) {
 			echo '<td title="' .
 				htmlspecialchars($row['teamid'].': '.$row['teamname']) . '">' .
-				"<a$link>" . str_cut($row['teamname'],20) . '</a></td>';
+				"<a$link>" . htmlspecialchars(str_cut($row['teamname'],20)) . '</a></td>';
 		}
 		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
-			"<a$link>" . $row['probid'] . '</a></td>';
+			"<a$link>" . htmlspecialchars($row['probid']) . '</a></td>';
 		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
-			"<a$link>" . $row['langid'] . '</a></td>';
+			"<a$link>" . htmlspecialchars($row['langid']) . '</a></td>';
 		echo '<td>';
 		if ( IS_JURY ) {
 			echo "<a$link>";
