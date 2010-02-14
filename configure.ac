@@ -215,7 +215,10 @@ AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
 if test "$submit_enablehttp" = "1" ; then
 	AC_CHECK_CURL([7.9.7])
+	save_CPPFLAGS="$CPPFLAGS"
+	CPPFLAGS="$CPPFLAGS $CURL_CFLAGS"
 	AC_CHECK_HEADERS([curl/curl.h])
+	CPPFLAGS="$save_CPPFLAGS"
 fi
 
 # Checks for header files.
@@ -252,6 +255,7 @@ echo ""
 echo "Summary:"
 echo " * project.............: $PACKAGE_NAME $PACKAGE_VERSION"
 echo " * prefix..............: $prefix"
+echo " * CPPFLAGS............: $CPPFLAGS"
 echo " * CFLAGS..............: $CFLAGS"
 echo " * CXXFLAGS............: $CXXFLAGS"
 echo " * LDFLAGS.............: $LDFLAGS"
@@ -263,18 +267,16 @@ echo ""
 if test $SUBMIT_DEFAULT -eq 0 ; then # {{{
 	echo " * submitclient........: disabled"
 else
-	echo " * submitclient........: enabled"
+	echo -n " * submitclient........: enabled (default: "
+	if test $SUBMIT_DEFAULT -eq 1 ; then echo "dolstra)" ; fi
+	if test $SUBMIT_DEFAULT -eq 2 ; then echo "http)" ; fi
 	if test $SUBMIT_ENABLE_WEB -eq 0 ; then
 		echo "    - http.............: no"
-	elif test $SUBMIT_DEFAULT -eq 2 ; then
-		echo "    - http.............: yes (preferred)"
 	else
-		echo "    - http.............: yes"
+		echo "    - http.............: yes, cURL version: $CURL_VERSION"
 	fi
 	if test $SUBMIT_ENABLE_CMD -eq 0 ; then
 		echo "    - dolstra..........: no"
-	elif test $SUBMIT_DEFAULT -eq 1 ; then
-		echo "    - dolstra..........: yes (preferred)"
 	else
 		echo "    - dolstra..........: yes"
 	fi
