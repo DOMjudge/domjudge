@@ -141,14 +141,14 @@ function calcScoreRow($cid, $team, $prob) {
  */
 function getFinalResult($runresults)
 {
-	global $RESULTS_PRIO;
+	global $RESULTS_PRIO, $RESULTS_REMAP;
 
 	// Whether we have NULL results
 	$havenull = FALSE;
 
 	// This stores the current result and priority to be returned:
 	$bestres  = NULL;
-	$bestprio = 999999999;
+	$bestprio = -1;
 
 	// Find first highest priority result:
 	foreach ( $runresults as $tc => $res ) {
@@ -157,28 +157,36 @@ function getFinalResult($runresults)
 		} else {
 			$prio = $RESULTS_PRIO[$res];
 			if ( empty($prio) ) error("Unknown result '$res' found.");
-			if ( $prio<$bestprio ) {
+			if ( $prio>$bestprio ) {
 				$bestres  = $res;
 				$bestprio = $prio;
 			}
 		}
 	}
 
-	if ( !$havenull ) return $bestres;
+//	var_dump($havenull,$bestres,$bestprio);
+	// Not all results are in yet, and we don't do lazy evaluation:
+	if ( $havenull && ! LAZY_EVAL_RESULTS ) return NULL;
 
 	if ( LAZY_EVAL_RESULTS ) {
 		// If we have NULL results, check whether the highest priority
-		// result has maximal priority, hence can already be returned
-		// as final. Use a local copy of the RESULTS_PRIO array,
-		// keeping the original untouched.
+		// result has maximal priority. Use a local copy of the
+		// RESULTS_PRIO array, keeping the original untouched.
 		$tmp = $RESULTS_PRIO;
-		sort($tmp);
+		rsort($tmp);
 		$maxprio = reset($tmp);
 
-		if ( $bestprio==$maxprio ) return $bestres;
+//		echo "maxprio = $maxprio\n";
+		// No highest priority result found: no final answer yet.
+		if ( $havenull && $bestprio<$maxprio ) return NULL;
 	}
 
-	return NULL;
+	// We have a (possibly lazy) final answer, check for remapping.
+	if ( array_key_exists($bestres, $RESULTS_REMAP) ) {
+		return $RESULTS_REMAP[$bestres];
+	} else {
+		return $bestres;
+	}
 }
 
 /**
