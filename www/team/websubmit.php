@@ -29,6 +29,18 @@ if ( difftime($cdata['starttime'], now()) > 0 ) {
 	exit;
 }
 
+echo "<script type=\"text/javascript\">\n<!--\n";
+echo "function getLangNameFromExtension(ext)\n{\n";
+echo "\tswitch(ext) {\n";
+$exts = explode(" ", LANG_EXTS);
+foreach($exts as $ext) {
+	$langexts = explode(',', $ext);
+	for ($i = 1; $i < count($langexts); $i++) {
+		echo "\t\tcase '" . $langexts[$i]. "': return '" .$langexts[0] . "';\n";
+	}
+}
+echo "\t\tdefault: return '';\n\t}\n}\n";
+echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
 echo "<div id=\"teamscoresummary\">\n";

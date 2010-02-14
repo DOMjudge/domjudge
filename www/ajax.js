@@ -67,17 +67,31 @@ function detectProblemLanguage(filename)
 {
 	var parts = filename.toLowerCase().split('.').reverse();
 	if ( parts.length < 2 ) return;
+	
+	// problem ID
 
-	tryToSetChoiceForElement('langext', parts[0]);
-	tryToSetChoiceForElement('probid', parts[1]);
-}
+	var elt=document.getElementById('probid');
+	// index 0 is the "autodetect" option
+	if ( elt.selectedIndex > 0 ) return;
 
-function tryToSetChoiceForElement(element, needle)
-{
-	var elt=document.getElementById(element);
 	for (i=0;i<elt.length;i++) {
-		if ( elt.options[i].value == needle ) {
+		if ( elt.options[i].value == parts[1] ) {
 			elt.selectedIndex = i;
 		}
 	}
+
+	// language extension
+
+	var elt=document.getElementById('langext');
+	// index 0 is the "autodetect" option
+	if ( elt.selectedIndex > 0 ) return;
+	
+	var langname = getLangNameFromExtension(parts[0]);
+	for (i=0;i<elt.length;i++) {
+		if ( elt.options[i].text == langname ) {
+			elt.selectedIndex = i;
+		}
+	}
+
 }
+
