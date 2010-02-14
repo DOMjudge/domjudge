@@ -285,7 +285,7 @@ function judge($mark, $row, $judgingid)
 	// FIXME(?): result is still returned as in EXITCODES.
 	if ( ($result = $EXITCODES[$retval])=='correct' ) {
 
-	// Fetch testcases from database.
+	logmsg(LOG_DEBUG, "Fetching testcases from database");
 	$testcases = $DB->q("KEYTABLE SELECT rank AS ARRAYKEY,
  	                     testcaseid, md5sum_input, md5sum_output, probid, rank
 	                     FROM testcase WHERE probid = %s ORDER BY rank", $row['probid']);
@@ -297,6 +297,7 @@ function judge($mark, $row, $judgingid)
 
 	foreach ( $testcases as $tc ) {
 
+	logmsg(LOG_DEBUG, "Running testcase $tc[rank]...");
 	$testcasedir = $workdir . "/testcase" . sprintf('%03d', $tc['rank']);
 
 	// Get both in- and output files, only if we didn't have them already.
@@ -360,6 +361,7 @@ function judge($mark, $row, $judgingid)
 	       getFileContents($testcasedir . '/program.out'),
 	       getFileContents($testcasedir . '/compare.out'),
 	       getFileContents($testcasedir . '/error.out'));
+	logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $runresults[$tc['rank']]);
 
 	// Optimization: stop judging when the result is already known.
 	// This should report a final result when all runresults are non-null!
