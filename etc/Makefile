@@ -53,9 +53,17 @@ install-judgehost:
 	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \
 		dbpasswords.secret
 
+# Let only distclean (_not_ the local variant) depend on password
+# removal, so these don't get removed with maintainer-clean.
+distclean: clean-passwords
+
 distclean-l:
-	-rm -f $(SUBST_CONFIGS) config.h \
-		dbpasswords.secret htpasswd-jury
+	-rm -f $(SUBST_CONFIGS) config.h
+
+clean-passwords:
+	-rm -f dbpasswords.secret htpasswd-jury
 
 maintainer-clean-l:
 	-rm -f etc/config.h.in
+
+.PHONY: clean-passwords

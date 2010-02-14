@@ -117,6 +117,7 @@ maintainer-conf: configure
 	            --with-judgehost_tmpdir=$(PWD)/output/tmp \
 	            --with-judgehost_judgedir=$(PWD)/output/judging \
 	            --with-domserver_submitdir=$(PWD)/output/submissions \
+	            --enable-submitclient=http,dolstra \
 	            CFLAGS='-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security' \
 	            CXXFLAGS='-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security' \
 	            LDFLAGS='-pie' \
