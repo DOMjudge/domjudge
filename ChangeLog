@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.0.3 - SVN
 -------------------
+ - Fix bug in handling of libmagic cookie.
 
 Version 3.0.2 - 13 February 2010
 --------------------------------
@@ -30,7 +31,6 @@ Version 3.0.0 - 21 October 2009
  - Added 'make check' dependency on submitclient.
  - Only show the configured submission methods in the team manual.
  - Fix install of gendbpasswords and use /dev/urandom.
- - Fix bug in handling of libmagic cookie.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------
