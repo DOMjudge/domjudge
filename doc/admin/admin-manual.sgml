@@ -465,7 +465,7 @@ Pascal; change the list as appropriate.
 
 <code>
 apt-get install make sudo php5-cli php5-mysql ntp xsltproc procps sharutils \
-	gcc g++ gcj openjdk-6-jre ghc fp-compiler
+	gcc g++ gcj openjdk-6-jre-headless ghc fp-compiler
 </code>
 
 <sect>Installation system
@@ -686,7 +686,7 @@ and (when not using the wrapper) the appendix on the
 <ref id="validator" name="ICPC validator interface">.
 
 DOMjudge supports a <tt>presentation-error</tt> result. The default
-<tt>compare</tt> program returns this results when output only differs
+<tt>compare</tt> program returns this result when output only differs
 by whitespace; this is counted as an incorrect submission. The wrapper
 script <tt>compare_program.sh</tt> does not support presentation error
 results however.
@@ -1226,7 +1226,7 @@ script (<tt>lib/judge/compile_c.sh</tt>, etc.), so when adding
 a new language, check that these match.
 
 <tt>name</tt> is the displayed name of the language;
-<tt>extension</tt> the internally used extension for that language,
+<tt>extension</tt> the internally used filename extension for that language,
 which has to match the first extension as listed in the global
 configuration file.
 
