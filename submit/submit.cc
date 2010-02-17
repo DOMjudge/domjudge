@@ -551,20 +551,23 @@ int file_istext(char *filename)
 {
 	magic_t cookie;
 	const char *filetype;
+	int res;
 
-	if ( (cookie = magic_open(MAGIC_MIME))==NULL ) goto error;
+	if ( (cookie = magic_open(MAGIC_MIME))==NULL ) goto magicerror;
 
-	if ( magic_load(cookie,NULL)!=0 ) goto error;
-	
-	if ( (filetype = magic_file(cookie,filename))==NULL ) goto error;
+	if ( magic_load(cookie,NULL)!=0 ) goto magicerror;
+
+	if ( (filetype = magic_file(cookie,filename))==NULL ) goto magicerror;
 
 	logmsg(LOG_DEBUG,"mime-type of '%s'",filetype);
-	
+
+	res = ( strncmp(filetype,"text/",5)==0 );
+
 	magic_close(cookie);
 
-	return strncmp(filetype,"text/",5)==0;
+	return res;
 
-error:
+magicerror:
 	warning(magic_errno(cookie),magic_error(cookie));
 
 	return 1; // return 'text' by default on error
