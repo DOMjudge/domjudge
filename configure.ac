@@ -214,7 +214,8 @@ AC_CHECK_PROGS(HTPASSWD,[htpasswd htpasswd2],[no htpasswd binary found])
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
 if test "$submit_enablehttp" = "1" ; then
-	AC_CHECK_CURL([7.9.7])
+	AX_LIB_CURL([7.9.7])
+	AC_SUBST(CURL_PREFIX,m4_esyscmd([curl-config --prefix]))
 	save_CPPFLAGS="$CPPFLAGS"
 	CPPFLAGS="$CPPFLAGS $CURL_CFLAGS"
 	AC_CHECK_HEADERS([curl/curl.h])
@@ -273,7 +274,7 @@ else
 	if test $SUBMIT_ENABLE_WEB -eq 0 ; then
 		echo "    - http.............: no"
 	else
-		echo "    - http.............: yes, cURL version: $CURL_VERSION"
+		echo "    - http.............: yes, cURL version: $curl_version"
 	fi
 	if test $SUBMIT_ENABLE_CMD -eq 0 ; then
 		echo "    - dolstra..........: no"

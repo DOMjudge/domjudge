@@ -109,6 +109,9 @@ to name them here too:
 <item> sorttable.js by Stuart Langridge.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
        Erik van Sebille.
+<item> Several M4 autoconf macros from the <htmlurl name="Autoconf archive"
+       url="http://www.nongnu.org/autoconf-archive/"> by various
+       people are included under <tt>m4/</tt>.
 </itemize>
 
 <sect1>Non-GPL licenced parts of DOMjudge
@@ -125,6 +128,9 @@ The <tt>sorttable.js</tt> script is copyright by Stuart Langridge and
 licenced under the MIT/X11 licence, see <tt>COPYING.MIT</tt>. This
 software was downloaded from:
 <url url="http://www.kryogenix.org/code/browser/sorttable/">
+
+The M4 autoconf macros are licenced under all-permissive and GPL3+
+licences; see the respective files for details.
 
 <sect1>About the name and logo
 <p>
