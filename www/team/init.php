@@ -35,7 +35,12 @@ require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/print.php');
 require_once(LIBWWWDIR . '/clarification.php');
 require_once(LIBWWWDIR . '/scoreboard.php');
-require_once(LIBWWWDIR . '/validate.team.php');
+require_once(LIBWWWDIR . '/auth.team.php');
+
+// The functions do_login and show_loginpage, if called, do not return.
+if ( @$_POST['cmd']=='login' ) do_login();
+
+if ( !logged_in() ) show_loginpage();
 
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];

@@ -41,6 +41,10 @@ logmsg(LOG_DEBUG, "arguments: '$team' '$ip' '$prob' '$langext' '$file'");
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];
 
+if ( AUTH_METHOD!='IPADDRESS' ) {
+	error("Only IP-based authentication is supported.");
+}
+
 // Verify and register IP address here, as other authentication
 // methods might conflict with this.
 $teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s', $team);

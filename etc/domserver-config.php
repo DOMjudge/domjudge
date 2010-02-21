@@ -19,17 +19,28 @@ define('WEBBASEURI', 'http://example.com/domjudge/');
 // 2 = Always
 define('SHOW_COMPILE', 2);
 
-// Strict checking of team's IP addresses.
+// Authentication scheme to be used for teams. The following methods
+// are supported:
+// IPADDRESS
+//   Use the computer's IP address to authenticate a team. This
+//   removes the hassle of logging in with user/pass, but requires
+//   that each team has a unique, fixed IP address, that cannot be
+//   spoofed, e.g. by logging in on another team's computer.
+// PHP_SESSIONS
+//   Use PHP sessions with user/password authentication. This allows
+//   teams to login from different machines and might be useful for
+//   online contests or programming courses.
+define('AUTH_METHOD', 'PHP_SESSIONS');
+
+// Strict checking of team's IP addresses (when using the IPADDRESS
+// authentication method).
 // The commandline submitdaemon can optionally check for correct source
 // IP of teams (additionally to the security of "callback" via scp, see
-// README on security).
-// The 'false' setting allows automatic updating during submission of IP
-// addresses of teams that have their address unset. Otherwise these
+// the admin manual appendix on the submitdaemon).
+// The 'false' setting allows automatic updating of IP addresses during
+// submission of teams that have their address unset. Otherwise these
 // addresses have to be configured beforehand.
 define('STRICTIPCHECK', false);
-
-// Authentication per php session handling?
-define('PHP_SESSIONS', false);
 
 define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl Bash,sh');
 

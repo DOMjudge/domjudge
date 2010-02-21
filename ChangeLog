@@ -29,6 +29,7 @@ Version 3.1.0 - SVN
    GeSHi syntax highlighter.
  - Add sample PDF problem texts for inclusion in the database.
  - Fix bug in handling of libmagic cookie.
+ - Refactor team authentication code to allow for other methods.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------

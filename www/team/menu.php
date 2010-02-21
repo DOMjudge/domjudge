@@ -19,7 +19,7 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 	echo "<a target=\"_top\" href=\"websubmit.php\" accesskey=\"u\">submit</a>\n";
 }
 
-if ( PHP_SESSIONS ) {
+if ( have_logout() ) {
 	echo "<a target=\"_top\" href=\"logout.php\" accesskey=\"l\">logout</a>\n";
 }
 
