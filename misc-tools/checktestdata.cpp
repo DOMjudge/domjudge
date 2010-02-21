@@ -89,6 +89,8 @@
 
  */
 
+#include "../etc/config.h"
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -99,8 +101,16 @@
 #include <ctype.h>
 #include <getopt.h>
 #include <stdarg.h>
+#ifdef HAVE_BOOST_REGEX
 #include <boost/regex.hpp>
+#else
+#error "Libboost regex library not available."
+#endif
+#ifdef HAVE_GMPXX_H
 #include <gmpxx.h>
+#else
+#error "LibGMP C++ extensions not available."
+#endif
 
 #include "parser.h"
 

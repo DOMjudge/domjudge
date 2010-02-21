@@ -222,6 +222,15 @@ if test "$submit_enablehttp" = "1" ; then
 	CPPFLAGS="$save_CPPFLAGS"
 fi
 
+AX_BOOST_BASE([1.33.1])
+AX_BOOST_REGEX
+
+# Check for gmpxx headers separately, as they are C++.
+AC_LANG_PUSH([C++])
+AC_CHECK_HEADERS([gmpxx.h])
+AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmp -lgmpxx'),[],[-lgmp])
+AC_LANG_POP([C++])
+
 # Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT

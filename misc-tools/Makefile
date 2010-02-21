@@ -16,7 +16,9 @@ $(SUBST_FILES): %: %.in ../paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
-checktestdata: checktestdata.cpp yylex.cc parse.cc -lboost_regex -lgmp -lgmpxx
+checktestdata: CPPFLAGS += $(BOOST_CPPFLAGS)
+checktestdata: LDFLAGS  += $(BOOST_LDFLAGS)
+checktestdata: checktestdata.cpp yylex.cc parse.cc $(LIBGMPXX) $(BOOST_REGEX_LIB)
 
 yylex.cc: checktestdata.l parsetype.h
 	flex++ $<
