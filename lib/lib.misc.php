@@ -415,10 +415,9 @@ function initsignals()
  * validates it and puts it into the database. Additionally it
  * moves it to a backup storage.
  */
-function submit_solution($team, $ip, $prob, $langext, $file)
+function submit_solution($team, $prob, $langext, $file)
 {
 	if( empty($team)    ) error("No value for Team.");
-	if( empty($ip)      ) error("No value for IP.");
 	if( empty($prob)    ) error("No value for Problem.");
 	if( empty($langext) ) error("No value for Language.");
 	if( empty($file)    ) error("No value for Filename.");
@@ -437,20 +436,10 @@ function submit_solution($team, $ip, $prob, $langext, $file)
 						  extension = %s AND allow_submit = 1', $langext) ) {
 		error("Language '$langext' not found in database or not submittable.");
 	}
-	if( ! $teamrow = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',$team) ) {
+	if( ! $login = $DB->q('MAYBEVALUE SELECT login FROM team WHERE login = %s',$team) ) {
 		error("Team '$team' not found in database.");
 	}
-	$team = $teamrow['login'];
-	if( ! compareipaddr($teamrow['ipaddress'],$ip) ) {
-		if ( $teamrow['ipaddress'] == NULL && ! STRICTIPCHECK ) {
-			$hostname = gethostbyaddr($ip);
-			if ( $hostname == $ip ) $hostname = NULL;
-			$DB->q('UPDATE team SET ipaddress = %s, hostname = %s WHERE login = %s',$ip,$hostname,$team);
-			logmsg (LOG_NOTICE, "Registered team '$team' at address '$ip'.");
-		} else {
-			error("Team '$team' not registered at this IP address.");
-		}
-	}
+	$team = $login;
 	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem WHERE probid = %s
 							AND cid = %i AND allow_submit = "1"', $prob, $cid) ) {
 		error("Problem '$prob' not found in database or not submittable [c$cid].");

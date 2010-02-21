@@ -21,7 +21,7 @@ if ( isset($_POST['submitter']) ) {
 	$ip = $DB->q('VALUE SELECT ipaddress FROM team
 	              WHERE login = %s', $_POST['submitter']);
 
-	submit_solution($_POST['submitter'], $ip, $_POST['probid'], $_POST['langid'], $tmpfname);
+	submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'], $tmpfname);
 	unlink($tmpfname);
 
 	header('Location: '.getBaseURI().'jury/submissions.php');

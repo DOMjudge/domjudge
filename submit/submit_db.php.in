@@ -41,7 +41,23 @@ logmsg(LOG_DEBUG, "arguments: '$team' '$ip' '$prob' '$langext' '$file'");
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];
 
-$sid = submit_solution($team, $ip, $prob, $langext, $file);
+// Verify and register IP address here, as other authentication
+// methods might conflict with this.
+$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s', $team);
+
+if( ! compareipaddr($teamdata['ipaddress'],$ip) ) {
+	if ( $teamdata['ipaddress'] == NULL && ! STRICTIPCHECK ) {
+		$hostname = gethostbyaddr($ip);
+		if ( $hostname == $ip ) $hostname = NULL;
+		$DB->q('UPDATE team SET ipaddress = %s, hostname = %s WHERE login = %s',
+		       $ip, $hostname, $team);
+		logmsg (LOG_NOTICE, "Registered team '$team' at address '$ip'.");
+	} else {
+		error("Team '$team' not registered at this IP address.");
+	}
+}
+
+$sid = submit_solution($team, $prob, $langext, $file);
 
 logmsg(LOG_NOTICE, "submitted $team/$prob/$langext, id s$sid/c$cid");
 
