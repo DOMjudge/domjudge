@@ -12,6 +12,7 @@
 define('NONINTERACTIVE', isset($_REQUEST['noninteractive']));
 
 require('init.php');
+$title = 'Submit';
 
 if ( ! ENABLE_WEBSUBMIT_SERVER ) {
 	error("Websubmit disabled.");
@@ -23,12 +24,14 @@ if ( !isset($_POST['submit']) ) {
 	return;
 }
 if ( is_null($cid) ) {
+	require(LIBWWWDIR . '/header.php');
 	echo "<p><em>No active contest</em></p>\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 $now = now();
 if ( difftime($cdata['starttime'], $now) > 0 ) {
+	require(LIBWWWDIR . '/header.php');
 	echo "<p><em>Contest has not yet started.</em></p>\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
@@ -42,14 +45,13 @@ function err($string) {
 	echo '<div id="uploadstatus">';
 	logmsg(LOG_WARNING, $string);
 	echo '</div>';
-	
+
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
 ini_set("upload_max_filesize", SOURCESIZE * 1024);
 
-$title = 'Submit';
 require(LIBWWWDIR . '/header.php');
 
 echo "<h2>Submit - upload status</h2>\n\n";
