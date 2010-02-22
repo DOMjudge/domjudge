@@ -18,6 +18,9 @@ if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
 $config = '@domserver_etcdir@/domserver-static.php';
 
+// This script might be run before or after autoconf variable
+// substitution, so we try to read the config from all possible
+// places:
 if ( is_readable($config) ) {
 	require($config);
 	require(ETCDIR . '/domserver-config.php');
@@ -29,9 +32,9 @@ if ( is_readable($config) ) {
 }
 
 $configvars = array(
+	'WEBBASEURI'                => $_SERVER['argv'][1],
 	'DOMJUDGE_VERSION'          => 'unknown',
 	'SOURCESIZE'                => 256,
-	'WEBBASEURI'                => 'http://example.com/domjudge/',
 	'COMPILETIME'               => 30,
 	'MEMLIMIT'                  => 524288,
 	'FILELIMIT'                 => 4096,

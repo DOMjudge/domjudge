@@ -214,8 +214,8 @@ function do_logout()
 
 	require(LIBWWWDIR . '/header.php');
 	echo "<h1>Logged out</h1>\n\n<p>Successfully logged out as team " .
-	    htmlspecialchars($login) . ".</p>\n<p><a href=\"" . getBaseURI() .
-	    "team/\">Click here to login again.</a></p>\n\n";
+	    htmlspecialchars($login) . ".</p>\n" .
+	    "<p><a href=\"./\">Click here to login again.</a></p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
