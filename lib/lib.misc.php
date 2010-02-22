@@ -8,10 +8,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-
-/** Constant to define MySQL datetime format in PHP date() function notation. */
-define('MYSQL_DATETIME_FORMAT', 'Y-m-d H:i:s');
-
+/** Constant to define MySQL datetime format in strftime() function notation. */
+define('MYSQL_DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S');
 
 /**
  * helperfunction to read all contents from a file.
@@ -164,7 +162,6 @@ function getFinalResult($runresults)
 		}
 	}
 
-//	var_dump($havenull,$bestres,$bestprio);
 	// Not all results are in yet, and we don't do lazy evaluation:
 	if ( $havenull && ! LAZY_EVAL_RESULTS ) return NULL;
 
@@ -195,7 +192,7 @@ function getFinalResult($runresults)
  */
 function now()
 {
-	return date(MYSQL_DATETIME_FORMAT);
+	return strftime(MYSQL_DATETIME_FORMAT);
 }
 
 /**
