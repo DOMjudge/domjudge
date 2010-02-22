@@ -24,7 +24,7 @@ if ( isset($_POST['submitter']) ) {
 	submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'], $tmpfname);
 	unlink($tmpfname);
 
-	header('Location: '.getBaseURI().'jury/submissions.php');
+	header('Location: submissions.php');
 	exit;
 }
 

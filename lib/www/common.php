@@ -12,17 +12,6 @@
 define('CIRCLE_SYM', '&#9679;');
 
 /**
- * Return the base URI for the DOMjudge Webinterface.
- * This is the full URL to the root of the 'www' dir,
- * including the trailing slash. Examples:
- * http://domjudge.example.com/
- * http://www.example.edu/contest/domjudge/
- */
-function getBaseURI() {
-	return WEBBASEURI;
-}
-
-/**
  * Print a list of submissions, either all or only those that
  * match <key> = <value>. Output is always limited to the
  * current or last contest.

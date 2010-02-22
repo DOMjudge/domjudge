@@ -19,7 +19,7 @@ if ( isset($_POST['cmd']) ) {
 } elseif ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
 } else {
-	$refresh = '15;url='.getBaseURI().'jury/'.$pagename.'?id='.urlencode($id);
+	$refresh = '15;url='.$pagename.'?id='.urlencode($id);
 }
 
 $title = 'Problem '.htmlspecialchars(@$id);

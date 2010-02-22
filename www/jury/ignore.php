@@ -37,5 +37,5 @@ $sdata = $DB->q('TUPLE SELECT submitid, cid, teamid, probid
 calcScoreRow($sdata['cid'], $sdata['teamid'], $sdata['probid']);
 
 /* redirect back. */
-header('Location: '.getBaseURI().'jury/submission.php?id=' .
+header('Location: submission.php?id=' .
 	urlencode($sdata['submitid']));

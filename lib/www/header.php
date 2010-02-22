@@ -30,8 +30,8 @@ if(!isset($ajaxtitle)) {
 <head>
 	<!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
 <title><?php echo $title?></title>
-<link rel="shortcut icon" href="<?php echo getBaseURI()?>images/favicon.png" type="image/png" />
-<link rel="stylesheet" href="<?php echo getBaseURI()?>style.css" type="text/css" />
+<link rel="shortcut icon" href="../images/favicon.png" type="image/png" />
+<link rel="stylesheet" href="../style.css" type="text/css" />
 <?php
 if ( IS_JURY ) {
 	echo "<link rel=\"stylesheet\" href=\"style_jury.css\" type=\"text/css\" />\n";
@@ -39,14 +39,14 @@ if ( IS_JURY ) {
 		echo "<link rel=\"stylesheet\" href=\"style_printer.css\" type=\"text/css\" media=\"print\" />\n";
 	}
 	echo "<script type=\"text/javascript\" src=\"" .
-		getBaseURI() . "sorttable.js\"></script>\n";
+		"../sorttable.js\"></script>\n";
 }
 
 /* NOTE: here a local menu.php is included
  *       both jury and team have their own menu.php
  */
 if ($menu) {?>
-<script type="text/javascript" src="<?php echo getBaseURI()?>ajax.js"></script>
+<script type="text/javascript" src="../ajax.js"></script>
 </head>
 <body onload="setInterval('updateClarifications(\'<?php echo $ajaxtitle?>\')', 20000)">
 <?php include("menu.php");

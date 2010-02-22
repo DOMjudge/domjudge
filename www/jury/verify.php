@@ -59,5 +59,5 @@ if ( $verifier ) {
 }
 
 /* redirect back. */
-header('Location: '.getBaseURI().'jury/submission.php?id=' . 
+header('Location: submission.php?id=' . 
 	urlencode($jdata['submitid']) . '&jid=' . urlencode($id));

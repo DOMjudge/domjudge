@@ -11,7 +11,7 @@
 $id = @$_REQUEST['id'];
 
 require('init.php');
-$refresh = '15;url='.getBaseURI().'jury/judgehost.php?id='.urlencode($id);
+$refresh = '15;url=judgehost.php?id='.urlencode($id);
 
 if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
 	error("Missing or invalid judge hostname");

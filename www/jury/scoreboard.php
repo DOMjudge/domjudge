@@ -10,7 +10,7 @@
  */
 
 require('init.php');
-$refresh = '30;url=' . getBaseURI() . 'jury/scoreboard.php';
+$refresh = '30;url=scoreboard.php';
 $title = 'Scoreboard';
 $printercss = TRUE;
 

@@ -9,7 +9,7 @@
  */
 
 require('init.php');
-$refresh = '30;url=' . getBaseURI() . 'team/scoreboard.php';
+$refresh = '30;url=scoreboard.php';
 $title = 'Scoreboard';
 require(LIBWWWDIR . '/header.php');
 

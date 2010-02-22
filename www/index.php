@@ -11,11 +11,6 @@
 require_once('configure.php');
 
 require_once(LIBDIR . '/lib.error.php');
-if ( !defined('WEBBASEURI') || WEBBASEURI == "" || stristr(WEBBASEURI, 'example.com') !== FALSE ) {
-	error('WEBBASEURI not configured. ' .
-		'Please set the WEBBASEURI in ' . htmlspecialchars(ETCDIR . '/domserver-config.php') .
-		' to the full URI to your DOMjudge installation.');
-}
 require_once(LIBDIR . '/use_db.php');
 setup_database_connection('public');
 
@@ -30,4 +25,4 @@ if( $res->count() > 0 ) {
 }
 
 header('HTTP/1.1 302 Please see this page');
-header('Location: ' . getBaseURI() . $target);
+header('Location: ' . $target);

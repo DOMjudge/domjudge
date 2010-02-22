@@ -91,7 +91,7 @@ if ( !empty($referrer) ) {
 	$returnto = ($t == 'team_category' ? 'team_categories' : $t.'s'). '.php';
 }
 
-header('Location: '.getBaseURI().'jury/'.$returnto);
+header('Location: '.$returnto);
 
 /**
  * Check an array with field->value data to make sure there's no

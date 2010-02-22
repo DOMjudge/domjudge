@@ -12,7 +12,7 @@
 require('init.php');
 $title="Scoreboard";
 // set auto refresh
-$refresh="30;url=" . getBaseURI() . 'public/';
+$refresh="30;url=./";
 $menu = false;
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');

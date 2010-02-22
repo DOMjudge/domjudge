@@ -9,7 +9,7 @@
  */
 
 require('init.php');
-$refresh = '30;url=' . getBaseURI() . 'team/clarifications.php';
+$refresh = '30;url=clarifications.php';
 $ajaxtitle = 'Clarifications';
 $title = $ajaxtitle.($nunread_clars ? ' ('.$nunread_clars.' new)' : '');
 require(LIBWWWDIR . '/header.php');

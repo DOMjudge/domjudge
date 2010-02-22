@@ -69,4 +69,4 @@ while ( $jud = $res->next() ) {
 
 
 /** redirect back. */
-header('Location: '.getBaseURI().'jury/'.$table.'.php?id='.urlencode($id));
+header('Location: '.$table.'.php?id='.urlencode($id));

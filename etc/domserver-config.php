@@ -2,14 +2,6 @@
 
 require_once("common-config.php");
 
-// Base URI where the DOMjudge webinterface is located.
-// This is the full URL to the root of the 'www' dir.
-// Examples:
-//    https://domjudge.example.com/
-//    http://www.example.edu/contest/domjudge/
-// Always end this URI with a slash!!!
-define('WEBBASEURI', 'http://example.com/domjudge/');
-
 // Show compile output in team webinterface.
 // Note that this might give teams the possibility to gain information
 // about the judging system; e.g. which functions are usable or

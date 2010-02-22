@@ -29,7 +29,7 @@ if ( !empty($_FILES['archive']['name']) ) {
 		$probid, 'unknown', (int)$cdata['cid']);
 	importZippedProblem($probid, $zip);
 	$zip->close();
-	header('Location: '.getBaseURI().'jury/problems.php');
+	header('Location: problems.php');
 }
 
 

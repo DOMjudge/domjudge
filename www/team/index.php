@@ -7,7 +7,7 @@
  */
 
 require('init.php');
-$refresh = '30;url=' . getBaseURI() . 'team/index.php';
+$refresh = '30;url=index.php';
 $title = 'Submissions';
 require(LIBWWWDIR . '/header.php');
 

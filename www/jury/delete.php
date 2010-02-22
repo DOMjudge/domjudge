@@ -27,7 +27,7 @@ if ( isset($_POST['cancel']) ) {
 
 	// this probably is not generic enough for the future, but
 	// works for all our current tables.
-	header('Location: '.getBaseURI().'jury/'.$t.'.php?id=' .
+	header('Location: '.$t.'.php?id=' .
 		urlencode(array_shift($k)));
 	exit;
 }

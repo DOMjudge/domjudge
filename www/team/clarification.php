@@ -36,7 +36,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	                $_POST['bodytext']);
 
 	// redirect back to the original location
-	header('Location: '.getBaseURI().'team/clarifications.php');
+	header('Location: clarifications.php');
 	exit;
 }
 

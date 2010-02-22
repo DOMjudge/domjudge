@@ -9,7 +9,6 @@
  */
 
 require('init.php');
-#$refresh = '15;url='.getBaseURI().'jury/clarifications.php';
 $ajaxtitle = 'Clarification Requests';
 $title = $ajaxtitle.($nunread_clars ? ' ('.$nunread_clars.' new)' : '');
 

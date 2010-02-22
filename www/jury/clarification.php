@@ -84,9 +84,9 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
 	// redirect back to the original location
 	if ( $isgeneral ) {
-		header('Location: ' . getBaseURI() . 'jury/clarifications.php');
+		header('Location: clarifications.php');
 	} else {
-		header('Location: ' . getBaseURI() . 'jury/clarification.php?id=' . $id);
+		header('Location: clarification.php?id=' . $id);
 	}
 	exit;
 }
@@ -97,7 +97,7 @@ if ( isset($_POST['submit']) && isset($_POST['answered']) ) {
 	       (int)$_POST['answered'], $respid);
 
 	// redirect back to the original location
-	header('Location: ' . getBaseURI() . 'jury/clarification.php?id=' . $id);
+	header('Location: clarification.php?id=' . $id);
 	exit;
 }
 
