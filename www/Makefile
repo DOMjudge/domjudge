@@ -21,7 +21,8 @@ install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/teams images/teams/*.jpg
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/plugin       plugin/*.xsd
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/jury         jury/*.css
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)              *.js *.css *.php
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/js           js/*.js js/*.gif js/*.png
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)              *.php style.css
 	ln -sfT $(domjudge_docdir) $(DESTDIR)$(domserver_wwwdir)/jury/doc
 
 install-docs:
