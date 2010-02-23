@@ -83,12 +83,15 @@ docs-create-dirs:
 install-docs-l:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir) README ChangeLog COPYING*
 
-install-domserver-l install-judgehost-l:
+install-domserver install-judgehost: check-root
+
+check-root:
 	@if [ `id -u` -ne 0 ]; then \
 		echo "**************************************************************" ; \
-		echo "You do not seem to have root privileges, which are needed" ; \
+		echo "***  You do not seem to have the required root privileges. ***" ; \
 		echo "**************************************************************" ; \
 	fi
+	exit 1
 
 dist-l:
 	$(MAKE) clean-autoconf
