@@ -46,7 +46,7 @@ if ( IS_JURY ) {
  *       both jury and team have their own menu.php
  */
 if ($menu) {?>
-<script type="text/javascript" src="../../domjudge.js"></script>
+<script type="text/javascript" src="../js/domjudge.js"></script>
 </head>
 <body onload="setInterval('updateClarifications(\'<?php echo $ajaxtitle?>\')', 20000)">
 <?php include("menu.php");
