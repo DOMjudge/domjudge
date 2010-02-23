@@ -147,7 +147,7 @@ $data = $DB->q('TUPLE SELECT p.*, c.contestname, count(rank) AS ntestcases
                 LEFT JOIN testcase USING (probid)
                 WHERE probid = %s GROUP BY probid', $id);
 
-echo addForm($pagename) . "<p>\n" .
+echo addForm($pagename, 'post', null, 'multipart/form-data') . "<p>\n" .
 	addHidden('id', $id) .
 	addHidden('val[toggle_judge]',  !$data['allow_judge']) .
 	addHidden('val[toggle_submit]', !$data['allow_submit']).
@@ -194,18 +194,15 @@ if ( !empty($data['special_compare']) ) {
 		htmlspecialchars($data['special_compare']) . "</td></tr>\n";
 }
 
-echo addEndForm();
-
 if ( IS_ADMIN && class_exists("ZipArchive") ) {
-	echo '<tr>' . addForm('problem.php', 'post', null, 'multipart/form-data') .
-		addHidden('id', @$data['probid']) .
+	echo '<tr>' . 
 		'<td scope="row">Problem archive:</td>' .
 		'<td>' . addFileField('problem_archive') . 
 		addSubmit('Upload', 'upload') . '</td>' .
-		addEndForm() . "</tr>\n";
+		"</tr>\n";
 }
 
-echo "</table>\n";
+echo "</table>\n" . addEndForm();
 
 echo "<br />\n" . rejudgeForm('problem', $id) . "\n\n";
 
