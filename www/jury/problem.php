@@ -35,6 +35,16 @@ if ( !empty($pcmd) ) {
 			   $_POST['val']['toggle_judge'], $id);
 	}
 }
+if ( isset($_POST['upload']) ) {
+	if ( !empty($_FILES['problem_archive']['name']) ) {
+		checkFileUpload( $_FILES['problem_archive']['error'] );
+		$zip = openZipFile($_FILES['problem_archive']['tmp_name']);
+		$id = importZippedProblem($zip, empty($id) ? NULL : $id);
+		$zip->close();
+		$_GET['id'] = $id; // needed for referrer link
+		$refresh = '15;url='.$pagename.'?id='.urlencode($id);
+	}
+}
 
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
@@ -101,10 +111,6 @@ src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 <tr><td><label for="data_0__special_compare_">Special compare script:</label></td>
 <td><?php echo addInput('data[0][special_compare]', @$row['special_compare'], 30, 25)?></td></tr>
 
-<?php if (!empty($row['probid']) && class_exists("ZipArchive")): ?>
-<tr><td><label for="data_0__archive_">Upload problem archive:</label></td>
-<td><?php echo addFileField('data[0][archive]')?></td></tr>
-<?php endif; ?>
 </table>
 
 <?php
@@ -114,6 +120,17 @@ echo addHidden('cmd', $cmd) .
 	addSubmit('Save') .
 	addSubmit('Cancel', 'cancel') .
 	addEndForm();
+
+
+if ( class_exists("ZipArchive") ) {
+	echo "<br /><span style=\"font-style:italic;\">or</span><br /><br />\n" .
+	addForm('problem.php', 'post', null, 'multipart/form-data') .
+	addHidden('id', @$row['probid']) .
+	'<label for="problem_archive">Upload problem archive:</label>' .
+	addFileField('problem_archive') .
+	addSubmit('Upload', 'upload');
+	addEndForm();
+}
 
 require(LIBWWWDIR . '/footer.php');
 exit;
@@ -177,8 +194,18 @@ if ( !empty($data['special_compare']) ) {
 		htmlspecialchars($data['special_compare']) . "</td></tr>\n";
 }
 
-echo "</table>\n" .
-	addEndForm();
+echo addEndForm();
+
+if ( IS_ADMIN && class_exists("ZipArchive") ) {
+	echo '<tr>' . addForm('problem.php', 'post', null, 'multipart/form-data') .
+		addHidden('id', @$data['probid']) .
+		'<td scope="row">Problem archive:</td>' .
+		'<td>' . addFileField('problem_archive') . 
+		addSubmit('Upload', 'upload') . '</td>' .
+		addEndForm() . "</tr>\n";
+}
+
+echo "</table>\n";
 
 echo "<br />\n" . rejudgeForm('problem', $id) . "\n\n";
 

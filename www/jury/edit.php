@@ -75,13 +75,6 @@ if ( ! isset($_POST['cancel']) ) {
 
 			$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
 		}
-
-		if ( !empty($_FILES['data']['name'][$i]['archive']) ) {
-			checkFileUpload( $_FILES['data']['error'][$i]['archive'] );
-			$zip = openZipFile($_FILES['data']['tmp_name'][$i]['archive']);
-			importZippedProblem($keydata[$i]['probid'], $zip);
-			$zip->close();
-		}
 	}
 }
 

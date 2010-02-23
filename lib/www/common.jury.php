@@ -147,13 +147,51 @@ if (!function_exists('parse_ini_string')) {
 	}
 }
 
-function importZippedProblem($probid, $zip) {
-	# update testcases
+/**
+ * Read problem description file and testdata from zip archive
+ * and update problem with it, or insert new problem when probid=NULL.
+ */
+function importZippedProblem($zip, $probid = NULL)
+{
 	global $DB;
-	$maxrank = 1 + $DB->q('VALUE SELECT max(rank)
-			       FROM testcase WHERE probid = %s',
-			       $probid);
-	for ($j = 0; $j < $zip->numFiles; $j++) {  
+
+	$ini_keys = array('probid', 'cid', 'name', 'allow_submit', 'allow_judge',
+	                  'timelimit', 'special_run', 'special_compare', 'color');
+
+	// Read problem properties
+	$ini_array = parse_ini_string($zip->getFromName("properties.ini"));
+
+	if ( $ini_array===FALSE ) {
+		if ( $probid===NULL ) error("Need 'properties.ini' file when adding a new problem.");
+	} else {
+		// Only preserve valid keys:
+		$ini_array = array_intersect_key($ini_array,array_flip($ini_keys));
+
+		if ( $probid===NULL ) {
+			if ( !isset($ini_array['probid']) ) {
+				error("Need 'probid' in 'properties.ini' when adding a new problem.");
+			}
+			// Set sensible defaults for cid and name if not specified:
+			if ( !isset($ini_array['cid'])  ) $ini_array['cid'] = getCurContest();
+			if ( !isset($ini_array['name']) ) $ini_array['name'] = $ini_array['probid'];
+
+			$DB->q('INSERT INTO problem (' . implode(', ',array_keys($ini_array)) .
+			       ') VALUES (%As)', $ini_array);
+
+			$probid = $ini_array['probid'];
+		} else {
+			// Remove keys that cannot be modified:
+			unset($ini_array['probid']);
+			unset($ini_array['cid']);
+
+			$DB->q('UPDATE problem SET %S WHERE probid = %s', $ini_array, $probid);
+		}
+	}
+
+	// Insert/update testcases
+	$maxrank = 1 + $DB->q('VALUE SELECT max(rank) FROM testcase
+	                       WHERE probid = %s', $probid);
+	for ($j = 0; $j < $zip->numFiles; $j++) {
 		$filename = $zip->getNameIndex($j);
 		if ( ends_with($filename, ".in") ) {
 			$basename = basename($filename, ".in");
@@ -174,37 +212,10 @@ function importZippedProblem($probid, $zip) {
 				$maxrank++;
 			}
 		}
-	} 
-
-	# update problem properties
-	$properties = $zip->getFromName("properties.ini");
-	if ($properties !== FALSE) {
-		$ini_array = parse_ini_string($properties);
-		if ($ini_array !== FALSE) {
-			$row = $DB->q('TUPLE SELECT * FROM problem
-				       WHERE probid = %s',
-				      $probid);
-			$ini_keys = array('timelimit', 'name',
-					'color', 'special_run',
-					'special_compare', 'cid',
-					'allow_submit', 'allow_judge');
-			foreach ($ini_keys as $ini_key) {
-				if (isset($ini_array[$ini_key])) {
-					$row[$ini_key] = $ini_array[$ini_key];
-				}
-			}
-
-			$DB->q('UPDATE problem SET timelimit=%i,
-				name=%s, color=%s,special_run=%i,
-				special_compare=%i, cid=%i,
-				allow_submit=%i, allow_judge=%i
-				WHERE probid=%s',
-				$row['timelimit'], $row['name'],
-				$row['color'], $row['special_run'],
-				$row['special_compare'], $row['cid'],
-				$row['allow_submit'], $row['allow_judge'],
-				$probid
-			);
-		}
 	}
+
+	// FIXME: insert PDF into database
+
+	return $probid;
+
 }

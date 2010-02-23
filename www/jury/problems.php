@@ -12,6 +12,7 @@ require('init.php');
 $title = 'Problems';
 
 require(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/forms.php');
 
 echo "<h1>Problems</h1>\n\n";
 
@@ -66,7 +67,16 @@ if( $res->count() == 0 ) {
 }
 
 if ( IS_ADMIN ) {
-	echo "<p>" . addLink('problem') . "</p>\n\n";
+	echo "<p>" . addLink('problem');
+	if ( class_exists("ZipArchive") ) {
+		echo "\n" . addForm('problem.php', 'post', null, 'multipart/form-data') .
+	 		addHidden('id', @$data['probid']) .
+	 		'Problem archive:' .
+	 		addFileField('problem_archive') . 
+	 		addSubmit('Upload', 'upload') . 
+	 		addEndForm() . "\n";
+	}
+       	echo "</p>\n\n";
 }
 
 require(LIBWWWDIR . '/footer.php');
