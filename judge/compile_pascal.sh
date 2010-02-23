@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Psacal compile wrapper-script for 'test_solution.sh'.
+# Psacal compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 
 SOURCE="$1"

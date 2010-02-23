@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Haskell compile wrapper-script for 'test_solution.sh'.
+# Haskell compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 
 SOURCE="$1"

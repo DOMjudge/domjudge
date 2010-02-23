@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Java compile wrapper-script for 'test_solution.sh'.
+# Java compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 #
 # This script byte-compiles with the Sun javac compiler and generates

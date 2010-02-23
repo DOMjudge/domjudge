@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Bash compile wrapper-script for 'test_solution.sh'.
+# Bash compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 #
 # This script does not actually "compile" the source, but writes a
