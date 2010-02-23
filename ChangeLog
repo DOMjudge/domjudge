@@ -132,7 +132,7 @@ Version 2.2.0 - 11 August 2008
  - Remove websubmitdaemon, submit directly to database (Closes: #1737229).
  - Add script to restore submission table from SUBMITDIR files.
  - Complete implementation of syslog logging (now also for C/C++).
- - Send jury user back to referer page after edits (Closes: #1821543).
+ - Send jury user back to referrer page after edits (Closes: #1821543).
  - Remove .php extensions from commandline scripts.
  - Higher displayed precision in float compare.
  - Fix submit_copy to use bash.

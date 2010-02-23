@@ -39,14 +39,14 @@ if ( IS_JURY ) {
 		echo "<link rel=\"stylesheet\" href=\"style_printer.css\" type=\"text/css\" media=\"print\" />\n";
 	}
 	echo "<script type=\"text/javascript\" src=\"" .
-		"../sorttable.js\"></script>\n";
+		"../js/sorttable.js\"></script>\n";
 }
 
 /* NOTE: here a local menu.php is included
  *       both jury and team have their own menu.php
  */
 if ($menu) {?>
-<script type="text/javascript" src="../ajax.js"></script>
+<script type="text/javascript" src="../../domjudge.js"></script>
 </head>
 <body onload="setInterval('updateClarifications(\'<?php echo $ajaxtitle?>\')', 20000)">
 <?php include("menu.php");
