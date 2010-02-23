@@ -90,8 +90,8 @@ check-root:
 		echo "**************************************************************" ; \
 		echo "***  You do not seem to have the required root privileges. ***" ; \
 		echo "**************************************************************" ; \
+		exit 1 ; \
 	fi
-	exit 1
 
 dist-l:
 	$(MAKE) clean-autoconf
