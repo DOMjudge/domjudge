@@ -19,6 +19,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 	require(LIBWWWDIR . '/forms.php');
 
 	$title = "Category: $cmd";
+	$jscolor = true;
 
 	require(LIBWWWDIR . '/header.php');
 	echo "<h2>" . ucfirst($cmd) . " category</h2>\n\n";
@@ -45,7 +46,8 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 <td><?php echo addInput('data[0][sortorder]', (empty($row['sortorder'])?0:$row['sortorder']), 2, 1)?></td></tr>
 
 <tr><td><label for="data_0__color_">Colour:</label></td>
-<td><?php echo addInput('data[0][color]', @$row['color'], 15, 25)?>
+<td><?php echo addInputField('text','data[0][color]', @$row['color'],
+	'size="15" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
 <a target="_blank"
 href="http://www.w3schools.com/css/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
