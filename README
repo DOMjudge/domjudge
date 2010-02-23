@@ -58,6 +58,8 @@ Sources can be downloaded from: http://domjudge.sourceforge.net/sources/
 The sorttable.js script is copyright by Stuart Langridge and licenced
 under the MIT/X11 licence, see COPYING.MIT. This software was
 downloaded from: http://www.kryogenix.org/code/browser/sorttable/
+jscolor.js is copyright Jan Odvarko and licenced under the GNU LGPL. 
+It was obtained at http://jscolor.com.
 
 The M4 autoconf macros are licenced under all-permissive and GPL3+
 licences; see the respective files under m4/ for details.

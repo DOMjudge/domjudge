@@ -107,6 +107,7 @@ to name them here too:
 <item> runguard.c was originally based on timeout from The
        Coroner's Toolkit by Wietse Venema.
 <item> sorttable.js by Stuart Langridge.
+<item> jscolor.js by Jan Odvarko. 
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
        Erik van Sebille.
 <item> Several M4 autoconf macros from the <htmlurl name="Autoconf archive"
@@ -122,12 +123,14 @@ is distributed with DOMjudge. This program is copyright by various
 people under the BSD licence and a part under the GNU GPL version 2,
 see <tt>COPYING.BSD</tt> and <tt>doc/dash.copyright</tt> for more details.
 Sources can be downloaded from:
-<url url="http://domjudge.sourceforge.net/sources/">
+<url url="http://domjudge.sourceforge.net/sources/">.
 
 The <tt>sorttable.js</tt> script is copyright by Stuart Langridge and
 licenced under the MIT/X11 licence, see <tt>COPYING.MIT</tt>. This
 software was downloaded from:
-<url url="http://www.kryogenix.org/code/browser/sorttable/">
+<url url="http://www.kryogenix.org/code/browser/sorttable/">.
+jscolor.js is copyright Jan Odvarko and licenced under the GNU LGPL. 
+It was obtained at <url url="http://jscolor.com">.
 
 The M4 autoconf macros are licenced under all-permissive and GPL3+
 licences; see the respective files for details.

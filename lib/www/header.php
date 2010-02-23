@@ -38,6 +38,10 @@ if ( IS_JURY ) {
 	if (isset($printercss)) {
 		echo "<link rel=\"stylesheet\" href=\"style_printer.css\" type=\"text/css\" media=\"print\" />\n";
 	}
+	if (isset($jscolor)) {
+		echo "<script type=\"text/javascript\" src=\"" .
+		"../js/jscolor.js\"></script>\n";
+	}
 	echo "<script type=\"text/javascript\" src=\"" .
 		"../js/sorttable.js\"></script>\n";
 }

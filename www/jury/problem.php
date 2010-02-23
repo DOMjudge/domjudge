@@ -46,6 +46,8 @@ if ( isset($_POST['upload']) ) {
 	}
 }
 
+$jscolor=true;
+
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
 
@@ -100,7 +102,8 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <td><?php echo addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
 
 <tr><td><label for="data_0__color_">Balloon colour:</label></td>
-<td><?php echo addInput('data[0][color]', @$row['color'], 8, 25)?>
+<td><?php echo addInputField('text','data[0][color]', @$row['color'],
+	'size="8" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
 <a target="_blank"
 href="http://www.w3schools.com/css/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
