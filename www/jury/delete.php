@@ -13,6 +13,8 @@ requireAdmin();
 require(LIBDIR . '/relations.php');
 
 $t = @$_REQUEST['table'];
+$referrer = @$_REQUEST['referrer'];
+if ( ! preg_match('/^[._a-zA-Z0-9?&=]*$/', $referrer ) ) error ("Invalid characters in referrer.");
 
 if(!$t)	error ("No table selected.");
 if(!in_array($t, array_keys($KEYS))) error ("Unknown table.");
@@ -25,10 +27,12 @@ foreach($KEYS[$t] as $key) {
 
 if ( isset($_POST['cancel']) ) {
 
-	// this probably is not generic enough for the future, but
-	// works for all our current tables.
-	header('Location: '.$t.'.php?id=' .
-		urlencode(array_shift($k)));
+	if ( !empty($referrer) ) {
+		header('Location: ' . $referrer);
+	} else {
+		header('Location: '.$t.'.php?id=' .
+			urlencode(array_shift($k)));
+	}
 	exit;
 }
 
@@ -52,10 +56,14 @@ if (isset($_POST['confirm'] ) ) {
 
 	echo "<p>" . ucfirst($t) . " <strong>" . htmlspecialchars(implode(", ", $k)) . 
 		"</strong> has been deleted.</p>\n\n";
-	// one table falls outside the predictable filenames
-	$tablemulti = ($t == 'team_category' ? 'team_categories' : $t.'s');
-	echo "<p><a href=\"" . $tablemulti . ".php\">back to $tablemulti</a></p>";
 
+	if ( !empty($referrer) ) {
+		echo "<p><a href=\"" . $referrer .  "\">back to overview</a></p>";
+	} else {
+		// one table falls outside the predictable filenames
+		$tablemulti = ($t == 'team_category' ? 'team_categories' : $t.'s');
+		echo "<p><a href=\"" . $tablemulti . ".php\">back to $tablemulti</a></p>";
+	}
 } else {
 	require_once(LIBWWWDIR . '/forms.php');
 
@@ -70,6 +78,7 @@ if (isset($_POST['confirm'] ) ) {
 		"You're about to delete $t <strong>" .
 		htmlspecialchars(join(", ", array_values($k))) . "</strong>.<br /><br />\n\n" .
 		"Are you sure?<br /><br />\n\n" .
+		( empty($referrer) ? '' : addHidden('referrer', $referrer) ) .
 		addSubmit(" Never mind... ", 'cancel') .
 		addSubmit(" Yes I'm sure! ", 'confirm') );
 

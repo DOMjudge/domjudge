@@ -225,7 +225,8 @@ foreach( $data as $rank => $row ) {
 			    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"2\">" . 
 			    htmlspecialchars($row['description']) . "</textarea></td>" .
 			    "<td rowspan=\"2\" class=\"editdel\">" .
-			    "<a href=\"delete.php?table=testcase&amp;testcaseid=$row[testcaseid]\">" .
+			    "<a href=\"delete.php?table=testcase&amp;testcaseid=$row[testcaseid]&amp;referrer=" .
+			    urlencode('testcase.php?probid='.$probid) . "\">" .
 			    "<img src=\"../images/delete.png\" alt=\"delete\"" .
 			    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
 
