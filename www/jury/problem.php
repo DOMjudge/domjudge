@@ -103,7 +103,7 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 
 <tr><td><label for="data_0__color_">Balloon colour:</label></td>
 <td><?php echo addInputField('text','data[0][color]', @$row['color'],
-	'size="8" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
+	' size="8" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
 <a target="_blank"
 href="http://www.w3schools.com/css/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
@@ -131,7 +131,7 @@ if ( class_exists("ZipArchive") ) {
 	addHidden('id', @$row['probid']) .
 	'<label for="problem_archive">Upload problem archive:</label>' .
 	addFileField('problem_archive') .
-	addSubmit('Upload', 'upload');
+	addSubmit('Upload', 'upload') .
 	addEndForm();
 }
 
@@ -198,9 +198,9 @@ if ( !empty($data['special_compare']) ) {
 }
 
 if ( IS_ADMIN && class_exists("ZipArchive") ) {
-	echo '<tr>' . 
+	echo '<tr>' .
 		'<td scope="row">Problem archive:</td>' .
-		'<td>' . addFileField('problem_archive') . 
+		'<td>' . addFileField('problem_archive') .
 		addSubmit('Upload', 'upload') . '</td>' .
 		"</tr>\n";
 }
