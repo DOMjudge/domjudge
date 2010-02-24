@@ -32,22 +32,19 @@ if( $res->count() == 0 ) {
 	while($row = $res->next()) {
 		$affillogo = "../images/affiliations/" . urlencode($row['affilid']) . ".png";
 		$countryflag = "../images/countries/" . urlencode($row['country']) . ".png";
-		echo '<tr><td><a href="team_affiliation.php?id=' .
-			urlencode($row['affilid']) . '">' .
-			htmlspecialchars($row['affilid']).
-			'</a></td><td><a href="team_affiliation.php?id=' .
-			urlencode($row['affilid']) . '">' .
-			htmlspecialchars($row['name']) .
-			'</a></td><td align="center">' .
+		$link = '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">';
+		echo '<tr><td>' . $link . htmlspecialchars($row['affilid']) .
+			'</a></td><td>' . $link . htmlspecialchars($row['name']) .
+			'</a></td><td align="center">' . $link .
 			( is_readable($affillogo) ? '<img src="' . $affillogo .
-			  '" alt="' . htmlspecialchars($row['name']) . '" />' : '' ) .
-			'</td><td align="center">' .
+			  '" alt="' . htmlspecialchars($row['name']) . '" />' : '&nbsp;' ) .
+			'</a></td><td align="center">' . $link .
 			htmlspecialchars($row['country']) .
 			( is_readable($countryflag) ? ' <img src="' . $countryflag .
-			  '" alt="' . htmlspecialchars($row['country']) . '" />' : '' ) .
-			'</td><td align="right">' .
+			  '" alt="' . htmlspecialchars($row['country']) . '" />' : '&nbsp;' ) .
+			'</a></td><td align="right">' . $link . 
 			(int)$row['cnt'] .
-			'</td>';
+			'</a></td>';
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 				editLink('team_affiliation', $row['affilid']) . " " .

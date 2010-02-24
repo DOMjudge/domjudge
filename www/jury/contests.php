@@ -39,26 +39,27 @@ if( count($res) == 0 ) {
 	$iseven = false;
 	foreach($res as $row) {
 
+		$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
+
 		echo '<tr class="' .
 			( $iseven ? 'roweven': 'rowodd' ) . 
 			(!$row['enabled']    ? ' disabled' :'') .
 			($row['cid'] == $cid ? ' highlight':'') . '">' .
-			"<td align=\"right\"><a href=\"contest.php?id=" . urlencode($row['cid']) .
-			"\">c" . (int)$row['cid'] . "</a></td>\n" .
+			"<td align=\"right\">" . $link .
+			"c" . (int)$row['cid'] . "</a></td>\n" .
 			"<td title=\"".htmlspecialchars(@$row['activatetime']) . "\">" .
-				printtime($row['activatetime']) . "</td>\n" .
+				$link . printtime($row['activatetime']) . "</a></td>\n" .
 			"<td title=\"" . htmlspecialchars($row['starttime']) . "\">" .
-				printtime($row['starttime'])."</td>\n".
+				$link . printtime($row['starttime'])."</a></td>\n".
 			"<td title=\"".htmlspecialchars($row['endtime']) . "\">" .
-				printtime($row['endtime'])."</td>\n".
+				$link . printtime($row['endtime'])."</a></td>\n".
 			"<td title=\"".htmlspecialchars(@$row['freezetime']) . "\">" .
-			( isset($row['freezetime']) ?
-			  printtime($row['freezetime']) : '-' ) . "</td>\n" .
+				$link . ( isset($row['freezetime']) ?
+			  printtime($row['freezetime']) : '-' ) . "</a></td>\n" .
 			"<td title=\"".htmlspecialchars(@$row['unfreezetime']) . "\">" .
-			( isset($row['unfreezetime']) ?
-			  printtime($row['unfreezetime']) : '-' ) . "</td>\n" .
-			"<td><a href=\"contest.php?id=" . urlencode($row['cid']) . "\">" .
-			htmlspecialchars($row['contestname']) . "</a></td>\n";
+				$link . ( isset($row['unfreezetime']) ?
+			  printtime($row['unfreezetime']) : '-' ) . "</a></td>\n" .
+			"<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
 		$iseven = ! $iseven;
 
 		if ( IS_ADMIN ) {

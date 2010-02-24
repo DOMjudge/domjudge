@@ -167,14 +167,14 @@ function putClarificationList($clars, $team = NULL)
 			continue;
 
 		$clar['clarid'] = (int)$clar['clarid'];
+		$link = '<a href="clarification.php?id=' . urlencode($clar['clarid'])  . '">';
 		
 		if(isset($clar['unread']))
 			echo '<tr class="unread">';
 		else
 			echo '<tr>';
 		
-		echo '<td><a href="clarification.php?id=' . urlencode($clar['clarid'])  . '">' .
-			$clar['clarid'] . '</a></td>';
+		echo '<td>' . $link . $clar['clarid'] . '</a></td>';
 
 		$sender = htmlspecialchars($clar['sender']);
 		$recipient = htmlspecialchars($clar['recipient']);
@@ -191,12 +191,12 @@ function putClarificationList($clars, $team = NULL)
 		}
 
 
-		echo '<td class="teamid"><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">' .
+		echo '<td class="teamid">' . $link .
 			 $sender . '</a></td>';
-		echo '<td class="teamid"><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">' .
+		echo '<td class="teamid">' . $link . 
 			 $recipient . '</a></td>';
 
-		echo '<td><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">';
+		echo '<td>' . $link;
 		if ( is_null($clar['probid']) ) {
 			echo "general";
 		} else {
@@ -204,9 +204,9 @@ function putClarificationList($clars, $team = NULL)
 		}
 		echo "</a></td>";
 		
-		echo '<td><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">';
+		echo '<td>' . $link;
 		echo printtime($clar['submittime']) . '</a></td>';
-		echo '<td><a href="clarification.php?id=' . urlencode($clar['clarid']) . '">';
+		echo '<td>' . $link;
 		echo summarizeClarification($clar['body']);
 		echo "</a></td></tr>\n";
 	}

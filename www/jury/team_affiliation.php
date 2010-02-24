@@ -125,14 +125,14 @@ $teams = $DB->q('SELECT login,name FROM team WHERE affilid = %s', $id);
 if ( $teams->count() == 0 ) {
 	echo "<p><em>no teams</em></p>\n\n";
 } else {
-	echo "<table>\n<thead>\n" .
+	echo "<table class=\"list\">\n<thead>\n" .
 		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th></tr>\n" .
 		"</thead>\n<tbody>\n";
 	while ($team = $teams->next()) {
-		echo "<tr><td class=\"teamid\"><a href=\"team.php?id=" .
-			urlencode($team['login']) . "\">" .
-			htmlspecialchars($team['login']) . "</a></td><td>" .
-			htmlspecialchars($team['name']) . "</td></tr>\n";
+		$link = '<a href="team.php?id=' . urlencode($team['login']) . '">';
+		echo "<tr><td class=\"teamid\">" .
+		$link . htmlspecialchars($team['login']) . "</a></td><td>" .
+		$link . htmlspecialchars($team['name']) . "</a></td></tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
 }

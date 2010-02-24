@@ -27,16 +27,18 @@ if( $res->count() == 0 ) {
 		"</tr>\n</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
+		$link = '<a href="language.php?id=' . urlencode($row['langid']) . '">';
 		echo "<tr".
 			( $row['allow_submit'] ? '': ' class="disabled"').
-			"><td><a href=\"language.php?id=".urlencode($row['langid'])."\">".
-				htmlspecialchars($row['langid'])."</a>".
-			"</td><td><a href=\"language.php?id=".urlencode($row['langid'])."\">".
-				htmlspecialchars($row['name'])."</a>".
-			"</td><td class=\"filename\">.".htmlspecialchars($row['extension']).
-			"</td><td align=\"center\">".printyn($row['allow_submit']).
-			"</td><td align=\"center\">".printyn($row['allow_judge']).
-			"</td><td>".htmlspecialchars($row['time_factor']);
+			"><td>" . $link . htmlspecialchars($row['langid'])."</a>".
+			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
+			"</td><td class=\"filename\">" . $link . "." . 
+				htmlspecialchars($row['extension']) . "</a>" .
+			"</td><td align=\"center\">" . $link .
+				printyn($row['allow_submit']) . "</a>" .
+			"</td><td align=\"center\">" . $link .
+				printyn($row['allow_judge']) . "</a>" .
+			"</td><td>" . $link . htmlspecialchars($row['time_factor']) . "</a>";
 			if ( IS_ADMIN ) {
 				echo "</td><td class=\"editdel\">" . 
 					editLink('language', $row['langid']) . " " .

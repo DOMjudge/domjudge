@@ -29,16 +29,15 @@ if( $res->count() == 0 ) {
 		"</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
+		$link = '<a href="team_category.php?id=' . (int)$row['categoryid'] . '">';
 		echo '<tr' . (isset($row['color']) ? ' style="background: ' .
 		              $row['color'] . ';"' : '') .
-			'><td><a href="team_category.php?id=' . (int)$row['categoryid'] .
-			'">' . (int)$row['categoryid'] .
-			'</a></td><td>' . (int)$row['sortorder'] .
-			'</td><td><a href="team_category.php?id=' . (int)$row['categoryid'] .
-			'">' . htmlspecialchars($row['name']) .
-			'</a></td><td align="right">' . (int)$row['numteams'] .
-			'</td><td align="center">' . printyn($row['visible']) .
-			"</td>";
+			'><td>' . $link. (int)$row['categoryid'] .
+			'</a></td><td>' . $link . (int)$row['sortorder'] .
+			'</a></td><td>' . $link . htmlspecialchars($row['name']) .
+			'</a></td><td align="right">' . $link . (int)$row['numteams'] .
+			'</a></td><td align="center">' . $link . printyn($row['visible']) .
+			'</a></td>';
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 				editLink('team_category', $row['categoryid']) . " " .

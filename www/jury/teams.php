@@ -56,31 +56,31 @@ if( $teams->count() == 0 ) {
 			$status = 3;
 			$numcor = (int)$ncorrect[$row['login']]['cnt'];
 		}
-		
+		$link = '<a href="team.php?id='.urlencode($row['login']) . '">';	
 		echo "<tr class=\"category" . (int)$row['categoryid'] . "\">".
-			"<td class=\"teamid\"><a href=\"team.php?id=".urlencode($row['login'])."\">".
+			"<td class=\"teamid\">" . $link .
 				htmlspecialchars($row['login'])."</a></td>".
-			"<td><a href=\"team.php?id=".htmlspecialchars($row['login'])."\">".
+			"<td>" . $link .
 				htmlspecialchars($row['name'])."</a></td>".
-			"<td><a href=\"team_category.php?id=".urlencode($row['categoryid'])."\">".
+			"<td>" . $link .
 				htmlspecialchars($row['catname'])."</a></td>".
-			"<td title=\"".htmlspecialchars($row['affname'])."\">".
-				"<a href=\"team_affiliation.php?id=".urlencode($row['affilid'])."\">".
+			"<td title=\"".htmlspecialchars($row['affname'])."\">" . $link .
 				htmlspecialchars($row['affilid'])."</a></td><td title=\"";
 		
 		if ( @$row['ipaddress'] ) {
 			$host = (empty($row['hostname'])?'':$row['hostname']);
 			echo htmlspecialchars($row['ipaddress']);
 			if ( empty($host) ) {
-				echo "\">" . htmlspecialchars($row['ipaddress']);
+				echo "\">" . $link . htmlspecialchars($row['ipaddress']);
 			} else {
-				echo " - " . htmlspecialchars($host) . "\">" .
+				echo " - " . htmlspecialchars($host) . "\">" . $link .
 					printhost($host);
 			}
 		} else {
-			echo "\">-";
+			echo "\">" . $link . "-</a>";
 		}
-		echo "</td><td>".htmlspecialchars($row['room'])."</td>";
+		echo "</td><td>" . $link . 
+			($row['room'] ? htmlspecialchars($row['room']) : '&nbsp;') . "</a></td>";
 		echo "<td class=\"";
 		switch ( $status ) {
 		case 0: echo 'team-nocon" title="no connections made"';
@@ -92,7 +92,8 @@ if( $teams->count() == 0 ) {
 		case 3: echo 'team-ok" title="correct submission(s)"';
 			break;
 		}
-		echo ">".CIRCLE_SYM."</td>";
+		// TODO? want to link this symbol aswell? need to do some css magic to retain color
+		echo ">" . CIRCLE_SYM . "</td>";
 		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$numcor / $numsub</td>";
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .

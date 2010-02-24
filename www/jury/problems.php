@@ -38,23 +38,26 @@ if( $res->count() == 0 ) {
 			if ( $lastcid != -1 ) $classes[] = 'contestswitch';
 			$lastcid = $row['cid'];
 		}
+		$link = '<a href="problem.php?id=' . urlencode($row['probid']) . '">';
+
 		echo "<tr class=\"" . implode(' ',$classes) .
-		    "\"><td class=\"probid\"><a href=\"problem.php?id=" . 
-				htmlspecialchars($row['probid'])."\">".
+		    "\"><td class=\"probid\">" . $link . 
 				htmlspecialchars($row['probid'])."</a>".
-			"</td><td><a href=\"problem.php?id=".htmlspecialchars($row['probid'])."\">".
-			htmlspecialchars($row['name'])."</a>".
-			"</td><td title=\"".htmlspecialchars($row['contestname'])."\">c".
-			htmlspecialchars($row['cid']).
-			"</td><td align=\"center\">".printyn($row['allow_submit']).
-			"</td><td align=\"center\">".printyn($row['allow_judge']).
-			"</td><td>".(int)$row['timelimit'].
+			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
+			"</td><td title=\"".htmlspecialchars($row['contestname'])."\">".
+			$link . 'c' . htmlspecialchars($row['cid']) . "</a>" .
+			"</td><td align=\"center\">" . $link .
+			printyn($row['allow_submit']) . "</a>" .
+			"</td><td align=\"center\">" . $link .
+			printyn($row['allow_judge']) . "</a>" .
+			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
 			"</td>".
 			( !empty($row['color'])
 			? '<td title="' . htmlspecialchars($row['color']) .
-		      '"><img style="background-color: ' . htmlspecialchars($row['color']) .
+		      '">' . $link . '<img style="background-color: ' .
+			htmlspecialchars($row['color']) .
 		      ';" alt="problem colour ' . htmlspecialchars($row['color']) .
-		      '" src="../images/circle.png" />'
+		      '" src="../images/circle.png" /></a>'
 			: '<td>' );
 			if ( IS_ADMIN ) {
 				echo "</td><td class=\"editdel\">" .
