@@ -8,7 +8,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-// please keep any includes synchronised with checkpasswd.php
 require_once('../configure.php');
 
 define('IS_JURY', false);
