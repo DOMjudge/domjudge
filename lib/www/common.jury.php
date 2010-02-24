@@ -161,7 +161,7 @@ function importZippedProblem($zip, $probid = NULL)
 	// Read problem properties
 	$ini_array = parse_ini_string($zip->getFromName("properties.ini"));
 
-	if ( $ini_array===FALSE ) {
+	if ( empty($ini_array) ) {
 		if ( $probid===NULL ) error("Need 'properties.ini' file when adding a new problem.");
 	} else {
 		// Only preserve valid keys:
