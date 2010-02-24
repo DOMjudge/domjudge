@@ -32,7 +32,7 @@ function editLink($table, $value, $multi = false)
 	return "<a href=\"" . htmlspecialchars($table) . ".php?cmd=edit" .
 		($multi ? "" : "&amp;id=" . urlencode($value) ) . 
 		"&amp;referrer=" . urlencode(basename($_SERVER['SCRIPT_NAME']) .
-		(empty($_GET['id']) ? '' : '?id=' . urlencode($_GET['id']))) .
+		(empty($_REQUEST['id']) ? '' : '?id=' . urlencode($_REQUEST['id']))) .
 		"\">" .
 		"<img src=\"../images/edit" . ($multi?"-multi":"") .
 		".png\" alt=\"edit" . ($multi?" multiple":"") .

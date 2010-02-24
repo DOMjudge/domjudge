@@ -41,7 +41,6 @@ if ( isset($_POST['upload']) ) {
 		$zip = openZipFile($_FILES['problem_archive']['tmp_name']);
 		$id = importZippedProblem($zip, empty($id) ? NULL : $id);
 		$zip->close();
-		$_GET['id'] = $id; // needed for referrer link
 		$refresh = '15;url='.$pagename.'?id='.urlencode($id);
 	}
 }
