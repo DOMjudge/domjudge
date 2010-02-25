@@ -69,6 +69,8 @@ function have_logout()
 // Generate a page stating that login has failed with $msg and exit.
 function show_failed_login($msg)
 {
+	$title = 'Login failed';
+	$menu = false;
 	require(LIBWWWDIR . '/header.php');
 	echo "<h1>Not Authenticated</h1>\n\n<p>$msg</p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
