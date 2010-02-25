@@ -56,7 +56,7 @@ if( $teams->count() == 0 ) {
 			$status = 3;
 			$numcor = (int)$ncorrect[$row['login']]['cnt'];
 		}
-		$link = '<a href="team.php?id='.urlencode($row['login']) . '">';	
+		$link = '<a href="team.php?id='.urlencode($row['login']) . '">';
 		echo "<tr class=\"category" . (int)$row['categoryid'] . "\">".
 			"<td class=\"teamid\">" . $link .
 				htmlspecialchars($row['login'])."</a></td>".
@@ -78,9 +78,9 @@ if( $teams->count() == 0 ) {
 					printhost($host);
 			}
 		} else {
-			echo "\">" . $link . "-</a>";
+			echo "\">" . $link . "-";
 		}
-		echo "</td><td>" . $link . 
+		echo "</a></td><td>" . $link .
 			($row['room'] ? htmlspecialchars($row['room']) : '&nbsp;') . "</a></td>";
 		echo "<td class=\"";
 		switch ( $status ) {
