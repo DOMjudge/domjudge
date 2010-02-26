@@ -79,8 +79,8 @@ if ( !empty($BALLOONS) ) {
 		// display an "F" after the time if this is after the freeze.
 		$balloontime = $conteststart + ($row['totaltime']*60);
 		$frozen = (isset($contestfreeze) && $balloontime >= $contestfreeze ?
-			' <span title="After Scoreboard Freeze">F</span>' : '');
-		
+			' <span title="After Scoreboard Freeze"><em>F</em></span>' : '');
+
 		echo '<td>' . printtime( strftime(MYSQL_DATETIME_FORMAT, $balloontime) ) .
 			$frozen . '</td>';
 
