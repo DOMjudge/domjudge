@@ -70,7 +70,7 @@ while ( ($src = readdir($dh))!==FALSE ) {
 	$cid = substr($cid,1);
 	$sid = substr($sid,1);
 
-	$submittime = date(MYSQL_DATETIME_FORMAT,filemtime($f));
+	$submittime = strftime(MYSQL_DATETIME_FORMAT,filemtime($f));
 
 	// Store in array for later sorting
 	$submissions[] = array('file'       => $f,
