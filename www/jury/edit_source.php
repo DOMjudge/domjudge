@@ -18,9 +18,6 @@ if ( isset($_POST['submitter']) ) {
 
 	file_put_contents($tmpfname, $_POST['source']);
 
-	$ip = $DB->q('VALUE SELECT ipaddress FROM team
-	              WHERE login = %s', $_POST['submitter']);
-
 	submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'], $tmpfname);
 	unlink($tmpfname);
 
