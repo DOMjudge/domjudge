@@ -96,3 +96,10 @@ function error($string) {
 function warning($string) {
 	logmsg(LOG_WARNING, "warning: $string");
 }
+
+/**
+ * Handle exceptions by calling error().
+ */
+function exception_handler($e) {
+	error($e->getMessage());
+}
