@@ -64,10 +64,10 @@ if ( (SHOW_COMPILE == 2) ||
 			( $row['result']=='compiler-error' ? 'failed' : 'successful' ) .
 			"</em></p>\n";
 	} else {
-		echo "<p><em>There were no compiler errors or warnings.</em></p>\n";
+		echo "<p class=\"nodata\">There were no compiler errors or warnings.</p>\n";
 	}
 } else {
-	echo "<p><em>Compilation output is disabled.</em></p>\n";
+	echo "<p class=\"nodata\">Compilation output is disabled.</p>\n";
 }
 
 require(LIBWWWDIR . '/footer.php');

@@ -19,7 +19,7 @@ echo "<h1>Problems</h1>\n\n";
 $res = $DB->q('SELECT * FROM problem NATURAL JOIN contest ORDER BY problem.cid, probid');
 
 if( $res->count() == 0 ) {
-	echo "<p><em>No problems defined</em></p>\n\n";
+	echo "<p class=\"nodata\">No problems defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .

@@ -41,7 +41,7 @@ $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
 echo '<h3><a name="clarifications"></a>' .
 	"Clarifications:</h3>\n";
 if ( $clarifications->count() == 0 ) {
-	echo "<p><em>No clarifications.</em></p>\n\n";
+	echo "<p class=\"nodata\">No clarifications.</p>\n\n";
 } else {
 	putClarificationList($clarifications,$login);
 }
@@ -49,7 +49,7 @@ if ( $clarifications->count() == 0 ) {
 echo '<h3><a name="requests"></a>' .
 	"Clarification Requests:</h3>\n";
 if ( $requests->count() == 0 ) {
-	echo "<p><em>No clarification requests.</em></p>\n\n";
+	echo "<p class=\"nodata\">No clarification requests.</p>\n\n";
 } else {
 	putClarificationList($requests,$login);
 }

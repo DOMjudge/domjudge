@@ -185,7 +185,7 @@ echo addForm('', 'post', null, 'multipart/form-data') .
     addHidden('probid', $probid);
 
 if ( count($data)==0 ) {
-	echo "<p><em>No testcase(s) yet.</em></p>\n";
+	echo "<p class=\"nodata\">No testcase(s) yet.</p>\n";
 } else {
 	?>
 <table class="list testcases">

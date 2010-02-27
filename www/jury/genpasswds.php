@@ -22,7 +22,7 @@ $teams = $DB->q('KEYVALUETABLE SELECT login, name FROM team
                  ORDER BY categoryid ASC, name ASC');
 
 if ( empty($teams) ) {
-	echo "<p><em>No teams defined.</em></p>\n\n";
+	echo "<p class=\"nodata\">No teams defined.</p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }

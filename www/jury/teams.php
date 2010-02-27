@@ -32,7 +32,7 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Teams</h1>\n\n";
 
 if( $teams->count() == 0 ) {
-	echo "<p><em>No teams defined</em></p>\n\n";
+	echo "<p class=\"nodata\">No teams defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th>" .

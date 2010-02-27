@@ -25,14 +25,14 @@ if ( !isset($_POST['submit']) ) {
 }
 if ( is_null($cid) ) {
 	require(LIBWWWDIR . '/header.php');
-	echo "<p><em>No active contest</em></p>\n";
+	echo "<p class=\"nodata\">No active contest</p>\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 $now = now();
 if ( difftime($cdata['starttime'], $now) > 0 ) {
 	require(LIBWWWDIR . '/header.php');
-	echo "<p><em>Contest has not yet started.</em></p>\n";
+	echo "<p class=\"nodata\">Contest has not yet started.</p>\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }

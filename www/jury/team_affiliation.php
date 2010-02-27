@@ -123,7 +123,7 @@ echo "<h2>Teams from " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $teams = $DB->q('SELECT login,name FROM team WHERE affilid = %s', $id);
 if ( $teams->count() == 0 ) {
-	echo "<p><em>no teams</em></p>\n\n";
+	echo "<p class=\"nodata\">no teams</p>\n\n";
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
 		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th></tr>\n" .

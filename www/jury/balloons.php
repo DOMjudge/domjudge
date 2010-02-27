@@ -120,7 +120,7 @@ if ( !empty($BALLOONS) ) {
 
 	echo "</table>\n\n" . addEndForm();
 } else {
-	echo "<p><em>No correct submissions yet... keep posted!</em></p>\n\n";
+	echo "<p class=\"nodata\">No correct submissions yet... keep posted!</p>\n\n";
 }
 
 

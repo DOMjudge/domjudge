@@ -51,7 +51,7 @@ echo '<h2 class="filename"><a name="source"></a>Submission ' .
 
 if ( strlen($source['sourcecode'])==0 ) {
 	// Someone submitted an empty file. Cope gracefully.
-	echo "<p><em>empty file</em></p>\n\n";
+	echo "<p class=\"nodata\">empty file</p>\n\n";
 } elseif ( strlen($source['sourcecode']) < 10 * 1024 ) {
 	// Source < 10kB (for longer source code,
 	// highlighter tends to take very long time or timeout)

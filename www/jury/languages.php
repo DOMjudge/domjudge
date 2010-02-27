@@ -18,7 +18,7 @@ echo "<h1>Languages</h1>\n\n";
 $res = $DB->q('SELECT * FROM language ORDER BY name');
 
 if( $res->count() == 0 ) {
-	echo "<p><em>No languages defined</em></p>\n\n";
+	echo "<p class=\"nodata\">No languages defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .

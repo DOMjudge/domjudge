@@ -26,7 +26,7 @@ if ( isset($_POST['unfreeze']) ) {
 $res = $DB->q('TABLE SELECT * FROM contest ORDER BY starttime DESC');
 
 if( count($res) == 0 ) {
-	echo "<p><em>No contests defined</em></p>\n\n";
+	echo "<p class=\"nodata\">No contests defined</p>\n\n";
 } else {
 	echo "<form action=\"contests.php\" method=\"post\">\n";
 	echo "<table class=\"list sortable\">\n<thead>\n" .

@@ -38,7 +38,7 @@ $clarifications = $DB->q('SELECT * FROM clarification
 echo '<h3><a name="newrequests"></a>' .
 	"New Requests:</h3>\n";
 if ( $newrequests->count() == 0 ) {
-	echo "<p><em>No new clarification requests.</em></p>\n\n";
+	echo "<p class=\"nodata\">No new clarification requests.</p>\n\n";
 } else {
 	putClarificationList($newrequests,NULL);
 }
@@ -46,7 +46,7 @@ if ( $newrequests->count() == 0 ) {
 echo '<h3><a name="oldrequests"></a>' .
 	"Old Requests:</h3>\n";
 if ( $oldrequests->count() == 0 ) {
-	echo "<p><em>No old clarification requests.</em></p>\n\n";
+	echo "<p class=\"nodata\">No old clarification requests.</p>\n\n";
 } else {
 	putClarificationList($oldrequests,NULL);
 }
@@ -54,7 +54,7 @@ if ( $oldrequests->count() == 0 ) {
 echo '<h3><a name="clarifications"></a>' .
 	"General Clarifications:</h3>\n";
 if ( $clarifications->count() == 0 ) {
-	echo "<p><em>No general clarifications.</em></p>\n\n";
+	echo "<p class=\"nodata\">No general clarifications.</p>\n\n";
 } else {
 	putClarificationList($clarifications,NULL);
 }

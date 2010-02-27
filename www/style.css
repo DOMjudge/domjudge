@@ -27,6 +27,7 @@ a:active          { color: red;    }
 
 .disabled         { color: silver; }
 .disabled a       { color: gray;   }
+.nodata           { color: gray; font-style: italic; }
 
 /* general table layout (not in scoreboard or lists) */
 table {

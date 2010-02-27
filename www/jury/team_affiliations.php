@@ -20,7 +20,7 @@ $res = $DB->q('SELECT a.*, COUNT(login) AS cnt FROM team_affiliation a
                GROUP BY affilid ORDER BY name');
 
 if( $res->count() == 0 ) {
-	echo "<p><em>No affiliations defined</em></p>\n\n";
+	echo "<p class=\"nodata\">No affiliations defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th>ID</th>" .

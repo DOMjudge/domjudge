@@ -20,7 +20,7 @@ $res = $DB->q('SELECT team_category.*, COUNT(login) AS numteams
                GROUP BY team_category.categoryid ORDER BY sortorder, categoryid');
 
 if( $res->count() == 0 ) {
-	echo "<p><em>No categories defined</em></p>\n\n";
+	echo "<p class=\"nodata\">No categories defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">sort</th>" .

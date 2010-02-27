@@ -85,7 +85,7 @@ $res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
 			   $cid, $row['hostname']);
 
 if( $res->count() == 0 ) {
-	echo "<p><em>No judgings.</em></p>\n\n";
+	echo "<p class=\"nodata\">No judgings.</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
