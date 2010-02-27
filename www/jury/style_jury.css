@@ -6,6 +6,7 @@
 	border-bottom: solid 1px silver;
 	vertical-align: middle;
 }
+.frozen { font-style: italic; }
 
 .teamstatus { text-align: center; }
 .teamstatus img { vertical-align: middle; }
