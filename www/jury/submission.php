@@ -261,9 +261,9 @@ if ( isset($jid) )  {
 		echo "<pre class=\"output_text\">".
 			htmlspecialchars($jud['output_compile'])."</pre>\n\n";
 	} elseif ( $jud['output_compile']===NULL ) {
-		echo "<p><em>Compilation not finished yet.</em></p>\n";
+		echo "<p class=\"nodata\">Compilation not finished yet.</p>\n";
 	} else {
-		echo "<p><em>There were no compiler errors or warnings.</em></p>\n";
+		echo "<p class=\"nodata\">There were no compiler errors or warnings.</p>\n";
 	}
 
 	// If compilation failed, there's no more info to show, so stop here
@@ -318,7 +318,7 @@ if ( isset($jid) )  {
 		echo "<h4 id=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
 
 		if ( $run['runresult']===NULL ) {
-			echo "<p><em>Run not finished yet.</em></p>\n";
+			echo "<p class=\"nodata\">Run not finished yet.</p>\n";
 			continue;
 		}
 
@@ -336,7 +336,7 @@ if ( isset($jid) )  {
 			echo "<pre class=\"output_text\">".
 			    htmlspecialchars($run['output_run'])."</pre>\n\n";
 		} else {
-			echo "<p><em>There was no program output.</em></p>\n";
+			echo "<p class=\"nodata\">There was no program output.</p>\n";
 		}
 
 		echo "<h5>Diff output</h5>\n";
@@ -345,7 +345,7 @@ if ( isset($jid) )  {
 			echo parseDiff($run['output_diff']);
 			echo "</pre>\n\n";
 		} else {
-			echo "<p><em>There was no diff output.</em></p>\n";
+			echo "<p class=\"nodata\">There was no diff output.</p>\n";
 		}
 
 		echo "<h5>Error output (info/debug/errors)</h5>\n";
@@ -353,7 +353,7 @@ if ( isset($jid) )  {
 			echo "<pre class=\"output_text\">".
 			    htmlspecialchars($run['output_error'])."</pre>\n\n";
 		} else {
-			echo "<p><em>There was no stderr output.</em></p>\n";
+			echo "<p class=\"nodata\">There was no stderr output.</p>\n";
 		}
 	}
 }

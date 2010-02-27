@@ -62,7 +62,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 
 	// nothing found...
 	if( $res->count() == 0 ) {
-		echo "<p><em>No submissions</em></p>\n\n";
+		echo "<p class=\"nodata\">No submissions</p>\n\n";
 		return;
 	}
 	

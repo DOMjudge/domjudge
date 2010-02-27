@@ -243,7 +243,7 @@ function genScoreBoard($cdata) {
  */
 function renderScoreBoard($cdata, $sdata, $myteamid = null, $static = FALSE) {
 
-	if ( empty( $cdata ) ) { echo "<p><em>No active contest</em></p>\n"; return; }
+	if ( empty( $cdata ) ) { echo "<p class=\"nodata\">No active contest</p>\n"; return; }
 	$cid = $cdata['cid'];
 
 	// 'unpack' the scoreboard data:
