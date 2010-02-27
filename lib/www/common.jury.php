@@ -150,6 +150,7 @@ if (!function_exists('parse_ini_string')) {
 /**
  * Read problem description file and testdata from zip archive
  * and update problem with it, or insert new problem when probid=NULL.
+ * Returns probid on success, or generates error on failure.
  */
 function importZippedProblem($zip, $probid = NULL)
 {
