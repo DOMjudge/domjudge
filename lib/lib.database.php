@@ -2,14 +2,14 @@
 // $Id$
 
 /******************************************************************************
-* lib.database.php version 1.4.0
+* lib.database.php version 1.4.1
 ******************************************************************************/
 
 /******************************************************************************
 *    Licence                                                                  *
 *******************************************************************************
 
-Copyright (C) 2001-2009 Jeroen van Wolffelaar <jeroen@php.net>, et al.
+Copyright (C) 2001-2010 Jeroen van Wolffelaar <jeroen@php.net>, et al.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -229,7 +229,7 @@ class db
 				case 'S':
 					$parts = array();
 					foreach ( $val as $field => $value ) {
-						$parts[] = $field.' = '.$this->val2sql($value);
+						$parts[] = '`'.$field.'` = '.$this->val2sql($value);
 					}
 					$query .= implode(', ', $parts);
 					unset($parts);
@@ -329,8 +329,6 @@ class db
 		$elapsed_ms = round(1000*(($secs2 - $secs) + ($micros2 - $micros)));
 
 		if ( DEBUG & DEBUG_SQL ) {
-			global $DEBUG_NUM_QUERIES;
-			$DEBUG_NUM_QUERIES++;
 			if ( isset($_SERVER['REMOTE_ADDR']) ) {
 				printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>\n",
 				       htmlspecialchars($query));
@@ -341,23 +339,28 @@ class db
 
 		if($res) return $res;
 
+		if(DEBUG) {
+			$backtrace = debug_backtrace();
+			$callsite = ' file:' . $backtrace[1]['file'] . ', ' .
+			            ' line:' . $backtrace[1]['line'] . ', ';
+		} else {
+			$callsite = '';
+		}
+
 		// switch error message depending on errornr.
 		switch(mysql_errno($this->_connection)) {
 			case 1062:	// duplicate key
 			throw new UnexpectedValueException("Item with this key already"
-			    . " exists.\n" . mysql_error($this->_connection));
+			    . " exists.\n" . $callsite . mysql_error($this->_connection));
 			case 1217:  // foreign key constraint
 			throw new UnexpectedValueException("This operation would have"
-			    . " brought the database in an inconsistent state.\n"
-			    . mysql_error($this->_connection));
+			    . " brought the database in an inconsistent state,\n"
+			    . $callsite . mysql_error($this->_connection));
 			case 2006:	// MySQL server has gone away
 			throw new RuntimeException("MySQL server has gone away");
 			default:
-			$backtrace = debug_backtrace();
-			throw new RuntimeException("SQL syntax-error, "
-			    . "file: " . $backtrace[1]['file'] . ", "
-			    . "line: " . $backtrace[1]['line'] . ", "
-			    . "Error# " . mysql_errno($this->_connection) . ": "
+			throw new RuntimeException("SQL syntax-error, " . $callsite
+			    . "Error#" . mysql_errno($this->_connection) . ": "
 			    . mysql_error($this->_connection) . ", query: '$query'");
 		}
 	}
