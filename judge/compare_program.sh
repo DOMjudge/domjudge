@@ -1,12 +1,11 @@
 #!/bin/sh
 # $Id$
 
-# Compare wrapper-script for 'test_solution.sh'.
-# See that script for syntax and more info.
+# Compare wrapper-script to be called from 'testcase_run.sh'.
 #
 # This script is written to comply with the ICPC Validator Interface Standard
 # as described in http://www.ecs.csus.edu/pc2/doc/valistandard.html.
-
+#
 # Usage: $0 <testdata.in> <program.out> <testdata.out> <result.xml> <diff.out>
 #
 # <testdata.in>   File containing testdata input.

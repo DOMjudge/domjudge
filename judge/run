@@ -1,9 +1,9 @@
 #!/bin/sh
 # $Id$
 
-# Run wrapper-script for 'test_solution.sh'.
+# Run wrapper-script called from 'testcase_run.sh'.
 # See that script for more info.
-
+#
 # Usage: $0 <program> <testin> <output> <error> <exitfile>
 #
 # <program>   Executable of the program to be run.

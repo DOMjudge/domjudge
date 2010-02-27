@@ -8,7 +8,7 @@
 # adapt this script to your environment. See also bin/dj_make_chroot.sh
 # for a script to generate a minimal chroot environment with Sun Java.
 #
-# This script will be called from test_solution.sh in the root
+# This script will be called from testcase_run.sh in the root
 # directory of the chroot environment with one parameter: either
 # 'start' to setup, or 'stop' to destroy the chroot environment.
 

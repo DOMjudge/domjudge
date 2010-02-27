@@ -3,11 +3,12 @@
 
    $Id$
 
-   This program is a compare wrapper-script for 'test_solution.sh'.
-   See that script for syntax and more info. This program is written to
+   This program is a compare script for 'testcase_run.sh' and executes
+   a normal 'diff' to detect correct, presentation-error (whitespace
+   mostly ignored) or wrong-answer results. This program is written to
    comply with the ICPC Validator Interface Standard as described in
    http://www.ecs.csus.edu/pc2/doc/valistandard.html.
-   
+
    Usage: compare <testdata.in> <program.out> <testdata.out> <result.xml> <diff.out>
 
    <testdata.in>   File containing testdata input.
@@ -36,7 +37,6 @@
      $ only end-of-lines characters differ (e.g. LF vs. CR+LF); note
        that only LF is considered to begin a newline and all CR
        characters are stripped.
-	 
  */
 
 #include <stdio.h>

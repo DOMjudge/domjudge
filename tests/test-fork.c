@@ -5,7 +5,7 @@
  * timeout.
  *
  * The result should be a TIMELIMIT and the running forked programs
- * killed by test_solution.
+ * killed by testcase_run.
  *
  * @EXPECTED_RESULTS@: TIMELIMIT
  */
