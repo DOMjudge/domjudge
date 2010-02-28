@@ -75,7 +75,11 @@ function highlight_geshi ($source, $ext)
 	$geshi = new Geshi ($source, $ext);
 	$geshi->enable_line_numbers(GESHI_FANCY_LINE_NUMBERS);
 	// TODO: make output use more CSS and less <font>
-	echo $geshi->parse_code();
+	if ( $geshi->error()===FALSE ) {
+		echo $geshi->parse_code();
+	} else {
+		highlight_native($source, $ext);
+	}
 }
 
 /**
@@ -85,25 +89,23 @@ function highlight_geshi ($source, $ext)
 function highlight_texthighlighter ($source, $ext)
 {
 	switch (strtolower($ext)) {
-		case 'c':
-		case 'cpp':
-			$lang = 'cpp';
-			break;
-		case 'java';
-		case 'perl':
-		case 'ruby':
-		case 'php':
-		case 'python':
-			$lang = $ext;
+	case 'c':    $lang = 'cpp'; break;
+	case 'bash': $lang = 'sh';  break;
+	default:
+		$lang = $ext;
 	}
-	
+
 	require('Text/Highlighter/Renderer/Html.php');
 	$renderer = new Text_Highlighter_Renderer_Html(
 		array("numbers" => HL_NUMBERS_TABLE, "tabsize" => 4));
 	$hl =& Text_Highlighter::factory($lang);
 
-	$hl->setRenderer($renderer);
-	echo $hl->highlight($source);
+	if ( !PEAR::isError($hl) ) {
+		$hl->setRenderer($renderer);
+		echo $hl->highlight($source);
+	} else {
+		highlight_native($source, $ext);
+	}
 }
 
 /**
