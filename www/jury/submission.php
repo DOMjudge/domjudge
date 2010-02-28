@@ -140,17 +140,18 @@ if ( count($jdata) > 0 ) {
 		echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
 
 		if ( $judgingid == $jid ) {
-			echo '<td>&rarr;&nbsp;</td><td>j' . $judgingid . '</td>';
+			$link = '<a>';
+			echo '<td><a>&rarr;&nbsp;</a></td>';
 		} else {
-			echo '<td>&nbsp;</td><td><a href="submission.php?id=' . $id .
-				'&amp;jid=' . $judgingid .  '">j' . $judgingid . '</a></td>';
+			$link = '<a href="submission.php?id=' . $id . '&amp;jid=' . $judgingid . '">';
+			echo '<td>' . $link . '&nbsp;</a></td>';
 		}
 
-		echo '<td>' . printtime($jud['starttime']) . '</td>';
-		echo '<td><a href="judgehost.php?id=' . urlencode(@$jud['judgehost']) .
-			'">' . printhost(@$jud['judgehost']) . '</a></td>';
-		echo '<td>' . printresult(@$jud['result'], $jud['valid']) . '</td>';
-		echo "</tr>\n";
+		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
+			'<td>' . $link . printtime($jud['starttime']) . '</a></td>' .
+			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
+			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) . '</a></td>' .
+			"</tr>\n";
 
 	}
     echo "</tbody>\n</table>\n\n";
