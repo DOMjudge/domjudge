@@ -321,7 +321,8 @@ function judge($mark, $row, $judgingid)
 			logmsg(LOG_NOTICE, "Fetched new $inout testcase $tc[rank] for " .
 			       "problem $row[probid]");
 		}
-		// sanity check (FIXME: maybe too big performance impact?)
+		// sanity check (NOTE: performance impact is negligible with 5
+		// testcases and total 3.3 MB of data)
 		if ( md5_file($tcfile[$inout]) != $tc['md5sum_' . $inout] ) {
 			error("File corrupted: md5sum mismatch: " . $tcfile[$inout]);
 		}

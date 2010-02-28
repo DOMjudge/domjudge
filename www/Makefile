@@ -11,7 +11,6 @@ config: configure.php
 domserver: configure.php
 
 install-domserver:
-# FIXME: DOMjudgelogo.png symlink wordt niet goed gekopieerd.
 	for d in . affiliations countries ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/$$d images/$$d/*.png ; \
 	done

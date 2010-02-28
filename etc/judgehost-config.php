@@ -59,7 +59,7 @@ $RESULTS_PRIO = array(
 define('LAZY_EVAL_RESULTS', true);
 
 // Remap results, e.g. to disable a specific result. Some possible
-// options are shown commented below. FIXME: not implemented yet!
+// options are shown commented below.
 $RESULTS_REMAP = array(
 //	'presentation-error' => 'wrong-answer',
 //	'presentation-error' => 'correct',
