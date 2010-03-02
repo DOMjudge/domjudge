@@ -279,6 +279,7 @@ if ( isset($jid) )  {
 	                                             r.judgingid = %i )
 	                WHERE t.probid = %s ORDER BY rank',
 	               $jid, $submdata['probid']);
+	$runinfo = $runs->gettable();
 
 	echo "<h3 id=\"testcases\">Testcase runs</h3>\n\n";
 
@@ -287,7 +288,7 @@ if ( isset($jid) )  {
 	    "<th scope=\"col\">result</th><th scope=\"col\">description</th>" .
 	    "</tr>\n</thead>\n<tbody>\n";
 
-	while ( $run = $runs->next() ) {
+	foreach ( $runinfo as $run ) {
 		$link = '#run-' . $run['rank'];
 		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
 		    "<td><a href=\"$link\">$run[runtime]</a></td>" .
@@ -307,14 +308,7 @@ if ( isset($jid) )  {
 	}
 	echo "</tbody>\n</table>\n\n";
 
-	// FIXME: this repeated query should be replaced by something like
-	//$runs->reset();
-	$runs = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
-	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
-	                                             r.judgingid = %i )
-	                WHERE t.probid = %s ORDER BY rank',
-	               $jid, $submdata['probid']);
-	while ( $run = $runs->next() ) {
+	foreach ( $runinfo as $run ) {
 
 		echo "<h4 id=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
 
