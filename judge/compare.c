@@ -200,6 +200,7 @@ void writediff()
 	char diffchar, quotechar[2];
 	char formatstr[256];
 	int firstdiff = -1;
+	char *dummy;
 
 	if ( (diffoutfile =fopen(diffout,"w"))==NULL ) error(errno,"opening file '%s'",diffout);
 	if ( (inputfile[0]=fopen(progout,"r"))==NULL ) error(errno,"opening file '%s'",progout);
@@ -251,7 +252,11 @@ void writediff()
 	/* Loop over all common lines for printing */
 	for(l=0; l<min(nlines[0],nlines[1]); l++) {
 
-		for(i=0; i<2; i++) fgets(line[i],MAXLINELEN,inputfile[i]);
+		/* Assign fgets return value to dummy variable to suppress
+		 * compiler warning. We should check fgets() returning NULL on
+		 * EOF or errors, but we did so above.
+		 */
+		for(i=0; i<2; i++) dummy = fgets(line[i],MAXLINELEN,inputfile[i]);
 
 		/* Check for endline (or normal) character differences */
 		endlinediff = ( strcmp(line[0],line[1])!=0 );
@@ -300,7 +305,11 @@ void writediff()
 		}
 
 		for(; l<nlines[i]; l++) {
-			fgets(line[i],MAXLINELEN,inputfile[i]);
+			/* Assign fgets return value to dummy variable to suppress
+			 * compiler warning. We should check fgets() returning NULL on
+			 * EOF or errors, but we did so above.
+			 */
+			dummy = fgets(line[i],MAXLINELEN,inputfile[i]);
 
 			stripendline(line[i]);
 			
