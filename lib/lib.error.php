@@ -60,6 +60,10 @@ function logmsg($msglevel, $string) {
 			if ( $msglevel == LOG_ERR ) {
 				echo "<fieldset class=\"error\"><legend>ERROR</legend> " .
 					htmlspecialchars($msg) . "</fieldset>\n";
+			} else
+			if ( $msglevel == LOG_WARNING ) {
+				echo "<fieldset class=\"warning\"><legend>Warning</legend> " .
+					htmlspecialchars($msg) . "</fieldset>\n";
 			} else {
 				echo "<p>" . htmlspecialchars($msg) . "</p>\n";
 			}

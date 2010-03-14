@@ -11,22 +11,19 @@
 require('init.php');
 $id    = @$_POST['id'];
 $val   = @$_POST['val'];
-if ( empty($id) ) {
-	error("No ID passed for to mark as verified.");
-}
+if ( empty($id) ) error("No judging ID passed to mark as verified.");
 
-$verifier = "";
-if ( ! empty($_POST['verifier_selected']) )
-	$verifier = $_POST['verifier_selected'];
-if ( ! empty($_POST['verifier_typed']) )
-	$verifier = $_POST['verifier_typed'];
+$verifier = getVerifier("");
 
+// Explicitly unset verifier when unmarking verified: otherwise this
+// judging would be marked as "viewing".
 $cnt = $DB->q('RETURNAFFECTED UPDATE judging
-               SET verified = %i, verifier = %s WHERE judgingid = %i',
+               SET verified = %i, verifier = ' . ($val ? '%s ' : 'NULL %_ ') .
+              'WHERE judgingid = %i',
               $val, $verifier, $id);
 
 if ( $cnt == 0 ) {
-	error("Judging not found.");
+	error("Judging '$id' not found or nothing changed.");
 } else if ( $cnt > 1 ) {
 	error("Validated more than one judging.");
 }
@@ -47,16 +44,7 @@ if ( VERIFICATION_REQUIRED ) {
 	       $jdata['probid'], $jdata['submitid']);
 }
 
-/* Set cookie of last verifier, expiry defaults to end of session. */
-if ( $verifier ) {
-	if  (version_compare(PHP_VERSION, '5.2') >= 0) {
-		// HTTPOnly Cookie, while this cookie is not security critical
-		// it's a good habit to get into.
-		setcookie('domjudge_lastverifier', $verifier, null, null, null, null, true);
-	} else {
-		setcookie('domjudge_lastverifier', $verifier);
-	}
-}
+setVerifier();
 
 /* redirect back. */
 header('Location: submission.php?id=' . 

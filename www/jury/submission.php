@@ -50,7 +50,11 @@ $pagename = basename($_SERVER['PHP_SELF']);
 $id = (int)$_REQUEST['id'];
 if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
 
-$lastverifier = @$_COOKIE['domjudge_lastverifier'];
+// Check for $id in claim POST variable as submissions.php cannot
+// send the submission ID as a separate variable.
+if ( is_array(@$_POST['claim']) ) {
+	foreach( $_POST['claim'] as $key => $val ) $id = (int)$key;
+}
 
 require('init.php');
 require_once(LIBWWWDIR . '/forms.php');
@@ -72,7 +76,53 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
 
 if ( ! $submdata ) error ("Missing submission data");
 
-require(LIBWWWDIR . '/header.php');
+$jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime,
+                 judgehost, verified, verifier
+                 FROM judging
+                 WHERE cid = %i AND submitid = %i
+                 ORDER BY starttime ASC, judgingid ASC',
+                 $cid, $id);
+
+// When there's no judging selected through the request, we select the
+// valid one.
+if ( !isset($jid) ) {
+	$jid = NULL;
+	foreach( $jdata as $judgingid => $jud ) {
+		if ( $jud['valid'] ) $jid = $judgingid;
+	}
+}
+
+if ( isset($_POST['claim']) || isset($_POST['unclaim']) ) {
+
+	// Set $lastverifier for default in select-box.
+	$lastverifier = $verifier = getVerifier();
+
+	if ( isset($_POST['unclaim']) ) $verifier = FALSE;
+
+	// Set verifier cookie
+	setVerifier($verifier);
+
+	// Send headers now: after cookies, before possible warning messages.
+	require_once(LIBWWWDIR . '/header.php');
+
+	if ( !isset($jid) ) {
+		warning("Cannot claim this submission: no valid judging found.");
+	} else if ( $jdata[$jid]['verified'] ) {
+		warning("Cannot claim this submission: judging already verified.");
+	} else if ( empty($verifier) && $verifier!==FALSE ) {
+		warning("Cannot claim this submission: no verifier specified.");
+	} else {
+		if ( !empty($jdata[$jid]['verifier']) && $verifier!==FALSE ) {
+			warning("Submission claimed and previous owner " .
+			        @$jdata[$jid]['verifier'] . " replaced.");
+		}
+		$DB->q('UPDATE judging SET verifier = ' . ($verifier===FALSE ? 'NULL %_ ' : '%s ') .
+		       'WHERE judgingid = %i', $verifier, $jid);
+	}
+}
+
+// Headers might already have been included.
+require_once(LIBWWWDIR . '/header.php');
 
 echo "<h1>Submission s".$id;
 if ( $submdata['valid'] ) {
@@ -82,12 +132,6 @@ if ( $submdata['valid'] ) {
 	echo "<p>This submission is not used during the scoreboard
 		  calculations.</p>\n\n";
 }
-
-$jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime, judgehost
-                 FROM judging
-                 WHERE cid = %i AND submitid = %i
-                 ORDER BY starttime ASC, judgingid ASC',
-                 $cid, $id);
 
 ?>
 <table width="100%">
@@ -127,23 +171,15 @@ if ( count($jdata) > 0 ) {
 		"<th scope=\"col\">judgehost</th><th scope=\"col\">result</th>" .
 		"</tr>\n</thead>\n<tbody>\n";
 
-	// when there's no judging selected through the request, we find
-	// out if there's a valid one: display that.
-	if ( ! isset($jid) ) {
-		$jid = $DB->q('MAYBEVALUE SELECT judgingid FROM judging
- 		               WHERE submitid = %i AND valid = 1', $id);
-	}
-
 	// print the judgings
 	foreach( $jdata as $judgingid => $jud ) {
 
 		echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
+		$link = '<a href="submission.php?id=' . $id . '&amp;jid=' . $judgingid . '">';
 
 		if ( $judgingid == $jid ) {
-			$link = '<a>';
-			echo '<td><a>&rarr;&nbsp;</a></td>';
+			echo '<td>' . $link . '&rarr;&nbsp;</a></td>';
 		} else {
-			$link = '<a href="submission.php?id=' . $id . '&amp;jid=' . $judgingid . '">';
 			echo '<td>' . $link . '&nbsp;</a></td>';
 		}
 
@@ -190,6 +226,21 @@ if ( isset($jid) )  {
 	echo "<h2>Judging j" . (int)$jud['judgingid'] .
 		($jud['valid'] == 1 ? '' : ' (INVALID)') . "</h2>\n\n";
 
+	if ( !$jud['verified'] ) {
+		echo addForm($pagename . '?id=' . urlencode($id) . '&jid=' . urlencode($jid));
+
+		echo "<p>Claimed: " .
+		    "<strong>" . printyn(!empty($jud['verifier'])) . "</strong>";
+		if ( empty($jud['verifier']) ) {
+			echo '; ';
+		} else {
+			echo ', by ' . htmlspecialchars($jud['verifier']) . '; ' .
+			    addSubmit('unclaim', 'unclaim') . ' or ';
+		}
+		echo addSubmit('claim', 'claim') . ' as ' . addVerifierSelect($lastverifier) .
+		    addEndForm();
+	}
+
 	$judging_ended = !empty($jud['endtime']);
 
 	// display following data only when the judging has been completed
@@ -214,24 +265,8 @@ if ( isset($jid) )  {
 			}
 
 			if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
-				echo '; <input type="submit" value="' .
-				    ($val ? '' : 'un') . 'mark verified"' .
-				    " />\n";
-				if ( $val ) {
-					echo "by " .addInput('verifier_typed', '', 10, 15);
-					$verifiers = $DB->q('COLUMN SELECT DISTINCT verifier FROM judging
-									 WHERE verifier IS NOT NULL AND verifier != ""
-									 ORDER BY verifier');
-					if ( count($verifiers) > 0 ) {
-						$opts = array(0 => "");
-						$opts = array_merge($verifiers, $opts);
-						$default = null;
-						if ( in_array($lastverifier,$verifiers) ) {
-							$default = $lastverifier;
-						}
-						echo "or " .addSelect('verifier_selected', $opts, $default);
-					}
-				}
+				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
+				if ( $val ) echo ' by ' . addVerifierSelect();
 				echo "</p>" . addEndForm();
 			} else {
 				echo "</p>\n";

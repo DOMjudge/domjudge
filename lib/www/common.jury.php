@@ -220,3 +220,58 @@ function importZippedProblem($zip, $probid = NULL)
 	return $probid;
 
 }
+
+/**
+ * Reads verifier from POST variables, returns $default if nothing is set.
+ */
+function getVerifier($default = null)
+{
+	$verifier = $default;
+	if ( ! empty($_POST['verifier_selected']) ) $verifier = $_POST['verifier_selected'];
+	if ( ! empty($_POST['verifier_typed']) )    $verifier = $_POST['verifier_typed'];
+
+	return $verifier;
+}
+
+/**
+ * Sets verifier in a cookie, only if a non-empty string is given.
+ */
+function setVerifier($verifier)
+{
+	// Set cookie of last verifier, expiry defaults to end of session.
+	if (  !empty($verifier) && is_string($verifier) ) {
+		if  (version_compare(PHP_VERSION, '5.2') >= 0) {
+			// HTTPOnly Cookie, while this cookie is not security critical
+			// it's a good habit to get into.
+			setcookie('domjudge_lastverifier', $verifier, null, null, null, null, true);
+		} else {
+			setcookie('domjudge_lastverifier', $verifier);
+		}
+	}
+}
+
+/**
+ * Add a both a text field and select box to select a verifier.
+ */
+function addVerifierSelect($default = null)
+{
+	global $DB;
+
+	$verifiers = $DB->q('COLUMN SELECT DISTINCT verifier FROM judging
+	                     WHERE verifier IS NOT NULL AND verifier != ""
+	                     ORDER BY verifier');
+
+	if ( !isset($lastverifier) ) {
+		$lastverifier = @$_COOKIE['domjudge_lastverifier'];
+	}
+
+	$res = addInput('verifier_typed', '', 10, 15);
+	if ( count($verifiers) > 0 ) {
+		$opts = array(0 => "");
+		$opts = array_merge($verifiers, $opts);
+		if ( !in_array($default,$verifiers) ) $default = null;
+		$res .= ' or ' . addSelect('verifier_selected', $opts, $default);
+	}
+
+	return $res;
+}
