@@ -44,7 +44,7 @@ if ( VERIFICATION_REQUIRED ) {
 	       $jdata['probid'], $jdata['submitid']);
 }
 
-setVerifier();
+setVerifier($verifier);
 
 /* redirect back. */
 header('Location: submission.php?id=' . 

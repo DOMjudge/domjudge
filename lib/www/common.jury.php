@@ -261,15 +261,13 @@ function addVerifierSelect($default = null)
 	                     WHERE verifier IS NOT NULL AND verifier != ""
 	                     ORDER BY verifier');
 
-	if ( !isset($lastverifier) ) {
-		$lastverifier = @$_COOKIE['domjudge_lastverifier'];
-	}
+ 	if ( empty($default) ) $default = null;
+	if ( $default!==null && !in_array($default,$verifiers) ) $verifiers[] = $default;
 
 	$res = addInput('verifier_typed', '', 10, 15);
 	if ( count($verifiers) > 0 ) {
 		$opts = array(0 => "");
 		$opts = array_merge($verifiers, $opts);
-		if ( !in_array($default,$verifiers) ) $default = null;
 		$res .= ' or ' . addSelect('verifier_selected', $opts, $default);
 	}
 

@@ -47,14 +47,16 @@ function parseDiff($difftext){
 
 $pagename = basename($_SERVER['PHP_SELF']);
 
-$id = (int)$_REQUEST['id'];
+$id = (int)@$_REQUEST['id'];
 if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
 
-// Check for $id in claim POST variable as submissions.php cannot
+// Also check for $id in claim POST variable as submissions.php cannot
 // send the submission ID as a separate variable.
 if ( is_array(@$_POST['claim']) ) {
 	foreach( $_POST['claim'] as $key => $val ) $id = (int)$key;
 }
+
+$lastverifier = @$_COOKIE['domjudge_lastverifier'];
 
 require('init.php');
 require_once(LIBWWWDIR . '/forms.php');
@@ -266,7 +268,7 @@ if ( isset($jid) )  {
 
 			if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
 				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
-				if ( $val ) echo ' by ' . addVerifierSelect();
+				if ( $val ) echo ' by ' . addVerifierSelect($lastverifier);
 				echo "</p>" . addEndForm();
 			} else {
 				echo "</p>\n";

@@ -69,7 +69,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 	if ( IS_JURY ) {
 		echo addForm('submission.php') .
 		    '<p>Claim submissions for verification as ' .
-		    addVerifierSelect() . "</p>\n";
+		    addVerifierSelect(@$_COOKIE['domjudge_lastverifier']) . "</p>\n";
 	}
 
 	// print the table with the submissions.
@@ -195,7 +195,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 			    echo addSubmit('claim',
 				               'claim[' . htmlspecialchars($row['submitid']) . ']');
 			} else {
-			    echo "<a$link>" . htmlspecialchars($verifier) . "</a>";
+			    echo "<a$link>$verifier</a>";
 			}
 		}
 		echo "</td></tr>\n";
