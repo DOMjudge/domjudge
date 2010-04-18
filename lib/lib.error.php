@@ -51,37 +51,37 @@ function logmsg($msglevel, $string) {
 	$stamp = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . 
 		(function_exists('posix_getpid') ? "[" . posix_getpid() . "]" : "") .
 		": ";
-	$msg = $string . "\n";
-	
+
 	if ( $msglevel <= $verbose  ) {
 		// if this is the webinterface, print it to stdout, else to stderr
 		if ( IS_WEB ) {
+			$msg = htmlspecialchars($string);
 			// string 'ERROR' parsed by submit client, don't modify!
 			if ( $msglevel == LOG_ERR ) {
 				echo "<fieldset class=\"error\"><legend>ERROR</legend> " .
-					htmlspecialchars($msg) . "</fieldset>\n";
+					 $msg . "</fieldset>\n";
 			} else
 			if ( $msglevel == LOG_WARNING ) {
 				echo "<fieldset class=\"warning\"><legend>Warning</legend> " .
-					htmlspecialchars($msg) . "</fieldset>\n";
+					$msg . "</fieldset>\n";
 			} else {
-				echo "<p>" . htmlspecialchars($msg) . "</p>\n";
+				echo "<p>" . $msg . "</p>\n";
 			}
 			// Add strings for non-interactive parsing:
-			if ( $msglevel == LOG_ERR     ) echo "\n<!-- @@@ERROR-$string@@@ -->\n";
-			if ( $msglevel == LOG_WARNING ) echo "\n<!-- @@@WARNING-$string@@@ -->\n";
+			if ( $msglevel == LOG_ERR     ) echo "\n<!-- @@@ERROR-$msg@@@ -->\n";
+			if ( $msglevel == LOG_WARNING ) echo "\n<!-- @@@WARNING-$msg@@@ -->\n";
 		} else {
-			fwrite(STDERR, $stamp . $msg);
+			fwrite(STDERR, $stamp . $string . "\n");
 			fflush(STDERR);
 		}
 	}
 	if ( $msglevel <= $loglevel ) {
 		if ( defined('STDLOG') ) {
-			fwrite(STDLOG, $stamp . $msg);
+			fwrite(STDLOG, $stamp . $string . "\n");
 			fflush(STDLOG);
 		}
 		if ( defined('SYSLOG') ) {
-			syslog($msglevel, $msg);
+			syslog($msglevel, $string . "\n");
 		}
 	}
 }

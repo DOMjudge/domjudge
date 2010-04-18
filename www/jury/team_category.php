@@ -18,11 +18,11 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 
 	require(LIBWWWDIR . '/forms.php');
 
-	$title = "Category: $cmd";
+	$title = "Category: " . htmlspecialchars($cmd);
 	$jscolor = true;
 
 	require(LIBWWWDIR . '/header.php');
-	echo "<h2>" . ucfirst($cmd) . " category</h2>\n\n";
+	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " category</h2>\n\n";
 
 	echo addForm('edit.php');
 

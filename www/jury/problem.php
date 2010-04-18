@@ -52,7 +52,7 @@ require(LIBWWWDIR . '/forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
 
-	echo "<h2>" . ucfirst($cmd) . " problem</h2>\n\n";
+	echo "<h2>" .  htmlspecialchars(ucfirst($cmd)) . " problem</h2>\n\n";
 
 	echo addForm('edit.php', 'post', null, 'multipart/form-data');
 
