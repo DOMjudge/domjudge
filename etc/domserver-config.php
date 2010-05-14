@@ -34,7 +34,12 @@ define('AUTH_METHOD', 'PHP_SESSIONS');
 // addresses have to be configured beforehand.
 define('STRICTIPCHECK', false);
 
-define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl Bash,sh');
+// List of auto-detected language extensions by the submit client.
+//   Format: 'LANG,MAINEXT[,EXT]... [LANG...]' where:
+//   - LANG is the language name displayed,
+//   - MAINEXT is the extension corresponding to the extension in DOMjudge,
+//   - EXT... are comma separated additional detected language extensions.
+define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl Bash,sh C#,cs');
 
 // Specify here which of the users in htpasswd-jury should have admin 
 // rights on top of their jury rights

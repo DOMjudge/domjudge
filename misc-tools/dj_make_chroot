@@ -27,6 +27,8 @@ INCLUDEDEBS=""
 
 # Debian packages to install after upgrade (space separated):
 INSTALLDEBS="openjdk-6-jre-headless"
+# For C# support add: mono-runtime libmono-system2.0-cil
+# However running mono within chroot still gives errors...
 
 # Debian packages to remove after upgrade (space separated):
 REMOVEDEBS=""

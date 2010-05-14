@@ -1935,7 +1935,7 @@ this cannot simply run in a chroot environment.
 There are some options to support Java as a language:
 <enum>
 <item> One can disable the chroot environment in
-       <tt>etc/judgehost-config.php</tt> by setting <tt>USE_CHROOT=0</tt>.
+       <tt>etc/judgehost-config.php</tt> by disabling <tt>USE_CHROOT</tt>.
        Disabling the chroot environment removes this extra layer of
        security against submissions that attempt to
        cheat, but it is a simple solution to getting Java to work.
@@ -2032,6 +2032,14 @@ terminal), the copying fails.
 
 Another cause might be that you do not have automatic access to the
 team's account (e.g. using ssh keys).
+
+<sect>C#/mono support
+<p>
+
+Using the mono compiler and runtime for C# gives rise to similar
+problems as with Java. Although the C# language has been added to
+DOMjudge, there's no support yet to run it within a chroot
+environment. So in that case, <tt>USE_CHROOT</tt> must be disabled.
 
 <sect>Memory limit errors in the web interface
 <p>
