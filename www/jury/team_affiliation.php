@@ -20,10 +20,10 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 
 	require(LIBWWWDIR . '/forms.php');
 
-	$title = "Affiliation: $cmd";
+	$title = "Affiliation: " . htmlspecialchars($cmd);
 
 	require(LIBWWWDIR . '/header.php');
-	echo "<h2>" . ucfirst($cmd) . " affiliation</h2>\n\n";
+	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " affiliation</h2>\n\n";
 
 	echo addForm('edit.php');
 
