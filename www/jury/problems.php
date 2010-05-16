@@ -16,7 +16,11 @@ require(LIBWWWDIR . '/forms.php');
 
 echo "<h1>Problems</h1>\n\n";
 
-$res = $DB->q('SELECT * FROM problem NATURAL JOIN contest ORDER BY problem.cid, probid');
+$res = $DB->q('SELECT p.*, c.*, COUNT(testcaseid) AS testcases
+               FROM problem p
+               NATURAL JOIN contest c
+               LEFT JOIN testcase USING (probid)
+               GROUP BY probid ORDER BY p.cid, probid');
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No problems defined</p>\n\n";
@@ -25,9 +29,10 @@ if( $res->count() == 0 ) {
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
 		"<th scope=\"col\">contest</th><th scope=\"col\">allow<br />submit</th>" .
 		"<th scope=\"col\">allow<br />judge</th>" .
-		"<th scope=\"col\">timelimit</th>" .
-		"<th class=\"sorttable_nosort\" scope=\"col\">colour</th></tr>" .
-		"</thead>\n<tbody>\n";
+		"<th scope=\"col\">time<br />limit</th>" .
+		"<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .
+	    "<th scope=\"col\">test<br />cases</th>" .
+		"</tr></thead>\n<tbody>\n";
 
 	$lastcid = -1;
 
@@ -58,10 +63,12 @@ if( $res->count() == 0 ) {
 			htmlspecialchars($row['color']) .
 		      ';" alt="problem colour ' . htmlspecialchars($row['color']) .
 		      '" src="../images/circle.png" /></a>'
-			: '<td>' );
+			: '<td>' . $link . '&nbsp;' );
 			if ( IS_ADMIN ) {
-				echo "</td><td class=\"editdel\">" .
-					editLink('problem', $row['probid']) . " " . 
+				echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
+				    "\">" . $row['testcases'] . "</a></td>" .
+				    "<td class=\"editdel\">" .
+					editLink('problem', $row['probid']) . " " .
 					delLink('problem','probid',$row['probid']);
 			}
 			echo "</td></tr>\n";
