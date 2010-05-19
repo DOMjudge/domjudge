@@ -63,9 +63,8 @@ while ( TRUE ) {
 		system(LIBDIR . "/user_callback.sh $login $file", $retval);
 
 		if ( $retval == 0 ) {
-			$hostname = gethostbyaddr($ipaddress);
-			$DB->q('UPDATE team SET ip = %s, host = %s
-			        WHERE login = %s', $ipaddress, $hostname, $login);
+			$DB->q('UPDATE team SET ipaddress = %s
+			        WHERE login = %s', $ipaddress, $login);
 
 			$DB->q('UPDATE team_identify SET status = "done", timestamp = NOW()
 			        WHERE login = %s AND ipaddress = %s AND status = "busy"',

@@ -3,7 +3,6 @@
 /**
  * Recalculate all cached data in DOMjudge:
  * - The scoreboard.
- * - Team hostnames.
  * Use this sparingly since it requires
  * (3 x #teams x #problems) queries.
  *
@@ -26,11 +25,11 @@ ob_implicit_flush();
 echo "<h1>Refresh Cache</h1>\n\n";
 
 // get the contest, teams and problems
-$teams = $DB->q('TABLE SELECT login,ipaddress FROM team ORDER BY login');
+$teams = $DB->q('TABLE SELECT login FROM team ORDER BY login');
 $probs = $DB->q('COLUMN SELECT probid FROM problem
                  WHERE cid = %i ORDER BY probid', $cid);
 
-echo "<p>Recalculating all values for the hostname and scoreboard cache (" .
+echo "<p>Recalculating all values for the scoreboard cache (" .
 	count($teams) . " teams, " . count($probs) ." problems, contest c" .
 	htmlspecialchars($cid) . ")...</p>\n\n<pre>\n";
 
@@ -54,17 +53,6 @@ foreach( $teams as $team ) {
 
 	echo "Team " . htmlspecialchars($team['login']) . ":";
 
-	if ( empty($team['ipaddress']) ) {
-		echo " [h]";
-	} else {
-		echo " [H]";
-		$hostname = gethostbyaddr($team['ipaddress']);
-		if ( $hostname != $team['ipaddress'] ) {
-			$DB->q("UPDATE team SET hostname = %s WHERE login = %s",
-				$hostname, $team['login']);
-		}
-	}
-	
 	// for each problem fetch the result
 	foreach( $probs as $pr ) {
 		echo " " .htmlspecialchars($pr);

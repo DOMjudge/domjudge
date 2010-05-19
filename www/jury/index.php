@@ -41,7 +41,7 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <ul>
 <li><a href="checkconfig.php">Config checker</a></li>
 <li><a href="genpasswds.php">Manage team passwords</a></li>
-<li><a href="refresh_cache.php">Refresh scoreboard and hostname cache</a></li>
+<li><a href="refresh_cache.php">Refresh scoreboard cache</a></li>
 </ul>
 
 <p><em>Note: the config check and cache refresh operations have a

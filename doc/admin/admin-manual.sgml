@@ -1295,17 +1295,12 @@ MD5-hash of a one-time password teams can use to authenticate and
 register their IP address. It can be set under Administrator Functions:
 Generate Passwords.
 
-The <tt>hostname</tt> field is automatically filled in when team data
-is added or changed based on a reverse DNS lookup of the IP address.
-If this cache becomes inaccurate for some reason, it can be refreshed
-under the Administrator functions on the main page.
-
 <tt>members</tt> are the names of the team members, separated by
 newlines and <tt>room</tt> is the room the team is located, both for
 display only; <tt>comments</tt> can be filled with arbitrary useful
 information and is only visible to the jury.
-The timestamp <tt>teampage_first_visited</tt> indicates when/whether a
-team visited its team web interface.
+The timestamp <tt>teampage_first_visited</tt> and the <tt>hostname</tt>
+field indicate when/whether/from where a team visited its team web interface.
 
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the

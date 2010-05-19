@@ -42,15 +42,7 @@ function check_team($data, $keydata = null)
 				}
 			}
 		}
-		// lookup hostname for in hostname cache field;
-		// if result is the same as IP address, the lookup failed.
-		$host = gethostbyaddr($data['ipaddress']);
-		if ( $host != $data['ipaddress'] ) {
-			$data['hostname'] = $host;
-		} else {
-			$data['hostname'] = '';
-		}
-
+		
 		if(!$keydata) {
 			$keydata['login'] = $data['login'];
 		}

@@ -45,11 +45,12 @@ function logged_in()
 
 	if ( !empty($teamdata) ) {
 		$login = $teamdata['login'];
-
 		// is this the first visit? record that in the team table
 		if ( empty($row['teampage_first_visited']) ) {
-			$DB->q('UPDATE team SET teampage_first_visited = %s WHERE login = %s',
-			       now(), $login);
+			$hostname = gethostbyaddr($ip);
+			$DB->q('UPDATE team SET teampage_first_visited = %s, hostname = %s
+			        WHERE login = %s',
+			       now(), $hostname, $login);
 		}
 	}
 
@@ -145,9 +146,6 @@ function do_login()
 			show_failed_login("Please supply a username and password.");
 		}
 
-		$hostname = gethostbyaddr($ip);
-		if ( $hostname==$ip ) $hostname = NULL;
-
 		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team
 		                    WHERE login = %s AND passwd = %s' .
 		                   (AUTH_METHOD=='IPADDRESS' ? ' AND ipaddress IS NULL' : ''),
@@ -162,9 +160,9 @@ function do_login()
 		$login = $teamdata['login'];
 
 		if ( AUTH_METHOD=='IPADDRESS' ) {
-			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET ipaddress = %s, hostname = %s
-			               WHERE login = %s', $ip, $hostname, $login);
-			if ( $cnt != 1 ) error("cannot set IP/hostname for team '$login'");
+			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET ipaddress = %s
+			               WHERE login = %s', $ip, $login);
+			if ( $cnt != 1 ) error("cannot set IP for team '$login'");
 		}
 		if ( AUTH_METHOD=='PHP_SESSIONS' ) {
 			session_start();

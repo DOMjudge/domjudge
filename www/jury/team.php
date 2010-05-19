@@ -122,8 +122,8 @@ if ( is_readable($teamimage) ) {
 	alt="edit" title="set password" class="picto" /></a>
 <?php endif; ?>
 	</td></tr>
-<tr><td scope="row">Host:</td><td><?php echo @$row['ipaddress'] ? htmlspecialchars($row['ipaddress']).
-	' - '.(@$row['hostname'] ? printhost($row['hostname'], TRUE):''):'-'?></td></tr>
+<tr><td scope="row">Host:</td><td><?php echo 
+	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
 <?php if (!empty($row['room'])): ?>
 <tr><td scope="row">Room:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>
