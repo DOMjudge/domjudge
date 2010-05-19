@@ -68,15 +68,9 @@ if( $teams->count() == 0 ) {
 				($row['affilid'] ? htmlspecialchars($row['affilid']) : '&nbsp;') .
 			"</a></td><td title=\"";
 		
-		if ( @$row['ipaddress'] ) {
-			$host = (empty($row['hostname'])?'':$row['hostname']);
-			echo htmlspecialchars($row['ipaddress']);
-			if ( empty($host) ) {
-				echo "\">" . $link . htmlspecialchars($row['ipaddress']);
-			} else {
+		if ( @$row['hostname'] ) {
 				echo " - " . htmlspecialchars($host) . "\">" . $link .
 					printhost($host);
-			}
 		} else {
 			echo "\">" . $link . "-";
 		}

@@ -63,7 +63,7 @@ while ( TRUE ) {
 		system(LIBDIR . "/user_callback.sh $login $file", $retval);
 
 		if ( $retval == 0 ) {
-			$DB->q('UPDATE team SET ipaddress = %s
+			$DB->q('UPDATE team SET authtoken = %s
 			        WHERE login = %s', $ipaddress, $login);
 
 			$DB->q('UPDATE team_identify SET status = "done", timestamp = NOW()

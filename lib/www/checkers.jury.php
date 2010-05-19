@@ -20,42 +20,6 @@ function ch_error($string)
 
 function check_team($data, $keydata = null)
 {
-	// check the IP address. If it's in a known good format, leave it
-	// that way. If not, it may be a hostname, see if we can resolve it.
-	// Otherwise error.
-	if ( !empty($data['ipaddress']) ) {
-		$data['ipaddress'] = trim($data['ipaddress']);
-		$ip2l = ip2long($data['ipaddress']);
-		// IPv4?
-		if ( $ip2l === FALSE ) {
-			if ( 		
-				// IPv6? PHP >= 5.1 (!Windows)
-			 (  function_exists('inet_pton') && !@inet_pton($data['ipaddress']) )
-			  // cheap way to guess if it's an IPv6 address
-			  && strpos(':', $data['ipaddress']) === FALSE
-			) {
-				$ip = gethostbyname($data['ipaddress']);
-				if ( $ip == $data['ipaddress'] ) {
-					ch_error("Cannot get IP address for '" . $ip ."'");
-				} else {
-					$data['ipaddress'] = $ip;
-				}
-			}
-		}
-		
-		if(!$keydata) {
-			$keydata['login'] = $data['login'];
-		}
-		global $DB;
-		$team = $DB->q("MAYBEVALUE SELECT `login` FROM `team`"
-					. " WHERE `ipaddress` = %s"
-					, $data['ipaddress']);
-		if($team && $team != $keydata['login']) {
-			ch_error("IP address '".$data['ipaddress']."' already in use "
-					."by team '".$team."'");
-		}
-	}
-	
 	return $data;
 }
 

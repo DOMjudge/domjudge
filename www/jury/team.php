@@ -64,8 +64,8 @@ $amap[''] = 'none';
 echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 ?>
 </td></tr>
-<tr><td><label for="data_0__ipaddress_">IP address:</label></td>
-<td><?php echo addInput('data[0][ipaddress]', @$row['ipaddress'], 35, 32)?> (or hostname)</td></tr>
+<tr><td><label for="data_0__authtoken_">Auth token:</label></td>
+<td><?php echo addInput('data[0][authtoken]', @$row['authtoken'], 35, 255)?></td></tr>
 <tr><td><label for="data_0__room_">Room:</label></td>
 <td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td valign="top"><label for="data_0__comments_">Comments:</label></td>
@@ -116,12 +116,6 @@ if ( is_readable($teamimage) ) {
 <div class="col1"><table>
 <tr><td scope="row">Login:     </td><td class="teamid"><?php echo $row['login']?></td></tr>
 <tr><td scope="row">Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
-<tr><td scope="row">Has passwd:</td><td><?php echo (isset($row['passwd']) ? 'yes':'no')?>
-<?php if ( IS_ADMIN ): ?>
-	<a href="genpasswds.php?forteam=<?php echo $id?>"><img src="../images/edit.png"
-	alt="edit" title="set password" class="picto" /></a>
-<?php endif; ?>
-	</td></tr>
 <tr><td scope="row">Host:</td><td><?php echo 
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
 <?php if (!empty($row['room'])): ?>

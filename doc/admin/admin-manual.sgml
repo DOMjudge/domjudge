@@ -1286,14 +1286,7 @@ Table of teams: <tt>login</tt> is the account/login-name of the team
 the ID of the category the team is in; <tt>affilid</tt> is the
 affiliation ID of the team.
 
-<tt>ipaddress</tt> is the IP-address of the team. This is used to
-automatically identify the team in the web interface and to check
-submission origin. A value of <tt>NULL</tt> results in the team being
-unable to submit or view its team page, unless they first authenticate
-via password or command line submission. <tt>passwd</tt> is a
-MD5-hash of a one-time password teams can use to authenticate and
-register their IP address. It can be set under Administrator Functions:
-Generate Passwords.
+<tt>authtoken</tt> is FIXME
 
 <tt>members</tt> are the names of the team members, separated by
 newlines and <tt>room</tt> is the room the team is located, both for

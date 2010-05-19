@@ -27,7 +27,7 @@ if ( empty($login) || empty($tempfile) ||
 $ip = $_SERVER['REMOTE_ADDR'];
 
 // check whether this request makes sense.
-$row = $DB->q('MAYBETUPLE SELECT login FROM team WHERE ipaddress = %s', $ip);
+$row = $DB->q('MAYBETUPLE SELECT login FROM team WHERE authtoken = %s', $ip);
 if ( $row ) {
 	if ( $row['login'] == $login ) {
 		echo "This team is already registered on this address";
@@ -38,9 +38,9 @@ if ( $row ) {
 	}
 }
 
-$row = $DB->q('MAYBETUPLE SELECT ipaddress FROM team WHERE login = %s', $login);
+$row = $DB->q('MAYBETUPLE SELECT authtoken FROM team WHERE login = %s', $login);
 if ( $row ) {
-	if ( !empty($row['ipaddress']) ) {
+	if ( !empty($row['authtoken']) ) {
 		echo "Error: team already registered on a different address";
 		die();
 	}

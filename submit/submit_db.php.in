@@ -49,9 +49,9 @@ if ( AUTH_METHOD!='IPADDRESS' ) {
 // methods might conflict with this.
 $teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s', $team);
 
-if( ! compareipaddr($teamdata['ipaddress'],$ip) ) {
-	if ( $teamdata['ipaddress'] == NULL && ! STRICTIPCHECK ) {
-		$DB->q('UPDATE team SET ipaddress = %s WHERE login = %s',
+if( ! compareipaddr($teamdata['authtoken'],$ip) ) {
+	if ( $teamdata['authtoken'] == NULL && ! STRICTIPCHECK ) {
+		$DB->q('UPDATE team SET authtoken = %s WHERE login = %s',
 		       $ip, $team);
 		logmsg (LOG_NOTICE, "Registered team '$team' at address '$ip'.");
 	} else {

@@ -17,7 +17,7 @@ setup_database_connection('public');
 require_once(LIBWWWDIR . '/common.php');
 
 $ip = $_SERVER['REMOTE_ADDR'];
-$res = $DB->q('SELECT ipaddress FROM team WHERE ipaddress = %s', $ip);
+$res = $DB->q('SELECT authtoken FROM team WHERE authtoken = %s', $ip);
 if( $res->count() > 0 ) {
 	$target = 'team/';
 } else {

@@ -28,7 +28,7 @@ function logged_in()
 	// when teamdata is empty:
 	switch ( AUTH_METHOD ) {
 	case 'IPADDRESS':
-		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE ipaddress = %s', $ip);
+		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE authtoken = %s', $ip);
 		break;
 
 	case 'PHP_SESSIONS':
@@ -147,8 +147,7 @@ function do_login()
 		}
 
 		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team
-		                    WHERE login = %s AND passwd = %s' .
-		                   (AUTH_METHOD=='IPADDRESS' ? ' AND ipaddress IS NULL' : ''),
+		                    WHERE login = %s AND authtoken = %s' 
 		                   $user, md5($user."#".$pass));
 
 		if ( !$teamdata ) {
@@ -160,7 +159,7 @@ function do_login()
 		$login = $teamdata['login'];
 
 		if ( AUTH_METHOD=='IPADDRESS' ) {
-			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET ipaddress = %s
+			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET authtoken = %s
 			               WHERE login = %s', $ip, $login);
 			if ( $cnt != 1 ) error("cannot set IP for team '$login'");
 		}
