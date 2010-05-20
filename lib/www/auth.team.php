@@ -147,7 +147,7 @@ function do_login()
 		}
 
 		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team
-		                    WHERE login = %s AND authtoken = %s' 
+		                    WHERE login = %s AND authtoken = %s',
 		                   $user, md5($user."#".$pass));
 
 		if ( !$teamdata ) {
