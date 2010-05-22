@@ -27,6 +27,11 @@ function logged_in()
 	// Retrieve teamdata for given AUTH_METHOD, assume not logged in
 	// when teamdata is empty:
 	switch ( AUTH_METHOD ) {
+	case 'FIXED':
+		$login = FIXED_TEAM;
+		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s', $login);
+		break;
+
 	case 'IPADDRESS':
 		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE authtoken = %s', $ip);
 		break;
@@ -61,6 +66,7 @@ function logged_in()
 function have_logout()
 {
 	switch ( AUTH_METHOD ) {
+	case 'FIXED':        return FALSE;
 	case 'IPADDRESS':    return FALSE;
 	case 'PHP_SESSIONS': return TRUE;
 	}
@@ -118,7 +124,8 @@ Please supply team credentials below, or contact a staff member for assistance.
 		break;
 
 	default:
-		error("Unknown authentication method '" . AUTH_METHOD . "' requested.");
+		error("Unknown authentication method '" . AUTH_METHOD .
+		      "' requested, or login not supported.");
 	}
 
 	exit;
@@ -168,6 +175,9 @@ function do_login()
 			$_SESSION['teamid'] = $login;
 		}
 
+	default:
+		error("Unknown authentication method '" . AUTH_METHOD .
+		      "' requested, or login not supported.");
 	}
 
 	require(LIBWWWDIR . '/header.php');

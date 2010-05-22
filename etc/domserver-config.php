@@ -22,6 +22,11 @@ define('SHOW_COMPILE', 2);
 //   Use PHP sessions with user/password authentication. This allows
 //   teams to login from different machines and might be useful for
 //   online contests or programming courses.
+// FIXED
+//   Use one fixed team user that is automatically logged in. This
+//   can be useful e.g. for a demo or testing environment. Define
+//   FIXED_TEAM to the team user to be used, e.g.:
+//   define('FIXED_TEAM', 'domjudge');
 define('AUTH_METHOD', 'PHP_SESSIONS');
 
 // Strict checking of team's IP addresses (when using the IPADDRESS
