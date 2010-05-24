@@ -195,17 +195,31 @@ uninstall)
 	remove_db_users
 	;;
 
-# Upgrades the DB structure and permissions to current version.
-# Preserves data by first dumping that and importing after upgrade.
-#         @echo "Upgrading database..."
-#         mysqldump -p -u $(MYSQL_UPGR_USER) -cntQ $(DBNAME) > mysql_upgrade_dump.sql
-#         ( $(call subst_db,$(DBNAME)) mysql_clean.sql ;          \
-#           cat                        mysql_db_structure.sql     \
-#                                      mysql_privileges.sql   \
-#                                      mysql_upgrade_dump.sql ; ) \
-#                 | mysql -h $(DBSERVER) -p -u $(MYSQL_UPGR_USER) $(DBNAME)
-#         rm -f mysql_upgrade_dump.sql
-
+# Upgrades the DB structure and permissions to current version
+# using SQL upgrade files under sql/upgrade.
+upgrade)
+	TMPFILE=`mktemp /tmp/domjudge-sql.XXXXXX`
+	read_dbpasswords
+	for i in "$SQLDIR"/upgrade/* ; do
+		# First find the line where the upgrade check is performed to
+		# filter possible error messages later.
+		UPGRADELINE=`grep -n '@UPGRADE-CHECK@' "$i" | cut -d : -f 1`
+		UPGRADELINE=$((UPGRADELINE+1))
+		if cat "$i" | mysql -D $DBNAME >$TMPFILE 2>&1 ; then
+			echo "Upgraded script '$i'."
+		else
+			if grep -E "^ERROR .* at line ${UPGRADELINE}: " $TMPFILE >/dev/null 2>&1 ; then
+				echo "Skipped script '$i': already applied."
+			else
+				echo "Error upgrading script '$i':"
+				cat $TMPFILE
+				rm -f $TMPFILE
+				exit 1
+			fi
+		fi
+	done
+	rm -f $TMPFILE
+	;;
 
 	*)
 	cat <<EOF
@@ -217,6 +231,7 @@ Commands:
   genpass    generate passwords
   install    create database, contents and users if not existing
   uninstall  remove database users and database, INCLUDING ALL DATA!
+  upgrade    upgrade MySQL database schema to current version
 
 Options:
   -u <user>  connect to MySQL with DB admin <user>

@@ -2,7 +2,17 @@
 -- from/to the exact version numbers specified in the filename.
 
 --
--- First create additional structures
+-- First execute a check whether this upgrade should apply. The check
+-- below should fail if this upgrade has already been applied, but
+-- keep everything unchanged if not.
+--
+
+-- @UPGRADE-CHECK@
+ALTER TABLE `contest` ADD  KEY `cid` (`cid`, `enabled`);
+ALTER TABLE `contest` DROP KEY `cid` (`cid`, `enabled`);
+
+--
+-- Create additional structures
 --
 
 ALTER TABLE `clarification`
@@ -45,7 +55,7 @@ REVOKE UPDATE (ipaddress) ON team FROM domjudge_team;
 FLUSH PRIVILEGES;
 
 --
--- Now transfer data from old to new structure
+-- Transfer data from old to new structure
 --
 
 INSERT INTO `judging_run`
@@ -54,6 +64,13 @@ INSERT INTO `judging_run`
   FROM `judging`
   LEFT JOIN `submission` USING (submitid)
   LEFT JOIN `testcase` USING (probid);
+
+--
+-- Add/remove sample/initial contents
+--
+
+INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('cs', 'C#', 'cs', 0, 1, 1);
+INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('awk', 'AWK', 'awk', 0, 1, 1);
 
 --
 -- Finally remove obsolete structures after moving data

@@ -36,6 +36,7 @@ Version 3.1.0 - SVN
  - Add "viewing" to verification status in jury submission list, idea
    from DomJudge@FAU.
  - Added AWK and C# language support.
+ - Added upgrade support for the SQL database.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------

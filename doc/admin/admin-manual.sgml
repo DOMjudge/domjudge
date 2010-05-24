@@ -1132,16 +1132,24 @@ structure.
 <sect>Upgrading
 <p>
 
-Upgrading DOMjudge to a newer version is not (yet) well supported. In
-case you want to upgrade, be aware of the following problems.
+There is some support to upgrade DOMjudge to newer versions. Note that
+this functionality is not extensively tested, so when you plan to
+upgrade, <em>you are strongly advised to backup the DOMjudge database
+and other data before continuing</em>. We also advise to check the
+<tt>ChangeLog</tt> file for important changes.
 
-There might be database layout incompatibility problems. The first
-place to check for this is the ChangeLog. There is not yet
-functionality to automatically upgrade to a new layout.
+Upgrading the filesystem installation is probably best done by
+installing the new version of DOMjudge in a separate place and
+transferring the configuration settings from the old version.
 
-Upgrading is probably best done by installing the new version of
-DOMjudge in a separate place and transferring the configuration
-settings from the old version.
+There are SQL upgrade scripts to transform the database including its
+data to the layout of a newer version. The scripts can be found under
+<tt>sql/upgrade</tt> and each script applies changes between two
+consecutive DOMjudge version. At the beginning of each script, a check
+is performed which will let MySQL bail out with an error if it should
+not be applied anymore. Note that the scripts must be applied in order
+(sorted by release). These scripts can be applied by running
+<tt>dj-database-setup upgrade</tt>.
 
 
 <chapt>Setting up a contest <label id="contestsetup">
