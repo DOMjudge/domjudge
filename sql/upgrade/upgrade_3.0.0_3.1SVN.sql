@@ -73,6 +73,13 @@ INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_ju
 INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('awk', 'AWK', 'awk', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('python', 'Python', 'py', 0, 1, 1);
 
+-- Updates to testcases for fltcmp: cannot remove old single testcase,
+-- because that might violate foreign key constraints and also cannot
+-- specify testcaseid auto_increment keys.
+INSERT INTO `testcase` (`md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `rank`, `description`) VALUES ('9b05c566cf4d373cd23ffe75787c1f6d', '0b93bf53346750cc7e04c02f31443721', 0x330a312e300a3245300a330a, 0x312e300a302e35303030303030303030310a332e333333333333333333452d310a, 'fltcmp', 1, 'Different floating formats');
+INSERT INTO `testcase` (`md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `rank`, `description`) VALUES ('a94c7fc1f4dac435f6fc5d5d4c7ba173', '2c266fa701a6034e02d928331d5bd4ef', 0x320a342e303030303030303030303030300a352e303030303030303030303030310a, 0x302e32350a32452d310a, 'fltcmp', 2, 'High precision inputs');
+INSERT INTO `testcase` (`md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `rank`, `description`) VALUES ('fc157fa74267ba846e8ddc9c0747ad53', 'd38340056cc41e311beae85f906d7f24', 0x330a2b300a496e660a6e616e0a, 0x696e660a300a4e614e0a, 'fltcmp', 3, 'Inf/NaN checks');
+
 --
 -- Finally remove obsolete structures after moving data
 --

@@ -70,12 +70,13 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 -- 
 
 INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 3, 'UU', '127.0.0.1', NULL, NULL, NULL, NULL);
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `passwd`, `room`, `comments`, `teampage_first_visited`) VALUES ('team01', 'Some very cool teamname!', 1, NULL, MD5('team01#mypassword'), NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('team01', 'Some very cool teamname!', 1, NULL, MD5('team01#mypassword'), NULL, NULL, NULL, NULL);
 
 -- 
 -- Dumping data for table `testcase`
 -- 
 
-INSERT INTO `testcase` (`testcaseid`, `md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `description`) VALUES (1, 'b026324c6904b2a9cb4b88d6d61c81d1', '59ca0efa9f5633cb0371bbc0355478d8', 0x310a, 0x48656c6c6f20776f726c64210a, 'hello', NULL);
-INSERT INTO `testcase` (`testcaseid`, `md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `description`) VALUES (2, '2c14f1fc7da58c19226ad10f0270ee25', '0286d435ce63a624d8c6e7bab5ae1002', 0x380a2b300a312e300a3245300a330a342e303030303030303030303030300a352e303030303030303030303030310a496e660a6e616e0a, 0x696e660a312e300a302e35303030303030303030310a332e333333333333333333452d310a302e32350a32452d310a300a4e614e0a, 'fltcmp', NULL);
-
+INSERT INTO `testcase` (`testcaseid`, `md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `rank`, `description`) VALUES (1, 'b026324c6904b2a9cb4b88d6d61c81d1', '59ca0efa9f5633cb0371bbc0355478d8', 0x310a, 0x48656c6c6f20776f726c64210a, 'hello', 1, NULL);
+INSERT INTO `testcase` (`testcaseid`, `md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `rank`, `description`) VALUES (2, '9b05c566cf4d373cd23ffe75787c1f6d', '0b93bf53346750cc7e04c02f31443721', 0x330a312e300a3245300a330a, 0x312e300a302e35303030303030303030310a332e333333333333333333452d310a, 'fltcmp', 1, 'Different floating formats');
+INSERT INTO `testcase` (`testcaseid`, `md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `rank`, `description`) VALUES (3, 'a94c7fc1f4dac435f6fc5d5d4c7ba173', '2c266fa701a6034e02d928331d5bd4ef', 0x320a342e303030303030303030303030300a352e303030303030303030303030310a, 0x302e32350a32452d310a, 'fltcmp', 2, 'High precision inputs');
+INSERT INTO `testcase` (`testcaseid`, `md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `rank`, `description`) VALUES (4, 'fc157fa74267ba846e8ddc9c0747ad53', 'd38340056cc41e311beae85f906d7f24', 0x330a2b300a496e660a6e616e0a, 0x696e660a300a4e614e0a, 'fltcmp', 3, 'Inf/NaN checks');
