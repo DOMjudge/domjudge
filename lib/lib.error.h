@@ -18,6 +18,8 @@
 #define WARNSTR   "warning"
 #define WARNMATCH WARNSTR": "
 
+#define NONINTSTR "@@@"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

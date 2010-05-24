@@ -792,8 +792,16 @@ int websubmit()
 	while ( getline(curloutput,line) ) {
 
 		// Search line for upload status or errors
- 		if ( (pos=line.find(ERRMATCH,0))!=string::npos ) {
-			error(0,"webserver returned: %s",line.substr(pos+strlen(ERRMATCH)).c_str());
+ 		if ( (pos=line.find(NONINTSTR,0))!=string::npos ) {
+			size_t msgstart = pos+strlen(NONINTSTR);
+			size_t msgend = line.find(NONINTSTR,msgstart);
+			string msg = line.substr(msgstart,msgend-msgstart);
+			if ( (pos=msg.find(ERRMATCH,0))!=string::npos ) {
+				error(0,"webserver returned: %s",msg.erase(pos,strlen(ERRMATCH)).c_str());
+			}
+			if ( (pos=msg.find(WARNMATCH,0))!=string::npos ) {
+				warning(0,"webserver returned: %s",msg.erase(pos,strlen(WARNMATCH)).c_str());
+			}
  		}
 		if ( line.find("uploadstatus",0)!=string::npos ) {
 			line = remove_html_tags(line);
