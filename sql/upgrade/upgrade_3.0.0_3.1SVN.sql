@@ -24,6 +24,10 @@ CREATE TABLE `judging_run` (
   UNIQUE KEY `testcaseid` (`judgingid`, `testcaseid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Result of a testcase run within a judging';
 
+ALTER TABLE `team`
+  CHANGE COLUMN `passwd` `authtoken` varchar(255) default NULL COMMENT 'Identifying token for this team',
+  CHANGE COLUMN `hostname` `hostname` varchar(255) default NULL COMMENT 'Teampage first visited from this address' AFTER `teampage_first_visited`;
+
 ALTER TABLE `testcase`
   CHANGE COLUMN `id` `testcaseid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique identifier',
   ADD COLUMN `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging' AFTER `probid`,
@@ -36,6 +40,7 @@ ALTER TABLE `testcase`
 --
 
 GRANT SELECT (langid, name, extension, allow_submit) ON language TO domjudge_plugin;
+REVOKE UPDATE (ipaddress) ON team FROM domjudge_team;
 
 FLUSH PRIVILEGES;
 
@@ -58,6 +63,9 @@ ALTER TABLE `judging`
   DROP COLUMN `output_run`,
   DROP COLUMN `output_diff`,
   DROP COLUMN `output_error`;
+
+ALTER TABLE `team`
+  DROP COLUMN `ipaddress`;
 
 ALTER TABLE `scoreboard_jury`
   DROP COLUMN `penalty`;
