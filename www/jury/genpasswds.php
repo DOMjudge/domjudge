@@ -61,7 +61,7 @@ if ( isset($_POST['forteam']) ) {
 	} else {
 		// all teams, or optionaly only those with null password
 		$teams = $DB->q('TABLE SELECT login,name,members FROM team ' .
-		                (isset($_POST['doallnull'])?'WHERE passwd IS NULL':'') .
+		                (isset($_POST['doallnull'])?'WHERE authtoken IS NULL':'') .
 		                ' ORDER BY login');
 	}
 
@@ -74,7 +74,7 @@ if ( isset($_POST['forteam']) ) {
 			$pass = $setpass;
 		}
 		// update the team table with a password
-		$DB->q('UPDATE team SET passwd = %s WHERE login = %s', md5($team['login'].'#'.$pass), $team['login']);
+		$DB->q('UPDATE team SET authtoken = %s WHERE login = %s', md5($team['login'].'#'.$pass), $team['login']);
 		$members = str_replace(array("\r\n","\n","\r")," & ", $team['members']);
 		echo "Team:      " . htmlspecialchars($team['name']) . "\n" .
 		     "Members:   " . htmlspecialchars($members) . "\n" .
