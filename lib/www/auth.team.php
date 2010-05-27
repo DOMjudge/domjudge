@@ -174,6 +174,7 @@ function do_login()
 			session_start();
 			$_SESSION['teamid'] = $login;
 		}
+		break;
 
 	default:
 		error("Unknown authentication method '" . AUTH_METHOD .
