@@ -1,7 +1,9 @@
 <?php
 
 /**
- * Switch a user to the right site based on IP (from database)
+ * Switch a user to the right site based on whether they can be
+ * autheticated as team, jury, or nothing (public).
+ *
  * $Id$
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
@@ -11,15 +13,18 @@
 require_once('configure.php');
 
 require_once(LIBDIR . '/lib.error.php');
+require_once(LIBDIR . '/lib.misc.php');
 require_once(LIBDIR . '/use_db.php');
-setup_database_connection('public');
+// Team login necessary for checking login credentials:
+setup_database_connection('team');
 
 require_once(LIBWWWDIR . '/common.php');
+require_once(LIBWWWDIR . '/auth.team.php');
 
-$ip = $_SERVER['REMOTE_ADDR'];
-$res = $DB->q('SELECT authtoken FROM team WHERE authtoken = %s', $ip);
-if( $res->count() > 0 ) {
+if ( logged_in() ) {
 	$target = 'team/';
+} else if ( false ) { /* FIXME: test jury login? */
+	$target = 'jury/';
 } else {
 	$target = 'public/';
 }
