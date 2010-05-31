@@ -29,6 +29,28 @@ if ( empty($teams) ) {
 
 $teams = array_merge(array(''=>'(select one)'),$teams);
 
+switch ( AUTH_METHOD ):
+
+case 'IPADDRESS':
+?>
+<p>You are using IP-address based authentication. Note that resetting the
+password of a team (or all teams) implies instantly revoking any current
+access that team may have to their teampage until they enter their newly
+generated password.</p>
+<?php
+break;
+case 'PHP_SESSIONS':
+?>
+<p>You are using PHP sessions based authentication. Generating a new password
+for a team will not affect existing logged-in sessions.</p>
+<?php
+break;
+default:
+?>
+<p>Unknown authentication scheme in use.</p>
+<?php
+endswitch;
+ 
 echo addForm('genpasswds.php') .
 	"<p>\nSet password for team " .
 	addSelect('forteam', $teams, @$_GET['forteam'], true) .
@@ -38,7 +60,7 @@ echo addForm('genpasswds.php') .
 	addSubmit('go', 'doteam') .
 	"</p>\n<p>" .
 	"Generate a random password for:</p>\n<p>\n" .
-	addSubmit('all teams without a password', 'doallnull') .
+	addSubmit('all teams without a password or IP-address', 'doallnull') .
 	"<br /></p>\n<p>" .
 	addSubmit('absolutely all teams', 'doall') .
 	"<br /></p>\n" .
