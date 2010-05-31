@@ -1294,7 +1294,14 @@ Table of teams: <tt>login</tt> is the account/login-name of the team
 the ID of the category the team is in; <tt>affilid</tt> is the
 affiliation ID of the team.
 
-<tt>authtoken</tt> is FIXME
+<tt>authtoken</tt> is a generic field used by several of the supported
+authentication mechanisms to store a piece of information it needs to
+identify the team. The content of the field for each of the mechanisms is:
+<itemize>
+<item>IPADDRESS: field contains the IP address of the team's workstation
+<item>PHP_SESSIONS: contains a hash of the password that the team can log in
+with
+</itemize>
 
 <tt>members</tt> are the names of the team members, separated by
 newlines and <tt>room</tt> is the room the team is located, both for
@@ -2070,6 +2077,45 @@ everything. Also do not confuse this with the <tt>domjudge-run</tt>
 user: this is a special user to run submissions as and should also not
 be used to run normal DOMjudge processes; this user is only for
 internal use.
+
+
+<chapt>Multi-site contests <label id="multisite">
+<p>
+
+This manual assumed you are running a singe-site contest; that is, the teams
+are located closely together, probably in a single physical location. In a
+multi-site or distributed contest, teams from several remote locations use the
+same DOMjudge installation. An example is a national contest where teams can
+participate at their local institution.
+
+DOMjudge supports such a setup on the condition that a central installation of
+DOMjudge is used to which the teams connect over the internet. It is here where
+all submission processing and judging takes place. Because DOMjudge uses a web
+interface for all interactions, teams and judges will interface with the system
+just as if it were local.  Still, there are some specific considerations for a
+multi-site contest.
+
+Network: there must be a relatively reliable network connection between the
+locations and the central DOMjudge installation, because teams cannot submit or
+query the scoreboard if the network is down. Because of travelling an unsecured
+network, you may want to consider HTTPS for encrypting the traffic.  If you
+want to limit internet access, it must be done in such a way that the remote
+DOMjudge installation can still be reached.
+
+Team authentication: the IP-based authentication will still work as long as
+each team workstation has a different public IP address. If some teams are
+behind a NAT-router and thus all present themselves to DOMjudge with the same
+IP-address, the PHP sessions authentication scheme needs to be used.
+
+Judges: if the people reviewing the submissions will be located remotely as
+well, it's important to agree beforehand on who-does-what, using the
+submissions claim feature and how responding to incoming clarification requests
+is handled. Having a shared chat/IM channel may help when unexpected issues
+arise.
+
+Scoreboard: by default DOMjudge presents all teams in the same scoreboard.
+Per-site rankings are not currently possible. <!-- FIXME -->
+
 
 <chapt>DOMjudge and the ICPC validator interface standard <label id="validator">
 <p>
