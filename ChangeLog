@@ -4,7 +4,7 @@ Version 3.1.0 - SVN
 -------------------
  - Add multiple testcases support.
  - Add PHP session support as alternative to IP address authentication.
-   Backport from patches by Tobias Werth.
+   Based on patches by Tobias Werth.
  - Bugfixes and improvements to checktestdata program.
  - Fix error trapping in subshells, thanks Jan Jergus. (Closes: #2866430)
  - Fix bug in lib.database.php with array_map "class::method" notation.
