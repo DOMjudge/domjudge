@@ -41,7 +41,7 @@ GRANT DELETE ON team_unread       TO domjudge_team;
 GRANT INSERT (cid, teamid, probid, langid, submittime, sourcecode) ON submission TO domjudge_team;
 GRANT INSERT (cid, teamid, probid, langid, submitid, description,
               eventtime)                                           ON event      TO domjudge_team;
-GRANT UPDATE (hostname, teampage_first_visited)                    ON team       TO domjudge_team;
+GRANT UPDATE (authtoken, hostname, teampage_first_visited)         ON team       TO domjudge_team;
 
 -- Make sure MySQL picks up all changes
 FLUSH PRIVILEGES;
