@@ -371,6 +371,10 @@ class db
 		if($this->_connection) return;
 
 		$con = $this->persist ? 'mysql_pconnect' : 'mysql_connect';
+		if(!function_exists($con)) {
+			throw new RuntimeException("PHP database module missing "
+			    . "(no such function: '$con')");
+		}
 
 		$this->_connection = @$con($this->host, $this->user, $this->password);
 		if(!$this->_connection) {
