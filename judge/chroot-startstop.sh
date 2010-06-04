@@ -28,8 +28,15 @@ case "$1" in
 		sudo -S mount -n -t proc --bind /proc proc < /dev/null
 
 		for i in $SUBDIRMOUNTS ; do
-			mkdir -p $i
-			sudo -S mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null
+
+			# Some dirs may be links to others, e.g. /lib64 -> /lib.
+			# Preserve those; bind mount the others.
+			if [ -L $CHROOTORIGINAL/$i ]; then
+				ln -s `readlink $CHROOTORIGINAL/$i` $i
+			else 
+				mkdir -p $i
+				sudo -S mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null
+			fi
 		done
 		;;
 
