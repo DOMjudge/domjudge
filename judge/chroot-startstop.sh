@@ -31,7 +31,7 @@ case "$1" in
 
 			# Some dirs may be links to others, e.g. /lib64 -> /lib.
 			# Preserve those; bind mount the others.
-			if [ -L $CHROOTORIGINAL/$i ]; then
+			if [ -L "$CHROOTORIGINAL/$i" ]; then
 				ln -s `readlink $CHROOTORIGINAL/$i` $i
 			else 
 				mkdir -p $i
@@ -48,8 +48,12 @@ case "$1" in
 		sudo -S umount "$PWD/proc" < /dev/null
 
 		for i in $SUBDIRMOUNTS ; do
-			sudo -S umount "$PWD/$i" < /dev/null
-			rmdir $i || true
+			if [ -L "$CHROOTORIGINAL/$i" ]; then
+				rm -f $i
+			else
+				sudo -S umount "$PWD/$i" < /dev/null
+				rmdir $i || true
+			fi
 		done
 		;;
 
