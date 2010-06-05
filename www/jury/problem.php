@@ -69,6 +69,7 @@ if ( IS_ADMIN && !empty($cmd) ):
 	} else {
 		echo "<tr><td><label for=\"data_0__probid_\">Problem ID:</label></td><td>";
 		echo addInput('data[0][probid]', null, 8, 10);
+		echo " (alphanumerics only)";
 	}
 	echo "</td></tr>\n";
 
