@@ -1262,7 +1262,8 @@ known to be structurally slower than C/C++.
 
 <tag>problem</tag>
 This table contains the problem definitions. <tt>probid</tt> is the
-reference ID, <tt>cid</tt> is the contest ID this problem is (only)
+reference ID, which may consist of a-z, A-Z, 0-9 and _ only.
+<tt>cid</tt> is the contest ID this problem is (only)
 defined for: a problem cannot be used in multiple contests.
 <tt>name</tt> is the full name (description) of the problem.
 
