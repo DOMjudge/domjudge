@@ -139,7 +139,7 @@ exit;
 
 endif;
 
-if ( ! $id ) error("Missing or invalid problem id");
+if ( ! preg_match('/^\w+$/', $id) ) error("Missing or invalid problem id");
 
 echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
 

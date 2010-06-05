@@ -29,6 +29,9 @@ function check_problem($data, $keydata = null)
 			(int)$data['timelimit'] != $data['timelimit'] ) {
 		ch_error("Timelimit is not a valid positive integer");
 	}
+	if ( ! preg_match ( '/^\w+$/', $data['probid'] ) ) {
+		ch_error("Problem ID may only contain letters, numbers and underscores.");
+	}
 	return $data;
 }
 

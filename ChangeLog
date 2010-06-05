@@ -39,6 +39,8 @@ Version 3.1.0 - SVN
  - Added upgrade support for the SQL database.
  - In chroot-startstop, cope properly with /lib64 being a symlink to
    /lib. Thanks Christoph Dittmann.
+ - Enforce the previously implicit notion that probid may only consist
+   of characters in "a-zA-Z0-9_".
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------
