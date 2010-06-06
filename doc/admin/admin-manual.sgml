@@ -1205,7 +1205,14 @@ x|testcase         |Definition of testdata for each problem.@
 </tabular>
 
 Now follows a longer description (including fields) per table that has
-to be filled manually.
+to be filled manually. As a general remark: almost all tables have an
+identifier field. Most of these are numeric and automatically
+increasing; these do not need to be specified. The tables
+<tt>language</tt>, <tt>problem</tt>, <tt>team</tt>, and
+<tt>team&lowbar;affiliation</tt> have text strings as identifier
+fields. These need to be manually specified and only alpha-numeric and
+underscore characters are valid, i.e. <tt>a-z, A-Z, 0-9</tt> and
+<tt>&lowbar;</tt>.
 
 <descrip>
 <tag>configuration</tag>
@@ -1262,8 +1269,7 @@ known to be structurally slower than C/C++.
 
 <tag>problem</tag>
 This table contains the problem definitions. <tt>probid</tt> is the
-reference ID, which may consist of a-z, A-Z, 0-9 and _ only.
-<tt>cid</tt> is the contest ID this problem is (only)
+reference ID, <tt>cid</tt> is the contest ID this problem is (only)
 defined for: a problem cannot be used in multiple contests.
 <tt>name</tt> is the full name (description) of the problem.
 

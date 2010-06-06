@@ -20,6 +20,25 @@ function ch_error($string)
 
 function check_team($data, $keydata = null)
 {
+	if ( ! preg_match ( '/^\w+$/', $data['login'] ) ) {
+		ch_error("Team ID (login) may only contain letters, numbers and underscores.");
+	}
+	return $data;
+}
+
+function check_affiliation($data, $keydata = null)
+{
+	if ( ! preg_match ( '/^\w+$/', $data['affilid'] ) ) {
+		ch_error("Team affiliation ID may only contain letters, numbers and underscores.");
+	}
+	$affillogo = '../images/affiliations/' . urlencode($data['affilid']) . '.png';
+	if ( ! file_exists ( $affillogo ) ) {
+		ch_error("Affiliation " . $data['affilid'] .
+		         " does not have a logo (looking for $affillogo).");
+	} elseif ( ! is_readable ( $affillogo ) ) {
+		ch_error("Affiliation " . $data['affilid'] .
+		         " has a logo, but it's not readable ($affillogo).");
+	}
 	return $data;
 }
 
@@ -39,6 +58,9 @@ function check_language($data, $keydata = null)
 {
 	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 0 ) {
 		ch_error("Timelimit is not a valid positive factor");
+	}
+	if ( ! preg_match ( '/^\w+$/', $data['langid'] ) ) {
+		ch_error("Language ID may only contain letters, numbers and underscores.");
 	}
 	if ( strpos($data['extension'], '.') !== FALSE ) {
 		ch_error("Do not include the dot (.) in the extension");

@@ -10,10 +10,12 @@
 
 $pagename = basename($_SERVER['PHP_SELF']);
 
-$id = @$_REQUEST['id'];
-
 require('init.php');
+
+$id = @$_REQUEST['id'];
 $title = 'Language '.htmlspecialchars(@$id);
+
+if ( ! preg_match('/^\w*$/', $id) ) error("Invalid language id");
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
@@ -23,7 +25,7 @@ if ( isset($_POST['cmd']) ) {
 
 if ( !empty($pcmd) ) {
 
-	if ( ! $id ) error("Missing or invalid language id");
+	if ( empty($id) ) error("Missing language id");
 
 	if ( isset($pcmd['toggle_submit']) ) {
 		$DB->q('UPDATE language SET allow_submit = %i WHERE langid = %s',
@@ -91,12 +93,11 @@ exit;
 
 endif;
 
-if ( ! $id ) error("Missing or invalid language id");
+$data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 
+if ( ! $data ) error("Missing or invalid language id");
 
 echo "<h1>Language ".htmlspecialchars($id)."</h1>\n\n";
-
-$data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 
 echo addForm($pagename) . "<p>\n" .
 	addHidden('id', $id) .

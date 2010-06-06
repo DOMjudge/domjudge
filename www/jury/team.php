@@ -10,9 +10,12 @@
 
 $pagename = basename($_SERVER['PHP_SELF']);
 
-$id = @$_REQUEST['id'];
-
 require('init.php');
+
+$id = @$_REQUEST['id'];
+$title = 'Team '.htmlspecialchars(@$id);
+
+if ( ! preg_match('/^\w*$/', $id) ) error("Invalid team id");
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
@@ -20,8 +23,6 @@ if ( isset($_GET['cmd'] ) ) {
 	$refresh = '15;url='.$pagename.'?id='.urlencode($id).
 		(isset($_GET['restrict'])?'&restrict='.urlencode($_GET['restrict']):'');
 }
-
-$title = 'Team '.htmlspecialchars(@$id);
 
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');

@@ -10,9 +10,12 @@
 
 $pagename = basename($_SERVER['PHP_SELF']);
 
-$id = @$_GET['id'];
-
 require('init.php');
+
+$id = @$_GET['id'];
+$title = "Affiliation: " .htmlspecialchars(@$id);
+
+if ( ! preg_match('/^\w*$/', $id) ) error("Invalid affiliation id");
 
 $cmd = @$_GET['cmd'];
 
@@ -70,15 +73,11 @@ echo addHidden('cmd', $cmd) .
 }
 
 
-
-
-if ( ! $id ) error("Missing or invalid affiliation id");
-$title = "Affiliation: " .htmlspecialchars(@$id);
-
-
 require(LIBWWWDIR . '/header.php');
 
 $data = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
+
+if ( ! $data ) error("Missing or invalid affiliation id");
 
 $affillogo = "../images/affiliations/" . urlencode($data['affilid']) . ".png";
 $countryflag = "../images/countries/" . urlencode($data['country']) . ".png";

@@ -10,9 +10,12 @@
 
 $pagename = basename($_SERVER['PHP_SELF']);
 
-$id = @$_REQUEST['id'];
-
 require('init.php');
+
+$id = @$_REQUEST['id'];
+$title = 'Problem '.htmlspecialchars(@$id);
+
+if ( ! preg_match('/^\w*$/', $id) ) error("Invalid problem id");
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
@@ -22,9 +25,10 @@ if ( isset($_POST['cmd']) ) {
 	$refresh = '15;url='.$pagename.'?id='.urlencode($id);
 }
 
-$title = 'Problem '.htmlspecialchars(@$id);
-
 if ( !empty($pcmd) ) {
+
+	if ( empty($id) ) error("Missing problem id");
+
 	if ( isset($pcmd['toggle_submit']) ) {
 		$DB->q('UPDATE problem SET allow_submit = %i WHERE probid = %s',
 			   $_POST['val']['toggle_submit'], $id);
@@ -140,15 +144,15 @@ exit;
 
 endif;
 
-if ( ! preg_match('/^\w+$/', $id) ) error("Missing or invalid problem id");
-
-echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
-
 $data = $DB->q('TUPLE SELECT p.*, c.contestname, count(rank) AS ntestcases
                 FROM problem p
                 NATURAL JOIN contest c
                 LEFT JOIN testcase USING (probid)
                 WHERE probid = %s GROUP BY probid', $id);
+
+if ( ! $data ) error("Missing or invalid problem id");
+
+echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
 
 echo addForm($pagename, 'post', null, 'multipart/form-data') . "<p>\n" .
 	addHidden('id', $id) .

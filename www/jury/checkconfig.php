@@ -342,14 +342,12 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 	$res = $DB->q('SELECT affilid FROM team_affiliation ORDER BY affilid');
 
 	while ( $row = $res->next() ) {
-		$affillogo = '../images/affiliations/' .
-			urlencode($row['affilid']) . '.png';
-		if ( ! file_exists ( $affillogo ) ) {
-			$details .= "Affiliation " . $row['affilid'] .
-				" does not have a logo (looking for $affillogo).\n";
-		} elseif ( ! is_readable ( $affillogo ) ) {
-			$details .= "Affiliation " . $row['affilid'] .
-				" has a logo, but it's not readable ($affillogo).\n";
+		$CHECKER_ERRORS = array();
+		check_affiliation($row);
+		if ( count ( $CHECKER_ERRORS ) > 0 ) {
+			foreach($CHECKER_ERRORS as $chk_err) {
+				$details .= $row['affilid'].': ' . $chk_err . "\n";
+			}
 		}
 	}
 
