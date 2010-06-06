@@ -5,6 +5,9 @@ Version 3.0.3 - SVN
  - Fix bug in handling of libmagic cookie.
  - Fix some HTML escaping issues found with skipfish.
  - Fix CSS link in admin/jury HTML documentation.
+ - In chroot-startstop, cope properly with /lib64 being a symlink to
+   /lib. Thanks Christoph Dittmann.
+ - Fix SQL syntax error in restore_sources2db script.
 
 Version 3.0.2 - 13 February 2010
 --------------------------------
@@ -33,8 +36,6 @@ Version 3.0.0 - 21 October 2009
  - Added 'make check' dependency on submitclient.
  - Only show the configured submission methods in the team manual.
  - Fix install of gendbpasswords and use /dev/urandom.
- - In chroot-startstop, cope properly with /lib64 being a symlink to
-   /lib. Thanks Christoph Dittmann.
 
 Version 3.0.0 Release Candidate 2 - 3 September 2009
 ----------------------------------------------------

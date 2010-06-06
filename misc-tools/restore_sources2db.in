@@ -110,7 +110,7 @@ foreach ( $submissions as $s ) {
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid,
  	                           probid, submitid, description)
-	        VALUES(%i, %s, %s, %s, %i, "problem submitted")',
+	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
 	       $s['submittime'], $cid, $login, $langid, $probid, $sid);
 
 	logmsg(LOG_DEBUG, "inserted $login/$probid/$langid, file $src, id s$sid/c$cid");
