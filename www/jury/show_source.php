@@ -8,6 +8,26 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+function parseDiff($difftext){
+	$line = strtok($difftext,"\n"); //first line
+	$return = '';
+	while ( strlen($line) != 0 ) {
+		switch ( substr($line,0,1) ) {
+		case '-':
+			$formdiffline = "<span class='diff-old'>".htmlspecialchars($line)."</span>";
+			break;
+		case '+':
+			$formdiffline = "<span class='diff-new'>".htmlspecialchars($line)."</span>";
+			break;
+		default:
+			$formdiffline = htmlspecialchars($line);
+		}
+		$return .= $formdiffline . "\n";
+		$line = strtok("\n");
+	}
+	return $return;
+}
+
 require('init.php');
 
 $id = (int)$_GET['id'];
@@ -128,9 +148,7 @@ if ( $oldsource ) {
 		"<a href=\"show_source.php?id=$oldid\">" .
 		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n";
 
-	// TODO: do we want to use syntax highlighter to colour the diff?
-	echo '<pre class="output_text">' .
-		htmlspecialchars($difftext) . "</pre>\n\n";
+	echo '<pre class="output_text">' . parseDiff($difftext) . "</pre>\n\n";
 }
 
 require(LIBWWWDIR . '/footer.php');
