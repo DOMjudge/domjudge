@@ -142,16 +142,12 @@ touch result.xml result.out      # Result of comparison (XML and plaintext versi
 touch program.out program.err    # Program output and stderr (for extra information)
 touch program.time program.exit  # Program runtime and exitcode
 
-# program.err is written to by processes running as RUNUSER:
-chmod a+rw program.err
-
 logmsg $LOG_INFO "setting up testing (chroot) environment"
 
 # Copy the testdata input
 cd "$OLDDIR"
 cp "$TESTIN" "$WORKDIR/testdata.in"
 cd "$WORKDIR"
-chmod a+r testdata.in
 
 mkdir -m 0711 bin dev
 # Copy the run-script and a statically compiled shell:
@@ -181,10 +177,11 @@ fi
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
-runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
+runcheck run testdata.in program.out \
+	$GAINROOT $RUNGUARD ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
 	-C $TIMELIMIT -t $((2*TIMELIMIT)) -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
-	-c -E program.exit -T program.time -- $PREFIX/run $PREFIX/$PROGRAM \
-	testdata.in program.out program.err >error.tmp 2>&1
+	-c -s $FILELIMIT -e program.err -E program.exit -T program.time -- \
+	$PREFIX/$PROGRAM 2>error.tmp
 
 # Execute an optional chroot destroy script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
@@ -225,10 +222,6 @@ if [ "`cat program.exit`" != "0" ]; then
 	echo "Non-zero exitcode `cat program.exit`" >>error.out
 	cat error.tmp >>error.out
 	cleanexit ${E_RUN_ERROR:--1}
-fi
-if [ $exitcode -ne 0 ]; then
-	cat error.tmp >>error.out
-	error "exitcode $exitcode without program.exit != 0"
 fi
 
 ############################################################

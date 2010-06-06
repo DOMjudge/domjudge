@@ -6,12 +6,11 @@
 # the contestants' solution bi-directionally communicates with a jury
 # program, e.g. while playing a two player game.
 #
-# Usage: $0 <program> <testin> <output> <error>
+# Usage: $0 <testin> <progout> <program>...
 #
-# <program>   Executable of the contestants' program to be run.
 # <testin>    File containing test-input.
-# <output>    File where to write solution output.
-# <error>     File where to write error messages.
+# <progout>   File where to write solution output.
+# <program>   Command and options of the program to be run.
 #
 # A jury-written program called 'runjury' should be available; this
 # program will normally be copied from 'runjury_<specialrun>' by
@@ -21,7 +20,7 @@
 # bi-directional pipes. The jury program should accept the following
 # calling syntax:
 #
-#    runjury <testdata.in> <program.out>
+#    runjury <testin> <progout>
 #
 # The jury program should exit with exitcode zero unless an unexpected
 # failure occurred (malformed contestant's program output should be
@@ -29,13 +28,9 @@
 # that that data can later be used to verify correctness of the
 # contestants' solution.
 
-PROGRAM="$1";   shift
-TESTIN="$1";    shift
-OUTPUT="$1";    shift
-ERROR="$1";     shift
+TESTIN="$1";  shift
+PROGOUT="$1"; shift
 
-# Run the program while redirecting input, output and stderr
-bin/runpipe ./runjury $TESTIN $OUTPUT = $PROGRAM 2>$ERROR
-exitcode=$?
-
-exit $exitcode
+# Run the program while redirecting its stdin/stdout to 'runjury' via
+# 'runpipe'. Note that "$@" expands to separate, quoted arguments.
+exec bin/runpipe ./runjury "$TESTIN" "$PROGOUT" = "$@"
