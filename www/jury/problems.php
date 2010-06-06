@@ -63,7 +63,7 @@ if( $res->count() == 0 ) {
 			htmlspecialchars($row['color']) .
 		      ';" alt="problem colour ' . htmlspecialchars($row['color']) .
 		      '" src="../images/circle.png" /></a>'
-			: '<td>' . $link . '&nbsp;' );
+			: '<td>' . $link . '&nbsp;</a>' );
 			if ( IS_ADMIN ) {
 				echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
 				    "\">" . $row['testcases'] . "</a></td>" .
