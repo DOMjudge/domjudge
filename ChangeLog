@@ -4,6 +4,7 @@ Version 3.0.3 - SVN
 -------------------
  - Fix bug in handling of libmagic cookie.
  - Fix some HTML escaping issues found with skipfish.
+ - Fix CSS link in admin/jury HTML documentation.
 
 Version 3.0.2 - 13 February 2010
 --------------------------------
