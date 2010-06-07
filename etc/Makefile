@@ -16,7 +16,7 @@ include $(TOPDIR)/Makefile.global
 SUBST_CONFIGS = apache.conf domserver-static.php domserver-static.h \
                 judgehost-static.php runguard-config.h submit-config.h
 
-$(SUBST_CONFIGS): %: %.in ../paths.mk
+$(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
 config: $(SUBST_CONFIGS)

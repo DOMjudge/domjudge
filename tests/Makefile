@@ -14,7 +14,7 @@ config: check-judgings
 
 build: $(TARGETS)
 
-check-judgings: check-judgings.in ../paths.mk
+check-judgings: check-judgings.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 

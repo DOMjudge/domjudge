@@ -35,7 +35,7 @@ domserver: submit_db.php
 
 submitclient: $(SUBMITCLIENT)
 
-submit_db.php: submit_db.php.in ../paths.mk
+submit_db.php: submit_db.php.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 

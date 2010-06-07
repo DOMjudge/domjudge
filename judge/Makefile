@@ -11,7 +11,7 @@ config: judgedaemon
 
 build: $(TARGETS)
 
-judgedaemon: judgedaemon.in ../paths.mk
+judgedaemon: judgedaemon.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 

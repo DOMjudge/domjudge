@@ -12,7 +12,7 @@ config: $(SUBST_FILES)
 
 build: $(TARGETS)
 
-$(SUBST_FILES): %: %.in ../paths.mk
+$(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 

@@ -5,7 +5,7 @@ include $(TOPDIR)/Makefile.global
 
 config: dj-setup-database
 
-dj-setup-database: %: %.in ../paths.mk
+dj-setup-database: %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 

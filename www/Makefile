@@ -3,7 +3,7 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-configure.php: configure.php.in ../paths.mk
+configure.php: configure.php.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
 config: configure.php
