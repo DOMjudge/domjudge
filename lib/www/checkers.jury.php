@@ -137,7 +137,7 @@ function check_contest($data, $keydata = null)
 		                   @$keydata['cid']);
 
 		if(count($overlaps) > 0) {
-			ch_error('This contest overlaps with the following contest(s): c' . 
+			ch_error('This contest overlaps with the following contest(s): c' .
 			         implode(',c', $overlaps));
 		}
 	}
@@ -165,7 +165,7 @@ function check_datetime($datetime)
 	$hr = substr($datetime, 11, 2);
 	$mi = substr($datetime, 14, 2);
 	$se = substr($datetime, 17, 2);
-	
+
 	// Is this a valid date?
 	if (is_numeric($y) && is_numeric($m) && is_numeric($d) &&
 		is_numeric($hr) && is_numeric($mi) && is_numeric($se)) {
@@ -188,15 +188,14 @@ function check_datetime($datetime)
 		}
 	} else {
 		ch_error ("Cannot parse date, params not numeric: " . $datetime);
-	}	
-	
+	}
+
 	return $datetime;
 }
 
-
 function check_submission($data, $keydata = null)
 {
-	check_datetime($data['submittime']);	
+	check_datetime($data['submittime']);
 
 	return $data;
 }
@@ -208,7 +207,7 @@ function check_judging($data, $keydata = null)
 			check_datetime($data[$f]);
 		}
 	}
-	
+
 	if ( !empty($data['endtime']) && difftime($data['endtime'], $data['starttime']) < 0 ) {
 		ch_error('Judging ended before it started');
 	}
