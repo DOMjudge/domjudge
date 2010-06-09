@@ -20,7 +20,8 @@ function ch_error($string)
 
 function check_team($data, $keydata = null)
 {
-	if ( ! preg_match ( '/^\w+$/', $data['login'] ) ) {
+	$id = (isset($data['login']) ? $data['login'] : $keydata['login']);
+	if ( ! preg_match ( '/^\w+$/', $id ) ) {
 		ch_error("Team ID (login) may only contain letters, numbers and underscores.");
 	}
 	return $data;
@@ -28,12 +29,13 @@ function check_team($data, $keydata = null)
 
 function check_affiliation($data, $keydata = null)
 {
-	if ( ! preg_match ( '/^\w+$/', $data['affilid'] ) ) {
+	$id = (isset($data['affilid']) ? $data['affilid'] : $keydata['affilid']);
+	if ( ! preg_match ( '/^\w+$/', $id ) ) {
 		ch_error("Team affiliation ID may only contain letters, numbers and underscores.");
 	}
-	$affillogo = '../images/affiliations/' . urlencode($data['affilid']) . '.png';
+	$affillogo = '../images/affiliations/' . urlencode($d) . '.png';
 	if ( ! file_exists ( $affillogo ) ) {
-		ch_error("Affiliation " . $data['affilid'] .
+		ch_error("Affiliation " . $id .
 		         " does not have a logo (looking for $affillogo).");
 	} elseif ( ! is_readable ( $affillogo ) ) {
 		ch_error("Affiliation " . $data['affilid'] .
@@ -48,7 +50,8 @@ function check_problem($data, $keydata = null)
 			(int)$data['timelimit'] != $data['timelimit'] ) {
 		ch_error("Timelimit is not a valid positive integer");
 	}
-	if ( ! preg_match ( '/^\w+$/', $data['probid'] ) ) {
+	$id = (isset($data['probid']) ? $data['probid'] : $keydata['probid']);
+	if ( ! preg_match ( '/^\w+$/', $id ) ) {
 		ch_error("Problem ID may only contain letters, numbers and underscores.");
 	}
 	return $data;
@@ -59,7 +62,8 @@ function check_language($data, $keydata = null)
 	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 0 ) {
 		ch_error("Timelimit is not a valid positive factor");
 	}
-	if ( ! preg_match ( '/^\w+$/', $data['langid'] ) ) {
+	$id = (isset($data['langid']) ? $data['langid'] : $keydata['langid']);
+	if ( ! preg_match ( '/^\w+$/', $id ) ) {
 		ch_error("Language ID may only contain letters, numbers and underscores.");
 	}
 	if ( strpos($data['extension'], '.') !== FALSE ) {
