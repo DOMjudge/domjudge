@@ -98,7 +98,7 @@ function flushresults() {
 		echo ".png\" alt=\"" . $row['result'] . "\" class=\"picto\" /></td><td>" .
 		    htmlspecialchars($row['item']) ." " .
 		    "<a href=\"javascript:collapse($resultno)\"><img src=\"../images/b_help.png\" " .
-		    "alt=\"?\" title=\"show details\" class=\"smallpicto\" /></a>\n" .
+		    "alt=\"?\" title=\"show details\" class=\"smallpicto helpicon\" /></a>\n" .
 		    "<div class=\"details\" id=\"detail$resultno\">" .
 		    nl2br(htmlspecialchars(trim($row['details']))."\n") . $row['details_html'] .
 		    "</div></td></tr>\n";

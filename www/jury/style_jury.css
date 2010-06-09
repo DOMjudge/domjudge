@@ -69,7 +69,11 @@
 
 img.picto { width: 16px; height: 16px; }
 img.smallpicto { width: 11px; height: 11px; }
+img.helpicon { cursor: help; }
 
+.sortable th { cursor: s-resize; }
+.sortable th.sorttable_sorted { cursor: n-resize; }
+.sortable th.sorttable_nosort { cursor: auto; }
 
 .judgetime { font-size: smaller; font-style: italic; }
 
