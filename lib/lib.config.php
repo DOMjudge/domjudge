@@ -19,28 +19,28 @@ $LIBCONFIGOPTIONS = array();
 function config_isset($option)
 {
 	global $LIBCONFIGOPTIONS;
-	
+
 	return isset($LIBCONFIGOPTIONS[$option]);
 }
 
 function config_getvalue($option)
 {
 	global $LIBCONFIGOPTIONS;
-	
+
 	return $LIBCONFIGOPTIONS[$option];
 }
 
 function config_setvalue($option, $value)
 {
 	global $LIBCONFIGOPTIONS;
-	
+
 	$LIBCONFIGOPTIONS[$option] = $value;
 }
 
 function config_readfile($filename)
 {
 	global $LIBCONFIGOPTIONS;
-	
+
 	if ( !($fd = fopen($filename, 'r')) ) error("could not open '$filename'");
 
 	// Read line by line

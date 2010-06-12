@@ -17,8 +17,8 @@ class Main {
 				for(k=0; k<i; k++)
 					for(l=0; l<i; l++)
 						x++;
-			
-                System.out.println(i + " ^ 3 = " + x);
+
+			System.out.println(i + " ^ 3 = " + x);
         }
     }
 }

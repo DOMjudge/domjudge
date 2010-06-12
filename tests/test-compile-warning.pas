@@ -9,7 +9,7 @@ program warning(input, output);
 
 var
    a : integer;
-   
-begin 
+
+begin
    a := 1;
 end.

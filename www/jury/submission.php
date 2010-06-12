@@ -66,7 +66,7 @@ $title = 'Submission s'.@$id;
 if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
-                    s.submittime, s.valid, c.cid, c.contestname, 
+                    s.submittime, s.valid, c.cid, c.contestname,
                     t.name AS teamname, l.name AS langname, p.name AS probname,
                     CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
@@ -207,7 +207,7 @@ if ( IS_ADMIN ) {
 		addHidden('id',  $id) .
 		addHidden('val', $val) .
 			'<input type="submit" value="' . $unornot .
-			'IGNORE this submission" onclick="return confirm(\'Really ' . $unornot . 
+			'IGNORE this submission" onclick="return confirm(\'Really ' . $unornot .
 			"ignore submission s$id?');\" /></form>\n";
 }
 

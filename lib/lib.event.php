@@ -20,7 +20,7 @@ function encode_field($str)
 {
 	$res = '';
 	for($i=0; $i<strlen($str); $i++) {
-		
+
 		$n = ord($str[$i]);
 		if ( $n < 32 || $n > 126 || $str[$i]==FIELD_SEP || $str[$i]=='%' ) {
 			$res .= sprintf('%%%02X', $n);
@@ -28,7 +28,7 @@ function encode_field($str)
 			$res .= $str[$i];
 		}
 	}
-	
+
 	return $res;
 }
 
@@ -60,7 +60,7 @@ function decode_line($line)
 	$data['timestamp']   = $data[1];
 	$data['eventid']     = $data[2];
 	$data['cid']         = $data[3];
-	
+
 	return $data;
 }
 

@@ -15,7 +15,7 @@
    absolute and relative deviation of the teams output from the
    reference output. If the floats are within either bounds, they are
    assumed equal.
-   
+
    $Id$
 
    This program is free software; you can redistribute it and/or modify
@@ -110,9 +110,9 @@ void error(int errnum, const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
-	
+
 	fprintf(stderr,"%s",progname);
-	
+
 	if ( format!=NULL ) {
 		fprintf(stderr,": ");
 		vfprintf(stderr,format,ap);
@@ -123,10 +123,10 @@ void error(int errnum, const char *format, ...)
 	if ( format==NULL && errnum==0 ) {
 		fprintf(stderr,": unknown error");
 	}
-	
+
 	fprintf(stderr,"\nTry `%s --help' for more information.\n",progname);
 	va_end(ap);
-	
+
 	exit(exit_failure);
 }
 
@@ -166,7 +166,7 @@ int main(int argc, char **argv)
 	int read1, read2, n1, n2;
 	flt f1, f2;
 	flt absdiff, reldiff;
-	
+
 	progname = argv[0];
 
 	/* Parse command-line options */
@@ -198,7 +198,7 @@ int main(int argc, char **argv)
 	}
 	if ( show_help ) usage();
 	if ( show_version ) version();
-	
+
 	if ( argc<optind+3 ) error(0,"not enough arguments given");
 
 	file1name = argv[optind+1];
@@ -207,7 +207,7 @@ int main(int argc, char **argv)
 	if ( strcmp(file1name,"-")==0 && strcmp(file2name,"-")==0 ) {
 		error(0,"both files specified as standard input");
 	}
-	
+
 	if ( strcmp(file1name,"-")==0 ) {
 		file1 = stdin;
 	} else {
@@ -221,14 +221,14 @@ int main(int argc, char **argv)
 
 	linenr = 0;
 	diff = 0;
-	
+
 	while ( 1 ) {
 		linenr++;
 		ptr1 = fgets(line1,MAXLINELEN,file1);
 		ptr2 = fgets(line2,MAXLINELEN,file2);
 
 		if ( ptr1==NULL && ptr2==NULL ) break;
-			
+
 		if ( ptr1==NULL && ptr2!=NULL ) {
 			printf("line %3d: file 1 ended before 2.\n",linenr);
 			diff++;
@@ -244,16 +244,16 @@ int main(int argc, char **argv)
 		posnr = 0;
 		while ( 1 ) {
 			posnr++;
-		
+
 			read1 = sscanf(&line1[pos1],"%Lf",&f1);
 			read2 = sscanf(&line2[pos2],"%Lf",&f2);
 			sscanf(&line1[pos1],"%*f%n",&n1);
 			sscanf(&line2[pos2],"%*f%n",&n2);
 			pos1 += n1;
 			pos2 += n2;
-			
+
 			if ( read1==EOF && read2==EOF ) break;
-			
+
 			if ( read1!=1 && read2==1 ) {
 				printf("line %3d: file 1 misses %d-th float.\n",linenr,posnr);
 				diff++;
@@ -277,11 +277,11 @@ int main(int argc, char **argv)
 				diff++;
 				break;
 			}
-			
+
 			if ( !(read1==1 && read2==1) ) {
 				error(0,"error reading float on line %d",linenr);
 			}
-                       
+
 
 			if ( ! equal(f1,f2) ) {
 				diff++;
@@ -297,11 +297,11 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-	
+
 	fclose(file1);
 	fclose(file2);
 
 	if ( diff > 0 ) printf("Found %d differences in %d lines\n",diff,linenr-1);
-		
+
 	return 0;
 }

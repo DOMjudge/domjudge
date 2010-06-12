@@ -42,7 +42,7 @@ require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
-	
+
 	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " language</h2>\n\n";
 
 	echo addForm('edit.php');
@@ -129,7 +129,7 @@ echo addEndForm();
 echo "<br />\n" . rejudgeForm('language',$data['langid']) . "\n\n";
 
 if ( IS_ADMIN ) {
-	echo "<p>" . 
+	echo "<p>" .
 		editLink('language', $data['langid']) . "\n" .
 		delLink('language','langid',$data['langid']) . "</p>\n\n";
 }

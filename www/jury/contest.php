@@ -99,7 +99,7 @@ echo '<tr><td scope="row">Activate time:</td><td>' .
 echo '<tr><td scope="row">Start time:</td><td>' .
 	htmlspecialchars($data['starttime']) .
 	"</td></tr>\n";
-echo '<tr><td scope="row">Scoreboard freeze:</td><td>' . 
+echo '<tr><td scope="row">Scoreboard freeze:</td><td>' .
 	(empty($data['freezetime']) ? "-" : htmlspecialchars(@$data['freezetime'])) .
 	"</td></tr>\n";
 echo '<tr><td scope="row">End time:</td><td>' .
@@ -111,7 +111,7 @@ echo '<tr><td scope="row">Scoreboard unfreeze:</td><td>' .
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
-	echo "<p>" . 
+	echo "<p>" .
 		editLink('contest',$data['cid']) . "\n" .
 		delLink('contest','cid',$data['cid']) ."</p>\n\n";
 }

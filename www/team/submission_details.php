@@ -40,7 +40,7 @@ if( ! $row['valid'] ) {
 
 <table>
 <tr><td scope="row">Problem:</td>
-	<td><?php echo htmlspecialchars($row['probname'])?> [<span class="probid"><?php echo 
+	<td><?php echo htmlspecialchars($row['probname'])?> [<span class="probid"><?php echo
 	htmlspecialchars($row['probid']) ?></span>]</td></tr>
 <tr><td scope="row">Submitted:</td>
 	<td><?php echo printtime($row['submittime'])?></td></tr>
@@ -53,7 +53,7 @@ if( ! $row['valid'] ) {
 
 if ( (SHOW_COMPILE == 2) ||
      (SHOW_COMPILE == 1 && $row['result'] == 'compiler-error') ) {
-	 
+
 	echo "<h2>Compilation output</h2>\n\n";
 
 	if(@$row['output_compile']) {

@@ -74,7 +74,7 @@ function printhost($hostname, $full = FALSE) {
  * input: timestamps, end defaults to now.
  */
 function printtimediff($start, $end = null) {
-	
+
 	if( ! $end )	$end = time();
 	$ret = '';
 	$diff = $end - $start;
@@ -84,13 +84,13 @@ function printtimediff($start, $end = null) {
 	if($h > 0) {
 		$ret .= $h.' h ';
 	}
-	
+
 	$m = floor($diff/60);
 	$diff %= 60;
 	if ( $m > 0 ) {
 		$ret .= $m.' m ';
 	}
-	
+
 	return $ret . $diff .' s';
 }
 

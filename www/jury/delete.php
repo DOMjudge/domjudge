@@ -54,7 +54,7 @@ if (isset($_POST['confirm'] ) ) {
 	// wiping a table by accident.
 	$DB->q("DELETE FROM $t WHERE %S LIMIT 1", $k);
 
-	echo "<p>" . ucfirst($t) . " <strong>" . htmlspecialchars(implode(", ", $k)) . 
+	echo "<p>" . ucfirst($t) . " <strong>" . htmlspecialchars(implode(", ", $k)) .
 		"</strong> has been deleted.</p>\n\n";
 
 	if ( !empty($referrer) ) {
@@ -73,7 +73,7 @@ if (isset($_POST['confirm'] ) ) {
 		echo addHidden($key, $val);
 	}
 
-	echo msgbox ( 
+	echo msgbox (
 		"Really delete?",
 		"You're about to delete $t <strong>" .
 		htmlspecialchars(join(", ", array_values($k))) . "</strong>.<br /><br />\n\n" .

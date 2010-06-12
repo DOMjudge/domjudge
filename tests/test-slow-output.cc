@@ -10,7 +10,7 @@
 int main()
 {
 	int i,j,k,l,x;
-	
+
 	for(i=10; 1; i+=10) {
 		x = 0;
 		for(j=0; j<i; j++)
@@ -20,6 +20,6 @@ int main()
 
 		std::cout << i << " ^ 3 = " << x << std::endl;
 	}
-	
+
 	return 0;
 }

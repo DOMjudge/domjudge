@@ -110,7 +110,7 @@ void logmsg(int msglevel, const char *mesg, ...)
 }
 
 /* Function to generate error/warning string:
-   - allocates memory for string (needs freeing later) 
+   - allocates memory for string (needs freeing later)
    - generates message of the form:
        errtype . ": " . mesg . ": " . errdescr
      where 'errtype' can be "WARNING" / "ERROR"
@@ -150,10 +150,10 @@ char *errorstring(const char *type, int errnum, const char *mesg)
 	strcat(buffer, ": ");
 
 	if ( mesg != NULL )     strcat(buffer, mesg);
-	
+
 	if ( mesg != NULL &&
 	     errdescr != NULL ) strcat(buffer, ": ");
-	
+
 	if ( errdescr != NULL )	strcat(buffer, errdescr);
 
 	if ( type == NULL ) free(errtype);

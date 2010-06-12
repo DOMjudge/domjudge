@@ -25,7 +25,7 @@ function totaltime() {
 	list($micros1, $secs1) = explode(' ',$DEBUG_TIMER_START);
 	list($micros2, $secs2) = explode(' ',microtime());
 	$elapsed_ms = round(1000*(($secs2 - $secs1) + ($micros2 - $micros1)));
-	
+
 	echo "Execution took: $elapsed_ms ms" .
 		(DEBUG & DEBUG_SQL ? ", queries: $DEBUG_NUM_QUERIES\n" : "\n");
 }

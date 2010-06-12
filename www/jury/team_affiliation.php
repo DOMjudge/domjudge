@@ -113,7 +113,7 @@ if ( !empty($data['comments']) ) {
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
-	echo "<p>" . 
+	echo "<p>" .
 		editLink('team_affiliation', $data['affilid']) . "\n" .
 		delLink('team_affiliation', 'affilid', $data['affilid']) . "</p>\n\n";
 }

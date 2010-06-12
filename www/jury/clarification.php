@@ -19,7 +19,7 @@ if ( isset($_REQUEST['id']) ) {
 	$req = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
 	               LEFT JOIN team t ON (t.login = q.sender)
 	               WHERE q.cid = %i AND q.clarid = %i', $cid, $id);
-	
+
 	if ( ! $req ) error("clarification $id not found, cid = $cid");
 
 	$respid = (int) (empty($req['respid']) ? $id : $req['respid']);
@@ -63,9 +63,9 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	if ( ! $isgeneral ) {
 		$DB->q('UPDATE clarification SET answered = 1 WHERE clarid = %i', $respid);
 	}
-	
+
 	if( is_null($sendto) ) {
-		// log to event table if clarification to all teams 
+		// log to event table if clarification to all teams
 		$DB->q('INSERT INTO event (eventtime, cid, clarid, description)
 		        VALUES(%s, %i, %i, "clarification")', now(), $cid, $newid);
 
@@ -115,7 +115,7 @@ if ( ! empty ( $req['respid'] ) ) {
 	                WHERE q.clarid = %i', $respid);
 	echo '<p>See the <a href="clarification.php?id=' . $respid .
 		'">original clarification ' . $respid . '</a> by ' .
-		( $orig['sender']==NULL ? 'Jury' : 
+		( $orig['sender']==NULL ? 'Jury' :
 			'<a href="team.php?id=' . urlencode($orig['sender']) . '">' .
 			htmlspecialchars($orig['sender'] . ': ' . $orig['name']) .
 			'</a>' ) .
@@ -129,7 +129,7 @@ putClarification($id, NULL);
 // Not relevant for 'general clarifications', ie those with sender=null
 if ( !empty($req['sender']) ) {
 	require_once(LIBWWWDIR . '/forms.php');
-	
+
 	echo addForm('clarification.php') .
 		addHidden('id', $id) .
 		addHidden('answered', !$req['answered']) .

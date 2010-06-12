@@ -10,12 +10,12 @@
 
 int main()
 {
-  int a = 0;
-  int b;
+	int a = 0;
+	int b;
 
-  b = 10 / a;
+	b = 10 / a;
 
-  printf("%d\n",b);
+	printf("%d\n",b);
 
-  return 0;
+	return 0;
 }

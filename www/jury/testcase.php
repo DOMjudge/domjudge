@@ -222,7 +222,7 @@ foreach( $data as $rank => $row ) {
 		    "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";
 		if ( $inout=='input' ) {
 			echo "<td rowspan=\"2\" class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
-			    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"2\">" . 
+			    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"2\">" .
 			    htmlspecialchars($row['description']) . "</textarea></td>" .
 			    "<td rowspan=\"2\" class=\"editdel\">" .
 			    "<a href=\"delete.php?table=testcase&amp;testcaseid=$row[testcaseid]&amp;referrer=" .

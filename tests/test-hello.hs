@@ -5,5 +5,5 @@
  - @EXPECTED_RESULTS@: CORRECT
  -}
 
-import IO 
+import IO
 main = do	putStr "Hello world!\n"

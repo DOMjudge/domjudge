@@ -37,7 +37,7 @@ function updateClarifications(ajaxtitle)
 		}
 	}
 	handle.open("GET", "update_clarifications.php", true);
-	handle.send(null); 
+	handle.send(null);
 }
 
 // make corresponding testcase description editable
@@ -56,7 +56,7 @@ function hideTcDescEdit(descid)
 	var node = document.getElementById('tcdesc_' + descid);
 	node.style.display = 'none';
 	node.setAttribute('name', 'invalid');
-	
+
 	var span = document.createElement('span');
 	span.innerHTML = node.innerHTML;
 	node.parentNode.appendChild(span);
@@ -67,7 +67,7 @@ function detectProblemLanguage(filename)
 {
 	var parts = filename.toLowerCase().split('.').reverse();
 	if ( parts.length < 2 ) return;
-	
+
 	// problem ID
 
 	var elt=document.getElementById('probid');
@@ -85,7 +85,7 @@ function detectProblemLanguage(filename)
 	var elt=document.getElementById('langext');
 	// index 0 is the "autodetect" option
 	if ( elt.selectedIndex > 0 ) return;
-	
+
 	var langname = getLangNameFromExtension(parts[0]);
 	for (i=0;i<elt.length;i++) {
 		if ( elt.options[i].text == langname ) {
@@ -103,7 +103,7 @@ function getUploadConfirmString()
 	var filename = fileelt.value;
 	var probelt = document.getElementById("probid");
 	var problem = probelt.options[probelt.selectedIndex].text;
-	var question = 
+	var question =
 		'Filename: ' + filename + '\n\n' +
 		'Problem: ' + problem + '\n'+
 		'Language: ' + language + '\n' +

@@ -34,7 +34,7 @@ $root   = XMLaddnode($xmldoc, 'root');
 $events = XMLaddnode($root, 'events');
 
 while ( $row = $res->next() ) {
-	
+
 	$event = XMLaddnode($events, 'event', NULL,
 	                    array('id' => $row['eventid'], 'time' => $row['eventtime']));
 
@@ -42,7 +42,7 @@ while ( $row = $res->next() ) {
 
 	case 'problem submitted':
 		if ( !IS_JURY && infreeze($row['eventtime']) ) continue(2);
-		
+
 		$data = $DB->q('TUPLE SELECT s.submittime, t.name AS teamname,
 		                             p.name AS probname, l.name AS langname
 		                FROM submission s
@@ -51,14 +51,14 @@ while ( $row = $res->next() ) {
 		                LEFT JOIN language l ON (l.langid   = s.langid)
 		                WHERE s.submitid = %i', $row['submitid']);
 
-		
+
 		$elem = XMLaddnode($event, 'submission', NULL, array('id' => $row['submitid']));
 
 		XMLaddnode($elem, 'team',     $data['teamname'], array('id' => $row['teamid']));
 		XMLaddnode($elem, 'problem',  $data['probname'], array('id' => $row['probid']));
 		XMLaddnode($elem, 'language', $data['langname'], array('id' => $row['langid']));
 		break;
-		
+
 	case 'problem judged':
 		$data = $DB->q('TUPLE SELECT s.submittime, j.result FROM judging j
 		                LEFT JOIN submission s ON (s.submitid = j.submitid)
@@ -69,11 +69,11 @@ while ( $row = $res->next() ) {
 		XMLaddnode($event, 'judging', $data['result'],
 		           array('id' => $row['judgingid'], 'submitid' => $row['submitid']));
 		break;
-			
+
 	case 'clarification':
 		$data = $DB->q('TUPLE SELECT * FROM clarification
 		                WHERE clarid = %i', $row['clarid']);
-		
+
 		XMLaddnode($event, 'clarification', $data['body'], array('id' => $row['clarid']));
 		break;
 	}

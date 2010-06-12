@@ -124,11 +124,11 @@ echo "<table class=\"configcheck\">\n";
 // SOFTWARE
 
 if( !function_exists('version_compare') || version_compare( '5.0.0',PHP_VERSION,'>=') ) {
-	result('software', 'PHP version', 'E', 
+	result('software', 'PHP version', 'E',
 		'You have PHP ' . PHP_VERSION . ', but need at least 5.0.0.',
 		'See <a href="?phpinfo">phpinfo</a> for details.');
 } else {
-	result('software', 'PHP version', 'O', 
+	result('software', 'PHP version', 'O',
 		'You have PHP ' . PHP_VERSION . '.',
 		'See <a href="?phpinfo">phpinfo</a> for details.');
 }
@@ -159,7 +159,7 @@ if ( $highlighter == 'native' ) {
 		'source code. See the manual for details.');
 } else {
 	result('software', 'Sourcecode syntax highlighting',
-		'O', 'Will format sourcecode for display with "' . 
+		'O', 'Will format sourcecode for display with "' .
 			htmlspecialchars($highlighter) .'".');
 }
 
@@ -389,7 +389,7 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 	if ( ! is_writable(SUBMITDIR) ) {
 		result('submissions and judgings', 'Websubmit', 'W',
 			'The webserver has no write access to SUBMITDIR (' .
-			htmlspecialchars(SUBMITDIR) . 
+			htmlspecialchars(SUBMITDIR) .
 			'), and thus will not be able to make backup copies of submissions.');
 	} else {
 		result('submissions and judgings', 'Websubmit',

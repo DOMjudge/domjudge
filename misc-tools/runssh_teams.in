@@ -2,7 +2,7 @@
 <?php
 /**
  * Program to run a specific command on all team accounts using ssh.
- * 
+ *
  * Usage: $0 <program>
  *
  * $Id$

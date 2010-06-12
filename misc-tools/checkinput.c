@@ -6,7 +6,7 @@
   - all whitespace is a single space (so no tabs)
   - lines are no longer than length MAXLINESIZE (incl. newline)
   - only printable characters
-  
+
   Jaap Eldering, 29-03-2004
 
   $Id$
@@ -25,7 +25,7 @@ FILE *f;
 void usage(char *error)
 {
   if ( error!=NULL ) printf("Error: %s.\n\n",error);
-  
+
   printf("Usage: %s <file>\n",progname);
   printf("Checks testinput file <file> for anomalies.\n");
 }
@@ -37,7 +37,7 @@ int check()
   int error,c;
 
   error = 0;
-  
+
   for(linenr=1; fgets(line,MAXLINESIZE+2,f)!=NULL; linenr++) {
     len = strlen(line);
 
@@ -53,7 +53,7 @@ int check()
       printf("Line %3d is an empty line.\n",linenr);
       error = 1;
     }
-    
+
     if ( line[len-1]!='\n' && len<=MAXLINESIZE ) {
       printf("Line %3d does not end with a newline.\n",linenr);
       error = 1;
@@ -76,7 +76,7 @@ int check()
 	printf("Line %3d position %d is a non-printable character.\n",linenr,pos);
 	error = 1;
       }
-      
+
       if ( isspace(line[pos]) && line[pos]!=' ' ) {
 	printf("Line %3d position %d is non-space whitespace.\n",linenr,pos);
 	error = 1;
@@ -87,7 +87,7 @@ int check()
 	error = 1;
       }
     }
-    
+
   }
 
   return !error;
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 {
   char str[256];
   int ok;
-  
+
   progname = &strrchr(argv[0],'/')[1];
 
   if ( argc!=2 ) {
@@ -113,8 +113,8 @@ int main(int argc, char **argv)
   }
 
   if ( (ok=check()) ) printf("No problems in testdata input format found.\n");
-  
+
   fclose(f);
-  
+
   return !ok;
 }

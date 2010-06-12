@@ -25,7 +25,7 @@ if ( isset($_REQUEST['view']) ) {
 }
 
 require('init.php');
-$refresh = '15;url=submissions.php?' . 
+$refresh = '15;url=submissions.php?' .
 	urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view]);
 $title = 'Submissions';
 

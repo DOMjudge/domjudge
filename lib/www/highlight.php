@@ -49,7 +49,7 @@ function highlighter_init ()
 	define ('GESHI_SECURITY_PARANOID', true);
 
 	$PATHS = array();
-	$PATHS['geshi'] = array ( 
+	$PATHS['geshi'] = array (
 		'geshi.php',
 		'/usr/share/php-geshi/geshi.php' );
 	$PATHS['texthighlighter'] = array (
@@ -64,7 +64,7 @@ function highlighter_init ()
 	}
 
 	return 'native';
-} 
+}
 
 /**
  * Output syntax highlighted HTML formatted source code using

@@ -158,7 +158,7 @@ while ( TRUE ) {
 		       (isset($newcid) ? "c$newcid" : "none" ) );
 		$cid = $newcid;
 	}
-	
+
 	// we have to check for the judgability of problems/languages this way,
 	// because we use an UPDATE below where joining is not possible.
 	$probs = $DB->q('COLUMN SELECT probid FROM problem WHERE allow_judge = 1');
@@ -224,7 +224,7 @@ while ( TRUE ) {
 	               FROM submission s, problem p, language l
 	               WHERE s.probid = p.probid AND s.langid = l.langid AND
 	               judgemark = %s AND judgehost = %s', $mark, $myhost);
-	
+
 	// update the judging table with our ID and the starttime
 	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)
 	                     VALUES (%i,%i,%s,%s)', $row['submitid'], $cid, now(), $myhost);

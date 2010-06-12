@@ -9,9 +9,9 @@
 
 int main()
 {
-  char str[1000];
+	char str[1000];
 
-  gets(str);
-  
-  return 0;
+	gets(str);
+
+	return 0;
 }

@@ -42,7 +42,7 @@ if( count($res) == 0 ) {
 		$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
 
 		echo '<tr class="' .
-			( $iseven ? 'roweven': 'rowodd' ) . 
+			( $iseven ? 'roweven': 'rowodd' ) .
 			(!$row['enabled']    ? ' disabled' :'') .
 			($row['cid'] == $cid ? ' highlight':'') . '">' .
 			"<td align=\"right\">" . $link .

@@ -22,11 +22,11 @@ void vsendit(int fd, const char *mesg, va_list ap)
 {
 	char buffer[SOCKETBUFFERSIZE];
 	ssize_t nwrite;
-	
+
 	vsnprintf(buffer,SOCKETBUFFERSIZE-2,mesg,ap);
-	
+
 	logmsg(LOG_DEBUG,"send: %s",buffer);
-	
+
 	strcat(buffer,"\015\012");
 
 	nwrite = write(fd,buffer,strlen(buffer));
@@ -55,7 +55,7 @@ void senderror(int fd, int errnum, const char *mesg, ...)
 
 	buf[0] = '-';
 	strcpy(&buf[1],tmp);
-	
+
 	va_start(ap,mesg);
 	vsendit(fd,buf,ap);
 	va_end(ap);
@@ -81,7 +81,7 @@ void sendwarning(int fd, int errnum, const char *mesg, ...)
 
 	buf[0] = '-';
 	strcpy(&buf[1],tmp);
-	
+
 	va_start(ap,mesg);
 	vsendit(fd,buf,ap);
 	va_end(ap);
@@ -100,17 +100,17 @@ int receive(int fd)
 	char buffer[SOCKETBUFFERSIZE];
 	ssize_t nread;
 	int i;
-	
+
 	if ( (nread = read(fd, buffer, SOCKETBUFFERSIZE-2)) == -1 ) {
 		error(errno,"reading from socket");
 		return -1;	// never reached, but removes gcc warning
 	}
 
 	buffer[nread] = 0;
-	
+
 	/* Check for end of file */
 	if ( nread==0 ) return 0;
-	
+
 	strcpy(lastmesg,buffer);
 	while ( nread>0 && iscntrl(lastmesg[nread-1]) ) lastmesg[--nread] = 0;
 	logmsg(LOG_DEBUG, "recv: %s", lastmesg);

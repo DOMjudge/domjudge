@@ -65,7 +65,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		echo "<p class=\"nodata\">No submissions</p>\n\n";
 		return;
 	}
-	
+
 	if ( IS_JURY ) {
 		echo addForm('submission.php') .
 		    '<p>Claim submissions for verification as ' .
@@ -87,11 +87,11 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		(IS_JURY ? "<th scope=\"col\">verified</th><th scope=\"col\">by</th>" : '') .
 
 		"</tr>\n</thead>\n<tbody>\n";
-	
+
 	// print each row with links to detailed information
 	$iseven = $subcnt = $corcnt = $igncnt = $vercnt = 0;
 	while( $row = $res->next() ) {
-		
+
 		$sid = (int)$row['submitid'];
 		// always provide link if this is Jury. For team, provide link
 		// to a different page, provided that the result is actually
@@ -103,7 +103,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		} else {
 			$link = '';
 		}
-		
+
 		echo "<tr class=\"" .
 			( $iseven ? 'roweven': 'rowodd' );
 		$iseven = !$iseven;
@@ -115,7 +115,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 			echo ' sub_ignore';
 		}
 		echo '">';
-		
+
 		if ( IS_JURY ) {
 			echo "<td><a$link>s$sid</a></td>";
 		}
@@ -199,7 +199,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 			}
 		}
 		echo "</td></tr>\n";
-		
+
 		if ( $row['result'] == 'correct' ) $corcnt++;
 	}
 	echo "</tbody>\n</table>\n\n";
@@ -256,7 +256,7 @@ function putTeam($login) {
 	$affillogo = "../images/affiliations/" . urlencode($team['affilid']) . ".png";
 	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";
 	$teamimage = "../images/teams/" . urlencode($team['login']) . ".jpg";
-	
+
 	echo "<h1>Team ".htmlspecialchars($team['name'])."</h1>\n\n";
 
 	if ( is_readable($teamimage) ) {
@@ -271,12 +271,12 @@ function putTeam($login) {
 <tr><td scope="row">Name:    </td><td><?php echo htmlspecialchars($team['name'])?></td></tr>
 <tr><td scope="row">Category:</td><td><?php echo htmlspecialchars($team['catname'])?></td></tr>
 <?php
-	 
+
 	if ( !empty($team['members']) ) {
 		echo '<tr><td valign="top" scope="row">Members:</td><td>' .
 			nl2br(htmlspecialchars($team['members'])) . "</td></tr>\n";
 	}
-	
+
 	if ( !empty($team['affilid']) ) {
 		echo '<tr><td scope="row">Affiliation:</td><td>';
 		if ( is_readable($affillogo) ) {
@@ -296,12 +296,12 @@ function putTeam($login) {
 			echo htmlspecialchars($team['country']) . "</td></tr>\n";
 		}
 	}
-	
+
 	if ( !empty($team['room']) ) {
 		echo '<tr><td scope="row">Room:</td><td>' .
 			htmlspecialchars($team['room']) . "</td></tr>\n";
 	}
-	
+
 	echo "</table>\n\n";
 }
 
@@ -340,7 +340,7 @@ function putClock() {
  * Output a footer for pages containing the DOMjudge version and server host/port.
  */
 function putDOMjudgeVersion() {
-	echo "<hr /><address>DOMjudge/" . DOMJUDGE_VERSION . 
+	echo "<hr /><address>DOMjudge/" . DOMJUDGE_VERSION .
 		" at ".$_SERVER['SERVER_NAME']." Port ".$_SERVER['SERVER_PORT']."</address>\n";
 }
 

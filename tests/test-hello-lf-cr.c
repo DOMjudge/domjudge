@@ -11,7 +11,7 @@
 
 int main()
 {
-  char hello[20] = "Hello world!";
-  printf("%s\n\r",hello);
-  return 0;
+	char hello[20] = "Hello world!";
+	printf("%s\n\r",hello);
+	return 0;
 }

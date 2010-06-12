@@ -87,7 +87,7 @@ if ( empty($langext) ) {
 	$fileext = strtolower(substr($filename, strrpos($filename, '.')+1));
 
 	$all_lang_exts = explode(" ", LANG_EXTS);
-	
+
 	foreach ($all_lang_exts as $langextlist) {
 		$langexts = explode(",", $langextlist);
 
@@ -96,7 +96,7 @@ if ( empty($langext) ) {
 			if ( $langexts[$i]==$fileext ) $langext = $langexts[1];
 		}
 	}
-	
+
 	if ( empty($langext) ) err("Unable to find language for extension '$fileext'");
 }
 
@@ -111,7 +111,7 @@ echo "<table>\n" .
 	"<tr><td>Language:</td><td><i>".htmlspecialchars($lang['name'])."</i></td></tr>\n" .
 	"</table>\n";
 
-submit_solution($login, $probid, $langext, $_FILES['code']['tmp_name']); 
+submit_solution($login, $probid, $langext, $_FILES['code']['tmp_name']);
 
 echo '<div id="uploadstatus">';
 if (NONINTERACTIVE) echo '<!-- noninteractive-upload-successful -->';

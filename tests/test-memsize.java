@@ -13,7 +13,7 @@ class Main {
     public static void main(String[] args) throws Exception {
 		int i;
 		int[][] ar = new int[10240][];
-		
+
 		for(i=0; 1==1; i++) {
 			ar[i] = new int[1024*1024/4];
 			System.out.print("allocated " + (i+1) + " MB of memory\n");

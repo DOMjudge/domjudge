@@ -72,7 +72,7 @@ function getCurContest($fulldata = FALSE) {
 function calcScoreRow($cid, $team, $prob) {
 	global $DB;
 
-	$result = $DB->q('SELECT result, verified, 
+	$result = $DB->q('SELECT result, verified,
 	                  (UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 AS timediff,
 	                  (c.freezetime IS NOT NULL && submittime >= c.freezetime) AS afterfreeze
 	                  FROM judging j
@@ -86,9 +86,9 @@ function calcScoreRow($cid, $team, $prob) {
 	$balloon = $DB->q('MAYBEVALUE SELECT balloon FROM scoreboard_jury
                        WHERE cid = %i AND teamid = %s AND probid = %s',
 	                  $cid, $team, $prob);
-	
+
 	if ( ! $balloon ) $balloon = 0;
-	
+
 	// reset vars
 	$submitted_j = $time_j = $correct_j = 0;
 	$submitted_p = $time_p = $correct_p = 0;
@@ -97,7 +97,7 @@ function calcScoreRow($cid, $team, $prob) {
 	while( $row = $result->next() ) {
 
 		if ( VERIFICATION_REQUIRED && ! $row['verified'] ) continue;
-		
+
 		$submitted_j++;
 		if ( ! $row['afterfreeze'] ) $submitted_p++;
 
@@ -230,13 +230,13 @@ function mkstemps($template, $suffixlen)
 	$TMP_MAX = 16384;
 
 	umask(0133);
-	
+
 	for($try=0; $try<$TMP_MAX; $try++) {
 		$value = mt_rand();
 
 		$filename = $template;
 		$pos = strlen($filename)-$suffixlen-6;
-		
+
 		for($i=0; $i<6; $i++) {
 			$filename{$pos+$i} = $letters{$value % 62};
 			$value /= 62;
@@ -282,7 +282,7 @@ function expandipaddr($addr)
 		if ( empty($addr) ) return NULL;
 		return '0000:0000:0000:0000:0000:0000:'.$addr;
 	}
-	
+
 	// Check for IPv4 notation in last part of addr and translate
 	$ip4 = substr($addr,strrpos($addr,':')+1);
 	if ( strstr($ip4,'.') ) {
@@ -290,14 +290,14 @@ function expandipaddr($addr)
 		if ( empty($ip4) ) return NULL;
 		$addr = substr($addr,0,strrpos($addr,':')+1).$ip4;
 	}
-	
+
 	// Check for IPv6 compressed form and expand
 	if ( strstr($addr,'::') ) {
 		list($pre, $post) = explode('::',$addr,2);
-		
+
 		// Check for single '::' separator
 		if ( strstr($post,'::') ) return NULL;
-		
+
 		// Check and reject unspecified addresses
 		if ( empty($pre) && empty($post) ) return NULL;
 
@@ -312,7 +312,7 @@ function expandipaddr($addr)
 		} else {
 			$npost = count(explode(':',$post));
 		}
-		
+
 		// Create mid part to replace compressed '::' with
 		$mid = ':';
 		for($i=0; $i<8-($npre+$npost); $i++) $mid .= '0:';
@@ -322,7 +322,7 @@ function expandipaddr($addr)
 
 		$addr = str_replace('::',$mid,$addr);
 	}
-	
+
 	// Expand all single quads to 4-digit length
 	$quads = explode(':',$addr);
 	if ( count($quads)!=8 ) return NULL;
@@ -365,7 +365,7 @@ function compareipaddr($ip1, $ip2)
 	if ( $ip2=='0000:0000:0000:0000:0000:0000:7F00:0001' ) {
 		$ip2 = '0000:0000:0000:0000:0000:0000:0000:0001';
 	}
-*/	
+*/
 	return $ip1==$ip2;
 }
 
@@ -377,7 +377,7 @@ function sig_handler($signal)
 	global $exitsignalled;
 
 	logmsg(LOG_DEBUG, "Signal $signal received");
-	
+
 	switch ( $signal ) {
 	case SIGTERM:
 	case SIGHUP:
@@ -391,7 +391,7 @@ function initsignals()
 	global $exitsignalled;
 
 	$exitsignalled = FALSE;
-	
+
 	if ( ! function_exists('pcntl_signal') ) {
 		logmsg(LOG_INFO, "Signal handling not available");
 		return;
@@ -423,7 +423,7 @@ function submit_solution($team, $prob, $langext, $file)
 
 	// If no contest has started yet, refuse submissions.
 	$now = now();
-	
+
 	if( difftime($cdata['starttime'], $now) > 0 ) {
 		error("The contest is closed, no submissions accepted. [c$cid]");
 	}
@@ -445,7 +445,7 @@ function submit_solution($team, $prob, $langext, $file)
 		error("File '$file' not found (or not readable).");
 	}
 	if( filesize($file) > SOURCESIZE*1024 ) {
-		error("Submission file is larger than ".SOURCESIZE." kB."); 
+		error("Submission file is larger than ".SOURCESIZE." kB.");
 	}
 
 	logmsg (LOG_INFO, "input verified");

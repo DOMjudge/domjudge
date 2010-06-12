@@ -17,7 +17,7 @@ if ( !empty($_FILES['archive']['name']) ) {
 	checkFileUpload( $_FILES['archive']['error'] );
 	$zip = openZipFile($_FILES['archive']['tmp_name']);
 	$probid = '#' . $DB->q('VALUE SELECT COUNT(*) FROM problem');
-	
+
 	$properties = $zip->getFromName("properties.ini");
 	if ($properties !== FALSE) {
 		$ini_array = parse_ini_string($properties);

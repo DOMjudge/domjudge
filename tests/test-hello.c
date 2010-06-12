@@ -9,7 +9,7 @@
 
 int main()
 {
-  char hello[20] = "Hello world!";
-  printf("%s\n",hello);
-  return 0;
+	char hello[20] = "Hello world!";
+	printf("%s\n",hello);
+	return 0;
 }

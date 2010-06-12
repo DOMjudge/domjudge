@@ -174,11 +174,11 @@ int main(int argc, char **argv)
 		lang=strtok_r(NULL," ",&lang_ptr)) {
 
 		languages.push_back(vector<string>());
-		
+
 		/* First read the language */
 		ext=strtok_r(lang,",",&ext_ptr);
 		languages[languages.size()-1].push_back(string(ext));
-		
+
 		/* Then all valid extensions for that language */
 		for(ext=strtok_r(NULL,",",&ext_ptr); ext!=NULL;
 			ext=strtok_r(NULL,",",&ext_ptr)) {
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
 
 	if ( getenv("HOME")==NULL ) error(0,"environment variable `HOME' not set");
 	homedir = getenv("HOME");
-	
+
 	/* Check for USERDIR and create it if nessary */
 	submitdir = allocstr("%s/%s",homedir,USERDIR);
 	if ( stat(submitdir,&fstats)!=0 ) {
@@ -203,7 +203,7 @@ int main(int argc, char **argv)
 			error(errno,"setting permissions on `%s'",submitdir);
 		}
 	}
-	
+
 	/* Set logging levels & open logfile */
 	verbose  = LOG_NOTICE;
 	loglevel = LOG_DEBUG;
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
 	if ( stdlog==NULL ) error(errno,"cannot open logfile `%s'",logfile);
 
 	logmsg(LOG_INFO,"started");
-	
+
 	/* Read defaults for server, team and baseurl from environment */
 	server = string("localhost");
 	baseurl = string("http://localhost/domjudge/");
@@ -236,13 +236,13 @@ int main(int argc, char **argv)
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
-			
+
 		case 'p': problem   = string(optarg); break;
 		case 'l': extension = string(optarg); break;
 		case 's': server    = string(optarg); break;
 		case 't': team      = string(optarg); break;
 		case 'u': baseurl   = string(optarg); break;
-			
+
 		case 'P': /* port option */
 			port = strtol(optarg,&ptr,10);
 			if ( *ptr!=0 || port<0 || port>65535 ) {
@@ -282,7 +282,7 @@ int main(int argc, char **argv)
 
 	if ( show_help ) usage();
 	if ( show_version ) version();
-	
+
 	if ( argc<=optind   ) usage2(0,"no filename specified");
 	if ( argc> optind+1 ) usage2(0,"multiple filenames specified");
 	filename = argv[optind];
@@ -322,7 +322,7 @@ int main(int argc, char **argv)
 		if ( problem.empty()   ) problem   = filebase;
 		if ( extension.empty() ) extension = fileext;
 	}
-	
+
 	/* Check for languages matching file extension */
 	extension = stringtolower(extension);
 	for(i=0; i<languages.size(); i++) {
@@ -333,18 +333,18 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-	
+
 	if ( language.empty() ) {
 		ptr = allocstr("language `%s' not recognised",extension.c_str());
 		warnuser(ptr);
 		free(ptr);
 		language = extension;
 	}
-	
+
 	if ( problem.empty()  ) usage2(0,"no problem specified");
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( team.empty()     ) usage2(0,"no team specified");
-	
+
 	if (use_websubmit) {
 		if ( server.empty()  ) usage2(0,"no server specified");
 	} else {
@@ -372,7 +372,7 @@ int main(int argc, char **argv)
 		} else {
 			printf("  server/port: %s/%d\n",server.c_str(),port);
 		}
-		
+
 		if ( nwarnings>0 ) printf("There are warnings for this submission!\a\n");
 		printf("Do you want to continue? (y/n) ");
 		c = readanswer("yn");
@@ -399,7 +399,7 @@ int main(int argc, char **argv)
 void usage()
 {
 	size_t i,j;
-	
+
 	printf("Usage: %s [OPTION]... FILENAME\n",progname);
 	printf(
 "Submit a solution for a problem.\n"
@@ -495,7 +495,7 @@ void usage2(int errnum, const char *mesg, ...)
 {
 	va_list ap;
 	va_start(ap,mesg);
-	
+
 	vlogerror(errnum,mesg,ap);
 
 	va_end(ap);
@@ -509,7 +509,7 @@ void warnuser(const char *warning)
 	nwarnings++;
 
 	logmsg(LOG_DEBUG,"user warning #%d: %s",nwarnings,warning);
-	
+
 	if ( ! quiet ) printf("WARNING: %s!\n",warning);
 }
 
@@ -601,7 +601,7 @@ int cmdsubmit()
 	if ( execute(COPY_CMD,args,2,redir_fd,1)!=0 ) {
 		error(0,"cannot copy `%s' to `%s'",filename,tempfile);
 	}
-	
+
 	if ( chmod(tempfile,USERPERMFILE)!=0 ) {
 		error(errno,"setting permissions on `%s'",tempfile);
 	}
@@ -611,7 +611,7 @@ int cmdsubmit()
 	/* Connect to the submission server */
 	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",
 	       server.c_str(),port);
-	
+
 	/* Set preferred network connection options: use both IPv4 and
  	   IPv6 by default */
 	memset(&hints, 0, sizeof(hints));
@@ -627,13 +627,13 @@ int cmdsubmit()
 	/* Try to connect to addresses for server in given order */
 	socket_fd = -1;
 	for(server_ai=server_ais; server_ai!=NULL; server_ai=server_ai->ai_next) {
-		
+
 		err = getnameinfo(server_ai->ai_addr,server_ai->ai_addrlen,server_addr,
 		                  sizeof(server_addr),NULL,0,NI_NUMERICHOST);
 		if ( err!=0 ) error(0,"getnameinfo: %s",gai_strerror(err));
 
 		logmsg(LOG_DEBUG,"trying to connect to address `%s'",server_addr);
-	
+
 		socket_fd = socket(server_ai->ai_family,server_ai->ai_socktype,
 		                   server_ai->ai_protocol);
 		if ( socket_fd>=0 ) {
@@ -650,7 +650,7 @@ int cmdsubmit()
 	/* Set socket timeout option on read/write */
 	timeout.tv_sec  = timeout_secs;
 	timeout.tv_usec = 0;
-	
+
 	if ( setsockopt(socket_fd,SOL_SOCKET,SO_SNDTIMEO,&timeout,sizeof(timeout)) < 0) {
 		error(errno,"setting socket option");
 	}
@@ -682,7 +682,7 @@ int cmdsubmit()
 	}
 
 	freeaddrinfo(server_ais);
-	
+
 	logmsg(LOG_NOTICE,"submission successful");
 
     return 0;
@@ -695,16 +695,16 @@ int cmdsubmit()
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 {
 	stringstream *s = (stringstream *) sptr;
-	
+
 	*s << string((char *)ptr,size*nmemb);
-	
+
 	return size*nmemb;
 }
 
 string remove_html_tags(string s)
 {
 	size_t p1, p2;
-	
+
 	while ( (p1=s.find('<',0))!=string::npos ) {
 		p2 = s.find('>',p1);
 		if ( p2==string::npos ) break;
@@ -728,9 +728,9 @@ int websubmit()
 	int uploadstatus_read;
 
 	url = allocstr((baseurl+"team/upload.php").c_str());
-	
+
 	curlerrormsg[0] = 0;
-	
+
 	handle = curl_easy_init();
 
 /* helper macro's to easily set curl options and fill forms */
@@ -815,7 +815,7 @@ int websubmit()
 	}
 
 	if ( ! uploadstatus_read ) error(0,"no upload status or error reported by webserver");
-	
+
 	return 0;
 }
 #endif /* SUBMIT_ENABLE_WEB */

@@ -11,6 +11,6 @@
 int main()
 {
 	printf("This line has no trailing newline");
-	
+
 	return 0;
 }

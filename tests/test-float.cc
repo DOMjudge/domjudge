@@ -14,15 +14,15 @@ using namespace std;
 
 int main()
 {
-  double a = M_PI/2;
-  double b;
+	double a = M_PI/2;
+	double b;
 
-  vector<int> c(10);
+	vector<int> c(10);
 
-  b = tan(a);
-  a = exp(b);
-  
-  printf("%lf\n%lf\n%lf\n%lf\n",b,a,1/a,acos(b));
-  
-  return 0;
+	b = tan(a);
+	a = exp(b);
+
+	printf("%lf\n%lf\n%lf\n%lf\n",b,a,1/a,acos(b));
+
+	return 0;
 }

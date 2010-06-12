@@ -12,7 +12,7 @@ int main()
 {
 	int run, nruns;
 	double x, y;
-	
+
 	scanf("%d\n",&nruns);
 
 	for(run=1; run<=nruns; run++) {
@@ -20,6 +20,6 @@ int main()
 		y = 1/x;
 		printf("%.7lf\n",y);
 	}
-	
+
 	return 0;
 }

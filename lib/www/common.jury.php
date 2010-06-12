@@ -30,7 +30,7 @@ function addLink($table, $multi = false)
 function editLink($table, $value, $multi = false)
 {
 	return "<a href=\"" . htmlspecialchars($table) . ".php?cmd=edit" .
-		($multi ? "" : "&amp;id=" . urlencode($value) ) . 
+		($multi ? "" : "&amp;id=" . urlencode($value) ) .
 		"&amp;referrer=" . urlencode(basename($_SERVER['SCRIPT_NAME']) .
 		(empty($_REQUEST['id']) ? '' : '?id=' . urlencode($_REQUEST['id']))) .
 		"\">" .
@@ -68,10 +68,10 @@ function rejudgeForm($table, $id)
 	$button = 'REJUDGE this submission';
 	$question = "Rejudge submission s$id?";
 	$disabled = false;
-	
+
 	// special case submission
 	if ( $table == 'submission' ) {
-		
+
 		// disable the form button if there are no valid judgings anyway
 		// (nothing to rejudge) or if the result is already correct
 		global $DB;
@@ -96,7 +96,7 @@ function rejudgeForm($table, $id)
 		$button = "REJUDGE ALL for $table $id";
 		$question = "Rejudge all submissions for this $table?";
 	}
-	
+
 	$ret .= '<input type="submit" value="' . htmlspecialchars($button) . '" ' .
 		($disabled ? 'disabled="disabled"' : 'onclick="return confirm(\'' .
 		htmlspecialchars($question) . '\');"') . " />\n" . addEndForm();

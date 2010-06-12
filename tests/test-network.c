@@ -45,7 +45,7 @@ void error(int errnum, const char *mesg, ...)
 
 	va_list ap;
 	va_start(ap, mesg);
-	
+
 	errdescr = NULL;
 	if ( errnum != 0 ) {
 		errdescr = strerror(errno);
@@ -77,9 +77,9 @@ void error(int errnum, const char *mesg, ...)
 void sendit(int fd, const char *mesg)
 {
 	ssize_t nwrite;
-	
+
 	snprintf(buffer,BUFFERSIZE-2,"%s",mesg);
-	
+
 	strcat(buffer,"\015\012");
 
 	nwrite = write(fd,buffer,strlen(buffer));
@@ -90,16 +90,16 @@ void sendit(int fd, const char *mesg)
 int receive(int fd)
 {
 	ssize_t nread;
-	
+
 	if ( (nread = read(fd, buffer, BUFFERSIZE-2)) == -1 ) {
 		error(errno,"reading from socket");
 	}
 
 	buffer[nread] = 0;
-	
+
 	/* Check for end of file */
 	if ( nread==0 ) return 0;
-	
+
 	while ( nread>0 && iscntrl(buffer[nread-1]) ) buffer[--nread] = 0;
 
 	return nread;
@@ -119,7 +119,7 @@ int main()
 	/* Try to connect to addresses for server in given order */
 	socket_fd = -1;
 	for(server_ai=server_ais; server_ai!=NULL; server_ai=server_ai->ai_next) {
-		
+
 		err = getnameinfo(server_ai->ai_addr,server_ai->ai_addrlen,server_addr,
 		                  sizeof(server_addr),NULL,0,NI_NUMERICHOST);
 		if ( err!=0 ) error(0,"getnameinfo: %s",gai_strerror(err));
@@ -140,7 +140,7 @@ int main()
 	/* Set socket timeout option on read/write */
 	timeout.tv_sec  = 10;
 	timeout.tv_usec = 0;
-	
+
 	if ( setsockopt(socket_fd,SOL_SOCKET,SO_SNDTIMEO,&timeout,sizeof(timeout)) < 0) {
 		error(errno,"setting socket option");
 	}
@@ -152,7 +152,7 @@ int main()
 	printf("Connected, server address is `%s'\nsending `%s'...\n",server_addr,request);
 
 	sendit(socket_fd,request);
-	
+
 	/* Keep reading until end of file, then check for errors */
 	while ( receive(socket_fd) ) printf("%s",buffer);
 

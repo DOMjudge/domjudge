@@ -59,7 +59,7 @@ if ( empty($row['polltime']) ) {
 if ( IS_ADMIN ) {
 	require_once(LIBWWWDIR . '/forms.php');
 
-	$cmd = ($row['active'] == 1 ? 'deactivate' : 'activate'); 
+	$cmd = ($row['active'] == 1 ? 'deactivate' : 'activate');
 
 	echo addForm('judgehost.php') . "<p>\n" .
 		addHidden('id',  $row['hostname']) .

@@ -33,7 +33,7 @@ case "$1" in
 			# Preserve those; bind mount the others.
 			if [ -L "$CHROOTORIGINAL/$i" ]; then
 				ln -s `readlink "$CHROOTORIGINAL/$i"` $i
-			else 
+			else
 				mkdir -p $i
 				sudo -S mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null
 			fi

@@ -80,7 +80,7 @@ img.helpicon { cursor: help; }
 /* configchecker */
 .details {
 	margin-left: 2em; padding-left: 1ex;
-	border-left: dotted 1px gray; 
+	border-left: dotted 1px gray;
 	margin-top: 1ex; margin-bottom: 1ex;}
 .O { background-color: #ccfbcc; }
 .W { background-color: #f0e68c; }

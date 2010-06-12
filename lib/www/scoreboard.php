@@ -10,7 +10,7 @@
  */
 
 
-/** 
+/**
  * The calcScoreRow is in lib/lib.misc.php because it's used by other
  * parts of the system aswell.
  */
@@ -77,7 +77,7 @@ function genScoreBoard($cdata) {
 
 	// Don't leak information before start of contest
 	if ( ! $cstarted && ! IS_JURY ) return;
-	
+
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY, login, team.name,
 	                 team.categoryid, team.affilid, country, sortorder
@@ -87,18 +87,18 @@ function genScoreBoard($cdata) {
 	                 LEFT JOIN team_affiliation
 	                        ON (team_affiliation.affilid = team.affilid)' .
 	                ( IS_JURY ? '' : ' WHERE visible = 1' ) );
-	
+
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
 	                 ORDER BY probid', $cid);
-	
+
 	// initialize the arrays we'll build from the data
 	$MATRIX = $SCORES = array();
-	$SUMMARY = array('num_correct' => 0, 
+	$SUMMARY = array('num_correct' => 0,
 	                 'affils' => array(), 'countries' => array(),
 					 'problems' => array());
 
-	// scoreboard_jury is always up to date, scoreboard_public might be frozen.	
+	// scoreboard_jury is always up to date, scoreboard_public might be frozen.
 	if ( IS_JURY || $showfinal ) {
 		$cachetable = 'scoreboard_jury';
 	} else {
@@ -122,16 +122,16 @@ function genScoreBoard($cdata) {
 		$SCORES[$login]['affilid']     = $team['affilid'];
 		$SCORES[$login]['country']     = $team['country'];
 	}
-	
+
 	// loop all info the scoreboard cache and put it in our own datastructure
 	while ( $srow = $scoredata->next() ) {
-		
+
 		// skip this row if the team or problem is not known by us
 		if ( ! array_key_exists ( $srow['teamid'], $teams ) ||
 		     ! array_key_exists ( $srow['probid'], $probs ) ) continue;
 
 		$penalty = calcPenaltyTime( $srow['is_correct'], $srow['submissions'] );
-	
+
 		// fill our matrix with the scores from the database
 		$MATRIX[$srow['teamid']][$srow['probid']] = array (
 			'is_correct'      => (bool) $srow['is_correct'],
@@ -173,7 +173,7 @@ function genScoreBoard($cdata) {
 		$SUMMARY['num_correct'] += $totals['num_correct'];
 		if ( ! empty($teams[$team]['affilid']) ) @$SUMMARY['affils'][$totals['affilid']]++;
 		if ( ! empty($teams[$team]['country']) ) @$SUMMARY['countries'][$totals['country']]++;
-		
+
 		// for each problem
 		foreach ( array_keys($probs) as $prob ) {
 
@@ -204,7 +204,7 @@ function genScoreBoard($cdata) {
 		} else {
 			$SUMMARY['problems'][$prob]['best_time'] = NULL;
 		}
-		
+
 	}
 
 	// get the teams and problems
@@ -403,7 +403,7 @@ function renderScoreBoard($cdata, $sdata, $myteamid = null, $static = FALSE) {
 
 			echo '<td class=';
 			// CSS class for correct/incorrect/neutral results
-			if( $matrix[$team][$prob]['is_correct'] ) { 
+			if( $matrix[$team][$prob]['is_correct'] ) {
 				echo '"score_correct"';
 			} elseif ( $matrix[$team][$prob]['num_submissions'] > 0 ) {
 				echo '"score_incorrect"';
@@ -438,7 +438,7 @@ function renderScoreBoard($cdata, $sdata, $myteamid = null, $static = FALSE) {
 	foreach( array_keys($probs) as $prob ) {
 		$str = $summary['problems'][$prob]['num_submissions'] . ' / ' .
 		       $summary['problems'][$prob]['num_correct'] . ' / ' .
-			   ( isset($summary['problems'][$prob]['best_time']) ? 
+			   ( isset($summary['problems'][$prob]['best_time']) ?
 				 $summary['problems'][$prob]['best_time'] : '-' );
 		echo '<td>' .
 			jurylink('problem.php?id=' . urlencode($prob),$str) .
@@ -497,7 +497,7 @@ function putTeamRow($cdata, $teamid) {
 
 	if ( empty( $cdata )  || difftime($cdata['starttime'],now()) > 0 ) return;
 	$cid = $cdata['cid'];
-	
+
 	echo '<table class="scoreboard">' . "\n";
 
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, name, color
@@ -586,7 +586,7 @@ function jurylink($target, $content) {
 	}
 	$res .= $content;
 	if ( IS_JURY ) $res .= '</a>';
-	
+
 	return $res;
 }
 

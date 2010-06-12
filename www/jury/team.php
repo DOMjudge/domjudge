@@ -28,7 +28,7 @@ require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
-	
+
 	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " team</h2>\n\n";
 
 	echo addForm('edit.php');
@@ -117,7 +117,7 @@ if ( is_readable($teamimage) ) {
 <div class="col1"><table>
 <tr><td scope="row">Login:     </td><td class="teamid"><?php echo $row['login']?></td></tr>
 <tr><td scope="row">Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
-<tr><td scope="row">Host:</td><td><?php echo 
+<tr><td scope="row">Host:</td><td><?php echo
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
 <?php if (!empty($row['room'])): ?>
 <tr><td scope="row">Room:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>

@@ -48,7 +48,7 @@ if ( defined('SYSLOG') ) {
 function logmsg($msglevel, $string) {
 	global $verbose, $loglevel;
 
-	$stamp = "[" . date('M d H:i:s') . "] " . SCRIPT_ID . 
+	$stamp = "[" . date('M d H:i:s') . "] " . SCRIPT_ID .
 		(function_exists('posix_getpid') ? "[" . posix_getpid() . "]" : "") .
 		": ";
 

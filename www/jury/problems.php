@@ -46,7 +46,7 @@ if( $res->count() == 0 ) {
 		$link = '<a href="problem.php?id=' . urlencode($row['probid']) . '">';
 
 		echo "<tr class=\"" . implode(' ',$classes) .
-		    "\"><td class=\"probid\">" . $link . 
+		    "\"><td class=\"probid\">" . $link .
 				htmlspecialchars($row['probid'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
 			"</td><td title=\"".htmlspecialchars($row['contestname'])."\">".
@@ -82,8 +82,8 @@ if ( IS_ADMIN ) {
 		echo "\n" . addForm('problem.php', 'post', null, 'multipart/form-data') .
 	 		addHidden('id', @$data['probid']) .
 	 		'Problem archive:' .
-	 		addFileField('problem_archive') . 
-	 		addSubmit('Upload', 'upload') . 
+	 		addFileField('problem_archive') .
+	 		addSubmit('Upload', 'upload') .
 	 		addEndForm() . "\n";
 	}
        	echo "</p>\n\n";

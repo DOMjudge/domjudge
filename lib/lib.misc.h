@@ -61,7 +61,7 @@ void initsignals();
 char *stripendline(char *);
 /* Removes end-of-line characters (CR and LF) from string. Returns the
  * original pointer to the modified string. */
-	
+
 #ifdef __cplusplus
 }
 #endif

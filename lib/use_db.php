@@ -26,7 +26,7 @@ function setup_database_connection($privlevel)
 		list ($priv, $host, $db, $user, $pass) =
 			explode(':', trim($credential));
 		if ($priv != $privlevel) continue;
-		
+
 		$DB = new db ($db, $host, $user, $pass);
 		break;
 	}

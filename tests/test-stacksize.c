@@ -15,7 +15,7 @@ void recurse_malloc(int depth)
 {
 	char a[mb];
 	int i, j;
-	
+
 	depth++;
 
 	/* Here we do some random array reads and writes to prevent the
@@ -23,17 +23,17 @@ void recurse_malloc(int depth)
 	i = rand() % mb;
 	j = rand() % mb;
 	a[i] = depth;
-	
+
 	printf("Allocated %3d MB stack memory, foo = %d.\n",depth,a[j]);
 
 	fflush(stdout);
-	
+
 	recurse_malloc(depth);
 }
 
 int main()
 {
 	recurse_malloc(0);
-	
+
 	return 0;
 }

@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 	int exit_status;
 	int c, i, err;
 	char *ptr;
-		
+
 	progname = argv[0];
 
 	/* Set logging levels & open logfile */
@@ -162,18 +162,18 @@ int main(int argc, char **argv)
 
 	if ( show_help ) usage();
 	if ( show_version ) version();
-	
+
 	if ( inet4_only && inet6_only ) {
 		error(0,"both options `inet4-only' and `inet6-only' specified");
 	}
-	
+
 	if ( argc>optind ) error(0,"non-option arguments given");
 
 	logmsg(LOG_NOTICE,"server started [%s]", DOMJUDGE_PROGRAM);
 
 	create_server();
 	logmsg(LOG_INFO,"listening on port %d/tcp", port);
-    
+
     /* Setup the child signal handler */
 	sigchildaction.sa_handler = sigchld_handler;
 	sigemptyset(&sigchildaction.sa_mask);
@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 
 	/* Setup graceful shutdown signal handlers */
 	initsignals();
-	
+
     /* main accept() loop of incoming connections */
     while ( true ) {
 
@@ -195,7 +195,7 @@ int main(int argc, char **argv)
 			fclose(stdlog);
 			return 0;
 		}
-		
+
 		if ( poll(server_fds,server_nfds,-1)<0 ) {
 			if ( errno==EINTR ) continue;
 			error(errno,"polling socket(s)");
@@ -203,33 +203,33 @@ int main(int argc, char **argv)
 
 		for(i=0; i<server_nfds; i++) {
 			if ( !(server_fds[i].revents & POLLIN) ) continue;
-		
+
 			client_fd = accept(server_fds[i].fd,
 			                   (struct sockaddr *) &client_sock,&socklen);
-				
+
 			if ( client_fd<0 ) {
 				warning(errno,"accepting incoming connection");
 				continue;
 			}
-        
+
 			logmsg(LOG_INFO,"incoming connection, spawning child");
-			
+
 			switch ( child_pid = fork() ) {
 			case -1: /* error */
 				error(errno,"cannot fork");
-				
+
 			case  0: /* child thread */
 				signal(SIGCHLD,SIG_DFL); /* child should not listen to signals */
-				
+
 				err = getnameinfo((struct sockaddr *) &client_sock,socklen,
 				                  client_addr,sizeof(client_addr),NULL,0,NI_NUMERICHOST);
-					
+
 				if ( err!=0 ) error(0,"getnameinfo: %s",gai_strerror(err));
-				
+
 				logmsg(LOG_NOTICE,"connection from %s",client_addr);
-				
+
 				exit_status = handle_client();
-				
+
 				logmsg(LOG_INFO,"child exiting");
 				switch ( exit_status ) {
 				case SUCCESS: exit(SUCCESS_EXITCODE);
@@ -271,7 +271,7 @@ void usage()
 "      --help            display this help and exit\n"
 "      --version         output version information and exit\n"
 "\n",progname,port);
-	
+
 	exit(0);
 }
 
@@ -284,9 +284,9 @@ void create_server()
 	struct addrinfo *res, *r;
 	char *port_str;
 	int err, fd;
-	
+
 	/* Set preferred network connection options: use both IPv4 and
-	   IPv6 by default */ 
+	   IPv6 by default */
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_flags    = AI_PASSIVE | AI_ADDRCONFIG;
 	hints.ai_socktype = SOCK_STREAM;
@@ -346,14 +346,14 @@ void create_server()
 			warning(errno,"starting listening via %s",addr_family_name.c_str());
 			continue;
 		}
-		
+
 		/* Store successfully opened listen socket in server_fds */
 		server_fds[server_nfds].fd = fd;
 		server_fds[server_nfds].events = POLLIN;
 		server_nfds++;
 		logmsg(LOG_INFO,"listening on %s",server_addr);
 	}
-	
+
 	freeaddrinfo(res);
 	if ( server_nfds==0 ) {
 		error(0,"could not create server socket(s)");
@@ -375,24 +375,24 @@ int handle_client()
 	FILE *rpipe;
 	char line[linelen];
 	int i;
-	
+
 	sendit(client_fd,"+server ready");
 
 	while ( receive(client_fd) ) {
 
 		// Make sure that tmp is big enough to contain command and argument
 		tmp2 = tmp = allocstr("%s",lastmesg);
-		
+
 		strsep(&tmp2," ");
-		
+
 		command.erase();
 		argument.erase();
-		
+
 		if ( tmp !=NULL ) command  = string(tmp);
 		if ( tmp2!=NULL ) argument = string(tmp2);
-		
+
 		free(tmp);
-	
+
 		command = stringtolower(command);
 		if ( command=="team" ) {
 			team = argument;
@@ -409,19 +409,19 @@ int handle_client()
 		if ( command=="filename" ) {
 			filename = argument;
 			sendit(client_fd,"+received filename '%s'",argument.c_str());
-		} else 
+		} else
 		if ( command=="quit" ) {
 			logmsg(LOG_NOTICE,"received quit, aborting");
 			close(client_fd);
 			return FAILURE;
-		} else 
+		} else
 		if ( command=="done" ) {
 			break;
 		} else {
 			senderror(client_fd,0,"invalid command: '%s'",command.c_str());
 		}
 	}
-	
+
 	if ( problem.empty()  || team.empty() ||
 	     language.empty() || filename.empty() ) {
 		senderror(client_fd,0,"missing submission info");
@@ -440,16 +440,16 @@ int handle_client()
 	}
 
 	fromfile = allocstr("%s/%s",USERDIR,filename.c_str());
-	
+
 	tempfile = allocstr("%s/cmdsubmit.%s.%s.XXXXXX.%s",TMPDIR,
 	                    problem.c_str(),team.c_str(),language.c_str());
-	
+
 	if ( mkstemps(tempfile,language.length()+1)<0 || strlen(tempfile)==0 ) {
 		senderror(client_fd,errno,"mkstemps cannot create tempfile");
 	}
-	
+
 	logmsg(LOG_INFO,"created tempfile: `%s'",tempfile);
-	
+
 	/* Copy the source-file */
 	args[0] = (char *) team.c_str();
 	args[1] = fromfile;
@@ -461,9 +461,9 @@ int handle_client()
 	case -2: senderror(client_fd,0,"starting submit_copy: internal error");
 	default: senderror(client_fd,0,"submit_copy failed with exitcode %d",status);
 	}
-	
+
 	logmsg(LOG_INFO,"copied `%s' to tempfile",filename.c_str());
-	
+
 	/* Check with database for correct parameters
 	   and then add a database entry for this file. */
 	args[0] = (char *) team.c_str();
@@ -481,7 +481,7 @@ int handle_client()
 	if ( (rpipe = fdopen(redir_fd[1],"r"))==NULL ) {
 		senderror(client_fd,errno,"binding submit_db stdout to stream");
 	}
-	
+
 	/* Read stdout/stderr and try to find errors */
 	while ( fgets(line,linelen,rpipe)!=NULL ) {
 
@@ -490,7 +490,7 @@ int handle_client()
 		while ( i>=0 && (line[i]=='\n' || line[i]=='\r') ) line[i--] = 0;
 
 		fprintf(stderr,"%s\n",line);
-		
+
 		/* Search line for error/warning messages */
 		if ( (tmp = strstr(line,ERRMATCH))!=NULL ) {
 			senderror(client_fd,0,"%s",&tmp[strlen(ERRMATCH)]);
@@ -504,11 +504,11 @@ int handle_client()
 	if ( fclose(rpipe)!=0 ) {
 		senderror(client_fd,errno,"closing submit_db pipe");
 	}
-	
+
 	if ( waitpid(cpid,&status,0)<0 ) {
 		senderror(client_fd,errno,"waiting for submit_db");
 	}
-	
+
 	if ( WIFEXITED(status) && WEXITSTATUS(status)!=0 ) {
 		senderror(client_fd,0,"submit_db failed with exitcode %d",
 		          WEXITSTATUS(status));
@@ -525,14 +525,14 @@ int handle_client()
 		}
 		senderror(client_fd,0,"submit_db aborted due to unknown error");
 	}
-	
+
 	logmsg(LOG_INFO,"added submission to database");
-	
+
 	if ( unlink(tempfile)!=0 ) error(errno,"deleting tempfile");
 
 	sendit(client_fd,"+done submission successful");
 	close(client_fd);
-	
+
 	return SUCCESS;
 }
 
@@ -543,7 +543,7 @@ void sigchld_handler(int sig)
 {
 	pid_t pid;
 	int exitcode;
-	
+
 	pid = waitpid(0,&exitcode,WNOHANG);
 
 	if ( pid<=0 ) {
@@ -554,7 +554,7 @@ void sigchld_handler(int sig)
 		alert("error","error waiting for child process");
 		return;
 	}
-	
+
 	logmsg(LOG_INFO,"child process %d exited with exitcode %d",pid,exitcode);
 
 	/* Report submission status via alert plugin. */

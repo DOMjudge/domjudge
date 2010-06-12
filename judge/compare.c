@@ -65,7 +65,7 @@ char *testin, *testout, *progout, *result, *diffout;
 void writeresult(char *msg)
 {
 	FILE *resultfile;
-	
+
 	if ( !(resultfile = fopen(result,"w")) ) error(errno,"cannot open '%s'",result);
 
 	fprintf(resultfile,"<?xml version=\"1.0\"?>\n");
@@ -85,7 +85,7 @@ void writediff();
 int main(int argc, char **argv)
 {
 	FILE *diffoutfile;
-	
+
 	/* Read arguments. Note that argc counts the number of arguments
 	   including the name of the executed program (argv[0]), thus
 	   (argc-1) is the real number of arguments. */
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 	} else {
 		diffout = NULL;
 	}
-	
+
 	/* Exit when no diff output found (nothing to do anymore) */
 	if ( execdiff(0)==0 ) {
 		writeresult("Accepted");
@@ -123,12 +123,12 @@ int main(int argc, char **argv)
 		/* We are left with the case of a wrong answer */
 		writeresult("Wrong answer");
 	}
-	
+
 	/* Exit when no 'diffout' file specified (nothing to do anymore) */
 	if ( diffout==NULL || strlen(diffout)==0 ) return 0;
 
 	writediff();
-	
+
 	return 0;
 }
 
@@ -163,7 +163,7 @@ int execdiff(int ignore_ws)
 	if ( (rpipe = fdopen(redir_fd[1],"r"))==NULL ) {
 		error(errno,"opening pipe from diff output");
 	}
-	
+
 	/* Read stdout/stderr and check for output */
 	differror = 0;
 	while ( fgets(line,255,rpipe)!=NULL ) {
@@ -171,7 +171,7 @@ int execdiff(int ignore_ws)
 	}
 
 	if ( fclose(rpipe)!=0 ) error(errno,"closing pipe from diff output");
-	
+
 	if ( waitpid(cpid,&status,0)<0 ) error(errno,"waiting for diff");
 
 	/* Check diff exitcode */
@@ -245,7 +245,7 @@ void writediff()
 	   string for printf later */
 	for(i=0; i<2; i++) maxlinelen[i] = min(maxlinelen[i],maxprintlen);
 	sprintf(formatstr,"%%3d %%c%%-%1$ds %%c %%c%%-%1$ds\n",(int)maxlinelen[0]+1);
-	
+
 	/* Print first differences found header at beginning of file */
 	fprintf(diffoutfile,"### DIFFERENCES FROM LINE %d ###\n",firstdiff+1);
 
@@ -266,7 +266,7 @@ void writediff()
 
 		/* Check for just normal character differences */
 		normaldiff = ( strcmp(line[0],line[1])!=0 );
-		
+
 		/* Truncate lines for printing */
 		for(i=0; i<2; i++) {
 			if ( strlen(line[i])>maxlinelen[i] ) {
@@ -286,7 +286,7 @@ void writediff()
 		} else {
 			diffchar = '=';
 		}
-		
+
 		fprintf(diffoutfile,formatstr,l+1,'\'',line[0],diffchar,'\'',line[1]);
 	}
 
@@ -312,7 +312,7 @@ void writediff()
 			dummy = fgets(line[i],MAXLINELEN,inputfile[i]);
 
 			stripendline(line[i]);
-			
+
 			if ( strlen(line[i])>maxlinelen[i] ) {
 				line[i][maxlinelen[i]+1] = 0;
 				line[i][maxlinelen[i]] = '_';

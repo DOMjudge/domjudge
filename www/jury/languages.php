@@ -32,7 +32,7 @@ if( $res->count() == 0 ) {
 			( $row['allow_submit'] ? '': ' class="disabled"').
 			"><td>" . $link . htmlspecialchars($row['langid'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
-			"</td><td class=\"filename\">" . $link . "." . 
+			"</td><td class=\"filename\">" . $link . "." .
 				htmlspecialchars($row['extension']) . "</a>" .
 			"</td><td align=\"center\">" . $link .
 				printyn($row['allow_submit']) . "</a>" .
@@ -40,7 +40,7 @@ if( $res->count() == 0 ) {
 				printyn($row['allow_judge']) . "</a>" .
 			"</td><td>" . $link . htmlspecialchars($row['time_factor']) . "</a>";
 			if ( IS_ADMIN ) {
-				echo "</td><td class=\"editdel\">" . 
+				echo "</td><td class=\"editdel\">" .
 					editLink('language', $row['langid']) . " " .
 					delLink('language','langid',$row['langid']);
 			}

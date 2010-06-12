@@ -9,7 +9,7 @@ program slowoutput(input, output);
 
 var
    i,j,k,l,x : longint;
-   
+
 begin
    i := 0;
    while true do

@@ -30,7 +30,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 			echo "<tr><td>" .
 				addInput("data[$i][hostname]", null, 20, 50) .
 				"</td><td>" .
-				addSelect("data[$i][active]", 
+				addSelect("data[$i][active]",
 					array(1=>'yes',0=>'no'), '1', true) .
 				"</td></tr>\n";
 		}
@@ -42,7 +42,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 				addHidden("keydata[$i][hostname]", $row['hostname']) .
 				printhost($row['hostname']) .
 				"</td><td>" .
-				addSelect("data[$i][active]", 
+				addSelect("data[$i][active]",
 					array(1=>'yes',0=>'no'), $row['active'], true) .
 				"</td></tr>\n";
 			++$i;
@@ -57,7 +57,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 
 	require(LIBWWWDIR . '/footer.php');
 	exit;
-	
+
 }
 
 $res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');

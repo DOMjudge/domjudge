@@ -24,7 +24,7 @@ int main()
 	  Testing shows, that (glibc 2.2.5) twice the requested amount is
 	  allocated, so e.g. when you have 64 MB memory available, already when
 	  resizing to more than 32 MB, you run out of memory.
-	 */
+	*/
 	for(p=4; 1; p*=2) {
 		for(i=p/2; i<p; i+=p/4) {
 			cout << "trying to allocate " << i << " MB... ";

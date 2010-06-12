@@ -56,7 +56,7 @@ if ( IS_ADMIN && $table == 'submission' ) {
 
 while ( $jud = $res->next() ) {
 	$DB->q('START TRANSACTION');
-	
+
 	$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
 	       $jud['judgingid']);
 

@@ -168,17 +168,17 @@ function putClarificationList($clars, $team = NULL)
 
 		$clar['clarid'] = (int)$clar['clarid'];
 		$link = '<a href="clarification.php?id=' . urlencode($clar['clarid'])  . '">';
-		
+
 		if(isset($clar['unread']))
 			echo '<tr class="unread">';
 		else
 			echo '<tr>';
-		
+
 		echo '<td>' . $link . $clar['clarid'] . '</a></td>';
 
 		$sender = htmlspecialchars($clar['sender']);
 		$recipient = htmlspecialchars($clar['recipient']);
-		
+
 		if ($sender == NULL && $recipient == NULL) {
 			$sender = 'Jury';
 			$recipient = 'All';
@@ -193,7 +193,7 @@ function putClarificationList($clars, $team = NULL)
 
 		echo '<td class="teamid">' . $link .
 			 $sender . '</a></td>';
-		echo '<td class="teamid">' . $link . 
+		echo '<td class="teamid">' . $link .
 			 $recipient . '</a></td>';
 
 		echo '<td>' . $link;
@@ -203,7 +203,7 @@ function putClarificationList($clars, $team = NULL)
 			echo "problem ".$clar['probid'];
 		}
 		echo "</a></td>";
-		
+
 		echo '<td>' . $link;
 		echo printtime($clar['submittime']) . '</a></td>';
 		echo '<td>' . $link;

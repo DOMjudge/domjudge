@@ -92,14 +92,14 @@ function cmpsid($a, $b) {
 usort($submissions, 'cmpsid');
 
 foreach ( $submissions as $s ) {
-	
+
 	$cid    = $s['cid'];
 	$sid	= $s['sid'];
 	$login  = $s['login'];
 	$probid = $s['probid'];
 	$langid = $s['langid'];
 	$src    = basename($s['file']);
-	
+
 	// Insert submissions into the database
 	$DB->q('INSERT INTO submission
 	        (submitid,cid,teamid,probid,langid,submittime,sourcecode)

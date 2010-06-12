@@ -42,7 +42,7 @@ if( $res->count() == 0 ) {
 			htmlspecialchars($row['country']) .
 			( is_readable($countryflag) ? ' <img src="' . $countryflag .
 			  '" alt="' . htmlspecialchars($row['country']) . '" />' : '&nbsp;' ) .
-			'</a></td><td align="right">' . $link . 
+			'</a></td><td align="right">' . $link .
 			(int)$row['cnt'] .
 			'</a></td>';
 		if ( IS_ADMIN ) {
