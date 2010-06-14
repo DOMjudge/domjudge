@@ -461,7 +461,7 @@ Pascal; change the list as appropriate.
 
 <code>
 apt-get install make sudo php5-cli php5-mysql ntp xsltproc procps sharutils \
-	gcc g++ gcj openjdk-6-jre ghc fp-compiler
+	gcc g++ gcj openjdk-6-jre-headless ghc fp-compiler
 </code>
 
 <sect>Installation system
@@ -1184,7 +1184,7 @@ script (<tt>lib/judge/compile_c.sh</tt>, etc.), so when adding
 a new language, check that these match.
 
 <tt>name</tt> is the displayed name of the language;
-<tt>extension</tt> the internally used extension for that language,
+<tt>extension</tt> the internally used filename extension for that language,
 which has to match the first extension as listed in the global
 configuration file.
 
