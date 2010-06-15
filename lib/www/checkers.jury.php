@@ -33,7 +33,7 @@ function check_affiliation($data, $keydata = null)
 	if ( ! preg_match ( '/^\w+$/', $id ) ) {
 		ch_error("Team affiliation ID may only contain letters, numbers and underscores.");
 	}
-	$affillogo = '../images/affiliations/' . urlencode($d) . '.png';
+	$affillogo = '../images/affiliations/' . urlencode($id) . '.png';
 	if ( ! file_exists ( $affillogo ) ) {
 		ch_error("Affiliation " . $id .
 		         " does not have a logo (looking for $affillogo).");
