@@ -37,7 +37,7 @@ TESTIN="$1"
 PROGRAM="$2"
 TESTOUT="$3"
 RESULT="$4"
-DIFFOUT="$5"
+DIFFOUT="${5:-/dev/null}"
 
 writeresult()
 {
