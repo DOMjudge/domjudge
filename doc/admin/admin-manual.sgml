@@ -142,7 +142,7 @@ The name of this judging system is inspired by a very important and
 well known landmark in the city of Utrecht: the dome tower, called the
 `Dom' in Dutch. The original logo of the 2004 Dutch Programming
 Championships (for which this system was originally developed) depicts
-a represention of the Dom in zeros and ones. We based the name and
+a representation of the Dom in zeros and ones. We based the name and
 logo of DOMjudge on that.
 
 We would like to thank Erik van Sebille, the original creator of the
@@ -311,6 +311,17 @@ can interfere with system stability.
 The requirements for the deployment of DOMjudge are:
 
 <itemize>
+<item> Computers for the domserver and judgehosts must run Linux or a
+       Unix variant. This software has been developed mostly under
+       Debian GNU/Linux and has bee tested a bit under other Linux
+       distributions and FreeBSD.
+
+<item> (Local) root access on the jury computers for installing some
+       programs setuid-root, some files with restricted permissions
+       and for (un)mounting the proc file system when using Sun Java.
+       See <ref id="security:rootprivs" name="Security: root privileges">
+       for more details.
+
 <item> A TCP/IP network which connects all jury and team computers.
        Extra network security which restricts internet access and
        access to other services (ssh, mail, talk, etc..) is advisable,
@@ -325,15 +336,10 @@ The requirements for the deployment of DOMjudge are:
   <item> The `submit' command line client connects to the web server also
          via HTTP.
   </itemize>
-       Each team computer needs to have a unique IP address from the
-       view of the DOMjudge server.
-
-<item> (Local) root access on the jury computers for installing some
-       programs setuid-root, some files with restricted permissions
-       and for (un)mounting the proc file system when using Sun Java.
-       See <ref id="security:rootprivs" name="Security: root privileges">
-       for more details.
-
+       When using the IP_ADDRESS authentication scheme, then each team
+       computer needs to have a unique IP address from the view of the
+       DOMjudge server, see <ref id="contestsetup:authentication"
+       name="Contest setup: team authentication"> for more details.
 </itemize>
 
 <sect1>Software requirements
@@ -1437,20 +1443,44 @@ contest at any time.
 
 
 <sect>Team authentication
+<label id="contestsetup:authentication">
 <p>
 
-The jury system needs to know which team it is dealing with.
+The authentication system lets domserver know which team it is dealing
+with. This system is modular, allowing flexible addition of new
+methods, if required. The following methods are available by default
+for team authentication.
 
-The IP-address of a workstation is the primary means of
+<sect1>PHP session with passwords (default)
+<p>
+
+Each team receives a password and PHP's session management is used to
+keep track of which team is logged in. This method is easiest to
+setup. It does require the administrator to generate passwords for all
+teams (this can be done in the jury interface) and distribute those,
+though. Also, each team has to login each time they (re)start their
+browser.
+
+<sect1>IP-address based
+<p>
+
+The IP-address of a team's workstation is used as the primary means of
 authentication. The system assumes that someone coming from a specific
 IP is the team with that IP listed in the team table. When a team
 browses to the web interface, this is checked and the appropriate team
-page is presented. The submitclient via the same method also checks this
-IP for the origin of a submission.
+page is presented.
+
+This method has the advantage that teams do not have to login. A
+requirement for this method is that each team computer has a separate
+IP-address from the view of the domserver, though, so this is most
+suitable for onsite contests and might not work with online contests
+if multiple teams are located behind a router, for example.
+Furthermore, with this method the command line submitclient can be
+used next to the web interface submit.
 
 There are three possible ways of configuring team IP-addresses.
 
-<sect1>Supply it beforehand
+<sect2>Supply it beforehand
 <p>
 
 Before the contest starts, when entering teams into the database, add
@@ -1460,10 +1490,10 @@ configuration (except when teams switch workplaces). If possible, this
 is the recommended modus operandi, because it's the least hassle just
 before and during the contest.
 
-<sect1>Use one-time passwords
+<sect2>Use one-time passwords
 <p>
 
-Supply the teams with a password with which to authenticate.
+Supply the teams with a one time password with which to authenticate.
 Beforehand, generate passwords for each team in the jury interface.
 When the test session (or contest) starts and a team connects to the
 web interface and have an unknown IP, they will be prompted for
@@ -1483,15 +1513,32 @@ Furthermore, a team must explicitly connect to the team interface,
 because with an unknown IP, the root DOMjudge website will redirect to
 the public interface.
 
-<sect1>Set IP upon first submission
+<sect2>Set IP upon first submission
 <p>
 
 This is only possible with the
 <ref id="dolstra" name="Dolstra protocol">. The advantage is that no
 prior mapping needs to be configured, but the disadvantage is that
-the team interface cannot be viewed until at least one submission  
+the team interface cannot be viewed until at least one submission
 was made; there are also more constraints on the system.
 See the section on the Dolstra protocol for details.
+
+<sect1>Fixed team authentication
+<p>
+
+This method automatically authenticates each connection to the team
+web interface as a fixed, configurable team. This can be useful for
+testing or demonstration purposes, but probably not for real use
+scenario's.
+
+<sect1>Adding new authentication methods
+<p>
+
+The authentication system is modular and adding new authentication
+methods is fairly easy. The authentication is handled in the file
+<tt>lib/www/auth.team.php</tt>. Adding a new method amounts to editing
+the functions in that file to handle your specific case.
+
 
 <sect>Providing testdata
 <label id="contestsetup:testdata">
