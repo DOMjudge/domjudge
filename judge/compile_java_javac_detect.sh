@@ -51,7 +51,7 @@ if [ -z "$MAINCLASS" ]; then
 fi
 
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
-MEMLIMITJAVA=$(($MEMLIMIT - 262144))
+MEMLIMITJAVA=$(($MEMLIMIT - 300000))
 
 # Write executing script:
 # Executes java byte-code interpreter with following options
