@@ -105,6 +105,11 @@ int main(int argc, char **argv)
     return 1;
   }
 
+  if (strlen(argv[1]) > 235 ) {
+    usage ( "Filename too long"); 
+    return 1;
+  }
+
   f = fopen(argv[1],"r");
   if ( f==NULL ) {
     sprintf(str,"file '%s' not found",argv[1]);
