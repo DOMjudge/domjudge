@@ -170,7 +170,16 @@ function importZippedProblem($zip, $probid = NULL)
 
 		if ( $probid===NULL ) {
 			if ( !isset($ini_array['probid']) ) {
-				error("Need 'probid' in 'domjudge-problem.ini' when adding a new problem.");
+				// generate a new probid
+				$prefix = 'c' . getCurContest() . '_';
+				$numProbs = $DB->q('VALUE SELECT COUNT(*) FROM problem WHERE probid LIKE %s', $prefix . '%');
+
+				$letter = 'A'; 
+				// $letter += $numProbs; does not give the desired result: A,B,...Y,Z,AA,AB,...
+				while ($numProbs > 0) {
+					$letter++; $numProbs--;
+				}
+				$ini_array['probid'] = $prefix . $letter;
 			}
 			// Set sensible defaults for cid and name if not specified:
 			if ( !isset($ini_array['cid'])  ) $ini_array['cid'] = getCurContest();
