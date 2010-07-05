@@ -160,17 +160,17 @@ function importZippedProblem($zip, $probid = NULL)
 	                  'timelimit', 'special_run', 'special_compare', 'color');
 
 	// Read problem properties
-	$ini_array = parse_ini_string($zip->getFromName("properties.ini"));
+	$ini_array = parse_ini_string($zip->getFromName("domjudge-problem.ini"));
 
 	if ( empty($ini_array) ) {
-		if ( $probid===NULL ) error("Need 'properties.ini' file when adding a new problem.");
+		if ( $probid===NULL ) error("Need 'domjudge-problem.ini' file when adding a new problem.");
 	} else {
 		// Only preserve valid keys:
 		$ini_array = array_intersect_key($ini_array,array_flip($ini_keys));
 
 		if ( $probid===NULL ) {
 			if ( !isset($ini_array['probid']) ) {
-				error("Need 'probid' in 'properties.ini' when adding a new problem.");
+				error("Need 'probid' in 'domjudge-problem.ini' when adding a new problem.");
 			}
 			// Set sensible defaults for cid and name if not specified:
 			if ( !isset($ini_array['cid'])  ) $ini_array['cid'] = getCurContest();
