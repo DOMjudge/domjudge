@@ -241,6 +241,9 @@ The <tt>check-judgings</tt> script automatically verifies most of the
 test sources, except for a few with multiple possible outcomes; these
 have to be verified by hand. Read the sources for a description of
 what should (not) happen.
+You may want to change the <tt>AUTH_METHOD</tt> to <tt>FIXED</tt> and set the
+environment variable <tt>SUBMITBASEURL</tt> to your DOMjudge base URL, e.g.
+<tt>http://domjudge.example.com/</tt>.
 
 Optionally:
 <itemize>
