@@ -155,15 +155,16 @@ if (!function_exists('parse_ini_string')) {
 function importZippedProblem($zip, $probid = NULL)
 {
 	global $DB;
+	$prop_file = 'domjudge-problem.ini';
 
 	$ini_keys = array('probid', 'cid', 'name', 'allow_submit', 'allow_judge',
 	                  'timelimit', 'special_run', 'special_compare', 'color');
 
 	// Read problem properties
-	$ini_array = parse_ini_string($zip->getFromName("domjudge-problem.ini"));
+	$ini_array = parse_ini_string($zip->getFromName($prop_file));
 
 	if ( empty($ini_array) ) {
-		if ( $probid===NULL ) error("Need 'domjudge-problem.ini' file when adding a new problem.");
+		if ( $probid===NULL ) error("Need '" . $prop_file . "' file when adding a new problem.");
 	} else {
 		// Only preserve valid keys:
 		$ini_array = array_intersect_key($ini_array,array_flip($ini_keys));
