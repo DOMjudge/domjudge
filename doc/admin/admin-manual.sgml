@@ -1549,18 +1549,38 @@ the functions in that file to handle your specific case.
 Testdata is used to judge the problems: when a submission run is given the
 input testdata, the resulting output is compared to the reference output data.
 If they match exactly, the problem is judged to be correct.
+For problems with a special compare script, testdata should still be
+provided in the same way, but the correctness depends on the output of the
+custom compare script. Please check the documentation in
+<tt>judge/compare_program.sh</tt> when using this feature.
 
 The database has a separate table named testcase, which can be manipulated
 from the web interface. Under a problem, click on the testcase link. There
-the files can be uploaded. The judger caches a copy based on MD5 sum, so if
+the files can be uploaded. The judgehosts cache a copy based on MD5 sum, so if
 you need to make changes later, re-upload the data in the web interface and
 it will automatically be picked up.
 
-For problems with a special compare script, things are a bit
-different: testdata should still be provided as above, but the
-correctness depends on the output of the custom compare script. Please
-check the documentation in
-<tt>judge/compare_program.sh</tt> when using this feature.
+Testdata can also be imported into the system from a zip-bundle on
+each problem webpage. Each pair of files
+<tt>&lt;path-to-file&gt;/&lt;filename&gt;.in</tt> and corresponding
+<tt>*.out</tt> found in the zip-bundle will be added as testdata.
+Furthermore, when the file <tt>domjudge-problem.ini</tt> exists, then
+problem properties are read from that file in INI-syntax. All keys
+from the problem table are supported, so an example contents could be:
+<code>
+probid = hello
+
+name = Hello world!
+allow_submit=false
+color=blue
+</code>
+Testcases will be added to those already present and imported
+properties will overwrite those in the database. A completely new
+problem can also be imported from a zip-bundle on the problems
+overview webpage; in that case, note that if the file
+<tt>domjudge-problem.ini</tt> is not present, a default value is
+chosen for the unmodifiable primary key <tt>probid</tt> (as well as
+for the other keys).
 
 
 <sect>Start the daemons
