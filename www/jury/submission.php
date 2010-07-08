@@ -14,14 +14,18 @@ function parseDiff($difftext){
 		return htmlspecialchars($difftext);
 	$return = sprintf("### DIFFERENCES FROM <a href='#firstdiff'>LINE %d</a> ###\n", $firstdiff);
 	$line = strtok("\n");
-	$loc = (strlen($line) - 5) / 2;
+
+	// We use a heuristic search to find the starting location of the
+	// middle separator (subtract 4 lineno chars, add 1 initial matched char)
+	$midloc = strlen(preg_replace('/[\'_ ] [!=<>\$] \'.*$/', '', $line)) - 4 + 1;
+
 	while(strlen($line) != 0){
 		$linenostr = substr($line,0,4);
 		if($firstdiff == (int)$linenostr) {
 			$linenostr = "<a id='firstdiff'></a>".$linenostr;
 		}
 		$diffline = substr($line,4);
-		$mid = substr($diffline, $loc-1, 3);
+		$mid = substr($diffline, $midloc, 3);
 		switch($mid){
 			case ' = ':
 				$formdiffline = "<span class='correct'>".htmlspecialchars($diffline)."</span>";
