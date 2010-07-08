@@ -346,9 +346,9 @@ int main(int argc, char **argv)
 	if ( team.empty()     ) usage2(0,"no team specified");
 	
 	if (use_websubmit) {
-		if ( server.empty()  ) usage2(0,"no server specified");
-	} else {
 		if ( baseurl.empty() ) usage2(0,"no url specified");
+	} else {
+		if ( server.empty() ) usage2(0,"no server specified");
 	}
 
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
