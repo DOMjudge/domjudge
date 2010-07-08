@@ -10,6 +10,7 @@ Version 3.0.3 - SVN
  - Fix SQL syntax error in restore_sources2db script.
  - Upgrade included dash shell to version 0.5.5.1-6.
  - Fix swapped error messages in submit client.
+ - Correctly handle empty optional diff file argument.
 
 Version 3.0.2 - 13 February 2010
 --------------------------------
