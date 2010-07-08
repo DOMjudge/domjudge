@@ -8,6 +8,7 @@ Version 3.0.3 - SVN
  - In chroot-startstop, cope properly with /lib64 being a symlink to
    /lib. Thanks Christoph Dittmann.
  - Fix SQL syntax error in restore_sources2db script.
+ - Upgrade included dash shell to version 0.5.5.1-6.
 
 Version 3.0.2 - 13 February 2010
 --------------------------------
