@@ -51,9 +51,22 @@ $teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s', $team);
 
 if( ! compareipaddr($teamdata['authtoken'],$ip) ) {
 	if ( $teamdata['authtoken'] == NULL && ! STRICTIPCHECK ) {
-		$DB->q('UPDATE team SET authtoken = %s WHERE login = %s',
-		       $ip, $team);
-		logmsg (LOG_NOTICE, "Registered team '$team' at address '$ip'.");
+		// Before registering team, check that IP address is unique
+		$DB->q('START TRANSACTION');
+		$res = $DB->q('MAYBEVALUE SELECT login FROM team WHERE authtoken = %s', $ip);
+
+		if ( !empty($res) ) {
+			$DB->q('COMMIT');
+			error("Team '$res' already registered at IP address '$ip'.");
+		}
+
+		$res = $DB->q('RETURNAFFECTED UPDATE team SET authtoken = %s
+		               WHERE login = %s', $ip, $team);
+		$DB->q('COMMIT');
+
+		if ( !$res ) error("Failed to register team '$team' at address '$ip'.");
+
+		logmsg(LOG_NOTICE, "Registered team '$team' at address '$ip'.");
 	} else {
 		error("Team '$team' not registered at this IP address.");
 	}
