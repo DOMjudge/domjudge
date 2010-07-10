@@ -8,8 +8,8 @@
 --
 
 -- @UPGRADE-CHECK@
-ALTER TABLE `contest` ADD  KEY `cid` (`cid`, `enabled`);
-ALTER TABLE `contest` DROP KEY `cid` (`cid`, `enabled`);
+ALTER TABLE `clarification` ADD  COLUMN `probid` varchar(8) default NULL;
+ALTER TABLE `clarification` DROP COLUMN `probid`;
 
 --
 -- Create additional structures
@@ -19,6 +19,7 @@ ALTER TABLE `clarification`
   ADD COLUMN `probid` varchar(8) default NULL COMMENT 'Problem associated to this clarification' AFTER `recipient`;
 
 ALTER TABLE `contest`
+  ADD COLUMN `enabled` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Whether this contest can be active',
   ADD KEY `cid` (`cid`, `enabled`);
 
 CREATE TABLE `judging_run` (
