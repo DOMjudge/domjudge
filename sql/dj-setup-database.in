@@ -76,12 +76,12 @@ status()
 		DBUSER=$user PASSWD=$pass mysql -e 'SELECT "success.";' || return 1
 	done
 
-	echo -n "Searching for database '$DBNAME': "
-	mysql -e "USE $DBNAME; SELECT 'found.';" || return 1
+	echo -n "Searching for database \`$DBNAME\`: "
+	mysql -e "USE \`$DBNAME\`; SELECT 'found.';" || return 1
 
 	echo -n "Searching for data in database: "
 	DBUSER=$jury_DBUSER PASSWD=$jury_PASSWD \
-		mysql -e "USE $DBNAME; SELECT name FROM problem WHERE probid = 'hello';" || return 1
+		mysql -e "USE \`$DBNAME\`; SELECT name FROM problem WHERE probid = 'hello';" || return 1
 
 	echo -n "MySQL server version: "
 	mysql -e 'SELECT version();'
@@ -91,7 +91,7 @@ create_db_users()
 {
 	local user pass
 	(
-	echo "CREATE DATABASE $DBNAME CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
+	echo "CREATE DATABASE \`$DBNAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
 	for role in $ROLES ; do
 		eval "user=\$${role}_DBUSER"
 		eval "pass=\$${role}_PASSWD"
@@ -110,7 +110,7 @@ remove_db_users()
 {
 	local user pass
 	(
-	echo "DROP DATABASE IF EXISTS $DBNAME;"
+	echo "DROP DATABASE IF EXISTS \`$DBNAME\`;"
 	for role in $ROLES ; do
 		eval "user=\$${role}_DBUSER"
 # In MySQL < 5.0.2, 'DROP USER' only removes the user, not its privileges:
@@ -186,7 +186,7 @@ install)
 	done
  	cat $SQLDIR/mysql_db_structure.sql \
  	    $SQLDIR/mysql_db_examples.sql \
-	    $TMPFILE | mysql -D $DBNAME
+	    $TMPFILE | mysql -D "$DBNAME"
 	rm -f $TMPFILE
 	;;
 
@@ -198,31 +198,37 @@ uninstall)
 # Upgrades the DB structure and permissions to current version
 # using SQL upgrade files under sql/upgrade.
 upgrade)
-	TMPFILE=`mktemp /tmp/domjudge-sql.XXXXXX`
+	TMPOUT=`mktemp /tmp/domjudge-sql.XXXXXX`
+	TMPSQL=`mktemp /tmp/domjudge-sql.XXXXXX`
 	read_dbpasswords
 	for i in "$SQLDIR"/upgrade/* ; do
 		if [ ! -r "$i" ]; then
 			echo "Error: cannot read upgrade script '$i'."
 			exit 1
 		fi
+		cp "$i" $TMPSQL
+		for role in $ROLES ; do
+			eval "user=\$${role}_DBUSER"
+			sed -i -e "s/domjudge_$role/$user/g" $TMPSQL
+		done
 		# First find the line where the upgrade check is performed to
 		# filter possible error messages later.
 		UPGRADELINE=`grep -n '@UPGRADE-CHECK@' "$i" | cut -d : -f 1`
 		UPGRADELINE=$((UPGRADELINE+1))
-		if cat "$i" | mysql -D $DBNAME >$TMPFILE 2>&1 ; then
+		if cat $TMPSQL | mysql -D "$DBNAME" >$TMPOUT 2>&1 ; then
 			echo "Upgraded script '$i'."
 		else
-			if grep -E "^ERROR .* at line ${UPGRADELINE}: " $TMPFILE >/dev/null 2>&1 ; then
+			if grep -E "^ERROR .* at line ${UPGRADELINE}: " $TMPOUT >/dev/null 2>&1 ; then
 				echo "Skipped script '$i': already applied."
 			else
 				echo "Error upgrading script '$i':"
-				cat $TMPFILE
-				rm -f $TMPFILE
+				cat $TMPOUT
+				rm -f $TMPOUT $TMPSQL
 				exit 1
 			fi
 		fi
 	done
-	rm -f $TMPFILE
+	rm -f $TMPOUT $TMPSQL
 	;;
 
 	*)

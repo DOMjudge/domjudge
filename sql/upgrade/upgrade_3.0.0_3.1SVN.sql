@@ -50,9 +50,9 @@ ALTER TABLE `testcase`
 -- Add/remove privileges
 --
 
-GRANT SELECT (langid, name, extension, allow_submit) ON language TO domjudge_plugin;
-REVOKE UPDATE (ipaddress) ON team FROM domjudge_team;
-GRANT  UPDATE (authtoken) ON team FROM domjudge_team;
+GRANT SELECT (langid, name, extension, allow_submit) ON language TO `domjudge_plugin`;
+REVOKE UPDATE (ipaddress) ON team FROM `domjudge_team`;
+GRANT  UPDATE (authtoken) ON team TO   `domjudge_team`;
 
 FLUSH PRIVILEGES;
 
