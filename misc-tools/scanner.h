@@ -6,6 +6,7 @@
 #define _SYSINC_FLEXLEXER_H_
 #endif
 
+#include <stdio.h>
 #include "parserbase.h"
 
 class Scanner: public yyFlexLexer
