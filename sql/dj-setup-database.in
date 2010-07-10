@@ -201,6 +201,10 @@ upgrade)
 	TMPFILE=`mktemp /tmp/domjudge-sql.XXXXXX`
 	read_dbpasswords
 	for i in "$SQLDIR"/upgrade/* ; do
+		if [ ! -r "$i" ]; then
+			echo "Error: cannot read upgrade script '$i'."
+			exit 1
+		fi
 		# First find the line where the upgrade check is performed to
 		# filter possible error messages later.
 		UPGRADELINE=`grep -n '@UPGRADE-CHECK@' "$i" | cut -d : -f 1`
