@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.0.3 - SVN
--------------------
+Version 3.0.3 - 11 July 2010
+----------------------------
  - Fix bug in handling of libmagic cookie.
  - Fix some HTML escaping issues found with skipfish.
  - Fix CSS link in admin/jury HTML documentation.
