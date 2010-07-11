@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 3.0.4 - SVN
+-------------------
+
 Version 3.0.3 - 11 July 2010
 ----------------------------
  - Fix bug in handling of libmagic cookie.
