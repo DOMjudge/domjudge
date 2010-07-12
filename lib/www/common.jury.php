@@ -160,6 +160,8 @@ function importZippedProblem($zip, $probid = NULL)
 	$ini_keys = array('probid', 'cid', 'name', 'allow_submit', 'allow_judge',
 	                  'timelimit', 'special_run', 'special_compare', 'color');
 
+	$def_timelimit = 10;
+
 	// Read problem properties
 	$ini_array = parse_ini_string($zip->getFromName($prop_file));
 
@@ -171,20 +173,12 @@ function importZippedProblem($zip, $probid = NULL)
 
 		if ( $probid===NULL ) {
 			if ( !isset($ini_array['probid']) ) {
-				// generate a new probid
-				$prefix = 'c' . getCurContest() . '_';
-				$numProbs = $DB->q('VALUE SELECT COUNT(*) FROM problem WHERE probid LIKE %s', $prefix . '%');
-
-				$letter = 'A'; 
-				// $letter += $numProbs; does not give the desired result: A,B,...Y,Z,AA,AB,...
-				while ($numProbs > 0) {
-					$letter++; $numProbs--;
-				}
-				$ini_array['probid'] = $prefix . $letter;
+				error("Need 'probid' in '" . $prop_file . "' when adding a new problem.");
 			}
 			// Set sensible defaults for cid and name if not specified:
-			if ( !isset($ini_array['cid'])  ) $ini_array['cid'] = getCurContest();
-			if ( !isset($ini_array['name']) ) $ini_array['name'] = $ini_array['probid'];
+			if ( !isset($ini_array['cid'])       ) $ini_array['cid'] = getCurContest();
+			if ( !isset($ini_array['name'])      ) $ini_array['name'] = $ini_array['probid'];
+			if ( !isset($ini_array['timelimit']) ) $ini_array['timelimit'] = $def_timelimit;
 
 			$DB->q('INSERT INTO problem (' . implode(', ',array_keys($ini_array)) .
 			       ') VALUES (%As)', $ini_array);
@@ -211,15 +205,11 @@ function importZippedProblem($zip, $probid = NULL)
 			if ($testout !== FALSE) {
 				$testin = $zip->getFromIndex($j);
 
-				$DB->q('INSERT INTO testcase
-					(probid,rank,md5sum_input,
-					md5sum_output,input,output,
-					description)
-					VALUES (%s,%i,%s,%s,%s,%s,%s)',
-					$probid,
-					$maxrank,
-					md5($testin), md5($testout),
-					$testin, $testout, $basename);
+				$DB->q('INSERT INTO testcase (probid, rank,
+				        md5sum_input, m5sum_output, input, output, description)
+				        VALUES (%s, %i, %s, %s, %s, %s, %s)',
+				       $probid, $maxrank, md5($testin), md5($testout),
+				       $testin, $testout, $basename);
 				$maxrank++;
 			}
 		}
@@ -228,7 +218,6 @@ function importZippedProblem($zip, $probid = NULL)
 	// FIXME: insert PDF into database
 
 	return $probid;
-
 }
 
 /**
