@@ -206,7 +206,7 @@ function importZippedProblem($zip, $probid = NULL)
 				$testin = $zip->getFromIndex($j);
 
 				$DB->q('INSERT INTO testcase (probid, rank,
-				        md5sum_input, m5sum_output, input, output, description)
+				        md5sum_input, md5sum_output, input, output, description)
 				        VALUES (%s, %i, %s, %s, %s, %s, %s)',
 				       $probid, $maxrank, md5($testin), md5($testout),
 				       $testin, $testout, $basename);
