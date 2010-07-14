@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.1.0 - SVN
--------------------
+Version 3.1.0 - 14 July 2010
+----------------------------
  - Add multiple testcases support.
  - Add PHP session support as alternative to IP address authentication.
    Based on patches by Tobias Werth.
