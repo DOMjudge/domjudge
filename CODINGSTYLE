@@ -113,7 +113,7 @@ Here is a (non-exhaustive) list of the GNU indent options we prefer:
 --space-after-for
 --space-after-if
 --space-after-while
---no-space-after-function-call-gnames
+--no-space-after-function-call-names
 
 --continue-at-parentheses
 --break-after-boolean-operator
