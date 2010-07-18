@@ -368,7 +368,7 @@ int handle_client()
 	string command, argument;
 	string team, problem, language, filename;
 	char *fromfile, *tempfile, *tmp, *tmp2;
-	char *args[MAXARGS];
+	char *args[5];
 	int redir_fd[3];
 	int status;
 	pid_t cpid;
@@ -454,7 +454,7 @@ int handle_client()
 	args[0] = (char *) team.c_str();
 	args[1] = fromfile;
 	args[2] = tempfile;
-	redir_fd[0] = redir_fd[1] = redir_fd[2] = 0;
+	redir_fd[0] = redir_fd[1] = redir_fd[2] = FDREDIR_NONE;
 	switch ( (status = execute(LIBSUBMITDIR"/submit_copy.sh",args,3,redir_fd,1)) ) {
 	case  0: break;
 	case -1: senderror(client_fd,errno,"starting submit_copy");
@@ -471,9 +471,9 @@ int handle_client()
 	args[2] = (char *) problem.c_str();
 	args[3] = (char *) language.c_str();
 	args[4] = tempfile;
-	redir_fd[0] = 0;
-	redir_fd[1] = 1;
-	redir_fd[2] = 0;
+	redir_fd[0] = FDREDIR_NONE;
+	redir_fd[1] = FDREDIR_PIPE;
+	redir_fd[2] = FDREDIR_NONE;
 	if ( (cpid = execute(LIBSUBMITDIR"/submit_db.php",args,5,redir_fd,1))<0 ) {
 		senderror(client_fd,errno,"starting submit_db");
 	}

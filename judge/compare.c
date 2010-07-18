@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 int execdiff(int ignore_ws)
 {
 	int redir_fd[3];
-	char *cmdargs[MAXARGS];
+	char *cmdargs[4];
 	pid_t cpid;
 	FILE *rpipe;
 	int status, differror;
@@ -152,9 +152,9 @@ int execdiff(int ignore_ws)
 	cmdargs[1] = "-U0";
 	cmdargs[2] = progout;
 	cmdargs[3] = testout;
-	redir_fd[0] = 0;
-	redir_fd[1] = 1;
-	redir_fd[2] = 0;
+	redir_fd[0] = FDREDIR_NONE;
+	redir_fd[1] = FDREDIR_PIPE;
+	redir_fd[2] = FDREDIR_NONE;
 	if ( (cpid = execute("diff",cmdargs,4,redir_fd,1))<0 ) {
 		error(errno,"running diff");
 	}

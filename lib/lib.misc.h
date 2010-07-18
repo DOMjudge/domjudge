@@ -11,8 +11,8 @@
 extern "C" {
 #endif
 
-/* Maximum arguments to execute() */
-#define MAXARGS 10
+#define FDREDIR_NONE -1
+#define FDREDIR_PIPE -2
 
 /* Define wrapper around true function '_alert' to allow passing
  * LIBDIR as defined in calling program. */
@@ -32,10 +32,11 @@ int execute(const char *, char **, int, int[3], int);
  * char *args[]     array of arguments to command
  * int nargs        number of arguments specified
  * int stdio_fd[3]  File descriptors for stdin, stdout and stderr respectively.
- *                    Set any combination of these to non-zero to redirect IO
- *                    for those. each non-zero element will be set to a file
- *                    descriptor pointing to a pipe to the respective stdio's
- *                    of the command.
+ *                    Each can separately be set to one of the following:
+ *                      FDREDIR_NONE - disable any redirection
+ *                      FDREDIR_PIPE - connect to pipe and set to file
+ *                                     descriptor of other end of the pipe
+ *                      fd >= 0      - make this a duplicate of <fd>
  * int err2out      Set non-zero to redirect command stderr to stdout. When set
  *                    the redirection of stderr by stdio_fd[2] is ignored.
  *

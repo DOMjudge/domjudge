@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.2.0 - SVN
 -------------------
+ - Change execute() function for more flexible I/O redirection.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------

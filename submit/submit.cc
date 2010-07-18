@@ -580,7 +580,7 @@ magicerror:
 int cmdsubmit()
 {
 	int redir_fd[3];
-	char *args[MAXARGS];
+	char *args[2];
 	struct timeval timeout;
 	struct addrinfo hints;
 	char *port_str;
@@ -597,7 +597,7 @@ int cmdsubmit()
 	/* Construct copy command and execute it */
 	args[0] = filename;
 	args[1] = tempfile;
-	redir_fd[0] = redir_fd[1] = redir_fd[2] = 0;
+	redir_fd[0] = redir_fd[1] = redir_fd[2] = FDREDIR_NONE;
 	if ( execute(COPY_CMD,args,2,redir_fd,1)!=0 ) {
 		error(0,"cannot copy `%s' to `%s'",filename,tempfile);
 	}

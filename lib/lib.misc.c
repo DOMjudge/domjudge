@@ -21,6 +21,8 @@
 #define PIPE_IN  1
 #define PIPE_OUT 0
 
+const int def_stdio_fd[3] = { STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO };
+
 void _alert(const char *libdir, const char *msgtype, const char *description)
 {
 	static char none[1] = "";
@@ -45,15 +47,17 @@ int execute(const char *cmd, char **args, int nargs, int stdio_fd[3], int err2ou
 	pid_t pid, child_pid;
 	int redirect;
 	int status;
-	int inpipe[2];
-	int outpipe[2];
-	int errpipe[2];
-	char *argv[MAXARGS+2];
-	int i;
+	int pipe_fd[3][2];
+	char **argv;
+	int i, dir;
 
-	if ( nargs>MAXARGS ) return -2;
+	if ( (argv=(char **) malloc((nargs+2)*sizeof(char **)))==NULL ) return -1;
 
-	redirect = ( stdio_fd[0] || stdio_fd[1] || stdio_fd[2] );
+	if ( err2out ) stdio_fd[2] = FDREDIR_NONE;
+
+	redirect = ( stdio_fd[0]!=FDREDIR_NONE ||
+	             stdio_fd[1]!=FDREDIR_NONE ||
+	             stdio_fd[2]!=FDREDIR_NONE );
 
 	/* Build the complete argument list for execvp */
 	argv[0] = (char *) cmd;
@@ -61,30 +65,31 @@ int execute(const char *cmd, char **args, int nargs, int stdio_fd[3], int err2ou
 	argv[nargs+1] = NULL;
 
 	/* Open pipes for IO redirection */
-	if ( err2out ) stdio_fd[2] = 0;
-
-	if ( stdio_fd[0] && pipe(inpipe )!=0 ) return -1;
-	if ( stdio_fd[1] && pipe(outpipe)!=0 ) return -1;
-	if ( stdio_fd[2] && pipe(errpipe)!=0 ) return -1;
+	for(i=0; i<3; i++) {
+		if ( stdio_fd[i]==FDREDIR_PIPE && pipe(pipe_fd[i])!=0 ) return -1;
+	}
 
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
 		return -1;
 
 	case  0: /* child process */
-		/* Connect pipes to command stdin/stdout and close unneeded fd's */
-		if ( stdio_fd[0] ) {
-			if ( dup2(inpipe[PIPE_OUT],STDIN_FILENO)<0 ) return -1;
-			if ( close(inpipe[PIPE_IN])!=0 ) return -1;
+		/* Connect pipes to command stdin/stdout/stderr and close unneeded fd's */
+		for(i=0; i<3; i++) {
+			if ( stdio_fd[i]==FDREDIR_PIPE ) {
+				/* stdin must be connected to the pipe output,
+				   stdout/stderr to the pipe input: */
+				dir = (i==0 ? PIPE_OUT : PIPE_IN);
+				if ( dup2(pipe_fd[i][dir],def_stdio_fd[i])<0 ) return -1;
+				if ( close(pipe_fd[i][dir])!=0 ) return -1;
+				if ( close(pipe_fd[i][1-dir])!=0 ) return -1;
+			}
+			if ( stdio_fd[i]>=0 ) {
+				if ( dup2(stdio_fd[i],def_stdio_fd[i])<0 ) return -1;
+				if ( close(stdio_fd[i])!=0 ) return -1;
+			}
 		}
-		if ( stdio_fd[1] ) {
-			if ( dup2(outpipe[PIPE_IN],STDOUT_FILENO)<0 ) return -1;
-			if ( close(outpipe[PIPE_OUT])!=0 ) return -1;
-		}
-		if ( stdio_fd[2] ) {
-			if ( dup2(errpipe[PIPE_IN],STDERR_FILENO)<0 ) return -1;
-			if ( close(errpipe[PIPE_OUT])!=0 ) return -1;
-		}
+		/* Redirect stderr to stdout */
 		if ( err2out && dup2(STDOUT_FILENO,STDERR_FILENO)<0 ) return -1;
 
 		/* Replace child with command */
@@ -92,18 +97,18 @@ int execute(const char *cmd, char **args, int nargs, int stdio_fd[3], int err2ou
 		abort();
 
 	default: /* parent process */
+
+		free(argv);
+
 		/* Set and close file descriptors */
-		if ( stdio_fd[0] ) {
-			stdio_fd[0] = inpipe[PIPE_IN];
-			if ( close(inpipe[PIPE_OUT])!=0 ) return -1;
-		}
-		if ( stdio_fd[1] ) {
-			stdio_fd[1] = outpipe[PIPE_OUT];
-			if ( close(outpipe[PIPE_IN])!=0 ) return -1;
-		}
-		if ( stdio_fd[2] ) {
-			stdio_fd[2] = errpipe[PIPE_OUT];
-			if ( close(errpipe[PIPE_IN])!=0 ) return -1;
+		for(i=0; i<3; i++) {
+			if ( stdio_fd[i]==FDREDIR_PIPE ) {
+				/* parent process output must connect to the input of
+				   the pipe to child, and vice versa for stdout/stderr: */
+				dir = (i==0 ? PIPE_IN : PIPE_OUT);
+				stdio_fd[i] = pipe_fd[i][dir];
+				if ( close(pipe_fd[i][1-dir])!=0 ) return -1;
+			}
 		}
 
 		/* Return if some IO is redirected to be able to read/write to child */
