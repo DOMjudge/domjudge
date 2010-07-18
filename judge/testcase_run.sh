@@ -47,7 +47,7 @@ cleanexit ()
 
 	# Remove some copied files to save disk space
 	if [ "$WORKDIR" ]; then
-		rm -f "$WORKDIR/bin/sh"
+		rm -f "$WORKDIR/bin/sh" "$WORKDIR/bin/runpipe"
 		if [ -f "$WORKDIR/testdata.in" ]; then
 			rm -f "$WORKDIR/testdata.in"
 			ln -s "$TESTIN" "$WORKDIR/testdata.in"
@@ -92,6 +92,7 @@ fi
 SCRIPTDIR="$DJ_LIBJUDGEDIR"
 STATICSHELL="$DJ_LIBJUDGEDIR/sh-static"
 RUNGUARD="$DJ_BINDIR/runguard"
+RUNPIPE="$DJ_BINDIR/runpipe"
 
 logmsg $LOG_INFO "starting '$0', PID = $$"
 
@@ -106,7 +107,10 @@ logmsg $LOG_DEBUG "arguments: '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$WORKDIR'"
 logmsg $LOG_DEBUG "optionals: '$SPECIALRUN' '$SPECIALCOMPARE'"
 
 COMPARE_SCRIPT="$SCRIPTDIR/compare${SPECIALCOMPARE:+_$SPECIALCOMPARE}"
-RUN_SCRIPT="run${SPECIALRUN:+_$SPECIALRUN}"
+RUN_SCRIPT="$SCRIPTDIR/run${SPECIALRUN:+_$SPECIALRUN}"
+if [ -n "$SPECIALRUN" ]; then
+	RUN_JURYPROG="$SCRIPTDIR/runjury_${SPECIALRUN}"
+fi
 
 [ -r "$TESTIN"  ] || error "test-input not found: $TESTIN"
 [ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT"
@@ -114,7 +118,7 @@ RUN_SCRIPT="run${SPECIALRUN:+_$SPECIALRUN}"
 	error "Workdir not found or not writable: $WORKDIR"
 [ -x "$WORKDIR/program" ] || error "submission program not found or not executable"
 [ -x "$COMPARE_SCRIPT"  ] || error "compare script not found or not executable: $COMPARE_SCRIPT"
-[ -x "$SCRIPTDIR/$RUN_SCRIPT" ] || error "run script not found or not executable: $RUN_SCRIPT"
+[ -x "$RUN_SCRIPT" ] || error "run script not found or not executable: $RUN_SCRIPT"
 [ -x "$RUNGUARD" ] || error "runguard not found or not executable: $RUNGUARD"
 
 OLDDIR="$PWD"
@@ -152,9 +156,16 @@ chmod a+r testdata.in
 
 mkdir -m 0711 bin dev proc
 # Copy the run-script and a statically compiled shell:
-cp -p  "$SCRIPTDIR/$RUN_SCRIPT" .
-cp -pL "$STATICSHELL"           ./bin/sh
+cp -p  "$RUN_SCRIPT"  .
+cp -pL "$STATICSHELL" ./bin/sh
 chmod a+rx "$RUN_SCRIPT" bin/sh
+# If using a custom run script, copy additional support programs
+# if required:
+if [ -n "$SPECIALRUN" -a -f "$RUN_JURYPROG" ]; then
+	cp -p "$RUN_JURYPROG" .
+	cp -pL "$RUNPIPE"     ./bin/runpipe
+	chmod a+rx "$RUN_JURYPROG" ./bin/runpipe
+fi
 
 # Execute an optional chroot setup script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
@@ -175,7 +186,8 @@ logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck "$RUNGUARD" ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
 	-t $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
-	$PREFIX/$RUN_SCRIPT $PREFIX/program testdata.in program.out program.err program.exit \
+	$PREFIX/`basename "$RUN_SCRIPT"` $PREFIX/program \
+	testdata.in program.out program.err program.exit \
 	&>error.tmp
 
 # Execute an optional chroot destroy script:

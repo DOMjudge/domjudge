@@ -21,7 +21,7 @@ check-judgings: check-judgings.in $(TOPDIR)/paths.mk
 check-syntax:
 	./syntax
 
-check: test-normal test-fltcmp
+check: test-normal test-fltcmp test-boolfind
 
 verify: check-judgings
 	./check-judgings
@@ -31,6 +31,7 @@ distclean-l:
 
 PROBLEM=hello
 test-fltcmp: PROBLEM=fltcmp
+test-boolfind: PROBLEM=boolfind
 
 test-normal: $(SUBMITCMD)
 	@echo "Submitting normal test sources..." ; \
@@ -39,6 +40,10 @@ test-normal: $(SUBMITCMD)
 test-fltcmp: $(SUBMITCMD)
 	@echo "Submitting fltcmp test sources..." ; \
 	for i in fltcmp-test-* ; do $(SUBMIT) ; done
+
+test-boolfind: $(SUBMITCMD)
+	@echo "Submitting boolfind test sources..." ; \
+	for i in boolfind-test-* ; do $(SUBMIT) ; done
 
 test-stress: $(SUBMITCMD)
 	@echo "Submitting stress test sources..." ; \

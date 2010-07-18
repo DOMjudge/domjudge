@@ -35,10 +35,10 @@ $nerrors = 0;
 
 $matchstring = '@EXPECTED_RESULTS@: ';
 
-$res = $DB->q('SELECT s.*, j.judgingid, j.result, j.verified, j.verifier
+$res = $DB->q("SELECT s.*, j.judgingid, j.result, j.verified, j.verifier
                FROM submission s
                LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
-               WHERE s.probid = \'hello\' OR s.probid = \'fltcmp\'');
+               WHERE s.probid = 'hello' OR s.probid = 'fltcmp' OR s.probid = 'boolfind'");
 
 while( $row = $res->next() ) {
 	if ( $pos = strpos($row['sourcecode'],$matchstring) ) {

@@ -1,0 +1,47 @@
+#!/bin/sh
+# $Id: run 3151 2010-02-27 14:56:01Z eldering $
+
+# Run wrapper-script to be called from 'testcase_run.sh'.
+#
+# This script is meant to simplify writing interactive problems where
+# the contestants' solution bi-directionally communicates with a jury
+# program, e.g. while playing a two player game.
+#
+# Usage: $0 <program> <testin> <output> <error> <exitfile>
+#
+# <program>   Executable of the contestants' program to be run.
+# <testin>    File containing test-input.
+# <output>    File where to write solution output.
+# <error>     File where to write error messages.
+# <exitfile>  File where to write solution exitcode.
+#
+# A jury program called 'runjury_<specialrun>' should be available. It
+# should communicate with the contestants' program to provide input
+# and read output via stdin/stdout. This wrapper script handles the
+# setup of bi-directional pipes. The jury program should accept the
+# following calling syntax:
+#
+#    $JURY_PROGRAM <testdata.in> <program.out>
+#
+# The jury program should exit with exitcode zero unless an unexpected
+# failure occurred (malformed contestant's program output should be
+# handled by the jury program), and write output to <program.out> such
+# that that data can later be used to verify correctness of the
+# contestants' solution.
+
+# Define jury program as name of this program replacing 'run_' by 'runjury_'
+JURY_PROGRAM="${0%/*}/runjury_${0##*/run_}"
+
+PROGRAM="$1";   shift
+TESTIN="$1";    shift
+OUTPUT="$1";    shift
+ERROR="$1";     shift
+EXITFILE="$1";  shift
+
+# Run the program while redirecting input, output and stderr
+bin/runpipe $JURY_PROGRAM $TESTIN $OUTPUT = $PROGRAM 2>$ERROR
+exitcode=$?
+
+printf "$exitcode" >$EXITFILE
+
+exit $exitcode
