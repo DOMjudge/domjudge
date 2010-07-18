@@ -19,16 +19,21 @@
 # program output is considered correct when diff.out is empty (and
 # specified).
 #
-# This script calls another (configurable) program to check the
-# results. Calling syntax:
+# This script calls another program to check the results.
+# Calling syntax:
+#
 #    $CHECK_PROGRAM <testdata.in> <program.out> <testdata.out>
 #
 # The $CHECK_PROGRAM should return the contents of <diff.out> to
 # standard output. It must exit with exitcode zero to indicate
 # successful checking.
 
-# Check program, specify with absolute path or use `dirname $0`:
-CHECK_PROGRAM="`dirname $0`/check_float"
+# Check program. The default program name below is defined by
+# replacing 'compare_' by 'check_' in this programs name. So by
+# copying or symlinking this default 'compare_wrapper' to
+# compare_<your_compare>, the program 'check_<your_compare>' will be
+# called; modify as required.
+CHECK_PROGRAM="${0%/*}/check_${0##*compare_}"
 
 # Options to pass to check program:
 CHECK_OPTIONS=""

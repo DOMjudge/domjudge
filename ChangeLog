@@ -4,6 +4,7 @@ Version 3.2.0 - SVN
 -------------------
  - Change execute() function for more flexible I/O redirection.
  - Add runpipe program for connecting stdin/out of two processes.
+ - Rename compare_program.sh to *_wrapper, allow symlinked usage.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------
