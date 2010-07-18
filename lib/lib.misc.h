@@ -11,6 +11,7 @@
 extern "C" {
 #endif
 
+/* I/O redirection options for execute() */
 #define FDREDIR_NONE -1
 #define FDREDIR_PIPE -2
 
@@ -33,8 +34,8 @@ int execute(const char *, char **, int, int[3], int);
  * int nargs        number of arguments specified
  * int stdio_fd[3]  File descriptors for stdin, stdout and stderr respectively.
  *                    Each can separately be set to one of the following:
- *                      FDREDIR_NONE - disable any redirection
- *                      FDREDIR_PIPE - connect to pipe and set to file
+ *                      FDREDIR_NONE - don't do redirection
+ *                      FDREDIR_PIPE - connect to pipe and set value to file
  *                                     descriptor of other end of the pipe
  *                      fd >= 0      - make this a duplicate of <fd>
  * int err2out      Set non-zero to redirect command stderr to stdout. When set
