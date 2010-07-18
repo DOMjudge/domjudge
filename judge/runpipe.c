@@ -52,13 +52,11 @@
 #include "lib.error.h"
 #include "lib.misc.h"
 
-const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
-
 extern int errno;
 
 char  *progname;
-char  *outputfilename;
 
+int be_verbose;
 int show_help;
 int show_version;
 
@@ -70,12 +68,10 @@ int    cmd_nargs[MAX_CMDS];
 char **cmd_args[MAX_CMDS];
 pid_t  cmd_pid[MAX_CMDS];
 int    cmd_fds[MAX_CMDS][3];
-
-
-struct timeval starttime, endtime;
+int    cmd_exit[MAX_CMDS];
 
 struct option const long_opts[] = {
-	{"output",  required_argument, NULL,         'o'},
+	{"verbose", no_argument,       NULL,         'v'},
 	{"help",    no_argument,       &show_help,    1 },
 	{"version", no_argument,       &show_version, 1 },
 	{ NULL,     0,                 NULL,          0 }
@@ -95,9 +91,10 @@ General Public Licence for details.\n",PROGRAM,VERSION,AUTHORS,PROGRAM);
 void usage()
 {
 	printf("\
-Usage: %s [OPTION]... COMMAND1 [ARGS...] = COMMANDD2 [ARGS...]\n\
+Usage: %s [OPTION]... COMMAND1 [ARGS...] = COMMAND2 [ARGS...]\n\
 Run two commands with stdin/stdout bi-directionally connected.\n\
 \n\
+  -v, --verbose        display some extra warnings and information\n\
       --help           display this help and exit\n\
       --version        output version information and exit\n\
 \n\
@@ -105,47 +102,34 @@ Arguments starting with a `=' must be escaped by prepending an extra `='.\n", pr
 	exit(0);
 }
 
-#if 0
+void verb(const char *format, ...)
+{
+	va_list ap;
+	va_start(ap,format);
+
+	if ( be_verbose ) {
+		fprintf(stderr,"%s: verbose: ",progname);
+		vfprintf(stderr,format,ap);
+		fprintf(stderr,"\n");
+	}
+
+	va_end(ap);
+}
+
 void terminate(int sig)
 {
 	struct sigaction sigact;
 
 	/* Reset signal handlers to default */
 	sigact.sa_handler = SIG_DFL;
-	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) warning("error restoring signal handler");
-	if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) warning("error restoring signal handler");
-
-	if ( sig==SIGALRM ) {
-		warning("timelimit reached: aborting command");
-	} else {
-		warning("received signal %d: aborting command",sig);
+	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
+		warning(0,"error restoring signal handler");
 	}
 
-	/* First try to kill graciously, then hard */
-	verbose("sending SIGTERM");
-	if ( kill(-child_pid,SIGTERM)!=0 ) error(errno,"sending SIGTERM to command");
-
-	/* Prefer nanosleep over sleep because of higher resolution and
-	   it does not interfere with signals. */
-	nanosleep(&killdelay,NULL);
-
-	verbose("sending SIGKILL");
-	if ( kill(-child_pid,SIGKILL)!=0 ) error(errno,"sending SIGKILL to command");
+	/* Send kill signal to all children */
+	verb("sending SIGTERM");
+	if ( kill(0,SIGTERM)!=0 ) error(errno,"sending SIGTERM");
 }
-
-inline long readoptarg(const char *desc, long minval, long maxval)
-{
-	long arg;
-	char *ptr;
-
-	arg = strtol(optarg,&ptr,10);
-	if ( errno || *ptr!='\0' || arg<minval || arg>maxval ) {
-		error(errno,"invalid %s specified: `%s'",desc,optarg);
-	}
-
-	return arg;
-}
-#endif
 
 void set_fd_close_exec(int fd, int value)
 {
@@ -165,32 +149,28 @@ void set_fd_close_exec(int fd, int value)
 
 int main(int argc, char **argv)
 {
-// 	sigset_t sigmask;
+ 	struct sigaction sigact;
+ 	sigset_t sigmask;
  	pid_t pid;
 	int   status;
-//	int   exitcode;
-//	char *ptr;
+	int   exitcode, myexitcode;
 	int   opt;
 	char *arg;
 	int   i, newcmd, argsize = 0;
 	int   pipe_fd[MAX_CMDS][2];
 
-// 	struct itimerval itimer;
-// 	struct sigaction sigact;
-
 	progname = argv[0];
 
 	/* Parse command-line options */
-	show_help = show_version = 0;
+	be_verbose = show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+v",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
-// 		case 'o': /* output option */
-// 			use_output = 1;
-// 			outputfilename = strdup(optarg);
-// 			break;
+		case 'v': /* verbose option */
+			be_verbose = 1;
+			break;
 		case ':': /* getopt error */
 		case '?':
 			error(0,"unknown option or missing argument `%c'",optopt);
@@ -249,6 +229,20 @@ int main(int argc, char **argv)
 		error(0,"%d commands specified, 2 required", ncmds);
 	}
 
+	/* Install TERM signal handler */
+	if ( sigemptyset(&sigmask)!=0 ) error(errno,"creating signal mask");
+	if ( sigprocmask(SIG_SETMASK, &sigmask, NULL)!=0 ) {
+		error(errno,"unmasking signals");
+	}
+	if ( sigaddset(&sigmask,SIGTERM)!=0 ) error(errno,"setting signal mask");
+
+	sigact.sa_handler = terminate;
+	sigact.sa_flags   = SA_RESETHAND | SA_RESTART;
+	sigact.sa_mask    = sigmask;
+	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
+		error(errno,"installing signal handler");
+	}
+
 	/* Create pipes and by default close all file descriptors when
 	   executing a forked subcommand, required ones are reset below. */
 	for(i=0; i<ncmds; i++) {
@@ -257,6 +251,7 @@ int main(int argc, char **argv)
 		set_fd_close_exec(pipe_fd[i][1], 1);
 	}
 
+	/* Execute commands as subprocesses and connect pipes as required. */
 	for(i=0; i<ncmds; i++) {
 		cmd_fds[i][0] = pipe_fd[i][0];
 		cmd_fds[i][1] = pipe_fd[1-i][1];
@@ -264,9 +259,10 @@ int main(int argc, char **argv)
 		set_fd_close_exec(pipe_fd[i][0], 0);
 		set_fd_close_exec(pipe_fd[1-i][1], 1);
 
+		cmd_exit[i] = -1;
 		cmd_pid[i] = execute(cmd_name[i], cmd_args[i], cmd_nargs[i], cmd_fds[i], 0);
 		if ( cmd_pid[i]==-1 ) error(errno,"failed to execute command #%d",i+1);
-		printf("started #%d, pid %d: %s\n",i+1,cmd_pid[i],cmd_name[i]);
+		verb("started #%d, pid %d: %s\n",i+1,cmd_pid[i],cmd_name[i]);
 	}
 
 	/* Wait for running child commands and check exit status. */
@@ -281,98 +277,42 @@ int main(int argc, char **argv)
 		}
 
 		for(i=0; i<ncmds; i++) if ( cmd_pid[i]==pid ) break;
+		if ( i>=ncmds ) error(0, "waited for unknown child");
 
-		printf("command #%d, pid %d has exited with status %d\n",i+1,pid,status);
+		cmd_exit[i] = status;
+		verb("command #%d, pid %d has exited (with status %d)\n",i+1,pid,status);
 
 		if ( close(cmd_fds[i][0])!=0 || close(cmd_fds[i][1])!=0 ) {
 			error(errno,"closing command #%d FD's",i+1);
 		}
 	} while ( 1 );
 
-#if 0
-	switch ( 1 ) {
-	default: /* become watchdog */
-
-		/* Shed privileges, only if not using a separate child uid,
-		   because in that case we may need root privileges to kill
-		   the child process. Do not use Linux specific setresuid()
-		   call with saved set-user-ID. */
-		if ( !use_user ) {
-			if ( setuid(getuid())!=0 ) error(errno, "setting watchdog uid");
-			verbose("watchdog using user ID `%d'",getuid());
-		}
-
-		if ( gettimeofday(&starttime,NULL) ) error(errno,"getting time");
-
-		/* unmask all signals */
-		if ( sigemptyset(&sigmask)!=0 ) error(errno,"creating signal mask");
-		if ( sigprocmask(SIG_SETMASK, &sigmask, NULL)!=0 ) {
-			error(errno,"unmasking signals");
-		}
-
-		/* Construct one-time signal handler to terminate() for TERM
-		   and ALRM signals. */
-		if ( sigaddset(&sigmask,SIGALRM)!=0 ||
-		     sigaddset(&sigmask,SIGTERM)!=0 ) error(errno,"setting signal mask");
-
-		sigact.sa_handler = terminate;
-		sigact.sa_flags   = SA_RESETHAND | SA_RESTART;
-		sigact.sa_mask    = sigmask;
-
-		/* Kill child command when we receive SIGTERM */
-		if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
-			error(errno,"installing signal handler");
-		}
-
-		if ( use_time ) {
-			/* Kill child when we receive SIGALRM */
-			if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) {
-				error(errno,"installing signal handler");
+	/* Check exit status of commands */
+	myexitcode = exitcode = 0;
+	for(i=0; i<ncmds; i++) {
+		if ( cmd_exit[i]!=0 ) {
+			status = cmd_exit[i];
+			/* Test whether command has finished abnormally */
+			if ( ! WIFEXITED(status) ) {
+				if ( WIFSIGNALED(status) ) {
+					warning(0,"command #%d terminated with signal %d",i+1,WTERMSIG(status));
+					exitcode = 128+WTERMSIG(status);
+				}
+				if ( WIFSTOPPED(status) ) {
+					warning(0,"command #%d stopped with signal %d",i+1,WSTOPSIG(status));
+					exitcode = 128+WSTOPSIG(status);
+				}
+				error(0,"command #%d exit status unknown: %d",i+1,status);
+			} else {
+				/* Return the exitstatus of the first failed command */
+				exitcode = WEXITSTATUS(status);
+				if ( exitcode!=0 ) {
+					warning(0,"command #%d exited with exitcode %d",i+1,exitcode);
+				}
 			}
-
-			/* Trigger SIGALRM via setitimer:  */
-			itimer.it_interval.tv_sec  = 0;
-			itimer.it_interval.tv_usec = 0;
-			itimer.it_value.tv_sec  = runtime / 1000000;
-			itimer.it_value.tv_usec = runtime % 1000000;
-
-			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
-				error(errno,"setting timer");
-			}
-			verbose("using timelimit of %.3lf seconds",runtime*1E-6);
+			if ( myexitcode==0 ) myexitcode = exitcode;
 		}
-
-		/* Wait for the child command to finish */
-		while ( (pid = wait(&status))!=-1 && pid!=child_pid );
-		if ( pid!=child_pid ) error(errno,"waiting on child");
-
-		/* Drop root before writing to output file. */
-		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
-
-		outputtime();
-
-		/* Test whether command has finished abnormally */
-		if ( ! WIFEXITED(status) ) {
-			if ( WIFSIGNALED(status) ) {
-				warning("command terminated with signal %d",WTERMSIG(status));
-				return 128+WTERMSIG(status);
-			}
-			if ( WIFSTOPPED(status) ) {
-				warning("command stopped with signal %d",WSTOPSIG(status));
-				return 128+WSTOPSIG(status);
-			}
-			error(0,"command exit status unknown: %d",status);
-		}
-
-		/* Return the exitstatus of the command */
-		exitcode = WEXITSTATUS(status);
-		if ( exitcode!=0 ) verbose("command exited with exitcode %d",exitcode);
-		return exitcode;
 	}
 
-	/* This should never be reached */
-	error(0,"unexpected end of program");
-#endif
-
-	return 0;
+	return myexitcode;
 }
