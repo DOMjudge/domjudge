@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: run 3151 2010-02-27 14:56:01Z eldering $
+# $Id$
 
 # Run wrapper-script to be called from 'testcase_run.sh'.
 #
