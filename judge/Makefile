@@ -22,13 +22,12 @@ check_float: -lm
 runguard: runguard.c $(TOPDIR)/etc/config.h $(TOPDIR)/etc/runguard-config.h -lm
 
 install-judgehost:
-	$(INSTALL_SCRIPT) -t $(DESTDIR)$(judgehost_libjudgedir) \
-		compile*.sh testcase_run.sh run compare_program.sh \
+	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libjudgedir) \
+		compile*.sh testcase_run.sh run sh-static compare_program.sh \
 		compare check_diff.sh check_float chroot-startstop.sh
-	$(INSTALL_DATA)   -t $(DESTDIR)$(judgehost_libjudgedir) \
+	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libjudgedir) \
 		judgedaemon.main.php parse_result.xslt
-	$(INSTALL_SCRIPT) -t $(DESTDIR)$(judgehost_bindir) judgedaemon
-	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libjudgedir) sh-static
+	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) judgedaemon
 	-$(INSTALL_PROG) -o root -m 4755 -t $(DESTDIR)$(judgehost_bindir) \
 		runguard
 

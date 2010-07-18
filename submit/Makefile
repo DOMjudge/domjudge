@@ -48,7 +48,7 @@ install-domserver:
 ifeq ($(SUBMIT_ENABLE_CMD),1)
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) submitdaemon
 endif
-	$(INSTALL_SCRIPT) -t $(DESTDIR)$(domserver_libsubmitdir) \
+	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libsubmitdir) \
 		submit_copy.sh submit_db.php
 
 clean-l:

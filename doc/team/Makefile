@@ -8,9 +8,9 @@ config: gentexconfig
 docs: team-manual.pdf
 
 install-docs:
-	$(INSTALL_SCRIPT) -t $(DESTDIR)$(domjudge_docdir)/team \
+	$(INSTALL_PROG) -t $(DESTDIR)$(domjudge_docdir)/team \
 		gentexconfig genteammanuals
-	$(INSTALL_DATA)   -t $(DESTDIR)$(domjudge_docdir)/team \
+	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/team \
 		team-manual*.tex team-manual*.pdf
 	$(INSTALL_DATA) -T README $(DESTDIR)$(domjudge_docdir)/README.teammanual
 
