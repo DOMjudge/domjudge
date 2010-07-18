@@ -3,7 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-BASE = hello fltcmp
+BASE = hello fltcmp boolfind
 PDF = $(BASE:=.pdf)
 
 docs: dist
@@ -12,6 +12,7 @@ install-docs:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples example.*
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples hello.pdf hello.in hello.out
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples fltcmp.pdf fltcmp.in fltcmp.out
+	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples boolfind.pdf boolfind.in boolfind.out
 
 $(PDF): %.pdf: %.tex %.in %.out $(TOPDIR)/doc/logos/DOMjudgelogo.pdf
 	pdflatex -interaction=nonstopmode $< > /dev/null

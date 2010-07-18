@@ -1,0 +1,61 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[scale={0.75,0.77}]{geometry}
+\usepackage[british]{babel}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{verbatim}
+
+\begin{document}
+
+\begin{wrapfigure}[1]{r}{1cm}
+  \includegraphics[height=4cm]{../logos/DOMjudgelogo.pdf}
+\end{wrapfigure}
+~\\
+\begin{center}
+  \Large\bf \textsc{DOM}judge sample problem\\
+  \texttt{boolfind} -- `Boolean switch search'
+\end{center}
+~\\
+
+\section*{Problem description}
+
+We have a very long array of boolean values, and it is known that the
+first value is \verb!true! and the last value \verb!false!. You
+are asked to search for a position in the array where a true value
+is succeeded by false.
+
+The input is as follows. The first line contains one integer: the
+number of testcases. Then follows for each testcase a number
+$2 \le n \le 10^9$, the length of the zero-indexed array. After that,
+the input depends interactively on your program's output. When you
+output a single line `\verb!READ x!' with $x$ an integer between $0$ and
+$n-1$, a line containing either \verb!true! or \verb!false! will be
+returned, specifying the value at position $x$ in the array. When you
+output a single line `\verb!OUTPUT x!', then this is taken as the answer
+of the position which has value \verb!true! and is followed by
+\verb!false! and the next testcase will be given.
+
+\section*{Sample input/output}
+
+The input box contains the input, but additionally, after the array
+length, a line containing all values of the array with booleans
+represented by $0$ and $1$. The input (and output) after that is a
+sample interactive session.
+
+~\\
+\begin{tabular}{|p{0.47\textwidth}|p{0.47\textwidth}|}
+\hline
+\textbf{Input} & \textbf{Output} \\
+\hline
+\verbatiminput{boolfind.in} &
+\verbatiminput{boolfind.out} \\
+\hline
+\end{tabular}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
