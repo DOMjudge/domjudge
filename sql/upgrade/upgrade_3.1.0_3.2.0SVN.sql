@@ -8,7 +8,8 @@
 --
 
 -- @UPGRADE-CHECK@
-SELECT `probid` FROM `problem` WHERE `probid` = 'boolfind';
+INSERT INTO `problem` (`probid`, `cid`, `name`) VALUES ('boolfind', 2, 'testinsert');
+DELETE FROM `problem` WHERE `probid` = 'boolfind';
 
 --
 -- Create additional structures
