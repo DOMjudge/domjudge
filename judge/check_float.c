@@ -46,7 +46,7 @@
 #include <errno.h>
 
 #define PROGRAM "check_float"
-#define VERSION "0.2"
+#define VERSION "$Rev$"
 #define AUTHORS "Jaap Eldering"
 
 #define MAXLINELEN 1024
