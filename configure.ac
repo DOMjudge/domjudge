@@ -215,12 +215,16 @@ AC_CHECK_PROGS(HTPASSWD,[htpasswd htpasswd2],[no htpasswd binary found])
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
 if test "$submit_enablehttp" = "1" ; then
-	AX_LIB_CURL([7.9.7])
-	AC_SUBST(CURL_PREFIX,m4_esyscmd([curl-config --prefix]))
+	AX_LIB_CURL([7.9.7],[],[
+		AC_MSG_ERROR([libcURL not found (required for http submit method)])
+	])
 	save_CPPFLAGS="$CPPFLAGS"
 	CPPFLAGS="$CPPFLAGS $CURL_CFLAGS"
-	AC_CHECK_HEADERS([curl/curl.h])
+	AC_CHECK_HEADERS([curl/curl.h],[],[
+		AC_MSG_ERROR([libcURL headers not found (required for http submit method)])
+	])
 	CPPFLAGS="$save_CPPFLAGS"
+	AC_SUBST(CURL_STATIC,`curl-config --static-libs`)
 fi
 
 AX_BOOST_BASE([1.33.1])
