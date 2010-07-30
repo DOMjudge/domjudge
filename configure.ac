@@ -224,7 +224,12 @@ if test "$submit_enablehttp" = "1" ; then
 		AC_MSG_ERROR([libcURL headers not found (required for http submit method)])
 	])
 	CPPFLAGS="$save_CPPFLAGS"
-	AC_SUBST(CURL_STATIC,`curl-config --static-libs`)
+	# The 'curl-config --static-libs' option is accepted since 7.17.1
+	AX_COMPARE_VERSION([$curl_version],[ge],[7.17.1],[
+		AC_SUBST(CURL_STATIC,`curl-config --static-libs`)
+	],[
+		AC_SUBST(CURL_STATIC,"")
+	])
 fi
 
 AX_BOOST_BASE([1.33.1])
