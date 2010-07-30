@@ -8,10 +8,10 @@
  * @EXPECTED_RESULTS@: RUN-ERROR
  */
 
-using namespace std;
-
 #include <iostream>
 #include <vector>
+
+using namespace std;
 
 vector<char> a;
 

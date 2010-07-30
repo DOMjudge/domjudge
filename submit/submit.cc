@@ -62,11 +62,11 @@
 #endif
 
 /* C++ includes for easy string handling */
-using namespace std;
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
+using namespace std;
 
 /* These defines are needed in 'version' and 'logmsg' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION

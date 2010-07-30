@@ -6,14 +6,12 @@
  * @EXPECTED_RESULTS@: TIME-LIMIT,RUN-ERROR
  */
 
-using namespace std;
-
 #include <iostream>
 #include <string>
 
 int main()
 {
-	while ( 1 ) cerr << "Fill stderr with nonsense, to test filesystem stability.\n";
+	while ( 1 ) std::cerr << "Fill stderr with nonsense, to test filesystem stability.\n";
 
 	return 0;
 }

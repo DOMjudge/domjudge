@@ -6,8 +6,6 @@
  * @EXPECTED_RESULTS@: WRONG-ANSWER
  */
 
-using namespace std;
-
 #include <vector>
 #include <stdio.h>
 #include <math.h>
@@ -17,7 +15,7 @@ int main()
 	double a = M_PI/2;
 	double b;
 
-	vector<int> c(10);
+	std::vector<int> c(10);
 
 	b = tan(a);
 	a = exp(b);

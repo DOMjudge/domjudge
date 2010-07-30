@@ -25,10 +25,10 @@
 #include <libgen.h>
 
 /* C++ includes for easy string handling */
-using namespace std;
 #include <iostream>
 #include <sstream>
 #include <string>
+using namespace std;
 
 /* System/site specific static config (paths, etc.) */
 #include "../etc/domserver-static.h"
