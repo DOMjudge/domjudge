@@ -11,9 +11,10 @@
 
 %token TEST_EOF TEST_MATCH
 %token CMP_LT CMP_GT CMP_LE CMP_GE CMP_EQ CMP_NE
-%token CMD_SPACE CMD_NEWLINE CMD_EOF CMD_INT CMD_STRING CMD_REGEX
+%token CMD_SPACE CMD_NEWLINE CMD_EOF CMD_INT CMD_FLOAT CMD_STRING CMD_REGEX
 %token CMD_REP CMD_WHILE CMD_END
-%token VARIABLE INTEGER STRING
+%token VARIABLE INTEGER FLOAT STRING
+%token OPT_FIXED OPT_SCIENTIFIC
 
 %left '&' '|'
 %left '+' '-'
@@ -46,6 +47,9 @@ command_noargs:
 command_args:
 	CMD_INT '(' expr ',' expr ')'              { $$ = parse_t($1,$3,$5); }
 |	CMD_INT '(' expr ',' expr ',' VARIABLE ')' { $$ = parse_t($1,$3,$5,$7); }
+|	CMD_FLOAT '(' expr ',' expr ')'            { $$ = parse_t($1,$3,$5); }
+|	CMD_FLOAT '(' expr ',' expr ',' VARIABLE ')' { $$ = parse_t($1,$3,$5,$7); }
+|	CMD_FLOAT '(' expr ',' expr ',' VARIABLE ',' opt_float ')' { $$ = parse_t($1,$3,$5,$7,$9); }
 |	CMD_STRING '(' STRING ')'                  { $$ = parse_t($1,$3); }
 |	CMD_REGEX  '(' STRING ')'                  { $$ = parse_t($1,$3); }
 | 	CMD_REP '(' expr ')'                       { $$ = parse_t($1,$3); }
@@ -54,7 +58,9 @@ command_args:
 | 	CMD_WHILE '(' test ',' command ')'         { $$ = parse_t($1,$3,$5); }
 ;
 
-value: INTEGER | VARIABLE ;
+opt_float: OPT_FIXED | OPT_SCIENTIFIC ;
+
+value: INTEGER | FLOAT | VARIABLE ;
 
 compare: CMP_LT | CMP_GT | CMP_LE | CMP_GE | CMP_EQ | CMP_NE ;
 

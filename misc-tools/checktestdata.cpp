@@ -1,7 +1,7 @@
 /*
    Checktestdata -- check testdata according to specification.
    Copyright (C) 2008 Jan Kuipers
-   Copyright (C) 2009 Jaap Eldering (eldering@a-eskwadraat.nl).
+   Copyright (C) 2009-2010 Jaap Eldering (eldering@a-eskwadraat.nl).
 
    $Id$
 
@@ -25,8 +25,9 @@
    with '#' are comments and ignored.
 
    integer  := 0|-?[1-9][0-9]*
+   float    := -?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?
    variable := [a-z][a-z0-9]*
-   value    := <integer> | <variable>
+   value    := <integer> | <float> | <variable>
    compare  := '<' | '>' | '<=' | '>=' | '==' | '!='
    expr     := <term> | <expr> [+-] <term>
    term     := <value> | '-' <term> | '(' <expr> ')' | <term> [*%/] <term>
@@ -36,6 +37,10 @@
       MATCH and ISEOF are special keyword that return whether the next
       character matches any of 'str', respectively if end-of-file has
       been reached.
+
+      A value or expression can either be an integer or a floating
+      point number. An expression is integer if all its sub-expressions
+      are integer.
 
    string   := ".*"
 
@@ -67,6 +72,14 @@
       Match an arbitrary sized integer value in the interval [min,max]
       and optionally assign the value read to variable 'name'.
 
+   FLOAT(<expr> min, <expr> max [, <variable> name [, option])
+
+      Match a floating point number in the range [min,max] and
+      optionally assign the value read to the variable 'name'.
+      When the option 'FIXED' or 'SCIENTIFIC' is set, only accept
+      floating point numbers in fixed point and scientific notation,
+      respectively.
+
    STRING(<string> str)
 
       Match the literal string 'str'.
@@ -92,6 +105,7 @@
 #include "../etc/config.h"
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -120,6 +134,30 @@ using namespace std;
 #define AUTHORS "Jan Kuipers, Jaap Eldering"
 #define VERSION "$Rev$"
 
+enum value_type { value_none, value_int, value_flt };
+
+struct value_t {
+	value_type type;
+	mpz_class intval;
+	mpf_class fltval;
+
+	value_t(): type(value_none) {};
+	explicit value_t(mpz_class x): type(value_int), intval(x) {};
+	explicit value_t(mpf_class x): type(value_flt), fltval(x) {};
+
+	operator mpz_class() const;
+	operator mpf_class() const;
+};
+
+ostream& operator <<(ostream &os, const value_t &val)
+{
+	switch ( val.type ) {
+	case value_int: return os << val.intval;
+	case value_flt: return os << val.fltval;
+	default:        return os << "<no value>";
+	}
+}
+
 const int exit_testdata = 1;
 const int exit_failure  = 2;
 
@@ -131,7 +169,7 @@ command currcmd;
 
 string data;
 vector<command> program;
-map<string,mpz_class> variable;
+map<string,value_t> variable;
 set<string> loop_cmds;
 // List of loop starting commands like REP, initialized in main().
 
@@ -265,7 +303,28 @@ void error(string msg = string())
 	exit(exit_testdata);
 }
 
-mpz_class value(string x)
+value_t::operator mpz_class() const
+{
+	if ( type!=value_int ) {
+		if ( type==value_flt  ) cerr << "float: " << fltval << endl;
+		if ( type==value_none ) cerr << "none" << endl;
+		cerr << "integer value expected in " << program[prognr] << endl;
+		exit(exit_failure);
+	}
+	return intval;
+}
+
+value_t::operator mpf_class() const
+{
+	if ( !(type==value_int || type==value_flt) ) {
+		cerr << "float (or integer) value expected in " << program[prognr] << endl;
+		exit(exit_failure);
+	}
+	if ( type==value_int ) return intval;
+	return fltval;
+}
+
+value_t value(string x)
 {
 	debug("value '%s'",x.c_str());
 	if ( isalpha(x[0]) ) {
@@ -274,10 +333,75 @@ mpz_class value(string x)
 		exit(exit_failure);
 	}
 
-	return mpz_class(x);
+	value_t res;
+	if ( res.intval.set_str(x,0)==0 ) res.type = value_int;
+	else if ( res.fltval.set_str(x,0)==0 ) {
+		res.type = value_flt;
+		// Set sufficient precision:
+		if ( res.fltval.get_prec()<4*x.length() ) {
+			res.fltval.set_prec(4*x.length());
+			res.fltval.set_str(x,0);
+		}
+	}
+	return res;
 }
 
-mpz_class eval(expr e)
+/* We define overloaded arithmetic and comparison operators.
+ * As they are all identical, the code is captured in two macro's
+ * below, except for the modulus and unary minus.
+ */
+#define DECL_VALUE_BINOP(op) \
+value_t operator op(const value_t &x, const value_t &y) \
+{ \
+	if ( x.type==value_none || y.type==value_none ) return value_t(); \
+	if ( x.type==value_int  && y.type==value_int ) { \
+		return value_t(mpz_class(x.intval op y.intval)); \
+	} else { \
+		return value_t(mpf_class(mpf_class(x) op mpf_class(y))); \
+	} \
+}
+
+#define DECL_VALUE_CMPOP(op) \
+bool operator op(const value_t &x, const value_t &y) \
+{ \
+	if ( x.type==value_none || y.type==value_none ) return false; \
+	if ( x.type==value_int  && y.type==value_int ) return x.intval op y.intval; \
+	return mpf_class(x) op mpf_class(y); \
+}
+
+DECL_VALUE_BINOP(+)
+DECL_VALUE_BINOP(-)
+DECL_VALUE_BINOP(*)
+DECL_VALUE_BINOP(/)
+
+DECL_VALUE_CMPOP(>)
+DECL_VALUE_CMPOP(<)
+DECL_VALUE_CMPOP(>=)
+DECL_VALUE_CMPOP(<=)
+DECL_VALUE_CMPOP(==)
+DECL_VALUE_CMPOP(!=)
+
+value_t operator -(const value_t &x)
+{
+	if ( x.type==value_int ) return value_t(mpz_class(-x.intval));
+	if ( x.type==value_flt ) return value_t(mpf_class(-x.fltval));
+	return value_t();
+}
+
+value_t operator %(const value_t &x, const value_t &y)
+{
+	if ( x.type==value_none || y.type==value_none ) return value_t();
+	value_t res;
+	if ( x.type==value_int  && y.type==value_int ) {
+		res = x;
+		res.intval %= y.intval;
+		return res;
+	}
+	cerr << "cannot use modulo on floats in " << program[prognr] << endl;
+	exit(exit_failure);
+}
+
+value_t eval(expr e)
 {
 	debug("eval op='%c', val='%s', #args=%d",e.op,e.val.c_str(),(int)e.args.size());
 	switch ( e.op ) {
@@ -298,8 +422,8 @@ mpz_class eval(expr e)
 bool compare(args_t cmp)
 {
 	string op = cmp[0].val;
-	mpz_class l = eval(cmp[1]);
-	mpz_class r = eval(cmp[2]);
+	value_t l = eval(cmp[1]);
+	value_t r = eval(cmp[2]);
 
 	if ( op=="<"  ) return l<r;
 	if ( op==">"  ) return l>r;
@@ -395,7 +519,7 @@ void checktoken(command cmd)
 		mpz_class lo = eval(cmd.args[0]);
 		mpz_class hi = eval(cmd.args[1]);
 
-		debug("%s <= %s <= %s",lo.get_str().c_str(),num.c_str(),hi.get_str().c_str());
+//		debug("%s <= %s <= %s",lo.get_str().c_str(),num.c_str(),hi.get_str().c_str());
 		if ( cmd.nargs()>=3 ) debug("'%s' = '%s'",cmd.args[2].c_str(),num.c_str());
 
 		if ( num.size()==0 ) error();
@@ -403,13 +527,55 @@ void checktoken(command cmd)
 		if ( num.size()>=1 && num[0]=='-' &&
 		     (num.size()==1 || num[1]=='0') ) error("invalid minus sign (-0 not allowed)");
 
-		mpz_class n(num);
+		mpz_class x(num);
 
-		if ( n<lo || n>hi ) error("value out of range");
-		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = n;
+		if ( x<lo || x>hi ) error("value out of range");
+		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = value_t(x);
 
 		datanr += len;
 		charnr += len;
+	}
+
+	else if ( cmd.name()=="FLOAT" ) {
+		// Accepts format -?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?
+		// where the last optional part, the exponent, is not allowed
+		// with the FIXED option and required with the SCIENTIFIC option.
+
+		string float_regex("-?[0-9]+(\\.[0-9]+)?([eE][+-]?[0-9]+)?");
+		string fixed_regex("-?[0-9]+(\\.[0-9]+)?");
+		string scien_regex("-?[0-9]+(\\.[0-9]+)?[eE][+-]?[0-9]+");
+		boost::regex regexstr(float_regex);
+		boost::match_results<string::const_iterator> res;
+		boost::match_flag_type flags = boost::match_default | boost::match_continuous;
+		string matchstr;
+
+		if ( cmd.nargs()>=4 ) {
+			if ( cmd.args[3].name()=="SCIENTIFIC" ) regexstr = scien_regex;
+			else if ( cmd.args[3].name()=="FIXED" ) regexstr = fixed_regex;
+			else {
+				cerr << "invalid option in " << program[prognr] << endl;
+				exit(exit_failure);
+			}
+		}
+
+		if ( !boost::regex_search((string::const_iterator)&data[datanr],
+		                          (string::const_iterator)data.end(),
+		                          res,regexstr,flags) ) {
+			error();
+		}
+		size_t matchend = size_t(res[0].second-data.begin());
+		matchstr = string(data.begin()+datanr,data.begin()+matchend);
+
+		mpf_class x(matchstr,4*matchstr.length());
+
+		mpf_class lo = eval(cmd.args[0]);
+		mpf_class hi = eval(cmd.args[1]);
+
+		if ( x<lo || x>hi ) error("value out of range");
+		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = value_t(x);
+
+		charnr += matchend - datanr;
+		datanr = matchend;
 	}
 
 	else if ( cmd.name()=="STRING" ) {
@@ -556,6 +722,11 @@ int main(int argc, char **argv)
 	if ( show_version ) { version(); return 0; }
 
 	debug("debugging enabled");
+
+	// Output floats with high precision:
+	cout << setprecision(50);
+	cerr << setprecision(50);
+	mpf_set_default_prec(256);
 
 	if ( argc<=optind ) {
 		printf("Error: no PROGRAM file specified.\n");

@@ -30,15 +30,28 @@ SPACE    { return Parser::CMD_SPACE; }
 NEWLINE  { return Parser::CMD_NEWLINE; }
 EOF      { return Parser::CMD_EOF; }
 INT      { return Parser::CMD_INT; }
+FLOAT    { return Parser::CMD_FLOAT; }
 STRING   { return Parser::CMD_STRING; }
 REGEX    { return Parser::CMD_REGEX; }
 REP      { return Parser::CMD_REP; }
 WHILE    { return Parser::CMD_WHILE; }
 END      { return Parser::CMD_END; }
 
+FIXED      { return Parser::OPT_FIXED; }
+SCIENTIFIC { return Parser::OPT_SCIENTIFIC; }
+
 [a-z][a-z0-9]* {
 	return Parser::VARIABLE;
 }
+
+ /* A floating point number must have a decimal point or exponent: */
+[0-9]+\.[0-9]+([eE][+-]?[0-9]+)? {
+	return Parser::FLOAT;
+}
+
+[0-9]+[eE][+-]?[0-9]+ {
+	return Parser::FLOAT;
+ }
 
 [0-9]+ {
 	return Parser::INTEGER;
