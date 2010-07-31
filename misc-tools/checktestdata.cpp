@@ -245,7 +245,7 @@ void readtestdata(istream &in)
  	data = ss.str();
 }
 
-void error()
+void error(string msg = string())
 {
 	size_t fr = max(0,int(datanr)-display_before_error);
 	size_t to = min(data.size(),datanr+display_after_error);
@@ -256,8 +256,10 @@ void error()
 		cout << data.substr(fr,to-fr) << endl;
 		cout << string(min(charnr,(size_t)display_before_error),' ') << "^" << endl << endl;
 
-		cout << "ERROR: line " << linenr << " character " << charnr;
-		cout << " of testdata doesn't match " << currcmd << endl << endl;
+		cout << "ERROR: line " << linenr+1 << " character " << charnr+1;
+		cout << " of testdata doesn't match " << currcmd;
+		if ( msg.length()>0 ) cout << ": " << msg;
+		cout << endl << endl;
 	}
 
 	exit(exit_testdata);
@@ -340,7 +342,7 @@ void readwhitespace()
 
 void checkspace()
 {
-	if ( datanr>=data.size() ) error();
+	if ( datanr>=data.size() ) error("end of file");
 
 	if ( whitespace_ok ) {
 		// First check at least one space-like character
@@ -359,7 +361,8 @@ void checknewline()
 	// Trailing whitespace before newline
 	if ( whitespace_ok ) readwhitespace();
 
-	if ( datanr>=data.size() || data[datanr++]!='\n' ) error();
+	if ( datanr>=data.size() ) error("end of file");
+	if ( data[datanr++]!='\n' ) error();
 	linenr++;
 	charnr=0;
 
@@ -396,13 +399,13 @@ void checktoken(command cmd)
 		if ( cmd.nargs()>=3 ) debug("'%s' = '%s'",cmd.args[2].c_str(),num.c_str());
 
 		if ( num.size()==0 ) error();
-		if ( num.size()>=2 && num[0]=='0' ) error();
+		if ( num.size()>=2 && num[0]=='0' ) error("prefix zero(s)");
 		if ( num.size()>=1 && num[0]=='-' &&
-		     (num.size()==1 || num[1]=='0') ) error();
+		     (num.size()==1 || num[1]=='0') ) error("invalid minus sign (-0 not allowed)");
 
 		mpz_class n(num);
 
-		if ( n<lo || n>hi ) error();
+		if ( n<lo || n>hi ) error("value out of range");
 		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = n;
 
 		datanr += len;
@@ -412,7 +415,8 @@ void checktoken(command cmd)
 	else if ( cmd.name()=="STRING" ) {
 		string str = cmd.args[0];
 		for (size_t i=0; i<str.size(); i++) {
-			if ( datanr>=data.size() || data[datanr++]!=str[i] ) error();
+			if ( datanr>=data.size() ) error("premature end of file");
+			if ( data[datanr++]!=str[i] ) error();
 			charnr++;
 			if ( str[i]=='\n' ) linenr++, charnr=0;
 		}
