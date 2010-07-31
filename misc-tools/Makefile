@@ -27,9 +27,9 @@ parse.cc: checktestdata.y parsetype.h
 	bisonc++ $<
 
 checksucc = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 || \
-		{ echo "Running ./checktestdata $$opts '$$prog' '$$data' did not succeed..." ; exit 1; }
+		{ echo "Running './checktestdata $$opts $$prog $$data' did not succeed..." ; exit 1; }
 checkfail = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 && \
-		{ echo "Running ./checktestdata $$opts '$$prog' '$$data' did not fail..."    ; exit 1; }
+		{ echo "Running './checktestdata $$opts $$prog $$data' did not fail..."    ; exit 1; }
 
 check: checktestdata
 	@for i in tests/testprog*.in ; do \
