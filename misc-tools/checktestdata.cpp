@@ -546,7 +546,6 @@ void checktoken(command cmd)
 		string scien_regex("-?[0-9]+(\\.[0-9]+)?[eE][+-]?[0-9]+");
 		boost::regex regexstr(float_regex);
 		boost::match_results<string::const_iterator> res;
-		boost::match_flag_type flags = boost::match_default | boost::match_continuous;
 		string matchstr;
 
 		if ( cmd.nargs()>=4 ) {
@@ -560,7 +559,7 @@ void checktoken(command cmd)
 
 		if ( !boost::regex_search((string::const_iterator)&data[datanr],
 		                          (string::const_iterator)data.end(),
-		                          res,regexstr,flags) ) {
+		                          res,regexstr,boost::match_continuous) ) {
 			error();
 		}
 		size_t matchend = size_t(res[0].second-data.begin());
@@ -593,12 +592,11 @@ void checktoken(command cmd)
 	else if ( cmd.name()=="REGEX" ) {
 		boost::regex regexstr(string(cmd.args[0]));
 		boost::match_results<string::const_iterator> res;
-		boost::match_flag_type flags = boost::match_default | boost::match_continuous;
 		string matchstr;
 
 		if ( !boost::regex_search((string::const_iterator)&data[datanr],
 		                          (string::const_iterator)data.end(),
-								  res,regexstr,flags) ) {
+								  res,regexstr,boost::match_continuous) ) {
 			error();
 		} else {
 			size_t matchend = size_t(res[0].second-data.begin());
