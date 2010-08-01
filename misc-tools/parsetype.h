@@ -58,10 +58,28 @@ struct parse_t {
 
 inline std::ostream &operator<<(std::ostream &out, const parse_t &obj)
 {
-	out << obj.val;
+	char op = obj.op;
+
+	// '#' should never be output as operator
+	switch ( op ) {
+	case ' ': out << obj.val; op = ','; break;
+	case 'n': out << '-';     op = '#'; break;
+	case '!': out << '!';     op = '#'; break;
+	case '(':                 op = '#'; break;
+	case 'E': out << "ISEOF"; op = '#'; break;
+	case 'M': out << "MATCH"; op = '#'; break;
+	}
+
+	// Special case compare operators, as these are not stored in 'op'
+	if ( op=='?' ) {
+		if ( obj.nargs()!=3 ) return out << "#error in compare#";
+		out << obj.args[1] << obj.args[0] << obj.args[2];
+		return out;
+	}
+
 	if ( obj.nargs()>0 ) {
 		out << '(' << obj.args[0];
-		for(size_t i=1; i<obj.nargs(); i++) out << ',' << obj.args[i];
+		for(size_t i=1; i<obj.nargs(); i++) out << op << obj.args[i];
 		out << ')';
 	}
     return out;

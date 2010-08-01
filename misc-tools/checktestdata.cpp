@@ -742,6 +742,10 @@ int main(int argc, char **argv)
 	readprogram(prog);
 	prog.close();
 
+	if ( debugging ) {
+		for(size_t i=0; i<program.size(); i++) cerr << program[i] << endl;
+	}
+
 	if ( argc<=optind+1 ) {
 		datafile = strdup("-");
 	} else {
