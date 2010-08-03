@@ -26,3 +26,6 @@ setup_database_connection('public');
 
 require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/print.php');
+
+$cdata = getCurContest(TRUE);
+$cid = $cdata['cid'];
