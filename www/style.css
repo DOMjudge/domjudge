@@ -224,8 +224,8 @@ td.scorenc { border-color: silver; }
 .contestswitch { border-top: 1px solid black; }
 
 .submissionsuccessful {
-    font-weight: bold;
-    background-color: #FFFFF0;
+	font-weight: bold;
+	background-color: #FFFFF0;
 	border: 1px solid black;
 	margin: 1em;
 	padding: 2px;
