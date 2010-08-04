@@ -42,6 +42,10 @@ if ( difftime($cdata['starttime'], $now) > 0 ) {
 function err($string) {
 	if (NONINTERACTIVE) error($string);
 
+	require(LIBWWWDIR . '/header.php');
+
+	echo "<h2>Submit - error</h2>\n\n";
+
 	echo '<div id="uploadstatus">';
 	logmsg(LOG_WARNING, $string);
 	echo '</div>';
@@ -51,10 +55,6 @@ function err($string) {
 }
 
 ini_set("upload_max_filesize", SOURCESIZE * 1024);
-
-require(LIBWWWDIR . '/header.php');
-
-echo "<h2>Submit - upload status</h2>\n\n";
 
 checkFileUpload($_FILES['code']['error']);
 
@@ -106,16 +106,18 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name, extension FROM language
 if ( ! isset($lang) ) err("Unable to find language '$langext'");
 $langext = $lang['extension'];
 
-echo "<table>\n" .
-	"<tr><td>Problem: </td><td><i>".htmlspecialchars($prob['name'])."</i></td></tr>\n" .
-	"<tr><td>Language:</td><td><i>".htmlspecialchars($lang['name'])."</i></td></tr>\n" .
-	"</table>\n";
+$sid = submit_solution($login, $probid, $langext, $_FILES['code']['tmp_name']);
 
-submit_solution($login, $probid, $langext, $_FILES['code']['tmp_name']);
+// Redirect back to index page.
+
+header('Location: index.php?submitted=' . urlencode($sid) );
+
+require(LIBWWWDIR . '/header.php');
 
 echo '<div id="uploadstatus">';
 if (NONINTERACTIVE) echo '<!-- noninteractive-upload-successful -->';
-echo "<p>Upload successful.</p>";
+echo "<p><a href=\"index.php?submitted=" . urlencode($sid) . "\">Submission successful.</a></p>";
 echo "</div>\n";
 
 require(LIBWWWDIR . '/footer.php');
+
