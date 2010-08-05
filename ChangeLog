@@ -8,6 +8,7 @@ Version 3.2.0 - SVN
  - Rename compare_program.sh to *_wrapper, allow symlinked usage.
  - Add FLOAT command to checktestdata program.
  - Add countdown before contest and timezone to clock.
+ - Automatically redirect team to submission list after submit.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------

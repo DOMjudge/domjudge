@@ -108,9 +108,10 @@ $langext = $lang['extension'];
 
 $sid = submit_solution($login, $probid, $langext, $_FILES['code']['tmp_name']);
 
-// Redirect back to index page.
-
-header('Location: index.php?submitted=' . urlencode($sid) );
+// Redirect back to index page when interactively used.
+if ( !NONINTERACTIVE ) {
+	header('Location: index.php?submitted=' . urlencode($sid) );
+}
 
 require(LIBWWWDIR . '/header.php');
 
