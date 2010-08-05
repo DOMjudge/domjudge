@@ -47,7 +47,7 @@ LIBFILES   = $(LIBOBJECTS) $(LIBHEADERS)
 CFLAGS   += -I$(TOPDIR)/lib
 CXXFLAGS += -I$(TOPDIR)/lib
 
-$(LIBOBJECTS):
+$(LIBOBJECTS): %$(OBJEXT): %.c %.h
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
 # Default recursive targets; these should always at least call the
