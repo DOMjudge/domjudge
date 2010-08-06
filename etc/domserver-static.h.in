@@ -7,5 +7,6 @@
 #define LIBWWWDIR    "@domserver_libwwwdir@"
 #define LIBSUBMITDIR "@domserver_libsubmitdir@"
 #define LOGDIR       "@domserver_logdir@"
+#define RUNDIR       "@domserver_rundir@"
 #define TMPDIR       "@domserver_tmpdir@"
 #define SUBMITDIR    "@domserver_submitdir@"

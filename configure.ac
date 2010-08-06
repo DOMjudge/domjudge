@@ -152,6 +152,7 @@ AX_PATH(domserver_libdir,       [$domserver_root/lib])
 AX_PATH(domserver_libwwwdir,    [$domserver_root/lib/www])
 AX_PATH(domserver_libsubmitdir, [$domserver_root/lib/submit])
 AX_PATH(domserver_logdir,       [$domserver_root/log])
+AX_PATH(domserver_rundir,       [$domserver_root/run])
 AX_PATH(domserver_tmpdir,       [$domserver_root/tmp])
 AX_PATH(domserver_submitdir,    [$domserver_root/submissions])
 AX_WITH_COMMENT(5,[     ])
@@ -160,6 +161,7 @@ AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
 AX_PATH(judgehost_libdir,       [$judgehost_root/lib])
 AX_PATH(judgehost_libjudgedir,  [$judgehost_root/lib/judge])
 AX_PATH(judgehost_logdir,       [$judgehost_root/log])
+AX_PATH(judgehost_rundir,       [$judgehost_root/run])
 AX_PATH(judgehost_tmpdir,       [$judgehost_root/tmp])
 AX_PATH(judgehost_judgedir,     [$judgehost_root/judgings])
 AX_PATH(judgehost_chrootdir,    [$judgehost_judgedir])
@@ -182,6 +184,7 @@ if test "x$enable_fhs" = xyes ; then
 	AC_SUBST(domserver_libwwwdir,   $libdir/${PACKAGE_TARNAME}/www)
 	AC_SUBST(domserver_libsubmitdir,$libdir/${PACKAGE_TARNAME}/submit)
 	AC_SUBST(domserver_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
+	AC_SUBST(domserver_rundir,      $localstatedir/run/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_tmpdir,      /tmp)
 	AC_SUBST(domserver_submitdir,   $localstatedir/lib/${PACKAGE_TARNAME}/submissions)
 
@@ -190,6 +193,7 @@ if test "x$enable_fhs" = xyes ; then
 	AC_SUBST(judgehost_libdir,      $libdir/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_libjudgedir, $libdir/${PACKAGE_TARNAME}/judge)
 	AC_SUBST(judgehost_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
+	AC_SUBST(judgehost_rundir,      $localstatedir/run/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_tmpdir,      /tmp)
 	AC_SUBST(judgehost_judgedir,    $localstatedir/lib/${PACKAGE_TARNAME}/judgings)
 	AC_SUBST(judgehost_chrootdir,   $judgehost_judgedir)
@@ -313,6 +317,7 @@ echo "    - lib..............: $domserver_libdir"
 echo "    - libwww...........: $domserver_libwwwdir"
 echo "    - libsubmit........: $domserver_libsubmitdir"
 echo "    - log..............: $domserver_logdir"
+echo "    - run..............: $domserver_rundir"
 echo "    - sql..............: $domserver_sqldir"
 echo "    - submit...........: $domserver_submitdir"
 echo "    - tmp..............: $domserver_tmpdir"
@@ -324,6 +329,7 @@ echo "    - etc..............: $judgehost_etcdir"
 echo "    - lib..............: $judgehost_libdir"
 echo "    - libjudge.........: $judgehost_libjudgedir"
 echo "    - log..............: $judgehost_logdir"
+echo "    - run..............: $judgehost_rundir"
 echo "    - tmp..............: $judgehost_tmpdir"
 echo "    - judge............: $judgehost_judgedir"
 echo "    - chroot...........: $judgehost_chrootdir"

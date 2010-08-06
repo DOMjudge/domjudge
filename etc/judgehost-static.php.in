@@ -12,6 +12,7 @@ define('ETCDIR',      '@judgehost_etcdir@');
 define('LIBDIR',      '@judgehost_libdir@');
 define('LIBJUDGEDIR', '@judgehost_libjudgedir@');
 define('LOGDIR',      '@judgehost_logdir@');
+define('RUNDIR',      '@judgehost_rundir@');
 define('TMPDIR',      '@judgehost_tmpdir@');
 define('JUDGEDIR',    '@judgehost_judgedir@');
 

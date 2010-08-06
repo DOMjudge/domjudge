@@ -63,6 +63,7 @@ domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))
 # Fix permissions for special directories (don't touch tmpdir when FHS enabled):
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
+	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_rundir)
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_submitdir)
 ifneq "$(fhs_enabled)" "yes"
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
@@ -72,6 +73,7 @@ judgehost-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(judgehost_dirs))
 # Fix permissions for special directories (don't touch tmpdir when FHS enabled):
 	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_logdir)
+	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_rundir)
 	-$(INSTALL_USER) -m 0711 -d $(DESTDIR)$(judgehost_judgedir)
 ifneq "$(fhs_enabled)" "yes"
 	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_tmpdir)
@@ -117,6 +119,8 @@ maintainer-conf: configure
 	            --with-domjudge_docdir=$(PWD)/doc \
 	            --with-domserver_logdir=$(PWD)/output/log \
 	            --with-judgehost_logdir=$(PWD)/output/log \
+	            --with-domserver_rundir=$(PWD)/output/run \
+	            --with-judgehost_rundir=$(PWD)/output/run \
 	            --with-domserver_tmpdir=$(PWD)/output/tmp \
 	            --with-judgehost_tmpdir=$(PWD)/output/tmp \
 	            --with-judgehost_judgedir=$(PWD)/output/judging \
