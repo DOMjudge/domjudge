@@ -408,6 +408,49 @@ function initsignals()
 }
 
 /**
+ * Forks and detaches the current process to run as a daemon. Similar
+ * to the daemon() call present in Linux and *BSD.
+ *
+ * Argument pidfile is an optional filename to check for running
+ * instances and write PID to.
+ *
+ * Either returns successfully or exits with an error.
+ */
+function daemonize($pidfile = NULL)
+{
+	switch ( $pid = pcntl_fork() ) {
+	case -1: error("cannot fork daemon");
+	case  0: break; // child process: do nothing here.
+	default: exit;  // parent process: exit.
+	}
+
+	if ( ($pid = posix_getpid())===FALSE ) error("failed to obtain PID");
+
+	// Check and write PID to file
+	if ( !empty($pidfile) ) {
+		if ( ($fd=@fopen($pidfile, 'x+'))===FALSE ) {
+			error("cannot create pidfile '$pidfile'");
+		}
+		$str = "$pid\n";
+		if ( @fwrite($fd, $str)!=strlen($str) ) {
+			error(errno, "failed writing PID to file");
+		}
+		register_shutdown_function('unlink', $pidfile);
+	}
+
+	// Notify user with daemon PID before detaching from TTY.
+	logmsg(LOG_NOTICE, "daemonizing with PID = $pid");
+
+	// Close std{in,out,err} file descriptors
+	if ( !fclose(STDIN ) ||
+	     !fclose(STDOUT) ||
+	     !fclose(STDERR) ) error("cannot close stdio files");
+
+	// Start own process group, detached from any tty
+	if ( posix_setsid()<0 ) error("cannot set daemon process group");
+}
+
+/**
  * This function takes a temporary file of a submission,
  * validates it and puts it into the database. Additionally it
  * moves it to a backup storage.

@@ -13,6 +13,7 @@
 #include <stdarg.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 #include "../etc/config.h"
 
@@ -168,6 +169,54 @@ void initsignals()
 	if ( sigaction(SIGTERM,&sa,NULL)!=0 ) error(errno,"installing signal handler");
 	if ( sigaction(SIGHUP ,&sa,NULL)!=0 ) error(errno,"installing signal handler");
 	if ( sigaction(SIGINT ,&sa,NULL)!=0 ) error(errno,"installing signal handler");
+}
+
+
+char *pidfile;
+
+/* Function to remove PID file at process exit. */
+void remove_pidfile()
+{
+	unlink(pidfile);
+}
+
+void daemonize(const char *_pidfile)
+{
+	pid_t pid;
+	int fd;
+	char str[15];
+
+	switch ( pid = fork() ) {
+	case -1: error(errno, "cannot fork daemon");
+	case  0: break;     /* child process: do nothing here. */
+	default: _exit(0);  /* parent process: exit. */
+	}
+
+	pid = getpid();
+
+	/* Check and write PID to file */
+	if ( _pidfile!=NULL ) {
+		pidfile = strdup(_pidfile);
+		if ( (fd=open(pidfile, O_RDWR|O_CREAT|O_EXCL, 0640))<0 ) {
+			error(errno, "cannot create pidfile '%s'", pidfile);
+		}
+		sprintf(str, "%d\n", pid);
+		if ( write(fd, str, strlen(str))<strlen(str) ) {
+			error(errno, "failed writing PID to file");
+		}
+		atexit(remove_pidfile);
+	}
+
+	/* Notify user with daemon PID before detaching from TTY. */
+	logmsg(LOG_NOTICE, "daemonizing with PID = %d", pid);
+
+	/* Close std{in,out,err} file descriptors */
+	if ( close(STDIN_FILENO )!=0 ||
+	     close(STDOUT_FILENO)!=0 ||
+	     close(STDERR_FILENO)!=0 ) error(errno, "cannot close stdio files");
+
+	/* Start own process group, detached from any tty */
+	if ( setsid()<0 ) error(errno, "cannot set daemon process group");
 }
 
 char *stripendline(char *str)

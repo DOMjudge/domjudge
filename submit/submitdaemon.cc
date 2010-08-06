@@ -54,9 +54,10 @@ using namespace std;
 /* Common send/receive functions */
 #include "submitcommon.h"
 
-/* Variables defining logmessages verbosity to stderr/logfile */
 #define LOGFILE LOGDIR"/submit.log"
+#define PIDFILE RUNDIR"/"PROGRAM".pid"
 
+/* Variables defining logmessage verbosity to stderr/logfile */
 extern int verbose;
 extern int loglevel;
 
@@ -76,12 +77,14 @@ int port = SUBMITPORT;
 
 int show_help;
 int show_version;
+int run_daemon;
 int inet4_only;
 int inet6_only;
 
 struct option const long_opts[] = {
 	{"inet4-only", no_argument,       NULL,         '4'},
 	{"inet6-only", no_argument,       NULL,         '6'},
+	{"daemon",     no_argument,       NULL,         'd'},
 	{"port",       required_argument, NULL,         'P'},
 	{"verbose",    optional_argument, NULL,         'v'},
 	{"help",       no_argument,       &show_help,    1 },
@@ -123,9 +126,9 @@ int main(int argc, char **argv)
 
 	/* Parse command-line options */
 	show_help = show_version = 0;
-	inet4_only = inet6_only = 0;
+	run_daemon = inet4_only = inet6_only = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"46P:v:",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"46dP:v:",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* this is a long-only option: nothing to do */
 			break;
@@ -134,6 +137,9 @@ int main(int argc, char **argv)
 			break;
 		case '6': /* inet6-only option */
 			inet6_only = 1;
+			break;
+		case 'd': /* deamon option */
+			run_daemon = 1;
 			break;
 		case 'P': /* port option */
 			port = strtol(optarg,&ptr,10);
@@ -170,6 +176,9 @@ int main(int argc, char **argv)
 	if ( argc>optind ) error(0,"non-option arguments given");
 
 	logmsg(LOG_NOTICE,"server started [%s]", DOMJUDGE_PROGRAM);
+
+	/* Deamonize if requested */
+	if ( run_daemon ) daemonize(PIDFILE);
 
 	create_server();
 	logmsg(LOG_INFO,"listening on port %d/tcp", port);
@@ -266,6 +275,7 @@ void usage()
 "\n"
 "  -4, --inet4-only      only bind to IPv4 addresses\n"
 "  -6, --inet6-only      only bind to IPv6 addresses\n"
+"  -d, --daemon          daemonize after startup\n"
 "  -P, --port=PORT       set TCP port to listen on to PORT (default: %i)\n"
 "  -v, --verbose=LEVEL   set verbosity to LEVEL (syslog levels)\n"
 "      --help            display this help and exit\n"

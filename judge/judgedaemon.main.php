@@ -40,12 +40,38 @@ $myhost = trim(`hostname | cut -d . -f 1`);
 
 define ('SCRIPT_ID', 'judgedaemon');
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
+define ('PIDFILE', RUNDIR.'/judgedaemon.'.$myhost.'.pid');
 
 require(LIBDIR . '/init.php');
+
+function usage()
+{
+	echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
+	    "Start the judgedaemon.\n\n" .
+	    "  -d, --daemon          daemonize after startup\n" .
+	    "  -v, --verbose=LEVEL   set verbosity to LEVEL (syslog levels)\n" .
+	    "      --help            display this help and exit\n" .
+	    "      --version         output version information and exit\n\n";
+	exit;
+}
+
+$options = getopt("dv:", array('daemon', 'verbose:', 'help', 'version'));
+// FIXME: getopt doesn't return FALSE on parse failure as documented!
+if ( $options===FALSE ) {
+	echo "Error: parsing options failed.\n";
+	usage();
+}
+if ( isset($options['d']) ) $options['daemon']  = $options['d'];
+if ( isset($options['v']) ) $options['verbose'] = $options['v'];
+
+if ( isset($options['version']) ) version();
+if ( isset($options['help']) ) usage();
 
 setup_database_connection('jury');
 
 $verbose = LOG_INFO;
+if ( isset($options['verbose']) ) $verbose = $options['verbose'];
+
 if ( DEBUG & DEBUG_JUDGE ) {
 	$verbose = LOG_DEBUG;
 	putenv('DEBUG=1');
@@ -67,6 +93,8 @@ if ( version_compare(PHP_VERSION, '5.3', '<' ) ) {
 	declare(ticks = 1);
 }
 initsignals();
+
+if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
 database_retry_connect($waittime);
 

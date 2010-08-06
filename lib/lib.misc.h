@@ -60,6 +60,18 @@ void initsignals();
  * return on receiving a signal.
  */
 
+void daemonize(const char *);
+/* Forks and detaches the current process to run as a daemon. Similar
+ * to the daemon() call present in Linux and *BSD, but implented here,
+ * because it is not specified by POSIX, SUSv2 or SVr4.
+ *
+ * Arguments:
+ * char *pidfile    pidfile to check for running instances and write PID;
+ *                    set to NULL to not use a pidfile.
+ *
+ * Either returns successfully or exits with an error.
+ */
+
 char *stripendline(char *);
 /* Removes end-of-line characters (CR and LF) from string. Returns the
  * original pointer to the modified string. */
