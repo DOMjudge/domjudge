@@ -22,6 +22,25 @@ if ( isset($_POST['done']) ) {
 	header('Location: balloons.php');
 }
 
+$viewall = TRUE;
+
+// Restore most recent view from cookie (overridden by explicit selection)
+if ( isset($_COOKIE['domjudge_balloonviewall']) ) {
+	$viewall = $_COOKIE['domjudge_balloonviewall'];
+}
+
+// Did someone press the view button?
+if ( isset($_REQUEST['viewall']) ) $viewall = $_REQUEST['viewall'];
+
+// Set cookie of submission view type, expiry defaults to end of session.
+if ( version_compare(PHP_VERSION, '5.2') >= 0 ) {
+	// HTTPOnly Cookie, while this cookie is not security critical
+	// it's a good habit to get into.
+	setcookie('domjudge_balloonviewall', $viewall, null, null, null, null, true);
+} else {
+	setcookie('domjudge_balloonviewall', $viewall);
+}
+
 $refresh = '30;url=balloons.php';
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
@@ -33,6 +52,13 @@ if ( isset($cdata['freezetime']) &&
 	echo "<h4>Scoreboard is now frozen.</h4>\n\n";
 }
 
+require_once(LIBWWWDIR . '/forms.php');
+
+echo addForm('balloons.php', 'get') . "<p>\n" .
+    addHidden('viewall', ($viewall ? 0 : 1)) .
+    addSubmit($viewall ? 'view unsent' : 'view all') . "</p>\n" .
+    addEndForm();
+
 // Problem metadata: colours and names.
 $probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
 		      FROM problem WHERE cid = %i', $cid);
@@ -40,12 +66,13 @@ $probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
 // Get all relevant info from the scoreboard_jury table.
 // Order by balloon, so we have the unsent balloons at the top.
 // Then by submittime, so the newest will also rank highest.
-$res = $DB->q('SELECT s.*,t.login,t.name as teamname,t.room
-       FROM scoreboard_jury s
-       LEFT JOIN team t ON (t.login = s.teamid)
-       WHERE s.cid = %i AND s.is_correct = 1
-       ORDER BY s.balloon, s.totaltime DESC',
-       $cid);
+$res = $DB->q('SELECT s.*, t.login, t.name AS teamname, t.room, c.name AS catname
+               FROM scoreboard_jury s
+               LEFT JOIN team t ON (t.login = s.teamid)
+               LEFT JOIN team_category c USING(categoryid)
+               WHERE s.cid = %i AND s.is_correct = 1
+               ORDER BY s.balloon, s.totaltime DESC',
+              $cid);
 
 /* Loop over the result, store the total of balloons for a team
  * (saves a query within the inner loop).
@@ -68,9 +95,11 @@ if ( !empty($BALLOONS) ) {
 
 	echo "<table class=\"list sortable balloons\">\n" .
 		"<tr><th>Time</th><th>Solved</th><th></th><th align=\"left\">Team</th>\n" .
-		"<th>Room</th><th>Total</th><th></th></tr>\n";
+		"<th>Room</th><th>Category</th><th>Total</th><th></th></tr>\n";
 
 	foreach ( $BALLOONS as $row ) {
+
+		if ( !$viewall && $row['balloon'] == 1 ) continue;
 
 		// start a new row, 'disable' if balloon has been handed out already
 		echo '<tr'  . ( $row['balloon'] == 1 ? ' class="disabled"' : '' ) . '>';
@@ -91,10 +120,11 @@ if ( !empty($BALLOONS) ) {
 			';" alt="problem colour ' . htmlspecialchars($probs_data[$row['probid']]['color']) .
 		    '" src="../images/circle.png" /> ' . htmlspecialchars($row['probid']) . '</td>';
 
-		// team name and room
+		// team name, room and category
 		echo '<td class="teamid">' . htmlspecialchars($row['login']) . '</td><td>' .
 			htmlspecialchars($row['teamname']) . '</td><td>' .
-			htmlspecialchars($row['room']) . '</td><td>';
+			htmlspecialchars($row['room']) . '</td><td>' .
+			htmlspecialchars($row['catname']) . '</td><td>';
 
 		// list of balloons for this team
 		sort($TOTAL_BALLOONS[$row['login']]);
