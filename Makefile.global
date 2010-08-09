@@ -49,7 +49,7 @@ LIBFILES   = $(LIBOBJECTS) $(LIBHEADERS)
 CFLAGS   += -I$(TOPDIR)/lib
 CXXFLAGS += -I$(TOPDIR)/lib
 
-$(LIBOBJECTS):
+$(LIBOBJECTS): %$(OBJEXT): %.c %.h
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
 # Recursive rule, runs in depth-first traversal. TARGET-l is the local

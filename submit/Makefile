@@ -42,7 +42,7 @@ submit_db.php: submit_db.php.in ../paths.mk
 $(SUBMIT_PROGS): %$(EXEEXT): %.cc $(SUBMITCOMMONOBJ) $(LIBFILES) \
                              $(TOPDIR)/etc/config.h $(TOPDIR)/etc/submit-config.h
 
-$(SUBMITCOMMONOBJ): %$(OBJEXT): %.cc %.h $(LIBHEADERS)
+$(SUBMITCOMMONOBJ): %$(OBJEXT): %.cc %.h $(LIBFILES)
 
 install-domserver:
 ifeq ($(SUBMIT_ENABLE_CMD),1)
