@@ -10,6 +10,8 @@ domserver: submitdaemon
 endif
 endif
 
+# Check if we have to build the submit client and which libraries
+# need to be linked:
 ifneq ($(SUBMIT_DEFAULT),0)
 SUBMITCLIENT = submit$(EXEEXT)
 SUBMIT_PROGS += $(SUBMITCLIENT)
@@ -17,9 +19,14 @@ ifneq ($(LIBMAGIC),)
 $(SUBMITCLIENT): $(LIBMAGIC)
 endif
 ifneq ($(SUBMIT_ENABLE_WEB),0)
-$(SUBMITCLIENT): $(CURL_PREFIX)/lib/libcurl.a
-$(SUBMITCLIENT): LDFLAGS += $(CURL_LIBS)
 $(SUBMITCLIENT): CXXFLAGS += $(CURL_CFLAGS)
+# Try to link statically against libcURL to prevent dependency
+# on team workstations:
+ifneq ($(CURL_STATIC),)
+$(SUBMITCLIENT): $(CURL_STATIC)
+else
+$(SUBMITCLIENT): LDFLAGS += $(CURL_LIBS)
+endif
 endif
 endif
 
