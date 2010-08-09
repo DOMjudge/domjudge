@@ -24,7 +24,7 @@
    variables are lowercase with non-leading digits. Lines starting
    with '#' are comments and ignored.
 
-   integer  := [0-9]+
+   integer  := 0|-?[1-9][0-9]*
    variable := [a-z][a-z0-9]*
    value    := <integer> | <variable>
    compare  := '<' | '>' | '<=' | '>=' | '==' | '!='
