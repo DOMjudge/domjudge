@@ -316,8 +316,8 @@ The requirements for the deployment of DOMjudge are:
 <itemize>
 <item> Computers for the domserver and judgehosts must run Linux or a
        Unix variant. This software has been developed mostly under
-       Debian GNU/Linux and has bee tested a bit under other Linux
-       distributions and FreeBSD.
+       Debian GNU/Linux and has been tested a bit under other Linux
+       distributions and FreeBSD. We try to adhere to POSIX standards.
 
 <item> (Local) root access on the jury computers for installing some
        programs setuid-root, some files with restricted permissions
