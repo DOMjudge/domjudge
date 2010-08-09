@@ -998,12 +998,14 @@ url="http://mirror.ctan.org/macros/latex/contrib">.
 <p>
 When the <tt>docs</tt> part of DOMjudge is installed and site-specific
 configuration set, the team manual can be generated with the command
-<tt>genteammanual</tt>. The PDF document will be placed in the current
+<tt>genteammanual</tt> found under <tt>docs/team</tt>. The PDF
+document will be placed in the current
 directory or a directory given as argument. The following should do
 it on a Debian-like system:
 <code>
 sudo apt-get install make transfig texlive-latex-extra texlive-latex-recommended
-./genteammanual
+cd .../docs/team
+./genteammanual [targetdir]
 </code>
 
 <p>

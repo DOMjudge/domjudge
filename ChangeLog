@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 3.0.4 - SVN
 -------------------
  - Fix Makefile rules for building library objects.
+ - Small documentation fixes.
 
 Version 3.0.3 - 11 July 2010
 ----------------------------
