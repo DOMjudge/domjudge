@@ -67,7 +67,7 @@ if ( !empty($BALLOONS) ) {
 	echo addForm('balloons.php');
 
 	echo "<table class=\"list sortable balloons\">\n" .
-		"<tr><th>Time</th><th>Solved</th><th colspan=\"2\">Team</th>\n" .
+		"<tr><th>Time</th><th>Solved</th><th></th><th align=\"left\">Team</th>\n" .
 		"<th>Room</th><th>Total</th><th></th></tr>\n";
 
 	foreach ( $BALLOONS as $row ) {
