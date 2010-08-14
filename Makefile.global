@@ -26,12 +26,11 @@ include $(TOPDIR)/paths.mk
 endif
 
 # Install settings
-INSTALL         = install
 INSTALL_PROG    = $(INSTALL)
 INSTALL_DATA    = $(INSTALL) -m 0644
 INSTALL_USER    = $(INSTALL) -m 0644 -o $(DOMJUDGE_USER)
 INSTALL_WEBSITE = $(INSTALL) -m 0644 -o $(DOMJUDGE_USER) -g $(WEBSERVER_GROUP)
-INSTALL_DIR     = mkdir -p
+INSTALL_DIR     = $(MKDIR_P)
 
 # Check whether we are running under Cygwin:
 ifneq ($(findstring CYGWIN,$(shell uname)),)

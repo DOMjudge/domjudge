@@ -22,7 +22,8 @@ install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/jury         jury/*.css
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/js           js/*.js js/*.gif js/*.png
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)              *.php style.css
-	ln -sfT $(domjudge_docdir) $(DESTDIR)$(domserver_wwwdir)/jury/doc
+	rm -f $(DESTDIR)$(domserver_wwwdir)/jury/doc
+	$(LN_S) $(domjudge_docdir) $(DESTDIR)$(domserver_wwwdir)/jury/doc
 
 install-docs:
 	$(INSTALL_DATA) -T images/countries/README    $(DESTDIR)$(domjudge_docdir)/README.country_flags

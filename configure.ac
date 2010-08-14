@@ -2,6 +2,8 @@
 AC_INIT([DOMjudge],
         m4_esyscmd([sed -n '1s/^.*version //p' README | tr -d '\n']),
         [domjudge-devel@lists.A-Eskwadraat.nl])
+AC_PREREQ([2.60])
+AC_REVISION($Rev$)
 AC_CONFIG_HEADERS([etc/config.h])
 AC_CONFIG_SRCDIR([Makefile.global])
 
@@ -19,7 +21,7 @@ if test "x$prefix" = xNONE; then
 fi
 
 if test -z "$PACKAGE_VERSION"; then
-	AC_MSG_ERROR([Could not find version on first line of README file.])
+	AC_MSG_ERROR([could not find version on first line of README file.])
 fi
 AC_SUBST(DOMJUDGE_VERSION, $PACKAGE_VERSION)
 AC_DEFINE_UNQUOTED(DOMJUDGE_VERSION, "$PACKAGE_VERSION",
@@ -40,7 +42,7 @@ DEF_LDFLAGS=""
 
 AX_CHECK_COMPILER_FLAGS(-Wall,             DEF_CXFLAGS="$DEF_CXFLAGS -Wall")
 AX_CHECK_COMPILER_FLAGS(-fstack-protector, DEF_CXFLAGS="$DEF_CXFLAGS -fstack-protector")
-AX_CHECK_COMPILER_FLAGS(-fPIE,             DEF_CXFLAGS="$DEF_CXFLAGS -fPIE"
+AX_CHECK_COMPILER_FLAGS(-fPIE -pie,        DEF_CXFLAGS="$DEF_CXFLAGS -fPIE"
                                            DEF_LDFLAGS="$DEF_LDFLAGS -pie")
 
 test "x$enable_CFLAGS_setting"   = xyes && AC_SUBST(CFLAGS,   $DEF_CXFLAGS)
@@ -208,9 +210,10 @@ AC_SUBST(CHROOTDIR, $judgehost_chrootdir)
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
-#AC_PROG_INSTALL
+AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
+AC_PROG_MKDIR_P
 
 # check for htpasswd/htpasswd2
 AC_CHECK_PROGS(HTPASSWD,[htpasswd htpasswd2],[no htpasswd binary found])
@@ -254,29 +257,25 @@ AC_DEFINE_UNQUOTED(_POSIX_C_SOURCE, 200112L, [Include POSIX.1-2001 base specific
 AC_DEFINE_UNQUOTED(_XOPEN_SOURCE, 500,       [Include SUSv2 (UNIX 98) extensions])
 
 # Checks for header files.
-AC_HEADER_STDC
-AC_HEADER_SYS_WAIT
+AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h termios.h unistd.h magic.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
+AC_C_INLINE
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
-AC_HEADER_TIME
-AC_HEADER_STDBOOL
 
 # Checks for library functions.
+dnl FIXME: need to use the results...
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_FORK
-AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MALLOC
-AC_FUNC_SETVBUF_REVERSED
-AC_TYPE_SIGNAL
-AC_FUNC_STAT
-AC_FUNC_STRFTIME
-AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([alarm dup2 getcwd gettimeofday memset mkdir realpath setenv socket strchr strdup strerror strncasecmp strrchr strstr strtol])
+AC_FUNC_REALLOC
+AC_FUNC_STRTOD
+AC_REPLACE_FUNCS([atexit dup2 getcwd gettimeofday memset mkdir realpath setenv \
+                  socket strchr strdup strerror strncasecmp strrchr strstr strtol],
+                 [],[AC_MSG_ERROR([required C function is missing.])])
 
 AC_CONFIG_FILES([paths.mk])
 AC_OUTPUT

@@ -143,7 +143,7 @@ maintainer-install: domserver judgehost docs submitclient \
 	ln -sf $(PWD)/judge  $(judgehost_libjudgedir)
 	ln -sf $(PWD)/submit $(domserver_libsubmitdir)
 	ln -sfn $(PWD)/doc $(domserver_wwwdir)/jury/doc
-	mkdir -p $(judgehost_bindir)
+	$(MKDIR_P) $(judgehost_bindir)
 	ln -sf $(PWD)/judge/runguard $(judgehost_bindir)
 	ln -sf $(PWD)/judge/runpipe  $(judgehost_bindir)
 # Make tmpdir writable for webserver, because judgehost-create-dirs
