@@ -11,6 +11,9 @@
 /** Constant to define MySQL datetime format in strftime() function notation. */
 define('MYSQL_DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S');
 
+/** Perl regex class of allowed characters in identifier strings. */
+define('IDENTIFIER_CHARS', '[a-zA-Z0-9_-]');
+
 /**
  * helperfunction to read all contents from a file.
  * If $sizelimit is true (default), then only limit this to

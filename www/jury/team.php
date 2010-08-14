@@ -15,7 +15,7 @@ require('init.php');
 $id = @$_REQUEST['id'];
 $title = 'Team '.htmlspecialchars(@$id);
 
-if ( ! preg_match('/^\w*$/', $id) ) error("Invalid team id");
+if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid team id");
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];

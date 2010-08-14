@@ -9,6 +9,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+define('ID_REGEX', '/^' . IDENTIFIER_CHARS . '+$/');
+
 /**
  * Store an error from the checker functions below.
  */
@@ -21,8 +23,8 @@ function ch_error($string)
 function check_team($data, $keydata = null)
 {
 	$id = (isset($data['login']) ? $data['login'] : $keydata['login']);
-	if ( ! preg_match ( '/^\w+$/', $id ) ) {
-		ch_error("Team ID (login) may only contain letters, numbers and underscores.");
+	if ( ! preg_match ( ID_REGEX, $id ) ) {
+		ch_error("Team ID (login) may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
 	return $data;
 }
@@ -30,8 +32,8 @@ function check_team($data, $keydata = null)
 function check_affiliation($data, $keydata = null)
 {
 	$id = (isset($data['affilid']) ? $data['affilid'] : $keydata['affilid']);
-	if ( ! preg_match ( '/^\w+$/', $id ) ) {
-		ch_error("Team affiliation ID may only contain letters, numbers and underscores.");
+	if ( ! preg_match ( ID_REGEX, $id ) ) {
+		ch_error("Team affiliation ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
 	$affillogo = '../images/affiliations/' . urlencode($id) . '.png';
 	if ( ! file_exists ( $affillogo ) ) {
@@ -51,8 +53,8 @@ function check_problem($data, $keydata = null)
 		ch_error("Timelimit is not a valid positive integer");
 	}
 	$id = (isset($data['probid']) ? $data['probid'] : $keydata['probid']);
-	if ( ! preg_match ( '/^\w+$/', $id ) ) {
-		ch_error("Problem ID may only contain letters, numbers and underscores.");
+	if ( ! preg_match ( ID_REGEX, $id ) ) {
+		ch_error("Problem ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
 	return $data;
 }
@@ -63,8 +65,8 @@ function check_language($data, $keydata = null)
 		ch_error("Timelimit is not a valid positive factor");
 	}
 	$id = (isset($data['langid']) ? $data['langid'] : $keydata['langid']);
-	if ( ! preg_match ( '/^\w+$/', $id ) ) {
-		ch_error("Language ID may only contain letters, numbers and underscores.");
+	if ( ! preg_match ( ID_REGEX, $id ) ) {
+		ch_error("Language ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
 	if ( strpos($data['extension'], '.') !== FALSE ) {
 		ch_error("Do not include the dot (.) in the extension");

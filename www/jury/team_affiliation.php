@@ -15,7 +15,7 @@ require('init.php');
 $id = @$_GET['id'];
 $title = "Affiliation: " .htmlspecialchars(@$id);
 
-if ( ! preg_match('/^\w*$/', $id) ) error("Invalid affiliation id");
+if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid affiliation id");
 
 $cmd = @$_GET['cmd'];
 

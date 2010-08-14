@@ -15,7 +15,7 @@ require('init.php');
 $id = @$_REQUEST['id'];
 $title = 'Problem '.htmlspecialchars(@$id);
 
-if ( ! preg_match('/^\w*$/', $id) ) error("Invalid problem id");
+if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid problem id");
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];

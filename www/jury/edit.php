@@ -95,7 +95,7 @@ header('Location: '.$returnto);
  */
 function check_sane_keys($itemdata) {
 	foreach(array_keys($itemdata) as $key) {
-		if ( ! preg_match ('/^\w+$/', $key ) ) {
+		if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $key ) ) {
 			error ("Invalid characters in field name \"$key\".");
 		}
 	}

@@ -1289,9 +1289,8 @@ identifier field. Most of these are numeric and automatically
 increasing; these do not need to be specified. The tables
 <tt>language</tt>, <tt>problem</tt>, <tt>team</tt>, and
 <tt>team&lowbar;affiliation</tt> have text strings as identifier
-fields. These need to be manually specified and only alpha-numeric and
-underscore characters are valid, i.e. <tt>a-z, A-Z, 0-9</tt> and
-<tt>&lowbar;</tt>.
+fields. These need to be manually specified and only alpha-numeric, dash and
+underscore characters are valid, i.e. <tt>a-z, A-Z, 0-9, -, &lowbar;</tt>.
 
 <descrip>
 <tag>configuration</tag>
