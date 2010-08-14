@@ -83,7 +83,7 @@ using namespace std;
 #include "basename.h"
 
 /* Common send/receive functions */
-#include "submitcommon.h"
+#include "submitcommon.hxx"
 
 const int timeout_secs = 60; /* seconds before send/receive timeouts with an error */
 

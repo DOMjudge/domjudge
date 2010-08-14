@@ -4,10 +4,10 @@
  * $Id$
  */
 
-#ifndef __SUBMITCOMMON_H
-#define __SUBMITCOMMON_H
+#ifndef __SUBMITCOMMON_HXX
+#define __SUBMITCOMMON_HXX
 
-#include <stdarg.h>
+#include <cstdarg>
 #include <string>
 
 #define FAILURE 0
@@ -62,4 +62,4 @@ std::string stringtolower(std::string);
  * Returns a copy of str, converted to lowercase
  */
 
-#endif /* __SUBMITCOMMON_H */
+#endif /* __SUBMITCOMMON_HXX */

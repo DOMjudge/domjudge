@@ -52,7 +52,7 @@ using namespace std;
 #include "basename.h"
 
 /* Common send/receive functions */
-#include "submitcommon.h"
+#include "submitcommon.hxx"
 
 #define LOGFILE LOGDIR"/submit.log"
 #define PIDFILE RUNDIR"/"PROGRAM".pid"
