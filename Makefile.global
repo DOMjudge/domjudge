@@ -65,15 +65,11 @@ dist-l:
 
 clean-l:
 
-distclean-l: clean-l clean-backupfiles
+distclean-l: clean-l
 
 maintainer-clean-l: distclean-l
 
-clean-backupfiles:
-	rm -f *~
-
-.PHONY: default $(REC_TARGETS) $(addsuffix -l,$(REC_TARGETS)) \
-        check config clean-backupfiles \
+.PHONY: default $(REC_TARGETS) $(addsuffix -l,$(REC_TARGETS)) check config \
         clean clean-l distclean distclean-l maintainer-clean maintainer-clean-l
 
 endif # GLOBALINCLUDED
