@@ -156,9 +156,9 @@ chmod a+r testdata.in
 
 mkdir -m 0711 bin dev proc
 # Copy the run-script and a statically compiled shell:
-cp -p  "$RUN_SCRIPT"  .
+cp -p  "$RUN_SCRIPT"  ./run
 cp -pL "$STATICSHELL" ./bin/sh
-chmod a+rx "$RUN_SCRIPT" bin/sh
+chmod a+rx run bin/sh
 # If using a custom run script, copy additional support programs
 # if required:
 if [ -n "$SPECIALRUN" -a -f "$RUN_JURYPROG" ]; then
@@ -186,7 +186,7 @@ logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck "$RUNGUARD" ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
 	-t $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
-	$PREFIX/`basename "$RUN_SCRIPT"` $PREFIX/program \
+	$PREFIX/run $PREFIX/program \
 	testdata.in program.out program.err program.exit \
 	&>error.tmp
 
