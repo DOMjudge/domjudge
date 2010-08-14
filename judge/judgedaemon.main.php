@@ -361,7 +361,7 @@ function judge($mark, $row, $judgingid)
 	system("mkdir -p '$testcasedir'", $retval);
 	if ( $retval!=0 ) error("Could not create directory '$testcasedir'");
 
-	system("cp -dprl '$workdir'/compile/* '$testcasedir'", $retval);
+	system("cp -dpRl '$workdir'/compile/* '$testcasedir'", $retval);
 	if ( $retval!=0 ) error("Could not copy program to '$testcasedir'");
 
 	// do the actual test-run
