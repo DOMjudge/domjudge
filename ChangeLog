@@ -11,6 +11,8 @@ Version 3.2.0 - SVN
  - Automatically redirect team to submission list after submit.
  - Add daemon support in C/PHP libraries, use for submit/judgedaemon.
  - Add category to balloons list and button to view only unsent.
+ - Lots of small changes to C/C++ sources and build system for better
+   POSIX compliance and portability; support LLVM clang compiler.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------
