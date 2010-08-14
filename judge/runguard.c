@@ -193,25 +193,27 @@ void usage()
 	printf("\
 Usage: %s [OPTION]... COMMAND...\n\
 Run COMMAND with restrictions.\n\
-\n\
+\n", progname);
+	printf("\
   -r, --root=ROOT      run COMMAND with root directory set to ROOT\n\
   -u, --user=USER      run COMMAND as user with username or ID USER\n\
   -g, --group=GROUP    run COMMAND under group with name or ID GROUP\n\
   -t, --time=TIME      kill COMMAND if still running after TIME seconds (float)\n\
   -C, --cputime=TIME   set maximum CPU time to TIME seconds (integer)\n\
   -m, --memsize=SIZE   set all (total, stack, etc) memory limits to SIZE kB\n\
-  -f, --filesize=SIZE  set maximum created filesize to SIZE kB\n\
+  -f, --filesize=SIZE  set maximum created filesize to SIZE kB\n");
+	printf("\
   -p, --nproc=N        set maximum no. processes to N\n\
   -c, --no-core        disable core dumps\n\
   -o, --output=FILE    write actual runtime to FILE\n\
   -v, --verbose        display some extra warnings and information\n\
   -q, --quiet          suppress all warnings and verbose output\n\
       --help           display this help and exit\n\
-      --version        output version information and exit\n\
-\n\
+      --version        output version information and exit\n");
+	printf("\n\
 Note that root privileges are needed for the `root' and `user' options.\n\
 When run setuid without the `user' option, the user ID is set to the\n\
-real user ID.\n",progname);
+real user ID.\n");
 	exit(0);
 }
 
