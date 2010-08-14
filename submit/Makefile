@@ -30,6 +30,9 @@ endif
 endif
 endif
 
+SUBMITHEADERS = submitcommon.hxx $(TOPDIR)/etc/config.h \
+                                 $(TOPDIR)/etc/submit-config.h
+
 SUBMITCOMMONOBJ = submitcommon$(OBJEXT)
 
 TARGETS = $(SUBMIT_PROGS)
@@ -46,10 +49,14 @@ submit_db.php: submit_db.php.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
-$(SUBMIT_PROGS): %$(EXEEXT): %.cc $(SUBMITCOMMONOBJ) $(LIBFILES) \
-                             $(TOPDIR)/etc/config.h $(TOPDIR)/etc/submit-config.h
+# Explicitly link with C++ compiler, as without any C++ extensions
+# this are recognized as plain C objects.
+$(SUBMIT_PROGS): %$(EXEEXT): %$(OBJEXT) $(SUBMITCOMMONOBJ) $(LIBOBJECTS)
+	$(CXX) $(LDFLAGS) $^ -o $@
 
-$(SUBMITCOMMONOBJ): %$(OBJEXT): %.cc %.hxx $(LIBFILES)
+$(SUBMIT_PROGS:%=%$(OBJEXT)): %$(OBJEXT): %.cc $(SUBMITHEADERS) $(LIBHEADERS)
+
+$(SUBMITCOMMONOBJ): %$(OBJEXT): %.cc %.hxx $(LIBHEADERS)
 
 install-domserver:
 ifeq ($(SUBMIT_ENABLE_CMD),1)
@@ -59,7 +66,7 @@ endif
 		submit_copy.sh submit_db.php
 
 clean-l:
-	-rm -f $(TARGETS) $(SUBMITCOMMONOBJ)
+	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT)) $(SUBMITCOMMONOBJ)
 
 distclean-l:
 	-rm -f submit_db.php

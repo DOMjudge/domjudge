@@ -15,11 +15,13 @@ judgedaemon: judgedaemon.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
-compare: $(LIBFILES)
+compare: $(LIBOBJECTS)
+compare$(OBJEXT): $(LIBHEADERS)
 
 check_float: -lm
 
-runguard: runguard.c $(TOPDIR)/etc/config.h $(TOPDIR)/etc/runguard-config.h -lm
+runguard: -lm
+runguard$(OBJEXT): $(TOPDIR)/etc/config.h $(TOPDIR)/etc/runguard-config.h
 
 # FIXME: compile with diet libc to produce a static binary which is
 # not 0.6 MB (!) in size?
@@ -42,7 +44,7 @@ install-judgehost:
 		runguard
 
 clean-l:
-	-rm -f $(TARGETS)
+	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT))
 
 distclean-l:
 	-rm -f judgedaemon
