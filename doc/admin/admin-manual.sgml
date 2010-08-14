@@ -431,6 +431,8 @@ Software required for building DOMjudge from distributed sources.
        the GNU <htmlurl name="Multiple Precision library"
        url="http://gmplib.org/"> to build the <tt>checktestdata</tt>
        program for advanced checking of input/output data correctness.
+       These are optional and can be disabled with the configure
+       option <tt>--disable-checktestdata</tt>.
 </itemize>
 
 Additional software required for building DOMjudge from a Subversion

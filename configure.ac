@@ -246,6 +246,7 @@ AC_ARG_ENABLE(checktestdata,AS_HELP_STRING([--enable-checktestdata],
  This requires the Boost regex and GNU GMP libraries.]))
 
 if test "x$enable_checktestdata" != "xno"; then
+	AC_SUBST(CHECKTESTDATA_ENABLED,[yes])
 
 	AX_BOOST_BASE([1.33.1])
 	AX_BOOST_REGEX

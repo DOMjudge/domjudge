@@ -3,7 +3,11 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = checkinput checktestdata
+TARGETS = checkinput
+
+ifeq ($(CHECKTESTDATA_ENABLED),yes)
+TARGETS += checktestdata
+endif
 
 SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
               combined_scoreboard runssh_judgehosts runssh_teams balloons
@@ -15,10 +19,6 @@ build: $(TARGETS)
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
-
-checktestdata: CPPFLAGS += $(BOOST_CPPFLAGS)
-checktestdata: LDFLAGS  += $(BOOST_LDFLAGS)
-checktestdata: checktestdata.cpp yylex.cc parse.cc $(LIBGMPXX) $(BOOST_REGEX_LIB)
 
 yylex.cc: checktestdata.l parsetype.h
 	flex++ $<
@@ -32,6 +32,12 @@ checksucc = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 || \
 		{ echo "Running './checktestdata $$opts $$prog $$data' did not succeed..." ; exit 1; }
 checkfail = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 && \
 		{ echo "Running './checktestdata $$opts $$prog $$data' did not fail..."    ; exit 1; }
+
+ifeq ($(CHECKTESTDATA_ENABLED),yes)
+
+checktestdata: CPPFLAGS += $(BOOST_CPPFLAGS)
+checktestdata: LDFLAGS  += $(BOOST_LDFLAGS)
+checktestdata: checktestdata.cpp yylex.cc parse.cc $(LIBGMPXX) $(BOOST_REGEX_LIB)
 
 check: checktestdata
 	@for i in tests/testprog*.in ; do \
@@ -52,6 +58,14 @@ check: checktestdata
 		data=tests/testwsdata$$n.in ; \
 		for prog in tests/testwsprog$$n.err* ; do $(checkfail) ; done ; \
 	done || true
+
+else
+
+checktestdata:
+	@echo "checktestdata was disabled by configure!"
+	@exit 1
+
+endif # CHECKTESTDATA_ENABLED
 
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) dj_make_chroot
