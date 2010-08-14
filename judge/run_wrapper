@@ -15,22 +15,21 @@
 # <error>     File where to write error messages.
 # <exitfile>  File where to write solution exitcode.
 #
-# A jury program called 'runjury_<specialrun>' should be available. It
-# should communicate with the contestants' program to provide input
-# and read output via stdin/stdout. This wrapper script handles the
-# setup of bi-directional pipes. The jury program should accept the
-# following calling syntax:
+# A jury-written program called 'runjury' should be available; this
+# program will normally be copied from 'runjury_<specialrun>' by
+# testcase_run.sh. This program should communicate with the
+# contestants' program to provide input and read output via
+# stdin/stdout. This wrapper script handles the setup of
+# bi-directional pipes. The jury program should accept the following
+# calling syntax:
 #
-#    $JURY_PROGRAM <testdata.in> <program.out>
+#    runjury <testdata.in> <program.out>
 #
 # The jury program should exit with exitcode zero unless an unexpected
 # failure occurred (malformed contestant's program output should be
 # handled by the jury program), and write output to <program.out> such
 # that that data can later be used to verify correctness of the
 # contestants' solution.
-
-# Define jury program as name of this program replacing 'run_' by 'runjury_'
-JURY_PROGRAM="${0%/*}/runjury_${0##*/run_}"
 
 PROGRAM="$1";   shift
 TESTIN="$1";    shift
@@ -39,7 +38,7 @@ ERROR="$1";     shift
 EXITFILE="$1";  shift
 
 # Run the program while redirecting input, output and stderr
-bin/runpipe $JURY_PROGRAM $TESTIN $OUTPUT = $PROGRAM 2>$ERROR
+bin/runpipe runjury $TESTIN $OUTPUT = $PROGRAM 2>$ERROR
 exitcode=$?
 
 printf "$exitcode" >$EXITFILE

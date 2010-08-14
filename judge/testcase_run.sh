@@ -162,9 +162,9 @@ chmod a+rx run bin/sh
 # If using a custom run script, copy additional support programs
 # if required:
 if [ -n "$SPECIALRUN" -a -f "$RUN_JURYPROG" ]; then
-	cp -p "$RUN_JURYPROG" .
+	cp -p "$RUN_JURYPROG" ./runjury
 	cp -pL "$RUNPIPE"     ./bin/runpipe
-	chmod a+rx "$RUN_JURYPROG" ./bin/runpipe
+	chmod a+rx runjury bin/runpipe
 fi
 
 # Execute an optional chroot setup script:
