@@ -112,6 +112,7 @@ paths.mk:
 	@exit 1
 
 # Configure for running in source tree, not meant for normal use:
+MAINT_CXFLAGS=-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security -ansi -pedantic
 maintainer-conf: configure
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(PWD) \
 	            --with-domserver_root=$(PWD) \
@@ -126,8 +127,8 @@ maintainer-conf: configure
 	            --with-judgehost_judgedir=$(PWD)/output/judging \
 	            --with-domserver_submitdir=$(PWD)/output/submissions \
 	            --enable-submitclient=http,dolstra \
-	            CFLAGS='-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security' \
-	            CXXFLAGS='-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security' \
+	            CFLAGS='$(MAINT_CXFLAGS)' \
+	            CXXFLAGS='$(MAINT_CXFLAGS)' \
 	            LDFLAGS='-pie' \
 	            $(CONFIGURE_FLAGS)
 

@@ -33,6 +33,8 @@
    non-zero exitcode will be returned.
  */
 
+#define _XOPEN_SOURCE 500
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>

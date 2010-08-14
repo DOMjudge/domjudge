@@ -38,8 +38,9 @@
  */
 
 /* For having access to isfinite() macro in math.h and some functions. */
-#define _ISOC99_SOURCE
 #define _BSD_SOURCE
+#define _POSIX_C_SOURCE 200112L
+#define _XOPEN_SOURCE 500
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -58,8 +59,10 @@
 #include <grp.h>
 #include <time.h>
 #include <math.h>
+#include <limits.h>
 
 /* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
+#include "../etc/config.h"
 #include "../etc/runguard-config.h"
 
 #define PROGRAM "runguard"
@@ -95,7 +98,7 @@ int be_quiet;
 int show_help;
 int show_version;
 
-long long runtime; /* in microseconds */
+unsigned long runtime; /* in microseconds */
 rlim_t cputime;
 rlim_t memsize;
 rlim_t filesize;
@@ -223,7 +226,7 @@ void outputtime()
 	timediff = (endtime.tv_sec  - starttime.tv_sec ) +
 	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
 
-	verbose("runtime is %.3lf seconds",timediff);
+	verbose("runtime is %.3f seconds",timediff);
 
 	if ( use_output ) {
 		verbose("writing runtime to file `%s'",outputfilename);
@@ -231,7 +234,7 @@ void outputtime()
 		if ( (outputfile = fopen(outputfilename,"w"))==NULL ) {
 			error(errno,"cannot open `%s'",outputfilename);
 		}
-		if ( fprintf(outputfile,"%.3lf\n",timediff)==0 ) {
+		if ( fprintf(outputfile,"%.3f\n",timediff)==0 ) {
 			error(0,"cannot write to file `%s'",outputfile);
 		}
 		if ( fclose(outputfile) ) {
@@ -460,10 +463,11 @@ int main(int argc, char **argv)
 		case 't': /* time option */
 			use_time = 1;
 			runtime_d = strtod(optarg,&ptr);
-			if ( errno || *ptr!='\0' || !isfinite(runtime_d) || runtime_d<=0 ) {
+			if ( errno || *ptr!='\0' || !isfinite(runtime_d) ||
+			     runtime_d<=0 || runtime_d>=ULONG_MAX*1E-6 ) {
 				error(errno,"invalid runtime specified: `%s'",optarg);
 			}
-			runtime = (int)(runtime_d*1E6);
+			runtime = (unsigned long)(runtime_d*1E6);
 			break;
 		case 'C': /* CPU time option */
 			cputime = (rlim_t) readoptarg("CPU-time limit",1,LONG_MAX);
@@ -593,7 +597,7 @@ int main(int argc, char **argv)
 			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
 				error(errno,"setting timer");
 			}
-			verbose("using timelimit of %.3lf seconds",runtime*1E-6);
+			verbose("using timelimit of %.3f seconds",runtime*1E-6);
 		}
 
 		/* Wait for the child command to finish */

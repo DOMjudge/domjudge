@@ -1,4 +1,4 @@
-// @configure_input@
+/* @configure_input@ */
 
 #define BINDIR       "@domserver_bindir@"
 #define ETCDIR       "@domserver_etcdir@"

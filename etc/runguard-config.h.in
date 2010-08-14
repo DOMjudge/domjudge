@@ -1,4 +1,4 @@
-// @configure_input@
+/* @configure_input@ */
 
 #ifndef _RUNGUARD_CONFIG_
 #define _RUNGUARD_CONFIG_

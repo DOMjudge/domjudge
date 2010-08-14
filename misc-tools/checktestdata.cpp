@@ -112,9 +112,10 @@
 #include <string>
 #include <map>
 #include <set>
-#include <ctype.h>
+#include <cctype>
+#include <cstdarg>
+#include <climits>
 #include <getopt.h>
-#include <stdarg.h>
 #ifdef HAVE_BOOST_REGEX
 #include <boost/regex.hpp>
 #else
@@ -630,7 +631,7 @@ void checktestdata()
 		          cmd.name()=="WHILE" ) {
 
 			// Current and maximum loop iterations.
-			unsigned long long i = 0, times = ULLONG_MAX;
+			unsigned long i = 0, times = ULONG_MAX;
 
 			if ( cmd.name()=="REP" ) {
 				mpz_class n = eval(cmd.args[0]);

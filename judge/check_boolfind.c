@@ -8,7 +8,7 @@ FILE *testin, *progout;
 int main(int argc, char **argv)
 {
 	int run, nruns;
-	long long pos, nbools;
+	long pos, nbools;
 	int *bools;
 	char line[256];
 	int i, outputvalid;
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 	fscanf(testin,"%d\n",&nruns);
 
 	for(run=1; run<=nruns; run++) {
-		fscanf(testin,"%lld\n",&nbools);
+		fscanf(testin,"%ld\n",&nbools);
 
 		bools = malloc(nbools*sizeof(int));
 		if ( bools==NULL ) {
@@ -62,14 +62,14 @@ int main(int argc, char **argv)
 			goto next;
 		}
 
-		sscanf(line,"OUTPUT %lld",&pos);
+		sscanf(line,"OUTPUT %ld",&pos);
 		if ( pos<0 || pos>=nbools-1 ) {
-			printf("testcase %d: position %lld out of range\n",run,pos);
+			printf("testcase %d: position %ld out of range\n",run,pos);
 			goto next;
 		}
 
 		if ( !bools[pos] || bools[pos+1] ) {
-			printf("testcase %d: position %lld,%lld = %s,%s\n",run,pos,pos+1,
+			printf("testcase %d: position %ld,%ld = %s,%s\n",run,pos,pos+1,
 			       (bools[pos]   ? "true" : "false"),
 			       (bools[pos+1] ? "true" : "false"));
 			goto next;

@@ -21,4 +21,4 @@ int   config_readfile(const char *);
 }
 #endif
 
-#endif // LIB_CONFIG_H
+#endif /* LIB_CONFIG_H */

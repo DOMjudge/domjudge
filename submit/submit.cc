@@ -87,8 +87,6 @@ using namespace std;
 
 const int timeout_secs = 60; /* seconds before send/receive timeouts with an error */
 
-extern int errno;
-
 /* Variables defining logmessages verbosity to stderr/logfile */
 extern int verbose;
 extern int loglevel;

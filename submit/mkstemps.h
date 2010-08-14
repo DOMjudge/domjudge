@@ -17,8 +17,6 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-typedef unsigned long long gcc_uint64_t;
-
 #ifndef TMP_MAX
 #define TMP_MAX 16384
 #endif
@@ -27,7 +25,7 @@ int mkstemps(char *templ, int suffix_len)
 {
 	static const char letters[]
 		= "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	static gcc_uint64_t value;
+	static unsigned long value;
 	struct timeval tv;
 	char *XXXXXX;
 	size_t len;
@@ -44,10 +42,10 @@ int mkstemps(char *templ, int suffix_len)
 
 	/* Get some more or less random data.  */
 	gettimeofday(&tv, NULL);
-	value += ((gcc_uint64_t) tv.tv_usec << 16) ^ tv.tv_sec ^ getpid ();
+	value += ((unsigned long) tv.tv_usec << 16) ^ tv.tv_sec ^ getpid ();
 
 	for (count = 0; count < TMP_MAX; ++count) {
-		gcc_uint64_t v = value;
+		unsigned long v = value;
 		int fd;
 
 		/* Fill in the random bits.  */

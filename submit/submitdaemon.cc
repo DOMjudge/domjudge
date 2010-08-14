@@ -9,6 +9,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+#define _BSD_SOURCE
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,8 +70,6 @@ const int linelen = 256; /* maximum length read from submit_db stdout lines */
 
 /* Accepted characters in submission filenames (except for alphanumeric) */
 const char filename_chars[5] = ".-_ ";
-
-extern int errno;
 
 char *progname;
 

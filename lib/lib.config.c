@@ -45,7 +45,7 @@ int config_newindex(void)
 {
 	if ( noptions<options_size ) return noptions++;
 
-	// dynamically resize exponentially
+	/* dynamically resize exponentially */
 	options_size = 2*options_size+1;
 
 	options = (config_option *) realloc((void *)options,options_size*sizeof *options);
@@ -88,18 +88,18 @@ int config_readfile(const char *filename)
 
 	if ( (in = fopen(filename,"rt"))==NULL ) error(errno,"opening '%s'",filename);
 
-	// read line by line
+	/* read line by line */
 	while ( fgets(line,2*CONFIG_MAXLEN+8,in)!=NULL ) {
 		lineno++;
 
-		// Search first non-whitespace char
+		/* Search first non-whitespace char */
 		option = line;
 		while ( isspace(*option) ) option++;
 
-		if ( *option==0 ) continue; // empty line
-		if ( *option==';' || *option=='#' ) continue; // comment line
+		if ( *option==0 ) continue; /* empty line */
+		if ( *option==';' || *option=='#' ) continue; /* comment line */
 
-		// Search first '=': key/value separator
+		/* Search first '=': key/value separator */
 		if ( (tmp = strchr(line,'='))==NULL ) {
 			error(0,"on line %d of '%s': no key/value pair found",lineno,filename);
 		}
@@ -107,14 +107,14 @@ int config_readfile(const char *filename)
 		value = tmp + 1;
 		while ( isspace(*value) ) value++;
 
-		// Trim trailing whitespace from option, value
+		/* Trim trailing whitespace from option, value */
 		tmp = option + strlen(option)-1;
 		while ( isspace(*(tmp)) ) *(tmp--) = 0;
 
 		tmp = value + strlen(value)-1;
 		while ( isspace(*(tmp)) ) *(tmp--) = 0;
 
-		// Check option for alphanumeric chars and _
+		/* Check option for alphanumeric chars and _ */
 		if ( strlen(option)==0 ) error(0,"on line %d of '%s': empty key",lineno,filename);
 		for(i=0; i<strlen(option); i++) {
 			if ( !(isalnum(option[i]) || option[i]=='_') ) {
@@ -123,7 +123,7 @@ int config_readfile(const char *filename)
 			}
 		}
 
-		// Strip optional enclosing quotes from value
+		/* Strip optional enclosing quotes from value */
 		if ( strlen(value)>=2 && *value=='"' && *(value+strlen(value)-1)=='"' ) {
 			value++;
 			*(value+strlen(value)-1) = 0;

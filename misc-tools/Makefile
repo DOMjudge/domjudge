@@ -22,6 +22,8 @@ checktestdata: checktestdata.cpp yylex.cc parse.cc $(LIBGMPXX) $(BOOST_REGEX_LIB
 
 yylex.cc: checktestdata.l parsetype.h
 	flex++ $<
+# Fix strict ANSI C++ bug in generated code, see Debian bug #488274
+	sed -i '/ isatty/d' $@
 
 parse.cc: checktestdata.y parsetype.h
 	bisonc++ $<

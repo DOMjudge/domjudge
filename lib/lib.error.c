@@ -16,12 +16,19 @@
  * turn calls errorstring to generate the actual error message;
  */
 
+#define _XOPEN_SOURCE 500
+
 #include "lib.error.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+
+/* Define va_copy macro if not available (ANSI C99 only) */
+#ifndef va_copy
+#define va_copy(dest, src) memcpy(&dest, &src, sizeof(va_list))
+#endif
 
 /* For SYSLOG config variable */
 #include "../etc/config.h"

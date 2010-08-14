@@ -4,8 +4,8 @@
  * $Id$
  */
 
-#ifndef __LIB_ERROR_H
-#define __LIB_ERROR_H
+#ifndef LIB_ERROR_H
+#define LIB_ERROR_H
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -93,4 +93,4 @@ char *vallocstr(const char *, va_list);
 }
 #endif
 
-#endif /* __LIB_ERROR_H */
+#endif /* LIB_ERROR_H */

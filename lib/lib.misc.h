@@ -4,8 +4,8 @@
  * $Id$
  */
 
-#ifndef __LIB_MISC_H
-#define __LIB_MISC_H
+#ifndef LIB_MISC_H
+#define LIB_MISC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -80,4 +80,4 @@ char *stripendline(char *);
 }
 #endif
 
-#endif /* __LIB_MISC_H */
+#endif /* LIB_MISC_H */

@@ -4,8 +4,8 @@
  * $Id$
  */
 
-#include "lib.misc.h"
-#include "lib.error.h"
+#define _XOPEN_SOURCE 500
+#define _POSIX_SOURCE
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -14,6 +14,9 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+
+#include "lib.misc.h"
+#include "lib.error.h"
 
 #include "../etc/config.h"
 
@@ -35,9 +38,11 @@ void _alert(const char *libdir, const char *msgtype, const char *description)
 	cmd = allocstr("%s/alert '%s' '%s' &",libdir,msgtype,description);
 	logmsg(LOG_INFO,"executing '%s'",cmd);
 
-	// Assign return value to dummy variable to remove compiler
-	// warnings. We're already trying to generate a warning; there's
-	// no sense in generating another warning when this gives an error.
+	/* Assign return value to dummy variable to remove compiler
+	 * warnings. We're already trying to generate a warning; there's
+	 * no sense in generating another warning when this gives an
+	 * error.
+	 */
 	dummy = system(cmd);
 
 	free(cmd);
