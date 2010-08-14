@@ -2,10 +2,12 @@
  * Miscellaneous common functions for C/C++ programs.
  *
  * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
  */
 
-#define _XOPEN_SOURCE 500
-#define _POSIX_SOURCE
+#include "config.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,9 +19,6 @@
 
 #include "lib.misc.h"
 #include "lib.error.h"
-
-#include "../etc/config.h"
-
 
 /* Array indices for input/output file descriptors as used by pipe() */
 #define PIPE_IN  1

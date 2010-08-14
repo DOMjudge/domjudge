@@ -7,6 +7,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

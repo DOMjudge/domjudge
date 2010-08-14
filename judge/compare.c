@@ -39,7 +39,7 @@
        characters are stripped.
  */
 
-#define _POSIX_SOURCE
+#include "config.h"
 
 #include <stdio.h>
 #include <string.h>

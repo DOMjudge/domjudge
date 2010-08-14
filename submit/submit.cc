@@ -10,9 +10,9 @@
  *
  */
 
-#include "../etc/config.h"
+#include "config.h"
 
-#include "../etc/submit-config.h"
+#include "submit-config.h"
 
 /* Check whether default submission method is available; bail out if not */
 #if ( SUBMIT_DEFAULT == 1 ) && ( SUBMIT_ENABLE_CMD != 1 )

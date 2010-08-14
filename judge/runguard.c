@@ -37,10 +37,10 @@
    has passed, followed by a SIGKILL after 'killdelay'.
  */
 
-/* For having access to isfinite() macro in math.h and some functions. */
+#include "config.h"
+
+/* For chroot(), which is not POSIX. */
 #define _BSD_SOURCE
-#define _POSIX_C_SOURCE 200112L
-#define _XOPEN_SOURCE 500
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -62,8 +62,7 @@
 #include <limits.h>
 
 /* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
-#include "../etc/config.h"
-#include "../etc/runguard-config.h"
+#include "runguard-config.h"
 
 #define PROGRAM "runguard"
 #define VERSION "$Rev$"

@@ -30,8 +30,7 @@ endif
 endif
 endif
 
-SUBMITHEADERS = submitcommon.hxx $(TOPDIR)/etc/config.h \
-                                 $(TOPDIR)/etc/submit-config.h
+SUBMITHEADERS = submitcommon.hxx $(TOPDIR)/etc/submit-config.h
 
 SUBMITCOMMONOBJ = submitcommon$(OBJEXT)
 

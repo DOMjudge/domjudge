@@ -7,6 +7,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+#include "config.h"
+
 #include "submitcommon.hxx"
 
 #include "lib.error.h"

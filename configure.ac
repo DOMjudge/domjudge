@@ -245,6 +245,14 @@ AC_CHECK_HEADERS([gmpxx.h])
 AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmp -lgmpxx'),[],[-lgmp])
 AC_LANG_POP([C++])
 
+# See 'man feature_test_macros' under Linux:
+# Expose POSIX.1-2001 base specification and SUSv2 features.
+# We try to conform to POSIX, so ideally we shouldn't need to include
+# other features, but there are still individual files that require
+# other specifications.
+AC_DEFINE_UNQUOTED(_POSIX_C_SOURCE, 200112L, [Include POSIX.1-2001 base specification])
+AC_DEFINE_UNQUOTED(_XOPEN_SOURCE, 500,       [Include SUSv2 (UNIX 98) extensions])
+
 # Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT

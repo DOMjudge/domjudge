@@ -102,7 +102,7 @@
 
  */
 
-#include "../etc/config.h"
+#include "config.h"
 
 #include <iostream>
 #include <iomanip>

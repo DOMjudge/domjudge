@@ -21,11 +21,11 @@ compare$(OBJEXT): $(LIBHEADERS)
 check_float: -lm
 
 runguard: -lm
-runguard$(OBJEXT): $(TOPDIR)/etc/config.h $(TOPDIR)/etc/runguard-config.h
+runguard$(OBJEXT): $(TOPDIR)/etc/runguard-config.h
 
 # FIXME: compile with diet libc to produce a static binary which is
 # not 0.6 MB (!) in size?
-runpipe: runpipe.c $(TOPDIR)/etc/config.h $(LIBHEADERS) $(LIBSOURCES)
+runpipe: runpipe.c $(LIBHEADERS) $(LIBSOURCES)
 	$(CC) $(CFLAGS) -static -o $@ $< $(LIBSOURCES)
 
 runjury_boolfind: runjury_boolfind.c

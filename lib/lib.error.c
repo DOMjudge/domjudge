@@ -16,7 +16,7 @@
  * turn calls errorstring to generate the actual error message;
  */
 
-#define _XOPEN_SOURCE 500
+#include "config.h"
 
 #include "lib.error.h"
 
@@ -29,9 +29,6 @@
 #ifndef va_copy
 #define va_copy(dest, src) memcpy(&dest, &src, sizeof(va_list))
 #endif
-
-/* For SYSLOG config variable */
-#include "../etc/config.h"
 
 /* Use program name in syslogging if defined */
 #ifndef PROGRAM

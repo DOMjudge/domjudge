@@ -9,7 +9,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-#define _BSD_SOURCE
+#include "config.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -33,11 +33,10 @@
 using namespace std;
 
 /* System/site specific static config (paths, etc.) */
-#include "../etc/domserver-static.h"
-#include "../etc/config.h"
+#include "domserver-static.h"
 
 /* and submit specific config */
-#include "../etc/submit-config.h"
+#include "submit-config.h"
 
 /* These defines are needed in 'version' and 'logmsg' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
