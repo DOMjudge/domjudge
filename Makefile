@@ -25,6 +25,7 @@ default:
 	@echo " - make install-judgehost"
 	@echo " - make install-docs"
 	@echo or
+	@echo " - make all"
 	@echo " - make build"
 	@echo " - make clean"
 	@echo " - make distclean"
@@ -36,6 +37,8 @@ install:
 	@echo " - make install-judgehost"
 	@echo " - make install-docs"
 	@exit 1
+
+all: build docs
 
 # MAIN TARGETS
 build domserver judgehost: paths.mk config
