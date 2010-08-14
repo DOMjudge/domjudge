@@ -218,9 +218,10 @@ AC_PROG_MKDIR_P
 # check for htpasswd/htpasswd2
 AC_CHECK_PROGS(HTPASSWD,[htpasswd htpasswd2],[no htpasswd binary found])
 
-# Checks for libraries.
+# Check for including optional libmagic.
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
+# Checks for libcURL when submit is enabled.
 if test "$submit_enablehttp" = "1" ; then
 	AX_LIB_CURL([7.9.7],[],[
 		AC_MSG_ERROR([libcURL not found (required for http submit method)])
@@ -239,14 +240,22 @@ if test "$submit_enablehttp" = "1" ; then
 	])
 fi
 
-AX_BOOST_BASE([1.33.1])
-AX_BOOST_REGEX
+# Check for building "checktestdata" program.
+AC_ARG_ENABLE(checktestdata,AS_HELP_STRING([--enable-checktestdata],
+[enable building of checktestdata program (default: yes).
+ This requires the Boost regex and GNU GMP libraries.]))
 
-# Check for gmpxx headers separately, as they are C++.
-AC_LANG_PUSH([C++])
-AC_CHECK_HEADERS([gmpxx.h])
-AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmp -lgmpxx'),[],[-lgmp])
-AC_LANG_POP([C++])
+if test "x$enable_checktestdata" != "xno"; then
+
+	AX_BOOST_BASE([1.33.1])
+	AX_BOOST_REGEX
+
+	# Check for gmpxx headers separately, as they are C++.
+	AC_LANG_PUSH([C++])
+	AC_CHECK_HEADERS([gmpxx.h])
+	AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmp -lgmpxx'),[],[-lgmp])
+	AC_LANG_POP([C++])
+fi
 
 # See 'man feature_test_macros' under Linux:
 # Expose POSIX.1-2001 base specification and SUSv2 features.
