@@ -464,7 +464,7 @@ int main(int argc, char **argv)
 		case 't': /* time option */
 			use_time = 1;
 			runtime_d = strtod(optarg,&ptr);
-			if ( errno || *ptr!='\0' || !isfinite(runtime_d) ||
+			if ( errno || *ptr!='\0' ||
 			     runtime_d<=0 || runtime_d>=ULONG_MAX*1E-6 ) {
 				error(errno,"invalid runtime specified: `%s'",optarg);
 			}
