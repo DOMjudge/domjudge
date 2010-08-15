@@ -30,13 +30,13 @@ if ( difftime($cdata['starttime'], now()) > 0 ) {
 }
 
 echo "<script type=\"text/javascript\">\n<!--\n";
-echo "function getLangNameFromExtension(ext)\n{\n";
+echo "function getMainExtension(ext)\n{\n";
 echo "\tswitch(ext) {\n";
 $exts = explode(" ", LANG_EXTS);
 foreach($exts as $ext) {
 	$langexts = explode(',', $ext);
 	for ($i = 1; $i < count($langexts); $i++) {
-		echo "\t\tcase '" . $langexts[$i]. "': return '" .$langexts[0] . "';\n";
+		echo "\t\tcase '" . $langexts[$i]. "': return '" .$langexts[1] . "';\n";
 	}
 }
 echo "\t\tdefault: return '';\n\t}\n}\n";

@@ -86,9 +86,9 @@ function detectProblemLanguage(filename)
 	// index 0 is the "autodetect" option
 	if ( elt.selectedIndex > 0 ) return;
 
-	var langname = getLangNameFromExtension(parts[0]);
+	var langext = getMainExtension(parts[0]);
 	for (i=0;i<elt.length;i++) {
-		if ( elt.options[i].text == langname ) {
+		if ( elt.options[i].value == langext ) {
 			elt.selectedIndex = i;
 		}
 	}
