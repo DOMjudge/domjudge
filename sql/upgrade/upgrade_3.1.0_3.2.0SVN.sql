@@ -15,6 +15,8 @@ DELETE FROM `problem` WHERE `probid` = 'boolfind';
 -- Create additional structures
 --
 
+ALTER TABLE `language` ADD UNIQUE KEY `extension` (`extension`);
+
 --
 -- Add/remove privileges
 --
