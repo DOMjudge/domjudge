@@ -13,6 +13,7 @@ Version 3.2.0 - SVN
  - Add category to balloons list and button to view only unsent.
  - Lots of small changes to C/C++ sources and build system for better
    POSIX compliance and portability; support LLVM clang compiler.
+ - Replace bash by POSIX shell in compile, testcase_run. (Closes: #1735673)
 
 Version 3.1.0 - 14 July 2010
 ----------------------------

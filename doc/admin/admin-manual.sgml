@@ -362,8 +362,6 @@ The following software is required for running DOMjudge.
 
 <item> PHP &gt;= 5.0.0 command line interface and the mysql extension.
 
-<item> Bash &gt;= 2
-
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash)
 
 <item> A statically compiled POSIX shell, located in

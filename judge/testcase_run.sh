@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Script to test (run and compare) submissions with a single testcase
 #
@@ -28,26 +28,18 @@
 # described in http://www.ecs.csus.edu/pc2/doc/valistandard.html.
 # If the compare program returns with nonzero exitcode however, this
 # is viewed as an internal error.
-#
-# This is a bash script because of the traps it uses.
 
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
-trap error ERR
-trap cleanexit EXIT
+trap 'cleanup ; error' EXIT
 
-cleanexit ()
+cleanup ()
 {
-	trap - EXIT
-
-	if [ "$CATPID" ] && ps -p $CATPID &>/dev/null; then
-		logmsg $LOG_DEBUG "killing $CATPID (cat-pipe to /dev/null)"
-		kill -9 $CATPID
-	fi
-
 	# Remove some copied files to save disk space
 	if [ "$WORKDIR" ]; then
-		rm -f "$WORKDIR/bin/sh" "$WORKDIR/bin/runpipe"
+		rm -f "$WORKDIR/dev/null" "$WORKDIR/bin/sh" "$WORKDIR/bin/runpipe"
+
+		# Replace testdata by symlinks to reduce disk usage
 		if [ -f "$WORKDIR/testdata.in" ]; then
 			rm -f "$WORKDIR/testdata.in"
 			ln -s "$TESTIN" "$WORKDIR/testdata.in"
@@ -57,19 +49,26 @@ cleanexit ()
 			ln -s "$TESTOUT" "$WORKDIR/testdata.out"
 		fi
 	fi
+}
+
+cleanexit ()
+{
+	set +e
+	trap - EXIT
+
+	cleanup
 
 	logmsg $LOG_DEBUG "exiting"
+	exit $1
 }
 
 # Runs command without error trapping and check exitcode
 runcheck ()
 {
 	set +e
-	trap - ERR
 	$@
 	exitcode=$?
 	set -e
-	trap error ERR
 }
 
 # Error and logging functions
@@ -173,13 +172,10 @@ if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
 	"$SCRIPTDIR/$CHROOT_SCRIPT" start
 fi
 
-# Add a fifo buffer to have /dev/null (indirectly) available in the
+# Add a fifo buffer to have /dev/null (substitute) available in the
 # chroot environment:
-logmsg $LOG_DEBUG "making a fifo-buffer link to /dev/null"
+logmsg $LOG_DEBUG "making a fifo-buffer /dev/null"
 mkfifo -m a+rw ./dev/null
-cat < ./dev/null >/dev/null &
-CATPID=$!
-disown $CATPID
 
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
@@ -188,7 +184,7 @@ runcheck "$RUNGUARD" ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
 	-t $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
 	$PREFIX/run $PREFIX/program \
 	testdata.in program.out program.err program.exit \
-	&>error.tmp
+	>error.tmp 2>&1
 
 # Execute an optional chroot destroy script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
@@ -198,7 +194,7 @@ fi
 
 # Check for still running processes (first wait for all exiting processes):
 sleep 1
-if ps -u "$RUNUSER" &>/dev/null; then
+if ps -u "$RUNUSER" >/dev/null 2>&1 ; then
 	error "found processes still running"
 fi
 
@@ -215,10 +211,10 @@ fi
 
 # Check for errors from running the program:
 logmsg $LOG_DEBUG "checking program run exit-status"
-if grep  'timelimit reached: aborting command' error.tmp &>/dev/null; then
+if grep  'timelimit reached: aborting command' error.tmp >/dev/null 2>&1 ; then
 	echo "Timelimit exceeded." >>error.out
 	cat error.tmp >>error.out
-	exit ${E_TIMELIMIT:--1}
+	cleanexit ${E_TIMELIMIT:--1}
 fi
 if [ ! -r program.exit ]; then
 	cat error.tmp >>error.out
@@ -227,7 +223,7 @@ fi
 if [ "`cat program.exit`" != "0" ]; then
 	echo "Non-zero exitcode `cat program.exit`" >>error.out
 	cat error.tmp >>error.out
-	exit ${E_RUN_ERROR:--1}
+	cleanexit ${E_RUN_ERROR:--1}
 fi
 if [ $exitcode -ne 0 ]; then
 	cat error.tmp >>error.out
@@ -239,18 +235,18 @@ fi
 ### Disabled, because these are not consistently         ###
 ### reported the same way by all different compilers.    ###
 ############################################################
-#if grep  'Floating point exception' error.tmp &>/dev/null; then
+#if grep  'Floating point exception' error.tmp >/dev/null 2>&1 ; then
 #	echo "Floating point exception." >>error.out
-#	exit ${E_RUN_ERROR:--1}
+#	cleanexit ${E_RUN_ERROR:--1}
 #fi
-#if grep  'Segmentation fault' error.tmp &>/dev/null; then
+#if grep  'Segmentation fault' error.tmp >/dev/null 2>&1 ; then
 #	echo "Segmentation fault." >>tee error.out
-#	exit ${E_RUN_ERROR:--1}
+#	cleanexit ${E_RUN_ERROR:--1}
 #fi
-#if grep  'File size limit exceeded' error.tmp &>/dev/null; then
+#if grep  'File size limit exceeded' error.tmp >/dev/null 2>&1 ; then
 #	echo "File size limit exceeded." >>error.out
 #	cat error.tmp >>error.out
-#	exit ${E_OUTPUT_LIMIT:--1}
+#	cleanexit ${E_OUTPUT_LIMIT:--1}
 #fi
 
 logmsg $LOG_INFO "comparing output"
@@ -263,7 +259,7 @@ cd "$WORKDIR"
 logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
 
 if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
-                       result.xml compare.out &>compare.tmp ; then
+                       result.xml compare.out >compare.tmp 2>&1 ; then
 	exitcode=$?
 	cat error.tmp >>error.out
 	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
@@ -278,23 +274,23 @@ descrp="${descrp:+ ($descrp)}"
 if [ "$result" = "accepted" ]; then
 	echo "Correct${descrp}! Runtime is `cat program.time` seconds." >>error.out
 	cat error.tmp >>error.out
-	exit ${E_CORRECT:--1}
+	cleanexit ${E_CORRECT:--1}
 elif [ "$result" = "presentation error" ]; then
 	echo "Presentation error${descrp}." >>error.out
 	cat error.tmp >>error.out
-	exit ${E_PRESENTATION_ERROR:--1}
+	cleanexit ${E_PRESENTATION_ERROR:--1}
 elif [ ! -s program.out ]; then
 	echo "Program produced no output." >>error.out
 	cat error.tmp >>error.out
-	exit ${E_NO_OUTPUT:--1}
+	cleanexit ${E_NO_OUTPUT:--1}
 elif [ "$result" = "wrong answer" ]; then
 	echo "Wrong answer${descrp}." >>error.out
 	cat error.tmp >>error.out
-	exit ${E_WRONG_ANSWER:--1}
+	cleanexit ${E_WRONG_ANSWER:--1}
 else
 	echo "Unknown result: Wrong answer${descrp}." >>error.out
 	cat error.tmp >>error.out
-	exit ${E_WRONG_ANSWER:--1}
+	cleanexit ${E_WRONG_ANSWER:--1}
 fi
 
 # This should never be reached

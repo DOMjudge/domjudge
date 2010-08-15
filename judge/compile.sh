@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Script to compile submissions.
 #
@@ -25,30 +25,17 @@
 # The <memlimit> (in kB) is passed to the compile script to let
 # interpreted languages (read: Sun javac/java) be able to set the
 # internal maximum memory size.
-#
-# This is a bash script because of the traps it uses.
 
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
-trap error ERR
-trap cleanexit EXIT
+trap error EXIT
 
 cleanexit ()
 {
 	trap - EXIT
 
-	logmsg $LOG_DEBUG "exiting"
-}
-
-# Runs command without error trapping and check exitcode
-runcheck ()
-{
-	set +e
-	trap - ERR
-	$@
-	exitcode=$?
-	set -e
-	trap error ERR
+	logmsg $LOG_DEBUG "exiting, code = '$1'"
+	exit $1
 }
 
 # Error and logging functions
@@ -105,9 +92,12 @@ logmsg $LOG_INFO "starting compile"
 cd "$WORKDIR/compile"
 
 # First compile to 'source' then rename to 'program' to avoid problems with
-# the compiler writing to different filenames and deleting intermediate files.
-runcheck "$RUNGUARD" ${DEBUG:+-v} -t $COMPILETIME -f $FILELIMIT -o "$WORKDIR/compile.time" -- \
-	"$COMPILE_SCRIPT" "`basename $SOURCE`" source "$MEMLIMIT" &>"$WORKDIR/compile.tmp"
+# the compiler writing to different filenames and deleting
+# intermediate files.
+exitcode=0
+"$RUNGUARD" ${DEBUG:+-v} -t $COMPILETIME -f $FILELIMIT -o "$WORKDIR/compile.time" -- \
+	"$COMPILE_SCRIPT" "`basename $SOURCE`" source "$MEMLIMIT" >"$WORKDIR/compile.tmp" 2>&1 || \
+	exitcode=$?
 if [ -f source ]; then
     mv -f source program
     chmod a+rx program
@@ -116,16 +106,16 @@ fi
 cd "$WORKDIR"
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
-if grep 'timelimit reached: aborting command' compile.tmp &>/dev/null; then
+if grep 'timelimit reached: aborting command' compile.tmp >/dev/null 2>&1 ; then
 	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
-	exit ${E_COMPILER_ERROR:--1}
+	cleanexit ${E_COMPILER_ERROR:--1}
 fi
 if [ $exitcode -ne 0 -o ! -e compile/program ]; then
 	echo "Compiling failed with exitcode $exitcode, compiler output:" >compile.out
 	cat compile.tmp >>compile.out
-	exit ${E_COMPILER_ERROR:--1}
+	cleanexit ${E_COMPILER_ERROR:--1}
 fi
 cat compile.tmp >>compile.out
 
 logmsg $LOG_INFO "Compilation successful"
-exit 0
+cleanexit 0

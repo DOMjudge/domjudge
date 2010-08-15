@@ -32,7 +32,7 @@ logmsg ()
 			echo "$stamp $msg" >>$LOGFILE
 		fi
 		if [ "$SYSLOG" ]; then
-			logger -i -t "$PROGNAME" -p "${SYSLOG#LOG_}.$msglevel" "$msg" &> /dev/null
+			logger -i -t "$PROGNAME" -p "${SYSLOG#LOG_}.$msglevel" "$msg" >/dev/null 2>&1
 		fi
 	fi
 }
@@ -40,7 +40,7 @@ logmsg ()
 error ()
 {
 	set +e
-	trap - ERR
+	trap - EXIT
 
 	if [ "$@" ]; then
 		logmsg $LOG_ERR "error: $@"
