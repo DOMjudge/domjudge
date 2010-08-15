@@ -75,10 +75,6 @@ SOURCE="$WORKDIR/compile/source.$EXT"
 [ -x "$COMPILE_SCRIPT" ] || error "compile script not found or not executable: $COMPILE_SCRIPT"
 [ -x "$RUNGUARD" ] || error "runguard not found or not executable: $RUNGUARD"
 
-logmsg $LOG_INFO "setting resource limits"
-ulimit -HS -c 0     # Do not write core-dumps
-ulimit -HS -f 65536 # Maximum filesize in kB
-
 OLDDIR="$PWD"
 cd "$WORKDIR"
 
@@ -95,7 +91,7 @@ cd "$WORKDIR/compile"
 # the compiler writing to different filenames and deleting
 # intermediate files.
 exitcode=0
-"$RUNGUARD" ${DEBUG:+-v} -t $COMPILETIME -f $FILELIMIT -o "$WORKDIR/compile.time" -- \
+"$RUNGUARD" ${DEBUG:+-v} -t $COMPILETIME -c -f 65536 -o "$WORKDIR/compile.time" -- \
 	"$COMPILE_SCRIPT" "`basename $SOURCE`" source "$MEMLIMIT" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 if [ -f source ]; then
