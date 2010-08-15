@@ -57,7 +57,7 @@ REC_TARGETS += dist clean distclean maintainer-clean
 $(REC_TARGETS): %:
 	@[ -n "$(QUIET)" -o -z "$(SUBDIRS)" ] || echo "Recursing target \`$@' into:" $(SUBDIRS)
 	@for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir $@ || exit 1 ; done
-	$(MAKE) $@-l
+	@$(MAKE) $@-l
 
 # Predefine local variants of recursive targets, so that they are
 # available from the above call:
