@@ -358,11 +358,12 @@ function judge($mark, $row, $judgingid)
 
 	// Copy program with all possible additional files to testcase
 	// dir. Use hardlinks to preserve space with big executables.
-	system("mkdir -p '$testcasedir'", $retval);
-	if ( $retval!=0 ) error("Could not create directory '$testcasedir'");
+	$programdir = $testcasedir . '/execdir';
+	system("mkdir -p '$programdir'", $retval);
+	if ( $retval!=0 ) error("Could not create directory '$programdir'");
 
-	system("cp -dpRl '$workdir'/compile/* '$testcasedir'", $retval);
-	if ( $retval!=0 ) error("Could not copy program to '$testcasedir'");
+	system("cp -dpRl '$workdir'/compile/* '$programdir'", $retval);
+	if ( $retval!=0 ) error("Could not copy program to '$programdir'");
 
 	// do the actual test-run
 	system(LIBJUDGEDIR . "/testcase_run.sh $tcfile[input] $tcfile[output] " .

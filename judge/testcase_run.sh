@@ -92,6 +92,7 @@ SCRIPTDIR="$DJ_LIBJUDGEDIR"
 STATICSHELL="$DJ_LIBJUDGEDIR/sh-static"
 RUNGUARD="$DJ_BINDIR/runguard"
 RUNPIPE="$DJ_BINDIR/runpipe"
+PROGRAM="execdir/program"
 
 logmsg $LOG_INFO "starting '$0', PID = $$"
 
@@ -115,8 +116,8 @@ fi
 [ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT"
 [ -d "$WORKDIR" -a -w "$WORKDIR" -a -x "$WORKDIR" ] || \
 	error "Workdir not found or not writable: $WORKDIR"
-[ -x "$WORKDIR/program" ] || error "submission program not found or not executable"
-[ -x "$COMPARE_SCRIPT"  ] || error "compare script not found or not executable: $COMPARE_SCRIPT"
+[ -x "$WORKDIR/$PROGRAM" ] || error "submission program not found or not executable"
+[ -x "$COMPARE_SCRIPT" ] || error "compare script not found or not executable: $COMPARE_SCRIPT"
 [ -x "$RUN_SCRIPT" ] || error "run script not found or not executable: $RUN_SCRIPT"
 [ -x "$RUNGUARD" ] || error "runguard not found or not executable: $RUNGUARD"
 
@@ -132,8 +133,8 @@ else
 	PREFIX=''
 fi
 
-# Make testing dir accessible for RUNUSER:
-chmod a+x "$WORKDIR"
+# Make testing/execute dir accessible for RUNUSER:
+chmod a+x "$WORKDIR" "$WORKDIR/execdir"
 
 # Create files which are expected to exist:
 touch error.out                  # Error output
@@ -153,7 +154,7 @@ cp "$TESTIN" "$WORKDIR/testdata.in"
 cd "$WORKDIR"
 chmod a+r testdata.in
 
-mkdir -m 0711 bin dev proc
+mkdir -m 0711 bin dev
 # Copy the run-script and a statically compiled shell:
 cp -p  "$RUN_SCRIPT"  ./run
 cp -pL "$STATICSHELL" ./bin/sh
@@ -166,23 +167,23 @@ if [ -n "$SPECIALRUN" -a -f "$RUN_JURYPROG" ]; then
 	chmod a+rx runjury bin/runpipe
 fi
 
+# Add a fifo buffer to have /dev/null (substitute) available in the
+# chroot environment:
+logmsg $LOG_DEBUG "making a fifo-buffer /dev/null"
+mkfifo -m a+rw ./dev/null
+
 # Execute an optional chroot setup script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
 	logmsg $LOG_DEBUG "executing chroot script: '$CHROOT_SCRIPT start'"
 	"$SCRIPTDIR/$CHROOT_SCRIPT" start
 fi
 
-# Add a fifo buffer to have /dev/null (substitute) available in the
-# chroot environment:
-logmsg $LOG_DEBUG "making a fifo-buffer /dev/null"
-mkfifo -m a+rw ./dev/null
-
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck "$RUNGUARD" ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
 	-t $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
-	$PREFIX/run $PREFIX/program \
+	$PREFIX/run $PREFIX/$PROGRAM \
 	testdata.in program.out program.err program.exit \
 	>error.tmp 2>&1
 

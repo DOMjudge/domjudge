@@ -36,7 +36,11 @@ cat > $DEST <<EOF
 #!/bin/sh
 # Generated shell-script to execute mono on CLI code.
 
-cd $SOURCEDIR
+# Detect dirname and change dir to prevent class not found errors.
+if [ "\${0%/*}" != "\$0" ]; then
+	cd "\${0%/*}"
+fi
+
 exec mono $DESTCLI
 EOF
 

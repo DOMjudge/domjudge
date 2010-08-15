@@ -25,6 +25,7 @@ case "$1" in
 	start)
 
 # Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
+		mkdir -p proc
 		sudo -S mount -n -t proc --bind /proc proc < /dev/null
 
 		for i in $SUBDIRMOUNTS ; do
@@ -46,6 +47,7 @@ case "$1" in
 		sleep 1
 
 		sudo -S umount "$PWD/proc" < /dev/null
+		rmdir proc || true
 
 		for i in $SUBDIRMOUNTS ; do
 			if [ -L "$CHROOTORIGINAL/$i" ]; then

@@ -62,6 +62,11 @@ cat > $DEST <<EOF
 #!/bin/sh
 # Generated shell-script to execute java interpreter on source.
 
+# Detect dirname and change dir to prevent class not found errors.
+if [ "\${0%/*}" != "\$0" ]; then
+	cd "\${0%/*}"
+fi
+
 exec java -Xrs -Xss8m -Xmx${MEMLIMITJAVA}k $MAINCLASS
 EOF
 
