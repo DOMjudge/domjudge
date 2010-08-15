@@ -39,6 +39,6 @@
    - MAINEXT is the extension corresponding to the extension in DOMjudge,
    - EXT... are comma separated additional detected language extensions.
 */
-#define LANG_EXTS    "C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl Bash,sh"
+#define LANG_EXTS    "C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,cs AWK,awk Python,py Bash,bash"
 
 #endif /* _SUBMIT_CONFIG_ */

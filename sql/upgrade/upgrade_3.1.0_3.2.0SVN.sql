@@ -31,6 +31,16 @@ FLUSH PRIVILEGES;
 -- Add/remove sample/initial contents
 --
 
+-- Disable language 'Bash' for 'POSIX shell' replacement, but do not
+-- remove as there may be dependent data. Copy POSIX shell from Bash data.
+UPDATE `language` SET `extension` = 'bash' WHERE `langid` = 'bash';
+
+INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`)
+  SELECT 'sh', 'POSIX shell', 'sh', `allow_submit`, `allow_judge`, `time_factor`
+  FROM `language` WHERE `langid` = 'bash';
+
+UPDATE `language` SET `allow_submit` = 0, `allow_judge` = 0 WHERE `langid` = 'bash';
+
 UPDATE `problem` SET `special_compare` = 'float' WHERE `special_compare` = 'program.sh';
 
 INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES ('boolfind', 2, 'Boolean switch search', 1, 1, 5, 'boolfind', 'boolfind', 'limegreen');
