@@ -48,14 +48,14 @@ function usage()
 {
 	echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
 	    "Start the judgedaemon.\n\n" .
-	    "  -d, --daemon          daemonize after startup\n" .
-	    "  -v, --verbose=LEVEL   set verbosity to LEVEL (syslog levels)\n" .
-	    "      --help            display this help and exit\n" .
-	    "      --version         output version information and exit\n\n";
+	    "  -d       daemonize after startup\n" .
+	    "  -v       set verbosity to LEVEL (syslog levels)\n" .
+	    "  -h       display this help and exit\n" .
+	    "  -V       output version information and exit\n\n";
 	exit;
 }
 
-$options = getopt("dv:", array('daemon', 'verbose:', 'help', 'version'));
+$options = getopt("dv:hV");
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
 if ( $options===FALSE ) {
 	echo "Error: parsing options failed.\n";
@@ -64,8 +64,8 @@ if ( $options===FALSE ) {
 if ( isset($options['d']) ) $options['daemon']  = $options['d'];
 if ( isset($options['v']) ) $options['verbose'] = $options['v'];
 
-if ( isset($options['version']) ) version();
-if ( isset($options['help']) ) usage();
+if ( isset($options['V']) ) version();
+if ( isset($options['h']) ) usage();
 
 setup_database_connection('jury');
 
