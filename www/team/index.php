@@ -19,7 +19,7 @@ echo "</div>\n";
 echo "<h1>Submissions team ".htmlspecialchars($teamdata['name'])."</h1>\n\n";
 
 if ( !empty($_GET['submitted']) ) {
-	echo "<p><span class='submissionsuccessful'>Submission succesful!</span></p>\n\n";
+	echo "<p><span class='submissionsuccessful'>Submission successful!</span></p>\n\n";
 }
 
 // call putSubmissions function from common.php for this team.
