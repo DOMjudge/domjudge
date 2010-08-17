@@ -81,7 +81,7 @@ if ( IS_ADMIN ) {
 	if ( class_exists("ZipArchive") ) {
 		echo "\n" . addForm('problem.php', 'post', null, 'multipart/form-data') .
 	 		addHidden('id', @$data['probid']) .
-	 		'Problem archive:' .
+	 		'Problem archive: ' .
 	 		addFileField('problem_archive') .
 	 		addSubmit('Upload', 'upload') .
 	 		addEndForm() . "\n";
