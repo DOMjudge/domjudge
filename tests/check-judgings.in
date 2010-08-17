@@ -30,23 +30,21 @@ function usage()
 {
 	echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
 	    "Check judging results of test sources.\n\n" .
-	    "  -a, --accept-any      accept any expected result when multiple\n" .
-	    "                          outcomes are possible\n" .
-	    "      --help            display this help and exit\n" .
-	    "      --version         output version information and exit\n\n";
+	    "  -a       accept any expected result when multiple outcomes are possible\n" .
+	    "  -h       display this help and exit\n" .
+	    "  -V       output version information and exit\n\n";
 	exit;
 }
 
-$options = getopt("a", array('accept-any', 'help', 'version'));
+$options = getopt("ahV");
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
 if ( $options===FALSE ) {
 	echo "Error: parsing options failed.\n";
 	usage();
 }
-if ( isset($options['a']) ) $options['accept-any'] = $options['a'];
 
-if ( isset($options['version']) ) version();
-if ( isset($options['help']) ) usage();
+if ( isset($options['V']) ) version();
+if ( isset($options['h']) ) usage();
 
 logmsg(LOG_NOTICE,"started automatic judging checker");
 
@@ -76,7 +74,7 @@ while( $row = $res->next() ) {
 		if ( !in_array($result,$results) ) {
 			logmsg(LOG_WARNING,"submission $sid has unexpected result '$result'");
 			$nerrors++;
-		} else if ( count($results)>1 && !isset($options['accept-any']) ) {
+		} else if ( count($results)>1 && !isset($options['a']) ) {
 			logmsg(LOG_NOTICE,"submission $sid has multiple possible outcomes, " .
 			       "check manually");
 			$nmanual++;
