@@ -347,7 +347,6 @@ void setrestrictions()
 	setlim(AS);
 	setlim(DATA);
 	setlim(STACK);
-	setlim(MEMLOCK);
 
 	if ( filesize!=RLIM_INFINITY ) {
 		verbose("setting filesize limit to %d bytes",(int)filesize);
