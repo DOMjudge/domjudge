@@ -40,8 +40,7 @@ install-judgehost:
 		judgedaemon.main.php
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libjudgedir) parse_result.xslt
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) judgedaemon
-	-$(INSTALL_PROG) -o root -m 4755 -t $(DESTDIR)$(judgehost_bindir) \
-		runguard
+	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) runguard
 
 clean-l:
 	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT))

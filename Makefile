@@ -149,10 +149,8 @@ maintainer-install: all domserver-create-dirs judgehost-create-dirs
 	ln -sf $(PWD)/judge/runguard $(judgehost_bindir)
 	ln -sf $(PWD)/judge/runpipe  $(judgehost_bindir)
 # Make tmpdir, submitdir writable for webserver, because
-# judgehost-create-dirs sets wrong permissiones:
+# judgehost-create-dirs sets wrong permissions:
 	chmod a+rwx $(domserver_tmpdir) $(domserver_submitdir)
-# Set runguard suid bit in-place (this doesn't work in FreeBSD):
-	su -c "chown root:root judge/runguard ; chmod u+s,a+x judge/runguard"
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 maintainer-uninstall:

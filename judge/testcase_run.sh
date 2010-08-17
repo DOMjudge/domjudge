@@ -90,6 +90,7 @@ fi
 # Location of scripts/programs:
 SCRIPTDIR="$DJ_LIBJUDGEDIR"
 STATICSHELL="$DJ_LIBJUDGEDIR/sh-static"
+GAINROOT="sudo"
 RUNGUARD="$DJ_BINDIR/runguard"
 RUNPIPE="$DJ_BINDIR/runpipe"
 PROGRAM="execdir/program"
@@ -181,7 +182,7 @@ fi
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
-runcheck "$RUNGUARD" ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
+runcheck "$GAINROOT $RUNGUARD" ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
 	-t $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
 	$PREFIX/run $PREFIX/$PROGRAM \
 	testdata.in program.out program.err program.exit \

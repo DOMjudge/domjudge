@@ -15,6 +15,8 @@ Version 3.2.0 - SVN
    POSIX compliance and portability; support LLVM clang compiler.
  - Replace bash by POSIX shell in compile, testcase_run. (Closes: #1735673)
  - Create separate execdir subdir for judging. (Closes: #3041492)
+ - Replace setuid root installation of runguard with invocation
+   via sudo.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------

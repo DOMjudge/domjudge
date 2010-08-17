@@ -67,7 +67,7 @@ A global overview of the features that DOMjudge provides:
 This is a (rough) list of the requirements for DOMjudge.
 
 <itemize>
-<item>At least one machine running Linux, with local root access
+<item>At least one machine running Linux, with (sudo) root access
 <item>Apache web server with PHP 5 and PHP-command line interface
 <item>MySQL database server version 4.1.0 or newer
 <item>Compilers for the languages you want to support
@@ -228,6 +228,9 @@ On the judgehosts:
 <item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
        Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
        (check specific options of useradd, since these vary per system)
+<!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
+<item> Add to <tt>/etc/sudoers</tt>:<newline><tt>      
+ domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *</tt>
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
 </itemize>
 It should be done by now. As a check that (almost) everything works,
@@ -319,8 +322,8 @@ The requirements for the deployment of DOMjudge are:
        Debian GNU/Linux and has been tested a bit under other Linux
        distributions and FreeBSD. We try to adhere to POSIX standards.
 
-<item> (Local) root access on the jury computers for installing some
-       programs setuid-root, some files with restricted permissions
+<item> (Local) root access on the jury computers for configuring sudo,
+       installing some files with restricted permissions
        and for (un)mounting the proc file system when using Sun Java.
        See <ref id="security:rootprivs" name="Security: root privileges">
        for more details.
@@ -373,6 +376,8 @@ The following software is required for running DOMjudge.
        hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
        grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail, pgrep
 
+<item> sudo to gain root privileges
+
 <item> Apache htpasswd
 
 <item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html"> 
@@ -385,7 +390,6 @@ The following software is required for running DOMjudge.
 The following items are optional, but may be required to use certain
 functionality.
 <itemize>
-<item> sudo (to use a chroot judging environment with Sun Java)
 
 <item> <htmlurl name="phpMyAdmin" url="http://www.phpmyadmin.net/">,
        to be able to access the database in an emergency
@@ -582,10 +586,11 @@ make docs &amp;&amp; make install-docs
 Note that even when installing e.g. in your own home directory, root
 privileges are still required for domserver and judgehost
 installation, because user and group ownership of password files, some
-directories and the setuid-root program <tt>runguard</tt> have to be
-set. One should <em>not</em> run DOMjudge programs under the root user
+directories and to give sudo access to <tt>runguard</tt>. One should
+<em>not</em> run DOMjudge programs and daemons under the root user
 however, but under a normal user: <tt>runguard</tt> is specifically
-installed setuid-root to make this unnecessary and running as root
+designed to be the only part invoked as root (through sudo) to make
+this unnecessary and running as root
 will give rise to problems, see <ref id="runguard-rootprivs"
 name="runguard: root privileges not dropped"> in the common problems
 section.
@@ -1012,6 +1017,16 @@ For other systems check the specifics of your useradd command.
 This user must also be configured as the user under which programs run
 via <tt>configure --enable-runuser=USER</tt>; the default is
 <tt>domjudge-run</tt>.
+
+<tt>Runguard</tt> needs to be able to become root for certain operations
+like changing to the runuser and performing a chroot. The following line
+must be added to <tt>/etc/sudoers</tt>, replacing &lt;domjudge&gt;
+with the user you intend to run the judgedaemon as, and the full path
+to runguard.
+<!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
+<verb>
+domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *<newline>
+</verb>
 
 When the chroot setting is enabled (default), a static POSIX shell has
 to be available for copying it to the chroot environment. For Linux
@@ -1630,7 +1645,7 @@ for the other keys).
 
 Once everything is configured, you can start the daemons.
 They all run as a normal user on the system. The needed root privileges
-are gained by the setuid-root programs only when required.
+are gained through sudo only when necessary.
 
 <itemize>
 <item> One or more judgedaemons, one on each judgehost;
@@ -2230,10 +2245,13 @@ Compiling failed with exitcode 255, compiler output:
 </verb>
 When the above error occurs on submitting any source, this indicates
 that you are running the <tt>judgedaemon</tt> as root user. You should
-not run any part of DOMjudge as root. Either run it as yourself or
-e.g. create a user <tt>domjudge</tt> under which to install and run
-everything. Also do not confuse this with the <tt>domjudge-run</tt>
-user: this is a special user to run submissions as and should also not
+not run any part of DOMjudge as root; the parts that require it will
+gain root by themselves through sudo. Either run it as yourself or,
+probably better, create dedicated a user <tt>domjudge</tt> under
+which to install and run everything.
+
+Also do not confuse this with the <tt>domjudge-run</tt> user:
+this is a special user to run submissions as and should also not
 be used to run normal DOMjudge processes; this user is only for
 internal use.
 
