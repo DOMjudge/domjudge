@@ -248,7 +248,7 @@ AC_ARG_ENABLE(checktestdata,AS_HELP_STRING([--enable-checktestdata],
 if test "x$enable_checktestdata" != "xno"; then
 	AC_SUBST(CHECKTESTDATA_ENABLED,[yes])
 
-	AX_BOOST_BASE([1.33.1])
+	AX_BOOST_BASE([1.33.1],[],[AC_MSG_ERROR([Boost not available.])])
 	AX_BOOST_REGEX
 
 	# Check for gmpxx headers separately, as they are C++.
