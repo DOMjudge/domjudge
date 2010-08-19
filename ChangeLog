@@ -4,7 +4,8 @@ Version 3.1.1 - SVN
 -------------------
  - Update upstream autoconf macro's fixing multiple small bugs.
  - Fix autoconf checks for libcURL and static linking.
- - Fix Makefile rules for building library objects.
+ - Fix Makefile rules for building library objects and for
+   (re)generating configure script.
  - Workaround sorttable colspan bug and use stable sorting.
  - Small documentation fixes.
  - Fix expected output for reboot test-source.

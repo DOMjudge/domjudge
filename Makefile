@@ -101,7 +101,8 @@ aclocal.m4: configure.ac $(wildcard m4/*.m4)
 	aclocal -I m4
 
 configure: configure.ac aclocal.m4
-	autoreconf
+	autoheader
+	autoconf
 
 paths.mk:
 	@echo "The file 'paths.mk' is not available. Probably you"
