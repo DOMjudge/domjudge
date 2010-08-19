@@ -8,6 +8,7 @@ Version 3.1.1 - SVN
  - Workaround sorttable colspan bug and use stable sorting.
  - Small documentation fixes.
  - Fix expected output for reboot test-source.
+ - Don't shorten a team's hostname if it is an IP address.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------
