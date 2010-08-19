@@ -2,7 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.1.1 - SVN
 -------------------
- - Update upstream autoconf macro's fixing bashism.
+ - Update upstream autoconf macro's fixing multiple small bugs.
  - Fix autoconf checks for libcURL and static linking.
  - Fix Makefile rules for building library objects.
  - Workaround sorttable colspan bug and use stable sorting.
