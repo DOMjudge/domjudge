@@ -10,6 +10,7 @@ Version 3.1.1 - SVN
  - Fix expected output for reboot test-source.
  - Don't shorten a team's hostname if it is an IP address.
  - Add unique index on language extension, required for compile scripts.
+ - Remove literate Haskell test-source: doesn't compile without extension.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------
