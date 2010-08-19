@@ -1897,41 +1897,54 @@ Internal security of the system relies on users not being able to get
 to any vital data (jury input/output and users' solutions). Data is
 stored in two places: files on the jury account and in the SQL
 database. Files should be protected by preventing permission to the
-relevant directories.
+relevant directories. Furthermore, the (jury) web interface offers a
+view and allows modification of a lot of sensitive data.
 
 Database access is protected by passwords. The default permissions
 allow connections from <em>all</em> hosts, so make sure you restrict
 this appropriately or choose strong enough passwords.
 
 <em>Note:</em> database passwords are stored in
-<tt>etc/passwords.php</tt>. This file has to be
+<tt>etc/dbpasswords.secret</tt>. This file has to be
 non-readable to teams, but has to be readable to the web server to let
 the jury web interface work. A solution is to make it readable to a
-special group the web server runs as.
+special group the web server runs as. This is done when using the
+default configuration and installation method and when <tt>make
+install-{domserver,judgehost}</tt> is run as root. The webserver group
+can be set with <tt>configure --with-webserver-group=GROUP</tt> which
+defaults to <tt>www-data</tt>.
 
-Secondly, the files submitted should not be interceptable by other
-teams (even though that, if these would be sent clear-text, a team
-would normally have to be root/administrator on their computer to
-intercept this). This can be accomplished by using HTTPS for the
-web interface.
-
-The team web interface relies on authentication by IP address only:
-this has the advantage for teams that they do not have to fill in yet
-another user/password combination. Only if teams are able to spoof
-their IP (for which they normally need root/administrator privileges),
-then they would be able to view other teams' submission info (not
-their code) and clarifications and submit as that team.
-
-<em>Note:</em> This means that care has to be taken e.g. that teams
-cannot simply login onto one another's computer and spoof their identity.
-
-The jury web interface is protected by HTTP Authentication. By default
+The jury web interface is protected by HTTP Authentication. These
+credentials are essentially sent plain-text, so we advise to setup
+HTTPS at least for the jury interface, but preferably for all web
+interfaces. By default
 the <tt>domjudge_jury</tt> user will be given full access. You can
-choose to add more users to the htpasswd file. In
+choose to add more users to the file <tt>etc/htpasswd-jury</tt>. In
 <tt>etc/domserver-config.php</tt> you can add these users to the list
 <tt>DOMJUDGE_ADMINS</tt>. Most data-modification functions are
 restricted to only users in this list. See also the judge manual for
 some more details.
+
+Secondly, the submitted sources should not be interceptable by other
+teams (even though that, if these would be sent clear-text, a team
+would normally need to be root/administrator on their computer to
+intercept this). This can be accomplished by using HTTPS for the web
+interface. The <ref id="dolstra" name="Dolstra submission method"> by
+default uses SSH to send files over the network.
+
+There are multiple authentication methods for teams, each having its
+own issues to check for.
+
+When using IP address authentication, one has to be careful that teams
+are not able to spoof their IP (for which they normally need
+root/administrator privileges), as they would then be able to view
+other teams' submission info (not their code) and clarifications and
+submit as that team.
+<em>Note:</em> This means that care has to be taken e.g. that teams
+cannot simply login onto one another's computer and spoof their identity.
+
+When using PHP sessions, authentication data is sent via HTTP, so we
+strongly advise to use HTTPS in that case.
 
 
 <sect>Root privileges <label id="security:rootprivs">
@@ -1989,9 +2002,9 @@ id="install_config:submissionmethods" name="submission methods">.
 
 You should take care not to serve any files over the web that
 are not under the DOMjudge 'www/' directory, because they might
-contain sensitive data (e.g. those under sql/). DOMjudge comes
-with .htaccess files that try to prevent this, but double-check
-that it's not accessible.
+contain sensitive data (e.g. those under <tt>etc/</tt>). DOMjudge
+comes with <tt>.htaccess</tt> files that try to prevent this, but
+double-check that it's not accessible.
 
 <sect>External security <label id="security:external">
 <p>
