@@ -61,7 +61,8 @@ function printtime($datetime) {
  * the local part (for keeping tables readable)
  */
 function printhost($hostname, $full = FALSE) {
-	if( ! $full ) {
+	// Shorten the hostname to first label, but not if it's an IP address.
+	if( ! $full  && !preg_match('/^\d{1,3}(\.\d{1,3}){3}$/', $hostname) ) {
 		$expl = explode('.', $hostname);
 		$hostname = array_shift($expl);
 	}
