@@ -64,6 +64,6 @@ clean-passwords:
 	-rm -f dbpasswords.secret htpasswd-jury
 
 maintainer-clean-l:
-	-rm -f etc/config.h.in
+	-rm -f config.h.in
 
 .PHONY: clean-passwords
