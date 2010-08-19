@@ -7,6 +7,7 @@ Version 3.0.4 - SVN
  - Small documentation fixes.
  - Fix expected output for reboot test-source.
  - Don't shorten a team's hostname if it is an IP address.
+ - Remove literate Haskell test-source: doesn't compile without extension.
 
 Version 3.0.3 - 11 July 2010
 ----------------------------
