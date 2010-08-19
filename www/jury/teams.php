@@ -38,9 +38,9 @@ if( $teams->count() == 0 ) {
 		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th>" .
 		"<th scope=\"col\">category</th><th scope=\"col\">affiliation</th>" .
 		"<th scope=\"col\">host</th><th scope=\"col\">room</th>" .
-		"<th class=\"sorttable_nosort\" colspan=\"2\" scope=\"col\">status" .
-		"</th></tr>\n</thead>\n" .
-		"<tbody>\n";
+		"<th class=\"sorttable_nosort\"></th><th align=\"left\" " .
+		"scope=\"col\">status</th>" .
+		"</tr>\n</thead>\n<tbody>\n";
 
 	while( $row = $teams->next() ) {
 
