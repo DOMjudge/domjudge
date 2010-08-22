@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.1.1 - SVN
--------------------
+Version 3.1.1 - 22 August 2010
+------------------------------
  - Update upstream autoconf macro's fixing multiple small bugs.
  - Fix autoconf checks for libcURL and static linking.
  - Fix Makefile rules for building library objects and for
