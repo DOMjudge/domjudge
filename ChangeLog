@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.0.4 - SVN
--------------------
+Version 3.0.4 - 22 August 2010
+------------------------------
  - Fix Makefile rules for building library objects.
  - Workaround sorttable colspan bug and use stable sorting.
  - Small documentation fixes.
