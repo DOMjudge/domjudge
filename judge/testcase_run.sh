@@ -168,10 +168,11 @@ if [ -n "$SPECIALRUN" -a -f "$RUN_JURYPROG" ]; then
 	chmod a+rx runjury bin/runpipe
 fi
 
-# Add a fifo buffer to have /dev/null (substitute) available in the
-# chroot environment:
-logmsg $LOG_DEBUG "making a fifo-buffer /dev/null"
-mkfifo -m a+rw ./dev/null
+# We copy /dev/null: mknod (and the major/minor device numbers) are
+# not portable, while a fifo link has the problem that a cat program
+# must be run and killed.
+logmsg $LOG_DEBUG "creating /dev/null character-special device"
+sudo cp -p /dev/null ./dev/null
 
 # Execute an optional chroot setup script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
