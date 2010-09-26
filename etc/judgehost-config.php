@@ -53,7 +53,7 @@ $RESULTS_PRIO = array(
 // Lazy evaluation of results? If enabled, returns final result as
 // soon as a highest priority result is found, otherwise only return
 // final result when all testcases are judged.
-// Note that may especially speed up judging when timelimit has
+// Note that this may especially speed up judging when timelimit has
 // highest priority and a solution would otherwise timeout on a lot of
 // testcases.
 define('LAZY_EVAL_RESULTS', true);
