@@ -38,7 +38,7 @@ ERROR="$1";     shift
 EXITFILE="$1";  shift
 
 # Run the program while redirecting input, output and stderr
-bin/runpipe runjury $TESTIN $OUTPUT = $PROGRAM 2>$ERROR
+bin/runpipe ./runjury $TESTIN $OUTPUT = $PROGRAM 2>$ERROR
 exitcode=$?
 
 printf "$exitcode" >$EXITFILE
