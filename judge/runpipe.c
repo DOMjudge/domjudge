@@ -299,12 +299,9 @@ int main(int argc, char **argv)
 				if ( WIFSIGNALED(status) ) {
 					warning(0,"command #%d terminated with signal %d",i+1,WTERMSIG(status));
 					exitcode = 128+WTERMSIG(status);
+				} else {
+					error(0,"command #%d exit status unknown: %d",i+1,status);
 				}
-				if ( WIFSTOPPED(status) ) {
-					warning(0,"command #%d stopped with signal %d",i+1,WSTOPSIG(status));
-					exitcode = 128+WSTOPSIG(status);
-				}
-				error(0,"command #%d exit status unknown: %d",i+1,status);
 			} else {
 				/* Return the exitstatus of the first failed command */
 				exitcode = WEXITSTATUS(status);

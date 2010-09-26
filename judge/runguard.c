@@ -615,10 +615,6 @@ int main(int argc, char **argv)
 				warning("command terminated with signal %d",WTERMSIG(status));
 				return 128+WTERMSIG(status);
 			}
-			if ( WIFSTOPPED(status) ) {
-				warning("command stopped with signal %d",WSTOPSIG(status));
-				return 128+WSTOPSIG(status);
-			}
 			error(0,"command exit status unknown: %d",status);
 		}
 
