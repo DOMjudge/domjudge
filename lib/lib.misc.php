@@ -176,7 +176,6 @@ function getFinalResult($runresults)
 		rsort($tmp);
 		$maxprio = reset($tmp);
 
-//		echo "maxprio = $maxprio\n";
 		// No highest priority result found: no final answer yet.
 		if ( $havenull && $bestprio<$maxprio ) return NULL;
 	}
