@@ -264,7 +264,7 @@ int main(int argc, char **argv)
 		cmd_exit[i] = -1;
 		cmd_pid[i] = execute(cmd_name[i], cmd_args[i], cmd_nargs[i], cmd_fds[i], 0);
 		if ( cmd_pid[i]==-1 ) error(errno,"failed to execute command #%d",i+1);
-		verb("started #%d, pid %d: %s\n",i+1,cmd_pid[i],cmd_name[i]);
+		verb("started #%d, pid %d: %s",i+1,cmd_pid[i],cmd_name[i]);
 	}
 
 	/* Wait for running child commands and check exit status. */
@@ -282,7 +282,7 @@ int main(int argc, char **argv)
 		if ( i>=ncmds ) error(0, "waited for unknown child");
 
 		cmd_exit[i] = status;
-		verb("command #%d, pid %d has exited (with status %d)\n",i+1,pid,status);
+		verb("command #%d, pid %d has exited (with status %d)",i+1,pid,status);
 
 		if ( close(cmd_fds[i][0])!=0 || close(cmd_fds[i][1])!=0 ) {
 			error(errno,"closing command #%d FD's",i+1);
