@@ -229,7 +229,7 @@ On the judgehosts:
        Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
        (check specific options of useradd, since these vary per system)
 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
-<item> Add to <tt>/etc/sudoers</tt>:<newline><tt>      
+<item> Add to <tt>/etc/sudoers</tt>:<newline><tt>
  domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *</tt>
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
 </itemize>
@@ -256,7 +256,7 @@ Optionally:
        firewall rules.
 <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
        or use the balloon web interface.
-<item> Setup the Java chroot environment to use Sun Java with chroot:<newline>
+<item> Setup the Java chroot environment on the judgehosts to use Sun Java with chroot:<newline>
        <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
        <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
@@ -1025,7 +1025,7 @@ with the user you intend to run the judgedaemon as, and the full path
 to runguard.
 <!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
 <verb>
-domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *<newline>
+domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *
 </verb>
 
 When the chroot setting is enabled (default), a static POSIX shell has
@@ -1239,7 +1239,7 @@ transferring the configuration settings from the old version.
 There are SQL upgrade scripts to transform the database including its
 data to the layout of a newer version. The scripts can be found under
 <tt>sql/upgrade</tt> and each script applies changes between two
-consecutive DOMjudge version. At the beginning of each script, a check
+consecutive DOMjudge versions. At the beginning of each script, a check
 is performed which will let MySQL bail out with an error if it should
 not be applied anymore. Note that the scripts must be applied in order
 (sorted by release). These scripts can be applied by running
@@ -2402,11 +2402,10 @@ of the jury account should be installed on all team accounts to
 provide key-based access), and a shared filesystem (e.g. NFS)
 is needed between the team computers and the domserver.
 Alternatively, another means of
-providing access from the server can be configured, see below
-the file
+providing access from the server can be configured, see the file
 <tt>submit/submit_copy.sh</tt> for more details.
 
-For the command line client you need to have at least Windows XP and
+To build the command line client under Windows, you need to have at least Windows XP and
 cygwin version 1.7 for support of the complete <tt>netdb.h</tt>
 headers.
 
