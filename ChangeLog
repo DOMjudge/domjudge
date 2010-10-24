@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.0.5 - SVN
 -------------------
+ - Fix missing permissions for plugin interface SQL user.
 
 Version 3.0.4 - 22 August 2010
 ------------------------------
