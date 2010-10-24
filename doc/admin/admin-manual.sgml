@@ -265,7 +265,7 @@ Optionally:
        domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
        domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*<newline>
-       domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*</tt>
+       domjudge ALL=(root) NOPASSWD: /bin/umount &lt;judgehost_judgedir&gt/*</tt>
 <item> Install GeSHI or the PEAR Text_Highlighter class for source syntax
        highlighting, and the PHP xdiff PECL extension for diffs between
        submissions.
@@ -837,8 +837,8 @@ to access the source files and as backup. The program
 <tt>bin/restore_sources2db</tt> is available to recover the submission
 table in the database from these files. The command line daemon will
 automatically store sources on the file system; the web server needs
-write permissions on <tt>SUBMITDIR</tt> and ignores file system storage
-if these permissions are not set.
+write permissions on <tt>&lt;domjudge_submitdir&gt;</tt> and ignores
+file system storage if these permissions are not set.
 
 <sect>Database installation
 <p>
@@ -984,9 +984,9 @@ are best left untouched.
 There are some files/directories that have to be readable/writable by
 the web server. These are:
 <itemize>
-<item> <tt>SYSTEM_ROOT/etc/passwords.php</tt> must be readable by the
+<item> <tt>etc/passwords.php</tt> must be readable by the
        web server, but (best) not world readable.
-<item> <tt>SUBMITDIR</tt> can optionally be set writable for the
+<item> <tt>&lt;domserver_submitdir&gt;</tt> can optionally be set writable for the
        web server, to store websubmitted sources there (next to the
 	   database), see <ref id="install_config:submissionmethods"
 	   name="submission methods"> for more information.
@@ -1042,7 +1042,7 @@ the following lines must be added to <tt>/etc/sudoers</tt>:
 domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
 domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
 domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*
-domjudge ALL=(root) NOPASSWD: /bin/umount JUDGEDIR/*
+domjudge ALL=(root) NOPASSWD: /bin/umount &lt;judgehost_judgedir&gt;/*
 </verb>
 Here the user <tt>domjudge</tt> must be replaced by the user you
 intend to run the judgedaemon as, <tt>&lt;chrootdir&gt;</tt> by the path
@@ -1169,8 +1169,7 @@ without highlighting.
 If you run a Debian-like system, you can simply install the 
 <tt>php-geshi</tt> package. If not, download GeSHi and place 
 <tt>geshi.php</tt> and the <tt>geshi/</tt> directory in
-DOMjudge's <tt>LIBWWWDIR</tt>
-(see domserver-static.php for the exact path).
+DOMjudge's <tt>lib/www</tt> directory on the server.
 
 <sect2>PEAR Text Highlighter
 <p>
@@ -1178,8 +1177,8 @@ You can install the Text Highlighter system wide with the
 PEAR-provided tools, like this: <tt>pear install Text_Highlighter</tt>.
 
 Alternatively you can download the source code from the
-Text_Highlighter website and unpack that under the <tt>LIBWWWDIR</tt>
-directory (see domserver-static.php for the exact path). Rename the
+Text_Highlighter website and unpack that under the <tt>lib/www</tt>
+directory on the domserver. Rename the
 resulting <tt>Text_Highlighter-x.y.z</tt> directory to just <tt>Text</tt>. 
 
 <sect1>NTP time synchronisation
@@ -2026,7 +2025,7 @@ that has to be handled separately.
 Of course you must make sure that the file system privileges are set
 such that there's no unauthorised access to sensitive data, like
 submitted solutions or passwords. This is quite system dependent. At
-least <tt>JUDGEDIR</tt> should not be readable by other users
+least <tt>&lt;judgehost_judgedir&gt</tt> should not be readable by other users
 than DOMjudge.
 
 <sect1>Permissions for the web server <label id="security:webprivs">
@@ -2051,7 +2050,7 @@ account&gt;:&lt;Web server group&gt; and permissions
 web server group access to the configuration and password files.
 
 If you want the web server to also store incoming submission sources on
-the file system (next to the database), then <tt>SUBMITDIR</tt> must be
+the file system (next to the database), then <tt>&lt;domserver_submitdir&gt;</tt> must be
 writable for the web server, see also <ref
 id="install_config:submissionmethods" name="submission methods">.
 
