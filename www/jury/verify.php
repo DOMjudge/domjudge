@@ -46,5 +46,11 @@ if ( VERIFICATION_REQUIRED ) {
 
 setVerifier($verifier);
 
-/* redirect back to submissions overview. */
-header('Location: submissions.php');
+/* redirect back to submission page or submissions overview depending
+ * on whether judging was (un)verified. */
+if ( $val ) {
+	header('Location: submissions.php');
+} else {
+	header('Location: submission.php?id=' .
+	       urlencode($jdata['submitid']) . '&jid=' . urlencode($id));
+}
