@@ -1046,14 +1046,8 @@ domjudge ALL=(root) NOPASSWD: /bin/umount &lt;judgehost_judgedir&gt;/*
 </verb>
 Here the user <tt>domjudge</tt> must be replaced by the user you
 intend to run the judgedaemon as, <tt>&lt;chrootdir&gt;</tt> by the path
-the chroot environment was installed to and <tt>JUDGEDIR</tt> by the
-value of <tt>judgehost_judgedir</tt> specified by <tt>configure</tt>.
-Note that <tt>&lt;chrootdir&gt;</tt> is different from
-<tt>CHROOTDIR</tt> as specified in <tt>configure</tt>; the first is
-the tree from which bind-mounts are made when Sun Java is used, the
-latter the directory under which judgings are allowed to be executed
-in a chroot environment, and this path is by default set to
-<tt>judgehost_judgedir</tt>.
+the chroot environment was installed to and <tt>&lt;judgehost_judgedir&gt;</tt>
+by the value specified in <tt>configure</tt>.
 
 <sect>Building and installing the submit client
 <p>

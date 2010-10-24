@@ -5,6 +5,6 @@
 
 #define VALID_USERS "@RUNUSER@"
 
-#define CHROOT_PREFIX "@CHROOTDIR@"
+#define CHROOT_PREFIX "@judgehost_judgedir@"
 
 #endif /* _RUNGUARD_CONFIG_ */

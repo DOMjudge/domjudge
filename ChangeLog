@@ -18,6 +18,8 @@ Version 3.2.0 - SVN
  - Replace setuid root installation of runguard with invocation
    via sudo.
  - Fix missing permissions for plugin interface SQL user.
+ - Remove CHROOTDIR (mountpoint prefix) variable to avoid confusion
+   with the directory where the Java chroot was created.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------

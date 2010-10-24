@@ -166,7 +166,6 @@ AX_PATH(judgehost_logdir,       [$judgehost_root/log])
 AX_PATH(judgehost_rundir,       [$judgehost_root/run])
 AX_PATH(judgehost_tmpdir,       [$judgehost_root/tmp])
 AX_PATH(judgehost_judgedir,     [$judgehost_root/judgings])
-AX_PATH(judgehost_chrootdir,    [$judgehost_judgedir])
 AX_WITH_COMMENT(6,[      ])
 
 # }}}
@@ -198,13 +197,11 @@ if test "x$enable_fhs" = xyes ; then
 	AC_SUBST(judgehost_rundir,      $localstatedir/run/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_tmpdir,      /tmp)
 	AC_SUBST(judgehost_judgedir,    $localstatedir/lib/${PACKAGE_TARNAME}/judgings)
-	AC_SUBST(judgehost_chrootdir,   $judgehost_judgedir)
 
 	AC_SUBST(domjudge_docdir,       $docdir)
 fi
 
 # }}}
-AC_SUBST(CHROOTDIR, $judgehost_chrootdir)
 
 # Checks for programs.
 AC_PROG_CXX
@@ -349,7 +346,6 @@ echo "    - log..............: $judgehost_logdir"
 echo "    - run..............: $judgehost_rundir"
 echo "    - tmp..............: $judgehost_tmpdir"
 echo "    - judge............: $judgehost_judgedir"
-echo "    - chroot...........: $judgehost_chrootdir"
 echo ""
 echo "Now you might want to run some of:"
 echo ""
