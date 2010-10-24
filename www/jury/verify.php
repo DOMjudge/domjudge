@@ -46,6 +46,5 @@ if ( VERIFICATION_REQUIRED ) {
 
 setVerifier($verifier);
 
-/* redirect back. */
-header('Location: submission.php?id=' .
-	urlencode($jdata['submitid']) . '&jid=' . urlencode($id));
+/* redirect back to submissions overview. */
+header('Location: submissions.php');
