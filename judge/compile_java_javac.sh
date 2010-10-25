@@ -3,7 +3,7 @@
 # Java compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 #
-# This script byte-compiles with the Sun javac compiler and generates
+# This script byte-compiles with the Oracle (Sun) javac compiler and generates
 # a shell script to run it with the java interpreter later.
 #
 # NOTICE: this compiler script cannot be used with the USE_CHROOT
@@ -14,7 +14,7 @@ SOURCE="$1"
 DEST="$2"
 MEMLIMIT="$3"
 
-# Sun java needs filename to match main class:
+# Oracle java needs filename to match main class:
 MAINCLASS=Main
 
 SOURCEDIR=${SOURCE%/*}

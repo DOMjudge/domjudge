@@ -1,7 +1,7 @@
 #!/bin/sh
 # $Id$
 #
-# Script to generate a minimal chroot environment with Sun Java
+# Script to generate a minimal chroot environment with Oracle (Sun) Java
 # support to allow for Java programs to run in a chroot.
 #
 # This script downloads and installs a Debian base system.
@@ -43,7 +43,7 @@ export DEBIAN_FRONTEND=noninteractive
 usage()
 {
     echo "Usage: $0 <chrootdir> <architecture>"
-    echo "Creates a chroot environment with Sun Java support using the"
+    echo "Creates a chroot environment with Oracle (Sun) Java support using the"
     echo "Debian GNU/Linux distribution."
     echo
     echo "This script must be run as root, <chrootdir> the non-existing target"

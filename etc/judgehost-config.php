@@ -11,7 +11,7 @@ define('USE_CHROOT', true);
 
 // Optional script to run for creating/destroying chroot environment,
 // leave empty to disable. This example script can be used to support
-// Sun Java with a chroot (edit the script first!).
+// Oracle (Sun) Java with a chroot (edit the script first!).
 // define('CHROOT_SCRIPT', 'chroot-startstop.sh');
 define('CHROOT_SCRIPT', '');
 
@@ -20,7 +20,7 @@ define('COMPILETIME', 30);
 
 // Maximum memory usage by RUNUSER in kB
 // This includes the shell which starts the compiled solution and
-// also any interpreter like Sun 'java', which takes 200MB away!
+// also any interpreter like Oracle (Sun) 'java', which takes 200MB away!
 define('MEMLIMIT', 524288);
 
 // Maximum filesize RUNUSER may write in kB

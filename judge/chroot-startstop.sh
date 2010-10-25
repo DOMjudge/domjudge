@@ -1,12 +1,12 @@
 #!/bin/sh
 # $Id$
 
-# Script to setup chroot environment extras needed for Sun Java.
+# Script to setup chroot environment extras needed for Oracle Java.
 #
 # Configure the use of this script in 'etc/judgehost-config.php' when
-# using the chroot environment and Sun Java compiler/interpreter and
+# using the chroot environment and Oracle Java compiler/interpreter and
 # adapt this script to your environment. See also bin/dj_make_chroot.sh
-# for a script to generate a minimal chroot environment with Sun Java.
+# for a script to generate a minimal chroot environment with Oracle Java.
 #
 # This script will be called from testcase_run.sh in the root
 # directory of the chroot environment with one parameter: either
