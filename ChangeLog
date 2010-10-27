@@ -5,6 +5,8 @@ Version 3.1.2 - SVN
  - Fix missing permissions for plugin interface SQL user.
  - Fix information leak in clarification problems list. (Closes: #3096018)
  - Small documentation improvements.
+ - Do not check scoreboard cache for key integrity; this
+   prevents deletion of teams while adding no real value.
 
 Version 3.1.1 - 22 August 2010
 ------------------------------
