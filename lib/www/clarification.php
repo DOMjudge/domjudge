@@ -221,7 +221,7 @@ function putClarificationForm($action, $cid, $respid = NULL)
 {
 	require_once('forms.php');
 
-	global $DB;
+	global $DB, $cdata;
 ?>
 
 <script type="text/javascript">
@@ -282,10 +282,15 @@ function confirmClar() {
 		echo "<tr><td><b>To:</b></td><td>Jury</td></tr>\n";
 	}
 
-	// Select box for a specific problem or general issue
-	$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid, ": ", name) as name
-	                 FROM problem WHERE cid = %i AND allow_submit = 1
-	                 ORDER BY probid ASC', $cid);
+	// Select box for a specific problem (only when the contest
+	// has started) or general issue.
+	if ( difftime($cdata['starttime'], now()) <= 0 ) {
+		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid, ": ", name) as name
+		                 FROM problem WHERE cid = %i AND allow_submit = 1
+		                 ORDER BY probid ASC', $cid);
+	} else {
+		$probs = array();
+	}
 	$options = array_merge(array('general' => 'General issue'), $probs);
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options, ($respid ? $clar['probid'] : 'general'), true) .

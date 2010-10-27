@@ -61,6 +61,23 @@ function getCurContest($fulldata = FALSE) {
 }
 
 /**
+ * Returns whether the problem with probid is visible to teams and the
+ * public. That is, it is in the active contest, which has started and
+ * it is submittable.
+ */
+function problemVisible($probid)
+{
+	global $DB, $cdata;
+
+	if ( empty($probid) ) return FALSE;
+	if ( !$cdata || difftime(now(),$cdata['starttime']) < 0 ) return FALSE;
+
+	return $DB->q('MAYBETUPLE SELECT probid FROM problem
+	               WHERE cid = %i AND allow_submit = 1 AND probid = %s',
+	              $cdata['cid'], $probid) !== NULL;
+}
+
+/**
  * Scoreboard calculation
  *
  * This is here because it needs to be called by the judgedaemon script

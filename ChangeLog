@@ -21,6 +21,7 @@ Version 3.2.0 - SVN
  - Remove CHROOTDIR (mountpoint prefix) variable to avoid confusion
    with the directory where the Java chroot was created.
  - Redirect to submissions overview page after verification.
+ - Fix information leak in clarification problems list. (Closes: #3096018)
 
 Version 3.1.0 - 14 July 2010
 ----------------------------

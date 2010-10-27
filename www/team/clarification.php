@@ -28,6 +28,10 @@ if ( isset($_REQUEST['id']) ) {
 
 // insert a request (if posted)
 if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
+	// Disallow problems that are not submittable or
+	// before contest start.
+	if ( !problemVisible($_POST['problem']) ) $_POST['problem'] = 'general';
+
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, submittime, sender, probid, body)
 	                 VALUES (%i, %s, %s, %s, %s)',
