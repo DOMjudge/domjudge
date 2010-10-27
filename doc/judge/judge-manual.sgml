@@ -322,7 +322,7 @@ verification, a submission will show as PENDING to the team until the
 judging has been verified.
 
 Under the Submissions menu, you can see submitted solutions, with
-the newest one at the top. Click on a submission id or result code
+the newest one at the top. Click on a submission line
 for more details about the submission (team name, submittime etc),
 a list of judgings and the details for the most recent judging
 (runtime, outputs, diff with testdata). There is also a switch
@@ -364,6 +364,16 @@ potentially changed outcome of their submissions. It might be desirable
 to combine rejudging with a clarification to the team or all teams
 explaining what has been rejudged and why.
 
+<sect1>Ignored submissions
+<p>
+Finally, there is the option to <em>ignore</em> specific submissions
+using the button on the submission page. When a submissions is being
+ignored, it is as if was never submitted: it is not visible to the
+team that sent it nor on the scoreboard. It will show striked through
+in the jury submissions list though. This can be used to effectively
+delete a submission for some reason, e.g. when a team erroneously sent
+it for the wrong problem. The submission can also be unignored again.
+
 <sect>Clarification Requests
 <p>
 Communication between teams and jury happens through Clarification
@@ -398,8 +408,8 @@ An answer to a clarification request is made by putting the text in the
 input box under the request text. The original text is quoted. You can
 choose to either send it to the team that requested the clarification,
 or to all teams. In the latter case, make sure you phrase it in such a
-way that the message is self-contained, since the other teams cannot
-view the original question.
+way that the message is self-contained (e.g. by keeping the quoted
+text), since the other teams cannot view the original request.
 
 <p>
 The menu on every page of the jury interface will mention the number

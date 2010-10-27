@@ -218,6 +218,7 @@ On the domserver host:
 
 <item> Check that the web interface works (/team, /public and /jury)
        and check that the jury interface is password protected.
+       Optionally add (more) users to <tt>etc/htpasswd-{jury,plugin}</tt>.
 <item> Add useful contest data through the jury web interface or with
        phpMyAdmin.
 <item> Run the config checker in the jury web interface.
@@ -228,6 +229,8 @@ On the judgehosts:
 <item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
        Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
        (check specific options of useradd, since these vary per system)
+<item> Copy the file <tt>etc/dbpasswords.secret</tt> from the
+       domserver to all judgehosts to synchronise database passwords.
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
 </itemize>
 It should be done by now. As a check that (almost) everything works,
@@ -886,7 +889,13 @@ To configure the web server for DOMjudge, use the Apache configuration
 snippet from <tt>etc/apache.conf</tt>. It contains examples for
 configuring the DOMjudge pages with an alias directive, or as a
 virtualhost, optionally with SSL; it also contains PHP and security
-settings. Reload the web server for changes to take effect.
+settings. The Apache configuration snippet by default includes HTTP
+basic-auth authentication to the jury and plugin interfaces. A default
+user <tt>domjudge_jury</tt> with password equal to that in
+<tt>etc/dbpasswords.secret</tt> is set for the jury interface.
+Additional users can be added with the <tt>htpasswd</tt> program to
+either file <tt>etc/htpasswd-{jury,plugin}</tt>.
+Reload the web server for changes to take effect.
 
 See also section <ref id="security:webprivs" name="Security: webserver
 privileges"> for some details on file permissions for the
