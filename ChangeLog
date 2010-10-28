@@ -4,6 +4,8 @@ Version 3.0.5 - SVN
 -------------------
  - Fix missing permissions for plugin interface SQL user.
  - Small admin and judge documentation fixes.
+ - Do not check scoreboard cache for key integrity; this
+   prevents deletion of teams while adding no real value.
 
 Version 3.0.4 - 22 August 2010
 ------------------------------

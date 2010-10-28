@@ -60,12 +60,6 @@ $RELATIONS['problem'] = array (
 	'cid' => 'contest.cid'
 );
 
-$RELATIONS['scoreboard_jury'] = array (
-	'cid' => 'contest.cid',
-	'teamid' => 'team.login',
-	'probid' => 'problem.probid'
-);
-
 $RELATIONS['submission'] = array (
 	'cid' => 'contest.cid',
 	'teamid' => 'team.login',
