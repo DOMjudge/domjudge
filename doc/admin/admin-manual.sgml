@@ -240,7 +240,7 @@ Optionally:
        firewall rules.
 <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
        or use the balloon web interface.
-<item> Setup the Java chroot environment to use Sun Java with chroot:<newline>
+<item> Setup the Java chroot environment on the judgehosts to use Sun Java with chroot:<newline>
        <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
        <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
@@ -2119,17 +2119,12 @@ of the jury account should be installed on all team accounts to
 provide key-based access), and a shared filesystem (e.g. NFS)
 is needed between the team computers and the domserver.
 Alternatively, another means of
-providing access from the server can be configured, see below
-the file
+providing access from the server can be configured, see the file
 <tt>submit/submit_copy.sh</tt> for more details.
 
-
-For the command line client you need to have Windows XP and the cygwin-base
-package must be (re-)installed from the mirror
-<url url="http://cygwin.win6.jp/cygwin-ipv6/"> for support of the
-complete <tt>netdb.h</tt> headers (as this is currently not supported
-in the standard Cygwin tree yet; the currently beta version 1.7 should
-include this).
+To build the command line client under Windows, you need to have at least Windows XP and
+cygwin version 1.7 for support of the complete <tt>netdb.h</tt>
+headers.
 
 
 </report>
