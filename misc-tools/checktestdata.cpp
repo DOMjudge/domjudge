@@ -30,17 +30,21 @@
    value    := <integer> | <float> | <variable>
    compare  := '<' | '>' | '<=' | '>=' | '==' | '!='
    expr     := <term> | <expr> [+-] <term>
-   term     := <value> | '-' <term> | '(' <expr> ')' | <term> [*%/] <term>
+   term     := <term> [*%/] <factor> | <factor>
+   factor   := <value> | '-' <term> | '(' <expr> ')' | <factor> '^' <factor>
    test     := '!' <test> | '(' <test> ')' | <test> [&|] <test> |
                <expr> <compare> <expr> | 'MATCH(' <string> str ')' | 'ISEOF'
+
+      That is, integer, as well as floating point values (of arbitrary
+      size and precision) are supported, and operators +-*%/^ with the
+      usual rules of precedence. An expression is integer if all its
+      sub-expressions are integer. Integer division is used on integers.
+      The exponentiation operator ^ only allows non-negative integer
+      exponents that fit in an unsigned long.
 
       MATCH and ISEOF are special keyword that return whether the next
       character matches any of 'str', respectively if end-of-file has
       been reached.
-
-      A value or expression can either be an integer or a floating
-      point number. An expression is integer if all its sub-expressions
-      are integer.
 
    string   := ".*"
 
@@ -163,7 +167,7 @@ const int exit_testdata = 1;
 const int exit_failure  = 2;
 
 const int display_before_error = 65;
-const int display_after_error  = 10;
+const int display_after_error  = 50;
 
 size_t prognr, datanr, linenr, charnr, extra_ws;
 command currcmd;
@@ -402,6 +406,31 @@ value_t operator %(const value_t &x, const value_t &y)
 	exit(exit_failure);
 }
 
+value_t pow(const value_t &x, const value_t &y)
+{
+	if ( x.type==value_none || y.type==value_none ) return value_t();
+	if ( y.type!=value_int ) {
+		cerr << "float exponent not allowed in " << program[prognr] << endl;
+		exit(exit_failure);
+	}
+	if ( !y.intval.fits_ulong_p() ) {
+		cerr << "integer exponent " << y.intval
+			 << " does not fit in unsigned long in " << program[prognr] << endl;
+		exit(exit_failure);
+	}
+	unsigned long y1 = y.intval.get_ui();
+	value_t res;
+	if ( x.type==value_int ) {
+		res = x;
+		mpz_pow_ui(res.intval.get_mpz_t(),x.intval.get_mpz_t(),y1);
+		return res;
+	}
+	mpf_class x1 = x;
+	res = value_t(x1);
+	mpf_pow_ui(res.fltval.get_mpf_t(),x1.get_mpf_t(),y1);
+	return res;
+}
+
 value_t eval(expr e)
 {
 	debug("eval op='%c', val='%s', #args=%d",e.op,e.val.c_str(),(int)e.args.size());
@@ -413,6 +442,7 @@ value_t eval(expr e)
 	case '*': return eval(e.args[0]) * eval(e.args[1]);
 	case '/': return eval(e.args[0]) / eval(e.args[1]);
 	case '%': return eval(e.args[0]) % eval(e.args[1]);
+	case '^': return pow(eval(e.args[0]),eval(e.args[1]));
 	default:
 		cerr << "unknown arithmetic operator " << e.op << " in "
 		     << program[prognr] << endl;

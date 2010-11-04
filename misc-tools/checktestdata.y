@@ -19,6 +19,7 @@
 %left '&' '|'
 %left '+' '-'
 %left '*' '/' '%'
+%left '^'
 
 %%
 
@@ -71,12 +72,17 @@ expr:
 ;
 
 term:
+	fact          { $$ = parse_t($1); }
+|	term '*' fact { $$ = parse_t('*',$1,$3); }
+|	term '/' fact { $$ = parse_t('/',$1,$3); }
+|	term '%' fact { $$ = parse_t('%',$1,$3); }
+;
+
+fact:
 	value         { $$ = parse_t($1); }
-|	'-' term      { $$ = parse_t('n',$2); }
+|	'-' fact      { $$ = parse_t('n',$2); }
 |	'(' expr ')'  { $$ = parse_t($2); }
-|	term '*' term { $$ = parse_t('*',$1,$3); }
-|	term '/' term { $$ = parse_t('/',$1,$3); }
-|	term '%' term { $$ = parse_t('%',$1,$3); }
+|	fact '^' fact { $$ = parse_t('^',$1,$3); }
 ;
 
 test:

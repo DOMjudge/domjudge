@@ -6,7 +6,7 @@ Version 3.2.0 - SVN
  - Change execute() function for more flexible I/O redirection.
  - Add runpipe program for connecting stdin/out of two processes.
  - Rename compare_program.sh to *_wrapper, allow symlinked usage.
- - Add FLOAT command to checktestdata program.
+ - Add FLOAT command and exponentiation to checktestdata program.
  - Add countdown before contest and timezone to clock.
  - Automatically redirect team to submission list after submit.
  - Add daemon support in C/PHP libraries, use for submit/judgedaemon.
