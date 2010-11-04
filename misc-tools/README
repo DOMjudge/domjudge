@@ -22,7 +22,7 @@ whitespace.
 This program can be used as a more advanced replacement of checkinput.
 It allows you to not only check on simple (spacing) layout errors, but
 a simple grammar file must be specified for the testdata, according to
-which the testdata is checked. See 'checktestdata.cpp' for a grammar
+which the testdata is checked. See 'checktestdata.cc' for a grammar
 specification and files in the 'tests' subdirectory for some examples.
 
 Two sample scripts 'checktestdata.{hello,fltcmp}' are provided for the

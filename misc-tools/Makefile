@@ -37,7 +37,7 @@ ifeq ($(CHECKTESTDATA_ENABLED),yes)
 
 checktestdata: CPPFLAGS += $(BOOST_CPPFLAGS)
 checktestdata: LDFLAGS  += $(BOOST_LDFLAGS)
-checktestdata: checktestdata.cpp yylex.cc parse.cc $(LIBGMPXX) $(BOOST_REGEX_LIB)
+checktestdata: checktestdata.cc yylex.cc parse.cc $(LIBGMPXX) $(BOOST_REGEX_LIB)
 
 check: checktestdata
 	@for i in tests/testprog*.in ; do \
