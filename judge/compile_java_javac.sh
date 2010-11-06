@@ -14,6 +14,11 @@ SOURCE="$1"
 DEST="$2"
 MEMLIMIT="$3"
 
+# Amount of memory reserved for the Java virtual machine in KB. The
+# default below is just above the maximum memory usage of current
+# versions of the jvm, but might need increasing in some cases.
+MEMRESERVED=300000
+
 # Oracle java needs filename to match main class:
 MAINCLASS=Main
 
@@ -35,7 +40,7 @@ if [ ! -f "$TMP.class" ]; then
 fi
 
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
-MEMLIMITJAVA=$(($MEMLIMIT - 300000))
+MEMLIMITJAVA=$(($MEMLIMIT - $MEMRESERVED))
 
 # Write executing script:
 # Executes java byte-code interpreter with following options
