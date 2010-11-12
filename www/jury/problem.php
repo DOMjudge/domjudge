@@ -45,7 +45,7 @@ if ( isset($_POST['upload']) ) {
 		$zip = openZipFile($_FILES['problem_archive']['tmp_name']);
 		$id = importZippedProblem($zip, empty($id) ? NULL : $id);
 		$zip->close();
-		$refresh = '15;url='.$pagename.'?id='.urlencode($id);
+		header('Location: '.$pagename.'?id='.urlencode($id));
 	} else {
 		error("Missing filename for problem upload");
 	}
