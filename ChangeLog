@@ -22,6 +22,7 @@ Version 3.2.0 - SVN
    with the directory where the Java chroot was created.
  - Redirect to submissions overview page after verification.
  - Fix information leak in clarification problems list. (Closes: #3096018)
+ - In JS problem name detection, probid needs to be casenormalised too.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------
