@@ -156,9 +156,11 @@ function putClarificationList($clars, $team = NULL)
 	}
 
 	echo "<table class=\"list sortable\">\n<thead>\n";
-	echo "<tr><th scope=\"col\">ID</th><th scope=\"col\">from</th>" .
-	     "<th scope=\"col\">to</th><th scope=\"col\">subject</th>" .
+	echo "<tr>" .
+		( IS_JURY ? "<th scope=\"col\">ID</th>" : "") .
 	     "<th scope=\"col\">time</th>" .
+	     "<th scope=\"col\">from</th>" .
+	     "<th scope=\"col\">to</th><th scope=\"col\">subject</th>" .
 	     "<th scope=\"col\">text</th></tr>\n</thead>\n<tbody>\n";
 
 	while ( $clar = $clars->next() ) {
@@ -174,7 +176,11 @@ function putClarificationList($clars, $team = NULL)
 		else
 			echo '<tr>';
 
-		echo '<td>' . $link . $clar['clarid'] . '</a></td>';
+		if ( IS_JURY ) 
+			echo '<td>' . $link . $clar['clarid'] . '</a></td>';
+
+		echo '<td>' . $link;
+		echo printtime($clar['submittime']) . '</a></td>';
 
 		$sender = htmlspecialchars($clar['sender']);
 		$recipient = htmlspecialchars($clar['recipient']);
@@ -204,8 +210,6 @@ function putClarificationList($clars, $team = NULL)
 		}
 		echo "</a></td>";
 
-		echo '<td>' . $link;
-		echo printtime($clar['submittime']) . '</a></td>';
 		echo '<td>' . $link;
 		echo summarizeClarification($clar['body']);
 		echo "</a></td></tr>\n";
