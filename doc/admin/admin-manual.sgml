@@ -269,9 +269,16 @@ Optionally:
        domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
        domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount &lt;judgehost_judgedir&gt/*</tt>
-<item> Install GeSHI or the PEAR Text_Highlighter class for source syntax
-       highlighting, and the PHP xdiff PECL extension for diffs between
-       submissions.
+<item> For additional features in the jury web interface, the
+       following PHP extensions can be installed:
+       <itemize>
+       <item>GeSHI or the PEAR Text_Highlighter class for source
+             syntax highlighting;
+       <item>xdiff PECL extension for diffs between submissions;
+       <item>the ZipArchive class for uploading problem data as
+             zip-bundles (included by default in Debian, but not in
+             all other Linux distributions).
+       </itemize>
 </itemize>
 
 
@@ -418,6 +425,10 @@ functionality.
         url="http://pecl.php.net/package/xdiff">~
        (to reliably make diffs between submissions, DOMjudge will try
         alternative approaches if it's not available)
+
+<item> <htmlurl name="PHP ZipArchive class"
+        url="http://php.net/manual/en/class.ziparchive.php">~
+       (to upload problem data via zip bundles)
 
 <item> <htmlurl name="beep" url="http://www.johnath.com/beep/"> for
        audible notification of errors, submissions and judgings, when

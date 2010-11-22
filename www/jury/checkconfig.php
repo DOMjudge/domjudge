@@ -163,6 +163,15 @@ if ( $highlighter == 'native' ) {
 			htmlspecialchars($highlighter) .'".');
 }
 
+if ( class_exists("ZipArchive") ) {
+	result('software', 'Problem upload via zip bundles',
+	       'O', 'PHP ZipArchive class available for uploading problem data.');
+} else {
+	result('software', 'Problem upload via zip bundles',
+	       'W', 'Optionally, install/configure the PHP ZipArchive class ' .
+	       'to be able to upload problem data via zip bundles.');
+}
+
 $mysqldatares = $DB->q('SHOW variables WHERE
                         Variable_name = "max_connections" OR
                         Variable_name = "version"');
