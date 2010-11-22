@@ -59,9 +59,10 @@ $RESULTS_PRIO = array(
 define('LAZY_EVAL_RESULTS', true);
 
 // Remap final result, e.g. to disable a specific result.
-// Some possible options are shown commented below.
+// Some possible options are shown commented below. By default
+// presentation errors are remapped to wrong-answer's.
 $RESULTS_REMAP = array(
-//	'presentation-error' => 'wrong-answer',
+	'presentation-error' => 'wrong-answer',
 //	'presentation-error' => 'correct',
 //	'no-output'          => 'wrong-answer',
 	);

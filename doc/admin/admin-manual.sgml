@@ -762,7 +762,8 @@ DOMjudge supports a <tt>presentation-error</tt> result. The default
 <tt>compare</tt> program returns this result when output only differs
 by whitespace; this is counted as an incorrect submission. The script
 <tt>compare_wrapper</tt> does not support presentation error results
-however.
+however. By default presentation errors are remapped to wrong answer;
+this can be changed in <tt>etc/judgehost-config.php</tt>.
 
 <sect1>Run programs
 <p>
