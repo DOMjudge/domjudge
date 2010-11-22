@@ -88,23 +88,27 @@ if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No judgings.</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
-		 "<th scope=\"col\">end</th><th scope=\"col\">result</th>" .
+	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">started</th>" .
+		 "<th scope=\"col\">runtime</th><th scope=\"col\">result</th>" .
 		 "<th scope=\"col\">valid</th><th scope=\"col\">verified</th>" .
 	     "</tr>\n</thead>\n<tbody>\n";
 
 	while( $jud = $res->next() ) {
-		$link = 'submission.php?id=' . (int)$jud['submitid'] .
-			'&amp;jid=' . (int)$jud['judgingid'];
+		$start = strtotime($jud['starttime']);
+		if ( empty($jud['endtime']) ) {
+			$end = NULL;
+		} else {
+			$end = strtotime($jud['endtime']);
+		}
+		$link = ' href="submission.php?id=' . (int)$jud['submitid'] .
+			'&jid=' . (int)$jud['judgingid'] . '"';
 		echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
-		echo '<td><a href="' . $link . '">j' . (int)$jud['judgingid'] .
-			'</a></td>';
-		echo '<td>' . printtime($jud['starttime']) . '</td>';
-		echo '<td>' . printtime(@$jud['endtime'])  . '</td>';
-		echo '<td><a href="' . $link . '">' .
-			printresult(@$jud['result'], $jud['valid']) . '</a></td>';
-		echo '<td align="center">' . printyn($jud['valid']) . '</td>';
-		echo '<td align="center">' . printyn($jud['verified']) . '</td>';
+		echo "<td><a$link>j" . (int)$jud['judgingid'] . '</a></td>';
+		echo "<td><a$link>" . printtime($jud['starttime']) . '</a></td>';
+		echo "<td><a$link>" . printtimediff($start, $end) . '</a></td>';
+		echo "<td><a$link>" . printresult(@$jud['result'], $jud['valid']) . '</a></td>';
+		echo "<td align=\"center\"><a$link>" . printyn($jud['valid']) . '</a></td>';
+		echo "<td align=\"center\"><a$link>" . printyn($jud['verified']) . '</a></td>';
 		echo "</tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
