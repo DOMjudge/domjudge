@@ -244,8 +244,12 @@ function genScoreBoard($cdata) {
  * $static generates output suitable for standalone static html pages,
  * that is without references/links to other parts of the DOMjudge
  * interface.
+ * $limitteams is an array of teamid's whose rows will be the only
+ * ones displayed. The function still needs the complete scoreboard
+ * data or it will not know the rank.
  */
-function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE) {
+function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
+	$static = FALSE, $limitteams = null) {
 
 	$cid = $cdata['cid'];
 
@@ -294,6 +298,8 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 	// print the main scoreboard rows
 	$prevsortorder = -1;
 	foreach( $scores as $team => $totals ) {
+		// skip if we have limitteams and the team is not listed
+		if ( !empty($limitteams) && !in_array($team,$limitteams) ) continue;
 
 		// rank, team name, total correct, total time
 		echo '<tr';
@@ -387,31 +393,36 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 		}
 		echo "</tr>\n";
 	}
-	echo "</tbody>\n\n<tbody>\n";
+	echo "</tbody>\n\n";
 
-	// print a summaryline
-	echo '<tr id="scoresummary" title="#submitted / #correct / fastest time">' .
-		'<td title="total teams">' .
-		jurylink(null,count($teams)) . '</td>' .
-		( $SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
-		  jurylink('team_affiliations.php',count($summary['affils']) . ' / ' .
-				   count($summary['countries'])) . '</td>' : '' ) .
-		'<td title=" ">' . jurylink(null,'Summary') . '</td>' .
-		'<td title="total solved" class="scorenc">' . jurylink(null,$summary['num_correct'])  . '</td><td title=" "></td>';
+	if ( empty($limitteams) ) {
+		// print a summaryline
+		echo '<tbody><tr id="scoresummary" title="#submitted / #correct / fastest time">' .
+			'<td title="total teams">' .
+			jurylink(null,count($teams)) . '</td>' .
+			( $SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
+			  jurylink('team_affiliations.php',count($summary['affils']) . ' / ' .
+					   count($summary['countries'])) . '</td>' : '' ) .
+			'<td title=" ">' . jurylink(null,'Summary') . '</td>' .
+			'<td title="total solved" class="scorenc">' . jurylink(null,$summary['num_correct'])  . '</td><td title=" "></td>';
 
-	foreach( array_keys($probs) as $prob ) {
-		$str = $summary['problems'][$prob]['num_submissions'] . ' / ' .
-		       $summary['problems'][$prob]['num_correct'] . ' / ' .
-			   ( isset($summary['problems'][$prob]['best_time']) ?
-				 $summary['problems'][$prob]['best_time'] : '-' );
-		echo '<td>' .
-			jurylink('problem.php?id=' . urlencode($prob),$str) .
-			'</td>';
+		foreach( array_keys($probs) as $prob ) {
+			$str = $summary['problems'][$prob]['num_submissions'] . ' / ' .
+			       $summary['problems'][$prob]['num_correct'] . ' / ' .
+				   ( isset($summary['problems'][$prob]['best_time']) ?
+					 $summary['problems'][$prob]['best_time'] : '-' );
+			echo '<td>' .
+				jurylink('problem.php?id=' . urlencode($prob),$str) .
+				'</td>';
+		}
+		echo "</tr>\n</tbody>\n";
+	
 	}
-	echo "</tr>\n</tbody>\n</table>\n\n";
+
+	echo "</table>\n\n";
 
 	// only print legend when there's more than one category
-	if ( count($categs) > 1 ) {
+	if ( empty($limitteams) && count($categs) > 1 ) {
 		echo "<p><br /><br /></p>\n<table id=\"legend\" class=\"scoreboard" .
 			(IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
 			"<thead><tr><th scope=\"col\">" .
