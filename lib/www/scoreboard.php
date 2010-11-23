@@ -456,29 +456,15 @@ function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 
 	if ( empty( $cdata ) ) { echo "<p class=\"nodata\">No active contest</p>\n"; return; }
 	
+	$fdata = calcFreezeData($cdata);
 	$sdata = genScoreBoard($cdata);
-	
-	// Show final scores if contest is over and unfreezetime has been
-	// reached, or if contest is over and no freezetime had been set.
-	// We can compare $now and the dbfields stringwise.
-	$now = now();
-	$showfinal  = ( !isset($cdata['freezetime']) &&
-	                difftime($cdata['endtime'],$now) <= 0 ) ||
-	              ( isset($cdata['unfreezetime']) &&
-	                difftime($cdata['unfreezetime'], $now) <= 0 );
-	// freeze scoreboard if freeze time has been reached and
-	// we're not showing the final score yet
-	$showfrozen = !$showfinal && isset($cdata['freezetime']) &&
-	              difftime($cdata['freezetime'],$now) <= 0;
-	// contest is active but has not yet started
-	$cstarted = difftime($cdata['starttime'],$now) <= 0;
 
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
 
-	if ( $showfinal ) {
+	if ( $fdata['showfinal'] ) {
 		echo "<h4>final standings</h4>\n\n";
-	} elseif ( ! $cstarted ) {
+	} elseif ( ! $fdata['cstarted'] ) {
 		echo "<h4>scheduled to start at " . printtime($cdata['starttime']) . "</h4>\n\n";
 		// Stop here (do not leak problem number, descriptions etc).
 		// Alternatively we could only display the list of teams?
@@ -487,7 +473,7 @@ function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 		echo "<h4>starts: " . printtime($cdata['starttime']) .
 				" - ends: " . printtime($cdata['endtime']) ;
 
-		if ( $showfrozen ) {
+		if ( $fdata['showfrozen'] ) {
 			echo " (";
 			if ( IS_JURY ) {
 				echo "public scoreboard is ";
@@ -501,7 +487,7 @@ function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 	
 	// last modified date, now if we are the jury, else include the
 	// freeze time
-	if( ! IS_JURY && $showfrozen ) {
+	if( ! IS_JURY && $fdata['showfrozen'] ) {
 		$lastupdate = strtotime($cdata['freezetime']);
 	} else {
 		$lastupdate = time();
@@ -510,6 +496,33 @@ function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 		date('j M Y H:i', $lastupdate) . "</p>\n\n";
 
 	return;
+}
+
+/**
+ * Given an array of contest data, calculates whether the contest
+ * has already started ('cstarted'), and if scoreboard is currently
+ * frozen ('showfrozen') or final ('showfinal').
+ */
+function calcFreezeData($cdata)
+{
+	$fdata = array();
+
+	// Show final scores if contest is over and unfreezetime has been
+	// reached, or if contest is over and no freezetime had been set.
+	// We can compare $now and the dbfields stringwise.
+	$now = now();
+	$fdata['showfinal']  = ( !isset($cdata['freezetime']) &&
+	                difftime($cdata['endtime'],$now) <= 0 ) ||
+	              ( isset($cdata['unfreezetime']) &&
+	                difftime($cdata['unfreezetime'], $now) <= 0 );
+	// freeze scoreboard if freeze time has been reached and
+	// we're not showing the final score yet
+	$fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
+	              difftime($cdata['freezetime'],$now) <= 0;
+	// contest is active but has not yet started
+	$fdata['cstarted'] = difftime($cdata['starttime'],$now) <= 0;
+
+	return $fdata;
 }
 
 /**
