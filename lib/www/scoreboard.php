@@ -247,9 +247,11 @@ function genScoreBoard($cdata) {
  * $limitteams is an array of teamid's whose rows will be the only
  * ones displayed. The function still needs the complete scoreboard
  * data or it will not know the rank.
+ * if $displayrank is false the first column will not display the
+ * team's current rank but a question mark.
  */
 function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
-	$static = FALSE, $limitteams = null) {
+	$static = FALSE, $limitteams = null, $displayrank = TRUE) {
 
 	$cid = $cdata['cid'];
 
@@ -317,7 +319,9 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 		}
 		echo '><td class="scorepl">';
 		// Only print rank when score is different from the previous team
-		if ( !isset($prevteam) || $scores[$prevteam]['rank']!=$totals['rank'] ) {
+		if ( ! $displayrank ) {
+			echo jurylink(null,'?');
+		} elseif ( !isset($prevteam) || $scores[$prevteam]['rank']!=$totals['rank'] ) {
 			echo jurylink(null,$totals['rank']);
 		} else {
 			echo jurylink(null,'');
