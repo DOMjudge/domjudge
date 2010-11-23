@@ -236,14 +236,17 @@ function genScoreBoard($cdata) {
 
 /**
  * Output the general scoreboard based on the cached data in table
- * 'scoreboard'. $myteamid can be passed to highlight a specific row.
+ * 'scoreboard_{team,jury}'. $myteamid can be passed to highlight a
+ * specific row.
  * If this function is called while IS_JURY is defined, the scoreboard
  * will always be current, regardless of the freezetime setting in the
- * contesttable. $static generates output suitable for static html pages.
+ * contesttable.
+ * $static generates output suitable for standalone static html pages,
+ * that is without references/links to other parts of the DOMjudge
+ * interface.
  */
-function renderScoreBoard($cdata, $sdata, $myteamid = null, $static = FALSE) {
+function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE) {
 
-	if ( empty( $cdata ) ) { echo "<p class=\"nodata\">No active contest</p>\n"; return; }
 	$cid = $cdata['cid'];
 
 	// 'unpack' the scoreboard data:
@@ -254,45 +257,6 @@ function renderScoreBoard($cdata, $sdata, $myteamid = null, $static = FALSE) {
 	$probs   = $sdata['problems'];
 	$categs  = $sdata['categories'];
 	unset($sdata);
-
-	// Show final scores if contest is over and unfreezetime has been
-	// reached, or if contest is over and no freezetime had been set.
-	// We can compare $now and the dbfields stringwise.
-	$now = now();
-	$showfinal  = ( !isset($cdata['freezetime']) &&
-	                difftime($cdata['endtime'],$now) <= 0 ) ||
-	              ( isset($cdata['unfreezetime']) &&
-	                difftime($cdata['unfreezetime'], $now) <= 0 );
-	// freeze scoreboard if freeze time has been reached and
-	// we're not showing the final score yet
-	$showfrozen = !$showfinal && isset($cdata['freezetime']) &&
-	              difftime($cdata['freezetime'],$now) <= 0;
-	// contest is active but has not yet started
-	$cstarted = difftime($cdata['starttime'],$now) <= 0;
-
-	// page heading with contestname and start/endtimes
-	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
-
-	if ( $showfinal ) {
-		echo "<h4>final standings</h4>\n\n";
-	} elseif ( ! $cstarted ) {
-		echo "<h4>scheduled to start at " . printtime($cdata['starttime']) . "</h4>\n\n";
-		// Stop here (do not leak problem number, descriptions etc).
-		// Alternatively we could only display the list of teams?
-		if ( ! IS_JURY ) return;
-	} else {
-		echo "<h4>starts: " . printtime($cdata['starttime']) .
-				" - ends: " . printtime($cdata['endtime']) ;
-
-		if ( $showfrozen ) {
-			echo " (";
-			if ( IS_JURY ) {
-				echo "public scoreboard is ";
-			}
-			echo "frozen since " . printtime($cdata['freezetime']) .")";
-		}
-		echo "</h4>\n\n";
-	}
 
 	// configuration
 	$SHOW_AFFILIATIONS = dbconfig_get('show_affiliations', 1);
@@ -463,6 +427,63 @@ function renderScoreBoard($cdata, $sdata, $myteamid = null, $static = FALSE) {
 		echo "</tbody>\n</table>\n\n";
 	}
 
+
+	return;
+}
+
+/**
+ * Function to output a complete scoreboard.
+ * This takes care of outputting the headings, start/endtimes and footer
+ * of the scoreboard. It calls genScoreBoard to generate the data and
+ * renderScoreBoardTable for displaying the actual table.
+ */
+function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
+
+	if ( empty( $cdata ) ) { echo "<p class=\"nodata\">No active contest</p>\n"; return; }
+	
+	$sdata = genScoreBoard($cdata);
+	
+	// Show final scores if contest is over and unfreezetime has been
+	// reached, or if contest is over and no freezetime had been set.
+	// We can compare $now and the dbfields stringwise.
+	$now = now();
+	$showfinal  = ( !isset($cdata['freezetime']) &&
+	                difftime($cdata['endtime'],$now) <= 0 ) ||
+	              ( isset($cdata['unfreezetime']) &&
+	                difftime($cdata['unfreezetime'], $now) <= 0 );
+	// freeze scoreboard if freeze time has been reached and
+	// we're not showing the final score yet
+	$showfrozen = !$showfinal && isset($cdata['freezetime']) &&
+	              difftime($cdata['freezetime'],$now) <= 0;
+	// contest is active but has not yet started
+	$cstarted = difftime($cdata['starttime'],$now) <= 0;
+
+	// page heading with contestname and start/endtimes
+	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
+
+	if ( $showfinal ) {
+		echo "<h4>final standings</h4>\n\n";
+	} elseif ( ! $cstarted ) {
+		echo "<h4>scheduled to start at " . printtime($cdata['starttime']) . "</h4>\n\n";
+		// Stop here (do not leak problem number, descriptions etc).
+		// Alternatively we could only display the list of teams?
+		if ( ! IS_JURY ) return;
+	} else {
+		echo "<h4>starts: " . printtime($cdata['starttime']) .
+				" - ends: " . printtime($cdata['endtime']) ;
+
+		if ( $showfrozen ) {
+			echo " (";
+			if ( IS_JURY ) {
+				echo "public scoreboard is ";
+			}
+			echo "frozen since " . printtime($cdata['freezetime']) .")";
+		}
+		echo "</h4>\n\n";
+	}
+
+	renderScoreBoardTable($cdata,$sdata,$myteamid,$static);
+	
 	// last modified date, now if we are the jury, else include the
 	// freeze time
 	if( ! IS_JURY && $showfrozen ) {
@@ -474,17 +495,6 @@ function renderScoreBoard($cdata, $sdata, $myteamid = null, $static = FALSE) {
 		date('j M Y H:i', $lastupdate) . "</p>\n\n";
 
 	return;
-}
-
-/**
- * Very simple wrapper around the scoreboard data-generating and
- * rendering functions.
- */
-function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
-
-	$sdata = genScoreBoard($cdata);
-
-	renderScoreBoard($cdata,$sdata,$myteamid,$static);
 }
 
 /**
