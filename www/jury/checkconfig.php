@@ -168,7 +168,7 @@ if ( class_exists("ZipArchive") ) {
 	       'O', 'PHP ZipArchive class available for uploading problem data.');
 } else {
 	result('software', 'Problem upload via zip bundles',
-	       'W', 'Optionally, install/configure the PHP ZipArchive class ' .
+	       'W', 'Optionally, enable the PHP zip extension ' .
 	       'to be able to upload problem data via zip bundles.');
 }
 

@@ -275,9 +275,10 @@ Optionally:
        <item>GeSHI or the PEAR Text_Highlighter class for source
              syntax highlighting;
        <item>xdiff PECL extension for diffs between submissions;
-       <item>the ZipArchive class for uploading problem data as
-             zip-bundles (included by default in Debian, but not in
-             all other Linux distributions).
+       <item>zip PHP-bundled extension (<tt>--enable-zip</tt>)
+             for uploading problem data as zip-bundles (enabled
+             by default in Debian, but not in all other Linux
+             distributions).
        </itemize>
 </itemize>
 
@@ -426,8 +427,8 @@ functionality.
        (to reliably make diffs between submissions, DOMjudge will try
         alternative approaches if it's not available)
 
-<item> <htmlurl name="PHP ZipArchive class"
-        url="http://php.net/manual/en/class.ziparchive.php">~
+<item> <htmlurl name="PHP zip Extension"
+        url="http://www.php.net/manual/en/book.zip.php">~
        (to upload problem data via zip bundles)
 
 <item> <htmlurl name="beep" url="http://www.johnath.com/beep/"> for
