@@ -68,8 +68,8 @@ $probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid,": ",name) as name F
 if( count($probs) == 0 ) {
 	error('No problems defined for this contest');
 }
-$probs = array_merge(array(''=>'by filename'), $probs);
 
+$probs[''] = 'by filename';
 echo addSelect('probid', $probs, '', true);
 
 ?></td>
@@ -84,7 +84,7 @@ if( count($langs) == 0 ) {
 	error('No languages defined');
 }
 
-$langs = array_merge(array(''=>'by extension'), $langs);
+$langs[''] = 'by extension';
 echo addSelect('langext', $langs, '', true);
 
 ?></td>
