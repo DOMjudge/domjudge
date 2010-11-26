@@ -24,9 +24,11 @@
    Output format of differences:
 
    - First a line stating from which line differences were found.
-   - Then all lines from that line until end of both <program.out> and
-     <testdata.out> formatted as
-	 '<PROGRAM LINE>' X '<TESTDATA LINE>'
+   - Then all lines from PREVLINES before that line until end of both
+     <program.out> and <testdata.out>, formatted as:
+
+	   '<PROGRAM LINE>' X '<TESTDATA LINE>'
+
 	 The left and right sides are aligned and ending quote (') is
      replaced by an underscore (_) if the line is truncated. The
      middle 'X' is one of the following characters:
@@ -56,7 +58,11 @@
 
 #define MAXLINELEN 65536
 
-const size_t maxprintlen = 80;
+/* Maximum characters to print per side on a line */
+#define MAXPRINTLEN 60
+
+/* Number of context lines printed before first line with differences */
+#define PREVLINES 3
 
 char *progname;
 
@@ -221,6 +227,9 @@ void writediff()
 				continue;
 			}
 			if ( fgets(line[i],MAXLINELEN,inputfile[i])!=NULL && strlen(line[i])!=0 ) {
+				if ( strlen(line[i])>=MAXLINELEN-1 ) {
+					error(0,"cannot read lines longer than %d characters",MAXLINELEN);
+				}
 				nlines[i]++;
 			} else {
 				endoffile[i] = 1;
@@ -240,12 +249,15 @@ void writediff()
 		}
 	}
 
+	/* If no differences found, then some error occurred */
+	if ( firstdiff==-1 ) error(0,"differences reported by 'diff', but none found");
+
 	/* Reset file position to start */
 	for(i=0; i<2; i++) rewind(inputfile[i]);
 
 	/* Determine left/right printing length and construct format
 	   string for printf later */
-	for(i=0; i<2; i++) maxlinelen[i] = min(maxlinelen[i],maxprintlen);
+	for(i=0; i<2; i++) maxlinelen[i] = min(maxlinelen[i],MAXPRINTLEN);
 	sprintf(formatstr,"%%3d %%c%%-%ds %%c %%c%%-%ds\n",
 	        (int)maxlinelen[0]+1, (int)maxlinelen[1]+1);
 
@@ -270,6 +282,22 @@ void writediff()
 		/* Check for just normal character differences */
 		normaldiff = ( strcmp(line[0],line[1])!=0 );
 
+		/* Discern cases '!', '$' and '=' */
+		if ( normaldiff ) {
+			diffchar = '!';
+		} else if ( endlinediff ) {
+			diffchar = '$';
+		} else {
+			diffchar = '=';
+		}
+
+		if ( diffchar!='=' && l<firstdiff ) {
+			error(0,"internal error: first difference on line %d != %d",l,firstdiff);
+		}
+
+		/* Skip printing until PREVLINES before first difference line */
+		if ( l+PREVLINES<firstdiff ) continue;
+
 		/* Truncate lines for printing */
 		for(i=0; i<2; i++) {
 			if ( strlen(line[i])>maxlinelen[i] ) {
@@ -279,15 +307,6 @@ void writediff()
 				line[i][strlen(line[i])+1] = 0;
 				line[i][strlen(line[i])] = '\'';
 			}
-		}
-
-		/* Discern cases '!', '$' and '=' */
-		if ( normaldiff ) {
-			diffchar = '!';
-		} else if ( endlinediff ) {
-			diffchar = '$';
-		} else {
-			diffchar = '=';
 		}
 
 		fprintf(diffoutfile,formatstr,l+1,'\'',line[0],diffchar,'\'',line[1]);
@@ -330,9 +349,6 @@ void writediff()
 			                         diffchar,quotechar[1],line[1]);
 		}
 	}
-
-	/* If no differences found, then some error occurred */
-	if ( firstdiff==-1 ) error(0,"differences reported by 'diff', but none found");
 
 	fclose(diffoutfile);
 	fclose(inputfile[0]);
