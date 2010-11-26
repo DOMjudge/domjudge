@@ -367,14 +367,6 @@ if ( isset($jid) )  {
 		    "correct\">$run[runresult]</span></td></tr>" .
 		    "</table>\n\n";
 
-		echo "<h5>Program output</h5>\n";
-		if ( @$run['output_run'] ) {
-			echo "<pre class=\"output_text\">".
-			    htmlspecialchars($run['output_run'])."</pre>\n\n";
-		} else {
-			echo "<p class=\"nodata\">There was no program output.</p>\n";
-		}
-
 		echo "<h5>Diff output</h5>\n";
 		if ( @$run['output_diff'] ) {
 			echo "<pre class=\"output_text\">";
@@ -382,6 +374,14 @@ if ( isset($jid) )  {
 			echo "</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no diff output.</p>\n";
+		}
+
+		echo "<h5>Program output</h5>\n";
+		if ( @$run['output_run'] ) {
+			echo "<pre class=\"output_text\">".
+			    htmlspecialchars($run['output_run'])."</pre>\n\n";
+		} else {
+			echo "<p class=\"nodata\">There was no program output.</p>\n";
 		}
 
 		echo "<h5>Error output (info/debug/errors)</h5>\n";
