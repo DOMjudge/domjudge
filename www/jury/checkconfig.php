@@ -465,6 +465,14 @@ while($row = $res->next()) {
 		$row['result'] . "\"\n";
 }
 
+// check for valid judgings that are already running too long
+$res = $DB->q('SELECT judgingid, submitid, starttime
+               FROM judging WHERE valid = 1 AND endtime IS NULL AND
+               (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(starttime)) > 300');
+while($row = $res->next()) {
+	$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
+		" is running for longer than 5 minutes, probably the judgedaemon crashed\n";
+}
 
 // check for start/endtime problems and contestids
 $res = $DB->q('SELECT s.submitid AS s_submitid, j.submitid AS j_submitid,
