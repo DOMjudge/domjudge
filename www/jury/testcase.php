@@ -90,14 +90,12 @@ $title = 'Testcases for problem '.htmlspecialchars(@$probid);
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
 
-requireAdmin();
-
 if ( ! $probid ) error("Missing or invalid problem id");
 
 echo "<h1>" . $title ."</h1>\n\n";
 
 $result = '';
-if ( isset($_POST['probid']) ) {
+if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 	$maxrank = 0;
 	foreach($data as $rank => $row) {
@@ -181,8 +179,10 @@ if ( !empty($result) ) {
 echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem " .
 	htmlspecialchars($probid) . "</a></p>\n\n";
 
-echo addForm('', 'post', null, 'multipart/form-data') .
-    addHidden('probid', $probid);
+if ( IS_ADMIN ) {
+	echo addForm('', 'post', null, 'multipart/form-data') .
+	    addHidden('probid', $probid);
+}
 
 if ( count($data)==0 ) {
 	echo "<p class=\"nodata\">No testcase(s) yet.</p>\n";
@@ -191,14 +191,17 @@ if ( count($data)==0 ) {
 <table class="list testcases">
         <!--
 <colgroup>
-<col id="testrank" /><col class="filename" /><col id="testupload" />
+<col id="testrank" /><col class="filename" /><?php
+	if ( IS_ADMIN ) echo '<col id="testupload" />'; ?>
 <col id="testsize" /><col id="testmd5" /><col id="testdesc" />
 </colgroup>
         -->
 <thead><tr>
 <th scope="col">#</th><th scope="col">download</th>
 <th scope="col">size</th><th scope="col">md5</th>
-<th scope="col">upload new</th><th scope="col">description</th>
+<?php
+	if ( IS_ADMIN ) echo '<th scope="col">upload new</th>';
+?><th scope="col">description</th>
 </tr></thead>
 <tbody>
 <?php
@@ -218,21 +221,28 @@ foreach( $data as $rank => $row ) {
 		    urlencode($probid) . "&amp;rank=$rank&amp;fetch=" . $inout . "\">" .
 		    htmlspecialchars($probid) . $rank . "." . substr($inout,0,-3) . "</a></td>" .
 		    "<td class=\"testsize\">" . htmlspecialchars($row["size_$inout"]) . "&nbsp;B</td>" .
-		    "<td class=\"testmd5\">" . htmlspecialchars($row["md5sum_$inout"]) . "</td>" .
-		    "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";
+		    "<td class=\"testmd5\">" . htmlspecialchars($row["md5sum_$inout"]) . "</td>";
+		if ( IS_ADMIN ) {
+		    echo "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";
+		}
 		if ( $inout=='input' ) {
-			echo "<td rowspan=\"2\" class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
-			    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"2\">" .
-			    htmlspecialchars($row['description']) . "</textarea></td>" .
-			    "<td rowspan=\"2\" class=\"editdel\">" .
-			    "<a href=\"delete.php?table=testcase&amp;testcaseid=$row[testcaseid]&amp;referrer=" .
-			    urlencode('testcase.php?probid='.$probid) . "\">" .
-			    "<img src=\"../images/delete.png\" alt=\"delete\"" .
-			    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
+			if ( IS_ADMIN ) {
+				echo "<td rowspan=\"2\" class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
+				    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"2\">" .
+				    htmlspecialchars($row['description']) . "</textarea></td>" .
+				    "<td rowspan=\"2\" class=\"editdel\">" .
+				    "<a href=\"delete.php?table=testcase&amp;testcaseid=$row[testcaseid]&amp;referrer=" .
+				    urlencode('testcase.php?probid='.$probid) . "\">" .
+				    "<img src=\"../images/delete.png\" alt=\"delete\"" .
+				    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
 
-			    // hide edit field if javascript is enabled
-			    echo "<script type=\"text/javascript\" language=\"JavaScript\">" .
-			    	"hideTcDescEdit($rank);</script>";
+				// hide edit field if javascript is enabled
+				echo "<script type=\"text/javascript\" language=\"JavaScript\">" .
+				    "hideTcDescEdit($rank);</script>";
+			} else {
+				echo "<td rowspan=\"2\" class=\"testdesc\">" .
+				    htmlspecialchars($row['description']) . "</td>";
+			}
 		}
 		echo "</tr>\n";
 	}
@@ -240,6 +250,7 @@ foreach( $data as $rank => $row ) {
 
 if ( count($data)!=0 ) echo "</tbody>\n</table>\n";
 
+if ( IS_ADMIN ) {
 ?>
 <h3>Create new testcase</h3>
 
@@ -250,6 +261,7 @@ if ( count($data)!=0 ) echo "</tbody>\n</table>\n";
 </table>
 <?php
 
-echo "<br />" . addSubmit('Submit all changes') . addEndForm();
+	echo "<br />" . addSubmit('Submit all changes') . addEndForm();
+}
 
 require(LIBWWWDIR . '/footer.php');

@@ -50,7 +50,6 @@
 .testdesc {
 	border-left: 1px solid silver;
 	max-width: 400px;
-	white-space: pre;
 }
 
 /* set cell padding to 0 and <a> tag to 3 to make all of cell
