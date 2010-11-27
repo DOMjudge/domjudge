@@ -87,11 +87,41 @@ function check_language($data, $keydata = null)
 	return $data;
 }
 
+function check_relative_time($time, $starttime, $field)
+{
+	if ($time[0] == '+' || $time[0] == '-') {
+		// convert relative times to absolute ones
+		$neg = ($time[0] == '-');
+		$time[0] = '0';
+		$times = split(':', $time, 2);
+		if (count($times) == 2 && is_numeric($times[0]) && is_numeric($times[1]) && $times[1] < 60) {
+			$hours = $times[0];
+			$minutes = $times[1];
+			$seconds = 60 * ($minutes + 60 * $hours);
+			if ($neg) {
+				$seconds *= -1;
+			}
+			$ret = strftime(MYSQL_DATETIME_FORMAT, strtotime($starttime) + $seconds);
+		} else {
+			ch_error($field . " is not correct formatted, expecting: +/-hh:mm");
+		}
+	} else {
+		// time is absolute, just copy
+		$ret = $time;
+	}
+
+	return $ret;
+}
+
 function check_contest($data, $keydata = null)
 {
 	// are these dates valid?
 	foreach(array('starttime','endtime','freezetime',
 		'unfreezetime','activatetime') as $f) {
+		if ($f != 'starttime') {
+			$data[$f.'_string'] = $data[$f];
+			$data[$f] = check_relative_time($data[$f], $data['starttime'], $f);
+		}
 		if ( !empty($data[$f]) ) {
 			check_datetime($data[$f]);
 		}
