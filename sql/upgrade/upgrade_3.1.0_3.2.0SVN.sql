@@ -8,12 +8,18 @@
 --
 
 -- @UPGRADE-CHECK@
-INSERT INTO `problem` (`probid`, `cid`, `name`) VALUES ('boolfind', 2, 'testinsert');
-DELETE FROM `problem` WHERE `probid` = 'boolfind';
+ALTER TABLE `contest` ADD  COLUMN `activatetime_string` varchar(20) NOT NULL;
+ALTER TABLE `contest` DROP COLUMN `activatetime_string`;
 
 --
 -- Create additional structures
 --
+
+ALTER TABLE `contest`
+  ADD COLUMN `activatetime_string` varchar(20) NOT NULL COMMENT 'Time contest becomes visible in team/public views',
+  ADD COLUMN `freezetime_string` varchar(20) default NULL COMMENT 'Time scoreboard is frozen',
+  ADD COLUMN `endtime_string` varchar(20) NOT NULL COMMENT 'Time after which no more submissions are accepted',
+  ADD COLUMN `unfreezetime_string` varchar(20) default NULL COMMENT 'Unfreeze a frozen scoreboard at this time';
 
 ALTER TABLE `language` ADD UNIQUE KEY `extension` (`extension`);
 
@@ -26,6 +32,12 @@ FLUSH PRIVILEGES;
 --
 -- Transfer data from old to new structure
 --
+
+UPDATE `contest` SET
+  `activatetime_string` = `activatetime`,
+  `freezetime_string`   = `freezetime`,
+  `endtime_string`      = `endtime`,
+  `unfreezetime_string` = `unfreezetime`;
 
 --
 -- Add/remove sample/initial contents

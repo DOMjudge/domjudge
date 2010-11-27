@@ -24,6 +24,7 @@ Version 3.2.0 - SVN
  - Fix information leak in clarification problems list. (Closes: #3096018)
  - In JS problem name detection, probid needs to be casenormalised too.
  - Fix websubmit when using numeric problem ID's, thanks Vladimir Vassiliev.
+ - Allow specification of contest times relative to starttime.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------

@@ -93,7 +93,7 @@ function check_relative_time($time, $starttime, $field)
 		// convert relative times to absolute ones
 		$neg = ($time[0] == '-');
 		$time[0] = '0';
-		$times = split(':', $time, 2);
+		$times = explode(':', $time, 2);
 		if (count($times) == 2 && is_numeric($times[0]) && is_numeric($times[1]) && $times[1] < 60) {
 			$hours = $times[0];
 			$minutes = $times[1];
