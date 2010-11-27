@@ -127,6 +127,14 @@ function check_contest($data, $keydata = null)
 		}
 	}
 
+	// are required times specified?
+	foreach(array('activatetime','starttime','endtime') as $f) {
+		if ( empty($data[$f]) ) {
+			ch_error("Contest $f is empty");
+			return $data;
+		}
+	}
+
 	// the ordering of times is:
 	// activatetime <= starttime <= freezetime < endtime <= unfreezetime
 
