@@ -537,7 +537,7 @@ function submit_solution($team, $prob, $langext, $file)
 	}
 
 	if( difftime($cdata['endtime'], $now) <= 0 ) {
-		warning("The contest is closed, submission stored but not processed. [c$cid]");
+		logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$cid]");
 	}
 
 	return $id;
