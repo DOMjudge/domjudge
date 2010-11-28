@@ -39,7 +39,6 @@ if ( !empty($pcmd) ) {
 }
 
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
 

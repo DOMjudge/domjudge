@@ -54,7 +54,6 @@ if ( isset($_POST['upload']) ) {
 $jscolor=true;
 
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
 

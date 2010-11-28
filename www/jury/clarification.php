@@ -128,8 +128,6 @@ putClarification($id, NULL);
 // Display button to (un)set request as 'answered'
 // Not relevant for 'general clarifications', ie those with sender=null
 if ( !empty($req['sender']) ) {
-	require_once(LIBWWWDIR . '/forms.php');
-
 	echo addForm('clarification.php') .
 		addHidden('id', $id) .
 		addHidden('answered', !$req['answered']) .

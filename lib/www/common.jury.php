@@ -59,8 +59,6 @@ function delLink($table, $field, $value)
  */
 function rejudgeForm($table, $id)
 {
-	require_once(LIBWWWDIR . '/forms.php');
-
 	$ret = addForm('rejudge.php') .
 		addHidden('table', $table) .
 		addHidden('id', $id);

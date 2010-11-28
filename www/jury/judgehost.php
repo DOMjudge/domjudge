@@ -57,8 +57,6 @@ if ( empty($row['polltime']) ) {
 
 <?php
 if ( IS_ADMIN ) {
-	require_once(LIBWWWDIR . '/forms.php');
-
 	$cmd = ($row['active'] == 1 ? 'deactivate' : 'activate');
 
 	echo addForm('judgehost.php') . "<p>\n" .

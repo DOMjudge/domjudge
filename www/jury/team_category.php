@@ -16,8 +16,6 @@ $cmd = @$_GET['cmd'];
 
 if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 
-	require(LIBWWWDIR . '/forms.php');
-
 	$title = "Category: " . htmlspecialchars($cmd);
 	$jscolor = true;
 

@@ -88,7 +88,6 @@ if ( isset ($_GET['move']) ) {
 $title = 'Testcases for problem '.htmlspecialchars(@$probid);
 
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
 
 if ( ! $probid ) error("Missing or invalid problem id");
 

@@ -12,7 +12,6 @@ require('init.php');
 $title = 'Problems';
 
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
 
 echo "<h1>Problems</h1>\n\n";
 

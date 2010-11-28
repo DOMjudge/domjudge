@@ -11,7 +11,6 @@
 require('init.php');
 $title = 'Generate Passwords';
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
 requireAdmin();
 ?>
 

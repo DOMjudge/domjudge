@@ -21,7 +21,6 @@ if ( IS_ADMIN && (isset($_POST['cmd-activate']) || isset($_POST['cmd-deactivate'
 	       (isset($_POST['cmd-activate']) ? 1:0));
 }
 if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
-	require ( LIBWWWDIR . '/forms.php' ) ;
 	echo addForm('edit.php');
 	echo "\n<table>\n" .
 		"<tr><th>Hostname</th><th>Active</th></tr>\n";
@@ -102,8 +101,6 @@ if( $res->count() == 0 ) {
 }
 
 if ( IS_ADMIN ) {
-	require(LIBWWWDIR . '/forms.php');
-
 	echo addForm('judgehosts.php') .
 		"<p>" .
 		addSubmit('Start all judgehosts', 'cmd-activate') .

@@ -63,7 +63,6 @@ if ( is_array(@$_POST['claim']) ) {
 $lastverifier = @$_COOKIE['domjudge_lastverifier'];
 
 require('init.php');
-require_once(LIBWWWDIR . '/forms.php');
 
 $title = 'Submission s'.@$id;
 

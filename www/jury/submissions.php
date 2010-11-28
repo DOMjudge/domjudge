@@ -45,8 +45,6 @@ echo "<h1>$title</h1>\n\n";
 $restrictions = array();
 if ( $viewtypes[$view] == 'unverified' ) $restrictions['verified'] = 0;
 
-require_once(LIBWWWDIR . '/forms.php');
-
 echo addForm('submissions.php', 'get') . "<p>\n";
 for($i=0; $i<count($viewtypes); ++$i) {
 	echo addSubmit($viewtypes[$i], 'view['.$i.']', null, ($view != $i));

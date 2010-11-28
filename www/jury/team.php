@@ -25,7 +25,6 @@ if ( isset($_GET['cmd'] ) ) {
 }
 
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
 

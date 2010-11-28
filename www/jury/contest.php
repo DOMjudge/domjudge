@@ -18,8 +18,6 @@ require(LIBWWWDIR . '/header.php');
 if ( IS_ADMIN && !empty($_GET['cmd']) ):
 	$cmd = $_GET['cmd'];
 
-	require(LIBWWWDIR . '/forms.php');
-
 	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " contest</h2>\n\n";
 
 	echo addForm('edit.php');

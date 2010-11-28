@@ -65,8 +65,6 @@ if (isset($_POST['confirm'] ) ) {
 		echo "<p><a href=\"" . $tablemulti . ".php\">back to $tablemulti</a></p>";
 	}
 } else {
-	require_once(LIBWWWDIR . '/forms.php');
-
 	echo addForm('delete.php') .
 		addHidden('table', $t);
 	foreach ( $k as $key => $val ) {

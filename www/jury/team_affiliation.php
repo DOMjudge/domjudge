@@ -21,8 +21,6 @@ $cmd = @$_GET['cmd'];
 
 if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 
-	require(LIBWWWDIR . '/forms.php');
-
 	$title = "Affiliation: " . htmlspecialchars($cmd);
 
 	require(LIBWWWDIR . '/header.php');

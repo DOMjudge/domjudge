@@ -43,7 +43,6 @@ if ( version_compare(PHP_VERSION, '5.2') >= 0 ) {
 
 $refresh = '30;url=balloons.php';
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
 
 echo "<h1>Balloon Status</h1>\n\n";
 
@@ -51,8 +50,6 @@ if ( isset($cdata['freezetime']) &&
      time() > strtotime($cdata['freezetime']) ) {
 	echo "<h4>Scoreboard is now frozen.</h4>\n\n";
 }
-
-require_once(LIBWWWDIR . '/forms.php');
 
 echo addForm('balloons.php', 'get') . "<p>\n" .
     addHidden('viewall', ($viewall ? 0 : 1)) .
