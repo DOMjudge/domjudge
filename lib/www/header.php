@@ -12,7 +12,9 @@ if (!defined('DOMJUDGE_VERSION')) die("DOMJUDGE_VERSION not defined.");
 
 header('Content-Type: text/html; charset=' . DJ_CHARACTER_SET);
 
-if ( isset($refresh) ) {
+if ( isset($refresh) &&
+     (!isset($_COOKIE["domjudge_refresh"]) ||
+      (bool)$_COOKIE["domjudge_refresh"]) ) {
 	header('Refresh: ' . $refresh);
 }
 echo '<?xml version="1.0" encoding="' . DJ_CHARACTER_SET . '" ?>' . "\n";

@@ -13,5 +13,16 @@
 <a href="submissions.php" accesskey="s">submissions</a>
 <a href="scoreboard.php" accesskey="b">scoreboard</a>
 </div>
+<?php
 
-<?php putClock();
+$refresh_flag = !isset($_COOKIE["domjudge_refresh"]) || (bool)$_COOKIE["domjudge_refresh"];
+
+if ( isset($refresh) ) {
+	echo "<div id=\"refresh\">\n" .
+	    addForm('toggle_refresh.php', 'get') .
+	    addHidden('enable', ($refresh_flag ? 0 : 1)) .
+	    addSubmit(($refresh_flag ? 'Dis' : 'En' ) . 'able refresh', 'submit') .
+	    addEndForm() . "</div>\n";
+}
+
+putClock();

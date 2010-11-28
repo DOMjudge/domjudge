@@ -127,6 +127,9 @@ span.diff-new {
 #menutop a.new {
 	color: #FF0000;
 }
+#refresh {
+	position: absolute; right: 1ex; top: 5ex;
+}
 #clock {
 	position: absolute; right: 1ex; top: 1ex;
 	font-size: small;
