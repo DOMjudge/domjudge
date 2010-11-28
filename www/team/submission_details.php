@@ -59,12 +59,14 @@ if ( (SHOW_COMPILE == 2) ||
 	if(@$row['output_compile']) {
 		echo "<pre class=\"output_text\">\n".
 			htmlspecialchars(@$row['output_compile'])."\n</pre>\n\n";
-
-		echo "<p><em>Compilation " .
-			( $row['result']=='compiler-error' ? 'failed' : 'successful' ) .
-			"</em></p>\n";
 	} else {
 		echo "<p class=\"nodata\">There were no compiler errors or warnings.</p>\n";
+	}
+
+	if ( $row['result'] == 'compiler-error' ) {
+		echo "<p class=\"compilation-error\">Compilation failed.</p>\n";
+	} else {
+		echo "<p class=\"compilation-success\">Compilation successful.</p>\n";
 	}
 } else {
 	echo "<p class=\"nodata\">Compilation output is disabled.</p>\n";

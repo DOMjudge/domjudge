@@ -237,3 +237,11 @@ td.scorenc { border-color: silver; }
 	padding-right: 5px;
 }
 
+.compilation-success {
+	color: green;
+	font-style: italic;
+}
+.compilation-error {
+	color: red;
+	font-style: italic;
+}
