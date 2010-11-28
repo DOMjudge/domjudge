@@ -35,7 +35,7 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 
 	// This may not be good enough for large testsets, but streaming them
 	// directly from the database query result seems overkill to implement.
-	echo $DB->q("VALUE SELECT $fetch FROM testcase
+	echo $DB->q("VALUE SELECT SQL_NO_CACHE $fetch FROM testcase
 	             WHERE probid = %s AND rank = %i", $probid, $rank);
 
 	exit(0);

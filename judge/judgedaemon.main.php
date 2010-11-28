@@ -335,7 +335,7 @@ function judge($mark, $row, $judgingid)
 		    $tc['md5sum_'.$inout] . "." . substr($inout, 0, -3);
 
 		if ( !file_exists($tcfile[$inout]) ) {
-			$content = $DB->q("VALUE SELECT $inout FROM testcase
+			$content = $DB->q("VALUE SELECT SQL_NO_CACHE $inout FROM testcase
 	 		                   WHERE testcaseid = %i", $tc['testcaseid']);
 			if ( file_put_contents($tcfile[$inout] . ".new", $content) === FALSE ) {
 				error("Could not create $tcfile[$inout].new");
