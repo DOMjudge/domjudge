@@ -1417,6 +1417,8 @@ identify the team. The content of the field for each of the mechanisms is:
 <item>IPADDRESS: field contains the IP address of the team's workstation
 <item>PHP_SESSIONS: contains a hash of the password that the team can log in
 with
+<item>LDAP: contains the LDAP name (e.g. CN) corresponding to this
+DOMjudge user
 </itemize>
 
 <tt>members</tt> are the names of the team members, separated by
@@ -1535,7 +1537,8 @@ keep track of which team is logged in. This method is easiest to
 setup. It does require the administrator to generate passwords for all
 teams (this can be done in the jury interface) and distribute those,
 though. Also, each team has to login each time they (re)start their
-browser.
+browser. The password is stored in a salted MD5 hash in the
+<tt>authtoken</tt> field in database (team table).
 
 <sect1>IP-address based
 <p>
@@ -1560,7 +1563,8 @@ There are three possible ways of configuring team IP-addresses.
 <p>
 
 Before the contest starts, when entering teams into the database, add
-the IP that each team will have to that team's entry. When the teams
+the IP that each team will have to that team's entry in the
+<tt>authtoken</tt> field. When the teams
 arrive, everything will work directly and without further
 configuration (except when teams switch workplaces). If possible, this
 is the recommended modus operandi, because it's the least hassle just
@@ -1574,7 +1578,7 @@ Beforehand, generate passwords for each team in the jury interface.
 When the test session (or contest) starts and a team connects to the
 web interface and have an unknown IP, they will be prompted for
 username and password. Once supplied, the IP is stored and the
-password is not needed anymore.
+password is removed and not needed anymore the next time.
 
 This is also a secure option, but requires a bit more hassle from the
 teams, and maybe from the organisers who have to distribute pieces of
@@ -1598,6 +1602,23 @@ prior mapping needs to be configured, but the disadvantage is that
 the team interface cannot be viewed until at least one submission
 was made; there are also more constraints on the system.
 See the section on the Dolstra protocol for details.
+
+The <tt>authtoken</tt> field in the database contains either the
+IP-address, or an MD5 hash of the one-time password if this was set
+and the team has not authenticated yet.
+
+<sect1>Using an external LDAP server
+<p>
+
+This method can be useful when you want to integrate DOMjudge into a
+larger system, or already have credentials on an LDAP server
+available. The <tt>authtoken</tt> field in the database must contain
+the LDAP username of the DOMjudge team. Furthermore, in
+<tt>etc/domserver-config.php</tt> the <tt>LDAP_*</tt> configuration
+settings must be adapted to your setup. Note that multiple (backup)
+servers can be specified: they are queried in order to try to
+successfully authenticate. After successful authentication against the
+LDAP server(s), PHP sessions are used to track login into DOMjudge.
 
 <sect1>Fixed team authentication
 <p>
@@ -2014,8 +2035,8 @@ submit as that team.
 <em>Note:</em> This means that care has to be taken e.g. that teams
 cannot simply login onto one another's computer and spoof their identity.
 
-When using PHP sessions, authentication data is sent via HTTP, so we
-strongly advise to use HTTPS in that case.
+When using PHP sessions or LDAP, authentication data is sent via HTTP,
+so we strongly advise to use HTTPS in that case.
 
 
 <sect>Root privileges <label id="security:rootprivs">
@@ -2314,7 +2335,7 @@ DOMjudge installation can still be reached.
 Team authentication: the IP-based authentication will still work as long as
 each team workstation has a different public IP address. If some teams are
 behind a NAT-router and thus all present themselves to DOMjudge with the same
-IP-address, the PHP sessions authentication scheme needs to be used.
+IP-address, another authentication scheme must be used (e.g. PHP sessions).
 
 Judges: if the people reviewing the submissions will be located remotely as
 well, it's important to agree beforehand on who-does-what, using the

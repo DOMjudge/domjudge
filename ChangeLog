@@ -26,6 +26,7 @@ Version 3.2.0 - SVN
  - Fix websubmit when using numeric problem ID's, thanks Vladimir Vassiliev.
  - Allow specification of contest times relative to starttime.
  - Add toggle button for autorefresh of jury pages (port from ETH tree).
+ - Add support for team authentication via LDAP server (port from ETH tree).
 
 Version 3.1.0 - 14 July 2010
 ----------------------------

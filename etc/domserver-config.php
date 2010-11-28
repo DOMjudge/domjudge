@@ -22,6 +22,10 @@ define('SHOW_COMPILE', 2);
 //   Use PHP sessions with user/password authentication. This allows
 //   teams to login from different machines and might be useful for
 //   online contests or programming courses.
+// LDAP
+//   Autheticate against one or more LDAP servers. Use PHP sessions
+//   after successful authentication. This option may be useful to
+//   integrate DOMjudge (e.g. as courseware) into a larger system.
 // FIXED
 //   Use one fixed team user that is automatically logged in. This
 //   can be useful e.g. for a demo or testing environment. Define
@@ -38,6 +42,12 @@ define('AUTH_METHOD', 'PHP_SESSIONS');
 // submission of teams that have their address unset. Otherwise these
 // addresses have to be configured beforehand.
 define('STRICTIPCHECK', false);
+
+// List of LDAP servers (space separated) to query when using the LDAP
+// authentication method. Secondly, DN to search in, where '&' will be
+// replaced by the authtoken as set in the team's DOMjudge database entry.
+define('LDAP_SERVERS', 'ldap1.example.com ldap2.example.com');
+define('LDAP_DNQUERY', 'CN=&,OU=users,DC=example,DC=com');
 
 // List of auto-detected language extensions by the submit client.
 //   Format: 'LANG,MAINEXT[,EXT]... [LANG...]' where:

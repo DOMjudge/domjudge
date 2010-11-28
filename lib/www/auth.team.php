@@ -37,6 +37,7 @@ function logged_in()
 		break;
 
 	case 'PHP_SESSIONS':
+	case 'LDAP':
 		session_start();
 		if ( isset($_SESSION['teamid']) ) {
 			$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',
@@ -69,6 +70,7 @@ function have_logout()
 	case 'FIXED':        return FALSE;
 	case 'IPADDRESS':    return FALSE;
 	case 'PHP_SESSIONS': return TRUE;
+	case 'LDAP':         return TRUE;
 	}
 	return FALSE;
 }
@@ -94,6 +96,7 @@ function show_loginpage()
 	switch ( AUTH_METHOD ) {
 	case 'IPADDRESS':
 	case 'PHP_SESSIONS':
+	case 'LDAP':
 		if ( NONINTERACTIVE ) error("Not authenticated");
 		$title = 'Not Authenticated';
 		$menu = false;
@@ -129,6 +132,47 @@ Please supply team credentials below, or contact a staff member for assistance.
 	}
 
 	exit;
+}
+
+// Check LDAP user and password credentials by trying to login to
+// the LDAP server(s).
+function ldap_check_credentials($user, $pass)
+{
+	foreach ( explode(' ', LDAP_SERVERS) as $server ) {
+
+		// The connection may only be really established when needed,
+		// so execute a dummy query to test if the server is available:
+		$conn = @ldap_connect($server);
+		if ( !$conn || !ldap_get_option($conn, LDAP_OPT_PROTOCOL_VERSION, $dummy) ) {
+			continue;
+		}
+
+/*
+		// The following options are necessary to be able to talk
+        // to an Active Directory:
+		if ( !ldap_set_option($conn, LDAP_OPT_PROTOCOL_VERSION, 3) ) {
+			error("Failed to set protocol version to 3.");
+		}
+
+		if ( !ldap_set_option($conn, LDAP_OPT_REFERRALS, 0) ) {
+			error("Failed to set LDAP_OPT_REFERRALS.");
+		}
+
+		if ( !ldap_set_option($conn, LDAP_OPT_DEREF, 0) ) {
+			error("Failed to set LDAP_OPT_DEREF.");
+		}
+*/
+
+		// Create the dn
+		$ldap_dn = str_replace('&', $user, LDAP_DNQUERY);
+
+		// Try to login to test credentials
+		if ( @ldap_bind($conn, $ldap_dn, $passwd) ) {
+			@ldap_unbind($conn);
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 // Try to login a team with e.g. authentication data POST-ed. Function
@@ -176,6 +220,33 @@ function do_login()
 		}
 		break;
 
+	case 'LDAP':
+		$user = trim($_POST['login']);
+		$pass = trim($_POST['passwd']);
+
+		$title = 'Authenticate user';
+		$menu = false;
+
+		if ( empty($user) || empty($pass) ) {
+			show_failed_login("Please supply a username and password.");
+		}
+
+		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team
+		                    WHERE login = %s', $user);
+
+		if ( !$teamdata ||
+		     !ldap_check_credentials($teamdata['authtoken'], $pass) ) {
+			sleep(3);
+			show_failed_login("Invalid username or password supplied. " .
+			                  "Please try again or contact a staff member.");
+		}
+
+		$login = $teamdata['login'];
+
+		session_start();
+		$_SESSION['teamid'] = $login;
+		break;
+
 	default:
 		error("Unknown authentication method '" . AUTH_METHOD .
 		      "' requested, or login not supported.");
@@ -199,6 +270,7 @@ function do_logout()
 
 	switch ( AUTH_METHOD ) {
 	case 'PHP_SESSIONS':
+	case 'LDAP':
 		// Unset all of the session variables.
 		$_SESSION = array();
 
