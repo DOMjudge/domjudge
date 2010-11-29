@@ -36,31 +36,32 @@ echo "<div id=\"submitlist\">\n";
 
 echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
 
-if ( $submitted ) {
-	echo "<p class=\"submissiondone\">submission done <a href=\"./\" style=\"color: red\">x</a></p>\n\n";
-} else {
-	# FIXME: duplicate with websubmit.php
-	echo addForm('upload.php','post',null,'multipart/form-data') .
-	"<p id=\"submitform\">\n\n" .
-	"<input type=\"file\" name=\"code\" id=\"code\" size=\"10\" onChange='detectProblemLanguage(document.getElementById(\"code\").value);' /> ";
+if ( ENABLE_WEBSUBMIT_SERVER ) {
+	if ( $submitted ) {
+		echo "<p class=\"submissiondone\">submission done <a href=\"./\" style=\"color: red\">x</a></p>\n\n";
+	} else {
+		# FIXME: duplicate with websubmit.php
+		echo addForm('upload.php','post',null,'multipart/form-data') .
+		"<p id=\"submitform\">\n\n" .
+		"<input type=\"file\" name=\"code\" id=\"code\" size=\"10\" onChange='detectProblemLanguage(document.getElementById(\"code\").value);' /> ";
 
-	$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid) as name FROM problem
-			 WHERE cid = %i AND allow_submit = 1
-			 ORDER BY probid', $cid);
-	$probs[''] = 'problem';
+		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid) as name FROM problem
+				 WHERE cid = %i AND allow_submit = 1
+				 ORDER BY probid', $cid);
+		$probs[''] = 'problem';
 
-	echo addSelect('probid', $probs, '', true);
-	$langs = $DB->q('KEYVALUETABLE SELECT extension, name FROM language
-			 WHERE allow_submit = 1 ORDER BY name');
-	$langs[''] = 'language';
-	echo addSelect('langext', $langs, '', true);
+		echo addSelect('probid', $probs, '', true);
+		$langs = $DB->q('KEYVALUETABLE SELECT extension, name FROM language
+				 WHERE allow_submit = 1 ORDER BY name');
+		$langs[''] = 'language';
+		echo addSelect('langext', $langs, '', true);
 
-	echo addSubmit('GO', 'submit',
-		       "return confirm(getUploadConfirmString());");
+		echo addSubmit('GO', 'submit',
+			       "return confirm(getUploadConfirmString());");
 
-	echo "</p>\n</form>\n\n";
+		echo "</p>\n</form>\n\n";
+	}
 }
-
 // call putSubmissions function from common.php for this team.
 $restrictions = array( 'teamid' => $login );
 putSubmissions($cdata, $restrictions, null, $submitted);
