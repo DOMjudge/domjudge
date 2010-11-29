@@ -40,7 +40,6 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 	if ( $submitted ) {
 		echo "<p class=\"submissiondone\">submission done <a href=\"./\" style=\"color: red\">x</a></p>\n\n";
 	} else {
-		# FIXME: duplicate with websubmit.php
 		echo addForm('upload.php','post',null,'multipart/form-data') .
 		"<p id=\"submitform\">\n\n" .
 		"<input type=\"file\" name=\"code\" id=\"code\" size=\"10\" onChange='detectProblemLanguage(document.getElementById(\"code\").value);' /> ";

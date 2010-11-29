@@ -20,7 +20,7 @@ if ( ! ENABLE_WEBSUBMIT_SERVER ) {
 
 if ( !isset($_POST['submit']) ) {
 	if (NONINTERACTIVE) error("No 'submit' done.");
-	header('Location: websubmit.php');
+	header('Location: ./');
 	return;
 }
 if ( is_null($cid) ) {
