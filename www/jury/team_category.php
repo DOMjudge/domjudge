@@ -11,6 +11,7 @@
 $id = (int)@$_GET['id'];
 
 require('init.php');
+require(LIBWWWDIR . '/scoreboard.php');
 
 $cmd = @$_GET['cmd'];
 
@@ -101,6 +102,7 @@ if ( IS_ADMIN ) {
 
 echo "<h2>Teams in " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
+$listteams = array();
 $teams = $DB->q('SELECT login,name FROM team WHERE categoryid = %i', $id);
 if ( $teams->count() == 0 ) {
 	echo "<p class=\"nodata\">no teams</p>\n\n";
@@ -109,12 +111,19 @@ if ( $teams->count() == 0 ) {
 		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th></tr>\n" .
 		"</thead>\n<tbody>\n";
 	while ($team = $teams->next()) {
+		$listteams[] = $team['login'];
 		$link = '<a href="team.php?id=' . urlencode($team['login']) . '">';
 		echo "<tr><td class=\"teamid\">" .
 		$link . htmlspecialchars($team['login']) . "</a></td><td>" .
 		$link . htmlspecialchars($team['name']) . "</a></td></tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
+
+	echo "<p>";
+	putTeamRow($cdata,$listteams);
+	echo "</p>\n\n";
 }
 
+
 require(LIBWWWDIR . '/footer.php');
+

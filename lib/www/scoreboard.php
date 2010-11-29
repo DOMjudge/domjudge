@@ -529,86 +529,19 @@ function calcFreezeData($cdata)
  * Output a team row from the scoreboard based on the cached data in
  * table 'scoreboard'.
  */
-function putTeamRow($cdata, $teamid) {
+function putTeamRow($cdata, $teamids) {
 
-	global $DB;
+	if ( empty($cdata) ) return;
+	
+	$fdata = calcFreezeData($cdata);
+	$sdata = genScoreBoard($cdata);
+	
+	$myteamid = null;
+	$static = FALSE;
+	$displayrank = !$fdata['showfrozen'];
 
-	if ( empty( $cdata )  || difftime($cdata['starttime'],now()) > 0 ) return;
-	$cid = $cdata['cid'];
-
-	echo '<table class="scoreboard">' . "\n";
-
-	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, name, color
-	                 FROM problem WHERE cid = %i AND allow_submit = 1
-	                 ORDER BY probid', $cid);
-
-	// column headers
-	echo "<tr class=\"scoreheader\"><th>problem</th><th>score</th></tr>\n";
-
-	// initialize the arrays we'll build from the data
-	$MATRIX = array();
-
-	// for a team, we always display the "current" information, that is,
-	// from scoreboard_jury
-	$scoredata = $DB->q('SELECT * FROM scoreboard_jury WHERE cid = %i AND teamid = %s',
-	                    $cid, $teamid);
-
-	// loop all info the scoreboard cache and put it in our own datastructure
-	while ( $srow = $scoredata->next() ) {
-		// skip this row if the problem is not known by us
-		if ( ! array_key_exists ( $srow['probid'], $probs ) ) continue;
-
-		$penalty = calcPenaltyTime( $srow['is_correct'], $srow['submissions'] );
-
-		// fill our matrix with the scores from the database,
-		$MATRIX[$srow['probid']] = array (
-			'is_correct'      => (bool) $srow['is_correct'],
-			'num_submissions' => $srow['submissions'],
-			'time'            => $srow['totaltime'],
-			'penalty'         => $penalty );
-	}
-
-	$SUMMARY = array('num_correct' => 0, 'total_time' => 0);
-	// for each problem
-	foreach ( $probs as $prob => $probdata ) {
-		// if we have scores, use them, else, provide the defaults
-		// (happens when nothing submitted for this problem,team yet)
-		if ( isset ( $MATRIX[$prob] ) ) {
-			$pdata = $MATRIX[$prob];
-		} else {
-			$pdata = array ( 'num_submissions' => 0, 'is_correct' => 0,
-			                 'time' => 0, 'penalty' => 0);
-		}
-		echo '<tr><td class="probid" title="' .
-			htmlspecialchars($probdata['name']) . '">' .
-			( !empty($probdata['color']) ?
-			  '<img style="background-color: ' . htmlspecialchars($probdata['color']) .
-			  ';" alt="problem colour ' . htmlspecialchars($probdata['color']) .
-			  '" src="../images/circle.png" /> ' : '' ) .
-			htmlspecialchars($prob) . '</td><td class="';
-		// CSS class for correct/incorrect/neutral results
-		if( $pdata['is_correct'] ) {
-			echo 'score_correct';
-		} elseif ( $pdata['num_submissions'] > 0 ) {
-			echo 'score_incorrect';
-		} else {
-			echo 'score_neutral';
-		}
-		// number of submissions for this problem
-		echo '">' . $pdata['num_submissions'];
-		// if correct, print time scored
-		if( $pdata['is_correct'] ) {
-			echo " (" . $pdata['time'] . ' + ' . $pdata['penalty'] . ")";
-			$SUMMARY['num_correct'] ++;
-			$SUMMARY['total_time'] += $pdata['time'] + $pdata['penalty'];
-		}
-		echo "</td></tr>\n";
-	}
-
-	echo "<tr id=\"scoresummary\" title=\"#correct / time\"><td>Summary</td>".
-		"<td>" . $SUMMARY['num_correct'] . " / " . $SUMMARY['total_time'] . "</td></tr>\n";
-
-	echo "</table>\n\n";
+	renderScoreBoardTable($cdata,$sdata,$myteamid,$static,
+		$teamids,$displayrank);
 
 	return;
 }

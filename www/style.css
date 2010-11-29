@@ -240,6 +240,31 @@ td.scorenc { border-color: silver; }
 	padding-right: 5px;
 }
 
+input,select,textarea {
+	border: solid 1px blue;
+}
+
+h3.teamoverview {
+	border-top: solid 1px blue;
+	border-bottom: solid 1px blue;
+	background-color: #c4d8ff;
+	font-size: smaller;
+	font-weight: normal;
+	margin-top: 2ex;
+	padding-left: 1ex;
+}
+
+#submitlist,#clarlist {
+	width: 48%;
+}
+#submitlist {
+	position: absolute;
+	left: 1ex;
+}
+#clarlist {
+	position: absolute;
+	right: 1ex;
+}
 .compilation-success {
 	color: green;
 	font-style: italic;
@@ -247,4 +272,20 @@ td.scorenc { border-color: silver; }
 .compilation-error {
 	color: red;
 	font-style: italic;
+}
+#submitform, .submissiondone {
+	text-align: center;
+}
+#submitlist .list, #clarlist .list {
+	width: 100%;
+}
+#submitlist .list th, #clarlist .list th {
+	text-align: left;
+}
+#submitlist td.result, #clarlist td.clartext {
+	width: 1000ex;
+}
+#submitlist tr.highlight {
+	background-color: #c4d8ff;
+	border-color: blue;
 }

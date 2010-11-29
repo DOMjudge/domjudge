@@ -210,7 +210,7 @@ function putClarificationList($clars, $team = NULL)
 		}
 		echo "</a></td>";
 
-		echo '<td>' . $link;
+		echo '<td class="clartext">' . $link;
 		echo summarizeClarification($clar['body']);
 		echo "</a></td></tr>\n";
 	}

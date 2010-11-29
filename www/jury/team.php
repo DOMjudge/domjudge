@@ -25,6 +25,7 @@ if ( isset($_GET['cmd'] ) ) {
 }
 
 require(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/scoreboard.php');
 
 if ( IS_ADMIN && !empty($cmd) ):
 
@@ -168,6 +169,9 @@ if ( IS_ADMIN ) {
 
 echo rejudgeForm('team', $id) . "\n\n";
 
+echo "<h3>Score</h3>\n\n";
+
+putTeamRow($cdata,array($id));
 
 echo '<h3>Submissions';
 if ( isset($key) ) {

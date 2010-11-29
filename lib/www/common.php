@@ -16,7 +16,7 @@ define('CIRCLE_SYM', '&#9679;');
  * match <key> = <value>. Output is always limited to the
  * current or last contest.
  */
-function putSubmissions($cdata, $restrictions, $limit = 0)
+function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 {
 	global $DB;
 
@@ -114,6 +114,9 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 			$igncnt++;
 			echo ' sub_ignore';
 		}
+		if ( $sid == $highlight ) {
+			echo ' highlight';
+		}
 		echo '">';
 
 		if ( IS_JURY ) {
@@ -129,7 +132,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 			"<a$link>" . htmlspecialchars($row['probid']) . '</a></td>';
 		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
 			"<a$link>" . htmlspecialchars($row['langid']) . '</a></td>';
-		echo '<td>';
+		echo '<td class="result">';
 		if ( IS_JURY ) {
 			echo "<a$link>";
 			if ( ! $row['result'] ) {
