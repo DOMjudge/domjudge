@@ -40,7 +40,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	                $_POST['bodytext']);
 
 	// redirect back to the original location
-	header('Location: clarifications.php');
+	header('Location: ./');
 	exit;
 }
 
