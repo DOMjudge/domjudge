@@ -289,3 +289,7 @@ h3.teamoverview {
 	background-color: #c4d8ff;
 	border-color: blue;
 }
+.errorfield {
+	border-color: red;
+	color: red;
+}

@@ -56,7 +56,7 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 		echo addSelect('langext', $langs, '', true);
 
 		echo addSubmit('GO', 'submit',
-			       "return confirm(getUploadConfirmString());");
+			       "return checkUploadForm();");
 
 		echo "</p>\n</form>\n\n";
 	}

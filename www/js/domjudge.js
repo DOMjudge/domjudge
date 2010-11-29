@@ -95,18 +95,44 @@ function detectProblemLanguage(filename)
 
 }
 
-function getUploadConfirmString()
+function checkUploadForm()
 {
 	var langelt = document.getElementById("langext");
-	var language = langelt.options[langelt.selectedIndex].text;
+	var language = langelt.options[langelt.selectedIndex].value;
+	var languagetxt = langelt.options[langelt.selectedIndex].text;
 	var fileelt = document.getElementById("code");
 	var filename = fileelt.value;
 	var probelt = document.getElementById("probid");
-	var problem = probelt.options[probelt.selectedIndex].text;
-	var question =
-		'Filename: ' + filename + '\n\n' +
-		'Problem: ' + problem + '\n'+
-		'Language: ' + language + '\n' +
-		'\nMake submission?';
-	return question;
+	var problem = probelt.options[probelt.selectedIndex].value;
+	var problemtxt = probelt.options[probelt.selectedIndex].text;
+
+	var error = false;
+	langelt.className = probelt.className = fileelt.className = "";
+	if ( language == "" ) {
+		langelt.focus();
+		langelt.className = "errorfield";
+		error = true;
+	}
+	if ( problem == "" ) {
+		probelt.focus();
+		probelt.className = "errorfield";
+		error = true;
+	}
+	if ( filename == "" ) {
+		fileelt.className = "errorfield";
+		return false;
+	}
+
+	if ( error ) {
+		return false;
+	} else {
+		var question =
+			'Filename: ' + filename + '\n\n' +
+			'Problem: ' + problemtxt + '\n'+
+			'Language: ' + languagetxt + '\n' +
+			'\nMake submission?';
+		return confirm (question);
+	}
+
 }
+
