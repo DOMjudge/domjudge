@@ -90,7 +90,7 @@ function putClar($clar)
 	echo printtime($clar['submittime']);
 	echo "</td></tr>\n";
 
-	echo '<tr><td valign="top"></td><td class="filename">';
+	echo '<tr><td></td><td class="filename">';
 	echo '<pre class="output_text">' . htmlspecialchars(wrap_unquoted($clar['body'],80)) . "</pre>";
 	echo "</td></tr>\n";
 
@@ -302,7 +302,7 @@ function confirmClar() {
 
 	?>
 <tr>
-<td valign="top"><b><label for="bodytext">Text</label>:</b></td>
+<td><b><label for="bodytext">Text</label>:</b></td>
 <td><?php
 $body = "";
 if ( $respid ) {

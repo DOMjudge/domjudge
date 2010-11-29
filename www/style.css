@@ -61,8 +61,11 @@ tr.unread td {
 	border-collapse: collapse;
 	border-spacing: 0px;
 }
-.list td, .list th {
+.list th {
 	vertical-align: bottom;
+}
+td {
+	vertical-align: top;
 }
 
 .list tr { border-bottom: 1px solid silver; }

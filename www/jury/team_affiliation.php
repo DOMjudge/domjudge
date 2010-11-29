@@ -53,7 +53,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 href="http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
-<tr><td valign="top"><label for="data_0__comments_">Comments:</label></td>
+<tr><td><label for="data_0__comments_">Comments:</label></td>
 <td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
 
 </table>
@@ -104,7 +104,7 @@ if ( is_readable($countryflag) ) {
 echo "</td></tr>\n";
 
 if ( !empty($data['comments']) ) {
-	echo '<tr><td valign="top" scope="row">Comments:</td><td>' .
+	echo '<tr><td scope="row">Comments:</td><td>' .
 		nl2br(htmlspecialchars($data['comments'])) . "</td></tr>\n";
 }
 

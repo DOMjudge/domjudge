@@ -55,7 +55,7 @@ $cmap = $DB->q("KEYVALUETABLE SELECT categoryid,name FROM team_category ORDER BY
 echo addSelect('data[0][categoryid]', $cmap, @$row['categoryid'], true);
 ?>
 </td></tr>
-<tr><td valign="top"><label for="data_0__members_">Members:</label></td>
+<tr><td><label for="data_0__members_">Members:</label></td>
 <td><?php echo addTextArea('data[0][members]', @$row['members'], 40, 3)?></td></tr>
 <tr><td><label for="data_0__affilid_">Affiliation:</label></td>
 <td><?php
@@ -68,7 +68,7 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <td><?php echo addInput('data[0][authtoken]', @$row['authtoken'], 35, 255)?></td></tr>
 <tr><td><label for="data_0__room_">Room:</label></td>
 <td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
-<tr><td valign="top"><label for="data_0__comments_">Comments:</label></td>
+<tr><td><label for="data_0__comments_">Comments:</label></td>
 <td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
 </table>
 
@@ -150,11 +150,11 @@ if ( !empty($row['country']) ) {
 	echo htmlspecialchars($row['country']) . "</td></tr>\n";
 }
 if ( !empty($row['members']) ) {
-	echo '<tr><td valign="top" scope="row">Members:   </td><td>' .
+	echo '<tr><td scope="row">Members:   </td><td>' .
 		nl2br(htmlspecialchars($row['members'])) . "</td></tr>\n";
 }
 if ( !empty($row['comments']) ) {
-	echo '<tr><td valign="top" scope="row">Comments:</td><td>' .
+	echo '<tr><td scope="row">Comments:</td><td>' .
 		nl2br(htmlspecialchars($row['comments'])) . "</td></tr>\n";
 }
 echo "</table></div>\n";

@@ -273,7 +273,7 @@ function putTeam($login) {
 <?php
 
 	if ( !empty($team['members']) ) {
-		echo '<tr><td valign="top" scope="row">Members:</td><td>' .
+		echo '<tr><td scope="row">Members:</td><td>' .
 			nl2br(htmlspecialchars($team['members'])) . "</td></tr>\n";
 	}
 

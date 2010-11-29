@@ -140,7 +140,7 @@ if ( $submdata['valid'] ) {
 
 ?>
 <table width="100%">
-<tr><td valign="top">
+<tr><td>
 <table>
 <caption>Submission</caption>
 <tr><td scope="row">Contest:</td><td>
@@ -165,7 +165,7 @@ if ( $submdata['valid'] ) {
 </table>
 
 
-</td><td valign="top">
+</td><td>
 
 <?php
 
