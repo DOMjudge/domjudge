@@ -54,8 +54,15 @@ if ( IS_JURY ) {
 if ($menu) {?>
 <script type="text/javascript" src="../js/domjudge.js"></script>
 </head>
-<body onload="setInterval('updateClarifications(\'<?php echo $ajaxtitle?>\')', 20000)">
-<?php include("menu.php");
+<?php
+if ( IS_JURY ) {
+	echo "<body onload=\"setInterval('updateClarifications(\'<?php echo $ajaxtitle?>\')', 20000)\">\n";
+} else {
+	echo "<body>\n";
+}
+
+include("menu.php");
+
 } else {?>
 </head>
 <body>
