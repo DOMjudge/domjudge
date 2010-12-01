@@ -201,7 +201,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			    echo "<a$link>$verifier</a>";
 			}
 		}
-		echo "</td></tr>\n";
+		echo "</tr>\n";
 
 		if ( $row['result'] == 'correct' ) $corcnt++;
 	}

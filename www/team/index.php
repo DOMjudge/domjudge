@@ -29,7 +29,7 @@ echo "\t\tdefault: return '';\n\t}\n}\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
-echo "<p>";
+echo "<p />";
 putTeamRow($cdata, array($login));
 
 echo "<div id=\"submitlist\">\n";
@@ -42,7 +42,7 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 	} else {
 		echo addForm('upload.php','post',null,'multipart/form-data') .
 		"<p id=\"submitform\">\n\n" .
-		"<input type=\"file\" name=\"code\" id=\"code\" size=\"10\" onChange='detectProblemLanguage(document.getElementById(\"code\").value);' /> ";
+		"<input type=\"file\" name=\"code\" id=\"code\" size=\"10\" onchange='detectProblemLanguage(document.getElementById(\"code\").value);' /> ";
 
 		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid) as name FROM problem
 				 WHERE cid = %i AND allow_submit = 1
@@ -98,8 +98,8 @@ if ( $requests->count() == 0 ) {
 	putClarificationList($requests,$login);
 }
 
-echo "<p><form action='clarification.php' method='get'>
-	<input type='submit' value='request clarification' /></form></p>";
+echo "<div><form action='clarification.php' method='get'>
+	<input type='submit' value='request clarification' /></form></div>";
 echo "</div>\n";
 
 require(LIBWWWDIR . '/footer.php');
