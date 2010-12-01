@@ -111,7 +111,7 @@ if ( isset($_POST['claim']) || isset($_POST['unclaim']) ) {
 	setVerifier($verifier);
 
 	// Send headers now: after cookies, before possible warning messages.
-	require_once(LIBWWWDIR . '/header.php');
+	if ( !isset($_POST['unclaim']) ) require_once(LIBWWWDIR . '/header.php');
 
 	if ( !isset($jid) ) {
 		warning("Cannot claim this submission: no valid judging found.");
@@ -126,6 +126,8 @@ if ( isset($_POST['claim']) || isset($_POST['unclaim']) ) {
 		}
 		$DB->q('UPDATE judging SET verifier = ' . ($verifier===FALSE ? 'NULL %_ ' : '%s ') .
 		       'WHERE judgingid = %i', $verifier, $jid);
+
+		if ( isset($_POST['unclaim']) ) header('Location: submissions.php');
 	}
 }
 
