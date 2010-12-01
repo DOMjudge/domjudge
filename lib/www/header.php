@@ -56,7 +56,7 @@ if ($menu) {?>
 </head>
 <?php
 if ( IS_JURY ) {
-	echo "<body onload=\"setInterval('updateClarifications(\'<?php echo $ajaxtitle?>\')', 20000)\">\n";
+	echo "<body onload=\"setInterval('updateClarifications(\'$ajaxtitle\')', 20000)\">\n";
 } else {
 	echo "<body>\n";
 }
