@@ -188,7 +188,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 					if ( empty($row['verifier']) ) {
 						$claim = TRUE;
 					} else {
-						$verified = 'viewing';
+						$verified = 'claimed';
 					}
 				}
 			}
@@ -198,7 +198,12 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			    echo addSubmit('claim',
 				               'claim[' . htmlspecialchars($row['submitid']) . ']');
 			} else {
-			    echo "<a$link>$verifier</a>";
+			    if ( $verifier == @$_COOKIE['domjudge_lastverifier'] ) {
+			        echo addSubmit('unclaim',
+						    'unclaim[' . htmlspecialchars($row['submitid']) . ']');
+			    } else {
+			        echo "<a$link>$verifier</a>";
+		            }
 			}
 		}
 		echo "</tr>\n";

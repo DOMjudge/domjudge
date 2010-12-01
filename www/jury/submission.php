@@ -59,6 +59,9 @@ if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
 if ( is_array(@$_POST['claim']) ) {
 	foreach( $_POST['claim'] as $key => $val ) $id = (int)$key;
 }
+if ( is_array(@$_POST['unclaim']) ) {
+	foreach( $_POST['unclaim'] as $key => $val ) $id = (int)$key;
+}
 
 $lastverifier = @$_COOKIE['domjudge_lastverifier'];
 

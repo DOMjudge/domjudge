@@ -16,7 +16,7 @@ if ( empty($id) ) error("No judging ID passed to mark as verified.");
 $verifier = getVerifier("");
 
 // Explicitly unset verifier when unmarking verified: otherwise this
-// judging would be marked as "viewing".
+// judging would be marked as "claimed".
 $cnt = $DB->q('RETURNAFFECTED UPDATE judging
                SET verified = %i, verifier = ' . ($val ? '%s ' : 'NULL %_ ') .
               'WHERE judgingid = %i',
