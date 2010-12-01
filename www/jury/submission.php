@@ -12,18 +12,19 @@ function parseDiff($difftext){
 	$line = strtok($difftext,"\n"); //first line
 	if(sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1)
 		return htmlspecialchars($difftext);
-	$return = sprintf("### DIFFERENCES FROM <a href='#firstdiff'>LINE %d</a> ###\n", $firstdiff);
+	$return = $line . "\n";
+
+	// Add second line 'team ? reference'
 	$line = strtok("\n");
+	$return .= $line . "\n";
 
-	// We use a heuristic search to find the starting location of the
-	// middle separator (subtract 4 lineno chars, add 1 initial matched char)
-	$midloc = strlen(preg_replace('/[\'_ ] [!=<>\$] \'.*$/', '', $line)) - 4 + 1;
+	// We determine the separator position from the character '?' on
+	// the second line, correct for offset of line numbers
+	$midloc = strpos($line, '?') - 5;
 
+	$line = strtok("\n");
 	while(strlen($line) != 0){
-		$linenostr = substr($line,0,4);
-		if($firstdiff == (int)$linenostr) {
-			$linenostr = "<a id='firstdiff'></a>".$linenostr;
-		}
+		$linenostr = substr($line,0,3);
 		$diffline = substr($line,4);
 		$mid = substr($diffline, $midloc, 3);
 		switch($mid){
@@ -376,7 +377,7 @@ if ( isset($jid) )  {
 		    "correct\">$run[runresult]</span></td></tr>" .
 		    "</table>\n\n";
 
-		echo "<h5>Diff output (team vs. reference output)</h5>\n";
+		echo "<h5>Diff output</h5>\n";
 		if ( @$run['output_diff'] ) {
 			echo "<pre class=\"output_text\">";
 			echo parseDiff($run['output_diff']);

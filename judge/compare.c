@@ -263,6 +263,7 @@ void writediff()
 
 	/* Print first differences found header at beginning of file */
 	fprintf(diffoutfile,"### DIFFERENCES FROM LINE %d ###\n",firstdiff+1);
+	fprintf(diffoutfile,"%*s ? REFERENCE\n",(int)maxlinelen[0]+6,"TEAM");
 
 	/* Loop over all common lines for printing */
 	for(l=0; l<min(nlines[0],nlines[1]); l++) {
