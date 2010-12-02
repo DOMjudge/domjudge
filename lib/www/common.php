@@ -205,6 +205,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			        echo "<a$link>$verifier</a>";
 		            }
 			}
+			echo "</td>";
 		}
 		echo "</tr>\n";
 
