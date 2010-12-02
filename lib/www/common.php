@@ -195,15 +195,15 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 
 			echo "<td><a$link>$verified</a></td><td>";
 			if ( $claim ) {
-			    echo addSubmit('claim',
+				echo addSubmit('claim',
 				               'claim[' . htmlspecialchars($row['submitid']) . ']');
 			} else {
-			    if ( $verifier == @$_COOKIE['domjudge_lastverifier'] ) {
-			        echo addSubmit('unclaim',
-						    'unclaim[' . htmlspecialchars($row['submitid']) . ']');
-			    } else {
-			        echo "<a$link>$verifier</a>";
-		            }
+				if ( $verifier == @$_COOKIE['domjudge_lastverifier'] ) {
+					echo addSubmit('unclaim',
+					               'unclaim[' . htmlspecialchars($row['submitid']) . ']');
+				} else {
+					echo "<a$link>$verifier</a>";
+				}
 			}
 			echo "</td>";
 		}
