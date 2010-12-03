@@ -198,7 +198,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 				echo addSubmit('claim',
 				               'claim[' . htmlspecialchars($row['submitid']) . ']');
 			} else {
-				if ( $verifier == @$_COOKIE['domjudge_lastverifier'] ) {
+				if ( !$verified && $verifier == @$_COOKIE['domjudge_lastverifier'] ) {
 					echo addSubmit('unclaim',
 					               'unclaim[' . htmlspecialchars($row['submitid']) . ']');
 				} else {
