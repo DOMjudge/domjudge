@@ -251,7 +251,7 @@ function genScoreBoard($cdata) {
  * team's current rank but a question mark.
  */
 function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
-	$static = FALSE, $limitteams = null, $displayrank = TRUE) {
+	$static = FALSE, $limitteams = null, $displayrank = TRUE, $center = FALSE) {
 
 	$cid = $cdata['cid'];
 
@@ -267,7 +267,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 	// configuration
 	$SHOW_AFFILIATIONS = dbconfig_get('show_affiliations', 1);
 
-	echo '<table class="scoreboard' . (IS_JURY ? ' scoreboard_jury' : '') . "\">\n";
+	echo '<table class="scoreboard' . (IS_JURY ? ' scoreboard_jury' : '') . ($center ? ' center' : '') . "\">\n";
 
 	// output table column groups (for the styles)
 	echo '<colgroup><col id="scorerank" />' .
@@ -541,7 +541,7 @@ function putTeamRow($cdata, $teamids) {
 	$displayrank = !$fdata['showfrozen'];
 
 	renderScoreBoardTable($cdata,$sdata,$myteamid,$static,
-		$teamids,$displayrank);
+		$teamids,$displayrank,TRUE);
 
 	return;
 }

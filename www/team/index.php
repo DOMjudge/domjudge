@@ -42,7 +42,7 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 	} else {
 		echo addForm('upload.php','post',null,'multipart/form-data') .
 		"<p id=\"submitform\">\n\n" .
-		"<input type=\"file\" name=\"code\" id=\"code\" size=\"10\" onchange='detectProblemLanguage(document.getElementById(\"code\").value);' /> ";
+		"<input type=\"file\" name=\"code\" id=\"code\" size=\"25\" onchange='detectProblemLanguage(document.getElementById(\"code\").value);' /> ";
 
 		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid) as name FROM problem
 				 WHERE cid = %i AND allow_submit = 1
@@ -55,7 +55,7 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 		$langs[''] = 'language';
 		echo addSelect('langext', $langs, '', true);
 
-		echo addSubmit('GO', 'submit',
+		echo addSubmit('submit', 'submit',
 			       "return checkUploadForm();");
 
 		echo "</p>\n</form>\n\n";
@@ -83,6 +83,12 @@ $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
 
 echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 
+echo addForm('clarification.php','get');
+echo "<p>\n\n";
+echo addSubmit('request clarification')
+	. addEndForm();
+echo "</p>";
+
 # FIXME: column width and wrapping/shortening of clarification text 
 if ( $clarifications->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarifications.</p>\n\n";
@@ -98,8 +104,6 @@ if ( $requests->count() == 0 ) {
 	putClarificationList($requests,$login);
 }
 
-echo "<div><form action='clarification.php' method='get'>
-	<input type='submit' value='request clarification' /></form></div>";
 echo "</div>\n";
 
 require(LIBWWWDIR . '/footer.php');

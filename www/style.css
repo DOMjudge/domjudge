@@ -168,6 +168,7 @@ legend {
 	border-bottom: 1px solid gray;
 }
 
+.center { margin: 0px auto; }
 
 .scoreboard { border-collapse: collapse; }
 .scoreboard td { font-size: small; }
@@ -241,12 +242,16 @@ td.scorenc { border-color: silver; }
 }
 
 input,select,textarea {
-	border: solid 1px blue;
+	border: solid 1px darkgray;
+	background-color: #F0F0F0;
+}
+input,select {
+	cursor: pointer;
 }
 
 h3.teamoverview {
-	border-top: solid 1px blue;
-	border-bottom: solid 1px blue;
+	border-top: solid 1px darkgray;
+	border-bottom: solid 1px darkgray;
 	background-color: #c4d8ff;
 	font-size: smaller;
 	font-weight: normal;
