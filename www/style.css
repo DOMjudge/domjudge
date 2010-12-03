@@ -298,3 +298,8 @@ h3.teamoverview {
 	border-color: red;
 	color: red;
 }
+.button {
+	border: solid 1px darkgray;
+	background-color: #F0F0F0;
+	font-size: 90%;
+}

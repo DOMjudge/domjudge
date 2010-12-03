@@ -15,11 +15,17 @@ ALTER TABLE `contest` DROP COLUMN `activatetime_string`;
 -- Create additional structures
 --
 
+ALTER TABLE `clarification`
+  ADD COLUMN  `jury_member` varchar(15) NOT NULL COMMENT 'Name of jury member who answered this' AFTER `recipient`;
+
 ALTER TABLE `contest`
   ADD COLUMN `activatetime_string` varchar(20) NOT NULL COMMENT 'Time contest becomes visible in team/public views' AFTER `unfreezetime`,
   ADD COLUMN `freezetime_string` varchar(20) default NULL COMMENT 'Time scoreboard is frozen' AFTER `activatetime_string`,
   ADD COLUMN `endtime_string` varchar(20) NOT NULL COMMENT 'Time after which no more submissions are accepted' AFTER `freezetime_string`,
   ADD COLUMN `unfreezetime_string` varchar(20) default NULL COMMENT 'Unfreeze a frozen scoreboard at this time' AFTER `endtime_string`;
+
+ALTER TABLE `judging`
+  CHANGE `verifier` `jury_member` varchar(15) NOT NULL default '';
 
 ALTER TABLE `language` ADD UNIQUE KEY `extension` (`extension`);
 

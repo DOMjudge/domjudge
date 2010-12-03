@@ -219,53 +219,56 @@ function importZippedProblem($zip, $probid = NULL)
 }
 
 /**
- * Reads verifier from POST variables, returns $default if nothing is set.
+ * Reads jury member from POST variables, returns $default if nothing is set.
  */
-function getVerifier($default = null)
+function getJuryMember($default = null)
 {
-	$verifier = $default;
-	if ( ! empty($_POST['verifier_selected']) ) $verifier = $_POST['verifier_selected'];
-	if ( ! empty($_POST['verifier_typed']) )    $verifier = $_POST['verifier_typed'];
+	$jury_member = $default;
+	if ( ! empty($_POST['jury_member_selected']) ) $jury_member = $_POST['jury_member_selected'];
+	if ( ! empty($_POST['jury_member_typed']) )    $jury_member = $_POST['jury_member_typed'];
 
-	return $verifier;
+	return $jury_member;
 }
 
 /**
- * Sets verifier in a cookie, only if a non-empty string is given.
+ * Sets jury member in a cookie, only if a non-empty string is given.
  */
-function setVerifier($verifier)
+function setJuryMember($jury_member)
 {
-	// Set cookie of last verifier, expiry defaults to end of session.
-	if (  !empty($verifier) && is_string($verifier) ) {
+	// Set cookie of last jury member, expiry defaults to end of session.
+	if ( !empty($jury_member) && is_string($jury_member) ) {
 		if  (version_compare(PHP_VERSION, '5.2') >= 0) {
 			// HTTPOnly Cookie, while this cookie is not security critical
 			// it's a good habit to get into.
-			setcookie('domjudge_lastverifier', $verifier, null, null, null, null, true);
+			setcookie('domjudge_last_jury_member', $jury_member, null, null, null, null, true);
 		} else {
-			setcookie('domjudge_lastverifier', $verifier);
+			setcookie('domjudge_last_jury_member', $jury_member);
 		}
 	}
 }
 
 /**
- * Add a both a text field and select box to select a verifier.
+ * Add a both a text field and select box to select a jury member.
  */
-function addVerifierSelect($default = null)
+function addJuryMemberSelect($default = null)
 {
 	global $DB;
 
-	$verifiers = $DB->q('COLUMN SELECT DISTINCT verifier FROM judging
-	                     WHERE verifier IS NOT NULL AND verifier != ""
-	                     ORDER BY verifier');
+	$jury_members = $DB->q('COLUMN SELECT DISTINCT jury_member FROM judging
+	                     WHERE jury_member IS NOT NULL AND jury_member != ""
+			     UNION
+			     SELECT DISTINCT jury_member FROM clarification
+			     WHERE jury_member IS NOT NULL AND jury_member != ""
+	                     ORDER BY jury_member');
 
  	if ( empty($default) ) $default = null;
-	if ( $default!==null && !in_array($default,$verifiers) ) $verifiers[] = $default;
+	if ( $default!==null && !in_array($default,$jury_members) ) $jury_members[] = $default;
 
-	$res = addInput('verifier_typed', '', 10, 15);
-	if ( count($verifiers) > 0 ) {
+	$res = addInput('jury_member_typed', '', 10, 15);
+	if ( count($jury_members) > 0 ) {
 		$opts = array(0 => "");
-		$opts = array_merge($verifiers, $opts);
-		$res .= ' or ' . addSelect('verifier_selected', $opts, $default);
+		$opts = array_merge($jury_members, $opts);
+		$res .= ' or ' . addSelect('jury_member_selected', $opts, $default);
 	}
 
 	return $res;

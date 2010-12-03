@@ -7,6 +7,11 @@
  */
 
 require('init.php');
+
+// Set jury_member cookie
+$jury_member = getJuryMember(@$_COOKIE['domjudge_last_jury_member']);
+setJuryMember($jury_member);
+
 $title = 'Jury interface';
 require(LIBWWWDIR . '/header.php');
 
@@ -17,7 +22,15 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 		"<img src=\"../images/DOMjudgelogo.png\" id=\"djlogo\" " .
 		"alt=\"DOMjudge logo\" title=\"The DOMjudge logo: free as in beer!\" /></a></p>\n\n";
 }
+
+
+echo addForm('index.php')
+	. '<p>Claim submissions/clarifications for verification as '
+	. addJuryMemberSelect($jury_member)
+	. addSubmit('change')
+	. "</p>\n";
 ?>
+
 
 <h3>Overviews:</h3>
 <ul>

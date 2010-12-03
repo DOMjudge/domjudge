@@ -55,7 +55,7 @@ $nerrors = 0;
 
 $matchstring = '@EXPECTED_RESULTS@: ';
 
-$res = $DB->q("SELECT s.*, j.judgingid, j.result, j.verified, j.verifier
+$res = $DB->q("SELECT s.*, j.judgingid, j.result, j.verified, j.jury_member
                FROM submission s
                LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
                WHERE s.probid = 'hello' OR s.probid = 'fltcmp' OR s.probid = 'boolfind'");
@@ -81,7 +81,7 @@ while( $row = $res->next() ) {
 		} else {
 			// Judging result is as expected, set judging to verified:
 			if ( $row['verified']!=1 ) {
-				$DB->q('UPDATE judging SET verified = 1, verifier = \'auto-verifier\'
+				$DB->q('UPDATE judging SET verified = 1, jury_member = \'auto-verifier\'
 				        WHERE judgingid = %i', $row['judgingid']);
 			}
 			logmsg(LOG_INFO,"verified submission $sid as '$result'");

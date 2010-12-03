@@ -9,6 +9,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+$last_jury_member = @$_COOKIE['domjudge_last_jury_member'];
+
 require('init.php');
 $title = 'Clarifications';
 
@@ -26,6 +28,36 @@ if ( isset($_REQUEST['id']) ) {
 	$isgeneral = FALSE;
 } else {
 	$isgeneral = TRUE;
+}
+
+if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
+
+	// Set $last_jury_member for default in select-box.
+	$last_jury_member = $jury_member = getJuryMember(@$_COOKIE['domjudge_last_jury_member']);
+
+	if ( isset($_REQUEST['unclaim']) ) $jury_member = FALSE;
+
+	// Set jury member cookie
+	setJuryMember($jury_member);
+
+	// Send headers now: after cookies, before possible warning messages.
+	if ( !isset($_REQUEST['unclaim']) ) require_once(LIBWWWDIR . '/header.php');
+
+	if ( $req['answered'] ) {
+		warning("Cannot claim this clarification: clarification already answered.");
+	} else if ( empty($jury_member) && $jury_member!==FALSE ) {
+		warning("Cannot claim this clarification: no jury_member specified.");
+	} else {
+		if ( !empty($req['jury_member']) && $jury_member!==FALSE ) {
+			warning("Submission claimed and previous owner " .
+			        @$req['jury_member'] . " replaced.");
+		}
+		$req['jury_member'] = $jury_member;
+		$DB->q('UPDATE clarification SET jury_member = ' . ($jury_member===FALSE ? 'NULL %_ ' : '%s ') .
+		       'WHERE clarid = %i', $jury_member, $id);
+
+		if ( isset($_REQUEST['unclaim']) ) header('Location: clarifications.php');
+	}
 }
 
 // insert a new response (if posted)
@@ -93,21 +125,41 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
 // (un)set 'answered' (if posted)
 if ( isset($_POST['submit']) && isset($_POST['answered']) ) {
-	$DB->q('UPDATE clarification SET answered = %i WHERE clarid = %i',
-	       (int)$_POST['answered'], $respid);
+	$answered = (int)$_POST['answered'];
+	$jury_member = getJuryMember($last_jury_member);
+	$DB->q('UPDATE clarification SET answered = %i, jury_member = '
+		. ($answered ? '%s ' : 'NULL %_ ')
+        	. 'WHERE clarid = %i',
+		$answered, $jury_member, $respid);
 
 	// redirect back to the original location
 	header('Location: clarification.php?id=' . $id);
 	exit;
 }
 
-require(LIBWWWDIR . '/header.php');
+require_once(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/clarification.php');
 
 if ( ! $isgeneral ) {
 
 // display clarification thread
 echo "<h1>Clarification $id</h1>\n\n";
+
+$pagename = basename($_SERVER['PHP_SELF']);
+if ( !$req['answered'] ) {
+	echo addForm($pagename . '?id=' . urlencode($id));
+
+	echo "<p>Claimed: " .
+	    "<strong>" . printyn(!empty($req['jury_member'])) . "</strong>";
+	if ( empty($req['jury_member']) ) {
+		echo '; ';
+	} else {
+		echo ', by ' . htmlspecialchars($req['jury_member']) . '; ' .
+		    addSubmit('unclaim', 'unclaim') . ' or ';
+	}
+	echo addSubmit('claim', 'claim') . ' as ' . addJuryMemberSelect($last_jury_member) .
+	    addEndForm();
+}
 
 if ( ! empty ( $req['respid'] ) ) {
 	$orig = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q

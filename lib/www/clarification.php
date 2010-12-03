@@ -161,7 +161,9 @@ function putClarificationList($clars, $team = NULL)
 	     "<th scope=\"col\">time</th>" .
 	     "<th scope=\"col\">from</th>" .
 	     "<th scope=\"col\">to</th><th scope=\"col\">subject</th>" .
-	     "<th scope=\"col\">text</th></tr>\n</thead>\n<tbody>\n";
+	     "<th scope=\"col\">text</th>" .
+		( IS_JURY ? "<th scope=\"col\">answered</th><th scope=\"col\">by</th>" : "") .
+	     "</tr>\n</thead>\n<tbody>\n";
 
 	while ( $clar = $clars->next() ) {
 		// check viewing permission for teams
@@ -212,7 +214,37 @@ function putClarificationList($clars, $team = NULL)
 
 		echo '<td class="clartext">' . $link;
 		echo summarizeClarification($clar['body']);
-		echo "</a></td></tr>\n";
+		echo "</a></td>";
+		if ( IS_JURY ) {
+			unset($answered, $jury_member);
+			$claim = FALSE;
+			$answered = printyn($clar['answered']);
+			if ( empty($clar['jury_member']) ) {
+				$jury_member = '&nbsp;';
+			} else {
+				$jury_member = htmlspecialchars($clar['jury_member']);
+			}
+			if ( !$clar['answered'] ) {
+				if ( empty($clar['jury_member']) ) {
+					$claim = TRUE;
+				} else {
+					$answered = 'claimed';
+				}
+			}
+
+			echo "<td>$link $answered</a></td><td>";
+			if ( $claim && isset($clar['sender']) ) {
+				echo "<a class=\"button\" href=\"clarification.php?claim=1&id=" . htmlspecialchars($clar['clarid']) . "\">claim</a>";
+			} else {
+				if ( !$clar['answered'] && $jury_member == @$_COOKIE['domjudge_last_jury_member'] ) {
+					echo "<a class=\"button\" href=\"clarification.php?unclaim=1&id=" . htmlspecialchars($clar['clarid']) . "\">unclaim</a>";
+				} else {
+					echo "$link $jury_member</a>";
+				}
+			}
+			echo "</td>";
+		}
+		echo "</tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
 }

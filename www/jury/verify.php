@@ -13,14 +13,14 @@ $id    = @$_POST['id'];
 $val   = @$_POST['val'];
 if ( empty($id) ) error("No judging ID passed to mark as verified.");
 
-$verifier = getVerifier("");
+$jury_member = getJuryMember("");
 
-// Explicitly unset verifier when unmarking verified: otherwise this
+// Explicitly unset jury_member when unmarking verified: otherwise this
 // judging would be marked as "claimed".
 $cnt = $DB->q('RETURNAFFECTED UPDATE judging
-               SET verified = %i, verifier = ' . ($val ? '%s ' : 'NULL %_ ') .
+               SET verified = %i, jury_member = ' . ($val ? '%s ' : 'NULL %_ ') .
               'WHERE judgingid = %i',
-              $val, $verifier, $id);
+              $val, $jury_member, $id);
 
 if ( $cnt == 0 ) {
 	error("Judging '$id' not found or nothing changed.");
@@ -44,7 +44,7 @@ if ( VERIFICATION_REQUIRED ) {
 	       $jdata['probid'], $jdata['submitid']);
 }
 
-setVerifier($verifier);
+setJuryMember($jury_member);
 
 /* redirect back to submission page or submissions overview depending
  * on whether judging was (un)verified. */

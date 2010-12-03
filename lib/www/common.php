@@ -51,7 +51,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid,
 					s.submittime, s.judgehost, s.valid, t.name AS teamname,
 					p.name AS probname, l.name AS langname,
-					j.result, j.judgehost, j.verified, j.verifier '
+					j.result, j.judgehost, j.verified, j.jury_member '
 				  . $sqlbody
 				  . (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '')
 				  .'ORDER BY s.submittime DESC, s.submitid DESC '
@@ -67,9 +67,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 	}
 
 	if ( IS_JURY ) {
-		echo addForm('submission.php') .
-		    '<p>Claim submissions for verification as ' .
-		    addVerifierSelect(@$_COOKIE['domjudge_lastverifier']) . "</p>\n";
+		echo addForm('submission.php');
 	}
 
 	// print the table with the submissions.
@@ -171,21 +169,21 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			echo '</a></td>';
 
 			// only display verification if we're done with judging
-			unset($verified, $verifier);
+			unset($verified, $jury_member);
 			$claim = FALSE;
 			if ( empty($row['result']) ) {
 				$verified = '&nbsp;';
-				$verifier = '&nbsp;';
+				$jury_member = '&nbsp;';
 			} else {
 				$verified = printyn($row['verified']);
-				if ( empty($row['verifier']) ) {
-					$verifier = '&nbsp;';
+				if ( empty($row['jury_member']) ) {
+					$jury_member = '&nbsp;';
 				} else {
-					$verifier = htmlspecialchars($row['verifier']);
+					$jury_member = htmlspecialchars($row['jury_member']);
 				}
 				if ( !$row['verified'] ) {
 					$vercnt++;
-					if ( empty($row['verifier']) ) {
+					if ( empty($row['jury_member']) ) {
 						$claim = TRUE;
 					} else {
 						$verified = 'claimed';
@@ -195,14 +193,12 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 
 			echo "<td><a$link>$verified</a></td><td>";
 			if ( $claim ) {
-				echo addSubmit('claim',
-				               'claim[' . htmlspecialchars($row['submitid']) . ']');
+				echo "<a class=\"button\" href=\"submission.php?claim=1&id=" . htmlspecialchars($row['submitid']) . "\">claim</a>";
 			} else {
-				if ( !$verified && $verifier == @$_COOKIE['domjudge_lastverifier'] ) {
-					echo addSubmit('unclaim',
-					               'unclaim[' . htmlspecialchars($row['submitid']) . ']');
+				if ( !$row['verified'] && $jury_member == @$_COOKIE['domjudge_last_jury_member'] ) {
+					echo "<a class=\"button\" href=\"submission.php?unclaim=1&id=" . htmlspecialchars($row['submitid']) . "\">unclaim</a>";
 				} else {
-					echo "<a$link>$verifier</a>";
+					echo "<a$link>$jury_member</a>";
 				}
 			}
 			echo "</td>";
