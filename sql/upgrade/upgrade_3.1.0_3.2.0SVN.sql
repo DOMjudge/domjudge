@@ -25,7 +25,7 @@ ALTER TABLE `contest`
   ADD COLUMN `unfreezetime_string` varchar(20) default NULL COMMENT 'Unfreeze a frozen scoreboard at this time' AFTER `endtime_string`;
 
 ALTER TABLE `judging`
-  CHANGE `verifier` `jury_member` varchar(15) NOT NULL default '';
+  CHANGE COLUMN `verifier` `jury_member` varchar(15) NOT NULL default '' COMMENT 'Name of jury member who verified this';
 
 ALTER TABLE `language` ADD UNIQUE KEY `extension` (`extension`);
 

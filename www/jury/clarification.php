@@ -27,6 +27,7 @@ if ( isset($_REQUEST['id']) ) {
 	$respid = (int) (empty($req['respid']) ? $id : $req['respid']);
 	$isgeneral = FALSE;
 } else {
+	$respid = NULL;
 	$isgeneral = TRUE;
 }
 
@@ -69,6 +70,8 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	// this goes well.
 	$DB->q('START TRANSACTION');
 
+	$jury_member = getJuryMember($last_jury_member);
+
 	if ( empty($_POST['sendto']) ) {
 		$sendto = null;
 	} elseif ( $_POST['sendto'] == 'domjudge-must-select' ) {
@@ -77,23 +80,20 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		$sendto = $_POST['sendto'];
 	}
 
-	if ( $isgeneral ) {
-		$newid = $DB->q('RETURNID INSERT INTO clarification
-		                 (cid, submittime, recipient, probid, body)
-		                 VALUES (%i, %s, %s, %s, %s)',
-		                $cid, now(), $sendto,
-		                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
-		                $_POST['bodytext']);
-	} else {
-		$newid = $DB->q('RETURNID INSERT INTO clarification
-		                 (cid, respid, submittime, recipient, probid, body)
-		                 VALUES (%i, %i, %s, %s, %s, %s)',
-		                $cid, $respid, now(), $sendto,
-		                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
-		                $_POST['bodytext']);
-	}
+	$newid = $DB->q('RETURNID INSERT INTO clarification
+	                 (cid, respid, submittime, recipient, probid, body,
+ 	                  answered, jury_member)
+	                 VALUES (%i, ' .
+	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %s, %s, %i, ' .
+	                ($jury_member===FALSE ? 'NULL %_)' : '%s)'),
+	                $cid, $respid, now(), $sendto,
+	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
+	                $_POST['bodytext'], 1, $last_jury_member);
+
 	if ( ! $isgeneral ) {
-		$DB->q('UPDATE clarification SET answered = 1 WHERE clarid = %i', $respid);
+		$DB->q('UPDATE clarification SET answered = 1, jury_member = ' .
+		       ($jury_member===FALSE ? 'NULL %_' : '%s') . ' WHERE clarid = %i',
+		       $jury_member, $respid);
 	}
 
 	if( is_null($sendto) ) {
