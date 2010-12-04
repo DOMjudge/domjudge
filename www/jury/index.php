@@ -28,7 +28,7 @@ echo addForm('index.php')
 	. '<p>Claim submissions/clarifications for verification as '
 	. addJuryMemberSelect($jury_member)
 	. addSubmit('change')
-	. "</p>\n";
+	. "</p>" . addEndForm() . "\n";
 ?>
 
 
