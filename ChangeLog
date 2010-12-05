@@ -6,6 +6,9 @@ Version 3.0.5 - SVN
  - Small admin and judge documentation fixes.
  - Do not check scoreboard cache for key integrity; this
    prevents deletion of teams while adding no real value.
+ - Add note countdown timer is only shown from activetime.
+ - Change sample team ID to avoid conflicts with real teams.
+ - Don't count unjudged submissions as unverified for consistency.
 
 Version 3.0.4 - 22 August 2010
 ------------------------------

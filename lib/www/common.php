@@ -194,7 +194,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 					, @$restrictions['langid'], @$restrictions['judgehost']
 					);
 		$vercnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-						.' AND verified = 0'
+						.' AND verified = 0 AND result IS NOT NULL'
 					, $cid, @$restrictions['teamid'], @$restrictions['probid']
 					, @$restrictions['langid'], @$restrictions['judgehost']
 					);
