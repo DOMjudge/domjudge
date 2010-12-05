@@ -2097,9 +2097,25 @@ are imposed before the compiled submissions are started. On the other
 hand, the Sun jvm is started via a compile-time generated script which
 is run as a wrapper around the program. This means that the memory
 limits imposed by DOMjudge are for the jvm and the running program
-within it. As the jvm uses approximately 200MB, this reduces the limit
+within it. As the jvm uses approximately 300MB, this reduces the limit
 by this significant amount. See <tt>judge/compile_java_javac.sh</tt>
 for the implementation details.
+
+If you see error messages of the form
+<code>
+Error occurred during initialization of VM
+java.lang.OutOfMemoryError: unable to create new native thread
+</code>
+or
+<code>
+Error occurred during initialization of VM
+Could not reserve enough space for object heap
+</code>
+Then the problem is probably that the jvm needs more memory than what
+is reserved by the Java compile script. You should try to increase the
+<tt>MEMRESERVED</tt> variable in <tt>judge/compile_java.sh</tt> and
+check that the total memory limit <tt>MEMLIMIT</tt> in
+<tt>etc/judgehost-config.php</tt> is larger than <tt>MEMRESERVED</tt>.
 
 <sect>Java class naming
 <p>

@@ -2,11 +2,25 @@
 
 # Java compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
+#
+# This script byte-compiles with the Oracle (Sun) javac compiler and
+# generates a shell script to run it with the java interpreter later.
+# It autodetects the main class name and optionally renames the source
+# file if the class is public.
+#
+# NOTICE: this compiler script cannot be used with the USE_CHROOT
+# configuration option turned on, unless proper preconfiguration of
+# the chroot environment has been taken care of!
 
 SOURCE="$1"
 DEST="$2"
 MEMLIMIT="$3"
 MAINCLASS=""
+
+# Amount of memory reserved for the Java virtual machine in KB. The
+# default below is just above the maximum memory usage of current
+# versions of the jvm, but might need increasing in some cases.
+MEMRESERVED=300000
 
 TMPFILE=`mktemp /tmp/domjudge_javac_output.XXXXXX` || exit 1
 
@@ -51,7 +65,7 @@ if [ -z "$MAINCLASS" ]; then
 fi
 
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
-MEMLIMITJAVA=$(($MEMLIMIT - 300000))
+MEMLIMITJAVA=$(($MEMLIMIT - $MEMRESERVED))
 
 # Write executing script:
 # Executes java byte-code interpreter with following options
