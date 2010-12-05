@@ -10,6 +10,7 @@ Version 3.1.2 - 27 October 2010
  - Small documentation improvements.
  - Do not check scoreboard cache for key integrity; this
    prevents deletion of teams while adding no real value.
+ - In JS problem name detection, probid needs to be casenormalised too.
 
 Version 3.1.1 - 22 August 2010
 ------------------------------
