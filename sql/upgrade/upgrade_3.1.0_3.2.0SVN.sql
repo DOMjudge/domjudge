@@ -16,7 +16,7 @@ ALTER TABLE `contest` DROP COLUMN `activatetime_string`;
 --
 
 ALTER TABLE `clarification`
-  ADD COLUMN  `jury_member` varchar(15) NOT NULL COMMENT 'Name of jury member who answered this' AFTER `recipient`;
+  ADD COLUMN  `jury_member` varchar(15) NOT NULL default '' COMMENT 'Name of jury member who answered this' AFTER `recipient`;
 
 ALTER TABLE `contest`
   ADD COLUMN `activatetime_string` varchar(20) NOT NULL COMMENT 'Time contest becomes visible in team/public views' AFTER `unfreezetime`,
