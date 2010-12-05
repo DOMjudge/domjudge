@@ -219,14 +219,16 @@ function importZippedProblem($zip, $probid = NULL)
 }
 
 /**
- * Reads jury member from POST variables, returns $default if nothing is set.
+ * Reads jury member from POST variables, COOKIE's, returns $default if nothing is set.
  */
 function getJuryMember($default = null)
 {
 	$jury_member = $default;
+	if ( ! empty($_COOKIE['domjudge_jury_member']) ) $jury_member = $_COOKIE['domjudge_jury_member'];
 	if ( ! empty($_POST['jury_member_selected']) ) $jury_member = $_POST['jury_member_selected'];
 	if ( ! empty($_POST['jury_member_typed']) )    $jury_member = $_POST['jury_member_typed'];
 
+	if ( !headers_sent() ) setJuryMember($jury_member);
 	return $jury_member;
 }
 
@@ -235,14 +237,14 @@ function getJuryMember($default = null)
  */
 function setJuryMember($jury_member)
 {
-	// Set cookie of last jury member, expiry defaults to end of session.
+	// Set cookie of jury_member, expiry defaults to end of session.
 	if ( !empty($jury_member) && is_string($jury_member) ) {
 		if  (version_compare(PHP_VERSION, '5.2') >= 0) {
 			// HTTPOnly Cookie, while this cookie is not security critical
 			// it's a good habit to get into.
-			setcookie('domjudge_last_jury_member', $jury_member, null, null, null, null, true);
+			setcookie('domjudge_jury_member', $jury_member, null, null, null, null, true);
 		} else {
-			setcookie('domjudge_last_jury_member', $jury_member);
+			setcookie('domjudge_jury_member', $jury_member);
 		}
 	}
 }

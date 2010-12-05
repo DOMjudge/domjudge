@@ -236,7 +236,7 @@ function putClarificationList($clars, $team = NULL)
 			if ( $claim && isset($clar['sender']) ) {
 				echo "<a class=\"button\" href=\"clarification.php?claim=1&id=" . htmlspecialchars($clar['clarid']) . "\">claim</a>";
 			} else {
-				if ( !$clar['answered'] && $jury_member == @$_COOKIE['domjudge_last_jury_member'] ) {
+				if ( !$clar['answered'] && $jury_member==getJuryMember() ) {
 					echo "<a class=\"button\" href=\"clarification.php?unclaim=1&id=" . htmlspecialchars($clar['clarid']) . "\">unclaim</a>";
 				} else {
 					echo "$link $jury_member</a>";

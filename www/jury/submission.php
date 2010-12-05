@@ -64,8 +64,6 @@ if ( is_array(@$_POST['unclaim']) ) {
 	foreach( $_POST['unclaim'] as $key => $val ) $id = (int)$key;
 }
 
-$last_jury_member = @$_COOKIE['domjudge_last_jury_member'];
-
 require('init.php');
 
 $title = 'Submission s'.@$id;
@@ -101,31 +99,26 @@ if ( !isset($jid) ) {
 	}
 }
 
+$jury_member = getJuryMember();
+
 if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 
-	// Set $last_jury_member for default in select-box.
-	$last_jury_member = $jury_member = getJuryMember(@$_COOKIE['domjudge_last_jury_member']);
-
-	if ( isset($_REQUEST['unclaim']) ) $jury_member = FALSE;
-
-	// Set jury_member cookie
-	setJuryMember($jury_member);
-
-	// Send headers now: after cookies, before possible warning messages.
+	// Send headers before possible warning messages.
 	if ( !isset($_REQUEST['unclaim']) ) require_once(LIBWWWDIR . '/header.php');
 
 	if ( !isset($jid) ) {
 		warning("Cannot claim this submission: no valid judging found.");
 	} else if ( $jdata[$jid]['verified'] ) {
 		warning("Cannot claim this submission: judging already verified.");
-	} else if ( empty($jury_member) && $jury_member!==FALSE ) {
+	} else if ( empty($jury_member) && isset($_REQUEST['claim']) ) {
 		warning("Cannot claim this submission: no jury member specified.");
 	} else {
-		if ( !empty($jdata[$jid]['jury_member']) && $jury_member!==FALSE ) {
+		if ( !empty($jdata[$jid]['jury_member']) && isset($_REQUEST['claim']) ) {
 			warning("Submission claimed and previous owner " .
 			        @$jdata[$jid]['jury_member'] . " replaced.");
 		}
-		$DB->q('UPDATE judging SET jury_member = ' . ($jury_member===FALSE ? 'NULL %_ ' : '%s ') .
+		$DB->q('UPDATE judging SET jury_member = ' .
+		       (isset($_REQUEST['unclaim']) ? 'NULL %_ ' : '%s ') .
 		       'WHERE judgingid = %i', $jury_member, $jid);
 
 		if ( isset($_REQUEST['unclaim']) ) header('Location: submissions.php');
@@ -248,7 +241,7 @@ if ( isset($jid) )  {
 			echo ', by ' . htmlspecialchars($jud['jury_member']) . '; ' .
 			    addSubmit('unclaim', 'unclaim') . ' or ';
 		}
-		echo addSubmit('claim', 'claim') . ' as ' . addJuryMemberSelect($last_jury_member) .
+		echo addSubmit('claim', 'claim') . ' as ' . addJuryMemberSelect($jury_member) .
 		    addEndForm();
 	}
 
@@ -277,7 +270,7 @@ if ( isset($jid) )  {
 
 			if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
 				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
-				if ( $val ) echo ' by ' . addJuryMemberSelect($last_jury_member);
+				if ( $val ) echo ' by ' . addJuryMemberSelect($jury_member);
 				echo "</p>" . addEndForm();
 			} else {
 				echo "</p>\n";

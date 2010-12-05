@@ -12,10 +12,18 @@ require('init.php');
 $ajaxtitle = 'Clarification Requests';
 $title = $ajaxtitle.($nunread_clars ? ' ('.$nunread_clars.' new)' : '');
 
+$jury_member = getJuryMember();
+
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/clarification.php');
 
 echo "<h1>Clarifications</h1>\n\n";
+
+echo addForm('clarifications.php') .
+	'<p>Claim submissions/clarifications as ' .
+	addJuryMemberSelect($jury_member) .
+	addSubmit('change') . "</p>" .
+	addEndForm() . "\n";
 
 echo "<p><a href=\"clarification.php\">Send Clarification</a></p>\n";
 echo "<p><a href=\"#newrequests\">View New Clarification Requests</a></p>\n";

@@ -9,8 +9,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$last_jury_member = @$_COOKIE['domjudge_last_jury_member'];
-
 require('init.php');
 $title = 'Clarifications';
 
@@ -31,30 +29,25 @@ if ( isset($_REQUEST['id']) ) {
 	$isgeneral = TRUE;
 }
 
+$jury_member = getJuryMember();
+
 if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
-
-	// Set $last_jury_member for default in select-box.
-	$last_jury_member = $jury_member = getJuryMember(@$_COOKIE['domjudge_last_jury_member']);
-
-	if ( isset($_REQUEST['unclaim']) ) $jury_member = FALSE;
-
-	// Set jury member cookie
-	setJuryMember($jury_member);
 
 	// Send headers now: after cookies, before possible warning messages.
 	if ( !isset($_REQUEST['unclaim']) ) require_once(LIBWWWDIR . '/header.php');
 
 	if ( $req['answered'] ) {
 		warning("Cannot claim this clarification: clarification already answered.");
-	} else if ( empty($jury_member) && $jury_member!==FALSE ) {
+	} else if ( empty($jury_member) && isset($_REQUEST['claim']) ) {
 		warning("Cannot claim this clarification: no jury_member specified.");
 	} else {
-		if ( !empty($req['jury_member']) && $jury_member!==FALSE ) {
+		if ( !empty($req['jury_member']) && isset($_REQUEST['claim']) ) {
 			warning("Submission claimed and previous owner " .
 			        @$req['jury_member'] . " replaced.");
 		}
 		$req['jury_member'] = $jury_member;
-		$DB->q('UPDATE clarification SET jury_member = ' . ($jury_member===FALSE ? 'NULL %_ ' : '%s ') .
+		$DB->q('UPDATE clarification SET jury_member = ' .
+		       (isset($_REQUEST['unclaim']) ? 'NULL %_ ' : '%s ') .
 		       'WHERE clarid = %i', $jury_member, $id);
 
 		if ( isset($_REQUEST['unclaim']) ) header('Location: clarifications.php');
@@ -70,8 +63,6 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	// this goes well.
 	$DB->q('START TRANSACTION');
 
-	$jury_member = getJuryMember($last_jury_member);
-
 	if ( empty($_POST['sendto']) ) {
 		$sendto = null;
 	} elseif ( $_POST['sendto'] == 'domjudge-must-select' ) {
@@ -85,14 +76,14 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
  	                  answered, jury_member)
 	                 VALUES (%i, ' .
 	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %s, %s, %i, ' .
-	                ($jury_member===FALSE ? 'NULL %_)' : '%s)'),
+	                (isset($jury_member) ? '%s)' : 'NULL %_)'),
 	                $cid, $respid, now(), $sendto,
 	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
-	                $_POST['bodytext'], 1, $last_jury_member);
+	                $_POST['bodytext'], 1, $jury_member);
 
 	if ( ! $isgeneral ) {
 		$DB->q('UPDATE clarification SET answered = 1, jury_member = ' .
-		       ($jury_member===FALSE ? 'NULL %_' : '%s') . ' WHERE clarid = %i',
+		       (isset($jury_member) ? '%s' : 'NULL %_') . ' WHERE clarid = %i',
 		       $jury_member, $respid);
 	}
 
@@ -126,11 +117,9 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 // (un)set 'answered' (if posted)
 if ( isset($_POST['submit']) && isset($_POST['answered']) ) {
 	$answered = (int)$_POST['answered'];
-	$jury_member = getJuryMember($last_jury_member);
-	$DB->q('UPDATE clarification SET answered = %i, jury_member = '
-		. ($answered ? '%s ' : 'NULL %_ ')
-        	. 'WHERE clarid = %i',
-		$answered, $jury_member, $respid);
+	$DB->q('UPDATE clarification SET answered = %i, jury_member = ' .
+	       ($answered ? '%s ' : 'NULL %_ ') . 'WHERE clarid = %i',
+	       $answered, $jury_member, $respid);
 
 	// redirect back to the original location
 	header('Location: clarification.php?id=' . $id);
@@ -157,7 +146,7 @@ if ( !$req['answered'] ) {
 		echo ', by ' . htmlspecialchars($req['jury_member']) . '; ' .
 		    addSubmit('unclaim', 'unclaim') . ' or ';
 	}
-	echo addSubmit('claim', 'claim') . ' as ' . addJuryMemberSelect($last_jury_member) .
+	echo addSubmit('claim', 'claim') . ' as ' . addJuryMemberSelect($jury_member) .
 	    addEndForm();
 }
 

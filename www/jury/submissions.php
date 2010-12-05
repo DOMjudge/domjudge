@@ -38,9 +38,17 @@ if ( version_compare(PHP_VERSION, '5.2') >= 0 ) {
 	setcookie('domjudge_submissionview', $view);
 }
 
+$jury_member = getJuryMember();
+
 require(LIBWWWDIR . '/header.php');
 
 echo "<h1>$title</h1>\n\n";
+
+echo addForm('submissions.php') .
+	'<p>Claim submissions/clarifications as ' .
+	addJuryMemberSelect($jury_member) .
+	addSubmit('change') . "</p>" .
+	addEndForm() . "\n";
 
 $restrictions = array();
 if ( $viewtypes[$view] == 'unverified' ) $restrictions['verified'] = 0;

@@ -13,7 +13,7 @@ $id    = @$_POST['id'];
 $val   = @$_POST['val'];
 if ( empty($id) ) error("No judging ID passed to mark as verified.");
 
-$jury_member = getJuryMember("");
+$jury_member = getJuryMember();
 
 // Explicitly unset jury_member when unmarking verified: otherwise this
 // judging would be marked as "claimed".
@@ -43,8 +43,6 @@ if ( VERIFICATION_REQUIRED ) {
 	       now(), $jdata['cid'], $jdata['teamid'], $jdata['langid'],
 	       $jdata['probid'], $jdata['submitid']);
 }
-
-setJuryMember($jury_member);
 
 /* redirect back to submission page or submissions overview depending
  * on whether judging was (un)verified. */
