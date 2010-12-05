@@ -71,8 +71,8 @@ function detectProblemLanguage(filename)
 	// problem ID
 
 	var elt=document.getElementById('probid');
-	// index 0 is the "autodetect" option
-	if ( elt.selectedIndex > 0 ) return;
+	// the "autodetect" option has empty value
+	if ( elt.value != '' ) return;
 
 	for (i=0;i<elt.length;i++) {
 		if ( elt.options[i].value.toLowerCase() == parts[1] ) {
@@ -83,8 +83,8 @@ function detectProblemLanguage(filename)
 	// language extension
 
 	var elt=document.getElementById('langext');
-	// index 0 is the "autodetect" option
-	if ( elt.selectedIndex > 0 ) return;
+	// the "autodetect" option has empty value
+	if ( elt.value != '' ) return;
 
 	var langname = getLangNameFromExtension(parts[0]);
 	for (i=0;i<elt.length;i++) {

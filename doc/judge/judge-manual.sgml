@@ -132,9 +132,11 @@ that it's correct to do so.
 <p>
 The scoreboard is the most important view on the contest.
 
-The scoreboard will display an upcoming contest from a given
-`activatetime'; only at the first second of the real start of the
-contest it will show the problems however.
+The scoreboard will display an upcoming contest from the given
+`activatetime'; the contest name and a countdown timer is shown. Only
+at the first second of the real start of the contest it will show the
+problems to the teams and public, however. The jury always has a full
+view on the scoreboard.
 
 It is possible to freeze the scoreboard at a given time, commonly
 one hour before the contest ends, to keep the last hour interesting

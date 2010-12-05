@@ -2,6 +2,9 @@ DOMjudge Programming Contest Judging System
 
 Version 3.1.3 - SVN
 -------------------
+ - In JS problem name detection, probid needs to be casenormalised too.
+ - Fix websubmit when using numeric problem ID's, thanks Vladimir Vassiliev.
+ - Improve documentation on JVM memory problems.
 
 Version 3.1.2 - 27 October 2010
 -------------------------------
@@ -10,7 +13,6 @@ Version 3.1.2 - 27 October 2010
  - Small documentation improvements.
  - Do not check scoreboard cache for key integrity; this
    prevents deletion of teams while adding no real value.
- - In JS problem name detection, probid needs to be casenormalised too.
 
 Version 3.1.1 - 22 August 2010
 ------------------------------
