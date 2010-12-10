@@ -223,6 +223,7 @@ if [ ! -r program.exit ]; then
 	cat error.tmp >>error.out
 	error "'program.exit' not readable"
 fi
+# Check that program.exit was written to (no runguard error)
 if [ "`cat program.exit`" != "0" ]; then
 	echo "Non-zero exitcode `cat program.exit`" >>error.out
 	cat error.tmp >>error.out
