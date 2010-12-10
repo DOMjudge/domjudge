@@ -90,9 +90,9 @@ if ( !empty($cdata['freezetime']) ) {
 if ( !empty($BALLOONS) ) {
 	echo addForm('balloons.php');
 
-	echo "<table class=\"list sortable balloons\">\n" .
+	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
 		"<tr><th>Time</th><th>Solved</th><th></th><th align=\"left\">Team</th>\n" .
-		"<th>Room</th><th>Category</th><th>Total</th><th></th></tr>\n";
+		"<th>Room</th><th>Category</th><th>Total</th><th></th></tr>\n</thead>\n";
 
 	foreach ( $BALLOONS as $row ) {
 
