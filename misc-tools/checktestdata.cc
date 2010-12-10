@@ -296,8 +296,9 @@ void error(string msg = string())
 	debug("error at datanr = %d, %d - %d\n",(int)datanr,(int)fr,(int)to);
 
 	if ( !quiet ) {
-		cout << data.substr(fr,to-fr) << endl;
-		cout << string(min(charnr,(size_t)display_before_error),' ') << "^" << endl << endl;
+		cout << data.substr(fr,datanr-fr) << endl;
+		cout << string(min(charnr,(size_t)display_before_error),' ') << '^';
+		cout << data.substr(datanr,to-datanr) << endl << endl;
 
 		cout << "ERROR: line " << linenr+1 << " character " << charnr+1;
 		cout << " of testdata doesn't match " << currcmd;
