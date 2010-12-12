@@ -42,6 +42,9 @@ define ('SCRIPT_ID', 'judgedaemon');
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 define ('PIDFILE', RUNDIR.'/judgedaemon.'.$myhost.'.pid');
 
+// Pass SYSLOG variable via environment for compare program
+if ( defined('SYSLOG') && SYSLOG ) putenv('DJ_SYSLOG=' . SYSLOG);
+
 require(LIBDIR . '/init.php');
 
 function usage()

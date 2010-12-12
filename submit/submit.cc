@@ -32,16 +32,12 @@
 #error "Webinterface submission requested, but libcURL not available."
 #endif
 
-/* Make sure we don't log to syslog */
-#undef SYSLOG
-
 /* Standard include headers */
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <syslog.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/types.h>

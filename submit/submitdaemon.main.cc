@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 	int c, i, err;
 	char *ptr;
 
-	progname = argv[0];
+	progname = gnu_basename(argv[0]);
 
 	/* Set logging levels & open logfile */
 	verbose  = LOG_NOTICE;

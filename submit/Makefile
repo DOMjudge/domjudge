@@ -5,8 +5,8 @@ include $(TOPDIR)/Makefile.global
 
 ifndef CYGWIN
 ifeq ($(SUBMIT_ENABLE_CMD),1)
-SUBMIT_PROGS += submitdaemon
-domserver: submitdaemon
+SUBMIT_PROGS += submitdaemon.main
+domserver: submitdaemon submitdaemon.main
 endif
 endif
 
@@ -36,7 +36,9 @@ SUBMITCOMMONOBJ = submitcommon$(OBJEXT)
 
 TARGETS = $(SUBMIT_PROGS)
 
-config: submit_db.php
+SUBST_CONFIGS = submitdaemon submit_db.php
+
+config: $(SUBST_CONFIGS)
 
 build: $(TARGETS)
 
@@ -44,7 +46,7 @@ domserver: submit_db.php
 
 submitclient: $(SUBMITCLIENT)
 
-submit_db.php: submit_db.php.in $(TOPDIR)/paths.mk
+$(SUBST_CONFIGS): %: %.in ../paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
@@ -60,6 +62,7 @@ $(SUBMITCOMMONOBJ): %$(OBJEXT): %.cc %.hxx $(LIBHEADERS)
 install-domserver:
 ifeq ($(SUBMIT_ENABLE_CMD),1)
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) submitdaemon
+	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libsubmitdir) submitdaemon.main
 endif
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libsubmitdir) \
 		submit_copy.sh submit_db.php

@@ -1,0 +1,32 @@
+#!/usr/bin/env php
+<?php
+/**
+ * @configure_input@
+ *
+ * This is a wrapper script which sets some configuration variables
+ * via the environment and then calls the main submitdaemon code.
+ *
+ * $Id$
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+
+require('@domserver_etcdir@/domserver-static.php');
+require(ETCDIR . '/domserver-config.php');
+
+// Copy commandline arguments, but remove $0
+$args = $_SERVER['argv'];
+unset($args[0]);
+
+// Pass relevant configuration settings via environment
+$config = array();
+if ( defined('SYSLOG') && SYSLOG ) $config['DJ_SYSLOG'] = SYSLOG;
+
+// Hand over execution to main submitdaemon program
+$submitmain = LIBSUBMITDIR . '/submitdaemon.main';
+pcntl_exec($submitmain, $args, $config);
+
+echo "Error executing main submitdaemon program '$submitmain'.\n";
+exit(1);

@@ -54,6 +54,8 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
 	int bufferlen;
 	va_list aq;
+	char *str, *endptr;
+	int syslog_fac;
 
 	/* Try to open logfile if it is defined */
 #ifdef LOGFILE
@@ -61,12 +63,13 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 #endif
 
 	/* Try to open syslog if it is defined */
-#ifdef SYSLOG
-	if ( ! syslog_open ) {
-		openlog(PROGRAM, LOG_NDELAY | LOG_PID, SYSLOG);
-		syslog_open = 1;
+	if ( ! syslog_open && (str=getenv("DJ_SYSLOG"))!=NULL ) {
+		syslog_fac = strtol(str,&endptr,10);
+		if ( *endptr==0 ) {
+			openlog(PROGRAM, LOG_NDELAY | LOG_PID, syslog_fac);
+			syslog_open = 1;
+		}
 	}
-#endif
 
 	currtime = time(NULL);
 	strftime(timestring, sizeof(timestring), "%b %d %H:%M:%S", localtime(&currtime));
@@ -93,13 +96,11 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 
 	free(buffer);
 
-#ifdef SYSLOG
-	if ( msglevel<=loglevel ) {
+	if ( msglevel<=loglevel && syslog_open ) {
 		buffer = vallocstr(mesg, ap);
 		syslog(msglevel, "%s", buffer);
 		free(buffer);
 	}
-#endif
 }
 
 /* Argument-list wrapper function around vlogmsg */
