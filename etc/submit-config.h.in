@@ -30,14 +30,17 @@
 #define WARN_MTIME   5
 
 /* Maximum source size in KB before warning (this is also the limit
-   the server will enforce). */
+   the server will enforce). This setting should be kept in sync with
+   that in common-config.php. */
 #define SOURCESIZE   256
 
-/* Auto-detected language extensions by the submit client.
+/* List of auto-detected language extensions by the submit client.
    Format: 'LANG,MAINEXT[,EXT]... [LANG...]' where:
    - LANG is the language name displayed,
    - MAINEXT is the extension corresponding to the extension in DOMjudge,
    - EXT... are comma separated additional detected language extensions.
+   This list only needs to be modified when additional languages are
+   added and should be kept in sync with the list in domserver-config.php.
 */
 #define LANG_EXTS    "C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,cs AWK,awk Python,py Bash,bash"
 

@@ -49,13 +49,6 @@ define('STRICTIPCHECK', false);
 define('LDAP_SERVERS', 'ldap1.example.com ldap2.example.com');
 define('LDAP_DNQUERY', 'CN=&,OU=users,DC=example,DC=com');
 
-// List of auto-detected language extensions by the submit client.
-//   Format: 'LANG,MAINEXT[,EXT]... [LANG...]' where:
-//   - LANG is the language name displayed,
-//   - MAINEXT is the extension corresponding to the extension in DOMjudge,
-//   - EXT... are comma separated additional detected language extensions.
-define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,cs AWK,awk Python,py Bash,bash');
-
 // Specify here which of the users in htpasswd-jury should have admin 
 // rights on top of their jury rights
 $DOMJUDGE_ADMINS = array('domjudge_jury', 'admin');
@@ -66,3 +59,11 @@ define('PENALTY_TIME', 20);
 // Internal and output character set used, don't change.
 define('DJ_CHARACTER_SET', 'utf-8');
 
+// List of auto-detected language extensions by the submit client.
+//   Format: 'LANG,MAINEXT[,EXT]... [LANG...]' where:
+//   - LANG is the language name displayed,
+//   - MAINEXT is the extension corresponding to the extension in DOMjudge,
+//   - EXT... are comma separated additional detected language extensions.
+// This list only needs to be modified when additional languages are
+// added and should be kept in sync with the list in submit-config.h.in.
+define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,cs AWK,awk Python,py Bash,bash');
