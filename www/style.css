@@ -63,6 +63,8 @@ tr.unread td {
 }
 .list th {
 	vertical-align: bottom;
+	padding-left: 3px;
+	padding-right: 3px;
 }
 td {
 	vertical-align: top;
