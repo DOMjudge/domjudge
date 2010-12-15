@@ -66,14 +66,6 @@ $filename = $_FILES['code']['name'];
 
 /* Determine the problem */
 $probid = @$_POST['probid'];
-
-if ( empty($probid) ) {
-	if ( strpos($filename, '.') === false ) {
-		err('Unable to autodetect the problem from the uploaded filename');
-	}
-	$probid = strtolower(substr($filename, 0, strpos($filename, '.')));
-}
-
 $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
                 WHERE allow_submit = 1 AND probid = %s AND cid = %i',
                $probid, $cid);
@@ -83,27 +75,6 @@ $probid = $prob['probid'];
 
 /* Determine the language */
 $langext = @$_POST['langext'];
-
-if ( empty($langext) ) {
-	if ( strrpos($filename, '.') === false ) {
-		err('Unable to autodetect the language from the uploaded filename');
-	}
-	$fileext = strtolower(substr($filename, strrpos($filename, '.')+1));
-
-	$all_lang_exts = explode(" ", LANG_EXTS);
-
-	foreach ($all_lang_exts as $langextlist) {
-		$langexts = explode(",", $langextlist);
-
-		// Skip first element: that's the language name
-		for ($i = 1; $i < count($langexts); $i++) {
-			if ( $langexts[$i]==$fileext ) $langext = $langexts[1];
-		}
-	}
-
-	if ( empty($langext) ) err("Unable to find language for extension '$fileext'");
-}
-
 $lang = $DB->q('MAYBETUPLE SELECT langid, name, extension FROM language
                 WHERE extension = %s AND allow_submit = 1', $langext);
 
