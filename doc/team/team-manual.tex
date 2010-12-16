@@ -52,8 +52,8 @@ your language.  For a complete reference of all options and examples,
 see \cmd{submit --help}.
 }
 \item[Web interface]
-From your team page, \url{\WEBBASEURI team}, browse to
-\textbf{submit} and select the file you want to submit. By default,
+From your team page, \url{\WEBBASEURI team}, click Browse in the
+left column and select the file you want to submit. By default,
 the problem is selected from the base of the filename and the language
 from the extension.
 \end{description}
@@ -61,8 +61,8 @@ from the extension.
 \subsection*{Viewing scores, submissions, etc.}
 
 Viewing scores, submissions and sending and reading clarification
-requests is done through the web interface. The menu buttons at
-\url{\WEBBASEURI team} speak for themselves.
+requests is done through the web interface at
+\url{\WEBBASEURI team}.
 
 \emph{End of summary}
 
@@ -110,25 +110,30 @@ for the functioning of \cmd{submit}.
 \subsection{Web interface}
 
 Solutions can be submitted from the web interface at \url{\WEBBASEURI team}.
-Navigate to \textbf{submit} to select the file for submission, and the
-problem and language. These can also be left on the default
-`automatic' setting; then the problem and language will be determined
-from the base and extension of the filename respectively.
+In the left column click Browse to select the file for submission.
+\textsc{dom}judge will try to determine the problem and
+language from the base and extension of the filename respectively.
+Otherwise, select the appropriate values.
 
 After you hit the submit button and confirm the submission, you will
-be redirected to your submission list page. On this page, a message
+be redirected back to your submission list page. On this page, a message
 will be displayed that your submission was successful and the
 submission should be present in the list. An error message will be
-displayed if something went wrong, for example when the problem or
-language cannot be autodetected from your filename.
+displayed if something went wrong.
 
 \section{Viewing the results of submissions}
 
-There is an overview of your submissions on your team web page.
+The left column of your team web page shows an overview of your submissions.
 It contains all relevant information: submission time, programming
 language, problem and status. The address of your team page is
-\url{\WEBBASEURI team}. From here you can also view the public
-scoreboard page with the scores of all teams.
+\url{\WEBBASEURI team}.
+
+The top of the page shows your team's row in the scoreboard: your position and
+which problems you attempted and solved. Via the menu you can view the public
+scoreboard page with the scores of all teams. Optionally the scoreboard can
+be `frozen' some time before the end of the contest. The full scoreboard view
+will not be updated anymore, but your team row will. Your team's rank will
+be displayed as `?'.
 
 \subsection{Possible results}
 
@@ -179,18 +184,14 @@ stored but will not be processed anymore.
 \section{Clarifications}
 
 All communication with the jury is to be done with clarifications.
-These can be found on your team page. Both clarification replies from
-the jury and requests sent by you are displayed there.
+These can be found in the right column on your team page. Both
+clarification replies from the jury and requests sent by you
+are displayed there.
 
-There is also a link to submit a new clarification request to the
+There is also a button to submit a new clarification request to the
 jury. This request is only readable for the jury and they will respond
 as soon as possible. Answers that are relevant for everyone will be
 sent to everyone.
-
-When you receive a new clarification from the jury, this will
-automatically be displayed as ``(1 new)'' in the clarification button
-in the menu bar. This will be updated automatically even without reloading
-the page.
 
 \section{How are submissions being judged?}
 
