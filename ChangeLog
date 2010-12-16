@@ -28,6 +28,8 @@ Version 3.2.0 - SVN
  - Add toggle button for autorefresh of jury pages (port from ETH tree).
  - Add support for team authentication via LDAP server (port from ETH tree).
  - Pass SYSLOG variable from PHP config to C/C++ programs via environment.
+ - Set MySQL connection encoding explicitly. Introduces a new option:
+   DJ_CHARACTER_SET_MYSQL.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------
