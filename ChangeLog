@@ -9,6 +9,8 @@ Version 3.0.5 - SVN
  - Add note countdown timer is only shown from activetime.
  - Change sample team ID to avoid conflicts with real teams.
  - Don't count unjudged submissions as unverified for consistency.
+ - Set MySQL connection encoding explicitly. Introduces a new option:
+   DJ_CHARACTER_SET_MYSQL.
 
 Version 3.0.4 - 22 August 2010
 ------------------------------

@@ -36,5 +36,7 @@ function setup_database_connection($privlevel)
 			$privlevel), E_USER_ERROR);
 		exit();
 	}
+
+	$DB->q('SET NAMES %s', DJ_CHARACTER_SET_MYSQL);
 }
 

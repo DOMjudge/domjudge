@@ -14,6 +14,7 @@ define('PENALTY_TIME', 20);
 
 // Internal and output character set used, don't change.
 define('DJ_CHARACTER_SET', 'utf-8');
+define('DJ_CHARACTER_SET_MYSQL', 'utf8');
 
 // Possible exitcodes from test_solution.sh and their meaning
 $EXITCODES = array (

@@ -153,6 +153,7 @@ class db
 			case 'update':
 			case 'replace':
 			case 'delete':
+			case 'set':
 				$type = 'update';
 				break;
 
