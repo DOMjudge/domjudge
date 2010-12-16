@@ -57,8 +57,9 @@ de programmeertaal. Voor de complete documentatie en alle opties, zie
 \cmd{submit --help}.
 }
 \item[Web-Interface]
-Vanaf je teampagina op \url{\WEBBASEURI team}, selecteer je
-\textbf{submit} en daar kun je een bestand selecteren en insturen.
+Vanaf je teampagina op \url{\WEBBASEURI team} kun je een bestand
+selecteren met de \textbf{Browse} knop in de linker kolom en deze met
+de \textbf{submit} knop insturen.
 Standaard wordt het probleem uit het deel van de bestandsnaam v\'o\'or de
 punt gehaald en de programmeertaal uit de extensie.
 
@@ -67,8 +68,7 @@ punt gehaald en de programmeertaal uit de extensie.
 \subsection*{Bekijken van scores, inzendingen, e.d.}
 
 Het bekijken van inzendingen, scores en sturen en lezen van
-``clarification requests'' gaat via de web-interface. De knoppen op
-\url{\WEBBASEURI team} spreken voor zich.
+``clarification requests'' gaat via de web-interface in de rechter kolom.
 
 \emph{Einde samenvatting.}
 
@@ -119,26 +119,31 @@ toegevoegd zijn. Ook deze is nodig voor het functioneren van \cmd{submit}.
 \subsection{Web-interface}
 
 Vanaf je teampagina \url{\WEBBASEURI team} kun je oplossingen insturen
-door naar \textbf{submit} te gaan. Daar kan een bestand
-geselecteerd worden om in te sturen. Verder kan het probleem en de
-taal van de inzending ingesteld worden. Deze kunnen ook het
-standaard geselecteerde `automatisch' blijven; dan wordt
-geprobeerd het probleem en de taal van de inzending uit
-respectievelijk de basis en de extensie van de bestandsnaam te halen.
+door het bestand te selecteren met de \textbf{Browse} knop in de
+linker kolom. \DOMjudge probeert het probleem te detecteren uit de
+basis van de bestandsnaam (v\'o\'or de punt) en de programmeertaal uit
+de extensie. Als dat niet lukt, kun je deze handmatig selecteren.
 
 Nadat je op de submitknop geklikt hebt en dit bevestigd hebt, wordt je
-doorgestuurd naar de inzendingen overzichtspagina. Daarop staat een
+teruggestuurd naar de inzendingen overzichtspagina. Daarop staat een
 bericht dat je inzending succesvol ingestuurd is en zal de inzending
 ook in lijst staan. Als er daarentegen iets misgegaan is, krijg je
-daar een foutmelding over, bijvoorbeeld in het geval het probleem of
-de taal niet uit je bestandsnaam afgeleid kon worden.
+daar een foutmelding over.
 
 \section{De uitslag bekijken van inzendingen}
 
-Op de team-webpagina staat een overzicht van je inzendingen.
+Op de team-webpagina staat in de linker kolom een overzicht van je inzendingen.
 Dit overzicht bevat alle relevante gegevens: de tijd van inzending, de
 programmeertaal, het probleem en de status. Hier vind je ook het scorebord
 met de resultaten van de andere teams.
+
+Bovenaan het overzicht staat de rij uit het scorebord van je eigen
+team met je positie. Deze geeft al je opgeloste en geprobeerde
+problemen weer. Je kunt het complete scorebord bekijken via het menu.
+Het scorebord kan mogelijk `bevroren' worden als het einde van de
+wedstrijd nadert. Het scorebord wordt dan niet meer aangepast, maar de
+rij op de overzichtspagina nog wel. Je positie wordt daar dan met een
+`?' weergegeven.
 
 \subsection{Mogelijke uitslagen}
 
@@ -189,19 +194,15 @@ Je inzending is opgeslagen maar wordt niet verder behandeld.
 \section{Clarifications}
 
 Communicatie met de jury loopt door middel van \emph{clarifications}
-(verhelderingen), deze komen op je teampagina te staan. Boven aan de
-pagina de gegeven clarifications, daar onder je \emph{requests} (verzoeken).
+(verhelderingen), deze komen in de rechter kolom op je teampagina te
+staan. Boven aan de pagina de gegeven clarifications, daar onder je
+\emph{requests} (verzoeken).
 
 Je kan vragen aan de jury stellen door middel van het doen van een
-``Clarification Request'', de link hiervoor bevindt zich onderaan de
-clarifications-pagina.  Je vraag zal alleen bij de jury aankomen; zij
+``Clarification Request''; de knop hiervoor bevindt zich bovenaan de
+clarifications kolom.  Je vraag zal alleen bij de jury aankomen; zij
 zullen deze zo snel mogelijk en adequaat beantwoorden. Antwoorden die
 voor iedereen relevant kunnen zijn zullen naar iedereen gestuurd worden.
-
-Als je een clarification ontvangt van de jury, dan wordt dat
-automatisch gemeld door toevoeging van ``(1 new)'' in de clarification
-knop in het menu. Dit wordt automatisch bijgewerkt zonder dat het nodig
-is de pagina te herladen.
 
 \section{Hoe worden opgaven beoordeeld?}
 
