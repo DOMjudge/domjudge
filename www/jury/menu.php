@@ -13,7 +13,11 @@
 <a href="submissions.php" accesskey="s">submissions</a>
 <a href="scoreboard.php" accesskey="b">scoreboard</a>
 </div>
+
+<div id="menutopright">
 <?php
+
+putClock();
 
 $refresh_flag = !isset($_COOKIE["domjudge_refresh"]) || (bool)$_COOKIE["domjudge_refresh"];
 
@@ -25,4 +29,4 @@ if ( isset($refresh) ) {
 	    addEndForm() . "</div>\n";
 }
 
-putClock();
+echo "</div>\n";

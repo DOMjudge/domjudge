@@ -132,20 +132,23 @@ span.diff-new {
 #menutop a.new {
 	color: #FF0000;
 }
-#refresh {
-	position: absolute; right: 1ex; top: 5ex;
+
+#menutopright {
+	position: absolute; right: 1ex; top: 1ex;
+	text-align: right;
 }
 #clock {
-	position: absolute; right: 1ex; top: 1ex;
 	font-size: small;
 	font-family: monospace;
 	border: 1px dashed #ccc;
 	padding: 4px;
 	color: gray;
-	text-align: right;
 }
 #timeleft { color: #800080;}
-
+#refresh {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
 
 fieldset {
 	margin: 2em;

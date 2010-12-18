@@ -10,6 +10,8 @@ if ( have_logout() ) {
 	echo "<a target=\"_top\" href=\"logout.php\" accesskey=\"l\">logout</a>\n";
 }
 
-echo "\n</div>\n\n";
+echo "</div>\n\n<div id=\"menutopright\">\n";
 
 putClock();
+
+echo "</div>\n\n";
