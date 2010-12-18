@@ -83,11 +83,9 @@ $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
 
 echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 
-echo addForm('clarification.php','get');
-echo "<p>\n\n";
-echo addSubmit('request clarification')
-	. addEndForm();
-echo "</p>";
+echo addForm('clarification.php','get') .
+	"<p>" . addSubmit('request clarification') . "</p>" .
+	addEndForm();
 
 # FIXME: column width and wrapping/shortening of clarification text 
 if ( $clarifications->count() == 0 ) {
