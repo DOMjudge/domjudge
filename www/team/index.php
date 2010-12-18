@@ -29,8 +29,9 @@ echo "\t\tdefault: return '';\n\t}\n}\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
-echo "<p />";
+echo "<div id=\"teamscoresummary\">\n<a href=\"scoreboard.php\">";
 putTeamRow($cdata, array($login));
+echo "</a></div>\n\n";
 
 echo "<div id=\"submitlist\">\n";
 

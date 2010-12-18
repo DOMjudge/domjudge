@@ -223,9 +223,7 @@ td.scorenc { border-color: silver; }
 	position: absolute; right: 1ex; margin-top: 1em;
 }
 
-#teamscoresummary { position: absolute; right: 2ex; top: 7ex; }
-#teamscoresummary td { padding: 3px; }
-#teamscoresummary th { padding: 3px; }
+#teamscoresummary { margin-top: 2.5em; }
 
 #teampicture { position: absolute; right: 2ex; top: 7ex; width: 70%; }
 
