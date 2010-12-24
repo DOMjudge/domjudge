@@ -306,3 +306,18 @@ h3.teamoverview {
 	background-color: #F0F0F0;
 	font-size: 90%;
 }
+
+h2#teamwelcome {
+	padding-bottom: 0;
+	margin-bottom: 0;
+	margin-left: 3em;
+	font-weight: normal;
+}
+#teamwelcometeam {
+	font-weight: bold;	
+}
+h3#contestnotstarted {
+	color: silver;
+	margin-top: .2ex;
+	margin-left: 8em;
+}

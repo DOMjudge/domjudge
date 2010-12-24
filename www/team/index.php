@@ -29,9 +29,7 @@ echo "\t\tdefault: return '';\n\t}\n}\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
-echo "<div id=\"teamscoresummary\">\n<a href=\"scoreboard.php\">";
 putTeamRow($cdata, array($login));
-echo "</a></div>\n\n";
 
 echo "<div id=\"submitlist\">\n";
 
@@ -84,10 +82,6 @@ $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
 
 echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 
-echo addForm('clarification.php','get') .
-	"<p>" . addSubmit('request clarification') . "</p>" .
-	addEndForm();
-
 # FIXME: column width and wrapping/shortening of clarification text 
 if ( $clarifications->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarifications.</p>\n\n";
@@ -102,6 +96,11 @@ if ( $requests->count() == 0 ) {
 } else {
 	putClarificationList($requests,$login);
 }
+
+echo addForm('clarification.php','get') .
+	"<p>" . addSubmit('request clarification') . "</p>" .
+	addEndForm();
+
 
 echo "</div>\n";
 

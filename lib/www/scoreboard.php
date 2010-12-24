@@ -536,6 +536,20 @@ function putTeamRow($cdata, $teamids) {
 	if ( empty($cdata) ) return;
 
 	$fdata = calcFreezeData($cdata);
+
+	if ( ! $fdata['cstarted'] ) {
+		if ( ! IS_JURY ) {
+
+			global $teamdata;
+			echo "<h2 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
+				htmlspecialchars($teamdata['name']) . "</span>!</h2>\n\n";
+			echo "<h3 id=\"contestnotstarted\">contest is scheduled to start at " .
+				printtime($cdata['starttime']) . "</h3>\n\n";
+		}
+		
+		return;
+	}
+
 	// Calculate scoreboard as jury to display non-visible teams:
 	$sdata = genScoreBoard($cdata, TRUE);
 
@@ -543,8 +557,10 @@ function putTeamRow($cdata, $teamids) {
 	$static = FALSE;
 	$displayrank = !$fdata['showfrozen'];
 
+	if ( ! IS_JURY ) echo "<div id=\"teamscoresummary\">\n<a href=\"scoreboard.php\">";
 	renderScoreBoardTable($cdata,$sdata,$myteamid,$static,
 		$teamids,$displayrank,TRUE);
+	if ( ! IS_JURY ) echo "</a></div>\n\n";
 
 	return;
 }
