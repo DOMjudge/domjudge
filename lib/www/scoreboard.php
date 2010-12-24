@@ -58,11 +58,13 @@ function calcPenaltyTime($solved, $num_submissions)
  * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid])
  *    probid(num_submissions, num_correct, best_time)
  */
-function genScoreBoard($cdata) {
+function genScoreBoard($cdata, $jury = FALSE) {
 
 	global $DB;
 
 	$cid = $cdata['cid'];
+
+	if ( IS_JURY ) $jury = TRUE;
 
 	// Show final scores if contest is over and unfreezetime has been
 	// reached, or if contest is over and no freezetime had been set.
@@ -76,7 +78,7 @@ function genScoreBoard($cdata) {
 	$cstarted = difftime($cdata['starttime'],$now) <= 0;
 
 	// Don't leak information before start of contest
-	if ( ! $cstarted && ! IS_JURY ) return;
+	if ( ! $cstarted && ! $jury ) return;
 
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY, login, team.name,
@@ -86,7 +88,7 @@ function genScoreBoard($cdata) {
 	                        ON (team_category.categoryid = team.categoryid)
 	                 LEFT JOIN team_affiliation
 	                        ON (team_affiliation.affilid = team.affilid)' .
-	                ( IS_JURY ? '' : ' WHERE visible = 1' ) );
+	                ( $jury ? '' : ' WHERE visible = 1' ) );
 
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
@@ -99,7 +101,7 @@ function genScoreBoard($cdata) {
 					 'problems' => array());
 
 	// scoreboard_jury is always up to date, scoreboard_public might be frozen.
-	if ( IS_JURY || $showfinal ) {
+	if ( $jury || $showfinal ) {
 		$cachetable = 'scoreboard_jury';
 	} else {
 		$cachetable = 'scoreboard_public';
@@ -216,14 +218,14 @@ function genScoreBoard($cdata) {
 	                        ON (team_category.categoryid = team.categoryid)
 	                 LEFT JOIN team_affiliation
 	                        ON (team_affiliation.affilid = team.affilid)' .
-	                ( IS_JURY ? '' : ' WHERE visible = 1' ) );
+	                ( $jury ? '' : ' WHERE visible = 1' ) );
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
 	                 probid, name, color FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
 	                 ORDER BY probid', $cid);
 	$categs = $DB->q('KEYTABLE SELECT categoryid AS ARRAYKEY,
  	                  categoryid, name, color FROM team_category ' .
-	                 (IS_JURY ? '' : 'WHERE visible = 1 ' ) .
+	                 ($jury ? '' : 'WHERE visible = 1 ' ) .
 	                 'ORDER BY sortorder,name,categoryid');
 
 	return array( 'matrix'     => $MATRIX,
@@ -532,10 +534,11 @@ function calcFreezeData($cdata)
 function putTeamRow($cdata, $teamids) {
 
 	if ( empty($cdata) ) return;
-	
+
 	$fdata = calcFreezeData($cdata);
-	$sdata = genScoreBoard($cdata);
-	
+	// Calculate scoreboard as jury to display non-visible teams:
+	$sdata = genScoreBoard($cdata, TRUE);
+
 	$myteamid = null;
 	$static = FALSE;
 	$displayrank = !$fdata['showfrozen'];
