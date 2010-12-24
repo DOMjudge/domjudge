@@ -252,13 +252,9 @@ function do_login()
 		      "' requested, or login not supported.");
 	}
 
-	require(LIBWWWDIR . '/header.php');
-	echo "<h1>Authenticated</h1>\n\n<p>Successfully authenticated as team " .
-	    htmlspecialchars($login) . " on " . htmlspecialchars($ip) . ".</p>\n" .
-	    "<p><a href=\"$_SERVER[PHP_SELF]\">Continue to your team page</a>, " .
-	    "and good luck!</p>\n\n";
-	require(LIBWWWDIR . '/footer.php');
-
+	// Authentication success. We could just return here, but we do a
+	// redirect to clear the POST data from the browser.
+	header("Location: ./");
 	exit;
 }
 
