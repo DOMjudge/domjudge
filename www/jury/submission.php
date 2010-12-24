@@ -360,9 +360,12 @@ if ( isset($jid) )  {
 		    "<tr><td>Description:</td><td>" .
 		    htmlspecialchars($run['description']) . "</td></tr>" .
 		    "<tr><td>Download: </td><td>" .
-		    "<a href=\"testcase.php?probid=" . htmlspecialchars($submdata['probid']) . "&rank=" . $run['rank'] . "&fetch=input\">Input</a> / " .
-		    "<a href=\"testcase.php?probid=" . htmlspecialchars($submdata['probid']) . "&rank=" . $run['rank'] . "&fetch=output\">Reference Output</a> / " .
-		    "<a href=\"team_output.php?probid=" . htmlspecialchars($submdata['probid']) . "&runid=" . $run['runid'] . "\">Team Output</a>" .
+		    "<a href=\"testcase.php?probid=" . htmlspecialchars($submdata['probid']) .
+		    "&amp;rank=" . $run['rank'] . "&amp;fetch=input\">Input</a> / " .
+		    "<a href=\"testcase.php?probid=" . htmlspecialchars($submdata['probid']) .
+		    "&amp;rank=" . $run['rank'] . "&amp;fetch=output\">Reference Output</a> / " .
+		    "<a href=\"team_output.php?probid=" . htmlspecialchars($submdata['probid']) .
+		    "&amp;runid=" . $run['runid'] . "\">Team Output</a>" .
 		    "</td></tr>" .
 		    "<tr><td>Runtime:</td><td>$run[runtime] sec</td></tr>" .
 		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
