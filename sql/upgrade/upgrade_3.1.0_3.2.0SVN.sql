@@ -27,8 +27,6 @@ ALTER TABLE `contest`
 ALTER TABLE `judging`
   CHANGE COLUMN `verifier` `jury_member` varchar(15) default NULL COMMENT 'Name of jury member who verified this';
 
-ALTER TABLE `language` ADD UNIQUE KEY `extension` (`extension`);
-
 --
 -- Add/remove privileges
 --
