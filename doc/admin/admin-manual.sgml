@@ -232,7 +232,8 @@ On the judgehosts:
        (check specific options of useradd, since these vary per system)
 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
 <item> Add to <tt>/etc/sudoers</tt>:<newline><tt>
- domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *</tt>
+ domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *<newline>
+ domjudge ALL=(root) NOPASSWD: /bin/cp -p /dev/null ./dev/null</tt>
 <item> Copy the file <tt>etc/dbpasswords.secret</tt> from the
        domserver to all judgehosts to synchronise database passwords.
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
@@ -1058,6 +1059,7 @@ to runguard.
 <!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
 <verb>
 domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *
+domjudge ALL=(root) NOPASSWD: /bin/cp -p /dev/null ./dev/null
 </verb>
 
 When the chroot setting is enabled (default), a static POSIX shell has

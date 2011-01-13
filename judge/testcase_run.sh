@@ -172,7 +172,7 @@ fi
 # not portable, while a fifo link has the problem that a cat program
 # must be run and killed.
 logmsg $LOG_DEBUG "creating /dev/null character-special device"
-sudo cp -p /dev/null ./dev/null
+sudo cp -pR /dev/null ./dev/null
 
 # Execute an optional chroot setup script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
