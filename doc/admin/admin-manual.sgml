@@ -888,7 +888,16 @@ setup"> for details.
 
 <sect1>Fine tuning settings
 <p>
+For Apache, there are countless documents on how to maximise performance.
+Of particular importance is to ensure that the <tt>MaxClients</tt> setting
+is high enough to receive the number of parallel requests you expect, but
+not higher than your amount of RAM allows.
 
+<p>
+As for PHP, the use of an opcode cache like the Alternative PHP Cache
+(Debian package: <tt>php-apc</tt>) is beneficial for performance.
+
+<p>
 It may be desirable or even necessary to fine tune some MySQL default settings:
 
 <itemize>
