@@ -41,7 +41,11 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 	} else {
 		echo addForm('upload.php','post',null,'multipart/form-data') .
 		"<p id=\"submitform\">\n\n" .
-		"<input type=\"file\" name=\"code\" id=\"code\" size=\"25\" onchange='detectProblemLanguage(document.getElementById(\"code\").value);' /> ";
+		"<span class=\"fileinputs\">\n\t" .
+		"<input type=\"file\" name=\"code\" id=\"code\" size=\"15\" /> " .
+		"\n</span>\n";
+
+		echo "<script type=\"text/javascript\">initFileUploads();</script>\n\n";
 
 		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid) as name FROM problem
 				 WHERE cid = %i AND allow_submit = 1

@@ -100,6 +100,7 @@ function checkUploadForm()
 	var langelt = document.getElementById("langext");
 	var language = langelt.options[langelt.selectedIndex].value;
 	var languagetxt = langelt.options[langelt.selectedIndex].text;
+	var filebut = document.getElementById("codebutton");
 	var fileelt = document.getElementById("code");
 	var filename = fileelt.value;
 	var probelt = document.getElementById("probid");
@@ -107,7 +108,7 @@ function checkUploadForm()
 	var problemtxt = probelt.options[probelt.selectedIndex].text;
 
 	var error = false;
-	langelt.className = probelt.className = fileelt.className = "";
+	langelt.className = probelt.className = filebut.className = "";
 	if ( language == "" ) {
 		langelt.focus();
 		langelt.className = "errorfield";
@@ -119,7 +120,7 @@ function checkUploadForm()
 		error = true;
 	}
 	if ( filename == "" ) {
-		fileelt.className = "errorfield";
+		filebut.className = "errorfield";
 		return false;
 	}
 
@@ -134,5 +135,36 @@ function checkUploadForm()
 		return confirm (question);
 	}
 
+}
+
+var W3CDOM = (document.createElement && document.getElementsByTagName);
+
+function initFileUploads() {
+	if (!W3CDOM) return;
+	var selecttext = "Select file...";
+	var fakeFileUpload = document.createElement('span');
+	fakeFileUpload.className = 'fakefile';
+	var input = document.createElement('input');
+	input.type = 'button';
+	input.value = selecttext;
+	input.id = "codebutton";
+	fakeFileUpload.appendChild(input);
+	var x = document.getElementsByTagName('input');
+	for (var i=0;i<x.length;i++) {
+		if (x[i].type != 'file') continue;
+		if (x[i].parentNode.className != 'fileinputs') continue;
+		x[i].className = 'file hidden';
+		var clone = fakeFileUpload.cloneNode(true);
+		x[i].parentNode.appendChild(clone);
+		x[i].relatedElement = clone.getElementsByTagName('input')[0];
+		x[i].onchange = x[i].onmouseout = function () {
+			if ( this.value == "" ) {
+				this.relatedElement.value = selecttext;
+			} else {
+				detectProblemLanguage(this.value);
+				this.relatedElement.value = this.value;
+			}
+		}
+	}
 }
 

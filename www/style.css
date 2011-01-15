@@ -321,3 +321,22 @@ h3#contestnotstarted {
 	margin-top: .2ex;
 	margin-left: 8em;
 }
+
+span.fileinputs {
+	position: relative;
+}
+span.fakefile {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 1;
+}
+input.file {
+	position: relative;
+	text-align: right;
+	opacity: 0; /* CSS standard */
+	filter: alpha(opacity: 0); /* IE */
+	-moz-opacity: 0; /* Ancient Mozilla/FF */
+	z-index: 2;
+}
+
