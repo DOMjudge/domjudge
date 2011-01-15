@@ -1,0 +1,13 @@
+/checkinput
+/checktestdata
+/parser.ih
+/yylex.cc
+/parse.cc
+/parserbase.h
+/runssh_judgehosts
+/runssh_teams
+/save_sources2file
+/restore_sources2db
+/static_scoreboard
+/combined_scoreboard
+/balloons
