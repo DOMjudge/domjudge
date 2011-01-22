@@ -495,9 +495,6 @@ apt-get install gcc g++ make libcurl4-gnutls-dev mysql-server \
 	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra
 </code>
 
-This is for Debian 5.0 "Lenny", for Debian 4.0 "Etch",
-replace <tt/libcurl4-gnutls-dev/ with <tt/libcurl3-dev/.
-
 On a judgehost, the following should be sufficient. The last line shows some
 example compilers to install for C, C++, Java (GNU), Java (Oracle/Sun), Haskell
 and Pascal; change the list as appropriate.
