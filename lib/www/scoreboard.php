@@ -557,10 +557,10 @@ function putTeamRow($cdata, $teamids) {
 	$static = FALSE;
 	$displayrank = !$fdata['showfrozen'];
 
-	if ( ! IS_JURY ) echo "<div id=\"teamscoresummary\">\n<a href=\"scoreboard.php\">";
+	if ( ! IS_JURY ) echo "<div id=\"teamscoresummary\">\n";
 	renderScoreBoardTable($cdata,$sdata,$myteamid,$static,
 		$teamids,$displayrank,TRUE);
-	if ( ! IS_JURY ) echo "</a></div>\n\n";
+	if ( ! IS_JURY ) echo "</div>\n\n";
 
 	return;
 }
