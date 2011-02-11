@@ -8,6 +8,10 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+// Frozen scoreboard requested, even if after unfreeze time. Make sure
+// we access the database as non-jury, before defining IS_JURY in init.
+if ( isset($_REQUEST['frozen']) ) define('IS_JURY', FALSE);
+
 require('init.php');
 
 require(LIBWWWDIR . '/scoreboard.php');
@@ -17,7 +21,7 @@ $now = now();
 $cstarted = difftime($now, $cdata['starttime'])>0;
 $cended   = difftime($now, $cdata['endtime'])  >0;
 
-// Frozen scoreboard requested, even if after unfreeze time:
+// Frozen scoreboard requested:
 if ( isset($_REQUEST['frozen']) ) unset($cdata['unfreezetime']);
 
 $tmp = @genScoreBoard($cdata);
