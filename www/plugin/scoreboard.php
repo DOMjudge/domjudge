@@ -17,13 +17,8 @@ $now = now();
 $cstarted = difftime($now, $cdata['starttime'])>0;
 $cended   = difftime($now, $cdata['endtime'])  >0;
 
-function infreeze($time) {
-	if ( ( ! empty($cdata['freezetime']) &&
-		   difftime($time, $cdata['freezetime'])>0 ) &&
-		!( ! empty($cdata['unfreezetime']) &&
-		   difftime($time, $cdata['unfreezetime'])<=0 ) ) return TRUE;
-	return FALSE;
-}
+// Frozen scoreboard requested, even if after unfreeze time:
+if ( isset($_REQUEST['frozen']) ) unset($cdata['unfreezetime']);
 
 $tmp = @genScoreBoard($cdata);
 if ( ! empty($tmp) ) {
