@@ -19,7 +19,8 @@ if ( isset($_POST['unfreeze']) ) {
 	if ( $docid != $cid ) {
 		error("Can only unfreeze for current contest");
 	}
-	$DB->q('UPDATE contest SET unfreezetime = %s WHERE cid = %i', now(), $docid);
+	$DB->q('UPDATE contest SET unfreezetime = %s, unfreezetime_string = %s
+	        WHERE cid = %i', now(), now(), $docid);
 }
 
 // Get data. Starttime seems most logical sort criterion.
