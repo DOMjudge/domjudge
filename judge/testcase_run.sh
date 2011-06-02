@@ -172,7 +172,7 @@ fi
 # not portable, while a fifo link has the problem that a cat program
 # must be run and killed.
 logmsg $LOG_DEBUG "creating /dev/null character-special device"
-sudo cp -pR /dev/null ./dev/null
+$GAINROOT cp -pR /dev/null ./dev/null
 
 # Execute an optional chroot setup script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
@@ -183,7 +183,7 @@ fi
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
-runcheck "$GAINROOT $RUNGUARD" ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
+runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
 	-t $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
 	$PREFIX/run $PREFIX/$PROGRAM \
 	testdata.in program.out program.err program.exit \
