@@ -10,7 +10,8 @@ DEST="$2"
 # -O:		Optimize
 # -static:	Static link Haskell libraries
 # -optl-static:	Pass '-static' option to the linker
-ghc -Wall -O -static -optl-static -o $DEST $SOURCE
+# -optl-pthread: Pass '-pthread' option to the linker (see Debian bug #593402)
+ghc -Wall -O -static -optl-static -optl-pthread -o $DEST $SOURCE
 exitcode=$?
 
 # clean created files:
