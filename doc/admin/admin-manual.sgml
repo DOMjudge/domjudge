@@ -776,7 +776,7 @@ problem, see <tt>docs/examples/boolfind.pdf</tt> for the description.
 
 Usage is similar to compare programs: you can either create a program
 <tt>run_&lt;tag&gt;</tt> yourself, or use the provided wrapper
-script, which handles handles bi-directional communication between a
+script, which handles bi-directional communication between a
 jury program and the contestants' program on stdin/stdout.
 
 For the first case, the calling syntax that the program must accept is
