@@ -12,6 +12,8 @@ function parseDiff($difftext){
 	$line = strtok($difftext,"\n"); //first line
 	$return = '';
 	while ( strlen($line) != 0 ) {
+		// Strip any additional DOS/MAC newline characters:
+		$line = trim($line, "\r\n");
 		switch ( substr($line,0,1) ) {
 		case '-':
 			$formdiffline = "<span class='diff-old'>".htmlspecialchars($line)."</span>";

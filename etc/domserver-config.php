@@ -53,7 +53,3 @@ $DOMJUDGE_ADMINS = array('domjudge_jury', 'admin');
 // Penalty time in minutes per wrong submission (if finally solved).
 define('PENALTY_TIME', 20);
 
-// Internal and output character set used, don't change.
-define('DJ_CHARACTER_SET', 'utf-8');
-define('DJ_CHARACTER_SET_MYSQL', 'utf8');
-
