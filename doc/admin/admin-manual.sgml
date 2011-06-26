@@ -108,11 +108,11 @@ to name them here too:
 <item> runguard.c was originally based on timeout from The
        Coroner's Toolkit by Wietse Venema.
 <item> sorttable.js by Stuart Langridge.
-<item> jscolor.js by Jan Odvarko. 
+<item> jscolor.js by Jan Odvarko.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
        Erik van Sebille.
 <item> Several M4 autoconf macros from the <htmlurl name="Autoconf archive"
-       url="http://www.nongnu.org/autoconf-archive/"> by various
+       url="http://www.gnu.org/software/autoconf-archive/"> by various
        people are included under <tt>m4/</tt>.
 </itemize>
 

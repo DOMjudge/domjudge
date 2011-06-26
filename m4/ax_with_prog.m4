@@ -1,5 +1,5 @@
 # ===========================================================================
-#          http://www.nongnu.org/autoconf-archive/ax_with_prog.html
+#       http://www.gnu.org/software/autoconf-archive/ax_with_prog.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -32,7 +32,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 12
+#serial 16
 
 AC_DEFUN([AX_WITH_PROG],[
     AC_PREREQ([2.61])
@@ -47,7 +47,7 @@ AC_DEFUN([AX_WITH_PROG],[
     AS_IF(test -z "$VARIABLE",[
         AC_MSG_CHECKING(whether EXECUTABLE executable path has been provided)
         AC_ARG_WITH(EXECUTABLE,AS_HELP_STRING([--with-EXECUTABLE=[[[PATH]]]],absolute path to EXECUTABLE executable), [
-            AS_IF([test "$withval" != yes -a "$withval" != no],[
+            AS_IF([test "$withval" != yes && test "$withval" != no],[
                 VARIABLE="$withval"
                 AC_MSG_RESULT($VARIABLE)
             ],[

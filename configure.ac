@@ -40,10 +40,10 @@ done
 DEF_CXFLAGS="-g -O2"
 DEF_LDFLAGS=""
 
-AX_CHECK_COMPILER_FLAGS(-Wall,             DEF_CXFLAGS="$DEF_CXFLAGS -Wall")
-AX_CHECK_COMPILER_FLAGS(-fstack-protector, DEF_CXFLAGS="$DEF_CXFLAGS -fstack-protector")
-AX_CHECK_COMPILER_FLAGS(-fPIE -pie,        DEF_CXFLAGS="$DEF_CXFLAGS -fPIE"
-                                           DEF_LDFLAGS="$DEF_LDFLAGS -pie")
+AX_APPEND_COMPILE_FLAGS(-Wall,             DEF_CXFLAGS)
+AX_APPEND_COMPILE_FLAGS(-fstack-protector, DEF_CXFLAGS)
+AX_APPEND_COMPILE_FLAGS(-fPIE,             DEF_CXFLAGS)
+AX_APPEND_LINK_FLAGS(-pie, DEF_LDFLAGS)
 
 test "x$enable_CFLAGS_setting"   = xyes && AC_SUBST(CFLAGS,   $DEF_CXFLAGS)
 test "x$enable_CXXFLAGS_setting" = xyes && AC_SUBST(CXXFLAGS, $DEF_CXFLAGS)

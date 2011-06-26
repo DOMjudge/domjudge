@@ -30,7 +30,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 15
+#serial 20
 
 AC_DEFUN([AX_BOOST_REGEX],
 [
@@ -46,7 +46,7 @@ AC_DEFUN([AX_BOOST_REGEX],
             ax_boost_user_regex_lib=""
         else
 		    want_boost="yes"
-        	ax_boost_user_regex_lib="$withval"
+		ax_boost_user_regex_lib="$withval"
 		fi
         ],
         [want_boost="yes"]
@@ -65,9 +65,9 @@ AC_DEFUN([AX_BOOST_REGEX],
         AC_CACHE_CHECK(whether the Boost::Regex library is available,
 					   ax_cv_boost_regex,
         [AC_LANG_PUSH([C++])
-			 AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[@%:@include <boost/regex.hpp>
+			 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <boost/regex.hpp>
 												]],
-                                   [[boost::regex r(); return 0;]]),
+                                   [[boost::regex r(); return 0;]])],
                    ax_cv_boost_regex=yes, ax_cv_boost_regex=no)
          AC_LANG_POP([C++])
 		])
@@ -80,14 +80,14 @@ AC_DEFUN([AX_BOOST_REGEX],
 				    AC_CHECK_LIB($ax_lib, exit,
                                  [BOOST_REGEX_LIB="-l$ax_lib"; AC_SUBST(BOOST_REGEX_LIB) link_regex="yes"; break],
                                  [link_regex="no"])
-  				done
+				done
                 if test "x$link_regex" != "xyes"; then
                 for libextension in `ls $BOOSTLIBDIR/boost_regex*.{dll,a}* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^\(boost_regex.*\)\.dll.*$;\1;' -e 's;^\(boost_regex.*\)\.a*$;\1;'` ; do
                      ax_lib=${libextension}
 				    AC_CHECK_LIB($ax_lib, exit,
                                  [BOOST_REGEX_LIB="-l$ax_lib"; AC_SUBST(BOOST_REGEX_LIB) link_regex="yes"; break],
                                  [link_regex="no"])
-  				done
+				done
                 fi
 
             else
@@ -98,7 +98,7 @@ AC_DEFUN([AX_BOOST_REGEX],
                done
             fi
             if test "x$ax_lib" = "x"; then
-                AC_MSG_ERROR(Could not find a version of the library!)
+                AC_MSG_ERROR(Could not find a version of the Boost::Regex library!)
             fi
 			if test "x$link_regex" != "xyes"; then
 				AC_MSG_ERROR(Could not link against $ax_lib !)
@@ -106,6 +106,6 @@ AC_DEFUN([AX_BOOST_REGEX],
 		fi
 
 		CPPFLAGS="$CPPFLAGS_SAVED"
-    	LDFLAGS="$LDFLAGS_SAVED"
+	LDFLAGS="$LDFLAGS_SAVED"
 	fi
 ])
