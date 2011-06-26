@@ -1,11 +1,11 @@
 /**
  * jscolor, JavaScript Color Picker
  *
- * @version 1.3.1
+ * @version 1.3.5
  * @license GNU Lesser General Public License, http://www.gnu.org/copyleft/lesser.html
  * @author  Jan Odvarko, http://odvarko.cz
  * @created 2008-06-15
- * @updated 2010-01-23
+ * @updated 2011-06-21
  * @link    http://jscolor.com
  */
 
@@ -171,16 +171,17 @@ var jscolor = {
 	},
 
 
-	getMousePos : function(e) {
-		if(!e) { e = window.event; }
-		if(typeof e.pageX === 'number') {
-			return [e.pageX, e.pageY];
-		} else if(typeof e.clientX === 'number') {
-			return [
-				e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft,
-				e.clientY + document.body.scrollTop + document.documentElement.scrollTop
-			];
+	getRelMousePos : function(e) {
+		var x = 0, y = 0;
+		if (!e) { e = window.event; }
+		if (typeof e.layerX === "number") {
+			x = e.layerX;
+			y = e.layerY;
+		} else if (typeof e.offsetX === "number") {
+			x = e.offsetX;
+			y = e.offsetY;
 		}
+		return { x: x, y: y };
 	},
 
 
@@ -329,6 +330,7 @@ var jscolor = {
 		this.adjust = true; // adjust value to uniform notation?
 		this.hash = false; // prefix color with # symbol?
 		this.caps = true; // uppercase?
+		this.slider = true; // show the value/saturation slider?
 		this.valueElement = target; // value holder
 		this.styleElement = target; // where to reflect current color
 		this.hsv = [0, 0, 1]; // read-only  0-6, 0-1, 0-1
@@ -367,7 +369,7 @@ var jscolor = {
 				var vp = jscolor.getViewPos(); // view pos
 				var vs = jscolor.getViewSize(); // view size
 				var ps = [ // picker size
-					2*this.pickerBorder + 4*this.pickerInset + 2*this.pickerFace + jscolor.images.pad[0] + 2*jscolor.images.arrow[0] + jscolor.images.sld[0],
+					2*this.pickerBorder + 2*this.pickerInset + 2*this.pickerFace + jscolor.images.pad[0] + (this.slider ? 2*this.pickerInset + 2*jscolor.images.arrow[0] + jscolor.images.sld[0] : 0),
 					2*this.pickerBorder + 2*this.pickerInset + 2*this.pickerFace + jscolor.images.pad[1]
 				];
 				var a, b, c;
@@ -572,19 +574,21 @@ var jscolor = {
 
 			var p = jscolor.picker;
 
-			// recompute controls positions
-			posPad = [
-				x+THIS.pickerBorder+THIS.pickerFace+THIS.pickerInset,
-				y+THIS.pickerBorder+THIS.pickerFace+THIS.pickerInset ];
-			posSld = [
-				null,
-				y+THIS.pickerBorder+THIS.pickerFace+THIS.pickerInset ];
-
 			// controls interaction
 			p.box.onmouseup =
 			p.box.onmouseout = function() { target.focus(); };
 			p.box.onmousedown = function() { abortBlur=true; };
-			p.box.onmousemove = function(e) { holdPad && setPad(e); holdSld && setSld(e); };
+			p.box.onmousemove = function(e) {
+				if (holdPad || holdSld) {
+					holdPad && setPad(e);
+					holdSld && setSld(e);
+					if (document.selection) {
+						document.selection.empty();
+					} else if (window.getSelection) {
+						window.getSelection().removeAllRanges();
+					}
+				}
+			};
 			p.padM.onmouseup =
 			p.padM.onmouseout = function() { if(holdPad) { holdPad=false; jscolor.fireEvent(valueElement,'change'); } };
 			p.padM.onmousedown = function(e) { holdPad=true; setPad(e); };
@@ -593,8 +597,8 @@ var jscolor = {
 			p.sldM.onmousedown = function(e) { holdSld=true; setSld(e); };
 
 			// picker
-			p.box.style.width = 4*THIS.pickerInset + 2*THIS.pickerFace + jscolor.images.pad[0] + 2*jscolor.images.arrow[0] + jscolor.images.sld[0] + 'px';
-			p.box.style.height = 2*THIS.pickerInset + 2*THIS.pickerFace + jscolor.images.pad[1] + 'px';
+			p.box.style.width = (2*THIS.pickerInset + 2*THIS.pickerFace + jscolor.images.pad[0] + (THIS.slider ? 2*THIS.pickerInset + 2*jscolor.images.arrow[0] + jscolor.images.sld[0] : 0)) + 'px';
+			p.box.style.height = (2*THIS.pickerInset + 2*THIS.pickerFace + jscolor.images.pad[1]) + 'px';
 
 			// picker border
 			p.boxB.style.position = 'absolute';
@@ -631,6 +635,7 @@ var jscolor = {
 			p.sld.style.height = jscolor.images.sld[1]+'px';
 
 			// slider border
+			p.sldB.style.display = THIS.slider ? "block" : "none";
 			p.sldB.style.position = 'absolute';
 			p.sldB.style.right = THIS.pickerFace+'px';
 			p.sldB.style.top = THIS.pickerFace+'px';
@@ -638,6 +643,7 @@ var jscolor = {
 			p.sldB.style.borderColor = THIS.pickerInsetColor;
 
 			// slider mouse area
+			p.sldM.style.display = THIS.slider ? "block" : "none";
 			p.sldM.style.position = 'absolute';
 			p.sldM.style.right = '0';
 			p.sldM.style.top = '0';
@@ -754,9 +760,9 @@ var jscolor = {
 
 
 		function setPad(e) {
-			var posM = jscolor.getMousePos(e);
-			var x = posM[0]-posPad[0];
-			var y = posM[1]-posPad[1];
+			var mpos = jscolor.getRelMousePos(e);
+			var x = mpos.x - THIS.pickerFace - THIS.pickerInset;
+			var y = mpos.y - THIS.pickerFace - THIS.pickerInset;
 			switch(modeID) {
 				case 0: THIS.fromHSV(x*(6/(jscolor.images.pad[0]-1)), 1 - y/(jscolor.images.pad[1]-1), null, leaveSld); break;
 				case 1: THIS.fromHSV(x*(6/(jscolor.images.pad[0]-1)), null, 1 - y/(jscolor.images.pad[1]-1), leaveSld); break;
@@ -765,8 +771,8 @@ var jscolor = {
 
 
 		function setSld(e) {
-			var posM = jscolor.getMousePos(e);
-			var y = posM[1]-posPad[1];
+			var mpos = jscolor.getRelMousePos(e);
+			var y = mpos.y - THIS.pickerFace - THIS.pickerInset;
 			switch(modeID) {
 				case 0: THIS.fromHSV(null, null, 1 - y/(jscolor.images.sld[1]-1), leavePad); break;
 				case 1: THIS.fromHSV(null, 1 - y/(jscolor.images.sld[1]-1), null, leavePad); break;
@@ -783,9 +789,6 @@ var jscolor = {
 		var
 			holdPad = false,
 			holdSld = false;
-		var
-			posPad,
-			posSld;
 		var
 			leaveValue = 1<<0,
 			leaveStyle = 1<<1,
