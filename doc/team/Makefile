@@ -3,9 +3,12 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
+MANUALSTEX=team-manual.tex $(wildcard team-manual-??.tex)
+MANUALSPDF=$(MANUALSTEX:%tex=%pdf)
+
 config: gentexconfig
 
-docs: team-manual.pdf
+docs: $(MANUALSPDF)
 
 install-docs:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domjudge_docdir)/team \
@@ -18,10 +21,11 @@ gentexconfig: gentexconfig.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
-team-manual.pdf: team-manual.tex team-manual-preamble.tex $(TOPDIR)/etc/domserver-config.php
+# 'genteammanual' (re-)generates all versions even if only one is not uptodate.
+$(MANUALSPDF): %pdf: %tex team-manual-preamble.tex $(TOPDIR)/etc/domserver-config.php
 	./genteammanuals
 
-dist-l: team-manual.pdf
+dist-l: $(MANUALSPDF)
 	$(MAKE) clean-l
 
 clean-l:
@@ -31,4 +35,4 @@ distclean-l:
 	-rm -f gentexconfig
 
 maintainer-clean-l:
-	-rm -f team-manual*.pdf
+	-rm -f $(MANUALSPDF)

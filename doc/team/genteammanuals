@@ -10,7 +10,7 @@
 
 set -e
 
-SOURCES="team-manual.tex team-manual-NL.tex"
+SOURCES="team-manual.tex team-manual-??.tex"
 PREAMBLE=team-manual-preamble.tex
 
 NRUNS=3
