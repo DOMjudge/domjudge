@@ -213,6 +213,26 @@ function importZippedProblem($zip, $probid = NULL)
 		}
 	}
 
+	// submit reference solutions
+	if ( isset($ini_array['allow_submit']) && $ini_array['allow_submit'] ) {
+		$langs = $DB->q('KEYTABLE SELECT extension AS ARRAYKEY, langid FROM language
+					WHERE allow_submit = 1');
+		for ($j = 0; $j < $zip->numFiles; $j++) {
+			$filename = $zip->getNameIndex($j);
+			$extension = end(explode(".", $filename));
+			if( isset($langs[$extension]['langid']) ) {
+				if ( !($tmpfname = mkstemps(TMPDIR."/ref_solution-XXXXXX",0)) ) {
+					error("Could not create temporary file.");
+				}
+				file_put_contents($tmpfname, $zip->getFromIndex($j));
+				if( filesize($tmpfname) <= SOURCESIZE*1024 ) {
+					submit_solution('domjudge', $probid, $langs[$extension]['langid'], $tmpfname);
+				}
+				unlink($tmpfname);
+			}
+		}
+	}
+
 	// FIXME: insert PDF into database
 
 	return $probid;
