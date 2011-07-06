@@ -54,7 +54,7 @@ while( $row = $res->next() ) {
 				. "</li>\n";
 			$nerrors++;
 		} else if ( count($results)>1 ) {
-			$multiple .= "<li><a href=\"submission.php?id=" . $sid 
+			$multiple .= "<li><a href=\"submission.php?id=" . $sid
 				. "\">submission $sid</a> is judged as $result, "
 				. "but has multiple possible outcomes ("
 				. implode(', ', $results)
@@ -72,7 +72,7 @@ while( $row = $res->next() ) {
 	} else {
 		$sid = $row['submitid'];
 		$nunchecked++;
-		$unchecked .= "<li>'$matchstring' not found in <a href=\"submission.php?id=" . $sid 
+		$unchecked .= "<li>'$matchstring' not found in <a href=\"submission.php?id=" . $sid
 			. "\">submission $sid</a>, leaving submission unchecked</li>\n";
 	}
 }
@@ -83,7 +83,7 @@ echo "checked $nchecked submissions: " .
 if ( $nunchecked > 0 ) {
 	echo "not checked $nunchecked submissions<br/>\n";
 }
-	
+
 
 if ( $nerrors > 0 ) {
 	echo "<h2>Unexpected results</h2>";
