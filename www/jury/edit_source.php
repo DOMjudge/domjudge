@@ -26,11 +26,14 @@ if ( isset($_POST['submitter']) ) {
 }
 
 $id = (int)$_GET['id'];
-$source = $DB->q('MAYBETUPLE SELECT * FROM submission WHERE submitid = %i',$id);
+$source = $DB->q('MAYBETUPLE SELECT * FROM submission
+                  LEFT JOIN language USING(langid)
+                  WHERE submitid = %i',$id);
+
 if ( empty($source) ) error ("Submission $id not found");
 
 $sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],
-                                $source['probid'],$source['langid']);
+                                $source['probid'],$source['extension']);
 
 $title = 'Source: ' . htmlspecialchars($sourcefile);
 require(LIBWWWDIR . '/header.php');

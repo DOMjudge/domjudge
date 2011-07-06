@@ -35,11 +35,12 @@ require('init.php');
 $id = (int)$_GET['id'];
 
 $source = $DB->q('MAYBETUPLE SELECT * FROM submission
+                  LEFT JOIN language USING(langid)
                   WHERE submitid = %i',$id);
 if ( empty($source) ) error ("Submission $id not found");
 
 $sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],
-	$source['probid'],$source['langid']);
+	$source['probid'],$source['extension']);
 
 // Download was requested
 if ( isset($_GET['fetch']) ) {
@@ -52,6 +53,7 @@ if ( isset($_GET['fetch']) ) {
 }
 
 $oldsource = $DB->q('MAYBETUPLE SELECT * FROM submission
+                     LEFT JOIN language USING(langid)
                      WHERE teamid = %s AND probid = %s AND langid = %s AND
                      submittime < %s ORDER BY submittime DESC LIMIT 1',
                     $source['teamid'],$source['probid'],$source['langid'],
@@ -89,7 +91,7 @@ if ( $oldsource ) {
 
 	$oldsourcefile = getSourceFilename($oldsource['cid'],$oldsource['submitid'],
 	                                   $oldsource['teamid'],$oldsource['probid'],
-	                                   $oldsource['langid']);
+	                                   $oldsource['extension']);
 
 	$oldfile = SUBMITDIR.'/'.$oldsourcefile;
 	$newfile = SUBMITDIR.'/'.$sourcefile;
