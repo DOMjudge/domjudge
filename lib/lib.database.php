@@ -250,7 +250,7 @@ class db
 					break;
 				default:
 					throw new InvalidArgumentException(
-					    "Unkown %-code: " . $part{0});
+					    "Unknown %-code: " . $part{0});
 			}
 
 		}
