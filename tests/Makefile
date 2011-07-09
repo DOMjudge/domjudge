@@ -10,24 +10,12 @@ SUBMIT = \
 	$(SUBMITCMD) -q -w1 -p $(PROBLEM) "$$i" ; \
 	echo ; sleep 1
 
-config: check-judgings
-
 build: $(TARGETS)
-
-check-judgings: check-judgings.in $(TOPDIR)/paths.mk
-	$(substconfigvars)
-	chmod a+x $@
 
 check-syntax:
 	./syntax
 
 check: test-normal test-fltcmp test-boolfind
-
-verify: check-judgings
-	./check-judgings
-
-distclean-l:
-	-rm -f check-judgings
 
 PROBLEM=hello
 test-fltcmp: PROBLEM=fltcmp
@@ -52,4 +40,4 @@ test-stress: $(SUBMITCMD)
 $(SUBMITCMD):
 	$(MAKE) -C $(TOPDIR)/submit submit
 
-.PHONY: test-normal test-fltcmp test-stress verify
+.PHONY: test-normal test-fltcmp test-stress

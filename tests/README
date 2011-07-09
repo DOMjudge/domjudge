@@ -1,8 +1,10 @@
 Test sources for DOMjudge
 =========================
 
-In this directory are several sources to test the DOMjudge system
-after installation for correct functioning.
+This directory contains several sources to test the DOMjudge system
+for correct functioning after installation. All sources are for
+problems part of the default "Demo Contest", see the PDF files under
+doc/examples for the problem descriptions.
 
 These files test various parts of the system: mostly whether the
 judging backend funtions correctly for all languages, but also whether
@@ -11,40 +13,21 @@ the submission system can handle some irregular cases.
 To test the system, run 'make check'. This will try to submit all
 sources (excluding the stress tests). For this to work the system
 should be completely configured and the submit- and judgedaemons
-running. The default contest 'Demo contest', problems 'Hello' and
-'Fltcmp' can be used for testing. Files named 'test-hello.*' should
-give correct answers on problem 'Hello'; all other files 'test-*'
-should fail for different reasons, which is described in these files
-respectively. The files 'fltcmp-test-*' are for problem 'Fltcmp'.
+running. The default contest 'Demo contest', problems 'Hello',
+'Fltcmp', and 'Boolfind' can be used for testing. Files named
+'test-hello.*' should give correct answers on problem 'Hello'; all
+other files 'test-*' should fail for different reasons, which is
+described in these files respectively. The files 'fltcmp-test-*' are
+for problem 'Fltcmp' and files 'boolfind-test-*' for problem
+'Boolfind' respectively.
 
 'make test-stress' will submit the stress tests, which may break the
 system and require manual repair: be careful!
 
 After running 'make check' you can either manually verify the results
-or run 'make verify' which will execute 'check-judgings' to
-automatically verify the results using the '@EXPECTED_RESULTS@:'
+or browse to the 'Judging verifier' page from the admin web-interface
+to automatically verify the results using the '@EXPECTED_RESULTS@:'
 header in the sources.
-
-
-Description of sample problems
-==============================
-
-Problem "hello" is included in the default "Demo Contest".
-
-The input consists of one line '1' (the number of testcases).
-The output should be the string 'Hello world!' literally, without quotes.
-
-
-Problem "fltcmp" is included in the default "Demo Contest".
-
-The input consists of one line with an integer 'n': the number of testcases.
-On the following n lines on each line one floating point number 'x'.
-
-The output should be for each input, a line with a floating point
-number y = 1/x with relative or absolute precision better than 1E-6.
-
-This sample problem tests a special compare script, namely the
-compare_program.sh script which calls check_float.
 
 
 $Id$
