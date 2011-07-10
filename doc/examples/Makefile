@@ -3,8 +3,11 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-BASE = hello fltcmp boolfind
-PDF = $(BASE:=.pdf)
+PROBLEMS = hello fltcmp boolfind
+
+INI = $(PROBLEMS:=.ini)
+PDF = $(PROBLEMS:=.pdf)
+ZIP = $(PROBLEMS:=.zip)
 
 docs: dist
 
@@ -17,11 +20,26 @@ install-docs:
 $(PDF): %.pdf: %.tex %.in %.out $(TOPDIR)/doc/logos/DOMjudgelogo.pdf
 	pdflatex -interaction=nonstopmode $< > /dev/null
 
-dist-l: $(PDF)
+$(INI): %.ini:
+	@echo "Generating '$@'..."
+	@echo '; DOMjudge problem properties file' > $@
+	@echo 'probid       = $*' >> $@
+	@echo 'name         = $*' >> $@
+	@echo 'timelimit    = 5'  >> $@
+	@echo 'allow_submit = 1'  >> $@
+
+# Use secondary expansion to use stem $* in dependencies:
+.SECONDEXPANSION:
+$(ZIP): %.zip: %.pdf %.ini $$(foreach ext,in out c cc java,$$(wildcard $$**.$$(ext)))
+	TMPDIR=`mktemp -d dj_probzip_XXXXXX` ; \
+	cp $^ $$TMPDIR ; mv $$TMPDIR/$*.ini $$TMPDIR/domjudge-problem.ini ; \
+	zip -j -r $@ $$TMPDIR ; rm -rf $$TMPDIR
+
+dist-l: $(PDF) $(ZIP)
 	$(MAKE) clean-l
 
 clean-l:
-	-rm -f $(BASE:=.aux) $(BASE:=.log)
+	-rm -f $(PROBLEMS:=.aux) $(PROBLEMS:=.log)
 
 maintainer-clean-l:
-	-rm -f $(PDF)
+	-rm -f $(INI) $(PDF) $(ZIP)
