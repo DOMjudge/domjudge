@@ -21,7 +21,7 @@ $(PDF): %.pdf: %.tex %.in %.out $(TOPDIR)/doc/logos/DOMjudgelogo.pdf
 	pdflatex -interaction=nonstopmode $< > /dev/null
 
 $(INI): %.ini:
-	@echo "Generating '$@'..."
+	@[ -n "$(QUIET)" ] || echo "Generating '$@'..."
 	@echo '; DOMjudge problem properties file' > $@
 	@echo 'probid       = $*' >> $@
 	@echo 'name         = $*' >> $@
@@ -33,7 +33,7 @@ $(INI): %.ini:
 $(ZIP): %.zip: %.pdf %.ini $$(foreach ext,in out c cc java,$$(wildcard $$**.$$(ext)))
 	TMPDIR=`mktemp -d dj_probzip_XXXXXX` ; \
 	cp $^ $$TMPDIR ; mv $$TMPDIR/$*.ini $$TMPDIR/domjudge-problem.ini ; \
-	zip -j -r $@ $$TMPDIR ; rm -rf $$TMPDIR
+	zip -q -j -r $@ $$TMPDIR ; rm -rf $$TMPDIR
 
 dist-l: $(PDF) $(ZIP)
 	$(MAKE) clean-l
