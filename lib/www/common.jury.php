@@ -215,8 +215,20 @@ function importZippedProblem($zip, $probid = NULL)
 
 	// submit reference solutions
 	if ( isset($ini_array['allow_submit']) && $ini_array['allow_submit'] ) {
-		$langs = $DB->q('KEYVALUETABLE SELECT extension, langid FROM language
+		// First find all submittable languages:
+		$langs = $DB->q('KEYVALUETABLE SELECT langid, langid FROM language
 		                 WHERE allow_submit = 1');
+		// Then add all known extensions for these:
+		$exts = explode(" ", LANG_EXTS);
+		foreach ($exts as $ext) {
+			$langexts = explode(',', $ext);
+			$langid = $langexts[1];
+			if ( !isset($langs[$langid]) ) continue;
+			for ($i = 2; $i < count($langexts); $i++) {
+				$langs[$langexts[i]] = $langid;
+			}
+		}
+
 		for ($j = 0; $j < $zip->numFiles; $j++) {
 			$filename = $zip->getNameIndex($j);
 			$extension = end(explode(".", $filename));

@@ -136,14 +136,12 @@ CREATE TABLE `judging_run` (
 --
 
 CREATE TABLE `language` (
-  `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
+  `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string), used for source file extension',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
-  `extension` varchar(5) NOT NULL COMMENT 'Filename extension for this language',
   `allow_submit` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Are submissions accepted in this language?',
   `allow_judge` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Are submissions in this language judged?',
   `time_factor` float NOT NULL default '1' COMMENT 'Language-specific factor multiplied by problem run times',
-  PRIMARY KEY  (`langid`),
-  UNIQUE KEY `extension` (`extension`)
+  PRIMARY KEY  (`langid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Programming languages in which teams can submit solutions';
 
 --

@@ -27,9 +27,14 @@ ALTER TABLE `contest`
 ALTER TABLE `judging`
   CHANGE COLUMN `verifier` `jury_member` varchar(15) default NULL COMMENT 'Name of jury member who verified this';
 
+ALTER TABLE `language`
+  CHANGE COLUMN `langid` `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string), used for source file extension';
+
 --
 -- Add/remove privileges
 --
+
+REVOKE SELECT (extension) ON language FROM `domjudge_team`, `domjudge_plugin`;
 
 FLUSH PRIVILEGES;
 
@@ -57,6 +62,13 @@ INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_ju
 
 UPDATE `language` SET `allow_submit` = 0, `allow_judge` = 0 WHERE `langid` = 'bash';
 
+-- Change some langid's to default extension, prepare for dropping
+-- extension column below.
+UPDATE `language` SET `langid` = 'hs'  WHERE `langid` = 'haskell';
+UPDATE `language` SET `langid` = 'pas' WHERE `langid` = 'pascal';
+UPDATE `language` SET `langid` = 'pl'  WHERE `langid` = 'perl';
+UPDATE `language` SET `langid` = 'py'  WHERE `langid` = 'python';
+
 UPDATE `problem` SET `special_compare` = 'float' WHERE `special_compare` = 'program.sh';
 
 INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES ('boolfind', 2, 'Boolean switch search', 1, 1, 5, 'boolfind', 'boolfind', 'limegreen');
@@ -67,3 +79,6 @@ INSERT INTO `testcase` (`md5sum_input`, `md5sum_output`, `input`, `output`, `pro
 -- Finally remove obsolete structures after moving data
 --
 
+ALTER TABLE `language`
+  DROP KEY `extension`,
+  DROP COLUMN `extension`;

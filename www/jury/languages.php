@@ -21,8 +21,8 @@ if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No languages defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
-		"<th scope=\"col\">extension</th><th scope=\"col\">allow<br />submit</th>" .
+		"<tr><th scope=\"col\">ID/ext</th><th scope=\"col\">name</th>" .
+		"<th scope=\"col\">allow<br />submit</th>" .
 		"<th scope=\"col\">allow<br />judge</th><th scope=\"col\">timefactor</th>" .
 		"</tr>\n</thead>\n<tbody>\n";
 
@@ -32,8 +32,6 @@ if( $res->count() == 0 ) {
 			( $row['allow_submit'] ? '': ' class="disabled"').
 			"><td>" . $link . htmlspecialchars($row['langid'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
-			"</td><td class=\"filename\">" . $link . "." .
-				htmlspecialchars($row['extension']) . "</a>" .
 			"</td><td align=\"center\">" . $link .
 				printyn($row['allow_submit']) . "</a>" .
 			"</td><td align=\"center\">" . $link .

@@ -31,7 +31,7 @@ GRANT SELECT (probid, name, cid, allow_submit, color)    ON problem    TO `domju
 GRANT SELECT (submitid, cid, langid, probid, teamid,
               submittime)                                ON submission TO `domjudge_public`, `domjudge_plugin`;
 
-GRANT SELECT (langid, name, extension, allow_submit)     ON language   TO `domjudge_team`, `domjudge_plugin`;
+GRANT SELECT (langid, name, allow_submit)                ON language   TO `domjudge_team`, `domjudge_plugin`;
 GRANT SELECT (probid, name, cid, allow_submit, color)    ON problem    TO `domjudge_team`;
 
 -- Team write privileges

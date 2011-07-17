@@ -49,13 +49,13 @@ if ( IS_ADMIN && !empty($cmd) ):
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Language ID:</td><td>";
+		echo "<tr><td>Language ID/ext:</td><td>";
 		$row = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s',
 			$_GET['id']);
 		echo addHidden('keydata[0][langid]', $row['langid']);
 		echo htmlspecialchars($row['langid']);
 	} else {
-		echo "<tr><td><label for=\"data_0__langid_\">Language ID:</label></td><td>";
+		echo "<tr><td><label for=\"data_0__langid_\">Language ID/ext:</label></td><td>";
 		echo addInput('data[0][langid]', null, 8, 8);
 	}
 	echo "</td></tr>\n";
@@ -63,9 +63,6 @@ if ( IS_ADMIN && !empty($cmd) ):
 ?>
 <tr><td><label for="data_0__name_">Language name:</label></td>
 <td><?php echo addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
-
-<tr><td><label for="data_0__extension_">Extension:</label></td>
-<td class="filename">.<?php echo addInput('data[0][extension]', @$row['extension'], 5, 5)?></td></tr>
 
 <tr><td>Allow submit:</td>
 <td><?php echo addRadioButton('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> <label for="data_0__allow_submit_1">yes</label>
@@ -106,9 +103,8 @@ echo addForm($pagename) . "<p>\n" .
 
 ?>
 <table>
-<tr><td scope="row">ID:          </td><td><?php echo htmlspecialchars($data['langid'])?></td></tr>
+<tr><td scope="row">ID/extension:</td><td><?php echo htmlspecialchars($data['langid'])?></td></tr>
 <tr><td scope="row">Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
-<tr><td scope="row">Extension:   </td><td class="filename">.<?php echo htmlspecialchars($data['extension'])?></td></tr>
 <tr><td scope="row">Allow submit:</td><td><?php echo printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .

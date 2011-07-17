@@ -4,10 +4,11 @@
 #
 # $Id$
 
-# Usage: $0 <ext> <lang> <workdir>
+# Usage: $0 <lang> <workdir>
 #
-# <ext>             Extension of the source: <workdir>/compile/source.<ext>
-# <lang>            Language of the source, see config-file for details.
+# <lang>            Language ID and extension of the source, see config-file
+#                   for details; source file must be located in
+#                   <workdir>/compile/source.<lang>
 # <workdir>         Base directory of this judging. Compilation is done in
 #                   <workdir>/compile, compiler output is stored in <workdir>.
 #
@@ -60,14 +61,13 @@ RUNGUARD="$DJ_BINDIR/runguard"
 
 logmsg $LOG_INFO "starting '$0', PID = $$"
 
-[ $# -ge 3 ] || error "not enough arguments. See script-code for usage."
-EXT="$1";     shift
+[ $# -ge 2 ] || error "not enough arguments. See script-code for usage."
 LANG="$1";    shift
 WORKDIR="$1"; shift
-logmsg $LOG_DEBUG "arguments: '$SEXT' '$LANG' '$WORKDIR'"
+logmsg $LOG_DEBUG "arguments: '$LANG' '$WORKDIR'"
 
 COMPILE_SCRIPT="$SCRIPTDIR/compile_$LANG.sh"
-SOURCE="$WORKDIR/compile/source.$EXT"
+SOURCE="$WORKDIR/compile/source.$LANG"
 
 [ -r "$SOURCE"  ] || error "source not found: $SOURCE"
 [ -d "$WORKDIR" -a -w "$WORKDIR" -a -x "$WORKDIR" ] || \

@@ -474,12 +474,12 @@ function daemonize($pidfile = NULL)
  * validates it and puts it into the database. Additionally it
  * moves it to a backup storage.
  */
-function submit_solution($team, $prob, $langext, $file)
+function submit_solution($team, $prob, $lang, $file)
 {
-	if( empty($team)    ) error("No value for Team.");
-	if( empty($prob)    ) error("No value for Problem.");
-	if( empty($langext) ) error("No value for Language.");
-	if( empty($file)    ) error("No value for Filename.");
+	if( empty($team) ) error("No value for Team.");
+	if( empty($prob) ) error("No value for Problem.");
+	if( empty($lang) ) error("No value for Language.");
+	if( empty($file) ) error("No value for Filename.");
 
 	global $cdata,$cid, $DB;
 
@@ -491,9 +491,9 @@ function submit_solution($team, $prob, $langext, $file)
 	}
 
 	// Check 2: valid parameters?
-	if( ! $lang = $DB->q('MAYBEVALUE SELECT langid FROM language WHERE
-						  extension = %s AND allow_submit = 1', $langext) ) {
-		error("Language '$langext' not found in database or not submittable.");
+	if( ! $langid = $DB->q('MAYBEVALUE SELECT langid FROM language WHERE
+						  langid = %s AND allow_submit = 1', $lang) ) {
+		error("Language '$lang' not found in database or not submittable.");
 	}
 	if( ! $login = $DB->q('MAYBEVALUE SELECT login FROM team WHERE login = %s',$team) ) {
 		error("Team '$team' not found in database.");
@@ -516,15 +516,15 @@ function submit_solution($team, $prob, $langext, $file)
 	$id = $DB->q('RETURNID INSERT INTO submission
 				  (cid, teamid, probid, langid, submittime, sourcecode)
 				  VALUES (%i, %s, %s, %s, %s, %s)',
-				 $cid, $team, $probid, $lang, $now,
+				 $cid, $team, $probid, $langid, $now,
 				 getFileContents($file, false));
 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
 			VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
-		   now(), $cid, $team, $lang, $prob, $id);
+		   now(), $cid, $team, $langid, $probid, $id);
 
-	$tofile = getSourceFilename($cid,$id,$team,$prob,$langext);
+	$tofile = getSourceFilename($cid,$id,$team,$probid,$langid);
 	$topath = SUBMITDIR . "/$tofile";
 
 	if ( is_writable( SUBMITDIR ) ) {
@@ -546,9 +546,9 @@ function submit_solution($team, $prob, $langext, $file)
 /**
  * Compute the filename of a given submission.
  */
-function getSourceFilename($cid,$sid,$team,$prob,$langext)
+function getSourceFilename($cid,$sid,$team,$prob,$lang)
 {
-	return "c$cid.s$sid.$team.$prob.$langext";
+	return "c$cid.s$sid.$team.$prob.$lang";
 }
 
 /**

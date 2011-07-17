@@ -80,15 +80,15 @@ function detectProblemLanguage(filename)
 		}
 	}
 
-	// language extension
+	// language ID
 
-	var elt=document.getElementById('langext');
+	var elt=document.getElementById('langid');
 	// the "autodetect" option has empty value
 	if ( elt.value != '' ) return;
 
-	var langext = getMainExtension(parts[0]);
+	var langid = getMainExtension(parts[0]);
 	for (i=0;i<elt.length;i++) {
-		if ( elt.options[i].value == langext ) {
+		if ( elt.options[i].value == langid ) {
 			elt.selectedIndex = i;
 		}
 	}
@@ -97,7 +97,7 @@ function detectProblemLanguage(filename)
 
 function checkUploadForm()
 {
-	var langelt = document.getElementById("langext");
+	var langelt = document.getElementById("langid");
 	var language = langelt.options[langelt.selectedIndex].value;
 	var languagetxt = langelt.options[langelt.selectedIndex].text;
 	var filebut = document.getElementById("codebutton");

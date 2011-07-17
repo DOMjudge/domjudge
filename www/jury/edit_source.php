@@ -18,7 +18,7 @@ if ( isset($_POST['submitter']) ) {
 
 	file_put_contents($tmpfname, $_POST['source']);
 
-	submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langext'], $tmpfname);
+	submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'], $tmpfname);
 	unlink($tmpfname);
 
 	header('Location: submissions.php');
@@ -33,7 +33,7 @@ $source = $DB->q('MAYBETUPLE SELECT * FROM submission
 if ( empty($source) ) error ("Submission $id not found");
 
 $sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],
-                                $source['probid'],$source['extension']);
+                                $source['probid'],$source['langid']);
 
 $title = 'Source: ' . htmlspecialchars($sourcefile);
 require(LIBWWWDIR . '/header.php');
@@ -47,11 +47,11 @@ echo addTextArea('source', $source['sourcecode'], 120, 40) . "<br />\n";
 
 $probs = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem WHERE
                  allow_submit = 1 AND cid = %i ORDER BY name', $cid);
-$langs = $DB->q('KEYVALUETABLE SELECT extension, name FROM language WHERE
+$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language WHERE
                  allow_submit = 1 ORDER BY name');
 
 echo addSelect('probid', $probs, $source['probid'], true);
-echo addSelect('langext', $langs, $source['extension'], true);
+echo addSelect('langid', $langs, $source['langid'], true);
 
 echo addHidden('teamid', $source['teamid']);
 echo addHidden('submitter', 'domjudge');

@@ -74,14 +74,14 @@ if ( ! isset($prob) ) err("Unable to find problem '$probid'");
 $probid = $prob['probid'];
 
 /* Determine the language */
-$langext = @$_POST['langext'];
-$lang = $DB->q('MAYBETUPLE SELECT langid, name, extension FROM language
-                WHERE extension = %s AND allow_submit = 1', $langext);
+$langid = @$_POST['langid'];
+$lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
+                WHERE langid = %s AND allow_submit = 1', $langid);
 
-if ( ! isset($lang) ) err("Unable to find language '$langext'");
-$langext = $lang['extension'];
+if ( ! isset($lang) ) err("Unable to find language '$langid'");
+$langid = $lang['langid'];
 
-$sid = submit_solution($login, $probid, $langext, $_FILES['code']['tmp_name']);
+$sid = submit_solution($login, $probid, $langid, $_FILES['code']['tmp_name']);
 
 // Redirect back to index page when interactively used.
 if ( !NONINTERACTIVE ) {

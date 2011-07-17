@@ -49,8 +49,6 @@ if ( !($dh = @opendir($sourcesdir)) ) {
 
 $submissions = array();
 
-$langs = $DB->q('KEYTABLE SELECT extension AS ARRAYKEY, langid FROM language');
-
 while ( ($src = readdir($dh))!==FALSE ) {
 
 	$f = $sourcesdir . '/' . $src;
@@ -66,7 +64,7 @@ while ( ($src = readdir($dh))!==FALSE ) {
 		logmsg(LOG_DEBUG, "skipping '$src': does not match pattern");
 		continue;
 	}
-	list($cid, $sid, $login, $probid, $langext) = $fdata;
+	list($cid, $sid, $login, $probid, $langid) = $fdata;
 	$cid = substr($cid,1);
 	$sid = substr($sid,1);
 
@@ -78,7 +76,7 @@ while ( ($src = readdir($dh))!==FALSE ) {
 	                       'sid'        => $sid,
 	                       'login'      => $login,
 	                       'probid'     => $probid,
-	                       'langid'     => $langs[$langext]['langid'],
+	                       'langid'     => $langid,
 	                       'submittime' => $submittime);
 }
 

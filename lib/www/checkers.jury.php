@@ -68,20 +68,17 @@ function check_language($data, $keydata = null)
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Language ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
-	if ( strpos($data['extension'], '.') !== FALSE ) {
-		ch_error("Do not include the dot (.) in the extension");
-	}
 
 	$langs = preg_split("/\s+/", LANG_EXTS);
 	$langfound = FALSE;
 	foreach ($langs as $lang) {
 		$langdata = explode(',', $lang);
-		if ( $langdata[1] == $data['extension'] ) {
+		if ( $langdata[1] == $data['langid'] ) {
 			$langfound = TRUE;
 		}
 	}
 	if ( !$langfound ) {
-		ch_error("Language extension not found in LANG_EXTS from domserver-config.php");
+		ch_error("Language ID/extension not found in LANG_EXTS from domserver-config.php");
 	}
 
 	return $data;

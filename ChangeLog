@@ -31,6 +31,8 @@ Version 3.2.0 - SVN
  - Set MySQL connection encoding explicitly. Introduces a new option:
    DJ_CHARACTER_SET_MYSQL.
  - Add 'frozen' flag option to scoreboard plugin interface.
+ - Remove language 'extension' column from SQL database, langid is now
+   used for source file extensions.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------

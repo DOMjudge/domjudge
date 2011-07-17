@@ -59,7 +59,7 @@ define('PENALTY_TIME', 20);
 // List of auto-detected language extensions by the submit client.
 //   Format: 'LANG,MAINEXT[,EXT]... [LANG...]' where:
 //   - LANG is the language name displayed,
-//   - MAINEXT is the extension corresponding to the extension in DOMjudge,
+//   - MAINEXT is the extension corresponding to the langid in DOMjudge,
 //   - EXT... are comma separated additional detected language extensions.
 // This list only needs to be modified when additional languages are
 // added and should be kept in sync with the list in submit-config.h.in.

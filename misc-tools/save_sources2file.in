@@ -38,13 +38,12 @@ if ( !(is_dir($sourcesdir) && is_writable($sourcesdir)) ) {
 
 logmsg(LOG_NOTICE, "started, sources dir = '" . $sourcesdir . "'");
 
-$res = $DB->q('SELECT s.*, l.extension FROM submission s
-               LEFT JOIN language l USING (langid)');
+$res = $DB->q('SELECT * FROM submission');
 
 while( $row = $res->next() ) {
 
 	$filename = implode('.',array('c'.$row['cid'],'s'.$row['submitid'],
-	                              $row['teamid'],$row['probid'],$row['extension']));
+	                              $row['teamid'],$row['probid'],$row['langid']));
 
 	$filepath = $sourcesdir . '/' . $filename;
 	file_put_contents($filepath, $row['sourcecode']);

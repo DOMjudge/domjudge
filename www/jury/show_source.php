@@ -40,7 +40,7 @@ $source = $DB->q('MAYBETUPLE SELECT * FROM submission
 if ( empty($source) ) error ("Submission $id not found");
 
 $sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],
-	$source['probid'],$source['extension']);
+                                $source['probid'],$source['langid']);
 
 // Download was requested
 if ( isset($_GET['fetch']) ) {
@@ -91,7 +91,7 @@ if ( $oldsource ) {
 
 	$oldsourcefile = getSourceFilename($oldsource['cid'],$oldsource['submitid'],
 	                                   $oldsource['teamid'],$oldsource['probid'],
-	                                   $oldsource['extension']);
+	                                   $oldsource['langid']);
 
 	$oldfile = SUBMITDIR.'/'.$oldsourcefile;
 	$newfile = SUBMITDIR.'/'.$sourcefile;

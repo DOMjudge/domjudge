@@ -251,7 +251,7 @@ while ( TRUE ) {
 	// get maximum runtime, source code and other parameters
 	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS maxruntime,
 	               s.submitid, s.sourcecode, s.langid, s.teamid, s.probid,
-	               p.special_run, p.special_compare, l.extension
+	               p.special_run, p.special_compare
 	               FROM submission s, problem p, language l
 	               WHERE s.probid = p.probid AND s.langid = l.langid AND
 	               judgemark = %s AND judgehost = %s', $mark, $myhost);
@@ -291,15 +291,14 @@ function judge($mark, $row, $judgingid)
 	if ( $retval != 0 ) error("Could not create '$workdir/compile'");
 
 	// Get the source code from the DB and store in a file
-	$srcfile = "$workdir/compile/source.$row[extension]";
+	$srcfile = "$workdir/compile/source.$row[langid]";
 	if ( file_put_contents($srcfile, $row['sourcecode']) === FALSE ) {
 		error("Could not create $srcfile");
 	}
 	unset($row['sourcecode']);
 
 	// Compile the program.
-	system(LIBJUDGEDIR . "/compile.sh $row[extension] $row[langid] " .
-	       "'$workdir'", $retval);
+	system(LIBJUDGEDIR . "/compile.sh $row[langid] '$workdir'", $retval);
 
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {

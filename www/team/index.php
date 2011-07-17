@@ -53,10 +53,10 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 		$probs[''] = 'problem';
 
 		echo addSelect('probid', $probs, '', true);
-		$langs = $DB->q('KEYVALUETABLE SELECT extension, name FROM language
+		$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language
 				 WHERE allow_submit = 1 ORDER BY name');
 		$langs[''] = 'language';
-		echo addSelect('langext', $langs, '', true);
+		echo addSelect('langid', $langs, '', true);
 
 		echo addSubmit('submit', 'submit',
 			       "return checkUploadForm();");

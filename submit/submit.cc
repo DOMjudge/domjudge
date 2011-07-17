@@ -743,7 +743,7 @@ int websubmit()
 	/* Fill post form */
 	curlformadd(COPYNAME,"code",   FILE,        filename);
 	curlformadd(COPYNAME,"probid", COPYCONTENTS,problem.c_str());
-	curlformadd(COPYNAME,"langext",COPYCONTENTS,extension.c_str());
+	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
 	curlformadd(COPYNAME,"noninteractive",COPYCONTENTS,"1");
 	curlformadd(COPYNAME,"submit", COPYCONTENTS,"submit");
 
