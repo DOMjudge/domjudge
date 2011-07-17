@@ -41,7 +41,7 @@ install:
 all: build docs
 
 # MAIN TARGETS
-build domserver judgehost: paths.mk config
+build domserver judgehost docs: paths.mk config
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
@@ -115,7 +115,7 @@ paths.mk:
 	@exit 1
 
 # Configure for running in source tree, not meant for normal use:
-MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -Wformat -Wformat-security -ansi
+MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -Wformat -Wformat-security -ansi -pedantic
 maintainer-conf: configure
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(PWD) \
 	            --with-domserver_root=$(PWD) \
