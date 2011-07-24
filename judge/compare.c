@@ -56,8 +56,6 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
-#define MAXLINELEN 65536
-
 /* Maximum characters to print per side on a line */
 #define MAXPRINTLEN 60
 
@@ -200,7 +198,8 @@ void writediff()
 	FILE *diffoutfile;
 	FILE *inputfile[2];
 	size_t maxlinelen[2], nlines[2];
-	char line[2][MAXLINELEN];
+	char *line[2];
+	size_t linesize[2];
 	int endoffile[2];
 	int i;
 	size_t l;
@@ -208,14 +207,18 @@ void writediff()
 	char diffchar, quotechar[2];
 	char formatstr[256];
 	int firstdiff = -1;
-	char *dummy;
 
 	if ( (diffoutfile =fopen(diffout,"w"))==NULL ) error(errno,"opening file '%s'",diffout);
 	if ( (inputfile[0]=fopen(progout,"r"))==NULL ) error(errno,"opening file '%s'",progout);
 	if ( (inputfile[1]=fopen(testout,"r"))==NULL ) error(errno,"opening file '%s'",testout);
 
-	/* Find maximum line length and no. lines per input file: */
-	for(i=0; i<2; i++) endoffile[i] = maxlinelen[i] = nlines[i] = 0;
+	/* Find maximum line length and no. lines per input file.
+	 * First initialize variables.
+	 */
+	for(i=0; i<2; i++) {
+		line[i] = NULL;
+		endoffile[i] = maxlinelen[i] = nlines[i] = linesize[i] = 0;
+	}
 
 	/* Read lines until end of file to find first difference and maxlinelen */
 	for(l=0; !(endoffile[0] && endoffile[1]); l++) {
@@ -226,12 +229,10 @@ void writediff()
 				line[i][0] = 0;
 				continue;
 			}
-			if ( fgets(line[i],MAXLINELEN,inputfile[i])!=NULL && strlen(line[i])!=0 ) {
-				if ( strlen(line[i])>=MAXLINELEN-1 ) {
-					error(0,"cannot read lines longer than %d characters",MAXLINELEN);
-				}
+			if ( getline(&line[i],&linesize[i],inputfile[i])>=0 ) {
 				nlines[i]++;
 			} else {
+				/* We assume no errors other than EOF occur */
 				endoffile[i] = 1;
 				line[i][0] = 0;
 			}
@@ -268,11 +269,10 @@ void writediff()
 	/* Loop over all common lines for printing */
 	for(l=0; l<min(nlines[0],nlines[1]); l++) {
 
-		/* Assign fgets return value to dummy variable to suppress
-		 * compiler warning. We should check fgets() returning NULL on
+		/* We should check getline() returning -1 on
 		 * EOF or errors, but we did so above.
 		 */
-		for(i=0; i<2; i++) dummy = fgets(line[i],MAXLINELEN,inputfile[i]);
+		for(i=0; i<2; i++) getline(&line[i],&linesize[i],inputfile[i]);
 
 		/* Check for endline (or normal) character differences */
 		endlinediff = ( strcmp(line[0],line[1])!=0 );
@@ -328,11 +328,10 @@ void writediff()
 		}
 
 		for(; l<nlines[i]; l++) {
-			/* Assign fgets return value to dummy variable to suppress
-			 * compiler warning. We should check fgets() returning NULL on
+			/* We should check fgets() returning -1 on
 			 * EOF or errors, but we did so above.
 			 */
-			dummy = fgets(line[i],MAXLINELEN,inputfile[i]);
+			getline(&line[i],&linesize[i],inputfile[i]);
 
 			stripendline(line[i]);
 

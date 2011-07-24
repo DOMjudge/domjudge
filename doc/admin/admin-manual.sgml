@@ -383,8 +383,6 @@ The following software is required for running DOMjudge.
 <item> A statically compiled POSIX shell, located in
        <tt>lib/judge/sh-static</tt> (dash is included for Linux IA32)
 
-<item> glibc &gt;= 2.1
-
 <item> A lot of standard (GNU) programs, a probably incomplete list:
        hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
        grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail, pgrep
@@ -440,7 +438,11 @@ functionality.
 
 Software required for building DOMjudge from distributed sources.
 <itemize>
-<item> gcc and g++ with standard libraries
+<item> gcc and g++ with standard libraries. Other compilers and
+       libraries might also work: we have successfully compiled
+       DOMjudge sources with <htmlurl name="Clang"
+       url="http://clang.llvm.org/"> from the LLVM project; the C
+       library should support the POSIX.1-2008 specification.
 
 <item> GNU make
 

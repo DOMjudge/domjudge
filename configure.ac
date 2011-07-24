@@ -260,7 +260,7 @@ fi
 # We try to conform to POSIX, so ideally we shouldn't need to include
 # other features, but there are still individual files that require
 # other specifications.
-AC_DEFINE_UNQUOTED(_POSIX_C_SOURCE, 200112L, [Include POSIX.1-2001 base specification])
+AC_DEFINE_UNQUOTED(_POSIX_C_SOURCE, 200809L, [Include POSIX.1-2008 base specification])
 AC_DEFINE_UNQUOTED(_XOPEN_SOURCE, 500,       [Include SUSv2 (UNIX 98) extensions])
 
 # Checks for header files.
