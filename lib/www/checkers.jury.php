@@ -61,6 +61,8 @@ function check_problem($data, $keydata = null)
 
 function check_language($data, $keydata = null)
 {
+	global $langexts;
+
 	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 0 ) {
 		ch_error("Timelimit is not a valid positive factor");
 	}
@@ -69,16 +71,9 @@ function check_language($data, $keydata = null)
 		ch_error("Language ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
 
-	$langs = preg_split("/\s+/", LANG_EXTS);
-	$langfound = FALSE;
-	foreach ($langs as $lang) {
-		$langdata = explode(',', $lang);
-		if ( $langdata[1] == $data['langid'] ) {
-			$langfound = TRUE;
-		}
-	}
-	if ( !$langfound ) {
-		ch_error("Language ID/extension not found in LANG_EXTS from domserver-config.php");
+	if ( $langexts[$data['langid']]!=$data['langid'] ) {
+		ch_error("Language ID/extension not found or set incorrectly " .
+		         "in LANG_EXTS from domserver-config.php");
 	}
 
 	return $data;

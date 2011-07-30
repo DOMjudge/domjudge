@@ -64,9 +64,10 @@ while ( ($src = readdir($dh))!==FALSE ) {
 		logmsg(LOG_DEBUG, "skipping '$src': does not match pattern");
 		continue;
 	}
-	list($cid, $sid, $login, $probid, $langid) = $fdata;
+	list($cid, $sid, $login, $probid, $ext) = $fdata;
 	$cid = substr($cid,1);
 	$sid = substr($sid,1);
+	$langid = getLangID($ext);
 
 	$submittime = strftime(MYSQL_DATETIME_FORMAT,filemtime($f));
 

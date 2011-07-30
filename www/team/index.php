@@ -18,12 +18,8 @@ $submitted = @$_GET['submitted'];
 echo "<script type=\"text/javascript\">\n<!--\n";
 echo "function getMainExtension(ext)\n{\n";
 echo "\tswitch(ext) {\n";
-$exts = explode(" ", LANG_EXTS);
-foreach($exts as $ext) {
-	$langexts = explode(',', $ext);
-	for ($i = 1; $i < count($langexts); $i++) {
-		echo "\t\tcase '" . $langexts[$i]. "': return '" .$langexts[1] . "';\n";
-	}
+foreach($langexts as $ext => $langid) {
+	echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
 }
 echo "\t\tdefault: return '';\n\t}\n}\n";
 echo "// -->\n</script>\n";

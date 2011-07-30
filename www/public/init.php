@@ -21,6 +21,8 @@ require_once(LIBDIR . '/lib.misc.php');
 require_once(LIBDIR . '/lib.dbconfig.php');
 require_once(LIBDIR . '/use_db.php');
 
+parseLangExts();
+
 set_exception_handler('exception_handler');
 setup_database_connection('public');
 

@@ -206,6 +206,32 @@ function getFinalResult($runresults)
 }
 
 /**
+ * Parse language extensions from LANG_EXTS to ext -> ID map
+ */
+function parseLangExts()
+{
+	global $langexts;
+
+	$langexts = array();
+	foreach ( explode(' ', LANG_EXTS) as $lang ) {
+		$exts = explode(',', $lang);
+		for ($i=1; $i<count($exts); $i++) $langexts[$exts[$i]] = $exts[1];
+	}
+}
+
+/**
+ * Get langid from extension (initialize global $langexts if necessary)
+ */
+function getLangID($ext)
+{
+	global $langexts;
+
+	if ( empty($langexts) ) parseLangExts();
+
+	return @$langexts[$ext];
+}
+
+/**
  * Simulate MySQL NOW() function to create insert queries that do not
  * change when replicated later.
  */

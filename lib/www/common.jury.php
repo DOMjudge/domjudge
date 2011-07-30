@@ -218,21 +218,12 @@ function importZippedProblem($zip, $probid = NULL)
 		// First find all submittable languages:
 		$langs = $DB->q('KEYVALUETABLE SELECT langid, langid FROM language
 		                 WHERE allow_submit = 1');
-		// Then add all known extensions for these:
-		$exts = explode(" ", LANG_EXTS);
-		foreach ($exts as $ext) {
-			$langexts = explode(',', $ext);
-			$langid = $langexts[1];
-			if ( !isset($langs[$langid]) ) continue;
-			for ($i = 2; $i < count($langexts); $i++) {
-				$langs[$langexts[i]] = $langid;
-			}
-		}
 
 		for ($j = 0; $j < $zip->numFiles; $j++) {
 			$filename = $zip->getNameIndex($j);
 			$extension = end(explode(".", $filename));
-			if( isset($langs[$extension]) ) {
+			$langid = getLangID($extension);
+			if( !empty($langid) && isset($langs[$langid]) ) {
 				if ( !($tmpfname = mkstemps(TMPDIR."/ref_solution-XXXXXX",0)) ) {
 					error("Could not create temporary file.");
 				}

@@ -63,11 +63,38 @@ INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_ju
 UPDATE `language` SET `allow_submit` = 0, `allow_judge` = 0 WHERE `langid` = 'bash';
 
 -- Change some langid's to default extension, prepare for dropping
--- extension column below.
-UPDATE `language` SET `langid` = 'hs'  WHERE `langid` = 'haskell';
-UPDATE `language` SET `langid` = 'pas' WHERE `langid` = 'pascal';
-UPDATE `language` SET `langid` = 'pl'  WHERE `langid` = 'perl';
-UPDATE `language` SET `langid` = 'py'  WHERE `langid` = 'python';
+-- extension column below. We must first copy the language row, then
+-- change dependent submissions and events, and finally delete the
+-- old rows.
+INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`)
+  SELECT 'csharp', `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`
+  FROM `language` WHERE `langid` = 'cs';
+INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`)
+  SELECT 'hs', `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`
+  FROM `language` WHERE `langid` = 'haskell';
+INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`)
+  SELECT 'pas', `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`
+  FROM `language` WHERE `langid` = 'pascal';
+INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`)
+  SELECT 'pl', `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`
+  FROM `language` WHERE `langid` = 'perl';
+INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`)
+  SELECT 'py', `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`
+  FROM `language` WHERE `langid` = 'python';
+
+UPDATE `submission` SET `langid` = 'csharp' WHERE `langid` = 'cs';
+UPDATE `submission` SET `langid` = 'hs'     WHERE `langid` = 'haskell';
+UPDATE `submission` SET `langid` = 'pas'    WHERE `langid` = 'pascal';
+UPDATE `submission` SET `langid` = 'pl'     WHERE `langid` = 'perl';
+UPDATE `submission` SET `langid` = 'py'     WHERE `langid` = 'python';
+
+UPDATE `event`      SET `langid` = 'csharp' WHERE `langid` = 'cs';
+UPDATE `event`      SET `langid` = 'hs'     WHERE `langid` = 'haskell';
+UPDATE `event`      SET `langid` = 'pas'    WHERE `langid` = 'pascal';
+UPDATE `event`      SET `langid` = 'pl'     WHERE `langid` = 'perl';
+UPDATE `event`      SET `langid` = 'py'     WHERE `langid` = 'python';
+
+DELETE FROM `language` WHERE `langid` IN ('cs', 'haskell', 'pascal', 'perl', 'python');
 
 UPDATE `problem` SET `special_compare` = 'float' WHERE `special_compare` = 'program.sh';
 
