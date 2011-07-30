@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.0.6 - SVN
--------------------
+Version 3.0.6 - 30 July 2011
+----------------------------
  - Fix static compilation with GHC.
  - Use language extension instead of langid in submit_solution().
 
