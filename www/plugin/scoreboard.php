@@ -24,7 +24,13 @@ $cended   = difftime($now, $cdata['endtime'])  >0;
 // Frozen scoreboard requested:
 if ( isset($_REQUEST['frozen']) ) unset($cdata['unfreezetime']);
 
-$tmp = @genScoreBoard($cdata);
+// parse filter options
+$filter = array();
+foreach( array('affilid', 'country', 'categoryid') as $type ) {
+	if ( !empty($_GET[$type]) ) $filter[$type] = $_GET[$type];
+}
+
+$tmp = @genScoreBoard($cdata, FALSE, $filter);
 if ( ! empty($tmp) ) {
 	$MATRIX  = $tmp['matrix'];
 	$SCORES  = $tmp['scores'];

@@ -11,6 +11,16 @@
 require('init.php');
 $refresh = '30;url=scoreboard.php';
 $title = 'Scoreboard';
+
+// parse filter options
+$filter = array();
+if ( !isset($_GET['clear']) ) {
+	foreach( array('affilid', 'country', 'categoryid') as $type ) {
+		if ( !empty($_GET[$type]) ) $filter[$type] = $_GET[$type];
+	}
+	if ( count($filter) ) $refresh .= '?' . http_build_query($filter);
+}
+
 require(LIBWWWDIR . '/header.php');
 
 // call the general putScoreBoard function from scoreboad.php

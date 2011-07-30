@@ -79,8 +79,9 @@ function addInput($name, $value = '', $size = 0, $maxlength = 0) {
  * values: array ( key => value )  ->  <option value="key">value</option>
  * default: the key that will be selected
  * usekeys: use the keys of the array as option value or not
+ * multi: multiple values are selectable, set to integer to set vertical size
  */
-function addSelect($name, $values, $default = null, $usekeys = false)
+function addSelect($name, $values, $default = null, $usekeys = false, $multi = false)
 {
 	// only one element
 	if ( count($values) == 1 ) {
@@ -89,12 +90,17 @@ function addSelect($name, $values, $default = null, $usekeys = false)
 			htmlspecialchars($v) . "\n";
 	}
 
-	$ret = '<select name="' . htmlspecialchars($name) .
-		'" id="' . htmlspecialchars(strtr($name,'[]','__')) . "\">\n";
+	$size = 5;
+	if ( is_int($multi) ) $size = $multi;
+
+	$ret = '<select name="' . htmlspecialchars($name) . '"' .
+		($multi ? " multiple=\"multiple\" size=\"$size\"" : '') .
+		' id="' . htmlspecialchars(strtr($name,'[]','__')) . "\">\n";
 	foreach ($values as $k => $v) {
 		if ( ! $usekeys ) $k = $v;
 		$ret .= '<option value="' .	htmlspecialchars( $k ) . '"' .
-			(($default == $k) ? ' selected="selected"' : '') . '>' .
+			(($default==$k || in_array($k,$default)) ?
+			 ' selected="selected"' : '') . '>' .
 			htmlspecialchars($v) ."</option>\n";
 	}
 	$ret .= "</select>\n";

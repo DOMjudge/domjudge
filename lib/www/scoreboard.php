@@ -44,8 +44,11 @@ function calcPenaltyTime($solved, $num_submissions)
 /**
  * Generate scoreboard data based on the cached data in table
  * 'scoreboard_{public,jury}'. If the function is called while
- * IS_JURY is defined, the scoreboard will always be current,
- * regardless of the freezetime setting in the contesttable.
+ * IS_JURY is defined or $jury set, the scoreboard will always be
+ * current, regardless of the freezetime setting in the contesttable.
+ *
+ * The $filter argument may contain subarrays 'affilid', 'country',
+ * 'categoryid' of values to filter on these.
  *
  * This function returns an array (scores, summary, matrix)
  * containing the following:
@@ -58,7 +61,7 @@ function calcPenaltyTime($solved, $num_submissions)
  * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid])
  *    probid(num_submissions, num_correct, best_time)
  */
-function genScoreBoard($cdata, $jury = FALSE) {
+function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
 	global $DB;
 
@@ -87,8 +90,13 @@ function genScoreBoard($cdata, $jury = FALSE) {
 	                 LEFT JOIN team_category
 	                        ON (team_category.categoryid = team.categoryid)
 	                 LEFT JOIN team_affiliation
-	                        ON (team_affiliation.affilid = team.affilid)' .
-	                ( $jury ? '' : ' WHERE visible = 1' ) );
+	                        ON (team_affiliation.affilid = team.affilid)
+	                 WHERE TRUE' .
+	                ( IS_JURY ? '' : ' AND visible = 1' ) .
+	                (isset($filter['affilid']) ? ' AND team.affilid IN (%As) ' : ' %_') .
+	                (isset($filter['country']) ? ' AND country IN (%As) ' : ' %_') .
+	                (isset($filter['categoryid']) ? ' AND team.categoryid IN (%As) ' : ' %_'),
+	                @$filter['affilid'], @$filter['country'], @$filter['categoryid']);
 
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
@@ -405,7 +413,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 		// print a summaryline
 		echo '<tbody><tr id="scoresummary" title="#submitted / #correct / fastest time">' .
 			'<td title="total teams">' .
-			jurylink(null,count($teams)) . '</td>' .
+			jurylink(null,count($matrix)) . '</td>' .
 			( $SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
 			  jurylink('team_affiliations.php',count($summary['affils']) . ' / ' .
 					   count($summary['countries'])) . '</td>' : '' ) .
@@ -453,13 +461,23 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
  * This takes care of outputting the headings, start/endtimes and footer
  * of the scoreboard. It calls genScoreBoard to generate the data and
  * renderScoreBoardTable for displaying the actual table.
+ *
+ * Arguments:
+ * $cdata       current contest data, as from 'getCurContest(TRUE)'
+ * $myteamid    set to highlight that teamid in the scoreboard
+ * $static      generate a static scoreboard, e.g. for external use
+ * $filter      set to TRUE to generate filter options, or pass array
+ *              with keys 'affilid', 'country', 'categoryid' pointing
+ *              to array of values to filter on these.
  */
-function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
+function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALSE)
+{
+	global $DB, $pagename;
 
 	if ( empty( $cdata ) ) { echo "<p class=\"nodata\">No active contest</p>\n"; return; }
-	
+
 	$fdata = calcFreezeData($cdata);
-	$sdata = genScoreBoard($cdata);
+	$sdata = genScoreBoard($cdata, FALSE, $filter);
 
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
@@ -485,8 +503,64 @@ function putScoreBoard($cdata, $myteamid = null, $static = FALSE) {
 		echo "</h4>\n\n";
 	}
 
+	if ( $filter!==FALSE ) {
+		?>
+<script type="text/javascript" language="JavaScript">
+<!--
+function collapse(x){
+  var oTemp=document.getElementById("details"+x) ;
+  if (oTemp.style.display=="none") {
+    oTemp.style.display="block";
+  } else {
+    oTemp.style.display="none";
+  }
+}
+-->
+</script>
+
+<table class="scorefilter">
+<tr>
+<td><a href="javascript:collapse('filter')">filter&hellip;</a></td>
+<td><div id="detailsfilter">
+<?php
+		$affilids  = array();
+		$countries = array();
+		$categids  = array();
+		foreach( $sdata['teams'] as $team ) {
+			if ( !empty($team['affilid']) ) {
+				$affilids[]  = $team['affilid'];
+				$countries[] = $team['country'];
+			}
+			$categids[] = $team['categoryid'];
+		}
+
+		$countries = array_unique($countries);
+		sort($countries);
+
+		$affilids = $DB->q('KEYVALUETABLE SELECT affilid, name FROM team_affiliation
+		                    WHERE affilid IN (%As)', $affilids);
+		$categids = $DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category
+		                    WHERE categoryid IN (%As)', $categids);
+
+		echo addForm($pagename, 'get') .
+			addSelect('affilid[]',    $affilids,  @$filter['affilid'],    TRUE,  8) .
+			addSelect('country[]',    $countries, @$filter['country'],    FALSE, 8) .
+			addSelect('categoryid[]', $categids,  @$filter['categoryid'], TRUE,  8) .
+			addSubmit('filter') . addSubmit('clear', 'clear') .
+			addEndForm();
+		?>
+</div></td></tr>
+</table>
+<script type="text/javascript" language="JavaScript">
+<!--
+collapse("filter");
+-->
+</script>
+		<?php
+	}
+
 	renderScoreBoardTable($cdata,$sdata,$myteamid,$static);
-	
+
 	// last modified date, now if we are the jury, else include the
 	// freeze time
 	if( ! IS_JURY && $fdata['showfrozen'] ) {

@@ -13,6 +13,16 @@ require('init.php');
 $title="Scoreboard";
 // set auto refresh
 $refresh="30;url=./";
+
+// parse filter options
+$filter = array();
+if ( !isset($_GET['clear']) ) {
+	foreach( array('affilid', 'country', 'categoryid') as $type ) {
+		if ( !empty($_GET[$type]) ) $filter[$type] = $_GET[$type];
+	}
+	if ( count($filter) ) $refresh .= '?' . http_build_query($filter);
+}
+
 $menu = false;
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');
@@ -26,6 +36,6 @@ if ( ! $isstatic ) {
 }
 
 // call the general putScoreBoard function from scoreboard.php
-putScoreBoard($cdata, null, $isstatic);
+putScoreBoard($cdata, null, $isstatic, $filter);
 
 require(LIBWWWDIR . '/footer.php');
