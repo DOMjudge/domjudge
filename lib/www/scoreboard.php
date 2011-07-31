@@ -504,6 +504,9 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	}
 
 	if ( $filter!==FALSE ) {
+
+		require_once(LIBWWWDIR . '/forms.php');
+
 		?>
 <script type="text/javascript" language="JavaScript">
 <!--
