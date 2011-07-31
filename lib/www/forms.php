@@ -73,6 +73,18 @@ function addInput($name, $value = '', $size = 0, $maxlength = 0) {
 }
 
 /**
+ * Helper function for addSelect
+ */
+function matchSelect($val, $default)
+{
+	if ( is_array($default) ) {
+		return in_array($val, $default);
+	} else {
+		return $val==$default;
+	}
+}
+
+/**
  * Function to create a selectlist from an array.
  * Usage:
  * name: html name attribute
@@ -99,8 +111,7 @@ function addSelect($name, $values, $default = null, $usekeys = false, $multi = f
 	foreach ($values as $k => $v) {
 		if ( ! $usekeys ) $k = $v;
 		$ret .= '<option value="' .	htmlspecialchars( $k ) . '"' .
-			(($default==$k || in_array($k,$default)) ?
-			 ' selected="selected"' : '') . '>' .
+			( matchSelect($k, $default) ? ' selected="selected"' : '') . '>' .
 			htmlspecialchars($v) ."</option>\n";
 	}
 	$ret .= "</select>\n";
