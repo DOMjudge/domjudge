@@ -23,7 +23,7 @@ $(SUBMITCLIENT): CXXFLAGS += $(CURL_CFLAGS)
 # Try to link statically against libcURL to prevent dependency
 # on team workstations:
 ifneq ($(CURL_STATIC),)
-$(SUBMITCLIENT): $(CURL_STATIC)
+$(SUBMITCLIENT): LDFLAGS += $(CURL_STATIC)
 else
 $(SUBMITCLIENT): LDFLAGS += $(CURL_LIBS)
 endif
@@ -53,7 +53,7 @@ $(SUBST_CONFIGS): %: %.in ../paths.mk
 # Explicitly link with C++ compiler, as without any C++ extensions
 # this are recognized as plain C objects.
 $(SUBMIT_PROGS): %$(EXEEXT): %$(OBJEXT) $(SUBMITCOMMONOBJ) $(LIBOBJECTS)
-	$(CXX) $(LDFLAGS) $^ -o $@
+	$(CXX) $^ -o $@ $(LDFLAGS)
 
 $(SUBMIT_PROGS:%=%$(OBJEXT)): %$(OBJEXT): %.cc $(SUBMITHEADERS) $(LIBHEADERS)
 
