@@ -56,6 +56,14 @@ allow from all
 Options FollowSymlinks
 DirectoryIndex index.php
 
+# Disable VCS metadata access, if present
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .svn/ - [F]
+RewriteRule .git/ - [F]
+RewriteRule .gitignore$ - [F]
+</IfModule>
+
 # Disable some evil PHP magic
 <IfModule mod_php5.c>
 php_flag magic_quotes_gpc off
