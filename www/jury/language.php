@@ -52,7 +52,7 @@ if ( IS_ADMIN && !empty($cmd) ):
 		echo "<tr><td>Language ID/ext:</td><td>";
 		$row = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s',
 			$_GET['id']);
-		echo addHidden('keydata[0][langid]', $row['langid']);
+		echo addHidden('data[0][langid]', $row['langid']);
 		echo htmlspecialchars($row['langid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__langid_\">Language ID/ext:</label></td><td>";
