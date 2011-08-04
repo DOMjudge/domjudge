@@ -540,14 +540,15 @@ function collapse(x){
 		$countries = array_unique($countries);
 		sort($countries);
 
-		$affilids = $DB->q('KEYVALUETABLE SELECT affilid, name FROM team_affiliation
+		$affilids = empty($affilids) ? array() : 
+				$DB->q('KEYVALUETABLE SELECT affilid, name FROM team_affiliation
 		                    WHERE affilid IN (%As)', $affilids);
 		$categids = $DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category
 		                    WHERE categoryid IN (%As)', $categids);
 
 		echo addForm($pagename, 'get') .
-			addSelect('affilid[]',    $affilids,  @$filter['affilid'],    TRUE,  8) .
-			addSelect('country[]',    $countries, @$filter['country'],    FALSE, 8) .
+			( empty($affilids) ? "" : addSelect('affilid[]',    $affilids,  @$filter['affilid'],    TRUE,  8) ) .
+			( empty($countries) ? "" : addSelect('country[]',    $countries, @$filter['country'],    FALSE, 8) ) .
 			addSelect('categoryid[]', $categids,  @$filter['categoryid'], TRUE,  8) .
 			addSubmit('filter') . addSubmit('clear', 'clear') .
 			addEndForm();
