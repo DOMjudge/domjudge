@@ -51,7 +51,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 <tr><td><label for="data_0__country_">Country:</label></td>
 <td><?php echo addInput('data[0][country]', @$row['country'], 3, 2)?>
 <a target="_blank"
-href="http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm"><img
+href="http://www.iso.org/iso/country_codes/iso_3166_code_lists/country_names_and_code_elements.htm"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__comments_">Comments:</label></td>
