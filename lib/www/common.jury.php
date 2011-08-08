@@ -216,7 +216,7 @@ function importZippedProblem($zip, $probid = NULL)
 	// submit reference solutions
 	if ( isset($ini_array['allow_submit']) && $ini_array['allow_submit'] ) {
 		// First find all submittable languages:
-		$langs = $DB->q('KEYVALUETABLE SELECT langid, langid FROM language
+		$langs = $DB->q('KEYVALUETABLE SELECT langid AS extension, langid AS langid FROM language
 		                 WHERE allow_submit = 1');
 
 		for ($j = 0; $j < $zip->numFiles; $j++) {
