@@ -34,6 +34,8 @@ Version 3.2.0 - SVN
  - Remove language 'extension' column from SQL database, langid is now
    used for source file extensions.
  - Add multiselect filters on scoreboard with javascript hiding.
+ - Add cascaded deletes to DB tables: most data can now be deleted from
+   the admin webinterface.
 
 Version 3.1.0 - 14 July 2010
 ----------------------------

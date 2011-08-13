@@ -42,9 +42,25 @@ $title = 'Delete from ' . $t;
 require(LIBWWWDIR . '/header.php');
 
 // Check if we can really delete this.
+$warnings = array();
 foreach($k as $key => $val) {
-	if ( $errtable = fk_check ( "$t.$key", $val ) ) {
-		error ( "$t.$key \"$val\" is still referenced in $errtable, cannot delete." );
+	if ( ($tables = fk_check ("$t.$key", $val))!==NULL ) {
+		foreach ( $tables as $table => $action ) {
+			switch ( $action ) {
+			case 'RESTRICT':
+				error("$t.$key \"$val\" is still referenced in $table, cannot delete.");
+			case 'CASCADE':
+				$warnings[] = "cascade to $table";
+				break;
+			case 'SETNULL':
+				$warnings[] = "create dangling references in $table";
+				break;
+			case 'NOCONSTRAINT':
+				break;
+			default:
+				error("$t.$key is referenced in $table with unknown action '$action'.");
+			}
+		}
 	}
 }
 
@@ -74,7 +90,9 @@ if (isset($_POST['confirm'] ) ) {
 	echo msgbox (
 		"Really delete?",
 		"You're about to delete $t <strong>" .
-		htmlspecialchars(join(", ", array_values($k))) . "</strong>.<br /><br />\n\n" .
+		htmlspecialchars(join(", ", array_values($k))) . "</strong>.<br />\n" .
+		(count($warnings)>0 ? "<br /><strong>Warning, this will:</strong><br />" .
+		 implode('<br />', $warnings) : '' ) . "<br /><br />\n" .
 		"Are you sure?<br /><br />\n\n" .
 		( empty($referrer) ? '' : addHidden('referrer', $referrer) ) .
 		addSubmit(" Never mind... ", 'cancel') .

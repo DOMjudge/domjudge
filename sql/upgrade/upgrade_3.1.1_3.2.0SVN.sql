@@ -30,6 +30,66 @@ ALTER TABLE `judging`
 ALTER TABLE `language`
   CHANGE COLUMN `langid` `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string), used for source file extension';
 
+-- Add ON DELETE actions to foreign keys, first delete old ones, since
+-- a change syntax is not available. Also add required keys and DEFAULT NULL.
+ALTER TABLE `clarification`
+  ADD KEY `respid` (`respid`),
+  ADD KEY `probid` (`probid`),
+  DROP FOREIGN KEY `clarification_ibfk_1`;
+ALTER TABLE `clarification`
+  ADD CONSTRAINT `clarification_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `clarification_ibfk_2` FOREIGN KEY (`respid`) REFERENCES `clarification` (`clarid`) ON DELETE SET NULL,
+  ADD CONSTRAINT `clarification_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE SET NULL;
+
+ALTER TABLE `judging`
+  CHANGE COLUMN `judgehost` `judgehost` varchar(50) default NULL COMMENT 'Judgehost that performed the judging',
+  DROP FOREIGN KEY `judging_ibfk_1`,
+  DROP FOREIGN KEY `judging_ibfk_2`,
+  DROP FOREIGN KEY `judging_ibfk_3`;
+ALTER TABLE `judging`
+  ADD CONSTRAINT `judging_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `judging_ibfk_2` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL;
+
+ALTER TABLE `judging_run`
+  ADD KEY `judgingid` (`judgingid`),
+  ADD KEY `testcaseid_2` (`testcaseid`);
+ALTER TABLE `judging_run`
+  ADD CONSTRAINT `judging_run_ibfk_1` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`),
+  ADD CONSTRAINT `judging_run_ibfk_2` FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE CASCADE;
+
+ALTER TABLE `problem`
+  DROP FOREIGN KEY `problem_ibfk_1`;
+ALTER TABLE `problem`
+  ADD CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE;
+
+ALTER TABLE `submission`
+  DROP FOREIGN KEY `submission_ibfk_1`,
+  DROP FOREIGN KEY `submission_ibfk_2`,
+  DROP FOREIGN KEY `submission_ibfk_3`,
+  DROP FOREIGN KEY `submission_ibfk_4`,
+  DROP FOREIGN KEY `submission_ibfk_5`;
+ALTER TABLE `submission`
+  ADD CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE,
+  ADD CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL;
+
+ALTER TABLE `team`
+  DROP FOREIGN KEY `team_ibfk_1`,
+  DROP FOREIGN KEY `team_ibfk_2`;
+ALTER TABLE `team`
+  ADD CONSTRAINT `team_ibfk_1` FOREIGN KEY (`categoryid`) REFERENCES `team_category` (`categoryid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `team_ibfk_2` FOREIGN KEY (`affilid`) REFERENCES `team_affiliation` (`affilid`) ON DELETE SET NULL;
+
+ALTER TABLE `team_unread`
+  ADD KEY `mesgid` (`mesgid`),
+  DROP FOREIGN KEY `team_unread_ibfk_1`;
+ALTER TABLE `team_unread`
+  ADD CONSTRAINT `team_unread_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE,
+  ADD CONSTRAINT `team_unread_ibfk_2` FOREIGN KEY (`mesgid`) REFERENCES `clarification` (`clarid`) ON DELETE CASCADE;
+
 --
 -- Add/remove privileges
 --

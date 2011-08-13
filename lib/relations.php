@@ -27,25 +27,35 @@ $KEYS['testcase'] = array('testcaseid');
 
 
 /** For each table, list all attributes that reference foreign keys
- *  and specify the source of that key. */
+ *  and specify the source of that key. Optionally appended to the
+ *  foreign key is '&<ACTION>' where ACTION can be any of the
+ *  following referential actions on delete of the foreign row:
+ *  CASCADE:  also delete the source row (default if not specified)
+ *  SETNULL:  set source key to NULL
+ *  RESTRICT: disallow delete of foreign row
+ *  NOCONSTRAINT: no constraint is specified, even though the field
+ *                references a foreign key.
+ */
 $RELATIONS = array();
 
 $RELATIONS['clarification'] = array (
 	'cid' => 'contest.cid',
-	'respid' => 'clarification.clarid',
-	'sender' => 'team.login',
-	'recipient' => 'team.login'
+	'respid' => 'clarification.clarid&SETNULL',
+	'sender' => 'team.login&NOCONSTRAINT',
+	'recipient' => 'team.login&NOCONSTRAINT',
+	'probid' => 'problem.probid&SETNULL',
 );
 
 $RELATIONS['contest'] = array();
 
 $RELATIONS['event'] = array (
-	'cid' => 'contest.cid',
-	'clarid' => 'clarification.clarid',
-	'langid' => 'language.langid',
-	'probid' => 'problem.probid',
-	'submitid' => 'submission.submitid',
-	'teamid' => 'team.login'
+	'cid' => 'contest.cid&NOCONSTRAINT',
+	'clarid' => 'clarification.clarid&NOCONSTRAINT',
+	'langid' => 'language.langid&NOCONSTRAINT',
+	'probid' => 'problem.probid&NOCONSTRAINT',
+	'submitid' => 'submission.submitid&NOCONSTRAINT',
+	'judgingid' => 'judging.judgingid&NOCONSTRAINT',
+	'teamid' => 'team.login&NOCONSTRAINT',
 );
 
 $RELATIONS['judgehost'] = array();
@@ -53,18 +63,25 @@ $RELATIONS['judgehost'] = array();
 $RELATIONS['judging'] = array (
 	'cid' => 'contest.cid',
 	'submitid' => 'submission.submitid',
-	'judgehost' => 'judgehost.hostname'
+	'judgehost' => 'judgehost.hostname&SETNULL',
 );
 
 $RELATIONS['judging_run'] = array (
 	'judgingid' => 'judging.judgingid',
-	'testcaseid' => 'testcase.testcaseid'
+	'testcaseid' => 'testcase.testcaseid&RESTRICT',
 );
 
 $RELATIONS['language'] = array();
 
 $RELATIONS['problem'] = array (
-	'cid' => 'contest.cid'
+	'cid' => 'contest.cid',
+);
+
+$RELATIONS['scoreboard_jury'] =
+$RELATIONS['scoreboard_public'] = array (
+	'cid' => 'contest.cid&NOCONSTRAINT',
+	'teamid' => 'team.login&NOCONSTRAINT',
+	'probid' => 'problem.probid&NOCONSTRAINT',
 );
 
 $RELATIONS['submission'] = array (
@@ -72,12 +89,12 @@ $RELATIONS['submission'] = array (
 	'teamid' => 'team.login',
 	'probid' => 'problem.probid',
 	'langid' => 'language.langid',
-	'judgehost' => 'judgehost.hostname'
+	'judgehost' => 'judgehost.hostname&SETNULL',
 );
 
 $RELATIONS['team'] = array (
 	'categoryid' => 'team_category.categoryid',
-	'affilid' => 'team_affiliation.affilid'
+	'affilid' => 'team_affiliation.affilid&SETNULL',
 );
 
 $RELATIONS['team_affiliation'] = array();
@@ -85,32 +102,36 @@ $RELATIONS['team_affiliation'] = array();
 $RELATIONS['team_category'] = array();
 
 $RELATIONS['team_unread'] = array(
-	'teamid' => 'team.login'
-	// can't check mesgid
+	'teamid' => 'team.login',
+	'mesgid' => 'clarification.clarid',
 );
 
 $RELATIONS['testcase'] = array(
-	'probid' => 'problem.probid'
+	'probid' => 'problem.probid',
 );
 
 /**
  * Check whether some primary key is referenced in any
  * table as a foreign key.
  *
- * Returns null or the table name if a match is found.
+ * Returns null or an array "table name => action" where matches are found.
  */
 function fk_check ($keyfield, $value) {
 	global $RELATIONS, $DB;
 
+	$ret = array();
 	foreach ( $RELATIONS as $table => $keys ) {
-		foreach ( $keys as $key => $foreign ) {
+		foreach ( $keys as $key => $val ) {
+			@list( $foreign, $action ) = explode('&', $val);
+			if ( empty($action) ) $action = 'CASCADE';
 			if ( $foreign == $keyfield ) {
 				$c = $DB->q("VALUE SELECT count(*) FROM $table WHERE $key = %s",
 					$value);
-				if ( $c > 0 ) return $table;
+				if ( $c > 0 ) $ret[$table] = $action;
 			}
 		}
 	}
 
+	if ( count($ret) ) return $ret;
 	return null;
 }

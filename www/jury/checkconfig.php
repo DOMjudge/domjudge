@@ -517,8 +517,10 @@ foreach ( $RELATIONS as $table => $foreign_keys ) {
 	}
 	$res = $DB->q('SELECT * FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
 	while ( $row = $res->next() ) {
-		foreach ( $foreign_keys as $foreign_key => $target ) {
-			if ( empty($row[$foreign_key]) ) {
+		foreach ( $foreign_keys as $foreign_key => $val ) {
+			list( $target, $action ) = explode('&', $val);
+			if ( empty($action) ) $action = 'CASCADE';
+			if ( empty($row[$foreign_key]) || $action=='NOCONSTRAINT' ) {
 				continue;
 			}
 			$f = explode('.', $target);

@@ -25,7 +25,11 @@ CREATE TABLE `clarification` (
   `answered` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),
   KEY `cid` (`cid`,`answered`,`submittime`),
-  CONSTRAINT `clarification_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`)
+  KEY `respid` (`respid`),
+  KEY `probid` (`probid`),
+  CONSTRAINT `clarification_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  CONSTRAINT `clarification_ibfk_2` FOREIGN KEY (`respid`) REFERENCES `clarification` (`clarid`) ON DELETE SET NULL,
+  CONSTRAINT `clarification_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Clarification requests by teams and responses by the jury';
 
 --
@@ -99,7 +103,7 @@ CREATE TABLE `judging` (
   `submitid` int(4) unsigned NOT NULL COMMENT 'Submission ID being judged',
   `starttime` datetime NOT NULL COMMENT 'Time judging started',
   `endtime` datetime default NULL COMMENT 'Time judging ended, null = still busy',
-  `judgehost` varchar(50) NOT NULL COMMENT 'Judgehost that performed the judging',
+  `judgehost` varchar(50) default NULL COMMENT 'Judgehost that performed the judging',
   `result` varchar(25) default NULL COMMENT 'Result string as defined in config.php',
   `verified` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Result verified by jury member?',
   `jury_member` varchar(15) default NULL COMMENT 'Name of jury member who verified this',
@@ -109,9 +113,9 @@ CREATE TABLE `judging` (
   KEY `submitid` (`submitid`),
   KEY `judgehost` (`judgehost`),
   KEY `cid` (`cid`),
-  CONSTRAINT `judging_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`),
-  CONSTRAINT `judging_ibfk_2` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`),
-  CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`)
+  CONSTRAINT `judging_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  CONSTRAINT `judging_ibfk_2` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
+  CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Result of judging a submission';
 
 --
@@ -128,7 +132,11 @@ CREATE TABLE `judging_run` (
   `output_diff` text COMMENT 'Diffing the program output and testcase output',
   `output_error` text COMMENT 'Standard error output of the program',
   PRIMARY KEY  (`runid`),
-  UNIQUE KEY `testcaseid` (`judgingid`, `testcaseid`)
+  UNIQUE KEY `testcaseid` (`judgingid`, `testcaseid`),
+  KEY `judgingid` (`judgingid`),
+  KEY `testcaseid_2` (`testcaseid`),
+  CONSTRAINT `judging_run_ibfk_1` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`),
+  CONSTRAINT `judging_run_ibfk_2` FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Result of a testcase run within a judging';
 
 --
@@ -160,7 +168,7 @@ CREATE TABLE `problem` (
   `color` varchar(25) default NULL COMMENT 'Balloon colour to display on the scoreboard',
   PRIMARY KEY  (`probid`),
   KEY `cid` (`cid`),
-  CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`)
+  CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
 
 --
@@ -215,11 +223,11 @@ CREATE TABLE `submission` (
   KEY `probid` (`probid`),
   KEY `langid` (`langid`),
   KEY `judgehost_2` (`judgehost`),
-  CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`),
-  CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`),
-  CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`),
-  CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`),
-  CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`)
+  CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE,
+  CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
+  CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
+  CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All incoming submissions';
 
 --
@@ -241,8 +249,8 @@ CREATE TABLE `team` (
   UNIQUE KEY `name` (`name`),
   KEY `affilid` (`affilid`),
   KEY `categoryid` (`categoryid`),
-  CONSTRAINT `team_ibfk_1` FOREIGN KEY (`categoryid`) REFERENCES `team_category` (`categoryid`),
-  CONSTRAINT `team_ibfk_2` FOREIGN KEY (`affilid`) REFERENCES `team_affiliation` (`affilid`)
+  CONSTRAINT `team_ibfk_1` FOREIGN KEY (`categoryid`) REFERENCES `team_category` (`categoryid`) ON DELETE CASCADE,
+  CONSTRAINT `team_ibfk_2` FOREIGN KEY (`affilid`) REFERENCES `team_affiliation` (`affilid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All teams participating in the contest';
 
 --
@@ -279,8 +287,10 @@ CREATE TABLE `team_unread` (
   `teamid` varchar(15) NOT NULL default '' COMMENT 'Team login',
   `mesgid` int(4) unsigned NOT NULL default '0' COMMENT 'Clarification ID',
   `type` varchar(25) NOT NULL default 'clarification' COMMENT 'Type of message (now always "clarification")',
-  PRIMARY KEY  (`teamid`,`type`,`mesgid`),
-  CONSTRAINT `team_unread_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE
+  PRIMARY KEY (`teamid`,`type`,`mesgid`),
+  KEY `mesgid` (`mesgid`),
+  CONSTRAINT `team_unread_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE,
+  CONSTRAINT `team_unread_ibfk_2` FOREIGN KEY (`mesgid`) REFERENCES `clarification` (`clarid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='List of items a team has not viewed yet';
 
 --
