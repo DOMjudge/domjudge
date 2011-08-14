@@ -7,6 +7,7 @@ Version 3.1.4 - SVN
  - Fix HTML validation error.
  - Fix static compilation with GHC.
  - Use language extension instead of langid in submit_solution().
+ - Fix broken link to ISO country codes.
 
 Version 3.1.3 - 21 December 2010
 --------------------------------
