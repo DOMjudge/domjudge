@@ -1,7 +1,11 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.2.0 - SVN
+Version 3.3.0 - SVN
 -------------------
+
+
+Version 3.2.0 - SVN r3594 (unreleased)
+--------------------------------------
  - Add better support for interactive problems, add sample problem.
  - Change execute() function for more flexible I/O redirection.
  - Add runpipe program for connecting stdin/out of two processes.
