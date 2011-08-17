@@ -103,7 +103,7 @@ if( $res->count() == 0 ) {
 			$runtime = printtimediff($start, strtotime($jud['endtime']));
 		}
 		$link = ' href="submission.php?id=' . (int)$jud['submitid'] .
-			'&jid=' . (int)$jud['judgingid'] . '"';
+			'&amp;jid=' . (int)$jud['judgingid'] . '"';
 		echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
 		echo "<td><a$link>j" . (int)$jud['judgingid'] . '</a></td>';
 		echo "<td><a$link>" . printtime($jud['starttime']) . '</a></td>';
