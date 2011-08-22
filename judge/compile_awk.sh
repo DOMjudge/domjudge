@@ -31,6 +31,11 @@ cat > $DEST <<EOF
 #!/bin/sh
 # Generated shell-script to execute awk interpreter on source.
 
+# Detect dirname and change dir to prevent file not found errors.
+if [ "\${0%/*}" != "\$0" ]; then
+	cd "\${0%/*}"
+fi
+
 exec awk -f $SOURCE
 EOF
 
