@@ -213,7 +213,7 @@ while ( TRUE ) {
 	// to be judged, and also prevents throwing away the query cache every
 	// single time
 	$numopen = $DB->q('VALUE SELECT COUNT(*) FROM submission
-	                   WHERE judgehost IS NULL AND cid = %i AND langid IN (%As)
+	                   WHERE judgemark IS NULL AND cid = %i AND langid IN (%As)
 	                   AND probid IN (%As) AND submittime < %s AND valid = 1',
 	                  $cid, $judgable_lang, $judgable_prob, $contdata['endtime']);
 
@@ -228,7 +228,7 @@ while ( TRUE ) {
 		// us to it
 		$numupd = $DB->q('RETURNAFFECTED UPDATE submission
 				  SET judgehost = %s, judgemark = %s
-				  WHERE judgehost IS NULL AND cid = %i AND langid IN (%As)
+				  WHERE judgemark IS NULL AND cid = %i AND langid IN (%As)
 				  AND probid IN (%As) AND submittime < %s AND valid = 1
 				  LIMIT 1',
 				 $myhost, $mark, $cid, $judgable_lang, $judgable_prob,
