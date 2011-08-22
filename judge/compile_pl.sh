@@ -34,7 +34,7 @@ cat > $DEST <<EOF
 #!/bin/sh
 # Generated shell-script to execute perl interpreter on source.
 
-# Detect dirname and change dir to prevent class not found errors.
+# Detect dirname and change dir to prevent file not found errors.
 if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
