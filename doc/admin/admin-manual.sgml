@@ -486,8 +486,7 @@ supported by any reasonably current browser with JavaScript enabled.
 
 For your convenience, the following command will install needed
 software on the DOMjudge server as mentioned above when using Debian
-GNU/Linux, or one of its derivate distributions. Most systems will
-have the bulk of these packages installed already.
+GNU/Linux, or one of its derivate distributions.
 
 <code>
 apt-get install gcc g++ make libcurl4-gnutls-dev mysql-server \
