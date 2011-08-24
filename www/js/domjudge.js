@@ -157,6 +157,8 @@ function initFileUploads() {
 		var clone = fakeFileUpload.cloneNode(true);
 		x[i].parentNode.appendChild(clone);
 		x[i].relatedElement = clone.getElementsByTagName('input')[0];
+		// stop refresh when clicking a button.
+		x[i].onclick = function() { window.stop(); }
 		x[i].onchange = x[i].onmouseout = function () {
 			if ( this.value == "" ) {
 				this.relatedElement.value = selecttext;
