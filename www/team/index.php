@@ -7,7 +7,8 @@
  */
 
 require('init.php');
-$refresh = '30;url=index.php';
+$refreshtime = 30;
+$refresh = $refreshtime.';url=index.php';
 $title = htmlspecialchars($teamdata['name']);
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
@@ -35,7 +36,7 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 	if ( $submitted ) {
 		echo "<p class=\"submissiondone\">submission done <a href=\"./\" style=\"color: red\">x</a></p>\n\n";
 	} else {
-		echo addForm('upload.php','post',null,'multipart/form-data') .
+		echo addForm('upload.php','post',null,'multipart/form-data', null, ' onreset="resetUploadForm('.$refreshtime .');"') .
 		"<p id=\"submitform\">\n\n" .
 		"<span class=\"fileinputs\">\n\t" .
 		"<input type=\"file\" name=\"code\" id=\"code\" size=\"15\" /> " .
@@ -56,6 +57,8 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 
 		echo addSubmit('submit', 'submit',
 			       "return checkUploadForm();");
+
+		echo addReset('cancel');
 
 		echo "</p>\n</form>\n\n";
 	}

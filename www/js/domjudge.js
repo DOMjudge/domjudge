@@ -137,6 +137,13 @@ function checkUploadForm()
 
 }
 
+function resetUploadForm(refreshtime) {
+	var filebut = document.getElementById("codebutton");
+	var selecttext = "Select file...";
+	filebut.value = selecttext;
+	setTimeout("location.reload(true);",refreshtime*1000);
+}
+
 var W3CDOM = (document.createElement && document.getElementsByTagName);
 
 function initFileUploads() {
