@@ -296,7 +296,9 @@ The flow of an incoming submission is as follows.
       verified.
 <item>If verification is required, a judge inspects the judging. Only
       after it has been approved (marked as <em>verified</em>) will
-      the result be visible outside the jury interface.
+      the result be visible outside the jury interface. This option
+      can be enabled by setting <tt>VERIFICATION_REQUIRED</tt> in
+      <tt>etc/common-config.php</tt>.
 </enum>
 
 <sect1>Submission judging status codes

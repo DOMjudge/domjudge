@@ -111,16 +111,16 @@ paths.mk:
 
 # Configure for running in source tree, not meant for normal use:
 maintainer-conf: configure
-	./configure $(subst 1,-q,$(QUIET)) --prefix=$(PWD) \
-	            --with-domserver_root=$(PWD) \
-	            --with-judgehost_root=$(PWD) \
-	            --with-domjudge_docdir=$(PWD)/doc \
-	            --with-domserver_logdir=$(PWD)/output/log \
-	            --with-judgehost_logdir=$(PWD)/output/log \
-	            --with-domserver_tmpdir=$(PWD)/output/tmp \
-	            --with-judgehost_tmpdir=$(PWD)/output/tmp \
-	            --with-judgehost_judgedir=$(PWD)/output/judging \
-	            --with-domserver_submitdir=$(PWD)/output/submissions \
+	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
+	            --with-domserver_root=$(CURDIR) \
+	            --with-judgehost_root=$(CURDIR) \
+	            --with-domjudge_docdir=$(CURDIR)/doc \
+	            --with-domserver_logdir=$(CURDIR)/output/log \
+	            --with-judgehost_logdir=$(CURDIR)/output/log \
+	            --with-domserver_tmpdir=$(CURDIR)/output/tmp \
+	            --with-judgehost_tmpdir=$(CURDIR)/output/tmp \
+	            --with-judgehost_judgedir=$(CURDIR)/output/judging \
+	            --with-domserver_submitdir=$(CURDIR)/output/submissions \
 	            --enable-submitclient=http,dolstra \
 	            CFLAGS='-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security' \
 	            CXXFLAGS='-g -O2 -Wall -fstack-protector -fPIE -Wformat -Wformat-security' \
@@ -135,11 +135,11 @@ maintainer-install: domserver judgehost docs submitclient \
 # Replace lib{judge,submit}dir with symlink to prevent lots of symlinks:
 	-rmdir $(judgehost_libjudgedir) $(domserver_libsubmitdir)
 	-rm -f $(judgehost_libjudgedir) $(domserver_libsubmitdir)
-	ln -sf $(PWD)/judge  $(judgehost_libjudgedir)
-	ln -sf $(PWD)/submit $(domserver_libsubmitdir)
-	ln -sfn $(PWD)/doc $(domserver_wwwdir)/jury/doc
+	ln -sf $(CURDIR)/judge  $(judgehost_libjudgedir)
+	ln -sf $(CURDIR)/submit $(domserver_libsubmitdir)
+	ln -sfn $(CURDIR)/doc $(domserver_wwwdir)/jury/doc
 	mkdir -p $(judgehost_bindir)
-	ln -sf $(PWD)/judge/runguard $(judgehost_bindir)
+	ln -sf $(CURDIR)/judge/runguard $(judgehost_bindir)
 # Make tmpdir writable for webserver, because judgehost-create-dirs
 # sets wrong permissiones:
 	chmod a+rwx $(domserver_tmpdir)

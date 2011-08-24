@@ -330,6 +330,8 @@ class db
 		$elapsed_ms = round(1000*(($secs2 - $secs) + ($micros2 - $micros)));
 
 		if ( DEBUG & DEBUG_SQL ) {
+			global $DEBUG_NUM_QUERIES;
+			$DEBUG_NUM_QUERIES++;
 			if ( isset($_SERVER['REMOTE_ADDR']) ) {
 				printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>\n",
 				       htmlspecialchars($query));
