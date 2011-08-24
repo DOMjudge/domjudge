@@ -543,7 +543,7 @@ function collapse(x){
 		$affilids = empty($affilids) ? array() : 
 				$DB->q('KEYVALUETABLE SELECT affilid, name FROM team_affiliation
 		                    WHERE affilid IN (%As)', $affilids);
-		$categids = empty($affilids) ? array() :
+		$categids = empty($categids) ? array() :
 				$DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category
 		                    WHERE categoryid IN (%As)', $categids);
 
