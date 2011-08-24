@@ -161,8 +161,11 @@ function initFileUploads() {
 			if ( this.value == "" ) {
 				this.relatedElement.value = selecttext;
 			} else {
-				detectProblemLanguage(this.value);
-				this.relatedElement.value = this.value;
+				var filename = this.value;
+				// Opera prepends a fake fs path: C:\fakepath\. Strip that.
+				if ( filename.indexOf("\\") > 0 ) filename = filename.substr(filename.lastIndexOf("\\")+1);
+				detectProblemLanguage(filename);
+				this.relatedElement.value = filename;
 			}
 		}
 	}
