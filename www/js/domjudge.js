@@ -137,6 +137,13 @@ function checkUploadForm()
 
 }
 
+function resetUploadForm(refreshtime) {
+	var filebut = document.getElementById("codebutton");
+	var selecttext = "Select file...";
+	filebut.value = selecttext;
+	setTimeout("location.reload(true);",refreshtime*1000);
+}
+
 var W3CDOM = (document.createElement && document.getElementsByTagName);
 
 function initFileUploads() {
@@ -157,12 +164,17 @@ function initFileUploads() {
 		var clone = fakeFileUpload.cloneNode(true);
 		x[i].parentNode.appendChild(clone);
 		x[i].relatedElement = clone.getElementsByTagName('input')[0];
+		// stop refresh when clicking a button.
+		x[i].onclick = function() { window.stop(); }
 		x[i].onchange = x[i].onmouseout = function () {
 			if ( this.value == "" ) {
 				this.relatedElement.value = selecttext;
 			} else {
-				detectProblemLanguage(this.value);
-				this.relatedElement.value = this.value;
+				var filename = this.value;
+				// Opera prepends a fake fs path: C:\fakepath\. Strip that.
+				if ( filename.indexOf("\\") > 0 ) filename = filename.substr(filename.lastIndexOf("\\")+1);
+				detectProblemLanguage(filename);
+				this.relatedElement.value = filename;
 			}
 		}
 	}

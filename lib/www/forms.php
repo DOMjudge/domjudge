@@ -130,10 +130,10 @@ function addSubmit($value, $name = null, $onclick = null, $enable = true) {
 }
 /**
  * Form reset button, $value = caption
+ */
 function addReset($value) {
 	return addInputField('reset', null, $value);
 }
- */
 
 /**
  * Textarea form element.
@@ -148,7 +148,7 @@ function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '') {
 /**
  * Make a <form> start-tag.
  */
-function addForm($action, $method = 'post', $id = '', $enctype = '', $charset = '')
+function addForm($action, $method = 'post', $id = '', $enctype = '', $charset = '', $extra = '')
 {
 	if ( $id ) {
 		$id = ' id="'.$id.'"';
@@ -161,7 +161,7 @@ function addForm($action, $method = 'post', $id = '', $enctype = '', $charset = 
 	}
 
 	return '<form action="'. $action .'" method="'. $method .'"'.
-		$enctype . $id . $charset . ">\n";
+		$enctype . $id . $charset . $extra .">\n";
 }
 
 /**

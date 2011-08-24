@@ -3,12 +3,12 @@ DOMjudge Programming Contest Judging System
 Version 3.2.0 - SVN
 -------------------
  - Add better support for interactive problems, add sample problem.
+ - New, redesigned single page "dashboard" team web interface.
  - Change execute() function for more flexible I/O redirection.
  - Add runpipe program for connecting stdin/out of two processes.
  - Rename compare_program.sh to *_wrapper, allow symlinked usage.
  - Add FLOAT command and exponentiation to checktestdata program.
  - Add countdown before contest and timezone to clock.
- - Automatically redirect team to submission list after submit.
  - Add daemon support in C/PHP libraries, use for submit/judgedaemon.
  - Add category to balloons list and button to view only unsent.
  - Lots of small changes to C/C++ sources and build system for better
