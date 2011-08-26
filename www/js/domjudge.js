@@ -172,9 +172,8 @@ function initFileUploads() {
 			} else {
 				var filename = this.value;
 				// Opera prepends a fake fs path: C:\fakepath\. Strip that.
-				if ( filename.indexOf(File.separator) >= 0 ) {
-					filename = filename.substr(filename.lastIndexOf(File.separator)+1);
-				}
+				if ( filename.indexOf("\\") >= 0 ) filename = filename.substr(filename.lastIndexOf("\\")+1);
+				if ( filename.indexOf("/") >= 0 ) filename = filename.substr(filename.lastIndexOf("/")+1);
 				detectProblemLanguage(filename);
 				this.relatedElement.value = filename;
 			}
