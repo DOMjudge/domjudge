@@ -141,10 +141,27 @@ function resetUploadForm(refreshtime) {
 	var filebut = document.getElementById("codebutton");
 	var selecttext = "Select file...";
 	filebut.value = selecttext;
-	setTimeout("location.reload(true);",refreshtime*1000);
+	doReload = true;
+	setTimeout('reloadPage()', refreshtime * 1000);
 }
 
 var W3CDOM = (document.createElement && document.getElementsByTagName);
+
+var doReload = true;
+
+function reloadPage()
+{
+	// interval is in seconds
+	if (doReload) {
+		location.reload(true);
+	}
+}
+
+function initReload(refreshtime)
+{
+	// interval is in seconds
+	setTimeout('reloadPage()', refreshtime * 1000);
+}
 
 function initFileUploads() {
 	if (!W3CDOM) return;
@@ -165,7 +182,7 @@ function initFileUploads() {
 		x[i].parentNode.appendChild(clone);
 		x[i].relatedElement = clone.getElementsByTagName('input')[0];
 		// stop refresh when clicking a button.
-		x[i].onclick = function() { window.stop(); }
+		x[i].onclick = function() { doReload = false; }
 		x[i].onchange = x[i].onmouseout = function () {
 			if ( this.value == "" ) {
 				this.relatedElement.value = selecttext;

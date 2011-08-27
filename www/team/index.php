@@ -7,8 +7,8 @@
  */
 
 require('init.php');
-$refreshtime = 30;
-$refresh = $refreshtime.';url=index.php';
+$refreshtime = 3;
+// $refresh = $refreshtime.';url=index.php';
 $title = htmlspecialchars($teamdata['name']);
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
@@ -22,7 +22,8 @@ echo "\tswitch(ext) {\n";
 foreach($langexts as $ext => $langid) {
 	echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
 }
-echo "\t\tdefault: return '';\n\t}\n}\n";
+echo "\t\tdefault: return '';\n\t}\n}\n\n";
+echo "initReload(" . $refreshtime . ");\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
