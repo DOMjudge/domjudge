@@ -37,6 +37,32 @@ CREATE TABLE `balloon` (
   PRIMARY KEY (`balloonid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Balloons to be handed out';
 
+-- Resize datastructures to fit "arbitrary" large data to satisfy
+-- http://domjudge.a-eskwadraat.nl/trac/ticket/15 for the ICPC CSS spec.
+ALTER TABLE `clarification`
+  CHANGE COLUMN `body` longtext NOT NULL COMMENT 'Clarification text';
+
+ALTER TABLE `event`
+  CHANGE COLUMN `description` longtext NOT NULL COMMENT 'Event description';
+
+ALTER TABLE `judging`
+  CHANGE COLUMN `output_compile` longtext COMMENT 'Output of the compiling the program';
+
+ALTER TABLE `judging_run`
+  CHANGE COLUMN `output_run` longtext COMMENT 'Output of running the program',
+  CHANGE COLUMN `output_diff` longtext COMMENT 'Diffing the program output and testcase output',
+  CHANGE COLUMN `output_error` longtext COMMENT 'Standard error output of the program';
+
+ALTER TABLE `submission`
+  CHANGE COLUMN `sourcecode` longblob NOT NULL COMMENT 'Full source code';
+
+ALTER TABLE `team`
+  CHANGE COLUMN `members` longtext COMMENT 'Team member names (freeform)',
+  CHANGE COLUMN `comments` longtext COMMENT 'Comments about this team';
+
+ALTER TABLE `team_affiliation`
+  CHANGE COLUMN `comments` longtext COMMENT 'Comments';
+
 --
 -- Add/remove privileges
 --
