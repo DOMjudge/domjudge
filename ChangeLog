@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 3.3.0 - SVN
 -------------------
  - Add compile script and test source for language 'bash'.
+ - Fix testing for empty output with strlen (port from ETH tree).
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
