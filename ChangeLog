@@ -36,6 +36,7 @@ Version 3.2.0 - SVN
  - Add multiselect filters on scoreboard with javascript hiding.
  - Add cascaded deletes to DB tables: most data can now be deleted from
    the admin webinterface.
+ - Fix testing for empty output with strlen (port from ETH tree).
 
 Version 3.1.0 - 14 July 2010
 ----------------------------
