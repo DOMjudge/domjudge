@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.2.0 - SVN
--------------------
+Version 3.2.0RC1 - 27 August 2011
+---------------------------------
  - Add better support for interactive problems, add sample problem.
  - New, redesigned single page "dashboard" team web interface.
  - Change execute() function for more flexible I/O redirection.
