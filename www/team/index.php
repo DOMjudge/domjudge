@@ -7,11 +7,14 @@
  */
 
 require('init.php');
-$refreshtime = 30;
-$refresh = $refreshtime.';url=index.php';
 $title = htmlspecialchars($teamdata['name']);
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
+
+// Don't use HTTP meta refresh, but javascript: otherwise we cannot
+// cancel it when the user starts editing the submit form. This also
+// provides graceful degradation without javascript present.
+$refreshtime = 30;
 
 $submitted = @$_GET['submitted'];
 
@@ -22,7 +25,8 @@ echo "\tswitch(ext) {\n";
 foreach($langexts as $ext => $langid) {
 	echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
 }
-echo "\t\tdefault: return '';\n\t}\n}\n";
+echo "\t\tdefault: return '';\n\t}\n}\n\n";
+echo "initReload(" . $refreshtime . ");\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
