@@ -7,11 +7,14 @@
  */
 
 require('init.php');
-$refreshtime = 3;
-// $refresh = $refreshtime.';url=index.php';
 $title = htmlspecialchars($teamdata['name']);
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/forms.php');
+
+// Don't use HTTP meta refresh, but javascript: otherwise we cannot
+// cancel it when the user starts editing the submit form. This also
+// provides graceful degradation without javascript present.
+$refreshtime = 30;
 
 $submitted = @$_GET['submitted'];
 
