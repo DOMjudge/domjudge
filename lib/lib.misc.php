@@ -19,7 +19,7 @@ define('IDENTIFIER_CHARS', '[a-zA-Z0-9_-]');
  * If $sizelimit is true (default), then only limit this to
  * the first 50,000 bytes and attach a note saying so.
  */
-function getFileContents($filename, $sizelimit = true) {
+function getFileContents($filename, $sizelimit = false) {
 
 	if ( ! file_exists($filename) ) {
 		return '';
