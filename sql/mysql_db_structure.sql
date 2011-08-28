@@ -243,6 +243,7 @@ CREATE TABLE `team` (
   `members` text COMMENT 'Team member names (freeform)',
   `room` varchar(15) default NULL COMMENT 'Physical location of team',
   `comments` text COMMENT 'Comments about this team',
+  `judging_last_started` datetime default NULL COMMENT 'Start time of last judging for priorization',
   `teampage_first_visited` datetime default NULL COMMENT 'Time of first teampage view',
   `hostname` varchar(255) default NULL COMMENT 'Teampage first visited from this address',
   PRIMARY KEY  (`login`),

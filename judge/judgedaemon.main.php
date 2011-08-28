@@ -218,21 +218,35 @@ while ( TRUE ) {
 	                  $cid, $judgable_lang, $judgable_prob, $contdata['endtime']);
 
 	$numupd = 0;
-	if ($numopen) {
-		// Generate (unique) random string to mark submission to be judged
-		list($usec, $sec) = explode(" ", microtime());
-		$mark = $myhost.'@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
+	if ( $numopen ) {
+		// Prioritize teams according to last judging time
+		$submitid = $DB->q('MAYBEVALUE SELECT submitid
+		                    FROM submission s
+		                    LEFT JOIN team t ON (s.teamid = t.login)
+		                    WHERE judgemark IS NULL AND cid = %i
+ 		                    AND langid IN (%As) AND probid IN (%As)
+ 		                    AND submittime < %s AND valid = 1
+		                    ORDER BY judging_last_started ASC, submittime ASC
+		                    LIMIT 1',
+		                   $cid, $judgable_lang, $judgable_prob,
+		                   $contdata['endtime']);
 
-		// update exactly one submission with our random string
-		// Note: this might still return 0 if another judgehost beat
-		// us to it
-		$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-				  SET judgehost = %s, judgemark = %s
-				  WHERE judgemark IS NULL AND cid = %i AND langid IN (%As)
-				  AND probid IN (%As) AND submittime < %s AND valid = 1
-				  LIMIT 1',
-				 $myhost, $mark, $cid, $judgable_lang, $judgable_prob,
-				 $contdata['endtime']);
+		if ( $submitid ) {
+			// Generate (unique) random string to mark submission to be judged
+			list($usec, $sec) = explode(" ", microtime());
+			$mark = $myhost.'@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
+
+			// update exactly one submission with our random string
+			// Note: this might still return 0 if another judgehost beat
+			// us to it
+			$numupd = $DB->q('RETURNAFFECTED UPDATE submission
+			                  SET judgehost = %s, judgemark = %s
+			                  WHERE submitid = %i AND judgemark IS NULL',
+			                 $myhost, $mark, $submitid);
+		}
+		// Another judgedaemon beat us to claim this submission, but
+		// there are more left: immediately restart loop without sleeping.
+		if ( $numupd == 0 && $numopen > 1 ) continue;
 	}
 
 	// nothing updated -> no open submissions
@@ -257,8 +271,12 @@ while ( TRUE ) {
 	               judgemark = %s AND judgehost = %s', $mark, $myhost);
 
 	// update the judging table with our ID and the starttime
+	$now = now();
 	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)
-	                     VALUES (%i,%i,%s,%s)', $row['submitid'], $cid, now(), $myhost);
+	                     VALUES (%i,%i,%s,%s)', $row['submitid'], $cid, $now, $myhost);
+	// also update team's last judging start
+	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s',
+	       $now, $row['teamid']);
 
 	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
 	       "($row[teamid]/$row[probid]/$row[langid]), id j$judgingid...");
