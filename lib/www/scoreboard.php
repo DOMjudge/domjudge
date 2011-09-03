@@ -92,7 +92,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	                 LEFT JOIN team_affiliation
 	                        ON (team_affiliation.affilid = team.affilid)
 	                 WHERE TRUE' .
-	                ( IS_JURY ? '' : ' AND visible = 1' ) .
+	                ( $jury ? '' : ' AND visible = 1' ) .
 	                (isset($filter['affilid']) ? ' AND team.affilid IN (%As) ' : ' %_') .
 	                (isset($filter['country']) ? ' AND country IN (%As) ' : ' %_') .
 	                (isset($filter['categoryid']) ? ' AND team.categoryid IN (%As) ' : ' %_'),

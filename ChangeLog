@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.2.0 - SVN
 -------------------
+ - Fix displaying scorerow on teampage also for invisible teams.
 
 Version 3.2.0RC1 - 27 August 2011
 ---------------------------------
