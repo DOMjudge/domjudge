@@ -46,7 +46,7 @@ define('STRICTIPCHECK', false);
 // List of LDAP servers (space separated) to query when using the LDAP
 // authentication method. Secondly, DN to search in, where '&' will be
 // replaced by the authtoken as set in the team's DOMjudge database entry.
-define('LDAP_SERVERS', 'ldap1.example.com ldap2.example.com');
+define('LDAP_SERVERS', 'ldaps://ldap1.example.com/ ldaps://ldap2.example.com/');
 define('LDAP_DNQUERY', 'CN=&,OU=users,DC=example,DC=com');
 
 // Specify here which of the users in htpasswd-jury should have admin 
