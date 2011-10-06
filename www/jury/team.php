@@ -107,11 +107,6 @@ $teamimage   = "../images/teams/"        . urlencode($row['login'])   . ".jpg";
 
 echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 
-if ( is_readable($teamimage) ) {
-	echo '<img id="teampicture" src="' . $teamimage .
-		'" alt="Picture of team ' . htmlspecialchars($row['name']) . '" />';
-}
-
 ?>
 
 <div class="col1"><table>
