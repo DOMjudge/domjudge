@@ -61,7 +61,7 @@ if ( IS_ADMIN && !empty($_GET['cmd']) ):
 <?php
 echo addHidden('cmd', $cmd) .
 	addHidden('table','contest') .
-	addHidden('referrer', @$_GET['referrer']) .
+	addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?'?edited=1':'')) .
 	addSubmit('Save') .
 	addSubmit('Cancel', 'cancel') .
 	addEndForm();
