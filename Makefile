@@ -115,7 +115,9 @@ paths.mk:
 	@exit 1
 
 # Configure for running in source tree, not meant for normal use:
-MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -Wformat -Wformat-security -ansi -pedantic
+MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -D_FORTIFY_SOURCE=2 \
+              -fPIE -Wformat -Wformat-security -ansi -pedantic
+MAINT_LDFLAGS=-fPIE -pie -Wl,-z,relro -Wl,-z,now
 maintainer-conf: configure
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
@@ -132,7 +134,7 @@ maintainer-conf: configure
 	            --enable-submitclient=http,dolstra \
 	            CFLAGS='$(MAINT_CXFLAGS)' \
 	            CXXFLAGS='$(MAINT_CXFLAGS)' \
-	            LDFLAGS='' \
+	            LDFLAGS='$(MAINT_LDFLAGS)' \
 	            $(CONFIGURE_FLAGS)
 
 # Install the system in place: don't really copy stuff, but create
