@@ -146,9 +146,9 @@ struct value_t {
 	mpz_class intval;
 	mpf_class fltval;
 
-	value_t(): type(value_none) {};
-	explicit value_t(mpz_class x): type(value_int), intval(x) {};
-	explicit value_t(mpf_class x): type(value_flt), fltval(x) {};
+	value_t(): type(value_none) {}
+	explicit value_t(mpz_class x): type(value_int), intval(x) {}
+	explicit value_t(mpf_class x): type(value_flt), fltval(x) {}
 
 	operator mpz_class() const;
 	operator mpf_class() const;

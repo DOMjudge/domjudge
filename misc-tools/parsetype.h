@@ -21,9 +21,9 @@ struct parse_t {
 	args_t args;
 	char op;
 
-	parse_t(): val(), args(), op('~') {};
-	parse_t(args_t _args): val(), args(_args), op(' ') {};
-	parse_t(val_t _val, args_t _args): val(_val), args(_args), op(' ') {};
+	parse_t(): val(), args(), op('~') {}
+	parse_t(args_t _args): val(), args(_args), op(' ') {}
+	parse_t(val_t _val, args_t _args): val(_val), args(_args), op(' ') {}
 
 	parse_t(val_t _val, parse_t arg1 = parse_t(),
 	                    parse_t arg2 = parse_t(),
@@ -35,7 +35,7 @@ struct parse_t {
 		if ( arg2.op!='~' ) args.push_back(arg2);
 		if ( arg3.op!='~' ) args.push_back(arg3);
 		if ( arg4.op!='~' ) args.push_back(arg4);
-	};
+	}
 
 	parse_t(char _op, parse_t arg1 = parse_t(),
 	                  parse_t arg2 = parse_t(),
