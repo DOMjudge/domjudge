@@ -61,7 +61,7 @@ if ( IS_ADMIN && !empty($_GET['cmd']) ):
 <?php
 echo addHidden('cmd', $cmd) .
 	addHidden('table','contest') .
-	addHidden('referrer', @$_GET['referrer']) .
+	addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?(strstr(@$_GET['referrer'],'?') === FALSE?'?edited=1':'&edited=1'):'')) .
 	addSubmit('Save') .
 	addSubmit('Cancel', 'cancel') .
 	addEndForm();
@@ -72,6 +72,18 @@ exit;
 endif;
 
 if ( ! $id ) error("Missing or invalid contest id");
+
+if ( isset($_GET['edited']) ) {
+
+	echo addForm('refresh_cache.php', 'get') .
+            msgbox (
+                "Warning: Refresh scoreboard cache",
+		"After changing contest times, it may be necessary to recalculate the cached scoreboards.<br /><br />" .
+		addSubmit('recalculate caches now') 
+		) .
+		addEndForm();
+
+}
 
 
 $data = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $id);
