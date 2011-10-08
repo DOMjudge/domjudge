@@ -523,7 +523,7 @@ function collapse(x){
 
 <table class="scorefilter">
 <tr>
-<td><a href="javascript:collapse('filter')">filter&hellip;</a></td>
+<td><a href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
 <td><div id="detailsfilter">
 <?php
 		$affilids  = array();
