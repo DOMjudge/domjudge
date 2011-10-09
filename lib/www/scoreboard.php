@@ -504,28 +504,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	}
 
 	if ( $filter!==FALSE ) {
-
-		require_once(LIBWWWDIR . '/forms.php');
-
-		?>
-<script type="text/javascript" language="JavaScript">
-<!--
-function collapse(x){
-  var oTemp=document.getElementById("details"+x) ;
-  if (oTemp.style.display=="none") {
-    oTemp.style.display="block";
-  } else {
-    oTemp.style.display="none";
-  }
-}
--->
-</script>
-
-<table class="scorefilter">
-<tr>
-<td><a href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
-<td><div id="detailsfilter">
-<?php
+		
 		$affilids  = array();
 		$countries = array();
 		$categids  = array();
@@ -547,6 +526,30 @@ function collapse(x){
 				$DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category
 		                    WHERE categoryid IN (%As)', $categids);
 
+		if ( count($categids) > 1 || count($countries) > 1 || count($affilids) > 1 ) {
+
+			require_once(LIBWWWDIR . '/forms.php');
+
+		?>
+<script type="text/javascript" language="JavaScript">
+<!--
+function collapse(x){
+  var oTemp=document.getElementById("details"+x) ;
+  if (oTemp.style.display=="none") {
+    oTemp.style.display="block";
+  } else {
+    oTemp.style.display="none";
+  }
+}
+-->
+</script>
+
+<table class="scorefilter">
+<tr>
+<td><a href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
+<td><div id="detailsfilter">
+<?php
+
 		echo addForm($pagename, 'get') .
 			( count($affilids) > 1 ? addSelect('affilid[]',    $affilids,  @$filter['affilid'],    TRUE,  8) : "" ) .
 			( count($countries) > 1 ? addSelect('country[]',    $countries, @$filter['country'],    FALSE, 8) : "" ) .
@@ -562,6 +565,7 @@ collapse("filter");
 -->
 </script>
 		<?php
+		}
 	}
 
 	renderScoreBoardTable($cdata,$sdata,$myteamid,$static);
