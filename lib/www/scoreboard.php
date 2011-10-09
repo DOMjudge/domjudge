@@ -548,9 +548,9 @@ function collapse(x){
 		                    WHERE categoryid IN (%As)', $categids);
 
 		echo addForm($pagename, 'get') .
-			( empty($affilids) ? "" : addSelect('affilid[]',    $affilids,  @$filter['affilid'],    TRUE,  8) ) .
-			( empty($countries) ? "" : addSelect('country[]',    $countries, @$filter['country'],    FALSE, 8) ) .
-			addSelect('categoryid[]', $categids,  @$filter['categoryid'], TRUE,  8) .
+			( count($affilids) > 1 ? addSelect('affilid[]',    $affilids,  @$filter['affilid'],    TRUE,  8) : "" ) .
+			( count($countries) > 1 ? addSelect('country[]',    $countries, @$filter['country'],    FALSE, 8) : "" ) .
+			( count($categids) > 1 ? addSelect('categoryid[]', $categids,  @$filter['categoryid'], TRUE,  8) : "" ) .
 			addSubmit('filter') . addSubmit('clear', 'clear') .
 			addEndForm();
 		?>
