@@ -556,9 +556,7 @@ There are three different methods for installing DOMjudge:
 		writable by the web server for this feature to work.
 		<tag><tt>judgings</tt></tag>
 		location on judgehosts where submissions are tested,
-		each in its own subdirectory. The system needs root
-		access to this directory! (for chroot and mounting of
-		proc-fs).
+		each in its own subdirectory.
 	</descrip>
 
 	This method of installation is the default and probably most
