@@ -305,6 +305,7 @@ DOMjudge discerns three different kinds of hosts:
        and MySQL. Optionally
        these tasks can be further split out to separate machines, but
        that's normally not necessary and not supported out of the box.
+       Also called domserver for brevity.
 <tag>Judgehosts</tag>
        A number of hosts, at least one, that will retrieve
        submitted solutions from the DOMjudge server, compile and run
@@ -337,13 +338,13 @@ The requirements for the deployment of DOMjudge are:
        DOMjudge has been tested a bit under other Linux
        distributions and FreeBSD. We try to adhere to POSIX standards.
 
-<item> (Local) root access on the jury computers for configuring sudo,
+<item> (Local) root access on the domserver and judgehosts for configuring sudo,
        installing some files with restricted permissions
        and for (un)mounting the proc file system when using Oracle (previously Sun) Java.
        See <ref id="security:rootprivs" name="Security: root privileges">
        for more details.
 
-<item> A TCP/IP network which connects all jury and team computers.
+<item> A TCP/IP network which connects all DOMjudge and team computers.
        Extra network security which restricts internet access and
        access to other services (ssh, mail, talk, etc..) is advisable,
        but not provided by this software, see <ref
@@ -539,7 +540,7 @@ There are three different methods for installing DOMjudge:
 </code>
 	This will install each of the <tt>domserver, judgehost,
 	docs</tt> parts in a subdirectory
-	<tt>$HOME/domjudge/domserver</tt> etc. Note that these
+	<tt>$HOME/domjudge/domserver</tt> etc. These
 	subdirectories can be overridden from the defaults with options
 	like <tt>--with-domserver_root=DIR</tt>, see <tt>configure
 	--help</tt> for a complete list. The prefix defaults to
@@ -942,7 +943,7 @@ and will require making changes to the DOMjudge source.
 <p>
 
 For the web interface, you need to have a web server (e.g. Apache)
-installed on the jury system and made sure that PHP correctly works
+installed on the domserver and made sure that PHP correctly works
 with it. Refer to the documentation of your web server and PHP for
 details.
 
@@ -1212,7 +1213,7 @@ resulting <tt>Text_Highlighter-x.y.z</tt> directory to just <tt>Text</tt>.
 <p>
 
 We advise to install an NTP-daemon (Network Time Protocol) to make
-sure the time between jury computer and judgehost (and team computers)
+sure the time between domserver and judgehost (and team computers)
 is in sync.
 
 <sect1>The plugin web interface
@@ -1358,7 +1359,8 @@ other contests. A disabled contest will also not become active.
 
 <tag>judgehost</tag>
 List here the hosts that will be judging the submissions.
-<tt>hostname</tt> is the (short) hostname of a judge computer.
+<tt>hostname</tt> is the (short) hostname of a machine running
+the judgehost part of DOMjudge.
 <tt>active</tt> indicates whether this host should judge incoming
 submissions. <tt>polltime</tt> is an internally used variable to
 detect whether a judgedaemon is running on the host.
@@ -1963,7 +1965,7 @@ daemon when you don't want balloons to be handed out anymore.
 This judging system was developed with security as one of the main
 goals in mind. To implement this rigorously in various aspects
 (restricting team access to others and the internet, restricting
-access to the submitted programs on the jury computers, etc...)
+access to the submitted programs on the domjudge systems, etc...)
 requires root privileges to different parts of the whole contest
 environment. Also, security measures might depend on the environment.
 Therefore we have decided not to implement security measures which are
@@ -1978,7 +1980,7 @@ from those in normal conditions: normally users only have to be
 protected from deliberately harming each other. During a contest we
 also have to restrict users from cooperatively communicating,
 accessing restricted resources (like the internet) and restrict user
-programs running on jury computers.
+programs running on judgehosts.
 
 We expect that chances are small that people are trying to cheat
 during a programming contest: you have to hack the system and make use
@@ -1996,14 +1998,13 @@ find weak spots before the contest.
 
 Internal security of the system relies on users not being able to get
 to any vital data (jury input/output and users' solutions). Data is
-stored in two places: files on the jury account and in the SQL
-database. Files should be protected by preventing permission to the
-relevant directories. Furthermore, the (jury) web interface offers a
-view and allows modification of a lot of sensitive data.
+stored in two places: in files on the DOMjudge system account and in
+the SQL database.
 
-Database access is protected by passwords. The default permissions
-allow connections from <em>all</em> hosts, so make sure you restrict
-this appropriately or choose strong enough passwords.
+Files should be protected by restricting permission to the relevant
+directories. Database access is protected by passwords. The default
+permissions allow connections from <em>all</em> hosts, so make sure you
+restrict this appropriately or choose strong enough passwords.
 
 <em>Note:</em> database passwords are stored in
 <tt>etc/dbpasswords.secret</tt>. This file has to be
@@ -2058,8 +2059,8 @@ calls (which can be obscured and are different per language).
 
 Therefore we decided to tackle this issue by running these programs in
 a environment as restrictive as possible. This is done by setting up a
-minimal chroot environment. For this, root privileges on the judging
-computers and statically compiled programs are needed. By also
+minimal chroot environment. For this, root privileges on the judgehosts
+and statically compiled programs are needed. By also
 limiting all kinds of system resources (memory, processes, time,
 unprivileged user) we protect the system from programs which try to
 hack or could crash the system.  However, a chroot environment does
@@ -2113,18 +2114,18 @@ double-check that it's not accessible.
 The following security issues are <em>not</em> handled by DOMjudge,
 but left to the administrator to set up.
 
-Network traffic between team- and jury-computers and the internet
+Network traffic between team computers, domserver and the internet
 should be limited to what is allowed. Possible ways of enforcing this
 might be: monitor traffic, modify firewall rules on team computers or
 (what we implemented with great satisfaction) put all team computers
 behind a firewalling router.
 
 Solutions are run within a restricted (chroot) environment on the
-judge computers. This however does not restrict network access, so a
+judgehosts. This however does not restrict network access, so a
 team could try to send in a solution that tries to send input testdata
 back to them, access the internet, etc... A solution to this problem
-is to disallow all network traffic for the test user on the judge
-computers. On Linux, this can be accomplished by modifying the
+is to disallow all network traffic for the test user on the judgehosts.
+On Linux, this can be accomplished by modifying the
 iptables, adding a rule like:
 
 <verb>
@@ -2460,9 +2461,9 @@ The submitdaemon needs to run at the domserver, and receive connections
 on a configurable TCP port, default 9147.
 
 Team accounts need to be
-accessible via SSH on the jury computers (a SSH public key
-of the jury account should be installed on all team accounts to
-provide key-based access), and a shared filesystem (e.g. NFS)
+accessible via SSH on the domserver (a SSH public key
+of the DOMjudge system account should be installed on all team accounts
+to provide key-based access), and a shared filesystem (e.g. NFS)
 is needed between the team computers and the domserver.
 Alternatively, another means of
 providing access from the server can be configured, see the file
