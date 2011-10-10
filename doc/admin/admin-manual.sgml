@@ -2420,15 +2420,19 @@ cygwin version 1.7 for support of the complete <tt>netdb.h</tt>
 headers.
 
 
-<sect>Developer information
+<chapt>Developer information
 <label id="appendix:developerinfo">
 <p>
 
 This section contains instructions specifically for those wishing
-to modify the DOMjudge source.
+to modify the DOMjudge source. If you have any questions about
+developing DOMjudge, or if you want to share your changes that
+may be useful to others, please don't hesitate to contact us
+through <htmlurl name="our development mailing list"
+url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">.
 
 
-<sect1>Maintainer mode installation
+<sect>Maintainer mode installation
 <p>
 
 Besides the two modes of installation described in section 
@@ -2446,7 +2450,7 @@ make maintainer-install
 </code>
 Note that these targets have to be executed <em>separately</em>.
 
-<sect1>Bootstrapping a Subversion checkout
+<sect>Bootstrapping a Subversion checkout
 <p>
 
 The installation steps in this document assume that you are using a
@@ -2472,7 +2476,7 @@ When this software is present, bootstrapping can be done by running
 <tt>make dist</tt>, which creates the <tt>configure</tt> script and
 generates documentation from SGML/LaTeX sources. 
 
-<sect1>Makefile structure
+<sect>Makefile structure
 <p>
 
 The Makefiles in the source tree use a recursion mechanism to run make
