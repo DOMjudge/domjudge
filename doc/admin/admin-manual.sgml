@@ -332,7 +332,9 @@ The requirements for the deployment of DOMjudge are:
 <itemize>
 <item> Computers for the domserver and judgehosts must run Linux or a
        Unix variant. This software has been developed mostly under
-       Debian GNU/Linux and has been tested a bit under other Linux
+       Debian GNU/Linux, and the manual adds some specific hints for
+       that, which also apply to Debian derivative distributions like Ubuntu.
+       DOMjudge has been tested a bit under other Linux
        distributions and FreeBSD. We try to adhere to POSIX standards.
 
 <item> (Local) root access on the jury computers for configuring sudo,
@@ -486,7 +488,7 @@ supported by any reasonably current browser with JavaScript enabled.
 
 For your convenience, the following command will install needed
 software on the DOMjudge server as mentioned above when using Debian
-GNU/Linux, or one of its derivate distributions.
+GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
 apt-get install gcc g++ make libcurl4-gnutls-dev mysql-server \
