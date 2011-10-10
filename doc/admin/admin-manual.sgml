@@ -439,7 +439,7 @@ functionality.
        using the default <tt>alert</tt> script.
 </itemize>
 
-Software required for building DOMjudge from distributed sources.
+Software required for building DOMjudge:
 <itemize>
 <item> gcc and g++ with standard libraries. Other compilers and
        libraries might also work: we have successfully compiled
@@ -457,20 +457,6 @@ Software required for building DOMjudge from distributed sources.
        program for advanced checking of input/output data correctness.
        These are optional and can be disabled with the configure
        option <tt>--disable-checktestdata</tt>.
-</itemize>
-
-Additional software required for building DOMjudge from a Subversion
-checkout.
-<itemize>
-<item> The GNU autoconf/automake toolset
-
-<item> Flex and <htmlurl name="bisonc++"
-       url="http://bisoncpp.sourceforge.net/"> for generating the
-       parsing code of the optional <tt>checktestdata</tt> script.
-
-<item> Linuxdoc and Xfig/transfig to build the admin and judge
-       documentation from SGML sources and a LaTeX installation to
-       generate the PDF admin, judge and default team manual.
 </itemize>
 
 <sect1>Requirements for team workstations
@@ -522,12 +508,6 @@ system to be present and can be installed separately. Within the build
 system these parts are referred to as <tt>domserver, judgehost</tt>
 and additionally <tt>docs</tt> for all documentation.
 
-When installing from a Subversion checkout, the configure/build system
-first has to be bootstrapped. This can be done by running <tt>make
-dist</tt>, which creates the <tt>configure</tt> script and generates
-documentation from SGML/LaTeX sources. Note that this requires
-additional software as specified in the
-<ref id="install_config:requirements" name="software requirements">.
 
 There are three different methods for installing DOMjudge:
 <descrip>
@@ -559,7 +539,7 @@ There are three different methods for installing DOMjudge:
 		writable by the web server for this feature to work.
 		<tag><tt>judgings</tt></tag>
 		location on judgehosts where submissions are tested,
-		each in its own subdirectory.
+		each in its own subdirectory. 
 	</descrip>
 
 	This method of installation is the default and probably most
@@ -576,20 +556,9 @@ There are three different methods for installing DOMjudge:
 	PREFIX/bin, /var/log, /tmp, /etc/domjudge</tt>.
 
 <tag>Maintainer install</tag>
-	The last installation method is meant for
-	developers/maintainers of DOMjudge and does an in-place
-	installation within the source tree. This allows one to
-	immediately see effects when modifying code.
-
-	This method requires some special steps which can most easily
-	be run via makefile rules as follows:
-<code>
-make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
-make maintainer-install
-</code>
-	Note that these targets have to be executed
-	<em>separately</em> and the latter requests root privileges
-	via <tt>su</tt>.
+	Meant for those wishing to do development on the DOMjudge
+	source code. See the <ref id="appendix:developerinfo"
+	name="appendix with developer information">.
 </descrip>
 
 After running the <tt>configure</tt> script, the system can be built
@@ -614,29 +583,6 @@ section.
 
 For a list of basic make targets, run <tt>make</tt> in the source root
 directory without arguments.
-
-<sect1>Makefile structure
-<p>
-
-The following information is meant for developers or other people who
-want to make changes to the sources.
-
-The Makefiles in the source tree use a recursion mechanism to run make
-targets within the relevant subdirectories. The recursion is handled
-by the <tt>REC_TARGETS</tt> and <tt>SUBDIRS</tt> variables and the
-recursion step is executed in <tt>Makefile.global</tt>. Any target
-added to the <tt>REC_TARGETS</tt> list will be recursively called in
-all directories in <tt>SUBDIRS</tt>. Moreover, a local variant of the
-target with <tt>-l</tt> appended is called after recursing into the
-subdirectories, so recursion is depth-first.
-
-The targets <tt>dist, clean, distclean, maintainer-clean</tt> are
-recursive by default, which means that these call their local
-<tt>-l</tt> variants in all directories containing a Makefile. This
-allows for true depth-first traversal, which is necessary to correctly
-run the <tt>*clean</tt> targets: otherwise e.g. <tt>paths.mk</tt> will
-be deleted before subdirectory <tt>*clean</tt> targets are called that
-depend on information in it.
 
 <sect>Configuration
 <p>
@@ -2472,6 +2418,81 @@ providing access from the server can be configured, see the file
 To build the command line client under Windows, you need to have at least Windows XP and
 cygwin version 1.7 for support of the complete <tt>netdb.h</tt>
 headers.
+
+
+<sect>Developer information
+<label id="appendix:developerinfo">
+<p>
+
+This section contains instructions specifically for those wishing
+to modify the DOMjudge source.
+
+
+<sect1>Maintainer mode installation
+<p>
+
+Besides the two modes of installation described in section 
+<ref id="install_config:installsystem" name="Installation system">,
+DOMjudge provides a special maintainer mode installation.
+This method does an in-place installation within the source
+tree. This allows one to immediately see effects when modifying
+code.
+
+This method requires some special steps which can most easily
+be run via makefile rules as follows:
+<code>
+make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
+make maintainer-install
+</code>
+Note that these targets have to be executed
+<em>separately</em> and the latter requests root privileges
+via <tt>su</tt>.
+
+<sect1>Bootstrapping a Subversion checkout
+<p>
+
+The installation steps in this document assume that you are using a
+downloaded tarball from the DOMjudge website. If you want to install
+from a Subversion checkout, because you want to use the bleeding edge
+code or consider to send a patch to the developers, the
+configure/build system first has to be bootstrapped.
+
+This requires
+additional software to be installed:
+<itemize>
+<item> The GNU autoconf/automake toolset
+
+<item> Flex and <htmlurl name="bisonc++"
+       url="http://bisoncpp.sourceforge.net/"> for generating the
+       parsing code of the optional <tt>checktestdata</tt> script.
+
+<item> Linuxdoc and Xfig/transfig to build the admin and judge
+       documentation from SGML sources and a LaTeX installation to
+       generate the PDF admin, judge and default team manual.
+</itemize>
+When this software is present, bootstrapping can be done by running
+<tt>make dist</tt>, which creates the <tt>configure</tt> script and
+generates documentation from SGML/LaTeX sources. 
+
+<sect1>Makefile structure
+<p>
+
+The Makefiles in the source tree use a recursion mechanism to run make
+targets within the relevant subdirectories. The recursion is handled
+by the <tt>REC_TARGETS</tt> and <tt>SUBDIRS</tt> variables and the
+recursion step is executed in <tt>Makefile.global</tt>. Any target
+added to the <tt>REC_TARGETS</tt> list will be recursively called in
+all directories in <tt>SUBDIRS</tt>. Moreover, a local variant of the
+target with <tt>-l</tt> appended is called after recursing into the
+subdirectories, so recursion is depth-first.
+
+The targets <tt>dist, clean, distclean, maintainer-clean</tt> are
+recursive by default, which means that these call their local
+<tt>-l</tt> variants in all directories containing a Makefile. This
+allows for true depth-first traversal, which is necessary to correctly
+run the <tt>*clean</tt> targets: otherwise e.g. <tt>paths.mk</tt> will
+be deleted before subdirectory <tt>*clean</tt> targets are called that
+depend on information in it.
 
 
 </report>
