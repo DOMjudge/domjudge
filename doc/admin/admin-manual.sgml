@@ -2444,9 +2444,7 @@ be run via makefile rules as follows:
 make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
 make maintainer-install
 </code>
-Note that these targets have to be executed
-<em>separately</em> and the latter requests root privileges
-via <tt>su</tt>.
+Note that these targets have to be executed <em>separately</em>.
 
 <sect1>Bootstrapping a Subversion checkout
 <p>
