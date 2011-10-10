@@ -263,7 +263,7 @@ Optionally:
        or use the balloon web interface.
 <item> Setup the Java chroot environment on the judgehosts to use Java with chroot:<newline>
        <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
-       <tt>$EDITOR judge/chroot-startstop.sh</tt><newline>
+       <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
        and add the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
@@ -493,7 +493,8 @@ apt-get install gcc g++ make libcurl4-gnutls-dev mysql-server \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql php-geshi \
 	ntp sudo procps sharutils \
 	phpmyadmin xsltproc libboost-regex-dev libgmp3-dev \
-	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra
+	linuxdoc-tools transfig texlive-latex-recommended texlive-latex-extra \
+	texlive-fonts-recommended
 </code>
 
 On a judgehost, the following should be sufficient. The last line shows some
@@ -502,7 +503,7 @@ and Pascal; change the list as appropriate.
 
 <code>
 apt-get install make sudo php5-cli php5-mysql ntp xsltproc procps sharutils \
-	gcc g++ gcj openjdk-6-jre-headless ghc fp-compiler
+	gcc g++ gcj openjdk-6-jre-headless openjdk-6-jdk ghc fp-compiler
 </code>
 
 <sect>Installation system
