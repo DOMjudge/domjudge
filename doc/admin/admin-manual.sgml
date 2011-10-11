@@ -2300,7 +2300,8 @@ is handled. Having a shared chat/IM channel may help when unexpected issues
 arise.
 
 Scoreboard: by default DOMjudge presents all teams in the same scoreboard.
-Per-site rankings are not currently possible. <!-- FIXME -->
+Per-site scoreboards can be implemented either by using team categories or
+team affiliations in combination with the scoreboard filtering option.
 
 
 <chapt>DOMjudge and the ICPC validator interface standard <label id="validator">
