@@ -61,11 +61,6 @@
 	width: 93px; height: 196px;
 }
 
-#teampicture {
-	position: absolute; right: 2ex; top: 7ex;
-	width: 35%;
-}
-
 img.picto { width: 16px; height: 16px; }
 img.smallpicto { width: 11px; height: 11px; }
 img.helpicon { cursor: help; }
