@@ -93,6 +93,16 @@ AuthUserFile @domserver_etcdir@/htpasswd-jury
 #php_value memory_limit        32M
 #</IfModule>
 
+# As an alternative to htpasswd files, you can also opt
+# for one of the many Apache authentication modules, e.g.
+# LDAP, CAS, SAML (Shibboleth), etc.
+# An LDAP example could look like this:
+#   AuthType Basic
+#   AuthBasicProvider ldap
+#   AuthName "DOMjudge Jury Interface"
+#   AuthLDAPURL "ldaps://ldap.uvt.nl/o=Universiteit van Tilburg,c=NL"
+#   Require johndoe janedoe jackbauer
+
 </Directory>
 
 # Optionally enable IP-restrictions for teams, recommended if you know the

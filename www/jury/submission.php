@@ -241,7 +241,7 @@ if ( isset($jid) )  {
 			echo ', by ' . htmlspecialchars($jud['jury_member']) . '; ' .
 			    addSubmit('unclaim', 'unclaim') . ' or ';
 		}
-		echo addSubmit('claim', 'claim') . ' as ' . addJuryMemberSelect($jury_member) .
+		echo addSubmit('claim', 'claim') .
 		    addEndForm();
 	}
 
@@ -270,7 +270,6 @@ if ( isset($jid) )  {
 
 			if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
 				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
-				if ( $val ) echo ' by ' . addJuryMemberSelect($jury_member);
 				echo "</p>" . addEndForm();
 			} else {
 				echo "</p>\n";

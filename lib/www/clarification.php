@@ -45,12 +45,13 @@ function putClar($clar)
 			'</span>: ' . htmlspecialchars($clar['fromname']);
 	} else {
 		$from = 'Jury';
+		if ( IS_JURY ) $from .= ' (' . htmlspecialchars($clar['jury_member']) . ')';
 	}
 	if ( $clar['recipient'] && $from == 'Jury' ) {
 		$to = '<span class="teamid">' . htmlspecialchars($clar['recipient']) .
 			'</span>: ' . htmlspecialchars($clar['toname']);
 	} else {
-		$to = ( $from == 'Jury' ) ? 'All' : 'Jury' ;
+		$to = ( $clar['sender'] ) ? 'Jury' : 'All';
 	}
 
 	echo "<table>\n";

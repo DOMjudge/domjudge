@@ -19,12 +19,6 @@ require(LIBWWWDIR . '/clarification.php');
 
 echo "<h1>Clarifications</h1>\n\n";
 
-echo addForm('clarifications.php') .
-	'<p>Claim submissions/clarifications as ' .
-	addJuryMemberSelect($jury_member) .
-	addSubmit('change') . "</p>" .
-	addEndForm() . "\n";
-
 echo "<p><a href=\"clarification.php\">Send Clarification</a></p>\n";
 echo "<p><a href=\"#newrequests\">View New Clarification Requests</a></p>\n";
 echo "<p><a href=\"#oldrequests\">View Old Clarification Requests</a></p>\n";

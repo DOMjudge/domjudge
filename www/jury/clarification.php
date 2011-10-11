@@ -39,7 +39,7 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 	if ( $req['answered'] ) {
 		warning("Cannot claim this clarification: clarification already answered.");
 	} else if ( empty($jury_member) && isset($_REQUEST['claim']) ) {
-		warning("Cannot claim this clarification: no jury_member specified.");
+		warning("Cannot claim this clarification: no jury_member found.");
 	} else {
 		if ( !empty($req['jury_member']) && isset($_REQUEST['claim']) ) {
 			warning("Submission claimed and previous owner " .
@@ -146,7 +146,7 @@ if ( !$req['answered'] ) {
 		echo ', by ' . htmlspecialchars($req['jury_member']) . '; ' .
 		    addSubmit('unclaim', 'unclaim') . ' or ';
 	}
-	echo addSubmit('claim', 'claim') . ' as ' . addJuryMemberSelect($jury_member) .
+	echo addSubmit('claim', 'claim') .
 	    addEndForm();
 }
 

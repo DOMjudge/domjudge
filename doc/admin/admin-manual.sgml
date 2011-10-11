@@ -219,7 +219,7 @@ On the domserver host:
 
 <item> Check that the web interface works (/team, /public and /jury)
        and check that the jury interface is password protected.
-       Optionally add (more) users to <tt>etc/htpasswd-{jury,plugin}</tt>.
+       Add individual user accounts for jury members to <tt>etc/htpasswd-jury</tt>.
 <item> Add useful contest data through the jury web interface or with
        phpMyAdmin.
 <item> Run the config checker in the jury web interface.
@@ -852,7 +852,7 @@ It may be desirable or even necessary to fine tune some MySQL default settings:
 connection caching by Apache threads. 1000 is more appropriate.
 <item><tt>max_allowed_packet</tt>: The default of 16MB might be too
 low when using large testcases. This should be changed both in the
-mysql server and client configuration.
+MySQL server and client configuration.
 <item><tt>skip-networking</tt> or <tt>bind-address</tt>: By default MySQL
 only listens on a local socket, but judgehosts need to connect remotely to
 it. When enabling remote connections, you may want to limit it to only the
@@ -905,13 +905,34 @@ To configure the web server for DOMjudge, use the Apache configuration
 snippet from <tt>etc/apache.conf</tt>. It contains examples for
 configuring the DOMjudge pages with an alias directive, or as a
 virtualhost, optionally with SSL; it also contains PHP and security
-settings. The Apache configuration snippet by default includes HTTP
-basic-auth authentication to the jury and plugin interfaces. A default
-user <tt>domjudge_jury</tt> with password equal to that in
-<tt>etc/dbpasswords.secret</tt> is set for the jury interface.
-Additional users can be added with the <tt>htpasswd</tt> program to
-either file <tt>etc/htpasswd-{jury,plugin}</tt>.
-Reload the web server for changes to take effect.
+settings. Reload the web server for changes to take effect.
+
+
+<sect1>Jury authentication
+<p>
+
+Protection of the jury (and plugin) interface happens through HTTP
+basic-auth configured in Apache. A default user <tt>domjudge_jury</tt>
+with password equal to that in <tt>etc/dbpasswords.secret</tt> is
+set at installation. You should add accounts for the individual users
+(admins, judges) that will access the jury interface. These users
+can be added with the <tt>htpasswd</tt> program to
+<tt>etc/htpasswd-jury</tt>:
+<code>
+htpasswd [<path to etc>]/htpasswd-jury <username>
+</code>
+
+Individual judge accounts are needed because actions in the jury
+interface, e.g. who claimed or verified a submission, are tied to
+this user.
+
+Apache supports many types of authentication backends, so it's
+also possible to use LDAP, CAS, SAML (Shibboleth) or any other means,
+as long as this results in a username being presented to DOMjudge.
+The included <tt>apache.conf</tt> has examples.
+
+For team authentication, see <ref id="contestsetup:authentication"
+name="the relevant section in Contest Setup">.
 
 See also section <ref id="security:webprivs" name="Security: webserver
 privileges"> for some details on file permissions for the
