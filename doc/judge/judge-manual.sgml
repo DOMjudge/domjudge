@@ -372,7 +372,7 @@ explaining what has been rejudged and why.
 <sect1>Ignored submissions
 <p>
 Finally, there is the option to <em>ignore</em> specific submissions
-using the button on the submission page. When a submissions is being
+using the button on the submission page. When a submission is being
 ignored, it is as if was never submitted: it is not visible to the
 team that sent it nor on the scoreboard. It will show striked through
 in the jury submissions list though. This can be used to effectively
