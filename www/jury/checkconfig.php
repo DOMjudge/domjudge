@@ -19,18 +19,6 @@ requireAdmin();
 $time_start = microtime(TRUE);
 
 ?>
-<script type="text/javascript" language="JavaScript">
-<!--
-function collapse(x){
-  var oTemp=document.getElementById("detail"+x) ;
-  if (oTemp.style.display=="none") {
-    oTemp.style.display="block";
-  } else {
-    oTemp.style.display="none";
-  }
-}
-// -->
-</script>
 
 <h1>Config Checker</h1>
 

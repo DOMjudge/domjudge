@@ -531,23 +531,11 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 			require_once(LIBWWWDIR . '/forms.php');
 
 		?>
-<script type="text/javascript" language="JavaScript">
-<!--
-function collapse(x){
-  var oTemp=document.getElementById("details"+x) ;
-  if (oTemp.style.display=="none") {
-    oTemp.style.display="block";
-  } else {
-    oTemp.style.display="none";
-  }
-}
--->
-</script>
 
 <table class="scorefilter">
 <tr>
 <td><a href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
-<td><div id="detailsfilter">
+<td><div id="detailfilter">
 <?php
 
 		echo addForm($pagename, 'get') .
