@@ -7,6 +7,11 @@ Version 3.2.0 - SVN
  - Fix bug with language extension in uploading problem zipfiles.
  - Warn to recalculate scoreboard cache after contesttime changes.
  - Add icon for scoreboard filter.
+ - Use POSIX compliant cp option -P instead of -d in judgedaemon.
+ - Remove teampicture from jury teampage.
+ - Only display scoreboard filter options if there's something to
+   choose.
+ - Various documentation improvements.
 
 Version 3.2.0RC1 - 27 August 2011
 ---------------------------------
