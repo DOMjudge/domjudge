@@ -56,7 +56,7 @@ if ( (SHOW_COMPILE == 2) ||
 
 	echo "<h2>Compilation output</h2>\n\n";
 
-	if(@$row['output_compile']) {
+	if ( strlen(@$row['output_compile']) > 0 ) {
 		echo "<pre class=\"output_text\">\n".
 			htmlspecialchars(@$row['output_compile'])."\n</pre>\n\n";
 

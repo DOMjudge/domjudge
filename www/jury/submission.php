@@ -299,7 +299,7 @@ if ( isset($jid) )  {
 
 	echo "<h3 id=\"compile\">Compilation output</h3>\n\n";
 
-	if ( @$jud['output_compile'] ) {
+	if ( strlen(@$jud['output_compile']) > 0 ) {
 		echo "<pre class=\"output_text\">".
 			htmlspecialchars($jud['output_compile'])."</pre>\n\n";
 	} elseif ( $jud['output_compile']===NULL ) {
@@ -376,7 +376,7 @@ if ( isset($jid) )  {
 		}
 
 		echo "<h5>Diff output</h5>\n";
-		if ( @$run['output_diff'] ) {
+		if ( strlen(@$run['output_diff']) > 0 ) {
 			echo "<pre class=\"output_text\">";
 			echo parseDiff($run['output_diff']);
 			echo "</pre>\n\n";
@@ -385,7 +385,7 @@ if ( isset($jid) )  {
 		}
 
 		echo "<h5>Error output (info/debug/errors)</h5>\n";
-		if ( @$run['output_error'] ) {
+		if ( strlen(@$run['output_error']) > 0 ) {
 			echo "<pre class=\"output_text\">".
 			    htmlspecialchars($run['output_error'])."</pre>\n\n";
 		} else {
