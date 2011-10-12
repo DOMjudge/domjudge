@@ -3,6 +3,8 @@ DOMjudge Programming Contest Judging System
 Version 3.1.5 - SVN
 -------------------
  - Fix testing for empty output with strlen (port from ETH tree).
+ - Add missing SQL select privilege on submission.valid column.
+   [Note: upgrade the SQL database with 'dj-setup-database upgrade']
 
 Version 3.1.4 - 27 August 2011
 ------------------------------
