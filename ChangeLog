@@ -5,6 +5,7 @@ Version 3.3.0 - SVN
  - Add compile script and test source for language 'bash'.
  - Prioritize to team's last judging (port from ETH tree).
  - Fix testing for empty output with strlen (port from ETH tree).
+ - Update M4 macro's from upstream, fixing some problems.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
