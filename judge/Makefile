@@ -36,9 +36,9 @@ install-judgehost:
 		compile*.sh testcase_run.sh chroot-startstop.sh \
 		run run_wrapper run_boolfind runjury_boolfind \
 		compare compare_wrapper compare_float compare_boolfind \
-		check_diff.sh check_float check_boolfind sh-static \
+		check_diff.sh check_float check_boolfind sh-static
+	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libjudgedir) parse_result.xslt \
 		judgedaemon.main.php
-	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libjudgedir) parse_result.xslt
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) judgedaemon
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) runguard runpipe
 
