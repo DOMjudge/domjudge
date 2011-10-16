@@ -180,6 +180,7 @@ AC_ARG_ENABLE(fhs,AS_HELP_STRING([--enable-fhs],
 
 if test "x$enable_fhs" = xyes ; then
 	AC_SUBST(fhs_enabled,           yes)
+	AC_SUBST(domserver_root,        '')
 	AC_SUBST(domserver_bindir,      $bindir)
 	AC_SUBST(domserver_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_wwwdir,      $datadir/${PACKAGE_TARNAME}/www)
@@ -192,6 +193,7 @@ if test "x$enable_fhs" = xyes ; then
 	AC_SUBST(domserver_tmpdir,      /tmp)
 	AC_SUBST(domserver_submitdir,   $localstatedir/lib/${PACKAGE_TARNAME}/submissions)
 
+	AC_SUBST(judgehost_root,        '')
 	AC_SUBST(judgehost_bindir,      $bindir)
 	AC_SUBST(judgehost_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_libdir,      $libdir/${PACKAGE_TARNAME})
