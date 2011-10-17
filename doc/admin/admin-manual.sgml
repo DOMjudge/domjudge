@@ -1188,7 +1188,7 @@ is in sync.
 
 Next to the public, team and jury web interfaces, DOMjudge also
 provides a <em>plugin</em> web interface. This web interface is still in
-development so subject to change. The interface provides contest data
+beta/development so subject to change. The interface provides contest data
 from DOMjudge in XML format and is meant to provide external programs
 (plugins) with data on the contest. This allows for all kinds of
 extensions beyond the core functionality of DOMjudge such as providing
@@ -1216,6 +1216,12 @@ subdirectory of the DOMjudge web interface, both in XML format:
 </descrip>
 See these pages or the accompanying <tt>xsd</tt>-files for the exact
 structure.
+
+A nice example plugin is <url name="DOMjura" url="https://github.com/nickygerritsen/DOMjura">
+by Nicky Gerritsen. This provides a graphical resolver of the
+scoreboard from the freeze time until end of contest and can be used
+during the final prize ceremony. It is a reimplementation of the
+resolver made by Tim deBoer for the ICPC World Finals.
 
 <sect>Upgrading
 <p>
