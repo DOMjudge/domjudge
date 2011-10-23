@@ -6,6 +6,7 @@ Version 3.3.0 - SVN
  - Prioritize to team's last judging (port from ETH tree).
  - Fix testing for empty output with strlen (port from ETH tree).
  - Update M4 macro's from upstream, fixing some problems.
+ - Fix configure script to allow subdir customization in FHS mode.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
