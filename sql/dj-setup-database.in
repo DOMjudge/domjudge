@@ -120,7 +120,7 @@ remove_db_users()
 			'$user'@'%', '$user'@'localhost';"
 	done
 	echo "FLUSH PRIVILEGES;"
-	) | mysql
+	) | mysql -f
 }
 
 ### Script starts here ###
