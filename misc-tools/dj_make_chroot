@@ -20,7 +20,7 @@ CHROOTDIR=$1
 ARCH=$2
 
 # List of possible architectures to install chroot for:
-ARCHLIST="alpha,amd64,arm,armel,hppa,i386,ia64,mips,mipsel,powerpc,s390,sparc"
+ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 
 # Debian packages to include during bootstrap process (comma separated):
 INCLUDEDEBS=""
@@ -81,7 +81,7 @@ if [ ! -x /usr/sbin/debootstrap ]; then
 		mkdir "$CHROOTDIR/debootstrap"
 		cd "$CHROOTDIR/debootstrap"
 
-		DEBOOTDEB="debootstrap_1.0.10lenny1_all.deb"
+		DEBOOTDEB="debootstrap_1.0.26+squeeze1_all.deb"
 		wget "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
 
 		ar -x "$DEBOOTDEB"
@@ -103,7 +103,7 @@ fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 /usr/sbin/debootstrap $INCLUDEOPT $EXCLUDEOPT \
-	--variant=minbase --arch "$ARCH" lenny "$CHROOTDIR" "$DEBMIRROR"
+	--variant=minbase --arch "$ARCH" squeeze "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
@@ -111,9 +111,9 @@ cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
 
-# Stable (lenny)
-deb $DEBMIRROR			lenny		main
-deb http://security.debian.org	lenny/updates	main
+# Stable (squeeze)
+deb $DEBMIRROR			squeeze		main
+deb http://security.debian.org	squeeze/updates	main
 
 # Testing
 #deb $DEBMIRROR			testing		main
