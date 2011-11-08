@@ -373,29 +373,25 @@ flushresults();
 
 // SUBMISSIONS, JUDINGS
 
-if ( ENABLE_CMDSUBMIT_SERVER ) {
-	result('submissions and judgings', 'Commandline submit',
-		'O', 'No issues found.');
+$submres = 'O';
+$submnote = 'Websubmit ' . ( ENABLE_WEBSUBMIT_SERVER ? 'en':'dis' ) ."abled.\n".
+	 'Submitserver ' . ( ENABLE_CMDSUBMIT_SERVER ? 'en':'dis' ) ."abled.\n\n";
+
+if ( ! ENABLE_WEBSUBMIT_SERVER && ! ENABLE_CMDSUBMIT_SERVER ) {
+	$submres = 'E';
+	$submnote .= 'Both Websubmit and Submitserver disabled. No way to make submissions.';
 } else {
-	result('submissions and judgings', 'Commandline submit',
-		(ENABLE_WEBSUBMIT_SERVER ? 'W' : 'E'),
-		'Commandline submit is disabled');
+	if ( ENABLE_WEBSUBMIT_SERVER && ! is_writable(SUBMITDIR) ) {
+		$submres = 'W';
+		$submnote .= 'The webserver has no write access to SUBMITDIR (' .
+			htmlspecialchars(SUBMITDIR) .
+			'), and thus will not be able to make backup copies of submissions.';
+	} else {
+		$submnote .= 'No issues found.';
+	}
 }
 
-if ( ENABLE_WEBSUBMIT_SERVER ) {
-	if ( ! is_writable(SUBMITDIR) ) {
-		result('submissions and judgings', 'Websubmit', 'W',
-			'The webserver has no write access to SUBMITDIR (' .
-			htmlspecialchars(SUBMITDIR) .
-			'), and thus will not be able to make backup copies of submissions.');
-	} else {
-		result('submissions and judgings', 'Websubmit',
-			'O', 'No issues found.');
-	}
-} else {
-	result('submissions and judgings', 'Websubmit',
-		(ENABLE_WEBSUBMIT_SERVER ? 'W' : 'E'), 'Websubmit is disabled');
-}
+result('submissions and judgings', 'Submit method', $submres, $submnote);
 
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
