@@ -12,11 +12,17 @@ AC_DEFUN([AX_WITH_COMMENT], [
 	AC_ARG_WITH([ax_comment_$1],[$2],[],[])
 	])
 
+AC_SUBST(fhs_enabled,[])
+AC_ARG_ENABLE(fhs,AS_HELP_STRING([--enable-fhs],
+[use FHS directories (default: no), see below under "Optional
+ Packages" for path configuration when FHS is disabled.]),
+[if test "x$enableval" != xno ; then AC_SUBST(fhs_enabled,yes) fi])
+
 if test "x$prefix" = xNONE; then
-	if test "x$enable_fhs" = x; then
-		prefix="/opt/domjudge"
-	else
+	if test "x$fhs_enabled" = xyes ; then
 		prefix=$ac_default_prefix
+	else
+		prefix="/opt/domjudge"
 	fi
 fi
 
@@ -131,52 +137,11 @@ else
 fi
 # }}}
 
-# {{{ non-FHS directory structure (the default)
-# This is a dirty hack to allow non-standard pathname configuration
-# within the autoconf framework.
-AC_DEFUN([AX_PATH], [
-	AC_ARG_WITH($1,[  --with-$1=DIR   	(default: $2)],
-		[AC_SUBST($1, $withval)],
-		[AC_SUBST($1, $2)])
-	])
-
-AX_WITH_COMMENT(2,[  ])
-AX_WITH_COMMENT(3,[Fine tuning of installation when FHS is disabled (the default):])
-AX_PATH(domserver_root,         [$prefix/domserver])
-AX_PATH(judgehost_root,         [$prefix/judgehost])
-AX_PATH(domjudge_docdir,        [$prefix/doc])
-AX_WITH_COMMENT(4,[    ])
-AX_PATH(domserver_bindir,       [$domserver_root/bin])
-AX_PATH(domserver_etcdir,       [$domserver_root/etc])
-AX_PATH(domserver_wwwdir,       [$domserver_root/www])
-AX_PATH(domserver_sqldir,       [$domserver_root/sql])
-AX_PATH(domserver_libdir,       [$domserver_root/lib])
-AX_PATH(domserver_libwwwdir,    [$domserver_root/lib/www])
-AX_PATH(domserver_libsubmitdir, [$domserver_root/lib/submit])
-AX_PATH(domserver_logdir,       [$domserver_root/log])
-AX_PATH(domserver_rundir,       [$domserver_root/run])
-AX_PATH(domserver_tmpdir,       [$domserver_root/tmp])
-AX_PATH(domserver_submitdir,    [$domserver_root/submissions])
-AX_WITH_COMMENT(5,[     ])
-AX_PATH(judgehost_bindir,       [$judgehost_root/bin])
-AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
-AX_PATH(judgehost_libdir,       [$judgehost_root/lib])
-AX_PATH(judgehost_libjudgedir,  [$judgehost_root/lib/judge])
-AX_PATH(judgehost_logdir,       [$judgehost_root/log])
-AX_PATH(judgehost_rundir,       [$judgehost_root/run])
-AX_PATH(judgehost_tmpdir,       [$judgehost_root/tmp])
-AX_PATH(judgehost_judgedir,     [$judgehost_root/judgings])
-AX_WITH_COMMENT(6,[      ])
-
-# }}}
-
 # {{{ FHS directory structure
-AC_ARG_ENABLE(fhs,AS_HELP_STRING([--enable-fhs],
-[use FHS directories (default: no), see below under "Optional
- Packages" for path configuration when FHS is disabled.]))
 
-if test "x$enable_fhs" = xyes ; then
-	AC_SUBST(fhs_enabled,           yes)
+# These are defaults that can still be overridden below!
+if test "x$fhs_enabled" = xyes ; then
+	AC_SUBST(domserver_root,        '')
 	AC_SUBST(domserver_bindir,      $bindir)
 	AC_SUBST(domserver_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_wwwdir,      $datadir/${PACKAGE_TARNAME}/www)
@@ -189,6 +154,7 @@ if test "x$enable_fhs" = xyes ; then
 	AC_SUBST(domserver_tmpdir,      /tmp)
 	AC_SUBST(domserver_submitdir,   $localstatedir/lib/${PACKAGE_TARNAME}/submissions)
 
+	AC_SUBST(judgehost_root,        '')
 	AC_SUBST(judgehost_bindir,      $bindir)
 	AC_SUBST(judgehost_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_libdir,      $libdir/${PACKAGE_TARNAME})
@@ -200,6 +166,46 @@ if test "x$enable_fhs" = xyes ; then
 
 	AC_SUBST(domjudge_docdir,       $docdir)
 fi
+
+# }}}
+
+# {{{ non-FHS directory structure (the default)
+# This is a dirty hack to allow non-standard pathname configuration
+# within the autoconf framework.
+AC_DEFUN([AX_PATH], [
+	AC_ARG_WITH($1,[  --with-$1=DIR   	(default: $2)],
+		[AC_SUBST($1, $withval)],
+		[if test "x$fhs_enabled" != xyes ; then AC_SUBST($1, $2) fi])
+	])
+
+AX_WITH_COMMENT(2,[  ])
+AX_WITH_COMMENT(3,[Fine tuning of installation root paths when FHS is disabled (the default):])
+AX_PATH(domserver_root,         [$prefix/domserver])
+AX_PATH(judgehost_root,         [$prefix/judgehost])
+AX_PATH(domjudge_docdir,        [$prefix/doc])
+AX_WITH_COMMENT(4,[    ])
+AX_WITH_COMMENT(5,[More fine tuning of all installation (sub)directories:])
+AX_PATH(domserver_bindir,       [$domserver_root/bin])
+AX_PATH(domserver_etcdir,       [$domserver_root/etc])
+AX_PATH(domserver_wwwdir,       [$domserver_root/www])
+AX_PATH(domserver_sqldir,       [$domserver_root/sql])
+AX_PATH(domserver_libdir,       [$domserver_root/lib])
+AX_PATH(domserver_libwwwdir,    [$domserver_root/lib/www])
+AX_PATH(domserver_libsubmitdir, [$domserver_root/lib/submit])
+AX_PATH(domserver_logdir,       [$domserver_root/log])
+AX_PATH(domserver_rundir,       [$domserver_root/run])
+AX_PATH(domserver_tmpdir,       [$domserver_root/tmp])
+AX_PATH(domserver_submitdir,    [$domserver_root/submissions])
+AX_WITH_COMMENT(6,[     ])
+AX_PATH(judgehost_bindir,       [$judgehost_root/bin])
+AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
+AX_PATH(judgehost_libdir,       [$judgehost_root/lib])
+AX_PATH(judgehost_libjudgedir,  [$judgehost_root/lib/judge])
+AX_PATH(judgehost_logdir,       [$judgehost_root/log])
+AX_PATH(judgehost_rundir,       [$judgehost_root/run])
+AX_PATH(judgehost_tmpdir,       [$judgehost_root/tmp])
+AX_PATH(judgehost_judgedir,     [$judgehost_root/judgings])
+AX_WITH_COMMENT(7,[      ])
 
 # }}}
 
