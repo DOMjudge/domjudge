@@ -40,7 +40,7 @@ $myhost = trim(`hostname | cut -d . -f 1`);
 
 define ('SCRIPT_ID', 'judgedaemon');
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
-define ('PIDFILE', RUNDIR.'/judgedaemon.'.$myhost.'.pid');
+define ('PIDFILE', RUNDIR.'/judgedaemon.pid');
 
 // Pass SYSLOG variable via environment for compare program
 if ( defined('SYSLOG') && SYSLOG ) putenv('DJ_SYSLOG=' . SYSLOG);
