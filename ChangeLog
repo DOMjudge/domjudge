@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.2.1 - SVN
--------------------
+Version 3.2.1 - 9 November 2011
+-------------------------------
  - Update M4 macros from upstream. Note that this fixes problems
    only occurring in development/maintainer context.
  - Fix configure script to allow subdir customization in FHS mode.
