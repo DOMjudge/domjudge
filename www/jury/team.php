@@ -60,7 +60,7 @@ echo addSelect('data[0][categoryid]', $cmap, @$row['categoryid'], true);
 <td><?php echo addTextArea('data[0][members]', @$row['members'], 40, 3)?></td></tr>
 <tr><td><label for="data_0__affilid_">Affiliation:</label></td>
 <td><?php
-$amap = $DB->q("KEYVALUETABLE SELECT affilid,name FROM team_affiliation ORDER BY affilid");
+$amap = $DB->q("KEYVALUETABLE SELECT affilid,name FROM team_affiliation ORDER BY name");
 $amap[''] = 'none';
 echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 ?>
