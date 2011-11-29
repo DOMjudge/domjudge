@@ -84,10 +84,10 @@ img.helpicon { cursor: help; }
 .configcheck th { text-align: left; padding-top: 1ex; }
 
 /* team connect status/judgehost poll status */
-.team-nocon, .judgehost-nocon { color: #AAA; }
-.team-nosub, .judgehost-err   { color: red; }
-.team-nocor, .judgehost-warn  { color: yellow; }
-.team-ok,    .judgehost-ok    { color: green; }
+.team-nocon, .judgehost-nocon a { color: #AAA; }
+.team-nosub, .judgehost-err   a { color: red; }
+.team-nocor, .judgehost-warn  a { color: yellow; }
+.team-ok,    .judgehost-ok    a { color: green; }
 
 /* source code highlighting */
 .hl-default {

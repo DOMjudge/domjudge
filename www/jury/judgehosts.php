@@ -91,7 +91,7 @@ if( $res->count() == 0 ) {
 			}
 			echo "\" title =\"last checked in $reltime seconds ago\">";
 		}
-		echo CIRCLE_SYM."</td>";
+		echo $link . CIRCLE_SYM . "</a></td>";
 		if ( IS_ADMIN ) {
 			echo "<td>" . delLink('judgehost','hostname',$row['hostname']) ."</td>";
 		}
