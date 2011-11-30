@@ -17,7 +17,7 @@ DEST="$2"
 MEMLIMIT="$3"
 MAINCLASS=""
 
-# Amount of memory reserved for the Java virtual machine in KB. The
+# Amount of memory reserved for the Java virtual machine in kB. The
 # default below is just above the maximum memory usage of current
 # versions of the jvm, but might need increasing in some cases.
 MEMRESERVED=300000

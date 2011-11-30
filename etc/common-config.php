@@ -6,7 +6,7 @@
 // Is verification of judgings by jury required before publication?
 define('VERIFICATION_REQUIRED', false);
 
-// Maximum allowed size in KB of source submissions.
+// Maximum allowed size in kB of source submissions.
 // This setting should be kept in sync with that in submit-config.h.in.
 define('SOURCESIZE', 256);
 
