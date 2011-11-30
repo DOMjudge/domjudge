@@ -859,6 +859,10 @@ it. When enabling remote connections, you may want to limit it to only the
 IP's of judgehosts in the MySQL user configuration (or with firewall rules).
 <item>Root password: MySQL does not have a password for the root user
 by default. It's very desirable to set one.
+<item>Client connection settings: client connections from the judgehosts
+to the domserver are by default unencrypted. Depending on your network
+setup it may be desirable to enable this. Also, enabling compression can
+help when working with large testcase data.
 <item>When maximising performance is required, you can
 consider to use the <em>Memory</em> (formerly <em>Heap</em>) table
 for the scoreboard_public and scoreboard_jury tables. They will be
@@ -1988,6 +1992,12 @@ default configuration and installation method and when <tt>make
 install-{domserver,judgehost}</tt> is run as root. The webserver group
 can be set with <tt>configure --with-webserver-group=GROUP</tt> which
 defaults to <tt>www-data</tt>.
+
+Judgehosts and the domserver communicate with each other through
+the MySQL protocol. By default, MySQL does not encrypt these
+connections. Refer to the MySQL manual to configure SSL on client
+connections, or ensure in the network setup that these connections
+are separated from the team network.
 
 The jury web interface is protected by HTTP Authentication. These
 credentials are essentially sent plain-text, so we advise to setup
