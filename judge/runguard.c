@@ -414,7 +414,7 @@ void setrestrictions()
 		if ( setuid(getuid()) ) error(errno,"cannot reset real user ID");
 		verbose("reset user ID to `%d' for command",getuid());
 	}
-	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped");
+	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped. Do not run judgedaemon as root.");
 }
 
 int main(int argc, char **argv)
