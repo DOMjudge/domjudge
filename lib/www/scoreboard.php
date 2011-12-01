@@ -496,7 +496,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		if ( $fdata['showfrozen'] ) {
 			echo " (";
 			if ( IS_JURY ) {
-				echo "public scoreboard is ";
+				echo '<a href="../public/">the public scoreboard</a> is ';
 			}
 			echo "frozen since " . printtime($cdata['freezetime']) .")";
 		}
