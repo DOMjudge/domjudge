@@ -48,22 +48,18 @@ if ( IS_JURY ) {
 		"../js/sorttable.js\"></script>\n";
 }
 
-/* NOTE: here a local menu.php is included
- *       both jury and team have their own menu.php
- */
-if ($menu) {?>
+?>
 <script type="text/javascript" src="../js/domjudge.js"></script>
 </head>
 <?php
+
 if ( IS_JURY ) {
 	echo "<body onload=\"setInterval('updateClarifications(\'$ajaxtitle\')', 20000)\">\n";
 } else {
 	echo "<body>\n";
 }
 
-include("menu.php");
-
-} else {?>
-</head>
-<body>
-<?php }
+/* NOTE: here a local menu.php is included
+ *       both jury and team have their own menu.php
+ */
+if ( $menu ) include("menu.php");

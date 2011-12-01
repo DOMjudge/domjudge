@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 3.2.2 - SVN
 -------------------
  - Rename SQL upgrade snippets and add README file for these.
+ - Fix JS collapse in public interface and simplify menu inclusion.
 
 Version 3.2.1 - 9 November 2011
 -------------------------------
