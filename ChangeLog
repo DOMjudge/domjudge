@@ -9,6 +9,7 @@ Version 3.3.0 - SVN
  - Fix configure script to allow subdir customization in FHS mode.
  - Upgrade included dash shell to version 0.5.7-2.
  - Fix warning of runguard trying to reset resource limits to infinity.
+ - Fix minor bug in diff output coloring due to line number overflow.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------

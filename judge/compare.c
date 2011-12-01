@@ -200,6 +200,7 @@ void writediff()
 	size_t maxlinelen[2], nlines[2];
 	char *line[2];
 	size_t linesize[2];
+	int linenowidth;
 	int endoffile[2];
 	int i;
 	size_t l;
@@ -250,6 +251,9 @@ void writediff()
 		}
 	}
 
+	/* Calculate max. line number width */
+	for(linenowidth=1, l=10; max(nlines[0],nlines[1])>=l; linenowidth++) l *= 10;
+
 	/* If no differences found, then some error occurred */
 	if ( firstdiff==-1 ) error(0,"differences reported by 'diff', but none found");
 
@@ -259,12 +263,13 @@ void writediff()
 	/* Determine left/right printing length and construct format
 	   string for printf later */
 	for(i=0; i<2; i++) maxlinelen[i] = min(maxlinelen[i],MAXPRINTLEN);
-	sprintf(formatstr,"%%3d %%c%%-%ds %%c %%c%%-%ds\n",
-	        (int)maxlinelen[0]+1, (int)maxlinelen[1]+1);
+	sprintf(formatstr,"%%%dd %%c%%-%ds %%c %%c%%-%ds\n",
+	        linenowidth, (int)maxlinelen[0]+1, (int)maxlinelen[1]+1);
 
 	/* Print first differences found header at beginning of file */
 	fprintf(diffoutfile,"### DIFFERENCES FROM LINE %d ###\n",firstdiff+1);
-	fprintf(diffoutfile,"%*s ? REFERENCE\n",(int)maxlinelen[0]+6,"TEAM");
+	for(i=0; i<linenowidth; i++) fprintf(diffoutfile,"_");
+	fprintf(diffoutfile,"%*s ? REFERENCE\n",(int)maxlinelen[0]+3,"TEAM");
 
 	/* Loop over all common lines for printing */
 	for(l=0; l<min(nlines[0],nlines[1]); l++) {
