@@ -1,0 +1,22 @@
+MySQL upgrade scripts
+=====================
+
+This directory contains MySQL upgrade scripts that can be applied to
+upgrade the DOMjudge MySQL database structure and data to a newer
+version.
+
+These upgrade scripts have names 'upgrade_<from>_<to>.sql', with
+<from> and <to> the respective versions of DOMjudge they apply to.
+Each script contains a check that verifies if it should be applied and
+which fails if the upgrade was applied already. The scripts should be
+applied in order; this can be done manually, but it is probably easier
+to use the command 'dj-setup-database upgrade'.
+
+Upgrading to a new minor/major version is supported, but only to the
+latest bugfix release in that series. For example, there is only one
+upgrade script between versions 3.1.X and 3.2.Y and this will be
+between the latest two bugfix releases of both series. The upgrade
+scripts between the different 3.1.X bugfix releases are also present,
+so this gives a unique upgrade path: first to the latest bugfix
+release in the current series, then to the latest bugfix release in
+the newer series.
