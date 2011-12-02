@@ -442,6 +442,11 @@ function judge($mark, $row, $judgingid)
 		        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
 		       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
 		       $row['submitid'], $judgingid);
+		if ( $result == 'correct' ) {
+			$DB->q('INSERT INTO balloon (submitid)
+			        VALUES(%i)',
+			        $row['submitid']);
+		} 
 	}
 
 	$DB->q('COMMIT');

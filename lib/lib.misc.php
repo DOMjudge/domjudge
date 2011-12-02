@@ -103,12 +103,6 @@ function calcScoreRow($cid, $team, $prob) {
 					  ORDER BY submittime',
 	                 $team, $prob, $cid);
 
-	$balloon = $DB->q('MAYBEVALUE SELECT balloon FROM scoreboard_jury
-                       WHERE cid = %i AND teamid = %s AND probid = %s',
-	                  $cid, $team, $prob);
-
-	if ( ! $balloon ) $balloon = 0;
-
 	// reset vars
 	$submitted_j = $time_j = $correct_j = 0;
 	$submitted_p = $time_p = $correct_p = 0;
@@ -143,9 +137,9 @@ function calcScoreRow($cid, $team, $prob) {
 
 	// insert or update the values in the jury scores table
 	$DB->q('REPLACE INTO scoreboard_jury
-	        (cid, teamid, probid, submissions, totaltime, is_correct, balloon)
-	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
-	       $cid, $team, $prob, $submitted_j, $time_j, $correct_j, $balloon);
+	        (cid, teamid, probid, submissions, totaltime, is_correct)
+	        VALUES (%i,%s,%s,%i,%i,%i)',
+	       $cid, $team, $prob, $submitted_j, $time_j, $correct_j);
 
 	return;
 }

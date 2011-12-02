@@ -8,6 +8,15 @@
 
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 
+--
+-- Table structure for table `balloon`
+--
+CREATE TABLE `balloon` (
+  `balloonid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `submitid` int(4) unsigned NOT NULL COMMENT 'Submission for which balloon was earned',
+  `done` int(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has been handed out yet?',
+  PRIMARY KEY (`balloonid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Balloons to be handed out';
 
 --
 -- Table structure for table `clarification`
@@ -182,7 +191,6 @@ CREATE TABLE `scoreboard_jury` (
   `submissions` int(4) unsigned NOT NULL default '0' COMMENT 'Number of submissions made',
   `totaltime` int(4) unsigned NOT NULL default '0' COMMENT 'Total time spent',
   `is_correct` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has there been a correct submission?',
-  `balloon` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has a balloon been handed out?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (jury version)';
 

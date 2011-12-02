@@ -14,10 +14,9 @@ $title = 'Balloon Status';
 
 if ( isset($_POST['done']) ) {
 	foreach($_POST['done'] as $done => $dummy) {
-		$parts = explode(';', $done);
-		$DB->q('UPDATE scoreboard_jury SET balloon=1
-			WHERE probid = %s AND teamid = %s AND cid = %i',
-			$parts[0], $parts[1], $parts[2]);
+		$DB->q('UPDATE balloon SET done=1
+			WHERE balloonid = %i',
+			$done);
 	}
 	header('Location: balloons.php');
 }
@@ -53,22 +52,23 @@ if ( isset($cdata['freezetime']) &&
 
 echo addForm('balloons.php', 'get') . "<p>\n" .
     addHidden('viewall', ($viewall ? 0 : 1)) .
-    addSubmit($viewall ? 'view unsent' : 'view all') . "</p>\n" .
+    addSubmit($viewall ? 'view unsent only' : 'view all') . "</p>\n" .
     addEndForm();
 
 // Problem metadata: colours and names.
 $probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
 		      FROM problem WHERE cid = %i', $cid);
 
-// Get all relevant info from the scoreboard_jury table.
-// Order by balloon, so we have the unsent balloons at the top.
-// Then by submittime, so the newest will also rank highest.
-$res = $DB->q('SELECT s.*, t.login, t.name AS teamname, t.room, c.name AS catname
-               FROM scoreboard_jury s
+// Get all relevant info from the balloon table.
+// Order by done, so we have the unsent balloons at the top.
+$res = $DB->q('SELECT b.*, s.probid, s.submittime,
+               t.login, t.name AS teamname, t.room, c.name AS catname
+               FROM balloon b
+	       LEFT JOIN submission s USING (submitid)
                LEFT JOIN team t ON (t.login = s.teamid)
                LEFT JOIN team_category c USING(categoryid)
-               WHERE s.cid = %i AND s.is_correct = 1
-               ORDER BY s.balloon, s.totaltime DESC',
+               WHERE s.cid = %i
+               ORDER BY done ASC, balloonid DESC',
               $cid);
 
 /* Loop over the result, store the total of balloons for a team
@@ -91,24 +91,21 @@ if ( !empty($BALLOONS) ) {
 	echo addForm('balloons.php');
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
-		"<tr><th>Time</th><th>Solved</th><th></th><th align=\"left\">Team</th>\n" .
+		"<tr><td></td><th>ID</th><th>Time</th><th>Solved</th><th></th><th align=\"left\">Team</th>\n" .
 		"<th>Room</th><th>Category</th><th>Total</th><th></th></tr>\n</thead>\n";
 
 	foreach ( $BALLOONS as $row ) {
 
-		if ( !$viewall && $row['balloon'] == 1 ) continue;
+		if ( !$viewall && $row['done'] == 1 ) continue;
 
 		// start a new row, 'disable' if balloon has been handed out already
-		echo '<tr'  . ( $row['balloon'] == 1 ? ' class="disabled"' : '' ) . '>';
-
-		// time the balloon was earned (contest start + total time (in minutes))
-		// display an "F" after the time if this is after the freeze.
-		$balloontime = $conteststart + ($row['totaltime']*60);
-		$frozen = (isset($contestfreeze) && $balloontime >= $contestfreeze ?
-			' <span title="After Scoreboard Freeze" class="frozen">F</span>' : '');
-
-		echo '<td>' . printtime( strftime(MYSQL_DATETIME_FORMAT, $balloontime) ) .
-			$frozen . '</td>';
+		echo '<tr'  . ( $row['done'] == 1 ? ' class="disabled"' : '' ) . '>';
+		if ( isset($cdata['freezetime']) &&
+		     $row['submittime'] > $cdata['freezetime'] ) {
+			echo "<td>FROZEN</td>";
+		}
+		echo '<td>b' . (int)$row['balloonid'] . '</td>';
+		echo '<td>' . printtime( $row['submittime'] ) . '</td>';
 
 		// the balloon earned
 		echo '<td class="probid">' .
@@ -136,11 +133,9 @@ if ( !empty($BALLOONS) ) {
 		echo '</td><td>';
 
 		// 'done' button when balloon has yet to be handed out
-		if ( $row['balloon'] == 0 ) {
+		if ( $row['done'] == 0 ) {
 			echo '<input type="submit" name="done[' .
-				htmlspecialchars($row['probid']) . ';' .
-				htmlspecialchars($row['teamid']) . ';' .
-				htmlspecialchars($row['cid']) . ']" value="done" />';
+				(int)$row['balloonid'] . ']" value="done" />';
 		}
 		echo "</td></tr>\n";
 	}

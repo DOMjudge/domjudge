@@ -28,7 +28,7 @@ if ( $cnt == 0 ) {
 	error("Validated more than one judging.");
 }
 
-$jdata = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid
+$jdata = $DB->q('TUPLE SELECT j.result, s.submitid, s.cid, s.teamid, s.probid, s.langid,
                  FROM judging j
                  LEFT JOIN submission s USING (submitid)
                  WHERE judgingid = %i', $id);
@@ -42,6 +42,12 @@ if ( VERIFICATION_REQUIRED ) {
 	        VALUES (%s, %i, %i, %s, %s, %i, "problem judged")',
 	       now(), $jdata['cid'], $jdata['teamid'], $jdata['langid'],
 	       $jdata['probid'], $jdata['submitid']);
+	
+	if ( $jdata['result'] == 'correct' ) {
+		$DB->q('INSERT INTO balloon (submitid)
+		        VALUES(%i)',
+		        $row['submitid']);
+	} 
 }
 
 /* redirect back to submission page or submissions overview depending
