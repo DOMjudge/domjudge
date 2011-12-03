@@ -303,7 +303,7 @@ function putTeam($login) {
 	}
 
 	if ( !empty($team['room']) ) {
-		echo '<tr><td scope="row">Room:</td><td>' .
+		echo '<tr><td scope="row">Location:</td><td>' .
 			htmlspecialchars($team['room']) . "</td></tr>\n";
 	}
 

@@ -67,7 +67,7 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 </td></tr>
 <tr><td><label for="data_0__authtoken_">Auth token:</label></td>
 <td><?php echo addInput('data[0][authtoken]', @$row['authtoken'], 35, 255)?></td></tr>
-<tr><td><label for="data_0__room_">Room:</label></td>
+<tr><td><label for="data_0__room_">Location:</label></td>
 <td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td><label for="data_0__comments_">Comments:</label></td>
 <td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
@@ -115,7 +115,7 @@ echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 <tr><td scope="row">Host:</td><td><?php echo
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
 <?php if (!empty($row['room'])): ?>
-<tr><td scope="row">Room:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
+<tr><td scope="row">Location:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>
 </table></div>
 

@@ -92,7 +92,7 @@ if ( !empty($BALLOONS) ) {
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
 		"<tr><td></td><th>ID</th><th>Time</th><th>Solved</th><th></th><th align=\"left\">Team</th>\n" .
-		"<th>Room</th><th>Category</th><th>Total</th><th></th></tr>\n</thead>\n";
+		"<th>Loc.</th><th>Category</th><th>Total</th><th></th></tr>\n</thead>\n";
 
 	foreach ( $BALLOONS as $row ) {
 
@@ -114,7 +114,7 @@ if ( !empty($BALLOONS) ) {
 			';" alt="problem colour ' . htmlspecialchars($probs_data[$row['probid']]['color']) .
 		    '" src="../images/circle.png" /> ' . htmlspecialchars($row['probid']) . '</td>';
 
-		// team name, room and category
+		// team name, location (room) and category
 		echo '<td class="teamid">' . htmlspecialchars($row['login']) . '</td><td>' .
 			htmlspecialchars($row['teamname']) . '</td><td>' .
 			htmlspecialchars($row['room']) . '</td><td>' .
