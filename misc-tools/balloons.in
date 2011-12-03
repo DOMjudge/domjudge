@@ -43,9 +43,9 @@ function notification_text($team, $problem, $probs_solved, $probs_data) {
 	$ret =
 		"A problem has been solved:\n".
 		"\n".
-		(empty($team['room']) ? "" : "Room:    ".$team['room']."\n" ) .
-		"Team:    ".$team['login'].": ".$team['name']."\n".
-		"Problem: ".$problem.": ".$probs_data[$problem]['name'].
+		(empty($team['room']) ? "" : "Location: ".$team['room']."\n" ) .
+		"Team:     ".$team['login'].": ".$team['name']."\n".
+		"Problem:  ".$problem.": ".$probs_data[$problem]['name'].
 		(empty($probs_data[$problem]['color']) ? "" : " (colour: ".$probs_data[$problem]['color'].")" ) . "\n\n" .
 		"Current balloon status for this team:\n";
 
@@ -102,30 +102,34 @@ while ( TRUE ) {
 	}
 
 	do {
-		$res = $DB->q('SELECT s.*,t.name as teamname,t.room
-		               FROM scoreboard_jury s
-		               LEFT JOIN team t ON (t.login = s.teamid)
-		               WHERE s.cid = %i AND s.is_correct = 1 AND s.balloon = 0',
-		               $cid);
+		$res = $DB->q('SELECT b.*, s.probid, s.submittime,
+			       t.login, t.name AS teamname, t.room, c.name AS catname
+			       FROM balloon b
+			       LEFT JOIN submission s USING (submitid)
+			       LEFT JOIN team t ON (t.login = s.teamid)
+			       LEFT JOIN team_category c USING(categoryid)
+			       WHERE s.cid = %i
+			       ORDER BY done ASC, balloonid DESC',
+			      $cid);
 
 		while ( $row = $res->next() ) {
 			$team = array ('name'   => $row['teamname'],
 			               'room'   => $row['room'],
-			               'login'  => $row['teamid']);
+			               'login'  => $row['login']);
 
 			logmsg(LOG_DEBUG,"New problem solved: ".$row['probid'].
-				   " by team ".$row['teamid']);
+				   " by team ".$row['login']);
 
 			if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
 
 				$probs_solved = $DB->q('COLUMN SELECT probid FROM scoreboard_jury
 				                        WHERE cid = %i AND teamid = %s AND is_correct = 1',
-				                       $cid, $row['teamid']);
+				                       $cid, $row['login']);
 				$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
 				                      FROM problem WHERE cid = %i', $cid);
 
 				logmsg(LOG_INFO,"Sending notification: team '".
-					   $row['teamid']."', problem '".$row['probid']."'.");
+					   $row['login']."', problem '".$row['probid']."'.");
 
 				logmsg(LOG_DEBUG,"Running command: '".BALLOON_CMD."'");
 
@@ -138,9 +142,9 @@ while ( TRUE ) {
 				}
 			}
 
-			$DB->q('UPDATE scoreboard_jury SET balloon=1
-			        WHERE cid = %i AND teamid = %s AND probid = %s',
-				   $row['cid'], $row['teamid'], $row['probid']);
+			$DB->q('UPDATE balloon SET done=1
+				WHERE balloonid = %i',
+				$row['balloonid']);
 		}
 
 	} while ( $res->count()!=0 );
