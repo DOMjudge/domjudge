@@ -25,8 +25,6 @@ CREATE TABLE `balloon` (
   PRIMARY KEY (`balloonid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Balloons to be handed out';
 
-ALTER TABLE `scoreboard_jury`
-  DROP COLUMN balloon;
 --
 -- Add/remove privileges
 --
@@ -44,3 +42,6 @@ FLUSH PRIVILEGES;
 --
 -- Finally remove obsolete structures after moving data
 --
+
+ALTER TABLE `scoreboard_jury`
+  DROP COLUMN balloon;
