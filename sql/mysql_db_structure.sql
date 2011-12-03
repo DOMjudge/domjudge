@@ -14,7 +14,7 @@
 CREATE TABLE `balloon` (
   `balloonid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `submitid` int(4) unsigned NOT NULL COMMENT 'Submission for which balloon was earned',
-  `done` int(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has been handed out yet?',
+  `done` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has been handed out yet?',
   PRIMARY KEY (`balloonid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Balloons to be handed out';
 

@@ -64,7 +64,7 @@ $probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
 $res = $DB->q('SELECT b.*, s.probid, s.submittime,
                t.login, t.name AS teamname, t.room, c.name AS catname
                FROM balloon b
-	       LEFT JOIN submission s USING (submitid)
+               LEFT JOIN submission s USING (submitid)
                LEFT JOIN team t ON (t.login = s.teamid)
                LEFT JOIN team_category c USING(categoryid)
                WHERE s.cid = %i
@@ -91,8 +91,8 @@ if ( !empty($BALLOONS) ) {
 	echo addForm('balloons.php');
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
-		"<tr><td></td><th>ID</th><th>Time</th><th>Solved</th><th></th><th align=\"left\">Team</th>\n" .
-		"<th>Loc.</th><th>Category</th><th>Total</th><th></th></tr>\n</thead>\n";
+		"<tr><th>ID</th><th>time</th><th>solved</th><th align=\"right\">team</th><th></th>\n" .
+		"<th>loc.</th><th>category</th><th>total</th><th></th></tr>\n</thead>\n";
 
 	foreach ( $BALLOONS as $row ) {
 
