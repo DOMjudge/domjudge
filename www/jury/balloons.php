@@ -91,8 +91,9 @@ if ( !empty($BALLOONS) ) {
 	echo addForm('balloons.php');
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
-		"<tr><th>ID</th><th>time</th><th>solved</th><th align=\"right\">team</th><th></th>\n" .
-		"<th>loc.</th><th>category</th><th>total</th><th></th></tr>\n</thead>\n";
+		"<tr><td></td><th>ID</th><th>time</th><th>solved</th>" .
+		"<th align=\"right\">team</th><th></th><th>loc.</th>" .
+		"<th>category</th><th>total</th><th></th></tr>\n</thead>\n";
 
 	foreach ( $BALLOONS as $row ) {
 
@@ -103,6 +104,8 @@ if ( !empty($BALLOONS) ) {
 		if ( isset($cdata['freezetime']) &&
 		     $row['submittime'] > $cdata['freezetime'] ) {
 			echo "<td>FROZEN</td>";
+		} else {
+			echo '<td></td>';
 		}
 		echo '<td>b' . (int)$row['balloonid'] . '</td>';
 		echo '<td>' . printtime( $row['submittime'] ) . '</td>';
