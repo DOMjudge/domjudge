@@ -16,7 +16,7 @@
 #define SUBMIT_ENABLE_CMD @SUBMIT_ENABLE_CMD@
 #define SUBMIT_ENABLE_WEB @SUBMIT_ENABLE_WEB@
 
-/* Default TCP port to use for command-line submit client/deamon. */
+/* Default TCP port to use for command-line submit client/daemon. */
 #define SUBMITPORT   9147
 
 /* Team HOME subdirectory to use for storing temporary/log/etc. files
