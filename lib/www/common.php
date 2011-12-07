@@ -380,11 +380,11 @@ function checkFileUpload($errorcode) {
 			error('The uploaded file was only partially uploaded.');
 		case UPLOAD_ERR_NO_FILE:
 			error('No file was uploaded.');
-		case 6:	// UPLOAD_ERR_NO_TMP_DIR, constant doesn't exist in our minimal PHP version
+		case UPLOAD_ERR_NO_TMP_DIR:
 			error('Missing a temporary folder. Contact staff.');
-		case 7: // UPLOAD_ERR_CANT_WRITE
+		case UPLOAD_ERR_CANT_WRITE:
 			error('Failed to write file to disk. Contact staff.');
-		case 8: // UPLOAD_ERR_EXTENSION
+		case UPLOAD_ERR_EXTENSION:
 			error('File upload stopped by extension. Contact staff.');
 		default:
 			error('Unknown error while uploading: '. $_FILES['code']['error'] .

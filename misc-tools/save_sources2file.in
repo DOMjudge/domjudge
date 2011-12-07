@@ -7,7 +7,6 @@
  * restore them with 'restore_sources2db'.
  *
  * Things to fix:
- * - requires php 5.0 (due to file_put_contents)
  * - add logging that IS useful
  *
  * $Id$

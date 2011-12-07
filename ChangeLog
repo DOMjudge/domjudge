@@ -11,6 +11,7 @@ Version 3.3.0 - SVN
  - Fix warning of runguard trying to reset resource limits to infinity.
  - Fix minor bug in diff output coloring due to line number overflow.
  - Rename SQL upgrade snippets and add README file for these.
+ - Raise minimum required PHP version to 5.2.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------

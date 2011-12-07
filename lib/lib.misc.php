@@ -29,13 +29,7 @@ function getFileContents($filename, $sizelimit = true) {
 	}
 
 	if ( $sizelimit && filesize($filename) > 50000 ) {
-		// When our lowest supported PHP version >= 5.1.0, we can just use
-		// file_get_contents() with the maxlen parameter.
-		$fh = fopen($filename,'r');
-		if ( ! $fh ) error("Could not open $filename for reading");
-		$ret = fread($fh, 50000) . "\n[output truncated after 50,000 B]\n";
-		fclose($fh);
-		return $ret;
+		return file_get_contents($filename, FALSE, NULL, -1, 50000);
 	}
 
 	return file_get_contents($filename);
