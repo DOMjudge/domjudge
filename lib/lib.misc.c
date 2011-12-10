@@ -214,10 +214,14 @@ void daemonize(const char *_pidfile)
 	/* Notify user with daemon PID before detaching from TTY. */
 	logmsg(LOG_NOTICE, "daemonizing with PID = %d", pid);
 
-	/* Close std{in,out,err} file descriptors */
-	if ( close(STDIN_FILENO )!=0 ||
-	     close(STDOUT_FILENO)!=0 ||
-	     close(STDERR_FILENO)!=0 ) error(errno, "cannot close stdio files");
+	/* Reopen std{in,out,err} file descriptors to /dev/null.
+	   Closing them gives error when the daemon or a child process
+	   tries to read/write to them. */
+	if ( freopen(STDIN_FILENO, "r", "/dev/null")!=NULL ||
+	     freopen(STDOUT_FILENO,"w", "/dev/null")!=NULL ||
+	     freopen(STDERR_FILENO,"w", "/dev/null")!=NULL ) {
+		error(errno, "cannot reopen stdio files to /dev/null");
+	}
 
 	/* Start own process group, detached from any tty */
 	if ( setsid()<0 ) error(errno, "cannot set daemon process group");

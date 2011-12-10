@@ -475,9 +475,11 @@ function daemonize($pidfile = NULL)
 	logmsg(LOG_NOTICE, "daemonizing with PID = $pid");
 
 	// Close std{in,out,err} file descriptors
-	if ( !fclose(STDIN ) ||
-	     !fclose(STDOUT) ||
-	     !fclose(STDERR) ) error("cannot close stdio files");
+	if ( !fclose(STDIN ) || !($GLOBALS['STDIN']  = fopen('/dev/null', 'r')) ||
+	     !fclose(STDOUT) || !($GLOBALS['STDOUT'] = fopen('/dev/null', 'w')) ||
+	     !fclose(STDERR) || !($GLOBALS['STDERR'] = fopen('/dev/null', 'w')) ) {
+		error("cannot reopen stdio files to /dev/null");
+	}
 
 	// Start own process group, detached from any tty
 	if ( posix_setsid()<0 ) error("cannot set daemon process group");
