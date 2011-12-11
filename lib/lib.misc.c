@@ -217,9 +217,9 @@ void daemonize(const char *_pidfile)
 	/* Reopen std{in,out,err} file descriptors to /dev/null.
 	   Closing them gives error when the daemon or a child process
 	   tries to read/write to them. */
-	if ( freopen(STDIN_FILENO, "r", "/dev/null")!=NULL ||
-	     freopen(STDOUT_FILENO,"w", "/dev/null")!=NULL ||
-	     freopen(STDERR_FILENO,"w", "/dev/null")!=NULL ) {
+	if ( freopen("/dev/null", "r", stdin )!=NULL ||
+	     freopen("/dev/null", "w", stdout)!=NULL ||
+	     freopen("/dev/null", "w", stderr)!=NULL ) {
 		error(errno, "cannot reopen stdio files to /dev/null");
 	}
 
