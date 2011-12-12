@@ -256,6 +256,11 @@ function putClarificationList($clars, $team = NULL)
  */
 function putClarificationForm($action, $cid, $respid = NULL)
 {
+	if ( empty($cid) ) {
+		echo '<p class="nodata">No active contest</p>';
+		return;
+	}
+
 	require_once('forms.php');
 
 	global $DB, $cdata;
