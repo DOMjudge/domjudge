@@ -16,7 +16,7 @@ header('Content-Type: text/html; charset=' . DJ_CHARACTER_SET);
  * Really want to frame DOMjudge? Then change DENY to SAMEORIGIN
  * or even comment out the header altogether.
  */
-header('X-Frame-Options: SAMEORIGIN');
+header('X-Frame-Options: DENY');
 
 if ( isset($refresh) &&
      (!isset($_COOKIE["domjudge_refresh"]) ||
