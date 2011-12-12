@@ -12,6 +12,12 @@ if (!defined('DOMJUDGE_VERSION')) die("DOMJUDGE_VERSION not defined.");
 
 header('Content-Type: text/html; charset=' . DJ_CHARACTER_SET);
 
+/* Prevent clickjacking by forbidding framing in modern browsers.
+ * Really want to frame DOMjudge? Then change DENY to SAMEORIGIN
+ * or even comment out the header altogether.
+ */
+header('X-Frame-Options: SAMEORIGIN');
+
 if ( isset($refresh) &&
      (!isset($_COOKIE["domjudge_refresh"]) ||
       (bool)$_COOKIE["domjudge_refresh"]) ) {
