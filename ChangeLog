@@ -8,10 +8,17 @@ Version 3.3.0 - SVN
  - Update M4 macro's from upstream, fixing some problems.
  - Fix configure script to allow subdir customization in FHS mode.
  - Upgrade included dash shell to version 0.5.7-2.
+ - Use Debian 6.0 Squeeze for building Java chroot.
  - Fix warning of runguard trying to reset resource limits to infinity.
  - Fix minor bug in diff output coloring due to line number overflow.
  - Rename SQL upgrade snippets and add README file for these.
  - Raise minimum required PHP version to 5.2.
+ - Judges now use individual accounts to access the jury webinterface,
+   which will be used to track claiming, verification, etc.
+ - Add auditlog for all actions changing contest state.
+ - Protect against clickjacking by forbidding framing using the
+   X-Frame-Options HTTP header supported in modern browsers.
+ - Reimplement balloon tracking and notification backend.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
