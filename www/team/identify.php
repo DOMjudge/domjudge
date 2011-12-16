@@ -58,5 +58,7 @@ $DB->q('UPDATE team_identify SET state = "invalid", timestamp = NOW()
 $DB->q('INSERT INTO team_identify (login, ipaddress, state, timestamp)
 	VALUES (%s, %s, "new", NOW()', $login, $ip);
 
+auditlog('team', $login, 'identified', $ip);
+
 // done
 echo "Request queued";

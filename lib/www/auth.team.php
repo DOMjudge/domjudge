@@ -217,6 +217,7 @@ function do_login()
 		if ( AUTH_METHOD=='PHP_SESSIONS' ) {
 			session_start();
 			$_SESSION['teamid'] = $login;
+			auditlog('team', $login, 'logged in', $_SERVER['REMOTE_ADDR']);
 		}
 		break;
 
@@ -245,6 +246,7 @@ function do_login()
 
 		session_start();
 		$_SESSION['teamid'] = $login;
+		auditlog('team', $login, 'logged in', $_SERVER['REMOTE_ADDR']);
 		break;
 
 	default:
@@ -289,6 +291,7 @@ function do_logout()
 
 	$title = 'Logout';
 	$menu = FALSE;
+	auditlog('team', $login, 'logged out', $_SERVER['REMOTE_ADDR']);
 
 	require(LIBWWWDIR . '/header.php');
 	echo "<h1>Logged out</h1>\n\n<p>Successfully logged out as team " .

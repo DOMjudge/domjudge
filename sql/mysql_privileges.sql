@@ -43,5 +43,6 @@ GRANT INSERT (cid, teamid, probid, langid, submitid, description,
               eventtime)                                           ON event      TO `domjudge_team`;
 GRANT UPDATE (authtoken, hostname, teampage_first_visited)         ON team       TO `domjudge_team`;
 
+GRANT INSERT ON auditlog TO `domjudge_team`;
 -- Make sure MySQL picks up all changes
 FLUSH PRIVILEGES;

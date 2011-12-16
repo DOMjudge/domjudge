@@ -19,6 +19,7 @@ echo "<h1>Judgehosts</h1>\n\n";
 if ( IS_ADMIN && (isset($_POST['cmd-activate']) || isset($_POST['cmd-deactivate']) ) ) {
 	$DB->q('UPDATE judgehost SET active = %i',
 	       (isset($_POST['cmd-activate']) ? 1:0));
+	auditlog('judgehost', null, 'marked all ' . (isset($_POST['cmd-activate'])?'active':'inactive'));
 }
 if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 	echo addForm('edit.php');

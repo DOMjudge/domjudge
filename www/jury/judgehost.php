@@ -21,6 +21,7 @@ if ( IS_ADMIN && isset($_POST['cmd']) &&
 	( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) ) {
 	$DB->q('UPDATE judgehost SET active = %i WHERE hostname = %s',
 	       ($_POST['cmd'] == 'activate' ? 1 : 0), $id);
+	auditlog('judgehost', $id, 'marked ' . ($_POST['cmd']=='activate'?'active':'inactive'));
 }
 
 $row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $id);

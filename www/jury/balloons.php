@@ -17,6 +17,7 @@ if ( isset($_POST['done']) ) {
 		$DB->q('UPDATE balloon SET done=1
 			WHERE balloonid = %i',
 			$done);
+		auditlog('balloon', $done, 'marked done');
 	}
 	header('Location: balloons.php');
 }

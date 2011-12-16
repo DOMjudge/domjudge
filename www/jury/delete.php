@@ -69,6 +69,7 @@ if (isset($_POST['confirm'] ) ) {
 	// LIMIT 1 is a security measure to prevent our bugs from
 	// wiping a table by accident.
 	$DB->q("DELETE FROM $t WHERE %S LIMIT 1", $k);
+	auditlog($t, implode(', ', $k), 'deleted');
 
 	echo "<p>" . ucfirst($t) . " <strong>" . htmlspecialchars(implode(", ", $k)) .
 		"</strong> has been deleted.</p>\n\n";

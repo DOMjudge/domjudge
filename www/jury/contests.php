@@ -22,6 +22,7 @@ if ( isset($_POST['unfreeze']) ) {
 	$now = now();
 	$DB->q('UPDATE contest SET unfreezetime = %s, unfreezetime_string = %s
 	        WHERE cid = %i', $now, $now, $docid);
+	auditlog('contest', $docid, 'unfreeze', $now);
 }
 
 if ( isset($_GET['edited']) ) {

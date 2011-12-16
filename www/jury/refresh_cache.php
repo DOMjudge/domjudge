@@ -19,6 +19,8 @@ require(LIBWWWDIR . '/scoreboard.php');
 
 requireAdmin();
 
+auditlog('scoreboard', null, 'refresh cache');
+
 // no output buffering... we want to see what's going on real-time
 ob_implicit_flush();
 

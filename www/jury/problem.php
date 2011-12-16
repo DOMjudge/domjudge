@@ -32,11 +32,13 @@ if ( !empty($pcmd) ) {
 	if ( isset($pcmd['toggle_submit']) ) {
 		$DB->q('UPDATE problem SET allow_submit = %i WHERE probid = %s',
 			   $_POST['val']['toggle_submit'], $id);
+		auditlog('problem', $id, 'set allow submit', $_POST['val']['toggle_submit']);
 	}
 
 	if ( isset($pcmd['toggle_judge']) ) {
 		$DB->q('UPDATE problem SET allow_judge = %i WHERE probid = %s',
 			   $_POST['val']['toggle_judge'], $id);
+		auditlog('problem', $id, 'set allow judge', $_POST['val']['toggle_judge']);
 	}
 }
 if ( isset($_POST['upload']) ) {
@@ -45,6 +47,7 @@ if ( isset($_POST['upload']) ) {
 		$zip = openZipFile($_FILES['problem_archive']['tmp_name']);
 		$id = importZippedProblem($zip, empty($id) ? NULL : $id);
 		$zip->close();
+		auditlog('problem', $id, 'upload zip', $_FILES['problem_archive']['name']);
 		header('Location: '.$pagename.'?id='.urlencode($id));
 	} else {
 		error("Missing filename for problem upload");

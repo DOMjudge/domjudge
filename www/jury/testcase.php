@@ -78,6 +78,7 @@ if ( isset ($_GET['move']) ) {
 		$DB->q('UPDATE testcase SET rank = %i
 		        WHERE probid = %s AND rank = %i', $rank, $probid, $tmprank);
 //		$DB->q('COMMIT');
+		auditlog('testcase', $probid, 'switch rank', "$rank <=> $other");
 	}
 
 	// Redirect to the original page to prevent accidental redo's
@@ -115,10 +116,12 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 				$DB->q("UPDATE testcase SET md5sum_$inout = %s, $inout = %s
 				        WHERE probid = %s AND rank = %i",
 				       md5($content), $content, $probid, $rank);
+				auditlog('testcase', $probid, 'updated', "$inout rank $rank");
 			} else {
 				$DB->q("INSERT INTO testcase (probid,rank,md5sum_$inout,$inout)
 				        VALUES (%s,%i,%s,%s)",
 				       $probid, $rank, md5($content), $content);
+				auditlog('testcase', $probid, 'added', "$inout rank $rank");
 			}
 			$result .= "<li>Updated $inout for testcase $rank from " .
 			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
@@ -130,6 +133,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 	if ( isset($_POST['description'][$rank]) ) {
 		$DB->q('UPDATE testcase SET description = %s WHERE probid = %s
 		        AND rank = %i', $_POST['description'][$rank], $probid, $rank);
+		auditlog('testcase', $probid, 'updated description', "rank $rank");
 
 		$result .= "<li>Updated description for testcase $rank</li>\n";
 	}
@@ -156,6 +160,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			        VALUES (%s,%i,%s,%s,%s,%s,%s)",
 			       $probid, $rank, md5(@$content['input']), md5(@$content['output']),
 			       @$content['input'], @$content['output'], @$_POST['add_desc']);
+			auditlog('testcase', $probid, 'added', "rank $rank");
 
 			$result .= "<li>Added new testcase $rank from " .
 			    htmlspecialchars($_FILES['add_input']['name']) .

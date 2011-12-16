@@ -21,6 +21,7 @@ $cnt = $DB->q('RETURNAFFECTED UPDATE judging
                SET verified = %i, jury_member = ' . ($val ? '%s ' : 'NULL %_ ') .
               'WHERE judgingid = %i',
               $val, $jury_member, $id);
+auditlog('judging', $id, $val ? 'set verified' : 'set unverified');
 
 if ( $cnt == 0 ) {
 	error("Judging '$id' not found or nothing changed.");

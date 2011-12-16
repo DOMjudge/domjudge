@@ -62,6 +62,8 @@ if ( ! isset($_POST['cancel']) ) {
 
 		if ( $cmd == 'add' ) {
 			$newid = $DB->q("RETURNID INSERT INTO $t SET %S", $itemdata);
+			auditlog($t, $newid, 'added');
+
 			foreach($KEYS[$t] as $tablekey) {
 				if ( isset($itemdata[$tablekey]) ) {
 					$newid = $itemdata[$tablekey];
@@ -74,6 +76,7 @@ if ( ! isset($_POST['cancel']) ) {
 			check_sane_keys($prikey);
 
 			$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
+			auditlog($t, implode(', ', $prikey), 'updated');
 		}
 	}
 }

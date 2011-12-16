@@ -83,6 +83,8 @@ $langid = $lang['langid'];
 
 $sid = submit_solution($login, $probid, $langid, $_FILES['code']['tmp_name']);
 
+auditlog('submission', $sid, 'added', NONINTERACTIVE?'noninteractive':null);
+
 // Redirect back to index page when interactively used.
 if ( !NONINTERACTIVE ) {
 	header('Location: index.php?submitted=' . urlencode($sid) );

@@ -663,3 +663,27 @@ function XMLgetattr($node, $attr)
 
 	return $attrnode->nodeValue;
 }
+
+/**
+ * Log an action to the auditlog table.
+ */
+function auditlog ($datatype, $dataid, $action, $extrainfo = null, $username = null)
+{
+	global $cid, $login, $DB;
+
+	if ( !empty($username) ) {
+		$user = $username;
+	} elseif ( IS_JURY ) {
+		$user = getJuryMember();
+	} else {
+		$user = $login;
+	}
+	
+
+	$DB->q('INSERT LOW_PRIORITY INTO auditlog
+               (logtime, cid, user, datatype, dataid, action, extrainfo)
+	        VALUES(%s, %i, %s, %s, %s, %s, %s)',
+		now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
+
+	return;
+}

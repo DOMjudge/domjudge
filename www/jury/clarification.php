@@ -80,6 +80,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	                $cid, $respid, now(), $sendto,
 	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
 	                $_POST['bodytext'], 1, $jury_member);
+	auditlog('clarification', $newid, 'added');
 
 	if ( ! $isgeneral ) {
 		$DB->q('UPDATE clarification SET answered = 1, jury_member = ' .
@@ -120,6 +121,8 @@ if ( isset($_POST['submit']) && isset($_POST['answered']) ) {
 	$DB->q('UPDATE clarification SET answered = %i, jury_member = ' .
 	       ($answered ? '%s ' : 'NULL %_ ') . 'WHERE clarid = %i',
 	       $answered, $jury_member, $respid);
+
+	auditlog('clarification', $respid, 'marked ' . ($answered?'answered':'unanswered'));
 
 	// redirect back to the original location
 	header('Location: clarification.php?id=' . $id);

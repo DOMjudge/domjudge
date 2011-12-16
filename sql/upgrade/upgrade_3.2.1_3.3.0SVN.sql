@@ -18,6 +18,18 @@ ALTER TABLE `team` DROP COLUMN `judging_last_started`;
 ALTER TABLE `team`
   ADD COLUMN `judging_last_started` datetime default NULL COMMENT 'Start time of last judging for priorization' AFTER `comments`;
 
+CREATE TABLE `auditlog` (
+  `logid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `logtime` datetime NOT NULL,
+  `cid` int(4) unsigned DEFAULT NULL,
+  `user` varchar(255) DEFAULT NULL,
+  `datatype` varchar(15) DEFAULT NULL,
+  `dataid` varchar(15) DEFAULT NULL,
+  `action` varchar(30) DEFAULT NULL,
+  `extrainfo` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`logid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Log of all actions performed';
+
 CREATE TABLE `balloon` (
   `balloonid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `submitid` int(4) unsigned NOT NULL COMMENT 'Submission for which balloon was earned',
@@ -28,6 +40,8 @@ CREATE TABLE `balloon` (
 --
 -- Add/remove privileges
 --
+
+GRANT INSERT ON auditlog TO `domjudge_team`;
 
 FLUSH PRIVILEGES;
 

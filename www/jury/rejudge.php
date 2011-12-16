@@ -65,6 +65,8 @@ while ( $jud = $res->next() ) {
 
 	calcScoreRow($cid, $jud['teamid'], $jud['probid']);
 	$DB->q('COMMIT');
+	
+	auditlog('judging', $jud['judgingid'], 'mark invalid', '(rejudge)');
 }
 
 

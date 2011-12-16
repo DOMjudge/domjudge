@@ -24,6 +24,8 @@ $cnt = $DB->q('RETURNAFFECTED UPDATE submission s
                SET s.valid = %i WHERE s.submitid = %i',
               $val, $id);
 
+auditlog('submission', $id, 'marked ' . ($val?'valid':'invalid'));
+
 if ( $cnt == 0 ) {
 	error("Submission s$id not found.");
 } else if ( $cnt > 1 ) {

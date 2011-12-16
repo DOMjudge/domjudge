@@ -9,6 +9,21 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 
 --
+-- Table structure for table `auditlog`
+--
+CREATE TABLE `auditlog` (
+  `logid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `logtime` datetime NOT NULL,
+  `cid` int(4) unsigned DEFAULT NULL,
+  `user` varchar(255) DEFAULT NULL,
+  `datatype` varchar(15) DEFAULT NULL,
+  `dataid` varchar(15) DEFAULT NULL,
+  `action` varchar(30) DEFAULT NULL,
+  `extrainfo` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`logid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Log of all actions performed';
+
+--
 -- Table structure for table `balloon`
 --
 CREATE TABLE `balloon` (

@@ -121,6 +121,7 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 		$DB->q('UPDATE judging SET jury_member = ' .
 		       (isset($_REQUEST['unclaim']) ? 'NULL %_ ' : '%s ') .
 		       'WHERE judgingid = %i', $jury_member, $jid);
+		auditlog('judging', $jid, isset($_REQUEST['unclaim']) ? 'unclaimed' : 'claimed');
 
 		if ( isset($_REQUEST['unclaim']) ) header('Location: submissions.php');
 	}

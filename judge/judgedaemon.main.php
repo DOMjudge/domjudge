@@ -454,6 +454,7 @@ function judge($mark, $row, $judgingid)
 
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
+	auditlog('judging', $judgingid, 'judged', $result, $myhost);
 	if ( $result == 'correct' ) {
 		alert('accept');
 	} else {

@@ -30,11 +30,13 @@ if ( !empty($pcmd) ) {
 	if ( isset($pcmd['toggle_submit']) ) {
 		$DB->q('UPDATE language SET allow_submit = %i WHERE langid = %s',
 		       $_POST['val']['toggle_submit'], $id);
+		auditlog('language', $id, 'set allow submit', $_POST['val']['toggle_submit']);
 	}
 
 	if ( isset($pcmd['toggle_judge']) ) {
 		$DB->q('UPDATE language SET allow_judge = %i WHERE langid = %s',
 		       $_POST['val']['toggle_judge'], $id);
+		auditlog('language', $id, 'set allow judge', $_POST['val']['toggle_judge']);
 	}
 }
 
