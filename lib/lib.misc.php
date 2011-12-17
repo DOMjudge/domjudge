@@ -680,7 +680,7 @@ function auditlog ($datatype, $dataid, $action, $extrainfo = null, $username = n
 	}
 	
 
-	$DB->q('INSERT DELAYED INTO auditlog
+	$DB->q('INSERT INTO auditlog
                (logtime, cid, user, datatype, dataid, action, extrainfo)
 	        VALUES(%s, %i, %s, %s, %s, %s, %s)',
 		now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
