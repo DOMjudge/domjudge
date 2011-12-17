@@ -680,7 +680,7 @@ function auditlog ($datatype, $dataid, $action, $extrainfo = null, $username = n
 	}
 	
 
-	$DB->q('INSERT LOW_PRIORITY INTO auditlog
+	$DB->q('INSERT DELAYED INTO auditlog
                (logtime, cid, user, datatype, dataid, action, extrainfo)
 	        VALUES(%s, %i, %s, %s, %s, %s, %s)',
 		now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
