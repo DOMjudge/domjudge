@@ -219,10 +219,10 @@ flushresults();
 
 if($cid == null) {
 	result('contests', 'Active contest', 'E',
-		'No current contest found. System will not function.');
+		'No currently active contest found. System will not function.');
 } else {
 	result('contests', 'Active contest', 'O',
-		'Current contest: c'.(int)$cid);
+		'Currently active contest: c'.(int)$cid);
 }
 
 // get all contests

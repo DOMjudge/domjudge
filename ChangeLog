@@ -19,6 +19,8 @@ Version 3.3.0 - SVN
  - Protect against clickjacking by forbidding framing using the
    X-Frame-Options HTTP header supported in modern browsers.
  - Reimplement balloon tracking and notification backend.
+ - Display current contest prominently on contests page and provide
+   button to have the next contest milestone happen now.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------

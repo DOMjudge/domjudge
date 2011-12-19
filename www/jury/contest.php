@@ -11,7 +11,7 @@
 $id = (int)@$_GET['id'];
 
 require('init.php');
-$title = "Contest: " .htmlspecialchars(@$id);
+$title = "Contest";
 
 require(LIBWWWDIR . '/header.php');
 
@@ -78,7 +78,7 @@ if ( isset($_GET['edited']) ) {
 	echo addForm('refresh_cache.php', 'get') .
             msgbox (
                 "Warning: Refresh scoreboard cache",
-		"After changing contest times, it may be necessary to recalculate the cached scoreboards.<br /><br />" .
+		"If the contest start time was changed, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
 		addSubmit('recalculate caches now') 
 		) .
 		addEndForm();
@@ -91,7 +91,7 @@ $data = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $id);
 echo "<h1>Contest: ".htmlspecialchars($data['contestname'])."</h1>\n\n";
 
 if ( $cid == $data['cid'] ) {
-	echo "<p><em>This is the current contest.</em></p>\n\n";
+	echo "<p><em>This is the active contest.</em></p>\n\n";
 }
 if ( !$data['enabled'] ) {
 	echo "<p><em>This contest is disabled.</em></p>\n\n";

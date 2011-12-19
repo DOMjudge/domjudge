@@ -432,7 +432,7 @@ response.
 If the scoreboard was frozen, it will remain frozen until the time set
 as unfreeze time, as seen under Contests. It is possible to publish
 the final standings at any given moment by pressing the `unfreeze
-scoreboard now' button under contests.
+now' button under contests.
 
 <p>
 There's not much more to be done after the contest has ended. The
