@@ -12,7 +12,7 @@ require('init.php');
 $times = array ('activate','start','freeze','end','unfreeze');
 $now = now();
 
-if ( isset($_POST['donow']) ) {
+if ( IS_ADMIN && isset($_POST['donow']) ) {
 	$time = array_pop(array_keys($_POST['donow']));
 	if ( !in_array($time, $times) ) error("Unknown value for timetype");
 	// for activatetime  we don't have a current contest to use,
@@ -67,7 +67,8 @@ if ( empty($cid) )  {
 		echo "<p>No active contest. Upcoming:<br/> <em>" .
 		     htmlspecialchars($row['contestname']) .
 		     "</em>; active from " . $row['activatetime'] .
-		     "<br /><br />\n<input type=\"submit\" " .
+		     "<br /><br />\n";
+		if ( IS_ADMIN ) echo "<input type=\"submit\" " .
 		     "name=\"donow[activate][" . (int)$row['cid'] . 
 		     "]\" value=\"activate now\" />\n";
 		
@@ -108,11 +109,11 @@ if ( empty($cid) )  {
 		// Show a button for setting the time to now(), only when that
 		// makes sense. E.g. only for end contest when contest has started.
 		// No button for 'activate', because when shown by definition always already active
-		if (
+		if ( IS_ADMIN && (
 		 ( $time == 'start' && !$hasstarted ) ||
 		 ( $time == 'end' && $hasstarted && !$hasended && (empty($row['freezetime']) || $hasfrozen) ) ||
 		 ( $time == 'freeze' && $hasstarted && !$hasended && !$hasfrozen ) || 
-		 ( $time == 'unfreeze' && $hasfrozen && !$hasunfrozen && $hasended ) ) {
+		 ( $time == 'unfreeze' && $hasfrozen && !$hasunfrozen && $hasended ) ) ) {
 			echo addSubmit("$time now", "donow[$time]");
 		}
 
