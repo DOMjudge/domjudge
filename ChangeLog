@@ -21,6 +21,7 @@ Version 3.3.0 - SVN
  - Reimplement balloon tracking and notification backend.
  - Display current contest prominently on contests page and provide
    button to have the next contest milestone happen now.
+ - Add script to automatically submit solutions and clarifications.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
