@@ -138,11 +138,12 @@ function putClarification($id,  $team = NULL)
  */
 function summarizeClarification($body)
 {
-	// when making a summary, try to igonore the quoted text
+	// when making a summary, try to ignore the quoted text, and
+	// replace newlines by spaces.
 	$split = explode("\n", $body);
 	$newbody = '';
 	foreach($split as $line) {
-		if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line;
+		if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line . ' ';
 	}
 	return htmlspecialchars( str_cut( ( empty($newbody) ? $body : $newbody ), 80) );
 }
