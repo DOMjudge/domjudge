@@ -29,7 +29,7 @@ if ( $cnt == 0 ) {
 	error("Validated more than one judging.");
 }
 
-$jdata = $DB->q('TUPLE SELECT j.result, s.submitid, s.cid, s.teamid, s.probid, s.langid,
+$jdata = $DB->q('TUPLE SELECT j.result, s.submitid, s.cid, s.teamid, s.probid, s.langid
                  FROM judging j
                  LEFT JOIN submission s USING (submitid)
                  WHERE judgingid = %i', $id);
