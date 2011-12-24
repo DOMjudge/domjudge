@@ -71,6 +71,8 @@ $amap[''] = 'none';
 echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 ?>
 </td></tr>
+<tr><td><label for="data_0__penalty_">Penalty time:</label></td>
+<td><?php echo addInput('data[0][penalty]', (isset($row['penalty'])?$row['penalty']:0), 10, 15, 'required')?></td></tr>
 <tr><td><label for="data_0__room_">Location:</label></td>
 <td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td><label for="data_0__comments_">Comments:</label></td>
@@ -175,6 +177,9 @@ if ( $row['enabled'] != 1 ) {
 <tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
 <tr><td>Host:</td><td><?php echo
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
+<?php if (!empty($row['penalty'])): ?>
+<tr><td>Penalty time:</td><td><?php echo htmlspecialchars($row['penalty'])?></td></tr>
+<?php endif; ?>
 <?php if (!empty($row['room'])): ?>
 <tr><td>Location:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>

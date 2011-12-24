@@ -186,7 +186,7 @@ function getTeams($filter, $jury, $cdata) {
 	global $DB;
 
 	return $DB->q('KEYTABLE SELECT team.teamid AS ARRAYKEY, team.teamid, externalid,
-	               team.name, team.categoryid, team.affilid, sortorder,
+	               team.name, team.categoryid, team.affilid, penalty, sortorder,
 	               country, color, team_affiliation.name AS affilname
 	               FROM team
 	               INNER JOIN contest ON (contest.cid = %i)
@@ -227,7 +227,7 @@ function initScores($teams) {
 	$SCORES = array();
 	foreach ($teams as $teamid => $team ) {
 		$SCORES[$teamid]['num_correct'] = 0;
-		$SCORES[$teamid]['total_time']  = 0;
+		$SCORES[$teamid]['total_time']  = $team['penalty'];
 		$SCORES[$teamid]['solve_times'] = array();
 		$SCORES[$teamid]['rank']        = 0;
 		$SCORES[$teamid]['teamname']    = $team['name'];

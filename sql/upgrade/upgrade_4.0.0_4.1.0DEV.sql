@@ -75,6 +75,9 @@ ALTER TABLE `problem`
   ADD COLUMN `outputlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum output size (in kB) for this problem' AFTER `memlimit`,
   ADD COLUMN `special_compare_args` varchar(255) DEFAULT NULL COMMENT 'Optional arguments to special_compare script' AFTER `special_compare`;
 
+ALTER TABLE `team`
+  ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`;
+
 ALTER TABLE `testcase`
   ADD COLUMN `image` longblob COMMENT 'A graphical representation of this testcase' AFTER `description`,
   ADD COLUMN `image_thumb` longblob COMMENT 'Aumatically created thumbnail of the image' AFTER `image`,
