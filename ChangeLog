@@ -4,6 +4,13 @@ Version 3.2.2 - SVN
 -------------------
  - Rename SQL upgrade snippets and add README file for these.
  - Fix JS collapse in public interface and simplify menu inclusion.
+ - Fix warning of runguard trying to reset resource limits to infinity.
+ - Use http port number to correctly test for network connectivity.
+ - Reopen daemon stdio to /dev/null, fixes spurious errors of child
+   processes failing to write to stdout.
+ - Fix: sending a clarification requires an active contest.
+ - Fix valid HTML URL encoding issue.
+ - Misc. minor spelling and documentation fixes.
 
 Version 3.2.1 - 9 November 2011
 -------------------------------

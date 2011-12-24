@@ -336,29 +336,29 @@ void setrestrictions()
 
 	if ( cputime!=RLIM_INFINITY ) {
 		verbose("setting CPU-time limit to %d seconds",(int)cputime);
+		lim.rlim_cur = lim.rlim_max = cputime;
+		setlim(CPU);
 	}
-	lim.rlim_cur = lim.rlim_max = cputime;
-	setlim(CPU);
 
 	if ( memsize!=RLIM_INFINITY ) {
 		verbose("setting memory limits to %d bytes",(int)memsize);
+		lim.rlim_cur = lim.rlim_max = memsize;
+		setlim(AS);
+		setlim(DATA);
+		setlim(STACK);
 	}
-	lim.rlim_cur = lim.rlim_max = memsize;
-	setlim(AS);
-	setlim(DATA);
-	setlim(STACK);
 
 	if ( filesize!=RLIM_INFINITY ) {
 		verbose("setting filesize limit to %d bytes",(int)filesize);
+		lim.rlim_cur = lim.rlim_max = filesize;
+		setlim(FSIZE);
 	}
-	lim.rlim_cur = lim.rlim_max = filesize;
-	setlim(FSIZE);
 
 	if ( nproc!=RLIM_INFINITY ) {
 		verbose("setting process limit to %d",(int)nproc);
+		lim.rlim_cur = lim.rlim_max = nproc;
+		setlim(NPROC);
 	}
-	lim.rlim_cur = lim.rlim_max = nproc;
-	setlim(NPROC);
 
 #undef setlim
 

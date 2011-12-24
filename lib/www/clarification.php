@@ -137,11 +137,12 @@ function putClarification($id,  $team = NULL)
  */
 function summarizeClarification($body)
 {
-	// when making a summary, try to igonore the quoted text
+	// when making a summary, try to ignore the quoted text, and
+	// replace newlines by spaces.
 	$split = explode("\n", $body);
 	$newbody = '';
 	foreach($split as $line) {
-		if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line;
+		if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line . ' ';
 	}
 	return htmlspecialchars( str_cut( ( empty($newbody) ? $body : $newbody ), 80) );
 }
@@ -234,10 +235,10 @@ function putClarificationList($clars, $team = NULL)
 
 			echo "<td>$link $answered</a></td><td>";
 			if ( $claim && isset($clar['sender']) ) {
-				echo "<a class=\"button\" href=\"clarification.php?claim=1&id=" . htmlspecialchars($clar['clarid']) . "\">claim</a>";
+				echo "<a class=\"button\" href=\"clarification.php?claim=1&amp;id=" . htmlspecialchars($clar['clarid']) . "\">claim</a>";
 			} else {
 				if ( !$clar['answered'] && $jury_member==getJuryMember() ) {
-					echo "<a class=\"button\" href=\"clarification.php?unclaim=1&id=" . htmlspecialchars($clar['clarid']) . "\">unclaim</a>";
+					echo "<a class=\"button\" href=\"clarification.php?unclaim=1&amp;id=" . htmlspecialchars($clar['clarid']) . "\">unclaim</a>";
 				} else {
 					echo "$link $jury_member</a>";
 				}
@@ -255,6 +256,11 @@ function putClarificationList($clars, $team = NULL)
  */
 function putClarificationForm($action, $cid, $respid = NULL)
 {
+	if ( empty($cid) ) {
+		echo '<p class="nodata">No active contest</p>';
+		return;
+	}
+
 	require_once('forms.php');
 
 	global $DB, $cdata;

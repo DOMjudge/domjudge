@@ -23,7 +23,7 @@
 #define BUFFERSIZE 10240
 
 const char host[255] = "google.com";
-const char port[10]  = "http";
+const char port[10]  = "80";
 const char request[255] = "GET google.com";
 
 int socket_fd; /* filedescriptor of the connection to server socket */

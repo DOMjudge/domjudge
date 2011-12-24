@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 		case '6': /* inet6-only option */
 			inet6_only = 1;
 			break;
-		case 'd': /* deamon option */
+		case 'd': /* daemon option */
 			run_daemon = 1;
 			break;
 		case 'P': /* port option */
@@ -176,7 +176,7 @@ int main(int argc, char **argv)
 
 	logmsg(LOG_NOTICE,"server started [%s]", DOMJUDGE_PROGRAM);
 
-	/* Deamonize if requested */
+	/* Daemonize if requested */
 	if ( run_daemon ) daemonize(PIDFILE);
 
 	create_server();
