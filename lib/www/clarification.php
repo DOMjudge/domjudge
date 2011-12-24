@@ -157,8 +157,7 @@ function putClarificationList($clars, $team = NULL)
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
-	echo "<table class=\"list sortable\">\n<thead>\n";
-	echo "<tr>" .
+	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
 		( IS_JURY ? "<th scope=\"col\">ID</th>" : "") .
 	     "<th scope=\"col\">time</th>" .
 	     "<th scope=\"col\">from</th>" .
@@ -169,22 +168,22 @@ function putClarificationList($clars, $team = NULL)
 
 	while ( $clar = $clars->next() ) {
 		// check viewing permission for teams
-		if ( ! IS_JURY && !canViewClarification($team, $clar))
-			continue;
+		if ( ! IS_JURY && !canViewClarification($team, $clar) ) continue;
 
 		$clar['clarid'] = (int)$clar['clarid'];
 		$link = '<a href="clarification.php?id=' . urlencode($clar['clarid'])  . '">';
 
-		if(isset($clar['unread']))
+		if ( isset($clar['unread']) ) {
 			echo '<tr class="unread">';
-		else
+		} else {
 			echo '<tr>';
+		}
 
-		if ( IS_JURY ) 
+		if ( IS_JURY ) {
 			echo '<td>' . $link . $clar['clarid'] . '</a></td>';
+		}
 
-		echo '<td>' . $link;
-		echo printtime($clar['submittime']) . '</a></td>';
+		echo '<td>' . $link . printtime($clar['submittime']) . '</a></td>';
 
 		$sender = htmlspecialchars($clar['sender']);
 		$recipient = htmlspecialchars($clar['recipient']);
@@ -193,18 +192,12 @@ function putClarificationList($clars, $team = NULL)
 			$sender = 'Jury';
 			$recipient = 'All';
 		} else {
-			if ($sender == NULL)
-				$sender = 'Jury';
-
-			if ($recipient == NULL)
-				$recipient = 'Jury';
+			if ( $sender    == NULL ) $sender = 'Jury';
+			if ( $recipient == NULL ) $recipient = 'Jury';
 		}
 
-
-		echo '<td class="teamid">' . $link .
-			 $sender . '</a></td>';
-		echo '<td class="teamid">' . $link .
-			 $recipient . '</a></td>';
+		echo '<td class="teamid">' . $link . $sender . '</a></td>' .
+		     '<td class="teamid">' . $link . $recipient . '</a></td>';
 
 		echo '<td>' . $link;
 		if ( is_null($clar['probid']) ) {
@@ -214,9 +207,9 @@ function putClarificationList($clars, $team = NULL)
 		}
 		echo "</a></td>";
 
-		echo '<td class="clartext">' . $link;
-		echo summarizeClarification($clar['body']);
-		echo "</a></td>";
+		echo '<td class="clartext">' . $link .
+		    summarizeClarification($clar['body']) . "</a></td>";
+
 		if ( IS_JURY ) {
 			unset($answered, $jury_member);
 			$claim = FALSE;
@@ -236,10 +229,12 @@ function putClarificationList($clars, $team = NULL)
 
 			echo "<td>$link $answered</a></td><td>";
 			if ( $claim && isset($clar['sender']) ) {
-				echo "<a class=\"button\" href=\"clarification.php?claim=1&amp;id=" . htmlspecialchars($clar['clarid']) . "\">claim</a>";
+				echo "<a class=\"button\" href=\"clarification.php?claim=1&amp;id=" .
+					htmlspecialchars($clar['clarid']) . "\">claim</a>";
 			} else {
 				if ( !$clar['answered'] && $jury_member==getJuryMember() ) {
-					echo "<a class=\"button\" href=\"clarification.php?unclaim=1&amp;id=" . htmlspecialchars($clar['clarid']) . "\">unclaim</a>";
+					echo "<a class=\"button\" href=\"clarification.php?unclaim=1&amp;id=" .
+						htmlspecialchars($clar['clarid']) . "\">unclaim</a>";
 				} else {
 					echo "$link $jury_member</a>";
 				}
