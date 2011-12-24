@@ -137,11 +137,12 @@ function putClarification($id,  $team = NULL)
  */
 function summarizeClarification($body)
 {
-	// when making a summary, try to igonore the quoted text
+	// when making a summary, try to ignore the quoted text, and
+	// replace newlines by spaces.
 	$split = explode("\n", $body);
 	$newbody = '';
 	foreach($split as $line) {
-		if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line;
+		if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line . ' ';
 	}
 	return htmlspecialchars( str_cut( ( empty($newbody) ? $body : $newbody ), 80) );
 }
@@ -219,6 +220,11 @@ function putClarificationList($clars, $team = NULL)
  */
 function putClarificationForm($action, $cid, $respid = NULL)
 {
+	if ( empty($cid) ) {
+		echo '<p class="nodata">No active contest</p>';
+		return;
+	}
+
 	require_once('forms.php');
 
 	global $DB, $cdata;

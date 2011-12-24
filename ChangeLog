@@ -6,6 +6,10 @@ Version 3.1.5 - SVN
  - Add missing SQL select privilege on submission.valid column.
    [Note: upgrade the SQL database with 'dj-setup-database upgrade']
  - Rename SQL upgrade snippets and add README file for these.
+ - Fix warning of runguard trying to reset resource limits to infinity.
+ - Use http port number to correctly test for network connectivity.
+ - Fix: sending a clarification requires an active contest.
+ - Fix spacing in clarification summary.
 
 Version 3.1.4 - 27 August 2011
 ------------------------------
