@@ -67,6 +67,8 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 </td></tr>
 <tr><td><label for="data_0__authtoken_">Auth token:</label></td>
 <td><?php echo addInput('data[0][authtoken]', @$row['authtoken'], 35, 255)?></td></tr>
+<tr><td><label for="data_0__penalty_">Penalty time:</label></td>
+<td><?php echo addInput('data[0][penalty]', @$row['penalty'], 10, 15)?></td></tr>
 <tr><td><label for="data_0__room_">Location:</label></td>
 <td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td><label for="data_0__comments_">Comments:</label></td>
@@ -112,6 +114,7 @@ echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 <div class="col1"><table>
 <tr><td scope="row">Login:     </td><td class="teamid"><?php echo $row['login']?></td></tr>
 <tr><td scope="row">Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
+<tr><td scope="row">Penalty time:</td><td><?php echo htmlspecialchars($row['penalty'])?></td></tr>
 <tr><td scope="row">Host:</td><td><?php echo
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
 <?php if (!empty($row['room'])): ?>

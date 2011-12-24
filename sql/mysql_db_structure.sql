@@ -269,6 +269,7 @@ CREATE TABLE `team` (
   `judging_last_started` datetime default NULL COMMENT 'Start time of last judging for priorization',
   `teampage_first_visited` datetime default NULL COMMENT 'Time of first teampage view',
   `hostname` varchar(255) default NULL COMMENT 'Teampage first visited from this address',
+  `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes',
   PRIMARY KEY  (`login`),
   UNIQUE KEY `name` (`name`),
   KEY `affilid` (`affilid`),

@@ -85,7 +85,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
 	// get the teams and problems
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY, login, team.name,
-	                 team.categoryid, team.affilid, country, sortorder
+	                 team.categoryid, team.affilid, penalty, country, sortorder
 	                 FROM team
 	                 LEFT JOIN team_category
 	                        ON (team_category.categoryid = team.categoryid)
@@ -123,7 +123,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	// use for determining the ranking. Initialise them here
 	foreach ($teams as $login => $team ) {
 		$SCORES[$login]['num_correct'] = 0;
-		$SCORES[$login]['total_time']  = 0;
+		$SCORES[$login]['total_time']  = $team['penalty'];
 		$SCORES[$login]['solve_times'] = array();
 		$SCORES[$login]['rank']        = 0;
 		$SCORES[$login]['teamname']    = $team['name'];

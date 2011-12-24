@@ -16,7 +16,8 @@ ALTER TABLE `team` DROP COLUMN `judging_last_started`;
 --
 
 ALTER TABLE `team`
-  ADD COLUMN `judging_last_started` datetime default NULL COMMENT 'Start time of last judging for priorization' AFTER `comments`;
+  ADD COLUMN `judging_last_started` datetime default NULL COMMENT 'Start time of last judging for priorization' AFTER `comments`,
+  ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`;
 
 CREATE TABLE `auditlog` (
   `logid` int(10) unsigned NOT NULL AUTO_INCREMENT,
