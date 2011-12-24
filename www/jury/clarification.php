@@ -77,8 +77,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	                 VALUES (%i, ' .
 	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %s, %s, %i, ' .
 	                (isset($jury_member) ? '%s)' : 'NULL %_)'),
-	                $cid, $respid, now(), $sendto,
-	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
+	                $cid, $respid, now(), $sendto, $_POST['problem'],
 	                $_POST['bodytext'], 1, $jury_member);
 	auditlog('clarification', $newid, 'added');
 

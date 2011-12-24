@@ -52,8 +52,7 @@ CREATE TABLE `clarification` (
   KEY `respid` (`respid`),
   KEY `probid` (`probid`),
   CONSTRAINT `clarification_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
-  CONSTRAINT `clarification_ibfk_2` FOREIGN KEY (`respid`) REFERENCES `clarification` (`clarid`) ON DELETE SET NULL,
-  CONSTRAINT `clarification_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE SET NULL
+  CONSTRAINT `clarification_ibfk_2` FOREIGN KEY (`respid`) REFERENCES `clarification` (`clarid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Clarification requests by teams and responses by the jury';
 
 --
@@ -62,7 +61,7 @@ CREATE TABLE `clarification` (
 
 CREATE TABLE `configuration` (
   `name` varchar(25) NOT NULL COMMENT 'Name of the configuration variable',
-  `value` varchar(255) NOT NULL COMMENT 'Content of the configuration variable',
+  `value` longtext NOT NULL COMMENT 'Content of the configuration variable',
   PRIMARY KEY  (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Global configuration variables';
 

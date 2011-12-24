@@ -35,6 +35,50 @@ function canViewClarification($team, $clar)
 }
 
 /**
+ * Returns the list of clarification categories as a key,value array.
+ * Define the clarification category list and default variables
+ * globally to prevent superfluous DB queries.
+ */
+$defclarcategory = null;
+$clarcategories = null;
+function getClarCategories(&$default)
+{
+	global $DB, $defclarcategory, $clarcategories;
+
+	if ( $clarcategories!=null ) return $clarcategories;
+
+	$categs = $DB->q("MAYBEVALUE SELECT value FROM configuration
+	                  WHERE name = 'clar_categories'");
+
+	$clarcategories = array();
+	foreach ( explode("\t", $categs) as $cat ) {
+		list($key, $val) = explode(':', $cat, 2);
+		$clarcategories['#'.$key] = $val;
+		if ( $defclarcategory===null ) $defclarcategory = '#'.$key;
+	}
+
+	return $clarcategories;
+}
+
+/**
+ * Writes a list of clarification categories to the DB configuration.
+ */
+function setClarCategories($categs)
+{
+	global $DB;
+
+	$res = array();
+	foreach ( $categs as $key => $val ) {
+		// Anything not starting with '#' is a problem, skip
+		if ( substr($key, 0, 1)!='#' ) continue;
+		$res[] = substr($key, 1) . $val;
+	}
+
+	$DB->q("REPLACE INTO configuration (name, value)
+	        VALUES ('clar_categories', %s)", implode("\t", $res));
+}
+
+/**
  * Output a single clarification.
  * Helperfunction for putClarification, do _not_ use directly!
  */
@@ -74,9 +118,12 @@ function putClar($clar)
 	}
 	echo "</td></tr>\n";
 
+	$categs = getClarCategories();
+
 	echo '<tr><td scope="row">Subject:</td><td>';
-	if ( is_null($clar['probid']) ) {
-		echo "General issue";
+	if ( empty($clar['probid']) ) { /* empty */ }
+	elseif ( substr($clar['probid'], 0, 1)=='#' ) {
+		echo $categs[$clar['probid']];
 	} else {
 		if ( IS_JURY ) {
 			echo '<a href="problem.php?id=' . urlencode($clar['probid']) . '">' .
@@ -167,6 +214,8 @@ function putClarificationList($clars, $team = NULL)
 		( IS_JURY ? "<th scope=\"col\">answered</th><th scope=\"col\">by</th>" : "") .
 	     "</tr>\n</thead>\n<tbody>\n";
 
+	$categs = getClarCategories();
+
 	while ( $clar = $clars->next() ) {
 		// check viewing permission for teams
 		if ( ! IS_JURY && !canViewClarification($team, $clar))
@@ -207,8 +256,9 @@ function putClarificationList($clars, $team = NULL)
 			 $recipient . '</a></td>';
 
 		echo '<td>' . $link;
-		if ( is_null($clar['probid']) ) {
-			echo "general";
+		if ( empty($clar['probid']) ) { /* empty */ }
+		elseif ( substr($clar['probid'], 0, 1)=='#' ) {
+			echo $categs[$clar['probid']];
 		} else {
 			echo "problem ".$clar['probid'];
 		}
@@ -264,7 +314,7 @@ function putClarificationForm($action, $cid, $respid = NULL)
 
 	require_once('forms.php');
 
-	global $DB, $cdata;
+	global $DB, $cdata, $defclarcategory;
 ?>
 
 <script type="text/javascript">
@@ -326,17 +376,15 @@ function confirmClar() {
 	}
 
 	// Select box for a specific problem (only when the contest
-	// has started) or general issue.
+	// has started) or other issue.
 	if ( difftime($cdata['starttime'], now()) <= 0 ) {
 		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid, ": ", name) as name
 		                 FROM problem WHERE cid = %i AND allow_submit = 1
 		                 ORDER BY probid ASC', $cid);
-	} else {
-		$probs = array();
 	}
-	$options = array_merge(array('general' => 'General issue'), $probs);
+	$options = array_merge($probs, getClarCategories());
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
-	     addSelect('problem', $options, ($respid ? $clar['probid'] : 'general'), true) .
+	     addSelect('problem', $options, ($respid ? $clar['probid'] : $defclarcategory), true) .
 	     "</td></tr>\n";
 
 	?>

@@ -43,7 +43,6 @@ $RELATIONS['clarification'] = array (
 	'respid' => 'clarification.clarid&SETNULL',
 	'sender' => 'team.login&NOCONSTRAINT',
 	'recipient' => 'team.login&NOCONSTRAINT',
-	'probid' => 'problem.probid&SETNULL',
 );
 
 $RELATIONS['contest'] = array();

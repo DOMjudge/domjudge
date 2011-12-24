@@ -43,6 +43,9 @@ CREATE TABLE `balloon` (
 ALTER TABLE `clarification`
   MODIFY COLUMN `body` longtext NOT NULL COMMENT 'Clarification text';
 
+ALTER TABLE `configuration`
+  MODIFY COLUMN `value` longtext NOT NULL COMMENT 'Content of the configuration variable';
+
 ALTER TABLE `event`
   MODIFY COLUMN `description` longtext NOT NULL COMMENT 'Event description';
 
@@ -64,6 +67,10 @@ ALTER TABLE `team`
 ALTER TABLE `team_affiliation`
   MODIFY COLUMN `comments` longtext COMMENT 'Comments';
 
+-- Drop foreign key clar:probid before changing data
+ALTER TABLE `clarification`
+  DROP FOREIGN KEY `clarification_ibfk_3`;
+
 --
 -- Add/remove privileges
 --
@@ -76,9 +83,14 @@ FLUSH PRIVILEGES;
 -- Transfer data from old to new structure
 --
 
+UPDATE `clarification` SET `probid` = '#general' WHERE `probid` IS NULL;
+
 --
 -- Add/remove sample/initial contents
 --
+
+INSERT INTO `configuration` (`name`, `value`) VALUES
+  ('clar_categories', 'general:General issue	technical:Technical issue');
 
 --
 -- Finally remove obsolete structures after moving data
