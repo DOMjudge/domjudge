@@ -491,16 +491,20 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		if ( ! IS_JURY ) return;
 	} else {
 		echo "<h4>starts: " . printtime($cdata['starttime']) .
-				" - ends: " . printtime($cdata['endtime']) ;
+				" - ends: " . printtime($cdata['endtime']) . "</h4>\n\n";
 
 		if ( $fdata['showfrozen'] ) {
-			echo " (";
+			$timerem = floor((strtotime($cdata['endtime']) -
+			                  strtotime($cdata['freezetime']))/60);
 			if ( IS_JURY ) {
-				echo '<a href="../public/">the public scoreboard</a> is ';
+				echo '<p><em><a href="../public/">The public scoreboard</a> ' .
+					"was frozen with $timerem minutes remaining.</em></p>\n";
+			} else {
+				echo "<p><em>The scoreboard was frozen with $timerem minutes " .
+					"remaining - solutions submitted in the last $timerem " .
+					"minutes of the contest are still shown as pending.</em></p>\n";
 			}
-			echo "frozen since " . printtime($cdata['freezetime']) .")";
 		}
-		echo "</h4>\n\n";
 	}
 
 	if ( $filter!==FALSE ) {
