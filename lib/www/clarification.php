@@ -51,10 +51,12 @@ function getClarCategories(&$default = null)
 	                  WHERE name = 'clar_categories'");
 
 	$clarcategories = array();
-	foreach ( explode("\t", $categs) as $cat ) {
-		list($key, $val) = explode(':', $cat, 2);
-		$clarcategories['#'.$key] = $val;
-		if ( $defclarcategory===null ) $defclarcategory = '#'.$key;
+	if ( !empty($categs) ) {
+		foreach ( explode("\t", $categs) as $cat ) {
+			list($key, $val) = explode(':', $cat, 2);
+			$clarcategories['#'.$key] = $val;
+			if ( $defclarcategory===null ) $defclarcategory = '#'.$key;
+		}
 	}
 
 	if ( $default!=null ) $default = $defclarcategory;
