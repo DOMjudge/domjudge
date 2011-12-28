@@ -83,9 +83,10 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	// Don't leak information before start of contest
 	if ( ! $cstarted && ! $jury ) return;
 
-	// get the teams and problems
+	// get the teams, problems and categories
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY, login, team.name,
-	                 team.categoryid, team.affilid, country, sortorder
+	                 team.categoryid, team.affilid, sortorder,
+	                 country, color, team_affiliation.name AS affilname
 	                 FROM team
 	                 LEFT JOIN team_category
 	                        ON (team_category.categoryid = team.categoryid)
@@ -98,9 +99,14 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	                (isset($filter['categoryid']) ? ' AND team.categoryid IN (%As) ' : ' %_'),
 	                @$filter['affilid'], @$filter['country'], @$filter['categoryid']);
 
-	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid FROM problem
+	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
+	                 probid, name, color FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
 	                 ORDER BY probid', $cid);
+	$categs = $DB->q('KEYTABLE SELECT categoryid AS ARRAYKEY,
+ 	                  categoryid, name, color FROM team_category ' .
+	                 ($jury ? '' : 'WHERE visible = 1 ' ) .
+	                 'ORDER BY sortorder,name,categoryid');
 
 	// initialize the arrays we'll build from the data
 	$MATRIX = $SCORES = array();
@@ -216,25 +222,6 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 		}
 
 	}
-
-	// get the teams and problems
-	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY,
-	                 login, team.name, team.categoryid, team.affilid, sortorder,
-	                 color, country, team_affiliation.name AS affilname
-	                 FROM team
-	                 LEFT JOIN team_category
-	                        ON (team_category.categoryid = team.categoryid)
-	                 LEFT JOIN team_affiliation
-	                        ON (team_affiliation.affilid = team.affilid)' .
-	                ( $jury ? '' : ' WHERE visible = 1' ) );
-	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
-	                 probid, name, color FROM problem
-	                 WHERE cid = %i AND allow_submit = 1
-	                 ORDER BY probid', $cid);
-	$categs = $DB->q('KEYTABLE SELECT categoryid AS ARRAYKEY,
- 	                  categoryid, name, color FROM team_category ' .
-	                 ($jury ? '' : 'WHERE visible = 1 ' ) .
-	                 'ORDER BY sortorder,name,categoryid');
 
 	return array( 'matrix'     => $MATRIX,
 	              'scores'     => $SCORES,
