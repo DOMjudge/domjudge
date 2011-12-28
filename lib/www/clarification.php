@@ -41,7 +41,7 @@ function canViewClarification($team, $clar)
  */
 $defclarcategory = null;
 $clarcategories = null;
-function getClarCategories(&$default)
+function getClarCategories(&$default = null)
 {
 	global $DB, $defclarcategory, $clarcategories;
 
@@ -57,6 +57,8 @@ function getClarCategories(&$default)
 		if ( $defclarcategory===null ) $defclarcategory = '#'.$key;
 	}
 
+	if ( $default!=null ) $default = $defclarcategory;
+
 	return $clarcategories;
 }
 
@@ -71,11 +73,47 @@ function setClarCategories($categs)
 	foreach ( $categs as $key => $val ) {
 		// Anything not starting with '#' is a problem, skip
 		if ( substr($key, 0, 1)!='#' ) continue;
-		$res[] = substr($key, 1) . $val;
+		$res[] = substr($key, 1).':'.$val;
 	}
 
 	$DB->q("REPLACE INTO configuration (name, value)
 	        VALUES ('clar_categories', %s)", implode("\t", $res));
+}
+
+/**
+ * Returns an array of predefined clarification answers. The first
+ * (index 0) is assumed to be the default answer. Define the
+ * clarification answer array globally to prevent superfluous DB
+ * queries.
+ */
+$claranswers = null;
+function getClarAnswers()
+{
+	global $DB, $claranswers;
+
+	if ( $claranswers!=null ) return $claranswers;
+
+	$answers = $DB->q("MAYBEVALUE SELECT value FROM configuration
+	                   WHERE name = 'clar_answers'");
+
+	if ( empty($answers) ) {
+		$claranswers = array();
+	} else {
+		$claranswers = explode("\t", $answers);
+	}
+
+	return $claranswers;
+}
+
+/**
+ * Writes the clarification answers to the DB configuration.
+ */
+function setClarAnswers($answers)
+{
+	global $DB;
+
+	$DB->q("REPLACE INTO configuration (name, value)
+	        VALUES ('clar_answers', %s)", implode("\t", $answers));
 }
 
 /**
