@@ -667,7 +667,7 @@ function XMLgetattr($node, $attr)
 /**
  * Log an action to the auditlog table.
  */
-function auditlog ($datatype, $dataid, $action, $extrainfo = null, $username = null)
+function auditlog($datatype, $dataid, $action, $extrainfo = null, $username = null)
 {
 	global $cid, $login, $DB;
 
@@ -678,12 +678,9 @@ function auditlog ($datatype, $dataid, $action, $extrainfo = null, $username = n
 	} else {
 		$user = $login;
 	}
-	
 
 	$DB->q('INSERT INTO auditlog
-               (logtime, cid, user, datatype, dataid, action, extrainfo)
+	        (logtime, cid, user, datatype, dataid, action, extrainfo)
 	        VALUES(%s, %i, %s, %s, %s, %s, %s)',
-		now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
-
-	return;
+	       now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
 }
