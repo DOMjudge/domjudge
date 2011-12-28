@@ -92,7 +92,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 }
 
 // (un)set 'answered' (if posted)
-if ( isset($_POST['submit']) && isset($_POST['answered']) ) {
+if ( isset($_POST['answer']) && isset($_POST['answered']) ) {
 	$DB->q('UPDATE clarification SET answered = %i WHERE clarid = %i',
 	       (int)$_POST['answered'], $respid);
 
@@ -133,7 +133,7 @@ if ( !empty($req['sender']) ) {
 	echo addForm('clarification.php') .
 		addHidden('id', $id) .
 		addHidden('answered', !$req['answered']) .
-		addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered'), 'submit') .
+		addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered'), 'answer') .
 		addEndForm();
 }
 
