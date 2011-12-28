@@ -115,7 +115,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 }
 
 // (un)set 'answered' (if posted)
-if ( isset($_POST['submit']) && isset($_POST['answered']) ) {
+if ( isset($_POST['answer']) && isset($_POST['answered']) ) {
 	$answered = (int)$_POST['answered'];
 	$DB->q('UPDATE clarification SET answered = %i, jury_member = ' .
 	       ($answered ? '%s ' : 'NULL %_ ') . 'WHERE clarid = %i',
@@ -147,7 +147,7 @@ if ( !$req['answered'] ) {
 		    addSubmit('unclaim', 'unclaim') . ' or ';
 	}
 	echo addSubmit('claim', 'claim') . ' as ' . addJuryMemberSelect($jury_member) .
-	    addEndForm();
+	    '</p>' . addEndForm();
 }
 
 if ( ! empty ( $req['respid'] ) ) {
@@ -172,7 +172,7 @@ if ( !empty($req['sender']) ) {
 	echo addForm('clarification.php') .
 		addHidden('id', $id) .
 		addHidden('answered', !$req['answered']) .
-		addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered'), 'submit') .
+		addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered'), 'answer') .
 		addEndForm();
 }
 
