@@ -17,7 +17,7 @@ requireAdmin();
 
 echo "<h1>Activity log</h1>\n\n";
 
-$res = $DB->q('SELECT * FROM auditlog');
+$res = $DB->q('SELECT * FROM auditlog ORDER BY logtime DESC');
 
 if ( $res->count() == 0 ) {
 	echo '<p class="nodata">No entries</p>';
