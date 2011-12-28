@@ -87,9 +87,8 @@ if( $teams->count() == 0 ) {
 		case 3: echo 'team-ok" title="correct submission(s)"';
 			break;
 		}
-		// TODO? want to link this symbol aswell? need to do some css magic to retain color
-		echo ">" . CIRCLE_SYM . "</td>";
-		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$numcor / $numsub</td>";
+		echo ">$link" . CIRCLE_SYM . "</a></td>";
+		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$link$numcor / $numsub</a></td>";
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 				editLink('team', $row['login']) . " " .
