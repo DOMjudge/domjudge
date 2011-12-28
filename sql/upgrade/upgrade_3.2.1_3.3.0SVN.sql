@@ -90,6 +90,8 @@ UPDATE `clarification` SET `probid` = '#general' WHERE `probid` IS NULL;
 --
 
 INSERT INTO `configuration` (`name`, `value`) VALUES
+  ('clar_answers', 'No comment	Read the problem statement carefully');
+INSERT INTO `configuration` (`name`, `value`) VALUES
   ('clar_categories', 'general:General issue	technical:Technical issue');
 
 --

@@ -11,6 +11,8 @@
 -- Dumping data for table `configuration`
 -- 
 
+INSERT INTO `configuration` (`name`, `value`) VALUES ('clar_answers', 'No comment	Read the problem statement carefully');
+INSERT INTO `configuration` (`name`, `value`) VALUES ('clar_categories', 'general:General issue	technical:Technical issue');
 INSERT INTO `configuration` (`name`, `value`) VALUES ('show_affiliations', '1');
 
 -- 
