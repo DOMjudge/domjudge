@@ -221,7 +221,7 @@ function putClarification($id,  $team = NULL)
  * Summarize a clarification.
  * Helper function for putClarificationList.
  */
-function summarizeClarification($body)
+function summarizeClarification($body, $maxchars = 80)
 {
 	// when making a summary, try to ignore the quoted text, and
 	// replace newlines by spaces.
@@ -230,7 +230,7 @@ function summarizeClarification($body)
 	foreach($split as $line) {
 		if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line . ' ';
 	}
-	return htmlspecialchars( str_cut( ( empty($newbody) ? $body : $newbody ), 80) );
+	return htmlspecialchars( str_cut( ( empty($newbody) ? $body : $newbody ), $maxchars) );
 }
 
 /**
@@ -370,6 +370,14 @@ function confirmClar() {
 	return confirm("Send clarification request to Jury?");
 <?php endif; ?>
 }
+<?php if ( IS_JURY ): ?>
+function replaceAnswer() {
+	var newtext = document.forms['sendclar'].answertext.value;
+	var elem = document.getElementById('bodytext');
+	elem.innerHTML = newtext;
+	return false;
+}
+<?php endif; ?>
 // -->
 </script>
 
@@ -434,8 +442,19 @@ if ( $respid ) {
 	$text = explode("\n",wrap_unquoted($clar['body']),75);
 	foreach($text as $line) $body .= "> $line\n";
 }
-echo addTextArea('bodytext', $body, 80, 10);
-?></td></tr>
+echo addTextArea('bodytext', $body, 80, 10) . "</td></tr>\n";
+
+$std_answers = getClarAnswers();
+if ( IS_JURY && $respid!==NULL && count($std_answers)>0 ) {
+	$options = array();
+	$default = $std_answers[0];
+	foreach($std_answers as $ans) $options[$ans] = summarizeClarification($ans, 50);
+	echo "<tr><td><b>Std. answer:</b></td><td>" .
+	    addSelect('answertext', $options, $default, TRUE) .
+	    addSubmit('replace', 'replace', 'return replaceAnswer()') . "</td></tr>\n";
+}
+
+?>
 <tr>
 <td>&nbsp;</td>
 <td><?php echo addSubmit('Send', 'submit', 'return confirmClar()'); ?></td>
