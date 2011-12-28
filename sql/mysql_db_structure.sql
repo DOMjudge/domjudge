@@ -263,6 +263,7 @@ CREATE TABLE `team` (
   `categoryid` int(4) unsigned NOT NULL default '0' COMMENT 'Team category ID',
   `affilid` varchar(10) default NULL COMMENT 'Team affiliation ID',
   `authtoken` varchar(255) default NULL COMMENT 'Identifying token for this team',
+  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the team is visible and operational',
   `members` text COMMENT 'Team member names (freeform)',
   `room` varchar(15) default NULL COMMENT 'Physical location of team',
   `comments` text COMMENT 'Comments about this team',

@@ -1410,6 +1410,11 @@ with
 DOMjudge user
 </itemize>
 
+When <tt>enabled</tt> is set to 0, the team immediately disappears from
+the scoreboards and cannot use the team web interface anymore, even
+when already logged in. One use case could be to disqualify a team on
+the spot.
+
 <tt>members</tt> are the names of the team members, separated by
 newlines and <tt>room</tt> is the location or room of the team, both for
 display only; <tt>comments</tt> can be filled with arbitrary useful

@@ -71,6 +71,9 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td><label for="data_0__comments_">Comments:</label></td>
 <td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
+<tr><td><label for="data_0__enabled_">Enabled:</label></td>
+<td><?php echo addRadioButton('data[0][enabled]', (!isset($row['']) || $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>
+<?php echo addRadioButton('data[0][enabled]', (isset($row['enabled']) && !$row['enabled']), 0)?> <label for="data_0__enabled_0">no</label></td></tr>
 </table>
 
 <?php
@@ -106,6 +109,10 @@ $countryflag = "../images/countries/"    . urlencode($row['country']) . ".png";
 $teamimage   = "../images/teams/"        . urlencode($row['login'])   . ".jpg";
 
 echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
+
+if ( $row['enabled'] != 1 ) {
+	echo "<p><em>Team is disabled</em></p>\n\n";
+}
 
 ?>
 

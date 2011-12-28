@@ -22,6 +22,10 @@ Version 3.3.0 - SVN
  - Display current contest prominently on contests page and provide
    button to have the next contest milestone happen now.
  - Add script to automatically submit solutions and clarifications.
+ - Remove duplicate queries in scoreboard generation.
+ - Add team 'enabled' switch which defaults to true, but when
+   disabled makes a team to immediately disappear from the
+   scoreboard and renders their team interface unusable.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------

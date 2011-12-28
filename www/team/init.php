@@ -39,6 +39,10 @@ if ( @$_POST['cmd']=='login' ) do_login();
 
 if ( !logged_in() ) show_loginpage();
 
+if ( $teamdata['enabled'] != 1 ) {
+	error("Team is not enabled.");
+}
+
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];
 

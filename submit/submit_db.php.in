@@ -49,6 +49,10 @@ if ( AUTH_METHOD!='IPADDRESS' ) {
 // methods might conflict with this.
 $teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s', $team);
 
+if ( $teamdata['enabled'] != 1 ) {
+	error("Team '$team' is disabled.");
+}
+
 if( ! compareipaddr($teamdata['authtoken'],$ip) ) {
 	if ( $teamdata['authtoken'] == NULL && ! STRICTIPCHECK ) {
 		// Before registering team, check that IP address is unique

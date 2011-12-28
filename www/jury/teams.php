@@ -57,7 +57,8 @@ if( $teams->count() == 0 ) {
 			$numcor = (int)$ncorrect[$row['login']]['cnt'];
 		}
 		$link = '<a href="team.php?id='.urlencode($row['login']) . '">';
-		echo "<tr class=\"category" . (int)$row['categoryid'] . "\">".
+		echo "<tr class=\"category" . (int)$row['categoryid']  .
+			($row['enabled'] == 1 ? '' : ' sub_ignore') .  "\">".
 			"<td class=\"teamid\">" . $link .
 				htmlspecialchars($row['login'])."</a></td>".
 			"<td>" . $link .
