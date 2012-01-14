@@ -11,14 +11,18 @@
 
 <title>DOMjudge Administrator's Manual
 <author>by the DOMjudge team
-<date>$Date$
+<!-- $Format: -%x5f%x3e
+<date>%cD
+%x3c!%x5f- $ -->
 
 <abstract>
 This document provides information about DOMjudge installation,
 configuration and operation for the DOMjudge administrator. A separate
 manual is available for teams and for jury members.
 
-Document version: $Rev$
+<!-- $Format: -%x5f%x3e
+Document version: %h
+%x3c!%x5f- $ -->
 </abstract>
 
 <toc>
