@@ -65,7 +65,7 @@
 #include "runguard-config.h"
 
 #define PROGRAM "runguard"
-#define VERSION "$Rev$"
+#define VERSION REVISION
 #define AUTHORS "Jaap Eldering"
 
 const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */

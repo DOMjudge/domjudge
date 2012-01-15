@@ -48,7 +48,7 @@
 #include <getopt.h>
 
 #define PROGRAM "runpipe"
-#define VERSION "$Rev$"
+#define VERSION REVISION
 #define AUTHORS "Jaap Eldering"
 
 #include "lib.error.h"
