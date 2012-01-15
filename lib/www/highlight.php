@@ -4,7 +4,7 @@
  * Functions to create syntax highlighted views of source code,
  * supporting different external formatters.
  *
- * $Id: scoreboard.php 2641 2009-04-09 21:46:39Z kink $
+ * $Id$
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
