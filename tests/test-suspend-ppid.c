@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * This code tries to send a SIGSTOP (and later SIGCONT) to the parent
  * controlling process. If this succeeds, the controller will be
  * suspended and not terminate the command after the timelimit.

@@ -1,7 +1,5 @@
 /*
  * Common socket send/receive code for submit and submitdaemon programs.
- *
- * $Id$
  */
 
 #ifndef SUBMITCOMMON_HXX

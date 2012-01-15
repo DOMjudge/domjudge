@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 
 # Script to check for a file on a team account.
 # Usage: $0 <team> <filename>

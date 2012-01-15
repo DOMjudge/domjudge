@@ -3,8 +3,6 @@
  * Tool to coordinate the handing out of balloons to teams that solved
  * a problem. Similar to the balloons-daemon, but web-based.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */

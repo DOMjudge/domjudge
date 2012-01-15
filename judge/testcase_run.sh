@@ -2,8 +2,6 @@
 
 # Script to test (run and compare) submissions with a single testcase
 #
-# $Id$
-
 # Usage: $0 <testdata.in> <testdata.out> <timelimit> <workdir>
 #           [<special-run> [<special-compare>]]
 #

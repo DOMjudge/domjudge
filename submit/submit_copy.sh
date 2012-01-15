@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 
 # Script to copy a submission file from a team to judge account.
 # Usage: $0 <team> <fromfile> <tofile>

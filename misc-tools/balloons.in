@@ -6,8 +6,6 @@
  * a web based tool in the jury interface. This daemon and that tool
  * cannot be used at the same time.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */

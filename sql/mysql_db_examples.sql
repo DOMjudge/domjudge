@@ -3,8 +3,6 @@
 -- You can pipe this file into the 'mysql' command to insert this
 -- data, but preferably use 'dj-setup-database'. Database should be set
 -- externally (e.g. to 'domjudge').
---
--- $Id$
 
 
 -- 

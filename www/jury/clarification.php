@@ -3,8 +3,6 @@
  * Show clarification thread and reply box.
  * When no id is given, show general clarification box.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */

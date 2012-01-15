@@ -1,8 +1,6 @@
 /*
    compare -- compare program and testdata output and return diff output.
 
-   $Id$
-
    This program is a compare script for 'testcase_run.sh' and executes
    a normal 'diff' to detect correct, presentation-error (whitespace
    mostly ignored) or wrong-answer results. This program is written to

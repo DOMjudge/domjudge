@@ -3,8 +3,6 @@
 -- You can pipe this file into the 'mysql' command to create the
 -- database tables, but preferably use 'dj-setup-database'. Database
 -- should be set externally (e.g. to 'domjudge').
---
--- $Id$
 
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 

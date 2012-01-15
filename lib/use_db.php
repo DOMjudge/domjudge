@@ -1,5 +1,4 @@
 <?php
-/* $Id$ */
 
 require('lib.database.php');
 

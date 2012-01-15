@@ -3,8 +3,6 @@
  * Functions that will check a given row of a given table
  * for problems, and if necessary, normalise it.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */

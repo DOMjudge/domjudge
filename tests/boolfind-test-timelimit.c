@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * Sample solution in C for the "boolfind" interactive problem.
  * This program uses scanf and should hang on reading input,
  * resulting in a timelimit verdict.

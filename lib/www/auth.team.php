@@ -6,8 +6,6 @@
  * to the team ID and $teamdata contains the corresponding row from
  * the database. $ip is set to the remote IP address used.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */

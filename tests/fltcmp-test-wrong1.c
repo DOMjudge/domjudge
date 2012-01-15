@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * This should give WRONG ANSWER on the problem 'fltcmp' with
  * precision errors.
  *

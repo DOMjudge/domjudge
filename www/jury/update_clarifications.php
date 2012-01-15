@@ -3,8 +3,6 @@
  * Supply information for AJAX RPC calls (update the number
  * of new clarifications in the menu line).
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */

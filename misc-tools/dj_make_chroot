@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 #
 # Script to generate a minimal chroot environment with Oracle (Sun) Java
 # support to allow for Java programs to run in a chroot.

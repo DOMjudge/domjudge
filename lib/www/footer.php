@@ -1,7 +1,6 @@
 <?php
 /**
  * Common page footer
- * $Id$
  */ 
 if (!defined('DOMJUDGE_VERSION')) die("DOMJUDGE_VERSION not defined.");
 

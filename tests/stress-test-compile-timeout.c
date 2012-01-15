@@ -1,7 +1,6 @@
 #ifndef HEADER
 #define HEADER
-/* $Id$
- *
+/*
  * This program should fail with a COMPILER-ERROR due to a timeout.
  *
  * The program recursively includes itself via the preprocessor

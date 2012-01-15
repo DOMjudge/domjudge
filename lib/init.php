@@ -1,5 +1,4 @@
 <?php
-// $Id$
 if ( !defined('LIBDIR') ) die ("LIBDIR not defined.");
 
 require(LIBDIR . '/lib.error.php');

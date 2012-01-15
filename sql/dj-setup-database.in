@@ -1,6 +1,5 @@
 #!/bin/sh
 # @configure_input@
-# $Id$
 
 # This script allows one to perform DOMjudge database setup actions.
 # See usage below for possible commands and options.

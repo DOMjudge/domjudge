@@ -1,5 +1,3 @@
-# $Id$
-#
 # Python doesn't have a syntax check, so this should fail at runtime
 # with a RUN-ERROR.
 #

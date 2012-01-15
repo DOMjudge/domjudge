@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * The result of this source depends on the specific java compile
  * script which is used. The original script requires a class 'Main'
  * with 'public static void main(String[] args)' method and will thus

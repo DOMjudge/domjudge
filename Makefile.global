@@ -1,7 +1,5 @@
 # Global Makefile
 #
-# $Id$
-#
 # Put here all things that need or can be defined globally, like
 # standard targets (clean, etc.) and global variables.
 

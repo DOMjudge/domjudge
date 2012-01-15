@@ -1,7 +1,5 @@
 /*
  * Error handling and logging functions
- *
- * $Id$
  */
 
 #ifndef LIB_ERROR_H

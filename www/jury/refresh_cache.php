@@ -6,8 +6,6 @@
  * Use this sparingly since it requires
  * (3 x #teams x #problems) queries.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */

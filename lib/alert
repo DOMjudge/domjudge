@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 
 # This script will be called by different parts of the DOMjudge system
 # and allows the administrator to flexibly configure a way to get

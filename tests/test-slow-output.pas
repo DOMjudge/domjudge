@@ -1,5 +1,4 @@
-(* $Id$
- *
+(*
  * Output answers slowly, should give TIMELIMIT with some output
  *
  * @EXPECTED_RESULTS@: TIMELIMIT

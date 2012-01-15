@@ -1,7 +1,6 @@
 #ifndef HEADER
 #define HEADER
-/* $Id$
- *
+/*
  * This program should fail with a COMPILER-ERROR due to a timeout or
  * too much compiler output.
  *

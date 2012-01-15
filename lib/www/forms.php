@@ -1,6 +1,5 @@
 <?php
 /**
- * $Id$
  * Simple functions to start a form, add a field to a form, end a form.
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced

@@ -1,7 +1,5 @@
 /*
  * Miscellaneous common functions for C/C++ programs.
- *
- * $Id$
  */
 
 #ifndef LIB_MISC_H

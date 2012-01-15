@@ -1,7 +1,5 @@
 /*
  * Functions for reading runtime configuration files
- *
- * $Id$
  */
 
 #ifndef LIB_CONFIG_H

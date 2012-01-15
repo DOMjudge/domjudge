@@ -3,8 +3,6 @@
 -- You can pipe this file into the 'mysql' command to set these
 -- permissions, but preferably use 'dj-setup-database'. Database
 -- should be set externally (e.g. to 'domjudge').
---
--- $Id$
 
 
 -- Juryaccount can do anything to the data (but not modify the structure)

@@ -1,6 +1,4 @@
 # Error handling and logging functions
-#
-# $Id$
 
 # Loglevels (as defined in syslog.h)
 LOG_EMERG=0

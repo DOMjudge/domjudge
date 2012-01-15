@@ -4,8 +4,6 @@
  * Functions to create syntax highlighted views of source code,
  * supporting different external formatters.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */

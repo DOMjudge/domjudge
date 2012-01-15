@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * With the default Java compile script that autodetects the class
  * name, this should give CORRECT on the default problem 'hello'.
  * If the compiled code is copied into the root of the judging chroot

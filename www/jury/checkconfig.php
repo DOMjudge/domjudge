@@ -4,8 +4,6 @@
  * permissions and the like. At the moment this only contains some basic
  * checks but this can be extended in the future.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */

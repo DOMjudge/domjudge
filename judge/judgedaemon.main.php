@@ -3,8 +3,6 @@
  * Request a yet unjudged submission from the database, judge it, and pass
  * the results back in to the database.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */

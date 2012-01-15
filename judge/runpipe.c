@@ -4,8 +4,6 @@
    Idea based on the program dpipe from the Virtual Distributed
    Ethernet package.
 
-   $Id$
-
    Part of the DOMjudge Programming Contest Jury System and licenced
    under the GNU GPL. See README and COPYING for details.
 

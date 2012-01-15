@@ -2,8 +2,6 @@
 
 # Script to compile submissions.
 #
-# $Id$
-
 # Usage: $0 <lang> <workdir>
 #
 # <lang>            Language ID and extension of the source, see config-file

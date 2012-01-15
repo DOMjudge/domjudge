@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * This allocates stack memory and should fail with RUN-ERROR due to
  * running out of memory, which is restricted.
  *
