@@ -240,13 +240,13 @@ char *stripendline(char *str)
 	return str;
 }
 
-void version()
+void version(const char *prog, const char *vers)
 {
 	printf("\
 %s -- part of DOMjudge version %s\n\
 Written by the DOMjudge developers\n\n\
 DOMjudge comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n\
 are welcome to redistribute it under certain conditions.  See the GNU\n\
-General Public Licence for details.\n",PROGRAM,VERSION);
+General Public Licence for details.\n", prog, vers);
 	exit(0);
 }

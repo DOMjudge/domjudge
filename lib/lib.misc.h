@@ -76,9 +76,9 @@ char *stripendline(char *);
 /* Removes end-of-line characters (CR and LF) from string. Returns the
  * original pointer to the modified string. */
 
-void version();
+void version(const char *, const char *);
 /* Print standard program name and version, with disclaimer and GPL
- * license info. Requires DEFINEs PROGRAM and VERSION to be set.
+ * license info. Arguments: program name and version strings.
  */
 
 #ifdef __cplusplus

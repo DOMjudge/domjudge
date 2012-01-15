@@ -38,11 +38,12 @@
 #define PROGRAM "check_float"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
+#include "lib.error.h"
+#include "lib.misc.h"
+
 #define MAXLINELEN 1024
 
 extern int errno;
-
-const int exit_failure = -1;
 
 /* The floating point type we use internally: */
 typedef long double flt;
@@ -83,30 +84,6 @@ void usage()
 	printf("      --version        output version information and exit\n");
 	printf("\n");
 	exit(0);
-}
-
-void error(int errnum, const char *format, ...)
-{
-	va_list ap;
-	va_start(ap,format);
-
-	fprintf(stderr,"%s",progname);
-
-	if ( format!=NULL ) {
-		fprintf(stderr,": ");
-		vfprintf(stderr,format,ap);
-	}
-	if ( errnum!=0 ) {
-		fprintf(stderr,": %s",strerror(errnum));
-	}
-	if ( format==NULL && errnum==0 ) {
-		fprintf(stderr,": unknown error");
-	}
-
-	fprintf(stderr,"\nTry `%s --help' for more information.\n",progname);
-	va_end(ap);
-
-	exit(exit_failure);
 }
 
 /* Test two numbers for equality, accounting for +/-INF, NaN and precision */
@@ -176,7 +153,7 @@ int main(int argc, char **argv)
 		}
 	}
 	if ( show_help ) usage();
-	if ( show_version ) version();
+	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( argc<optind+3 ) error(0,"not enough arguments given");
 
