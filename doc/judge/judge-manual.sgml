@@ -10,9 +10,12 @@
 
 <title>DOMjudge Jury Manual
 <author>by the DOMjudge team
-<!-- $Format: -%x5f%x3e
-<date>%cD
-%x3c!%x5f- $  -->
+<!--
+ This is some comment character magic to circumvent problems
+ with an unexpanded git archive $Format$ keyword.
+$Format: -%x2d%x3e
+<date>%aD
+%x3c!%x2d- $  -->
 
 <abstract>
 This document provides information about DOMjudge aimed at a jury
@@ -21,9 +24,9 @@ submissions and working with clarification requests.
 
 A separate manual is available for teams and administrators.
 
-<!-- $Format: -%x5f%x3e
+<!-- $Format: -%x2d%x3e
 Document version: %h
-%x3c!%x5f- $ -->
+%x3c!%x2d- $ -->
 
 </abstract>
 

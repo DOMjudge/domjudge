@@ -5,24 +5,26 @@
  DOMjudge Administrator's Manual
  This manual is part of the DOMjudge Programming Contest Jury System
  and licenced under the GNU GPL. See README and COPYING for details.
-
 -->
 <report>
 
 <title>DOMjudge Administrator's Manual
 <author>by the DOMjudge team
-<!-- $Format: -%x5f%x3e
-<date>%cD
-%x3c!%x5f- $ -->
+<!--
+ This is some comment character magic to circumvent problems
+ with an unexpanded git archive $Format$ keyword.
+ $Format: -%x2d%x3e
+<date>%aD
+%x3c!%x2d- $ -->
 
 <abstract>
 This document provides information about DOMjudge installation,
 configuration and operation for the DOMjudge administrator. A separate
 manual is available for teams and for jury members.
 
-<!-- $Format: -%x5f%x3e
+<!-- $Format: -%x2d%x3e
 Document version: %h
-%x3c!%x5f- $ -->
+%x3c!%x2d- $ -->
 </abstract>
 
 <toc>
