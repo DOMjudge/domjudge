@@ -1,6 +1,6 @@
 /*
    runguard -- run command with restrictions.
-   Copyright (C) 2004-2009 Jaap Eldering (eldering@a-eskwadraat.nl).
+   Copyright (C) 2004-2012 Jaap Eldering (eldering@a-eskwadraat.nl).
 
    Based on an idea from the timeout program, written by Wietse Venema
    as part of The Coroner's Toolkit.

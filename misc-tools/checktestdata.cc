@@ -1,7 +1,7 @@
 /*
    Checktestdata -- check testdata according to specification.
    Copyright (C) 2008 Jan Kuipers
-   Copyright (C) 2009-2010 Jaap Eldering (eldering@a-eskwadraat.nl).
+   Copyright (C) 2009-2012 Jaap Eldering (eldering@a-eskwadraat.nl).
 
    $Id$
 
