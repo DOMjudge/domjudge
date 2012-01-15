@@ -2,9 +2,17 @@
 
 \usepackage[english]{babel}
 
-% For inclusion of the correct date (last modified)
-\SVN $Date$
-\SVN $Revision$
+% For inclusion of the correct date (last modified) and revision.
+% Use the \SVN command to get language dependent formatting of the
+% date. We need to do some %/$ comment character magic to satisfy both
+% TeX and 'git log' format string formatting both with and without
+% expansion of the $Format$ keyword below with 'git archive'.
+\SVN $Date: 1900-01-01 00:00:00 +0000 $
+\SVN $Rev: unpublished $
+% $Format:
+%n\SVN %x24Date: %ai %x24$
+% $Format:
+%n\SVN %x24Rev: %h %x24$
 
 \title{\DOMjudge team manual}
 

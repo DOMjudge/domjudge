@@ -6,6 +6,10 @@ PACKAGE = @PACKAGE_TARNAME@
 VERSION = @PACKAGE_VERSION@
 DISTNAME = $(PACKAGE)-$(VERSION)
 
+# The following line is automatically modified by snapshot/release
+# scripts, do not change manually!
+PUBLISHED =
+
 PACKAGE_NAME      = @PACKAGE_NAME@
 PACKAGE_VERSION   = @PACKAGE_VERSION@
 PACKAGE_STRING    = @PACKAGE_STRING@

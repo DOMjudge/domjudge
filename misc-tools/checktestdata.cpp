@@ -118,7 +118,7 @@ using namespace std;
 
 #define PROGRAM "checktestdata"
 #define AUTHORS "Jan Kuipers, Jaap Eldering"
-#define VERSION "$Rev$"
+#define VERSION REVISION
 
 const int exit_testdata = 1;
 const int exit_failure  = 2;

@@ -1,0 +1,5 @@
+.git* export-ignore
+
+/doc/admin/admin-manual.sgml  export-subst
+/doc/judge/judge-manual.sgml  export-subst
+/doc/team/team-manual*.tex    export-subst
