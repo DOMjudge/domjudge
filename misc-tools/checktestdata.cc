@@ -137,7 +137,7 @@ using namespace std;
 
 #define PROGRAM "checktestdata"
 #define AUTHORS "Jan Kuipers, Jaap Eldering"
-#define VERSION "$Rev$"
+#define VERSION DOMJUDGE_VERSION "/" REVISION
 
 enum value_type { value_none, value_int, value_flt };
 

@@ -46,7 +46,7 @@
 #include <errno.h>
 
 #define PROGRAM "check_float"
-#define VERSION "$Rev$"
+#define VERSION DOMJUDGE_VERSION "/" REVISION
 #define AUTHORS "Jaap Eldering"
 
 #define MAXLINELEN 1024
