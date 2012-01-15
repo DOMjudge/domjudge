@@ -239,3 +239,14 @@ char *stripendline(char *str)
 
 	return str;
 }
+
+void version()
+{
+	printf("\
+%s -- part of DOMjudge version %s\n\
+Written by the DOMjudge developers\n\n\
+DOMjudge comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n\
+are welcome to redistribute it under certain conditions.  See the GNU\n\
+General Public Licence for details.\n",PROGRAM,VERSION);
+	exit(0);
+}

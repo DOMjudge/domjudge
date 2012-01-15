@@ -1,6 +1,11 @@
 /*
    check_float -- program to compare output data containing floats.
-   Copyright (C) 2006 Jaap Eldering.
+
+   $Id$
+
+   Part of the DOMjudge Programming Contest Jury System and licenced
+   under the GNU GPL. See README and COPYING for details.
+
 
    This program can be used to test solutions to problems where the
    output consists (only) of floating point numbers. These floats will
@@ -15,23 +20,6 @@
    absolute and relative deviation of the teams output from the
    reference output. If the floats are within either bounds, they are
    assumed equal.
-
-   $Id$
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
  */
 
 #include "config.h"
@@ -49,7 +37,6 @@
 
 #define PROGRAM "check_float"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
-#define AUTHORS "Jaap Eldering"
 
 #define MAXLINELEN 1024
 
@@ -81,16 +68,6 @@ struct option const long_opts[] = {
 	{"version",  no_argument,       &show_version, 1 },
 	{ NULL,      0,                 NULL,          0 }
 };
-
-void version()
-{
-	printf("%s -- version %s\n",PROGRAM,VERSION);
-	printf("Written by %s\n\n",AUTHORS);
-	printf("%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n",PROGRAM);
-	printf("are welcome to redistribute it under certain conditions.  See the GNU\n");
-	printf("General Public Licence for details.\n");
-	exit(0);
-}
 
 void usage()
 {
