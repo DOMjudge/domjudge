@@ -553,7 +553,8 @@ collapse("filter");
 		$lastupdate = time();
 	}
 	echo "<p id=\"lastmod\">Last Update: " .
-		date('j M Y H:i', $lastupdate) . "</p>\n\n";
+	     date('j M Y H:i', $lastupdate) . "<br />\n" .
+	     "using <a href=\"http://domjudge.sourceforge.net/\">DOMjudge</a></p>\n\n";
 
 	return;
 }

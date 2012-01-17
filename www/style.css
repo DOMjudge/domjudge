@@ -217,10 +217,13 @@ td.scorenc { border-color: silver; }
 	font-weight: bold;
 }
 
-#lastmod {
-	color: gray;
-	font-size: x-small;
+#lastmod { 
 	position: absolute; right: 1ex; margin-top: 1em;
+}
+#lastmod, #lastmod a { 
+	font-size: x-small;
+	color: gray;
+	text-align: right;
 }
 
 #teamscoresummary { margin-top: 2.5em; }
