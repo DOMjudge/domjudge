@@ -18,7 +18,8 @@ judgedaemon: judgedaemon.in $(TOPDIR)/paths.mk
 compare: $(LIBOBJECTS)
 compare$(OBJEXT): $(LIBHEADERS)
 
-check_float: -lm
+check_float: -lm $(LIBOBJECTS)
+check_float$(OBJEXT): -lm $(LIBHEADERS)
 
 runguard: -lm
 runguard$(OBJEXT): $(TOPDIR)/etc/runguard-config.h

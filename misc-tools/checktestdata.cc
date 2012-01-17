@@ -1,7 +1,7 @@
 /*
    Checktestdata -- check testdata according to specification.
    Copyright (C) 2008 Jan Kuipers
-   Copyright (C) 2009-2010 Jaap Eldering (eldering@a-eskwadraat.nl).
+   Copyright (C) 2009-2012 Jaap Eldering (eldering@a-eskwadraat.nl).
 
    $Id$
 
@@ -137,7 +137,7 @@ using namespace std;
 
 #define PROGRAM "checktestdata"
 #define AUTHORS "Jan Kuipers, Jaap Eldering"
-#define VERSION "$Rev$"
+#define VERSION DOMJUDGE_VERSION "/" REVISION
 
 enum value_type { value_none, value_int, value_flt };
 

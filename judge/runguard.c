@@ -1,6 +1,6 @@
 /*
    runguard -- run command with restrictions.
-   Copyright (C) 2004-2009 Jaap Eldering (eldering@a-eskwadraat.nl).
+   Copyright (C) 2004-2012 Jaap Eldering (eldering@a-eskwadraat.nl).
 
    Based on an idea from the timeout program, written by Wietse Venema
    as part of The Coroner's Toolkit.
@@ -65,7 +65,7 @@
 #include "runguard-config.h"
 
 #define PROGRAM "runguard"
-#define VERSION "$Rev$"
+#define VERSION DOMJUDGE_VERSION "/" REVISION
 #define AUTHORS "Jaap Eldering"
 
 const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
