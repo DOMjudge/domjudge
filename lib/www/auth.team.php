@@ -167,7 +167,7 @@ function ldap_check_credentials($user, $pass)
 		$ldap_dn = str_replace('&', $user, LDAP_DNQUERY);
 
 		// Try to login to test credentials
-		if ( @ldap_bind($conn, $ldap_dn, $passwd) ) {
+		if ( @ldap_bind($conn, $ldap_dn, $pass) ) {
 			@ldap_unbind($conn);
 			return TRUE;
 		}

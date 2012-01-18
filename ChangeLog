@@ -11,6 +11,7 @@ Version 3.2.2 - SVN
  - Fix: sending a clarification requires an active contest.
  - Fix valid HTML URL encoding issue.
  - Misc. minor spelling and documentation fixes.
+ - Fix bug in LDAP authentication. Thanks Jorge Romo.
 
 Version 3.2.1 - 9 November 2011
 -------------------------------
