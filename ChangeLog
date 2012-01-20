@@ -1,6 +1,6 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.2.2 - SVN
+Version 3.2.2 - DEV
 -------------------
  - Rename SQL upgrade snippets and add README file for these.
  - Fix JS collapse in public interface and simplify menu inclusion.
@@ -12,6 +12,7 @@ Version 3.2.2 - SVN
  - Fix valid HTML URL encoding issue.
  - Misc. minor spelling and documentation fixes.
  - Fix bug in LDAP authentication. Thanks Jorge Romo.
+ - Switch from Subversion to Git VCS.
 
 Version 3.2.1 - 9 November 2011
 -------------------------------
