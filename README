@@ -25,9 +25,9 @@ interface of DOMjudge). A LaTeX installation including the packages
 For more information, see the administrator documentation.
 
 All documentation is also available online at the DOMjudge homepage:
-	http://domjudge.sourceforge.net/#documentation
-Please note that this documentation is from the daily generated
-snapshot and thus might not apply to your version.
+	http://domjudge.sourceforge.net/documentation
+Please note that this documentation is from the latest stable
+release and thus might not apply to your version.
 
 
 Copyright & Licencing
@@ -35,8 +35,9 @@ Copyright & Licencing
 
 DOMjudge is Copyright (c) 2004 - 2012 by The DOMjudge Developers.
 The DOMjudge developers are Jaap Eldering, Thijs Kinkhorst,
-Peter van de Werken and Tobias Werth. Development is hosted at
-Study Association "A-Eskwadraat", Utrecht University, The Netherlands.
+Peter van de Werken, Tobias Werth, and Nicky Gerritsen. Development is
+hosted at Study Association "A-Eskwadraat", Utrecht University,
+The Netherlands.
 
 DOMjudge, including its documentation, is free software; you can
 redistribute it and/or modify it under the terms of the GNU General
