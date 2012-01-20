@@ -6,3 +6,4 @@
 /paths.mk
 /aclocal.m4
 /output
+*.o
