@@ -1,4 +1,4 @@
-This is the Programming Contest Jury System "DOMjudge" version 3.1.5SVN
+This is the Programming Contest Jury System "DOMjudge" version 3.1.5DEV
 
 DOMjudge is a system for running a programming contest, like the
 ACM ICPC regional and world championship programming contests.
@@ -25,9 +25,9 @@ interface of DOMjudge). A LaTeX installation including the packages
 For more information, see the administrator documentation.
 
 All documentation is also available online at the DOMjudge homepage:
-	http://domjudge.sourceforge.net/#documentation
-Please note that this documentation is from the daily generated
-snapshot and thus might not apply to your version.
+	http://domjudge.sourceforge.net/documentation
+Please note that this documentation is from the latest stable
+release and thus might not apply to your version.
 
 
 Copyright & Licencing

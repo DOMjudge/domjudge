@@ -1,6 +1,6 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.1.5 - SVN
+Version 3.1.5 - DEV
 -------------------
  - Fix testing for empty output with strlen (port from ETH tree).
  - Add missing SQL select privilege on submission.valid column.
@@ -10,6 +10,7 @@ Version 3.1.5 - SVN
  - Use http port number to correctly test for network connectivity.
  - Fix: sending a clarification requires an active contest.
  - Fix spacing in clarification summary.
+ - Switch from Subversion to Git VCS.
 
 Version 3.1.4 - 27 August 2011
 ------------------------------
