@@ -1,6 +1,6 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.3.0 - SVN
+Version 3.3.0 - DEV
 -------------------
  - Add compile script and test source for language 'bash'.
  - Prioritize to team's last judging (port from ETH tree).

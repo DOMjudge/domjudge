@@ -2497,12 +2497,12 @@ make maintainer-install
 </code>
 Note that these targets have to be executed <em>separately</em>.
 
-<sect>Bootstrapping a Subversion checkout
+<sect>Bootstrapping from Git repository sources
 <p>
 
 The installation steps in this document assume that you are using a
 downloaded tarball from the DOMjudge website. If you want to install
-from a Subversion checkout, because you want to use the bleeding edge
+from Git repository sources, because you want to use the bleeding edge
 code or consider to send a patch to the developers, the
 configure/build system first has to be bootstrapped.
 
