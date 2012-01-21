@@ -76,7 +76,7 @@ ALTER TABLE `clarification`
 --
 
 GRANT INSERT ON auditlog TO `domjudge_team`;
-
+GRANT SELECT (probid, name, cid, allow_submit, allow_judge, color)    ON problem    TO `domjudge_public`, `domjudge_plugin`, `domjudge_team`;
 FLUSH PRIVILEGES;
 
 --
