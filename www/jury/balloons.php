@@ -72,6 +72,10 @@ $BALLOONS = $TOTAL_BALLOONS = array();
 while ( $row = $res->next() ) {
 	$BALLOONS[] = $row;
 	$TOTAL_BALLOONS[$row['login']][] = $row['probid'];
+
+	// keep overwriting these variables - in the end they'll
+	// contain the id's of the first balloon in each type
+	$first_contest = $first_problem[$row['probid']] = $first_team[$row['login']] = $row['balloonid'];
 }
 
 $conteststart  = strtotime($cdata['starttime']);
@@ -85,7 +89,7 @@ if ( !empty($BALLOONS) ) {
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
 		"<tr><td></td><th>ID</th><th>time</th><th>solved</th>" .
 		"<th align=\"right\">team</th><th></th><th>loc.</th>" .
-		"<th>category</th><th>total</th><th></th></tr>\n</thead>\n";
+		"<th>category</th><th>total</th><th></th><th></th></tr>\n</thead>\n";
 
 	foreach ( $BALLOONS as $row ) {
 
@@ -133,6 +137,22 @@ if ( !empty($BALLOONS) ) {
 			echo '<input type="submit" name="done[' .
 				(int)$row['balloonid'] . ']" value="done" />';
 		}
+		
+		echo '</td><td>';
+
+		$comments = array();
+		if ( $first_contest == $row['balloonid'] ) {
+			$comments[] = 'first in contest';
+		} else {
+			if ( $first_team[$row['login']] == $row['balloonid'] ) {
+				$comments[] = 'first for team';
+			}	
+			if ( $first_problem[$row['probid']] == $row['balloonid'] ) {
+				$comments[] = 'first for problem';
+			}
+		}
+		echo implode('; ', $comments);
+
 		echo "</td></tr>\n";
 	}
 
