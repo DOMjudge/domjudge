@@ -1929,6 +1929,13 @@ install-{domserver,judgehost}</tt> is run as root. The webserver group
 can be set with <tt>configure --with-webserver-group=GROUP</tt> which
 defaults to <tt>www-data</tt>.
 
+Judgehosts and the domserver communicate with each other through
+the MySQL protocol. By default, MySQL does not encrypt these
+connections. Refer to the MySQL manual to configure SSL on client
+connections; alternatively you can employ an SSH tunnel or ensure
+in the network setup that these connections are separated from
+the team network.
+
 The jury web interface is protected by HTTP Authentication. These
 credentials are essentially sent plain-text, so we advise to setup
 HTTPS at least for the jury interface, but preferably for all web
