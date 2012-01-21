@@ -26,6 +26,7 @@ Version 3.3.0 - DEV
  - Add team 'enabled' switch which defaults to true, but when
    disabled makes a team to immediately disappear from the
    scoreboard and renders their team interface unusable.
+ - Support 'first for contest/team/problem' comments for balloons.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
