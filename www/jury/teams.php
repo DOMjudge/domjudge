@@ -13,7 +13,7 @@ $teams = $DB->q('SELECT t.*,c.name AS catname,a.name AS affname
                  FROM team t
                  LEFT JOIN team_category c USING (categoryid)
                  LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
-                 ORDER BY c.sortorder, t.name');
+                 ORDER BY c.sortorder, t.name COLLATE utf8_general_ci');
 
 $nsubmits = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
                     FROM submission s

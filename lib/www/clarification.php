@@ -301,7 +301,7 @@ function confirmClar() {
 		if ( ! $respid ) {
 			$teams = $DB->q('KEYVALUETABLE SELECT login, CONCAT(login, ": ", name) as name
 			                 FROM team
-			                 ORDER BY categoryid ASC, name ASC');
+			                 ORDER BY categoryid ASC, team.name COLLATE utf8_general_ci ASC');
 			$options = array_merge($options,$teams);
 		} else {
 			if ( $clar['sender'] ) {
