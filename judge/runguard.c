@@ -2,6 +2,8 @@
    runguard -- run command with restrictions.
    Copyright (C) 2004-2012 Jaap Eldering (eldering@a-eskwadraat.nl).
 
+   Multiple minor improvements ported from the DOMjudge-ETH tree.
+
    Based on an idea from the timeout program, written by Wietse Venema
    as part of The Coroner's Toolkit.
 
@@ -44,6 +46,7 @@
 #include <sys/wait.h>
 #include <sys/param.h>
 #include <sys/time.h>
+#include <sys/times.h>
 #include <sys/resource.h>
 #include <errno.h>
 #include <signal.h>
@@ -86,6 +89,7 @@ int runuid;
 int rungid;
 int use_root;
 int use_time;
+int use_cputime;
 int use_user;
 int use_group;
 int use_output;
@@ -96,7 +100,7 @@ int show_help;
 int show_version;
 
 unsigned long runtime; /* in microseconds */
-rlim_t cputime;
+unsigned long cputime;
 rlim_t memsize;
 rlim_t filesize;
 rlim_t nproc;
@@ -104,6 +108,7 @@ rlim_t nproc;
 pid_t child_pid;
 
 struct timeval starttime, endtime;
+struct tms startticks, endticks;
 
 struct option const long_opts[] = {
 	{"root",    required_argument, NULL,         'r'},
@@ -197,7 +202,7 @@ Run COMMAND with restrictions.\n\
   -u, --user=USER      run COMMAND as user with username or ID USER\n\
   -g, --group=GROUP    run COMMAND under group with name or ID GROUP\n\
   -t, --time=TIME      kill COMMAND if still running after TIME seconds (float)\n\
-  -C, --cputime=TIME   set maximum CPU time to TIME seconds (integer)\n\
+  -C, --cputime=TIME   set maximum CPU time to TIME seconds (float)\n\
   -m, --memsize=SIZE   set all (total, stack, etc) memory limits to SIZE kB\n\
   -f, --filesize=SIZE  set maximum created filesize to SIZE kB\n");
 	printf("\
@@ -219,13 +224,25 @@ void outputtime()
 {
 	FILE  *outputfile;
 	double timediff; /* in seconds */
+	unsigned long userdiff, sysdiff;
+	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
 	if ( gettimeofday(&endtime,NULL) ) error(errno,"getting time");
 
 	timediff = (endtime.tv_sec  - starttime.tv_sec ) +
 	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
 
-	verbose("runtime is %.3f seconds",timediff);
+	userdiff = (unsigned long)(endticks.tms_cutime - startticks.tms_cutime)
+		* 1000000 / ticks_per_second;
+	sysdiff  = (unsigned long)(endticks.tms_cstime - startticks.tms_cstime)
+		* 1000000 / ticks_per_second;
+
+	verbose("runtime is %.3lf seconds real, %.3lf user, %.3lf sys\n",
+	        timediff, userdiff*1e-6, sysdiff*1e-6);
+
+	if ( use_cputime && (userdiff+sysdiff) > cputime ) {
+		warning("timelimit exceeded (cpu time)");
+	}
 
 	if ( use_output ) {
 		verbose("writing runtime to file `%s'",outputfilename);
@@ -233,7 +250,7 @@ void outputtime()
 		if ( (outputfile = fopen(outputfilename,"w"))==NULL ) {
 			error(errno,"cannot open `%s'",outputfilename);
 		}
-		if ( fprintf(outputfile,"%.3f\n",timediff)==0 ) {
+		if ( fprintf(outputfile,"%.3f\n",(userdiff+sysdiff)*1e-6)==0 ) {
 			error(0,"cannot write to file `%s'",outputfile);
 		}
 		if ( fclose(outputfile) ) {
@@ -252,7 +269,7 @@ void terminate(int sig)
 	if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) warning("error restoring signal handler");
 
 	if ( sig==SIGALRM ) {
-		warning("timelimit reached: aborting command");
+		warning("timelimit exceeded (wall time): aborting command");
 	} else {
 		warning("received signal %d: aborting command",sig);
 	}
@@ -332,9 +349,10 @@ void setrestrictions()
 		} \
 	}
 
-	if ( cputime!=RLIM_INFINITY ) {
-		verbose("setting CPU-time limit to %d seconds",(int)cputime);
-		lim.rlim_cur = lim.rlim_max = cputime;
+	if ( use_cputime ) {
+		rlim_t cputime_limit = (rlim_t)(cputime/1000000 + 1);
+		verbose("setting CPU-time limit to %d seconds",(int)cputime_limit);
+		lim.rlim_cur = lim.rlim_max = cputime_limit;
 		setlim(CPU);
 	}
 
@@ -425,6 +443,7 @@ int main(int argc, char **argv)
 	char *ptr;
 	int   opt;
 	double runtime_d;
+	double cputime_d;
 
 	struct itimerval itimer;
 	struct sigaction sigact;
@@ -432,8 +451,8 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	/* Parse command-line options */
-	use_root = use_time = use_user = use_output = no_coredump = 0;
-	cputime = memsize = filesize = nproc = RLIM_INFINITY;
+	use_root = use_time = use_cputime = use_user = use_output = no_coredump = 0;
+	memsize = filesize = nproc = RLIM_INFINITY;
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
@@ -468,7 +487,12 @@ int main(int argc, char **argv)
 			runtime = (unsigned long)(runtime_d*1E6);
 			break;
 		case 'C': /* CPU time option */
-			cputime = (rlim_t) readoptarg("CPU-time limit",1,LONG_MAX);
+			use_cputime = 1;
+			cputime_d = strtod(optarg,&ptr);
+			if ( errno || *ptr!='\0' || !finite(cputime_d) || cputime_d<=0 ) {
+				error(errno,"invalid cputime specified: `%s'",optarg);
+			}
+			cputime = (int)(cputime_d*1E6);
 			break;
 		case 'm': /* memsize option */
 			memsize = (rlim_t) readoptarg("memory limit",1,LONG_MAX);
@@ -598,14 +622,22 @@ int main(int argc, char **argv)
 			verbose("using timelimit of %.3f seconds",runtime*1E-6);
 		}
 
+		if ( times(&startticks)==(clock_t) -1 ) {
+			error(errno,"getting start clock ticks");
+		}
+
 		/* Wait for the child command to finish */
 		while ( (pid = wait(&status))!=-1 && pid!=child_pid );
 		if ( pid!=child_pid ) error(errno,"waiting on child");
 
+		if ( times(&endticks)==(clock_t) -1 ) {
+			error(errno,"getting end clock ticks");
+		}
+
 		/* Drop root before writing to output file. */
 		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
 
-		outputtime();
+		outputtime(status);
 
 		/* Test whether command has finished abnormally */
 		if ( ! WIFEXITED(status) ) {

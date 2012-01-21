@@ -212,7 +212,7 @@ fi
 
 # Check for errors from running the program:
 logmsg $LOG_DEBUG "checking program run exit-status"
-if grep  'timelimit reached: aborting command' error.tmp >/dev/null 2>&1 ; then
+if grep  'timelimit exceeded' error.tmp >/dev/null 2>&1 ; then
 	echo "Timelimit exceeded." >>error.out
 	cat error.tmp >>error.out
 	cleanexit ${E_TIMELIMIT:--1}
