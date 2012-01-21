@@ -2006,8 +2006,9 @@ defaults to <tt>www-data</tt>.
 Judgehosts and the domserver communicate with each other through
 the MySQL protocol. By default, MySQL does not encrypt these
 connections. Refer to the MySQL manual to configure SSL on client
-connections, or ensure in the network setup that these connections
-are separated from the team network.
+connections; alternatively you can employ an SSH tunnel or ensure
+in the network setup that these connections are separated from
+the team network.
 
 The jury web interface is protected by HTTP Authentication. These
 credentials are essentially sent plain-text, so we advise to setup
