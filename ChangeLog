@@ -28,6 +28,7 @@ Version 3.3.0 - DEV
    scoreboard and renders their team interface unusable.
  - Support 'first for contest/team/problem' comments for balloons.
  - Change ISO 3166-1 country codes from alpha-2 to alpha-3.
+ - Use CPU time as primary limit (port from ETH tree).
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
