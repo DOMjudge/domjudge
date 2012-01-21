@@ -228,7 +228,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	                        ON (team_affiliation.affilid = team.affilid)' .
 	                ( $jury ? '' : ' WHERE visible = 1' ) );
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
-	                 probid, name, color FROM problem
+	                 probid, name, color, allow_judge FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
 	                 ORDER BY probid', $cid);
 	$categs = $DB->q('KEYTABLE SELECT categoryid AS ARRAYKEY,
@@ -299,6 +299,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">' .
 			jurylink('problem.php?id=' . urlencode($pr['probid']),
 				htmlspecialchars($pr['probid']) .
+				($pr['allow_judge'] ? '':' ¶') .
 				(!empty($pr['color']) ? ' <img style="background-color: ' .
 				htmlspecialchars($pr['color']) . ';" alt="problem colour ' .
 				htmlspecialchars($pr['color']) . '" src="../images/circle.png" />' : '' )
