@@ -1374,7 +1374,7 @@ field indicate when/whether/from where a team visited its team web interface.
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the
 institution. <tt>country</tt> should be the 2 character 
 <htmlurl name="ISO 3166-1 alpha-2 abbreviation"
-url="http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm">
+url="http://www.iso.org/iso/country_codes/iso_3166_code_lists/country_names_and_code_elements.htm">
 of the country and <tt>comments</tt> is a free form field
 that is displayed in the jury interface.
 
