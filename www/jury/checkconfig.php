@@ -193,6 +193,15 @@ if ( DEBUG == 0 ) {
 		'Should not be enabled on live systems.');
 }
 
+if ( !TEST_MODE ) {
+	result('configuration', 'Real mode', 'O', 'System running in Real mode.');
+} else {
+	result('configuration', 'Real mode', 'W',
+		"Test mode enabled.\n" .
+		'Should not be enabled on live systems.');
+}
+
+
 if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
 	result('configuration', 'Protected Jury interface', 'W',
 		"You are not using HTTP Authentication for the Jury interface. " .
