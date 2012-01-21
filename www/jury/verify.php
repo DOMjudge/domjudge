@@ -12,6 +12,7 @@ require('init.php');
 $id    = @$_POST['id'];
 $val   = @$_POST['val'];
 if ( empty($id) ) error("No judging ID passed to mark as verified.");
+if ( dbconfig_get('disable_verify') ) error("Verification is disabled/paused.");
 
 $jury_member = getJuryMember();
 

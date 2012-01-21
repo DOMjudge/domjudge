@@ -271,7 +271,7 @@ if ( isset($jid) )  {
 			}
 
 			if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
-				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
+				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify', null, !dbconfig_get('disable_verify'));
 				echo "</p>" . addEndForm();
 			} else {
 				echo "</p>\n";

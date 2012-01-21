@@ -14,6 +14,7 @@
 INSERT INTO `configuration` (`name`, `value`) VALUES ('clar_answers', 'No comment	Read the problem statement carefully');
 INSERT INTO `configuration` (`name`, `value`) VALUES ('clar_categories', 'general:General issue	technical:Technical issue');
 INSERT INTO `configuration` (`name`, `value`) VALUES ('show_affiliations', '1');
+INSERT INTO `configuration` (`name`, `value`) VALUES ('disable_verify', '0');
 
 -- 
 -- Dumping data for table `contest`
