@@ -30,14 +30,7 @@ if ( isset($_COOKIE['domjudge_balloonviewall']) ) {
 // Did someone press the view button?
 if ( isset($_REQUEST['viewall']) ) $viewall = $_REQUEST['viewall'];
 
-// Set cookie of submission view type, expiry defaults to end of session.
-if ( version_compare(PHP_VERSION, '5.2') >= 0 ) {
-	// HTTPOnly Cookie, while this cookie is not security critical
-	// it's a good habit to get into.
-	setcookie('domjudge_balloonviewall', $viewall, null, null, null, null, true);
-} else {
-	setcookie('domjudge_balloonviewall', $viewall);
-}
+setcookie('domjudge_balloonviewall', $viewall);
 
 $refresh = '30;url=balloons.php';
 require(LIBWWWDIR . '/header.php');

@@ -28,13 +28,7 @@ $refresh = '15;url=submissions.php?' .
 $title = 'Submissions';
 
 // Set cookie of submission view type, expiry defaults to end of session.
-if ( version_compare(PHP_VERSION, '5.2') >= 0 ) {
-	// HTTPOnly Cookie, while this cookie is not security critical
-	// it's a good habit to get into.
-	setcookie('domjudge_submissionview', $view, null, null, null, null, true);
-} else {
-	setcookie('domjudge_submissionview', $view);
-}
+setcookie('domjudge_submissionview', $view);
 
 $jury_member = getJuryMember();
 
