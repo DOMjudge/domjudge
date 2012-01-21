@@ -65,6 +65,10 @@ if ( IS_JURY ) {
 	echo "<body>\n";
 }
 
+if ( TEST_MODE ) {
+	echo "<div id=\"testmode\">test mode</div>\n\n";
+}
+
 /* NOTE: here a local menu.php is included
  *       both jury and team have their own menu.php
  */

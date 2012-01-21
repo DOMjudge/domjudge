@@ -340,3 +340,9 @@ input.file {
 	z-index: 2;
 }
 
+#testmode {
+	text-align: center;
+	font-variant: small-caps;
+	margin-bottom: 1em;
+	color: red;
+}

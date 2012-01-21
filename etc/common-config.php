@@ -48,6 +48,10 @@ define('DEBUG_JUDGE',      8); // Display judging scripts debug info
 
 define('DEBUG', 1);
 
+// TEST mode displays a warning on all interfaces indicating such.
+// it also affects the handling of timestamps in automated submissions
+define('TEST_MODE', 0);
+
 // By default report all PHP errors, except notices.
 error_reporting(E_ALL & ~E_NOTICE);
 
