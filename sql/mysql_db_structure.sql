@@ -283,7 +283,7 @@ CREATE TABLE `team` (
 CREATE TABLE `team_affiliation` (
   `affilid` varchar(10) NOT NULL COMMENT 'Unique ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
-  `country` char(2) default NULL COMMENT 'ISO country code',
+  `country` char(3) default NULL COMMENT 'ISO 3166-1 alpha-3 country code',
   `comments` text COMMENT 'Comments',
   PRIMARY KEY  (`affilid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Affilitations for teams (e.g.: university, company)';

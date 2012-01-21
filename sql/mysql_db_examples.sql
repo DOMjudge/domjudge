@@ -53,7 +53,7 @@ INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `
 -- Dumping data for table `team_affiliation`
 -- 
 
-INSERT INTO `team_affiliation` (`affilid`, `name`, `country`, `comments`) VALUES ('UU', 'Utrecht University', 'NL', NULL);
+INSERT INTO `team_affiliation` (`affilid`, `name`, `country`, `comments`) VALUES ('UU', 'Utrecht University', 'NLD', NULL);
 
 -- 
 -- Dumping data for table `team_category`

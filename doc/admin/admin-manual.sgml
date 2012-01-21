@@ -1428,9 +1428,9 @@ field indicate when/whether/from where a team visited its team web interface.
 
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the
-institution. <tt>country</tt> should be the 2 character 
-<htmlurl name="ISO 3166-1 alpha-2 abbreviation"
-url="http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm">
+institution. <tt>country</tt> should be the 3 character 
+<htmlurl name="ISO 3166-1 alpha-3 abbreviation"
+url="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Officially_assigned_code_elements">
 of the country and <tt>comments</tt> is a free form field
 that is displayed in the jury interface.
 
@@ -1440,7 +1440,7 @@ logo picture located in
 <tt>www/images/affiliations/&lt;affilid&gt;.png</tt> and
 <tt>country</tt> must match a (flag) picture in
 <tt>www/images/countries/&lt;country&gt;.png</tt>. All
-country flags are present there, named with their 2-character ISO
+country flags are present there, named with their 3-character ISO
 codes. See also <tt>www/images/countries/README</tt>. If
 either file is not present the respective ID string will be printed
 instead.

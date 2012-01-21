@@ -21,6 +21,8 @@ ALTER TABLE `team`
 ALTER TABLE `team`
   ADD COLUMN `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the team is visible and operational' AFTER `authtoken`;
 
+ALTER TABLE `team_affiliation`
+  MODIFY COLUMN `country` char(3) default NULL COMMENT 'ISO 3166-1 alpha-3 country code',
 
 CREATE TABLE `auditlog` (
   `logid` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -56,6 +58,8 @@ FLUSH PRIVILEGES;
 --
 -- Add/remove sample/initial contents
 --
+
+UPDATE team_affiliation SET country = "NLD" WHERE country = "NL";
 
 --
 -- Finally remove obsolete structures after moving data
