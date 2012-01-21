@@ -1,0 +1,20 @@
+INT(1,100,runs) NEWLINE
+REP(runs)
+  IF(MATCH("i"))
+    STRING("impossible") NEWLINE
+  ELSE
+    INT(0,100,n)
+    REP(n)
+      SPACE
+      STRING("(")
+      INT(-100,100,x)
+      ELSE
+      STRING("else within rep loop")
+      STRING(",")
+      INT(-100,100,y)
+      STRING(")")
+    END
+    NEWLINE
+  END
+END
+EOF

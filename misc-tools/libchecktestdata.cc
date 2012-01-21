@@ -1,6 +1,6 @@
 /*
-   Checktestdata -- check testdata according to specification.
-   Copyright (C) 2008 Jan Kuipers
+   Libchecktestdata -- check testdata according to specification.
+   Copyright (C) 2008-2012 Jan Kuipers
    Copyright (C) 2009-2012 Jaap Eldering (eldering@a-eskwadraat.nl).
 
    This program is free software; you can redistribute it and/or modify
@@ -102,6 +102,10 @@
       Repeat the commands as long as 'condition' is true. Optionally
       match 'separator' command between two consecutive iterations.
 
+   IF(<test> cond) [<command> cmds1...] [ELSE [<command> cmds2...]] END
+
+      Executes cmds1 if cond is true. Otherwise, executes cmds2
+      if the else statement is available.
  */
 
 #include "config.h"
@@ -214,18 +218,31 @@ void readprogram(istream &in)
 	program.push_back(command("EOF"));
 
 	// Check for correct REP ... END nesting
-	int replevel = 0;
+	vector<string> levels;
 	for (size_t i=0; i<program.size(); i++) {
-		if ( program[i].name()=="WHILE" ||
-		     program[i].name()=="REP" ) replevel++;
-		if ( program[i].name()=="END" ) replevel--;
-		if ( replevel<0 ) {
-			cerr << "unbalanced WHILE/REP/END statements" << endl;
-			exit(exit_failure);
+		if ( loop_cmds.count(program[i].name()) ||
+		     program[i].name() == "IF" )
+			levels.push_back(program[i].name());
+
+		if ( program[i].name()=="END" ) {
+			if ( levels.size()==0 ) {
+				cerr << "incorrect END statement" << endl;
+				exit(exit_failure);
+			}
+			levels.pop_back();
+		}
+
+		if ( program[i].name()=="ELSE" ) {
+			if ( levels.size()==0 || levels.back()!="IF") {
+				cerr << "incorrect ELSE statement" << endl;
+				exit(exit_failure);
+			}
+			levels.pop_back();
+			levels.push_back(program[i].name());
 		}
 	}
-	if ( replevel!=0 ) {
-		cerr << "unbalanced WHILE/REP/END statements" << endl;
+	if ( levels.size()>0 ) {
+		cerr << "unclosed block statement(s)" << endl;
 		exit(exit_failure);
 	}
 }
@@ -614,8 +631,7 @@ void checktestdata()
 			return;
 		}
 
-		else if ( cmd.name()=="REP" ||
-		          cmd.name()=="WHILE" ) {
+		else if ( loop_cmds.count(cmd.name()) ) {
 
 			// Current and maximum loop iterations.
 			unsigned long i = 0, times = ULONG_MAX;
@@ -637,7 +653,7 @@ void checktestdata()
 
 			for(int looplevel=1; looplevel>0; ++loopend) {
 				string cmdstr = program[loopend].name();
-				if ( loop_cmds.count(cmdstr) ) looplevel++;
+				if ( loop_cmds.count(cmdstr) || cmdstr=="IF") looplevel++;
 				if ( cmdstr=="END" ) looplevel--;
 			}
 
@@ -659,7 +675,37 @@ void checktestdata()
 			prognr = loopend;
 		}
 
-		else if ( cmd.name()=="END" ) {
+		else if ( cmd.name()=="IF" ) {
+
+			// Find line numbers of matching else/end
+			int ifline   = prognr;
+			int elseline = -1;
+			int endline  = prognr+1;
+
+			for(int looplevel=1; looplevel>0; ++endline) {
+				string cmdstr = program[endline].name();
+				if ( loop_cmds.count(cmdstr) || cmdstr=="IF") looplevel++;
+				if ( cmdstr=="END" ) looplevel--;
+				if ( cmdstr=="ELSE" && looplevel==1) elseline=endline;
+			}
+
+			debug("if statement, if/else/end=%lld/%lld/%lld",
+			      ifline,elseline,endline);
+
+			// Test and execute correct command block
+			if (dotest(cmd.args[0])) {
+				prognr = ifline+1;
+				checktestdata();
+			}
+			else if (elseline!=-1) {
+				prognr = elseline+1;
+				checktestdata();
+			}
+
+			prognr = endline;
+		}
+
+		else if ( cmd.name()=="END" || cmd.name()=="ELSE" ) {
 			prognr++;
 			return;
 		}
@@ -678,7 +724,7 @@ bool checksyntax(istream &progstream, istream &datastream, int opt_mask) {
 	cerr << setprecision(50);
 	mpf_set_default_prec(256);
 
-	// Initialize loop_cmds here, as a set cannot be initialized on
+	// Initialize block_cmds here, as a set cannot be initialized on
 	// declaration.
 	loop_cmds.insert("REP");
 	loop_cmds.insert("WHILE");
