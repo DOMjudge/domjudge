@@ -31,6 +31,7 @@ Version 3.3.0 - DEV
  - Use CPU time as primary limit (port from ETH tree).
  - Move checktestdata code to separate library for easier use in
    stand-alone checkers, and add 'IF() [ELSE] END' syntax.
+ - Add option to display pending submissions on the scoreboard.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------

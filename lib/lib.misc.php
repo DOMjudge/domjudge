@@ -87,25 +87,39 @@ function calcScoreRow($cid, $team, $prob) {
 	$result = $DB->q('SELECT result, verified,
 	                  (UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 AS timediff,
 	                  (c.freezetime IS NOT NULL && submittime >= c.freezetime) AS afterfreeze
-	                  FROM judging j
-	                  LEFT JOIN submission s USING(submitid)
+	                  FROM submission s
+	                  LEFT JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
 	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
-	                  WHERE teamid = %s AND probid = %s AND j.valid = 1 AND
-	                  result IS NOT NULL AND s.cid = %i AND s.valid = 1
-					  ORDER BY submittime',
+	                  WHERE teamid = %s AND probid = %s AND s.cid = %i AND s.valid = 1
+	                  ORDER BY submittime',
 	                 $team, $prob, $cid);
 
 	// reset vars
-	$submitted_j = $time_j = $correct_j = 0;
-	$submitted_p = $time_p = $correct_p = 0;
+	$submitted_j = $pending_j = $time_j = $correct_j = 0;
+	$submitted_p = $pending_p = $time_p = $correct_p = 0;
 
 	// for each submission
 	while( $row = $result->next() ) {
 
 		if ( VERIFICATION_REQUIRED && ! $row['verified'] ) continue;
 
+		// Check for unjudged submissions. These show as pending also
+		// after freeze.
+		if ( empty($row['result']) ) {
+			$pending_j++;
+			$pending_p++;
+			// Don't do any more counting for this submission.
+			continue;
+		}
+
 		$submitted_j++;
-		if ( ! $row['afterfreeze'] ) $submitted_p++;
+		if ( ! $row['afterfreeze'] ) {
+			$submitted_p++;
+		} else {
+			// Show submissions after freeze as pending to the public
+			// (if SHOW_PENDING is enabled):
+			$pending_p++;
+		}
 
 		// if correct, don't look at any more submissions after this one
 		if ( $row['result'] == 'correct' ) {
@@ -123,15 +137,15 @@ function calcScoreRow($cid, $team, $prob) {
 
 	// insert or update the values in the public/team scores table
 	$DB->q('REPLACE INTO scoreboard_public
-	        (cid, teamid, probid, submissions, totaltime, is_correct)
-	        VALUES (%i,%s,%s,%i,%i,%i)',
-	       $cid, $team, $prob, $submitted_p, $time_p, $correct_p);
+	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
+	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
+	       $cid, $team, $prob, $submitted_p, $pending_p, $time_p, $correct_p);
 
 	// insert or update the values in the jury scores table
 	$DB->q('REPLACE INTO scoreboard_jury
-	        (cid, teamid, probid, submissions, totaltime, is_correct)
-	        VALUES (%i,%s,%s,%i,%i,%i)',
-	       $cid, $team, $prob, $submitted_j, $time_j, $correct_j);
+	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
+	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
+	       $cid, $team, $prob, $submitted_j, $pending_j, $time_j, $correct_j);
 
 	return;
 }
@@ -532,6 +546,9 @@ function submit_solution($team, $prob, $lang, $file)
 				  VALUES (%i, %s, %s, %s, %s, %s)',
 				 $cid, $team, $probid, $langid, $now,
 				 getFileContents($file, false));
+
+	// Recalculate scoreboard cache for pending submissions
+	calcScoreRow($cid, $team, $probid);
 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)

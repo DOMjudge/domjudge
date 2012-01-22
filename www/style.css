@@ -195,6 +195,7 @@ legend {
 	border-bottom: 2px solid black;
 }
 .score_correct   { background: #33FF66; }
+.score_pending   { background: #6666FF; }
 .score_incorrect { background: #FF6666; }
 .score_neutral   { background: white;   }
 

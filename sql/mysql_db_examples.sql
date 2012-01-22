@@ -10,6 +10,7 @@
 -- 
 
 INSERT INTO `configuration` (`name`, `value`) VALUES ('show_affiliations', '1');
+INSERT INTO `configuration` (`name`, `value`) VALUES ('show_pending', '0');
 
 -- 
 -- Dumping data for table `contest`

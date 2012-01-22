@@ -54,10 +54,10 @@ function calcPenaltyTime($solved, $num_submissions)
  * scores[login](num_correct, total_time, solve_times[], rank,
  *               teamname, categoryid, sortorder, country, affilid)
  *
- * matrix[login][probid](is_correct, num_submissions, time, penalty)
+ * matrix[login][probid](is_correct, num_submissions, num_pending, time, penalty)
  *
  * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid])
- *    probid(num_submissions, num_correct, best_time)
+ *    probid(num_submissions, num_pending, num_correct, best_time)
  */
 function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
@@ -150,6 +150,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 		$MATRIX[$srow['teamid']][$srow['probid']] = array (
 			'is_correct'      => (bool) $srow['is_correct'],
 			'num_submissions' => $srow['submissions'],
+			'num_pending'     => $srow['pending'],
 			'time'            => $srow['totaltime'],
 			'penalty'         => $penalty );
 
@@ -193,13 +194,14 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
 			// provide default scores when nothing submitted for this team,problem yet
 			if ( ! isset ( $MATRIX[$team][$prob] ) ) {
-				$MATRIX[$team][$prob] = array ( 'num_submissions' => 0, 'is_correct' => 0,
-				                                'time' => 0, 'penalty' => 0);
+				$MATRIX[$team][$prob] = array('num_submissions' => 0, 'num_pending' => 0,
+				                              'is_correct' => 0, 'time' => 0, 'penalty' => 0);
 			}
 			$pdata = $MATRIX[$team][$prob];
 
 			// update summary data for the bottom row
 			@$SUMMARY['problems'][$prob]['num_submissions'] += $pdata['num_submissions'];
+			@$SUMMARY['problems'][$prob]['num_pending'] += $pdata['num_pending'];
 			@$SUMMARY['problems'][$prob]['num_correct'] += ($pdata['is_correct'] ? 1 : 0);
 			if ( $pdata['is_correct'] ) {
 				@$SUMMARY['problems'][$prob]['times'][] = $pdata['time'];
@@ -211,6 +213,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	foreach( array_keys($probs) as $prob ) {
 		if ( !isset($SUMMARY['problems'][$prob]) ) {
 			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
+			$SUMMARY['problems'][$prob]['num_pending'] = 0;
 			$SUMMARY['problems'][$prob]['num_correct'] = 0;
 		}
 		if ( isset($SUMMARY['problems'][$prob]['times']) ) {
@@ -261,6 +264,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 
 	// configuration
 	$SHOW_AFFILIATIONS = dbconfig_get('show_affiliations', 1);
+	$SHOW_PENDING      = dbconfig_get('show_pending', 0);
 
 	echo '<table class="scoreboard' . (IS_JURY ? ' scoreboard_jury' : '') . ($center ? ' center' : '') . "\">\n";
 
@@ -374,6 +378,8 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 			// CSS class for correct/incorrect/neutral results
 			if( $matrix[$team][$prob]['is_correct'] ) {
 				echo '"score_correct"';
+			} elseif ( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
+				echo '"score_pending"';
 			} elseif ( $matrix[$team][$prob]['num_submissions'] > 0 ) {
 				echo '"score_incorrect"';
 			} else {
@@ -381,6 +387,10 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 			}
 			// number of submissions for this problem
 			$str = $matrix[$team][$prob]['num_submissions'];
+			// add pending submissions
+			if( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
+				$str .= ' + ' . $matrix[$team][$prob]['num_pending'];
+			}
 			// if correct, print time scored
 			if( $matrix[$team][$prob]['is_correct'] ) {
 				$str .= ' (' . $matrix[$team][$prob]['time'] . ' + ' .
@@ -396,7 +406,8 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 
 	if ( empty($limitteams) ) {
 		// print a summaryline
-		echo '<tbody><tr id="scoresummary" title="#submitted / #correct / fastest time">' .
+		echo '<tbody><tr id="scoresummary" title="#submitted' .
+		    ( $SHOW_PENDING ? ' + #pending' : '' ) . ' / #correct / fastest time">' .
 			'<td title="total teams">' .
 			jurylink(null,count($matrix)) . '</td>' .
 			( $SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
@@ -406,7 +417,9 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 			'<td title="total solved" class="scorenc">' . jurylink(null,$summary['num_correct'])  . '</td><td title=" "></td>';
 
 		foreach( array_keys($probs) as $prob ) {
-			$str = $summary['problems'][$prob]['num_submissions'] . ' / ' .
+			$str = $summary['problems'][$prob]['num_submissions'] .
+			       ( $SHOW_PENDING ? ' + ' .
+			         $summary['problems'][$prob]['num_pending'] : '' ) . ' / ' .
 			       $summary['problems'][$prob]['num_correct'] . ' / ' .
 				   ( isset($summary['problems'][$prob]['best_time']) ?
 					 $summary['problems'][$prob]['best_time'] : '-' );

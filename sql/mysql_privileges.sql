@@ -35,6 +35,10 @@ GRANT SELECT (probid, name, cid, allow_submit, color)    ON problem    TO `domju
 -- Team write privileges
 GRANT INSERT ON clarification     TO `domjudge_team`;
 GRANT DELETE ON team_unread       TO `domjudge_team`;
+GRANT INSERT ON scoreboard_jury   TO `domjudge_team`;
+GRANT DELETE ON scoreboard_jury   TO `domjudge_team`;
+GRANT INSERT ON scoreboard_public TO `domjudge_team`;
+GRANT DELETE ON scoreboard_public TO `domjudge_team`;
 
 GRANT INSERT (cid, teamid, probid, langid, submittime, sourcecode) ON submission TO `domjudge_team`;
 GRANT INSERT (cid, teamid, probid, langid, submitid, description,
