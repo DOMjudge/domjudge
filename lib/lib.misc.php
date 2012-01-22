@@ -84,6 +84,11 @@ function problemVisible($probid)
 function calcScoreRow($cid, $team, $prob) {
 	global $DB;
 
+	// Note the clause 'submittime < c.endtime': this is used to
+	// filter out TOO-LATE submissions from pending, but it also means
+	// that these will not count as solved. Correct submissions with
+	// submittime after contest end should never happen, unless one
+	// resets the contest time after successful judging.
 	$result = $DB->q('SELECT result, verified,
 	                  (UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 AS timediff,
 	                  (c.freezetime IS NOT NULL && submittime >= c.freezetime) AS afterfreeze
@@ -91,6 +96,7 @@ function calcScoreRow($cid, $team, $prob) {
 	                  LEFT JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
 	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
 	                  WHERE teamid = %s AND probid = %s AND s.cid = %i AND s.valid = 1
+	                  AND submittime < c.endtime
 	                  ORDER BY submittime',
 	                 $team, $prob, $cid);
 
@@ -101,11 +107,10 @@ function calcScoreRow($cid, $team, $prob) {
 	// for each submission
 	while( $row = $result->next() ) {
 
-		if ( VERIFICATION_REQUIRED && ! $row['verified'] ) continue;
+		// Check if this submission has a publicly visible judging result:
+		if ( (VERIFICATION_REQUIRED && ! $row['verified']) ||
+		     empty($row['result']) ) {
 
-		// Check for unjudged submissions. These show as pending also
-		// after freeze.
-		if ( empty($row['result']) ) {
 			$pending_j++;
 			$pending_p++;
 			// Don't do any more counting for this submission.
@@ -113,12 +118,12 @@ function calcScoreRow($cid, $team, $prob) {
 		}
 
 		$submitted_j++;
-		if ( ! $row['afterfreeze'] ) {
-			$submitted_p++;
-		} else {
+		if ( $row['afterfreeze'] ) {
 			// Show submissions after freeze as pending to the public
 			// (if SHOW_PENDING is enabled):
 			$pending_p++;
+		} else {
+			$submitted_p++;
 		}
 
 		// if correct, don't look at any more submissions after this one
