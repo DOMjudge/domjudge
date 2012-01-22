@@ -257,7 +257,7 @@ CREATE TABLE `submission` (
 
 CREATE TABLE `team` (
   `login` varchar(15) NOT NULL COMMENT 'Team login name',
-  `name` varchar(255) COLLATE utf8_bin NOT NULL COMMENT 'Team name',
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Team name',
   `categoryid` int(4) unsigned NOT NULL default '0' COMMENT 'Team category ID',
   `affilid` varchar(10) default NULL COMMENT 'Team affiliation ID',
   `authtoken` varchar(255) default NULL COMMENT 'Identifying token for this team',
