@@ -25,10 +25,10 @@ ALTER TABLE `team_affiliation`
   MODIFY COLUMN `country` char(3) default NULL COMMENT 'ISO 3166-1 alpha-3 country code',
 
 ALTER TABLE `scoreboard_jury`
-  ADD COLUMN `pending` int(4) NOT NULL COMMENT 'Number of submissions pending judgement' AFTER `submissions`;
+  ADD COLUMN `pending` int(4) NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement' AFTER `submissions`;
 
 ALTER TABLE `scoreboard_public`
-  ADD COLUMN `pending` int(4) NOT NULL COMMENT 'Number of submissions pending judgement' AFTER `submissions`;
+  ADD COLUMN `pending` int(4) NOT NULL  DEFAULT '0'COMMENT 'Number of submissions pending judgement' AFTER `submissions`;
 
 CREATE TABLE `auditlog` (
   `logid` int(10) unsigned NOT NULL AUTO_INCREMENT,

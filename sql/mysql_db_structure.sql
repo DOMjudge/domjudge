@@ -202,7 +202,7 @@ CREATE TABLE `scoreboard_jury` (
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL default '0' COMMENT 'Number of submissions made',
-  `pending` int(4) NOT NULL COMMENT 'Number of submissions pending judgement',
+  `pending` int(4) NOT NULL default '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL default '0' COMMENT 'Total time spent',
   `is_correct` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has there been a correct submission?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
@@ -217,7 +217,7 @@ CREATE TABLE `scoreboard_public` (
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL default '0' COMMENT 'Number of submissions made',
-  `pending` int(4) NOT NULL COMMENT 'Number of submissions pending judgement',
+  `pending` int(4) NOT NULL default '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL default '0' COMMENT 'Total time spent',
   `is_correct` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has there been a correct submission?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
