@@ -71,6 +71,9 @@ ALTER TABLE `team_affiliation`
 ALTER TABLE `clarification`
   DROP FOREIGN KEY `clarification_ibfk_3`;
 
+ALTER TABLE `clarification`
+  MODIFY COLUMN `probid` varchar(15) default NULL COMMENT 'Problem or category associated to this clarification';
+
 --
 -- Add/remove privileges
 --
