@@ -4,9 +4,12 @@ endif
 include $(TOPDIR)/Makefile.global
 
 TARGETS = checkinput
+OBJECTS =
 
 ifeq ($(CHECKTESTDATA_ENABLED),yes)
 TARGETS += checktestdata
+CHKOBJS = $(addsuffix $(OBJEXT),checktestdata libchecktestdata parse yylex)
+OBJECTS += $(CHKOBJS)
 endif
 
 SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
@@ -35,15 +38,12 @@ checkfail = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 && \
 
 ifeq ($(CHECKTESTDATA_ENABLED),yes)
 
+libchecktestdata.o: %.o: %.cc %.h
+
 checktestdata: CPPFLAGS += $(BOOST_CPPFLAGS)
 checktestdata: LDFLAGS  += $(BOOST_LDFLAGS)
-checktestdata: checktestdata.o libchecktestdata.o parse.o yylex.o \
-               $(LIBGMPXX) $(BOOST_REGEX_LIB)
+checktestdata: $(CHKOBJS) $(LIBGMPXX) $(BOOST_REGEX_LIB)
 	$(CXX) $(CXXFLAGS) -o $@ $^
-
-checktestdata.o: checktestdata.cc
-
-libchecktestdata.o: libchecktestdata.cc
 
 check: checktestdata
 	@for i in tests/testprog*.in ; do \
@@ -79,7 +79,7 @@ install-judgehost:
 dist-l: yylex.cc parse.cc
 
 clean-l:
-	-rm -f $(TARGETS)
+	-rm -f $(TARGETS) $(OBJECTS)
 
 distclean-l:
 	-rm -f $(SUBST_FILES)
