@@ -82,7 +82,7 @@ SCIENTIFIC { return Parser::OPT_SCIENTIFIC; }
 
 \\[0-7]{1,3} {
 	/* octal escape sequence */
-	int result;
+	unsigned int result;
 
 	(void) sscanf(yytext+1,"%o",&result);
 
