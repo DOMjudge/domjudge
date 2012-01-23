@@ -5,6 +5,7 @@ include $(TOPDIR)/Makefile.global
 
 TARGETS = checkinput
 OBJECTS =
+PARSER_GEN = yylex.cc parse.cc parserbase.h
 
 ifeq ($(CHECKTESTDATA_ENABLED),yes)
 TARGETS += checktestdata
@@ -28,7 +29,7 @@ yylex.cc: checktestdata.l parsetype.h
 # Fix strict ANSI C++ bug in generated code, see Debian bug #488274
 	sed -i '/ isatty/d' $@
 
-parse.cc: checktestdata.y parsetype.h
+parse.cc parserbase.h: checktestdata.y parsetype.h
 	bisonc++ $<
 
 checksucc = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 || \
@@ -38,7 +39,7 @@ checkfail = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 && \
 
 ifeq ($(CHECKTESTDATA_ENABLED),yes)
 
-libchecktestdata.o: %.o: %.cc %.h
+libchecktestdata.o: %.o: %.cc %.h $(PARSER_GEN)
 
 checktestdata: CPPFLAGS += $(BOOST_CPPFLAGS)
 checktestdata: LDFLAGS  += $(BOOST_LDFLAGS)
@@ -76,7 +77,7 @@ endif # CHECKTESTDATA_ENABLED
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) dj_make_chroot
 
-dist-l: yylex.cc parse.cc
+dist-l: $(PARSER_GEN)
 
 clean-l:
 	-rm -f $(TARGETS) $(OBJECTS)
@@ -85,4 +86,4 @@ distclean-l:
 	-rm -f $(SUBST_FILES)
 
 maintainer-clean-l:
-	-rm -f parse.cc yylex.cc parser.ih parserbase.h
+	-rm -f $(PARSER_GEN)
