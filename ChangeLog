@@ -32,6 +32,8 @@ Version 3.3.0 - DEV
  - Move checktestdata code to separate library for easier use in
    stand-alone checkers, and add 'IF() [ELSE] END' syntax.
  - Add option to display pending submissions on the scoreboard.
+ - Remove 'identify daemon' experimental code. It hasn't been
+   working for years and no-one discovered that.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
