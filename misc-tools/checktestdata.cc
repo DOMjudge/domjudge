@@ -20,12 +20,13 @@
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include "config.h"
+
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <getopt.h>
 
-#include "config.h"
 #include "libchecktestdata.h"
 
 using namespace std;
