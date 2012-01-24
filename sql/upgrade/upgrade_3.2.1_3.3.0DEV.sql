@@ -18,7 +18,6 @@ ALTER TABLE `team` DROP COLUMN `judging_last_started`;
 ALTER TABLE `team`
   MODIFY COLUMN `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Team name',
   ADD COLUMN `judging_last_started` datetime default NULL COMMENT 'Start time of last judging for priorization' AFTER `comments`,
-ALTER TABLE `team`
   ADD COLUMN `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the team is visible and operational' AFTER `authtoken`;
 
 ALTER TABLE `team_affiliation`
