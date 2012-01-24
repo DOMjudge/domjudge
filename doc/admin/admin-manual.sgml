@@ -818,7 +818,7 @@ The database structure and privileges are included in MySQL
 dump files in the sql subdirectory. The default database name is
 <tt>domjudge</tt>. This can be changed manually in the
 <tt>etc/dbpasswords.secret</tt> file: the database name as specified
-for the <tt>jury</tt> user will be used when installing.
+in this file will be used when installing.
 
 Installation of the database is done with <tt>bin/dj-setup-database</tt>.
 For this, you need an installed and configured MySQL server and
@@ -1993,7 +1993,7 @@ directories. Database access is protected by passwords. The default
 permissions allow connections from <em>all</em> hosts, so make sure you
 restrict this appropriately or choose strong enough passwords.
 
-<em>Note:</em> database passwords are stored in
+<em>Note:</em> the database password is stored in
 <tt>etc/dbpasswords.secret</tt>. This file has to be
 non-readable to teams, but has to be readable to the web server to let
 the jury web interface work. A solution is to make it readable to a

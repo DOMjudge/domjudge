@@ -11,9 +11,7 @@ SQLDIR="@domserver_sqldir@"
 
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
 
-ROLES='jury team public plugin'
-
-# Wrapper around mysql command to allow settings options, user, etc.
+# Wrapper around mysql command to allow setting options, user, etc.
 mysql()
 {
 	local user pass
@@ -41,18 +39,16 @@ read_dbpasswords()
 	while read role host db user passwd; do
 		# Skip lines beginning with a '#'
 		[ "x$role" != "x${role###}" ] && continue
-		eval "${role}_DBHOST=$host"
-		eval "${role}_DBNAME=$db"
-		eval "${role}_DBUSER=$user"
-		eval "${role}_PASSWD=$passwd"
-		if [ "x$role" = xjury ]; then
-			DBHOST=$host
-			DBNAME=$db
-		fi
+		domjudge_DBHOST=$host
+		domjudge_DBNAME=$db
+		domjudge_DBUSER=$user
+		domjudge_PASSWD=$passwd
+		DBHOST=$host
+		DBNAME=$db
 	done < "$PASSWDFILE"
 	IFS="$OLDIFS"
-	if [ -z "$jury_PASSWD" -o -z "$team_PASSWD" -o -z "$public_PASSWD" ]; then
-		echo "Error: no login info found for one of jury, team, public users."
+	if [ -z "$domjudge_PASSWD" ]; then
+		echo "Error: no login info found."
 		return 1
 	fi
 }
@@ -60,7 +56,7 @@ read_dbpasswords()
 status()
 {
 	if [ ! -r "$PASSWDFILE" ]; then
-		echo "Error: cannot read database passwords file '$PASSWDFILE'."
+		echo "Error: cannot read database password file '$PASSWDFILE'."
 		return 1
 	fi
 	read_dbpasswords || return 1
@@ -68,18 +64,14 @@ status()
 	echo -n "Trying to connect to the server as DB admin: "
 	mysql -e 'SELECT "success.";' || return 1
 
-	for role in $ROLES ; do
-		eval "user=\$${role}_DBUSER"
-		eval "pass=\$${role}_PASSWD"
-		echo -n "Trying to connect to the server with role '$role': "
-		DBUSER=$user PASSWD=$pass mysql -e 'SELECT "success.";' || return 1
-	done
+	echo -n "Trying to connect to the server with user '$domjudge_DBUSER': "
+	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD mysql -e 'SELECT "success.";' || return 1
 
 	echo -n "Searching for database \`$DBNAME\`: "
 	mysql -e "USE \`$DBNAME\`; SELECT 'found.';" || return 1
 
 	echo -n "Searching for data in database: "
-	DBUSER=$jury_DBUSER PASSWD=$jury_PASSWD \
+	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD \
 		mysql -e "USE \`$DBNAME\`; SELECT name FROM problem WHERE probid = 'hello';" || return 1
 
 	echo -n "MySQL server version: "
@@ -91,16 +83,15 @@ create_db_users()
 	local user pass
 	(
 	echo "CREATE DATABASE \`$DBNAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
-	for role in $ROLES ; do
-		eval "user=\$${role}_DBUSER"
-		eval "pass=\$${role}_PASSWD"
 # Need to add both '%' and 'localhost' as entries, because a default
 # fresh MySQL installation has a Host='localhost',User='' entry which
 # is more specific than Host='%' and thus leads to Access Denied errors.
-		echo "CREATE USER
-			'$user'@'%' IDENTIFIED BY '$pass',
-			'$user'@'localhost' IDENTIFIED BY '$pass';"
-	done
+	echo "CREATE USER
+		'$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD',
+		'$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+
+	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER';"
+
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
 }
@@ -110,14 +101,11 @@ remove_db_users()
 	local user pass
 	(
 	echo "DROP DATABASE IF EXISTS \`$DBNAME\`;"
-	for role in $ROLES ; do
-		eval "user=\$${role}_DBUSER"
 # In MySQL < 5.0.2, 'DROP USER' only removes the user, not its privileges:
-		echo "REVOKE ALL PRIVILEGES, GRANT OPTION FROM
-			'$user'@'%', '$user'@'localhost';"
-		echo "DROP USER
-			'$user'@'%', '$user'@'localhost';"
-	done
+	echo "REVOKE ALL PRIVILEGES, GRANT OPTION FROM
+		'$domjudge_DBUSER'@'%', '$domjudge_DBUSER'@'localhost';"
+	echo "DROP USER
+		'$domjudge_DBUSER'@'%', '$domjudge_DBUSER'@'localhost';"
 	echo "FLUSH PRIVILEGES;"
 	) | mysql -f
 }
@@ -171,21 +159,15 @@ genpass)
 	fi
 	echo "Running '$ETCDIR/gendbpasswords'..."
 	$ETCDIR/gendbpasswords > "$PASSWDFILE"
-	echo "Passwords file '$PASSWDFILE' created."
+	echo "Password file '$PASSWDFILE' created."
 	;;
 
 install)
 	read_dbpasswords
 	create_db_users
-	TMPFILE=`mktemp /tmp/domjudge-sql.XXXXXX`
-	cp $SQLDIR/mysql_privileges.sql $TMPFILE
-	for role in $ROLES ; do
-		eval "user=\$${role}_DBUSER"
-		sed -i -e "s/domjudge_$role/$user/g" $TMPFILE
-	done
  	cat $SQLDIR/mysql_db_structure.sql \
  	    $SQLDIR/mysql_db_examples.sql \
-	    $TMPFILE | mysql -D "$DBNAME"
+	     | mysql -D "$DBNAME"
 	rm -f $TMPFILE
 	;;
 
@@ -197,24 +179,24 @@ uninstall)
 # Upgrades the DB structure and permissions to current version
 # using SQL upgrade files under sql/upgrade.
 upgrade)
+	# check for legacy dbpasswords.secret content
+	if grep -Eq ^team: $PASSWDFILE >/dev/null 2>&1 ; then
+		echo "Error: please remove all non-jury users from $PASSWDFILE"
+		echo "You may also remove those users from MySQL."
+		exit 2;
+	fi
 	TMPOUT=`mktemp /tmp/domjudge-sql.XXXXXX`
-	TMPSQL=`mktemp /tmp/domjudge-sql.XXXXXX`
 	read_dbpasswords
 	for i in "$SQLDIR"/upgrade/* ; do
 		if [ ! -r "$i" ]; then
 			echo "Error: cannot read upgrade script '$i'."
 			exit 1
 		fi
-		cp "$i" $TMPSQL
-		for role in $ROLES ; do
-			eval "user=\$${role}_DBUSER"
-			sed -i -e "s/domjudge_$role/$user/g" $TMPSQL
-		done
 		# First find the line where the upgrade check is performed to
 		# filter possible error messages later.
 		UPGRADELINE=`grep -n '@UPGRADE-CHECK@' "$i" | cut -d : -f 1`
 		UPGRADELINE=$((UPGRADELINE+1))
-		if cat $TMPSQL | mysql -D "$DBNAME" >$TMPOUT 2>&1 ; then
+		if cat $i | mysql -D "$DBNAME" >$TMPOUT 2>&1 ; then
 			echo "Upgraded script '$i'."
 		else
 			if grep -E "^ERROR .* at line ${UPGRADELINE}: " $TMPOUT >/dev/null 2>&1 ; then
@@ -222,12 +204,12 @@ upgrade)
 			else
 				echo "Error upgrading script '$i':"
 				cat $TMPOUT
-				rm -f $TMPOUT $TMPSQL
+				rm -f $TMPOUT
 				exit 1
 			fi
 		fi
 	done
-	rm -f $TMPOUT $TMPSQL
+	rm -f $TMPOUT
 	;;
 
 	*)
@@ -237,7 +219,7 @@ Usage: $0 [option]... <command>
 
 Commands:
   status     check database installation status
-  genpass    generate passwords
+  genpass    generate password file
   install    create database, contents and users if not existing
   uninstall  remove database users and database, INCLUDING ALL DATA!
   upgrade    upgrade MySQL database schema to current version

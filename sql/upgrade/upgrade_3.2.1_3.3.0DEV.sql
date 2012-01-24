@@ -50,19 +50,6 @@ CREATE TABLE `balloon` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Balloons to be handed out';
 
 --
--- Add/remove privileges
---
-
-GRANT INSERT ON auditlog TO `domjudge_team`;
-
-GRANT INSERT ON scoreboard_jury   TO `domjudge_team`;
-GRANT DELETE ON scoreboard_jury   TO `domjudge_team`;
-GRANT INSERT ON scoreboard_public TO `domjudge_team`;
-GRANT DELETE ON scoreboard_public TO `domjudge_team`;
-
-FLUSH PRIVILEGES;
-
---
 -- Transfer data from old to new structure
 --
 
