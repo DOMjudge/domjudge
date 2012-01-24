@@ -201,7 +201,7 @@ upgrade)
 	TMPOUT=`mktemp /tmp/domjudge-sql.XXXXXX`
 	TMPSQL=`mktemp /tmp/domjudge-sql.XXXXXX`
 	read_dbpasswords
-	for i in "$SQLDIR"/upgrade/* ; do
+	for i in "$SQLDIR"/upgrade/*.sql ; do
 		if [ ! -r "$i" ]; then
 			echo "Error: cannot read upgrade script '$i'."
 			exit 1
