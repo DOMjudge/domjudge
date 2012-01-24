@@ -34,7 +34,7 @@ Version 3.3.0 - DEV
  - Add option to display pending submissions on the scoreboard.
  - Remove 'identify daemon' experimental code. It hasn't been
    working for years and no-one discovered that.
- - Merge all MySQL users into one omnipotent user (previosly
+ - Merge all MySQL users into one omnipotent user (previously
    domjudge_jury). The differences between the levels were
    getting to a point where the separation provided not enough
    added benefit anymore. You should remove the users
