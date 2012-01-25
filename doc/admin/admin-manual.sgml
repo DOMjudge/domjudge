@@ -442,7 +442,7 @@ Software required for building DOMjudge from distributed sources.
        program for advanced checking of input/output data correctness.
 </itemize>
 
-Additional software required for building DOMjudge from a Subversion
+Additional software required for building DOMjudge from a Git repository
 checkout.
 <itemize>
 <item> The GNU autoconf/automake toolset
@@ -508,7 +508,7 @@ system to be present and can be installed separately. Within the build
 system these parts are referred to as <tt>domserver, judgehost</tt>
 and additionally <tt>docs</tt> for all documentation.
 
-When installing from a Subversion checkout, the configure/build system
+When installing from a Git checkout, the configure/build system
 first has to be bootstrapped. This can be done by running <tt>make
 dist</tt>, which creates the <tt>configure</tt> script and generates
 documentation from SGML/LaTeX sources. Note that this requires
