@@ -13,6 +13,7 @@ Version 3.2.2 - DEV
  - Misc. minor spelling and documentation fixes.
  - Fix bug in LDAP authentication. Thanks Jorge Romo.
  - Switch from Subversion to Git VCS.
+ - Extend sample contest end date to make it active again.
 
 Version 3.2.1 - 9 November 2011
 -------------------------------
