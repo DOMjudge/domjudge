@@ -94,8 +94,6 @@ ALTER TABLE `team_unread`
 -- Add/remove privileges
 --
 
-GRANT SELECT (valid) ON submission TO `domjudge_public`, `domjudge_plugin`;
-
 REVOKE SELECT (extension) ON language FROM `domjudge_team`, `domjudge_plugin`;
 
 FLUSH PRIVILEGES;
