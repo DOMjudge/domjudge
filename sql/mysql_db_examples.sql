@@ -17,8 +17,8 @@ INSERT INTO `configuration` (`name`, `value`) VALUES ('show_affiliations', '1');
 -- Dumping data for table `contest`
 -- 
 
-INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`) VALUES (1, 'Demo practice session', '2006-01-01 09:00:00', '2006-01-01 09:00:00', NULL, '2006-01-01 11:00:00', NULL);
-INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`) VALUES (2, 'Demo contest', '2006-01-01 11:30:00', '2006-01-01 12:00:00', '2010-01-01 16:00:00', '2011-01-01 17:00:00', '2011-01-01 17:30:00');
+INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`) VALUES (1, 'Demo practice session', '2010-01-01 09:00:00', '2010-01-01 09:00:00', NULL, '2010-01-01 11:00:00', NULL);
+INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`) VALUES (2, 'Demo contest', '2012-01-01 11:30:00', '2012-01-01 12:00:00', '2014-01-01 16:00:00', '2014-01-01 17:00:00', '2014-01-01 17:30:00');
 
 -- 
 -- Dumping data for table `judgehost`

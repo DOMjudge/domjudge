@@ -11,6 +11,7 @@ Version 3.1.5 - DEV
  - Fix: sending a clarification requires an active contest.
  - Fix spacing in clarification summary.
  - Switch from Subversion to Git VCS.
+ - Extend sample contest end date to make it active again.
 
 Version 3.1.4 - 27 August 2011
 ------------------------------
