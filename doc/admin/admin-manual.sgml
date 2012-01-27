@@ -2426,7 +2426,7 @@ are just file system operations. Squares are programs and rounded
 squares are storage locations.
 
 <figure loc="h">
-<eps file="submitflow.eps">
+<eps file="submitflow.eps" height="7cm">
 <img src="submitflow.png">
 <caption>Submission flow diagram including Dolstra protocol.
 </figure>
