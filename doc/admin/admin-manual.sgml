@@ -2362,7 +2362,8 @@ invocation and the result interface. The invocation interface
 specifies that a validator must be called as a separate executable
 with at least four command line parameters:
 <code>
-/path/to/validator <input_data> <program_output> <reference_output> <result_file> [<extra_options>...]
+/path/to/validator <input_data> <program_output> <reference_output> \
+                   <result_file> [<extra_options>...]
 </code>
 
 The result interface specifies that <tt>result_file</tt> should be a
