@@ -53,6 +53,9 @@ CREATE TABLE `balloon` (
 ALTER TABLE `clarification`
   MODIFY COLUMN `body` longtext NOT NULL COMMENT 'Clarification text';
 
+ALTER TABLE `configuration`
+  MODIFY `value` longtext NOT NULL COMMENT 'Content of the configuration variable';
+
 ALTER TABLE `event`
   MODIFY COLUMN `description` longtext NOT NULL COMMENT 'Event description';
 

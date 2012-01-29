@@ -60,7 +60,7 @@ CREATE TABLE `clarification` (
 
 CREATE TABLE `configuration` (
   `name` varchar(25) NOT NULL COMMENT 'Name of the configuration variable',
-  `value` varchar(255) NOT NULL COMMENT 'Content of the configuration variable',
+  `value` longtext NOT NULL COMMENT 'Content of the configuration variable',
   PRIMARY KEY  (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Global configuration variables';
 
