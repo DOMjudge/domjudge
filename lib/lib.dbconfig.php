@@ -10,7 +10,7 @@ function dbconfig_get($name, $default, $cacheok = true)
 {
 	global $LIBDBCONFIG;
 
-        if ( (!isset($LIBDBCONFIG)) || (!$cacheok) ) {
+	if ( (!isset($LIBDBCONFIG)) || (!$cacheok) ) {
 		dbconfig_init();
 	}
 
