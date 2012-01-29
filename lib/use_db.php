@@ -30,7 +30,7 @@ function setup_database_connection($privlevel)
 	}
 
 	if (!$DB) {
-		user_error("Failed to create dataabase connection", E_USER_ERROR);
+		user_error("Failed to create database connection", E_USER_ERROR);
 		exit();
 	}
 
