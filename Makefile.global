@@ -48,7 +48,7 @@ CYGWIN = 1
 endif
 
 # Library objects required in multiple places:
-LIBSBASE   = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc lib.config)
+LIBSBASE   = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc)
 LIBHEADERS = $(addsuffix .h,$(LIBSBASE))
 LIBSOURCES = $(addsuffix .c,$(LIBSBASE))
 LIBOBJECTS = $(addsuffix $(OBJEXT),$(LIBSBASE))

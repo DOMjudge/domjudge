@@ -3,7 +3,7 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-OBJECTS = $(addsuffix $(OBJEXT),lib.error lib.misc lib.config)
+OBJECTS = $(addsuffix $(OBJEXT),lib.error lib.misc)
 
 build: $(OBJECTS)
 
