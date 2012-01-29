@@ -1,0 +1,17 @@
+INT(1,100,runs) NEWLINE
+REP(runs)
+  IF(MATCH("J"))
+    STRING("J")
+    IF(MATCH("a"))
+      STRING("a")
+      IF(MATCH("a"))
+        STRING("ap")
+      ELSE
+        STRING("n")
+      END
+    END
+  ELSE
+    STRING("Thijs")
+  END
+  NEWLINE
+END

@@ -6,8 +6,6 @@
  * a web based tool in the jury interface. This daemon and that tool
  * cannot be used at the same time.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -37,7 +35,7 @@ $waittime = 5;
 /**
  * Returns a text to be sent when notifying of a new balloon.
  */
-function notification_text($team, $problem, $probs_solved, $probs_data) {
+function notification_text($team, $problem, $probs_solved, $probs_data, $comment) {
 	global $cdata;
 
 	$ret =
@@ -52,6 +50,10 @@ function notification_text($team, $problem, $probs_solved, $probs_data) {
 	foreach($probs_solved as $probid) {
 		$ret .= " - " . $probid .": " . $probs_data[$probid]['name'] .
 			(empty($probs_data[$probid]['color']) ? "" : " (colour: ".$probs_data[$probid]['color'].")" )."\n";
+	}
+
+	if ( $comment ) {
+		$ret .= "\n$comment\n";
 	}
 
 	if ( isset($cdata['freezetime']) &&
@@ -128,6 +130,22 @@ while ( TRUE ) {
 				$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
 				                      FROM problem WHERE cid = %i', $cid);
 
+				// current limitation is that this gets reset if the balloon daemon is restarted
+				$comment = '';
+				if ( !isset($nonfirst_contest) ) {
+					$comment = 'first in contest';
+					$nonfirst_contest = true;
+				} else {
+					if (!isset($nonfirst_problem[$row['probid']])) {
+						$comment = 'first for problem ';
+						$nonfirst_problem[$row['probid']] = true;
+					}
+					if (!isset($nonfirst_team[$row['login']])) {
+						$comment = 'first for team';
+						$nonfirst_team[$row['login']] = true;
+					}
+				}
+
 				logmsg(LOG_INFO,"Sending notification: team '".
 					   $row['login']."', problem '".$row['probid']."'.");
 
@@ -136,7 +154,7 @@ while ( TRUE ) {
 				$handle = popen(BALLOON_CMD, 'w');
 				if ( ! $handle ) error("Could not run command '".BALLOON_CMD."'");
 
-				fwrite($handle,notification_text($team,$row['probid'],$probs_solved, $probs_data));
+				fwrite($handle,notification_text($team,$row['probid'],$probs_solved, $probs_data, $comment));
 				if ( ($exitcode = pclose($handle))!=0 ) {
 					warning("Notification command exited with exitcode $exitcode");
 				}

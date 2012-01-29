@@ -5,4 +5,6 @@
 /config.cache
 /paths.mk
 /aclocal.m4
+/bin
 /output
+*.o

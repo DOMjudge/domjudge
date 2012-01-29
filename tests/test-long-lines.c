@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * Writes very long lines to stdout. Should give WRONG-ANSWER, but not
  * crash the system.
  *

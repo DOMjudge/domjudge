@@ -1,7 +1,5 @@
 # Global Makefile
 #
-# $Id$
-#
 # Put here all things that need or can be defined globally, like
 # standard targets (clean, etc.) and global variables.
 
@@ -25,6 +23,18 @@ ifneq ($(wildcard $(TOPDIR)/paths.mk),)
 include $(TOPDIR)/paths.mk
 endif
 
+# Determine revision info:
+REVISION = $(shell \
+if [ -n "$(PUBLISHED)" ]; then \
+	echo "$(PUBLISHED)" ; \
+elif git describe >/dev/null 2>&1 ; then \
+	git describe --long | sed 's/^.*-//' ; \
+else \
+	echo 'unknown' ; \
+fi )
+CFLAGS   += -DREVISION="\"$(REVISION)\""
+CXXFLAGS += -DREVISION="\"$(REVISION)\""
+
 # Install settings
 INSTALL_PROG    = $(INSTALL)
 INSTALL_DATA    = $(INSTALL) -m 0644
@@ -38,7 +48,7 @@ CYGWIN = 1
 endif
 
 # Library objects required in multiple places:
-LIBSBASE   = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc lib.config)
+LIBSBASE   = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc)
 LIBHEADERS = $(addsuffix .h,$(LIBSBASE))
 LIBSOURCES = $(addsuffix .c,$(LIBSBASE))
 LIBOBJECTS = $(addsuffix $(OBJEXT),$(LIBSBASE))

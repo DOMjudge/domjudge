@@ -2,8 +2,6 @@
 /**
  * View a row in team_affiliation: an institution, company etc
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -49,7 +47,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 <td><?php echo addInput('data[0][name]', @$row['name'], 40, 255)?></td></tr>
 
 <tr><td><label for="data_0__country_">Country:</label></td>
-<td><?php echo addInput('data[0][country]', @$row['country'], 3, 2)?>
+<td><?php echo addInput('data[0][country]', @$row['country'], 4, 3)?>
 <a target="_blank"
 href="http://www.iso.org/iso/country_codes/iso_3166_code_lists/country_names_and_code_elements.htm"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>

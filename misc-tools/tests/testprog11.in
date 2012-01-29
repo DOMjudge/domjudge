@@ -1,0 +1,13 @@
+INT(1,100,runs) NEWLINE
+REP(runs)
+  INT(-100,100,n)
+  IF(n>0)
+    SPACE STRING("positive")
+  ELSE
+    IF(n<0)
+      SPACE STRING("negative")
+    END
+  END
+  NEWLINE
+END
+EOF

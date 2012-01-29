@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * This code tries to contact http://google.com/ and returns with a
  * message and page contents if successful, it returns exitcode != 0
  * otherwise.

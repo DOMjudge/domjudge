@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 #
 # Wrapper script for the submit client binary to pass submit server
 # address, url and possibly other information.

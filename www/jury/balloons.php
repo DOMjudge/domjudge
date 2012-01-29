@@ -3,8 +3,6 @@
  * Tool to coordinate the handing out of balloons to teams that solved
  * a problem. Similar to the balloons-daemon, but web-based.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -32,14 +30,7 @@ if ( isset($_COOKIE['domjudge_balloonviewall']) ) {
 // Did someone press the view button?
 if ( isset($_REQUEST['viewall']) ) $viewall = $_REQUEST['viewall'];
 
-// Set cookie of submission view type, expiry defaults to end of session.
-if ( version_compare(PHP_VERSION, '5.2') >= 0 ) {
-	// HTTPOnly Cookie, while this cookie is not security critical
-	// it's a good habit to get into.
-	setcookie('domjudge_balloonviewall', $viewall, null, null, null, null, true);
-} else {
-	setcookie('domjudge_balloonviewall', $viewall);
-}
+setcookie('domjudge_balloonviewall', $viewall);
 
 $refresh = '30;url=balloons.php';
 require(LIBWWWDIR . '/header.php');
@@ -81,6 +72,10 @@ $BALLOONS = $TOTAL_BALLOONS = array();
 while ( $row = $res->next() ) {
 	$BALLOONS[] = $row;
 	$TOTAL_BALLOONS[$row['login']][] = $row['probid'];
+
+	// keep overwriting these variables - in the end they'll
+	// contain the id's of the first balloon in each type
+	$first_contest = $first_problem[$row['probid']] = $first_team[$row['login']] = $row['balloonid'];
 }
 
 $conteststart  = strtotime($cdata['starttime']);
@@ -94,7 +89,7 @@ if ( !empty($BALLOONS) ) {
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
 		"<tr><td></td><th>ID</th><th>time</th><th>solved</th>" .
 		"<th align=\"right\">team</th><th></th><th>loc.</th>" .
-		"<th>category</th><th>total</th><th></th></tr>\n</thead>\n";
+		"<th>category</th><th>total</th><th></th><th></th></tr>\n</thead>\n";
 
 	foreach ( $BALLOONS as $row ) {
 
@@ -126,6 +121,7 @@ if ( !empty($BALLOONS) ) {
 
 		// list of balloons for this team
 		sort($TOTAL_BALLOONS[$row['login']]);
+		$TOTAL_BALLOONS[$row['login']] = array_unique($TOTAL_BALLOONS[$row['login']]);
 		foreach($TOTAL_BALLOONS[$row['login']] as $prob_solved) {
 			echo '<img title="' . htmlspecialchars($prob_solved) .
 				'" style="background-color: ' .
@@ -141,6 +137,22 @@ if ( !empty($BALLOONS) ) {
 			echo '<input type="submit" name="done[' .
 				(int)$row['balloonid'] . ']" value="done" />';
 		}
+		
+		echo '</td><td>';
+
+		$comments = array();
+		if ( $first_contest == $row['balloonid'] ) {
+			$comments[] = 'first in contest';
+		} else {
+			if ( $first_team[$row['login']] == $row['balloonid'] ) {
+				$comments[] = 'first for team';
+			}	
+			if ( $first_problem[$row['probid']] == $row['balloonid'] ) {
+				$comments[] = 'first for problem';
+			}
+		}
+		echo implode('; ', $comments);
+
 		echo "</td></tr>\n";
 	}
 

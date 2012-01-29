@@ -2,8 +2,6 @@
  * basename - return the name-within-directory of a file name.
  * Inspired by basename.c from the GNU C Library.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */

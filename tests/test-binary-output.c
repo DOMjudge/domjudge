@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * This program test binary output and should give WRONG-ANSWER, but
  * display diff correctly.
  *

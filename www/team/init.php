@@ -2,8 +2,6 @@
 /**
  * Include required files.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -38,6 +36,10 @@ require_once(LIBWWWDIR . '/auth.team.php');
 if ( @$_POST['cmd']=='login' ) do_login();
 
 if ( !logged_in() ) show_loginpage();
+
+if ( $teamdata['enabled'] != 1 ) {
+	error("Team is not enabled.");
+}
 
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];

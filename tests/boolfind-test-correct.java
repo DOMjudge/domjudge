@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * Sample solution in Java for the "boolfind" interactive problem.
  *
  * @EXPECTED_RESULTS@: CORRECT

@@ -1,25 +1,11 @@
 /*
    runpipe -- run two commands with stdin/stdout bi-directionally connected.
-   Copyright (C) 2010 Jaap Eldering (eldering@a-eskwadraat.nl).
 
    Idea based on the program dpipe from the Virtual Distributed
    Ethernet package.
 
-   $Id$
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+   Part of the DOMjudge Programming Contest Jury System and licenced
+   under the GNU GPL. See README and COPYING for details.
 
 
    Program specifications:
@@ -48,8 +34,7 @@
 #include <getopt.h>
 
 #define PROGRAM "runpipe"
-#define VERSION "$Rev$"
-#define AUTHORS "Jaap Eldering"
+#define VERSION DOMJUDGE_VERSION "/" REVISION
 
 #include "lib.error.h"
 #include "lib.misc.h"
@@ -78,17 +63,6 @@ struct option const long_opts[] = {
 	{"version", no_argument,       &show_version, 1 },
 	{ NULL,     0,                 NULL,          0 }
 };
-
-void version()
-{
-	printf("\
-%s -- version %s\n\
-Written by %s\n\n\
-%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n\
-are welcome to redistribute it under certain conditions.  See the GNU\n\
-General Public Licence for details.\n",PROGRAM,VERSION,AUTHORS,PROGRAM);
-	exit(0);
-}
 
 void usage()
 {
@@ -183,7 +157,7 @@ int main(int argc, char **argv)
 	}
 
 	if ( show_help ) usage();
-	if ( show_version ) version();
+	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( argc<=optind ) error(0,"no command specified");
 

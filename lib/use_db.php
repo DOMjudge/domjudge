@@ -1,5 +1,4 @@
 <?php
-/* $Id$ */
 
 require('lib.database.php');
 
@@ -25,15 +24,13 @@ function setup_database_connection($privlevel)
 		if ( $credential{0} == '#' ) continue;
 		list ($priv, $host, $db, $user, $pass) =
 			explode(':', trim($credential));
-		if ($priv != $privlevel) continue;
 
 		$DB = new db ($db, $host, $user, $pass);
 		break;
 	}
 
 	if (!$DB) {
-		user_error(sprintf("Privilege level '%s' not supported",
-			$privlevel), E_USER_ERROR);
+		user_error("Failed to create database connection", E_USER_ERROR);
 		exit();
 	}
 

@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * This code tries to fork as many processes as possible. The limit on
  * the number of processes will limit that and the program will
  * timeout.

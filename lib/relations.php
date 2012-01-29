@@ -1,8 +1,6 @@
 <?php
 /**
  * Document relations between DOMjudge tables for various use.
- *
- * $Id$
  */
 
 /** For each table specify the set of attributes that together

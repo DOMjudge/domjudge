@@ -2,8 +2,6 @@
 /**
  * View/edit testcases
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -70,14 +68,14 @@ if ( isset ($_GET['move']) ) {
 		// (probid, rank) is a unique key, so we must switch via a
 		// temporary rank, and use a transaction.
 		$tmprank = 999999;
-//		$DB->q('START TRANSACTION');
+		$DB->q('START TRANSACTION');
 		$DB->q('UPDATE testcase SET rank = %i
 		        WHERE probid = %s AND rank = %i', $tmprank, $probid, $other);
 		$DB->q('UPDATE testcase SET rank = %i
 		        WHERE probid = %s AND rank = %i', $other, $probid, $rank);
 		$DB->q('UPDATE testcase SET rank = %i
 		        WHERE probid = %s AND rank = %i', $rank, $probid, $tmprank);
-//		$DB->q('COMMIT');
+		$DB->q('COMMIT');
 		auditlog('testcase', $probid, 'switch rank', "$rank <=> $other");
 	}
 
@@ -193,13 +191,6 @@ if ( count($data)==0 ) {
 } else {
 	?>
 <table class="list testcases">
-        <!--
-<colgroup>
-<col id="testrank" /><col class="filename" /><?php
-	if ( IS_ADMIN ) echo '<col id="testupload" />'; ?>
-<col id="testsize" /><col id="testmd5" /><col id="testdesc" />
-</colgroup>
-        -->
 <thead><tr>
 <th scope="col">#</th><th scope="col">download</th>
 <th scope="col">size</th><th scope="col">md5</th>

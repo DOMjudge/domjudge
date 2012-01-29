@@ -1,5 +1,3 @@
-$Id$
-
 This file should give a submission warning about it's size and abort
 at submission and otherwise at compilation time.
 

@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * This should fail with RUN-ERROR due to running out of memory, which
  * is restricted. The amount allocated may seem to be half of the
  * available, but that is because (GNU implementation) STL vectors by

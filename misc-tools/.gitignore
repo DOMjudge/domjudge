@@ -1,6 +1,5 @@
 /checkinput
 /checktestdata
-/parser.ih
 /yylex.cc
 /parse.cc
 /parserbase.h

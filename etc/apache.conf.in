@@ -125,8 +125,6 @@ AuthUserFile @domserver_etcdir@/htpasswd-plugin
 # allow from 172.30.20.0/24
 </Directory>
 
-# $Id$
-
 # vim: syntax=apachestyle
 # Local Variables:
 # mode: apache

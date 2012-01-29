@@ -2,8 +2,6 @@
  * submitdaemon -- server for the submit program.
  *
  * Based on submitdaemon.pl by Eelco Dolstra.
- *  
- * $Id$
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.

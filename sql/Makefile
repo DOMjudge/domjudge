@@ -12,9 +12,9 @@ dj-setup-database: %: %.in $(TOPDIR)/paths.mk
 install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) dj-setup-database
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir) \
-		mysql_db_structure.sql mysql_db_examples.sql \
-		mysql_privileges.sql
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/upgrade upgrade/upgrade_*.sql
+		mysql_db_structure.sql mysql_db_examples.sql
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/upgrade \
+	 	upgrade/upgrade_*.sql upgrade/README
 
 distclean-l:
 	-rm -f dj-setup-database

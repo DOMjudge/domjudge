@@ -3,8 +3,6 @@
 -- You can pipe this file into the 'mysql' command to insert this
 -- data, but preferably use 'dj-setup-database'. Database should be set
 -- externally (e.g. to 'domjudge').
---
--- $Id$
 
 
 -- 
@@ -14,6 +12,7 @@
 INSERT INTO `configuration` (`name`, `value`) VALUES ('clar_answers', 'No comment	Read the problem statement carefully');
 INSERT INTO `configuration` (`name`, `value`) VALUES ('clar_categories', 'general:General issue	technical:Technical issue');
 INSERT INTO `configuration` (`name`, `value`) VALUES ('show_affiliations', '1');
+INSERT INTO `configuration` (`name`, `value`) VALUES ('show_pending', '0');
 INSERT INTO `configuration` (`name`, `value`) VALUES ('disable_verify', '0');
 
 -- 
@@ -21,7 +20,7 @@ INSERT INTO `configuration` (`name`, `value`) VALUES ('disable_verify', '0');
 -- 
 
 INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `activatetime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`) VALUES (1, 'Demo practice session', '2010-01-01 08:30:00', '2010-01-01 09:00:00', NULL, '2010-01-01 11:00:00', NULL, '-1:00', NULL, '+2:00', NULL);
-INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `activatetime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`) VALUES (2, 'Demo contest', '2010-01-01 11:30:00', '2010-01-01 12:00:00', '2012-01-01 16:00:00', '2012-01-01 17:00:00', '2012-01-01 17:30:00', '2010-01-01 11:30:00', '2012-01-01 16:00:00', '2012-01-01 17:00:00', '2012-01-01 17:30:00');
+INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `activatetime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`) VALUES (2, 'Demo contest', '2012-01-01 11:30:00', '2012-01-01 12:00:00', '2014-01-01 16:00:00', '2014-01-01 17:00:00', '2014-01-01 17:30:00', '2012-01-01 11:30:00', '2014-01-01 16:00:00', '2014-01-01 17:00:00', '2014-01-01 17:30:00');
 
 -- 
 -- Dumping data for table `judgehost`
@@ -58,7 +57,7 @@ INSERT INTO `problem` (`probid`, `cid`, `name`, `allow_submit`, `allow_judge`, `
 -- Dumping data for table `team_affiliation`
 -- 
 
-INSERT INTO `team_affiliation` (`affilid`, `name`, `country`, `comments`) VALUES ('UU', 'Utrecht University', 'NL', NULL);
+INSERT INTO `team_affiliation` (`affilid`, `name`, `country`, `comments`) VALUES ('UU', 'Utrecht University', 'NLD', NULL);
 
 -- 
 -- Dumping data for table `team_category`

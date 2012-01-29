@@ -1,6 +1,4 @@
 # Main Makefile
-#
-# $Id$
 
 # Define TOPDIR from shell command and _not_ $(PWD) because that gives
 # pwd before changing to a 'make -C <dir>' <dir>:

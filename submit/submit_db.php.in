@@ -10,8 +10,6 @@
  *
  * @configure_input@
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -48,6 +46,10 @@ if ( AUTH_METHOD!='IPADDRESS' ) {
 // Verify and register IP address here, as other authentication
 // methods might conflict with this.
 $teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s', $team);
+
+if ( $teamdata['enabled'] != 1 ) {
+	error("Team '$team' is disabled.");
+}
 
 if( ! compareipaddr($teamdata['authtoken'],$ip) ) {
 	if ( $teamdata['authtoken'] == NULL && ! STRICTIPCHECK ) {

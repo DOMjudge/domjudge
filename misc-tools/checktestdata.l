@@ -35,6 +35,8 @@ STRING   { return Parser::CMD_STRING; }
 REGEX    { return Parser::CMD_REGEX; }
 REP      { return Parser::CMD_REP; }
 WHILE    { return Parser::CMD_WHILE; }
+IF       { return Parser::CMD_IF; }
+ELSE     { return Parser::CMD_ELSE; }
 END      { return Parser::CMD_END; }
 
 FIXED      { return Parser::OPT_FIXED; }
@@ -80,7 +82,7 @@ SCIENTIFIC { return Parser::OPT_SCIENTIFIC; }
 
 \\[0-7]{1,3} {
 	/* octal escape sequence */
-	int result;
+	unsigned int result;
 
 	(void) sscanf(yytext+1,"%o",&result);
 

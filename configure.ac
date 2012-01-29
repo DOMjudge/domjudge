@@ -3,7 +3,6 @@ AC_INIT([DOMjudge],
         m4_esyscmd([sed -n '1s/^.*version //p' README | tr -d '\n']),
         [domjudge-devel@lists.A-Eskwadraat.nl])
 AC_PREREQ([2.60])
-AC_REVISION($Rev$)
 AC_CONFIG_HEADERS([etc/config.h])
 AC_CONFIG_SRCDIR([Makefile.global])
 

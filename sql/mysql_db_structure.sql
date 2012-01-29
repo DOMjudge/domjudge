@@ -3,8 +3,6 @@
 -- You can pipe this file into the 'mysql' command to create the
 -- database tables, but preferably use 'dj-setup-database'. Database
 -- should be set externally (e.g. to 'domjudge').
---
--- $Id$
 
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 
@@ -131,7 +129,7 @@ CREATE TABLE `judging` (
   `verified` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Result verified by jury member?',
   `jury_member` varchar(15) default NULL COMMENT 'Name of jury member who verified this',
   `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Old judging is marked as invalid when rejudging',
-  `output_compile` longtext COMMENT 'Output of the compiling the program',
+  `output_compile` longblob COMMENT 'Output of the compiling the program',
   PRIMARY KEY  (`judgingid`),
   KEY `submitid` (`submitid`),
   KEY `judgehost` (`judgehost`),
@@ -151,9 +149,9 @@ CREATE TABLE `judging_run` (
   `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
   `runresult` varchar(25) default NULL COMMENT 'Result of this run, NULL if not finished yet',
   `runtime` float DEFAULT NULL COMMENT 'Submission running time on this testcase',
-  `output_run` longtext COMMENT 'Output of running the program',
-  `output_diff` longtext COMMENT 'Diffing the program output and testcase output',
-  `output_error` longtext COMMENT 'Standard error output of the program',
+  `output_run` longblob COMMENT 'Output of running the program',
+  `output_diff` longblob COMMENT 'Diffing the program output and testcase output',
+  `output_error` longblob COMMENT 'Standard error output of the program',
   PRIMARY KEY  (`runid`),
   UNIQUE KEY `testcaseid` (`judgingid`, `testcaseid`),
   KEY `judgingid` (`judgingid`),
@@ -203,6 +201,7 @@ CREATE TABLE `scoreboard_jury` (
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL default '0' COMMENT 'Number of submissions made',
+  `pending` int(4) NOT NULL default '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL default '0' COMMENT 'Total time spent',
   `is_correct` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has there been a correct submission?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
@@ -217,6 +216,7 @@ CREATE TABLE `scoreboard_public` (
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL default '0' COMMENT 'Number of submissions made',
+  `pending` int(4) NOT NULL default '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL default '0' COMMENT 'Total time spent',
   `is_correct` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has there been a correct submission?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
@@ -258,10 +258,11 @@ CREATE TABLE `submission` (
 
 CREATE TABLE `team` (
   `login` varchar(15) NOT NULL COMMENT 'Team login name',
-  `name` varchar(255) NOT NULL COMMENT 'Team name',
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Team name',
   `categoryid` int(4) unsigned NOT NULL default '0' COMMENT 'Team category ID',
   `affilid` varchar(10) default NULL COMMENT 'Team affiliation ID',
   `authtoken` varchar(255) default NULL COMMENT 'Identifying token for this team',
+  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the team is visible and operational',
   `members` longtext COMMENT 'Team member names (freeform)',
   `room` varchar(15) default NULL COMMENT 'Physical location of team',
   `comments` longtext COMMENT 'Comments about this team',
@@ -284,7 +285,7 @@ CREATE TABLE `team` (
 CREATE TABLE `team_affiliation` (
   `affilid` varchar(10) NOT NULL COMMENT 'Unique ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
-  `country` char(2) default NULL COMMENT 'ISO country code',
+  `country` char(3) default NULL COMMENT 'ISO 3166-1 alpha-3 country code',
   `comments` longtext COMMENT 'Comments',
   PRIMARY KEY  (`affilid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Affilitations for teams (e.g.: university, company)';

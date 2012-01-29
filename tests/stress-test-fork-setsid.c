@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * This will crash the judging daemon: it forks processes and places
  * these in a new session, such that testcase_run cannot retrace and
  * kill these. They are left running and should be killed before

@@ -1,5 +1,3 @@
-/* $Id$ */
-
 body {
 	color: black;
 	background-color: white;
@@ -197,6 +195,7 @@ legend {
 	border-bottom: 2px solid black;
 }
 .score_correct   { background: #33FF66; }
+.score_pending   { background: #6666FF; }
 .score_incorrect { background: #FF6666; }
 .score_neutral   { background: white;   }
 
@@ -217,10 +216,13 @@ td.scorenc { border-color: silver; }
 	font-weight: bold;
 }
 
-#lastmod {
-	color: gray;
-	font-size: x-small;
+#lastmod { 
 	position: absolute; right: 1ex; margin-top: 1em;
+}
+#lastmod, #lastmod a { 
+	font-size: x-small;
+	color: gray;
+	text-align: right;
 }
 
 #teamscoresummary { margin-top: 2.5em; }

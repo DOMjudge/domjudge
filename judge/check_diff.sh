@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 
 # Simple program for compare_program.sh script: this just runs a diff
 # comparison between the program and expected output. Should give same

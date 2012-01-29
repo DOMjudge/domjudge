@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 
 # Compare wrapper-script to be called from 'testcase_run.sh'.
 #

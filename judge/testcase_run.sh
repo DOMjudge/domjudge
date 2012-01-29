@@ -2,8 +2,6 @@
 
 # Script to test (run and compare) submissions with a single testcase
 #
-# $Id$
-
 # Usage: $0 <testdata.in> <testdata.out> <timelimit> <workdir>
 #           [<special-run> [<special-compare>]]
 #
@@ -184,8 +182,8 @@ fi
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
-	-t $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT -c -o program.time -- \
-	$PREFIX/run $PREFIX/$PROGRAM \
+	-C $TIMELIMIT -t $((2*TIMELIMIT)) -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
+	-c -o program.time -- $PREFIX/run $PREFIX/$PROGRAM \
 	testdata.in program.out program.err program.exit \
 	>error.tmp 2>&1
 
@@ -214,7 +212,7 @@ fi
 
 # Check for errors from running the program:
 logmsg $LOG_DEBUG "checking program run exit-status"
-if grep  'timelimit reached: aborting command' error.tmp >/dev/null 2>&1 ; then
+if grep  'timelimit exceeded' error.tmp >/dev/null 2>&1 ; then
 	echo "Timelimit exceeded." >>error.out
 	cat error.tmp >>error.out
 	cleanexit ${E_TIMELIMIT:--1}

@@ -1,8 +1,6 @@
 /*
  * Jury program to communicate with contestants' program
  * for the sample "boolfind" interactive problem.
- *
- * $Id$
  */
 
 #include "config.h"

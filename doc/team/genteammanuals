@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 #
 # Script to generate team manual including actual configuration
 # settings. Also allows one to pass a WEBBASEURI setting with the

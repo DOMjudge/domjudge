@@ -1,24 +1,28 @@
 <!doctype linuxdoc system>
 <!--
- $Id$
-
  DOMjudge Administrator's Manual
  This manual is part of the DOMjudge Programming Contest Jury System
  and licenced under the GNU GPL. See README and COPYING for details.
-
 -->
 <report>
 
 <title>DOMjudge Administrator's Manual
 <author>by the DOMjudge team
-<date>$Date$
+<!--
+ This is some comment character magic to circumvent problems
+ with an unexpanded git archive $Format$ keyword.
+ $Format: -%x2d%x3e
+<date>%aD
+%x3c!%x2d- $ -->
 
 <abstract>
 This document provides information about DOMjudge installation,
 configuration and operation for the DOMjudge administrator. A separate
 manual is available for teams and for jury members.
 
-Document version: $Rev$
+<!-- $Format: -%x2d%x3e
+Document version: %h
+%x3c!%x2d- $ -->
 </abstract>
 
 <toc>
@@ -86,7 +90,7 @@ Study Association <htmlurl name="A-Eskwadraat"
 url="http://www.a-eskwadraat.nl/">, <htmlurl name="Utrecht University"
 url="http://www.uu.nl/">, The Netherlands.
 
-It is Copyright (c) 2004 - 2011 by The DOMjudge Developers.
+It is Copyright (c) 2004 - 2012 by The DOMjudge Developers.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the <url name="GNU General Public License"
@@ -814,7 +818,7 @@ The database structure and privileges are included in MySQL
 dump files in the sql subdirectory. The default database name is
 <tt>domjudge</tt>. This can be changed manually in the
 <tt>etc/dbpasswords.secret</tt> file: the database name as specified
-for the <tt>jury</tt> user will be used when installing.
+in this file will be used when installing.
 
 Installation of the database is done with <tt>bin/dj-setup-database</tt>.
 For this, you need an installed and configured MySQL server and
@@ -1410,6 +1414,11 @@ with
 DOMjudge user
 </itemize>
 
+When <tt>enabled</tt> is set to 0, the team immediately disappears from
+the scoreboards and cannot use the team web interface anymore, even
+when already logged in. One use case could be to disqualify a team on
+the spot.
+
 <tt>members</tt> are the names of the team members, separated by
 newlines and <tt>room</tt> is the location or room of the team, both for
 display only; <tt>comments</tt> can be filled with arbitrary useful
@@ -1419,9 +1428,9 @@ field indicate when/whether/from where a team visited its team web interface.
 
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the
-institution. <tt>country</tt> should be the 2 character 
-<htmlurl name="ISO 3166-1 alpha-2 abbreviation"
-url="http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm">
+institution. <tt>country</tt> should be the 3 character 
+<htmlurl name="ISO 3166-1 alpha-3 abbreviation"
+url="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Officially_assigned_code_elements">
 of the country and <tt>comments</tt> is a free form field
 that is displayed in the jury interface.
 
@@ -1431,7 +1440,7 @@ logo picture located in
 <tt>www/images/affiliations/&lt;affilid&gt;.png</tt> and
 <tt>country</tt> must match a (flag) picture in
 <tt>www/images/countries/&lt;country&gt;.png</tt>. All
-country flags are present there, named with their 2-character ISO
+country flags are present there, named with their 3-character ISO
 codes. See also <tt>www/images/countries/README</tt>. If
 either file is not present the respective ID string will be printed
 instead.
@@ -1984,7 +1993,7 @@ directories. Database access is protected by passwords. The default
 permissions allow connections from <em>all</em> hosts, so make sure you
 restrict this appropriately or choose strong enough passwords.
 
-<em>Note:</em> database passwords are stored in
+<em>Note:</em> the database password is stored in
 <tt>etc/dbpasswords.secret</tt>. This file has to be
 non-readable to teams, but has to be readable to the web server to let
 the jury web interface work. A solution is to make it readable to a
@@ -1997,8 +2006,9 @@ defaults to <tt>www-data</tt>.
 Judgehosts and the domserver communicate with each other through
 the MySQL protocol. By default, MySQL does not encrypt these
 connections. Refer to the MySQL manual to configure SSL on client
-connections, or ensure in the network setup that these connections
-are separated from the team network.
+connections; alternatively you can employ an SSH tunnel or ensure
+in the network setup that these connections are separated from
+the team network.
 
 The jury web interface is protected by HTTP Authentication. These
 credentials are essentially sent plain-text, so we advise to setup
@@ -2352,7 +2362,8 @@ invocation and the result interface. The invocation interface
 specifies that a validator must be called as a separate executable
 with at least four command line parameters:
 <code>
-/path/to/validator <input_data> <program_output> <reference_output> <result_file> [<extra_options>...]
+/path/to/validator <input_data> <program_output> <reference_output> \
+                   <result_file> [<extra_options>...]
 </code>
 
 The result interface specifies that <tt>result_file</tt> should be a
@@ -2416,7 +2427,7 @@ are just file system operations. Squares are programs and rounded
 squares are storage locations.
 
 <figure loc="h">
-<eps file="submitflow.eps">
+<eps file="submitflow.eps" height="7cm">
 <img src="submitflow.png">
 <caption>Submission flow diagram including Dolstra protocol.
 </figure>
@@ -2488,12 +2499,12 @@ make maintainer-install
 </code>
 Note that these targets have to be executed <em>separately</em>.
 
-<sect>Bootstrapping a Subversion checkout
+<sect>Bootstrapping from Git repository sources
 <p>
 
 The installation steps in this document assume that you are using a
 downloaded tarball from the DOMjudge website. If you want to install
-from a Subversion checkout, because you want to use the bleeding edge
+from Git repository sources, because you want to use the bleeding edge
 code or consider to send a patch to the developers, the
 configure/build system first has to be bootstrapped.
 

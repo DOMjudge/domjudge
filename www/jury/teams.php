@@ -2,8 +2,6 @@
 /**
  * View the teams
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -15,7 +13,7 @@ $teams = $DB->q('SELECT t.*,c.name AS catname,a.name AS affname
                  FROM team t
                  LEFT JOIN team_category c USING (categoryid)
                  LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
-                 ORDER BY c.sortorder, t.name');
+                 ORDER BY c.sortorder, t.name COLLATE utf8_general_ci');
 
 $nsubmits = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
                     FROM submission s
@@ -57,7 +55,8 @@ if( $teams->count() == 0 ) {
 			$numcor = (int)$ncorrect[$row['login']]['cnt'];
 		}
 		$link = '<a href="team.php?id='.urlencode($row['login']) . '">';
-		echo "<tr class=\"category" . (int)$row['categoryid'] . "\">".
+		echo "<tr class=\"category" . (int)$row['categoryid']  .
+			($row['enabled'] == 1 ? '' : ' sub_ignore') .  "\">".
 			"<td class=\"teamid\">" . $link .
 				htmlspecialchars($row['login'])."</a></td>".
 			"<td>" . $link .
@@ -87,9 +86,8 @@ if( $teams->count() == 0 ) {
 		case 3: echo 'team-ok" title="correct submission(s)"';
 			break;
 		}
-		// TODO? want to link this symbol aswell? need to do some css magic to retain color
-		echo ">" . CIRCLE_SYM . "</td>";
-		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$numcor / $numsub</td>";
+		echo ">$link" . CIRCLE_SYM . "</a></td>";
+		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$link$numcor / $numsub</a></td>";
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 				editLink('team', $row['login']) . " " .

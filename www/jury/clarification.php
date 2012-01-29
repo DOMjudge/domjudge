@@ -3,8 +3,6 @@
  * Show clarification thread and reply box.
  * When no id is given, show general clarification box.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -115,7 +113,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 }
 
 // (un)set 'answered' (if posted)
-if ( isset($_POST['submit']) && isset($_POST['answered']) ) {
+if ( isset($_POST['answer']) && isset($_POST['answered']) ) {
 	$answered = (int)$_POST['answered'];
 	$DB->q('UPDATE clarification SET answered = %i, jury_member = ' .
 	       ($answered ? '%s ' : 'NULL %_ ') . 'WHERE clarid = %i',
@@ -148,7 +146,7 @@ if ( !$req['answered'] ) {
 		echo ', by ' . htmlspecialchars($req['jury_member']) . '; ' .
 		    addSubmit('unclaim', 'unclaim') . ' or ';
 	}
-	echo addSubmit('claim', 'claim') .
+	echo addSubmit('claim', 'claim') . '</p>' .
 	    addEndForm();
 }
 
@@ -174,7 +172,7 @@ if ( !empty($req['sender']) ) {
 	echo addForm('clarification.php') .
 		addHidden('id', $id) .
 		addHidden('answered', !$req['answered']) .
-		addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered'), 'submit') .
+		addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered'), 'answer') .
 		addEndForm();
 }
 

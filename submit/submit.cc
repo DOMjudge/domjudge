@@ -2,8 +2,6 @@
  * submit -- command-line submit program for solutions.
  *
  * Based on submit.pl by Eelco Dolstra.
- *  
- * $Id$
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.

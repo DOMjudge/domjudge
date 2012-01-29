@@ -1,6 +1,9 @@
 /*
    check_float -- program to compare output data containing floats.
-   Copyright (C) 2006 Jaap Eldering.
+
+   Part of the DOMjudge Programming Contest Jury System and licenced
+   under the GNU GPL. See README and COPYING for details.
+
 
    This program can be used to test solutions to problems where the
    output consists (only) of floating point numbers. These floats will
@@ -15,24 +18,9 @@
    absolute and relative deviation of the teams output from the
    reference output. If the floats are within either bounds, they are
    assumed equal.
-
-   $Id$
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
  */
+
+#include "config.h"
 
 /* For having access to isfinite() macro in math.h */
 #define _ISOC99_SOURCE
@@ -46,14 +34,14 @@
 #include <errno.h>
 
 #define PROGRAM "check_float"
-#define VERSION "$Rev$"
-#define AUTHORS "Jaap Eldering"
+#define VERSION DOMJUDGE_VERSION "/" REVISION
+
+#include "lib.error.h"
+#include "lib.misc.h"
 
 #define MAXLINELEN 1024
 
 extern int errno;
-
-const int exit_failure = -1;
 
 /* The floating point type we use internally: */
 typedef long double flt;
@@ -80,16 +68,6 @@ struct option const long_opts[] = {
 	{ NULL,      0,                 NULL,          0 }
 };
 
-void version()
-{
-	printf("%s -- version %s\n",PROGRAM,VERSION);
-	printf("Written by %s\n\n",AUTHORS);
-	printf("%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n",PROGRAM);
-	printf("are welcome to redistribute it under certain conditions.  See the GNU\n");
-	printf("General Public Licence for details.\n");
-	exit(0);
-}
-
 void usage()
 {
 	printf("Usage: %s [OPTION]... <IGNORED> <FILE1> <FILE2>\n",progname);
@@ -104,30 +82,6 @@ void usage()
 	printf("      --version        output version information and exit\n");
 	printf("\n");
 	exit(0);
-}
-
-void error(int errnum, const char *format, ...)
-{
-	va_list ap;
-	va_start(ap,format);
-
-	fprintf(stderr,"%s",progname);
-
-	if ( format!=NULL ) {
-		fprintf(stderr,": ");
-		vfprintf(stderr,format,ap);
-	}
-	if ( errnum!=0 ) {
-		fprintf(stderr,": %s",strerror(errnum));
-	}
-	if ( format==NULL && errnum==0 ) {
-		fprintf(stderr,": unknown error");
-	}
-
-	fprintf(stderr,"\nTry `%s --help' for more information.\n",progname);
-	va_end(ap);
-
-	exit(exit_failure);
 }
 
 /* Test two numbers for equality, accounting for +/-INF, NaN and precision */
@@ -197,7 +151,7 @@ int main(int argc, char **argv)
 		}
 	}
 	if ( show_help ) usage();
-	if ( show_version ) version();
+	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( argc<optind+3 ) error(0,"not enough arguments given");
 

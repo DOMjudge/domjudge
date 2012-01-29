@@ -1,5 +1,4 @@
 #!/bin/bash
-# $Id$
 #
 # Script for automatic submission of solution source code or
 # sending clarification requests as a team.

@@ -2,8 +2,6 @@
 /**
  * Manage passwords for all users.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -18,7 +16,7 @@ requireAdmin();
 
 <?php
 $teams = $DB->q('KEYVALUETABLE SELECT login, name FROM team
-                 ORDER BY categoryid ASC, name ASC');
+                 ORDER BY categoryid ASC, name COLLATE utf8_general_ci ASC');
 
 if ( empty($teams) ) {
 	echo "<p class=\"nodata\">No teams defined.</p>\n\n";

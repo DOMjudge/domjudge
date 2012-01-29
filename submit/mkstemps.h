@@ -1,8 +1,6 @@
 /* Copyright (C) 1991, 1992, 1996, 1998 Free Software Foundation, Inc.
  * This file is derived from mkstemp.c from the GNU C Library.
  *
- * $Id$
- *
  * This file is taken from the GNU GCC libiberty library and included
  * and relicenced under the GNU GPL by the DOMjudge developers. See
  * README and COPYING for details.

@@ -3,8 +3,6 @@
 /**
  * Display the auditlog entries.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -17,7 +15,7 @@ requireAdmin();
 
 echo "<h1>Activity log</h1>\n\n";
 
-$res = $DB->q('SELECT * FROM auditlog');
+$res = $DB->q('SELECT * FROM auditlog ORDER BY logtime DESC');
 
 if ( $res->count() == 0 ) {
 	echo '<p class="nodata">No entries</p>';
@@ -26,7 +24,8 @@ if ( $res->count() == 0 ) {
 }
 
 echo "<table class=\"sortable\">\n" .
-     "<tr><th>id</th><th>when</th><th>cid</th><th>who</th><th colspan=\"3\">what</th><th>extra info</th></tr>\n";
+     "<tr><th>id</th><th>when</th><th>cid</th><th>who</th>" .
+     "<th colspan=\"3\">what</th><th>extra info</th></tr>\n";
 while ( $logline = $res->next() ) {
 	echo "<tr><td>" .
 	htmlspecialchars($logline['logid']) . "</td>" .

@@ -56,6 +56,7 @@ CR  CRI  CS  Costa Rica
 CI  CIV  IV  Cote d'Ivoire 
 HR  HRV  HR  Croatia 
 CU  CUB  CU  Cuba 
+CW  CUW  UC  Curacao 
 CY  CYP  CY  Cyprus 
 CZ  CZE  EZ  Czech Republic 
 DK  DNK  DA  Denmark 
@@ -184,9 +185,11 @@ RE  REU  RE  Reunion
 RO  ROU  RO  Romania 
 RU  RUS  RS  Russia 
 RW  RWA  RW  Rwanda 
+BL  BLM  TB  Saint Barthelemy 
 SH  SHN  SH  Saint Helena 
 KN  KNA  SC  Saint Kitts and Nevis 
 LC  LCA  ST  Saint Lucia 
+MF  MAF  RN  Saint Martin (French part) 
 PM  SPM  SB  Saint Pierre and Miquelon 
 VC  VCT  VC  Saint Vincent and the Grenadines 
 WS  WSM  WS  Samoa 
@@ -198,12 +201,14 @@ RS  SRB  RB  Serbia
 SC  SYC  SE  Seychelles 
 SL  SLE  SL  Sierra Leone 
 SG  SGP  SN  Singapore 
+SX  SXM  SK  Sint Maarten (Dutch part) 
 SK  SVK  LO  Slovakia 
 SI  SVN  SI  Slovenia 
 SB  SLB  BP  Solomon Islands 
 SO  SOM  SO  Somalia 
 ZA  ZAF  SF  South Africa 
 GS  SGS  SX  South Georgia and the Islands 
+SS  SSD  OD  South Sudan 
 ES  ESP  SP  Spain 
 LK  LKA  CE  Sri Lanka 
 SD  SDN  SU  Sudan 

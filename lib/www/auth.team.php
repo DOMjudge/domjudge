@@ -6,8 +6,6 @@
  * to the team ID and $teamdata contains the corresponding row from
  * the database. $ip is set to the remote IP address used.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -167,7 +165,7 @@ function ldap_check_credentials($user, $pass)
 		$ldap_dn = str_replace('&', $user, LDAP_DNQUERY);
 
 		// Try to login to test credentials
-		if ( @ldap_bind($conn, $ldap_dn, $passwd) ) {
+		if ( @ldap_bind($conn, $ldap_dn, $pass) ) {
 			@ldap_unbind($conn);
 			return TRUE;
 		}

@@ -1,5 +1,3 @@
-/* $Id$ */
-
 .balloons td {
 	padding-right: 2ex;
 	padding-bottom: 2ex;
@@ -84,10 +82,10 @@ img.helpicon { cursor: help; }
 .configcheck th { text-align: left; padding-top: 1ex; }
 
 /* team connect status/judgehost poll status */
-.team-nocon, .judgehost-nocon a { color: #AAA; }
-.team-nosub, .judgehost-err   a { color: red; }
-.team-nocor, .judgehost-warn  a { color: yellow; }
-.team-ok,    .judgehost-ok    a { color: green; }
+.team-nocon a, .judgehost-nocon a { color: #AAA; }
+.team-nosub a, .judgehost-err   a { color: red; }
+.team-nocor a, .judgehost-warn  a { color: yellow; }
+.team-ok a,    .judgehost-ok    a { color: green; }
 
 /* source code highlighting */
 .hl-default {

@@ -2,8 +2,6 @@
 /**
  * Change the verification status of a given judging.
  *
- * $Id$
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -44,12 +42,12 @@ if ( VERIFICATION_REQUIRED ) {
 	        VALUES (%s, %i, %i, %s, %s, %i, "problem judged")',
 	       now(), $jdata['cid'], $jdata['teamid'], $jdata['langid'],
 	       $jdata['probid'], $jdata['submitid']);
-	
+
 	if ( $jdata['result'] == 'correct' ) {
 		$DB->q('INSERT INTO balloon (submitid)
 		        VALUES(%i)',
-		        $row['submitid']);
-	} 
+		        $jdata['submitid']);
+	}
 }
 
 /* redirect back to submission page or submissions overview depending

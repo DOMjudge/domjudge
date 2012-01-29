@@ -1,7 +1,5 @@
 <!doctype linuxdoc system>
 <!--
- $Id$
-
  DOMjudge Jury Manual
  This manual is part of the DOMjudge Programming Contest Jury System
  and licenced under the GNU GPL. See README and COPYING for details.
@@ -10,7 +8,12 @@
 
 <title>DOMjudge Jury Manual
 <author>by the DOMjudge team
-<date>$Date$
+<!--
+ This is some comment character magic to circumvent problems
+ with an unexpanded git archive $Format$ keyword.
+$Format: -%x2d%x3e
+<date>%aD
+%x3c!%x2d- $  -->
 
 <abstract>
 This document provides information about DOMjudge aimed at a jury
@@ -19,7 +22,10 @@ submissions and working with clarification requests.
 
 A separate manual is available for teams and administrators.
 
-Document version: $Rev$
+<!-- $Format: -%x2d%x3e
+Document version: %h
+%x3c!%x2d- $ -->
+
 </abstract>
 
 <toc>
@@ -72,7 +78,7 @@ Study Association <htmlurl name="A-Eskwadraat"
 url="http://www.a-eskwadraat.nl/">, <htmlurl name="Utrecht University"
 url="http://www.uu.nl/">, The Netherlands.
 
-It is Copyright (c) 2004 - 2011 by The DOMjudge Developers.
+It is Copyright (c) 2004 - 2012 by The DOMjudge Developers.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the <url name="GNU General Public License"
@@ -211,16 +217,18 @@ This program can be used as a more advanced replacement of checkinput.
 It allows you to not only check on simple (spacing) layout errors, but
 a simple grammar file must be specified for the testdata, according to
 which the testdata is checked. This allows e.g. for bounds checking.
-See 'checktestdata.cc' for a grammar specification. Two sample
-scripts 'checktestdata.{hello,fltcmp}' are provided for the sample
-problems 'hello' and 'fltcmp'.
+See <tt>libchecktestdata.cc</tt> for a grammar specification. Two sample
+scripts <tt>checktestdata.{hello,fltcmp}</tt> are provided for the sample
+problems <tt>hello</tt> and <tt>fltcmp</tt>.
 
-This program can also be useful as a syntax checker for a special
-compare script: it can easily handle the tedious task of verifying
+This program is built upon the separate library <tt>libchecktestdata.h</tt>
+(see <tt>checktestdata.cc</tt> for how to use this library)
+that can be used to write the syntax checking part of special
+compare scripts: it can easily handle the tedious task of verifying
 that a team's submission output is syntactically valid, leaving just
 the task of semantic validation to another program. When you want to
 support `presentation error' as a verdict, also in variable output
-problems, the option <tt>--whitespace-ok</tt> can be useful. This
+problems, the option <tt>whitespace-ok</tt> can be useful. This
 allows any non-empty sequence of whitespace (no newlines though) where
 the <tt>SPACE</tt> command is used, as well as leading and trailing
 whitespace on lines (when using the <tt>NEWLINE</tt> command). Please

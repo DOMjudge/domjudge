@@ -33,7 +33,7 @@ dbpasswords.secret:
 htpasswd-jury: dbpasswords.secret
 	touch $@
 	chmod go= $@
-	$(HTPASSWD) -b $@ domjudge_jury `grep '^jury:' $< | cut -d : -f 5`
+	$(HTPASSWD) -b $@ domjudge_jury `grep '^dummy:' $< | cut -d : -f 5`
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \

@@ -1,10 +1,13 @@
 % LaTeX extra preamble definitions for DOMjudge PDF manuals
 \setcounter{tocdepth}{1}
 
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
 \usepackage{fancyhdr}
 \pagestyle{fancy}
-\fancyhead[LE,LO]{\slshape \leftmark}
-\fancyhead[RE,RO]{\slshape \thepage}
+\fancyhead[L]{\slshape \leftmark}
+\fancyhead[R]{\slshape \thepage}
 \fancyfoot[C]{}
 
 % Redefined chapter title generation:
@@ -13,7 +16,7 @@
 %  \vspace*{10\p@}%
   {\parindent \z@ \raggedright \normalfont
     \ifnum \c@secnumdepth >\m@ne
-        {\fontsize{40pt}{40pt}\selectfont\bfseries \thechapter~}
+        {\fontsize{36pt}{40pt}\selectfont\bfseries \thechapter~}
     \fi
     \Huge \bfseries #1\par\nobreak
     \vskip 20\p@

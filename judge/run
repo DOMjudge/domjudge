@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 
 # Run wrapper-script called from 'testcase_run.sh'.
 # See that script for more info.
