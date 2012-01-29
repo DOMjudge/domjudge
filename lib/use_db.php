@@ -24,6 +24,10 @@ function setup_database_connection($privlevel)
 		if ( $credential{0} == '#' ) continue;
 		list ($priv, $host, $db, $user, $pass) =
 			explode(':', trim($credential));
+		if ( $priv=='team' || $priv=='public' ) {
+			user_error("Found obsolete database privilege:user '$priv:$user'", E_USER_WARNING);
+			continue;
+		}
 
 		$DB = new db ($db, $host, $user, $pass);
 		break;

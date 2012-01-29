@@ -181,9 +181,8 @@ uninstall)
 upgrade)
 	# check for legacy dbpasswords.secret content
 	if grep -Eq ^team: $PASSWDFILE >/dev/null 2>&1 ; then
-		echo "Error: please remove all non-jury users from $PASSWDFILE"
+		echo "Warning: please remove all non-jury users from $PASSWDFILE"
 		echo "You may also remove those users from MySQL."
-		exit 2;
 	fi
 	TMPOUT=`mktemp /tmp/domjudge-sql.XXXXXX`
 	read_dbpasswords
