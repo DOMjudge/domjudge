@@ -57,12 +57,12 @@ ALTER TABLE `event`
   MODIFY COLUMN `description` longtext NOT NULL COMMENT 'Event description';
 
 ALTER TABLE `judging`
-  MODIFY COLUMN `output_compile` longtext COMMENT 'Output of the compiling the program';
+  MODIFY COLUMN `output_compile` longblob COMMENT 'Output of the compiling the program';
 
 ALTER TABLE `judging_run`
-  MODIFY COLUMN `output_run` longtext COMMENT 'Output of running the program',
-  MODIFY COLUMN `output_diff` longtext COMMENT 'Diffing the program output and testcase output',
-  MODIFY COLUMN `output_error` longtext COMMENT 'Standard error output of the program';
+  MODIFY COLUMN `output_run` longblob COMMENT 'Output of running the program',
+  MODIFY COLUMN `output_diff` longblob COMMENT 'Diffing the program output and testcase output',
+  MODIFY COLUMN `output_error` longblob COMMENT 'Standard error output of the program';
 
 ALTER TABLE `submission`
   MODIFY COLUMN `sourcecode` longblob NOT NULL COMMENT 'Full source code';
