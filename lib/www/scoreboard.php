@@ -502,32 +502,22 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	}
 
 	if ( $filter!==FALSE ) {
-		
+
+		$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, name, country
+		                  FROM team_affiliation');
+		$categids = $DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category');
+
 		$affilids  = array();
 		$countries = array();
-		$categids  = array();
-		foreach( $sdata['teams'] as $team ) {
-			if ( !empty($team['affilid']) ) {
-				$affilids[]  = $team['affilid'];
-				$countries[] = $team['country'];
-			}
-			$categids[] = $team['categoryid'];
+		foreach( $affils as $id => $affil ) {
+			$affilids[$id]  = $affil['name'];
+			$countries[] = $affil['country'];
 		}
 
 		$countries = array_unique($countries);
 		sort($countries);
 
-		$affilids = empty($affilids) ? array() : 
-				$DB->q('KEYVALUETABLE SELECT affilid, name FROM team_affiliation
-		                    WHERE affilid IN (%As)', $affilids);
-		$categids = empty($categids) ? array() :
-				$DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category
-		                    WHERE categoryid IN (%As)', $categids);
-
-		if ( count($categids) > 1 || count($countries) > 1 || count($affilids) > 1 ) {
-
-			require_once(LIBWWWDIR . '/forms.php');
-
+		require_once(LIBWWWDIR . '/forms.php');
 		?>
 
 <table class="scorefilter">
@@ -538,7 +528,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 
 		echo addForm($pagename, 'get') .
 			( count($affilids) > 1 ? addSelect('affilid[]',    $affilids,  @$filter['affilid'],    TRUE,  8) : "" ) .
-			( count($countries) > 1 ? addSelect('country[]',    $countries, @$filter['country'],    FALSE, 8) : "" ) .
+			( count($countries)> 1 ? addSelect('country[]',    $countries, @$filter['country'],    FALSE, 8) : "" ) .
 			( count($categids) > 1 ? addSelect('categoryid[]', $categids,  @$filter['categoryid'], TRUE,  8) : "" ) .
 			addSubmit('filter') . addSubmit('clear', 'clear') .
 			addEndForm();
@@ -551,7 +541,6 @@ collapse("filter");
 -->
 </script>
 		<?php
-		}
 	}
 
 	renderScoreBoardTable($cdata,$sdata,$myteamid,$static);
