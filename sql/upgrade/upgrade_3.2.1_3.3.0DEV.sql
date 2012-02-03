@@ -21,7 +21,7 @@ ALTER TABLE `team`
   ADD COLUMN `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the team is visible and operational' AFTER `authtoken`;
 
 ALTER TABLE `team_affiliation`
-  MODIFY COLUMN `country` char(3) default NULL COMMENT 'ISO 3166-1 alpha-3 country code',
+  MODIFY COLUMN `country` char(3) default NULL COMMENT 'ISO 3166-1 alpha-3 country code';
 
 ALTER TABLE `scoreboard_jury`
   ADD COLUMN `pending` int(4) NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement' AFTER `submissions`;
