@@ -8,8 +8,10 @@
 --
 
 -- @UPGRADE-CHECK@
-SELECT 1;
--- This upgrade can always be applied without problems
+ALTER TABLE `contest` ADD  COLUMN `activatetime_string` varchar(20) NOT NULL;
+ALTER TABLE `contest` DROP COLUMN `activatetime_string`;
+-- This upgrade can always be applied without problems, but we still
+-- check at least that our version < 3.2.
 
 --
 -- Create additional structures
