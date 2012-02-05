@@ -88,7 +88,10 @@ ALTER TABLE `team_affiliation`
 
 UPDATE team_affiliation SET country = "NLD" WHERE country = "NL";
 
+INSERT INTO `configuration` (`name`, `value`) VALUES ('clar_answers', 'No comment	Read the problem statement carefully');
+INSERT INTO `configuration` (`name`, `value`) VALUES ('clar_categories', 'general:General issue	technical:Technical issue');
 INSERT INTO `configuration` (`name`, `value`) VALUES ('show_pending', '0');
+INSERT INTO `configuration` (`name`, `value`) VALUES ('disable_verify', '0');
 
 --
 -- Finally remove obsolete structures after moving data
