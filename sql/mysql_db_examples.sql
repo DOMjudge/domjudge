@@ -9,8 +9,8 @@
 -- Dumping data for table `configuration`
 -- 
 
-INSERT INTO `configuration` (`name`, `value`) VALUES ('show_affiliations', '1');
-INSERT INTO `configuration` (`name`, `value`) VALUES ('show_pending', '0');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_affiliations', '1', 'bool', 'Show affiliations names and icons in the scoreboard?');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?');
 
 -- 
 -- Dumping data for table `contest`

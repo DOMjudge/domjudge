@@ -15,6 +15,10 @@ ALTER TABLE `team` DROP COLUMN `judging_last_started`;
 -- Create additional structures
 --
 
+ALTER TABLE `configuration`
+  ADD COLUMN `type` varchar(25) default NULL COMMENT 'Type of the value (metatype for use in the webinterface)' AFTER `value`,
+  ADD COLUMN `description` varchar(255) default NULL COMMENT 'Description for in the webinterface' AFTER `type`;
+
 ALTER TABLE `team`
   MODIFY COLUMN `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Team name',
   ADD COLUMN `judging_last_started` datetime default NULL COMMENT 'Start time of last judging for priorization' AFTER `comments`,
@@ -87,7 +91,9 @@ ALTER TABLE `team_affiliation`
 
 UPDATE team_affiliation SET country = "NLD" WHERE country = "NL";
 
-INSERT INTO `configuration` (`name`, `value`) VALUES ('show_pending', '0');
+UPDATE `configuration` SET `type` = 'bool', `description` = 'Show affiliations names and icons in the scoreboard?' WHERE `name` = 'show_affiliations';
+
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?');
 
 --
 -- Finally remove obsolete structures after moving data
