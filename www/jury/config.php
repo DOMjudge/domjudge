@@ -23,15 +23,14 @@ if ( isset($_POST['save']) ) {
 		}
 
 		// Test data type validity and cast to standard form:
-		switch ( @$data['type'] ) {
+		switch ( @$config[$key]['type'] ) {
 		case 'bool':
-			$val = ( (bool)$val ? 1 : 0 );
+			$val = ( (bool)$val ? '1' : '0' );
 			break;
 		case 'int':
 			if ( (int)$val!=$val ) {
 				error("Configuration variable '$key' must be integer");
 			}
-			$val = (int)$val;
 			break;
 		case 'string':
 			// Nothing to do here.
@@ -66,9 +65,9 @@ foreach ( $config as $key => $data ) {
 	case 'bool':
 		$editfield =
 		    addRadioButton('config_'.$key, (bool)$data['value']==true, 1) .
-		    "<label for=\"${key}1\">yes</label>" .
+		    "<label for=\"config_${key}1\">yes</label>" .
 		    addRadioButton('config_'.$key, (bool)$data['value']==false, 0) .
-		    "<label for=\"${key}0\">no</label>";
+		    "<label for=\"config_${key}0\">no</label>";
 		break;
 	case 'int':
 		$editfield = addInput('config_'.$key, $data['value'], 6, 6);
