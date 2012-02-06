@@ -967,7 +967,7 @@ There are three ways in which information is logged:
 </itemize>
 Each script also defines a default threshold level for messages to be
 logged to stderr (<tt>VERBOSE</tt>: defaults to <tt>LOG_INFO</tt> in
-daemons and <tt>LOG_ERROR</tt> in the web interface) and for
+daemons and <tt>LOG_ERR</tt> in the web interface) and for
 log file/syslog (<tt>LOGLEVEL</tt>: defaults to <tt>LOG_DEBUG</tt>).
 
 In case of problems, it is advisable to check the logs for clues.
