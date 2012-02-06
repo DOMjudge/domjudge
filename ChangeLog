@@ -5,6 +5,7 @@ Version 3.2.3 - DEV
  - Fix SQL upgrade file for DB upgrade from 3.1 series.
  - Fix bug: don't show multiple balloons for a single problem solved.
  - Make all judging output binary in SQL to display non-UTF8 correctly.
+ - Include a few minor documentation improvements.
 
 Version 3.2.2 - 25 January 2012
 -------------------------------
