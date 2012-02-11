@@ -10,28 +10,6 @@ if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
 require(ETCDIR . '/judgehost-config.php');
 
-// Set environment variables for passing path configuration to called programs
-putenv('DJ_BINDIR='      . BINDIR);
-putenv('DJ_ETCDIR='      . ETCDIR);
-putenv('DJ_JUDGEDIR='    . JUDGEDIR);
-putenv('DJ_LIBDIR='      . LIBDIR);
-putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
-putenv('DJ_LOGDIR='      . LOGDIR);
-
-// Set other configuration variables for called programs
-putenv('RUNUSER='       . RUNUSER);
-putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
-putenv('CHROOT_SCRIPT=' . CHROOT_SCRIPT);
-putenv('COMPILETIME='   . COMPILETIME);
-putenv('MEMLIMIT='      . MEMLIMIT);
-putenv('FILELIMIT='     . FILELIMIT);
-putenv('PROCLIMIT='     . PROCLIMIT);
-
-foreach ( $EXITCODES as $code => $name ) {
-	$var = 'E_' . strtoupper(str_replace('-','_',$name));
-	putenv($var . '=' . $code);
-}
-
 $waittime = 5;
 
 $myhost = trim(`hostname | cut -d . -f 1`);
@@ -39,9 +17,6 @@ $myhost = trim(`hostname | cut -d . -f 1`);
 define ('SCRIPT_ID', 'judgedaemon');
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 define ('PIDFILE', RUNDIR.'/judgedaemon.pid');
-
-// Pass SYSLOG variable via environment for compare program
-if ( defined('SYSLOG') && SYSLOG ) putenv('DJ_SYSLOG=' . SYSLOG);
 
 require(LIBDIR . '/init.php');
 
@@ -78,6 +53,31 @@ if ( DEBUG & DEBUG_JUDGE ) {
 	$verbose = LOG_DEBUG;
 	putenv('DEBUG=1');
 }
+
+// Set environment variables for passing path configuration to called programs
+putenv('DJ_BINDIR='      . BINDIR);
+putenv('DJ_ETCDIR='      . ETCDIR);
+putenv('DJ_JUDGEDIR='    . JUDGEDIR);
+putenv('DJ_LIBDIR='      . LIBDIR);
+putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
+putenv('DJ_LOGDIR='      . LOGDIR);
+
+// Set other configuration variables for called programs
+putenv('RUNUSER='       . RUNUSER);
+putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
+putenv('CHROOT_SCRIPT=' . CHROOT_SCRIPT);
+putenv('COMPILETIME='   . dbconfig_get('compile_time'));
+putenv('MEMLIMIT='      . dbconfig_get('memory_limit'));
+putenv('FILELIMIT='     . dbconfig_get('filesize_limit'));
+putenv('PROCLIMIT='     . dbconfig_get('process_limit'));
+
+foreach ( $EXITCODES as $code => $name ) {
+	$var = 'E_' . strtoupper(str_replace('-','_',$name));
+	putenv($var . '=' . $code);
+}
+
+// Pass SYSLOG variable via environment for compare program
+if ( defined('SYSLOG') && SYSLOG ) putenv('DJ_SYSLOG=' . SYSLOG);
 
 system("pgrep -u ".RUNUSER, $retval);
 if ($retval == 0) {
@@ -435,7 +435,7 @@ function judge($mark, $row, $judgingid)
 
 	// log to event table if no verification required
 	// (case of verification required is handled in www/jury/verify.php)
-	if ( ! VERIFICATION_REQUIRED ) {
+	if ( ! dbconfig_get('verification_required', 0) ) {
 		$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
 		                           submitid, judgingid, description)
 		        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',

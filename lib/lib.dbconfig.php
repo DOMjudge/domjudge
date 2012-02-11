@@ -6,7 +6,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-function dbconfig_get($name, $default, $cacheok = true)
+function dbconfig_get($name, $default = null, $cacheok = true)
 {
 	global $LIBDBCONFIG;
 
@@ -16,6 +16,9 @@ function dbconfig_get($name, $default, $cacheok = true)
 
 	if ( isset($LIBDBCONFIG[$name]) ) return $LIBDBCONFIG[$name];
 
+	if ( $default===null ) {
+		error("Configuration variable '$name' not found.");
+	}
 	return $default;
 }
 

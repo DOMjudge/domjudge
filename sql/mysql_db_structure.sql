@@ -59,11 +59,13 @@ CREATE TABLE `clarification` (
 --
 
 CREATE TABLE `configuration` (
+  `configid` int(4) NOT NULL AUTO_INCREMENT COMMENT 'Configuration ID',
   `name` varchar(25) NOT NULL COMMENT 'Name of the configuration variable',
   `value` longtext NOT NULL COMMENT 'Content of the configuration variable',
   `type` varchar(25) default NULL COMMENT 'Type of the value (metatype for use in the webinterface)',
   `description` varchar(255) default NULL COMMENT 'Description for in the webinterface',
-  PRIMARY KEY  (`name`)
+  PRIMARY KEY (`configid`),
+  KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Global configuration variables';
 
 

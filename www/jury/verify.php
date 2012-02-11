@@ -32,7 +32,7 @@ $jdata = $DB->q('TUPLE SELECT j.result, s.submitid, s.cid, s.teamid, s.probid, s
                  LEFT JOIN submission s USING (submitid)
                  WHERE judgingid = %i', $id);
 
-if ( VERIFICATION_REQUIRED ) {
+if ( dbconfig_get('verification_required', 0) ) {
 	calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
 
 	// log to event table (case of no verification required is handled

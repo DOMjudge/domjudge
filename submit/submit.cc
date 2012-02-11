@@ -289,11 +289,6 @@ int main(int argc, char **argv)
 	if ( ! (fstats.st_mode & S_IFREG) ) warnuser("file is not a regular file");
 	if ( ! (fstats.st_mode & S_IRUSR) ) warnuser("file is not readable");
 	if ( fstats.st_size==0 )            warnuser("file is empty");
-	if ( fstats.st_size>=SOURCESIZE*1024 ) {
-		ptr = allocstr("file is larger than %d kB",SOURCESIZE);
-		warnuser(ptr);
-		free(ptr);
-	}
 
 	if ( (fileage=(time(NULL)-fstats.st_mtime)/60)>WARN_MTIME ) {
 		ptr = allocstr("file has not been modified for %d minutes",fileage);

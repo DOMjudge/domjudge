@@ -16,8 +16,12 @@ ALTER TABLE `team` DROP COLUMN `judging_last_started`;
 --
 
 ALTER TABLE `configuration`
+  DROP PRIMARY KEY,
+  ADD COLUMN `configid` int(4) NOT NULL AUTO_INCREMENT COMMENT 'Configuration ID' FIRST,
   ADD COLUMN `type` varchar(25) default NULL COMMENT 'Type of the value (metatype for use in the webinterface)' AFTER `value`,
-  ADD COLUMN `description` varchar(255) default NULL COMMENT 'Description for in the webinterface' AFTER `type`;
+  ADD COLUMN `description` varchar(255) default NULL COMMENT 'Description for in the webinterface' AFTER `type`,
+  ADD PRIMARY KEY (`configid`),
+  ADD KEY `name` (`name`);
 
 ALTER TABLE `team`
   MODIFY COLUMN `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Team name',
@@ -92,6 +96,12 @@ ALTER TABLE `team_affiliation`
 UPDATE `configuration` SET `type` = 'bool', `description` = 'Show affiliations names and icons in the scoreboard?' WHERE `name` = 'show_affiliations';
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_time', '30', 'int', 'Maximum seconds available for compiling.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('memory_limit', '524288', 'int', 'Maximum memory usage (in kB) a submission. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB!');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('filesize_limit', '4096', 'int', 'Maximum file size (in kB) that a submission may write. Solutions will abort when trying to write more, so this should be greater than the maximum testdata output.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('process_limit', '15', 'int', 'Maximum number of processes that a submission is allowed to start (including shell and possibly interpreters).');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('sourcesize_limit', '256', 'int', 'Maximum source code size (in kB) of a submission. This setting should be kept in sync with that in "etc/submit-config.h.in".');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('verification_required', '0', 'bool', 'Is verification of judgings by jury required before publication?');
 
 UPDATE `team_affiliation` SET `country` = 'AFG' WHERE country = 'AF';
 UPDATE `team_affiliation` SET `country` = 'ALB' WHERE country = 'AL';

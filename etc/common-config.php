@@ -3,13 +3,6 @@
  * DOMjudge system and included by the specific configuration files.
  */
 
-// Is verification of judgings by jury required before publication?
-define('VERIFICATION_REQUIRED', false);
-
-// Maximum allowed size in kB of source submissions.
-// This setting should be kept in sync with that in submit-config.h.in.
-define('SOURCESIZE', 256);
-
 // Possible exitcodes from testcase_run.sh and their meaning.
 $EXITCODES = array (
 	0   => 'correct',

@@ -259,7 +259,8 @@ if ( isset($jid) )  {
 		// display verification data: verified, and by whom.
 		// only if this is a valid judging, otherwise irrelevant
 		if ( $jud['valid'] ) {
-			if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
+			$verification_required = dbconfig_get('verification_required', 0);
+			if ( ! ($verification_required && $jud['verified']) ) {
 
 				$val = ! $jud['verified'];
 
@@ -274,7 +275,7 @@ if ( isset($jid) )  {
 				echo ", by " . htmlspecialchars($jud['jury_member']);
 			}
 
-			if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
+			if ( ! ($verification_required && $jud['verified']) ) {
 				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
 				echo "</p>" . addEndForm();
 			} else {

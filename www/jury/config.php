@@ -10,7 +10,8 @@ require('init.php');
 
 requireAdmin();
 
-$config = $DB->q('KEYTABLE SELECT name AS ARRAYKEY, c.* FROM configuration c');
+$config = $DB->q('KEYTABLE SELECT name AS ARRAYKEY, c.*
+                  FROM configuration c ORDER BY configid');
 
 if ( isset($_POST['save']) ) {
 
@@ -83,7 +84,7 @@ foreach ( $config as $key => $data ) {
 	if ( empty($editfield) ) continue;
 
 	echo "<tr><td>" . htmlspecialchars($key) .
-		"</td><td>" . $editfield .
+		"</td><td style=\"white-space: nowrap;\">" . $editfield .
 		"</td><td>" . htmlspecialchars($data['description']) .
 		"</td></tr>\n";
 }
