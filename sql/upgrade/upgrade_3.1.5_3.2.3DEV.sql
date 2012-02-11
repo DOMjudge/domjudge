@@ -123,9 +123,13 @@ INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_ju
 UPDATE `language` SET `allow_submit` = 0, `allow_judge` = 0 WHERE `langid` = 'bash';
 
 -- Change some langid's to default extension, prepare for dropping
--- extension column below. We must first copy the language row, then
+-- extension column below. We must first disable the index on extension
+-- to allow temporary duplicates, then copy the language row, then
 -- change dependent submissions and events, and finally delete the
 -- old rows.
+ALTER TABLE `language`
+  DROP KEY `extension`;
+
 INSERT INTO `language` (`langid`, `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`)
   SELECT 'csharp', `name`, `extension`, `allow_submit`, `allow_judge`, `time_factor`
   FROM `language` WHERE `langid` = 'cs';
@@ -167,5 +171,4 @@ INSERT INTO `testcase` (`md5sum_input`, `md5sum_output`, `input`, `output`, `pro
 --
 
 ALTER TABLE `language`
-  DROP KEY `extension`,
   DROP COLUMN `extension`;

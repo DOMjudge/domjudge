@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.2.3 - DEV
 -------------------
+ - Fix SQL upgrade file for DB upgrade from 3.1 series.
 
 Version 3.2.2 - 25 January 2012
 -------------------------------
