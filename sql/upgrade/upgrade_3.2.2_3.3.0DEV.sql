@@ -34,14 +34,14 @@ ALTER TABLE `scoreboard_public`
   ADD COLUMN `pending` int(4) NOT NULL  DEFAULT '0'COMMENT 'Number of submissions pending judgement' AFTER `submissions`;
 
 CREATE TABLE `auditlog` (
-  `logid` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `logtime` datetime NOT NULL,
-  `cid` int(4) unsigned DEFAULT NULL,
-  `user` varchar(255) DEFAULT NULL,
-  `datatype` varchar(15) DEFAULT NULL,
-  `dataid` varchar(15) DEFAULT NULL,
-  `action` varchar(30) DEFAULT NULL,
-  `extrainfo` varchar(255) DEFAULT NULL,
+  `logid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `logtime` datetime NOT NULL COMMENT 'Timestamp of the logentry',
+  `cid` int(4) unsigned DEFAULT NULL COMMENT 'Contest ID associated to this entry',
+  `user` varchar(255) DEFAULT NULL COMMENT 'User who performed this action',
+  `datatype` varchar(15) DEFAULT NULL COMMENT 'Reference to DB table associated to this entry',
+  `dataid` varchar(15) DEFAULT NULL COMMENT 'Identifier in reference table',
+  `action` varchar(30) DEFAULT NULL COMMENT 'Description of action performed',
+  `extrainfo` varchar(255) DEFAULT NULL COMMENT 'Optional additional description of the entry',
   PRIMARY KEY (`logid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Log of all actions performed';
 
