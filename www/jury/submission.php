@@ -65,6 +65,12 @@ if ( is_array(@$_POST['unclaim']) ) {
 
 require('init.php');
 
+// If jid is set but not id, try to deduce it from the database.
+if ( isset($jid) && ! $id ) {
+	$id = $DB->q('MAYBEVALUE SELECT submitid FROM judging
+	              WHERE judgingid = %i', $jid);
+}
+
 $title = 'Submission s'.@$id;
 
 if ( ! $id ) error("Missing or invalid submission id");

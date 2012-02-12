@@ -14,8 +14,8 @@ CREATE TABLE `auditlog` (
   `logtime` datetime NOT NULL COMMENT 'Timestamp of the logentry',
   `cid` int(4) unsigned DEFAULT NULL COMMENT 'Contest ID associated to this entry',
   `user` varchar(255) DEFAULT NULL COMMENT 'User who performed this action',
-  `datatype` varchar(15) DEFAULT NULL COMMENT 'Reference to DB table associated to this entry',
-  `dataid` varchar(15) DEFAULT NULL COMMENT 'Identifier in reference table',
+  `datatype` varchar(25) DEFAULT NULL COMMENT 'Reference to DB table associated to this entry',
+  `dataid` varchar(50) DEFAULT NULL COMMENT 'Identifier in reference table',
   `action` varchar(30) DEFAULT NULL COMMENT 'Description of action performed',
   `extrainfo` varchar(255) DEFAULT NULL COMMENT 'Optional additional description of the entry',
   PRIMARY KEY (`logid`)
