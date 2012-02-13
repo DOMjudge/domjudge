@@ -54,22 +54,15 @@ if ( DEBUG & DEBUG_JUDGE ) {
 	putenv('DEBUG=1');
 }
 
-// Set environment variables for passing path configuration to called programs
+// Set static environment variables for passing path configuration
+// to called programs:
 putenv('DJ_BINDIR='      . BINDIR);
 putenv('DJ_ETCDIR='      . ETCDIR);
 putenv('DJ_JUDGEDIR='    . JUDGEDIR);
 putenv('DJ_LIBDIR='      . LIBDIR);
 putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
 putenv('DJ_LOGDIR='      . LOGDIR);
-
-// Set other configuration variables for called programs
-putenv('RUNUSER='       . RUNUSER);
-putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
-putenv('CHROOT_SCRIPT=' . CHROOT_SCRIPT);
-putenv('COMPILETIME='   . dbconfig_get('compile_time'));
-putenv('MEMLIMIT='      . dbconfig_get('memory_limit'));
-putenv('FILELIMIT='     . dbconfig_get('filesize_limit'));
-putenv('PROCLIMIT='     . dbconfig_get('process_limit'));
+putenv('RUNUSER='        . RUNUSER);
 
 foreach ( $EXITCODES as $code => $name ) {
 	$var = 'E_' . strtoupper(str_replace('-','_',$name));
@@ -288,6 +281,16 @@ while ( TRUE ) {
 function judge($mark, $row, $judgingid)
 {
 	global $EXITCODES, $DB, $cid, $myhost, $workdirpath;
+
+	// Set configuration variables for called programs
+	// Call dbconfig_init() to prevent using cached values.
+	dbconfig_init();
+	putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
+	putenv('CHROOT_SCRIPT=' . CHROOT_SCRIPT);
+	putenv('COMPILETIME='   . dbconfig_get('compile_time'));
+	putenv('MEMLIMIT='      . dbconfig_get('memory_limit'));
+	putenv('FILELIMIT='     . dbconfig_get('filesize_limit'));
+	putenv('PROCLIMIT='     . dbconfig_get('process_limit'));
 
 	// create workdir for judging
 	$workdir = "$workdirpath/c$cid-s$row[submitid]-j$judgingid";
