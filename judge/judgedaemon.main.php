@@ -172,8 +172,8 @@ while ( TRUE ) {
 		$waiting = FALSE;
 	}
 
-	$contdata = getCurContest(TRUE);
-	$newcid = $contdata['cid'];
+	$cdata = getCurContest(TRUE);
+	$newcid = $cdata['cid'];
 	$oldcid = $cid;
 	if ( $oldcid !== $newcid ) {
 		logmsg(LOG_NOTICE, "Contest has changed from " .
@@ -207,7 +207,7 @@ while ( TRUE ) {
 	$numopen = $DB->q('VALUE SELECT COUNT(*) FROM submission
 	                   WHERE judgemark IS NULL AND cid = %i AND langid IN (%As)
 	                   AND probid IN (%As) AND submittime < %s AND valid = 1',
-	                  $cid, $judgable_lang, $judgable_prob, $contdata['endtime']);
+	                  $cid, $judgable_lang, $judgable_prob, $cdata['endtime']);
 
 	$numupd = 0;
 	if ( $numopen ) {
@@ -221,7 +221,7 @@ while ( TRUE ) {
 		                    ORDER BY judging_last_started ASC, submittime ASC
 		                    LIMIT 1',
 		                   $cid, $judgable_lang, $judgable_prob,
-		                   $contdata['endtime']);
+		                   $cdata['endtime']);
 
 		if ( $submitid ) {
 			// Generate (unique) random string to mark submission to be judged

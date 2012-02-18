@@ -46,10 +46,11 @@ function getCurContest($fulldata = FALSE) {
 	               WHERE enabled = 1 AND activatetime <= NOW()
 	               ORDER BY activatetime DESC LIMIT 1');
 
-	if ($now == NULL)
-		return FALSE;
-	else
-		return ( $fulldata ? $now : $now['cid'] );
+	if ( $now == NULL ) return FALSE;
+
+	if ( !$fulldata ) return $now['cid'];
+
+	return $now;
 }
 
 /**
@@ -67,6 +68,22 @@ function problemVisible($probid)
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
 	               WHERE cid = %i AND allow_submit = 1 AND probid = %s',
 	              $cdata['cid'], $probid) !== NULL;
+}
+
+/**
+ * Calculate contest time from wall-clock time.
+ * Returns time since contest start in seconds.
+ * This function is currently a stub around timediff, but introduced
+ * to allow minimal changes wrt. the removed intervals required for
+ * the ICPC specification.
+ */
+function calcContestTime($walltime)
+{
+	global $cdata;
+
+	$contesttime = difftime($walltime, $cdata['starttime']);
+
+	return $contesttime;
 }
 
 /**
@@ -89,8 +106,7 @@ function calcScoreRow($cid, $team, $prob) {
 	// that these will not count as solved. Correct submissions with
 	// submittime after contest end should never happen, unless one
 	// resets the contest time after successful judging.
-	$result = $DB->q('SELECT result, verified,
-	                  (UNIX_TIMESTAMP(submittime)-UNIX_TIMESTAMP(c.starttime))/60 AS timediff,
+	$result = $DB->q('SELECT result, verified, submittime,
 	                  (c.freezetime IS NOT NULL && submittime >= c.freezetime) AS afterfreeze
 	                  FROM submission s
 	                  LEFT JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
@@ -106,6 +122,9 @@ function calcScoreRow($cid, $team, $prob) {
 
 	// for each submission
 	while( $row = $result->next() ) {
+
+		// Contest submit time in minutes for scoring.
+		$submittime = (int)floor(calcContestTime($row['submittime']) / 60);
 
 		// Check if this submission has a publicly visible judging result:
 		if ( (dbconfig_get('verification_required', 0) && ! $row['verified']) ||
@@ -130,10 +149,10 @@ function calcScoreRow($cid, $team, $prob) {
 		if ( $row['result'] == 'correct' ) {
 
 			$correct_j = 1;
-			$time_j = round((int)@$row['timediff']);
+			$time_j = $submittime;
 			if ( ! $row['afterfreeze'] ) {
 				$correct_p = 1;
-				$time_p = round((int)@$row['timediff']);
+				$time_p = $submittime;
 			}
 			// stop counting after a first correct submission
 			break;
@@ -247,13 +266,13 @@ function now()
 
 /**
  * Returns >0, =0, <0 when $time1 >, =, < $time2 respectively.
- * This function currently uses string-based compare on the MySQL
- * format (see above), but is abstracted here for possible changes,
- * e.g. a C-like implementation with a numeric representation.
+ * This function converts the strings to integer seconds and returns
+ * their difference. We don't use the default second argument 'now()'
+ * for 'strtotime()' since it could (theoretically) change.
  */
 function difftime($time1, $time2)
 {
-	return strcmp($time1, $time2);
+	return strtotime($time1, 0) - strtotime($time2, 0);
 }
 
 /**

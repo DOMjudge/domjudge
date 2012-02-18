@@ -47,10 +47,22 @@ function printyn ($val) {
 
 /**
  * given 2004-12-31 15:43:05, returns 15:43
+ * if $contesttime is set, show time from start of contest, after
+ * removing ignored intervals.
  */
-function printtime($datetime) {
+function printtime($datetime, $contesttime = FALSE) {
 	if ( ! $datetime ) return '';
-	return htmlspecialchars(substr($datetime,11,5));
+	if ( $contesttime ) {
+		$reltime = (int)floor(calcContestTime($datetime));
+		$sign = ( $reltime<0 ? -1 : 1 );
+		$reltime *= $sign;
+		$s = $reltime%60; $reltime = ($reltime - $s)/60;
+		$m = $reltime%60; $reltime = ($reltime - $m)/60;
+		$h = $sign*$reltime;
+		return sprintf("%d:%02d", $h, $m);
+	} else {
+		return htmlspecialchars(substr($datetime,11,5));
+	}
 }
 
 /**
