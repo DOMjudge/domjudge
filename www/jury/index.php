@@ -47,11 +47,6 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <li><a href="check_judgings.php">Judging verifier</a></li>
 <li><a href="auditlog.php">Activity log</a></li>
 <li><a href="clar_config.php">Clarification config</a></li>
-<?php if ( dbconfig_get('disable_verify') ): ?>
-<li><a href="disable_verify.php">Enable verification</a></li>
-<?php else: ?>
-<li><a href="disable_verify.php">Disable verification</a></li>
-<?php endif; ?>
 </ul>
 
 <p><em>Note: the config check and cache refresh operations have a
