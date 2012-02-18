@@ -29,6 +29,7 @@ if ( is_readable($config) ) {
 	define('DOMJUDGE_VERSION', `sed -n '1s/.*version //p' ../../README | tr -d '\n'`);
 }
 
+// FIXME: we need to read some of these variables from the MySQL DB.
 $configvars = array(
 	'WEBBASEURI'                => $_SERVER['argv'][1],
 	'DOMJUDGE_VERSION'          => 'unknown',
@@ -36,7 +37,7 @@ $configvars = array(
 	'COMPILETIME'               => 30,
 	'MEMLIMIT'                  => 524288,
 	'FILELIMIT'                 => 4096,
-	'PROCLIMIT'                 => 10,
+	'PROCLIMIT'                 => 15,
 	'USERSUBMITDIR'             => '.domjudge',
 	'SUBMIT_DEFAULT'            => '2',
 	);

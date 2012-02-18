@@ -108,7 +108,7 @@ function calcScoreRow($cid, $team, $prob) {
 	while( $row = $result->next() ) {
 
 		// Check if this submission has a publicly visible judging result:
-		if ( (VERIFICATION_REQUIRED && ! $row['verified']) ||
+		if ( (dbconfig_get('verification_required', 0) && ! $row['verified']) ||
 		     empty($row['result']) ) {
 
 			$pending_j++;
@@ -516,6 +516,8 @@ function submit_solution($team, $prob, $lang, $file)
 
 	global $cdata,$cid, $DB;
 
+	$sourcesize = dbconfig_get('sourcesize_limit');
+
 	// If no contest has started yet, refuse submissions.
 	$now = now();
 
@@ -539,8 +541,8 @@ function submit_solution($team, $prob, $lang, $file)
 	if( ! is_readable($file) ) {
 		error("File '$file' not found (or not readable).");
 	}
-	if( filesize($file) > SOURCESIZE*1024 ) {
-		error("Submission file is larger than ".SOURCESIZE." kB.");
+	if( filesize($file) > $sourcesize*1024 ) {
+		error("Submission file is larger than $sourcesize kB.");
 	}
 
 	logmsg (LOG_INFO, "input verified");

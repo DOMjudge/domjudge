@@ -41,6 +41,8 @@ Version 3.3.0 - DEV
    getting to a point where the separation provided not enough
    added benefit anymore. You should remove the users
    domjudge_{team,public,plugin} from MySQL and dbpasswords.secret.
+ - Add configuration page to admin interface and move various variables
+   from judgehost-config.php to the DB configuration table.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------

@@ -4,8 +4,6 @@ require_once("common-config.php");
 
 // Default config
 
-/** Restrictions during testing */
-
 // Run solutions in a chroot environment? (gives better security)
 define('USE_CHROOT', true);
 
@@ -14,23 +12,6 @@ define('USE_CHROOT', true);
 // Oracle (Sun) Java with a chroot (edit the script first!).
 // define('CHROOT_SCRIPT', 'chroot-startstop.sh');
 define('CHROOT_SCRIPT', '');
-
-// Maximum seconds available for compiling
-define('COMPILETIME', 30);
-
-// Maximum memory usage by RUNUSER in kB
-// This includes the shell which starts the compiled solution and
-// also any interpreter like Oracle (Sun) 'java', which takes 200MB away!
-define('MEMLIMIT', 524288);
-
-// Maximum filesize RUNUSER may write in kB
-// This should be greater than the maximum testdata output, otherwise
-// solutions will abort before writing the complete correct output!!
-define('FILELIMIT', 4096);
-
-// Maximum no. processes running as RUNUSER (including shell and
-// possibly interpreters)
-define('PROCLIMIT', 15);
 
 /** Possible results and their priorities */
 

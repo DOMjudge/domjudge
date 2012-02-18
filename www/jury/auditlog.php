@@ -35,25 +35,36 @@ while ( $logline = $res->next() ) {
 	htmlspecialchars($logline['user']) . "</td><td>" .
 	htmlspecialchars($logline['datatype']) . "</td><td>";
 
-	$tables = array ('balloon' => 'b',
-		'clarification' => '',
-		'contest' => 'c',
-		'judgehost' => '',
-		'judging' => 'j',
-		'language' => '',
-		'problem' => '',
-		'submission' => 's',
-		'team' => '',
-		'team_affiliation' => '',
-		'team_category' => '',
-		'testcase' => '');
+	// First define defaults, allow to override afterwards:
+	$link = urlencode($logline['datatype']) . '.php?id=' .
+	    urlencode($logline['dataid']);
+	$name = htmlspecialchars($logline['dataid']);
+	switch ( $logline['datatype'] ) {
+	case 'balloon':
+		$link = NULL;
+		$name = 'b'.$name;
+		break;
+	case 'contest':
+		$name = 'c'.$name;
+		break;
+	case 'judging':
+		$link = 'submission.php?jid=' . urlencode($logline['dataid']);
+		$name = 'j'.$name;
+		break;
+	case 'submission':
+		$name = 's'.$name;
+		break;
+	case 'testcase':
+		$link = 'testcase.php?probid=' . urlencode($logline['dataid']);
+		break;
+	}
 
 	if ( !empty($logline['dataid']) ) {
-		echo "<a href=\"" .
-		urlencode($logline['datatype']) . '.php?id=' .
-		urlencode($logline['dataid']) . "\">" .
-		$tables[$logline['datatype']] .
-		htmlspecialchars($logline['dataid']) . "</a>";
+		if ( $link!==NULL ) {
+			echo "<a href=\"$link\">$name</a>";
+		} else {
+			echo $name;
+		}
 	}
 
 	echo "</td><td>" .

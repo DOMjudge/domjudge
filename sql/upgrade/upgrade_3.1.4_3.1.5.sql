@@ -21,9 +21,7 @@ ALTER TABLE `contest` DROP COLUMN `activatetime_string`;
 -- Add/remove privileges
 --
 
-GRANT SELECT ON clarification TO `domjudge_plugin`;
-
-GRANT SELECT (langid) ON submission TO `domjudge_public`, `domjudge_plugin`;
+GRANT SELECT (valid) ON submission TO `domjudge_public`, `domjudge_plugin`;
 
 FLUSH PRIVILEGES;
 

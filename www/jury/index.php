@@ -40,6 +40,7 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <h3>Administrator:</h3>
 
 <ul>
+<li><a href="config.php">Configuration settings</a></li>
 <li><a href="checkconfig.php">Config checker</a></li>
 <li><a href="genpasswds.php">Manage team passwords</a></li>
 <li><a href="refresh_cache.php">Refresh scoreboard cache</a></li>

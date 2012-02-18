@@ -65,6 +65,12 @@ if ( is_array(@$_POST['unclaim']) ) {
 
 require('init.php');
 
+// If jid is set but not id, try to deduce it from the database.
+if ( isset($jid) && ! $id ) {
+	$id = $DB->q('MAYBEVALUE SELECT submitid FROM judging
+	              WHERE judgingid = %i', $jid);
+}
+
 $title = 'Submission s'.@$id;
 
 if ( ! $id ) error("Missing or invalid submission id");
@@ -253,7 +259,8 @@ if ( isset($jid) )  {
 		// display verification data: verified, and by whom.
 		// only if this is a valid judging, otherwise irrelevant
 		if ( $jud['valid'] ) {
-			if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
+			$verification_required = dbconfig_get('verification_required', 0);
+			if ( ! ($verification_required && $jud['verified']) ) {
 
 				$val = ! $jud['verified'];
 
@@ -268,8 +275,9 @@ if ( isset($jid) )  {
 				echo ", by " . htmlspecialchars($jud['jury_member']);
 			}
 
-			if ( ! (VERIFICATION_REQUIRED && $jud['verified']) ) {
-				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify', null, !dbconfig_get('disable_verify'));
+			if ( ! ($verification_required && $jud['verified']) ) {
+				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify',
+				                      null, !dbconfig_get('disable_verify'));
 				echo "</p>" . addEndForm();
 			} else {
 				echo "</p>\n";

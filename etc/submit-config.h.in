@@ -29,11 +29,6 @@
    an old file. */
 #define WARN_MTIME   5
 
-/* Maximum source size in KB before warning (this is also the limit
-   the server will enforce). This setting should be kept in sync with
-   that in common-config.php. */
-#define SOURCESIZE   256
-
 /* List of auto-detected language extensions by the submit client.
    Format: 'LANG,MAINEXT[,EXT]... [LANG...]' where:
    - LANG is the language name displayed,

@@ -143,7 +143,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			echo '</a>';
 		} else {
 			if ( ! $row['result'] ||
-			     ( VERIFICATION_REQUIRED && ! $row['verified'] ) ) {
+			     ( dbconfig_get('verification_required', 0) && ! $row['verified'] ) ) {
 				if ( $row['submittime'] >= $cdata['endtime'] ) {
 					echo "<a>" . printresult('too-late') . "</a>";
 				} else {

@@ -10,14 +10,14 @@
 -- Table structure for table `auditlog`
 --
 CREATE TABLE `auditlog` (
-  `logid` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `logtime` datetime NOT NULL,
-  `cid` int(4) unsigned DEFAULT NULL,
-  `user` varchar(255) DEFAULT NULL,
-  `datatype` varchar(15) DEFAULT NULL,
-  `dataid` varchar(15) DEFAULT NULL,
-  `action` varchar(30) DEFAULT NULL,
-  `extrainfo` varchar(255) DEFAULT NULL,
+  `logid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `logtime` datetime NOT NULL COMMENT 'Timestamp of the logentry',
+  `cid` int(4) unsigned DEFAULT NULL COMMENT 'Contest ID associated to this entry',
+  `user` varchar(255) DEFAULT NULL COMMENT 'User who performed this action',
+  `datatype` varchar(25) DEFAULT NULL COMMENT 'Reference to DB table associated to this entry',
+  `dataid` varchar(50) DEFAULT NULL COMMENT 'Identifier in reference table',
+  `action` varchar(30) DEFAULT NULL COMMENT 'Description of action performed',
+  `extrainfo` varchar(255) DEFAULT NULL COMMENT 'Optional additional description of the entry',
   PRIMARY KEY (`logid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Log of all actions performed';
 
@@ -58,9 +58,13 @@ CREATE TABLE `clarification` (
 --
 
 CREATE TABLE `configuration` (
+  `configid` int(4) NOT NULL AUTO_INCREMENT COMMENT 'Configuration ID',
   `name` varchar(25) NOT NULL COMMENT 'Name of the configuration variable',
   `value` longtext NOT NULL COMMENT 'Content of the configuration variable',
-  PRIMARY KEY  (`name`)
+  `type` varchar(25) default NULL COMMENT 'Type of the value (metatype for use in the webinterface)',
+  `description` varchar(255) default NULL COMMENT 'Description for in the webinterface',
+  PRIMARY KEY (`configid`),
+  KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Global configuration variables';
 
 

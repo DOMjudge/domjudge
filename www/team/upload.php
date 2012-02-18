@@ -56,7 +56,7 @@ function err($string)
 	exit;
 }
 
-ini_set("upload_max_filesize", SOURCESIZE * 1024);
+ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
 
 checkFileUpload($_FILES['code']['error']);
 
