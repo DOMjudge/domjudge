@@ -62,6 +62,15 @@ CREATE TABLE `balloon` (
   PRIMARY KEY (`balloonid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Balloons to be handed out';
 
+CREATE TABLE `removed_interval` (
+  `intervalid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `starttime` datetime NOT NULL COMMENT 'Initial time of removed interval',
+  `endtime` datetime NOT NULL COMMENT 'Final time of removed interval',
+  PRIMARY KEY (`intervalid`),
+  KEY `cid` (`cid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Time intervals removed from the contest for scoring';
+
 -- Resize datastructures to fit "arbitrary" large data to satisfy
 -- http://domjudge.a-eskwadraat.nl/trac/ticket/15 for the ICPC CSS spec.
 ALTER TABLE `clarification`

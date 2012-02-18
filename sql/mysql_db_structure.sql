@@ -197,6 +197,19 @@ CREATE TABLE `problem` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
 
 --
+-- Table structure for table `removed_interval`
+--
+
+CREATE TABLE `removed_interval` (
+  `intervalid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `starttime` datetime NOT NULL COMMENT 'Initial time of removed interval',
+  `endtime` datetime NOT NULL COMMENT 'Final time of removed interval',
+  PRIMARY KEY (`intervalid`),
+  KEY `cid` (`cid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Time intervals removed from the contest for scoring';
+
+--
 -- Table structure for table `scoreboard_jury`
 --
 

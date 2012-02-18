@@ -34,10 +34,9 @@ function getFileContents($filename, $sizelimit = false) {
 }
 
 /**
- * Will return either the current contest id, or
- * the most recently finished one.
- * When fulldata is true, returns the total row as an array
- * instead of just the ID.
+ * Will return either the current contest id, or the most recently
+ * finished one. When fulldata is true, returns the total row as an
+ * array (including list of removed_intervals) instead of just the ID.
  */
 function getCurContest($fulldata = FALSE) {
 
@@ -49,6 +48,11 @@ function getCurContest($fulldata = FALSE) {
 	if ( $now == NULL ) return FALSE;
 
 	if ( !$fulldata ) return $now['cid'];
+
+	$res = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
+	               FROM removed_interval WHERE cid = %i', $now['cid']);
+
+	$now['removed_intervals'] = $res;
 
 	return $now;
 }
@@ -71,17 +75,24 @@ function problemVisible($probid)
 }
 
 /**
- * Calculate contest time from wall-clock time.
+ * Calculate contest time from wall-clock time and removed intervals.
  * Returns time since contest start in seconds.
- * This function is currently a stub around timediff, but introduced
- * to allow minimal changes wrt. the removed intervals required for
- * the ICPC specification.
+ * NOTE: It is assumed that removed intervals do not overlap and that
+ * they all fall within the contest start and end times.
  */
 function calcContestTime($walltime)
 {
 	global $cdata;
 
 	$contesttime = difftime($walltime, $cdata['starttime']);
+
+	foreach ( $cdata['removed_intervals'] as $intv ) {
+		if ( difftime($intv['starttime'], $walltime)<0 ) {
+			$contesttime -= min(
+				difftime($walltime,        $intv['starttime']),
+				difftime($intv['endtime'], $intv['starttime']));
+		}
+	}
 
 	return $contesttime;
 }
