@@ -15,6 +15,11 @@ ALTER TABLE `team` DROP COLUMN `judging_last_started`;
 -- Create additional structures
 --
 
+-- Drop constraint before changing data
+ALTER TABLE `clarification`
+  MODIFY COLUMN `probid` varchar(8) default NULL COMMENT 'Problem or category associated to this clarification',
+  DROP FOREIGN KEY `clarification_ibfk_3`;
+
 ALTER TABLE `configuration`
   DROP PRIMARY KEY,
   ADD COLUMN `configid` int(4) NOT NULL AUTO_INCREMENT COMMENT 'Configuration ID' FIRST,
