@@ -105,7 +105,7 @@ if( $res->count() == 0 ) {
 			'&amp;jid=' . (int)$jud['judgingid'] . '"';
 		echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
 		echo "<td><a$link>j" . (int)$jud['judgingid'] . '</a></td>';
-		echo "<td><a$link>" . printtime($jud['starttime']) . '</a></td>';
+		echo "<td><a$link>" . printtime($jud['starttime'], TRUE) . '</a></td>';
 		echo "<td><a$link>" . $runtime . '</a></td>';
 		echo "<td><a$link>" . printresult(@$jud['result'], $jud['valid']) . '</a></td>';
 		echo "<td align=\"center\"><a$link>" . printyn($jud['valid']) . '</a></td>';

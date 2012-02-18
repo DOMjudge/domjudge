@@ -173,7 +173,7 @@ function putClar($clar)
 	echo "</td></tr>\n";
 
 	echo '<tr><td scope="row">Time:</td><td>';
-	echo printtime($clar['submittime']);
+	echo printtime($clar['submittime'], TRUE);
 	echo "</td></tr>\n";
 
 	echo '<tr><td></td><td class="filename">';
@@ -270,7 +270,7 @@ function putClarificationList($clars, $team = NULL)
 			echo '<td>' . $link . $clar['clarid'] . '</a></td>';
 		}
 
-		echo '<td>' . $link . printtime($clar['submittime']) . '</a></td>';
+		echo '<td>' . $link . printtime($clar['submittime'], TRUE) . '</a></td>';
 
 		$sender = htmlspecialchars($clar['sender']);
 		$recipient = htmlspecialchars($clar['recipient']);

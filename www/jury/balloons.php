@@ -104,7 +104,7 @@ if ( !empty($BALLOONS) ) {
 			echo '<td></td>';
 		}
 		echo '<td>b' . (int)$row['balloonid'] . '</td>';
-		echo '<td>' . printtime( $row['submittime'] ) . '</td>';
+		echo '<td>' . printtime($row['submittime'], TRUE) . '</td>';
 
 		// the balloon earned
 		echo '<td class="probid">' .

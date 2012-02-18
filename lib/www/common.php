@@ -118,7 +118,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		if ( IS_JURY ) {
 			echo "<td><a$link>s$sid</a></td>";
 		}
-		echo "<td><a$link>" . printtime($row['submittime']) . "</a></td>";
+		echo "<td><a$link>" . printtime($row['submittime'], TRUE) . "</a></td>";
 		if ( IS_JURY ) {
 			echo '<td title="' .
 				htmlspecialchars($row['teamid'].': '.$row['teamname']) . '">' .

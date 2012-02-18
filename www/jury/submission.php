@@ -162,7 +162,9 @@ if ( $submdata['valid'] ) {
 <tr><td scope="row">Language:</td><td>
 	<a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a></td></tr>
-<tr><td scope="row">Submitted:</td><td><?php echo  htmlspecialchars($submdata['submittime']) ?></td></tr>
+<tr><td scope="row">Submitted:</td><td><?php
+	echo printtime($submdata['submittime'], TRUE) .
+		' (' . htmlspecialchars($submdata['submittime']) . ')'; ?></td></tr>
 <tr><td scope="row">Source:</td><td>
 	<a href="show_source.php?id=<?php echo $id?>">view source code</a></td></tr>
 <tr><td scope="row">Max runtime:</td><td>
@@ -194,7 +196,7 @@ if ( count($jdata) > 0 ) {
 		}
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
-			'<td>' . $link . printtime($jud['starttime']) . '</a></td>' .
+			'<td>' . $link . printtime($jud['starttime'], TRUE) . '</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
 			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) . '</a></td>' .
 			"</tr>\n";

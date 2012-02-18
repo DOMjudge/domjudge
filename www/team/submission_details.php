@@ -41,7 +41,7 @@ if( ! $row['valid'] ) {
 	<td><?php echo htmlspecialchars($row['probname'])?> [<span class="probid"><?php echo
 	htmlspecialchars($row['probid']) ?></span>]</td></tr>
 <tr><td scope="row">Submitted:</td>
-	<td><?php echo printtime($row['submittime'])?></td></tr>
+	<td><?php echo printtime($row['submittime'], TRUE)?></td></tr>
 <tr><td scope="row">Language:</td>
 	<td><?php echo htmlspecialchars($row['langname'])?></td></tr>
 </table>
