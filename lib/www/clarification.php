@@ -76,8 +76,8 @@ function setClarCategories($categs)
 		$res[] = substr($key, 1).':'.$val;
 	}
 
-	$DB->q("REPLACE INTO configuration (name, value)
-	        VALUES ('clar_categories', %s)", implode("\t", $res));
+	$DB->q("UPDATE configuration SET value = %s
+	        WHERE name  = 'clar_categories'", implode("\t", $res));
 }
 
 /**
@@ -112,8 +112,8 @@ function setClarAnswers($answers)
 {
 	global $DB;
 
-	$DB->q("REPLACE INTO configuration (name, value)
-	        VALUES ('clar_answers', %s)", implode("\t", $answers));
+	$DB->q("UPDATE configuration SET value = %s
+	        WHERE name = 'clar_answers'", implode("\t", $answers));
 }
 
 /**
