@@ -96,12 +96,14 @@ ALTER TABLE `team_affiliation`
 UPDATE `configuration` SET `type` = 'bool', `description` = 'Show affiliations names and icons in the scoreboard?' WHERE `name` = 'show_affiliations';
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_compile', '2', 'int', 'Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_time', '30', 'int', 'Maximum seconds available for compiling.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('memory_limit', '524288', 'int', 'Maximum memory usage (in kB) a submission. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB!');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('filesize_limit', '4096', 'int', 'Maximum file size (in kB) that a submission may write. Solutions will abort when trying to write more, so this should be greater than the maximum testdata output.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('process_limit', '15', 'int', 'Maximum number of processes that a submission is allowed to start (including shell and possibly interpreters).');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('sourcesize_limit', '256', 'int', 'Maximum source code size (in kB) of a submission. This setting should be kept in sync with that in "etc/submit-config.h.in".');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('verification_required', '0', 'bool', 'Is verification of judgings by jury required before publication?');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('penalty_time', '20', 'int', 'Penalty time in minutes per wrong submission (if finally solved).');
 
 UPDATE `team_affiliation` SET `country` = 'AFG' WHERE country = 'AF';
 UPDATE `team_affiliation` SET `country` = 'ALB' WHERE country = 'AL';
