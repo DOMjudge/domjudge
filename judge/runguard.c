@@ -637,7 +637,7 @@ int main(int argc, char **argv)
 		/* Drop root before writing to output file. */
 		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
 
-		outputtime(status);
+		outputtime();
 
 		/* Test whether command has finished abnormally */
 		if ( ! WIFEXITED(status) ) {
