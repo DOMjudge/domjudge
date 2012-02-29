@@ -4,7 +4,6 @@
 %scanner scanner.h
 
 %lsp-needed
-%lines
 //%debug
 
 %stype parse_t
