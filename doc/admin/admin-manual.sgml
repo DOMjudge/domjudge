@@ -700,12 +700,11 @@ retained, and a plain diff output is generated. Next, for each problem
 that you want to use this validator for, set the
 <tt>special_compare</tt> field to <tt>dos_newline_OK</tt>. As an
 alternative to this modified validator script, one can accept
-presentation errors as correct answers by uncommenting the line
+presentation errors as correct answers by adding the mapping
 <code>
 	'presentation-error' => 'correct',
 </code>
-in the <tt>RESULTS_REMAP</tt> array in the file
-<tt>etc/judgehost-config.php</tt>.
+to the <tt>results_remap</tt> configuration variable.
 
 For more details on modifying validator scripts, see the comments at the top
 of the files <tt>testcase_run.sh</tt>, <tt>compare_wrapper</tt>
@@ -717,7 +716,7 @@ DOMjudge supports a <tt>presentation-error</tt> result. The default
 by whitespace; this is counted as an incorrect submission. The script
 <tt>compare_wrapper</tt> does not support presentation error results
 however. By default presentation errors are remapped to wrong answer;
-this can be changed in <tt>etc/judgehost-config.php</tt>.
+this can be changed with <tt>results_remap</tt>.
 
 <sect1>Run programs
 <p>

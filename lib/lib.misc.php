@@ -183,7 +183,9 @@ function calcScoreRow($cid, $team, $prob) {
  */
 function getFinalResult($runresults)
 {
-	global $RESULTS_PRIO, $RESULTS_REMAP;
+	$results_prio  = dbconfig_get('results_prio');
+	$results_remap = dbconfig_get('results_remap');
+	$lazy_eval     = dbconfig_get('lazy_eval_results', true);
 
 	// Whether we have NULL results
 	$havenull = FALSE;
@@ -197,7 +199,7 @@ function getFinalResult($runresults)
 		if ( $res===NULL ) {
 			$havenull = TRUE;
 		} else {
-			$prio = $RESULTS_PRIO[$res];
+			$prio = $results_prio[$res];
 			if ( empty($prio) ) error("Unknown result '$res' found.");
 			if ( $prio>$bestprio ) {
 				$bestres  = $res;
@@ -207,13 +209,13 @@ function getFinalResult($runresults)
 	}
 
 	// Not all results are in yet, and we don't do lazy evaluation:
-	if ( $havenull && ! LAZY_EVAL_RESULTS ) return NULL;
+	if ( $havenull && ! $lazy_eval ) return NULL;
 
-	if ( LAZY_EVAL_RESULTS ) {
+	if ( $lazy_eval ) {
 		// If we have NULL results, check whether the highest priority
 		// result has maximal priority. Use a local copy of the
-		// RESULTS_PRIO array, keeping the original untouched.
-		$tmp = $RESULTS_PRIO;
+		// 'results_prio' array, keeping the original untouched.
+		$tmp = $results_prio;
 		rsort($tmp);
 		$maxprio = reset($tmp);
 
@@ -222,8 +224,8 @@ function getFinalResult($runresults)
 	}
 
 	// We have a (possibly lazy) final answer, check for remapping.
-	if ( array_key_exists($bestres, $RESULTS_REMAP) ) {
-		return $RESULTS_REMAP[$bestres];
+	if ( array_key_exists($bestres, $results_remap) ) {
+		return $results_remap[$bestres];
 	} else {
 		return $bestres;
 	}
