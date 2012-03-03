@@ -10,8 +10,7 @@ require('init.php');
 
 requireAdmin();
 
-$config = $DB->q('KEYTABLE SELECT name AS ARRAYKEY, c.*
-                  FROM configuration c ORDER BY configid');
+dbconfig_init();
 
 if ( isset($_POST['save']) ) {
 
@@ -19,33 +18,37 @@ if ( isset($_POST['save']) ) {
 		if ( substr($tmp, 0, 7)!='config_' ) continue;
 		$key = substr($tmp, 7);
 
-		if ( !isset($config[$key]) ) {
+		if ( !isset($LIBDBCONFIG[$key]) ) {
 			error("Cannot set unknown configuration variable '$key'");
 		}
 
-		// Test data type validity and cast to standard form:
-		switch ( @$config[$key]['type'] ) {
+		switch ( $LIBDBCONFIG[$key]['type'] ) {
 		case 'bool':
-			$val = ( (bool)$val ? '1' : '0' );
+			$val = (bool)$val ? 1 : 0;
 			break;
 		case 'int':
-			if ( (int)$val!=$val ) {
-				error("Configuration variable '$key' must be integer");
+			$val = (int)$val;
+			break;
+		case 'array_val':
+			$res = array();
+			foreach ( $val as $data ) {
+				if ( !empty($data) ) $res[] = $data;
 			}
+			$val = $res;
 			break;
-		case 'string':
-			// Nothing to do here.
+		case 'array_keyval':
+			$res = array();
+			foreach ( $val as $data ) {
+				if ( !empty($data['key']) ) $res[$data['key']] = $data['val'];
+			}
+			$val = $res;
 			break;
-		default:
-			continue 2; // Skip unknown datatypes.
 		}
 
-		if ( $config[$key]['value']!=$val ) {
-			$DB->q('UPDATE configuration SET value = %s WHERE name = %s',
-			       $val, $key);
-			auditlog('configuration', NULL, 'update '.$key, $val);
-		}
+		$LIBDBCONFIG[$key]['value'] = $val;
 	}
+
+	dbconfig_store();
 
 	// Redirect to the original page to prevent accidental redo's
 	header('Location: config.php');
@@ -58,10 +61,10 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Configuration settings</h1>\n\n";
 
 echo addForm('config.php') . "<table>\n<thead>\n" .
-    "<tr align=\"left\"><th>name</th><th>value</th><th>description</th></tr>\n" .
+    "<tr align=\"left\"><th>name</th><th>value(s)</th><th>description</th></tr>\n" .
     "</thead>\n<tbody>\n";
 
-foreach ( $config as $key => $data ) {
+foreach ( $LIBDBCONFIG as $key => $data ) {
 	switch ( @$data['type'] ) {
 	case 'bool':
 		$editfield =
@@ -76,6 +79,27 @@ foreach ( $config as $key => $data ) {
 	case 'string':
 		$editfield = addInput('config_'.$key, $data['value'], 30);
 		break;
+	case 'array_val':
+	case 'array_keyval':
+		$editfield = '';
+		$i = 0;
+		foreach ( $data['value'] as $k => $v ) {
+			if ( $data['type']=='array_keyval' ) {
+				$editfield .= addInput("config_${key}[$i][key]", $k, 10);
+				$editfield .= addInput("config_${key}[$i][val]", $v, 18);
+			} else {
+				$editfield .= addInput("config_${key}[$i]", $v, 30);
+			}
+			$editfield .= "<br />";
+			$i++;
+		}
+		if ( $data['type']=='array_keyval' ) {
+			$editfield .= addInput("config_${key}[$i][key]", '', 10);
+			$editfield .= addInput("config_${key}[$i][val]", '', 18);
+		} else {
+			$editfield .= addInput("config_${key}[$i]", '', 30);
+		}
+		break;
 	default:
 		$editfield = '';
 		break;
@@ -85,7 +109,7 @@ foreach ( $config as $key => $data ) {
 
 	echo "<tr><td>" . htmlspecialchars($key) .
 		"</td><td style=\"white-space: nowrap;\">" . $editfield .
-		"</td><td>" . htmlspecialchars($data['description']) .
+		"</td><td>" . htmlspecialchars($data['desc']) .
 		"</td></tr>\n";
 }
 
