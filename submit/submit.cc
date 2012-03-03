@@ -100,10 +100,14 @@ struct option const long_opts[] = {
 	{"problem",  required_argument, NULL,         'p'},
 	{"language", required_argument, NULL,         'l'},
 	{"server",   required_argument, NULL,         's'},
-	{"team",     required_argument, NULL,         't'},
-	{"url",      required_argument, NULL,         'u'},
+	{"team",     required_argument, NULL,         'u'},
+	{"password", required_argument, NULL,         'w'},	// TODO not yet used
+	{"main",     required_argument, NULL,         'm'},
+	{"dir",      required_argument, NULL,         'd'},
+	{"url",      required_argument, NULL,         'r'},
 	{"port",     required_argument, NULL,         'P'},
-	{"web",      optional_argument, NULL,         'w'},
+	{"time",     required_argument, NULL,         't'},	// TODO not yet used
+	{"web",      optional_argument, NULL,         'x'},
 	{"verbose",  optional_argument, NULL,         'v'},
 	{"quiet",    no_argument,       NULL,         'q'},
 	{"help",     no_argument,       &show_help,    1 },
@@ -137,7 +141,8 @@ char server_addr[NI_MAXHOST];            /* server IP address string  */
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, server, team, baseurl;
+string problem, language, extension, server, team, password, mainfile, maindir, baseurl;
+struct tm submissiontime;
 char *filename, *submitdir, *tempfile;
 int temp_fd;
 
@@ -224,7 +229,7 @@ int main(int argc, char **argv)
 #endif
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:s:t:u:P:w::v::q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"p:l:s:u:w:m:d:r:P:t:x::v::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
@@ -232,8 +237,11 @@ int main(int argc, char **argv)
 		case 'p': problem   = string(optarg); break;
 		case 'l': extension = string(optarg); break;
 		case 's': server    = string(optarg); break;
-		case 't': team      = string(optarg); break;
-		case 'u': baseurl   = string(optarg); break;
+		case 'u': team      = string(optarg); break;
+		case 'w': password  = string(optarg); break;
+		case 'm': mainfile  = string(optarg); break;
+		case 'd': maindir   = string(optarg); break;
+		case 'r': baseurl   = string(optarg); break;
 
 		case 'P': /* port option */
 			port = strtol(optarg,&ptr,10);
@@ -241,7 +249,12 @@ int main(int argc, char **argv)
 				usage2(0,"invalid tcp port specified: `%s'",optarg);
 			}
 			break;
-		case 'w': /* websubmit option */
+		case 't': /* time option */
+			if ( strptime(optarg,"%H:%M:%S",&submissiontime) == NULL ) {
+				usage2(0,"invalid contest timestamp specified: `%s'",optarg);
+			}
+			break;
+		case 'x': /* websubmit option */
 			if ( optarg!=NULL ) {
 				use_websubmit = strtol(optarg,&ptr,10);
 				if ( *ptr!=0 ) usage2(0,"invalid value specified: `%s'",optarg);
@@ -275,11 +288,31 @@ int main(int argc, char **argv)
 	if ( show_help ) usage();
 	if ( show_version ) version();
 
-	if ( argc<=optind   ) usage2(0,"no filename specified");
-	if ( argc> optind+1 ) usage2(0,"multiple filenames specified");
-	filename = argv[optind];
+	if ( maindir.empty() && mainfile.empty() ) {
+		if ( argc<=optind   ) usage2(0,"no filename specified");
+		if ( argc> optind+1 ) usage2(0,"multiple filenames specified");
+		mainfile = string(gnu_basename(argv[optind]));
 
-	/* Stat file and do some sanity checks */
+		int pathlen = strlen(mainfile.c_str()) - (strlen(gnu_basename(mainfile.c_str())) + 1);
+		if( pathlen > 0 ) {
+			maindir = string(argv[optind], pathlen);
+		} else {
+			maindir = string(".");
+		}
+	} else {
+		if ( argc> optind ) usage2(0,"unrecognized parameter(s)");
+	}
+
+	/* Check for dir */
+	if ( maindir.empty() ) usage2(0,"no source directory specified");
+	if ( stat(maindir.c_str(),&fstats) !=0 ) {
+		error(errno,"stat directory `%s'",maindir.c_str());
+	} else if ( ! S_ISDIR(fstats.st_mode) ) {
+		error(0,"`%s' is not a directory",maindir.c_str());
+	}
+	/* Stat mainfile and do some sanity checks */
+	if ( mainfile.empty() ) usage2(0,"no main source file specified");
+	filename = allocstr("%s/%s",maindir.c_str(),mainfile.c_str());
 	if ( stat(filename,&fstats)!=0 ) usage2(errno,"cannot find `%s'",filename);
 	logmsg(LOG_DEBUG,"submission file is %s",filename);
 
@@ -331,6 +364,7 @@ int main(int argc, char **argv)
 	if ( problem.empty()  ) usage2(0,"no problem specified");
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( team.empty()     ) usage2(0,"no team specified");
+//	if ( password.empty() ) usage2(0,"no password specified");
 
 	if (use_websubmit) {
 		if ( baseurl.empty() ) usage2(0,"no url specified");
@@ -350,14 +384,22 @@ int main(int argc, char **argv)
 	/* Ask user for confirmation */
 	if ( ! quiet ) {
 		printf("Submission information:\n");
-		printf("  filename:    %s\n",filename);
-		printf("  problem:     %s\n",problem.c_str());
-		printf("  language:    %s\n",language.c_str());
-		printf("  team:        %s\n",team.c_str());
+		printf("  sources directory:    %s\n",maindir.c_str());
+		printf("  main source filename: %s\n",mainfile.c_str());
+		printf("  problem:              %s\n",problem.c_str());
+		printf("  language:             %s\n",language.c_str());
+		printf("  team:                 %s\n",team.c_str());
 		if (use_websubmit) {
-			printf("  url:         %s\n",baseurl.c_str());
+			printf("  url:                  %s\n",baseurl.c_str());
 		} else {
-			printf("  server/port: %s/%d\n",server.c_str(),port);
+			printf("  server/port:          %s/%d\n",server.c_str(),port);
+		}
+		if ( false ) {
+			printf("  submission timestamp: %i:%02i:%02i\n"
+					, submissiontime.tm_hour
+					, submissiontime.tm_min
+					, submissiontime.tm_sec
+					);
 		}
 
 		if ( nwarnings>0 ) printf("There are warnings for this submission!\a\n");
@@ -392,8 +434,11 @@ void usage()
 "Submit a solution for a problem.\n"
 "\n"
 "Options (see below for more information)\n"
+"  -m, --main=MAIN          main source filename\n"
+"  -d, --dir=DIR            directory with main source and other source files\n"
 "  -p, --problem=PROBLEM    submit for problem PROBLEM\n"
 "  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
+"  -t, --time=TIME          contest-time for the submission, format HH:MM:SS\n"
 "  -v, --verbose[=LEVEL]    increase verbosity or set to LEVEL, where LEVEL\n"
 "                               must be numerically specified as in 'syslog.h'\n"
 "                               defaults to LOG_INFO without argument\n"
@@ -404,7 +449,8 @@ void usage()
 "\n"
 "The following option(s) should not be necessary for normal use\n"
 #if ( SUBMIT_ENABLE_CMD )
-"  -t, --team=TEAM          submit as team TEAM\n"
+"  -u, --team=TEAM          submit as team TEAM\n"
+"  -w, --password=PASSWORD  authenticate using password PASSWORD\n"
 "  -s, --server=SERVER      submit to server SERVER\n"
 "  -P, --port=PORT          connect to SERVER on tcp-port PORT\n"
 #endif
@@ -412,7 +458,7 @@ void usage()
 "  -u, --url=URL            submit to webserver with base address URL\n"
 #endif
 #if ( SUBMIT_ENABLE_WEB && SUBMIT_ENABLE_CMD )
-"  -w, --web[=0|1]          toggle or set submit to the webinterface\n"
+"  -x, --web[=0|1]          toggle or set submit to the webinterface\n"
 #endif
 "\n"
 "Explanation of submission options:\n"
