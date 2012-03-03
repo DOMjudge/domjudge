@@ -40,8 +40,8 @@ CREATE TABLE `removed_interval` (
 -- Add/remove sample/initial contents
 --
 
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_answers', 'No comment	Read the problem statement carefully', 'array_val', 'List of predefined clarification answers');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', 'general:General issue	technical:Technical issue', 'array_keyval', 'List of additional clarification categories');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', '{"general":"General issue","technical":"Technical issue"}', 'array_keyval', 'List of additional clarification categories');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('disable_verify', '0', 'bool', 'Disable the ''mark verified'' button to allow suspension of notification of accepted submissions. Requires ''verification_required=yes'' to work!');
 
 --

@@ -9,8 +9,8 @@
 -- Dumping data for table `configuration`
 -- 
 
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_answers', 'No comment	Read the problem statement carefully', 'array_val', 'List of predefined clarification answers');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', 'general:General issue	technical:Technical issue', 'array_keyval', 'List of additional clarification categories');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', '{"general":"General issue","technical":"Technical issue"}', 'array_keyval', 'List of additional clarification categories');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_time', '30', 'int', 'Maximum seconds available for compiling.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('memory_limit', '524288', 'int', 'Maximum memory usage (in kB) by submissions. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB!');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('filesize_limit', '4096', 'int', 'Maximum filesize (in kB) submissions may write. Solutions will abort when trying to write more, so this should be greater than the maximum testdata output.');
