@@ -93,7 +93,7 @@ function check_relative_time($time, $starttime, $field)
 			}
 			$ret = strftime(MYSQL_DATETIME_FORMAT, strtotime($starttime) + $seconds);
 		} else {
-			ch_error($field . " is not correct formatted, expecting: +/-hh:mm");
+			ch_error($field . " is not correctly formatted, expecting: +/-hh:mm");
 			$ret = null;
 		}
 	} else {
