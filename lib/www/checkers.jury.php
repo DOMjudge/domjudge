@@ -172,7 +172,8 @@ function check_relative_time($time, $starttime, $field)
 		     is_numeric($times[2]) && $times[2] < 60 ) {
 			$hours = $times[0];
 			$minutes = $times[1];
-			$seconds = 60 * ($minutes + 60 * $hours);
+			$seconds = $times[2];
+			$seconds = $seconds + 60 * ($minutes + 60 * $hours);
 			if ($neg) {
 				$seconds *= -1;
 			}

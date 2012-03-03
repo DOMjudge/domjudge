@@ -105,9 +105,13 @@ function problemVisible($probid)
  * to allow minimal changes wrt. the removed intervals required for
  * the ICPC specification.
  */
-function calcContestTime($walltime)
+function calcContestTime($walltime, $contest_data = null)
 {
-	global $cdata;
+	if ( is_null($contest_data) ) {
+		global $cdata;
+	} else {
+		$cdata = $contest_data;
+	}
 
 	$contesttime = difftime($walltime, $cdata['starttime']);
 
