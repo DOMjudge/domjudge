@@ -14,11 +14,11 @@
 #define PATHSEP "/"
 #endif
 
-char *gnu_basename(const char *filename)
+const char *gnu_basename(const char *filename)
 {
-	char *p;
+	const char *p;
 
-	for(p=(char *)filename+strlen(filename)-1; p>=filename; p--) {
+	for(p=filename+strlen(filename)-1; p>=filename; p--) {
 		if ( strchr(PATHSEP,*p)!=NULL ) break;
 	}
 
