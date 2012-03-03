@@ -127,7 +127,9 @@ echo "</fieldset>\n</form>\n\n";
 
 
 // Get data. Starttime seems most logical sort criterion.
-$res = $DB->q('TABLE SELECT * FROM contest ORDER BY starttime DESC');
+$res = $DB->q('TABLE SELECT contest.*,COUNT(intervalid) as numintervals
+               FROM contest LEFT JOIN removed_interval USING(cid)
+               GROUP BY cid ORDER BY contest.starttime DESC');
 
 if( count($res) == 0 ) {
 	echo "<p class=\"nodata\">No contests defined</p>\n\n";
@@ -136,6 +138,7 @@ if( count($res) == 0 ) {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 	     "<tr><th scope=\"col\">CID</th>";
 	foreach($times as $time) echo "<th scope=\"col\">$time</th>";
+	echo "<th scope=\"col\">removed</th>";
 	echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
 
 	$iseven = false;
@@ -154,6 +157,7 @@ if( count($res) == 0 ) {
 			      $link . ( isset($row[$time.'time']) ?
 			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
 		}
+		echo "<td>" . $link . htmlspecialchars($row['numintervals']) . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
 		$iseven = ! $iseven;
 

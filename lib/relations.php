@@ -14,6 +14,7 @@ $KEYS['judging'] = array('judgingid');
 $KEYS['judging_run'] = array('runid');
 $KEYS['language'] = array('langid');
 $KEYS['problem'] = array('probid');
+$KEYS['removed_interval'] = array('intervalid');
 $KEYS['scoreboard_jury'] = array('cid','teamid','probid');
 $KEYS['scoreboard_public'] = array('cid','teamid','probid');
 $KEYS['submission'] = array('submitid');
@@ -73,6 +74,11 @@ $RELATIONS['language'] = array();
 $RELATIONS['problem'] = array (
 	'cid' => 'contest.cid',
 );
+
+$RELATIONS['removed_interval'] = array (
+	'cid' => 'contest.cid',
+);
+
 
 $RELATIONS['scoreboard_jury'] =
 $RELATIONS['scoreboard_public'] = array (

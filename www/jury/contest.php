@@ -124,4 +124,40 @@ if ( IS_ADMIN ) {
 		delLink('contest','cid',$data['cid']) ."</p>\n\n";
 }
 
+
+echo "<h3>Removed intervals</h3>\n\n";
+
+$removals = $DB->q('TABLE SELECT * FROM removed_interval WHERE cid = %i ORDER BY starttime', $id);
+
+if ( count($removals) == 0 ) {
+	echo "<p class=\"nodata\">None.</p>\n\n";
+} else {
+	echo "<table>\n";
+	echo "<tr><th>from</th><td></td><th>to</th><td></td><th>duration</th></tr>\n";
+	foreach ( $removals as $row ) {
+		echo "<tr><td title=\"" . htmlspecialchars($row['starttime']) . "\">" .
+		     printtime($row['starttime']) . "</td><td>&rarr;</td>" . 
+		     "<td title=\"" . htmlspecialchars($row['endtime']) . "\">" .
+		     printtime($row['endtime']) . "</td><td></td><td>( " .
+		     printtimediff(strtotime($row['starttime']), strtotime($row['endtime'])) . " )</td>" .
+		     "<td><a href=\"removed_intervals.php?intervalid=" . (int)$row['intervalid'] .
+		     "&amp;cmd=delete\" onclick=\"return confirm('Really delete interval?');\">" .
+		     "<img src=\"../images/delete.png\" alt=\"delete\" \"delete removed interval\" " .
+		     "class=\"picto\" /></a></td>" .
+		     "</tr>\n";
+	}
+	echo "</table>\n\n";
+
+	if ( IS_ADMIN ) {
+		echo "<p>" .
+		     "<a href=\"removed_intervals.php?cid=" . (int)$id . "&amp;cmd=add\">" .
+		     "<img src=\"../images/add.png\" alt=\"add\" title=\"add new removed interval\" " .
+		     "class=\"picto\" /></a> " .
+		     "<a href=\"removed_intervals.php?cid=" . (int)$id . "&amp;cmd=edit\">" .
+		     "<img src=\"../images/edit-multi.png\" alt=\"edit\" title=\"edit removed intervals\" " .
+		     "class=\"picto\" /></a>";
+	}
+
+}
+
 require(LIBWWWDIR . '/footer.php');
