@@ -19,6 +19,10 @@ tr.sub_ignore td {
 	text-decoration: line-through;
 }
 
+tr.unseen td {
+	font-weight: bold;
+}
+
 a:link, a:visited { color: blue;   }
 a:hover           { color: purple; }
 a:active          { color: red;    }

@@ -97,6 +97,7 @@ domserver_etcdir       = @domserver_etcdir@
 domserver_wwwdir       = @domserver_wwwdir@
 domserver_sqldir       = @domserver_sqldir@
 domserver_libdir       = @domserver_libdir@
+domserver_libextdir    = @domserver_libextdir@
 domserver_libwwwdir    = @domserver_libwwwdir@
 domserver_libsubmitdir = @domserver_libsubmitdir@
 domserver_logdir       = @domserver_logdir@
@@ -116,7 +117,7 @@ judgehost_judgedir     = @judgehost_judgedir@
 domjudge_docdir        = @domjudge_docdir@
 
 domserver_dirs = $(domserver_bindir) $(domserver_etcdir) $(domserver_wwwdir) \
-                 $(domserver_libdir) $(domserver_libsubmitdir) \
+                 $(domserver_libdir) $(domserver_libsubmitdir) $(domserver_libextdir) \
                  $(domserver_libwwwdir) $(domserver_logdir) $(domserver_rundir) \
                  $(domserver_tmpdir) $(domserver_submitdir) $(domserver_sqldir)/upgrade \
                  $(addprefix $(domserver_wwwdir)/images/,affiliations countries teams) \
@@ -142,6 +143,7 @@ define substconfigvars
 	-e 's,@domserver_wwwdir[@],@domserver_wwwdir@,g' \
 	-e 's,@domserver_sqldir[@],@domserver_sqldir@,g' \
 	-e 's,@domserver_libdir[@],@domserver_libdir@,g' \
+	-e 's,@domserver_libextdir[@],@domserver_libextdir@,g' \
 	-e 's,@domserver_libwwwdir[@],@domserver_libwwwdir@,g' \
 	-e 's,@domserver_libsubmitdir[@],@domserver_libsubmitdir@,g' \
 	-e 's,@domserver_logdir[@],@domserver_logdir@,g' \

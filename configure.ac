@@ -149,6 +149,7 @@ if test "x$fhs_enabled" = xyes ; then
 	AC_SUBST(domserver_wwwdir,      $datadir/${PACKAGE_TARNAME}/www)
 	AC_SUBST(domserver_sqldir,      $datadir/${PACKAGE_TARNAME}/sql)
 	AC_SUBST(domserver_libdir,      $libdir/${PACKAGE_TARNAME})
+	AC_SUBST(domserver_libextdir,   $libdir/${PACKAGE_TARNAME}/ext)
 	AC_SUBST(domserver_libwwwdir,   $libdir/${PACKAGE_TARNAME}/www)
 	AC_SUBST(domserver_libsubmitdir,$libdir/${PACKAGE_TARNAME}/submit)
 	AC_SUBST(domserver_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
@@ -192,6 +193,7 @@ AX_PATH(domserver_etcdir,       [$domserver_root/etc])
 AX_PATH(domserver_wwwdir,       [$domserver_root/www])
 AX_PATH(domserver_sqldir,       [$domserver_root/sql])
 AX_PATH(domserver_libdir,       [$domserver_root/lib])
+AX_PATH(domserver_libextdir,    [$domserver_root/lib/ext])
 AX_PATH(domserver_libwwwdir,    [$domserver_root/lib/www])
 AX_PATH(domserver_libsubmitdir, [$domserver_root/lib/submit])
 AX_PATH(domserver_logdir,       [$domserver_root/log])
@@ -336,6 +338,7 @@ echo " * domserver...........: $domserver_root"
 echo "    - bin..............: $domserver_bindir"
 echo "    - etc..............: $domserver_etcdir"
 echo "    - lib..............: $domserver_libdir"
+echo "    - libext...........: $domserver_libextdir"
 echo "    - libwww...........: $domserver_libwwwdir"
 echo "    - libsubmit........: $domserver_libsubmitdir"
 echo "    - log..............: $domserver_logdir"

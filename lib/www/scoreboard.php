@@ -20,13 +20,13 @@ require_once(LIBDIR . '/lib.misc.php');
  * This expects bool $solved (whether there was at least one correct
  * submission by this team for this problem) and int $num_submissions
  * (the total number of tries for this problem by this team)
- * as input, uses the constant PENALTY_TIME and outputs the number
+ * as input, uses the 'penalty_time' variable and outputs the number
  * of penalty minutes.
  *
  * The current formula is as follows:
  * - Penalty time is only counted for problems that the team finally
  *   solved. Yet unsolved problems always have zero penalty minutes.
- * - The penalty is PENALTY_TIME (usually 20 minutes) for each
+ * - The penalty is 'penalty_time' (usually 20 minutes) for each
  *   unsuccessful try. By definition, the number of unsuccessful
  *   tries is the number of submissions for a problem minus 1: the
  *   final, correct one.
@@ -36,7 +36,7 @@ function calcPenaltyTime($solved, $num_submissions)
 {
 	if ( ! $solved ) return 0;
 
-	return ( $num_submissions - 1 ) * PENALTY_TIME;
+	return ( $num_submissions - 1 ) * dbconfig_get('penalty_time', 20);
 }
 
 /**

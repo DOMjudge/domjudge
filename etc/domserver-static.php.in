@@ -11,6 +11,7 @@ define('BINDIR',      '@domserver_bindir@');
 define('ETCDIR',      '@domserver_etcdir@');
 define('WWWDIR',      '@domserver_wwwdir@');
 define('LIBDIR',      '@domserver_libdir@');
+define('LIBEXTDIR',   '@domserver_libextdir@');
 define('LIBWWWDIR',   '@domserver_libwwwdir@');
 define('LIBSUBMITDIR','@domserver_libsubmitdir@');
 define('LOGDIR',      '@domserver_logdir@');

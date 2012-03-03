@@ -2521,6 +2521,15 @@ additional software to be installed:
        documentation from SGML sources and a LaTeX installation to
        generate the PDF admin, judge and default team manual.
 </itemize>
+
+On Debian(-based) systems, the following apt-get command should
+install the additionally required packages (next to the
+<ref id="install_config:apt-getinstall"
+       name="standard set of packages">):
+<code>
+apt-get install autoconf automake flex bisonc++ linuxdoc-tools transfig
+</code>
+
 When this software is present, bootstrapping can be done by running
 <tt>make dist</tt>, which creates the <tt>configure</tt> script and
 generates documentation from SGML/LaTeX sources. 

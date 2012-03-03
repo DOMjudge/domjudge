@@ -134,6 +134,7 @@ CREATE TABLE `judging` (
   `jury_member` varchar(15) default NULL COMMENT 'Name of jury member who verified this',
   `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Old judging is marked as invalid when rejudging',
   `output_compile` longblob COMMENT 'Output of the compiling the program',
+  `seen` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Whether the team has seen this judging',
   PRIMARY KEY  (`judgingid`),
   KEY `submitid` (`submitid`),
   KEY `judgehost` (`judgehost`),

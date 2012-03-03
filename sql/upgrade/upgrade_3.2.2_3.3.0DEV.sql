@@ -83,7 +83,8 @@ ALTER TABLE `event`
   MODIFY COLUMN `description` longtext NOT NULL COMMENT 'Event description';
 
 ALTER TABLE `judging`
-  MODIFY COLUMN `output_compile` longblob COMMENT 'Output of the compiling the program';
+  MODIFY COLUMN `output_compile` longblob COMMENT 'Output of the compiling the program',
+  ADD COLUMN `seen` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Whether the team has seen this judging' after `output_compile`;
 
 ALTER TABLE `judging_run`
   MODIFY COLUMN `output_run` longblob COMMENT 'Output of running the program',
@@ -113,6 +114,7 @@ UPDATE `configuration` SET `type` = 'bool', `description` = 'Show affiliations n
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_answers', 'No comment	Read the problem statement carefully', 'array_val', 'List of predefined clarification answers');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', 'general:General issue	technical:Technical issue', 'array_keyval', 'List of additional clarification categories');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_compile', '2', 'int', 'Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_time', '30', 'int', 'Maximum seconds available for compiling.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('memory_limit', '524288', 'int', 'Maximum memory usage (in kB) a submission. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB!');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('filesize_limit', '4096', 'int', 'Maximum file size (in kB) that a submission may write. Solutions will abort when trying to write more, so this should be greater than the maximum testdata output.');
@@ -120,6 +122,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('pr
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('sourcesize_limit', '256', 'int', 'Maximum source code size (in kB) of a submission. This setting should be kept in sync with that in "etc/submit-config.h.in".');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('verification_required', '0', 'bool', 'Is verification of judgings by jury required before publication?');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('disable_verify', '0', 'bool', 'Disable the ''mark verified'' button to allow suspension of notification of accepted submissions. Requires ''verification_required=yes'' to work!');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('penalty_time', '20', 'int', 'Penalty time in minutes per wrong submission (if finally solved).');
 
 UPDATE `team_affiliation` SET `country` = 'AFG' WHERE country = 'AF';
 UPDATE `team_affiliation` SET `country` = 'ALB' WHERE country = 'AL';

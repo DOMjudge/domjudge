@@ -20,6 +20,8 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('ve
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('disable_verify', '0', 'bool', 'Disable the ''mark verified'' button to allow suspension of notification of accepted submissions. Requires ''verification_required=yes'' to work!');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_affiliations', '1', 'bool', 'Show affiliations names and icons in the scoreboard?');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_compile', '2', 'int', 'Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('penalty_time', '20', 'int', 'Penalty time in minutes per wrong submission (if finally solved).');
 
 -- 
 -- Dumping data for table `contest`

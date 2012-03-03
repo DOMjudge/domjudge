@@ -2,15 +2,6 @@
 
 require_once("common-config.php");
 
-// Show compile output in team webinterface.
-// Note that this might give teams the possibility to gain information
-// about the judging system; e.g. which functions are usable or
-// possibly system information through compiler directives.
-// 0 = Never
-// 1 = Only on compilation error(s)
-// 2 = Always
-define('SHOW_COMPILE', 2);
-
 // Authentication scheme to be used for teams. The following methods
 // are supported:
 // IPADDRESS
@@ -52,9 +43,6 @@ define('LDAP_DNQUERY', 'CN=&,OU=users,DC=example,DC=com');
 // Specify here which of the users in htpasswd-jury should have admin 
 // rights on top of their jury rights
 $DOMJUDGE_ADMINS = array('domjudge_jury', 'admin');
-
-// Penalty time in minutes per wrong submission (if finally solved).
-define('PENALTY_TIME', 20);
 
 // List of auto-detected language extensions by the submit client.
 //   Format: 'LANG,MAINEXT[,EXT]... [LANG...]' where:

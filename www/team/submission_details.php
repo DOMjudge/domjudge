@@ -28,6 +28,9 @@ if( ! $row ) {
 	exit;
 }
 
+// update seen status when viewing submission
+$DB->q("UPDATE judging j SET j.seen = 1 WHERE j.submitid = %i", $sid);
+
 echo "<h1>Submission details</h1>\n";
 
 if( ! $row['valid'] ) {
@@ -49,8 +52,10 @@ if( ! $row['valid'] ) {
 <p>Result: <?php echo printresult($row['result'], TRUE)?></p>
 <?php
 
-if ( (SHOW_COMPILE == 2) ||
-     (SHOW_COMPILE == 1 && $row['result'] == 'compiler-error') ) {
+$show_compile = dbconfig_get('show_compile', 2);
+
+if ( ( $show_compile == 2 ) ||
+     ( $show_compile == 1 && $row['result'] == 'compiler-error') ) {
 
 	echo "<h2>Compilation output</h2>\n\n";
 
