@@ -141,7 +141,7 @@ function dbconfig_get($name, $default = null, $cacheok = true)
 		dbconfig_init();
 	}
 
-	if ( isset($LIBDBCONFIG[$name]) ) return $LIBDBCONFIG[$name];
+	if ( isset($LIBDBCONFIG[$name]) ) return $LIBDBCONFIG[$name]['value'];
 
 	if ( $default===null ) {
 		error("Configuration variable '$name' not found.");

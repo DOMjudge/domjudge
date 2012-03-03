@@ -106,6 +106,28 @@ function printtimediff($start, $end = null) {
 }
 
 /**
+ * print the relative time in h:mm:ss format
+ */
+function printtimerel($rel_time) {
+
+	$h = floor($rel_time/3600);
+	$rel_time %= 3600;
+
+	$m = floor($rel_time/60);
+	if ($m < 10) {
+		$m = '0' . $m;
+	}
+	$rel_time %= 60;
+	
+	$s = $rel_time;
+	if ($s < 10) {
+		$s = '0' . $s;
+	}
+
+	return $h . ':' . $m . ':' . $s;
+}
+
+/**
  * Cut a string at $size chars and append ..., only if neccessary.
  */
 function str_cut ($str, $size) {

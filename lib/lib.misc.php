@@ -80,9 +80,13 @@ function problemVisible($probid)
  * NOTE: It is assumed that removed intervals do not overlap and that
  * they all fall within the contest start and end times.
  */
-function calcContestTime($walltime)
+function calcContestTime($walltime, $contest_data = null)
 {
-	global $cdata;
+	if ( is_null($contest_data) ) {
+		global $cdata;
+	} else {
+		$cdata = $contest_data;
+	}
 
 	$contesttime = difftime($walltime, $cdata['starttime']);
 
