@@ -49,7 +49,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid,
 					s.submittime, s.judgehost, s.valid, t.name AS teamname,
 					p.name AS probname, l.name AS langname,
-					j.result, j.judgehost, j.verified, j.jury_member '
+					j.result, j.judgehost, j.verified, j.jury_member, j.seen '
 				  . $sqlbody
 				  . (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '')
 				  .'ORDER BY s.submittime DESC, s.submitid DESC '
@@ -112,6 +112,9 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		}
 		if ( $sid == $highlight ) {
 			echo ' highlight';
+		}
+		if (!IS_JURY && !$row['seen'] ) {
+			echo ' unseen';
 		}
 		echo '">';
 

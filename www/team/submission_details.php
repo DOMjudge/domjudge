@@ -28,6 +28,9 @@ if( ! $row ) {
 	exit;
 }
 
+// update seen status when viewing submission
+$DB->q("UPDATE judging j SET j.seen = 1 WHERE j.submitid = %i", $sid);
+
 echo "<h1>Submission details</h1>\n";
 
 if( ! $row['valid'] ) {

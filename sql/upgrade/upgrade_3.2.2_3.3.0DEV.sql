@@ -68,7 +68,8 @@ ALTER TABLE `event`
   MODIFY COLUMN `description` longtext NOT NULL COMMENT 'Event description';
 
 ALTER TABLE `judging`
-  MODIFY COLUMN `output_compile` longblob COMMENT 'Output of the compiling the program';
+  MODIFY COLUMN `output_compile` longblob COMMENT 'Output of the compiling the program',
+  ADD COLUMN `seen` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Whether the team has seen this judging' after `output_compile`;
 
 ALTER TABLE `judging_run`
   MODIFY COLUMN `output_run` longblob COMMENT 'Output of running the program',
