@@ -593,11 +593,17 @@ directory without arguments.
 <p>
 
 Configuration of the judge system is mostly done by editing the
-configuration file(s) in <tt>etc</tt>: <tt>domserver-config.php,
+configuration variables on the page <tt>Configuration settings</tt>
+available in the administrator interface. Changes take effect immediately.
+
+Some settings that are tightly coupled to the filesystem can be
+configured in the files in <tt>etc</tt>: <tt>domserver-config.php,
 judgehost-config.php, common-config.php</tt> for the configuration
 options of the domserver, judgehost and shared configuration options
 respectively. The latter should be synchronised between domserver and
 judgehosts. Descriptions of settings are included in these files.
+The judgedaemon must be restarted for changes to take effect, while
+these are directly picked up by the webinterfaces.
 
 Besides these settings, there are a few other places where changes can
 be made to the system, see <ref id="install_config:configurablescripts"
@@ -700,12 +706,11 @@ retained, and a plain diff output is generated. Next, for each problem
 that you want to use this validator for, set the
 <tt>special_compare</tt> field to <tt>dos_newline_OK</tt>. As an
 alternative to this modified validator script, one can accept
-presentation errors as correct answers by uncommenting the line
+presentation errors as correct answers by adding the mapping
 <code>
 	'presentation-error' => 'correct',
 </code>
-in the <tt>RESULTS_REMAP</tt> array in the file
-<tt>etc/judgehost-config.php</tt>.
+to the <tt>results_remap</tt> configuration variable.
 
 For more details on modifying validator scripts, see the comments at the top
 of the files <tt>testcase_run.sh</tt>, <tt>compare_wrapper</tt>
@@ -717,7 +722,7 @@ DOMjudge supports a <tt>presentation-error</tt> result. The default
 by whitespace; this is counted as an incorrect submission. The script
 <tt>compare_wrapper</tt> does not support presentation error results
 however. By default presentation errors are remapped to wrong answer;
-this can be changed in <tt>etc/judgehost-config.php</tt>.
+this can be changed with <tt>results_remap</tt>.
 
 <sect1>Run programs
 <p>
@@ -2201,8 +2206,8 @@ Could not reserve enough space for object heap
 Then the problem is probably that the jvm needs more memory than what
 is reserved by the Java compile script. You should try to increase the
 <tt>MEMRESERVED</tt> variable in <tt>judge/compile_java.sh</tt> and
-check that the total memory limit <tt>MEMLIMIT</tt> in
-<tt>etc/judgehost-config.php</tt> is larger than <tt>MEMRESERVED</tt>.
+check that the configuration variable <tt>memory-limit</tt> is set
+larger than <tt>MEMRESERVED</tt>.
 
 <sect>Java class naming
 <p>

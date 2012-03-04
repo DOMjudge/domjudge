@@ -376,7 +376,8 @@ if ( isset($jid) )  {
 		    "<a href=\"team_output.php?probid=" . htmlspecialchars($submdata['probid']) .
 		    "&amp;runid=" . $run['runid'] . "\">Team Output</a>" .
 		    "</td></tr>" .
-		    "<tr><td>Runtime:</td><td>$run[runtime] sec</td></tr>" .
+		    "<tr><td>Runtime:</td><td>$run[runtime] sec" .
+		    ( $run['runresult']=='timelimit' ? ' (terminated)' : '' ) ."</td></tr>" .
 		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
 		    ( $run['runresult']=='correct' ? '' : 'in' ) .
 		    "correct\">$run[runresult]</span></td></tr>" .
