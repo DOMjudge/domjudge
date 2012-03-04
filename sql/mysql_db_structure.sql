@@ -207,7 +207,8 @@ CREATE TABLE `removed_interval` (
   `starttime` datetime NOT NULL COMMENT 'Initial time of removed interval',
   `endtime` datetime NOT NULL COMMENT 'Final time of removed interval',
   PRIMARY KEY (`intervalid`),
-  KEY `cid` (`cid`)
+  KEY `cid` (`cid`),
+  CONSTRAINT `removed_interval_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Time intervals removed from the contest for scoring';
 
 --
