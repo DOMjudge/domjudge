@@ -41,7 +41,7 @@ if(!file_exists($path)) {
 $contents = file_get_contents($path);
 
 // Prepare GeSHi instance
-$geshi =& new GeSHi($contents, "PHP");
+$geshi = new GeSHi($contents, "PHP");
 $geshi->set_header_type(GESHI_HEADER_PRE);
 $geshi->enable_classes();
 $geshi->enable_line_numbers(GESHI_FANCY_LINE_NUMBERS, 10);
