@@ -43,6 +43,8 @@ Version 3.3.0 - DEV
    domjudge_{team,public,plugin} from MySQL and dbpasswords.secret.
  - Add configuration page to admin interface and move various variables
    from etc/*-config.php to the DB configuration table.
+ - Support inclusion of external libraries under the lib/ext/ path.
+ - Include a copy of the GeSHi syntax highlighter.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
