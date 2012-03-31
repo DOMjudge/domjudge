@@ -158,6 +158,7 @@ struct value_t {
 };
 
 class doesnt_match_exception {};
+class eof_found_exception {};
 
 ostream& operator <<(ostream &os, const value_t &val)
 {
@@ -627,8 +628,9 @@ void checktestdata()
 		command cmd = currcmd = program[prognr];
 
 		if ( cmd.name()=="EOF" ) {
+			debug("checking EOF");
 			if ( datanr++!=data.size() ) error();
-			return;
+			throw eof_found_exception();
 		}
 
 		else if ( loop_cmds.count(cmd.name()) ) {
@@ -658,13 +660,13 @@ void checktestdata()
 			}
 
 			// Run loop...
-			debug("running %s loop, commands %d - %d, max. times = %lld",
+			debug("running %s loop, commands %d - %d, max. times = %d",
 			      cmd.name().c_str(),loopbegin,loopend,times);
 
 			while ( (cmd.name()=="REP"   && i<times) ||
 			        (cmd.name()=="WHILE" && dotest(cmd.args[0])) ) {
 
-				debug("loop iteration %lld/%lld",i+1,times);
+				debug("loop iteration %d/%d",i+1,times);
 				prognr = loopbegin;
 				if ( i>0 && cmd.nargs()>=2 ) checktoken(cmd.args[1]);
 				checktestdata();
@@ -678,34 +680,38 @@ void checktestdata()
 		else if ( cmd.name()=="IF" ) {
 
 			// Find line numbers of matching else/end
-			int ifline   = prognr;
-			int elseline = -1;
-			int endline  = prognr+1;
+			int ifnr   = prognr;
+			int elsenr = -1;
+			int endnr  = prognr+1;
 
-			for(int looplevel=1; looplevel>0; ++endline) {
-				string cmdstr = program[endline].name();
+			for(int looplevel=1; looplevel>0; ++endnr) {
+				string cmdstr = program[endnr].name();
 				if ( loop_cmds.count(cmdstr) || cmdstr=="IF") looplevel++;
 				if ( cmdstr=="END" ) looplevel--;
-				if ( cmdstr=="ELSE" && looplevel==1) elseline=endline;
+				if ( cmdstr=="ELSE" && looplevel==1) elsenr = endnr;
 			}
+			endnr--;
 
-			debug("if statement, if/else/end=%lld/%lld/%lld",
-			      ifline,elseline,endline);
+			debug("IF statement, if/else/end commands: %d/%d/%d",
+			      ifnr,elsenr,endnr);
 
 			// Test and execute correct command block
 			if (dotest(cmd.args[0])) {
-				prognr = ifline+1;
+				debug("executing IF clause");
+				prognr = ifnr+1;
 				checktestdata();
 			}
-			else if (elseline!=-1) {
-				prognr = elseline+1;
+			else if (elsenr!=-1) {
+				debug("executing ELSE clause");
+				prognr = elsenr+1;
 				checktestdata();
 			}
 
-			prognr = endline;
+			prognr = endnr+1;
 		}
 
 		else if ( cmd.name()=="END" || cmd.name()=="ELSE" ) {
+			debug("scope closed by %s",cmd.name().c_str());
 			prognr++;
 			return;
 		}
@@ -758,6 +764,7 @@ bool checksyntax(istream &progstream, istream &datastream, int opt_mask) {
 	catch (doesnt_match_exception) {
 		return false;
 	}
+	catch (eof_found_exception) {}
 
 	return true;
 }
