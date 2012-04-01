@@ -526,7 +526,10 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 				$DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category
 		                    WHERE categoryid IN (%As)', $categids);
 
-		if ( count($categids) > 1 || count($countries) > 1 || count($affilids) > 1 ) {
+		// Generate filter form if at least one category contains more than
+		// one element, _or_ if we were already filtering.
+		if ( is_array($filter) ||
+		     (count($categids) > 1 || count($countries) > 1 || count($affilids) > 1) ) {
 
 			require_once(LIBWWWDIR . '/forms.php');
 
