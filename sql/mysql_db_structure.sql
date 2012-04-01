@@ -99,7 +99,7 @@ CREATE TABLE `judging` (
   `verified` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Result verified by jury member?',
   `verifier` varchar(15) NOT NULL default '' COMMENT 'Name of jury member who verified this',
   `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Old judging is marked as invalid when rejudging',
-  `output_compile` text COMMENT 'Output of the compiling the program',
+  `output_compile` blob COMMENT 'Output of the compiling the program',
   PRIMARY KEY  (`judgingid`),
   KEY `submitid` (`submitid`),
   KEY `judgehost` (`judgehost`),
@@ -119,9 +119,9 @@ CREATE TABLE `judging_run` (
   `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
   `runresult` varchar(25) default NULL COMMENT 'Result of this run, NULL if not finished yet',
   `runtime` float DEFAULT NULL COMMENT 'Submission running time on this testcase',
-  `output_run` text COMMENT 'Output of running the program',
-  `output_diff` text COMMENT 'Diffing the program output and testcase output',
-  `output_error` text COMMENT 'Standard error output of the program',
+  `output_run` blob COMMENT 'Output of running the program',
+  `output_diff` blob COMMENT 'Diffing the program output and testcase output',
+  `output_error` blob COMMENT 'Standard error output of the program',
   PRIMARY KEY  (`runid`),
   UNIQUE KEY `testcaseid` (`judgingid`, `testcaseid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Result of a testcase run within a judging';
