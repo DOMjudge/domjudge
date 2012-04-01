@@ -125,6 +125,7 @@ if ( !empty($BALLOONS) ) {
 
 		// list of balloons for this team
 		sort($TOTAL_BALLOONS[$row['login']]);
+		$TOTAL_BALLOONS[$row['login']] = array_unique($TOTAL_BALLOONS[$row['login']]);
 		foreach($TOTAL_BALLOONS[$row['login']] as $prob_solved) {
 			echo '<img title="' . htmlspecialchars($prob_solved) .
 				'" style="background-color: ' .
