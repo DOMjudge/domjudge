@@ -4,6 +4,7 @@ Version 3.1.6 - DEV
 -------------------
  - Fix bug: don't show multiple balloons for a single problem solved.
  - Make all judging output binary in SQL to display non-UTF8 correctly.
+ - Fix checktestdata debug print formatting.
 
 Version 3.1.5 - 25 January 2012
 -------------------------------
