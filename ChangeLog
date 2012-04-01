@@ -7,6 +7,7 @@ Version 3.2.3 - DEV
  - Make all judging output binary in SQL to display non-UTF8 correctly.
  - Include a few minor documentation improvements.
  - Fix: scoreboard filter disappeared with single affiliation selected.
+ - Fix checktestdata debug print formatting.
 
 Version 3.2.2 - 25 January 2012
 -------------------------------
