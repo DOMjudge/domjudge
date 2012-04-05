@@ -87,7 +87,7 @@ extern int loglevel;
 
 char *logfile;
 
-char *progname;
+const char *progname;
 
 int port = SUBMITPORT;
 

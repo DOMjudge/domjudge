@@ -68,7 +68,7 @@ const int linelen = 256; /* maximum length read from submit_db stdout lines */
 /* Accepted characters in submission filenames (except for alphanumeric) */
 const char filename_chars[5] = ".-_ ";
 
-char *progname;
+const char *progname;
 
 int port = SUBMITPORT;
 

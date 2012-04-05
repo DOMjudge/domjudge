@@ -50,8 +50,8 @@ typedef long double flt;
 const flt default_abs_prec = 1E-7;
 const flt default_rel_prec = 1E-7;
 
-char *progname;
-char *file1name, *file2name;
+const char *progname;
+const char *file1name, *file2name;
 FILE *file1, *file2;
 
 flt abs_prec;

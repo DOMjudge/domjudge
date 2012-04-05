@@ -29,7 +29,7 @@ extern "C" {
 extern const int exit_failure;
 
 /* Import from the main program for logging purposes */
-extern char *progname;
+extern const char *progname;
 
 /* Variables defining logmessages verbosity to stderr/logfile */
 extern int  verbose;
