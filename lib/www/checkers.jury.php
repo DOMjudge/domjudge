@@ -83,8 +83,12 @@ function check_relative_time($time, $starttime, $field)
 		// convert relative times to absolute ones
 		$neg = ($time[0] == '-');
 		$time[0] = '0';
-		$times = explode(':', $time, 2);
-		if (count($times) == 2 && is_numeric($times[0]) && is_numeric($times[1]) && $times[1] < 60) {
+		$times = explode(':', $time, 3);
+		if ( count($times) == 2 ) $times[2] = 0;
+		if ( count($times) == 3 &&
+		     is_numeric($times[0]) &&
+		     is_numeric($times[1]) && $times[1] < 60 &&
+		     is_numeric($times[2]) && $times[2] < 60 ) {
 			$hours = $times[0];
 			$minutes = $times[1];
 			$seconds = 60 * ($minutes + 60 * $hours);
