@@ -114,7 +114,7 @@ struct option const long_opts[] = {
 void version();
 void usage();
 void usage2(int , const char *, ...) __attribute__((format (printf, 2, 3)));
-void warnuser(const char *);
+void warnuser(const char *, ...)     __attribute__((format (printf, 1, 2)));
 char readanswer(const char *answers);
 #ifdef HAVE_MAGIC_H
 int  file_istext(char *filename);
@@ -138,8 +138,8 @@ int nwarnings;
 
 /* Submission information */
 string problem, language, extension, server, team, baseurl;
-char *filename, *submitdir, *tempfile;
-int temp_fd;
+vector<string> filenames;
+char *submitdir;
 
 /* Language extensions */
 vector<vector<string> > languages;
@@ -275,33 +275,46 @@ int main(int argc, char **argv)
 	if ( show_help ) usage();
 	if ( show_version ) version();
 
-	if ( argc<=optind   ) usage2(0,"no filename specified");
-	if ( argc> optind+1 ) usage2(0,"multiple filenames specified");
-	filename = argv[optind];
+	if ( argc<=optind   ) usage2(0,"no file(s) specified");
 
-	/* Stat file and do some sanity checks */
-	if ( stat(filename,&fstats)!=0 ) usage2(errno,"cannot find `%s'",filename);
-	logmsg(LOG_DEBUG,"submission file is %s",filename);
+	/* Process all source files */
+	for(i=0; optind+(int)i<argc; i++) {
+		ptr = argv[optind+i];
 
-	/* Do some sanity checks on submission file and warn user */
-	nwarnings = 0;
+		/* Ignore doubly specified files */
+		for(j=0; j<filenames.size(); j++) {
+			if ( filenames[j]==string(ptr) ) {
+				logmsg(LOG_DEBUG,"ignoring doubly specified file `%s'",ptr);
+				goto nextfile;
+			}
+		}
 
-	if ( ! (fstats.st_mode & S_IFREG) ) warnuser("file is not a regular file");
-	if ( ! (fstats.st_mode & S_IRUSR) ) warnuser("file is not readable");
-	if ( fstats.st_size==0 )            warnuser("file is empty");
+		/* Stat file and do some sanity checks */
+		if ( stat(ptr,&fstats)!=0 ) usage2(errno,"cannot find file `%s'",ptr);
+		logmsg(LOG_DEBUG,"submission file %d: `%s'",i+1,ptr);
 
-	if ( (fileage=(time(NULL)-fstats.st_mtime)/60)>WARN_MTIME ) {
-		ptr = allocstr("file has not been modified for %d minutes",(int)fileage);
-		warnuser(ptr);
-		free(ptr);
-	}
+		/* Do some sanity checks on submission file and warn user */
+		nwarnings = 0;
+
+		if ( ! (fstats.st_mode & S_IFREG) ) warnuser("`%s' is not a regular file",ptr);
+		if ( ! (fstats.st_mode & S_IRUSR) ) warnuser("`%s' is not readable",ptr);
+		if ( fstats.st_size==0 )            warnuser("`%s' is empty",ptr);
+
+		if ( (fileage=(time(NULL)-fstats.st_mtime)/60)>WARN_MTIME ) {
+			warnuser("`%s' has not been modified for %d minutes",ptr,(int)fileage);
+		}
 
 #ifdef HAVE_MAGIC_H
-	if ( !file_istext(filename) ) warnuser("file is detected as binary/data");
+		if ( !file_istext(ptr) ) warnuser("`%s' is detected as binary/data",ptr);
 #endif
 
-	/* Try to parse problem and language from filename */
-	filebase = string(gnu_basename(filename));
+		filenames.push_back(ptr);
+
+	  nextfile:	;
+	}
+
+	/* Try to parse problem and language from first filename */
+	filebase = string(gnu_basename(filenames[0].c_str()));
 	if ( filebase.find('.')!=string::npos ) {
 		fileext = filebase.substr(filebase.rfind('.')+1);
 		filebase.erase(filebase.find('.'));
@@ -322,9 +335,7 @@ int main(int argc, char **argv)
 	}
 
 	if ( language.empty() ) {
-		ptr = allocstr("language `%s' not recognised",extension.c_str());
-		warnuser(ptr);
-		free(ptr);
+		warnuser("language `%s' not recognised",extension.c_str());
 		language = extension;
 	}
 
@@ -350,7 +361,15 @@ int main(int argc, char **argv)
 	/* Ask user for confirmation */
 	if ( ! quiet ) {
 		printf("Submission information:\n");
-		printf("  filename:    %s\n",filename);
+		if ( filenames.size()==1 ) {
+			printf("  filename:    %s\n",filenames[0].c_str());
+		} else {
+			printf("  filenames:  ");
+			for(i=0; i<filenames.size(); i++) {
+				printf(" %s\n",filenames[i].c_str());
+			}
+			printf("\n");
+		}
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
 		printf("  team:        %s\n",team.c_str());
@@ -387,7 +406,7 @@ void usage()
 {
 	size_t i,j;
 
-	printf("Usage: %s [OPTION]... FILENAME\n",progname);
+	printf("Usage: %s [OPTION]... FILENAME...\n",progname);
 	printf(
 "Submit a solution for a problem.\n"
 "\n"
@@ -418,8 +437,8 @@ void usage()
 "Explanation of submission options:\n"
 "\n"
 "For PROBLEM use the ID of the problem (letter, number or short name)\n"
-"in lower- or uppercase. When not specified, PROBLEM defaults to\n"
-"FILENAME excluding the extension.\n"
+"in lower- or uppercase. When not specified, PROBLEM defaults to the\n"
+"first FILENAME excluding the extension.\n"
 "For example, 'c.java' will indicate problem 'C'.\n"
 "\n"
 "For LANGUAGE use one of the following extensions in lower- or uppercase:\n");
@@ -440,6 +459,8 @@ void usage()
 	       "    %s --problem e --language=cpp ProblemE.cc\n\n",progname);
 	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
 	       "    %s -p hello -l C HelloWorld.java\n\n",progname);
+	printf("Submit multiple files (the problem and languare are taken from the first):\n"
+	       "    %s hello.java message.java\n\n",progname);
 	printf(
 "The following options should not be necessary for normal use:\n"
 "\n"
@@ -491,13 +512,22 @@ void usage2(int errnum, const char *mesg, ...)
 	exit(1);
 }
 
-void warnuser(const char *warning)
+void warnuser(const char *warning, ...)
 {
+	char *str;
+	va_list ap;
+
+	va_start(ap,warning);
+	str = vallocstr(warning,ap);
+
 	nwarnings++;
 
-	logmsg(LOG_DEBUG,"user warning #%d: %s",nwarnings,warning);
+	logmsg(LOG_DEBUG,"user warning #%d: %s",nwarnings,str);
 
-	if ( ! quiet ) printf("WARNING: %s!\n",warning);
+	if ( ! quiet ) printf("WARNING: %s!\n",str);
+
+	free(str);
+	va_end(ap);
 }
 
 char readanswer(const char *answers)
@@ -576,33 +606,41 @@ magicerror:
 int cmdsubmit()
 {
 	int redir_fd[3];
-	char *args[2];
+	int temp_fd;
+	const char *args[2];
+	char *template_str, *tempfile;
+	vector<string> tempfiles;
 	struct timeval timeout;
 	struct addrinfo hints;
 	char *port_str;
 	int err;
+	size_t i;
 
-	/* Make tempfile to submit */
-	tempfile = allocstr("%s/%s.XXXXXX.%s",submitdir,
-	                    problem.c_str(),extension.c_str());
-	temp_fd = mkstemps(tempfile,extension.length()+1);
-	if ( temp_fd<0 || strlen(tempfile)==0 ) {
-		error(errno,"mkstemps cannot create tempfile");
+	/* Make tempfiles to submit */
+	template_str = allocstr("%s/%s.XXXXXX.%s",submitdir,
+	                        problem.c_str(),extension.c_str());
+	for(i=0; i<filenames.size(); i++) {
+		tempfile = strdup(template_str);
+		temp_fd = mkstemps(tempfile,extension.length()+1);
+		if ( temp_fd<0 || strlen(tempfile)==0 ) {
+			error(errno,"mkstemps cannot create tempfile");
+		}
+
+		/* Construct copy command and execute it */
+		args[0] = filenames[i].c_str();
+		args[1] = tempfile;
+		redir_fd[0] = redir_fd[1] = redir_fd[2] = FDREDIR_NONE;
+		if ( execute(COPY_CMD,args,2,redir_fd,1)!=0 ) {
+			error(0,"cannot copy `%s' to `%s'",args[0],args[1]);
+		}
+
+		if ( chmod(tempfile,USERPERMFILE)!=0 ) {
+			error(errno,"setting permissions on `%s'",tempfile);
+		}
+
+		logmsg(LOG_INFO,"copied `%s' to tempfile `%s'",filenames[i].c_str(),tempfile);
+		tempfiles.push_back(tempfile);
 	}
-
-	/* Construct copy command and execute it */
-	args[0] = filename;
-	args[1] = tempfile;
-	redir_fd[0] = redir_fd[1] = redir_fd[2] = FDREDIR_NONE;
-	if ( execute(COPY_CMD,args,2,redir_fd,1)!=0 ) {
-		error(0,"cannot copy `%s' to `%s'",filename,tempfile);
-	}
-
-	if ( chmod(tempfile,USERPERMFILE)!=0 ) {
-		error(errno,"setting permissions on `%s'",tempfile);
-	}
-
-	logmsg(LOG_INFO,"copied `%s' to tempfile `%s'",filename,tempfile);
 
 	/* Connect to the submission server */
 	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",
@@ -667,8 +705,12 @@ int cmdsubmit()
 	receive(socket_fd);
 	sendit(socket_fd,"+language %s",extension.c_str());
 	receive(socket_fd);
-	sendit(socket_fd,"+filename %s",gnu_basename(tempfile));
-	receive(socket_fd);
+	for(i=0; i<filenames.size(); i++) {
+		sendit(socket_fd,"+filename %s",gnu_basename(tempfiles[i].c_str()));
+		receive(socket_fd);
+		sendit(socket_fd,"+fileorig %s",gnu_basename(filenames[i].c_str()));
+		receive(socket_fd);
+	}
 	sendit(socket_fd,"+done");
 
 	/* Keep reading until end of file, then check for errors */
@@ -743,7 +785,8 @@ int websubmit()
 		error(0,"libcurl could not add form field '%s'='%s'",namecont,valcont)
 
 	/* Fill post form */
-	curlformadd(COPYNAME,"code",   FILE,        filename);
+	/* FIXME: need multifile support, also in team web-interface */
+	curlformadd(COPYNAME,"code",   FILE,        filenames[0].c_str());
 	curlformadd(COPYNAME,"probid", COPYCONTENTS,problem.c_str());
 	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
 	curlformadd(COPYNAME,"noninteractive",COPYCONTENTS,"1");

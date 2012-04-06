@@ -17,6 +17,7 @@ $KEYS['problem'] = array('probid');
 $KEYS['scoreboard_jury'] = array('cid','teamid','probid');
 $KEYS['scoreboard_public'] = array('cid','teamid','probid');
 $KEYS['submission'] = array('submitid');
+$KEYS['submission_file'] = array('submitfileid');
 $KEYS['team'] = array('login');
 $KEYS['team_affiliation'] = array('affilid');
 $KEYS['team_category'] = array('categoryid');
@@ -88,6 +89,10 @@ $RELATIONS['submission'] = array (
 	'probid' => 'problem.probid',
 	'langid' => 'language.langid',
 	'judgehost' => 'judgehost.hostname&SETNULL',
+);
+
+$RELATIONS['submission_file'] = array (
+	'submitid' => 'submission.submitid',
 );
 
 $RELATIONS['team'] = array (

@@ -57,60 +57,68 @@ while ( ($src = readdir($dh))!==FALSE ) {
 	}
 
 	// Reconstruct submission data from filename and mtime
-	$fdata = explode('.',$src);
-	if ( count($fdata)!=5 ) {
+	$fdata = explode('.', $src, 7);
+	if ( $fdata[0][0]!='c' || $fdata[1][0]!='s' ) {
 		logmsg(LOG_DEBUG, "skipping '$src': does not match pattern");
 		continue;
 	}
-	list($cid, $sid, $login, $probid, $ext) = $fdata;
+	// Detect and support obsolete (version <=3.2) sourcefile format
+	if ( count($fdata)==5 ) {
+		logmsg(LOG_DEBUG, "detected old sourcefile format: '$src'");
+		list($cid, $sid, $teamid, $probid, $langid) = $fdata;
+		$rank = 0;
+		$filename = 'source.'.$langid;
+	} else if ( count($fdata)==7 ) {
+		list($cid, $sid, $teamid, $probid, $langid, $rank, $filename) = $fdata;
+	} else {
+		logmsg(LOG_DEBUG, "skipping '$src': does not match pattern");
+		continue;
+	}
+
 	$cid = substr($cid,1);
 	$sid = substr($sid,1);
-	$langid = getLangID($ext);
-
 	$submittime = strftime(MYSQL_DATETIME_FORMAT,filemtime($f));
 
-	// Store in array for later sorting
-	$submissions[] = array('file'       => $f,
-	                       'cid'        => $cid,
-	                       'sid'        => $sid,
-	                       'login'      => $login,
-	                       'probid'     => $probid,
-	                       'langid'     => $langid,
-	                       'submittime' => $submittime);
+	// Store submission in array
+	if ( !isset($submissions[$sid]) ) {
+		$submissions[$sid] = array('cid' => $cid,
+		                           'sid' => $sid,
+		                           'teamid' => $teamid,
+		                           'probid' => $probid,
+		                           'langid' => $langid,
+		                           'submittime' => $submittime,
+		                           'files' => array() );
+	}
+	$submissions[$sid]['files'][$rank] = array('source' => $f, 'name' => $filename);
 }
 
 closedir($dh);
 
-// sort submissions on sid
-function cmpsid($a, $b) {
-	if ($a['sid'] == $b['sid']) return 0;
-	return ($a['sid'] < $b['sid']) ? -1 : 1;
-}
-usort($submissions, 'cmpsid');
-
 foreach ( $submissions as $s ) {
-
-	$cid    = $s['cid'];
-	$sid	= $s['sid'];
-	$login  = $s['login'];
-	$probid = $s['probid'];
-	$langid = $s['langid'];
-	$src    = basename($s['file']);
 
 	// Insert submissions into the database
 	$DB->q('INSERT INTO submission
-	        (submitid,cid,teamid,probid,langid,submittime,sourcecode)
-	        VALUES (%i, %i, %s, %s, %s, %s, %s)',
-	       $sid, $cid, $login, $probid, $langid, $s['submittime'],
-	       getFileContents($s['file'], false));
+	        (submitid,cid,teamid,probid,langid,submittime)
+	        VALUES (%i, %i, %s, %s, %s, %s)', $s['sid'], $s['cid'],
+	       $s['teamid'], $s['probid'], $s['langid'], $s['submittime']);
+
+	$mainfile = NULL;
+	foreach ( $s['files'] as $rank => $file ) {
+		$DB->q('INSERT INTO submission_file (submitid, filename, rank, sourcecode)
+		        VALUES (%i, %s, %i, %s)', $s['sid'], $file['name'], $rank,
+		       getFileContents($file['source'], false));
+		if ( empty($mainfile) ) $mainfile = $file['name'];
+	}
 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid,
  	                           probid, submitid, description)
 	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
-	       $s['submittime'], $cid, $login, $langid, $probid, $sid);
+	       $s['submittime'], $s['cid'], $s['teamid'], $s['langid'],
+	       $s['probid'], $s['sid']);
 
-	logmsg(LOG_INFO, "inserted $login/$probid/$langid, file $src, id s$sid/c$cid");
+	logmsg(LOG_INFO, "inserted $s[teamid]/$s[probid]/$s[langid], " .
+	       "id s$s[sid]/c$s[cid], main file '$mainfile'");
 }
 
 logmsg(LOG_NOTICE, "finished, restored " . count($submissions) .

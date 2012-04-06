@@ -32,13 +32,18 @@ require('init.php');
 
 $id = (int)$_GET['id'];
 
-$source = $DB->q('MAYBETUPLE SELECT * FROM submission
-                  LEFT JOIN language USING(langid)
-                  WHERE submitid = %i',$id);
+/* FIXME: this currently only shows the first source file of a
+ * multiple file submission; need to think about how to show and diff
+ * a multifile submission.
+ */
+$source = $DB->q('MAYBETUPLE SELECT s.*, f.*, COUNT(g.rank) AS nfiles
+                  FROM submission s
+                  LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
+                  LEFT JOIN submission_file g ON(s.submitid=g.submitid)
+                  WHERE s.submitid = %i GROUP BY g.submitid',$id);
 if ( empty($source) ) error ("Submission $id not found");
 
-$sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],
-                                $source['probid'],$source['langid']);
+$sourcefile = getSourceFilename($source);
 
 // Download was requested
 if ( isset($_GET['fetch']) ) {
@@ -50,16 +55,20 @@ if ( isset($_GET['fetch']) ) {
 	exit;
 }
 
-$oldsource = $DB->q('MAYBETUPLE SELECT * FROM submission
-                     LEFT JOIN language USING(langid)
-                     WHERE teamid = %s AND probid = %s AND langid = %s AND
-                     submittime < %s ORDER BY submittime DESC LIMIT 1',
+$oldsource = $DB->q('MAYBETUPLE SELECT s.*, f.*, COUNT(g.rank) AS nfiles
+                     FROM submission s
+                     LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
+                     LEFT JOIN submission_file g ON(s.submitid=g.submitid)
+                     WHERE teamid = %s AND probid = %s AND langid = %s AND submittime < %s
+                     GROUP BY g.submitid ORDER BY submittime DESC LIMIT 1',
                     $source['teamid'],$source['probid'],$source['langid'],
                     $source['submittime']);
 
 $title = 'Source: ' . htmlspecialchars($sourcefile);
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/highlight.php');
+
+if ( $source['nfiles']>1 ) warning("Submission $id has multiple source files");
 
 if ( $oldsource ) {
 	echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
@@ -87,9 +96,11 @@ if ( strlen($source['sourcecode'])==0 ) {
 // show diff to old source
 if ( $oldsource ) {
 
-	$oldsourcefile = getSourceFilename($oldsource['cid'],$oldsource['submitid'],
-	                                   $oldsource['teamid'],$oldsource['probid'],
-	                                   $oldsource['langid']);
+	if ( $oldsource['nfiles']>1 ) {
+		warning("Submission $oldsource[submitid] has multiple source files");
+	}
+
+	$oldsourcefile = getSourceFilename($oldsource);
 
 	$oldfile = SUBMITDIR.'/'.$oldsourcefile;
 	$newfile = SUBMITDIR.'/'.$sourcefile;

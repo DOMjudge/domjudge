@@ -12,6 +12,9 @@ define('MYSQL_DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S');
 /** Perl regex class of allowed characters in identifier strings. */
 define('IDENTIFIER_CHARS', '[a-zA-Z0-9_-]');
 
+/** Perl regex of allowed filenames. */
+define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9_\.-]*$/');
+
 /**
  * helperfunction to read all contents from a file.
  * If $sizelimit is true (default), then only limit this to
@@ -518,16 +521,24 @@ function daemonize($pidfile = NULL)
 }
 
 /**
- * This function takes a temporary file of a submission,
+ * This function takes a (set of) temporary file(s) of a submission,
  * validates it and puts it into the database. Additionally it
  * moves it to a backup storage.
  */
-function submit_solution($team, $prob, $lang, $file)
+function submit_solution($team, $prob, $lang, $files, $filenames)
 {
 	if( empty($team) ) error("No value for Team.");
 	if( empty($prob) ) error("No value for Problem.");
 	if( empty($lang) ) error("No value for Language.");
-	if( empty($file) ) error("No value for Filename.");
+
+	if ( !is_array($files) || count($files)==0 ) error("No files specified.");
+	if ( !is_array($filenames) || count($filenames)!=count($files) ) {
+		error("Nonmatching (number of) filenames specified.");
+	}
+
+	if ( count($filenames)!=count(array_unique($filenames)) ) {
+		error("Duplicate filenames detected.");
+	}
 
 	global $cdata,$cid, $DB;
 
@@ -553,37 +564,62 @@ function submit_solution($team, $prob, $lang, $file)
 							AND cid = %i AND allow_submit = "1"', $prob, $cid) ) {
 		error("Problem '$prob' not found in database or not submittable [c$cid].");
 	}
-	if( ! is_readable($file) ) {
-		error("File '$file' not found (or not readable).");
+
+	// Reindex arrays numerically to allow simultaneously iterating
+	// over both $files and $filenames.
+	$files     = array_values($files);
+	$filenames = array_values($filenames);
+
+	$totalsize = 0;
+	for($i=0; $i<count($files); $i++) {
+		if ( ! is_readable($files[$i]) ) {
+			error("File '".$files[$i]."' not found (or not readable).");
+		}
+		if ( ! preg_match(FILENAME_REGEX, $filenames[$i]) ) {
+			error("Illegal filename '".$filenames[$i]."'.");
+		}
+		$totalsize += filesize($files[$i]);
 	}
-	if( filesize($file) > $sourcesize*1024 ) {
-		error("Submission file is larger than $sourcesize kB.");
+	if ( $totalsize > $sourcesize*1024 ) {
+		error("Submission file(s) are larger than $sourcesize kB.");
 	}
 
 	logmsg (LOG_INFO, "input verified");
 
 	// Insert submission into the database
 	$id = $DB->q('RETURNID INSERT INTO submission
-				  (cid, teamid, probid, langid, submittime, sourcecode)
-				  VALUES (%i, %s, %s, %s, %s, %s)',
-				 $cid, $team, $probid, $langid, $now,
-				 getFileContents($file, false));
+				  (cid, teamid, probid, langid, submittime)
+				  VALUES (%i, %s, %s, %s, %s)',
+	             $cid, $team, $probid, $langid, $now);
+
+	for($rank=0; $rank<count($files); $rank++) {
+		$DB->q('INSERT INTO submission_file
+		        (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
+		       $id, $filenames[$rank], $rank, getFileContents($files[$rank], false));
+	}
 
 	// Recalculate scoreboard cache for pending submissions
 	calcScoreRow($cid, $team, $probid);
 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
-			VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
-		   now(), $cid, $team, $langid, $probid, $id);
-
-	$tofile = getSourceFilename($cid,$id,$team,$probid,$langid);
-	$topath = SUBMITDIR . "/$tofile";
+	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
+	       now(), $cid, $team, $langid, $probid, $id);
 
 	if ( is_writable( SUBMITDIR ) ) {
 		// Copy the submission to SUBMITDIR for safe-keeping
-		if ( ! @copy($file, $topath) ) {
-			warning("Could not copy '" . $file . "' to '" . $topath . "'");
+		for($rank=0; $rank<count($files); $rank++) {
+			$fdata = array('cid' => $cid,
+			               'submitid' => $id,
+			               'teamid' => $team,
+			               'probid' => $probid,
+			               'langid' => $langid,
+			               'rank' => $rank,
+			               'filename' => $filename[$i]);
+			$tofile = SUBMITDIR . '/' . getSourceFilename($fdata);
+			if ( ! @copy($files[$rank], $tofile) ) {
+				warning("Could not copy '" . $files[$rank] . "' to '" . $tofile . "'");
+			}
 		}
 	} else {
 		logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
@@ -597,11 +633,14 @@ function submit_solution($team, $prob, $lang, $file)
 }
 
 /**
- * Compute the filename of a given submission.
+ * Compute the filename of a given submission. $fdata must be an array
+ * that contains the data from submission and submission_file.
  */
-function getSourceFilename($cid,$sid,$team,$prob,$lang)
+function getSourceFilename($fdata)
 {
-	return "c$cid.s$sid.$team.$prob.$lang";
+	return implode('.', array('c'.$fdata['cid'], 's'.$fdata['submitid'],
+	                          $fdata['teamid'], $fdata['probid'], $fdata['langid'],
+	                          $fdata['rank'], $fdata['filename']));
 }
 
 /**

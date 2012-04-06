@@ -5,7 +5,7 @@
  * 'submit_solution' to add the submission to the database and store a
  * copy of the source in SUBMITDIR.
  *
- * Called: submit_db.php <team> <ip> <problem> <langext> <filename>
+ * Called: submit_db.php <team> <ip> <problem> <langext> [<tempfile> <filename>]...
  * Returns exitcode != 0 on failure.
  *
  * @configure_input@
@@ -32,9 +32,17 @@ $team    = strtolower(@$argv[1]);
 $ip      = @$argv[2];
 $prob    = strtolower(@$argv[3]);
 $langext = strtolower(@$argv[4]);
-$file    = @$argv[5];
 
-logmsg(LOG_DEBUG, "arguments: '$team' '$ip' '$prob' '$langext' '$file'");
+$files = array();
+$filenames = array();
+for($i=5; $i<count($argv); $i+=2) {
+	$files[] = $argv[$i];
+	if ( $i+1>=count($argv) ) error("Non-matching number of tempfiles and filenames.");
+	$filenames[] = $argv[$i+1];
+}
+
+logmsg(LOG_DEBUG, "arguments: '$team' '$ip' '$prob' '$langext' and " .
+       count($files) . " files specified");
 
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];
@@ -74,7 +82,7 @@ if( ! compareipaddr($teamdata['authtoken'],$ip) ) {
 	}
 }
 
-$sid = submit_solution($team, $prob, $langext, $file);
+$sid = submit_solution($team, $prob, $langext, $files, $filenames);
 
 logmsg(LOG_NOTICE, "submitted $team/$prob/$langext, id s$sid/c$cid");
 

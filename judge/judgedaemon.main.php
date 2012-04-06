@@ -254,9 +254,9 @@ while ( TRUE ) {
 	// we have marked a submission for judging
 	$waiting = FALSE;
 
-	// get maximum runtime, source code and other parameters
+	// get maximum runtime and other parameters
 	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS maxruntime,
-	               s.submitid, s.sourcecode, s.langid, s.teamid, s.probid,
+	               s.submitid, s.langid, s.teamid, s.probid,
 	               p.special_run, p.special_compare
 	               FROM submission s, problem p, language l
 	               WHERE s.probid = p.probid AND s.langid = l.langid AND
@@ -310,15 +310,21 @@ function judge($mark, $row, $judgingid)
 	system("mkdir -p '$workdir/compile'", $retval);
 	if ( $retval != 0 ) error("Could not create '$workdir/compile'");
 
-	// Get the source code from the DB and store in a file
-	$srcfile = "$workdir/compile/source.$row[langid]";
-	if ( file_put_contents($srcfile, $row['sourcecode']) === FALSE ) {
-		error("Could not create $srcfile");
+	// Get the source code from the DB and store in local file(s)
+	$sources = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, sourcecode, filename
+	                   FROM submission_file WHERE submitid = %i', $row['submitid']);
+	$files = array();
+	foreach ( $sources as $rank => $source ) {
+		$srcfile = "$workdir/compile/$source[filename]";
+		$files[] = "'$source[filename]'";
+		if ( file_put_contents($srcfile, $source['sourcecode']) === FALSE ) {
+			error("Could not create $srcfile");
+		}
 	}
-	unset($row['sourcecode']);
 
 	// Compile the program.
-	system(LIBJUDGEDIR . "/compile.sh $row[langid] '$workdir'", $retval);
+	system(LIBJUDGEDIR . "/compile.sh $row[langid] '$workdir' " .
+	       implode(' ', $files), $retval);
 
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {

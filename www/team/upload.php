@@ -79,7 +79,9 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
 if ( ! isset($lang) ) err("Unable to find language '$langid'");
 $langid = $lang['langid'];
 
-$sid = submit_solution($login, $probid, $langid, $_FILES['code']['tmp_name']);
+$sid = submit_solution($login, $probid, $langid,
+                       array($_FILES['code']['tmp_name']),
+                       array($_FILES['code']['name']));
 
 auditlog('submission', $sid, 'added', NONINTERACTIVE?'noninteractive':null);
 

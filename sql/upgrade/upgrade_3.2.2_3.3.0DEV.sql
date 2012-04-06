@@ -62,6 +62,17 @@ CREATE TABLE `balloon` (
   PRIMARY KEY (`balloonid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Balloons to be handed out';
 
+CREATE TABLE `submission_file` (
+  `submitfileid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `submitid` int(4) unsigned NOT NULL COMMENT 'Submission this file belongs to',
+  `sourcecode` longblob NOT NULL COMMENT 'Full source code',
+  `filename` varchar(255) NOT NULL COMMENT 'Filename as submitted',
+  `rank` int(4) unsigned NOT NULL COMMENT 'Order of the submission files, zero-indexed',
+  PRIMARY KEY (`submitfileid`),
+  KEY `submitid` (`submitid`),
+  CONSTRAINT `submission_file_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Files associated to a submission';
+
 -- Resize datastructures to fit "arbitrary" large data to satisfy
 -- http://domjudge.a-eskwadraat.nl/trac/ticket/15 for the ICPC CSS spec.
 ALTER TABLE `clarification`
@@ -95,6 +106,9 @@ ALTER TABLE `team_affiliation`
 --
 -- Transfer data from old to new structure
 --
+
+INSERT INTO `submission_file` (`submitid`, `rank`, `sourcecode`, `filename`)
+  SELECT `submitid`, '1', `sourcecode`, CONCAT('source.',`langid`) FROM submission;
 
 --
 -- Add/remove sample/initial contents
@@ -372,3 +386,6 @@ UPDATE `team_affiliation` SET `country` = 'ZWE' WHERE country = 'ZW';
 
 ALTER TABLE `scoreboard_jury`
   DROP COLUMN balloon;
+
+ALTER TABLE `submission`
+  DROP COLUMN sourcecode;

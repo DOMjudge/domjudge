@@ -16,7 +16,8 @@ if ( isset($_POST['submitter']) ) {
 
 	file_put_contents($tmpfname, $_POST['source']);
 
-	submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'], $tmpfname);
+	submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'],
+	                array($tmpfname), array($_POST['filename']));
 	unlink($tmpfname);
 
 	header('Location: submissions.php');
@@ -24,17 +25,26 @@ if ( isset($_POST['submitter']) ) {
 }
 
 $id = (int)$_GET['id'];
-$source = $DB->q('MAYBETUPLE SELECT * FROM submission
-                  LEFT JOIN language USING(langid)
-                  WHERE submitid = %i',$id);
+$source = $DB->q('MAYBETUPLE SELECT s.*, f.*, l.*, COUNT(g.rank) AS nfiles
+                  FROM submission s
+                  LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
+                  LEFT JOIN submission_file g ON(s.submitid=g.submitid)
+                  LEFT JOIN language l USING(langid)
+                  WHERE s.submitid = %i GROUP BY g.submitid',$id);
 
 if ( empty($source) ) error ("Submission $id not found");
 
-$sourcefile = getSourceFilename($source['cid'],$id,$source['teamid'],
-                                $source['probid'],$source['langid']);
+$sourcefile = getSourceFilename($source);
 
 $title = 'Source: ' . htmlspecialchars($sourcefile);
 require(LIBWWWDIR . '/header.php');
+
+if ( $source['nfiles']>1 ) {
+	warning("Submission $id has multiple source files, editing not (yet) supported.");
+
+	require(LIBWWWDIR . '/footer.php');
+	return;
+}
 
 echo '<h2 class="filename"><a name="source"></a>Submission ' .
 	"<a href=\"submission.php?id=$id\">s$id</a> source: " .
@@ -52,6 +62,7 @@ echo addSelect('probid', $probs, $source['probid'], true);
 echo addSelect('langid', $langs, $source['langid'], true);
 
 echo addHidden('teamid', $source['teamid']);
+echo addHidden('filename', $source['filename']);
 echo addHidden('submitter', 'domjudge');
 echo addSubmit('submit');
 
