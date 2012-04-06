@@ -60,7 +60,7 @@
 /* Number of context lines printed before first line with differences */
 #define PREVLINES 3
 
-char *progname;
+const char *progname;
 
 /* filenames of commandline arguments */
 char *testin, *testout, *progout, *result, *diffout;

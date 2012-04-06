@@ -41,7 +41,7 @@
 
 extern int errno;
 
-char  *progname;
+const char *progname;
 
 int be_verbose;
 int show_help;

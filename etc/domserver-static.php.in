@@ -22,3 +22,5 @@ define('SUBMITDIR',   '@domserver_submitdir@');
 define('SUBMIT_DEFAULT', @SUBMIT_DEFAULT@);
 define('ENABLE_CMDSUBMIT_SERVER', @SUBMIT_ENABLE_CMD@);
 define('ENABLE_WEBSUBMIT_SERVER', @SUBMIT_ENABLE_WEB@);
+
+set_include_path(get_include_path() . PATH_SEPARATOR . LIBEXTDIR);

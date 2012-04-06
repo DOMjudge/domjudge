@@ -50,6 +50,11 @@ are covered by other copyrights. This will be noted in the files
 themselves and these copyrights/attributions can also be found in the
 administrator manual.
 
+The lib/ext/ dir contains convenience copies of libraries produced
+by other projects and used by DOMjudge. They are licenced as follows:
+- geshi: GeSHi Syntax Highlighter, copyright Benny Baumann, Nigel McNie.
+  Licenced under the GNU GPL version 2+. 
+
 Furthermore, a binary version of the dash shell (statically compiled)
 is distributed with DOMjudge. This program is copyright by various
 people under the BSD licence and a part under the GNU GPL version 2,

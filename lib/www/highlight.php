@@ -46,13 +46,9 @@ function highlighter_init ()
 	// marginally more secure when including files. Doesn't hurt.
 	define ('GESHI_SECURITY_PARANOID', true);
 
-	// Add LIBWWWDIR to include path for locally installed libs.
-	// Text_Highlighter needs this since it specifies relative paths.
-	set_include_path(get_include_path() . PATH_SEPARATOR . LIBWWWDIR);
-
 	$PATHS = array();
 	$PATHS['geshi'] = array (
-		'geshi.php',
+		'geshi/geshi.php',
 		'/usr/share/php-geshi/geshi.php' );
 	$PATHS['texthighlighter'] = array (
 		'Text/Highlighter.php' );
