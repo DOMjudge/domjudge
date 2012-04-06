@@ -77,7 +77,7 @@ function check_language($data, $keydata = null)
 	return $data;
 }
 
-function check_relative_time($time, $starttime, $field)
+function check_relative_time($time, $starttime, $field, $removed_intervals = null)
 {
 	// FIXME: need to incorporate removed intervals
 	if ($time[0] == '+' || $time[0] == '-') {
@@ -97,7 +97,16 @@ function check_relative_time($time, $starttime, $field)
 			if ($neg) {
 				$seconds *= -1;
 			}
-			$ret = strftime(MYSQL_DATETIME_FORMAT, strtotime($starttime) + $seconds);
+			// calculate the absolute time, adjusting for removed intervals
+			$abstime = strtotime($starttime) + $seconds;
+			if ( is_array($removed_intervals) ) {
+				foreach ( $removed_intervals as $intv ) {
+					if ( strtotime($intv['starttime'])<=$abstime ) {
+						$abstime += difftime($intv['endtime'],$intv['starttime']);
+					}
+				}
+			}
+			$ret = strftime(MYSQL_DATETIME_FORMAT, $abstime);
 		} else {
 			ch_error($field . " is not correctly formatted, expecting: +/-hh:mm(:ss)");
 			$ret = null;
@@ -110,50 +119,50 @@ function check_relative_time($time, $starttime, $field)
 	return $ret;
 }
 
-function check_removed_interval($data, $keydata = null)
+function check_removed_intervals($contest, $intervals)
 {
-	check_datetime($data['starttime']);
-	check_datetime($data['endtime']);
-	if ( difftime($data['endtime'], $data['starttime']) < 0 ) {
-		ch_error('Interval ends before it even starts');
+	foreach ( $intervals as $data ) {
+		check_datetime($data['starttime']);
+		check_datetime($data['endtime']);
+		if ( difftime($data['endtime'], $data['starttime']) <= 0 ) {
+			ch_error('Interval ends before (or when) it starts');
+		}
+
+		if ( difftime($data['starttime'], $contest['starttime']) < 0 ) {
+			ch_error("Interval starttime '$data[starttime]' outside of contest");
+		}
+		if ( difftime($data['endtime'], $contest['endtime']) > 0 ) {
+			ch_error("Interval endtime '$data[endtime]' outside of contest");
+		}
+
+		foreach( $intervals as $other ) {
+			if ( @$data['intervalid']===@$other['intervalid'] ) continue;
+			if ( (difftime($data['starttime'], $other['starttime']) >= 0 &&
+			      difftime($data['starttime'], $other['endtime']  ) <  0 ) ||
+			     (difftime($data['endtime'],   $other['starttime']) >  0 &&
+			      difftime($data['endtime'],   $other['endtime']  ) <= 0 ) ) {
+				ch_error('Removed intervals ' .
+				         (isset($data['intervalid'])  ? $data['intervalid']  : 'new') .
+				         ' and ' .
+				         (isset($other['intervalid']) ? $other['intervalid'] : 'new') .
+				         ' overlap');
+			}
+		}
 	}
-	
-	global $DB;
-	$overlaps = $DB->q('COLUMN SELECT intervalid FROM removed_interval WHERE
-			    cid = %i AND
-			    ( (%s >= starttime AND %s <= endtime) OR
-			      (%s >= starttime AND %s <= endtime) OR
-			      (%s <= starttime AND %s >= endtime) ) ' .
-			    (isset($keydata['intervalid'])?'AND intervalid != %i ':'%_') .
-			    'ORDER BY intervalid', $data['cid'],
-			    $data['starttime'], $data['starttime'],
-			    $data['endtime'], $data['endtime'],
-			    $data['starttime'], $data['endtime'],
-			    @$keydata['intervalid']);
-
-	if(count($overlaps) > 0) {
-		ch_error('This interval overlaps with existing interval(s): ' .
-			 implode(', ', $overlaps));
-	}
-
-	$contest = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $data['cid']);
-
-	if ( difftime($data['starttime'],$contest['starttime']) < 0 ||
-		difftime($data['starttime'], $contest['endtime']) > 0 ) {
-		ch_error('Starttime outside of contest');
-	}
-	if ( difftime($data['endtime'],$contest['starttime']) < 0 ||
-		difftime($data['endtime'], $contest['endtime']) > 0 ) {
-		ch_error('Endtime outside of contest');
-	}
-
-	// FIXME: need to UPDATE contest freeze/end/unfreezetimes
-
-	return $data;
 }
 
-function check_contest($data, $keydata = null)
+function check_contest($data, $keydata = null, $removed_intervals = null)
 {
+	global $DB;
+
+	// Contest removed intervals are required to correctly calculate
+	// absolute contest times from relative ones. Use the ones
+	// provides as argument or from the database if available.
+	if ( !isset($removed_intervals) && isset($keydata['cid']) ) {
+		$removed_intervals = $DB->q('TABLE SELECT * FROM removed_interval
+		                             WHERE cid = %i', $keydata['cid']);
+	}
+
 	// are these dates valid?
 	foreach(array('starttime','endtime','freezetime',
 		'unfreezetime','activatetime') as $f) {
@@ -162,7 +171,8 @@ function check_contest($data, $keydata = null)
 			// *_string variables, since these may be relative times
 			// that need to be kept as is.
 			$data[$f] = $data[$f.'_string'];
-			$data[$f] = check_relative_time($data[$f], $data['starttime'], $f);
+			$data[$f] = check_relative_time($data[$f], $data['starttime'], $f,
+			                                $removed_intervals);
 		}
 		if ( !empty($data[$f]) ) {
 			check_datetime($data[$f]);
@@ -202,6 +212,13 @@ function check_contest($data, $keydata = null)
 		}
 	}
 
+	// check removed_intervals with contest times adapted to these,
+	// i.e. we check self-consistency, while a new removed_interval
+	// could have been specified that initially has its endtime beyond
+	// the contest endtime, but _not_ after correcting the contest
+	// endtime for it.
+	if ( isset($keydata['cid']) ) check_removed_intervals($data,$removed_intervals);
+
 	// a check whether this contest overlaps in time with any other, the
 	// system can only deal with exactly ONE current contest at any time.
 	// A new contest N overlaps with an existing contest E if the activate- or
@@ -209,7 +226,6 @@ function check_contest($data, $keydata = null)
 	// the activatetime is before E and the end time after E (E is completely
 	// contained in N).
 	if ( $data['enabled'] ) {
-		global $DB;
 		$overlaps = $DB->q('COLUMN SELECT cid FROM contest WHERE
 	                        enabled = 1 AND
 		                    ( (%s >= activatetime AND %s <= endtime) OR
