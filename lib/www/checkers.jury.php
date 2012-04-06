@@ -114,7 +114,10 @@ function check_contest($data, $keydata = null)
 	foreach(array('starttime','endtime','freezetime',
 		'unfreezetime','activatetime') as $f) {
 		if ($f != 'starttime') {
-			$data[$f.'_string'] = $data[$f];
+			// The true input date/time strings are preserved in the
+			// *_string variables, since these may be relative times
+			// that need to be kept as is.
+			$data[$f] = $data[$f.'_string'];
 			$data[$f] = check_relative_time($data[$f], $data['starttime'], $f);
 		}
 		if ( !empty($data[$f]) ) {
