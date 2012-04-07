@@ -662,13 +662,13 @@ void checktestdata()
 			}
 
 			// Run loop...
-			debug("running %s loop, commands %d - %d, max. times = %d",
+			debug("running %s loop, commands %d - %d, max. times = %ld",
 			      cmd.name().c_str(),loopbegin,loopend,times);
 
 			while ( (cmd.name()=="REP"   && i<times) ||
 			        (cmd.name()=="WHILE" && dotest(cmd.args[0])) ) {
 
-				debug("loop iteration %d/%d",i+1,times);
+				debug("loop iteration %ld/%ld",i+1,times);
 				prognr = loopbegin;
 				if ( i>0 && cmd.nargs()>=2 ) checktoken(cmd.args[1]);
 				checktestdata();

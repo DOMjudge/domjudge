@@ -275,7 +275,7 @@ void output_exit_time(int exitcode, double timediff)
 			error(errno,"cannot open `%s'",exitfilename);
 		}
 		if ( fprintf(outputfile,"%d\n",exitcode)==0 ) {
-			error(0,"cannot write to file `%s'",outputfile);
+			error(0,"cannot write to file `%s'",exitfilename);
 		}
 		if ( fclose(outputfile) ) {
 			error(errno,"closing file `%s'",exitfilename);
@@ -287,7 +287,7 @@ void output_exit_time(int exitcode, double timediff)
 	sysdiff  = (unsigned long)(endticks.tms_cstime - startticks.tms_cstime)
 		* 1000000 / ticks_per_second;
 
-	verbose("runtime is %.3lf seconds real, %.3lf user, %.3lf sys\n",
+	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys\n",
 	        timediff, userdiff*1e-6, sysdiff*1e-6);
 
 	if ( use_cputime && (userdiff+sysdiff) > cputime ) {
@@ -301,7 +301,7 @@ void output_exit_time(int exitcode, double timediff)
 			error(errno,"cannot open `%s'",timefilename);
 		}
 		if ( fprintf(outputfile,"%.3f\n",(userdiff+sysdiff)*1e-6)==0 ) {
-			error(0,"cannot write to file `%s'",outputfile);
+			error(0,"cannot write to file `%s'",timefilename);
 		}
 		if ( fclose(outputfile) ) {
 			error(errno,"closing file `%s'",timefilename);

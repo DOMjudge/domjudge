@@ -99,7 +99,7 @@ int receive(int fd)
 {
 	char buffer[SOCKETBUFFERSIZE];
 	ssize_t nread;
-	int i;
+	int i,j;
 
 	if ( (nread = read(fd, buffer, SOCKETBUFFERSIZE-2)) == -1 ) {
 		error(errno,"reading from socket");
@@ -122,6 +122,12 @@ int receive(int fd)
 		if ( strncmp(&lastmesg[i],ERRMATCH,strlen(ERRMATCH))==0 ) {
 			i += strlen(ERRMATCH);
 		}
+		/* Filter out any printf '%' format characters, since these
+		 * would be interpreted by error(). Note that these would only
+		 * by sent by a malicious submit client.
+		 */
+		for(j=i; lastmesg[j]!=0; j++) if ( lastmesg[j]=='%' ) lastmesg[j] = '_';
+
 		error(0,&lastmesg[i]);
 	}
 

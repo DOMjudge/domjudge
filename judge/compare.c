@@ -202,6 +202,7 @@ void writediff()
 	int endoffile[2];
 	int i;
 	size_t l;
+	ssize_t dummy;
 	int endlinediff, normaldiff;
 	char diffchar, quotechar[2];
 	char formatstr[256];
@@ -275,7 +276,7 @@ void writediff()
 		/* We should check getline() returning -1 on
 		 * EOF or errors, but we did so above.
 		 */
-		for(i=0; i<2; i++) getline(&line[i],&linesize[i],inputfile[i]);
+		for(i=0; i<2; i++) dummy = getline(&line[i],&linesize[i],inputfile[i]);
 
 		/* Check for endline (or normal) character differences */
 		endlinediff = ( strcmp(line[0],line[1])!=0 );
@@ -334,7 +335,7 @@ void writediff()
 			/* We should check fgets() returning -1 on
 			 * EOF or errors, but we did so above.
 			 */
-			getline(&line[i],&linesize[i],inputfile[i]);
+			dummy = getline(&line[i],&linesize[i],inputfile[i]);
 
 			stripendline(line[i]);
 

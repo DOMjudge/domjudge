@@ -291,7 +291,7 @@ int main(int argc, char **argv)
 	if ( fstats.st_size==0 )            warnuser("file is empty");
 
 	if ( (fileage=(time(NULL)-fstats.st_mtime)/60)>WARN_MTIME ) {
-		ptr = allocstr("file has not been modified for %d minutes",fileage);
+		ptr = allocstr("file has not been modified for %d minutes",(int)fileage);
 		warnuser(ptr);
 		free(ptr);
 	}
@@ -538,7 +538,8 @@ int file_istext(char *filename)
 {
 	magic_t cookie;
 	const char *filetype;
-	int res;
+	char *errstr;
+	int i, res;
 
 	if ( (cookie = magic_open(MAGIC_MIME))==NULL ) goto magicerror;
 
@@ -555,7 +556,15 @@ int file_istext(char *filename)
 	return res;
 
 magicerror:
-	warning(magic_errno(cookie),magic_error(cookie));
+	/* Filter out any printf '%' format characters, since these
+	 * would be interpreted by warning().
+	 */
+	errstr = strdup(magic_error(cookie));
+	for(i=0; errstr[i]!=0; i++) if ( errstr[i]=='%' ) errstr[i] = '_';
+
+	warning(magic_errno(cookie),errstr);
+
+	free(errstr);
 
 	return 1; // return 'text' by default on error
 }
@@ -714,7 +723,7 @@ int websubmit()
 	size_t pos;
 	int uploadstatus_read;
 
-	url = allocstr((baseurl+"team/upload.php").c_str());
+	url = strdup((baseurl+"team/upload.php").c_str());
 
 	curlerrormsg[0] = 0;
 
