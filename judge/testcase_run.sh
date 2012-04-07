@@ -142,8 +142,8 @@ touch result.xml result.out      # Result of comparison (XML and plaintext versi
 touch program.out program.err    # Program output and stderr (for extra information)
 touch program.time program.exit  # Program runtime and exitcode
 
-# program.{out,err,time,exit} are written to by processes running as RUNUSER:
-chmod a+rw program.out program.err program.time program.exit
+# program.err is written to by processes running as RUNUSER:
+chmod a+rw program.err
 
 logmsg $LOG_INFO "setting up testing (chroot) environment"
 
@@ -183,9 +183,8 @@ logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
 	-C $TIMELIMIT -t $((2*TIMELIMIT)) -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
-	-c -o program.time -- $PREFIX/run $PREFIX/$PROGRAM \
-	testdata.in program.out program.err program.exit \
-	>error.tmp 2>&1
+	-c -E program.exit -T program.time -- $PREFIX/run $PREFIX/$PROGRAM \
+	testdata.in program.out program.err >error.tmp 2>&1
 
 # Execute an optional chroot destroy script:
 if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then

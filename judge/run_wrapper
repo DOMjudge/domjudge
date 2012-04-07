@@ -6,13 +6,12 @@
 # the contestants' solution bi-directionally communicates with a jury
 # program, e.g. while playing a two player game.
 #
-# Usage: $0 <program> <testin> <output> <error> <exitfile>
+# Usage: $0 <program> <testin> <output> <error>
 #
 # <program>   Executable of the contestants' program to be run.
 # <testin>    File containing test-input.
 # <output>    File where to write solution output.
 # <error>     File where to write error messages.
-# <exitfile>  File where to write solution exitcode.
 #
 # A jury-written program called 'runjury' should be available; this
 # program will normally be copied from 'runjury_<specialrun>' by
@@ -34,12 +33,9 @@ PROGRAM="$1";   shift
 TESTIN="$1";    shift
 OUTPUT="$1";    shift
 ERROR="$1";     shift
-EXITFILE="$1";  shift
 
 # Run the program while redirecting input, output and stderr
 bin/runpipe ./runjury $TESTIN $OUTPUT = $PROGRAM 2>$ERROR
 exitcode=$?
-
-printf "$exitcode" >$EXITFILE
 
 exit $exitcode

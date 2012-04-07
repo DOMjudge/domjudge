@@ -83,7 +83,8 @@ char  *progname;
 char  *cmdname;
 char **cmdargs;
 char  *rootdir;
-char  *outputfilename;
+char  *exitfilename;
+char  *timefilename;
 
 int runuid;
 int rungid;
@@ -92,7 +93,8 @@ int use_time;
 int use_cputime;
 int use_user;
 int use_group;
-int use_output;
+int outputexit;
+int outputtime;
 int no_coredump;
 int be_verbose;
 int be_quiet;
@@ -120,7 +122,8 @@ struct option const long_opts[] = {
 	{"filesize",required_argument, NULL,         'f'},
 	{"nproc",   required_argument, NULL,         'p'},
 	{"no-core", no_argument,       NULL,         'c'},
-	{"output",  required_argument, NULL,         'o'},
+	{"outexit", required_argument, NULL,         'E'},
+	{"outtime", required_argument, NULL,         'T'},
 	{"verbose", no_argument,       NULL,         'v'},
 	{"quiet",   no_argument,       NULL,         'q'},
 	{"help",    no_argument,       &show_help,    1 },
@@ -208,7 +211,8 @@ Run COMMAND with restrictions.\n\
 	printf("\
   -p, --nproc=N        set maximum no. processes to N\n\
   -c, --no-core        disable core dumps\n\
-  -o, --output=FILE    write actual runtime to FILE\n\
+  -E, --outexit=FILE   write COMMAND exitcode to FILE\n\
+  -T, --outtime=FILE   write COMMAND runtime to FILE\n\
   -v, --verbose        display some extra warnings and information\n\
   -q, --quiet          suppress all warnings and verbose output\n\
       --help           display this help and exit\n\
@@ -220,17 +224,27 @@ real user ID.\n");
 	exit(0);
 }
 
-void outputtime()
+void output_exit_time(int exitcode, double timediff)
 {
 	FILE  *outputfile;
-	double timediff; /* in seconds */
 	unsigned long userdiff, sysdiff;
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
-	if ( gettimeofday(&endtime,NULL) ) error(errno,"getting time");
+	verbose("command exited with exitcode %d",exitcode);
 
-	timediff = (endtime.tv_sec  - starttime.tv_sec ) +
-	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
+	if ( outputexit ) {
+		verbose("writing exitcode to file `%s'",exitfilename);
+
+		if ( (outputfile = fopen(exitfilename,"w"))==NULL ) {
+			error(errno,"cannot open `%s'",exitfilename);
+		}
+		if ( fprintf(outputfile,"%d\n",exitcode)==0 ) {
+			error(0,"cannot write to file `%s'",outputfile);
+		}
+		if ( fclose(outputfile) ) {
+			error(errno,"closing file `%s'",exitfilename);
+		}
+	}
 
 	userdiff = (unsigned long)(endticks.tms_cutime - startticks.tms_cutime)
 		* 1000000 / ticks_per_second;
@@ -244,17 +258,17 @@ void outputtime()
 		warning("timelimit exceeded (cpu time)");
 	}
 
-	if ( use_output ) {
-		verbose("writing runtime to file `%s'",outputfilename);
+	if ( outputtime ) {
+		verbose("writing runtime to file `%s'",timefilename);
 
-		if ( (outputfile = fopen(outputfilename,"w"))==NULL ) {
-			error(errno,"cannot open `%s'",outputfilename);
+		if ( (outputfile = fopen(timefilename,"w"))==NULL ) {
+			error(errno,"cannot open `%s'",timefilename);
 		}
 		if ( fprintf(outputfile,"%.3f\n",(userdiff+sysdiff)*1e-6)==0 ) {
 			error(0,"cannot write to file `%s'",outputfile);
 		}
 		if ( fclose(outputfile) ) {
-			error(errno,"closing file `%s'",outputfilename);
+			error(errno,"closing file `%s'",timefilename);
 		}
 	}
 }
@@ -444,6 +458,7 @@ int main(int argc, char **argv)
 	int   opt;
 	double runtime_d;
 	double cputime_d;
+	double timediff;
 
 	struct itimerval itimer;
 	struct sigaction sigact;
@@ -451,12 +466,12 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	/* Parse command-line options */
-	use_root = use_time = use_cputime = use_user = use_output = no_coredump = 0;
-	memsize = filesize = nproc = RLIM_INFINITY;
+	use_root = use_time = use_cputime = use_user = outputexit = outputtime = no_coredump = 0;
+	cputime = memsize = filesize = nproc = RLIM_INFINITY;
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:co:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:cE:T:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -518,9 +533,13 @@ int main(int argc, char **argv)
 		case 'c': /* no-core option */
 			no_coredump = 1;
 			break;
-		case 'o': /* output option */
-			use_output = 1;
-			outputfilename = strdup(optarg);
+		case 'E': /* outputexit option */
+			outputexit = 1;
+			exitfilename = strdup(optarg);
+			break;
+		case 'T': /* outputtime option */
+			outputtime = 1;
+			timefilename = strdup(optarg);
 			break;
 		case 'v': /* verbose option */
 			be_verbose = 1;
@@ -634,23 +653,33 @@ int main(int argc, char **argv)
 			error(errno,"getting end clock ticks");
 		}
 
-		/* Drop root before writing to output file. */
-		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
+		if ( gettimeofday(&endtime,NULL) ) error(errno,"getting time");
 
-		outputtime();
+		timediff = (endtime.tv_sec  - starttime.tv_sec ) +
+		           (endtime.tv_usec - starttime.tv_usec)*1E-6;
 
 		/* Test whether command has finished abnormally */
 		if ( ! WIFEXITED(status) ) {
 			if ( WIFSIGNALED(status) ) {
 				warning("command terminated with signal %d",WTERMSIG(status));
-				return 128+WTERMSIG(status);
+				exitcode = 128+WTERMSIG(status);
+			} else
+			if ( WIFSTOPPED(status) ) {
+				warning("command stopped with signal %d",WSTOPSIG(status));
+				exitcode = 128+WSTOPSIG(status);
+			} else {
+				error(0,"command exit status unknown: %d",status);
 			}
-			error(0,"command exit status unknown: %d",status);
+		} else {
+			exitcode = WEXITSTATUS(status);
 		}
 
+		/* Drop root before writing to output file(s). */
+		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
+
+		output_exit_time(exitcode, timediff);
+
 		/* Return the exitstatus of the command */
-		exitcode = WEXITSTATUS(status);
-		if ( exitcode!=0 ) verbose("command exited with exitcode %d",exitcode);
 		return exitcode;
 	}
 
