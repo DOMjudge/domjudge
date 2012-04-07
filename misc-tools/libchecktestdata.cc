@@ -185,6 +185,8 @@ int whitespace_ok;
 int debugging;
 int quiet;
 
+void debug(const char *, ...) __attribute__((format (printf, 1, 2)));
+
 void debug(const char *format, ...)
 {
 	va_list ap;

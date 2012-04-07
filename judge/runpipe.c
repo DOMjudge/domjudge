@@ -78,6 +78,8 @@ Arguments starting with a `=' must be escaped by prepending an extra `='.\n", pr
 	exit(0);
 }
 
+void verb(const char *, ...) __attribute__((format (printf, 1, 2)));
+
 void verb(const char *format, ...)
 {
 	va_list ap;

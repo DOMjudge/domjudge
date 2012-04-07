@@ -113,7 +113,7 @@ struct option const long_opts[] = {
 
 void version();
 void usage();
-void usage2(int , const char *, ...);
+void usage2(int , const char *, ...) __attribute__((format (printf, 2, 3)));
 void warnuser(const char *);
 char readanswer(const char *answers);
 #ifdef HAVE_MAGIC_H

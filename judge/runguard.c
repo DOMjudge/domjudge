@@ -159,6 +159,10 @@ struct option const long_opts[] = {
 	{ NULL,        0,                 NULL,          0 }
 };
 
+void warning(   const char *, ...) __attribute__((format (printf, 1, 2)));
+void verbose(   const char *, ...) __attribute__((format (printf, 1, 2)));
+void error(int, const char *, ...) __attribute__((format (printf, 2, 3)));
+
 void warning(const char *format, ...)
 {
 	va_list ap;
