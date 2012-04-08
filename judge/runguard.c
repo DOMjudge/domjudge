@@ -814,6 +814,7 @@ int main(int argc, char **argv)
 		           (endtime.tv_usec - starttime.tv_usec)*1E-6;
 
 		/* Test whether command has finished abnormally */
+		exitcode = 0;
 		if ( ! WIFEXITED(status) ) {
 			if ( WIFSIGNALED(status) ) {
 				warning("command terminated with signal %d",WTERMSIG(status));
