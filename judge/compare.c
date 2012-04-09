@@ -297,7 +297,7 @@ void writediff()
 		}
 
 		if ( diffchar!='=' && l<firstdiff ) {
-			error(0,"internal error: first difference on line %d != %d",l,firstdiff);
+			error(0,"internal error: first difference on line %zd != %d",l,firstdiff);
 		}
 
 		/* Skip printing until PREVLINES before first difference line */

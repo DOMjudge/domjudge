@@ -506,7 +506,7 @@ void checknewline()
 void checktoken(command cmd)
 {
 	currcmd = cmd;
-	debug("checking token %s at %d,%d",cmd.name().c_str(),linenr,charnr);
+	debug("checking token %s at %zd,%zd",cmd.name().c_str(),linenr,charnr);
 
 	if ( cmd.name()=="SPACE" ) checkspace();
 
