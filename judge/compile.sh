@@ -21,9 +21,9 @@
 #   compile_<lang>.sh <source> <dest> <memlimit>
 #
 # where <dest> is the same filename as <source> but without extension.
-# The <memlimit> (in kB) is passed to the compile script to let
-# interpreted languages (read: Oracle (Sun) javac/java) be able to set the
-# internal maximum memory size.
+# The <memlimit> (in kB, obtained from the environment) is passed to
+# the compile script to let interpreted languages (read: Oracle (Sun)
+# javac/java) be able to set the internal maximum memory size.
 
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
