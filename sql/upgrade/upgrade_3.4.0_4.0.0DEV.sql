@@ -105,6 +105,9 @@ CREATE TABLE `rankcache_public` (
 RENAME TABLE `scoreboard_jury`   TO `scorecache_jury`;
 RENAME TABLE `scoreboard_public` TO `scorecache_public`;
 
+ALTER TABLE `testcase`
+  ADD COLUMN `sample` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Sample testcases that can be shared with teams' AFTER `description`;
+
 -- Before modifying the datetime to decimal(32.9) data type, we have
 -- to move the data to be able to convert it afterwards.
 
