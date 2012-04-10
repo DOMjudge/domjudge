@@ -118,7 +118,17 @@ src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__special_compare_">Special compare script:</label></td>
 <td><?php echo addInput('data[0][special_compare]', @$row['special_compare'], 30, 25)?></td></tr>
+<?
+	if ( SEPARATE_START_END ) {
+?>
+<tr><td><label for="data_0__start_">Start time:</label></td>
+<td><?php echo addInput('data[0][start]', @$row['start'], 20, 19)?> (yyyy-mm-dd hh:mm:ss) </td></tr>
 
+<tr><td><label for="data_0__end_">End time:</label></td>
+<td><?php echo addInput('data[0][end]', @$row['end'], 20, 19)?> (yyyy-mm-dd hh:mm:ss) </td></tr>
+<?
+	} // if ( SEPARATE_START_END ) 
+?>
 </table>
 
 <?php
@@ -200,6 +210,18 @@ if ( !empty($data['special_run']) ) {
 if ( !empty($data['special_compare']) ) {
 	echo '<tr><td scope="row">Special compare script:</td><td class="filename">' .
 		htmlspecialchars($data['special_compare']) . "</td></tr>\n";
+}
+if ( SEPARATE_START_END ) {
+	if ( !empty($data['start']) ) {
+		echo '<tr><td scope="row">Start time:</td><td title="' .
+		     htmlspecialchars($data['start']) . '">' . 
+             printtime($data['start']) . "</td></tr>\n";
+	}
+	if ( !empty($data['end']) ) {
+		echo '<tr><td scope="row">End time:</td><td title="' .
+		     htmlspecialchars($data['end']) . '">'  . 
+             printtime($data['end']) . "</td></tr>\n";
+	}
 }
 
 if ( IS_ADMIN && class_exists("ZipArchive") ) {

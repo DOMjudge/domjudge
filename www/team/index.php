@@ -48,9 +48,17 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 
 		echo "<script type=\"text/javascript\">initFileUploads();</script>\n\n";
 
-		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid) as name FROM problem
-				 WHERE cid = %i AND allow_submit = 1
-				 ORDER BY probid', $cid);
+		if ( SEPARATE_START_END ) {
+			$now = now();
+			$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid) as name FROM problem
+			                 WHERE cid = %i AND allow_submit = 1 AND
+			                 (start < %s OR start IS NULL) AND (end > %s or end IS NULL)
+			                 ORDER BY probid', $cid, $now, $now);
+		} else {
+			$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid) as name FROM problem
+			                 WHERE cid = %i AND allow_submit = 1
+			                 ORDER BY probid', $cid);
+		}
 		$probs[''] = 'problem';
 
 		echo addSelect('probid', $probs, '', true);

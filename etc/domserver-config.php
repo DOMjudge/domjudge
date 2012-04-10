@@ -11,6 +11,9 @@ require_once("common-config.php");
 // 2 = Always
 define('SHOW_COMPILE', 2);
 
+// Support for seperate start and end times per problem
+define('SEPARATE_START_END', false);
+
 // The format to print times (of submissions etc in the submissions overview)
 // define('TIME_FMT', 'm-d H:i'); // eg 04-10 15:43, useful for contests on
                                   // multiple days

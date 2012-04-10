@@ -29,6 +29,9 @@ if( $res->count() == 0 ) {
 		"<th scope=\"col\">contest</th><th scope=\"col\">allow<br />submit</th>" .
 		"<th scope=\"col\">allow<br />judge</th>" .
 		"<th scope=\"col\">time<br />limit</th>" .
+		( SEPARATE_START_END 
+		? "<th scope=\"col\">Start</th><th scope=\"col\">End</th>"
+		: "" ) .
 		"<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .
 	    "<th scope=\"col\">test<br />cases</th>" .
 		"</tr></thead>\n<tbody>\n";
@@ -56,6 +59,10 @@ if( $res->count() == 0 ) {
 			printyn($row['allow_judge']) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
 			"</td>".
+			( SEPARATE_START_END
+			? "<td>" . printtime($row['start']) . "</td>" .
+			  "<td>" . printtime($row['end']) . "</td>"
+			: "" ) .
 			( !empty($row['color'])
 			? '<td title="' . htmlspecialchars($row['color']) .
 		      '">' . $link . '<img style="background-color: ' .

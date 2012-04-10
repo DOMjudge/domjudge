@@ -73,6 +73,19 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
 if ( ! isset($prob) ) err("Unable to find problem '$probid'");
 $probid = $prob['probid'];
 
+if ( SEPARATE_START_END ) {
+	/* check if submissions for this particular problem are allowed */
+	$deadline = $DB->q('TUPLE SELECT (start > %s OR start IS NULL) as started,
+	                                 (end   > %s OR end   IS NULL) as ended 
+	                    FROM problem
+	                    WHERE probid = %s', $now, $now, $probid);
+	if ( !$deadline['started'] ) 
+		err("Submissions for '$probid' aren't allowed yet");
+	if ( $deadline['ended'] ) 
+		err("Deadline for '$probid' has passed");
+} 
+
+
 /* Determine the language */
 $langid = @$_POST['langid'];
 $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
