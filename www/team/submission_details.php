@@ -15,7 +15,7 @@ $sid = (int)@$_GET['id'];
 
 // select also on teamid so we can only select our own submissions
 $row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
-               s.valid, l.name AS langname, result, output_compile, verified
+               s.valid, l.name AS langname, result, output_compile, verified, judgingid
                FROM judging j
                LEFT JOIN submission s USING (submitid)
                LEFT JOIN language   l USING (langid)
@@ -73,6 +73,55 @@ if ( ( $show_compile == 2 ) ||
 	}
 } else {
 	echo "<p class=\"nodata\">Compilation output is disabled.</p>\n";
+}
+
+if ( @$row['result']!='compiler-error' ) {
+	$runs = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
+	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
+	                                             r.judgingid = %i )
+	                WHERE t.probid = %s AND t.sample = 1 ORDER BY rank',
+	               $row['judgingid'], $row['probid']);
+
+	$runinfo = $runs->gettable();
+	echo '<h3>Run(s) on the provided sample data</h3>';
+
+	foreach ( $runinfo as $run ) {
+		echo "<h4 id=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
+		if ( $run['runresult']===NULL ) {
+			echo "<p class=\"nodata\">Run not finished yet.</p>\n";
+			continue;
+		}
+		echo "<table>\n" .
+		    "<tr><td>Description:</td><td>" .
+		    htmlspecialchars($run['description']) . "</td></tr>" .
+		    "<tr><td>Runtime:</td><td>$run[runtime] sec</td></tr>" .
+		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
+		    ( $run['runresult']=='correct' ? '' : 'in' ) .
+		    "correct\">$run[runresult]</span></td></tr>" .
+		    "</table>\n\n";
+		echo "<h5>Program output</h5>\n";
+		if ( @$run['output_run'] ) {
+			echo "<pre class=\"output_text\">".
+			    htmlspecialchars($run['output_run'])."</pre>\n\n";
+		} else {
+			echo "<p class=\"nodata\">There was no program output.</p>\n";
+		}
+		echo "<h5>Diff output</h5>\n";
+		if ( @$run['output_diff'] ) {
+			echo "<pre class=\"output_text\">";
+			echo parseDiff($run['output_diff']);
+			echo "</pre>\n\n";
+		} else {
+			echo "<p class=\"nodata\">There was no diff output.</p>\n";
+		}
+		echo "<h5>Error output (info/debug/errors)</h5>\n";
+		if ( @$run['output_error'] ) {
+			echo "<pre class=\"output_text\">".
+			    htmlspecialchars($run['output_error'])."</pre>\n\n";
+		} else {
+			echo "<p class=\"nodata\">There was no stderr output.</p>\n";
+		}
+	}
 }
 
 require(LIBWWWDIR . '/footer.php');

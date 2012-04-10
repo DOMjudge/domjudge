@@ -8,11 +8,15 @@
 --
 
 -- @UPGRADE-CHECK@
-SELECT 1;
+ALTER TABLE `testcase` ADD  COLUMN `sample` tinyint(1) default NULL;
+ALTER TABLE `testcase` DROP COLUMN `sample`;
 
 --
 -- Create additional structures
 --
+
+ALTER TABLE `testcase`
+  ADD COLUMN `sample` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Sample testcases can be shared with teams.' AFTER `description`;
 
 --
 -- Transfer data from old to new structure

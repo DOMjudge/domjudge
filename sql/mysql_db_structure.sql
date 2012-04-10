@@ -358,6 +358,7 @@ CREATE TABLE `testcase` (
   `probid` varchar(8) NOT NULL COMMENT 'Corresponding problem ID',
   `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
   `description` varchar(255) default NULL COMMENT 'Description of this testcase',
+  `sample` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Sample testcases can be shared with teams.',
   PRIMARY KEY  (`testcaseid`),
   UNIQUE KEY `rank` (`probid`,`rank`),
   KEY `probid` (`probid`),
