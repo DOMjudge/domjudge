@@ -14,7 +14,8 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Problems</h1>\n\n";
 
 // Select all data, sort problems from the current contest on top.
-$res = $DB->q('SELECT p.probid,p.name,p.allow_submit,p.allow_judge,p.timelimit,p.color,
+$res = $DB->q('SELECT p.probid,p.name,p.allow_submit,p.allow_judge,p.timelimit,
+               p.start,p.end,p.color,
                c.*, COUNT(testcaseid) AS testcases
                FROM problem p
                NATURAL JOIN contest c
@@ -30,6 +31,9 @@ if( $res->count() == 0 ) {
 	        "<th scope=\"col\">allow<br />submit</th>" .
 		"<th scope=\"col\">allow<br />judge</th>" .
 		"<th scope=\"col\">time<br />limit</th>" .
+		( dbconfig_get('separate_start_end',0)
+		? "<th scope=\"col\">start</th><th scope=\"col\">end</th>"
+		: "" ) .
 		"<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .
 	    "<th scope=\"col\">test<br />cases</th>" .
 		"</tr></thead>\n<tbody>\n";
@@ -57,6 +61,10 @@ if( $res->count() == 0 ) {
 			printyn($row['allow_judge']) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
 			"</td>".
+			( dbconfig_get('separate_start_end',0)
+			? "<td>" . printtime($row['start']) . "</td>" .
+			  "<td>" . printtime($row['end']) . "</td>"
+			: "" ) .
 			( !empty($row['color'])
 			? '<td title="' . htmlspecialchars($row['color']) .
 		      '">' . $link . '<img class="balloonimage" style="background-color: ' .

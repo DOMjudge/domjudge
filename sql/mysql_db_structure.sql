@@ -192,6 +192,8 @@ CREATE TABLE `problem` (
   `allow_submit` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Are submissions for this problem judged?',
   `timelimit` int(4) unsigned NOT NULL default '0' COMMENT 'Maximum run time for this problem',
+  `start` datetime default NULL COMMENT 'Start time when submissions are allowed',
+  `end` datetime default NULL COMMENT 'deadline for this problem',
   `special_run` varchar(25) default NULL COMMENT 'Script to run submissions for this problem',
   `special_compare` varchar(25) default NULL COMMENT 'Script to compare problem and jury output for this problem',
   `color` varchar(25) default NULL COMMENT 'Balloon colour to display on the scoreboard',

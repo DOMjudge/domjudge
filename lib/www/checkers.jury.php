@@ -54,6 +54,27 @@ function check_problem($data, $keydata = null)
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Problem ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
+	if ( dbconfig_get('separate_start_end',0) ) {
+		global $DB;
+		$contest =  $DB->q("TUPLE SELECT * FROM contest WHERE cid = %s", $data['cid']);
+		if ( ! empty($data['start'] ) ) {
+			$data['start'] = check_datetime($data['start']);
+			if( difftime($data['start'], $contest['starttime']) < 0 ) {
+				ch_error("Problem submission start time can't be before start of the contest");
+			}
+		}
+		if ( ! empty($data['end'] ) ) {
+			$data['end'] = check_datetime($data['end']);
+			if( difftime($data['end'], $contest['endtime']) > 0 ) {
+				ch_error("Problem submission deadline can't be after end of contest");
+			}
+		}
+		if ( ! empty($data['start']) &&
+	         ! empty($data['end']) &&
+		     ! difftime($data['start'], $data['endtime']) > 0 ) {
+			ch_error("Deadline should be after the start time of problem");
+		}
+	}
 	return $data;
 }
 

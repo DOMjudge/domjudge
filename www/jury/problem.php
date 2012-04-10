@@ -111,7 +111,16 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 ?>
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
 <td><?php echo addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
-
+<?
+	if ( dbconfig_get('separate_start_end',0) ) {
+?>
+<tr><td><label for="data_0__start_">Start time:</label></td>
+<td><?php echo addInput('data[0][start]', @$row['start'], 20, 19)?> (yyyy-mm-dd hh:mm:ss) </td></tr>
+<tr><td><label for="data_0__end_">End time:</label></td>
+<td><?php echo addInput('data[0][end]', @$row['end'], 20, 19)?> (yyyy-mm-dd hh:mm:ss) </td></tr>
+<?
+	} // separate_start_end
+?>
 <tr><td><label for="data_0__color_">Balloon colour:</label></td>
 <td><?php echo addInputField('text','data[0][color]', @$row['color'],
 	' size="8" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
@@ -127,7 +136,6 @@ src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__special_compare_">Special compare script:</label></td>
 <td><?php echo addInput('data[0][special_compare]', @$row['special_compare'], 30, 25)?></td></tr>
-
 </table>
 
 <?php
@@ -155,7 +163,8 @@ exit;
 endif;
 
 $data = $DB->q('TUPLE SELECT p.probid,p.cid,p.name,p.allow_submit,p.allow_judge,
-                             p.timelimit,p.special_run,p.special_compare,p.color,
+                             p.timelimit,p.start,p.end,p.color,
+                             p.special_run,p.special_compare,
                              OCTET_LENGTH(p.problemtext) as textlen,
                              c.contestname, count(rank) AS ntestcases
                 FROM problem p
@@ -198,6 +207,18 @@ echo addForm($pagename, 'post', null, 'multipart/form-data') . "<p>\n" .
 ?></td></tr>
 <tr><td scope="row">Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
 <?php
+if ( dbconfig_get('separate_start_end',0) ) {
+	if ( !empty($data['start']) ) {
+		echo '<tr><td scope="row">Start time:</td><td title="' .
+		     htmlspecialchars($data['start']) . '">' .
+             printtime($data['start']) . "</td></tr>\n";
+	}
+	if ( !empty($data['end']) ) {
+		echo '<tr><td scope="row">End time:</td><td title="' .
+		     htmlspecialchars($data['end']) . '">'  .
+             printtime($data['end']) . "</td></tr>\n";
+	}
+}
 if ( !empty($data['color']) ) {
 	echo '<tr><td scope="row">Colour:</td><td><img style="background-color: ' .
 		htmlspecialchars($data['color']) .

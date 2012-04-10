@@ -21,10 +21,18 @@ $fdata = calcFreezeData($cdata);
 echo "<script type=\"text/javascript\">\n<!--\n";
 
 if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
-	$probdata = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
-			 WHERE cid = %i AND allow_submit = 1
-			 ORDER BY probid', $cid);
-
+	if ( dbconfig_get('separate_start_end',0) ) {
+		$now = now();
+		$probdata = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
+		                    WHERE cid = %i AND allow_submit = 1 AND
+		                    (start < %s OR start IS NULL) AND
+		                    (end   > %s or end   IS NULL)
+		                    ORDER BY probid', $cid, $now, $now);
+	} else {
+		$probdata = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
+		                    WHERE cid = %i AND allow_submit = 1
+		                    ORDER BY probid', $cid);
+	}
 	echo "function getMainExtension(ext)\n{\n";
 	echo "\tswitch(ext) {\n";
 	foreach($langexts as $ext => $langid) {
