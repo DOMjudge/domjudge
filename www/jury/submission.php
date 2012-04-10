@@ -8,48 +8,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-function parseDiff($difftext){
-	$line = strtok($difftext,"\n"); //first line
-	if(sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1)
-		return htmlspecialchars($difftext);
-	$return = $line . "\n";
-
-	// Add second line 'team ? reference'
-	$line = strtok("\n");
-	$return .= $line . "\n";
-
-	// We determine the separator position from the character '?' on
-	// the second line, correct for offset of line numbers
-	$midloc = strpos($line, '?') - 5;
-
-	$line = strtok("\n");
-	while(strlen($line) != 0){
-		$linenostr = substr($line,0,3);
-		$diffline = substr($line,4);
-		$mid = substr($diffline, $midloc, 3);
-		switch($mid){
-			case ' = ':
-				$formdiffline = "<span class='correct'>".htmlspecialchars($diffline)."</span>";
-				break;
-			case ' ! ':
-				$formdiffline = "<span class='differ'>".htmlspecialchars($diffline)."</span>";
-				break;
-			case ' $ ':
-				$formdiffline = "<span class='endline'>".htmlspecialchars($diffline)."</span>";
-				break;
-			case ' > ':
-			case ' < ':
-				$formdiffline = "<span class='extra'>".htmlspecialchars($diffline)."</span>";
-				break;
-			default:
-				$formdiffline = htmlspecialchars($diffline);
-		}
-		$return = $return . $linenostr . " " . $formdiffline . "\n";
-		$line = strtok("\n");
-	}
-	return $return;
-}
-
 $pagename = basename($_SERVER['PHP_SELF']);
 
 $id = (int)@$_REQUEST['id'];
