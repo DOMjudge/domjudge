@@ -6,7 +6,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-function parseDiff($difftext){
+function parseSourceDiff($difftext){
 	$line = strtok($difftext,"\n"); //first line
 	$return = '';
 	while ( strlen($line) != 0 ) {
@@ -218,7 +218,7 @@ if ( $origsource ) {
 		"<a href=\"show_source.php?id=$oldid\">" .
 		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n";
 
-	echo '<pre class="output_text">' . parseDiff($difftext) . "</pre>\n\n";
+	echo '<pre class="output_text">' . parseSourceDiff($difftext) . "</pre>\n\n";
 }
 
 require(LIBWWWDIR . '/footer.php');

@@ -6,49 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-function parseDiff($difftext){
-	$line = strtok($difftext,"\n"); //first line
-	if(sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1)
-		return htmlspecialchars($difftext);
-	$return = $line . "\n";
-
-	// Add second line 'team ? reference'
-	$line = strtok("\n");
-	$return .= $line . "\n";
-
-	// We determine the line number width from the '_' characters and
-	// the separator position from the character '?' on the second line.
-	$linenowidth = strrpos($line, '_') + 1;
-	$midloc = strpos($line, '?') - ($linenowidth+1);
-
-	$line = strtok("\n");
-	while(strlen($line) != 0){
-		$linenostr = substr($line, 0, $linenowidth);
-		$diffline = substr($line, $linenowidth+1);
-		$mid = substr($diffline, $midloc-1, 3);
-		switch($mid){
-			case ' = ':
-				$formdiffline = "<span class='correct'>".htmlspecialchars($diffline)."</span>";
-				break;
-			case ' ! ':
-				$formdiffline = "<span class='differ'>".htmlspecialchars($diffline)."</span>";
-				break;
-			case ' $ ':
-				$formdiffline = "<span class='endline'>".htmlspecialchars($diffline)."</span>";
-				break;
-			case ' > ':
-			case ' < ':
-				$formdiffline = "<span class='extra'>".htmlspecialchars($diffline)."</span>";
-				break;
-			default:
-				$formdiffline = htmlspecialchars($diffline);
-		}
-		$return = $return . $linenostr . " " . $formdiffline . "\n";
-		$line = strtok("\n");
-	}
-	return $return;
-}
-
 $pagename = basename($_SERVER['PHP_SELF']);
 
 $id = (int)@$_REQUEST['id'];
@@ -430,7 +387,7 @@ togglelastruns();
 		echo "<h5>Diff output</h5>\n";
 		if ( strlen(@$run['output_diff']) > 0 ) {
 			echo "<pre class=\"output_text\">";
-			echo parseDiff($run['output_diff']);
+			echo parseRunDiff($run['output_diff']);
 			echo "</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no diff output.</p>\n";
