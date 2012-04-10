@@ -127,6 +127,14 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 		}
 	}
 
+	if ( isset($_POST['sample'][$rank]) ) {
+		$DB->q('UPDATE testcase SET sample = %i WHERE probid = %s
+		        AND rank = %i', $_POST['sample'][$rank], $probid, $rank);
+		$result .= "<li>Set testcase $rank to be " . 
+		           ($_POST['sample'][$rank] ? "" : "not ") .
+		           "a sample testcase</li>\n";
+	}
+
 	if ( isset($_POST['description'][$rank]) ) {
 		$DB->q('UPDATE testcase SET description = %s WHERE probid = %s
 		        AND rank = %i', $_POST['description'][$rank], $probid, $rank);
@@ -152,10 +160,10 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 		if ( !empty($content['input']) && !empty($content['output']) ) {
 			$DB->q("INSERT INTO testcase
-			        (probid,rank,md5sum_input,md5sum_output,input,output,description)
-			        VALUES (%s,%i,%s,%s,%s,%s,%s)",
+			        (probid,rank,md5sum_input,md5sum_output,input,output,description,sample)
+			        VALUES (%s,%i,%s,%s,%s,%s,%s,%i)",
 			       $probid, $rank, md5(@$content['input']), md5(@$content['output']),
-			       @$content['input'], @$content['output'], @$_POST['add_desc']);
+			       @$content['input'], @$content['output'], @$_POST['add_desc'], @$_POST['add_sample']);
 
 			$result .= "<li>Added new testcase $rank from " .
 			    htmlspecialchars($_FILES['add_input']['name']) .
@@ -169,7 +177,8 @@ if ( !empty($result) ) {
 	echo "<ul>\n$result</ul>\n\n";
 
 	// Reload testcase data after updates
-	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank, description,
+	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
+	                description, sample,
 	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
 	                OCTET_LENGTH(output) AS size_output, md5sum_output
 	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
@@ -200,6 +209,7 @@ if ( count($data)==0 ) {
 <th scope="col">size</th><th scope="col">md5</th>
 <?php
 	if ( IS_ADMIN ) echo '<th scope="col">upload new</th>';
+	if ( SHOW_SAMPLE_RUN ) echo '<th scope="col">sample</th>';
 ?><th scope="col">description</th>
 </tr></thead>
 <tbody>
@@ -225,6 +235,19 @@ foreach( $data as $rank => $row ) {
 		    echo "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";
 		}
 		if ( $inout=='input' ) {
+			if(SHOW_SAMPLE_RUN){
+				if ( IS_ADMIN ) {
+					echo "<td rowspan=\"2\"	align=\"center]\" onclick=\"editTcSample($rank)\">" .
+					    addSelect("sample[$rank]",array("no", "yes"), $row['sample'], true) . "</td>";
+
+					// hide sample dropdown field if javascript is enabled
+					echo "<script type=\"text/javascript\" language=\"JavaScript\">" .
+					    "hideTcSample($rank, '". printyn($row['sample'])."');</script>";
+				} else {
+					echo "<td rowspan=\"2\" align=\"center\">" .
+					    printyn($row['sample']) . "</td>";
+				}
+			} 
 			if ( IS_ADMIN ) {
 				echo "<td rowspan=\"2\" class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
 				    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"2\">" .
@@ -256,6 +279,9 @@ if ( IS_ADMIN ) {
 <table>
 <tr><td>Input testdata: </td><td><?php echo addFileField('add_input')  ?></td></tr>
 <tr><td>Output testdata:</td><td><?php echo addFileField('add_output') ?></td></tr>
+<? if ( SHOW_SAMPLE_RUN ) { ?>
+<tr><td>Sample testcase:</td><td><?php echo addSelect('add_sample', array("no","yes"), 0, true);?></td></tr>
+<? } ?>
 <tr><td>Description:    </td><td><?php echo addInput('add_desc','',30); ?></td></tr>
 </table>
 <?php

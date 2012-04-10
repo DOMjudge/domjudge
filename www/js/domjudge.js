@@ -62,6 +62,31 @@ function hideTcDescEdit(descid)
 	node.parentNode.appendChild(span);
 }
 
+// make corresponding testcase sample dropdown editable
+function editTcSample(tcid)
+{
+	var node = document.getElementById('sample_' + tcid + '_');
+	node.parentNode.setAttribute('onclick', '');
+	var remove = node.nextSibling;
+	while (remove.nodeName == '#text')
+		remove = remove.nextSibling;
+	node.parentNode.removeChild(remove);
+	node.style.display = 'block';
+	node.setAttribute('name', 'sample[' + tcid + ']');
+}
+
+// hides sample dropdown field if javascript is enabled
+function hideTcSample(tcid, str)
+{
+	var node = document.getElementById('sample_' + tcid + '_');
+	node.style.display = 'none';
+	node.setAttribute('name', 'invalid');
+
+	var span = document.createElement('span');
+	span.innerHTML = str;
+	node.parentNode.appendChild(span);
+}
+
 // Autodetection of problem, language in websubmit
 function detectProblemLanguage(filename)
 {
