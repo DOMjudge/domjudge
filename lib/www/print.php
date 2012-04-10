@@ -48,11 +48,11 @@ function printyn ($val) {
 }
 
 /**
- * given 2004-12-31 15:43:05, returns 15:43
+ * print a time dependant on configured TIME_FMT (default H:i)
  */
 function printtime($datetime) {
 	if ( ! $datetime ) return '';
-	return htmlspecialchars(substr($datetime,11,5));
+	return htmlspecialchars(date(TIME_FMT, strtotime($datetime)));
 }
 
 /**

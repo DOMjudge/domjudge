@@ -11,6 +11,11 @@ require_once("common-config.php");
 // 2 = Always
 define('SHOW_COMPILE', 2);
 
+// The format to print times (of submissions etc in the submissions overview)
+// define('TIME_FMT', 'm-d H:i'); // eg 04-10 15:43, useful for contests on
+                                  // multiple days
+define('TIME_FMT', 'H:i'); // eg 15:43, useful for contests on a single day.
+
 // Authentication scheme to be used for teams. The following methods
 // are supported:
 // IPADDRESS
