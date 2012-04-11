@@ -181,7 +181,7 @@ function calcScoreRow($cid, $team, $prob) {
  * determined yet; this may only occur when not all testcases have
  * been run yet.
  */
-function getFinalResult($runresults)
+function getFinalResult($runresults, &$remap_msg)
 {
 	$results_prio  = dbconfig_get('results_prio');
 	$results_remap = dbconfig_get('results_remap');
@@ -193,6 +193,7 @@ function getFinalResult($runresults)
 	// This stores the current result and priority to be returned:
 	$bestres  = NULL;
 	$bestprio = -1;
+	$remap_msg = "";
 
 	// Find first highest priority result:
 	foreach ( $runresults as $tc => $res ) {
@@ -201,7 +202,10 @@ function getFinalResult($runresults)
 		} else {
 			// check for remapping
 			if ( array_key_exists($res, $results_remap) ) {
-				// FIXME: note in auditlog
+				if ( !empty($remap_msg) ) {
+					$remap_msg .= ", ";
+				}
+				$remap_msg .= "remapped result of testcase " . $tc . " from " . $res . " to " . $results_remap[$res];
 				$res = $results_remap[$res];
 			}
 			$prio = $results_prio[$res];
