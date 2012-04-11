@@ -60,6 +60,13 @@ define('LAZY_EVAL_RESULTS', true);
 
 // Remap results, e.g. to disable a specific result. Some possible
 // options are shown commented below.
+//
+// NOTE: changing the remapping may give surprising results because only
+// the final outcome of the RESULTS_PRIO list defined above is remapped.
+// Take care to update RESULTS_PRIO accordingly.
+// For example, if you enable the remapping from presentation-error to
+// correct, you also need to change the priority of presentation-error to
+// lower than that of no-output, e.g. to 5.
 $RESULTS_REMAP = array(
 //	'presentation-error' => 'wrong-answer',
 //	'presentation-error' => 'correct',
