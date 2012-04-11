@@ -199,6 +199,11 @@ function getFinalResult($runresults)
 		if ( $res===NULL ) {
 			$havenull = TRUE;
 		} else {
+			// check for remapping
+			if ( array_key_exists($res, $results_remap) ) {
+				// FIXME: note in auditlog
+				$res = $results_remap[$res];
+			}
 			$prio = $results_prio[$res];
 			if ( empty($prio) ) error("Unknown result '$res' found.");
 			if ( $prio>$bestprio ) {
@@ -223,12 +228,7 @@ function getFinalResult($runresults)
 		if ( $havenull && $bestprio<$maxprio ) return NULL;
 	}
 
-	// We have a (possibly lazy) final answer, check for remapping.
-	if ( array_key_exists($bestres, $results_remap) ) {
-		return $results_remap[$bestres];
-	} else {
-		return $bestres;
-	}
+	return $bestres;
 }
 
 /**
