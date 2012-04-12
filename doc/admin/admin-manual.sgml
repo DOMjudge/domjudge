@@ -707,7 +707,9 @@ presentation errors as correct answers by uncommenting the line
 	'presentation-error' => 'correct',
 </code>
 in the <tt>RESULTS_REMAP</tt> array in the file
-<tt>etc/judgehost-config.php</tt>.
+<tt>etc/judgehost-config.php</tt>, and change the priority of
+presentation-error in <tt>RESULTS_PRIO</tt> to be lower than that
+of no-answer.
 
 For more details on modifying validator scripts, see the comments at the top
 of the files <tt>testcase_run.sh</tt>, <tt>compare_wrapper</tt>
@@ -719,7 +721,9 @@ DOMjudge supports a <tt>presentation-error</tt> result. The default
 by whitespace; this is counted as an incorrect submission. The script
 <tt>compare_wrapper</tt> does not support presentation error results
 however. By default presentation errors are remapped to wrong answer;
-this can be changed in <tt>etc/judgehost-config.php</tt>.
+this can be changed in <tt>etc/judgehost-config.php</tt>. If you
+change the remapping of a result, be sure to also update its priority
+in the results priority list in the same file.
 
 <sect1>Run programs
 <p>
