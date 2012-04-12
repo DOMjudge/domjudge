@@ -184,7 +184,6 @@ function calcScoreRow($cid, $team, $prob) {
 function getFinalResult($runresults)
 {
 	$results_prio  = dbconfig_get('results_prio');
-	$results_remap = dbconfig_get('results_remap');
 	$lazy_eval     = dbconfig_get('lazy_eval_results', true);
 
 	// Whether we have NULL results
@@ -223,12 +222,7 @@ function getFinalResult($runresults)
 		if ( $havenull && $bestprio<$maxprio ) return NULL;
 	}
 
-	// We have a (possibly lazy) final answer, check for remapping.
-	if ( array_key_exists($bestres, $results_remap) ) {
-		return $results_remap[$bestres];
-	} else {
-		return $bestres;
-	}
+	return $bestres;
 }
 
 /**

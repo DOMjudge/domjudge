@@ -344,6 +344,7 @@ function judge($mark, $row, $judgingid)
 	}
 
 	$runresults = array_fill_keys(array_keys($testcases), NULL);
+	$results_remap = dbconfig_get('results_remap');
 
 	foreach ( $testcases as $tc ) {
 
@@ -404,6 +405,13 @@ function judge($mark, $row, $judgingid)
 	$runtime = NULL;
 	if ( is_readable($testcasedir . '/program.time') ) {
 		$runtime = getFileContents($testcasedir . '/program.time');
+	}
+
+	// Apply any result remapping
+	if ( array_key_exists($runresults[$tc['rank']], $results_remap) ) {
+		logmsg(LOG_INFO, "Testcase $tc[rank] remapping result " . $runresults[$tc['rank']] .
+		                 " -> " . $results_remap[$runresults[$tc['rank']]]);
+		$runresults[$tc['rank']] = $results_remap[$runresults[$tc['rank']]];
 	}
 
 	$DB->q('INSERT INTO judging_run (judgingid, testcaseid, runresult,
