@@ -732,7 +732,8 @@ presentation errors as correct answers by uncommenting the line
 	'presentation-error' => 'correct',
 </code>
 in the <tt>RESULTS_REMAP</tt> array in the file
-<tt>etc/judgehost-config.php</tt>.
+<tt>etc/judgehost-config.php</tt>, and changing the <tt>RESULTS_PRIO</tt>
+ordering such that presentation-error has lower priority than no-answer.
 
 For more details on modifying validator scripts, see the comments at the top
 of the files <tt>testcase_run.sh</tt>, <tt>compare_program.sh</tt>
