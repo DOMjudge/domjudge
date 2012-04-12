@@ -45,6 +45,9 @@ Version 3.3.0 - DEV
    from etc/*-config.php to the DB configuration table.
  - Support inclusion of external libraries under the lib/ext/ path.
  - Include a copy of the GeSHi syntax highlighter.
+ - Result remapping is now done on each testcase result, in order
+   to avoid surprising interactions with results_prio. A message
+   is logged for each remapping done.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
