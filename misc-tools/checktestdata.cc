@@ -37,7 +37,7 @@ using namespace std;
 
 const int exit_testdata = 1;
 
-char *progname;
+const char *progname;
 
 int show_help;
 int show_version;

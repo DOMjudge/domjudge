@@ -48,6 +48,7 @@ Version 3.3.0 - DEV
  - Result remapping is now done on each testcase result, in order
    to avoid surprising interactions with results_prio. A message
    is logged for each remapping done.
+ - Transparant redirection of stdio through runguard, Closes: #89.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------

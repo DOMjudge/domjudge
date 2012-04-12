@@ -425,7 +425,7 @@ function judge($mark, $row, $judgingid)
 
 	// Optimization: stop judging when the result is already known.
 	// This should report a final result when all runresults are non-null!
-	if ( ($result = getFinalResult($runresults))!==NULL ) break;
+	if ( ($result = getFinalResult($runresults, $remap_msg))!==NULL ) break;
 
 	} // end: for each testcase
 
@@ -463,7 +463,7 @@ function judge($mark, $row, $judgingid)
 
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
-	auditlog('judging', $judgingid, 'judged', $result, $myhost);
+	auditlog('judging', $judgingid, 'judged', $result . (empty($remap_msg) ? "" : " (" . $remap_msg . ")"), $myhost);
 	if ( $result == 'correct' ) {
 		alert('accept');
 	} else {

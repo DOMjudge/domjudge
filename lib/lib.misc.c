@@ -194,8 +194,6 @@ void daemonize(const char *_pidfile)
 	default: _exit(0);  /* parent process: exit. */
 	}
 
-	pid = getpid();
-
 	/* Check and write PID to file */
 	if ( _pidfile!=NULL ) {
 		pidfile = strdup(_pidfile);

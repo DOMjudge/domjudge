@@ -32,7 +32,7 @@ void talk()
 	printf("%ld\n",n); fflush(NULL);
 
 	do {
-		fgets(line,255,stdin);
+		if ( fgets(line,255,stdin)==NULL ) break;
 		for(i=strlen(line)-1; i>=0 && line[i]=='\n'; i--) line[i] = 0;
 
 		if ( strncmp(line,"READ ",5)==0 ) {
@@ -88,13 +88,25 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	fscanf(in,"%d\n",&nruns);
+	if ( fscanf(in,"%d\n",&nruns)!=1 ) {
+		fprintf(stderr,"error: failed to read number of test cases\n");
+		exit(1);
+	}
 	printf("%d\n",nruns);
 	fflush(NULL);
 
 	for(run=1; run<=nruns; run++) {
-		fscanf(in,"%ld\n",&n);
-		for(i=0; i<n; i++) fscanf(in,"%d\n",&data[i]);
+		if ( fscanf(in,"%ld\n",&n)!=1 ) {
+			fprintf(stderr,"error: failed to read data in test case %d\n",run);
+			exit(1);
+		}
+
+		for(i=0; i<n; i++) {
+			if ( fscanf(in,"%d\n",&data[i])!=1 ) {
+				fprintf(stderr,"error: failed to read data in test case %d\n",run);
+				exit(1);
+			}
+		}
 
 		talk();
 	}
@@ -103,7 +115,12 @@ int main(int argc, char **argv)
 	fclose(stdout);
 
 	/* Copy any additional data from program */
-	while ( (nbuf=fread(buf,1,256,stdin))>0 ) fwrite(buf,1,nbuf,out);
+	while ( (nbuf=fread(buf,1,256,stdin))>0 ) {
+		if ( fwrite(buf,1,nbuf,out)!=nbuf ) {
+			fprintf(stderr,"error: failed to write additional program data\n");
+			exit(1);
+		}
+	}
 
 	fprintf(stderr,"jury program exited successfully\n");
 	return 0;

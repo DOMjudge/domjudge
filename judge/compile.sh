@@ -86,10 +86,9 @@ logmsg $LOG_INFO "starting compile"
 cd "$WORKDIR/compile"
 
 # First compile to 'source' then rename to 'program' to avoid problems with
-# the compiler writing to different filenames and deleting
-# intermediate files.
+# the compiler writing to different filenames and deleting intermediate files.
 exitcode=0
-"$RUNGUARD" ${DEBUG:+-v} -t $COMPILETIME -c -f 65536 -o "$WORKDIR/compile.time" -- \
+"$RUNGUARD" ${DEBUG:+-v} -t $COMPILETIME -c -f 65536 -T "$WORKDIR/compile.time" -- \
 	"$COMPILE_SCRIPT" "`basename $SOURCE`" source "$MEMLIMIT" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 if [ -f source ]; then

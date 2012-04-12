@@ -22,7 +22,8 @@
 extern char lastmesg[];
 
 void vsendit(int, const char *, va_list);
-void  sendit(int, const char *, ...);
+void  sendit(int, const char *, ...)
+    __attribute__((format (printf, 2, 3)));
 /* Send a message over a socket and log it (va_list and argument list versions).
  *
  * Arguments:
@@ -31,8 +32,10 @@ void  sendit(int, const char *, ...);
  * va_list or ...  optional arguments for format characters
  */
 
-void senderror  (int fd, int errnum, const char *mesg, ...);
-void sendwarning(int fd, int errnum, const char *mesg, ...);
+void senderror  (int fd, int errnum, const char *mesg, ...)
+    __attribute__((format (printf, 3, 4)));
+void sendwarning(int fd, int errnum, const char *mesg, ...)
+    __attribute__((format (printf, 3, 4)));
 /* Send an error/warning message over a socket using sendit, close the
  * socket and generate an error/warning.
  *
