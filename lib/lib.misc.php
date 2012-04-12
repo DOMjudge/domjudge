@@ -181,7 +181,7 @@ function calcScoreRow($cid, $team, $prob) {
  * determined yet; this may only occur when not all testcases have
  * been run yet.
  */
-function getFinalResult($runresults, &$remap_msg)
+function getFinalResult($runresults)
 {
 	$results_prio  = dbconfig_get('results_prio');
 	$lazy_eval     = dbconfig_get('lazy_eval_results', true);
@@ -192,21 +192,12 @@ function getFinalResult($runresults, &$remap_msg)
 	// This stores the current result and priority to be returned:
 	$bestres  = NULL;
 	$bestprio = -1;
-	$remap_msg = "";
 
 	// Find first highest priority result:
 	foreach ( $runresults as $tc => $res ) {
 		if ( $res===NULL ) {
 			$havenull = TRUE;
 		} else {
-			// check for remapping
-			if ( array_key_exists($res, $results_remap) ) {
-				if ( !empty($remap_msg) ) {
-					$remap_msg .= ", ";
-				}
-				$remap_msg .= "remapped result of testcase " . $tc . " from " . $res . " to " . $results_remap[$res];
-				$res = $results_remap[$res];
-			}
 			$prio = $results_prio[$res];
 			if ( empty($prio) ) error("Unknown result '$res' found.");
 			if ( $prio>$bestprio ) {
