@@ -249,11 +249,11 @@ the set of test sources can be submitted:
 <code>
 cd tests
 make check
-./check-judgings
 </code>
-The <tt>check-judgings</tt> script automatically verifies most of the
+Then, in the main jury web interface, select the admin link
+<it>judging verifier</it> to automatically verify most of the
 test sources, except for a few with multiple possible outcomes; these
-have to be verified by hand. Read the sources for a description of
+have to be verified by hand. Read the test sources for a description of
 what should (not) happen.
 You may want to change the <tt>AUTH_METHOD</tt> to <tt>FIXED</tt> and set the
 environment variable <tt>SUBMITBASEURL</tt> to your DOMjudge base URL, e.g.
