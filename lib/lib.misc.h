@@ -23,7 +23,7 @@ void _alert(const char *libdir, const char *msgtype, const char *description)
  * on important system events. See default alert script for more details.
  */
 
-int execute(const char *, char **, int, int[3], int)
+int execute(const char *, const char **, int, int[3], int)
     __attribute__((nonnull (1, 2)));
 /* Execute a subprocess using fork and execvp and optionally perform
  * IO redirection of stdin/stdout/stderr.
