@@ -49,6 +49,7 @@ Version 3.3.0 - DEV
    to avoid surprising interactions with results_prio. A message
    is logged for each remapping done.
  - Transparant redirection of stdio through runguard, Closes: #89.
+ - Display first solved in scoreboard (suggested by Andrés Mejía).
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------

@@ -57,7 +57,7 @@ function calcPenaltyTime($solved, $num_submissions)
  * matrix[login][probid](is_correct, num_submissions, num_pending, time, penalty)
  *
  * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid])
- *    probid(num_submissions, num_pending, num_correct, best_time)
+ *    probid(num_submissions, num_pending, num_correct, besttime, bestteam)
  */
 function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
@@ -203,8 +203,11 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			@$SUMMARY['problems'][$prob]['num_submissions'] += $pdata['num_submissions'];
 			@$SUMMARY['problems'][$prob]['num_pending'] += $pdata['num_pending'];
 			@$SUMMARY['problems'][$prob]['num_correct'] += ($pdata['is_correct'] ? 1 : 0);
-			if ( $pdata['is_correct'] ) {
-				@$SUMMARY['problems'][$prob]['times'][] = $pdata['time'];
+			if ( $pdata['is_correct'] &&
+			     (!isset($SUMMARY['problems'][$prob]['besttime']) ||
+			      $pdata['time']<=@$SUMMARY['problems'][$prob]['besttime']) ) {
+				@$SUMMARY['problems'][$prob]['besttime'] = $pdata['time'];
+				@$SUMMARY['problems'][$prob]['bestteam'] = $team;
 			}
 		}
 	}
@@ -215,13 +218,9 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
 			$SUMMARY['problems'][$prob]['num_pending'] = 0;
 			$SUMMARY['problems'][$prob]['num_correct'] = 0;
+			$SUMMARY['problems'][$prob]['besttime'] = NULL;
+			$SUMMARY['problems'][$prob]['bestteam'] = NULL;
 		}
-		if ( isset($SUMMARY['problems'][$prob]['times']) ) {
-			$SUMMARY['problems'][$prob]['best_time'] = min(@$SUMMARY['problems'][$prob]['times']);
-		} else {
-			$SUMMARY['problems'][$prob]['best_time'] = NULL;
-		}
-
 	}
 
 	return array( 'matrix'     => $MATRIX,
@@ -377,7 +376,9 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 			echo '<td class=';
 			// CSS class for correct/incorrect/neutral results
 			if( $matrix[$team][$prob]['is_correct'] ) {
-				echo '"score_correct"';
+				echo '"score_correct' .
+					( $summary['problems'][$prob]['bestteam']==$team ?
+					  ' score_first' : '') . '"';
 			} elseif ( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
 				echo '"score_pending"';
 			} elseif ( $matrix[$team][$prob]['num_submissions'] > 0 ) {
@@ -449,7 +450,6 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 		}
 		echo "</tbody>\n</table>\n\n";
 	}
-
 
 	return;
 }
