@@ -95,7 +95,9 @@ ALTER TABLE `judging_run`
 
 ALTER TABLE `submission`
   MODIFY COLUMN `sourcecode` longblob NOT NULL COMMENT 'Full source code',
-  ADD COLUM `origsubmitid` int(4) unsigned default NULL COMMENT 'If set, specifies original submission in case of edit/resubmit';
+  ADD COLUMN `origsubmitid` int(4) unsigned default NULL COMMENT 'If set, specifies original submission in case of edit/resubmit' AFTER `submitid`,
+  ADD KEY `origsubmitid` (`origsubmitid`),
+  ADD CONSTRAINT `submission_ibfk_6` FOREIGN KEY (`origsubmitid`) REFERENCES `submission` (`submitid`) ON DELETE SET NULL;
 
 ALTER TABLE `team`
   MODIFY COLUMN `members` longtext COMMENT 'Team member names (freeform)',

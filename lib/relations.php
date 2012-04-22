@@ -84,6 +84,7 @@ $RELATIONS['scoreboard_public'] = array (
 );
 
 $RELATIONS['submission'] = array (
+	'origsubmitid' => 'submission.submitid&SETNULL',
 	'cid' => 'contest.cid',
 	'teamid' => 'team.login',
 	'probid' => 'problem.probid',
