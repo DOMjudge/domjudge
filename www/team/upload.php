@@ -58,9 +58,9 @@ function err($string)
 
 ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
 
-checkFileUpload($_FILES['code']['error']);
-
-$filename = $_FILES['code']['name'];
+foreach ($_FILES['code']['error'] as $errorcode) {
+	checkFileUpload($errorcode);
+}
 
 /* Determine the problem */
 $probid = @$_POST['probid'];
@@ -80,8 +80,8 @@ if ( ! isset($lang) ) err("Unable to find language '$langid'");
 $langid = $lang['langid'];
 
 $sid = submit_solution($login, $probid, $langid,
-                       array($_FILES['code']['tmp_name']),
-                       array($_FILES['code']['name']));
+                       $_FILES['code']['tmp_name'],
+                       $_FILES['code']['name']);
 
 auditlog('submission', $sid, 'added', NONINTERACTIVE?'noninteractive':null);
 

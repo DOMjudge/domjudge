@@ -347,3 +347,6 @@ input.file {
 	z-index: 2;
 }
 
+input#addfile {
+	margin-top: 1ex;
+}
