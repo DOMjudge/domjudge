@@ -366,7 +366,7 @@ int main(int argc, char **argv)
 		} else {
 			printf("  filenames:  ");
 			for(i=0; i<filenames.size(); i++) {
-				printf(" %s\n",filenames[i].c_str());
+				printf(" %s",filenames[i].c_str());
 			}
 			printf("\n");
 		}

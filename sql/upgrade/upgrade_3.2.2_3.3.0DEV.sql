@@ -111,7 +111,7 @@ ALTER TABLE `team_affiliation`
 --
 
 INSERT INTO `submission_file` (`submitid`, `rank`, `sourcecode`, `filename`)
-  SELECT `submitid`, '1', `sourcecode`, CONCAT('source.',`langid`) FROM submission;
+  SELECT `submitid`, '0', `sourcecode`, CONCAT('source.',`langid`) FROM submission;
 
 --
 -- Add/remove sample/initial contents

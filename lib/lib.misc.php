@@ -615,7 +615,7 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 			               'probid' => $probid,
 			               'langid' => $langid,
 			               'rank' => $rank,
-			               'filename' => $filename[$i]);
+			               'filename' => $filenames[$rank]);
 			$tofile = SUBMITDIR . '/' . getSourceFilename($fdata);
 			if ( ! @copy($files[$rank], $tofile) ) {
 				warning("Could not copy '" . $files[$rank] . "' to '" . $tofile . "'");

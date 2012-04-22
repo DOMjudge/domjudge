@@ -10,8 +10,8 @@ SUBMIT = \
 	if [ "$${i%.zip}" != "$$i" ]; then \
 		tmp=`mktemp -d` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
-		main=`grep -l '@EXPECTED-RESULTS@' "$$tmp/"*` ; \
-		$(SUBMITCMD) -q -w1 -p $(PROBLEM) "$$main" "$$tmp/*" ; \
+		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
+		$(SUBMITCMD) -q -w1 -p $(PROBLEM) "$$main" "$$tmp/"* ; \
 		rm -rf "$$tmp" ; \
 	else \
 		$(SUBMITCMD) -q -w1 -p $(PROBLEM) "$$i" ; \
