@@ -55,14 +55,34 @@ if ( isset($_GET['fetch']) ) {
 	exit;
 }
 
-$oldsource = $DB->q('MAYBETUPLE SELECT s.*, f.*, COUNT(g.rank) AS nfiles
-                     FROM submission s
-                     LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
-                     LEFT JOIN submission_file g ON(s.submitid=g.submitid)
-                     WHERE teamid = %s AND probid = %s AND langid = %s AND submittime < %s
-                     GROUP BY g.submitid ORDER BY submittime DESC LIMIT 1',
-                    $source['teamid'],$source['probid'],$source['langid'],
-                    $source['submittime']);
+$sub_resub = "submission";
+if ( $source['origsubmitid'] !== NULL ) {
+	$origsource = $DB->q('MAYBETUPLE SELECT s.*, f.*, COUNT(g.rank) AS nfiles
+			     FROM submission s
+			     LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
+			     LEFT JOIN submission_file g ON(s.submitid=g.submitid)
+			     WHERE s.submitid = %i',
+			    $source['origsubmitid']);
+	$oldsource = $DB->q('MAYBETUPLE SELECT s.*, f.*, COUNT(g.rank) AS nfiles
+			     FROM submission s
+			     LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
+			     LEFT JOIN submission_file g ON(s.submitid=g.submitid)
+			     WHERE teamid = %s AND probid = %s AND langid = %s AND submittime < %s
+			     AND origsubmitid = %i
+			     GROUP BY g.submitid ORDER BY submittime DESC LIMIT 1',
+			    'domjudge',$source['probid'],$source['langid'],
+			    $source['submittime'], $source['origsubmitid']);
+	$sub_resub = "resubmit";
+} else {
+	$oldsource = $DB->q('MAYBETUPLE SELECT s.*, f.*, COUNT(g.rank) AS nfiles
+			     FROM submission s
+			     LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
+			     LEFT JOIN submission_file g ON(s.submitid=g.submitid)
+			     WHERE teamid = %s AND probid = %s AND langid = %s AND submittime < %s
+			     GROUP BY g.submitid ORDER BY submittime DESC LIMIT 1',
+			    $source['teamid'],$source['probid'],$source['langid'],
+			    $source['submittime']);
+}
 
 $title = 'Source: ' . htmlspecialchars($sourcefile);
 require(LIBWWWDIR . '/header.php');
@@ -70,11 +90,14 @@ require(LIBWWWDIR . '/highlight.php');
 
 if ( $source['nfiles']>1 ) warning("Submission $id has multiple source files");
 
+if ( $origsource ) {
+	echo "<p>(This is a resubmit)</p>\n\n";
+}
 if ( $oldsource ) {
-	echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
+	echo "<p><a href=\"#diff\">Go to diff to previous $sub_resub</a></p>\n\n";
 }
 
-echo '<h2 class="filename"><a name="source"></a>Submission ' .
+echo '<h2 class="filename"><a name="source"></a>' . $sub_resub . ' ' .
 	"<a href=\"submission.php?id=$id\">s$id</a> source: " .
 	htmlspecialchars($sourcefile) . " (<a " .
 	"href=\"show_source.php?id=$id&amp;fetch=1\">download</a>, <a " .
@@ -156,7 +179,7 @@ if ( $oldsource ) {
 		$difftext = "DOMjudge: diff functionality not available in PHP or via shell_exec.";
 	}
 
-	echo '<h2 class="filename"><a name="diff"></a>Diff to submission ' .
+	echo '<h2 class="filename"><a name="diff"></a>Diff to ' . $sub_resub . ' ' .
 		"<a href=\"submission.php?id=$oldid\">s$oldid</a> source: " .
 		"<a href=\"show_source.php?id=$oldid\">" .
 		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n";

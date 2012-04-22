@@ -17,7 +17,7 @@ if ( isset($_POST['submitter']) ) {
 	file_put_contents($tmpfname, $_POST['source']);
 
 	submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'],
-	                array($tmpfname), array($_POST['filename']));
+	                array($tmpfname), array($_POST['filename']), $_POST['origsubmitid']);
 	unlink($tmpfname);
 
 	header('Location: submissions.php');
@@ -64,6 +64,7 @@ echo addSelect('langid', $langs, $source['langid'], true);
 echo addHidden('teamid', $source['teamid']);
 echo addHidden('filename', $source['filename']);
 echo addHidden('submitter', 'domjudge');
+echo addHidden('origsubmitid', $source['origsubmitid'] === NULL ? $id : $source['origsubmitid']);
 echo addSubmit('submit');
 
 echo addEndForm();

@@ -234,6 +234,7 @@ CREATE TABLE `scoreboard_public` (
 
 CREATE TABLE `submission` (
   `submitid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
+  `origsubmitid` int(4) unsigned default NULL COMMENT 'If set, specifies original submission in case of edit/resubmit',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',

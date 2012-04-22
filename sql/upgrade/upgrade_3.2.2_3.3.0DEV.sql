@@ -94,7 +94,8 @@ ALTER TABLE `judging_run`
   MODIFY COLUMN `output_error` longblob COMMENT 'Standard error output of the program';
 
 ALTER TABLE `submission`
-  MODIFY COLUMN `sourcecode` longblob NOT NULL COMMENT 'Full source code';
+  MODIFY COLUMN `sourcecode` longblob NOT NULL COMMENT 'Full source code',
+  ADD COLUM `origsubmitid` int(4) unsigned default NULL COMMENT 'If set, specifies original submission in case of edit/resubmit';
 
 ALTER TABLE `team`
   MODIFY COLUMN `members` longtext COMMENT 'Team member names (freeform)',
