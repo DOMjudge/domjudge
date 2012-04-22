@@ -28,6 +28,60 @@ function parseDiff($difftext){
 	return $return;
 }
 
+function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
+	// Try different ways of diffing, in order of preference.
+	if ( function_exists('xdiff_string_diff') ) {
+		// The PECL xdiff PHP-extension.
+
+		$difftext = xdiff_string_diff($oldsource['sourcecode'],
+		                              $source['sourcecode'],2);
+
+	} elseif ( !(bool) ini_get('safe_mode') ||
+		       strtolower(ini_get('safe_mode'))=='off' ) {
+		// Only try executing diff when safe_mode is off, otherwise
+		// the shell_exec will fail.
+
+		if ( is_readable($oldfile) && is_readable($newfile) ) {
+			// A direct diff on the sources in the SUBMITDIR.
+
+			$difftext = `diff -Bt -U 2 $oldfile $newfile 2>&1`;
+
+		} else {
+			// Try generating temporary files for executing diff.
+
+			$oldfile = mkstemps(TMPDIR."/source-old-s$oldid-XXXXXX",0);
+			$newfile = mkstemps(TMPDIR."/source-new-s$id-XXXXXX",0);
+
+			if( ! $oldfile || ! $newfile ) {
+				$difftext = "DOMjudge: error generating temporary files for diff.";
+			} else {
+				$oldhandle = fopen($oldfile,'w');
+				$newhandle = fopen($newfile,'w');
+
+				if( ! $oldhandle || ! $newhandle ) {
+					$difftext = "DOMjudge: error opening temporary files for diff.";
+				} else {
+					if ( (fwrite($oldhandle,$oldsource['sourcecode'])===FALSE) ||
+					     (fwrite($newhandle,   $source['sourcecode'])===FALSE) ) {
+						$difftext = "DOMjudge: error writing temporary files for diff.";
+					} else {
+						$difftext = `diff -Bt -U 2 $oldfile $newfile 2>&1`;
+					}
+				}
+				if ( $oldhandle ) fclose($oldhandle);
+				if ( $newhandle ) fclose($newhandle);
+			}
+
+			if ( $oldfile ) unlink($oldfile);
+			if ( $newfile ) unlink($newfile);
+		}
+	} else {
+		$difftext = "DOMjudge: diff functionality not available in PHP or via shell_exec.";
+	}
+
+	return $difftext;
+}
+
 require('init.php');
 
 $id = (int)$_GET['id'];
@@ -91,10 +145,17 @@ require(LIBWWWDIR . '/highlight.php');
 if ( $source['nfiles']>1 ) warning("Submission $id has multiple source files");
 
 if ( $origsource ) {
-	echo "<p>(This is a resubmit)</p>\n\n";
+	$origid = $source['origsubmitid'];
+	$origtid = $origsource['teamid'];
+	echo "<p>(This is a resubmit; original submission was " .
+		"<a href=\"submission.php?id=$origid\">s$origid</a> of " .
+		"team <a href=\"team.php?id=$origtid\">$origtid</a>.)</p>";
 }
 if ( $oldsource ) {
 	echo "<p><a href=\"#diff\">Go to diff to previous $sub_resub</a></p>\n\n";
+}
+if ( $origsource ) {
+	echo "<p><a href=\"#origdiff\">Go to diff to original submission</a></p>\n\n";
 }
 
 echo '<h2 class="filename"><a name="source"></a>' . $sub_resub . ' ' .
@@ -118,7 +179,6 @@ if ( strlen($source['sourcecode'])==0 ) {
 
 // show diff to old source
 if ( $oldsource ) {
-
 	if ( $oldsource['nfiles']>1 ) {
 		warning("Submission $oldsource[submitid] has multiple source files");
 	}
@@ -129,57 +189,31 @@ if ( $oldsource ) {
 	$newfile = SUBMITDIR.'/'.$sourcefile;
 	$oldid = (int)$oldsource['submitid'];
 
-	// Try different ways of diffing, in order of preference.
-	if ( function_exists('xdiff_string_diff') ) {
-		// The PECL xdiff PHP-extension.
-
-		$difftext = xdiff_string_diff($oldsource['sourcecode'],
-		                              $source['sourcecode'],2);
-
-	} elseif ( !(bool) ini_get('safe_mode') ||
-		       strtolower(ini_get('safe_mode'))=='off' ) {
-		// Only try executing diff when safe_mode is off, otherwise
-		// the shell_exec will fail.
-
-		if ( is_readable($oldfile) && is_readable($newfile) ) {
-			// A direct diff on the sources in the SUBMITDIR.
-
-			$difftext = `diff -Bt -U 2 $oldfile $newfile 2>&1`;
-
-		} else {
-			// Try generating temporary files for executing diff.
-
-			$oldfile = mkstemps(TMPDIR."/source-old-s$oldid-XXXXXX",0);
-			$newfile = mkstemps(TMPDIR."/source-new-s$id-XXXXXX",0);
-
-			if( ! $oldfile || ! $newfile ) {
-				$difftext = "DOMjudge: error generating temporary files for diff.";
-			} else {
-				$oldhandle = fopen($oldfile,'w');
-				$newhandle = fopen($newfile,'w');
-
-				if( ! $oldhandle || ! $newhandle ) {
-					$difftext = "DOMjudge: error opening temporary files for diff.";
-				} else {
-					if ( (fwrite($oldhandle,$oldsource['sourcecode'])===FALSE) ||
-					     (fwrite($newhandle,   $source['sourcecode'])===FALSE) ) {
-						$difftext = "DOMjudge: error writing temporary files for diff.";
-					} else {
-						$difftext = `diff -Bt -U 2 $oldfile $newfile 2>&1`;
-					}
-				}
-				if ( $oldhandle ) fclose($oldhandle);
-				if ( $newhandle ) fclose($newhandle);
-			}
-
-			if ( $oldfile ) unlink($oldfile);
-			if ( $newfile ) unlink($newfile);
-		}
-	} else {
-		$difftext = "DOMjudge: diff functionality not available in PHP or via shell_exec.";
-	}
+	$difftext = createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid);
 
 	echo '<h2 class="filename"><a name="diff"></a>Diff to ' . $sub_resub . ' ' .
+		"<a href=\"submission.php?id=$oldid\">s$oldid</a> source: " .
+		"<a href=\"show_source.php?id=$oldid\">" .
+		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n";
+
+	echo '<pre class="output_text">' . parseDiff($difftext) . "</pre>\n\n";
+}
+
+// show diff to original source
+if ( $origsource ) {
+	if ( $origsource['nfiles']>1 ) {
+		warning("Submission $origsource[submitid] has multiple source files");
+	}
+
+	$oldsourcefile = getSourceFilename($origsource);
+
+	$oldfile = SUBMITDIR.'/'.$oldsourcefile;
+	$newfile = SUBMITDIR.'/'.$sourcefile;
+	$oldid = (int)$origsource['submitid'];
+
+	$difftext = createDiff($source, $newfile, $id, $origsource, $oldfile, $oldid);
+
+	echo '<h2 class="filename"><a name="origdiff"></a>Diff to original source ' .
 		"<a href=\"submission.php?id=$oldid\">s$oldid</a> source: " .
 		"<a href=\"show_source.php?id=$oldid\">" .
 		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n";
