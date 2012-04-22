@@ -10,18 +10,17 @@
 # configuration option turned on, unless proper preconfiguration of
 # the chroot environment has been taken care of!
 
-SOURCE="$1"
-DEST="$2"
-MEMLIMIT="$3"
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+MAINSOURCE="$1"
 
 DESTCLI="${DEST}.exe"
 
-SOURCEDIR=${SOURCE%/*}
-[ "$SOURCEDIR" = "$SOURCE" ] && SOURCEDIR='.'
+SOURCEDIR="${MAINSOURCE%/*}"
+[ "$SOURCEDIR" = "$MAINSOURCE" ] && SOURCEDIR='.'
 
 # Byte-compile:
-echo "gmcs -o+ -out:'$DESTCLI' '$SOURCE'"
-gmcs -o+ -out:"$DESTCLI" "$SOURCE"
+gmcs -o+ -out:"$DESTCLI" "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 

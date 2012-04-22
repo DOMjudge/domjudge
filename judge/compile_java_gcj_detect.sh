@@ -3,15 +3,16 @@
 # Java compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 
-SOURCE="$1"
-DEST="$2"
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+MAINSOURCE="$1"
 MAINCLASS=""
 
 TMPFILE=`mktemp /tmp/domjudge_gcj_output.XXXXXX` || exit 1
 
 # Byte-compile:
 #   -Wall:  Report all warnings
-gcj -d . -Wall -C "$SOURCE" 2> "$TMPFILE"
+gcj -d . -Wall -C "$@" 2> "$TMPFILE"
 EXITCODE=$?
 if [ "$EXITCODE" -ne 0 ]; then
 	# Let's see if should have named the .java differently
@@ -23,9 +24,9 @@ if [ "$EXITCODE" -ne 0 ]; then
 	fi
 	rm -f $TMPFILE
 	echo "Info: renaming source to '$PUBLICCLASS.java'"
-	mv "$SOURCE" "$PUBLICCLASS.java"
-	SOURCE="$PUBLICCLASS.java"
-	gcj -d . -Wall -C "$SOURCE"
+	mv "$MAINSOURCE" "$PUBLICCLASS.java"
+	MAINSOURCE="$PUBLICCLASS.java"
+	gcj -d . -Wall -C "$PUBLICCLASS.java"
 	EXITCODE=$?
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi

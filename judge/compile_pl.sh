@@ -13,19 +13,20 @@
 # configuration option turned on! (Unless proper preconfiguration of
 # the chroot environment has been taken care of.)
 
-SOURCE="$1"
-DEST="$2"
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+MAINSOURCE="$1"
 
 # Check for '#!' interpreter line: don't allow it to prevent teams
 # from passing options to the interpreter.
-if grep '^#!' $SOURCE >/dev/null 2>&1 ; then
+if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
 	echo "Error: interpreter statement(s) found:"
-	grep -n '^#!' $SOURCE
+	grep -n '^#!' "$MAINSOURCE"
 	exit 1
 fi
 
 # Check perl syntax:
-perl -c -W $SOURCE
+perl -c -W "$MAINSOURCE"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
@@ -39,7 +40,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec perl $SOURCE
+exec perl "$MAINSOURCE"
 EOF
 
 chmod a+x $DEST

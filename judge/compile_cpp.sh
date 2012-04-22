@@ -5,6 +5,7 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
+MAINSOURCE="$1"
 
 # -Wall:	Report all warnings
 # -O2:		Level 2 optimizations (default for speed)
