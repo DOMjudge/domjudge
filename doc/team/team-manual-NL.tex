@@ -109,7 +109,7 @@ Hieronder worden beide methodes beschreven.
 
 \subsection{Command-line: \cmd{submit}}
 
-\textbf{Syntax:} \cmd{submit [opties] bestandsnaam.ext}
+\textbf{Syntax:} \cmd{submit [opties] bestandsnaam.ext ...}
 
 Het submitprogramma haalt de naam (label) van het probleem uit
 \cmd{bestandsnaam} en de de programmeertaal uit de extensie
@@ -123,6 +123,11 @@ helptekst niet op \'e\'en scherm past, gebruik dan
 \cmd{submit} zal het bestand controleren en eventueel
 waarschuwingen geven, zoals wanneer het bestand al lange tijd niet
 veranderd is of groter is dan de maximale source-code-grootte.
+Bestandsnamen moeten beginnen met een alfanumeriek teken en
+mogen daarna slechts bestaan uit alfanumerieke tekens en 
+\cmd{.\_-}. Je kunt meerdere bestanden opgeven die deel uit
+moeten maken van deze oplossing (zie sectie~\ref{howjudged}
+`Hoe worden opgaven beoordeeld?').
 
 Hierna geeft \cmd{submit} een kort overzicht met de details van de
 inzending en vraagt om bevestiging. Controleer vooral of je het goede
@@ -147,6 +152,14 @@ door het bestand te selecteren met de \textbf{Select file\ldots}-knop in de
 linker kolom. \DOMjudge probeert het probleem te detecteren uit de
 basis van de bestandsnaam (v\'o\'or de punt) en de programmeertaal uit
 de extensie. Als dat niet lukt, kun je deze handmatig selecteren.
+Bestandsnamen moeten beginnen met een alfanumeriek teken en
+mogen daarna slechts bestaan uit alfanumerieke tekens en 
+\cmd{.\_-}.
+
+Nadat je de eerste bestandsnaam geselecteerd hebt, kun je extra bestanden
+opgeven die deel uit moeten maken van deze oplossing door de knop \textbf{Add
+more files} te gebruiken (zie sectie~\ref{howjudged} `Hoe worden opgaven
+beoordeeld?').
 
 Nadat je op de submitknop geklikt hebt en dit bevestigd hebt, word je
 teruggestuurd naar de overzichtspagina. Daarop staat een
@@ -228,7 +241,7 @@ clarifications kolom.  Je vraag zal alleen bij de jury aankomen; zij
 zullen deze zo snel mogelijk en adequaat beantwoorden. Antwoorden die
 voor iedereen relevant kunnen zijn zullen naar iedereen gestuurd worden.
 
-\section{Hoe worden opgaven beoordeeld?}
+\section{Hoe worden opgaven beoordeeld?}\label{howjudged}
 
 Het \DOMjudge jurysysteem is volledig geautomatiseerd. Dit betekent
 dat er (in principe) geen menselijke interactie is tijdens de
@@ -249,6 +262,11 @@ uitgevoerd en getest te worden op \'e\'en van de jury-computers.
 \subsection{Compileren}
 
 Je programma wordt op een jury-computer onder Linux gecompileerd.
+Alle ingestuurde sourcebestanden worden aan de compiler gegeven die
+hier \'e\'en uit te voeren programma van maakt. Het als eerste
+opgegeven bestand wordt beschouwd als de `main' source, voor talen
+waarbij dat relevant is.
+
 Als je een andere compiler of besturingssysteem gebruikt dan de jury,
 moet dat in principe geen probleem zijn, maar let wel op dat
 je geen compiler/systeem-specifieke dingen gebruikt (afhankelijk van
@@ -285,8 +303,9 @@ opleveren. Mocht dit toch gebeuren bij een normaal programma, laat het
 dan de jury weten.
 
 \item[sourcegrootte]
-De sourcecode van je programma mag maximaal \SOURCESIZE\ kilobytes
-groot zijn, anders wordt je inzending geweigerd.
+De totale hoeveelheid sourcecode per ingestuurde oplossing mag
+maximaal \SOURCESIZE\ kilobytes groot zijn, anders wordt je
+inzending geweigerd.
 
 \item[geheugen]
 Je programma heeft tijdens het draaien maximaal \MEMLIMIT\ kilobytes

@@ -102,7 +102,7 @@ configuration by the jury. A description of both methods follows.
 
 \subsection{Command-line: \cmd{submit}}
 
-\textbf{Syntax:} \cmd{submit [options] filename.ext}
+\textbf{Syntax:} \cmd{submit [options] filename.ext ...}
 
 The submit program takes the name (label) of the problem from
 \cmd{filename} and the programming language from the extension
@@ -115,6 +115,10 @@ when the help text does not fit on one screen.
 \cmd{submit} will check your file and warns you for some problems:
 for example when the file has not been modified for a long time or
 when it's larger than the maximum source code size.
+Filenames must start with an alphanumerical character and may contain only
+alphanumerical characters and \cmd{.\_-}. You can specify multiple files
+to be part of this submission (see section~\ref{howjudged} `How are
+submissions being judged?').
 
 Then \cmd{submit} displays a summary with all details of your
 submission and asks for confirmation. Check whether you are submitting
@@ -138,6 +142,12 @@ In the left column click {\em Select file\ldots} to select the file for submissi
 \DOMjudge will try to determine the problem and
 language from the base and extension of the filename respectively.
 Otherwise, select the appropriate values.
+Filenames must start with an alphanumerical character and may contain only
+alphanumerical characters and \cmd{.\_-}. 
+
+When you've selected the first source file, you may use the {\em Add more
+files} button to specify additional files to be part of this submission (see
+section~\ref{howjudged} `How are submissions being judged?').
 
 After you hit the submit button and confirm the submission, you will
 be redirected back to your submission list page. On this page, a message
@@ -217,7 +227,7 @@ jury. This request is only readable for the jury and they will respond
 as soon as possible. Answers that are relevant for everyone will be
 sent to everyone.
 
-\section{How are submissions being judged?}
+\section{How are submissions being judged?}\label{howjudged}
 
 The \DOMjudge jury system is fully automated. In principle no human
 interaction is necessary. The judging is done in the following way:
@@ -237,6 +247,11 @@ and testing on one of the jury computers.
 \subsection{Compilation}
 
 Your program will be compiled on a jury computer running Linux.
+All submitted source files will be passed to the compiler which
+generates a single program to run out of them; for languages where
+that is relevant, the first specified file will be considered the
+`main' source file.
+
 Using a different compiler or operating system than the jury should
 not be a problem. Be careful however, not to use any special compiler
 and/or system specific things (you may be able to check compiler errors
@@ -273,8 +288,8 @@ problems. Should this happen to a normal program, please inform the
 jury right away.
 
 \item[source size]
-The source code of your program may not exceed \SOURCESIZE\ kilobytes,
-otherwise your submission will be rejected.
+The total amount of source code in a single submission may not exceed
+\SOURCESIZE\ kilobytes, otherwise your submission will be rejected.
 
 \item[memory]
 During execution of your program, there are \MEMLIMIT\ kilobytes of
