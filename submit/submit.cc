@@ -803,8 +803,6 @@ int websubmit()
 	curlsetopt(HTTPGET,       0);
 	curlsetopt(WRITEFUNCTION, writesstream);
 	curlsetopt(WRITEDATA,     (void *)&curloutput);
-	curlsetopt(SSL_VERIFYPEER,0);
-	curlsetopt(SSL_VERIFYHOST,0);
 	curlsetopt(USERAGENT     ,DOMJUDGE_PROGRAM " (" PROGRAM " using cURL)");
 
 	if ( verbose >= LOG_DEBUG ) {
