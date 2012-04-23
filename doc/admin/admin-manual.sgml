@@ -471,10 +471,8 @@ Software required for building DOMjudge:
 
 In the most basic setup the team workstations only need (next to the tools needed
 for program development) a web browser. The web interface fully works with any
-known browser, with the exception of notification of new clarifications in the
-menu bar. That can be updated without reloading the page by using AJAX. This is
-supported by any reasonably current browser with JavaScript enabled.
-
+known browser; JavaScript is not required but will be used when available for
+some convenience functionality.
 
 <label id="install_config:apt-getinstall">
 <sect1>Debian installation command
