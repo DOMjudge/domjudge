@@ -245,18 +245,18 @@ CREATE TABLE `submission` (
   `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'If false ignore this submission in all scoreboard calculations',
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `judgemark` (`judgemark`),
-  KEY `origsubmitid` (`origsubmitid`),
   KEY `teamid` (`cid`,`teamid`),
   KEY `judgehost` (`cid`,`judgehost`),
   KEY `teamid_2` (`teamid`),
   KEY `probid` (`probid`),
   KEY `langid` (`langid`),
   KEY `judgehost_2` (`judgehost`),
+  KEY `origsubmitid` (`origsubmitid`),
   CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
-  CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL
+  CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL,
   CONSTRAINT `submission_ibfk_6` FOREIGN KEY (`origsubmitid`) REFERENCES `submission` (`submitid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All incoming submissions';
 
