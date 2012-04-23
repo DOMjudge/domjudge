@@ -785,8 +785,10 @@ int websubmit()
 		error(0,"libcurl could not add form field '%s'='%s'",namecont,valcont)
 
 	/* Fill post form */
-	/* FIXME: need multifile support, also in team web-interface */
-	curlformadd(COPYNAME,"code[]", FILE,        filenames[0].c_str());
+
+	for(unsigned int i=0; i<filenames.size(); i++) {
+		curlformadd(COPYNAME,"code[]", FILE, filenames[i].c_str());
+	}
 	curlformadd(COPYNAME,"probid", COPYCONTENTS,problem.c_str());
 	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
 	curlformadd(COPYNAME,"noninteractive",COPYCONTENTS,"1");
