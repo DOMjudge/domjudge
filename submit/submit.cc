@@ -771,7 +771,7 @@ int websubmit()
 
 	handle = curl_easy_init();
 
-/* helper macro's to easily set curl options and fill forms */
+/* helper macros to easily set curl options and fill forms */
 #define curlsetopt(opt,val) \
 	if ( curl_easy_setopt(handle, CURLOPT_ ## opt, val)!=CURLE_OK ) { \
 		warning(0,"setting curl option '" #opt "': %s, aborting download",curlerrormsg); \
@@ -786,7 +786,7 @@ int websubmit()
 
 	/* Fill post form */
 	/* FIXME: need multifile support, also in team web-interface */
-	curlformadd(COPYNAME,"code",   FILE,        filenames[0].c_str());
+	curlformadd(COPYNAME,"code[]", FILE,        filenames[0].c_str());
 	curlformadd(COPYNAME,"probid", COPYCONTENTS,problem.c_str());
 	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
 	curlformadd(COPYNAME,"noninteractive",COPYCONTENTS,"1");
