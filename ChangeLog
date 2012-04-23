@@ -50,6 +50,9 @@ Version 3.3.0 - DEV
    is logged for each remapping done.
  - Transparant redirection of stdio through runguard, Closes: #89.
  - Display first solved in scoreboard (suggested by Andrés Mejía).
+ - Fix source code diff function to work with resubmitting modified
+   source from the jury interface.
+ - Support submissions consisting of multiple source files.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
