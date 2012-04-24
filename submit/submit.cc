@@ -786,7 +786,7 @@ int websubmit()
 
 	/* Fill post form */
 
-	for(unsigned int i=0; i<filenames.size(); i++) {
+	for(size_t i=0; i<filenames.size(); i++) {
 		curlformadd(COPYNAME,"code[]", FILE, filenames[i].c_str());
 	}
 	curlformadd(COPYNAME,"probid", COPYCONTENTS,problem.c_str());
