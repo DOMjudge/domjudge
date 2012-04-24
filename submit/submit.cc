@@ -438,18 +438,18 @@ void usage()
 "\n"
 "For PROBLEM use the ID of the problem (letter, number or short name)\n"
 "in lower- or uppercase. When not specified, PROBLEM defaults to the\n"
-"first FILENAME excluding the extension.\n"
-"For example, 'c.java' will indicate problem 'C'.\n"
+"first FILENAME excluding the extension. For example, 'c.java' will\n"
+"indicate problem 'C'.\n"
 "\n"
 "For LANGUAGE use one of the following extensions in lower- or uppercase:\n");
 	for(i=0; i<languages.size(); i++) {
-		printf("   %-10s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
+		printf("   %-15s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
 		for(j=2; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
 		printf("\n");
 	}
 	printf(
-"The default for LANGUAGE is the extension of FILENAME.\n"
-"For example, 'c.java' wil indicate a Java solution.\n"
+"The default for LANGUAGE is the extension of FILENAME. For example,\n"
+"'c.java' will indicate a Java solution.\n"
 "\n"
 "Examples:\n"
 "\n");
@@ -458,18 +458,18 @@ void usage()
 	printf("Submit problem 'e' in C++:\n"
 	       "    %s --problem e --language=cpp ProblemE.cc\n\n",progname);
 	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
-	       "    %s -p hello -l C HelloWorld.java\n\n",progname);
+	       "    %s -p hello -l C HelloWorld.cpp\n\n",progname);
 	printf("Submit multiple files (the problem and languare are taken from the first):\n"
 	       "    %s hello.java message.java\n\n",progname);
 	printf(
 "The following options should not be necessary for normal use:\n"
 "\n"
 #if ( SUBMIT_ENABLE_CMD )
-"For TEAM use the login of the account, you want to submit for.\n"
-"The default value for TEAM is taken from the environment variable\n"
-"'TEAM' or your login name if 'TEAM' is not defined.\n"
+"Specify with TEAM the team ID you want to submit as. The default\n"
+"value for TEAM is taken from the environment variable 'TEAM' or\n"
+"your login name if 'TEAM' is not defined.\n"
 "\n"
-"For SERVER use the servername or IP-address of the submit-server.\n"
+"Set SERVER to the hostname or IP-address of the submit-server.\n"
 "The default value for SERVER is defined internally or otherwise\n"
 "taken from the environment variable 'SUBMITSERVER', or 'localhost'\n"
 "if 'SUBMITSERVER' is not defined; PORT can be used to set an alternative\n"
@@ -477,13 +477,13 @@ void usage()
 "\n"
 #endif
 #if ( SUBMIT_ENABLE_WEB )
-"For URL use the base address of the webinterface without the\n"
+"Set URL to the base address of the webinterface without the\n"
 "'team/upload.php' suffix.\n"
 "\n"
 #endif
 #if ( SUBMIT_ENABLE_WEB && SUBMIT_ENABLE_CMD )
-"The TEAM/SERVER/PORT and URL options are only used when submitting to the\n"
-"commandline daemon or webinterface respectively.\n"
+"The TEAM/SERVER/PORT options are only used when submitting to the\n"
+"commandline daemon, and URL only when using the webinterface.\n"
 #endif
 	);
 	exit(0);
