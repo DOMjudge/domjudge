@@ -325,15 +325,48 @@ if ( isset($jid) )  {
 	                WHERE t.probid = %s ORDER BY rank',
 	               $jid, $submdata['probid']);
 	$runinfo = $runs->gettable();
+	$lastsubmitid = $DB->q('MAYBEVALUE SELECT submitid
+			     FROM submission
+			     WHERE teamid = %s AND probid = %s AND submittime < %s
+			     ORDER BY submittime DESC LIMIT 1',
+			    $submdata['teamid'],$submdata['probid'],
+			    $submdata['submittime']);
+	if ( $lastsubmitid !== NULL ) {
+		$lastjid = $DB->q('MAYBEVALUE SELECT judgingid
+				FROM judging
+				WHERE submitid = %s AND valid = 1
+				ORDER BY judgingid DESC LIMIT 1',
+				$lastsubmitid);
+		if ( $lastjid !== NULL ) {
+			$lastruns = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
+					LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
+								     r.judgingid = %i )
+					WHERE t.probid = %s ORDER BY rank',
+				       $lastjid, $submdata['probid']);
+			$lastruninfo = $lastruns->gettable();
+		}
+	}
 
-	echo "<h3 id=\"testcases\">Testcase runs</h3>\n\n";
+	echo "<h3 id=\"testcases\">Testcase runs " .
+		"<a href=\"javascript:togglelastruns();\">" .
+		"<span style=\"font-size:xx-small;\">show/hide previous runs</span>" .
+		"</a></h3>\n\n";
 
 	echo "<table class=\"list\">\n<thead>\n" .
 		"<tr><th scope=\"col\">#</th><th scope=\"col\">runtime</th>" .
-	    "<th scope=\"col\">result</th><th scope=\"col\">description</th>" .
+		"<th scope=\"col\">result</th>";
+	if ( $lastjid !== NULL ) {
+		$link = "submission.php?id=$lastsubmitid";
+		echo "<th scope=\"col\" name=\"lastruntime\"><a href=\"$link\">" .
+			"<span class=\"disabled\">s$lastsubmitid runtime</span></a></th>" .
+			"<th scope=\"col\" name=\"lastresult\"><a href=\"$link\">" .
+			"<span class=\"disabled\">s$lastsubmitid result</span></a></th>";
+	}
+
+	echo "<th scope=\"col\">description</th>" .
 	    "</tr>\n</thead>\n<tbody>\n";
 
-	foreach ( $runinfo as $run ) {
+	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
 		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
 		    "<td><a href=\"$link\">$run[runtime]</a></td>" .
@@ -346,12 +379,26 @@ if ( isset($jid) )  {
 		default:
 			echo 'sol_incorrect';
 		}
-		echo "\">$run[runresult]</span></a></td>" .
-		    "<td><a href=\"$link\">" .
+		echo "\">$run[runresult]</span></a></td>";
+		if ( $lastjid !== NULL ) {
+			$lastrun = $lastruninfo[$key];
+			echo "<td name=\"lastruntime\"><a href=\"$link\"><span class=\"disabled\">$lastrun[runtime]</span></a></td>" .
+				"<td name=\"lastresult\"><a href=\"$link\"><span class=\"sol disabled\">$lastrun[runresult]</span></a></td>";
+		}
+
+		echo "<td><a href=\"$link\">" .
 		    htmlspecialchars(str_cut($run['description'],20)) . "</a></td>" .
 			"</tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
+
+?>
+<script type="text/javascript" language="JavaScript">
+<!--
+togglelastruns();
+-->
+</script>
+<?php
 
 	foreach ( $runinfo as $run ) {
 

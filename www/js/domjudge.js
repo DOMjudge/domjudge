@@ -243,3 +243,13 @@ function addFileUpload() {
 	document.getElementById('auxfiles').appendChild( input );
 	document.getElementById('auxfiles').appendChild( br );
 }
+
+function togglelastruns() {
+	var names = {'lastruntime':0, 'lastresult':1};
+	for (var name in names) {
+		cells = document.getElementsByName(name);
+		for (i = 0; i < cells.length; i++) {
+			cells[i].style.display = (cells[i].style.display == 'none') ? 'table-cell' : 'none';
+		}
+	}
+}
