@@ -34,7 +34,7 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 		// The PECL xdiff PHP-extension.
 
 		$difftext = xdiff_string_diff($oldsource['sourcecode'],
-		                              $source['sourcecode'],2);
+					      $source['sourcecode'],2);
 
 	} elseif ( !(bool) ini_get('safe_mode') ||
 		       strtolower(ini_get('safe_mode'))=='off' ) {
@@ -82,143 +82,165 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 	return $difftext;
 }
 
+function presentSource ($sourcedata, $langid)
+{
+	$head = '<h2 class="filename"><a name="source' . htmlspecialchars($sourcedata['rank']) .
+		'"></a>source: ' .
+		htmlspecialchars($sourcedata['filename']) . " <a " .
+		"href=\"show_source.php?id=" . htmlspecialchars($sourcedata['submitid']) .
+		"&amp;fetch=" . htmlspecialchars($sourcedata['rank']) .
+		"\"><img class=\"picto\" src=\"../images/b_save.png\" alt=\"download\" title=\"download\" /></a></h2>\n\n";
+
+	if ( strlen($sourcedata['sourcecode'])==0 ) {
+		// Someone submitted an empty file. Cope gracefully.
+		return $head . "<p class=\"nodata\">empty file</p>\n\n";
+	} 
+	if ( strlen($sourcedata['sourcecode']) < 10 * 1024 ) {
+		// Source < 10kB (for longer source code,
+		// highlighter tends to take very long time or timeout)
+		return $head . highlight($sourcedata['sourcecode'], $langid);
+	}
+	
+	return $head . highlight_native($sourcedata['sourcecode'], $langid);
+}
+
+function presentDiff ($old, $new)
+{
+	$oldsourcefile = getSourceFilename($old);
+	$newsourcefile = getSourceFilename($new);
+
+	$difftext = createDiff($new['sourcecode'], SUBMITDIR.'/'.$newsourcefile, $new['submitid'],
+	                       $old['sourcecode'], SUBMITDIR.'/'.$oldsourcefile, $old['submitid']);
+
+	$oldid = htmlspecialchars($old['submitid']);
+	return '<h2 class="filename"><a name="diff"></a>Diff to ' .
+		"<a href=\"submission.php?id=$oldid\">s$oldid</a> source: " .
+		"<a href=\"show_source.php?id=$oldid\">" .
+		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n" .
+
+	        '<pre class="output_text">' . parseSourceDiff($difftext) . "</pre>\n\n";
+}
+
+
+
 require('init.php');
 
+// FIXME/questions:
+// - content-disposition: attachment instead of inline, content-type octet-stream?
+// - filenames: display team filenames (a.java) or 'domjudge' filenames (c1.s2.bla..)?
+//   for downloads: same question do we want the 'domjudge' filenames at all?
+//   alternative: store on disk as SUBMITDIR/c1/s12.etc/a.java. This does lose some of the
+//   metadata (rank) which is currently encoded in the filename. Or: use 'domjudge' filenames
+//   ONLY on disk.
+// - does table submission_file need UNIQUE on (submitid,filename) and on (submitid,rank)?
+// - code allows for some refactoring and layout polishing
+// - edit multiple source
+
 $id = (int)$_GET['id'];
-
-/* FIXME: this currently only shows the first source file of a
- * multiple file submission; need to think about how to show and diff
- * a multifile submission.
- */
-$source = $DB->q('MAYBETUPLE SELECT s.*, f.*, COUNT(g.rank) AS nfiles
-                  FROM submission s
-                  LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
-                  LEFT JOIN submission_file g ON(s.submitid=g.submitid)
-                  WHERE s.submitid = %i GROUP BY g.submitid',$id);
-if ( empty($source) ) error ("Submission $id not found");
-
-$sourcefile = getSourceFilename($source);
+$submission = $DB->q('MAYBETUPLE SELECT * FROM submission s
+	      WHERE submitid = %i',$id);
+if ( empty($submission) ) error ("Submission $id not found");
 
 // Download was requested
 if ( isset($_GET['fetch']) ) {
-	header("Content-Type: text/plain; name=\"$sourcefile\"; charset=" . DJ_CHARACTER_SET);
-	header("Content-Disposition: inline; filename=\"$sourcefile\"");
-	header("Content-Length: " . strlen($source['sourcecode']));
 
-	echo $source['sourcecode'];
+	$row = $DB->q('TUPLE SELECT filename, sourcecode FROM submission_file
+	               WHERE submitid = %i AND rank = %i', $id, $_GET['fetch']);
+	header("Content-Type: text/plain; name=\"" . $row['filename'] . "\"; charset=" . DJ_CHARACTER_SET);
+	header("Content-Disposition: inline; filename=\"" . $row['filename'] . "\"");
+	header("Content-Length: " . strlen($row['sourcecode']));
+
+	echo $row['sourcecode'];
 	exit;
 }
 
-$sub_resub = "submission";
-if ( $source['origsubmitid'] !== NULL ) {
-	$origsource = $DB->q('MAYBETUPLE SELECT s.*, f.*, COUNT(g.rank) AS nfiles
-			     FROM submission s
-			     LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
-			     LEFT JOIN submission_file g ON(s.submitid=g.submitid)
-			     WHERE s.submitid = %i',
-			    $source['origsubmitid']);
-	$oldsource = $DB->q('MAYBETUPLE SELECT s.*, f.*, COUNT(g.rank) AS nfiles
-			     FROM submission s
-			     LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
-			     LEFT JOIN submission_file g ON(s.submitid=g.submitid)
-			     WHERE teamid = %s AND probid = %s AND langid = %s AND submittime < %s
-			     AND origsubmitid = %i
-			     GROUP BY g.submitid ORDER BY submittime DESC LIMIT 1',
-			    'domjudge',$source['probid'],$source['langid'],
-			    $source['submittime'], $source['origsubmitid']);
-	$sub_resub = "resubmit";
-} else {
-	$oldsource = $DB->q('MAYBETUPLE SELECT s.*, f.*, COUNT(g.rank) AS nfiles
-			     FROM submission s
-			     LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
-			     LEFT JOIN submission_file g ON(s.submitid=g.submitid)
-			     WHERE teamid = %s AND probid = %s AND langid = %s AND submittime < %s
-			     GROUP BY g.submitid ORDER BY submittime DESC LIMIT 1',
-			    $source['teamid'],$source['probid'],$source['langid'],
-			    $source['submittime']);
-}
-
-$title = 'Source: ' . htmlspecialchars($sourcefile);
+$title = "Source: s$id";
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/highlight.php');
 
-if ( $source['nfiles']>1 ) warning("Submission $id has multiple source files");
-
-if ( $origsource ) {
-	$origid = $source['origsubmitid'];
-	$origtid = $origsource['teamid'];
-	echo "<p>(This is a resubmit; original submission was " .
-		"<a href=\"submission.php?id=$origid\">s$origid</a> of " .
-		"team <a href=\"team.php?id=$origtid\">$origtid</a>.)</p>";
+echo "<h2>Source code for submission s" .htmlspecialchars($id);
+if ( !empty($submission['origsubmitid']) ) {
+	echo  " (resubmit of s" . htmlspecialchars($submission['origsubmitid']) . ")";
 }
-if ( $oldsource ) {
-	echo "<p><a href=\"#diff\">Go to diff to previous $sub_resub</a></p>\n\n";
-}
-if ( $origsource ) {
-	echo "<p><a href=\"#origdiff\">Go to diff to original submission</a></p>\n\n";
+echo "</h2>\n\n";
+
+
+// display highlighted content of the source files
+$sources = $DB->q('TABLE SELECT *
+                   FROM submission_file LEFT JOIN submission USING(submitid)
+                   WHERE submitid = %i ORDER BY rank', $id);
+
+$html = "";
+foreach($sources as $sourcedata)
+{
+	$html .= presentSource($sourcedata, $submission['langid']);	
 }
 
-echo '<h2 class="filename"><a name="source"></a>' . $sub_resub . ' ' .
-	"<a href=\"submission.php?id=$id\">s$id</a> source: " .
-	htmlspecialchars($sourcefile) . " (<a " .
-	"href=\"show_source.php?id=$id&amp;fetch=1\">download</a>, <a " .
-	"href=\"edit_source.php?id=$id\">edit</a>)</h2>\n\n";
+// display diff between previous and/or original submission
 
-if ( strlen($source['sourcecode'])==0 ) {
-	// Someone submitted an empty file. Cope gracefully.
-	echo "<p class=\"nodata\">empty file</p>\n\n";
-} elseif ( strlen($source['sourcecode']) < 10 * 1024 ) {
-	// Source < 10kB (for longer source code,
-	// highlighter tends to take very long time or timeout)
-	highlight($source['sourcecode'], $source['langid']);
+if ($submission['origsubmitid']) {
+	$origdata    = $DB->q('TUPLE SELECT * FROM submission
+	                       WHERE submitid = %i', $submission['origsubmitid']);
+	$origsources = $DB->q('TABLE SELECT * FROM submission_file
+	                       WHERE submitid = %i', $submission['origsubmitid']);
+	$olddata     = $DB->q('MAYBETUPLE SELECT * FROM submission
+	                       WHERE teamid = %s AND probid = %s AND langid = %s AND submittime < %s
+	                       AND origsubmitid = %i ORDER BY submittime DESC LIMIT 1',
+	                      'domjudge',$submission['probid'],$submission['langid'],
+	                      $submission['submittime'], $submission['origsubmitid']);
+	$oldsources  = $DB->q('TABLE SELECT * FROM submission_file
+	                       WHERE submitid = %i', $olddata['submitid']);
 } else {
-	// Fall back to built-in simple formatter
-	highlight_native($source['sourcecode'], $source['langid']);
+	$olddata     = $DB->q('MAYBETUPLE SELECT * FROM submission
+	                       WHERE teamid = %s AND probid = %s AND langid = %s AND submittime < %s
+	                       ORDER BY submittime DESC LIMIT 1',
+	                      $submission['teamid'],$submission['probid'],$submission['langid'],
+	                      $submission['submittime']);
+	$oldsources  = $DB->q('TABLE SELECT * FROM submission_file
+	                       WHERE submitid = %i', $olddata['submitid']);
 }
 
+// if both current and previous submission have just one file, diff them directly
+if (count($sources) == 1 && count($oldsources) == 1 ) {
+	// FIXME: edit/resubmit, including diffs currently only supports single files
+	$html .= "(<a href=\"edit_source.php?id=$id\">edit</a>)\n\n";
 
-// show diff to old source
-if ( $oldsource ) {
-	if ( $oldsource['nfiles']>1 ) {
-		warning("Submission $oldsource[submitid] has multiple source files");
+	$html .= presentDiff ( array_merge($oldsources[0],$olddata), $sources[0] );
+} else {
+	$newfilenames = $fileschanged = $filesunchanged = array();
+	foreach($sources as $newsource) {
+		$oldfilenames = array();
+		foreach($oldsources as $oldsource) {
+			if($newsource['filename'] == $oldsource['filename']) {
+				if ( $oldsource['sourcecode'] == $newsource['sourcecode'] ) {
+					$filesunchanged[] = $newsource['filename'];
+				} else {
+					$fileschanged[] = $newsource['filename'];
+					$html .= presentDiff ( array_merge($oldsource,$olddata), $newsource );
+				}
+			}
+			$oldfilenames[] = $oldsource['filename'];
+		}
+		$newfilenames[] = $newsource['filename'];
 	}
+	$filesadded   = array_diff($newfilenames,$oldfilenames);
+	$filesremoved = array_diff($oldfilenames,$newfilenames);
 
-	$oldsourcefile = getSourceFilename($oldsource);
-
-	$oldfile = SUBMITDIR.'/'.$oldsourcefile;
-	$newfile = SUBMITDIR.'/'.$sourcefile;
-	$oldid = (int)$oldsource['submitid'];
-
-	$difftext = createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid);
-
-	echo '<h2 class="filename"><a name="diff"></a>Diff to ' . $sub_resub . ' ' .
-		"<a href=\"submission.php?id=$oldid\">s$oldid</a> source: " .
-		"<a href=\"show_source.php?id=$oldid\">" .
-		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n";
-
-	echo '<pre class="output_text">' . parseSourceDiff($difftext) . "</pre>\n\n";
+	echo "<table>\n" .
+	     "<tr><td>Files added:</td><td class=\"filename\">" . implode(' ', $filesadded) . "</td></tr>\n" .
+	     "<tr><td>Files removed:</td><td class=\"filename\">" . implode(' ', $filesremoved) . "</td></tr>\n" .
+	     "<tr><td>Files unchanged:</td><td class=\"filename\">" . implode(' ', $filesunchanged) . "</td></tr>\n" .
+	     "<tr><td>Files changed:</td><td class=\"filename\">" . implode(' ', $fileschanged) . "</td></tr>\n" .
+	     "</table>\n\n";
 }
 
-// show diff to original source
-if ( $origsource ) {
-	if ( $origsource['nfiles']>1 ) {
-		warning("Submission $origsource[submitid] has multiple source files");
-	}
+// FIXME: edit/resubmit, including diffs currently only supports single files
+if ( !empty($origsources) ) {
+	$html .= "<h2>Diff to original submission</h2>\n\n";
+	$html .= presentDiff ( array_merge($origsources[0],$origdata), $sources[0] );
 
-	$oldsourcefile = getSourceFilename($origsource);
-
-	$oldfile = SUBMITDIR.'/'.$oldsourcefile;
-	$newfile = SUBMITDIR.'/'.$sourcefile;
-	$oldid = (int)$origsource['submitid'];
-
-	$difftext = createDiff($source, $newfile, $id, $origsource, $oldfile, $oldid);
-
-	echo '<h2 class="filename"><a name="origdiff"></a>Diff to original source ' .
-		"<a href=\"submission.php?id=$oldid\">s$oldid</a> source: " .
-		"<a href=\"show_source.php?id=$oldid\">" .
-		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n";
-
-	echo '<pre class="output_text">' . parseSourceDiff($difftext) . "</pre>\n\n";
 }
+
+echo $html;
 
 require(LIBWWWDIR . '/footer.php');
