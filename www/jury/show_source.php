@@ -196,7 +196,7 @@ if ( $oldsource ) {
 		"<a href=\"show_source.php?id=$oldid\">" .
 		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n";
 
-	echo '<pre class="output_text">' . parseDiff($difftext) . "</pre>\n\n";
+	echo '<pre class="output_text">' . parseSourceDiff($difftext) . "</pre>\n\n";
 }
 
 // show diff to original source
