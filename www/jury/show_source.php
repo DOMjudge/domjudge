@@ -84,24 +84,26 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 
 function presentSource ($sourcedata, $langid)
 {
-	$head = '<h2 class="filename"><a name="source' . htmlspecialchars($sourcedata['rank']) .
-		'"></a>source: ' .
-		htmlspecialchars($sourcedata['filename']) . " <a " .
+	$head = '<div class="tabbertab">' .
+		'<h2 class="filename"><a name="source' . htmlspecialchars($sourcedata['rank']) .
+		'"></a>' .
+		htmlspecialchars($sourcedata['filename']) . "</h2> <a " .
 		"href=\"show_source.php?id=" . htmlspecialchars($sourcedata['submitid']) .
 		"&amp;fetch=" . htmlspecialchars($sourcedata['rank']) .
-		"\"><img class=\"picto\" src=\"../images/b_save.png\" alt=\"download\" title=\"download\" /></a></h2>\n\n";
+		"\"><img class=\"picto\" src=\"../images/b_save.png\" alt=\"download\" title=\"download\" /></a>\n\n";
 
 	if ( strlen($sourcedata['sourcecode'])==0 ) {
 		// Someone submitted an empty file. Cope gracefully.
-		return $head . "<p class=\"nodata\">empty file</p>\n\n";
-	} 
-	if ( strlen($sourcedata['sourcecode']) < 10 * 1024 ) {
+		$head .= "<p class=\"nodata\">empty file</p>\n\n";
+	} else if ( strlen($sourcedata['sourcecode']) < 10 * 1024 ) {
 		// Source < 10kB (for longer source code,
 		// highlighter tends to take very long time or timeout)
-		return $head . highlight($sourcedata['sourcecode'], $langid);
+		$head .= highlight($sourcedata['sourcecode'], $langid);
+	} else {
+		$head .= highlight_native($sourcedata['sourcecode'], $langid);
 	}
-	
-	return $head . highlight_native($sourcedata['sourcecode'], $langid);
+
+	return $head .= '</div>';
 }
 
 function presentDiff ($old, $new)
@@ -113,12 +115,12 @@ function presentDiff ($old, $new)
 	                       $old['sourcecode'], SUBMITDIR.'/'.$oldsourcefile, $old['submitid']);
 
 	$oldid = htmlspecialchars($old['submitid']);
-	return '<h2 class="filename"><a name="diff"></a>Diff to ' .
-		"<a href=\"submission.php?id=$oldid\">s$oldid</a> source: " .
-		"<a href=\"show_source.php?id=$oldid\">" .
-		htmlspecialchars($oldsourcefile) . "</a></h2>\n\n" .
+	return '<div class="tabbertab">' .
+		'<h2 class="filename"><a name="diff"></a>' .
+		htmlspecialchars($old['filename']) . "</h2>\n\n" .
 
-	        '<pre class="output_text">' . parseSourceDiff($difftext) . "</pre>\n\n";
+		'<pre class="output_text">' . parseSourceDiff($difftext) . "</pre>\n\n" .
+		'</div>';
 }
 
 
@@ -170,11 +172,13 @@ $sources = $DB->q('TABLE SELECT *
                    FROM submission_file LEFT JOIN submission USING(submitid)
                    WHERE submitid = %i ORDER BY rank', $id);
 
-$html = "";
+$html = '<script type="text/javascript" src="../js/tabber.js"></script>' .
+	'<div class="tabber">';
 foreach($sources as $sourcedata)
 {
 	$html .= presentSource($sourcedata, $submission['langid']);	
 }
+$html .= "</div>";
 
 // display diff between previous and/or original submission
 
@@ -200,38 +204,46 @@ if ($submission['origsubmitid']) {
 	                       WHERE submitid = %i', $olddata['submitid']);
 }
 
-// if both current and previous submission have just one file, diff them directly
-if (count($sources) == 1 && count($oldsources) == 1 ) {
-	// FIXME: edit/resubmit, including diffs currently only supports single files
-	$html .= "(<a href=\"edit_source.php?id=$id\">edit</a>)\n\n";
+if ($olddata !== NULL) {
+	$oldid = $olddata['submitid'];
+	$html .= "<h2>Diff to submission <a href=\"submission.php?id=$oldid\">s$oldid</a></h2>";
+	$html .= '<div class="tabber">';
 
-	$html .= presentDiff ( array_merge($oldsources[0],$olddata), $sources[0] );
-} else {
-	$newfilenames = $fileschanged = $filesunchanged = array();
-	foreach($sources as $newsource) {
-		$oldfilenames = array();
-		foreach($oldsources as $oldsource) {
-			if($newsource['filename'] == $oldsource['filename']) {
-				if ( $oldsource['sourcecode'] == $newsource['sourcecode'] ) {
-					$filesunchanged[] = $newsource['filename'];
-				} else {
-					$fileschanged[] = $newsource['filename'];
-					$html .= presentDiff ( array_merge($oldsource,$olddata), $newsource );
+	// if both current and previous submission have just one file, diff them directly
+	if (count($sources) == 1 && count($oldsources) == 1 ) {
+		// FIXME: edit/resubmit, including diffs currently only supports single files
+		$html .= "(<a href=\"edit_source.php?id=$id\">edit</a>)\n\n";
+
+		$html .= presentDiff ( array_merge($oldsources[0],$olddata), $sources[0] );
+	} else {
+		$newfilenames = $fileschanged = $filesunchanged = array();
+		foreach($sources as $newsource) {
+			$oldfilenames = array();
+			foreach($oldsources as $oldsource) {
+				if($newsource['filename'] == $oldsource['filename']) {
+					if ( $oldsource['sourcecode'] == $newsource['sourcecode'] ) {
+						$filesunchanged[] = $newsource['filename'];
+					} else {
+						$fileschanged[] = $newsource['filename'];
+						$html .= presentDiff ( array_merge($oldsource,$olddata), $newsource );
+					}
 				}
+				$oldfilenames[] = $oldsource['filename'];
 			}
-			$oldfilenames[] = $oldsource['filename'];
+			$newfilenames[] = $newsource['filename'];
 		}
-		$newfilenames[] = $newsource['filename'];
-	}
-	$filesadded   = array_diff($newfilenames,$oldfilenames);
-	$filesremoved = array_diff($oldfilenames,$newfilenames);
+		$filesadded   = array_diff($newfilenames,$oldfilenames);
+		$filesremoved = array_diff($oldfilenames,$newfilenames);
 
-	echo "<table>\n" .
-	     "<tr><td>Files added:</td><td class=\"filename\">" . implode(' ', $filesadded) . "</td></tr>\n" .
-	     "<tr><td>Files removed:</td><td class=\"filename\">" . implode(' ', $filesremoved) . "</td></tr>\n" .
-	     "<tr><td>Files unchanged:</td><td class=\"filename\">" . implode(' ', $filesunchanged) . "</td></tr>\n" .
-	     "<tr><td>Files changed:</td><td class=\"filename\">" . implode(' ', $fileschanged) . "</td></tr>\n" .
-	     "</table>\n\n";
+		echo "<table>\n" .
+		     "<tr><td>Files added:</td><td class=\"filename\">" . implode(' ', $filesadded) . "</td></tr>\n" .
+		     "<tr><td>Files removed:</td><td class=\"filename\">" . implode(' ', $filesremoved) . "</td></tr>\n" .
+		     "<tr><td>Files unchanged:</td><td class=\"filename\">" . implode(' ', $filesunchanged) . "</td></tr>\n" .
+		     "<tr><td>Files changed:</td><td class=\"filename\">" . implode(' ', $fileschanged) . "</td></tr>\n" .
+		     "</table>\n\n";
+	}
+
+	$html .= '</div>';
 }
 
 // FIXME: edit/resubmit, including diffs currently only supports single files
