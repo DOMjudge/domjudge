@@ -289,34 +289,35 @@ if ( isset($jid) )  {
 	                       $submdata['teamid'],$submdata['probid'],
 	                       $submdata['submittime']);
 	if ( $lastsubmitid !== NULL ) {
-		$lastjid = $DB->q('MAYBEVALUE SELECT judgingid
+		$lastjud = $DB->q('MAYBETUPLE SELECT *
 		                   FROM judging
 		                   WHERE submitid = %s AND valid = 1
 		                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
-		if ( $lastjid !== NULL ) {
+		if ( $lastjud !== NULL ) {
 			$lastruns = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
 			                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 			                                                 r.judgingid = %i )
 			                    WHERE t.probid = %s ORDER BY rank',
-			                   $lastjid, $submdata['probid']);
+			                   $lastjud['judgingid'], $submdata['probid']);
 			$lastruninfo = $lastruns->gettable();
 		}
 	}
 
 	echo "<h3 id=\"testcases\">Testcase runs " .
-		"<a href=\"javascript:togglelastruns();\">" .
-		"<span style=\"font-size:xx-small;\">show/hide previous runs</span>" .
-		"</a></h3>\n\n";
+	    ( $lastjud === NULL ? '' :
+	      "<span style=\"font-size:xx-small;\">" .
+	      "<a href=\"javascript:togglelastruns();\">show/hide results of previous</a> " .
+	      "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a></span>" ) .
+	    "</h3>\n\n";
 
 	echo "<table class=\"list\">\n<thead>\n" .
 		"<tr><th scope=\"col\">#</th><th scope=\"col\">runtime</th>" .
 		"<th scope=\"col\">result</th>";
-	if ( $lastjid !== NULL ) {
-		$link = "submission.php?id=$lastsubmitid";
-		echo "<th scope=\"col\" name=\"lastruntime\"><a href=\"$link\">" .
-			"<span class=\"disabled\">s$lastsubmitid runtime</span></a></th>" .
-			"<th scope=\"col\" name=\"lastresult\"><a href=\"$link\">" .
-			"<span class=\"disabled\">s$lastsubmitid result</span></a></th>";
+	if ( $lastjud !== NULL ) {
+		echo "<th scope=\"col\" name=\"lastruntime\">" .
+			"<span class=\"disabled\">s$lastsubmitid runtime</span></th>" .
+			"<th scope=\"col\" name=\"lastresult\">" .
+			"<span class=\"disabled\">s$lastsubmitid result</span></th>";
 	}
 
 	echo "<th scope=\"col\">description</th>" .
@@ -336,10 +337,13 @@ if ( isset($jid) )  {
 			echo 'sol_incorrect';
 		}
 		echo "\">$run[runresult]</span></a></td>";
-		if ( $lastjid !== NULL ) {
+		if ( $lastjud !== NULL ) {
 			$lastrun = $lastruninfo[$key];
-			echo "<td name=\"lastruntime\"><a href=\"$link\"><span class=\"disabled\">$lastrun[runtime]</span></a></td>" .
-				"<td name=\"lastresult\"><a href=\"$link\"><span class=\"sol disabled\">$lastrun[runresult]</span></a></td>";
+			if ( $lastjud['result']=='compiler-error' ) $lastrun['runresult'] = 'compiler-error';
+			echo "<td name=\"lastruntime\"><a href=\"$link\">" .
+				"<span class=\"disabled\">$lastrun[runtime]</span></a></td>" .
+				"<td name=\"lastresult\"><a href=\"$link\">" .
+				"<span class=\"sol disabled\">$lastrun[runresult]</span></a></td>";
 		}
 
 		echo "<td><a href=\"$link\">" .
