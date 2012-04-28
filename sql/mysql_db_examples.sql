@@ -49,6 +49,7 @@ INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_f
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('hs', 'Haskell', 0, 1, 2);
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('pl', 'Perl', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('sh', 'POSIX shell', 0, 1, 1);
+INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('bash', 'Bash shell', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('csharp', 'C#', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('awk', 'AWK', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('py', 'Python', 0, 1, 1);
