@@ -269,15 +269,15 @@ if ( !empty($origsources) ) {
 echo "<h2>Source code for submission s" .htmlspecialchars($id);
 if ( !empty($submission['origsubmitid']) ) {
 	$origid = $submission['origsubmitid'];
-	echo  " (resubmit of <a href=\"submission.php?id=$origid\">s$origid</a>)</h2>\n\n";
+	echo  " (resubmit of <a href=\"submission.php?id=$origid\">s$origid</a>)";
 }
+echo "</h2>\n\n";
 if ( $olddata !== NULL ) {
        echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
 }
 if ( $submission['origsubmitid'] ) {
        echo "<p><a href=\"#origdiff\">Go to diff to original submission</a></p>\n\n";
 }
-echo "</h2>\n\n";
 
 
 
