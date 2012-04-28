@@ -28,13 +28,23 @@ function parseSourceDiff($difftext){
 	return $return;
 }
 
+/* FIXME: this assumes GNU diff. */
+function systemDiff($oldfile, $newfile)
+{
+	$oldname = basename($oldfile);
+	$newname = basename($newfile);
+	return `diff -Bdt --strip-trailing-cr -U2 \
+	             --label $oldname --label $newname $oldfile $newfile 2>&1`;
+}
+
 function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
+
 	// Try different ways of diffing, in order of preference.
 	if ( function_exists('xdiff_string_diff') ) {
 		// The PECL xdiff PHP-extension.
 
 		$difftext = xdiff_string_diff($oldsource['sourcecode'],
-					      $source['sourcecode'],2);
+		                              $source['sourcecode'],2,TRUE);
 
 	} elseif ( !(bool) ini_get('safe_mode') ||
 		       strtolower(ini_get('safe_mode'))=='off' ) {
@@ -44,7 +54,7 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 		if ( is_readable($oldfile) && is_readable($newfile) ) {
 			// A direct diff on the sources in the SUBMITDIR.
 
-			$difftext = `diff -Bt -U 2 $oldfile $newfile 2>&1`;
+			$difftext = systemDiff($oldfile, $newfile);
 
 		} else {
 			// Try generating temporary files for executing diff.
@@ -65,7 +75,7 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 					     (fwrite($newhandle,   $source['sourcecode'])===FALSE) ) {
 						$difftext = "DOMjudge: error writing temporary files for diff.";
 					} else {
-						$difftext = `diff -Bt -U 2 $oldfile $newfile 2>&1`;
+						$difftext = systemDiff($oldfile, $newfile);
 					}
 				}
 				if ( $oldhandle ) fclose($oldhandle);
