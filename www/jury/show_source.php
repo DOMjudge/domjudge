@@ -262,7 +262,7 @@ if ($olddata !== NULL) {
 
 // FIXME: edit/resubmit, including diffs currently only supports single files
 if ( !empty($origsources) ) {
-	$html .= "<h2>Diff to original submission</h2>\n\n";
+	$html .= "<h2>Diff to original submission <a href=\"submission.php?id=" . $submission['origsubmitid'] . "\">s" . $submission['origsubmitid'] . "</a></h2>\n\n";
 	$html .= '<div class="tabber">' .
 		presentDiff ( array_merge($origsources[0],$origdata), $sources[0] ) .
 		'</div>';
