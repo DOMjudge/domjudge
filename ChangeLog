@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 3.3.0 - DEV
 -------------------
+ - [INCOMPATIBLE CHANGE,security] enable cURL SSL host/peer verification.
+   This requires self-signed certificates now to be available to libcURL.
  - Add compile script and test source for language 'bash'.
  - Prioritize to team's last judging (port from ETH tree).
  - Fix testing for empty output with strlen (port from ETH tree).
