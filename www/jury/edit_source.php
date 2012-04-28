@@ -65,7 +65,7 @@ echo '<script type="text/javascript" src="../js/tabber.js"></script>' .
 	'<div class="tabber">';
 foreach($sources as $sourcedata)
 {
-	echo '<div class="tabbertab">';
+	echo '<div class="tabbertab' . ($_GET['rank'] === $sourcedata['rank'] ? ' tabbertabdefault' : '') .'">';
 	echo '<h2 class="filename">' . htmlspecialchars($sourcedata['filename']) . '</h2>';
 	echo addTextArea('source' . $sourcedata['rank'], $sourcedata['sourcecode'], 120, 40) . "<br />\n";
 	echo "</div>\n";

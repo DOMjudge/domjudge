@@ -91,7 +91,8 @@ function presentSource ($sourcedata, $langid)
 		"href=\"show_source.php?id=" . htmlspecialchars($sourcedata['submitid']) .
 		"&amp;fetch=" . htmlspecialchars($sourcedata['rank']) .
 		"\"><img class=\"picto\" src=\"../images/b_save.png\" alt=\"download\" title=\"download\" /></a> " .
-		"<a href=\"edit_source.php?id=" . htmlspecialchars($sourcedata['submitid']) . "\">" .
+		"<a href=\"edit_source.php?id=" . htmlspecialchars($sourcedata['submitid']) .
+		"&rank=" . htmlspecialchars($sourcedata['rank']) . "\">" .
 		"<img class=\"picto\" src=\"../images/edit.png\" alt=\"edit\" title=\"edit\" />" .
 		"</a>\n\n";
 
