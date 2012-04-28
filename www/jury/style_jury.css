@@ -87,6 +87,11 @@ img.helpicon { cursor: help; }
 .team-nocor a, .judgehost-warn  a { color: yellow; }
 .team-ok a,    .judgehost-ok    a { color: green; }
 
+/* source filenames diff colors */
+.diff-add     { color: green; }
+.diff-del     { color: red; }
+.diff-changed { color: darkorange; }
+
 /* source code highlighting */
 .hl-default {
     color: Black;
