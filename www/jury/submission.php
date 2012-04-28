@@ -283,23 +283,22 @@ if ( isset($jid) )  {
 	               $jid, $submdata['probid']);
 	$runinfo = $runs->gettable();
 	$lastsubmitid = $DB->q('MAYBEVALUE SELECT submitid
-			     FROM submission
-			     WHERE teamid = %s AND probid = %s AND submittime < %s
-			     ORDER BY submittime DESC LIMIT 1',
-			    $submdata['teamid'],$submdata['probid'],
-			    $submdata['submittime']);
+	                        FROM submission
+	                        WHERE teamid = %s AND probid = %s AND submittime < %s
+	                        ORDER BY submittime DESC LIMIT 1',
+	                       $submdata['teamid'],$submdata['probid'],
+	                       $submdata['submittime']);
 	if ( $lastsubmitid !== NULL ) {
 		$lastjid = $DB->q('MAYBEVALUE SELECT judgingid
-				FROM judging
-				WHERE submitid = %s AND valid = 1
-				ORDER BY judgingid DESC LIMIT 1',
-				$lastsubmitid);
+		                   FROM judging
+		                   WHERE submitid = %s AND valid = 1
+		                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
 		if ( $lastjid !== NULL ) {
 			$lastruns = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
-					LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
-								     r.judgingid = %i )
-					WHERE t.probid = %s ORDER BY rank',
-				       $lastjid, $submdata['probid']);
+			                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
+			                                                 r.judgingid = %i )
+			                    WHERE t.probid = %s ORDER BY rank',
+			                   $lastjid, $submdata['probid']);
 			$lastruninfo = $lastruns->gettable();
 		}
 	}
