@@ -90,7 +90,10 @@ function presentSource ($sourcedata, $langid)
 		htmlspecialchars($sourcedata['filename']) . "</h2> <a " .
 		"href=\"show_source.php?id=" . htmlspecialchars($sourcedata['submitid']) .
 		"&amp;fetch=" . htmlspecialchars($sourcedata['rank']) .
-		"\"><img class=\"picto\" src=\"../images/b_save.png\" alt=\"download\" title=\"download\" /></a>\n\n";
+		"\"><img class=\"picto\" src=\"../images/b_save.png\" alt=\"download\" title=\"download\" /></a> " .
+		"<a href=\"edit_source.php?id=" . htmlspecialchars($sourcedata['submitid']) . "\">" .
+		"<img class=\"picto\" src=\"../images/edit.png\" alt=\"edit\" title=\"edit\" />" .
+		"</a>\n\n";
 
 	if ( strlen($sourcedata['sourcecode'])==0 ) {
 		// Someone submitted an empty file. Cope gracefully.
@@ -211,7 +214,6 @@ if ($olddata !== NULL) {
 	// if both current and previous submission have just one file, diff them directly
 	if (count($sources) == 1 && count($oldsources) == 1 ) {
 		// FIXME: edit/resubmit, including diffs currently only supports single files
-		$html .= "(<a href=\"edit_source.php?id=$id\">edit</a>)\n\n";
 
 		$html .= '<div class="tabber">' .
 			presentDiff ( array_merge($oldsources[0],$olddata), $sources[0] ) .
