@@ -10,61 +10,79 @@ require('init.php');
 
 // submit code
 if ( isset($_POST['submitter']) ) {
-	if ( !($tmpfname = mkstemps(TMPDIR."/edit_source-XXXXXX",0)) ) {
-		error("Could not create temporary file.");
+	$sources = $DB->q('TABLE SELECT *
+			   FROM submission_file LEFT JOIN submission USING(submitid)
+			   WHERE submitid = %i ORDER BY rank', $_POST['origsubmitid']);
+
+	$files = array();
+	$filenames = array();
+	foreach($sources as $sourcedata)
+	{
+		if ( !($tmpfname = mkstemps(TMPDIR."/edit_source-XXXXXX",0)) ) {
+			error("Could not create temporary file.");
+		}
+		file_put_contents($tmpfname, $_POST['source' . $sourcedata['rank']]);
+
+		$files[] = $tmpfname;
+		$filenames[] = $sourcedata['filename'];
 	}
 
-	file_put_contents($tmpfname, $_POST['source']);
-
 	submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'],
-	                array($tmpfname), array($_POST['filename']), $_POST['origsubmitid']);
-	unlink($tmpfname);
+	                $files, $filenames, $_POST['origsubmitid']);
+
+	foreach($files as $file)
+	{
+		unlink($file);
+	}
 
 	header('Location: submissions.php');
 	exit;
 }
 
 $id = (int)$_GET['id'];
-$source = $DB->q('MAYBETUPLE SELECT s.*, f.*, l.*, COUNT(g.rank) AS nfiles
-                  FROM submission s
-                  LEFT JOIN submission_file f ON(s.submitid=f.submitid AND f.rank=0)
-                  LEFT JOIN submission_file g ON(s.submitid=g.submitid)
-                  LEFT JOIN language l USING(langid)
-                  WHERE s.submitid = %i GROUP BY g.submitid',$id);
+$submission = $DB->q('MAYBETUPLE SELECT * FROM submission s
+                  WHERE submitid = %i', $id);
 
-if ( empty($source) ) error ("Submission $id not found");
+if ( empty($submission) ) error ("Submission $id not found");
 
 $sourcefile = getSourceFilename($source);
 
 $title = 'Source: ' . htmlspecialchars($sourcefile);
 require(LIBWWWDIR . '/header.php');
 
-if ( $source['nfiles']>1 ) {
-	warning("Submission $id has multiple source files, editing not (yet) supported.");
 
-	require(LIBWWWDIR . '/footer.php');
-	return;
-}
-
-echo '<h2 class="filename"><a name="source"></a>Submission ' .
-	"<a href=\"submission.php?id=$id\">s$id</a> source: " .
-	htmlspecialchars($sourcefile) . "</h2>\n\n";
+echo '<h2 class="filename"><a name="source"></a>Edit submission ' .
+	"<a href=\"submission.php?id=$id\">s$id</a> source files</h2>\n\n";
 
 echo addForm('edit_source.php', 'post', null, 'multipart/form-data');
-echo addTextArea('source', $source['sourcecode'], 120, 40) . "<br />\n";
+
+
+$sources = $DB->q('TABLE SELECT *
+                   FROM submission_file LEFT JOIN submission USING(submitid)
+                   WHERE submitid = %i ORDER BY rank', $id);
+
+echo '<script type="text/javascript" src="../js/tabber.js"></script>' .
+	'<div class="tabber">';
+foreach($sources as $sourcedata)
+{
+	echo '<div class="tabbertab">';
+	echo '<h2 class="filename">' . htmlspecialchars($sourcedata['filename']) . '</h2>';
+	echo addTextArea('source' . $sourcedata['rank'], $sourcedata['sourcecode'], 120, 40) . "<br />\n";
+	echo "</div>\n";
+}
+echo "</div>\n";
 
 $probs = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem WHERE
                  allow_submit = 1 AND cid = %i ORDER BY name', $cid);
 $langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language WHERE
                  allow_submit = 1 ORDER BY name');
 
-echo addSelect('probid', $probs, $source['probid'], true);
-echo addSelect('langid', $langs, $source['langid'], true);
+echo addSelect('probid', $probs, $submission['probid'], true);
+echo addSelect('langid', $langs, $submission['langid'], true);
 
-echo addHidden('teamid', $source['teamid']);
-echo addHidden('filename', $source['filename']);
+echo addHidden('teamid', $submission['teamid']);
 echo addHidden('submitter', 'domjudge');
-echo addHidden('origsubmitid', $source['origsubmitid'] === NULL ? $id : $source['origsubmitid']);
+echo addHidden('origsubmitid', $submission['origsubmitid'] === NULL ? $id : $submission['origsubmitid']);
 echo addSubmit('submit');
 
 echo addEndForm();
