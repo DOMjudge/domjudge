@@ -213,7 +213,9 @@ if ($olddata !== NULL) {
 		// FIXME: edit/resubmit, including diffs currently only supports single files
 		$html .= "(<a href=\"edit_source.php?id=$id\">edit</a>)\n\n";
 
-		$html .= presentDiff ( array_merge($oldsources[0],$olddata), $sources[0] );
+		$html .= '<div class="tabber">' .
+			presentDiff ( array_merge($oldsources[0],$olddata), $sources[0] ) .
+			'</div>';
 	} else {
 		$newfilenames = $fileschanged = $filesunchanged = array();
 		foreach($sources as $newsource) {
@@ -259,7 +261,9 @@ if ($olddata !== NULL) {
 // FIXME: edit/resubmit, including diffs currently only supports single files
 if ( !empty($origsources) ) {
 	$html .= "<h2>Diff to original submission</h2>\n\n";
-	$html .= presentDiff ( array_merge($origsources[0],$origdata), $sources[0] );
+	$html .= '<div class="tabber">' .
+		presentDiff ( array_merge($origsources[0],$origdata), $sources[0] ) .
+		'</div>';
 
 }
 
