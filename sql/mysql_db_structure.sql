@@ -271,6 +271,8 @@ CREATE TABLE `submission_file` (
   `filename` varchar(255) NOT NULL COMMENT 'Filename as submitted',
   `rank` int(4) unsigned NOT NULL COMMENT 'Order of the submission files, zero-indexed',
   PRIMARY KEY (`submitfileid`),
+  UNIQUE KEY `filename` (`submitid`,`filename`),
+  UNIQUE KEY `rank` (`submitid`,`rank`),
   KEY `submitid` (`submitid`),
   CONSTRAINT `submission_file_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Files associated to a submission';
