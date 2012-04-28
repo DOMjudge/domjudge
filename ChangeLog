@@ -55,6 +55,10 @@ Version 3.3.0 - DEV
  - Fix source code diff function to work with resubmitting modified
    source from the jury interface.
  - Support submissions consisting of multiple source files.
+ - Replace check_judgings script by web page in jury interface ('judging
+   verifier').
+ - Add toggle link for showing/hiding verdicts of previous submission by same
+   team.
 
 Version 3.2.0 - SVN r3594 (unreleased)
 --------------------------------------
