@@ -113,6 +113,7 @@ to name them here too:
        Coroner's Toolkit by Wietse Venema.
 <item> sorttable.js by Stuart Langridge.
 <item> jscolor.js by Jan Odvarko.
+<item> tabber.js by Patrick Fitzgerald.
 <item> GeSHi syntax highlighter library by Benny Baumann, Nigel McNie.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
        Erik van Sebille.
@@ -133,11 +134,14 @@ Sources can be downloaded from:
 <url url="http://domjudge.sourceforge.net/sources/">.
 
 The <tt>sorttable.js</tt> script is copyright by Stuart Langridge and
-licenced under the MIT/X11 licence, see <tt>COPYING.MIT</tt>. This
-software was downloaded from:
+licenced under the MIT licence, see <tt>COPYING.MIT</tt>. This
+software was downloaded from
 <url url="http://www.kryogenix.org/code/browser/sorttable/">.
-jscolor.js is copyright Jan Odvarko and licenced under the GNU LGPL. 
-It was obtained at <url url="http://jscolor.com">.
+The <tt>jscolor.js</tt> script is copyright by Jan Odvarko and licenced
+under the GNU LGPL. It was obtained at <url url="http://jscolor.com">.
+The <tt>tabber.js</tt> script is copyright by Patrick Fitzgerald and
+licenced under the MIT licence, see <tt>COPYING.MIT</tt>. It was
+downloaded from <url url="http://www.barelyfitz.com/projects/tabber/">.
 
 The M4 autoconf macros are licenced under all-permissive and GPL3+
 licences; see the respective files for details.
