@@ -213,8 +213,6 @@ if ($olddata !== NULL) {
 
 	// if both current and previous submission have just one file, diff them directly
 	if (count($sources) == 1 && count($oldsources) == 1 ) {
-		// FIXME: edit/resubmit, including diffs currently only supports single files
-
 		$html .= '<div class="tabber">' .
 			presentDiff ( array_merge($oldsources[0],$olddata), $sources[0] ) .
 			'</div>';
@@ -260,7 +258,6 @@ if ($olddata !== NULL) {
 	}
 }
 
-// FIXME: edit/resubmit, including diffs currently only supports single files
 if ( !empty($origsources) ) {
 	$html .= "<h2>Diff to original submission <a href=\"submission.php?id=" . $submission['origsubmitid'] . "\">s" . $submission['origsubmitid'] . "</a></h2>\n\n";
 	$html .= '<div class="tabber">' .
