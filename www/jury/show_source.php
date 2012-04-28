@@ -215,13 +215,6 @@ $title = "Source: s$id";
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/highlight.php');
 
-echo "<h2>Source code for submission s" .htmlspecialchars($id);
-if ( !empty($submission['origsubmitid']) ) {
-	echo  " (resubmit of s" . htmlspecialchars($submission['origsubmitid']) . ")";
-}
-echo "</h2>\n\n";
-
-
 // display highlighted content of the source files
 $sources = $DB->q('TABLE SELECT *
                    FROM submission_file LEFT JOIN submission USING(submitid)
@@ -261,7 +254,7 @@ if ($submission['origsubmitid']) {
 
 if ($olddata !== NULL) {
 	$oldid = $olddata['submitid'];
-	$html .= "<h2>Diff to submission <a href=\"submission.php?id=$oldid\">s$oldid</a></h2>\n";
+	$html .= "<h2><a name=\"diff\"></a>Diff to submission <a href=\"submission.php?id=$oldid\">s$oldid</a></h2>\n";
 
 	$html .= multifilediff($sources, $oldsources, $olddata);
 
@@ -269,10 +262,25 @@ if ($olddata !== NULL) {
 
 if ( !empty($origsources) ) {
 	$origid = $submission['origsubmitid'];
-	$html .= "<h2>Diff to original submission <a href=\"submission.php?id=$origid\">s$origid</a></h2>\n\n";
+	$html .= "<h2><a name=\"origdiff\"></a>Diff to original submission <a href=\"submission.php?id=$origid\">s$origid</a></h2>\n\n";
 
 	$html .= multifilediff($sources, $origsources, $origdata);
 }
+
+echo "<h2>Source code for submission s" .htmlspecialchars($id);
+if ( !empty($submission['origsubmitid']) ) {
+	$origid = $submission['origsubmitid'];
+	echo  " (resubmit of <a href=\"submission.php?id=$origid\">s$origid</a>)</h2>\n\n";
+}
+if ( $olddata !== NULL ) {
+       echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
+}
+if ( $submission['origsubmitid'] ) {
+       echo "<p><a href=\"#origdiff\">Go to diff to original submission</a></p>\n\n";
+}
+echo "</h2>\n\n";
+
+
 
 echo $html;
 
