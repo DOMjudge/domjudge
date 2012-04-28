@@ -8,6 +8,7 @@ Version 3.2.3 - DEV
  - Include a number of documentation improvements.
  - Fix: scoreboard filter disappeared with single affiliation selected.
  - Fix checktestdata debug print formatting.
+ - Fix bug in using va_copy macro with g++ on AMD 64bit.
 
 Version 3.2.2 - 25 January 2012
 -------------------------------
