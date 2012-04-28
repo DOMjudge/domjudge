@@ -126,6 +126,57 @@ function presentDiff ($old, $new)
 		'</div>';
 }
 
+function multifilediff ($sources, $oldsources, $olddata)
+{
+	// if both current and previous submission have just one file, diff them directly
+	if (count($sources) == 1 && count($oldsources) == 1 ) {
+		$html .= '<div class="tabber">' .
+			presentDiff ( array_merge($oldsources[0],$olddata), $sources[0] ) .
+			'</div>';
+	} else {
+		$newfilenames = $fileschanged = $filesunchanged = array();
+		foreach($sources as $newsource) {
+			$oldfilenames = array();
+			foreach($oldsources as $oldsource) {
+				if($newsource['filename'] == $oldsource['filename']) {
+					if ( $oldsource['sourcecode'] == $newsource['sourcecode'] ) {
+						$filesunchanged[] = $newsource['filename'];
+					} else {
+						$fileschanged[] = $newsource['filename'];
+						$diffhtml .= presentDiff ( array_merge($oldsource,$olddata), $newsource );
+					}
+				}
+				$oldfilenames[] = $oldsource['filename'];
+			}
+			$newfilenames[] = $newsource['filename'];
+		}
+		$filesadded   = array_diff($newfilenames,$oldfilenames);
+		$filesremoved = array_diff($oldfilenames,$newfilenames);
+
+		$html .= "<table>\n";
+		if ( count($filesadded)>0 ) {
+			$html .= "<tr><td class=\"diff-add\">Files added:</td><td class=\"filename\">" .
+				implode(' ', $filesadded) . "</td></tr>\n";
+		}
+		if ( count($filesremoved)>0 ) {
+			$html .= "<tr><td class=\"diff-del\">Files removed:</td>" .
+				"<td class=\"filename\">" . implode(' ', $filesremoved) . "</td></tr>\n";
+		}
+		if ( count($fileschanged)>0 ) {
+			$html .= "<tr><td class=\"diff-changed\">Files changed:</td>" .
+			    "<td class=\"filename\">" . implode(' ', $fileschanged) . "</td></tr>\n";
+		}
+		if ( count($filesunchanged)>0 ) {
+			$html .= "<tr><td>Files unchanged:</td><td class=\"filename\">" .
+				implode(' ', $filesunchanged) . "</td></tr>\n";
+		}
+		$html .= "</table>\n\n";
+		$html .= "<div class=\"tabber\">\n" . $diffhtml . "</div>\n";
+	}
+
+	return $html;
+}
+
 
 
 require('init.php');
@@ -211,59 +262,15 @@ if ($olddata !== NULL) {
 	$oldid = $olddata['submitid'];
 	$html .= "<h2>Diff to submission <a href=\"submission.php?id=$oldid\">s$oldid</a></h2>\n";
 
-	// if both current and previous submission have just one file, diff them directly
-	if (count($sources) == 1 && count($oldsources) == 1 ) {
-		$html .= '<div class="tabber">' .
-			presentDiff ( array_merge($oldsources[0],$olddata), $sources[0] ) .
-			'</div>';
-	} else {
-		$newfilenames = $fileschanged = $filesunchanged = array();
-		foreach($sources as $newsource) {
-			$oldfilenames = array();
-			foreach($oldsources as $oldsource) {
-				if($newsource['filename'] == $oldsource['filename']) {
-					if ( $oldsource['sourcecode'] == $newsource['sourcecode'] ) {
-						$filesunchanged[] = $newsource['filename'];
-					} else {
-						$fileschanged[] = $newsource['filename'];
-						$diffhtml .= presentDiff ( array_merge($oldsource,$olddata), $newsource );
-					}
-				}
-				$oldfilenames[] = $oldsource['filename'];
-			}
-			$newfilenames[] = $newsource['filename'];
-		}
-		$filesadded   = array_diff($newfilenames,$oldfilenames);
-		$filesremoved = array_diff($oldfilenames,$newfilenames);
+	$html .= multifilediff($sources, $oldsources, $olddata);
 
-		$html .= "<table>\n";
-		if ( count($filesadded)>0 ) {
-			$html .= "<tr><td class=\"diff-add\">Files added:</td><td class=\"filename\">" .
-				implode(' ', $filesadded) . "</td></tr>\n";
-		}
-		if ( count($filesremoved)>0 ) {
-			$html .= "<tr><td class=\"diff-del\">Files removed:</td>" .
-				"<td class=\"filename\">" . implode(' ', $filesremoved) . "</td></tr>\n";
-		}
-		if ( count($fileschanged)>0 ) {
-			$html .= "<tr><td class=\"diff-changed\">Files changed:</td>" .
-			    "<td class=\"filename\">" . implode(' ', $fileschanged) . "</td></tr>\n";
-		}
-		if ( count($filesunchanged)>0 ) {
-			$html .= "<tr><td>Files unchanged:</td><td class=\"filename\">" .
-				implode(' ', $filesunchanged) . "</td></tr>\n";
-		}
-		$html .= "</table>\n\n";
-		$html .= "<div class=\"tabber\">\n" . $diffhtml . "</div>\n";
-	}
 }
 
 if ( !empty($origsources) ) {
-	$html .= "<h2>Diff to original submission <a href=\"submission.php?id=" . $submission['origsubmitid'] . "\">s" . $submission['origsubmitid'] . "</a></h2>\n\n";
-	$html .= '<div class="tabber">' .
-		presentDiff ( array_merge($origsources[0],$origdata), $sources[0] ) .
-		'</div>';
+	$origid = $submission['origsubmitid'];
+	$html .= "<h2>Diff to original submission <a href=\"submission.php?id=$origid\">s$origid</a></h2>\n\n";
 
+	$html .= multifilediff($sources, $origsources, $origdata);
 }
 
 echo $html;
