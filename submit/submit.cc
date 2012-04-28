@@ -291,7 +291,7 @@ int main(int argc, char **argv)
 
 		/* Stat file and do some sanity checks */
 		if ( stat(ptr,&fstats)!=0 ) usage2(errno,"cannot find file `%s'",ptr);
-		logmsg(LOG_DEBUG,"submission file %d: `%s'",i+1,ptr);
+		logmsg(LOG_DEBUG,"submission file %d: `%s'",(int)i+1,ptr);
 
 		/* Do some sanity checks on submission file and warn user */
 		nwarnings = 0;

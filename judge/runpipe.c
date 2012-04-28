@@ -238,7 +238,8 @@ int main(int argc, char **argv)
 		set_fd_close_exec(pipe_fd[1-i][1], 1);
 
 		cmd_exit[i] = -1;
-		cmd_pid[i] = execute(cmd_name[i], cmd_args[i], cmd_nargs[i], cmd_fds[i], 0);
+		cmd_pid[i] = execute(cmd_name[i], (const char **)cmd_args[i],
+		                     cmd_nargs[i], cmd_fds[i], 0);
 		if ( cmd_pid[i]==-1 ) error(errno,"failed to execute command #%d",i+1);
 		verb("started #%d, pid %d: %s",i+1,cmd_pid[i],cmd_name[i]);
 	}

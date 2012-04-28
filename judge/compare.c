@@ -159,7 +159,7 @@ int execdiff(int ignore_ws)
 	redir_fd[0] = FDREDIR_NONE;
 	redir_fd[1] = FDREDIR_PIPE;
 	redir_fd[2] = FDREDIR_NONE;
-	if ( (cpid = execute("diff",cmdargs,4,redir_fd,1))<0 ) {
+	if ( (cpid = execute("diff",(const char **)cmdargs,4,redir_fd,1))<0 ) {
 		error(errno,"running diff");
 	}
 
@@ -297,7 +297,7 @@ void writediff()
 		}
 
 		if ( diffchar!='=' && l<firstdiff ) {
-			error(0,"internal error: first difference on line %zd != %d",l,firstdiff);
+			error(0,"internal error: first difference on line %d != %d",(int)l,firstdiff);
 		}
 
 		/* Skip printing until PREVLINES before first difference line */
