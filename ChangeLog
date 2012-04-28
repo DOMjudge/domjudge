@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 3.2.3 - DEV
 -------------------
+ - [INCOMPATIBLE CHANGE,security] enable cURL SSL host/peer verification.
+   This requires self-signed certificates now to be available to libcURL.
  - Fix SQL upgrade file for DB upgrade from 3.1 series.
  - Fix bug: don't show multiple balloons for a single problem solved.
  - Make all judging output binary in SQL to display non-UTF8 correctly.
