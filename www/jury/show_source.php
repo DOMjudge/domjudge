@@ -182,17 +182,6 @@ function multifilediff ($sources, $oldsources, $olddata)
 
 require('init.php');
 
-// FIXME/questions:
-// - content-disposition: attachment instead of inline, content-type octet-stream?
-// - filenames: display team filenames (a.java) or 'domjudge' filenames (c1.s2.bla..)?
-//   for downloads: same question do we want the 'domjudge' filenames at all?
-//   alternative: store on disk as SUBMITDIR/c1/s12.etc/a.java. This does lose some of the
-//   metadata (rank) which is currently encoded in the filename. Or: use 'domjudge' filenames
-//   ONLY on disk.
-// - does table submission_file need UNIQUE on (submitid,filename) and on (submitid,rank)?
-// - code allows for some refactoring and layout polishing
-// - edit multiple source
-
 $id = (int)$_GET['id'];
 $submission = $DB->q('MAYBETUPLE SELECT * FROM submission s
 	      WHERE submitid = %i',$id);
@@ -204,7 +193,7 @@ if ( isset($_GET['fetch']) ) {
 	$row = $DB->q('TUPLE SELECT filename, sourcecode FROM submission_file
 	               WHERE submitid = %i AND rank = %i', $id, $_GET['fetch']);
 	header("Content-Type: text/plain; name=\"" . $row['filename'] . "\"; charset=" . DJ_CHARACTER_SET);
-	header("Content-Disposition: inline; filename=\"" . $row['filename'] . "\"");
+	header("Content-Disposition: attachment; filename=\"" . $row['filename'] . "\"");
 	header("Content-Length: " . strlen($row['sourcecode']));
 
 	echo $row['sourcecode'];
