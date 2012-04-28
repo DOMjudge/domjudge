@@ -109,15 +109,6 @@ span.extra {
 	color: Red;
 }
 
-span.diff-old {
-	color: Red;
-}
-
-span.diff-new {
-	color: Green;
-}
-
-
 .teamid { font-family: monospace; }
 .probid, .langid { font-variant: small-caps; }
 

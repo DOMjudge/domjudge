@@ -14,10 +14,10 @@ function parseSourceDiff($difftext){
 		$line = trim($line, "\r\n");
 		switch ( substr($line,0,1) ) {
 		case '-':
-			$formdiffline = "<span class='diff-old'>".htmlspecialchars($line)."</span>";
+			$formdiffline = "<span class='diff-del'>".htmlspecialchars($line)."</span>";
 			break;
 		case '+':
-			$formdiffline = "<span class='diff-new'>".htmlspecialchars($line)."</span>";
+			$formdiffline = "<span class='diff-add'>".htmlspecialchars($line)."</span>";
 			break;
 		default:
 			$formdiffline = htmlspecialchars($line);
