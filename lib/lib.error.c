@@ -26,6 +26,19 @@
 /* For SYSLOG config variable */
 #include "../etc/config.h"
 
+/* Define va_copy macro if not available (ANSI C99 only).
+ * memcpy() is fallback suggested by the autoconf manual, but doesn't
+ * work with g++ on AMD 64bit platform.
+ * FIXME: Replace by autoconf test?
+ */
+#ifndef va_copy
+#ifdef __va_copy
+#define va_copy(dest, src) __va_copy(dest,src)
+#else
+#define va_copy(dest, src) memcpy(&dest, &src, sizeof(va_list))
+#endif
+#endif
+
 /* Use program name in syslogging if defined */
 #ifndef PROGRAM
 #define PROGRAM NULL
