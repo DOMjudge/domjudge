@@ -111,8 +111,8 @@ function presentDiff ($old, $new)
 	$oldsourcefile = getSourceFilename($old);
 	$newsourcefile = getSourceFilename($new);
 
-	$difftext = createDiff($new['sourcecode'], SUBMITDIR.'/'.$newsourcefile, $new['submitid'],
-	                       $old['sourcecode'], SUBMITDIR.'/'.$oldsourcefile, $old['submitid']);
+	$difftext = createDiff($new, SUBMITDIR.'/'.$newsourcefile, $new['submitid'],
+	                       $old, SUBMITDIR.'/'.$oldsourcefile, $old['submitid']);
 
 	$oldid = htmlspecialchars($old['submitid']);
 	return '<div class="tabbertab">' .
