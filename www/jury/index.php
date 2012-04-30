@@ -47,7 +47,6 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <li><a href="refresh_cache.php">Refresh scoreboard cache</a></li>
 <li><a href="check_judgings.php">Judging verifier</a></li>
 <li><a href="auditlog.php">Activity log</a></li>
-<li><a href="clar_config.php">Clarification config</a></li>
 </ul>
 
 <p><em>Note: the config check and cache refresh operations have a

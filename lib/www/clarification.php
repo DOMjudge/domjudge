@@ -34,86 +34,16 @@ function canViewClarification($team, $clar)
 
 /**
  * Returns the list of clarification categories as a key,value array.
- * Define the clarification category list and default variables
- * globally to prevent superfluous DB queries.
+ * Keys are prepended with '#' to distinguish them from problem IDs.
  */
-$defclarcategory = null;
-$clarcategories = null;
 function getClarCategories(&$default = null)
 {
-	global $DB, $defclarcategory, $clarcategories;
-
-	if ( $clarcategories!=null ) return $clarcategories;
-
-	$categs = $DB->q("MAYBEVALUE SELECT value FROM configuration
-	                  WHERE name = 'clar_categories'");
+	$categs = dbconfig_get('clar_categories');
 
 	$clarcategories = array();
-	if ( !empty($categs) ) {
-		foreach ( explode("\t", $categs) as $cat ) {
-			list($key, $val) = explode(':', $cat, 2);
-			$clarcategories['#'.$key] = $val;
-			if ( $defclarcategory===null ) $defclarcategory = '#'.$key;
-		}
-	}
-
-	if ( $default!=null ) $default = $defclarcategory;
+	foreach ( $categs as $key => $val ) $clarcategories['#'.$key] = $val;
 
 	return $clarcategories;
-}
-
-/**
- * Writes a list of clarification categories to the DB configuration.
- */
-function setClarCategories($categs)
-{
-	global $DB;
-
-	$res = array();
-	foreach ( $categs as $key => $val ) {
-		// Anything not starting with '#' is a problem, skip
-		if ( substr($key, 0, 1)!='#' ) continue;
-		$res[] = substr($key, 1).':'.$val;
-	}
-
-	$DB->q("UPDATE configuration SET value = %s
-	        WHERE name  = 'clar_categories'", implode("\t", $res));
-}
-
-/**
- * Returns an array of predefined clarification answers. The first
- * (index 0) is assumed to be the default answer. Define the
- * clarification answer array globally to prevent superfluous DB
- * queries.
- */
-$claranswers = null;
-function getClarAnswers()
-{
-	global $DB, $claranswers;
-
-	if ( $claranswers!=null ) return $claranswers;
-
-	$answers = $DB->q("MAYBEVALUE SELECT value FROM configuration
-	                   WHERE name = 'clar_answers'");
-
-	if ( empty($answers) ) {
-		$claranswers = array();
-	} else {
-		$claranswers = explode("\t", $answers);
-	}
-
-	return $claranswers;
-}
-
-/**
- * Writes the clarification answers to the DB configuration.
- */
-function setClarAnswers($answers)
-{
-	global $DB;
-
-	$DB->q("UPDATE configuration SET value = %s
-	        WHERE name = 'clar_answers'", implode("\t", $answers));
 }
 
 /**
@@ -347,7 +277,7 @@ function putClarificationForm($action, $cid, $respid = NULL)
 
 	require_once('forms.php');
 
-	global $DB, $cdata, $defclarcategory;
+	global $DB, $cdata;
 ?>
 
 <script type="text/javascript">
@@ -423,9 +353,11 @@ function replaceAnswer() {
 		                 FROM problem WHERE cid = %i AND allow_submit = 1
 		                 ORDER BY probid ASC', $cid);
 	}
-	$options = array_merge($probs, getClarCategories());
+	$categs = getClarCategories();
+	$defclar = key($categs);
+	$options = array_merge($probs, $categs);
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
-	     addSelect('problem', $options, ($respid ? $clar['probid'] : $defclarcategory), true) .
+	     addSelect('problem', $options, ($respid ? $clar['probid'] : $defclar), true) .
 	     "</td></tr>\n";
 
 	?>
@@ -439,7 +371,7 @@ if ( $respid ) {
 }
 echo addTextArea('bodytext', $body, 80, 10) . "</td></tr>\n";
 
-$std_answers = getClarAnswers();
+$std_answers = dbconfig_get('clar_answers');
 if ( IS_JURY && $respid!==NULL && count($std_answers)>0 ) {
 	$options = array();
 	$default = $std_answers[0];
