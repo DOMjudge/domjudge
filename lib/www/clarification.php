@@ -302,6 +302,12 @@ function replaceAnswer() {
 	elem.innerHTML = newtext;
 	return false;
 }
+function appendAnswer() {
+	var newtext = document.forms['sendclar'].answertext.value;
+	var elem = document.getElementById('bodytext');
+	elem.innerHTML += '\n' + newtext;
+	return false;
+}
 <?php endif; ?>
 // -->
 </script>
@@ -378,6 +384,7 @@ if ( IS_JURY && $respid!==NULL && count($std_answers)>0 ) {
 	foreach($std_answers as $ans) $options[$ans] = summarizeClarification($ans, 50);
 	echo "<tr><td><b>Std. answer:</b></td><td>" .
 	    addSelect('answertext', $options, $default, TRUE) .
+	    addSubmit('append',  'append',  'return appendAnswer()') .
 	    addSubmit('replace', 'replace', 'return replaceAnswer()') . "</td></tr>\n";
 }
 
