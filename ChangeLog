@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 3.3.0 - DEV
+-------------------
+
 Version 3.3.0 Release Candidate 1 - 30 April 2012
 -------------------------------------------------
  - [INCOMPATIBLE CHANGE,security] enable cURL SSL host/peer verification.
