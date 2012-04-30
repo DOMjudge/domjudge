@@ -352,6 +352,7 @@ echo addTextArea('bodytext', $body, 80, 10);
 <script type="text/javascript">
 <!--
 document.forms['sendclar'].bodytext.focus();
+document.forms['sendclar'].bodytext.select();
 // -->
 </script>
 <?php
