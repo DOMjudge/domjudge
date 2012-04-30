@@ -6,49 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-function parseDiff($difftext){
-	$line = strtok($difftext,"\n"); //first line
-	if(sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1)
-		return htmlspecialchars($difftext);
-	$return = $line . "\n";
-
-	// Add second line 'team ? reference'
-	$line = strtok("\n");
-	$return .= $line . "\n";
-
-	// We determine the line number width from the '_' characters and
-	// the separator position from the character '?' on the second line.
-	$linenowidth = strrpos($line, '_') + 1;
-	$midloc = strpos($line, '?') - ($linenowidth+1);
-
-	$line = strtok("\n");
-	while(strlen($line) != 0){
-		$linenostr = substr($line, 0, $linenowidth);
-		$diffline = substr($line, $linenowidth+1);
-		$mid = substr($diffline, $midloc-1, 3);
-		switch($mid){
-			case ' = ':
-				$formdiffline = "<span class='correct'>".htmlspecialchars($diffline)."</span>";
-				break;
-			case ' ! ':
-				$formdiffline = "<span class='differ'>".htmlspecialchars($diffline)."</span>";
-				break;
-			case ' $ ':
-				$formdiffline = "<span class='endline'>".htmlspecialchars($diffline)."</span>";
-				break;
-			case ' > ':
-			case ' < ':
-				$formdiffline = "<span class='extra'>".htmlspecialchars($diffline)."</span>";
-				break;
-			default:
-				$formdiffline = htmlspecialchars($diffline);
-		}
-		$return = $return . $linenostr . " " . $formdiffline . "\n";
-		$line = strtok("\n");
-	}
-	return $return;
-}
-
 $pagename = basename($_SERVER['PHP_SELF']);
 
 $id = (int)@$_REQUEST['id'];
@@ -328,15 +285,48 @@ if ( isset($jid) )  {
 	                WHERE t.probid = %s ORDER BY rank',
 	               $jid, $submdata['probid']);
 	$runinfo = $runs->gettable();
+	$lastsubmitid = $DB->q('MAYBEVALUE SELECT submitid
+	                        FROM submission
+	                        WHERE teamid = %s AND probid = %s AND submittime < %s
+	                        ORDER BY submittime DESC LIMIT 1',
+	                       $submdata['teamid'],$submdata['probid'],
+	                       $submdata['submittime']);
+	if ( $lastsubmitid !== NULL ) {
+		$lastjud = $DB->q('MAYBETUPLE SELECT *
+		                   FROM judging
+		                   WHERE submitid = %s AND valid = 1
+		                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
+		if ( $lastjud !== NULL ) {
+			$lastruns = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
+			                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
+			                                                 r.judgingid = %i )
+			                    WHERE t.probid = %s ORDER BY rank',
+			                   $lastjud['judgingid'], $submdata['probid']);
+			$lastruninfo = $lastruns->gettable();
+		}
+	}
 
-	echo "<h3 id=\"testcases\">Testcase runs</h3>\n\n";
+	echo "<h3 id=\"testcases\">Testcase runs " .
+	    ( $lastjud === NULL ? '' :
+	      "<span style=\"font-size:xx-small;\">" .
+	      "<a href=\"javascript:togglelastruns();\">show/hide results of previous</a> " .
+	      "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a></span>" ) .
+	    "</h3>\n\n";
 
 	echo "<table class=\"list\">\n<thead>\n" .
 		"<tr><th scope=\"col\">#</th><th scope=\"col\">runtime</th>" .
-	    "<th scope=\"col\">result</th><th scope=\"col\">description</th>" .
+		"<th scope=\"col\">result</th>";
+	if ( $lastjud !== NULL ) {
+		echo "<th scope=\"col\" name=\"lastruntime\">" .
+			"<span class=\"disabled\">s$lastsubmitid runtime</span></th>" .
+			"<th scope=\"col\" name=\"lastresult\">" .
+			"<span class=\"disabled\">s$lastsubmitid result</span></th>";
+	}
+
+	echo "<th scope=\"col\">description</th>" .
 	    "</tr>\n</thead>\n<tbody>\n";
 
-	foreach ( $runinfo as $run ) {
+	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
 		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
 		    "<td><a href=\"$link\">$run[runtime]</a></td>" .
@@ -349,12 +339,29 @@ if ( isset($jid) )  {
 		default:
 			echo 'sol_incorrect';
 		}
-		echo "\">$run[runresult]</span></a></td>" .
-		    "<td><a href=\"$link\">" .
+		echo "\">$run[runresult]</span></a></td>";
+		if ( $lastjud !== NULL ) {
+			$lastrun = $lastruninfo[$key];
+			if ( $lastjud['result']=='compiler-error' ) $lastrun['runresult'] = 'compiler-error';
+			echo "<td name=\"lastruntime\"><a href=\"$link\">" .
+				"<span class=\"disabled\">$lastrun[runtime]</span></a></td>" .
+				"<td name=\"lastresult\"><a href=\"$link\">" .
+				"<span class=\"sol disabled\">$lastrun[runresult]</span></a></td>";
+		}
+
+		echo "<td><a href=\"$link\">" .
 		    htmlspecialchars(str_cut($run['description'],20)) . "</a></td>" .
 			"</tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
+
+?>
+<script type="text/javascript" language="JavaScript">
+<!--
+togglelastruns();
+-->
+</script>
+<?php
 
 	foreach ( $runinfo as $run ) {
 
@@ -386,7 +393,7 @@ if ( isset($jid) )  {
 		echo "<h5>Diff output</h5>\n";
 		if ( strlen(@$run['output_diff']) > 0 ) {
 			echo "<pre class=\"output_text\">";
-			echo parseDiff($run['output_diff']);
+			echo parseRunDiff($run['output_diff']);
 			echo "</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no diff output.</p>\n";

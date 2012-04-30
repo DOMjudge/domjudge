@@ -62,6 +62,19 @@ CREATE TABLE `balloon` (
   PRIMARY KEY (`balloonid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Balloons to be handed out';
 
+CREATE TABLE `submission_file` (
+  `submitfileid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `submitid` int(4) unsigned NOT NULL COMMENT 'Submission this file belongs to',
+  `sourcecode` longblob NOT NULL COMMENT 'Full source code',
+  `filename` varchar(255) NOT NULL COMMENT 'Filename as submitted',
+  `rank` int(4) unsigned NOT NULL COMMENT 'Order of the submission files, zero-indexed',
+  PRIMARY KEY (`submitfileid`),
+  UNIQUE KEY `filename` (`submitid`,`filename`),
+  UNIQUE KEY `rank` (`submitid`,`rank`),
+  KEY `submitid` (`submitid`),
+  CONSTRAINT `submission_file_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Files associated to a submission';
+
 -- Resize datastructures to fit "arbitrary" large data to satisfy
 -- http://domjudge.a-eskwadraat.nl/trac/ticket/15 for the ICPC CSS spec.
 ALTER TABLE `clarification`
@@ -83,7 +96,10 @@ ALTER TABLE `judging_run`
   MODIFY COLUMN `output_error` longblob COMMENT 'Standard error output of the program';
 
 ALTER TABLE `submission`
-  MODIFY COLUMN `sourcecode` longblob NOT NULL COMMENT 'Full source code';
+  MODIFY COLUMN `sourcecode` longblob NOT NULL COMMENT 'Full source code',
+  ADD COLUMN `origsubmitid` int(4) unsigned default NULL COMMENT 'If set, specifies original submission in case of edit/resubmit' AFTER `submitid`,
+  ADD KEY `origsubmitid` (`origsubmitid`),
+  ADD CONSTRAINT `submission_ibfk_6` FOREIGN KEY (`origsubmitid`) REFERENCES `submission` (`submitid`) ON DELETE SET NULL;
 
 ALTER TABLE `team`
   MODIFY COLUMN `members` longtext COMMENT 'Team member names (freeform)',
@@ -95,6 +111,9 @@ ALTER TABLE `team_affiliation`
 --
 -- Transfer data from old to new structure
 --
+
+INSERT INTO `submission_file` (`submitid`, `rank`, `sourcecode`, `filename`)
+  SELECT `submitid`, '0', `sourcecode`, CONCAT('source.',`langid`) FROM submission;
 
 --
 -- Add/remove sample/initial contents
@@ -112,7 +131,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('so
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('verification_required', '0', 'bool', 'Is verification of judgings by jury required before publication?');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('penalty_time', '20', 'int', 'Penalty time in minutes per wrong submission (if finally solved).');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('results_prio', '{"memory-limit":99,"output-limit":99,"run-error":99,"timelimit":99,"wrong-answer":30,"presentation-error":20,"no-output":10,"correct":1}', 'array_keyval', 'Priorities of results for determining final result with multiple testcases. Higher priority is used first as final result. With equal priority, the first occurring result determines the final result.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('results_remap', '{"presentation-error":"wrong-answer"}', 'array_keyval', 'Remap final result, e.g. to disable a specific result type such as ''presentation-error''.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('results_remap', '{"presentation-error":"wrong-answer"}', 'array_keyval', 'Remap testcase result, e.g. to disable a specific result type such as ''presentation-error''.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('lazy_eval_results', '1', 'bool', 'Lazy evaluation of results? If enabled, returns final result as soon as a highest priority result is found, otherwise only return final result when all testcases are judged.');
 
 UPDATE `team_affiliation` SET `country` = 'AFG' WHERE country = 'AF';
@@ -372,3 +391,6 @@ UPDATE `team_affiliation` SET `country` = 'ZWE' WHERE country = 'ZW';
 
 ALTER TABLE `scoreboard_jury`
   DROP COLUMN balloon;
+
+ALTER TABLE `submission`
+  DROP COLUMN sourcecode;

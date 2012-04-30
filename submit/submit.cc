@@ -115,8 +115,8 @@ struct option const long_opts[] = {
 
 void version();
 void usage();
-void usage2(int , const char *, ...);
-void warnuser(const char *);
+void usage2(int , const char *, ...) __attribute__((format (printf, 2, 3)));
+void warnuser(const char *, ...)     __attribute__((format (printf, 1, 2)));
 char readanswer(const char *answers);
 #ifdef HAVE_MAGIC_H
 int  file_istext(char *filename);
@@ -141,8 +141,8 @@ int nwarnings;
 /* Submission information */
 string problem, language, extension, server, team, password, baseurl;
 long submissiontime; /* in ms since start of contest, -1 means unset */
-char *filename, *submitdir, *tempfile;
-int temp_fd;
+vector<string> filenames;
+char *submitdir;
 
 /* Language extensions */
 vector<vector<string> > languages;
@@ -286,33 +286,46 @@ int main(int argc, char **argv)
 	if ( show_help ) usage();
 	if ( show_version ) version();
 
-	if ( argc<=optind   ) usage2(0,"no filename specified");
-	if ( argc> optind+1 ) usage2(0,"multiple filenames specified");
-	filename = argv[optind];
+	if ( argc<=optind   ) usage2(0,"no file(s) specified");
 
-	/* Stat file and do some sanity checks */
-	if ( stat(filename,&fstats)!=0 ) usage2(errno,"cannot find `%s'",filename);
-	logmsg(LOG_DEBUG,"submission file is %s",filename);
+	/* Process all source files */
+	for(i=0; optind+(int)i<argc; i++) {
+		ptr = argv[optind+i];
 
-	/* Do some sanity checks on submission file and warn user */
-	nwarnings = 0;
+		/* Ignore doubly specified files */
+		for(j=0; j<filenames.size(); j++) {
+			if ( filenames[j]==string(ptr) ) {
+				logmsg(LOG_DEBUG,"ignoring doubly specified file `%s'",ptr);
+				goto nextfile;
+			}
+		}
 
-	if ( ! (fstats.st_mode & S_IFREG) ) warnuser("file is not a regular file");
-	if ( ! (fstats.st_mode & S_IRUSR) ) warnuser("file is not readable");
-	if ( fstats.st_size==0 )            warnuser("file is empty");
+		/* Stat file and do some sanity checks */
+		if ( stat(ptr,&fstats)!=0 ) usage2(errno,"cannot find file `%s'",ptr);
+		logmsg(LOG_DEBUG,"submission file %d: `%s'",(int)i+1,ptr);
 
-	if ( (fileage=(time(NULL)-fstats.st_mtime)/60)>WARN_MTIME ) {
-		ptr = allocstr("file has not been modified for %d minutes",fileage);
-		warnuser(ptr);
-		free(ptr);
-	}
+		/* Do some sanity checks on submission file and warn user */
+		nwarnings = 0;
+
+		if ( ! (fstats.st_mode & S_IFREG) ) warnuser("`%s' is not a regular file",ptr);
+		if ( ! (fstats.st_mode & S_IRUSR) ) warnuser("`%s' is not readable",ptr);
+		if ( fstats.st_size==0 )            warnuser("`%s' is empty",ptr);
+
+		if ( (fileage=(time(NULL)-fstats.st_mtime)/60)>WARN_MTIME ) {
+			warnuser("`%s' has not been modified for %d minutes",ptr,(int)fileage);
+		}
 
 #ifdef HAVE_MAGIC_H
-	if ( !file_istext(filename) ) warnuser("file is detected as binary/data");
+		if ( !file_istext(ptr) ) warnuser("`%s' is detected as binary/data",ptr);
 #endif
 
-	/* Try to parse problem and language from filename */
-	filebase = string(gnu_basename(filename));
+		filenames.push_back(ptr);
+
+	  nextfile:	;
+	}
+
+	/* Try to parse problem and language from first filename */
+	filebase = string(gnu_basename(filenames[0].c_str()));
 	if ( filebase.find('.')!=string::npos ) {
 		fileext = filebase.substr(filebase.rfind('.')+1);
 		filebase.erase(filebase.find('.'));
@@ -333,9 +346,7 @@ int main(int argc, char **argv)
 	}
 
 	if ( language.empty() ) {
-		ptr = allocstr("language `%s' not recognised",extension.c_str());
-		warnuser(ptr);
-		free(ptr);
+		warnuser("language `%s' not recognised",extension.c_str());
 		language = extension;
 	}
 
@@ -361,7 +372,15 @@ int main(int argc, char **argv)
 	/* Ask user for confirmation */
 	if ( ! quiet ) {
 		printf("Submission information:\n");
-		printf("  filename:    %s\n",filename);
+		if ( filenames.size()==1 ) {
+			printf("  filename:    %s\n",filenames[0].c_str());
+		} else {
+			printf("  filenames:  ");
+			for(i=0; i<filenames.size(); i++) {
+				printf(" %s",filenames[i].c_str());
+			}
+			printf("\n");
+		}
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
 		printf("  team:        %s\n",team.c_str());
@@ -405,7 +424,7 @@ void usage()
 {
 	size_t i,j;
 
-	printf("Usage: %s [OPTION]... FILENAME\n",progname);
+	printf("Usage: %s [OPTION]... FILENAME...\n",progname);
 	printf(
 "Submit a solution for a problem.\n"
 "\n"
@@ -438,19 +457,19 @@ void usage()
 "Explanation of submission options:\n"
 "\n"
 "For PROBLEM use the ID of the problem (letter, number or short name)\n"
-"in lower- or uppercase. When not specified, PROBLEM defaults to\n"
-"FILENAME excluding the extension.\n"
-"For example, 'c.java' will indicate problem 'C'.\n"
+"in lower- or uppercase. When not specified, PROBLEM defaults to the\n"
+"first FILENAME excluding the extension. For example, 'c.java' will\n"
+"indicate problem 'C'.\n"
 "\n"
 "For LANGUAGE use one of the following extensions in lower- or uppercase:\n");
 	for(i=0; i<languages.size(); i++) {
-		printf("   %-10s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
+		printf("   %-15s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
 		for(j=2; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
 		printf("\n");
 	}
 	printf(
-"The default for LANGUAGE is the extension of FILENAME.\n"
-"For example, 'c.java' wil indicate a Java solution.\n"
+"The default for LANGUAGE is the extension of FILENAME. For example,\n"
+"'c.java' will indicate a Java solution.\n"
 "\n"
 "Examples:\n"
 "\n");
@@ -459,16 +478,18 @@ void usage()
 	printf("Submit problem 'e' in C++:\n"
 	       "    %s --problem e --language=cpp ProblemE.cc\n\n",progname);
 	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
-	       "    %s -p hello -l C HelloWorld.java\n\n",progname);
+	       "    %s -p hello -l C HelloWorld.cpp\n\n",progname);
+	printf("Submit multiple files (the problem and languare are taken from the first):\n"
+	       "    %s hello.java message.java\n\n",progname);
 	printf(
 "The following options should not be necessary for normal use:\n"
 "\n"
 #if ( SUBMIT_ENABLE_CMD )
-"For TEAM use the login of the account, you want to submit for.\n"
-"The default value for TEAM is taken from the environment variable\n"
-"'TEAM' or your login name if 'TEAM' is not defined.\n"
+"Specify with TEAM the team ID you want to submit as. The default\n"
+"value for TEAM is taken from the environment variable 'TEAM' or\n"
+"your login name if 'TEAM' is not defined.\n"
 "\n"
-"For SERVER use the servername or IP-address of the submit-server.\n"
+"Set SERVER to the hostname or IP-address of the submit-server.\n"
 "The default value for SERVER is defined internally or otherwise\n"
 "taken from the environment variable 'SUBMITSERVER', or 'localhost'\n"
 "if 'SUBMITSERVER' is not defined; PORT can be used to set an alternative\n"
@@ -476,13 +497,13 @@ void usage()
 "\n"
 #endif
 #if ( SUBMIT_ENABLE_WEB )
-"For URL use the base address of the webinterface without the\n"
+"Set URL to the base address of the webinterface without the\n"
 "'team/upload.php' suffix.\n"
 "\n"
 #endif
 #if ( SUBMIT_ENABLE_WEB && SUBMIT_ENABLE_CMD )
-"The TEAM/SERVER/PORT and URL options are only used when submitting to the\n"
-"commandline daemon or webinterface respectively.\n"
+"The TEAM/SERVER/PORT options are only used when submitting to the\n"
+"commandline daemon, and URL only when using the webinterface.\n"
 #endif
 	);
 	exit(0);
@@ -511,13 +532,22 @@ void usage2(int errnum, const char *mesg, ...)
 	exit(1);
 }
 
-void warnuser(const char *warning)
+void warnuser(const char *warning, ...)
 {
+	char *str;
+	va_list ap;
+
+	va_start(ap,warning);
+	str = vallocstr(warning,ap);
+
 	nwarnings++;
 
-	logmsg(LOG_DEBUG,"user warning #%d: %s",nwarnings,warning);
+	logmsg(LOG_DEBUG,"user warning #%d: %s",nwarnings,str);
 
-	if ( ! quiet ) printf("WARNING: %s!\n",warning);
+	if ( ! quiet ) printf("WARNING: %s!\n",str);
+
+	free(str);
+	va_end(ap);
 }
 
 char readanswer(const char *answers)
@@ -558,7 +588,8 @@ int file_istext(char *filename)
 {
 	magic_t cookie;
 	const char *filetype;
-	int res;
+	char *errstr;
+	int i, res;
 
 	if ( (cookie = magic_open(MAGIC_MIME))==NULL ) goto magicerror;
 
@@ -575,7 +606,15 @@ int file_istext(char *filename)
 	return res;
 
 magicerror:
-	warning(magic_errno(cookie),magic_error(cookie));
+	/* Filter out any printf '%' format characters, since these
+	 * would be interpreted by warning().
+	 */
+	errstr = strdup(magic_error(cookie));
+	for(i=0; errstr[i]!=0; i++) if ( errstr[i]=='%' ) errstr[i] = '_';
+
+	warning(magic_errno(cookie),errstr);
+
+	free(errstr);
 
 	return 1; // return 'text' by default on error
 }
@@ -587,33 +626,41 @@ magicerror:
 int cmdsubmit()
 {
 	int redir_fd[3];
-	char *args[2];
+	int temp_fd;
+	const char *args[2];
+	char *template_str, *tempfile;
+	vector<string> tempfiles;
 	struct timeval timeout;
 	struct addrinfo hints;
 	char *port_str;
 	int err;
+	size_t i;
 
-	/* Make tempfile to submit */
-	tempfile = allocstr("%s/%s.XXXXXX.%s",submitdir,
-	                    problem.c_str(),extension.c_str());
-	temp_fd = mkstemps(tempfile,extension.length()+1);
-	if ( temp_fd<0 || strlen(tempfile)==0 ) {
-		error(errno,"mkstemps cannot create tempfile");
+	/* Make tempfiles to submit */
+	template_str = allocstr("%s/%s.XXXXXX.%s",submitdir,
+	                        problem.c_str(),extension.c_str());
+	for(i=0; i<filenames.size(); i++) {
+		tempfile = strdup(template_str);
+		temp_fd = mkstemps(tempfile,extension.length()+1);
+		if ( temp_fd<0 || strlen(tempfile)==0 ) {
+			error(errno,"mkstemps cannot create tempfile");
+		}
+
+		/* Construct copy command and execute it */
+		args[0] = filenames[i].c_str();
+		args[1] = tempfile;
+		redir_fd[0] = redir_fd[1] = redir_fd[2] = FDREDIR_NONE;
+		if ( execute(COPY_CMD,args,2,redir_fd,1)!=0 ) {
+			error(0,"cannot copy `%s' to `%s'",args[0],args[1]);
+		}
+
+		if ( chmod(tempfile,USERPERMFILE)!=0 ) {
+			error(errno,"setting permissions on `%s'",tempfile);
+		}
+
+		logmsg(LOG_INFO,"copied `%s' to tempfile `%s'",filenames[i].c_str(),tempfile);
+		tempfiles.push_back(tempfile);
 	}
-
-	/* Construct copy command and execute it */
-	args[0] = filename;
-	args[1] = tempfile;
-	redir_fd[0] = redir_fd[1] = redir_fd[2] = FDREDIR_NONE;
-	if ( execute(COPY_CMD,args,2,redir_fd,1)!=0 ) {
-		error(0,"cannot copy `%s' to `%s'",filename,tempfile);
-	}
-
-	if ( chmod(tempfile,USERPERMFILE)!=0 ) {
-		error(errno,"setting permissions on `%s'",tempfile);
-	}
-
-	logmsg(LOG_INFO,"copied `%s' to tempfile `%s'",filename,tempfile);
 
 	/* Connect to the submission server */
 	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",
@@ -678,8 +725,12 @@ int cmdsubmit()
 	receive(socket_fd);
 	sendit(socket_fd,"+language %s",extension.c_str());
 	receive(socket_fd);
-	sendit(socket_fd,"+filename %s",gnu_basename(tempfile));
-	receive(socket_fd);
+	for(i=0; i<filenames.size(); i++) {
+		sendit(socket_fd,"+filename %s",gnu_basename(tempfiles[i].c_str()));
+		receive(socket_fd);
+		sendit(socket_fd,"+fileorig %s",gnu_basename(filenames[i].c_str()));
+		receive(socket_fd);
+	}
 	sendit(socket_fd,"+done");
 
 	/* Keep reading until end of file, then check for errors */
@@ -734,13 +785,13 @@ int websubmit()
 	size_t pos;
 	int uploadstatus_read;
 
-	url = allocstr((baseurl+"team/upload.php").c_str());
+	url = strdup((baseurl+"team/upload.php").c_str());
 
 	curlerrormsg[0] = 0;
 
 	handle = curl_easy_init();
 
-/* helper macro's to easily set curl options and fill forms */
+/* helper macros to easily set curl options and fill forms */
 #define curlsetopt(opt,val) \
 	if ( curl_easy_setopt(handle, CURLOPT_ ## opt, val)!=CURLE_OK ) { \
 		warning(0,"setting curl option '" #opt "': %s, aborting download",curlerrormsg); \
@@ -754,7 +805,10 @@ int websubmit()
 		error(0,"libcurl could not add form field '%s'='%s'",namecont,valcont)
 
 	/* Fill post form */
-	curlformadd(COPYNAME,"code",   FILE,        filename);
+
+	for(size_t i=0; i<filenames.size(); i++) {
+		curlformadd(COPYNAME,"code[]", FILE, filenames[i].c_str());
+	}
 	curlformadd(COPYNAME,"probid", COPYCONTENTS,problem.c_str());
 	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
 	curlformadd(COPYNAME,"noninteractive",COPYCONTENTS,"1");
@@ -771,8 +825,6 @@ int websubmit()
 	curlsetopt(HTTPGET,       0);
 	curlsetopt(WRITEFUNCTION, writesstream);
 	curlsetopt(WRITEDATA,     (void *)&curloutput);
-	curlsetopt(SSL_VERIFYPEER,0);
-	curlsetopt(SSL_VERIFYHOST,0);
 	curlsetopt(USERAGENT     ,DOMJUDGE_PROGRAM " (" PROGRAM " using cURL)");
 
 	if ( verbose >= LOG_DEBUG ) {

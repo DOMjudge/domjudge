@@ -37,16 +37,24 @@ logmsg(LOG_NOTICE, "started, sources dir = '" . $sourcesdir . "'");
 
 $res = $DB->q('SELECT * FROM submission');
 
-while( $row = $res->next() ) {
+while( $subm = $res->next() ) {
 
-	$filename = implode('.',array('c'.$row['cid'],'s'.$row['submitid'],
-	                              $row['teamid'],$row['probid'],$row['langid']));
+	$sources = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, sourcecode, filename
+	                   FROM submission_file WHERE submitid = %i', $subm['submitid']);
 
-	$filepath = $sourcesdir . '/' . $filename;
-	file_put_contents($filepath, $row['sourcecode']);
-	touch($filepath, strtotime($row['submittime']));
+	foreach ( $sources as $rank => $source) {
+		$fdata = $subm;
+		$fdata['rank'] = $rank;
+		$fdata['filename'] = $source['filename'];
 
-	logmsg(LOG_DEBUG, "saved file '$filename'");
+		$file = getSourceFilename($fdata);
+
+		$filepath = $sourcesdir . '/' . $file;
+		file_put_contents($filepath, $source['sourcecode']);
+		touch($filepath, strtotime($subm['submittime']));
+
+		logmsg(LOG_DEBUG, "saved file '$file'");
+	}
 }
 
 logmsg(LOG_NOTICE, "finished");

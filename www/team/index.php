@@ -16,7 +16,6 @@ $refreshtime = 30;
 
 $submitted = @$_GET['submitted'];
 
-#FIXME: JavaScript must be in page <head>
 echo "<script type=\"text/javascript\">\n<!--\n";
 echo "function getMainExtension(ext)\n{\n";
 echo "\tswitch(ext) {\n";
@@ -41,7 +40,7 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 		echo addForm('upload.php','post',null,'multipart/form-data', null, ' onreset="resetUploadForm('.$refreshtime .');"') .
 		"<p id=\"submitform\">\n\n" .
 		"<span class=\"fileinputs\">\n\t" .
-		"<input type=\"file\" name=\"code\" id=\"code\" size=\"15\" /> " .
+		"<input type=\"file\" name=\"code[]\" id=\"maincode\" size=\"15\" /> " .
 		"\n</span>\n";
 
 		echo "<script type=\"text/javascript\">initFileUploads();</script>\n\n";
@@ -61,6 +60,9 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 			       "return checkUploadForm();");
 
 		echo addReset('cancel');
+
+		echo "<br /><div id=\"morefiles\"><span id=\"auxfiles\"></span>\n" .
+		     "<input type=\"button\" name=\"addfile\" id=\"addfile\" value=\"Add another file\" onclick=\"addFileUpload();\" disabled=\"disabled\" /></div>\n";
 
 		echo "</p>\n</form>\n\n";
 	}

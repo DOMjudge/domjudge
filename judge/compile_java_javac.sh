@@ -10,9 +10,9 @@
 # configuration option turned on, unless proper preconfiguration of
 # the chroot environment has been taken care of!
 
-SOURCE="$1"
-DEST="$2"
-MEMLIMIT="$3"
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+MAINSOURCE="$1"
 
 # Amount of memory reserved for the Java virtual machine in kB. The
 # default below is just above the maximum memory usage of current
@@ -22,11 +22,11 @@ MEMRESERVED=300000
 # Oracle java needs filename to match main class:
 MAINCLASS=Main
 
-SOURCEDIR=${SOURCE%/*}
-[ "$SOURCEDIR" = "$SOURCE" ] && SOURCEDIR='.'
+SOURCEDIR="${MAINSOURCE%/*}"
+[ "$SOURCEDIR" = "$MAINSOURCE" ] && SOURCEDIR='.'
 TMP="$SOURCEDIR/$MAINCLASS"
 
-cp $SOURCE $TMP.java
+cp "$MAINSOURCE" $TMP.java
 
 # Byte-compile:
 javac $TMP.java

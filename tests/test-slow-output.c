@@ -3,7 +3,7 @@
  * However it doesn't give output: GNU C seems not to flush buffers
  * when it receives a signal.
  *
- * @EXPECTED_RESULTS@: TIMELIMIT,WRONG-ANSWER
+ * @EXPECTED_RESULTS@: TIMELIMIT
  */
 
 #include <stdio.h>

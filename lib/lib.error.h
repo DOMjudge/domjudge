@@ -36,7 +36,7 @@ extern int  verbose;
 extern int  loglevel;
 extern FILE *stdlog;
 
-void  logmsg(int, const char *, ...);
+void  logmsg(int, const char *, ...) __attribute__((format (printf, 2, 3)));
 void vlogmsg(int, const char *, va_list);
 /* Logging functions (vlogmsg uses va_list instead of argument list):
  * Logs a message to stderr and/or logfile, including date and program name,
@@ -48,7 +48,7 @@ void vlogmsg(int, const char *, va_list);
  * ... or va_list  optional arguments for format characters
  */
 
-char *errorstring(const char *, int, const char *);
+char *errorstring(const char *, int, const char *) __attribute__((nonnull (1)));
 /* Error string generating function:
  * Returns a pointer to a dynamically allocated string containing the error
  * message.
@@ -61,12 +61,12 @@ char *errorstring(const char *, int, const char *);
  * Returns a char pointer to the allocated string.
  */
 
-void logerror (int, const char *, ...);
-void error    (int, const char *, ...);
-void warning  (int, const char *, ...);
-void vlogerror(int, const char *, va_list);
-void verror   (int, const char *, va_list);
-void vwarning (int, const char *, va_list);
+void logerror (int, const char *, ...) __attribute__((format (printf, 2, 3)));
+void error    (int, const char *, ...) __attribute__((format (printf, 2, 3), noreturn));
+void warning  (int, const char *, ...) __attribute__((format (printf, 2, 3)));
+void vlogerror(int, const char *, va_list) __attribute__((nonnull (2)));
+void verror   (int, const char *, va_list) __attribute__((nonnull (2), noreturn));
+void vwarning (int, const char *, va_list) __attribute__((nonnull (2)));
 /* Error and warning functions (v.. uses va_list instead of argument list):
  * Logs an error message including error string from 'errno'.
  *   logerror   only logs the error message (non-fatal error)
@@ -79,7 +79,7 @@ void vwarning (int, const char *, va_list);
  * ... or va_list  optional arguments for format characters
  */
 
-char  *allocstr(const char *, ...);
+char  *allocstr(const char *, ...) __attribute__((format (printf, 1, 2)));
 char *vallocstr(const char *, va_list);
 /* Create a c-string by allocating memory for it and writing to it,
  * using printf type format characters.

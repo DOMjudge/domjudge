@@ -1,8 +1,8 @@
 /*
- * Floods stderr and should fail with TIME-LIMIT or RUN-ERROR
- * depending on whether timelimit or filesize limit is reached first.
+ * Floods stderr and should fail with TIMELIMIT, since output is
+ * automatically truncated at the filesize limit.
  *
- * @EXPECTED_RESULTS@: TIME-LIMIT,RUN-ERROR
+ * @EXPECTED_RESULTS@: TIMELIMIT
  */
 
 #include <iostream>

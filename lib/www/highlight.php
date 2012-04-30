@@ -20,7 +20,7 @@ function highlight ($source, $ext)
 	if ( !isset($lib) ) {
 		$lib = highlighter_init();
 	}
-	call_user_func('highlight_'.$lib, $source, $ext);
+	return call_user_func('highlight_'.$lib, $source, $ext);
 }
 
 /**
@@ -74,10 +74,10 @@ function highlight_geshi ($source, $ext)
 	$geshi->enable_line_numbers(GESHI_FANCY_LINE_NUMBERS);
 	// TODO: make output use more CSS and less <font>
 	if ( $geshi->error()===FALSE ) {
-		echo $geshi->parse_code();
-	} else {
-		highlight_native($source, $ext);
+		return $geshi->parse_code();
 	}
+	
+	return highlight_native($source, $ext);
 }
 
 /**
@@ -100,10 +100,10 @@ function highlight_texthighlighter ($source, $ext)
 
 	if ( !PEAR::isError($hl) ) {
 		$hl->setRenderer($renderer);
-		echo $hl->highlight($source);
-	} else {
-		highlight_native($source, $ext);
+		return $hl->highlight($source);
 	}
+
+	return highlight_native($source, $ext);
 }
 
 /**
@@ -113,13 +113,13 @@ function highlight_texthighlighter ($source, $ext)
 function highlight_native ($source, $ext)
 {
 	$sourcelines = explode("\n", $source);
-	echo '<pre class="output_text">';
+	$ret = '<pre class="output_text">';
 	$i = 1;
 	$lnlen = strlen(count($sourcelines));
 	foreach ($sourcelines as $line ) {
-		echo "<span class=\"lineno\">" . str_pad($i, $lnlen, ' ', STR_PAD_LEFT) .
+		$ret .= "<span class=\"lineno\">" . str_pad($i, $lnlen, ' ', STR_PAD_LEFT) .
 			"</span>  " . htmlspecialchars($line) . "\n";
 		$i++;
 	}
-	echo "</pre>\n\n";
+	return $ret . "</pre>\n\n";
 }

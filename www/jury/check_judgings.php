@@ -34,8 +34,9 @@ $earlier = array();
 $matchstring = '@EXPECTED_RESULTS@: ';
 $verifier = 'auto-verifier';
 
-$res = $DB->q("SELECT s.*, j.judgingid, j.result, j.verified, j.jury_member
+$res = $DB->q("SELECT s.*, f.sourcecode, j.judgingid, j.result, j.verified, j.jury_member
                FROM submission s
+               LEFT JOIN submission_file f ON (s.submitid = f.submitid AND f.rank=0)
                LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
                WHERE s.cid = %i AND j.result IS NOT NULL", $cid);
 

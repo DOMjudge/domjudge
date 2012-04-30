@@ -247,12 +247,12 @@ CREATE TABLE `scoreboard_public` (
 
 CREATE TABLE `submission` (
   `submitid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
+  `origsubmitid` int(4) unsigned default NULL COMMENT 'If set, specifies original submission in case of edit/resubmit',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
   `langid` varchar(8) NOT NULL COMMENT 'Language ID',
   `submittime` datetime NOT NULL COMMENT 'Time submitted',
-  `sourcecode` longblob NOT NULL COMMENT 'Full source code',
   `judgehost` varchar(50) default NULL COMMENT 'Current/last judgehost judging this submission',
   `judgemark` varchar(255) default NULL COMMENT 'Unique identifier for taking a submission by a judgehost',
   `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'If false ignore this submission in all scoreboard calculations',
@@ -264,12 +264,31 @@ CREATE TABLE `submission` (
   KEY `probid` (`probid`),
   KEY `langid` (`langid`),
   KEY `judgehost_2` (`judgehost`),
+  KEY `origsubmitid` (`origsubmitid`),
   CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
-  CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL
+  CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL,
+  CONSTRAINT `submission_ibfk_6` FOREIGN KEY (`origsubmitid`) REFERENCES `submission` (`submitid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All incoming submissions';
+
+--
+-- Table structure for table `submission_file`
+--
+
+CREATE TABLE `submission_file` (
+  `submitfileid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `submitid` int(4) unsigned NOT NULL COMMENT 'Submission this file belongs to',
+  `sourcecode` longblob NOT NULL COMMENT 'Full source code',
+  `filename` varchar(255) NOT NULL COMMENT 'Filename as submitted',
+  `rank` int(4) unsigned NOT NULL COMMENT 'Order of the submission files, zero-indexed',
+  PRIMARY KEY (`submitfileid`),
+  UNIQUE KEY `filename` (`submitid`,`filename`),
+  UNIQUE KEY `rank` (`submitid`,`rank`),
+  KEY `submitid` (`submitid`),
+  CONSTRAINT `submission_file_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Files associated to a submission';
 
 --
 -- Table structure for table `team`

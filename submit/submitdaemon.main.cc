@@ -28,6 +28,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 using namespace std;
 
 /* System/site specific static config (paths, etc.) */
@@ -373,15 +374,21 @@ void create_server()
 int handle_client()
 {
 	string command, argument;
-	string team, problem, language, filename;
+	string team, problem, language;
 	char *fromfile, *tempfile, *tmp, *tmp2;
-	char *args[5];
+	const char *args[3], **varargs;
+	int nargs;
 	int redir_fd[3];
 	int status;
 	pid_t cpid;
 	FILE *rpipe;
 	char line[linelen];
-	int i;
+	size_t i,j;
+	vector<string> filenames, fileorigs, tempfiles;
+	/* filenames: client side temporary filenames in SUBMITDIR
+	 * fileorigs: original filenames as specified by client
+	 * tempfiles: server side temporary filenames
+	 */
 
 	sendit(client_fd,"+server ready");
 
@@ -414,8 +421,12 @@ int handle_client()
 			sendit(client_fd,"+received language '%s'",argument.c_str());
 		} else
 		if ( command=="filename" ) {
-			filename = argument;
+			filenames.push_back(argument);
 			sendit(client_fd,"+received filename '%s'",argument.c_str());
+		} else
+		if ( command=="fileorig" ) {
+			fileorigs.push_back(argument);
+			sendit(client_fd,"+received fileorig '%s'",argument.c_str());
 		} else
 		if ( command=="quit" ) {
 			logmsg(LOG_NOTICE,"received quit, aborting");
@@ -429,59 +440,71 @@ int handle_client()
 		}
 	}
 
-	if ( problem.empty()  || team.empty() ||
-	     language.empty() || filename.empty() ) {
+	if ( problem.empty()  || team.empty() || language.empty() ||
+	     filenames.size()==0 || filenames.size()!=fileorigs.size() ) {
 		senderror(client_fd,0,"missing submission info");
 	}
 
 	logmsg(LOG_NOTICE,"submission received: %s/%s/%s",
 	       team.c_str(),problem.c_str(),language.c_str());
 
-	/* Create the absolute path to submission file, which is expected
-	   (and for security explicitly taken) to be basename only! */
-	filename = string(gnu_basename(filename.c_str()));
+	for(i=0; i<filenames.size(); i++) {
 
-	for(i=0; i<(int)filename.length(); i++) {
-		if ( !( isalnum(filename[i]) || strchr(filename_chars,filename[i]) ) )
-			senderror(client_fd,0,"illegal character '%c' in filename",filename[i]);
+		/* Create the absolute path to submission file, which is expected
+		   (and for security explicitly taken) to be basename only! */
+		filenames[i] = string(gnu_basename(filenames[i].c_str()));
+
+		for(j=0; j<filenames[i].length(); j++) {
+			if ( !( isalnum(filenames[i][j]) ||
+			        strchr(filename_chars,filenames[i][j]) ) ) {
+				senderror(client_fd,0,"illegal character '%c' in file '%s'",
+				          filenames[i][j],filenames[i].c_str());
+			}
+		}
+
+		fromfile = allocstr("%s/%s",USERDIR,filenames[i].c_str());
+
+		tempfile = allocstr("%s/cmdsubmit.%s.%s.XXXXXX.%s",TMPDIR,
+		                    problem.c_str(),team.c_str(),language.c_str());
+
+		if ( mkstemps(tempfile,language.length()+1)<0 || strlen(tempfile)==0 ) {
+			senderror(client_fd,errno,"mkstemps cannot create tempfile");
+		}
+
+		logmsg(LOG_INFO,"created tempfile: `%s'",tempfile);
+
+		/* Copy the source-file */
+		args[0] = (char *) team.c_str();
+		args[1] = fromfile;
+		args[2] = tempfile;
+		redir_fd[0] = redir_fd[1] = redir_fd[2] = FDREDIR_NONE;
+		switch ( (status = execute(LIBSUBMITDIR"/submit_copy.sh",args,3,redir_fd,1)) ) {
+		case  0: break;
+		case -1: senderror(client_fd,errno,"starting submit_copy");
+		case -2: senderror(client_fd,0,"starting submit_copy: internal error");
+		default: senderror(client_fd,0,"submit_copy failed with exitcode %d",status);
+		}
+
+		logmsg(LOG_INFO,"copied `%s' to tempfile",filenames[i].c_str());
+		tempfiles.push_back(tempfile);
 	}
-
-	fromfile = allocstr("%s/%s",USERDIR,filename.c_str());
-
-	tempfile = allocstr("%s/cmdsubmit.%s.%s.XXXXXX.%s",TMPDIR,
-	                    problem.c_str(),team.c_str(),language.c_str());
-
-	if ( mkstemps(tempfile,language.length()+1)<0 || strlen(tempfile)==0 ) {
-		senderror(client_fd,errno,"mkstemps cannot create tempfile");
-	}
-
-	logmsg(LOG_INFO,"created tempfile: `%s'",tempfile);
-
-	/* Copy the source-file */
-	args[0] = (char *) team.c_str();
-	args[1] = fromfile;
-	args[2] = tempfile;
-	redir_fd[0] = redir_fd[1] = redir_fd[2] = FDREDIR_NONE;
-	switch ( (status = execute(LIBSUBMITDIR"/submit_copy.sh",args,3,redir_fd,1)) ) {
-	case  0: break;
-	case -1: senderror(client_fd,errno,"starting submit_copy");
-	case -2: senderror(client_fd,0,"starting submit_copy: internal error");
-	default: senderror(client_fd,0,"submit_copy failed with exitcode %d",status);
-	}
-
-	logmsg(LOG_INFO,"copied `%s' to tempfile",filename.c_str());
 
 	/* Check with database for correct parameters
 	   and then add a database entry for this file. */
-	args[0] = (char *) team.c_str();
-	args[1] = client_addr;
-	args[2] = (char *) problem.c_str();
-	args[3] = (char *) language.c_str();
-	args[4] = tempfile;
+	nargs = 4 + 2*filenames.size();
+	varargs = (const char **) calloc(sizeof(char *),nargs);
+	varargs[0] = (char *) team.c_str();
+	varargs[1] = client_addr;
+	varargs[2] = (char *) problem.c_str();
+	varargs[3] = (char *) language.c_str();
+	for(i=0; i<filenames.size(); i++) {
+		varargs[4+2*i]   = tempfiles[i].c_str();
+		varargs[4+2*i+1] = fileorigs[i].c_str();
+	}
 	redir_fd[0] = FDREDIR_NONE;
 	redir_fd[1] = FDREDIR_PIPE;
 	redir_fd[2] = FDREDIR_NONE;
-	if ( (cpid = execute(LIBSUBMITDIR"/submit_db.php",args,5,redir_fd,1))<0 ) {
+	if ( (cpid = execute(LIBSUBMITDIR"/submit_db.php",varargs,nargs,redir_fd,1))<0 ) {
 		senderror(client_fd,errno,"starting submit_db");
 	}
 
@@ -535,7 +558,11 @@ int handle_client()
 
 	logmsg(LOG_INFO,"added submission to database");
 
-	if ( unlink(tempfile)!=0 ) error(errno,"deleting tempfile");
+	for(i=0; i<tempfiles.size(); i++) {
+		if ( unlink(tempfiles[i].c_str())!=0 ) {
+			error(errno,"deleting tempfile '%s'",tempfiles[i].c_str());
+		}
+	}
 
 	sendit(client_fd,"+done submission successful");
 	close(client_fd);

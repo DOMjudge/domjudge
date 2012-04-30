@@ -12,9 +12,9 @@
 # configuration option turned on, unless proper preconfiguration of
 # the chroot environment has been taken care of!
 
-SOURCE="$1"
-DEST="$2"
-MEMLIMIT="$3"
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+MAINSOURCE="$1"
 MAINCLASS=""
 
 # Amount of memory reserved for the Java virtual machine in kB. The
@@ -25,7 +25,7 @@ MEMRESERVED=300000
 TMPFILE=`mktemp /tmp/domjudge_javac_output.XXXXXX` || exit 1
 
 # Byte-compile:
-javac -d . "$SOURCE" 2> "$TMPFILE"
+javac -d . "$@" 2> "$TMPFILE"
 EXITCODE=$?
 if [ "$EXITCODE" -ne 0 ]; then
 	# Let's see if should have named the .java differently
@@ -36,8 +36,8 @@ if [ "$EXITCODE" -ne 0 ]; then
 		exit $EXITCODE
 	fi
 	rm -f $TMPFILE
-	echo "Info: renaming source to '$PUBLICCLASS.java'"
-	mv "$SOURCE" "$PUBLICCLASS.java"
+	echo "Info: renaming main source '$MAINSOURCE' to '$PUBLICCLASS.java'"
+	mv "$MAINSOURCE" "$PUBLICCLASS.java"
 	javac -d . "$PUBLICCLASS.java"
 	EXITCODE=$?
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE

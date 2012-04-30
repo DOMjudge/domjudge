@@ -1,5 +1,6 @@
 /*
- * This should give CORRECT on the default problem 'hello'.
+ * This should give CORRECT on the default problem 'hello'. Note that
+ * it will fail with RUN-ERROR if using the (default) chroot environment.
  *
  * @EXPECTED_RESULTS@: CORRECT
  */

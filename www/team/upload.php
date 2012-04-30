@@ -58,9 +58,15 @@ function err($string)
 
 ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
 
-checkFileUpload($_FILES['code']['error']);
-
-$filename = $_FILES['code']['name'];
+// rebuild array of filenames, paths to get rid of empty upload fields
+$FILEPATHS = $FILENAMES = array();
+foreach($_FILES['code']['tmp_name'] as $fileid => $tmpname ) {
+	if ( !empty($tmpname) ) {
+		checkFileUpload($_FILES['code']['error'][$fileid]);
+		$FILEPATHS[] = $_FILES['code']['tmp_name'][$fileid];
+		$FILENAMES[] = $_FILES['code']['name'][$fileid];
+	}
+}
 
 /* Determine the problem */
 $probid = @$_POST['probid'];
@@ -79,7 +85,7 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
 if ( ! isset($lang) ) err("Unable to find language '$langid'");
 $langid = $lang['langid'];
 
-$sid = submit_solution($login, $probid, $langid, $_FILES['code']['tmp_name']);
+$sid = submit_solution($login, $probid, $langid, $FILEPATHS, $FILENAMES);
 
 auditlog('submission', $sid, 'added', NONINTERACTIVE?'noninteractive':null);
 

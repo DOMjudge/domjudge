@@ -7,7 +7,15 @@ SUBMITCMD = $(TOPDIR)/submit/submit
 
 SUBMIT = \
 	echo -n "Submitting '$$i' " ; \
-	$(SUBMITCMD) -q -w1 -p $(PROBLEM) "$$i" ; \
+	if [ "$${i%.zip}" != "$$i" ]; then \
+		tmp=`mktemp -d` ; \
+		unzip -jnq -d "$$tmp" "$$i" ; \
+		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
+		$(SUBMITCMD) -q -w1 -p $(PROBLEM) "$$main" "$$tmp/"* ; \
+		rm -rf "$$tmp" ; \
+	else \
+		$(SUBMITCMD) -q -w1 -p $(PROBLEM) "$$i" ; \
+	fi ; \
 	echo ; sleep 1
 
 build: $(TARGETS)

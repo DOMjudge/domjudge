@@ -17,21 +17,22 @@
 # Thus, besides installing bash in the chroot environment, it should
 # (for example) be copied to /usr/bin/bash.
 
-SOURCE="$1"
-DEST="$2"
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+MAINSOURCE="$1"
 
 RUNOPTIONS=""
 
 # Check for '#!' interpreter line: don't allow it to prevent teams
 # from passing options to the interpreter.
-if grep '^#!' $SOURCE > /dev/null 2>&1 ; then
+if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
 	echo "Error: interpreter statement(s) found:"
-	grep -n '^#!' $SOURCE
+	grep -n '^#!' "$MAINSOURCE"
 	exit 1
 fi
 
 # Check syntax:
-bash $RUNOPTIONS -n $SOURCE
+bash $RUNOPTIONS -n "$MAINSOURCE"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
@@ -40,12 +41,12 @@ cat > $DEST <<EOF
 #!/bin/sh
 # Generated shell-script to execute shell interpreter on source.
 
-# Detect dirname and change dir to prevent class not found errors.
+# Detect dirname and change dir to prevent file not found errors.
 if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec bash $RUNOPTIONS $SOURCE
+exec bash $RUNOPTIONS "$MAINSOURCE"
 EOF
 
 chmod a+x $DEST

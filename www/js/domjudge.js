@@ -65,6 +65,9 @@ function hideTcDescEdit(descid)
 // Autodetection of problem, language in websubmit
 function detectProblemLanguage(filename)
 {
+	var addfile = document.getElementById("addfile");
+	addfile.disabled = false;
+
 	var parts = filename.toLowerCase().split('.').reverse();
 	if ( parts.length < 2 ) return;
 
@@ -101,11 +104,12 @@ function checkUploadForm()
 	var language = langelt.options[langelt.selectedIndex].value;
 	var languagetxt = langelt.options[langelt.selectedIndex].text;
 	var filebut = document.getElementById("codebutton");
-	var fileelt = document.getElementById("code");
+	var fileelt = document.getElementById("maincode");
 	var filename = fileelt.value;
 	var probelt = document.getElementById("probid");
 	var problem = probelt.options[probelt.selectedIndex].value;
 	var problemtxt = probelt.options[probelt.selectedIndex].text;
+	var auxfiles = document.getElementsByName("code[]");
 
 	var error = false;
 	langelt.className = probelt.className = filebut.className = "";
@@ -127,8 +131,20 @@ function checkUploadForm()
 	if ( error ) {
 		return false;
 	} else {
+		var auxfileno = 0;
+		// start at one; skip maincode file field
+		for (var i = 1; i < auxfiles.length; i++) {
+			if (auxfiles[i].value != "" ) {
+				auxfileno++;
+			}
+		}
+		var extrafiles = '';
+		if ( auxfileno > 0 ) {
+			extrafiles = "Additional source files: " + auxfileno + '\n';
+		}
 		var question =
-			'Filename: ' + filename + '\n\n' +
+			'Main source file: ' + filename + '\n' +
+			extrafiles + '\n' +
 			'Problem: ' + problemtxt + '\n'+
 			'Language: ' + languagetxt + '\n' +
 			'\nMake submission?';
@@ -139,8 +155,12 @@ function checkUploadForm()
 
 function resetUploadForm(refreshtime) {
 	var filebut = document.getElementById("codebutton");
+	var addfile = document.getElementById("addfile");
+	var auxfiles = document.getElementById("auxfiles");
 	var selecttext = "Select file...";
 	filebut.value = selecttext;
+	addfile.disabled = true;
+	auxfiles.innerHTML = "";
 	doReload = true;
 	setTimeout('reloadPage()', refreshtime * 1000);
 }
@@ -210,5 +230,26 @@ function collapse(x){
 		oTemp.style.display="block";
 	} else {
 		oTemp.style.display="none";
+	}
+}
+
+function addFileUpload() {
+	var input = document.createElement('input');
+	input.type = 'file';
+	input.name = 'code[]';
+	input.size = '15';
+	var br = document.createElement('br');
+
+	document.getElementById('auxfiles').appendChild( input );
+	document.getElementById('auxfiles').appendChild( br );
+}
+
+function togglelastruns() {
+	var names = {'lastruntime':0, 'lastresult':1};
+	for (var name in names) {
+		cells = document.getElementsByName(name);
+		for (i = 0; i < cells.length; i++) {
+			cells[i].style.display = (cells[i].style.display == 'none') ? 'table-cell' : 'none';
+		}
 	}
 }

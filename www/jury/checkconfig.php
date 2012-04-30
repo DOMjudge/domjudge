@@ -423,6 +423,15 @@ while($row = $res->next()) {
 	}
 }
 
+// check for submissions that have no associated source file(s)
+$res = $DB->q('SELECT s.submitid FROM submission s
+               LEFT OUTER JOIN submission_file f USING (submitid)
+               WHERE f.submitid IS NULL');
+
+while($row = $res->next()) {
+	$details .= 'Submission s' . $row['submitid'] . " does not have any associated source files\n";
+}
+
 // check for submissions that have been marked by a judgehost but that
 // have no judging-row
 $res = $DB->q('SELECT s.submitid FROM submission s

@@ -113,6 +113,7 @@ to name them here too:
        Coroner's Toolkit by Wietse Venema.
 <item> sorttable.js by Stuart Langridge.
 <item> jscolor.js by Jan Odvarko.
+<item> tabber.js by Patrick Fitzgerald.
 <item> GeSHi syntax highlighter library by Benny Baumann, Nigel McNie.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
        Erik van Sebille.
@@ -133,11 +134,14 @@ Sources can be downloaded from:
 <url url="http://domjudge.sourceforge.net/sources/">.
 
 The <tt>sorttable.js</tt> script is copyright by Stuart Langridge and
-licenced under the MIT/X11 licence, see <tt>COPYING.MIT</tt>. This
-software was downloaded from:
+licenced under the MIT licence, see <tt>COPYING.MIT</tt>. This
+software was downloaded from
 <url url="http://www.kryogenix.org/code/browser/sorttable/">.
-jscolor.js is copyright Jan Odvarko and licenced under the GNU LGPL. 
-It was obtained at <url url="http://jscolor.com">.
+The <tt>jscolor.js</tt> script is copyright by Jan Odvarko and licenced
+under the GNU LGPL. It was obtained at <url url="http://jscolor.com">.
+The <tt>tabber.js</tt> script is copyright by Patrick Fitzgerald and
+licenced under the MIT licence, see <tt>COPYING.MIT</tt>. It was
+downloaded from <url url="http://www.barelyfitz.com/projects/tabber/">.
 
 The M4 autoconf macros are licenced under all-permissive and GPL3+
 licences; see the respective files for details.
@@ -147,7 +151,7 @@ licences; see the respective files for details.
 
 The name of this judging system is inspired by a very important and
 well known landmark in the city of Utrecht: the dome tower, called the
-`Dom' in Dutch. The original logo of the 2004 Dutch Programming
+`Dom' in Dutch. The logo of the 2004 Dutch Programming
 Championships (for which this system was originally developed) depicts
 a representation of the Dom in zeros and ones. We based the name and
 logo of DOMjudge on that.
@@ -249,11 +253,11 @@ the set of test sources can be submitted:
 <code>
 cd tests
 make check
-./check-judgings
 </code>
-The <tt>check-judgings</tt> script automatically verifies most of the
+Then, in the main jury web interface, select the admin link
+<it>judging verifier</it> to automatically verify most of the
 test sources, except for a few with multiple possible outcomes; these
-have to be verified by hand. Read the sources for a description of
+have to be verified by hand. Read the test sources for a description of
 what should (not) happen.
 You may want to change the <tt>AUTH_METHOD</tt> to <tt>FIXED</tt> and set the
 environment variable <tt>SUBMITBASEURL</tt> to your DOMjudge base URL, e.g.
@@ -461,10 +465,9 @@ Software required for building DOMjudge:
 
 In the most basic setup the team workstations only need (next to the tools needed
 for program development) a web browser. The web interface fully works with any
-known browser, with the exception of notification of new clarifications in the
-menu bar. That can be updated without reloading the page by using AJAX. This is
-supported by any reasonably current browser with JavaScript enabled.
-
+known browser. With JavaScript disabled, all basic functionality remains working,
+with the notable exception of multiple file submissions and some convenience
+functions.
 
 <label id="install_config:apt-getinstall">
 <sect1>Debian installation command

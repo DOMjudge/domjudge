@@ -45,7 +45,7 @@ void _alert(const char *libdir, const char *msgtype, const char *description)
 	free(cmd);
 }
 
-int execute(const char *cmd, char **args, int nargs, int stdio_fd[3], int err2out)
+int execute(const char *cmd, const char **args, int nargs, int stdio_fd[3], int err2out)
 {
 	pid_t pid, child_pid;
 	int redirect;
@@ -62,9 +62,12 @@ int execute(const char *cmd, char **args, int nargs, int stdio_fd[3], int err2ou
 	             stdio_fd[1]!=FDREDIR_NONE ||
 	             stdio_fd[2]!=FDREDIR_NONE );
 
-	/* Build the complete argument list for execvp */
+	/* Build the complete argument list for execvp.
+	 * We can const-cast the pointers, since execvp is guaranteed
+	 * not to modify these (or the data pointed to).
+	 */
 	argv[0] = (char *) cmd;
-	for(i=0; i<nargs; i++) argv[i+1] = args[i];
+	for(i=0; i<nargs; i++) argv[i+1] = (char *) args[i];
 	argv[nargs+1] = NULL;
 
 	/* Open pipes for IO redirection */
@@ -193,8 +196,6 @@ void daemonize(const char *_pidfile)
 	case  0: break;     /* child process: do nothing here. */
 	default: _exit(0);  /* parent process: exit. */
 	}
-
-	pid = getpid();
 
 	/* Check and write PID to file */
 	if ( _pidfile!=NULL ) {

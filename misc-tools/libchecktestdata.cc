@@ -185,6 +185,8 @@ int whitespace_ok;
 int debugging;
 int quiet;
 
+void debug(const char *, ...) __attribute__((format (printf, 1, 2)));
+
 void debug(const char *format, ...)
 {
 	va_list ap;
@@ -504,7 +506,8 @@ void checknewline()
 void checktoken(command cmd)
 {
 	currcmd = cmd;
-	debug("checking token %s at %d,%d",cmd.name().c_str(),linenr,charnr);
+	debug("checking token %s at %lu,%lu",
+	      cmd.name().c_str(),(unsigned long)linenr,(unsigned long)charnr);
 
 	if ( cmd.name()=="SPACE" ) checkspace();
 
@@ -660,13 +663,13 @@ void checktestdata()
 			}
 
 			// Run loop...
-			debug("running %s loop, commands %d - %d, max. times = %d",
+			debug("running %s loop, commands %d - %d, max. times = %ld",
 			      cmd.name().c_str(),loopbegin,loopend,times);
 
 			while ( (cmd.name()=="REP"   && i<times) ||
 			        (cmd.name()=="WHILE" && dotest(cmd.args[0])) ) {
 
-				debug("loop iteration %d/%d",i+1,times);
+				debug("loop iteration %ld/%ld",i+1,times);
 				prognr = loopbegin;
 				if ( i>0 && cmd.nargs()>=2 ) checktoken(cmd.args[1]);
 				checktestdata();

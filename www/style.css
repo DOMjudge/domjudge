@@ -109,15 +109,6 @@ span.extra {
 	color: Red;
 }
 
-span.diff-old {
-	color: Red;
-}
-
-span.diff-new {
-	color: Green;
-}
-
-
 .teamid { font-family: monospace; }
 .probid, .langid { font-variant: small-caps; }
 
@@ -199,6 +190,7 @@ legend {
 	border-bottom: 2px solid black;
 }
 .score_correct   { background: #33FF66; }
+.score_first     { background: #00AA00 !important; }
 .score_pending   { background: #6666FF; }
 .score_incorrect { background: #FF6666; }
 .score_neutral   { background: white;   }
@@ -351,4 +343,73 @@ input.file {
 	font-variant: small-caps;
 	margin-bottom: 1em;
 	color: red;
+}
+
+input#addfile {
+	margin-top: 1ex;
+}
+
+/* tabbed layout for multiple source files */
+.tabberlive .tabbertabhide {
+	display:none;
+}
+.tabber {
+}
+.tabberlive {
+	margin-top:1em;
+}
+ul.tabbernav
+{
+	margin:0;
+	padding: 3px 0;
+	border-bottom: 1px solid #778;
+	font: bold 12px Verdana, sans-serif;
+}
+
+ul.tabbernav li
+{
+	list-style: none;
+	margin: 0;
+	display: inline;
+}
+
+ul.tabbernav li a
+{
+	padding: 3px 0.5em;
+	margin-left: 3px;
+	border: 1px solid #778;
+	border-bottom: none;
+	background: #DDE;
+	text-decoration: none;
+}
+
+ul.tabbernav li a:link { color: #448; }
+ul.tabbernav li a:visited { color: #667; }
+
+ul.tabbernav li a:hover
+{
+	color: #000;
+	background: #AAE;
+	border-color: #227;
+}
+
+ul.tabbernav li.tabberactive a
+{
+	background-color: #fff;
+	border-bottom: 1px solid #fff;
+}
+
+ul.tabbernav li.tabberactive a:hover
+{
+	color: #000;
+	background: white;
+	border-bottom: 1px solid white;
+}
+.tabberlive .tabbertab {
+	padding:5px;
+	border:1px solid #aaa;
+	border-top:0;
+}
+.tabberlive .tabbertab h2 {
+	display:none;
 }

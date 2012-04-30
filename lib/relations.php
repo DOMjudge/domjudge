@@ -18,6 +18,7 @@ $KEYS['removed_interval'] = array('intervalid');
 $KEYS['scoreboard_jury'] = array('cid','teamid','probid');
 $KEYS['scoreboard_public'] = array('cid','teamid','probid');
 $KEYS['submission'] = array('submitid');
+$KEYS['submission_file'] = array('submitfileid');
 $KEYS['team'] = array('login');
 $KEYS['team_affiliation'] = array('affilid');
 $KEYS['team_category'] = array('categoryid');
@@ -88,11 +89,16 @@ $RELATIONS['scoreboard_public'] = array (
 );
 
 $RELATIONS['submission'] = array (
+	'origsubmitid' => 'submission.submitid&SETNULL',
 	'cid' => 'contest.cid',
 	'teamid' => 'team.login',
 	'probid' => 'problem.probid',
 	'langid' => 'language.langid',
 	'judgehost' => 'judgehost.hostname&SETNULL',
+);
+
+$RELATIONS['submission_file'] = array (
+	'submitid' => 'submission.submitid',
 );
 
 $RELATIONS['team'] = array (

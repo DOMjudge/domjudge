@@ -31,7 +31,7 @@
    The stdin and stdout streams are passed to the command and runguard
    does not read or write to these. Error and verbose messages from
    runguard are by default written to stderr, hence mixed with stderr
-   output of the command.
+   output of the command, unless that is optionally redirected to file.
 
    The command and its children are sent a SIGTERM after the runtime
    has passed, followed by a SIGKILL after 'killdelay'.
@@ -45,10 +45,13 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/param.h>
+#include <sys/select.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/times.h>
 #include <sys/resource.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -69,6 +72,15 @@
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 #define AUTHORS "Jaap Eldering"
 
+#define max(x,y) ((x) > (y) ? (x) : (y))
+
+/* Array indices for input/output file descriptors as used by pipe() */
+#define PIPE_IN  1
+#define PIPE_OUT 0
+
+#define BUF_SIZE 4*1024
+char buf[BUF_SIZE];
+
 const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
 
 extern int errno;
@@ -83,7 +95,10 @@ char  *progname;
 char  *cmdname;
 char **cmdargs;
 char  *rootdir;
-char  *outputfilename;
+char  *stdoutfilename;
+char  *stderrfilename;
+char  *exitfilename;
+char  *timefilename;
 
 int runuid;
 int rungid;
@@ -92,7 +107,11 @@ int use_time;
 int use_cputime;
 int use_user;
 int use_group;
-int use_output;
+int redir_stdout;
+int redir_stderr;
+int limit_streamsize;
+int outputexit;
+int outputtime;
 int no_coredump;
 int be_verbose;
 int be_quiet;
@@ -104,29 +123,45 @@ unsigned long cputime;
 rlim_t memsize;
 rlim_t filesize;
 rlim_t nproc;
+size_t streamsize;
 
 pid_t child_pid;
+
+static volatile sig_atomic_t received_SIGCHLD = 0;
+
+FILE *child_stdout;
+FILE *child_stderr;
+int child_pipefd[3][2];
+int child_redirfd[3];
 
 struct timeval starttime, endtime;
 struct tms startticks, endticks;
 
 struct option const long_opts[] = {
-	{"root",    required_argument, NULL,         'r'},
-	{"user",    required_argument, NULL,         'u'},
-	{"group",   required_argument, NULL,         'g'},
-	{"time",    required_argument, NULL,         't'},
-	{"cputime", required_argument, NULL,         'C'},
-	{"memsize", required_argument, NULL,         'm'},
-	{"filesize",required_argument, NULL,         'f'},
-	{"nproc",   required_argument, NULL,         'p'},
-	{"no-core", no_argument,       NULL,         'c'},
-	{"output",  required_argument, NULL,         'o'},
-	{"verbose", no_argument,       NULL,         'v'},
-	{"quiet",   no_argument,       NULL,         'q'},
-	{"help",    no_argument,       &show_help,    1 },
-	{"version", no_argument,       &show_version, 1 },
-	{ NULL,     0,                 NULL,          0 }
+	{"root",       required_argument, NULL,         'r'},
+	{"user",       required_argument, NULL,         'u'},
+	{"group",      required_argument, NULL,         'g'},
+	{"time",       required_argument, NULL,         't'},
+	{"cputime",    required_argument, NULL,         'C'},
+	{"memsize",    required_argument, NULL,         'm'},
+	{"filesize",   required_argument, NULL,         'f'},
+	{"nproc",      required_argument, NULL,         'p'},
+	{"no-core",    no_argument,       NULL,         'c'},
+	{"stdout",     required_argument, NULL,         'o'},
+	{"stderr",     required_argument, NULL,         'e'},
+	{"streamsize", required_argument, NULL,         's'},
+	{"outexit",    required_argument, NULL,         'E'},
+	{"outtime",    required_argument, NULL,         'T'},
+	{"verbose",    no_argument,       NULL,         'v'},
+	{"quiet",      no_argument,       NULL,         'q'},
+	{"help",       no_argument,       &show_help,    1 },
+	{"version",    no_argument,       &show_version, 1 },
+	{ NULL,        0,                 NULL,          0 }
 };
+
+void warning(   const char *, ...) __attribute__((format (printf, 1, 2)));
+void verbose(   const char *, ...) __attribute__((format (printf, 1, 2)));
+void error(int, const char *, ...) __attribute__((format (printf, 2, 3)));
 
 void warning(const char *format, ...)
 {
@@ -198,21 +233,26 @@ Usage: %s [OPTION]... COMMAND...\n\
 Run COMMAND with restrictions.\n\
 \n", progname);
 	printf("\
-  -r, --root=ROOT      run COMMAND with root directory set to ROOT\n\
-  -u, --user=USER      run COMMAND as user with username or ID USER\n\
-  -g, --group=GROUP    run COMMAND under group with name or ID GROUP\n\
-  -t, --time=TIME      kill COMMAND if still running after TIME seconds (float)\n\
-  -C, --cputime=TIME   set maximum CPU time to TIME seconds (float)\n\
-  -m, --memsize=SIZE   set all (total, stack, etc) memory limits to SIZE kB\n\
-  -f, --filesize=SIZE  set maximum created filesize to SIZE kB\n");
+  -r, --root=ROOT        run COMMAND with root directory set to ROOT\n\
+  -u, --user=USER        run COMMAND as user with username or ID USER\n\
+  -g, --group=GROUP      run COMMAND under group with name or ID GROUP\n\
+  -t, --time=TIME        kill COMMAND after TIME seconds (float)\n\
+  -C, --cputime=TIME     set maximum CPU time to TIME seconds (float)\n\
+  -m, --memsize=SIZE     set all (total, stack, etc) memory limits to SIZE kB\n\
+  -f, --filesize=SIZE    set maximum created filesize to SIZE kB;\n");
 	printf("\
-  -p, --nproc=N        set maximum no. processes to N\n\
-  -c, --no-core        disable core dumps\n\
-  -o, --output=FILE    write actual runtime to FILE\n\
-  -v, --verbose        display some extra warnings and information\n\
-  -q, --quiet          suppress all warnings and verbose output\n\
-      --help           display this help and exit\n\
-      --version        output version information and exit\n");
+  -p, --nproc=N          set maximum no. processes to N\n\
+  -c, --no-core          disable core dumps\n\
+  -o, --stdout=FILE      redirect COMMAND stdout output to FILE\n\
+  -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
+  -s, --streamsize=SIZE  truncate COMMAND stdout/stderr streams at SIZE kB\n\
+  -E, --outexit=FILE     write COMMAND exitcode to FILE\n\
+  -T, --outtime=FILE     write COMMAND runtime to FILE\n");
+	printf("\
+  -v, --verbose          display some extra warnings and information\n\
+  -q, --quiet            suppress all warnings and verbose output\n\
+      --help             display this help and exit\n\
+      --version          output version information and exit\n");
 	printf("\n\
 Note that root privileges are needed for the `root' and `user' options.\n\
 When run setuid without the `user' option, the user ID is set to the\n\
@@ -220,41 +260,51 @@ real user ID.\n");
 	exit(0);
 }
 
-void outputtime()
+void output_exit_time(int exitcode, double timediff)
 {
 	FILE  *outputfile;
-	double timediff; /* in seconds */
 	unsigned long userdiff, sysdiff;
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
-	if ( gettimeofday(&endtime,NULL) ) error(errno,"getting time");
+	verbose("command exited with exitcode %d",exitcode);
 
-	timediff = (endtime.tv_sec  - starttime.tv_sec ) +
-	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
+	if ( outputexit ) {
+		verbose("writing exitcode to file `%s'",exitfilename);
+
+		if ( (outputfile = fopen(exitfilename,"w"))==NULL ) {
+			error(errno,"cannot open `%s'",exitfilename);
+		}
+		if ( fprintf(outputfile,"%d\n",exitcode)==0 ) {
+			error(0,"cannot write to file `%s'",exitfilename);
+		}
+		if ( fclose(outputfile) ) {
+			error(errno,"closing file `%s'",exitfilename);
+		}
+	}
 
 	userdiff = (unsigned long)(endticks.tms_cutime - startticks.tms_cutime)
 		* 1000000 / ticks_per_second;
 	sysdiff  = (unsigned long)(endticks.tms_cstime - startticks.tms_cstime)
 		* 1000000 / ticks_per_second;
 
-	verbose("runtime is %.3lf seconds real, %.3lf user, %.3lf sys\n",
+	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys\n",
 	        timediff, userdiff*1e-6, sysdiff*1e-6);
 
 	if ( use_cputime && (userdiff+sysdiff) > cputime ) {
 		warning("timelimit exceeded (cpu time)");
 	}
 
-	if ( use_output ) {
-		verbose("writing runtime to file `%s'",outputfilename);
+	if ( outputtime ) {
+		verbose("writing runtime to file `%s'",timefilename);
 
-		if ( (outputfile = fopen(outputfilename,"w"))==NULL ) {
-			error(errno,"cannot open `%s'",outputfilename);
+		if ( (outputfile = fopen(timefilename,"w"))==NULL ) {
+			error(errno,"cannot open `%s'",timefilename);
 		}
 		if ( fprintf(outputfile,"%.3f\n",(userdiff+sysdiff)*1e-6)==0 ) {
-			error(0,"cannot write to file `%s'",outputfile);
+			error(0,"cannot write to file `%s'",timefilename);
 		}
 		if ( fclose(outputfile) ) {
-			error(errno,"closing file `%s'",outputfilename);
+			error(errno,"closing file `%s'",timefilename);
 		}
 	}
 }
@@ -284,6 +334,11 @@ void terminate(int sig)
 
 	verbose("sending SIGKILL");
 	if ( kill(-child_pid,SIGKILL)!=0 ) error(errno,"sending SIGKILL to command");
+}
+
+static void child_handler(int sig)
+{
+	received_SIGCHLD = 1;
 }
 
 int userid(char *name)
@@ -435,8 +490,10 @@ void setrestrictions()
 
 int main(int argc, char **argv)
 {
-	sigset_t sigmask;
+	sigset_t sigmask, emptymask;
+	fd_set readfds;
 	pid_t pid;
+	int   i, r, nfds;
 	int   status;
 	int   exitcode;
 	char *valid_users;
@@ -444,6 +501,9 @@ int main(int argc, char **argv)
 	int   opt;
 	double runtime_d;
 	double cputime_d;
+	double timediff;
+	size_t data_passed[3];
+	ssize_t nread, nwritten;
 
 	struct itimerval itimer;
 	struct sigaction sigact;
@@ -451,12 +511,13 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	/* Parse command-line options */
-	use_root = use_time = use_cputime = use_user = use_output = no_coredump = 0;
-	memsize = filesize = nproc = RLIM_INFINITY;
+	use_root = use_time = use_cputime = use_user = outputexit = outputtime = no_coredump = 0;
+	cputime = memsize = filesize = nproc = RLIM_INFINITY;
+	redir_stdout = redir_stderr = limit_streamsize = 0;
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:co:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:co:e:s:E:T:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -518,9 +579,31 @@ int main(int argc, char **argv)
 		case 'c': /* no-core option */
 			no_coredump = 1;
 			break;
-		case 'o': /* output option */
-			use_output = 1;
-			outputfilename = strdup(optarg);
+		case 'o': /* stdout option */
+			redir_stdout = 1;
+			stdoutfilename = strdup(optarg);
+			break;
+		case 'e': /* stderr option */
+			redir_stderr = 1;
+			stderrfilename = strdup(optarg);
+			break;
+		case 's': /* streamsize option */
+			limit_streamsize = 1;
+			streamsize = (size_t) readoptarg("streamsize limit",0,LONG_MAX);
+			/* Convert limit from kB to bytes and check for overflow */
+			if ( streamsize!=(streamsize*1024)/1024 ) {
+				streamsize = (size_t) LONG_MAX;
+			} else {
+				streamsize *= 1024;
+			}
+			break;
+		case 'E': /* outputexit option */
+			outputexit = 1;
+			exitfilename = strdup(optarg);
+			break;
+		case 'T': /* outputtime option */
+			outputtime = 1;
+			timefilename = strdup(optarg);
 			break;
 		case 'v': /* verbose option */
 			be_verbose = 1;
@@ -556,10 +639,26 @@ int main(int argc, char **argv)
 		if ( ptr==NULL || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
 	}
 
+	/* Setup pipes connecting to child stdout/err streams (ignore stdin). */
+	for(i=1; i<=2; i++) {
+		if ( pipe(child_pipefd[i])!=0 ) error(errno,"creating pipe for fd %d",i);
+	}
+
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
 		error(errno,"cannot fork");
 	case  0: /* run controlled command */
+		/* Connect pipes to command (stdin/)stdout/stderr and close unneeded fd's */
+		for(i=1; i<=2; i++) {
+			if ( dup2(child_pipefd[i][PIPE_IN],i)<0 ) {
+				error(errno,"redirecting child fd %d",i);
+			}
+			if ( close(child_pipefd[i][PIPE_IN] )!=0 ||
+			     close(child_pipefd[i][PIPE_OUT])!=0 ) {
+				error(errno,"closing pipe for fd %d",i);
+			}
+		}
+
 		/* Run the command in a separate process group so that the command
 		   and all its children can be killed off with one signal. */
 		if ( setsid()==-1 ) error(errno,"setsid failed");
@@ -572,7 +671,6 @@ int main(int argc, char **argv)
 		error(errno,"cannot start `%s'",cmdname);
 
 	default: /* become watchdog */
-
 		/* Shed privileges, only if not using a separate child uid,
 		   because in that case we may need root privileges to kill
 		   the child process. Do not use Linux specific setresuid()
@@ -584,14 +682,52 @@ int main(int argc, char **argv)
 
 		if ( gettimeofday(&starttime,NULL) ) error(errno,"getting time");
 
-		/* unmask all signals */
-		if ( sigemptyset(&sigmask)!=0 ) error(errno,"creating signal mask");
+		/* Close unused file descriptors */
+		for(i=1; i<=2; i++) {
+			if ( close(child_pipefd[i][PIPE_IN])!=0 ) {
+				error(errno,"closing pipe for fd %i",i);
+			}
+		}
+
+		/* Redirect child stdout/stderr to file */
+		for(i=1; i<=2; i++) {
+			child_redirfd[i] = i; /* Default: no redirects */
+			data_passed[i] = 0; /* Reset data counters */
+		}
+		if ( redir_stdout ) {
+			child_redirfd[STDOUT_FILENO] = creat(stdoutfilename, S_IRUSR | S_IWUSR);
+			if ( child_redirfd[STDOUT_FILENO]<0 ) {
+				error(errno,"opening file '%s'",stdoutfilename);
+			}
+		}
+		if ( redir_stderr ) {
+			child_redirfd[STDERR_FILENO] = creat(stderrfilename, S_IRUSR | S_IWUSR);
+			if ( child_redirfd[STDERR_FILENO]<0 ) {
+				error(errno,"opening file '%s'",stderrfilename);
+			}
+		}
+
+		if ( sigemptyset(&emptymask)!=0 ) error(errno,"creating empty signal mask");
+
+		/* unmask all signals, except SIGCHLD: detected in pselect() below */
+		sigmask = emptymask;
+		if ( sigaddset(&sigmask, SIGCHLD)!=0 ) error(errno,"setting signal mask");
 		if ( sigprocmask(SIG_SETMASK, &sigmask, NULL)!=0 ) {
 			error(errno,"unmasking signals");
 		}
 
+		/* Construct signal handler for SIGCHLD detection in pselect(). */
+		received_SIGCHLD = 0;
+		sigact.sa_handler = child_handler;
+		sigact.sa_flags   = 0;
+		sigact.sa_mask    = emptymask;
+		if ( sigaction(SIGCHLD,&sigact,NULL)!=0 ) {
+			error(errno,"installing signal handler");
+		}
+
 		/* Construct one-time signal handler to terminate() for TERM
 		   and ALRM signals. */
+		sigmask = emptymask;
 		if ( sigaddset(&sigmask,SIGALRM)!=0 ||
 		     sigaddset(&sigmask,SIGTERM)!=0 ) error(errno,"setting signal mask");
 
@@ -626,31 +762,84 @@ int main(int argc, char **argv)
 			error(errno,"getting start clock ticks");
 		}
 
-		/* Wait for the child command to finish */
-		while ( (pid = wait(&status))!=-1 && pid!=child_pid );
-		if ( pid!=child_pid ) error(errno,"waiting on child");
+		/* Wait for child data or exit. */
+		while ( 1 ) {
+
+			FD_ZERO(&readfds);
+			nfds = -1;
+			for(i=1; i<=2; i++) {
+				if ( child_pipefd[i][PIPE_OUT]>=0 ) {
+					FD_SET(child_pipefd[i][PIPE_OUT],&readfds);
+					nfds = max(nfds,child_pipefd[i][PIPE_OUT]);
+				}
+			}
+
+			r = pselect(nfds+1, &readfds, NULL, NULL, NULL, &emptymask);
+			if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
+
+			if ( received_SIGCHLD ) {
+				if ( (pid = wait(&status))<0 ) error(errno,"waiting on child");
+				if ( pid==child_pid ) break;
+			}
+
+			/* Check to see if data is available and pass it on */
+			for(i=1; i<=2; i++) {
+				if ( FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
+					nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
+					if ( nread==-1 ) error(errno,"reading child fd %d",i);
+					if ( nread==0 ) {
+						/* EOF detected: close fd and indicate this with -1 */
+						if ( close(child_pipefd[i][PIPE_OUT])!=0 ) {
+							error(errno,"closing pipe for fd %d",i);
+						}
+						child_pipefd[i][PIPE_OUT] = -1;
+						continue;
+					}
+					if ( limit_streamsize && data_passed[i]+nread>=streamsize ) {
+						if ( data_passed[i]<streamsize ) {
+							verbose("child fd %d limit reached",i);
+						}
+						nread = streamsize - data_passed[i];
+					}
+					nwritten = write(child_redirfd[i], buf, nread);
+					if ( nwritten==-1 ) error(errno,"writing child fd %d",i);
+					data_passed[i] += nwritten;
+				}
+			}
+		}
 
 		if ( times(&endticks)==(clock_t) -1 ) {
 			error(errno,"getting end clock ticks");
 		}
 
-		/* Drop root before writing to output file. */
-		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
+		if ( gettimeofday(&endtime,NULL) ) error(errno,"getting time");
 
-		outputtime();
+		timediff = (endtime.tv_sec  - starttime.tv_sec ) +
+		           (endtime.tv_usec - starttime.tv_usec)*1E-6;
 
 		/* Test whether command has finished abnormally */
+		exitcode = 0;
 		if ( ! WIFEXITED(status) ) {
 			if ( WIFSIGNALED(status) ) {
 				warning("command terminated with signal %d",WTERMSIG(status));
-				return 128+WTERMSIG(status);
+				exitcode = 128+WTERMSIG(status);
+			} else
+			if ( WIFSTOPPED(status) ) {
+				warning("command stopped with signal %d",WSTOPSIG(status));
+				exitcode = 128+WSTOPSIG(status);
+			} else {
+				error(0,"command exit status unknown: %d",status);
 			}
-			error(0,"command exit status unknown: %d",status);
+		} else {
+			exitcode = WEXITSTATUS(status);
 		}
 
+		/* Drop root before writing to output file(s). */
+		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
+
+		output_exit_time(exitcode, timediff);
+
 		/* Return the exitstatus of the command */
-		exitcode = WEXITSTATUS(status);
-		if ( exitcode!=0 ) verbose("command exited with exitcode %d",exitcode);
 		return exitcode;
 	}
 

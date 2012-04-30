@@ -9,6 +9,49 @@
 /** Text symbol used in output to represent a circle */
 define('CIRCLE_SYM', '&#9679;');
 
+function parseRunDiff($difftext){
+	$line = strtok($difftext,"\n"); //first line
+	if(sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1)
+		return htmlspecialchars($difftext);
+	$return = $line . "\n";
+
+	// Add second line 'team ? reference'
+	$line = strtok("\n");
+	$return .= $line . "\n";
+
+	// We determine the line number width from the '_' characters and
+	// the separator position from the character '?' on the second line.
+	$linenowidth = strrpos($line, '_') + 1;
+	$midloc = strpos($line, '?') - ($linenowidth+1);
+
+	$line = strtok("\n");
+	while(strlen($line) != 0){
+		$linenostr = substr($line, 0, $linenowidth);
+		$diffline = substr($line, $linenowidth+1);
+		$mid = substr($diffline, $midloc-1, 3);
+		switch($mid){
+			case ' = ':
+				$formdiffline = "<span class='correct'>".htmlspecialchars($diffline)."</span>";
+				break;
+			case ' ! ':
+				$formdiffline = "<span class='differ'>".htmlspecialchars($diffline)."</span>";
+				break;
+			case ' $ ':
+				$formdiffline = "<span class='endline'>".htmlspecialchars($diffline)."</span>";
+				break;
+			case ' > ':
+			case ' < ':
+				$formdiffline = "<span class='extra'>".htmlspecialchars($diffline)."</span>";
+				break;
+			default:
+				$formdiffline = htmlspecialchars($diffline);
+		}
+		$return = $return . $linenostr . " " . $formdiffline . "\n";
+		$line = strtok("\n");
+	}
+	return $return;
+}
+
 /**
  * Print a list of submissions, either all or only those that
  * match <key> = <value>. Output is always limited to the
