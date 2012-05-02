@@ -139,6 +139,7 @@ function presentDiff ($old, $new)
 
 function multifilediff ($sources, $oldsources, $olddata)
 {
+	$diffhtml = $html = '';
 	// if both current and previous submission have just one file, diff them directly
 	if (count($sources) == 1 && count($oldsources) == 1 ) {
 		$html .= '<div class="tabber">' .
