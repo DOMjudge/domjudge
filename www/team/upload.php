@@ -39,9 +39,8 @@ if ( difftime($cdata['starttime'], $now) > 0 ) {
 /** helper to output an error message. */
 function err($string)
 {
-	// Annoying PHP: we need to import all global variables here...
-	global $nunread_clars, $title, $ajaxtitle, $refresh, $menu;
-
+	// Annoying PHP: we need to import global variables here...
+	global $title;
 	if (NONINTERACTIVE) error($string);
 
 	require(LIBWWWDIR . '/header.php');
