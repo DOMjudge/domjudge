@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 3.3.0 - DEV
 -------------------
+ - Fix bug: don't show unverified submission details if verification is
+   required. Thanks Keith Johnson.
 
 Version 3.3.0 Release Candidate 1 - 30 April 2012
 -------------------------------------------------
