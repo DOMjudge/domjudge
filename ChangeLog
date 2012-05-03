@@ -11,6 +11,8 @@ Version 3.2.3 - DEV
  - Fix: scoreboard filter disappeared with single affiliation selected.
  - Fix checktestdata debug print formatting.
  - Fix bug in using va_copy macro with g++ on AMD 64bit.
+ - Fix bug: don't show unverified submission details if verification is
+   required. Thanks Keith Johnson.
 
 Version 3.2.2 - 25 January 2012
 -------------------------------
