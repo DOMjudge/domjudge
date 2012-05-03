@@ -17,15 +17,15 @@ $sid = (int)@$_GET['id'];
 
 // select also on teamid so we can only select our own submissions
 $row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
-               s.valid, l.name AS langname, result, output_compile
+               s.valid, l.name AS langname, result, output_compile, verified
 			   FROM judging j
                LEFT JOIN submission s USING (submitid)
                LEFT JOIN language   l USING (langid)
                LEFT JOIN problem    p ON (p.probid = s.probid)
                WHERE j.submitid = %i AND teamid = %s AND j.valid = 1',$sid,$login);
 
-if( ! $row ) {
-	echo "<p>Submission not found for this team.</p>\n";
+if( ! $row || (VERIFICATION_REQUIRED && !$row['verified']) ) {
+	echo "<p>Submission not found for this team or not judged yet.</p>\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }

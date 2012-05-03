@@ -98,7 +98,8 @@ function putSubmissions($cdata, $restrictions, $limit = 0)
 		// present and valid.
 		if ( IS_JURY ) {
 			$link = ' href="submission.php?id=' . $sid . '"';
-		} elseif ( $row['result'] && $row['valid'] ) {
+		} elseif ( $row['result'] && $row['valid'] &&
+		           (!VERIFICATION_REQUIRED || $row['verified']) ) {
 			$link = ' href="submission_details.php?id=' . $sid . '"';
 		} else {
 			$link = '';

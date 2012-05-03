@@ -9,6 +9,8 @@ Version 3.1.6 - DEV
  - Fix checktestdata debug print formatting.
  - Include a number of documentation improvements.
  - Fix bug in using va_copy macro with g++ on AMD 64bit.
+ - Fix bug: don't show unverified submission details if verification is
+   required. Thanks Keith Johnson.
 
 Version 3.1.5 - 25 January 2012
 -------------------------------
