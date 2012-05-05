@@ -122,7 +122,6 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		"<th scope=\"col\">problem</th>" .
 		"<th scope=\"col\">lang</th>" .
 		"<th scope=\"col\">result</th>" .
-		(IS_JURY ? "<th scope=\"col\">judgehost</th>" : '') .
 		(IS_JURY ? "<th scope=\"col\">verified</th><th scope=\"col\">by</th>" : '') .
 
 		"</tr>\n</thead>\n<tbody>\n";
@@ -204,15 +203,6 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		echo "</td>";
 
 		if ( IS_JURY ) {
-			echo "<td><a$link>";
-			$judgehost = $row['judgehost'];
-			if ( !empty($judgehost) ) {
-					echo printhost($judgehost);
-			} else {
-				echo '&nbsp;';
-			}
-			echo '</a></td>';
-
 			// only display verification if we're done with judging
 			unset($verified, $jury_member);
 			$claim = FALSE;
