@@ -62,10 +62,10 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 		echo addReset('cancel');
 
 		if ( SOURCEFILES_LIMIT > 1 ) {
-			echo "<br /><div id=\"morefiles\"><span id=\"auxfiles\"></span>\n" .
+			echo "<br /><span id=\"auxfiles\"></span>\n" .
 			    "<input type=\"button\" name=\"addfile\" id=\"addfile\" " .
 			    "value=\"Add another file\" onclick=\"addFileUpload();\" " .
-			    "disabled=\"disabled\" /></div>\n";
+			    "disabled=\"disabled\" />\n";
 		}
 
 		echo "</p>\n</form>\n\n";
