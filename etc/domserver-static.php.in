@@ -23,7 +23,4 @@ define('SUBMIT_DEFAULT', @SUBMIT_DEFAULT@);
 define('ENABLE_CMDSUBMIT_SERVER', @SUBMIT_ENABLE_CMD@);
 define('ENABLE_WEBSUBMIT_SERVER', @SUBMIT_ENABLE_WEB@);
 
-// sanity limit on the amount of source files one submission may contain
-define('SOURCEFILES_LIMIT', 100);
-
 set_include_path(get_include_path() . PATH_SEPARATOR . LIBEXTDIR);
