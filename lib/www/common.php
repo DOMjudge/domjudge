@@ -112,11 +112,10 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 	}
 
 	// print the table with the submissions.
-	// table header; leave out the field that is our key (because it's the same
-	// for all rows)
+	// table header
 	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
 
-		(IS_JURY ? "<th scope=\"col\">ID</th>" : '') .
+		(IS_JURY ? "<th scope=\"col\" class=\"sorttable_numeric\">ID</th>" : '') .
 		"<th scope=\"col\">time</th>" .
 		(IS_JURY ? "<th scope=\"col\">team</th>" : '') .
 		"<th scope=\"col\">problem</th>" .

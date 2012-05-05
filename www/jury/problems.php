@@ -24,7 +24,8 @@ if( $res->count() == 0 ) {
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
-		"<th scope=\"col\">contest</th><th scope=\"col\">allow<br />submit</th>" .
+		"<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" .
+	        "<th scope=\"col\">allow<br />submit</th>" .
 		"<th scope=\"col\">allow<br />judge</th>" .
 		"<th scope=\"col\">time<br />limit</th>" .
 		"<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .

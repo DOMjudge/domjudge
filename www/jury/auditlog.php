@@ -24,8 +24,8 @@ if ( $res->count() == 0 ) {
 }
 
 echo "<table class=\"sortable\">\n" .
-     "<tr><th>id</th><th>when</th><th>cid</th><th>who</th>" .
-     "<th colspan=\"3\">what</th><th>extra info</th></tr>\n";
+     "<tr><th>id</th><th>when</th><th class=\"sorttable_numeric\">cid</th>" .
+     "<th>who</th><th colspan=\"3\">what</th><th>extra info</th></tr>\n";
 while ( $logline = $res->next() ) {
 	echo "<tr><td>" .
 	htmlspecialchars($logline['logid']) . "</td>" .

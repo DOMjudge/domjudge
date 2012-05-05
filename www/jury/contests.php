@@ -134,7 +134,7 @@ if( count($res) == 0 ) {
 } else {
 	echo "<h3>All available contests</h3>\n\n";
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-	     "<tr><th scope=\"col\">CID</th>";
+	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
 	foreach($times as $time) echo "<th scope=\"col\">$time</th>";
 	echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
 
