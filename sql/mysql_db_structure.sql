@@ -248,6 +248,8 @@ CREATE TABLE `scoreboard_public` (
 CREATE TABLE `submission` (
   `submitid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
   `origsubmitid` int(4) unsigned default NULL COMMENT 'If set, specifies original submission in case of edit/resubmit',
+  `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
+  `externalresult` varchar(25) default NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
