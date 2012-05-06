@@ -49,6 +49,9 @@ function import($team, $prob, $lang, $submittime, $files, $filenames, $extid, $e
 	if( empty($team) ) error("No value for Team.");
 	if( empty($prob) ) error("No value for Problem.");
 	if( empty($lang) ) error("No value for Language.");
+	if( empty($submittime) ) error("No value for submit time.");
+	if( empty($extid) ) error("No value for external submission ID.");
+	if( empty($extresult) ) error("No value for external submission verdict.");
 
 	if ( !is_array($files) || count($files)==0 ) error("No files specified.");
 	if ( !is_array($filenames) || count($filenames)!=count($files) ) {
@@ -60,6 +63,14 @@ function import($team, $prob, $lang, $submittime, $files, $filenames, $extid, $e
 	}
 
 	global $cdata,$cid, $DB;
+
+	$duplicate = $DB->q('MAYBEVALUE SELECT externalid FROM submission
+			WHERE externalid = %i', $extid);
+	if ( $duplicate !== NULL ) {
+		echo("submission already present\n");
+		// FIXME: do we want to check "real" equality here?
+		exit;
+	}
 
 	$sourcesize = dbconfig_get('sourcesize_limit');
 	$submittime = strftime(MYSQL_DATETIME_FORMAT, $submittime);
