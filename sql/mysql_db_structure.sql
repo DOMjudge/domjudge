@@ -260,6 +260,7 @@ CREATE TABLE `submission` (
   `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'If false ignore this submission in all scoreboard calculations',
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `judgemark` (`judgemark`),
+  UNIQUE KEY `externalid` (`externalid`),
   KEY `teamid` (`cid`,`teamid`),
   KEY `judgehost` (`cid`,`judgehost`),
   KEY `teamid_2` (`teamid`),
