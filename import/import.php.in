@@ -1,5 +1,16 @@
 #!/usr/bin/env php
 <?php
+/**
+ * Imports submissions into DOMjudge, which have been exported from another CCS
+ *
+ * Called: ./import.php <team> <problem> <langext> <submittime> <external-id> <external-result> [<tempfile> <filename>]...
+ *
+ * @configure_input@
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
 require('@domserver_etcdir@/domserver-static.php');
@@ -12,8 +23,27 @@ require(LIBDIR.'/init.php');
 
 setup_database_connection('jury');
 
+$argv = $_SERVER['argv'];
+
+$team    = strtolower(@$argv[1]);
+$prob    = strtolower(@$argv[2]);
+$langext = strtolower(@$argv[3]);
+$submittime = strtolower(@$argv[4]);
+$extid   = strtolower(@$argv[5]);
+$extresult = strtolower(@$argv[6]);
+
+$files = array();
+$filenames = array();
+for($i=7; $i<count($argv); $i+=2) {
+	$files[] = $argv[$i];
+	if ( $i+1>=count($argv) ) error("Non-matching number of tempfiles and filenames.");
+	$filenames[] = $argv[$i+1];
+}
+
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];
+
+import($team, $prob, $langext, $submittime, $files, $filenames, $extid, $extresult);
 
 function import($team, $prob, $lang, $submittime, $files, $filenames, $extid, $extresult) {
 	if( empty($team) ) error("No value for Team.");
@@ -116,7 +146,5 @@ function import($team, $prob, $lang, $submittime, $files, $filenames, $extid, $e
 		logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$cid]");
 	}
 }
-
-import('coolteam', 'fltcmp', 'c', 1336006501.84, array('/home/sitowert/domjudge/tests/fltcmp-test-wrong1.c'), array('flt-wrong.c'), 4713, 'WRONG-ANSWER');
 
 exit;
