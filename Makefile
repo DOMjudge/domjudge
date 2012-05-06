@@ -46,10 +46,10 @@ install-docs: docs-create-dirs
 dist: configure
 
 # List of SUBDIRS for recursive targets:
-config:            SUBDIRS=etc doc lib sql www judge submit tests misc-tools
-build:             SUBDIRS=        lib         judge submit tests misc-tools
-domserver:         SUBDIRS=etc             www       submit
-install-domserver: SUBDIRS=etc     lib sql www       submit
+config:            SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
+build:             SUBDIRS=        lib         judge submit import tests misc-tools
+domserver:         SUBDIRS=etc             www       submit import
+install-domserver: SUBDIRS=etc     lib sql www       submit import
 judgehost:         SUBDIRS=etc                 judge
 install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
 docs:              SUBDIRS=    doc
@@ -57,8 +57,8 @@ install-docs:      SUBDIRS=    doc         www
 submitclient:      SUBDIRS=                          submit
 dist:              SUBDIRS=    doc                                misc-tools
 clean:             SUBDIRS=etc doc lib sql www judge submit tests misc-tools
-distclean:         SUBDIRS=etc doc lib sql www judge submit tests misc-tools
-maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit tests misc-tools
+distclean:         SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
+maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))

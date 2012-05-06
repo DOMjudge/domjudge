@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+
+require('@domserver_etcdir@/domserver-static.php');
+require(ETCDIR . '/domserver-config.php');
+
+define ('SCRIPT_ID', 'import');
+define ('LOGFILE', LOGDIR.'/import.log');
+
+require(LIBDIR.'/init.php');
+
+setup_database_connection('jury');
+
+
+exit;
