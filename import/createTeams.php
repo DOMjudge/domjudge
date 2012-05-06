@@ -9,7 +9,7 @@ $teams = $feedDOM->getElementsByTagName('team');
 
 foreach ($teams as $team) {
 	if (hasChild($team)) {
-		echo "INSERT INTO team (login, name) VALUES ('" . val($team, 'id') . "', '" . val($team, 'name') . "');\n";
+		echo "INSERT INTO team (login, name, categoryid) VALUES ('" . val($team, 'id') . "', '" . val($team, 'name') . "', 1);\n";
 	}
 }
 
