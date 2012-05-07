@@ -20,12 +20,12 @@ MAINCLASS=""
 # Amount of memory reserved for the Java virtual machine in kB. The
 # default below is just above the maximum memory usage of current
 # versions of the jvm, but might need increasing in some cases.
-MEMRESERVED=300000
+MEMRESERVED=350000
 
 TMPFILE=`mktemp /tmp/domjudge_javac_output.XXXXXX` || exit 1
 
 # Byte-compile:
-javac -d . "$@" 2> "$TMPFILE"
+javac -encoding UTF-8 -d . "$@" 2> "$TMPFILE"
 EXITCODE=$?
 if [ "$EXITCODE" -ne 0 ]; then
 	# Let's see if should have named the .java differently
@@ -81,7 +81,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec java -Xrs -Xss8m -Xmx${MEMLIMITJAVA}k $MAINCLASS
+exec java -client -Xrs -Xss8m -Xmx${MEMLIMITJAVA}k $MAINCLASS
 EOF
 
 chmod a+x $DEST

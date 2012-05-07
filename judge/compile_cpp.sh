@@ -11,5 +11,5 @@ MAINSOURCE="$1"
 # -O2:		Level 2 optimizations (default for speed)
 # -static:	Static link with all libraries
 # -pipe:	Use pipes for communication between stages of compilation
-g++ -Wall -O2 -static -pipe -o $DEST "$@"
+g++ -Wall -O2 -std=gnu++98 -static -pipe -o $DEST "$@"
 exit $?
