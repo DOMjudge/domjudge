@@ -56,8 +56,9 @@ function calcPenaltyTime($solved, $num_submissions)
  *
  * matrix[login][probid](is_correct, num_submissions, num_pending, time, penalty)
  *
- * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid])
- *    probid(num_submissions, num_pending, num_correct, best_time, bestteam)
+ * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid]
+ *    probid(num_submissions, num_pending, num_correct, best_time, 
+ *    sortorder(best_team, best_team_time) ) )
  */
 function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
@@ -203,11 +204,19 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			@$SUMMARY['problems'][$prob]['num_submissions'] += $pdata['num_submissions'];
 			@$SUMMARY['problems'][$prob]['num_pending'] += $pdata['num_pending'];
 			@$SUMMARY['problems'][$prob]['num_correct'] += ($pdata['is_correct'] ? 1 : 0);
+
+			// store per sortorder which team solved the problem first
 			if ( $pdata['is_correct'] &&
-			     (!isset($SUMMARY['problems'][$prob]['best_time']) ||
-			      $pdata['time']<=@$SUMMARY['problems'][$prob]['best_time']) ) {
-				@$SUMMARY['problems'][$prob]['best_time'] = $pdata['time'];
-				@$SUMMARY['problems'][$prob]['bestteam'] = $team;
+			     (!isset($SUMMARY['problems'][$totals['sortorder']][$prob]['best_team_time']) ||
+			      $pdata['time']<@$SUMMARY['problems'][$totals['sortorder']][$prob]['best_team_time']) ) {
+				@$SUMMARY['problems'][$totals['sortorder']][$prob]['best_team_time'] = $pdata['time'];
+				@$SUMMARY['problems'][$totals['sortorder']][$prob]['best_team'] = $team;
+
+				// also keep overall best time per problem for in bottom summary row
+				if ( !isset($SUMMARY['problems'][$prob]['best_time']) ||
+				     $pdata['time'] < @$SUMMARY['problems'][$prob]['best_time'] ) {
+					@$SUMMARY['problems'][$prob]['best_time'] = $pdata['time'];
+				}
 			}
 		}
 	}
@@ -218,8 +227,6 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
 			$SUMMARY['problems'][$prob]['num_pending'] = 0;
 			$SUMMARY['problems'][$prob]['num_correct'] = 0;
-			$SUMMARY['problems'][$prob]['best_time'] = NULL;
-			$SUMMARY['problems'][$prob]['bestteam'] = NULL;
 		}
 	}
 
@@ -377,7 +384,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 			// CSS class for correct/incorrect/neutral results
 			if( $matrix[$team][$prob]['is_correct'] ) {
 				echo '"score_correct' .
-					( $summary['problems'][$prob]['bestteam']==$team ?
+					( $summary['problems'][$totals['sortorder']][$prob]['best_team']==$team ?
 					  ' score_first' : '') . '"';
 			} elseif ( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
 				echo '"score_pending"';
