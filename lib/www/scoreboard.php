@@ -57,7 +57,7 @@ function calcPenaltyTime($solved, $num_submissions)
  * matrix[login][probid](is_correct, num_submissions, num_pending, time, penalty)
  *
  * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid])
- *    probid(num_submissions, num_pending, num_correct, besttime, bestteam)
+ *    probid(num_submissions, num_pending, num_correct, best_time, bestteam)
  */
 function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
@@ -204,9 +204,9 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			@$SUMMARY['problems'][$prob]['num_pending'] += $pdata['num_pending'];
 			@$SUMMARY['problems'][$prob]['num_correct'] += ($pdata['is_correct'] ? 1 : 0);
 			if ( $pdata['is_correct'] &&
-			     (!isset($SUMMARY['problems'][$prob]['besttime']) ||
-			      $pdata['time']<=@$SUMMARY['problems'][$prob]['besttime']) ) {
-				@$SUMMARY['problems'][$prob]['besttime'] = $pdata['time'];
+			     (!isset($SUMMARY['problems'][$prob]['best_time']) ||
+			      $pdata['time']<=@$SUMMARY['problems'][$prob]['best_time']) ) {
+				@$SUMMARY['problems'][$prob]['best_time'] = $pdata['time'];
 				@$SUMMARY['problems'][$prob]['bestteam'] = $team;
 			}
 		}
@@ -218,7 +218,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
 			$SUMMARY['problems'][$prob]['num_pending'] = 0;
 			$SUMMARY['problems'][$prob]['num_correct'] = 0;
-			$SUMMARY['problems'][$prob]['besttime'] = NULL;
+			$SUMMARY['problems'][$prob]['best_time'] = NULL;
 			$SUMMARY['problems'][$prob]['bestteam'] = NULL;
 		}
 	}
