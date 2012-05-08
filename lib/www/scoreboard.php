@@ -57,8 +57,7 @@ function calcPenaltyTime($solved, $num_submissions)
  * matrix[login][probid](is_correct, num_submissions, num_pending, time, penalty)
  *
  * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid]
- *    probid(num_submissions, num_pending, num_correct, best_time, 
- *    sortorder(best_team, best_team_time) ) )
+ *    probid(num_submissions, num_pending, num_correct, best_time, best_time_sort[sortorder] )
  */
 function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
@@ -216,12 +215,12 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			@$SUMMARY['problems'][$prob]['num_pending'] += $pdata['num_pending'];
 			@$SUMMARY['problems'][$prob]['num_correct'] += ($pdata['is_correct'] ? 1 : 0);
 
-			// store per sortorder which team solved the problem first
-			if ( $pdata['is_correct'] &&
-			     (!isset($SUMMARY['problems'][$totals['sortorder']][$prob]['best_team_time']) ||
-			      $pdata['time']<@$SUMMARY['problems'][$totals['sortorder']][$prob]['best_team_time']) ) {
-				@$SUMMARY['problems'][$totals['sortorder']][$prob]['best_team_time'] = $pdata['time'];
-				@$SUMMARY['problems'][$totals['sortorder']][$prob]['best_team'] = $team;
+			if ( $pdata['is_correct'] ) {
+				// store per sortorder the first solve time
+				if ( !isset($SUMMARY['problems'][$prob]['best_time_sort'][$totals['sortorder']]) ||
+				     $pdata['time']<$SUMMARY['problems'][$prob]['best_time_sort'][$totals['sortorder']] ) {
+					@$SUMMARY['problems'][$prob]['best_time_sort'][$totals['sortorder']] = $pdata['time'];
+				}
 
 				// also keep overall best time per problem for in bottom summary row
 				if ( !isset($SUMMARY['problems'][$prob]['best_time']) ||
@@ -386,7 +385,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 			// CSS class for correct/incorrect/neutral results
 			if( $matrix[$team][$prob]['is_correct'] ) {
 				echo '"score_correct' .
-					( $summary['problems'][$totals['sortorder']][$prob]['best_team']==$team ?
+					( $summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]==$matrix[$team][$prob]['time'] ?
 					  ' score_first' : '') . '"';
 			} elseif ( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
 				echo '"score_pending"';
