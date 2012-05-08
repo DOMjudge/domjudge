@@ -209,23 +209,24 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 				                              'is_correct' => 0, 'time' => 0, 'penalty' => 0);
 			}
 			$pdata = $MATRIX[$team][$prob];
+			$psum = &$SUMMARY['problems'][$prob];
 
 			// update summary data for the bottom row
-			@$SUMMARY['problems'][$prob]['num_submissions'] += $pdata['num_submissions'];
-			@$SUMMARY['problems'][$prob]['num_pending'] += $pdata['num_pending'];
-			@$SUMMARY['problems'][$prob]['num_correct'] += ($pdata['is_correct'] ? 1 : 0);
+			@$psum['num_submissions'] += $pdata['num_submissions'];
+			@$psum['num_pending'] += $pdata['num_pending'];
+			@$psum['num_correct'] += ($pdata['is_correct'] ? 1 : 0);
 
 			if ( $pdata['is_correct'] ) {
 				// store per sortorder the first solve time
-				if ( !isset($SUMMARY['problems'][$prob]['best_time_sort'][$totals['sortorder']]) ||
-				     $pdata['time']<$SUMMARY['problems'][$prob]['best_time_sort'][$totals['sortorder']] ) {
-					@$SUMMARY['problems'][$prob]['best_time_sort'][$totals['sortorder']] = $pdata['time'];
+				if ( !isset($psum['best_time_sort'][$totals['sortorder']]) ||
+				     $pdata['time']<$psum['best_time_sort'][$totals['sortorder']] ) {
+					@$psum['best_time_sort'][$totals['sortorder']] = $pdata['time'];
 				}
 
 				// also keep overall best time per problem for in bottom summary row
-				if ( !isset($SUMMARY['problems'][$prob]['best_time']) ||
-				     $pdata['time'] < @$SUMMARY['problems'][$prob]['best_time'] ) {
-					@$SUMMARY['problems'][$prob]['best_time'] = $pdata['time'];
+				if ( !isset($psum['best_time']) ||
+				     $pdata['time'] < @$psum['best_time'] ) {
+					@$psum['best_time'] = $pdata['time'];
 				}
 			}
 		}
