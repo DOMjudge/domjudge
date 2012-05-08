@@ -138,6 +138,17 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 		$SCORES[$login]['country']     = $team['country'];
 	}
 
+	// initialize all problems with data
+	foreach( array_keys($probs) as $prob ) {
+		if ( !isset($SUMMARY['problems'][$prob]) ) {
+			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
+			$SUMMARY['problems'][$prob]['num_pending'] = 0;
+			$SUMMARY['problems'][$prob]['num_correct'] = 0;
+			$SUMMARY['problems'][$prob]['best_time'] = NULL;
+			$SUMMARY['problems'][$prob]['best_time_sort'] = array();
+		}
+	}
+
 	// loop all info the scoreboard cache and put it in our own datastructure
 	while ( $srow = $scoredata->next() ) {
 
@@ -218,15 +229,6 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 					@$SUMMARY['problems'][$prob]['best_time'] = $pdata['time'];
 				}
 			}
-		}
-	}
-
-	// Fill all problems with data if not set already
-	foreach( array_keys($probs) as $prob ) {
-		if ( !isset($SUMMARY['problems'][$prob]) ) {
-			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
-			$SUMMARY['problems'][$prob]['num_pending'] = 0;
-			$SUMMARY['problems'][$prob]['num_correct'] = 0;
 		}
 	}
 
