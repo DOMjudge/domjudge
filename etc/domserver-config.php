@@ -52,3 +52,6 @@ $DOMJUDGE_ADMINS = array('domjudge_jury', 'admin');
 // This list only needs to be modified when additional languages are
 // added and should be kept in sync with the list in submit-config.h.in.
 define('LANG_EXTS', 'C,c C++,cpp,cc Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,csharp,cs AWK,awk Python,py Bash,bash');
+
+// Specify URL to external CCS, e.g. Kattis
+define('EXT_CCS_URL', 'https://ccs.example.com/');
