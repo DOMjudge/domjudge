@@ -21,23 +21,29 @@ function dbconfig_init()
 		$key = $row['name'];
 		$val = json_decode($row['value'], true);
 
-		switch ( json_last_error() ) {
-		case JSON_ERROR_NONE:
-			break;
-		case JSON_ERROR_DEPTH:
-			error("JSON config '$key' decode: maximum stack depth exceeded");
-		case JSON_ERROR_STATE_MISMATCH:
-			error("JSON config '$key' decode: underflow or the modes mismatch");
-		case JSON_ERROR_CTRL_CHAR:
-			error("JSON config '$key' decode: unexpected control character found");
-		case JSON_ERROR_SYNTAX:
-			error("JSON config '$key' decode: syntax error, malformed JSON");
-		/* Only available since PHP >= 5.3.3:
-		case JSON_ERROR_UTF8:
-			error("JSON config '$key' decode: malformed UTF-8 characters, possibly incorrectly encoded");
-		 */
-		default:
-			error("JSON config '$key' decode: unknown error");
+		if ( function_exists('json_last_error') ) {
+			switch ( json_last_error() ) {
+			case JSON_ERROR_NONE:
+				break;
+			case JSON_ERROR_DEPTH:
+				error("JSON config '$key' decode: maximum stack depth exceeded");
+			case JSON_ERROR_STATE_MISMATCH:
+				error("JSON config '$key' decode: underflow or the modes mismatch");
+			case JSON_ERROR_CTRL_CHAR:
+				error("JSON config '$key' decode: unexpected control character found");
+			case JSON_ERROR_SYNTAX:
+				error("JSON config '$key' decode: syntax error, malformed JSON");
+			/* Only available since PHP >= 5.3.3:
+			case JSON_ERROR_UTF8:
+				error("JSON config '$key' decode: malformed UTF-8 characters, possibly incorrectly encoded");
+			 */
+			default:
+				error("JSON config '$key' decode: unknown error");
+			}
+		} else {
+			if ( $val === NULL ) {
+				error("JSON config '$key' decode: unknown error");
+			}
 		}
 
 		switch ( $type = $row['type'] ) {
@@ -101,23 +107,29 @@ function dbconfig_store()
 
 		$val = json_encode($row['value']);
 
-		switch ( json_last_error() ) {
-		case JSON_ERROR_NONE:
-			break;
-		case JSON_ERROR_DEPTH:
-			error("JSON config '$key' encode: maximum stack depth exceeded");
-		case JSON_ERROR_STATE_MISMATCH:
-			error("JSON config '$key' encode: underflow or the modes mismatch");
-		case JSON_ERROR_CTRL_CHAR:
-			error("JSON config '$key' encode: unexpected control character found");
-		case JSON_ERROR_SYNTAX:
-			error("JSON config '$key' encode: syntax error, malformed JSON");
-		/* Only available since PHP >= 5.3.3:
-		case JSON_ERROR_UTF8:
-			error("JSON config '$key' encode: malformed UTF-8 characters, possibly incorrectly encoded");
-		 */
-		default:
-			error("JSON config '$key' encode: unknown error");
+		if ( function_exists('json_last_error') ) {
+			switch ( json_last_error() ) {
+			case JSON_ERROR_NONE:
+				break;
+			case JSON_ERROR_DEPTH:
+				error("JSON config '$key' encode: maximum stack depth exceeded");
+			case JSON_ERROR_STATE_MISMATCH:
+				error("JSON config '$key' encode: underflow or the modes mismatch");
+			case JSON_ERROR_CTRL_CHAR:
+				error("JSON config '$key' encode: unexpected control character found");
+			case JSON_ERROR_SYNTAX:
+				error("JSON config '$key' encode: syntax error, malformed JSON");
+			/* Only available since PHP >= 5.3.3:
+			case JSON_ERROR_UTF8:
+				error("JSON config '$key' encode: malformed UTF-8 characters, possibly incorrectly encoded");
+			 */
+			default:
+				error("JSON config '$key' encode: unknown error");
+			}
+		} else {
+			if ( $val === NULL ) {
+				error("JSON config '$key' encode: unknown error");
+			}
 		}
 
 		$res = $DB->q('RETURNAFFECTED UPDATE configuration
