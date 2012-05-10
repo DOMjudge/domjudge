@@ -24,7 +24,7 @@ $teammap     = array(
     '3248' => '816'
     );
 $resultmap = array(
-	'CE' => 'compile-error',
+	'CE' => 'compiler-error',
 	'RTE' => 'run-error',
 	'TLE' => 'timelimit',
 	'WA' => 'wrong-answer',

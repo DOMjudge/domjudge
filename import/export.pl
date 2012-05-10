@@ -5,9 +5,9 @@ use File::Path qw(make_path);
 use strict;
 
 # config section
-my $SERVER = "https://secret.secret.secret.secret/";
-my $USER = "secret";
-my $PASSWORD = "secret";
+my $SERVER = "https://contest.dev.scrool.se/";
+my $USER = "test";
+my $PASSWORD = "testingtester";
 my $DIRECTORY = "submissions";
 
 make_path($DIRECTORY);
