@@ -131,7 +131,7 @@ if ( $submdata['valid'] ) {
 <tr><td scope="row">External ID:</td><td>
 	<?php echo  "<a href=\"" . EXT_CCS_URL . urlencode($submdata['externalid']) . "\" target=\"extCCS\">" . htmlspecialchars($submdata['externalid']) . "</a>"; ?></td></tr>
 <tr><td scope="row">External Result:</td><td>
-	<?php echo  htmlspecialchars($submdata['externalresult']); ?></td></tr>
+	<?php echo  printresult($submdata['externalresult']); ?></td></tr>
 <?php } ?>
 </table>
 
@@ -247,6 +247,18 @@ if ( isset($jid) )  {
 				echo "</p>" . addEndForm();
 			} else {
 				echo "</p>\n";
+			}
+
+			if ( $jud['result'] !== $submdata['externalresult'] ) {
+				echo msgbox('results differ', 
+					'This submission was judged as '
+					. '<a href="' . EXT_CCS_URL
+					. urlencode($submdata['externalid']) . '" target="extCCS">'
+					. printresult($submdata['externalresult'])
+					. '</a>' 
+					. ' by the external CCS, but as '
+					. printresult($jud['result'])
+					. ' by DOMjudge.');
 			}
 		}
 	} else { // judging not ended yet
