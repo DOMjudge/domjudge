@@ -89,7 +89,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
 	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
 
-	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid,
+	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.externalresult,
 					s.submittime, s.judgehost, s.valid, t.name AS teamname,
 					p.name AS probname, l.name AS langname,
 					j.result, j.judgehost, j.verified, j.jury_member, j.seen '
@@ -185,6 +185,9 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 				}
 			} else {
 					echo printresult($row['result']);
+					if ( isset($row['externalresult']) && $row['result'] !== $row['externalresult'] ) {
+						echo " (&#x26a1;" . printresult($row['externalresult']) . ")";
+					}
 			}
 			echo '</a>';
 		} else {
