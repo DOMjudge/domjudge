@@ -23,7 +23,17 @@ $teammap     = array(
     '3100' => '815',
     '3248' => '816'
     );
-
+$resultmap = array(
+	'CE' => 'compile-error',
+	'RTE' => 'run-error',
+	'TLE' => 'timelimit',
+	'WA' => 'wrong-answer',
+	'AC' => 'correct',
+	'SV' => 'security violation',
+	'JE' => 'judging error',
+	'DEL' => 'deleted'
+);
+// FIXME: rejudges are still broken (used first instead of last result)
 
 $knownRuns = array();
 $submittimes = array();
@@ -74,7 +84,7 @@ while (1) {
 			. $problemmap[val($run, 'problem')] . " "
 			. $languagemap[val($run, 'language')] . " "
 			. $submittimes[$id] . " $id "
-			. val($run, 'result') . $files
+			. $resultmap[val($run, 'result')] . $files
 			. " 1>2");
 
 		$handle = opendir($ziptmp);
@@ -93,6 +103,10 @@ while (1) {
 
 function val($node, $tag) {
 	return $node->getElementsByTagName($tag)->item(0)->nodeValue;
+}
+
+function stderr($msg) {
+	file_put_contents('php://stderr', $msg);
 }
 
 ?>
