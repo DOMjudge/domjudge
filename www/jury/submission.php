@@ -34,6 +34,7 @@ if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
                     s.submittime, s.valid, c.cid, c.contestname,
+		    s.externalid, s.externalresult,
                     t.name AS teamname, l.name AS langname, p.name AS probname,
                     CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
@@ -126,6 +127,12 @@ if ( $submdata['valid'] ) {
 	<a href="show_source.php?id=<?php echo $id?>">view source code</a></td></tr>
 <tr><td scope="row">Max runtime:</td><td>
 	<?php echo  htmlspecialchars($submdata['maxruntime']) ?> sec</td></tr>
+<?php if ( isset($submdata['externalid']) ) { ?>
+<tr><td scope="row">External ID:</td><td>
+	<?php echo  "<a href=\"" . EXT_CCS_URL . urlencode($submdata['externalid']) . "\" target=\"extCCS\">" . htmlspecialchars($submdata['externalid']) . "</a>"; ?></td></tr>
+<tr><td scope="row">External Result:</td><td>
+	<?php echo  htmlspecialchars($submdata['externalresult']); ?></td></tr>
+<?php } ?>
 </table>
 
 
