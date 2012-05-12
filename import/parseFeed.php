@@ -1,4 +1,16 @@
+#!/usr/bin/env php
 <?php
+/**
+ * Parses a CCS event feed, writes out the run IDs which should be exported 
+ * from primary CCS and imported into DOMjudge as secondary/shadow CCS
+ *
+ * Called: ./parseFeed.php | ./export.pl
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
 # config section
 $feedURL = 'testfeed.xml';
@@ -33,7 +45,6 @@ $resultmap = array(
 	'JE' => 'judging error',
 	'DEL' => 'deleted'
 );
-// FIXME: rejudges are still broken (used first instead of last result)
 
 $knownRuns = array();
 $submittimes = array();
@@ -43,14 +54,14 @@ while (1) {
 	$feedDOM = DOMDocument::loadXML($feedXML);
 	$runs = $feedDOM->getElementsByTagName('run');
 
-	foreach ($runs as $run) {
-		if (val($run, 'judged') !== 'True') {
+	foreach ( $runs as $run ) {
+		if ( val($run, 'judged') !== 'True' ) {
 			$submittimes[val($run, 'id')] = val($run, 'timestamp');
 			continue;
 		}
 
 		$id = val($run, 'id');
-		if ($knownRuns[$id] >= val($run, 'timestamp')) {
+		if ( $knownRuns[$id] >= val($run, 'timestamp') ) {
 			continue;
 		}
 		$knownRuns[$id] = val($run, 'timestamp');
@@ -88,8 +99,8 @@ while (1) {
 			. " 1>2");
 
 		$handle = opendir($ziptmp);
-		while (false !== ($entry = readdir($handle))) {
-			if ($entry != "." && $entry != "..") {
+		while ( false !== ($entry = readdir($handle)) ) {
+			if ( $entry != "." && $entry != ".." ) {
 				unlink($ziptmp . "/" . $entry);
 			}
 		}
