@@ -50,10 +50,10 @@ while (1) {
 		}
 
 		$id = val($run, 'id');
-		if (in_array($id, $knownRuns)) {
+		if ($knownRuns[$id] >= val($run, 'timestamp')) {
 			continue;
 		}
-		$knownRuns[] = $id;
+		$knownRuns[$id] = val($run, 'timestamp');
 		print "$id\n";
 
 		// wait for submission

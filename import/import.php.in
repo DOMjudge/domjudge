@@ -63,17 +63,23 @@ function import($team, $prob, $lang, $submittime, $files, $filenames, $extid, $e
 	}
 
 	global $cdata,$cid, $DB;
+	$submittime = strftime(MYSQL_DATETIME_FORMAT, $submittime);
 
 	$duplicate = $DB->q('MAYBEVALUE SELECT externalid FROM submission
 			WHERE externalid = %i', $extid);
 	if ( $duplicate !== NULL ) {
-		echo("submission already present\n");
-		// FIXME: do we want to check "real" equality here?
+		$origtime = $DB->q('VALUE SELECT submittime FROM submission
+			WHERE externalid = %i', $extid);
+		if ( $origtime !== $submittime ) {
+			error("duplicate submission ID with different submittime found");
+		}
+		// update judging result (in case of a rejudge)
+		$DB->q('UPDATE submission SET externalresult = %s
+			WHERE externalid = %i', $extresult, $extid);
 		exit;
 	}
 
 	$sourcesize = dbconfig_get('sourcesize_limit');
-	$submittime = strftime(MYSQL_DATETIME_FORMAT, $submittime);
 
 	if( difftime($cdata['starttime'], $submittime) > 0 ) {
 		error("The contest is closed, no submissions accepted. [c$cid]");
