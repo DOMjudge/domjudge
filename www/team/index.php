@@ -33,7 +33,9 @@ echo "<div id=\"submitlist\">\n";
 
 echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
 
-if ( ENABLE_WEBSUBMIT_SERVER ) {
+$fdata = calcFreezeData($cdata);
+
+if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 	if ( $submitted ) {
 		echo "<p class=\"submissiondone\">submission done <a href=\"./\" style=\"color: red\">x</a></p>\n\n";
 	} else {
