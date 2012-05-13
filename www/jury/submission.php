@@ -249,7 +249,7 @@ if ( isset($jid) )  {
 				echo "</p>\n";
 			}
 
-			if ( $jud['result'] !== $submdata['externalresult'] ) {
+			if ( !empty($submdata['externalresult']) && $jud['result'] !== $submdata['externalresult'] ) {
 				echo msgbox('results differ', 
 					'This submission was judged as '
 					. '<a href="' . EXT_CCS_URL
