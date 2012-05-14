@@ -6,7 +6,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'all');
+$viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'all');
 
 $view = 0;
 
@@ -16,7 +16,7 @@ if ( isset($_COOKIE['domjudge_submissionview']) && isset($viewtypes[$_COOKIE['do
 }
 
 if ( isset($_REQUEST['view']) ) {
-	// did someone press any of the three view buttons?
+	// did someone press any of the four view buttons?
 	foreach ($viewtypes as $i => $name) {
 		if ( isset($_REQUEST['view'][$i]) ) $view = $i;
 	}
@@ -38,6 +38,7 @@ echo "<h1>$title</h1>\n\n";
 
 $restrictions = array();
 if ( $viewtypes[$view] == 'unverified' ) $restrictions['verified'] = 0;
+if ( $viewtypes[$view] == 'unjudged' ) $restrictions['judged'] = 0;
 
 echo addForm('submissions.php', 'get') . "<p>Show submissions:\n";
 for($i=0; $i<count($viewtypes); ++$i) {

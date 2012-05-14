@@ -76,6 +76,13 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			$verifyclause = '(j.verified = 0 OR s.judgehost IS NULL) ';
 		}
 	}
+	if ( isset($restrictions['judged']) ) {
+		if ( $restrictions['judged'] ) {
+			$judgedclause = '(j.result IS NOT NULL) ';
+		} else {
+			$judgedclause = '(j.result IS NULL) ';
+		}
+	}
 
 	$sqlbody =
 		'FROM submission s
@@ -95,6 +102,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 					j.result, j.judgehost, j.verified, j.jury_member, j.seen '
 				  . $sqlbody
 				  . (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '')
+				  . (isset($restrictions['judged'])  ? 'AND ' . $judgedclause : '')
 				  .'ORDER BY s.submittime DESC, s.submitid DESC '
 				  . ($limit > 0 ? 'LIMIT 0, %i' : '%_')
 				, $cid, @$restrictions['teamid'], @$restrictions['probid']
@@ -267,10 +275,16 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 					, $cid, @$restrictions['teamid'], @$restrictions['probid']
 					, @$restrictions['langid'], @$restrictions['judgehost']
 					);
+		$quecnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
+						.' AND result IS NULL'
+					, $cid, @$restrictions['teamid'], @$restrictions['probid']
+					, @$restrictions['langid'], @$restrictions['judgehost']
+					);
 		}
 		echo "<p>Total correct: $corcnt, submitted: $subcnt";
 		if($vercnt > 0)	echo ", unverified: $vercnt";
 		if($igncnt > 0) echo ", ignored: $igncnt";
+		if($quecnt > 0) echo ", judgement pending: $quecnt";
 		echo "</p>\n\n";
 	}
 
