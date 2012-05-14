@@ -24,7 +24,8 @@ if( $res->count() == 0 ) {
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
-		"<th scope=\"col\">contest</th><th scope=\"col\">allow<br />submit</th>" .
+		"<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" .
+	        "<th scope=\"col\">allow<br />submit</th>" .
 		"<th scope=\"col\">allow<br />judge</th>" .
 		"<th scope=\"col\">time<br />limit</th>" .
 		"<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .
@@ -56,7 +57,7 @@ if( $res->count() == 0 ) {
 			"</td>".
 			( !empty($row['color'])
 			? '<td title="' . htmlspecialchars($row['color']) .
-		      '">' . $link . '<img style="background-color: ' .
+		      '">' . $link . '<img class="balloonimage" style="background-color: ' .
 			htmlspecialchars($row['color']) .
 		      ';" alt="problem colour ' . htmlspecialchars($row['color']) .
 		      '" src="../images/circle.png" /></a>'
@@ -74,7 +75,7 @@ if( $res->count() == 0 ) {
 }
 
 if ( IS_ADMIN ) {
-	echo "<p>" . addLink('problem');
+	echo "<p>" . addLink('problem') . "</p>\n\n";
 	if ( class_exists("ZipArchive") ) {
 		echo "\n" . addForm('problem.php', 'post', null, 'multipart/form-data') .
 	 		addHidden('id', @$data['probid']) .
@@ -83,7 +84,6 @@ if ( IS_ADMIN ) {
 	 		addSubmit('Upload', 'upload') .
 	 		addEndForm() . "\n";
 	}
-       	echo "</p>\n\n";
 }
 
 require(LIBWWWDIR . '/footer.php');

@@ -398,6 +398,7 @@ if ( IS_JURY && $respid!==NULL && count($std_answers)>0 ) {
 <script type="text/javascript">
 <!--
 document.forms['sendclar'].bodytext.focus();
+document.forms['sendclar'].bodytext.select();
 // -->
 </script>
 <?php

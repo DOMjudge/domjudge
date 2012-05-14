@@ -237,7 +237,7 @@ function addFileUpload() {
 	var input = document.createElement('input');
 	input.type = 'file';
 	input.name = 'code[]';
-	input.size = '15';
+	input.size = '50';
 	var br = document.createElement('br');
 
 	document.getElementById('auxfiles').appendChild( input );

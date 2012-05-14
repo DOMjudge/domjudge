@@ -189,8 +189,7 @@ if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
 	"$SCRIPTDIR/$CHROOT_SCRIPT" stop
 fi
 
-# Check for still running processes (first wait for all exiting processes):
-sleep 1
+# Check for still running processes:
 if ps -u "$RUNUSER" >/dev/null 2>&1 ; then
 	error "found processes still running"
 fi

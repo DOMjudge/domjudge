@@ -98,11 +98,11 @@ function presentSource ($sourcedata, $langid)
 		'<h2 class="filename"><a name="source' . htmlspecialchars($sourcedata['rank']) .
 		'"></a>' .
 		htmlspecialchars($sourcedata['filename']) . "</h2> <a " .
-		"href=\"show_source.php?id=" . htmlspecialchars($sourcedata['submitid']) .
-		"&amp;fetch=" . htmlspecialchars($sourcedata['rank']) .
+		"href=\"show_source.php?id=" . urlencode($sourcedata['submitid']) .
+		"&amp;fetch=" . urlencode($sourcedata['rank']) .
 		"\"><img class=\"picto\" src=\"../images/b_save.png\" alt=\"download\" title=\"download\" /></a> " .
-		"<a href=\"edit_source.php?id=" . htmlspecialchars($sourcedata['submitid']) .
-		"&amp;rank=" . htmlspecialchars($sourcedata['rank']) . "\">" .
+		"<a href=\"edit_source.php?id=" . urlencode($sourcedata['submitid']) .
+		"&amp;rank=" . urlencode($sourcedata['rank']) . "\">" .
 		"<img class=\"picto\" src=\"../images/edit.png\" alt=\"edit\" title=\"edit\" />" .
 		"</a>\n\n";
 
@@ -139,6 +139,7 @@ function presentDiff ($old, $new)
 
 function multifilediff ($sources, $oldsources, $olddata)
 {
+	$diffhtml = $html = '';
 	// if both current and previous submission have just one file, diff them directly
 	if (count($sources) == 1 && count($oldsources) == 1 ) {
 		$html .= '<div class="tabber">' .
@@ -269,7 +270,7 @@ if ( !empty($origsources) ) {
 echo "<h2>Source code for submission s" .htmlspecialchars($id);
 if ( !empty($submission['origsubmitid']) ) {
 	$origid = $submission['origsubmitid'];
-	echo  " (resubmit of <a href=\"submission.php?id=$origid\">s$origid</a>)";
+	echo  " (resubmit of <a href=\"submission.php?id=" . urlencode($origid) . "\">s$origid</a>)";
 }
 echo "</h2>\n\n";
 if ( $olddata !== NULL ) {

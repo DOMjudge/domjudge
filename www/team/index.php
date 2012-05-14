@@ -33,7 +33,9 @@ echo "<div id=\"submitlist\">\n";
 
 echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
 
-if ( ENABLE_WEBSUBMIT_SERVER ) {
+$fdata = calcFreezeData($cdata);
+
+if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 	if ( $submitted ) {
 		echo "<p class=\"submissiondone\">submission done <a href=\"./\" style=\"color: red\">x</a></p>\n\n";
 	} else {
@@ -61,8 +63,12 @@ if ( ENABLE_WEBSUBMIT_SERVER ) {
 
 		echo addReset('cancel');
 
-		echo "<br /><div id=\"morefiles\"><span id=\"auxfiles\"></span>\n" .
-		     "<input type=\"button\" name=\"addfile\" id=\"addfile\" value=\"Add another file\" onclick=\"addFileUpload();\" disabled=\"disabled\" /></div>\n";
+		if ( dbconfig_get('sourcefiles_limit',1) > 1 ) {
+			echo "<br /><span id=\"auxfiles\"></span>\n" .
+			    "<input type=\"button\" name=\"addfile\" id=\"addfile\" " .
+			    "value=\"Add another file\" onclick=\"addFileUpload();\" " .
+			    "disabled=\"disabled\" />\n";
+		}
 
 		echo "</p>\n</form>\n\n";
 	}

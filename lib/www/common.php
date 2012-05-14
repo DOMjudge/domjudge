@@ -76,6 +76,13 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			$verifyclause = '(j.verified = 0 OR s.judgehost IS NULL) ';
 		}
 	}
+	if ( isset($restrictions['judged']) ) {
+		if ( $restrictions['judged'] ) {
+			$judgedclause = '(j.result IS NOT NULL) ';
+		} else {
+			$judgedclause = '(j.result IS NULL) ';
+		}
+	}
 
 	$sqlbody =
 		'FROM submission s
@@ -95,6 +102,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 					j.result, j.judgehost, j.verified, j.jury_member, j.seen '
 				  . $sqlbody
 				  . (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '')
+				  . (isset($restrictions['judged'])  ? 'AND ' . $judgedclause : '')
 				  .'ORDER BY s.submittime DESC, s.submitid DESC '
 				  . ($limit > 0 ? 'LIMIT 0, %i' : '%_')
 				, $cid, @$restrictions['teamid'], @$restrictions['probid']
@@ -112,17 +120,15 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 	}
 
 	// print the table with the submissions.
-	// table header; leave out the field that is our key (because it's the same
-	// for all rows)
+	// table header
 	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
 
-		(IS_JURY ? "<th scope=\"col\">ID</th>" : '') .
+		(IS_JURY ? "<th scope=\"col\" class=\"sorttable_numeric\">ID</th>" : '') .
 		"<th scope=\"col\">time</th>" .
 		(IS_JURY ? "<th scope=\"col\">team</th>" : '') .
 		"<th scope=\"col\">problem</th>" .
 		"<th scope=\"col\">lang</th>" .
 		"<th scope=\"col\">result</th>" .
-		(IS_JURY ? "<th scope=\"col\">judgehost</th>" : '') .
 		(IS_JURY ? "<th scope=\"col\">verified</th><th scope=\"col\">by</th>" : '') .
 
 		"</tr>\n</thead>\n<tbody>\n";
@@ -137,7 +143,8 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		// present and valid.
 		if ( IS_JURY ) {
 			$link = ' href="submission.php?id=' . $sid . '"';
-		} elseif ( $row['result'] && $row['valid'] ) {
+		} elseif ( $row['result'] && $row['valid'] &&
+		           (!dbconfig_get('verification_required',0) || $row['verified']) ) {
 			$link = ' href="submission_details.php?id=' . $sid . '"';
 		} else {
 			$link = '';
@@ -203,15 +210,6 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		echo "</td>";
 
 		if ( IS_JURY ) {
-			echo "<td><a$link>";
-			$judgehost = $row['judgehost'];
-			if ( !empty($judgehost) ) {
-					echo printhost($judgehost);
-			} else {
-				echo '&nbsp;';
-			}
-			echo '</a></td>';
-
 			// only display verification if we're done with judging
 			unset($verified, $jury_member);
 			$claim = FALSE;
@@ -277,10 +275,16 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 					, $cid, @$restrictions['teamid'], @$restrictions['probid']
 					, @$restrictions['langid'], @$restrictions['judgehost']
 					);
+		$quecnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
+						.' AND result IS NULL'
+					, $cid, @$restrictions['teamid'], @$restrictions['probid']
+					, @$restrictions['langid'], @$restrictions['judgehost']
+					);
 		}
 		echo "<p>Total correct: $corcnt, submitted: $subcnt";
 		if($vercnt > 0)	echo ", unverified: $vercnt";
 		if($igncnt > 0) echo ", ignored: $igncnt";
+		if($quecnt > 0) echo ", judgement pending: $quecnt";
 		echo "</p>\n\n";
 	}
 

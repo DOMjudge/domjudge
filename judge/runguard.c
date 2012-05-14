@@ -334,6 +334,9 @@ void terminate(int sig)
 
 	verbose("sending SIGKILL");
 	if ( kill(-child_pid,SIGKILL)!=0 ) error(errno,"sending SIGKILL to command");
+
+	/* Wait another while to make sure the process is killed by now. */
+	nanosleep(&killdelay,NULL);
 }
 
 static void child_handler(int sig)

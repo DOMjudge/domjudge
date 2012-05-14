@@ -39,9 +39,8 @@ if ( difftime($cdata['starttime'], $now) > 0 ) {
 /** helper to output an error message. */
 function err($string)
 {
-	// Annoying PHP: we need to import all global variables here...
-	global $nunread_clars, $title, $ajaxtitle, $refresh, $menu;
-
+	// Annoying PHP: we need to import global variables here...
+	global $title;
 	if (NONINTERACTIVE) error($string);
 
 	require(LIBWWWDIR . '/header.php');
@@ -54,6 +53,10 @@ function err($string)
 
 	require(LIBWWWDIR . '/footer.php');
 	exit;
+}
+
+if ( count($_FILES['code']['tmp_name']) > dbconfig_get('sourcefiles_limit',1) ) {
+	err("Tried to submit more than the allowed number of source files.");
 }
 
 ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
