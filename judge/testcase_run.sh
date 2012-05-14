@@ -190,7 +190,6 @@ if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
 fi
 
 # Check for still running processes (first wait for all exiting processes):
-sleep 1
 if ps -u "$RUNUSER" >/dev/null 2>&1 ; then
 	error "found processes still running"
 fi
