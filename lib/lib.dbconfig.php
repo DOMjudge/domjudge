@@ -21,6 +21,7 @@ function dbconfig_init()
 		$key = $row['name'];
 		$val = json_decode($row['value'], true);
 
+		// json_last_error() is only available in PHP >= 5.3
 		if ( function_exists('json_last_error') ) {
 			switch ( json_last_error() ) {
 			case JSON_ERROR_NONE:

@@ -56,8 +56,8 @@ function calcPenaltyTime($solved, $num_submissions)
  *
  * matrix[login][probid](is_correct, num_submissions, num_pending, time, penalty)
  *
- * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid])
- *    probid(num_submissions, num_pending, num_correct, besttime, bestteam)
+ * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid]
+ *    probid(num_submissions, num_pending, num_correct, best_time, best_time_sort[sortorder] )
  */
 function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
@@ -137,6 +137,17 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 		$SCORES[$login]['country']     = $team['country'];
 	}
 
+	// initialize all problems with data
+	foreach( array_keys($probs) as $prob ) {
+		if ( !isset($SUMMARY['problems'][$prob]) ) {
+			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
+			$SUMMARY['problems'][$prob]['num_pending'] = 0;
+			$SUMMARY['problems'][$prob]['num_correct'] = 0;
+			$SUMMARY['problems'][$prob]['best_time'] = NULL;
+			$SUMMARY['problems'][$prob]['best_time_sort'] = array();
+		}
+	}
+
 	// loop all info the scoreboard cache and put it in our own datastructure
 	while ( $srow = $scoredata->next() ) {
 
@@ -198,28 +209,26 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 				                              'is_correct' => 0, 'time' => 0, 'penalty' => 0);
 			}
 			$pdata = $MATRIX[$team][$prob];
+			$psum = &$SUMMARY['problems'][$prob];
 
 			// update summary data for the bottom row
-			@$SUMMARY['problems'][$prob]['num_submissions'] += $pdata['num_submissions'];
-			@$SUMMARY['problems'][$prob]['num_pending'] += $pdata['num_pending'];
-			@$SUMMARY['problems'][$prob]['num_correct'] += ($pdata['is_correct'] ? 1 : 0);
-			if ( $pdata['is_correct'] &&
-			     (!isset($SUMMARY['problems'][$prob]['besttime']) ||
-			      $pdata['time']<=@$SUMMARY['problems'][$prob]['besttime']) ) {
-				@$SUMMARY['problems'][$prob]['besttime'] = $pdata['time'];
-				@$SUMMARY['problems'][$prob]['bestteam'] = $team;
-			}
-		}
-	}
+			@$psum['num_submissions'] += $pdata['num_submissions'];
+			@$psum['num_pending'] += $pdata['num_pending'];
+			@$psum['num_correct'] += ($pdata['is_correct'] ? 1 : 0);
 
-	// Fill all problems with data if not set already
-	foreach( array_keys($probs) as $prob ) {
-		if ( !isset($SUMMARY['problems'][$prob]) ) {
-			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
-			$SUMMARY['problems'][$prob]['num_pending'] = 0;
-			$SUMMARY['problems'][$prob]['num_correct'] = 0;
-			$SUMMARY['problems'][$prob]['besttime'] = NULL;
-			$SUMMARY['problems'][$prob]['bestteam'] = NULL;
+			if ( $pdata['is_correct'] ) {
+				// store per sortorder the first solve time
+				if ( !isset($psum['best_time_sort'][$totals['sortorder']]) ||
+				     $pdata['time']<$psum['best_time_sort'][$totals['sortorder']] ) {
+					@$psum['best_time_sort'][$totals['sortorder']] = $pdata['time'];
+				}
+
+				// also keep overall best time per problem for in bottom summary row
+				if ( !isset($psum['best_time']) ||
+				     $pdata['time'] < @$psum['best_time'] ) {
+					@$psum['best_time'] = $pdata['time'];
+				}
+			}
 		}
 	}
 
@@ -378,7 +387,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 			// CSS class for correct/incorrect/neutral results
 			if( $matrix[$team][$prob]['is_correct'] ) {
 				echo '"score_correct' .
-					( $summary['problems'][$prob]['bestteam']==$team ?
+					( $summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]==$matrix[$team][$prob]['time'] ?
 					  ' score_first' : '') . '"';
 			} elseif ( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
 				echo '"score_pending"';

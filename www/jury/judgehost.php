@@ -85,10 +85,10 @@ if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No judgings.</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">started</th>" .
-		 "<th scope=\"col\">runtime</th><th scope=\"col\">result</th>" .
-		 "<th scope=\"col\">valid</th><th scope=\"col\">verified</th>" .
-	     "</tr>\n</thead>\n<tbody>\n";
+	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">ID</th><th " .
+	     "scope=\"col\">started</th><th scope=\"col\">runtime</th><th " .
+	     "scope=\"col\">result</th><th scope=\"col\">valid</th><th " .
+	     "scope=\"col\">verified</th></tr>\n</thead>\n<tbody>\n";
 
 	while( $jud = $res->next() ) {
 		$start = strtotime($jud['starttime']);

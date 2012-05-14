@@ -15,6 +15,8 @@ img {	border: 0; }
 .sol_incorrect    { color: red;    }
 .sol_queued       { color: gray;   }
 
+.prevsubmit       { color: #696969; }
+
 tr.sub_ignore td {
 	text-decoration: line-through;
 }
@@ -29,6 +31,12 @@ a:active          { color: red;    }
 
 .disabled         { color: silver; }
 .disabled a       { color: gray;   }
+.disabled .balloonimage {
+	opacity: 0.2;
+	/* what follows is for IE-compatibility */
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+	filter: alpha(opacity=20);
+}
 .nodata           { color: gray; font-style: italic; }
 
 /* general table layout (not in scoreboard or lists) */

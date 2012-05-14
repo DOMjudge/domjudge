@@ -337,9 +337,9 @@ if ( isset($jid) )  {
 		"<th scope=\"col\">result</th>";
 	if ( $lastjud !== NULL ) {
 		echo "<th scope=\"col\" name=\"lastruntime\">" .
-			"<span class=\"disabled\">s$lastsubmitid runtime</span></th>" .
+			"<span class=\"prevsubmit\">s$lastsubmitid runtime</span></th>" .
 			"<th scope=\"col\" name=\"lastresult\">" .
-			"<span class=\"disabled\">s$lastsubmitid result</span></th>";
+			"<span class=\"prevsubmit\">s$lastsubmitid result</span></th>";
 	}
 
 	echo "<th scope=\"col\">description</th>" .
@@ -363,9 +363,9 @@ if ( isset($jid) )  {
 			$lastrun = $lastruninfo[$key];
 			if ( $lastjud['result']=='compiler-error' ) $lastrun['runresult'] = 'compiler-error';
 			echo "<td name=\"lastruntime\"><a href=\"$link\">" .
-				"<span class=\"disabled\">$lastrun[runtime]</span></a></td>" .
+				"<span class=\"prevsubmit\">$lastrun[runtime]</span></a></td>" .
 				"<td name=\"lastresult\"><a href=\"$link\">" .
-				"<span class=\"sol disabled\">$lastrun[runresult]</span></a></td>";
+				"<span class=\"sol prevsubmit\">$lastrun[runresult]</span></a></td>";
 		}
 
 		echo "<td><a href=\"$link\">" .
