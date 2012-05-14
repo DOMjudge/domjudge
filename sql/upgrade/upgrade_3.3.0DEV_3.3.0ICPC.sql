@@ -23,6 +23,10 @@ ALTER TABLE `clarification`
 ALTER TABLE `team`
   ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`;
 
+ALTER TABLE `submission`
+  ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
+  ADD COLUMN `externalresult` varchar(25) default NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis';
+
 CREATE TABLE `removed_interval` (
   `intervalid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
