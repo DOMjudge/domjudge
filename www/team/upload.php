@@ -55,7 +55,7 @@ function err($string)
 	exit;
 }
 
-if ( count($_FILES['code']['tmp_name']) > SOURCEFILES_LIMIT ) {
+if ( count($_FILES['code']['tmp_name']) > dbconfig_get('sourcefiles_limit',1) ) {
 	err("Tried to submit more than the allowed number of source files.");
 }
 

@@ -52,7 +52,3 @@ $DOMJUDGE_ADMINS = array('domjudge_jury', 'admin');
 // This list only needs to be modified when additional languages are
 // added and should be kept in sync with the list in submit-config.h.in.
 define('LANG_EXTS', 'C,c C++,cpp,cc Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,csharp,cs AWK,awk Python,py Bash,bash');
-
-// Sanity limit on the amount of source files one submission may
-// contain. This can be set to 1 to disable multifile submissions.
-define('SOURCEFILES_LIMIT', 100);
