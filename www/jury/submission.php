@@ -288,6 +288,7 @@ if ( isset($jid) )  {
 	                        ORDER BY submittime DESC LIMIT 1',
 	                       $submdata['teamid'],$submdata['probid'],
 	                       $submdata['submittime']);
+	$lastjud = NULL;
 	if ( $lastsubmitid !== NULL ) {
 		$lastjud = $DB->q('MAYBETUPLE SELECT *
 		                   FROM judging

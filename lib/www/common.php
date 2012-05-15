@@ -134,7 +134,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		"</tr>\n</thead>\n<tbody>\n";
 
 	// print each row with links to detailed information
-	$iseven = $subcnt = $corcnt = $igncnt = $vercnt = 0;
+	$iseven = $subcnt = $corcnt = $igncnt = $vercnt = $quecnt = 0;
 	while( $row = $res->next() ) {
 
 		$sid = (int)$row['submitid'];
