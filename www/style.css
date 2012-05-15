@@ -137,6 +137,7 @@ span.extra {
 #menutopright {
 	position: absolute; right: 1ex; top: 1ex;
 	text-align: right;
+	z-index: -1;
 }
 #clock {
 	font-size: small;
