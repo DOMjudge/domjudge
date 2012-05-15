@@ -17,24 +17,18 @@ $feedURL = 'testfeed.xml';
 $sleeptime = 1;
 $directory = 'submissions';
 $languagemap = array('Java' => 'java', 'C' => 'c', 'C++' => 'cpp');
-$problemmap  = array('1' => 'fltcmp', '2' => 'boolfind', '3' => 'hello',
-	'4' => 'fltcmp', '5' => 'boolfind', '6' => 'hello');
-// FIXME: why is the teammap necessary? why don't the IDs in the feed match?
-$teammap     = array(
-    '2139' => '804', 
-    '2175' => '805',
-    '2282' => '806',
-    '2432' => '807',
-    '2671' => '808',
-    '2711' => '809',
-    '2757' => '810',
-    '2758' => '811',
-    '2929' => '812',
-    '3033' => '813',
-    '3082' => '814',
-    '3100' => '815',
-    '3248' => '816'
-    );
+$problemmap  = array(
+'1' => 'oriA',
+'2' => 'oriB',
+'3' => 'oriC',
+'4' => 'oriD',
+'5' => 'oriE',
+'6' => 'oriF',
+'7' => 'oriG',
+'8' => 'oriH',
+'9' => 'oriI',
+'10' => 'oriJ'
+ );
 $resultmap = array(
 	'CE' => 'compiler-error',
 	'RTE' => 'run-error',
@@ -43,7 +37,8 @@ $resultmap = array(
 	'AC' => 'correct',
 	'SV' => 'security violation',
 	'JE' => 'judging error',
-	'DEL' => 'deleted'
+	'DEL' => 'deleted',
+	'IF' => 'invalid function'
 );
 
 $knownRuns = array();
@@ -61,7 +56,7 @@ while (1) {
 		}
 
 		$id = val($run, 'id');
-		if ( $knownRuns[$id] >= val($run, 'timestamp') ) {
+		if ( isset($knownRuns[$id]) && $knownRuns[$id] >= val($run, 'timestamp') ) {
 			continue;
 		}
 		$knownRuns[$id] = val($run, 'timestamp');
@@ -91,7 +86,7 @@ while (1) {
 		closedir($handle);
 
 		system("./import.php "
-			. $teammap[val($run, 'team')] . " "
+			. val($run, 'team') . " "
 			. $problemmap[val($run, 'problem')] . " "
 			. $languagemap[val($run, 'language')] . " "
 			. $submittimes[$id] . " $id "
