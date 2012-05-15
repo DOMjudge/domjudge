@@ -66,7 +66,7 @@ function hideTcDescEdit(descid)
 function detectProblemLanguage(filename)
 {
 	var addfile = document.getElementById("addfile");
-	addfile.disabled = false;
+	if ( addfile ) addfile.disabled = false;
 
 	var parts = filename.toLowerCase().split('.').reverse();
 	if ( parts.length < 2 ) return;
