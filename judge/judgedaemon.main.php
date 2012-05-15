@@ -122,6 +122,20 @@ while( !$exitsignalled )
 	}
 }
 
+// If there are any unfinished judgings in the queue in my name,
+// they will not be finished. Give them back.
+$res = $DB->q('SELECT judgingid, submitid FROM judging WHERE
+               judgehost = %s AND endtime IS NULL AND valid = 1', $myhost);
+while ( $jud = $res->next() ) {
+	$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
+	       $jud['judgingid']);
+	$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
+	        WHERE submitid = %i', $jud['submitid']);
+}
+if ($res->count() > 0 ) {
+	logmsg(LOG_WARNING, "Found " . $res->count() . " unfinished judging(s) in my name; given back");
+}
+
 // Create directory where to test submissions
 $workdirpath = JUDGEDIR . "/$myhost";
 system("mkdir -p $workdirpath/testcase", $retval);
