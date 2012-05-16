@@ -108,7 +108,7 @@ function checkUploadForm()
 	var filename = fileelt.value;
 	var probelt = document.getElementById("probid");
 	var problem = probelt.options[probelt.selectedIndex].value;
-	var problemtxt = probelt.options[probelt.selectedIndex].text;
+	var problemtxt = probelt.options[probelt.selectedIndex].text + " - " + getProbDescription(probelt.options[probelt.selectedIndex].text);
 	var auxfiles = document.getElementsByName("code[]");
 
 	var error = false;
