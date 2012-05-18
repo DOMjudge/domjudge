@@ -13,11 +13,12 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Problems</h1>\n\n";
 
+// Select all data, sort problems from the current contest on top.
 $res = $DB->q('SELECT p.*, c.*, COUNT(testcaseid) AS testcases
                FROM problem p
                NATURAL JOIN contest c
                LEFT JOIN testcase USING (probid)
-               GROUP BY probid ORDER BY p.cid, probid');
+               GROUP BY probid ORDER BY (p.cid = %i) DESC, p.cid, probid', $cid);
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No problems defined</p>\n\n";
