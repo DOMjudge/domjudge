@@ -35,7 +35,7 @@ cleanup ()
 {
 	# Remove some copied files to save disk space
 	if [ "$WORKDIR" ]; then
-		rm -f "$WORKDIR/dev/null" "$WORKDIR/bin/sh" "$WORKDIR/bin/runpipe"
+		rm -f "$WORKDIR/../dev/null" "$WORKDIR/../bin/sh" "$WORKDIR/../bin/runpipe"
 
 		# Replace testdata by symlinks to reduce disk usage
 		if [ -f "$WORKDIR/testdata.in" ]; then
@@ -129,7 +129,7 @@ if [ -z "$USE_CHROOT" ] || [ "$USE_CHROOT" -eq 0 ]; then
 	unset USE_CHROOT
 	PREFIX=$PWD
 else
-	PREFIX=''
+	PREFIX="/`basename $PWD`"
 fi
 
 # Make testing/execute dir accessible for RUNUSER:
@@ -149,45 +149,33 @@ cd "$OLDDIR"
 cp "$TESTIN" "$WORKDIR/testdata.in"
 cd "$WORKDIR"
 
-mkdir -m 0711 bin dev
+mkdir -p -m 0711 ../bin ../dev
 # Copy the run-script and a statically compiled shell:
 cp -p  "$RUN_SCRIPT"  ./run
-cp -pL "$STATICSHELL" ./bin/sh
-chmod a+rx run bin/sh
+cp -pL "$STATICSHELL" ../bin/sh
+chmod a+rx run ../bin/sh
 # If using a custom run script, copy additional support programs
 # if required:
 if [ -n "$SPECIALRUN" -a -f "$RUN_JURYPROG" ]; then
 	cp -p "$RUN_JURYPROG" ./runjury
-	cp -pL "$RUNPIPE"     ./bin/runpipe
-	chmod a+rx runjury bin/runpipe
+	cp -pL "$RUNPIPE"     ../bin/runpipe
+	chmod a+rx runjury ../bin/runpipe
 fi
 
 # We copy /dev/null: mknod (and the major/minor device numbers) are
 # not portable, while a fifo link has the problem that a cat program
 # must be run and killed.
 logmsg $LOG_DEBUG "creating /dev/null character-special device"
-$GAINROOT cp -pR /dev/null ./dev/null
-
-# Execute an optional chroot setup script:
-if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
-	logmsg $LOG_DEBUG "executing chroot script: '$CHROOT_SCRIPT start'"
-	"$SCRIPTDIR/$CHROOT_SCRIPT" start
-fi
+$GAINROOT cp -pR /dev/null ../dev/null
 
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck ./run testdata.in program.out \
-	$GAINROOT $RUNGUARD ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD"} -u "$RUNUSER" \
+	$GAINROOT $RUNGUARD ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD/.."} -u "$RUNUSER" \
 	-C $TIMELIMIT -t $((2*TIMELIMIT)) -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
 	-c -s $FILELIMIT -e program.err -E program.exit -T program.time -- \
 	$PREFIX/$PROGRAM 2>error.tmp
-
-# Execute an optional chroot destroy script:
-if [ "$USE_CHROOT" -a "$CHROOT_SCRIPT" ]; then
-	logmsg $LOG_DEBUG "executing chroot script: '$CHROOT_SCRIPT stop'"
-	"$SCRIPTDIR/$CHROOT_SCRIPT" stop
-fi
 
 # Check for still running processes:
 if ps -u "$RUNUSER" >/dev/null 2>&1 ; then

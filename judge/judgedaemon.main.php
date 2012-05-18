@@ -299,7 +299,6 @@ function judge($mark, $row, $judgingid)
 	// Call dbconfig_init() to prevent using cached values.
 	dbconfig_init();
 	putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
-	putenv('CHROOT_SCRIPT=' . CHROOT_SCRIPT);
 	putenv('COMPILETIME='   . dbconfig_get('compile_time'));
 	putenv('MEMLIMIT='      . dbconfig_get('memory_limit'));
 	putenv('FILELIMIT='     . dbconfig_get('filesize_limit'));
@@ -364,6 +363,14 @@ function judge($mark, $row, $judgingid)
 
 	$runresults = array_fill_keys(array_keys($testcases), NULL);
 	$results_remap = dbconfig_get('results_remap');
+
+	// Optionally create chroot environment
+	if ( USE_CHROOT && CHROOT_SCRIPT ) {
+		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." start'");
+		chdir($workdir);
+		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
+		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
+	}
 
 	foreach ( $testcases as $tc ) {
 
@@ -447,6 +454,14 @@ function judge($mark, $row, $judgingid)
 	if ( ($result = getFinalResult($runresults))!==NULL ) break;
 
 	} // end: for each testcase
+
+	// Optionally destroy chroot environment
+	if ( USE_CHROOT && CHROOT_SCRIPT ) {
+		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
+		chdir($workdir);
+		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
+		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
+	}
 
 	} // end: if compile result==0
 
