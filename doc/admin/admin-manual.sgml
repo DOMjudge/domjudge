@@ -241,10 +241,8 @@ On the judgehosts:
 <item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
        Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
        (check specific options of useradd, since these vary per system)
-<!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
-<item> Add to <tt>/etc/sudoers</tt>:<newline><tt>
- domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *<newline>
- domjudge ALL=(root) NOPASSWD: /bin/cp -pR /dev/null ./dev/null</tt>
+<item> Add to <tt>/etc/sudoers.d/</tt> or <tt>/etc/sudoers</tt> the
+       sudoers configuration as in <tt>etc/sudoers-domjudge</tt>.
 <item> Copy the file <tt>etc/dbpasswords.secret</tt> from the
        domserver to all judgehosts to synchronise database passwords.
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
@@ -276,12 +274,9 @@ Optionally:
        <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
        <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
-       and add the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
-<!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
-       domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc<newline>
-       domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
-       domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*<newline>
-       domjudge ALL=(root) NOPASSWD: /bin/umount &lt;judgehost_judgedir&gt/*</tt>
+       and add <tt>etc/sudoers-domjudge</tt> to <tt>/etc/sudoers.d/</tt> or
+       <tt>/etc/sudoers</tt>. 
+
 <item> For additional features in the jury web interface, the
        following PHP extensions can be installed:
        <itemize>
@@ -1029,15 +1024,16 @@ via <tt>configure --enable-runuser=USER</tt>; the default is
 <tt>domjudge-run</tt>.
 
 <tt>Runguard</tt> needs to be able to become root for certain operations
-like changing to the runuser and performing a chroot. The following line
+like changing to the runuser and performing a chroot. The following lines
 must be added to <tt>/etc/sudoers</tt>, replacing &lt;domjudge&gt;
 with the user you intend to run the judgedaemon as, and the full path
 to runguard.
-<!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
 <verb>
 domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *
 domjudge ALL=(root) NOPASSWD: /bin/cp -pR /dev/null ./dev/null
 </verb>
+There's a pregenerated <tt>/etc/sudoers.d/</tt> snippet in
+<tt>etc/sudoers-domjudge</tt>. 
 
 When the chroot setting is enabled (default), a static POSIX shell has
 to be available for copying it to the chroot environment. For Linux
@@ -1048,7 +1044,6 @@ file.
 
 If you use the default <tt>chroot-startstop.sh</tt> script, then
 the following lines must be added to <tt>/etc/sudoers</tt>:
-<!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
 <verb>
 domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
 domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
@@ -1059,6 +1054,8 @@ Here the user <tt>domjudge</tt> must be replaced by the user you
 intend to run the judgedaemon as, <tt>&lt;chrootdir&gt;</tt> by the path
 the chroot environment was installed to and <tt>&lt;judgehost_judgedir&gt;</tt>
 by the value specified in <tt>configure</tt>.
+This is also in the pregenerated <tt>/etc/sudoers.d/</tt> snippet in
+<tt>etc/sudoers-domjudge</tt>. 
 
 <sect>Building and installing the submit client
 <p>
