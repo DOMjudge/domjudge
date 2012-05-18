@@ -499,7 +499,7 @@ result('submissions and judgings', 'Judging integrity',
 
 flushresults();
 
-// REFERENTIAL INTEGRITY. This should really never turn anything uo since
+// REFERENTIAL INTEGRITY. Nothing should turn up here since
 // we have defined foreign key relations between our tables.
 if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 
