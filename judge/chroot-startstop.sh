@@ -36,6 +36,9 @@ case "$1" in
 			else
 				mkdir -p $i
 				sudo -S mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null
+				# Mount read-only for extra security. Note that this
+				# must be executed separately from the bind mount.
+				sudo -S mount -o remount,ro "$PWD/$i" < /dev/null
 			fi
 		done
 		;;

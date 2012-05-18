@@ -1048,6 +1048,7 @@ the following lines must be added to <tt>/etc/sudoers</tt>:
 domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
 domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
 domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*
+domjudge ALL=(root) NOPASSWD: /bin/mount -o remount\,ro &lt;judgehost_judgedir&gt/*
 domjudge ALL=(root) NOPASSWD: /bin/umount &lt;judgehost_judgedir&gt;/*
 </verb>
 Here the user <tt>domjudge</tt> must be replaced by the user you
