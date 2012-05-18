@@ -149,7 +149,7 @@ cd "$OLDDIR"
 cp "$TESTIN" "$WORKDIR/testdata.in"
 cd "$WORKDIR"
 
-mkdir -m 0711 ../bin ../dev
+mkdir -p -m 0711 ../bin ../dev
 # Copy the run-script and a statically compiled shell:
 cp -p  "$RUN_SCRIPT"  ./run
 cp -pL "$STATICSHELL" ../bin/sh
