@@ -69,7 +69,7 @@ function flushresults($header, $results, $collapse = FALSE)
 while( $row = $res->next() ) {
 	$sid = $row['submitid'];
 
-	if ( ($pos = strpos($row['sourcecode'],$matchstring)) && $row['verified']==0 ) {
+	if ( ($pos = strpos($row['sourcecode'],$matchstring)) !== FALSE && $row['verified']==0 ) {
 		$nchecked++;
 
 		$beginpos = $pos + strlen($matchstring);
