@@ -14,7 +14,8 @@ include $(TOPDIR)/Makefile.global
 # between domserver and judgehost installs.
 
 SUBST_CONFIGS = apache.conf domserver-static.php domserver-static.h \
-                judgehost-static.php runguard-config.h submit-config.h
+                judgehost-static.php runguard-config.h submit-config.h \
+                sudoers-domjudge
 
 $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)

@@ -9,3 +9,4 @@
 /htpasswd-jury
 /htpasswd-plugin
 /dbpasswords.secret
+/sudoers-domjudge

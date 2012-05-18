@@ -1,0 +1,18 @@
+# @configure_input@
+
+# Example sudoers configuration for DOMjudge.
+# Check the file paths (especially the chroot prefix),
+# give it file mode 0440 and this file into /etc/sudoers.d/
+# (most recent sudo versions; otherwise use an #include statement
+# in or add its content to /etc/sudoers
+
+@DOMJUDGE_USER@ ALL=(root) NOPASSWD: @judgehost_bindir@/runguard *
+@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/cp -pR /dev/null ../dev/null
+
+# The following is needed if you set USE_CHROOT=1 (recommended).
+# The chroot path below must match the path in chroot-startstop.sh.
+@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
+@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/umount /*/proc
+@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount --bind /chroot/domjudge/*
+@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/umount @judgehost_judgedir@/*
+
