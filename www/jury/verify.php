@@ -49,10 +49,12 @@ if ( dbconfig_get('verification_required', 0) ) {
 	}
 }
 
-/* redirect back to submission page or submissions overview depending
- * on whether judging was (un)verified. */
+/* redirect to referrer page after verification
+ * or back to submission page when unverifying. */
 if ( $val ) {
-	header('Location: submissions.php');
+	$redirect = @$_POST['redirect'];
+	if ( empty($redirect) ) $redirect = 'submissions.php';
+	header('Location: '.$redirect);
 } else {
 	header('Location: submission.php?id=' .
 	       urlencode($jdata['submitid']) . '&jid=' . urlencode($id));
