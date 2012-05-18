@@ -131,9 +131,8 @@ while ( $jud = $res->next() ) {
 	       $jud['judgingid']);
 	$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
 	        WHERE submitid = %i', $jud['submitid']);
-}
-if ($res->count() > 0 ) {
-	logmsg(LOG_WARNING, "Found " . $res->count() . " unfinished judging(s) in my name; given back");
+	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] . " in my name; given back");
+	auditlog('judging', $jud['judgingid'], 'given back', null, $myhost);
 }
 
 // Create directory where to test submissions
