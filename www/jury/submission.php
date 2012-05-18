@@ -290,12 +290,12 @@ if ( isset($jid) )  {
 	                       $submdata['submittime']);
 	$lastjud = NULL;
 	if ( $lastsubmitid !== NULL ) {
-		$lastjud = $DB->q('MAYBETUPLE SELECT *
+		$lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result 
 		                   FROM judging
 		                   WHERE submitid = %s AND valid = 1
 		                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
 		if ( $lastjud !== NULL ) {
-			$lastruns = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
+			$lastruns = $DB->q('SELECT r.runtime, r.runresult FROM testcase t
 			                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 			                                                 r.judgingid = %i )
 			                    WHERE t.probid = %s ORDER BY rank',
