@@ -1,51 +1,55 @@
-#!/usr/bin/env php
 <?php
 /**
- * Imports submissions into DOMjudge, which have been exported from another CCS
+ * Handle Kattis submission via their api.
+ * Api is defined by a python script they call that submits
+ * a POST request with relevant (and irrelevant) data.
+ * It is in this location so the Kattis team only needs to change
+ * their ini, not main code.
  *
- * Called: ./import.php <team> <problem> <langext> <submittime> <external-id> <external-result> [<tempfile> <filename>]...
- *
- * @configure_input@
+ * This is just barely tested and was not yet used in any real setting,
+ * and may be incomplete.
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
 
-if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+require('init.php');
+$title = 'Submit';
 
-require('@domserver_etcdir@/domserver-static.php');
-require(ETCDIR . '/domserver-config.php');
+$team = $_POST['teamid'];
+$prob = $_POST['problem'];
+$lang = $_POST['language'];
+$submittime = $_POST['time'];
+$extid = $_POST['runid'];
+$extresult = 'dummy';
 
-define ('SCRIPT_ID', 'import');
-define ('LOGFILE', LOGDIR.'/import.log');
+$files = $filenames = array();
 
-require(LIBDIR.'/init.php');
-
-setup_database_connection('jury');
-
-$argv = $_SERVER['argv'];
-
-$team    = strtolower(@$argv[1]);
-$prob    = strtolower(@$argv[2]);
-$langext = strtolower(@$argv[3]);
-$submittime = strtolower(@$argv[4]);
-$extid   = strtolower(@$argv[5]);
-$extresult = strtolower(@$argv[6]);
-
-$files = array();
-$filenames = array();
-for($i=7; $i<count($argv); $i+=2) {
-	$files[] = $argv[$i];
-	if ( $i+1>=count($argv) ) error("Non-matching number of tempfiles and filenames.");
-	$filenames[] = $argv[$i+1];
+for ($i = 1; $i <= $_POST['sourcecount']; $i++) {
+	if ( $_FILES["source$i"]['name'] == $_POST['mainfile'] ) {
+		$files[]     = $_FILES["source$i"]['tmp_name'];	
+		$filenames[] = $_FILES["source$i"]['name'];	
+	}
 }
+if ( empty($filenames) ) die("Main file not found");
+
+for ($i = 1; $i <= $_POST['sourcecount']; $i++) {
+	if ( $_FILES["source$i"]['name'] != $_POST['mainfile'] ) {
+		$files[]     = $_FILES["source$i"]['tmp_name'];	
+		$filenames[] = $_FILES["source$i"]['name'];	
+	}
+}
+
+echo "Received " . count($filenames) . " files.\n";
 
 $cdata = getCurContest(TRUE);
 $cid = $cdata['cid'];
 
-import($team, $prob, $langext, $submittime, $files, $filenames, $extid, $extresult);
+import($team, $prob, $lang, $submittime, $files, $filenames, $extid, $extresult);
 
-// FIXME: duplicate code with www/team/submission.php
+echo "Submission done.";
+
+# FIXME: duplicate code with import/import.php
 function import($team, $prob, $lang, $submittime, $files, $filenames, $extid, $extresult) {
 	if( empty($team) ) error("No value for Team.");
 	if( empty($prob) ) error("No value for Problem.");
@@ -165,4 +169,3 @@ function import($team, $prob, $lang, $submittime, $files, $filenames, $extid, $e
 	}
 }
 
-exit;
