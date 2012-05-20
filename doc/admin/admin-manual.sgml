@@ -146,6 +146,17 @@ downloaded from <url url="http://www.barelyfitz.com/projects/tabber/">.
 The M4 autoconf macros are licenced under all-permissive and GPL3+
 licences; see the respective files for details.
 
+DOMjudge includes specifications of a number of interfaces. These
+specifications are dedicated dedicated to the public domain, as
+specified in the <htmlurl
+name="Creative Commons Public Domain Dedication (CC0 1.0)"
+url="http://creativecommons.org/publicdomain/zero/1.0/">. These
+include:
+<itemize>
+<item> The checktestdata grammar in <tt>checktestdata-grammar.txt</tt>.
+</itemize>
+
+
 <sect1>About the name and logo
 <p>
 

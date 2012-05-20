@@ -222,12 +222,12 @@ This program can be used as a more advanced replacement of checkinput.
 It allows you to not only check on simple (spacing) layout errors, but
 a simple grammar file must be specified for the testdata, according to
 which the testdata is checked. This allows e.g. for bounds checking.
-See <tt>libchecktestdata.cc</tt> for a grammar specification. Two sample
-scripts <tt>checktestdata.{hello,fltcmp}</tt> are provided for the sample
-problems <tt>hello</tt> and <tt>fltcmp</tt>.
+See <tt>checktestdata-grammar.txt</tt> for a grammar specification.
+Two sample scripts <tt>checktestdata.{hello,fltcmp}</tt> are provided
+for the sample problems <tt>hello</tt> and <tt>fltcmp</tt>.
 
 This program is built upon the separate library <tt>libchecktestdata.h</tt>
-(see <tt>checktestdata.cc</tt> for how to use this library)
+(see <tt>checktestdata.cc</tt> as an example for how to use this library)
 that can be used to write the syntax checking part of special
 compare scripts: it can easily handle the tedious task of verifying
 that a team's submission output is syntactically valid, leaving just
