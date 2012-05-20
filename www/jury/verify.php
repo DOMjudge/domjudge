@@ -7,8 +7,9 @@
  */
 
 require('init.php');
-$id    = @$_POST['id'];
-$val   = @$_POST['val'];
+$id      = @$_POST['id'];
+$val     = @$_POST['val'];
+$comment = @$_POST['comment'];
 if ( empty($id) ) error("No judging ID passed to mark as verified.");
 
 $jury_member = getJuryMember();
@@ -17,8 +18,8 @@ $jury_member = getJuryMember();
 // judging would be marked as "claimed".
 $cnt = $DB->q('RETURNAFFECTED UPDATE judging
                SET verified = %i, jury_member = ' . ($val ? '%s ' : 'NULL %_ ') .
-              'WHERE judgingid = %i',
-              $val, $jury_member, $id);
+              ', verify_comment = %s WHERE judgingid = %i',
+              $val, $jury_member, $comment, $id);
 auditlog('judging', $id, $val ? 'set verified' : 'set unverified');
 
 if ( $cnt == 0 ) {

@@ -46,7 +46,7 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
 if ( ! $submdata ) error ("Missing submission data");
 
 $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime,
-                 judgehost, verified, jury_member
+                 judgehost, verified, jury_member, verify_comment
                  FROM judging
                  WHERE cid = %i AND submitid = %i
                  ORDER BY starttime ASC, judgingid ASC',
@@ -213,7 +213,7 @@ if ( isset($jid) )  {
 	// display following data only when the judging has been completed
 	if ( $judging_ended ) {
 
-		// display verification data: verified, and by whom.
+		// display verification data: verified, by whom, and comment.
 		// only if this is a valid judging, otherwise irrelevant
 		if ( $jud['valid'] ) {
 			$verification_required = dbconfig_get('verification_required', 0);
@@ -231,10 +231,14 @@ if ( isset($jid) )  {
 			    "<strong>" . printyn($jud['verified']) . "</strong>";
 			if ( $jud['verified'] && ! empty($jud['jury_member']) ) {
 				echo ", by " . htmlspecialchars($jud['jury_member']);
+				if ( !empty($jud['verify_comment']) ) {
+					echo ' with comment "'.htmlspecialchars($jud['verify_comment']).'"';
+				}
 			}
 
 			if ( ! ($verification_required && $jud['verified']) ) {
 				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
+				if ( $val ) echo ' with comment ' . addInput('comment', '', 25);
 				echo "</p>" . addEndForm();
 			} else {
 				echo "</p>\n";

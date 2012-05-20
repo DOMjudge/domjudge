@@ -133,6 +133,7 @@ CREATE TABLE `judging` (
   `result` varchar(25) default NULL COMMENT 'Result string as defined in config.php',
   `verified` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Result verified by jury member?',
   `jury_member` varchar(15) default NULL COMMENT 'Name of jury member who verified this',
+  `verify_comment` varchar(255) DEFAULT NULL COMMENT 'Optional additional information provided by the verifier',
   `valid` tinyint(1) unsigned NOT NULL default '1' COMMENT 'Old judging is marked as invalid when rejudging',
   `output_compile` longblob COMMENT 'Output of the compiling the program',
   `seen` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Whether the team has seen this judging',
