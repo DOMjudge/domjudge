@@ -491,7 +491,11 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
 
 	if ( $fdata['showfinal'] ) {
-		echo "<h4>final standings</h4>\n\n";
+		if ( empty($cdata['finalizetime']) ) {
+			echo "<h4>preliminary results - not final</h4>\n\n";
+		} else {
+			echo "<h4>final standings</h4>\n\n";
+		}
 	} elseif ( ! $fdata['cstarted'] ) {
 		echo "<h4>scheduled to start at " . printtime($cdata['starttime']) . "</h4>\n\n";
 		// Stop here (do not leak problem number, descriptions etc).

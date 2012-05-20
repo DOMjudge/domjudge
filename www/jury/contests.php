@@ -7,12 +7,18 @@
  */
 
 require('init.php');
-$times = array ('activate','start','freeze','end','unfreeze');
+$times = array ('activate','start','freeze','end','unfreeze','finalize');
 $now = now();
 
 if ( IS_ADMIN && isset($_POST['donow']) ) {
+
 	$time = array_pop(array_keys($_POST['donow']));
 	if ( !in_array($time, $times) ) error("Unknown value for timetype");
+
+	if ( $time == 'finalize' ) {
+		header('Location: finalize.php?id=' . (int)$cid);
+		exit;
+	}
 	// for activatetime  we don't have a current contest to use,
 	// so we need to get it from the form data.
 	$docid = $time == 'activate' ? array_pop(array_keys($_POST['donow'][$time])) : $cid;
@@ -36,9 +42,7 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Contests</h1>\n\n";
 
-
 if ( isset($_GET['edited']) ) {
-
 	echo addForm('refresh_cache.php', 'get') .
             msgbox (
                 "Warning: Refresh scoreboard cache",
@@ -46,7 +50,6 @@ if ( isset($_GET['edited']) ) {
 		addSubmit('recalculate caches now') 
 		) .
 		addEndForm();
-
 }
 
 // Display current contest data prominently
@@ -83,6 +86,7 @@ if ( empty($cid) )  {
 	$hasended = difftime($row['endtime'], $now) <= 0;
 	$hasfrozen = !empty($row['freezetime']) && difftime($row['freezetime'], $now) <= 0;
 	$hasunfrozen = !empty($row['unfreezetime']) && difftime($row['unfreezetime'], $now) <= 0;
+	$isfinal = !empty($row['finalizetime']);
 
 	echo "<table>\n";
 	foreach ($times as $time) {
@@ -110,6 +114,7 @@ if ( empty($cid) )  {
 		if ( IS_ADMIN && (
 		 ( $time == 'start' && !$hasstarted ) ||
 		 ( $time == 'end' && $hasstarted && !$hasended && (empty($row['freezetime']) || $hasfrozen) ) ||
+		 ( $time == 'finalize' && $hasstarted && $hasended && !$isfinal ) ||
 		 ( $time == 'freeze' && $hasstarted && !$hasended && !$hasfrozen ) || 
 		 ( $time == 'unfreeze' && $hasfrozen && !$hasunfrozen && $hasended ) ) ) {
 			echo addSubmit("$time now", "donow[$time]");

@@ -24,7 +24,7 @@ if ( IS_ADMIN && !empty($_GET['cmd']) ):
 
 	if ( $cmd == 'edit' ) {
 		echo "<tr><td>Contest ID:</td><td>";
-		$row = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %s',
+		$row = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i',
 			$_GET['id']);
 		echo addHidden('keydata[0][cid]', $row['cid']) .
 			'c' . htmlspecialchars($row['cid']) .
@@ -94,6 +94,10 @@ if ( $cid == $data['cid'] ) {
 if ( !$data['enabled'] ) {
 	echo "<p><em>This contest is disabled.</em></p>\n\n";
 }
+if ( !empty($data['finalizetime']) ) {
+	echo "<p><em>This contest is final.</em></p>\n\n";
+}
+
 
 echo "<table>\n";
 echo '<tr><td scope="row">CID:</td><td>c' .
@@ -124,6 +128,17 @@ if ( IS_ADMIN ) {
 		delLink('contest','cid',$data['cid']) ."</p>\n\n";
 }
 
+if ( !empty($data['finalizetime']) ) {
+	echo "<h3>Finalized</h3>\n\n";
+	echo "<table>\n" .
+	     "<tr><td>Finalized at:</td><td>" . htmlspecialchars($data['finalizetime']) . "</td></tr>\n" .
+             "<tr><td>B:</td><td>" . htmlspecialchars($data['b']) . "</td></tr>\n" .
+	     "</table>\n<p>Comment:</p>\n<pre class=\"output_text\">" . htmlspecialchars($data['finalizecomment']) . "</pre>\n";
+
+	echo "<p><a href=\"finalize.php?id=" . (int)$data['cid'] . "\">update finalization</a></p>\n\n";
+} else {
+	echo "<p><a href=\"finalize.php?id=" . (int)$data['cid'] . "\">finalize this contest</a></p>\n\n";
+}
 
 echo "<h3>Removed intervals</h3>\n\n";
 
