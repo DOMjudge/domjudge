@@ -14,7 +14,7 @@ require_once("common-config.php");
 //   teams to login from different machines and might be useful for
 //   online contests or programming courses.
 // LDAP
-//   Autheticate against one or more LDAP servers. Use PHP sessions
+//   Authenticate against one or more LDAP servers. Use PHP sessions
 //   after successful authentication. This option may be useful to
 //   integrate DOMjudge (e.g. as courseware) into a larger system.
 // FIXED

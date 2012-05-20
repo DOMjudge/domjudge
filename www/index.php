@@ -2,7 +2,7 @@
 
 /**
  * Switch a user to the right site based on whether they can be
- * autheticated as team, jury, or nothing (public).
+ * authenticated as team, jury, or nothing (public).
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
