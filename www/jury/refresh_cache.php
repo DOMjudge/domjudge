@@ -17,6 +17,8 @@ require(LIBWWWDIR . '/scoreboard.php');
 
 requireAdmin();
 
+$time_start = microtime(TRUE);
+
 auditlog('scoreboard', null, 'refresh cache');
 
 // no output buffering... we want to see what's going on real-time
@@ -60,6 +62,7 @@ foreach( $teams as $team ) {
 	}
 
 	echo "\n";
+	ob_flush();
 }
 
 echo "</pre>\n\n<p>Deleting irrelevant data...</p>\n\n";
@@ -72,6 +75,8 @@ $DB->q('DELETE FROM scoreboard_public
         WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%As)',
        $cid, $teamlist, $probs);
 
-echo "<p>Finished.</p>\n\n";
+$time_end = microtime(TRUE);
+
+echo "<p>Scoreboard cache refresh completed in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
 
 require(LIBWWWDIR . '/footer.php');
