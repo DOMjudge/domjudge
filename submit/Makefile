@@ -71,6 +71,6 @@ clean-l:
 	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT)) $(SUBMITCOMMONOBJ)
 
 distclean-l:
-	-rm -f submit_db.php
+	-rm -f submit_db.php submitdaemon
 
 .PHONY: submitclient
