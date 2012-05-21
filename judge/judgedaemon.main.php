@@ -44,7 +44,7 @@ if ( isset($options['v']) ) $options['verbose'] = $options['v'];
 if ( isset($options['V']) ) version();
 if ( isset($options['h']) ) usage();
 
-setup_database_connection('jury');
+setup_database_connection();
 
 $verbose = LOG_INFO;
 if ( isset($options['verbose']) ) $verbose = $options['verbose'];

@@ -23,7 +23,7 @@ define ('LOGFILE', LOGDIR.'/submit.log');
 
 require(LIBDIR.'/init.php');
 
-setup_database_connection('jury');
+setup_database_connection();
 
 // Get commandline vars and case-normalize them
 $argv = $_SERVER['argv'];

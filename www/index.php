@@ -14,7 +14,7 @@ require_once(LIBDIR . '/lib.error.php');
 require_once(LIBDIR . '/lib.misc.php');
 require_once(LIBDIR . '/use_db.php');
 // Team login necessary for checking login credentials:
-setup_database_connection('team');
+setup_database_connection();
 
 require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/auth.team.php');

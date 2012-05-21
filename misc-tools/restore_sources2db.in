@@ -30,7 +30,7 @@ define('LOGFILE', LOGDIR.'/auxiliary.log');
 
 require(LIBDIR . '/init.php');
 
-setup_database_connection('jury');
+setup_database_connection();
 
 $sourcesdir = SUBMITDIR;
 if ( ! empty($_SERVER['argv'][1]) ) $sourcesdir = $_SERVER['argv'][1];

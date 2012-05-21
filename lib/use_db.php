@@ -2,7 +2,7 @@
 
 require('lib.database.php');
 
-function setup_database_connection($privlevel)
+function setup_database_connection()
 {
 	$credfile = ETCDIR . '/dbpasswords.secret';
 	$credentials = @file($credfile);
