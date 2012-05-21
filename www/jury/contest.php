@@ -73,11 +73,11 @@ if ( ! $id ) error("Missing or invalid contest id");
 
 if ( isset($_GET['edited']) ) {
 
-	echo addForm('refresh_cache.php', 'get') .
+	echo addForm('refresh_cache.php') .
             msgbox (
                 "Warning: Refresh scoreboard cache",
 		"If the contest start time was changed, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
-		addSubmit('recalculate caches now') 
+		addSubmit('recalculate caches now', 'refresh') 
 		) .
 		addEndForm();
 

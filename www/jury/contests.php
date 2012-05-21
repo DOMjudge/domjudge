@@ -39,11 +39,11 @@ echo "<h1>Contests</h1>\n\n";
 
 if ( isset($_GET['edited']) ) {
 
-	echo addForm('refresh_cache.php', 'get') .
+	echo addForm('refresh_cache.php') .
             msgbox (
                 "Warning: Refresh scoreboard cache",
 		"After changing the contest start time, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
-		addSubmit('recalculate caches now') 
+		addSubmit('recalculate caches now', 'refresh') 
 		) .
 		addEndForm();
 

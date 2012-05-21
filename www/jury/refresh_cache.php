@@ -15,7 +15,22 @@ $title = 'Refresh Cache';
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
+echo "<h1>Refresh Cache</h1>\n\n";
+
 requireAdmin();
+
+if ( ! isset($_REQUEST['refresh']) ) {
+	echo addForm('');
+	echo msgbox('Significant database impact',
+	       'Refreshing the scoreboard cache can have a significant impact on the database load, ' .
+	       'and is not necessary in normal operating circumstances.<br /><br />Refresh scoreboard cache now?' .
+	       '<br /><br />' .
+               addSubmit(" Refresh now! ", 'refresh') );
+        echo addEndForm();
+
+	require(LIBWWWDIR . '/footer.php');
+	exit;	
+}
 
 $time_start = microtime(TRUE);
 
@@ -23,8 +38,6 @@ auditlog('scoreboard', null, 'refresh cache');
 
 // no output buffering... we want to see what's going on real-time
 ob_implicit_flush();
-
-echo "<h1>Refresh Cache</h1>\n\n";
 
 // get the contest, teams and problems
 $teams = $DB->q('TABLE SELECT login FROM team ORDER BY login');
