@@ -79,7 +79,7 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 
 		echo addReset('cancel');
 
-		if ( dbconfig_get('sourcefiles_limit',1) > 1 ) {
+		if ( dbconfig_get('sourcefiles_limit',100) > 1 ) {
 			echo "<br /><span id=\"auxfiles\"></span>\n" .
 			    "<input type=\"button\" name=\"addfile\" id=\"addfile\" " .
 			    "value=\"Add another file\" onclick=\"addFileUpload();\" " .
