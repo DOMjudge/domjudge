@@ -4,6 +4,33 @@ Version 3.3.0 - DEV
 -------------------
  - Fix bug: don't show unverified submission details if verification is
    required. Thanks Keith Johnson.
+ - Add SOURCEFILES_LIMIT, upper bound on the number of source files in
+   one submission.
+ - Improve polishing of multifile submission handling.
+ - Preselect original text in clarification form.
+ - Remove judgehost from submission overview tables.
+ - Calculate team that first solved a problem per sortorder.
+ - Do not show submission form when contest has not yet started.
+ - Add button to submission list to view only unjudged submissions.
+ - Improve performance of checkofnig under large databases.
+ - Change runguard kill process to remove unnecessary sleep()s.
+ - Create chroot once per judging instead of once per testcase to
+   remove overhead of repeated chroot start/stopping.
+ - Make chroot bind mounts read-only for extra security.
+ - Refresh scoreboard cache only after a warning has been acknowledged
+ - Add advisory locking to calcScoreRow() updating of scoreboard cache.
+   to prevent accidental high database load.
+ - Check for unfinished judgings on judgehost startup and give
+   them back to the queue.
+ - Display problem description in submit confirmation dialog.
+ - Add configure-variables-interpolated sudoers.d-snippet.
+ - Fix JS sorting on id for several tables.
+ - Sort problems from the current contest to the top on the problems
+   overview page.
+ - Add optional judge comment field to judging verification.
+ - Redirect to originating page after verification of submission.
+ - Move checktestdata grammar specification to separate file
+   and publish as public domain.
 
 Version 3.3.0 Release Candidate 1 - 30 April 2012
 -------------------------------------------------
