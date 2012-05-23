@@ -66,6 +66,8 @@ if( $res->count() == 0 ) {
 			if ( IS_ADMIN ) {
 				echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
 				    "\">" . $row['testcases'] . "</a></td>" .
+				    '<td><a href="export.php?id=' . urlencode($row['probid']) .
+				    '"><img src="../images/b_save.png" /></a></td>' .
 				    "<td class=\"editdel\">" .
 					editLink('problem', $row['probid']) . " " .
 					delLink('problem','probid',$row['probid']);
