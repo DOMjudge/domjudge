@@ -42,7 +42,7 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <ul>
 <li><a href="config.php">Configuration settings</a></li>
 <li><a href="checkconfig.php">Config checker</a></li>
-<li><a href="import-export-config.php">Import / export config</a></li>
+<li><a href="impexp.php">Import / export</a></li>
 <li><a href="genpasswds.php">Manage team passwords</a></li>
 <li><a href="refresh_cache.php">Refresh scoreboard cache</a></li>
 <li><a href="check_judgings.php">Judging verifier</a></li>
