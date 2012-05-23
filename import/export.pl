@@ -5,9 +5,9 @@ use File::Path qw(make_path);
 use strict;
 
 # config section
-my $SERVER = "https://contest.dev.scrool.se/";
-my $USER = "test";
-my $PASSWORD = "testingtester";
+my $SERVER = "https://kattis/";
+my $USER = "analyst14";
+my $PASSWORD = "4MGbcqSq";
 my $DIRECTORY = "submissions";
 
 make_path($DIRECTORY);
@@ -42,6 +42,7 @@ while (my $submID = <STDIN>) {
 		print STDERR "downloading submission $submID\n";
 
 		# download and store submission data
+		sleep(1); # sleep before downloading
 		$response = $mech->get($SERVER . "download/submissiondata?id=" . $submID . "&allfiles=1");
 		if ($response->is_error) {
 			print STDERR "problem while downloading submission " . $submID . ": " . $response->status_line . "\n";
