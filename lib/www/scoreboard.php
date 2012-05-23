@@ -84,7 +84,8 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	// get the teams, problems and categories
 	$teams = $DB->q('KEYTABLE SELECT login AS ARRAYKEY, login, team.name,
 	                 team.categoryid, team.affilid, penalty, sortorder,
-	                 country, color, team_affiliation.name AS affilname
+	                 country, color, team_affiliation.name AS affilname,
+	                 externalid
 	                 FROM team
 	                 LEFT JOIN team_category
 	                        ON (team_category.categoryid = team.categoryid)
