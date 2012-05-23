@@ -16,7 +16,12 @@ requireAdmin();
 
 <ul>
 <li><a href="import-export-config.php">Contest data (contest.yaml)</a></li>
-<li><a href="problems.php">Problem archive</a></li>
+<li><a href="problems.php#problem_archive">Problem archive</a></li>
+<li>tsv's:
+	<a href="impexp_tsv.php?fmt=groups">groups.tsv</a>,
+	<a href="impexp_tsv.php?fmt=teams">teams.tsv</a>,
+	<a href="impexp_tsv.php?fmt=scoreboard">scoreboard.tsv</a>
+</li>
 </ul>
 
 
