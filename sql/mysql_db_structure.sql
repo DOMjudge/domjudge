@@ -311,6 +311,7 @@ CREATE TABLE `team` (
   `teampage_first_visited` datetime default NULL COMMENT 'Time of first teampage view',
   `hostname` varchar(255) default NULL COMMENT 'Teampage first visited from this address',
   `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes',
+  `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of team if imported from external source',
   PRIMARY KEY  (`login`),
   UNIQUE KEY `name` (`name`),
   KEY `affilid` (`affilid`),

@@ -26,7 +26,8 @@ ALTER TABLE `clarification`
   DROP FOREIGN KEY `clarification_ibfk_3`;
 
 ALTER TABLE `team`
-  ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`;
+  ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`,
+  ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of team if imported from external source';
 
 CREATE TABLE `removed_interval` (
   `intervalid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
