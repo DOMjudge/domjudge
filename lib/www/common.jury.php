@@ -227,7 +227,7 @@ function importZippedProblem($zip, $probid = NULL)
 				}
 				file_put_contents($tmpfname, $zip->getFromIndex($j));
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
-					submit_solution('domjudge', $probid, $langs[$langid], $tmpfname);
+					submit_solution('domjudge', $probid, $langs[$langid], array($tmpfname), array($filename));
 				}
 				unlink($tmpfname);
 			}
