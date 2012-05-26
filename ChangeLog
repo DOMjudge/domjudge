@@ -31,6 +31,7 @@ Version 3.3.0 - DEV
  - Redirect to originating page after verification of submission.
  - Move checktestdata grammar specification to separate file
    and publish as public domain.
+ - Add specification of DOMjudge problem format zip-bundle.
 
 Version 3.3.0 Release Candidate 1 - 30 April 2012
 -------------------------------------------------
