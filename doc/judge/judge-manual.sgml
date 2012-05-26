@@ -1,4 +1,6 @@
-<!doctype linuxdoc system>
+<!doctype linuxdoc system [
+<!ENTITY checktestdatagrammar SYSTEM "checktestdata-grammar-inc.sgml">
+]>
 <!--
  DOMjudge Jury Manual
  This manual is part of the DOMjudge Programming Contest Jury System
@@ -222,7 +224,7 @@ This program can be used as a more advanced replacement of checkinput.
 It allows you to not only check on simple (spacing) layout errors, but
 a simple grammar file must be specified for the testdata, according to
 which the testdata is checked. This allows e.g. for bounds checking.
-See <tt>checktestdata-grammar.txt</tt> for a grammar specification.
+See appendix <ref id="checktestdata-grammar"> for a grammar specification.
 Two sample scripts <tt>checktestdata.{hello,fltcmp}</tt> are provided
 for the sample problems <tt>hello</tt> and <tt>fltcmp</tt>.
 
@@ -456,6 +458,11 @@ now' button under contests.
 There's not much more to be done after the contest has ended. The
 administrator will need to take care of backing up all system data and
 submissions, and the awards ceremony can start.
+
+
+<appendix>
+
+&checktestdatagrammar;
 
 
 </report>
