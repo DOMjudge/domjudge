@@ -151,9 +151,11 @@ specifications are dedicated dedicated to the public domain, as
 specified in the <htmlurl
 name="Creative Commons Public Domain Dedication (CC0 1.0)"
 url="http://creativecommons.org/publicdomain/zero/1.0/">. These
-include:
+specifications can be found as appendices in the judge manual and as
+separate ASCII text files in the documentation directory:
 <itemize>
-<item> The checktestdata grammar in <tt>checktestdata-grammar.txt</tt>.
+<item> The checktestdata language grammar.
+<item> The DOMjudge problem format zip-bundle.
 </itemize>
 
 

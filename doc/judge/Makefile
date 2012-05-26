@@ -3,7 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-SPEC_SGML = checktestdata-grammar-inc.sgml
+SPEC_SGML = checktestdata-grammar-inc.sgml problem-format-inc.sgml
 SPEC_TXT  = $(SPEC_SGML:-inc.sgml=.txt)
 
 docs: judge-manual.pdf judge-manual.html $(SPEC_TXT)

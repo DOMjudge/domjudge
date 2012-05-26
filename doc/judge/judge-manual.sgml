@@ -1,5 +1,6 @@
 <!doctype linuxdoc system [
 <!ENTITY checktestdatagrammar SYSTEM "checktestdata-grammar-inc.sgml">
+<!ENTITY problemformat SYSTEM "problem-format-inc.sgml">
 ]>
 <!--
  DOMjudge Jury Manual
@@ -192,7 +193,10 @@ submissions, but leave them queued; this is useful in case an
 unexpected problem shows up with one of the problems. Timelimit is the
 maximum number of seconds a submission for this problem is allowed to
 run before a `TIMELIMIT' response is given (multiplied by the language
-factor).
+factor). Problems can be imported and exported into and from DOMjudge
+using zip-files that contain the problem metadata and testdata files.
+See appendix <ref id="problem-format" name="DOMjuge problem format
+specification">.
 
 The `Languages' overview is quite the same. It has a timefactor
 column; submissions in a language that has time factor 2 will be
@@ -463,6 +467,8 @@ submissions, and the awards ceremony can start.
 <appendix>
 
 &checktestdatagrammar;
+
+&problemformat;
 
 
 </report>
