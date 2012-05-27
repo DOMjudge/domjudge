@@ -25,6 +25,14 @@ input and correct/reference output for a single test case. Single
 files without their corresponding <tt>in</tt> or <tt>out</tt>
 counterpart are ignored.
 
+<tag><tt>&lt;solution&gt;.&lt;ext&gt;</tt></tag>
+
+Submits code of reference solution as team DOMjudge if &lt;ext&gt; is a known
+language extension. The contest, the problem, and the language have to be
+enabled. The contest must be started. If you include an comment starting with
+'<tt>@EXPECTED_RESULTS@: </tt>' followed by the possible outcomes, you can use
+the <i>judging verifier</i> in the admin interface to verify the results.
+
 </descrip>
 When importing a zip file into DOMjudge, any other files are ignored.
 
