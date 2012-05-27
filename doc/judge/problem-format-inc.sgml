@@ -31,7 +31,7 @@ Submits code of reference solution as team DOMjudge if &lt;ext&gt; is a known
 language extension. The contest, the problem, and the language have to be
 enabled. The contest must be started. If you include an comment starting with
 '<tt>@EXPECTED_RESULTS@: </tt>' followed by the possible outcomes, you can use
-the <i>judging verifier</i> in the admin interface to verify the results.
+the <em>judging verifier</em> in the admin interface to verify the results.
 
 </descrip>
 When importing a zip file into DOMjudge, any other files are ignored.
