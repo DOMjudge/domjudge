@@ -88,6 +88,7 @@ function tsv_groups_set($data)
 	$c = 0;
 	foreach ($data as $row) {
 		$DB->q("REPLACE INTO team_category SET %S", $row);
+		auditlog('team_category', $row['categoryid'], 'replaced', 'imported from tsv');
 		$c++;
 	}
 	return $c;
@@ -130,8 +131,10 @@ function tsv_teams_set($data)
 		// it is legitimate that a team has no affiliation. Do not add it then.
 		if ( !empty($row['team_affiliation']['affilid']) ) {
 			$DB->q("REPLACE INTO team_affiliation SET %S", $row['team_affiliation']);
+			auditlog('team_affiliation', $row['team_affiliation']['affilid'], 'replaced', 'imported from tsv');
 		}
 		$DB->q("REPLACE INTO team SET %S", $row['team']);
+		auditlog('team', $row['team']['login'], 'replaced', 'imported from tsv');
 		$c++;
 	}
 	return $c;
