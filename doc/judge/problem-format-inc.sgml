@@ -27,9 +27,9 @@ counterpart are ignored.
 
 <tag><tt>&lt;solution&gt;.&lt;ext&gt;</tt></tag>
 
-Submits code of reference solution as team DOMjudge if &lt;ext&gt; is a known
+Submits code of reference solution as team 'domjudge' if &lt;ext&gt; is a known
 language extension. The contest, the problem, and the language have to be
-enabled. The contest must be started. If you include an comment starting with
+enabled. The contest must be started. If you include a comment starting with
 '<tt>@EXPECTED_RESULTS@: </tt>' followed by the possible outcomes, you can use
 the <em>judging verifier</em> in the admin interface to verify the results.
 
@@ -61,7 +61,7 @@ the <tt>jury/problems.php</tt> overview page, while it is ignored when
 uploading into an existing problem. All other keys are optional. If
 they are present, the respective value will be overwritten; if not
 present, then the value will not be changed or a default chosen when
-creating a new problem. Test data files are added to set of of test
+creating a new problem. Test data files are added to set of test
 cases already present. Thus, one can easily add test cases to a
 configured problem by uploading a zip file that contains only
 <tt>*.{in,out}</tt> files.
