@@ -151,12 +151,12 @@ if ( $highlighter == 'native' ) {
 }
 
 if ( class_exists("ZipArchive") ) {
-	result('software', 'Problem upload via zip bundles',
-	       'O', 'PHP ZipArchive class available for uploading problem data.');
+	result('software', 'Problem up/download via zip bundles',
+	       'O', 'PHP ZipArchive class available for importing and exporting problem data.');
 } else {
-	result('software', 'Problem upload via zip bundles',
+	result('software', 'Problem up/download via zip bundles',
 	       'W', 'Optionally, enable the PHP zip extension ' .
-	       'to be able to upload problem data via zip bundles.');
+	       'to be able to import or export problem data via zip bundles.');
 }
 
 $mysqldatares = $DB->q('SHOW variables WHERE
