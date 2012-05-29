@@ -33,6 +33,7 @@ Version 3.3.0 - DEV
    and publish as public domain.
  - Add possibility to export a problem to a zip-bundle.
  - Add specification of DOMjudge problem format zip-bundle.
+ - Add admin button to rejudge all submissions in the current contest.
 
 Version 3.3.0 Release Candidate 1 - 30 April 2012
 -------------------------------------------------

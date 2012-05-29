@@ -119,6 +119,9 @@ echo '<tr><td scope="row">Scoreboard unfreeze:</td><td>' .
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
+	if ( $cid == $data['cid'] ) {
+		echo "<p>". rejudgeForm('contest', $data['cid']) . "</p>\n\n";
+	}
 	echo "<p>" .
 		editLink('contest',$data['cid']) . "\n" .
 		delLink('contest','cid',$data['cid']) ."</p>\n\n";
