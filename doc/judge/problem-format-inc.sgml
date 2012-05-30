@@ -23,7 +23,8 @@ below.
 Each pair of <tt>&lt;testdata-file&gt;.{in,out}</tt> contains the
 input and correct/reference output for a single test case. Single
 files without their corresponding <tt>in</tt> or <tt>out</tt>
-counterpart are ignored.
+counterpart are ignored. The order of the files in the zip archive
+determines the initial ordering of the testcases after import.
 
 <tag><tt>&lt;solution&gt;.&lt;ext&gt;</tt></tag>
 
