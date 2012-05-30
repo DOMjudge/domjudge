@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.3.0 - DEV
--------------------
+Version 3.3.0 - 29 May 2012
+---------------------------
  - Fix bug: don't show unverified submission details if verification is
    required. Thanks Keith Johnson.
  - Add sourcefiles_limit setting, upper bound on the number of source
