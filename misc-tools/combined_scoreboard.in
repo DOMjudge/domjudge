@@ -31,7 +31,7 @@ define('IS_JURY', FALSE);
 require_once(LIBDIR . '/init.php');
 require_once(LIBDIR . '/use_db.php');
 
-setup_database_connection('public');
+setup_database_connection();
 
 require_once(LIBWWWDIR . '/scoreboard.php');
 require_once(LIBWWWDIR . '/common.php');

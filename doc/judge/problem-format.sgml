@@ -1,0 +1,12 @@
+<!doctype linuxdoc system [
+<!ENTITY problemformat SYSTEM "problem-format-inc.sgml">
+]>
+
+<report>
+
+<title>DOMjudge problem format specification
+<author>by the DOMjudge team
+
+&problemformat;
+
+</report>

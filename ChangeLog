@@ -1,14 +1,48 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.3.0 - DEV
+Version 3.4.0 - DEV
 -------------------
+
+Version 3.3.0 - 29 May 2012
+---------------------------
  - Fix bug: don't show unverified submission details if verification is
    required. Thanks Keith Johnson.
+ - Add sourcefiles_limit setting, upper bound on the number of source
+   files in one submission.
+ - Improve polishing of multifile submission handling.
+ - Preselect original text in clarification form.
+ - Remove judgehost from submission overview tables.
+ - Calculate team that first solved a problem per sortorder.
+ - Do not show submission form when contest has not yet started.
+ - Add button to submission list to view only unjudged submissions.
+ - Improve performance of checkconfig under large databases.
+ - Change runguard kill process to remove unnecessary sleep()s.
+ - Create chroot once per judging instead of once per testcase to
+   remove overhead of repeated chroot start/stopping.
+ - Make chroot bind mounts read-only for extra security.
+ - Refresh scoreboard cache only after a warning has been acknowledged.
+ - Add advisory locking to calcScoreRow() updating of scoreboard cache,
+   to prevent accidental high database load.
+ - Check for unfinished judgings on judgehost startup and give
+   them back to the queue.
+ - Display problem description in submit confirmation dialog.
+ - Add configure-variables-interpolated sudoers.d-snippet.
+ - Fix JS sorting on id for several tables.
+ - Sort problems from the current contest to the top on the problems
+   overview page.
+ - Add optional judge comment field to judging verification.
+ - Redirect to originating page after verification of submission.
+ - Move checktestdata grammar specification to separate file
+   and publish as public domain.
+ - Add possibility to export a problem to a zip-bundle.
+ - Add specification of DOMjudge problem format zip-bundle.
+ - Add admin button to rejudge all submissions in the current contest.
 
 Version 3.3.0 Release Candidate 1 - 30 April 2012
 -------------------------------------------------
- - [INCOMPATIBLE CHANGE,security] enable cURL SSL host/peer verification.
-   This requires self-signed certificates now to be available to libcURL.
+ - [INCOMPATIBLE CHANGE,security] enable cURL SSL host/peer verification
+   in the command line submit client. This requires any self-signed
+   certificates now to be available to libcURL on a team machine.
  - Add compile script and test source for language 'bash'.
  - Prioritize to team's last judging (port from ETH tree).
  - Fix testing for empty output with strlen (port from ETH tree).

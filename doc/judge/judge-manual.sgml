@@ -1,4 +1,7 @@
-<!doctype linuxdoc system>
+<!doctype linuxdoc system [
+<!ENTITY checktestdatagrammar SYSTEM "checktestdata-grammar-inc.sgml">
+<!ENTITY problemformat SYSTEM "problem-format-inc.sgml">
+]>
 <!--
  DOMjudge Jury Manual
  This manual is part of the DOMjudge Programming Contest Jury System
@@ -151,7 +154,7 @@ problems to the teams and public, however. The jury always has a full
 view on the scoreboard.
 
 It is possible to freeze the scoreboard at a given time, commonly
-one hour before the contest ends, to keep the last hour interesting
+one hour before the contest ends, to keep that last hour interesting
 for all. From that time on, the public and team scoreboard will not
 be updated anymore (the jury scoreboard will) and indicate that they
 are frozen. It will be unfrozen at a specified time, or by a button
@@ -190,7 +193,10 @@ submissions, but leave them queued; this is useful in case an
 unexpected problem shows up with one of the problems. Timelimit is the
 maximum number of seconds a submission for this problem is allowed to
 run before a `TIMELIMIT' response is given (multiplied by the language
-factor).
+factor). Problems can be imported and exported into and from DOMjudge
+using zip-files that contain the problem metadata and testdata files.
+See appendix <ref id="problem-format" name="DOMjuge problem format
+specification">.
 
 The `Languages' overview is quite the same. It has a timefactor
 column; submissions in a language that has time factor 2 will be
@@ -222,12 +228,12 @@ This program can be used as a more advanced replacement of checkinput.
 It allows you to not only check on simple (spacing) layout errors, but
 a simple grammar file must be specified for the testdata, according to
 which the testdata is checked. This allows e.g. for bounds checking.
-See <tt>libchecktestdata.cc</tt> for a grammar specification. Two sample
-scripts <tt>checktestdata.{hello,fltcmp}</tt> are provided for the sample
-problems <tt>hello</tt> and <tt>fltcmp</tt>.
+See appendix <ref id="checktestdata-grammar"> for a grammar specification.
+Two sample scripts <tt>checktestdata.{hello,fltcmp}</tt> are provided
+for the sample problems <tt>hello</tt> and <tt>fltcmp</tt>.
 
 This program is built upon the separate library <tt>libchecktestdata.h</tt>
-(see <tt>checktestdata.cc</tt> for how to use this library)
+(see <tt>checktestdata.cc</tt> as an example for how to use this library)
 that can be used to write the syntax checking part of special
 compare scripts: it can easily handle the tedious task of verifying
 that a team's submission output is syntactically valid, leaving just
@@ -344,12 +350,17 @@ the newest one at the top. Click on a submission line
 for more details about the submission (team name, submittime etc),
 a list of judgings and the details for the most recent judging
 (runtime, outputs, diff with testdata). There is also a switch
-available between newest 50, only unverified or all submissions.
+available between newest 50, only unverified, only unjudged or
+all submissions.
 
-Under the submission details the source filename can be clicked to
-inspect the source code. If the team has submitted code in the same
-language for this problem before, a diff output between the current
-and previous submission is also available there.
+Under the submission details the `view source code' link can be
+clicked to inspect the source code. If the team has submitted code
+in the same language for this problem before, a diff output between
+the current and previous submission is also available there.
+
+It's possible to edit the source code and resubmit it as the special
+`domjudge' user. This does not have any effect for the teams, but
+allows a judge to perform a `what if this was changed'-analysis.
 
 A submission can have multiple judgings, but only one valid judging at
 any time. Multiple judgings occur when rejudging, see <ref
@@ -409,8 +420,8 @@ will be termed `general clarifications'.
 <p>
 Under Clarifications, three lists are shown: new clarifications,
 answered clarifications and general clarifications. It lists the team
-login, the time and an excerpt. Click the excerpt for details about
-that clarification request.
+login, the problem concerned, the time and an excerpt. Click the excerpt
+for details about that clarification request.
 
 <p>
 Every incoming clarification request will initially be marked as
@@ -451,6 +462,13 @@ now' button under contests.
 There's not much more to be done after the contest has ended. The
 administrator will need to take care of backing up all system data and
 submissions, and the awards ceremony can start.
+
+
+<appendix>
+
+&checktestdatagrammar;
+
+&problemformat;
 
 
 </report>

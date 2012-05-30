@@ -77,6 +77,13 @@ endif # CHECKTESTDATA_ENABLED
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) dj_make_chroot
 
+install-docs:
+ifeq ($(CHECKTESTDATA_ENABLED),yes)
+	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir) checktestdata-grammar.txt
+	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples \
+		checktestdata.fltcmp checktestdata.hello
+endif
+
 dist-l: $(PARSER_GEN)
 
 clean-l:

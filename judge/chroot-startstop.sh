@@ -7,7 +7,7 @@
 # adapt this script to your environment. See also bin/dj_make_chroot.sh
 # for a script to generate a minimal chroot environment with Oracle Java.
 #
-# This script will be called from testcase_run.sh in the root
+# This script will be called from judgedaemon.main.php in the root
 # directory of the chroot environment with one parameter: either
 # 'start' to setup, or 'stop' to destroy the chroot environment.
 
@@ -36,6 +36,9 @@ case "$1" in
 			else
 				mkdir -p $i
 				sudo -S mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null
+				# Mount read-only for extra security. Note that this
+				# must be executed separately from the bind mount.
+				sudo -S mount -o remount,ro "$PWD/$i" < /dev/null
 			fi
 		done
 		;;

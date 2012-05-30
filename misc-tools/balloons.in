@@ -19,7 +19,7 @@ define ('LOGFILE', LOGDIR.'/balloons.log');
 
 require(LIBDIR . '/init.php');
 
-setup_database_connection('jury');
+setup_database_connection();
 
 /* Set this to a notification command, which receives the notification
  * text on stdin. Examples below for notification by mail or prints.

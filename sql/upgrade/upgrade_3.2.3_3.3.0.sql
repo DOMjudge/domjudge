@@ -29,6 +29,9 @@ ALTER TABLE `contest`
   MODIFY COLUMN `endtime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
   MODIFY COLUMN `unfreezetime_string` varchar(20) default NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime';
 
+ALTER TABLE `judging`
+  ADD COLUMN `verify_comment` varchar(255) DEFAULT NULL COMMENT 'Optional additional information provided by the verifier' AFTER `jury_member`;
+
 ALTER TABLE `team`
   MODIFY COLUMN `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Team name',
   ADD COLUMN `judging_last_started` datetime default NULL COMMENT 'Start time of last judging for priorization' AFTER `comments`,

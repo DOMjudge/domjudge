@@ -46,7 +46,7 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
 if ( ! $submdata ) error ("Missing submission data");
 
 $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime,
-                 judgehost, verified, jury_member
+                 judgehost, verified, jury_member, verify_comment
                  FROM judging
                  WHERE cid = %i AND submitid = %i
                  ORDER BY starttime ASC, judgingid ASC',
@@ -215,7 +215,7 @@ if ( isset($jid) )  {
 	// display following data only when the judging has been completed
 	if ( $judging_ended ) {
 
-		// display verification data: verified, and by whom.
+		// display verification data: verified, by whom, and comment.
 		// only if this is a valid judging, otherwise irrelevant
 		if ( $jud['valid'] ) {
 			$verification_required = dbconfig_get('verification_required', 0);
@@ -225,18 +225,23 @@ if ( isset($jid) )  {
 
 				echo addForm('verify.php') .
 				    addHidden('id',  $jud['judgingid']) .
-				    addHidden('val', $val);
+				    addHidden('val', $val) .
+				    addHidden('redirect', $_SERVER['HTTP_REFERER']);
 			}
 
 			echo "<p>Verified: " .
 			    "<strong>" . printyn($jud['verified']) . "</strong>";
 			if ( $jud['verified'] && ! empty($jud['jury_member']) ) {
 				echo ", by " . htmlspecialchars($jud['jury_member']);
+				if ( !empty($jud['verify_comment']) ) {
+					echo ' with comment "'.htmlspecialchars($jud['verify_comment']).'"';
+				}
 			}
 
 			if ( ! ($verification_required && $jud['verified']) ) {
 				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify',
 				                      null, !dbconfig_get('disable_verify'));
+				if ( $val ) echo ' with comment ' . addInput('comment', '', 25);
 				echo "</p>" . addEndForm();
 			} else {
 				echo "</p>\n";
@@ -291,13 +296,14 @@ if ( isset($jid) )  {
 	                        ORDER BY submittime DESC LIMIT 1',
 	                       $submdata['teamid'],$submdata['probid'],
 	                       $submdata['submittime']);
+	$lastjud = NULL;
 	if ( $lastsubmitid !== NULL ) {
-		$lastjud = $DB->q('MAYBETUPLE SELECT *
+		$lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result 
 		                   FROM judging
 		                   WHERE submitid = %s AND valid = 1
 		                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
 		if ( $lastjud !== NULL ) {
-			$lastruns = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
+			$lastruns = $DB->q('SELECT r.runtime, r.runresult FROM testcase t
 			                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 			                                                 r.judgingid = %i )
 			                    WHERE t.probid = %s ORDER BY rank',

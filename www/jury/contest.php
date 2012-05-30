@@ -73,11 +73,11 @@ if ( ! $id ) error("Missing or invalid contest id");
 
 if ( isset($_GET['edited']) ) {
 
-	echo addForm('refresh_cache.php', 'get') .
+	echo addForm('refresh_cache.php') .
             msgbox (
                 "Warning: Refresh scoreboard cache",
 		"If the contest start time was changed, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
-		addSubmit('recalculate caches now') 
+		addSubmit('recalculate caches now', 'refresh') 
 		) .
 		addEndForm();
 
@@ -123,6 +123,9 @@ echo '<tr><td scope="row">Scoreboard unfreeze:</td><td>' .
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
+	if ( $cid == $data['cid'] ) {
+		echo "<p>". rejudgeForm('contest', $data['cid']) . "</p>\n\n";
+	}
 	echo "<p>" .
 		editLink('contest',$data['cid']) . "\n" .
 		delLink('contest','cid',$data['cid']) ."</p>\n\n";

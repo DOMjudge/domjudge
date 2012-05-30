@@ -16,13 +16,30 @@ $refreshtime = 30;
 
 $submitted = @$_GET['submitted'];
 
+$fdata = calcFreezeData($cdata);
+
 echo "<script type=\"text/javascript\">\n<!--\n";
-echo "function getMainExtension(ext)\n{\n";
-echo "\tswitch(ext) {\n";
-foreach($langexts as $ext => $langid) {
-	echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
+
+if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
+	$probdata = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
+			 WHERE cid = %i AND allow_submit = 1
+			 ORDER BY probid', $cid);
+
+	echo "function getMainExtension(ext)\n{\n";
+	echo "\tswitch(ext) {\n";
+	foreach($langexts as $ext => $langid) {
+		echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
+	}
+	echo "\t\tdefault: return '';\n\t}\n}\n\n";
+
+	echo "function getProbDescription(probid)\n{\n";
+	echo "\tswitch(probid) {\n";
+	foreach($probdata as $probid => $probname) {
+		echo "\t\tcase '" . htmlspecialchars($probid) . "': return '" . htmlspecialchars($probname) . "';\n";
+	}
+	echo "\t\tdefault: return '';\n\t}\n}\n\n";
 }
-echo "\t\tdefault: return '';\n\t}\n}\n\n";
+
 echo "initReload(" . $refreshtime . ");\n";
 echo "// -->\n</script>\n";
 
@@ -33,7 +50,6 @@ echo "<div id=\"submitlist\">\n";
 
 echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
 
-$fdata = calcFreezeData($cdata);
 
 if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 	if ( $submitted ) {
@@ -47,11 +63,11 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 
 		echo "<script type=\"text/javascript\">initFileUploads();</script>\n\n";
 
-		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid) as name FROM problem
-				 WHERE cid = %i AND allow_submit = 1
-				 ORDER BY probid', $cid);
+		$probs = array();
+		foreach($probdata as $probid => $dummy) {
+			$probs[$probid]=$probid;
+		}
 		$probs[''] = 'problem';
-
 		echo addSelect('probid', $probs, '', true);
 		$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language
 				 WHERE allow_submit = 1 ORDER BY name');
@@ -63,7 +79,7 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 
 		echo addReset('cancel');
 
-		if ( dbconfig_get('sourcefiles_limit',1) > 1 ) {
+		if ( dbconfig_get('sourcefiles_limit',100) > 1 ) {
 			echo "<br /><span id=\"auxfiles\"></span>\n" .
 			    "<input type=\"button\" name=\"addfile\" id=\"addfile\" " .
 			    "value=\"Add another file\" onclick=\"addFileUpload();\" " .

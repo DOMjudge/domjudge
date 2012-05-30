@@ -14,6 +14,7 @@ require('init.php');
 
 /** These are the tables that we can deal with */
 $tablemap = array (
+	'contest'    => 's.cid',
 	'judgehost'  => 'j.judgehost',
 	'language'   => 's.langid',
 	'problem'    => 's.probid',
@@ -36,8 +37,8 @@ global $DB;
 // allow us to call calcScoreRow() for the right rows, so we'll just loop
 // over the results one at a time.
 
-// Special case 'submission' for admin overrides
-if ( IS_ADMIN && $table == 'submission' ) {
+// Special case 'submission' and 'contest' for admin overrides
+if ( IS_ADMIN && ($table == 'submission' || $table == 'contest') ) {
 	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid
 	               FROM judging j
 	               LEFT JOIN submission s USING (submitid)

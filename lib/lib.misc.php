@@ -119,6 +119,13 @@ function calcContestTime($walltime, $contest_data = null)
 function calcScoreRow($cid, $team, $prob) {
 	global $DB;
 
+	// First acquire an advisory lock to prevent other calls to
+	// calcScoreRow() from interfering with our update.
+	$lockstr = "domjudge.$cid.$team.$prob";
+	if ( $DB->q("VALUE SELECT GET_LOCK('$lockstr',3)") != 1 ) {
+		error("calcScoreRow failed to obtain lock '$lockstr'");
+	}
+
 	// Note the clause 'submittime < c.endtime': this is used to
 	// filter out TOO-LATE submissions from pending, but it also means
 	// that these will not count as solved. Correct submissions with
@@ -188,6 +195,10 @@ function calcScoreRow($cid, $team, $prob) {
 	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
 	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
 	       $cid, $team, $prob, $submitted_j, $pending_j, $time_j, $correct_j);
+
+	if ( $DB->q("VALUE SELECT RELEASE_LOCK('$lockstr')") != 1 ) {
+		error("calcScoreRow failed to release lock '$lockstr'");
+	}
 
 	return;
 }

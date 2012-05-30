@@ -49,10 +49,6 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <li><a href="auditlog.php">Activity log</a></li>
 </ul>
 
-<p><em>Note: the config check and cache refresh operations have a
-significant impact on the database load and can take some time to
-complete.</em></p>
-
 <?php endif; ?>
 
 <h3>Documentation:</h3>

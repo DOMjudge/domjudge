@@ -44,7 +44,7 @@ if ( isset($options['v']) ) $options['verbose'] = $options['v'];
 if ( isset($options['V']) ) version();
 if ( isset($options['h']) ) usage();
 
-setup_database_connection('jury');
+setup_database_connection();
 
 $verbose = LOG_INFO;
 if ( isset($options['verbose']) ) $verbose = $options['verbose'];
@@ -120,6 +120,19 @@ while( !$exitsignalled )
 		}
 		throw $e;
 	}
+}
+
+// If there are any unfinished judgings in the queue in my name,
+// they will not be finished. Give them back.
+$res = $DB->q('SELECT judgingid, submitid FROM judging WHERE
+               judgehost = %s AND endtime IS NULL AND valid = 1', $myhost);
+while ( $jud = $res->next() ) {
+	$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
+	       $jud['judgingid']);
+	$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
+	        WHERE submitid = %i', $jud['submitid']);
+	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] . " in my name; given back");
+	auditlog('judging', $jud['judgingid'], 'given back', null, $myhost);
 }
 
 // Create directory where to test submissions
@@ -286,7 +299,6 @@ function judge($mark, $row, $judgingid)
 	// Call dbconfig_init() to prevent using cached values.
 	dbconfig_init();
 	putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
-	putenv('CHROOT_SCRIPT=' . CHROOT_SCRIPT);
 	putenv('COMPILETIME='   . dbconfig_get('compile_time'));
 	putenv('MEMLIMIT='      . dbconfig_get('memory_limit'));
 	putenv('FILELIMIT='     . dbconfig_get('filesize_limit'));
@@ -351,6 +363,14 @@ function judge($mark, $row, $judgingid)
 
 	$runresults = array_fill_keys(array_keys($testcases), NULL);
 	$results_remap = dbconfig_get('results_remap');
+
+	// Optionally create chroot environment
+	if ( USE_CHROOT && CHROOT_SCRIPT ) {
+		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." start'");
+		chdir($workdir);
+		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
+		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
+	}
 
 	foreach ( $testcases as $tc ) {
 
@@ -434,6 +454,14 @@ function judge($mark, $row, $judgingid)
 	if ( ($result = getFinalResult($runresults))!==NULL ) break;
 
 	} // end: for each testcase
+
+	// Optionally destroy chroot environment
+	if ( USE_CHROOT && CHROOT_SCRIPT ) {
+		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
+		chdir($workdir);
+		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
+		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
+	}
 
 	} // end: if compile result==0
 

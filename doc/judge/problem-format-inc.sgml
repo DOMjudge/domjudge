@@ -1,0 +1,68 @@
+<chapt>DOMjudge problem format
+<label id="problem-format">
+
+<p>
+This specification is dedicated to the public domain. Its authors
+waive all rights to the work worldwide under copyright law, including
+all related and neighboring rights, as specified in the
+<url name="Creative Commons Public Domain Dedication (CC0 1.0)"
+url="http://creativecommons.org/publicdomain/zero/1.0/">.
+
+<p>
+DOMjudge supports the import and export of problems in a zip-bundle
+format. This zip file contains the following files in its base
+directory:
+<descrip>
+<tag><tt>domjudge-problem.ini</tt></tag>
+
+This file has a simple INI-syntax and contains problem metadata, see
+below.
+
+<tag><tt>&lt;testdata-file&gt;.in</tt> / <tt>&lt;testdata-file&gt;.out</tt></tag>
+
+Each pair of <tt>&lt;testdata-file&gt;.{in,out}</tt> contains the
+input and correct/reference output for a single test case. Single
+files without their corresponding <tt>in</tt> or <tt>out</tt>
+counterpart are ignored. The order of the files in the zip archive
+determines the initial ordering of the testcases after import.
+
+<tag><tt>&lt;solution&gt;.&lt;ext&gt;</tt></tag>
+
+Submits code of reference solution as team 'domjudge' if &lt;ext&gt; is a known
+language extension. The contest, the problem, and the language have to be
+enabled. The contest must be started. If you include a comment starting with
+'<tt>@EXPECTED_RESULTS@: </tt>' followed by the possible outcomes, you can use
+the <em>judging verifier</em> in the admin interface to verify the results.
+
+</descrip>
+When importing a zip file into DOMjudge, any other files are ignored.
+
+<p>
+The file <tt>domjudge-problem.ini</tt> contains key-value pairs, one
+pair per line, of the form <tt>key = value</tt>. The <tt>=</tt> can
+optionally be surrounded by whitespace and the value may be quoted,
+which allows it to contain newlines. The following keys are supported
+(these correspond directly to the problem settings in the jury web
+interface):
+<itemize>
+<item><tt>probid</tt> - the problem identifier
+<item><tt>cid</tt> - the associated contest identifier
+<item><tt>name</tt> - the problem displayed name
+<item><tt>allow_submit</tt> - allow submissions to this problem,
+disabling this also makes the problem invisible to teams and public
+<item><tt>allow_judge</tt> - allow judging of this problem
+<item><tt>timelimit</tt> - time limit in seconds per test case
+<item><tt>special_run</tt> - suffix tag of a special run script
+<item><tt>special_compare</tt> - suffix tag of a special compare script
+<item><tt>color</tt> - CSS color specification for this problem
+</itemize>
+
+The <tt>probid</tt> key is required when importing a new problem from
+the <tt>jury/problems.php</tt> overview page, while it is ignored when
+uploading into an existing problem. All other keys are optional. If
+they are present, the respective value will be overwritten; if not
+present, then the value will not be changed or a default chosen when
+creating a new problem. Test data files are added to set of test
+cases already present. Thus, one can easily add test cases to a
+configured problem by uploading a zip file that contains only
+<tt>*.{in,out}</tt> files.
