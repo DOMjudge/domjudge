@@ -15,13 +15,19 @@ ALTER TABLE `team` DROP COLUMN `penalty`;
 -- Create additional structures
 --
 
+ALTER TABLE contest
+  ADD `finalizetime` DATETIME NULL COMMENT 'Time when contest was finalized, null if not yet',
+  ADD `finalizecomment` TEXT NULL COMMENT 'Comments by the finalizer',
+  ADD `b` smallint(3) unsigned NOT NULL default '0' COMMENT 'Number of extra bronze medals';
+
 -- Drop constraint before changing data
 ALTER TABLE `clarification`
   MODIFY COLUMN `probid` varchar(8) default NULL COMMENT 'Problem or category associated to this clarification',
   DROP FOREIGN KEY `clarification_ibfk_3`;
 
 ALTER TABLE `team`
-  ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`;
+  ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`,
+  ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of team if imported from external source';
 
 ALTER TABLE `submission`
   ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',

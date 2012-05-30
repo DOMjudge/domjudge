@@ -126,6 +126,10 @@ if ( isset($_POST['import']) ) {
 		require(LIBWWWDIR . '/footer.php');
 		exit;
 	}
+	$res = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
+	               FROM removed_interval WHERE cid = %i', $cid);
+
+	$contest_row['removed_intervals'] = $res;
 
 	$contest_data = array();
 	$contest_data['name'] = $contest_row['contestname'];

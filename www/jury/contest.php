@@ -24,7 +24,7 @@ if ( IS_ADMIN && !empty($_GET['cmd']) ):
 
 	if ( $cmd == 'edit' ) {
 		echo "<tr><td>Contest ID:</td><td>";
-		$row = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %s',
+		$row = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i',
 			$_GET['id']);
 		echo addHidden('keydata[0][cid]', $row['cid']) .
 			'c' . htmlspecialchars($row['cid']) .
@@ -73,11 +73,11 @@ if ( ! $id ) error("Missing or invalid contest id");
 
 if ( isset($_GET['edited']) ) {
 
-	echo addForm('refresh_cache.php', 'get') .
+	echo addForm('refresh_cache.php') .
             msgbox (
                 "Warning: Refresh scoreboard cache",
 		"If the contest start time was changed, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
-		addSubmit('recalculate caches now') 
+		addSubmit('recalculate caches now', 'refresh') 
 		) .
 		addEndForm();
 
@@ -94,6 +94,10 @@ if ( $cid == $data['cid'] ) {
 if ( !$data['enabled'] ) {
 	echo "<p><em>This contest is disabled.</em></p>\n\n";
 }
+if ( !empty($data['finalizetime']) ) {
+	echo "<p><em>This contest is final.</em></p>\n\n";
+}
+
 
 echo "<table>\n";
 echo '<tr><td scope="row">CID:</td><td>c' .
@@ -119,11 +123,25 @@ echo '<tr><td scope="row">Scoreboard unfreeze:</td><td>' .
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
+	if ( $cid == $data['cid'] ) {
+		echo "<p>". rejudgeForm('contest', $data['cid']) . "</p>\n\n";
+	}
 	echo "<p>" .
 		editLink('contest',$data['cid']) . "\n" .
 		delLink('contest','cid',$data['cid']) ."</p>\n\n";
 }
 
+if ( !empty($data['finalizetime']) ) {
+	echo "<h3>Finalized</h3>\n\n";
+	echo "<table>\n" .
+	     "<tr><td>Finalized at:</td><td>" . htmlspecialchars($data['finalizetime']) . "</td></tr>\n" .
+             "<tr><td>B:</td><td>" . htmlspecialchars($data['b']) . "</td></tr>\n" .
+	     "</table>\n<p>Comment:</p>\n<pre class=\"output_text\">" . htmlspecialchars($data['finalizecomment']) . "</pre>\n";
+
+	echo "<p><a href=\"finalize.php?id=" . (int)$data['cid'] . "\">update finalization</a></p>\n\n";
+} else {
+	echo "<p><a href=\"finalize.php?id=" . (int)$data['cid'] . "\">finalize this contest</a></p>\n\n";
+}
 
 echo "<h3>Removed intervals</h3>\n\n";
 

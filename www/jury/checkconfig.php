@@ -79,6 +79,7 @@ function flushresults() {
 		case 'O': echo "okay"; break;
 		case 'W': echo "warn"; break;
 		case 'E': echo "error"; break;
+		case 'R': echo "refint"; break;
 		default: error("Unknown config checker result: ".$row['result']);
 		}
 		echo ".png\" alt=\"" . $row['result'] . "\" class=\"picto\" /></td><td>" .
@@ -150,12 +151,12 @@ if ( $highlighter == 'native' ) {
 }
 
 if ( class_exists("ZipArchive") ) {
-	result('software', 'Problem upload via zip bundles',
-	       'O', 'PHP ZipArchive class available for uploading problem data.');
+	result('software', 'Problem up/download via zip bundles',
+	       'O', 'PHP ZipArchive class available for importing and exporting problem data.');
 } else {
-	result('software', 'Problem upload via zip bundles',
+	result('software', 'Problem up/download via zip bundles',
 	       'W', 'Optionally, enable the PHP zip extension ' .
-	       'to be able to upload problem data via zip bundles.');
+	       'to be able to import or export problem data via zip bundles.');
 }
 
 $mysqldatares = $DB->q('SHOW variables WHERE
@@ -507,37 +508,42 @@ result('submissions and judgings', 'Judging integrity',
 
 flushresults();
 
-// REFERENTIAL INTEGRITY. This may be obsolete now that we have defined
-// foreign key relations between our tables.
+// REFERENTIAL INTEGRITY. Nothing should turn up here since
+// we have defined foreign key relations between our tables.
+if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 
-$details = '';
-foreach ( $RELATIONS as $table => $foreign_keys ) {
-	if ( empty($foreign_keys) ) {
-		continue;
-	}
-	$res = $DB->q('SELECT * FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
-	while ( $row = $res->next() ) {
-		foreach ( $foreign_keys as $foreign_key => $val ) {
-			@list( $target, $action ) = explode('&', $val);
-			if ( empty($action) ) $action = 'CASCADE';
-			if ( empty($row[$foreign_key]) || $action=='NOCONSTRAINT' ) {
-				continue;
-			}
-			$f = explode('.', $target);
-			if ( $DB->q("VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
-					$row[$foreign_key]) < 1 ) {
-				$details .= "foreign key constraint fails for $table.$foreign_key = \"" .
-					$row[$foreign_key] . "\" (not found in $target)\n";
+	$details = '';
+	foreach ( $RELATIONS as $table => $foreign_keys ) {
+		if ( empty($foreign_keys) ) {
+			continue;
+		}
+		$fields = implode(', ', array_keys($foreign_keys));
+		$res = $DB->q('SELECT ' . $fields . ' FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
+		while ( $row = $res->next() ) {
+			foreach ( $foreign_keys as $foreign_key => $val ) {
+				@list( $target, $action ) = explode('&', $val);
+				if ( empty($action) ) $action = 'CASCADE';
+				if ( empty($row[$foreign_key]) || $action=='NOCONSTRAINT' ) {
+					continue;
+				}
+				$f = explode('.', $target);
+				if ( $DB->q("VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
+						$row[$foreign_key]) < 1 ) {
+					$details .= "foreign key constraint fails for $table.$foreign_key = \"" .
+						$row[$foreign_key] . "\" (not found in $target)\n";
+				}
 			}
 		}
 	}
+
+	// problems found are of level warning, because the severity may be different depending
+	// on which table it is.
+	result('referential integrity', 'Inter-table relationships',
+		($details == '' ? 'O':'W'), $details);
+} else {
+	result('referential integrity', 'Inter-table relationships',
+		'R', 'Not checked.', '<a href="?refint">check now</a> (potentially slow operation)');
 }
-
-// problems found are of level warning, because the severity may be different depending
-// on which table it is.
-result('referential integrity', 'Inter-table relationships',
-	($details == '' ? 'O':'W'), $details);
-
 
 flushresults();
 
@@ -548,9 +554,9 @@ $time_end = microtime(TRUE);
 echo "<p>Config checker completed in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
 
 echo "<p>Legend:
-<img src=\"../images/s_okay.png\"  alt=\"O\" class=\"picto\" /> OK
-<img src=\"../images/s_warn.png\"  alt=\"W\" class=\"picto\" /> Warning
-<img src=\"../images/s_error.png\" alt=\"E\" class=\"picto\" /> Error
+<img src=\"../images/s_okay.png\"      alt=\"O\" class=\"picto\" /> OK
+<img src=\"../images/s_warn.png\"      alt=\"W\" class=\"picto\" /> Warning
+<img src=\"../images/s_error.png\"     alt=\"E\" class=\"picto\" /> Error
 </p>\n";
 
 require(LIBWWWDIR . '/footer.php');

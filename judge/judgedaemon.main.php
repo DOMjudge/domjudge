@@ -44,7 +44,7 @@ if ( isset($options['v']) ) $options['verbose'] = $options['v'];
 if ( isset($options['V']) ) version();
 if ( isset($options['h']) ) usage();
 
-setup_database_connection('jury');
+setup_database_connection();
 
 $verbose = LOG_INFO;
 if ( isset($options['verbose']) ) $verbose = $options['verbose'];
@@ -120,6 +120,19 @@ while( !$exitsignalled )
 		}
 		throw $e;
 	}
+}
+
+// If there are any unfinished judgings in the queue in my name,
+// they will not be finished. Give them back.
+$res = $DB->q('SELECT judgingid, submitid FROM judging WHERE
+               judgehost = %s AND endtime IS NULL AND valid = 1', $myhost);
+while ( $jud = $res->next() ) {
+	$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
+	       $jud['judgingid']);
+	$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
+	        WHERE submitid = %i', $jud['submitid']);
+	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] . " in my name; given back");
+	auditlog('judging', $jud['judgingid'], 'given back', null, $myhost);
 }
 
 // Create directory where to test submissions

@@ -15,14 +15,29 @@ $title = 'Refresh Cache';
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
+echo "<h1>Refresh Cache</h1>\n\n";
+
 requireAdmin();
+
+if ( ! isset($_REQUEST['refresh']) ) {
+	echo addForm('');
+	echo msgbox('Significant database impact',
+	       'Refreshing the scoreboard cache can have a significant impact on the database load, ' .
+	       'and is not necessary in normal operating circumstances.<br /><br />Refresh scoreboard cache now?' .
+	       '<br /><br />' .
+               addSubmit(" Refresh now! ", 'refresh') );
+        echo addEndForm();
+
+	require(LIBWWWDIR . '/footer.php');
+	exit;	
+}
+
+$time_start = microtime(TRUE);
 
 auditlog('scoreboard', null, 'refresh cache');
 
 // no output buffering... we want to see what's going on real-time
 ob_implicit_flush();
-
-echo "<h1>Refresh Cache</h1>\n\n";
 
 // get the contest, teams and problems
 $teams = $DB->q('TABLE SELECT login FROM team ORDER BY login');
@@ -60,6 +75,7 @@ foreach( $teams as $team ) {
 	}
 
 	echo "\n";
+	ob_flush();
 }
 
 echo "</pre>\n\n<p>Deleting irrelevant data...</p>\n\n";
@@ -72,6 +88,8 @@ $DB->q('DELETE FROM scoreboard_public
         WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%As)',
        $cid, $teamlist, $probs);
 
-echo "<p>Finished.</p>\n\n";
+$time_end = microtime(TRUE);
+
+echo "<p>Scoreboard cache refresh completed in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
 
 require(LIBWWWDIR . '/footer.php');

@@ -1,0 +1,12 @@
+<!doctype linuxdoc system [
+<!ENTITY checktestdatagrammar SYSTEM "checktestdata-grammar-inc.sgml">
+]>
+
+<report>
+
+<title>Checktestdata language specification
+<author>by the DOMjudge team
+
+&checktestdatagrammar;
+
+</report>

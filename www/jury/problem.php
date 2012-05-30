@@ -216,7 +216,10 @@ echo "</table>\n" . addEndForm();
 echo "<br />\n" . rejudgeForm('problem', $id) . "\n\n";
 
 if ( IS_ADMIN ) {
-	echo "<p>" . editLink('problem',$id) . "\n" .
+	echo "<p>" . 
+		'<a href="export.php?id=' . urlencode($id) .
+		'"><img src="../images/b_save.png" /></a> ' .
+		editLink('problem',$id) . "\n" .
 		delLink('problem','probid', $id) . "</p>\n\n";
 }
 

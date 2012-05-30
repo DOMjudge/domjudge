@@ -1,0 +1,105 @@
+<chapt>Checktestdata language specification
+<label id="checktestdata-grammar">
+
+<p>
+This specification is dedicated to the public domain. Its authors
+waive all rights to the work worldwide under copyright law, including
+all related and neighboring rights, as specified in the
+<url name="Creative Commons Public Domain Dedication (CC0 1.0)"
+url="http://creativecommons.org/publicdomain/zero/1.0/">.
+
+<p>
+Grammar and command syntax below. A valid checktestdata program
+consists of a list of commands. All commands are uppercase, while
+variables are lowercase with non-leading digits. Lines starting with
+'#' are comments and ignored.
+
+The following grammar sub-elements are defined:
+<code>
+integer  := 0|-?[1-9][0-9]*
+float    := -?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?
+string   := ".*"
+variable := [a-z][a-z0-9]*
+value    := &lt;integer&gt; | &lt;float&gt; | &lt;variable&gt;
+compare  := '&lt;' | '&gt;' | '&lt;=' | '&gt;=' | '==' | '!='
+expr     := &lt;term&gt; | &lt;expr&gt; [+-] &lt;term&gt;
+term     := &lt;term&gt; [*%/] &lt;factor&gt; | &lt;factor&gt;
+factor   := &lt;value&gt; | '-' &lt;term&gt; | '(' &lt;expr&gt; ')' | &lt;factor&gt; '^' &lt;factor&gt;
+test     := '!' &lt;test&gt; | '(' &lt;test&gt; ')' | &lt;test&gt; [&|] &lt;test&gt; |
+             &lt;expr&gt; &lt;compare&gt; &lt;expr&gt; | 'MATCH(' &lt;string&gt; str ')' | 'ISEOF'
+</code>
+
+<p>
+That is, integer, as well as floating point values (of arbitrary size
+and precision) are supported, as well as operators <tt>+-*%/^</tt>
+with the usual rules of precedence. An expression is integer if all
+its sub-expressions are integer. Integer division is used on integers.
+The exponentiation operator <tt>^</tt> only allows non-negative
+integer exponents that fit in an unsigned long.
+
+<p>
+<tt>MATCH</tt> and <tt>ISEOF</tt> are special keywords that return
+whether the next character matches any of 'str', respectively if
+end-of-file has been reached.
+
+<p>
+Within a string, the backslash acts as escape character for the
+following expressions:
+<itemize>
+<item> <tt>\[0-7]{1,3}</tt> denotes an octal escape for a character
+<item> <tt>\n, \t, \r, \b</tt> denote linefeed, tab, carriage return and backspace
+<item> <tt>\"</tt> and <tt>\\</tt> denote " and \
+<item> an escaped newline is ignored (line continuation)
+</itemize>
+A backslash preceding any other character is treated as a literal
+backslash.
+
+The following commands are available:
+<descrip>
+<tag><tt>SPACE</tt> / <tt>NEWLINE</tt></tag>
+
+    No-argument commands matching a single space (0x20) or newline
+    respectively.
+
+<tag><tt>EOF</tt></tag>
+
+    Matches end-of-file. This is implicitly added at the end of each
+    program and must match exactly: no extra data may be present.
+
+<tag><tt>INT(&lt;expr&gt; min, &lt;expr&gt; max [, &lt;variable&gt; name])</tt></tag>
+
+    Match an arbitrary sized integer value in the interval [min,max]
+    and optionally assign the value read to variable 'name'.
+
+<tag><tt>FLOAT(&lt;expr&gt; min, &lt;expr&gt; max [, &lt;variable&gt; name [, option])</tt></tag>
+
+    Match a floating point number in the range [min,max] and
+    optionally assign the value read to the variable 'name'. When the
+    option 'FIXED' or 'SCIENTIFIC' is set, only accept floating point
+    numbers in fixed point or scientific notation, respectively.
+
+<tag><tt>STRING(&lt;string&gt; str)</tt></tag>
+
+    Match the literal string 'str'.
+
+<tag><tt>REGEX(&lt;string&gt; str)</tt></tag>
+
+    Match the extended regular expression 'str'. Matching is performed
+    greedily.
+
+<tag><tt>REP(&lt;expr&gt; count [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
+
+    Repeat the commands between the 'REP() ... END' statements count
+    times and optionally match 'separator' command (count-1) times in
+    between. The value of count must fit in a unsigned 32 bit int.
+
+<tag><tt>WHILE(&lt;test&gt; condition [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
+
+    Repeat the commands as long as 'condition' is true. Optionally
+    match 'separator' command between two consecutive iterations.
+
+<tag><tt>IF(&lt;test&gt; cond) [&lt;command&gt; cmds1...] [ELSE [&lt;command&gt; cmds2...]] END</tt></tag>
+
+    Executes cmds1 if cond is true. Otherwise, executes cmds2 if the
+    else statement is available.
+</descrip>

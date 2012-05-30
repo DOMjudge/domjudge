@@ -22,7 +22,7 @@ define('LOGFILE', LOGDIR.'/auxiliary.log');
 
 require(LIBDIR . '/init.php');
 
-setup_database_connection('jury');
+setup_database_connection();
 
 $verbose = LOG_INFO;
 
