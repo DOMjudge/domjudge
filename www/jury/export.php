@@ -40,8 +40,8 @@ $zip->addFromString('domjudge-problem.ini', $inistring);
 $testcases = $DB->q('SELECT description, testcaseid, rank FROM testcase
 		     WHERE probid = %s ORDER BY rank', $id);
 while ($tc = $testcases->next()) {
-	$fname = empty($tc['description']) ? ($id . "_" . $tc['rank']) :
-		$tc['description'];
+	$fname = $id . "_" . $tc['rank'] .
+	         (empty($tc['description'])?"":"_".$tc['description']);
 	foreach(array('in','out') as $inout) {
 		$content = $DB->q("VALUE SELECT SQL_NO_CACHE " . $inout . "put FROM testcase
 				   WHERE testcaseid = %i", $tc['testcaseid']);
@@ -55,7 +55,7 @@ $zip->close();
 header("Content-Description: File Transfer");
 header("Content-Disposition: attachment; filename=" . $id . ".zip");
 header("Content-Type: application/zip");
-header("Content-length: " . filesize($tmpfname) . "\n\n");
+header("Content-Length: " . filesize($tmpfname) . "\n\n");
 header("Content-Transfer-Encoding: binary");
 
 readfile($tmpfname);
