@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.1.6 - DEV
--------------------
+Version 3.1.6 - 2 June 2012
+---------------------------
  - [INCOMPATIBLE CHANGE,security] enable cURL SSL host/peer verification
    in the command line submit client. This requires any self-signed
    certificates now to be available to libcURL on a team machine.
