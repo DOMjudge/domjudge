@@ -787,7 +787,7 @@ int main(int argc, char **argv)
 
 			/* Check to see if data is available and pass it on */
 			for(i=1; i<=2; i++) {
-				if ( FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
+				if ( child_pipefd[i][PIPE_OUT] != -1 && FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
 					nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
 					if ( nread==-1 ) error(errno,"reading child fd %d",i);
 					if ( nread==0 ) {
