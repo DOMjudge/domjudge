@@ -74,7 +74,7 @@ This is a (rough) list of the requirements for DOMjudge.
 
 <itemize>
 <item>At least one machine running Linux, with (sudo) root access
-<item>Apache web server with PHP 5 and PHP-command line interface
+<item>Apache web server with PHP 5.2 or newer and PHP-command line interface
 <item>MySQL database server version 4.1.0 or newer
 <item>Compilers for the languages you want to support
 </itemize>
