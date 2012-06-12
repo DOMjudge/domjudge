@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.3.1 - DEV
--------------------
+Version 3.3.1 - 12 June 2012
+----------------------------
  - Fix bug: buffer underflow bug in runguard when compiled on Ubuntu 12.04:
    added check for closed pipe (file descriptor == -1). Thanks Keith Johnson.
 
