@@ -288,7 +288,7 @@ void output_exit_time(int exitcode, double timediff)
 	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys\n",
 	        timediff, userdiff, sysdiff);
 
-	if ( use_cputime && (userdiff+sysdiff) > cputime * 1000000 ) {
+	if ( use_cputime && (userdiff+sysdiff) * 1000000 > cputime ) {
 		warning("timelimit exceeded (cpu time)");
 	}
 
