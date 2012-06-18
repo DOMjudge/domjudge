@@ -263,7 +263,7 @@ real user ID.\n");
 void output_exit_time(int exitcode, double timediff)
 {
 	FILE  *outputfile;
-	unsigned long userdiff, sysdiff;
+	double userdiff, sysdiff;
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
 	verbose("command exited with exitcode %d",exitcode);
@@ -282,15 +282,13 @@ void output_exit_time(int exitcode, double timediff)
 		}
 	}
 
-	userdiff = (unsigned long)(endticks.tms_cutime - startticks.tms_cutime)
-		* 1000000 / ticks_per_second;
-	sysdiff  = (unsigned long)(endticks.tms_cstime - startticks.tms_cstime)
-		* 1000000 / ticks_per_second;
+	userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
+	sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
 
 	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys\n",
-	        timediff, userdiff*1e-6, sysdiff*1e-6);
+	        timediff, userdiff, sysdiff);
 
-	if ( use_cputime && (userdiff+sysdiff) > cputime ) {
+	if ( use_cputime && (userdiff+sysdiff) > cputime * 1000000 ) {
 		warning("timelimit exceeded (cpu time)");
 	}
 
@@ -300,7 +298,7 @@ void output_exit_time(int exitcode, double timediff)
 		if ( (outputfile = fopen(timefilename,"w"))==NULL ) {
 			error(errno,"cannot open `%s'",timefilename);
 		}
-		if ( fprintf(outputfile,"%.3f\n",(userdiff+sysdiff)*1e-6)==0 ) {
+		if ( fprintf(outputfile,"%.3f\n",userdiff+sysdiff)==0 ) {
 			error(0,"cannot write to file `%s'",timefilename);
 		}
 		if ( fclose(outputfile) ) {
