@@ -645,6 +645,24 @@ int main(int argc, char **argv)
 		if ( pipe(child_pipefd[i])!=0 ) error(errno,"creating pipe for fd %d",i);
 	}
 
+	if ( sigemptyset(&emptymask)!=0 ) error(errno,"creating empty signal mask");
+
+	/* unmask all signals, except SIGCHLD: detected in pselect() below */
+	sigmask = emptymask;
+	if ( sigaddset(&sigmask, SIGCHLD)!=0 ) error(errno,"setting signal mask");
+	if ( sigprocmask(SIG_SETMASK, &sigmask, NULL)!=0 ) {
+		error(errno,"unmasking signals");
+	}
+
+	/* Construct signal handler for SIGCHLD detection in pselect(). */
+	received_SIGCHLD = 0;
+	sigact.sa_handler = child_handler;
+	sigact.sa_flags   = 0;
+	sigact.sa_mask    = emptymask;
+	if ( sigaction(SIGCHLD,&sigact,NULL)!=0 ) {
+		error(errno,"installing signal handler");
+	}
+
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
 		error(errno,"cannot fork");
@@ -709,22 +727,6 @@ int main(int argc, char **argv)
 		}
 
 		if ( sigemptyset(&emptymask)!=0 ) error(errno,"creating empty signal mask");
-
-		/* unmask all signals, except SIGCHLD: detected in pselect() below */
-		sigmask = emptymask;
-		if ( sigaddset(&sigmask, SIGCHLD)!=0 ) error(errno,"setting signal mask");
-		if ( sigprocmask(SIG_SETMASK, &sigmask, NULL)!=0 ) {
-			error(errno,"unmasking signals");
-		}
-
-		/* Construct signal handler for SIGCHLD detection in pselect(). */
-		received_SIGCHLD = 0;
-		sigact.sa_handler = child_handler;
-		sigact.sa_flags   = 0;
-		sigact.sa_mask    = emptymask;
-		if ( sigaction(SIGCHLD,&sigact,NULL)!=0 ) {
-			error(errno,"installing signal handler");
-		}
 
 		/* Construct one-time signal handler to terminate() for TERM
 		   and ALRM signals. */
