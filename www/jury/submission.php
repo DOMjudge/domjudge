@@ -295,7 +295,7 @@ if ( isset($jid) )  {
 	                       $submdata['submittime']);
 	$lastjud = NULL;
 	if ( $lastsubmitid !== NULL ) {
-		$lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result 
+		$lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result, verify_comment
 		                   FROM judging
 		                   WHERE submitid = %s AND valid = 1
 		                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
@@ -313,7 +313,11 @@ if ( isset($jid) )  {
 	    ( $lastjud === NULL ? '' :
 	      "<span style=\"font-size:xx-small;\">" .
 	      "<a href=\"javascript:togglelastruns();\">show/hide</a> results of previous " .
-	      "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a></span>" ) .
+	      "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a>" .
+	          ( empty($lastjud['verify_comment']) ? '' :
+		    "<span class=\"prevsubmit\"> (verify comment: '" . $lastjud['verify_comment'] . "')</span>"
+                  ) .
+	      "</span>" ) .
 	    "</h3>\n\n";
 
 	echo "<table class=\"list\">\n<thead>\n" .
