@@ -312,7 +312,7 @@ if ( isset($jid) )  {
 	echo "<h3 id=\"testcases\">Testcase runs " .
 	    ( $lastjud === NULL ? '' :
 	      "<span style=\"font-size:xx-small;\">" .
-	      "<a href=\"javascript:togglelastruns();\">show/hide results of previous</a> " .
+	      "<a href=\"javascript:togglelastruns();\">show/hide</a> results of previous " .
 	      "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a></span>" ) .
 	    "</h3>\n\n";
 
