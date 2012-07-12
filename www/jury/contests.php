@@ -7,6 +7,7 @@
  */
 
 require('init.php');
+require(LIBWWWDIR . '/checkers.jury.php');
 $times = array ('activate','start','freeze','end','unfreeze');
 $now = now();
 
@@ -20,8 +21,15 @@ if ( IS_ADMIN && isset($_POST['donow']) ) {
 	auditlog('contest', $docid, $time. ' now', $now);
 	// starttime is special because it doesn't have relative time support
 	if ( $time == 'start' ) {
-		$DB->q('UPDATE contest SET ' . $time . 'time = %s
-		        WHERE cid = %i', $now, $docid);
+		$cdata['starttime'] = $now;
+		foreach(array('endtime','freezetime','unfreezetime','activatetime') as $f) {
+			$cdata[$f] = check_relative_time($cdata[$f.'_string'], $cdata['starttime'], $f);
+		}
+		$DB->q('UPDATE contest SET starttime = %s, endtime = %s, freezetime = %s,
+			unfreezetime = %s, activatetime = %s
+		        WHERE cid = %i', $cdata['starttime'], $cdata['endtime'],
+			$cdata['freezetime'], $cdata['unfreezetime'], $cdata['activatetime'],
+			$docid);
 		header ("Location: ./contests.php?edited=1");
 	} else {
 		$DB->q('UPDATE contest SET ' . $time . 'time = %s, ' . $time . 'time_string = %s
