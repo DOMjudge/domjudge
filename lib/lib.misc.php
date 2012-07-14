@@ -198,7 +198,6 @@ function calcScoreRow($cid, $team, $prob) {
 function getFinalResult($runresults)
 {
 	$results_prio  = dbconfig_get('results_prio');
-	$lazy_eval     = dbconfig_get('lazy_eval_results', true);
 
 	// Whether we have NULL results
 	$havenull = FALSE;
@@ -221,20 +220,15 @@ function getFinalResult($runresults)
 		}
 	}
 
-	// Not all results are in yet, and we don't do lazy evaluation:
-	if ( $havenull && ! $lazy_eval ) return NULL;
+	// If we have NULL results, check whether the highest priority
+	// result has maximal priority. Use a local copy of the
+	// 'results_prio' array, keeping the original untouched.
+	$tmp = $results_prio;
+	rsort($tmp);
+	$maxprio = reset($tmp);
 
-	if ( $lazy_eval ) {
-		// If we have NULL results, check whether the highest priority
-		// result has maximal priority. Use a local copy of the
-		// 'results_prio' array, keeping the original untouched.
-		$tmp = $results_prio;
-		rsort($tmp);
-		$maxprio = reset($tmp);
-
-		// No highest priority result found: no final answer yet.
-		if ( $havenull && $bestprio<$maxprio ) return NULL;
-	}
+	// No highest priority result found: no final answer yet.
+	if ( $havenull && $bestprio<$maxprio ) return NULL;
 
 	return $bestres;
 }
