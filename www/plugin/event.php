@@ -41,13 +41,14 @@ while ( $row = $res->next() ) {
 	case 'problem submitted':
 		if ( !IS_JURY && infreeze($row['eventtime']) ) continue(2);
 
-		$data = $DB->q('TUPLE SELECT s.submittime, t.name AS teamname,
+		$data = $DB->q('MAYBETUPLE SELECT s.submittime, t.name AS teamname,
 		                             p.name AS probname, l.name AS langname
 		                FROM submission s
 		                LEFT JOIN team     t ON (t.login    = s.teamid)
 		                LEFT JOIN problem  p ON (p.probid   = s.probid)
 		                LEFT JOIN language l ON (l.langid   = s.langid)
 		                WHERE s.submitid = %i', $row['submitid']);
+		if ($data == NULL) continue;
 
 
 		$elem = XMLaddnode($event, 'submission', NULL, array('id' => $row['submitid']));
@@ -58,9 +59,10 @@ while ( $row = $res->next() ) {
 		break;
 
 	case 'problem judged':
-		$data = $DB->q('TUPLE SELECT s.submittime, j.result FROM judging j
+		$data = $DB->q('MAYBETUPLE SELECT s.submittime, j.result FROM judging j
 		                LEFT JOIN submission s ON (s.submitid = j.submitid)
 		                WHERE j.judgingid = %i', $row['judgingid']);
+		if ($data == NULL) continue;
 
 		if ( !IS_JURY && infreeze($data['submittime']) ) continue(2);
 
@@ -69,8 +71,9 @@ while ( $row = $res->next() ) {
 		break;
 
 	case 'clarification':
-		$data = $DB->q('TUPLE SELECT * FROM clarification
+		$data = $DB->q('MAYBETUPLE SELECT * FROM clarification
 		                WHERE clarid = %i', $row['clarid']);
+		if ($data == NULL) continue;
 
 		XMLaddnode($event, 'clarification', $data['body'], array('id' => $row['clarid']));
 		break;
