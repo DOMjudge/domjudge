@@ -453,13 +453,13 @@ function judge($mark, $row, $judgingid)
 	// Optimization: stop judging when the result is already known.
 	// This should report a final result when all runresults are non-null!
 	if ( !$final && ($result = getFinalResult($runresults))!==NULL ) {
-		$final = TRUE;	
+		$final = TRUE;
 		// Start a transaction. This will provide extra safety if the table type
 		// supports it.
 		$DB->q('START TRANSACTION');
 		// pop the result back into the judging table
 		$DB->q('UPDATE judging SET result = %s
-			WHERE judgingid = %i AND judgehost = %s',
+		        WHERE judgingid = %i AND judgehost = %s',
 		       $result, $judgingid, $myhost);
 
 		// recalculate the scoreboard cell (team,problem) after this judging
@@ -469,22 +469,22 @@ function judge($mark, $row, $judgingid)
 		// (case of verification required is handled in www/jury/verify.php)
 		if ( ! dbconfig_get('verification_required', 0) ) {
 			$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-						   submitid, judgingid, description)
-				VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
+			                           submitid, judgingid, description)
+			        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
 			       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
 			       $row['submitid'], $judgingid);
 			if ( $result == 'correct' ) {
 				$DB->q('INSERT INTO balloon (submitid)
 					VALUES(%i)',
 					$row['submitid']);
-			} 
+			}
 		}
 
 		$DB->q('COMMIT');
 
 		if ( dbconfig_get('lazy_eval_results', true) ) {
 			break;
-		}	
+		}
 	}
 
 	} // end: for each testcase
