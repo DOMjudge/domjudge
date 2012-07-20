@@ -351,7 +351,9 @@ function judge($mark, $row, $judgingid)
 
 	// Only continue running testcases when compilation was successful.
 	// FIXME(?): result is still returned as in EXITCODES.
-	if ( ($result = $EXITCODES[$retval])=='correct' ) {
+	if ( ($result = $EXITCODES[$retval])=='compiler-error' ) {
+		store_result($result, $row, $judgingid);
+	} else {
 
 	logmsg(LOG_DEBUG, "Fetching testcases from database");
 	$testcases = $DB->q("KEYTABLE SELECT rank AS ARRAYKEY,
@@ -454,33 +456,8 @@ function judge($mark, $row, $judgingid)
 	// This should report a final result when all runresults are non-null!
 	if ( !$final && ($result = getFinalResult($runresults))!==NULL ) {
 		$final = TRUE;
-		// Start a transaction. This will provide extra safety if the table type
-		// supports it.
-		$DB->q('START TRANSACTION');
-		// pop the result back into the judging table
-		$DB->q('UPDATE judging SET result = %s
-		        WHERE judgingid = %i AND judgehost = %s',
-		       $result, $judgingid, $myhost);
 
-		// recalculate the scoreboard cell (team,problem) after this judging
-		calcScoreRow($cid, $row['teamid'], $row['probid']);
-
-		// log to event table if no verification required
-		// (case of verification required is handled in www/jury/verify.php)
-		if ( ! dbconfig_get('verification_required', 0) ) {
-			$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-			                           submitid, judgingid, description)
-			        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
-			       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
-			       $row['submitid'], $judgingid);
-			if ( $result == 'correct' ) {
-				$DB->q('INSERT INTO balloon (submitid)
-					VALUES(%i)',
-					$row['submitid']);
-			}
-		}
-
-		$DB->q('COMMIT');
+		store_result($result, $row, $judgingid);
 
 		if ( dbconfig_get('lazy_eval_results', true) ) {
 			break;
@@ -497,19 +474,14 @@ function judge($mark, $row, $judgingid)
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}
 
-	} // end: if compile result==0
+	} // end: if no compile-error
 
 	if ( $result==NULL ) error("No final result obtained");
 
-	// Start a transaction. This will provide extra safety if the table type
-	// supports it.
-	$DB->q('START TRANSACTION');
-	// pop the result back into the judging table
+	// Store judging endtime, result was already stored.
 	$DB->q('UPDATE judging SET endtime = %s
 	        WHERE judgingid = %i AND judgehost = %s',
 	       now(), $judgingid, $myhost);
-
-	$DB->q('COMMIT');
 
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
@@ -544,4 +516,36 @@ function database_retry_connect()
 			throw $e;
 		}
 	}
+}
+
+function store_result($result, $row, $judgingid)
+{
+	global $DB, $cid, $myhost;
+
+	// Start a transaction. This will provide extra safety if the table type
+	// supports it.
+	$DB->q('START TRANSACTION');
+	// pop the result back into the judging table
+	$DB->q('UPDATE judging SET result = %s
+	        WHERE judgingid = %i AND judgehost = %s',
+	       $result, $judgingid, $myhost);
+
+	// recalculate the scoreboard cell (team,problem) after this judging
+	calcScoreRow($cid, $row['teamid'], $row['probid']);
+
+	// log to event table if no verification required
+	// (case of verification required is handled in www/jury/verify.php)
+	if ( ! dbconfig_get('verification_required', 0) ) {
+		$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
+		                           submitid, judgingid, description)
+		        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
+		       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
+		       $row['submitid'], $judgingid);
+		if ( $result == 'correct' ) {
+			$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
+			       $row['submitid']);
+		}
+	}
+
+	$DB->q('COMMIT');
 }
