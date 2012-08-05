@@ -88,9 +88,9 @@ AuthUserFile @domserver_etcdir@/htpasswd-jury
 # values. The following example will allow to upload testcases of
 # up to 16MB. Defaults for these vary per PHP version and install.
 #<IfModule mod_php5.c>
-#php_value upload_max_filesize 16M
-#php_value post_max_size       16M
-#php_value memory_limit        32M
+#php_value upload_max_filesize 64M
+#php_value post_max_size       64M
+#php_value memory_limit        128M
 #</IfModule>
 
 # As an alternative to htpasswd files, you can also opt
