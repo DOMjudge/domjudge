@@ -851,7 +851,9 @@ not higher than your amount of RAM allows.
 
 <p>
 As for PHP, the use of an opcode cache like the Alternative PHP Cache
-(Debian package: <tt>php-apc</tt>) is beneficial for performance.
+(Debian package: <tt>php-apc</tt>) is beneficial for performance. For
+uploading large testcases, see the
+<ref id="problems:memory" name="section about memory limits">.
 
 <p>
 It may be desirable or even necessary to fine tune some MySQL default settings:
@@ -904,11 +906,6 @@ details.
 
 You should turn PHP's <tt>magic_quotes_*</tt> options off. We
 also recommend to turn off <tt>register_globals</tt>.
-If you want to upload large testcases in the jury web interface,
-it may be necessary to raise some PHP limits or you'll get
-"memory exhausted" errors. Make sure that the parameters
-<tt>memory_limit</tt>, <tt>upload_max_filesize</tt> and <tt>post_max_size</tt>
-in <tt>php.ini</tt> are all well above the size of your largest testcase.
 
 To configure the web server for DOMjudge, use the Apache configuration
 snippet from <tt>etc/apache.conf</tt>. It contains examples for
@@ -2249,22 +2246,28 @@ problems as with Java. Although the C# language has been added to
 DOMjudge, there's no support yet to run it within a chroot
 environment. So in that case, <tt>USE_CHROOT</tt> must be disabled.
 
-<sect>Memory limit errors in the web interface
+<sect>Memory limit errors in the web interface<label id="problems:memory">
 <p>
 
-E.g. when uploading large testdata files, one can run into an error in
+When uploading large testdata files, one can run into an error in
 the jury web interface of the form:
 <verb>
-*Fatal error*: Allowed memory size of XX bytes exhausted (tried to
-allocate YY bytes) in */home/domjudge/system/lib/lib.database.php*
-on line *154*
+Fatal error: Allowed memory size of XX bytes exhausted (tried to
+allocate YY bytes) in /home/domjudge/system/lib/lib.database.php
+on line 154
 </verb>
 This means that the PHP engine has run out of memory. The solution is
 to raise the memory limits for PHP. This can be done by either editing
 <tt>etc/apache.conf</tt> and raising the <tt>memory_limit</tt>,
-<tt>upload_max_filesize</tt> and <tt>post_max_size</tt> values under
-the jury directory or by directly editing the global Apache or
+<tt>upload_max_filesize</tt> and <tt>post_max_size</tt> values to well
+above the size of your largest testcase. You can change these parameters
+under the jury directory or by directly editing the global Apache or
 <tt>php.ini</tt> configuration.
+
+The optional PHP Suhosin module may also impose additional limits; check
+your error logging to see if these are triggered. You may also need to
+raise MySQL's <tt>max_allowed_packet</tt> parameter in
+<tt>/etc/mysql/my.cnf</tt> on both server and client.
 
 <sect>Compiler errors: `runguard: root privileges not dropped'
 <label id="runguard-rootprivs">

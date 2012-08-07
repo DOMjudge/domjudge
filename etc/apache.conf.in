@@ -86,7 +86,7 @@ AuthUserFile @domserver_etcdir@/htpasswd-jury
 # If you want to allow large file uploads for testcases, you must
 # ensure that the following PHP settings are all set to high enough
 # values. The following example will allow to upload testcases of
-# up to 16MB. Defaults for these vary per PHP version and install.
+# up to 64 MB. Defaults for these vary per PHP version and install.
 #<IfModule mod_php5.c>
 #php_value upload_max_filesize 16M
 #php_value post_max_size       16M
