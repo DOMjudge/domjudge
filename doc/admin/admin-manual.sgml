@@ -491,7 +491,7 @@ apt-get install gcc g++ make libcurl4-gnutls-dev mysql-server \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql php-geshi \
 	ntp sudo procps sharutils phpmyadmin xsltproc \
 	libboost-regex-dev libgmp3-dev linuxdoc-tools linuxdoc-tools-text \
-	transfig texlive-latex-recommended texlive-latex-extra \
+	transfig groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended
 </code>
 
@@ -1157,7 +1157,7 @@ format and prebuilt from SGML sources. Rebuilding these is not normally
 necessary. To rebuild them on a Debian-like system, the following commands
 should do it:
 <code>
-sudo apt-get install linuxdoc-tools make transfig texlive-latex-recommended
+sudo apt-get install linuxdoc-tools make transfig groff texlive-latex-recommended
 make -C doc/admin docs
 make -C doc/judge docs
 </code>
@@ -2530,7 +2530,7 @@ additional software to be installed:
        url="http://bisoncpp.sourceforge.net/"> for generating the
        parsing code of the optional <tt>checktestdata</tt> script.
 
-<item> Linuxdoc and Xfig/transfig to build the admin and judge
+<item> Linuxdoc, groff and Xfig/transfig to build the admin and judge
        documentation from SGML sources and a LaTeX installation to
        generate the PDF admin, judge and default team manual.
 </itemize>
@@ -2540,7 +2540,7 @@ install the additionally required packages (next to the
 <ref id="install_config:apt-getinstall"
        name="standard set of packages">):
 <code>
-apt-get install autoconf automake flex bisonc++ linuxdoc-tools transfig
+apt-get install autoconf automake flex bisonc++
 </code>
 
 When this software is present, bootstrapping can be done by running
