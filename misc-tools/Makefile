@@ -79,7 +79,6 @@ install-judgehost:
 
 install-docs:
 ifeq ($(CHECKTESTDATA_ENABLED),yes)
-	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir) checktestdata-grammar.txt
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples \
 		checktestdata.fltcmp checktestdata.hello
 endif
