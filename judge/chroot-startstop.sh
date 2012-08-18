@@ -26,7 +26,7 @@ case "$1" in
 
 # Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
 		mkdir -p proc
-		sudo -S mount -n -t proc --bind /proc proc < /dev/null
+		sudo -n mount -n -t proc --bind /proc proc < /dev/null
 
 		for i in $SUBDIRMOUNTS ; do
 
@@ -36,7 +36,7 @@ case "$1" in
 				ln -s `readlink "$CHROOTORIGINAL/$i"` $i
 			else
 				mkdir -p $i
-				sudo -S mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null
+				sudo -n mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null
 			fi
 		done
 		;;
@@ -46,14 +46,14 @@ case "$1" in
 # Wait a second to assure that no files are accessed anymore:
 		sleep 1
 
-		sudo -S umount "$PWD/proc" < /dev/null
+		sudo -n umount "$PWD/proc" < /dev/null
 		rmdir proc || true
 
 		for i in $SUBDIRMOUNTS ; do
 			if [ -L "$CHROOTORIGINAL/$i" ]; then
 				rm -f $i
 			else
-				sudo -S umount "$PWD/$i" < /dev/null
+				sudo -n umount "$PWD/$i" < /dev/null
 				rmdir $i || true
 			fi
 		done
