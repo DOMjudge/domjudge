@@ -118,8 +118,7 @@ int be_quiet;
 int show_help;
 int show_version;
 
-unsigned long runtime; /* in microseconds */
-unsigned long cputime;
+double runtime, cputime; /* in seconds */
 rlim_t memsize;
 rlim_t filesize;
 rlim_t nproc;
@@ -288,7 +287,7 @@ void output_exit_time(int exitcode, double timediff)
 	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys\n",
 	        timediff, userdiff, sysdiff);
 
-	if ( use_cputime && (userdiff+sysdiff) * 1000000 > cputime ) {
+	if ( use_cputime && (userdiff+sysdiff) > cputime ) {
 		warning("timelimit exceeded (cpu time)");
 	}
 
@@ -406,7 +405,7 @@ void setrestrictions()
 	}
 
 	if ( use_cputime ) {
-		rlim_t cputime_limit = (rlim_t)(cputime/1000000 + 1);
+		rlim_t cputime_limit = (rlim_t)cputime + 1;
 		verbose("setting CPU-time limit to %d seconds",(int)cputime_limit);
 		lim.rlim_cur = lim.rlim_max = cputime_limit;
 		setlim(CPU);
@@ -500,9 +499,7 @@ int main(int argc, char **argv)
 	char *valid_users;
 	char *ptr;
 	int   opt;
-	double runtime_d;
-	double cputime_d;
-	double timediff;
+	double timediff, tmpd;
 	size_t data_passed[3];
 	ssize_t nread, nwritten;
 
@@ -513,7 +510,7 @@ int main(int argc, char **argv)
 
 	/* Parse command-line options */
 	use_root = use_time = use_cputime = use_user = outputexit = outputtime = no_coredump = 0;
-	cputime = memsize = filesize = nproc = RLIM_INFINITY;
+	memsize = filesize = nproc = RLIM_INFINITY;
 	redir_stdout = redir_stderr = limit_streamsize = 0;
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
@@ -541,20 +538,17 @@ int main(int argc, char **argv)
 			break;
 		case 't': /* time option */
 			use_time = 1;
-			runtime_d = strtod(optarg,&ptr);
-			if ( errno || *ptr!='\0' ||
-			     runtime_d<=0 || runtime_d>=ULONG_MAX*1E-6 ) {
+			runtime = strtod(optarg,&ptr);
+			if ( errno || *ptr!='\0' || !finite(runtime) || runtime<=0 ) {
 				error(errno,"invalid runtime specified: `%s'",optarg);
 			}
-			runtime = (unsigned long)(runtime_d*1E6);
 			break;
 		case 'C': /* CPU time option */
 			use_cputime = 1;
-			cputime_d = strtod(optarg,&ptr);
-			if ( errno || *ptr!='\0' || !finite(cputime_d) || cputime_d<=0 ) {
+			cputime = strtod(optarg,&ptr);
+			if ( errno || *ptr!='\0' || !finite(cputime) || cputime<=0 ) {
 				error(errno,"invalid cputime specified: `%s'",optarg);
 			}
-			cputime = (int)(cputime_d*1E6);
 			break;
 		case 'm': /* memsize option */
 			memsize = (rlim_t) readoptarg("memory limit",1,LONG_MAX);
@@ -752,13 +746,13 @@ int main(int argc, char **argv)
 			/* Trigger SIGALRM via setitimer:  */
 			itimer.it_interval.tv_sec  = 0;
 			itimer.it_interval.tv_usec = 0;
-			itimer.it_value.tv_sec  = runtime / 1000000;
-			itimer.it_value.tv_usec = runtime % 1000000;
+			itimer.it_value.tv_sec  = (int) runtime;
+			itimer.it_value.tv_usec = (int)(modf(runtime,&tmpd) * 1E6);
 
 			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
 				error(errno,"setting timer");
 			}
-			verbose("using timelimit of %.3f seconds",runtime*1E-6);
+			verbose("using timelimit of %.3f seconds",runtime);
 		}
 
 		if ( times(&startticks)==(clock_t) -1 ) {
