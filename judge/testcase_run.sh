@@ -88,7 +88,7 @@ fi
 # Location of scripts/programs:
 SCRIPTDIR="$DJ_LIBJUDGEDIR"
 STATICSHELL="$DJ_LIBJUDGEDIR/sh-static"
-GAINROOT="sudo"
+GAINROOT="sudo -n"
 RUNGUARD="$DJ_BINDIR/runguard"
 RUNPIPE="$DJ_BINDIR/runpipe"
 PROGRAM="execdir/program"
