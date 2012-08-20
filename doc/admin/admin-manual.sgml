@@ -238,7 +238,7 @@ On the judgehosts:
        Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
        (check specific options of useradd, since these vary per system)
 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
-<item> Add to <tt>/etc/sudoers</tt>:<newline><tt>
+<item> Append to <tt>/etc/sudoers</tt>:<newline><tt>
  domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *<newline>
  domjudge ALL=(root) NOPASSWD: /bin/cp -pR /dev/null ./dev/null</tt>
 <item> Copy the file <tt>etc/dbpasswords.secret</tt> from the
@@ -272,7 +272,7 @@ Optionally:
        <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
        <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
-       and add the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
+       and append the following lines to <tt>/etc/sudoers</tt>:<newline><tt>
 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
        domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc<newline>
        domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc<newline>
@@ -1008,7 +1008,7 @@ via <tt>configure --enable-runuser=USER</tt>; the default is
 
 <tt>Runguard</tt> needs to be able to become root for certain operations
 like changing to the runuser and performing a chroot. The following line
-must be added to <tt>/etc/sudoers</tt>, replacing &lt;domjudge&gt;
+must be appended to <tt>/etc/sudoers</tt>, replacing &lt;domjudge&gt;
 with the user you intend to run the judgedaemon as, and the full path
 to runguard.
 <!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
@@ -1025,7 +1025,7 @@ manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
 file.
 
 If you use the default <tt>chroot-startstop.sh</tt> script, then
-the following lines must be added to <tt>/etc/sudoers</tt>:
+the following lines must be appended to <tt>/etc/sudoers</tt>:
 <!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
 <verb>
 domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
