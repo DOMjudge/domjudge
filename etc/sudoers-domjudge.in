@@ -4,7 +4,7 @@
 # Check the file paths (especially the chroot prefix),
 # give it file mode 0440 and this file into /etc/sudoers.d/
 # (most recent sudo versions; otherwise use an #include statement
-# in or add its content to /etc/sudoers
+# in or add its content to the end of /etc/sudoers
 
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: @judgehost_bindir@/runguard *
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/cp -pR /dev/null ../dev/null
