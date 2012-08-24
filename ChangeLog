@@ -2,6 +2,16 @@ DOMjudge Programming Contest Judging System
 
 Version 3.3.2 - DEV
 -------------------
+ - Fix bug: change absolute time strings for those times which are specified
+   as relative time when starttime was changed by "start now".
+ - Fix bug: long overflow in runguard / output_exit_time.
+ - Fix bug: add missing $pagename to check_judgings.php.
+ - Fix bug: race condition in runguard where the forked child terminates
+   before the parent could setup a signal handler.
+ - Fix bug: handle gracefully events deleted from the database.
+ - Fix bug: submitclient compile error with g++ (Debian 4.7.1-2) 4.7.1.
+ - Don't let sudo try to read passwords.
+ - Various documentation improvements.
 
 Version 3.3.1 - 12 June 2012
 ----------------------------
