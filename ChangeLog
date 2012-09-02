@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.3.2 - DEV
--------------------
+Version 3.3.2 - 2 September 2012
+--------------------------------
  - Fix bug: change absolute time strings for those times which are specified
    as relative time when starttime was changed by "start now".
  - Fix bug: long overflow in runguard / output_exit_time.
