@@ -98,7 +98,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	                @$filter['affilid'], @$filter['country'], @$filter['categoryid']);
 
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
-	                 probid, name, color FROM problem
+	                 probid, name, color, LENGTH(text) AS hastext FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
 	                 ORDER BY probid', $cid);
 	$categs = $DB->q('KEYTABLE SELECT categoryid AS ARRAYKEY,
@@ -293,14 +293,17 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 		'<th title="team name" scope="col">' . jurylink('teams.php','team') . '</th>' .
 		'<th title="# solved / penalty time" colspan="2" scope="col">' . jurylink(null,'score') . "</th>\n";
 	foreach( $probs as $pr ) {
-		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">' .
-			jurylink('problem.php?id=' . urlencode($pr['probid']),
-				htmlspecialchars($pr['probid']) .
-				(!empty($pr['color']) ? ' <img style="background-color: ' .
-				htmlspecialchars($pr['color']) . ';" alt="problem colour ' .
-				htmlspecialchars($pr['color']) . '" src="../images/circle.png" />' : '' )
-			) .
-			'</th>';
+		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">';
+		$str = htmlspecialchars($pr['probid']) .
+		       (!empty($pr['color']) ? ' <img style="background-color: ' .
+		        htmlspecialchars($pr['color']) . ';" alt="problem colour ' .
+		        htmlspecialchars($pr['color']) . '" src="../images/circle.png" />' : '' );
+		if ( IS_JURY || $pr['hastext']>0 ) {
+		     echo '<a href="problem.php?id=' . urlencode($pr['probid']) .
+			     '">' . $str . '</a></th>';
+		} else {
+			echo '<a>' . $str . '</a></th>';
+		}
 	}
 	echo "</tr>\n</thead>\n\n<tbody>\n";
 

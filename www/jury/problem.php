@@ -52,6 +52,9 @@ if ( isset($_POST['upload']) ) {
 	}
 }
 
+// This doesn't return, call before sending headers
+if ( $cmd == 'viewtext' ) putProblemText($id);
+
 $jscolor=true;
 
 require(LIBWWWDIR . '/header.php');
@@ -113,6 +116,9 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <a target="_blank"
 href="http://www.w3schools.com/css/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
+
+<tr><td><label for="data_0__text_">Problem text:</label></td>
+<td><?php echo addFileField('data[0][text]', 30)?></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>
 <td><?php echo addInput('data[0][special_run]', @$row['special_run'], 30, 25)?></td></tr>
@@ -193,6 +199,10 @@ if ( !empty($data['color']) ) {
 		';" alt="problem colour ' . htmlspecialchars($data['color']) .
 		'" src="../images/circle.png" /> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
+}
+if ( !empty($data['text']) ) {
+	echo '<tr><td scope="row">Problem text:</td><td><a href="problem.php?id=' .
+	    urlencode($id) . "&cmd=viewtext\">view text</a></td></tr>\n";
 }
 if ( !empty($data['special_run']) ) {
 	echo '<tr><td scope="row">Special run script:</td><td class="filename">' .

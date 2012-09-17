@@ -439,3 +439,51 @@ function checkFileUpload($errorcode) {
 				'. Contact staff.');
 	}
 }
+
+/**
+ * Outputs a problem description text, either as download or inline.
+ * It is assumed that the headers have not been sent yet, and this
+ * function terminates the PHP script execution.
+ */
+function putProblemText($probid)
+{
+	global $DB, $cdata;
+
+	$prob = $DB->q("MAYBETUPLE SELECT *, OCTET_LENGTH(text) AS textlen FROM problem
+	                WHERE probid = %s AND cid = %i", $probid, $cdata['cid']);
+
+	if ( empty($prob) ||
+	     !(IS_JURY || difftime($cdata['starttime'],now())<=0) ) {
+		error("Problem '$probid' not found or not available");
+	}
+
+	$finfo = finfo_open(FILEINFO_MIME);
+
+	list($type, $enc) = explode('; ', finfo_buffer($finfo, $prob['text']));
+
+	finfo_close($finfo);
+
+	$ext = NULL;
+	switch ( $type ) {
+	case 'application/pdf':
+		$ext = 'pdf';
+		break;
+	case 'text/html':
+		$ext = 'html';
+		break;
+	case 'text/plain':
+		$ext = 'txt';
+		break;
+	default:
+		error("Problem '$probid' text has unknown mime-type");
+	}
+	$filename = "prob-$probid." . $ext;
+
+	header("Content-Type: $type; name=\"$filename\"");
+	header("Content-Disposition: inline; filename=\"$filename\"");
+	header("Content-Length: " . $prob['textlen']);
+
+	echo $prob['text'];
+
+	exit(0);
+}
