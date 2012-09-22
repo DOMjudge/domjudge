@@ -8,4 +8,7 @@
 
 require('init.php');
 
-putProblemText(@$_REQUEST['id']);
+$id = @$_REQUEST['id'];
+if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid problem id");
+
+putProblemText($id);
