@@ -16,7 +16,7 @@ ALTER TABLE `problem` DROP COLUMN `text`;
 --
 
 ALTER TABLE `problem`
-  ADD COLUMN `text` longblob NOT NULL COMMENT 'Problem text in HTML/PDF/ASCII' AFTER `color`;
+  ADD COLUMN `text` longblob COMMENT 'Problem text in HTML/PDF/ASCII' AFTER `color`;
 
 --
 -- Transfer data from old to new structure
