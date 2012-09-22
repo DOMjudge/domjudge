@@ -53,7 +53,7 @@ if ( isset($_POST['upload']) ) {
 }
 
 // This doesn't return, call before sending headers
-if ( $cmd == 'viewtext' ) putProblemText($id);
+if ( isset($cmd) && $cmd == 'viewtext' ) putProblemText($id);
 
 $jscolor=true;
 
@@ -202,7 +202,7 @@ if ( !empty($data['color']) ) {
 }
 if ( !empty($data['text']) ) {
 	echo '<tr><td scope="row">Problem text:</td><td><a href="problem.php?id=' .
-	    urlencode($id) . "&cmd=viewtext\">view text</a></td></tr>\n";
+	    urlencode($id) . "&amp;cmd=viewtext\">view text</a></td></tr>\n";
 }
 if ( !empty($data['special_run']) ) {
 	echo '<tr><td scope="row">Special run script:</td><td class="filename">' .
