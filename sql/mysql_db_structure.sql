@@ -194,7 +194,7 @@ CREATE TABLE `problem` (
   `special_run` varchar(25) default NULL COMMENT 'Script to run submissions for this problem',
   `special_compare` varchar(25) default NULL COMMENT 'Script to compare problem and jury output for this problem',
   `color` varchar(25) default NULL COMMENT 'Balloon colour to display on the scoreboard',
-  `text` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
+  `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
   PRIMARY KEY  (`probid`),
   KEY `cid` (`cid`),
   CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE

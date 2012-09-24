@@ -449,7 +449,7 @@ function putProblemText($probid)
 {
 	global $DB, $cdata;
 
-	$prob = $DB->q("MAYBETUPLE SELECT *, OCTET_LENGTH(text) AS textlen FROM problem
+	$prob = $DB->q("MAYBETUPLE SELECT *, OCTET_LENGTH(problemtext) AS textlen FROM problem
 	                WHERE probid = %s AND cid = %i", $probid, $cdata['cid']);
 
 	if ( empty($prob) ||
@@ -459,7 +459,7 @@ function putProblemText($probid)
 
 	$finfo = finfo_open(FILEINFO_MIME);
 
-	list($type, $enc) = explode('; ', finfo_buffer($finfo, $prob['text']));
+	list($type, $enc) = explode('; ', finfo_buffer($finfo, $prob['problemtext']));
 
 	finfo_close($finfo);
 
@@ -483,7 +483,7 @@ function putProblemText($probid)
 	header("Content-Disposition: inline; filename=\"$filename\"");
 	header("Content-Length: " . $prob['textlen']);
 
-	echo $prob['text'];
+	echo $prob['problemtext'];
 
 	exit(0);
 }

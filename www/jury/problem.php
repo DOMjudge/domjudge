@@ -117,8 +117,8 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 href="http://www.w3schools.com/css/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
-<tr><td><label for="data_0__text_">Problem text:</label></td>
-<td><?php echo addFileField('data[0][text]', 30)?></td></tr>
+<tr><td><label for="data_0__problemtext_">Problem text:</label></td>
+<td><?php echo addFileField('data[0][problemtext]', 30)?></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>
 <td><?php echo addInput('data[0][special_run]', @$row['special_run'], 30, 25)?></td></tr>
@@ -200,7 +200,7 @@ if ( !empty($data['color']) ) {
 		'" src="../images/circle.png" /> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
 }
-if ( !empty($data['text']) ) {
+if ( !empty($data['problemtext']) ) {
 	echo '<tr><td scope="row">Problem text:</td><td><a href="problem.php?id=' .
 	    urlencode($id) . "&amp;cmd=viewtext\">view text</a></td></tr>\n";
 }

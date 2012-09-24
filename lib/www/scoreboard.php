@@ -98,7 +98,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	                @$filter['affilid'], @$filter['country'], @$filter['categoryid']);
 
 	$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
-	                 probid, name, color, LENGTH(text) AS hastext FROM problem
+	                 probid, name, color, LENGTH(problemtext) AS hastext FROM problem
 	                 WHERE cid = %i AND allow_submit = 1
 	                 ORDER BY probid', $cid);
 	$categs = $DB->q('KEYTABLE SELECT categoryid AS ARRAYKEY,

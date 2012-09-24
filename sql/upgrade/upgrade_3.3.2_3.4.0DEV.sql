@@ -8,15 +8,15 @@
 --
 
 -- @UPGRADE-CHECK@
-ALTER TABLE `problem` ADD  COLUMN `text` longblob;
-ALTER TABLE `problem` DROP COLUMN `text`;
+ALTER TABLE `problem` ADD  COLUMN `problemtext` longblob;
+ALTER TABLE `problem` DROP COLUMN `problemtext`;
 
 --
 -- Create additional structures
 --
 
 ALTER TABLE `problem`
-  ADD COLUMN `text` longblob COMMENT 'Problem text in HTML/PDF/ASCII' AFTER `color`;
+  ADD COLUMN `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII' AFTER `color`;
 
 --
 -- Transfer data from old to new structure
