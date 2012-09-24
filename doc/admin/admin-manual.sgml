@@ -1403,7 +1403,7 @@ The <tt>color</tt> tag can be filled with a CSS colour specification
 to associate with this problem; see also section <ref id="scoreboard:colours"
 name="Scoreboard: colours">.
 
-In <tt>problemtext</tt> a PDF, html or plain text document can be
+In <tt>problemtext</tt> a PDF, HTML or plain text document can be
 placed which allows team, public and jury to download the problem
 statement. Note that no additional filtering takes place, so HTML
 (and PDF to some extent) should be from a trusted source to prevent
@@ -2056,8 +2056,8 @@ When using PHP sessions or LDAP, authentication data is sent via HTTP,
 so we strongly advise to use HTTPS in that case.
 
 Problem texts can be uploaded to DOMjudge. No filtering is performed
-there, so make sure they are from trusted sources to prevent in the
-case of HTML to prevent cross site scripting code to be injected.
+there, so make sure they are from trusted sources to, in the
+case of HTML, prevent cross site scripting code to be injected.
 
 <sect>Root privileges <label id="security:rootprivs">
 <p>
