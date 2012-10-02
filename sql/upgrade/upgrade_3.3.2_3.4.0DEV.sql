@@ -26,6 +26,8 @@ ALTER TABLE `problem`
 -- Add/remove sample/initial contents
 --
 
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('enable_printing', '0', 'bool', 'Enable teams and jury to send source code to a printer via the DOMjudge web interface.');
+
 --
 -- Finally remove obsolete structures after moving data
 --

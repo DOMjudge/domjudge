@@ -49,7 +49,7 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 	} elseif ( !(bool) ini_get('safe_mode') ||
 		       strtolower(ini_get('safe_mode'))=='off' ) {
 		// Only try executing diff when safe_mode is off, otherwise
-		// the shell_exec will fail.
+		// the shell exec will fail.
 
 		if ( is_readable($oldfile) && is_readable($newfile) ) {
 			// A direct diff on the sources in the SUBMITDIR.
@@ -86,7 +86,7 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 			if ( $newfile ) unlink($newfile);
 		}
 	} else {
-		$difftext = "DOMjudge: diff functionality not available in PHP or via shell_exec.";
+		$difftext = "DOMjudge: diff functionality not available in PHP or via shell exec.";
 	}
 
 	return $difftext;

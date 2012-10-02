@@ -30,6 +30,7 @@ require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/print.php');
 require_once(LIBWWWDIR . '/clarification.php');
 require_once(LIBWWWDIR . '/scoreboard.php');
+require_once(LIBWWWDIR . '/printing.php');
 require_once(LIBWWWDIR . '/auth.team.php');
 
 // The functions do_login and show_loginpage, if called, do not return.

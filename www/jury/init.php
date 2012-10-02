@@ -33,6 +33,7 @@ setup_database_connection();
 require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/print.php');
 require_once(LIBWWWDIR . '/forms.php');
+require_once(LIBWWWDIR . '/printing.php');
 
 require_once(LIBWWWDIR . '/validate.jury.php');
 require_once(LIBWWWDIR . '/common.jury.php');
