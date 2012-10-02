@@ -5,5 +5,5 @@
  - @EXPECTED_RESULTS@: CORRECT
  -}
 
-import IO
+import System.IO
 main = do	putStr "Hello world!\n"
