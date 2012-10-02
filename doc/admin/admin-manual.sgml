@@ -1199,6 +1199,22 @@ We advise to install an NTP-daemon (Network Time Protocol) to make
 sure the time between domserver and judgehost (and team computers)
 is in sync.
 
+<sect1>Printing
+<p>
+
+It is recommended to configure the local desktop printing of team
+workstations whereever possible: this has the most simple interface
+and allows teams to print from within their editor.
+
+<p>
+If this is not feasible, DOMjudge includes support for printing via
+the DOMjudge web interface: the DOMjudge server then needs to be
+able to deliver the uploaded files to the printer. It can be
+enabled via the <tt>enable_printing</tt> configuration option in 
+the administrator interface. The exact command used to send the
+files to a printer can be changed the function <tt>send_print()</tt>
+in <tt>lib/www/printing.php</tt>.
+
 <sect1>The plugin web interface
 <p>
 
