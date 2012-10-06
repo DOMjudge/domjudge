@@ -13,9 +13,11 @@ header('Content-Type: text/html; charset=' . DJ_CHARACTER_SET);
 
 /* Prevent clickjacking by forbidding framing in modern browsers.
  * Really want to frame DOMjudge? Then change DENY to SAMEORIGIN
- * or even comment out the header altogether.
+ * or even comment out the header altogether. For the public
+ * interface there's no risk, and embedding the scoreboard in a
+ * frame may be useful.
  */
-header('X-Frame-Options: DENY');
+if ( ! IS_PUBLIC ) header('X-Frame-Options: DENY');
 
 if ( isset($refresh) &&
      (!isset($_COOKIE["domjudge_refresh"]) ||
