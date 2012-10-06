@@ -109,7 +109,7 @@ if ( !empty($BALLOONS) ) {
 
 		// the balloon earned
 		echo '<td class="probid">' .
-			'<img style="background-color: ' .
+			'<img class="balloonimage" style="background-color: ' .
 		    htmlspecialchars($probs_data[$row['probid']]['color']) .
 			';" alt="problem colour ' . htmlspecialchars($probs_data[$row['probid']]['color']) .
 		    '" src="../images/circle.png" /> ' . htmlspecialchars($row['probid']) . '</td>';
@@ -125,7 +125,7 @@ if ( !empty($BALLOONS) ) {
 		$TOTAL_BALLOONS[$row['login']] = array_unique($TOTAL_BALLOONS[$row['login']]);
 		foreach($TOTAL_BALLOONS[$row['login']] as $prob_solved) {
 			echo '<img title="' . htmlspecialchars($prob_solved) .
-				'" style="background-color: ' .
+				'" class="balloonimage" style="background-color: ' .
 				htmlspecialchars($probs_data[$prob_solved]['color']) .
 				';" alt="problem colour ' .
 				htmlspecialchars($probs_data[$row['probid']]['color']) .
