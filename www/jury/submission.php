@@ -366,7 +366,7 @@ if ( isset($jid) )  {
 <script type="text/javascript" language="JavaScript">
 <!--
 togglelastruns();
--->
+// -->
 </script>
 <?php
 

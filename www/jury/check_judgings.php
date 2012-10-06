@@ -61,7 +61,7 @@ function flushresults($header, $results, $collapse = FALSE)
 		echo "<script type=\"text/javascript\" language=\"JavaScript\">
 <!--
 	collapse($section);
--->
+// -->
 </script>\n\n";
 	}
 

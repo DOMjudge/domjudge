@@ -100,7 +100,7 @@ function flushresults() {
 for (var i = $lastresultno; i < $resultno; i++) {
     collapse(i);
 }
--->
+// -->
 </script>\n\n";
 
 	flush();
