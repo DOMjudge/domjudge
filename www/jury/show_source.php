@@ -109,8 +109,8 @@ function presentSource ($sourcedata, $langid)
 	if ( strlen($sourcedata['sourcecode'])==0 ) {
 		// Someone submitted an empty file. Cope gracefully.
 		$head .= "<p class=\"nodata\">empty file</p>\n\n";
-	} else if ( strlen($sourcedata['sourcecode']) < 10 * 1024 ) {
-		// Source < 10kB (for longer source code,
+	} else if ( strlen($sourcedata['sourcecode']) < 32 * 1024 ) {
+		// Source < 32kB (for longer source code,
 		// highlighter tends to take very long time or timeout)
 		$head .= highlight($sourcedata['sourcecode'], $langid);
 	} else {
