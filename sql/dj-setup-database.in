@@ -166,6 +166,7 @@ install)
 	read_dbpasswords
 	create_db_users
  	cat $SQLDIR/mysql_db_structure.sql \
+ 	    $SQLDIR/mysql_db_defaultdata.sql \
  	    $SQLDIR/mysql_db_examples.sql \
 	     | mysql -D "$DBNAME"
 	rm -f $TMPFILE
