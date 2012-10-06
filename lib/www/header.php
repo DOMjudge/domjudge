@@ -54,9 +54,11 @@ if ( IS_JURY ) {
 	echo "<script type=\"text/javascript\" src=\"" .
 		"../js/sorttable.js\"></script>\n";
 }
-
+if ( ! IS_PUBLIC ) {
+	echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
+}
+if ( ! empty($extrahead) ) echo $extrahead;
 ?>
-<script type="text/javascript" src="../js/domjudge.js"></script>
 </head>
 <?php
 
