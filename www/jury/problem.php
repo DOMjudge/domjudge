@@ -114,7 +114,7 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 <td><?php echo addInputField('text','data[0][color]', @$row['color'],
 	' size="8" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
 <a target="_blank"
-href="http://www.w3schools.com/css/css_colornames.asp"><img
+href="http://www.w3schools.com/cssref/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__problemtext_">Problem text:</label></td>
