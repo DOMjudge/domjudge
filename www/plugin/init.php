@@ -12,6 +12,7 @@ require_once('../configure.php');
  * successfully authenticate as user 'jury'.
  */
 define('IS_JURY', (@$_SERVER['REMOTE_USER'] == "jury"));
+define('IS_PUBLIC', false);
 
 if( DEBUG & DEBUG_TIMINGS ) {
 	require_once(LIBDIR . '/lib.timer.php');

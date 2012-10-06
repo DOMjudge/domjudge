@@ -9,6 +9,7 @@
 require_once('../configure.php');
 
 define('IS_JURY', false);
+define('IS_PUBLIC', false);
 
 if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
 

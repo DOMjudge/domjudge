@@ -13,6 +13,7 @@ if (empty($_SERVER['REMOTE_USER']) || $_SERVER['AUTH_TYPE'] != "Basic") {
 }
 
 define('IS_JURY', TRUE);
+define('IS_PUBLIC', false);
 
 require_once('../configure.php');
 
