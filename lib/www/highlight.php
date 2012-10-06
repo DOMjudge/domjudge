@@ -70,7 +70,17 @@ function highlighter_init ()
  */
 function highlight_geshi ($source, $ext)
 {
-	$geshi = new Geshi ($source, $ext);
+	switch (strtolower($ext)) {
+	case 'hs':  $lang = 'haskell'; break;
+	case 'pas': $lang = 'pascal';  break;
+	case 'pl':  $lang = 'perk';    break;
+	case 'py':  $lang = 'python';  break;
+	case 'sh':  $lang = 'bash';    break;
+	default:
+		$lang = $ext;
+	}
+
+	$geshi = new Geshi ($source, $lang);
 	$geshi->enable_line_numbers(GESHI_FANCY_LINE_NUMBERS);
 	// TODO: make output use more CSS and less <font>
 	if ( $geshi->error()===FALSE ) {
