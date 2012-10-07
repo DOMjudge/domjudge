@@ -38,14 +38,15 @@ function canViewClarification($team, $clar)
  */
 function putClar($clar)
 {
-	if ( $clar['sender'] ) {
+	// $clar['sender'] is set to the team ID, or empty if sent by the jury.
+	if ( !empty($clar['sender']) ) {
 		$from = '<span class="teamid">' . htmlspecialchars($clar['sender']) .
 			'</span>: ' . htmlspecialchars($clar['fromname']);
 	} else {
 		$from = 'Jury';
 		if ( IS_JURY ) $from .= ' (' . htmlspecialchars($clar['jury_member']) . ')';
 	}
-	if ( $clar['recipient'] && $from == 'Jury' ) {
+	if ( $clar['recipient'] && empty($clar['sender']) ) {
 		$to = '<span class="teamid">' . htmlspecialchars($clar['recipient']) .
 			'</span>: ' . htmlspecialchars($clar['toname']);
 	} else {
