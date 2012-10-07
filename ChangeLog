@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 3.3.3 - DEV
 -------------------
+ - Fix bug: clarifications sent by jury member would display the recipient
+   as 'All' (even though linked to one team). Thanks Mark Janssen.
 
 Version 3.3.2 - 2 September 2012
 --------------------------------
