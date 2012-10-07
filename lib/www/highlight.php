@@ -79,7 +79,7 @@ function highlight_geshi ($source, $ext)
 	switch (strtolower($ext)) {
 	case 'hs':  $lang = 'haskell'; break;
 	case 'pas': $lang = 'pascal';  break;
-	case 'pl':  $lang = 'perk';    break;
+	case 'pl':  $lang = 'perl';    break;
 	case 'py':  $lang = 'python';  break;
 	case 'sh':  $lang = 'bash';    break;
 	default:
