@@ -13,12 +13,13 @@ if ( !isset($id) ) {
 	error("No problem id given.");
 }
 
-$problem = $DB->q('MAYBETUPLE SELECT * FROM problem p
-	      WHERE probid = %s',$id);
-if ( empty($problem) ) error ("Problem $id not found");
-
 $ini_keys = array('probid', 'name', 'timelimit', 'special_run', 
 		  'special_compare', 'color');
+
+$problem = $DB->q('MAYBETUPLE SELECT ' . join(',', $ini_keys) .
+                 ' FROM problem p WHERE probid = %s',$id);
+if ( empty($problem) ) error ("Problem $id not found");
+
 $inistring = "";
 foreach ($ini_keys as $ini_val) {
 	if ( !empty($problem[$ini_val]) ) {

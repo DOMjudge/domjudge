@@ -449,7 +449,7 @@ function putProblemText($probid)
 {
 	global $DB, $cdata;
 
-	$prob = $DB->q("MAYBETUPLE SELECT *, OCTET_LENGTH(problemtext) AS textlen FROM problem
+	$prob = $DB->q("MAYBETUPLE SELECT problemtext, OCTET_LENGTH(problemtext) AS textlen FROM problem
 	                WHERE probid = %s AND cid = %i", $probid, $cdata['cid']);
 
 	if ( empty($prob) ||

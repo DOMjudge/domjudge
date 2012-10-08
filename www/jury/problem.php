@@ -69,7 +69,9 @@ if ( IS_ADMIN && !empty($cmd) ):
 
 	if ( $cmd == 'edit' ) {
 		echo "<tr><td>Problem ID:</td><td class=\"probid\">";
-		$row = $DB->q('TUPLE SELECT p.*, COUNT(testcaseid) AS testcases
+		$row = $DB->q('TUPLE SELECT p.probid,p.cid,p.name,p.allow_submit,p.allow_judge,
+	                                    p.timelimit,p.special_run,p.special_compare,p.color,
+	                                    COUNT(testcaseid) AS testcases
 		               FROM problem p
 		               LEFT JOIN testcase USING (probid)
 		               WHERE probid = %s GROUP BY probid', $id);
@@ -152,7 +154,10 @@ exit;
 
 endif;
 
-$data = $DB->q('TUPLE SELECT p.*, c.contestname, count(rank) AS ntestcases
+$data = $DB->q('TUPLE SELECT p.probid,p.cid,p.name,p.allow_submit,p.allow_judge,
+                             p.timelimit,p.special_run,p.special_compare,p.color,
+                             OCTET_LENGTH(p.problemtext) as textlen,
+                             c.contestname, count(rank) AS ntestcases
                 FROM problem p
                 NATURAL JOIN contest c
                 LEFT JOIN testcase USING (probid)
@@ -200,7 +205,7 @@ if ( !empty($data['color']) ) {
 		'" src="../images/circle.png" /> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
 }
-if ( !empty($data['problemtext']) ) {
+if ( $data['textlen'] > 0 ) {
 	echo '<tr><td scope="row">Problem text:</td><td><a href="problem.php?id=' .
 	    urlencode($id) . "&amp;cmd=viewtext\">view text</a></td></tr>\n";
 }
