@@ -3,6 +3,38 @@ DOMjudge Programming Contest Judging System
 Version 3.4.0 - DEV
 -------------------
  - Add problem text to database and support viewing in PDF/HTML/ASCII.
+ - Add optional printing support via DOMjudge web interface. Using
+   local system printing remains the preferred way.
+ - Change non-lazy evaluation to also return the result to the team
+   as soon as possible while continuing to judge the remaining test
+   cases.
+ - Display verification comment for previous run.
+ - Check IP address equivalence with inet_pton.
+ - Make public interface not dependent on domjudge.js.
+ - Do not apply framing protection to public interface.
+ - Update GeSHi to upstream 1.0.8.11.
+ - Increase highlighted source limit from 10 kB to 32 kB.
+ - Add mapping to GeSHi highlighting to translate DOMjudge language
+   ID's to their GeSHi counterparts.
+ - Move configuration data to separate SQL file.
+ - Store CPU/wall time limits in double to prevent overflows.
+ - Fix bug: CSS class missing in disabled balloon interfaces rows.
+ - Fix bug: link to CSS colour names reference was broken.
+ - Make Java class name detection compatible with Java 7.
+ - Make Haskell example source compatible with newer GHC versions.
+ - Make default colour for observers grey instead of yellow.
+ - Fix bug: buffer underflow bug in runguard when compiled on Ubuntu 12.04:
+   added check for closed pipe (file descriptor == -1). Thanks Keith Johnson.
+ - Fix bug: change absolute time strings for those times which are specified
+   as relative time when starttime was changed by "start now".
+ - Fix bug: long overflow in runguard / output_exit_time.
+ - Fix bug: add missing $pagename to check_judgings.php.
+ - Fix bug: race condition in runguard where the forked child terminates
+   before the parent could setup a signal handler.
+ - Fix bug: handle gracefully events deleted from the database.
+ - Fix bug: submitclient compile error with g++ (Debian 4.7.1-2) 4.7.1.
+ - Don't let sudo try to read passwords.
+ - Various documentation improvements.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
