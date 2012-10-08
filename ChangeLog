@@ -5,6 +5,11 @@ Version 3.2.4 - DEV
  - Fix bug: add missing $pagename to check_judgings.php.
  - Fix bug: handle gracefully events deleted from the database.
  - Fix bug: submitclient compile error with g++ (Debian 4.7.1-2) 4.7.1.
+ - Fix bug: link to CSS colour names reference was broken.
+ - Make Java class name detection compatible with Java 7.
+ - Make Haskell example source compatible with newer GHC versions.
+ - Add mapping to GeSHi highlighting to translate DOMjudge language
+   ID's to their GeSHi counterparts.
  - Don't let sudo try to read passwords.
  - Various documentation improvements.
 
