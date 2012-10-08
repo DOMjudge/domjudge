@@ -81,7 +81,6 @@ if ( IS_ADMIN ) {
 	echo "<p>" . addLink('problem') . "</p>\n\n";
 	if ( class_exists("ZipArchive") ) {
 		echo "\n" . addForm('problem.php', 'post', null, 'multipart/form-data') .
-	 		addHidden('id', @$data['probid']) .
 	 		'Problem archive: ' .
 	 		addFileField('problem_archive') .
 	 		addSubmit('Upload', 'upload') .
