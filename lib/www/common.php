@@ -444,8 +444,10 @@ function checkFileUpload($errorcode) {
  * Outputs a problem description text, either as download or inline.
  * It is assumed that the headers have not been sent yet, and this
  * function terminates the PHP script execution.
+ *
+ * If return is true, will return an array (content-type, full text)
  */
-function putProblemText($probid)
+function putProblemText($probid, $return = false)
 {
 	global $DB, $cdata;
 
@@ -477,6 +479,11 @@ function putProblemText($probid)
 	default:
 		error("Problem '$probid' text has unknown mime-type");
 	}
+
+	if ( $return ) {
+		return array('ext' => $ext, 'text' => $prob['problemtext']);
+	}
+
 	$filename = "prob-$probid." . $ext;
 
 	header("Content-Type: $type; name=\"$filename\"");

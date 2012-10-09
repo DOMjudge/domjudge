@@ -189,6 +189,16 @@ function importZippedProblem($zip, $probid = NULL)
 		}
 	}
 
+	// Add problem statement
+	foreach (array('pdf', 'html', 'txt') as $type) {
+		$text = $zip->getFromName('problem.' . $type);
+		if ($text !== FALSE) {
+			$DB->q('UPDATE problem SET problemtext = %s WHERE probid = %s',
+				$text, $probid);
+			break;
+		}
+	}
+
 	// Insert/update testcases
 	$maxrank = 1 + $DB->q('VALUE SELECT max(rank) FROM testcase
 	                       WHERE probid = %s', $probid);

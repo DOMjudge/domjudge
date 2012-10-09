@@ -16,8 +16,8 @@ if ( !isset($id) ) {
 $ini_keys = array('probid', 'name', 'timelimit', 'special_run', 
 		  'special_compare', 'color');
 
-$problem = $DB->q('MAYBETUPLE SELECT ' . join(',', $ini_keys) .
-                 ' FROM problem p WHERE probid = %s',$id);
+$problem = $DB->q('MAYBETUPLE SELECT OCTET_LENGTH(problemtext) as textlen, ' .
+                 join(',', $ini_keys) . ' FROM problem p WHERE probid = %s',$id);
 if ( empty($problem) ) error ("Problem $id not found");
 
 $inistring = "";
@@ -37,6 +37,12 @@ if ( $res !== TRUE ) {
 	error("Could not create temporary zip file.");
 }
 $zip->addFromString('domjudge-problem.ini', $inistring);
+
+if ( $problem['textlen'] > 0 ) {
+	$probdata = putProblemText($id, true);
+	$zip->addFromString('problem.'.$probdata['ext'], $probdata['text']);
+	unset($probdata);
+}
 
 $testcases = $DB->q('SELECT description, testcaseid, rank FROM testcase
 		     WHERE probid = %s ORDER BY rank', $id);
