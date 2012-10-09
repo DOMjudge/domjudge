@@ -18,6 +18,13 @@ directory:
 This file has a simple INI-syntax and contains problem metadata, see
 below.
 
+<tag><tt>problem.{pdf,html,txt}</tt></tag>
+
+The full problem statement as distributed to participants. The file
+extension determines any of three supported formats. If multiple
+files matching this pattern are available, any one of those will be
+used.
+
 <tag><tt>&lt;testdata-file&gt;.in</tt> / <tt>&lt;testdata-file&gt;.out</tt></tag>
 
 Each pair of <tt>&lt;testdata-file&gt;.{in,out}</tt> contains the

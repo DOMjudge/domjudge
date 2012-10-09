@@ -10,6 +10,7 @@ Version 3.3.3 - DEV
  - Make Haskell example source compatible with newer GHC versions.
  - Add mapping to GeSHi highlighting to translate DOMjudge language
    ID's to their GeSHi counterparts.
+ - Problem format spec: allow to include a problem statement text.
 
 Version 3.3.2 - 2 September 2012
 --------------------------------
