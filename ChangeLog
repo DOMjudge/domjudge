@@ -11,6 +11,7 @@ Version 3.3.3 - DEV
  - Add mapping to GeSHi highlighting to translate DOMjudge language
    ID's to their GeSHi counterparts.
  - Problem format spec: allow to include a problem statement text.
+ - Add cascading delete on submitid to balloons table.
 
 Version 3.3.2 - 2 September 2012
 --------------------------------
