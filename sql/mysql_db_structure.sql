@@ -28,7 +28,9 @@ CREATE TABLE `balloon` (
   `balloonid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `submitid` int(4) unsigned NOT NULL COMMENT 'Submission for which balloon was earned',
   `done` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has been handed out yet?',
-  PRIMARY KEY (`balloonid`)
+  PRIMARY KEY (`balloonid`),
+  KEY `submitid` (`submitid`),
+  CONSTRAINT `balloon_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Balloons to be handed out';
 
 --
