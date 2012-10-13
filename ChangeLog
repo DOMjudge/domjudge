@@ -35,6 +35,7 @@ Version 3.4.0 - DEV
  - Fix bug: submitclient compile error with g++ (Debian 4.7.1-2) 4.7.1.
  - Don't let sudo try to read passwords.
  - Various documentation improvements.
+ - Add cascading delete on submitid to balloons table.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
