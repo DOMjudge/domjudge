@@ -6,6 +6,8 @@
 /** For each table specify the set of attributes that together
  *  are considered the primary key / superkey. */
 $KEYS = array();
+$KEYS['auditlog'] = array('logid');
+$KEYS['balloon'] = array('balloonid');
 $KEYS['clarification'] = array('clarid');
 $KEYS['contest'] = array('cid');
 $KEYS['event'] = array('eventid');
@@ -36,6 +38,12 @@ $KEYS['testcase'] = array('testcaseid');
  *                references a foreign key.
  */
 $RELATIONS = array();
+
+$RELATIONS['auditlog'] = array();
+
+$RELATIONS['clarification'] = array (
+	'submitid' => 'submission.submitid',
+);
 
 $RELATIONS['clarification'] = array (
 	'cid' => 'contest.cid',
