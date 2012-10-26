@@ -828,11 +828,16 @@ Installation of the database is done with <tt>bin/dj-setup-database</tt>.
 For this, you need an installed and configured MySQL server and
 administrator access to it. Run
 <code>
+dj-setup-database genpass
 dj-setup-database [-u <admin_user>] [-p <password>|-r] install
 </code>
-to create the database, users and insert some default/example data
-into the domjudge database. The option <tt>-r</tt> will prompt for a
-password; when no user is specified, the mysql client will try to read
+This first creates the DOMjudge database credentials file
+<tt>etc/dbpasswords.secret</tt> (optionally change the random
+generated password, although it is not needed for normal operation).
+Then it creates the database and users and inserts some
+default/example data into the domjudge database. The option
+<tt>-r</tt> will prompt for a password for mysql; when no user is
+specified, the mysql client will try to read
 credentials from <tt>$HOME/.my.cnf</tt> as usual. The command
 <tt>uninstall</tt> can be passed to <tt>dj-setup-database</tt> to
 remove the DOMjudge database and users; <em>this deletes all data!</em>
@@ -1228,7 +1233,7 @@ consecutive DOMjudge versions. At the beginning of each script, a check
 is performed which will let MySQL bail out with an error if it should
 not be applied anymore. Note that the scripts must be applied in order
 (sorted by release). These scripts can be applied by running
-<tt>dj-database-setup upgrade</tt>.
+<tt>dj-setup-database upgrade</tt>.
 
 
 <chapt>Setting up a contest <label id="contestsetup">
@@ -1684,9 +1689,9 @@ default example problems are in the active contest. There's also
 <tt>make stress-test</tt>, but be warned that these tests might crash
 a judgedaemon. The results can be checked in the web interface; each
 source file specifies the expected outcome with some explanations. For
-convenience, there is also a script <tt>check-judgings</tt>; this will
-automatically check whether submitted sources from the
-<tt>tests</tt> directory were judged as expected. Note that a
+convenience, there is a link <it>judging verifier</it> in the admin
+web interface; this will automatically check whether submitted sources
+from the <tt>tests</tt> directory were judged as expected. Note that a
 few sources have multiple possible outcomes: these must be verified
 manually.
 
