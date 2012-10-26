@@ -1747,9 +1747,9 @@ default example problems are in the active contest. There's also
 <tt>make stress-test</tt>, but be warned that these tests might crash
 a judgedaemon. The results can be checked in the web interface; each
 source file specifies the expected outcome with some explanations. For
-convenience, there is also a script <tt>check-judgings</tt>; this will
-automatically check whether submitted sources from the
-<tt>tests</tt> directory were judged as expected. Note that a
+convenience, there is a link <it>judging verifier</it> in the admin
+web interface; this will automatically check whether submitted sources
+from the <tt>tests</tt> directory were judged as expected. Note that a
 few sources have multiple possible outcomes: these must be verified
 manually.
 
