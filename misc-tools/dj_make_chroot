@@ -71,6 +71,14 @@ cd "$CHROOTDIR"
 CHROOTDIR="$PWD"
 
 if [ ! -x /usr/sbin/debootstrap ]; then
+
+	echo "This script will install debootstrap on your system."
+	echo -n "Continue? (y/N) "
+	read yn
+	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
+		exit 1;
+	fi
+
 	if [ -f /etc/debian_version ]; then
 
 		cd /
