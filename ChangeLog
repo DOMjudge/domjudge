@@ -36,6 +36,7 @@ Version 3.4.0 - DEV
  - Don't let sudo try to read passwords.
  - Various documentation improvements.
  - Add cascading delete on submitid to balloons table.
+ - Support stringwise token compare and ignoring whitespace in check_float.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
