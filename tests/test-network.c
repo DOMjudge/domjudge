@@ -1,12 +1,13 @@
 /*
  * This code tries to contact http://google.com/ and returns with a
  * message and page contents if successful, it returns exitcode != 0
- * otherwise.
+ * otherwise. Depending on the system configuration, it might also
+ * timeout waiting for the network connection.
  *
  * Although up to the administrator, it is advisable to disable
  * network access (when not allowed according to the contest rules).
  *
- * @EXPECTED_RESULTS@: RUN-ERROR
+ * @EXPECTED_RESULTS@: RUN-ERROR,TIMELIMIT
  */
 
 #include <stdio.h>
