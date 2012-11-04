@@ -11,6 +11,7 @@ Version 3.2.4 - DEV
  - Add mapping to GeSHi highlighting to translate DOMjudge language
    ID's to their GeSHi counterparts.
  - Don't let sudo try to read passwords.
+ - Use Debian 6.0 Squeeze for building Java chroot.
  - Various documentation improvements.
 
 Version 3.2.3 - 2 June 2012
