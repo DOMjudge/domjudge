@@ -541,9 +541,16 @@ function store_result($result, $row, $judgingid)
 		        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
 		       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
 		       $row['submitid'], $judgingid);
-		if ( $result == 'correct' ) {
-			$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
-			       $row['submitid']);
+		if ( $result == 'correct' ) { 
+			// prevent duplicate balloons in case of multiple correct submissions
+			$numcorrect = $DB->q('VALUE SELECT count(submitid)
+			                      FROM balloon LEFT JOIN submission USING(submitid)
+			                      WHERE valid = 1 AND probid = %s AND teamid = %s',
+			                      $row['probid'], $row['teamid']);
+			if ( $numcorrect == 0 ) {
+				$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
+				       $row['submitid']);
+			}
 		}
 	}
 
