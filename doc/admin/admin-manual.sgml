@@ -1975,9 +1975,9 @@ are sent. Examples are to mail to a specific mailbox or to send
 prints to a printer. When configured, start <tt>bin/balloons</tt>
 and notification will start.
 
-Notifications will continue even after the scoreboard is frozen,
-although a warning is printed on the notification. Stop the balloons
-daemon when you don't want balloons to be handed out anymore.
+Notifications will stop as soon as the scoreboard is frozen.
+Enable the <tt>show_balloons_postfreeze</tt> to keep issuing balloon
+notifications after the freeze.
 
 
 <chapt>Security <label id="security">

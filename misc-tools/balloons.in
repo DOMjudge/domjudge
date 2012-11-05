@@ -56,11 +56,6 @@ function notification_text($team, $problem, $probs_solved, $probs_data, $comment
 		$ret .= "\n$comment\n";
 	}
 
-	if ( isset($cdata['freezetime']) &&
-	     difftime(now(), $cdata['freezetime']) > 0 ) {
-		$ret .= "\nWARNING: scoreboard is frozen!\n";
-	}
-
 	return $ret;
 }
 
@@ -102,16 +97,21 @@ while ( TRUE ) {
 		$infreeze = TRUE;
 		logmsg(LOG_NOTICE, "Scoreboard is frozen since " . $cdata['freezetime']);
 	}
+	$freezecond = '';
+	if ( ! dbconfig_get('show_balloons_postfreeze',0) && isset($cdata['freezetime']) ) {
+		$freezecond = 'AND submittime <= "' . $cdata['freezetime'] . '"';
+	}
 
 	do {
-		$res = $DB->q('SELECT b.*, s.probid, s.submittime,
+
+		$res = $DB->q("SELECT b.*, s.probid, s.submittime,
 		               t.login, t.name AS teamname, t.room, c.name AS catname
 		               FROM balloon b
 		               LEFT JOIN submission s USING (submitid)
 		               LEFT JOIN team t ON (t.login = s.teamid)
 		               LEFT JOIN team_category c USING(categoryid)
-		               WHERE s.cid = %i AND b.done = 0
-		               ORDER BY submitid ASC',
+		               WHERE s.cid = %i AND b.done = 0 $freezecond
+		               ORDER BY submitid ASC",
 		              $cid);
 
 		while ( $row = $res->next() ) {

@@ -51,16 +51,21 @@ echo addForm('balloons.php', 'get') . "<p>\n" .
 $probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
 		      FROM problem WHERE cid = %i', $cid);
 
+$freezecond = '';
+if ( ! dbconfig_get('show_balloons_postfreeze',0) && isset($cdata['freezetime']) ) {
+	$freezecond = 'AND submittime <= "' . $cdata['freezetime'] . '"';
+}
+
 // Get all relevant info from the balloon table.
 // Order by done, so we have the unsent balloons at the top.
-$res = $DB->q('SELECT b.*, s.probid, s.submittime,
+$res = $DB->q("SELECT b.*, s.probid, s.submittime,
                t.login, t.name AS teamname, t.room, c.name AS catname
                FROM balloon b
                LEFT JOIN submission s USING (submitid)
                LEFT JOIN team t ON (t.login = s.teamid)
                LEFT JOIN team_category c USING(categoryid)
-               WHERE s.cid = %i
-               ORDER BY done ASC, balloonid DESC',
+               WHERE s.cid = %i $freezecond
+               ORDER BY done ASC, balloonid DESC",
               $cid);
 
 /* Loop over the result, store the total of balloons for a team
@@ -87,7 +92,7 @@ if ( !empty($BALLOONS) ) {
 	echo addForm('balloons.php');
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
-		"<tr><td></td><th class=\"sorttable_numeric\">ID</th>" .
+		"<tr><th class=\"sorttable_numeric\">ID</th>" .
 	        "<th>time</th><th>solved</th><th align=\"right\">team</th>" .
 	        "<th></th><th>loc.</th><th>category</th><th>total</th>" .
 	        "<th></th><th></th></tr>\n</thead>\n";
@@ -98,12 +103,6 @@ if ( !empty($BALLOONS) ) {
 
 		// start a new row, 'disable' if balloon has been handed out already
 		echo '<tr'  . ( $row['done'] == 1 ? ' class="disabled"' : '' ) . '>';
-		if ( isset($cdata['freezetime']) &&
-		     $row['submittime'] > $cdata['freezetime'] ) {
-			echo "<td>FROZEN</td>";
-		} else {
-			echo '<td></td>';
-		}
 		echo '<td>b' . (int)$row['balloonid'] . '</td>';
 		echo '<td>' . printtime( $row['submittime'] ) . '</td>';
 
