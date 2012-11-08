@@ -11,7 +11,7 @@
 %token TEST_EOF TEST_MATCH
 %token CMP_LT CMP_GT CMP_LE CMP_GE CMP_EQ CMP_NE
 %token CMD_SPACE CMD_NEWLINE CMD_EOF CMD_INT CMD_FLOAT CMD_STRING CMD_REGEX
-%token CMD_REP CMD_WHILE CMD_IF CMD_ELSE CMD_END
+%token CMD_REP CMD_WHILE CMD_IF CMD_ELSE CMD_END CMD_ASSERT
 %token VARIABLE INTEGER FLOAT STRING
 %token OPT_FIXED OPT_SCIENTIFIC
 
@@ -53,6 +53,7 @@ command_args:
 |	CMD_FLOAT '(' expr ',' expr ',' VARIABLE ',' opt_float ')' { $$ = parse_t($1,$3,$5,$7,$9); }
 |	CMD_STRING '(' STRING ')'                  { $$ = parse_t($1,$3); }
 |	CMD_REGEX  '(' STRING ')'                  { $$ = parse_t($1,$3); }
+|	CMD_ASSERT '(' test ')'                    { $$ = parse_t($1,$3); }
 |	CMD_REP '(' expr ')'                       { $$ = parse_t($1,$3); }
 |	CMD_REP '(' expr ',' command ')'           { $$ = parse_t($1,$3,$5); }
 |	CMD_WHILE '(' test ')'                     { $$ = parse_t($1,$3); }

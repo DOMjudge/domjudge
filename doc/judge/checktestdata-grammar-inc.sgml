@@ -87,6 +87,10 @@ The following commands are available:
     Match the extended regular expression 'str'. Matching is performed
     greedily.
 
+<tag><tt>ASSERT(&lt;test&gt; condition)</tt></tag>
+
+    Assert that 'condition' is true, fail otherwise.
+
 <tag><tt>REP(&lt;expr&gt; count [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
 
     Repeat the commands between the 'REP() ... END' statements count

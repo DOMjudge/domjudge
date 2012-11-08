@@ -530,6 +530,10 @@ void checktoken(command cmd)
 		debug("'%s' = '%s'",matchstr.c_str(),cmd.args[0].c_str());
 	}
 
+	else if ( cmd.name()=="ASSERT" ) {
+		if ( !dotest(cmd.args[0]) ) error("assertion failed");
+	}
+
 	else {
 		cerr << "unknown command " << program[prognr] << endl;
 		exit(exit_failure);

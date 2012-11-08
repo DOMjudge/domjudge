@@ -33,6 +33,7 @@ INT      { return Parser::CMD_INT; }
 FLOAT    { return Parser::CMD_FLOAT; }
 STRING   { return Parser::CMD_STRING; }
 REGEX    { return Parser::CMD_REGEX; }
+ASSERT   { return Parser::CMD_ASSERT; }
 REP      { return Parser::CMD_REP; }
 WHILE    { return Parser::CMD_WHILE; }
 IF       { return Parser::CMD_IF; }
