@@ -2,6 +2,7 @@
    Libchecktestdata -- check testdata according to specification.
    Copyright (C) 2008-2012 Jan Kuipers
    Copyright (C) 2009-2012 Jaap Eldering (eldering@a-eskwadraat.nl).
+   Copyright (C) 2012 Tobias Werth (werth@cs.fau.de)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -33,6 +34,8 @@
 #include <cstdarg>
 #include <climits>
 #include <getopt.h>
+#include <sys/time.h>
+#include <cstdlib>
 #ifdef HAVE_BOOST_REGEX
 #include <boost/regex.hpp>
 #else
@@ -50,7 +53,7 @@
 using namespace std;
 
 #define PROGRAM "checktestdata"
-#define AUTHORS "Jan Kuipers, Jaap Eldering"
+#define AUTHORS "Jan Kuipers, Jaap Eldering, Tobias Werth"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
 enum value_type { value_none, value_int, value_flt };
@@ -95,6 +98,7 @@ set<string> loop_cmds;
 int whitespace_ok;
 int debugging;
 int quiet;
+int gendata;
 
 void debug(const char *, ...) __attribute__((format (printf, 1, 2)));
 
@@ -363,8 +367,16 @@ bool dotest(test t)
 	case '!': return !dotest(t.args[0]);
 	case '&': return dotest(t.args[0]) && dotest(t.args[1]);
 	case '|': return dotest(t.args[0]) || dotest(t.args[1]);
-	case 'E': return datanr>=data.size();
-	case 'M': return datanr<data.size() && t.args[0].val.find(data[datanr])!=string::npos;
+	case 'E': if ( gendata ) {
+			  return (rand() % 10 < 3);
+		  } else {
+			  return datanr>=data.size();
+		  }
+	case 'M': if ( gendata ) {
+			  return (rand() % 2 == 0);
+		  } else {
+			  return datanr<data.size() && t.args[0].val.find(data[datanr])!=string::npos;
+		  }
 	case '?': return compare(t.args);
 	default:
 		cerr << "unknown test " << t.op << " in " << program[prognr] << endl;
@@ -412,6 +424,64 @@ void checknewline()
 	// Leading whitespace after newline
 	if ( whitespace_ok ) readwhitespace();
 
+}
+
+void gentoken(command cmd, ostream &datastream)
+{
+	currcmd = cmd;
+	debug("checking token %s at %lu,%lu",
+	      cmd.name().c_str(),(unsigned long)linenr,(unsigned long)charnr);
+
+	if ( cmd.name()=="SPACE" ) datastream << ' ';
+
+	else if ( cmd.name()=="NEWLINE" ) datastream << '\n';
+
+	else if ( cmd.name()=="INT" ) {
+		mpz_class lo = eval(cmd.args[0]);
+		mpz_class hi = eval(cmd.args[1]);
+
+		mpz_class x(lo + rand() % (hi - lo + 1));
+		datastream << x.get_str();
+
+		if ( cmd.nargs()>=3 ) {
+			variable[cmd.args[2]] = value_t(x);
+		}
+	}
+
+	else if ( cmd.name()=="FLOAT" ) {
+		mpf_class lo = eval(cmd.args[0]);
+		mpf_class hi = eval(cmd.args[1]);
+
+		if ( cmd.nargs()>=4 ) {
+			if ( cmd.args[3].name()=="SCIENTIFIC" ) datastream << scientific;
+			else if ( cmd.args[3].name()=="FIXED" ) datastream << fixed;
+			else {
+				cerr << "invalid option in " << program[prognr] << endl;
+				exit(exit_failure);
+			}
+		}
+
+		mpf_class x(lo + (float)rand()/((float)RAND_MAX/(hi-lo)));
+		datastream << x.get_d();
+
+		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = value_t(x);
+	}
+
+	else if ( cmd.name()=="STRING" ) {
+		string str = cmd.args[0];
+		datastream << str;
+	}
+
+	else if ( cmd.name()=="REGEX" ) {
+		string regex = cmd.args[0];
+		cerr << "Regexes are not yet supported, regex is '" + regex + "'" << endl;
+		exit(exit_failure);
+	}
+
+	else {
+		cerr << "unknown command " << program[prognr] << endl;
+		exit(exit_failure);
+	}
 }
 
 void checktoken(command cmd)
@@ -641,6 +711,132 @@ void checktestdata()
 	}
 }
 
+void genrandomdata(ostream &datastream) {
+	while ( true ) {
+		command cmd = currcmd = program[prognr];
+
+		if ( cmd.name()=="EOF" ) {
+			debug("we are done ;-)");
+			return;
+		}
+
+		else if ( loop_cmds.count(cmd.name()) ) {
+			// Current and maximum loop iterations.
+			unsigned long i = 0, times = ULONG_MAX;
+
+			if ( cmd.name()=="REP" ) {
+				mpz_class n = eval(cmd.args[0]);
+				if ( !n.fits_ulong_p() ) {
+					cerr << "'" << n << "' does not fit in an unsigned long in "
+						 << program[prognr] << endl;
+					exit(exit_failure);
+				}
+				times = n.get_ui();
+			}
+
+			// Begin and end of loop commands
+			int loopbegin, loopend;
+
+			loopbegin = loopend = prognr + 1;
+
+			for(int looplevel=1; looplevel>0; ++loopend) {
+				string cmdstr = program[loopend].name();
+				if ( loop_cmds.count(cmdstr) || cmdstr=="IF") looplevel++;
+				if ( cmdstr=="END" ) looplevel--;
+			}
+
+			// Run loop...
+			debug("running %s loop, commands %d - %d, max. times = %ld",
+			      cmd.name().c_str(),loopbegin,loopend,times);
+
+			while ( (cmd.name()=="REP"   && i<times) ||
+			        (cmd.name()=="WHILE" && dotest(cmd.args[0])) ) {
+
+				debug("loop iteration %ld/%ld",i+1,times);
+				prognr = loopbegin;
+				if ( i>0 && cmd.nargs()>=2 ) gentoken(cmd.args[1], datastream);
+				genrandomdata(datastream);
+				i++;
+			}
+
+			// And skip to end of loop
+			prognr = loopend;
+		}
+
+		else if ( cmd.name()=="IF" ) {
+			// Find line numbers of matching else/end
+			int ifnr   = prognr;
+			int elsenr = -1;
+			int endnr  = prognr+1;
+
+			for(int looplevel=1; looplevel>0; ++endnr) {
+				string cmdstr = program[endnr].name();
+				if ( loop_cmds.count(cmdstr) || cmdstr=="IF") looplevel++;
+				if ( cmdstr=="END" ) looplevel--;
+				if ( cmdstr=="ELSE" && looplevel==1) elsenr = endnr;
+			}
+			endnr--;
+
+			debug("IF statement, if/else/end commands: %d/%d/%d",
+			      ifnr,elsenr,endnr);
+
+			// Test and execute correct command block
+			if (dotest(cmd.args[0])) {
+				debug("executing IF clause");
+				prognr = ifnr+1;
+				genrandomdata(datastream);
+			}
+			else if (elsenr!=-1) {
+				debug("executing ELSE clause");
+				prognr = elsenr+1;
+				genrandomdata(datastream);
+			}
+
+			prognr = endnr+1;
+		}
+
+		else if ( cmd.name()=="END" || cmd.name()=="ELSE" ) {
+			debug("scope closed by %s",cmd.name().c_str());
+			prognr++;
+			return;
+		}
+
+		else {
+			gentoken(cmd, datastream);
+			prognr++;
+		}
+	}
+}
+
+void gentestdata(istream &progstream, ostream &datastream, int opt_mask) {
+
+	// Output floats with high precision:
+	cout << setprecision(50);
+	cerr << setprecision(50);
+	mpf_set_default_prec(256);
+
+	// Initialize block_cmds here, as a set cannot be initialized on
+	// declaration.
+	loop_cmds.insert("REP");
+	loop_cmds.insert("WHILE");
+
+	// Read program and testdata
+	readprogram(progstream);
+
+	if ( debugging ) {
+		for(size_t i=0; i<program.size(); i++) cerr << program[i] << endl;
+	}
+
+	struct timeval time;
+	gettimeofday(&time,NULL);
+	srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+	// Generate random testdata
+	gendata = 1;
+	genrandomdata(datastream);
+	
+}
+
 bool checksyntax(istream &progstream, istream &datastream, int opt_mask) {
 
 	// Output floats with high precision:
@@ -671,6 +867,7 @@ bool checksyntax(istream &progstream, istream &datastream, int opt_mask) {
 	linenr = charnr = 0;
 	datanr = prognr = 0;
 	extra_ws = 0;
+	gendata = 0;
 
 	// If we ignore whitespace, skip leading whitespace on first line
 	// as a special case; other lines are handled by checknewline().

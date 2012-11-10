@@ -20,4 +20,7 @@ bool checksyntax(std::istream &progstream,
  * Returns 'true' if the syntax is completely valid.
  */
 
+void gentestdata(std::istream &progstream,
+                 std::ostream &datastream, int opt_mask = 0);
+
 #endif /* LIBCHECKTESTDATA_H */
