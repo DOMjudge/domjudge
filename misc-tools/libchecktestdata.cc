@@ -38,6 +38,7 @@
 #include <cstdlib>
 #ifdef HAVE_BOOST_REGEX
 #include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
 #else
 #error "Libboost regex library not available."
 #endif
@@ -426,6 +427,159 @@ void checknewline()
 
 }
 
+#define MAX_MULT 10
+int getmult(string &exp, unsigned int &index)
+{
+	index++;
+
+	if (index >= exp.length()) {
+		return 1;
+	}
+
+	int min = 0;
+	int max = MAX_MULT;
+	switch (exp[index]) {
+	case '?':
+		index++;
+		max = 1;
+		break;
+	case '+':
+		index++;
+		min = 1;
+		break;
+	case '*':
+		index++;
+		break;
+	case '{':
+		index++;
+		{
+			int end = exp.find_first_of('}', index);
+			string minmaxs = exp.substr(index, end - index);
+			int pos = minmaxs.find_first_of(',');
+			if (pos == -1) {
+				min = max = boost::lexical_cast<int>(minmaxs);
+			} else {
+				string mins = minmaxs.substr(0, pos);
+				string maxs = minmaxs.substr(pos + 1);
+				min = boost::lexical_cast<int>(mins);
+				if (maxs.length() > 0) {
+					max = boost::lexical_cast<int>(maxs);
+				}
+			}
+			index = end + 1;
+		}
+		break;
+	default:
+		min = 1;
+		max = 1;
+	}
+
+	return (min + rand() % (1 + max - min));
+}
+
+void genregex(string exp, ostream &datastream)
+{
+	unsigned int i = 0;
+	while (i < exp.length()) {
+		switch (exp[i]) {
+		case '\\':
+			{
+				i++;
+				char c = exp[i];
+				int mult = getmult(exp, i);
+				for (int cnt = 0; cnt < mult; cnt++) {
+					datastream << c;
+				}
+			}
+			break;
+		case '.':
+			{
+				int mult = getmult(exp, i);
+				for (int cnt = 0; cnt < mult; cnt++) {
+					datastream << (char) (' ' + (rand() % (int) ('~' - ' ')));
+				}
+			}
+			break;
+		case '[':
+			{
+				set<char> possible;
+				bool escaped = false;
+				while (i + 1 < exp.length()) {
+					i++;
+					if (escaped) {
+						if (exp[i] == '\\') {
+							escaped = false;
+						}
+					} else if (exp[i] == ']') {
+						break;
+					} else if (exp[i] == '\\') {
+						escaped = true;
+						continue;
+					}
+					if (i + 2 < exp.length() && exp[i + 1] == '-') {
+						char from = exp[i];
+						i += 2;
+						char to = exp[i];
+						if (to == '\\') {
+							i++;
+							to = exp[i];
+						}
+						while (from <= to) {
+							possible.insert(from);
+							from++;
+						}
+					} else {
+						possible.insert(exp[i]);
+					}
+				}
+				vector<char> possibleVec;
+				copy(possible.begin(), possible.end(), std::back_inserter(possibleVec));
+				int mult = getmult(exp, i);
+				for (int cnt = 0; cnt < mult; cnt++) {
+					datastream << possibleVec[rand() % possibleVec.size()];
+				}
+			}
+			break;
+		case '(':
+			{
+				i++;
+				vector<string> alternatives;
+				int depth = 0;
+				int begin = i;
+				bool escaped = false;
+				while (depth > 0 || escaped || exp[i] != ')') {
+					if (exp[i] == '\\') {
+						escaped = !escaped;
+					} else if (depth == 0 && exp[i] == '|' && !escaped) {
+						alternatives.push_back(exp.substr(begin, i - begin));
+						begin = i + 1;
+					} else if (exp[i] == '(' && !escaped) {
+						depth++;
+					} else if (exp[i] == ')' && !escaped) {
+						depth--;
+					}
+					i++;
+				}
+				alternatives.push_back(exp.substr(begin, i - begin));
+				int mult = getmult(exp, i);
+				for (int cnt = 0; cnt < mult; cnt++) {
+					genregex(alternatives[rand() % alternatives.size()], datastream);
+				}
+			}
+			break;
+		default:
+			{
+				char c = exp[i];
+				int mult = getmult(exp, i);
+				for (int cnt = 0; cnt < mult; cnt++) {
+					datastream << c;
+				}
+			}
+			break;
+		}
+	}
+}
+
 void gentoken(command cmd, ostream &datastream)
 {
 	currcmd = cmd;
@@ -474,8 +628,8 @@ void gentoken(command cmd, ostream &datastream)
 
 	else if ( cmd.name()=="REGEX" ) {
 		string regex = cmd.args[0];
-		cerr << "Regexes are not yet supported, regex is '" + regex + "'" << endl;
-		exit(exit_failure);
+		boost::regex e1(regex, boost::regex::extended); // this is only to check the expression
+		genregex(regex, datastream);
 	}
 
 	else {
