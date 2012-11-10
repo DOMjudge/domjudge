@@ -90,6 +90,8 @@ const int display_after_error  = 50;
 size_t prognr, datanr, linenr, charnr, extra_ws;
 command currcmd;
 
+gmp_randclass gmp_rnd(gmp_randinit_default);
+
 string data;
 vector<command> program;
 map<string,value_t> variable;
@@ -583,7 +585,7 @@ void genregex(string exp, ostream &datastream)
 void gentoken(command cmd, ostream &datastream)
 {
 	currcmd = cmd;
-	debug("checking token %s at %lu,%lu",
+	debug("generating token %s at %lu,%lu",
 	      cmd.name().c_str(),(unsigned long)linenr,(unsigned long)charnr);
 
 	if ( cmd.name()=="SPACE" ) datastream << ' ';
@@ -593,8 +595,7 @@ void gentoken(command cmd, ostream &datastream)
 	else if ( cmd.name()=="INT" ) {
 		mpz_class lo = eval(cmd.args[0]);
 		mpz_class hi = eval(cmd.args[1]);
-
-		mpz_class x(lo + rand() % (hi - lo + 1));
+		mpz_class x(lo + gmp_rnd.get_z_range(hi - lo + 1));
 		datastream << x.get_str();
 
 		if ( cmd.nargs()>=3 ) {
@@ -615,8 +616,8 @@ void gentoken(command cmd, ostream &datastream)
 			}
 		}
 
-		mpf_class x(lo + (float)rand()/((float)RAND_MAX/(hi-lo)));
-		datastream << x.get_d();
+		mpf_class x(lo + gmp_rnd.get_f()*(hi-lo));
+		datastream << x;
 
 		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = value_t(x);
 	}
@@ -981,14 +982,17 @@ void gentestdata(istream &progstream, ostream &datastream, int opt_mask) {
 		for(size_t i=0; i<program.size(); i++) cerr << program[i] << endl;
 	}
 
+	// Initialize random generators
 	struct timeval time;
+	unsigned long seed;
 	gettimeofday(&time,NULL);
-	srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+	seed = (time.tv_sec * 1000) + (time.tv_usec % 1000);
+	srand(seed);
+	gmp_rnd.seed(seed);
 
 	// Generate random testdata
 	gendata = 1;
 	genrandomdata(datastream);
-	
 }
 
 bool checksyntax(istream &progstream, istream &datastream, int opt_mask) {

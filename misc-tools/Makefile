@@ -65,6 +65,14 @@ check: checktestdata
 		data=tests/testwsdata$$n.in ; \
 		for prog in tests/testwsprog$$n.err* ; do $(checkfail) ; done ; \
 	done || true
+# Test if generating testdata works and complies with the script:
+	@TMP=`mktemp --tmpdir dj_gendata.XXXXXX` || exit 1 ; data=$$TMP ; \
+	for i in tests/testprog*.in ; do \
+		n=$${i#tests/testprog} ; n=$${n%.in} ; \
+		prog=$$i ; \
+		for i in seq 10 ; do opts=-g ; $(checksucc) ; opts='' ; $(checksucc) ; done ; \
+	done ; \
+	rm -f $$TMP
 
 else
 
