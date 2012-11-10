@@ -37,7 +37,7 @@ Version 3.4.0 - DEV
  - Various documentation improvements.
  - Add cascading delete on submitid to balloons table.
  - Support stringwise token compare and ignoring whitespace in check_float.
- - Added ASSERT statement to checktestdata syntax.
+ - Add option to generate testdata and add ASSERT to checktestdata syntax.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------

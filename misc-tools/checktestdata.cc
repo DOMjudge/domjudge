@@ -46,6 +46,7 @@ int show_version;
 struct option const long_opts[] = {
 	{"whitespace-ok", no_argument, NULL,         'w'},
 	{"generate",no_argument,       NULL,         'g'},
+	{"preset",  required_argument, NULL,         'p'},
 	{"debug",   no_argument,       NULL,         'd'},
 	{"quiet",   no_argument,       NULL,         'q'},
 	{"help",    no_argument,       &show_help,    1 },
@@ -74,6 +75,8 @@ void usage()
 "                         and trailing whitespace, but not newlines;\n"
 "                         be careful: extra whitespace matches greedily!\n"
 "  -g, --generate       don't check but generate (random) testdata\n"
+"  -p, --preset=<name>=<value>[,...]\n"
+"                       preset variable(s) <name> when generating testdata\n"
 "  -d, --debug          enable extra debugging output\n"
 "  -q, --quiet          don't display testdata error messages: test exitcode\n"
 "      --help           display this help and exit\n"
@@ -87,6 +90,7 @@ int main(int argc, char **argv)
 	int generate;
 	int debugging;
 	int quiet;
+	string presets;
 
 	int opt;
 
@@ -96,7 +100,7 @@ int main(int argc, char **argv)
 	whitespace_ok = 0;
 	generate = debugging = quiet = show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+wgdq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+wgp:dq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -105,6 +109,9 @@ int main(int argc, char **argv)
 			break;
 		case 'g':
 			generate = 1;
+			break;
+		case 'p':
+			presets = optarg;
 			break;
 		case 'd':
 			debugging = 1;
@@ -148,11 +155,19 @@ int main(int argc, char **argv)
 	// Check for testdata file and check syntax
 	bool testdata_ok = 0;
 
+	init_checktestdata(prog, options);
+
+	// Parse presets after initialization to have debugging available
+	if ( !parse_preset_list(presets) ) {
+		printf("Error parsing preset variable list.\n");
+		exit(exit_failure);
+	}
+
 	if ( argc<=optind+1 ) {
 		if ( generate ) {
-			gentestdata(prog, cout, options);
+			gentestdata(cout);
 		} else {
-			testdata_ok = checksyntax(prog, cin, options);
+			testdata_ok = checksyntax(cin);
 		}
 	} else {
 		if ( generate ) {
@@ -162,7 +177,7 @@ int main(int argc, char **argv)
 				cerr << "Error opening '" << datafile << "'.\n";
 				exit(exit_failure);
 			}
-			gentestdata(prog, fout, options);
+			gentestdata(fout);
 			fout.close();
 		} else {
 			char *datafile = argv[optind+1];
@@ -171,7 +186,7 @@ int main(int argc, char **argv)
 				cerr << "Error opening '" << datafile << "'.\n";
 				exit(exit_failure);
 			}
-			testdata_ok = checksyntax(prog, fin, options);
+			testdata_ok = checksyntax(fin);
 			fin.close();
 		}
 	}

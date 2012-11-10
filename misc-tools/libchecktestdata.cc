@@ -74,6 +74,7 @@ struct value_t {
 
 class doesnt_match_exception {};
 class eof_found_exception {};
+class generate_exception {};
 
 ostream& operator <<(ostream &os, const value_t &val)
 {
@@ -94,7 +95,7 @@ gmp_randclass gmp_rnd(gmp_randinit_default);
 
 string data;
 vector<command> program;
-map<string,value_t> variable;
+map<string,value_t> variable, preset;
 set<string> loop_cmds;
 // List of loop starting commands like REP, initialized in checksyntax.
 
@@ -184,6 +185,11 @@ void readtestdata(istream &in)
 
 void error(string msg = string())
 {
+	if ( gendata ) {
+		cerr << "ERROR: in command " << currcmd << ": " << msg << endl << endl;
+		throw generate_exception();
+	}
+
 	size_t fr = max(0,int(datanr)-display_before_error);
 	size_t to = min(data.size(),datanr+display_after_error);
 
@@ -596,11 +602,21 @@ void gentoken(command cmd, ostream &datastream)
 		mpz_class lo = eval(cmd.args[0]);
 		mpz_class hi = eval(cmd.args[1]);
 		mpz_class x(lo + gmp_rnd.get_z_range(hi - lo + 1));
-		datastream << x.get_str();
 
 		if ( cmd.nargs()>=3 ) {
+			// Check if we have a preset value, then override the
+			// random generated value
+			if ( preset.count(cmd.args[2]) ) {
+				x = preset[cmd.args[2]];
+				if ( x<lo || x>hi ) {
+					error("preset value for '" + string(cmd.args[2]) + "' out of range");
+				}
+			}
+
 			variable[cmd.args[2]] = value_t(x);
 		}
+
+		datastream << x.get_str();
 	}
 
 	else if ( cmd.name()=="FLOAT" ) {
@@ -617,9 +633,21 @@ void gentoken(command cmd, ostream &datastream)
 		}
 
 		mpf_class x(lo + gmp_rnd.get_f()*(hi-lo));
-		datastream << x;
 
-		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = value_t(x);
+		if ( cmd.nargs()>=3 ) {
+			// Check if we have a preset value, then override the
+			// random generated value
+			if ( preset.count(cmd.args[2]) ) {
+				x = preset[cmd.args[2]];
+				if ( x<lo || x>hi ) {
+					error("preset value for '" + string(cmd.args[2]) + "' out of range");
+				}
+			}
+
+			variable[cmd.args[2]] = value_t(x);
+		}
+
+		datastream << x;
 	}
 
 	else if ( cmd.name()=="STRING" ) {
@@ -631,6 +659,10 @@ void gentoken(command cmd, ostream &datastream)
 		string regex = cmd.args[0];
 		boost::regex e1(regex, boost::regex::extended); // this is only to check the expression
 		genregex(regex, datastream);
+	}
+
+	else if ( cmd.name()=="ASSERT" ) {
+		if ( !dotest(cmd.args[0]) ) error("assertion failed");
 	}
 
 	else {
@@ -963,12 +995,17 @@ void genrandomdata(ostream &datastream) {
 	}
 }
 
-void gentestdata(istream &progstream, ostream &datastream, int opt_mask) {
-
+void init_checktestdata(std::istream &progstream, int opt_mask)
+{
 	// Output floats with high precision:
-	cout << setprecision(50);
-	cerr << setprecision(50);
+	cout << setprecision(10);
+	cerr << setprecision(10);
 	mpf_set_default_prec(256);
+
+	// Check the options bitmask
+	if (opt_mask & opt_whitespace_ok) whitespace_ok = 1;
+	if (opt_mask & opt_debugging    ) debugging = 1;
+	if (opt_mask & opt_quiet        ) quiet = 1;
 
 	// Initialize block_cmds here, as a set cannot be initialized on
 	// declaration.
@@ -990,42 +1027,23 @@ void gentestdata(istream &progstream, ostream &datastream, int opt_mask) {
 	srand(seed);
 	gmp_rnd.seed(seed);
 
+	// Initialize current position in program and data.
+	linenr = charnr = 0;
+	datanr = prognr = 0;
+	extra_ws = 0;
+}
+
+void gentestdata(ostream &datastream)
+{
 	// Generate random testdata
 	gendata = 1;
 	genrandomdata(datastream);
 }
 
-bool checksyntax(istream &progstream, istream &datastream, int opt_mask) {
-
-	// Output floats with high precision:
-	cout << setprecision(50);
-	cerr << setprecision(50);
-	mpf_set_default_prec(256);
-
-	// Initialize block_cmds here, as a set cannot be initialized on
-	// declaration.
-	loop_cmds.insert("REP");
-	loop_cmds.insert("WHILE");
-
-	// Check the options bitmask
-	if (opt_mask & opt_whitespace_ok) whitespace_ok = 1;
-	if (opt_mask & opt_debugging    ) debugging = 1;
-	if (opt_mask & opt_quiet        ) quiet = 1;
-
-	// Read program and testdata
-	readprogram(progstream);
-
-	if ( debugging ) {
-		for(size_t i=0; i<program.size(); i++) cerr << program[i] << endl;
-	}
-
-	readtestdata(datastream);
-
-	// Check testdata
-	linenr = charnr = 0;
-	datanr = prognr = 0;
-	extra_ws = 0;
+bool checksyntax(istream &datastream)
+{
 	gendata = 0;
+	readtestdata(datastream);
 
 	// If we ignore whitespace, skip leading whitespace on first line
 	// as a special case; other lines are handled by checknewline().
@@ -1038,6 +1056,38 @@ bool checksyntax(istream &progstream, istream &datastream, int opt_mask) {
 		return false;
 	}
 	catch (eof_found_exception) {}
+
+	return true;
+}
+
+bool parse_preset_list(std::string list)
+{
+	size_t pos = 0, sep1, sep2;
+	string name, val_str;
+	value_t value;
+
+	debug("parsing preset list '%s'", list.c_str());
+
+	while ( pos<list.length() ) {
+		if ( ( sep1=list.find('=', pos) )==string::npos ) return false;
+		if ( ( sep2=list.find(',', pos) )==string::npos ) sep2 = list.length();
+
+		name = list.substr(pos,sep1-pos);
+		val_str = list.substr(sep1+1,sep2-sep1-1);
+		debug("parsing preset '%s' = '%s'",name.c_str(),val_str.c_str());
+
+		try {
+			value = value_t(mpz_class(val_str));
+		} catch ( std::invalid_argument ) {
+			try {
+				value = value_t(mpf_class(val_str));
+			} catch ( ... ) { return false; }
+		} catch ( ... ) { return false; }
+
+		preset[name] = value;
+
+		pos = sep2 + 1;
+	}
 
 	return true;
 }
