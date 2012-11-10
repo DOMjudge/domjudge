@@ -22,7 +22,7 @@ MAINCLASS=""
 # versions of the jvm, but might need increasing in some cases.
 MEMRESERVED=300000
 
-TMPFILE=`mktemp /tmp/domjudge_javac_output.XXXXXX` || exit 1
+TMPFILE=`mktemp --tmpdir domjudge_javac_output.XXXXXX` || exit 1
 
 # Byte-compile:
 javac -d . "$@" 2> "$TMPFILE"

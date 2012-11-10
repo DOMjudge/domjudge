@@ -39,7 +39,7 @@ fi
 [ -z "$LATEX" ] && LATEX=pdflatex
 [ -z "$LATEXFLAGS" ] && LATEXFLAGS='--interaction=errorstopmode'
 
-TEXCONFIG=`mktemp /tmp/domjudge-texconfig.XXXXXX`
+TEXCONFIG=`mktemp --tmpdir domjudge-texconfig.XXXXXX`
 
 if [ -x "gentexconfig" ]; then
 	./gentexconfig    "$WEBBASEURI" > "$TEXCONFIG"

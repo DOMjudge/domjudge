@@ -8,7 +8,7 @@ SUBMITCMD = $(TOPDIR)/submit/submit
 SUBMIT = \
 	echo -n "Submitting '$$i' " ; \
 	if [ "$${i%.zip}" != "$$i" ]; then \
-		tmp=`mktemp -d` ; \
+		tmp=`mktemp -d --tmpdir` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
 		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
 		$(SUBMITCMD) -q -w1 -p $(PROBLEM) "$$main" "$$tmp/"* ; \

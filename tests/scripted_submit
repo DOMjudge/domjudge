@@ -21,7 +21,7 @@ PROBID='general'
 BASEURL='http://localhost/domjudge/'
 
 # cURL cookie-jar file to store PHP session data.
-COOKIEJAR=`mktemp`
+COOKIEJAR=`mktemp --tmpdir`
 
 CURLOPTS="-sq -m 30 -b $COOKIEJAR"
 

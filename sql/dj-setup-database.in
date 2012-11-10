@@ -202,7 +202,7 @@ upgrade)
 		echo "Warning: please remove all non-jury users from $PASSWDFILE"
 		echo "You may also remove those users from MySQL."
 	fi
-	TMPOUT=`mktemp /tmp/domjudge-sql.XXXXXX`
+	TMPOUT=`mktemp --tmpdir domjudge-sql.XXXXXX`
 	read_dbpasswords
 	for i in "$SQLDIR"/upgrade/*.sql ; do
 		if [ ! -r "$i" ]; then
