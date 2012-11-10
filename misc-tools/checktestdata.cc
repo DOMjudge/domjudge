@@ -114,10 +114,10 @@ int main(int argc, char **argv)
 			break;
 		case ':': /* getopt error */
 		case '?':
-			printf("unknown option or missing argument `%c'",optopt);
+			printf("Error: unknown option or missing argument `%c'.\n",optopt);
 			exit(exit_failure);
 		default:
-			printf("getopt returned character code `%c' ??",(char)opt);
+			printf("Error: getopt returned character code `%c' ??\n",(char)opt);
 			exit(exit_failure);
 		}
 	}
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 	char *progfile = argv[optind];
 	ifstream prog(progfile);
 	if ( prog.fail() ) {
-		cerr << "error opening " << progfile << endl;
+		cerr << "Error opening '" << progfile << "'.\n";
 		exit(exit_failure);
 	}
 
@@ -159,7 +159,7 @@ int main(int argc, char **argv)
 			char *datafile = argv[optind+1];
 			ofstream fout(datafile);
 			if ( fout.fail() ) {
-				cerr << "error opening " << datafile << endl;
+				cerr << "Error opening '" << datafile << "'.\n";
 				exit(exit_failure);
 			}
 			gentestdata(prog, fout, options);
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 			char *datafile = argv[optind+1];
 			ifstream fin(datafile);
 			if ( fin.fail() ) {
-				cerr << "error opening " << datafile << endl;
+				cerr << "Error opening '" << datafile << "'.\n";
 				exit(exit_failure);
 			}
 			testdata_ok = checksyntax(prog, fin, options);

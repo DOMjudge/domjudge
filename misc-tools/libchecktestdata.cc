@@ -190,14 +190,14 @@ void error(string msg = string())
 	debug("error at datanr = %d, %d - %d\n",(int)datanr,(int)fr,(int)to);
 
 	if ( !quiet ) {
-		cout << data.substr(fr,datanr-fr) << endl;
-		cout << string(min(charnr,(size_t)display_before_error),' ') << '^';
-		cout << data.substr(datanr,to-datanr) << endl << endl;
+		cerr << data.substr(fr,datanr-fr) << endl;
+		cerr << string(min(charnr,(size_t)display_before_error),' ') << '^';
+		cerr << data.substr(datanr,to-datanr) << endl << endl;
 
-		cout << "ERROR: line " << linenr+1 << " character " << charnr+1;
-		cout << " of testdata doesn't match " << currcmd;
-		if ( msg.length()>0 ) cout << ": " << msg;
-		cout << endl << endl;
+		cerr << "ERROR: line " << linenr+1 << " character " << charnr+1;
+		cerr << " of testdata doesn't match " << currcmd;
+		if ( msg.length()>0 ) cerr << ": " << msg;
+		cerr << endl << endl;
 	}
 
 	throw doesnt_match_exception();
