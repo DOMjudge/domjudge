@@ -14,7 +14,8 @@ OBJECTS += $(CHKOBJS)
 endif
 
 SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
-              combined_scoreboard runssh_judgehosts runssh_teams balloons
+              combined_scoreboard runssh_judgehosts runssh_teams balloons \
+              simulate_contest
 
 config: $(SUBST_FILES)
 
