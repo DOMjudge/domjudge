@@ -8,6 +8,7 @@ Version 3.2.4 - 12 September 2012
  - Fix bug: link to CSS colour names reference was broken.
  - Make Java class name detection compatible with Java 7.
  - Make Haskell example source compatible with newer GHC versions.
+ - Make checktestdata compatible with bisonc++ 3.0.
  - Add mapping to GeSHi highlighting to translate DOMjudge language
    ID's to their GeSHi counterparts.
  - Don't let sudo try to read passwords.
