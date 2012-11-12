@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 3.2.5 - DEV
+-------------------
+
 Version 3.2.4 - 12 September 2012
 ---------------------------------
  - Fix bug: add missing $pagename to check_judgings.php.
