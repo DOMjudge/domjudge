@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.3.3 - DEV
--------------------
+Version 3.3.3 - 12 November 2012
+--------------------------------
  - Fix bug: clarifications sent by jury member would display the recipient
    as 'All' (even though linked to one team). Thanks Mark Janssen.
  - Fix bug: CSS class missing in disabled balloon interfaces rows.
