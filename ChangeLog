@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.2.4 - DEV
--------------------
+Version 3.2.4 - 12 September 2012
+---------------------------------
  - Fix bug: add missing $pagename to check_judgings.php.
  - Fix bug: handle gracefully events deleted from the database.
  - Fix bug: submitclient compile error with g++ (Debian 4.7.1-2) 4.7.1.
