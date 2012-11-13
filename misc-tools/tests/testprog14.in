@@ -1,0 +1,6 @@
+REP(10)
+	STRING("0.")
+	REGEX("[0-9]{0,6}")
+	REGEX("(\([0-9]{1,9}\))?")
+	NEWLINE
+END
