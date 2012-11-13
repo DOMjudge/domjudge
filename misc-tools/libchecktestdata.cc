@@ -515,16 +515,14 @@ void genregex(string exp, ostream &datastream)
 				while (i + 1 < exp.length()) {
 					i++;
 					if (escaped) {
-						if (exp[i] == '\\') {
-							escaped = false;
-						}
+						escaped = false;
 					} else if (exp[i] == ']') {
 						break;
 					} else if (exp[i] == '\\') {
 						escaped = true;
 						continue;
 					}
-					if (i + 2 < exp.length() && exp[i + 1] == '-') {
+					if (i + 2 < exp.length() && exp[i + 1] == '-' && exp[i] != '[' && exp[i+2] != ']') {
 						char from = exp[i];
 						i += 2;
 						char to = exp[i];
