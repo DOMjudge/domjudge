@@ -556,14 +556,16 @@ void genregex(string exp, ostream &datastream)
 				int begin = i;
 				bool escaped = false;
 				while (depth > 0 || escaped || exp[i] != ')') {
-					if (exp[i] == '\\') {
-						escaped = !escaped;
-					} else if (depth == 0 && exp[i] == '|' && !escaped) {
+					if (escaped) {
+						escaped = false;
+					} else if (exp[i] == '\\') {
+						escaped = true;
+					} else if (depth == 0 && exp[i] == '|') {
 						alternatives.push_back(exp.substr(begin, i - begin));
 						begin = i + 1;
-					} else if (exp[i] == '(' && !escaped) {
+					} else if (exp[i] == '(') {
 						depth++;
-					} else if (exp[i] == ')' && !escaped) {
+					} else if (exp[i] == ')') {
 						depth--;
 					}
 					i++;
