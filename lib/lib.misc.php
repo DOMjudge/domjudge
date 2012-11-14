@@ -30,7 +30,8 @@ function getFileContents($filename, $sizelimit = true) {
 	}
 
 	if ( $sizelimit && filesize($filename) > 50000 ) {
-		return file_get_contents($filename, FALSE, NULL, -1, 50000);
+		return file_get_contents($filename, FALSE, NULL, -1, 50000)
+			. "\n[output truncated after 50,000 B]\n";
 	}
 
 	return file_get_contents($filename);
