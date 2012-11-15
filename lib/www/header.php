@@ -57,6 +57,9 @@ if ( IS_JURY ) {
 if ( ! IS_PUBLIC ) {
 	echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
 }
+if ( file_exists(WWWDIR . "/custom.css") ) {
+	echo "<link rel=\"stylesheet\" href=\"../custom.css\" type=\"text/css\" />";
+}
 if ( ! empty($extrahead) ) echo $extrahead;
 ?>
 </head>
@@ -66,6 +69,10 @@ if ( IS_JURY ) {
 	echo "<body onload=\"setInterval('updateClarifications(\'$ajaxtitle\')', 20000)\">\n";
 } else {
 	echo "<body>\n";
+}
+
+if ( file_exists(LIBWWWDIR . '/customHeader.php') ) {
+	require_once(LIBWWWDIR . '/customHeader.php');
 }
 
 /* NOTE: here a local menu.php is included
