@@ -12,7 +12,7 @@ require(LIBWWWDIR . '/forms.php');
 // Don't use HTTP meta refresh, but javascript: otherwise we cannot
 // cancel it when the user starts editing the submit form. This also
 // provides graceful degradation without javascript present.
-$refreshtime = 30;
+$refreshtime = 300;
 
 $submitted = @$_GET['submitted'];
 
@@ -44,11 +44,11 @@ echo "initReload(" . $refreshtime . ");\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
-putTeamRow($cdata, array($login));
+//putTeamRow($cdata, array($login));
 
 echo "<div id=\"submitlist\">\n";
 
-echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
+echo "<h3 class=\"teamoverview\"><a name=\"submit\" href=\"#submit\">Submit</a></h3>\n\n";
 
 
 if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
@@ -89,6 +89,8 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 		echo "</p>\n</form>\n\n";
 	}
 }
+
+echo "<h3 class=\"teamoverview\"><a name=\"submissions\" href=\"#submissions\">Submissions</a></h3>\n\n";
 // call putSubmissions function from common.php for this team.
 $restrictions = array( 'teamid' => $login );
 putSubmissions($cdata, $restrictions, null, $submitted);
@@ -109,7 +111,7 @@ $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
                           ORDER BY c.submittime DESC, c.clarid DESC',
                           $login, $cid, $login);
 
-echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
+echo "<h3 class=\"teamoverview\"><a name=\"clarifications\" href=\"#clarifications\">Clarifications</a></h3>\n";
 
 # FIXME: column width and wrapping/shortening of clarification text 
 if ( $clarifications->count() == 0 ) {
@@ -118,7 +120,7 @@ if ( $clarifications->count() == 0 ) {
 	putClarificationList($clarifications,$login);
 }
 
-echo "<h3 class=\"teamoverview\">Clarification Requests</h3>\n";
+echo "<h3 class=\"teamoverview\"><a name=\"clarreq\" href=\"#clarreq\">Clarification Requests</a></h3>\n";
 
 if ( $requests->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarification requests.</p>\n\n";
