@@ -500,9 +500,6 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		// Alternatively we could only display the list of teams?
 		if ( ! IS_JURY ) return;
 	} else {
-		echo "<h4>starts: " . printtime($cdata['starttime']) .
-				" - ends: " . printtime($cdata['endtime']) ;
-
 		if ( $fdata['showfrozen'] ) {
 			echo " (";
 			if ( IS_JURY ) {

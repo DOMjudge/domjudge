@@ -365,34 +365,6 @@ function putClock() {
 	global $cdata;
 	// current time
 	echo '<div id="clock">' . strftime('%a %e %b %Y %T %Z');
-	// timediff to end of contest
-	if ( strcmp(now(), $cdata['starttime']) >= 0 && strcmp(now(), $cdata['endtime']) < 0) {
-		$left = strtotime($cdata['endtime'])-time();
-		$what = "time left: ";
-	}
-	if ( strcmp(now(), $cdata['activatetime']) >= 0 && strcmp(now(), $cdata['starttime']) < 0) {
-		$left = strtotime($cdata['starttime'])-time();
-		$what = "time to start: ";
-	}
-	if ( !empty($left) ) {
-		$fmt = '';
-		if ( $left > 24*60*60 ) {
-			$d = floor($left/(24*60*60));
-			$fmt .= $d . "d ";
-			$left -= $d * 24*60*60;
-		}
-		if ( $left > 60*60 ) {
-			$h = floor($left/(60*60));
-			$fmt .= $h . ":";
-			$left -= $h * 60*60;
-		}
-		$m = floor($left/60);
-		$fmt .= sprintf('%02d:', $m);
-		$left -= $m * 60;
-		$fmt .= sprintf('%02d', $left);
-
-		echo "<br /><span id=\"timeleft\">" . $what . $fmt . "</span>";
-	}
 	echo "</div>\n\n";
 }
 
