@@ -249,7 +249,7 @@ function putClarificationList($clars, $team = NULL)
  * Output a form to send a new clarification.
  * Set team to a login, to make only that team (or ALL) selectable.
  */
-function putClarificationForm($action, $cid, $respid = NULL)
+function putClarificationForm($action, $cid, $respid = NULL, $pid = NULL)
 {
 	if ( empty($cid) ) {
 		echo '<p class="nodata">No active contest</p>';
@@ -329,8 +329,12 @@ function confirmClar() {
 		$probs = array();
 	}
 	$options = array_merge(array('general' => 'General issue'), $probs);
+	$default_subject = 'general';
+	if ( $pid != NULL ) {
+		$default_subject = $pid;
+	}
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
-	     addSelect('problem', $options, ($respid ? $clar['probid'] : 'general'), true) .
+	     addSelect('problem', $options, ($respid ? $clar['probid'] : $default_subject), true) .
 	     "</td></tr>\n";
 
 	?>

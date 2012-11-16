@@ -43,6 +43,10 @@ $ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 	<td><?php echo $unsolved ?></td></tr>
 <tr><th scope="row">ratio:</th>
 	<td><?php echo $ratio ?></td></tr>
+<tr><th scope="row"><a href="index.php?id=<?= urlencode($pid) ?>#submit">submit</a></th>
+	<td/></tr>
+<tr><th scope="row"><a href="clarification.php?pid=<?= urlencode($pid) ?>">request clarification</a></th>
+	<td/></tr>
 </table>
 
 <?php

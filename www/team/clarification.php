@@ -61,7 +61,8 @@ if ( isset($id) ) {
 } else {
 	// display a clarification request send box
 	echo "<h1>Send Clarification Request</h1>\n\n";
-	putClarificationForm("clarification.php", $cdata['cid']);
+	$pid = (isset($_REQUEST['pid']) ? $_REQUEST['pid'] : NULL);
+	putClarificationForm("clarification.php", $cdata['cid'], NULL, $pid);
 }
 
 require(LIBWWWDIR . '/footer.php');

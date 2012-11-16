@@ -67,8 +67,11 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 		foreach($probdata as $probid => $dummy) {
 			$probs[$probid]=$probid;
 		}
-		$probs[''] = 'problem';
-		echo addSelect('probid', $probs, '', true);
+		$pid = (isset($_REQUEST['id']) ? $_REQUEST['id'] : NULL);
+		if ( $pid == NULL ) {
+			$probs[''] = 'problem';
+		}
+		echo addSelect('probid', $probs, ($pid == NULL ? '' : $pid), true);
 		$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language
 				 WHERE allow_submit = 1 ORDER BY name');
 		$langs[''] = 'language';
