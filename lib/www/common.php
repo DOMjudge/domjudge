@@ -105,6 +105,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid,
 					s.submittime, s.judgehost, s.valid, t.name AS teamname,
+					t.categoryid,
 					p.name AS probname, l.name AS langname,
 					j.result, j.judgehost, j.verified, j.jury_member, j.seen '
 				  . $sqlbody
@@ -147,6 +148,10 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 	$iseven = $subcnt = $corcnt = $igncnt = $vercnt = $quecnt = 0;
 	$cnt = 0;
 	while( $row = $res->next() ) {
+		if ( isset($restrictions['correct']) && $row['categoryid'] != 1 ) {
+			// skip DOMjudge submissions
+			continue;
+		}
 		$cnt++;
 
 		$sid = (int)$row['submitid'];
