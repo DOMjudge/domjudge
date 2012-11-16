@@ -129,6 +129,8 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		"<th scope=\"col\">problem</th>" .
 		"<th scope=\"col\">lang</th>" .
 		"<th scope=\"col\">result</th>" .
+		"<th scope=\"col\">max. time</th>" .
+		"<th scope=\"col\">total time</th>" .
 		(IS_JURY ? "<th scope=\"col\">verified</th><th scope=\"col\">by</th>" : '') .
 
 		"</tr>\n</thead>\n<tbody>\n";
@@ -208,6 +210,15 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			}
 		}
 		echo "</td>";
+
+		$maxtime = $totaltime = "n/a";
+		if ( $row['result'] == 'correct' || IS_JURY ) {
+			$maxtime = $DB->q('VALUE SELECT MAX(runtime) FROM judging_run WHERE judgingid IN (SELECT judgingid FROM judging WHERE valid=1 AND submitid=%i)', $sid);
+			$maxtime = sprintf("%3.3lfs", $maxtime);
+			$totaltime = $DB->q('VALUE SELECT SUM(runtime) FROM judging_run WHERE judgingid IN (SELECT judgingid FROM judging WHERE valid=1 AND submitid=%i)', $sid);
+			$totaltime = sprintf("%3.3lfs", $totaltime);
+		}
+		echo "<td><a$link>$maxtime</a></td><td><a$link>$totaltime</a></td>";
 
 		if ( IS_JURY ) {
 			// only display verification if we're done with judging

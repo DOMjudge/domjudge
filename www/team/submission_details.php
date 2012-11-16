@@ -94,7 +94,6 @@ if ( @$row['result']!='compiler-error' ) {
 		echo "<table>\n" .
 		    "<tr><td>Description:</td><td>" .
 		    htmlspecialchars($run['description']) . "</td></tr>" .
-		    "<tr><td>Runtime:</td><td>$run[runtime] sec</td></tr>" .
 		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
 		    ( $run['runresult']=='correct' ? '' : 'in' ) .
 		    "correct\">$run[runresult]</span></td></tr>" .
