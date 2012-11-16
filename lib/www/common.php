@@ -137,7 +137,9 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 
 	// print each row with links to detailed information
 	$iseven = $subcnt = $corcnt = $igncnt = $vercnt = $quecnt = 0;
+	$cnt = 0;
 	while( $row = $res->next() ) {
+		$cnt++;
 
 		$sid = (int)$row['submitid'];
 		// always provide link if this is Jury. For team, provide link
@@ -167,6 +169,9 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		}
 		if (!IS_JURY && !$row['seen'] ) {
 			echo ' unseen';
+		}
+		if (!IS_JURY && $cnt > 10) {
+			echo ' old';
 		}
 		echo '">';
 

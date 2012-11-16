@@ -95,6 +95,28 @@ echo "<h3 class=\"teamoverview\"><a name=\"submissions\" href=\"#submissions\">S
 $restrictions = array( 'teamid' => $login );
 putSubmissions($cdata, $restrictions, null, $submitted);
 
+?>
+<div style="text-align:center;">
+	<span id="showsubs" style="display:none;color:#50508f;font-weight:bold;" onclick="showAllSubmissions(true)">all submissions</span>
+</div>
+<script language="javascript">
+	function showAllSubmissions(show) {
+		var css = document.createElement("style");
+		css.type = "text/css";
+		showsubs = document.getElementById('showsubs');
+		if (show) {
+			showsubs.style.display = "none";
+			css.innerHTML = ".old { display: table-row; }";
+		} else {
+			showsubs.style.display = "inline";
+			css.innerHTML = ".old { display: none; }";
+		}
+		document.body.appendChild(css);
+	}
+	showAllSubmissions(false);
+</script> 
+<?php
+
 echo "</div>\n\n";
 
 echo "<h3 class=\"teamoverview\"><a name=\"stats\" href=\"#stats\">Stats</a></h3>\n\n";
