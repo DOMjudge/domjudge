@@ -31,23 +31,24 @@ if ($res->count() == 0) {
 
 	$iseven = 0;
 	while( $row = $res->next() ) {
+		$link = " href=\"problem_details.php?id=" . urlencode($row['probid']) . "\"";
 		echo "<tr class=\"" .
 			( $iseven ? 'roweven': 'rowodd' ) .
 			"\">";
 		$iseven = !$iseven;
-		echo "<td>" . $row['probid'] . "</td>";
-		echo "<td>" . $row['name'] . "</td>";
+		echo "<td><a$link>" . $row['probid'] . "</a></td>";
+		echo "<td><a$link>" . $row['name'] . "</a></td>";
 
 		$solved = $DB->q('VALUE SELECT COUNT(*)
 				FROM scoreboard_public
 				WHERE probid = %s AND is_correct = 1', $row['probid']);
-		echo "<td>" . $solved . "</td>";
+		echo "<td><a$link>" . $solved . "</a></td>";
 		$unsolved = $DB->q('VALUE SELECT COUNT(*)
 				FROM scoreboard_public
 				WHERE probid = %s AND is_correct = 0', $row['probid']);
-		echo "<td>" . $unsolved . "</td>";
+		echo "<td><a$link>" . $unsolved . "</a></td>";
 		$ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
-		echo "<td>" . $ratio . "</td>";
+		echo "<td><a$link>" . $ratio . "</a></td>";
 		echo "<td><a href=\"problem.php?id=" . $row['probid'] . "\"><img src=\"../images/pdf.gif\" alt=\"pdf\"/></a></td>";
 		echo "<td>n/a</td>";
 		echo "</tr>\n";
