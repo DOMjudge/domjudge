@@ -447,11 +447,16 @@ function putProblemText($probid, $return = false)
 		error("Problem '$probid' not found or not available");
 	}
 
-	$finfo = finfo_open(FILEINFO_MIME);
+	if ( function_exists("finfo_open") ) {
+		$finfo = finfo_open(FILEINFO_MIME);
 
-	list($type, $enc) = explode('; ', finfo_buffer($finfo, $prob['problemtext']));
+		list($type, $enc) = explode('; ', finfo_buffer($finfo, $prob['problemtext']));
 
-	finfo_close($finfo);
+		finfo_close($finfo);
+	} else {
+		// assume pdf
+		$type = 'application/pdf';
+	}
 
 	$ext = NULL;
 	switch ( $type ) {
