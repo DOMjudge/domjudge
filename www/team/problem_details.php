@@ -50,9 +50,38 @@ $ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 echo "<h3 class=\"teamoverview\"><a name=\"own\" href=\"#own\">own submissions</a></h3>\n\n";
 $restrictions = array( 'probid' => $id, 'teamid' => $login );
 putSubmissions($cdata, $restrictions);
+?>
+<div style="text-align:center;">
+	<span id="showsubs" style="display:none;color:#50508f;font-weight:bold;" onclick="showAllSubmissions(true)">all submissions</span>
+</div>
+<?php
 
 echo "<h3 class=\"teamoverview\"><a name=\"correct\" href=\"#correct\">correct submissions (from all users)</a></h3>\n\n";
 $restrictions = array( 'probid' => $id, 'correct' => TRUE );
 putSubmissions($cdata, $restrictions);
+?>
+<div style="text-align:center;">
+	<span id="showsubs2" style="display:none;color:#50508f;font-weight:bold;" onclick="showAllSubmissions(true)">all submissions</span>
+</div>
+<script language="javascript">
+	function showAllSubmissions(show) {
+		var css = document.createElement("style");
+		css.type = "text/css";
+		showsubs = document.getElementById('showsubs');
+		showsubs2 = document.getElementById('showsubs2');
+		if (show) {
+			showsubs.style.display = "none";
+			showsubs2.style.display = "none";
+			css.innerHTML = ".old { display: table-row; }";
+		} else {
+			showsubs.style.display = "inline";
+			showsubs2.style.display = "inline";
+			css.innerHTML = ".old { display: none; }";
+		}
+		document.body.appendChild(css);
+	}
+	showAllSubmissions(false);
+</script> 
+<?php
 
 require(LIBWWWDIR . '/footer.php');
