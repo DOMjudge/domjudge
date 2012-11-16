@@ -83,6 +83,13 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			$judgedclause = '(j.result IS NULL) ';
 		}
 	}
+	if ( isset($restrictions['correct']) ) {
+		if ( $restrictions['correct'] ) {
+			$correctclause = '(j.result = \'correct\') ';
+		} else {
+			$correctclause = '(j.result != \'correct\') ';
+		}
+	}
 
 	$sqlbody =
 		'FROM submission s
@@ -103,6 +110,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 				  . $sqlbody
 				  . (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '')
 				  . (isset($restrictions['judged'])  ? 'AND ' . $judgedclause : '')
+				  . (isset($restrictions['correct'])  ? 'AND ' . $correctclause : '')
 				  .'ORDER BY s.submittime DESC, s.submitid DESC '
 				  . ($limit > 0 ? 'LIMIT 0, %i' : '%_')
 				, $cid, @$restrictions['teamid'], @$restrictions['probid']
