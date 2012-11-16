@@ -333,7 +333,7 @@ function putTeam($login) {
 	                a.name AS affname, a.country FROM team t
 	                LEFT JOIN team_category c USING (categoryid)
 	                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
-	                WHERE login = %s', $login);
+	                WHERE login = %s AND categoryid=1', $login);
 
 	if ( empty($team) ) error ("No team found by this id.");
 
@@ -353,7 +353,6 @@ function putTeam($login) {
 
 <table>
 <tr><td scope="row">Name:    </td><td><?php echo htmlspecialchars($team['name'])?></td></tr>
-<tr><td scope="row">Category:</td><td><?php echo htmlspecialchars($team['catname'])?></td></tr>
 <?php
 
 	if ( !empty($team['members']) ) {
