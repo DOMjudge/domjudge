@@ -156,7 +156,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		if ( IS_JURY ) {
 			$link = ' href="submission.php?id=' . $sid . '"';
 		} elseif ( isset($restrictions['correct']) ) {
-			$link = ' href="show_source?id=' . $sid . '"';
+			$link = ' href="show_source.php?id=' . $sid . '"';
 		} elseif ( $row['result'] && $row['valid'] &&
 		           (!dbconfig_get('verification_required',0) || $row['verified']) ) {
 			$link = ' href="submission_details.php?id=' . $sid . '"';
