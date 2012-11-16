@@ -133,7 +133,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 
 		(IS_JURY ? "<th scope=\"col\" class=\"sorttable_numeric\">ID</th>" : '') .
 		"<th scope=\"col\">time</th>" .
-		(IS_JURY ? "<th scope=\"col\">team</th>" : '') .
+		(IS_JURY || isset($restrictions['correct']) ? "<th scope=\"col\">team</th>" : '') .
 		"<th scope=\"col\">problem</th>" .
 		"<th scope=\"col\">lang</th>" .
 		"<th scope=\"col\">result</th>" .
@@ -155,6 +155,8 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		// present and valid.
 		if ( IS_JURY ) {
 			$link = ' href="submission.php?id=' . $sid . '"';
+		} elseif ( isset($restrictions['correct']) ) {
+			$link = ' href="show_source?id=' . $sid . '"';
 		} elseif ( $row['result'] && $row['valid'] &&
 		           (!dbconfig_get('verification_required',0) || $row['verified']) ) {
 			$link = ' href="submission_details.php?id=' . $sid . '"';
@@ -187,7 +189,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			echo "<td><a$link>s$sid</a></td>";
 		}
 		echo "<td style=\"font-size:smaller;text-align:center;\"><a$link>" . printtime($row['submittime']) . "</a></td>";
-		if ( IS_JURY ) {
+		if ( IS_JURY || isset($restrictions['correct']) ) {
 			echo '<td title="' .
 				htmlspecialchars($row['teamid'].': '.$row['teamname']) . '">' .
 				"<a$link>" . htmlspecialchars(str_cut($row['teamname'],20)) . '</a></td>';
