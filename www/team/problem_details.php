@@ -37,11 +37,11 @@ $ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 <tr><th scope="row">Problem:</th>
 	<td><?php echo htmlspecialchars($name)?> [<span class="probid"><?php echo
 	htmlspecialchars($pid) ?></span>]</td></tr>
-<tr><th scope="row">Solved:</th>
+<tr><th scope="row">#users - solved:</th>
 	<td><?php echo $solved ?></td></tr>
-<tr><th scope="row">Unsolved:</th>
+<tr><th scope="row">#users - unsolved:</th>
 	<td><?php echo $unsolved ?></td></tr>
-<tr><th scope="row">Ratio:</th>
+<tr><th scope="row">ratio:</th>
 	<td><?php echo $ratio ?></td></tr>
 </table>
 
