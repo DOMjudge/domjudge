@@ -25,6 +25,10 @@ $solved = $DB->q('VALUE SELECT is_correct FROM scoreboard_public WHERE probid=%s
 if (!$solved) {
 	error("invalid request"); // you did not solve the same problem
 }
+$category = $DB->q('VALUE SELECT categoryid FROM team, submission WHERE submitid=%i AND login = teamid', $id);
+if ($category != 1) {
+	error("invalid request"); // avoid reading DOMjudge's submissions
+}
 
 // FIXME: displays only first sourcefile
 $sourcecode = $DB->q('VALUE SELECT sourcecode FROM submission_file WHERE submitid=%i LIMIT 1', $id);
