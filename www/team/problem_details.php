@@ -48,7 +48,7 @@ $ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 <?php
 
 echo "<h3 class=\"teamoverview\"><a name=\"own\" href=\"#own\">own submissions</a></h3>\n\n";
-$restrictions = array( 'probid' => $id, 'teamid' => $login );
+$restrictions = array( 'probid' => $pid, 'teamid' => $login );
 putSubmissions($cdata, $restrictions);
 ?>
 <div style="text-align:center;">
@@ -57,7 +57,7 @@ putSubmissions($cdata, $restrictions);
 <?php
 
 echo "<h3 class=\"teamoverview\"><a name=\"correct\" href=\"#correct\">correct submissions (from all users)</a></h3>\n\n";
-$restrictions = array( 'probid' => $id, 'correct' => TRUE );
+$restrictions = array( 'probid' => $pid, 'correct' => TRUE );
 putSubmissions($cdata, $restrictions);
 ?>
 <div style="text-align:center;">
