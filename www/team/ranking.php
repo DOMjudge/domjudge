@@ -33,15 +33,16 @@ if ($res->count() == 0) {
 	$iseven = 0;
 	$rank = 1;
 	while( $row = $res->next() ) {
+		$link = " href=\"team.php?id=" . $row['teamid'] . "\"";
 		echo "<tr class=\"" .
 			( $iseven ? 'roweven': 'rowodd' ) .
 			"\">";
 		$iseven = !$iseven;
-		echo "<td>" . $rank++ . "</td>";
-		echo "<td>" . $row['name'] . "</td>";
-		echo "<td>" . $row['score'] . "</td>";
-		echo "<td>" . $row['subcnt'] . "</td>";
-		echo "<td>" . $row['time'] . "</td>";
+		echo "<td><a$link>" . $rank++ . "</a></td>";
+		echo "<td><a$link>" . $row['name'] . "</a></td>";
+		echo "<td><a$link>" . $row['score'] . "</a></td>";
+		echo "<td><a$link>" . $row['subcnt'] . "</a></td>";
+		echo "<td><a$link>" . $row['time'] . "</a></td>";
 		echo "</tr>";
 	}
 }
