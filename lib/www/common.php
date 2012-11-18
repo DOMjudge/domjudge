@@ -281,6 +281,9 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		if ( $row['result'] == 'correct' ) $corcnt++;
 	}
 	echo "</tbody>\n</table>\n\n";
+	if ( isset($restrictions['correct']) && $corcnt == 0 ) {
+		echo "<p class=\"nodata\">No correct submissions yet - be the first!.</p>\n";
+	}
 
 	if ( IS_JURY ) {
 		echo addEndForm();
