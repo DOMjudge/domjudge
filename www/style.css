@@ -415,3 +415,7 @@ ul.tabbernav li.tabberactive a:hover
 .tabberlive .tabbertab h2 {
 	display:none;
 }
+
+.sortable th { cursor: s-resize; }
+.sortable th.sorttable_sorted { cursor: n-resize; }
+.sortable th.sorttable_nosort { cursor: auto; }

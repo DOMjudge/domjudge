@@ -51,11 +51,11 @@ if ( IS_JURY ) {
 		echo "<script type=\"text/javascript\" src=\"" .
 		"../js/jscolor.js\"></script>\n";
 	}
-	echo "<script type=\"text/javascript\" src=\"" .
-		"../js/sorttable.js\"></script>\n";
 }
 if ( ! IS_PUBLIC ) {
 	echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
+	echo "<script type=\"text/javascript\" src=\"" .
+		"../js/sorttable.js\"></script>\n";
 
 	echo "<script type=\"text/javascript\" src=\"" .
 		"../js/jquery.js\"></script>\n";
