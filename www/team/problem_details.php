@@ -25,10 +25,10 @@ echo "<h1>Problem details</h1>\n";
 
 $solved = $DB->q('VALUE SELECT COUNT(*)
 		FROM scoreboard_public
-		WHERE probid = %s AND is_correct = 1', $pid);
+		WHERE probid = %s AND is_correct = 1 AND teamid!=%s', $pid, 'domjudge');
 $unsolved = $DB->q('VALUE SELECT COUNT(*)
 		FROM scoreboard_public
-		WHERE probid = %s AND is_correct = 0', $pid);
+		WHERE probid = %s AND is_correct = 0 AND teamid!=%s', $pid, 'domjudge');
 $ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 
 $samples = $DB->q("SELECT testcaseid, description FROM testcase
@@ -65,6 +65,23 @@ foreach ($verdicts as $verdict) {
 $verdictCnt_string = join(',', $verdictCnt);
 $verdict_string = join(',', $verdictId);
 
+$langs = $DB->q('SELECT langid,name FROM language WHERE allow_submit=1');
+$cnt = 0;
+while ( $lang = $langs->next() ) {
+	$langCnt[] = "[" . $cnt . ", " .
+		$DB->q('VALUE SELECT COUNT(*)
+			FROM submission
+			WHERE valid=1
+			AND probid=%s
+			AND langid=%s
+			AND teamid!=%s', $pid, $lang['langid'], 'domjudge')
+		. "]";
+	$langId[] = "[" . $cnt . ", '" . $lang['name'] . "']";
+	$cnt++;
+}
+$langCnt_string = join(',', $langCnt);
+$lang_string = join(',', $langId);
+
 ?>
 
 <table>
@@ -88,6 +105,7 @@ $verdict_string = join(',', $verdictId);
 </table>
 
 <div id="verdicts" style="width:550px;height:200px;"></div>
+<div id="langs" style="width:550px;height:200px;"></div>
 
 <script type="text/javascript">
 $.plot(
@@ -106,6 +124,29 @@ $.plot(
  {
    xaxis: {
      ticks: [ <?= $verdict_string ?> ]
+   },
+   yaxis: {
+     minTickSize: 1,
+     tickDecimals: 0
+   }
+ }
+);
+$.plot(
+   $("#langs"),
+   [
+    {
+      label: null,
+      data: [ <?= $langCnt_string ?> ],
+      bars: {
+        show: true,
+        barWidth: 0.5,
+        align: "center"
+      }   
+    }
+ ],
+ {
+   xaxis: {
+     ticks: [ <?= $lang_string ?> ]
    },
    yaxis: {
      minTickSize: 1,

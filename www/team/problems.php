@@ -13,7 +13,8 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Problems</h1>\n\n";
 
 $res = $DB->q('SELECT probid, name
-               FROM problem p');
+               FROM problem p
+		WHERE cid=%i', $cid);
 
 if ($res->count() == 0) {
 	echo "<p class=\"nodata\">No problems.</p>";
@@ -41,11 +42,11 @@ if ($res->count() == 0) {
 
 		$solved = $DB->q('VALUE SELECT COUNT(*)
 				FROM scoreboard_public
-				WHERE probid = %s AND is_correct = 1', $row['probid']);
+				WHERE probid = %s AND is_correct = 1 AND teamid!=%s', $row['probid'], 'domjudge');
 		echo "<td><a$link>" . $solved . "</a></td>";
 		$unsolved = $DB->q('VALUE SELECT COUNT(*)
 				FROM scoreboard_public
-				WHERE probid = %s AND is_correct = 0', $row['probid']);
+				WHERE probid = %s AND is_correct = 0 AND teamid!=%s', $row['probid'], 'domjudge');
 		echo "<td><a$link>" . $unsolved . "</a></td>";
 		$ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 		echo "<td><a$link>" . $ratio . "</a></td>";
