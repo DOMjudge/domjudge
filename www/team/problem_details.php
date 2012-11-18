@@ -31,6 +31,19 @@ $unsolved = $DB->q('VALUE SELECT COUNT(*)
 		WHERE probid = %s AND is_correct = 0', $pid);
 $ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 
+$sample_string = "";
+$samples = $DB->q("SELECT testcaseid, description FROM testcase
+                   WHERE probid=%s AND sample=1 AND description IS NOT NULL
+                   ORDER BY rank", $pid);
+if ( $samples->count() == 0) {
+	$sample_string = '<span class="nodata">no public samples</span>';
+} else {
+	while ( $sample = $samples->next() ) {
+		$sample_string .= ' <a href="sample.php?in=1id=' . $sample['testcaseid'] . '">' . $sample['description'] . '.in<a>';
+		$sample_string .= ' <a href="sample.php?in=0id=' . $sample['testcaseid'] . '">' . $sample['description'] . '.out<a>';
+	}
+}
+
 ?>
 
 <table>
@@ -40,7 +53,7 @@ $ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 <tr><th scope="row">description:</th>
 	<td><a href="problem.php?id=<?= urlencode($pid) ?>"><img src="../images/pdf.gif" alt="pdf"/></a></td></tr>
 <tr><th scope="row">sample:</th>
-	<td>n/a</td></tr>
+	<td><?= $sample_string ?></td></tr>
 <tr><th scope="row">#users - solved:</th>
 	<td><?php echo $solved ?></td></tr>
 <tr><th scope="row">#users - unsolved:</th>

@@ -50,7 +50,19 @@ if ($res->count() == 0) {
 		$ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 		echo "<td><a$link>" . $ratio . "</a></td>";
 		echo "<td><a href=\"problem.php?id=" . $row['probid'] . "\"><img src=\"../images/pdf.gif\" alt=\"pdf\"/></a></td>";
-		echo "<td>n/a</td>";
+		$sample_string = "";
+		$samples = $DB->q("SELECT testcaseid, description FROM testcase
+		                   WHERE probid=%s AND sample=1 AND description IS NOT NULL
+		                   ORDER BY rank", $row['probid']);
+		if ( $samples->count() == 0) {
+			$sample_string = '<span class="nodata">no public samples</span>';
+		} else {
+			while ( $sample = $samples->next() ) {
+				$sample_string .= ' <a href="sample.php?in=1id=' . $sample['testcaseid'] . '">' . $sample['description'] . '.in<a>';
+				$sample_string .= ' <a href="sample.php?in=0id=' . $sample['testcaseid'] . '">' . $sample['description'] . '.out<a>';
+			}
+		}
+		echo "<td>$sample_string</td>";
 		echo "</tr>\n";
 	}
 
