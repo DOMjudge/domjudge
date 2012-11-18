@@ -71,7 +71,7 @@ $verdict_string = join(',', $verdictId);
 	<td><?php echo htmlspecialchars($name)?> [<span class="probid"><?php echo
 	htmlspecialchars($pid) ?></span>]</td></tr>
 <tr><th scope="row">description:</th>
-	<td><a href="problem.php?id=<?= urlencode($pid) ?>"><img src="../images/pdf.gif" alt="pdf"/></a></td></tr>
+	<td><a href="problem.php?id=<?= urlencode($pid) ?>"><img src="../images/pdf.gif" alt="pdf"/> <?= htmlspecialchars($pid) ?>.pdf</a></td></tr>
 <tr><th scope="row">sample:</th>
 	<td><?= $sample_string ?></td></tr>
 <tr><th scope="row">#users - solved:</th>
