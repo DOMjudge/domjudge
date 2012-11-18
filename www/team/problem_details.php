@@ -39,8 +39,8 @@ if ( $samples->count() == 0) {
 	$sample_string = '<span class="nodata">no public samples</span>';
 } else {
 	while ( $sample = $samples->next() ) {
-		$sample_string .= ' <a href="sample.php?in=1id=' . $sample['testcaseid'] . '">' . $sample['description'] . '.in<a>';
-		$sample_string .= ' <a href="sample.php?in=0id=' . $sample['testcaseid'] . '">' . $sample['description'] . '.out<a>';
+		$sample_string .= ' <a href="sample.php?in=1&id=' . $sample['testcaseid'] . '">' . $sample['description'] . '.in<a>';
+		$sample_string .= ' <a href="sample.php?in=0&id=' . $sample['testcaseid'] . '">' . $sample['description'] . '.out<a>';
 	}
 }
 
