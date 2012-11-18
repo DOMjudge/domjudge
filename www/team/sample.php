@@ -20,9 +20,10 @@ if ( !isset($tcid) ) {
 $INOROUT = array('input','output');
 
 // Download testcase
-$fetch = ($in ? 'input' : 'output'); 
+$fetch = ($in ? 'input' : 'output');
 
-$testcase = $DB->q("SELECT probid, rank, OCTET_LENGTH($fetch) AS size FROM testcase WHERE testcaseid=%i", $tcid);
+$testcase = $DB->q("SELECT probid, rank, OCTET_LENGTH($fetch) AS size FROM testcase
+                    WHERE issample=1 AND testcaseid=%i", $tcid);
 if ( $testcase->count() != 1 ) {
 	error("Problem downloading sample data.");
 }
