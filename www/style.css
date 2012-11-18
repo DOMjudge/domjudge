@@ -416,6 +416,10 @@ ul.tabbernav li.tabberactive a:hover
 	display:none;
 }
 
+.untouched { font-size: 250%; color: #AAA; }
+.unsolved  { font-size: 250%; color: red; }
+.solved    { font-size: 250%; color: green; }
+
 .sortable th { cursor: s-resize; }
 .sortable th.sorttable_sorted { cursor: n-resize; }
 .sortable th.sorttable_nosort { cursor: auto; }

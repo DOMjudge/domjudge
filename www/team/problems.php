@@ -19,6 +19,96 @@ $res = $DB->q('SELECT probid, name
 if ($res->count() == 0) {
 	echo "<p class=\"nodata\">No problems.</p>";
 } else {
+	// TODO: don't query these values over and over again but add another table
+	$verdicts = array('correct', 'run-error', 'timelimit', 'wrong-answer', 'presentation-error', 'no-output');
+	$cnt = 0;
+	foreach ($verdicts as $verdict) {
+		$verdictCnt[] = "[" . $cnt . ", " . 
+			$DB->q('VALUE SELECT COUNT(*)
+			FROM judging j
+			LEFT JOIN submission s USING (submitid)
+			WHERE
+			s.valid=1
+			AND j.valid=1
+			AND j.result=%s
+			AND s.teamid!=%s', $verdict, 'domjudge')
+			. "]";
+		$verdictId[] = "[" . $cnt . ", '" . $verdict . "']";
+		$cnt++;
+	}
+	$verdictCnt_string = join(',', $verdictCnt);
+	$verdict_string = join(',', $verdictId);
+
+	$langs = $DB->q('SELECT langid,name FROM language WHERE allow_submit=1');
+	$cnt = 0;
+	while ( $lang = $langs->next() ) {
+		$langCnt[] = "[" . $cnt . ", " .
+			$DB->q('VALUE SELECT COUNT(*)
+				FROM submission
+				WHERE valid=1
+				AND langid=%s
+				AND teamid!=%s', $lang['langid'], 'domjudge')
+			. "]";
+		$langId[] = "[" . $cnt . ", '" . $lang['name'] . "']";
+		$cnt++;
+	}
+	$langCnt_string = join(',', $langCnt);
+	$lang_string = join(',', $langId);
+
+?>
+<div id="verdicts" style="width:550px;height:200px;"></div>
+<div id="langs" style="width:550px;height:200px;"></div>
+
+<script type="text/javascript">
+$.plot(
+   $("#verdicts"),
+   [
+    {
+      label: null,
+      data: [ <?= $verdictCnt_string ?> ],
+      bars: {
+        show: true,
+        barWidth: 0.5,
+        align: "center"
+      }   
+    }
+ ],
+ {
+   xaxis: {
+     ticks: [ <?= $verdict_string ?> ]
+   },
+   yaxis: {
+     minTickSize: 1,
+     tickDecimals: 0
+   }
+ }
+);
+$.plot(
+   $("#langs"),
+   [
+    {
+      label: null,
+      data: [ <?= $langCnt_string ?> ],
+      bars: {
+        show: true,
+        barWidth: 0.5,
+        align: "center"
+      }   
+    }
+ ],
+ {
+   xaxis: {
+     ticks: [ <?= $lang_string ?> ]
+   },
+   yaxis: {
+     minTickSize: 1,
+     tickDecimals: 0
+   }
+ }
+);
+</script>
+
+<?
 	// table header
 	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
 		"<th scope=\"col\">problem ID</th>" .
@@ -28,6 +118,7 @@ if ($res->count() == 0) {
 		"<th scope=\"col\">ratio</th>" .
 		"<th scope=\"col\">description</th>" .
 		"<th scope=\"col\">sample</th>" .
+		"<th scope=\"col\">status</th>" .
 		"</tr>\n</thead>\n<tbody>\n";
 
 	$iseven = 0;
@@ -65,6 +156,16 @@ if ($res->count() == 0) {
 			$sample_string = join(' | ', $sample_string);
 		}
 		echo "<td>$sample_string</td>";
+		$status = $DB->q('MAYBEVALUE SELECT is_correct FROM scoreboard_public WHERE probid=%s AND teamid=%s', $row['probid'], $login);
+		if ( $status === NULL ) {
+			$status = "untouched";
+		} else if ( $status == 1 ) {
+			$status = "solved";
+		} else {
+			$status = "unsolved";
+		}
+		
+		echo "<td class=\"$status\">" . CIRCLE_SYM . "</td>";
 		echo "</tr>\n";
 	}
 
