@@ -44,7 +44,7 @@ CREATE TABLE `clarification` (
   `sender` varchar(15) default NULL COMMENT 'Team login, null means jury',
   `recipient` varchar(15) default NULL COMMENT 'Team login, null means to jury or to all',
   `jury_member` varchar(15) default NULL COMMENT 'Name of jury member who answered this',
-  `probid` varchar(8) default NULL COMMENT 'Problem associated to this clarification',
+  `probid` varchar(50) default NULL COMMENT 'Problem associated to this clarification',
   `body` longtext NOT NULL COMMENT 'Clarification text',
   `answered` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),
@@ -101,7 +101,7 @@ CREATE TABLE `event` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `clarid` int(4) unsigned default NULL COMMENT 'Clarification ID',
   `langid` varchar(8) default NULL COMMENT 'Language ID',
-  `probid` varchar(8) default NULL COMMENT 'Problem ID',
+  `probid` varchar(50) default NULL COMMENT 'Problem ID',
   `submitid` int(4) unsigned default NULL COMMENT 'Submission ID',
   `judgingid` int(4) unsigned default NULL COMMENT 'Judging ID',
   `teamid` varchar(15) default NULL COMMENT 'Team login',
@@ -186,7 +186,7 @@ CREATE TABLE `language` (
 --
 
 CREATE TABLE `problem` (
-  `probid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
+  `probid` varchar(50) NOT NULL COMMENT 'Unique ID (string)',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `allow_submit` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Are submissions accepted for this problem?',
@@ -208,7 +208,7 @@ CREATE TABLE `problem` (
 CREATE TABLE `scoreboard_jury` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `probid` varchar(50) NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL default '0' COMMENT 'Number of submissions made',
   `pending` int(4) NOT NULL default '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL default '0' COMMENT 'Total time spent',
@@ -223,7 +223,7 @@ CREATE TABLE `scoreboard_jury` (
 CREATE TABLE `scoreboard_public` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `probid` varchar(50) NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL default '0' COMMENT 'Number of submissions made',
   `pending` int(4) NOT NULL default '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL default '0' COMMENT 'Total time spent',
@@ -240,7 +240,7 @@ CREATE TABLE `submission` (
   `origsubmitid` int(4) unsigned default NULL COMMENT 'If set, specifies original submission in case of edit/resubmit',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `probid` varchar(50) NOT NULL COMMENT 'Problem ID',
   `langid` varchar(8) NOT NULL COMMENT 'Language ID',
   `submittime` datetime NOT NULL COMMENT 'Time submitted',
   `judgehost` varchar(50) default NULL COMMENT 'Current/last judgehost judging this submission',

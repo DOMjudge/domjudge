@@ -21,6 +21,27 @@ ALTER TABLE `team`
 ALTER TABLE `testcase`
   ADD COLUMN `sample` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Sample testcases can be shared with teams.' AFTER `description`;
 
+ALTER TABLE `clarification`
+  MODIFY COLUMN `probid` varchar(50) default NULL COMMENT 'Problem associated to this clarification';
+
+ALTER TABLE `event`
+  MODIFY COLUMN `probid` varchar(50) default NULL COMMENT 'Problem ID';
+
+ALTER TABLE `problem`
+  MODIFY COLUMN `probid` varchar(50) NOT NULL COMMENT 'Unique ID (string)';
+
+ALTER TABLE `scoreboard_jury`
+  MODIFY COLUMN `probid` varchar(50) NOT NULL COMMENT 'Problem ID';
+
+ALTER TABLE `scoreboard_public`
+  MODIFY COLUMN `probid` varchar(50) NOT NULL COMMENT 'Problem ID';
+
+ALTER TABLE `submission`
+  MODIFY COLUMN `probid` varchar(50) NOT NULL COMMENT 'Problem ID';
+
+ALTER TABLE `testcase`
+  MODIFY COLUMN `probid` varchar(8) NOT NULL COMMENT 'Corresponding problem ID';
+
 --
 -- Transfer data from old to new structure
 --
