@@ -56,6 +56,11 @@ if ( IS_JURY ) {
 }
 if ( ! IS_PUBLIC ) {
 	echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
+
+	echo "<script type=\"text/javascript\" src=\"" .
+		"../js/jquery.js\"></script>\n";
+	echo "<script type=\"text/javascript\" src=\"" .
+		"../js/jflot.js\"></script>\n";
 }
 if ( file_exists(WWWDIR . "/custom.css") ) {
 	echo "<link rel=\"stylesheet\" href=\"../custom.css\" type=\"text/css\" />";

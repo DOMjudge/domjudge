@@ -44,6 +44,26 @@ if ( $samples->count() == 0) {
 	}
 }
 
+// TODO: don't query these values over and over again but add another table
+$verdicts = array('correct', 'run-error', 'timelimit', 'wrong-answer', 'presentation-error', 'no-output');
+$cnt = 0;
+foreach ($verdicts as $verdict) {
+	$verdictCnt[] = "[" . $cnt . ", " . 
+		$DB->q('VALUE SELECT COUNT(*)
+		FROM judging j
+		LEFT JOIN submission s USING (submitid)
+		WHERE s.probid=%s
+		AND s.valid=1
+		AND j.valid=1
+		AND j.result=%s
+		AND s.teamid!=%s', $pid, $verdict, 'domjudge')
+		. "]";
+	$verdictId[] = "[" . $cnt . ", '" . $verdict . "']";
+	$cnt++;
+}
+$verdictCnt_string = join(',', $verdictCnt);
+$verdict_string = join(',', $verdictId);
+
 ?>
 
 <table>
@@ -65,6 +85,34 @@ if ( $samples->count() == 0) {
 <tr><th scope="row"><a href="clarification.php?pid=<?= urlencode($pid) ?>">request clarification</a></th>
 	<td/></tr>
 </table>
+
+<div id="verdicts" style="width:550px;height:200px;"></div>
+
+<script type="text/javascript">
+$.plot(
+   $("#verdicts"),
+   [
+    {
+      label: null,
+      data: [ <?= $verdictCnt_string ?> ],
+      bars: {
+        show: true,
+        barWidth: 0.5,
+        align: "center"
+      }   
+    }
+ ],
+ {
+   xaxis: {
+     ticks: [ <?= $verdict_string ?> ]
+   },
+   yaxis: {
+     minTickSize: 1,
+     tickDecimals: 0
+   }
+ }
+);
+</script>
 
 <?php
 
