@@ -206,16 +206,17 @@ function importZippedProblem($zip, $probid = NULL)
 		$filename = $zip->getNameIndex($j);
 		if ( ends_with($filename, ".in") ) {
 			$basename = basename($filename, ".in");
+			$issample = (int) (!strncmp(strtolower($basename), "sample", strlen("sample")));
 			$fileout = $basename . ".out";
 			$testout = $zip->getFromName($fileout);
 			if ($testout !== FALSE) {
 				$testin = $zip->getFromIndex($j);
 
 				$DB->q('INSERT INTO testcase (probid, rank,
-				        md5sum_input, md5sum_output, input, output, description)
-				        VALUES (%s, %i, %s, %s, %s, %s, %s)',
+				        md5sum_input, md5sum_output, input, output, description, sample)
+				        VALUES (%s, %i, %s, %s, %s, %s, %s, %i)',
 				       $probid, $maxrank, md5($testin), md5($testout),
-				       $testin, $testout, $basename);
+				       $testin, $testout, $basename, $issample);
 				$maxrank++;
 			}
 		}
