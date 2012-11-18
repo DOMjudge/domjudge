@@ -34,9 +34,13 @@ $ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 ?>
 
 <table>
-<tr><th scope="row">Problem:</th>
+<tr><th scope="row">problem:</th>
 	<td><?php echo htmlspecialchars($name)?> [<span class="probid"><?php echo
 	htmlspecialchars($pid) ?></span>]</td></tr>
+<tr><th scope="row">description:</th>
+	<td><a href="problem.php?id=<?= urlencode($pid) ?>"><img src="../images/pdf.gif" alt="pdf"/></a></td></tr>
+<tr><th scope="row">sample:</th>
+	<td>n/a</td></tr>
 <tr><th scope="row">#users - solved:</th>
 	<td><?php echo $solved ?></td></tr>
 <tr><th scope="row">#users - unsolved:</th>
