@@ -56,7 +56,7 @@ if ( IS_JURY ) {
 }
 if ( ! IS_PUBLIC ) {
 	echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
-} else if ( dbconfig_get('team_select_js', 1) ) {
+} else if ( dbconfig_get('team_select', 1) ) {
 	echo "<script type=\"text/javascript\" src=\"../js/djfav.js\"></script>\n";
 }
 if ( ! empty($extrahead) ) echo $extrahead;

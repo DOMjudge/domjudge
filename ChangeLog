@@ -41,6 +41,7 @@ Version 3.4.0 - DEV
  - Correct mount bind option, see Debian bug #677815. Ported from
    WISVCH/DOMjudge tree at GitHub.
  - Add program to "relive" simulate original contest submissions.
+ - Add option to display favourite teams on top of the public scoreboard.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
