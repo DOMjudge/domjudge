@@ -444,14 +444,14 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 	
 	}
 
-	echo "</table>\n\n";
+	echo "</table>\n\n<p><br /><br /></p>\n";
 
 	// only print legend when there's more than one category
 	if ( empty($limitteams) && count($categs) > 1 ) {
-		echo "<p><br /><br /></p>\n<table id=\"legend\" class=\"scoreboard" .
+		echo "<table id=\"legend\" class=\"scoreboard" .
 			(IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
 			"<thead><tr><th scope=\"col\">" .
-			jurylink('team_categories.php','Legend') .
+			jurylink('team_categories.php','Categories') .
 			"</th></tr></thead>\n<tbody>\n";
 		foreach( $categs as $cat ) {
 			echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
@@ -460,8 +460,26 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 				jurylink('team_category.php?id=' . urlencode($cat['categoryid']),
 					htmlspecialchars($cat['name'])) .	"</td></tr>\n";
 		}
-		echo "</tbody>\n</table>\n\n";
+		echo "</tbody>\n</table>\n\n&nbsp;";
 	}
+
+	// print legend of scorecell colors
+	$cellcolors = array('first'     => 'Solved first',
+	                    'correct'   => 'Solved',
+	                    'incorrect' => 'Tried, incorrect',
+	                    'pending'   => 'Tried, pending',
+	                    'neutral'   => 'Untried');
+
+	echo "<table id=\"legend\" class=\"scoreboard" .
+	    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
+	    "<thead><tr><th scope=\"col\"><a>Cell colours</a></th></tr>" .
+	    "</thead>\n<tbody>\n";
+	foreach( $cellcolors as $color => $desc ) {
+		if ( $color=='pending' && !dbconfig_get('show_pending', 0) ) continue;
+		echo '<tr class="score_' . $color . '">' .
+		    '<td align="center" class="scoretn"><a>' . $desc . "</a></td></tr>\n";
+	}
+	echo "</tbody>\n</table>\n\n";
 
 	return;
 }

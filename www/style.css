@@ -221,6 +221,11 @@ td.scorenc { border-color: silver; }
 	font-weight: bold;
 }
 
+#legend {
+	display: inline-block;
+	vertical-align: top
+}
+
 #lastmod { 
 	position: absolute; right: 1ex; margin-top: 1em;
 }
