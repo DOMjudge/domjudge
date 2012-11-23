@@ -51,7 +51,7 @@ if ( isset($_GET['edited']) ) {
             msgbox (
                 "Warning: Refresh scoreboard cache",
 		"After changing the contest start time, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
-		addSubmit('recalculate caches now', 'refresh') 
+		addSubmit('recalculate caches now', 'refresh')
 		) .
 		addEndForm();
 
@@ -75,9 +75,8 @@ if ( empty($cid) )  {
 		     "</em>; active from " . $row['activatetime'] .
 		     "<br /><br />\n";
 		if ( IS_ADMIN ) echo "<input type=\"submit\" " .
-		     "name=\"donow[activate][" . (int)$row['cid'] . 
+		     "name=\"donow[activate][" . (int)$row['cid'] .
 		     "]\" value=\"activate now\" />\n";
-		
 	} else {
 		echo "<p class=\"nodata\">No upcoming contest</p>\n";
 	}
@@ -118,7 +117,7 @@ if ( empty($cid) )  {
 		if ( IS_ADMIN && (
 		 ( $time == 'start' && !$hasstarted ) ||
 		 ( $time == 'end' && $hasstarted && !$hasended && (empty($row['freezetime']) || $hasfrozen) ) ||
-		 ( $time == 'freeze' && $hasstarted && !$hasended && !$hasfrozen ) || 
+		 ( $time == 'freeze' && $hasstarted && !$hasended && !$hasfrozen ) ||
 		 ( $time == 'unfreeze' && $hasfrozen && !$hasunfrozen && $hasended ) ) ) {
 			echo addSubmit("$time now", "donow[$time]");
 		}

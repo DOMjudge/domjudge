@@ -226,10 +226,10 @@ td.scorenc { border-color: silver; }
 	vertical-align: top
 }
 
-#lastmod { 
+#lastmod {
 	position: absolute; right: 1ex; margin-top: 1em;
 }
-#lastmod, #lastmod a { 
+#lastmod, #lastmod a {
 	font-size: x-small;
 	color: gray;
 	text-align: right;

@@ -441,7 +441,6 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 				'</td>';
 		}
 		echo "</tr>\n</tbody>\n";
-	
 	}
 
 	echo "</table>\n\n<p><br /><br /></p>\n";

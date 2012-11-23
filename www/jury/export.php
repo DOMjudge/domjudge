@@ -13,7 +13,7 @@ if ( !isset($id) ) {
 	error("No problem id given.");
 }
 
-$ini_keys = array('probid', 'name', 'timelimit', 'special_run', 
+$ini_keys = array('probid', 'name', 'timelimit', 'special_run',
 		  'special_compare', 'color');
 
 $problem = $DB->q('MAYBETUPLE SELECT OCTET_LENGTH(problemtext) as textlen, ' .

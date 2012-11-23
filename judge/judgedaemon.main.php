@@ -541,7 +541,7 @@ function store_result($result, $row, $judgingid)
 		        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
 		       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
 		       $row['submitid'], $judgingid);
-		if ( $result == 'correct' ) { 
+		if ( $result == 'correct' ) {
 			// prevent duplicate balloons in case of multiple correct submissions
 			$numcorrect = $DB->q('VALUE SELECT count(submitid)
 			                      FROM balloon LEFT JOIN submission USING(submitid)
