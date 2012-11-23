@@ -221,7 +221,7 @@ td.scorenc { border-color: silver; }
 	font-weight: bold;
 }
 
-#legend {
+.scorelegend {
 	display: inline-block;
 	vertical-align: top
 }

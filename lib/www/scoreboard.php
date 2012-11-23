@@ -447,7 +447,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 
 	// only print legend when there's more than one category
 	if ( empty($limitteams) && count($categs) > 1 ) {
-		echo "<table id=\"legend\" class=\"scoreboard" .
+		echo "<table id=\"categ_legend\" class=\"scoreboard scorelegend" .
 			(IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
 			"<thead><tr><th scope=\"col\">" .
 			jurylink('team_categories.php','Categories') .
@@ -469,7 +469,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 	                    'pending'   => 'Tried, pending',
 	                    'neutral'   => 'Untried');
 
-	echo "<table id=\"legend\" class=\"scoreboard" .
+	echo "<table id=\"cell_legend\" class=\"scoreboard scorelegend" .
 	    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
 	    "<thead><tr><th scope=\"col\"><a>Cell colours</a></th></tr>" .
 	    "</thead>\n<tbody>\n";
