@@ -123,8 +123,14 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			}
 			$result .= "<li>Updated $inout for testcase $rank from " .
 			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
-				" (" . htmlspecialchars($_FILES[$fileid]['size'][$rank]) .
-				" B)</li>\n";
+			    " (" . htmlspecialchars($_FILES[$fileid]['size'][$rank]) . " B)";
+			if ( $inout=='output' &&
+			     $_FILES[$fileid]['size'][$rank]>dbconfig_get('filesize_limit')*1024 ) {
+				$result .= ".<br /><b>Warning: file size exceeds " .
+				    "<tt>filesize_limit</tt> of " . dbconfig_get('filesize_limit') .
+				    " kB. This will always result in wrong answers!</b>";
+			}
+			$result .= "</li>\n";
 		}
 	}
 
@@ -164,7 +170,13 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			    htmlspecialchars($_FILES['add_input']['name']) .
 			    " (" . htmlspecialchars($_FILES['add_input']['size']) . " B) and " .
 			    htmlspecialchars($_FILES['add_output']['name']) .
-			    " (" . htmlspecialchars($_FILES['add_output']['size']) . " B)</li>\n";
+			    " (" . htmlspecialchars($_FILES['add_output']['size']) . " B)";
+			if ( $_FILES['add_output']['size']>dbconfig_get('filesize_limit')*1024 ) {
+				$result .= ".<br /><b>Warning: output file size exceeds " .
+				    "<tt>filesize_limit</tt> of " . dbconfig_get('filesize_limit') .
+				    " kB. This will always result in wrong answers!</b>";
+			}
+			$result .= "</li>\n";
 		}
 	}
 }

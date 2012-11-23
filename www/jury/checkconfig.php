@@ -273,10 +273,18 @@ while($row = $res->next()) {
 	}
 }
 foreach(array('input','output') as $inout) {
-	$mismatch = $DB->q("SELECT probid FROM testcase WHERE md5($inout) != md5sum_$inout");
+	$mismatch = $DB->q("SELECT probid, rank FROM testcase WHERE md5($inout) != md5sum_$inout");
 	while($r = $mismatch->next()) {
-		$details .= $r['probid'] . ": testcase MD5 sum mismatch between $inout and md5sum_$inout\n";
+		$details .= $r['probid'] . ": testcase #" . $r['rank'] .
+		    " MD5 sum mismatch between $inout and md5sum_$inout\n";
 	}
+}
+$oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
+                    FROM testcase WHERE OCTET_LENGTH(output) > %i",
+                   dbconfig_get('filesize_limit')*1024);
+while($r = $oversize->next()) {
+	$details .= $r['probid'] . ": testcase #" . $r['rank'] .
+	    " output size (" . $r['size'] . " B) exceeds filesize_limit\n";
 }
 
 $has_errors = $details != '';
