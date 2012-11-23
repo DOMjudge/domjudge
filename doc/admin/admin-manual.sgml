@@ -2328,7 +2328,9 @@ to raise the memory limits for PHP. This can be done by either editing
 <tt>upload_max_filesize</tt> and <tt>post_max_size</tt> values to well
 above the size of your largest testcase. You can change these parameters
 under the jury directory or by directly editing the global Apache or
-<tt>php.ini</tt> configuration.
+<tt>php.ini</tt> configuration. Note also that <tt>max_file_uploads</tt>
+must be larger than the maximum number of testcases per problem to be
+able to upload and edit these in the web interface.
 
 The optional PHP Suhosin module may also impose additional limits; check
 your error logging to see if these are triggered. You may also need to
