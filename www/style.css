@@ -223,7 +223,12 @@ td.scorenc { border-color: silver; }
 
 .scorelegend {
 	display: inline-block;
-	vertical-align: top
+	vertical-align: top;
+}
+
+.scorelegend td {
+	text-align: center;
+	width: 25ex;
 }
 
 #lastmod {

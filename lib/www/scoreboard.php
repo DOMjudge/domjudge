@@ -458,11 +458,11 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 			foreach( $categs as $cat ) {
 				echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
 				              $cat['color'] . ';"' : '') . '>' .
-				    '<td align="center" class="scoretn">' .
+				    '<td>' .
 				    jurylink('team_category.php?id=' . urlencode($cat['categoryid']),
-				             htmlspecialchars($cat['name'])) .  "</td></tr>\n";
+				             htmlspecialchars($cat['name'])) .	"</td></tr>\n";
 			}
-			echo "</tbody>\n</table>\n\n&nbsp;";
+			echo "</tbody>\n</table>\n&nbsp;\n";
 		}
 
 		// print legend of scorecell colors
@@ -472,14 +472,15 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 		                    'pending'   => 'Tried, pending',
 		                    'neutral'   => 'Untried');
 
+
 		echo "<table id=\"cell_legend\" class=\"scoreboard scorelegend" .
 		    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
-		    "<thead><tr><th scope=\"col\"><a>Cell colours</a></th></tr>" .
-		    "</thead>\n<tbody>\n";
+		    "<thead><tr><th scope=\"col\">" . jurylink(null,'Cell colours') .
+		    "</th></tr></thead>\n<tbody>\n";
 		foreach( $cellcolors as $color => $desc ) {
 			if ( $color=='pending' && !dbconfig_get('show_pending', 0) ) continue;
 			echo '<tr class="score_' . $color . '">' .
-			    '<td align="center" class="scoretn"><a>' . $desc . "</a></td></tr>\n";
+			    '<td>' . jurylink(null, $desc) . "</td></tr>\n";
 		}
 		echo "</tbody>\n</table>\n\n";
 	}
