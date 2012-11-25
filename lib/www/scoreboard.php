@@ -256,9 +256,9 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
  * if $displayrank is false the first column will not display the
  * team's current rank but a question mark.
  */
-function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
-	$static = FALSE, $limitteams = null, $displayrank = TRUE, $center = FALSE) {
-
+function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE,
+	$limitteams = null, $displayrank = TRUE, $center = FALSE, $showlegends = TRUE)
+{
 	$cid = $cdata['cid'];
 
 	// 'unpack' the scoreboard data:
@@ -443,42 +443,46 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null,
 		echo "</tr>\n</tbody>\n";
 	}
 
-	echo "</table>\n\n<p><br /><br /></p>\n";
+	echo "</table>\n\n";
 
-	// only print legend when there's more than one category
-	if ( empty($limitteams) && count($categs) > 1 ) {
-		echo "<table id=\"categ_legend\" class=\"scoreboard scorelegend" .
-			(IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
-			"<thead><tr><th scope=\"col\">" .
-			jurylink('team_categories.php','Categories') .
-			"</th></tr></thead>\n<tbody>\n";
-		foreach( $categs as $cat ) {
-			echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
-				          $cat['color'] . ';"' : '') . '>' .
-				'<td align="center" class="scoretn">' .
-				jurylink('team_category.php?id=' . urlencode($cat['categoryid']),
-					htmlspecialchars($cat['name'])) .	"</td></tr>\n";
+	if ( $showlegends ) {
+		echo "<p><br /><br /></p>\n";
+
+		// only print legend when there's more than one category
+		if ( empty($limitteams) && count($categs) > 1 ) {
+			echo "<table id=\"categ_legend\" class=\"scoreboard scorelegend" .
+			    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
+			    "<thead><tr><th scope=\"col\">" .
+			    jurylink('team_categories.php','Categories') .
+			    "</th></tr></thead>\n<tbody>\n";
+			foreach( $categs as $cat ) {
+				echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
+				              $cat['color'] . ';"' : '') . '>' .
+				    '<td align="center" class="scoretn">' .
+				    jurylink('team_category.php?id=' . urlencode($cat['categoryid']),
+				             htmlspecialchars($cat['name'])) .  "</td></tr>\n";
+			}
+			echo "</tbody>\n</table>\n\n&nbsp;";
 		}
-		echo "</tbody>\n</table>\n\n&nbsp;";
-	}
 
-	// print legend of scorecell colors
-	$cellcolors = array('first'     => 'Solved first',
-	                    'correct'   => 'Solved',
-	                    'incorrect' => 'Tried, incorrect',
-	                    'pending'   => 'Tried, pending',
-	                    'neutral'   => 'Untried');
+		// print legend of scorecell colors
+		$cellcolors = array('first'     => 'Solved first',
+		                    'correct'   => 'Solved',
+		                    'incorrect' => 'Tried, incorrect',
+		                    'pending'   => 'Tried, pending',
+		                    'neutral'   => 'Untried');
 
-	echo "<table id=\"cell_legend\" class=\"scoreboard scorelegend" .
-	    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
-	    "<thead><tr><th scope=\"col\"><a>Cell colours</a></th></tr>" .
-	    "</thead>\n<tbody>\n";
-	foreach( $cellcolors as $color => $desc ) {
-		if ( $color=='pending' && !dbconfig_get('show_pending', 0) ) continue;
-		echo '<tr class="score_' . $color . '">' .
-		    '<td align="center" class="scoretn"><a>' . $desc . "</a></td></tr>\n";
+		echo "<table id=\"cell_legend\" class=\"scoreboard scorelegend" .
+		    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
+		    "<thead><tr><th scope=\"col\"><a>Cell colours</a></th></tr>" .
+		    "</thead>\n<tbody>\n";
+		foreach( $cellcolors as $color => $desc ) {
+			if ( $color=='pending' && !dbconfig_get('show_pending', 0) ) continue;
+			echo '<tr class="score_' . $color . '">' .
+			    '<td align="center" class="scoretn"><a>' . $desc . "</a></td></tr>\n";
+		}
+		echo "</tbody>\n</table>\n\n";
 	}
-	echo "</tbody>\n</table>\n\n";
 
 	return;
 }
@@ -634,7 +638,7 @@ function putTeamRow($cdata, $teamids) {
 			echo "<h3 id=\"contestnotstarted\">contest is scheduled to start at " .
 				printtime($cdata['starttime']) . "</h3>\n\n";
 		}
-		
+
 		return;
 	}
 
@@ -647,7 +651,7 @@ function putTeamRow($cdata, $teamids) {
 
 	if ( ! IS_JURY ) echo "<div id=\"teamscoresummary\">\n";
 	renderScoreBoardTable($cdata,$sdata,$myteamid,$static,
-		$teamids,$displayrank,TRUE);
+	                      $teamids,$displayrank,TRUE,FALSE);
 	if ( ! IS_JURY ) echo "</div>\n\n";
 
 	return;
