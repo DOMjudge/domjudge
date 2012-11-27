@@ -136,6 +136,14 @@ if ( function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()==1 ) {
 	result('software', 'PHP magic quotes', 'O', 'PHP magic quotes disabled.');
 }
 
+$max_file_check = max(100,dbconfig_get('sourcefiles_limit', 100));
+result('software', 'PHP max_file_uploads',
+       (int) ini_get('max_file_uploads') < $max_file_check ? 'W':'O',
+       'PHP max_file_uploads is set to ' .
+       (int) ini_get('max_file_uploads') . '. This should be set higher ' .
+       'than the maximum number of test cases per problem and the ' .
+       'configuration setting \'sourcefiles_limit\'.');
+
 require ( LIBWWWDIR . '/highlight.php');
 $highlighter = highlighter_init();
 
