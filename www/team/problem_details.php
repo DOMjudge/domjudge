@@ -104,6 +104,7 @@ $lang_string = join(',', $langId);
 	<td/></tr>
 </table>
 
+<h3 class="teamoverview"><a name=\"stats\" href=\"#stats\">submission graphs</a></h3>
 <div id="verdicts" style="width:550px;height:200px;"></div>
 <div id="langs" style="width:550px;height:200px;"></div>
 
@@ -117,6 +118,7 @@ $.plot(
       bars: {
         show: true,
         barWidth: 0.5,
+	lineWidth: 0,
         align: "center"
       }   
     }
@@ -140,6 +142,7 @@ $.plot(
       bars: {
         show: true,
         barWidth: 0.5,
+	lineWidth: 0,
         align: "center"
       }   
     }
