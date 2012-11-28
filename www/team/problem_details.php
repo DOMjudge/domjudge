@@ -9,6 +9,7 @@
 require('init.php');
 $title = 'Problem details';
 require(LIBWWWDIR . '/header.php');
+require(LIBWWWDIR . '/forms.php');
 
 $pid = @$_GET['id'];
 
@@ -196,6 +197,46 @@ putSubmissions($cdata, $restrictions);
 	}
 	showAllSubmissions(false);
 </script> 
+
 <?php
+
+echo "<div id=\"clarlist\">\n";
+
+$requests = $DB->q('SELECT * FROM clarification
+                    WHERE cid = %i AND sender = %s AND probid = %s
+                    ORDER BY submittime DESC, clarid DESC', $cid, $login, $pid);
+
+$clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
+                          LEFT JOIN team_unread u ON
+                          (c.clarid=u.mesgid AND u.type="clarification" AND u.teamid = %s)
+                          WHERE c.cid = %i AND c.sender IS NULL
+                          AND ( c.recipient IS NULL OR c.recipient = %s )
+			  AND probid = %s
+                          ORDER BY c.submittime DESC, c.clarid DESC',
+                          $login, $cid, $login, $pid);
+
+echo "<h3 class=\"teamoverview\"><a name=\"clarifications\" href=\"#clarifications\">Clarifications</a></h3>\n";
+
+# FIXME: column width and wrapping/shortening of clarification text 
+if ( $clarifications->count() == 0 ) {
+	echo "<p class=\"nodata\">No clarifications.</p>\n\n";
+} else {
+	putClarificationList($clarifications,$login);
+}
+
+echo "<h3 class=\"teamoverview\"><a name=\"clarreq\" href=\"#clarreq\">Clarification Requests</a></h3>\n";
+
+if ( $requests->count() == 0 ) {
+	echo "<p class=\"nodata\">No clarification requests.</p>\n\n";
+} else {
+	putClarificationList($requests,$login);
+}
+
+echo addForm('clarification.php','get') .
+	addHidden('pid', htmlspecialchars($pid)) . 
+	"<p>" . addSubmit('request clarification') . "</p>" .
+	addEndForm();
+
+echo "</div>\n";
 
 require(LIBWWWDIR . '/footer.php');
