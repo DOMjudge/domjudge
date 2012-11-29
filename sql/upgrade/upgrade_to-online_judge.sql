@@ -16,6 +16,7 @@ ALTER TABLE `testcase` DROP COLUMN `sample`;
 --
 
 ALTER TABLE `team`
+  CHANGE COLUMN `teampage_first_visited` `teampage_visited` datetime default NULL COMMENT 'Time of last teampage view',
   ADD COLUMN `maillog` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Whether the team gets mails for each submission' AFTER `hostname`;
 
 ALTER TABLE `testcase`

@@ -47,8 +47,8 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 -- Dumping data for table `team`
 -- 
 
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 3, 'UU', '127.0.0.1', NULL, NULL, NULL, NULL);
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('coolteam', 'Some very cool teamname!', 1, NULL, MD5('coolteam#mypassword'), NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_visited`) VALUES ('domjudge', 'DOMjudge', 3, 'UU', '127.0.0.1', NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_visited`) VALUES ('coolteam', 'Some very cool teamname!', 1, NULL, MD5('coolteam#mypassword'), NULL, NULL, NULL, NULL);
 
 -- 
 -- Dumping data for table `testcase`

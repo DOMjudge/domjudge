@@ -1457,7 +1457,7 @@ the spot.
 newlines and <tt>room</tt> is the location or room of the team, both for
 display only; <tt>comments</tt> can be filled with arbitrary useful
 information and is only visible to the jury.
-The timestamp <tt>teampage_first_visited</tt> and the <tt>hostname</tt>
+The timestamp <tt>teampage_visited</tt> and the <tt>hostname</tt>
 field indicate when/whether/from where a team visited its team web interface.
 
 <tag>team_affiliation</tag>

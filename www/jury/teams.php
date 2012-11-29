@@ -43,7 +43,7 @@ if( $teams->count() == 0 ) {
 	while( $row = $teams->next() ) {
 
 		$status = $numsub = $numcor = 0;
-		if ( isset($row['teampage_first_visited']) ) $status = 1;
+		if ( isset($row['teampage_visited']) ) $status = 1;
 		if ( isset($nsubmits[$row['login']]) &&
 			 $nsubmits[$row['login']]['cnt']>0 ) {
 			$status = 2;
