@@ -69,6 +69,7 @@ $.plot(
       bars: {
         show: true,
         barWidth: 0.5,
+	lineWidth: 0,
         align: "center"
       }   
     }
@@ -92,6 +93,7 @@ $.plot(
       bars: {
         show: true,
         barWidth: 0.5,
+	lineWidth: 0,
         align: "center"
       }   
     }
