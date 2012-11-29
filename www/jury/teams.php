@@ -35,7 +35,7 @@ if( $teams->count() == 0 ) {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th>" .
 		"<th scope=\"col\">category</th><th scope=\"col\">affiliation</th>" .
-		"<th scope=\"col\">host</th><th scope=\"col\">room</th>" .
+		"<th scope=\"col\">host</th><th scope=\"col\">last login</th>" .
 		"<th class=\"sorttable_nosort\"></th><th align=\"left\" " .
 		"scope=\"col\">status</th>" .
 		"</tr>\n</thead>\n<tbody>\n";
@@ -74,7 +74,7 @@ if( $teams->count() == 0 ) {
 			echo "\">" . $link . "-";
 		}
 		echo "</a></td><td>" . $link .
-			($row['room'] ? htmlspecialchars($row['room']) : '&nbsp;') . "</a></td>";
+			($row['teampage_visited'] ? htmlspecialchars($row['teampage_visited']) : '&nbsp;') . "</a></td>";
 		echo "<td class=\"";
 		switch ( $status ) {
 		case 0: echo 'team-nocon" title="no connections made"';
