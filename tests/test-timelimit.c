@@ -6,7 +6,7 @@
 
 int main()
 {
-	int a;
+	int a = 0;
 
 	while ( 1 ) a++;
 
