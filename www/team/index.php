@@ -130,7 +130,7 @@ if( $solved->count() == 0 ) {
 	echo "<p class=\"nodata\">No solved problems.</p>\n\n";
 } else {
 	while( $row = $solved->next() ) {
-		echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . $row['probid'] . "&nbsp;(" . $row['submissions'] . ")</a>";
+		echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . $row['probid'] . "&nbsp;(" . $row['submissions'] . ")</a> ";
 	}
 }
 echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">unsolved, but tried</h3>\n\n";
@@ -139,7 +139,7 @@ if( $unsolved->count() == 0 ) {
 	echo "<p class=\"nodata\">No unsolved problems.</p>\n\n";
 } else {
 	while( $row = $unsolved->next() ) {
-		echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . $row['probid'] . "&nbsp;(" . $row['submissions'] . ")</a>";
+		echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . $row['probid'] . "&nbsp;(" . $row['submissions'] . ")</a> ";
 	}
 }
 
