@@ -66,8 +66,18 @@ if( $res->count() == 0 ) {
 			: '<td>' . $link . '&nbsp;</a>' );
 			if ( IS_ADMIN ) {
 				echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
-				    "\">" . $row['testcases'] . "</a></td>" .
-				    '<td><a href="export.php?id=' . urlencode($row['probid']) .
+				    "\">" . $row['testcases'] . "</a></td>";
+				$probtext = getProblemText($row['probid']);
+				if ( $probtext!=NULL && $probtext['ext']!=NULL ) {
+				    echo '<td title="view problem description">' .
+					    '<a href="problem.php?id=' . urlencode($row['probid']) .
+					    '&amp;cmd=viewtext"><img src="../images/' . $probtext['ext'] .
+					    '.png" /></a></td>';
+				} else {
+					echo '<td></td>';
+				}
+				echo '<td title="export problem as zip-file"><a href="export.php?id=' .
+				    urlencode($row['probid']) .
 				    '"><img src="../images/b_save.png" /></a></td>' .
 				    "<td class=\"editdel\">" .
 					editLink('problem', $row['probid']) . " " .
