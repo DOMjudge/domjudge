@@ -42,6 +42,7 @@ Version 3.4.0 - DEV
    WISVCH/DOMjudge tree at GitHub.
  - Add program to "relive" simulate original contest submissions.
  - Add option to display favourite teams on top of the public scoreboard.
+ - Make format of timestamps in web interfaces configurable.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
