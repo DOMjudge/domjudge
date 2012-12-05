@@ -296,7 +296,7 @@ CREATE TABLE `team` (
   `comments` longtext COMMENT 'Comments about this team',
   `judging_last_started` datetime default NULL COMMENT 'Start time of last judging for priorization',
   `teampage_visited` datetime default NULL COMMENT 'Time of last teampage view',
-  `hostname` varchar(255) default NULL COMMENT 'Teampage visited last from this address',
+  `hostname` varchar(255) default NULL COMMENT 'Teampage last visited from this address',
   `maillog` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Whether the team gets mails for each submission',
   PRIMARY KEY  (`login`),
   UNIQUE KEY `name` (`name`),

@@ -37,7 +37,7 @@ CREATE TABLE `judging_run` (
 
 ALTER TABLE `team`
   CHANGE COLUMN `passwd` `authtoken` varchar(255) default NULL COMMENT 'Identifying token for this team',
-  CHANGE COLUMN `hostname` `hostname` varchar(255) default NULL COMMENT 'Teampage visited last from this address' AFTER `teampage_visited`;
+  CHANGE COLUMN `hostname` `hostname` varchar(255) default NULL COMMENT 'Teampage first visited last from this address' AFTER `teampage_first_visited`;
 
 ALTER TABLE `testcase`
   CHANGE COLUMN `id` `testcaseid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique identifier',

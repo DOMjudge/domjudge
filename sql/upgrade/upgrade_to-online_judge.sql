@@ -17,6 +17,7 @@ ALTER TABLE `testcase` DROP COLUMN `sample`;
 
 ALTER TABLE `team`
   CHANGE COLUMN `teampage_first_visited` `teampage_visited` datetime default NULL COMMENT 'Time of last teampage view',
+  MODIFY COLUMN `hostname` varchar(255) default NULL COMMENT 'Teampage last visited from this address',
   ADD COLUMN `maillog` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Whether the team gets mails for each submission' AFTER `hostname`;
 
 ALTER TABLE `testcase`
