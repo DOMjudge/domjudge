@@ -441,22 +441,22 @@ function checkFileUpload($errorcode) {
 }
 
 /**
- * Outputs a problem description text, either as download or inline.
- * It is assumed that the headers have not been sent yet, and this
- * function terminates the PHP script execution.
- *
- * If return is true, will return an array (content-type, full text)
+ * Returns an array (mime-type, ext, text) for the problem ID given, or NULL if
+ * problem is not found or no permission to view. 'ext' can be pdf,
+ * txt, html or NULL, and 'text' is the content of the problem text.
  */
-function putProblemText($probid, $return = false)
+function getProblemText($probid)
 {
 	global $DB, $cdata;
 
-	$prob = $DB->q("MAYBETUPLE SELECT problemtext, OCTET_LENGTH(problemtext) AS textlen FROM problem
-	                WHERE probid = %s AND cid = %i", $probid, $cdata['cid']);
+	$prob = $DB->q("MAYBETUPLE SELECT cid, problemtext,
+	                OCTET_LENGTH(problemtext) AS textlen
+	                FROM problem WHERE probid = %s", $probid);
 
 	if ( empty($prob) ||
-	     !(IS_JURY || difftime($cdata['starttime'],now())<=0) ) {
-		error("Problem '$probid' not found or not available");
+	     !(IS_JURY ||
+	       ($prob['cid']==$cdata['cid'] && difftime($cdata['starttime'],now())<=0)) ) {
+		return NULL;
 	}
 
 	// These functions only exist in PHP >= 5.3.0.
@@ -482,21 +482,32 @@ function putProblemText($probid, $return = false)
 	case 'text/plain':
 		$ext = 'txt';
 		break;
-	default:
+	}
+
+	return array('type' => $type, 'ext' => $ext, 'text' => $prob['problemtext']);
+}
+
+/**
+ * Outputs a problem description text, either as download or inline.
+ * It is assumed that the headers have not been sent yet, and this
+ * function terminates the PHP script execution.
+ */
+function putProblemText($probid)
+{
+	if ( ($res = getProblemText($probid))===NULL ) {
+		error("Problem '$probid' not found or not available");
+	}
+	if ( $res['ext']===NULL ) {
 		error("Problem '$probid' text has unknown mime-type");
 	}
 
-	if ( $return ) {
-		return array('ext' => $ext, 'text' => $prob['problemtext']);
-	}
+	$filename = "prob-$probid.$res[ext]";
 
-	$filename = "prob-$probid." . $ext;
-
-	header("Content-Type: $type; name=\"$filename\"");
+	header("Content-Type: $res[type]; name=\"$filename\"");
 	header("Content-Disposition: inline; filename=\"$filename\"");
-	header("Content-Length: " . $prob['textlen']);
+	header("Content-Length: " . strlen($res['text']));
 
-	echo $prob['problemtext'];
+	echo $res['text'];
 
 	exit(0);
 }

@@ -39,8 +39,10 @@ if ( $res !== TRUE ) {
 $zip->addFromString('domjudge-problem.ini', $inistring);
 
 if ( $problem['textlen'] > 0 ) {
-	$probdata = putProblemText($id, true);
-	$zip->addFromString('problem.'.$probdata['ext'], $probdata['text']);
+	$probdata = getProblemText($id);
+	if ( $probdata!=NULL && $probdata['ext']!=NULL ) {
+		$zip->addFromString('problem.'.$probdata['ext'], $probdata['text']);
+	}
 	unset($probdata);
 }
 
