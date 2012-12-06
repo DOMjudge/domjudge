@@ -23,6 +23,8 @@
 #   compile_<lang>.sh <source> <dest> <memlimit>
 #
 # where <dest> is the same filename as <source> but without extension.
+# This executable should run the submission in some way; compilation
+# is considered failed if <dest> is not created or not executable.
 # The <memlimit> (in kB) is passed to the compile script to let
 # interpreted languages (read: Oracle (Sun) javac/java) be able to set the
 # internal maximum memory size.
@@ -106,8 +108,13 @@ if grep 'timelimit reached: aborting command' compile.tmp >/dev/null 2>&1 ; then
 	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
 	cleanexit ${E_COMPILER_ERROR:--1}
 fi
-if [ $exitcode -ne 0 -o ! -e compile/program ]; then
+if [ $exitcode -ne 0 ]; then
 	echo "Compiling failed with exitcode $exitcode, compiler output:" >compile.out
+	cat compile.tmp >>compile.out
+	cleanexit ${E_COMPILER_ERROR:--1}
+fi
+if [ ! -f compile/program -o ! -x compile/program ]; then
+	echo "Compiling failed: no executable was created; compiler output:" >compile.out
 	cat compile.tmp >>compile.out
 	cleanexit ${E_COMPILER_ERROR:--1}
 fi
