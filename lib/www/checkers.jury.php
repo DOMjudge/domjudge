@@ -71,7 +71,7 @@ function check_language($data, $keydata = null)
 		ch_error("Language ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
 
-	if ( $langexts[$id]!=$id ) {
+	if ( @$langexts[$id]!=$id ) {
 		ch_error("Language ID/extension not found or set incorrectly " .
 		         "in LANG_EXTS from domserver-config.php");
 	}

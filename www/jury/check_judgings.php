@@ -52,11 +52,11 @@ function flushresults($header, $results, $collapse = FALSE)
 	$section++;
 
 	echo "<h2><a href=\"javascript:collapse($section)\">$header</a></h2>\n\n";
-	echo "<div class=\"details\" id=\"detail$section\">\n";
+	echo "<ul class=\"details\" id=\"detail$section\">\n";
 	foreach ($results as $row) {
 		echo "<li>$row</li>\n";
 	}
-	echo "</div>\n\n";
+	echo "</ul>\n\n";
 
 	if ( $collapse ) {
 		echo "<script type=\"text/javascript\" language=\"JavaScript\">

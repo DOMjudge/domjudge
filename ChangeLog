@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 3.2.5 - DEV
 -------------------
  - Bugfix: check that compilation creates executable file, closes: #119.
+ - Fix minor HTML validation error and PHP notice.
 
 Version 3.2.4 - 12 September 2012
 ---------------------------------
