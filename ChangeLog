@@ -5,6 +5,7 @@ Version 3.3.4 - DEV
  - Readd note for truncated file contents.
  - Correct mount bind option, see Debian bug #677815. Ported from
    WISVCH/DOMjudge tree at GitHub.
+ - Bugfix: check that compilation creates executable file, closes: #119.
 
 Version 3.3.3 - 12 November 2012
 --------------------------------
