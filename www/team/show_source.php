@@ -38,7 +38,7 @@ $runtime = $DB->q('VALUE SELECT MAX(runtime) FROM judging_run WHERE judgingid IN
 $totaltime = $DB->q('VALUE SELECT SUM(runtime) FROM judging_run WHERE judgingid IN (SELECT judgingid FROM judging WHERE submitid=%i AND valid=1)', $id);
 $sourcecode =
 	"/*\n" .
-	" * FAU Online Judge Submission\n" . 
+	" * Online Judge Submission\n" . 
 	" * Author:         " . $teamname . "\n" . 
 	" * Problem:        " . $probname . "\n" .
 	" * Max. Runtime:   " . sprintf("%3.3lf", $runtime) . "s\n" . 
