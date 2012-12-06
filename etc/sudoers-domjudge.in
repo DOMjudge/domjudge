@@ -14,6 +14,6 @@
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/umount /*/proc
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount --bind /chroot/domjudge/*
-@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount -o remount\,ro @judgehost_judgedir@/*
+@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount -o remount\,ro\,bind @judgehost_judgedir@/*
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/umount @judgehost_judgedir@/*
 
