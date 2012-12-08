@@ -873,7 +873,8 @@ It may be desirable or even necessary to fine tune some MySQL default settings:
 connection caching by Apache threads. 1000 is more appropriate.
 <item><tt>max_allowed_packet</tt>: The default of 16MB might be too
 low when using large testcases. This should be changed both in the
-MySQL server and client configuration.
+MySQL server and client configuration and be set to about twice the
+maximum testcase size.
 <item><tt>skip-networking</tt> or <tt>bind-address</tt>: By default MySQL
 only listens on a local socket, but judgehosts need to connect remotely to
 it. When enabling remote connections, you may want to limit it to only the

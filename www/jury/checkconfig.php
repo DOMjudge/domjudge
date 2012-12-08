@@ -169,6 +169,7 @@ if ( class_exists("ZipArchive") ) {
 
 $mysqldatares = $DB->q('SHOW variables WHERE
                         Variable_name = "max_connections" OR
+                        Variable_name = "max_allowed_packet" OR
                         Variable_name = "version"');
 while($row = $mysqldatares->next()) {
 	$mysqldata[$row['Variable_name']] = $row['Value'];
@@ -187,6 +188,12 @@ result('software', 'MySQL maximum connections',
 	(int)$mysqldata['max_connections'] . '. In our experience ' .
 	'you need at least 300, but better 1000 connections to ' .
 	'prevent connection refusal during the contest.');
+
+result('software', 'MySQL maximum packet size',
+	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O',
+	'MySQL\'s max_allowed_packet is set to ' .
+	(int)$mysqldata['max_allowed_packet']/1024/1024 . 'MB. You may ' .
+	'want to raise this to about twice the maximum test case size.');
 
 flushresults();
 
