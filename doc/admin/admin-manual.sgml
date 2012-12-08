@@ -2160,7 +2160,7 @@ On Linux, this can be accomplished by modifying the
 iptables, adding a rule like:
 
 <verb>
-iptables -I OUTPUT -o &lt;network_interface&gt; -m owner --uid-owner &lt;testuser_uid&gt; -j REJECT
+iptables -I OUTPUT -m owner --uid-owner &lt;testuser_uid&gt; -j REJECT
 </verb>
 
 
