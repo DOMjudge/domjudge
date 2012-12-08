@@ -175,7 +175,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		if ( IS_JURY ) {
 			echo '<td title="' .
 				htmlspecialchars($row['teamid'].': '.$row['teamname']) . '">' .
-				"<a$link>" . htmlspecialchars(str_cut($row['teamname'],20)) . '</a></td>';
+				"<a$link>" . htmlspecialchars(str_cut($row['teamname'],30)) . '</a></td>';
 		}
 		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
 			"<a$link>" . htmlspecialchars($row['probid']) . '</a></td>';
