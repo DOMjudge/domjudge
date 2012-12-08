@@ -108,3 +108,5 @@ function warning($string) {
 function exception_handler($e) {
 	error($e->getMessage());
 }
+
+set_exception_handler('exception_handler');

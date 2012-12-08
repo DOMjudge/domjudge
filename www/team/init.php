@@ -13,18 +13,8 @@ define('IS_PUBLIC', false);
 
 if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
 
-if( DEBUG & DEBUG_TIMINGS ) {
-	require_once(LIBDIR . '/lib.timer.php');
-}
+require_once(LIBDIR . '/init.php');
 
-require_once(LIBDIR . '/lib.error.php');
-require_once(LIBDIR . '/lib.misc.php');
-require_once(LIBDIR . '/lib.dbconfig.php');
-require_once(LIBDIR . '/use_db.php');
-
-parseLangExts();
-
-set_exception_handler('exception_handler');
 setup_database_connection();
 
 require_once(LIBWWWDIR . '/common.php');
@@ -44,7 +34,7 @@ if ( $teamdata['enabled'] != 1 ) {
 }
 
 $cdata = getCurContest(TRUE);
-$cid = $cdata['cid'];
+$cid = (int)$cdata['cid'];
 
 $nunread_clars = $DB->q('VALUE SELECT COUNT(*) FROM team_unread
                          LEFT JOIN clarification ON(mesgid=clarid)
