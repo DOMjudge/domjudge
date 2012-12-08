@@ -52,7 +52,7 @@ ALTER TABLE `testcase`
 -- Add/remove sample/initial contents
 --
 
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('time_format', 'Y-m-d H:i', 'string', 'The format used to print times. For formatting options see the PHP \'date\' function.');
+UPDATE `configuration` SET `value` = '"Y-m-d H:i"' WHERE `name` = 'time_format';
 
 --
 -- Finally remove obsolete structures after moving data
