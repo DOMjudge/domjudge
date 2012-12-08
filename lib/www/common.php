@@ -21,14 +21,14 @@ function parseRunDiff($difftext){
 
 	// We determine the line number width from the '_' characters and
 	// the separator position from the character '?' on the second line.
-	$linenowidth = strrpos($line, '_') + 1;
-	$midloc = strpos($line, '?') - ($linenowidth+1);
+	$linenowidth = mb_strrpos($line, '_') + 1;
+	$midloc = mb_strpos($line, '?') - ($linenowidth+1);
 
 	$line = strtok("\n");
-	while(strlen($line) != 0){
-		$linenostr = substr($line, 0, $linenowidth);
-		$diffline = substr($line, $linenowidth+1);
-		$mid = substr($diffline, $midloc-1, 3);
+	while(mb_strlen($line) != 0){
+		$linenostr = mb_substr($line, 0, $linenowidth);
+		$diffline = mb_substr($line, $linenowidth+1);
+		$mid = mb_substr($diffline, $midloc-1, 3);
 		switch($mid){
 			case ' = ':
 				$formdiffline = "<span class='correct'>".htmlspecialchars($diffline)."</span>";

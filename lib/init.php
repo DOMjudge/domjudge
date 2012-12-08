@@ -16,3 +16,5 @@ if ( defined('LANG_EXTS') ) parseLangExts();
 // E_NOTICE warning messages otherwise.
 @date_default_timezone_set(@date_default_timezone_get());
 
+// Set for using mb_* functions:
+mb_internal_encoding(DJ_CHARACTER_SET);

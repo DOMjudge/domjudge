@@ -43,6 +43,8 @@ Version 3.4.0 - DEV
  - Add program to "relive" simulate original contest submissions.
  - Add option to display favourite teams on top of the public scoreboard.
  - Make format of timestamps in web interfaces configurable.
+ - Use PHP multibyte string functions where applicable. Thanks Vladimir
+   Vassiliev for the bug report.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------

@@ -71,14 +71,14 @@ function flushresults($header, $results, $collapse = FALSE)
 while( $row = $res->next() ) {
 	$sid = $row['submitid'];
 
-	if ( ($pos = strpos($row['sourcecode'],$matchstring)) !== FALSE && $row['verified']==0 ) {
+	if ( ($pos = mb_strpos($row['sourcecode'],$matchstring)) !== FALSE && $row['verified']==0 ) {
 		$nchecked++;
 
-		$beginpos = $pos + strlen($matchstring);
-		$endpos = strpos($row['sourcecode'],"\n",$beginpos);
-		$results = explode(',',trim(substr($row['sourcecode'],$beginpos,$endpos-$beginpos)));
+		$beginpos = $pos + mb_strlen($matchstring);
+		$endpos = mb_strpos($row['sourcecode'],"\n",$beginpos);
+		$results = explode(',',trim(mb_substr($row['sourcecode'],$beginpos,$endpos-$beginpos)));
 
-		$result = strtoupper($row['result']);
+		$result = mb_strtoupper($row['result']);
 
 		if ( !in_array($result,$results) ) {
 			$unexpected[] = "<a href=\"submission.php?id=" . $sid
