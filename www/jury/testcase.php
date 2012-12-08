@@ -190,6 +190,27 @@ if ( !empty($result) ) {
 	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
 }
 
+// Check if ranks must be renumbered (if test cases have been deleted).
+// There is no need to run this within one MySQL transaction since
+// nothing depends on the ranks being sequential, and we do preserve
+// their order while renumbering.
+end($data);
+if ( count($data)<(int)key($data) ) {
+	$newrank = 1;
+	foreach( $data as $rank => $row ) {
+		$DB->q('UPDATE testcase SET rank = %i
+		        WHERE probid = %s AND rank = %i', $newrank++, $probid, $rank);
+	}
+
+	echo "<p>Test case rankings reordered.</p>\n\n";
+
+	// Reload testcase data after updates
+	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank, description,
+	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
+	                OCTET_LENGTH(output) AS size_output, md5sum_output
+	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+}
+
 echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem " .
 	htmlspecialchars($probid) . "</a></p>\n\n";
 
