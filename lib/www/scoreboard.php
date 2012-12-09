@@ -535,7 +535,8 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		echo "</h4>\n\n";
 	}
 
-	if ( $filter!==FALSE ) {
+	// The static scoreboard does not support filtering
+	if ( $filter!==FALSE && $static!==TRUE ) {
 
 		$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, name, country
 		                  FROM team_affiliation');
