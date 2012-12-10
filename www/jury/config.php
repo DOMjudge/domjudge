@@ -61,7 +61,7 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Configuration settings</h1>\n\n";
 
 echo addForm('config.php') . "<table>\n<thead>\n" .
-    "<tr align=\"left\"><th>name</th><th>value(s)</th><th>description</th></tr>\n" .
+    "<tr align=\"left\"><th>Option</th><th>Value(s)</th><th>Description</th></tr>\n" .
     "</thead>\n<tbody>\n";
 
 foreach ( $LIBDBCONFIG as $key => $data ) {
@@ -107,7 +107,7 @@ foreach ( $LIBDBCONFIG as $key => $data ) {
 	// Ignore unknown datatypes
 	if ( empty($editfield) ) continue;
 
-	echo "<tr><td>" . htmlspecialchars($key) .
+	echo "<tr><td>" . htmlspecialchars(ucfirst(strtr($key,'_',' '))) .
 		"</td><td style=\"white-space: nowrap;\">" . $editfield .
 		"</td><td>" . htmlspecialchars($data['desc']) .
 		"</td></tr>\n";
