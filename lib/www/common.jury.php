@@ -244,8 +244,6 @@ function importZippedProblem($zip, $probid = NULL)
 		}
 	}
 
-	// FIXME: insert PDF into database
-
 	return $probid;
 }
 
