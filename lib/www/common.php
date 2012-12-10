@@ -451,7 +451,8 @@ function getProblemText($probid)
 
 	$prob = $DB->q("MAYBETUPLE SELECT cid, problemtext,
 	                OCTET_LENGTH(problemtext) AS textlen
-	                FROM problem WHERE probid = %s", $probid);
+	                FROM problem WHERE OCTET_LENGTH(problemtext) > 0
+	                AND probid = %s", $probid);
 
 	if ( empty($prob) ||
 	     !(IS_JURY ||
