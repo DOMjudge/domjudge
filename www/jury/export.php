@@ -16,7 +16,7 @@ if ( !isset($id) ) {
 $ini_keys = array('probid', 'name', 'timelimit', 'special_run',
 		  'special_compare', 'color');
 
-$problem = $DB->q('MAYBETUPLE SELECT OCTET_LENGTH(problemtext) as textlen, ' .
+$problem = $DB->q('MAYBETUPLE SELECT problemtext, problemtext_type, ' .
                  join(',', $ini_keys) . ' FROM problem p WHERE probid = %s',$id);
 if ( empty($problem) ) error ("Problem $id not found");
 
@@ -38,12 +38,9 @@ if ( $res !== TRUE ) {
 }
 $zip->addFromString('domjudge-problem.ini', $inistring);
 
-if ( $problem['textlen'] > 0 ) {
-	$probdata = getProblemText($id);
-	if ( $probdata!=NULL && $probdata['ext']!=NULL ) {
-		$zip->addFromString('problem.'.$probdata['ext'], $probdata['text']);
-	}
-	unset($probdata);
+if ( !empty($problem['problemtext']) ) {
+	$zip->addFromString('problem.'.$problem['problemtext_type'], $problem['problemtext']);
+	unset($problem['problemtext']);
 }
 
 $testcases = $DB->q('SELECT description, testcaseid, rank FROM testcase

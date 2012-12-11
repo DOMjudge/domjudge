@@ -441,74 +441,46 @@ function checkFileUpload($errorcode) {
 }
 
 /**
- * Returns an array (mime-type, ext, text) for the problem ID given, or NULL if
- * problem is not found or no permission to view. 'ext' can be pdf,
- * txt, html or NULL, and 'text' is the content of the problem text.
- */
-function getProblemText($probid)
-{
-	global $DB, $cdata;
-
-	$prob = $DB->q("MAYBETUPLE SELECT cid, problemtext,
-	                OCTET_LENGTH(problemtext) AS textlen
-	                FROM problem WHERE OCTET_LENGTH(problemtext) > 0
-	                AND probid = %s", $probid);
-
-	if ( empty($prob) ||
-	     !(IS_JURY ||
-	       ($prob['cid']==$cdata['cid'] && difftime($cdata['starttime'],now())<=0)) ) {
-		return NULL;
-	}
-
-	// These functions only exist in PHP >= 5.3.0.
-	if ( function_exists("finfo_open") ) {
-		$finfo = finfo_open(FILEINFO_MIME);
-
-		list($type, $enc) = explode('; ', finfo_buffer($finfo, $prob['problemtext']));
-
-		finfo_close($finfo);
-	} else {
-		// assume pdf
-		$type = 'application/pdf';
-	}
-
-	$ext = NULL;
-	switch ( $type ) {
-	case 'application/pdf':
-		$ext = 'pdf';
-		break;
-	case 'text/html':
-		$ext = 'html';
-		break;
-	case 'text/plain':
-		$ext = 'txt';
-		break;
-	}
-
-	return array('type' => $type, 'ext' => $ext, 'text' => $prob['problemtext']);
-}
-
-/**
  * Outputs a problem description text, either as download or inline.
  * It is assumed that the headers have not been sent yet, and this
  * function terminates the PHP script execution.
  */
 function putProblemText($probid)
 {
-	if ( ($res = getProblemText($probid))===NULL ) {
+	global $DB, $cdata;
+
+	$prob = $DB->q("MAYBETUPLE SELECT cid, problemtext, problemtext_type
+	                FROM problem WHERE OCTET_LENGTH(problemtext) > 0
+	                AND probid = %s", $probid);
+
+	if ( empty($prob) ||
+	     !(IS_JURY ||
+	       ($prob['cid']==$cdata['cid'] && difftime($cdata['starttime'],now())<=0)) ) {
 		error("Problem '$probid' not found or not available");
 	}
-	if ( $res['ext']===NULL ) {
-		error("Problem '$probid' text has unknown mime-type");
+
+	switch ( $prob['problemtext_type'] ) {
+	case 'pdf':
+		$mimetype = 'application/pdf';
+		break;
+	case 'html':
+		$mimetype = 'text/html';
+		break;
+	case 'txt':
+		$mimetype = 'text/plain';
+		break;
+	default:
+		error("Problem '$probid' text has unknown type");
 	}
 
-	$filename = "prob-$probid.$res[ext]";
 
-	header("Content-Type: $res[type]; name=\"$filename\"");
+	$filename = "prob-$probid.$prob[problemtext_type]";
+
+	header("Content-Type: $mimetype; name=\"$filename\"");
 	header("Content-Disposition: inline; filename=\"$filename\"");
-	header("Content-Length: " . strlen($res['text']));
+	header("Content-Length: " . strlen($prob['problemtext']));
 
-	echo $res['text'];
+	echo $prob['problemtext'];
 
 	exit(0);
 }

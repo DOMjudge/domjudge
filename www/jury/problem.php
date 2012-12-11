@@ -156,8 +156,7 @@ endif;
 
 $data = $DB->q('TUPLE SELECT p.probid,p.cid,p.name,p.allow_submit,p.allow_judge,
                              p.timelimit,p.special_run,p.special_compare,p.color,
-                             OCTET_LENGTH(p.problemtext) as textlen,
-                             c.contestname, count(rank) AS ntestcases
+                             p.problemtext_type,c.contestname, count(rank) AS ntestcases
                 FROM problem p
                 NATURAL JOIN contest c
                 LEFT JOIN testcase USING (probid)
@@ -205,9 +204,10 @@ if ( !empty($data['color']) ) {
 		'" src="../images/circle.png" /> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
 }
-if ( $data['textlen'] > 0 ) {
+if ( !empty($data['problemtext_type']) ) {
 	echo '<tr><td scope="row">Problem text:</td><td><a href="problem.php?id=' .
-	    urlencode($id) . "&amp;cmd=viewtext\">view text</a></td></tr>\n";
+	    urlencode($id) . '&amp;cmd=viewtext"><img src="../images/' .
+	    urlencode($data['problemtext_type']) . ".png\" /></a></td></tr>\n";
 }
 if ( !empty($data['special_run']) ) {
 	echo '<tr><td scope="row">Special run script:</td><td class="filename">' .

@@ -15,7 +15,7 @@ echo "<h1>Problems</h1>\n\n";
 
 // Select all data, sort problems from the current contest on top.
 $res = $DB->q('SELECT p.probid,p.name,p.allow_submit,p.allow_judge,p.timelimit,p.color,
-               c.*, COUNT(testcaseid) AS testcases
+               p.problemtext_type, c.*, COUNT(testcaseid) AS testcases
                FROM problem p
                NATURAL JOIN contest c
                LEFT JOIN testcase USING (probid)
@@ -25,14 +25,14 @@ if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No problems defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
-		"<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" .
-	        "<th scope=\"col\">allow<br />submit</th>" .
-		"<th scope=\"col\">allow<br />judge</th>" .
-		"<th scope=\"col\">time<br />limit</th>" .
-		"<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .
-	    "<th scope=\"col\">test<br />cases</th>" .
-		"</tr></thead>\n<tbody>\n";
+	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
+	     "<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" .
+	     "<th scope=\"col\">allow<br />submit</th>" .
+	     "<th scope=\"col\">allow<br />judge</th>" .
+	     "<th scope=\"col\">time<br />limit</th>" .
+	     "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .
+	     "<th scope=\"col\">test<br />cases</th>" .
+	     "</tr></thead>\n<tbody>\n";
 
 	$lastcid = -1;
 
@@ -67,11 +67,10 @@ if( $res->count() == 0 ) {
 			if ( IS_ADMIN ) {
 				echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
 				    "\">" . $row['testcases'] . "</a></td>";
-				$probtext = getProblemText($row['probid']);
-				if ( $probtext!=NULL && $probtext['ext']!=NULL ) {
+				if ( !empty($row['problemtext_type']) ) {
 				    echo '<td title="view problem description">' .
 					    '<a href="problem.php?id=' . urlencode($row['probid']) .
-					    '&amp;cmd=viewtext"><img src="../images/' . $probtext['ext'] .
+					    '&amp;cmd=viewtext"><img src="../images/' . urlencode($row['problemtext_type']) .
 					    '.png" /></a></td>';
 				} else {
 					echo '<td></td>';

@@ -54,6 +54,15 @@ function check_problem($data, $keydata = null)
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Problem ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
+
+	if ( !empty($_FILES['data']['name'][0]['problemtext']) ) {
+		$origname = $_FILES['data']['name'][0]['problemtext'];
+		$data['problemtext_type'] = substr($origname,strrpos($origname,'.')+1);
+	}
+	if ( isset($data['problemtext_type']) && ! in_array($data['problemtext_type'], array('txt','html','pdf')) ) {
+		ch_error("Problem statement has unknown file type.");
+	}
+
 	return $data;
 }
 

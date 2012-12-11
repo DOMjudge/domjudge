@@ -1429,7 +1429,8 @@ In <tt>problemtext</tt> a PDF, HTML or plain text document can be
 placed which allows team, public and jury to download the problem
 statement. Note that no additional filtering takes place, so HTML
 (and PDF to some extent) should be from a trusted source to prevent
-cross site scripting or other attacks.
+cross site scripting or other attacks. The file type is stored in
+<tt>problemtext_type</tt>.
 
 <tag>team</tag>
 Table of teams: <tt>login</tt> is the account/login-name of the team
