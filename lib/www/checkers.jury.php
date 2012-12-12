@@ -57,9 +57,36 @@ function check_problem($data, $keydata = null)
 
 	if ( !empty($_FILES['data']['name'][0]['problemtext']) ) {
 		$origname = $_FILES['data']['name'][0]['problemtext'];
-		$data['problemtext_type'] = substr($origname,strrpos($origname,'.')+1);
+		$tempname = $_FILES['data']['tmp_name'][0]['problemtext'];
+		if ( strrpos($origname,'.')!==FALSE ) {
+			$ext = substr($origname,strrpos($origname,'.')+1);
+			if ( in_array($ext, array('txt','html','pdf')) ) {
+				$data['problemtext_type'] = $ext;
+			}
+		}
+		// These functions only exist in PHP >= 5.3.0.
+		if ( !isset($data['problemtext_type']) &&
+		     function_exists("finfo_open") ) {
+			$finfo = finfo_open(FILEINFO_MIME);
+
+			list($type, $enc) = explode('; ', finfo_file($finfo, $tempname));
+
+			finfo_close($finfo);
+
+			switch ( $type ) {
+			case 'application/pdf':
+				$data['problemtext_type'] = 'pdf';
+				break;
+			case 'text/html':
+				$data['problemtext_type'] = 'html';
+				break;
+			case 'text/plain':
+				$data['problemtext_type'] = 'txt';
+				break;
+			}
+		}
 	}
-	if ( isset($data['problemtext_type']) && ! in_array($data['problemtext_type'], array('txt','html','pdf')) ) {
+	if ( !isset($data['problemtext_type']) ) {
 		ch_error("Problem statement has unknown file type.");
 	}
 
