@@ -1,4 +1,4 @@
-This file should give a submission warning about it's size and abort
+This file should give a submission warning about its size and abort
 at submission and otherwise at compilation time.
 
 0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF

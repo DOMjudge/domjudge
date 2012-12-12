@@ -21,14 +21,14 @@ function parseRunDiff($difftext){
 
 	// We determine the line number width from the '_' characters and
 	// the separator position from the character '?' on the second line.
-	$linenowidth = strrpos($line, '_') + 1;
-	$midloc = strpos($line, '?') - ($linenowidth+1);
+	$linenowidth = mb_strrpos($line, '_') + 1;
+	$midloc = mb_strpos($line, '?') - ($linenowidth+1);
 
 	$line = strtok("\n");
-	while(strlen($line) != 0){
-		$linenostr = substr($line, 0, $linenowidth);
-		$diffline = substr($line, $linenowidth+1);
-		$mid = substr($diffline, $midloc-1, 3);
+	while(mb_strlen($line) != 0){
+		$linenostr = mb_substr($line, 0, $linenowidth);
+		$diffline = mb_substr($line, $linenowidth+1);
+		$mid = mb_substr($diffline, $midloc-1, 3);
 		switch($mid){
 			case ' = ':
 				$formdiffline = "<span class='correct'>".htmlspecialchars($diffline)."</span>";
@@ -197,7 +197,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		if ( IS_JURY || isset($restrictions['correct']) ) {
 			echo '<td title="' .
 				htmlspecialchars($row['teamid'].': '.$row['teamname']) . '">' .
-				"<a$link>" . htmlspecialchars(str_cut($row['teamname'],20)) . '</a></td>';
+				"<a$link>" . htmlspecialchars(str_cut($row['teamname'],30)) . '</a></td>';
 		}
 		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
 			"<a$link>" . htmlspecialchars($row['probid']) . '</a></td>';
@@ -468,56 +468,41 @@ function checkFileUpload($errorcode) {
  * Outputs a problem description text, either as download or inline.
  * It is assumed that the headers have not been sent yet, and this
  * function terminates the PHP script execution.
- *
- * If return is true, will return an array (content-type, full text)
  */
-function putProblemText($probid, $return = false)
+function putProblemText($probid)
 {
 	global $DB, $cdata;
 
-	$prob = $DB->q("MAYBETUPLE SELECT problemtext, OCTET_LENGTH(problemtext) AS textlen FROM problem
-	                WHERE probid = %s AND cid = %i", $probid, $cdata['cid']);
+	$prob = $DB->q("MAYBETUPLE SELECT cid, problemtext, problemtext_type
+	                FROM problem WHERE OCTET_LENGTH(problemtext) > 0
+	                AND probid = %s", $probid);
 
 	if ( empty($prob) ||
-	     !(IS_JURY || difftime($cdata['starttime'],now())<=0) ) {
+	     !(IS_JURY ||
+	       ($prob['cid']==$cdata['cid'] && difftime($cdata['starttime'],now())<=0)) ) {
 		error("Problem '$probid' not found or not available");
 	}
 
-	if ( function_exists("finfo_open") ) {
-		$finfo = finfo_open(FILEINFO_MIME);
-
-		list($type, $enc) = explode('; ', finfo_buffer($finfo, $prob['problemtext']));
-
-		finfo_close($finfo);
-	} else {
-		// assume pdf
-		$type = 'application/pdf';
-	}
-
-	$ext = NULL;
-	switch ( $type ) {
-	case 'application/pdf':
-		$ext = 'pdf';
+	switch ( $prob['problemtext_type'] ) {
+	case 'pdf':
+		$mimetype = 'application/pdf';
 		break;
-	case 'text/html':
-		$ext = 'html';
+	case 'html':
+		$mimetype = 'text/html';
 		break;
-	case 'text/plain':
-		$ext = 'txt';
+	case 'txt':
+		$mimetype = 'text/plain';
 		break;
 	default:
-		error("Problem '$probid' text has unknown mime-type");
+		error("Problem '$probid' text has unknown type");
 	}
 
-	if ( $return ) {
-		return array('ext' => $ext, 'text' => $prob['problemtext']);
-	}
 
-	$filename = "prob-$probid." . $ext;
+	$filename = "prob-$probid.$prob[problemtext_type]";
 
-	header("Content-Type: $type; name=\"$filename\"");
+	header("Content-Type: $mimetype; name=\"$filename\"");
 	header("Content-Disposition: inline; filename=\"$filename\"");
-	header("Content-Length: " . $prob['textlen']);
+	header("Content-Length: " . strlen($prob['problemtext']));
 
 	echo $prob['problemtext'];
 

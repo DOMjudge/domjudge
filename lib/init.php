@@ -1,10 +1,14 @@
 <?php
 if ( !defined('LIBDIR') ) die ("LIBDIR not defined.");
 
-require(LIBDIR . '/lib.error.php');
-require(LIBDIR . '/lib.misc.php');
-require(LIBDIR . '/lib.dbconfig.php');
-require(LIBDIR . '/use_db.php');
+if( DEBUG & DEBUG_TIMINGS ) {
+	require_once(LIBDIR . '/lib.timer.php');
+}
+
+require_once(LIBDIR . '/lib.error.php');
+require_once(LIBDIR . '/lib.misc.php');
+require_once(LIBDIR . '/lib.dbconfig.php');
+require_once(LIBDIR . '/use_db.php');
 
 if ( defined('LANG_EXTS') ) parseLangExts();
 
@@ -12,3 +16,5 @@ if ( defined('LANG_EXTS') ) parseLangExts();
 // E_NOTICE warning messages otherwise.
 @date_default_timezone_set(@date_default_timezone_get());
 
+// Set for using mb_* functions:
+mb_internal_encoding(DJ_CHARACTER_SET);

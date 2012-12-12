@@ -61,6 +61,8 @@ if ( ! IS_PUBLIC ) {
 		"../js/jquery.js\"></script>\n";
 	echo "<script type=\"text/javascript\" src=\"" .
 		"../js/jflot.js\"></script>\n";
+} else if ( dbconfig_get('team_select', 1) ) {
+	echo "<script type=\"text/javascript\" src=\"../js/djfav.js\"></script>\n";
 }
 if ( file_exists(WWWDIR . "/custom.css") ) {
 	echo "<link rel=\"stylesheet\" href=\"../custom.css\" type=\"text/css\" />";

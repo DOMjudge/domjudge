@@ -49,6 +49,10 @@ t('printyn2', printyn(false), 'no');
 t('printyn3', printyn(1), 'yes');
 t('printyn4', printyn(0), 'no');
 
+// Fake loaded configuration settings from DB
+require('../lib/lib.dbconfig.php');
+$LIBDBCONFIG = array();
+
 t('printtime1', printtime(now()), date('H:i'));
 
 require('../lib/www/checkers.jury.php');

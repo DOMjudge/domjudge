@@ -105,7 +105,7 @@ function rejudgeForm($table, $id)
  * Returns TRUE iff string $haystack ends with string $needle
  */
 function ends_with($haystack, $needle) {
-	return substr( $haystack, strlen( $haystack ) - strlen( $needle ) )
+	return mb_substr( $haystack, mb_strlen( $haystack ) - mb_strlen( $needle ) )
        		=== $needle;
 }
 
@@ -193,8 +193,8 @@ function importZippedProblem($zip, $probid = NULL)
 	foreach (array('pdf', 'html', 'txt') as $type) {
 		$text = $zip->getFromName('problem.' . $type);
 		if ($text !== FALSE) {
-			$DB->q('UPDATE problem SET problemtext = %s WHERE probid = %s',
-				$text, $probid);
+			$DB->q('UPDATE problem SET problemtext = %s, problemtext_type = %s WHERE probid = %s',
+				$text, $type, $probid);
 			break;
 		}
 	}
@@ -244,8 +244,6 @@ function importZippedProblem($zip, $probid = NULL)
 			}
 		}
 	}
-
-	// FIXME: insert PDF into database
 
 	return $probid;
 }

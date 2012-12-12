@@ -140,12 +140,12 @@ function send_print($filename, $language = null, $team = null, $origname = null)
 	case 'pas': $language = 'pascal'; break;
 	case 'pl': $language = 'perl'; break;
 	case 'py': $language = 'python'; break;
-	}	
+	}
 	$highlight = "";
 	if ( ! empty($language) ) {
 		$highlight = "-E" . escapeshellarg($language);
 	}
-	
+
 	$banner = "TeamID: $team     File: $origname    Page $% of $= ";
 
 	$cmd = "enscript -C " . $highlight
@@ -153,7 +153,7 @@ function send_print($filename, $language = null, $team = null, $origname = null)
 	     . " -a 0-10 "
 	// for debugging: uncomment next line
 	//   . " -p /tmp/test.ps "
-	     . escapeshellarg($filename) . " 2>&1"; 
+	     . escapeshellarg($filename) . " 2>&1";
 
 	exec($cmd, $output, $retval);
 

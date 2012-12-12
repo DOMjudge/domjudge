@@ -164,8 +164,7 @@ endif;
 
 $data = $DB->q('TUPLE SELECT p.probid,p.cid,p.name,p.allow_submit,p.allow_judge,
                              p.timelimit,p.start,p.end,p.color,
-                             p.special_run,p.special_compare,
-                             OCTET_LENGTH(p.problemtext) as textlen,
+                             p.special_run,p.special_compare,p.problemtext_type,
                              c.contestname, count(rank) AS ntestcases
                 FROM problem p
                 NATURAL JOIN contest c
@@ -226,9 +225,10 @@ if ( !empty($data['color']) ) {
 		'" src="../images/circle.png" /> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
 }
-if ( $data['textlen'] > 0 ) {
+if ( !empty($data['problemtext_type']) ) {
 	echo '<tr><td scope="row">Problem text:</td><td><a href="problem.php?id=' .
-	    urlencode($id) . "&amp;cmd=viewtext\">view text</a></td></tr>\n";
+	    urlencode($id) . '&amp;cmd=viewtext"><img src="../images/' .
+	    urlencode($data['problemtext_type']) . ".png\" /></a></td></tr>\n";
 }
 if ( !empty($data['special_run']) ) {
 	echo '<tr><td scope="row">Special run script:</td><td class="filename">' .
@@ -252,7 +252,7 @@ echo "</table>\n" . addEndForm();
 echo "<br />\n" . rejudgeForm('problem', $id) . "\n\n";
 
 if ( IS_ADMIN ) {
-	echo "<p>" . 
+	echo "<p>" .
 		'<a href="export.php?id=' . urlencode($id) .
 		'"><img src="../images/b_save.png" /></a> ' .
 		editLink('problem',$id) . "\n" .

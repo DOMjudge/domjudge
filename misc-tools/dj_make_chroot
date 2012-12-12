@@ -32,9 +32,8 @@ INSTALLDEBS="openjdk-6-jre-headless"
 # Debian packages to remove after upgrade (space separated):
 REMOVEDEBS=""
 
-# Debian mirror, modify to match closest mirror
-#DEBMIRROR="http://ftp.us.debian.org/debian"
-DEBMIRROR="http://ftp.nl.debian.org/debian"
+# Debian mirror. http.debian.net will pick the 'closest'.
+DEBMIRROR="http://http.debian.net/debian"
 
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive

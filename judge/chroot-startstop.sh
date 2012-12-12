@@ -38,7 +38,7 @@ case "$1" in
 				sudo -n mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null
 				# Mount read-only for extra security. Note that this
 				# must be executed separately from the bind mount.
-				sudo -n mount -o remount,ro "$PWD/$i" < /dev/null
+				sudo -n mount -o remount,ro,bind "$PWD/$i" < /dev/null
 			fi
 		done
 		;;

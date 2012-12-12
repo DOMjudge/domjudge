@@ -54,6 +54,7 @@ function check_problem($data, $keydata = null)
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Problem ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
+
 	if ( dbconfig_get('separate_start_end',0) ) {
 		global $DB;
 		$contest =  $DB->q("TUPLE SELECT * FROM contest WHERE cid = %s", $data['cid']);
@@ -75,6 +76,42 @@ function check_problem($data, $keydata = null)
 			ch_error("Deadline should be after the start time of problem");
 		}
 	}
+
+	if ( !empty($_FILES['data']['name'][0]['problemtext']) ) {
+		$origname = $_FILES['data']['name'][0]['problemtext'];
+		$tempname = $_FILES['data']['tmp_name'][0]['problemtext'];
+		if ( strrpos($origname,'.')!==FALSE ) {
+			$ext = substr($origname,strrpos($origname,'.')+1);
+			if ( in_array($ext, array('txt','html','pdf')) ) {
+				$data['problemtext_type'] = $ext;
+			}
+		}
+		// These functions only exist in PHP >= 5.3.0.
+		if ( !isset($data['problemtext_type']) &&
+		     function_exists("finfo_open") ) {
+			$finfo = finfo_open(FILEINFO_MIME);
+
+			list($type, $enc) = explode('; ', finfo_file($finfo, $tempname));
+
+			finfo_close($finfo);
+
+			switch ( $type ) {
+			case 'application/pdf':
+				$data['problemtext_type'] = 'pdf';
+				break;
+			case 'text/html':
+				$data['problemtext_type'] = 'html';
+				break;
+			case 'text/plain':
+				$data['problemtext_type'] = 'txt';
+				break;
+			}
+		}
+	}
+	if ( !isset($data['problemtext_type']) ) {
+		ch_error("Problem statement has unknown file type.");
+	}
+
 	return $data;
 }
 
@@ -90,7 +127,7 @@ function check_language($data, $keydata = null)
 		ch_error("Language ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
 
-	if ( $langexts[$id]!=$id ) {
+	if ( @$langexts[$id]!=$id ) {
 		ch_error("Language ID/extension not found or set incorrectly " .
 		         "in LANG_EXTS from domserver-config.php");
 	}

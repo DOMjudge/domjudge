@@ -169,7 +169,7 @@ $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
 
 echo "<h3 class=\"teamoverview\"><a name=\"clarifications\" href=\"#clarifications\">Clarifications</a></h3>\n";
 
-# FIXME: column width and wrapping/shortening of clarification text 
+# FIXME: column width and wrapping/shortening of clarification text
 if ( $clarifications->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarifications.</p>\n\n";
 } else {

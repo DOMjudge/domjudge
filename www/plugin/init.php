@@ -14,18 +14,8 @@ require_once('../configure.php');
 define('IS_JURY', (@$_SERVER['REMOTE_USER'] == "jury"));
 define('IS_PUBLIC', false);
 
-if( DEBUG & DEBUG_TIMINGS ) {
-	require_once(LIBDIR . '/lib.timer.php');
-}
+require_once(LIBDIR . '/init.php');
 
-require_once(LIBDIR . '/lib.error.php');
-require_once(LIBDIR . '/lib.misc.php');
-require_once(LIBDIR . '/lib.dbconfig.php');
-require_once(LIBDIR . '/use_db.php');
-
-parseLangExts();
-
-set_exception_handler('exception_handler');
 setup_database_connection();
 
 require_once(LIBWWWDIR . '/common.php');

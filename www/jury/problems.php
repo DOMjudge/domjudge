@@ -15,7 +15,7 @@ echo "<h1>Problems</h1>\n\n";
 
 // Select all data, sort problems from the current contest on top.
 $res = $DB->q('SELECT p.probid,p.name,p.allow_submit,p.allow_judge,p.timelimit,
-               p.start,p.end,p.color,
+               p.start,p.end,p.color,p.problemtext_type,
                c.*, COUNT(testcaseid) AS testcases
                FROM problem p
                NATURAL JOIN contest c
@@ -26,17 +26,17 @@ if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No problems defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-		"<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
-		"<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" .
-	        "<th scope=\"col\">allow<br />submit</th>" .
-		"<th scope=\"col\">allow<br />judge</th>" .
-		"<th scope=\"col\">time<br />limit</th>" .
-		( dbconfig_get('separate_start_end',0)
-		? "<th scope=\"col\">start</th><th scope=\"col\">end</th>"
-		: "" ) .
-		"<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .
-	    "<th scope=\"col\">test<br />cases</th>" .
-		"</tr></thead>\n<tbody>\n";
+	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
+	     "<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" .
+	     "<th scope=\"col\">allow<br />submit</th>" .
+	     "<th scope=\"col\">allow<br />judge</th>" .
+	     "<th scope=\"col\">time<br />limit</th>" .
+	     ( dbconfig_get('separate_start_end',0)
+	     ? "<th scope=\"col\">start</th><th scope=\"col\">end</th>"
+	     : "" ) .
+	     "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .
+	     "<th scope=\"col\">test<br />cases</th>" .
+	     "</tr></thead>\n<tbody>\n";
 
 	$lastcid = -1;
 
@@ -74,8 +74,17 @@ if( $res->count() == 0 ) {
 			: '<td>' . $link . '&nbsp;</a>' );
 			if ( IS_ADMIN ) {
 				echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
-				    "\">" . $row['testcases'] . "</a></td>" .
-				    '<td><a href="export.php?id=' . urlencode($row['probid']) .
+				    "\">" . $row['testcases'] . "</a></td>";
+				if ( !empty($row['problemtext_type']) ) {
+				    echo '<td title="view problem description">' .
+					    '<a href="problem.php?id=' . urlencode($row['probid']) .
+					    '&amp;cmd=viewtext"><img src="../images/' . urlencode($row['problemtext_type']) .
+					    '.png" /></a></td>';
+				} else {
+					echo '<td></td>';
+				}
+				echo '<td title="export problem as zip-file"><a href="export.php?id=' .
+				    urlencode($row['probid']) .
 				    '"><img src="../images/b_save.png" /></a></td>' .
 				    "<td class=\"editdel\">" .
 					editLink('problem', $row['probid']) . " " .

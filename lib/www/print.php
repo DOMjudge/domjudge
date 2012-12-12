@@ -111,11 +111,11 @@ function printtimediff($start, $end = null) {
 function str_cut ($str, $size) {
 	// is the string already short enough?
 	// we count '…' for 1 extra chars.
-	if( strlen($str) <= $size+1 ) {
+	if( mb_strlen($str) <= $size+1 ) {
 		return $str;
 	}
 
-	return substr($str, 0, $size) . '…';
+	return mb_substr($str, 0, $size) . '…';
 }
 
 /**

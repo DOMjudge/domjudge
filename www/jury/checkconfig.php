@@ -136,6 +136,14 @@ if ( function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()==1 ) {
 	result('software', 'PHP magic quotes', 'O', 'PHP magic quotes disabled.');
 }
 
+$max_file_check = max(100,dbconfig_get('sourcefiles_limit', 100));
+result('software', 'PHP max_file_uploads',
+       (int) ini_get('max_file_uploads') < $max_file_check ? 'W':'O',
+       'PHP max_file_uploads is set to ' .
+       (int) ini_get('max_file_uploads') . '. This should be set higher ' .
+       'than the maximum number of test cases per problem and the ' .
+       'configuration setting \'sourcefiles_limit\'.');
+
 require ( LIBWWWDIR . '/highlight.php');
 $highlighter = highlighter_init();
 
@@ -161,6 +169,7 @@ if ( class_exists("ZipArchive") ) {
 
 $mysqldatares = $DB->q('SHOW variables WHERE
                         Variable_name = "max_connections" OR
+                        Variable_name = "max_allowed_packet" OR
                         Variable_name = "version"');
 while($row = $mysqldatares->next()) {
 	$mysqldata[$row['Variable_name']] = $row['Value'];
@@ -179,6 +188,12 @@ result('software', 'MySQL maximum connections',
 	(int)$mysqldata['max_connections'] . '. In our experience ' .
 	'you need at least 300, but better 1000 connections to ' .
 	'prevent connection refusal during the contest.');
+
+result('software', 'MySQL maximum packet size',
+	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O',
+	'MySQL\'s max_allowed_packet is set to ' .
+	(int)$mysqldata['max_allowed_packet']/1024/1024 . 'MB. You may ' .
+	'want to raise this to about twice the maximum test case size.');
 
 flushresults();
 
@@ -273,10 +288,18 @@ while($row = $res->next()) {
 	}
 }
 foreach(array('input','output') as $inout) {
-	$mismatch = $DB->q("SELECT probid FROM testcase WHERE md5($inout) != md5sum_$inout");
+	$mismatch = $DB->q("SELECT probid, rank FROM testcase WHERE md5($inout) != md5sum_$inout");
 	while($r = $mismatch->next()) {
-		$details .= $r['probid'] . ": testcase MD5 sum mismatch between $inout and md5sum_$inout\n";
+		$details .= $r['probid'] . ": testcase #" . $r['rank'] .
+		    " MD5 sum mismatch between $inout and md5sum_$inout\n";
 	}
+}
+$oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
+                    FROM testcase WHERE OCTET_LENGTH(output) > %i",
+                   dbconfig_get('filesize_limit')*1024);
+while($r = $oversize->next()) {
+	$details .= $r['probid'] . ": testcase #" . $r['rank'] .
+	    " output size (" . $r['size'] . " B) exceeds filesize_limit\n";
 }
 
 $has_errors = $details != '';

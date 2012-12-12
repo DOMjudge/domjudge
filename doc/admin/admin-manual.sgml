@@ -873,7 +873,8 @@ It may be desirable or even necessary to fine tune some MySQL default settings:
 connection caching by Apache threads. 1000 is more appropriate.
 <item><tt>max_allowed_packet</tt>: The default of 16MB might be too
 low when using large testcases. This should be changed both in the
-MySQL server and client configuration.
+MySQL server and client configuration and be set to about twice the
+maximum testcase size.
 <item><tt>skip-networking</tt> or <tt>bind-address</tt>: By default MySQL
 only listens on a local socket, but judgehosts need to connect remotely to
 it. When enabling remote connections, you may want to limit it to only the
@@ -1063,7 +1064,7 @@ the following lines must be added to the end of <tt>/etc/sudoers</tt>:
 domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
 domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
 domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*
-domjudge ALL=(root) NOPASSWD: /bin/mount -o remount\,ro &lt;judgehost_judgedir&gt/*
+domjudge ALL=(root) NOPASSWD: /bin/mount -o remount\,ro\,bind &lt;judgehost_judgedir&gt/*
 domjudge ALL=(root) NOPASSWD: /bin/umount &lt;judgehost_judgedir&gt;/*
 </verb>
 Here the user <tt>domjudge</tt> must be replaced by the user you
@@ -1428,7 +1429,8 @@ In <tt>problemtext</tt> a PDF, HTML or plain text document can be
 placed which allows team, public and jury to download the problem
 statement. Note that no additional filtering takes place, so HTML
 (and PDF to some extent) should be from a trusted source to prevent
-cross site scripting or other attacks.
+cross site scripting or other attacks. The file type is stored in
+<tt>problemtext_type</tt>.
 
 <tag>team</tag>
 Table of teams: <tt>login</tt> is the account/login-name of the team
@@ -2160,7 +2162,7 @@ On Linux, this can be accomplished by modifying the
 iptables, adding a rule like:
 
 <verb>
-iptables -I OUTPUT -o &lt;network_interface&gt; -m owner --uid-owner &lt;testuser_uid&gt; -j REJECT
+iptables -I OUTPUT -m owner --uid-owner &lt;testuser_uid&gt; -j REJECT
 </verb>
 
 
@@ -2328,7 +2330,9 @@ to raise the memory limits for PHP. This can be done by either editing
 <tt>upload_max_filesize</tt> and <tt>post_max_size</tt> values to well
 above the size of your largest testcase. You can change these parameters
 under the jury directory or by directly editing the global Apache or
-<tt>php.ini</tt> configuration.
+<tt>php.ini</tt> configuration. Note also that <tt>max_file_uploads</tt>
+must be larger than the maximum number of testcases per problem to be
+able to upload and edit these in the web interface.
 
 The optional PHP Suhosin module may also impose additional limits; check
 your error logging to see if these are triggered. You may also need to

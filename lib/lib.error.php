@@ -46,6 +46,9 @@ if ( defined('SYSLOG') ) {
 function logmsg($msglevel, $string) {
 	global $verbose, $loglevel;
 
+	// Trim $string to reasonable length to prevent server/browser crashes:
+	$string = substr($string, 0, 10000);
+
 	$stamp = "[" . strftime("%b %d %H:%M:%S") . "] " . SCRIPT_ID .
 		(function_exists('posix_getpid') ? "[" . posix_getpid() . "]" : "") .
 		": ";
@@ -105,3 +108,5 @@ function warning($string) {
 function exception_handler($e) {
 	error($e->getMessage());
 }
+
+set_exception_handler('exception_handler');

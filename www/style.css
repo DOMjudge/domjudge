@@ -221,10 +221,20 @@ td.scorenc { border-color: silver; }
 	font-weight: bold;
 }
 
-#lastmod { 
+.scorelegend {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.scorelegend td {
+	text-align: center;
+	width: 25ex;
+}
+
+#lastmod {
 	position: absolute; right: 1ex; margin-top: 1em;
 }
-#lastmod, #lastmod a { 
+#lastmod, #lastmod a {
 	font-size: x-small;
 	color: gray;
 	text-align: right;
