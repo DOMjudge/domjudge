@@ -36,6 +36,8 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('en
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('team_select', '1', 'bool', 'Enable selection of favourite teams in the public scoreboard?');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('time_format', '"H:i"', 'string', 'The format used to print times. For formatting options see the PHP \'date\' function.');
 
+UPDATE `configuration` SET `description` = 'Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged.' WHERE `name` = 'lazy_eval_results';
+
 --
 -- Finally remove obsolete structures after moving data
 --
