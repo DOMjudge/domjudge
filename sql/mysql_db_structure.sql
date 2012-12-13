@@ -196,7 +196,7 @@ CREATE TABLE `problem` (
   `special_compare` varchar(25) default NULL COMMENT 'Script to compare problem and jury output for this problem',
   `color` varchar(25) default NULL COMMENT 'Balloon colour to display on the scoreboard',
   `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
-  `problemtext_type` varchar(4) COMMENT 'File type of problem text',
+  `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text',
   PRIMARY KEY  (`probid`),
   KEY `cid` (`cid`),
   CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
