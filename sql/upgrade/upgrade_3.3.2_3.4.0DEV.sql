@@ -16,7 +16,7 @@ ALTER TABLE `problem` DROP COLUMN `problemtext`;
 --
 
 ALTER TABLE `problem`
-  ADD COLUMN `problemtext` longblob DEFAULT NULL COMMENT 'Problem text in HTML/PDF/ASCII' AFTER `color`,
+  ADD COLUMN `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII' AFTER `color`,
   ADD COLUMN `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text' AFTER `problemtext`;
 
 ALTER TABLE `balloon`
