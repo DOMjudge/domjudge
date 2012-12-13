@@ -31,6 +31,7 @@
 #include <map>
 #include <set>
 #include <cctype>
+#include <cstdlib>
 #include <cstdarg>
 #include <climits>
 #include <getopt.h>
@@ -38,7 +39,6 @@
 #include <cstdlib>
 #ifdef HAVE_BOOST_REGEX
 #include <boost/regex.hpp>
-#include <boost/lexical_cast.hpp>
 #else
 #error "Libboost regex library not available."
 #endif
@@ -207,6 +207,19 @@ void error(string msg = string())
 	}
 
 	throw doesnt_match_exception();
+}
+
+long string2int(string s)
+{
+	long res;
+	char *ptr;
+
+	res = strtol(s.c_str(),&ptr,10);
+	if ( *ptr!='\0' || res==LONG_MIN || res==LONG_MAX ) {
+		error("cannot parse integer: `" + s + "'");
+	}
+
+	return res;
 }
 
 value_t::operator mpz_class() const
@@ -465,13 +478,13 @@ int getmult(string &exp, unsigned int &index)
 			string minmaxs = exp.substr(index, end - index);
 			int pos = minmaxs.find_first_of(',');
 			if (pos == -1) {
-				min = max = boost::lexical_cast<int>(minmaxs);
+				min = max = string2int(minmaxs);
 			} else {
 				string mins = minmaxs.substr(0, pos);
 				string maxs = minmaxs.substr(pos + 1);
-				min = boost::lexical_cast<int>(mins);
+				min = string2int(mins);
 				if (maxs.length() > 0) {
-					max = boost::lexical_cast<int>(maxs);
+					max = string2int(maxs);
 				}
 			}
 			index = end + 1;
