@@ -38,7 +38,7 @@ htpasswd-jury: dbpasswords.secret
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
-		apache.conf domserver-static.php sudoers-domjudge
+		apache.conf domserver-static.php
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_etcdir) \
 		gendbpasswords
 	-$(INSTALL_USER) -t $(DESTDIR)$(domserver_etcdir) \
@@ -48,7 +48,7 @@ install-domserver:
 
 install-judgehost:
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
-		judgehost-static.php
+		judgehost-static.php sudoers-domjudge
 	-$(INSTALL_USER) -t $(DESTDIR)$(judgehost_etcdir) \
 		judgehost-config.php common-config.php
 	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \
