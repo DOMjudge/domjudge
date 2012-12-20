@@ -85,8 +85,12 @@ function check_problem($data, $keydata = null)
 				break;
 			}
 		}
+		if ( !isset($data['problemtext_type']) ) {
+			ch_error("Problem statement has unknown file type.");
+		}
 	}
-	if ( !isset($data['problemtext_type']) ) {
+	if ( !empty($data['problemtext']) &&
+	     !isset($data['problemtext_type']) ) {
 		ch_error("Problem statement has unknown file type.");
 	}
 
