@@ -53,7 +53,7 @@ echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
 
 if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 	if ( $submitted ) {
-		echo "<p class=\"submissiondone\">submission done <a href=\"./\" style=\"color: red\">x</a></p>\n\n";
+		echo "<p class=\"submissiondone\">submission done <a href=\"./\">x</a></p>\n\n";
 	} else {
 		echo addForm('upload.php','post',null,'multipart/form-data', null, ' onreset="resetUploadForm('.$refreshtime .');"') .
 		"<p id=\"submitform\">\n\n" .

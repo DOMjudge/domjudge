@@ -127,7 +127,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			if ( $inout=='output' &&
 			     $_FILES[$fileid]['size'][$rank]>dbconfig_get('filesize_limit')*1024 ) {
 				$result .= ".<br /><b>Warning: file size exceeds " .
-				    "<tt>filesize_limit</tt> of " . dbconfig_get('filesize_limit') .
+				    "<code>filesize_limit</code> of " . dbconfig_get('filesize_limit') .
 				    " kB. This will always result in wrong answers!</b>";
 			}
 			$result .= "</li>\n";
@@ -173,7 +173,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			    " (" . htmlspecialchars($_FILES['add_output']['size']) . " B)";
 			if ( $_FILES['add_output']['size']>dbconfig_get('filesize_limit')*1024 ) {
 				$result .= ".<br /><b>Warning: output file size exceeds " .
-				    "<tt>filesize_limit</tt> of " . dbconfig_get('filesize_limit') .
+				    "<code>filesize_limit</code> of " . dbconfig_get('filesize_limit') .
 				    " kB. This will always result in wrong answers!</b>";
 			}
 			$result .= "</li>\n";

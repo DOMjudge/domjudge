@@ -110,7 +110,7 @@ while( $row = $res->next() ) {
 		$nunchecked++;
 
 		if ( $pos===FALSE ) {
-			$nomatch[] = "string '<tt>$matchstring</tt>' not found in " .
+			$nomatch[] = "string '<code>$matchstring</code>' not found in " .
 				"<a href=\"submission.php?id=" . $sid .
 				"\">s$sid</a>, leaving submission unchecked";
 		} else {

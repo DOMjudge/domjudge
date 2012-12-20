@@ -140,7 +140,7 @@ echo addHidden('cmd', $cmd) .
 
 
 if ( class_exists("ZipArchive") ) {
-	echo "<br /><span style=\"font-style:italic;\">or</span><br /><br />\n" .
+	echo "<br /><em>or</em><br /><br />\n" .
 	addForm('problem.php', 'post', null, 'multipart/form-data') .
 	addHidden('id', @$row['probid']) .
 	'<label for="problem_archive">Upload problem archive:</label>' .

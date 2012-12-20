@@ -301,6 +301,9 @@ h3.teamoverview {
 #submitform, .submissiondone {
 	text-align: center;
 }
+.submissiondone a {
+	color: red;
+}
 #submitlist .list, #clarlist .list {
 	width: 100%;
 }
