@@ -103,19 +103,19 @@ echo addForm($pagename) . "<p>\n" .
 
 ?>
 <table>
-<tr><td scope="row">ID/extension:</td><td><?php echo htmlspecialchars($data['langid'])?></td></tr>
-<tr><td scope="row">Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
-<tr><td scope="row">Allow submit:</td><td><?php echo printyn($data['allow_submit']) . ' '.
+<tr><td>ID/extension:</td><td><?php echo htmlspecialchars($data['langid'])?></td></tr>
+<tr><td>Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
+<tr><td>Allow submit:</td><td><?php echo printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
 		" submissions for this language?')"); ?>
 </td></tr>
-<tr><td scope="row">Allow judge: </td><td><?php echo printyn($data['allow_judge']) . ' ' .
+<tr><td>Allow judge: </td><td><?php echo printyn($data['allow_judge']) . ' ' .
 	addSubmit('toggle', 'cmd[toggle_judge]',
 		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
 		" judging for this language?')"); ?>
 </td></tr>
-<tr><td scope="row">Time factor:  </td><td><?php echo htmlspecialchars($data['time_factor'])?> x</td></tr>
+<tr><td>Time factor:  </td><td><?php echo htmlspecialchars($data['time_factor'])?> x</td></tr>
 </table>
 
 <?php

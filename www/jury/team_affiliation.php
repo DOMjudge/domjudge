@@ -82,10 +82,10 @@ $countryflag = "../images/countries/" . urlencode($data['country']) . ".png";
 echo "<h1>Affiliation: ".htmlspecialchars($data['name'])."</h1>\n\n";
 
 echo "<table>\n";
-echo '<tr><td scope="row">ID:</td><td>' . htmlspecialchars($data['affilid']) . "</td></tr>\n";
-echo '<tr><td scope="row">Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
+echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['affilid']) . "</td></tr>\n";
+echo '<tr><td>Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
 
-echo '<tr><td scope="row">Logo:</td><td>';
+echo '<tr><td>Logo:</td><td>';
 
 if ( is_readable($affillogo) ) {
 	echo '<img src="' . $affillogo . '" alt="' .
@@ -94,7 +94,7 @@ if ( is_readable($affillogo) ) {
 	echo "not available</td></tr>\n";
 }
 
-echo '<tr><td scope="row">Country:</td><td>' . htmlspecialchars($data['country']);
+echo '<tr><td>Country:</td><td>' . htmlspecialchars($data['country']);
 
 if ( is_readable($countryflag) ) {
 	echo ' <img src="' . $countryflag . '" alt="' .
@@ -103,7 +103,7 @@ if ( is_readable($countryflag) ) {
 echo "</td></tr>\n";
 
 if ( !empty($data['comments']) ) {
-	echo '<tr><td scope="row">Comments:</td><td>' .
+	echo '<tr><td>Comments:</td><td>' .
 		nl2br(htmlspecialchars($data['comments'])) . "</td></tr>\n";
 }
 

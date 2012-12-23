@@ -173,21 +173,21 @@ echo addForm($pagename, 'post', null, 'multipart/form-data') . "<p>\n" .
 	"</p>\n";
 ?>
 <table>
-<tr><td scope="row">ID:          </td><td class="probid"><?php echo htmlspecialchars($data['probid'])?></td></tr>
-<tr><td scope="row">Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
-<tr><td scope="row">Contest:     </td><td><?php echo htmlspecialchars($data['contestname']) .
+<tr><td>ID:          </td><td class="probid"><?php echo htmlspecialchars($data['probid'])?></td></tr>
+<tr><td>Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
+<tr><td>Contest:     </td><td><?php echo htmlspecialchars($data['contestname']) .
 									' (c' . htmlspecialchars($data['cid']) .')'?></td></tr>
-<tr><td scope="row">Allow submit:</td><td class="nobreak"><?php echo printyn($data['allow_submit']) . ' '.
+<tr><td>Allow submit:</td><td class="nobreak"><?php echo printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
 		" submissions for this problem?')"); ?>
 </td></tr>
-<tr><td scope="row">Allow judge: </td><td><?php echo printyn($data['allow_judge']) . ' '.
+<tr><td>Allow judge: </td><td><?php echo printyn($data['allow_judge']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_judge]',
 		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
 		" judging for this problem?')"); ?>
 </td></tr>
-<tr><td scope="row">Testcases:   </td><td><?php
+<tr><td>Testcases:   </td><td><?php
     if ( $data['ntestcases']==0 ) {
 		echo '<em>no testcases</em>';
 	} else {
@@ -195,32 +195,32 @@ echo addForm($pagename, 'post', null, 'multipart/form-data') . "<p>\n" .
 	}
 	echo ' <a href="testcase.php?probid='.urlencode($data['probid']).'">details/edit</a>';
 ?></td></tr>
-<tr><td scope="row">Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
+<tr><td>Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
 <?php
 if ( !empty($data['color']) ) {
-	echo '<tr><td scope="row">Colour:</td><td><img style="background-color: ' .
+	echo '<tr><td>Colour:</td><td><img style="background-color: ' .
 		htmlspecialchars($data['color']) .
 		';" alt="problem colour ' . htmlspecialchars($data['color']) .
 		'" src="../images/circle.png" /> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
 }
 if ( !empty($data['problemtext_type']) ) {
-	echo '<tr><td scope="row">Problem text:</td><td><a href="problem.php?id=' .
+	echo '<tr><td>Problem text:</td><td><a href="problem.php?id=' .
 	    urlencode($id) . '&amp;cmd=viewtext"><img src="../images/' .
-	    urlencode($data['problemtext_type']) . ".png\" /></a></td></tr>\n";
+	    urlencode($data['problemtext_type']) . ".png\" alt=\"problem text\" /></a></td></tr>\n";
 }
 if ( !empty($data['special_run']) ) {
-	echo '<tr><td scope="row">Special run script:</td><td class="filename">' .
+	echo '<tr><td>Special run script:</td><td class="filename">' .
 		htmlspecialchars($data['special_run']) . "</td></tr>\n";
 }
 if ( !empty($data['special_compare']) ) {
-	echo '<tr><td scope="row">Special compare script:</td><td class="filename">' .
+	echo '<tr><td>Special compare script:</td><td class="filename">' .
 		htmlspecialchars($data['special_compare']) . "</td></tr>\n";
 }
 
 if ( IS_ADMIN && class_exists("ZipArchive") ) {
 	echo '<tr>' .
-		'<td scope="row">Problem archive:</td>' .
+		'<td>Problem archive:</td>' .
 		'<td>' . addFileField('problem_archive') .
 		addSubmit('Upload', 'upload') . '</td>' .
 		"</tr>\n";

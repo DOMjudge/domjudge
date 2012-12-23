@@ -58,7 +58,7 @@ function flushresults($header, $results, $collapse = FALSE)
 	echo "</ul>\n\n";
 
 	if ( $collapse ) {
-		echo "<script type=\"text/javascript\" language=\"JavaScript\">
+		echo "<script type=\"text/javascript\">
 <!--
 	collapse($section);
 // -->

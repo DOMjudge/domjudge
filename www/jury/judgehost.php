@@ -33,9 +33,9 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 ?>
 
 <table>
-<tr><td scope="row">Name:  </td><td><?php echo printhost($row['hostname'], TRUE)?></td></tr>
-<tr><td scope="row">Active:</td><td><?php echo printyn($row['active'])?></td></tr>
-<tr><td scope="row">Status:</td><td>
+<tr><td>Name:  </td><td><?php echo printhost($row['hostname'], TRUE)?></td></tr>
+<tr><td>Active:</td><td><?php echo printyn($row['active'])?></td></tr>
+<tr><td>Status:</td><td>
 <?php
 if ( empty($row['polltime']) ) {
 	echo "Judgehost never checked in.";

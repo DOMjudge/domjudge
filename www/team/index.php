@@ -58,7 +58,7 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 		echo addForm('upload.php','post',null,'multipart/form-data', null, ' onreset="resetUploadForm('.$refreshtime .');"') .
 		"<p id=\"submitform\">\n\n" .
 		"<span class=\"fileinputs\">\n\t" .
-		"<input type=\"file\" name=\"code[]\" id=\"maincode\" size=\"15\" /> " .
+		"<input type=\"file\" name=\"code[]\" id=\"maincode\" /> " .
 		"\n</span>\n";
 
 		echo "<script type=\"text/javascript\">initFileUploads();</script>\n\n";

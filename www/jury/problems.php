@@ -71,7 +71,7 @@ if( $res->count() == 0 ) {
 				    echo '<td title="view problem description">' .
 					    '<a href="problem.php?id=' . urlencode($row['probid']) .
 					    '&amp;cmd=viewtext"><img src="../images/' . urlencode($row['problemtext_type']) .
-					    '.png" /></a></td>';
+					    '.png" alt="problem text" /></a></td>';
 				} else {
 					echo '<td></td>';
 				}

@@ -37,7 +37,7 @@ if( $teams->count() == 0 ) {
 		"<th scope=\"col\">category</th><th scope=\"col\">affiliation</th>" .
 		"<th scope=\"col\">host</th><th scope=\"col\">room</th>" .
 		"<th class=\"sorttable_nosort\"></th><th align=\"left\" " .
-		"scope=\"col\">status</th>" .
+		"scope=\"col\">status</th><th></th>" .
 		"</tr>\n</thead>\n<tbody>\n";
 
 	while( $row = $teams->next() ) {

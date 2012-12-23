@@ -79,15 +79,15 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>$title</h1>\n\n";
 
 echo "<table>\n";
-echo '<tr><td scope="row">ID:</td><td>' . htmlspecialchars($data['categoryid']) . "</td></tr>\n";
-echo '<tr><td scope="row">Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
-echo '<tr><td scope="row">Sortorder:</td><td>' . htmlspecialchars($data['sortorder']) . "</td></tr>\n";
+echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['categoryid']) . "</td></tr>\n";
+echo '<tr><td>Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
+echo '<tr><td>Sortorder:</td><td>' . htmlspecialchars($data['sortorder']) . "</td></tr>\n";
 if ( isset($data['color']) ) {
-	echo '<tr><td scope="row">Colour:       </td><td style="background: ' .
+	echo '<tr><td>Colour:       </td><td style="background: ' .
 		htmlspecialchars($data['color']) .
 		';">' . htmlspecialchars($data['color']) . "</td></tr>\n";
 }
-echo '<tr><td scope="row">Visible:</td><td>' . printyn($data['visible']) . "</td></tr>\n";
+echo '<tr><td>Visible:</td><td>' . printyn($data['visible']) . "</td></tr>\n";
 
 
 echo "</table>\n\n";

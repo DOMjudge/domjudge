@@ -321,17 +321,17 @@ function putTeam($login) {
 ?>
 
 <table>
-<tr><td scope="row">Name:    </td><td><?php echo htmlspecialchars($team['name'])?></td></tr>
-<tr><td scope="row">Category:</td><td><?php echo htmlspecialchars($team['catname'])?></td></tr>
+<tr><td>Name:    </td><td><?php echo htmlspecialchars($team['name'])?></td></tr>
+<tr><td>Category:</td><td><?php echo htmlspecialchars($team['catname'])?></td></tr>
 <?php
 
 	if ( !empty($team['members']) ) {
-		echo '<tr><td scope="row">Members:</td><td>' .
+		echo '<tr><td>Members:</td><td>' .
 			nl2br(htmlspecialchars($team['members'])) . "</td></tr>\n";
 	}
 
 	if ( !empty($team['affilid']) ) {
-		echo '<tr><td scope="row">Affiliation:</td><td>';
+		echo '<tr><td>Affiliation:</td><td>';
 		if ( is_readable($affillogo) ) {
 			echo '<img src="' . $affillogo . '" alt="' .
 				htmlspecialchars($team['affilid']) . '" /> ';
@@ -341,7 +341,7 @@ function putTeam($login) {
 		echo htmlspecialchars($team['affname']);
 		echo "</td></tr>\n";
 		if ( !empty($team['country']) ) {
-			echo '<tr><td scope="row">Country:</td><td>';
+			echo '<tr><td>Country:</td><td>';
 			if ( is_readable($countryflag) ) {
 				echo '<img src="' . $countryflag . '" alt="' .
 					htmlspecialchars($team['country']) . '" /> ';
@@ -351,7 +351,7 @@ function putTeam($login) {
 	}
 
 	if ( !empty($team['room']) ) {
-		echo '<tr><td scope="row">Location:</td><td>' .
+		echo '<tr><td>Location:</td><td>' .
 			htmlspecialchars($team['room']) . "</td></tr>\n";
 	}
 

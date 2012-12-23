@@ -215,7 +215,7 @@ echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem "
 	htmlspecialchars($probid) . "</a></p>\n\n";
 
 if ( IS_ADMIN ) {
-	echo addForm('', 'post', null, 'multipart/form-data') .
+	echo addForm($pagename, 'post', null, 'multipart/form-data') .
 	    addHidden('probid', $probid);
 }
 
@@ -229,7 +229,7 @@ if ( count($data)==0 ) {
 <th scope="col">size</th><th scope="col">md5</th>
 <?php
 	if ( IS_ADMIN ) echo '<th scope="col">upload new</th>';
-?><th scope="col">description</th>
+?><th scope="col">description</th><th></th>
 </tr></thead>
 <tbody>
 <?php
@@ -263,10 +263,6 @@ foreach( $data as $rank => $row ) {
 				    urlencode('testcase.php?probid='.$probid) . "\">" .
 				    "<img src=\"../images/delete.png\" alt=\"delete\"" .
 				    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
-
-				// hide edit field if javascript is enabled
-				echo "<script type=\"text/javascript\" language=\"JavaScript\">" .
-				    "hideTcDescEdit($rank);</script>";
 			} else {
 				echo "<td rowspan=\"2\" class=\"testdesc\">" .
 				    htmlspecialchars($row['description']) . "</td>";
@@ -279,6 +275,12 @@ foreach( $data as $rank => $row ) {
 if ( count($data)!=0 ) echo "</tbody>\n</table>\n";
 
 if ( IS_ADMIN ) {
+	echo "<script type=\"text/javascript\">\n";
+	foreach ( $data as $rank => $row ) {
+		echo "hideTcDescEdit($rank);\n";
+	}
+	echo "</script>\n\n";
+
 ?>
 <h3>Create new testcase</h3>
 

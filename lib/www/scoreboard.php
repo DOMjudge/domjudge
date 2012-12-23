@@ -570,7 +570,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		?>
 </div></td></tr>
 </table>
-<script type="text/javascript" language="JavaScript">
+<script type="text/javascript">
 <!--
 collapse("filter");
 // -->

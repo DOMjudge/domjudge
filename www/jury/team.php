@@ -115,24 +115,24 @@ if ( $row['enabled'] != 1 ) {
 ?>
 
 <div class="col1"><table>
-<tr><td scope="row">Login:     </td><td class="teamid"><?php echo $row['login']?></td></tr>
-<tr><td scope="row">Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
-<tr><td scope="row">Host:</td><td><?php echo
+<tr><td>Login:     </td><td class="teamid"><?php echo $row['login']?></td></tr>
+<tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
+<tr><td>Host:</td><td><?php echo
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
 <?php if (!empty($row['room'])): ?>
-<tr><td scope="row">Location:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
+<tr><td>Location:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>
 </table></div>
 
 <div class="col2"><table>
 <?php
 
-echo '<tr><td scope="row">Category:</td><td><a href="team_category.php?id=' .
+echo '<tr><td>Category:</td><td><a href="team_category.php?id=' .
 	urlencode($row['categoryid']) . '">' .
 	htmlspecialchars($row['catname']) . "</a></td></tr>\n";
 
 if ( !empty($row['affilid']) ) {
-	echo '<tr><td scope="row">Affiliation:</td><td>';
+	echo '<tr><td>Affiliation:</td><td>';
 	if ( is_readable($affillogo) ) {
 		echo '<img src="' . $affillogo . '" alt="' .
 			htmlspecialchars($row['affilid']) . '" /> ';
@@ -143,7 +143,7 @@ if ( !empty($row['affilid']) ) {
 		htmlspecialchars($row['affname']) . "</a></td></tr>\n";
 }
 if ( !empty($row['country']) ) {
-	echo '<tr><td scope="row">Country:</td><td>';
+	echo '<tr><td>Country:</td><td>';
 	if ( is_readable($countryflag) ) {
 		echo '<img src="' . $countryflag . '" alt="' .
 			htmlspecialchars($row['country']) . '" /> ';
@@ -151,11 +151,11 @@ if ( !empty($row['country']) ) {
 	echo htmlspecialchars($row['country']) . "</td></tr>\n";
 }
 if ( !empty($row['members']) ) {
-	echo '<tr><td scope="row">Members:   </td><td>' .
+	echo '<tr><td>Members:   </td><td>' .
 		nl2br(htmlspecialchars($row['members'])) . "</td></tr>\n";
 }
 if ( !empty($row['comments']) ) {
-	echo '<tr><td scope="row">Comments:</td><td>' .
+	echo '<tr><td>Comments:</td><td>' .
 		nl2br(htmlspecialchars($row['comments'])) . "</td></tr>\n";
 }
 echo "</table></div>\n";

@@ -93,7 +93,7 @@ if ( !empty($BALLOONS) ) {
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
 		"<tr><th class=\"sorttable_numeric\">ID</th>" .
-	        "<th>time</th><th>solved</th><th align=\"right\">team</th>" .
+	        "<th>time</th><th>solved</th><th>team</th>" .
 	        "<th></th><th>loc.</th><th>category</th><th>total</th>" .
 	        "<th></th><th></th></tr>\n</thead>\n";
 

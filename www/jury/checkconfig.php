@@ -95,7 +95,7 @@ function flushresults() {
 
 	// collapse all details; they are not collapsed in the default
 	// style sheet to keep things working with JavaScript disabled.
-	echo "<script type=\"text/javascript\" language=\"JavaScript\">
+	echo "<script type=\"text/javascript\">
 <!--
 for (var i = $lastresultno; i < $resultno; i++) {
     collapse(i);

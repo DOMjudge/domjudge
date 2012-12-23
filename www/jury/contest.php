@@ -96,24 +96,24 @@ if ( !$data['enabled'] ) {
 }
 
 echo "<table>\n";
-echo '<tr><td scope="row">CID:</td><td>c' .
+echo '<tr><td>CID:</td><td>c' .
 	(int)$data['cid'] . "</td></tr>\n";
-echo '<tr><td scope="row">Name:</td><td>' .
+echo '<tr><td>Name:</td><td>' .
 	htmlspecialchars($data['contestname']) .
 	"</td></tr>\n";
-echo '<tr><td scope="row">Activate time:</td><td>' .
+echo '<tr><td>Activate time:</td><td>' .
 	htmlspecialchars(@$data['activatetime_string']) .
 	"</td></tr>\n";
-echo '<tr><td scope="row">Start time:</td><td>' .
+echo '<tr><td>Start time:</td><td>' .
 	htmlspecialchars($data['starttime']) .
 	"</td></tr>\n";
-echo '<tr><td scope="row">Scoreboard freeze:</td><td>' .
+echo '<tr><td>Scoreboard freeze:</td><td>' .
 	(empty($data['freezetime_string']) ? "-" : htmlspecialchars(@$data['freezetime_string'])) .
 	"</td></tr>\n";
-echo '<tr><td scope="row">End time:</td><td>' .
+echo '<tr><td>End time:</td><td>' .
 	htmlspecialchars($data['endtime_string']) .
 	"</td></tr>\n";
-echo '<tr><td scope="row">Scoreboard unfreeze:</td><td>' .
+echo '<tr><td>Scoreboard unfreeze:</td><td>' .
 	(empty($data['unfreezetime_string']) ? "-" : htmlspecialchars(@$data['unfreezetime_string'])) .
 	"</td></tr>\n";
 echo "</table>\n\n";

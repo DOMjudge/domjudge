@@ -55,7 +55,7 @@ function putClar($clar)
 
 	echo "<table>\n";
 
-	echo '<tr><td scope="row">From:</td><td>';
+	echo '<tr><td>From:</td><td>';
 	if ( IS_JURY && $clar['sender']) {
 		echo '<a href="team.php?id=' . urlencode($clar['sender']) . '">' .
 			$from . '</a>';
@@ -64,7 +64,7 @@ function putClar($clar)
 	}
 	echo "</td></tr>\n";
 
-	echo '<tr><td scope="row">To:</td><td>';
+	echo '<tr><td>To:</td><td>';
 	if ( IS_JURY && $clar['recipient']) {
 		echo '<a href="team.php?id=' . urlencode($clar['recipient']) . '">' .
 			$to . '</a>';
@@ -73,7 +73,7 @@ function putClar($clar)
 	}
 	echo "</td></tr>\n";
 
-	echo '<tr><td scope="row">Subject:</td><td>';
+	echo '<tr><td>Subject:</td><td>';
 	if ( is_null($clar['probid']) ) {
 		echo "General issue";
 	} else {
@@ -86,7 +86,7 @@ function putClar($clar)
 	}
 	echo "</td></tr>\n";
 
-	echo '<tr><td scope="row">Time:</td><td>';
+	echo '<tr><td>Time:</td><td>';
 	echo printtime($clar['submittime']);
 	echo "</td></tr>\n";
 

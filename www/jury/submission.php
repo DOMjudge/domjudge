@@ -105,24 +105,24 @@ if ( $submdata['valid'] ) {
 <tr><td>
 <table>
 <caption>Submission</caption>
-<tr><td scope="row">Contest:</td><td>
+<tr><td>Contest:</td><td>
 	<a href="contest.php?id=<?php echo urlencode($submdata['cid'])?>">
 	<?php echo htmlspecialchars($submdata['contestname'])?></a></td></tr>
-<tr><td scope="row">Team:</td><td>
+<tr><td>Team:</td><td>
 	<a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>">
 	<span class="teamid"><?php echo htmlspecialchars($submdata['teamid'])?></span>:
 	<?php echo htmlspecialchars($submdata['teamname'])?></a></td></tr>
-<tr><td scope="row">Problem:</td><td>
+<tr><td>Problem:</td><td>
 	<a href="problem.php?id=<?php echo $submdata['probid']?>">
 	<span class="probid"><?php echo htmlspecialchars($submdata['probid'])?></span>:
 	<?php echo htmlspecialchars($submdata['probname'])?></a></td></tr>
-<tr><td scope="row">Language:</td><td>
+<tr><td>Language:</td><td>
 	<a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a></td></tr>
-<tr><td scope="row">Submitted:</td><td><?php echo  htmlspecialchars($submdata['submittime']) ?></td></tr>
-<tr><td scope="row">Source:</td><td>
+<tr><td>Submitted:</td><td><?php echo  htmlspecialchars($submdata['submittime']) ?></td></tr>
+<tr><td>Source:</td><td>
 	<a href="show_source.php?id=<?php echo $id?>">view source code</a></td></tr>
-<tr><td scope="row">Max runtime:</td><td>
+<tr><td>Max runtime:</td><td>
 	<?php echo  htmlspecialchars($submdata['maxruntime']) ?> sec</td></tr>
 </table>
 
@@ -363,7 +363,7 @@ if ( isset($jid) )  {
 	echo "</tbody>\n</table>\n\n";
 
 ?>
-<script type="text/javascript" language="JavaScript">
+<script type="text/javascript">
 <!--
 togglelastruns();
 // -->
