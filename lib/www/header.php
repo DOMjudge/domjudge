@@ -24,7 +24,6 @@ if ( isset($refresh) &&
       (bool)$_COOKIE["domjudge_refresh"]) ) {
 	header('Refresh: ' . $refresh);
 }
-echo '<?xml version="1.0" encoding="' . DJ_CHARACTER_SET . '" ?>' . "\n";
 
 if(!isset($menu)) {
 	$menu = true;
@@ -33,9 +32,8 @@ if(!isset($ajaxtitle)) {
 	$ajaxtitle = '';
 }
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
 <head>
 	<!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
 <title><?php echo $title?></title>
