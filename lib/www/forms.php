@@ -59,13 +59,16 @@ function addHidden($name, $value) {
 /**
  * An input textbox.
  */
-function addInput($name, $value = '', $size = 0, $maxlength = 0) {
+function addInput($name, $value = '', $size = 0, $maxlength = 0, $extraattr = null) {
 	$attr = '';
 	if ( $size ) {
 		$attr .= ' size="'.(int)$size.'"';
 	}
 	if ( $maxlength ) {
 		$attr .= ' maxlength="'.(int)$maxlength .'"';
+	}
+	if ( $extraattr ) {
+		$attr .= ' ' . $extraattr;
 	}
 
 	return addInputField('text', $name, $value, $attr);
