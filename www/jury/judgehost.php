@@ -108,8 +108,8 @@ if( $res->count() == 0 ) {
 		echo "<td><a$link>" . printtime($jud['starttime']) . '</a></td>';
 		echo "<td><a$link>" . $runtime . '</a></td>';
 		echo "<td><a$link>" . printresult(@$jud['result'], $jud['valid']) . '</a></td>';
-		echo "<td align=\"center\"><a$link>" . printyn($jud['valid']) . '</a></td>';
-		echo "<td align=\"center\"><a$link>" . printyn($jud['verified']) . '</a></td>';
+		echo "<td class=\"tdcenter\"><a$link>" . printyn($jud['valid']) . '</a></td>';
+		echo "<td class=\"tdcenter\"><a$link>" . printyn($jud['verified']) . '</a></td>';
 		echo "</tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";

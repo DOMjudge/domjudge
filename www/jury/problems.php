@@ -51,9 +51,9 @@ if( $res->count() == 0 ) {
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
 			"</td><td title=\"".htmlspecialchars($row['contestname'])."\">".
 			$link . 'c' . htmlspecialchars($row['cid']) . "</a>" .
-			"</td><td align=\"center\">" . $link .
+			"</td><td class=\"tdcenter\">" . $link .
 			printyn($row['allow_submit']) . "</a>" .
-			"</td><td align=\"center\">" . $link .
+			"</td><td class=\"tdcenter\">" . $link .
 			printyn($row['allow_judge']) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
 			"</td>".

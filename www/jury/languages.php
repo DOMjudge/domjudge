@@ -30,9 +30,9 @@ if( $res->count() == 0 ) {
 			( $row['allow_submit'] ? '': ' class="disabled"').
 			"><td>" . $link . htmlspecialchars($row['langid'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
-			"</td><td align=\"center\">" . $link .
+			"</td><td>" . $link .
 				printyn($row['allow_submit']) . "</a>" .
-			"</td><td align=\"center\">" . $link .
+			"</td><td>" . $link .
 				printyn($row['allow_judge']) . "</a>" .
 			"</td><td>" . $link . htmlspecialchars($row['time_factor']) . "</a>";
 			if ( IS_ADMIN ) {

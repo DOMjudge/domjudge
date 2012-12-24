@@ -61,7 +61,7 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Configuration settings</h1>\n\n";
 
 echo addForm('config.php') . "<table>\n<thead>\n" .
-    "<tr align=\"left\"><th>Option</th><th>Value(s)</th><th>Description</th></tr>\n" .
+    "<tr class=\"thleft\"><th>Option</th><th>Value(s)</th><th>Description</th></tr>\n" .
     "</thead>\n<tbody>\n";
 
 foreach ( $LIBDBCONFIG as $key => $data ) {

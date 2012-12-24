@@ -33,8 +33,8 @@ if( $res->count() == 0 ) {
 			'><td>' . $link. (int)$row['categoryid'] .
 			'</a></td><td>' . $link . (int)$row['sortorder'] .
 			'</a></td><td>' . $link . htmlspecialchars($row['name']) .
-			'</a></td><td align="right">' . $link . (int)$row['numteams'] .
-			'</a></td><td align="center">' . $link . printyn($row['visible']) .
+			'</a></td><td class="tdright">' . $link . (int)$row['numteams'] .
+			'</a></td><td class="tdcenter">' . $link . printyn($row['visible']) .
 			'</a></td>';
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .

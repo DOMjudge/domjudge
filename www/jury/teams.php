@@ -36,7 +36,7 @@ if( $teams->count() == 0 ) {
 		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th>" .
 		"<th scope=\"col\">category</th><th scope=\"col\">affiliation</th>" .
 		"<th scope=\"col\">host</th><th scope=\"col\">room</th>" .
-		"<th class=\"sorttable_nosort\"></th><th align=\"left\" " .
+		"<th class=\"sorttable_nosort\"></th><th class=\"thleft\" " .
 		"scope=\"col\">status</th><th></th>" .
 		"</tr>\n</thead>\n<tbody>\n";
 
@@ -87,7 +87,7 @@ if( $teams->count() == 0 ) {
 			break;
 		}
 		echo ">$link" . CIRCLE_SYM . "</a></td>";
-		echo "<td align=\"right\" title=\"$numcor correct / $numsub submitted\">$link$numcor / $numsub</a></td>";
+		echo "<td class=\"teamstat\" title=\"$numcor correct / $numsub submitted\">$link$numcor / $numsub</a></td>";
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 				editLink('team', $row['login']) . " " .

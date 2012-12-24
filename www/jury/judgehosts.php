@@ -73,9 +73,9 @@ if( $res->count() == 0 ) {
 		$link = '<a href="judgehost.php?id=' . urlencode($row['hostname']) . '">';
 		echo "<tr".( $row['active'] ? '': ' class="disabled"').
 			"><td>" . $link . printhost($row['hostname']) . '</a>' .
-			"</td><td align=\"center\">" . $link . printyn($row['active']) .
+			"</td><td class=\"tdcenter\">" . $link . printyn($row['active']) .
 			"</a></td>";
-		echo "<td align=\"center\" class=\"";
+		echo "<td class=\"tdcenter ";
 		if ( empty($row['polltime'] ) ) {
 			echo "judgehost-nocon";
 			echo "\" title =\"never checked in\">";

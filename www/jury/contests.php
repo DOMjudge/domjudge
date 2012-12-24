@@ -154,7 +154,7 @@ if( count($res) == 0 ) {
 			( $iseven ? 'roweven': 'rowodd' ) .
 			(!$row['enabled']    ? ' disabled' :'') .
 			($row['cid'] == $cid ? ' highlight':'') . '">' .
-			"<td align=\"right\">" . $link .
+			"<td class=\"tdright\">" . $link .
 			"c" . (int)$row['cid'] . "</a></td>\n";
 		foreach ($times as $time) {
 			echo "<td title=\"".htmlspecialchars(@$row[$time. 'time']) . "\">" .
