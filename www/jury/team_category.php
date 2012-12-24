@@ -37,18 +37,17 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 ?>
 
 <tr><td><label for="data_0__name_">Description:</label></td>
-<td><?php echo addInput('data[0][name]', @$row['name'], 15, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 15, 255, 'required')?></td></tr>
 
 <tr><td><label for="data_0__sortorder_">Sort order:</label></td>
-<td><?php echo addInput('data[0][sortorder]', (empty($row['sortorder'])?0:$row['sortorder']), 2, 1)?></td></tr>
+<td><?php echo addInputField('number', 'data[0][sortorder]', (empty($row['sortorder'])?0:$row['sortorder']), ' size="3" maxlength="2"')?></td></tr>
 
 <tr><td><label for="data_0__color_">Colour:</label></td>
 <td><?php echo addInputField('text','data[0][color]', @$row['color'],
-	'size="15" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
+	' size="15" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}" color')?>
 <a target="_blank"
 href="http://www.w3schools.com/cssref/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
-</td></tr>
 
 <tr><td>Visible:</td>
 <td><?php echo addRadioButton('data[0][visible]', (!isset($row['visible']) || $row['visible']), 1)?> <label for="data_0__visible_1">yes</label>

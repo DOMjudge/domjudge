@@ -41,13 +41,13 @@ if ( IS_ADMIN && !empty($cmd) ):
 		echo htmlspecialchars($row['login']);
 	} else {
 		echo "<tr><td><label for=\"data_0__login_\">Login:</label></td><td class=\"teamid\">";
-		echo addInput('data[0][login]', null, 8, 15);
+		echo addInput('data[0][login]', null, 8, 15, 'pattern="' . IDENTIFIER_CHARS . '+" title="Alphanumerics only" required');
 	}
 	echo "</td></tr>\n";
 
 ?>
 <tr><td><label for="data_0__name_">Team name:</label></td>
-<td><?php echo addInput('data[0][name]', @$row['name'], 35, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 35, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__categoryid_">Category:</label></td>
 <td><?php
 $cmap = $DB->q("KEYVALUETABLE SELECT categoryid,name FROM team_category ORDER BY categoryid");

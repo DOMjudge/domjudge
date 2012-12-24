@@ -37,17 +37,17 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 			htmlspecialchars($row['affilid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__affilid_\">Affiliation ID:</label></td><td>";
-		echo addInput('data[0][affilid]', null, 11, 10);
+		echo addInput('data[0][affilid]', null, 11, 10, 'required');
 	}
 	echo "</td></tr>\n";
 
 ?>
 
 <tr><td><label for="data_0__name_">Name:</label></td>
-<td><?php echo addInput('data[0][name]', @$row['name'], 40, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 40, 255, 'required')?></td></tr>
 
 <tr><td><label for="data_0__country_">Country:</label></td>
-<td><?php echo addInput('data[0][country]', @$row['country'], 4, 3)?>
+<td><?php echo addInput('data[0][country]', @$row['country'], 4, 3, 'pattern="[A-Z]{3}" title="three uppercase letters (ISO-3166-1 alpha-3)"')?>
 <a target="_blank"
 href="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Current_codes"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>

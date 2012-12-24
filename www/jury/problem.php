@@ -79,7 +79,7 @@ if ( IS_ADMIN && !empty($cmd) ):
 		echo htmlspecialchars($row['probid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__probid_\">Problem ID:</label></td><td>";
-		echo addInput('data[0][probid]', null, 8, 10);
+		echo addInput('data[0][probid]', null, 8, 10, " pattern=\"" . IDENTIFIER_CHARS . "+\"");
 		echo " (alphanumerics only)";
 	}
 	echo "</td></tr>\n";
@@ -93,7 +93,7 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 </td></tr>
 
 <tr><td><label for="data_0__name_">Problem name:</label></td>
-<td><?php echo addInput('data[0][name]', @$row['name'], 30, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 30, 255, 'required')?></td></tr>
 
 <tr><td>Allow submit:</td>
 <td><?php echo addRadioButton('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> <label for="data_0__allow_submit_1">yes</label>
@@ -110,11 +110,12 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 	}
 ?>
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
-<td><?php echo addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
+<td><?php echo addInputField('number','data[0][timelimit]', @$row['timelimit'],
+	' size="5" maxlength="5" min="1" max="10000" ')?> sec</td></tr>
 
 <tr><td><label for="data_0__color_">Balloon colour:</label></td>
 <td><?php echo addInputField('text','data[0][color]', @$row['color'],
-	' size="8" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
+	' size="8" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}" color')?>
 <a target="_blank"
 href="http://www.w3schools.com/cssref/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
