@@ -26,6 +26,9 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('pe
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('results_prio', '{"memory-limit":99,"output-limit":99,"run-error":99,"timelimit":99,"wrong-answer":30,"presentation-error":20,"no-output":10,"correct":1}', 'array_keyval', 'Priorities of results for determining final result with multiple testcases. Higher priority is used first as final result. With equal priority, the first occurring result determines the final result.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('results_remap', '{"presentation-error":"wrong-answer"}', 'array_keyval', 'Remap testcase result, e.g. to disable a specific result type such as ''presentation-error''.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('lazy_eval_results', '1', 'bool', 'Lazy evaluation of results? If enabled, returns final result as soon as a highest priority result is found, otherwise only return final result when all testcases are judged.');
+INSERT INTO `configuration` (`name`, `value`) VALUES ('clar_answers', 'No comment	Read the problem statement carefully');
+INSERT INTO `configuration` (`name`, `value`) VALUES ('clar_categories', 'general:General issue	technical:Technical issue');
+INSERT INTO `configuration` (`name`, `value`) VALUES ('show_affiliations', '1');
 
 -- 
 -- Dumping data for table `contest`
