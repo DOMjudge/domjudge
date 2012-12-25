@@ -97,6 +97,17 @@ function check_problem($data, $keydata = null)
 	return $data;
 }
 
+function check_judgehost($data, $keydata = null)
+{
+	$id = (isset($data['hostname']) ? $data['hostname'] : $keydata['hostname']);
+
+	if ( ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id) ) {
+		ch_error("Judgehost has invalid hostname.");
+	}
+
+	return $data;
+}
+
 function check_language($data, $keydata = null)
 {
 	global $langexts;
