@@ -31,24 +31,28 @@ if ( IS_ADMIN && !empty($_GET['cmd']) ):
 			"</td></tr>\n";
 	}
 
+$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d";
+$pattern_offset    = "\d\d:\d\d";
+$pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
+$pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 ?>
 
 <tr><td><label for="data_0__contestname_">Contest name:</label></td>
-<td><?php echo addInput('data[0][contestname]', @$row['contestname'], 40, 255)?></td></tr>
+<td><?php echo addInput('data[0][contestname]', @$row['contestname'], 40, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__activatetime_string_">Activate time:</label></td>
-<td><?php echo addInput('data[0][activatetime_string]', @$row['activatetime_string'], 20, 19)?> (yyyy-mm-dd hh:mm:ss <i>or</i> -hh:mm)</td></tr>
+<td><?php echo addInput('data[0][activatetime_string]', @$row['activatetime_string'], 20, 19, 'required pattern="' . $pattern_dateorneg . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> -hh:mm)</td></tr>
 
 <tr><td><label for="data_0__starttime_">Start time:</label></td>
-<td><?php echo addInput('data[0][starttime]', @$row['starttime'], 20, 19)?> (yyyy-mm-dd hh:mm:ss)</td></tr>
+<td><?php echo addInput('data[0][starttime]', @$row['starttime'], 20, 19, 'required pattern="' . $pattern_datetime . '"')?> (yyyy-mm-dd hh:mm:ss)</td></tr>
 
 <tr><td><label for="data_0__freezetime_string_">Scoreboard freeze time:</label></td>
-<td><?php echo addInput('data[0][freezetime_string]', @$row['freezetime_string'], 20, 19)?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][freezetime_string]', @$row['freezetime_string'], 20, 19, 'pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
 
 <tr><td><label for="data_0__endtime_string_">End time:</label></td>
-<td><?php echo addInput('data[0][endtime_string]', @$row['endtime_string'], 20, 19)?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][endtime_string]', @$row['endtime_string'], 20, 19, 'required pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
 
 <tr><td><label for="data_0__unfreezetime_string_">Scoreboard unfreeze time:</label></td>
-<td><?php echo addInput('data[0][unfreezetime_string]', @$row['unfreezetime_string'], 20, 19)?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][unfreezetime_string]', @$row['unfreezetime_string'], 20, 19, 'pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
 
 <tr><td>Enabled:</td><td>
 <?php echo addRadioButton('data[0][enabled]', (!isset($row['enabled']) ||  $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>

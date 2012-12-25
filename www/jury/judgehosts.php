@@ -26,7 +26,7 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 	if ( $cmd == 'add' ) {
 		for ($i=0; $i<10; ++$i) {
 			echo "<tr><td>" .
-				addInput("data[$i][hostname]", null, 20, 50) .
+				addInput("data[$i][hostname]", null, 20, 50, 'pattern="[A-Za-z0-9._-]+"') .
 				"</td><td>" .
 				addSelect("data[$i][active]",
 					array(1=>'yes',0=>'no'), '1', true) .

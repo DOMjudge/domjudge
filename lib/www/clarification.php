@@ -342,7 +342,7 @@ if ( $respid ) {
 	$text = explode("\n",wrap_unquoted($clar['body']),75);
 	foreach($text as $line) $body .= "> $line\n";
 }
-echo addTextArea('bodytext', $body, 80, 10);
+echo addTextArea('bodytext', $body, 80, 10, 'required');
 ?></td></tr>
 <tr>
 <td>&nbsp;</td>
