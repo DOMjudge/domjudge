@@ -65,7 +65,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','contest') .
 	addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?(strstr(@$_GET['referrer'],'?') === FALSE?'?edited=1':'&edited=1'):'')) .
 	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
 	addEndForm();
 
 require(LIBWWWDIR . '/footer.php');

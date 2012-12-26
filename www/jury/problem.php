@@ -79,7 +79,7 @@ if ( IS_ADMIN && !empty($cmd) ):
 		echo htmlspecialchars($row['probid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__probid_\">Problem ID:</label></td><td>";
-		echo addInput('data[0][probid]', null, 8, 10, " pattern=\"" . IDENTIFIER_CHARS . "+\"");
+		echo addInput('data[0][probid]', null, 8, 10, " required pattern=\"" . IDENTIFIER_CHARS . "+\"");
 		echo " (alphanumerics only)";
 	}
 	echo "</td></tr>\n";
@@ -111,7 +111,7 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 ?>
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
 <td><?php echo addInputField('number','data[0][timelimit]', @$row['timelimit'],
-	' size="5" maxlength="5" min="1" max="10000" ')?> sec</td></tr>
+	' size="5" maxlength="5" min="1" max="10000" required')?> sec</td></tr>
 
 <tr><td><label for="data_0__color_">Balloon colour:</label></td>
 <td><?php echo addInputField('text','data[0][color]', @$row['color'],
@@ -121,7 +121,7 @@ href="http://www.w3schools.com/cssref/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__problemtext_">Problem text:</label></td>
-<td><?php echo addFileField('data[0][problemtext]', 30)?></td></tr>
+<td><?php echo addFileField('data[0][problemtext]', 30, ' accept="text/plain,text/html,application/pdf"')?></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>
 <td><?php echo addInput('data[0][special_run]', @$row['special_run'], 30, 25)?></td></tr>
@@ -136,7 +136,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','problem') .
 	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
 	addEndForm();
 
 

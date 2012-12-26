@@ -60,7 +60,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','team_category') .
 	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
 	addEndForm();
 
 	require(LIBWWWDIR . '/footer.php');

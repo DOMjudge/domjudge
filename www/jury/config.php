@@ -114,7 +114,9 @@ foreach ( $LIBDBCONFIG as $key => $data ) {
 }
 
 echo "</tbody>\n</table>\n<p>" .
-	addSubmit('Save', 'save') . addSubmit('Cancel', 'cancel') . "</p>" .
+	addSubmit('Save', 'save') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
+	"</p>" .
 	addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
