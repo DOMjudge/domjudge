@@ -1,6 +1,6 @@
 <?php
 
-echo "<div id=\"menutop\">\n";
+echo "<nav><div id=\"menutop\">\n";
 
 echo "<a target=\"_top\" href=\"index.php\" accesskey=\"o\">overview</a>\n";
 
@@ -17,4 +17,4 @@ echo "</div>\n\n<div id=\"menutopright\">\n";
 
 putClock();
 
-echo "</div>\n\n";
+echo "</div></nav>\n\n";

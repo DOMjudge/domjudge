@@ -1,4 +1,4 @@
-<div id="menutop">
+<nav><div id="menutop">
 <a href="index.php" accesskey="h">home</a>
 <a href="problems.php" accesskey="p">problems</a>
 <?php	if ( IS_ADMIN ) { ?>
@@ -32,4 +32,4 @@ if ( isset($refresh) ) {
 	    addEndForm() . "</div>\n";
 }
 
-echo "</div>\n";
+echo "</div></nav>\n";
