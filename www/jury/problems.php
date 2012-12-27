@@ -91,8 +91,8 @@ if ( IS_ADMIN ) {
 	echo "<p>" . addLink('problem') . "</p>\n\n";
 	if ( class_exists("ZipArchive") ) {
 		echo "\n" . addForm('problem.php', 'post', null, 'multipart/form-data') .
-	 		'Problem archive: ' .
-	 		addFileField('problem_archive') .
+	 		'Problem archive(s): ' .
+	 		addFileField('problem_archive[]', null, ' required multiple accept="application/zip"') .
 	 		addSubmit('Upload', 'upload') .
 	 		addEndForm() . "\n";
 	}

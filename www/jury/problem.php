@@ -40,13 +40,19 @@ if ( !empty($pcmd) ) {
 	}
 }
 if ( isset($_POST['upload']) ) {
-	if ( !empty($_FILES['problem_archive']['name']) ) {
-		checkFileUpload( $_FILES['problem_archive']['error'] );
-		$zip = openZipFile($_FILES['problem_archive']['tmp_name']);
-		$id = importZippedProblem($zip, empty($id) ? NULL : $id);
-		$zip->close();
-		auditlog('problem', $id, 'upload zip', $_FILES['problem_archive']['name']);
-		header('Location: '.$pagename.'?id='.urlencode($id));
+	if ( !empty($_FILES['problem_archive']['tmp_name'][0]) ) {
+		foreach($_FILES['problem_archive']['tmp_name'] as $fileid => $tmpname) {
+			checkFileUpload( $_FILES['problem_archive']['error'][$fileid] );
+			$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
+			$newid = importZippedProblem($zip, empty($id) ? NULL : $id);
+			$zip->close();
+			auditlog('problem', $newid, 'upload zip', $_FILES['problem_archive']['name'][$fileid]);
+		}
+		if ( count($_FILES['problem_archive']['tmp_name']) == 1 ) {
+			header('Location: '.$pagename.'?id='.urlencode((empty($newid)?$id:$newid)));
+		} else {
+			header('Location: problems.php');
+		}
 	} else {
 		error("Missing filename for problem upload");
 	}
@@ -144,8 +150,8 @@ if ( class_exists("ZipArchive") ) {
 	echo "<br /><em>or</em><br /><br />\n" .
 	addForm('problem.php', 'post', null, 'multipart/form-data') .
 	addHidden('id', @$row['probid']) .
-	'<label for="problem_archive">Upload problem archive:</label>' .
-	addFileField('problem_archive') .
+	'<label for="problem_archive__">Upload problem archive:</label>' .
+	addFileField('problem_archive[]') .
 	addSubmit('Upload', 'upload') .
 	addEndForm();
 }
@@ -222,7 +228,7 @@ if ( !empty($data['special_compare']) ) {
 if ( IS_ADMIN && class_exists("ZipArchive") ) {
 	echo '<tr>' .
 		'<td>Problem archive:</td>' .
-		'<td>' . addFileField('problem_archive') .
+		'<td>' . addFileField('problem_archive[]') .
 		addSubmit('Upload', 'upload') . '</td>' .
 		"</tr>\n";
 }
