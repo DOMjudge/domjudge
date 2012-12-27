@@ -153,11 +153,17 @@ function checkUploadForm()
 
 }
 
-function resetUploadForm(refreshtime) {
+function resetUploadForm(refreshtime, maxfiles) {
 	var filebut = document.getElementById("codebutton");
 	var addfile = document.getElementById("addfile");
 	var auxfiles = document.getElementById("auxfiles");
-	var selecttext = "Select file...";
+	var fileelt = document.getElementById("maincode");
+	var supportshtml5multi = ("multiple" in fileelt);
+	if ( supportshtml5multi && maxfiles > 1 ) {
+		var selecttext = "Select files...";
+	} else {
+		var selecttext = "Select file...";
+	}
 	filebut.value = selecttext;
 	addfile.disabled = true;
 	auxfiles.innerHTML = "";
@@ -183,9 +189,21 @@ function initReload(refreshtime)
 	setTimeout('reloadPage()', refreshtime * 1000);
 }
 
-function initFileUploads() {
+function initFileUploads(maxfiles) {
 	if (!W3CDOM) return;
+	
 	var selecttext = "Select file...";
+
+	if ( maxfiles > 1 ) {
+		var fileelt = document.getElementById("maincode");
+		var fileadd = document.getElementById("addfile");
+		var supportshtml5multi = ("multiple" in fileelt);
+		if ( supportshtml5multi ) {
+			selecttext = "Select files...";
+			fileadd.style.display = "none";
+		}
+	}
+
 	var fakeFileUpload = document.createElement('span');
 	fakeFileUpload.className = 'fakefile';
 	var input = document.createElement('input');
@@ -237,7 +255,6 @@ function addFileUpload() {
 	var input = document.createElement('input');
 	input.type = 'file';
 	input.name = 'code[]';
-	input.size = '50';
 	var br = document.createElement('br');
 
 	document.getElementById('auxfiles').appendChild( input );
