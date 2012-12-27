@@ -116,9 +116,7 @@ if ( $teams->count() == 0 ) {
 	}
 	echo "</tbody>\n</table>\n\n";
 
-	echo "<p>";
 	putTeamRow($cdata,$listteams);
-	echo "</p>\n\n";
 }
 
 

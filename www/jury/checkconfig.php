@@ -57,8 +57,6 @@ $lastsection = false; $resultno = 0;
 function flushresults() {
 	global $RESULTS, $lastsection, $resultno;
 
-	$lastresultno = $resultno;
-
 	foreach($RESULTS as &$row) {
 
 		if ( $row['flushed'] ) continue;
@@ -92,16 +90,6 @@ function flushresults() {
 
 		++$resultno;
 	}
-
-	// collapse all details; they are not collapsed in the default
-	// style sheet to keep things working with JavaScript disabled.
-	echo "<script type=\"text/javascript\">
-<!--
-for (var i = $lastresultno; i < $resultno; i++) {
-    collapse(i);
-}
-// -->
-</script>\n\n";
 
 	flush();
 }
@@ -562,6 +550,16 @@ if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 flushresults();
 
 echo "</table>\n\n";
+
+// collapse all details; they are not collapsed in the default
+// style sheet to keep things working with JavaScript disabled.
+echo "<script type=\"text/javascript\">
+<!--
+for (var i = 0; i < $resultno; i++) {
+    collapse(i);
+}
+// -->
+</script>\n\n";
 
 $time_end = microtime(TRUE);
 
