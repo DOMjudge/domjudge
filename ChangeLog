@@ -45,6 +45,7 @@ Version 3.4.0 - DEV
  - Make format of timestamps in web interfaces configurable.
  - Use PHP multibyte string functions where applicable. Thanks Vladimir
    Vassiliev for the bug report.
+ - Use HTML5 for multiple file uploads and form validation, when available.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
