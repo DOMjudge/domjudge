@@ -103,7 +103,6 @@ function checkUploadForm()
 	var langelt = document.getElementById("langid");
 	var language = langelt.options[langelt.selectedIndex].value;
 	var languagetxt = langelt.options[langelt.selectedIndex].text;
-	var filebut = document.getElementById("codebutton");
 	var fileelt = document.getElementById("maincode");
 	var filename = fileelt.value;
 	var probelt = document.getElementById("probid");
@@ -112,7 +111,7 @@ function checkUploadForm()
 	var auxfiles = document.getElementsByName("code[]");
 
 	var error = false;
-	langelt.className = probelt.className = filebut.className = "";
+	langelt.className = probelt.className = "";
 	if ( language == "" ) {
 		langelt.focus();
 		langelt.className = "errorfield";
@@ -124,7 +123,6 @@ function checkUploadForm()
 		error = true;
 	}
 	if ( filename == "" ) {
-		filebut.className = "errorfield";
 		return false;
 	}
 
@@ -154,24 +152,13 @@ function checkUploadForm()
 }
 
 function resetUploadForm(refreshtime, maxfiles) {
-	var filebut = document.getElementById("codebutton");
 	var addfile = document.getElementById("addfile");
 	var auxfiles = document.getElementById("auxfiles");
-	var fileelt = document.getElementById("maincode");
-	var supportshtml5multi = ("multiple" in fileelt);
-	if ( supportshtml5multi && maxfiles > 1 ) {
-		var selecttext = "Select files...";
-	} else {
-		var selecttext = "Select file...";
-	}
-	filebut.value = selecttext;
 	addfile.disabled = true;
 	auxfiles.innerHTML = "";
 	doReload = true;
 	setTimeout('reloadPage()', refreshtime * 1000);
 }
-
-var W3CDOM = (document.createElement && document.getElementsByTagName);
 
 var doReload = true;
 
@@ -190,54 +177,19 @@ function initReload(refreshtime)
 }
 
 function initFileUploads(maxfiles) {
-	if (!W3CDOM) return;
-	
-	var selecttext = "Select file...";
+	var fileelt = document.getElementById("maincode");
 
 	if ( maxfiles > 1 ) {
-		var fileelt = document.getElementById("maincode");
 		var fileadd = document.getElementById("addfile");
 		var supportshtml5multi = ("multiple" in fileelt);
 		if ( supportshtml5multi ) {
-			selecttext = "Select files...";
 			fileadd.style.display = "none";
 		}
 	}
-
-	var fakeFileUpload = document.createElement('span');
-	fakeFileUpload.className = 'fakefile';
-	var input = document.createElement('input');
-	input.type = 'button';
-	input.value = selecttext;
-	input.id = "codebutton";
-	fakeFileUpload.appendChild(input);
-	var x = document.getElementsByTagName('input');
-	for (var i=0;i<x.length;i++) {
-		if (x[i].type != 'file') continue;
-		if (x[i].parentNode.className != 'fileinputs') continue;
-		x[i].className = 'file hidden';
-		var clone = fakeFileUpload.cloneNode(true);
-		x[i].parentNode.appendChild(clone);
-		x[i].relatedElement = clone.getElementsByTagName('input')[0];
-		// stop refresh when clicking a button.
-		x[i].onclick = function() { doReload = false; }
-		x[i].onchange = x[i].onmouseout = function () {
-			if ( this.value == "" ) {
-				this.relatedElement.value = selecttext;
-			} else {
-				var filename = this.value;
-				// Opera prepends a fake fs path: C:\fakepath\. Strip that.
-				var fake = "fakepath\\";
-				if ( filename.indexOf(fake) >= 0 ) {
-					filename = filename.substr(filename.lastIndexOf(fake)+fake.length);
-				}
-				// some other browsers (Konqueror at least) may prepend the full FS path
-				if ( filename.indexOf(File.separator) >= 0 ) {
-					filename = filename.substr(filename.lastIndexOf(File.separator)+1);
-				}
-				detectProblemLanguage(filename);
-				this.relatedElement.value = filename;
-			}
+	fileelt.onclick = function() { doReload = false; }
+	fileelt.onchange = fileelt.onmouseout = function () {
+		if ( this.value != "" ) {
+			detectProblemLanguage(this.value);
 		}
 	}
 }

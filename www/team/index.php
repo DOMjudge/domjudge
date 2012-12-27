@@ -58,14 +58,13 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 		$maxfiles = dbconfig_get('sourcefiles_limit',100);
 
 		echo addForm('upload.php','post',null,'multipart/form-data', null, ' onreset="resetUploadForm('.$refreshtime .', ' . $maxfiles . ');"') .
-		"<p id=\"submitform\">\n\n" .
-		"<span class=\"fileinputs\">\n\t";
+		"<p id=\"submitform\">\n\n";
 
 		echo "<input type=\"file\" name=\"code[]\" id=\"maincode\" required";
 		if ( $maxfiles > 1 ) {
-			echo " multiple min=\"1\" max=\"$maxfiles\"";
+			echo " multiple";
 		}
-		echo " />\n</span>\n";
+		echo " />\n";
 
 
 		$probs = array();
