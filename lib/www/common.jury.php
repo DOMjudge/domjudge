@@ -58,7 +58,7 @@ function exportLink($probid)
 {
 	return '<a href="export.php?id=' . urlencode($probid) .
 		'"><img src="../images/b_save.png" ' .
-	    ' title="export problem as zip-file" alt="export" /></a>';
+		' title="export problem as zip-file" alt="export" /></a>';
 }
 
 /**

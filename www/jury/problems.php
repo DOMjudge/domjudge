@@ -76,8 +76,8 @@ if( $res->count() == 0 ) {
 					echo '<td></td>';
 				}
 				echo '<td title="export problem as zip-file">' .
-				    exportLink($row['probid']) . '</td>' .
-				    "<td class=\"editdel\">" .
+					exportLink($row['probid']) . '</td>' .
+					"<td class=\"editdel\">" .
 					editLink('problem', $row['probid']) . " " .
 					delLink('problem','probid',$row['probid']);
 			}
