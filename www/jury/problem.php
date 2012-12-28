@@ -239,8 +239,7 @@ echo "<br />\n" . rejudgeForm('problem', $id) . "\n\n";
 
 if ( IS_ADMIN ) {
 	echo "<p>" .
-		'<a href="export.php?id=' . urlencode($id) .
-		'"><img src="../images/b_save.png" /></a> ' .
+	    exportLink($id) . "\n" .
 		editLink('problem',$id) . "\n" .
 		delLink('problem','probid', $id) . "</p>\n\n";
 }

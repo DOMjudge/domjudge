@@ -51,6 +51,17 @@ function delLink($table, $field, $value)
 }
 
 /**
+ * Returns a link to export a problem as zip-file.
+ *
+ */
+function exportLink($probid)
+{
+	return '<a href="export.php?id=' . urlencode($probid) .
+		'"><img src="../images/b_save.png" ' .
+	    ' title="export problem as zip-file" alt="export" /></a>';
+}
+
+/**
  * Returns a form to rejudge all judgings based on a (table,id)
  * pair. For example, to rejudge all for language 'java', call
  * as rejudgeForm('language', 'java').
