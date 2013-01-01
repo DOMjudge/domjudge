@@ -130,7 +130,7 @@ function presentDiff ($old, $new)
 
 	$oldid = htmlspecialchars($old['submitid']);
 	return '<div class="tabbertab">' .
-		'<h2 class="filename"><a name="diff"></a>' .
+		'<h2 class="filename">' .
 		htmlspecialchars($old['filename']) . "</h2>\n\n" .
 
 		'<pre class="output_text">' . parseSourceDiff($difftext) . "</pre>\n\n" .
