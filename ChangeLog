@@ -46,6 +46,7 @@ Version 3.4.0 - DEV
  - Use PHP multibyte string functions where applicable. Thanks Vladimir
    Vassiliev for the bug report.
  - Use HTML5 for multiple file uploads and form validation, when available.
+ - Fix: close all file descriptors when daemonizing (no PHP solution yet).
 
 Version 3.3.0 - 29 May 2012
 ---------------------------

@@ -416,6 +416,9 @@ function daemonize($pidfile = NULL)
 		error("cannot reopen stdio files to /dev/null");
 	}
 
+	// FIXME: We should really close all other open file descriptors
+	// here, but PHP does not support this.
+
 	// Start own process group, detached from any tty
 	if ( posix_setsid()<0 ) error("cannot set daemon process group");
 }

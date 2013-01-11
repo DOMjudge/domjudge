@@ -188,7 +188,7 @@ void remove_pidfile()
 void daemonize(const char *_pidfile)
 {
 	pid_t pid;
-	int fd;
+	int fd, maxfd;
 	char str[15];
 
 	switch ( pid = fork() ) {
@@ -221,6 +221,10 @@ void daemonize(const char *_pidfile)
 	     freopen("/dev/null", "w", stderr)!=NULL ) {
 		error(errno, "cannot reopen stdio files to /dev/null");
 	}
+
+	/* Close all other file descriptors. */
+	maxfd = sysconf(_SC_OPEN_MAX);
+	for(fd=3; fd<maxfd; fd++) close(fd);
 
 	/* Start own process group, detached from any tty */
 	if ( setsid()<0 ) error(errno, "cannot set daemon process group");
