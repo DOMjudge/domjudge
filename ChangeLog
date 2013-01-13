@@ -7,6 +7,7 @@ Version 3.3.4 - DEV
    WISVCH/DOMjudge tree at GitHub.
  - Bugfix: check that compilation creates executable file, closes: #119.
  - Fix minor HTML validation error and PHP notice.
+ - Add missing $pagename in a few PHP/HTML pages.
 
 Version 3.3.3 - 12 November 2012
 --------------------------------
