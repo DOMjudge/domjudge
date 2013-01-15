@@ -165,8 +165,7 @@ while($row = $mysqldatares->next()) {
 
 result('software', 'MySQL version',
 	version_compare('4.1', $mysqldata['version'], '>=') ? 'E':'O',
-	'Connected to ' . mysql_get_host_info().",\n".
-	'MySQL server version ' .
+	'Connected to MySQL server version ' .
 	htmlspecialchars($mysqldata['version']) .
 	'. Minimum required is 4.1.');
 
