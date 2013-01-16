@@ -390,13 +390,13 @@ The following software is required for running DOMjudge.
        preferably one that can generate statically linked stand-alone
        executables.
 
-<item> Apache web server with support for PHP &gt;= 5.2.0 and the mysql
+<item> Apache web server with support for PHP &gt;= 5.2.0 and the mysqli
        extension for PHP. We also recommend the posix extension for extra
        debugging information.
 
 <item> MySQL &gt;= 4.1.x database and client software
 
-<item> PHP &gt;= 5.2.0 command line interface and the mysql extension.
+<item> PHP &gt;= 5.2.0 command line interface and the mysqli extension.
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash)
 
@@ -2041,10 +2041,11 @@ defaults to <tt>www-data</tt>.
 
 Judgehosts and the domserver communicate with each other through
 the MySQL protocol. By default, MySQL does not encrypt these
-connections. Refer to the MySQL manual to configure SSL on client
-connections; alternatively you can employ an SSH tunnel or ensure
-in the network setup that these connections are separated from
-the team network.
+connections. Refer to the MySQL manual to configure SSL for the
+server and enable the option in common-config.php to enable it
+for client connections; alternatively you can employ an SSH tunnel
+or ensure in the network setup that these connections are separated
+from the team network.
 
 The jury web interface is protected by HTTP Authentication. These
 credentials are essentially sent plain-text, so we advise to setup
