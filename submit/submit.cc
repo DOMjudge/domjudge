@@ -784,11 +784,12 @@ int websubmit()
 	if ( curl_formadd(&post, &last, \
 			CURLFORM_ ## nametype, namecont, \
 			CURLFORM_ ## valtype, valcont, \
-			CURLFORM_END) != 0 ) \
+			CURLFORM_END) != 0 ) { \
 		curl_formfree(post); \
 		curl_easy_cleanup(handle); \
 		free(url); \
-		error(0,"libcurl could not add form field '%s'='%s'",namecont,valcont)
+		error(0,"libcurl could not add form field '%s'='%s'",namecont,valcont); \
+	}
 
 	/* Fill post form */
 
