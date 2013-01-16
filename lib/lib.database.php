@@ -19,16 +19,18 @@ class db
 	private $user;
 	private $password;
 	private $persist;
+	private $flags;
 
 	private $_connection=FALSE;
 
-	function __construct($database, $host, $user, $password, $persist=TRUE)
+	function __construct($database, $host, $user, $password, $persist=TRUE, $flags = null)
 	{
 		$this->database = $database;
 		$this->host     = $host;
 		$this->user     = $user;
 		$this->password = $password;
 		$this->persist  = $persist;
+		$this->flags    = $flags;
 
 		$this->_connection = FALSE;
 	}
@@ -298,17 +300,19 @@ class db
 		if($this->_connection) return;
 
 		$pers = ( $this->persist && version_compare(PHP_VERSION, '5.3', '>=') ) ? "p:" : ""; 
-		if(!function_exists('mysqli_connect')) {
+		if(!function_exists('mysqli_real_connect')) {
 			throw new RuntimeException("PHP database module missing "
-			    . "(no such function: '$con')");
+			    . "(no such function: 'mysqli_real_connect')");
 		}
 
-		$this->_connection = @mysqli_connect($pers.$this->host, $this->user, $this->password, $this->database);
+		$this->_connection = mysqli_init();
+		@mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, $this->flags);
 		if(!$this->_connection) {
 			throw new RuntimeException("Could not connect to database server "
 			    . "(host=$this->host,user=$this->user,password="
 			    . str_repeat('*', strlen($this->password)) . ",db=$this->database)");
 		}
+		mysqli_set_charset($this->_connection, DJ_CHARACTER_SET_MYSQL);
 	}
 
 	// reconnect to a db-server

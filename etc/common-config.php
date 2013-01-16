@@ -26,6 +26,13 @@ $EXITCODES = array (
 define('DJ_CHARACTER_SET', 'utf-8');
 define('DJ_CHARACTER_SET_MYSQL', 'utf8');
 
+// MySQL connection flags.
+define('DJ_MYSQL_CONNECT_FLAGS', null);
+// To enable SSL/TLS encryption of MySQL connections, use the following.
+// Not enabled by default because the server isn't configured to
+// accept SSL by default.
+// define('DJ_MYSQL_CONNECT_FLAGS', MYSQLI_CLIENT_SSL);
+
 /** Loglevels and debugging */
 
 // Log to syslog facility; do not define to disable.
