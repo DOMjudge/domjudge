@@ -8,6 +8,7 @@ Version 3.3.4 - DEV
  - Bugfix: check that compilation creates executable file, closes: #119.
  - Fix minor HTML validation error and PHP notice.
  - Add missing $pagename in a few PHP/HTML pages.
+ - Remove sharutils dependency.
 
 Version 3.3.3 - 12 November 2012
 --------------------------------
