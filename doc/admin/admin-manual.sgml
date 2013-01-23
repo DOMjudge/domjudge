@@ -192,6 +192,198 @@ to be subscribed before you can post. See
 url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
 for subscription and more details.
 
+<chapt>Contest planning<label id="contest_planning">
+<p>
+
+<sect>Contest hardware
+<p>
+
+DOMjudge discerns the following kinds of hosts:
+<descrip>
+<tag>Team computer</tag>
+       Workstation for a team, where they develop their
+       solutions and from which they submit them to the jury system.
+       The only part of DOMjudge that runs here is the optional
+       command line submit client; all other interaction by teams is
+       done with a browser via the web interface.
+<tag>DOMjudge server</tag>
+       A host that receives the submissions, runs the
+       database and serves the web pages. This host will run Apache,
+       and MySQL. 
+       Also called domserver for brevity.
+<tag>Judgehosts</tag>
+       A number of hosts, at least one, that will retrieve
+       submitted solutions from the DOMjudge server, compile and run
+       them and send the results back to the server.
+       They will run the judgedaemon from DOMjudge.
+<tag>Jury / admin workstations</tag>
+       The jury members (persons) that want to monitor the contest need
+       just any workstation with a web browser to access the web interface.
+       No DOMjudge software runs on these machines.
+</descrip>
+
+One (virtual) machine is required to run the DOMserver. The minimum amount of
+judgehosts is also one, but preferably more: depending on configured timeouts,
+judging one solution can tie up a judgehost for several minutes, and if there's
+a problem with one judgehost it can be resolved while judging continues on the
+others. 
+
+As a rule of thumb, we recommend one judgehost per 10 teams.
+
+However, overprovisioning does not hurt: DOMjudge scales easily in the
+number of judegehosts, so if hardware is available, by all means use it. But
+running a contest with fewer machines will equally work well, only the waiting
+time for teams to receive an answer may increase.
+
+Each judgehost should be a dedicated (virtual) machine that performs no other
+tasks. For example, although running a judgehost on the same machine as the
+domserver is possible, it's not recommended except for testing purposes.
+Judgedaemons should also not double as local workstations for jury members.
+Having all judgehosts be of uniform hardware configuration helps in creating a fair,
+reproducible setup.
+
+
+<sect>Requirements
+<label id="install_config:requirements">
+<p>
+
+<sect1>System requirements
+<p>
+
+The requirements for the deployment of DOMjudge are:
+
+<itemize>
+<item> Computers for the domserver and judgehosts must run Linux or a
+       Unix variant. This software has been developed mostly under
+       Debian GNU/Linux, and the manual adds some specific hints for
+       that, which also apply to Debian derivative distributions like Ubuntu.
+       DOMjudge has been tested a bit under other Linux
+       distributions and FreeBSD. We try to adhere to POSIX standards.
+
+<item> (Local) root access on the domserver and judgehosts for configuring sudo,
+       installing some files with restricted permissions
+       and for (un)mounting the proc file system when using Oracle (previously Sun) Java.
+       See <ref id="security:rootprivs" name="Security: root privileges">
+       for more details.
+
+<item> A TCP/IP network which connects all DOMjudge and team computers.
+       Extra network security which restricts internet access and
+       access to other services (ssh, mail, talk, etc..) is advisable,
+       but not provided by this software, see <ref
+       id="security:external" name="Security: external security"> for
+       more details. TCP/IP networking is used in a few different ways:
+  <itemize>
+  <item> The judgehosts use TCP/IP connections to connect to the
+         MySQL database on port 3306.
+  <item> HTTP traffic from teams, the public and jury to the web server,
+         port 80 or 443.
+  <item> The `submit' command line client connects to the web server also
+         via HTTP.
+  </itemize>
+       When using the IP_ADDRESS authentication scheme, then each team
+       computer needs to have a unique IP address from the view of the
+       DOMjudge server, see <ref id="contestsetup:authentication"
+       name="Contest setup: team authentication"> for more details.
+</itemize>
+
+
+<sect1>Software requirements
+<p>
+
+The following software is required for running DOMjudge.
+<itemize>
+<item> For every supported programming language a compiler is needed;
+       preferably one that can generate statically linked stand-alone
+       executables.
+
+<item> Apache web server with support for PHP &gt;= 5.2.0 and the mysqli
+       extension for PHP. We also recommend the posix extension for extra
+       debugging information.
+
+<item> MySQL &gt;= 4.1.x database and client software
+
+<item> PHP &gt;= 5.2.0 command line interface and the mysqli extension.
+
+<item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash)
+
+<item> A statically compiled POSIX shell, located in
+       <tt>lib/judge/sh-static</tt> (dash is included for Linux IA32)
+
+<item> A lot of standard (GNU) programs, a probably incomplete list:
+       hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
+       grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail, pgrep
+
+<item> sudo to gain root privileges
+
+<item> Apache htpasswd
+
+<item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html"> 
+       from the GNOME XSLT library package.
+
+<item> A LaTeX installation to regenerate the team PDF-manual with
+       site specific configuration settings included.
+</itemize>
+
+The following items are optional, but may be required to use certain
+functionality.
+<itemize>
+
+<item> <htmlurl name="phpMyAdmin" url="http://www.phpmyadmin.net/">,
+       to be able to access the database in an emergency
+       or for data import/export
+
+<item> An NTP daemon (for keeping the clocks between jury
+       system and judgehosts in sync)
+
+<item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
+       (to use the command line submit client with the web interface)
+
+<item> <htmlurl name="libmagic" url="http://www.darwinsys.com/file/">~
+       (for command line submit client to detect binary file submissions)
+
+<item> <htmlurl name="PECL xdiff extension"
+        url="http://pecl.php.net/package/xdiff">~
+       (to reliably make diffs between submissions, DOMjudge will try
+        alternative approaches if it's not available)
+
+<item> <htmlurl name="PHP zip Extension"
+        url="http://www.php.net/manual/en/book.zip.php">~
+       (to upload problem data via zip bundles)
+
+<item> <htmlurl name="beep" url="http://www.johnath.com/beep/"> for
+       audible notification of errors, submissions and judgings, when
+       using the default <tt>alert</tt> script.
+</itemize>
+
+Software required for building DOMjudge:
+<itemize>
+<item> gcc and g++ with standard libraries. Other compilers and
+       libraries might also work: we have successfully compiled
+       DOMjudge sources with <htmlurl name="Clang"
+       url="http://clang.llvm.org/"> from the LLVM project; the C
+       library should support the POSIX.1-2008 specification.
+
+<item> GNU make
+
+<item> The <htmlurl name="Boost" url="http://www.boost.org/">
+       <htmlurl name="regular expression library"
+        url="http://www.boost.org/doc/libs/release/libs/regex/"> and
+       the GNU <htmlurl name="Multiple Precision library"
+       url="http://gmplib.org/"> to build the <tt>checktestdata</tt>
+       program for advanced checking of input/output data correctness.
+       These are optional and can be disabled with the configure
+       option <tt>--disable-checktestdata</tt>.
+</itemize>
+
+<sect1>Requirements for team workstations
+<p>
+
+In the most basic setup the team workstations only need (next to the tools needed
+for program development) a web browser. The web interface fully works with any
+known browser, but a HTML5-capable browser adds more convenience funcions. With
+JavaScript disabled, all basic functionality remains working, with the notable
+exception of multiple file uploads on non-HTML5-ready browsers.
+
 
 <chapt>Installation and configuration <label id="install_config">
 <p>
@@ -302,181 +494,11 @@ Optionally:
 </itemize>
 
 
-<sect>Concepts
+
+<sect>Prerequisites
 <p>
-
-This manual assumes you are aware of some of the concepts used within
-DOMjudge. Here's an overview.
-
-DOMjudge discerns three different kinds of hosts:
-<descrip>
-<tag>Team computer</tag>
-       Workstation for a team, where they develop their
-       solutions and from which they submit them to the jury system.
-       The only part of DOMjudge that runs here is the optional
-       command line submit client; all other interaction by teams is
-       done with a browser via the web interface.
-<tag>DOMjudge server</tag>
-       A host that receives the submissions, runs the
-       database and serves the web pages. This host will run Apache,
-       and MySQL. Optionally
-       these tasks can be further split out to separate machines, but
-       that's normally not necessary and not supported out of the box.
-       Also called domserver for brevity.
-<tag>Judgehosts</tag>
-       A number of hosts, at least one, that will retrieve
-       submitted solutions from the DOMjudge server, compile and run
-       them and send the results back to the server. Since this
-       is computationally intensive, there should ideally be at least
-       a couple of these. They will run the judgedaemon from DOMjudge.
-       For security and performance reasons it is highly recommended not
-       to use the server as a judgehost.
-</descrip>
-
-Note that the judges (persons) are not required and not recommended to
-work on any of the DOMjudge server or judgehosts. They can just access
-the system via the jury web interface and working e.g. on judgehosts
-can interfere with system stability.
-
-<sect>Requirements
-<label id="install_config:requirements">
-<p>
-
-<sect1>System requirements
-<p>
-
-The requirements for the deployment of DOMjudge are:
-
-<itemize>
-<item> Computers for the domserver and judgehosts must run Linux or a
-       Unix variant. This software has been developed mostly under
-       Debian GNU/Linux, and the manual adds some specific hints for
-       that, which also apply to Debian derivative distributions like Ubuntu.
-       DOMjudge has been tested a bit under other Linux
-       distributions and FreeBSD. We try to adhere to POSIX standards.
-
-<item> (Local) root access on the domserver and judgehosts for configuring sudo,
-       installing some files with restricted permissions
-       and for (un)mounting the proc file system when using Oracle (previously Sun) Java.
-       See <ref id="security:rootprivs" name="Security: root privileges">
-       for more details.
-
-<item> A TCP/IP network which connects all DOMjudge and team computers.
-       Extra network security which restricts internet access and
-       access to other services (ssh, mail, talk, etc..) is advisable,
-       but not provided by this software, see <ref
-       id="security:external" name="Security: external security"> for
-       more details. TCP/IP networking is used in a few different ways:
-  <itemize>
-  <item> The judgehosts use TCP/IP connections to connect to the
-         MySQL database on port 3306.
-  <item> HTTP traffic from teams, the public and jury to the web server,
-         port 80 or 443.
-  <item> The `submit' command line client connects to the web server also
-         via HTTP.
-  </itemize>
-       When using the IP_ADDRESS authentication scheme, then each team
-       computer needs to have a unique IP address from the view of the
-       DOMjudge server, see <ref id="contestsetup:authentication"
-       name="Contest setup: team authentication"> for more details.
-</itemize>
-
-<sect1>Software requirements
-<p>
-
-The following software is required for running DOMjudge.
-<itemize>
-<item> For every supported programming language a compiler is needed;
-       preferably one that can generate statically linked stand-alone
-       executables.
-
-<item> Apache web server with support for PHP &gt;= 5.2.0 and the mysqli
-       extension for PHP. We also recommend the posix extension for extra
-       debugging information.
-
-<item> MySQL &gt;= 4.1.x database and client software
-
-<item> PHP &gt;= 5.2.0 command line interface and the mysqli extension.
-
-<item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash)
-
-<item> A statically compiled POSIX shell, located in
-       <tt>lib/judge/sh-static</tt> (dash is included for Linux IA32)
-
-<item> A lot of standard (GNU) programs, a probably incomplete list:
-       hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
-       grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail, pgrep
-
-<item> sudo to gain root privileges
-
-<item> Apache htpasswd
-
-<item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html"> 
-       from the GNOME XSLT library package.
-
-<item> A LaTeX installation to regenerate the team PDF-manual with
-       site specific configuration settings included.
-</itemize>
-
-The following items are optional, but may be required to use certain
-functionality.
-<itemize>
-
-<item> <htmlurl name="phpMyAdmin" url="http://www.phpmyadmin.net/">,
-       to be able to access the database in an emergency
-       or for data import/export
-
-<item> An NTP daemon (for keeping the clocks between jury
-       system and judgehosts in sync)
-
-<item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
-       (to use the command line submit client with the web interface)
-
-<item> <htmlurl name="libmagic" url="http://www.darwinsys.com/file/">~
-       (for command line submit client to detect binary file submissions)
-
-<item> <htmlurl name="PECL xdiff extension"
-        url="http://pecl.php.net/package/xdiff">~
-       (to reliably make diffs between submissions, DOMjudge will try
-        alternative approaches if it's not available)
-
-<item> <htmlurl name="PHP zip Extension"
-        url="http://www.php.net/manual/en/book.zip.php">~
-       (to upload problem data via zip bundles)
-
-<item> <htmlurl name="beep" url="http://www.johnath.com/beep/"> for
-       audible notification of errors, submissions and judgings, when
-       using the default <tt>alert</tt> script.
-</itemize>
-
-Software required for building DOMjudge:
-<itemize>
-<item> gcc and g++ with standard libraries. Other compilers and
-       libraries might also work: we have successfully compiled
-       DOMjudge sources with <htmlurl name="Clang"
-       url="http://clang.llvm.org/"> from the LLVM project; the C
-       library should support the POSIX.1-2008 specification.
-
-<item> GNU make
-
-<item> The <htmlurl name="Boost" url="http://www.boost.org/">
-       <htmlurl name="regular expression library"
-        url="http://www.boost.org/doc/libs/release/libs/regex/"> and
-       the GNU <htmlurl name="Multiple Precision library"
-       url="http://gmplib.org/"> to build the <tt>checktestdata</tt>
-       program for advanced checking of input/output data correctness.
-       These are optional and can be disabled with the configure
-       option <tt>--disable-checktestdata</tt>.
-</itemize>
-
-<sect1>Requirements for team workstations
-<p>
-
-In the most basic setup the team workstations only need (next to the tools needed
-for program development) a web browser. The web interface fully works with any
-known browser. With JavaScript disabled, all basic functionality remains working,
-with the notable exception of multiple file submissions and some convenience
-functions.
+For a detailed list of the hardware and software requirements,
+please refer to the previous chapter on contest planning.
 
 <label id="install_config:apt-getinstall">
 <sect1>Debian installation command
