@@ -1010,35 +1010,6 @@ option <tt>DEBUG</tt> to a bitwise-or of the available
 <tt>DEBUG_*</tt> flags in <tt>etc/common-config.php</tt>, to e.g.
 generate extra SQL query and timing information in the web interface.
 
-<!-- This needs to be cleaned up and possibly merged in other places:
-
-<sect>Building and installing
-<p>
-
-<itemize>
-<item> a password which will be set on the jury web interface.
-<item> the system root password to install some programs set-uid root.
-<item> the MySQL database root password to install the DOMjudge database.
-</itemize>
-It does also automatically generate and set passwords for the team and
-public web interface: these are only used internally in the system and
-are best left untouched.
-
-There are some files/directories that have to be readable/writable by
-the web server. These are:
-<itemize>
-<item> <tt>etc/passwords.php</tt> must be readable by the
-       web server, but (best) not world readable.
-<item> <tt>&lt;domserver_submitdir&gt;</tt> can optionally be set writable for the
-       web server, to store websubmitted sources there (next to the
-	   database), see <ref id="install_config:submissionmethods"
-	   name="submission methods"> for more information.
-</itemize>
-
-See also section <ref id="security:webprivs" name="Security: webserver
-privileges">.
--->
-
 <sect>Installation of a judgehost<label id="install_config:judgehost">
 <p>
 
@@ -2135,15 +2106,13 @@ than DOMjudge.
 <sect1>Permissions for the web server <label id="security:webprivs">
 <p>
 
-<!--
-FIXME: check that permissions are set as laid out here, and modify
-this text to say that these things are set correctly by default.
--->
-Make sure that the web server serving the DOMjudge web interface pages
-has correct permissions to the <tt>www, lib, etc</tt>
-directory trees. The <tt>www</tt> and <tt>lib</tt> trees can safely
-set to be readable and accessible. Care should be taken with the
-<tt>etc</tt> dir: the <tt>domserver-{config,static}.php</tt>,
+The default installation sets permissions correctly for the web
+server user (commonly <tt>www-data</tt>).
+The following information is for those who want to verify the setup
+or make modifications to the settings.
+
+Care should be taken with the <tt>etc</tt> dir: the
+<tt>domserver-{config,static}.php</tt>,
 <tt>htpasswd-*</tt> and <tt>dbpasswords.secret</tt> files
 should all be readable, but <tt>dbpasswords.secret</tt> and the
 htpasswd files should not be
