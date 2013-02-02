@@ -32,6 +32,8 @@ if( $res->count() == 0 ) {
 	     "<th scope=\"col\">time<br />limit</th>" .
 	     "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .
 	     "<th scope=\"col\">test<br />cases</th>" .
+	     "<th scope=\"col\"></th>" .
+	    ( IS_ADMIN ? "<th scope=\"col\"></th>" : '' ) .
 	     "</tr></thead>\n<tbody>\n";
 
 	$lastcid = -1;
@@ -64,24 +66,24 @@ if( $res->count() == 0 ) {
 		      ';" alt="problem colour ' . htmlspecialchars($row['color']) .
 		      '" src="../images/circle.png" /></a>'
 			: '<td>' . $link . '&nbsp;</a>' );
-			if ( IS_ADMIN ) {
-				echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
-				    "\">" . $row['testcases'] . "</a></td>";
-				if ( !empty($row['problemtext_type']) ) {
-				    echo '<td title="view problem description">' .
-					    '<a href="problem.php?id=' . urlencode($row['probid']) .
-					    '&amp;cmd=viewtext"><img src="../images/' . urlencode($row['problemtext_type']) .
-					    '.png" alt="problem text" /></a></td>';
-				} else {
-					echo '<td></td>';
-				}
-				echo '<td title="export problem as zip-file">' .
-					exportLink($row['probid']) . '</td>' .
-					"<td class=\"editdel\">" .
-					editLink('problem', $row['probid']) . " " .
-					delLink('problem','probid',$row['probid']);
-			}
-			echo "</td></tr>\n";
+		echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
+		    "\">" . $row['testcases'] . "</a></td>";
+		if ( !empty($row['problemtext_type']) ) {
+			echo '<td title="view problem description">' .
+			     '<a href="problem.php?id=' . urlencode($row['probid']) .
+			     '&amp;cmd=viewtext"><img src="../images/' . urlencode($row['problemtext_type']) .
+			     '.png" alt="problem text" /></a></td>';
+		} else {
+			echo '<td></td>';
+		}
+		if ( IS_ADMIN ) {
+			echo '<td title="export problem as zip-file">' .
+			     exportLink($row['probid']) . '</td>' .
+			     "<td class=\"editdel\">" .
+			     editLink('problem', $row['probid']) . " " .
+			     delLink('problem','probid',$row['probid']) . "</td>";
+		}
+		echo "</tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
 }
