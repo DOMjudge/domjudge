@@ -27,8 +27,8 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 	// sanity check before we start to output headers
 	if ( $size===NULL || !is_numeric($size)) error("Problem while fetching testcase");
 
-	header("Content-Type: application/octet-stream; name=\"$filename\"");
-	header("Content-Disposition: inline; filename=\"$filename\"");
+	header("Content-Type: text/plain; name=\"$filename\"");
+	header("Content-Disposition: attachment; filename=\"$filename\"");
 	header("Content-Length: $size");
 
 	// This may not be good enough for large testsets, but streaming them
