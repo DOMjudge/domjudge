@@ -231,7 +231,7 @@ if ( isset($jid) )  {
 		($jud['valid'] == 1 ? '' : ' (INVALID)') . "</h2>\n\n";
 
 	if ( !$jud['verified'] ) {
-		echo addForm($pagename . '?id=' . urlencode($id) . '&jid=' . urlencode($jid));
+		echo addForm($pagename . '?id=' . urlencode($id) . '&amp;jid=' . urlencode($jid));
 
 		echo "<p>Claimed: " .
 		    "<strong>" . printyn(!empty($jud['jury_member'])) . "</strong>";
