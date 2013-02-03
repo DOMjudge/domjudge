@@ -8,11 +8,11 @@
 
 require('init.php');
 
-requireAdmin();
-
 dbconfig_init();
 
 if ( isset($_POST['save']) ) {
+
+	requireAdmin();
 
 	foreach ( $_POST as $tmp => $val ) {
 		if ( substr($tmp, 0, 7)!='config_' ) continue;
@@ -57,6 +57,9 @@ if ( isset($_POST['save']) ) {
 
 $title = "Configuration";
 require(LIBWWWDIR . '/header.php');
+
+// Check admin rights after header to generate valid HTML page
+requireAdmin();
 
 echo "<h1>Configuration settings</h1>\n\n";
 
