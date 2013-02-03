@@ -13,7 +13,10 @@ $title = "Contest";
 
 require(LIBWWWDIR . '/header.php');
 
-if ( IS_ADMIN && !empty($_GET['cmd']) ):
+if ( !empty($_GET['cmd']) ):
+
+	requireAdmin();
+
 	$cmd = $_GET['cmd'];
 
 	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " contest</h2>\n\n";

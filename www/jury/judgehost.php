@@ -15,8 +15,11 @@ if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
 	error("Missing or invalid judge hostname");
 }
 
-if ( IS_ADMIN && isset($_POST['cmd']) &&
+if ( isset($_POST['cmd']) &&
 	( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) ) {
+
+	requireAdmin();
+
 	$DB->q('UPDATE judgehost SET active = %i WHERE hostname = %s',
 	       ($_POST['cmd'] == 'activate' ? 1 : 0), $id);
 	auditlog('judgehost', $id, 'marked ' . ($_POST['cmd']=='activate'?'active':'inactive'));

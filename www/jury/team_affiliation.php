@@ -18,7 +18,9 @@ if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid affilia
 
 $cmd = @$_GET['cmd'];
 
-if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
+if ( $cmd == 'add' || $cmd == 'edit' ) {
+
+	requireAdmin();
 
 	$title = "Affiliation: " . htmlspecialchars($cmd);
 

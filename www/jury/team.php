@@ -25,7 +25,9 @@ if ( isset($_GET['cmd'] ) ) {
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
-if ( IS_ADMIN && !empty($cmd) ):
+if ( !empty($cmd) ):
+
+	requireAdmin();
 
 	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " team</h2>\n\n";
 

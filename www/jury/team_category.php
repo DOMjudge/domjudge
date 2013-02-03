@@ -13,7 +13,9 @@ require(LIBWWWDIR . '/scoreboard.php');
 
 $cmd = @$_GET['cmd'];
 
-if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
+if ( $cmd == 'add' || $cmd == 'edit' ) {
+
+	requireAdmin();
 
 	$title = "Category: " . htmlspecialchars($cmd);
 	$jscolor = true;

@@ -65,7 +65,9 @@ $jscolor=true;
 
 require(LIBWWWDIR . '/header.php');
 
-if ( IS_ADMIN && !empty($cmd) ):
+if ( !empty($cmd) ):
+
+	requireAdmin();
 
 	echo "<h2>" .  htmlspecialchars(ucfirst($cmd)) . " problem</h2>\n\n";
 
