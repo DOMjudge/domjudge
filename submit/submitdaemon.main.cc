@@ -517,7 +517,7 @@ int handle_client()
 
 		/* Remove newlines from end of line */
 		i = strlen(line)-1;
-		while ( i>=0 && (line[i]=='\n' || line[i]=='\r') ) line[i--] = 0;
+		while ( line[i]=='\n' || line[i]=='\r' ) line[i--] = 0;
 
 		fprintf(stderr,"%s\n",line);
 
