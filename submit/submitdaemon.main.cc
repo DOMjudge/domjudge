@@ -384,6 +384,7 @@ int handle_client()
 	FILE *rpipe;
 	char line[linelen];
 	size_t i,j;
+	int pos;
 	vector<string> filenames, fileorigs, tempfiles;
 	/* filenames: client side temporary filenames in SUBMITDIR
 	 * fileorigs: original filenames as specified by client
@@ -516,8 +517,8 @@ int handle_client()
 	while ( fgets(line,linelen,rpipe)!=NULL ) {
 
 		/* Remove newlines from end of line */
-		i = strlen(line)-1;
-		while ( line[i]=='\n' || line[i]=='\r' ) line[i--] = 0;
+		pos = strlen(line)-1;
+		while ( pos>=0 && (line[pos]=='\n' || line[pos]=='\r') ) line[pos--] = 0;
 
 		fprintf(stderr,"%s\n",line);
 
