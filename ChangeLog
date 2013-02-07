@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.3.5 - DEV
 -------------------
+ - Fix (theoretical) buffer underrun in submitdaemon.
 
 Version 3.3.4 - 21 January 2013
 -------------------------------
