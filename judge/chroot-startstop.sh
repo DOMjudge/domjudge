@@ -41,6 +41,11 @@ case "$1" in
 				sudo -n mount -o remount,ro,bind "$PWD/$i" < /dev/null
 			fi
 		done
+
+		# copy dev/random and /dev/urandom as a random source
+		mkdir -p dev
+		sudo cp -pR /dev/random dev
+		sudo cp -pR /dev/urandom dev
 		;;
 
 	stop)
@@ -50,6 +55,9 @@ case "$1" in
 
 		sudo -n umount "$PWD/proc" < /dev/null
 		rmdir proc || true
+		rm dev/urandom
+		rm dev/random
+		rmdir dev
 
 		for i in $SUBDIRMOUNTS ; do
 			if [ -L "$CHROOTORIGINAL/$i" ]; then
