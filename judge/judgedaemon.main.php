@@ -322,6 +322,8 @@ function judge($mark, $row, $judgingid)
 	system("mkdir -p '$workdir/compile'", $retval);
 	if ( $retval != 0 ) error("Could not create '$workdir/compile'");
 
+	if ( !chdir($workdir) ) error("Could not chdir to '$workdir'");
+
 	// Get the source code from the DB and store in local file(s)
 	$sources = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, sourcecode, filename
 	                   FROM submission_file WHERE submitid = %i', $row['submitid']);
@@ -369,7 +371,6 @@ function judge($mark, $row, $judgingid)
 	// Optionally create chroot environment
 	if ( USE_CHROOT && CHROOT_SCRIPT ) {
 		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." start'");
-		chdir($workdir);
 		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}
@@ -469,7 +470,6 @@ function judge($mark, $row, $judgingid)
 	// Optionally destroy chroot environment
 	if ( USE_CHROOT && CHROOT_SCRIPT ) {
 		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
-		chdir($workdir);
 		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}

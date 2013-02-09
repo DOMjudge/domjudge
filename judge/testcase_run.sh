@@ -5,8 +5,8 @@
 # Usage: $0 <testdata.in> <testdata.out> <timelimit> <workdir>
 #           [<special-run> [<special-compare>]]
 #
-# <testdata.in>     File containing test-input.
-# <testdata.out>    File containing test-output.
+# <testdata.in>     File containing test-input with absolute pathname.
+# <testdata.out>    File containing test-output with absolute pathname.
 # <timelimit>       Timelimit in seconds.
 # <workdir>         Directory where to execute submission in a chroot-ed
 #                   environment. For best security leave it as empty as possible.
@@ -121,7 +121,6 @@ fi
 [ -x "$RUN_SCRIPT" ] || error "run script not found or not executable: $RUN_SCRIPT"
 [ -x "$RUNGUARD" ] || error "runguard not found or not executable: $RUNGUARD"
 
-OLDDIR="$PWD"
 cd "$WORKDIR"
 
 # Check whether we're going to run in a chroot environment:
@@ -146,9 +145,7 @@ touch program.time program.exit  # Program runtime and exitcode
 logmsg $LOG_INFO "setting up testing (chroot) environment"
 
 # Copy the testdata input
-cd "$OLDDIR"
 cp "$TESTIN" "$WORKDIR/testdata.in"
-cd "$WORKDIR"
 
 mkdir -p -m 0711 ../bin ../dev
 # Copy the run-script and a statically compiled shell:
@@ -233,10 +230,8 @@ fi
 
 logmsg $LOG_INFO "comparing output"
 
-# Copy testdata output (first cd to olddir to correctly resolve relative paths)
-cd "$OLDDIR"
+# Copy testdata output, only after program has run
 cp "$TESTOUT" "$WORKDIR/testdata.out"
-cd "$WORKDIR"
 
 logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
 
