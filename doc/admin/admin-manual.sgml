@@ -1059,6 +1059,8 @@ domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
 domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*
 domjudge ALL=(root) NOPASSWD: /bin/mount -o remount\,ro\,bind &lt;judgehost_judgedir&gt/*
 domjudge ALL=(root) NOPASSWD: /bin/umount &lt;judgehost_judgedir&gt;/*
+domjudge ALL=(root) NOPASSWD: /bin/cp -pR /dev/random
+domjudge ALL=(root) NOPASSWD: /bin/cp -pR /dev/urandom
 </verb>
 Here the user <tt>domjudge</tt> must be replaced by the user you
 intend to run the judgedaemon as, <tt>&lt;chrootdir&gt;</tt> by the path

@@ -10,6 +10,9 @@
 # This script will be called from judgedaemon.main.php in the root
 # directory of the chroot environment with one parameter: either
 # 'start' to setup, or 'stop' to destroy the chroot environment.
+#
+# We always use 'sudo -n <command> < /dev/null' to make sure that sudo
+# doesn't try to ask for a password, but just fails.
 
 # Exit on error:
 set -e
@@ -44,8 +47,8 @@ case "$1" in
 
 		# copy dev/random and /dev/urandom as a random source
 		mkdir -p dev
-		sudo cp -pR /dev/random dev
-		sudo cp -pR /dev/urandom dev
+		sudo -n cp -pR /dev/random  dev < /dev/null
+		sudo -n cp -pR /dev/urandom dev < /dev/null
 		;;
 
 	stop)
@@ -55,9 +58,10 @@ case "$1" in
 
 		sudo -n umount "$PWD/proc" < /dev/null
 		rmdir proc || true
+
 		rm dev/urandom
 		rm dev/random
-		rmdir dev
+		rmdir dev || true
 
 		for i in $SUBDIRMOUNTS ; do
 			if [ -L "$CHROOTORIGINAL/$i" ]; then
