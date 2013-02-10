@@ -285,7 +285,7 @@ void output_exit_time(int exitcode, double timediff)
 	userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
 	sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
 
-	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys\n",
+	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys",
 	        timediff, userdiff, sysdiff);
 
 	if ( use_cputime && (userdiff+sysdiff) * 1000000 > cputime ) {
