@@ -25,7 +25,7 @@ ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 INCLUDEDEBS=""
 
 # Debian packages to install after upgrade (space separated):
-INSTALLDEBS="openjdk-6-jre-headless"
+INSTALLDEBS="openjdk-6-jre-headless locales"
 # For C# support add: mono-runtime libmono-system2.0-cil
 # However running mono within chroot still gives errors...
 
