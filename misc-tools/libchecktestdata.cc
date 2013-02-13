@@ -810,15 +810,23 @@ void checktoken(command cmd)
 	}
 }
 
-void checktestdata()
+// This function processes the outer control structure commands both
+// for checking and generating testdata (as determined by the global
+// variable 'gendata').
+void checktestdata(ostream &datastream)
 {
 	while ( true ) {
 		command cmd = currcmd = program[prognr];
 
 		if ( cmd.name()=="EOF" ) {
-			debug("checking EOF");
-			if ( datanr++!=data.size() ) error();
-			throw eof_found_exception();
+			if ( gendata ) {
+				debug("done: EOF found");
+				return;
+			} else {
+				debug("checking EOF");
+				if ( datanr++!=data.size() ) error();
+				throw eof_found_exception();
+			}
 		}
 
 		else if ( loop_cmds.count(cmd.name()) ) {
@@ -856,106 +864,14 @@ void checktestdata()
 
 				debug("loop iteration %ld/%ld",i+1,times);
 				prognr = loopbegin;
-				if ( i>0 && cmd.nargs()>=2 ) checktoken(cmd.args[1]);
-				checktestdata();
-				i++;
-			}
-
-			// And skip to end of loop
-			prognr = loopend;
-		}
-
-		else if ( cmd.name()=="IF" ) {
-
-			// Find line numbers of matching else/end
-			int ifnr   = prognr;
-			int elsenr = -1;
-			int endnr  = prognr+1;
-
-			for(int looplevel=1; looplevel>0; ++endnr) {
-				string cmdstr = program[endnr].name();
-				if ( loop_cmds.count(cmdstr) || cmdstr=="IF") looplevel++;
-				if ( cmdstr=="END" ) looplevel--;
-				if ( cmdstr=="ELSE" && looplevel==1) elsenr = endnr;
-			}
-			endnr--;
-
-			debug("IF statement, if/else/end commands: %d/%d/%d",
-			      ifnr,elsenr,endnr);
-
-			// Test and execute correct command block
-			if (dotest(cmd.args[0])) {
-				debug("executing IF clause");
-				prognr = ifnr+1;
-				checktestdata();
-			}
-			else if (elsenr!=-1) {
-				debug("executing ELSE clause");
-				prognr = elsenr+1;
-				checktestdata();
-			}
-
-			prognr = endnr+1;
-		}
-
-		else if ( cmd.name()=="END" || cmd.name()=="ELSE" ) {
-			debug("scope closed by %s",cmd.name().c_str());
-			prognr++;
-			return;
-		}
-
-		else {
-			checktoken(cmd);
-			prognr++;
-		}
-	}
-}
-
-void genrandomdata(ostream &datastream) {
-	while ( true ) {
-		command cmd = currcmd = program[prognr];
-
-		if ( cmd.name()=="EOF" ) {
-			debug("we are done ;-)");
-			return;
-		}
-
-		else if ( loop_cmds.count(cmd.name()) ) {
-			// Current and maximum loop iterations.
-			unsigned long i = 0, times = ULONG_MAX;
-
-			if ( cmd.name()=="REP" ) {
-				mpz_class n = eval(cmd.args[0]);
-				if ( !n.fits_ulong_p() ) {
-					cerr << "'" << n << "' does not fit in an unsigned long in "
-						 << program[prognr] << endl;
-					exit(exit_failure);
+				if ( i>0 && cmd.nargs()>=2 ) {
+					if ( gendata ) {
+						gentoken(cmd.args[1], datastream);
+					} else {
+						checktoken(cmd.args[1]);
+					}
 				}
-				times = n.get_ui();
-			}
-
-			// Begin and end of loop commands
-			int loopbegin, loopend;
-
-			loopbegin = loopend = prognr + 1;
-
-			for(int looplevel=1; looplevel>0; ++loopend) {
-				string cmdstr = program[loopend].name();
-				if ( loop_cmds.count(cmdstr) || cmdstr=="IF") looplevel++;
-				if ( cmdstr=="END" ) looplevel--;
-			}
-
-			// Run loop...
-			debug("running %s loop, commands %d - %d, max. times = %ld",
-			      cmd.name().c_str(),loopbegin,loopend,times);
-
-			while ( (cmd.name()=="REP"   && i<times) ||
-			        (cmd.name()=="WHILE" && dotest(cmd.args[0])) ) {
-
-				debug("loop iteration %ld/%ld",i+1,times);
-				prognr = loopbegin;
-				if ( i>0 && cmd.nargs()>=2 ) gentoken(cmd.args[1], datastream);
-				genrandomdata(datastream);
+				checktestdata(datastream);
 				i++;
 			}
 
@@ -964,6 +880,7 @@ void genrandomdata(ostream &datastream) {
 		}
 
 		else if ( cmd.name()=="IF" ) {
+
 			// Find line numbers of matching else/end
 			int ifnr   = prognr;
 			int elsenr = -1;
@@ -984,12 +901,12 @@ void genrandomdata(ostream &datastream) {
 			if (dotest(cmd.args[0])) {
 				debug("executing IF clause");
 				prognr = ifnr+1;
-				genrandomdata(datastream);
+				checktestdata(datastream);
 			}
 			else if (elsenr!=-1) {
 				debug("executing ELSE clause");
 				prognr = elsenr+1;
-				genrandomdata(datastream);
+				checktestdata(datastream);
 			}
 
 			prognr = endnr+1;
@@ -1002,7 +919,11 @@ void genrandomdata(ostream &datastream) {
 		}
 
 		else {
-			gentoken(cmd, datastream);
+			if ( gendata ) {
+				gentoken(cmd, datastream);
+			} else {
+				checktoken(cmd);
+			}
 			prognr++;
 		}
 	}
@@ -1050,11 +971,13 @@ void gentestdata(ostream &datastream)
 {
 	// Generate random testdata
 	gendata = 1;
-	genrandomdata(datastream);
+	checktestdata(datastream);
 }
 
 bool checksyntax(istream &datastream)
 {
+	ofstream dummy;
+
 	gendata = 0;
 	readtestdata(datastream);
 
@@ -1063,7 +986,7 @@ bool checksyntax(istream &datastream)
 	if ( whitespace_ok ) readwhitespace();
 
 	try {
-		checktestdata();
+		checktestdata(dummy);
 	}
 	catch (doesnt_match_exception) {
 		return false;
