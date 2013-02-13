@@ -36,6 +36,8 @@ REGEX    { return Parser::CMD_REGEX; }
 ASSERT   { return Parser::CMD_ASSERT; }
 REP      { return Parser::CMD_REP; }
 WHILE    { return Parser::CMD_WHILE; }
+REPI     { return Parser::CMD_REPI; }
+WHILEI   { return Parser::CMD_WHILEI; }
 IF       { return Parser::CMD_IF; }
 ELSE     { return Parser::CMD_ELSE; }
 END      { return Parser::CMD_END; }

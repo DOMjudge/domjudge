@@ -1,7 +1,7 @@
 /*
    Libchecktestdata -- check testdata according to specification.
    Copyright (C) 2008-2012 Jan Kuipers
-   Copyright (C) 2009-2012 Jaap Eldering (eldering@a-eskwadraat.nl).
+   Copyright (C) 2009-2013 Jaap Eldering (eldering@a-eskwadraat.nl).
    Copyright (C) 2012 Tobias Werth (werth@cs.fau.de)
 
    This program is free software; you can redistribute it and/or modify
@@ -833,9 +833,15 @@ void checktestdata(ostream &datastream)
 
 			// Current and maximum loop iterations.
 			unsigned long i = 0, times = ULONG_MAX;
+			int loopvar = 0; // Optional variable for loop iteration present.
 
-			if ( cmd.name()=="REP" ) {
-				mpz_class n = eval(cmd.args[0]);
+			if ( cmd.name()=="REPI" || cmd.name()=="WHILEI" ) {
+				loopvar = 1;
+				variable[cmd.args[0]] = value_t(mpz_class(i));
+			}
+
+			if ( cmd.name()=="REP" || cmd.name()=="REPI" ) {
+				mpz_class n = eval(cmd.args[loopvar]);
 				if ( !n.fits_ulong_p() ) {
 					cerr << "'" << n << "' does not fit in an unsigned long in "
 						 << program[prognr] << endl;
@@ -859,20 +865,22 @@ void checktestdata(ostream &datastream)
 			debug("running %s loop, commands %d - %d, max. times = %ld",
 			      cmd.name().c_str(),loopbegin,loopend,times);
 
-			while ( (cmd.name()=="REP"   && i<times) ||
-			        (cmd.name()=="WHILE" && dotest(cmd.args[0])) ) {
+			while ( ((cmd.name()=="REP"   || cmd.name()=="REPI")   && i<times) ||
+			        ((cmd.name()=="WHILE" || cmd.name()=="WHILEI") &&
+			         dotest(cmd.args[loopvar])) ) {
 
 				debug("loop iteration %ld/%ld",i+1,times);
 				prognr = loopbegin;
-				if ( i>0 && cmd.nargs()>=2 ) {
+				if ( i>0 && cmd.nargs()>=loopvar+2 ) {
 					if ( gendata ) {
-						gentoken(cmd.args[1], datastream);
+						gentoken(cmd.args[loopvar+1], datastream);
 					} else {
-						checktoken(cmd.args[1]);
+						checktoken(cmd.args[loopvar+1]);
 					}
 				}
 				checktestdata(datastream);
 				i++;
+				if ( loopvar ) variable[cmd.args[0]] = value_t(mpz_class(i));
 			}
 
 			// And skip to end of loop
@@ -944,7 +952,9 @@ void init_checktestdata(std::istream &progstream, int opt_mask)
 	// Initialize block_cmds here, as a set cannot be initialized on
 	// declaration.
 	loop_cmds.insert("REP");
+	loop_cmds.insert("REPI");
 	loop_cmds.insert("WHILE");
+	loop_cmds.insert("WHILEI");
 
 	// Read program and testdata
 	readprogram(progstream);

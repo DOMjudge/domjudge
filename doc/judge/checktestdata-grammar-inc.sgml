@@ -91,16 +91,22 @@ The following commands are available:
 
     Assert that 'condition' is true, fail otherwise.
 
-<tag><tt>REP(&lt;expr&gt; count [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
+<tag><tt>REP(&lt;expr&gt; count [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag><p>
+<tag><tt>REPI(&lt;variable&gt; i, &lt;expr&gt; count [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
 
     Repeat the commands between the 'REP() ... END' statements count
     times and optionally match 'separator' command (count-1) times in
     between. The value of count must fit in a unsigned 32 bit int.
+    The second command 'REPI' does the same, but also stores the
+    current iteration (counting from zero) in the variable 'i'.
 
-<tag><tt>WHILE(&lt;test&gt; condition [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
+<tag><tt>WHILE(&lt;test&gt; condition [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag><p>
+<tag><tt>WHILEI(&lt;variable&gt; i, &lt;test&gt; condition [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
 
     Repeat the commands as long as 'condition' is true. Optionally
     match 'separator' command between two consecutive iterations.
+    The second command 'WHILEI' does the same, but also stores the
+    current iteration (counting from zero) in the variable 'i'.
 
 <tag><tt>IF(&lt;test&gt; cond) [&lt;command&gt; cmds1...] [ELSE [&lt;command&gt; cmds2...]] END</tt></tag>
 
