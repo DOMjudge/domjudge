@@ -69,6 +69,7 @@ check: checktestdata
 # Test if generating testdata works and complies with the script:
 	@TMP=`mktemp --tmpdir dj_gendata.XXXXXX` || exit 1 ; data=$$TMP ; \
 	for i in tests/testprog*.in ; do \
+		grep 'IGNORE GENERATE TESTING' $$i >/dev/null && continue ; \
 		n=$${i#tests/testprog} ; n=$${n%.in} ; \
 		prog=$$i ; \
 		for i in seq 10 ; do opts=-g ; $(checksucc) ; opts='' ; $(checksucc) ; done ; \
