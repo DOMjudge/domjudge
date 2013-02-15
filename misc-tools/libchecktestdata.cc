@@ -95,9 +95,14 @@ gmp_randclass gmp_rnd(gmp_randinit_default);
 
 string data;
 vector<command> program;
-map<string,value_t> variable, preset;
-set<string> loop_cmds;
+
+// This stores array-type variables like x[i,j] as string "x" and
+// vector of the indices. Plain variables are stored using an index
+// vector of zero length.
+map<string,map<vector<mpz_class>,value_t> > variable, preset;
+
 // List of loop starting commands like REP, initialized in checksyntax.
+set<string> loop_cmds;
 
 int whitespace_ok;
 int debugging;
@@ -243,23 +248,59 @@ value_t::operator mpf_class() const
 	return fltval;
 }
 
-value_t value(string x)
+value_t eval(expr); // forward declaration
+
+value_t getvar(expr var, int use_preset = 0)
 {
-	debug("value '%s'",x.c_str());
-	if ( isalpha(x[0]) ) {
-		if ( variable.count(x) ) return variable[x];
-		cerr << "variable " << x << " undefined in " << program[prognr] << endl;
-		exit(exit_failure);
+	// Construct index array. The cast to mpz_class automatically
+	// verifies that the index value is of type mpz_class.
+	vector<mpz_class> ind;
+	for(size_t i=0; i<var.nargs(); i++) {
+		ind.push_back(mpz_class(eval(var.args[i])));
+	}
+	if ( use_preset ) {
+		if ( preset.count(var.val) && preset[var.val].count(ind) ) {
+			return preset[var.val][ind];
+		}
+		return value_t();
+	} else {
+		if ( variable.count(var.val) && variable[var.val].count(ind) ) {
+			return variable[var.val][ind];
+		}
+	}
+	cerr << "variable " << var << " undefined in " << program[prognr] << endl;
+	exit(exit_failure);
+}
+
+void setvar(expr var, value_t val, int use_preset = 0)
+{
+	// Construct index array. The cast to mpz_class automatically
+	// verifies that the index value is of type mpz_class.
+	vector<mpz_class> ind;
+	for(size_t i=0; i<var.nargs(); i++) {
+		ind.push_back(mpz_class(eval(var.args[i])));
 	}
 
+	if ( use_preset ) {
+		preset[var][ind] = val;
+	} else {
+		variable[var][ind] = val;
+	}
+}
+
+value_t value(expr x)
+{
+	debug("value '%s'",x.val.c_str());
+	if ( isalpha(x.val[0]) ) return getvar(x);
+
 	value_t res;
-	if ( res.intval.set_str(x,0)==0 ) res.type = value_int;
-	else if ( res.fltval.set_str(x,0)==0 ) {
+	if ( res.intval.set_str(x.val,0)==0 ) res.type = value_int;
+	else if ( res.fltval.set_str(x.val,0)==0 ) {
 		res.type = value_flt;
 		// Set sufficient precision:
-		if ( res.fltval.get_prec()<4*x.length() ) {
-			res.fltval.set_prec(4*x.length());
-			res.fltval.set_str(x,0);
+		if ( res.fltval.get_prec()<4*x.val.length() ) {
+			res.fltval.set_prec(4*x.val.length());
+			res.fltval.set_str(x.val,0);
 		}
 	}
 	return res;
@@ -349,7 +390,10 @@ value_t eval(expr e)
 {
 	debug("eval op='%c', val='%s', #args=%d",e.op,e.val.c_str(),(int)e.args.size());
 	switch ( e.op ) {
-	case ' ': return value(e.val);
+	case 'i':
+	case 'f':
+	case 's':
+	case 'v': return value(e);
 	case 'n': return -eval(e.args[0]);
 	case '+': return eval(e.args[0]) + eval(e.args[1]);
 	case '-': return eval(e.args[0]) - eval(e.args[1]);
@@ -358,17 +402,17 @@ value_t eval(expr e)
 	case '%': return eval(e.args[0]) % eval(e.args[1]);
 	case '^': return pow(eval(e.args[0]),eval(e.args[1]));
 	default:
-		cerr << "unknown arithmetic operator " << e.op << " in "
+		cerr << "unknown arithmetic operator '" << e.op << "' in "
 		     << program[prognr] << endl;
 		exit(exit_failure);
 	}
 }
 
-bool compare(args_t cmp)
+bool compare(expr cmp)
 {
-	string op = cmp[0].val;
-	value_t l = eval(cmp[1]);
-	value_t r = eval(cmp[2]);
+	string op = cmp.val;
+	value_t l = eval(cmp.args[0]);
+	value_t r = eval(cmp.args[1]);
 
 	if ( op=="<"  ) return l<r;
 	if ( op==">"  ) return l>r;
@@ -399,7 +443,7 @@ bool dotest(test t)
 		  } else {
 			  return datanr<data.size() && t.args[0].val.find(data[datanr])!=string::npos;
 		  }
-	case '?': return compare(t.args);
+	case '?': return compare(t);
 	default:
 		cerr << "unknown test " << t.op << " in " << program[prognr] << endl;
 		exit(exit_failure);
@@ -619,14 +663,14 @@ void gentoken(command cmd, ostream &datastream)
 		if ( cmd.nargs()>=3 ) {
 			// Check if we have a preset value, then override the
 			// random generated value
-			if ( preset.count(cmd.args[2]) ) {
-				x = preset[cmd.args[2]];
+			value_t y = getvar(cmd.args[2],1);
+			if ( y.type!=value_none ) {
+				x = y;
 				if ( x<lo || x>hi ) {
 					error("preset value for '" + string(cmd.args[2]) + "' out of range");
 				}
 			}
-
-			variable[cmd.args[2]] = value_t(x);
+			setvar(cmd.args[2],value_t(x));
 		}
 
 		datastream << x.get_str();
@@ -650,14 +694,14 @@ void gentoken(command cmd, ostream &datastream)
 		if ( cmd.nargs()>=3 ) {
 			// Check if we have a preset value, then override the
 			// random generated value
-			if ( preset.count(cmd.args[2]) ) {
-				x = preset[cmd.args[2]];
+			value_t y = getvar(cmd.args[2],1);
+			if ( y.type!=value_none ) {
+				x = y;
 				if ( x<lo || x>hi ) {
 					error("preset value for '" + string(cmd.args[2]) + "' out of range");
 				}
 			}
-
-			variable[cmd.args[2]] = value_t(x);
+			setvar(cmd.args[2],value_t(x));
 		}
 
 		datastream << x;
@@ -720,7 +764,7 @@ void checktoken(command cmd)
 		mpz_class x(num);
 
 		if ( x<lo || x>hi ) error("value out of range");
-		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = value_t(x);
+		if ( cmd.nargs()>=3 ) setvar(cmd.args[2],value_t(x));
 
 		datanr += len;
 		charnr += len;
@@ -761,7 +805,7 @@ void checktoken(command cmd)
 		mpf_class hi = eval(cmd.args[1]);
 
 		if ( x<lo || x>hi ) error("value out of range");
-		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = value_t(x);
+		if ( cmd.nargs()>=3 ) setvar(cmd.args[2],value_t(x));
 
 		charnr += matchend - datanr;
 		datanr = matchend;
@@ -837,7 +881,7 @@ void checktestdata(ostream &datastream)
 
 			if ( cmd.name()=="REPI" || cmd.name()=="WHILEI" ) {
 				loopvar = 1;
-				variable[cmd.args[0]] = value_t(mpz_class(i));
+				setvar(cmd.args[0],value_t(mpz_class(i)));
 			}
 
 			if ( cmd.name()=="REP" || cmd.name()=="REPI" ) {
@@ -880,7 +924,7 @@ void checktestdata(ostream &datastream)
 				}
 				checktestdata(datastream);
 				i++;
-				if ( loopvar ) variable[cmd.args[0]] = value_t(mpz_class(i));
+				if ( loopvar ) setvar(cmd.args[0],value_t(mpz_class(i)));
 			}
 
 			// And skip to end of loop
@@ -1006,6 +1050,7 @@ bool checksyntax(istream &datastream)
 	return true;
 }
 
+// This doesn't support variables with indices (yet?).
 bool parse_preset_list(std::string list)
 {
 	size_t pos = 0, sep1, sep2;
@@ -1030,7 +1075,7 @@ bool parse_preset_list(std::string list)
 			} catch ( ... ) { return false; }
 		} catch ( ... ) { return false; }
 
-		preset[name] = value;
+		setvar(expr(name),value,1);
 
 		pos = sep2 + 1;
 	}

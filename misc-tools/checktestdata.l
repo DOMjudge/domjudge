@@ -46,7 +46,7 @@ FIXED      { return Parser::OPT_FIXED; }
 SCIENTIFIC { return Parser::OPT_SCIENTIFIC; }
 
 [a-z][a-z0-9]* {
-	return Parser::VARIABLE;
+	return Parser::VARNAME;
 }
 
  /* A floating point number must have a decimal point or exponent: */

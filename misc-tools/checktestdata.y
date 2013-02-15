@@ -13,7 +13,7 @@
 %token CMD_SPACE CMD_NEWLINE CMD_EOF CMD_INT CMD_FLOAT CMD_STRING CMD_REGEX
 %token CMD_ASSERT
 %token CMD_REP CMD_WHILE CMD_REPI CMD_WHILEI CMD_IF CMD_ELSE CMD_END
-%token VARIABLE INTEGER FLOAT STRING
+%token VARNAME INTEGER FLOAT STRING
 %token OPT_FIXED OPT_SCIENTIFIC
 
 %left '&' '|'
@@ -48,27 +48,45 @@ command_noargs:
 
 command_args:
 	CMD_INT '(' expr ',' expr ')'              { $$ = parse_t($1,$3,$5); }
-|	CMD_INT '(' expr ',' expr ',' VARIABLE ')' { $$ = parse_t($1,$3,$5,$7); }
+|	CMD_INT '(' expr ',' expr ',' variable ')' { $$ = parse_t($1,$3,$5,$7); }
 |	CMD_FLOAT '(' expr ',' expr ')'            { $$ = parse_t($1,$3,$5); }
-|	CMD_FLOAT '(' expr ',' expr ',' VARIABLE ')' { $$ = parse_t($1,$3,$5,$7); }
-|	CMD_FLOAT '(' expr ',' expr ',' VARIABLE ',' opt_float ')' { $$ = parse_t($1,$3,$5,$7,$9); }
-|	CMD_STRING '(' STRING ')'                  { $$ = parse_t($1,$3); }
-|	CMD_REGEX  '(' STRING ')'                  { $$ = parse_t($1,$3); }
+|	CMD_FLOAT '(' expr ',' expr ',' variable ')' { $$ = parse_t($1,$3,$5,$7); }
+|	CMD_FLOAT '(' expr ',' expr ',' variable ',' opt_float ')' { $$ = parse_t($1,$3,$5,$7,$9); }
+|	CMD_STRING '(' string ')'                  { $$ = parse_t($1,$3); }
+|	CMD_REGEX  '(' string ')'                  { $$ = parse_t($1,$3); }
 |	CMD_ASSERT '(' test ')'                    { $$ = parse_t($1,$3); }
 |	CMD_REP '(' expr ')'                       { $$ = parse_t($1,$3); }
 |	CMD_REP '(' expr ',' command ')'           { $$ = parse_t($1,$3,$5); }
 |	CMD_WHILE '(' test ')'                     { $$ = parse_t($1,$3); }
 |	CMD_WHILE '(' test ',' command ')'         { $$ = parse_t($1,$3,$5); }
 |	CMD_IF '(' test ')'                        { $$ = parse_t($1,$3); }
-|	CMD_REPI   '(' VARIABLE ',' expr ')'             { $$ = parse_t($1,$3,$5); }
-|	CMD_REPI   '(' VARIABLE ',' expr ',' command ')' { $$ = parse_t($1,$3,$5,$7); }
-|	CMD_WHILEI '(' VARIABLE ',' test ')'             { $$ = parse_t($1,$3,$5); }
-|	CMD_WHILEI '(' VARIABLE ',' test ',' command ')' { $$ = parse_t($1,$3,$5,$7); }
+|	CMD_REPI   '(' variable ',' expr ')'             { $$ = parse_t($1,$3,$5); }
+|	CMD_REPI   '(' variable ',' expr ',' command ')' { $$ = parse_t($1,$3,$5,$7); }
+|	CMD_WHILEI '(' variable ',' test ')'             { $$ = parse_t($1,$3,$5); }
+|	CMD_WHILEI '(' variable ',' test ',' command ')' { $$ = parse_t($1,$3,$5,$7); }
 ;
 
 opt_float: OPT_FIXED | OPT_SCIENTIFIC ;
 
-value: INTEGER | FLOAT | VARIABLE ;
+string:
+	STRING    { $$ = parse_t('s',$1); }
+;
+
+value:
+	INTEGER   { $$ = parse_t('i',$1); }
+|	FLOAT     { $$ = parse_t('f',$1); }
+|	variable
+;
+
+variable:
+	VARNAME                  { $$ = parse_t('v',$1); }
+|	VARNAME '[' exprlist ']' { $$ = parse_t('v',$1,$3); }
+;
+
+exprlist:
+	expr                     { $$ = parse_t('l',$1); }
+|	exprlist ',' expr        { $$ = parse_t('l',$1,$3); }
+;
 
 compare: CMP_LT | CMP_GT | CMP_LE | CMP_GE | CMP_EQ | CMP_NE ;
 
@@ -99,5 +117,5 @@ test:
 |	test '|' test { $$ = parse_t('|',$1,$3); }
 |	expr compare expr         { $$ = parse_t('?',$2,$1,$3); }
 |	TEST_EOF                  { $$ = parse_t('E'); }
-|	TEST_MATCH '(' STRING ')' { $$ = parse_t('M',$3); }
+|	TEST_MATCH '(' string ')' { $$ = parse_t('M',$3); }
 ;
