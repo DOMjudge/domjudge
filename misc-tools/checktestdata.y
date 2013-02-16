@@ -8,7 +8,7 @@
 
 %stype parse_t
 
-%token TEST_EOF TEST_MATCH
+%token TEST_EOF TEST_MATCH TEST_UNIQUE TEST_INARRAY
 %token CMP_LT CMP_GT CMP_LE CMP_GE CMP_EQ CMP_NE
 %token CMD_SPACE CMD_NEWLINE CMD_EOF CMD_INT CMD_FLOAT CMD_STRING CMD_REGEX
 %token CMD_ASSERT
@@ -88,6 +88,11 @@ exprlist:
 |	exprlist ',' expr        { $$ = parse_t('l',$1,$3); }
 ;
 
+varlist:
+	VARNAME             { $$ = parse_t('l',$1); }
+|	varlist ',' VARNAME { $$ = parse_t('l',$1,$3); }
+;
+
 compare: CMP_LT | CMP_GT | CMP_LE | CMP_GE | CMP_EQ | CMP_NE ;
 
 expr:
@@ -115,7 +120,9 @@ test:
 |	'(' test ')'  { $$ = parse_t($2); }
 |	test '&' test { $$ = parse_t('&',$1,$3); }
 |	test '|' test { $$ = parse_t('|',$1,$3); }
-|	expr compare expr         { $$ = parse_t('?',$2,$1,$3); }
-|	TEST_EOF                  { $$ = parse_t('E'); }
-|	TEST_MATCH '(' string ')' { $$ = parse_t('M',$3); }
+|	expr compare expr                       { $$ = parse_t('?',$2,$1,$3); }
+|	TEST_EOF                                { $$ = parse_t('E'); }
+|	TEST_MATCH '(' string ')'               { $$ = parse_t('M',$3); }
+|	TEST_UNIQUE '(' varlist ')'             { $$ = parse_t('U',$3); }
+|	TEST_INARRAY '(' expr ',' variable ')'  { $$ = parse_t('A',$3,$5); }
 ;

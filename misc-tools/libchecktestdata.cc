@@ -70,6 +70,9 @@ struct value_t {
 
 	operator mpz_class() const;
 	operator mpf_class() const;
+
+	// This converts any value type to a string representation.
+	string tostr() const;
 };
 
 class doesnt_match_exception {};
@@ -83,6 +86,13 @@ ostream& operator <<(ostream &os, const value_t &val)
 	case value_flt: return os << val.fltval;
 	default:        return os << "<no value>";
 	}
+}
+
+string value_t::tostr() const
+{
+	stringstream ss;
+	ss << *this;
+	return ss.str();
 }
 
 const int display_before_error = 65;
@@ -99,7 +109,8 @@ vector<command> program;
 // This stores array-type variables like x[i,j] as string "x" and
 // vector of the indices. Plain variables are stored using an index
 // vector of zero length.
-map<string,map<vector<mpz_class>,value_t> > variable, preset;
+typedef map<vector<mpz_class>,value_t> indexmap;
+map<string,indexmap> variable, preset;
 
 // List of loop starting commands like REP, initialized in checksyntax.
 set<string> loop_cmds;
@@ -426,6 +437,87 @@ bool compare(expr cmp)
 	exit(exit_failure);
 }
 
+bool unique(args_t varlist)
+{
+	debug("unique, #args=%d",varlist.size());
+
+	vector<string> vars;
+
+	// First check if all variables exist.
+	for(size_t i=0; i<varlist.size(); i++) {
+		vars.push_back(varlist[i].val);
+		if ( !variable.count(vars[i]) ) {
+			cerr << "variable " << vars[i] << " undefined in "
+				 << program[prognr] << endl;
+			exit(exit_failure);
+		}
+	}
+
+	// Check if all variables have equal numbers of indices. Then we
+	// can later check if they have the same indices by comparing the
+	// indices to that of the first variable.
+	for(size_t i=1; i<vars.size(); i++) {
+		if ( variable[vars[0]].size()!=variable[vars[i]].size() ) {
+			error("variables " + vars[0] + " and " + vars[i] +
+			      " have different indices");
+		}
+	}
+
+	// Now check if all tuples are unique.
+	set<vector<value_t> > tuples;
+	for(indexmap::iterator it=variable[vars[0]].begin();
+		it!=variable[vars[0]].end(); ++it) {
+		vector<mpz_class> index = it->first;
+		vector<value_t> tuple;
+		for(size_t i=0; i<vars.size(); i++) {
+			if ( !variable[vars[i]].count(index) ) {
+				string s;
+				s = "index [";
+				for(size_t j=0; j<index.size(); j++) {
+					if ( j>0 ) s += ",";
+					s += index[j].get_str();
+				}
+				s += "] not defined for variable " + vars[i];
+				error(s);
+			}
+			tuple.push_back(variable[vars[i]][index]);
+		}
+		if ( tuples.count(tuple) ) {
+			string s;
+			s = "non-unique tuple (" + tuple[0].tostr();
+			for(size_t j=1; j<tuple.size(); j++) s += "," + tuple[j].tostr();
+			s += ") found at index [";
+			for(size_t j=0; j<index.size(); j++) {
+				if ( j>0 ) s += ",";
+				s += index[j].get_str();
+			}
+			s += "]";
+			error(s);
+		}
+		tuples.insert(tuple);
+	}
+	return true;
+}
+
+bool inarray(expr e, expr array)
+{
+	string var = array.val;
+	value_t val = eval(e);
+
+	debug("inarray, value = %s, array = %s",val.tostr().c_str(),var.c_str());
+
+	if ( !variable.count(var) ) {
+		cerr << "variable " << var << " undefined in "
+			 << program[prognr] << endl;
+		exit(exit_failure);
+	}
+
+	for(indexmap::iterator it=variable[var].begin(); it!=variable[var].end(); ++it) {
+		if ( it->second==val ) return true;
+	}
+	return false;
+}
+
 bool dotest(test t)
 {
 	debug("test op='%c', #args=%d",t.op,(int)t.args.size());
@@ -443,6 +535,8 @@ bool dotest(test t)
 		  } else {
 			  return datanr<data.size() && t.args[0].val.find(data[datanr])!=string::npos;
 		  }
+	case 'U': return unique(t.args);
+	case 'A': return inarray(t.args[0],t.args[1]);
 	case '?': return compare(t);
 	default:
 		cerr << "unknown test " << t.op << " in " << program[prognr] << endl;
@@ -877,7 +971,7 @@ void checktestdata(ostream &datastream)
 
 			// Current and maximum loop iterations.
 			unsigned long i = 0, times = ULONG_MAX;
-			int loopvar = 0; // Optional variable for loop iteration present.
+			unsigned loopvar = 0; // Optional variable for loop iteration present.
 
 			if ( cmd.name()=="REPI" || cmd.name()=="WHILEI" ) {
 				loopvar = 1;

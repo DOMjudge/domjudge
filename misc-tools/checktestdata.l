@@ -18,6 +18,8 @@
 
 ISEOF    { return Parser::TEST_EOF; }
 MATCH    { return Parser::TEST_MATCH; }
+UNIQUE   { return Parser::TEST_UNIQUE; }
+INARRAY  { return Parser::TEST_INARRAY; }
 
 \<       { return Parser::CMP_LT; }
 >        { return Parser::CMP_GT; }

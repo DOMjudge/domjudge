@@ -28,7 +28,7 @@ struct parse_t {
 
 	  ?      a comparison operator stored in 'val'
 	  |&!    logical AND,OR,NOT
-	  E/M    EOF/MATCH keywords used within test expressions
+	  EMUA   EOF,MATCH,UNIQUE,INARRAY keywords used within test expressions
 
 	  l      list of expressions (e.g. for array indices or argument list)
 	  v      variable with array indices in second argument
@@ -90,6 +90,10 @@ struct parse_t {
 			args = arg2.args;
 			break;
 
+		case 'U': // UNIQUE test, has argument list in arg1
+			args = arg1.args;
+			break;
+
 		case '?': // comparison operator as arg1
 			val = arg1;
 			args.push_back(arg2);
@@ -125,6 +129,8 @@ inline std::ostream &operator<<(std::ostream &out, const parse_t &obj)
 	case '(':                   op = '#'; break;
 	case 'E': out << "ISEOF";   op = '#'; break;
 	case 'M': out << "MATCH";   op = '#'; break;
+	case 'U': out << "UNIQUE";  op = '#'; break;
+	case 'A': out << "INARRAY"; op = '#'; break;
 	}
 
 	// Special case quote strings

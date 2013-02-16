@@ -27,7 +27,7 @@ expr     := &lt;term&gt; | &lt;expr&gt; [+-] &lt;term&gt;
 term     := &lt;term&gt; [*%/] &lt;factor&gt; | &lt;factor&gt;
 factor   := &lt;value&gt; | '-' &lt;term&gt; | '(' &lt;expr&gt; ')' | &lt;factor&gt; '^' &lt;factor&gt;
 test     := '!' &lt;test&gt; | '(' &lt;test&gt; ')' | &lt;test&gt; [&|] &lt;test&gt; |
-             &lt;expr&gt; &lt;compare&gt; &lt;expr&gt; | 'MATCH(' &lt;string&gt; str ')' | 'ISEOF'
+             &lt;expr&gt; &lt;compare&gt; &lt;expr&gt; | &lt;testcommand&gt;
 </code>
 
 <p>
@@ -37,11 +37,6 @@ with the usual rules of precedence. An expression is integer if all
 its sub-expressions are integer. Integer division is used on integers.
 The exponentiation operator <tt>^</tt> only allows non-negative
 integer exponents that fit in an unsigned long.
-
-<p>
-<tt>MATCH</tt> and <tt>ISEOF</tt> are special keywords that return
-whether the next character matches any of 'str', respectively if
-end-of-file has been reached.
 
 <p>
 Within a string, the backslash acts as escape character for the
@@ -54,6 +49,35 @@ following expressions:
 </itemize>
 A backslash preceding any other character is treated as a literal
 backslash.
+
+<p>
+Tests can be built from comparison operators, the usual logical
+operators <tt>!&|</tt> (not, and, or) and a number of test commands
+that return a boolean value. These are:
+<descrip>
+<tag><tt>MATCH(&lt;string&gt; str)</tt></tag>
+
+    Returns whether the next character matches any of the characters
+    in 'str'.
+
+<tag><tt>ISEOF</tt></tag>
+
+    Returns whether end-of-file has been reached.
+
+<tag><tt>UNIQUE(&lt;varname&gt; a [,&lt;varname&gt; b ...])</tt></tag>
+
+    Checks for uniqueness of tuples of values in the combined (array)
+    variables a, b, ... That is, it is checked that firstly all
+    arguments have precisely the same set of indices defined, and
+    secondly that the tuples formed by evaluating (a,b,...) at these
+    indices are unique. For example, if x,y are 1D arrays containing
+    coordinates, then <tt>UNIQUE(x,y)</tt> checks that the points
+    (x[i],y[i]) in the plane are unique.
+
+<tag><tt>INARRAY(&lt;value&gt; val, &lt;varname&gt; array)</tt></tag>
+
+    Checks if val occurs in one of the indices of array.
+</descrip>
 
 The following commands are available:
 <descrip>
