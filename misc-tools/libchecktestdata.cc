@@ -299,6 +299,13 @@ void setvar(expr var, value_t val, int use_preset = 0)
 	}
 }
 
+void unsetvars(args_t varlist)
+{
+	for(size_t i=0; i<varlist.size(); i++) {
+		variable.erase(varlist[i].val);
+	}
+}
+
 value_t value(expr x)
 {
 	debug("value '%s'",x.val.c_str());
@@ -816,6 +823,10 @@ void gentoken(command cmd, ostream &datastream)
 		if ( !dotest(cmd.args[0]) ) error("assertion failed");
 	}
 
+	else if ( cmd.name()=="UNSET" ) {
+		unsetvars(cmd.args);
+	}
+
 	else {
 		cerr << "unknown command " << program[prognr] << endl;
 		exit(exit_failure);
@@ -940,6 +951,10 @@ void checktoken(command cmd)
 
 	else if ( cmd.name()=="ASSERT" ) {
 		if ( !dotest(cmd.args[0]) ) error("assertion failed");
+	}
+
+	else if ( cmd.name()=="UNSET" ) {
+		unsetvars(cmd.args);
 	}
 
 	else {

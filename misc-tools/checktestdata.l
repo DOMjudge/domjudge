@@ -36,6 +36,7 @@ FLOAT    { return Parser::CMD_FLOAT; }
 STRING   { return Parser::CMD_STRING; }
 REGEX    { return Parser::CMD_REGEX; }
 ASSERT   { return Parser::CMD_ASSERT; }
+UNSET    { return Parser::CMD_UNSET; }
 REP      { return Parser::CMD_REP; }
 WHILE    { return Parser::CMD_WHILE; }
 REPI     { return Parser::CMD_REPI; }

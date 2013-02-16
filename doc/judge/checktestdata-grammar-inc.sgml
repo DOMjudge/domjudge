@@ -116,6 +116,14 @@ The following commands are available:
 
     Assert that 'condition' is true, fail otherwise.
 
+<tag><tt>UNSET(&lt;varname&gt; a [,&lt;varname&gt; b ...])</tt></tag>
+
+    Unset all values for variables a, b, ... This includes all values
+    for array indexed variables with these names. This command should
+    typically be inserted at the end of a loop after using UNIQUE or
+    INARRAY, to make sure that no old variables are present anymore
+    during the next iteration.
+
 <tag><tt>REP(&lt;expr&gt; count [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag><p>
 <tag><tt>REPI(&lt;variable&gt; i, &lt;expr&gt; count [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
 
