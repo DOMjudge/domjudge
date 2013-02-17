@@ -46,6 +46,7 @@ command:
 	                                                 { $$ = parse_t($1,$3,$5,$7,$9); }
 |	CMD_STRING '(' string ')'                        { $$ = parse_t($1,$3); }
 |	CMD_REGEX  '(' string ')'                        { $$ = parse_t($1,$3); }
+|	CMD_REGEX  '(' string ',' variable ')'           { $$ = parse_t($1,$3,$5); }
 |	CMD_ASSERT '(' test ')'                          { $$ = parse_t($1,$3); }
 |	CMD_UNSET  '(' varlist ')'                       { $$ = parse_t('@',$1,$3); }
 |	CMD_REP    '(' expr ')'                          { $$ = parse_t($1,$3); }
@@ -68,6 +69,7 @@ string:
 value:
 	INTEGER   { $$ = parse_t('i',$1); }
 |	FLOAT     { $$ = parse_t('f',$1); }
+|	string
 |	variable
 ;
 

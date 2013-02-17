@@ -57,19 +57,25 @@ using namespace std;
 #define AUTHORS "Jan Kuipers, Jaap Eldering, Tobias Werth"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
-enum value_type { value_none, value_int, value_flt };
+enum value_type { value_none, value_int, value_flt, value_str };
 
 struct value_t {
 	value_type type;
 	mpz_class intval;
 	mpf_class fltval;
+	string    strval;
 
 	value_t(): type(value_none) {}
 	explicit value_t(mpz_class x): type(value_int), intval(x) {}
 	explicit value_t(mpf_class x): type(value_flt), fltval(x) {}
+	explicit value_t(string    x): type(value_str), strval(x) {}
 
 	operator mpz_class() const;
 	operator mpf_class() const;
+
+	// This is a member function instead of a casting operator, since
+	// otherwise the string could be used in other implicit casts.
+	string getstr() const;
 
 	// This converts any value type to a string representation.
 	string tostr() const;
@@ -84,6 +90,7 @@ ostream& operator <<(ostream &os, const value_t &val)
 	switch ( val.type ) {
 	case value_int: return os << val.intval;
 	case value_flt: return os << val.fltval;
+	case value_str: return os << '"' << val.strval << '"';
 	default:        return os << "<no value>";
 	}
 }
@@ -259,6 +266,15 @@ value_t::operator mpf_class() const
 	return fltval;
 }
 
+string value_t::getstr() const
+{
+	if ( type!=value_str ) {
+		cerr << "string value expected in " << program[prognr] << endl;
+		exit(exit_failure);
+	}
+	return strval;
+}
+
 value_t eval(expr); // forward declaration
 
 value_t getvar(expr var, int use_preset = 0)
@@ -309,6 +325,8 @@ void unsetvars(args_t varlist)
 value_t value(expr x)
 {
 	debug("value '%s'",x.val.c_str());
+
+	if ( x.op=='s' ) return value_t(x.val);
 	if ( isalpha(x.val[0]) ) return getvar(x);
 
 	value_t res;
@@ -331,20 +349,29 @@ value_t value(expr x)
 #define DECL_VALUE_BINOP(op) \
 value_t operator op(const value_t &x, const value_t &y) \
 { \
-	if ( x.type==value_none || y.type==value_none ) return value_t(); \
 	if ( x.type==value_int  && y.type==value_int ) { \
 		return value_t(mpz_class(x.intval op y.intval)); \
-	} else { \
+	} \
+	if ( (x.type==value_int || x.type==value_flt) && \
+	     (y.type==value_int || y.type==value_flt) ) { \
 		return value_t(mpf_class(mpf_class(x) op mpf_class(y))); \
 	} \
+	cerr << "cannot apply " << #op << " to non-arithmetic argument(s) in " \
+	     << program[prognr] << endl; \
+	exit(exit_failure); \
 }
 
 #define DECL_VALUE_CMPOP(op) \
 bool operator op(const value_t &x, const value_t &y) \
 { \
-	if ( x.type==value_none || y.type==value_none ) return false; \
+	if ( x.type==value_str  && y.type==value_str ) return x.strval op y.strval; \
 	if ( x.type==value_int  && y.type==value_int ) return x.intval op y.intval; \
-	return mpf_class(x) op mpf_class(y); \
+	if ( (x.type==value_int || x.type==value_flt) && \
+	     (y.type==value_int || y.type==value_flt) ) \
+		return mpf_class(x) op mpf_class(y); \
+	cerr << "incompatible value types in comparison in " \
+	     << program[prognr] << endl; \
+	exit(exit_failure); \
 }
 
 DECL_VALUE_BINOP(+)
@@ -363,27 +390,32 @@ value_t operator -(const value_t &x)
 {
 	if ( x.type==value_int ) return value_t(mpz_class(-x.intval));
 	if ( x.type==value_flt ) return value_t(mpf_class(-x.fltval));
-	return value_t();
+	cerr << "cannot negate non-arithmetic argument"
+		 << program[prognr] << endl;
+	exit(exit_failure);
 }
 
 value_t operator %(const value_t &x, const value_t &y)
 {
-	if ( x.type==value_none || y.type==value_none ) return value_t();
 	value_t res;
 	if ( x.type==value_int  && y.type==value_int ) {
 		res = x;
 		res.intval %= y.intval;
 		return res;
 	}
-	cerr << "cannot use modulo on floats in " << program[prognr] << endl;
+	cerr << "can only use modulo on integers in " << program[prognr] << endl;
 	exit(exit_failure);
 }
 
 value_t pow(const value_t &x, const value_t &y)
 {
-	if ( x.type==value_none || y.type==value_none ) return value_t();
+	if ( !(x.type==value_int || x.type==value_flt) ) {
+		cerr << "exponentiation base must be of arithmetic type in "
+			 << program[prognr] << endl;
+		exit(exit_failure);
+	}
 	if ( y.type!=value_int ) {
-		cerr << "float exponent not allowed in " << program[prognr] << endl;
+		cerr << "only integer exponents allowed in " << program[prognr] << endl;
 		exit(exit_failure);
 	}
 	if ( !y.intval.fits_ulong_p() ) {
@@ -643,9 +675,10 @@ int getmult(string &exp, unsigned int &index)
 	return (min + rand() % (1 + max - min));
 }
 
-void genregex(string exp, ostream &datastream)
+string genregex(string exp)
 {
 	unsigned int i = 0;
+	string res;
 	while (i < exp.length()) {
 		switch (exp[i]) {
 		case '\\':
@@ -654,7 +687,7 @@ void genregex(string exp, ostream &datastream)
 				char c = exp[i];
 				int mult = getmult(exp, i);
 				for (int cnt = 0; cnt < mult; cnt++) {
-					datastream << c;
+					res += c;
 				}
 			}
 			break;
@@ -662,7 +695,7 @@ void genregex(string exp, ostream &datastream)
 			{
 				int mult = getmult(exp, i);
 				for (int cnt = 0; cnt < mult; cnt++) {
-					datastream << (char) (' ' + (rand() % (int) ('~' - ' ')));
+					res += (char) (' ' + (rand() % (int) ('~' - ' ')));
 				}
 			}
 			break;
@@ -700,7 +733,7 @@ void genregex(string exp, ostream &datastream)
 				copy(possible.begin(), possible.end(), std::back_inserter(possibleVec));
 				int mult = getmult(exp, i);
 				for (int cnt = 0; cnt < mult; cnt++) {
-					datastream << possibleVec[rand() % possibleVec.size()];
+					res += possibleVec[rand() % possibleVec.size()];
 				}
 			}
 			break;
@@ -729,7 +762,7 @@ void genregex(string exp, ostream &datastream)
 				alternatives.push_back(exp.substr(begin, i - begin));
 				int mult = getmult(exp, i);
 				for (int cnt = 0; cnt < mult; cnt++) {
-					genregex(alternatives[rand() % alternatives.size()], datastream);
+					res += genregex(alternatives[rand() % alternatives.size()]);
 				}
 			}
 			break;
@@ -738,12 +771,13 @@ void genregex(string exp, ostream &datastream)
 				char c = exp[i];
 				int mult = getmult(exp, i);
 				for (int cnt = 0; cnt < mult; cnt++) {
-					datastream << c;
+					res += c;
 				}
 			}
 			break;
 		}
 	}
+	return res;
 }
 
 void gentoken(command cmd, ostream &datastream)
@@ -809,14 +843,16 @@ void gentoken(command cmd, ostream &datastream)
 	}
 
 	else if ( cmd.name()=="STRING" ) {
-		string str = cmd.args[0];
+		string str = eval(cmd.args[0]).getstr();
 		datastream << str;
 	}
 
 	else if ( cmd.name()=="REGEX" ) {
 		string regex = cmd.args[0];
-		boost::regex e1(regex, boost::regex::extended); // this is only to check the expression
-		genregex(regex, datastream);
+//		boost::regex e1(regex, boost::regex::extended); // this is only to check the expression
+		string str = genregex(regex);
+		datastream << str;
+		if ( cmd.nargs()>=2 ) setvar(cmd.args[1],value_t(str));
 	}
 
 	else if ( cmd.name()=="ASSERT" ) {
@@ -917,7 +953,7 @@ void checktoken(command cmd)
 	}
 
 	else if ( cmd.name()=="STRING" ) {
-		string str = cmd.args[0];
+		string str = eval(cmd.args[0]).getstr();
 		for (size_t i=0; i<str.size(); i++) {
 			if ( datanr>=data.size() ) error("premature end of file");
 			if ( data[datanr++]!=str[i] ) error();
@@ -945,8 +981,9 @@ void checktoken(command cmd)
 				if ( data[datanr]=='\n' ) linenr++, charnr=0;
 			}
 		}
-
 		debug("'%s' = '%s'",matchstr.c_str(),cmd.args[0].c_str());
+
+		if ( cmd.nargs()>=2 ) setvar(cmd.args[1],value_t(matchstr));
 	}
 
 	else if ( cmd.name()=="ASSERT" ) {

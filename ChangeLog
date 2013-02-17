@@ -39,7 +39,7 @@ Version 3.4.0 - DEV
  - Add cascading delete on submitid to balloons table.
  - Support stringwise token compare and ignoring whitespace in check_float.
  - Add option to generate testdata and add ASSERT to checktestdata syntax.
- - Extend checktestdata syntax: array variables, UNIQUE, INARRAY tests.
+ - Extend checktestdata syntax: arrays, strings, UNIQUE, INARRAY tests.
  - Correct mount bind option, see Debian bug #677815. Ported from
    WISVCH/DOMjudge tree at GitHub.
  - Add program to "relive" simulate original contest submissions.

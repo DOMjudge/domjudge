@@ -21,7 +21,7 @@ float    := -?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?
 string   := ".*"
 varname  := [a-z][a-z0-9]*
 variable := &lt;varname&gt; | &lt;varname&gt; '[' &lt;expr&gt; [',' &lt;expr&gt; ...] ']'
-value    := &lt;integer&gt; | &lt;float&gt; | &lt;variable&gt;
+value    := &lt;integer&gt; | &lt;float&gt; | &lt;string&gt; | &lt;variable&gt;
 compare  := '&lt;' | '&gt;' | '&lt;=' | '&gt;=' | '==' | '!='
 expr     := &lt;term&gt; | &lt;expr&gt; [+-] &lt;term&gt;
 term     := &lt;term&gt; [*%/] &lt;factor&gt; | &lt;factor&gt;
@@ -31,12 +31,16 @@ test     := '!' &lt;test&gt; | '(' &lt;test&gt; ')' | &lt;test&gt; [&|] &lt;test
 </code>
 
 <p>
-That is, integer, as well as floating point values (of arbitrary size
-and precision) are supported, as well as operators <tt>+-*%/^</tt>
+That is, variables can take integer, floating point as well as string
+values. No dynamic casting is performed, except that integers can be
+cast into floats. Integers and floats of arbitrary size and precision
+are supported, as well as the arithmetic operators <tt>+-*%/^</tt>
 with the usual rules of precedence. An expression is integer if all
 its sub-expressions are integer. Integer division is used on integers.
 The exponentiation operator <tt>^</tt> only allows non-negative
-integer exponents that fit in an unsigned long.
+integer exponents that fit in an unsigned long. String-valued
+variables can only be compared (lexicographically), no operators are
+supported.
 
 <p>
 Within a string, the backslash acts as escape character for the
@@ -103,14 +107,14 @@ The following commands are available:
     option 'FIXED' or 'SCIENTIFIC' is set, only accept floating point
     numbers in fixed point or scientific notation, respectively.
 
-<tag><tt>STRING(&lt;string&gt; str)</tt></tag>
+<tag><tt>STRING(&lt;value&gt; str)</tt></tag>
 
-    Match the literal string 'str'.
+    Match the string (variable) 'str'.
 
-<tag><tt>REGEX(&lt;string&gt; str)</tt></tag>
+<tag><tt>REGEX(&lt;string&gt; str [, &lt;variable&gt; name])</tt></tag>
 
     Match the extended regular expression 'str'. Matching is performed
-    greedily.
+    greedily. Optionally assign the matched string to variable 'name'.
 
 <tag><tt>ASSERT(&lt;test&gt; condition)</tt></tag>
 
