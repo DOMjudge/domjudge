@@ -71,7 +71,7 @@ The following commands are available:
     Match an arbitrary sized integer value in the interval [min,max]
     and optionally assign the value read to variable 'name'.
 
-<tag><tt>FLOAT(&lt;expr&gt; min, &lt;expr&gt; max [, &lt;variable&gt; name [, option])</tt></tag>
+<tag><tt>FLOAT(&lt;expr&gt; min, &lt;expr&gt; max [, &lt;variable&gt; name [, option]])</tt></tag>
 
     Match a floating point number in the range [min,max] and
     optionally assign the value read to the variable 'name'. When the
