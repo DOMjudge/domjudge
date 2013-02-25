@@ -38,20 +38,21 @@ command:
 |	CMD_EOF
 |	CMD_END
 |	CMD_ELSE
-|	CMD_INT '(' expr ',' expr ')'              { $$ = parse_t($1,$3,$5); }
-|	CMD_INT '(' expr ',' expr ',' variable ')' { $$ = parse_t($1,$3,$5,$7); }
-|	CMD_FLOAT '(' expr ',' expr ')'            { $$ = parse_t($1,$3,$5); }
-|	CMD_FLOAT '(' expr ',' expr ',' variable ')' { $$ = parse_t($1,$3,$5,$7); }
-|	CMD_FLOAT '(' expr ',' expr ',' variable ',' opt_float ')' { $$ = parse_t($1,$3,$5,$7,$9); }
-|	CMD_STRING '(' string ')'                  { $$ = parse_t($1,$3); }
-|	CMD_REGEX  '(' string ')'                  { $$ = parse_t($1,$3); }
-|	CMD_ASSERT '(' test ')'                    { $$ = parse_t($1,$3); }
-|	CMD_UNSET  '(' varlist ')'                 { $$ = parse_t('@',$1,$3); }
-|	CMD_REP '(' expr ')'                       { $$ = parse_t($1,$3); }
-|	CMD_REP '(' expr ',' command ')'           { $$ = parse_t($1,$3,$5); }
-|	CMD_WHILE '(' test ')'                     { $$ = parse_t($1,$3); }
-|	CMD_WHILE '(' test ',' command ')'         { $$ = parse_t($1,$3,$5); }
-|	CMD_IF '(' test ')'                        { $$ = parse_t($1,$3); }
+|	CMD_INT    '(' expr ',' expr ')'                 { $$ = parse_t($1,$3,$5); }
+|	CMD_INT    '(' expr ',' expr ',' variable ')'    { $$ = parse_t($1,$3,$5,$7); }
+|	CMD_FLOAT  '(' expr ',' expr ')'                 { $$ = parse_t($1,$3,$5); }
+|	CMD_FLOAT  '(' expr ',' expr ',' variable ')'    { $$ = parse_t($1,$3,$5,$7); }
+|	CMD_FLOAT  '(' expr ',' expr ',' variable ',' opt_float ')'
+	                                                 { $$ = parse_t($1,$3,$5,$7,$9); }
+|	CMD_STRING '(' string ')'                        { $$ = parse_t($1,$3); }
+|	CMD_REGEX  '(' string ')'                        { $$ = parse_t($1,$3); }
+|	CMD_ASSERT '(' test ')'                          { $$ = parse_t($1,$3); }
+|	CMD_UNSET  '(' varlist ')'                       { $$ = parse_t('@',$1,$3); }
+|	CMD_REP    '(' expr ')'                          { $$ = parse_t($1,$3); }
+|	CMD_REP    '(' expr ',' command ')'              { $$ = parse_t($1,$3,$5); }
+|	CMD_WHILE  '(' test ')'                          { $$ = parse_t($1,$3); }
+|	CMD_WHILE  '(' test ',' command ')'              { $$ = parse_t($1,$3,$5); }
+|	CMD_IF     '(' test ')'                          { $$ = parse_t($1,$3); }
 |	CMD_REPI   '(' variable ',' expr ')'             { $$ = parse_t($1,$3,$5); }
 |	CMD_REPI   '(' variable ',' expr ',' command ')' { $$ = parse_t($1,$3,$5,$7); }
 |	CMD_WHILEI '(' variable ',' test ')'             { $$ = parse_t($1,$3,$5); }
@@ -81,8 +82,8 @@ exprlist:
 ;
 
 varlist:
-	VARNAME             { $$ = parse_t('l',$1); }
-|	varlist ',' VARNAME { $$ = parse_t('l',$1,$3); }
+	VARNAME                  { $$ = parse_t('l',$1); }
+|	varlist ',' VARNAME      { $$ = parse_t('l',$1,$3); }
 ;
 
 compare: CMP_LT | CMP_GT | CMP_LE | CMP_GE | CMP_EQ | CMP_NE ;
