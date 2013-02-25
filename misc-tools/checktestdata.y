@@ -33,21 +33,12 @@ commands:
 ;
 
 command:
-	command_noargs
-|
-	command_args
-;
-
-command_noargs:
-	CMD_SPACE   { $$ = parse_t($1); }
-|	CMD_NEWLINE { $$ = parse_t($1); }
-|	CMD_EOF     { $$ = parse_t($1); }
-|	CMD_END     { $$ = parse_t($1); }
-|	CMD_ELSE    { $$ = parse_t($1); }
-;
-
-command_args:
-	CMD_INT '(' expr ',' expr ')'              { $$ = parse_t($1,$3,$5); }
+	CMD_SPACE
+|	CMD_NEWLINE
+|	CMD_EOF
+|	CMD_END
+|	CMD_ELSE
+|	CMD_INT '(' expr ',' expr ')'              { $$ = parse_t($1,$3,$5); }
 |	CMD_INT '(' expr ',' expr ',' variable ')' { $$ = parse_t($1,$3,$5,$7); }
 |	CMD_FLOAT '(' expr ',' expr ')'            { $$ = parse_t($1,$3,$5); }
 |	CMD_FLOAT '(' expr ',' expr ',' variable ')' { $$ = parse_t($1,$3,$5,$7); }
