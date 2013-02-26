@@ -446,7 +446,7 @@ bool compare(expr cmp)
 
 bool unique(args_t varlist)
 {
-	debug("unique, #args=%d",varlist.size());
+	debug("unique, #args=%d",(int)varlist.size());
 
 	vector<string> vars;
 
