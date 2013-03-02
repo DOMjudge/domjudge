@@ -18,6 +18,9 @@ set -e
 CHROOTDIR=$1
 ARCH=$2
 
+# Debian release to bootstrap
+RELEASE="squeeze"
+
 # List of possible architectures to install chroot for:
 ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 
@@ -109,7 +112,7 @@ fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 /usr/sbin/debootstrap $INCLUDEOPT $EXCLUDEOPT \
-	--variant=minbase --arch "$ARCH" squeeze "$CHROOTDIR" "$DEBMIRROR"
+	--variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
@@ -117,9 +120,9 @@ cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
 
-# Stable (squeeze)
-deb $DEBMIRROR			squeeze		main
-deb http://security.debian.org	squeeze/updates	main
+# Stable ($RELEASE)
+deb $DEBMIRROR			$RELEASE		main
+deb http://security.debian.org	$RELEASE/updates	main
 
 # Testing
 #deb $DEBMIRROR			testing		main
