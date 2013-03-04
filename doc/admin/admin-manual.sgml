@@ -347,7 +347,7 @@ The requirements for the deployment of DOMjudge are:
 
 <item> (Local) root access on the domserver and judgehosts for configuring sudo,
        installing some files with restricted permissions
-       and for (un)mounting the proc file system when using Oracle (previously Sun) Java.
+       and for (un)mounting the proc file system when using Java.
        See <ref id="security:rootprivs" name="Security: root privileges">
        for more details.
 
@@ -617,11 +617,12 @@ for example <tt>compile_c.sh</tt>, and <tt>compile.sh</tt> in
 for the most common languages already.
 
 Interpreted languages and non-statically linked binaries can in
-principle also be used, but then the option <tt>USE_CHROOT</tt> should
-be disabled (or all dependencies be added to the chroot environment).
+principle also be used, but requires that all dependencies are added
+to the chroot environment.
+
 Interpreted languages do not generate an executable and in principle
 do not need a compilation step. However, to be able to use interpreted
-languages (also Oracle's (Sun) Java), a script must be generated during the
+languages (also Oracle's Java), a script must be generated during the
 compilation step, which will function as the executable: the script
 must run the interpreter on the source. See <tt>compile_perl.sh</tt>
 and <tt>compile_java_javac.sh</tt> in <tt>lib/judge</tt> for
@@ -2122,19 +2123,14 @@ chroot environment. For this the programs have to be statically
 linked, because they do not have access to shared libraries.
 
 For most languages compilers support this, but for Java, this is a bit
-problematic. The Oracle (Sun) Java compiler `javac' is not a real compiler:
+problematic. The Oracle Java compiler `javac' is not a real compiler:
 a bytecode interpreter `java' is needed to run the binaries and thus
 this cannot simply run in a chroot environment.
 
 There are some options to support Java as a language:
 <enum>
-<item> One can disable the chroot environment in
-       <tt>etc/judgehost-config.php</tt> by disabling <tt>USE_CHROOT</tt>.
-       Disabling the chroot environment removes this extra layer of
-       security against submissions that attempt to
-       cheat, but it is a simple solution to getting Java to work.
-<item> Next, one can build a bigger chroot environment which contains
-       all necessary ingredients to let Oracle (Sun) Java work within it.
+<item> One can build a bigger chroot environment which contains
+       all necessary ingredients to let Java work within it.
        DOMjudge supports this with some manual setup.
 
        First of all, a chroot tree with Java support must be created.
@@ -2144,24 +2140,31 @@ There are some options to support Java as a language:
        and adapt it to work with your local system and uncomment the
        script in <tt>etc/judgehost-config.php</tt>.
 <item> As an alternative the <tt>gcj</tt> compiler from GNU can be
-       used instead of Oracle's (Sun's) version. This one generates true machine
+       used instead of Oracle's version. This one generates true machine
        code and can link statically. However a few function calls
        cannot be linked statically (see `GCJ compiler warnings' in
        this FAQ). Secondly, the static library <tt>libgcj.a</tt>
        doesn't seem to be included in all GNU/Linux distributions: at
        least not in RedHat Enterprise Linux 4.
+<item> One can disable the chroot environment in
+       <tt>etc/judgehost-config.php</tt> by disabling <tt>USE_CHROOT</tt>.
+       Disabling the chroot environment removes this layer of
+       security against submissions that attempt to
+       cheat, but it is a simple solution to getting Java to work, for
+       demo or testing purposes. No guarantees about system security
+       can be made when running a contest with chroot disabled.
 </enum>
 
-<sect>The Oracle (Sun) Java virtual machine (jvm) and memory limits
+<sect>The Java virtual machine (jvm) and memory limits
 <p>
 
 DOMjudge imposes memory limits on submitted solutions. These limits
 are imposed before the compiled submissions are started. On the other
-hand, the Oracle (Sun) jvm is started via a compile-time generated script which
-is run as a wrapper around the program. This means that the memory
-limits imposed by DOMjudge are for the jvm and the running program
-within it. As the jvm uses approximately 300MB, this reduces the limit
-by this significant amount. See <tt>judge/compile_java_javac.sh</tt>
+hand, the Java virtual machine is started via a compile-time generated
+script which is run as a wrapper around the program. This means that
+the memory limits imposed by DOMjudge are for the jvm and the running
+program within it. As the jvm uses approximately 300MB, this reduces
+the limit by this significant amount. See <tt>judge/compile_java_javac.sh</tt>
 for the implementation details.
 
 If you see error messages of the form

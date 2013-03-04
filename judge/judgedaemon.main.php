@@ -130,6 +130,11 @@ while( !$exitsignalled )
 	}
 }
 
+// Warn when chroot has been disabled. This has security implications.
+if ( ! USE_CHROOT ) {
+	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
+}
+
 // Create directory where to test submissions
 $workdirpath = JUDGEDIR . "/$myhost";
 system("mkdir -p $workdirpath/testcase", $retval);
