@@ -4,6 +4,9 @@ Version 3.2.5 - DEV
 -------------------
  - Bugfix: check that compilation creates executable file, closes: #119.
  - Fix minor HTML validation error and PHP notice.
+ - Stress better that disabling use_chroot is really not secure.
+ - Install locales in chroot, necessary for ghc solutions.
+ - Allow java main method to be final.
 
 Version 3.2.4 - 12 September 2012
 ---------------------------------
