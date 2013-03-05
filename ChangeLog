@@ -3,6 +3,11 @@ DOMjudge Programming Contest Judging System
 Version 3.3.5 - DEV
 -------------------
  - Fix (theoretical) buffer underrun in submitdaemon.
+ - In Java main method detection, allow it to be final.
+ - Install locales in chroot, necessary for ghc solutions.
+ - Also allow + character in filename regex.
+ - Fix documentation typo's and HTML validity.
+ - Stress better that disabling use_chroot is really not secure.
 
 Version 3.3.4 - 21 January 2013
 -------------------------------
