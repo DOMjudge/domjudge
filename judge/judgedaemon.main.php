@@ -8,6 +8,9 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
+// By default, make sure no other users can read output files.
+umask(0077);
+
 require(ETCDIR . '/judgehost-config.php');
 
 $waittime = 5;
@@ -380,6 +383,10 @@ function judge($mark, $row, $judgingid)
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}
 
+	// Make sure the workdir is accessible for the domjudge-run user.	
+	// Will be revoked again after this run finished.
+	chmod ($workdir, 0711);
+
 	$final = FALSE;
 	foreach ( $testcases as $tc ) {
 
@@ -471,6 +478,9 @@ function judge($mark, $row, $judgingid)
 	}
 
 	} // end: for each testcase
+
+	// revoke readablity for domjudge-run user to this workdir
+	chmod($workdir, 0700);
 
 	// Optionally destroy chroot environment
 	if ( USE_CHROOT && CHROOT_SCRIPT ) {
