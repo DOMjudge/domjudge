@@ -13,7 +13,7 @@ define('MYSQL_DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S');
 define('IDENTIFIER_CHARS', '[a-zA-Z0-9_-]');
 
 /** Perl regex of allowed filenames. */
-define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9_\.-]*$/');
+define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/');
 
 /**
  * helperfunction to read all contents from a file.
