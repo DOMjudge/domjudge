@@ -125,19 +125,6 @@ while( !$exitsignalled )
 	}
 }
 
-// If there are any unfinished judgings in the queue in my name,
-// they will not be finished. Give them back.
-$res = $DB->q('SELECT judgingid, submitid FROM judging WHERE
-               judgehost = %s AND endtime IS NULL AND valid = 1', $myhost);
-while ( $jud = $res->next() ) {
-	$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
-	       $jud['judgingid']);
-	$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
-	        WHERE submitid = %i', $jud['submitid']);
-	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] . " in my name; given back");
-	auditlog('judging', $jud['judgingid'], 'given back', null, $myhost);
-}
-
 // Warn when chroot has been disabled. This has security implications.
 if ( ! USE_CHROOT ) {
 	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
@@ -147,6 +134,21 @@ if ( ! USE_CHROOT ) {
 $workdirpath = JUDGEDIR . "/$myhost";
 system("mkdir -p $workdirpath/testcase", $retval);
 if ( $retval != 0 ) error("Could not create $workdirpath");
+
+// If there are any unfinished judgings in the queue in my name,
+// they will not be finished. Give them back.
+$res = $DB->q('SELECT judgingid, submitid, cid FROM judging WHERE
+               judgehost = %s AND endtime IS NULL AND valid = 1', $myhost);
+while ( $jud = $res->next() ) {
+	$workdir = "$workdirpath/c$jud[cid]-s$jud[submitid]-j$jud[judgingid]";
+	@chmod($workdir, 0700);
+	$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
+	       $jud['judgingid']);
+	$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
+	        WHERE submitid = %i', $jud['submitid']);
+	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] . " in my name; given back");
+	auditlog('judging', $jud['judgingid'], 'given back', null, $myhost);
+}
 
 $waiting = FALSE;
 $active = TRUE;
@@ -324,6 +326,7 @@ function judge($mark, $row, $judgingid)
 		if ( !rename($workdir, $oldworkdir) ) {
 			error("Could not rename stale working directory to '$oldworkdir'");
 		}
+		@chmod($oldworkdir, 0700);
 		warning("Found stale working directory; renamed to '$oldworkdir'");
 	}
 
