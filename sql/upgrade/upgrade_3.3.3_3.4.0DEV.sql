@@ -19,10 +19,6 @@ ALTER TABLE `problem`
   ADD COLUMN `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII' AFTER `color`,
   ADD COLUMN `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text' AFTER `problemtext`;
 
-ALTER TABLE `balloon`
-  ADD KEY `submitid` (`submitid`),
-  ADD FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE;
-
 --
 -- Transfer data from old to new structure
 --
