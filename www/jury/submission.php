@@ -333,6 +333,7 @@ if ( isset($jid) )  {
 	echo "<th scope=\"col\">description</th>" .
 	    "</tr>\n</thead>\n<tbody>\n";
 
+	$total_runtime = 0;
 	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
 		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
@@ -359,7 +360,10 @@ if ( isset($jid) )  {
 		echo "<td><a href=\"$link\">" .
 		    htmlspecialchars(str_cut($run['description'],20)) . "</a></td>" .
 			"</tr>\n";
+
+		$total_runtime += $run['runtime'];
 	}
+	echo "<tr class=\"summary\"><td></td><td><a>$total_runtime</a></td><td></td><td><a>total runtime</a></td></tr>\n";
 	echo "</tbody>\n</table>\n\n";
 
 ?>

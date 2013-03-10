@@ -33,6 +33,7 @@
 	padding-right: 5px;
 }
 .testcases_prev { font-size: xx-small; }
+tr.summary td { border-top: 1px solid black; }
 
 .testrank {
 	line-height: 0.9;
