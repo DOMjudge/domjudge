@@ -53,7 +53,7 @@ function put_print_form()
 
 	<table>
 	<tr><td><label for="code">File</label>:</td>
-	<td><input type="file" name="code" id="code" size="40" onChange='detectLanguage(document.getElementById("code").value);' /></td>
+	<td><input type="file" name="code" id="code" size="40" required onChange='detectLanguage(document.getElementById("code").value);' /></td>
 	</tr>
 	<tr><td colspan="2">&nbsp;</td></tr>
 	<tr><td><label for="langid">Language</label>:</td>
