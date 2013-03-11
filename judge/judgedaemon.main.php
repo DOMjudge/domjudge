@@ -386,7 +386,7 @@ function judge($mark, $row, $judgingid)
 
 	// Make sure the workdir is accessible for the domjudge-run user.	
 	// Will be revoked again after this run finished.
-	chmod ($workdir, 0711);
+	chmod ($workdir, 0755);
 
 	$final = FALSE;
 	foreach ( $testcases as $tc ) {
