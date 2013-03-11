@@ -207,11 +207,11 @@ if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
 
 if ( !is_writable(TMPDIR) ) {
        result('configuration', 'TMPDIR writable', 'W',
-              'TMPDIR is not writable by the webserver; ' .
+              'TMPDIR (' . TMPDIR . ') is not writable by the webserver; ' .
               'Showing diffs and editing of submissions may not work.');
 } else {
        result('configuration', 'TMPDIR writable', 'O',
-              'TMPDIR can be used to store temporary files for submission diffs and edits.');
+              'TMPDIR (' . TMPDIR . ') can be used to store temporary files for submission diffs and edits.');
 }
 
 flushresults();
