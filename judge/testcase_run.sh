@@ -134,7 +134,6 @@ fi
 
 # Make testing/execute dir accessible for RUNUSER:
 chmod a+x "$WORKDIR" "$WORKDIR/execdir"
-chmod a+rx "$WORKDIR/execdir/program"
 
 # Create files which are expected to exist:
 touch error.out                  # Error output

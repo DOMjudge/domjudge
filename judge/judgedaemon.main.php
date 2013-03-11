@@ -8,9 +8,6 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
-// By default, make sure no other users can read output files.
-umask(0077);
-
 require(ETCDIR . '/judgehost-config.php');
 
 $waittime = 5;
@@ -134,6 +131,7 @@ if ( ! USE_CHROOT ) {
 $workdirpath = JUDGEDIR . "/$myhost";
 system("mkdir -p $workdirpath/testcase", $retval);
 if ( $retval != 0 ) error("Could not create $workdirpath");
+chmod("$workdirpath/testcase", 0700);
 
 // If there are any unfinished judgings in the queue in my name,
 // they will not be finished. Give them back.
