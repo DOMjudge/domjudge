@@ -222,3 +222,45 @@ function togglelastruns() {
 		}
 	}
 }
+
+function updateClock()
+{	
+	curtime = initial+offset;
+	date.setTime(curtime*1000);
+
+	var fmt = "";
+	if (curtime >= starttime && curtime < endtime ) {
+		var left = endtime - curtime;
+		var what = "time left: ";
+	} else if (curtime >= activatetime && curtime < starttime ) {
+		var left = starttime - curtime;
+		var what = "time to start: ";
+	} else {
+		var left = 0;
+		var what = "";
+	}
+
+	if ( left ) {
+		if ( left > 24*60*60 ) {
+			d = Math.floor(left/(24*60*60));
+			fmt += d + "d ";
+			left -= d * 24*60*60;
+		}
+		if ( left > 60*60 ) {
+			h = Math.floor(left/(60*60));
+			fmt += h + ":";
+			left -= h * 60*60;
+		} 
+		m = Math.floor(left/60);
+		if ( m < 10 ) { fmt += "0"; }
+		fmt += m + ":";
+		left -= m * 60;
+		if ( left < 10 ) { fmt += "0"; }
+		fmt += left;
+	}
+
+	timecurelt.innerHTML = date.toString().replace(/(\w{3})\ (\w{3})\ (\d{2})\ (\d{4})\ (\d{2}:\d{2}:\d{2}).*\((\w+)\)/, "$1 $3 $2 $4 $5 $6");
+	timeleftelt.innerHTML = what + fmt;
+	offset++;
+}
+

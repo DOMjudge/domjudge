@@ -363,15 +363,19 @@ function putTeam($login) {
  */
 function putClock() {
 	global $cdata;
+	$what = $fmt = "";
+	$activatetime_u = strtotime($cdata['activatetime']);
+	$starttime_u = strtotime($cdata['starttime']);
+	$endtime_u = strtotime($cdata['endtime']);
+
 	// current time
-	echo '<div id="clock">' . strftime('%a %e %b %Y %T %Z');
+	echo '<div id="clock"><span id="timecur">' . strftime('%a %e %b %Y %T %Z') . "</span>";
 	// timediff to end of contest
 	if ( strcmp(now(), $cdata['starttime']) >= 0 && strcmp(now(), $cdata['endtime']) < 0) {
-		$left = strtotime($cdata['endtime'])-time();
+		$left = $endtime_u-time();
 		$what = "time left: ";
-	}
-	if ( strcmp(now(), $cdata['activatetime']) >= 0 && strcmp(now(), $cdata['starttime']) < 0) {
-		$left = strtotime($cdata['starttime'])-time();
+	} else if ( strcmp(now(), $cdata['activatetime']) >= 0 && strcmp(now(), $cdata['starttime']) < 0) {
+		$left = $starttime_u-time();
 		$what = "time to start: ";
 	}
 	if ( !empty($left) ) {
@@ -391,9 +395,22 @@ function putClock() {
 		$left -= $m * 60;
 		$fmt .= sprintf('%02d', $left);
 
-		echo "<br /><span id=\"timeleft\">" . $what . $fmt . "</span>";
 	}
-	echo "</div>\n\n";
+	echo "<br /><span id=\"timeleft\">" . $what . $fmt . "</span>";
+	echo "</div>";
+
+	echo "<script type=\"text/javascript\">
+	var initial = " . time() . ";
+	var activatetime = " . $activatetime_u . ";
+	var starttime = " . $starttime_u . ";
+	var endtime = " . $endtime_u . ";
+	var offset = 1;
+	var date = new Date(initial*1000);
+	var timecurelt = document.getElementById(\"timecur\");
+	var timeleftelt = document.getElementById(\"timeleft\");
+
+	setInterval(function(){updateClock();},1000);
+</script>\n";
 }
 
 /**
