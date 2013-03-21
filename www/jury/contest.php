@@ -35,7 +35,7 @@ if ( !empty($_GET['cmd']) ):
 	}
 
 $pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d";
-$pattern_offset    = "\d\d:\d\d";
+$pattern_offset    = "\d?\d:\d\d";
 $pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
 $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 ?>
