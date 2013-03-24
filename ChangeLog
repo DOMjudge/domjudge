@@ -9,6 +9,7 @@ Version 3.3.5 - DEV
  - Fix documentation typo's and HTML validity.
  - Stress better that disabling use_chroot is really not secure.
  - Fix PHP notice about unset HTTP_REFERER variable.
+ - Fix bug that teampage_first_visit would be updated on each visit.
 
 Version 3.3.4 - 21 January 2013
 -------------------------------
