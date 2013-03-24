@@ -49,8 +49,8 @@ function logged_in()
 
 	if ( !empty($teamdata) ) {
 		$login = $teamdata['login'];
-		// is this the first visit? record that in the team table
-		if ( empty($row['teampage_first_visited']) ) {
+		// Is this the first visit? Record that in the team table.
+		if ( empty($teamdata['teampage_first_visited']) ) {
 			$hostname = gethostbyaddr($ip);
 			$DB->q('UPDATE team SET teampage_first_visited = %s, hostname = %s
 			        WHERE login = %s',
