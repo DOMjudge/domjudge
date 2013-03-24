@@ -7,6 +7,7 @@ Version 3.2.5 - DEV
  - Stress better that disabling use_chroot is really not secure.
  - Install locales in chroot, necessary for ghc solutions.
  - Allow java main method to be final.
+ - Fix bug that teampage_first_visit would be updated on each visit.
 
 Version 3.2.4 - 12 September 2012
 ---------------------------------
