@@ -97,7 +97,7 @@
 
       Repeat the commands between the 'REP() ... END' statements count
       times and optionally match 'separator' command (count-1) times
-      in between. The value of count must fit in a unsigned 32 bit int.
+      in between. The value of count must fit in an unsigned 32 bit int.
 
    WHILE(<test> condition [,<command> separator]) [<command>...] END
 
