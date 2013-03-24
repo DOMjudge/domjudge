@@ -224,7 +224,7 @@ if ( isset($jid) )  {
 				echo addForm('verify.php') .
 				    addHidden('id',  $jud['judgingid']) .
 				    addHidden('val', $val) .
-				    addHidden('redirect', $_SERVER['HTTP_REFERER']);
+				    addHidden('redirect', @$_SERVER['HTTP_REFERER']);
 			}
 
 			echo "<p>Verified: " .
