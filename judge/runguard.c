@@ -1,6 +1,7 @@
 /*
    runguard -- run command with restrictions.
-   Copyright (C) 2004-2012 Jaap Eldering (eldering@a-eskwadraat.nl).
+   Copyright (C) 2004-2013 Jaap Eldering (eldering@a-eskwadraat.nl)
+   Copyright (C) 2013      Keith Johnson
 
    Multiple minor improvements ported from the DOMjudge-ETH tree.
 
@@ -39,6 +40,9 @@
 
 #include "config.h"
 
+/* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
+#include "runguard-config.h"
+
 /* For chroot(), which is not POSIX. */
 #define _BSD_SOURCE
 
@@ -64,13 +68,12 @@
 #include <time.h>
 #include <math.h>
 #include <limits.h>
-#ifdef HAVE_LIBCGROUP_H
+#if ( USE_CGROUPS == 1 )
 #include <inttypes.h>
 #include <libcgroup.h>
+#else
+#undef USE_CGROUPS
 #endif
-
-/* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
-#include "runguard-config.h"
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
@@ -103,7 +106,7 @@ char  *stdoutfilename;
 char  *stderrfilename;
 char  *exitfilename;
 char  *timefilename;
-#ifdef HAVE_LIBCGROUP_H
+#ifdef USE_CGROUPS
 char  *cgroupname;
 #endif
 
@@ -126,7 +129,7 @@ int show_help;
 int show_version;
 
 double runtime, cputime; /* in seconds */
-#ifdef HAVE_LIBCGROUP_H
+#ifdef USE_CGROUPS
 int64_t memsize;
 #else
 rlim_t memsize;
@@ -316,8 +319,10 @@ void output_exit_time(int exitcode, double timediff)
 		}
 	}
 }
-#ifdef HAVE_LIBCGROUP_H
-void output_cgroup_stats() {
+
+#ifdef USE_CGROUPS
+void output_cgroup_stats()
+{
 	int ret;
 	int64_t max_usage;
 	struct cgroup *cg;
@@ -448,7 +453,7 @@ void setrestrictions()
 	}
 
 	/* Memory limits may be handled by cgroups now */
-#ifndef HAVE_LIBCGROUP_H
+#ifndef USE_CGROUPS
 	if ( memsize!=RLIM_INFINITY ) {
 		verbose("setting memory limits to %d bytes",(int)memsize);
 		lim.rlim_cur = lim.rlim_max = memsize;
@@ -533,8 +538,9 @@ void setrestrictions()
 	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped. Do not run judgedaemon as root.");
 }
 
-#ifdef HAVE_LIBCGROUP_H
-void cgroup_create() {
+#ifdef USE_CGROUPS
+void cgroup_create()
+{
 	int ret;
 	struct cgroup *cg;
 	struct cgroup_controller *cg_controller;
@@ -558,7 +564,9 @@ void cgroup_create() {
 
 	cgroup_free(&cg);
 }
-void cgroup_attach() {
+
+void cgroup_attach()
+{
 	int ret;
 	struct cgroup *cg;
 
@@ -579,7 +587,9 @@ void cgroup_attach() {
 
 	cgroup_free(&cg);
 }
-void cgroup_delete() {
+
+void cgroup_delete()
+{
 	int ret;
 	struct cgroup *cg;
 
@@ -606,7 +616,7 @@ int main(int argc, char **argv)
 	fd_set readfds;
 	pid_t pid;
 	int   i, r, nfds;
-#ifdef HAVE_LIBCGROUP_H
+#ifdef USE_CGROUPS
 	int   ret;
 #endif
 	int   status;
@@ -772,7 +782,7 @@ int main(int argc, char **argv)
 		error(errno,"installing signal handler");
 	}
 
-#ifdef HAVE_LIBCGROUP_H
+#ifdef USE_CGROUPS
 	/* Make libcgroup ready for use */
 	ret = cgroup_init();
 	if ( ret!=0 ) {
@@ -808,7 +818,7 @@ int main(int argc, char **argv)
 		   and all its children can be killed off with one signal. */
 		if ( setsid()==-1 ) error(errno,"setsid failed");
 
-#ifdef HAVE_LIBCGROUP_H
+#ifdef USE_CGROUPS
 		/* Put the child process in the cgroup */
 		cgroup_attach();
 #endif
@@ -968,7 +978,7 @@ int main(int argc, char **argv)
 			exitcode = WEXITSTATUS(status);
 		}
 
-#ifdef HAVE_LIBCGROUP_H
+#ifdef USE_CGROUPS
 		output_cgroup_stats();
 		cgroup_delete();
 #endif

@@ -38,6 +38,9 @@ INSTALL = @INSTALL@
 # Build checktestdata program?
 CHECKTESTDATA_ENABLED = @CHECKTESTDATA_ENABLED@
 
+# Use Linux cgroups?
+USE_CGROUPS = @USE_CGROUPS@
+
 # Submit protocols
 SUBMIT_DEFAULT    = @SUBMIT_DEFAULT@
 SUBMIT_ENABLE_CMD = @SUBMIT_ENABLE_CMD@
@@ -167,6 +170,7 @@ define substconfigvars
 	-e 's,@WEBSERVER_GROUP[@],@WEBSERVER_GROUP@,g' \
 	-e 's,@BEEP[@],@BEEP@,g' \
 	-e 's,@RUNUSER[@],@RUNUSER@,g' \
+	-e 's,@USE_CGROUPS[@],@USE_CGROUPS@,g' \
 	-e 's,@SUBMIT_DEFAULT[@],@SUBMIT_DEFAULT@,g' \
 	-e 's,@SUBMIT_ENABLE_CMD[@],@SUBMIT_ENABLE_CMD@,g' \
 	-e 's,@SUBMIT_ENABLE_WEB[@],@SUBMIT_ENABLE_WEB@,g' \

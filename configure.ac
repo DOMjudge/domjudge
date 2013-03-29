@@ -125,7 +125,7 @@ fi
 
 # }}}
 
-# {{{ runguard user
+# {{{ runguard
 AC_MSG_CHECKING([runuser])
 AC_ARG_WITH([runuser], [AS_HELP_STRING([--with-runuser=USER],
 [Unprivileged user under which to run submissions (default: domjudge-run).])], [], [])
@@ -137,6 +137,32 @@ else
 	AC_SUBST(RUNUSER,$with_runuser)
 	AC_MSG_RESULT($RUNUSER)
 fi
+
+# Check for using Linux cgroups for memory control
+AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]))
+
+if test "x$LIBCGROUP" != x; then
+	use_cgroups=yes
+else
+	use_cgroups=no
+fi
+AC_ARG_ENABLE(cgroups,AS_HELP_STRING([--enable-cgroups],
+[Use Linux cgroups for memory control (default: $use_cgroups).]), [], [])
+
+if test "x$enable_cgroups" = xno; then
+	use_cgroups=no
+elif test "x$enable_cgroups" != x; then
+	use_cgroups=yes
+fi
+
+# Finally define an export variable that can be substituted into
+# etc/runguard-config.h.in:
+if test "x$use_cgroups" = xyes; then
+	AC_SUBST(USE_CGROUPS,1)
+else
+	AC_SUBST(USE_CGROUPS,0)
+fi
+
 # }}}
 
 # {{{ FHS directory structure
@@ -225,9 +251,6 @@ AC_PROG_MKDIR_P
 # check for htpasswd/htpasswd2
 AC_CHECK_PROGS(HTPASSWD,[htpasswd htpasswd2],[no htpasswd binary found])
 
-# Check for including optional libcgroup
-AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]))
-
 # Check for including optional libmagic.
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
@@ -314,6 +337,14 @@ echo ""
 echo " * default user........: $DOMJUDGE_USER"
 echo " * runguard user.......: $RUNUSER"
 echo " * webserver group.....: $WEBSERVER_GROUP"
+echo ""
+echo " * use Linux cgroups...: $use_cgroups"
+echo ""
+if test "x$CHECKTESTDATA_ENABLED" = xyes ; then
+   echo " * checktestdata.......: enabled"
+else
+   echo " * checktestdata.......: disabled"
+fi
 echo ""
 if test $SUBMIT_DEFAULT -eq 0 ; then # {{{
 	echo " * submitclient........: disabled"

@@ -7,4 +7,6 @@
 
 #define CHROOT_PREFIX "@judgehost_judgedir@"
 
+#define USE_CGROUPS @USE_CGROUPS@
+
 #endif /* _RUNGUARD_CONFIG_ */
