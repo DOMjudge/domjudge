@@ -70,7 +70,8 @@ DOMJUDGE_USER   = @DOMJUDGE_USER@
 WEBSERVER_GROUP = @WEBSERVER_GROUP@
 
 # Autoconf prefixes and paths
-fhs_enabled    = @fhs_enabled@
+FHS_ENABLED    = @FHS_ENABLED@
+
 prefix         = @prefix@
 exec_prefix    = @exec_prefix@
 

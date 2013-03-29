@@ -11,14 +11,14 @@ AC_DEFUN([AX_WITH_COMMENT], [
 	AC_ARG_WITH([ax_comment_$1],[$2],[],[])
 	])
 
-AC_SUBST(fhs_enabled,[])
+AC_SUBST(FHS_ENABLED,no)
 AC_ARG_ENABLE(fhs,AS_HELP_STRING([--enable-fhs],
 [use FHS directories (default: no), see below under "Optional
  Packages" for path configuration when FHS is disabled.]),
-[if test "x$enableval" != xno ; then AC_SUBST(fhs_enabled,yes) fi])
+[if test "x$enableval" != xno ; then AC_SUBST(FHS_ENABLED,yes) fi])
 
 if test "x$prefix" = xNONE; then
-	if test "x$fhs_enabled" = xyes ; then
+	if test "x$FHS_ENABLED" = xyes ; then
 		prefix=$ac_default_prefix
 	else
 		prefix="/opt/domjudge"
@@ -142,7 +142,7 @@ fi
 # {{{ FHS directory structure
 
 # These are defaults that can still be overridden below!
-if test "x$fhs_enabled" = xyes ; then
+if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(domserver_root,        '')
 	AC_SUBST(domserver_bindir,      $bindir)
 	AC_SUBST(domserver_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
@@ -178,7 +178,7 @@ fi
 AC_DEFUN([AX_PATH], [
 	AC_ARG_WITH($1,[  --with-$1=DIR   	(default: $2)],
 		[AC_SUBST($1, $withval)],
-		[if test "x$fhs_enabled" != xyes ; then AC_SUBST($1, $2) fi])
+		[if test "x$FHS_ENABLED" != xyes ; then AC_SUBST($1, $2) fi])
 	])
 
 AX_WITH_COMMENT(2,[  ])
