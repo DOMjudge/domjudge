@@ -225,6 +225,9 @@ AC_PROG_MKDIR_P
 # check for htpasswd/htpasswd2
 AC_CHECK_PROGS(HTPASSWD,[htpasswd htpasswd2],[no htpasswd binary found])
 
+# Check for including optional libcgroup
+AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]))
+
 # Check for including optional libmagic.
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
@@ -275,7 +278,7 @@ AC_DEFINE_UNQUOTED(_XOPEN_SOURCE, 500,       [Include SUSv2 (UNIX 98) extensions
 
 # Checks for header files.
 AC_HEADER_STDBOOL
-AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h termios.h unistd.h magic.h])
+AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h termios.h unistd.h magic.h libcgroup.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE

@@ -21,7 +21,7 @@ compare$(OBJEXT): $(LIBHEADERS)
 check_float: -lm $(LIBOBJECTS)
 check_float$(OBJEXT): -lm $(LIBHEADERS)
 
-runguard: -lm
+runguard: -lm $(LIBCGROUP)
 runguard$(OBJEXT): $(TOPDIR)/etc/runguard-config.h
 
 # FIXME: compile with diet libc to produce a static binary which is

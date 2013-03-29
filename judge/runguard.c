@@ -64,6 +64,10 @@
 #include <time.h>
 #include <math.h>
 #include <limits.h>
+#ifdef HAVE_LIBCGROUP_H
+#include <inttypes.h>
+#include <libcgroup.h>
+#endif
 
 /* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
 #include "runguard-config.h"
@@ -99,6 +103,9 @@ char  *stdoutfilename;
 char  *stderrfilename;
 char  *exitfilename;
 char  *timefilename;
+#ifdef HAVE_LIBCGROUP_H
+char  *cgroupname;
+#endif
 
 int runuid;
 int rungid;
@@ -119,7 +126,11 @@ int show_help;
 int show_version;
 
 double runtime, cputime; /* in seconds */
+#ifdef HAVE_LIBCGROUP_H
+int64_t memsize;
+#else
 rlim_t memsize;
+#endif
 rlim_t filesize;
 rlim_t nproc;
 size_t streamsize;
@@ -305,6 +316,31 @@ void output_exit_time(int exitcode, double timediff)
 		}
 	}
 }
+#ifdef HAVE_LIBCGROUP_H
+void output_cgroup_stats() {
+	int ret;
+	int64_t max_usage;
+	struct cgroup *cg;
+	struct cgroup_controller *cg_controller;
+
+	cg = cgroup_new_cgroup(cgroupname);
+	if (!cg) {
+		error(0,"cgroup_new_cgroup");
+	}
+	if ((ret = cgroup_get_cgroup(cg)) != 0) {
+		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+	}
+	cg_controller = cgroup_get_controller(cg, "memory");
+	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
+	if ( ret!=0 ) {
+		error(0,"get cgroup value - %s(%d)", cgroup_strerror(ret), ret);
+	}
+
+	fprintf(stderr, "Total memory used: %" PRId64 " kb\n", max_usage/1024);
+
+	cgroup_free(&cg);
+}
+#endif
 
 void terminate(int sig)
 {
@@ -411,6 +447,8 @@ void setrestrictions()
 		setlim(CPU);
 	}
 
+	/* Memory limits may be handled by cgroups now */
+#ifndef HAVE_LIBCGROUP_H
 	if ( memsize!=RLIM_INFINITY ) {
 		verbose("setting memory limits to %d bytes",(int)memsize);
 		lim.rlim_cur = lim.rlim_max = memsize;
@@ -418,6 +456,13 @@ void setrestrictions()
 		setlim(DATA);
 		setlim(STACK);
 	}
+#else
+	/* Memory limits should be unlimited when using cgroups */
+	lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
+	setlim(AS);
+	setlim(DATA);
+	setlim(STACK);
+#endif
 
 	if ( filesize!=RLIM_INFINITY ) {
 		verbose("setting filesize limit to %d bytes",(int)filesize);
@@ -488,12 +533,82 @@ void setrestrictions()
 	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped. Do not run judgedaemon as root.");
 }
 
+#ifdef HAVE_LIBCGROUP_H
+void cgroup_create() {
+	int ret;
+	struct cgroup *cg;
+	struct cgroup_controller *cg_controller;
+
+	cg = cgroup_new_cgroup(cgroupname);
+	if (!cg) {
+		error(0,"cgroup_new_cgroup");
+	}
+
+	/* Set up the memory restrictions; these two options limit ram use
+	   and ram+swap use. They are the same so no swapping can occur */
+	cg_controller = cgroup_add_controller(cg, "memory");
+	cgroup_add_value_int64(cg_controller, "memory.limit_in_bytes", memsize);
+	cgroup_add_value_int64(cg_controller, "memory.memsw.limit_in_bytes", memsize);
+
+	/* Perform the actual creation of the cgroup */
+	ret = cgroup_create_cgroup(cg, 1);
+	if ( ret!=0) {
+		error(0,"creating cgroup - %s(%d)", cgroup_strerror(ret), ret);
+	}
+
+	cgroup_free(&cg);
+}
+void cgroup_attach() {
+	int ret;
+	struct cgroup *cg;
+
+	cg = cgroup_new_cgroup(cgroupname);
+	if (!cg) {
+		error(0,"cgroup_new_cgroup");
+	}
+	ret = cgroup_get_cgroup(cg);
+	if ( ret!=0 ) {
+		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+	}
+
+	/* Attach task to the cgroup */
+	ret = cgroup_attach_task(cg);
+	if ( ret!=0 ) {
+		error(0,"attach task to cgroup - %s(%d)", cgroup_strerror(ret), ret);
+	}
+
+	cgroup_free(&cg);
+}
+void cgroup_delete() {
+	int ret;
+	struct cgroup *cg;
+
+	cg = cgroup_new_cgroup(cgroupname);
+	if (!cg) {
+		error(0,"cgroup_new_cgroup");
+	}
+	ret = cgroup_get_cgroup(cg);
+	if ( ret!=0 ) {
+		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+	}
+	/* Clean up our cgroup */
+	ret = cgroup_delete_cgroup(cg, 1);
+	if ( ret!=0 ) {
+		error(0,"deleting cgroup - %s(%d)", cgroup_strerror(ret), ret);
+	}
+	cgroup_free(&cg);
+}
+#endif
+
 int main(int argc, char **argv)
 {
 	sigset_t sigmask, emptymask;
 	fd_set readfds;
 	pid_t pid;
 	int   i, r, nfds;
+#ifdef HAVE_LIBCGROUP_H
+	int   ret;
+#endif
 	int   status;
 	int   exitcode;
 	char *valid_users;
@@ -657,6 +772,23 @@ int main(int argc, char **argv)
 		error(errno,"installing signal handler");
 	}
 
+#ifdef HAVE_LIBCGROUP_H
+	/* Make libcgroup ready for use */
+	ret = cgroup_init();
+	if ( ret!=0 ) {
+		error(0,"libcgroup initialization failed: %s(%d)\n", cgroup_strerror(ret), ret);
+	}
+	/* Define the cgroup name that we will use */
+	cgroupname = (char*)malloc(256);
+	if ( cgroupname==NULL ) {
+		error(errno,"allocating memory for cgroupname");
+	}
+	/* Note: group names must have slashes! */
+	snprintf(cgroupname, 256, "/domjudge/dj_cgroup_%d/", getpid());
+
+	cgroup_create();
+#endif
+
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
 		error(errno,"cannot fork");
@@ -675,6 +807,11 @@ int main(int argc, char **argv)
 		/* Run the command in a separate process group so that the command
 		   and all its children can be killed off with one signal. */
 		if ( setsid()==-1 ) error(errno,"setsid failed");
+
+#ifdef HAVE_LIBCGROUP_H
+		/* Put the child process in the cgroup */
+		cgroup_attach();
+#endif
 
 		/* Apply all restrictions for child process. */
 		setrestrictions();
@@ -830,6 +967,11 @@ int main(int argc, char **argv)
 		} else {
 			exitcode = WEXITSTATUS(status);
 		}
+
+#ifdef HAVE_LIBCGROUP_H
+		output_cgroup_stats();
+		cgroup_delete();
+#endif
 
 		/* Drop root before writing to output file(s). */
 		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
