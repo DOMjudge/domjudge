@@ -345,7 +345,77 @@ void output_cgroup_stats()
 
 	cgroup_free(&cg);
 }
-#endif
+
+void cgroup_create()
+{
+	int ret;
+	struct cgroup *cg;
+	struct cgroup_controller *cg_controller;
+
+	cg = cgroup_new_cgroup(cgroupname);
+	if (!cg) {
+		error(0,"cgroup_new_cgroup");
+	}
+
+	/* Set up the memory restrictions; these two options limit ram use
+	   and ram+swap use. They are the same so no swapping can occur */
+	cg_controller = cgroup_add_controller(cg, "memory");
+	cgroup_add_value_int64(cg_controller, "memory.limit_in_bytes", memsize);
+	cgroup_add_value_int64(cg_controller, "memory.memsw.limit_in_bytes", memsize);
+
+	/* Perform the actual creation of the cgroup */
+	ret = cgroup_create_cgroup(cg, 1);
+	if ( ret!=0) {
+		error(0,"creating cgroup - %s(%d)", cgroup_strerror(ret), ret);
+	}
+
+	cgroup_free(&cg);
+}
+
+void cgroup_attach()
+{
+	int ret;
+	struct cgroup *cg;
+
+	cg = cgroup_new_cgroup(cgroupname);
+	if (!cg) {
+		error(0,"cgroup_new_cgroup");
+	}
+	ret = cgroup_get_cgroup(cg);
+	if ( ret!=0 ) {
+		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+	}
+
+	/* Attach task to the cgroup */
+	ret = cgroup_attach_task(cg);
+	if ( ret!=0 ) {
+		error(0,"attach task to cgroup - %s(%d)", cgroup_strerror(ret), ret);
+	}
+
+	cgroup_free(&cg);
+}
+
+void cgroup_delete()
+{
+	int ret;
+	struct cgroup *cg;
+
+	cg = cgroup_new_cgroup(cgroupname);
+	if (!cg) {
+		error(0,"cgroup_new_cgroup");
+	}
+	ret = cgroup_get_cgroup(cg);
+	if ( ret!=0 ) {
+		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+	}
+	/* Clean up our cgroup */
+	ret = cgroup_delete_cgroup(cg, 1);
+	if ( ret!=0 ) {
+		error(0,"deleting cgroup - %s(%d)", cgroup_strerror(ret), ret);
+	}
+	cgroup_free(&cg);
+}
+#endif // USE_CGROUPS
 
 void terminate(int sig)
 {
@@ -537,78 +607,6 @@ void setrestrictions()
 	}
 	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped. Do not run judgedaemon as root.");
 }
-
-#ifdef USE_CGROUPS
-void cgroup_create()
-{
-	int ret;
-	struct cgroup *cg;
-	struct cgroup_controller *cg_controller;
-
-	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) {
-		error(0,"cgroup_new_cgroup");
-	}
-
-	/* Set up the memory restrictions; these two options limit ram use
-	   and ram+swap use. They are the same so no swapping can occur */
-	cg_controller = cgroup_add_controller(cg, "memory");
-	cgroup_add_value_int64(cg_controller, "memory.limit_in_bytes", memsize);
-	cgroup_add_value_int64(cg_controller, "memory.memsw.limit_in_bytes", memsize);
-
-	/* Perform the actual creation of the cgroup */
-	ret = cgroup_create_cgroup(cg, 1);
-	if ( ret!=0) {
-		error(0,"creating cgroup - %s(%d)", cgroup_strerror(ret), ret);
-	}
-
-	cgroup_free(&cg);
-}
-
-void cgroup_attach()
-{
-	int ret;
-	struct cgroup *cg;
-
-	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) {
-		error(0,"cgroup_new_cgroup");
-	}
-	ret = cgroup_get_cgroup(cg);
-	if ( ret!=0 ) {
-		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
-	}
-
-	/* Attach task to the cgroup */
-	ret = cgroup_attach_task(cg);
-	if ( ret!=0 ) {
-		error(0,"attach task to cgroup - %s(%d)", cgroup_strerror(ret), ret);
-	}
-
-	cgroup_free(&cg);
-}
-
-void cgroup_delete()
-{
-	int ret;
-	struct cgroup *cg;
-
-	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) {
-		error(0,"cgroup_new_cgroup");
-	}
-	ret = cgroup_get_cgroup(cg);
-	if ( ret!=0 ) {
-		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
-	}
-	/* Clean up our cgroup */
-	ret = cgroup_delete_cgroup(cg, 1);
-	if ( ret!=0 ) {
-		error(0,"deleting cgroup - %s(%d)", cgroup_strerror(ret), ret);
-	}
-	cgroup_free(&cg);
-}
-#endif
 
 int main(int argc, char **argv)
 {
