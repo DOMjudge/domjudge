@@ -185,8 +185,8 @@ problem on the scoreboard. Disallow judge will make DOMjudge accept
 submissions, but leave them queued; this is useful in case an
 unexpected problem shows up with one of the problems. Timelimit is the
 maximum number of seconds a submission for this problem is allowed to
-run before a `TIMELIMIT' response is given (multiplied by the language
-factor).
+run before a `TIMELIMIT' response is given (to be multiplied possibly
+by a language factor).
 
 The `Languages' overview is quite the same. It has a timefactor
 column; submissions in a language that has time factor 2 will be
