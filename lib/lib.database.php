@@ -362,7 +362,7 @@ class db
 			case 2006:	// MySQL server has gone away
 			throw new RuntimeException("MySQL server has gone away");
 			default:
-			throw new RuntimeException("SQL syntax-error, " . $callsite
+			throw new RuntimeException("SQL error, " . $callsite
 			    . "Error#" . mysql_errno($this->_connection) . ": "
 			    . mysql_error($this->_connection) . ", query: '$query'");
 		}
