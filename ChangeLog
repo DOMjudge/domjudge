@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.3.5 - DEV
--------------------
+Version 3.3.5 - 16 April 2013
+-----------------------------
  - Fix (theoretical) buffer underrun in submitdaemon.
  - In Java main method detection, allow it to be final.
  - Install locales in chroot, necessary for ghc solutions.
