@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.2.5 - DEV
--------------------
+Version 3.2.5 - 16 April 2013
+-----------------------------
  - Bugfix: check that compilation creates executable file, closes: #119.
  - Fix minor HTML validation error and PHP notice.
  - Stress better that disabling use_chroot is really not secure.
