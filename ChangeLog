@@ -45,6 +45,16 @@ Version 3.4.0 - DEV
  - Make format of timestamps in web interfaces configurable.
  - Use PHP multibyte string functions where applicable. Thanks Vladimir
    Vassiliev for the bug report.
+Online-judge branch specific changes:
+ - Add time_format configuration variable for webpage date/time display.
+ - Allow testcases to be "public": teams can view/download the data for
+   these testcases and their own output.
+ - Allow customization of HTML headers and CSS.
+ - Misc. UI improvements for usage in long term and many user situations.
+ - Add team ranking and problem list pages.
+ - Allow viewing of correct submissions by other teams for solved problems.
+ - Add various statistics.
+ - Support separate start and end times per problem.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
