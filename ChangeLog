@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 3.2.6 - DEV
+-------------------
+
 Version 3.2.5 - 16 April 2013
 -----------------------------
  - Bugfix: check that compilation creates executable file, closes: #119.
