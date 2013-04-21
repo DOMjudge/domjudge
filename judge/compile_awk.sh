@@ -37,7 +37,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec awk -f "$MAINSOURCE"
+exec awk -v ONLINE_JUDGE=1 -v DOMJUDGE=1 -f "$MAINSOURCE"
 EOF
 
 chmod a+x $DEST

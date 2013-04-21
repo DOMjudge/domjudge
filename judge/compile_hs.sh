@@ -12,7 +12,7 @@ MAINSOURCE="$1"
 # -static:	Static link Haskell libraries
 # -optl-static:	Pass '-static' option to the linker
 # -optl-pthread: Pass '-pthread' option to the linker (see Debian bug #593402)
-ghc -Wall -Wwarn -O -static -optl-static -optl-pthread -o $DEST "$@"
+ghc -Wall -Wwarn -O -static -optl-static -optl-pthread -DONLINE_JUDGE -DDOMJUDGE -o $DEST "$@"
 exitcode=$?
 
 # clean created files:

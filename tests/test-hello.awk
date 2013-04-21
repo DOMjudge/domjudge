@@ -2,4 +2,4 @@
 #
 # @EXPECTED_RESULTS@: CORRECT
 
-BEGIN { print "Hello world!" }
+BEGIN { if ( DOMJUDGE ) print "Hello world!"; else print "variable DOMJUDGE not set" }

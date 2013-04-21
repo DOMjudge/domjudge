@@ -53,6 +53,7 @@ Version 3.4.0 - DEV
  - Switch make_chroot to Debian 7.0 'Wheezy' and OpenJDK 7.
  - Add support for memory control in rungard with Linux cgroups.
    Patch provided by Keith Johnson.
+ - Pass ONLINE_JUDGE and DOMJUDGE directives to submissions.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
