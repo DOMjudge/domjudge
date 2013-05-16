@@ -15,7 +15,7 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Contests</h1>\n\n";
 
 if ( isset($_POST['unfreeze']) ) {
-	$docid = array_pop(array_keys($_POST['unfreeze']));
+	$docid = key($_POST['unfreeze']);
 	if ( $docid != $cid ) {
 		error("Can only unfreeze for current contest");
 	}
