@@ -1305,14 +1305,14 @@ x|contest          |Contest definitions with start/end time.@
 x|language         |Definition of allowed submission languages.@
 x|problem          |Definition of problems (name, corresponding contest, etc.).@
  |scoreboard&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
- |scoreboard&lowbar;public|separately, because of possibility of score freezing.
+ |scoreboard&lowbar;public|separately, because of possibility of score freezing.@
  |submission       |Submission metadata of solutions to problems.@
  |submission_file  |Submitted code files.@
 x|team             |Definition of teams.@
 x|team&lowbar;affiliation |Definition of institutions a team can be affiliated with.@
 x|team&lowbar;category    |Different category groups teams can be put in.@
  |team&lowbar;unread      |Records which clarifications are read by which team.@
-x|testcase         |Definition of testdata for each problem.@
+x|testcase         |Definition of testdata for each problem.
 </tabular>
 
 Now follows a longer description (including fields) per table that has
