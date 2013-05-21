@@ -1293,23 +1293,26 @@ configure with contest data before running a contest (via the jury web
 interface or e.g. with phpMyAdmin), the other tables are used
 automatically by the software:
 <tabular ca="cll">
+ |auditlog         |Log of every state-changing event.@
+ |balloon          |Balloons to be handed out.@
  |clarification    |Clarification requests/replies are stored here.@
 x|configuration    |Runtime configuration settings.@
 x|contest          |Contest definitions with start/end time.@
  |event            |Log of events during contests.@
-x|judgehost        |Computers (hostnames) that function as judgehosts.@
+ |judgehost        |Computers (hostnames) that function as judgehosts.@
  |judging          |Judgings of submissions.@
  |judging&lowbar;run      |Result of one testcase within a judging.@
 x|language         |Definition of allowed submission languages.@
 x|problem          |Definition of problems (name, corresponding contest, etc.).@
- |submission       |Submissions of solutions to problems.@
+ |scoreboard&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
+ |scoreboard&lowbar;public|separately, because of possibility of score freezing.
+ |submission       |Submission metadata of solutions to problems.@
+ |submission_file  |Submitted code files.@
 x|team             |Definition of teams.@
 x|team&lowbar;affiliation |Definition of institutions a team can be affiliated with.@
 x|team&lowbar;category    |Different category groups teams can be put in.@
  |team&lowbar;unread      |Records which clarifications are read by which team.@
 x|testcase         |Definition of testdata for each problem.@
- |scoreboard&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
- |scoreboard&lowbar;public|separately, because of possibility of score freezing.
 </tabular>
 
 Now follows a longer description (including fields) per table that has
@@ -1343,14 +1346,6 @@ id="contestsetup:milestones" name="Contest milestones">.
 The <tt>enabled</tt> field can be unset to allow for easier editing of
 contest times, as disabled contests are not checked to overlap with
 other contests. A disabled contest will also not become active.
-
-<tag>judgehost</tag>
-List here the hosts that will be judging the submissions.
-<tt>hostname</tt> is the (short) hostname of a machine running
-the judgehost part of DOMjudge.
-<tt>active</tt> indicates whether this host should judge incoming
-submissions. <tt>polltime</tt> is an internally used variable to
-detect whether a judgedaemon is running on the host.
 
 <tag>language</tag>
 Programming languages in which to accept and judge submissions.
