@@ -93,33 +93,13 @@ if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
 database_retry_connect($waittime);
 
-$first = True;
-while( !$exitsignalled )
-{
-	try {
-		// Retrieve hostname and check database for judgehost entry
-		$row = $DB->q('MAYBETUPLE SELECT * FROM judgehost WHERE hostname = %s'
-		             , $myhost);
-		if ( ! $row ) {
-			if($first)
-				logmsg(LOG_WARNING, "No database entry found for me ($myhost)");
-			$first = False;
-			sleep($waittime);
-			continue;
-		}
-		$myhost = $row['hostname'];
-		unset($first);
-		break;
-	}
-	catch( Exception $e ) {
-		$msg = "MySQL server has gone away";
-		if( ! strncmp($e->getMessage(), $msg, strlen($msg)) ) {
-			logmsg(LOG_WARNING, $msg);
-			database_retry_connect();
-			continue;
-		}
-		throw $e;
-	}
+// Check database for judgehost entry
+$row = $DB->q('MAYBETUPLE SELECT * FROM judgehost WHERE hostname = %s'
+             , $myhost);
+if ( ! $row ) {
+	logmsg(LOG_INFO, "No database entry found for me ($myhost), registering");
+	$DB->q('INSERT INTO judgehost (hostname) VALUES (%s)'
+	      , $myhost);
 }
 
 // Warn when chroot has been disabled. This has security implications.
