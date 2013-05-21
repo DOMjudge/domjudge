@@ -4,8 +4,8 @@
 # should be added to /etc/cgconfig.conf when cgroups were enabled at
 # configure time. It is then used by runguard to impose memory limits.
 
-# The uid's below have to be set to the user that runs the
-# judgedaemon. The values below
+# The uids below have to be set to the user that runs the
+# judgedaemon.
 group domjudge {
 	perm {
 		task {
