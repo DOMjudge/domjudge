@@ -51,4 +51,4 @@ $DOMJUDGE_ADMINS = array('domjudge_jury', 'admin');
 //   - EXT... are comma separated additional detected language extensions.
 // This list only needs to be modified when additional languages are
 // added and should be kept in sync with the list in submit-config.h.in.
-define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,csharp,cs AWK,awk Python,py Bash,bash');
+define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,csharp,cs AWK,awk Python,py Bash,bash Ada,adb,ads Fortran,f95,f90 Scala,scala Lua,lua');

@@ -33,6 +33,11 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('ti
 
 UPDATE `configuration` SET `description` = 'Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged.' WHERE `name` = 'lazy_eval_results';
 
+INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('adb',    'Ada',     0, 1, 1);
+INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('f95',    'Fortran', 0, 1, 1);
+INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('scala',  'Scala',   0, 1, 1.5);
+INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('lua',    'Lua',     0, 1, 1);
+
 --
 -- Finally remove obsolete structures after moving data
 --
