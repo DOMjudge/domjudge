@@ -678,15 +678,15 @@ fixed input and/or output, DOMjudge has the possibility to change the
 way submissions are run and checked for correctness.
 
 The back end script <tt>testcase_run.sh</tt> that handles
-the running and checking of submissions, calls separate
-programs for running and comparison of the results. These can be
+the running and checking of submissions, calls separate programs
+for running submissions and comparison of the results. These can be
 specialised and adapted to the requirements per problem. For this, one
 has to create programs or scripts named <tt>run_&lt;tag&gt;</tt> and/or
 <tt>compare_&lt;tag&gt;</tt> in the <tt>lib/judge</tt>
 directory, see <tt>run</tt> and <tt>compare</tt> for examples and
 usage information. Then the <tt>&lt;tag&gt;</tt> must be
 specified in the <tt>special_run</tt> and/or <tt>special_compare</tt>
-fields of the problem (empty means that the default script run and
+fields of the problem (an empty value means that the default run and
 compare scripts should be used). To simplify the use of custom run and
 compare programs, DOMjudge comes with wrapper scripts that handle the
 tedious, standard part. In most cases it will probably be convenient
@@ -701,15 +701,17 @@ Implementing a special compare program, also called a
 that is called directly (by <tt>testcase_run.sh</tt>) or use a copy of
 the <tt>compare_wrapper</tt> script. In the first case, the compare
 program must adhere to the <ref id="validator" name="ICPC validator
-interface">. In the latter case, the wrapper generates the XML result
+interface">. The second case is probably the easiest solution: the
+script <tt>compare_wrapper</tt> generates the XML result
 file and handles redirection of input/output for you. Use this
-wrapper by copying it to <tt>compare_&lt;tag&gt;</tt> and let the
-jury write a checker program which can be called as
+wrapper by copying or symlinking it to <tt>compare_&lt;tag&gt;</tt>
+and let the jury write a checker program which can be called as
 <code>
 check_<tag> <testdata.in> <program.out> <testdata.out>
 </code>
 This program should write some kind of difference to stdout. No
-output results in a <em>correct</em> verdict and a nonzero exitcode in
+output from the checker program results in a <em>correct</em> verdict
+and a nonzero exitcode in
 an internal (system) error. See as an example the included program
 <tt>check_float</tt>, which compares floating point numbers. The name
 of the check program and any parameters can also be modified in the

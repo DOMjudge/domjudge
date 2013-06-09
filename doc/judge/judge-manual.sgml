@@ -196,7 +196,10 @@ run before a `TIMELIMIT' response is given (to be multiplied possibly by a langu
 factor). Problems can be imported and exported into and from DOMjudge
 using zip-files that contain the problem metadata and testdata files.
 See appendix <ref id="problem-format" name="DOMjuge problem format
-specification">.
+specification">. Problems can have special <em>compare</em> and
+<em>run</em> scripts associated to them, to deal with problem
+statements that require non-standard evaluation. For more details see
+the administrator's manual.
 
 The `Languages' overview is quite the same. It has a timefactor
 column; submissions in a language that has time factor 2 will be
@@ -351,7 +354,12 @@ for more details about the submission (team name, submittime etc),
 a list of judgings and the details for the most recent judging
 (runtime, outputs, diff with testdata). There is also a switch
 available between newest 50, only unverified, only unjudged or
-all submissions.
+all submissions. The default (coloured) diff output shows differences
+on numbered lines side by side separated by a character indicating how
+the lines differ: <bf><tt>!</tt></bf> for different contents,
+<bf><tt>$</tt></bf> for different or missing end-of-line characters,
+and one of <bf><tt>&lt;&gt;</tt></bf> when there are no more lines at
+the end of the other file.
 
 Under the submission details the `view source code' link can be
 clicked to inspect the source code. If the team has submitted code
