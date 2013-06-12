@@ -54,9 +54,9 @@ if ( IS_JURY ) {
 }
 if ( IS_PUBLIC ) {
 	echo "<script type=\"text/javascript\" src=\"../js/djfav.js\"></script>\n";
-} else {
-	echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
 }
+echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
+
 if ( ! empty($extrahead) ) echo $extrahead;
 ?>
 </head>
