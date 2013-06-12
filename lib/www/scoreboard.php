@@ -538,9 +538,14 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	// The static scoreboard does not support filtering
 	if ( $filter!==FALSE && $static!==TRUE ) {
 
-		$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, name, country
-		                  FROM team_affiliation');
-		$categids = $DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category');
+		$categids = $DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category ' .
+				    (IS_JURY ? '' : 'WHERE visible = 1 ' ));
+		// show only affilids/countries with visible teams
+		$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, team_affiliation.name, country
+				  FROM team_affiliation
+				  JOIN team USING(affilid)
+				  WHERE categoryid IN (%As)
+				  GROUP BY affilid', array_keys($categids));
 
 		$affilids  = array();
 		$countries = array();
