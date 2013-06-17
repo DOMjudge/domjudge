@@ -102,7 +102,16 @@ of new releases.
 
 The authors can be reached at the following address:
 <htmlurl name="domjudge-devel@lists.a-eskwadraat.nl"
-url="mailto:domjudge-devel@lists.a-eskwadraat.nl">
+url="mailto:domjudge-devel@lists.a-eskwadraat.nl">.  You need
+to be subscribed before you can post. See
+<htmlurl name="the list information page"
+url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
+for subscription and more details.
+
+Some developers and users of DOMjudge linger on the IRC channel
+dedicated to DOMjudge on the Freenode network:
+server <tt>irc.freenode.net</tt>, channel <tt>#domjudge</tt>.
+Feel free to drop by with your questions and comments.
 
 <chapt>General
 <p>
