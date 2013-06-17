@@ -192,6 +192,10 @@ to be subscribed before you can post. See
 url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
 for subscription and more details.
 
+Some developers and users of DOMjudge linger on the IRC channel
+dedicated to DOMjudge on the Freenode network:
+server <tt>irc.freenode.net</tt>, channel <tt>#domjudge</tt>.
+Feel free to drop by with your questions and comments.
 
 <chapt>Installation and configuration <label id="install_config">
 <p>
@@ -202,6 +206,7 @@ follows after that.
 
 
 <sect>Quick installation
+
 <p>
 <em>Note:</em> this is not a replacement for the thorough installation
 instructions below, but more a cheat-sheet for those who've already
