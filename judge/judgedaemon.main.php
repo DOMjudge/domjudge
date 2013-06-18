@@ -12,26 +12,22 @@ require(ETCDIR . '/judgehost-config.php');
 
 $waittime = 5;
 
-$myhost = trim(`hostname | cut -d . -f 1`);
-
 define ('SCRIPT_ID', 'judgedaemon');
-define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 define ('PIDFILE', RUNDIR.'/judgedaemon.pid');
-
-require(LIBDIR . '/init.php');
 
 function usage()
 {
 	echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
 	    "Start the judgedaemon.\n\n" .
 	    "  -d       daemonize after startup\n" .
+	    "  -n <id>  daemon number\n" .
 	    "  -v       set verbosity to LEVEL (syslog levels)\n" .
 	    "  -h       display this help and exit\n" .
 	    "  -V       output version information and exit\n\n";
 	exit;
 }
 
-$options = getopt("dv:hV");
+$options = getopt("dv:n:hV");
 // With PHP version >= 5.3 we can also use long options.
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
 if ( $options===FALSE ) {
@@ -40,14 +36,35 @@ if ( $options===FALSE ) {
 }
 if ( isset($options['d']) ) $options['daemon']  = $options['d'];
 if ( isset($options['v']) ) $options['verbose'] = $options['v'];
+if ( isset($options['n']) ) $options['daemonid'] = $options['n'];
 
 if ( isset($options['V']) ) version();
 if ( isset($options['h']) ) usage();
 
+$myhost = trim(`hostname | cut -d . -f 1`);
+if ( isset($options['daemonid']) ) {
+	if ( preg_match('/^\d+$/', $options['daemonid'] ) ) {
+		$myhost = $myhost . "-" . $options['daemonid'];	
+	} else {
+		echo "Invalid value for daemonid, must be positive integer\n";
+		exit(1);
+	}
+}
+
+define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
+require(LIBDIR . '/init.php');
+
 setup_database_connection();
 
 $verbose = LOG_INFO;
-if ( isset($options['verbose']) ) $verbose = $options['verbose'];
+if ( isset($options['verbose']) ) {
+	if ( preg_match('/^\d+$/', $options['verbose'] ) ) {
+		$verbose = $options['verbose'];	
+	} else {
+		echo "Invalid value for verbose, must be positive integer\n";
+		exit(1);
+	}
+}
 
 if ( DEBUG & DEBUG_JUDGE ) {
 	$verbose = LOG_DEBUG;
@@ -62,7 +79,11 @@ putenv('DJ_JUDGEDIR='    . JUDGEDIR);
 putenv('DJ_LIBDIR='      . LIBDIR);
 putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
 putenv('DJ_LOGDIR='      . LOGDIR);
-putenv('RUNUSER='        . RUNUSER);
+if ( isset($options['daemonid']) ) {
+	putenv('RUNUSER='    . RUNUSER . '-' . $options['daemonid']);
+} else {
+	putenv('RUNUSER='    . RUNUSER);
+}
 
 foreach ( $EXITCODES as $code => $name ) {
 	$var = 'E_' . strtoupper(str_replace('-','_',$name));
@@ -281,7 +302,7 @@ while ( TRUE ) {
 
 function judge($mark, $row, $judgingid)
 {
-	global $EXITCODES, $DB, $cid, $myhost, $workdirpath;
+	global $EXITCODES, $DB, $cid, $myhost, $options, $workdirpath;
 
 	// Set configuration variables for called programs
 	// Call dbconfig_init() to prevent using cached values.
@@ -291,6 +312,9 @@ function judge($mark, $row, $judgingid)
 	putenv('MEMLIMIT='      . dbconfig_get('memory_limit'));
 	putenv('FILELIMIT='     . dbconfig_get('filesize_limit'));
 	putenv('PROCLIMIT='     . dbconfig_get('process_limit'));
+
+	$cpuset_opt = "";
+	if ( isset($options['daemonid']) ) $cpuset_opt = "-n ${options['daemonid']}";
 
 	// create workdir for judging
 	$workdir = "$workdirpath/c$cid-s$row[submitid]-j$judgingid";
@@ -326,7 +350,7 @@ function judge($mark, $row, $judgingid)
 	}
 
 	// Compile the program.
-	system(LIBJUDGEDIR . "/compile.sh $row[langid] '$workdir' " .
+	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt $row[langid] '$workdir' " .
 	       implode(' ', $files), $retval);
 
 	// what does the exitcode mean?
@@ -412,7 +436,7 @@ function judge($mark, $row, $judgingid)
 	if ( $retval!=0 ) error("Could not copy program to '$programdir'");
 
 	// do the actual test-run
-	system(LIBJUDGEDIR . "/testcase_run.sh $tcfile[input] $tcfile[output] " .
+	system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 	       "$row[maxruntime] '$testcasedir' " .
 	       "'$row[special_run]' '$row[special_compare]'", $retval);
 

@@ -18,4 +18,11 @@ group domjudge {
 	memory {
 # This section is an empty stub: the limits are set by runguard.
 	}
+# Change the cpuset.cpus line to a range specifying the cores you are
+# going to use.  e.g. if you have a quad core machine, set cpuset.cpus = 0-3
+# and then run 4 judgedaemons.
+	cpuset {
+		cpuset.mems = 0;
+		cpuset.cpus = 0;
+	}
 }
