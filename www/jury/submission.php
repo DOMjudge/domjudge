@@ -8,6 +8,8 @@
 
 $pagename = basename($_SERVER['PHP_SELF']);
 
+$ext_id = (int)@$_REQUEST['ext_id'];
+
 $id = (int)@$_REQUEST['id'];
 if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
 
@@ -26,6 +28,12 @@ require('init.php');
 if ( isset($jid) && ! $id ) {
 	$id = $DB->q('MAYBEVALUE SELECT submitid FROM judging
 	              WHERE judgingid = %i', $jid);
+}
+
+// If external id is set but not id, try to deduce it from the database.
+if ( isset($ext_id) && ! $id ) {
+	$id = $DB->q('MAYBEVALUE SELECT submitid FROM submission
+	              WHERE externalid = %i', $ext_id);
 }
 
 $title = 'Submission s'.@$id;
