@@ -167,8 +167,10 @@ function compute_lcsdiff($line1, $line2) {
 require('init.php');
 
 $id = getRequestID();
+
 if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
 if ( !empty($_GET['rejudgingid']) ) $rejudgingid = (int)$_GET['rejudgingid'];
+if ( !empty($_GET['ext_id']) )  $ext_id = (int)@$_GET['ext_id'];
 
 // Also check for $id in claim POST variable as submissions.php cannot
 // send the submission ID as a separate variable.
@@ -189,10 +191,16 @@ if ( isset($jid) && ! $id ) {
 	              WHERE judgingid = %i', $jid);
 }
 
-// If jid is not set but rejudgingid, try to deduce the jid from the database.
+// If jid is not set but rejudgingid is, try to deduce the jid from the database.
 if ( !isset($jid) && isset($rejudgingid) ) {
 	$jid = $DB->q('MAYBEVALUE SELECT judgingid FROM judging
 	               WHERE submitid=%i AND rejudgingid = %i', $id, $rejudgingid);
+}
+
+// If external id is set but not id, try to deduce it from the database.
+if ( isset($ext_id) && ! $id ) {
+	$id = $DB->q('MAYBEVALUE SELECT submitid FROM submission
+	              WHERE externalid = %i', $ext_id);
 }
 
 $title = 'Submission s'.@$id;
