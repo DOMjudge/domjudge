@@ -3,7 +3,8 @@
 #ifndef _RUNGUARD_CONFIG_
 #define _RUNGUARD_CONFIG_
 
-#define VALID_USERS "@RUNUSER@"
+/* Lots of suffixed names because we want to support multiple judgedaemons per host.  This allows 8 of them.*/
+#define VALID_USERS "@RUNUSER@,@RUNUSER@-0,@RUNUSER@-1,@RUNUSER@-2,@RUNUSER@-3,@RUNUSER@-4,@RUNUSER@-5,@RUNUSER@-6,@RUNUSER@-7"
 
 #define CHROOT_PREFIX "@judgehost_judgedir@"
 

@@ -108,6 +108,7 @@ char  *exitfilename;
 char  *timefilename;
 #ifdef USE_CGROUPS
 char  *cgroupname;
+const char *cpuset;
 #endif
 
 int runuid;
@@ -159,6 +160,7 @@ struct option const long_opts[] = {
 	{"memsize",    required_argument, NULL,         'm'},
 	{"filesize",   required_argument, NULL,         'f'},
 	{"nproc",      required_argument, NULL,         'p'},
+	{"cpuset",     required_argument, NULL,         'P'},
 	{"no-core",    no_argument,       NULL,         'c'},
 	{"stdout",     required_argument, NULL,         'o'},
 	{"stderr",     required_argument, NULL,         'e'},
@@ -255,6 +257,7 @@ Run COMMAND with restrictions.\n\
   -f, --filesize=SIZE    set maximum created filesize to SIZE kB;\n");
 	printf("\
   -p, --nproc=N          set maximum no. processes to N\n\
+  -P, --cpuset=ID        use only processor number ID\n\
   -c, --no-core          disable core dumps\n\
   -o, --stdout=FILE      redirect COMMAND stdout output to FILE\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
@@ -363,9 +366,23 @@ void cgroup_create()
 	cgroup_add_value_int64(cg_controller, "memory.limit_in_bytes", memsize);
 	cgroup_add_value_int64(cg_controller, "memory.memsw.limit_in_bytes", memsize);
 
+	/* Set up cpu restrictions; we pin the task to a specific set of cpus,
+	   based on the environment variable CPUSET. We also give it exclusive
+	   access to those cores, and set no limits on memory nodes */
+	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
+		cg_controller = cgroup_add_controller(cg, "cpuset");
+		/* To make a cpuset exclusive, some additional setup outside of domjudge is
+		   required, so for now, we will leave this commented out. */
+		/* cgroup_add_value_int64(cg_controller, "cpuset.cpu_exclusive", 1); */
+		cgroup_add_value_string(cg_controller, "cpuset.mems", "0");
+		cgroup_add_value_string(cg_controller, "cpuset.cpus", cpuset);
+	} else {
+		fprintf(stderr, "CPUSET undefined\n");
+	}
+
 	/* Perform the actual creation of the cgroup */
 	ret = cgroup_create_cgroup(cg, 1);
-	if ( ret!=0) {
+	if ( ret!=0 ) {
 		error(0,"creating cgroup - %s(%d)", cgroup_strerror(ret), ret);
 	}
 
@@ -638,7 +655,7 @@ int main(int argc, char **argv)
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:co:e:s:E:T:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:E:T:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -693,6 +710,9 @@ int main(int argc, char **argv)
 			break;
 		case 'p': /* nproc option */
 			nproc = (rlim_t) readoptarg("process limit",1,LONG_MAX);
+			break;
+		case 'P': /* cpuset option */
+			cpuset = optarg;
 			break;
 		case 'c': /* no-core option */
 			no_coredump = 1;

@@ -73,8 +73,33 @@ runcheck ()
 # Error and logging functions
 . "$DJ_LIBDIR/lib.error.sh"
 
+
+CPUSET=""
+CPUSET_OPT=""
+# Do argument parsing
+OPTIND=1 # reset if necessary
+while getopts "n:" opt; do
+	case $opt in
+		n)
+			CPUSET="$OPTARG"
+			;;
+		:)
+			echo "Option -$OPTARG requires an argument." >&2
+			;;
+	esac
+done
+# Shift any of the arguments out of the way
+shift $((OPTIND-1))
+[ "$1" = "--" ] && shift
+
+if [ -n "$CPUSET" ]; then
+	CPUSET_OPT="-P $CPUSET"
+	LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`-$CPUSET.log"
+else
+	LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`.log"
+fi
+
 # Logging:
-LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`.log"
 LOGLEVEL=$LOG_DEBUG
 PROGNAME="`basename $0`"
 
@@ -170,7 +195,7 @@ $GAINROOT cp -pR /dev/null ../dev/null
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck ./run testdata.in program.out \
-	$GAINROOT $RUNGUARD ${DEBUG:+-v} ${USE_CHROOT:+-r "$PWD/.."} -u "$RUNUSER" \
+	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT ${USE_CHROOT:+-r "$PWD/.."} -u "$RUNUSER" \
 	-C $TIMELIMIT -t $((2*TIMELIMIT)) -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
 	-c -s $FILELIMIT -e program.err -E program.exit -T program.time -- \
 	$PREFIX/$PROGRAM 2>error.tmp
