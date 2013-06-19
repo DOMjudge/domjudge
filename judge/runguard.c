@@ -71,6 +71,7 @@
 #if ( USE_CGROUPS == 1 )
 #include <inttypes.h>
 #include <libcgroup.h>
+#include <sched.h>
 #else
 #undef USE_CGROUPS
 #endif
@@ -344,7 +345,7 @@ void output_cgroup_stats()
 		error(0,"get cgroup value - %s(%d)", cgroup_strerror(ret), ret);
 	}
 
-	fprintf(stderr, "Total memory used: %" PRId64 " kb\n", max_usage/1024);
+	fprintf(stderr, "Total memory used: %" PRId64 " kB\n", max_usage/1024);
 
 	cgroup_free(&cg);
 }
@@ -815,8 +816,9 @@ int main(int argc, char **argv)
 	snprintf(cgroupname, 256, "/domjudge/dj_cgroup_%d/", getpid());
 
 	cgroup_create();
-#endif
 
+	unshare(CLONE_FILES|CLONE_FS|CLONE_NEWIPC|CLONE_NEWNET|CLONE_NEWNS|CLONE_NEWUTS|CLONE_SYSVSEM);
+#endif
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
 		error(errno,"cannot fork");
