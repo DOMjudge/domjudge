@@ -56,7 +56,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec java -Xrs -Xss8m -Xmx${MEMLIMITJAVA}k $MAINCLASS
+exec java -Xrs -Xss8m -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 $MAINCLASS
 EOF
 
 chmod a+x $DEST

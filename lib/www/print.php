@@ -46,7 +46,7 @@ function printyn ($val) {
 }
 
 /**
- * given 2004-12-31 15:43:05, returns 15:43
+ * print a time dependent on configured time_format.
  * if $contesttime is set, show time from start of contest, after
  * removing ignored intervals.
  */
@@ -61,7 +61,7 @@ function printtime($datetime, $contesttime = FALSE) {
 		$h = $sign*$reltime;
 		return sprintf("%d:%02d", $h, $m);
 	} else {
-		return htmlspecialchars(substr($datetime,11,5));
+		return htmlspecialchars(date(dbconfig_get('time_format', 'H:i'), strtotime($datetime)));
 	}
 }
 
@@ -133,11 +133,11 @@ function printtimerel($rel_time) {
 function str_cut ($str, $size) {
 	// is the string already short enough?
 	// we count '…' for 1 extra chars.
-	if( strlen($str) <= $size+1 ) {
+	if( mb_strlen($str) <= $size+1 ) {
 		return $str;
 	}
 
-	return substr($str, 0, $size) . '…';
+	return mb_substr($str, 0, $size) . '…';
 }
 
 /**

@@ -18,7 +18,9 @@ if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid affilia
 
 $cmd = @$_GET['cmd'];
 
-if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
+if ( $cmd == 'add' || $cmd == 'edit' ) {
+
+	requireAdmin();
 
 	$title = "Affiliation: " . htmlspecialchars($cmd);
 
@@ -37,19 +39,19 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 			htmlspecialchars($row['affilid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__affilid_\">Affiliation ID:</label></td><td>";
-		echo addInput('data[0][affilid]', null, 11, 10);
+		echo addInput('data[0][affilid]', null, 11, 10, 'required');
 	}
 	echo "</td></tr>\n";
 
 ?>
 
 <tr><td><label for="data_0__name_">Name:</label></td>
-<td><?php echo addInput('data[0][name]', @$row['name'], 40, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 40, 255, 'required')?></td></tr>
 
 <tr><td><label for="data_0__country_">Country:</label></td>
-<td><?php echo addInput('data[0][country]', @$row['country'], 4, 3)?>
+<td><?php echo addInput('data[0][country]', @$row['country'], 4, 3, 'pattern="[A-Z]{3}" title="three uppercase letters (ISO-3166-1 alpha-3)"')?>
 <a target="_blank"
-href="http://www.iso.org/iso/country_codes/iso_3166_code_lists/country_names_and_code_elements.htm"><img
+href="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Current_codes"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__comments_">Comments:</label></td>
@@ -62,7 +64,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','team_affiliation') .
 	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
 	addEndForm();
 
 	require(LIBWWWDIR . '/footer.php');
@@ -82,10 +84,10 @@ $countryflag = "../images/countries/" . urlencode($data['country']) . ".png";
 echo "<h1>Affiliation: ".htmlspecialchars($data['name'])."</h1>\n\n";
 
 echo "<table>\n";
-echo '<tr><td scope="row">ID:</td><td>' . htmlspecialchars($data['affilid']) . "</td></tr>\n";
-echo '<tr><td scope="row">Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
+echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['affilid']) . "</td></tr>\n";
+echo '<tr><td>Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
 
-echo '<tr><td scope="row">Logo:</td><td>';
+echo '<tr><td>Logo:</td><td>';
 
 if ( is_readable($affillogo) ) {
 	echo '<img src="' . $affillogo . '" alt="' .
@@ -94,7 +96,7 @@ if ( is_readable($affillogo) ) {
 	echo "not available</td></tr>\n";
 }
 
-echo '<tr><td scope="row">Country:</td><td>' . htmlspecialchars($data['country']);
+echo '<tr><td>Country:</td><td>' . htmlspecialchars($data['country']);
 
 if ( is_readable($countryflag) ) {
 	echo ' <img src="' . $countryflag . '" alt="' .
@@ -103,7 +105,7 @@ if ( is_readable($countryflag) ) {
 echo "</td></tr>\n";
 
 if ( !empty($data['comments']) ) {
-	echo '<tr><td scope="row">Comments:</td><td>' .
+	echo '<tr><td>Comments:</td><td>' .
 		nl2br(htmlspecialchars($data['comments'])) . "</td></tr>\n";
 }
 
@@ -134,9 +136,7 @@ if ( $teams->count() == 0 ) {
 	}
 	echo "</tbody>\n</table>\n\n";
 
-	echo "<p>";
 	putTeamRow($cdata,$listteams);
-	echo "</p>\n\n";
 }
 
 require(LIBWWWDIR . '/footer.php');

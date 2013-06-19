@@ -93,40 +93,33 @@ if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
 database_retry_connect($waittime);
 
-$first = True;
-while( !$exitsignalled )
-{
-	try {
-		// Retrieve hostname and check database for judgehost entry
-		$row = $DB->q('MAYBETUPLE SELECT * FROM judgehost WHERE hostname = %s'
-		             , $myhost);
-		if ( ! $row ) {
-			if($first)
-				logmsg(LOG_WARNING, "No database entry found for me ($myhost)");
-			$first = False;
-			sleep($waittime);
-			continue;
-		}
-		$myhost = $row['hostname'];
-		unset($first);
-		break;
-	}
-	catch( Exception $e ) {
-		$msg = "MySQL server has gone away";
-		if( ! strncmp($e->getMessage(), $msg, strlen($msg)) ) {
-			logmsg(LOG_WARNING, $msg);
-			database_retry_connect();
-			continue;
-		}
-		throw $e;
-	}
+// Check database for judgehost entry
+$row = $DB->q('MAYBETUPLE SELECT * FROM judgehost WHERE hostname = %s'
+             , $myhost);
+if ( ! $row ) {
+	logmsg(LOG_INFO, "No database entry found for me ($myhost), registering");
+	$DB->q('INSERT INTO judgehost (hostname) VALUES (%s)'
+	      , $myhost);
 }
+
+// Warn when chroot has been disabled. This has security implications.
+if ( ! USE_CHROOT ) {
+	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
+}
+
+// Create directory where to test submissions
+$workdirpath = JUDGEDIR . "/$myhost";
+system("mkdir -p $workdirpath/testcase", $retval);
+if ( $retval != 0 ) error("Could not create $workdirpath");
+chmod("$workdirpath/testcase", 0700);
 
 // If there are any unfinished judgings in the queue in my name,
 // they will not be finished. Give them back.
-$res = $DB->q('SELECT judgingid, submitid FROM judging WHERE
+$res = $DB->q('SELECT judgingid, submitid, cid FROM judging WHERE
                judgehost = %s AND endtime IS NULL AND valid = 1', $myhost);
 while ( $jud = $res->next() ) {
+	$workdir = "$workdirpath/c$jud[cid]-s$jud[submitid]-j$jud[judgingid]";
+	@chmod($workdir, 0700);
 	$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
 	       $jud['judgingid']);
 	$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
@@ -134,11 +127,6 @@ while ( $jud = $res->next() ) {
 	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] . " in my name; given back");
 	auditlog('judging', $jud['judgingid'], 'given back', null, $myhost);
 }
-
-// Create directory where to test submissions
-$workdirpath = JUDGEDIR . "/$myhost";
-system("mkdir -p $workdirpath/testcase", $retval);
-if ( $retval != 0 ) error("Could not create $workdirpath");
 
 $waiting = FALSE;
 $active = TRUE;
@@ -316,11 +304,14 @@ function judge($mark, $row, $judgingid)
 		if ( !rename($workdir, $oldworkdir) ) {
 			error("Could not rename stale working directory to '$oldworkdir'");
 		}
+		@chmod($oldworkdir, 0700);
 		warning("Found stale working directory; renamed to '$oldworkdir'");
 	}
 
 	system("mkdir -p '$workdir/compile'", $retval);
 	if ( $retval != 0 ) error("Could not create '$workdir/compile'");
+
+	if ( !chdir($workdir) ) error("Could not chdir to '$workdir'");
 
 	// Get the source code from the DB and store in local file(s)
 	$sources = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, sourcecode, filename
@@ -351,7 +342,9 @@ function judge($mark, $row, $judgingid)
 
 	// Only continue running testcases when compilation was successful.
 	// FIXME(?): result is still returned as in EXITCODES.
-	if ( ($result = $EXITCODES[$retval])=='correct' ) {
+	if ( ($result = $EXITCODES[$retval])=='compiler-error' ) {
+		store_result($result, $row, $judgingid);
+	} else {
 
 	logmsg(LOG_DEBUG, "Fetching testcases from database");
 	$testcases = $DB->q("KEYTABLE SELECT rank AS ARRAYKEY,
@@ -367,11 +360,15 @@ function judge($mark, $row, $judgingid)
 	// Optionally create chroot environment
 	if ( USE_CHROOT && CHROOT_SCRIPT ) {
 		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." start'");
-		chdir($workdir);
 		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}
 
+	// Make sure the workdir is accessible for the domjudge-run user.	
+	// Will be revoked again after this run finished.
+	chmod ($workdir, 0755);
+
+	$final = FALSE;
 	foreach ( $testcases as $tc ) {
 
 	logmsg(LOG_DEBUG, "Running testcase $tc[rank]...");
@@ -451,49 +448,36 @@ function judge($mark, $row, $judgingid)
 
 	// Optimization: stop judging when the result is already known.
 	// This should report a final result when all runresults are non-null!
-	if ( ($result = getFinalResult($runresults))!==NULL ) break;
+	if ( !$final && ($result = getFinalResult($runresults))!==NULL ) {
+		$final = TRUE;
+
+		store_result($result, $row, $judgingid);
+
+		if ( dbconfig_get('lazy_eval_results', true) ) {
+			break;
+		}
+	}
 
 	} // end: for each testcase
+
+	// revoke readablity for domjudge-run user to this workdir
+	chmod($workdir, 0700);
 
 	// Optionally destroy chroot environment
 	if ( USE_CHROOT && CHROOT_SCRIPT ) {
 		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
-		chdir($workdir);
 		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}
 
-	} // end: if compile result==0
+	} // end: if no compile-error
 
 	if ( $result==NULL ) error("No final result obtained");
 
-	// Start a transaction. This will provide extra safety if the table type
-	// supports it.
-	$DB->q('START TRANSACTION');
-	// pop the result back into the judging table
-	$DB->q('UPDATE judging SET endtime = %s, result = %s
+	// Store judging endtime, result was already stored.
+	$DB->q('UPDATE judging SET endtime = %s
 	        WHERE judgingid = %i AND judgehost = %s',
-	       now(), $result, $judgingid, $myhost);
-
-	// recalculate the scoreboard cell (team,problem) after this judging
-	calcScoreRow($cid, $row['teamid'], $row['probid']);
-
-	// log to event table if no verification required
-	// (case of verification required is handled in www/jury/verify.php)
-	if ( ! dbconfig_get('verification_required', 0) ) {
-		$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-		                           submitid, judgingid, description)
-		        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
-		       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
-		       $row['submitid'], $judgingid);
-		if ( $result == 'correct' ) {
-			$DB->q('INSERT INTO balloon (submitid)
-			        VALUES(%i)',
-			        $row['submitid']);
-		} 
-	}
-
-	$DB->q('COMMIT');
+	       now(), $judgingid, $myhost);
 
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
@@ -528,4 +512,43 @@ function database_retry_connect()
 			throw $e;
 		}
 	}
+}
+
+function store_result($result, $row, $judgingid)
+{
+	global $DB, $cid, $myhost;
+
+	// Start a transaction. This will provide extra safety if the table type
+	// supports it.
+	$DB->q('START TRANSACTION');
+	// pop the result back into the judging table
+	$DB->q('UPDATE judging SET result = %s
+	        WHERE judgingid = %i AND judgehost = %s',
+	       $result, $judgingid, $myhost);
+
+	// recalculate the scoreboard cell (team,problem) after this judging
+	calcScoreRow($cid, $row['teamid'], $row['probid']);
+
+	// log to event table if no verification required
+	// (case of verification required is handled in www/jury/verify.php)
+	if ( ! dbconfig_get('verification_required', 0) ) {
+		$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
+		                           submitid, judgingid, description)
+		        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
+		       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
+		       $row['submitid'], $judgingid);
+		if ( $result == 'correct' ) {
+			// prevent duplicate balloons in case of multiple correct submissions
+			$numcorrect = $DB->q('VALUE SELECT count(submitid)
+			                      FROM balloon LEFT JOIN submission USING(submitid)
+			                      WHERE valid = 1 AND probid = %s AND teamid = %s',
+			                      $row['probid'], $row['teamid']);
+			if ( $numcorrect == 0 ) {
+				$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
+				       $row['submitid']);
+			}
+		}
+	}
+
+	$DB->q('COMMIT');
 }

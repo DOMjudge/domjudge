@@ -103,7 +103,6 @@ function checkUploadForm()
 	var langelt = document.getElementById("langid");
 	var language = langelt.options[langelt.selectedIndex].value;
 	var languagetxt = langelt.options[langelt.selectedIndex].text;
-	var filebut = document.getElementById("codebutton");
 	var fileelt = document.getElementById("maincode");
 	var filename = fileelt.value;
 	var probelt = document.getElementById("probid");
@@ -112,7 +111,7 @@ function checkUploadForm()
 	var auxfiles = document.getElementsByName("code[]");
 
 	var error = false;
-	langelt.className = probelt.className = filebut.className = "";
+	langelt.className = probelt.className = "";
 	if ( language == "" ) {
 		langelt.focus();
 		langelt.className = "errorfield";
@@ -124,7 +123,6 @@ function checkUploadForm()
 		error = true;
 	}
 	if ( filename == "" ) {
-		filebut.className = "errorfield";
 		return false;
 	}
 
@@ -153,19 +151,14 @@ function checkUploadForm()
 
 }
 
-function resetUploadForm(refreshtime) {
-	var filebut = document.getElementById("codebutton");
+function resetUploadForm(refreshtime, maxfiles) {
 	var addfile = document.getElementById("addfile");
 	var auxfiles = document.getElementById("auxfiles");
-	var selecttext = "Select file...";
-	filebut.value = selecttext;
 	addfile.disabled = true;
 	auxfiles.innerHTML = "";
 	doReload = true;
 	setTimeout('reloadPage()', refreshtime * 1000);
 }
-
-var W3CDOM = (document.createElement && document.getElementsByTagName);
 
 var doReload = true;
 
@@ -183,43 +176,20 @@ function initReload(refreshtime)
 	setTimeout('reloadPage()', refreshtime * 1000);
 }
 
-function initFileUploads() {
-	if (!W3CDOM) return;
-	var selecttext = "Select file...";
-	var fakeFileUpload = document.createElement('span');
-	fakeFileUpload.className = 'fakefile';
-	var input = document.createElement('input');
-	input.type = 'button';
-	input.value = selecttext;
-	input.id = "codebutton";
-	fakeFileUpload.appendChild(input);
-	var x = document.getElementsByTagName('input');
-	for (var i=0;i<x.length;i++) {
-		if (x[i].type != 'file') continue;
-		if (x[i].parentNode.className != 'fileinputs') continue;
-		x[i].className = 'file hidden';
-		var clone = fakeFileUpload.cloneNode(true);
-		x[i].parentNode.appendChild(clone);
-		x[i].relatedElement = clone.getElementsByTagName('input')[0];
-		// stop refresh when clicking a button.
-		x[i].onclick = function() { doReload = false; }
-		x[i].onchange = x[i].onmouseout = function () {
-			if ( this.value == "" ) {
-				this.relatedElement.value = selecttext;
-			} else {
-				var filename = this.value;
-				// Opera prepends a fake fs path: C:\fakepath\. Strip that.
-				var fake = "fakepath\\";
-				if ( filename.indexOf(fake) >= 0 ) {
-					filename = filename.substr(filename.lastIndexOf(fake)+fake.length);
-				}
-				// some other browsers (Konqueror at least) may prepend the full FS path
-				if ( filename.indexOf(File.separator) >= 0 ) {
-					filename = filename.substr(filename.lastIndexOf(File.separator)+1);
-				}
-				detectProblemLanguage(filename);
-				this.relatedElement.value = filename;
-			}
+function initFileUploads(maxfiles) {
+	var fileelt = document.getElementById("maincode");
+
+	if ( maxfiles > 1 ) {
+		var fileadd = document.getElementById("addfile");
+		var supportshtml5multi = ("multiple" in fileelt);
+		if ( supportshtml5multi ) {
+			fileadd.style.display = "none";
+		}
+	}
+	fileelt.onclick = function() { doReload = false; }
+	fileelt.onchange = fileelt.onmouseout = function () {
+		if ( this.value != "" ) {
+			detectProblemLanguage(this.value);
 		}
 	}
 }
@@ -237,7 +207,6 @@ function addFileUpload() {
 	var input = document.createElement('input');
 	input.type = 'file';
 	input.name = 'code[]';
-	input.size = '50';
 	var br = document.createElement('br');
 
 	document.getElementById('auxfiles').appendChild( input );
@@ -253,3 +222,45 @@ function togglelastruns() {
 		}
 	}
 }
+
+function updateClock()
+{	
+	curtime = initial+offset;
+	date.setTime(curtime*1000);
+
+	var fmt = "";
+	if (curtime >= starttime && curtime < endtime ) {
+		var left = endtime - curtime;
+		var what = "time left: ";
+	} else if (curtime >= activatetime && curtime < starttime ) {
+		var left = starttime - curtime;
+		var what = "time to start: ";
+	} else {
+		var left = 0;
+		var what = "";
+	}
+
+	if ( left ) {
+		if ( left > 24*60*60 ) {
+			d = Math.floor(left/(24*60*60));
+			fmt += d + "d ";
+			left -= d * 24*60*60;
+		}
+		if ( left > 60*60 ) {
+			h = Math.floor(left/(60*60));
+			fmt += h + ":";
+			left -= h * 60*60;
+		} 
+		m = Math.floor(left/60);
+		if ( m < 10 ) { fmt += "0"; }
+		fmt += m + ":";
+		left -= m * 60;
+		if ( left < 10 ) { fmt += "0"; }
+		fmt += left;
+	}
+
+	timecurelt.innerHTML = date.toString().replace(/(\w{3})\ (\w{3})\ (\d{2})\ (\d{4})\ (\d{2}:\d{2}:\d{2}).*\((\w+)\)/, "$1 $3 $2 $4 $5 $6");
+	timeleftelt.innerHTML = what + fmt;
+	offset++;
+}
+

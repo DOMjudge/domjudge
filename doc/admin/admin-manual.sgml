@@ -72,7 +72,7 @@ This is a (rough) list of the requirements for DOMjudge.
 
 <itemize>
 <item>At least one machine running Linux, with (sudo) root access
-<item>Apache web server with PHP 5 and PHP-command line interface
+<item>Apache web server with PHP 5.2 or newer and PHP-command line interface
 <item>MySQL database server version 4.1.0 or newer
 <item>Compilers for the languages you want to support
 </itemize>
@@ -90,7 +90,7 @@ Study Association <htmlurl name="A-Eskwadraat"
 url="http://www.a-eskwadraat.nl/">, <htmlurl name="Utrecht University"
 url="http://www.uu.nl/">, The Netherlands.
 
-It is Copyright (c) 2004 - 2012 by The DOMjudge Developers.
+It is Copyright (c) 2004 - 2013 by The DOMjudge Developers.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the <url name="GNU General Public License"
@@ -147,7 +147,7 @@ The M4 autoconf macros are licenced under all-permissive and GPL3+
 licences; see the respective files for details.
 
 DOMjudge includes specifications of a number of interfaces. These
-specifications are dedicated dedicated to the public domain, as
+specifications are dedicated to the public domain, as
 specified in the <htmlurl
 name="Creative Commons Public Domain Dedication (CC0 1.0)"
 url="http://creativecommons.org/publicdomain/zero/1.0/">. These
@@ -192,123 +192,18 @@ to be subscribed before you can post. See
 url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
 for subscription and more details.
 
+Some developers and users of DOMjudge linger on the IRC channel
+dedicated to DOMjudge on the Freenode network:
+server <tt>irc.freenode.net</tt>, channel <tt>#domjudge</tt>.
+Feel free to drop by with your questions and comments.
 
-<chapt>Installation and configuration <label id="install_config">
-<p>
-This chapter details a fresh installation of DOMjudge. The first
-section is a Quick Installation Reference, but that should only be
-used by those already acquainted with the system. A detailed guide
-follows after that.
-
-
-<sect>Quick installation
-<p>
-<em>Note:</em> this is not a replacement for the thorough installation
-instructions below, but more a cheat-sheet for those who've already
-installed DOMjudge before and need a few hints. When in doubt, always
-consult the full installation instruction.
-
-
-External software:
-<itemize>
-<item> Install the MySQL-server, set a root password for it and
-       make it accessible from all judgehosts.
-<item> Install Apache, PHP and (recommended) phpMyAdmin.
-<item> Make sure PHP works for the web server and command line scripts.
-<item> Install necessary compilers on the judgehosts.
-<item> See also <ref id="install_config:apt-getinstall"
-       name="an example command line for Debian GNU/Linux">.
-</itemize>
-
-DOMjudge:
-<itemize>
-<item> Extract the source tarball and run <tt>./configure
-       [--enable-fhs] --prefix=&lt;basepath&gt;</tt>.
-<item> Run <tt>make domserver judgehost docs</tt> or just those
-       targets you want installed on the current host.
-<item> Run <tt>make install-{domserver,judgehost,docs}</tt>
-       as root to install the system.
-</itemize>
-On the domserver host:
-<itemize>
-<item> Install the MySQL database using <tt>bin/dj-setup-database -u root -r
-       install</tt> on the domserver host.
-<item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
-       it to your needs, reload web server:
-       <tt>
-       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf &&
-       sudo apache2ctl graceful
-       </tt>
-
-
-<item> Check that the web interface works (/team, /public and /jury)
-       and check that the jury interface is password protected.
-       Add individual user accounts for jury members to <tt>etc/htpasswd-jury</tt>.
-<item> Add useful contest data through the jury web interface or with
-       phpMyAdmin.
-<item> Run the config checker in the jury web interface.
-</itemize>
-On the judgehosts:
-<itemize>
-<!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
-<item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
-       Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
-       (check specific options of useradd, since these vary per system)
-<item> Add to <tt>/etc/sudoers.d/</tt> or <tt>/etc/sudoers</tt> the
-       sudoers configuration as in <tt>etc/sudoers-domjudge</tt>.
-<item> Copy the file <tt>etc/dbpasswords.secret</tt> from the
-       domserver to all judgehosts to synchronise database passwords.
-<item> Start the judge daemon: <tt>bin/judgedaemon</tt>
-</itemize>
-It should be done by now. As a check that (almost) everything works,
-the set of test sources can be submitted:
-<code>
-cd tests
-make check
-</code>
-Then, in the main jury web interface, select the admin link
-<it>judging verifier</it> to automatically verify most of the
-test sources, except for a few with multiple possible outcomes; these
-have to be verified by hand. Read the test sources for a description of
-what should (not) happen.
-You may want to change the <tt>AUTH_METHOD</tt> to <tt>FIXED</tt> and set the
-environment variable <tt>SUBMITBASEURL</tt> to your DOMjudge base URL, e.g.
-<tt>http://domjudge.example.com/</tt>.
-
-Optionally:
-<itemize>
-<item> Install the submit client on the team workstations.
-<item> Generate one-time passwords for all the teams in the web interface.
-<item> Further tighten the security of the system, e.g. by applying
-       firewall rules.
-<item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
-       or use the balloon web interface.
-<item> Setup the Java chroot environment on the judgehosts to use Java with chroot:<newline>
-       <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
-       <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
-       enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
-       and add <tt>etc/sudoers-domjudge</tt> to <tt>/etc/sudoers.d/</tt> or
-       <tt>/etc/sudoers</tt>. 
-
-<item> For additional features in the jury web interface, the
-       following PHP extensions can be installed:
-       <itemize>
-       <item>xdiff PECL extension for diffs between submissions;
-       <item>zip PHP-bundled extension (<tt>--enable-zip</tt>)
-             for uploading problem data as zip-bundles (enabled
-             by default in Debian, but not in all other Linux
-             distributions).
-       </itemize>
-</itemize>
-
-
-<sect>Concepts
+<chapt>Contest planning<label id="contest_planning">
 <p>
 
-This manual assumes you are aware of some of the concepts used within
-DOMjudge. Here's an overview.
+<sect>Contest hardware
+<p>
 
-DOMjudge discerns three different kinds of hosts:
+DOMjudge discerns the following kinds of hosts:
 <descrip>
 <tag>Team computer</tag>
        Workstation for a team, where they develop their
@@ -319,24 +214,39 @@ DOMjudge discerns three different kinds of hosts:
 <tag>DOMjudge server</tag>
        A host that receives the submissions, runs the
        database and serves the web pages. This host will run Apache,
-       and MySQL. Optionally
-       these tasks can be further split out to separate machines, but
-       that's normally not necessary and not supported out of the box.
+       and MySQL. 
        Also called domserver for brevity.
 <tag>Judgehosts</tag>
        A number of hosts, at least one, that will retrieve
        submitted solutions from the DOMjudge server, compile and run
-       them and send the results back to the server. Since this
-       is computationally intensive, there should ideally be at least
-       a couple of these. They will run the judgedaemon from DOMjudge.
-       For security and performance reasons it is highly recommended not
-       to use the server as a judgehost.
+       them and send the results back to the server.
+       They will run the judgedaemon from DOMjudge.
+<tag>Jury / admin workstations</tag>
+       The jury members (persons) that want to monitor the contest need
+       just any workstation with a web browser to access the web interface.
+       No DOMjudge software runs on these machines.
 </descrip>
 
-Note that the judges (persons) are not required and not recommended to
-work on any of the DOMjudge server or judgehosts. They can just access
-the system via the jury web interface and working e.g. on judgehosts
-can interfere with system stability.
+One (virtual) machine is required to run the DOMserver. The minimum amount of
+judgehosts is also one, but preferably more: depending on configured timeouts,
+judging one solution can tie up a judgehost for several minutes, and if there's
+a problem with one judgehost it can be resolved while judging continues on the
+others. 
+
+As a rule of thumb, we recommend one judgehost per 10 teams.
+
+However, overprovisioning does not hurt: DOMjudge scales easily in the
+number of judegehosts, so if hardware is available, by all means use it. But
+running a contest with fewer machines will equally work well, only the waiting
+time for teams to receive an answer may increase.
+
+Each judgehost should be a dedicated (virtual) machine that performs no other
+tasks. For example, although running a judgehost on the same machine as the
+domserver is possible, it's not recommended except for testing purposes.
+Judgedaemons should also not double as local workstations for jury members.
+Having all judgehosts be of uniform hardware configuration helps in creating a fair,
+reproducible setup.
+
 
 <sect>Requirements
 <label id="install_config:requirements">
@@ -357,7 +267,7 @@ The requirements for the deployment of DOMjudge are:
 
 <item> (Local) root access on the domserver and judgehosts for configuring sudo,
        installing some files with restricted permissions
-       and for (un)mounting the proc file system when using Oracle (previously Sun) Java.
+       and for (un)mounting the proc file system when using Java.
        See <ref id="security:rootprivs" name="Security: root privileges">
        for more details.
 
@@ -381,6 +291,7 @@ The requirements for the deployment of DOMjudge are:
        name="Contest setup: team authentication"> for more details.
 </itemize>
 
+
 <sect1>Software requirements
 <p>
 
@@ -390,13 +301,14 @@ The following software is required for running DOMjudge.
        preferably one that can generate statically linked stand-alone
        executables.
 
-<item> Apache web server with support for PHP &gt;= 5.2.0 and the mysql
-       extension for PHP. We also recommend the posix extension for extra
-       debugging information.
+<item> Apache web server with support for PHP &gt;= 5.2.0 and the mysqli
+       and json extensions for PHP. We also recommend the posix extension
+       for extra debugging information.
 
 <item> MySQL &gt;= 4.1.x database and client software
 
-<item> PHP &gt;= 5.2.0 command line interface and the mysql extension.
+<item> PHP &gt;= 5.2.0 command line interface and the mysqli and json
+       extensions.
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash)
 
@@ -474,9 +386,125 @@ Software required for building DOMjudge:
 
 In the most basic setup the team workstations only need (next to the tools needed
 for program development) a web browser. The web interface fully works with any
-known browser. With JavaScript disabled, all basic functionality remains working,
-with the notable exception of multiple file submissions and some convenience
-functions.
+known browser, but a HTML5-capable browser adds more convenience funcions. With
+JavaScript disabled, all basic functionality remains working, with the notable
+exception of multiple file uploads on non-HTML5-ready browsers.
+
+
+<chapt>Installation and configuration <label id="install_config">
+<p>
+This chapter details a fresh installation of DOMjudge. The first
+section is a Quick Installation Reference, but that should only be
+used by those already acquainted with the system. A detailed guide
+follows after that.
+
+
+<sect>Quick installation
+<p>
+<em>Note:</em> this is not a replacement for the thorough installation
+instructions below, but more a cheat-sheet for those who've already
+installed DOMjudge before and need a few hints. When in doubt, always
+consult the full installation instruction.
+
+
+External software:
+<itemize>
+<item> Install the MySQL-server, set a root password for it and
+       make it accessible from all judgehosts.
+<item> Install Apache, PHP and (recommended) phpMyAdmin.
+<item> Make sure PHP works for the web server and command line scripts.
+<item> Install necessary compilers on the judgehosts.
+<item> See also <ref id="install_config:apt-getinstall"
+       name="an example command line for Debian GNU/Linux">.
+</itemize>
+
+DOMjudge:
+<itemize>
+<item> Extract the source tarball and run <tt>./configure
+       [--enable-fhs] --prefix=&lt;basepath&gt;</tt>.
+<item> Run <tt>make domserver judgehost docs</tt> or just those
+       targets you want installed on the current host.
+<item> Run <tt>make install-{domserver,judgehost,docs}</tt>
+       as root to install the system.
+</itemize>
+On the domserver host:
+<itemize>
+<item> Install the MySQL database using <tt>bin/dj-setup-database -u root -r
+       install</tt> on the domserver host.
+<item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
+       it to your needs, reload web server:
+       <tt>
+       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf &&
+       sudo apache2ctl graceful
+       </tt>
+
+
+<item> Check that the web interface works (/team, /public and /jury)
+       and check that the jury interface is password protected.
+       Add individual user accounts for jury members to <tt>etc/htpasswd-jury</tt>.
+<item> Add useful contest data through the jury web interface or with
+       phpMyAdmin.
+<item> Run the config checker in the jury web interface.
+</itemize>
+On the judgehosts:
+<itemize>
+<!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
+<item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
+       Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
+       (check specific options of useradd, since these vary per system)
+<item> Add to <tt>/etc/sudoers.d/</tt> or append to <tt>/etc/sudoers</tt> the
+       sudoers configuration as in <tt>etc/sudoers-domjudge</tt>.
+<item> Copy the file <tt>etc/dbpasswords.secret</tt> from the
+       domserver to all judgehosts to synchronise database passwords.
+<item> Start the judge daemon: <tt>bin/judgedaemon</tt>
+</itemize>
+It should be done by now. As a check that (almost) everything works,
+the set of test sources can be submitted:
+<code>
+cd tests
+make check
+</code>
+Then, in the main jury web interface, select the admin link
+<it>judging verifier</it> to automatically verify most of the
+test sources, except for a few with multiple possible outcomes; these
+have to be verified by hand. Read the test sources for a description of
+what should (not) happen.
+You may want to change the <tt>AUTH_METHOD</tt> to <tt>FIXED</tt> and set the
+environment variable <tt>SUBMITBASEURL</tt> to your DOMjudge base URL, e.g.
+<tt>http://domjudge.example.com/</tt>.
+
+Optionally:
+<itemize>
+<item> Install the submit client on the team workstations.
+<item> Generate one-time passwords for all the teams in the web interface.
+<item> Further tighten the security of the system, e.g. by applying
+       firewall rules.
+<item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
+       or use the balloon web interface.
+<item> Setup the Java chroot environment on the judgehosts to use Java with chroot:<newline>
+       <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
+       <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
+       enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
+       and add <tt>etc/sudoers-domjudge</tt> to <tt>/etc/sudoers.d/</tt> or
+       append it to <tt>/etc/sudoers</tt>. 
+
+<item> For additional features in the jury web interface, the
+       following PHP extensions can be installed:
+       <itemize>
+       <item>xdiff PECL extension for diffs between submissions;
+       <item>zip PHP-bundled extension (<tt>--enable-zip</tt>)
+             for uploading problem data as zip-bundles (enabled
+             by default in Debian, but not in all other Linux
+             distributions).
+       </itemize>
+</itemize>
+
+
+
+<sect>Prerequisites
+<p>
+For a detailed list of the hardware and software requirements,
+please refer to the previous chapter on contest planning.
 
 <label id="install_config:apt-getinstall">
 <sect1>Debian installation command
@@ -488,10 +516,11 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
 apt-get install gcc g++ make libcurl4-gnutls-dev mysql-server \
-	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql php-geshi \
-	ntp sudo procps sharutils phpmyadmin xsltproc \
+	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql php5-json \
+        php-geshi phpmyadmin \
+	ntp sudo procps xsltproc \
 	libboost-regex-dev libgmp3-dev linuxdoc-tools linuxdoc-tools-text \
-	transfig texlive-latex-recommended texlive-latex-extra \
+	transfig groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended
 </code>
 
@@ -500,7 +529,7 @@ example compilers to install for C, C++, Java (GNU), Java (Oracle/Sun), Haskell
 and Pascal; change the list as appropriate.
 
 <code>
-apt-get install make sudo php5-cli php5-mysql ntp xsltproc procps sharutils \
+apt-get install make sudo php5-cli php5-mysql php5-json ntp xsltproc procps \
 	gcc g++ gcj openjdk-6-jre-headless openjdk-6-jdk ghc fp-compiler
 </code>
 
@@ -627,11 +656,12 @@ for example <tt>compile_c.sh</tt>, and <tt>compile.sh</tt> in
 for the most common languages already.
 
 Interpreted languages and non-statically linked binaries can in
-principle also be used, but then the option <tt>USE_CHROOT</tt> should
-be disabled (or all dependencies be added to the chroot environment).
+principle also be used, but requires that all dependencies are added
+to the chroot environment.
+
 Interpreted languages do not generate an executable and in principle
 do not need a compilation step. However, to be able to use interpreted
-languages (also Oracle's (Sun) Java), a script must be generated during the
+languages (also Oracle's Java), a script must be generated during the
 compilation step, which will function as the executable: the script
 must run the interpreter on the source. See <tt>compile_perl.sh</tt>
 and <tt>compile_java_javac.sh</tt> in <tt>lib/judge</tt> for
@@ -655,15 +685,15 @@ fixed input and/or output, DOMjudge has the possibility to change the
 way submissions are run and checked for correctness.
 
 The back end script <tt>testcase_run.sh</tt> that handles
-the running and checking of submissions, calls separate
-programs for running and comparison of the results. These can be
+the running and checking of submissions, calls separate programs
+for running submissions and comparison of the results. These can be
 specialised and adapted to the requirements per problem. For this, one
 has to create programs or scripts named <tt>run_&lt;tag&gt;</tt> and/or
 <tt>compare_&lt;tag&gt;</tt> in the <tt>lib/judge</tt>
 directory, see <tt>run</tt> and <tt>compare</tt> for examples and
 usage information. Then the <tt>&lt;tag&gt;</tt> must be
 specified in the <tt>special_run</tt> and/or <tt>special_compare</tt>
-fields of the problem (empty means that the default script run and
+fields of the problem (an empty value means that the default run and
 compare scripts should be used). To simplify the use of custom run and
 compare programs, DOMjudge comes with wrapper scripts that handle the
 tedious, standard part. In most cases it will probably be convenient
@@ -678,15 +708,17 @@ Implementing a special compare program, also called a
 that is called directly (by <tt>testcase_run.sh</tt>) or use a copy of
 the <tt>compare_wrapper</tt> script. In the first case, the compare
 program must adhere to the <ref id="validator" name="ICPC validator
-interface">. In the latter case, the wrapper generates the XML result
+interface">. The second case is probably the easiest solution: the
+script <tt>compare_wrapper</tt> generates the XML result
 file and handles redirection of input/output for you. Use this
-wrapper by copying it to <tt>compare_&lt;tag&gt;</tt> and let the
-jury write a checker program which can be called as
+wrapper by copying or symlinking it to <tt>compare_&lt;tag&gt;</tt>
+and let the jury write a checker program which can be called as
 <code>
 check_<tag> <testdata.in> <program.out> <testdata.out>
 </code>
 This program should write some kind of difference to stdout. No
-output results in a <em>correct</em> verdict and a nonzero exitcode in
+output from the checker program results in a <em>correct</em> verdict
+and a nonzero exitcode in
 an internal (system) error. See as an example the included program
 <tt>check_float</tt>, which compares floating point numbers. The name
 of the check program and any parameters can also be modified in the
@@ -833,11 +865,16 @@ Installation of the database is done with <tt>bin/dj-setup-database</tt>.
 For this, you need an installed and configured MySQL server and
 administrator access to it. Run
 <code>
+dj-setup-database genpass
 dj-setup-database [-u <admin_user>] [-p <password>|-r] install
 </code>
-to create the database, users and insert some default/example data
-into the domjudge database. The option <tt>-r</tt> will prompt for a
-password; when no user is specified, the mysql client will try to read
+This first creates the DOMjudge database credentials file
+<tt>etc/dbpasswords.secret</tt> (optionally change the random
+generated password, although it is not needed for normal operation).
+Then it creates the database and users and inserts some
+default/example data into the domjudge database. The option
+<tt>-r</tt> will prompt for a password for mysql; when no user is
+specified, the mysql client will try to read
 credentials from <tt>$HOME/.my.cnf</tt> as usual. The command
 <tt>uninstall</tt> can be passed to <tt>dj-setup-database</tt> to
 remove the DOMjudge database and users; <em>this deletes all data!</em>
@@ -856,7 +893,9 @@ not higher than your amount of RAM allows.
 
 <p>
 As for PHP, the use of an opcode cache like the Alternative PHP Cache
-(Debian package: <tt>php-apc</tt>) is beneficial for performance.
+(Debian package: <tt>php-apc</tt>) is beneficial for performance. For
+uploading large testcases, see the
+<ref id="problems:memory" name="section about memory limits">.
 
 <p>
 It may be desirable or even necessary to fine tune some MySQL default settings:
@@ -866,7 +905,8 @@ It may be desirable or even necessary to fine tune some MySQL default settings:
 connection caching by Apache threads. 1000 is more appropriate.
 <item><tt>max_allowed_packet</tt>: The default of 16MB might be too
 low when using large testcases. This should be changed both in the
-MySQL server and client configuration.
+MySQL server and client configuration and be set to about twice the
+maximum testcase size.
 <item><tt>skip-networking</tt> or <tt>bind-address</tt>: By default MySQL
 only listens on a local socket, but judgehosts need to connect remotely to
 it. When enabling remote connections, you may want to limit it to only the
@@ -913,11 +953,6 @@ details.
 
 You should turn PHP's <tt>magic_quotes_*</tt> options off. We
 also recommend to turn off <tt>register_globals</tt>.
-If you want to upload large testcases in the jury web interface,
-it may be necessary to raise some PHP limits or you'll get
-"memory exhausted" errors. Make sure that the parameters
-<tt>memory_limit</tt>, <tt>upload_max_filesize</tt> and <tt>post_max_size</tt>
-in <tt>php.ini</tt> are all well above the size of your largest testcase.
 
 To configure the web server for DOMjudge, use the Apache configuration
 snippet from <tt>etc/apache.conf</tt>. It contains examples for
@@ -985,35 +1020,6 @@ option <tt>DEBUG</tt> to a bitwise-or of the available
 <tt>DEBUG_*</tt> flags in <tt>etc/common-config.php</tt>, to e.g.
 generate extra SQL query and timing information in the web interface.
 
-<!-- This needs to be cleaned up and possibly merged in other places:
-
-<sect>Building and installing
-<p>
-
-<itemize>
-<item> a password which will be set on the jury web interface.
-<item> the system root password to install some programs set-uid root.
-<item> the MySQL database root password to install the DOMjudge database.
-</itemize>
-It does also automatically generate and set passwords for the team and
-public web interface: these are only used internally in the system and
-are best left untouched.
-
-There are some files/directories that have to be readable/writable by
-the web server. These are:
-<itemize>
-<item> <tt>etc/passwords.php</tt> must be readable by the
-       web server, but (best) not world readable.
-<item> <tt>&lt;domserver_submitdir&gt;</tt> can optionally be set writable for the
-       web server, to store websubmitted sources there (next to the
-	   database), see <ref id="install_config:submissionmethods"
-	   name="submission methods"> for more information.
-</itemize>
-
-See also section <ref id="security:webprivs" name="Security: webserver
-privileges">.
--->
-
 <sect>Installation of a judgehost<label id="install_config:judgehost">
 <p>
 
@@ -1037,16 +1043,14 @@ via <tt>configure --enable-runuser=USER</tt>; the default is
 <tt>domjudge-run</tt>.
 
 <tt>Runguard</tt> needs to be able to become root for certain operations
-like changing to the runuser and performing a chroot. The following lines
-must be added to <tt>/etc/sudoers</tt>, replacing &lt;domjudge&gt;
-with the user you intend to run the judgedaemon as, and the full path
-to runguard.
-<verb>
-domjudge ALL=(root) NOPASSWD: &lt;path-to-runguard&gt;/runguard *
-domjudge ALL=(root) NOPASSWD: /bin/cp -pR /dev/null ../dev/null
-</verb>
-There's a pregenerated <tt>/etc/sudoers.d/</tt> snippet in
-<tt>etc/sudoers-domjudge</tt>. 
+like changing to the runuser and performing a chroot. Also, the default
+<tt>chroot-startstop.sh</tt> script uses sudo to gain privileges for
+certain operations. There's a pregenerated <tt>/etc/sudoers.d/</tt> snippet
+in <tt>etc/sudoers-domjudge</tt> that contains all required rules. You can
+put the lines in the snippet at the end of  <tt>/etc/sudoers</tt>, or, for
+modern sudo versions, place the file in <tt>/etc/sudoers.d/</tt>. If you
+change the user you run the judgehost at, or the installation paths, be
+sure to update the sudoers rules accordingly.
 
 When the chroot setting is enabled (default), a static POSIX shell has
 to be available for copying it to the chroot environment. For Linux
@@ -1054,22 +1058,6 @@ i386, a static Dash shell is included, which works out of the box. For
 other architectures or operating systems, a shell has to be added
 manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
 file.
-
-If you use the default <tt>chroot-startstop.sh</tt> script, then
-the following lines must be added to <tt>/etc/sudoers</tt>:
-<verb>
-domjudge ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
-domjudge ALL=(root) NOPASSWD: /bin/umount /*/proc
-domjudge ALL=(root) NOPASSWD: /bin/mount --bind &lt;chrootdir&gt;/*
-domjudge ALL=(root) NOPASSWD: /bin/mount -o remount\,ro &lt;judgehost_judgedir&gt/*
-domjudge ALL=(root) NOPASSWD: /bin/umount &lt;judgehost_judgedir&gt;/*
-</verb>
-Here the user <tt>domjudge</tt> must be replaced by the user you
-intend to run the judgedaemon as, <tt>&lt;chrootdir&gt;</tt> by the path
-the chroot environment was installed to and <tt>&lt;judgehost_judgedir&gt;</tt>
-by the value specified in <tt>configure</tt>.
-This is also in the pregenerated <tt>/etc/sudoers.d/</tt> snippet in
-<tt>etc/sudoers-domjudge</tt>. 
 
 <sect>Building and installing the submit client
 <p>
@@ -1160,7 +1148,7 @@ format and prebuilt from SGML sources. Rebuilding these is not normally
 necessary. To rebuild them on a Debian-like system, the following commands
 should do it:
 <code>
-sudo apt-get install linuxdoc-tools make transfig texlive-latex-recommended
+sudo apt-get install linuxdoc-tools make transfig groff texlive-latex-recommended
 make -C doc/admin docs
 make -C doc/judge docs
 </code>
@@ -1201,6 +1189,22 @@ resulting <tt>Text_Highlighter-x.y.z</tt> directory to just <tt>Text</tt>.
 We advise to install an NTP-daemon (Network Time Protocol) to make
 sure the time between domserver and judgehost (and team computers)
 is in sync.
+
+<sect1>Printing
+<p>
+
+It is recommended to configure the local desktop printing of team
+workstations whereever possible: this has the most simple interface
+and allows teams to print from within their editor.
+
+<p>
+If this is not feasible, DOMjudge includes support for printing via
+the DOMjudge web interface: the DOMjudge server then needs to be
+able to deliver the uploaded files to the printer. It can be
+enabled via the <tt>enable_printing</tt> configuration option in 
+the administrator interface. The exact command used to send the
+files to a printer can be changed the function <tt>send_print()</tt>
+in <tt>lib/www/printing.php</tt>.
 
 <sect1>The plugin web interface
 <p>
@@ -1262,7 +1266,7 @@ consecutive DOMjudge versions. At the beginning of each script, a check
 is performed which will let MySQL bail out with an error if it should
 not be applied anymore. Note that the scripts must be applied in order
 (sorted by release). These scripts can be applied by running
-<tt>dj-database-setup upgrade</tt>.
+<tt>dj-setup-database upgrade</tt>.
 
 
 <chapt>Setting up a contest <label id="contestsetup">
@@ -1298,23 +1302,26 @@ configure with contest data before running a contest (via the jury web
 interface or e.g. with phpMyAdmin), the other tables are used
 automatically by the software:
 <tabular ca="cll">
+ |auditlog         |Log of every state-changing event.@
+ |balloon          |Balloons to be handed out.@
  |clarification    |Clarification requests/replies are stored here.@
 x|configuration    |Runtime configuration settings.@
 x|contest          |Contest definitions with start/end time.@
  |event            |Log of events during contests.@
-x|judgehost        |Computers (hostnames) that function as judgehosts.@
+ |judgehost        |Computers (hostnames) that function as judgehosts.@
  |judging          |Judgings of submissions.@
  |judging&lowbar;run      |Result of one testcase within a judging.@
 x|language         |Definition of allowed submission languages.@
 x|problem          |Definition of problems (name, corresponding contest, etc.).@
- |submission       |Submissions of solutions to problems.@
+ |scoreboard&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
+ |scoreboard&lowbar;public|separately, because of possibility of score freezing.@
+ |submission       |Submission metadata of solutions to problems.@
+ |submission_file  |Submitted code files.@
 x|team             |Definition of teams.@
 x|team&lowbar;affiliation |Definition of institutions a team can be affiliated with.@
 x|team&lowbar;category    |Different category groups teams can be put in.@
  |team&lowbar;unread      |Records which clarifications are read by which team.@
-x|testcase         |Definition of testdata for each problem.@
- |scoreboard&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
- |scoreboard&lowbar;public|separately, because of possibility of score freezing.
+x|testcase         |Definition of testdata for each problem.
 </tabular>
 
 Now follows a longer description (including fields) per table that has
@@ -1348,14 +1355,6 @@ id="contestsetup:milestones" name="Contest milestones">.
 The <tt>enabled</tt> field can be unset to allow for easier editing of
 contest times, as disabled contests are not checked to overlap with
 other contests. A disabled contest will also not become active.
-
-<tag>judgehost</tag>
-List here the hosts that will be judging the submissions.
-<tt>hostname</tt> is the (short) hostname of a machine running
-the judgehost part of DOMjudge.
-<tt>active</tt> indicates whether this host should judge incoming
-submissions. <tt>polltime</tt> is an internally used variable to
-detect whether a judgedaemon is running on the host.
 
 <tag>language</tag>
 Programming languages in which to accept and judge submissions.
@@ -1405,6 +1404,13 @@ compare output for this problem.
 The <tt>color</tt> tag can be filled with a CSS colour specification
 to associate with this problem; see also section <ref id="scoreboard:colours"
 name="Scoreboard: colours">.
+
+In <tt>problemtext</tt> a PDF, HTML or plain text document can be
+placed which allows team, public and jury to download the problem
+statement. Note that no additional filtering takes place, so HTML
+(and PDF to some extent) should be from a trusted source to prevent
+cross site scripting or other attacks. The file type is stored in
+<tt>problemtext_type</tt>.
 
 <tag>team</tag>
 Table of teams: <tt>login</tt> is the account/login-name of the team
@@ -1723,9 +1729,9 @@ default example problems are in the active contest. There's also
 <tt>make stress-test</tt>, but be warned that these tests might crash
 a judgedaemon. The results can be checked in the web interface; each
 source file specifies the expected outcome with some explanations. For
-convenience, there is also a script <tt>check-judgings</tt>; this will
-automatically check whether submitted sources from the
-<tt>tests</tt> directory were judged as expected. Note that a
+convenience, there is a link <it>judging verifier</it> in the admin
+web interface; this will automatically check whether submitted sources
+from the <tt>tests</tt> directory were judged as expected. Note that a
 few sources have multiple possible outcomes: these must be verified
 manually.
 
@@ -1951,9 +1957,9 @@ are sent. Examples are to mail to a specific mailbox or to send
 prints to a printer. When configured, start <tt>bin/balloons</tt>
 and notification will start.
 
-Notifications will continue even after the scoreboard is frozen,
-although a warning is printed on the notification. Stop the balloons
-daemon when you don't want balloons to be handed out anymore.
+Notifications will stop as soon as the scoreboard is frozen.
+Enable the <tt>show_balloons_postfreeze</tt> to keep issuing balloon
+notifications after the freeze.
 
 
 <chapt>Security <label id="security">
@@ -2015,10 +2021,11 @@ defaults to <tt>www-data</tt>.
 
 Judgehosts and the domserver communicate with each other through
 the MySQL protocol. By default, MySQL does not encrypt these
-connections. Refer to the MySQL manual to configure SSL on client
-connections; alternatively you can employ an SSH tunnel or ensure
-in the network setup that these connections are separated from
-the team network.
+connections. Refer to the MySQL manual to configure SSL for the
+server and enable the option in common-config.php to enable it
+for client connections; alternatively you can employ an SSH tunnel
+or ensure in the network setup that these connections are separated
+from the team network.
 
 The jury web interface is protected by HTTP Authentication. These
 credentials are essentially sent plain-text, so we advise to setup
@@ -2052,6 +2059,9 @@ cannot simply login onto one another's computer and spoof their identity.
 When using PHP sessions or LDAP, authentication data is sent via HTTP,
 so we strongly advise to use HTTPS in that case.
 
+Problem texts can be uploaded to DOMjudge. No filtering is performed
+there, so make sure they are from trusted sources to, in the
+case of HTML, prevent cross site scripting code to be injected.
 
 <sect>Root privileges <label id="security:rootprivs">
 <p>
@@ -2083,15 +2093,13 @@ than DOMjudge.
 <sect1>Permissions for the web server <label id="security:webprivs">
 <p>
 
-<!--
-FIXME: check that permissions are set as laid out here, and modify
-this text to say that these things are set correctly by default.
--->
-Make sure that the web server serving the DOMjudge web interface pages
-has correct permissions to the <tt>www, lib, etc</tt>
-directory trees. The <tt>www</tt> and <tt>lib</tt> trees can safely
-set to be readable and accessible. Care should be taken with the
-<tt>etc</tt> dir: the <tt>domserver-{config,static}.php</tt>,
+The default installation sets permissions correctly for the web
+server user (commonly <tt>www-data</tt>).
+The following information is for those who want to verify the setup
+or make modifications to the settings.
+
+Care should be taken with the <tt>etc</tt> dir: the
+<tt>domserver-{config,static}.php</tt>,
 <tt>htpasswd-*</tt> and <tt>dbpasswords.secret</tt> files
 should all be readable, but <tt>dbpasswords.secret</tt> and the
 htpasswd files should not be
@@ -2133,7 +2141,7 @@ On Linux, this can be accomplished by modifying the
 iptables, adding a rule like:
 
 <verb>
-iptables -I OUTPUT -o &lt;network_interface&gt; -m owner --uid-owner &lt;testuser_uid&gt; -j REJECT
+iptables -I OUTPUT -m owner --uid-owner &lt;testuser_uid&gt; -j REJECT
 </verb>
 
 
@@ -2156,19 +2164,14 @@ chroot environment. For this the programs have to be statically
 linked, because they do not have access to shared libraries.
 
 For most languages compilers support this, but for Java, this is a bit
-problematic. The Oracle (Sun) Java compiler `javac' is not a real compiler:
+problematic. The Oracle Java compiler `javac' is not a real compiler:
 a bytecode interpreter `java' is needed to run the binaries and thus
 this cannot simply run in a chroot environment.
 
 There are some options to support Java as a language:
 <enum>
-<item> One can disable the chroot environment in
-       <tt>etc/judgehost-config.php</tt> by disabling <tt>USE_CHROOT</tt>.
-       Disabling the chroot environment removes this extra layer of
-       security against submissions that attempt to
-       cheat, but it is a simple solution to getting Java to work.
-<item> Next, one can build a bigger chroot environment which contains
-       all necessary ingredients to let Oracle (Sun) Java work within it.
+<item> One can build a bigger chroot environment which contains
+       all necessary ingredients to let Java work within it.
        DOMjudge supports this with some manual setup.
 
        First of all, a chroot tree with Java support must be created.
@@ -2178,24 +2181,31 @@ There are some options to support Java as a language:
        and adapt it to work with your local system and uncomment the
        script in <tt>etc/judgehost-config.php</tt>.
 <item> As an alternative the <tt>gcj</tt> compiler from GNU can be
-       used instead of Oracle's (Sun's) version. This one generates true machine
+       used instead of Oracle's version. This one generates true machine
        code and can link statically. However a few function calls
        cannot be linked statically (see `GCJ compiler warnings' in
        this FAQ). Secondly, the static library <tt>libgcj.a</tt>
        doesn't seem to be included in all GNU/Linux distributions: at
        least not in RedHat Enterprise Linux 4.
+<item> One can disable the chroot environment in
+       <tt>etc/judgehost-config.php</tt> by disabling <tt>USE_CHROOT</tt>.
+       Disabling the chroot environment removes this layer of
+       security against submissions that attempt to
+       cheat, but it is a simple solution to getting Java to work, for
+       demo or testing purposes. No guarantees about system security
+       can be made when running a contest with chroot disabled.
 </enum>
 
-<sect>The Oracle (Sun) Java virtual machine (jvm) and memory limits
+<sect>The Java virtual machine (jvm) and memory limits
 <p>
 
 DOMjudge imposes memory limits on submitted solutions. These limits
 are imposed before the compiled submissions are started. On the other
-hand, the Oracle (Sun) jvm is started via a compile-time generated script which
-is run as a wrapper around the program. This means that the memory
-limits imposed by DOMjudge are for the jvm and the running program
-within it. As the jvm uses approximately 300MB, this reduces the limit
-by this significant amount. See <tt>judge/compile_java_javac.sh</tt>
+hand, the Java virtual machine is started via a compile-time generated
+script which is run as a wrapper around the program. This means that
+the memory limits imposed by DOMjudge are for the jvm and the running
+program within it. As the jvm uses approximately 300MB, this reduces
+the limit by this significant amount. See <tt>judge/compile_java_javac.sh</tt>
 for the implementation details.
 
 If you see error messages of the form
@@ -2285,22 +2295,30 @@ problems as with Java. Although the C# language has been added to
 DOMjudge, there's no support yet to run it within a chroot
 environment. So in that case, <tt>USE_CHROOT</tt> must be disabled.
 
-<sect>Memory limit errors in the web interface
+<sect>Memory limit errors in the web interface<label id="problems:memory">
 <p>
 
-E.g. when uploading large testdata files, one can run into an error in
+When uploading large testdata files, one can run into an error in
 the jury web interface of the form:
 <verb>
-*Fatal error*: Allowed memory size of XX bytes exhausted (tried to
-allocate YY bytes) in */home/domjudge/system/lib/lib.database.php*
-on line *154*
+Fatal error: Allowed memory size of XX bytes exhausted (tried to
+allocate YY bytes) in /home/domjudge/system/lib/lib.database.php
+on line 154
 </verb>
 This means that the PHP engine has run out of memory. The solution is
 to raise the memory limits for PHP. This can be done by either editing
 <tt>etc/apache.conf</tt> and raising the <tt>memory_limit</tt>,
-<tt>upload_max_filesize</tt> and <tt>post_max_size</tt> values under
-the jury directory or by directly editing the global Apache or
-<tt>php.ini</tt> configuration.
+<tt>upload_max_filesize</tt> and <tt>post_max_size</tt> values to well
+above the size of your largest testcase. You can change these parameters
+under the jury directory or by directly editing the global Apache or
+<tt>php.ini</tt> configuration. Note also that <tt>max_file_uploads</tt>
+must be larger than the maximum number of testcases per problem to be
+able to upload and edit these in the web interface.
+
+The optional PHP Suhosin module may also impose additional limits; check
+your error logging to see if these are triggered. You may also need to
+raise MySQL's <tt>max_allowed_packet</tt> parameter in
+<tt>/etc/mysql/my.cnf</tt> on both server and client.
 
 <sect>Compiler errors: `runguard: root privileges not dropped'
 <label id="runguard-rootprivs">
@@ -2527,7 +2545,7 @@ additional software to be installed:
        url="http://bisoncpp.sourceforge.net/"> for generating the
        parsing code of the optional <tt>checktestdata</tt> script.
 
-<item> Linuxdoc and Xfig/transfig to build the admin and judge
+<item> Linuxdoc, groff and Xfig/transfig to build the admin and judge
        documentation from SGML sources and a LaTeX installation to
        generate the PDF admin, judge and default team manual.
 </itemize>
@@ -2537,7 +2555,7 @@ install the additionally required packages (next to the
 <ref id="install_config:apt-getinstall"
        name="standard set of packages">):
 <code>
-apt-get install autoconf automake flex bisonc++ linuxdoc-tools transfig
+apt-get install autoconf automake flex bisonc++
 </code>
 
 When this software is present, bootstrapping can be done by running

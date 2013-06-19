@@ -15,7 +15,7 @@ include $(TOPDIR)/Makefile.global
 
 SUBST_CONFIGS = apache.conf domserver-static.php domserver-static.h \
                 judgehost-static.php runguard-config.h submit-config.h \
-                sudoers-domjudge
+                sudoers-domjudge cgroup-domjudge.conf
 
 $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
@@ -48,7 +48,7 @@ install-domserver:
 
 install-judgehost:
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
-		judgehost-static.php
+		judgehost-static.php sudoers-domjudge
 	-$(INSTALL_USER) -t $(DESTDIR)$(judgehost_etcdir) \
 		judgehost-config.php common-config.php
 	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \

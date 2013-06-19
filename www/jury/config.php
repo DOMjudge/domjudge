@@ -8,11 +8,11 @@
 
 require('init.php');
 
-requireAdmin();
-
 dbconfig_init();
 
 if ( isset($_POST['save']) ) {
+
+	requireAdmin();
 
 	foreach ( $_POST as $tmp => $val ) {
 		if ( substr($tmp, 0, 7)!='config_' ) continue;
@@ -58,10 +58,13 @@ if ( isset($_POST['save']) ) {
 $title = "Configuration";
 require(LIBWWWDIR . '/header.php');
 
+// Check admin rights after header to generate valid HTML page
+requireAdmin();
+
 echo "<h1>Configuration settings</h1>\n\n";
 
 echo addForm('config.php') . "<table>\n<thead>\n" .
-    "<tr align=\"left\"><th>name</th><th>value(s)</th><th>description</th></tr>\n" .
+    "<tr class=\"thleft\"><th>Option</th><th>Value(s)</th><th>Description</th></tr>\n" .
     "</thead>\n<tbody>\n";
 
 foreach ( $LIBDBCONFIG as $key => $data ) {
@@ -74,7 +77,7 @@ foreach ( $LIBDBCONFIG as $key => $data ) {
 		    "<label for=\"config_${key}0\">no</label>";
 		break;
 	case 'int':
-		$editfield = addInput('config_'.$key, $data['value'], 10, 10);
+		$editfield = addInputField('number', 'config_'.$key, $data['value'], ' size="10" maxlength="10"');
 		break;
 	case 'string':
 		$editfield = addInput('config_'.$key, $data['value'], 30);
@@ -107,14 +110,16 @@ foreach ( $LIBDBCONFIG as $key => $data ) {
 	// Ignore unknown datatypes
 	if ( empty($editfield) ) continue;
 
-	echo "<tr><td>" . htmlspecialchars($key) .
+	echo "<tr><td>" . htmlspecialchars(ucfirst(strtr($key,'_',' '))) .
 		"</td><td style=\"white-space: nowrap;\">" . $editfield .
 		"</td><td>" . htmlspecialchars($data['desc']) .
 		"</td></tr>\n";
 }
 
 echo "</tbody>\n</table>\n<p>" .
-	addSubmit('Save', 'save') . addSubmit('Cancel', 'cancel') . "</p>" .
+	addSubmit('Save', 'save') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
+	"</p>" .
 	addEndForm();
 
 require(LIBWWWDIR . '/footer.php');

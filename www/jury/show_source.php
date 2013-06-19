@@ -49,7 +49,7 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 	} elseif ( !(bool) ini_get('safe_mode') ||
 		       strtolower(ini_get('safe_mode'))=='off' ) {
 		// Only try executing diff when safe_mode is off, otherwise
-		// the shell_exec will fail.
+		// the shell exec will fail.
 
 		if ( is_readable($oldfile) && is_readable($newfile) ) {
 			// A direct diff on the sources in the SUBMITDIR.
@@ -86,7 +86,7 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 			if ( $newfile ) unlink($newfile);
 		}
 	} else {
-		$difftext = "DOMjudge: diff functionality not available in PHP or via shell_exec.";
+		$difftext = "DOMjudge: diff functionality not available in PHP or via shell exec.";
 	}
 
 	return $difftext;
@@ -109,8 +109,8 @@ function presentSource ($sourcedata, $langid)
 	if ( strlen($sourcedata['sourcecode'])==0 ) {
 		// Someone submitted an empty file. Cope gracefully.
 		$head .= "<p class=\"nodata\">empty file</p>\n\n";
-	} else if ( strlen($sourcedata['sourcecode']) < 10 * 1024 ) {
-		// Source < 10kB (for longer source code,
+	} else if ( strlen($sourcedata['sourcecode']) < 32 * 1024 ) {
+		// Source < 32kB (for longer source code,
 		// highlighter tends to take very long time or timeout)
 		$head .= highlight($sourcedata['sourcecode'], $langid);
 	} else {
@@ -130,7 +130,7 @@ function presentDiff ($old, $new)
 
 	$oldid = htmlspecialchars($old['submitid']);
 	return '<div class="tabbertab">' .
-		'<h2 class="filename"><a name="diff"></a>' .
+		'<h2 class="filename">' .
 		htmlspecialchars($old['filename']) . "</h2>\n\n" .
 
 		'<pre class="output_text">' . parseSourceDiff($difftext) . "</pre>\n\n" .

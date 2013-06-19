@@ -22,7 +22,7 @@ MAINCLASS=""
 # versions of the jvm, but might need increasing in some cases.
 MEMRESERVED=350000
 
-TMPFILE=`mktemp /tmp/domjudge_javac_output.XXXXXX` || exit 1
+TMPFILE=`mktemp --tmpdir domjudge_javac_output.XXXXXX` || exit 1
 
 # Byte-compile:
 javac -encoding UTF-8 -d . "$@" 2> "$TMPFILE"
@@ -49,7 +49,7 @@ rm -f $TMPFILE
 for cn in $(find * -type f -regex '^.*\.class$' \
 		| sed -e 's/\.class$//' -e 's/\//./'); do
 	javap -public "$cn" \
-	| grep -q 'public static void main(java.lang.String\[\])' \
+	| egrep -q 'public static (|final )void main\(java.lang.String(\[\]|\.\.\.)\)' \
 	&& {
 		if [ -n "$MAINCLASS" ]; then
 			echo "Warning: found another 'main' in '$cn'"

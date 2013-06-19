@@ -52,14 +52,15 @@ function getClarCategories(&$default = null)
  */
 function putClar($clar)
 {
-	if ( $clar['sender'] ) {
+	// $clar['sender'] is set to the team ID, or empty if sent by the jury.
+	if ( !empty($clar['sender']) ) {
 		$from = '<span class="teamid">' . htmlspecialchars($clar['sender']) .
 			'</span>: ' . htmlspecialchars($clar['fromname']);
 	} else {
 		$from = 'Jury';
 		if ( IS_JURY ) $from .= ' (' . htmlspecialchars($clar['jury_member']) . ')';
 	}
-	if ( $clar['recipient'] && $from == 'Jury' ) {
+	if ( $clar['recipient'] && empty($clar['sender']) ) {
 		$to = '<span class="teamid">' . htmlspecialchars($clar['recipient']) .
 			'</span>: ' . htmlspecialchars($clar['toname']);
 	} else {
@@ -68,7 +69,7 @@ function putClar($clar)
 
 	echo "<table>\n";
 
-	echo '<tr><td scope="row">From:</td><td>';
+	echo '<tr><td>From:</td><td>';
 	if ( IS_JURY && $clar['sender']) {
 		echo '<a href="team.php?id=' . urlencode($clar['sender']) . '">' .
 			$from . '</a>';
@@ -77,7 +78,7 @@ function putClar($clar)
 	}
 	echo "</td></tr>\n";
 
-	echo '<tr><td scope="row">To:</td><td>';
+	echo '<tr><td>To:</td><td>';
 	if ( IS_JURY && $clar['recipient']) {
 		echo '<a href="team.php?id=' . urlencode($clar['recipient']) . '">' .
 			$to . '</a>';
@@ -88,7 +89,7 @@ function putClar($clar)
 
 	$categs = getClarCategories();
 
-	echo '<tr><td scope="row">Subject:</td><td>';
+	echo '<tr><td>Subject:</td><td>';
 	if ( empty($clar['probid']) ) { /* empty */ }
 	elseif ( substr($clar['probid'], 0, 1)=='#' ) {
 		echo $categs[$clar['probid']];
@@ -102,7 +103,7 @@ function putClar($clar)
 	}
 	echo "</td></tr>\n";
 
-	echo '<tr><td scope="row">Time:</td><td>';
+	echo '<tr><td>Time:</td><td>';
 	echo printtime($clar['submittime'], TRUE);
 	echo "</td></tr>\n";
 

@@ -27,8 +27,8 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 	// sanity check before we start to output headers
 	if ( $size===NULL || !is_numeric($size)) error("Problem while fetching testcase");
 
-	header("Content-Type: application/octet-stream; name=\"$filename\"");
-	header("Content-Disposition: inline; filename=\"$filename\"");
+	header("Content-Type: text/plain; name=\"$filename\"");
+	header("Content-Disposition: attachment; filename=\"$filename\"");
 	header("Content-Length: $size");
 
 	// This may not be good enough for large testsets, but streaming them
@@ -123,8 +123,14 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			}
 			$result .= "<li>Updated $inout for testcase $rank from " .
 			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
-				" (" . htmlspecialchars($_FILES[$fileid]['size'][$rank]) .
-				" B)</li>\n";
+			    " (" . htmlspecialchars($_FILES[$fileid]['size'][$rank]) . " B)";
+			if ( $inout=='output' &&
+			     $_FILES[$fileid]['size'][$rank]>dbconfig_get('filesize_limit')*1024 ) {
+				$result .= ".<br /><b>Warning: file size exceeds " .
+				    "<code>filesize_limit</code> of " . dbconfig_get('filesize_limit') .
+				    " kB. This will always result in wrong answers!</b>";
+			}
+			$result .= "</li>\n";
 		}
 	}
 
@@ -164,7 +170,13 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			    htmlspecialchars($_FILES['add_input']['name']) .
 			    " (" . htmlspecialchars($_FILES['add_input']['size']) . " B) and " .
 			    htmlspecialchars($_FILES['add_output']['name']) .
-			    " (" . htmlspecialchars($_FILES['add_output']['size']) . " B)</li>\n";
+			    " (" . htmlspecialchars($_FILES['add_output']['size']) . " B)";
+			if ( $_FILES['add_output']['size']>dbconfig_get('filesize_limit')*1024 ) {
+				$result .= ".<br /><b>Warning: output file size exceeds " .
+				    "<code>filesize_limit</code> of " . dbconfig_get('filesize_limit') .
+				    " kB. This will always result in wrong answers!</b>";
+			}
+			$result .= "</li>\n";
 		}
 	}
 }
@@ -178,11 +190,32 @@ if ( !empty($result) ) {
 	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
 }
 
+// Check if ranks must be renumbered (if test cases have been deleted).
+// There is no need to run this within one MySQL transaction since
+// nothing depends on the ranks being sequential, and we do preserve
+// their order while renumbering.
+end($data);
+if ( count($data)<(int)key($data) ) {
+	$newrank = 1;
+	foreach( $data as $rank => $row ) {
+		$DB->q('UPDATE testcase SET rank = %i
+		        WHERE probid = %s AND rank = %i', $newrank++, $probid, $rank);
+	}
+
+	echo "<p>Test case rankings reordered.</p>\n\n";
+
+	// Reload testcase data after updates
+	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank, description,
+	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
+	                OCTET_LENGTH(output) AS size_output, md5sum_output
+	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+}
+
 echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem " .
 	htmlspecialchars($probid) . "</a></p>\n\n";
 
 if ( IS_ADMIN ) {
-	echo addForm('', 'post', null, 'multipart/form-data') .
+	echo addForm($pagename, 'post', null, 'multipart/form-data') .
 	    addHidden('probid', $probid);
 }
 
@@ -196,7 +229,7 @@ if ( count($data)==0 ) {
 <th scope="col">size</th><th scope="col">md5</th>
 <?php
 	if ( IS_ADMIN ) echo '<th scope="col">upload new</th>';
-?><th scope="col">description</th>
+?><th scope="col">description</th><th></th>
 </tr></thead>
 <tbody>
 <?php
@@ -230,10 +263,6 @@ foreach( $data as $rank => $row ) {
 				    urlencode('testcase.php?probid='.$probid) . "\">" .
 				    "<img src=\"../images/delete.png\" alt=\"delete\"" .
 				    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
-
-				// hide edit field if javascript is enabled
-				echo "<script type=\"text/javascript\" language=\"JavaScript\">" .
-				    "hideTcDescEdit($rank);</script>";
 			} else {
 				echo "<td rowspan=\"2\" class=\"testdesc\">" .
 				    htmlspecialchars($row['description']) . "</td>";
@@ -246,6 +275,12 @@ foreach( $data as $rank => $row ) {
 if ( count($data)!=0 ) echo "</tbody>\n</table>\n";
 
 if ( IS_ADMIN ) {
+	echo "<script type=\"text/javascript\">\n";
+	foreach ( $data as $rank => $row ) {
+		echo "hideTcDescEdit($rank);\n";
+	}
+	echo "</script>\n\n";
+
 ?>
 <h3>Create new testcase</h3>
 

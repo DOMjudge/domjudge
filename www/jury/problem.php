@@ -40,23 +40,34 @@ if ( !empty($pcmd) ) {
 	}
 }
 if ( isset($_POST['upload']) ) {
-	if ( !empty($_FILES['problem_archive']['name']) ) {
-		checkFileUpload( $_FILES['problem_archive']['error'] );
-		$zip = openZipFile($_FILES['problem_archive']['tmp_name']);
-		$id = importZippedProblem($zip, empty($id) ? NULL : $id);
-		$zip->close();
-		auditlog('problem', $id, 'upload zip', $_FILES['problem_archive']['name']);
-		header('Location: '.$pagename.'?id='.urlencode($id));
+	if ( !empty($_FILES['problem_archive']['tmp_name'][0]) ) {
+		foreach($_FILES['problem_archive']['tmp_name'] as $fileid => $tmpname) {
+			checkFileUpload( $_FILES['problem_archive']['error'][$fileid] );
+			$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
+			$newid = importZippedProblem($zip, empty($id) ? NULL : $id);
+			$zip->close();
+			auditlog('problem', $newid, 'upload zip', $_FILES['problem_archive']['name'][$fileid]);
+		}
+		if ( count($_FILES['problem_archive']['tmp_name']) == 1 ) {
+			header('Location: '.$pagename.'?id='.urlencode((empty($newid)?$id:$newid)));
+		} else {
+			header('Location: problems.php');
+		}
 	} else {
 		error("Missing filename for problem upload");
 	}
 }
 
+// This doesn't return, call before sending headers
+if ( isset($cmd) && $cmd == 'viewtext' ) putProblemText($id);
+
 $jscolor=true;
 
 require(LIBWWWDIR . '/header.php');
 
-if ( IS_ADMIN && !empty($cmd) ):
+if ( !empty($cmd) ):
+
+	requireAdmin();
 
 	echo "<h2>" .  htmlspecialchars(ucfirst($cmd)) . " problem</h2>\n\n";
 
@@ -66,7 +77,9 @@ if ( IS_ADMIN && !empty($cmd) ):
 
 	if ( $cmd == 'edit' ) {
 		echo "<tr><td>Problem ID:</td><td class=\"probid\">";
-		$row = $DB->q('TUPLE SELECT p.*, COUNT(testcaseid) AS testcases
+		$row = $DB->q('TUPLE SELECT p.probid,p.cid,p.name,p.allow_submit,p.allow_judge,
+	                                    p.timelimit,p.special_run,p.special_compare,p.color,
+	                                    COUNT(testcaseid) AS testcases
 		               FROM problem p
 		               LEFT JOIN testcase USING (probid)
 		               WHERE probid = %s GROUP BY probid', $id);
@@ -74,7 +87,7 @@ if ( IS_ADMIN && !empty($cmd) ):
 		echo htmlspecialchars($row['probid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__probid_\">Problem ID:</label></td><td>";
-		echo addInput('data[0][probid]', null, 8, 10);
+		echo addInput('data[0][probid]', null, 8, 10, " required pattern=\"" . IDENTIFIER_CHARS . "+\"");
 		echo " (alphanumerics only)";
 	}
 	echo "</td></tr>\n";
@@ -88,7 +101,7 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 </td></tr>
 
 <tr><td><label for="data_0__name_">Problem name:</label></td>
-<td><?php echo addInput('data[0][name]', @$row['name'], 30, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 30, 255, 'required')?></td></tr>
 
 <tr><td>Allow submit:</td>
 <td><?php echo addRadioButton('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> <label for="data_0__allow_submit_1">yes</label>
@@ -105,14 +118,18 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 	}
 ?>
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
-<td><?php echo addInput('data[0][timelimit]', @$row['timelimit'], 5, 5)?> sec</td></tr>
+<td><?php echo addInputField('number','data[0][timelimit]', @$row['timelimit'],
+	' size="5" maxlength="5" min="1" max="10000" required')?> sec</td></tr>
 
 <tr><td><label for="data_0__color_">Balloon colour:</label></td>
-<td><?php echo addInputField('text','data[0][color]', @$row['color'],
+<td><?php echo addInputField('color','data[0][color]', @$row['color'],
 	' size="8" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
 <a target="_blank"
-href="http://www.w3schools.com/css/css_colornames.asp"><img
+href="http://www.w3schools.com/cssref/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
+
+<tr><td><label for="data_0__problemtext_">Problem text:</label></td>
+<td><?php echo addFileField('data[0][problemtext]', 30, ' accept="text/plain,text/html,application/pdf"')?></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>
 <td><?php echo addInput('data[0][special_run]', @$row['special_run'], 30, 25)?></td></tr>
@@ -127,16 +144,16 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','problem') .
 	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
 	addEndForm();
 
 
 if ( class_exists("ZipArchive") ) {
-	echo "<br /><span style=\"font-style:italic;\">or</span><br /><br />\n" .
+	echo "<br /><em>or</em><br /><br />\n" .
 	addForm('problem.php', 'post', null, 'multipart/form-data') .
 	addHidden('id', @$row['probid']) .
-	'<label for="problem_archive">Upload problem archive:</label>' .
-	addFileField('problem_archive') .
+	'<label for="problem_archive__">Upload problem archive:</label>' .
+	addFileField('problem_archive[]') .
 	addSubmit('Upload', 'upload') .
 	addEndForm();
 }
@@ -146,7 +163,9 @@ exit;
 
 endif;
 
-$data = $DB->q('TUPLE SELECT p.*, c.contestname, count(rank) AS ntestcases
+$data = $DB->q('TUPLE SELECT p.probid,p.cid,p.name,p.allow_submit,p.allow_judge,
+                             p.timelimit,p.special_run,p.special_compare,p.color,
+                             p.problemtext_type,c.contestname, count(rank) AS ntestcases
                 FROM problem p
                 NATURAL JOIN contest c
                 LEFT JOIN testcase USING (probid)
@@ -163,21 +182,21 @@ echo addForm($pagename, 'post', null, 'multipart/form-data') . "<p>\n" .
 	"</p>\n";
 ?>
 <table>
-<tr><td scope="row">ID:          </td><td class="probid"><?php echo htmlspecialchars($data['probid'])?></td></tr>
-<tr><td scope="row">Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
-<tr><td scope="row">Contest:     </td><td><?php echo htmlspecialchars($data['contestname']) .
+<tr><td>ID:          </td><td class="probid"><?php echo htmlspecialchars($data['probid'])?></td></tr>
+<tr><td>Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
+<tr><td>Contest:     </td><td><?php echo htmlspecialchars($data['contestname']) .
 									' (c' . htmlspecialchars($data['cid']) .')'?></td></tr>
-<tr><td scope="row">Allow submit:</td><td class="nobreak"><?php echo printyn($data['allow_submit']) . ' '.
+<tr><td>Allow submit:</td><td class="nobreak"><?php echo printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
 		" submissions for this problem?')"); ?>
 </td></tr>
-<tr><td scope="row">Allow judge: </td><td><?php echo printyn($data['allow_judge']) . ' '.
+<tr><td>Allow judge: </td><td><?php echo printyn($data['allow_judge']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_judge]',
 		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
 		" judging for this problem?')"); ?>
 </td></tr>
-<tr><td scope="row">Testcases:   </td><td><?php
+<tr><td>Testcases:   </td><td><?php
     if ( $data['ntestcases']==0 ) {
 		echo '<em>no testcases</em>';
 	} else {
@@ -185,28 +204,33 @@ echo addForm($pagename, 'post', null, 'multipart/form-data') . "<p>\n" .
 	}
 	echo ' <a href="testcase.php?probid='.urlencode($data['probid']).'">details/edit</a>';
 ?></td></tr>
-<tr><td scope="row">Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
+<tr><td>Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
 <?php
 if ( !empty($data['color']) ) {
-	echo '<tr><td scope="row">Colour:</td><td><img style="background-color: ' .
+	echo '<tr><td>Colour:</td><td><img style="background-color: ' .
 		htmlspecialchars($data['color']) .
 		';" alt="problem colour ' . htmlspecialchars($data['color']) .
 		'" src="../images/circle.png" /> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
 }
+if ( !empty($data['problemtext_type']) ) {
+	echo '<tr><td>Problem text:</td><td><a href="problem.php?id=' .
+	    urlencode($id) . '&amp;cmd=viewtext"><img src="../images/' .
+	    urlencode($data['problemtext_type']) . ".png\" alt=\"problem text\" /></a></td></tr>\n";
+}
 if ( !empty($data['special_run']) ) {
-	echo '<tr><td scope="row">Special run script:</td><td class="filename">' .
+	echo '<tr><td>Special run script:</td><td class="filename">' .
 		htmlspecialchars($data['special_run']) . "</td></tr>\n";
 }
 if ( !empty($data['special_compare']) ) {
-	echo '<tr><td scope="row">Special compare script:</td><td class="filename">' .
+	echo '<tr><td>Special compare script:</td><td class="filename">' .
 		htmlspecialchars($data['special_compare']) . "</td></tr>\n";
 }
 
 if ( IS_ADMIN && class_exists("ZipArchive") ) {
 	echo '<tr>' .
-		'<td scope="row">Problem archive:</td>' .
-		'<td>' . addFileField('problem_archive') .
+		'<td>Problem archive:</td>' .
+		'<td>' . addFileField('problem_archive[]') .
 		addSubmit('Upload', 'upload') . '</td>' .
 		"</tr>\n";
 }
@@ -216,9 +240,8 @@ echo "</table>\n" . addEndForm();
 echo "<br />\n" . rejudgeForm('problem', $id) . "\n\n";
 
 if ( IS_ADMIN ) {
-	echo "<p>" . 
-		'<a href="export.php?id=' . urlencode($id) .
-		'"><img src="../images/b_save.png" /></a> ' .
+	echo "<p>" .
+		exportLink($id) . "\n" .
 		editLink('problem',$id) . "\n" .
 		delLink('problem','probid', $id) . "</p>\n\n";
 }

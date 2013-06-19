@@ -7,12 +7,15 @@
  */
 
 require('init.php');
+require(LIBWWWDIR . '/checkers.jury.php');
 $times = array ('activate','start','freeze','end','unfreeze','finalize');
 $now = now();
 
-if ( IS_ADMIN && isset($_POST['donow']) ) {
+if ( isset($_POST['donow']) ) {
 
-	$time = array_pop(array_keys($_POST['donow']));
+	requireAdmin();
+
+	$time = key($_POST['donow']);
 	if ( !in_array($time, $times) ) error("Unknown value for timetype");
 
 	if ( $time == 'finalize' ) {
@@ -26,8 +29,15 @@ if ( IS_ADMIN && isset($_POST['donow']) ) {
 	auditlog('contest', $docid, $time. ' now', $now);
 	// starttime is special because it doesn't have relative time support
 	if ( $time == 'start' ) {
-		$DB->q('UPDATE contest SET ' . $time . 'time = %s
-		        WHERE cid = %i', $now, $docid);
+		$cdata['starttime'] = $now;
+		foreach(array('endtime','freezetime','unfreezetime','activatetime') as $f) {
+			$cdata[$f] = check_relative_time($cdata[$f.'_string'], $cdata['starttime'], $f);
+		}
+		$DB->q('UPDATE contest SET starttime = %s, endtime = %s, freezetime = %s,
+			unfreezetime = %s, activatetime = %s
+		        WHERE cid = %i', $cdata['starttime'], $cdata['endtime'],
+			$cdata['freezetime'], $cdata['unfreezetime'], $cdata['activatetime'],
+			$docid);
 		header ("Location: ./contests.php?edited=1");
 	} else {
 		$DB->q('UPDATE contest SET ' . $time . 'time = %s, ' . $time . 'time_string = %s
@@ -47,7 +57,7 @@ if ( isset($_GET['edited']) ) {
             msgbox (
                 "Warning: Refresh scoreboard cache",
 		"After changing the contest start time, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
-		addSubmit('recalculate caches now', 'refresh') 
+		addSubmit('recalculate caches now', 'refresh')
 		) .
 		addEndForm();
 }
@@ -70,9 +80,8 @@ if ( empty($cid) )  {
 		     "</em>; active from " . $row['activatetime'] .
 		     "<br /><br />\n";
 		if ( IS_ADMIN ) echo "<input type=\"submit\" " .
-		     "name=\"donow[activate][" . (int)$row['cid'] . 
+		     "name=\"donow[activate][" . (int)$row['cid'] .
 		     "]\" value=\"activate now\" />\n";
-		
 	} else {
 		echo "<p class=\"nodata\">No upcoming contest</p>\n";
 	}
@@ -155,7 +164,7 @@ if( count($res) == 0 ) {
 			( $iseven ? 'roweven': 'rowodd' ) .
 			(!$row['enabled']    ? ' disabled' :'') .
 			($row['cid'] == $cid ? ' highlight':'') . '">' .
-			"<td align=\"right\">" . $link .
+			"<td class=\"tdright\">" . $link .
 			"c" . (int)$row['cid'] . "</a></td>\n";
 		foreach ($times as $time) {
 			echo "<td title=\"".htmlspecialchars(@$row[$time. 'time']) . "\">" .

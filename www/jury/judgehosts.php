@@ -14,19 +14,25 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Judgehosts</h1>\n\n";
 
 @$cmd = @$_REQUEST['cmd'];
-if ( IS_ADMIN && (isset($_POST['cmd-activate']) || isset($_POST['cmd-deactivate']) ) ) {
+if ( isset($_POST['cmd-activate']) || isset($_POST['cmd-deactivate']) ) {
+
+	requireAdmin();
+
 	$DB->q('UPDATE judgehost SET active = %i',
 	       (isset($_POST['cmd-activate']) ? 1:0));
 	auditlog('judgehost', null, 'marked all ' . (isset($_POST['cmd-activate'])?'active':'inactive'));
 }
-if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
+if ( $cmd == 'add' || $cmd == 'edit' ) {
+
+	requireAdmin();
+
 	echo addForm('edit.php');
 	echo "\n<table>\n" .
 		"<tr><th>Hostname</th><th>Active</th></tr>\n";
 	if ( $cmd == 'add' ) {
 		for ($i=0; $i<10; ++$i) {
 			echo "<tr><td>" .
-				addInput("data[$i][hostname]", null, 20, 50) .
+				addInput("data[$i][hostname]", null, 20, 50, 'pattern="[A-Za-z0-9._-]+"') .
 				"</td><td>" .
 				addSelect("data[$i][active]",
 					array(1=>'yes',0=>'no'), '1', true) .
@@ -73,9 +79,9 @@ if( $res->count() == 0 ) {
 		$link = '<a href="judgehost.php?id=' . urlencode($row['hostname']) . '">';
 		echo "<tr".( $row['active'] ? '': ' class="disabled"').
 			"><td>" . $link . printhost($row['hostname']) . '</a>' .
-			"</td><td align=\"center\">" . $link . printyn($row['active']) .
+			"</td><td class=\"tdcenter\">" . $link . printyn($row['active']) .
 			"</a></td>";
-		echo "<td align=\"center\" class=\"";
+		echo "<td class=\"tdcenter ";
 		if ( empty($row['polltime'] ) ) {
 			echo "judgehost-nocon";
 			echo "\" title =\"never checked in\">";

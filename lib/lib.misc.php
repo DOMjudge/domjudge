@@ -13,7 +13,7 @@ define('MYSQL_DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S');
 define('IDENTIFIER_CHARS', '[a-zA-Z0-9_-]');
 
 /** Perl regex of allowed filenames. */
-define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9_\.-]*$/');
+define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/');
 
 /**
  * helperfunction to read all contents from a file.
@@ -30,7 +30,8 @@ function getFileContents($filename, $sizelimit = false) {
 	}
 
 	if ( $sizelimit && filesize($filename) > 50000 ) {
-		return file_get_contents($filename, FALSE, NULL, -1, 50000);
+		return file_get_contents($filename, FALSE, NULL, -1, 50000)
+			. "\n[output truncated after 50,000 B]\n";
 	}
 
 	return file_get_contents($filename);
@@ -213,7 +214,6 @@ function calcScoreRow($cid, $team, $prob) {
 function getFinalResult($runresults)
 {
 	$results_prio  = dbconfig_get('results_prio');
-	$lazy_eval     = dbconfig_get('lazy_eval_results', true);
 
 	// Whether we have NULL results
 	$havenull = FALSE;
@@ -236,20 +236,15 @@ function getFinalResult($runresults)
 		}
 	}
 
-	// Not all results are in yet, and we don't do lazy evaluation:
-	if ( $havenull && ! $lazy_eval ) return NULL;
+	// If we have NULL results, check whether the highest priority
+	// result has maximal priority. Use a local copy of the
+	// 'results_prio' array, keeping the original untouched.
+	$tmp = $results_prio;
+	rsort($tmp);
+	$maxprio = reset($tmp);
 
-	if ( $lazy_eval ) {
-		// If we have NULL results, check whether the highest priority
-		// result has maximal priority. Use a local copy of the
-		// 'results_prio' array, keeping the original untouched.
-		$tmp = $results_prio;
-		rsort($tmp);
-		$maxprio = reset($tmp);
-
-		// No highest priority result found: no final answer yet.
-		if ( $havenull && $bestprio<$maxprio ) return NULL;
-	}
+	// No highest priority result found: no final answer yet.
+	if ( $havenull && $bestprio<$maxprio ) return NULL;
 
 	return $bestres;
 }
@@ -349,118 +344,12 @@ function mkstemps($template, $suffixlen)
 }
 
 /**
- * Convert an IPv4 address to the hexadecimal last 2 quads of an IPv6
- * address or return NULL on error.
- */
-function ip4toip6sub($addr)
-{
-	if ( ip2long($addr)==-1 ) return NULL;
-	$addr = sprintf("%8X",ip2long($addr));
-	$q1 = substr($addr,0,4);
-	$q2 = substr($addr,4);
-	return $q1.':'.$q2;
-}
-
-/**
- * Expand an IPv4/6 address to full IPv6 notation
- *
- * Returns the expanded address as a string of 8 uppercase 4-digit
- * hexadecimal quads or NULL on error. So ::ffff:127.0.0.1 is expanded
- * to '0000:0000:0000:0000:0000:FFFF:FF00:0001'.
- */
-function expandipaddr($addr)
-{
-	// Check for an IPv4 address
-	if ( ! strstr($addr,':') ) {
-		$addr = ip4toip6sub($addr);
-		if ( empty($addr) ) return NULL;
-		return '0000:0000:0000:0000:0000:0000:'.$addr;
-	}
-
-	// Check for IPv4 notation in last part of addr and translate
-	$ip4 = substr($addr,strrpos($addr,':')+1);
-	if ( strstr($ip4,'.') ) {
-		$ip4 = ip4toip6sub($ip4);
-		if ( empty($ip4) ) return NULL;
-		$addr = substr($addr,0,strrpos($addr,':')+1).$ip4;
-	}
-
-	// Check for IPv6 compressed form and expand
-	if ( strstr($addr,'::') ) {
-		list($pre, $post) = explode('::',$addr,2);
-
-		// Check for single '::' separator
-		if ( strstr($post,'::') ) return NULL;
-
-		// Check and reject unspecified addresses
-		if ( empty($pre) && empty($post) ) return NULL;
-
-		// Count # quads in pre and post strings
-		if ( empty($pre) ) {
-			$npre = 0;
-		} else {
-			$npre = count(explode(':',$pre));
-		}
-		if ( empty($post) ) {
-			$npost = 0;
-		} else {
-			$npost = count(explode(':',$post));
-		}
-
-		// Create mid part to replace compressed '::' with
-		$mid = ':';
-		for($i=0; $i<8-($npre+$npost); $i++) $mid .= '0:';
-
-		if ( $npre==0  ) $mid = substr($mid,1);
-		if ( $npost==0 ) $mid = substr($mid,0,strlen($mid)-1);
-
-		$addr = str_replace('::',$mid,$addr);
-	}
-
-	// Expand all single quads to 4-digit length
-	$quads = explode(':',$addr);
-	if ( count($quads)!=8 ) return NULL;
-
-	$addr = '';
-	foreach($quads as $quad) {
-		while ( strlen($quad)<4 ) $quad = '0'.$quad;
-		$addr .= ':'.$quad;
-	}
-	$addr = strtoupper(substr($addr,1));
-
-	if ( ! preg_match('/^([0-9A-F]{4}:){7}[0-9A-F]{4}$/',$addr) ) return NULL;
-
-	return $addr;
-}
-
-/**
  * Compares two IP addresses for equivalence
- * Currently IPv6 equivalent address checks are disabled.
  */
 function compareipaddr($ip1, $ip2)
 {
-/*
-	$ip1 = expandipaddr($ip1);
-	$ip2 = expandipaddr($ip2);
-	if ( empty($ip1) || empty($ip2) ) return FALSE;
-
-	// Replace IPv4 IPv6-mapped by IPv4-compatible address
-	if ( substr($ip1, 0, 30) == '0000:0000:0000:0000:0000:FFFF:' ) {
-		$ip1 = '0000:0000:0000:0000:0000:0000:'.substr($ip1,30);
-	}
-	if ( substr($ip2, 0, 30) == '0000:0000:0000:0000:0000:FFFF:' ) {
-		$ip2 = '0000:0000:0000:0000:0000:0000:'.substr($ip2,30);
-	}
-
-	// Replace IPv4 loopback by IPv6 loopback
-	if ( $ip1=='0000:0000:0000:0000:0000:0000:7F00:0001' ) {
-		$ip1 = '0000:0000:0000:0000:0000:0000:0000:0001';
-	}
-	if ( $ip2=='0000:0000:0000:0000:0000:0000:7F00:0001' ) {
-		$ip2 = '0000:0000:0000:0000:0000:0000:0000:0001';
-	}
-*/
-	return $ip1==$ip2;
+	$ip1n = inet_pton($ip1); $ip2n = inet_pton($ip2);
+	return $ip1n !== FALSE && $ip1n === $ip2n;
 }
 
 /**
@@ -541,6 +430,9 @@ function daemonize($pidfile = NULL)
 	     !fclose(STDERR) || !($GLOBALS['STDERR'] = fopen('/dev/null', 'w')) ) {
 		error("cannot reopen stdio files to /dev/null");
 	}
+
+	// FIXME: We should really close all other open file descriptors
+	// here, but PHP does not support this.
 
 	// Start own process group, detached from any tty
 	if ( posix_setsid()<0 ) error("cannot set daemon process group");

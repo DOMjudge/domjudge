@@ -31,7 +31,7 @@ $(INI): %.ini:
 # Use secondary expansion to use stem $* in dependencies:
 .SECONDEXPANSION:
 $(ZIP): %.zip: %.pdf %.ini $$(foreach ext,in out c cc java,$$(wildcard $$**.$$(ext)))
-	TMPDIR=`mktemp -d dj_probzip_XXXXXX` ; \
+	TMPDIR=`mktemp -d --tmpdir dj_probzip_XXXXXX` ; \
 	cp $^ $$TMPDIR ; mv $$TMPDIR/$*.ini $$TMPDIR/domjudge-problem.ini ; \
 	zip -q -j -r $@ $$TMPDIR ; rm -rf $$TMPDIR
 

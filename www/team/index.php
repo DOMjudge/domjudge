@@ -53,15 +53,19 @@ echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
 
 if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 	if ( $submitted ) {
-		echo "<p class=\"submissiondone\">submission done <a href=\"./\" style=\"color: red\">x</a></p>\n\n";
+		echo "<p class=\"submissiondone\">submission done <a href=\"./\">x</a></p>\n\n";
 	} else {
-		echo addForm('upload.php','post',null,'multipart/form-data', null, ' onreset="resetUploadForm('.$refreshtime .');"') .
-		"<p id=\"submitform\">\n\n" .
-		"<span class=\"fileinputs\">\n\t" .
-		"<input type=\"file\" name=\"code[]\" id=\"maincode\" size=\"15\" /> " .
-		"\n</span>\n";
+		$maxfiles = dbconfig_get('sourcefiles_limit',100);
 
-		echo "<script type=\"text/javascript\">initFileUploads();</script>\n\n";
+		echo addForm('upload.php','post',null,'multipart/form-data', null, ' onreset="resetUploadForm('.$refreshtime .', ' . $maxfiles . ');"') .
+		"<p id=\"submitform\">\n\n";
+
+		echo "<input type=\"file\" name=\"code[]\" id=\"maincode\" required";
+		if ( $maxfiles > 1 ) {
+			echo " multiple";
+		}
+		echo " />\n";
+
 
 		$probs = array();
 		foreach($probdata as $probid => $dummy) {
@@ -79,12 +83,13 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 
 		echo addReset('cancel');
 
-		if ( dbconfig_get('sourcefiles_limit',100) > 1 ) {
+		if ( $maxfiles > 1 ) {
 			echo "<br /><span id=\"auxfiles\"></span>\n" .
 			    "<input type=\"button\" name=\"addfile\" id=\"addfile\" " .
 			    "value=\"Add another file\" onclick=\"addFileUpload();\" " .
 			    "disabled=\"disabled\" />\n";
 		}
+		echo "<script type=\"text/javascript\">initFileUploads($maxfiles);</script>\n\n";
 
 		echo "</p>\n</form>\n\n";
 	}
@@ -111,7 +116,7 @@ $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
 
 echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 
-# FIXME: column width and wrapping/shortening of clarification text 
+# FIXME: column width and wrapping/shortening of clarification text
 if ( $clarifications->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarifications.</p>\n\n";
 } else {

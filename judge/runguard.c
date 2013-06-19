@@ -1,6 +1,7 @@
 /*
    runguard -- run command with restrictions.
-   Copyright (C) 2004-2012 Jaap Eldering (eldering@a-eskwadraat.nl).
+   Copyright (C) 2004-2013 Jaap Eldering (eldering@a-eskwadraat.nl)
+   Copyright (C) 2013      Keith Johnson
 
    Multiple minor improvements ported from the DOMjudge-ETH tree.
 
@@ -39,6 +40,9 @@
 
 #include "config.h"
 
+/* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
+#include "runguard-config.h"
+
 /* For chroot(), which is not POSIX. */
 #define _BSD_SOURCE
 
@@ -64,9 +68,12 @@
 #include <time.h>
 #include <math.h>
 #include <limits.h>
-
-/* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
-#include "runguard-config.h"
+#if ( USE_CGROUPS == 1 )
+#include <inttypes.h>
+#include <libcgroup.h>
+#else
+#undef USE_CGROUPS
+#endif
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
@@ -99,6 +106,9 @@ char  *stdoutfilename;
 char  *stderrfilename;
 char  *exitfilename;
 char  *timefilename;
+#ifdef USE_CGROUPS
+char  *cgroupname;
+#endif
 
 int runuid;
 int rungid;
@@ -118,9 +128,12 @@ int be_quiet;
 int show_help;
 int show_version;
 
-unsigned long runtime; /* in microseconds */
-unsigned long cputime;
+double runtime, cputime; /* in seconds */
+#ifdef USE_CGROUPS
+int64_t memsize;
+#else
 rlim_t memsize;
+#endif
 rlim_t filesize;
 rlim_t nproc;
 size_t streamsize;
@@ -263,7 +276,7 @@ real user ID.\n");
 void output_exit_time(int exitcode, double timediff)
 {
 	FILE  *outputfile;
-	unsigned long userdiff, sysdiff;
+	double userdiff, sysdiff;
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
 	verbose("command exited with exitcode %d",exitcode);
@@ -282,13 +295,11 @@ void output_exit_time(int exitcode, double timediff)
 		}
 	}
 
-	userdiff = (unsigned long)(endticks.tms_cutime - startticks.tms_cutime)
-		* 1000000 / ticks_per_second;
-	sysdiff  = (unsigned long)(endticks.tms_cstime - startticks.tms_cstime)
-		* 1000000 / ticks_per_second;
+	userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
+	sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
 
-	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys\n",
-	        timediff, userdiff*1e-6, sysdiff*1e-6);
+	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys",
+	        timediff, userdiff, sysdiff);
 
 	if ( use_cputime && (userdiff+sysdiff) > cputime ) {
 		warning("timelimit exceeded (cpu time)");
@@ -300,7 +311,7 @@ void output_exit_time(int exitcode, double timediff)
 		if ( (outputfile = fopen(timefilename,"w"))==NULL ) {
 			error(errno,"cannot open `%s'",timefilename);
 		}
-		if ( fprintf(outputfile,"%.3f\n",(userdiff+sysdiff)*1e-6)==0 ) {
+		if ( fprintf(outputfile,"%.3f\n",userdiff+sysdiff)==0 ) {
 			error(0,"cannot write to file `%s'",timefilename);
 		}
 		if ( fclose(outputfile) ) {
@@ -308,6 +319,103 @@ void output_exit_time(int exitcode, double timediff)
 		}
 	}
 }
+
+#ifdef USE_CGROUPS
+void output_cgroup_stats()
+{
+	int ret;
+	int64_t max_usage;
+	struct cgroup *cg;
+	struct cgroup_controller *cg_controller;
+
+	cg = cgroup_new_cgroup(cgroupname);
+	if (!cg) {
+		error(0,"cgroup_new_cgroup");
+	}
+	if ((ret = cgroup_get_cgroup(cg)) != 0) {
+		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+	}
+	cg_controller = cgroup_get_controller(cg, "memory");
+	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
+	if ( ret!=0 ) {
+		error(0,"get cgroup value - %s(%d)", cgroup_strerror(ret), ret);
+	}
+
+	fprintf(stderr, "Total memory used: %" PRId64 " kb\n", max_usage/1024);
+
+	cgroup_free(&cg);
+}
+
+void cgroup_create()
+{
+	int ret;
+	struct cgroup *cg;
+	struct cgroup_controller *cg_controller;
+
+	cg = cgroup_new_cgroup(cgroupname);
+	if (!cg) {
+		error(0,"cgroup_new_cgroup");
+	}
+
+	/* Set up the memory restrictions; these two options limit ram use
+	   and ram+swap use. They are the same so no swapping can occur */
+	cg_controller = cgroup_add_controller(cg, "memory");
+	cgroup_add_value_int64(cg_controller, "memory.limit_in_bytes", memsize);
+	cgroup_add_value_int64(cg_controller, "memory.memsw.limit_in_bytes", memsize);
+
+	/* Perform the actual creation of the cgroup */
+	ret = cgroup_create_cgroup(cg, 1);
+	if ( ret!=0) {
+		error(0,"creating cgroup - %s(%d)", cgroup_strerror(ret), ret);
+	}
+
+	cgroup_free(&cg);
+}
+
+void cgroup_attach()
+{
+	int ret;
+	struct cgroup *cg;
+
+	cg = cgroup_new_cgroup(cgroupname);
+	if (!cg) {
+		error(0,"cgroup_new_cgroup");
+	}
+	ret = cgroup_get_cgroup(cg);
+	if ( ret!=0 ) {
+		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+	}
+
+	/* Attach task to the cgroup */
+	ret = cgroup_attach_task(cg);
+	if ( ret!=0 ) {
+		error(0,"attach task to cgroup - %s(%d)", cgroup_strerror(ret), ret);
+	}
+
+	cgroup_free(&cg);
+}
+
+void cgroup_delete()
+{
+	int ret;
+	struct cgroup *cg;
+
+	cg = cgroup_new_cgroup(cgroupname);
+	if (!cg) {
+		error(0,"cgroup_new_cgroup");
+	}
+	ret = cgroup_get_cgroup(cg);
+	if ( ret!=0 ) {
+		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+	}
+	/* Clean up our cgroup */
+	ret = cgroup_delete_cgroup(cg, 1);
+	if ( ret!=0 ) {
+		error(0,"deleting cgroup - %s(%d)", cgroup_strerror(ret), ret);
+	}
+	cgroup_free(&cg);
+}
+#endif // USE_CGROUPS
 
 void terminate(int sig)
 {
@@ -408,12 +516,14 @@ void setrestrictions()
 	}
 
 	if ( use_cputime ) {
-		rlim_t cputime_limit = (rlim_t)(cputime/1000000 + 1);
+		rlim_t cputime_limit = (rlim_t)cputime + 1;
 		verbose("setting CPU-time limit to %d seconds",(int)cputime_limit);
 		lim.rlim_cur = lim.rlim_max = cputime_limit;
 		setlim(CPU);
 	}
 
+	/* Memory limits may be handled by cgroups now */
+#ifndef USE_CGROUPS
 	if ( memsize!=RLIM_INFINITY ) {
 		verbose("setting memory limits to %d bytes",(int)memsize);
 		lim.rlim_cur = lim.rlim_max = memsize;
@@ -421,6 +531,13 @@ void setrestrictions()
 		setlim(DATA);
 		setlim(STACK);
 	}
+#else
+	/* Memory limits should be unlimited when using cgroups */
+	lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
+	setlim(AS);
+	setlim(DATA);
+	setlim(STACK);
+#endif
 
 	if ( filesize!=RLIM_INFINITY ) {
 		verbose("setting filesize limit to %d bytes",(int)filesize);
@@ -497,14 +614,15 @@ int main(int argc, char **argv)
 	fd_set readfds;
 	pid_t pid;
 	int   i, r, nfds;
+#ifdef USE_CGROUPS
+	int   ret;
+#endif
 	int   status;
 	int   exitcode;
 	char *valid_users;
 	char *ptr;
 	int   opt;
-	double runtime_d;
-	double cputime_d;
-	double timediff;
+	double timediff, tmpd;
 	size_t data_passed[3];
 	ssize_t nread, nwritten;
 
@@ -515,7 +633,7 @@ int main(int argc, char **argv)
 
 	/* Parse command-line options */
 	use_root = use_time = use_cputime = use_user = outputexit = outputtime = no_coredump = 0;
-	cputime = memsize = filesize = nproc = RLIM_INFINITY;
+	memsize = filesize = nproc = RLIM_INFINITY;
 	redir_stdout = redir_stderr = limit_streamsize = 0;
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
@@ -543,20 +661,17 @@ int main(int argc, char **argv)
 			break;
 		case 't': /* time option */
 			use_time = 1;
-			runtime_d = strtod(optarg,&ptr);
-			if ( errno || *ptr!='\0' ||
-			     runtime_d<=0 || runtime_d>=ULONG_MAX*1E-6 ) {
+			runtime = strtod(optarg,&ptr);
+			if ( errno || *ptr!='\0' || !finite(runtime) || runtime<=0 ) {
 				error(errno,"invalid runtime specified: `%s'",optarg);
 			}
-			runtime = (unsigned long)(runtime_d*1E6);
 			break;
 		case 'C': /* CPU time option */
 			use_cputime = 1;
-			cputime_d = strtod(optarg,&ptr);
-			if ( errno || *ptr!='\0' || !finite(cputime_d) || cputime_d<=0 ) {
+			cputime = strtod(optarg,&ptr);
+			if ( errno || *ptr!='\0' || !finite(cputime) || cputime<=0 ) {
 				error(errno,"invalid cputime specified: `%s'",optarg);
 			}
-			cputime = (int)(cputime_d*1E6);
 			break;
 		case 'm': /* memsize option */
 			memsize = (rlim_t) readoptarg("memory limit",1,LONG_MAX);
@@ -647,6 +762,41 @@ int main(int argc, char **argv)
 		if ( pipe(child_pipefd[i])!=0 ) error(errno,"creating pipe for fd %d",i);
 	}
 
+	if ( sigemptyset(&emptymask)!=0 ) error(errno,"creating empty signal mask");
+
+	/* unmask all signals, except SIGCHLD: detected in pselect() below */
+	sigmask = emptymask;
+	if ( sigaddset(&sigmask, SIGCHLD)!=0 ) error(errno,"setting signal mask");
+	if ( sigprocmask(SIG_SETMASK, &sigmask, NULL)!=0 ) {
+		error(errno,"unmasking signals");
+	}
+
+	/* Construct signal handler for SIGCHLD detection in pselect(). */
+	received_SIGCHLD = 0;
+	sigact.sa_handler = child_handler;
+	sigact.sa_flags   = 0;
+	sigact.sa_mask    = emptymask;
+	if ( sigaction(SIGCHLD,&sigact,NULL)!=0 ) {
+		error(errno,"installing signal handler");
+	}
+
+#ifdef USE_CGROUPS
+	/* Make libcgroup ready for use */
+	ret = cgroup_init();
+	if ( ret!=0 ) {
+		error(0,"libcgroup initialization failed: %s(%d)\n", cgroup_strerror(ret), ret);
+	}
+	/* Define the cgroup name that we will use */
+	cgroupname = (char*)malloc(256);
+	if ( cgroupname==NULL ) {
+		error(errno,"allocating memory for cgroupname");
+	}
+	/* Note: group names must have slashes! */
+	snprintf(cgroupname, 256, "/domjudge/dj_cgroup_%d/", getpid());
+
+	cgroup_create();
+#endif
+
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
 		error(errno,"cannot fork");
@@ -665,6 +815,11 @@ int main(int argc, char **argv)
 		/* Run the command in a separate process group so that the command
 		   and all its children can be killed off with one signal. */
 		if ( setsid()==-1 ) error(errno,"setsid failed");
+
+#ifdef USE_CGROUPS
+		/* Put the child process in the cgroup */
+		cgroup_attach();
+#endif
 
 		/* Apply all restrictions for child process. */
 		setrestrictions();
@@ -712,22 +867,6 @@ int main(int argc, char **argv)
 
 		if ( sigemptyset(&emptymask)!=0 ) error(errno,"creating empty signal mask");
 
-		/* unmask all signals, except SIGCHLD: detected in pselect() below */
-		sigmask = emptymask;
-		if ( sigaddset(&sigmask, SIGCHLD)!=0 ) error(errno,"setting signal mask");
-		if ( sigprocmask(SIG_SETMASK, &sigmask, NULL)!=0 ) {
-			error(errno,"unmasking signals");
-		}
-
-		/* Construct signal handler for SIGCHLD detection in pselect(). */
-		received_SIGCHLD = 0;
-		sigact.sa_handler = child_handler;
-		sigact.sa_flags   = 0;
-		sigact.sa_mask    = emptymask;
-		if ( sigaction(SIGCHLD,&sigact,NULL)!=0 ) {
-			error(errno,"installing signal handler");
-		}
-
 		/* Construct one-time signal handler to terminate() for TERM
 		   and ALRM signals. */
 		sigmask = emptymask;
@@ -752,13 +891,13 @@ int main(int argc, char **argv)
 			/* Trigger SIGALRM via setitimer:  */
 			itimer.it_interval.tv_sec  = 0;
 			itimer.it_interval.tv_usec = 0;
-			itimer.it_value.tv_sec  = runtime / 1000000;
-			itimer.it_value.tv_usec = runtime % 1000000;
+			itimer.it_value.tv_sec  = (int) runtime;
+			itimer.it_value.tv_usec = (int)(modf(runtime,&tmpd) * 1E6);
 
 			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
 				error(errno,"setting timer");
 			}
-			verbose("using timelimit of %.3f seconds",runtime*1E-6);
+			verbose("using timelimit of %.3f seconds",runtime);
 		}
 
 		if ( times(&startticks)==(clock_t) -1 ) {
@@ -787,7 +926,7 @@ int main(int argc, char **argv)
 
 			/* Check to see if data is available and pass it on */
 			for(i=1; i<=2; i++) {
-				if ( FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
+				if ( child_pipefd[i][PIPE_OUT] != -1 && FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
 					nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
 					if ( nread==-1 ) error(errno,"reading child fd %d",i);
 					if ( nread==0 ) {
@@ -836,6 +975,11 @@ int main(int argc, char **argv)
 		} else {
 			exitcode = WEXITSTATUS(status);
 		}
+
+#ifdef USE_CGROUPS
+		output_cgroup_stats();
+		cgroup_delete();
+#endif
 
 		/* Drop root before writing to output file(s). */
 		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");

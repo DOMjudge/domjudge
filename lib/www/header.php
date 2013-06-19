@@ -13,16 +13,17 @@ header('Content-Type: text/html; charset=' . DJ_CHARACTER_SET);
 
 /* Prevent clickjacking by forbidding framing in modern browsers.
  * Really want to frame DOMjudge? Then change DENY to SAMEORIGIN
- * or even comment out the header altogether.
+ * or even comment out the header altogether. For the public
+ * interface there's no risk, and embedding the scoreboard in a
+ * frame may be useful.
  */
-header('X-Frame-Options: DENY');
+if ( ! IS_PUBLIC ) header('X-Frame-Options: DENY');
 
 if ( isset($refresh) &&
      (!isset($_COOKIE["domjudge_refresh"]) ||
       (bool)$_COOKIE["domjudge_refresh"]) ) {
 	header('Refresh: ' . $refresh);
 }
-echo '<?xml version="1.0" encoding="' . DJ_CHARACTER_SET . '" ?>' . "\n";
 
 if(!isset($menu)) {
 	$menu = true;
@@ -31,9 +32,8 @@ if(!isset($ajaxtitle)) {
 	$ajaxtitle = '';
 }
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
 <head>
 	<!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
 <title><?php echo $title?></title>
@@ -52,9 +52,13 @@ if ( IS_JURY ) {
 	echo "<script type=\"text/javascript\" src=\"" .
 		"../js/sorttable.js\"></script>\n";
 }
+if ( IS_PUBLIC ) {
+	echo "<script type=\"text/javascript\" src=\"../js/djfav.js\"></script>\n";
+}
+echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
 
+if ( ! empty($extrahead) ) echo $extrahead;
 ?>
-<script type="text/javascript" src="../js/domjudge.js"></script>
 </head>
 <?php
 

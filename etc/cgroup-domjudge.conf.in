@@ -1,0 +1,21 @@
+# @configure_input@
+
+# Linux cgroup configuration for DOMjudge. The contents of this file
+# should be added to /etc/cgconfig.conf when cgroups were enabled at
+# configure time. It is then used by runguard to impose memory limits.
+
+# The uids below have to be set to the user that runs the
+# judgedaemon.
+group domjudge {
+	perm {
+		task {
+			uid = @DOMJUDGE_USER@;
+		}
+		admin {
+			uid = @DOMJUDGE_USER@;
+		}
+	}
+	memory {
+# This section is an empty stub: the limits are set by runguard.
+	}
+}

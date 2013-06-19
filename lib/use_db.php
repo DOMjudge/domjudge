@@ -29,7 +29,7 @@ function setup_database_connection()
 			continue;
 		}
 
-		$DB = new db ($db, $host, $user, $pass);
+		$DB = new db ($db, $host, $user, $pass, null, DJ_MYSQL_CONNECT_FLAGS);
 		break;
 	}
 
@@ -37,7 +37,5 @@ function setup_database_connection()
 		user_error("Failed to create database connection", E_USER_ERROR);
 		exit();
 	}
-
-	$DB->q('SET NAMES %s', DJ_CHARACTER_SET_MYSQL);
 }
 

@@ -51,6 +51,17 @@ function delLink($table, $field, $value)
 }
 
 /**
+ * Returns a link to export a problem as zip-file.
+ *
+ */
+function exportLink($probid)
+{
+	return '<a href="export.php?id=' . urlencode($probid) .
+		'"><img src="../images/b_save.png" ' .
+		' title="export problem as zip-file" alt="export" /></a>';
+}
+
+/**
  * Returns a form to rejudge all judgings based on a (table,id)
  * pair. For example, to rejudge all for language 'java', call
  * as rejudgeForm('language', 'java').
@@ -105,7 +116,7 @@ function rejudgeForm($table, $id)
  * Returns TRUE iff string $haystack ends with string $needle
  */
 function ends_with($haystack, $needle) {
-	return substr( $haystack, strlen( $haystack ) - strlen( $needle ) )
+	return mb_substr( $haystack, mb_strlen( $haystack ) - mb_strlen( $needle ) )
        		=== $needle;
 }
 
@@ -189,6 +200,16 @@ function importZippedProblem($zip, $probid = NULL)
 		}
 	}
 
+	// Add problem statement
+	foreach (array('pdf', 'html', 'txt') as $type) {
+		$text = $zip->getFromName('problem.' . $type);
+		if ($text !== FALSE) {
+			$DB->q('UPDATE problem SET problemtext = %s, problemtext_type = %s WHERE probid = %s',
+				$text, $type, $probid);
+			break;
+		}
+	}
+
 	// Insert/update testcases
 	$maxrank = 1 + $DB->q('VALUE SELECT max(rank) FROM testcase
 	                       WHERE probid = %s', $probid);
@@ -233,8 +254,6 @@ function importZippedProblem($zip, $probid = NULL)
 			}
 		}
 	}
-
-	// FIXME: insert PDF into database
 
 	return $probid;
 }

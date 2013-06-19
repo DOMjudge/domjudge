@@ -6,10 +6,12 @@
 
 
    This program can be used to test solutions to problems where the
-   output consists (only) of floating point numbers. These floats will
-   be compared based on a maximum allowed deviation from the reference
+   output consists (partially) of floating point numbers. Each line
+   will be tokenized by whitespace. First the tokens will be compared
+   as strings. If this fails, then the tokens will be parsed as floats
+   and compared based on a maximum allowed deviation from the reference
    output and not on exact matching output strings. Each line may
-   contain multiple floats, but these numbers must be equal for both
+   contain multiple tokens, but these numbers must be equal for both
    files compared.
 
    Use this program in conjunction with the "compare_program.sh"
@@ -32,6 +34,7 @@
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+#include <ctype.h>
 
 #define PROGRAM "check_float"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
@@ -56,6 +59,7 @@ FILE *file1, *file2;
 
 flt abs_prec;
 flt rel_prec;
+int ignore_ws;
 
 int show_help;
 int show_version;
@@ -63,6 +67,7 @@ int show_version;
 struct option const long_opts[] = {
 	{"abs-prec", required_argument, NULL,         'a'},
 	{"rel-prec", required_argument, NULL,         'r'},
+	{"ignore-ws",no_argument,       NULL,         'w'},
 	{"help",     no_argument,       &show_help,    1 },
 	{"version",  no_argument,       &show_version, 1 },
 	{ NULL,      0,                 NULL,          0 }
@@ -78,6 +83,7 @@ void usage()
 	printf("\n");
 	printf("  -a, --abs-prec=PREC  use PREC as relative precision (default: 1E-7)\n");
 	printf("  -r, --rel-prec=PREC  use PREC as absolute precision (default: 1E-7)\n");
+	printf("  -w, --ignore-ws      ignore whitespace differences\n");
 	printf("      --help           display this help and exit\n");
 	printf("      --version        output version information and exit\n");
 	printf("\n");
@@ -108,16 +114,29 @@ int equal(flt f1, flt f2)
 	return 0;
 }
 
+/* Read whitespace from str into res, returns number of characters read */
+int scanspace(const char *str, char *res)
+{
+	int pos = 0;
+	while ( isspace(str[pos]) ) {
+		res[pos] = str[pos];
+		pos++;
+	}
+
+	res[pos] = 0;
+	return pos;
+}
 
 int main(int argc, char **argv)
 {
 	int opt;
 	char *ptr;
-	int linenr, posnr, diff;
+	int linenr, tokennr, diff, wsdiff;
 	char line1[MAXLINELEN], line2[MAXLINELEN];
 	char *ptr1, *ptr2;
 	int pos1, pos2;
 	int read1, read2, n1, n2;
+	char str1[MAXLINELEN], str2[MAXLINELEN];
 	flt f1, f2;
 	flt absdiff, reldiff;
 
@@ -126,9 +145,10 @@ int main(int argc, char **argv)
 	/* Parse command-line options */
 	abs_prec = default_abs_prec;
 	rel_prec = default_rel_prec;
+	ignore_ws = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"a:r:",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"a:r:w",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -141,6 +161,9 @@ int main(int argc, char **argv)
 			rel_prec = strtold(optarg,&ptr);
 			if ( *ptr!=0 || ptr==(char *)&optarg )
 				error(errno,"incorrect relative precision specified");
+			break;
+		case 'w': /* ignore whitespace errors */
+			ignore_ws = 1;
 			break;
 		case ':': /* getopt error */
 		case '?':
@@ -175,6 +198,7 @@ int main(int argc, char **argv)
 
 	linenr = 0;
 	diff = 0;
+	wsdiff = 0;
 
 	while ( 1 ) {
 		linenr++;
@@ -194,53 +218,69 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		pos1 = pos2 = 0;
-		posnr = 0;
-		while ( 1 ) {
-			posnr++;
+		/* Check leading whitespace */
+		n1 = scanspace(line1,str1);
+		n2 = scanspace(line2,str2);
+		if ( strcmp(str1,str2)!=0 ) {
+			wsdiff++;
+			if ( !ignore_ws ) {
+				printf("line %3d: whitespace mismatch at begin of line.\n",linenr);
+			}
+		}
 
-			read1 = sscanf(&line1[pos1],"%Lf",&f1);
-			read2 = sscanf(&line2[pos2],"%Lf",&f2);
-			sscanf(&line1[pos1],"%*f%n",&n1);
-			sscanf(&line2[pos2],"%*f%n",&n2);
+		tokennr = 0;
+		pos1 = n1;
+		pos2 = n2;
+		while ( 1 ) {
+			tokennr++;
+
+			read1 = sscanf(&line1[pos1],"%s",str1);
+			read2 = sscanf(&line2[pos2],"%s",str2);
+			sscanf(&line1[pos1],"%*s%n",&n1);
+			sscanf(&line2[pos2],"%*s%n",&n2);
 			pos1 += n1;
 			pos2 += n2;
 
-			if ( read1==EOF && read2==EOF ) break;
-
 			if ( read1!=1 && read2==1 ) {
-				printf("line %3d: file 1 misses %d-th float.\n",linenr,posnr);
+				printf("line %3d: file 1 misses %d-th token.\n",linenr,tokennr);
 				diff++;
 				break;
 			}
 			if ( read1==1 && read2!=1 ) {
-				printf("line %3d: file 1 has excess %d-th float.\n",linenr,posnr);
+				printf("line %3d: file 1 has excess %d-th token.\n",linenr,tokennr);
 				diff++;
 				break;
 			}
 
+			/* Check if tokens are equal as strings */
+			if ( strcmp(str1,str2)==0 ) goto tokendone;
+
+			read1 = sscanf(str1,"%Lf",&f1);
+			read2 = sscanf(str2,"%Lf",&f2);
+
 			if ( read1==0 ) {
 				printf("line %3d: file 1, %d-th entry cannot be parsed as float.\n",
-				       linenr,posnr);
+				       linenr,tokennr);
 				diff++;
 				break;
 			}
 			if ( read2==0 ) {
 				printf("line %3d: file 2, %d-th entry cannot be parsed as float.\n",
-				       linenr,posnr);
+				       linenr,tokennr);
 				diff++;
 				break;
 			}
 
 			if ( !(read1==1 && read2==1) ) {
-				error(0,"error reading float on line %d",linenr);
+				printf("line %3d: %d-th non-float tokens differ: '%s' != '%s'.\n",
+				       linenr,tokennr,str1,str2);
+				diff++;
 			}
-
 
 			if ( ! equal(f1,f2) ) {
 				diff++;
 				printf("line %3d: %d-th float differs: %8LG != %-8LG",
-				       linenr,posnr,f1,f2);
+				       linenr,tokennr,f1,f2);
 				if ( isfinite(f1) && isfinite(f2) ) {
 					absdiff = fabsl(f1-f2);
 					reldiff = fabsl((f1-f2)/f2);
@@ -249,6 +289,23 @@ int main(int argc, char **argv)
 				}
 				printf("\n");
 			}
+
+		  tokendone:
+			/* Check whitespace after tokens */
+			n1 = scanspace(&line1[pos1],str1);
+			n2 = scanspace(&line2[pos2],str2);
+			if ( strcmp(str1,str2)!=0 ) {
+				wsdiff++;
+				if ( !ignore_ws ) {
+					printf("line %3d: whitespace mismatch after %d-th token.\n",
+					       linenr,tokennr);
+				}
+			}
+			pos1 += n1;
+			pos2 += n2;
+
+			/* No more tokens on this line */
+			if ( line1[pos1]==0 && line2[pos2]==0 ) break;
 		}
 	}
 
@@ -256,6 +313,9 @@ int main(int argc, char **argv)
 	fclose(file2);
 
 	if ( diff > 0 ) printf("Found %d differences in %d lines\n",diff,linenr-1);
+	if ( !ignore_ws && wsdiff > 0 ) {
+		printf("Found %d whitespace differences in %d lines\n",wsdiff,linenr-1);
+	}
 
 	return 0;
 }

@@ -790,19 +790,26 @@ int websubmit()
 	curlerrormsg[0] = 0;
 
 	handle = curl_easy_init();
+	if ( handle == NULL ) error(0,"curl_easy_init() error");
 
 /* helper macros to easily set curl options and fill forms */
 #define curlsetopt(opt,val) \
 	if ( curl_easy_setopt(handle, CURLOPT_ ## opt, val)!=CURLE_OK ) { \
 		warning(0,"setting curl option '" #opt "': %s, aborting download",curlerrormsg); \
 		curl_easy_cleanup(handle); \
-		return 0; }
+		curl_formfree(post); \
+		free(url); \
+		return 1; }
 #define curlformadd(nametype,namecont,valtype,valcont) \
 	if ( curl_formadd(&post, &last, \
 			CURLFORM_ ## nametype, namecont, \
 			CURLFORM_ ## valtype, valcont, \
-			CURLFORM_END) != 0 ) \
-		error(0,"libcurl could not add form field '%s'='%s'",namecont,valcont)
+			CURLFORM_END) != 0 ) { \
+		curl_formfree(post); \
+		curl_easy_cleanup(handle); \
+		free(url); \
+		error(0,"libcurl could not add form field '%s'='%s'",namecont,valcont); \
+	}
 
 	/* Fill post form */
 
@@ -836,6 +843,8 @@ int websubmit()
 	logmsg(LOG_NOTICE,"connecting to %s",url);
 
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
+		curl_formfree(post);
+		curl_easy_cleanup(handle);
 		error(0,"downloading '%s': %s",url,curlerrormsg);
 	}
 

@@ -18,6 +18,8 @@
 
 ISEOF    { return Parser::TEST_EOF; }
 MATCH    { return Parser::TEST_MATCH; }
+UNIQUE   { return Parser::TEST_UNIQUE; }
+INARRAY  { return Parser::TEST_INARRAY; }
 
 \<       { return Parser::CMP_LT; }
 >        { return Parser::CMP_GT; }
@@ -33,8 +35,12 @@ INT      { return Parser::CMD_INT; }
 FLOAT    { return Parser::CMD_FLOAT; }
 STRING   { return Parser::CMD_STRING; }
 REGEX    { return Parser::CMD_REGEX; }
+ASSERT   { return Parser::CMD_ASSERT; }
+UNSET    { return Parser::CMD_UNSET; }
 REP      { return Parser::CMD_REP; }
 WHILE    { return Parser::CMD_WHILE; }
+REPI     { return Parser::CMD_REPI; }
+WHILEI   { return Parser::CMD_WHILEI; }
 IF       { return Parser::CMD_IF; }
 ELSE     { return Parser::CMD_ELSE; }
 END      { return Parser::CMD_END; }
@@ -43,7 +49,7 @@ FIXED      { return Parser::OPT_FIXED; }
 SCIENTIFIC { return Parser::OPT_SCIENTIFIC; }
 
 [a-z][a-z0-9]* {
-	return Parser::VARIABLE;
+	return Parser::VARNAME;
 }
 
  /* A floating point number must have a decimal point or exponent: */

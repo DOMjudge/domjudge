@@ -106,26 +106,26 @@ if ( $submdata['valid'] ) {
 <tr><td>
 <table>
 <caption>Submission</caption>
-<tr><td scope="row">Contest:</td><td>
+<tr><td>Contest:</td><td>
 	<a href="contest.php?id=<?php echo urlencode($submdata['cid'])?>">
 	<?php echo htmlspecialchars($submdata['contestname'])?></a></td></tr>
-<tr><td scope="row">Team:</td><td>
+<tr><td>Team:</td><td>
 	<a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>">
 	<span class="teamid"><?php echo htmlspecialchars($submdata['teamid'])?></span>:
 	<?php echo htmlspecialchars($submdata['teamname'])?></a></td></tr>
-<tr><td scope="row">Problem:</td><td>
+<tr><td>Problem:</td><td>
 	<a href="problem.php?id=<?php echo $submdata['probid']?>">
 	<span class="probid"><?php echo htmlspecialchars($submdata['probid'])?></span>:
 	<?php echo htmlspecialchars($submdata['probname'])?></a></td></tr>
-<tr><td scope="row">Language:</td><td>
+<tr><td>Language:</td><td>
 	<a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a></td></tr>
-<tr><td scope="row">Submitted:</td><td><?php
+<tr><td>Submitted:</td><td><?php
 	echo printtime($submdata['submittime'], TRUE) .
 		' (' . htmlspecialchars($submdata['submittime']) . ')'; ?></td></tr>
-<tr><td scope="row">Source:</td><td>
+<tr><td>Source:</td><td>
 	<a href="show_source.php?id=<?php echo $id?>">view source code</a></td></tr>
-<tr><td scope="row">Max runtime:</td><td>
+<tr><td>Max runtime:</td><td>
 	<?php echo  htmlspecialchars($submdata['maxruntime']) ?> sec</td></tr>
 <?php if ( isset($submdata['externalid']) ) { ?>
 <tr><td scope="row">External ID:</td><td>
@@ -203,7 +203,7 @@ if ( isset($jid) )  {
 		($jud['valid'] == 1 ? '' : ' (INVALID)') . "</h2>\n\n";
 
 	if ( !$jud['verified'] ) {
-		echo addForm($pagename . '?id=' . urlencode($id) . '&jid=' . urlencode($jid));
+		echo addForm($pagename . '?id=' . urlencode($id) . '&amp;jid=' . urlencode($jid));
 
 		echo "<p>Claimed: " .
 		    "<strong>" . printyn(!empty($jud['jury_member'])) . "</strong>";
@@ -233,7 +233,7 @@ if ( isset($jid) )  {
 				echo addForm('verify.php') .
 				    addHidden('id',  $jud['judgingid']) .
 				    addHidden('val', $val) .
-				    addHidden('redirect', $_SERVER['HTTP_REFERER']);
+				    addHidden('redirect', @$_SERVER['HTTP_REFERER']);
 			}
 
 			echo "<p>Verified: " .
@@ -317,7 +317,7 @@ if ( isset($jid) )  {
 	                       $submdata['submittime']);
 	$lastjud = NULL;
 	if ( $lastsubmitid !== NULL ) {
-		$lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result 
+		$lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result, verify_comment
 		                   FROM judging
 		                   WHERE submitid = %s AND valid = 1
 		                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
@@ -333,9 +333,13 @@ if ( isset($jid) )  {
 
 	echo "<h3 id=\"testcases\">Testcase runs " .
 	    ( $lastjud === NULL ? '' :
-	      "<span style=\"font-size:xx-small;\">" .
-	      "<a href=\"javascript:togglelastruns();\">show/hide results of previous</a> " .
-	      "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a></span>" ) .
+	      "<span class=\"testcases_prev\">" .
+	      "<a href=\"javascript:togglelastruns();\">show/hide</a> results of previous " .
+	      "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a>" .
+	          ( empty($lastjud['verify_comment']) ? '' :
+		    "<span class=\"prevsubmit\"> (verify comment: '" . $lastjud['verify_comment'] . "')</span>"
+                  ) .
+	      "</span>" ) .
 	    "</h3>\n\n";
 
 	echo "<table class=\"list\">\n<thead>\n" .
@@ -351,6 +355,7 @@ if ( isset($jid) )  {
 	echo "<th scope=\"col\">description</th>" .
 	    "</tr>\n</thead>\n<tbody>\n";
 
+	$total_runtime = 0;
 	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
 		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
@@ -377,14 +382,17 @@ if ( isset($jid) )  {
 		echo "<td><a href=\"$link\">" .
 		    htmlspecialchars(str_cut($run['description'],20)) . "</a></td>" .
 			"</tr>\n";
+
+		$total_runtime += $run['runtime'];
 	}
+	echo "<tr class=\"summary\"><td></td><td><a>$total_runtime</a></td><td></td><td><a>total runtime</a></td></tr>\n";
 	echo "</tbody>\n</table>\n\n";
 
 ?>
-<script type="text/javascript" language="JavaScript">
+<script type="text/javascript">
 <!--
 togglelastruns();
--->
+// -->
 </script>
 <?php
 

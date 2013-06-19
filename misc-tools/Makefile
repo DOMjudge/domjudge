@@ -14,7 +14,8 @@ OBJECTS += $(CHKOBJS)
 endif
 
 SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
-              combined_scoreboard runssh_judgehosts runssh_teams balloons
+              combined_scoreboard runssh_judgehosts runssh_teams balloons \
+              simulate_contest
 
 config: $(SUBST_FILES)
 
@@ -65,6 +66,15 @@ check: checktestdata
 		data=tests/testwsdata$$n.in ; \
 		for prog in tests/testwsprog$$n.err* ; do $(checkfail) ; done ; \
 	done || true
+# Test if generating testdata works and complies with the script:
+	@TMP=`mktemp --tmpdir dj_gendata.XXXXXX` || exit 1 ; data=$$TMP ; \
+	for i in tests/testprog*.in ; do \
+		grep 'IGNORE GENERATE TESTING' $$i >/dev/null && continue ; \
+		n=$${i#tests/testprog} ; n=$${n%.in} ; \
+		prog=$$i ; \
+		for i in seq 10 ; do opts=-g ; $(checksucc) ; opts='' ; $(checksucc) ; done ; \
+	done ; \
+	rm -f $$TMP
 
 else
 
@@ -79,7 +89,6 @@ install-judgehost:
 
 install-docs:
 ifeq ($(CHECKTESTDATA_ENABLED),yes)
-	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir) checktestdata-grammar.txt
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples \
 		checktestdata.fltcmp checktestdata.hello
 endif

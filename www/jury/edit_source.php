@@ -27,7 +27,7 @@ if ( isset($_POST['submitter']) ) {
 		$filenames[] = $sourcedata['filename'];
 	}
 
-	submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'],
+	$newid = submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'],
 	                $files, $filenames, $_POST['origsubmitid']);
 
 	foreach($files as $file)
@@ -35,7 +35,7 @@ if ( isset($_POST['submitter']) ) {
 		unlink($file);
 	}
 
-	header('Location: submissions.php');
+	header('Location: submission.php?id=' . $newid);
 	exit;
 }
 

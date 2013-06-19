@@ -11,7 +11,7 @@ MAINSOURCE="$1"
 # -02:		Level 2 optimizations (default for speed)
 # -Sg:		Support label and goto commands (for those who need it ;-)
 # -XS:		Static link with all libraries
-fpc -viwn -O2 -Sg -XS -o$DEST "$MAINSOURCE"
+fpc -viwn -O2 -Sg -XS -dONLINE_JUDGE -dDOMJUDGE -o$DEST "$MAINSOURCE"
 exitcode=$?
 
 # clean created object files:

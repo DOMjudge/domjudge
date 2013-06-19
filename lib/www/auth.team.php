@@ -49,8 +49,8 @@ function logged_in()
 
 	if ( !empty($teamdata) ) {
 		$login = $teamdata['login'];
-		// is this the first visit? record that in the team table
-		if ( empty($row['teampage_first_visited']) ) {
+		// Is this the first visit? Record that in the team table.
+		if ( empty($teamdata['teampage_first_visited']) ) {
 			$hostname = gethostbyaddr($ip);
 			$DB->q('UPDATE team SET teampage_first_visited = %s, hostname = %s
 			        WHERE login = %s',
@@ -113,9 +113,9 @@ Please supply team credentials below, or contact a staff member for assistance.
 <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">
 <input type="hidden" name="cmd" value="login" />
 <table>
-<tr><td><label for="login">Login:</label></td><td><input type="text" id="login" name="login" value="" size="15" maxlength="15" accesskey="l" /></td></tr>
+<tr><td><label for="login">Login:</label></td><td><input type="text" id="login" name="login" value="" size="15" maxlength="15" accesskey="l" autofocus /></td></tr>
 <tr><td><label for="passwd">Password:</label></td><td><input type="password" id="passwd" name="passwd" value="" size="15" maxlength="255" accesskey="p" /></td></tr>
-<tr><td colspan="2" align="center"><input type="submit" value="Login" /></td></tr>
+<tr><td></td><td><input type="submit" value="Login" /></td></tr>
 </table>
 </form>
 

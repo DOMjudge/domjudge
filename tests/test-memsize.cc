@@ -32,6 +32,7 @@ int main()
 				cout << "resizing failed." << endl;
 				return 0;
 			}
+			for(int j=a.capacity()/2; j<a.capacity(); j++) a[j] = j%137;
 			cout << "allocated: " << a.capacity()/1024/1024 << " MB." << endl;
 		}
 	}

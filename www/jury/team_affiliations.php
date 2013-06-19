@@ -33,14 +33,14 @@ if( $res->count() == 0 ) {
 		$link = '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">';
 		echo '<tr><td>' . $link . htmlspecialchars($row['affilid']) .
 			'</a></td><td>' . $link . htmlspecialchars($row['name']) .
-			'</a></td><td align="center">' . $link .
+			'</a></td><td class="tdcenter">' . $link .
 			( is_readable($affillogo) ? '<img src="' . $affillogo .
 			  '" alt="' . htmlspecialchars($row['name']) . '" />' : '&nbsp;' ) .
-			'</a></td><td align="center">' . $link .
+			'</a></td><td class="tdcenter">' . $link .
 			htmlspecialchars($row['country']) .
 			( is_readable($countryflag) ? ' <img src="' . $countryflag .
 			  '" alt="' . htmlspecialchars($row['country']) . '" />' : '&nbsp;' ) .
-			'</a></td><td align="right">' . $link .
+			'</a></td><td class="tdright">' . $link .
 			(int)$row['cnt'] .
 			'</a></td>';
 		if ( IS_ADMIN ) {

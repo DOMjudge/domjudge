@@ -1,0 +1,185 @@
+#!/usr/bin/env php
+<?php
+/**
+ * @configure_input@
+ *
+ * Program to do a "relive" simulation of a previous contest: all
+ * original results are added to the scoreboard in real contest time.
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+
+$waittime = 30;
+
+// template to generate team ID's from; requires 'XXXXX' substring
+// that is replaced by a random number.
+$def_team = 'simulate_XXXXX';
+$def_categ = 1;
+$def_lang = 'c';
+
+require('@domserver_etcdir@/domserver-static.php');
+require(ETCDIR . '/domserver-config.php');
+
+define('SCRIPT_ID', 'simulate_contest');
+define('LOGFILE', LOGDIR.'/auxiliary.log');
+
+require(LIBDIR . '/init.php');
+
+function usage()
+{
+	echo "Usage: " . SCRIPT_ID . " [OPTION]... <resultfile>\n" .
+	    "Replay a previous contest in the active one. Recorded submissions are read\n" .
+	    "from <resultfile>. Each line in this file must describe a submission with\n" .
+	    "tab separated entries: team, problem ID, time (in contest minutes), result.\n\n" .
+	    "  -f       automatically verify simulated submissions (useful when the\n" .
+	    "             configuration option VERIFICATION_REQUIRED is enabled\n" .
+	    "  -r       remove simulation generated data and exit\n" .
+	    "  -v       set verbosity to LEVEL (syslog levels)\n" .
+	    "  -h       display this help and exit\n" .
+	    "  -V       output version information and exit\n\n";
+	exit;
+}
+
+$options = getopt("frv:hV");
+// With PHP version >= 5.3 we can also use long options.
+// FIXME: getopt doesn't return FALSE on parse failure as documented!
+if ( $options===FALSE ) {
+	echo "Error: parsing options failed.\n";
+	usage();
+}
+
+if ( isset($options['f']) ) $options['verify']  = $options['f'];
+if ( isset($options['r']) ) $options['remove']  = $options['r'];
+if ( isset($options['v']) ) $options['verbose'] = $options['v'];
+
+if ( isset($options['V']) ) version();
+if ( isset($options['h']) ) usage();
+
+setup_database_connection();
+
+$verify = FALSE;
+if ( isset($options['verify']) ) $verify = TRUE;
+
+$verbose = LOG_INFO;
+if ( isset($options['verbose']) ) $verbose = $options['verbose'];
+
+if ( isset($options['remove']) ) {
+	logmsg(LOG_NOTICE, "removing simulation generated data from the database...");
+
+	$teammatch = str_replace('XXXXX', '%%', $def_team);
+	$res = $DB->q("RETURNAFFECTED DELETE FROM team WHERE login LIKE '$teammatch'");
+
+	logmsg(LOG_NOTICE, "deleted $res teams, exiting.");
+
+	exit;
+}
+
+// PHP getopt() sucks: it does not provide an OPTIND variable. We're
+// just going to assume that the last commandline argument is the
+// results file.
+$pos = $_SERVER['argc']-1;
+if ( $pos==0 || empty($_SERVER['argv'][$pos]) ) error("original results file missing");
+
+$resultsfile = $_SERVER['argv'][$pos];
+
+logmsg(LOG_NOTICE, "started, results file = '$resultsfile'");
+
+if ( ($fd = @fopen($resultsfile, 'r'))===FALSE ) {
+	error("results file '$resultsfile' not found or readable");
+}
+
+$submissions = array();
+while ( ($subm = fgetcsv($fd, 0, '	')) ) $submissions[] = $subm;
+
+fclose($fd);
+
+// Field encoding:
+$fteam = 0;
+$fprob = 1;
+$ftime = 2;
+$fresult = 3;
+
+$cdata = getCurContest(TRUE);
+$cid = $cdata['cid'];
+
+// Create team IDs:
+$teamids = array();
+foreach ( $submissions as &$subm ) {
+	if ( !isset($teamids[$subm[$fteam]]) ) {
+		// Create fake team ID
+		while ( TRUE ) {
+			$rnd = sprintf("%05d", mt_rand(0,99999));
+			$teamid = str_replace('XXXXX', $rnd, $def_team);
+			if ( !$DB->q('MAYBEVALUE SELECT login FROM team
+ 			              WHERE login = %s', $teamid) ) {
+
+				$DB->q('INSERT INTO team
+				        (login, name, categoryid, comments)
+				        VALUES (%s, %s, %i, "fake simulation team")',
+				       $teamid, "$subm[$fteam] (simulated)", $def_categ);
+
+				$teamids[$subm[$fteam]] = $teamid;
+
+				break;
+			}
+		}
+	}
+	$subm['teamid'] = $teamids[$subm[$fteam]];
+}
+
+logmsg(LOG_INFO, "teams created");
+
+while ( $cdata['cid']==$cid && difftime(now(),$cdata['endtime'])<0 ) { // bug!
+
+	// Check for submissions that require inserting at current time
+	foreach ( $submissions as &$subm ) {
+
+		$stime = strftime(MYSQL_DATETIME_FORMAT,
+		                  strtotime($cdata['starttime'],0) + $subm[$ftime]*60);
+
+		if ( !isset($subm['inserted']) && difftime($stime,now())<=0 ) {
+
+			// Insert submission together with fake judgement to make
+			// sure that no judgehost tries to pick it up.
+			$DB->q('START TRANSACTION');
+
+			list($usec, $sec) = explode(" ", microtime());
+			$mark = 'simulate_fakehost@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
+
+			$submitid = $DB->q('RETURNID INSERT INTO submission
+						        (cid, teamid, probid, langid, submittime, judgemark)
+						        VALUES (%i, %s, %s, %s, %s, %s)',
+			                   $cid, $subm['teamid'], $subm[$fprob],
+			                   $def_lang, $stime, $mark);
+
+			$DB->q('INSERT INTO judging
+			        (cid, submitid, starttime, endtime, result, verified)
+			        VALUES (%i, %i, %s, %s, %s, %i)',
+			       $cid, $submitid, $stime, $stime, $subm[$fresult], (int)$verify);
+
+			calcScoreRow($cid, $subm['teamid'], $subm[$fprob]);
+
+			$DB->q('COMMIT');
+/*
+	// Log to event table
+	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid,
+ 	                           probid, submitid, description)
+	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
+	       $s['submittime'], $s['cid'], $s['teamid'], $s['langid'],
+	       $s['probid'], $s['sid']);
+*/
+
+			logmsg(LOG_INFO, "inserted submission $subm[$fteam]/$subm[$fprob]");
+			$subm['inserted'] = TRUE;
+		}
+	}
+
+	sleep($waittime);
+	$cdata = getCurContest(TRUE);
+}
+
+logmsg(LOG_NOTICE, "contest finished, exiting.");
+
+exit;

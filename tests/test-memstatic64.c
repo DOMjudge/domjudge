@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #define size 512
 
@@ -14,6 +15,8 @@ char a[size*1024*1024];
 
 int main()
 {
+	memset(a,0,size*1024*1024);
+
 	a[10] = 1;
 
 	printf("Statically allocated %d MB.\n",size);

@@ -168,6 +168,7 @@ char *errorstring(const char *type, int errnum, const char *mesg)
 	if ( errdescr != NULL )	strcat(buffer, errdescr);
 
 	if ( type == NULL ) free(errtype);
+	if ( mesg == NULL && errnum == 0 ) free(errdescr);
 
 	return buffer;
 }

@@ -40,12 +40,12 @@ if( ! $row['valid'] ) {
 ?>
 
 <table>
-<tr><td scope="row">Problem:</td>
+<tr><td>Problem:</td>
 	<td><?php echo htmlspecialchars($row['probname'])?> [<span class="probid"><?php echo
 	htmlspecialchars($row['probid']) ?></span>]</td></tr>
-<tr><td scope="row">Submitted:</td>
+<tr><td>Submitted:</td>
 	<td><?php echo printtime($row['submittime'], TRUE)?></td></tr>
-<tr><td scope="row">Language:</td>
+<tr><td>Language:</td>
 	<td><?php echo htmlspecialchars($row['langname'])?></td></tr>
 </table>
 

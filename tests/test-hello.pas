@@ -11,5 +11,9 @@ var
 
 begin
    hello := 'Hello world!';
+{$ifdef DOMJUDGE}
    writeln(hello);
+{$else}
+   writeln('DOMJUDGE not defined');
+{$endif}
 end.

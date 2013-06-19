@@ -4,17 +4,18 @@ endif
 include $(TOPDIR)/Makefile.global
 
 SUBMITCMD = $(TOPDIR)/submit/submit
+SUBMITOPTS = -q -w1 -p $(PROBLEM)
 
 SUBMIT = \
 	echo -n "Submitting '$$i' " ; \
 	if [ "$${i%.zip}" != "$$i" ]; then \
-		tmp=`mktemp -d` ; \
+		tmp=`mktemp -d --tmpdir` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
 		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
-		$(SUBMITCMD) -q -w1 -p $(PROBLEM) "$$main" "$$tmp/"* ; \
+		$(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; \
 		rm -rf "$$tmp" ; \
 	else \
-		$(SUBMITCMD) -q -w1 -p $(PROBLEM) "$$i" ; \
+		$(SUBMITCMD) $(SUBMITOPTS) "$$i" ; \
 	fi ; \
 	echo ; sleep 1
 

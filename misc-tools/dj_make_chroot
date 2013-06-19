@@ -18,23 +18,25 @@ set -e
 CHROOTDIR=$1
 ARCH=$2
 
+# Debian release to bootstrap:
+RELEASE="wheezy"
+
 # List of possible architectures to install chroot for:
-ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
+ARCHLIST="amd64,armel,armhf,i386,ia64,powerpc,s390,s390x,sparc"
 
 # Debian packages to include during bootstrap process (comma separated):
 INCLUDEDEBS=""
 
 # Debian packages to install after upgrade (space separated):
-INSTALLDEBS="openjdk-6-jre-headless"
+INSTALLDEBS="openjdk-7-jre-headless locales"
 # For C# support add: mono-runtime libmono-system2.0-cil
 # However running mono within chroot still gives errors...
 
 # Debian packages to remove after upgrade (space separated):
 REMOVEDEBS=""
 
-# Debian mirror, modify to match closest mirror
-#DEBMIRROR="http://ftp.us.debian.org/debian"
-DEBMIRROR="http://ftp.nl.debian.org/debian"
+# Debian mirror. http.debian.net will pick the 'closest'.
+DEBMIRROR="http://http.debian.net/debian"
 
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
@@ -71,6 +73,14 @@ cd "$CHROOTDIR"
 CHROOTDIR="$PWD"
 
 if [ ! -x /usr/sbin/debootstrap ]; then
+
+	echo "This script will install debootstrap on your system."
+	echo -n "Continue? (y/N) "
+	read yn
+	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
+		exit 1;
+	fi
+
 	if [ -f /etc/debian_version ]; then
 
 		cd /
@@ -102,7 +112,7 @@ fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 /usr/sbin/debootstrap $INCLUDEOPT $EXCLUDEOPT \
-	--variant=minbase --arch "$ARCH" squeeze "$CHROOTDIR" "$DEBMIRROR"
+	--variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
@@ -110,9 +120,9 @@ cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
 
-# Stable (squeeze)
-deb $DEBMIRROR			squeeze		main
-deb http://security.debian.org	squeeze/updates	main
+# Stable ($RELEASE)
+deb $DEBMIRROR			$RELEASE		main
+deb http://security.debian.org	$RELEASE/updates	main
 
 # Testing
 #deb $DEBMIRROR			testing		main

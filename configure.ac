@@ -11,14 +11,14 @@ AC_DEFUN([AX_WITH_COMMENT], [
 	AC_ARG_WITH([ax_comment_$1],[$2],[],[])
 	])
 
-AC_SUBST(fhs_enabled,[])
+AC_SUBST(FHS_ENABLED,no)
 AC_ARG_ENABLE(fhs,AS_HELP_STRING([--enable-fhs],
 [use FHS directories (default: no), see below under "Optional
  Packages" for path configuration when FHS is disabled.]),
-[if test "x$enableval" != xno ; then AC_SUBST(fhs_enabled,yes) fi])
+[if test "x$enableval" != xno ; then AC_SUBST(FHS_ENABLED,yes) fi])
 
 if test "x$prefix" = xNONE; then
-	if test "x$fhs_enabled" = xyes ; then
+	if test "x$FHS_ENABLED" = xyes ; then
 		prefix=$ac_default_prefix
 	else
 		prefix="/opt/domjudge"
@@ -125,7 +125,7 @@ fi
 
 # }}}
 
-# {{{ runguard user
+# {{{ runguard
 AC_MSG_CHECKING([runuser])
 AC_ARG_WITH([runuser], [AS_HELP_STRING([--with-runuser=USER],
 [Unprivileged user under which to run submissions (default: domjudge-run).])], [], [])
@@ -137,12 +137,38 @@ else
 	AC_SUBST(RUNUSER,$with_runuser)
 	AC_MSG_RESULT($RUNUSER)
 fi
+
+# Check for using Linux cgroups for memory control
+AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]))
+
+if test "x$LIBCGROUP" != x; then
+	use_cgroups=yes
+else
+	use_cgroups=no
+fi
+AC_ARG_ENABLE(cgroups,AS_HELP_STRING([--enable-cgroups],
+[Use Linux cgroups for memory control (default: $use_cgroups).]), [], [])
+
+if test "x$enable_cgroups" = xno; then
+	use_cgroups=no
+elif test "x$enable_cgroups" != x; then
+	use_cgroups=yes
+fi
+
+# Finally define an export variable that can be substituted into
+# etc/runguard-config.h.in:
+if test "x$use_cgroups" = xyes; then
+	AC_SUBST(USE_CGROUPS,1)
+else
+	AC_SUBST(USE_CGROUPS,0)
+fi
+
 # }}}
 
 # {{{ FHS directory structure
 
 # These are defaults that can still be overridden below!
-if test "x$fhs_enabled" = xyes ; then
+if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(domserver_root,        '')
 	AC_SUBST(domserver_bindir,      $bindir)
 	AC_SUBST(domserver_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
@@ -178,7 +204,7 @@ fi
 AC_DEFUN([AX_PATH], [
 	AC_ARG_WITH($1,[  --with-$1=DIR   	(default: $2)],
 		[AC_SUBST($1, $withval)],
-		[if test "x$fhs_enabled" != xyes ; then AC_SUBST($1, $2) fi])
+		[if test "x$FHS_ENABLED" != xyes ; then AC_SUBST($1, $2) fi])
 	])
 
 AX_WITH_COMMENT(2,[  ])
@@ -275,7 +301,7 @@ AC_DEFINE_UNQUOTED(_XOPEN_SOURCE, 500,       [Include SUSv2 (UNIX 98) extensions
 
 # Checks for header files.
 AC_HEADER_STDBOOL
-AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h termios.h unistd.h magic.h])
+AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h termios.h unistd.h magic.h libcgroup.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -311,6 +337,14 @@ echo ""
 echo " * default user........: $DOMJUDGE_USER"
 echo " * runguard user.......: $RUNUSER"
 echo " * webserver group.....: $WEBSERVER_GROUP"
+echo ""
+echo " * use Linux cgroups...: $use_cgroups"
+echo ""
+if test "x$CHECKTESTDATA_ENABLED" = xyes ; then
+   echo " * checktestdata.......: enabled"
+else
+   echo " * checktestdata.......: disabled"
+fi
 echo ""
 if test $SUBMIT_DEFAULT -eq 0 ; then # {{{
 	echo " * submitclient........: disabled"

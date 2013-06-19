@@ -11,6 +11,11 @@ SQLDIR="@domserver_sqldir@"
 
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
 
+verbose()
+{
+	[ -z "$QUIET" ] && echo "$@"
+}
+
 # Wrapper around mysql command to allow setting options, user, etc.
 mysql()
 {
@@ -32,6 +37,11 @@ mysql()
 
 read_dbpasswords()
 {
+	if [ ! -r "$PASSWDFILE" ]; then
+		echo "Error: password file '$PASSWDFILE' not found or not readable."
+		echo "You may want to run: $0 genpass"
+		return 1
+	fi
 	local OLDIFS="$IFS"
 	IFS=":"
 	# Don't pipe $PASSWDFILE into this while loop as that spawns a
@@ -51,6 +61,7 @@ read_dbpasswords()
 		echo "Error: no login info found."
 		return 1
 	fi
+	verbose "Database credentials read from '$PASSWDFILE'."
 }
 
 status()
@@ -94,6 +105,7 @@ create_db_users()
 
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
+	verbose "DOMjudge database and user(s) created."
 }
 
 remove_db_users()
@@ -108,18 +120,22 @@ remove_db_users()
 		'$domjudge_DBUSER'@'%', '$domjudge_DBUSER'@'localhost';"
 	echo "FLUSH PRIVILEGES;"
 	) | mysql -f
+	verbose "DOMjudge database and user(s) removed."
 }
 
 ### Script starts here ###
 
 # Parse command-line options:
-while getopts ':u:p:r' OPT ; do
+while getopts ':u:p:qr' OPT ; do
 	case "$OPT" in
 		u)
 			DBA_USER=$OPTARG
 			;;
 		p)
 			DBA_PASSWD=$OPTARG
+			;;
+		q)
+			QUIET=1
 			;;
 		r)
 			PROMPT_PASSWD=1
@@ -166,8 +182,10 @@ install)
 	read_dbpasswords
 	create_db_users
  	cat $SQLDIR/mysql_db_structure.sql \
+ 	    $SQLDIR/mysql_db_defaultdata.sql \
  	    $SQLDIR/mysql_db_examples.sql \
 	     | mysql -D "$DBNAME"
+	verbose "SQL structure and default/example data installed."
 	rm -f $TMPFILE
 	;;
 
@@ -184,7 +202,7 @@ upgrade)
 		echo "Warning: please remove all non-jury users from $PASSWDFILE"
 		echo "You may also remove those users from MySQL."
 	fi
-	TMPOUT=`mktemp /tmp/domjudge-sql.XXXXXX`
+	TMPOUT=`mktemp --tmpdir domjudge-sql.XXXXXX`
 	read_dbpasswords
 	for i in "$SQLDIR"/upgrade/*.sql ; do
 		if [ ! -r "$i" ]; then
@@ -208,6 +226,7 @@ upgrade)
 			fi
 		fi
 	done
+	verbose "DOMjudge database upgrade completed."
 	rm -f $TMPOUT
 	;;
 

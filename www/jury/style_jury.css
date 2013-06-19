@@ -32,6 +32,8 @@
 	padding-left: 5px;
 	padding-right: 5px;
 }
+.testcases_prev { font-size: xx-small; }
+tr.summary td { border-top: 1px solid black; }
 
 .testrank {
 	line-height: 0.9;
@@ -156,3 +158,8 @@ img.helpicon { cursor: help; }
 .col1 { float: left;  width: 30%; }
 .col2 { float: right; width: 70%; }
 .nomorecol { clear: left; }
+
+.thleft { text-align: left; }
+.tdcenter { text-align: center; }
+.tdright { text-align: right; }
+.teamstat { text-align: right; }

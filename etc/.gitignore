@@ -10,3 +10,4 @@
 /htpasswd-plugin
 /dbpasswords.secret
 /sudoers-domjudge
+/cgroup-domjudge.conf

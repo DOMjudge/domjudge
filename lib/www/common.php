@@ -21,14 +21,14 @@ function parseRunDiff($difftext){
 
 	// We determine the line number width from the '_' characters and
 	// the separator position from the character '?' on the second line.
-	$linenowidth = strrpos($line, '_') + 1;
-	$midloc = strpos($line, '?') - ($linenowidth+1);
+	$linenowidth = mb_strrpos($line, '_') + 1;
+	$midloc = mb_strpos($line, '?') - ($linenowidth+1);
 
 	$line = strtok("\n");
-	while(strlen($line) != 0){
-		$linenostr = substr($line, 0, $linenowidth);
-		$diffline = substr($line, $linenowidth+1);
-		$mid = substr($diffline, $midloc-1, 3);
+	while(mb_strlen($line) != 0){
+		$linenostr = mb_substr($line, 0, $linenowidth);
+		$diffline = mb_substr($line, $linenowidth+1);
+		$mid = mb_substr($diffline, $midloc-1, 3);
 		switch($mid){
 			case ' = ':
 				$formdiffline = "<span class='correct'>".htmlspecialchars($diffline)."</span>";
@@ -175,7 +175,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		if ( IS_JURY ) {
 			echo '<td title="' .
 				htmlspecialchars($row['teamid'].': '.$row['teamname']) . '">' .
-				"<a$link>" . htmlspecialchars(str_cut($row['teamname'],20)) . '</a></td>';
+				"<a$link>" . htmlspecialchars(str_cut($row['teamname'],30)) . '</a></td>';
 		}
 		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
 			"<a$link>" . htmlspecialchars($row['probid']) . '</a></td>';
@@ -324,17 +324,17 @@ function putTeam($login) {
 ?>
 
 <table>
-<tr><td scope="row">Name:    </td><td><?php echo htmlspecialchars($team['name'])?></td></tr>
-<tr><td scope="row">Category:</td><td><?php echo htmlspecialchars($team['catname'])?></td></tr>
+<tr><td>Name:    </td><td><?php echo htmlspecialchars($team['name'])?></td></tr>
+<tr><td>Category:</td><td><?php echo htmlspecialchars($team['catname'])?></td></tr>
 <?php
 
 	if ( !empty($team['members']) ) {
-		echo '<tr><td scope="row">Members:</td><td>' .
+		echo '<tr><td>Members:</td><td>' .
 			nl2br(htmlspecialchars($team['members'])) . "</td></tr>\n";
 	}
 
 	if ( !empty($team['affilid']) ) {
-		echo '<tr><td scope="row">Affiliation:</td><td>';
+		echo '<tr><td>Affiliation:</td><td>';
 		if ( is_readable($affillogo) ) {
 			echo '<img src="' . $affillogo . '" alt="' .
 				htmlspecialchars($team['affilid']) . '" /> ';
@@ -344,7 +344,7 @@ function putTeam($login) {
 		echo htmlspecialchars($team['affname']);
 		echo "</td></tr>\n";
 		if ( !empty($team['country']) ) {
-			echo '<tr><td scope="row">Country:</td><td>';
+			echo '<tr><td>Country:</td><td>';
 			if ( is_readable($countryflag) ) {
 				echo '<img src="' . $countryflag . '" alt="' .
 					htmlspecialchars($team['country']) . '" /> ';
@@ -354,7 +354,7 @@ function putTeam($login) {
 	}
 
 	if ( !empty($team['room']) ) {
-		echo '<tr><td scope="row">Location:</td><td>' .
+		echo '<tr><td>Location:</td><td>' .
 			htmlspecialchars($team['room']) . "</td></tr>\n";
 	}
 
@@ -366,15 +366,19 @@ function putTeam($login) {
  */
 function putClock() {
 	global $cdata;
+	$what = $fmt = "";
+	$activatetime_u = strtotime($cdata['activatetime']);
+	$starttime_u = strtotime($cdata['starttime']);
+	$endtime_u = strtotime($cdata['endtime']);
+
 	// current time
-	echo '<div id="clock">' . strftime('%a %e %b %Y %T %Z');
+	echo '<div id="clock"><span id="timecur">' . strftime('%a %e %b %Y %T %Z') . "</span>";
 	// timediff to end of contest
 	if ( strcmp(now(), $cdata['starttime']) >= 0 && strcmp(now(), $cdata['endtime']) < 0) {
-		$left = strtotime($cdata['endtime'])-time();
+		$left = $endtime_u-time();
 		$what = "time left: ";
-	}
-	if ( strcmp(now(), $cdata['activatetime']) >= 0 && strcmp(now(), $cdata['starttime']) < 0) {
-		$left = strtotime($cdata['starttime'])-time();
+	} else if ( strcmp(now(), $cdata['activatetime']) >= 0 && strcmp(now(), $cdata['starttime']) < 0) {
+		$left = $starttime_u-time();
 		$what = "time to start: ";
 	}
 	if ( !empty($left) ) {
@@ -394,9 +398,22 @@ function putClock() {
 		$left -= $m * 60;
 		$fmt .= sprintf('%02d', $left);
 
-		echo "<br /><span id=\"timeleft\">" . $what . $fmt . "</span>";
 	}
-	echo "</div>\n\n";
+	echo "<br /><span id=\"timeleft\">" . $what . $fmt . "</span>";
+	echo "</div>";
+
+	echo "<script type=\"text/javascript\">
+	var initial = " . time() . ";
+	var activatetime = " . $activatetime_u . ";
+	var starttime = " . $starttime_u . ";
+	var endtime = " . $endtime_u . ";
+	var offset = 1;
+	var date = new Date(initial*1000);
+	var timecurelt = document.getElementById(\"timecur\");
+	var timeleftelt = document.getElementById(\"timeleft\");
+
+	setInterval(function(){updateClock();},1000);
+</script>\n";
 }
 
 /**
@@ -441,4 +458,49 @@ function checkFileUpload($errorcode) {
 			error('Unknown error while uploading: '. $_FILES['code']['error'] .
 				'. Contact staff.');
 	}
+}
+
+/**
+ * Outputs a problem description text, either as download or inline.
+ * It is assumed that the headers have not been sent yet, and this
+ * function terminates the PHP script execution.
+ */
+function putProblemText($probid)
+{
+	global $DB, $cdata;
+
+	$prob = $DB->q("MAYBETUPLE SELECT cid, problemtext, problemtext_type
+	                FROM problem WHERE OCTET_LENGTH(problemtext) > 0
+	                AND probid = %s", $probid);
+
+	if ( empty($prob) ||
+	     !(IS_JURY ||
+	       ($prob['cid']==$cdata['cid'] && difftime($cdata['starttime'],now())<=0)) ) {
+		error("Problem '$probid' not found or not available");
+	}
+
+	switch ( $prob['problemtext_type'] ) {
+	case 'pdf':
+		$mimetype = 'application/pdf';
+		break;
+	case 'html':
+		$mimetype = 'text/html';
+		break;
+	case 'txt':
+		$mimetype = 'text/plain';
+		break;
+	default:
+		error("Problem '$probid' text has unknown type");
+	}
+
+
+	$filename = "prob-$probid.$prob[problemtext_type]";
+
+	header("Content-Type: $mimetype; name=\"$filename\"");
+	header("Content-Disposition: inline; filename=\"$filename\"");
+	header("Content-Length: " . strlen($prob['problemtext']));
+
+	echo $prob['problemtext'];
+
+	exit(0);
 }

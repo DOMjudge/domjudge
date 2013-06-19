@@ -9,6 +9,10 @@
 int main()
 {
 	char hello[20] = "Hello world!";
+#ifdef ONLINE_JUDGE
 	printf("%s\n",hello);
+#else
+	printf("ONLINE_JUDGE not defined\n");
+#endif
 	return 0;
 }

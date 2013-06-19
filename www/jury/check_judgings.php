@@ -21,6 +21,8 @@ $verify_multiple = isset($_REQUEST['verify_multiple']);
 
 <?php
 
+$pagename = basename($_SERVER['PHP_SELF']);
+
 $nchecked = 0;
 $nunchecked = 0;
 
@@ -49,17 +51,17 @@ function flushresults($header, $results, $collapse = FALSE)
 	$section++;
 
 	echo "<h2><a href=\"javascript:collapse($section)\">$header</a></h2>\n\n";
-	echo "<div class=\"details\" id=\"detail$section\">\n";
+	echo "<ul class=\"details\" id=\"detail$section\">\n";
 	foreach ($results as $row) {
 		echo "<li>$row</li>\n";
 	}
-	echo "</div>\n\n";
+	echo "</ul>\n\n";
 
 	if ( $collapse ) {
-		echo "<script type=\"text/javascript\" language=\"JavaScript\">
+		echo "<script type=\"text/javascript\">
 <!--
 	collapse($section);
--->
+// -->
 </script>\n\n";
 	}
 
@@ -69,14 +71,14 @@ function flushresults($header, $results, $collapse = FALSE)
 while( $row = $res->next() ) {
 	$sid = $row['submitid'];
 
-	if ( ($pos = strpos($row['sourcecode'],$matchstring)) !== FALSE && $row['verified']==0 ) {
+	if ( ($pos = mb_strpos($row['sourcecode'],$matchstring)) !== FALSE && $row['verified']==0 ) {
 		$nchecked++;
 
-		$beginpos = $pos + strlen($matchstring);
-		$endpos = strpos($row['sourcecode'],"\n",$beginpos);
-		$results = explode(',',trim(substr($row['sourcecode'],$beginpos,$endpos-$beginpos)));
+		$beginpos = $pos + mb_strlen($matchstring);
+		$endpos = mb_strpos($row['sourcecode'],"\n",$beginpos);
+		$results = explode(',',trim(mb_substr($row['sourcecode'],$beginpos,$endpos-$beginpos)));
 
-		$result = strtoupper($row['result']);
+		$result = mb_strtoupper($row['result']);
 
 		if ( !in_array($result,$results) ) {
 			$unexpected[] = "<a href=\"submission.php?id=" . $sid
@@ -108,7 +110,7 @@ while( $row = $res->next() ) {
 		$nunchecked++;
 
 		if ( $pos===FALSE ) {
-			$nomatch[] = "string '<tt>$matchstring</tt>' not found in " .
+			$nomatch[] = "string '<code>$matchstring</code>' not found in " .
 				"<a href=\"submission.php?id=" . $sid .
 				"\">s$sid</a>, leaving submission unchecked";
 		} else {
