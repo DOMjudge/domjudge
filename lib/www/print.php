@@ -58,8 +58,13 @@ function printtime($datetime, $contesttime = FALSE) {
 		$reltime *= $sign;
 		$s = $reltime%60; $reltime = ($reltime - $s)/60;
 		$m = $reltime%60; $reltime = ($reltime - $m)/60;
-		$h = $sign*$reltime;
-		return sprintf("%d:%02d", $h, $m);
+		$h = $reltime;
+		// The last minute before contest start should show as "-00:01"
+		if ( $sign<0 ) {
+			return sprintf("-%d:%02d", $h, $m+1);
+		} else {
+			return sprintf("%d:%02d", $h, $m);
+		}
 	} else {
 		return htmlspecialchars(date(dbconfig_get('time_format', 'H:i'), strtotime($datetime)));
 	}
