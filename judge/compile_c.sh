@@ -7,10 +7,10 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
-# -Wall:	Report all warnings
+# -g:		Enable debug symbols
 # -O2:		Level 2 optimizations (default for speed)
 # -static:	Static link with all libraries
 # -pipe:	Use pipes for communication between stages of compilation
 # -lm:		Link with math-library (has to be last argument!)
-gcc -Wall -O2 -std=gnu99 -static -pipe -o $DEST "$@" -lm
+gcc -g -O2 -std=gnu99 -static -pipe -o $DEST "$@" -lm
 exit $?
