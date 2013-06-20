@@ -717,7 +717,11 @@ int main(int argc, char **argv)
 			nproc = (rlim_t) readoptarg("process limit",1,LONG_MAX);
 			break;
 		case 'P': /* cpuset option */
-			cpuset = optarg;
+			#ifdef USE_CGROUPS
+				cpuset = optarg;
+			#else
+				error(0,"This option is only supported when compiled with cgroup support.");
+			#endif
 			break;
 		case 'c': /* no-core option */
 			no_coredump = 1;
