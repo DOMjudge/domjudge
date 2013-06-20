@@ -45,6 +45,10 @@
 
 /* For chroot(), which is not POSIX. */
 #define _BSD_SOURCE
+/* For unshare(), only used when cgroups are enabled */
+#if ( USE_CGROUPS == 1 )
+#define _GNU_SOURCE
+#endif
 
 #include <sys/types.h>
 #include <sys/wait.h>
