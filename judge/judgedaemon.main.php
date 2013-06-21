@@ -72,7 +72,7 @@ if ( DEBUG & DEBUG_JUDGE ) {
 }
 
 $runuser = RUNUSER;
-if ( isset($options['daemonid']) ) $runuser .= '-' . $options['daemonid']);
+if ( isset($options['daemonid']) ) $runuser .= '-' . $options['daemonid'];
 
 // Set static environment variables for passing path configuration
 // to called programs:
