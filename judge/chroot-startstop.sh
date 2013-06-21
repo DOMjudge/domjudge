@@ -17,8 +17,8 @@
 # Exit on error:
 set -e
 
-# Chroot subdirs needed: (add 'lib64' for amd64 architecture)
-SUBDIRMOUNTS="etc lib usr"
+# Chroot subdirs needed: (optional lib64 only needed for amd64 architecture)
+SUBDIRMOUNTS="etc usr lib lib64"
 
 # Location where to bind mount from:
 CHROOTORIGINAL="/chroot/domjudge"
@@ -36,7 +36,7 @@ case "$1" in
 			# Preserve those; bind mount the others.
 			if [ -L "$CHROOTORIGINAL/$i" ]; then
 				ln -s `readlink "$CHROOTORIGINAL/$i"` $i
-			else
+			elif [ -d "$CHROOTORIGINAL/$i" ]; then
 				mkdir -p $i
 				sudo -n mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null
 				# Mount read-only for extra security. Note that this
@@ -66,7 +66,7 @@ case "$1" in
 		for i in $SUBDIRMOUNTS ; do
 			if [ -L "$CHROOTORIGINAL/$i" ]; then
 				rm -f $i
-			else
+			elif [ -d "$CHROOTORIGINAL/$i" ]; then
 				sudo -n umount "$PWD/$i" < /dev/null
 				rmdir $i || true
 			fi
