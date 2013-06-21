@@ -1,9 +1,8 @@
--- These are some example/default entries for the DOMjudge database.
+-- This provides a sample contest setup for the DOMjudge database.
 --
 -- You can pipe this file into the 'mysql' command to insert this
 -- data, but preferably use 'dj-setup-database'. Database should be set
 -- externally (e.g. to 'domjudge').
-
 
 -- 
 -- Dumping data for table `contest`
@@ -41,17 +40,16 @@ INSERT INTO `team_affiliation` (`affilid`, `name`, `country`, `comments`) VALUES
 -- Dumping data for table `team_category`
 -- 
 
-INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visible`) VALUES (1, 'Participants', 0, NULL, 1);
-INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visible`) VALUES (2, 'Observers', 1, "#d9d9d9", 1);
-INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visible`) VALUES (3, 'Organisation', 1, "#ff99cc", 0);
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visible`) VALUES (2, 'Participants', 0, NULL, 1);
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visible`) VALUES (3, 'Observers', 1, "#ffcc33", 1);
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visible`) VALUES (4, 'Organisation', 1, "#ff99cc", 0);
 
 
 -- 
 -- Dumping data for table `team`
 -- 
 
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 3, 'UU', '127.0.0.1', NULL, NULL, NULL, NULL);
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('coolteam', 'Some very cool teamname!', 1, NULL, MD5('coolteam#mypassword'), NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('coolteam', 'Some very cool teamname!', 2, 'UU', MD5('coolteam#mypassword'), NULL, NULL, NULL, NULL);
 
 -- 
 -- Dumping data for table `testcase`

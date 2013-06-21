@@ -47,3 +47,16 @@ INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_f
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('f95',    'Fortran', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('scala',  'Scala',   0, 1, 1.5);
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('lua',    'Lua',     0, 1, 1);
+
+-- 
+-- Dumping data for table `team_category`
+-- 
+-- System category
+INSERT INTO `team_category` VALUES (1, 'System', 9, '#ff2bea', 0);
+
+-- 
+-- Dumping data for table `team`
+-- 
+
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 1, NULL, '127.0.0.1', NULL, NULL, NULL, NULL);
+

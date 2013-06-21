@@ -83,7 +83,7 @@ status()
 
 	echo -n "Searching for data in database: "
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD \
-		mysql -e "USE \`$DBNAME\`; SELECT name FROM problem WHERE probid = 'hello';" || return 1
+		mysql -e "USE \`$DBNAME\`; SELECT name FROM team WHERE login = 'domjudge';" || return 1
 
 	echo -n "MySQL server version: "
 	mysql -e 'SELECT version();'
@@ -181,11 +181,21 @@ genpass)
 install)
 	read_dbpasswords
 	create_db_users
- 	cat $SQLDIR/mysql_db_structure.sql \
- 	    $SQLDIR/mysql_db_defaultdata.sql \
- 	    $SQLDIR/mysql_db_examples.sql \
+	cat $SQLDIR/mysql_db_structure.sql \
+	    $SQLDIR/mysql_db_defaultdata.sql \
+	    $SQLDIR/mysql_db_examples.sql \
 	     | mysql -D "$DBNAME"
 	verbose "SQL structure and default/example data installed."
+	rm -f $TMPFILE
+	;;
+
+bare-install)
+	read_dbpasswords
+	create_db_users
+ 	cat $SQLDIR/mysql_db_structure.sql \
+ 	    $SQLDIR/mysql_db_defaultdata.sql \
+	     | mysql -D "$DBNAME"
+	verbose "SQL structure and defaults installed(No sample data)."
 	rm -f $TMPFILE
 	;;
 
@@ -236,11 +246,12 @@ Unknown subcommand '$1'
 Usage: $0 [option]... <command>
 
 Commands:
-  status     check database installation status
-  genpass    generate password file
-  install    create database, contents and users if not existing
-  uninstall  remove database users and database, INCLUDING ALL DATA!
-  upgrade    upgrade MySQL database schema to current version
+  status        check database installation status
+  genpass       generate password file
+  install       create database, example contest and users if not existing
+  bare-install  create database, setup defaults if not existing
+  uninstall     remove database users and database, INCLUDING ALL DATA!
+  upgrade       upgrade MySQL database schema to current version
 
 Options:
   -u <user>  connect to MySQL with DB admin <user>
