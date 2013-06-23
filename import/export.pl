@@ -6,8 +6,8 @@ use strict;
 
 # config section
 my $SERVER = "https://kattis/";
-my $USER = "analyst14";
-my $PASSWORD = "4MGbcqSq";
+my $USER = $ENV{'KATTIS_USER'};
+my $PASSWORD = $ENV{'KATTIS_PWD'};
 my $DIRECTORY = "submissions";
 
 make_path($DIRECTORY);
