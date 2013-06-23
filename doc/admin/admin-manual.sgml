@@ -746,7 +746,8 @@ presentation errors as correct answers by adding the mapping
 <code>
 	'presentation-error' => 'correct',
 </code>
-to the <tt>results_remap</tt> configuration variable.
+to the <tt>results_remap</tt> configuration variable (to be found in
+the admin web interface under <em>configuration settings</em>).
 
 For more details on modifying validator scripts, see the comments at the top
 of the files <tt>testcase_run.sh</tt>, <tt>compare_wrapper</tt>
