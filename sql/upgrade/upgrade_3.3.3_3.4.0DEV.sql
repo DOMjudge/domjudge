@@ -37,6 +37,17 @@ INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_f
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('f95',    'Fortran', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('scala',  'Scala',   0, 1, 1.5);
 INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('lua',    'Lua',     0, 1, 1);
+INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('py3', 'Python 3', 0, 1, 1);
+
+-- Rename language extension py to py2 (to discern from added py3):
+INSERT INTO `language` (`langid`, `name`, `allow_submit`, `allow_judge`, `time_factor`)
+  SELECT 'py2', 'Python 2', `allow_submit`, `allow_judge`, `time_factor`
+  FROM `language` WHERE `langid` = 'py';
+
+UPDATE `event`      SET `langid` = 'py2' WHERE `langid` = 'py';
+UPDATE `submission` SET `langid` = 'py2' WHERE `langid` = 'py';
+
+DELETE FROM `language` WHERE `langid` = 'py';
 
 --
 -- Finally remove obsolete structures after moving data

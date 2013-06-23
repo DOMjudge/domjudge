@@ -54,6 +54,7 @@ Version 3.4.0 - DEV
  - Add support for memory control in rungard with Linux cgroups.
    Patch provided by Keith Johnson.
  - Pass ONLINE_JUDGE and DOMJUDGE directives to submissions.
+ - Add support for new languages: Python3, Ada, Fortran, Lua, Scala.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
