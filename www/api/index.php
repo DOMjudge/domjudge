@@ -59,7 +59,7 @@ function contest() {
                'start'   => $cdata['starttime'],
                'end'     => $cdata['endtime']);
 }
-$doc = "Get information about  the current contest: id, name, start and end.";
+$doc = "Get information about the current contest: id, name, start and end.";
 $api->provideFunction('GET', 'contest', 'contest', $doc);
 
 /**
@@ -248,7 +248,7 @@ function languages() {
   }
   return $res;
 }
-$doc = 'Get a list of all languages.';
+$doc = 'Get a list of all suported programming languages.';
 $api->provideFunction('GET', 'languages', 'languages', $doc);
 
 /**
@@ -299,4 +299,3 @@ $api->provideFunction('GET', 'scoreboard', 'scoreboard', $doc, $args, $exArgs);
 
 // Now provide the api, which will handle the request
 $api->provideApi();
-?>

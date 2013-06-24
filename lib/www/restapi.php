@@ -77,11 +77,11 @@ class RestApi {
   public function showDocs() {
     ksort($this->apiFunctions);
 
-    print "<!DOCTYPE HTML>\n";
+    print "<!DOCTYPE html>\n";
     print "<html>\n";
     print "<head>\n";
-    print '<meta charset="utf-8">';
-    print "<title>DOMjudge version" . DOMJUDGE_VERSION . " REST API</title>\n";
+    print "<meta charset=\"" . DJ_CHARACTER_SET . "\">";
+    print "<title>DOMjudge version " . DOMJUDGE_VERSION . " REST API</title>\n";
     print "</head>\n";
     print "<body>\n";
     print "The supported functions are:\n";
@@ -109,11 +109,11 @@ class RestApi {
       print "</dd>\n";
     }
     print "</dl>\n";
-    print "</html>\n";
+    print "<body>\n</html>\n";
   }
   
   private function createResponse($response) {
-    header('Content-type: application/json');
+    header('Content-Type: application/json');
     print json_encode($response);
     exit;
   }
@@ -124,4 +124,3 @@ class RestApi {
     $this->createResponse(array('error' => $message));
   }
 }
-?>
