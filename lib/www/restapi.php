@@ -109,7 +109,7 @@ class RestApi {
       print "</dd>\n";
     }
     print "</dl>\n";
-    print "<body>\n</html>\n";
+    print "</body>\n</html>\n";
   }
   
   private function createResponse($response) {
