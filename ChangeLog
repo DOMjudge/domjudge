@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.5.0 - DEV
 -------------------
+ - [INCOMPATIBLE CHANGE] checktestdata logical operators are now '&&' and '||'.
 
 Version 3.4.0 - (unreleased)
 ----------------------------
