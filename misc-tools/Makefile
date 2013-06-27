@@ -88,7 +88,7 @@ install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) balloons
 
 install-judgehost:
-	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) dj_make_chroot
+	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) dj_make_*chroot
 
 install-docs:
 ifeq ($(CHECKTESTDATA_ENABLED),yes)
