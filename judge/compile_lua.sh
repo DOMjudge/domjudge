@@ -25,6 +25,11 @@ if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
     exit 1
 fi
 
+# Check lua syntax:
+luac -p "$MAINSOURCE"
+EXITCODE=$?
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+
 # Write executing script:
 cat > $DEST <<EOF
 #!/bin/sh
