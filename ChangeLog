@@ -10,7 +10,6 @@ Version 3.4.0 - DEV
    cases.
  - Display verification comment for previous run.
  - Check IP address equivalence with inet_pton.
- - Make public interface not dependent on domjudge.js.
  - Do not apply framing protection to public interface.
  - Update GeSHi to upstream 1.0.8.11.
  - Update JSColor to upstream 1.4.0.
