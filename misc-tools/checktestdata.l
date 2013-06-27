@@ -21,6 +21,9 @@ MATCH    { return Parser::TEST_MATCH; }
 UNIQUE   { return Parser::TEST_UNIQUE; }
 INARRAY  { return Parser::TEST_INARRAY; }
 
+&&       { return Parser::LOGIC_AND; }
+\|\|     { return Parser::LOGIC_OR; }
+
 \<       { return Parser::CMP_LT; }
 >        { return Parser::CMP_GT; }
 \<=      { return Parser::CMP_LE; }
