@@ -38,6 +38,9 @@ REMOVEDEBS=""
 # Debian mirror. http.debian.net will pick the 'closest'.
 DEBMIRROR="http://http.debian.net/debian"
 
+# Which debootstrap package to install on non-Debian systems:
+DEBOOTDEB="debootstrap_1.0.48+deb7u1_all.deb"
+
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
 
@@ -90,7 +93,6 @@ if [ ! -x /usr/sbin/debootstrap ]; then
 		mkdir "$CHROOTDIR/debootstrap"
 		cd "$CHROOTDIR/debootstrap"
 
-		DEBOOTDEB="debootstrap_1.0.26+squeeze1_all.deb"
 		wget "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
 
 		ar -x "$DEBOOTDEB"
