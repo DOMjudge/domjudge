@@ -49,7 +49,7 @@ dist: configure
 config:            SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
 build:             SUBDIRS=        lib         judge submit import tests misc-tools
 domserver:         SUBDIRS=etc             www       submit import
-install-domserver: SUBDIRS=etc     lib sql www       submit import
+install-domserver: SUBDIRS=etc     lib sql www       submit import       misc-tools
 judgehost:         SUBDIRS=etc                 judge
 install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
 docs:              SUBDIRS=    doc

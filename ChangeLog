@@ -10,7 +10,6 @@ Version 3.4.0 - DEV
    cases.
  - Display verification comment for previous run.
  - Check IP address equivalence with inet_pton.
- - Make public interface not dependent on domjudge.js.
  - Do not apply framing protection to public interface.
  - Update GeSHi to upstream 1.0.8.11.
  - Update JSColor to upstream 1.4.0.
@@ -54,6 +53,9 @@ Version 3.4.0 - DEV
  - Add support for memory control in rungard with Linux cgroups.
    Patch provided by Keith Johnson.
  - Pass ONLINE_JUDGE and DOMJUDGE directives to submissions.
+ - Add support for new languages: Python3, Ada, Fortran, Lua, Scala.
+ - Checktestdata logical operators are now '&&' and '||'. The old '&' and
+   '|' are obsoleted and will be removed in the next major release.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------

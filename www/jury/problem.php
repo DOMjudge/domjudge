@@ -38,6 +38,12 @@ if ( !empty($pcmd) ) {
 			   $_POST['val']['toggle_judge'], $id);
 		auditlog('problem', $id, 'set allow judge', $_POST['val']['toggle_judge']);
 	}
+
+	if ( isset($pcmd['delete_text']) ) {
+		$DB->q('UPDATE problem SET problemtext = NULL, problemtext_type = NULL
+		        WHERE probid = %s', $id);
+		auditlog('problem', $id, 'delete problem text');
+	}
 }
 if ( isset($_POST['upload']) ) {
 	if ( !empty($_FILES['problem_archive']['tmp_name'][0]) ) {
@@ -214,9 +220,13 @@ if ( !empty($data['color']) ) {
 		"</td></tr>\n";
 }
 if ( !empty($data['problemtext_type']) ) {
-	echo '<tr><td>Problem text:</td><td><a href="problem.php?id=' .
+	echo '<tr><td>Problem text:</td><td class="nobreak"><a href="problem.php?id=' .
 	    urlencode($id) . '&amp;cmd=viewtext"><img src="../images/' .
-	    urlencode($data['problemtext_type']) . ".png\" alt=\"problem text\" /></a></td></tr>\n";
+	    urlencode($data['problemtext_type']) . '.png" alt="problem text" ' .
+	    'title="view problem description" /></a> ' .
+	    addSubmit('delete', 'cmd[delete_text]',
+	              "return confirm('Delete problem description text?')") .
+	    "</td></tr>\n";
 }
 if ( !empty($data['special_run']) ) {
 	echo '<tr><td>Special run script:</td><td class="filename">' .

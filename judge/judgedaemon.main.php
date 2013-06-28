@@ -71,6 +71,9 @@ if ( DEBUG & DEBUG_JUDGE ) {
 	putenv('DEBUG=1');
 }
 
+$runuser = RUNUSER;
+if ( isset($options['daemonid']) ) $runuser .= '-' . $options['daemonid'];
+
 // Set static environment variables for passing path configuration
 // to called programs:
 putenv('DJ_BINDIR='      . BINDIR);
@@ -79,11 +82,7 @@ putenv('DJ_JUDGEDIR='    . JUDGEDIR);
 putenv('DJ_LIBDIR='      . LIBDIR);
 putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
 putenv('DJ_LOGDIR='      . LOGDIR);
-if ( isset($options['daemonid']) ) {
-	putenv('RUNUSER='    . RUNUSER . '-' . $options['daemonid']);
-} else {
-	putenv('RUNUSER='    . RUNUSER);
-}
+putenv('RUNUSER='        . $runuser);
 
 foreach ( $EXITCODES as $code => $name ) {
 	$var = 'E_' . strtoupper(str_replace('-','_',$name));
@@ -93,12 +92,12 @@ foreach ( $EXITCODES as $code => $name ) {
 // Pass SYSLOG variable via environment for compare program
 if ( defined('SYSLOG') && SYSLOG ) putenv('DJ_SYSLOG=' . SYSLOG);
 
-system("pgrep -u ".RUNUSER, $retval);
+system("pgrep -u $runuser", $retval);
 if ($retval == 0) {
-	error("Still some processes by ".RUNUSER." found, aborting");
+	error("Still some processes by $runuser found, aborting");
 }
 if ($retval != 1) {
-	error("Error while checking processes for user " . RUNUSER);
+	error("Error while checking processes for user $runuser");
 }
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");

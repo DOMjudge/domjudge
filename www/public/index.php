@@ -38,4 +38,6 @@ if ( ! $isstatic ) {
 // call the general putScoreBoard function from scoreboard.php
 putScoreBoard($cdata, null, $isstatic, $filter);
 
+echo "<script type=\"text/javascript\">initFavouriteTeams();</script>";
+
 require(LIBWWWDIR . '/footer.php');

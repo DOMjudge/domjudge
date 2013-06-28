@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Python compile wrapper-script for 'compile.sh'.
+# Python3 compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 #
 # This script does not actually "compile" the source, but writes a
@@ -37,7 +37,7 @@ fi
 
 export ONLINE_JUDGE=1 DOMJUDGE=1
 
-exec python "$MAINSOURCE"
+exec python3 "$MAINSOURCE"
 EOF
 
 chmod a+x $DEST

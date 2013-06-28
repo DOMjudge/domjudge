@@ -45,6 +45,10 @@
 
 /* For chroot(), which is not POSIX. */
 #define _BSD_SOURCE
+/* For unshare(), only used when cgroups are enabled */
+#if ( USE_CGROUPS == 1 )
+#define _GNU_SOURCE
+#endif
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -71,6 +75,7 @@
 #if ( USE_CGROUPS == 1 )
 #include <inttypes.h>
 #include <libcgroup.h>
+#include <sched.h>
 #else
 #undef USE_CGROUPS
 #endif
@@ -344,7 +349,7 @@ void output_cgroup_stats()
 		error(0,"get cgroup value - %s(%d)", cgroup_strerror(ret), ret);
 	}
 
-	fprintf(stderr, "Total memory used: %" PRId64 " kb\n", max_usage/1024);
+	fprintf(stderr, "Total memory used: %" PRId64 " kB\n", max_usage/1024);
 
 	cgroup_free(&cg);
 }
@@ -712,7 +717,11 @@ int main(int argc, char **argv)
 			nproc = (rlim_t) readoptarg("process limit",1,LONG_MAX);
 			break;
 		case 'P': /* cpuset option */
-			cpuset = optarg;
+			#ifdef USE_CGROUPS
+				cpuset = optarg;
+			#else
+				error(0,"This option is only supported when compiled with cgroup support.");
+			#endif
 			break;
 		case 'c': /* no-core option */
 			no_coredump = 1;
@@ -815,8 +824,9 @@ int main(int argc, char **argv)
 	snprintf(cgroupname, 256, "/domjudge/dj_cgroup_%d/", getpid());
 
 	cgroup_create();
-#endif
 
+	unshare(CLONE_FILES|CLONE_FS|CLONE_NEWIPC|CLONE_NEWNET|CLONE_NEWNS|CLONE_NEWUTS|CLONE_SYSVSEM);
+#endif
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
 		error(errno,"cannot fork");

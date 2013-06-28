@@ -51,7 +51,13 @@ $DOMJUDGE_ADMINS = array('domjudge_jury', 'admin');
 //   - EXT... are comma separated additional detected language extensions.
 // This list only needs to be modified when additional languages are
 // added and should be kept in sync with the list in submit-config.h.in.
-define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,csharp,cs AWK,awk Python,py Bash,bash Ada,adb,ads Fortran,f95,f90 Scala,scala Lua,lua');
+define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,csharp,cs AWK,awk Python2,py2,py Python3,py3 Bash,bash Ada,adb,ads Fortran,f95,f90 Scala,scala Lua,lua');
+
+// Set this to a notification command, which receives the notification
+// text on stdin. Examples below for notification by mail or prints.
+//define('BALLOON_CMD', 'mail -s Balloon_notification domjudge@localhost');
+//define('BALLOON_CMD', 'lpr');
+define('BALLOON_CMD', '');
 
 // Specify URL to external CCS, e.g. Kattis
 define('EXT_CCS_URL', 'https://ccs.example.com/');

@@ -23,10 +23,11 @@ varname  := [a-z][a-z0-9]*
 variable := &lt;varname&gt; | &lt;varname&gt; '[' &lt;expr&gt; [',' &lt;expr&gt; ...] ']'
 value    := &lt;integer&gt; | &lt;float&gt; | &lt;string&gt; | &lt;variable&gt;
 compare  := '&lt;' | '&gt;' | '&lt;=' | '&gt;=' | '==' | '!='
+logical  := '&&' | '||'
 expr     := &lt;term&gt; | &lt;expr&gt; [+-] &lt;term&gt;
 term     := &lt;term&gt; [*%/] &lt;factor&gt; | &lt;factor&gt;
 factor   := &lt;value&gt; | '-' &lt;term&gt; | '(' &lt;expr&gt; ')' | &lt;factor&gt; '^' &lt;factor&gt;
-test     := '!' &lt;test&gt; | '(' &lt;test&gt; ')' | &lt;test&gt; [&|] &lt;test&gt; |
+test     := '!' &lt;test&gt; | &lt;test&gt; &lt;logical&gt; &lt;test&gt; | '(' &lt;test&gt; ')' |
              &lt;expr&gt; &lt;compare&gt; &lt;expr&gt; | &lt;testcommand&gt;
 </code>
 
@@ -56,8 +57,8 @@ backslash.
 
 <p>
 Tests can be built from comparison operators, the usual logical
-operators <tt>!&|</tt> (not, and, or) and a number of test commands
-that return a boolean value. These are:
+operators <tt>! && ||</tt> (not, and, or) and a number of test
+commands that return a boolean value. These are:
 <descrip>
 <tag><tt>MATCH(&lt;string&gt; str)</tt></tag>
 

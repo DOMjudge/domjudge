@@ -10,7 +10,8 @@ MAINSOURCE="$1"
 # -Wall:        Report all warnings
 # -02:          Level 2 optimizations (default for speed)
 # -static:      Static link with all libraries
-gfortran -static -Wall -O2 -o $DEST "$@"
+# -cpp:         Run C preprocessor
+gfortran -static -Wall -O2 -cpp -DONLINE_JUDGE -DDOMJUDGE -o $DEST "$@"
 exitcode=$?
 
 # clean created files:
