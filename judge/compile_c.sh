@@ -12,5 +12,5 @@ MAINSOURCE="$1"
 # -static:	Static link with all libraries
 # -pipe:	Use pipes for communication between stages of compilation
 # -lm:		Link with math-library (has to be last argument!)
-gcc -g -O2 -std=gnu99 -static -pipe -o $DEST "$@" -lm
+gcc -g -O2 -std=gnu99 -static -pipe -DONLINE_JUDGE -DDOMJUDGE -o $DEST "$@" -lm
 exit $?
