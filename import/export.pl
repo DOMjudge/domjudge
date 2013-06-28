@@ -43,7 +43,7 @@ while (my $submID = <STDIN>) {
 
 		# download and store submission data
 		sleep(1); # sleep before downloading
-		$response = $mech->get($SERVER . "download/submissiondata?id=" . $submID . "&allfiles=1");
+		$response = $mech->get($SERVER . "download/submissiondata?id=" . $submID . "&type=src");
 		if ($response->is_error) {
 			print STDERR "problem while downloading submission " . $submID . ": " . $response->status_line . "\n";
 		} elsif ($response->decoded_content =~ /^No such submission\.$/) {
