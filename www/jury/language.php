@@ -97,7 +97,7 @@ if ( ! $data ) error("Missing or invalid language id");
 
 echo "<h1>Language ".htmlspecialchars($id)."</h1>\n\n";
 
-echo addForm($pagename) . "<p>\n" .
+echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 	addHidden('id', $id) .
 	addHidden('val[toggle_judge]',  !$data['allow_judge']) .
 	addHidden('val[toggle_submit]', !$data['allow_submit']).
