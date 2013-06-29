@@ -181,7 +181,8 @@ if ( ! $data ) error("Missing or invalid problem id");
 
 echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
 
-echo addForm($pagename, 'post', null, 'multipart/form-data') . "<p>\n" .
+echo addForm($pagename . '?id=' . urlencode($id),
+             'post', null, 'multipart/form-data') . "<p>\n" .
 	addHidden('id', $id) .
 	addHidden('val[toggle_judge]',  !$data['allow_judge']) .
 	addHidden('val[toggle_submit]', !$data['allow_submit']).
