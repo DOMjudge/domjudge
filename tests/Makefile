@@ -17,7 +17,7 @@ SUBMIT = \
 	else \
 		$(SUBMITCMD) $(SUBMITOPTS) "$$i" ; \
 	fi ; \
-	echo ; sleep 1
+	echo
 
 build: $(TARGETS)
 
