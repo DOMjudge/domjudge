@@ -26,7 +26,8 @@ ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 INCLUDEDEBS=""
 
 # Packages to install after upgrade (space separated):
-INSTALLDEBS="mono-mcs mono-gmcs mono-dmcs lua5.2 python3"
+#INSTALLDEBS="mono-mcs mono-gmcs mono-dmcs lua5.2 python3"
+INSTALLDEBS=""
 # The url for scala(should point to the version you want)
 SCALAPKG="http://www.scala-lang.org/downloads/distrib/files/scala-2.10.2.tgz"
 
@@ -34,7 +35,7 @@ SCALAPKG="http://www.scala-lang.org/downloads/distrib/files/scala-2.10.2.tgz"
 REMOVEDEBS=""
 
 # Ubuntu mirror, modify to match closest mirror
-DEBMIRROR="http://us.archive.ubuntu.com./ubuntu/"
+DEBMIRROR="http://ru.archive.ubuntu.com./ubuntu/"
 DEBOOTDEB="debootstrap_1.0.46_all.deb"
 # "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
 CODENAME="precise"
@@ -194,9 +195,9 @@ chroot "$CHROOTDIR" /bin/sh -c "apt-get update"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install oracle-java7-installer"
 
 # Install scala(in /usr/local so it is on the path)
-mkdir -p "$CHROOTDIR/usr/local"
-curl $SCALAPKG | tar xzf - --no-same-owner --strip-components=1 -C "$CHROOTDIR/usr/local"
-chmod +x "$CHROOTDIR"/usr/local/bin/*
+#mkdir -p "$CHROOTDIR/usr/local"
+#curl $SCALAPKG | tar xzf - --no-same-owner --strip-components=1 -C "$CHROOTDIR/usr/local"
+#chmod +x "$CHROOTDIR"/usr/local/bin/*
 
 # Do some cleanup of the chroot
 chroot "$CHROOTDIR" /bin/sh -c "apt-get remove --purge $REMOVEDEBS"
