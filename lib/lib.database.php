@@ -307,10 +307,13 @@ class db
 
 		$this->_connection = mysqli_init();
 		@mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, $this->flags);
-		if(!$this->_connection) {
+
+		if(mysqli_connect_error() || !$this->_connection) {
 			throw new RuntimeException("Could not connect to database server "
 			    . "(host=$this->host,user=$this->user,password="
-			    . str_repeat('*', strlen($this->password)) . ",db=$this->database)");
+			    . str_repeat('*', strlen($this->password)) . ",db=$this->database). "
+			    . "Error " . mysqli_connect_errno() . ": "
+			    . mysqli_connect_error() );
 		}
 		mysqli_set_charset($this->_connection, DJ_CHARACTER_SET_MYSQL);
 	}
