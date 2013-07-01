@@ -21,7 +21,7 @@ set -e
 SUBDIRMOUNTS="etc usr lib lib64"
 
 # Location where to bind mount from:
-CHROOTORIGINAL="/chroot/domjudge"
+CHROOTORIGINAL="/home/analyst/chroot"
 
 case "$1" in
 	start)
@@ -68,6 +68,14 @@ case "$1" in
 				rm -f $i
 			elif [ -d "$CHROOTORIGINAL/$i" ]; then
 				sudo -n umount "$PWD/$i" < /dev/null
+			fi
+		done
+
+# Wait a second to assure that all are unmounted:
+		sleep 1
+
+		for i in $SUBDIRMOUNTS ; do
+			if [ -d "$CHROOTORIGINAL/$i" ]; then
 				rmdir $i || true
 			fi
 		done
