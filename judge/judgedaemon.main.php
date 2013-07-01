@@ -239,7 +239,7 @@ while ( TRUE ) {
 		                    WHERE judgemark IS NULL AND cid = %i
  		                    AND langid IN (%As) AND probid IN (%As)
  		                    AND submittime < %s AND valid = 1
-		                    ORDER BY judging_last_started ASC, submittime ASC
+		                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
 		                    LIMIT 1',
 		                   $cid, $judgable_lang, $judgable_prob,
 		                   $cdata['endtime']);
