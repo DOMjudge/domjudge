@@ -137,7 +137,6 @@ span.extra {
 #menutopright {
 	position: absolute; right: 1ex; top: 1ex;
 	text-align: right;
-	z-index: -1;
 }
 #clock {
 	font-size: small;
@@ -145,6 +144,7 @@ span.extra {
 	border: 1px dashed #ccc;
 	padding: 4px;
 	color: gray;
+	z-index: -1;
 }
 #timeleft { color: #800080;}
 #refresh {
