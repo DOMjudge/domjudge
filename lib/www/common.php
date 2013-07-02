@@ -83,6 +83,9 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			$judgedclause = '(j.result IS NULL) ';
 		}
 	}
+	if ( isset($restrictions['externaldiff']) ) {
+		$externalclause = '(j.result IS NOT NULL AND j.result != s.externalresult) ';
+	}
 
 	$sqlbody =
 		'FROM submission s
@@ -103,6 +106,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 				  . $sqlbody
 				  . (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '')
 				  . (isset($restrictions['judged'])  ? 'AND ' . $judgedclause : '')
+				  . (isset($restrictions['externaldiff'])  ? 'AND ' . $externalclause : '')
 				  .'ORDER BY s.submittime DESC, s.submitid DESC '
 				  . ($limit > 0 ? 'LIMIT 0, %i' : '%_')
 				, $cid, @$restrictions['teamid'], @$restrictions['probid']

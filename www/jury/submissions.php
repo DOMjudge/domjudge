@@ -6,7 +6,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'all');
+$viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'all', 4 => 'externaldiff');
 
 $view = 0;
 
@@ -39,6 +39,7 @@ echo "<h1>$title</h1>\n\n";
 $restrictions = array();
 if ( $viewtypes[$view] == 'unverified' ) $restrictions['verified'] = 0;
 if ( $viewtypes[$view] == 'unjudged' ) $restrictions['judged'] = 0;
+if ( $viewtypes[$view] == 'externaldiff' ) $restrictions['externaldiff'] = 1;
 
 echo addForm('submissions.php', 'get') . "<p>Show submissions:\n";
 for($i=0; $i<count($viewtypes); ++$i) {
