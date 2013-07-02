@@ -143,6 +143,7 @@ span.diff-new {
 	border: 1px dashed #ccc;
 	padding: 4px;
 	color: gray;
+	z-index: -1;
 }
 #timeleft { color: #800080;}
 #refresh {
