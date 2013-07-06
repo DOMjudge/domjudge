@@ -536,8 +536,10 @@ function database_retry_connect()
 		}
 	}
 
-	logmsg(LOG_NOTICE, "Received signal, exiting.");
-	exit;
+	if ( $exitsignalled ) {
+		logmsg(LOG_NOTICE, "Received signal, exiting.");
+		exit;
+	}
 }
 
 function store_result($result, $row, $judgingid)
