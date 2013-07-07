@@ -15,14 +15,20 @@ if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
 	error("Missing or invalid judge hostname");
 }
 
-if ( isset($_POST['cmd']) &&
-	( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) ) {
+if ( isset($_REQUEST['cmd']) &&
+	( $_REQUEST['cmd'] == 'activate' || $_REQUEST['cmd'] == 'deactivate' ) ) {
 
 	requireAdmin();
 
 	$DB->q('UPDATE judgehost SET active = %i WHERE hostname = %s',
-	       ($_POST['cmd'] == 'activate' ? 1 : 0), $id);
-	auditlog('judgehost', $id, 'marked ' . ($_POST['cmd']=='activate'?'active':'inactive'));
+	       ($_REQUEST['cmd'] == 'activate' ? 1 : 0), $id);
+	auditlog('judgehost', $id, 'marked ' . ($_REQUEST['cmd']=='activate'?'active':'inactive'));
+
+	// the request came from the overview page
+	if ( isset($_GET['cmd']) ) {
+		header("Location: judgehosts.php");
+		exit;
+	}
 }
 
 $row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $id);
