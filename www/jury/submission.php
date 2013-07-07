@@ -337,7 +337,7 @@ if ( isset($jid) )  {
 	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
 		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
-		    "<td><a href=\"$link\">$run[runtime]</a></td>" .
+		    "<td><a href=\"$link\">" . sprintf('%.2f',$run[runtime]) . "</a></td>" .
 		    "<td><a href=\"$link\"><span class=\"sol ";
 		switch ( $run['runresult'] ) {
 		case 'correct':
@@ -363,7 +363,9 @@ if ( isset($jid) )  {
 
 		$total_runtime += $run['runtime'];
 	}
-	echo "<tr class=\"summary\"><td></td><td><a>$total_runtime</a></td><td></td><td><a>total runtime</a></td></tr>\n";
+	echo "<tr class=\"summary\"><td></td><td><a>" .
+		sprintf('%.2f',$total_runtime) . "</a></td><td></td>" .
+		"<td><a>total runtime</a></td></tr>\n";
 	echo "</tbody>\n</table>\n\n";
 
 ?>
