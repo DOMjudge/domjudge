@@ -334,6 +334,7 @@ if ( isset($jid) )  {
 	    "</tr>\n</thead>\n<tbody>\n";
 
 	$total_runtime = 0;
+	$max_runtime = 0;
 	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
 		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
@@ -362,10 +363,12 @@ if ( isset($jid) )  {
 			"</tr>\n";
 
 		$total_runtime += $run['runtime'];
+		$max_runtime = max($max_runtime,$run['runtime']);
 	}
 	echo "<tr class=\"summary\"><td></td><td><a>" .
-		sprintf('%.2f',$total_runtime) . "</a></td><td></td>" .
-		"<td><a>total runtime</a></td></tr>\n";
+		sprintf('%.2f',$total_runtime) . "</a></td><td><a>" .
+		printresult(@$jud['result']) . "</a></td><td><a>max runtime: " .
+	    sprintf('%.2f',$max_runtime) . "</a></td></tr>\n";
 	echo "</tbody>\n</table>\n\n";
 
 ?>
