@@ -139,7 +139,7 @@ span.extra {
 	text-align: right;
 }
 #clock {
-	font-size: small;
+/*	font-size: small; */
 	font-family: monospace;
 	border: 1px dashed #ccc;
 	padding: 4px;
