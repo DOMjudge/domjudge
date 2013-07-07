@@ -399,6 +399,7 @@ function judge($mark, $row, $judgingid)
 
 	// Get both in- and output files, only if we didn't have them already.
 	$tcfile = array();
+	$fetched = array();
 	foreach(array('input','output') as $inout) {
 		$tcfile[$inout] = "$workdirpath/testcase/testcase.$tc[probid].$tc[rank]." .
 		    $tc['md5sum_'.$inout] . "." . substr($inout, 0, -3);
@@ -415,14 +416,18 @@ function judge($mark, $row, $judgingid)
 			} else {
 				error("File corrupted during download.");
 			}
-			logmsg(LOG_NOTICE, "Fetched new $inout testcase $tc[rank] for " .
-			       "problem $row[probid]");
+			$fetched[] = $inout;
 		}
 		// sanity check (NOTE: performance impact is negligible with 5
 		// testcases and total 3.3 MB of data)
 		if ( md5_file($tcfile[$inout]) != $tc['md5sum_' . $inout] ) {
 			error("File corrupted: md5sum mismatch: " . $tcfile[$inout]);
 		}
+	}
+	// Only log downloading input and/or output testdata once.
+	if ( count($fetched)>0 ) {
+		logmsg(LOG_INFO, "Fetched new " . implode($fetched,',') .
+		       " testcase $tc[rank] for problem $row[probid]");
 	}
 
 	// Copy program with all possible additional files to testcase
