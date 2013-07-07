@@ -50,12 +50,12 @@ if ( empty($row['polltime']) ) {
 	echo "Judgehost never checked in.";
 } else {
 	$reltime = time() - strtotime($row['polltime']);
-	if ( $reltime < 30 ) {
+	if ( $reltime < JUDGEHOST_WARNING ) {
 		echo "OK";
-	} else if ( $reltime < 120 ) {
+	} else if ( $reltime < JUDGEHOST_CRITICAL ) {
 		echo "Warning";
 	} else {
-		echo "Error";
+		echo "Critical";
 	}
 	echo ", judgehost last checked in ". $reltime . " seconds ago.";
 }

@@ -87,12 +87,12 @@ if( $res->count() == 0 ) {
 			echo "\" title =\"never checked in\">";
 		} else {
 			$reltime = time() - strtotime($row['polltime']);
-			if ( $reltime < 30 ) {
+			if ( $reltime < JUDGEHOST_WARNING ) {
 				echo "judgehost-ok";
-			} else if ( $reltime < 120 ) {
+			} else if ( $reltime < JUDGEHOST_CRITICAL ) {
 				echo "judgehost-warn";
 			} else {
-				echo "judgehost-err";
+				echo "judgehost-crit";
 			}
 			echo "\" title =\"last checked in $reltime seconds ago\">";
 		}

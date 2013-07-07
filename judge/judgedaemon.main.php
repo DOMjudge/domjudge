@@ -469,6 +469,11 @@ function judge($mark, $row, $judgingid)
 	       getFileContents($testcasedir . '/error.out'));
 	logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $runresults[$tc['rank']]);
 
+	// Make sure that judge status doesn't turn to warning levels when
+	// we're judging lots of test cases.
+	$DB->q('UPDATE LOW_PRIORITY judgehost SET polltime = NOW()
+	        WHERE hostname = %s', $myhost);
+
 	// Optimization: stop judging when the result is already known.
 	// This should report a final result when all runresults are non-null!
 	if ( !$final && ($result = getFinalResult($runresults))!==NULL ) {

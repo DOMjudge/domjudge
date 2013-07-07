@@ -85,7 +85,7 @@ img.helpicon { cursor: help; }
 
 /* team connect status/judgehost poll status */
 .team-nocon a, .judgehost-nocon a { color: #AAA; }
-.team-nosub a, .judgehost-err   a { color: red; }
+.team-nosub a, .judgehost-crit  a { color: red; }
 .team-nocor a, .judgehost-warn  a { color: yellow; }
 .team-ok a,    .judgehost-ok    a { color: green; }
 

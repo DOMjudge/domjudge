@@ -58,3 +58,8 @@ define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Pe
 //define('BALLOON_CMD', 'mail -s Balloon_notification domjudge@localhost');
 //define('BALLOON_CMD', 'lpr');
 define('BALLOON_CMD', '');
+
+// After what delay of a judgehost not checking in should its status
+// start displaying as warning or critical.
+define('JUDGEHOST_WARNING', 30);
+define('JUDGEHOST_CRITICAL', 120);
