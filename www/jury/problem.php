@@ -101,7 +101,7 @@ if ( !empty($cmd) ):
 ?>
 <tr><td><label for="data_0__cid_">Contest:</label></td>
 <td><?php
-$cmap = $DB->q("KEYVALUETABLE SELECT cid,contestname FROM contest ORDER BY cid");
+$cmap = $DB->q("KEYVALUETABLE SELECT cid,contestname FROM contest ORDER BY cid DESC");
 echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 ?>
 </td></tr>
