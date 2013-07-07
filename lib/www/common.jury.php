@@ -99,6 +99,9 @@ function rejudgeForm($table, $id)
 				$disabled = true;
 			}
 		}
+	} else if ( $table == 'contest' ) {
+		$button = "REJUDGE ALL for $table $id";
+		$question = "Rejudge all submissions for this $table?";
 	} else {
 		$button = "REJUDGE ALL for $table $id";
 		$question = "Rejudge all non-CORRECT submissions for this $table?";
