@@ -245,7 +245,8 @@ tasks. For example, although running a judgehost on the same machine as the
 domserver is possible, it's not recommended except for testing purposes.
 Judgedaemons should also not double as local workstations for jury members.
 Having all judgehosts be of uniform hardware configuration helps in creating a fair,
-reproducible setup.
+reproducible setup; in the ideal case they are run on the same type of machines
+that the teams use.
 
 
 <sect>Requirements
