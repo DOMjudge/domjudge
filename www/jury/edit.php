@@ -83,7 +83,7 @@ if ( ! isset($_POST['cancel']) ) {
 if ( isset($_FILES['data']) ) {
 	foreach($_FILES['data']['tmp_name'] as $id => $tmpnames) {
 		foreach($tmpnames as $field => $tmpname) {
-			if ( !empty ($tmpname) ) { 
+			if ( !empty ($tmpname) ) {
 				checkFileUpload($_FILES['data']['error'][$id][$field]);
 				$itemdata = array($field => file_get_contents($tmpname));
 				$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);

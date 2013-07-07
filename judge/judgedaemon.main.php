@@ -44,7 +44,7 @@ if ( isset($options['h']) ) usage();
 $myhost = trim(`hostname | cut -d . -f 1`);
 if ( isset($options['daemonid']) ) {
 	if ( preg_match('/^\d+$/', $options['daemonid'] ) ) {
-		$myhost = $myhost . "-" . $options['daemonid'];	
+		$myhost = $myhost . "-" . $options['daemonid'];
 	} else {
 		echo "Invalid value for daemonid, must be positive integer\n";
 		exit(1);
@@ -59,7 +59,7 @@ setup_database_connection();
 $verbose = LOG_INFO;
 if ( isset($options['verbose']) ) {
 	if ( preg_match('/^\d+$/', $options['verbose'] ) ) {
-		$verbose = $options['verbose'];	
+		$verbose = $options['verbose'];
 	} else {
 		echo "Invalid value for verbose, must be positive integer\n";
 		exit(1);
