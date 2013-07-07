@@ -369,7 +369,7 @@ function putClock() {
 	$endtime_u = strtotime($cdata['endtime']);
 
 	// current time
-	echo '<div id="clock"><span id="timecur">' . strftime('%a %e %b %Y %T %Z') . "</span>";
+	echo '<div id="clock"><span id="timecur">' . strftime('%a %d %b %Y %T %Z') . "</span>";
 	// timediff to end of contest
 	if ( strcmp(now(), $cdata['starttime']) >= 0 && strcmp(now(), $cdata['endtime']) < 0) {
 		$left = $endtime_u-time();
