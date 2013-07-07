@@ -101,7 +101,7 @@ function rejudgeForm($table, $id)
 		}
 	} else {
 		$button = "REJUDGE ALL for $table $id";
-		$question = "Rejudge all submissions for this $table?";
+		$question = "Rejudge all non-CORRECT submissions for this $table?";
 	}
 
 	$ret .= '<input type="submit" value="' . htmlspecialchars($button) . '" ' .
