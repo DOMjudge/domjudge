@@ -1061,6 +1061,12 @@ other architectures or operating systems, a shell has to be added
 manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
 file.
 
+Upon startup, the judgehost will connect to the domserver and add an entry
+for itself to the judgehosts table, by default enabled. If you wish to
+add a new judgehost but have it initially disabled, you can add it
+manually through the DOMjudge web interface and set it to disabled
+before starting the judgedaemon.
+
 <sect>Building and installing the submit client
 <p>
 

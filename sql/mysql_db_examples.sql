@@ -15,9 +15,7 @@ INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freez
 -- Dumping data for table `judgehost`
 -- 
 
-INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('judgehost1', 1);
-INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('judgehost2', 1);
-INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('sparehost', 0);
+INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('example-judgehost1', 0);
 
 -- 
 -- Dumping data for table `problem`
