@@ -59,11 +59,10 @@ Version 3.4.0 - (unreleased)
  - Prevent network access from runguard when cgroups are enabled.
  - Pass ONLINE_JUDGE and DOMJUDGE directives to submissions.
  - Add support for new languages: Python3, Ada, Fortran, Lua, Scala.
- - Checktestdata logical operators are now '&&' and '||'. The old '&' and
-   '|' are obsoleted and will be removed in the next major release.
  - Make it explicit that rejuding 'all' does not include CORRECT submissions.
  - Allow to (de)activate judgehosts on the judgehosts overview page.
- - Apply the z-index to the clock only, otherwise the refresh button stops being clickable.
+ - Apply the z-index to the clock only, otherwise the refresh button
+   stops being clickable.
  - Remove unnecessary sleep from submitting test sources.
  - Run C preprocessor on Fortran source to be able to pass defines.
  - Also install an Ubuntu chroot creation script.
