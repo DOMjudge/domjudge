@@ -79,7 +79,10 @@ Version 3.4.0 - (unreleased)
  - Further tighten permissions on files written when judging submissions,
    to make the case when not using chroot more secure.
  - Add c++ as a language extension for C++.
- - Display a total of all testcase runtimes for a submission.
+ - Display a total and maximum of all testcase runtimes for a submission,
+   and always print runtimes with two decimals.
+ - Judgehosts update their status after each testcase to prevent
+   warning/critical status with many testcases.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
