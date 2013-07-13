@@ -59,7 +59,8 @@ Version 3.4.0 - DEV
    '|' are obsoleted and will be removed in the next major release.
  - Make it explicit that rejuding 'all' does not include CORRECT submissions.
  - Allow to (de)activate judgehosts on the judgehosts overview page.
- - Apply the z-index to the clock only, otherwise the refresh button stops being clickable.
+ - Apply the z-index to the clock only, otherwise the refresh button stops
+   being clickable.
  - Remove unnecessary sleep from submitting test sources.
  - Run C preprocessor on Fortran source to be able to pass defines.
  - Also install an Ubuntu chroot creation script.
@@ -76,7 +77,8 @@ Version 3.4.0 - DEV
  - Further tighten permissions on files written when judging submissions,
    to make the case when not using chroot more secure.
  - Add c++ as a language extension for C++.
- - Display a total of all testcase runtimes for a submission.
+ - Display a total and maximum of all testcase runtimes for a submission,
+   and always print runtimes with two decimals.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
