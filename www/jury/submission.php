@@ -338,7 +338,7 @@ if ( isset($jid) )  {
 	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
 		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
-		    "<td><a href=\"$link\">" . sprintf('%.2f',$run[runtime]) . "</a></td>" .
+		    "<td><a href=\"$link\">" . sprintf('%.2f',$run['runtime']) . "</a></td>" .
 		    "<td><a href=\"$link\"><span class=\"sol ";
 		switch ( $run['runresult'] ) {
 		case 'correct':
