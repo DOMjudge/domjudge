@@ -1,11 +1,19 @@
 #!/bin/sh
+# This script will create cgroups for DOMjudge to use in /cgroup/
+# They need to be re-created after system boot; you may want to
+# add this script to an init script.
+
+# Change the following to the user you run the judgedaemon as.
+# (hence: not the 'domjudge-run' user!)
+
+JUDGEHOSTUSER=my-username
 
 for i in cpuset memory; do
 	mkdir -p /cgroup/$i; mount -t cgroup -o$i $i /cgroup/$i/;
 	mkdir /cgroup/$i/domjudge
 done
 
-chown -R analyst /cgroup/*/domjudge
+chown -R $JUDGEHOSTUSER /cgroup/*/domjudge
 
 cat /cgroup/cpuset/cpuset.cpus > /cgroup/cpuset/domjudge/cpuset.cpus
 cat /cgroup/cpuset/cpuset.mems > /cgroup/cpuset/domjudge/cpuset.mems
