@@ -488,6 +488,7 @@ Optionally:
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
        and add <tt>etc/sudoers-domjudge</tt> to <tt>/etc/sudoers.d/</tt> or
        append it to <tt>/etc/sudoers</tt>. 
+<item> Set up cgroup support in the judgedaemons.
 
 <item> For additional features in the jury web interface, the
        following PHP extensions can be installed:
@@ -1164,6 +1165,39 @@ make -C doc/judge docs
 
 <sect>Optional features
 <p>
+
+<sect1>Linux Control Groups (cgroups) in the judgedaemon
+<p>
+DOMjudge has experimental support for using Linux Control Groups or cgroups
+for process isolation in the judgedaemon. Using cgroups gives more accurate
+measurement of actually allocated memory, which is helpful with interpreters
+like Java that reserve but not actually use lots of memory. Also, the feature
+will restrict network access so no separate measures are necessary, and allows
+to run multiple judgedaemons on a multi-core machine.
+
+<p>
+The judgedaemon needs to run a recent Linux kernel (at least 3.2.0). The
+following steps configure cgroups on Debian wheezy. Instructions for other
+distributions may be different (send us your feedback!).
+
+<p>
+<itemize>
+<item> Install the necessary packages:
+<tt># apt-get install libcgroup-dev cgroup-bin</tt>
+<item> Edit grub config to add memory cgroup and swap accounting to the boot options. Edit <tt>/etc/default/grub</tt> and change the default commandline to <tt>GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"</tt>.
+Then run <tt>update-grub</tt> and reboot.
+<item> Compile DOMjudge with cgroup support. Re-run <tt>./configure</tt> and look for cgroup in the output. Then rebuild the runguard with <tt>make build</tt>.
+</itemize>
+
+You have now configured the system to use cgroups, but you need to create
+the actual cgroups that DOMjudge will use. For that, you can use the
+script under <tt>misc-tools/create_cgroups</tt>. Edit the script to
+match your situation first.
+This script needs to be re-run after each boot (e.g., add it to
+the judegedaemon init script).
+ 
+Once this is done, your system is ready to use cgroups and will do so
+automatically.
 
 <sect1>Source code syntax highlighting
 <p>
