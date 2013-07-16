@@ -53,11 +53,7 @@ case "$1" in
 
 	stop)
 
-# Wait a second to assure that no files are accessed anymore:
-		sleep 1
-
 		sudo -n umount "$PWD/proc" < /dev/null
-		rmdir proc || true
 
 		rm dev/urandom
 		rm dev/random
@@ -68,9 +64,21 @@ case "$1" in
 				rm -f $i
 			elif [ -d "$CHROOTORIGINAL/$i" ]; then
 				sudo -n umount "$PWD/$i" < /dev/null
+			fi
+		done
+
+# FIXME: it seems that after unmounting, we sometimes still get error
+# messages "Device or resource busy" when trying to rmdir the
+# mountpoints. A 'sync' doesn't help, so we wait one second. This is
+# not enough in all cases, but hopefully for most at least...
+		sleep 1
+
+		for i in $SUBDIRMOUNTS ; do
+			if [ -d "$CHROOTORIGINAL/$i" ]; then
 				rmdir $i || true
 			fi
 		done
+		rmdir proc || true
 		;;
 
 	*)
