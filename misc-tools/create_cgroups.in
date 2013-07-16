@@ -6,7 +6,7 @@
 # Change the following to the user you run the judgedaemon as.
 # (hence: not the 'domjudge-run' user!)
 
-JUDGEHOSTUSER=my-username
+JUDGEHOSTUSER=@DOMJUDGE_USER@
 
 for i in cpuset memory; do
 	mkdir -p /cgroup/$i; mount -t cgroup -o$i $i /cgroup/$i/;
