@@ -27,6 +27,38 @@ if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
 	exit();
 }
 
+function request($url, $verb = 'GET', $data = '') {
+	global $resturl, $restuser, $restpass;
+
+	$ch = curl_init($resturl . "/" . $url);
+	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	if ( $verb == 'POST' ) {
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		if ( is_array($data) ) {
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
+		}
+	} else if ( $verb == 'PUT' || $verb == 'DELETE' ) {
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $verb);
+	}
+	if ( $verb == 'POST' || $verb == 'PUT' ) {
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+	}
+
+	$response = curl_exec($ch);
+	if ( !$response ) {
+		error("Error while executing curl with url " . $url . ": " . curl_error($ch));
+	}
+	$status = curl_getinfo($ch)['http_code'];
+	if ( $status < 200 || $status >= 300 ) {
+		error("Error while executing curl with url " . $url . ": http status code: " . $status . ", response: " . $response);
+	}
+
+	curl_close($ch);
+	return $response;
+}
+
 $waittime = 5;
 
 define ('SCRIPT_ID', 'judgedaemon');
