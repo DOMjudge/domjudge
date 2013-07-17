@@ -200,7 +200,9 @@ $args = array('judgehost' => 'Try to set judgehost.',
               'judgemark' => 'Try to set judgemark if NULL');
 $doc = 'Update a single submission.';
 $exArgs = array();
-$api->provideFunction('PUT', 'submissions', 'submissions_PUT', $doc, $args, $exArgs);
+if ( IS_JURY ) {
+	$api->provideFunction('PUT', 'submissions', 'submissions_PUT', $doc, $args, $exArgs);
+}
 
 /**
  * Judging Queue
@@ -259,7 +261,9 @@ function queue($args) {
 $args = array('limit' => 'Get only the first N queued submissions');
 $doc = 'Get a list of all queued submission ids.';
 $exArgs = array(array('limit' => 10));
-$api->provideFunction('GET', 'queue', 'queue', $doc, $args, $exArgs);
+if ( IS_JURY ) {
+	$api->provideFunction('GET', 'queue', 'queue', $doc, $args, $exArgs);
+}
 
 /**
  * Affiliation information
