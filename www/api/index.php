@@ -123,7 +123,7 @@ function submissions($args) {
   global $cid, $DB;
 
   $query = 'SELECT submitid, teamid, probid, langid, submittime, valid FROM submission WHERE cid = %i';
-  
+
   $hasLanguage = array_key_exists('language', $args);
   $query .= ($hasLanguage ? ' AND langid = %s' : ' AND TRUE %_');
   $language = ($hasLanguage ? $args['language'] : 0);
@@ -153,10 +153,69 @@ function submissions($args) {
 }
 $args = array('language' => 'Search only for submissions in a certain language.',
               'fromid' => 'Search from a certain ID',
-              'limit' => 'Get only the first N submissions');
+	      'limit' => 'Get only the first N submissions');
 $doc = 'Get a list of all submissions. Should we give away all info about submissions? Or is there something we would like to hide, for example language?';
 $exArgs = array(array('fromid' => 100, 'limit' => 10), array('language' => 'cpp'));
 $api->provideFunction('GET', 'submissions', 'submissions', $doc, $args, $exArgs);
+
+/**
+ * Judging Queue
+ */
+function queue($args) {
+  global $DB;
+
+  // TODO: make this configurable
+  $cdata = getCurContest(TRUE);
+  $cid = $cdata['cid'];
+
+  // we have to check for the judgability of problems/languages this way,
+  // because we use an UPDATE below where joining is not possible.
+  $probs = $DB->q('COLUMN SELECT probid FROM problem WHERE allow_judge = 1');
+  if( count($probs) == 0 ) {
+	  return '';
+  }
+  $judgable_prob = array_unique(array_values($probs));
+  $langs = $DB->q('COLUMN SELECT langid FROM language WHERE allow_judge = 1');
+  if( count($langs) == 0 ) {
+	  return '';
+  }
+  $judgable_lang = array_unique(array_values($langs));
+
+  // First, use a select to see whether there are any judgeable
+  // submissions. This query is query-cacheable, and doing a select
+  // first prevents a write-lock on the submission table if nothing is
+  // to be judged, and also prevents throwing away the query cache every
+  // single time
+  $numopen = $DB->q('VALUE SELECT COUNT(*) FROM submission
+                     WHERE judgemark IS NULL AND cid = %i AND langid IN (%As)
+                     AND probid IN (%As) AND submittime < %s AND valid = 1',
+                    $cid, $judgable_lang, $judgable_prob, $cdata['endtime']);
+
+  if ( $numopen == 0 ) {
+	  return '';
+  }
+
+  $hasLimit = array_key_exists('limit', $args);
+  // TODO: validate limit
+
+  $submitids = $DB->q('SELECT submitid
+                                    FROM submission s
+                                    LEFT JOIN team t ON (s.teamid = t.login)
+                                    WHERE judgemark IS NULL AND cid = %i
+                                    AND langid IN (%As) AND probid IN (%As)
+                                    AND submittime < %s AND valid = 1
+                                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC'
+                                    . ($hasLimit ? ' LIMIT %i' : ' %_'),
+                                   $cid, $judgable_lang, $judgable_prob,
+                                   $cdata['endtime'],
+				   ($hasLimit ? $args['limit'] : -1));
+
+  return $submitids->getTable();
+}
+$args = array('limit' => 'Get only the first N queued submissions');
+$doc = 'Get a list of all queued submission ids.';
+$exArgs = array(array('limit' => 10));
+$api->provideFunction('GET', 'queue', 'queue', $doc, $args, $exArgs);
 
 /**
  * Affiliation information

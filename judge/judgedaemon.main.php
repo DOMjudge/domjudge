@@ -233,60 +233,24 @@ while ( TRUE ) {
 		$cid = $newcid;
 	}
 
-	// we have to check for the judgability of problems/languages this way,
-	// because we use an UPDATE below where joining is not possible.
-	$probs = $DB->q('COLUMN SELECT probid FROM problem WHERE allow_judge = 1');
-	if( count($probs) == 0 ) {
-		logmsg(LOG_NOTICE, "No judgable problems, waiting...");
-		sleep($waittime);
-		continue;
-	}
-	$judgable_prob = array_unique(array_values($probs));
-	$langs = $DB->q('COLUMN SELECT langid FROM language WHERE allow_judge = 1');
-	if( count($langs) == 0 ) {
-		logmsg(LOG_NOTICE, "No judgable languages, waiting...");
-		sleep($waittime);
-		continue;
-	}
-	$judgable_lang = array_unique(array_values($langs));
-
-	// First, use a select to see whether there are any judgeable
-	// submissions. This query is query-cacheable, and doing a select
-	// first prevents a write-lock on the submission table if nothing is
-	// to be judged, and also prevents throwing away the query cache every
-	// single time
-	$numopen = $DB->q('VALUE SELECT COUNT(*) FROM submission
-	                   WHERE judgemark IS NULL AND cid = %i AND langid IN (%As)
-	                   AND probid IN (%As) AND submittime < %s AND valid = 1',
-	                  $cid, $judgable_lang, $judgable_prob, $cdata['endtime']);
+	$submissions = request('queue', 'GET', 'limit=1');
+	$submissions = json_decode($submissions, TRUE);
 
 	$numupd = 0;
-	if ( $numopen ) {
-		// Prioritize teams according to last judging time
-		$submitid = $DB->q('MAYBEVALUE SELECT submitid
-		                    FROM submission s
-		                    LEFT JOIN team t ON (s.teamid = t.login)
-		                    WHERE judgemark IS NULL AND cid = %i
- 		                    AND langid IN (%As) AND probid IN (%As)
- 		                    AND submittime < %s AND valid = 1
-		                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
-		                    LIMIT 1',
-		                   $cid, $judgable_lang, $judgable_prob,
-		                   $cdata['endtime']);
+	foreach ( $submissions as $submission ) {
+		$submitid = $submission['submitid'];
 
-		if ( $submitid ) {
-			// Generate (unique) random string to mark submission to be judged
-			list($usec, $sec) = explode(" ", microtime());
-			$mark = $myhost.'@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
+		// Generate (unique) random string to mark submission to be judged
+		list($usec, $sec) = explode(" ", microtime());
+		$mark = $myhost.'@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
 
-			// update exactly one submission with our random string
-			// Note: this might still return 0 if another judgehost beat
-			// us to it
-			$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-			                  SET judgehost = %s, judgemark = %s
-			                  WHERE submitid = %i AND judgemark IS NULL',
-			                 $myhost, $mark, $submitid);
-		}
+		// update exactly one submission with our random string
+		// Note: this might still return 0 if another judgehost beat
+		// us to it
+		$numupd = $DB->q('RETURNAFFECTED UPDATE submission
+				  SET judgehost = %s, judgemark = %s
+				  WHERE submitid = %i AND judgemark IS NULL',
+				 $myhost, $mark, $submitid);
 		// Another judgedaemon beat us to claim this submission, but
 		// there are more left: immediately restart loop without sleeping.
 		if ( $numupd == 0 && $numopen > 1 ) continue;
