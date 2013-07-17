@@ -28,13 +28,13 @@ class RestApi {
 	public function provideFunction($httpMethod, $name, $callback, $docs = '',
 	                                $optArgs = array(), $exArgs = array())
 	{
-		if ( $httpMethod != 'GET' ) {
-			$this->createError("Only get methods supported.", INTERNAL_SERVER_ERROR);
+		if ( $httpMethod != 'GET' && $httpMethod != 'POST' ) {
+			$this->createError("Only get/post methods supported.", INTERNAL_SERVER_ERROR);
 		}
-		if ( array_key_exists($name, $this->apiFunctions) ) {
-			$this->createError("Multiple definitions of " . $name . ".", INTERNAL_SERVER_ERROR);
+		if ( array_key_exists($name . '#' . $httpMethod, $this->apiFunctions) ) {
+			$this->createError("Multiple definitions of " . $name . " for " . $httpMethod . ".", INTERNAL_SERVER_ERROR);
 		}
-		$this->apiFunctions[$name] = array("callback" => $callback,
+		$this->apiFunctions[$name . '#' . $httpMethod] = array("callback" => $callback,
 		                                   "optArgs" => $optArgs,
 		                                   "docs" => $docs,
 		                                   "exArgs" => $exArgs);
@@ -49,8 +49,8 @@ class RestApi {
 			$this->createError("Handler not set.", INTERNAL_SERVER_ERROR);
 		}
 
-		if ( $_SERVER['REQUEST_METHOD'] != 'GET' ) {
-			$this->createError("Only get methods supported.", METHOD_NOT_ALLOWED);
+		if ( $_SERVER['REQUEST_METHOD'] != 'GET' && $_SERVER['REQUEST_METHOD'] != 'POST' ) {
+			$this->createError("Only get/post methods supported.", METHOD_NOT_ALLOWED);
 		}
 
 		$handler = $_GET['handler'];
@@ -58,7 +58,11 @@ class RestApi {
 		if ( empty($handler) ) {
 			$this->showDocs();
 		} else {
-			$this->callFunction($handler, $_GET);
+			if ( $_SERVER['REQUEST_METHOD'] == 'GET' ) {
+				$this->callFunction($handler, $_GET);
+			} else if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
+				$this->callFunction($handler, $_POST);
+			}
 		}
 	}
 
@@ -67,6 +71,7 @@ class RestApi {
 	 */
 	public function callFunction($name, $arguments)
 	{
+		$name = $name . '#' . $_SERVER['REQUEST_METHOD'];
 		if ( !array_key_exists($name, $this->apiFunctions) ) {
 			$this->createError("Function '" . $name . "' does not exist.", BAD_REQUEST);
 		}
@@ -100,6 +105,7 @@ class RestApi {
 		print "The supported functions are:\n";
 		print "<dl>\n";
 		foreach ( $this->apiFunctions as $name => $func ) {
+			$name = explode('#', $name)[0];
 			$url = $_SERVER['REQUEST_URI'] . $name;
 			print '<dt><a href="' . $url . '">' . $url . "</a></dt>\n";
 			print "<dd>";
