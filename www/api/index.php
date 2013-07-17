@@ -184,6 +184,59 @@ if ( IS_JURY ) {
 }
 
 /**
+ * Judging_Runs
+ */
+function judging_runs_POST($args) {
+  global $DB, $api, $cid;
+
+  // FIXME; get cid from problem instead
+
+  if ( !isset($args['judgingid']) ) {
+	  $api->createError("judgingid is mandatory");
+  }
+  if ( !isset($args['testcaseid']) ) {
+	  $api->createError("testcaseid is mandatory");
+  }
+  if ( !isset($args['runresult']) ) {
+	  $api->createError("runresult is mandatory");
+  }
+  if ( !isset($args['runtime']) ) {
+	  $api->createError("runtime is mandatory");
+  }
+  if ( !isset($args['output_run']) ) {
+	  $api->createError("output_run is mandatory");
+  }
+  if ( !isset($args['output_diff']) ) {
+	  $api->createError("output_diff is mandatory");
+  }
+  if ( !isset($args['output_error']) ) {
+	  $api->createError("output_error is mandatory");
+  }
+
+  $DB->q('INSERT INTO judging_run (judgingid, testcaseid, runresult,
+  	runtime, output_run, output_diff, output_error)
+  	VALUES (%i, %i, %s, %f, %s, %s, %s)',
+	$args['judgingid'], $args['testcaseid'], $args['runresult'], $args['runtime'],
+	base64_decode($args['output_run']),
+        base64_decode($args['output_diff']),
+	base64_decode($args['output_error']));
+
+  return '';
+}
+$doc = 'Add a new judging_run to the list of judging_runs.';
+$args = array('judgingid' => 'Judging_run corresponds to this specific judgingid.',
+	'testcaseid' => 'Judging_run corresponding to this specific testcaseid.',
+	'runresult' => 'Result of this run.',
+	'runtime' => 'Runtime of this run.',
+	'output_run' => 'Program output of this run.',
+	'output_diff' => 'Program diff of this run.',
+	'output_error' => 'Program error output of this run.');
+$exArgs = array();
+if ( IS_JURY ) {
+	$api->provideFunction('POST', 'judging_runs', 'judging_runs_POST', $doc, $args, $exArgs);
+}
+
+/**
  * Submissions information
  */
 function submissions($args) {
