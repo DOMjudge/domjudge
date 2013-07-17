@@ -280,12 +280,16 @@ function judgehosts($args) {
 
   $query = 'SELECT hostname, active, polltime FROM judgehost';
 
-  $q = $DB->q($query);
+  $byHostname = array_key_exists('hostname', $args);
+  $query .= ($byHostname ? ' WHERE hostname = %s' : '%_');
+  $hostname = ($byHostname ? $args['hostname'] : null);
+
+  $q = $DB->q($query, $hostname);
   return $q->getTable();
 }
 $doc = 'Get a list of judgehosts.';
-$args = array();
-$exArgs = array();
+$args = array('hostname' => 'Search only for judgehosts with given hostname.');
+$exArgs = array(array('hostname' => 'sparehost'));
 if ( IS_JURY ) {
 	$api->provideFunction('GET', 'judgehosts', 'judgehosts', $doc, $args, $exArgs);
 }
