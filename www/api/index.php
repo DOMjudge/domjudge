@@ -272,6 +272,23 @@ $args = array('problem' => 'Search for clarifications about a specific problem.'
 $exArgs = array(array('problem' => 'H'));
 $api->provideFunction('GET', 'clarifications', 'clarifications', $doc, $args, $exArgs);
 
+/**
+ * Judgehosts
+ */
+function judgehosts($args) {
+  global $DB;
+
+  $query = 'SELECT hostname, active, polltime FROM judgehost';
+
+  $q = $DB->q($query);
+  return $q->getTable();
+}
+$doc = 'Get a list of judgehosts.';
+$args = array();
+$exArgs = array();
+if ( IS_JURY ) {
+	$api->provideFunction('GET', 'judgehosts', 'judgehosts', $doc, $args, $exArgs);
+}
 
 /**
  * Scoreboard (not finished yet)
