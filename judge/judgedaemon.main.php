@@ -30,6 +30,10 @@ if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
 function request($url, $verb = 'GET', $data = '') {
 	global $resturl, $restuser, $restpass;
 
+	if ( $verb == 'GET' ) {
+		$url .= '?' . $data;
+	}
+
 	$ch = curl_init($resturl . "/" . $url);
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
