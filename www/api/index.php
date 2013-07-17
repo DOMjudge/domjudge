@@ -165,11 +165,19 @@ function judgings_PUT($args) {
 		$judgingid, $args['judgehost']);
   }
 
+  if ( isset($args['endtime']) ) {
+	$DB->q('UPDATE judging SET endtime = %s
+		WHERE judgingid = %i AND judgehost = %s',
+		now(), $judgingid, $args['judgehost']);
+  }
+
+  return '';
 }
 $doc = 'Update a judging.';
 $args = array('judgingid' => 'Judging corresponds to this specific judgingid.',
 	'judgehost' => 'Judging is judged by this specific judgehost.',
-	'output_compile' => 'Ouput of compilation phase.');
+	'output_compile' => 'Ouput of compilation phase.',
+	'endtime' => 'Store endtime of judging.');
 $exArgs = array();
 if ( IS_JURY ) {
 	$api->provideFunction('PUT', 'judgings', 'judgings_PUT', $doc, $args, $exArgs);

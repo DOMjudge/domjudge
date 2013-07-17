@@ -502,9 +502,8 @@ function judge($mark, $row, $judgingid)
 	if ( $result==NULL ) error("No final result obtained");
 
 	// Store judging endtime, result was already stored.
-	$DB->q('UPDATE judging SET endtime = %s
-	        WHERE judgingid = %i AND judgehost = %s',
-	       now(), $judgingid, $myhost);
+	request('judgings/' . urlencode($judgingid), 'PUT',
+		'endtime=1&judgehost=' . urlencode($myhost));
 
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
