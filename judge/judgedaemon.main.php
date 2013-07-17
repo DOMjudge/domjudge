@@ -162,14 +162,8 @@ if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
 database_retry_connect($waittime);
 
-// Check database for judgehost entry
-$row = $DB->q('MAYBETUPLE SELECT * FROM judgehost WHERE hostname = %s'
-             , $myhost);
-if ( ! $row ) {
-	logmsg(LOG_INFO, "No database entry found for me ($myhost), registering");
-	$DB->q('INSERT INTO judgehost (hostname) VALUES (%s)'
-	      , $myhost);
-}
+// Auto-register judgehost via REST
+request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
 
 // Warn when chroot has been disabled. This has security implications.
 if ( ! USE_CHROOT ) {
