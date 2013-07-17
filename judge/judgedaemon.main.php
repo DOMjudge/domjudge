@@ -269,13 +269,9 @@ while ( TRUE ) {
 	// we have marked a submission for judging
 	$waiting = FALSE;
 
-	// get maximum runtime and other parameters
-	$row = $DB->q('TUPLE SELECT CEILING(time_factor*timelimit) AS maxruntime,
-	               s.submitid, s.langid, s.teamid, s.probid,
-	               p.special_run, p.special_compare
-	               FROM submission s, problem p, language l
-	               WHERE s.probid = p.probid AND s.langid = l.langid AND
-	               judgemark = %s AND judgehost = %s', $mark, $myhost);
+	$row = request('judgeinfo', 'GET', 'judgemark='
+		. urlencode($mark) . '&judgehost=' . urlencode($myhost));
+	$row = json_decode($row, TRUE);
 
 	// update the judging table with our ID and the starttime
 	$now = now();

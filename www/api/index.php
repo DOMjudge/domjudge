@@ -456,6 +456,41 @@ if ( IS_JURY ) {
 }
 
 /**
+ * Judgeinfo
+ */
+function judgeinfo($args) {
+  global $DB;
+
+  // get maximum runtime and other parameters
+  $query = 'TUPLE SELECT CEILING(time_factor*timelimit) AS maxruntime,
+  	       s.submitid, s.langid, s.teamid, s.probid,
+  	       p.special_run, p.special_compare
+  	       FROM submission s, problem p, language l
+  	       WHERE s.probid = p.probid AND s.langid = l.langid';
+
+  $byJudgehost = array_key_exists('judgehost', $args);
+  $query .= ($byJudgehost ? ' AND judgehost = %s' : '%_');
+  $judgehost = ($byJudgehost ? $args['judgehost'] : null);
+
+  $byJudgemark = array_key_exists('judgemark', $args);
+  $query .= ($byJudgemark ? ' AND judgemark = %s' : '%_');
+  $judgemark = ($byJudgemark ? $args['judgemark'] : null);
+
+  // only return the first submission
+  $query .= ' LIMIT 1';
+
+  $q = $DB->q($query, $judgehost, $judgemark);
+  return $q;
+}
+$doc = 'Get most relevant info for a *single* submission/judging.';
+$args = array('judgehost' => 'Search only for submissions that are judged by a given hostname.',
+		'judgemark' => 'Search only for submissions with a given judgemark.');
+$exArgs = array(array('judgehost' => 'sparehost'));
+if ( IS_JURY ) {
+	$api->provideFunction('GET', 'judgeinfo', 'judgeinfo', $doc, $args, $exArgs);
+}
+
+/**
  * Scoreboard (not finished yet)
  */
 function scoreboard($args) {
