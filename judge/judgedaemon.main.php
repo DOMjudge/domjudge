@@ -330,8 +330,8 @@ function judge($mark, $row, $judgingid)
 	if ( !chdir($workdir) ) error("Could not chdir to '$workdir'");
 
 	// Get the source code from the DB and store in local file(s)
-	$sources = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, sourcecode, filename
-	                   FROM submission_file WHERE submitid = %i', $row['submitid']);
+	$sources = request('submission_files', 'GET', 'submitid=' . urlencode($row['submitid']));
+	$sources = json_decode($sources, TRUE);
 	$files = array();
 	foreach ( $sources as $rank => $source ) {
 		$srcfile = "$workdir/compile/$source[filename]";

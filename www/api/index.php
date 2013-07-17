@@ -237,6 +237,29 @@ if ( IS_JURY ) {
 }
 
 /**
+ * Submission Files
+ */
+function submission_files($args) {
+  global $DB, $api;
+
+  if ( !isset($args['submitid']) ) {
+	  $api->createError("submitid is mandatory");
+  }
+
+  $sources = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, sourcecode, filename
+	  FROM submission_file WHERE submitid = %i', $args['submitid']);
+
+  return $sources;
+}
+$args = array('submitid' => 'Get only the corresponding submission files.');
+$doc = 'Get a list of all submission files.';
+$exArgs = array(array('submitid' => 3));
+if ( IS_JURY ) {
+	$api->provideFunction('GET', 'submission_files', 'submission_files', $doc, $args, $exArgs);
+}
+
+
+/**
  * Judging Queue
  */
 function queue($args) {
