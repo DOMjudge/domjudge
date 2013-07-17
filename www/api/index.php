@@ -340,17 +340,43 @@ function teams($args) {
   $query .= ($byAffil ? ' affilid = %s' : ' TRUE %_');
   $affiliation = ($byAffil ? $args['affiliation'] : 0);
 
+  $byLogin = array_key_exists('login', $args);
+  $query .= ($byLogin ? ' AND login = %s' : ' AND TRUE %_');
+  $login = ($byLogin ? $args['login'] : 0);
+
   // Run query and return result
-  $q = $DB->q($query, $category, $affiliation);
+  $q = $DB->q($query, $category, $affiliation, $login);
   return $q->gettable();
 }
 $args = array('category' => 'ID of a single category to search for.',
-              'affiliation' => 'ID of an affiliation to search for.');
+              'affiliation' => 'ID of an affiliation to search for.',
+              'login' => 'Search for a specific team.');
 $doc = 'Get a list of teams containing login, name, category and affiliation.';
 $exArgs = array(array('category' => 1, 'affiliation' => 'UU'));
 $api->provideFunction('GET', 'teams', 'teams',  $doc, $args, $exArgs);
+function teams_PUT($args) {
+  global $DB, $api;
 
+  if ( !isset($args['__primary_key']) ) {
+	  $api->createError("login is mandatory");
+  }
+  $login = $args['__primary_key'];
+  if ( !isset($args['judging_last_started']) ) {
+	  $api->createError("judging_last_started is mandatory");
+  }
+  $judging_last_started = $args['judging_last_started'];
 
+  $DB->q('UPDATE team SET judging_last_started=%s WHERE login=%s', $judging_last_started, $login);
+
+  return teams(array('login' => $login));
+}
+$doc = 'Update the information of a team.';
+$args = array('judging_last_started' => 'Time of last judging.');
+$exArgs = array();
+if ( IS_JURY ) {
+	$api->provideFunction('PUT', 'teams', 'teams_PUT', $doc, $args, $exArgs);
+}
+  
 /**
  * Category information
  */

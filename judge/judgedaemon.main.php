@@ -283,8 +283,7 @@ while ( TRUE ) {
 
 	$now = now();
 	// also update team's last judging start
-	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s',
-	       $now, $row['teamid']);
+	request('teams/' . urlencode($row['teamid']), 'PUT', 'judging_last_started=' . urlencode($now));
 
 	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
 	       "($row[teamid]/$row[probid]/$row[langid]), id j$judgingid...");
