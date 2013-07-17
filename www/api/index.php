@@ -147,6 +147,33 @@ $exArgs = array();
 if ( IS_JURY ) {
 	$api->provideFunction('POST', 'judgings', 'judgings_POST', $doc, $args, $exArgs);
 }
+function judgings_PUT($args) {
+  global $DB, $api;
+
+  if ( !isset($args['__primary_key']) ) {
+	  $api->createError("judgingid is mandatory");
+  }
+  $judgingid = $args['__primary_key'];
+  if ( !isset($args['judgehost']) ) {
+	  $api->createError("judgehost is mandatory");
+  }
+
+  if ( isset($args['output_compile']) ) {
+	$DB->q('UPDATE judging SET output_compile = %s
+		WHERE judgingid = %i AND judgehost = %s',
+		base64_decode($args['output_compile']),
+		$judgingid, $args['judgehost']);
+  }
+
+}
+$doc = 'Update a judging.';
+$args = array('judgingid' => 'Judging corresponds to this specific judgingid.',
+	'judgehost' => 'Judging is judged by this specific judgehost.',
+	'output_compile' => 'Ouput of compilation phase.');
+$exArgs = array();
+if ( IS_JURY ) {
+	$api->provideFunction('PUT', 'judgings', 'judgings_PUT', $doc, $args, $exArgs);
+}
 
 /**
  * Submissions information

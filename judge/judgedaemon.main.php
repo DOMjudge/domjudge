@@ -352,9 +352,10 @@ function judge($mark, $row, $judgingid)
 	}
 
 	// pop the compilation result back into the judging table
-	$DB->q('UPDATE judging SET output_compile = %s
-	        WHERE judgingid = %i AND judgehost = %s',
-	       getFileContents( $workdir . '/compile.out' ), $judgingid, $myhost);
+	request('judgings/' . urlencode($judgingid), 'PUT',
+		'judgehost=' . urlencode($myhost)
+		. '&output_compile='
+		. base64_encode(getFileContents( $workdir . '/compile.out' )));
 
 	// Only continue running testcases when compilation was successful.
 	// FIXME(?): result is still returned as in EXITCODES.
