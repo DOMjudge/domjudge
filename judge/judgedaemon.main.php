@@ -244,16 +244,16 @@ while ( TRUE ) {
 		list($usec, $sec) = explode(" ", microtime());
 		$mark = $myhost.'@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
 
-		// update exactly one submission with our random string
-		// Note: this might still return 0 if another judgehost beat
-		// us to it
-		$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-				  SET judgehost = %s, judgemark = %s
-				  WHERE submitid = %i AND judgemark IS NULL',
-				 $myhost, $mark, $submitid);
+		$res = request('submissions/' . urlencode($submitid), 'PUT',
+			'judgehost=' . urlencode($myhost) . '&judgemark=' . urlencode($mark));
+		$res = json_decode($res, TRUE);
+		if ( count($res) > 0 ) {
+			$numupd = 1;
+			break;
+		}
+
 		// Another judgedaemon beat us to claim this submission, but
 		// there are more left: immediately restart loop without sleeping.
-		if ( $numupd == 0 && $numopen > 1 ) continue;
 	}
 
 	// nothing updated -> no open submissions

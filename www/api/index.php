@@ -131,6 +131,10 @@ function submissions($args) {
   $hasFromid = array_key_exists('fromid', $args);
   $query .= ($hasFromid ? ' AND submitid >= %i' : ' AND TRUE %_');
   $fromId = ($hasFromid ? $args['fromid'] : 0);
+
+  $hasSubmitid = array_key_exists('submitid', $args);
+  $query .= ($hasSubmitid ? ' AND submitid = %i' : ' AND TRUE %_');
+  $submitid = ($hasSubmitid ? $args['submitid'] : 0);
   
   $query .= ' ORDER BY submitid';
   
@@ -139,7 +143,7 @@ function submissions($args) {
   $limit = ($hasLimit ? $args['limit'] : -1);
   // TODO: validate limit
   
-  $q = $DB->q($query, $cid, $language, $fromId, $limit);
+  $q = $DB->q($query, $cid, $language, $fromId, $submitid, $limit);
   $res = array();
   while($row = $q->next()) {
     $res[] = array('submitid' => $row['submitid'],
@@ -152,11 +156,51 @@ function submissions($args) {
   return $res;
 }
 $args = array('language' => 'Search only for submissions in a certain language.',
+              'submitid' => 'Search only a certain ID',
               'fromid' => 'Search from a certain ID',
 	      'limit' => 'Get only the first N submissions');
 $doc = 'Get a list of all submissions. Should we give away all info about submissions? Or is there something we would like to hide, for example language?';
 $exArgs = array(array('fromid' => 100, 'limit' => 10), array('language' => 'cpp'));
 $api->provideFunction('GET', 'submissions', 'submissions', $doc, $args, $exArgs);
+function submissions_PUT($args) {
+  global $DB;
+
+  if ( !isset($args['__primary_key']) ) {
+	  $api->createError("submitid is mandatory");
+  }
+  $submitid = $args['__primary_key'];
+
+  $query = 'RETURNAFFECTED UPDATE submission SET ';
+
+  $sep = '';
+  $hasJudgehost = array_key_exists('judgehost', $args);
+  $query .= $sep . ($hasJudgehost ? ' judgehost = %s' : ' %_');
+  $judgehost = ($hasJudgehost ? $args['judgehost'] : null);
+  if ( $hasJudgehost ) $sep = ', ';
+
+  $hasJudgemark = array_key_exists('judgemark', $args);
+  $query .= $sep . ($hasJudgemark ? ' judgemark = %s' : ' %_');
+  $judgemark = ($hasJudgemark ? $args['judgemark'] : null);
+  if ( $hasJudgemark ) $sep = ', ';
+
+  $query .= ' WHERE submitid = %i';
+  if ( $hasJudgemark ) {
+	// update exactly one submission with our random string
+	// Note: this might still return 0 if another judgehost beat
+	// us to it
+  	$query .= ' AND judgemark IS NULL';
+  }
+  
+  $q = $DB->q($query, $judgehost, $judgemark, $submitid);
+  if ( $q == 0 ) return array();
+
+  return submissions(array('submitid' => $submitid));
+}
+$args = array('judgehost' => 'Try to set judgehost.',
+              'judgemark' => 'Try to set judgemark if NULL');
+$doc = 'Update a single submission.';
+$exArgs = array();
+$api->provideFunction('PUT', 'submissions', 'submissions_PUT', $doc, $args, $exArgs);
 
 /**
  * Judging Queue
