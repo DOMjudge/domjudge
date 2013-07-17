@@ -290,6 +290,9 @@ function results_POST($args) {
   }
   
   $DB->q('COMMIT');
+
+  auditlog('judging', $args['judgingid'], 'judged',
+	  $args['result'], $args['judgehost']);
 }
 $doc = 'Stores final result.';
 $args = array('judgingid' => 'Final result corresponds to this specific judgingid.',
@@ -725,6 +728,7 @@ function judgehosts_POST($args) {
                  $jud['judgingid']);
           $DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
                   WHERE submitid = %i', $jud['submitid']);
+	  auditlog('judging', $jud['judgingid'], 'given back', null, $args['hostname']);
   }
 
   return $ret;

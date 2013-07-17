@@ -196,9 +196,11 @@ function calcScoreRow($cid, $team, $prob) {
  * determined yet; this may only occur when not all testcases have
  * been run yet.
  */
-function getFinalResult($runresults)
+function getFinalResult($runresults, $results_prio = null)
 {
-	$results_prio  = dbconfig_get('results_prio');
+	if ( empty($results_prio) ) {
+		$results_prio  = dbconfig_get('results_prio');
+	}
 
 	// Whether we have NULL results
 	$havenull = FALSE;

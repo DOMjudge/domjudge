@@ -113,8 +113,6 @@ if ( isset($options['daemonid']) ) {
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 require(LIBDIR . '/init.php');
 
-setup_database_connection();
-
 $verbose = LOG_INFO;
 if ( isset($options['verbose']) ) {
 	if ( preg_match('/^\d+$/', $options['verbose'] ) ) {
@@ -170,8 +168,6 @@ initsignals();
 
 if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
-database_retry_connect($waittime);
-
 // Warn when chroot has been disabled. This has security implications.
 if ( ! USE_CHROOT ) {
 	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
@@ -192,7 +188,6 @@ foreach ( $unfinished as $jud ) {
 	$workdir = "$workdirpath/c$jud[cid]-s$jud[submitid]-j$jud[judgingid]";
 	@chmod($workdir, 0700);
 	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] . " in my name; given back");
-	auditlog('judging', $jud['judgingid'], 'given back', null, $myhost);
 }
 
 $waiting = FALSE;
@@ -228,8 +223,9 @@ while ( TRUE ) {
 		$waiting = FALSE;
 	}
 
-	$cdata = getCurContest(TRUE);
-	$newcid = $cdata['cid'];
+	$cdata = request('contest', 'GET');
+	$cdata = json_decode($cdata, TRUE);
+	$newcid = $cdata['id'];
 	$oldcid = $cid;
 	if ( $oldcid !== $newcid ) {
 		logmsg(LOG_NOTICE, "Contest has changed from " .
@@ -300,7 +296,7 @@ while ( TRUE ) {
 
 function judge($mark, $row, $judgingid)
 {
-	global $EXITCODES, $DB, $cid, $myhost, $options, $workdirpath;
+	global $EXITCODES, $cid, $myhost, $options, $workdirpath;
 
 	// Set configuration variables for called programs
 	putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
@@ -482,7 +478,9 @@ function judge($mark, $row, $judgingid)
 
 	// Optimization: stop judging when the result is already known.
 	// This should report a final result when all runresults are non-null!
-	if ( !$final && ($result = getFinalResult($runresults))!==NULL ) {
+	if ( !$final 
+		&& ($result = getFinalResult($runresults,
+			dbconfig_get_rest('results_prio')))!==NULL ) {
 		$final = TRUE;
 
 		store_result($result, $row, $judgingid);
@@ -514,7 +512,6 @@ function judge($mark, $row, $judgingid)
 
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
-	auditlog('judging', $judgingid, 'judged', $result, $myhost);
 	if ( $result == 'correct' ) {
 		alert('accept');
 	} else {
@@ -522,39 +519,9 @@ function judge($mark, $row, $judgingid)
 	}
 }
 
-function database_retry_connect()
-{
-	global $DB, $exitsignalled, $waittime;
-
-	$first = True;
-	while( !$exitsignalled )
-	{
-		try {
-			$DB->reconnect();
-			logmsg(LOG_INFO, "Connected to database");
-			break;
-		}
-		catch( Exception $e ) {
-			$msg = "Could not connect to database server";
-			if( ! strncmp($e->getMessage(), $msg, strlen($msg)) ) {
-				if($first) logmsg(LOG_WARNING, $msg);
-				$first = False;
-				sleep($waittime);
-				continue;
-			}
-			throw $e;
-		}
-	}
-
-	if ( $exitsignalled ) {
-		logmsg(LOG_NOTICE, "Received signal, exiting.");
-		exit;
-	}
-}
-
 function store_result($result, $row, $judgingid)
 {
-	global $DB, $cid, $myhost;
+	global $cid, $myhost;
 
 	request('results', 'POST',
 		'judgingid=' . $judgingid
