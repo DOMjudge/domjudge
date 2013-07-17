@@ -289,6 +289,24 @@ $exArgs = array();
 if ( IS_JURY ) {
 	$api->provideFunction('GET', 'judgehosts', 'judgehosts', $doc, $args, $exArgs);
 }
+function judgehosts_POST($args) {
+  global $DB, $api;
+
+  if ( !isset($args['hostname']) ) {
+	  $api->createError("hostname is mandatory");
+  }
+
+  $query = 'INSERT IGNORE INTO judgehost (hostname) VALUES(%s)';
+
+  $q = $DB->q($query, $args['hostname']);
+  return judgehosts($args);
+}
+$doc = 'Add a new judgehost to the list of judgehosts.';
+$args = array('hostname' => 'Add this specific judgehost and activate it.');
+$exArgs = array(array('hostname' => 'judge007'));
+if ( IS_JURY ) {
+	$api->provideFunction('POST', 'judgehosts', 'judgehosts_POST', $doc, $args, $exArgs);
+}
 
 /**
  * Scoreboard (not finished yet)
