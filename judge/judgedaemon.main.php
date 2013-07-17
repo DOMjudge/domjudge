@@ -237,23 +237,25 @@ while ( TRUE ) {
 	$submissions = json_decode($submissions, TRUE);
 
 	$numupd = 0;
-	foreach ( $submissions as $submission ) {
-		$submitid = $submission['submitid'];
+	if ( is_array($submissions) ) {
+		foreach ( $submissions as $submission ) {
+			$submitid = $submission['submitid'];
 
-		// Generate (unique) random string to mark submission to be judged
-		list($usec, $sec) = explode(" ", microtime());
-		$mark = $myhost.'@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
+			// Generate (unique) random string to mark submission to be judged
+			list($usec, $sec) = explode(" ", microtime());
+			$mark = $myhost.'@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
 
-		$res = request('submissions/' . urlencode($submitid), 'PUT',
-			'judgehost=' . urlencode($myhost) . '&judgemark=' . urlencode($mark));
-		$res = json_decode($res, TRUE);
-		if ( count($res) > 0 ) {
-			$numupd = 1;
-			break;
+			$res = request('submissions/' . urlencode($submitid), 'PUT',
+				'judgehost=' . urlencode($myhost) . '&judgemark=' . urlencode($mark));
+			$res = json_decode($res, TRUE);
+			if ( count($res) > 0 ) {
+				$numupd = 1;
+				break;
+			}
+
+			// Another judgedaemon beat us to claim this submission, but
+			// there are more left: immediately restart loop without sleeping.
 		}
-
-		// Another judgedaemon beat us to claim this submission, but
-		// there are more left: immediately restart loop without sleeping.
 	}
 
 	// nothing updated -> no open submissions
