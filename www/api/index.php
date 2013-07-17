@@ -384,6 +384,28 @@ $exArgs = array(array('hostname' => 'judge007'));
 if ( IS_JURY ) {
 	$api->provideFunction('POST', 'judgehosts', 'judgehosts_POST', $doc, $args, $exArgs);
 }
+function judgehosts_PUT($args)  {
+  global $DB, $api;
+
+  if ( !isset($args['__primary_key']) ) {
+	  $api->createError("hostname is mandatory");
+  }
+  $hostname = $args['__primary_key'];
+  if ( !isset($args['active']) ) {
+	  $api->createError("active is mandatory");
+  }
+  $active = $args['active'];
+
+  $DB->q('UPDATE judgehost SET active=%i WHERE hostname=%s', $active, $hostname);
+
+  return judgehosts(array('hostname' => $hostname));
+}
+$doc = 'Update the configuration of a judgehost.';
+$args = array('active' => 'Activate judgehost?');
+$exArgs = array();
+if ( IS_JURY ) {
+	$api->provideFunction('PUT', 'judgehosts', 'judgehosts_PUT', $doc, $args, $exArgs);
+}
 
 /**
  * Scoreboard (not finished yet)
