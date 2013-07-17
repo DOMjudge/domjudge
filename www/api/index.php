@@ -285,6 +285,59 @@ if ( IS_JURY ) {
 	$api->provideFunction('GET', 'submission_files', 'submission_files', $doc, $args, $exArgs);
 }
 
+/**
+ * Testcases
+ */
+function testcases($args) {
+  global $DB, $api;
+
+  if ( !isset($args['probid']) ) {
+	  $api->createError("probid is mandatory");
+  }
+
+  $testcases = $DB->q("KEYTABLE SELECT rank AS ARRAYKEY,
+  		     testcaseid, md5sum_input, md5sum_output, probid, rank
+  		     FROM testcase WHERE probid = %s ORDER BY rank", $args['probid']);
+
+  return $testcases;
+}
+$args = array('probid' => 'Get only the corresponding testcase.');
+$doc = 'Get a list of all testcases.';
+$exArgs = array(array('probid' => 'boolfind'));
+if ( IS_JURY ) {
+	$api->provideFunction('GET', 'testcases', 'testcases', $doc, $args, $exArgs);
+}
+function testcase_files($args) {
+  global $DB, $api;
+
+  if ( !isset($args['testcaseid']) ) {
+	  $api->createError("testcaseid is mandatory");
+  }
+  if ( !isset($args['input']) && !isset($args['output']) ) {
+	  $api->createError("either input or output is mandatory");
+  }
+  if ( isset($args['input']) && isset($args['output']) ) {
+	  $api->createError("cannot select both input and output");
+  }
+  $inout = 'output';
+  if ( isset($args['input']) ) {
+	$inout = 'input';
+  }
+
+  $content = $DB->q("VALUE SELECT SQL_NO_CACHE $inout FROM testcase
+			WHERE testcaseid = %i", $args['testcaseid']);
+
+  return $content;
+}
+$args = array('testcaseid' => 'Get only the corresponding testcase.',
+	'input' => 'Get the input file.',
+	'output' => 'Get the output file.');
+$doc = 'Get a testcase file.';
+$exArgs = array(array('testcaseid' => '3', 'input' => TRUE));
+if ( IS_JURY ) {
+	$api->provideFunction('GET', 'testcase_files', 'testcase_files', $doc, $args, $exArgs);
+}
+
 
 /**
  * Judging Queue

@@ -364,9 +364,8 @@ function judge($mark, $row, $judgingid)
 	} else {
 
 	logmsg(LOG_DEBUG, "Fetching testcases from database");
-	$testcases = $DB->q("KEYTABLE SELECT rank AS ARRAYKEY,
- 	                     testcaseid, md5sum_input, md5sum_output, probid, rank
-	                     FROM testcase WHERE probid = %s ORDER BY rank", $row['probid']);
+	$testcases = request('testcases', 'GET', 'probid=' . urlencode($row['probid']));
+	$testcases = json_decode($testcases, TRUE);
 	if ( count($testcases)==0 ) {
 		error("No testcase found for problem " . $row['probid']);
 	}
@@ -399,8 +398,10 @@ function judge($mark, $row, $judgingid)
 		    $tc['md5sum_'.$inout] . "." . substr($inout, 0, -3);
 
 		if ( !file_exists($tcfile[$inout]) ) {
-			$content = $DB->q("VALUE SELECT SQL_NO_CACHE $inout FROM testcase
-	 		                   WHERE testcaseid = %i", $tc['testcaseid']);
+			$content = request('testcase_files', 'GET', 'testcaseid='
+					. urlencode($tc['testcaseid'])
+					. '&' . $inout);
+			$content = json_decode($content);
 			if ( file_put_contents($tcfile[$inout] . ".new", $content) === FALSE ) {
 				error("Could not create $tcfile[$inout].new");
 			}
