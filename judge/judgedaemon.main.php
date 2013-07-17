@@ -63,6 +63,12 @@ function request($url, $verb = 'GET', $data = '') {
 	return $response;
 }
 
+function dbconfig_get_rest($name) {
+	$res = request('dbconfig', 'GET', 'name=' . urlencode($name));
+	$res = json_decode($res, TRUE);
+	return $res[$name];
+}
+
 $waittime = 5;
 
 define ('SCRIPT_ID', 'judgedaemon');
@@ -297,13 +303,11 @@ function judge($mark, $row, $judgingid)
 	global $EXITCODES, $DB, $cid, $myhost, $options, $workdirpath;
 
 	// Set configuration variables for called programs
-	// Call dbconfig_init() to prevent using cached values.
-	dbconfig_init();
 	putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
-	putenv('COMPILETIME='   . dbconfig_get('compile_time'));
-	putenv('MEMLIMIT='      . dbconfig_get('memory_limit'));
-	putenv('FILELIMIT='     . dbconfig_get('filesize_limit'));
-	putenv('PROCLIMIT='     . dbconfig_get('process_limit'));
+	putenv('COMPILETIME='   . dbconfig_get_rest('compile_time'));
+	putenv('MEMLIMIT='      . dbconfig_get_rest('memory_limit'));
+	putenv('FILELIMIT='     . dbconfig_get_rest('filesize_limit'));
+	putenv('PROCLIMIT='     . dbconfig_get_rest('process_limit'));
 
 	$cpuset_opt = "";
 	if ( isset($options['daemonid']) ) $cpuset_opt = "-n ${options['daemonid']}";
@@ -371,7 +375,7 @@ function judge($mark, $row, $judgingid)
 	}
 
 	$runresults = array_fill_keys(array_keys($testcases), NULL);
-	$results_remap = dbconfig_get('results_remap');
+	$results_remap = dbconfig_get_rest('results_remap');
 
 	// Optionally create chroot environment
 	if ( USE_CHROOT && CHROOT_SCRIPT ) {
@@ -483,7 +487,7 @@ function judge($mark, $row, $judgingid)
 
 		store_result($result, $row, $judgingid);
 
-		if ( dbconfig_get('lazy_eval_results', true) ) {
+		if ( dbconfig_get_rest('lazy_eval_results', true) ) {
 			break;
 		}
 	}
@@ -552,37 +556,9 @@ function store_result($result, $row, $judgingid)
 {
 	global $DB, $cid, $myhost;
 
-	// Start a transaction. This will provide extra safety if the table type
-	// supports it.
-	$DB->q('START TRANSACTION');
-	// pop the result back into the judging table
-	$DB->q('UPDATE judging SET result = %s
-	        WHERE judgingid = %i AND judgehost = %s',
-	       $result, $judgingid, $myhost);
-
-	// recalculate the scoreboard cell (team,problem) after this judging
-	calcScoreRow($cid, $row['teamid'], $row['probid']);
-
-	// log to event table if no verification required
-	// (case of verification required is handled in www/jury/verify.php)
-	if ( ! dbconfig_get('verification_required', 0) ) {
-		$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-		                           submitid, judgingid, description)
-		        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
-		       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
-		       $row['submitid'], $judgingid);
-		if ( $result == 'correct' ) {
-			// prevent duplicate balloons in case of multiple correct submissions
-			$numcorrect = $DB->q('VALUE SELECT count(submitid)
-			                      FROM balloon LEFT JOIN submission USING(submitid)
-			                      WHERE valid = 1 AND probid = %s AND teamid = %s',
-			                      $row['probid'], $row['teamid']);
-			if ( $numcorrect == 0 ) {
-				$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
-				       $row['submitid']);
-			}
-		}
-	}
-
-	$DB->q('COMMIT');
+	request('results', 'POST',
+		'judgingid=' . $judgingid
+		. '&result=' . urlencode($result)
+		. '&judgehost=' . urlencode($myhost)
+		. '&subinfo=' . json_encode($row));
 }

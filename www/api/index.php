@@ -237,6 +237,87 @@ if ( IS_JURY ) {
 }
 
 /**
+ * Result
+ */
+function results_POST($args) {
+  global $cid, $DB;
+
+  if ( !isset($args['result']) ) {
+	  $api->createError("result is mandatory");
+  }
+  if ( !isset($args['judgingid']) ) {
+	  $api->createError("judgingid is mandatory");
+  }
+  if ( !isset($args['judgehost']) ) {
+	  $api->createError("judgehost is mandatory");
+  }
+  if ( !isset($args['subinfo']) ) {
+	  $api->createError("subinfo is mandatory");
+  }
+
+  $row = json_decode($args['subinfo'], TRUE);
+
+  // Start a transaction. This will provide extra safety if the table type
+  // supports it.
+  $DB->q('START TRANSACTION');
+  // pop the result back into the judging table
+  $DB->q('UPDATE judging SET result = %s
+          WHERE judgingid = %i AND judgehost = %s',
+         $args['result'], $args['judgingid'], $args['judgehost']);
+  
+  // recalculate the scoreboard cell (team,problem) after this judging
+  calcScoreRow($cid, $row['teamid'], $row['probid']);
+  
+  // log to event table if no verification required
+  // (case of verification required is handled in www/jury/verify.php)
+  if ( ! dbconfig_get('verification_required', 0) ) {
+  	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
+  	                           submitid, judgingid, description)
+  	        VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
+  	       now(), $cid, $row['teamid'], $row['langid'], $row['probid'],
+  	       $row['submitid'], $args['judgingid']);
+  	if ( $args['result'] == 'correct' ) {
+  		// prevent duplicate balloons in case of multiple correct submissions
+  		$numcorrect = $DB->q('VALUE SELECT count(submitid)
+  		                      FROM balloon LEFT JOIN submission USING(submitid)
+  		                      WHERE valid = 1 AND probid = %s AND teamid = %s',
+  		                      $row['probid'], $row['teamid']);
+  		if ( $numcorrect == 0 ) {
+  			$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
+  			       $row['submitid']);
+  		}
+  	}
+  }
+  
+  $DB->q('COMMIT');
+}
+$doc = 'Stores final result.';
+$args = array('judgingid' => 'Final result corresponds to this specific judgingid.',
+	'result' => 'This is the final result of the judging.',
+	'judgehost' => 'Judged by this judgehost.',
+	'subinfo' => 'Additional information (teamid, probid, langid, submitid) of this run encoded as JSON.');
+$exArgs = array();
+if ( IS_JURY ) {
+	$api->provideFunction('POST', 'results', 'results_POST', $doc, $args, $exArgs);
+}
+
+/**
+ * DBconfiguration
+ */
+function dbconfig($args) {
+  global $DB;
+
+  // Call dbconfig_init() to prevent using cached values.
+  dbconfig_init();
+
+  return array($args['name'] => dbconfig_get($args['name']));
+}
+$doc = 'Get configuration variables.';
+$args = array('name' => 'Search only a single config variable.');
+$exArgs = array();
+$api->provideFunction('GET', 'dbconfig', 'dbconfig', $doc, $args, $exArgs);
+
+/**
  * Submissions information
  */
 function submissions($args) {
