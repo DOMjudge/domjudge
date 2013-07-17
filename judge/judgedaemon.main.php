@@ -276,9 +276,12 @@ while ( TRUE ) {
 	$row = json_decode($row, TRUE);
 
 	// update the judging table with our ID and the starttime
+	$judging = request('judgings', 'POST',
+		'judgehost=' . urlencode($myhost) . '&submitid=' . urlencode($row['submitid']));
+	$judging = json_decode($judging, TRUE);
+	$judgingid = $judging['judgingid'];
+
 	$now = now();
-	$judgingid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)
-	                     VALUES (%i,%i,%s,%s)', $row['submitid'], $cid, $now, $myhost);
 	// also update team's last judging start
 	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s',
 	       $now, $row['teamid']);

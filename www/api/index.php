@@ -81,11 +81,18 @@ $api->provideFunction('GET', 'problems', 'problems', $doc);
 function judgings($args) {
   global $cid, $DB;
 
-  $query = 'SELECT submitid, judgingid, eventtime FROM event WHERE description = "problem judged" AND cid = %i';
+  $query = 'SELECT submitid, judgingid, eventtime FROM event WHERE cid = %i';
+  if ( !IS_JURY ) {
+	$query .= ' AND description = "problem judged"';
+  }
   
   $hasFromid = array_key_exists('fromid', $args);
   $query .= ($hasFromid ? ' AND judgingid >= %i' : ' AND TRUE %_');
   $fromId = ($hasFromid ? $args['fromid'] : 0);
+
+  $hasJudgingid = array_key_exists('judgingid', $args);
+  $query .= ($hasJudgingid ? ' AND judgingid = %i' : ' AND TRUE %_');
+  $judgingid = ($hasJudgingid ? $args['judgingid'] : 0);
   
   $query .= ' ORDER BY eventid';
   
@@ -94,7 +101,7 @@ function judgings($args) {
   $limit = ($hasLimit ? $args['limit'] : -1);
   // TODO: validate limit
   
-  $q = $DB->q($query, $cid, $fromId, $limit);
+  $q = $DB->q($query, $cid, $fromId, $judgingid, $limit);
   $res = array();
   while($row = $q->next()) {
     $data = $DB->q('MAYBETUPLE SELECT s.submittime, j.result FROM judging j
@@ -112,9 +119,34 @@ function judgings($args) {
 $doc = 'Get all judgings. Jury only? Or provide some limited list for the public?';
 $args = array('result' => 'Search only for judgings with a certain result.',
               'fromid' => 'Search from a certain ID',
+              'judgingid' => 'Search only for a certain ID',
               'limit' => 'Get only the first N judgings');
 $exArgs = array(array('result' => 'correct'), array('fromid' => 800, 'limit' => 10));
 $api->provideFunction('GET', 'judgings', 'judgings', $doc, $args, $exArgs);
+function judgings_POST($args) {
+  global $DB, $api, $cid;
+
+  // FIXME; get cid from problem instead
+
+  if ( !isset($args['submitid']) ) {
+	  $api->createError("submitid is mandatory");
+  }
+  if ( !isset($args['judgehost']) ) {
+	  $api->createError("judgehost is mandatory");
+  }
+
+  $query = 'RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost) VALUES(%i,%i,%s,%s)';
+  $q = $DB->q($query, $args['submitid'], $cid, now(), $args['judgehost']);
+
+  return array('judgingid' => $q);
+}
+$doc = 'Add a new judging to the list of judgings.';
+$args = array('submitid' => 'Judging corresponds to this specific submitid.',
+	'judgehost' => 'Judging is to be judged by this specific judgehost.');
+$exArgs = array();
+if ( IS_JURY ) {
+	$api->provideFunction('POST', 'judgings', 'judgings_POST', $doc, $args, $exArgs);
+}
 
 /**
  * Submissions information
@@ -454,6 +486,7 @@ $exArgs = array();
 if ( IS_JURY ) {
 	$api->provideFunction('PUT', 'judgehosts', 'judgehosts_PUT', $doc, $args, $exArgs);
 }
+
 
 /**
  * Judgeinfo
