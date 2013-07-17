@@ -28,8 +28,8 @@ class RestApi {
 	public function provideFunction($httpMethod, $name, $callback, $docs = '',
 	                                $optArgs = array(), $exArgs = array())
 	{
-		if ( $httpMethod != 'GET' && $httpMethod != 'POST' ) {
-			$this->createError("Only get/post methods supported.", INTERNAL_SERVER_ERROR);
+		if ( $httpMethod != 'GET' && $httpMethod != 'POST' && $httpMethod != 'PUT' ) {
+			$this->createError("Only get/post/put methods supported.", INTERNAL_SERVER_ERROR);
 		}
 		if ( array_key_exists($name . '#' . $httpMethod, $this->apiFunctions) ) {
 			$this->createError("Multiple definitions of " . $name . " for " . $httpMethod . ".", INTERNAL_SERVER_ERROR);
@@ -49,8 +49,8 @@ class RestApi {
 			$this->createError("Handler not set.", INTERNAL_SERVER_ERROR);
 		}
 
-		if ( $_SERVER['REQUEST_METHOD'] != 'GET' && $_SERVER['REQUEST_METHOD'] != 'POST' ) {
-			$this->createError("Only get/post methods supported.", METHOD_NOT_ALLOWED);
+		if ( $_SERVER['REQUEST_METHOD'] != 'GET' && $_SERVER['REQUEST_METHOD'] != 'POST' && $_SERVER['REQUEST_METHOD'] != 'PUT' ) {
+			$this->createError("Only get/post/put methods supported.", METHOD_NOT_ALLOWED);
 		}
 
 		$handler = $_GET['handler'];
@@ -62,6 +62,9 @@ class RestApi {
 				$this->callFunction($handler, $_GET);
 			} else if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
 				$this->callFunction($handler, $_POST);
+			} else if ( $_SERVER['REQUEST_METHOD'] == 'PUT' ) {
+				parse_str(file_get_contents('php://input'), $_PUT);
+				$this->callFunction($handler, $_PUT);
 			}
 		}
 	}
@@ -71,6 +74,10 @@ class RestApi {
 	 */
 	public function callFunction($name, $arguments)
 	{
+		if ( $_SERVER['REQUEST_METHOD'] == 'PUT' ) {
+			list($name, $primary_key) = explode('/', $name);
+			$arguments['__primary_key'] = $primary_key;
+		}
 		$name = $name . '#' . $_SERVER['REQUEST_METHOD'];
 		if ( !array_key_exists($name, $this->apiFunctions) ) {
 			$this->createError("Function '" . $name . "' does not exist.", BAD_REQUEST);
@@ -79,7 +86,7 @@ class RestApi {
 		// Arguments
 		$args = array();
 		foreach ( $arguments as $key => $value ) {
-			if ( !array_key_exists($key, $func['optArgs']) ) {
+			if ( !array_key_exists($key, $func['optArgs']) && $key != '__primary_key' ) {
 				$this->createError("Invalid argument '" . $key .
 				                   "' for function '" . $name . "'.", BAD_REQUEST);
 			}
