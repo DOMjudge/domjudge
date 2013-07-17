@@ -497,17 +497,23 @@ function judgehosts_PUT($args)  {
 	  $api->createError("hostname is mandatory");
   }
   $hostname = $args['__primary_key'];
-  if ( !isset($args['active']) ) {
-	  $api->createError("active is mandatory");
+  if ( !isset($args['active']) && !isset($args['polltime']) ) {
+	  $api->createError("either active or polltime is mandatory");
   }
-  $active = $args['active'];
-
-  $DB->q('UPDATE judgehost SET active=%i WHERE hostname=%s', $active, $hostname);
+  if ( isset($args['active']) && isset($args['polltime']) ) {
+	  $api->createError("cannot update active and polltime at the same time");
+  } else if ( isset($args['active']) ) {
+	  $active = $args['active'];
+	  $DB->q('UPDATE judgehost SET active=%i WHERE hostname=%s', $active, $hostname);
+  } else if ( isset($args['polltime']) ) {
+	  $DB->q('UPDATE LOW_PRIORITY judgehost SET polltime = NOW() WHERE hostname=%s', $hostname);
+  }
 
   return judgehosts(array('hostname' => $hostname));
 }
 $doc = 'Update the configuration of a judgehost.';
-$args = array('active' => 'Activate judgehost?');
+$args = array('active' => 'Activate judgehost?',
+	'polltime' => 'Set time of last poll to now.');
 $exArgs = array();
 if ( IS_JURY ) {
 	$api->provideFunction('PUT', 'judgehosts', 'judgehosts_PUT', $doc, $args, $exArgs);

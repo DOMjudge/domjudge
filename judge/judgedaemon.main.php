@@ -205,9 +205,8 @@ while ( TRUE ) {
 
 	$res = request('judgehosts', 'GET', 'hostname=' . urlencode($myhost));
 	$row = json_decode($res, TRUE)[0];
-	// FIXME: do this either on server side or via REST call
-	// $DB->q('UPDATE LOW_PRIORITY judgehost SET polltime = NOW()
-	//       WHERE hostname = %s', $myhost);
+
+	request('judgehosts/' . urlencode($myhost), 'PUT', 'polltime');
 
 	if ( $row['active'] != 1 ) {
 		if ( $active ) {
@@ -470,8 +469,7 @@ function judge($mark, $row, $judgingid)
 
 	// Make sure that judge status doesn't turn to warning levels when
 	// we're judging lots of test cases.
-	$DB->q('UPDATE LOW_PRIORITY judgehost SET polltime = NOW()
-	        WHERE hostname = %s', $myhost);
+	request('judgehosts/' . urlencode($myhost), 'PUT', 'polltime');
 
 	// Optimization: stop judging when the result is already known.
 	// This should report a final result when all runresults are non-null!
