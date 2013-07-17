@@ -297,11 +297,25 @@ function judgehosts_POST($args) {
   }
 
   $query = 'INSERT IGNORE INTO judgehost (hostname) VALUES(%s)';
-
   $q = $DB->q($query, $args['hostname']);
-  return judgehosts($args);
+
+  // If there are any unfinished judgings in the queue in my name,
+  // they will not be finished. Give them back.
+  $res = $DB->q('SELECT judgingid, submitid, cid FROM judging WHERE
+                 judgehost = %s AND endtime IS NULL AND valid = 1', $args['hostname']);
+  $ret = $res->getTable();
+  $res = $DB->q('SELECT judgingid, submitid, cid FROM judging WHERE
+                 judgehost = %s AND endtime IS NULL AND valid = 1', $args['hostname']);
+  while ( $jud = $res->next() ) {
+          $DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
+                 $jud['judgingid']);
+          $DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
+                  WHERE submitid = %i', $jud['submitid']);
+  }
+
+  return $ret;
 }
-$doc = 'Add a new judgehost to the list of judgehosts.';
+$doc = 'Add a new judgehost to the list of judgehosts. Also restarts (and returns) unfinished judgings.';
 $args = array('hostname' => 'Add this specific judgehost and activate it.');
 $exArgs = array(array('hostname' => 'judge007'));
 if ( IS_JURY ) {

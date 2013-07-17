@@ -162,9 +162,6 @@ if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
 database_retry_connect($waittime);
 
-// Auto-register judgehost via REST
-request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
-
 // Warn when chroot has been disabled. This has security implications.
 if ( ! USE_CHROOT ) {
 	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
@@ -176,17 +173,14 @@ system("mkdir -p $workdirpath/testcase", $retval);
 if ( $retval != 0 ) error("Could not create $workdirpath");
 chmod("$workdirpath/testcase", 0700);
 
+// Auto-register judgehost via REST
 // If there are any unfinished judgings in the queue in my name,
 // they will not be finished. Give them back.
-$res = $DB->q('SELECT judgingid, submitid, cid FROM judging WHERE
-               judgehost = %s AND endtime IS NULL AND valid = 1', $myhost);
-while ( $jud = $res->next() ) {
+$unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
+$unfinished = json_decode($unfinished, TRUE);
+foreach ( $unfinished as $jud ) {
 	$workdir = "$workdirpath/c$jud[cid]-s$jud[submitid]-j$jud[judgingid]";
 	@chmod($workdir, 0700);
-	$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
-	       $jud['judgingid']);
-	$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
-	        WHERE submitid = %i', $jud['submitid']);
 	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] . " in my name; given back");
 	auditlog('judging', $jud['judgingid'], 'given back', null, $myhost);
 }
