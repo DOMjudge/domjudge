@@ -203,22 +203,11 @@ while ( TRUE ) {
 		exit;
 	}
 
-	try {
-		// Check that this judge is active, else wait and check again later
-		$row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s'
-		             , $myhost);
-		$DB->q('UPDATE LOW_PRIORITY judgehost SET polltime = NOW()
-		       WHERE hostname = %s', $myhost);
-	}
-	catch( Exception $e ) {
-		$msg = "MySQL server has gone away";
-		if( ! strncmp($e->getMessage(), $msg, strlen($msg)) ) {
-			logmsg(LOG_WARNING, $msg);
-			database_retry_connect();
-			continue;
-		}
-		throw $e;
-	}
+	$res = request('judgehosts', 'GET', 'hostname=' . urlencode($myhost));
+	$row = json_decode($res, TRUE)[0];
+	// FIXME: do this either on server side or via REST call
+	// $DB->q('UPDATE LOW_PRIORITY judgehost SET polltime = NOW()
+	//       WHERE hostname = %s', $myhost);
 
 	if ( $row['active'] != 1 ) {
 		if ( $active ) {
