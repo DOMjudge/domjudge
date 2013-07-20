@@ -79,6 +79,7 @@ Version 3.4.0 - DEV
  - Add c++ as a language extension for C++.
  - Display a total and maximum of all testcase runtimes for a submission,
    and always print runtimes with two decimals.
+ - Partial fix for failed directory removal after unmounting chroot subdirs.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------
