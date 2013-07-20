@@ -111,8 +111,8 @@ class RestApi {
 		print "<body>\n";
 		print "The supported functions are:\n";
 		print "<dl>\n";
-		foreach ( $this->apiFunctions as $name => $func ) {
-			$name = explode('#', $name)[0];
+		foreach ( $this->apiFunctions as $key => $func ) {
+			list($name, $method) = explode('#', $key);
 			$url = $_SERVER['REQUEST_URI'] . $name;
 			print '<dt><a href="' . $url . '">' . $url . "</a></dt>\n";
 			print "<dd>";

@@ -54,7 +54,7 @@ function request($url, $verb = 'GET', $data = '') {
 	if ( !$response ) {
 		error("Error while executing curl with url " . $url . ": " . curl_error($ch));
 	}
-	$status = curl_getinfo($ch)['http_code'];
+	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	if ( $status < 200 || $status >= 300 ) {
 		error("Error while executing curl with url " . $url . ": http status code: " . $status . ", response: " . $response);
 	}
