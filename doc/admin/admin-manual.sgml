@@ -1195,9 +1195,22 @@ script under <tt>misc-tools/create_cgroups</tt>. Edit the script to
 match your situation first.
 This script needs to be re-run after each boot (e.g., add it to
 the judegedaemon init script).
- 
+
 Once this is done, your system is ready to use cgroups and will do so
-automatically.
+automatically. With cgroup support you can also run multiple
+judgedaemons on one machine, one dedicated to each core. To that end,
+set the <tt>cpuset.cpus</tt> variable in
+<tt>etc/cgroup-domjudge.conf</tt> snippet correctly, e.g. to use all
+cores on a quad-core machine set it to <tt>0-3</tt>, and add extra
+unprivileged users to the system, i.e. add users
+<tt>domjudge-run-&lt;X&gt;</tt> (where <tt>X</tt> runs through
+<tt>0,1,2,3</tt>) with <tt>useradd</tt> as described in section <ref
+id="install_config:judgehost" name="installation of a judgehost">.
+Finally, start each of the judgedaemons with:
+<code>
+$ judgedaemon -n <X>
+</code>
+
 
 <sect1>Source code syntax highlighting
 <p>
