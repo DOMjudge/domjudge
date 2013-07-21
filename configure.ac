@@ -147,7 +147,8 @@ else
 	use_cgroups=no
 fi
 AC_ARG_ENABLE(cgroups,AS_HELP_STRING([--enable-cgroups],
-[Use Linux cgroups for memory control (default: $use_cgroups).]), [], [])
+[Use Linux cgroups for memory control (default: if supported).
+ This requires Linux kernel >= 3.2.0 and libcgroup.]), [], [])
 
 if test "x$enable_cgroups" = xno; then
 	use_cgroups=no
