@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.4.0 - DEV
--------------------
+Version 3.4.0 - 22 July 2013
+----------------------------
  - Add problem text to database and support viewing in PDF/HTML/ASCII.
  - Add optional printing support via DOMjudge web interface. Using
    local system printing remains the preferred way.
