@@ -341,15 +341,15 @@ void output_cgroup_stats()
 		error(0,"cgroup_new_cgroup");
 	}
 	if ((ret = cgroup_get_cgroup(cg)) != 0) {
-		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
 	}
 	cg_controller = cgroup_get_controller(cg, "memory");
 	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
 	if ( ret!=0 ) {
-		error(0,"get cgroup value - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"get cgroup value: %s(%d)", cgroup_strerror(ret), ret);
 	}
 
-	fprintf(stderr, "Total memory used: %" PRId64 " kB\n", max_usage/1024);
+	verbose("total memory used: %" PRId64 " kB\n", max_usage/1024);
 
 	cgroup_free(&cg);
 }
@@ -371,9 +371,9 @@ void cgroup_create()
 	cgroup_add_value_int64(cg_controller, "memory.limit_in_bytes", memsize);
 	cgroup_add_value_int64(cg_controller, "memory.memsw.limit_in_bytes", memsize);
 
-	/* Set up cpu restrictions; we pin the task to a specific set of cpus,
-	   based on the environment variable CPUSET. We also give it exclusive
-	   access to those cores, and set no limits on memory nodes */
+	/* Set up cpu restrictions; we pin the task to a specific set of
+	   cpus. We also give it exclusive access to those cores, and set
+	   no limits on memory nodes */
 	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
 		cg_controller = cgroup_add_controller(cg, "cpuset");
 		/* To make a cpuset exclusive, some additional setup outside of domjudge is
@@ -382,13 +382,13 @@ void cgroup_create()
 		cgroup_add_value_string(cg_controller, "cpuset.mems", "0");
 		cgroup_add_value_string(cg_controller, "cpuset.cpus", cpuset);
 	} else {
-		fprintf(stderr, "CPUSET undefined\n");
+		verbose("cpuset undefined\n");
 	}
 
 	/* Perform the actual creation of the cgroup */
 	ret = cgroup_create_cgroup(cg, 1);
 	if ( ret!=0 ) {
-		error(0,"creating cgroup - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"creating cgroup: %s(%d)", cgroup_strerror(ret), ret);
 	}
 
 	cgroup_free(&cg);
@@ -405,13 +405,13 @@ void cgroup_attach()
 	}
 	ret = cgroup_get_cgroup(cg);
 	if ( ret!=0 ) {
-		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
 	}
 
 	/* Attach task to the cgroup */
 	ret = cgroup_attach_task(cg);
 	if ( ret!=0 ) {
-		error(0,"attach task to cgroup - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"attach task to cgroup: %s(%d)", cgroup_strerror(ret), ret);
 	}
 
 	cgroup_free(&cg);
@@ -428,12 +428,12 @@ void cgroup_delete()
 	}
 	ret = cgroup_get_cgroup(cg);
 	if ( ret!=0 ) {
-		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
 	}
 	/* Clean up our cgroup */
 	ret = cgroup_delete_cgroup(cg, 1);
 	if ( ret!=0 ) {
-		error(0,"deleting cgroup - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"deleting cgroup: %s(%d)", cgroup_strerror(ret), ret);
 	}
 	cgroup_free(&cg);
 }
@@ -720,7 +720,7 @@ int main(int argc, char **argv)
 			#ifdef USE_CGROUPS
 				cpuset = optarg;
 			#else
-				error(0,"This option is only supported when compiled with cgroup support.");
+				error(0,"option `-P' is only supported when compiled with cgroup support.");
 			#endif
 			break;
 		case 'c': /* no-core option */
