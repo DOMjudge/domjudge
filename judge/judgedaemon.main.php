@@ -43,10 +43,14 @@ if ( isset($options['h']) ) usage();
 
 $myhost = trim(`hostname | cut -d . -f 1`);
 if ( isset($options['daemonid']) ) {
+	if ( !defined('USE_CGROUPS') || !USE_CGROUPS ) {
+		echo "Option `-n' is only supported when compiled with cgroup support.\n";
+		exit(1);
+	}
 	if ( preg_match('/^\d+$/', $options['daemonid'] ) ) {
 		$myhost = $myhost . "-" . $options['daemonid'];	
 	} else {
-		echo "Invalid value for daemonid, must be positive integer\n";
+		echo "Invalid value for daemonid, must be positive integer.\n";
 		exit(1);
 	}
 }
