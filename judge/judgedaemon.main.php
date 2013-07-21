@@ -205,7 +205,10 @@ while ( TRUE ) {
 	}
 
 	$res = request('judgehosts', 'GET', 'hostname=' . urlencode($myhost));
-	$row = json_decode($res, TRUE)[0];
+	// Note: in PHP >= 5.4 the lines below can be done in assignment
+	// with support for dereferencing temporary arrays.
+	$rows = json_decode($res, TRUE);
+	$row = $rows[0];
 
 	request('judgehosts/' . urlencode($myhost), 'PUT', 'polltime');
 
