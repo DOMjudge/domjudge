@@ -1196,10 +1196,13 @@ match your situation first.
 This script needs to be re-run after each boot (e.g., add it to
 the judegedaemon init script).
 
-Once this is done, your system is ready to use cgroups and will do so
-automatically. With cgroup support you can also run multiple
-judgedaemons on one machine, one dedicated to each core. To that end,
-set the <tt>cpuset.cpus</tt> variable in
+<sect1>Multiple judgedaemons per machine
+<p>
+With cgroup support set up, as per the section above, you can run multiple
+judgedaemons on one multi-cpu or multi-core machine, dedicating one cpu core
+to each judgedaemon.
+
+To that end, set the <tt>cpuset.cpus</tt> variable in
 <tt>etc/cgroup-domjudge.conf</tt> snippet correctly, e.g. to use all
 cores on a quad-core machine set it to <tt>0-3</tt>, and add extra
 unprivileged users to the system, i.e. add users
