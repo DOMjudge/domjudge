@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 3.4.1 - DEV
+-------------------
+
 Version 3.4.0 - 22 July 2013
 ----------------------------
  - Add problem text to database and support viewing in PDF/HTML/ASCII.
