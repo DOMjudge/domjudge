@@ -1,8 +1,9 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.5.0 - DEV
+Version 4.0.0 - DEV
 -------------------
  - [INCOMPATIBLE CHANGE] checktestdata logical operators are now '&&' and '||'.
+ - Introduce REST API; used by judgedaemon to communicate with domserver.
 
 Version 3.4.0 - (unreleased)
 ----------------------------
