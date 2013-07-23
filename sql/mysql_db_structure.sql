@@ -63,7 +63,7 @@ CREATE TABLE `clarification` (
 CREATE TABLE `configuration` (
   `configid` int(4) NOT NULL AUTO_INCREMENT COMMENT 'Configuration ID',
   `name` varchar(25) NOT NULL COMMENT 'Name of the configuration variable',
-  `value` longtext NOT NULL COMMENT 'Content of the configuration variable',
+  `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)',
   `type` varchar(25) DEFAULT NULL COMMENT 'Type of the value (metatype for use in the webinterface)',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description for in the webinterface',
   PRIMARY KEY (`configid`),
@@ -175,6 +175,7 @@ CREATE TABLE `judging_run` (
 CREATE TABLE `language` (
   `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string), used for source file extension',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
+  `extensions` longtext DEFAULT NULL COMMENT 'List of recognized extensions (JSON encoded)',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted in this language?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions in this language judged?',
   `time_factor` float NOT NULL DEFAULT '1' COMMENT 'Language-specific factor multiplied by problem run times',
