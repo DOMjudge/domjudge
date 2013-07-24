@@ -44,15 +44,6 @@ define('LDAP_DNQUERY', 'CN=&,OU=users,DC=example,DC=com');
 // rights on top of their jury rights
 $DOMJUDGE_ADMINS = array('domjudge_jury', 'admin');
 
-// List of auto-detected language extensions by the submit client.
-//   Format: 'LANG,MAINEXT[,EXT]... [LANG...]' where:
-//   - LANG is the language name displayed,
-//   - MAINEXT is the extension corresponding to the langid in DOMjudge,
-//   - EXT... are comma separated additional detected language extensions.
-// This list only needs to be modified when additional languages are
-// added and should be kept in sync with the list in submit-config.h.in.
-define('LANG_EXTS', 'C,c C++,cpp,cc,c++ Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,csharp,cs AWK,awk Python2,py2,py Python3,py3 Bash,bash Ada,adb,ads Fortran,f95,f90 Scala,scala Lua,lua');
-
 // Set this to a notification command, which receives the notification
 // text on stdin. Examples below for notification by mail or prints.
 //define('BALLOON_CMD', 'mail -s Balloon_notification domjudge@localhost');

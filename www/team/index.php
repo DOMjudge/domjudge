@@ -22,13 +22,18 @@ echo "<script type=\"text/javascript\">\n<!--\n";
 
 if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 	$probdata = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
-			 WHERE cid = %i AND allow_submit = 1
-			 ORDER BY probid', $cid);
+	                    WHERE cid = %i AND allow_submit = 1
+	                    ORDER BY probid', $cid);
+
+	$langdata = $DB->q('KEYVALUETABLE SELECT langid, extensions
+	                    FROM language WHERE allow_submit = 1');
 
 	echo "function getMainExtension(ext)\n{\n";
 	echo "\tswitch(ext) {\n";
-	foreach($langexts as $ext => $langid) {
-		echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
+	foreach ( $langdata as $langid => $extensions ) {
+		foreach ( json_decode($extensions) as $ext ) {
+			echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
+		}
 	}
 	echo "\t\tdefault: return '';\n\t}\n}\n\n";
 

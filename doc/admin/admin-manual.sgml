@@ -1417,12 +1417,12 @@ other contests. A disabled contest will also not become active.
 <tag>language</tag>
 Programming languages in which to accept and judge submissions.
 <tt>langid</tt> is a string of maximum length 8, which references the
-language; it is used internally as extension for source files and must
-match the first extension listed for the language in
-the <tt>LANG_EXTS</tt> setting in the configuration files.
+language; it is used internally as extension for source files.
 This reference is also used to call the correct compile
 script (<tt>lib/judge/compile_c.sh</tt>, etc.), so when adding
 a new language, check that these match.
+Alternative extensions that should be recognized are JSON encoded in
+<tt>extensions</tt>.
 
 <tt>name</tt> is the displayed name of the language;
 <tt>allow_submit</tt> determines whether teams can submit

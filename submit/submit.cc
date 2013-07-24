@@ -47,13 +47,15 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #endif
-#if ( SUBMIT_ENABLE_WEB )
+#ifdef HAVE_CURL_CURL_H
 #include <curl/curl.h>
 #include <curl/easy.h>
 #endif
 #ifdef HAVE_MAGIC_H
 #include <magic.h>
 #endif
+
+#include <jsoncpp/json/json.h>
 
 /* C++ includes for easy string handling */
 #include <iostream>
@@ -126,6 +128,19 @@ int  cmdsubmit();
 #if ( SUBMIT_ENABLE_WEB )
 int  websubmit();
 #endif
+#ifdef HAVE_CURL_CURL_H
+int  getlangexts();
+
+/* Helper function for using libcurl in websubmit() and getlangexts() */
+size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
+{
+	stringstream *s = (stringstream *) sptr;
+
+	*s << string((char *)ptr,size*nmemb);
+
+	return size*nmemb;
+}
+#endif
 
 #if ( SUBMIT_ENABLE_CMD )
 int socket_fd; /* filedescriptor of the connection to server socket */
@@ -153,30 +168,9 @@ int main(int argc, char **argv)
 	struct stat fstats;
 	string filebase, fileext;
 	time_t fileage;
-	char *lang_exts;
-	char *lang, *ext;
-	char *lang_ptr, *ext_ptr;
 
 	progname = argv[0];
 	stdlog = NULL;
-
-	/* Parse LANGEXTS define into separate strings */
-	lang_exts = strdup(LANG_EXTS);
-	for(lang=strtok_r(lang_exts," ",&lang_ptr); lang!=NULL;
-		lang=strtok_r(NULL," ",&lang_ptr)) {
-
-		languages.push_back(vector<string>());
-
-		/* First read the language */
-		ext=strtok_r(lang,",",&ext_ptr);
-		languages[languages.size()-1].push_back(string(ext));
-
-		/* Then all valid extensions for that language */
-		for(ext=strtok_r(NULL,",",&ext_ptr); ext!=NULL;
-			ext=strtok_r(NULL,",",&ext_ptr)) {
-			languages[languages.size()-1].push_back(stringtolower(ext));
-		}
-	}
 
 	if ( getenv("HOME")==NULL ) error(0,"environment variable `HOME' not set");
 	homedir = getenv("HOME");
@@ -271,6 +265,10 @@ int main(int argc, char **argv)
 			error(0,"getopt returned character code `%c' ??",c);
 		}
 	}
+
+#ifdef HAVE_CURL_CURL_H
+	if ( getlangexts()!=0 ) warning(0,"could not obtain language extensions");
+#endif
 
 	if ( show_help ) usage();
 	if ( show_version ) version();
@@ -440,12 +438,19 @@ void usage()
 "in lower- or uppercase. When not specified, PROBLEM defaults to the\n"
 "first FILENAME excluding the extension. For example, 'c.java' will\n"
 "indicate problem 'C'.\n"
-"\n"
+"\n");
+	if ( languages.size()==0 ) {
+		printf(
+"For LANGUAGE use one the ID of the language (typically the main language\n"
+"extension) in lower- or uppercase.\n");
+	} else {
+		printf(
 "For LANGUAGE use one of the following extensions in lower- or uppercase:\n");
-	for(i=0; i<languages.size(); i++) {
-		printf("   %-15s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
-		for(j=2; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
-		printf("\n");
+		for(i=0; i<languages.size(); i++) {
+			printf("   %-15s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
+			for(j=2; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
+			printf("\n");
+		}
 	}
 	printf(
 "The default for LANGUAGE is the extension of FILENAME. For example,\n"
@@ -601,6 +606,94 @@ magicerror:
 
 #endif /* HAVE_MAGIC_H */
 
+#ifdef HAVE_CURL_CURL_H
+int getlangexts()
+{
+	CURL *handle;
+	CURLcode res;
+	char curlerrormsg[CURL_ERROR_SIZE];
+	char *url;
+	stringstream curloutput;
+	Json::Reader reader;
+	Json::Value root, exts;
+
+	url = strdup((baseurl+"api/languages").c_str());
+
+	curlerrormsg[0] = 0;
+
+	handle = curl_easy_init();
+	if ( handle == NULL ) error(0,"curl_easy_init() error");
+
+/* helper macros to easily set curl options */
+#define curlsetopt(opt,val) \
+	if ( curl_easy_setopt(handle, CURLOPT_ ## opt, val)!=CURLE_OK ) { \
+		warning(0,"setting curl option '" #opt "': %s, aborting download",curlerrormsg); \
+		curl_easy_cleanup(handle); \
+		free(url); \
+		return 1; }
+
+	/* Set options for post */
+	curlsetopt(ERRORBUFFER,   curlerrormsg);
+	curlsetopt(FAILONERROR,   1);
+	curlsetopt(FOLLOWLOCATION,1);
+	curlsetopt(MAXREDIRS,     10);
+	curlsetopt(TIMEOUT,       timeout_secs);
+	curlsetopt(URL,           url);
+	curlsetopt(WRITEFUNCTION, writesstream);
+	curlsetopt(WRITEDATA,     (void *)&curloutput);
+	curlsetopt(USERAGENT     ,DOMJUDGE_PROGRAM " (" PROGRAM " using cURL)");
+
+	if ( verbose >= LOG_DEBUG ) {
+		curlsetopt(VERBOSE,   1);
+	} else {
+		curlsetopt(NOPROGRESS,1);
+	}
+
+	logmsg(LOG_NOTICE,"connecting to %s",url);
+
+	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
+		curl_easy_cleanup(handle);
+		error(0,"downloading '%s': %s",url,curlerrormsg);
+	}
+
+#undef curlsetopt
+
+	curl_easy_cleanup(handle);
+
+	free(url);
+
+	cout << curloutput.str() << endl;
+
+	if ( !reader.parse(curloutput, root) ) {
+		warning(0,"parsing REST API output: %s",
+		        reader.getFormattedErrorMessages().c_str());
+		return 1;
+	}
+
+	if ( !root.isArray() || root.size()==0 ) goto invalid_json;
+
+	for(size_t i=0; i<root.size(); i++) {
+		vector<string> lang;
+
+		lang.push_back(root[i].get("name","").asString());
+		if ( lang[0]=="" ||
+		     !(exts = root[i]["extensions"]) ||
+		     !exts.isArray() || exts.size()==0 ) goto invalid_json;
+
+		for(size_t j=0; j<exts.size(); j++) lang.push_back(exts[j].asString());
+
+		languages.push_back(lang);
+	}
+
+	return 0;
+
+  invalid_json:
+	warning(0,"REST API returned unexpected JSON data");
+	return 1;
+}
+
+#endif /* HAVE_CURL_CURL_H */
+
 #if ( SUBMIT_ENABLE_CMD )
 
 int cmdsubmit()
@@ -729,15 +822,6 @@ int cmdsubmit()
 #endif /* SUBMIT_ENABLE_CMD */
 
 #if ( SUBMIT_ENABLE_WEB )
-
-size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
-{
-	stringstream *s = (stringstream *) sptr;
-
-	*s << string((char *)ptr,size*nmemb);
-
-	return size*nmemb;
-}
 
 string remove_html_tags(string s)
 {

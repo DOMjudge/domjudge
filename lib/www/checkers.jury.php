@@ -110,19 +110,12 @@ function check_judgehost($data, $keydata = null)
 
 function check_language($data, $keydata = null)
 {
-	global $langexts;
-
 	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 0 ) {
 		ch_error("Timelimit is not a valid positive factor");
 	}
 	$id = (isset($data['langid']) ? $data['langid'] : $keydata['langid']);
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Language ID may only contain characters " . IDENTIFIER_CHARS . ".");
-	}
-
-	if ( @$langexts[$id]!=$id ) {
-		ch_error("Language ID/extension not found or set incorrectly " .
-		         "in LANG_EXTS from domserver-config.php");
 	}
 
 	return $data;

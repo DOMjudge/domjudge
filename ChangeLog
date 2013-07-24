@@ -4,6 +4,8 @@ Version 4.0.0 - DEV
 -------------------
  - [INCOMPATIBLE CHANGE] checktestdata logical operators are now '&&' and '||'.
  - Introduce REST API; used by judgedaemon to communicate with domserver.
+ - Store recognized language extensions in database and query from
+   submit client through REST API.
 
 Version 3.4.0 - (unreleased)
 ----------------------------

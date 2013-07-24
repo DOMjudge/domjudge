@@ -30,6 +30,8 @@ endif
 endif
 endif
 
+LDFLAGS += -ljsoncpp
+
 SUBMITHEADERS = submitcommon.hxx $(TOPDIR)/etc/submit-config.h
 
 SUBMITCOMMONOBJ = submitcommon$(OBJEXT)

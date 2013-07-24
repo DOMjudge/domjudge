@@ -654,11 +654,12 @@ $api->provideFunction('GET', 'categories', 'categories', $doc);
 function languages() {
 	global $DB;
 
-	$q = $DB->q('SELECT langid, name, allow_submit, allow_judge, time_factor FROM language');
+	$q = $DB->q('SELECT langid, name, extensions, allow_submit, allow_judge, time_factor FROM language');
 	$res = array();
 	while($row = $q->next()) {
 		$res[] = array('langid' => $row['langid'],
 			'name' => $row['name'],
+			'extensions' => json_decode($row['extensions']),
 			'allow_judge' => (bool)$row['allow_judge'],
 			'allow_submit' => (bool)$row['allow_submit'],
 			'time_factor' => (float)$row['time_factor']);
