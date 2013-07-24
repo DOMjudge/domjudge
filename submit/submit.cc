@@ -672,7 +672,7 @@ int getlangexts()
 
 	if ( !root.isArray() || root.size()==0 ) goto invalid_json;
 
-	for(size_t i=0; i<root.size(); i++) {
+	for(Json::ArrayIndex i=0; i<root.size(); i++) {
 		vector<string> lang;
 
 		lang.push_back(root[i].get("name","").asString());
@@ -680,7 +680,7 @@ int getlangexts()
 		     !(exts = root[i]["extensions"]) ||
 		     !exts.isArray() || exts.size()==0 ) goto invalid_json;
 
-		for(size_t j=0; j<exts.size(); j++) lang.push_back(exts[j].asString());
+		for(Json::ArrayIndex j=0; j<exts.size(); j++) lang.push_back(exts[j].asString());
 
 		languages.push_back(lang);
 	}
