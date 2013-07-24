@@ -6,12 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-// Sanity check whether webserver basic authentication (e.g in
-// apache.conf) is configured correctly
-if (empty($_SERVER['REMOTE_USER']) || $_SERVER['AUTH_TYPE'] != "Basic") {
-	die("Authentication not enabled, check webserver config");
-}
-
 require_once('../configure.php');
 
 define('IS_JURY', TRUE);
@@ -25,8 +19,31 @@ require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/print.php');
 require_once(LIBWWWDIR . '/forms.php');
 require_once(LIBWWWDIR . '/printing.php');
+require_once(LIBWWWDIR . '/auth.php');
 
-require_once(LIBWWWDIR . '/validate.jury.php');
+if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
+
+// The functions do_login and show_loginpage, if called, do not return.
+if ( @$_POST['cmd']=='login' ) do_login();
+if ( !logged_in() ) show_loginpage();
+
+if ( checkrole('admin') ) {
+    define('IS_ADMIN', true);
+} else {
+    define('IS_ADMIN', false);
+}
+
+if ( !isset($REQUIRED_ROLES) ) $REQUIRED_ROLES = array('jury');
+$allowed = false;
+foreach ($REQUIRED_ROLES as $role) {
+    if ( checkrole($role) ) {
+        $allowed = true;
+    }
+}
+if (!$allowed) {
+    error("You do not have permission to perform that action(Missing role(s): " . implode($REQUIRED_ROLES,',') . ")");
+}
+
 require_once(LIBWWWDIR . '/common.jury.php');
 
 $cdata = getCurContest(TRUE);

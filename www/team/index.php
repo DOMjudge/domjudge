@@ -49,7 +49,7 @@ echo "initReload(" . $refreshtime . ");\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
-putTeamRow($cdata, array($login));
+putTeamRow($cdata, array($teamid));
 
 echo "<div id=\"submitlist\">\n";
 
@@ -100,7 +100,7 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 	}
 }
 // call putSubmissions function from common.php for this team.
-$restrictions = array( 'teamid' => $login );
+$restrictions = array( 'teamid' => $teamid );
 putSubmissions($cdata, $restrictions, null, $submitted);
 
 echo "</div>\n\n";
@@ -109,7 +109,7 @@ echo "<div id=\"clarlist\">\n";
 
 $requests = $DB->q('SELECT * FROM clarification
                     WHERE cid = %i AND sender = %s
-                    ORDER BY submittime DESC, clarid DESC', $cid, $login);
+                    ORDER BY submittime DESC, clarid DESC', $cid, $teamid);
 
 $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
                           LEFT JOIN team_unread u ON
@@ -117,7 +117,7 @@ $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
                           WHERE c.cid = %i AND c.sender IS NULL
                           AND ( c.recipient IS NULL OR c.recipient = %s )
                           ORDER BY c.submittime DESC, c.clarid DESC',
-                          $login, $cid, $login);
+                          $teamid, $cid, $teamid);
 
 echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 
@@ -125,7 +125,7 @@ echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 if ( $clarifications->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarifications.</p>\n\n";
 } else {
-	putClarificationList($clarifications,$login);
+	putClarificationList($clarifications,$teamid);
 }
 
 echo "<h3 class=\"teamoverview\">Clarification Requests</h3>\n";
@@ -133,7 +133,7 @@ echo "<h3 class=\"teamoverview\">Clarification Requests</h3>\n";
 if ( $requests->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarification requests.</p>\n\n";
 } else {
-	putClarificationList($requests,$login);
+	putClarificationList($requests,$teamid);
 }
 
 echo addForm('clarification.php','get') .

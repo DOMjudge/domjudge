@@ -266,11 +266,3 @@ function importZippedProblem($zip, $probid = NULL)
 
 	return $probid;
 }
-
-/**
- * returns jury member username as supplied by Apache
- */
-function getJuryMember()
-{
-	return $_SERVER['REMOTE_USER'];
-}

@@ -152,6 +152,7 @@ function summarizeClarification($body)
  */
 function putClarificationList($clars, $team = NULL)
 {
+	global $username;
 	if ( $team==NULL && ! IS_JURY ) {
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
@@ -231,7 +232,7 @@ function putClarificationList($clars, $team = NULL)
 				echo "<a class=\"button\" href=\"clarification.php?claim=1&amp;id=" .
 					htmlspecialchars($clar['clarid']) . "\">claim</a>";
 			} else {
-				if ( !$clar['answered'] && $jury_member==getJuryMember() ) {
+				if ( !$clar['answered'] && $jury_member==$username ) {
 					echo "<a class=\"button\" href=\"clarification.php?unclaim=1&amp;id=" .
 						htmlspecialchars($clar['clarid']) . "\">unclaim</a>";
 				} else {

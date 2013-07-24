@@ -2,7 +2,7 @@
 /**
  * This file provides all functionality for authenticating teams. The
  * authentication method used is configured with the AUTH_METHOD
- * variable. When a team is succesfully authenticated, $login is set
+ * variable. When a team is succesfully authenticated, $username is set
  * to the team ID and $teamdata contains the corresponding row from
  * the database. $ip is set to the remote IP address used.
  *
@@ -12,34 +12,48 @@
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
-$login = NULL;
+$teamid = NULL;
+$username = NULL;
 $teamdata = NULL;
+$userdata = NULL;
 
-// Returns whether the connected user is logged in, sets $login, $teamdata
+function checkrole($rolename) {
+	global $userdata;
+	if ( !array_key_exists('roles', $userdata) ) {
+		return false;
+	}
+	if ( in_array($rolename, $userdata['roles']) ||
+		 in_array('admin',   $userdata['roles'])) {
+		return true;
+	}
+	return false;
+}
+
+// Returns whether the connected user is logged in, sets $username, $teamdata
 function logged_in()
 {
-	global $DB, $ip, $login, $teamdata;
+	global $DB, $ip, $username, $teamid, $teamdata, $userdata;
 
-	if ( !empty($login) && !empty($teamdata) ) return TRUE;
+	if ( !empty($username) && !empty($userdata) && !empty($teamdata) ) return TRUE;
 
-	// Retrieve teamdata for given AUTH_METHOD, assume not logged in
-	// when teamdata is empty:
+	// Retrieve userdata for given AUTH_METHOD, assume not logged in
+	// when userdata is empty:
 	switch ( AUTH_METHOD ) {
 	case 'FIXED':
-		$login = FIXED_TEAM;
-		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s', $login);
+		$username = FIXED_TEAM;
+		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $username);
 		break;
 
 	case 'IPADDRESS':
-		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE authtoken = %s', $ip);
+		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE ip_address = %s', $ip);
 		break;
 
 	case 'PHP_SESSIONS':
 	case 'LDAP':
 		session_start();
-		if ( isset($_SESSION['teamid']) ) {
-			$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s',
-			                   $_SESSION['teamid']);
+		if ( isset($_SESSION['username']) ) {
+			$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s',
+			                   $_SESSION['username']);
 		}
 		break;
 
@@ -47,18 +61,30 @@ function logged_in()
 		error("Unknown authentication method '" . AUTH_METHOD . "' requested.");
 	}
 
+	if ( !empty($userdata) ) {
+		$username = $userdata['username'];
+		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s', $userdata['teamid']);
+		$DB->q('UPDATE user SET last_login = %s, last_ip_address = %s
+			    WHERE username = %s',
+			   now(), $ip, $username);
+
+		// Pull the list of roles that a user has
+		$roles = $DB->q('COLUMN SELECT role.role FROM userrole LEFT JOIN role ON userrole.roleid = role.roleid WHERE userrole.userid = %s', $userdata['userid']);
+		$userdata['roles'] = $roles;
+	}
+
 	if ( !empty($teamdata) ) {
-		$login = $teamdata['login'];
+		$teamid = $teamdata['login'];
 		// Is this the first visit? Record that in the team table.
 		if ( empty($teamdata['teampage_first_visited']) ) {
 			$hostname = gethostbyaddr($ip);
 			$DB->q('UPDATE team SET teampage_first_visited = %s, hostname = %s
 			        WHERE login = %s',
-			       now(), $hostname, $login);
+			       now(), $hostname, $teamid);
 		}
 	}
 
-	return $login!==NULL;
+	return $username!==NULL;
 }
 
 // Returns whether the active authentication method has logout functionality.
@@ -178,7 +204,7 @@ function ldap_check_credentials($user, $pass)
 // referring page.
 function do_login()
 {
-	global $DB, $ip, $login, $teamdata;
+	global $DB, $ip, $username, $teamdata;
 
 	switch ( AUTH_METHOD ) {
 	// Generic authentication code for IPADDRESS and PHP_SESSIONS;
@@ -195,27 +221,27 @@ function do_login()
 			show_failed_login("Please supply a username and password.");
 		}
 
-		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team
-		                    WHERE login = %s AND authtoken = %s',
+		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
+		                    WHERE username = %s AND authtoken = %s',
 		                   $user, md5($user."#".$pass));
 
-		if ( !$teamdata ) {
+		if ( !$userdata || $userdata['enabled']!='1') {
 			sleep(3);
 			show_failed_login("Invalid username or password supplied. " .
 			                  "Please try again or contact a staff member.");
 		}
 
-		$login = $teamdata['login'];
+		$username = $userdata['username'];
 
 		if ( AUTH_METHOD=='IPADDRESS' ) {
-			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET authtoken = %s
-			               WHERE login = %s', $ip, $login);
-			if ( $cnt != 1 ) error("cannot set IP for team '$login'");
+			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET ip_address = %s
+			               WHERE username = %s', $ip, $username);
+			if ( $cnt != 1 ) error("cannot set IP for '$username'");
 		}
 		if ( AUTH_METHOD=='PHP_SESSIONS' ) {
 			session_start();
-			$_SESSION['teamid'] = $login;
-			auditlog('team', $login, 'logged in', $_SERVER['REMOTE_ADDR']);
+			$_SESSION['username'] = $username;
+			auditlog('user', $userdata['userid'], 'logged in', $ip);
 		}
 		break;
 
@@ -230,21 +256,26 @@ function do_login()
 			show_failed_login("Please supply a username and password.");
 		}
 
-		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team
-		                    WHERE login = %s', $user);
+		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
+		                    WHERE username = %s', $user);
 
-		if ( !$teamdata ||
-		     !ldap_check_credentials($teamdata['authtoken'], $pass) ) {
+		if ( !$userdata ||
+			 $userdata['enabled']!='1' ||
+		     !ldap_check_credentials($userdata['authtoken'], $pass) ) {
 			sleep(3);
 			show_failed_login("Invalid username or password supplied. " .
 			                  "Please try again or contact a staff member.");
 		}
 
-		$login = $teamdata['login'];
+		$username = $userdata['username'];
 
+		if ( !$teamid ) {
+			show_failed_login("You are not a member of a team. " .
+			                  "Please contact a staff member.");
+		}
 		session_start();
-		$_SESSION['teamid'] = $login;
-		auditlog('team', $login, 'logged in', $_SERVER['REMOTE_ADDR']);
+		$_SESSION['username'] = $username;
+		auditlog('user', $userdata['userid'], 'logged in', $ip);
 		break;
 
 	default:
@@ -262,11 +293,15 @@ function do_login()
 // showing logout and optionally refer to a login page.
 function do_logout()
 {
-	global $DB, $ip, $login, $teamdata;
+	global $DB, $ip, $username, $userdata;
 
 	switch ( AUTH_METHOD ) {
 	case 'PHP_SESSIONS':
 	case 'LDAP':
+
+		// Check that a session exists:
+		if (session_id() == "") session_start();
+
 		// Unset all of the session variables.
 		$_SESSION = array();
 
@@ -289,12 +324,12 @@ function do_logout()
 
 	$title = 'Logout';
 	$menu = FALSE;
-	auditlog('team', $login, 'logged out', $_SERVER['REMOTE_ADDR']);
+	auditlog('user', @$userdata['userid'], 'logged out', $ip);
 
 	require(LIBWWWDIR . '/header.php');
-	echo "<h1>Logged out</h1>\n\n<p>Successfully logged out as team " .
-	    htmlspecialchars($login) . ".</p>\n" .
-	    "<p><a href=\"./\">Click here to login again.</a></p>\n\n";
+	echo "<h1>Logged out</h1>\n\n<p>Successfully logged out as user '" .
+	    htmlspecialchars($username) . "'.</p>\n" .
+	    "<p><a href=\"./\">Click here to return to the main site.</a></p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }

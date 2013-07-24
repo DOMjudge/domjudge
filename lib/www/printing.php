@@ -79,7 +79,7 @@ function put_print_form()
 
 function handle_print_upload()
 {
-	global $DB, $login;
+	global $DB, $username;
 
 	ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
 
@@ -98,8 +98,8 @@ function handle_print_upload()
 		if ( ! isset($lang) ) error("Unable to find language '$langid'");
 	}
 
-	if ( IS_JURY ) $whoami = 'JURY/' . getJuryMember();
-	else $whoami = $login;
+	if ( IS_JURY ) $whoami = 'JURY/' . $username;
+	else $whoami = $username;
 
 	$ret = send_print($realfilename,$langid,$whoami,$filename);
 

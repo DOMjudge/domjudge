@@ -17,12 +17,15 @@ require_once(LIBDIR . '/use_db.php');
 setup_database_connection();
 
 require_once(LIBWWWDIR . '/common.php');
-require_once(LIBWWWDIR . '/auth.team.php');
+require_once(LIBWWWDIR . '/auth.php');
 
 if ( logged_in() ) {
-	$target = 'team/';
-} else if ( false ) { /* FIXME: test jury login? */
-	$target = 'jury/';
+    if (checkrole('team'))
+	   $target = 'team/';
+    elseif (checkrole('jury'))
+        $target = 'jury/';
+    elseif (checkrole('balloon'))
+        $target = 'jury/balloons.php';
 } else {
 	$target = 'public/';
 }

@@ -61,7 +61,7 @@ if ( !isset($jid) ) {
 	}
 }
 
-$jury_member = getJuryMember();
+$jury_member = $username;
 
 if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 

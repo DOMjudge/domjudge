@@ -4,6 +4,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+$REQUIRED_ROLES = array('jury', 'balloon');
 require('init.php');
 
 $title = 'Jury interface';
@@ -30,6 +31,7 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <li><a href="problems.php">Problems</a></li>
 <li><a href="scoreboard.php">Scoreboard</a></li>
 <li><a href="submissions.php">Submissions</a></li>
+<li><a href="users.php">Users</a></li>
 <li><a href="teams.php">Teams</a></li>
 <li><a href="team_categories.php">Team Categories</a></li>
 <li><a href="team_affiliations.php">Team Affiliations</a></li>
@@ -42,7 +44,7 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <ul>
 <li><a href="config.php">Configuration settings</a></li>
 <li><a href="checkconfig.php">Config checker</a></li>
-<li><a href="genpasswds.php">Manage team passwords</a></li>
+<li><a href="genpasswds.php">Manage user passwords</a></li>
 <li><a href="refresh_cache.php">Refresh scoreboard cache</a></li>
 <li><a href="check_judgings.php">Judging verifier</a></li>
 <li><a href="auditlog.php">Activity log</a></li>

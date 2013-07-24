@@ -45,6 +45,13 @@ if ( ! isset($_POST['cancel']) ) {
 			}
 		}
 
+		// special case for many-to-many mappings
+		$mappingdata = null;
+		if ( is_array($itemdata['mapping']) ) {
+			$mappingdata = $itemdata['mapping'];
+			unset($itemdata['mapping']);
+		}
+
 		$fn = "check_$t";
 		if ( function_exists($fn) ) {
 			$CHECKER_ERRORS = array();
@@ -58,14 +65,21 @@ if ( ! isset($_POST['cancel']) ) {
 		}
 		check_sane_keys($itemdata);
 
+		$newid = null;
 		if ( $cmd == 'add' ) {
 			$newid = $DB->q("RETURNID INSERT INTO $t SET %S", $itemdata);
 			auditlog($t, $newid, 'added');
 
+			$i = 0;
+			// save the primary key for the insert
 			foreach($KEYS[$t] as $tablekey) {
-				if ( isset($itemdata[$tablekey]) ) {
-					$newid = $itemdata[$tablekey];
+				if ( $i == 0 ) { // Assume first primary key is the autoincrement one
+					$prikey[$tablekey] = $newid;
 				}
+				if ( isset($itemdata[$tablekey]) ) {
+					$prikey[$tablekey] = $itemdata[$tablekey];
+				}
+				$i++;
 			}
 		} elseif ( $cmd == 'edit' ) {
 			foreach($KEYS[$t] as $tablekey) {
@@ -75,6 +89,22 @@ if ( ! isset($_POST['cancel']) ) {
 
 			$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
 			auditlog($t, implode(', ', $prikey), 'updated');
+		}
+
+		// special case for many-to-many mappings
+		if ( $mappingdata != null ) {
+			$junctiontable = $mappingdata['table'];
+			$fk = $mappingdata['fk'];
+
+			// Make sure this is a valid mapping
+			check_manymany_mapping($junctiontable, $fk);
+
+			// Remove all old mappings
+			$DB->q('DELETE FROM %l WHERE %S', $junctiontable, $prikey);
+			foreach ($mappingdata['items'] as $mapdest) {
+				$ret = $DB->q('INSERT INTO %l (%l, %l) VALUES (%s,%s)',
+				              $junctiontable, $fk[0], $fk[1], $prikey[$fk[0]], $mapdest);
+			}
 		}
 	}
 }
@@ -109,6 +139,24 @@ header('Location: '.$returnto);
  */
 function check_sane_keys($itemdata) {
 	foreach(array_keys($itemdata) as $key) {
+		if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $key ) ) {
+			error ("Invalid characters in field name \"$key\".");
+		}
+	}
+}
+
+// Verify a many-to-many mapping is valid
+function check_manymany_mapping($table, $keys) {
+	if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $table ) ) {
+		error ("Invalid characters in table name \"$table\".");
+	}
+
+	global $KEYS;
+	foreach($keys as $key) {
+		if (!in_array($key, $KEYS[$table])) {
+			error("Invalid many-to-many mapping.");
+		}
+
 		if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $key ) ) {
 			error ("Invalid characters in field name \"$key\".");
 		}

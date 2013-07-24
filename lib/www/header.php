@@ -59,7 +59,7 @@ if ( ! empty($extrahead) ) echo $extrahead;
 </head>
 <?php
 
-if ( IS_JURY ) {
+if ( checkrole('jury') ) {
 	echo "<body onload=\"setInterval('updateClarifications(\'$ajaxtitle\')', 20000)\">\n";
 } else {
 	echo "<body>\n";

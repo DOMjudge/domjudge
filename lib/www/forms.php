@@ -35,11 +35,12 @@ function addPwField($name , $value = null) {
 
 /**
  * Form checkbox
+ */
 function addCheckBox($name, $checked = false, $value = null) {
 	return addInputField('checkbox', $name, $value,
 	                     ($checked ? ' checked="checked"' : ''));
 }
- */
+
 
 /**
  * Form radio button

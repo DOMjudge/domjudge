@@ -27,7 +27,7 @@ if ( isset($_REQUEST['id']) ) {
 	$isgeneral = TRUE;
 }
 
-$jury_member = getJuryMember();
+$jury_member = $username;
 
 if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 

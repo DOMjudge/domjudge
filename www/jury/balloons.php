@@ -7,6 +7,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+$REQUIRED_ROLES = array('jury','balloon');
 require('init.php');
 $title = 'Balloon Status';
 

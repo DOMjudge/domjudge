@@ -10,7 +10,7 @@ if ( have_printing() ) {
 echo "<a target=\"_top\" href=\"scoreboard.php\" accesskey=\"b\">scoreboard</a>\n";
 
 if ( have_logout() ) {
-	echo "<a target=\"_top\" href=\"logout.php\" accesskey=\"l\">logout</a>\n";
+	echo "<a target=\"_top\" href=\"../logout.php\" accesskey=\"l\">logout $username ($teamid)</a>\n";
 }
 
 echo "</div>\n\n<div id=\"menutopright\">\n";

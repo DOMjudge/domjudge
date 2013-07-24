@@ -61,3 +61,14 @@ INSERT INTO `team_category` VALUES (1, 'System', 9, '#ff2bea', 0);
 
 INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 1, NULL, '127.0.0.1', NULL, NULL, NULL, NULL);
 
+--
+-- Dumping data for table `role`
+--
+INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (1, 'admin',          'Administrative User');
+INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (2, 'jury',           'Jury User');
+INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (3, 'team',           'Team Member');
+INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (4, 'balloon',        'Balloon runner');
+INSERT INTO `role` (`role`, `description`) VALUES ('print',             'print');
+INSERT INTO `role` (`role`, `description`) VALUES ('judgehost',         '(Internal/System) Judgehost');
+INSERT INTO `role` (`role`, `description`) VALUES ('event_reader',      '(Internal/System) event_reader');
+INSERT INTO `role` (`role`, `description`) VALUES ('full_event_reader', '(Internal/System) full_event_reader');

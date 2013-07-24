@@ -65,8 +65,6 @@ $amap[''] = 'none';
 echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 ?>
 </td></tr>
-<tr><td><label for="data_0__authtoken_">Auth token:</label></td>
-<td><?php echo addInput('data[0][authtoken]', @$row['authtoken'], 35, 255)?></td></tr>
 <tr><td><label for="data_0__room_">Location:</label></td>
 <td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td><label for="data_0__comments_">Comments:</label></td>

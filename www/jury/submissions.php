@@ -30,7 +30,7 @@ $title = 'Submissions';
 // Set cookie of submission view type, expiry defaults to end of session.
 setcookie('domjudge_submissionview', $view);
 
-$jury_member = getJuryMember();
+$jury_member = $username;
 
 require(LIBWWWDIR . '/header.php');
 

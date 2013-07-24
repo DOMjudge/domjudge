@@ -622,16 +622,14 @@ function XMLgetattr($node, $attr)
 /**
  * Log an action to the auditlog table.
  */
-function auditlog($datatype, $dataid, $action, $extrainfo = null, $username = null)
+function auditlog($datatype, $dataid, $action, $extrainfo = null, $force_username = null)
 {
-	global $cid, $login, $DB;
+	global $cid, $username, $DB;
 
-	if ( !empty($username) ) {
-		$user = $username;
-	} elseif ( IS_JURY ) {
-		$user = getJuryMember();
+	if ( !empty($force_username) ) {
+		$user = $force_username;
 	} else {
-		$user = $login;
+		$user = $username;
 	}
 
 	$DB->q('INSERT INTO auditlog

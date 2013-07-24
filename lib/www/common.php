@@ -59,7 +59,7 @@ function parseRunDiff($difftext){
  */
 function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 {
-	global $DB;
+	global $DB, $username;
 
 	/* We need two kind of queries: one for all submissions, and one
 	 * with the results for the valid ones. Restrictions is an array
@@ -237,7 +237,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			if ( $claim ) {
 				echo "<a class=\"button\" href=\"submission.php?claim=1&amp;id=" . htmlspecialchars($row['submitid']) . "\">claim</a>";
 			} else {
-				if ( !$row['verified'] && $jury_member==getJuryMember() ) {
+				if ( !$row['verified'] && $jury_member==$username ) {
 					echo "<a class=\"button\" href=\"submission.php?unclaim=1&amp;id=" . htmlspecialchars($row['submitid']) . "\">unclaim</a>";
 				} else {
 					echo "<a$link>$jury_member</a>";
@@ -426,7 +426,9 @@ function putDOMjudgeVersion() {
  * as defined in passwords.php. If not, error and stop further execution.
  */
 function requireAdmin() {
-	if ( ! IS_ADMIN ) error ("This function is only accessible to administrators.");
+	if (!checkrole('admin')) {
+		error("This function is only accessible to administrators.");
+	}
 }
 
 /**

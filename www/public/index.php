@@ -23,7 +23,7 @@ if ( !isset($_GET['clear']) ) {
 	if ( count($filter) ) $refresh .= '?' . http_build_query($filter);
 }
 
-$menu = false;
+$menu = true;
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
