@@ -784,7 +784,7 @@ function judgeinfo($args) {
 
 	// get maximum runtime and other parameters
 	$query = 'TUPLE SELECT CEILING(time_factor*timelimit) AS maxruntime,
-		  s.submitid, s.langid, s.teamid, s.probid,
+		  s.submitid, s.langid, s.teamid, s.probid, s.cid,
 		  p.special_run, p.special_compare
 		  FROM submission s, problem p, language l
 		  WHERE s.probid = p.probid AND s.langid = l.langid';

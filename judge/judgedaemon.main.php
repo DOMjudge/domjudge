@@ -196,7 +196,6 @@ foreach ( $unfinished as $jud ) {
 
 $waiting = FALSE;
 $active = TRUE;
-$cid = null;
 
 // Constantly check database for unjudged submissions
 while ( TRUE ) {
@@ -228,17 +227,6 @@ while ( TRUE ) {
 		logmsg(LOG_INFO, "Activated, checking queue...");
 		$active = TRUE;
 		$waiting = FALSE;
-	}
-
-	$cdata = request('contest', 'GET');
-	$cdata = json_decode($cdata, TRUE);
-	$newcid = $cdata['id'];
-	$oldcid = $cid;
-	if ( $oldcid !== $newcid ) {
-		logmsg(LOG_NOTICE, "Contest has changed from " .
-		       (isset($oldcid) ? "c$oldcid" : "none" ) . " to " .
-		       (isset($newcid) ? "c$newcid" : "none" ) );
-		$cid = $newcid;
 	}
 
 	$submissions = request('queue', 'GET', 'limit=1');
@@ -303,7 +291,7 @@ while ( TRUE ) {
 
 function judge($mark, $row, $judgingid)
 {
-	global $EXITCODES, $cid, $myhost, $options, $workdirpath;
+	global $EXITCODES, $myhost, $options, $workdirpath;
 
 	// Set configuration variables for called programs
 	putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
@@ -316,7 +304,7 @@ function judge($mark, $row, $judgingid)
 	if ( isset($options['daemonid']) ) $cpuset_opt = "-n ${options['daemonid']}";
 
 	// create workdir for judging
-	$workdir = "$workdirpath/c$cid-s$row[submitid]-j$judgingid";
+	$workdir = "$workdirpath/c$row[cid]-s$row[submitid]-j$judgingid";
 
 	logmsg(LOG_INFO, "Working directory: $workdir");
 
@@ -528,7 +516,7 @@ function judge($mark, $row, $judgingid)
 
 function store_result($result, $row, $judgingid)
 {
-	global $cid, $myhost;
+	global $myhost;
 
 	request('results', 'POST',
 		'judgingid=' . $judgingid
