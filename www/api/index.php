@@ -41,7 +41,7 @@ $api = new RestApi();
  * API information
  */
 function info() {
-	return array('api_version' => 1,
+	return array('api_version' => DOMJUDGE_API_VERSION,
 		'domjudge_version' => DOMJUDGE_VERSION);
 }
 $doc = "Get general API information.";

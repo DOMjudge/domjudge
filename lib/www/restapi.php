@@ -7,6 +7,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+define('DOMJUDGE_API_VERSION', 1);
+
 define('BAD_REQUEST', '400 Bad Request');
 define('METHOD_NOT_ALLOWED', '405 Method Not Allowed');
 define('INTERNAL_SERVER_ERROR', '500 Internal Server Error');
@@ -109,12 +111,16 @@ class RestApi {
 		print "<title>DOMjudge version " . DOMJUDGE_VERSION . " REST API</title>\n";
 		print "</head>\n";
 		print "<body>\n";
-		print "The supported functions are:\n";
+		print "<h1>DOMjudge REST API</h1>\n";
+		print "<p>Welcome to the DOMjudge REST API.<br />";
+		print "This is API version: " . DOMJUDGE_API_VERSION . "<br />\n";
+		print "running on DOMjudge version: " . DOMJUDGE_VERSION . "</p>\n";
+		print "<p>The supported functions are:</p>\n";
 		print "<dl>\n";
 		foreach ( $this->apiFunctions as $key => $func ) {
 			list($name, $method) = explode('#', $key);
 			$url = $_SERVER['REQUEST_URI'] . $name;
-			print '<dt><a href="' . $url . '">' . $url . "</a></dt>\n";
+			print '<dt><a href="' . $url . '">' . $url . "</a> ($method)</dt>\n";
 			print "<dd>";
 			print "<p>" . $func['docs'] . "</p>\n";
 			if ( count($func['optArgs']) > 0 ) {
