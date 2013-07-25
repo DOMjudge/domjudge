@@ -19,7 +19,7 @@ ALTER TABLE `configuration`
   MODIFY COLUMN `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)';
 
 ALTER TABLE `language`
-  ADD COLUMN `extensions` longtext DEFAULT NULL COMMENT 'List of recognized extensions (JSON encoded)' AFTER `name`;
+  ADD COLUMN `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)' AFTER `name`;
 
 --
 -- Transfer data from old to new structure

@@ -175,7 +175,7 @@ CREATE TABLE `judging_run` (
 CREATE TABLE `language` (
   `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string), used for source file extension',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
-  `extensions` longtext DEFAULT NULL COMMENT 'List of recognized extensions (JSON encoded)',
+  `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted in this language?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions in this language judged?',
   `time_factor` float NOT NULL DEFAULT '1' COMMENT 'Language-specific factor multiplied by problem run times',
