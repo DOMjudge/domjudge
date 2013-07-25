@@ -64,7 +64,7 @@ function request($url, $verb = 'GET', $data = '') {
 }
 
 function dbconfig_get_rest($name) {
-	$res = request('dbconfig', 'GET', 'name=' . urlencode($name));
+	$res = request('config', 'GET', 'name=' . urlencode($name));
 	$res = json_decode($res, TRUE);
 	return $res[$name];
 }

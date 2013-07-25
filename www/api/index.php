@@ -309,9 +309,7 @@ if ( IS_JURY ) {
 /**
  * DBconfiguration
  */
-function dbconfig($args) {
-	global $DB;
-
+function config($args) {
 	// Call dbconfig_init() to prevent using cached values.
 	dbconfig_init();
 
@@ -319,8 +317,8 @@ function dbconfig($args) {
 }
 $doc = 'Get configuration variables.';
 $args = array('name' => 'Search only a single config variable.');
-$exArgs = array();
-$api->provideFunction('GET', 'dbconfig', 'dbconfig', $doc, $args, $exArgs);
+$exArgs = array(array('name' => 'sourcesize_limit'));
+$api->provideFunction('GET', 'config', 'config', $doc, $args, $exArgs);
 
 /**
  * Submissions information
