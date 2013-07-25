@@ -392,6 +392,9 @@ function judge($mark, $row, $judgingid)
 	chmod ($workdir, 0755);
 
 	$final = FALSE;
+	$results_prio = dbconfig_get_rest('results_prio');
+	$lazy_eval_results = dbconfig_get_rest('lazy_eval_results', true);
+
 	foreach ( $testcases as $tc ) {
 
 	logmsg(LOG_DEBUG, "Running testcase $tc[rank]...");
@@ -486,15 +489,12 @@ function judge($mark, $row, $judgingid)
 	// Optimization: stop judging when the result is already known.
 	// This should report a final result when all runresults are non-null!
 	if ( !$final 
-		&& ($result = getFinalResult($runresults,
-			dbconfig_get_rest('results_prio')))!==NULL ) {
+		&& ($result = getFinalResult($runresults, $results_prio))!==NULL ) {
 		$final = TRUE;
 
 		store_result($result, $row, $judgingid);
 
-		if ( dbconfig_get_rest('lazy_eval_results', true) ) {
-			break;
-		}
+		if ( $lazy_eval_results ) break;
 	}
 
 	} // end: for each testcase
