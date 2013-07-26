@@ -40,6 +40,7 @@ using namespace std;
 /* These defines are needed in 'version' and 'logmsg' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
 #define PROGRAM "submitdaemon"
+#define VERSION DOMJUDGE_VERSION "/" REVISION
 
 /* Logging and error functions */
 #include "lib.error.h"
@@ -100,7 +101,6 @@ char client_addr[NI_MAXHOST]; /* string of client IP address */
 struct sockaddr_storage client_sock; /* client socket information */
 socklen_t socklen = sizeof(sockaddr_storage);
 
-void version();
 void usage();
 void create_server();
 int  handle_client();
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 	}
 
 	if ( show_help ) usage();
-	if ( show_version ) version();
+	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( inet4_only && inet6_only ) {
 		error(0,"both options `inet4-only' and `inet6-only' specified");
@@ -253,16 +253,6 @@ int main(int argc, char **argv)
 	}
 
 	return FAILURE; /* This should never be reached */
-}
-
-void version()
-{
-	printf("%s %s\n\n",DOMJUDGE_PROGRAM,PROGRAM);
-	printf(
-"%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
-"are welcome to redistribute it under certain conditions.  See the GNU\n"
-"General Public Licence for details.\n",PROGRAM);
-	exit(0);
 }
 
 void usage()

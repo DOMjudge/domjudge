@@ -82,7 +82,6 @@
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
-#define AUTHORS "Jaap Eldering"
 
 #define max(x,y) ((x) > (y) ? (x) : (y))
 
@@ -235,14 +234,14 @@ void error(int errnum, const char *format, ...)
 	exit(exit_failure);
 }
 
-void version()
+void version(const char *prog, const char *vers)
 {
 	printf("\
-%s -- version %s\n\
-Written by %s\n\n\
-%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n\
+%s -- part of DOMjudge version %s\n\
+Written by the DOMjudge developers\n\n\
+DOMjudge comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n\
 are welcome to redistribute it under certain conditions.  See the GNU\n\
-General Public Licence for details.\n",PROGRAM,VERSION,AUTHORS,PROGRAM);
+General Public Licence for details.\n", prog, vers);
 	exit(0);
 }
 
@@ -768,7 +767,7 @@ int main(int argc, char **argv)
 	}
 
 	if ( show_help ) usage();
-	if ( show_version ) version();
+	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( argc<=optind ) error(0,"no command specified");
 

@@ -67,6 +67,7 @@ using namespace std;
 /* These defines are needed in 'version' and 'logmsg' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
 #define PROGRAM "submit"
+#define VERSION DOMJUDGE_VERSION "/" REVISION
 
 /* Logging and error functions */
 #include "lib.error.h"
@@ -271,7 +272,7 @@ int main(int argc, char **argv)
 #endif
 
 	if ( show_help ) usage();
-	if ( show_version ) version();
+	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( argc<=optind   ) usage2(0,"no file(s) specified");
 
@@ -491,16 +492,6 @@ void usage()
 "commandline daemon, and URL only when using the webinterface.\n"
 #endif
 	);
-	exit(0);
-}
-
-void version()
-{
-	printf("%s %s\n\n",DOMJUDGE_PROGRAM,PROGRAM);
-	printf(
-"%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
-"are welcome to redistribute it under certain conditions.  See the GNU\n"
-"General Public Licence for details.\n",PROGRAM);
 	exit(0);
 }
 
