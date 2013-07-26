@@ -21,12 +21,6 @@
 # usage of 'run' see that script. Likewise, for comparing results, a
 # program 'compare' is called by default.
 #
-# The program 'xsltproc' is used to parse the result from
-# 'result.xml' according to the ICPC Validator Interface Standard as
-# described in http://www.ecs.csus.edu/pc2/doc/valistandard.html.
-# If the compare program returns with nonzero exitcode however, this
-# is viewed as an internal error.
-
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
 trap 'cleanup ; error' EXIT
@@ -163,7 +157,7 @@ chmod a+x "$WORKDIR" "$WORKDIR/execdir"
 # Create files which are expected to exist:
 touch error.out                  # Error output
 touch compare.out                # Compare output
-touch result.xml result.out      # Result of comparison (XML and plaintext version)
+touch result.out                 # Result of comparison
 touch program.out program.err    # Program output and stderr (for extra information)
 touch program.time program.exit  # Program runtime and exitcode
 
@@ -261,14 +255,12 @@ cp "$TESTOUT" "$WORKDIR/testdata.out"
 logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
 
 if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
-                       result.xml compare.out >compare.tmp 2>&1 ; then
+                       result.out compare.out >compare.tmp 2>&1 ; then
 	exitcode=$?
 	cat error.tmp >>error.out
 	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
 fi
 
-# Parse result.xml with xsltproc
-xsltproc "$SCRIPTDIR"/parse_result.xslt result.xml > result.out
 result=`grep '^result='      result.out | cut -d = -f 2- | tr '[:upper:]' '[:lower:]'`
 descrp=`grep '^description=' result.out | cut -d = -f 2-`
 descrp="${descrp:+ ($descrp)}"
@@ -290,7 +282,7 @@ elif [ "$result" = "wrong answer" ]; then
 	cat error.tmp >>error.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 else
-	echo "Unknown result: Wrong answer${descrp}." >>error.out
+	echo "Unknown result: Wrong answer#${descrp}#${result}#." >>error.out
 	cat error.tmp >>error.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 fi

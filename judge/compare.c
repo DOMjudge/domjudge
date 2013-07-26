@@ -3,16 +3,14 @@
 
    This program is a compare script for 'testcase_run.sh' and executes
    a normal 'diff' to detect correct, presentation-error (whitespace
-   mostly ignored) or wrong-answer results. This program is written to
-   comply with the ICPC Validator Interface Standard as described in
-   http://www.ecs.csus.edu/pc2/doc/valistandard.html.
+   mostly ignored) or wrong-answer results.
 
-   Usage: compare <testdata.in> <program.out> <testdata.out> <result.xml> <diff.out>
+   Usage: compare <testdata.in> <program.out> <testdata.out> <result.out> <diff.out>
 
    <testdata.in>   File containing testdata input.
    <program.out>   File containing the program output.
    <testdata.out>  File containing the correct output.
-   <result.xml>    File containing an XML document describing the result.
+   <result.out>    File describing the judging verdict.
    <diff.out>      File to write program/correct output differences to (optional).
 
    Exits successfully except when an internal error occurs. Program
@@ -65,19 +63,14 @@ const char *progname;
 /* filenames of commandline arguments */
 char *testin, *testout, *progout, *result, *diffout;
 
-/* Write an XML result file with result message */
+/* Write result file with result message */
 void writeresult(char *msg)
 {
 	FILE *resultfile;
 
 	if ( !(resultfile = fopen(result,"w")) ) error(errno,"cannot open '%s'",result);
 
-	fprintf(resultfile,"<?xml version=\"1.0\"?>\n");
-	fprintf(resultfile,"<!DOCTYPE result [\n");
-	fprintf(resultfile,"  <!ELEMENT result (#PCDATA)>\n");
-	fprintf(resultfile,"  <!ATTLIST result outcome CDATA #REQUIRED>\n");
-	fprintf(resultfile,"]>\n");
-	fprintf(resultfile,"<result outcome=\"%s\">%s</result>\n",msg,msg);
+	fprintf(resultfile,"result=%s", msg);
 
 	fclose(resultfile);
 }
