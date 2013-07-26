@@ -573,8 +573,7 @@ int file_istext(char *filename)
 {
 	magic_t cookie;
 	const char *filetype;
-	char *errstr;
-	int i, res;
+	int res;
 
 	if ( (cookie = magic_open(MAGIC_MIME))==NULL ) goto magicerror;
 
@@ -591,15 +590,7 @@ int file_istext(char *filename)
 	return res;
 
 magicerror:
-	/* Filter out any printf '%' format characters, since these
-	 * would be interpreted by warning().
-	 */
-	errstr = strdup(magic_error(cookie));
-	for(i=0; errstr[i]!=0; i++) if ( errstr[i]=='%' ) errstr[i] = '_';
-
-	warning(magic_errno(cookie),errstr);
-
-	free(errstr);
+	warning(magic_errno(cookie),"%s",magic_error(cookie));
 
 	return 1; // return 'text' by default on error
 }
