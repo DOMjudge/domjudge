@@ -100,6 +100,11 @@ char  *timefilename;
 #ifdef USE_CGROUPS
 char  *cgroupname;
 const char *cpuset;
+
+/* Linux Out-Of-Memory adjustment for current process. */
+#define OOM_PATH_NEW "/proc/self/oom_score_adj"
+#define OOM_PATH_OLD "/proc/self/oom_adj"
+#define OOM_RESET_VALUE 0
 #endif
 
 int runuid;
@@ -624,6 +629,8 @@ int main(int argc, char **argv)
 	int   i, r, nfds;
 #ifdef USE_CGROUPS
 	int   ret;
+	FILE *fp;
+	char *oom_path;
 #endif
 	int   status;
 	int   exitcode;
@@ -812,7 +819,28 @@ int main(int argc, char **argv)
 	cgroup_create();
 
 	unshare(CLONE_FILES|CLONE_FS|CLONE_NEWIPC|CLONE_NEWNET|CLONE_NEWNS|CLONE_NEWUTS|CLONE_SYSVSEM);
+
+	/* Check if any Linux Out-Of-Memory killer adjustments have to
+	 * be made. The oom_adj or oom_score_adj is inherited by child
+	 * processes, and at least older versions of sshd seemed to set
+	 * it, leading to processes getting a timelimit instead of memory
+	 * exceeded, when running via SSH. */
+	fp = NULL;
+	if ( !fp && (fp = fopen(OOM_PATH_NEW,"r+")) ) oom_path = strdup(OOM_PATH_NEW);
+	if ( !fp && (fp = fopen(OOM_PATH_OLD,"r+")) ) oom_path = strdup(OOM_PATH_OLD);
+	if ( fp!=NULL ) {
+		if ( fscanf(fp,"%d",&ret)!=1 ) error(errno,"cannot read from `%s'",oom_path);
+		if ( ret<0 ) {
+			verbose("resetting `%s' from %d to %d",oom_path,ret,OOM_RESET_VALUE);
+			rewind(fp);
+			if ( fprintf(fp,"%d\n",OOM_RESET_VALUE)<=0 ) {
+				error(errno,"cannot write to `%s'",oom_path);
+			}
+		}
+		if ( fclose(fp)!=0 ) error(errno,"closing file `%s'",oom_path);
+	}
 #endif
+
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
 		error(errno,"cannot fork");
