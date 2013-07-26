@@ -163,6 +163,20 @@ if ($retval != 1) {
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
+// check if judgedaemon + child processes can be killed by OOM killer
+// this is necessary to detect memory limits with cgroup support
+if ( defined('USE_CGROUPS') ) {
+	$oom_adj = "/proc/" . getmypid() . "/oom_adj";
+	if ( file_exists($oom_adj) && file_get_contents($oom_adj) == -17 ) {
+		// try to set the flag and check again
+		file_put_contents($oom_adj, 0);
+		if ( file_get_contents($oom_adj) != 0 ) {
+			die("Allow OOM killer to kill judgedaemon and its child processes.");
+		}
+		logmsg(LOG_INFO, "OOM killer was disabled, enabled it.");
+	}
+}
+
 // Tick use required between PHP 4.3.0 and 5.3.0 for handling signals,
 // must be declared globally.
 if ( version_compare(PHP_VERSION, '5.3', '<' ) ) {
