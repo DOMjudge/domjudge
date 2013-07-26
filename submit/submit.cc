@@ -604,7 +604,11 @@ int getlangexts()
 	curlerrormsg[0] = 0;
 
 	handle = curl_easy_init();
-	if ( handle == NULL ) error(0,"curl_easy_init() error");
+	if ( handle == NULL ) {
+		warning(0,"curl_easy_init() error");
+		free(url);
+		return 1;
+	}
 
 /* helper macros to easily set curl options */
 #define curlsetopt(opt,val) \
@@ -631,11 +635,13 @@ int getlangexts()
 		curlsetopt(NOPROGRESS,1);
 	}
 
-	logmsg(LOG_NOTICE,"connecting to %s",url);
+	logmsg(LOG_INFO,"connecting to %s",url);
 
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
+		warning(0,"downloading '%s': %s",url,curlerrormsg);
 		curl_easy_cleanup(handle);
-		error(0,"downloading '%s': %s",url,curlerrormsg);
+		free(url);
+		return 1;
 	}
 
 #undef curlsetopt
