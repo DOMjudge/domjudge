@@ -335,7 +335,7 @@ void output_cgroup_stats()
 		error(0,"get cgroup value: %s(%d)", cgroup_strerror(ret), ret);
 	}
 
-	verbose("total memory used: %" PRId64 " kB\n", max_usage/1024);
+	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
 
 	cgroup_free(&cg);
 }
