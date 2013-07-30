@@ -125,28 +125,92 @@ $exArgs = array(array('result' => 'correct'), array('fromid' => 800, 'limit' => 
 $api->provideFunction('GET', 'judgings', 'judgings', $doc, $args, $exArgs);
 
 function judgings_POST($args) {
-	global $DB, $api, $cid;
+	global $DB, $api;
 
-	// FIXME; get cid from problem instead
-
-	if ( !isset($args['submitid']) ) {
-		$api->createError("submitid is mandatory");
-	}
 	if ( !isset($args['judgehost']) ) {
 		$api->createError("judgehost is mandatory");
 	}
 
-	$login = $DB->q('VALUE SELECT teamid FROM submission WHERE submitid = %i', $args['submitid']);
-	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s', now(), $login);
+	$host = $args['judgehost'];
+	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $host);
+
+	// If this judgehost is not active, there's nothing to do 
+	$active = $DB->q('MAYBEVALUE SELECT active FROM judgehost WHERE hostname = %s', $host);
+	if ( !$active ) return '';
+
+	// we have to check for the judgability of problems/languages this way,
+	// because we use an UPDATE below where joining is not possible.
+	$probs = $DB->q('COLUMN SELECT probid FROM problem WHERE allow_judge = 1');
+	if( count($probs) == 0 ) return '';
+	$judgable_prob = array_unique(array_values($probs));
+
+	$langs = $DB->q('COLUMN SELECT langid FROM language WHERE allow_judge = 1');
+	if( count($langs) == 0 ) return '';
+	$judgable_lang = array_unique(array_values($langs));
+
+	$cdata = getCurContest(TRUE);
+	$cid = $cdata['cid'];
+
+	// First, use a select to see whether there are any judgeable
+	// submissions. This query is query-cacheable, and doing a select
+	// first prevents a write-lock on the submission table if nothing is
+	// to be judged, and also prevents throwing away the query cache every
+	// single time
+	$numopen = $DB->q('VALUE SELECT COUNT(*) FROM submission
+	                   WHERE judgemark IS NULL AND cid = %i AND langid IN (%As)
+	                   AND probid IN (%As) AND submittime < %s AND valid = 1',
+	                   $cid, $judgable_lang, $judgable_prob, $cdata['endtime']);
+	if ( $numopen == 0 ) return '';
+
+	// Prioritize teams according to last judging time
+	$submitid = $DB->q('MAYBEVALUE SELECT submitid
+	                    FROM submission s
+	                    LEFT JOIN team t ON (s.teamid = t.login)
+	                    WHERE judgemark IS NULL AND cid = %i
+	                    AND langid IN (%As) AND probid IN (%As)
+	                    AND submittime < %s AND valid = 1
+	                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
+	                    LIMIT 1',
+	                    $cid, $judgable_lang, $judgable_prob,
+	                    $cdata['endtime']);
+
+	if ( $submitid ) {
+		// Generate (unique) random string to mark submission to be judged
+		list($usec, $sec) = explode(" ", microtime());
+		$mark = $host.'@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
+
+		// update exactly one submission with our random string
+		// Note: this might still return 0 if another judgehost beat
+		// us to it
+		$numupd = $DB->q('RETURNAFFECTED UPDATE submission
+		                  SET judgehost = %s, judgemark = %s
+		                  WHERE submitid = %i AND judgemark IS NULL',
+		                  $host, $mark, $submitid);
+
+		// TODO: a small optimisation could be made: if numupd=0 but
+		// numopen > 1; not return but retry procudure again immediately
+	}
+
+	if ( $numupd == 0 ) return '';
+
+	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid,
+	               CEILING(time_factor*timelimit) AS maxruntime,	
+	               special_run, special_compare
+	               FROM submission s, problem p, language l
+	               WHERE s.probid = p.probid AND s.langid = l.langid AND
+	               submitid = %i', $submitid);
+
+	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s', now(), $row['teamid']);
 
 	$query = 'RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost) VALUES(%i,%i,%s,%s)';
-	$jid = $DB->q($query, $args['submitid'], $cid, now(), $args['judgehost']);
+	$jid = $DB->q($query, $row['submitid'], $row['cid'], now(), $host);
 
-	return array('judgingid' => $jid);
+	$row['judgingid'] = $jid;
+
+	return $row;
 }
-$doc = 'Add a new judging to the list of judgings.';
-$args = array('submitid' => 'Judging corresponds to this specific submitid.',
-	'judgehost' => 'Judging is to be judged by this specific judgehost.');
+$doc = 'Request a new judging to be judged.';
+$args = array('judgehost' => 'Judging is to be judged by this specific judgehost.');
 $exArgs = array();
 if ( IS_JURY ) {
 	$api->provideFunction('POST', 'judgings', 'judgings_POST', $doc, $args, $exArgs);
@@ -371,48 +435,6 @@ $doc = 'Get a list of all submissions. Should we give away all info about submis
 $exArgs = array(array('fromid' => 100, 'limit' => 10), array('language' => 'cpp'));
 $api->provideFunction('GET', 'submissions', 'submissions', $doc, $args, $exArgs);
 
-function submissions_PUT($args) {
-	global $DB;
-
-	if ( !isset($args['__primary_key']) ) {
-		$api->createError("submitid is mandatory");
-	}
-	$submitid = $args['__primary_key'];
-
-	$query = 'RETURNAFFECTED UPDATE submission SET ';
-
-	$sep = '';
-	$hasJudgehost = array_key_exists('judgehost', $args);
-	$query .= $sep . ($hasJudgehost ? ' judgehost = %s' : ' %_');
-	$judgehost = ($hasJudgehost ? $args['judgehost'] : null);
-	if ( $hasJudgehost ) $sep = ', ';
-
-	$hasJudgemark = array_key_exists('judgemark', $args);
-	$query .= $sep . ($hasJudgemark ? ' judgemark = %s' : ' %_');
-	$judgemark = ($hasJudgemark ? $args['judgemark'] : null);
-	if ( $hasJudgemark ) $sep = ', ';
-
-	$query .= ' WHERE submitid = %i';
-	if ( $hasJudgemark ) {
-		// update exactly one submission with our random string
-		// Note: this might still return 0 if another judgehost beat
-		// us to it
-		$query .= ' AND judgemark IS NULL';
-	}
-
-	$q = $DB->q($query, $judgehost, $judgemark, $submitid);
-	if ( $q == 0 ) return array();
-
-	return submissions(array('submitid' => $submitid));
-}
-$args = array('judgehost' => 'Try to set judgehost.',
-              'judgemark' => 'Try to set judgemark if NULL');
-$doc = 'Update a single submission.';
-$exArgs = array();
-if ( IS_JURY ) {
-	$api->provideFunction('PUT', 'submissions', 'submissions_PUT', $doc, $args, $exArgs);
-}
-
 /**
  * Submission Files
  */
@@ -496,13 +518,6 @@ if ( IS_JURY ) {
 function queue($args) {
 	global $DB;
 
-	$host = @$args['judgehost'];
-	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $host);
-
-	// If this judgehost is not active, do not send any queue items
-	$judgehost = $DB->q('MAYBEVALUE SELECT active FROM judgehost WHERE hostname = %s', $host);
-	if ( empty($judgehost) ) return '';
-
 	// TODO: make this configurable
 	$cdata = getCurContest(TRUE);
 	$cid = $cdata['cid'];
@@ -551,7 +566,7 @@ function queue($args) {
 
 	return $submitids->getTable();
 }
-$args = array('judgehost' => 'Requesting judgehost name', 'limit' => 'Get only the first N queued submissions');
+$args = array('limit' => 'Get only the first N queued submissions');
 $doc = 'Get a list of all queued submission ids.';
 $exArgs = array(array('limit' => 10));
 if ( IS_JURY ) {
@@ -755,41 +770,6 @@ if ( IS_JURY ) {
 	$api->provideFunction('PUT', 'judgehosts', 'judgehosts_PUT', $doc, $args, $exArgs);
 }
 
-
-/**
- * Judgeinfo
- */
-function judgeinfo($args) {
-	global $DB;
-
-	// get maximum runtime and other parameters
-	$query = 'TUPLE SELECT CEILING(time_factor*timelimit) AS maxruntime,
-		  s.submitid, s.langid, s.teamid, s.probid, s.cid,
-		  p.special_run, p.special_compare
-		  FROM submission s, problem p, language l
-		  WHERE s.probid = p.probid AND s.langid = l.langid';
-
-	$byJudgehost = array_key_exists('judgehost', $args);
-	$query .= ($byJudgehost ? ' AND judgehost = %s' : '%_');
-	$judgehost = ($byJudgehost ? $args['judgehost'] : null);
-
-	$byJudgemark = array_key_exists('judgemark', $args);
-	$query .= ($byJudgemark ? ' AND judgemark = %s' : '%_');
-	$judgemark = ($byJudgemark ? $args['judgemark'] : null);
-
-	// only return the first submission
-	$query .= ' LIMIT 1';
-
-	$q = $DB->q($query, $judgehost, $judgemark);
-	return $q;
-}
-$doc = 'Get most relevant info for a *single* submission/judging.';
-$args = array('judgehost' => 'Search only for submissions that are judged by a given hostname.',
-		'judgemark' => 'Search only for submissions with a given judgemark.');
-$exArgs = array(array('judgehost' => 'sparehost'));
-if ( IS_JURY ) {
-	$api->provideFunction('GET', 'judgeinfo', 'judgeinfo', $doc, $args, $exArgs);
-}
 
 /**
  * Scoreboard (not finished yet)

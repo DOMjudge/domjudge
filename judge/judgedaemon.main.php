@@ -195,7 +195,6 @@ foreach ( $unfinished as $jud ) {
 }
 
 $waiting = FALSE;
-$active = TRUE;
 
 // Constantly check database for unjudged submissions
 while ( TRUE ) {
@@ -207,33 +206,11 @@ while ( TRUE ) {
 		exit;
 	}
 
-	$submissions = request('queue', 'GET', 'limit=1&judgehost=' . urlencode($myhost));
-	$submissions = json_decode($submissions, TRUE);
+	$judging = request('judgings', 'POST', 'judgehost=' . urlencode($myhost));
+	$row = json_decode($judging, TRUE);
 
-	$numupd = 0;
-	if ( is_array($submissions) ) {
-		foreach ( $submissions as $submission ) {
-			$submitid = $submission['submitid'];
-
-			// Generate (unique) random string to mark submission to be judged
-			list($usec, $sec) = explode(" ", microtime());
-			$mark = $myhost.'@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
-
-			$res = request('submissions/' . urlencode($submitid), 'PUT',
-				'judgehost=' . urlencode($myhost) . '&judgemark=' . urlencode($mark));
-			$res = json_decode($res, TRUE);
-			if ( count($res) > 0 ) {
-				$numupd = 1;
-				break;
-			}
-
-			// Another judgedaemon beat us to claim this submission, but
-			// there are more left: immediately restart loop without sleeping.
-		}
-	}
-
-	// nothing updated -> no open submissions
-	if ( $numupd == 0 ) {
+	// nothing returned -> no open submissions for us
+	if ( empty($row) ) {
 		if ( ! $waiting ) {
 			logmsg(LOG_INFO, "No submissions in queue, waiting...");
 			$waiting = TRUE;
@@ -242,28 +219,18 @@ while ( TRUE ) {
 		continue;
 	}
 
-	// we have marked a submission for judging
+	// we have gotten a submission for judging
 	$waiting = FALSE;
 
-	$row = request('judgeinfo', 'GET', 'judgemark='
-		. urlencode($mark) . '&judgehost=' . urlencode($myhost));
-	$row = json_decode($row, TRUE);
-
-	// update the judging table with our ID and the starttime
-	$judging = request('judgings', 'POST',
-		'judgehost=' . urlencode($myhost) . '&submitid=' . urlencode($row['submitid']));
-	$judging = json_decode($judging, TRUE);
-	$judgingid = $judging['judgingid'];
-
 	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
-	       "($row[teamid]/$row[probid]/$row[langid]), id j$judgingid...");
+	       "($row[teamid]/$row[probid]/$row[langid]), id j$row[judgingid]...");
 
-	judge($mark, $row, $judgingid);
+	judge($row);
 
 	// restart the judging loop
 }
 
-function judge($mark, $row, $judgingid)
+function judge($row)
 {
 	global $EXITCODES, $myhost, $options, $workdirpath;
 
@@ -278,7 +245,7 @@ function judge($mark, $row, $judgingid)
 	if ( isset($options['daemonid']) ) $cpuset_opt = "-n ${options['daemonid']}";
 
 	// create workdir for judging
-	$workdir = "$workdirpath/c$row[cid]-s$row[submitid]-j$judgingid";
+	$workdir = "$workdirpath/c$row[cid]-s$row[submitid]-j$row[judgingid]";
 
 	logmsg(LOG_INFO, "Working directory: $workdir");
 
@@ -321,7 +288,7 @@ function judge($mark, $row, $judgingid)
 	}
 
 	// pop the compilation result back into the judging table
-	request('judgings/' . urlencode($judgingid), 'PUT',
+	request('judgings/' . urlencode($row['judgingid']), 'PUT',
 		'judgehost=' . urlencode($myhost)
 		. '&output_compile='
 		. base64_encode(getFileContents( $workdir . '/compile.out' )));
@@ -329,7 +296,7 @@ function judge($mark, $row, $judgingid)
 	// Only continue running testcases when compilation was successful.
 	// FIXME(?): result is still returned as in EXITCODES.
 	if ( ($result = $EXITCODES[$retval])=='compiler-error' ) {
-		store_result($result, $row, $judgingid);
+		store_result($result, $row);
 	} else {
 
 	logmsg(LOG_DEBUG, "Fetching testcases from database");
@@ -432,7 +399,7 @@ function judge($mark, $row, $judgingid)
 		$runresults[$tc['rank']] = $results_remap[$runresults[$tc['rank']]];
 	}
 
-	request('judging_runs', 'POST', 'judgingid=' . urlencode($judgingid)
+	request('judging_runs', 'POST', 'judgingid=' . urlencode($row['judgingid'])
 		. '&testcaseid=' . urlencode($tc['testcaseid'])
 		. '&runresult=' . urlencode($runresults[$tc['rank']])
 		. '&runtime=' . urlencode($runtime)
@@ -451,7 +418,7 @@ function judge($mark, $row, $judgingid)
 		&& ($result = getFinalResult($runresults, $results_prio))!==NULL ) {
 		$final = TRUE;
 
-		store_result($result, $row, $judgingid);
+		store_result($result, $row);
 
 		if ( $lazy_eval_results ) break;
 	}
@@ -473,7 +440,7 @@ function judge($mark, $row, $judgingid)
 	if ( $result==NULL ) error("No final result obtained");
 
 	// done!
-	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");
+	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid] finished, result: $result");
 	if ( $result == 'correct' ) {
 		alert('accept');
 	} else {
@@ -481,12 +448,12 @@ function judge($mark, $row, $judgingid)
 	}
 }
 
-function store_result($result, $row, $judgingid)
+function store_result($result, $row)
 {
 	global $myhost;
 
 	request('results', 'POST',
-		'judgingid=' . $judgingid
+		'judgingid=' . $row['judgingid']
 		. '&result=' . urlencode($result)
 		. '&judgehost=' . urlencode($myhost)
 		. '&subinfo=' . json_encode($row));
