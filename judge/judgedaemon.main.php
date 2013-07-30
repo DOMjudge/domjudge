@@ -207,29 +207,7 @@ while ( TRUE ) {
 		exit;
 	}
 
-	$res = request('judgehosts', 'GET', 'hostname=' . urlencode($myhost));
-	// Note: in PHP >= 5.4 the lines below can be done in assignment
-	// with support for dereferencing temporary arrays.
-	$rows = json_decode($res, TRUE);
-	$row = $rows[0];
-
-	request('judgehosts/' . urlencode($myhost), 'PUT', 'polltime');
-
-	if ( $row['active'] != 1 ) {
-		if ( $active ) {
-			logmsg(LOG_NOTICE, "Not active, waiting for activation...");
-			$active = FALSE;
-		}
-		sleep($waittime);
-		continue;
-	}
-	if ( ! $active ) {
-		logmsg(LOG_INFO, "Activated, checking queue...");
-		$active = TRUE;
-		$waiting = FALSE;
-	}
-
-	$submissions = request('queue', 'GET', 'limit=1');
+	$submissions = request('queue', 'GET', 'limit=1&judgehost=' . urlencode($myhost));
 	$submissions = json_decode($submissions, TRUE);
 
 	$numupd = 0;
@@ -276,10 +254,6 @@ while ( TRUE ) {
 		'judgehost=' . urlencode($myhost) . '&submitid=' . urlencode($row['submitid']));
 	$judging = json_decode($judging, TRUE);
 	$judgingid = $judging['judgingid'];
-
-	$now = now();
-	// also update team's last judging start
-	request('teams/' . urlencode($row['teamid']), 'PUT', 'judging_last_started=' . urlencode($now));
 
 	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
 	       "($row[teamid]/$row[probid]/$row[langid]), id j$judgingid...");
@@ -462,6 +436,7 @@ function judge($mark, $row, $judgingid)
 		. '&testcaseid=' . urlencode($tc['testcaseid'])
 		. '&runresult=' . urlencode($runresults[$tc['rank']])
 		. '&runtime=' . urlencode($runtime)
+		. '&judgehost=' . urlencode($myhost)
 		. '&output_run='
 		. base64_encode(getFileContents($testcasedir . '/program.out'))
 		. '&output_diff='
@@ -469,10 +444,6 @@ function judge($mark, $row, $judgingid)
 		. '&output_error='
 		. base64_encode(getFileContents($testcasedir . '/error.out')));
 	logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $runresults[$tc['rank']]);
-
-	// Make sure that judge status doesn't turn to warning levels when
-	// we're judging lots of test cases.
-	request('judgehosts/' . urlencode($myhost), 'PUT', 'polltime');
 
 	// Optimization: stop judging when the result is already known.
 	// This should report a final result when all runresults are non-null!
@@ -500,10 +471,6 @@ function judge($mark, $row, $judgingid)
 	} // end: if no compile-error
 
 	if ( $result==NULL ) error("No final result obtained");
-
-	// Store judging endtime, result was already stored.
-	request('judgings/' . urlencode($judgingid), 'PUT',
-		'endtime=1&judgehost=' . urlencode($myhost));
 
 	// done!
 	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$judgingid finished, result: $result");

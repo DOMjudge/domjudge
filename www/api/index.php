@@ -136,10 +136,13 @@ function judgings_POST($args) {
 		$api->createError("judgehost is mandatory");
 	}
 
-	$query = 'RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost) VALUES(%i,%i,%s,%s)';
-	$q = $DB->q($query, $args['submitid'], $cid, now(), $args['judgehost']);
+	$login = $DB->q('VALUE SELECT teamid FROM submission WHERE submitid = %i', $args['submitid']);
+	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s', now(), $login);
 
-	return array('judgingid' => $q);
+	$query = 'RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost) VALUES(%i,%i,%s,%s)';
+	$jid = $DB->q($query, $args['submitid'], $cid, now(), $args['judgehost']);
+
+	return array('judgingid' => $jid);
 }
 $doc = 'Add a new judging to the list of judgings.';
 $args = array('submitid' => 'Judging corresponds to this specific submitid.',
@@ -167,19 +170,14 @@ function judgings_PUT($args) {
 			$judgingid, $args['judgehost']);
 	}
 
-	if ( isset($args['endtime']) ) {
-		$DB->q('UPDATE judging SET endtime = %s
-			WHERE judgingid = %i AND judgehost = %s',
-			now(), $judgingid, $args['judgehost']);
-	}
+	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $args['judgehost']);
 
 	return '';
 }
 $doc = 'Update a judging.';
 $args = array('judgingid' => 'Judging corresponds to this specific judgingid.',
 	'judgehost' => 'Judging is judged by this specific judgehost.',
-	'output_compile' => 'Ouput of compilation phase.',
-	'endtime' => 'Store endtime of judging.');
+	'output_compile' => 'Ouput of compilation phase.');
 $exArgs = array();
 if ( IS_JURY ) {
 	$api->provideFunction('PUT', 'judgings', 'judgings_PUT', $doc, $args, $exArgs);
@@ -214,6 +212,9 @@ function judging_runs_POST($args) {
 	if ( !isset($args['output_error']) ) {
 		$api->createError("output_error is mandatory");
 	}
+	if ( !isset($args['judgehost']) ) {
+		$api->createError("judgehost is mandatory");
+	}
 
 	$DB->q('INSERT INTO judging_run (judgingid, testcaseid, runresult,
 		runtime, output_run, output_diff, output_error)
@@ -222,6 +223,8 @@ function judging_runs_POST($args) {
 			base64_decode($args['output_run']),
 			base64_decode($args['output_diff']),
 			base64_decode($args['output_error']));
+	
+	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $args['judgehost']);
 
 	return '';
 }
@@ -232,7 +235,8 @@ $args = array('judgingid' => 'Judging_run corresponds to this specific judgingid
 	'runtime' => 'Runtime of this run.',
 	'output_run' => 'Program output of this run.',
 	'output_diff' => 'Program diff of this run.',
-	'output_error' => 'Program error output of this run.');
+	'output_error' => 'Program error output of this run.',
+	'judgehost' => 'Judgehost performing this judging');
 $exArgs = array();
 if ( IS_JURY ) {
 	$api->provideFunction('POST', 'judging_runs', 'judging_runs_POST', $doc, $args, $exArgs);
@@ -263,9 +267,9 @@ function results_POST($args) {
 	// supports it.
 	$DB->q('START TRANSACTION');
 	// pop the result back into the judging table
-	$DB->q('UPDATE judging SET result = %s
+	$DB->q('UPDATE judging SET result = %s, endtime = %s
 		WHERE judgingid = %i AND judgehost = %s',
-		$args['result'], $args['judgingid'], $args['judgehost']);
+		$args['result'], now(), $args['judgingid'], $args['judgehost']);
 
 	// recalculate the scoreboard cell (team,problem) after this judging
 	calcScoreRow($cid, $row['teamid'], $row['probid']);
@@ -492,6 +496,13 @@ if ( IS_JURY ) {
 function queue($args) {
 	global $DB;
 
+	$host = @$args['judgehost'];
+	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $host);
+
+	// If this judgehost is not active, do not send any queue items
+	$judgehost = $DB->q('MAYBEVALUE SELECT active FROM judgehost WHERE hostname = %s', $host);
+	if ( empty($judgehost) ) return '';
+
 	// TODO: make this configurable
 	$cdata = getCurContest(TRUE);
 	$cid = $cdata['cid'];
@@ -540,7 +551,7 @@ function queue($args) {
 
 	return $submitids->getTable();
 }
-$args = array('limit' => 'Get only the first N queued submissions');
+$args = array('judgehost' => 'Requesting judgehost name', 'limit' => 'Get only the first N queued submissions');
 $doc = 'Get a list of all queued submission ids.';
 $exArgs = array(array('limit' => 10));
 if ( IS_JURY ) {
@@ -603,30 +614,7 @@ $args = array('category' => 'ID of a single category to search for.',
               'login' => 'Search for a specific team.');
 $doc = 'Get a list of teams containing login, name, category and affiliation.';
 $exArgs = array(array('category' => 1, 'affiliation' => 'UU'));
-$api->provideFunction('GET', 'teams', 'teams',  $doc, $args, $exArgs);
-function teams_PUT($args) {
-	global $DB, $api;
 
-	if ( !isset($args['__primary_key']) ) {
-		$api->createError("login is mandatory");
-	}
-	$login = $args['__primary_key'];
-	if ( !isset($args['judging_last_started']) ) {
-		$api->createError("judging_last_started is mandatory");
-	}
-	$judging_last_started = $args['judging_last_started'];
-
-	$DB->q('UPDATE team SET judging_last_started=%s WHERE login=%s', $judging_last_started, $login);
-
-	return teams(array('login' => $login));
-}
-$doc = 'Update the information of a team.';
-$args = array('judging_last_started' => 'Time of last judging.');
-$exArgs = array();
-if ( IS_JURY ) {
-	$api->provideFunction('PUT', 'teams', 'teams_PUT', $doc, $args, $exArgs);
-}
-  
 /**
  * Category information
  */
@@ -752,24 +740,16 @@ function judgehosts_PUT($args)  {
 		$api->createError("hostname is mandatory");
 	}
 	$hostname = $args['__primary_key'];
-	if ( !isset($args['active']) && !isset($args['polltime']) ) {
-		$api->createError("either active or polltime is mandatory");
+	if ( !isset($args['active']) ) {
+		$api->createError("active is mandatory");
 	}
-	if ( isset($args['active']) && isset($args['polltime']) ) {
-		$api->createError("cannot update active and polltime at the same time");
-	} else if ( isset($args['active']) ) {
-		$active = $args['active'];
-		$DB->q('UPDATE judgehost SET active=%i WHERE hostname=%s', $active, $hostname);
-	} else if ( isset($args['polltime']) ) {
-		$DB->q('UPDATE LOW_PRIORITY judgehost SET polltime = NOW()
-			WHERE hostname=%s', $hostname);
-	}
+	$active = $args['active'];
+	$DB->q('UPDATE judgehost SET active=%i WHERE hostname=%s', $active, $hostname);
 
 	return judgehosts(array('hostname' => $hostname));
 }
 $doc = 'Update the configuration of a judgehost.';
-$args = array('active' => 'Activate judgehost?',
-	'polltime' => 'Set time of last poll to now.');
+$args = array('active' => 'Activate judgehost?');
 $exArgs = array();
 if ( IS_JURY ) {
 	$api->provideFunction('PUT', 'judgehosts', 'judgehosts_PUT', $doc, $args, $exArgs);
