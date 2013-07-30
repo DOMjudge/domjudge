@@ -19,7 +19,7 @@ $userdata = NULL;
 
 function checkrole($rolename) {
 	global $userdata;
-	if ( !array_key_exists('roles', $userdata) ) {
+	if ( empty($userdata) || !array_key_exists('roles', $userdata) ) {
 		return false;
 	}
 	if ( in_array($rolename, $userdata['roles']) ||
@@ -129,11 +129,8 @@ function show_loginpage()
 		?>
 <h1>Not Authenticated</h1>
 
-<p>Sorry, we are unable to identify you as a valid team
-(IP <?php echo htmlspecialchars($ip); ?>).</p>
-
 <p>
-Please supply team credentials below, or contact a staff member for assistance.
+Please supply your credentials below, or contact a staff member for assistance.
 </p>
 
 <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">

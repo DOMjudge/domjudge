@@ -95,7 +95,7 @@ if ( isset($_POST['foruser']) ) {
 		// update the user table with a password
 		$DB->q('UPDATE user SET authtoken = %s WHERE username = %s', md5($user['username'].'#'.$pass), $user['username']);
 		auditlog('user', $user['username'], 'set password');
-		echo "User:      " . htmlspecialchars($user['user']) . "\n" .
+		echo "User:      " . htmlspecialchars($user['name']) . "\n" .
 		     "Login:     " . htmlspecialchars($user['username']) . "\n" .
 		     "Password:  $pass\n\n\n\n";
 	}
