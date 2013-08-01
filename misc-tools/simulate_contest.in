@@ -145,14 +145,11 @@ while ( $cdata['cid']==$cid && difftime(now(),$cdata['endtime'])<0 ) { // bug!
 			// sure that no judgehost tries to pick it up.
 			$DB->q('START TRANSACTION');
 
-			list($usec, $sec) = explode(" ", microtime());
-			$mark = 'simulate_fakehost@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
-
 			$submitid = $DB->q('RETURNID INSERT INTO submission
-						        (cid, teamid, probid, langid, submittime, judgemark)
+						        (cid, teamid, probid, langid, submittime)
 						        VALUES (%i, %s, %s, %s, %s, %s)',
 			                   $cid, $subm['teamid'], $subm[$fprob],
-			                   $def_lang, $stime, $mark);
+			                   $def_lang, $stime);
 
 			$DB->q('INSERT INTO judging
 			        (cid, submitid, starttime, endtime, result, verified)

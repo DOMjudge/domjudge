@@ -92,3 +92,6 @@ INSERT INTO `role` (`role`, `description`) VALUES ('full_event_reader', '(Intern
 -- Finally remove obsolete structures after moving data
 --
 
+ALTER TABLE `submission` DROP KEY `judgemark`;
+ALTER TABLE `submission` DROP COLUMN `judgemark`;
+

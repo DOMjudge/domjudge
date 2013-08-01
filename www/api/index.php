@@ -151,22 +151,11 @@ function judgings_POST($args) {
 	$cdata = getCurContest(TRUE);
 	$cid = $cdata['cid'];
 
-	// First, use a select to see whether there are any judgeable
-	// submissions. This query is query-cacheable, and doing a select
-	// first prevents a write-lock on the submission table if nothing is
-	// to be judged, and also prevents throwing away the query cache every
-	// single time
-	$numopen = $DB->q('VALUE SELECT COUNT(*) FROM submission
-	                   WHERE judgemark IS NULL AND cid = %i AND langid IN (%As)
-	                   AND probid IN (%As) AND submittime < %s AND valid = 1',
-	                   $cid, $judgable_lang, $judgable_prob, $cdata['endtime']);
-	if ( $numopen == 0 ) return '';
-
 	// Prioritize teams according to last judging time
 	$submitid = $DB->q('MAYBEVALUE SELECT submitid
 	                    FROM submission s
 	                    LEFT JOIN team t ON (s.teamid = t.login)
-	                    WHERE judgemark IS NULL AND cid = %i
+	                    WHERE judgehost IS NULL AND cid = %i
 	                    AND langid IN (%As) AND probid IN (%As)
 	                    AND submittime < %s AND valid = 1
 	                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
@@ -175,17 +164,13 @@ function judgings_POST($args) {
 	                    $cdata['endtime']);
 
 	if ( $submitid ) {
-		// Generate (unique) random string to mark submission to be judged
-		list($usec, $sec) = explode(" ", microtime());
-		$mark = $host.'@'.($sec+$usec).'#'.uniqid( mt_rand(), true );
-
-		// update exactly one submission with our random string
+		// update exactly one submission with our judgehost name
 		// Note: this might still return 0 if another judgehost beat
 		// us to it
 		$numupd = $DB->q('RETURNAFFECTED UPDATE submission
-		                  SET judgehost = %s, judgemark = %s
-		                  WHERE submitid = %i AND judgemark IS NULL',
-		                  $host, $mark, $submitid);
+		                  SET judgehost = %s
+		                  WHERE submitid = %i AND judgehost IS NULL',
+		                  $host, $submitid);
 
 		// TODO: a small optimisation could be made: if numupd=0 but
 		// numopen > 1; not return but retry procudure again immediately
@@ -535,27 +520,13 @@ function queue($args) {
 	}
 	$judgable_lang = array_unique(array_values($langs));
 
-	// First, use a select to see whether there are any judgeable
-	// submissions. This query is query-cacheable, and doing a select
-	// first prevents a write-lock on the submission table if nothing is
-	// to be judged, and also prevents throwing away the query cache every
-	// single time
-	$numopen = $DB->q('VALUE SELECT COUNT(*) FROM submission
-			   WHERE judgemark IS NULL AND cid = %i AND langid IN (%As)
-			   AND probid IN (%As) AND submittime < %s AND valid = 1',
-			   $cid, $judgable_lang, $judgable_prob, $cdata['endtime']);
-
-	if ( $numopen == 0 ) {
-		return '';
-	}
-
 	$hasLimit = array_key_exists('limit', $args);
 	// TODO: validate limit
 
 	$submitids = $DB->q('SELECT submitid
 			     FROM submission s
 			     LEFT JOIN team t ON (s.teamid = t.login)
-			     WHERE judgemark IS NULL AND cid = %i
+			     WHERE judgehost IS NULL AND cid = %i
 			     AND langid IN (%As) AND probid IN (%As)
 			     AND submittime < %s AND valid = 1
 			     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC'
@@ -734,7 +705,7 @@ function judgehosts_POST($args) {
 	while ( $jud = $res->next() ) {
 		$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
 			$jud['judgingid']);
-		$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
+		$DB->q('UPDATE submission SET judgehost = NULL
 			WHERE submitid = %i', $jud['submitid']);
 		auditlog('judging', $jud['judgingid'], 'given back', null, $args['hostname']);
 	}
