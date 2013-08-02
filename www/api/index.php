@@ -176,7 +176,7 @@ function judgings_POST($args) {
 		// numopen > 1; not return but retry procudure again immediately
 	}
 
-	if ( $numupd == 0 ) return '';
+	if ( empty($submitid) || $numupd == 0 ) return '';
 
 	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid,
 	               CEILING(time_factor*timelimit) AS maxruntime,	
