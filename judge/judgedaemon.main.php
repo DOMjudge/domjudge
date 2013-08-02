@@ -35,6 +35,7 @@ function request($url, $verb = 'GET', $data = '') {
 	}
 
 	$ch = curl_init($resturl . "/" . $url);
+	curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
@@ -115,7 +116,8 @@ if ( isset($options['daemonid']) ) {
 }
 
 define ('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
-require(LIBDIR . '/init.php');
+require(LIBDIR . '/lib.error.php');
+require(LIBDIR . '/lib.misc.php');
 
 $verbose = LOG_INFO;
 if ( isset($options['verbose']) ) {
