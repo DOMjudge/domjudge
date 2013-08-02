@@ -66,8 +66,19 @@ function request($url, $verb = 'GET', $data = '') {
 
 function dbconfig_get_rest($name) {
 	$res = request('config', 'GET', 'name=' . urlencode($name));
-	$res = json_decode($res, TRUE);
+	$res = dj_json_decode($res);
 	return $res[$name];
+}
+
+/**
+ * Decode a json encoded string and handle errors.
+ */
+function dj_json_decode($str) {
+	$res = json_decode($str, TRUE);
+	if ( $res === NULL ) {
+		error("Error retrieving API data. API gave us: " . $str);
+	}
+	return $res;	
 }
 
 $waittime = 5;
@@ -189,7 +200,7 @@ chmod("$workdirpath/testcase", 0700);
 // If there are any unfinished judgings in the queue in my name,
 // they will not be finished. Give them back.
 $unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
-$unfinished = json_decode($unfinished, TRUE);
+$unfinished = dj_json_decode($unfinished);
 foreach ( $unfinished as $jud ) {
 	$workdir = "$workdirpath/c$jud[cid]-s$jud[submitid]-j$jud[judgingid]";
 	@chmod($workdir, 0700);
@@ -209,7 +220,7 @@ while ( TRUE ) {
 	}
 
 	$judging = request('judgings', 'POST', 'judgehost=' . urlencode($myhost));
-	$row = json_decode($judging, TRUE);
+	$row = dj_json_decode($judging);
 
 	// nothing returned -> no open submissions for us
 	if ( empty($row) ) {
@@ -269,7 +280,7 @@ function judge($row)
 
 	// Get the source code from the DB and store in local file(s)
 	$sources = request('submission_files', 'GET', 'submitid=' . urlencode($row['submitid']));
-	$sources = json_decode($sources, TRUE);
+	$sources = dj_json_decode($sources);
 	$files = array();
 	foreach ( $sources as $rank => $source ) {
 		$srcfile = "$workdir/compile/$source[filename]";
@@ -303,7 +314,7 @@ function judge($row)
 
 	logmsg(LOG_DEBUG, "Fetching testcases from database");
 	$testcases = request('testcases', 'GET', 'probid=' . urlencode($row['probid']));
-	$testcases = json_decode($testcases, TRUE);
+	$testcases = dj_json_decode($testcases);
 	if ( count($testcases)==0 ) {
 		error("No testcase found for problem " . $row['probid']);
 	}
@@ -342,7 +353,7 @@ function judge($row)
 			$content = request('testcase_files', 'GET', 'testcaseid='
 					. urlencode($tc['testcaseid'])
 					. '&' . $inout);
-			$content = json_decode($content);
+			$content = dj_json_decode($content);
 			if ( file_put_contents($tcfile[$inout] . ".new", $content) === FALSE ) {
 				error("Could not create $tcfile[$inout].new");
 			}
