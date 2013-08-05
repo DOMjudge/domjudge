@@ -88,6 +88,11 @@ INSERT INTO `role` (`role`, `description`) VALUES ('print',             'print')
 INSERT INTO `role` (`role`, `description`) VALUES ('judgehost',         '(Internal/System) Judgehost');
 INSERT INTO `role` (`role`, `description`) VALUES ('event_reader',      '(Internal/System) event_reader');
 INSERT INTO `role` (`role`, `description`) VALUES ('full_event_reader', '(Internal/System) full_event_reader');
+
+INSERT INTO `user` (`userid`, `username`, `name`, `authtoken`) VALUES ('1', 'admin', 'Administrator', MD5('admin#admin'));
+
+INSERT INTO `userrole` (`userid`, `roleid`) VALUES ('1', '1');
+
 --
 -- Finally remove obsolete structures after moving data
 --

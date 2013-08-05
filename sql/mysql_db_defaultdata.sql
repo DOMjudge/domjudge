@@ -73,3 +73,15 @@ INSERT INTO `team_category` VALUES (1, 'System', 9, '#ff2bea', 0);
 -- 
 
 INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 1, NULL, '127.0.0.1', NULL, NULL, NULL, NULL);
+
+-- 
+-- Dumping data for table `user`
+-- 
+
+INSERT INTO `user` (`userid`, `username`, `name`, `authtoken`) VALUES ('1', 'admin', 'Administrator', MD5('admin#admin'));
+
+-- 
+-- Dumping data for table `userrole`
+-- 
+
+INSERT INTO `userrole` (`userid`, `roleid`) VALUES ('1', '1');
