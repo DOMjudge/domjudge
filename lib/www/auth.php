@@ -231,7 +231,7 @@ function do_login()
 		$username = $userdata['username'];
 
 		if ( AUTH_METHOD=='IPADDRESS' ) {
-			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET ip_address = %s
+			$cnt = $DB->q('RETURNAFFECTED UPDATE user SET ip_address = %s
 			               WHERE username = %s', $ip, $username);
 			if ( $cnt != 1 ) error("cannot set IP for '$username'");
 		}
