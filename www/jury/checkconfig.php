@@ -186,23 +186,21 @@ flushresults();
 
 // CONFIGURATION
 
+if ( $DB->q('VALUE SELECT count(*) FROM user WHERE username = "admin" AND authtoken=MD5("admin#admin")') != 0 ) {
+	result('configuration', 'Default admin password', 'E',
+		'The "admin" user still has the default password. You should change it immediately.');
+} else {
+	result('configuration', 'Default admin password', 'O',
+		'Password for "admin" has been changed from the default.');
+}
+
+
 if ( DEBUG == 0 ) {
 	result('configuration', 'Debugging', 'O', 'Debugging disabled.');
 } else {
 	result('configuration', 'Debugging', 'W',
 		'Debug information enabled (level ' . htmlspecialchars(DEBUG).").\n" .
 		'Should not be enabled on live systems.');
-}
-
-if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
-	result('configuration', 'Protected Jury interface', 'W',
-		"You are not using HTTP Authentication for the Jury interface. " .
-		"Are you sure that the jury interface is adequately protected?");
-} else {
-	result('configuration', 'Protected Jury interface', 'O',
-		'Logged in as user ' .
-		htmlspecialchars($_SERVER['REMOTE_USER']) .
-		".");
 }
 
 if ( !is_writable(TMPDIR) ) {
