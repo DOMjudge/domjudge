@@ -600,6 +600,7 @@ $args = array('category' => 'ID of a single category to search for.',
               'login' => 'Search for a specific team.');
 $doc = 'Get a list of teams containing login, name, category and affiliation.';
 $exArgs = array(array('category' => 1, 'affiliation' => 'UU'));
+$api->provideFunction('GET', 'teams', 'teams', $doc, $args, $exArgs);
 
 /**
  * Category information
