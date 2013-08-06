@@ -285,7 +285,7 @@ function judge($row)
 	foreach ( $sources as $rank => $source ) {
 		$srcfile = "$workdir/compile/$source[filename]";
 		$files[] = "'$source[filename]'";
-		if ( file_put_contents($srcfile, $source['sourcecode']) === FALSE ) {
+		if ( file_put_contents($srcfile, base64_decode($source['sourcecode'])) === FALSE ) {
 			error("Could not create $srcfile");
 		}
 	}
