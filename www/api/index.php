@@ -1,5 +1,4 @@
 <?php
-
 /**
  * DomJudge public REST API
  *
@@ -213,8 +212,11 @@ function judgings_PUT($args) {
 	}
 
 	if ( isset($args['output_compile']) ) {
-		$DB->q('UPDATE judging SET output_compile = %s
-			WHERE judgingid = %i AND judgehost = %s',
+		// FIXME: uses NOW() in query
+		$DB->q('UPDATE judging SET output_compile = %s' .
+			($args['compile_success'] ? '' :
+			', result = "compiler-error", endtime=NOW() ' ) .
+			'WHERE judgingid = %i AND judgehost = %s',
 			base64_decode($args['output_compile']),
 			$judgingid, $args['judgehost']);
 	}
@@ -226,6 +228,7 @@ function judgings_PUT($args) {
 $doc = 'Update a judging.';
 $args = array('judgingid' => 'Judging corresponds to this specific judgingid.',
 	'judgehost' => 'Judging is judged by this specific judgehost.',
+	'compile_success' => 'Did the compilation succeed?',
 	'output_compile' => 'Ouput of compilation phase.');
 $exArgs = array();
 if ( IS_JURY ) {
@@ -236,9 +239,7 @@ if ( IS_JURY ) {
  * Judging_Runs
  */
 function judging_runs_POST($args) {
-	global $DB, $api, $cid;
-
-	// FIXME; get cid from problem instead
+	global $DB, $api;
 
 	if ( !isset($args['judgingid']) ) {
 		$api->createError("judgingid is mandatory");
@@ -265,6 +266,15 @@ function judging_runs_POST($args) {
 		$api->createError("judgehost is mandatory");
 	}
 
+	$results_remap = dbconfig_get('results_remap');
+	$results_prio = dbconfig_get('results_prio');
+
+	if ( array_key_exists($args['runresult'], $results_remap) ) {
+		logmsg(LOG_INFO, "Testcase $args[testcaseid] remapping result " . $args['runresult'] .
+		                 " -> " . $results_remap[$args['runresult']]);
+		$args['runresult'] = $results_remap[$args['runresult']];
+	}
+
 	$DB->q('INSERT INTO judging_run (judgingid, testcaseid, runresult,
 		runtime, output_run, output_diff, output_error)
 		VALUES (%i, %i, %s, %f, %s, %s, %s)',
@@ -273,11 +283,32 @@ function judging_runs_POST($args) {
 			base64_decode($args['output_diff']),
 			base64_decode($args['output_error']));
 	
+	// result of this judging_run has been stored. now check whether
+	// we're done or if more testcases need to be judged.
+
+	$probid = $DB->q('VALUE SELECT probid FROM testcase WHERE testcaseid = %i', $args['testcaseid']);
+
+	$runresults = $DB->q('COLUMN SELECT runresult
+		FROM judging_run LEFT JOIN testcase USING(testcaseid)
+		WHERE judgingid = %i ORDER BY rank', $args['judgingid']);
+	$numtestcases = $DB->q('VALUE SELECT count(*) FROM testcase WHERE probid = %s', $probid);
+
+	$allresults = array_pad($runresults, $numtestcases, null);
+
+	if ( ($result = getFinalResult($allresults, $results_prio))!==NULL ) {
+		if ( count($runresults) == $numtestcases || dbconfig_get('lazy_eval_results', true) ) {
+			$extrasql = ", endtime = NOW() ";
+		} else { $extrasql = ""; }
+
+		$DB->q('UPDATE judging SET result = %s' .$extrasql .
+			'WHERE judgingid = %i', $result, $args['judgingid']);
+	}
+
 	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $args['judgehost']);
 
 	return '';
 }
-$doc = 'Add a new judging_run to the list of judging_runs.';
+$doc = 'Add a new judging_run to the list of judging_runs. When relevant, finalize the judging.';
 $args = array('judgingid' => 'Judging_run corresponds to this specific judgingid.',
 	'testcaseid' => 'Judging_run corresponding to this specific testcaseid.',
 	'runresult' => 'Result of this run.',
@@ -448,21 +479,28 @@ if ( IS_JURY ) {
 function testcases($args) {
 	global $DB, $api;
 
-	if ( !isset($args['probid']) ) {
-		$api->createError("probid is mandatory");
+	if ( !isset($args['judgingid']) ) {
+		$api->createError("judgingid is mandatory");
 	}
 
-	$testcases = $DB->q("KEYTABLE SELECT rank AS ARRAYKEY,
-			     testcaseid, md5sum_input, md5sum_output, probid, rank
-			     FROM testcase WHERE probid = %s ORDER BY rank", $args['probid']);
+	// endtime is set: judging is fully done; return empty
+	$row = $DB->q('TUPLE SELECT endtime,probid
+		FROM judging LEFT JOIN submission USING(submitid)
+		WHERE judgingid = %i', $args['judgingid']);
+	if ( !empty($row['endtime']) ) return '';
 
-	return $testcases;
+	$judging_runs = $DB->q("COLUMN SELECT testcaseid FROM judging_run WHERE judgingid = %i", $args['judgingid']);
+	$sqlextra = count($judging_runs) ? "AND testcaseid NOT IN (%Ai)" : "%_";
+	$testcase = $DB->q("MAYBETUPLE SELECT testcaseid, rank, probid, md5sum_input, md5sum_output
+			     FROM testcase WHERE probid = %s $sqlextra ORDER BY rank LIMIT 1", $row['probid'], $judging_runs);
+
+	// would probably never be empty, because then endtime would also have been set. we cope with it anyway for now.
+	return is_null($testcase)?'':$testcase;
 }
-$args = array('probid' => 'Get only the corresponding testcase.');
-$doc = 'Get a list of all testcases.';
-$exArgs = array(array('probid' => 'boolfind'));
+$args = array('judgingid' => 'Get the next-to-judge testcase for this judging.');
+$doc = 'Get a testcase.';
 if ( IS_JURY ) {
-	$api->provideFunction('GET', 'testcases', 'testcases', $doc, $args, $exArgs);
+	$api->provideFunction('GET', 'testcases', 'testcases', $doc, $args);
 }
 
 function testcase_files($args) {

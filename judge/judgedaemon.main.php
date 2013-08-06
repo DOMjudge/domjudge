@@ -1,7 +1,7 @@
 <?php
 /**
- * Request a yet unjudged submission from the database, judge it, and pass
- * the results back in to the database.
+ * Request a yet unjudged submission from the domserver, judge it, and pass
+ * the results back to the domserver.
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
@@ -209,7 +209,7 @@ foreach ( $unfinished as $jud ) {
 
 $waiting = FALSE;
 
-// Constantly check database for unjudged submissions
+// Constantly check API for unjudged submissions
 while ( TRUE ) {
 
 	// Check whether we have received an exit signal
@@ -299,175 +299,128 @@ function judge($row)
 		alert('error');
 		error("Unknown exitcode from compile.sh for s$row[submitid]: $retval");
 	}
+	$compile_success =  ($EXITCODES[$retval]!='compiler-error');
 
 	// pop the compilation result back into the judging table
 	request('judgings/' . urlencode($row['judgingid']), 'PUT',
 		'judgehost=' . urlencode($myhost)
+		. '&compile_success=' . $compile_success
 		. '&output_compile='
 		. base64_encode(getFileContents( $workdir . '/compile.out' )));
 
-	// Only continue running testcases when compilation was successful.
-	// FIXME(?): result is still returned as in EXITCODES.
-	if ( ($result = $EXITCODES[$retval])=='compiler-error' ) {
-		store_result($result, $row);
-	} else {
+	// compile error: our job here is done
+	if ( ! $compile_success ) return;
 
-		logmsg(LOG_DEBUG, "Fetching testcases from database");
-		$testcases = request('testcases', 'GET', 'probid=' . urlencode($row['probid']));
-		$testcases = dj_json_decode($testcases);
-		if ( count($testcases)==0 ) {
-			error("No testcase found for problem " . $row['probid']);
-		}
+	// Optionally create chroot environment
+	if ( USE_CHROOT && CHROOT_SCRIPT ) {
+		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." start'");
+		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
+		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
+	}
 
-		$runresults = array_fill_keys(array_keys($testcases), NULL);
-		$results_remap = dbconfig_get_rest('results_remap');
+	// Make sure the workdir is accessible for the domjudge-run user.	
+	// Will be revoked again after this run finished.
+	chmod ($workdir, 0755);
 
-		// Optionally create chroot environment
-		if ( USE_CHROOT && CHROOT_SCRIPT ) {
-			logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." start'");
-			system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
-			if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
-		}
+	while ( TRUE ) {
+		// get the next testcase
+		$testcase = request('testcases', 'GET', 'judgingid=' . urlencode($row['judgingid']));
+		$tc = dj_json_decode($testcase);
 
-		// Make sure the workdir is accessible for the domjudge-run user.	
-		// Will be revoked again after this run finished.
-		chmod ($workdir, 0755);
+		// empty means: no more testcases for this judging.
+		if ( empty($tc) ) break;
+		
+		logmsg(LOG_DEBUG, "Running testcase $tc[rank]...");
+		$testcasedir = $workdir . "/testcase" . sprintf('%03d', $tc['rank']);
 
-		$final = FALSE;
-		$results_prio = dbconfig_get_rest('results_prio');
-		$lazy_eval_results = dbconfig_get_rest('lazy_eval_results', true);
+		// Get both in- and output files, only if we didn't have them already.
+		$tcfile = array();
+		$fetched = array();
+		foreach(array('input','output') as $inout) {
+			$tcfile[$inout] = "$workdirpath/testcase/testcase.$tc[probid].$tc[rank]." .
+			    $tc['md5sum_'.$inout] . "." . substr($inout, 0, -3);
 
-		foreach ( $testcases as $tc ) {
-
-			logmsg(LOG_DEBUG, "Running testcase $tc[rank]...");
-			$testcasedir = $workdir . "/testcase" . sprintf('%03d', $tc['rank']);
-
-			// Get both in- and output files, only if we didn't have them already.
-			$tcfile = array();
-			$fetched = array();
-			foreach(array('input','output') as $inout) {
-				$tcfile[$inout] = "$workdirpath/testcase/testcase.$tc[probid].$tc[rank]." .
-				    $tc['md5sum_'.$inout] . "." . substr($inout, 0, -3);
-
-				if ( !file_exists($tcfile[$inout]) ) {
-					$content = request('testcase_files', 'GET', 'testcaseid='
-							. urlencode($tc['testcaseid'])
-							. '&' . $inout);
-					$content = dj_json_decode($content);
-					if ( file_put_contents($tcfile[$inout] . ".new", $content) === FALSE ) {
-						error("Could not create $tcfile[$inout].new");
-					}
-					unset($content);
-					if ( md5_file("$tcfile[$inout].new") == $tc['md5sum_'.$inout]) {
-						rename("$tcfile[$inout].new",$tcfile[$inout]);
-					} else {
-						error("File corrupted during download.");
-					}
-					$fetched[] = $inout;
+			if ( !file_exists($tcfile[$inout]) ) {
+				$content = request('testcase_files', 'GET', 'testcaseid='
+						. urlencode($tc['testcaseid'])
+						. '&' . $inout);
+				$content = dj_json_decode($content);
+				if ( file_put_contents($tcfile[$inout] . ".new", $content) === FALSE ) {
+					error("Could not create $tcfile[$inout].new");
 				}
-				// sanity check (NOTE: performance impact is negligible with 5
-				// testcases and total 3.3 MB of data)
-				if ( md5_file($tcfile[$inout]) != $tc['md5sum_' . $inout] ) {
-					error("File corrupted: md5sum mismatch: " . $tcfile[$inout]);
+				unset($content);
+				if ( md5_file("$tcfile[$inout].new") == $tc['md5sum_'.$inout]) {
+					rename("$tcfile[$inout].new",$tcfile[$inout]);
+				} else {
+					error("File corrupted during download.");
 				}
+				$fetched[] = $inout;
 			}
-			// Only log downloading input and/or output testdata once.
-			if ( count($fetched)>0 ) {
-				logmsg(LOG_INFO, "Fetched new " . implode($fetched,',') .
-				       " testcase $tc[rank] for problem $row[probid]");
+			// sanity check (NOTE: performance impact is negligible with 5
+			// testcases and total 3.3 MB of data)
+			if ( md5_file($tcfile[$inout]) != $tc['md5sum_' . $inout] ) {
+				error("File corrupted: md5sum mismatch: " . $tcfile[$inout]);
 			}
-
-			// Copy program with all possible additional files to testcase
-			// dir. Use hardlinks to preserve space with big executables.
-			$programdir = $testcasedir . '/execdir';
-			system("mkdir -p '$programdir'", $retval);
-			if ( $retval!=0 ) error("Could not create directory '$programdir'");
-
-			system("cp -pPRl '$workdir'/compile/* '$programdir'", $retval);
-			if ( $retval!=0 ) error("Could not copy program to '$programdir'");
-
-			// do the actual test-run
-			system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
-			       "$row[maxruntime] '$testcasedir' " .
-			       "'$row[special_run]' '$row[special_compare]'", $retval);
-
-			// what does the exitcode mean?
-			if( ! isset($EXITCODES[$retval]) ) {
-				alert('error');
-				error("Unknown exitcode from testcase_run.sh for s$row[submitid], " .
-				      "testcase $tc[rank]: $retval");
-			}
-			$runresults[$tc['rank']] = $EXITCODES[$retval];
-
-			// Try to read runtime from file
-			$runtime = NULL;
-			if ( is_readable($testcasedir . '/program.time') ) {
-				$runtime = getFileContents($testcasedir . '/program.time');
-			}
-
-			// Apply any result remapping
-			if ( array_key_exists($runresults[$tc['rank']], $results_remap) ) {
-				logmsg(LOG_INFO, "Testcase $tc[rank] remapping result " . $runresults[$tc['rank']] .
-						 " -> " . $results_remap[$runresults[$tc['rank']]]);
-				$runresults[$tc['rank']] = $results_remap[$runresults[$tc['rank']]];
-			}
-
-			request('judging_runs', 'POST', 'judgingid=' . urlencode($row['judgingid'])
-				. '&testcaseid=' . urlencode($tc['testcaseid'])
-				. '&runresult=' . urlencode($runresults[$tc['rank']])
-				. '&runtime=' . urlencode($runtime)
-				. '&judgehost=' . urlencode($myhost)
-				. '&output_run='
-				. base64_encode(getFileContents($testcasedir . '/program.out'))
-				. '&output_diff='
-				. base64_encode(getFileContents($testcasedir . '/compare.out'))
-				. '&output_error='
-				. base64_encode(getFileContents($testcasedir . '/error.out')));
-			logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $runresults[$tc['rank']]);
-
-			// Optimization: stop judging when the result is already known.
-			// This should report a final result when all runresults are non-null!
-			if ( !$final 
-				&& ($result = getFinalResult($runresults, $results_prio))!==NULL ) {
-				$final = TRUE;
-
-				store_result($result, $row);
-
-				if ( $lazy_eval_results ) break;
-			}
-
-		} // end: for each testcase
-
-		// revoke readablity for domjudge-run user to this workdir
-		chmod($workdir, 0700);
-
-		// Optionally destroy chroot environment
-		if ( USE_CHROOT && CHROOT_SCRIPT ) {
-			logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
-			system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
-			if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
+		}
+		// Only log downloading input and/or output testdata once.
+		if ( count($fetched)>0 ) {
+			logmsg(LOG_INFO, "Fetched new " . implode($fetched,',') .
+			       " testcase $tc[rank] for problem $tc[probid]");
 		}
 
-	} // end: if no compile-error
+		// Copy program with all possible additional files to testcase
+		// dir. Use hardlinks to preserve space with big executables.
+		$programdir = $testcasedir . '/execdir';
+		system("mkdir -p '$programdir'", $retval);
+		if ( $retval!=0 ) error("Could not create directory '$programdir'");
 
-	if ( $result==NULL ) error("No final result obtained");
+		system("cp -pPRl '$workdir'/compile/* '$programdir'", $retval);
+		if ( $retval!=0 ) error("Could not copy program to '$programdir'");
+
+		// do the actual test-run
+		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
+		       "$row[maxruntime] '$testcasedir' " .
+		       "'$row[special_run]' '$row[special_compare]'", $retval);
+
+		// what does the exitcode mean?
+		if( ! isset($EXITCODES[$retval]) ) {
+			alert('error');
+			error("Unknown exitcode from testcase_run.sh for s$row[submitid], " .
+			      "testcase $tc[rank]: $retval");
+		}
+		$result = $EXITCODES[$retval];
+
+		// Try to read runtime from file
+		$runtime = NULL;
+		if ( is_readable($testcasedir . '/program.time') ) {
+			$runtime = getFileContents($testcasedir . '/program.time');
+		}
+
+		request('judging_runs', 'POST', 'judgingid=' . urlencode($row['judgingid'])
+			. '&testcaseid=' . urlencode($tc['testcaseid'])
+			. '&runresult=' . urlencode($result)
+			. '&runtime=' . urlencode($runtime)
+			. '&judgehost=' . urlencode($myhost)
+			. '&output_run='
+			. base64_encode(getFileContents($testcasedir . '/program.out'))
+			. '&output_diff='
+			. base64_encode(getFileContents($testcasedir . '/compare.out'))
+			. '&output_error='
+			. base64_encode(getFileContents($testcasedir . '/error.out')));
+		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
+
+	} // end: for each testcase
+
+	// revoke readablity for domjudge-run user to this workdir
+	chmod($workdir, 0700);
+
+	// Optionally destroy chroot environment
+	if ( USE_CHROOT && CHROOT_SCRIPT ) {
+		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
+		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
+		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
+	}
 
 	// done!
-	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid] finished, result: $result");
-	if ( $result == 'correct' ) {
-		alert('accept');
-	} else {
-		alert('reject');
-	}
-}
-
-function store_result($result, $row)
-{
-	global $myhost;
-
-	request('results', 'POST',
-		'judgingid=' . $row['judgingid']
-		. '&result=' . urlencode($result)
-		. '&judgehost=' . urlencode($myhost)
-		. '&subinfo=' . json_encode($row));
+	logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid] finished");
 }
