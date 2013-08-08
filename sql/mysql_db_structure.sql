@@ -393,6 +393,7 @@ CREATE TABLE `user` (
   `teamid` varchar(15) DEFAULT NULL COMMENT 'Team associated with',
   PRIMARY KEY (`userid`),
   UNIQUE KEY `username` (`username`),
+  KEY `teamid` (`teamid`),
   CONSTRAINT `user_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Users that have access to DOMjudge';
 
@@ -403,9 +404,9 @@ CREATE TABLE `user` (
 CREATE TABLE `userrole` (
   `userid` int(4) unsigned NOT NULL COMMENT 'User ID',
   `roleid` int(4) unsigned NOT NULL COMMENT 'Role ID',
+  PRIMARY KEY (`userid`, `roleid`),
   KEY `userid` (`userid`),
   KEY `roleid` (`roleid`),
-  CONSTRAINT `userrole_pk` PRIMARY KEY (`userid`, `roleid`),
   CONSTRAINT `userrole_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `user` (`userid`) ON DELETE CASCADE,
   CONSTRAINT `userrole_ibfk_2` FOREIGN KEY (`roleid`) REFERENCES `role` (`roleid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of users and roles';

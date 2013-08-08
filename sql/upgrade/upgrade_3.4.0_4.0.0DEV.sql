@@ -34,6 +34,7 @@ CREATE TABLE `user` (
   `teamid` varchar(15) DEFAULT NULL COMMENT 'Team associated with',
   PRIMARY KEY (`userid`),
   UNIQUE KEY `username` (`username`),
+  KEY `teamid` (`teamid`),
   CONSTRAINT `user_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Users that have access to DOMjudge';
 
