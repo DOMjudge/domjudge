@@ -277,12 +277,11 @@ The requirements for the deployment of DOMjudge are:
        access to other services (ssh, mail, talk, etc..) is advisable,
        but not provided by this software, see <ref
        id="security:external" name="Security: external security"> for
-       more details. TCP/IP networking is used in a few different ways:
+       more details. All network-based interactions are done over HTTP
+       or HTTPS (tcp port 80 or 443):
   <itemize>
-  <item> The judgehosts use TCP/IP connections to connect to the
-         MySQL database on port 3306.
-  <item> HTTP traffic from teams, the public and jury to the web server,
-         port 80 or 443.
+  <item> HTTP traffic from teams, the public and jury to the web server.
+  <item> The judgehosts connect to the DOMjudge API over HTTP.
   <item> The `submit' command line client connects to the web server also
          via HTTP.
   </itemize>
@@ -308,7 +307,7 @@ The following software is required for running DOMjudge.
 
 <item> MySQL &gt;= 4.1.x database and client software
 
-<item> PHP &gt;= 5.2.0 command line interface and the mysqli and json
+<item> PHP &gt;= 5.2.0 command line interface and the curl and json
        extensions.
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash)
@@ -321,11 +320,6 @@ The following software is required for running DOMjudge.
        grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail, pgrep
 
 <item> sudo to gain root privileges
-
-<item> Apache htpasswd
-
-<item> <htmlurl name="xsltproc" url="http://xmlsoft.org/XSLT/index.html"> 
-       from the GNOME XSLT library package.
 
 <item> A LaTeX installation to regenerate the team PDF-manual with
        site specific configuration settings included.
@@ -340,7 +334,7 @@ functionality.
        or for data import/export
 
 <item> An NTP daemon (for keeping the clocks between jury
-       system and judgehosts in sync)
+       system and team workstations in sync)
 
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
        (to use the command line submit client with the web interface)
@@ -410,8 +404,7 @@ consult the full installation instruction.
 
 External software:
 <itemize>
-<item> Install the MySQL-server, set a root password for it and
-       make it accessible from all judgehosts.
+<item> Install the MySQL-server and set a root password for it.
 <item> Install Apache, PHP and (recommended) phpMyAdmin.
 <item> Make sure PHP works for the web server and command line scripts.
 <item> Install necessary compilers on the judgehosts.
@@ -440,11 +433,11 @@ On the domserver host:
        </tt>
 
 
-<item> Check that the web interface works (/team, /public and /jury)
-       and check that the jury interface is password protected.
-       Add individual user accounts for jury members to <tt>etc/htpasswd-jury</tt>.
-<item> Add useful contest data through the jury web interface or with
-       phpMyAdmin.
+<item> Check that the web interface works (/team, /public and /jury).
+<item> Change the admin password from its default value.
+<item> Check that the API (/api) works and create credentials for the judgehosts.
+<item> Create accounts and add useful contest data through the jury web
+       interface or with phpMyAdmin.
 <item> Run the config checker in the jury web interface.
 </itemize>
 On the judgehosts:
@@ -455,8 +448,8 @@ On the judgehosts:
        (check specific options of useradd, since these vary per system)
 <item> Add to <tt>/etc/sudoers.d/</tt> or append to <tt>/etc/sudoers</tt> the
        sudoers configuration as in <tt>etc/sudoers-domjudge</tt>.
-<item> Copy the file <tt>etc/dbpasswords.secret</tt> from the
-       domserver to all judgehosts to synchronise database passwords.
+<item> Put the right credentials in the file <tt>etc/restapi.secret</tt>
+       domserver on all judgehosts.
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
 </itemize>
 It should be done by now. As a check that (almost) everything works,
@@ -519,8 +512,7 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 <code>
 apt-get install gcc g++ make libcurl4-gnutls-dev mysql-server \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql php5-json \
-        php5-curl php-geshi phpmyadmin \
-	ntp sudo procps xsltproc \
+        php-geshi phpmyadmin ntp \
 	libboost-regex-dev libgmp3-dev linuxdoc-tools linuxdoc-tools-text \
 	transfig groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended
@@ -531,7 +523,7 @@ example compilers to install for C, C++, Java (GNU), Java (Oracle/Sun), Haskell
 and Pascal; change the list as appropriate.
 
 <code>
-apt-get install make sudo php5-cli php5-mysql php5-json ntp xsltproc procps \
+apt-get install make sudo php5-cli php5-curl php5-json procps \
 	gcc g++ gcj openjdk-6-jre-headless openjdk-6-jdk ghc fp-compiler
 </code>
 
@@ -706,14 +698,10 @@ for details, and the usage explanations below.
 <p>
 
 Implementing a special compare program, also called a
-<em>validator</em>, can be done in two ways: either write a program
-that is called directly (by <tt>testcase_run.sh</tt>) or use a copy of
-the <tt>compare_wrapper</tt> script. In the first case, the compare
-program must adhere to the <ref id="validator" name="ICPC validator
-interface">. The second case is probably the easiest solution: the
-script <tt>compare_wrapper</tt> generates the XML result
-file and handles redirection of input/output for you. Use this
-wrapper by copying or symlinking it to <tt>compare_&lt;tag&gt;</tt>
+<em>validator</em>, can be done by writing a program that's run by
+the <tt>compare_wrapper</tt> script.
+
+Use this wrapper by copying or symlinking it to <tt>compare_&lt;tag&gt;</tt>
 and let the jury write a checker program which can be called as
 <code>
 check_<tag> <testdata.in> <program.out> <testdata.out>
@@ -752,9 +740,7 @@ to the <tt>results_remap</tt> configuration variable (to be found in
 the admin web interface under <em>configuration settings</em>).
 
 For more details on modifying validator scripts, see the comments at the top
-of the files <tt>testcase_run.sh</tt>, <tt>compare_wrapper</tt>
-and (when not using the wrapper) the appendix on the
-<ref id="validator" name="ICPC validator interface">.
+of the files <tt>testcase_run.sh</tt> and <tt>compare_wrapper</tt>.
 
 DOMjudge supports a <tt>presentation-error</tt> result. The default
 <tt>compare</tt> program returns this result when output only differs
@@ -874,7 +860,7 @@ dj-setup-database [-u <admin_user>] [-p <password>|-r] install
 This first creates the DOMjudge database credentials file
 <tt>etc/dbpasswords.secret</tt> (optionally change the random
 generated password, although it is not needed for normal operation).
-Then it creates the database and users and inserts some
+Then it creates the database and user and inserts some
 default/example data into the domjudge database. The option
 <tt>-r</tt> will prompt for a password for mysql; when no user is
 specified, the mysql client will try to read
@@ -910,16 +896,8 @@ connection caching by Apache threads. 1000 is more appropriate.
 low when using large testcases. This should be changed both in the
 MySQL server and client configuration and be set to about twice the
 maximum testcase size.
-<item><tt>skip-networking</tt> or <tt>bind-address</tt>: By default MySQL
-only listens on a local socket, but judgehosts need to connect remotely to
-it. When enabling remote connections, you may want to limit it to only the
-IP's of judgehosts in the MySQL user configuration (or with firewall rules).
 <item>Root password: MySQL does not have a password for the root user
 by default. It's very desirable to set one.
-<item>Client connection settings: client connections from the judgehosts
-to the domserver are by default unencrypted. Depending on your network
-setup it may be desirable to enable this. Also, enabling compression can
-help when working with large testcase data.
 <item>When maximising performance is required, you can
 consider to use the <em>Memory</em> (formerly <em>Heap</em>) table
 for the scoreboard_public and scoreboard_jury tables. They will be
@@ -963,37 +941,9 @@ configuring the DOMjudge pages with an alias directive, or as a
 virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
 
-
-<sect1>Jury authentication
-<p>
-
-Protection of the jury (and plugin) interface happens through HTTP
-basic-auth configured in Apache. A default user <tt>domjudge_jury</tt>
-with password equal to that in <tt>etc/dbpasswords.secret</tt> is
-set at installation. You should add accounts for the individual users
-(admins, judges) that will access the jury interface. These users
-can be added with the <tt>htpasswd</tt> program to
-<tt>etc/htpasswd-jury</tt>:
-<code>
-htpasswd [<path to etc>]/htpasswd-jury <username>
-</code>
-
-Individual judge accounts are needed because actions in the jury
-interface, e.g. who claimed or verified a submission, are tied to
-this user.
-
-Apache supports many types of authentication backends, so it's
-also possible to use LDAP, CAS, SAML (Shibboleth) or any other means,
-as long as this results in a username being presented to DOMjudge.
-The included <tt>apache.conf</tt> has examples.
-
-For team authentication, see <ref id="contestsetup:authentication"
-name="the relevant section in Contest Setup">.
-
-See also section <ref id="security:webprivs" name="Security: webserver
-privileges"> for some details on file permissions for the
-<tt>etc/dbpasswords.secret</tt> and
-<tt>etc/htpasswd-{jury,plugin}</tt> files.
+The judgehosts connect to DOMjudge via the DOMjudge API, via the
+web interface. You need to enable support for <tt>.htaccess</tt> files
+in Apache for this to work.
 
 <sect>Logging &amp; debugging
 <p>
@@ -1062,8 +1012,8 @@ other architectures or operating systems, a shell has to be added
 manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
 file.
 
-Upon startup, the judgehost will connect to the domserver and add an entry
-for itself to the judgehosts table, by default enabled. If you wish to
+Upon its first connection to the domserver API the judgehost will be
+auto-registered and and will be by default enabled. If you wish to
 add a new judgehost but have it initially disabled, you can add it
 manually through the DOMjudge web interface and set it to disabled
 before starting the judgedaemon.
@@ -1245,8 +1195,7 @@ resulting <tt>Text_Highlighter-x.y.z</tt> directory to just <tt>Text</tt>.
 <p>
 
 We advise to install an NTP-daemon (Network Time Protocol) to make
-sure the time between domserver and judgehost (and team computers)
-is in sync.
+sure the time between domserver and team computers is in sync.
 
 <sect1>Printing
 <p>
@@ -2063,9 +2012,7 @@ stored in two places: in files on the DOMjudge system account and in
 the SQL database.
 
 Files should be protected by restricting permission to the relevant
-directories. Database access is protected by passwords. The default
-permissions allow connections from <em>all</em> hosts, so make sure you
-restrict this appropriately or choose strong enough passwords.
+directories.
 
 <em>Note:</em> the database password is stored in
 <tt>etc/dbpasswords.secret</tt>. This file has to be
@@ -2077,34 +2024,12 @@ install-{domserver,judgehost}</tt> is run as root. The webserver group
 can be set with <tt>configure --with-webserver-group=GROUP</tt> which
 defaults to <tt>www-data</tt>.
 
-Judgehosts and the domserver communicate with each other through
-the MySQL protocol. By default, MySQL does not encrypt these
-connections. Refer to the MySQL manual to configure SSL for the
-server and enable the option in common-config.php to enable it
-for client connections; alternatively you can employ an SSH tunnel
-or ensure in the network setup that these connections are separated
-from the team network.
-
-The jury web interface is protected by HTTP Authentication. These
-credentials are essentially sent plain-text, so we advise to setup
-HTTPS at least for the jury interface, but preferably for all web
-interfaces. By default
-the <tt>domjudge_jury</tt> user will be given full access. You can
-choose to add more users to the file <tt>etc/htpasswd-jury</tt>. In
-<tt>etc/domserver-config.php</tt> you can add these users to the list
-<tt>DOMJUDGE_ADMINS</tt>. Most data-modification functions are
-restricted to only users in this list. See also the judge manual for
-some more details.
-
-Secondly, the submitted sources should not be interceptable by other
-teams (even though that, if these would be sent clear-text, a team
-would normally need to be root/administrator on their computer to
-intercept this). This can be accomplished by using HTTPS for the web
-interface. The <ref id="dolstra" name="Dolstra submission method"> by
-default uses SSH to send files over the network.
-
-There are multiple authentication methods for teams, each having its
-own issues to check for.
+Judgehosts and the domserver communicate with each other over HTTP.
+Also all parties accessing the domserver web interface obvioulsly use
+this protocol. We advise to setup HTTPS so interactions between domserver,
+judgehosts and teams are all protected. If you need to use a self-signed
+certificate, you can consider to install it on the team workstations
+beforehand to minimize hassle.
 
 When using IP address authentication, one has to be careful that teams
 are not able to spoof their IP (for which they normally need
@@ -2113,9 +2038,6 @@ other teams' submission info (not their code) and clarifications and
 submit as that team.
 <em>Note:</em> This means that care has to be taken e.g. that teams
 cannot simply login onto one another's computer and spoof their identity.
-
-When using PHP sessions or LDAP, authentication data is sent via HTTP,
-so we strongly advise to use HTTPS in that case.
 
 Problem texts can be uploaded to DOMjudge. No filtering is performed
 there, so make sure they are from trusted sources to, in the
@@ -2157,10 +2079,9 @@ The following information is for those who want to verify the setup
 or make modifications to the settings.
 
 Care should be taken with the <tt>etc</tt> dir: the
-<tt>domserver-{config,static}.php</tt>,
-<tt>htpasswd-*</tt> and <tt>dbpasswords.secret</tt> files
-should all be readable, but <tt>dbpasswords.secret</tt> and the
-htpasswd files should not be
+<tt>domserver-{config,static}.php</tt> and
+<tt>dbpasswords.secret</tt> files
+should all be readable, but <tt>dbpasswords.secret</tt> should not be
 readable by anyone else. This can be done for example by setting the
 <tt>etc</tt> directory to owner:group &lt;DOMjudge
 account&gt;:&lt;Web server group&gt; and permissions
@@ -2202,6 +2123,8 @@ iptables, adding a rule like:
 iptables -I OUTPUT -m owner --uid-owner &lt;testuser_uid&gt; -j REJECT
 </verb>
 
+Note that when using cgroups, network access <em>is</em> restricted by
+default and the above is not necessary.
 
 <appendix>
 
@@ -2437,49 +2360,6 @@ Scoreboard: by default DOMjudge presents all teams in the same scoreboard.
 Per-site scoreboards can be implemented either by using team categories or
 team affiliations in combination with the scoreboard filtering option.
 
-
-<chapt>DOMjudge and the ICPC validator interface standard <label id="validator">
-<p>
-DOMjudge supports the ICPC validator interface standard, which can be
-found at: <url url="http://www.ecs.csus.edu/pc2/doc/valistandard.html">
-
-As short summary, this interface standard consists of two parts: the
-invocation and the result interface. The invocation interface
-specifies that a validator must be called as a separate executable
-with at least four command line parameters:
-<code>
-/path/to/validator <input_data> <program_output> <reference_output> \
-                   <result_file> [<extra_options>...]
-</code>
-
-The result interface specifies that <tt>result_file</tt> should be a
-valid XML document containing a root element
-<code>
-&lt;result outcome="string1"> string2 &lt;/result>
-</code>
-where <tt>string1</tt> is the result reported to the judging system
-and a value "accepted" indicates a correct result.
-
-The invocation code (<tt>judge/testcase_run.sh</tt>) adheres to the
-invocation interface. It passes as a 5th optional parameter to the
-validator program the filename in which it expects a difference output
-between the program and jury output (parameters 2 and 3 respectively).
-
-Parsing of the result XML file (in the result interface) is done with
-the `xsltproc' program, which is part of the
-<url name="GNOME libxslt package" url="http://www.xmlsoft.org/XSLT/">.
-<em>The exitcode of the validator program should be zero, otherwise
-an internal error is generated.</em>
-
-DOMjudge currently has two validator scripts: <tt>judge/compare</tt>
-and <tt>judge/compare_wrapper</tt>. The first does a compare with a
-plain diff, the second script calls an external program for checking
-(e.g. <tt>judge/check_float</tt> for comparison of floating point
-results). When passed a 5th parameter, this is interpreted as a
-filename to which these scripts will write a comparison of the program
-and jury output. Both scripts also generate XML compliant output,
-which is written to the result file specified in parameter 4 and fully
-complies with the validator standard.
 
 <chapt>Submitdaemon and the Dolstra protocol <label id="dolstra">
 <p>
