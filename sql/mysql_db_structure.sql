@@ -204,6 +204,18 @@ CREATE TABLE `problem` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
 
 --
+-- Table structure for table `role`
+--
+
+CREATE TABLE `role` (
+  `roleid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `role` varchar(15) NOT NULL COMMENT 'Role name',
+  `description` varchar(255) NOT NULL COMMENT 'Description for the web interface',
+  PRIMARY KEY (`roleid`),
+  UNIQUE KEY `role` (`role`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Possible user roles';
+
+--
 -- Table structure for table `scoreboard_jury`
 --
 
@@ -279,53 +291,6 @@ CREATE TABLE `submission_file` (
   KEY `submitid` (`submitid`),
   CONSTRAINT `submission_file_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Files associated to a submission';
-
-
---
--- Table structure for table `user`
---
-
-CREATE TABLE `user` (
-  `userid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `username` varchar(255) NOT NULL COMMENT 'User login name',
-  `name` varchar(255) NOT NULL COMMENT 'Name',
-  `email` varchar(255) DEFAULT NULL COMMENT 'Email address',
-  `last_login` datetime DEFAULT NULL COMMENT 'Time of last successful login',
-  `last_ip_address` varchar(255) DEFAULT NULL COMMENT 'Last IP address of successful login',
-  `authtoken` varchar(255) DEFAULT NULL COMMENT 'Password/auth hash',
-  `ip_address` varchar(255) DEFAULT NULL COMMENT 'IP Address used to autologin',
-  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the user is able to log in',
-  `teamid` varchar(15) DEFAULT NULL COMMENT 'Team associated with',
-  PRIMARY KEY (`userid`),
-  UNIQUE KEY `username` (`username`),
-  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Users that have access to DOMjudge';
-
-
---
--- Table structure for table `role`
---
-
-CREATE TABLE `role` (
-  `roleid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `role` varchar(15) NOT NULL COMMENT 'Role name',
-  `description` varchar(255) NOT NULL COMMENT 'Description for the web interface',
-  PRIMARY KEY (`roleid`),
-  UNIQUE KEY `role` (`role`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Possible user roles';
-
---
--- Table structure for table `userrole`
---
-CREATE TABLE `userrole` (
-  `userid` int(4) unsigned NOT NULL COMMENT 'User ID',
-  `roleid` int(4) unsigned NOT NULL COMMENT 'Role ID',
-  KEY `userid` (`userid`),
-  KEY `roleid` (`roleid`),
-  CONSTRAINT `userrole_pk` PRIMARY KEY (`userid`, `roleid`),
-  CONSTRAINT `userrole_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `user` (`userid`) ON DELETE CASCADE,
-  CONSTRAINT `userrole_ibfk_2` FOREIGN KEY (`roleid`) REFERENCES `role` (`roleid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of users and roles';
 
 --
 -- Table structure for table `team`
@@ -410,6 +375,40 @@ CREATE TABLE `testcase` (
   KEY `probid` (`probid`),
   CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';
+
+--
+-- Table structure for table `user`
+--
+
+CREATE TABLE `user` (
+  `userid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `username` varchar(255) NOT NULL COMMENT 'User login name',
+  `name` varchar(255) NOT NULL COMMENT 'Name',
+  `email` varchar(255) DEFAULT NULL COMMENT 'Email address',
+  `last_login` datetime DEFAULT NULL COMMENT 'Time of last successful login',
+  `last_ip_address` varchar(255) DEFAULT NULL COMMENT 'Last IP address of successful login',
+  `authtoken` varchar(255) DEFAULT NULL COMMENT 'Password/auth hash',
+  `ip_address` varchar(255) DEFAULT NULL COMMENT 'IP Address used to autologin',
+  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the user is able to log in',
+  `teamid` varchar(15) DEFAULT NULL COMMENT 'Team associated with',
+  PRIMARY KEY (`userid`),
+  UNIQUE KEY `username` (`username`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Users that have access to DOMjudge';
+
+
+--
+-- Table structure for table `userrole`
+--
+CREATE TABLE `userrole` (
+  `userid` int(4) unsigned NOT NULL COMMENT 'User ID',
+  `roleid` int(4) unsigned NOT NULL COMMENT 'Role ID',
+  KEY `userid` (`userid`),
+  KEY `roleid` (`roleid`),
+  CONSTRAINT `userrole_pk` PRIMARY KEY (`userid`, `roleid`),
+  CONSTRAINT `userrole_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `user` (`userid`) ON DELETE CASCADE,
+  CONSTRAINT `userrole_ibfk_2` FOREIGN KEY (`roleid`) REFERENCES `role` (`roleid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of users and roles';
 
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 
