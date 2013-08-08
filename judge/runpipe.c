@@ -100,8 +100,13 @@ void terminate(int sig)
 
 	/* Reset signal handlers to default */
 	sigact.sa_handler = SIG_DFL;
+	sigact.sa_flags = 0;
+	if ( sigemptyset(&sigact.sa_mask)!=0 ) {
+		warning(0,"could not initialize signal mask");
+	}
+
 	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
-		warning(0,"error restoring signal handler");
+		warning(0,"could not restore signal handler");
 	}
 
 	/* Send kill signal to all children */

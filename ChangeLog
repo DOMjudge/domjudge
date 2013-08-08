@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.4.1 - DEV
 -------------------
+ - Misc. minor bugs fixed reported by Coverity scan.
 
 Version 3.4.0 - 22 July 2013
 ----------------------------

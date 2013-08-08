@@ -585,7 +585,7 @@ void setrestrictions()
 	if ( use_root ) {
 		/* Small security issue: when running setuid-root, people can find
 		   out which directories exist from error message. */
-		if ( chdir(rootdir) ) error(errno,"cannot chdir to `%s'",rootdir);
+		if ( chdir(rootdir)!=0 ) error(errno,"cannot chdir to `%s'",rootdir);
 
 		/* Get absolute pathname of rootdir, by reading it. */
 		if ( getcwd(cwd,PATH_MAX)==NULL ) error(errno,"cannot get directory");
@@ -605,7 +605,9 @@ void setrestrictions()
 		}
 		free(path);
 
-		if ( chroot(".") ) error(errno,"cannot change root to `%s'",cwd);
+		if ( chroot(".")!=0 ) error(errno,"cannot change root to `%s'",cwd);
+		/* Just to make sure and satisfy Coverity scan: */
+		if ( chdir("/")!=0 ) error(errno,"cannot chdir to `/' in chroot");
 		verbose("using root-directory `%s'",cwd);
 	}
 
