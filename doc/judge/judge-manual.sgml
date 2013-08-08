@@ -138,14 +138,8 @@ canonical overview of current standings.
 The DOMjudge system discerns between <em>judges</em> and
 <em>administrators</em> (admins). An administrator is responsible for
 the technical side of DOMjudge: installation and keeping it running.
-The jury web interface may be used by both.
-
-Depending on configuration, there may either be a separate
-administrator view or one is shared between judges and administrators.
-In the first case you will not have access to the admin-specific
-options. In the latter, you may see options directed at admins, like
-options to edit or delete data. Only use these options if you're sure
-that it's correct to do so.
+The jury web interface may be used by both, but depending on your
+assigned role you may have more options.
 
 <sect>Scoreboard
 <p>
@@ -214,7 +208,7 @@ e.g. Java.
 <sect>Verifying testdata
 <p>
 
-DOMjudge comes with some small tools to check for mistakes in the
+DOMjudge comes with some tools to check for mistakes in the
 testdata. These tools are all located in the <tt>misc-tools</tt>
 directory in the source tree.
 
