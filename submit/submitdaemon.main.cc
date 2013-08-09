@@ -494,10 +494,10 @@ int handle_client()
 	   and then add a database entry for this file. */
 	nargs = 4 + 2*filenames.size();
 	varargs = (const char **) calloc(sizeof(char *),nargs);
-	varargs[0] = (char *) team.c_str();
+	varargs[0] = team.c_str();
 	varargs[1] = client_addr;
-	varargs[2] = (char *) problem.c_str();
-	varargs[3] = (char *) language.c_str();
+	varargs[2] = problem.c_str();
+	varargs[3] = language.c_str();
 	for(i=0; i<filenames.size(); i++) {
 		varargs[4+2*i]   = tempfiles[i].c_str();
 		varargs[4+2*i+1] = fileorigs[i].c_str();
