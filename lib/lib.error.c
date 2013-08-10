@@ -57,11 +57,13 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
     time_t currtime;
     char timestring[128];
 	char *buffer;
-	int mesglen = (mesg==NULL ? 0 : strlen(mesg));
 	int bufferlen;
 	va_list aq;
 	char *str, *endptr;
 	int syslog_fac;
+
+	/* This should never happen when called from any of the functions below. */
+	if ( mesg==NULL ) abort();
 
 	/* Try to open logfile if it is defined */
 #ifdef LOGFILE
@@ -80,7 +82,7 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 	currtime = time(NULL);
 	strftime(timestring, sizeof(timestring), "%b %d %H:%M:%S", localtime(&currtime));
 
-	bufferlen = strlen(timestring)+strlen(progname)+mesglen+20;
+	bufferlen = strlen(timestring)+strlen(progname)+strlen(mesg)+20;
 	buffer = (char *)malloc(bufferlen);
 	if ( buffer==NULL ) abort();
 

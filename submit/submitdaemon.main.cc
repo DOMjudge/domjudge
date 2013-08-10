@@ -498,6 +498,7 @@ int handle_client()
 	if ( (cpid = execute(LIBSUBMITDIR"/submit_db.php",varargs,nargs,redir_fd,1))<0 ) {
 		senderror(client_fd,errno,"starting submit_db");
 	}
+	free(varargs);
 
 	if ( (rpipe = fdopen(redir_fd[1],"r"))==NULL ) {
 		senderror(client_fd,errno,"binding submit_db stdout to stream");

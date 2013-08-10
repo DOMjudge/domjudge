@@ -706,6 +706,8 @@ int cmdsubmit()
 		if ( temp_fd<0 || strlen(tempfile)==0 ) {
 			error(errno,"mkstemps cannot create tempfile");
 		}
+		/* Close temp_fd because we only need the filename */
+		if ( close(temp_fd)!=0 ) error(errno,"closing tempfile");
 
 		/* Construct copy command and execute it */
 		args[0] = filenames[i].c_str();
@@ -721,7 +723,9 @@ int cmdsubmit()
 
 		logmsg(LOG_INFO,"copied `%s' to tempfile `%s'",filenames[i].c_str(),tempfile);
 		tempfiles.push_back(tempfile);
+		free(tempfile);
 	}
+	free(template_str);
 
 	/* Connect to the submission server */
 	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",

@@ -94,6 +94,7 @@ void sendwarning(int fd, int errnum, const char *mesg, ...)
 
 	va_start(ap,mesg);
 	vwarning(errnum,mesg,ap);
+	va_end(ap);
 }
 
 int receive(int fd)

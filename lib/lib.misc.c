@@ -72,7 +72,7 @@ int execute(const char *cmd, const char **args, int nargs, int stdio_fd[3], int 
 
 	/* Open pipes for IO redirection */
 	for(i=0; i<3; i++) {
-		if ( stdio_fd[i]==FDREDIR_PIPE && pipe(pipe_fd[i])!=0 ) return -1;
+		if ( stdio_fd[i]==FDREDIR_PIPE && pipe(pipe_fd[i])!=0 ) goto ret_error;
 	}
 
 	switch ( child_pid = fork() ) {
@@ -86,17 +86,17 @@ int execute(const char *cmd, const char **args, int nargs, int stdio_fd[3], int 
 				/* stdin must be connected to the pipe output,
 				   stdout/stderr to the pipe input: */
 				dir = (i==0 ? PIPE_OUT : PIPE_IN);
-				if ( dup2(pipe_fd[i][dir],def_stdio_fd[i])<0 ) return -1;
-				if ( close(pipe_fd[i][dir])!=0 ) return -1;
-				if ( close(pipe_fd[i][1-dir])!=0 ) return -1;
+				if ( dup2(pipe_fd[i][dir],def_stdio_fd[i])<0 ) goto ret_error;
+				if ( close(pipe_fd[i][dir])!=0 ) goto ret_error;
+				if ( close(pipe_fd[i][1-dir])!=0 ) goto ret_error;
 			}
 			if ( stdio_fd[i]>=0 ) {
-				if ( dup2(stdio_fd[i],def_stdio_fd[i])<0 ) return -1;
-				if ( close(stdio_fd[i])!=0 ) return -1;
+				if ( dup2(stdio_fd[i],def_stdio_fd[i])<0 ) goto ret_error;
+				if ( close(stdio_fd[i])!=0 ) goto ret_error;
 			}
 		}
 		/* Redirect stderr to stdout */
-		if ( err2out && dup2(STDOUT_FILENO,STDERR_FILENO)<0 ) return -1;
+		if ( err2out && dup2(STDOUT_FILENO,STDERR_FILENO)<0 ) goto ret_error;
 
 		/* Replace child with command */
 		execvp(cmd,argv);
@@ -135,6 +135,11 @@ int execute(const char *cmd, const char **args, int nargs, int stdio_fd[3], int 
 
 	/* This should never be reached */
 	return -2;
+
+	/* Handle resources before returning on error */
+  ret_error:
+	free(argv);
+	return -1;
 }
 
 int exitsignalled;
