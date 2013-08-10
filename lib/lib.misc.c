@@ -77,6 +77,7 @@ int execute(const char *cmd, const char **args, int nargs, int stdio_fd[3], int 
 
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
+		free(argv);
 		return -1;
 
 	case  0: /* child process */
