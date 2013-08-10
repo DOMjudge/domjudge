@@ -445,8 +445,16 @@ void terminate(int sig)
 
 	/* Reset signal handlers to default */
 	sigact.sa_handler = SIG_DFL;
-	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) warning("error restoring signal handler");
-	if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) warning("error restoring signal handler");
+	sigact.sa_flags = 0;
+	if ( sigemptyset(&sigact.sa_mask)!=0 ) {
+		warning("could not initialize signal mask");
+	}
+	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
+		warning("could not restore signal handler");
+	}
+	if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) {
+		warning("could not restore signal handler");
+	}
 
 	if ( sig==SIGALRM ) {
 		warning("timelimit exceeded (wall time): aborting command");

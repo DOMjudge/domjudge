@@ -212,6 +212,7 @@ void daemonize(const char *_pidfile)
 		if ( write(fd, str, strlen(str))<strlen(str) ) {
 			error(errno, "failed writing PID to file");
 		}
+		if ( close(fd)!=0 ) error(errno, "closing pidfile '%s'", pidfile);
 		atexit(remove_pidfile);
 	}
 
