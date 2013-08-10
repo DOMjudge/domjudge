@@ -370,6 +370,7 @@ int handle_client()
 	int nargs;
 	int redir_fd[3];
 	int status;
+	int fd;
 	pid_t cpid;
 	FILE *rpipe;
 	char line[linelen];
@@ -458,11 +459,11 @@ int handle_client()
 		tempfile = allocstr("%s/cmdsubmit.%s.%s.XXXXXX.%s",TMPDIR,
 		                    problem.c_str(),team.c_str(),language.c_str());
 
-		if ( mkstemps(tempfile,language.length()+1)<0 || strlen(tempfile)==0 ) {
+		if ( (fd=mkstemps(tempfile,language.length()+1))<0 || strlen(tempfile)==0 ) {
 			senderror(client_fd,errno,"mkstemps cannot create tempfile");
 		}
-
-		logmsg(LOG_INFO,"created tempfile: `%s'",tempfile);
+		/* Close fd because we only need the filename */
+		if ( close(fd)!=0 ) error(errno,"closing tempfile");
 
 		/* Copy the source-file */
 		args[0] = (char *) team.c_str();
