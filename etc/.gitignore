@@ -9,5 +9,6 @@
 /htpasswd-jury
 /htpasswd-plugin
 /dbpasswords.secret
+/restpasswords.secret
 /sudoers-domjudge
 /cgroup-domjudge.conf
