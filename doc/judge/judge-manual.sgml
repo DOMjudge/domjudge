@@ -73,13 +73,24 @@ A global overview of the features that DOMjudge provides:
 <sect>Copyright and licencing
 <p>
 
-DOMjudge is developed by Jaap Eldering, Thijs Kinkhorst,
-Peter van de Werken and Tobias Werth. Development is hosted at
-Study Association <htmlurl name="A-Eskwadraat"
-url="http://www.a-eskwadraat.nl/">, <htmlurl name="Utrecht University"
-url="http://www.uu.nl/">, The Netherlands.
+DOMjudge is developed by Jaap Eldering, Keith Johnson, Thijs
+Kinkhorst and Tobias Werth; Peter van de Werken has retired as
+developer. Many other people have contributed:
+Jeroen Bransen,
+Stijn van Drongelen,
+Rob Franken,
+Nicky Gerritsen,
+Jacob Kleerekoper,
+Jan Kuipers,
+Jeroen Schot,
+and Jeroen van Wolffelaar.
 
-It is Copyright (c) 2004 - 2013 by The DOMjudge Developers.
+Development is hosted at Study Association
+<htmlurl name="A-Eskwadraat" url="http://www.a-eskwadraat.nl/">,
+<htmlurl name="Utrecht University" url="http://www.uu.nl/">,
+The Netherlands.
+
+It is Copyright (c) 2004 - 2013 by the DOMjudge developers and its contributors.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the <url name="GNU General Public License"

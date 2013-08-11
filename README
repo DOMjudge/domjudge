@@ -33,11 +33,12 @@ release and thus might not apply to your version.
 Copyright & Licencing
 ---------------------
 
-DOMjudge is Copyright (c) 2004 - 2013 by The DOMjudge Developers.
-The DOMjudge developers are Jaap Eldering, Thijs Kinkhorst,
-Peter van de Werken, Tobias Werth, and Nicky Gerritsen. Development is
-hosted at Study Association "A-Eskwadraat", Utrecht University,
-The Netherlands.
+DOMjudge is Copyright (c) 2004 - 2013 by the DOMjudge developers and
+all respective contributors. The current DOMjudge developers are Jaap
+Eldering, Keith Johnson, Thijs Kinkhorst and Peter van de Werken; see
+the administrator's manual for a complete list of contributors.
+Development is hosted at Study Association "A-Eskwadraat", Utrecht
+University, The Netherlands.
 
 DOMjudge, including its documentation, is free software; you can
 redistribute it and/or modify it under the terms of the GNU General
