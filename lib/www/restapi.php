@@ -51,7 +51,9 @@ class RestApi {
 			$this->createError("Handler not set.", INTERNAL_SERVER_ERROR);
 		}
 
-		if ( $_SERVER['REQUEST_METHOD'] != 'GET' && $_SERVER['REQUEST_METHOD'] != 'POST' && $_SERVER['REQUEST_METHOD'] != 'PUT' ) {
+		if ( $_SERVER['REQUEST_METHOD'] != 'GET' &&
+		     $_SERVER['REQUEST_METHOD'] != 'POST' &&
+		     $_SERVER['REQUEST_METHOD'] != 'PUT' ) {
 			$this->createError("Only get/post/put methods supported.", METHOD_NOT_ALLOWED);
 		}
 
