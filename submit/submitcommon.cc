@@ -118,7 +118,7 @@ int receive(int fd)
 	logmsg(LOG_DEBUG, "recv: %s", lastmesg);
 
 	if ( lastmesg[0]!='+' ) {
-		close(fd);
+		if ( close(fd)!=0 ) error(errno,"close");
 		i = 0;
 		if ( lastmesg[i]=='-' ) i++;
 		if ( strncmp(&lastmesg[i],ERRMATCH,strlen(ERRMATCH))==0 ) {
