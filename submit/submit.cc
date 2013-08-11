@@ -26,7 +26,7 @@
 #if ( SUBMIT_ENABLE_CMD && ! ( HAVE_NETDB_H && HAVE_NETINET_IN_H ) )
 #error "Commandline submission requested, but network headers not available."
 #endif
-#if ( SUBMIT_ENABLE_WEB && ! HAVE_CURL_CURL_H )
+#if ( SUBMIT_ENABLE_WEB && ! ( HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H ) )
 #error "Webinterface submission requested, but libcURL not available."
 #endif
 
@@ -51,11 +51,13 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #endif
+#ifdef HAVE_JSONCPP_JSON_JSON_H
+#include <jsoncpp/json/json.h>
+#endif
 #ifdef HAVE_MAGIC_H
 #include <magic.h>
 #endif
 
-#include <jsoncpp/json/json.h>
 
 /* C++ includes for easy string handling */
 #include <iostream>
@@ -129,9 +131,11 @@ int  cmdsubmit();
 #if ( SUBMIT_ENABLE_WEB )
 int  websubmit();
 #endif
-#ifdef HAVE_CURL_CURL_H
+#if HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H
 int  getlangexts();
+#endif
 
+#ifdef HAVE_CURL_CURL_H
 /* Helper function for using libcurl in websubmit() and getlangexts() */
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 {
@@ -267,7 +271,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-#ifdef HAVE_CURL_CURL_H
+#if HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H
 	if ( getlangexts()!=0 ) warning(0,"could not obtain language extensions");
 #endif
 
@@ -589,7 +593,7 @@ magicerror:
 
 #endif /* HAVE_MAGIC_H */
 
-#ifdef HAVE_CURL_CURL_H
+#if HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H
 int getlangexts()
 {
 	CURL *handle;
@@ -681,7 +685,7 @@ int getlangexts()
 	return 1;
 }
 
-#endif /* HAVE_CURL_CURL_H */
+#endif /* HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H */
 
 #if ( SUBMIT_ENABLE_CMD )
 

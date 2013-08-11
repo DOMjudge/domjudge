@@ -255,7 +255,13 @@ AC_CHECK_PROGS(HTPASSWD,[htpasswd htpasswd2],[no htpasswd binary found])
 # Check for including optional libmagic.
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
-# Checks for libcURL when submit is enabled.
+# Check for JSONcpp library to decode language/extensions list from
+# REST API (this also requires libcURL below).
+AC_LANG_PUSH([C++])
+AC_CHECK_HEADERS([jsoncpp/json/json.h],AC_SUBST(LIBJSONCPP,[-ljsoncpp]))
+AC_LANG_POP([C++])
+
+# Check for libcURL and JSONcpp when submit is enabled.
 if test "$submit_enablehttp" = "1" ; then
 	AX_LIB_CURL([7.9.7],[],[
 		AC_MSG_ERROR([libcURL not found (required for http submit method)])
