@@ -449,7 +449,7 @@ On the judgehosts:
 <item> Add to <tt>/etc/sudoers.d/</tt> or append to <tt>/etc/sudoers</tt> the
        sudoers configuration as in <tt>etc/sudoers-domjudge</tt>.
 <item> Put the right credentials in the file <tt>etc/restapi.secret</tt>
-       domserver on all judgehosts.
+       on all judgehosts.
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
 </itemize>
 It should be done by now. As a check that (almost) everything works,
