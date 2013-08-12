@@ -533,7 +533,7 @@ void warnuser(const char *warning, ...)
 char readanswer(const char *answers)
 {
 	struct termios old_termio, new_termio;
-	char c;
+	int c;
 
 	/* save the terminal settings for stdin */
 	tcgetattr(STDIN_FILENO,&old_termio);
@@ -545,6 +545,7 @@ char readanswer(const char *answers)
 
 	while ( true ) {
 		c = getchar();
+		if ( c==EOF ) error(0,"in readanswer: error or EOF");
 		if ( c!=0 && (strchr(answers,tolower(c)) ||
 					  strchr(answers,toupper(c))) ) {
 			if ( strchr(answers,tolower(c))!=NULL ) {
@@ -559,7 +560,7 @@ char readanswer(const char *answers)
 	/* restore the saved settings */
 	tcsetattr(STDIN_FILENO,TCSANOW,&old_termio);
 
-	return c;
+	return (char) c;
 }
 
 #ifdef HAVE_MAGIC_H
@@ -625,6 +626,8 @@ int cmdsubmit()
 		if ( temp_fd<0 || strlen(tempfile)==0 ) {
 			error(errno,"mkstemps cannot create tempfile");
 		}
+		/* Close temp_fd because we only need the filename */
+		if ( close(temp_fd)!=0 ) error(errno,"closing tempfile");
 
 		/* Construct copy command and execute it */
 		args[0] = filenames[i].c_str();
@@ -640,7 +643,9 @@ int cmdsubmit()
 
 		logmsg(LOG_INFO,"copied `%s' to tempfile `%s'",filenames[i].c_str(),tempfile);
 		tempfiles.push_back(tempfile);
+		free(tempfile);
 	}
+	free(template_str);
 
 	/* Connect to the submission server */
 	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",

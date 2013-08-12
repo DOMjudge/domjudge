@@ -380,6 +380,7 @@ int handle_client()
 	int nargs;
 	int redir_fd[3];
 	int status;
+	int fd;
 	pid_t cpid;
 	FILE *rpipe;
 	char line[linelen];
@@ -468,9 +469,11 @@ int handle_client()
 		tempfile = allocstr("%s/cmdsubmit.%s.%s.XXXXXX.%s",TMPDIR,
 		                    problem.c_str(),team.c_str(),language.c_str());
 
-		if ( mkstemps(tempfile,language.length()+1)<0 || strlen(tempfile)==0 ) {
+		if ( (fd=mkstemps(tempfile,language.length()+1))<0 || strlen(tempfile)==0 ) {
 			senderror(client_fd,errno,"mkstemps cannot create tempfile");
 		}
+		/* Close fd because we only need the filename */
+		if ( close(fd)!=0 ) error(errno,"closing tempfile");
 
 		logmsg(LOG_INFO,"created tempfile: `%s'",tempfile);
 
@@ -494,10 +497,10 @@ int handle_client()
 	   and then add a database entry for this file. */
 	nargs = 4 + 2*filenames.size();
 	varargs = (const char **) calloc(sizeof(char *),nargs);
-	varargs[0] = (char *) team.c_str();
+	varargs[0] = team.c_str();
 	varargs[1] = client_addr;
-	varargs[2] = (char *) problem.c_str();
-	varargs[3] = (char *) language.c_str();
+	varargs[2] = problem.c_str();
+	varargs[3] = language.c_str();
 	for(i=0; i<filenames.size(); i++) {
 		varargs[4+2*i]   = tempfiles[i].c_str();
 		varargs[4+2*i+1] = fileorigs[i].c_str();
@@ -508,6 +511,7 @@ int handle_client()
 	if ( (cpid = execute(LIBSUBMITDIR"/submit_db.php",varargs,nargs,redir_fd,1))<0 ) {
 		senderror(client_fd,errno,"starting submit_db");
 	}
+	free(varargs);
 
 	if ( (rpipe = fdopen(redir_fd[1],"r"))==NULL ) {
 		senderror(client_fd,errno,"binding submit_db stdout to stream");

@@ -313,8 +313,16 @@ void terminate(int sig)
 
 	/* Reset signal handlers to default */
 	sigact.sa_handler = SIG_DFL;
-	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) warning("error restoring signal handler");
-	if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) warning("error restoring signal handler");
+	sigact.sa_flags = 0;
+	if ( sigemptyset(&sigact.sa_mask)!=0 ) {
+		warning("could not initialize signal mask");
+	}
+	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
+		warning("could not restore signal handler");
+	}
+	if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) {
+		warning("could not restore signal handler");
+	}
 
 	if ( sig==SIGALRM ) {
 		warning("timelimit exceeded (wall time): aborting command");
@@ -444,7 +452,7 @@ void setrestrictions()
 	if ( use_root ) {
 		/* Small security issue: when running setuid-root, people can find
 		   out which directories exist from error message. */
-		if ( chdir(rootdir) ) error(errno,"cannot chdir to `%s'",rootdir);
+		if ( chdir(rootdir)!=0 ) error(errno,"cannot chdir to `%s'",rootdir);
 
 		/* Get absolute pathname of rootdir, by reading it. */
 		if ( getcwd(cwd,PATH_MAX)==NULL ) error(errno,"cannot get directory");
@@ -464,7 +472,9 @@ void setrestrictions()
 		}
 		free(path);
 
-		if ( chroot(".") ) error(errno,"cannot change root to `%s'",cwd);
+		if ( chroot(".")!=0 ) error(errno,"cannot change root to `%s'",cwd);
+		/* Just to make sure and satisfy Coverity scan: */
+		if ( chdir("/")!=0 ) error(errno,"cannot chdir to `/' in chroot");
 		verbose("using root-directory `%s'",cwd);
 	}
 
