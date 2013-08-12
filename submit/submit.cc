@@ -510,7 +510,7 @@ void warnuser(const char *warning)
 char readanswer(const char *answers)
 {
 	struct termios old_termio, new_termio;
-	char c;
+	int c;
 
 	/* save the terminal settings for stdin */
 	tcgetattr(STDIN_FILENO,&old_termio);
@@ -522,6 +522,7 @@ char readanswer(const char *answers)
 
 	while ( true ) {
 		c = getchar();
+		if ( c==EOF ) error(0,"in readanswer: error or EOF");
 		if ( c!=0 && (strchr(answers,tolower(c)) ||
 					  strchr(answers,toupper(c))) ) {
 			if ( strchr(answers,tolower(c))!=NULL ) {
@@ -536,7 +537,7 @@ char readanswer(const char *answers)
 	/* restore the saved settings */
 	tcsetattr(STDIN_FILENO,TCSANOW,&old_termio);
 
-	return c;
+	return (char) c;
 }
 
 #ifdef HAVE_MAGIC_H
@@ -587,6 +588,8 @@ int cmdsubmit()
 	if ( temp_fd<0 || strlen(tempfile)==0 ) {
 		error(errno,"mkstemps cannot create tempfile");
 	}
+	/* Close temp_fd because we only need the filename */
+	if ( close(temp_fd)!=0 ) error(errno,"closing tempfile");
 
 	/* Construct copy command and execute it */
 	args[0] = filename;
@@ -676,6 +679,7 @@ int cmdsubmit()
 	}
 
 	freeaddrinfo(server_ais);
+	free(tempfile);
 
 	logmsg(LOG_NOTICE,"submission successful");
 

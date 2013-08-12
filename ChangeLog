@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 3.2.6 - DEV
 -------------------
  - Fix 'Disable refresh' button not being clickable.
+ - Misc. minor bugs fixed reported by Coverity scan.
 
 Version 3.2.5 - 16 April 2013
 -----------------------------
