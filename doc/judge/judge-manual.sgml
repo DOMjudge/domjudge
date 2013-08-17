@@ -14,9 +14,9 @@
 <!--
  This is some comment character magic to circumvent problems
  with an unexpanded git archive $Format$ keyword.
-$Format: -%x2d%x3e
+ $Format: -%x2d%x3e
 <date>%aD
-%x3c!%x2d- $  -->
+%x3c!%x2d- $ -->
 
 <abstract>
 This document provides information about DOMjudge aimed at a jury
@@ -28,15 +28,14 @@ A separate manual is available for teams and administrators.
 <!-- $Format: -%x2d%x3e
 Document version: %h
 %x3c!%x2d- $ -->
-
 </abstract>
 
 <toc>
 
-<chapt>DOMjudge Overview
+<chapt>DOMjudge overview <label id="overview">
 <p>
 
-DOMjudge is a system for running a programming contest, like the ACM
+DOMjudge is a system for running programming contests, like the ACM
 ICPC regional and world championship programming contests.
 
 This means that teams are on-site and have a fixed time period (mostly
@@ -51,7 +50,7 @@ program and compares the program output with the expected output.
 
 This software can be used to handle the submission and judging during
 such contests. It also handles feedback to the teams and communication
-on problems (clarification requests). It has web-interfaces for the
+on problems (clarification requests). It has web interfaces for the
 jury, the teams (their submissions and clarification requests) and the
 public (scoreboard).
 
@@ -59,11 +58,10 @@ public (scoreboard).
 <p>
 
 A global overview of the features that DOMjudge provides:
-
 <itemize>
 <item>Automatic judging with distributed (scalable) judge hosts
-<item>Web-interface for portability and simplicity
-<item>Modular system for plugging in languages/compilers
+<item>Web interface for portability and simplicity
+<item>Modular system for plugging in languages/compilers and more
 <item>Detailed jury information (submissions, judgings) and options
       (rejudge, clarifications)
 <item>Designed with security in mind

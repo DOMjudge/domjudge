@@ -30,8 +30,8 @@ Document version: %h
 <chapt>DOMjudge overview <label id="overview">
 <p>
 
-DOMjudge is a system for running programming contests like the ACM
-regional and world championship programming contests.
+DOMjudge is a system for running programming contests, like the ACM
+ICPC regional and world championship programming contests.
 
 This means that teams are on-site and have a fixed time period (mostly
 5 hours) and one computer to solve a number of problems (mostly 6-10).
@@ -40,8 +40,8 @@ languages, that reads input according to the problem input
 specification and writes the correct, corresponding output.
 
 The judging is done by submitting the source code of the solution to
-the jury. There the jury system compiles and runs the program and
-compares the program output with the expected output.
+the jury. There the jury system automatically compiles and runs the
+program and compares the program output with the expected output.
 
 This software can be used to handle the submission and judging during
 such contests. It also handles feedback to the teams and communication
@@ -1784,7 +1784,7 @@ steps have to be taken:
 <item> revert the contest to the original times.
 </itemize>
 Note that while the contest time is changed to the current time,
-anyone might be able to access the public or team web-interface:
+anyone might be able to access the public or team web interface:
 there's not too much there, but on the scoreboard the number of
 problems and their titles can be read. To prevent this information
 leak, one could disconnect the DOMjudge server, judgehosts and the
