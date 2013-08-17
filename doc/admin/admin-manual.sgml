@@ -379,6 +379,8 @@ Software required for building DOMjudge:
        DOMjudge sources with <htmlurl name="Clang"
        url="http://clang.llvm.org/"> from the LLVM project; the C
        library should support the POSIX.1-2008 specification.
+       Note that building the optional <tt>checktestdata</tt> program
+       requires a compiler that supports C++11.
 
 <item> GNU make
 
@@ -2511,9 +2513,10 @@ additional software to be installed:
 <itemize>
 <item> The GNU autoconf/automake toolset
 
-<item> Flex and <htmlurl name="bisonc++"
-       url="http://bisoncpp.sourceforge.net/"> for generating the
-       parsing code of the optional <tt>checktestdata</tt> script.
+<item> <htmlurl name="flexc++" url="http://flexcpp.sourceforge.net/">
+       and <htmlurl name="bisonc++" url="http://bisoncpp.sourceforge.net/">
+       for generating the parsing code of the optional
+       <tt>checktestdata</tt> script.
 
 <item> Linuxdoc, groff and Xfig/transfig to build the admin and judge
        documentation from SGML sources and a LaTeX installation to
@@ -2525,12 +2528,12 @@ install the additionally required packages (next to the
 <ref id="install_config:apt-getinstall"
        name="standard set of packages">):
 <code>
-apt-get install autoconf automake flex bisonc++
+apt-get install autoconf automake flexc++ bisonc++
 </code>
 
 When this software is present, bootstrapping can be done by running
 <tt>make dist</tt>, which creates the <tt>configure</tt> script and
-generates documentation from SGML/LaTeX sources. 
+generates documentation from SGML/LaTeX sources.
 
 <sect>Makefile structure
 <p>

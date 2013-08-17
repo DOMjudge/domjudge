@@ -1,6 +1,7 @@
 %baseclass-preinclude "parsetype.h"
 
 %filenames parser
+
 %scanner scanner.h
 
 %lsp-needed

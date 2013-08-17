@@ -3,13 +3,16 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
+CXXFLAGS += -std=c++11
+
 TARGETS = checkinput
 OBJECTS =
-PARSER_GEN = yylex.cc parse.cc parserbase.h
+
+PARSER_GEN = lex.cc scannerbase.h parse.cc parserbase.h
 
 ifeq ($(CHECKTESTDATA_ENABLED),yes)
 TARGETS += checktestdata
-CHKOBJS = $(addsuffix $(OBJEXT),libchecktestdata parse yylex)
+CHKOBJS = $(addsuffix $(OBJEXT),libchecktestdata parse lex)
 OBJECTS += $(CHKOBJS)
 endif
 
@@ -25,12 +28,10 @@ $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
-yylex.cc: checktestdata.l parsetype.h
-	flex++ $<
-# Fix strict ANSI C++ bug in generated code, see Debian bug #488274
-	sed -i '/ isatty/d' $@
+lex.cc scannerbase.h: checktestdata.l scanner.h scanner.ih
+	flexc++ $<
 
-parse.cc parserbase.h: checktestdata.y parsetype.h
+parse.cc parserbase.h: checktestdata.y parser.h parser.ih parsetype.h
 	bisonc++ $<
 
 checksucc = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 || \

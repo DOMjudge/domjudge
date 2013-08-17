@@ -8,6 +8,7 @@ Version 4.0.0 - DEV
    submit client through REST API.
  - Update jscolor and sorttable javascript to latest upstream versions.
  - Misc. minor bugs fixed reported by Coverity scan.
+ - Replace flex++ by flexc++, fixes a missing build dep. and code cleanup.
 
 Version 3.4.0 - (unreleased)
 ----------------------------
