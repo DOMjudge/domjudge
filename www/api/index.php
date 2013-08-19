@@ -34,6 +34,17 @@ function infreeze($time)
 	return FALSE;
 }
 
+function checkargs($args, $mandatory)
+{
+	global $api;
+
+	foreach ( $mandatory as $arg ) {
+		if ( !isset($args[$arg]) ) {
+			$api->createError("argument '$arg' is mandatory");
+		}
+	}
+}
+
 $api = new RestApi();
 
 /**
@@ -137,9 +148,7 @@ function judgings_POST($args)
 {
 	global $DB, $api;
 
-	if ( !isset($args['judgehost']) ) {
-		$api->createError("judgehost is mandatory");
-	}
+	checkargs($args, array('judgehost'));
 
 	$host = $args['judgehost'];
 	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $host);
@@ -264,30 +273,8 @@ function judging_runs_POST($args)
 {
 	global $DB, $api;
 
-	if ( !isset($args['judgingid']) ) {
-		$api->createError("judgingid is mandatory");
-	}
-	if ( !isset($args['testcaseid']) ) {
-		$api->createError("testcaseid is mandatory");
-	}
-	if ( !isset($args['runresult']) ) {
-		$api->createError("runresult is mandatory");
-	}
-	if ( !isset($args['runtime']) ) {
-		$api->createError("runtime is mandatory");
-	}
-	if ( !isset($args['output_run']) ) {
-		$api->createError("output_run is mandatory");
-	}
-	if ( !isset($args['output_diff']) ) {
-		$api->createError("output_diff is mandatory");
-	}
-	if ( !isset($args['output_error']) ) {
-		$api->createError("output_error is mandatory");
-	}
-	if ( !isset($args['judgehost']) ) {
-		$api->createError("judgehost is mandatory");
-	}
+	checkargs($args, array('judgingid', 'testcaseid', 'runresult', 'runtime',
+	                       'output_run', 'output_diff', 'output_error', 'judgehost'));
 
 	$results_remap = dbconfig_get('results_remap');
 	$results_prio = dbconfig_get('results_prio');
@@ -446,9 +433,7 @@ function submission_files($args)
 {
 	global $DB, $api;
 
-	if ( !isset($args['submitid']) ) {
-		$api->createError("submitid is mandatory");
-	}
+	checkargs($args, array('submitid'));
 
 	$sources = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, sourcecode, filename
 			   FROM submission_file WHERE submitid = %i', $args['submitid']);
@@ -473,9 +458,7 @@ function testcases($args)
 {
 	global $DB, $api;
 
-	if ( !isset($args['judgingid']) ) {
-		$api->createError("judgingid is mandatory");
-	}
+	checkargs($args, array('judgingid'));
 
 	// endtime is set: judging is fully done; return empty
 	$row = $DB->q('TUPLE SELECT endtime,probid
@@ -504,9 +487,8 @@ function testcase_files($args)
 {
 	global $DB, $api;
 
-	if ( !isset($args['testcaseid']) ) {
-		$api->createError("testcaseid is mandatory");
-	}
+	checkargs($args, array('testcaseid'));
+
 	if ( !isset($args['input']) && !isset($args['output']) ) {
 		$api->createError("either input or output is mandatory");
 	}
@@ -733,9 +715,7 @@ function judgehosts_POST($args)
 {
 	global $DB, $api;
 
-	if ( !isset($args['hostname']) ) {
-		$api->createError("hostname is mandatory");
-	}
+	checkargs($args, array('hostname'));
 
 	$q = $DB->q('INSERT IGNORE INTO judgehost (hostname) VALUES(%s)',
 	            $args['hostname']);
