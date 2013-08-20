@@ -40,10 +40,6 @@ define('STRICTIPCHECK', false);
 define('LDAP_SERVERS', 'ldaps://ldap1.example.com/ ldaps://ldap2.example.com/');
 define('LDAP_DNQUERY', 'CN=&,OU=users,DC=example,DC=com');
 
-// Specify here which of the users in htpasswd-jury should have admin 
-// rights on top of their jury rights
-$DOMJUDGE_ADMINS = array('domjudge_jury', 'admin');
-
 // Set this to a notification command, which receives the notification
 // text on stdin. Examples below for notification by mail or prints.
 //define('BALLOON_CMD', 'mail -s Balloon_notification domjudge@localhost');
@@ -54,3 +50,14 @@ define('BALLOON_CMD', '');
 // start displaying as warning or critical.
 define('JUDGEHOST_WARNING', 30);
 define('JUDGEHOST_CRITICAL', 120);
+
+// Internal and output character set used, don't change.
+define('DJ_CHARACTER_SET', 'utf-8');
+define('DJ_CHARACTER_SET_MYSQL', 'utf8');
+// MySQL connection flags.
+define('DJ_MYSQL_CONNECT_FLAGS', null);
+// To enable SSL/TLS encryption of MySQL connections, use the following.
+// Not enabled by default because the server isn't configured to
+// accept SSL by default. Not normally necessary if you run the DOMserver
+// and database on the same machine.
+// define('DJ_MYSQL_CONNECT_FLAGS', MYSQLI_CLIENT_SSL);
