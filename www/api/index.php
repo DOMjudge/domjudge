@@ -219,6 +219,9 @@ function judgings_PUT($args) {
 			'WHERE judgingid = %i AND judgehost = %s',
 			base64_decode($args['output_compile']),
 			$judgingid, $args['judgehost']);
+
+		$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$judgingid);
+		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 	}
 
 	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $args['judgehost']);
@@ -302,6 +305,8 @@ function judging_runs_POST($args) {
 
 		$DB->q('UPDATE judging SET result = %s' .$extrasql .
 			'WHERE judgingid = %i', $result, $args['judgingid']);
+		$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$args['judgingid']);
+		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 	}
 
 	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $args['judgehost']);
