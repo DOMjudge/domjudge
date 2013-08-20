@@ -105,6 +105,8 @@ function calcContestTime($walltime)
 function calcScoreRow($cid, $team, $prob) {
 	global $DB;
 
+	logmsg(LOG_DEBUG, "calcScoreRow '$cid' '$team' '$prob'");
+
 	// First acquire an advisory lock to prevent other calls to
 	// calcScoreRow() from interfering with our update.
 	$lockstr = "domjudge.$cid.$team.$prob";
