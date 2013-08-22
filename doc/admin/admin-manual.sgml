@@ -73,7 +73,7 @@ This is a (rough) list of the requirements for DOMjudge.
 <itemize>
 <item>At least one machine running Linux, with (sudo) root access
 <item>Apache web server with PHP 5.2 or newer and PHP-command line interface
-<item>MySQL database server version 4.1.0 or newer
+<item>MySQL or MariaDB database server version 4.1.0 or newer
 <item>Compilers for the languages you want to support
 </itemize>
 
@@ -318,7 +318,7 @@ The following software is required for running DOMjudge.
        and json extensions for PHP. We also recommend the posix extension
        for extra debugging information.
 
-<item> MySQL &gt;= 4.1.x database and client software
+<item> MySQL or MariaDB &gt;= 4.1.x database and client software
 
 <item> PHP &gt;= 5.2.0 command line interface and the curl and json
        extensions.
@@ -872,7 +872,9 @@ file system storage if these permissions are not set.
 <sect>Database installation
 <p>
 
-DOMjudge uses a MySQL database server for information storage.
+DOMjudge uses a MySQL or MariaDB database server for information storage.
+Where this document talks about MySQL, it can be understood to also apply
+to MariaDB.
 
 The database structure and privileges are included in MySQL
 dump files in the sql subdirectory. The default database name is
