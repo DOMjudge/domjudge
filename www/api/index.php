@@ -1,6 +1,6 @@
 <?php
 /**
- * DomJudge public REST API
+ * DOMJudge public REST API
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
@@ -212,14 +212,18 @@ function judgings_PUT($args) {
 	}
 
 	if ( isset($args['output_compile']) ) {
-		// FIXME: uses NOW() in query
-		$DB->q('UPDATE judging SET output_compile = %s' .
-			($args['compile_success'] ? '' :
-			', result = "compiler-error", endtime=NOW() ' ) .
-			'WHERE judgingid = %i AND judgehost = %s',
-			base64_decode($args['output_compile']),
-			$judgingid, $args['judgehost']);
-
+		if ( $args['compile_success'] ) {
+			$DB->q('UPDATE judging SET output_compile = %s ' .
+				'WHERE judgingid = %i AND judgehost = %s',
+				base64_decode($args['output_compile']),
+				$judgingid, $args['judgehost']);
+		} else {
+			$DB->q('UPDATE judging SET output_compile = %s, ' .
+				'result = "compiler-error", endtime=%s ' .
+				'WHERE judgingid = %i AND judgehost = %s',
+				base64_decode($args['output_compile']), now(),
+				$judgingid, $args['judgehost']);
+		}
 		$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$judgingid);
 		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 	}
@@ -300,12 +304,16 @@ function judging_runs_POST($args) {
 
 	if ( ($result = getFinalResult($allresults, $results_prio))!==NULL ) {
 		if ( count($runresults) == $numtestcases || dbconfig_get('lazy_eval_results', true) ) {
-			$extrasql = ", endtime = NOW() ";
-		} else { $extrasql = ""; }
+			$DB->q('UPDATE judging SET result = %s, endtime = %s ' .
+				'WHERE judgingid = %i', $result, now(), $args['judgingid']);
+		} else {
+			$DB->q('UPDATE judging SET result = %s ' .
+				'WHERE judgingid = %i', $result, $args['judgingid']);
+		}
 
-		$DB->q('UPDATE judging SET result = %s' .$extrasql .
-			'WHERE judgingid = %i', $result, $args['judgingid']);
-		$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$args['judgingid']);
+		$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid
+				FROM judging LEFT JOIN submission s USING(submitid)
+				WHERE judgingid = %i',$args['judgingid']);
 		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 
 		// log to event table if no verification required
