@@ -305,8 +305,30 @@ function judging_runs_POST($args) {
 
 		$DB->q('UPDATE judging SET result = %s' .$extrasql .
 			'WHERE judgingid = %i', $result, $args['judgingid']);
-		$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$args['judgingid']);
+		$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$args['judgingid']);
 		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
+
+		// log to event table if no verification required
+		// (case of verification required is handled in www/jury/verify.php)
+		if ( ! dbconfig_get('verification_required', 0) ) {
+			$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
+				submitid, judgingid, description)
+				VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
+				now(), $row['cid'], $row['teamid'], $row['langid'], $row['probid'],
+				$row['submitid'], $args['judgingid']);
+			if ( $result == 'correct' ) {
+				// prevent duplicate balloons in case of multiple correct submissions
+				$numcorrect = $DB->q('VALUE SELECT count(submitid)
+						      FROM balloon LEFT JOIN submission USING(submitid)
+						      WHERE valid = 1 AND probid = %s AND teamid = %s',
+						      $row['probid'], $row['teamid']);
+				if ( $numcorrect == 0 ) {
+					$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
+						$row['submitid']);
+				}
+			}
+		}
+
 	}
 
 	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $args['judgehost']);
