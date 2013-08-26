@@ -24,7 +24,7 @@ if ( empty($teams) ) {
 	exit;
 }
 
-$teams = array_merge(array(''=>'(select one)'),$teams);
+$teams = array(''=>'(select one)') + $teams;
 
 switch ( AUTH_METHOD ):
 
