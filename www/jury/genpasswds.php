@@ -24,7 +24,7 @@ if ( empty($users) ) {
 	exit;
 }
 
-$users = array_merge(array(''=>'(select one)'),$users);
+$users = array(''=>'(select one)') + $users;
 
 switch ( AUTH_METHOD ):
 

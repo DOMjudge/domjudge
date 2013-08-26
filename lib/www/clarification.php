@@ -304,7 +304,7 @@ function confirmClar() {
 			$teams = $DB->q('KEYVALUETABLE SELECT login, CONCAT(login, ": ", name) as name
 			                 FROM team
 			                 ORDER BY categoryid ASC, team.name COLLATE utf8_general_ci ASC');
-			$options = array_merge($options,$teams);
+			$options += $teams;
 		} else {
 			if ( $clar['sender'] ) {
 				$options[$clar['sender']] = $clar['sender'] .': '.
@@ -329,7 +329,7 @@ function confirmClar() {
 	} else {
 		$probs = array();
 	}
-	$options = array_merge(array('general' => 'General issue'), $probs);
+	$options = array('general' => 'General issue') + $probs;
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options, ($respid ? $clar['probid'] : 'general'), true) .
 	     "</td></tr>\n";
