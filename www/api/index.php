@@ -359,16 +359,6 @@ if ( IS_JURY ) {
 	$api->provideFunction('POST', 'judging_runs', 'judging_runs_POST', $doc, $args, $exArgs);
 }
 
-$doc = 'Stores final result.';
-$args = array('judgingid' => 'Final result corresponds to this specific judgingid.',
-	'result' => 'This is the final result of the judging.',
-	'judgehost' => 'Judged by this judgehost.',
-	'subinfo' => 'Additional information (teamid, probid, langid, submitid) of this run encoded as JSON.');
-$exArgs = array();
-if ( IS_JURY ) {
-	$api->provideFunction('POST', 'results', 'results_POST', $doc, $args, $exArgs);
-}
-
 /**
  * DBconfiguration
  */
