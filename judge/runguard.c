@@ -497,7 +497,7 @@ int groupid(char *name)
 	return (int) grp->gr_gid;
 }
 
-inline long readoptarg(const char *desc, long minval, long maxval)
+long readoptarg(const char *desc, long minval, long maxval)
 {
 	long arg;
 	char *ptr;
