@@ -171,7 +171,15 @@ them, when set.
 
 Nearly everything on the scoreboard can be clicked to reveal more
 detailed information about the item in question: team names, specific
-submissions and problem headers.
+submissions and problem headers. Many cells will show additional
+`title text' information when hovering over them. The score column
+lists the number of solved problems and the total penalty time for
+each team. Each cell in a problem column lists the number of
+submissions, and if the problem was solved, then within parentheses
+the time of the first correct submission in minutes since contest
+start, followed by a `<tt>+</tt>' and the penalty time for any
+incorrect submissions. Together these count towards each team's total
+penalty time.
 
 <chapt>Before the contest
 <p>
