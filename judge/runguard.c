@@ -267,6 +267,7 @@ Run COMMAND with restrictions.\n\
       --version          output version information and exit\n");
 	printf("\n\
 Note that root privileges are needed for the `root' and `user' options.\n\
+The COMMAND path is relative to the changed ROOT directory if specified.\n\
 When run setuid without the `user' option, the user ID is set to the\n\
 real user ID.\n");
 	exit(0);
