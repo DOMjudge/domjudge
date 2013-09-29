@@ -294,7 +294,7 @@ if test "x$enable_checktestdata" != "xno"; then
 	# Check for gmpxx headers separately, as they are C++.
 	AC_LANG_PUSH([C++])
 	AC_CHECK_HEADERS([gmpxx.h])
-	AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmp -lgmpxx'),[],[-lgmp])
+	AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmpxx -lgmp'),[],[-lgmp])
 	AC_LANG_POP([C++])
 fi
 
