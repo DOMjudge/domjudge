@@ -25,7 +25,7 @@ interface of DOMjudge). A LaTeX installation including the packages
 For more information, see the administrator documentation.
 
 All documentation is also available online at the DOMjudge homepage:
-	http://domjudge.sourceforge.net/documentation
+	http://www.domjudge.org/documentation
 Please note that this documentation is from the latest stable
 release and thus might not apply to your version.
 
@@ -68,14 +68,14 @@ Furthermore, a binary version of the dash shell (statically compiled)
 is distributed with DOMjudge. This program is copyright by various
 people under the BSD licence and a part under the GNU GPL version 2,
 see doc/dash.copyright for more details.
-Sources can be downloaded from: http://domjudge.sourceforge.net/sources/
+Sources can be downloaded from: http://www.domjudge.org/sources/
 
 
 Contact
 -------
 
 The DOMjudge homepage can be found at:
-http://domjudge.sourceforge.net/
+http://www.domjudge.org/
 
 Announcements of new releases are sent to our low volume announcements
 mailinglist. Subscription to this list is done via
