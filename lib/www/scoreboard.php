@@ -594,7 +594,7 @@ collapse("filter");
 	}
 	echo "<p id=\"lastmod\">Last Update: " .
 	     date('j M Y H:i', $lastupdate) . "<br />\n" .
-	     "using <a href=\"http://domjudge.sourceforge.net/\">DOMjudge</a></p>\n\n";
+	     "using <a href=\"http://www.domjudge.org/\">DOMjudge</a></p>\n\n";
 
 	return;
 }

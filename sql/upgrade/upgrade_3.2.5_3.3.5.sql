@@ -81,7 +81,7 @@ CREATE TABLE `submission_file` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Files associated to a submission';
 
 -- Resize datastructures to fit "arbitrary" large data to satisfy
--- http://domjudge.a-eskwadraat.nl/trac/ticket/15 for the ICPC CSS spec.
+-- the ICPC CSS spec.
 ALTER TABLE `clarification`
   MODIFY COLUMN `body` longtext NOT NULL COMMENT 'Clarification text';
 
