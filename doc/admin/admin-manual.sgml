@@ -144,7 +144,7 @@ is distributed with DOMjudge. This program is copyright by various
 people under the BSD licence and a part under the GNU GPL version 2,
 see <tt>COPYING.BSD</tt> and <tt>doc/dash.copyright</tt> for more details.
 Sources can be downloaded from:
-<url url="http://domjudge.sourceforge.net/sources/">.
+<url url="http://www.domjudge.org/sources/">.
 
 The <tt>sorttable.js</tt> script is copyright by Stuart Langridge and
 licenced under the MIT licence, see <tt>COPYING.MIT</tt>. This
@@ -190,8 +190,8 @@ free beer in case might you encounter him.
 <sect>Contact
 <p>
 The DOMjudge homepage can be found at:
-<htmlurl name="http://domjudge.sourceforge.net/"
-url="http://domjudge.sourceforge.net/">
+<htmlurl name="http://www.domjudge.org/"
+url="http://www.domjudge.org/">
 
 We have a low volume <htmlurl name="mailing list for announcements"
 url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
