@@ -12,7 +12,7 @@ PARSER_GEN = lex.cc scannerbase.h parse.cc parserbase.h
 
 ifeq ($(CHECKTESTDATA_ENABLED),yes)
 TARGETS += checktestdata
-CHKOBJS = $(addsuffix $(OBJEXT),libchecktestdata parse lex)
+CHKOBJS = $(addsuffix $(OBJEXT),libchecktestdata parse lex parsetype)
 OBJECTS += $(CHKOBJS)
 endif
 
