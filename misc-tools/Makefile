@@ -9,7 +9,7 @@ PARSER_GEN = yylex.cc parse.cc parserbase.h
 
 ifeq ($(CHECKTESTDATA_ENABLED),yes)
 TARGETS += checktestdata
-CHKOBJS = $(addsuffix $(OBJEXT),checktestdata libchecktestdata parse yylex)
+CHKOBJS = $(addsuffix $(OBJEXT),libchecktestdata parse yylex)
 OBJECTS += $(CHKOBJS)
 endif
 
@@ -43,9 +43,9 @@ ifeq ($(CHECKTESTDATA_ENABLED),yes)
 libchecktestdata.o: %.o: %.cc %.h $(PARSER_GEN)
 
 checktestdata: CPPFLAGS += $(BOOST_CPPFLAGS)
-checktestdata: LDFLAGS  += $(BOOST_LDFLAGS)
-checktestdata: $(CHKOBJS) $(LIBGMPXX) $(BOOST_REGEX_LIB)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+checktestdata: LDFLAGS  += $(BOOST_LDFLAGS) -Wl,-Bstatic $(LIBGMPXX) $(BOOST_REGEX_LIB) -Wl,-Bdynamic
+checktestdata: checktestdata.cc $(CHKOBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 check: checktestdata
 	@for i in tests/testprog*.in ; do \
