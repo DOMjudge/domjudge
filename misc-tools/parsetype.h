@@ -45,6 +45,7 @@ struct parse_t {
 	parse_t(val_t _val, args_t _args): val(_val), args(_args), op(' ') {}
 
 	// Parsing command with optional arguments
+	explicit
 	parse_t(val_t _val, parse_t arg1 = parse_t(),
 	                    parse_t arg2 = parse_t(),
 	                    parse_t arg3 = parse_t(),
@@ -59,6 +60,7 @@ struct parse_t {
 
 	// Parsing arithmetic/logical/compare operator and some other
 	// special cases
+	explicit
 	parse_t(char _op, parse_t arg1 = parse_t(),
 	                  parse_t arg2 = parse_t(),
 	                  parse_t arg3 = parse_t(),
