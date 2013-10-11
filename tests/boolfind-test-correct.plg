@@ -1,0 +1,55 @@
+% @EXPECTED_RESULTS@: CORRECT
+
+read_line([]) :-
+	at_end_of_stream.
+read_line(Out) :-
+	get_char(Char),
+	(
+		Char = '\n'
+	->
+		Out = []
+	;
+		read_line(Line),
+		Out = [Char | Line]
+	).
+
+read_number(N) :-
+	read_line(Line),
+	term_to_atom(N, Line).
+
+testcases(0).
+testcases(N) :-
+	read_number(X),
+	testcase(X),
+	M is N - 1,
+	testcases(M).
+
+% Start binary search
+testcase(N) :- testcase(0, N).
+
+% Base case
+testcase(L, H) :-
+	L + 1 >= H,
+	write('OUTPUT '),
+	write(L),
+	nl.
+
+% Try one
+testcase(L, H) :-
+	M is (L + H) // 2,
+	write('READ '),
+	write(M),
+	nl,
+	read_line(A),
+	term_to_atom(Ans, A),
+	(
+		Ans = true
+	->
+		testcase(M, H)
+	;
+		testcase(L, M)
+	).
+
+main :-
+	read_number(N),
+	testcases(N).

@@ -94,6 +94,8 @@ INSERT INTO `user` (`userid`, `username`, `name`, `authtoken`) VALUES ('1', 'adm
 
 INSERT INTO `userrole` (`userid`, `roleid`) VALUES ('1', '1');
 
+INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('plg', 'Prolog', '["plg"]', 0, 1, 1);
+
 --
 -- Finally remove obsolete structures after moving data
 --
