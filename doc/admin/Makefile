@@ -20,6 +20,8 @@ install-docs: docs
 		admin-manual.pdf admin-manual*.html $(FIGSPNG)
 
 admin-manual.pdf: %.pdf: %.sgml $(TOPDIR)/doc/docs_header.tex $(FIGSEPS)
+# Ideally, we'd generate the pdf directly, but linuxdoc isn't able to
+# include pdf figures, and the unscaled png figure looks ugly.
 	linuxdoc -B latex -o ps -P "`cat $(TOPDIR)/doc/docs_header.tex`" $< >/dev/null
 	ps2pdf $*.ps
 	rm -f $*.ps

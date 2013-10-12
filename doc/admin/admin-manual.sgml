@@ -1163,7 +1163,7 @@ format and prebuilt from SGML sources. Rebuilding these is not normally
 necessary. To rebuild them on a Debian-like system, the following commands
 should do it:
 <code>
-sudo apt-get install linuxdoc-tools make transfig groff texlive-latex-recommended
+sudo apt-get install linuxdoc-tools make transfig ghostscript groff texlive-latex-recommended
 make -C doc/admin docs
 make -C doc/judge docs
 </code>
