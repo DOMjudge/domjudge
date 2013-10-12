@@ -227,13 +227,13 @@ DOMjudge discerns the following kinds of hosts:
 <tag>DOMjudge server</tag>
        A host that receives the submissions, runs the
        database and serves the web pages. This host will run Apache,
-       and MySQL. 
-       Also called domserver for brevity.
+       and MySQL.
+       Also called <em>domserver</em> for brevity.
 <tag>Judgehosts</tag>
        A number of hosts, at least one, that will retrieve
        submitted solutions from the DOMjudge server, compile and run
        them and send the results back to the server.
-       They will run the judgedaemon from DOMjudge.
+       They will run the <tt>judgedaemon</tt> from DOMjudge.
 <tag>Jury / admin workstations</tag>
        The jury members (persons) that want to monitor the contest need
        just any workstation with a web browser to access the web interface.
@@ -244,9 +244,9 @@ One (virtual) machine is required to run the DOMserver. The minimum amount of
 judgehosts is also one, but preferably more: depending on configured timeouts,
 judging one solution can tie up a judgehost for several minutes, and if there's
 a problem with one judgehost it can be resolved while judging continues on the
-others. 
+others.
 
-As a rule of thumb, we recommend one judgehost per 10 teams.
+As a rule of thumb, we recommend one judgehost per 10-20 teams.
 
 However, overprovisioning does not hurt: DOMjudge scales easily in the
 number of judegehosts, so if hardware is available, by all means use it. But
@@ -256,11 +256,18 @@ time for teams to receive an answer may increase.
 Each judgehost should be a dedicated (virtual) machine that performs no other
 tasks. For example, although running a judgehost on the same machine as the
 domserver is possible, it's not recommended except for testing purposes.
-Judgedaemons should also not double as local workstations for jury members.
+Judgehosts should also not double as local workstations for jury members.
 Having all judgehosts be of uniform hardware configuration helps in creating a fair,
 reproducible setup; in the ideal case they are run on the same type of machines
 that the teams use.
 
+DOMjudge supports running multiple judgedaemons in parallel on a
+single judgehost machine. This might be useful on multi-core machines.
+Note that although each judgedaemon process can be bound to one single
+CPU core (using Linux cgroups), shared use of other resources such as
+disk I/O might still have a minor effect on run times. For more
+details on using this, see the section <ref id="optionalfeatures"
+name="Installation: optional features">.
 
 <sect>Requirements
 <label id="install_config:requirements">
@@ -1147,7 +1154,7 @@ make -C doc/judge docs
 </code>
 
 
-<sect>Optional features
+<sect>Optional features <label id="optionalfeatures">
 <p>
 
 <sect1>Linux Control Groups (cgroups) in the judgedaemon
