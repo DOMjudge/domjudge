@@ -517,7 +517,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	if ( $fdata['showfinal'] ) {
 		echo "<h4>final standings</h4>\n\n";
 	} elseif ( ! $fdata['cstarted'] ) {
-		echo "<h4>scheduled to start at " . printtime($cdata['starttime']) . "</h4>\n\n";
+		echo "<h4>" . printContestStart($cdata) . "</h4>\n\n";
 		// Stop here (do not leak problem number, descriptions etc).
 		// Alternatively we could only display the list of teams?
 		if ( ! IS_JURY ) return;
@@ -642,8 +642,8 @@ function putTeamRow($cdata, $teamids) {
 			global $teamdata;
 			echo "<h2 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
 				htmlspecialchars($teamdata['name']) . "</span>!</h2>\n\n";
-			echo "<h3 id=\"contestnotstarted\">contest is scheduled to start at " .
-				printtime($cdata['starttime']) . "</h3>\n\n";
+			echo "<h3 id=\"contestnotstarted\">contest is " .
+				printContestStart($cdata) . "</h3>\n\n";
 		}
 
 		return;
@@ -676,6 +676,22 @@ function jurylink($target, $content) {
 	$res .= $content;
 	if ( IS_JURY ) $res .= '</a>';
 
+	return $res;
+}
+
+/**
+ * Print contest start time
+ */
+function printContestStart($cdata) {
+	$res = "scheduled to start ";
+	$starttime_u = strtotime($cdata['starttime']);
+	if( date('Ymd') == date('Ymd', $starttime_u) ) {
+		// Today
+		$res .= "at " . printtime($cdata['starttime']);
+	} else {
+		// Print full date
+		$res .= "on " . strftime('%a %d %b %Y %T %Z', $starttime_u);
+	}
 	return $res;
 }
 
