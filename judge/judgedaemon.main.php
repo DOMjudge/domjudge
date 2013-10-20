@@ -30,11 +30,12 @@ if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
 function request($url, $verb = 'GET', $data = '') {
 	global $resturl, $restuser, $restpass;
 
+	$url = $resturl . "/" . $url;
 	if ( $verb == 'GET' ) {
 		$url .= '?' . $data;
 	}
 
-	$ch = curl_init($resturl . "/" . $url);
+	$ch = curl_init($url);
 	curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
