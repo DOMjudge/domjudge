@@ -483,14 +483,18 @@ the set of test sources can be submitted:
 cd tests
 make check
 </code>
+Note that this requires <tt>AUTH_METHOD</tt> in
+<tt>etc/domserver-config.php</tt> to be configured to
+<tt>IPADDRESS</tt> or <tt>FIXED</tt>, such that one team has
+passwordless access to the web interface. You may also want to set the
+environment variable <tt>SUBMITBASEURL</tt> to your DOMjudge base URL,
+e.g. <tt>http://domjudge.example.com/</tt>.
+
 Then, in the main jury web interface, select the admin link
 <it>judging verifier</it> to automatically verify most of the
 test sources, except for a few with multiple possible outcomes; these
 have to be verified by hand. Read the test sources for a description of
 what should (not) happen.
-You may want to change the <tt>AUTH_METHOD</tt> to <tt>FIXED</tt> and set the
-environment variable <tt>SUBMITBASEURL</tt> to your DOMjudge base URL, e.g.
-<tt>http://domjudge.example.com/</tt>.
 
 Optionally:
 <itemize>
@@ -553,7 +557,8 @@ apt-get install make sudo php5-cli php5-curl php5-json procps \
 </code>
 
 Finally, to build the command-line submit client, install the
-following additional software.
+following additional software. Note that the submit client can only be
+used when the <tt>IPADDRESS</tt> authentication method is used.
 
 <code>
 apt-get install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
@@ -855,7 +860,9 @@ be made. These are sometimes needed in non-standard environments.
 
 DOMjudge supports two submission methods: via the command line submit
 program and via the web interface. From experience, both methods have
-users that prefer the one above the other.
+users that prefer the one above the other. Note that the submit client
+can only be used when the <tt>IPADDRESS</tt> authentication method is
+used.
 
 The command line submit client can send submissions by either using
 the web interface internally (<em>http</em> protocol, the default),
