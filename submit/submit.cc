@@ -655,8 +655,6 @@ int getlangexts()
 
 	free(url);
 
-	cout << curloutput.str() << endl;
-
 	if ( !reader.parse(curloutput, root) ) {
 		warning(0,"parsing REST API output: %s",
 		        reader.getFormattedErrorMessages().c_str());
