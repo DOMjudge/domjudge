@@ -3,6 +3,8 @@ DOMjudge Programming Contest Judging System
 Version 3.4.1 - DEV
 -------------------
  - Misc. minor bugs fixed reported by Coverity scan.
+ - Add note that submit client requires the IPADDRESS (or FIXED)
+   authentication method (Closes #125).
 
 Version 3.4.0 - 22 July 2013
 ----------------------------
