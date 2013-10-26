@@ -4,6 +4,7 @@ Version 3.3.6 - DEV
 -------------------
  - Fix 'Disable refresh' button not being clickable.
  - Misc. minor bugs fixed reported by Coverity scan.
+ - Fix bug when using fully numeric team ids or ids containing '-'.
 
 Version 3.3.5 - 16 April 2013
 -----------------------------
