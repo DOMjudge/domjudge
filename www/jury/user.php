@@ -48,7 +48,7 @@ if ( !empty($cmd) ):
 <tr><td><label for="data_0__name_">Full name:</label></td>
 <td><?php echo addInput('data[0][name]', @$row['name'], 35, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__email_">Email:</label></td>
-<td><?php echo addInput('data[0][email]', @$row['email'], 35, 255)?></td></tr>
+<td><?php echo addInputField('email', 'data[0][email]', @$row['email'], 'size="35" maglength="255"')?></td></tr>
 
 <tr><td><label for="data_0__authtoken_">Auth token:</label></td>
 <td><?php echo addInput('data[0][authtoken]', @$row['authtoken'], 35, 255)?></td></tr>
@@ -75,7 +75,7 @@ echo addSelect('data[0][teamid]', $tmap, @$row['teamid'], true);
 $roles = $DB->q("TABLE SELECT role.roleid,role,description,max(userrole.userid=%s) AS hasrole ".
     "FROM role ".
     "LEFT JOIN userrole ON userrole.roleid = role.roleid ".
-    "GROUP BY role.roleid", $row['userid']);
+    "GROUP BY role.roleid", @$row['userid']);
 $i=0;
 foreach ($roles as $role) {
     echo "<label>";
