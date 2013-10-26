@@ -48,7 +48,7 @@ if ( !empty($cmd) ):
 <tr><td><label for="data_0__name_">Full name:</label></td>
 <td><?php echo addInput('data[0][name]', @$row['name'], 35, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__email_">Email:</label></td>
-<td><?php echo addInputField('email', 'data[0][email]', @$row['email'], 'size="35" maglength="255"')?></td></tr>
+<td><?php echo addInputField('email', 'data[0][email]', @$row['email'], ' size="35" maxlength="255"')?></td></tr>
 
 <tr><td><label for="data_0__authtoken_">Auth token:</label></td>
 <td><?php echo addInput('data[0][authtoken]', @$row['authtoken'], 35, 255)?></td></tr>
@@ -140,8 +140,6 @@ if ( $row['enabled'] != 1 ) {
 </table></div>
 
 <?php
-echo "</table></div>\n";
-
 if ( IS_ADMIN ) {
     echo "<p class=\"nomorecol\">" .
         editLink('user', $id). "\n" .
