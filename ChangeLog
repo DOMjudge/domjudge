@@ -5,6 +5,11 @@ Version 3.4.1 - DEV
  - Misc. minor bugs fixed reported by Coverity scan.
  - Add note that submit client requires the IPADDRESS (or FIXED)
    authentication method (Closes #125).
+ - Fix bug when using fully numeric team ids or ids containing '-'.
+ - Fix bug when canceling a submission in team interface, also
+   the file uploads should be canceled.
+ - Fix verbose runguard output being visible to teams.
+ - Various documentation improvements and fixes.
 
 Version 3.4.0 - 22 July 2013
 ----------------------------
