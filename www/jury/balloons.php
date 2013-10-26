@@ -109,10 +109,9 @@ if ( !empty($BALLOONS) ) {
 
 		// the balloon earned
 		echo '<td class="probid">' .
-			'<img class="balloonimage" style="background-color: ' .
+			'<div class="circle" style="background-color: ' .
 		    htmlspecialchars($probs_data[$row['probid']]['color']) .
-			';" alt="problem colour ' . htmlspecialchars($probs_data[$row['probid']]['color']) .
-		    '" src="../images/circle.png" /> ' . htmlspecialchars($row['probid']) . '</td>';
+			';"></div> ' . htmlspecialchars($row['probid']) . '</td>';
 
 		// team name, location (room) and category
 		echo '<td class="teamid">' . htmlspecialchars($row['login']) . '</td><td>' .
@@ -124,12 +123,10 @@ if ( !empty($BALLOONS) ) {
 		sort($TOTAL_BALLOONS[$row['login']]);
 		$TOTAL_BALLOONS[$row['login']] = array_unique($TOTAL_BALLOONS[$row['login']]);
 		foreach($TOTAL_BALLOONS[$row['login']] as $prob_solved) {
-			echo '<img title="' . htmlspecialchars($prob_solved) .
-				'" class="balloonimage" style="background-color: ' .
+			echo '<div title="' . htmlspecialchars($prob_solved) .
+				'" class="circle" style="background-color: ' .
 				htmlspecialchars($probs_data[$prob_solved]['color']) .
-				';" alt="problem colour ' .
-				htmlspecialchars($probs_data[$row['probid']]['color']) .
-				'" src="../images/circle.png" /> ';
+				';"></div> ';
 		}
 		echo '</td><td>';
 

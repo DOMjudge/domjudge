@@ -31,7 +31,7 @@ a:active          { color: red;    }
 
 .disabled         { color: silver; }
 .disabled a       { color: gray;   }
-.disabled .balloonimage {
+.disabled .circle {
 	opacity: 0.2;
 	/* what follows is for IE-compatibility */
 	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
@@ -413,4 +413,12 @@ ul.tabbernav li.tabberactive a:hover
 }
 .tabberlive .tabbertab h2 {
 	display:none;
+}
+
+.circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: solid 1px black;
+    display: inline-block;
 }

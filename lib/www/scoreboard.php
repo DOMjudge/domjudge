@@ -295,9 +295,9 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 	foreach( $probs as $pr ) {
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">';
 		$str = htmlspecialchars($pr['probid']) .
-		       (!empty($pr['color']) ? ' <img style="background-color: ' .
-		        htmlspecialchars($pr['color']) . ';" alt="problem colour ' .
-		        htmlspecialchars($pr['color']) . '" src="../images/circle.png" />' : '' );
+		       (!empty($pr['color']) ? ' <div class="circle" style="background: ' .
+			htmlspecialchars($pr['color']) . ';"></div>' : '') ;
+
 		if ( IS_JURY || $pr['hastext']>0 ) {
 		     echo '<a href="problem.php?id=' . urlencode($pr['probid']) .
 			     '">' . $str . '</a></th>';

@@ -214,10 +214,9 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <tr><td>Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
 <?php
 if ( !empty($data['color']) ) {
-	echo '<tr><td>Colour:</td><td><img style="background-color: ' .
+	echo '<tr><td>Colour:</td><td><div class="circle" style="background-color: ' .
 		htmlspecialchars($data['color']) .
-		';" alt="problem colour ' . htmlspecialchars($data['color']) .
-		'" src="../images/circle.png" /> ' . htmlspecialchars($data['color']) .
+		';"></div> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
 }
 if ( !empty($data['problemtext_type']) ) {

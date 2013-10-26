@@ -61,10 +61,9 @@ if( $res->count() == 0 ) {
 			"</td>".
 			( !empty($row['color'])
 			? '<td title="' . htmlspecialchars($row['color']) .
-		      '">' . $link . '<img class="balloonimage" style="background-color: ' .
+		      '">' . $link . '<div class="circle" style="background-color: ' .
 			htmlspecialchars($row['color']) .
-		      ';" alt="problem colour ' . htmlspecialchars($row['color']) .
-		      '" src="../images/circle.png" /></a>'
+		      ';"></div></a>'
 			: '<td>' . $link . '&nbsp;</a>' );
 		echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
 		    "\">" . $row['testcases'] . "</a></td>";
