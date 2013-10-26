@@ -77,16 +77,16 @@ if ( ! isset($_POST['cancel']) ) {
 			auditlog($t, implode(', ', $prikey), 'updated');
 		}
 	}
-}
 
-// If the form contained uploadable files, process these now.
-if ( isset($_FILES['data']) ) {
-	foreach($_FILES['data']['tmp_name'] as $id => $tmpnames) {
-		foreach($tmpnames as $field => $tmpname) {
-			if ( !empty ($tmpname) ) { 
-				checkFileUpload($_FILES['data']['error'][$id][$field]);
-				$itemdata = array($field => file_get_contents($tmpname));
-				$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
+	// If the form contained uploadable files, process these now.
+	if ( isset($_FILES['data']) ) {
+		foreach($_FILES['data']['tmp_name'] as $id => $tmpnames) {
+			foreach($tmpnames as $field => $tmpname) {
+				if ( !empty ($tmpname) ) { 
+					checkFileUpload($_FILES['data']['error'][$id][$field]);
+					$itemdata = array($field => file_get_contents($tmpname));
+					$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
+				}
 			}
 		}
 	}
