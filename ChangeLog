@@ -10,6 +10,7 @@ Version 3.4.1 - DEV
    the file uploads should be canceled.
  - Fix verbose runguard output being visible to teams.
  - Various documentation improvements and fixes.
+ - Minor cosmetic CSS fix.
 
 Version 3.4.0 - 22 July 2013
 ----------------------------
