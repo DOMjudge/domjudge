@@ -15,6 +15,8 @@ judgedaemon: judgedaemon.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
+compare check_float runguard: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
+
 compare: $(LIBOBJECTS)
 
 check_float: -lm $(LIBOBJECTS)

@@ -33,6 +33,7 @@ else
 $(SUBMITCLIENT): LDFLAGS += $(CURL_LIBS)
 endif
 endif
+$(SUBMITCLIENT): LDFLAGS := $(filter-out -pie,$(LDFLAGS))
 endif
 
 SUBMITHEADERS = submitcommon.hxx $(TOPDIR)/etc/submit-config.h
