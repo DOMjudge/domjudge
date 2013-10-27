@@ -202,7 +202,6 @@ legend {
 .score_first     { background: #00AA00 !important; }
 .score_pending   { background: #6666FF; }
 .score_incorrect { background: #FF6666; }
-.score_neutral   { background: white;   }
 
 #scoresolv,#scoretotal { width: 5em; }
 .scorenc,.scorett,.scorepl { text-align: right; width: 2ex; }
@@ -334,7 +333,7 @@ h2#teamwelcome {
 	font-weight: normal;
 }
 #teamwelcometeam {
-	font-weight: bold;	
+	font-weight: bold;
 }
 h3#contestnotstarted {
 	color: silver;
