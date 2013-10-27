@@ -16,10 +16,8 @@ judgedaemon: judgedaemon.in $(TOPDIR)/paths.mk
 	chmod a+x $@
 
 compare: $(LIBOBJECTS)
-compare$(OBJEXT): $(LIBHEADERS)
 
 check_float: -lm $(LIBOBJECTS)
-check_float$(OBJEXT): -lm $(LIBHEADERS)
 
 runguard: -lm $(LIBCGROUP)
 runguard: CFLAGS += -std=c99
