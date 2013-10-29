@@ -29,8 +29,6 @@ $waittime = 5;
  * Returns a text to be sent when notifying of a new balloon.
  */
 function notification_text($team, $problem, $probs_solved, $probs_data, $comment) {
-	global $cdata;
-
 	$ret =
 		"A problem has been solved:\n".
 		"\n".

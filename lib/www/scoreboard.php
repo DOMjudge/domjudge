@@ -259,8 +259,6 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE,
 	$limitteams = null, $displayrank = TRUE, $center = FALSE, $showlegends = TRUE)
 {
-	$cid = $cdata['cid'];
-
 	// 'unpack' the scoreboard data:
 	$scores  = $sdata['scores'];
 	$matrix  = $sdata['matrix'];
