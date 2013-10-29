@@ -23,7 +23,7 @@ function updateClarifications(ajaxtitle)
 		if (handle.readyState == 4) {
 			var elem = document.getElementById('menu_clarifications');
 			var cnew = handle.responseText;
-			var newstr = ''
+			var newstr = '';
 			if (cnew == 0) {
 				elem.className = null;
 			} else {
@@ -35,7 +35,7 @@ function updateClarifications(ajaxtitle)
 				document.title = ajaxtitle + newstr;
 			}
 		}
-	}
+	};
 	handle.open("GET", "update_clarifications.php", true);
 	handle.send(null);
 }
@@ -186,7 +186,7 @@ function initFileUploads(maxfiles) {
 			fileadd.style.display = "none";
 		}
 	}
-	fileelt.onclick = function() { doReload = false; }
+	fileelt.onclick = function() { doReload = false; };
 	fileelt.onchange = fileelt.onmouseout = function () {
 		if ( this.value != "" ) {
 			detectProblemLanguage(this.value);
