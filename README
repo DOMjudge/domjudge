@@ -29,6 +29,11 @@ All documentation is also available online at the DOMjudge homepage:
 Please note that this documentation is from the latest stable
 release and thus might not apply to your version.
 
+A fresh copy of the repository source tree must first be bootstrapped,
+generating the configure script and documentation. This can be done
+by running 'make dist', see the online documentation, section
+"Developer information" for more details.
+
 
 Copyright & Licencing
 ---------------------
