@@ -201,7 +201,7 @@ function ldap_check_credentials($user, $pass)
 // referring page.
 function do_login()
 {
-	global $DB, $ip, $username, $teamdata;
+	global $DB, $ip, $username;
 
 	switch ( AUTH_METHOD ) {
 	// Generic authentication code for IPADDRESS and PHP_SESSIONS;
@@ -266,10 +266,6 @@ function do_login()
 
 		$username = $userdata['username'];
 
-		if ( !$teamid ) {
-			show_failed_login("You are not a member of a team. " .
-			                  "Please contact a staff member.");
-		}
 		session_start();
 		$_SESSION['username'] = $username;
 		auditlog('user', $userdata['userid'], 'logged in', $ip);
