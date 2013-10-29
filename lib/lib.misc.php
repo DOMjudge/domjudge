@@ -379,7 +379,7 @@ function daemonize($pidfile = NULL)
 		}
 		$str = "$pid\n";
 		if ( @fwrite($fd, $str)!=strlen($str) ) {
-			error(errno, "failed writing PID to file");
+			error("failed writing PID to file");
 		}
 		register_shutdown_function('unlink', $pidfile);
 	}
