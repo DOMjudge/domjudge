@@ -394,14 +394,14 @@ class db_result
 			throw new BadMethodCallException(
 			    'Result does not contain a valid resource.');
 		}
-		$this->tuple = mysqli_fetch_assoc($this->_result);
+		$this->_tuple = mysqli_fetch_assoc($this->_result);
 		$this->_nextused = TRUE;
-		if (is_null ($this->tuple) )
+		if (is_null ($this->_tuple) )
 		{
 			$this->free();
 			return FALSE;
 		}
-		return $this->tuple;
+		return $this->_tuple;
 	}
 
 	public function getcolumn($field=NULL)
@@ -413,7 +413,7 @@ class db_result
 		$col = array();
 		while($this->next())
 		{
-			$col[]=$field?$this->tuple[$field]:current($this->tuple);
+			$col[]=$field?$this->_tuple[$field]:current($this->_tuple);
 		}
 		return $col;
 	}
@@ -428,7 +428,7 @@ class db_result
 		$table = array();
 		while ($this->next())
 		{
-			$table[] = $this->tuple;
+			$table[] = $this->_tuple;
 		}
 		return $table;
 	}
@@ -443,7 +443,7 @@ class db_result
 		}
 		$table = array();
 		while ($this->next()) {
-			$table[$this->tuple[$key]] = $this->tuple;
+			$table[$this->_tuple[$key]] = $this->_tuple;
 		}
 		return $table;
 	}
@@ -464,8 +464,8 @@ class db_result
 
 		$table = array();
 		while ($this->next()) {
-			$key = array_shift($this->tuple);
-			$value = array_shift($this->tuple);
+			$key = array_shift($this->_tuple);
+			$value = array_shift($this->_tuple);
 			$table[$key] = $value;
 		}
 		return $table;
