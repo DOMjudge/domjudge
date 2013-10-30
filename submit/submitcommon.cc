@@ -101,7 +101,7 @@ int receive(int fd)
 {
 	char buffer[SOCKETBUFFERSIZE];
 	ssize_t nread;
-	int i,j;
+	int i;
 
 	if ( (nread = read(fd, buffer, SOCKETBUFFERSIZE-2)) == -1 ) {
 		error(errno,"reading from socket");
