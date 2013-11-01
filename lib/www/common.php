@@ -503,3 +503,46 @@ function putProblemText($probid)
 
 	exit(0);
 }
+
+/**
+ * Outputs bulletet list of problem statements for this contest
+ */
+function putProblemTextList()
+{
+	global $cid, $cdata, $DB;
+	$fdata = calcFreezeData($cdata);
+
+	if ( ! have_problemtexts() ) {
+		echo "<p class=\"nodata\">No problem texts available for this contest.</p>\n\n";
+	} elseif ( !$fdata['cstarted'] ) {
+		echo "<p class=\"nodata\">Problem texts will appear here at contest start.</p>\n\n";
+	} else {
+	 
+		// otherwise, display list
+		$res = $DB->q('SELECT p.probid,p.name,p.color,p.problemtext_type
+			FROM problem p WHERE cid = %i AND allow_submit = 1 AND
+			problemtext_type IS NOT NULL ORDER BY p.probid', $cid);
+
+		if ( $res->count() > 0 ) {
+			echo "<ul>\n";
+			while($row = $res->next()) {
+				print '<li> ' .
+				      '<img src="../images/' . urlencode($row['problemtext_type']) .
+				      '.png" alt="' . htmlspecialchars($row['problemtext_type']) .
+				      '" /> <a href="?id=' . urlencode($row['probid']) . '">' .
+				      'Problem ' . htmlspecialchars($row['name']) . "</a></li>\n";
+			}
+			echo "</ul>\n";
+		}
+	}
+}
+
+/**
+ * Returns true if at least one problem in the current contest has a
+ * problem statement text in the database.
+ */
+function have_problemtexts()
+{
+	global $DB, $cid;
+	return $DB->q('VALUE SELECT COUNT(*) FROM problem WHERE problemtext_type IS NOT NULL AND cid = %i', $cid) > 0;
+}

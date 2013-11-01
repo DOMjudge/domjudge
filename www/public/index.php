@@ -25,7 +25,6 @@ if ( !isset($_GET['clear']) ) {
 
 $menu = true;
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/scoreboard.php');
 
 $isstatic = @$_SERVER['argv'][1] == 'static' || isset($_REQUEST['static']);
 

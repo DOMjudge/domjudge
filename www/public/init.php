@@ -18,6 +18,7 @@ setup_database_connection();
 require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/print.php');
 require_once(LIBWWWDIR . '/auth.php');
+require_once(LIBWWWDIR . '/scoreboard.php');
 
 $cdata = getCurContest(TRUE);
 $cid = (int)$cdata['cid'];

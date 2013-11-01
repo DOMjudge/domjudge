@@ -4,6 +4,10 @@ echo "<nav><div id=\"menutop\">\n";
 
 echo "<a target=\"_top\" href=\"index.php\" accesskey=\"o\">overview</a>\n";
 
+if ( have_problemtexts() ) {
+	echo "<a target=\"_top\" href=\"problem.php\" accesskey=\"t\">problems</a>\n";
+}
+
 if ( have_printing() ) {
 	echo "<a target=\"_top\" href=\"print.php\" accesskey=\"p\">print</a>\n";
 }
