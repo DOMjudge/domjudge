@@ -285,11 +285,11 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 	// column headers
 	echo "<thead>\n";
 	echo '<tr class="scoreheader">' .
-		'<th title="rank" scope="col">' . jurylink(null,'#') . '</th>' .
-		( $SHOW_AFFILIATIONS ? '<th title="team affiliation" scope="col">' .
-		jurylink('team_affiliations.php','affil.') . '</th>' : '' ) .
-		'<th title="team name" scope="col">' . jurylink('teams.php','team') . '</th>' .
-		'<th title="# solved / penalty time" colspan="2" scope="col">' . jurylink(null,'score') . "</th>\n";
+		'<th title="rank" scope="col">' . jurylink(null,'rank') . '</th>' .
+		( $SHOW_AFFILIATIONS ? '<th title="team affiliation" scope="col" style="border-right: 0;"/>'
+		: '' ) .
+		'<th title="team name" scope="col"/>' .
+		'<th title="# solved / penalty time" colspan="2" scope="col"/>' . "\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">';
 		$str = htmlspecialchars($pr['probid']) .
@@ -343,6 +343,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 					echo '<a href="team_affiliation.php?id=' .
 						urlencode($teams[$team]['affilid']) . '">';
 				}
+				/*
 				$affillogo = '../images/affiliations/' .
 					urlencode($teams[$team]['affilid']) . '.png';
 				if ( is_readable($affillogo) ) {
@@ -352,6 +353,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 				} else {
 					echo htmlspecialchars($teams[$team]['affilid']);
 				}
+				 */
 				if ( isset($teams[$team]['country']) ) {
 					$countryflag = '../images/countries/' .
 						urlencode($teams[$team]['country']) . '.png';
@@ -368,12 +370,17 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 			}
 			echo '</td>';
 		}
+		$affilname = '';
+		if ( $SHOW_AFFILIATIONS && isset($teams[$team]['affilid']) ) {
+				$affilname = htmlspecialchars($teams[$team]['affilname']);
+		}
 		echo
 			'<td class="scoretn"' .
 			(!empty($color) ? ' style="background: ' . $color . ';"' : '') .
 			(IS_JURY ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
 			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
-			htmlspecialchars($teams[$team]['name']) .
+			htmlspecialchars($teams[$team]['name']) . '<br />' .
+			'<span class="univ">' . $affilname . '</span>' . 
 			($static ? '' : '</a>') .
 			'</td>';
 		echo
@@ -404,8 +411,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 			}
 			// if correct, print time scored
 			if( $matrix[$team][$prob]['is_correct'] ) {
-				$str .= ' (' . $matrix[$team][$prob]['time'] . ' + ' .
-				               $matrix[$team][$prob]['penalty'] . ')';
+				$str .= '/' . $matrix[$team][$prob]['time'];
 			}
 			echo '>' . jurylink('team.php?id=' . urlencode($team) .
 								'&amp;restrict=probid:' . urlencode($prob),
@@ -417,8 +423,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 
 	if ( empty($limitteams) ) {
 		// print a summaryline
-		echo '<tbody><tr id="scoresummary" title="#submitted' .
-		    ( $SHOW_PENDING ? ' + #pending' : '' ) . ' / #correct / fastest time">' .
+		echo '<tbody><tr id="scoresummary" title="#submitted / #correct">' .
 			'<td title="total teams">' .
 			jurylink(null,count($matrix)) . '</td>' .
 			( $SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
@@ -428,12 +433,8 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 			'<td title="total solved" class="scorenc">' . jurylink(null,$summary['num_correct'])  . '</td><td title=" "></td>';
 
 		foreach( array_keys($probs) as $prob ) {
-			$str = $summary['problems'][$prob]['num_submissions'] .
-			       ( $SHOW_PENDING ? ' + ' .
-			         $summary['problems'][$prob]['num_pending'] : '' ) . ' / ' .
-			       $summary['problems'][$prob]['num_correct'] . ' / ' .
-				   ( isset($summary['problems'][$prob]['best_time']) ?
-					 $summary['problems'][$prob]['best_time'] : '-' );
+			$str = $summary['problems'][$prob]['num_submissions'] . '/' .
+			       $summary['problems'][$prob]['num_correct'];
 			echo '<td>' .
 				jurylink('problem.php?id=' . urlencode($prob),$str) .
 				'</td>';

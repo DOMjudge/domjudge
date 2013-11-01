@@ -77,7 +77,7 @@ tr.unread td {
 	padding-right: 3px;
 }
 td {
-	text-align: center;
+	vertical-align: top;
 }
 
 .list tr { border-bottom: 1px solid silver; }
@@ -179,7 +179,11 @@ legend {
 .center { margin: 0px auto; }
 
 .scoreboard { border-collapse: collapse; }
-.scoreboard td { font-size: small; }
+.scoreboard td { 
+	font-size: small;
+	vertical-align: middle;
+	text-align: center;
+}
 .scoreboard tr { border-bottom: 1px solid black; }
 .scoreboard td, .scoreboard th {
 	border-right: 1px solid silver;
