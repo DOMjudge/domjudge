@@ -304,6 +304,10 @@ function getRank(row) {
 	return row.getElementsByTagName("td")[0];
 }
 
+function getHeartCol(row) {
+	return row.getElementsByTagName("td")[1];
+}
+
 function getTeamname(row) {
 	return row.getElementsByTagName("td")[2];
 }
@@ -347,9 +351,9 @@ function toggle(id, show) {
 }
 
 function addHeart(rank, row, id, isFav) {
-	var firstCol = getRank(row);
+	var heartCol = getHeartCol(row);
 	var color = isFav ? "red" : "gray";
-	return "<span style=\"cursor:pointer;color:" + color + ";\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\">&#9829;</span>" + firstCol.innerHTML;
+	return heartCol.innerHTML + "<span style=\"cursor:pointer;color:" + color + ";\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\">&#9829;</span>";
 }
 
 function initFavouriteTeams() {
@@ -369,11 +373,12 @@ function initFavouriteTeams() {
 			continue;
 		}
 		var firstCol = getRank(scoreboard[j]);
+		var heartCol = getHeartCol(scoreboard[j]);
 		var rank = firstCol.innerHTML;
 		for (var i = 0; i < favTeams.length; i++) {
 			if (teamname.innerHTML == favTeams[i]) {
 				found = true;
-				firstCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
+				heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
 				toAdd[cntFound] = scoreboard[j].cloneNode(true);
 				if (rank == "") {
 					// make rank explicit in case of tie
@@ -385,7 +390,7 @@ function initFavouriteTeams() {
 			}
 		}
 		if (!found) {
-			firstCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
+			heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
 		}
 		if (rank != "") {
 			lastRank = rank;
