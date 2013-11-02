@@ -19,15 +19,11 @@ setup_database_connection();
 require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/auth.php');
 
+$target = 'public/';
 if ( logged_in() ) {
-    if (checkrole('team'))
-	   $target = 'team/';
-    elseif (checkrole('jury'))
-        $target = 'jury/';
-    elseif (checkrole('balloon'))
-        $target = 'jury/balloons.php';
-} else {
-	$target = 'public/';
+	if     ( checkrole('team',false) ) $target = 'team/';
+	elseif ( checkrole('jury') )       $target = 'jury/';
+	elseif ( checkrole('balloon') )    $target = 'jury/balloons.php';
 }
 
 header('HTTP/1.1 302 Please see this page');

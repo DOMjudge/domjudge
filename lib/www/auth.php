@@ -17,14 +17,19 @@ $username = NULL;
 $teamdata = NULL;
 $userdata = NULL;
 
-function checkrole($rolename) {
+// Check if current user has given role, or has superset of this role's
+// privileges
+function checkrole($rolename, $check_superset = TRUE) {
 	global $userdata;
 	if ( empty($userdata) || !array_key_exists('roles', $userdata) ) {
 		return false;
 	}
-	if ( in_array($rolename, $userdata['roles']) ||
-		 in_array('admin',   $userdata['roles'])) {
-		return true;
+	if ( in_array($rolename, $userdata['roles']) ) return true;
+	if ( $check_superset ) {
+		if ( in_array('admin', $userdata['roles']) &&
+		     ($rolename!='team' || $userdata['teamid']!=NULL) ) {
+			return true;
+		}
 	}
 	return false;
 }
