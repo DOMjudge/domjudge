@@ -505,7 +505,7 @@ function putProblemText($probid)
 }
 
 /**
- * Outputs bulletet list of problem statements for this contest
+ * Outputs bulleted list of problem statements for this contest
  */
 function putProblemTextList()
 {
@@ -530,7 +530,8 @@ function putProblemTextList()
 				      '<img src="../images/' . urlencode($row['problemtext_type']) .
 				      '.png" alt="' . htmlspecialchars($row['problemtext_type']) .
 				      '" /> <a href="?id=' . urlencode($row['probid']) . '">' .
-				      'Problem ' . htmlspecialchars($row['name']) . "</a></li>\n";
+				      'Problem ' . htmlspecialchars($row['probid']) . ': ' .
+				      htmlspecialchars($row['name']) . "</a></li>\n";
 			}
 			echo "</ul>\n";
 		}
