@@ -36,7 +36,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	                $cid, now(), $teamid,
 	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
 	                $_POST['bodytext']);
-	
+
 	auditlog('clarification', $newid, 'added');
 
 	// redirect back to the original location

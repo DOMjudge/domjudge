@@ -86,7 +86,7 @@ function highlight_geshi ($source, $ext)
 	if ( $geshi->error()===FALSE ) {
 		return $geshi->parse_code();
 	}
-	
+
 	return highlight_native($source, $ext);
 }
 

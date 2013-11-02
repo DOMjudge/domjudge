@@ -421,7 +421,7 @@ function submissions($args)
 $args = array('language' => 'Search only for submissions in a certain language.',
               'submitid' => 'Search only a certain ID',
               'fromid' => 'Search from a certain ID',
-	      'limit' => 'Get only the first N submissions');
+              'limit' => 'Get only the first N submissions');
 $doc = 'Get a list of all submissions. Should we give away all info about submissions? Or is there something we would like to hide, for example language?';
 $exArgs = array(array('fromid' => 100, 'limit' => 10), array('language' => 'cpp'));
 $api->provideFunction('GET', 'submissions', 'submissions', $doc, $args, $exArgs);

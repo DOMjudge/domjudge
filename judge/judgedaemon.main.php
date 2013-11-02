@@ -79,7 +79,7 @@ function dj_json_decode($str) {
 	if ( $res === NULL ) {
 		error("Error retrieving API data. API gave us: " . $str);
 	}
-	return $res;	
+	return $res;
 }
 
 $waittime = 5;
@@ -319,7 +319,7 @@ function judge($row)
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}
 
-	// Make sure the workdir is accessible for the domjudge-run user.	
+	// Make sure the workdir is accessible for the domjudge-run user.
 	// Will be revoked again after this run finished.
 	chmod ($workdir, 0755);
 
@@ -330,7 +330,7 @@ function judge($row)
 
 		// empty means: no more testcases for this judging.
 		if ( empty($tc) ) break;
-		
+
 		logmsg(LOG_DEBUG, "Running testcase $tc[rank]...");
 		$testcasedir = $workdir . "/testcase" . sprintf('%03d', $tc['rank']);
 

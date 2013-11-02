@@ -119,8 +119,7 @@ function rejudgeForm($table, $id)
  * Returns TRUE iff string $haystack ends with string $needle
  */
 function ends_with($haystack, $needle) {
-	return mb_substr( $haystack, mb_strlen( $haystack ) - mb_strlen( $needle ) )
-       		=== $needle;
+	return mb_substr($haystack, mb_strlen($haystack)-mb_strlen($needle)) === $needle;
 }
 
 /**

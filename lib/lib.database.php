@@ -4,7 +4,7 @@
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
- * 
+ *
  * Originally based on: lib.database.php 1.4.1, Copyright (C) 2001-2010
  * Jeroen van Wolffelaar <jeroen@php.net>, et al.; licenced under the
  * GNU GPL version 2 or higher.
@@ -299,7 +299,7 @@ class db
 	{
 		if($this->_connection) return;
 
-		$pers = ( $this->persist && version_compare(PHP_VERSION, '5.3', '>=') ) ? "p:" : ""; 
+		$pers = ( $this->persist && version_compare(PHP_VERSION, '5.3', '>=') ) ? "p:" : "";
 		if(!function_exists('mysqli_real_connect')) {
 			throw new RuntimeException("PHP database module missing "
 			    . "(no such function: 'mysqli_real_connect')");

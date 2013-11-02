@@ -28,20 +28,20 @@ if ( @$_POST['cmd']=='login' ) do_login();
 if ( !logged_in() ) show_loginpage();
 
 if ( checkrole('admin') ) {
-    define('IS_ADMIN', true);
+	define('IS_ADMIN', true);
 } else {
-    define('IS_ADMIN', false);
+	define('IS_ADMIN', false);
 }
 
 if ( !isset($REQUIRED_ROLES) ) $REQUIRED_ROLES = array('jury');
 $allowed = false;
 foreach ($REQUIRED_ROLES as $role) {
-    if ( checkrole($role) ) {
-        $allowed = true;
-    }
+	if ( checkrole($role) ) {
+		$allowed = true;
+	}
 }
 if (!$allowed) {
-    error("You do not have permission to perform that action(Missing role(s): " . implode($REQUIRED_ROLES,',') . ")");
+	error("You do not have permission to perform that action(Missing role(s): " . implode($REQUIRED_ROLES,',') . ")");
 }
 
 require_once(LIBWWWDIR . '/common.jury.php');

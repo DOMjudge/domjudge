@@ -615,7 +615,7 @@ There are three different methods for installing DOMjudge:
 		writable by the web server for this feature to work.
 		<tag><tt>judgings</tt></tag>
 		location on judgehosts where submissions are tested,
-		each in its own subdirectory. 
+		each in its own subdirectory.
 	</descrip>
 
 	This method of installation is the default and probably most
@@ -1231,13 +1231,13 @@ GeSHi is included by default under the <tt>lib/ext/</tt> dir.
 <sect2>PEAR Text Highlighter
 <p>
 If you prefer the PEAR Text Highlighter, first move away the
-<tt>lib/ext/geshi</tt> directory. 
+<tt>lib/ext/geshi</tt> directory.
 You can install the Text Highlighter system wide with the
 PEAR-provided tools, like this: <tt>pear install Text_Highlighter</tt>.
 Alternatively you can download the source code from the
 Text_Highlighter website and unpack that under the <tt>lib/ext/</tt>
 directory on the domserver. Rename the
-resulting <tt>Text_Highlighter-x.y.z</tt> directory to just <tt>Text</tt>. 
+resulting <tt>Text_Highlighter-x.y.z</tt> directory to just <tt>Text</tt>.
 
 <sect1>NTP time synchronisation
 <p>
@@ -1256,7 +1256,7 @@ and allows teams to print from within their editor.
 If this is not feasible, DOMjudge includes support for printing via
 the DOMjudge web interface: the DOMjudge server then needs to be
 able to deliver the uploaded files to the printer. It can be
-enabled via the <tt>enable_printing</tt> configuration option in 
+enabled via the <tt>enable_printing</tt> configuration option in
 the administrator interface. The exact command used to send the
 files to a printer can be changed the function <tt>send_print()</tt>
 in <tt>lib/www/printing.php</tt>.
@@ -1499,7 +1499,7 @@ field indicate when/whether/from where a team visited its team web interface.
 
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the
-institution. <tt>country</tt> should be the 3 character 
+institution. <tt>country</tt> should be the 3 character
 <htmlurl name="ISO 3166-1 alpha-3 abbreviation"
 url="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Officially_assigned_code_elements">
 of the country and <tt>comments</tt> is a free form field
@@ -2498,7 +2498,7 @@ url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">.
 <sect>Maintainer mode installation
 <p>
 
-Besides the two modes of installation described in section 
+Besides the two modes of installation described in section
 <ref id="install_config:installsystem" name="Installation system">,
 DOMjudge provides a special maintainer mode installation.
 This method does an in-place installation within the source

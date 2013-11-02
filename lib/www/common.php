@@ -517,11 +517,11 @@ function putProblemTextList()
 	} elseif ( !$fdata['cstarted'] ) {
 		echo "<p class=\"nodata\">Problem texts will appear here at contest start.</p>\n\n";
 	} else {
-	 
+
 		// otherwise, display list
 		$res = $DB->q('SELECT p.probid,p.name,p.color,p.problemtext_type
-			FROM problem p WHERE cid = %i AND allow_submit = 1 AND
-			problemtext_type IS NOT NULL ORDER BY p.probid', $cid);
+		               FROM problem p WHERE cid = %i AND allow_submit = 1 AND
+		               problemtext_type IS NOT NULL ORDER BY p.probid', $cid);
 
 		if ( $res->count() > 0 ) {
 			echo "<ul>\n";

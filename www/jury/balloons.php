@@ -135,7 +135,7 @@ if ( !empty($BALLOONS) ) {
 			echo '<input type="submit" name="done[' .
 				(int)$row['balloonid'] . ']" value="done" />';
 		}
-		
+
 		echo '</td><td>';
 
 		$comments = array();
@@ -144,7 +144,7 @@ if ( !empty($BALLOONS) ) {
 		} else {
 			if ( $first_team[$row['login']] == $row['balloonid'] ) {
 				$comments[] = 'first for team';
-			}	
+			}
 			if ( $first_problem[$row['probid']] == $row['balloonid'] ) {
 				$comments[] = 'first for problem';
 			}
