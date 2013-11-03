@@ -350,7 +350,7 @@ void output_cgroup_stats()
 		error(0,"get cgroup value: %s(%d)", cgroup_strerror(ret), ret);
 	}
 
-	verbose("total memory used: %" PRId64 " kB\n", max_usage/1024);
+	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
 
 	cgroup_free(&cg);
 }
@@ -383,7 +383,7 @@ void cgroup_create()
 		cgroup_add_value_string(cg_controller, "cpuset.mems", "0");
 		cgroup_add_value_string(cg_controller, "cpuset.cpus", cpuset);
 	} else {
-		verbose("cpuset undefined\n");
+		verbose("cpuset undefined");
 	}
 
 	/* Perform the actual creation of the cgroup */

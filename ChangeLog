@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 3.4.2 - DEV
 -------------------
+ - Fix duplicate newlines being printed in runguard.
 
 Version 3.4.1 - 3 November 2013
 -------------------------------
