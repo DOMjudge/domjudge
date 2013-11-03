@@ -10,6 +10,7 @@
 define('DOMJUDGE_API_VERSION', 1);
 
 define('BAD_REQUEST', '400 Bad Request');
+define('FORBIDDEN', '403 Forbidden');
 define('METHOD_NOT_ALLOWED', '405 Method Not Allowed');
 define('INTERNAL_SERVER_ERROR', '500 Internal Server Error');
 
@@ -28,7 +29,7 @@ class RestApi {
 	 * $exArgs        Example usage of arguments
 	 */
 	public function provideFunction($httpMethod, $name, $callback, $docs = '',
-	                                $optArgs = array(), $exArgs = array())
+	                                $optArgs = array(), $exArgs = array(), $roles = null)
 	{
 		if ( $httpMethod != 'GET' && $httpMethod != 'POST' && $httpMethod != 'PUT' ) {
 			$this->createError("Only get/post/put methods supported.", INTERNAL_SERVER_ERROR);
@@ -39,7 +40,8 @@ class RestApi {
 		$this->apiFunctions[$name . '#' . $httpMethod] = array("callback" => $callback,
 		                                   "optArgs" => $optArgs,
 		                                   "docs" => $docs,
-		                                   "exArgs" => $exArgs);
+		                                   "exArgs" => $exArgs,
+		                                   "roles" => $roles);
 	}
 
 	/**
@@ -47,8 +49,8 @@ class RestApi {
 	 */
 	public function provideApi()
 	{
-		if ( !isset($_GET['handler']) ) {
-			$this->createError("Handler not set.", INTERNAL_SERVER_ERROR);
+		if ( !isset($_SERVER['PATH_INFO']) ) {
+			$this->createError("PATH_INFO not set.", INTERNAL_SERVER_ERROR);
 		}
 
 		if ( $_SERVER['REQUEST_METHOD'] != 'GET' &&
@@ -57,8 +59,8 @@ class RestApi {
 			$this->createError("Only get/post/put methods supported.", METHOD_NOT_ALLOWED);
 		}
 
-		$handler = $_GET['handler'];
-		unset($_GET['handler']);
+		// trim off starting / of path_info
+		$handler = preg_replace('#^/#', '', $_SERVER['PATH_INFO']);
 		if ( empty($handler) ) {
 			$this->showDocs();
 		} else {
@@ -87,6 +89,21 @@ class RestApi {
 			$this->createError("Function '" . $name . "' does not exist.", BAD_REQUEST);
 		}
 		$func = $this->apiFunctions[$name];
+		// Permissions
+		// no roles = anyone may access; admin may also access all
+		if ( !empty($func['roles']) && !checkrole('admin') ) {
+			$hasrole = false;
+			foreach ($func['roles'] as $role) {
+				if ( checkrole($role) ) {
+					$hasrole = TRUE; break;
+				}
+			}
+			if  ( ! $hasrole ) {
+				$this->createError("Permission denied " . 
+				                   "' for function '" . $name . "'.", FORBIDDEN);
+			}
+		}
+
 		// Arguments
 		$args = array();
 		foreach ( $arguments as $key => $value ) {
@@ -104,6 +121,7 @@ class RestApi {
 	 */
 	public function showDocs()
 	{
+		global $userdata;
 		ksort($this->apiFunctions);
 
 		print "<!DOCTYPE html>\n";
@@ -117,6 +135,16 @@ class RestApi {
 		print "<p>Welcome to the DOMjudge REST API.<br />";
 		print "This is API version: " . DOMJUDGE_API_VERSION . "<br />\n";
 		print "running on DOMjudge version: " . DOMJUDGE_VERSION . "</p>\n";
+		print "<p>You are: ";
+		if ( empty($userdata) ) {
+			print "anonymous user";
+		} else {
+			print htmlspecialchars($userdata['username']) . " with roles ";
+			$roles = $userdata['roles'];
+			if ( !empty($userdata['teamid']) ) $roles[] = "team(".$userdata['teamid'].")";
+			print implode(", ", $roles);
+		}
+		print "</p>\n";
 		print "<p>The supported functions are:</p>\n";
 		print "<dl>\n";
 		foreach ( $this->apiFunctions as $key => $func ) {
@@ -140,6 +168,9 @@ class RestApi {
 					print "</p>\n";
 				}
 			}
+			print "<p>Required roles: ";
+			print empty($func['roles']) ? "none" : implode (" or ", $func['roles']);
+			print "</p>\n";
 			print "</dd>\n";
 		}
 		print "</dl>\n";

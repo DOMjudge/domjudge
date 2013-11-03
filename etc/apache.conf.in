@@ -15,6 +15,7 @@
 #<VirtualHost *>
 #ServerName _default_
 #DocumentRoot @domserver_wwwdir@
+#Alias /api @domserver_wwwdir@/index.php
 #</VirtualHost>
 
 # Alternatively, use HTTPS and redirect HTTP to HTTPS:
@@ -43,8 +44,8 @@
 # want DOMjudge in the root, but only occupy a subdir, like this:
 # www.example.com/domjudge
 
+Alias /domjudge/api @domserver_wwwdir@/api/index.php
 Alias /domjudge @domserver_wwwdir@
-
 
 ### General options ###
 #

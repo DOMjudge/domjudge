@@ -6,23 +6,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-require_once('../configure.php');
+require('init.php');
 
-if ( ! defined('IS_JURY') ) define('IS_JURY', false);
-
-// TODO: use IS_JURY constant in code below for access rights
-
-require_once(LIBDIR . '/init.php');
-
-setup_database_connection();
-
-require_once(LIBWWWDIR . '/common.php');
-require_once(LIBWWWDIR . '/print.php');
-require_once(LIBWWWDIR . '/scoreboard.php');
-require_once(LIBWWWDIR . '/restapi.php');
-
-$cdata = getCurContest(TRUE);
-$cid = (int)$cdata['cid'];
 
 
 function infreeze($time)
@@ -95,10 +80,8 @@ function judgings($args)
 {
 	global $cid, $DB;
 
-	$query = 'SELECT submitid, judgingid, eventtime FROM event WHERE cid = %i';
-	if ( !IS_JURY ) {
-		$query .= ' AND description = "problem judged"';
-	}
+	$query = 'SELECT submitid, judgingid, eventtime FROM event WHERE cid = %i' .
+	         ' AND description = "problem judged"';
 
 	$hasFromid = array_key_exists('fromid', $args);
 	$query .= ($hasFromid ? ' AND judgingid >= %i' : ' AND TRUE %_');
@@ -123,8 +106,6 @@ function judgings($args)
 			        WHERE j.judgingid = %i', $row['judgingid']);
 		if ($data == NULL) continue;
 
-		if ( !IS_JURY && infreeze($data['submittime']) ) continue;
-
 		// This should be encoded directly in the query
 		if ( array_key_exists('result', $args) &&
 		     $args['result'] != $data['result'] ) continue;
@@ -136,13 +117,14 @@ function judgings($args)
 	}
 	return $res;
 }
-$doc = 'Get all judgings. Jury only? Or provide some limited list for the public?';
+$doc = 'Get all judgings (including those post-freeze, so currently limtied to jury).';
 $args = array('result' => 'Search only for judgings with a certain result.',
               'fromid' => 'Search from a certain ID',
               'judgingid' => 'Search only for a certain ID',
               'limit' => 'Get only the first N judgings');
 $exArgs = array(array('result' => 'correct'), array('fromid' => 800, 'limit' => 10));
-$api->provideFunction('GET', 'judgings', 'judgings', $doc, $args, $exArgs);
+$roles = array('jury');
+$api->provideFunction('GET', 'judgings', 'judgings', $doc, $args, $exArgs, $roles);
 
 function judgings_POST($args)
 {
@@ -217,9 +199,8 @@ function judgings_POST($args)
 $doc = 'Request a new judging to be judged.';
 $args = array('judgehost' => 'Judging is to be judged by this specific judgehost.');
 $exArgs = array();
-if ( IS_JURY ) {
-	$api->provideFunction('POST', 'judgings', 'judgings_POST', $doc, $args, $exArgs);
-}
+$roles = array('judgehost');
+$api->provideFunction('POST', 'judgings', 'judgings_POST', $doc, $args, $exArgs, $roles);
 
 function judgings_PUT($args)
 {
@@ -262,9 +243,8 @@ $args = array('judgingid' => 'Judging corresponds to this specific judgingid.',
 	'compile_success' => 'Did the compilation succeed?',
 	'output_compile' => 'Ouput of compilation phase.');
 $exArgs = array();
-if ( IS_JURY ) {
-	$api->provideFunction('PUT', 'judgings', 'judgings_PUT', $doc, $args, $exArgs);
-}
+$roles = array('judgehost');
+$api->provideFunction('PUT', 'judgings', 'judgings_PUT', $doc, $args, $exArgs, $roles);
 
 /**
  * Judging_Runs
@@ -359,9 +339,8 @@ $args = array('judgingid' => 'Judging_run corresponds to this specific judgingid
 	'output_error' => 'Program error output of this run.',
 	'judgehost' => 'Judgehost performing this judging');
 $exArgs = array();
-if ( IS_JURY ) {
-	$api->provideFunction('POST', 'judging_runs', 'judging_runs_POST', $doc, $args, $exArgs);
-}
+$roles = array('judgehost');
+$api->provideFunction('POST', 'judging_runs', 'judging_runs_POST', $doc, $args, $exArgs, $roles);
 
 /**
  * DB configuration
@@ -447,9 +426,8 @@ function submission_files($args)
 $args = array('submitid' => 'Get only the corresponding submission files.');
 $doc = 'Get a list of all submission files. The file contents will be base64 encoded.';
 $exArgs = array(array('submitid' => 3));
-if ( IS_JURY ) {
-	$api->provideFunction('GET', 'submission_files', 'submission_files', $doc, $args, $exArgs);
-}
+$roles = array('jury','judgehost');
+$api->provideFunction('GET', 'submission_files', 'submission_files', $doc, $args, $exArgs, $roles);
 
 /**
  * Testcases
@@ -479,9 +457,9 @@ function testcases($args)
 }
 $args = array('judgingid' => 'Get the next-to-judge testcase for this judging.');
 $doc = 'Get a testcase.';
-if ( IS_JURY ) {
-	$api->provideFunction('GET', 'testcases', 'testcases', $doc, $args);
-}
+$exArgs = array();
+$roles = array('jury','judgehost');
+$api->provideFunction('GET', 'testcases', 'testcases', $doc, $args, $exArgs, $roles);
 
 function testcase_files($args)
 {
@@ -510,10 +488,8 @@ $args = array('testcaseid' => 'Get only the corresponding testcase.',
 	'output' => 'Get the output file.');
 $doc = 'Get a testcase file.';
 $exArgs = array(array('testcaseid' => '3', 'input' => TRUE));
-if ( IS_JURY ) {
-	$api->provideFunction('GET', 'testcase_files', 'testcase_files', $doc, $args, $exArgs);
-}
-
+$roles = array('jury','judgehost');
+$api->provideFunction('GET', 'testcase_files', 'testcase_files', $doc, $args, $exArgs, $roles);
 
 /**
  * Judging Queue
@@ -559,9 +535,8 @@ function queue($args)
 $args = array('limit' => 'Get only the first N queued submissions');
 $doc = 'Get a list of all queued submission ids.';
 $exArgs = array(array('limit' => 10));
-if ( IS_JURY ) {
-	$api->provideFunction('GET', 'queue', 'queue', $doc, $args, $exArgs);
-}
+$roles = array('jury','judgehost');
+$api->provideFunction('GET', 'queue', 'queue', $doc, $args, $exArgs, $roles);
 
 /**
  * Affiliation information
@@ -707,9 +682,8 @@ function judgehosts($args)
 $doc = 'Get a list of judgehosts.';
 $args = array('hostname' => 'Search only for judgehosts with given hostname.');
 $exArgs = array(array('hostname' => 'sparehost'));
-if ( IS_JURY ) {
-	$api->provideFunction('GET', 'judgehosts', 'judgehosts', $doc, $args, $exArgs);
-}
+$roles = array('jury');
+$api->provideFunction('GET', 'judgehosts', 'judgehosts', $doc, $args, $exArgs, $roles);
 
 function judgehosts_POST($args)
 {
@@ -742,9 +716,8 @@ function judgehosts_POST($args)
 $doc = 'Add a new judgehost to the list of judgehosts. Also restarts (and returns) unfinished judgings.';
 $args = array('hostname' => 'Add this specific judgehost and activate it.');
 $exArgs = array(array('hostname' => 'judge007'));
-if ( IS_JURY ) {
-	$api->provideFunction('POST', 'judgehosts', 'judgehosts_POST', $doc, $args, $exArgs);
-}
+$roles = array('judgehost');
+$api->provideFunction('POST', 'judgehosts', 'judgehosts_POST', $doc, $args, $exArgs, $roles);
 
 function judgehosts_PUT($args)
 {
@@ -765,10 +738,8 @@ function judgehosts_PUT($args)
 $doc = 'Update the configuration of a judgehost.';
 $args = array('active' => 'Activate judgehost?');
 $exArgs = array();
-if ( IS_JURY ) {
-	$api->provideFunction('PUT', 'judgehosts', 'judgehosts_PUT', $doc, $args, $exArgs);
-}
-
+$roles = array('judgehost');
+$api->provideFunction('PUT', 'judgehosts', 'judgehosts_PUT', $doc, $args, $exArgs, $roles);
 
 /**
  * Scoreboard (not finished yet)
