@@ -74,8 +74,7 @@ function logged_in()
 			   now(), $ip, $username);
 
 		// Pull the list of roles that a user has
-		$roles = $DB->q('COLUMN SELECT role.role FROM userrole LEFT JOIN role ON userrole.roleid = role.roleid WHERE userrole.userid = %s', $userdata['userid']);
-		$userdata['roles'] = $roles;
+		$userdata['roles'] = get_user_roles($userdata['userid']);
 	}
 
 	if ( !empty($teamdata) ) {
@@ -336,4 +335,10 @@ function do_logout()
 	    "<p><a href=\"./\">Click here to return to the main site.</a></p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
+}
+
+function get_user_roles($userid)
+{
+	global $DB;
+	return $DB->q('COLUMN SELECT role.role FROM userrole LEFT JOIN role ON userrole.roleid = role.roleid WHERE userrole.userid = %s', $userid);
 }
