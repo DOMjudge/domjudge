@@ -222,22 +222,11 @@ function do_login()
 		if ( empty($user) || empty($pass) ) {
 			show_failed_login("Please supply a username and password.");
 		}
-
-		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
-		                    WHERE username = %s AND authtoken = %s',
-		                   $user, md5($user."#".$pass));
-
-		if ( !$userdata || $userdata['enabled']!='1') {
-			sleep(3);
-			show_failed_login("Invalid username or password supplied. " .
-			                  "Please try again or contact a staff member.");
-		}
-
-		$username = $userdata['username'];
+		do_login_native($user, $pass);
 
 		if ( AUTH_METHOD=='IPADDRESS' ) {
 			$cnt = $DB->q('RETURNAFFECTED UPDATE user SET ip_address = %s
-			               WHERE username = %s', $ip, $username);
+				       WHERE username = %s', $ip, $username);
 			if ( $cnt != 1 ) error("cannot set IP for '$username'");
 		}
 		if ( AUTH_METHOD=='PHP_SESSIONS' ) {
@@ -285,6 +274,23 @@ function do_login()
 	// redirect to clear the POST data from the browser.
 	header("Location: ./");
 	exit;
+}
+
+function do_login_native($user, $pass)
+{
+	global $DB, $userdata, $username;
+
+	$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
+			    WHERE username = %s AND authtoken = %s',
+			   $user, md5($user."#".$pass));
+
+	if ( !$userdata || $userdata['enabled']!='1') {
+		sleep(1);
+		show_failed_login("Invalid username or password supplied. " .
+				  "Please try again or contact a staff member.");
+	}
+
+	$username = $userdata['username'];
 }
 
 // Logout a team. Function does not return and should generate a page
