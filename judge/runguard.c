@@ -591,9 +591,17 @@ void setrestrictions()
 	}
 
 	if ( use_cputime ) {
+		/* The CPU-time resource limit can only be specified in
+		   seconds, so round up: we can measure actual CPU time used
+		   more accurately. Also set the real hard limit one second
+		   higher: at the soft limit the kernel will send SIGXCPU at
+		   the hard limit a SIGKILL. The SIGXCPU can be caught, but is
+		   not by default and gives us a reliable way to detect if the
+		   CPU-time limit was reached. */
 		rlim_t cputime_limit = (rlim_t)ceil(cputime[1]);
-		verbose("setting hard CPU-time limit to %d seconds",(int)cputime_limit);
-		lim.rlim_cur = lim.rlim_max = cputime_limit;
+		verbose("setting hard CPU-time limit to %d(+1) seconds",(int)cputime_limit);
+		lim.rlim_cur = cputime_limit;
+		lim.rlim_max = cputime_limit+1;
 		setlim(CPU);
 	}
 
@@ -1066,7 +1074,11 @@ int main(int argc, char **argv)
 		exitcode = 0;
 		if ( ! WIFEXITED(status) ) {
 			if ( WIFSIGNALED(status) ) {
-				warning("command terminated with signal %d",WTERMSIG(status));
+				if ( WTERMSIG(status)==SIGXCPU ) {
+					warning("timelimit exceeded (hard cpu time)");
+				} else {
+					warning("command terminated with signal %d",WTERMSIG(status));
+				}
 				exitcode = 128+WTERMSIG(status);
 			} else
 			if ( WIFSTOPPED(status) ) {
