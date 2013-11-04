@@ -82,6 +82,14 @@ function dj_json_decode($str) {
 	return $res;
 }
 
+/**
+ * Encode file contents for POST-ing to REST API.
+ * Returns contents of $file as encoded string.
+ */
+function rest_encode_file($file) {
+	return urlencode(base64_encode(getFileContents($file)));
+}
+
 $waittime = 5;
 
 define ('SCRIPT_ID', 'judgedaemon');
@@ -306,8 +314,7 @@ function judge($row)
 	request('judgings/' . urlencode($row['judgingid']), 'PUT',
 		'judgehost=' . urlencode($myhost)
 		. '&compile_success=' . $compile_success
-		. '&output_compile='
-		. base64_encode(getFileContents( $workdir . '/compile.out' )));
+		. '&output_compile=' . rest_encode_file($workdir . '/compile.out'));
 
 	// compile error: our job here is done
 	if ( ! $compile_success ) return;
@@ -402,12 +409,9 @@ function judge($row)
 			. '&runresult=' . urlencode($result)
 			. '&runtime=' . urlencode($runtime)
 			. '&judgehost=' . urlencode($myhost)
-			. '&output_run='
-			. base64_encode(getFileContents($testcasedir . '/program.out'))
-			. '&output_diff='
-			. base64_encode(getFileContents($testcasedir . '/compare.out'))
-			. '&output_error='
-			. base64_encode(getFileContents($testcasedir . '/error.out')));
+			. '&output_run='   . rest_encode_file($testcasedir . '/program.out')
+			. '&output_diff='  . rest_encode_file($testcasedir . '/compare.out')
+			. '&output_error=' . rest_encode_file($testcasedir . '/error.out'));
 		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
 
 	} // end: for each testcase
