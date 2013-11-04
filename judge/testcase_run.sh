@@ -190,7 +190,8 @@ logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck ./run testdata.in program.out \
 	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT ${USE_CHROOT:+-r "$PWD/.."} -u "$RUNUSER" \
-	-C $TIMELIMIT -t $((2*TIMELIMIT)) -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
+	-t $TIMELIMIT:$((TIMELIMIT+10)) -C $TIMELIMIT:$((TIMELIMIT+5)) \
+	-m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
 	-c -s $FILELIMIT -e program.err -E program.exit -T program.time -- \
 	$PREFIX/$PROGRAM 2>error.tmp
 
