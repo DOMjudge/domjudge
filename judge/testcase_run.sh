@@ -210,6 +210,23 @@ elif [ -s program.err ]; then
 	cat program.err >>error.tmp
 fi
 
+# We first compare the output, so that even if the submission gets a
+# timelimit exceeded or runtime error verdict later, the jury can
+# still view the diff with what the submission produced.
+logmsg $LOG_INFO "comparing output"
+
+# Copy testdata output, only after program has run
+cp "$TESTOUT" "$WORKDIR/testdata.out"
+
+logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
+
+if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
+                       result.out compare.out >compare.tmp 2>&1 ; then
+	exitcode=$?
+	cat error.tmp >>error.out
+	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
+fi
+
 # Check for errors from running the program:
 logmsg $LOG_DEBUG "checking program run exit-status"
 if grep  'timelimit exceeded' error.tmp >/dev/null 2>&1 ; then
@@ -246,20 +263,6 @@ fi
 #	cat error.tmp >>error.out
 #	cleanexit ${E_OUTPUT_LIMIT:--1}
 #fi
-
-logmsg $LOG_INFO "comparing output"
-
-# Copy testdata output, only after program has run
-cp "$TESTOUT" "$WORKDIR/testdata.out"
-
-logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
-
-if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
-                       result.out compare.out >compare.tmp 2>&1 ; then
-	exitcode=$?
-	cat error.tmp >>error.out
-	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
-fi
 
 result=`grep '^result='      result.out | cut -d = -f 2- | tr '[:upper:]' '[:lower:]'`
 descrp=`grep '^description=' result.out | cut -d = -f 2-`
