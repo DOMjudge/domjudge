@@ -4,7 +4,7 @@ endif
 include $(TOPDIR)/Makefile.global
 
 # Note:
-# Although dbpasswords.secret and htpasswd-jury are generated during
+# Although dbpasswords.secret is generated during
 # building/installing, we only remove them with 'distclean', for in
 # maintainer-install mode it's inconvenient to have these regenerated
 # with different passwords from those in the database.
@@ -22,7 +22,7 @@ $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 
 config: $(SUBST_CONFIGS)
 
-domserver: apache.conf dbpasswords.secret htpasswd-jury
+domserver: apache.conf dbpasswords.secret
 
 judgehost: dbpasswords.secret
 
@@ -30,11 +30,6 @@ dbpasswords.secret:
 	echo "# Randomly generated on host `hostname`, `date`" > $@
 	chmod go= $@
 	./gendbpasswords >> $@
-
-htpasswd-jury: dbpasswords.secret
-	touch $@
-	chmod go= $@
-	$(HTPASSWD) -b $@ domjudge_jury `grep '^dummy:' $< | cut -d : -f 5`
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
@@ -44,7 +39,7 @@ install-domserver:
 	-$(INSTALL_USER) -t $(DESTDIR)$(domserver_etcdir) \
 		domserver-config.php common-config.php
 	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
-		dbpasswords.secret htpasswd-jury
+		dbpasswords.secret
 
 install-judgehost:
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
@@ -62,7 +57,7 @@ distclean-l:
 	-rm -f $(SUBST_CONFIGS) config.h
 
 clean-passwords:
-	-rm -f dbpasswords.secret htpasswd-jury
+	-rm -f dbpasswords.secret
 
 maintainer-clean-l:
 	-rm -f config.h.in
