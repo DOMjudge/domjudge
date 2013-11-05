@@ -224,7 +224,7 @@ function togglelastruns() {
 }
 
 function updateClock()
-{	
+{
 	curtime = initial+offset;
 	date.setTime(curtime*1000);
 
@@ -250,7 +250,7 @@ function updateClock()
 			h = Math.floor(left/(60*60));
 			fmt += h + ":";
 			left -= h * 60*60;
-		} 
+		}
 		m = Math.floor(left/60);
 		if ( m < 10 ) { fmt += "0"; }
 		fmt += m + ":";
