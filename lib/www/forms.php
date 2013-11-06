@@ -179,7 +179,6 @@ function addEndForm()
 /**
  * File upload field
  */
-function addFileField($name, $size = null, $extraattr = "") {
-	return addInputField('file', $name , null,
-	                     (is_null($size) ? null : " size=\"".(int)($size).'"').$extraattr);
+function addFileField($name, $dummy = null, $extraattr = "") {
+	return addInputField('file', $name , null, $extraattr);
 }

@@ -77,7 +77,7 @@ foreach ( $LIBDBCONFIG as $key => $data ) {
 		    "<label for=\"config_${key}0\">no</label>";
 		break;
 	case 'int':
-		$editfield = addInputField('number', 'config_'.$key, $data['value'], ' size="10" maxlength="10"');
+		$editfield = addInputField('number', 'config_'.$key, $data['value']);
 		break;
 	case 'string':
 		$editfield = addInput('config_'.$key, $data['value'], 30);

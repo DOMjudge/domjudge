@@ -162,7 +162,7 @@ class RestApi {
 				if ( count($func['exArgs']) > 0 ) {
 					print "<p>Example usage:<br />\n";
 					foreach ( $func['exArgs'] as $exArg ) {
-						$exUrl = $url . '?' . http_build_query($exArg);
+						$exUrl = $url . '?' . http_build_query($exArg, null, '&amp;');
 						print '<a href="' . $exUrl . '">' . $exUrl . "</a><br />\n";
 					}
 					print "</p>\n";
