@@ -63,7 +63,7 @@ requireAdmin();
 
 echo "<h1>Configuration settings</h1>\n\n";
 
-echo addForm('config.php') . "<table>\n<thead>\n" .
+echo addForm($pagename) . "<table>\n<thead>\n" .
     "<tr class=\"thleft\"><th>Option</th><th>Value(s)</th><th>Description</th></tr>\n" .
     "</thead>\n<tbody>\n";
 

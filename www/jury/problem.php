@@ -6,8 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 require('init.php');
 
 $id = @$_REQUEST['id'];
@@ -156,7 +154,7 @@ echo addHidden('cmd', $cmd) .
 
 if ( class_exists("ZipArchive") ) {
 	echo "<br /><em>or</em><br /><br />\n" .
-	addForm('problem.php', 'post', null, 'multipart/form-data') .
+	addForm($pagename, 'post', null, 'multipart/form-data') .
 	addHidden('id', @$row['probid']) .
 	'<label for="problem_archive__">Upload problem archive:</label>' .
 	addFileField('problem_archive[]') .

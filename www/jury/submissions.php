@@ -40,7 +40,7 @@ $restrictions = array();
 if ( $viewtypes[$view] == 'unverified' ) $restrictions['verified'] = 0;
 if ( $viewtypes[$view] == 'unjudged' ) $restrictions['judged'] = 0;
 
-echo addForm('submissions.php', 'get') . "<p>Show submissions:\n";
+echo addForm($pagename, 'get') . "<p>Show submissions:\n";
 for($i=0; $i<count($viewtypes); ++$i) {
 	echo addSubmit($viewtypes[$i], 'view['.$i.']', null, ($view != $i));
 }

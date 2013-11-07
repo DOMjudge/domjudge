@@ -80,7 +80,7 @@ if (isset($_POST['confirm'] ) ) {
 		echo "<p><a href=\"" . $tablemulti . ".php\">back to $tablemulti</a></p>";
 	}
 } else {
-	echo addForm('delete.php') .
+	echo addForm($pagename) .
 		addHidden('table', $t);
 	foreach ( $k as $key => $val ) {
 		echo addHidden($key, $val);

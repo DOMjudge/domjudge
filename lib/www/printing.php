@@ -17,7 +17,7 @@ function have_printing()
 
 function put_print_form()
 {
-	global $DB, $langexts;
+	global $DB, $langexts, $pagename;
 	echo "<script type=\"text/javascript\">\n<!--\n";
 	echo "function detectLanguage(filename)
 	{
@@ -47,7 +47,7 @@ function put_print_form()
 
 	echo "// -->\n</script>\n";
 
-	echo addForm('','post',null,'multipart/form-data');
+	echo addForm($pagename,'post',null,'multipart/form-data');
 
 	?>
 

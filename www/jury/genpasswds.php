@@ -48,7 +48,7 @@ default:
 <?php
 endswitch;
 
-echo addForm('genpasswds.php') .
+echo addForm($pagename) .
 	"<p>\nSet password for user " .
 	addSelect('foruser', $users, @$_GET['foruser'], true) .
 	" to " .

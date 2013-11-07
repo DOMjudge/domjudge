@@ -43,7 +43,7 @@ if ( isset($cdata['freezetime']) &&
 	echo "<h4>Scoreboard is now frozen.</h4>\n\n";
 }
 
-echo addForm('balloons.php', 'get') . "<p>\n" .
+echo addForm($pagename, 'get') . "<p>\n" .
     addHidden('viewall', ($viewall ? 0 : 1)) .
     addSubmit($viewall ? 'view unsent only' : 'view all') . "</p>\n" .
     addEndForm();
@@ -90,7 +90,7 @@ if ( !empty($cdata['freezetime']) ) {
 }
 
 if ( !empty($BALLOONS) ) {
-	echo addForm('balloons.php');
+	echo addForm($pagename);
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
 		"<tr><th class=\"sorttable_numeric\">ID</th>" .

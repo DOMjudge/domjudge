@@ -115,7 +115,7 @@ if( $res->count() == 0 ) {
 }
 
 if ( IS_ADMIN ) {
-	echo addForm('judgehosts.php') .
+	echo addForm($pagename) .
 		"<p>" .
 		addSubmit('Start all judgehosts', 'cmd-activate') .
 		addSubmit('Stop all judgehosts', 'cmd-deactivate') .

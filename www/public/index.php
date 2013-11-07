@@ -7,8 +7,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 require('init.php');
 $title="Scoreboard";
 // set auto refresh

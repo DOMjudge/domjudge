@@ -8,6 +8,8 @@
 
 require_once('../configure.php');
 
+$pagename = basename($_SERVER['PHP_SELF']);
+
 define('IS_JURY', TRUE);
 define('IS_PUBLIC', false);
 

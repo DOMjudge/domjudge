@@ -67,7 +67,7 @@ if ( empty($row['polltime']) ) {
 if ( IS_ADMIN ) {
 	$cmd = ($row['active'] == 1 ? 'deactivate' : 'activate');
 
-	echo addForm('judgehost.php') . "<p>\n" .
+	echo addForm($pagename) . "<p>\n" .
 		addHidden('id',  $row['hostname']) .
 		addHidden('cmd', $cmd) .
 		addSubmit($cmd) . "</p>\n" .
