@@ -62,6 +62,7 @@ fi
 
 # Location of scripts/programs:
 SCRIPTDIR="$DJ_LIBJUDGEDIR"
+GAINROOT="sudo -n"
 RUNGUARD="$DJ_BINDIR/runguard"
 
 logmsg $LOG_INFO "starting '$0', PID = $$"
@@ -82,6 +83,9 @@ COMPILE_SCRIPT="$SCRIPTDIR/compile_$LANG.sh"
 OLDDIR="$PWD"
 cd "$WORKDIR"
 
+# Make compile dir accessible and writable for RUNUSER:
+chmod a+rwx "$WORKDIR/compile"
+
 # Create files which are expected to exist: compiler output and runtime
 touch compile.out compile.time
 
@@ -99,7 +103,8 @@ logmsg $LOG_INFO "starting compile"
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
 exitcode=0
-"$RUNGUARD" ${DEBUG:+-v} -t $COMPILETIME -c -f 65536 -T "$WORKDIR/compile.time" -- \
+$GAINROOT $RUNGUARD ${DEBUG:+-v} -u "$RUNUSER" \
+	-t $COMPILETIME -c -f 65536 -T "$WORKDIR/compile.time" -- \
 	"$COMPILE_SCRIPT" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
