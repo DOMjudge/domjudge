@@ -384,7 +384,7 @@ function judge($row)
 		system("mkdir -p '$programdir'", $retval);
 		if ( $retval!=0 ) error("Could not create directory '$programdir'");
 
-		system("cp -pPRl '$workdir'/compile/* '$programdir'", $retval);
+		system("cp -PR '$workdir'/compile/* '$programdir'", $retval);
 		if ( $retval!=0 ) error("Could not copy program to '$programdir'");
 
 		// do the actual test-run
