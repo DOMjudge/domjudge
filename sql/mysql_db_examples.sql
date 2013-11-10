@@ -28,8 +28,8 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('la
 -- Dumping data for table `contest`
 -- 
 
-INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `activatetime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`) VALUES (1, 'Demo practice session', '2010-01-01 08:30:00', '2010-01-01 09:00:00', NULL, '2010-01-01 11:00:00', NULL, '-1:00', NULL, '+2:00', NULL);
-INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `activatetime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`) VALUES (2, 'Demo contest', '2012-01-01 11:30:00', '2012-01-01 12:00:00', '2014-01-01 16:00:00', '2014-01-01 17:00:00', '2014-01-01 17:30:00', '2012-01-01 11:30:00', '2014-01-01 16:00:00', '2014-01-01 17:00:00', '2014-01-01 17:30:00');
+INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `activatetime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`) VALUES (1, 'Demo practice session', '2013-01-01 08:30:00', '2013-01-01 09:00:00', NULL, '2013-01-01 11:00:00', NULL, '-1:00', NULL, '+2:00', NULL);
+INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `activatetime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`) VALUES (2, 'Demo contest', '2013-01-01 11:30:00', '2013-01-01 12:00:00', '2016-01-01 16:00:00', '2016-01-01 17:00:00', '2016-01-01 17:30:00', '2012-01-01 11:30:00', '2016-01-01 16:00:00', '2016-01-01 17:00:00', '2016-01-01 17:30:00');
 
 -- 
 -- Dumping data for table `judgehost`
