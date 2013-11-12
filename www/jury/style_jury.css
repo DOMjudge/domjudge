@@ -73,6 +73,8 @@ img.helpicon { cursor: help; }
 
 .judgetime { font-size: smaller; font-style: italic; }
 
+.config_input { width: 9em; }
+
 /* configchecker */
 .details {
 	margin-left: 2em; padding-left: 1ex;
