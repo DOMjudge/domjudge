@@ -99,7 +99,7 @@ if ( $submdata['valid'] ) {
 }
 
 ?>
-<table width="100%">
+<table id="submission_layout">
 <tr><td>
 <table>
 <caption>Submission</caption>

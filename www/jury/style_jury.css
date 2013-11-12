@@ -56,6 +56,8 @@ tr.summary td { border-top: 1px solid black; }
    clickable in the jury scoreboard and for all team cells */
 .scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
 
+#submission_layout { width: 100%; }
+
 #djlogo {
 	position: absolute; right: 1ex;
 	width: 93px; height: 196px;
