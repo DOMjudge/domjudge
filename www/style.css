@@ -85,6 +85,7 @@ td {
 .list tr:hover { background: #ffffcc; }
 .list thead tr { border-bottom-color: black; }
 .list thead tr:hover { background: white; }
+.list tfoot tr:hover { background: white; }
 .list a {
 	text-decoration: none;
 	color: black;

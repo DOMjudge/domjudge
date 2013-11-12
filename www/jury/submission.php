@@ -331,8 +331,10 @@ if ( isset($jid) )  {
 	echo "<th scope=\"col\">description</th>" .
 	    "</tr>\n</thead>\n<tbody>\n";
 
-	$total_runtime = 0;
+	$sum_runtime = 0;
 	$max_runtime = 0;
+	$sum_lastruntime = 0;
+	$max_lastruntime = 0;
 	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
 		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
@@ -360,14 +362,22 @@ if ( isset($jid) )  {
 		    htmlspecialchars(str_cut($run['description'],20)) . "</a></td>" .
 			"</tr>\n";
 
-		$total_runtime += $run['runtime'];
+		$sum_runtime += $run['runtime'];
 		$max_runtime = max($max_runtime,$run['runtime']);
+		if ( $lastjud !== NULL ) {
+			$sum_lastruntime += $lastrun['runtime'];
+			$max_lastruntime = max($max_lastruntime,$lastrun['runtime']);
+		}
 	}
-	echo "<tr class=\"summary\"><td></td><td><a>" .
-		sprintf('%.2f',$total_runtime) . "</a></td><td><a>" .
-		printresult(@$jud['result']) . "</a></td><td><a>max runtime: " .
-	    sprintf('%.2f',$max_runtime) . "</a></td></tr>\n";
-	echo "</tbody>\n</table>\n\n";
+	echo "</tbody>\n<tfoot><tr class=\"summary\"><td></td>" .
+	    "<td title=\"max/sum runtime\"><a>" .
+	    sprintf('%.2f/%.2f',$max_runtime,$sum_runtime) . "</a></td>" .
+	    "<td><a>" . printresult(@$jud['result']) . "</a></td>" .
+	    "<td name=\"lastruntime\" title=\"previous max/sum runtime\"><a>" .
+	    sprintf('%.2f/%.2f',$max_lastruntime,$sum_lastruntime) . "</a></td>" .
+	    "<td name=\"lastresult\"><a>" . printresult(@$lastjud['result']) . "</a></td>" .
+	    "<td></td></tr>\n" .
+	    "</tfoot>\n</table>\n\n";
 
 ?>
 <script type="text/javascript">
