@@ -239,6 +239,49 @@ function getFinalResult($runresults, $results_prio = null)
 }
 
 /**
+ * Calculate timelimit overshoot from actual timelimit and configured
+ * overshoot that can be specified as a sum,max,min of absolute and
+ * relative times. Returns overshoot seconds as a float.
+ */
+function overshoot_time($timelimit, $overshoot_cfg)
+{
+	$tokens = preg_split('/([+&|])/', $overshoot_cfg, -1, PREG_SPLIT_DELIM_CAPTURE);
+	if ( count($tokens)!=1 && count($tokens)!=3 ) {
+		var_dump($tokens);
+		error("invalid timelimit overshoot string '$overshoot_cfg'");
+	}
+
+	$val1 = overshoot_parse($timelimit, $tokens[0]);
+	if ( count($tokens)==1 ) return $val1;
+
+	$val2 = overshoot_parse($timelimit, $tokens[2]);
+	switch ( $tokens[1] ) {
+	case '+': return $val1 + $val2;
+	case '|': return max($val1,$val2);
+	case '&': return min($val1,$val2);
+	}
+	error("invalid timelimit overshoot string '$overshoot_cfg'");
+}
+
+/**
+ * Helper function for overshoot_time(), returns overshoot for single token.
+ */
+function overshoot_parse($timelimit, $token)
+{
+	$res = sscanf($token,'%d%c%n');
+	if ( count($res)!=3 ) error("invalid timelimit overshoot token '$token'");
+	list($val,$type,$len) = $res;
+	if ( strlen($token)!=$len ) error("invalid timelimit overshoot token '$token'");
+
+	if ( $val<0 ) error("timelimit overshoot cannot be negative: '$token'");
+	switch ( $type ) {
+	case 's': return $val;
+	case '%': return $timelimit * 0.01*$val;
+	default: error("invalid timelimit overshoot token '$token'");
+	}
+}
+
+/**
  * Simulate MySQL NOW() function to create insert queries that do not
  * change when replicated later.
  */

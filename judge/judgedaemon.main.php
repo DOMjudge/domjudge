@@ -386,8 +386,12 @@ function judge($row)
 		if ( $retval!=0 ) error("Could not copy program to '$programdir'");
 
 		// do the actual test-run
+		$hardtimelimit = $row['maxruntime'] +
+		                 overshoot_time($row['maxruntime'],
+		                                dbconfig_get_rest('timelimit_overshoot'));
+
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
-		       "$row[maxruntime] '$testcasedir' " .
+		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
 		       "'$row[special_run]' '$row[special_compare]'", $retval);
 
 		// what does the exitcode mean?

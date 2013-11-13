@@ -7,7 +7,8 @@
 #
 # <testdata.in>     File containing test-input with absolute pathname.
 # <testdata.out>    File containing test-output with absolute pathname.
-# <timelimit>       Timelimit in seconds.
+# <timelimit>       Timelimit in seconds, optionally followed by ':' and
+#                   the hard limit to kill still running submissions.
 # <workdir>         Directory where to execute submission in a chroot-ed
 #                   environment. For best security leave it as empty as possible.
 #                   Certainly do not place output-files there!
@@ -189,9 +190,9 @@ $GAINROOT cp -pR /dev/null ../dev/null
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck ./run testdata.in program.out \
-	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT ${USE_CHROOT:+-r "$PWD/.."} -u "$RUNUSER" \
-	-t $TIMELIMIT:$((TIMELIMIT+10)) -C $TIMELIMIT:$((TIMELIMIT+5)) \
-	-m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
+	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT \
+	${USE_CHROOT:+-r "$PWD/.."} -u "$RUNUSER" \
+	-t $TIMELIMIT -C $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
 	-c -s $FILELIMIT -e program.err -E program.exit -T program.time -- \
 	$PREFIX/$PROGRAM 2>error.tmp
 
