@@ -405,7 +405,8 @@ function judge($row)
 		// Try to read runtime from file
 		$runtime = NULL;
 		if ( is_readable($testcasedir . '/program.time') ) {
-			$runtime = getFileContents($testcasedir . '/program.time');
+			$fdata = getFileContents($testcasedir . '/program.time');
+			list($runtime) = sscanf($fdata,"%f");
 		}
 
 		request('judging_runs', 'POST', 'judgingid=' . urlencode($row['judgingid'])

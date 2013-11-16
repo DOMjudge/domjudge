@@ -7,6 +7,7 @@ Version 4.0.0 - DEV
  - Store recognized language extensions in database and query from
    submit client through REST API.
  - Show diff of team and reference output even if run stopped prematurely.
+ - Make timelimit overshoot margin configurable.
  - Update jscolor and sorttable javascript to latest upstream versions.
  - Misc. minor bugs fixed reported by Coverity scan.
  - Replace flex++ by flexc++, fixes a missing build dep. and code cleanup.

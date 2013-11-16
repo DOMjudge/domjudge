@@ -83,6 +83,14 @@ char buf[BUF_SIZE];
 #define WALL_TIME_TYPE 0
 #define CPU_TIME_TYPE  1
 
+/* Strings to write to file when exceeding no/soft/hard/both limits. */
+const char output_timelimit_str[4][16] = {
+	"",
+	"soft-timelimit",
+	"hard-timelimit",
+	"hard-timelimit"
+};
+
 const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
 
 extern int errno;
@@ -131,6 +139,7 @@ int show_help;
 int show_version;
 
 double walltime[2], cputime[2]; /* in seconds, soft and hard limits */
+int walllimit_reached, cpulimit_reached; /* 1=soft, 2=hard, 3=both limits reached */
 #ifdef USE_CGROUPS
 int64_t memsize;
 #else
@@ -285,6 +294,7 @@ void output_exit_time(int exitcode)
 {
 	FILE  *outputfile;
 	double walldiff, cpudiff, userdiff, sysdiff, outdiff;
+	int timelimit_reached;
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
 	verbose("command exited with exitcode %d",exitcode);
@@ -295,7 +305,7 @@ void output_exit_time(int exitcode)
 		if ( (outputfile = fopen(exitfilename,"w"))==NULL ) {
 			error(errno,"cannot open `%s'",exitfilename);
 		}
-		if ( fprintf(outputfile,"%d\n",exitcode)==0 ) {
+		if ( fprintf(outputfile,"%d\n",exitcode)<=0 ) {
 			error(0,"cannot write to file `%s'",exitfilename);
 		}
 		if ( fclose(outputfile) ) {
@@ -314,18 +324,26 @@ void output_exit_time(int exitcode)
 	        walldiff, userdiff, sysdiff);
 
 	if ( use_walltime && walldiff > walltime[0] ) {
+		walllimit_reached |= 1;
 		warning("timelimit exceeded (soft wall time)");
 	}
 
 	if ( use_cputime && cpudiff > cputime[0] ) {
+		cpulimit_reached |= 1;
 		warning("timelimit exceeded (soft cpu time)");
 	}
 
 	if ( outputtime ) {
 		verbose("writing runtime to file `%s'",timefilename);
 		switch ( outputtimetype ) {
-		case WALL_TIME_TYPE: outdiff = walldiff; break;
-		case CPU_TIME_TYPE:  outdiff = cpudiff;  break;
+		case WALL_TIME_TYPE:
+			outdiff = walldiff;
+			timelimit_reached = walllimit_reached;
+			break;
+		case CPU_TIME_TYPE:
+			outdiff = cpudiff;
+			timelimit_reached = cpulimit_reached;
+			break;
 		default:
 			error(0,"cannot write unknown time type `%d' to file",outputtimetype);
 		}
@@ -333,7 +351,8 @@ void output_exit_time(int exitcode)
 		if ( (outputfile = fopen(timefilename,"w"))==NULL ) {
 			error(errno,"cannot open `%s'",timefilename);
 		}
-		if ( fprintf(outputfile,"%.3f\n",outdiff)==0 ) {
+		if ( fprintf(outputfile,"%.3f %s\n",outdiff,
+		             output_timelimit_str[timelimit_reached])<=0 ) {
 			error(0,"cannot write to file `%s'",timefilename);
 		}
 		if ( fclose(outputfile) ) {
@@ -471,6 +490,7 @@ void terminate(int sig)
 	}
 
 	if ( sig==SIGALRM ) {
+		walllimit_reached |= 2;
 		warning("timelimit exceeded (hard wall time): aborting command");
 	} else {
 		warning("received signal %d: aborting command",sig);
@@ -720,7 +740,7 @@ int main(int argc, char **argv)
 
 	/* Parse command-line options */
 	use_root = use_walltime = use_cputime = use_user = no_coredump = 0;
-	outputexit = outputtime = 0;
+	outputexit = outputtime = walllimit_reached = cpulimit_reached = 0;
 	outputtimetype = CPU_TIME_TYPE;
 	memsize = filesize = nproc = RLIM_INFINITY;
 	redir_stdout = redir_stderr = limit_streamsize = 0;
@@ -1075,6 +1095,7 @@ int main(int argc, char **argv)
 		if ( ! WIFEXITED(status) ) {
 			if ( WIFSIGNALED(status) ) {
 				if ( WTERMSIG(status)==SIGXCPU ) {
+					cpulimit_reached |= 2;
 					warning("timelimit exceeded (hard cpu time)");
 				} else {
 					warning("command terminated with signal %d",WTERMSIG(status));

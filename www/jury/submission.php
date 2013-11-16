@@ -396,6 +396,14 @@ togglelastruns();
 			continue;
 		}
 
+		$timelimit_str = '';
+		if ( $run['runresult']=='timelimit' ) {
+			if ( preg_match('/Timelimit exceeded.* hard-timelimit/',$run['output_error']) ) {
+				$timelimit_str = '<b>(terminated)</b>';
+			} else {
+				$timelimit_str = '<b>(finished late)</b>';
+			}
+		}
 		echo "<table>\n" .
 		    "<tr><td>Description:</td><td>" .
 		    htmlspecialchars($run['description']) . "</td></tr>" .
@@ -407,8 +415,7 @@ togglelastruns();
 		    "<a href=\"team_output.php?probid=" . htmlspecialchars($submdata['probid']) .
 		    "&amp;runid=" . $run['runid'] . "\">Team Output</a>" .
 		    "</td></tr>" .
-		    "<tr><td>Runtime:</td><td>$run[runtime] sec" .
-		    ( $run['runresult']=='timelimit' ? ' (terminated)' : '' ) ."</td></tr>" .
+		    "<tr><td>Runtime:</td><td>$run[runtime] sec $timelimit_str</td></tr>" .
 		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
 		    ( $run['runresult']=='correct' ? '' : 'in' ) .
 		    "correct\">$run[runresult]</span></td></tr>" .
