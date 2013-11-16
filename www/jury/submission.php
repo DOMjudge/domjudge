@@ -379,7 +379,7 @@ togglelastruns();
 		echo "<h4 id=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
 
 		if ( $run['runresult']===NULL ) {
-			echo "<p class=\"nodata\">Run not finished yet.</p>\n";
+			echo "<p class=\"nodata\">Run not started/finished yet.</p>\n";
 			continue;
 		}
 
