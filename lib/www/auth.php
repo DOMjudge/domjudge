@@ -48,6 +48,14 @@ function logged_in()
 		$username = FIXED_TEAM;
 		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $username);
 		break;
+	case 'EXTERNAL':
+		if ( empty($_SERVER['REMOTE_USER']) ) {
+			$username = $userdata = null;
+		} else {
+			$username = $_SERVER['REMOTE_USER'];
+			$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $username);
+		}
+		break;
 
 	case 'IPADDRESS':
 		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE ip_address = %s', $ip);
@@ -96,6 +104,7 @@ function have_logout()
 {
 	switch ( AUTH_METHOD ) {
 	case 'FIXED':        return FALSE;
+	case 'EXTERNAL':     return FALSE;
 	case 'IPADDRESS':    return FALSE;
 	case 'PHP_SESSIONS': return TRUE;
 	case 'LDAP':         return TRUE;
@@ -108,6 +117,7 @@ function show_failed_login($msg)
 {
 	$title = 'Login failed';
 	$menu = false;
+	header("HTTP/1.0 403 Forbidden");
 	require(LIBWWWDIR . '/header.php');
 	echo "<h1>Not Authenticated</h1>\n\n<p>$msg</p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
@@ -122,6 +132,12 @@ function show_loginpage()
 	global $ip;
 
 	switch ( AUTH_METHOD ) {
+	case 'EXTERNAL':
+		if ( empty($_SERVER['REMOTE_USER'] ) ) {
+			show_failed_login("No authentication information provided by Apache.");
+		} else {
+			show_failed_login("User '" . htmlspecialchars($_SERVER['REMOTE_USER']) . "' not authorized.");
+		}
 	case 'IPADDRESS':
 	case 'PHP_SESSIONS':
 	case 'LDAP':
@@ -262,6 +278,11 @@ function do_login()
 		session_start();
 		$_SESSION['username'] = $username;
 		auditlog('user', $userdata['userid'], 'logged in', $ip);
+		break;
+	case 'EXTERNAL':
+		if ( empty($_SERVER['REMOTE_USER']) ) {
+			show_failed_login("No authentication data provided by Apache.");
+		}
 		break;
 
 	default:

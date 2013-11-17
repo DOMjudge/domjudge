@@ -17,6 +17,10 @@ require_once("common-config.php");
 //   Authenticate against one or more LDAP servers. Use PHP sessions
 //   after successful authentication. This option may be useful to
 //   integrate DOMjudge (e.g. as courseware) into a larger system.
+// EXTERNAL
+//   Use authentication information provided by Apache. This enables
+//   use of any authentication module available for Apache, and will
+//   get the username from the REMOTE_USER environment variable.
 // FIXED
 //   Use one fixed team user that is automatically logged in. This
 //   can be useful e.g. for a demo or testing environment. Define
