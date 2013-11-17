@@ -473,6 +473,9 @@ On the judgehosts:
        sudoers configuration as in <tt>etc/sudoers-domjudge</tt>.
 <item> Put the right credentials in the file <tt>etc/restapi.secret</tt>
        on all judgehosts.
+<item> Optionally build a chroot to support interpreted or
+       byte-compiled langauges such as Java, see the appendix on
+       <ref id="problems:java-chroot" name="setting up a chroot">.
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
 </itemize>
 It should be done by now. As a check that (almost) everything works,
@@ -1056,7 +1059,12 @@ to be available for copying it to the chroot environment. For Linux
 i386, a static Dash shell is included, which works out of the box. For
 other architectures or operating systems, a shell has to be added
 manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
-file.
+file. If you want to support languages that cannot be compiled to
+statically linked binaries, e.g. byte-compiled languages such as Java,
+or interpreted languages such as Python, then a complete chroot
+environment must be built and configured. See the appendix on
+<ref id="problems:java-chroot" name="setting up a chroot"> for more
+details.
 
 Upon its first connection to the domserver API the judgehost will be
 auto-registered and will be by default enabled. If you wish to
