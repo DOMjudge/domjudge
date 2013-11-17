@@ -456,8 +456,6 @@ On the domserver host:
        sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf &&
        sudo apache2ctl graceful
        </tt>
-
-
 <item> Check that the web interface works (/team, /public and /jury).
 <item> Change the admin password from its default value.
 <item> Check that the API (/api) works and create credentials for the judgehosts.
@@ -1061,7 +1059,7 @@ manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
 file.
 
 Upon its first connection to the domserver API the judgehost will be
-auto-registered and and will be by default enabled. If you wish to
+auto-registered and will be by default enabled. If you wish to
 add a new judgehost but have it initially disabled, you can add it
 manually through the DOMjudge web interface and set it to disabled
 before starting the judgedaemon.
