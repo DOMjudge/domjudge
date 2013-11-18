@@ -353,7 +353,7 @@ function toggle(id, show) {
 function addHeart(rank, row, id, isFav) {
 	var heartCol = getHeartCol(row);
 	var color = isFav ? "red" : "gray";
-	return heartCol.innerHTML + "<span style=\"cursor:pointer;color:" + color + ";\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\">&#9829;</span>";
+	return heartCol.innerHTML + "<span class=\"heart\" style=\"color:" + color + ";\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\">&#9829;</span>";
 }
 
 function initFavouriteTeams() {

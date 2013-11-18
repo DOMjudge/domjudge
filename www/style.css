@@ -440,3 +440,8 @@ ul.tabbernav li.tabberactive a:hover
     border: solid 1px black;
     display: inline-block;
 }
+
+.heart {
+	padding: .3em;
+	cursor: pointer;
+}
