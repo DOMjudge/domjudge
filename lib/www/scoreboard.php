@@ -286,10 +286,10 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 	echo "<thead>\n";
 	echo '<tr class="scoreheader">' .
 		'<th title="rank" scope="col">' . jurylink(null,'rank') . '</th>' .
-		( $SHOW_AFFILIATIONS ? '<th title="team affiliation" scope="col" style="border-right: 0;"/>'
-		: '' ) .
-		'<th title="team name" scope="col"/>' .
-		'<th title="# solved / penalty time" colspan="2" scope="col"/>' . "\n";
+		'<th title="team name" scope="col"' .
+		( $SHOW_AFFILIATIONS ? ' colspan="2"' : '' ) .
+		'>' . jurylink(null, 'team') . '</th>' .
+		'<th title="# solved / penalty time" colspan="2" scope="col"/>' . jurylink(null, 'score') . '</th>' . "\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">';
 		$str = htmlspecialchars($pr['probid']) .
