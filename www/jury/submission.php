@@ -353,7 +353,7 @@ if ( isset($jid) )  {
 			$lastrun = $lastruninfo[$key];
 			if ( $lastjud['result']=='compiler-error' ) $lastrun['runresult'] = 'compiler-error';
 			echo "<td name=\"lastruntime\"><a href=\"$link\">" .
-				"<span class=\"prevsubmit\">$lastrun[runtime]</span></a></td>" .
+				"<span class=\"prevsubmit\">" . sprintf('%.2f', $lastrun['runtime']) . "</span></a></td>" .
 				"<td name=\"lastresult\"><a href=\"$link\">" .
 				"<span class=\"sol prevsubmit\">$lastrun[runresult]</span></a></td>";
 		}
@@ -375,7 +375,7 @@ if ( isset($jid) )  {
 	    "<td><a>" . printresult(@$jud['result']) . "</a></td>" .
 	    "<td name=\"lastruntime\" title=\"previous max/sum runtime\"><a>" .
 	    sprintf('%.2f/%.2f',$max_lastruntime,$sum_lastruntime) . "</a></td>" .
-	    "<td name=\"lastresult\"><a>" . printresult(@$lastjud['result']) . "</a></td>" .
+	    "<td name=\"lastresult\"><a><span class=\"sol prevsubmit\">" . @$lastjud['result'] . "</span></a></td>" .
 	    "<td></td></tr>\n" .
 	    "</tfoot>\n</table>\n\n";
 
