@@ -43,7 +43,7 @@ foreach ($REQUIRED_ROLES as $role) {
 	}
 }
 if (!$allowed) {
-	error("You do not have permission to perform that action(Missing role(s): " . implode($REQUIRED_ROLES,',') . ")");
+	error("You do not have permission to perform that action (Missing role(s): " . implode($REQUIRED_ROLES,',') . ")");
 }
 
 require_once(LIBWWWDIR . '/common.jury.php');

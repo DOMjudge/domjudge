@@ -31,7 +31,7 @@ if ( @$_POST['cmd']=='login' ) do_login();
 if ( !logged_in() ) show_loginpage();
 
 if ( !checkrole('team') ) {
-	error("You do not have permission to perform that action(Missing role: 'team')");
+	error("You do not have permission to perform that action (Missing role: 'team')");
 }
 if ( empty($teamdata) ) {
 	error("You do not have a team associated with your account.  Please contact a staff member.");
