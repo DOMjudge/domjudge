@@ -414,14 +414,18 @@ function submission_files($args)
 
 	checkargs($args, array('submitid'));
 
-	$sources = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, sourcecode, filename
-			   FROM submission_file WHERE submitid = %i', $args['submitid']);
+	$sources = $DB->q('SELECT filename, sourcecode
+			   FROM submission_file WHERE submitid = %i ORDER BY rank', $args['submitid']);
 
-	foreach($sources as $r=>$src){
-		$sources[$r]['sourcecode'] = base64_encode($sources[$r]['sourcecode']);
+	$ret = array();
+	while($src = $sources->next()) {
+		$ret[] = array(
+		         'filename' => $src['filename'],
+		         'sourcecode' => base64_encode($src['sourcecode'])
+		         );
 	}
 
-	return $sources;
+	return $ret;
 }
 $args = array('submitid' => 'Get only the corresponding submission files.');
 $doc = 'Get a list of all submission files. The file contents will be base64 encoded.';

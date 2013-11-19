@@ -291,7 +291,7 @@ function judge($row)
 	$sources = request('submission_files', 'GET', 'submitid=' . urlencode($row['submitid']));
 	$sources = dj_json_decode($sources);
 	$files = array();
-	foreach ( $sources as $rank => $source ) {
+	foreach ( $sources as $source ) {
 		$srcfile = "$workdir/compile/$source[filename]";
 		$files[] = "'$source[filename]'";
 		if ( file_put_contents($srcfile, base64_decode($source['sourcecode'])) === FALSE ) {
