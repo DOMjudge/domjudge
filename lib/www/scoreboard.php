@@ -57,7 +57,7 @@ function calcPenaltyTime($solved, $num_submissions)
  * matrix[login][probid](is_correct, num_submissions, num_pending, time, penalty)
  *
  * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid]
- *    probid(num_submissions, num_pending, num_correct, best_time, best_time_sort[sortorder] )
+ *    probid(num_submissions, num_pending, num_correct, best_time_sort[sortorder] )
  */
 function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
@@ -141,7 +141,6 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
 			$SUMMARY['problems'][$prob]['num_pending'] = 0;
 			$SUMMARY['problems'][$prob]['num_correct'] = 0;
-			$SUMMARY['problems'][$prob]['best_time'] = NULL;
 			$SUMMARY['problems'][$prob]['best_time_sort'] = array();
 		}
 	}
@@ -219,12 +218,6 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 				if ( !isset($psum['best_time_sort'][$totals['sortorder']]) ||
 				     $pdata['time']<$psum['best_time_sort'][$totals['sortorder']] ) {
 					@$psum['best_time_sort'][$totals['sortorder']] = $pdata['time'];
-				}
-
-				// also keep overall best time per problem for in bottom summary row
-				if ( !isset($psum['best_time']) ||
-				     $pdata['time'] < @$psum['best_time'] ) {
-					@$psum['best_time'] = $pdata['time'];
 				}
 			}
 		}
