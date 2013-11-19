@@ -42,7 +42,7 @@ function calcPenaltyTime($solved, $num_submissions)
 /**
  * Generate scoreboard data based on the cached data in table
  * 'scoreboard_{public,jury}'. If the function is called while
- * IS_JURY is defined or $jury set, the scoreboard will always be
+ * $jury set to true, the scoreboard will always be
  * current, regardless of the freezetime setting in the contesttable.
  *
  * The $filter argument may contain subarrays 'affilid', 'country',
@@ -64,8 +64,6 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	global $DB;
 
 	$cid = $cdata['cid'];
-
-	if ( IS_JURY ) $jury = TRUE;
 
 	// Show final scores if contest is over and unfreezetime has been
 	// reached, or if contest is over and no freezetime had been set.
@@ -508,7 +506,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	if ( empty( $cdata ) ) { echo "<p class=\"nodata\">No active contest</p>\n"; return; }
 
 	$fdata = calcFreezeData($cdata);
-	$sdata = genScoreBoard($cdata, FALSE, $filter);
+	$sdata = genScoreBoard($cdata, IS_JURY, $filter);
 
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
