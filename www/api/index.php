@@ -347,10 +347,11 @@ $api->provideFunction('POST', 'judging_runs', 'judging_runs_POST', $doc, $args, 
  */
 function config($args)
 {
-	// Call dbconfig_init() to prevent using cached values.
-	dbconfig_init();
+	if ( isset($args['name']) ) {
+		return array($args['name'] => dbconfig_get($args['name'], null, false));
+	}
 
-	return array($args['name'] => dbconfig_get($args['name']));
+	return dbconfig_get(null, null, false);
 }
 $doc = 'Get configuration variables.';
 $args = array('name' => 'Search only a single config variable.');
