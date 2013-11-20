@@ -63,7 +63,7 @@ function logged_in()
 
 	case 'PHP_SESSIONS':
 	case 'LDAP':
-		session_start();
+		if (session_id() == "") session_start();
 		if ( isset($_SESSION['username']) ) {
 			$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s',
 			                   $_SESSION['username']);
@@ -221,7 +221,7 @@ function ldap_check_credentials($user, $pass)
 // referring page.
 function do_login()
 {
-	global $DB, $ip, $username;
+	global $DB, $ip, $username, $userdata;
 
 	switch ( AUTH_METHOD ) {
 	// Generic authentication code for IPADDRESS and PHP_SESSIONS;
