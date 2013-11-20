@@ -13,8 +13,6 @@ if ( checkrole('jury') || checkrole('balloon') ) {
 }
 if ( !logged_in() ) {
 	echo "<a href=\"login.php\" accesskey=\"l\">login</a>\n";
-} else if ( have_logout() ) {
-	echo "<a href=\"../logout.php\" accesskey=\"l\">logout</a>\n";
 }
 ?>
 </div></nav>

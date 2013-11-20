@@ -29,9 +29,6 @@
 if ( checkrole('team') ) {
 	echo "<a target=\"_top\" href=\"../team/\" accesskey=\"t\">→team</a>\n";
 }
-if ( have_logout() ) {
-    echo "<a target=\"_top\" href=\"../logout.php\" accesskey=\"l\">logout $username</a>\n";
-}
 ?>
 </div>
 
