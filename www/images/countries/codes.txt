@@ -158,7 +158,6 @@ NA  NAM  WA  Namibia
 NR  NRU  NR  Nauru
 NP  NPL  NP  Nepal
 NL  NLD  NL  Netherlands
-AN  ANT  NT  Netherlands Antilles
 NC  NCL  NC  New Caledonia
 NZ  NZL  NZ  New Zealand
 NI  NIC  NU  Nicaragua
