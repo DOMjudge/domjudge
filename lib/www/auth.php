@@ -292,6 +292,17 @@ function do_login()
 
 	// Authentication success. We could just return here, but we do a
 	// redirect to clear the POST data from the browser.
+	$script = ($_SERVER['PHP_SELF']);
+	if ( preg_match( '/\/public\/login\.php$/', $_SERVER['PHP_SELF'] ) ) {
+		logged_in(); // fill userdata
+		if ( checkrole('jury') || checkrole('balloon') ) {
+			header("Location: ../jury/");
+			exit;
+		} else if ( checkrole('team') ) {
+			header("Location: ../team/");
+			exit;
+		}
+	}
 	header("Location: ./");
 	exit;
 }

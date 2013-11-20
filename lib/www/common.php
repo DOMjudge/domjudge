@@ -362,7 +362,7 @@ function putTeam($login) {
  * Output clock
  */
 function putClock() {
-	global $cdata;
+	global $cdata, $username;
 	$what = $fmt = "";
 	$activatetime_u = strtotime($cdata['activatetime']);
 	$starttime_u = strtotime($cdata['starttime']);
@@ -397,6 +397,11 @@ function putClock() {
 
 	}
 	echo "<br /><span id=\"timeleft\">" . $what . $fmt . "</span>";
+	if ( logged_in() ) {
+		echo "<br /><span id=\"username\">logged in as " . $username
+			. ( have_logout() ? " <a href=\"../logout.php\">×</a>" : "" )
+			. "</span>";
+	}
 	echo "</div>";
 
 	echo "<script type=\"text/javascript\">

@@ -13,6 +13,10 @@ if ( have_printing() ) {
 }
 echo "<a target=\"_top\" href=\"scoreboard.php\" accesskey=\"b\">scoreboard</a>\n";
 
+if ( checkrole('jury') || checkrole('balloon') ) {
+	echo "<a target=\"_top\" href=\"../jury/\" accesskey=\"j\">→jury</a>\n";
+}
+
 if ( have_logout() ) {
 	echo "<a target=\"_top\" href=\"../logout.php\" accesskey=\"l\">logout $username ($teamid)</a>\n";
 }
