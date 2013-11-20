@@ -24,6 +24,7 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <h3>Overviews:</h3>
 <ul>
 <li><a href="balloons.php">Balloon Status</a></li>
+<?php if ( checkrole('jury') ) { ?>
 <li><a href="clarifications.php">Clarifications</a></li>
 <li><a href="contests.php">Contests</a></li>
 <li><a href="judgehosts.php">Judgehosts</a></li>
@@ -35,6 +36,7 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <li><a href="teams.php">Teams</a></li>
 <li><a href="team_categories.php">Team Categories</a></li>
 <li><a href="team_affiliations.php">Team Affiliations</a></li>
+<?php } ?>
 </ul>
 
 <?php if ( IS_ADMIN ): ?>
