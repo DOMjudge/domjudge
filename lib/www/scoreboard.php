@@ -280,7 +280,8 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 		'<th title="team name" scope="col"' .
 		( $SHOW_AFFILIATIONS ? ' colspan="2"' : '' ) .
 		'>' . jurylink(null, 'team') . '</th>' .
-		'<th title="# solved / penalty time" colspan="2" scope="col"/>' . jurylink(null, 'score') . '</th>' . "\n";
+		'<th title="# solved / penalty time" colspan="2" scope="col">' .
+		jurylink(null, 'score') . '</th>' . "\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">';
 		$str = htmlspecialchars($pr['probid']) .
