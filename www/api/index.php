@@ -117,7 +117,7 @@ function judgings($args)
 	}
 	return $res;
 }
-$doc = 'Get all judgings (including those post-freeze, so currently limtied to jury).';
+$doc = 'Get all judgings (including those post-freeze, so currently limited to jury).';
 $args = array('result' => 'Search only for judgings with a certain result.',
               'fromid' => 'Search from a certain ID',
               'judgingid' => 'Search only for a certain ID',
