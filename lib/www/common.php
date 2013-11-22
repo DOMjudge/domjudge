@@ -143,7 +143,8 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		// present and valid.
 		if ( IS_JURY ) {
 			$link = ' href="submission.php?id=' . $sid . '"';
-		} elseif ( $row['result'] && $row['valid'] &&
+		} elseif ( $row['submittime'] < $cdata['endtime'] &&
+		           $row['result'] && $row['valid'] &&
 		           (!dbconfig_get('verification_required',0) || $row['verified']) ) {
 			$link = ' href="submission_details.php?id=' . $sid . '"';
 		} else {
@@ -181,33 +182,17 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			"<a$link>" . htmlspecialchars($row['probid']) . '</a></td>';
 		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
 			"<a$link>" . htmlspecialchars($row['langid']) . '</a></td>';
-		echo '<td class="result">';
-		if ( IS_JURY ) {
-			echo "<a$link>";
-			if ( ! $row['result'] ) {
-				if ( $row['submittime'] >= $cdata['endtime'] ) {
-					echo printresult('too-late', TRUE);
-				} else {
-					echo printresult($row['judgehost'] ? '' : 'queued', TRUE);
-				}
-			} else {
-					echo printresult($row['result']);
-			}
-			echo '</a>';
+		echo "<td class=\"result\"><a$link>";
+		if ( $row['submittime'] >= $cdata['endtime'] ) {
+			echo printresult('too-late');
+		} else if ( ! $row['result'] ||
+		            ( !IS_JURY && ! $row['verified'] &&
+		              dbconfig_get('verification_required', 0) ) ) {
+			echo printresult($row['judgehost'] || !IS_JURY ? '' : 'queued');
 		} else {
-			if ( ! $row['result'] ||
-			     ( dbconfig_get('verification_required', 0) && ! $row['verified'] ) ) {
-				if ( $row['submittime'] >= $cdata['endtime'] ) {
-					echo "<a>" . printresult('too-late') . "</a>";
-				} else {
-					echo "<a>" . printresult('', TRUE) . "</a>";
-				}
-			} else {
-				echo "<a$link>";
-				echo printresult($row['result']) . '</a>';
-			}
+			echo printresult($row['result']);
 		}
-		echo "</td>";
+		echo "</a></td>";
 
 		if ( IS_JURY ) {
 			// only display verification if we're done with judging

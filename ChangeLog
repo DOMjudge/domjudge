@@ -8,6 +8,7 @@ Version 4.0.0 - DEV
    submit client through REST API.
  - Show diff of team and reference output even if run stopped prematurely.
  - Make timelimit overshoot margin configurable.
+ - Judge too-late submissions without scoring them (Closes #99).
  - Update jscolor and sorttable javascript to latest upstream versions.
  - Misc. minor bugs fixed reported by Coverity scan.
  - Replace flex++ by flexc++, fixes a missing build dep. and code cleanup.

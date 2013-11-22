@@ -157,12 +157,10 @@ function judgings_POST($args)
 	                    FROM submission s
 	                    LEFT JOIN team t ON (s.teamid = t.login)
 	                    WHERE judgehost IS NULL AND cid = %i
-	                    AND langid IN (%As) AND probid IN (%As)
-	                    AND submittime < %s AND valid = 1
+	                    AND langid IN (%As) AND probid IN (%As) AND valid = 1
 	                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
 	                    LIMIT 1',
-	                    $cid, $judgable_lang, $judgable_prob,
-	                    $cdata['endtime']);
+	                    $cid, $judgable_lang, $judgable_prob);
 
 	if ( $submitid ) {
 		// update exactly one submission with our judgehost name
@@ -527,12 +525,10 @@ function queue($args)
 			     FROM submission s
 			     LEFT JOIN team t ON (s.teamid = t.login)
 			     WHERE judgehost IS NULL AND cid = %i
-			     AND langid IN (%As) AND probid IN (%As)
-			     AND submittime < %s AND valid = 1
+			     AND langid IN (%As) AND probid IN (%As) AND valid = 1
 			     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC'
 			     . ($hasLimit ? ' LIMIT %i' : ' %_'),
 			     $cid, $judgable_lang, $judgable_prob,
-			     $cdata['endtime'],
 			     ($hasLimit ? $args['limit'] : -1));
 
 	return $submitids->getTable();
