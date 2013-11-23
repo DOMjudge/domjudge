@@ -330,6 +330,7 @@ function judge($row)
 	// Will be revoked again after this run finished.
 	chmod ($workdir, 0755);
 
+	$totalcases = 0;
 	while ( TRUE ) {
 		// get the next testcase
 		$testcase = request('testcases', 'GET', 'judgingid=' . urlencode($row['judgingid']));
@@ -338,6 +339,7 @@ function judge($row)
 		// empty means: no more testcases for this judging.
 		if ( empty($tc) ) break;
 
+		$totalcases++;
 		logmsg(LOG_DEBUG, "Running testcase $tc[rank]...");
 		$testcasedir = $workdir . "/testcase" . sprintf('%03d', $tc['rank']);
 
@@ -429,6 +431,11 @@ function judge($row)
 		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
 		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
+	}
+
+	// Sanity check: need to have had at least one testcase
+	if ( $totalcases == 0 ) {
+		logmsg(LOG_WARNING, "No testcases judged for s$row[submitid]/j$row[judgingid]!");
 	}
 
 	// done!
