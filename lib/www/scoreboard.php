@@ -42,7 +42,7 @@ function calcPenaltyTime($solved, $num_submissions)
 /**
  * Generate scoreboard data based on the cached data in table
  * 'scoreboard_{public,jury}'. If the function is called while
- * IS_JURY is defined or $jury set, the scoreboard will always be
+ * $jury set to true, the scoreboard will always be
  * current, regardless of the freezetime setting in the contesttable.
  *
  * The $filter argument may contain subarrays 'affilid', 'country',
@@ -57,15 +57,13 @@ function calcPenaltyTime($solved, $num_submissions)
  * matrix[login][probid](is_correct, num_submissions, num_pending, time, penalty)
  *
  * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid]
- *    probid(num_submissions, num_pending, num_correct, best_time, best_time_sort[sortorder] )
+ *    probid(num_submissions, num_pending, num_correct, best_time_sort[sortorder] )
  */
 function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
 	global $DB;
 
 	$cid = $cdata['cid'];
-
-	if ( IS_JURY ) $jury = TRUE;
 
 	// Show final scores if contest is over and unfreezetime has been
 	// reached, or if contest is over and no freezetime had been set.
@@ -143,7 +141,6 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
 			$SUMMARY['problems'][$prob]['num_pending'] = 0;
 			$SUMMARY['problems'][$prob]['num_correct'] = 0;
-			$SUMMARY['problems'][$prob]['best_time'] = NULL;
 			$SUMMARY['problems'][$prob]['best_time_sort'] = array();
 		}
 	}
@@ -222,12 +219,6 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 				     $pdata['time']<$psum['best_time_sort'][$totals['sortorder']] ) {
 					@$psum['best_time_sort'][$totals['sortorder']] = $pdata['time'];
 				}
-
-				// also keep overall best time per problem for in bottom summary row
-				if ( !isset($psum['best_time']) ||
-				     $pdata['time'] < @$psum['best_time'] ) {
-					@$psum['best_time'] = $pdata['time'];
-				}
 			}
 		}
 	}
@@ -259,8 +250,6 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE,
 	$limitteams = null, $displayrank = TRUE, $center = FALSE, $showlegends = TRUE)
 {
-	$cid = $cdata['cid'];
-
 	// 'unpack' the scoreboard data:
 	$scores  = $sdata['scores'];
 	$matrix  = $sdata['matrix'];
@@ -287,17 +276,18 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 	// column headers
 	echo "<thead>\n";
 	echo '<tr class="scoreheader">' .
-		'<th title="rank" scope="col">' . jurylink(null,'#') . '</th>' .
-		( $SHOW_AFFILIATIONS ? '<th title="team affiliation" scope="col">' .
-		jurylink('team_affiliations.php','affil.') . '</th>' : '' ) .
-		'<th title="team name" scope="col">' . jurylink('teams.php','team') . '</th>' .
-		'<th title="# solved / penalty time" colspan="2" scope="col">' . jurylink(null,'score') . "</th>\n";
+		'<th title="rank" scope="col">' . jurylink(null,'rank') . '</th>' .
+		'<th title="team name" scope="col"' .
+		( $SHOW_AFFILIATIONS ? ' colspan="2"' : '' ) .
+		'>' . jurylink(null, 'team') . '</th>' .
+		'<th title="# solved / penalty time" colspan="2" scope="col">' .
+		jurylink(null, 'score') . '</th>' . "\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">';
 		$str = htmlspecialchars($pr['probid']) .
-		       (!empty($pr['color']) ? ' <img style="background-color: ' .
-		        htmlspecialchars($pr['color']) . ';" alt="problem colour ' .
-		        htmlspecialchars($pr['color']) . '" src="../images/circle.png" />' : '' );
+		       (!empty($pr['color']) ? ' <div class="circle" style="background: ' .
+			htmlspecialchars($pr['color']) . ';"></div>' : '') ;
+
 		if ( IS_JURY || $pr['hastext']>0 ) {
 		     echo '<a href="problem.php?id=' . urlencode($pr['probid']) .
 			     '">' . $str . '</a></th>';
@@ -345,6 +335,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 					echo '<a href="team_affiliation.php?id=' .
 						urlencode($teams[$team]['affilid']) . '">';
 				}
+				/*
 				$affillogo = '../images/affiliations/' .
 					urlencode($teams[$team]['affilid']) . '.png';
 				if ( is_readable($affillogo) ) {
@@ -354,6 +345,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 				} else {
 					echo htmlspecialchars($teams[$team]['affilid']);
 				}
+				 */
 				if ( isset($teams[$team]['country']) ) {
 					$countryflag = '../images/countries/' .
 						urlencode($teams[$team]['country']) . '.png';
@@ -370,12 +362,17 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 			}
 			echo '</td>';
 		}
+		$affilname = '';
+		if ( $SHOW_AFFILIATIONS && isset($teams[$team]['affilid']) ) {
+				$affilname = htmlspecialchars($teams[$team]['affilname']);
+		}
 		echo
 			'<td class="scoretn"' .
 			(!empty($color) ? ' style="background: ' . $color . ';"' : '') .
 			(IS_JURY ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
 			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
-			htmlspecialchars($teams[$team]['name']) .
+			htmlspecialchars($teams[$team]['name']) . '<br />' .
+			'<span class="univ">' . $affilname . '</span>' . 
 			($static ? '' : '</a>') .
 			'</td>';
 		echo
@@ -406,8 +403,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 			}
 			// if correct, print time scored
 			if( $matrix[$team][$prob]['is_correct'] ) {
-				$str .= ' (' . $matrix[$team][$prob]['time'] . ' + ' .
-				               $matrix[$team][$prob]['penalty'] . ')';
+				$str .= '/' . $matrix[$team][$prob]['time'];
 			}
 			echo '>' . jurylink('team.php?id=' . urlencode($team) .
 								'&amp;restrict=probid:' . urlencode($prob),
@@ -419,8 +415,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 
 	if ( empty($limitteams) ) {
 		// print a summaryline
-		echo '<tbody><tr id="scoresummary" title="#submitted' .
-		    ( $SHOW_PENDING ? ' + #pending' : '' ) . ' / #correct / fastest time">' .
+		echo '<tbody><tr id="scoresummary" title="#submitted / #correct">' .
 			'<td title="total teams">' .
 			jurylink(null,count($matrix)) . '</td>' .
 			( $SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
@@ -430,12 +425,8 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 			'<td title="total solved" class="scorenc">' . jurylink(null,$summary['num_correct'])  . '</td><td title=" "></td>';
 
 		foreach( array_keys($probs) as $prob ) {
-			$str = $summary['problems'][$prob]['num_submissions'] .
-			       ( $SHOW_PENDING ? ' + ' .
-			         $summary['problems'][$prob]['num_pending'] : '' ) . ' / ' .
-			       $summary['problems'][$prob]['num_correct'] . ' / ' .
-				   ( isset($summary['problems'][$prob]['best_time']) ?
-					 $summary['problems'][$prob]['best_time'] : '-' );
+			$str = $summary['problems'][$prob]['num_submissions'] . '/' .
+			       $summary['problems'][$prob]['num_correct'];
 			echo '<td>' .
 				jurylink('problem.php?id=' . urlencode($prob),$str) .
 				'</td>';
@@ -509,7 +500,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	if ( empty( $cdata ) ) { echo "<p class=\"nodata\">No active contest</p>\n"; return; }
 
 	$fdata = calcFreezeData($cdata);
-	$sdata = genScoreBoard($cdata, FALSE, $filter);
+	$sdata = genScoreBoard($cdata, IS_JURY, $filter);
 
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
@@ -517,7 +508,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	if ( $fdata['showfinal'] ) {
 		echo "<h4>final standings</h4>\n\n";
 	} elseif ( ! $fdata['cstarted'] ) {
-		echo "<h4>scheduled to start at " . printtime($cdata['starttime']) . "</h4>\n\n";
+		echo "<h4>" . printContestStart($cdata) . "</h4>\n\n";
 		// Stop here (do not leak problem number, descriptions etc).
 		// Alternatively we could only display the list of teams?
 		if ( ! IS_JURY ) return;
@@ -535,9 +526,14 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	// The static scoreboard does not support filtering
 	if ( $filter!==FALSE && $static!==TRUE ) {
 
-		$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, name, country
-		                  FROM team_affiliation');
-		$categids = $DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category');
+		$categids = $DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category ' .
+				    (IS_JURY ? '' : 'WHERE visible = 1 ' ));
+		// show only affilids/countries with visible teams
+		$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, team_affiliation.name, country
+				  FROM team_affiliation
+				  JOIN team USING(affilid)
+				  WHERE categoryid IN (%As)
+				  GROUP BY affilid', array_keys($categids));
 
 		$affilids  = array();
 		$countries = array();
@@ -567,7 +563,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		?>
 </div></td></tr>
 </table>
-<script type="text/javascript" language="JavaScript">
+<script type="text/javascript">
 <!--
 collapse("filter");
 // -->
@@ -586,7 +582,7 @@ collapse("filter");
 	}
 	echo "<p id=\"lastmod\">Last Update: " .
 	     date('j M Y H:i', $lastupdate) . "<br />\n" .
-	     "using <a href=\"http://domjudge.sourceforge.net/\">DOMjudge</a></p>\n\n";
+	     "using <a href=\"http://www.domjudge.org/\">DOMjudge</a></p>\n\n";
 
 	return;
 }
@@ -634,8 +630,8 @@ function putTeamRow($cdata, $teamids) {
 			global $teamdata;
 			echo "<h2 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
 				htmlspecialchars($teamdata['name']) . "</span>!</h2>\n\n";
-			echo "<h3 id=\"contestnotstarted\">contest is scheduled to start at " .
-				printtime($cdata['starttime']) . "</h3>\n\n";
+			echo "<h3 id=\"contestnotstarted\">contest is " .
+				printContestStart($cdata) . "</h3>\n\n";
 		}
 
 		return;
@@ -668,6 +664,22 @@ function jurylink($target, $content) {
 	$res .= $content;
 	if ( IS_JURY ) $res .= '</a>';
 
+	return $res;
+}
+
+/**
+ * Print contest start time
+ */
+function printContestStart($cdata) {
+	$res = "scheduled to start ";
+	$starttime_u = strtotime($cdata['starttime']);
+	if( date('Ymd') == date('Ymd', $starttime_u) ) {
+		// Today
+		$res .= "at " . printtime($cdata['starttime']);
+	} else {
+		// Print full date
+		$res .= "on " . strftime('%a %d %b %Y %T %Z', $starttime_u);
+	}
 	return $res;
 }
 

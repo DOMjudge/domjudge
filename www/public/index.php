@@ -20,24 +20,9 @@ if ( !isset($_GET['clear']) ) {
 	}
 	if ( count($filter) ) $refresh .= '?' . http_build_query($filter);
 }
-$extrahead = <<<HEAD
-<script type="text/javascript">
-<!--
-function collapse(x){
-	var oTemp=document.getElementById("detail"+x);
-	if (oTemp.style.display=="none") {
-		oTemp.style.display="block";
-	} else {
-		oTemp.style.display="none";
-	}
-}
-// -->
-</script>
-HEAD;
 
-$menu = false;
+$menu = true;
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/scoreboard.php');
 
 $isstatic = @$_SERVER['argv'][1] == 'static' || isset($_REQUEST['static']);
 
@@ -49,5 +34,7 @@ if ( ! $isstatic ) {
 
 // call the general putScoreBoard function from scoreboard.php
 putScoreBoard($cdata, null, $isstatic, $filter);
+
+echo "<script type=\"text/javascript\">initFavouriteTeams();</script>";
 
 require(LIBWWWDIR . '/footer.php');

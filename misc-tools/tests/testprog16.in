@@ -1,0 +1,3 @@
+REPI(i,10)
+	INT(i,2*i,x) NEWLINE
+END

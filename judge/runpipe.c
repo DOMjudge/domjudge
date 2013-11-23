@@ -100,8 +100,13 @@ void terminate(int sig)
 
 	/* Reset signal handlers to default */
 	sigact.sa_handler = SIG_DFL;
+	sigact.sa_flags = 0;
+	if ( sigemptyset(&sigact.sa_mask)!=0 ) {
+		warning(0,"could not initialize signal mask");
+	}
+
 	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
-		warning(0,"error restoring signal handler");
+		warning(0,"could not restore signal handler");
 	}
 
 	/* Send kill signal to all children */
@@ -164,16 +169,17 @@ int main(int argc, char **argv)
 	if ( argc<=optind ) error(0,"no command specified");
 
 	/* Parse commands to be executed */
-	ncmds = 0;
-	newcmd = 1;
+	ncmds = 0; /* Zero-based index to current command in loop,
+	              contains #commands specified after loop */
+	newcmd = 1; /* Is current command newly started? */
 	for(i=optind; i<argc; i++) {
 		/* Check for commands separator */
 		if ( strcmp(argv[i],"=")==0 ) {
 			ncmds++;
 			if ( newcmd ) error(0,"empty command #%d specified", ncmds);
 			newcmd = 1;
-			if ( ncmds>MAX_CMDS ) {
-				error(0,"too many commands specified: %d > %d", ncmds, MAX_CMDS);
+			if ( ncmds+1>MAX_CMDS ) {
+				error(0,"too many commands specified: %d > %d", ncmds+1, MAX_CMDS);
 			}
 			continue;
 		}
@@ -200,9 +206,6 @@ int main(int argc, char **argv)
 	}
 	ncmds++;
 	if ( newcmd ) error(0,"empty command #%d specified", ncmds);
-	if ( ncmds>MAX_CMDS ) {
-		error(0,"too many commands specified: %d > %d", ncmds, MAX_CMDS);
-	}
 	if ( ncmds!=2 ) {
 		error(0,"%d commands specified, 2 required", ncmds);
 	}

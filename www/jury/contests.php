@@ -11,8 +11,11 @@ require(LIBWWWDIR . '/checkers.jury.php');
 $times = array ('activate','start','freeze','end','unfreeze');
 $now = now();
 
-if ( IS_ADMIN && isset($_POST['donow']) ) {
-	$time = array_pop(array_keys($_POST['donow']));
+if ( isset($_POST['donow']) ) {
+
+	requireAdmin();
+
+	$time = key($_POST['donow']);
 	if ( !in_array($time, $times) ) error("Unknown value for timetype");
 	// for activatetime  we don't have a current contest to use,
 	// so we need to get it from the form data.
@@ -154,7 +157,7 @@ if( count($res) == 0 ) {
 			( $iseven ? 'roweven': 'rowodd' ) .
 			(!$row['enabled']    ? ' disabled' :'') .
 			($row['cid'] == $cid ? ' highlight':'') . '">' .
-			"<td align=\"right\">" . $link .
+			"<td class=\"tdright\">" . $link .
 			"c" . (int)$row['cid'] . "</a></td>\n";
 		foreach ($times as $time) {
 			echo "<td title=\"".htmlspecialchars(@$row[$time. 'time']) . "\">" .

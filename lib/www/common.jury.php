@@ -51,6 +51,17 @@ function delLink($table, $field, $value)
 }
 
 /**
+ * Returns a link to export a problem as zip-file.
+ *
+ */
+function exportLink($probid)
+{
+	return '<a href="export.php?id=' . urlencode($probid) .
+		'"><img src="../images/b_save.png" ' .
+		' title="export problem as zip-file" alt="export" /></a>';
+}
+
+/**
  * Returns a form to rejudge all judgings based on a (table,id)
  * pair. For example, to rejudge all for language 'java', call
  * as rejudgeForm('language', 'java').
@@ -88,9 +99,12 @@ function rejudgeForm($table, $id)
 				$disabled = true;
 			}
 		}
-	} else {
+	} else if ( $table == 'contest' ) {
 		$button = "REJUDGE ALL for $table $id";
 		$question = "Rejudge all submissions for this $table?";
+	} else {
+		$button = "REJUDGE ALL for $table $id";
+		$question = "Rejudge all non-CORRECT submissions for this $table?";
 	}
 
 	$ret .= '<input type="submit" value="' . htmlspecialchars($button) . '" ' .
@@ -105,8 +119,7 @@ function rejudgeForm($table, $id)
  * Returns TRUE iff string $haystack ends with string $needle
  */
 function ends_with($haystack, $needle) {
-	return mb_substr( $haystack, mb_strlen( $haystack ) - mb_strlen( $needle ) )
-       		=== $needle;
+	return mb_substr($haystack, mb_strlen($haystack)-mb_strlen($needle)) === $needle;
 }
 
 /**
@@ -223,22 +236,28 @@ function importZippedProblem($zip, $probid = NULL)
 	}
 
 	// submit reference solutions
-	if ( isset($ini_array['allow_submit']) && $ini_array['allow_submit'] ) {
+	if ( $DB->q('VALUE SELECT allow_submit FROM problem WHERE probid = %s', $probid) ) {
 		// First find all submittable languages:
-		$langs = $DB->q('KEYVALUETABLE SELECT langid AS extension, langid AS langid FROM language
-		                 WHERE allow_submit = 1');
+		$langs = $DB->q('KEYVALUETABLE SELECT langid, extensions
+ 		                 FROM language WHERE allow_submit = 1');
 
 		for ($j = 0; $j < $zip->numFiles; $j++) {
 			$filename = $zip->getNameIndex($j);
 			$extension = end(explode(".", $filename));
-			$langid = getLangID($extension);
-			if( !empty($langid) && isset($langs[$langid]) ) {
+			unset($langid);
+			foreach ( $langs as $key => $exts ) {
+				if ( in_array($extension,json_decode($exts)) ) {
+					$langid = $key;
+					break;
+				}
+			}
+			if( !empty($langid) ) {
 				if ( !($tmpfname = mkstemps(TMPDIR."/ref_solution-XXXXXX",0)) ) {
 					error("Could not create temporary file.");
 				}
 				file_put_contents($tmpfname, $zip->getFromIndex($j));
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
-					submit_solution('domjudge', $probid, $langs[$langid], array($tmpfname), array($filename));
+					submit_solution('domjudge', $probid, $langid, array($tmpfname), array($filename));
 				}
 				unlink($tmpfname);
 			}
@@ -246,12 +265,4 @@ function importZippedProblem($zip, $probid = NULL)
 	}
 
 	return $probid;
-}
-
-/**
- * returns jury member username as supplied by Apache
- */
-function getJuryMember()
-{
-	return $_SERVER['REMOTE_USER'];
 }

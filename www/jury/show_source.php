@@ -128,9 +128,8 @@ function presentDiff ($old, $new)
 	$difftext = createDiff($new, SUBMITDIR.'/'.$newsourcefile, $new['submitid'],
 	                       $old, SUBMITDIR.'/'.$oldsourcefile, $old['submitid']);
 
-	$oldid = htmlspecialchars($old['submitid']);
 	return '<div class="tabbertab">' .
-		'<h2 class="filename"><a name="diff"></a>' .
+		'<h2 class="filename">' .
 		htmlspecialchars($old['filename']) . "</h2>\n\n" .
 
 		'<pre class="output_text">' . parseSourceDiff($difftext) . "</pre>\n\n" .
@@ -224,7 +223,7 @@ $html = '<script type="text/javascript" src="../js/tabber.js"></script>' .
 	'<div class="tabber">';
 foreach($sources as $sourcedata)
 {
-	$html .= presentSource($sourcedata, $submission['langid']);	
+	$html .= presentSource($sourcedata, $submission['langid']);
 }
 $html .= "</div>";
 
@@ -274,10 +273,10 @@ if ( !empty($submission['origsubmitid']) ) {
 }
 echo "</h2>\n\n";
 if ( $olddata !== NULL ) {
-       echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
+	echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
 }
 if ( $submission['origsubmitid'] ) {
-       echo "<p><a href=\"#origdiff\">Go to diff to original submission</a></p>\n\n";
+	echo "<p><a href=\"#origdiff\">Go to diff to original submission</a></p>\n\n";
 }
 
 

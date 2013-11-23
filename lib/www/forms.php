@@ -35,11 +35,12 @@ function addPwField($name , $value = null) {
 
 /**
  * Form checkbox
+ */
 function addCheckBox($name, $checked = false, $value = null) {
 	return addInputField('checkbox', $name, $value,
 	                     ($checked ? ' checked="checked"' : ''));
 }
- */
+
 
 /**
  * Form radio button
@@ -59,13 +60,16 @@ function addHidden($name, $value) {
 /**
  * An input textbox.
  */
-function addInput($name, $value = '', $size = 0, $maxlength = 0) {
+function addInput($name, $value = '', $size = 0, $maxlength = 0, $extraattr = null) {
 	$attr = '';
 	if ( $size ) {
 		$attr .= ' size="'.(int)$size.'"';
 	}
 	if ( $maxlength ) {
 		$attr .= ' maxlength="'.(int)$maxlength .'"';
+	}
+	if ( $extraattr ) {
+		$attr .= ' ' . $extraattr;
 	}
 
 	return addInputField('text', $name, $value, $attr);
@@ -122,10 +126,11 @@ function addSelect($name, $values, $default = null, $usekeys = false, $multi = f
  * Form submission button
  * Note the switched value/name parameters!
  */
-function addSubmit($value, $name = null, $onclick = null, $enable = true) {
+function addSubmit($value, $name = null, $onclick = null, $enable = true, $extraattrs = "") {
 	return addInputField('submit', $name, $value,
 		(empty($onclick) ? null : ' onclick="'.htmlspecialchars($onclick).'"') .
-		($enable ? '' : ' disabled="disabled"'));
+		($enable ? '' : ' disabled="disabled"') .
+		(empty($extraattrs) ? '' : " $extraattrs"));
 }
 /**
  * Form reset button, $value = caption
@@ -174,7 +179,6 @@ function addEndForm()
 /**
  * File upload field
  */
-function addFileField($name, $size = null) {
-	return addInputField('file', $name , null,
-	                     (is_null($size) ? null : " size=\"".(int)($size).'"'));
+function addFileField($name, $dummy = null, $extraattr = "") {
+	return addInputField('file', $name , null, $extraattr);
 }

@@ -17,7 +17,7 @@ function have_printing()
 
 function put_print_form()
 {
-	global $DB, $langexts;
+	global $DB, $langexts, $pagename;
 	echo "<script type=\"text/javascript\">\n<!--\n";
 	echo "function detectLanguage(filename)
 	{
@@ -47,13 +47,13 @@ function put_print_form()
 
 	echo "// -->\n</script>\n";
 
-	echo addForm('','post',null,'multipart/form-data');
+	echo addForm($pagename,'post',null,'multipart/form-data');
 
 	?>
 
 	<table>
 	<tr><td><label for="code">File</label>:</td>
-	<td><input type="file" name="code" id="code" size="40" onChange='detectLanguage(document.getElementById("code").value);' /></td>
+	<td><input type="file" name="code" id="code" size="40" required onChange='detectLanguage(document.getElementById("code").value);' /></td>
 	</tr>
 	<tr><td colspan="2">&nbsp;</td></tr>
 	<tr><td><label for="langid">Language</label>:</td>
@@ -79,7 +79,7 @@ function put_print_form()
 
 function handle_print_upload()
 {
-	global $DB, $login;
+	global $DB, $username;
 
 	ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
 
@@ -98,8 +98,8 @@ function handle_print_upload()
 		if ( ! isset($lang) ) error("Unable to find language '$langid'");
 	}
 
-	if ( IS_JURY ) $whoami = 'JURY/' . getJuryMember();
-	else $whoami = $login;
+	if ( IS_JURY ) $whoami = 'JURY/' . $username;
+	else $whoami = $username;
 
 	$ret = send_print($realfilename,$langid,$whoami,$filename);
 

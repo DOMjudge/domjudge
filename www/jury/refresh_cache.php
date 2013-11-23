@@ -20,7 +20,7 @@ echo "<h1>Refresh Cache</h1>\n\n";
 requireAdmin();
 
 if ( ! isset($_REQUEST['refresh']) ) {
-	echo addForm('');
+	echo addForm($pagename);
 	echo msgbox('Significant database impact',
 	       'Refreshing the scoreboard cache can have a significant impact on the database load, ' .
 	       'and is not necessary in normal operating circumstances.<br /><br />Refresh scoreboard cache now?' .
@@ -29,7 +29,7 @@ if ( ! isset($_REQUEST['refresh']) ) {
         echo addEndForm();
 
 	require(LIBWWWDIR . '/footer.php');
-	exit;	
+	exit;
 }
 
 $time_start = microtime(TRUE);

@@ -17,6 +17,10 @@ require_once("common-config.php");
 //   Authenticate against one or more LDAP servers. Use PHP sessions
 //   after successful authentication. This option may be useful to
 //   integrate DOMjudge (e.g. as courseware) into a larger system.
+// EXTERNAL
+//   Use authentication information provided by Apache. This enables
+//   use of any authentication module available for Apache, and will
+//   get the username from the REMOTE_USER environment variable.
 // FIXED
 //   Use one fixed team user that is automatically logged in. This
 //   can be useful e.g. for a demo or testing environment. Define
@@ -40,15 +44,24 @@ define('STRICTIPCHECK', false);
 define('LDAP_SERVERS', 'ldaps://ldap1.example.com/ ldaps://ldap2.example.com/');
 define('LDAP_DNQUERY', 'CN=&,OU=users,DC=example,DC=com');
 
-// Specify here which of the users in htpasswd-jury should have admin 
-// rights on top of their jury rights
-$DOMJUDGE_ADMINS = array('domjudge_jury', 'admin');
+// Set this to a notification command, which receives the notification
+// text on stdin. Examples below for notification by mail or prints.
+//define('BALLOON_CMD', 'mail -s Balloon_notification domjudge@localhost');
+//define('BALLOON_CMD', 'lpr');
+define('BALLOON_CMD', '');
 
-// List of auto-detected language extensions by the submit client.
-//   Format: 'LANG,MAINEXT[,EXT]... [LANG...]' where:
-//   - LANG is the language name displayed,
-//   - MAINEXT is the extension corresponding to the langid in DOMjudge,
-//   - EXT... are comma separated additional detected language extensions.
-// This list only needs to be modified when additional languages are
-// added and should be kept in sync with the list in submit-config.h.in.
-define('LANG_EXTS', 'C,c C++,cpp,cc Java,java Pascal,pas,p Haskell,hs,lhs Perl,pl POSIX-shell,sh C#,csharp,cs AWK,awk Python,py Bash,bash');
+// After what delay of a judgehost not checking in should its status
+// start displaying as warning or critical.
+define('JUDGEHOST_WARNING', 30);
+define('JUDGEHOST_CRITICAL', 120);
+
+// Internal and output character set used, don't change.
+define('DJ_CHARACTER_SET', 'utf-8');
+define('DJ_CHARACTER_SET_MYSQL', 'utf8');
+// MySQL connection flags.
+define('DJ_MYSQL_CONNECT_FLAGS', null);
+// To enable SSL/TLS encryption of MySQL connections, use the following.
+// Not enabled by default because the server isn't configured to
+// accept SSL by default. Not normally necessary if you run the DOMserver
+// and database on the same machine.
+// define('DJ_MYSQL_CONNECT_FLAGS', MYSQLI_CLIENT_SSL);

@@ -10,12 +10,15 @@
 # This script will be called from judgedaemon.main.php in the root
 # directory of the chroot environment with one parameter: either
 # 'start' to setup, or 'stop' to destroy the chroot environment.
+#
+# We always use 'sudo -n <command> < /dev/null' to make sure that sudo
+# doesn't try to ask for a password, but just fails.
 
 # Exit on error:
 set -e
 
-# Chroot subdirs needed: (add 'lib64' for amd64 architecture)
-SUBDIRMOUNTS="etc lib usr"
+# Chroot subdirs needed: (optional lib64 only needed for amd64 architecture)
+SUBDIRMOUNTS="etc usr lib lib64"
 
 # Location where to bind mount from:
 CHROOTORIGINAL="/chroot/domjudge"
@@ -33,7 +36,7 @@ case "$1" in
 			# Preserve those; bind mount the others.
 			if [ -L "$CHROOTORIGINAL/$i" ]; then
 				ln -s `readlink "$CHROOTORIGINAL/$i"` $i
-			else
+			elif [ -d "$CHROOTORIGINAL/$i" ]; then
 				mkdir -p $i
 				sudo -n mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null
 				# Mount read-only for extra security. Note that this
@@ -41,24 +44,41 @@ case "$1" in
 				sudo -n mount -o remount,ro,bind "$PWD/$i" < /dev/null
 			fi
 		done
+
+		# copy dev/random and /dev/urandom as a random source
+		mkdir -p dev
+		sudo -n cp -pR /dev/random  dev < /dev/null
+		sudo -n cp -pR /dev/urandom dev < /dev/null
 		;;
 
 	stop)
 
-# Wait a second to assure that no files are accessed anymore:
-		sleep 1
-
 		sudo -n umount "$PWD/proc" < /dev/null
-		rmdir proc || true
+
+		rm dev/urandom
+		rm dev/random
+		rmdir dev || true
 
 		for i in $SUBDIRMOUNTS ; do
 			if [ -L "$CHROOTORIGINAL/$i" ]; then
 				rm -f $i
-			else
+			elif [ -d "$CHROOTORIGINAL/$i" ]; then
 				sudo -n umount "$PWD/$i" < /dev/null
+			fi
+		done
+
+# FIXME: it seems that after unmounting, we sometimes still get error
+# messages "Device or resource busy" when trying to rmdir the
+# mountpoints. A 'sync' doesn't help, so we wait one second. This is
+# not enough in all cases, but hopefully for most at least...
+		sleep 1
+
+		for i in $SUBDIRMOUNTS ; do
+			if [ -d "$CHROOTORIGINAL/$i" ]; then
 				rmdir $i || true
 			fi
 		done
+		rmdir proc || true
 		;;
 
 	*)

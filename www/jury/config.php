@@ -8,11 +8,11 @@
 
 require('init.php');
 
-requireAdmin();
-
 dbconfig_init();
 
 if ( isset($_POST['save']) ) {
+
+	requireAdmin();
 
 	foreach ( $_POST as $tmp => $val ) {
 		if ( substr($tmp, 0, 7)!='config_' ) continue;
@@ -58,12 +58,16 @@ if ( isset($_POST['save']) ) {
 $title = "Configuration";
 require(LIBWWWDIR . '/header.php');
 
+// Check admin rights after header to generate valid HTML page
+requireAdmin();
+
 echo "<h1>Configuration settings</h1>\n\n";
 
-echo addForm('config.php') . "<table>\n<thead>\n" .
-    "<tr align=\"left\"><th>Option</th><th>Value(s)</th><th>Description</th></tr>\n" .
+echo addForm($pagename) . "<table>\n<thead>\n" .
+    "<tr class=\"thleft\"><th>Option</th><th>Value(s)</th><th>Description</th></tr>\n" .
     "</thead>\n<tbody>\n";
 
+$extra = ' class="config_input"';
 foreach ( $LIBDBCONFIG as $key => $data ) {
 	switch ( @$data['type'] ) {
 	case 'bool':
@@ -74,10 +78,10 @@ foreach ( $LIBDBCONFIG as $key => $data ) {
 		    "<label for=\"config_${key}0\">no</label>";
 		break;
 	case 'int':
-		$editfield = addInput('config_'.$key, $data['value'], 10, 10);
+		$editfield = addInputField('number', 'config_'.$key, $data['value'],$extra);
 		break;
 	case 'string':
-		$editfield = addInput('config_'.$key, $data['value'], 30);
+		$editfield = addInput('config_'.$key, $data['value'], 0,0,$extra);
 		break;
 	case 'array_val':
 	case 'array_keyval':
@@ -85,19 +89,19 @@ foreach ( $LIBDBCONFIG as $key => $data ) {
 		$i = 0;
 		foreach ( $data['value'] as $k => $v ) {
 			if ( $data['type']=='array_keyval' ) {
-				$editfield .= addInput("config_${key}[$i][key]", $k, 10);
-				$editfield .= addInput("config_${key}[$i][val]", $v, 18);
+				$editfield .= addInput("config_${key}[$i][key]", $k, 0,0,$extra);
+				$editfield .= addInput("config_${key}[$i][val]", $v, 0,0,$extra);
 			} else {
-				$editfield .= addInput("config_${key}[$i]", $v, 30);
+				$editfield .= addInput("config_${key}[$i]", $v, 0,0,$extra);
 			}
 			$editfield .= "<br />";
 			$i++;
 		}
 		if ( $data['type']=='array_keyval' ) {
-			$editfield .= addInput("config_${key}[$i][key]", '', 10);
-			$editfield .= addInput("config_${key}[$i][val]", '', 18);
+			$editfield .= addInput("config_${key}[$i][key]", '', 0,0,$extra);
+			$editfield .= addInput("config_${key}[$i][val]", '', 0,0,$extra);
 		} else {
-			$editfield .= addInput("config_${key}[$i]", '', 30);
+			$editfield .= addInput("config_${key}[$i]", '', 0,0,$extra);
 		}
 		break;
 	default:
@@ -114,7 +118,9 @@ foreach ( $LIBDBCONFIG as $key => $data ) {
 }
 
 echo "</tbody>\n</table>\n<p>" .
-	addSubmit('Save', 'save') . addSubmit('Cancel', 'cancel') . "</p>" .
+	addSubmit('Save', 'save') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
+	"</p>" .
 	addEndForm();
 
 require(LIBWWWDIR . '/footer.php');

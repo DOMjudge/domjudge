@@ -6,8 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 $id = (int)@$_REQUEST['id'];
 if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
 
@@ -61,7 +59,7 @@ if ( !isset($jid) ) {
 	}
 }
 
-$jury_member = getJuryMember();
+$jury_member = $username;
 
 if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 
@@ -101,28 +99,28 @@ if ( $submdata['valid'] ) {
 }
 
 ?>
-<table width="100%">
+<table id="submission_layout">
 <tr><td>
 <table>
 <caption>Submission</caption>
-<tr><td scope="row">Contest:</td><td>
+<tr><td>Contest:</td><td>
 	<a href="contest.php?id=<?php echo urlencode($submdata['cid'])?>">
 	<?php echo htmlspecialchars($submdata['contestname'])?></a></td></tr>
-<tr><td scope="row">Team:</td><td>
+<tr><td>Team:</td><td>
 	<a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>">
 	<span class="teamid"><?php echo htmlspecialchars($submdata['teamid'])?></span>:
 	<?php echo htmlspecialchars($submdata['teamname'])?></a></td></tr>
-<tr><td scope="row">Problem:</td><td>
+<tr><td>Problem:</td><td>
 	<a href="problem.php?id=<?php echo $submdata['probid']?>">
 	<span class="probid"><?php echo htmlspecialchars($submdata['probid'])?></span>:
 	<?php echo htmlspecialchars($submdata['probname'])?></a></td></tr>
-<tr><td scope="row">Language:</td><td>
+<tr><td>Language:</td><td>
 	<a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a></td></tr>
-<tr><td scope="row">Submitted:</td><td><?php echo  htmlspecialchars($submdata['submittime']) ?></td></tr>
-<tr><td scope="row">Source:</td><td>
+<tr><td>Submitted:</td><td><?php echo  htmlspecialchars($submdata['submittime']) ?></td></tr>
+<tr><td>Source:</td><td>
 	<a href="show_source.php?id=<?php echo $id?>">view source code</a></td></tr>
-<tr><td scope="row">Max runtime:</td><td>
+<tr><td>Max runtime:</td><td>
 	<?php echo  htmlspecialchars($submdata['maxruntime']) ?> sec</td></tr>
 </table>
 
@@ -194,7 +192,7 @@ if ( isset($jid) )  {
 		($jud['valid'] == 1 ? '' : ' (INVALID)') . "</h2>\n\n";
 
 	if ( !$jud['verified'] ) {
-		echo addForm($pagename . '?id=' . urlencode($id) . '&jid=' . urlencode($jid));
+		echo addForm($pagename . '?id=' . urlencode($id) . '&amp;jid=' . urlencode($jid));
 
 		echo "<p>Claimed: " .
 		    "<strong>" . printyn(!empty($jud['jury_member'])) . "</strong>";
@@ -224,7 +222,7 @@ if ( isset($jid) )  {
 				echo addForm('verify.php') .
 				    addHidden('id',  $jud['judgingid']) .
 				    addHidden('val', $val) .
-				    addHidden('redirect', $_SERVER['HTTP_REFERER']);
+				    addHidden('redirect', @$_SERVER['HTTP_REFERER']);
 			}
 
 			echo "<p>Verified: " .
@@ -311,7 +309,7 @@ if ( isset($jid) )  {
 
 	echo "<h3 id=\"testcases\">Testcase runs " .
 	    ( $lastjud === NULL ? '' :
-	      "<span style=\"font-size:xx-small;\">" .
+	      "<span class=\"testcases_prev\">" .
 	      "<a href=\"javascript:togglelastruns();\">show/hide</a> results of previous " .
 	      "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a>" .
 	          ( empty($lastjud['verify_comment']) ? '' :
@@ -333,10 +331,14 @@ if ( isset($jid) )  {
 	echo "<th scope=\"col\">description</th>" .
 	    "</tr>\n</thead>\n<tbody>\n";
 
+	$sum_runtime = 0;
+	$max_runtime = 0;
+	$sum_lastruntime = 0;
+	$max_lastruntime = 0;
 	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
 		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
-		    "<td><a href=\"$link\">$run[runtime]</a></td>" .
+		    "<td><a href=\"$link\">" . sprintf('%.2f',$run['runtime']) . "</a></td>" .
 		    "<td><a href=\"$link\"><span class=\"sol ";
 		switch ( $run['runresult'] ) {
 		case 'correct':
@@ -351,7 +353,7 @@ if ( isset($jid) )  {
 			$lastrun = $lastruninfo[$key];
 			if ( $lastjud['result']=='compiler-error' ) $lastrun['runresult'] = 'compiler-error';
 			echo "<td name=\"lastruntime\"><a href=\"$link\">" .
-				"<span class=\"prevsubmit\">$lastrun[runtime]</span></a></td>" .
+				"<span class=\"prevsubmit\">" . sprintf('%.2f', $lastrun['runtime']) . "</span></a></td>" .
 				"<td name=\"lastresult\"><a href=\"$link\">" .
 				"<span class=\"sol prevsubmit\">$lastrun[runresult]</span></a></td>";
 		}
@@ -359,11 +361,26 @@ if ( isset($jid) )  {
 		echo "<td><a href=\"$link\">" .
 		    htmlspecialchars(str_cut($run['description'],20)) . "</a></td>" .
 			"</tr>\n";
+
+		$sum_runtime += $run['runtime'];
+		$max_runtime = max($max_runtime,$run['runtime']);
+		if ( $lastjud !== NULL ) {
+			$sum_lastruntime += $lastrun['runtime'];
+			$max_lastruntime = max($max_lastruntime,$lastrun['runtime']);
+		}
 	}
-	echo "</tbody>\n</table>\n\n";
+	echo "</tbody>\n<tfoot><tr class=\"summary\"><td></td>" .
+	    "<td title=\"max/sum runtime\"><a>" .
+	    sprintf('%.2f/%.2f',$max_runtime,$sum_runtime) . "</a></td>" .
+	    "<td><a>" . printresult(@$jud['result']) . "</a></td>" .
+	    "<td name=\"lastruntime\" title=\"previous max/sum runtime\"><a>" .
+	    sprintf('%.2f/%.2f',$max_lastruntime,$sum_lastruntime) . "</a></td>" .
+	    "<td name=\"lastresult\"><a><span class=\"sol prevsubmit\">" . @$lastjud['result'] . "</span></a></td>" .
+	    "<td></td></tr>\n" .
+	    "</tfoot>\n</table>\n\n";
 
 ?>
-<script type="text/javascript" language="JavaScript">
+<script type="text/javascript">
 <!--
 togglelastruns();
 // -->
@@ -375,10 +392,18 @@ togglelastruns();
 		echo "<h4 id=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
 
 		if ( $run['runresult']===NULL ) {
-			echo "<p class=\"nodata\">Run not finished yet.</p>\n";
+			echo "<p class=\"nodata\">Run not started/finished yet.</p>\n";
 			continue;
 		}
 
+		$timelimit_str = '';
+		if ( $run['runresult']=='timelimit' ) {
+			if ( preg_match('/Timelimit exceeded.* hard-timelimit/',$run['output_error']) ) {
+				$timelimit_str = '<b>(terminated)</b>';
+			} else {
+				$timelimit_str = '<b>(finished late)</b>';
+			}
+		}
 		echo "<table>\n" .
 		    "<tr><td>Description:</td><td>" .
 		    htmlspecialchars($run['description']) . "</td></tr>" .
@@ -390,8 +415,7 @@ togglelastruns();
 		    "<a href=\"team_output.php?probid=" . htmlspecialchars($submdata['probid']) .
 		    "&amp;runid=" . $run['runid'] . "\">Team Output</a>" .
 		    "</td></tr>" .
-		    "<tr><td>Runtime:</td><td>$run[runtime] sec" .
-		    ( $run['runresult']=='timelimit' ? ' (terminated)' : '' ) ."</td></tr>" .
+		    "<tr><td>Runtime:</td><td>$run[runtime] sec $timelimit_str</td></tr>" .
 		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
 		    ( $run['runresult']=='correct' ? '' : 'in' ) .
 		    "correct\">$run[runresult]</span></td></tr>" .

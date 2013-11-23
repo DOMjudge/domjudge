@@ -3,19 +3,22 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
+CXXFLAGS += -std=c++11
+
 TARGETS = checkinput
 OBJECTS =
-PARSER_GEN = yylex.cc parse.cc parserbase.h
+
+PARSER_GEN = lex.cc scannerbase.h parse.cc parserbase.h
 
 ifeq ($(CHECKTESTDATA_ENABLED),yes)
 TARGETS += checktestdata
-CHKOBJS = $(addsuffix $(OBJEXT),checktestdata libchecktestdata parse yylex)
+CHKOBJS = $(addsuffix $(OBJEXT),libchecktestdata parse lex parsetype)
 OBJECTS += $(CHKOBJS)
 endif
 
 SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
               combined_scoreboard runssh_judgehosts runssh_teams balloons \
-              simulate_contest
+              simulate_contest create_cgroups
 
 config: $(SUBST_FILES)
 
@@ -25,12 +28,10 @@ $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
-yylex.cc: checktestdata.l parsetype.h
-	flex++ $<
-# Fix strict ANSI C++ bug in generated code, see Debian bug #488274
-	sed -i '/ isatty/d' $@
+lex.cc scannerbase.h: checktestdata.l scanner.h scanner.ih
+	flexc++ $<
 
-parse.cc parserbase.h: checktestdata.y parsetype.h
+parse.cc parserbase.h: checktestdata.y parser.h parser.ih parsetype.h
 	bisonc++ $<
 
 checksucc = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 || \
@@ -43,9 +44,10 @@ ifeq ($(CHECKTESTDATA_ENABLED),yes)
 libchecktestdata.o: %.o: %.cc %.h $(PARSER_GEN)
 
 checktestdata: CPPFLAGS += $(BOOST_CPPFLAGS)
-checktestdata: LDFLAGS  += $(BOOST_LDFLAGS)
-checktestdata: $(CHKOBJS) $(LIBGMPXX) $(BOOST_REGEX_LIB)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+checktestdata: LDFLAGS  += $(BOOST_LDFLAGS) -Wl,-Bstatic $(LIBGMPXX) $(BOOST_REGEX_LIB) -Wl,-Bdynamic
+checktestdata: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
+checktestdata: checktestdata.cc $(CHKOBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 check: checktestdata
 	@for i in tests/testprog*.in ; do \
@@ -69,6 +71,7 @@ check: checktestdata
 # Test if generating testdata works and complies with the script:
 	@TMP=`mktemp --tmpdir dj_gendata.XXXXXX` || exit 1 ; data=$$TMP ; \
 	for i in tests/testprog*.in ; do \
+		grep 'IGNORE GENERATE TESTING' $$i >/dev/null && continue ; \
 		n=$${i#tests/testprog} ; n=$${n%.in} ; \
 		prog=$$i ; \
 		for i in seq 10 ; do opts=-g ; $(checksucc) ; opts='' ; $(checksucc) ; done ; \
@@ -83,8 +86,11 @@ checktestdata:
 
 endif # CHECKTESTDATA_ENABLED
 
+install-domserver:
+	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) balloons
+
 install-judgehost:
-	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) dj_make_chroot
+	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) dj_make_*chroot
 
 install-docs:
 ifeq ($(CHECKTESTDATA_ENABLED),yes)

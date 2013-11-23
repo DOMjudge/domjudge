@@ -1,0 +1,10 @@
+INT(1,100,runs) NEWLINE
+REP(runs)
+	INT(1,1000,n) SPACE INT(1,10^9,b) NEWLINE
+	REPI(i,n)
+		REGEX("[a-zA-Z0-9_]{4,20}",type[i]) SPACE
+		REGEX("[a-zA-Z0-9_]{4,20}",name[i]) SPACE
+		INT(0,10^6) SPACE INT(0,10^9) NEWLINE
+	END
+	ASSERT ( UNIQUE(name) ) UNSET(name)
+END

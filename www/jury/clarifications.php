@@ -10,7 +10,7 @@ require('init.php');
 $ajaxtitle = 'Clarification Requests';
 $title = $ajaxtitle.($nunread_clars ? ' ('.$nunread_clars.' new)' : '');
 
-$jury_member = getJuryMember();
+$jury_member = $username;
 
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/clarification.php');

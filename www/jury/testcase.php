@@ -6,8 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 $probid = @$_REQUEST['probid'];
 
 require('init.php');
@@ -27,8 +25,8 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 	// sanity check before we start to output headers
 	if ( $size===NULL || !is_numeric($size)) error("Problem while fetching testcase");
 
-	header("Content-Type: application/octet-stream; name=\"$filename\"");
-	header("Content-Disposition: inline; filename=\"$filename\"");
+	header("Content-Type: text/plain; name=\"$filename\"");
+	header("Content-Disposition: attachment; filename=\"$filename\"");
 	header("Content-Length: $size");
 
 	// This may not be good enough for large testsets, but streaming them
@@ -127,7 +125,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			if ( $inout=='output' &&
 			     $_FILES[$fileid]['size'][$rank]>dbconfig_get('filesize_limit')*1024 ) {
 				$result .= ".<br /><b>Warning: file size exceeds " .
-				    "<tt>filesize_limit</tt> of " . dbconfig_get('filesize_limit') .
+				    "<code>filesize_limit</code> of " . dbconfig_get('filesize_limit') .
 				    " kB. This will always result in wrong answers!</b>";
 			}
 			$result .= "</li>\n";
@@ -182,7 +180,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			    " (" . htmlspecialchars($_FILES['add_output']['size']) . " B)";
 			if ( $_FILES['add_output']['size']>dbconfig_get('filesize_limit')*1024 ) {
 				$result .= ".<br /><b>Warning: output file size exceeds " .
-				    "<tt>filesize_limit</tt> of " . dbconfig_get('filesize_limit') .
+				    "<code>filesize_limit</code> of " . dbconfig_get('filesize_limit') .
 				    " kB. This will always result in wrong answers!</b>";
 			}
 			$result .= "</li>\n";
@@ -225,7 +223,7 @@ echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem "
 	htmlspecialchars($probid) . "</a></p>\n\n";
 
 if ( IS_ADMIN ) {
-	echo addForm('', 'post', null, 'multipart/form-data') .
+	echo addForm($pagename, 'post', null, 'multipart/form-data') .
 	    addHidden('probid', $probid);
 }
 
@@ -279,10 +277,6 @@ foreach( $data as $rank => $row ) {
 				    urlencode('testcase.php?probid='.$probid) . "\">" .
 				    "<img src=\"../images/delete.png\" alt=\"delete\"" .
 				    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
-
-				// hide edit field if javascript is enabled
-				echo "<script type=\"text/javascript\" language=\"JavaScript\">" .
-				    "hideTcDescEdit($rank);</script>";
 			} else {
 				echo "<td rowspan=\"2\" align=\"center\">" .
 					printyn($row['issample']) . "</td>";
@@ -297,6 +291,12 @@ foreach( $data as $rank => $row ) {
 if ( count($data)!=0 ) echo "</tbody>\n</table>\n";
 
 if ( IS_ADMIN ) {
+	echo "<script type=\"text/javascript\">\n";
+	foreach ( $data as $rank => $row ) {
+		echo "hideTcDescEdit($rank);\n";
+	}
+	echo "</script>\n\n";
+
 ?>
 <h3>Create new testcase</h3>
 

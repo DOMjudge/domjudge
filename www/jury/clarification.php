@@ -27,7 +27,7 @@ if ( isset($_REQUEST['id']) ) {
 	$isgeneral = TRUE;
 }
 
-$jury_member = getJuryMember();
+$jury_member = $username;
 
 if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 
@@ -135,7 +135,6 @@ if ( ! $isgeneral ) {
 // display clarification thread
 echo "<h1>Clarification $id</h1>\n\n";
 
-$pagename = basename($_SERVER['PHP_SELF']);
 if ( !$req['answered'] ) {
 	echo addForm($pagename . '?id=' . urlencode($id));
 
@@ -170,7 +169,7 @@ putClarification($id, NULL);
 // Display button to (un)set request as 'answered'
 // Not relevant for 'general clarifications', ie those with sender=null
 if ( !empty($req['sender']) ) {
-	echo addForm('clarification.php') .
+	echo addForm($pagename) .
 		addHidden('id', $id) .
 		addHidden('answered', !$req['answered']) .
 		addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered'), 'answer') .

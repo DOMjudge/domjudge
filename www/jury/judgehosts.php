@@ -14,19 +14,25 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Judgehosts</h1>\n\n";
 
 @$cmd = @$_REQUEST['cmd'];
-if ( IS_ADMIN && (isset($_POST['cmd-activate']) || isset($_POST['cmd-deactivate']) ) ) {
+if ( isset($_POST['cmd-activate']) || isset($_POST['cmd-deactivate']) ) {
+
+	requireAdmin();
+
 	$DB->q('UPDATE judgehost SET active = %i',
 	       (isset($_POST['cmd-activate']) ? 1:0));
 	auditlog('judgehost', null, 'marked all ' . (isset($_POST['cmd-activate'])?'active':'inactive'));
 }
-if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
+if ( $cmd == 'add' || $cmd == 'edit' ) {
+
+	requireAdmin();
+
 	echo addForm('edit.php');
 	echo "\n<table>\n" .
 		"<tr><th>Hostname</th><th>Active</th></tr>\n";
 	if ( $cmd == 'add' ) {
 		for ($i=0; $i<10; ++$i) {
 			echo "<tr><td>" .
-				addInput("data[$i][hostname]", null, 20, 50) .
+				addInput("data[$i][hostname]", null, 20, 50, 'pattern="[A-Za-z0-9._-]+"') .
 				"</td><td>" .
 				addSelect("data[$i][active]",
 					array(1=>'yes',0=>'no'), '1', true) .
@@ -73,25 +79,34 @@ if( $res->count() == 0 ) {
 		$link = '<a href="judgehost.php?id=' . urlencode($row['hostname']) . '">';
 		echo "<tr".( $row['active'] ? '': ' class="disabled"').
 			"><td>" . $link . printhost($row['hostname']) . '</a>' .
-			"</td><td align=\"center\">" . $link . printyn($row['active']) .
+			"</td><td class=\"tdcenter\">" . $link . printyn($row['active']) .
 			"</a></td>";
-		echo "<td align=\"center\" class=\"";
+		echo "<td class=\"tdcenter ";
 		if ( empty($row['polltime'] ) ) {
 			echo "judgehost-nocon";
 			echo "\" title =\"never checked in\">";
 		} else {
 			$reltime = time() - strtotime($row['polltime']);
-			if ( $reltime < 30 ) {
+			if ( $reltime < JUDGEHOST_WARNING ) {
 				echo "judgehost-ok";
-			} else if ( $reltime < 120 ) {
+			} else if ( $reltime < JUDGEHOST_CRITICAL ) {
 				echo "judgehost-warn";
 			} else {
-				echo "judgehost-err";
+				echo "judgehost-crit";
 			}
 			echo "\" title =\"last checked in $reltime seconds ago\">";
 		}
 		echo $link . CIRCLE_SYM . "</a></td>";
 		if ( IS_ADMIN ) {
+			if ( $row['active'] ) {
+				$activepicto = "pause"; $activecmd = "deactivate";
+			} else {
+				$activepicto = "play"; $activecmd = "activate";
+			}
+			echo "<td><a href=\"judgehost.php?id=" . $row['hostname'] . "&amp;cmd=" .
+			     $activecmd . "\"><img class=\"picto\" alt=\"" . $activecmd .
+			     "\" title=\"" . $activecmd . " judgehost\" " .
+			     "src=\"../images/" . $activepicto . ".png\" /></a></td>";
 			echo "<td>" . delLink('judgehost','hostname',$row['hostname']) ."</td>";
 		}
 		echo "</tr>\n";
@@ -100,7 +115,7 @@ if( $res->count() == 0 ) {
 }
 
 if ( IS_ADMIN ) {
-	echo addForm('judgehosts.php') .
+	echo addForm($pagename) .
 		"<p>" .
 		addSubmit('Start all judgehosts', 'cmd-activate') .
 		addSubmit('Stop all judgehosts', 'cmd-deactivate') .

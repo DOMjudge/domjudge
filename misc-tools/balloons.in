@@ -21,13 +21,6 @@ require(LIBDIR . '/init.php');
 
 setup_database_connection();
 
-/* Set this to a notification command, which receives the notification
- * text on stdin. Examples below for notification by mail or prints.
- */
-//define('BALLOON_CMD', 'mail -s Balloon_notification domjudge@localhost');
-//define('BALLOON_CMD', 'lpr');
-define('BALLOON_CMD', '');
-
 $verbose = LOG_INFO;
 
 $waittime = 5;
@@ -36,8 +29,6 @@ $waittime = 5;
  * Returns a text to be sent when notifying of a new balloon.
  */
 function notification_text($team, $problem, $probs_solved, $probs_data, $comment) {
-	global $cdata;
-
 	$ret =
 		"A problem has been solved:\n".
 		"\n".

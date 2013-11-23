@@ -31,7 +31,7 @@ a:active          { color: red;    }
 
 .disabled         { color: silver; }
 .disabled a       { color: gray;   }
-.disabled .balloonimage {
+.disabled .circle {
 	opacity: 0.2;
 	/* what follows is for IE-compatibility */
 	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
@@ -85,6 +85,7 @@ td {
 .list tr:hover { background: #ffffcc; }
 .list thead tr { border-bottom-color: black; }
 .list thead tr:hover { background: white; }
+.list tfoot tr:hover { background: white; }
 .list a {
 	text-decoration: none;
 	color: black;
@@ -137,14 +138,14 @@ span.extra {
 #menutopright {
 	position: absolute; right: 1ex; top: 1ex;
 	text-align: right;
-	z-index: -1;
 }
 #clock {
-	font-size: small;
+/*	font-size: small; */
 	font-family: monospace;
 	border: 1px dashed #ccc;
 	padding: 4px;
 	color: gray;
+	z-index: -1;
 }
 #timeleft { color: #800080;}
 #refresh {
@@ -178,11 +179,14 @@ legend {
 .center { margin: 0px auto; }
 
 .scoreboard { border-collapse: collapse; }
-.scoreboard td { font-size: small; }
-.scoreboard tr { border-bottom: 1px solid silver; }
+.scoreboard td { 
+	font-size: small;
+	vertical-align: middle;
+	text-align: center;
+}
+.scoreboard tr { border-bottom: 1px solid black; }
 .scoreboard td, .scoreboard th {
-	border-right: 1px solid black;
-	padding: 3px;
+	border-right: 1px solid silver;
 }
 .scoreboard a {
 	display: block;
@@ -191,24 +195,38 @@ legend {
 	color: black;
 }
 
-.scoreboard .scoretn { padding: 0px; width: 25ex; }
-.scoreboard .scoreaf { white-space: nowrap; }
+.scoreboard .scoretn {
+	padding: 0px;
+	max-width: 15em;
+	text-align: right;
+	font-weight: bold; 
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.scoreboard .scoreaf { white-space: nowrap; border: 0; }
+.scoreboard .scoreaf img { vertical-align: middle; }
+.univ {
+	font-size: 80%;
+	font-weight: normal;
+	color: darkgray;
+}
 
 .scoreheader {
 	font-variant: small-caps;
 	border-bottom: 2px solid black;
 }
-.score_correct   { background: #33FF66; }
-.score_first     { background: #00AA00 !important; }
+.score_correct   { background: #60e760; }
+.score_first     { background: #1daa1d !important; }
 .score_pending   { background: #6666FF; }
-.score_incorrect { background: #FF6666; }
-.score_neutral   { background: white;   }
+.score_incorrect { background: #e87272; }
 
-#scoresolv,#scoretotal { width: 5em; }
-.scorenc,.scorett,.scorepl { text-align: right; width: 2ex; }
-td.scorenc { border-color: silver; }
+#scoresolv,#scoretotal { width: 2.5em; }
+.scorenc,.scorett,.scorepl { text-align: center; width: 2ex; }
+.scorenc { font-weight: bold; }
+td.scorenc { border-color: silver; border-right: 0; }
 
-.scoreprob { width: 7em; }
+.scoreprob { width: 3.0em; vertical-align: middle; }
 .scoreaffil { text-align: center; }
 
 #scoresummary {
@@ -301,6 +319,9 @@ h3.teamoverview {
 #submitform, .submissiondone {
 	text-align: center;
 }
+.submissiondone a {
+	color: red;
+}
 #submitlist .list, #clarlist .list {
 	width: 100%;
 }
@@ -331,7 +352,7 @@ h2#teamwelcome {
 	font-weight: normal;
 }
 #teamwelcometeam {
-	font-weight: bold;	
+	font-weight: bold;
 }
 h3#contestnotstarted {
 	color: silver;
@@ -341,20 +362,6 @@ h3#contestnotstarted {
 
 span.fileinputs {
 	position: relative;
-}
-span.fakefile {
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	z-index: 1;
-}
-input.file {
-	position: relative;
-	text-align: right;
-	opacity: 0; /* CSS standard */
-	filter: alpha(opacity: 0); /* IE */
-	-moz-opacity: 0; /* Ancient Mozilla/FF */
-	z-index: 2;
 }
 
 input#addfile {
@@ -433,3 +440,16 @@ ul.tabbernav li.tabberactive a:hover
 .sortable th { cursor: s-resize; }
 .sortable th.sorttable_sorted { cursor: n-resize; }
 .sortable th.sorttable_nosort { cursor: auto; }
+
+.circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: solid 1px black;
+    display: inline-block;
+}
+
+.heart {
+	padding: .3em;
+	cursor: pointer;
+}

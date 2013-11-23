@@ -13,7 +13,7 @@ define('MYSQL_DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S');
 define('IDENTIFIER_CHARS', '[a-zA-Z0-9_-]');
 
 /** Perl regex of allowed filenames. */
-define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9_\.-]*$/');
+define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/');
 
 /**
  * helperfunction to read all contents from a file.
@@ -104,6 +104,8 @@ function calcContestTime($walltime)
  */
 function calcScoreRow($cid, $team, $prob) {
 	global $DB;
+
+	logmsg(LOG_DEBUG, "calcScoreRow '$cid' '$team' '$prob'");
 
 	// First acquire an advisory lock to prevent other calls to
 	// calcScoreRow() from interfering with our update.
@@ -196,9 +198,11 @@ function calcScoreRow($cid, $team, $prob) {
  * determined yet; this may only occur when not all testcases have
  * been run yet.
  */
-function getFinalResult($runresults)
+function getFinalResult($runresults, $results_prio = null)
 {
-	$results_prio  = dbconfig_get('results_prio');
+	if ( empty($results_prio) ) {
+		$results_prio  = dbconfig_get('results_prio');
+	}
 
 	// Whether we have NULL results
 	$havenull = FALSE;
@@ -235,29 +239,46 @@ function getFinalResult($runresults)
 }
 
 /**
- * Parse language extensions from LANG_EXTS to ext -> ID map
+ * Calculate timelimit overshoot from actual timelimit and configured
+ * overshoot that can be specified as a sum,max,min of absolute and
+ * relative times. Returns overshoot seconds as a float.
  */
-function parseLangExts()
+function overshoot_time($timelimit, $overshoot_cfg)
 {
-	global $langexts;
-
-	$langexts = array();
-	foreach ( explode(' ', LANG_EXTS) as $lang ) {
-		$exts = explode(',', $lang);
-		for ($i=1; $i<count($exts); $i++) $langexts[$exts[$i]] = $exts[1];
+	$tokens = preg_split('/([+&|])/', $overshoot_cfg, -1, PREG_SPLIT_DELIM_CAPTURE);
+	if ( count($tokens)!=1 && count($tokens)!=3 ) {
+		var_dump($tokens);
+		error("invalid timelimit overshoot string '$overshoot_cfg'");
 	}
+
+	$val1 = overshoot_parse($timelimit, $tokens[0]);
+	if ( count($tokens)==1 ) return $val1;
+
+	$val2 = overshoot_parse($timelimit, $tokens[2]);
+	switch ( $tokens[1] ) {
+	case '+': return $val1 + $val2;
+	case '|': return max($val1,$val2);
+	case '&': return min($val1,$val2);
+	}
+	error("invalid timelimit overshoot string '$overshoot_cfg'");
 }
 
 /**
- * Get langid from extension (initialize global $langexts if necessary)
+ * Helper function for overshoot_time(), returns overshoot for single token.
  */
-function getLangID($ext)
+function overshoot_parse($timelimit, $token)
 {
-	global $langexts;
+	$res = sscanf($token,'%d%c%n');
+	if ( count($res)!=3 ) error("invalid timelimit overshoot token '$token'");
+	list($val,$type,$len) = $res;
+	if ( strlen($token)!=$len ) error("invalid timelimit overshoot token '$token'");
 
-	if ( empty($langexts) ) parseLangExts();
-
-	return @$langexts[$ext];
+	if ( $val<0 ) error("timelimit overshoot cannot be negative: '$token'");
+	switch ( $type ) {
+	case 's': return $val;
+	case '%': return $timelimit * 0.01*$val;
+	default: error("invalid timelimit overshoot token '$token'");
+	}
 }
 
 /**
@@ -401,7 +422,7 @@ function daemonize($pidfile = NULL)
 		}
 		$str = "$pid\n";
 		if ( @fwrite($fd, $str)!=strlen($str) ) {
-			error(errno, "failed writing PID to file");
+			error("failed writing PID to file");
 		}
 		register_shutdown_function('unlink', $pidfile);
 	}
@@ -415,6 +436,9 @@ function daemonize($pidfile = NULL)
 	     !fclose(STDERR) || !($GLOBALS['STDERR'] = fopen('/dev/null', 'w')) ) {
 		error("cannot reopen stdio files to /dev/null");
 	}
+
+	// FIXME: We should really close all other open file descriptors
+	// here, but PHP does not support this.
 
 	// Start own process group, detached from any tty
 	if ( posix_setsid()<0 ) error("cannot set daemon process group");
@@ -643,16 +667,14 @@ function XMLgetattr($node, $attr)
 /**
  * Log an action to the auditlog table.
  */
-function auditlog($datatype, $dataid, $action, $extrainfo = null, $username = null)
+function auditlog($datatype, $dataid, $action, $extrainfo = null, $force_username = null)
 {
-	global $cid, $login, $DB;
+	global $cid, $username, $DB;
 
-	if ( !empty($username) ) {
-		$user = $username;
-	} elseif ( IS_JURY ) {
-		$user = getJuryMember();
+	if ( !empty($force_username) ) {
+		$user = $force_username;
 	} else {
-		$user = $login;
+		$user = $username;
 	}
 
 	$DB->q('INSERT INTO auditlog

@@ -7,6 +7,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+$REQUIRED_ROLES = array('jury','balloon');
 require('init.php');
 $title = 'Balloon Status';
 
@@ -42,7 +43,7 @@ if ( isset($cdata['freezetime']) &&
 	echo "<h4>Scoreboard is now frozen.</h4>\n\n";
 }
 
-echo addForm('balloons.php', 'get') . "<p>\n" .
+echo addForm($pagename, 'get') . "<p>\n" .
     addHidden('viewall', ($viewall ? 0 : 1)) .
     addSubmit($viewall ? 'view unsent only' : 'view all') . "</p>\n" .
     addEndForm();
@@ -89,11 +90,11 @@ if ( !empty($cdata['freezetime']) ) {
 }
 
 if ( !empty($BALLOONS) ) {
-	echo addForm('balloons.php');
+	echo addForm($pagename);
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
 		"<tr><th class=\"sorttable_numeric\">ID</th>" .
-	        "<th>time</th><th>solved</th><th align=\"right\">team</th>" .
+	        "<th>time</th><th>solved</th><th>team</th>" .
 	        "<th></th><th>loc.</th><th>category</th><th>total</th>" .
 	        "<th></th><th></th></tr>\n</thead>\n";
 
@@ -108,10 +109,9 @@ if ( !empty($BALLOONS) ) {
 
 		// the balloon earned
 		echo '<td class="probid">' .
-			'<img class="balloonimage" style="background-color: ' .
+			'<div class="circle" style="background-color: ' .
 		    htmlspecialchars($probs_data[$row['probid']]['color']) .
-			';" alt="problem colour ' . htmlspecialchars($probs_data[$row['probid']]['color']) .
-		    '" src="../images/circle.png" /> ' . htmlspecialchars($row['probid']) . '</td>';
+			';"></div> ' . htmlspecialchars($row['probid']) . '</td>';
 
 		// team name, location (room) and category
 		echo '<td class="teamid">' . htmlspecialchars($row['login']) . '</td><td>' .
@@ -123,12 +123,10 @@ if ( !empty($BALLOONS) ) {
 		sort($TOTAL_BALLOONS[$row['login']]);
 		$TOTAL_BALLOONS[$row['login']] = array_unique($TOTAL_BALLOONS[$row['login']]);
 		foreach($TOTAL_BALLOONS[$row['login']] as $prob_solved) {
-			echo '<img title="' . htmlspecialchars($prob_solved) .
-				'" class="balloonimage" style="background-color: ' .
+			echo '<div title="' . htmlspecialchars($prob_solved) .
+				'" class="circle" style="background-color: ' .
 				htmlspecialchars($probs_data[$prob_solved]['color']) .
-				';" alt="problem colour ' .
-				htmlspecialchars($probs_data[$row['probid']]['color']) .
-				'" src="../images/circle.png" /> ';
+				';"></div> ';
 		}
 		echo '</td><td>';
 
@@ -137,7 +135,7 @@ if ( !empty($BALLOONS) ) {
 			echo '<input type="submit" name="done[' .
 				(int)$row['balloonid'] . ']" value="done" />';
 		}
-		
+
 		echo '</td><td>';
 
 		$comments = array();
@@ -146,7 +144,7 @@ if ( !empty($BALLOONS) ) {
 		} else {
 			if ( $first_team[$row['login']] == $row['balloonid'] ) {
 				$comments[] = 'first for team';
-			}	
+			}
 			if ( $first_problem[$row['probid']] == $row['balloonid'] ) {
 				$comments[] = 'first for problem';
 			}

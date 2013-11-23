@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 const int mb   = 1024*1024;
 
@@ -17,8 +18,9 @@ void recurse_malloc(int depth)
 
 	depth++;
 
-	/* Here we do some random array reads and writes to prevent the
-	 * compiler from optimizing away the array a. */
+	/* Here we fill the array and do some random reads and writes to
+	 * prevent the compiler from optimizing away the array a. */
+	memset(a,0,mb);
 	i = rand() % mb;
 	j = rand() % mb;
 	a[i] = depth;

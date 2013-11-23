@@ -24,7 +24,6 @@ if ( isset($refresh) &&
       (bool)$_COOKIE["domjudge_refresh"]) ) {
 	header('Refresh: ' . $refresh);
 }
-echo '<?xml version="1.0" encoding="' . DJ_CHARACTER_SET . '" ?>' . "\n";
 
 if(!isset($menu)) {
 	$menu = true;
@@ -33,11 +32,11 @@ if(!isset($ajaxtitle)) {
 	$ajaxtitle = '';
 }
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
 <head>
 	<!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
+<meta charset="<?php echo DJ_CHARACTER_SET?>">
 <title><?php echo $title?></title>
 <link rel="shortcut icon" href="../images/favicon.png" type="image/png" />
 <link rel="stylesheet" href="../style.css" type="text/css" />
@@ -53,7 +52,6 @@ if ( IS_JURY ) {
 	}
 }
 if ( ! IS_PUBLIC ) {
-	echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
 	echo "<script type=\"text/javascript\" src=\"" .
 		"../js/sorttable.js\"></script>\n";
 
@@ -61,18 +59,18 @@ if ( ! IS_PUBLIC ) {
 		"../js/jquery.js\"></script>\n";
 	echo "<script type=\"text/javascript\" src=\"" .
 		"../js/jflot.js\"></script>\n";
-} else if ( dbconfig_get('team_select', 1) ) {
-	echo "<script type=\"text/javascript\" src=\"../js/djfav.js\"></script>\n";
 }
 if ( file_exists(WWWDIR . "/custom.css") ) {
 	echo "<link rel=\"stylesheet\" href=\"../custom.css\" type=\"text/css\" />";
 }
+echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
+
 if ( ! empty($extrahead) ) echo $extrahead;
 ?>
 </head>
 <?php
 
-if ( IS_JURY ) {
+if ( checkrole('jury') ) {
 	echo "<body onload=\"setInterval('updateClarifications(\'$ajaxtitle\')', 20000)\">\n";
 } else {
 	echo "<body>\n";

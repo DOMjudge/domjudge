@@ -94,13 +94,14 @@ void sendwarning(int fd, int errnum, const char *mesg, ...)
 
 	va_start(ap,mesg);
 	vwarning(errnum,mesg,ap);
+	va_end(ap);
 }
 
 int receive(int fd)
 {
 	char buffer[SOCKETBUFFERSIZE];
 	ssize_t nread;
-	int i,j;
+	int i;
 
 	if ( (nread = read(fd, buffer, SOCKETBUFFERSIZE-2)) == -1 ) {
 		error(errno,"reading from socket");
@@ -117,19 +118,13 @@ int receive(int fd)
 	logmsg(LOG_DEBUG, "recv: %s", lastmesg);
 
 	if ( lastmesg[0]!='+' ) {
-		close(fd);
+		if ( close(fd)!=0 ) error(errno,"close");
 		i = 0;
 		if ( lastmesg[i]=='-' ) i++;
 		if ( strncmp(&lastmesg[i],ERRMATCH,strlen(ERRMATCH))==0 ) {
 			i += strlen(ERRMATCH);
 		}
-		/* Filter out any printf '%' format characters, since these
-		 * would be interpreted by error(). Note that these would only
-		 * by sent by a malicious submit client.
-		 */
-		for(j=i; lastmesg[j]!=0; j++) if ( lastmesg[j]=='%' ) lastmesg[j] = '_';
-
-		error(0,&lastmesg[i]);
+		error(0,"remote: %s",&lastmesg[i]);
 	}
 
 	/* Remove the first character from the message (if '+' or '-') */

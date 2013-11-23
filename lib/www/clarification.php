@@ -55,7 +55,7 @@ function putClar($clar)
 
 	echo "<table>\n";
 
-	echo '<tr><td scope="row">From:</td><td>';
+	echo '<tr><td>From:</td><td>';
 	if ( IS_JURY && $clar['sender']) {
 		echo '<a href="team.php?id=' . urlencode($clar['sender']) . '">' .
 			$from . '</a>';
@@ -64,7 +64,7 @@ function putClar($clar)
 	}
 	echo "</td></tr>\n";
 
-	echo '<tr><td scope="row">To:</td><td>';
+	echo '<tr><td>To:</td><td>';
 	if ( IS_JURY && $clar['recipient']) {
 		echo '<a href="team.php?id=' . urlencode($clar['recipient']) . '">' .
 			$to . '</a>';
@@ -73,7 +73,7 @@ function putClar($clar)
 	}
 	echo "</td></tr>\n";
 
-	echo '<tr><td scope="row">Subject:</td><td>';
+	echo '<tr><td>Subject:</td><td>';
 	if ( is_null($clar['probid']) ) {
 		echo "General issue";
 	} else {
@@ -86,7 +86,7 @@ function putClar($clar)
 	}
 	echo "</td></tr>\n";
 
-	echo '<tr><td scope="row">Time:</td><td>';
+	echo '<tr><td>Time:</td><td>';
 	echo printtime($clar['submittime']);
 	echo "</td></tr>\n";
 
@@ -152,6 +152,7 @@ function summarizeClarification($body)
  */
 function putClarificationList($clars, $team = NULL)
 {
+	global $username;
 	if ( $team==NULL && ! IS_JURY ) {
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
@@ -231,7 +232,7 @@ function putClarificationList($clars, $team = NULL)
 				echo "<a class=\"button\" href=\"clarification.php?claim=1&amp;id=" .
 					htmlspecialchars($clar['clarid']) . "\">claim</a>";
 			} else {
-				if ( !$clar['answered'] && $jury_member==getJuryMember() ) {
+				if ( !$clar['answered'] && $jury_member==$username ) {
 					echo "<a class=\"button\" href=\"clarification.php?unclaim=1&amp;id=" .
 						htmlspecialchars($clar['clarid']) . "\">unclaim</a>";
 				} else {
@@ -303,7 +304,7 @@ function confirmClar() {
 			$teams = $DB->q('KEYVALUETABLE SELECT login, CONCAT(login, ": ", name) as name
 			                 FROM team
 			                 ORDER BY categoryid ASC, team.name COLLATE utf8_general_ci ASC');
-			$options = array_merge($options,$teams);
+			$options += $teams;
 		} else {
 			if ( $clar['sender'] ) {
 				$options[$clar['sender']] = $clar['sender'] .': '.
@@ -328,7 +329,7 @@ function confirmClar() {
 	} else {
 		$probs = array();
 	}
-	$options = array_merge(array('general' => 'General issue'), $probs);
+	$options = array('general' => 'General issue') + $probs;
 	$default_subject = 'general';
 	if ( $pid != NULL ) {
 		$default_subject = $pid;
@@ -346,7 +347,7 @@ if ( $respid ) {
 	$text = explode("\n",wrap_unquoted($clar['body']),75);
 	foreach($text as $line) $body .= "> $line\n";
 }
-echo addTextArea('bodytext', $body, 80, 10);
+echo addTextArea('bodytext', $body, 80, 10, 'required');
 ?></td></tr>
 <tr>
 <td>&nbsp;</td>

@@ -22,10 +22,6 @@ $EXITCODES = array (
 //	127 => 'internal-error'
 	);
 
-// Internal and output character set used, don't change.
-define('DJ_CHARACTER_SET', 'utf-8');
-define('DJ_CHARACTER_SET_MYSQL', 'utf8');
-
 /** Loglevels and debugging */
 
 // Log to syslog facility; do not define to disable.

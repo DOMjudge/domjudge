@@ -26,7 +26,7 @@
 #if ( SUBMIT_ENABLE_CMD && ! ( HAVE_NETDB_H && HAVE_NETINET_IN_H ) )
 #error "Commandline submission requested, but network headers not available."
 #endif
-#if ( SUBMIT_ENABLE_WEB && ! HAVE_CURL_CURL_H )
+#if ( SUBMIT_ENABLE_WEB && ! ( HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H ) )
 #error "Webinterface submission requested, but libcURL not available."
 #endif
 
@@ -47,13 +47,17 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #endif
-#if ( SUBMIT_ENABLE_WEB )
+#ifdef HAVE_CURL_CURL_H
 #include <curl/curl.h>
 #include <curl/easy.h>
+#endif
+#ifdef HAVE_JSONCPP_JSON_JSON_H
+#include <jsoncpp/json/json.h>
 #endif
 #ifdef HAVE_MAGIC_H
 #include <magic.h>
 #endif
+
 
 /* C++ includes for easy string handling */
 #include <iostream>
@@ -65,6 +69,7 @@ using namespace std;
 /* These defines are needed in 'version' and 'logmsg' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
 #define PROGRAM "submit"
+#define VERSION DOMJUDGE_VERSION "/" REVISION
 
 /* Logging and error functions */
 #include "lib.error.h"
@@ -126,6 +131,21 @@ int  cmdsubmit();
 #if ( SUBMIT_ENABLE_WEB )
 int  websubmit();
 #endif
+#if HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H
+int  getlangexts();
+#endif
+
+#ifdef HAVE_CURL_CURL_H
+/* Helper function for using libcurl in websubmit() and getlangexts() */
+size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
+{
+	stringstream *s = (stringstream *) sptr;
+
+	*s << string((char *)ptr,size*nmemb);
+
+	return size*nmemb;
+}
+#endif
 
 #if ( SUBMIT_ENABLE_CMD )
 int socket_fd; /* filedescriptor of the connection to server socket */
@@ -153,30 +173,9 @@ int main(int argc, char **argv)
 	struct stat fstats;
 	string filebase, fileext;
 	time_t fileage;
-	char *lang_exts;
-	char *lang, *ext;
-	char *lang_ptr, *ext_ptr;
 
 	progname = argv[0];
 	stdlog = NULL;
-
-	/* Parse LANGEXTS define into separate strings */
-	lang_exts = strdup(LANG_EXTS);
-	for(lang=strtok_r(lang_exts," ",&lang_ptr); lang!=NULL;
-		lang=strtok_r(NULL," ",&lang_ptr)) {
-
-		languages.push_back(vector<string>());
-
-		/* First read the language */
-		ext=strtok_r(lang,",",&ext_ptr);
-		languages[languages.size()-1].push_back(string(ext));
-
-		/* Then all valid extensions for that language */
-		for(ext=strtok_r(NULL,",",&ext_ptr); ext!=NULL;
-			ext=strtok_r(NULL,",",&ext_ptr)) {
-			languages[languages.size()-1].push_back(stringtolower(ext));
-		}
-	}
 
 	if ( getenv("HOME")==NULL ) error(0,"environment variable `HOME' not set");
 	homedir = getenv("HOME");
@@ -272,8 +271,12 @@ int main(int argc, char **argv)
 		}
 	}
 
+#if HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H
+	if ( getlangexts()!=0 ) warning(0,"could not obtain language extensions");
+#endif
+
 	if ( show_help ) usage();
-	if ( show_version ) version();
+	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( argc<=optind   ) usage2(0,"no file(s) specified");
 
@@ -440,12 +443,19 @@ void usage()
 "in lower- or uppercase. When not specified, PROBLEM defaults to the\n"
 "first FILENAME excluding the extension. For example, 'c.java' will\n"
 "indicate problem 'C'.\n"
-"\n"
+"\n");
+	if ( languages.size()==0 ) {
+		printf(
+"For LANGUAGE use one the ID of the language (typically the main language\n"
+"extension) in lower- or uppercase.\n");
+	} else {
+		printf(
 "For LANGUAGE use one of the following extensions in lower- or uppercase:\n");
-	for(i=0; i<languages.size(); i++) {
-		printf("   %-15s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
-		for(j=2; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
-		printf("\n");
+		for(i=0; i<languages.size(); i++) {
+			printf("   %-15s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
+			for(j=2; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
+			printf("\n");
+		}
 	}
 	printf(
 "The default for LANGUAGE is the extension of FILENAME. For example,\n"
@@ -489,16 +499,6 @@ void usage()
 	exit(0);
 }
 
-void version()
-{
-	printf("%s %s\n\n",DOMJUDGE_PROGRAM,PROGRAM);
-	printf(
-"%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
-"are welcome to redistribute it under certain conditions.  See the GNU\n"
-"General Public Licence for details.\n",PROGRAM);
-	exit(0);
-}
-
 void usage2(int errnum, const char *mesg, ...)
 {
 	va_list ap;
@@ -533,7 +533,7 @@ void warnuser(const char *warning, ...)
 char readanswer(const char *answers)
 {
 	struct termios old_termio, new_termio;
-	char c;
+	int c;
 
 	/* save the terminal settings for stdin */
 	tcgetattr(STDIN_FILENO,&old_termio);
@@ -545,6 +545,7 @@ char readanswer(const char *answers)
 
 	while ( true ) {
 		c = getchar();
+		if ( c==EOF ) error(0,"in readanswer: error or EOF");
 		if ( c!=0 && (strchr(answers,tolower(c)) ||
 					  strchr(answers,toupper(c))) ) {
 			if ( strchr(answers,tolower(c))!=NULL ) {
@@ -559,7 +560,7 @@ char readanswer(const char *answers)
 	/* restore the saved settings */
 	tcsetattr(STDIN_FILENO,TCSANOW,&old_termio);
 
-	return c;
+	return (char) c;
 }
 
 #ifdef HAVE_MAGIC_H
@@ -568,8 +569,7 @@ int file_istext(char *filename)
 {
 	magic_t cookie;
 	const char *filetype;
-	char *errstr;
-	int i, res;
+	int res;
 
 	if ( (cookie = magic_open(MAGIC_MIME))==NULL ) goto magicerror;
 
@@ -586,20 +586,104 @@ int file_istext(char *filename)
 	return res;
 
 magicerror:
-	/* Filter out any printf '%' format characters, since these
-	 * would be interpreted by warning().
-	 */
-	errstr = strdup(magic_error(cookie));
-	for(i=0; errstr[i]!=0; i++) if ( errstr[i]=='%' ) errstr[i] = '_';
-
-	warning(magic_errno(cookie),errstr);
-
-	free(errstr);
+	warning(magic_errno(cookie),"%s",magic_error(cookie));
 
 	return 1; // return 'text' by default on error
 }
 
 #endif /* HAVE_MAGIC_H */
+
+#if HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H
+int getlangexts()
+{
+	CURL *handle;
+	CURLcode res;
+	char curlerrormsg[CURL_ERROR_SIZE];
+	char *url;
+	stringstream curloutput;
+	Json::Reader reader;
+	Json::Value root, exts;
+
+	url = strdup((baseurl+"api/languages").c_str());
+
+	curlerrormsg[0] = 0;
+
+	handle = curl_easy_init();
+	if ( handle == NULL ) {
+		warning(0,"curl_easy_init() error");
+		free(url);
+		return 1;
+	}
+
+/* helper macros to easily set curl options */
+#define curlsetopt(opt,val) \
+	if ( curl_easy_setopt(handle, CURLOPT_ ## opt, val)!=CURLE_OK ) { \
+		warning(0,"setting curl option '" #opt "': %s, aborting download",curlerrormsg); \
+		curl_easy_cleanup(handle); \
+		free(url); \
+		return 1; }
+
+	/* Set options for post */
+	curlsetopt(ERRORBUFFER,   curlerrormsg);
+	curlsetopt(FAILONERROR,   1);
+	curlsetopt(FOLLOWLOCATION,1);
+	curlsetopt(MAXREDIRS,     10);
+	curlsetopt(TIMEOUT,       timeout_secs);
+	curlsetopt(URL,           url);
+	curlsetopt(WRITEFUNCTION, writesstream);
+	curlsetopt(WRITEDATA,     (void *)&curloutput);
+	curlsetopt(USERAGENT     ,DOMJUDGE_PROGRAM " (" PROGRAM " using cURL)");
+
+	if ( verbose >= LOG_DEBUG ) {
+		curlsetopt(VERBOSE,   1);
+	} else {
+		curlsetopt(NOPROGRESS,1);
+	}
+
+	logmsg(LOG_INFO,"connecting to %s",url);
+
+	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
+		warning(0,"downloading '%s': %s",url,curlerrormsg);
+		curl_easy_cleanup(handle);
+		free(url);
+		return 1;
+	}
+
+#undef curlsetopt
+
+	curl_easy_cleanup(handle);
+
+	free(url);
+
+	if ( !reader.parse(curloutput, root) ) {
+		warning(0,"parsing REST API output: %s",
+		        reader.getFormattedErrorMessages().c_str());
+		return 1;
+	}
+
+	if ( !root.isArray() || root.size()==0 ) goto invalid_json;
+
+	for(Json::ArrayIndex i=0; i<root.size(); i++) {
+		vector<string> lang;
+
+		lang.push_back(root[i].get("name","").asString());
+		if ( lang[0]=="" ||
+		     !(exts = root[i]["extensions"]) ||
+		     !exts.isArray() || exts.size()==0 ) goto invalid_json;
+
+		for(Json::ArrayIndex j=0; j<exts.size(); j++) lang.push_back(exts[j].asString());
+
+		languages.push_back(lang);
+	}
+
+	return 0;
+
+  invalid_json:
+	warning(0,"REST API returned unexpected JSON data");
+	return 1;
+}
+
+#endif /* HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H */
 
 #if ( SUBMIT_ENABLE_CMD )
 
@@ -625,6 +709,8 @@ int cmdsubmit()
 		if ( temp_fd<0 || strlen(tempfile)==0 ) {
 			error(errno,"mkstemps cannot create tempfile");
 		}
+		/* Close temp_fd because we only need the filename */
+		if ( close(temp_fd)!=0 ) error(errno,"closing tempfile");
 
 		/* Construct copy command and execute it */
 		args[0] = filenames[i].c_str();
@@ -640,7 +726,9 @@ int cmdsubmit()
 
 		logmsg(LOG_INFO,"copied `%s' to tempfile `%s'",filenames[i].c_str(),tempfile);
 		tempfiles.push_back(tempfile);
+		free(tempfile);
 	}
+	free(template_str);
 
 	/* Connect to the submission server */
 	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",
@@ -730,15 +818,6 @@ int cmdsubmit()
 
 #if ( SUBMIT_ENABLE_WEB )
 
-size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
-{
-	stringstream *s = (stringstream *) sptr;
-
-	*s << string((char *)ptr,size*nmemb);
-
-	return size*nmemb;
-}
-
 string remove_html_tags(string s)
 {
 	size_t p1, p2;
@@ -784,11 +863,12 @@ int websubmit()
 	if ( curl_formadd(&post, &last, \
 			CURLFORM_ ## nametype, namecont, \
 			CURLFORM_ ## valtype, valcont, \
-			CURLFORM_END) != 0 ) \
+			CURLFORM_END) != 0 ) { \
 		curl_formfree(post); \
 		curl_easy_cleanup(handle); \
 		free(url); \
-		error(0,"libcurl could not add form field '%s'='%s'",namecont,valcont)
+		error(0,"libcurl could not add form field '%s'='%s'",namecont,valcont); \
+	}
 
 	/* Fill post form */
 

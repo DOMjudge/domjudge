@@ -19,7 +19,7 @@ TMPFILE=`mktemp --tmpdir domjudge_gcj_output.XXXXXX` || exit 1
 # -O2:		Level 2 optimizations (default for speed)
 # -static:	Static link with all libraries
 # -pipe:	Use pipes for communication between stages of compilation
-gcj -Wall -O2 -static-libgcj -pipe --main=Main -o $DEST "$@" > $TMPFILE 2>&1
+gcj -Wall -O2 -static-libgcj -pipe --main=Main -DONLINE_JUDGE=1 -DDOMJUDGE=1 -o $DEST "$@" > $TMPFILE 2>&1
 exitcode=$?
 grep -vE 'requires at runtime the shared libraries|libgcj\.a' $TMPFILE
 rm -f $TMPFILE

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Python compile wrapper-script for 'compile.sh'.
+# Ruby compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 #
 # This script does not actually "compile" the source, but writes a
@@ -25,17 +25,24 @@ if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
 	exit 1
 fi
 
+# Check syntax (prints "Syntax OK" but filtering would obscure the exitcode):
+ruby -c "$MAINSOURCE"
+EXITCODE=$?
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+
 # Write executing script:
 cat > $DEST <<EOF
 #!/bin/sh
-# Generated shell-script to execute python interpreter on source.
+# Generated shell-script to execute ruby interpreter on source.
 
 # Detect dirname and change dir to prevent class not found errors.
 if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec python "$MAINSOURCE"
+export ONLINE_JUDGE=1 DOMJUDGE=1
+
+exec ruby "$MAINSOURCE"
 EOF
 
 chmod a+x $DEST

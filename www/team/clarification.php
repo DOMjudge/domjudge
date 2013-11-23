@@ -16,10 +16,10 @@ if ( isset($_REQUEST['id']) ) {
 	$req = $DB->q('MAYBETUPLE SELECT * FROM clarification
 	               WHERE cid = %i AND clarid = %i', $cid, $id);
 	if ( ! $req ) error("clarification $id not found");
-	if ( ! canViewClarification($login, $req) ) {
+	if ( ! canViewClarification($teamid, $req) ) {
 		error("Permission denied");
 	}
-	$myrequest = ( $req['sender'] == $login );
+	$myrequest = ( $req['sender'] == $teamid );
 
 	$respid = empty($req['respid']) ? $id : $req['respid'];
 }
@@ -33,10 +33,10 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, submittime, sender, probid, body)
 	                 VALUES (%i, %s, %s, %s, %s)',
-	                $cid, now(), $login,
+	                $cid, now(), $teamid,
 	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
 	                $_POST['bodytext']);
-	
+
 	auditlog('clarification', $newid, 'added');
 
 	// redirect back to the original location
@@ -54,7 +54,7 @@ if ( isset($id) ) {
 	} else {
 		echo "<h1>Clarification</h1>\n\n";
 	}
-	putClarification($respid, $login);
+	putClarification($respid, $teamid);
 
 	echo "<h2>Send Clarification Request</h2>\n\n";
 	putClarificationForm("clarification.php", $cdata['cid'], $id);

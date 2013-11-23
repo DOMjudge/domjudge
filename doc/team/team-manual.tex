@@ -117,7 +117,7 @@ when the help text does not fit on one screen.
 for example when the file has not been modified for a long time or
 when it's larger than the maximum source code size.
 Filenames must start with an alphanumerical character and may contain only
-alphanumerical characters and \cmd{.\_-}. You can specify multiple files
+alphanumerical characters and \cmd{+.\_-}. You can specify multiple files
 to be part of this submission (see section~\ref{howjudged} `How are
 submissions being judged?').
 
@@ -144,7 +144,7 @@ In the left column click \textbf{Select file\ldots} to select the file for submi
 language from the base and extension of the filename respectively.
 Otherwise, select the appropriate values.
 Filenames must start with an alphanumerical character and may contain only
-alphanumerical characters and \cmd{.\_-}.
+alphanumerical characters and \cmd{+.\_-}.
 
 When you've selected the first source file, you may use the \textbf{Add more
 files} button to specify additional files to be part of this submission (see
@@ -165,7 +165,14 @@ language, problem and status. The address of your team page is
 
 The top of the page shows your team's row in the scoreboard: your position and
 which problems you attempted and solved. Via the menu you can view the public
-scoreboard page with the scores of all teams. Optionally the scoreboard can
+scoreboard page with the scores of all teams. Many cells will show
+additional ``title text'' information when hovering over them. The
+score column lists the number of solved problems and the total penalty
+time. Each cell in a problem column lists the number of submissions,
+and if the problem was solved, then within parentheses the time of the
+first correct submission in minutes since contest start, followed by a
+`+' and the penalty time for any incorrect submissions. Together these
+count towards each team's total penalty time. Optionally the scoreboard can
 be `frozen' some time before the end of the contest. The full scoreboard view
 will not be updated anymore, but your team row will. Your team's rank will
 be displayed as `?'.
@@ -257,6 +264,10 @@ Using a different compiler or operating system than the jury should
 not be a problem. Be careful however, not to use any special compiler
 and/or system specific things (you may be able to check compiler errors
 on the team page).
+
+The jury system defines \cmd{ONLINE\_JUDGE} and \cmd{DOMJUDGE}.
+These are defined as preprocessor symbols in gecompiled languages and
+as (environment) variables in scripted languages.
 
 \subsection{Testing}
 

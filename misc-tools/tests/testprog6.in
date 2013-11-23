@@ -1,7 +1,7 @@
 WHILE(!ISEOF)
 	INT(1,100)
 	WHILE(!MATCH("1\n")) SPACE INT(1,100) END NEWLINE
-	WHILE( 0 > 3 & 1==1 | (2<1 & !1==2) ) END
+	WHILE( 0 > 3 && 1==1 || (2<1 && !1==2) ) END
 	WHILE(0==-1) SPACE END
 	WHILE(42 != 42) EOF END
 END

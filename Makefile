@@ -49,7 +49,7 @@ dist: configure
 config:            SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 build:             SUBDIRS=        lib         judge submit tests misc-tools
 domserver:         SUBDIRS=etc             www       submit
-install-domserver: SUBDIRS=etc     lib sql www       submit
+install-domserver: SUBDIRS=etc     lib sql www       submit       misc-tools
 judgehost:         SUBDIRS=etc                 judge
 install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
 docs:              SUBDIRS=    doc
@@ -66,7 +66,7 @@ domserver-create-dirs:
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_rundir)
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_submitdir)
-ifneq "$(fhs_enabled)" "yes"
+ifneq "$(FHS_ENABLED)" "yes"
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
 endif
 
@@ -76,7 +76,7 @@ judgehost-create-dirs:
 	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_logdir)
 	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_rundir)
 	-$(INSTALL_USER) -m 0711 -d $(DESTDIR)$(judgehost_judgedir)
-ifneq "$(fhs_enabled)" "yes"
+ifneq "$(FHS_ENABLED)" "yes"
 	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_tmpdir)
 endif
 

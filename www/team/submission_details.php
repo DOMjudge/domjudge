@@ -20,7 +20,7 @@ $row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
                LEFT JOIN submission s USING (submitid)
                LEFT JOIN language   l USING (langid)
                LEFT JOIN problem    p ON (p.probid = s.probid)
-               WHERE j.submitid = %i AND teamid = %s AND j.valid = 1',$sid,$login);
+               WHERE j.submitid = %i AND teamid = %s AND j.valid = 1',$sid,$teamid);
 
 if( ! $row || (dbconfig_get('verification_required',0) && !$row['verified']) ) {
 	echo "<p>Submission not found for this team or not judged yet.</p>\n";
@@ -40,12 +40,12 @@ if( ! $row['valid'] ) {
 ?>
 
 <table>
-<tr><td scope="row">Problem:</td>
+<tr><td>Problem:</td>
 	<td><a href="problem_details.php?id=<?= urlencode($row['probid']) ?>"><?php echo htmlspecialchars($row['probname'])?> [<span class="probid"><?php echo
 	htmlspecialchars($row['probid']) ?></span>]</a></td></tr>
-<tr><td scope="row">Submitted:</td>
+<tr><td>Submitted:</td>
 	<td><?php echo printtime($row['submittime'])?></td></tr>
-<tr><td scope="row">Language:</td>
+<tr><td>Language:</td>
 	<td><?php echo htmlspecialchars($row['langname'])?></td></tr>
 </table>
 

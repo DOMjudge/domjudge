@@ -12,7 +12,7 @@ require(LIBDIR . '/relations.php');
 
 $t = @$_REQUEST['table'];
 $referrer = @$_REQUEST['referrer'];
-if ( ! preg_match('/^[._a-zA-Z0-9?&=]*$/', $referrer ) ) error ("Invalid characters in referrer.");
+if ( ! preg_match('/^[._a-zA-Z0-9?&=-]*$/', $referrer ) ) error ("Invalid characters in referrer.");
 
 if(!$t)	error ("No table selected.");
 if(!in_array($t, array_keys($KEYS))) error ("Unknown table.");
@@ -80,7 +80,7 @@ if (isset($_POST['confirm'] ) ) {
 		echo "<p><a href=\"" . $tablemulti . ".php\">back to $tablemulti</a></p>";
 	}
 } else {
-	echo addForm('delete.php') .
+	echo addForm($pagename) .
 		addHidden('table', $t);
 	foreach ( $k as $key => $val ) {
 		echo addHidden($key, $val);

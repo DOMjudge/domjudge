@@ -7,4 +7,6 @@
 /aclocal.m4
 /bin
 /output
+/cov-int
+/domjudge-scan.tgz
 *.o

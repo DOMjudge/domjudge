@@ -49,7 +49,7 @@ rm -f $TMPFILE
 for cn in $(find * -type f -regex '^.*\.class$' \
 		| sed -e 's/\.class$//' -e 's/\//./'); do
 	javap -public "$cn" \
-	| egrep -q 'public static void main\(java.lang.String(\[\]|\.\.\.)\)' \
+	| egrep -q 'public static (|final )void main\(java.lang.String(\[\]|\.\.\.)\)' \
 	&& {
 		if [ -n "$MAINCLASS" ]; then
 			echo "Warning: found another 'main' in '$cn'"
@@ -81,7 +81,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec java -Xrs -Xss8m -Xmx${MEMLIMITJAVA}k $MAINCLASS
+exec java -Xrs -Xss8m -DONLINE_JUDGE=1 -DDOMJUDGE=1 -Xmx${MEMLIMITJAVA}k $MAINCLASS
 EOF
 
 chmod a+x $DEST

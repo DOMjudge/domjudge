@@ -21,8 +21,6 @@ $verify_multiple = isset($_REQUEST['verify_multiple']);
 
 <?php
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 $nchecked = 0;
 $nunchecked = 0;
 
@@ -58,7 +56,7 @@ function flushresults($header, $results, $collapse = FALSE)
 	echo "</ul>\n\n";
 
 	if ( $collapse ) {
-		echo "<script type=\"text/javascript\" language=\"JavaScript\">
+		echo "<script type=\"text/javascript\">
 <!--
 	collapse($section);
 // -->
@@ -110,7 +108,7 @@ while( $row = $res->next() ) {
 		$nunchecked++;
 
 		if ( $pos===FALSE ) {
-			$nomatch[] = "string '<tt>$matchstring</tt>' not found in " .
+			$nomatch[] = "string '<code>$matchstring</code>' not found in " .
 				"<a href=\"submission.php?id=" . $sid .
 				"\">s$sid</a>, leaving submission unchecked";
 		} else {

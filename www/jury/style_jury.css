@@ -32,6 +32,8 @@
 	padding-left: 5px;
 	padding-right: 5px;
 }
+.testcases_prev { font-size: xx-small; }
+tr.summary td { border-top: 1px solid black; }
 
 .testrank {
 	line-height: 0.9;
@@ -54,6 +56,8 @@
    clickable in the jury scoreboard and for all team cells */
 .scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
 
+#submission_layout { width: 100%; }
+
 #djlogo {
 	position: absolute; right: 1ex;
 	width: 93px; height: 196px;
@@ -64,6 +68,8 @@ img.smallpicto { width: 11px; height: 11px; }
 img.helpicon { cursor: help; }
 
 .judgetime { font-size: smaller; font-style: italic; }
+
+.config_input { width: 9em; }
 
 /* configchecker */
 .details {
@@ -79,7 +85,7 @@ img.helpicon { cursor: help; }
 
 /* team connect status/judgehost poll status */
 .team-nocon a, .judgehost-nocon a { color: #AAA; }
-.team-nosub a, .judgehost-err   a { color: red; }
+.team-nosub a, .judgehost-crit  a { color: red; }
 .team-nocor a, .judgehost-warn  a { color: yellow; }
 .team-ok a,    .judgehost-ok    a { color: green; }
 
@@ -152,3 +158,8 @@ img.helpicon { cursor: help; }
 .col1 { float: left;  width: 30%; }
 .col2 { float: right; width: 70%; }
 .nomorecol { clear: left; }
+
+.thleft { text-align: left; }
+.tdcenter { text-align: center; }
+.tdright { text-align: right; }
+.teamstat { text-align: right; }

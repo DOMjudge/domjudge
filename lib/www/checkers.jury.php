@@ -107,9 +107,24 @@ function check_problem($data, $keydata = null)
 				break;
 			}
 		}
+		if ( !isset($data['problemtext_type']) ) {
+			ch_error("Problem statement has unknown file type.");
+		}
 	}
-	if ( !isset($data['problemtext_type']) ) {
+	if ( !empty($data['problemtext']) &&
+	     !isset($data['problemtext_type']) ) {
 		ch_error("Problem statement has unknown file type.");
+	}
+
+	return $data;
+}
+
+function check_judgehost($data, $keydata = null)
+{
+	$id = (isset($data['hostname']) ? $data['hostname'] : $keydata['hostname']);
+
+	if ( ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id) ) {
+		ch_error("Judgehost has invalid hostname.");
 	}
 
 	return $data;
@@ -117,19 +132,12 @@ function check_problem($data, $keydata = null)
 
 function check_language($data, $keydata = null)
 {
-	global $langexts;
-
 	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 0 ) {
 		ch_error("Timelimit is not a valid positive factor");
 	}
 	$id = (isset($data['langid']) ? $data['langid'] : $keydata['langid']);
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Language ID may only contain characters " . IDENTIFIER_CHARS . ".");
-	}
-
-	if ( @$langexts[$id]!=$id ) {
-		ch_error("Language ID/extension not found or set incorrectly " .
-		         "in LANG_EXTS from domserver-config.php");
 	}
 
 	return $data;

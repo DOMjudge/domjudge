@@ -1,7 +1,7 @@
 /*
    Libchecktestdata -- check testdata according to specification.
    Copyright (C) 2008-2012 Jan Kuipers
-   Copyright (C) 2009-2012 Jaap Eldering (eldering@a-eskwadraat.nl).
+   Copyright (C) 2009-2013 Jaap Eldering (eldering@a-eskwadraat.nl).
    Copyright (C) 2012 Tobias Werth (werth@cs.fau.de)
 
    This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@
 #include <map>
 #include <set>
 #include <cctype>
+#include <cstdlib>
 #include <cstdarg>
 #include <climits>
 #include <getopt.h>
@@ -38,7 +39,6 @@
 #include <cstdlib>
 #ifdef HAVE_BOOST_REGEX
 #include <boost/regex.hpp>
-#include <boost/lexical_cast.hpp>
 #else
 #error "Libboost regex library not available."
 #endif
@@ -57,19 +57,28 @@ using namespace std;
 #define AUTHORS "Jan Kuipers, Jaap Eldering, Tobias Werth"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
-enum value_type { value_none, value_int, value_flt };
+enum value_type { value_none, value_int, value_flt, value_str };
 
 struct value_t {
 	value_type type;
 	mpz_class intval;
 	mpf_class fltval;
+	string    strval;
 
 	value_t(): type(value_none) {}
 	explicit value_t(mpz_class x): type(value_int), intval(x) {}
 	explicit value_t(mpf_class x): type(value_flt), fltval(x) {}
+	explicit value_t(string    x): type(value_str), strval(x) {}
 
 	operator mpz_class() const;
 	operator mpf_class() const;
+
+	// This is a member function instead of a casting operator, since
+	// otherwise the string could be used in other implicit casts.
+	string getstr() const;
+
+	// This converts any value type to a string representation.
+	string tostr() const;
 };
 
 class doesnt_match_exception {};
@@ -81,8 +90,16 @@ ostream& operator <<(ostream &os, const value_t &val)
 	switch ( val.type ) {
 	case value_int: return os << val.intval;
 	case value_flt: return os << val.fltval;
+	case value_str: return os << '"' << val.strval << '"';
 	default:        return os << "<no value>";
 	}
+}
+
+string value_t::tostr() const
+{
+	stringstream ss;
+	ss << *this;
+	return ss.str();
 }
 
 const int display_before_error = 65;
@@ -95,9 +112,15 @@ gmp_randclass gmp_rnd(gmp_randinit_default);
 
 string data;
 vector<command> program;
-map<string,value_t> variable, preset;
-set<string> loop_cmds;
+
+// This stores array-type variables like x[i,j] as string "x" and
+// vector of the indices. Plain variables are stored using an index
+// vector of zero length.
+typedef map<vector<mpz_class>,value_t> indexmap;
+map<string,indexmap> variable, preset;
+
 // List of loop starting commands like REP, initialized in checksyntax.
+set<string> loop_cmds;
 
 int whitespace_ok;
 int debugging;
@@ -131,8 +154,13 @@ void readprogram(istream &in)
 	debug("parsing script...");
 
 	Parser parseprog(in);
-	if ( parseprog.parse()!=0 ) {
-		cerr << "parse error reading program" << endl;
+	try {
+		if ( parseprog.parse()!=0 ) {
+			cerr << "parse error reading program" << endl;
+			exit(exit_failure);
+		}
+	} catch ( exception& e ) {
+		cerr << "parse error: " << e.what() << endl;
 		exit(exit_failure);
 	}
 
@@ -209,6 +237,19 @@ void error(string msg = string())
 	throw doesnt_match_exception();
 }
 
+long string2int(string s)
+{
+	long res;
+	char *ptr;
+
+	res = strtol(s.c_str(),&ptr,10);
+	if ( *ptr!='\0' || res==LONG_MIN || res==LONG_MAX ) {
+		error("cannot parse integer: `" + s + "'");
+	}
+
+	return res;
+}
+
 value_t::operator mpz_class() const
 {
 	if ( type!=value_int ) {
@@ -230,23 +271,77 @@ value_t::operator mpf_class() const
 	return fltval;
 }
 
-value_t value(string x)
+string value_t::getstr() const
 {
-	debug("value '%s'",x.c_str());
-	if ( isalpha(x[0]) ) {
-		if ( variable.count(x) ) return variable[x];
-		cerr << "variable " << x << " undefined in " << program[prognr] << endl;
+	if ( type!=value_str ) {
+		cerr << "string value expected in " << program[prognr] << endl;
 		exit(exit_failure);
 	}
+	return strval;
+}
+
+value_t eval(expr); // forward declaration
+
+value_t getvar(expr var, int use_preset = 0)
+{
+	// Construct index array. The cast to mpz_class automatically
+	// verifies that the index value is of type mpz_class.
+	vector<mpz_class> ind;
+	for(size_t i=0; i<var.nargs(); i++) {
+		ind.push_back(mpz_class(eval(var.args[i])));
+	}
+	if ( use_preset ) {
+		if ( preset.count(var.val) && preset[var.val].count(ind) ) {
+			return preset[var.val][ind];
+		}
+		return value_t();
+	} else {
+		if ( variable.count(var.val) && variable[var.val].count(ind) ) {
+			return variable[var.val][ind];
+		}
+	}
+	cerr << "variable " << var << " undefined in " << program[prognr] << endl;
+	exit(exit_failure);
+}
+
+void setvar(expr var, value_t val, int use_preset = 0)
+{
+	// Construct index array. The cast to mpz_class automatically
+	// verifies that the index value is of type mpz_class.
+	vector<mpz_class> ind;
+	for(size_t i=0; i<var.nargs(); i++) {
+		ind.push_back(mpz_class(eval(var.args[i])));
+	}
+
+	if ( use_preset ) {
+		preset[var][ind] = val;
+	} else {
+		variable[var][ind] = val;
+	}
+}
+
+void unsetvars(args_t varlist)
+{
+	for(size_t i=0; i<varlist.size(); i++) {
+		variable.erase(varlist[i].val);
+	}
+}
+
+value_t value(expr x)
+{
+	debug("value '%s'",x.val.c_str());
+
+	if ( x.op=='s' ) return value_t(x.val);
+	if ( isalpha(x.val[0]) ) return getvar(x);
 
 	value_t res;
-	if ( res.intval.set_str(x,0)==0 ) res.type = value_int;
-	else if ( res.fltval.set_str(x,0)==0 ) {
+	if ( res.intval.set_str(x.val,0)==0 ) res.type = value_int;
+	else if ( res.fltval.set_str(x.val,0)==0 ) {
 		res.type = value_flt;
 		// Set sufficient precision:
-		if ( res.fltval.get_prec()<4*x.length() ) {
-			res.fltval.set_prec(4*x.length());
-			res.fltval.set_str(x,0);
+		if ( res.fltval.get_prec()<4*x.val.length() ) {
+			res.fltval.set_prec(4*x.val.length());
+			res.fltval.set_str(x.val,0);
 		}
 	}
 	return res;
@@ -259,20 +354,29 @@ value_t value(string x)
 #define DECL_VALUE_BINOP(op) \
 value_t operator op(const value_t &x, const value_t &y) \
 { \
-	if ( x.type==value_none || y.type==value_none ) return value_t(); \
 	if ( x.type==value_int  && y.type==value_int ) { \
 		return value_t(mpz_class(x.intval op y.intval)); \
-	} else { \
+	} \
+	if ( (x.type==value_int || x.type==value_flt) && \
+	     (y.type==value_int || y.type==value_flt) ) { \
 		return value_t(mpf_class(mpf_class(x) op mpf_class(y))); \
 	} \
+	cerr << "cannot apply " << #op << " to non-arithmetic argument(s) in " \
+	     << program[prognr] << endl; \
+	exit(exit_failure); \
 }
 
 #define DECL_VALUE_CMPOP(op) \
 bool operator op(const value_t &x, const value_t &y) \
 { \
-	if ( x.type==value_none || y.type==value_none ) return false; \
+	if ( x.type==value_str  && y.type==value_str ) return x.strval op y.strval; \
 	if ( x.type==value_int  && y.type==value_int ) return x.intval op y.intval; \
-	return mpf_class(x) op mpf_class(y); \
+	if ( (x.type==value_int || x.type==value_flt) && \
+	     (y.type==value_int || y.type==value_flt) ) \
+		return mpf_class(x) op mpf_class(y); \
+	cerr << "incompatible value types in comparison in " \
+	     << program[prognr] << endl; \
+	exit(exit_failure); \
 }
 
 DECL_VALUE_BINOP(+)
@@ -291,27 +395,32 @@ value_t operator -(const value_t &x)
 {
 	if ( x.type==value_int ) return value_t(mpz_class(-x.intval));
 	if ( x.type==value_flt ) return value_t(mpf_class(-x.fltval));
-	return value_t();
+	cerr << "cannot negate non-arithmetic argument"
+		 << program[prognr] << endl;
+	exit(exit_failure);
 }
 
 value_t operator %(const value_t &x, const value_t &y)
 {
-	if ( x.type==value_none || y.type==value_none ) return value_t();
 	value_t res;
 	if ( x.type==value_int  && y.type==value_int ) {
 		res = x;
 		res.intval %= y.intval;
 		return res;
 	}
-	cerr << "cannot use modulo on floats in " << program[prognr] << endl;
+	cerr << "can only use modulo on integers in " << program[prognr] << endl;
 	exit(exit_failure);
 }
 
 value_t pow(const value_t &x, const value_t &y)
 {
-	if ( x.type==value_none || y.type==value_none ) return value_t();
+	if ( !(x.type==value_int || x.type==value_flt) ) {
+		cerr << "exponentiation base must be of arithmetic type in "
+			 << program[prognr] << endl;
+		exit(exit_failure);
+	}
 	if ( y.type!=value_int ) {
-		cerr << "float exponent not allowed in " << program[prognr] << endl;
+		cerr << "only integer exponents allowed in " << program[prognr] << endl;
 		exit(exit_failure);
 	}
 	if ( !y.intval.fits_ulong_p() ) {
@@ -336,7 +445,10 @@ value_t eval(expr e)
 {
 	debug("eval op='%c', val='%s', #args=%d",e.op,e.val.c_str(),(int)e.args.size());
 	switch ( e.op ) {
-	case ' ': return value(e.val);
+	case 'i':
+	case 'f':
+	case 's':
+	case 'v': return value(e);
 	case 'n': return -eval(e.args[0]);
 	case '+': return eval(e.args[0]) + eval(e.args[1]);
 	case '-': return eval(e.args[0]) - eval(e.args[1]);
@@ -345,17 +457,17 @@ value_t eval(expr e)
 	case '%': return eval(e.args[0]) % eval(e.args[1]);
 	case '^': return pow(eval(e.args[0]),eval(e.args[1]));
 	default:
-		cerr << "unknown arithmetic operator " << e.op << " in "
+		cerr << "unknown arithmetic operator '" << e.op << "' in "
 		     << program[prognr] << endl;
 		exit(exit_failure);
 	}
 }
 
-bool compare(args_t cmp)
+bool compare(expr cmp)
 {
-	string op = cmp[0].val;
-	value_t l = eval(cmp[1]);
-	value_t r = eval(cmp[2]);
+	string op = cmp.val;
+	value_t l = eval(cmp.args[0]);
+	value_t r = eval(cmp.args[1]);
 
 	if ( op=="<"  ) return l<r;
 	if ( op==">"  ) return l>r;
@@ -367,6 +479,87 @@ bool compare(args_t cmp)
 	cerr << "unknown compare operator " << op << " in "
 	     << program[prognr] << endl;
 	exit(exit_failure);
+}
+
+bool unique(args_t varlist)
+{
+	debug("unique, #args=%d",(int)varlist.size());
+
+	vector<string> vars;
+
+	// First check if all variables exist.
+	for(size_t i=0; i<varlist.size(); i++) {
+		vars.push_back(varlist[i].val);
+		if ( !variable.count(vars[i]) ) {
+			cerr << "variable " << vars[i] << " undefined in "
+				 << program[prognr] << endl;
+			exit(exit_failure);
+		}
+	}
+
+	// Check if all variables have equal numbers of indices. Then we
+	// can later check if they have the same indices by comparing the
+	// indices to that of the first variable.
+	for(size_t i=1; i<vars.size(); i++) {
+		if ( variable[vars[0]].size()!=variable[vars[i]].size() ) {
+			error("variables " + vars[0] + " and " + vars[i] +
+			      " have different indices");
+		}
+	}
+
+	// Now check if all tuples are unique.
+	set<vector<value_t> > tuples;
+	for(indexmap::iterator it=variable[vars[0]].begin();
+		it!=variable[vars[0]].end(); ++it) {
+		vector<mpz_class> index = it->first;
+		vector<value_t> tuple;
+		for(size_t i=0; i<vars.size(); i++) {
+			if ( !variable[vars[i]].count(index) ) {
+				string s;
+				s = "index [";
+				for(size_t j=0; j<index.size(); j++) {
+					if ( j>0 ) s += ",";
+					s += index[j].get_str();
+				}
+				s += "] not defined for variable " + vars[i];
+				error(s);
+			}
+			tuple.push_back(variable[vars[i]][index]);
+		}
+		if ( tuples.count(tuple) ) {
+			string s;
+			s = "non-unique tuple (" + tuple[0].tostr();
+			for(size_t j=1; j<tuple.size(); j++) s += "," + tuple[j].tostr();
+			s += ") found at index [";
+			for(size_t j=0; j<index.size(); j++) {
+				if ( j>0 ) s += ",";
+				s += index[j].get_str();
+			}
+			s += "]";
+			error(s);
+		}
+		tuples.insert(tuple);
+	}
+	return true;
+}
+
+bool inarray(expr e, expr array)
+{
+	string var = array.val;
+	value_t val = eval(e);
+
+	debug("inarray, value = %s, array = %s",val.tostr().c_str(),var.c_str());
+
+	if ( !variable.count(var) ) {
+		cerr << "variable " << var << " undefined in "
+			 << program[prognr] << endl;
+		exit(exit_failure);
+	}
+
+	for(indexmap::iterator it=variable[var].begin(); it!=variable[var].end(); ++it) {
+		if ( it->second==val ) return true;
+	}
+	return false;
 }
 
 bool dotest(test t)
@@ -386,7 +579,9 @@ bool dotest(test t)
 		  } else {
 			  return datanr<data.size() && t.args[0].val.find(data[datanr])!=string::npos;
 		  }
-	case '?': return compare(t.args);
+	case 'U': return unique(t.args);
+	case 'A': return inarray(t.args[0],t.args[1]);
+	case '?': return compare(t);
 	default:
 		cerr << "unknown test " << t.op << " in " << program[prognr] << endl;
 		exit(exit_failure);
@@ -465,13 +660,13 @@ int getmult(string &exp, unsigned int &index)
 			string minmaxs = exp.substr(index, end - index);
 			int pos = minmaxs.find_first_of(',');
 			if (pos == -1) {
-				min = max = boost::lexical_cast<int>(minmaxs);
+				min = max = string2int(minmaxs);
 			} else {
 				string mins = minmaxs.substr(0, pos);
 				string maxs = minmaxs.substr(pos + 1);
-				min = boost::lexical_cast<int>(mins);
+				min = string2int(mins);
 				if (maxs.length() > 0) {
-					max = boost::lexical_cast<int>(maxs);
+					max = string2int(maxs);
 				}
 			}
 			index = end + 1;
@@ -485,9 +680,10 @@ int getmult(string &exp, unsigned int &index)
 	return (min + rand() % (1 + max - min));
 }
 
-void genregex(string exp, ostream &datastream)
+string genregex(string exp)
 {
 	unsigned int i = 0;
+	string res;
 	while (i < exp.length()) {
 		switch (exp[i]) {
 		case '\\':
@@ -496,7 +692,7 @@ void genregex(string exp, ostream &datastream)
 				char c = exp[i];
 				int mult = getmult(exp, i);
 				for (int cnt = 0; cnt < mult; cnt++) {
-					datastream << c;
+					res += c;
 				}
 			}
 			break;
@@ -504,7 +700,7 @@ void genregex(string exp, ostream &datastream)
 			{
 				int mult = getmult(exp, i);
 				for (int cnt = 0; cnt < mult; cnt++) {
-					datastream << (char) (' ' + (rand() % (int) ('~' - ' ')));
+					res += (char) (' ' + (rand() % (int) ('~' - ' ')));
 				}
 			}
 			break;
@@ -542,7 +738,7 @@ void genregex(string exp, ostream &datastream)
 				copy(possible.begin(), possible.end(), std::back_inserter(possibleVec));
 				int mult = getmult(exp, i);
 				for (int cnt = 0; cnt < mult; cnt++) {
-					datastream << possibleVec[rand() % possibleVec.size()];
+					res += possibleVec[rand() % possibleVec.size()];
 				}
 			}
 			break;
@@ -571,7 +767,7 @@ void genregex(string exp, ostream &datastream)
 				alternatives.push_back(exp.substr(begin, i - begin));
 				int mult = getmult(exp, i);
 				for (int cnt = 0; cnt < mult; cnt++) {
-					genregex(alternatives[rand() % alternatives.size()], datastream);
+					res += genregex(alternatives[rand() % alternatives.size()]);
 				}
 			}
 			break;
@@ -580,12 +776,13 @@ void genregex(string exp, ostream &datastream)
 				char c = exp[i];
 				int mult = getmult(exp, i);
 				for (int cnt = 0; cnt < mult; cnt++) {
-					datastream << c;
+					res += c;
 				}
 			}
 			break;
 		}
 	}
+	return res;
 }
 
 void gentoken(command cmd, ostream &datastream)
@@ -606,14 +803,14 @@ void gentoken(command cmd, ostream &datastream)
 		if ( cmd.nargs()>=3 ) {
 			// Check if we have a preset value, then override the
 			// random generated value
-			if ( preset.count(cmd.args[2]) ) {
-				x = preset[cmd.args[2]];
+			value_t y = getvar(cmd.args[2],1);
+			if ( y.type!=value_none ) {
+				x = y;
 				if ( x<lo || x>hi ) {
 					error("preset value for '" + string(cmd.args[2]) + "' out of range");
 				}
 			}
-
-			variable[cmd.args[2]] = value_t(x);
+			setvar(cmd.args[2],value_t(x));
 		}
 
 		datastream << x.get_str();
@@ -637,32 +834,38 @@ void gentoken(command cmd, ostream &datastream)
 		if ( cmd.nargs()>=3 ) {
 			// Check if we have a preset value, then override the
 			// random generated value
-			if ( preset.count(cmd.args[2]) ) {
-				x = preset[cmd.args[2]];
+			value_t y = getvar(cmd.args[2],1);
+			if ( y.type!=value_none ) {
+				x = y;
 				if ( x<lo || x>hi ) {
 					error("preset value for '" + string(cmd.args[2]) + "' out of range");
 				}
 			}
-
-			variable[cmd.args[2]] = value_t(x);
+			setvar(cmd.args[2],value_t(x));
 		}
 
 		datastream << x;
 	}
 
 	else if ( cmd.name()=="STRING" ) {
-		string str = cmd.args[0];
+		string str = eval(cmd.args[0]).getstr();
 		datastream << str;
 	}
 
 	else if ( cmd.name()=="REGEX" ) {
 		string regex = cmd.args[0];
-		boost::regex e1(regex, boost::regex::extended); // this is only to check the expression
-		genregex(regex, datastream);
+//		boost::regex e1(regex, boost::regex::extended); // this is only to check the expression
+		string str = genregex(regex);
+		datastream << str;
+		if ( cmd.nargs()>=2 ) setvar(cmd.args[1],value_t(str));
 	}
 
 	else if ( cmd.name()=="ASSERT" ) {
 		if ( !dotest(cmd.args[0]) ) error("assertion failed");
+	}
+
+	else if ( cmd.name()=="UNSET" ) {
+		unsetvars(cmd.args);
 	}
 
 	else {
@@ -707,7 +910,7 @@ void checktoken(command cmd)
 		mpz_class x(num);
 
 		if ( x<lo || x>hi ) error("value out of range");
-		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = value_t(x);
+		if ( cmd.nargs()>=3 ) setvar(cmd.args[2],value_t(x));
 
 		datanr += len;
 		charnr += len;
@@ -748,14 +951,14 @@ void checktoken(command cmd)
 		mpf_class hi = eval(cmd.args[1]);
 
 		if ( x<lo || x>hi ) error("value out of range");
-		if ( cmd.nargs()>=3 ) variable[cmd.args[2]] = value_t(x);
+		if ( cmd.nargs()>=3 ) setvar(cmd.args[2],value_t(x));
 
 		charnr += matchend - datanr;
 		datanr = matchend;
 	}
 
 	else if ( cmd.name()=="STRING" ) {
-		string str = cmd.args[0];
+		string str = eval(cmd.args[0]).getstr();
 		for (size_t i=0; i<str.size(); i++) {
 			if ( datanr>=data.size() ) error("premature end of file");
 			if ( data[datanr++]!=str[i] ) error();
@@ -783,12 +986,17 @@ void checktoken(command cmd)
 				if ( data[datanr]=='\n' ) linenr++, charnr=0;
 			}
 		}
-
 		debug("'%s' = '%s'",matchstr.c_str(),cmd.args[0].c_str());
+
+		if ( cmd.nargs()>=2 ) setvar(cmd.args[1],value_t(matchstr));
 	}
 
 	else if ( cmd.name()=="ASSERT" ) {
 		if ( !dotest(cmd.args[0]) ) error("assertion failed");
+	}
+
+	else if ( cmd.name()=="UNSET" ) {
+		unsetvars(cmd.args);
 	}
 
 	else {
@@ -797,24 +1005,38 @@ void checktoken(command cmd)
 	}
 }
 
-void checktestdata()
+// This function processes the outer control structure commands both
+// for checking and generating testdata (as determined by the global
+// variable 'gendata').
+void checktestdata(ostream &datastream)
 {
 	while ( true ) {
 		command cmd = currcmd = program[prognr];
 
 		if ( cmd.name()=="EOF" ) {
-			debug("checking EOF");
-			if ( datanr++!=data.size() ) error();
-			throw eof_found_exception();
+			if ( gendata ) {
+				debug("done: EOF found");
+				return;
+			} else {
+				debug("checking EOF");
+				if ( datanr++!=data.size() ) error();
+				throw eof_found_exception();
+			}
 		}
 
 		else if ( loop_cmds.count(cmd.name()) ) {
 
 			// Current and maximum loop iterations.
 			unsigned long i = 0, times = ULONG_MAX;
+			unsigned loopvar = 0; // Optional variable for loop iteration present.
 
-			if ( cmd.name()=="REP" ) {
-				mpz_class n = eval(cmd.args[0]);
+			if ( cmd.name()=="REPI" || cmd.name()=="WHILEI" ) {
+				loopvar = 1;
+				setvar(cmd.args[0],value_t(mpz_class(i)));
+			}
+
+			if ( cmd.name()=="REP" || cmd.name()=="REPI" ) {
+				mpz_class n = eval(cmd.args[loopvar]);
 				if ( !n.fits_ulong_p() ) {
 					cerr << "'" << n << "' does not fit in an unsigned long in "
 						 << program[prognr] << endl;
@@ -838,14 +1060,22 @@ void checktestdata()
 			debug("running %s loop, commands %d - %d, max. times = %ld",
 			      cmd.name().c_str(),loopbegin,loopend,times);
 
-			while ( (cmd.name()=="REP"   && i<times) ||
-			        (cmd.name()=="WHILE" && dotest(cmd.args[0])) ) {
+			while ( ((cmd.name()=="REP"   || cmd.name()=="REPI")   && i<times) ||
+			        ((cmd.name()=="WHILE" || cmd.name()=="WHILEI") &&
+			         dotest(cmd.args[loopvar])) ) {
 
 				debug("loop iteration %ld/%ld",i+1,times);
 				prognr = loopbegin;
-				if ( i>0 && cmd.nargs()>=2 ) checktoken(cmd.args[1]);
-				checktestdata();
+				if ( i>0 && cmd.nargs()>=loopvar+2 ) {
+					if ( gendata ) {
+						gentoken(cmd.args[loopvar+1], datastream);
+					} else {
+						checktoken(cmd.args[loopvar+1]);
+					}
+				}
+				checktestdata(datastream);
 				i++;
+				if ( loopvar ) setvar(cmd.args[0],value_t(mpz_class(i)));
 			}
 
 			// And skip to end of loop
@@ -874,12 +1104,12 @@ void checktestdata()
 			if (dotest(cmd.args[0])) {
 				debug("executing IF clause");
 				prognr = ifnr+1;
-				checktestdata();
+				checktestdata(datastream);
 			}
 			else if (elsenr!=-1) {
 				debug("executing ELSE clause");
 				prognr = elsenr+1;
-				checktestdata();
+				checktestdata(datastream);
 			}
 
 			prognr = endnr+1;
@@ -892,104 +1122,11 @@ void checktestdata()
 		}
 
 		else {
-			checktoken(cmd);
-			prognr++;
-		}
-	}
-}
-
-void genrandomdata(ostream &datastream) {
-	while ( true ) {
-		command cmd = currcmd = program[prognr];
-
-		if ( cmd.name()=="EOF" ) {
-			debug("we are done ;-)");
-			return;
-		}
-
-		else if ( loop_cmds.count(cmd.name()) ) {
-			// Current and maximum loop iterations.
-			unsigned long i = 0, times = ULONG_MAX;
-
-			if ( cmd.name()=="REP" ) {
-				mpz_class n = eval(cmd.args[0]);
-				if ( !n.fits_ulong_p() ) {
-					cerr << "'" << n << "' does not fit in an unsigned long in "
-						 << program[prognr] << endl;
-					exit(exit_failure);
-				}
-				times = n.get_ui();
+			if ( gendata ) {
+				gentoken(cmd, datastream);
+			} else {
+				checktoken(cmd);
 			}
-
-			// Begin and end of loop commands
-			int loopbegin, loopend;
-
-			loopbegin = loopend = prognr + 1;
-
-			for(int looplevel=1; looplevel>0; ++loopend) {
-				string cmdstr = program[loopend].name();
-				if ( loop_cmds.count(cmdstr) || cmdstr=="IF") looplevel++;
-				if ( cmdstr=="END" ) looplevel--;
-			}
-
-			// Run loop...
-			debug("running %s loop, commands %d - %d, max. times = %ld",
-			      cmd.name().c_str(),loopbegin,loopend,times);
-
-			while ( (cmd.name()=="REP"   && i<times) ||
-			        (cmd.name()=="WHILE" && dotest(cmd.args[0])) ) {
-
-				debug("loop iteration %ld/%ld",i+1,times);
-				prognr = loopbegin;
-				if ( i>0 && cmd.nargs()>=2 ) gentoken(cmd.args[1], datastream);
-				genrandomdata(datastream);
-				i++;
-			}
-
-			// And skip to end of loop
-			prognr = loopend;
-		}
-
-		else if ( cmd.name()=="IF" ) {
-			// Find line numbers of matching else/end
-			int ifnr   = prognr;
-			int elsenr = -1;
-			int endnr  = prognr+1;
-
-			for(int looplevel=1; looplevel>0; ++endnr) {
-				string cmdstr = program[endnr].name();
-				if ( loop_cmds.count(cmdstr) || cmdstr=="IF") looplevel++;
-				if ( cmdstr=="END" ) looplevel--;
-				if ( cmdstr=="ELSE" && looplevel==1) elsenr = endnr;
-			}
-			endnr--;
-
-			debug("IF statement, if/else/end commands: %d/%d/%d",
-			      ifnr,elsenr,endnr);
-
-			// Test and execute correct command block
-			if (dotest(cmd.args[0])) {
-				debug("executing IF clause");
-				prognr = ifnr+1;
-				genrandomdata(datastream);
-			}
-			else if (elsenr!=-1) {
-				debug("executing ELSE clause");
-				prognr = elsenr+1;
-				genrandomdata(datastream);
-			}
-
-			prognr = endnr+1;
-		}
-
-		else if ( cmd.name()=="END" || cmd.name()=="ELSE" ) {
-			debug("scope closed by %s",cmd.name().c_str());
-			prognr++;
-			return;
-		}
-
-		else {
-			gentoken(cmd, datastream);
 			prognr++;
 		}
 	}
@@ -1010,7 +1147,9 @@ void init_checktestdata(std::istream &progstream, int opt_mask)
 	// Initialize block_cmds here, as a set cannot be initialized on
 	// declaration.
 	loop_cmds.insert("REP");
+	loop_cmds.insert("REPI");
 	loop_cmds.insert("WHILE");
+	loop_cmds.insert("WHILEI");
 
 	// Read program and testdata
 	readprogram(progstream);
@@ -1037,11 +1176,13 @@ void gentestdata(ostream &datastream)
 {
 	// Generate random testdata
 	gendata = 1;
-	genrandomdata(datastream);
+	checktestdata(datastream);
 }
 
 bool checksyntax(istream &datastream)
 {
+	ofstream dummy;
+
 	gendata = 0;
 	readtestdata(datastream);
 
@@ -1050,7 +1191,7 @@ bool checksyntax(istream &datastream)
 	if ( whitespace_ok ) readwhitespace();
 
 	try {
-		checktestdata();
+		checktestdata(dummy);
 	}
 	catch (doesnt_match_exception) {
 		return false;
@@ -1060,6 +1201,7 @@ bool checksyntax(istream &datastream)
 	return true;
 }
 
+// This doesn't support variables with indices (yet?).
 bool parse_preset_list(std::string list)
 {
 	size_t pos = 0, sep1, sep2;
@@ -1084,7 +1226,7 @@ bool parse_preset_list(std::string list)
 			} catch ( ... ) { return false; }
 		} catch ( ... ) { return false; }
 
-		preset[name] = value;
+		setvar(expr(name),value,1);
 
 		pos = sep2 + 1;
 	}

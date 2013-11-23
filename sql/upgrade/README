@@ -19,4 +19,5 @@ between the latest two bugfix releases of both series. The upgrade
 scripts between the different 3.1.X bugfix releases are also present,
 so this gives a unique upgrade path: first to the latest bugfix
 release in the current series, then to the latest bugfix release in
-the newer series.
+the newer series. (Note that all SQL upgrade scripts are shipped, so
+one does not need to install these intermediate versions of DOMjudge.)

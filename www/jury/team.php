@@ -6,8 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 require('init.php');
 
 $id = @$_REQUEST['id'];
@@ -25,7 +23,9 @@ if ( isset($_GET['cmd'] ) ) {
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
-if ( IS_ADMIN && !empty($cmd) ):
+if ( !empty($cmd) ):
+
+	requireAdmin();
 
 	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " team</h2>\n\n";
 
@@ -41,13 +41,13 @@ if ( IS_ADMIN && !empty($cmd) ):
 		echo htmlspecialchars($row['login']);
 	} else {
 		echo "<tr><td><label for=\"data_0__login_\">Login:</label></td><td class=\"teamid\">";
-		echo addInput('data[0][login]', null, 8, 15);
+		echo addInput('data[0][login]', null, 8, 15, 'pattern="' . IDENTIFIER_CHARS . '+" title="Alphanumerics only" required');
 	}
 	echo "</td></tr>\n";
 
 ?>
 <tr><td><label for="data_0__name_">Team name:</label></td>
-<td><?php echo addInput('data[0][name]', @$row['name'], 35, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 35, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__categoryid_">Category:</label></td>
 <td><?php
 $cmap = $DB->q("KEYVALUETABLE SELECT categoryid,name FROM team_category ORDER BY categoryid");
@@ -63,13 +63,11 @@ $amap[''] = 'none';
 echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 ?>
 </td></tr>
-<tr><td><label for="data_0__authtoken_">Auth token:</label></td>
-<td><?php echo addInput('data[0][authtoken]', @$row['authtoken'], 35, 255)?></td></tr>
 <tr><td><label for="data_0__room_">Location:</label></td>
 <td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td><label for="data_0__comments_">Comments:</label></td>
 <td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
-<tr><td><label for="data_0__enabled_">Enabled:</label></td>
+<tr><td>Enabled:</td>
 <td><?php echo addRadioButton('data[0][enabled]', (!isset($row['']) || $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>
 <?php echo addRadioButton('data[0][enabled]', (isset($row['enabled']) && !$row['enabled']), 0)?> <label for="data_0__enabled_0">no</label></td></tr>
 </table>
@@ -79,7 +77,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','team') .
 	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
 	addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
@@ -115,24 +113,24 @@ if ( $row['enabled'] != 1 ) {
 ?>
 
 <div class="col1"><table>
-<tr><td scope="row">Login:     </td><td class="teamid"><?php echo $row['login']?></td></tr>
-<tr><td scope="row">Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
-<tr><td scope="row">Host:</td><td><?php echo
+<tr><td>Login:     </td><td class="teamid"><?php echo $row['login']?></td></tr>
+<tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
+<tr><td>Host:</td><td><?php echo
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
 <?php if (!empty($row['room'])): ?>
-<tr><td scope="row">Location:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
+<tr><td>Location:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>
 </table></div>
 
 <div class="col2"><table>
 <?php
 
-echo '<tr><td scope="row">Category:</td><td><a href="team_category.php?id=' .
+echo '<tr><td>Category:</td><td><a href="team_category.php?id=' .
 	urlencode($row['categoryid']) . '">' .
 	htmlspecialchars($row['catname']) . "</a></td></tr>\n";
 
 if ( !empty($row['affilid']) ) {
-	echo '<tr><td scope="row">Affiliation:</td><td>';
+	echo '<tr><td>Affiliation:</td><td>';
 	if ( is_readable($affillogo) ) {
 		echo '<img src="' . $affillogo . '" alt="' .
 			htmlspecialchars($row['affilid']) . '" /> ';
@@ -143,7 +141,7 @@ if ( !empty($row['affilid']) ) {
 		htmlspecialchars($row['affname']) . "</a></td></tr>\n";
 }
 if ( !empty($row['country']) ) {
-	echo '<tr><td scope="row">Country:</td><td>';
+	echo '<tr><td>Country:</td><td>';
 	if ( is_readable($countryflag) ) {
 		echo '<img src="' . $countryflag . '" alt="' .
 			htmlspecialchars($row['country']) . '" /> ';
@@ -151,11 +149,11 @@ if ( !empty($row['country']) ) {
 	echo htmlspecialchars($row['country']) . "</td></tr>\n";
 }
 if ( !empty($row['members']) ) {
-	echo '<tr><td scope="row">Members:   </td><td>' .
+	echo '<tr><td>Members:   </td><td>' .
 		nl2br(htmlspecialchars($row['members'])) . "</td></tr>\n";
 }
 if ( !empty($row['comments']) ) {
-	echo '<tr><td scope="row">Comments:</td><td>' .
+	echo '<tr><td>Comments:</td><td>' .
 		nl2br(htmlspecialchars($row['comments'])) . "</td></tr>\n";
 }
 echo "</table></div>\n";

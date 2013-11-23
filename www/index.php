@@ -17,14 +17,13 @@ require_once(LIBDIR . '/use_db.php');
 setup_database_connection();
 
 require_once(LIBWWWDIR . '/common.php');
-require_once(LIBWWWDIR . '/auth.team.php');
+require_once(LIBWWWDIR . '/auth.php');
 
+$target = 'public/';
 if ( logged_in() ) {
-	$target = 'team/';
-} else if ( false ) { /* FIXME: test jury login? */
-	$target = 'jury/';
-} else {
-	$target = 'public/';
+	if     ( checkrole('team',false) ) $target = 'team/';
+	elseif ( checkrole('jury') )       $target = 'jury/';
+	elseif ( checkrole('balloon') )    $target = 'jury/balloons.php';
 }
 
 header('HTTP/1.1 302 Please see this page');

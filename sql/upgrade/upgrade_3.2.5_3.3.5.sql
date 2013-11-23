@@ -62,7 +62,9 @@ CREATE TABLE `balloon` (
   `balloonid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `submitid` int(4) unsigned NOT NULL COMMENT 'Submission for which balloon was earned',
   `done` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has been handed out yet?',
-  PRIMARY KEY (`balloonid`)
+  PRIMARY KEY (`balloonid`),
+  KEY `submitid` (`submitid`),
+  CONSTRAINT `balloon_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Balloons to be handed out';
 
 CREATE TABLE `submission_file` (
@@ -79,7 +81,7 @@ CREATE TABLE `submission_file` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Files associated to a submission';
 
 -- Resize datastructures to fit "arbitrary" large data to satisfy
--- http://domjudge.a-eskwadraat.nl/trac/ticket/15 for the ICPC CSS spec.
+-- the ICPC CSS spec.
 ALTER TABLE `clarification`
   MODIFY COLUMN `body` longtext NOT NULL COMMENT 'Clarification text';
 

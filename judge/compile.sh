@@ -47,8 +47,32 @@ cleanexit ()
 # Error and logging functions
 . "$DJ_LIBDIR/lib.error.sh"
 
+CPUSET=""
+CPUSET_OPT=""
+# Do argument parsing
+OPTIND=1 # reset if necessary
+while getopts "n:" opt; do
+	case $opt in
+		n)
+			CPUSET="$OPTARG"
+			;;
+		:)
+			echo "Option -$OPTARG requires an argument." >&2
+			;;
+	esac
+done
+# Shift any of the arguments out of the way
+shift $((OPTIND-1))
+[ "$1" = "--" ] && shift
+
+if [ -n "$CPUSET" ]; then
+	CPUSET_OPT="-P $CPUSET"
+	LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`-$CPUSET.log"
+else
+	LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`.log"
+fi
+
 # Logging:
-LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`.log"
 LOGLEVEL=$LOG_DEBUG
 PROGNAME="`basename $0`"
 
@@ -99,14 +123,14 @@ logmsg $LOG_INFO "starting compile"
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
 exitcode=0
-"$RUNGUARD" ${DEBUG:+-v} -t $COMPILETIME -c -f 65536 -T "$WORKDIR/compile.time" -- \
+"$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -t $COMPILETIME -c -f 65536 -T "$WORKDIR/compile.time" -- \
 	"$COMPILE_SCRIPT" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
 cd "$WORKDIR"
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
-if grep 'timelimit reached: aborting command' compile.tmp >/dev/null 2>&1 ; then
+if grep 'timelimit exceeded' compile.tmp >/dev/null 2>&1 ; then
 	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
 	cleanexit ${E_COMPILER_ERROR:--1}
 fi

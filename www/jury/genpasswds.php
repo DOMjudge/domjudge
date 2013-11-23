@@ -12,34 +12,34 @@ require(LIBWWWDIR . '/header.php');
 requireAdmin();
 ?>
 
-<h1>Manage team passwords</h1>
+<h1>Manage user passwords</h1>
 
 <?php
-$teams = $DB->q('KEYVALUETABLE SELECT login, name FROM team
-                 ORDER BY categoryid ASC, name COLLATE utf8_general_ci ASC');
+$users = $DB->q('KEYVALUETABLE SELECT username, CONCAT(CONCAT(username, " - "),name) FROM user
+                 ORDER BY username');
 
-if ( empty($teams) ) {
-	echo "<p class=\"nodata\">No teams defined.</p>\n\n";
+if ( empty($users) ) {
+	echo "<p class=\"nodata\">No users defined.</p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
-$teams = array_merge(array(''=>'(select one)'),$teams);
+$users = array(''=>'(select one)') + $users;
 
 switch ( AUTH_METHOD ):
 
 case 'IPADDRESS':
 ?>
 <p>You are using IP-address based authentication. Note that resetting the
-password of a team (or all teams) implies instantly revoking any current
-access that team may have to their teampage until they enter their newly
+password of a user (or all users) implies instantly revoking any current
+access that user may have to their userpage until they enter their newly
 generated password.</p>
 <?php
 break;
 case 'PHP_SESSIONS':
 ?>
 <p>You are using PHP sessions based authentication. Generating a new password
-for a team will not affect existing logged-in sessions.</p>
+for a user will not affect existing logged-in sessions.</p>
 <?php
 break;
 default:
@@ -48,57 +48,55 @@ default:
 <?php
 endswitch;
 
-echo addForm('genpasswds.php') .
-	"<p>\nSet password for team " .
-	addSelect('forteam', $teams, @$_GET['forteam'], true) .
+echo addForm($pagename) .
+	"<p>\nSet password for user " .
+	addSelect('foruser', $users, @$_GET['foruser'], true) .
 	" to " .
 	addInput('setpass', '', 10, 255) .
 	" (leave empty for random) " .
-	addSubmit('go', 'doteam') .
+	addSubmit('go', 'douser') .
 	"</p>\n<p>" .
 	"Generate a random password for:</p>\n<p>\n" .
-	addSubmit('all teams without a password or IP-address', 'doallnull') .
+	addSubmit('all users without a password or IP-address', 'doallnull') .
 	"<br /></p>\n<p>" .
-	addSubmit('absolutely all teams', 'doall') .
+	addSubmit('absolutely all users', 'doall') .
 	"<br /></p>\n" .
 	addEndForm();
 
-if ( isset($_POST['forteam']) ) {
+if ( isset($_POST['foruser']) ) {
 	// output each password once we're done
 	ob_implicit_flush();
 
-	if ( isset($_POST['doteam']) ) {
-		// one team only
-		if ( empty($_POST['forteam']) ) {
-			error("Please select a team to set this password for.");
+	if ( isset($_POST['douser']) ) {
+		// one user only
+		if ( empty($_POST['foruser']) ) {
+			error("Please select a user to set this password for.");
 		}
-		$teams = $DB->q('TABLE SELECT login,name,members FROM team ' .
-				'WHERE login = %s', $_POST['forteam']);
+		$users = $DB->q('TABLE SELECT username,name FROM user ' .
+				'WHERE username = %s', $_POST['foruser']);
 		if ( !empty($_POST['setpass']) ) {
 			$setpass = $_POST['setpass'];
 		}
 	} else {
-		// all teams, or optionaly only those with null password
-		$teams = $DB->q('TABLE SELECT login,name,members FROM team ' .
+		// all users, or optionaly only those with null password
+		$users = $DB->q('TABLE SELECT username,name FROM user ' .
 		                (isset($_POST['doallnull'])?'WHERE authtoken IS NULL':'') .
-		                ' ORDER BY login');
+		                ' ORDER BY username');
 	}
 
 	echo "<hr />\n\n<pre>";
-	foreach($teams as $team) {
+	foreach($users as $user) {
 		// generate a new password, only if it wasn't set in the interface
 		if ( !isset($setpass) ) {
 			$pass = genrandpasswd();
 		} else {
 			$pass = $setpass;
 		}
-		// update the team table with a password
-		$DB->q('UPDATE team SET authtoken = %s WHERE login = %s', md5($team['login'].'#'.$pass), $team['login']);
-		auditlog('team', $team['login'], 'set password');
-		$members = str_replace(array("\r\n","\n","\r")," & ", $team['members']);
-		echo "Team:      " . htmlspecialchars($team['name']) . "\n" .
-		     "Members:   " . htmlspecialchars($members) . "\n" .
-		     "Login:     " . htmlspecialchars($team['login']) . "\n" .
+		// update the user table with a password
+		$DB->q('UPDATE user SET authtoken = %s WHERE username = %s', md5($user['username'].'#'.$pass), $user['username']);
+		auditlog('user', $user['username'], 'set password');
+		echo "User:      " . htmlspecialchars($user['name']) . "\n" .
+		     "Login:     " . htmlspecialchars($user['username']) . "\n" .
 		     "Password:  $pass\n\n\n\n";
 	}
 	echo "</pre>\n";

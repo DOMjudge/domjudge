@@ -15,6 +15,7 @@
 #<VirtualHost *>
 #ServerName _default_
 #DocumentRoot @domserver_wwwdir@
+#Alias /api @domserver_wwwdir@/index.php
 #</VirtualHost>
 
 # Alternatively, use HTTPS and redirect HTTP to HTTPS:
@@ -43,8 +44,8 @@
 # want DOMjudge in the root, but only occupy a subdir, like this:
 # www.example.com/domjudge
 
+Alias /domjudge/api @domserver_wwwdir@/api/index.php
 Alias /domjudge @domserver_wwwdir@
-
 
 ### General options ###
 #
@@ -72,12 +73,8 @@ php_flag magic_quotes_runtime off
 
 </Directory>
 
-# Require authentication to jury webinterface
+# Limit access to the jury webinterface
 <Directory @domserver_wwwdir@/jury>
-AuthType Basic
-AuthName "DOMjudge Jury Interface"
-Require valid-user
-AuthUserFile @domserver_etcdir@/htpasswd-jury
 
 # Optionally restrict access to just the jury computers:
 # deny from all
@@ -95,16 +92,6 @@ AuthUserFile @domserver_etcdir@/htpasswd-jury
 #php_value post_max_size       64M
 #php_value memory_limit        128M
 #</IfModule>
-
-# As an alternative to htpasswd files, you can also opt
-# for one of the many Apache authentication modules, e.g.
-# LDAP, CAS, SAML (Shibboleth), etc.
-# An LDAP example could look like this:
-#   AuthType Basic
-#   AuthBasicProvider ldap
-#   AuthName "DOMjudge Jury Interface"
-#   AuthLDAPURL "ldaps://ldap.uvt.nl/o=Universiteit van Tilburg,c=NL"
-#   Require johndoe janedoe jackbauer
 
 </Directory>
 

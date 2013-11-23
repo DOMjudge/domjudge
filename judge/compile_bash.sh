@@ -46,6 +46,8 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
+export ONLINE_JUDGE=1 DOMJUDGE=1
+
 exec bash $RUNOPTIONS "$MAINSOURCE"
 EOF
 

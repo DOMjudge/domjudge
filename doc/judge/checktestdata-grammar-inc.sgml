@@ -19,28 +19,29 @@ The following grammar sub-elements are defined:
 integer  := 0|-?[1-9][0-9]*
 float    := -?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?
 string   := ".*"
-variable := [a-z][a-z0-9]*
-value    := &lt;integer&gt; | &lt;float&gt; | &lt;variable&gt;
+varname  := [a-z][a-z0-9]*
+variable := &lt;varname&gt; | &lt;varname&gt; '[' &lt;expr&gt; [',' &lt;expr&gt; ...] ']'
+value    := &lt;integer&gt; | &lt;float&gt; | &lt;string&gt; | &lt;variable&gt;
 compare  := '&lt;' | '&gt;' | '&lt;=' | '&gt;=' | '==' | '!='
+logical  := '&&' | '||'
 expr     := &lt;term&gt; | &lt;expr&gt; [+-] &lt;term&gt;
 term     := &lt;term&gt; [*%/] &lt;factor&gt; | &lt;factor&gt;
 factor   := &lt;value&gt; | '-' &lt;term&gt; | '(' &lt;expr&gt; ')' | &lt;factor&gt; '^' &lt;factor&gt;
-test     := '!' &lt;test&gt; | '(' &lt;test&gt; ')' | &lt;test&gt; [&|] &lt;test&gt; |
-             &lt;expr&gt; &lt;compare&gt; &lt;expr&gt; | 'MATCH(' &lt;string&gt; str ')' | 'ISEOF'
+test     := '!' &lt;test&gt; | &lt;test&gt; &lt;logical&gt; &lt;test&gt; | '(' &lt;test&gt; ')' |
+             &lt;expr&gt; &lt;compare&gt; &lt;expr&gt; | &lt;testcommand&gt;
 </code>
 
 <p>
-That is, integer, as well as floating point values (of arbitrary size
-and precision) are supported, as well as operators <tt>+-*%/^</tt>
+That is, variables can take integer, floating point as well as string
+values. No dynamic casting is performed, except that integers can be
+cast into floats. Integers and floats of arbitrary size and precision
+are supported, as well as the arithmetic operators <tt>+-*%/^</tt>
 with the usual rules of precedence. An expression is integer if all
 its sub-expressions are integer. Integer division is used on integers.
 The exponentiation operator <tt>^</tt> only allows non-negative
-integer exponents that fit in an unsigned long.
-
-<p>
-<tt>MATCH</tt> and <tt>ISEOF</tt> are special keywords that return
-whether the next character matches any of 'str', respectively if
-end-of-file has been reached.
+integer exponents that fit in an unsigned long. String-valued
+variables can only be compared (lexicographically), no operators are
+supported.
 
 <p>
 Within a string, the backslash acts as escape character for the
@@ -53,6 +54,35 @@ following expressions:
 </itemize>
 A backslash preceding any other character is treated as a literal
 backslash.
+
+<p>
+Tests can be built from comparison operators, the usual logical
+operators <tt>! && ||</tt> (not, and, or) and a number of test
+commands that return a boolean value. These are:
+<descrip>
+<tag><tt>MATCH(&lt;string&gt; str)</tt></tag>
+
+    Returns whether the next character matches any of the characters
+    in 'str'.
+
+<tag><tt>ISEOF</tt></tag>
+
+    Returns whether end-of-file has been reached.
+
+<tag><tt>UNIQUE(&lt;varname&gt; a [,&lt;varname&gt; b ...])</tt></tag>
+
+    Checks for uniqueness of tuples of values in the combined (array)
+    variables a, b, ... That is, it is checked that firstly all
+    arguments have precisely the same set of indices defined, and
+    secondly that the tuples formed by evaluating (a,b,...) at these
+    indices are unique. For example, if x,y are 1D arrays containing
+    coordinates, then <tt>UNIQUE(x,y)</tt> checks that the points
+    (x[i],y[i]) in the plane are unique.
+
+<tag><tt>INARRAY(&lt;value&gt; val, &lt;varname&gt; array)</tt></tag>
+
+    Checks if val occurs in one of the indices of array.
+</descrip>
 
 The following commands are available:
 <descrip>
@@ -71,36 +101,50 @@ The following commands are available:
     Match an arbitrary sized integer value in the interval [min,max]
     and optionally assign the value read to variable 'name'.
 
-<tag><tt>FLOAT(&lt;expr&gt; min, &lt;expr&gt; max [, &lt;variable&gt; name [, option])</tt></tag>
+<tag><tt>FLOAT(&lt;expr&gt; min, &lt;expr&gt; max [, &lt;variable&gt; name [, option]])</tt></tag>
 
     Match a floating point number in the range [min,max] and
     optionally assign the value read to the variable 'name'. When the
     option 'FIXED' or 'SCIENTIFIC' is set, only accept floating point
     numbers in fixed point or scientific notation, respectively.
 
-<tag><tt>STRING(&lt;string&gt; str)</tt></tag>
+<tag><tt>STRING(&lt;value&gt; str)</tt></tag>
 
-    Match the literal string 'str'.
+    Match the string (variable) 'str'.
 
-<tag><tt>REGEX(&lt;string&gt; str)</tt></tag>
+<tag><tt>REGEX(&lt;string&gt; str [, &lt;variable&gt; name])</tt></tag>
 
     Match the extended regular expression 'str'. Matching is performed
-    greedily.
+    greedily. Optionally assign the matched string to variable 'name'.
 
 <tag><tt>ASSERT(&lt;test&gt; condition)</tt></tag>
 
     Assert that 'condition' is true, fail otherwise.
 
-<tag><tt>REP(&lt;expr&gt; count [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
+<tag><tt>UNSET(&lt;varname&gt; a [,&lt;varname&gt; b ...])</tt></tag>
+
+    Unset all values for variables a, b, ... This includes all values
+    for array indexed variables with these names. This command should
+    typically be inserted at the end of a loop after using UNIQUE or
+    INARRAY, to make sure that no old variables are present anymore
+    during the next iteration.
+
+<tag><tt>REP(&lt;expr&gt; count [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag><p>
+<tag><tt>REPI(&lt;variable&gt; i, &lt;expr&gt; count [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
 
     Repeat the commands between the 'REP() ... END' statements count
     times and optionally match 'separator' command (count-1) times in
-    between. The value of count must fit in a unsigned 32 bit int.
+    between. The value of count must fit in an unsigned 32 bit int.
+    The second command 'REPI' does the same, but also stores the
+    current iteration (counting from zero) in the variable 'i'.
 
-<tag><tt>WHILE(&lt;test&gt; condition [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
+<tag><tt>WHILE(&lt;test&gt; condition [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag><p>
+<tag><tt>WHILEI(&lt;variable&gt; i, &lt;test&gt; condition [,&lt;command&gt; separator]) [&lt;command&gt;...] END</tt></tag>
 
     Repeat the commands as long as 'condition' is true. Optionally
     match 'separator' command between two consecutive iterations.
+    The second command 'WHILEI' does the same, but also stores the
+    current iteration (counting from zero) in the variable 'i'.
 
 <tag><tt>IF(&lt;test&gt; cond) [&lt;command&gt; cmds1...] [ELSE [&lt;command&gt; cmds2...]] END</tt></tag>
 

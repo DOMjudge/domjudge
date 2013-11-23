@@ -27,7 +27,7 @@ if ( isset($_POST['submitter']) ) {
 		$filenames[] = $sourcedata['filename'];
 	}
 
-	submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'],
+	$newid = submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'],
 	                $files, $filenames, $_POST['origsubmitid']);
 
 	foreach($files as $file)
@@ -35,7 +35,7 @@ if ( isset($_POST['submitter']) ) {
 		unlink($file);
 	}
 
-	header('Location: submissions.php');
+	header('Location: submission.php?id=' . $newid);
 	exit;
 }
 
@@ -52,7 +52,7 @@ require(LIBWWWDIR . '/header.php');
 echo '<h2><a name="source"></a>Edit submission ' .
 	"<a href=\"submission.php?id=$id\">s$id</a> source files</h2>\n\n";
 
-echo addForm('edit_source.php', 'post', null, 'multipart/form-data');
+echo addForm($pagename, 'post', null, 'multipart/form-data');
 
 
 $sources = $DB->q('TABLE SELECT *

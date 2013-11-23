@@ -14,9 +14,9 @@
 <!--
  This is some comment character magic to circumvent problems
  with an unexpanded git archive $Format$ keyword.
-$Format: -%x2d%x3e
+ $Format: -%x2d%x3e
 <date>%aD
-%x3c!%x2d- $  -->
+%x3c!%x2d- $ -->
 
 <abstract>
 This document provides information about DOMjudge aimed at a jury
@@ -28,15 +28,14 @@ A separate manual is available for teams and administrators.
 <!-- $Format: -%x2d%x3e
 Document version: %h
 %x3c!%x2d- $ -->
-
 </abstract>
 
 <toc>
 
-<chapt>DOMjudge Overview
+<chapt>DOMjudge overview <label id="overview">
 <p>
 
-DOMjudge is a system for running a programming contest, like the ACM
+DOMjudge is a system for running programming contests, like the ACM
 ICPC regional and world championship programming contests.
 
 This means that teams are on-site and have a fixed time period (mostly
@@ -51,7 +50,7 @@ program and compares the program output with the expected output.
 
 This software can be used to handle the submission and judging during
 such contests. It also handles feedback to the teams and communication
-on problems (clarification requests). It has web-interfaces for the
+on problems (clarification requests). It has web interfaces for the
 jury, the teams (their submissions and clarification requests) and the
 public (scoreboard).
 
@@ -59,11 +58,10 @@ public (scoreboard).
 <p>
 
 A global overview of the features that DOMjudge provides:
-
 <itemize>
 <item>Automatic judging with distributed (scalable) judge hosts
-<item>Web-interface for portability and simplicity
-<item>Modular system for plugging in languages/compilers
+<item>Web interface for portability and simplicity
+<item>Modular system for plugging in languages/compilers and more
 <item>Detailed jury information (submissions, judgings) and options
       (rejudge, clarifications)
 <item>Designed with security in mind
@@ -75,13 +73,26 @@ A global overview of the features that DOMjudge provides:
 <sect>Copyright and licencing
 <p>
 
-DOMjudge is developed by Jaap Eldering, Thijs Kinkhorst,
-Peter van de Werken and Tobias Werth. Development is hosted at
-Study Association <htmlurl name="A-Eskwadraat"
-url="http://www.a-eskwadraat.nl/">, <htmlurl name="Utrecht University"
-url="http://www.uu.nl/">, The Netherlands.
+DOMjudge is developed by Jaap Eldering, Keith Johnson, Thijs
+Kinkhorst and Tobias Werth; Peter van de Werken has retired as
+developer. Many other people have contributed:
+Jeroen Bransen,
+Stijn van Drongelen,
+Rob Franken,
+Nicky Gerritsen,
+Jacob Kleerekoper,
+Jan Kuipers,
+Jeroen Schot,
+and Jeroen van Wolffelaar.
+Some code has been ported from the ETH Zurich fork by Christoph
+Krautz, Thomas Rast et al.
 
-It is Copyright (c) 2004 - 2012 by The DOMjudge Developers.
+Development is hosted at Study Association
+<htmlurl name="A-Eskwadraat" url="http://www.a-eskwadraat.nl/">,
+<htmlurl name="Utrecht University" url="http://www.uu.nl/">,
+The Netherlands.
+
+It is Copyright (c) 2004 - 2013 by the DOMjudge developers and its contributors.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the <url name="GNU General Public License"
@@ -95,8 +106,8 @@ are covered by other copyrights. See the file README for details.
 <sect>Contact
 <p>
 The DOMjudge homepage can be found at:
-<htmlurl name="http://domjudge.sourceforge.net/"
-url="http://domjudge.sourceforge.net/">
+<htmlurl name="http://www.domjudge.org/"
+url="http://www.domjudge.org/">
 
 We have a low volume <htmlurl name="mailing list for announcements"
 url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
@@ -110,6 +121,10 @@ to be subscribed before you can post. See
 url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
 for subscription and more details.
 
+Some developers and users of DOMjudge linger on the IRC channel
+dedicated to DOMjudge on the Freenode network:
+server <tt>irc.freenode.net</tt>, channel <tt>#domjudge</tt>.
+Feel free to drop by with your questions and comments.
 
 <chapt>General
 <p>
@@ -134,14 +149,8 @@ canonical overview of current standings.
 The DOMjudge system discerns between <em>judges</em> and
 <em>administrators</em> (admins). An administrator is responsible for
 the technical side of DOMjudge: installation and keeping it running.
-The jury web interface may be used by both.
-
-Depending on configuration, there may either be a separate
-administrator view or one is shared between judges and administrators.
-In the first case you will not have access to the admin-specific
-options. In the latter, you may see options directed at admins, like
-options to edit or delete data. Only use these options if you're sure
-that it's correct to do so.
+The jury web interface may be used by both, but depending on your
+assigned role you may have more options.
 
 <sect>Scoreboard
 <p>
@@ -167,7 +176,15 @@ them, when set.
 
 Nearly everything on the scoreboard can be clicked to reveal more
 detailed information about the item in question: team names, specific
-submissions and problem headers.
+submissions and problem headers. Many cells will show additional
+`title text' information when hovering over them. The score column
+lists the number of solved problems and the total penalty time for
+each team. Each cell in a problem column lists the number of
+submissions, and if the problem was solved, then within parentheses
+the time of the first correct submission in minutes since contest
+start, followed by a `<tt>+</tt>' and the penalty time for any
+incorrect submissions. Together these count towards each team's total
+penalty time.
 
 <chapt>Before the contest
 <p>
@@ -192,11 +209,14 @@ problem on the scoreboard. Disallow judge will make DOMjudge accept
 submissions, but leave them queued; this is useful in case an
 unexpected problem shows up with one of the problems. Timelimit is the
 maximum number of seconds a submission for this problem is allowed to
-run before a `TIMELIMIT' response is given (multiplied by the language
+run before a `TIMELIMIT' response is given (to be multiplied possibly by a language
 factor). Problems can be imported and exported into and from DOMjudge
 using zip-files that contain the problem metadata and testdata files.
 See appendix <ref id="problem-format" name="DOMjuge problem format
-specification">.
+specification">. Problems can have special <em>compare</em> and
+<em>run</em> scripts associated to them, to deal with problem
+statements that require non-standard evaluation. For more details see
+the administrator's manual.
 
 The `Languages' overview is quite the same. It has a timefactor
 column; submissions in a language that has time factor 2 will be
@@ -207,7 +227,7 @@ e.g. Java.
 <sect>Verifying testdata
 <p>
 
-DOMjudge comes with some small tools to check for mistakes in the
+DOMjudge comes with some tools to check for mistakes in the
 testdata. These tools are all located in the <tt>misc-tools</tt>
 directory in the source tree.
 
@@ -298,7 +318,7 @@ might be having difficulties.
 <sect>Judging Submissions
 <p>
 
-<sect1>Flow of submitted solutions 
+<sect1>Flow of submitted solutions
 <p>
 
 The flow of an incoming submission is as follows.
@@ -351,7 +371,12 @@ for more details about the submission (team name, submittime etc),
 a list of judgings and the details for the most recent judging
 (runtime, outputs, diff with testdata). There is also a switch
 available between newest 50, only unverified, only unjudged or
-all submissions.
+all submissions. The default (coloured) diff output shows differences
+on numbered lines side by side separated by a character indicating how
+the lines differ: <bf><tt>!</tt></bf> for different contents,
+<bf><tt>$</tt></bf> for different or missing end-of-line characters,
+and one of <bf><tt>&lt;&gt;</tt></bf> when there are no more lines at
+the end of the other file.
 
 Under the submission details the `view source code' link can be
 clicked to inspect the source code. If the team has submitted code

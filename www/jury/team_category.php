@@ -13,7 +13,9 @@ require(LIBWWWDIR . '/scoreboard.php');
 
 $cmd = @$_GET['cmd'];
 
-if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
+if ( $cmd == 'add' || $cmd == 'edit' ) {
+
+	requireAdmin();
 
 	$title = "Category: " . htmlspecialchars($cmd);
 	$jscolor = true;
@@ -37,18 +39,17 @@ if ( IS_ADMIN && ($cmd == 'add' || $cmd == 'edit') ) {
 ?>
 
 <tr><td><label for="data_0__name_">Description:</label></td>
-<td><?php echo addInput('data[0][name]', @$row['name'], 15, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 15, 255, 'required')?></td></tr>
 
 <tr><td><label for="data_0__sortorder_">Sort order:</label></td>
-<td><?php echo addInput('data[0][sortorder]', (empty($row['sortorder'])?0:$row['sortorder']), 2, 1)?></td></tr>
+<td><?php echo addInputField('number', 'data[0][sortorder]', (empty($row['sortorder'])?0:$row['sortorder']), ' size="3" maxlength="2"')?></td></tr>
 
 <tr><td><label for="data_0__color_">Colour:</label></td>
-<td><?php echo addInputField('text','data[0][color]', @$row['color'],
-	'size="15" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
+<td><?php echo addInputField('color','data[0][color]', @$row['color'],
+	' size="15" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
 <a target="_blank"
 href="http://www.w3schools.com/cssref/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
-</td></tr>
 
 <tr><td>Visible:</td>
 <td><?php echo addRadioButton('data[0][visible]', (!isset($row['visible']) || $row['visible']), 1)?> <label for="data_0__visible_1">yes</label>
@@ -61,7 +62,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','team_category') .
 	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
 	addEndForm();
 
 	require(LIBWWWDIR . '/footer.php');
@@ -79,15 +80,15 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>$title</h1>\n\n";
 
 echo "<table>\n";
-echo '<tr><td scope="row">ID:</td><td>' . htmlspecialchars($data['categoryid']) . "</td></tr>\n";
-echo '<tr><td scope="row">Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
-echo '<tr><td scope="row">Sortorder:</td><td>' . htmlspecialchars($data['sortorder']) . "</td></tr>\n";
+echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['categoryid']) . "</td></tr>\n";
+echo '<tr><td>Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
+echo '<tr><td>Sortorder:</td><td>' . htmlspecialchars($data['sortorder']) . "</td></tr>\n";
 if ( isset($data['color']) ) {
-	echo '<tr><td scope="row">Colour:       </td><td style="background: ' .
+	echo '<tr><td>Colour:       </td><td style="background: ' .
 		htmlspecialchars($data['color']) .
 		';">' . htmlspecialchars($data['color']) . "</td></tr>\n";
 }
-echo '<tr><td scope="row">Visible:</td><td>' . printyn($data['visible']) . "</td></tr>\n";
+echo '<tr><td>Visible:</td><td>' . printyn($data['visible']) . "</td></tr>\n";
 
 
 echo "</table>\n\n";
@@ -117,9 +118,7 @@ if ( $teams->count() == 0 ) {
 	}
 	echo "</tbody>\n</table>\n\n";
 
-	echo "<p>";
 	putTeamRow($cdata,$listteams);
-	echo "</p>\n\n";
 }
 
 

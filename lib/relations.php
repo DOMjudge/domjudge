@@ -25,7 +25,9 @@ $KEYS['team_affiliation'] = array('affilid');
 $KEYS['team_category'] = array('categoryid');
 $KEYS['team_unread'] = array('teamid','mesgid','type');
 $KEYS['testcase'] = array('testcaseid');
-
+$KEYS['user'] = array('userid');
+$KEYS['role'] = array('roleid');
+$KEYS['userrole'] = array('userid', 'roleid');
 
 /** For each table, list all attributes that reference foreign keys
  *  and specify the source of that key. Optionally appended to the
@@ -38,6 +40,10 @@ $KEYS['testcase'] = array('testcaseid');
  *                references a foreign key.
  */
 $RELATIONS = array();
+
+$RELATIONS['user'] = array();
+$RELATIONS['role'] = array();
+$RELATIONS['userrole'] = array();
 
 $RELATIONS['auditlog'] = array();
 

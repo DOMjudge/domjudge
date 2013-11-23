@@ -57,8 +57,6 @@ $lastsection = false; $resultno = 0;
 function flushresults() {
 	global $RESULTS, $lastsection, $resultno;
 
-	$lastresultno = $resultno;
-
 	foreach($RESULTS as &$row) {
 
 		if ( $row['flushed'] ) continue;
@@ -92,16 +90,6 @@ function flushresults() {
 
 		++$resultno;
 	}
-
-	// collapse all details; they are not collapsed in the default
-	// style sheet to keep things working with JavaScript disabled.
-	echo "<script type=\"text/javascript\" language=\"JavaScript\">
-<!--
-for (var i = $lastresultno; i < $resultno; i++) {
-    collapse(i);
-}
-// -->
-</script>\n\n";
 
 	flush();
 }
@@ -177,8 +165,7 @@ while($row = $mysqldatares->next()) {
 
 result('software', 'MySQL version',
 	version_compare('4.1', $mysqldata['version'], '>=') ? 'E':'O',
-	'Connected to ' . mysql_get_host_info().",\n".
-	'MySQL server version ' .
+	'Connected to MySQL server version ' .
 	htmlspecialchars($mysqldata['version']) .
 	'. Minimum required is 4.1.');
 
@@ -199,6 +186,15 @@ flushresults();
 
 // CONFIGURATION
 
+if ( $DB->q('VALUE SELECT count(*) FROM user WHERE username = "admin" AND authtoken=MD5("admin#admin")') != 0 ) {
+	result('configuration', 'Default admin password', 'E',
+		'The "admin" user still has the default password. You should change it immediately.');
+} else {
+	result('configuration', 'Default admin password', 'O',
+		'Password for "admin" has been changed from the default.');
+}
+
+
 if ( DEBUG == 0 ) {
 	result('configuration', 'Debugging', 'O', 'Debugging disabled.');
 } else {
@@ -207,24 +203,13 @@ if ( DEBUG == 0 ) {
 		'Should not be enabled on live systems.');
 }
 
-if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
-	result('configuration', 'Protected Jury interface', 'W',
-		"You are not using HTTP Authentication for the Jury interface. " .
-		"Are you sure that the jury interface is adequately protected?");
-} else {
-	result('configuration', 'Protected Jury interface', 'O',
-		'Logged in as user ' .
-		htmlspecialchars($_SERVER['REMOTE_USER']) .
-		".");
-}
-
 if ( !is_writable(TMPDIR) ) {
        result('configuration', 'TMPDIR writable', 'W',
-              'TMPDIR is not writable by the webserver; ' .
+              'TMPDIR (' . TMPDIR . ') is not writable by the webserver; ' .
               'Showing diffs and editing of submissions may not work.');
 } else {
        result('configuration', 'TMPDIR writable', 'O',
-              'TMPDIR can be used to store temporary files for submission diffs and edits.');
+              'TMPDIR (' . TMPDIR . ') can be used to store temporary files for submission diffs and edits.');
 }
 
 flushresults();
@@ -562,6 +547,16 @@ if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 flushresults();
 
 echo "</table>\n\n";
+
+// collapse all details; they are not collapsed in the default
+// style sheet to keep things working with JavaScript disabled.
+echo "<script type=\"text/javascript\">
+<!--
+for (var i = 0; i < $resultno; i++) {
+    collapse(i);
+}
+// -->
+</script>\n\n";
 
 $time_end = microtime(TRUE);
 

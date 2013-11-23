@@ -6,8 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 require('init.php');
 
 $id = @$_REQUEST['id'];
@@ -40,7 +38,9 @@ if ( !empty($pcmd) ) {
 
 require(LIBWWWDIR . '/header.php');
 
-if ( IS_ADMIN && !empty($cmd) ):
+if ( !empty($cmd) ):
+
+	requireAdmin();
 
 	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " language</h2>\n\n";
 
@@ -56,13 +56,13 @@ if ( IS_ADMIN && !empty($cmd) ):
 		echo htmlspecialchars($row['langid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__langid_\">Language ID/ext:</label></td><td>";
-		echo addInput('data[0][langid]', null, 8, 8);
+		echo addInput('data[0][langid]', null, 8, 8,  'required pattern="' . IDENTIFIER_CHARS . '+" title="alphanumerics only"');
 	}
 	echo "</td></tr>\n";
 
 ?>
 <tr><td><label for="data_0__name_">Language name:</label></td>
-<td><?php echo addInput('data[0][name]', @$row['name'], 20, 255)?></td></tr>
+<td><?php echo addInput('data[0][name]', @$row['name'], 20, 255, 'required')?></td></tr>
 
 <tr><td>Allow submit:</td>
 <td><?php echo addRadioButton('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> <label for="data_0__allow_submit_1">yes</label>
@@ -73,7 +73,7 @@ if ( IS_ADMIN && !empty($cmd) ):
 <?php echo addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
 
 <tr><td><label for="data_0__time_factor_">Time factor:</label></td>
-<td><?php echo addInput('data[0][time_factor]', @$row['time_factor'], 5, 5)?> x</td></tr>
+<td><?php echo addInputField('number', 'data[0][time_factor]', @$row['time_factor'], ' min="0"')?> x</td></tr>
 </table>
 
 <?php
@@ -81,7 +81,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','language') .
 	addHidden('referrer', @$_GET['referrer']) .
 	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
 	addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
@@ -95,7 +95,7 @@ if ( ! $data ) error("Missing or invalid language id");
 
 echo "<h1>Language ".htmlspecialchars($id)."</h1>\n\n";
 
-echo addForm($pagename) . "<p>\n" .
+echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 	addHidden('id', $id) .
 	addHidden('val[toggle_judge]',  !$data['allow_judge']) .
 	addHidden('val[toggle_submit]', !$data['allow_submit']).
@@ -103,19 +103,19 @@ echo addForm($pagename) . "<p>\n" .
 
 ?>
 <table>
-<tr><td scope="row">ID/extension:</td><td><?php echo htmlspecialchars($data['langid'])?></td></tr>
-<tr><td scope="row">Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
-<tr><td scope="row">Allow submit:</td><td><?php echo printyn($data['allow_submit']) . ' '.
+<tr><td>ID/extension:</td><td><?php echo htmlspecialchars($data['langid'])?></td></tr>
+<tr><td>Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
+<tr><td>Allow submit:</td><td><?php echo printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
 		" submissions for this language?')"); ?>
 </td></tr>
-<tr><td scope="row">Allow judge: </td><td><?php echo printyn($data['allow_judge']) . ' ' .
+<tr><td>Allow judge: </td><td><?php echo printyn($data['allow_judge']) . ' ' .
 	addSubmit('toggle', 'cmd[toggle_judge]',
 		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
 		" judging for this language?')"); ?>
 </td></tr>
-<tr><td scope="row">Time factor:  </td><td><?php echo htmlspecialchars($data['time_factor'])?> x</td></tr>
+<tr><td>Time factor:  </td><td><?php echo htmlspecialchars($data['time_factor'])?> x</td></tr>
 </table>
 
 <?php

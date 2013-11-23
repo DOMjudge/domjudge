@@ -59,7 +59,7 @@ function parseRunDiff($difftext){
  */
 function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 {
-	global $DB;
+	global $DB, $username;
 
 	/* We need two kind of queries: one for all submissions, and one
 	 * with the results for the valid ones. Restrictions is an array
@@ -268,7 +268,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			if ( $claim ) {
 				echo "<a class=\"button\" href=\"submission.php?claim=1&amp;id=" . htmlspecialchars($row['submitid']) . "\">claim</a>";
 			} else {
-				if ( !$row['verified'] && $jury_member==getJuryMember() ) {
+				if ( !$row['verified'] && $jury_member==$username ) {
 					echo "<a class=\"button\" href=\"submission.php?unclaim=1&amp;id=" . htmlspecialchars($row['submitid']) . "\">unclaim</a>";
 				} else {
 					echo "<a$link>$jury_member</a>";
@@ -355,16 +355,17 @@ function putTeam($login) {
 ?>
 
 <table>
-<tr><td scope="row">Name:    </td><td><?php echo htmlspecialchars($team['name'])?></td></tr>
+<tr><td>Name:    </td><td><?php echo htmlspecialchars($team['name'])?></td></tr>
+<tr><td>Category:</td><td><?php echo htmlspecialchars($team['catname'])?></td></tr>
 <?php
 
 	if ( !empty($team['members']) ) {
-		echo '<tr><td scope="row">Members:</td><td>' .
+		echo '<tr><td>Members:</td><td>' .
 			nl2br(htmlspecialchars($team['members'])) . "</td></tr>\n";
 	}
 
 	if ( !empty($team['affilid']) ) {
-		echo '<tr><td scope="row">Affiliation:</td><td>';
+		echo '<tr><td>Affiliation:</td><td>';
 		if ( is_readable($affillogo) ) {
 			echo '<img src="' . $affillogo . '" alt="' .
 				htmlspecialchars($team['affilid']) . '" /> ';
@@ -374,7 +375,7 @@ function putTeam($login) {
 		echo htmlspecialchars($team['affname']);
 		echo "</td></tr>\n";
 		if ( !empty($team['country']) ) {
-			echo '<tr><td scope="row">Country:</td><td>';
+			echo '<tr><td>Country:</td><td>';
 			if ( is_readable($countryflag) ) {
 				echo '<img src="' . $countryflag . '" alt="' .
 					htmlspecialchars($team['country']) . '" /> ';
@@ -384,7 +385,7 @@ function putTeam($login) {
 	}
 
 	if ( !empty($team['room']) ) {
-		echo '<tr><td scope="row">Location:</td><td>' .
+		echo '<tr><td>Location:</td><td>' .
 			htmlspecialchars($team['room']) . "</td></tr>\n";
 	}
 
@@ -414,10 +415,60 @@ function putTeam($login) {
  * Output clock
  */
 function putClock() {
-	global $cdata;
+	global $cdata, $username;
+	$what = $fmt = "";
+	$activatetime_u = strtotime($cdata['activatetime']);
+	$starttime_u = strtotime($cdata['starttime']);
+	$endtime_u = strtotime($cdata['endtime']);
+
 	// current time
-	echo '<div id="clock">' . strftime('%a %e %b %Y %T %Z');
-	echo "</div>\n\n";
+	echo '<div id="clock"><span id="timecur">' . strftime('%a %d %b %Y %T %Z') . "</span>";
+	// timediff to end of contest
+	if ( strcmp(now(), $cdata['starttime']) >= 0 && strcmp(now(), $cdata['endtime']) < 0) {
+		$left = $endtime_u-time();
+		$what = "time left: ";
+	} else if ( strcmp(now(), $cdata['activatetime']) >= 0 && strcmp(now(), $cdata['starttime']) < 0) {
+		$left = $starttime_u-time();
+		$what = "time to start: ";
+	}
+	if ( !empty($left) ) {
+		$fmt = '';
+		if ( $left > 24*60*60 ) {
+			$d = floor($left/(24*60*60));
+			$fmt .= $d . "d ";
+			$left -= $d * 24*60*60;
+		}
+		if ( $left > 60*60 ) {
+			$h = floor($left/(60*60));
+			$fmt .= $h . ":";
+			$left -= $h * 60*60;
+		}
+		$m = floor($left/60);
+		$fmt .= sprintf('%02d:', $m);
+		$left -= $m * 60;
+		$fmt .= sprintf('%02d', $left);
+
+	}
+	echo "<br /><span id=\"timeleft\">" . $what . $fmt . "</span>";
+	if ( logged_in() ) {
+		echo "<br /><span id=\"username\">logged in as " . $username
+			. ( have_logout() ? " <a href=\"../logout.php\">×</a>" : "" )
+			. "</span>";
+	}
+	echo "</div>";
+
+	echo "<script type=\"text/javascript\">
+	var initial = " . time() . ";
+	var activatetime = " . $activatetime_u . ";
+	var starttime = " . $starttime_u . ";
+	var endtime = " . $endtime_u . ";
+	var offset = 1;
+	var date = new Date(initial*1000);
+	var timecurelt = document.getElementById(\"timecur\");
+	var timeleftelt = document.getElementById(\"timeleft\");
+
+	setInterval(function(){updateClock();},1000);
+</script>\n";
 }
 
 /**
@@ -433,7 +484,9 @@ function putDOMjudgeVersion() {
  * as defined in passwords.php. If not, error and stop further execution.
  */
 function requireAdmin() {
-	if ( ! IS_ADMIN ) error ("This function is only accessible to administrators.");
+	if (!checkrole('admin')) {
+		error("This function is only accessible to administrators.");
+	}
 }
 
 /**
@@ -507,4 +560,48 @@ function putProblemText($probid)
 	echo $prob['problemtext'];
 
 	exit(0);
+}
+
+/**
+ * Outputs bulleted list of problem statements for this contest
+ */
+function putProblemTextList()
+{
+	global $cid, $cdata, $DB;
+	$fdata = calcFreezeData($cdata);
+
+	if ( ! have_problemtexts() ) {
+		echo "<p class=\"nodata\">No problem texts available for this contest.</p>\n\n";
+	} elseif ( !$fdata['cstarted'] ) {
+		echo "<p class=\"nodata\">Problem texts will appear here at contest start.</p>\n\n";
+	} else {
+
+		// otherwise, display list
+		$res = $DB->q('SELECT p.probid,p.name,p.color,p.problemtext_type
+		               FROM problem p WHERE cid = %i AND allow_submit = 1 AND
+		               problemtext_type IS NOT NULL ORDER BY p.probid', $cid);
+
+		if ( $res->count() > 0 ) {
+			echo "<ul>\n";
+			while($row = $res->next()) {
+				print '<li> ' .
+				      '<img src="../images/' . urlencode($row['problemtext_type']) .
+				      '.png" alt="' . htmlspecialchars($row['problemtext_type']) .
+				      '" /> <a href="?id=' . urlencode($row['probid']) . '">' .
+				      'Problem ' . htmlspecialchars($row['probid']) . ': ' .
+				      htmlspecialchars($row['name']) . "</a></li>\n";
+			}
+			echo "</ul>\n";
+		}
+	}
+}
+
+/**
+ * Returns true if at least one problem in the current contest has a
+ * problem statement text in the database.
+ */
+function have_problemtexts()
+{
+	global $DB, $cid;
+	return $DB->q('VALUE SELECT COUNT(*) FROM problem WHERE problemtext_type IS NOT NULL AND cid = %i', $cid) > 0;
 }

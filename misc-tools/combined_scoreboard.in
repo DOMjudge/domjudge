@@ -150,15 +150,6 @@ foreach( $scores as $team => $totals ) {
 	$prevteam = $team;
 }
 
-// Calculate best submission times per problem
-foreach( $summary['problems'] as &$prob ) {
-	if ( isset($prob['times']) ) {
-		$prob['best_time'] = min(@$prob['times']);
-	} else {
-		$prob['best_time'] = null;
-	}
-}
-
 $sdata = array('scores'     => $scores,
                'matrix'     => $matrix,
                'summary'    => $summary,

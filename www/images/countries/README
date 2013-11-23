@@ -1,11 +1,5 @@
-These flags are downloaded from the CIA factbook, which can be found 
-at: https://www.cia.gov/cia/publications/factbook/
+These flags are generated using the ISO country SVG collection from
+https://github.com/koppi/iso-country-flags-svg-collection
 
-The images are PNG files rescaled to a height of 18 pixels (one third
-the original size) and named after the 3-letter ISO 3166 code of the 
-country/region (instead of their FIPS code on the website), see the
-file codes.txt.
-
-These images are in the public domain as stated on the CIA fackbook 
-website at:
-https://www.cia.gov/cia/publications/factbook/docs/contributor_copyright.html
+The generated images are PNG files with 40x30 pixels and named after the
+3-letter ISO 3166 code of the country/region, see the file codes.txt.

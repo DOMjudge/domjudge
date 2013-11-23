@@ -33,10 +33,16 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 		                    WHERE cid = %i AND allow_submit = 1
 		                    ORDER BY probid', $cid);
 	}
+
+	$langdata = $DB->q('KEYVALUETABLE SELECT langid, extensions
+	                    FROM language WHERE allow_submit = 1');
+
 	echo "function getMainExtension(ext)\n{\n";
 	echo "\tswitch(ext) {\n";
-	foreach($langexts as $ext => $langid) {
-		echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
+	foreach ( $langdata as $langid => $extensions ) {
+		foreach ( json_decode($extensions) as $ext ) {
+			echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
+		}
 	}
 	echo "\t\tdefault: return '';\n\t}\n}\n\n";
 
@@ -52,7 +58,7 @@ echo "initReload(" . $refreshtime . ");\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
-//putTeamRow($cdata, array($login));
+//putTeamRow($cdata, array($teamid));
 
 echo "<div id=\"submitlist\">\n";
 
@@ -61,15 +67,19 @@ echo "<h3 class=\"teamoverview\"><a name=\"submit\" href=\"#submit\">Submit</a><
 
 if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 	if ( $submitted ) {
-		echo "<p class=\"submissiondone\">submission done <a href=\"./\" style=\"color: red\">x</a></p>\n\n";
+		echo "<p class=\"submissiondone\">submission done <a href=\"./\">x</a></p>\n\n";
 	} else {
-		echo addForm('upload.php','post',null,'multipart/form-data', null, ' onreset="resetUploadForm('.$refreshtime .');"') .
-		"<p id=\"submitform\">\n\n" .
-		"<span class=\"fileinputs\">\n\t" .
-		"<input type=\"file\" name=\"code[]\" id=\"maincode\" size=\"15\" /> " .
-		"\n</span>\n";
+		$maxfiles = dbconfig_get('sourcefiles_limit',100);
 
-		echo "<script type=\"text/javascript\">initFileUploads();</script>\n\n";
+		echo addForm('upload.php','post',null,'multipart/form-data', null, ' onreset="resetUploadForm('.$refreshtime .', ' . $maxfiles . ');"') .
+		"<p id=\"submitform\">\n\n";
+
+		echo "<input type=\"file\" name=\"code[]\" id=\"maincode\" required";
+		if ( $maxfiles > 1 ) {
+			echo " multiple";
+		}
+		echo " />\n";
+
 
 		$probs = array();
 		foreach($probdata as $probid => $dummy) {
@@ -90,12 +100,13 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 
 		echo addReset('cancel');
 
-		if ( dbconfig_get('sourcefiles_limit',100) > 1 ) {
+		if ( $maxfiles > 1 ) {
 			echo "<br /><span id=\"auxfiles\"></span>\n" .
 			    "<input type=\"button\" name=\"addfile\" id=\"addfile\" " .
 			    "value=\"Add another file\" onclick=\"addFileUpload();\" " .
 			    "disabled=\"disabled\" />\n";
 		}
+		echo "<script type=\"text/javascript\">initFileUploads($maxfiles);</script>\n\n";
 
 		echo "</p>\n</form>\n\n";
 	}
@@ -103,7 +114,7 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 
 echo "<h3 class=\"teamoverview\"><a name=\"submissions\" href=\"#submissions\">Submissions</a></h3>\n\n";
 // call putSubmissions function from common.php for this team.
-$restrictions = array( 'teamid' => $login );
+$restrictions = array( 'teamid' => $teamid );
 putSubmissions($cdata, $restrictions, null, $submitted);
 
 ?>
@@ -157,7 +168,7 @@ echo "<div id=\"clarlist\">\n";
 
 $requests = $DB->q('SELECT * FROM clarification
                     WHERE cid = %i AND sender = %s
-                    ORDER BY submittime DESC, clarid DESC', $cid, $login);
+                    ORDER BY submittime DESC, clarid DESC', $cid, $teamid);
 
 $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
                           LEFT JOIN team_unread u ON
@@ -165,7 +176,7 @@ $clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
                           WHERE c.cid = %i AND c.sender IS NULL
                           AND ( c.recipient IS NULL OR c.recipient = %s )
                           ORDER BY c.submittime DESC, c.clarid DESC',
-                          $login, $cid, $login);
+                          $teamid, $cid, $teamid);
 
 echo "<h3 class=\"teamoverview\"><a name=\"clarifications\" href=\"#clarifications\">Clarifications</a></h3>\n";
 
@@ -173,7 +184,7 @@ echo "<h3 class=\"teamoverview\"><a name=\"clarifications\" href=\"#clarificatio
 if ( $clarifications->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarifications.</p>\n\n";
 } else {
-	putClarificationList($clarifications,$login);
+	putClarificationList($clarifications,$teamid);
 }
 
 echo "<h3 class=\"teamoverview\"><a name=\"clarreq\" href=\"#clarreq\">Clarification Requests</a></h3>\n";
@@ -181,7 +192,7 @@ echo "<h3 class=\"teamoverview\"><a name=\"clarreq\" href=\"#clarreq\">Clarifica
 if ( $requests->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarification requests.</p>\n\n";
 } else {
-	putClarificationList($requests,$login);
+	putClarificationList($requests,$teamid);
 }
 
 echo addForm('clarification.php','get') .

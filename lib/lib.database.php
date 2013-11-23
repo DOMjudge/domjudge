@@ -1,55 +1,17 @@
 <?php
-// $Id$
-
-/******************************************************************************
-* lib.database.php version 1.4.1
-******************************************************************************/
-
-/******************************************************************************
-*    Licence                                                                  *
-*******************************************************************************
-
-Copyright (C) 2001-2010 Jeroen van Wolffelaar <jeroen@php.net>, et al.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
-version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-/******************************************************************************
-*    Initialisation                                                           *
-******************************************************************************/
+/**
+ * Database abstraction functions.
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ *
+ * Originally based on: lib.database.php 1.4.1, Copyright (C) 2001-2010
+ * Jeroen van Wolffelaar <jeroen@php.net>, et al.; licenced under the
+ * GNU GPL version 2 or higher.
+ */
 
 if (!@define('INCLUDED_LIB_DATABASE',true)) return;
 
-/**
- * To be used with or without constructor. Without constructor, a simple
- * extend is possible:
- *
- * class fake_db extends db
- * {
- *		function my_db()
- *		{
- *			$this->db('dilithium','localhost','nobody','<password>',TRUE);
- *			// for faking another db
- *			$this->setprefix('fake');
- *		}
- * }
- * This uses the real database 'dilithium' to fake the database 'fake'.
- * In 'dilithium', the tables from 'fake' have the prefix 'fake_'.
- * So if you want to fake the table 'myfake' from 'fake':
- *		$fake_db->insert('mytable',array('name'=>'me, myself and I'));
- * then this will be mapped to the following query on 'dilithium':
- *		INSERT fake_mytable SET name='me, myself and I';
- */
 class db
 {
 	private $host;
@@ -57,52 +19,20 @@ class db
 	private $user;
 	private $password;
 	private $persist;
+	private $flags;
 
 	private $_connection=FALSE;
-	private $_prefix = '';
-	private $_cached_metadata;
 
-	function __construct($database, $host, $user, $password, $persist=TRUE)
+	function __construct($database, $host, $user, $password, $persist=TRUE, $flags = null)
 	{
 		$this->database = $database;
 		$this->host     = $host;
 		$this->user     = $user;
 		$this->password = $password;
 		$this->persist  = $persist;
+		$this->flags    = $flags;
 
 		$this->_connection = FALSE;
-		$this->_prefix = '';
-		$this->_cached_metadata = array();
-	}
-
-	public function setprefix($prefix)
-	{
-		$this->_prefix = $prefix;
-	}
-
-	public function metadata($table)
-	{
-		if(!isset($this->_cached_metadata[$table])) {
-			$res  = mysql_list_fields($this->database, $table);
-			$this->_cached_metadata[$table] = db::metadataData($res);
-			mysql_free_result($res);
-		}
-		return $this->_cached_metadata[$table];
-	}
-
-	// Helper method, is also used by db_result->metadata()
-	public static function metadataData($res)
-	{
-		$count = mysql_num_fields($res);
-		$data  = array();
-		for ($i=0; $i<$count; $i++) {
-			$data[$i]["table"] = mysql_field_table($res, $i);
-			$data[$i]["name"]  = mysql_field_name ($res, $i);
-			$data[$i]["type"]  = mysql_field_type ($res, $i);
-			$data[$i]["len"]   = mysql_field_len  ($res, $i);
-			$data[$i]["flags"] = mysql_field_flags($res, $i);
-		}
-		return $data;
 	}
 
 	/**
@@ -272,10 +202,10 @@ class db
 
 		if ($type == 'update') {
 			if ($key == 'returnid') {
-				return mysql_insert_id($this->_connection);
+				return mysqli_insert_id($this->_connection);
 			}
 			if ($key == 'returnaffected') {
-				return mysql_affected_rows($this->_connection);
+				return mysqli_affected_rows($this->_connection);
 			}
 			return;
 		}
@@ -320,12 +250,8 @@ class db
 	{
 		$query = trim($query);
 
-		// reselect DB, could have been changed by some bad php/mysql
-		// implementation.
-		mysql_select_db($this->database, $this->_connection);
-
 		list($micros, $secs) = explode(' ',microtime());
-		$res = @mysql_query($query,$this->_connection);
+		$res = @mysqli_query($this->_connection, $query);
 		list($micros2, $secs2) = explode(' ',microtime());
 		$elapsed_ms = round(1000*(($secs2 - $secs) + ($micros2 - $micros)));
 
@@ -333,7 +259,7 @@ class db
 			global $DEBUG_NUM_QUERIES;
 			$DEBUG_NUM_QUERIES++;
 			if ( isset($_SERVER['REMOTE_ADDR']) ) {
-				printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>\n",
+				printf("<p>SQL: $this->database: <kbd>%s</kbd> ({$elapsed_ms}ms)</p>\n",
 				       htmlspecialchars($query));
 			} else {
 				printf("SQL: $this->database: %s ({$elapsed_ms}ms)\n",$query);
@@ -351,20 +277,20 @@ class db
 		}
 
 		// switch error message depending on errornr.
-		switch(mysql_errno($this->_connection)) {
+		switch(mysqli_errno($this->_connection)) {
 			case 1062:	// duplicate key
 			throw new UnexpectedValueException("Item with this key already"
-			    . " exists.\n" . $callsite . mysql_error($this->_connection));
+			    . " exists.\n" . $callsite . mysqli_error($this->_connection));
 			case 1217:  // foreign key constraint
 			throw new UnexpectedValueException("This operation would have"
 			    . " brought the database in an inconsistent state,\n"
-			    . $callsite . mysql_error($this->_connection));
+			    . $callsite . mysqli_error($this->_connection));
 			case 2006:	// MySQL server has gone away
 			throw new RuntimeException("MySQL server has gone away");
 			default:
-			throw new RuntimeException("SQL syntax-error, " . $callsite
-			    . "Error#" . mysql_errno($this->_connection) . ": "
-			    . mysql_error($this->_connection) . ", query: '$query'");
+			throw new RuntimeException("SQL error, " . $callsite
+			    . "Error#" . mysqli_errno($this->_connection) . ": "
+			    . mysqli_error($this->_connection) . ", query: '$query'");
 		}
 	}
 
@@ -373,29 +299,30 @@ class db
 	{
 		if($this->_connection) return;
 
-		$con = $this->persist ? 'mysql_pconnect' : 'mysql_connect';
-		if(!function_exists($con)) {
+		$pers = ( $this->persist && version_compare(PHP_VERSION, '5.3', '>=') ) ? "p:" : "";
+		if(!function_exists('mysqli_real_connect')) {
 			throw new RuntimeException("PHP database module missing "
-			    . "(no such function: '$con')");
+			    . "(no such function: 'mysqli_real_connect')");
 		}
 
-		$this->_connection = @$con($this->host, $this->user, $this->password);
-		if(!$this->_connection) {
+		$this->_connection = mysqli_init();
+		@mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, $this->flags);
+
+		if(mysqli_connect_error() || !$this->_connection) {
 			throw new RuntimeException("Could not connect to database server "
 			    . "(host=$this->host,user=$this->user,password="
-			    . str_repeat('*', strlen($this->password)) . ")");
+			    . str_repeat('*', strlen($this->password)) . ",db=$this->database). "
+			    . "Error " . mysqli_connect_errno() . ": "
+			    . mysqli_connect_error() );
 		}
-		if(!mysql_select_db($this->database, $this->_connection)) {
-			throw new RuntimeException("Could not select database '"
-			    . $this->database . "': " . mysql_error($this->_connection));
-		}
+		mysqli_set_charset($this->_connection, DJ_CHARACTER_SET_MYSQL);
 	}
 
 	// reconnect to a db-server
 	public function reconnect()
 	{
 		if(!$this->persist && $this->_connection)
-			mysql_close($this->_connection);
+			mysqli_close($this->_connection);
 
 		$this->_connection = NULL;
 		$this->connect();
@@ -412,8 +339,8 @@ class db
 		{
 			case 'f': return (float)$val;
 			case 'i': return (int)$val;
-			case 's': return '"'.mysql_real_escape_string($val, $this->_connection).'"';
-			case 'c': return '"%'.mysql_real_escape_string($val, $this->_connection).'%"';
+			case 's': return '"'.mysqli_real_escape_string($this->_connection, $val).'"';
+			case 'c': return '"%'.mysqli_real_escape_string($this->_connection, $val).'%"';
 			case 'l': return $val;
 			case '.': break;
 			default:
@@ -428,13 +355,10 @@ class db
 			case 'double':
 				return $val;
 			case 'string':
-				return '"'.mysql_real_escape_string($val, $this->_connection).'"';
-			case 'array':
-			case 'object':
-				return '"'.mysql_real_escape_string(serialize($val), $this->_connection).'"';
-			case 'resource':
+				return '"'.mysqli_real_escape_string($this->_connection, $val).'"';
+			default:
 				throw new InvalidArgumentException(
-				    'Cannot store a resource in database');
+				    'Cannot store type ' . gettype($val) .' in database');
 		}
 		user_error('Case failed in lib.database', E_USER_ERROR);
 	}
@@ -446,21 +370,19 @@ class db_result
 	private $_count;
 	private $_tuple;
 	private $_nextused;
-	private $_cached_metadata;
 
 	function __construct($res)
 	{
 		$this->_result = $res;
-		$this->_count  = mysql_num_rows($res);
-		$this->_fields = mysql_num_fields($res);
+		$this->_count  = mysqli_num_rows($res);
+		$this->_fields = mysqli_num_fields($res);
 
 		$this->_nextused = FALSE;
-		$this->_cached_metadata = FALSE;
 	}
 
 	public function free()
 	{
-		mysql_free_result($this->_result);
+		mysqli_free_result($this->_result);
 		$this->_result = null;
 	}
 
@@ -472,24 +394,14 @@ class db_result
 			throw new BadMethodCallException(
 			    'Result does not contain a valid resource.');
 		}
-		$this->tuple = mysql_fetch_assoc($this->_result);
+		$this->_tuple = mysqli_fetch_assoc($this->_result);
 		$this->_nextused = TRUE;
-		if ($this->tuple === FALSE)
+		if (is_null ($this->_tuple) )
 		{
 			$this->free();
 			return FALSE;
 		}
-		return $this->tuple = array_map( array('db_result', 'sql2val')
-		                               , $this->tuple);
-	}
-
-	public function field($field)
-	{
-		$this->next();
-
-		if($this->tuple===FALSE)
-			return FALSE;
-		return $this->tuple[$field];
+		return $this->_tuple;
 	}
 
 	public function getcolumn($field=NULL)
@@ -501,7 +413,7 @@ class db_result
 		$col = array();
 		while($this->next())
 		{
-			$col[]=$field?$this->tuple[$field]:current($this->tuple);
+			$col[]=$field?$this->_tuple[$field]:current($this->_tuple);
 		}
 		return $col;
 	}
@@ -516,7 +428,7 @@ class db_result
 		$table = array();
 		while ($this->next())
 		{
-			$table[] = $this->tuple;
+			$table[] = $this->_tuple;
 		}
 		return $table;
 	}
@@ -531,7 +443,7 @@ class db_result
 		}
 		$table = array();
 		while ($this->next()) {
-			$table[$this->tuple[$key]] = $this->tuple;
+			$table[$this->_tuple[$key]] = $this->_tuple;
 		}
 		return $table;
 	}
@@ -552,8 +464,8 @@ class db_result
 
 		$table = array();
 		while ($this->next()) {
-			$key = array_shift($this->tuple);
-			$value = array_shift($this->tuple);
+			$key = array_shift($this->_tuple);
+			$value = array_shift($this->_tuple);
 			$table[$key] = $value;
 		}
 		return $table;
@@ -564,34 +476,6 @@ class db_result
 		return $this->_count;
 	}
 
-	public function fieldname($i)
-	{
-		$data = $this->metadata();
-		return $data[$i]['name'];
-	}
 
-	public function numfields()
-	{
-		return count( $this->metadata() );
-	}
-
-	public function seek($i)
-	{
-		return mysql_data_seek($this->_result, $i);
-	}
-
-	public function metadata()
-	{
-		if(!$this->_cached_metadata)
-			$this->_cached_metadata = db::metadataData($this->_result);
-		return $this->_cached_metadata;
-	}
-
-	// inverse of db->val2sql
-	private static function sql2val($val)
-	{
-		$t = @unserialize($val);
-		return $t !== false ? $t : $val;
-	}
 }
 

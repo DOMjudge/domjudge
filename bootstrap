@@ -1,0 +1,12 @@
+#!/bin/sh
+
+cat <<EOF
+Bootstrapping DOMjudge from Git repository sources...
+
+Note that this script simply calls 'make dist'. Besides bootstrapping
+the configure/build system, it also tries to build the PDF/HTML
+documentation.
+
+EOF
+
+make dist
