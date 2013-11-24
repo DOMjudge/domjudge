@@ -623,7 +623,7 @@ function putTeamRow($cdata, $teamids) {
 
 	$myteamid = null;
 	$static = FALSE;
-	$displayrank = !$fdata['showfrozen'];
+	$displayrank = IS_JURY || !$fdata['showfrozen'];
 
 	if ( ! IS_JURY ) echo "<div id=\"teamscoresummary\">\n";
 	renderScoreBoardTable($cdata,$sdata,$myteamid,$static,
