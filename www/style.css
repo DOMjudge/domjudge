@@ -178,7 +178,10 @@ legend {
 
 .center { margin: 0px auto; }
 
-.scoreboard { border-collapse: collapse; }
+.scoreboard {
+	border-collapse: collapse;
+	clear: both;
+}
 .scoreboard td { 
 	font-size: small;
 	vertical-align: middle;
