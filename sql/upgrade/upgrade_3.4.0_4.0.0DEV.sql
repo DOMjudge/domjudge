@@ -18,6 +18,22 @@ ALTER TABLE `language` DROP COLUMN `extensions`;
 ALTER TABLE `configuration`
   MODIFY COLUMN `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)';
 
+ALTER TABLE `event`
+  ADD KEY `cid` (`cid`),
+  ADD KEY `clarid` (`clarid`),
+  ADD KEY `langid` (`langid`),
+  ADD KEY `probid` (`probid`),
+  ADD KEY `submitid` (`submitid`),
+  ADD KEY `judgingid` (`judgingid`),
+  ADD KEY `teamid` (`teamid`),
+  ADD FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`clarid`) REFERENCES `clarification` (`clarid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE;
+
 ALTER TABLE `language`
   ADD COLUMN `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)' AFTER `name`;
 
