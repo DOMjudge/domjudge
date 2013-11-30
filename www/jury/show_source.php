@@ -106,18 +106,21 @@ function presentSource ($sourcedata, $langid)
 		"<img class=\"picto\" src=\"../images/edit.png\" alt=\"edit\" title=\"edit\" />" .
 		"</a>\n\n";
 
-	if ( strlen($sourcedata['sourcecode'])==0 ) {
-		// Someone submitted an empty file. Cope gracefully.
-		$head .= "<p class=\"nodata\">empty file</p>\n\n";
-	} else if ( strlen($sourcedata['sourcecode']) < 32 * 1024 ) {
-		// Source < 32kB (for longer source code,
-		// highlighter tends to take very long time or timeout)
-		$head .= highlight($sourcedata['sourcecode'], $langid);
-	} else {
-		$head .= highlight_native($sourcedata['sourcecode'], $langid);
+	if ( $langid == 'c' || $langid == 'cpp' ) {
+		$langid = 'c_cpp';
 	}
 
-	return $head .= '</div>';
+	$ace = '<pre class="editor" id="editor' . htmlspecialchars($sourcedata['rank']) . '">' . $sourcedata['sourcecode'] . '</pre>' .
+		'<script src="../js/ace/ace.js" type="text/javascript" charset="utf-8"></script>' .
+		'<script>' .
+		'var editor = ace.edit("editor' . htmlspecialchars($sourcedata['rank']) . '");' .
+		'editor.setTheme("ace/theme/eclipse");' .
+		'editor.setOptions({ maxLines: Infinity });' .
+		'editor.setReadOnly(true);' .
+		'editor.getSession().setMode("ace/mode/' . $langid . '");' .
+		'</script>';
+
+	return $head . $ace . '</div>';
 }
 
 function presentDiff ($old, $new)
@@ -212,7 +215,6 @@ if ( isset($_GET['fetch']) ) {
 
 $title = "Source: s$id";
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/highlight.php');
 
 // display highlighted content of the source files
 $sources = $DB->q('TABLE SELECT *

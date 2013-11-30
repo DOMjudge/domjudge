@@ -15,6 +15,7 @@ Version 4.0.0 - DEV
  - Add support for new languages: Prolog, Ruby.
  - Add note that submit client requires the IPADDRESS (or FIXED)
    authentication method (Closes #125).
+-  Replace GeSHi syntax highlighter with Ace javascript code editor.
 
 Version 3.4.0 - (unreleased)
 ----------------------------

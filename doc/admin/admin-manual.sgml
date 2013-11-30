@@ -1042,32 +1042,6 @@ $ judgedaemon -n <X>
 </code>
 
 
-<sect1>Source code syntax highlighting
-<p>
-
-To support coloured display of submitted source code in the jury
-interface, two external classes of syntax highlighters are supported:
-<url name="GeSHi" url="http://qbnz.com/highlighter"> and the
-<url name="PEAR" url="http://pear.php.net">
-<url name="Text_Highlighter class" url="http://pear.php.net/package/Text_Highlighter/">. DOMjudge includes a copy of GeSHi under the <tt>lib/ext/</tt> dir, but
-tries to find either of those in your PHP include path. When none are
-found, DOMjudge falls back to source code display without highlighting.
-
-<sect2>GeSHi
-<p>
-GeSHi is included by default under the <tt>lib/ext/</tt> dir.
-
-<sect2>PEAR Text Highlighter
-<p>
-If you prefer the PEAR Text Highlighter, first move away the
-<tt>lib/ext/geshi</tt> directory.
-You can install the Text Highlighter system wide with the
-PEAR-provided tools, like this: <tt>pear install Text_Highlighter</tt>.
-Alternatively you can download the source code from the
-Text_Highlighter website and unpack that under the <tt>lib/ext/</tt>
-directory on the domserver. Rename the
-resulting <tt>Text_Highlighter-x.y.z</tt> directory to just <tt>Text</tt>.
-
 <sect1>NTP time synchronisation
 <p>
 
