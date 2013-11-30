@@ -893,7 +893,7 @@ create an account for the judgedaemons to use (this may be a
 shared account between all judgedaemons) with a difficult,
 random password and the 'judgehost' role. On each judgedaemon,
 create a file <tt>etc/restapi.secret</tt> containing the URL,
-username and password space-separated on one line, for example:
+username and password whitespace-separated on one line, for example:
 <verb>http://example.edu/domjudge/api/  judgehosts  MzfJYWF5agSlUfmiGEy5mgkfqU</verb>
 
 Upon its first connection to the domserver API the judgehost will be
