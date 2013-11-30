@@ -27,7 +27,7 @@
 #error "Commandline submission requested, but network headers not available."
 #endif
 #if ( SUBMIT_ENABLE_WEB && ! ( HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H ) )
-#error "Webinterface submission requested, but libcURL not available."
+#error "Webinterface submission requested, but libcURL or libJSONcpp not available."
 #endif
 
 /* Standard include headers */
