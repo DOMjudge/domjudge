@@ -19,9 +19,9 @@ header('Content-Type: text/html; charset=' . DJ_CHARACTER_SET);
  */
 if ( ! IS_PUBLIC ) header('X-Frame-Options: DENY');
 
-if ( isset($refresh) &&
-     (!isset($_COOKIE["domjudge_refresh"]) ||
-      (bool)$_COOKIE["domjudge_refresh"]) ) {
+$refresh_cookie = (!isset($_COOKIE["domjudge_refresh"]) || (bool)$_COOKIE["domjudge_refresh"]);
+
+if ( isset($refresh) && $refresh_cookie ) {
 	header('Refresh: ' . $refresh);
 }
 
@@ -58,7 +58,7 @@ if ( ! empty($extrahead) ) echo $extrahead;
 <?php
 
 if ( checkrole('jury') ) {
-	echo "<body onload=\"setInterval('updateClarifications(" . ($pagename=='clarifications.php') . ")', 20000)\">\n";
+	echo "<body onload=\"setInterval('updateClarifications(" . ($pagename=='clarifications.php' && $refresh_cookie) . ")', 20000)\">\n";
 } else {
 	echo "<body>\n";
 }
