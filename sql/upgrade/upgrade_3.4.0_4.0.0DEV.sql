@@ -15,6 +15,14 @@ ALTER TABLE `language` DROP COLUMN `extensions`;
 -- Create additional structures
 --
 
+-- Create a new key `cid` here, later recreate the old key as `cid_2`
+-- after the new submittime column has been created.
+SET FOREIGN_KEY_CHECKS = 0;
+ALTER TABLE `clarification`
+  DROP KEY `cid`,
+  ADD KEY `cid` (`cid`);
+SET FOREIGN_KEY_CHECKS = 1;
+
 ALTER TABLE `configuration`
   MODIFY COLUMN `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)';
 
@@ -42,7 +50,7 @@ CREATE TABLE `user` (
   `username` varchar(255) NOT NULL COMMENT 'User login name',
   `name` varchar(255) NOT NULL COMMENT 'Name',
   `email` varchar(255) DEFAULT NULL COMMENT 'Email address',
-  `last_login` datetime DEFAULT NULL COMMENT 'Time of last successful login',
+  `last_login` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of last successful login',
   `last_ip_address` varchar(255) DEFAULT NULL COMMENT 'Last IP address of successful login',
   `password` varchar(32) DEFAULT NULL COMMENT 'Password hash',
   `ip_address` varchar(255) DEFAULT NULL COMMENT 'IP Address used to autologin',
@@ -72,9 +80,83 @@ CREATE TABLE `userrole` (
   CONSTRAINT `userrole_ibfk_2` FOREIGN KEY (`roleid`) REFERENCES `role` (`roleid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of users and roles';
 
+-- Before modifying the datetime to decimal(32.9) data type, we have
+-- to move the data to be able to convert it afterwards.
+
+ALTER TABLE `auditlog`
+  CHANGE COLUMN `logtime` `logtime_old` datetime NOT NULL,
+  ADD COLUMN `logtime` decimal(32,9) unsigned NOT NULL COMMENT 'Timestamp of the logentry' AFTER `logid`;
+
+ALTER TABLE `clarification`
+  CHANGE COLUMN `submittime` `submittime_old` datetime NOT NULL,
+  ADD COLUMN `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time sent' AFTER `respid`,
+  ADD KEY `cid_2` (`cid`,`answered`,`submittime`);
+
+ALTER TABLE `contest`
+  CHANGE COLUMN `activatetime` `activatetime_old` datetime NOT NULL,
+  CHANGE COLUMN `starttime` `starttime_old` datetime NOT NULL,
+  CHANGE COLUMN `freezetime` `freezetime_old` datetime DEFAULT NULL,
+  CHANGE COLUMN `endtime` `endtime_old` datetime NOT NULL,
+  CHANGE COLUMN `unfreezetime` `unfreezetime_old` datetime DEFAULT NULL,
+  ADD COLUMN `activatetime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest becomes visible in team/public views' AFTER `contestname`,
+  ADD COLUMN `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest starts, submissions accepted' AFTER `activatetime`,
+  ADD COLUMN `freezetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time scoreboard is frozen' AFTER `starttime`,
+  ADD COLUMN `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time after which no more submissions are accepted' AFTER `freezetime`,
+  ADD COLUMN `unfreezetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Unfreeze a frozen scoreboard at this time' AFTER `endtime`;
+
+ALTER TABLE `event`
+  CHANGE COLUMN `eventtime` `eventtime_old` datetime NOT NULL,
+  ADD COLUMN `eventtime` decimal(32,9) unsigned NOT NULL COMMENT 'When the event occurred' AFTER `eventid`;
+
+ALTER TABLE `judgehost`
+  CHANGE COLUMN `polltime` `polltime_old` datetime DEFAULT NULL,
+  ADD COLUMN `polltime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of last poll by autojudger' AFTER `active`;
+
+ALTER TABLE `judging`
+  CHANGE COLUMN `starttime` `starttime_old` datetime NOT NULL,
+  CHANGE COLUMN `endtime` `endtime_old` datetime DEFAULT NULL,
+  ADD COLUMN `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Time judging started' AFTER `submitid`,
+  ADD COLUMN `endtime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time judging ended, null = still busy' AFTER `starttime`;
+
+ALTER TABLE `submission`
+  CHANGE COLUMN `submittime` `submittime_old` datetime NOT NULL,
+  ADD COLUMN `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time submitted' AFTER `langid`;
+
+ALTER TABLE `team`
+  CHANGE COLUMN `judging_last_started` `judging_last_started_old` datetime DEFAULT NULL,
+  CHANGE COLUMN `teampage_first_visited` `teampage_first_visited_old` datetime DEFAULT NULL,
+  ADD COLUMN `judging_last_started` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Start time of last judging for priorization' AFTER `comments`,
+  ADD COLUMN `teampage_first_visited` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of first teampage view' AFTER `judging_last_started`;
+
 --
 -- Transfer data from old to new structure
 --
+
+UPDATE `auditlog` SET `logtime` = UNIX_TIMESTAMP(logtime_old);
+
+UPDATE `clarification` SET `submittime` = UNIX_TIMESTAMP(submittime_old);
+
+UPDATE `contest` SET
+  `activatetime`  = UNIX_TIMESTAMP(activatetime_old),
+  `starttime`     = UNIX_TIMESTAMP(starttime_old),
+  `endtime`       = UNIX_TIMESTAMP(endtime_old);
+
+UPDATE `contest` SET `freezetime`   = UNIX_TIMESTAMP(freezetime_old),   WHERE `freezetime_old`   IS NOT NULL;
+UPDATE `contest` SET `unfreezetime` = UNIX_TIMESTAMP(unfreezetime_old), WHERE `unfreezetime_old` IS NOT NULL;
+
+UPDATE `event` SET `eventtime` = UNIX_TIMESTAMP(eventtime_old);
+
+UPDATE `judgehost` SET `polltime` = UNIX_TIMESTAMP(polltime_old);
+
+UPDATE `judging` SET
+  `starttime` = UNIX_TIMESTAMP(starttime_old),
+  `endtime`   = UNIX_TIMESTAMP(endtime_old);
+
+UPDATE `submission` SET `submittime` = UNIX_TIMESTAMP(submittime_old);
+
+UPDATE `team` SET
+  `judging_last_started`   = UNIX_TIMESTAMP(judging_last_started_old),
+  `teampage_first_visited` = UNIX_TIMESTAMP(teampage_first_visited_old);
 
 --
 -- Add/remove sample/initial contents
@@ -122,3 +204,28 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 ALTER TABLE `submission` DROP KEY `judgemark`;
 ALTER TABLE `submission` DROP COLUMN `judgemark`;
 ALTER TABLE `team` DROP COLUMN `authtoken`;
+
+ALTER TABLE `auditlog` DROP COLUMN `logtime_old`;
+
+ALTER TABLE `clarification` DROP COLUMN `submittime_old`;
+
+ALTER TABLE `contest`
+  DROP COLUMN `activatetime_old`,
+  DROP COLUMN `starttime_old`,
+  DROP COLUMN `freezetime_old`,
+  DROP COLUMN `endtime_old`,
+  DROP COLUMN `unfreezetime_old`;
+
+ALTER TABLE `event` DROP COLUMN `eventtime_old`;
+
+ALTER TABLE `judgehost` DROP COLUMN `polltime_old`;
+
+ALTER TABLE `judging`
+  DROP COLUMN `starttime_old`,
+  DROP COLUMN `endtime_old`;
+
+ALTER TABLE `submission` DROP COLUMN `submittime_old`;
+
+ALTER TABLE `team`
+  DROP COLUMN `judging_last_started_old`,
+  DROP COLUMN `teampage_first_visited_old`;
