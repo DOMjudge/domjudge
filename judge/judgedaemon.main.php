@@ -9,7 +9,7 @@
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
 require(ETCDIR . '/judgehost-config.php');
-$credfile = ETCDIR . '/restpasswords.secret';
+$credfile = ETCDIR . '/restapi.secret';
 $credentials = @file($credfile);
 if (!$credentials) {
 	user_error("Cannot read REST API credentials file " . $credfile,
@@ -18,7 +18,7 @@ if (!$credentials) {
 }
 foreach ($credentials as $credential) {
 	if ( $credential{0} == '#' ) continue;
-	list ($resturl, $restuser, $restpass) = explode("\t", trim($credential));
+	list ($resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
 	break;
 }
 if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {

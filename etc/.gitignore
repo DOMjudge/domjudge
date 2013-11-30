@@ -8,6 +8,6 @@
 /config.h
 /htpasswd-plugin
 /dbpasswords.secret
-/restpasswords.secret
+/restapi.secret
 /sudoers-domjudge
 /cgroup-domjudge.conf
