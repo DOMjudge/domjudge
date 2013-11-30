@@ -1,7 +1,7 @@
 <?php
 /**
  * Common page header.
- * Before including this, one can set $title, $ajaxtitle, $refresh,
+ * Before including this, one can set $title, $refresh,
  * $printercss, $jscolor and $menu.
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
@@ -27,9 +27,6 @@ if ( isset($refresh) &&
 
 if(!isset($menu)) {
 	$menu = true;
-}
-if(!isset($ajaxtitle)) {
-	$ajaxtitle = '';
 }
 ?>
 <!DOCTYPE html>
@@ -61,7 +58,7 @@ if ( ! empty($extrahead) ) echo $extrahead;
 <?php
 
 if ( checkrole('jury') ) {
-	echo "<body onload=\"setInterval('updateClarifications(\'$ajaxtitle\')', 20000)\">\n";
+	echo "<body onload=\"setInterval('updateClarifications(" . ($pagename=='clarifications.php') . ")', 20000)\">\n";
 } else {
 	echo "<body>\n";
 }

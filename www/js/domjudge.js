@@ -13,7 +13,7 @@ function XMLHttpHandle()
 	return ajaxRequest;
 }
 
-function updateClarifications(ajaxtitle)
+function updateClarifications(doreload)
 {
 	var handle = XMLHttpHandle();
 	if (!handle) {
@@ -30,9 +30,11 @@ function updateClarifications(ajaxtitle)
 				newstr = ' ('+cnew+' new)';
 				elem.className = 'new';
 			}
-			elem.innerHTML = 'clarifications' + newstr;
-			if(ajaxtitle) {
-				document.title = ajaxtitle + newstr;
+			if ( elem.innerHTML != 'clarifications' + newstr ) {
+				elem.innerHTML = 'clarifications' + newstr;
+				if(doreload) {
+					location.reload()
+				}
 			}
 		}
 	};
