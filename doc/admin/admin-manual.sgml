@@ -1219,8 +1219,10 @@ underscore characters are valid, i.e. <tt>a-z, A-Z, 0-9, -, &lowbar;</tt>.
 
 <descrip>
 <tag>configuration</tag>
-This table contains configuration settings and is work in progress.
-These entries are simply stored as <tt>name, value</tt> pairs.
+This table contains configuration settings.
+These entries are simply stored as <tt>name, value</tt> pairs, where
+the values are JSON encoded, <tt>type</tt> contains the allowed data
+type, and <tt>description</tt> documents the configuration setting.
 
 <tag>contest</tag>
 The contests that the software will run. E.g. a test session and the
@@ -1235,6 +1237,11 @@ open for submissions. Optional <tt>freezetime</tt> and
 <tt>unfreezetime</tt> control scoreboard freezing. For a
 detailed treating of these, see section <ref
 id="contestsetup:milestones" name="Contest milestones">.
+All contest times can be specified relative to <tt>starttime</tt>,
+except of course <tt>starttime</tt> itself. The input given in the
+jury interface (either relative or absolute) is stored in the
+<tt>*time_string</tt> fields, while a calculated absolute version is
+stored in the fields without the <tt>_string</tt> suffix.
 
 The <tt>enabled</tt> field can be unset to allow for easier editing of
 contest times, as disabled contests are not checked to overlap with
@@ -1389,9 +1396,10 @@ that was displayed before). Nothing can be submitted yet and the
 problem set is not revealed. Clarifications can be viewed and sent.
 
 At starttime, the scoreboard is displayed and submissions are accepted.
-At endtime the contest stops. New incoming submissions will be stored
-but not processed; unjudged submissions received before endtime will
-still be judged.
+At endtime the contest stops. New incoming submissions will still be
+processed, but will not be scored anymore and receive the verdict
+`too-late'; unjudged submissions received before endtime will still be
+judged normally.
 
 <em>freezetime</em> and <em>unfreezetime</em> control scoreboard
 freezing. freezetime is the time after which the public and team
@@ -1835,8 +1843,8 @@ The web based tool is reachable from the main page in the jury
 interface, where each balloon has to be checked off by the person
 handing it out.
 
-For the daemon, set the BALLOON_CMD in <tt>bin/balloons</tt> to define
-how notifications
+For the daemon, set the <tt>BALLOON_CMD</tt> in
+<tt>etc/domserver-config.php</tt> to define how notifications
 are sent. Examples are to mail to a specific mailbox or to send
 prints to a printer. When configured, start <tt>bin/balloons</tt>
 and notification will start.

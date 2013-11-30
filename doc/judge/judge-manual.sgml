@@ -91,11 +91,10 @@ submissions and problem headers. Many cells will show additional
 `title text' information when hovering over them. The score column
 lists the number of solved problems and the total penalty time for
 each team. Each cell in a problem column lists the number of
-submissions, and if the problem was solved, then within parentheses
+submissions, and if the problem was solved, this is followed by
 the time of the first correct submission in minutes since contest
-start, followed by a `<tt>+</tt>' and the penalty time for any
-incorrect submissions. Together these count towards each team's total
-penalty time.
+start. Any penalty time incurred for previous incorrect submissions is
+included in the team's total time.
 
 <chapt>Before the contest
 <p>
@@ -120,8 +119,13 @@ problem on the scoreboard. Disallow judge will make DOMjudge accept
 submissions, but leave them queued; this is useful in case an
 unexpected problem shows up with one of the problems. Timelimit is the
 maximum number of seconds a submission for this problem is allowed to
-run before a `TIMELIMIT' response is given (to be multiplied possibly by a language
-factor). Problems can be imported and exported into and from DOMjudge
+run before a `TIMELIMIT' response is given (to be multiplied possibly
+by a language factor). Note that a `timelimit overshoot' can be
+configured to let submissions run a bit longer. Although DOMjudge will
+use the actual limit to determine the verdict, this allows judges to
+see if a submission is close to the timelimit.
+
+Problems can be imported and exported into and from DOMjudge
 using zip-files that contain the problem metadata and testdata files.
 See appendix <ref id="problem-format" name="DOMjuge problem format
 specification">. Problems can have special <em>compare</em> and
@@ -259,7 +263,7 @@ a code.
 <descrip>
 <tag>QUEUED/PENDING</tag>submission received and awaiting a judgehost to process it *;
 <tag>JUDGING       </tag>a judgehost is currently compiling/running/testing the submission *;
-<tag>TOO-LATE      </tag>submission received but submitted after the contest ended;
+<tag>TOO-LATE      </tag>submission submitted after the contest ended;
 <tag>CORRECT       </tag>submission correct, problem solved;
 <tag>COMPILER-ERROR</tag>the compiler gave an error while compiling the program;
 <tag>TIMELIMIT     </tag>program execution time exceeded the time defined for the problem;
@@ -333,9 +337,9 @@ explaining what has been rejudged and why.
 <p>
 Finally, there is the option to <em>ignore</em> specific submissions
 using the button on the submission page. When a submission is being
-ignored, it is as if was never submitted: it is not visible to the
-team that sent it nor on the scoreboard. It will show striked through
-in the jury submissions list though. This can be used to effectively
+ignored, it is as if was never submitted: it will show strike-through
+in the jury's and affected team's submission list, and it is not
+visible on the scoreboard. This can be used to effectively
 delete a submission for some reason, e.g. when a team erroneously sent
 it for the wrong problem. The submission can also be unignored again.
 
@@ -385,8 +389,10 @@ automatically updated, even without reloading the page.
 <chapt>After the contest
 <p>
 Once the contest is over, the system will still accept submissions but
-will not judge them anymore. Teams will see this as a `TOO-LATE'
-response.
+these will receive the verdict `TOO-LATE'. These submissions will
+still be judged and can be inspected by the jury, but they will not
+affect scoring and none of the judging details will be visible to the
+teams.
 
 <p>
 If the scoreboard was frozen, it will remain frozen until the time set
