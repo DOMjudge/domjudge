@@ -60,12 +60,33 @@ $sources = $DB->q('TABLE SELECT *
                    WHERE submitid = %i ORDER BY rank', $id);
 
 echo '<script type="text/javascript" src="../js/tabber.js"></script>' .
+	'<script src="../js/ace/ace.js" type="text/javascript" charset="utf-8"></script>' .
 	'<div class="tabber">';
 foreach($sources as $sourcedata)
 {
 	echo '<div class="tabbertab' . ($_GET['rank'] === $sourcedata['rank'] ? ' tabbertabdefault' : '') .'">';
 	echo '<h2 class="filename">' . htmlspecialchars($sourcedata['filename']) . '</h2>';
 	echo addTextArea('source' . $sourcedata['rank'], $sourcedata['sourcecode'], 120, 40) . "<br />\n";
+	$editor = 'editor' . htmlspecialchars($sourcedata['rank']);
+	$langid = $submission['langid'];
+	if ( $langid == 'c' || $langid == 'cpp' ) {
+		$langid = 'c_cpp';
+	}
+	echo '<div class="editor" id="' . $editor . '"></div>';
+	echo '<script>' .
+		'var textarea = document.getElementById("source' . htmlspecialchars($sourcedata['rank']) . '");' .
+		'textarea.style.display = \'none\';' .
+		'var ' . $editor . ' = ace.edit("' . $editor . '");' .
+		$editor . '.setTheme("ace/theme/eclipse");' .
+		$editor . '.getSession().setValue(textarea.value);' . 
+		$editor . '.getSession().on(\'change\', function(){' .
+			'var textarea = document.getElementById("source' . htmlspecialchars($sourcedata['rank']) . '");' .
+			'textarea.value = ' . $editor . '.getSession().getValue();' . 
+		'});' .
+		$editor . '.setOptions({ maxLines: Infinity });' .
+		$editor . '.setReadOnly(false);' .
+		$editor . '.getSession().setMode("ace/mode/' . $langid . '");' .
+		'</script>';
 	echo "</div>\n";
 }
 echo "</div>\n";
