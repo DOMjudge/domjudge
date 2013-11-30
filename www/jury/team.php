@@ -34,13 +34,13 @@ if ( !empty($cmd) ):
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Login:</td><td class=\"teamid\">";
+		echo "<tr><td>ID:</td><td class=\"teamid\">";
 		$row = $DB->q('TUPLE SELECT * FROM team WHERE login = %s',
 			$_GET['id']);
 		echo addHidden('keydata[0][login]', $row['login']);
 		echo htmlspecialchars($row['login']);
 	} else {
-		echo "<tr><td><label for=\"data_0__login_\">Login:</label></td><td class=\"teamid\">";
+		echo "<tr><td><label for=\"data_0__login_\">ID:</label></td><td class=\"teamid\">";
 		echo addInput('data[0][login]', null, 8, 15, 'pattern="' . IDENTIFIER_CHARS . '+" title="Alphanumerics only" required');
 	}
 	echo "</td></tr>\n";
@@ -113,7 +113,7 @@ if ( $row['enabled'] != 1 ) {
 ?>
 
 <div class="col1"><table>
-<tr><td>Login:     </td><td class="teamid"><?php echo $row['login']?></td></tr>
+<tr><td>ID:        </td><td class="teamid"><?php echo $row['login']?></td></tr>
 <tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
 <tr><td>Host:</td><td><?php echo
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
