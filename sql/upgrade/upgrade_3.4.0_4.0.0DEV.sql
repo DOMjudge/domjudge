@@ -44,7 +44,7 @@ CREATE TABLE `user` (
   `email` varchar(255) DEFAULT NULL COMMENT 'Email address',
   `last_login` datetime DEFAULT NULL COMMENT 'Time of last successful login',
   `last_ip_address` varchar(255) DEFAULT NULL COMMENT 'Last IP address of successful login',
-  `authtoken` varchar(255) DEFAULT NULL COMMENT 'Password/auth hash',
+  `password` varchar(32) DEFAULT NULL COMMENT 'Password hash',
   `ip_address` varchar(255) DEFAULT NULL COMMENT 'IP Address used to autologin',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the user is able to log in',
   `teamid` varchar(15) DEFAULT NULL COMMENT 'Team associated with',
@@ -108,7 +108,7 @@ INSERT INTO `role` (`role`, `description`) VALUES ('judgehost',         '(Intern
 INSERT INTO `role` (`role`, `description`) VALUES ('event_reader',      '(Internal/System) event_reader');
 INSERT INTO `role` (`role`, `description`) VALUES ('full_event_reader', '(Internal/System) full_event_reader');
 
-INSERT INTO `user` (`userid`, `username`, `name`, `authtoken`) VALUES ('1', 'admin', 'Administrator', MD5('admin#admin'));
+INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES ('1', 'admin', 'Administrator', MD5('admin#admin'));
 
 INSERT INTO `userrole` (`userid`, `roleid`) VALUES ('1', '1');
 
@@ -121,4 +121,4 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 
 ALTER TABLE `submission` DROP KEY `judgemark`;
 ALTER TABLE `submission` DROP COLUMN `judgemark`;
-
+ALTER TABLE `team` DROP COLUMN `authtoken`;

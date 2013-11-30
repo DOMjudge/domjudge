@@ -1418,7 +1418,7 @@ setup. It does require the administrator to generate users and passwords
 for all teams (this can be done in the jury interface) and distribute those,
 though. Also, each team has to login each time they (re)start their
 browser. The password is stored in a salted MD5 hash in the
-<tt>authtoken</tt> field in database (user table).
+<tt>password</tt> field in database (user table).
 
 <sect1>IP-address based
 <p>
@@ -1444,7 +1444,7 @@ There are three possible ways of configuring team IP-addresses.
 
 Before the contest starts, when entering teams into the database, add
 the IP that each team will have to that user's entry in the
-<tt>authtoken</tt> field. When the teams
+<tt>ip_address</tt> field. When the teams
 arrive, everything will work directly and without further
 configuration (except when teams switch workplaces). If possible, this
 is the recommended modus operandi, because it's the least hassle just
@@ -1483,16 +1483,16 @@ the team interface cannot be viewed until at least one submission
 was made; there are also more constraints on the system.
 See the section on the Dolstra protocol for details.
 
-The <tt>authtoken</tt> field in the database contains either the
-IP-address, or an MD5 hash of the one-time password if this was set
-and the team has not authenticated yet.
+The user table in the database contains either the
+IP-address, or an MD5 hash of the one-time password
+when the team has not authenticated yet.
 
 <sect1>Using an external LDAP server
 <p>
 
 This method can be useful when you want to integrate DOMjudge into a
 larger system, or already have credentials on an LDAP server
-available. The <tt>authtoken</tt> field in the database must contain
+available. The <tt>username</tt> field in the database must contain
 the LDAP username of the DOMjudge user. Furthermore, in
 <tt>etc/domserver-config.php</tt> the <tt>LDAP_*</tt> configuration
 settings must be adapted to your setup. Note that multiple (backup)

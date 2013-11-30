@@ -186,7 +186,7 @@ flushresults();
 
 // CONFIGURATION
 
-if ( $DB->q('VALUE SELECT count(*) FROM user WHERE username = "admin" AND authtoken=MD5("admin#admin")') != 0 ) {
+if ( $DB->q('VALUE SELECT count(*) FROM user WHERE username = "admin" AND password=MD5("admin#admin")') != 0 ) {
 	result('configuration', 'Default admin password', 'E',
 		'The "admin" user still has the default password. You should change it immediately.');
 } else {

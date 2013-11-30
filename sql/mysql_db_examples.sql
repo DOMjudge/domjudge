@@ -47,7 +47,7 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 -- Dumping data for table `team`
 -- 
 
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('egteam', 'Example teamname!', 2, 'UU', MD5('egteam#mypassword'), NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('egteam', 'Example teamname', 2, 'UU', NULL, NULL, NULL, NULL);
 
 -- 
 -- Dumping data for table `testcase`

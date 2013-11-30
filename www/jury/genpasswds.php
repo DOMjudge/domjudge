@@ -80,7 +80,7 @@ if ( isset($_POST['foruser']) ) {
 	} else {
 		// all users, or optionaly only those with null password
 		$users = $DB->q('TABLE SELECT username,name FROM user ' .
-		                (isset($_POST['doallnull'])?'WHERE authtoken IS NULL':'') .
+		                (isset($_POST['doallnull'])?'WHERE password IS NULL':'') .
 		                ' ORDER BY username');
 	}
 
@@ -93,7 +93,7 @@ if ( isset($_POST['foruser']) ) {
 			$pass = $setpass;
 		}
 		// update the user table with a password
-		$DB->q('UPDATE user SET authtoken = %s WHERE username = %s', md5($user['username'].'#'.$pass), $user['username']);
+		$DB->q('UPDATE user SET password = %s WHERE username = %s', md5($user['username'].'#'.$pass), $user['username']);
 		auditlog('user', $user['username'], 'set password');
 		echo "User:      " . htmlspecialchars($user['name']) . "\n" .
 		     "Login:     " . htmlspecialchars($user['username']) . "\n" .

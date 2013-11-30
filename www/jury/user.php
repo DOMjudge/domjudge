@@ -48,9 +48,6 @@ if ( !empty($cmd) ):
 <tr><td><label for="data_0__email_">Email:</label></td>
 <td><?php echo addInputField('email', 'data[0][email]', @$row['email'], ' size="35" maxlength="255"')?></td></tr>
 
-<tr><td><label for="data_0__authtoken_">Auth token:</label></td>
-<td><?php echo addInput('data[0][authtoken]', @$row['authtoken'], 35, 255)?></td></tr>
-
 <tr><td><label for="data_0__ip_address_">IP Address:</label></td>
 <td><?php echo addInput('data[0][ip_address]', @$row['ip_address'], 35, 255)?></td></tr>
 
