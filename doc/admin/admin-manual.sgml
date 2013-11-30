@@ -1767,8 +1767,9 @@ problem can also be imported from a zip-bundle on the problems
 overview webpage; in that case, note that if the file
 <tt>domjudge-problem.ini</tt> is not present, a default value is
 chosen for the unmodifiable primary key <tt>probid</tt> (as well as
-for the other keys).
-
+for the other keys). It is possible to upload multiple zip
+files in one go, each of which will be added as a separate
+problem.
 
 <sect>Start the daemons
 <p>
