@@ -1,6 +1,9 @@
 <!doctype linuxdoc system [
 <!ENTITY checktestdatagrammar SYSTEM "checktestdata-grammar-inc.sgml">
 <!ENTITY problemformat SYSTEM "problem-format-inc.sgml">
+<!ENTITY % admin "IGNORE">
+<!ENTITY % judge "INCLUDE">
+<!ENTITY domjudgeoverview SYSTEM "../domjudge-overview-inc.sgml">
 ]>
 <!--
  DOMjudge Jury Manual
@@ -32,99 +35,7 @@ Document version: %h
 
 <toc>
 
-<chapt>DOMjudge overview <label id="overview">
-<p>
-
-DOMjudge is a system for running programming contests, like the ACM
-ICPC regional and world championship programming contests.
-
-This means that teams are on-site and have a fixed time period (mostly
-5 hours) and one computer to solve a number of problems (mostly 6-10).
-Problems are solved by writing a program in one of the allowed
-languages, that reads input according to the problem input
-specification and writes the correct, corresponding output.
-
-The judging is done by submitting the source code of the solution to
-the jury. There the jury system automatically compiles and runs the
-program and compares the program output with the expected output.
-
-This software can be used to handle the submission and judging during
-such contests. It also handles feedback to the teams and communication
-on problems (clarification requests). It has web interfaces for the
-jury, the teams (their submissions and clarification requests) and the
-public (scoreboard).
-
-<sect>Features
-<p>
-
-A global overview of the features that DOMjudge provides:
-<itemize>
-<item>Automatic judging with distributed (scalable) judge hosts
-<item>Web interface for portability and simplicity
-<item>Modular system for plugging in languages/compilers and more
-<item>Detailed jury information (submissions, judgings) and options
-      (rejudge, clarifications)
-<item>Designed with security in mind
-<item>Has been used in many live contests
-<item>Open Source, Free Software
-</itemize>
-
-
-<sect>Copyright and licencing
-<p>
-
-DOMjudge is developed by Jaap Eldering, Keith Johnson, Thijs
-Kinkhorst and Tobias Werth; Peter van de Werken has retired as
-developer. Many other people have contributed:
-Jeroen Bransen,
-Stijn van Drongelen,
-Rob Franken,
-Nicky Gerritsen,
-Jacob Kleerekoper,
-Jan Kuipers,
-Jeroen Schot,
-and Jeroen van Wolffelaar.
-Some code has been ported from the ETH Zurich fork by Christoph
-Krautz, Thomas Rast et al.
-
-Development is hosted at Study Association
-<htmlurl name="A-Eskwadraat" url="http://www.a-eskwadraat.nl/">,
-<htmlurl name="Utrecht University" url="http://www.uu.nl/">,
-The Netherlands.
-
-It is Copyright (c) 2004 - 2013 by the DOMjudge developers and its contributors.
-
-DOMjudge, including its documentation, is free software; you can redistribute
-it and/or modify it under the terms of the <url name="GNU General Public License"
-url="http://www.gnu.org/copyleft/gpl.html"> as published by the Free Software
-Foundation; either version 2, or (at your option) any later version. See the
-file COPYING.
-
-Additionally, parts of this system are based on other programs, which
-are covered by other copyrights. See the file README for details.
-
-<sect>Contact
-<p>
-The DOMjudge homepage can be found at:
-<htmlurl name="http://www.domjudge.org/"
-url="http://www.domjudge.org/">
-
-We have a low volume <htmlurl name="mailing list for announcements"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
-of new releases.
-
-The authors can be reached at the following address:
-<htmlurl name="domjudge-devel@lists.a-eskwadraat.nl"
-url="mailto:domjudge-devel@lists.a-eskwadraat.nl">.  You need
-to be subscribed before you can post. See
-<htmlurl name="the list information page"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
-for subscription and more details.
-
-Some developers and users of DOMjudge linger on the IRC channel
-dedicated to DOMjudge on the Freenode network:
-server <tt>irc.freenode.net</tt>, channel <tt>#domjudge</tt>.
-Feel free to drop by with your questions and comments.
+&domjudgeoverview;
 
 <chapt>General
 <p>
