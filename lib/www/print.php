@@ -46,23 +46,15 @@ function printyn ($val) {
 }
 
 /**
- * print a time dependent on configured time_format.
- * if $contesttime is set, show time from start of contest, after
- * removing ignored intervals.
+ * Print a time in default configured time_format, or formatted as
+ * specified. The format is according to strftime().
+ * FIXME: reintroduce contest relative time: show time from start of
+ * contest, after removing ignored intervals.
  */
-function printtime($datetime, $contesttime = FALSE) {
-	if ( ! $datetime ) return '';
-	if ( $contesttime ) {
-		$reltime = (int)floor(calcContestTime($datetime));
-		$sign = ( $reltime<0 ? -1 : 1 );
-		$reltime *= $sign;
-		$s = $reltime%60; $reltime = ($reltime - $s)/60;
-		$m = $reltime%60; $reltime = ($reltime - $m)/60;
-		$h = $sign*$reltime;
-		return sprintf("%d:%02d", $h, $m);
-	} else {
-		return htmlspecialchars(date(dbconfig_get('time_format', 'H:i'), strtotime($datetime)));
-	}
+function printtime($datetime, $format = NULL) {
+	if ( empty($datetime) ) return '';
+	if ( is_null($format) ) $format = dbconfig_get('time_format', '%H:%M');
+	return htmlspecialchars(strftime($format,floor($datetime)));
 }
 
 /**

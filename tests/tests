@@ -53,7 +53,7 @@ t('printyn4', printyn(0), 'no');
 require('../lib/lib.dbconfig.php');
 $LIBDBCONFIG = array();
 
-t('printtime1', printtime(now()), date('H:i'));
+t('printtime1', printtime(now()), strftime('%H:%M'));
 
 require('../lib/www/checkers.jury.php');
 
