@@ -21,22 +21,26 @@ if ( isset($_POST['donow']) ) {
 	// so we need to get it from the form data.
 	$docid = $time == 'activate' ? array_pop(array_keys($_POST['donow'][$time])) : $cid;
 
-	auditlog('contest', $docid, $time. ' now', $now);
-	// starttime is special because it doesn't have relative time support
+	$now = floor($now);
+	$nowstring = strftime('%Y-%m-%d %H:%M:%S',$now);
+	auditlog('contest', $docid, $time. ' now', $nowstring);
+
+	// starttime is special because other, relative times depend on it.
 	if ( $time == 'start' ) {
 		$cdata['starttime'] = $now;
+		$cdata['starttime_string'] = $nowstring;
 		foreach(array('endtime','freezetime','unfreezetime','activatetime') as $f) {
 			$cdata[$f] = check_relative_time($cdata[$f.'_string'], $cdata['starttime'], $f);
 		}
-		$DB->q('UPDATE contest SET starttime = %s, endtime = %s, freezetime = %s,
-			unfreezetime = %s, activatetime = %s
-		        WHERE cid = %i', $cdata['starttime'], $cdata['endtime'],
-			$cdata['freezetime'], $cdata['unfreezetime'], $cdata['activatetime'],
-			$docid);
+		$DB->q('UPDATE contest SET starttime = %s, starttime_string = %s,
+		        endtime = %s, freezetime = %s, unfreezetime = %s, activatetime = %s
+		        WHERE cid = %i', $cdata['starttime'], $cdata['starttime_string'],
+		       $cdata['endtime'], $cdata['freezetime'], $cdata['unfreezetime'],
+		       $cdata['activatetime'], $docid);
 		header ("Location: ./contests.php?edited=1");
 	} else {
 		$DB->q('UPDATE contest SET ' . $time . 'time = %s, ' . $time . 'time_string = %s
-		        WHERE cid = %i', $now, $now, $docid);
+		        WHERE cid = %i', $now, $nowstring, $docid);
 		header ("Location: ./contests.php");
 	}
 	exit;

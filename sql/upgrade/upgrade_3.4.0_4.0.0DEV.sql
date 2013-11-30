@@ -102,7 +102,8 @@ ALTER TABLE `contest`
   ADD COLUMN `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest starts, submissions accepted' AFTER `activatetime`,
   ADD COLUMN `freezetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time scoreboard is frozen' AFTER `starttime`,
   ADD COLUMN `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time after which no more submissions are accepted' AFTER `freezetime`,
-  ADD COLUMN `unfreezetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Unfreeze a frozen scoreboard at this time' AFTER `endtime`;
+  ADD COLUMN `unfreezetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Unfreeze a frozen scoreboard at this time' AFTER `endtime`,
+  ADD COLUMN `starttime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute (only!) string representation of starttime' AFTER `activatetime_string`;
 
 ALTER TABLE `event`
   CHANGE COLUMN `eventtime` `eventtime_old` datetime NOT NULL,
@@ -137,9 +138,10 @@ UPDATE `auditlog` SET `logtime` = UNIX_TIMESTAMP(logtime_old);
 UPDATE `clarification` SET `submittime` = UNIX_TIMESTAMP(submittime_old);
 
 UPDATE `contest` SET
-  `activatetime`  = UNIX_TIMESTAMP(activatetime_old),
-  `starttime`     = UNIX_TIMESTAMP(starttime_old),
-  `endtime`       = UNIX_TIMESTAMP(endtime_old);
+  `activatetime`     = UNIX_TIMESTAMP(activatetime_old),
+  `starttime`        = UNIX_TIMESTAMP(starttime_old),
+  `endtime`          = UNIX_TIMESTAMP(endtime_old),
+  `starttime_string` = `starttime_old`;
 
 UPDATE `contest` SET `freezetime`   = UNIX_TIMESTAMP(freezetime_old),   WHERE `freezetime_old`   IS NOT NULL;
 UPDATE `contest` SET `unfreezetime` = UNIX_TIMESTAMP(unfreezetime_old), WHERE `unfreezetime_old` IS NOT NULL;

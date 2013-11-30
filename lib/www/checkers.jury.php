@@ -164,9 +164,11 @@ function check_relative_time($time, $starttime, $field)
 function check_contest($data, $keydata = null)
 {
 	// are these dates valid?
-	foreach(array('starttime','endtime','freezetime',
-		'unfreezetime','activatetime') as $f) {
-		if ($f != 'starttime') {
+	foreach ( array('starttime','endtime','freezetime',
+	                'unfreezetime','activatetime') as $f ) {
+		if ( $f == 'starttime' ) {
+			$data[$f] = strtotime($data[$f.'_string']);
+		} else {
 			// The true input date/time strings are preserved in the
 			// *_string variables, since these may be relative times
 			// that need to be kept as is.
