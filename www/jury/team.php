@@ -100,6 +100,8 @@ $row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname, a.name AS af
 
 if ( ! $row ) error("Missing or invalid team id");
 
+$users = $DB->q('TABLE SELECT userid,username FROM user WHERE teamid = %s', $id);
+
 $affillogo   = "../images/affiliations/" . urlencode($row['affilid']) . ".png";
 $countryflag = "../images/countries/"    . urlencode($row['country']) . ".png";
 $teamimage   = "../images/teams/"        . urlencode($row['login'])   . ".jpg";
@@ -120,6 +122,15 @@ if ( $row['enabled'] != 1 ) {
 <?php if (!empty($row['room'])): ?>
 <tr><td>Location:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>
+<tr><td>User:</td><td><?php
+if ( count($users) ) {
+	foreach($users as $user) {
+		echo "<a href=\"user.php?id=" . urlencode($user['userid']) . "\">" . htmlspecialchars($user['username']) . "</a> ";
+	}
+} else {
+	echo "<a href=\"user.php?cmd=add&forteam=" . urlencode($row['login']) . "\"><small>(add)</small></a>";
+}
+?></td></tr>
 </table></div>
 
 <div class="col2"><table>

@@ -27,6 +27,22 @@ function check_team($data, $keydata = null)
 	return $data;
 }
 
+function check_user($data, $keydata = null)
+{
+	$id = (isset($data['username']) ? $data['username'] : $keydata['username']);
+	if ( ! preg_match ( ID_REGEX, $id ) ) {
+		ch_error("Username may only contain characters " . IDENTIFIER_CHARS . ".");
+	}
+	if ( ! empty($data['email'])  && ! filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+		ch_error("Email not valid.");
+	} 
+	if ( !empty($data['password']) ) {
+		$data['password'] = md5("$id#".$data['password']);
+	}
+	return $data;
+}
+
+
 function check_affiliation($data, $keydata = null)
 {
 	$id = (isset($data['affilid']) ? $data['affilid'] : $keydata['affilid']);
@@ -295,3 +311,4 @@ function check_judging($data, $keydata = null)
 
 	return $data;
 }
+

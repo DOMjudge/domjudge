@@ -15,23 +15,13 @@ requireAdmin();
 <h1>Manage user passwords</h1>
 
 <?php
-$users = $DB->q('KEYVALUETABLE SELECT username, CONCAT(CONCAT(username, " - "),name) FROM user
-                 ORDER BY username');
-
-if ( empty($users) ) {
-	echo "<p class=\"nodata\">No users defined.</p>\n\n";
-	require(LIBWWWDIR . '/footer.php');
-	exit;
-}
-
-$users = array(''=>'(select one)') + $users;
 
 switch ( AUTH_METHOD ):
 
 case 'IPADDRESS':
 ?>
 <p>You are using IP-address based authentication. Note that resetting the
-password of a user (or all users) implies instantly revoking any current
+password of a user implies instantly revoking any current
 access that user may have to their userpage until they enter their newly
 generated password.</p>
 <?php
@@ -48,55 +38,36 @@ default:
 <?php
 endswitch;
 
-echo addForm($pagename) .
-	"<p>\nSet password for user " .
-	addSelect('foruser', $users, @$_GET['foruser'], true) .
-	" to " .
-	addInput('setpass', '', 10, 255) .
-	" (leave empty for random) " .
-	addSubmit('go', 'douser') .
-	"</p>\n<p>" .
-	"Generate a random password for:</p>\n<p>\n" .
-	addSubmit('all users without a password or IP-address', 'doallnull') .
-	"<br /></p>\n<p>" .
-	addSubmit('absolutely all users', 'doall') .
-	"<br /></p>\n" .
-	addEndForm();
+echo addForm($pagename);
+?>
+<p>Generate a random password for: <select name="action">
+<option value="doallnull">all users with a team role without a password or IP-address</option>
+<option value="doall">all users with a team role</option>
+</select>
+</p>
 
-if ( isset($_POST['foruser']) ) {
+<?php
+echo addSubmit('generate') . addEndForm();
+
+
+if ( isset($_POST['action']) ) {
 	// output each password once we're done
 	ob_implicit_flush();
 
-	if ( isset($_POST['douser']) ) {
-		// one user only
-		if ( empty($_POST['foruser']) ) {
-			error("Please select a user to set this password for.");
-		}
-		$users = $DB->q('TABLE SELECT username,name FROM user ' .
-				'WHERE username = %s', $_POST['foruser']);
-		if ( !empty($_POST['setpass']) ) {
-			$setpass = $_POST['setpass'];
-		}
-	} else {
-		// all users, or optionaly only those with null password
-		$users = $DB->q('TABLE SELECT username,name FROM user ' .
-		                (isset($_POST['doallnull'])?'WHERE password IS NULL':'') .
-		                ' ORDER BY username');
-	}
+	// all users, or optionaly only those with null password
+	$users = $DB->q('TABLE SELECT username,name FROM user WHERE teamid IS NOT NULL' .
+	                ($_POST['action'] == 'doallnull'?' AND password IS NULL':'') .
+	                ' ORDER BY username');
 
 	echo "<hr />\n\n<pre>";
 	foreach($users as $user) {
-		// generate a new password, only if it wasn't set in the interface
-		if ( !isset($setpass) ) {
-			$pass = genrandpasswd();
-		} else {
-			$pass = $setpass;
-		}
+		$pass = genrandpasswd();
+
 		// update the user table with a password
 		$DB->q('UPDATE user SET password = %s WHERE username = %s', md5($user['username'].'#'.$pass), $user['username']);
 		auditlog('user', $user['username'], 'set password');
-		echo "User:      " . htmlspecialchars($user['name']) . "\n" .
-		     "Login:     " . htmlspecialchars($user['username']) . "\n" .
+		echo "Full name: " . htmlspecialchars($user['name']) . "\n" .
+		     "Username:  " . htmlspecialchars($user['username']) . "\n" .
 		     "Password:  $pass\n\n\n\n";
 	}
 	echo "</pre>\n";
