@@ -6,9 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-/** Constant to define MySQL datetime format in strftime() function notation. */
-define('MYSQL_DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S');
-
 /** Perl regex class of allowed characters in identifier strings. */
 define('IDENTIFIER_CHARS', '[a-zA-Z0-9_-]');
 
@@ -47,7 +44,7 @@ function getCurContest($fulldata = FALSE) {
 
 	global $DB;
 	$now = $DB->q('MAYBETUPLE SELECT * FROM contest
-	               WHERE enabled = 1 AND activatetime <= NOW()
+	               WHERE enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
 	               ORDER BY activatetime DESC LIMIT 1');
 
 	if ( $now == NULL ) return FALSE;
@@ -281,24 +278,26 @@ function overshoot_parse($timelimit, $token)
 	}
 }
 
+/* The functions below abstract away the precise time format used
+ * internally. We currently use Unix epoch with up to 9 decimals for
+ * subsecond precision.
+ */
+
 /**
- * Simulate MySQL NOW() function to create insert queries that do not
- * change when replicated later.
+ * Simulate MySQL UNIX_TIMESTAMP() function to create insert queries
+ * that do not change when replicated later.
  */
 function now()
 {
-	return strftime(MYSQL_DATETIME_FORMAT);
+	return microtime(TRUE);
 }
 
 /**
  * Returns >0, =0, <0 when $time1 >, =, < $time2 respectively.
- * This function converts the strings to integer seconds and returns
- * their difference. We don't use the default second argument 'now()'
- * for 'strtotime()' since it could (theoretically) change.
  */
 function difftime($time1, $time2)
 {
-	return strtotime($time1, 0) - strtotime($time2, 0);
+	return $time1 - $time2;
 }
 
 /**

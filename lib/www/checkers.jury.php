@@ -35,7 +35,7 @@ function check_user($data, $keydata = null)
 	}
 	if ( ! empty($data['email'])  && ! filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
 		ch_error("Email not valid.");
-	} 
+	}
 	if ( !empty($data['password']) ) {
 		$data['password'] = md5("$id#".$data['password']);
 	}
@@ -131,6 +131,7 @@ function check_language($data, $keydata = null)
 
 function check_relative_time($time, $starttime, $field)
 {
+	if ( empty($time) ) return null;
 	if ($time[0] == '+' || $time[0] == '-') {
 		// convert relative times to absolute ones
 		$neg = ($time[0] == '-');
@@ -147,14 +148,14 @@ function check_relative_time($time, $starttime, $field)
 			if ($neg) {
 				$seconds *= -1;
 			}
-			$ret = strftime(MYSQL_DATETIME_FORMAT, strtotime($starttime) + $seconds);
+			$ret = $starttime + $seconds;
 		} else {
 			ch_error($field . " is not correctly formatted, expecting: +/-hh:mm");
 			$ret = null;
 		}
 	} else {
-		// time is absolute, just copy
-		$ret = $time;
+		// Time string is absolute, just convert to Unix epoch
+		$ret = strtotime($time);
 	}
 
 	return $ret;
@@ -171,9 +172,6 @@ function check_contest($data, $keydata = null)
 			// that need to be kept as is.
 			$data[$f] = $data[$f.'_string'];
 			$data[$f] = check_relative_time($data[$f], $data['starttime'], $f);
-		}
-		if ( !empty($data[$f]) ) {
-			check_datetime($data[$f]);
 		}
 	}
 
@@ -239,69 +237,13 @@ function check_contest($data, $keydata = null)
 	return $data;
 }
 
-/**
- * Check whether a string is in a valid datetime format, e.g.:
- * 2001-05-12 13:45:00.
- * Checks for the presence of the right parts, and whether the
- * date is sensible (e.g. not 31 February)
- */
-function check_datetime($datetime)
-{
-	$datetime = trim($datetime);
-
-	// It must be 19 chars or we're wrong anyway.
-	if (strlen($datetime) != 19) {
-		ch_error ("Cannot parse date, not length 19: " . $datetime);
-	}
-	$y = substr($datetime, 0, 4);
-	$m = substr($datetime, 5, 2);
-	$d = substr($datetime, 8, 2);
-	$hr = substr($datetime, 11, 2);
-	$mi = substr($datetime, 14, 2);
-	$se = substr($datetime, 17, 2);
-
-	// Is this a valid date?
-	if (is_numeric($y) && is_numeric($m) && is_numeric($d) &&
-		is_numeric($hr) && is_numeric($mi) && is_numeric($se)) {
-		// They are numeric.
-
-		// is this a sensible date?
-		$valid = checkdate($m,$d,$y);
-		if (!$valid) {
-			ch_error ("Cannot parse date, not a valid date: " . $datetime);
-		}
-
-		if ( $hr < 0 || $hr > 23 ) {
-			ch_error ("Cannot parse date, invalid hour: " . $datetime);
-		}
-		if ( $mi < 0 || $mi > 59 ) {
-			ch_error ("Cannot parse date, invalid minute: " . $datetime);
-		}
-		if ( $se < 0 || $se > 59 ) {
-			ch_error ("Cannot parse date, invalid second: " . $datetime);
-		}
-	} else {
-		ch_error ("Cannot parse date, params not numeric: " . $datetime);
-	}
-
-	return $datetime;
-}
-
 function check_submission($data, $keydata = null)
 {
-	check_datetime($data['submittime']);
-
 	return $data;
 }
 
 function check_judging($data, $keydata = null)
 {
-	foreach(array('starttime','endtime') as $f) {
-		if ( !empty($data[$f]) ) {
-			check_datetime($data[$f]);
-		}
-	}
-
 	if ( !empty($data['endtime']) && difftime($data['endtime'], $data['starttime']) < 0 ) {
 		ch_error('Judging ended before it started');
 	}

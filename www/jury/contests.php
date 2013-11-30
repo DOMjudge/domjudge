@@ -69,8 +69,8 @@ if ( empty($cid) )  {
 	echo "none</legend>\n\n";
 
 	$row = $DB->q('MAYBETUPLE SELECT * FROM contest
-	               WHERE activatetime > now() AND enabled = 1
-                       ORDER BY activatetime LIMIT 1');
+	               WHERE activatetime > UNIX_TIMESTAMP() AND enabled = 1
+	               ORDER BY activatetime LIMIT 1');
 
 	if ( $row ) {
 		echo "<p>No active contest. Upcoming:<br/> <em>" .

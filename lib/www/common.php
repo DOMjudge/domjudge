@@ -342,9 +342,6 @@ function putTeam($login) {
 function putClock() {
 	global $cdata, $username;
 	$what = $fmt = "";
-	$activatetime_u = strtotime($cdata['activatetime']);
-	$starttime_u = strtotime($cdata['starttime']);
-	$endtime_u = strtotime($cdata['endtime']);
 
 	// current time
 	echo '<div id="clock"><span id="timecur">' . strftime('%a %d %b %Y %T %Z') . "</span>";
@@ -383,10 +380,10 @@ function putClock() {
 	echo "</div>";
 
 	echo "<script type=\"text/javascript\">
-	var initial = " . time() . ";
-	var activatetime = " . $activatetime_u . ";
-	var starttime = " . $starttime_u . ";
-	var endtime = " . $endtime_u . ";
+	var initial = " . now() . ";
+	var activatetime = " . $cdata['activatetime'] . ";
+	var starttime = " . $cdata['starttime'] . ";
+	var endtime = " . $cdata['endtime'] . ";
 	var offset = 1;
 	var date = new Date(initial*1000);
 	var timecurelt = document.getElementById(\"timecur\");

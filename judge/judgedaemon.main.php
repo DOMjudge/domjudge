@@ -274,7 +274,7 @@ function judge($row)
 	// If a database gets reset without removing the judging
 	// directories, we might hit an old directory: rename it.
 	if ( file_exists($workdir) ) {
-		$oldworkdir = $workdir . '-old-' . getmypid() . '-' . now();
+		$oldworkdir = $workdir . '-old-' . getmypid() . '-' . strftime('%Y-%m-%d_%H:%M');
 		if ( !rename($workdir, $oldworkdir) ) {
 			error("Could not rename stale working directory to '$oldworkdir'");
 		}

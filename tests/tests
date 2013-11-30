@@ -57,7 +57,5 @@ t('printtime1', printtime(now()), date('H:i'));
 
 require('../lib/www/checkers.jury.php');
 
-t('datetime1', check_datetime(now()), now());
-
 
 exit($failed);
