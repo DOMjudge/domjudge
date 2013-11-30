@@ -662,15 +662,15 @@ function jurylink($target, $content) {
 /**
  * Print contest start time
  */
-function printContestStart($cdata) {
+function printContestStart($cdata)
+{
 	$res = "scheduled to start ";
-	$starttime_u = strtotime($cdata['starttime']);
-	if( date('Ymd') == date('Ymd', $starttime_u) ) {
+	if ( printtime(now(),'%Y%m%d') == printtime($cdata['starttime'],'%Y%m%d') ) {
 		// Today
 		$res .= "at " . printtime($cdata['starttime']);
 	} else {
 		// Print full date
-		$res .= "on " . strftime('%a %d %b %Y %T %Z', $starttime_u);
+		$res .= "on " . printtime($cdata['starttime'],'%a %d %b %Y %T %Z');
 	}
 	return $res;
 }

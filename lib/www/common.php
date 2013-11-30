@@ -341,37 +341,18 @@ function putTeam($login) {
  */
 function putClock() {
 	global $cdata, $username;
-	$what = $fmt = "";
 
 	// current time
 	echo '<div id="clock"><span id="timecur">' . strftime('%a %d %b %Y %T %Z') . "</span>";
 	// timediff to end of contest
-	if ( strcmp(now(), $cdata['starttime']) >= 0 && strcmp(now(), $cdata['endtime']) < 0) {
-		$left = $endtime_u-time();
-		$what = "time left: ";
-	} else if ( strcmp(now(), $cdata['activatetime']) >= 0 && strcmp(now(), $cdata['starttime']) < 0) {
-		$left = $starttime_u-time();
-		$what = "time to start: ";
+	if ( difftime(now(), $cdata['starttime']) >= 0 &&
+	     difftime(now(), $cdata['endtime'])   <  0 ) {
+		$left = "time left: " . printtimediff(now(),$cdata['endtime']);
+	} else if ( difftime(now(), $cdata['activatetime']) >= 0 &&
+	            difftime(now(), $cdata['starttime'])    <  0 ) {
+		$left = "time to start: " . printtimediff(now(),$cdata['starttime']);
 	}
-	if ( !empty($left) ) {
-		$fmt = '';
-		if ( $left > 24*60*60 ) {
-			$d = floor($left/(24*60*60));
-			$fmt .= $d . "d ";
-			$left -= $d * 24*60*60;
-		}
-		if ( $left > 60*60 ) {
-			$h = floor($left/(60*60));
-			$fmt .= $h . ":";
-			$left -= $h * 60*60;
-		}
-		$m = floor($left/60);
-		$fmt .= sprintf('%02d:', $m);
-		$left -= $m * 60;
-		$fmt .= sprintf('%02d', $left);
-
-	}
-	echo "<br /><span id=\"timeleft\">" . $what . $fmt . "</span>";
+	echo "<br /><span id=\"timeleft\">" . $left . "</span>";
 	if ( logged_in() ) {
 		echo "<br /><span id=\"username\">logged in as " . $username
 			. ( have_logout() ? " <a href=\"../logout.php\">×</a>" : "" )
@@ -380,7 +361,7 @@ function putClock() {
 	echo "</div>";
 
 	echo "<script type=\"text/javascript\">
-	var initial = " . now() . ";
+	var initial = " . time() . ";
 	var activatetime = " . $cdata['activatetime'] . ";
 	var starttime = " . $cdata['starttime'] . ";
 	var endtime = " . $cdata['endtime'] . ";

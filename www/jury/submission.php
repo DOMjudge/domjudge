@@ -117,7 +117,7 @@ if ( $submdata['valid'] ) {
 <tr><td>Language:</td><td>
 	<a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a></td></tr>
-<tr><td>Submitted:</td><td><?php echo  htmlspecialchars($submdata['submittime']) ?></td></tr>
+<tr><td>Submitted:</td><td><?php echo printtime($submdata['submittime']) ?></td></tr>
 <tr><td>Source:</td><td>
 	<a href="show_source.php?id=<?php echo $id?>">view source code</a></td></tr>
 <tr><td>Max runtime:</td><td>
@@ -247,15 +247,14 @@ if ( isset($jid) )  {
 	}
 
 	// Time (start, end, used)
-	echo "<p class=\"judgetime\">Judging started: " . htmlspecialchars($jud['starttime']);
+	echo "<p class=\"judgetime\">Judging started: " . printtime($jud['starttime'],'%H:%M:%S');
 
-	$unix_start = strtotime($jud['starttime']);
 	if ( $judging_ended ) {
-		echo ', ended: ' . htmlspecialchars($jud['endtime']) .
+		echo ', ended: ' . printtime($jud['endtime'],'%H:%M:%S') .
 			' (judging took '.
-				printtimediff($unix_start, strtotime($jud['endtime']) ) . ')';
+				printtimediff($jud['starttime'], $jud['endtime']) . ')';
 	} elseif ( $jud['valid'] ) {
-		echo ' [still judging - busy ' . printtimediff($unix_start) . ']';
+		echo ' [still judging - busy ' . printtimediff($jud['starttime']) . ']';
 	} else {
 		echo ' [aborted]';
 	}

@@ -116,7 +116,7 @@ if ( empty($cid) )  {
 
 		echo "</td><td>" .
 		     ucfirst($time) . " time:</td><td>" .
-		     htmlspecialchars($row[$time.'time']) . "</td><td>";
+		     printtime($row[$time.'time'],'%Y-%m-%d %H:%M (%Z)') . "</td><td>";
 
 		// Show a button for setting the time to now(), only when that
 		// makes sense. E.g. only for end contest when contest has started.
@@ -164,7 +164,7 @@ if( count($res) == 0 ) {
 			"<td class=\"tdright\">" . $link .
 			"c" . (int)$row['cid'] . "</a></td>\n";
 		foreach ($times as $time) {
-			echo "<td title=\"".htmlspecialchars(@$row[$time. 'time']) . "\">" .
+			echo "<td title=\"".printtime(@$row[$time. 'time'],'%Y-%m-%d %H:%M') . "\">" .
 			      $link . ( isset($row[$time.'time']) ?
 			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
 		}

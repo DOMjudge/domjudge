@@ -73,28 +73,30 @@ function printhost($hostname, $full = FALSE) {
 }
 
 /**
- * print the time something took from start to end.
- * input: timestamps, end defaults to now.
+ * Print the time something took from start to end (which defaults to now).
  */
-function printtimediff($start, $end = null) {
-
-	if( ! $end )	$end = time();
+function printtimediff($start, $end = NULL)
+{
+	if ( is_null($end) ) $end = microtime(TRUE);
 	$ret = '';
-	$diff = $end - $start;
+	$diff = floor($end - $start);
 
-	$h = floor($diff/3600);
-	$diff %= 3600;
-	if($h > 0) {
-		$ret .= $h.' h ';
+	if ( $diff > 24*60*60 ) {
+		$d = floor($diff/(24*60*60));
+		$ret .= $d . "d ";
+		$diff -= $d * 24*60*60;
 	}
-
+	if ( $diff > 60*60 ) {
+		$h = floor($diff/(60*60));
+		$ret .= $h . ":";
+		$diff -= $h * 60*60;
+	}
 	$m = floor($diff/60);
-	$diff %= 60;
-	if ( $m > 0 ) {
-		$ret .= $m.' m ';
-	}
+	$ret .= sprintf('%02d:', $m);
+	$diff -= $m * 60;
+	$ret .= sprintf('%02d', $diff);
 
-	return $ret . $diff .' s';
+	return $ret;
 }
 
 /**
