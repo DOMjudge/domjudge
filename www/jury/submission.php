@@ -322,9 +322,9 @@ if ( isset($jid) )  {
 		"<tr><th scope=\"col\">#</th><th scope=\"col\">runtime</th>" .
 		"<th scope=\"col\">result</th>";
 	if ( $lastjud !== NULL ) {
-		echo "<th scope=\"col\" name=\"lastruntime\">" .
+		echo "<th scope=\"col\" class=\"lastruntime\">" .
 			"<span class=\"prevsubmit\">s$lastsubmitid runtime</span></th>" .
-			"<th scope=\"col\" name=\"lastresult\">" .
+			"<th scope=\"col\" class=\"lastresult\">" .
 			"<span class=\"prevsubmit\">s$lastsubmitid result</span></th>";
 	}
 
@@ -352,9 +352,9 @@ if ( isset($jid) )  {
 		if ( $lastjud !== NULL ) {
 			$lastrun = $lastruninfo[$key];
 			if ( $lastjud['result']=='compiler-error' ) $lastrun['runresult'] = 'compiler-error';
-			echo "<td name=\"lastruntime\"><a href=\"$link\">" .
+			echo "<td class=\"lastruntime\"><a href=\"$link\">" .
 				"<span class=\"prevsubmit\">" . sprintf('%.2f', $lastrun['runtime']) . "</span></a></td>" .
-				"<td name=\"lastresult\"><a href=\"$link\">" .
+				"<td class=\"lastresult\"><a href=\"$link\">" .
 				"<span class=\"sol prevsubmit\">$lastrun[runresult]</span></a></td>";
 		}
 
@@ -373,9 +373,9 @@ if ( isset($jid) )  {
 	    "<td title=\"max/sum runtime\"><a>" .
 	    sprintf('%.2f/%.2f',$max_runtime,$sum_runtime) . "</a></td>" .
 	    "<td><a>" . printresult(@$jud['result']) . "</a></td>" .
-	    "<td name=\"lastruntime\" title=\"previous max/sum runtime\"><a>" .
+	    "<td class=\"lastruntime\" title=\"previous max/sum runtime\"><a>" .
 	    sprintf('%.2f/%.2f',$max_lastruntime,$sum_lastruntime) . "</a></td>" .
-	    "<td name=\"lastresult\"><a><span class=\"sol prevsubmit\">" . @$lastjud['result'] . "</span></a></td>" .
+	    "<td class=\"lastresult\"><a><span class=\"sol prevsubmit\">" . @$lastjud['result'] . "</span></a></td>" .
 	    "<td></td></tr>\n" .
 	    "</tfoot>\n</table>\n\n";
 

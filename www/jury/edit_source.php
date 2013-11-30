@@ -49,7 +49,7 @@ $title = 'Edit Source: s' . $id;
 require(LIBWWWDIR . '/header.php');
 
 
-echo '<h2><a name="source"></a>Edit submission ' .
+echo '<h2><a id="source"></a>Edit submission ' .
 	"<a href=\"submission.php?id=$id\">s$id</a> source files</h2>\n\n";
 
 echo addForm($pagename, 'post', null, 'multipart/form-data');

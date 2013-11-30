@@ -95,7 +95,7 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 function presentSource ($sourcedata, $langid)
 {
 	$head = '<div class="tabbertab">' .
-		'<h2 class="filename"><a name="source' . htmlspecialchars($sourcedata['rank']) .
+		'<h2 class="filename"><a id="source' . htmlspecialchars($sourcedata['rank']) .
 		'"></a>' .
 		htmlspecialchars($sourcedata['filename']) . "</h2> <a " .
 		"href=\"show_source.php?id=" . urlencode($sourcedata['submitid']) .
