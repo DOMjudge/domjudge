@@ -335,17 +335,6 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 					echo '<a href="team_affiliation.php?id=' .
 						urlencode($teams[$team]['affilid']) . '">';
 				}
-				/*
-				$affillogo = '../images/affiliations/' .
-					urlencode($teams[$team]['affilid']) . '.png';
-				if ( is_readable($affillogo) ) {
-					echo '<img src="' . $affillogo . '"' .
-						' alt="'   . htmlspecialchars($teams[$team]['affilid']) . '"' .
-						' title="' . htmlspecialchars($teams[$team]['affilname']) . '" />';
-				} else {
-					echo htmlspecialchars($teams[$team]['affilid']);
-				}
-				 */
 				if ( isset($teams[$team]['country']) ) {
 					$countryflag = '../images/countries/' .
 						urlencode($teams[$team]['country']) . '.png';

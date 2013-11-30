@@ -33,14 +33,6 @@ function check_affiliation($data, $keydata = null)
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Team affiliation ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
-	$affillogo = '../images/affiliations/' . urlencode($id) . '.png';
-	if ( ! file_exists ( $affillogo ) ) {
-		ch_error("Affiliation " . $id .
-		         " does not have a logo (looking for $affillogo).");
-	} elseif ( ! is_readable ( $affillogo ) ) {
-		ch_error("Affiliation " . $data['affilid'] .
-		         " has a logo, but it's not readable ($affillogo).");
-	}
 	return $data;
 }
 

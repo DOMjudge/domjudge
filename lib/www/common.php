@@ -291,7 +291,6 @@ function putTeam($login) {
 
 	if ( empty($team) ) error ("No team found by this id.");
 
-	$affillogo = "../images/affiliations/" . urlencode($team['affilid']) . ".png";
 	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";
 	$teamimage = "../images/teams/" . urlencode($team['login']) . ".jpg";
 
@@ -317,12 +316,6 @@ function putTeam($login) {
 
 	if ( !empty($team['affilid']) ) {
 		echo '<tr><td>Affiliation:</td><td>';
-		if ( is_readable($affillogo) ) {
-			echo '<img src="' . $affillogo . '" alt="' .
-				htmlspecialchars($team['affilid']) . '" /> ';
-		} else {
-			echo htmlspecialchars($team['affilid']) . ' - ';
-		}
 		echo htmlspecialchars($team['affname']);
 		echo "</td></tr>\n";
 		if ( !empty($team['country']) ) {
