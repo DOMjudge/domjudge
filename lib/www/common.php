@@ -530,3 +530,33 @@ function have_problemtexts()
 	global $DB, $cid;
 	return $DB->q('VALUE SELECT COUNT(*) FROM problem WHERE problemtext_type IS NOT NULL AND cid = %i', $cid) > 0;
 }
+
+/**
+ * Maps domjudge language id to Ace language id
+ */
+function langidToAce($langid) {
+	switch ($langid) {
+	case 'c':
+	case 'cpp':
+	case 'cxx':
+		return 'c_cpp';
+	case 'pas':
+		return 'pascal';
+	case 'hs':
+		return 'haskell';
+	case 'pl':
+		return 'perl';
+	case 'bash':
+		return 'sh';
+	case 'py2':
+	case 'py3':
+		return 'python';
+	case 'adb':
+		return 'ada';
+	case 'plg':
+		return 'prolog';
+	case 'rb':
+		return 'ruby';
+	}
+	return $langid;
+}

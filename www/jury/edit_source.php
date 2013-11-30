@@ -68,10 +68,7 @@ foreach($sources as $sourcedata)
 	echo '<h2 class="filename">' . htmlspecialchars($sourcedata['filename']) . '</h2>';
 	echo addTextArea('source' . $sourcedata['rank'], $sourcedata['sourcecode'], 120, 40) . "<br />\n";
 	$editor = 'editor' . htmlspecialchars($sourcedata['rank']);
-	$langid = $submission['langid'];
-	if ( $langid == 'c' || $langid == 'cpp' ) {
-		$langid = 'c_cpp';
-	}
+	$langid = langidToAce($submission['langid']);
 	echo '<div class="editor" id="' . $editor . '"></div>';
 	echo '<script>' .
 		'var textarea = document.getElementById("source' . htmlspecialchars($sourcedata['rank']) . '");' .

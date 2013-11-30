@@ -106,9 +106,7 @@ function presentSource ($sourcedata, $langid)
 		"<img class=\"picto\" src=\"../images/edit.png\" alt=\"edit\" title=\"edit\" />" .
 		"</a>\n\n";
 
-	if ( $langid == 'c' || $langid == 'cpp' ) {
-		$langid = 'c_cpp';
-	}
+	$langid = langidToAce($langid);
 
 	$ace = '<pre class="editor" id="editor' . htmlspecialchars($sourcedata['rank']) . '">'
 		. htmlspecialchars($sourcedata['sourcecode']) . '</pre>' .
