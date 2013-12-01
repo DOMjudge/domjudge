@@ -129,7 +129,7 @@ function show_failed_login($msg)
 // not return.
 function show_loginpage()
 {
-	global $ip;
+	global $ip, $pagename;
 
 	switch ( AUTH_METHOD ) {
 	case 'EXTERNAL':
