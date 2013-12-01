@@ -177,7 +177,10 @@ legend {
 
 .center { margin: 0px auto; }
 
-.scoreboard { border-collapse: collapse; }
+.scoreboard {
+	border-collapse: collapse;
+	clear: both;
+}
 .scoreboard td { font-size: small; }
 .scoreboard tr { border-bottom: 1px solid silver; }
 .scoreboard td, .scoreboard th {
