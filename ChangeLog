@@ -4,6 +4,9 @@ Version 4.0.0 - DEV
 -------------------
  - [INCOMPATIBLE CHANGE] checktestdata logical operators are now '&&' and '||'.
  - Introduce REST API; used by judgedaemon to communicate with domserver.
+ - New scoreboard layout: more compact, affil. logos replaced by names.
+ - Store timestamps in database as Unix epoch, independent of time zones
+   with subsecond resolution.
  - Store recognized language extensions in database and query from
    submit client through REST API.
  - Show diff of team and reference output even if run stopped prematurely.
@@ -15,7 +18,9 @@ Version 4.0.0 - DEV
  - Add support for new languages: Prolog, Ruby.
  - Add note that submit client requires the IPADDRESS (or FIXED)
    authentication method (Closes #125).
--  Replace GeSHi syntax highlighter with Ace javascript code editor.
+ - Replace GeSHi syntax highlighter with Ace javascript code editor.
+ - [security] Compile as unprivileged user to prevent compile-time access
+   to e.g. testdata files.
 
 Version 3.4.0 - (unreleased)
 ----------------------------
