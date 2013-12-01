@@ -143,8 +143,8 @@ UPDATE `contest` SET
   `endtime`          = UNIX_TIMESTAMP(endtime_old),
   `starttime_string` = `starttime_old`;
 
-UPDATE `contest` SET `freezetime`   = UNIX_TIMESTAMP(freezetime_old),   WHERE `freezetime_old`   IS NOT NULL;
-UPDATE `contest` SET `unfreezetime` = UNIX_TIMESTAMP(unfreezetime_old), WHERE `unfreezetime_old` IS NOT NULL;
+UPDATE `contest` SET `freezetime`   = UNIX_TIMESTAMP(freezetime_old)   WHERE `freezetime_old`   IS NOT NULL;
+UPDATE `contest` SET `unfreezetime` = UNIX_TIMESTAMP(unfreezetime_old) WHERE `unfreezetime_old` IS NOT NULL;
 
 UPDATE `event` SET `eventtime` = UNIX_TIMESTAMP(eventtime_old);
 
