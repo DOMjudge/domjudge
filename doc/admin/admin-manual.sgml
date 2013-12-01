@@ -464,6 +464,9 @@ On the judgehosts:
        sudoers configuration as in <tt>etc/sudoers-domjudge</tt>.
 <item> Copy the file <tt>etc/dbpasswords.secret</tt> from the
        domserver to all judgehosts to synchronise database passwords.
+<item> Optionally build a chroot to support interpreted or
+       byte-compiled langauges such as Java, see the appendix on
+       <ref id="problems:java-chroot" name="setting up a chroot">.
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
 </itemize>
 It should be done by now. As a check that (almost) everything works,
@@ -1073,7 +1076,12 @@ to be available for copying it to the chroot environment. For Linux
 i386, a static Dash shell is included, which works out of the box. For
 other architectures or operating systems, a shell has to be added
 manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
-file.
+file. If you want to support languages that cannot be compiled to
+statically linked binaries, e.g. byte-compiled languages such as Java,
+or interpreted languages such as Python, then a complete chroot
+environment must be built and configured. See the appendix on
+<ref id="problems:java-chroot" name="setting up a chroot"> for more
+details.
 
 Upon startup, the judgehost will connect to the domserver and add an entry
 for itself to the judgehosts table, by default enabled. If you wish to
