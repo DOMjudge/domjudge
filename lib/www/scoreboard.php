@@ -568,12 +568,11 @@ collapse("filter");
 	// last modified date, now if we are the jury, else include the
 	// freeze time
 	if( ! IS_JURY && $fdata['showfrozen'] ) {
-		$lastupdate = strtotime($cdata['freezetime']);
+		$lastupdate = printtime($cdata['freezetime'],'%a %d %b %Y %T %Z');
 	} else {
-		$lastupdate = time();
+		$lastupdate = printtime(now(),'%a %d %b %Y %T %Z');
 	}
-	echo "<p id=\"lastmod\">Last Update: " .
-	     date('j M Y H:i', $lastupdate) . "<br />\n" .
+	echo "<p id=\"lastmod\">Last Update: $lastupdate<br />\n" .
 	     "using <a href=\"http://www.domjudge.org/\">DOMjudge</a></p>\n\n";
 
 	return;

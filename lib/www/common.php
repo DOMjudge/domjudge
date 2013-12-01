@@ -351,6 +351,8 @@ function putClock() {
 	} else if ( difftime(now(), $cdata['activatetime']) >= 0 &&
 	            difftime(now(), $cdata['starttime'])    <  0 ) {
 		$left = "time to start: " . printtimediff(now(),$cdata['starttime']);
+	} else {
+		$left = "";
 	}
 	echo "<br /><span id=\"timeleft\">" . $left . "</span>";
 	if ( logged_in() ) {

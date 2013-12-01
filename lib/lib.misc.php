@@ -294,6 +294,7 @@ function now()
 
 /**
  * Returns >0, =0, <0 when $time1 >, =, < $time2 respectively.
+ * Returned value is time difference in seconds.
  */
 function difftime($time1, $time2)
 {

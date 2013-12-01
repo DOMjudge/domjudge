@@ -38,8 +38,7 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Balloon Status</h1>\n\n";
 
-if ( isset($cdata['freezetime']) &&
-     time() > strtotime($cdata['freezetime']) ) {
+if ( isset($cdata['freezetime']) && difftime($cdata['freezetime'],now())<=0 ) {
 	echo "<h4>Scoreboard is now frozen.</h4>\n\n";
 }
 
@@ -82,11 +81,6 @@ while ( $row = $res->next() ) {
 	// keep overwriting these variables - in the end they'll
 	// contain the id's of the first balloon in each type
 	$first_contest = $first_problem[$row['probid']] = $first_team[$row['login']] = $row['balloonid'];
-}
-
-$conteststart  = strtotime($cdata['starttime']);
-if ( !empty($cdata['freezetime']) ) {
-	$contestfreeze = strtotime($cdata['freezetime']);
 }
 
 if ( !empty($BALLOONS) ) {
