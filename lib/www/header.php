@@ -57,7 +57,7 @@ if ( ! empty($extrahead) ) echo $extrahead;
 </head>
 <?php
 
-if ( checkrole('jury') ) {
+if ( IS_JURY ) {
 	echo "<body onload=\"setInterval('updateClarifications(" . ($pagename=='clarifications.php' && $refresh_cookie) . ")', 20000)\">\n";
 } else {
 	echo "<body>\n";
