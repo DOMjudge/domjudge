@@ -128,7 +128,7 @@ if ( count($users) ) {
 		echo "<a href=\"user.php?id=" . urlencode($user['userid']) . "\">" . htmlspecialchars($user['username']) . "</a> ";
 	}
 } else {
-	echo "<a href=\"user.php?cmd=add&forteam=" . urlencode($row['login']) . "\"><small>(add)</small></a>";
+	echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode($row['login']) . "\"><small>(add)</small></a>";
 }
 ?></td></tr>
 </table></div>
