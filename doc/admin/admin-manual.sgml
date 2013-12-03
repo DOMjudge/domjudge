@@ -145,7 +145,9 @@ The following software is required for running DOMjudge.
        executables.
 
 <item> Apache web server with support for PHP &gt;= 5.2.0 and the mysqli
-       and json extensions for PHP. We also recommend the posix extension
+       and json extensions for PHP. PHP needs to be running as an Apache
+       module (the most common configuration); a (fast)CGI setup is not
+       currently supported. We also recommend the posix extension
        for extra debugging information.
 
 <item> MySQL or MariaDB &gt;= 4.1.x database and client software
