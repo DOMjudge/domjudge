@@ -5,6 +5,13 @@ Version 3.3.6 - DEV
  - Fix 'Disable refresh' button not being clickable.
  - Misc. minor bugs fixed reported by Coverity scan.
  - Fix bug when using fully numeric team ids or ids containing '-'.
+ - Fix two errors in calling error() in PHP code.
+ - Update example contest end times to lie in the future.
+ - Misc. minor documentation improvements.
+ - Fix linking order of gmp,gmpxx libraries to match dependency.
+ - Fix typo of variable "_tuple" in lib.database.php.
+ - Show team rank in jury interface after scoreboard freeze.
+ - Misc. HTML validity fixes and minor CSS tweaks.
 
 Version 3.3.5 - 16 April 2013
 -----------------------------
