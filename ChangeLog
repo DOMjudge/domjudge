@@ -2,6 +2,10 @@ DOMjudge Programming Contest Judging System
 
 Version 3.3.6 - DEV
 -------------------
+ - [security] Tighten permissions on judgedaemon output files and
+   compile as unprivileged user to prevent compile-time access
+   to e.g. testdata files. Note that this constitutes a significant
+   code change!
  - Fix 'Disable refresh' button not being clickable.
  - Misc. minor bugs fixed reported by Coverity scan.
  - Fix bug when using fully numeric team ids or ids containing '-'.
