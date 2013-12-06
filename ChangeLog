@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 3.4.2 - DEV
 -------------------
+ - [security] Compile as unprivileged user to prevent compile-time access
+   to e.g. testdata files.
  - Fix duplicate newlines being printed in runguard.
  - Fix buffer overflow found by Coverity scan.
  - Misc. documentation improvements.
