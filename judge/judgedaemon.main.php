@@ -285,6 +285,10 @@ function judge($row)
 	system("mkdir -p '$workdir/compile'", $retval);
 	if ( $retval != 0 ) error("Could not create '$workdir/compile'");
 
+	// Make sure the workdir is accessible for the domjudge-run user.
+	// Will be revoked again after this run finished.
+	chmod($workdir, 0755);
+
 	if ( !chdir($workdir) ) error("Could not chdir to '$workdir'");
 
 	// Get the source code from the DB and store in local file(s)
@@ -317,7 +321,11 @@ function judge($row)
 		. '&output_compile=' . rest_encode_file($workdir . '/compile.out'));
 
 	// compile error: our job here is done
-	if ( ! $compile_success ) return;
+	if ( ! $compile_success ) {
+		// revoke readablity for domjudge-run user to this workdir
+		chmod($workdir, 0700);
+		return;
+	}
 
 	// Optionally create chroot environment
 	if ( USE_CHROOT && CHROOT_SCRIPT ) {
@@ -325,10 +333,6 @@ function judge($row)
 		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}
-
-	// Make sure the workdir is accessible for the domjudge-run user.
-	// Will be revoked again after this run finished.
-	chmod ($workdir, 0755);
 
 	$totalcases = 0;
 	while ( TRUE ) {
