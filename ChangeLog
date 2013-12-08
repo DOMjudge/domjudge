@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 3.3.7 - DEV
+-------------------
+
 Version 3.3.6 - 8 December 2013
 -------------------------------
  - [security] Tighten permissions on judgedaemon output files and
