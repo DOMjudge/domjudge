@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.3.6 - DEV
--------------------
+Version 3.3.6 - 8 December 2013
+-------------------------------
  - [security] Tighten permissions on judgedaemon output files and
    compile as unprivileged user to prevent compile-time access
    to e.g. testdata files. Note that this constitutes a significant
