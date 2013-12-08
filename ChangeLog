@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 3.4.3 - DEV
+-------------------
+
 Version 3.4.2 - 8 December 2013
 -------------------------------
  - [security] Compile as unprivileged user to prevent compile-time access
