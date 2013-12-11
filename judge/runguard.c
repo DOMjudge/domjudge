@@ -113,6 +113,7 @@ char  *stdoutfilename;
 char  *stderrfilename;
 char  *exitfilename;
 char  *timefilename;
+char  *metafilename;
 #ifdef USE_CGROUPS
 char  *cgroupname;
 const char *cpuset;
@@ -134,6 +135,7 @@ int redir_stdout;
 int redir_stderr;
 int limit_streamsize;
 int outputexit;
+int outputmeta;
 int outputtime;
 int outputtimetype;
 int no_coredump;
@@ -181,6 +183,7 @@ struct option const long_opts[] = {
 	{"streamsize", required_argument, NULL,         's'},
 	{"outexit",    required_argument, NULL,         'E'},
 	{"outtime",    required_argument, NULL,         'T'},
+	{"outmeta",    required_argument, NULL,         'M'},
 	{"verbose",    no_argument,       NULL,         'v'},
 	{"quiet",      no_argument,       NULL,         'q'},
 	{"help",       no_argument,       &show_help,    1 },
@@ -191,6 +194,7 @@ struct option const long_opts[] = {
 void warning(   const char *, ...) __attribute__((format (printf, 1, 2)));
 void verbose(   const char *, ...) __attribute__((format (printf, 1, 2)));
 void error(int, const char *, ...) __attribute__((format (printf, 2, 3)));
+void write_meta(const char*, const char *, ...) __attribute__((format (printf, 2, 3)));
 
 void warning(const char *format, ...)
 {
@@ -241,7 +245,38 @@ void error(int errnum, const char *format, ...)
 	fprintf(stderr,"\nTry `%s --help' for more information.\n",progname);
 	va_end(ap);
 
+	write_meta("internal-error","%s","runguard error");
+
 	exit(exit_failure);
+}
+
+void write_meta(const char *key, const char*format, ...) {
+	FILE  *outputfile;
+	va_list ap;
+	va_start(ap,format);
+	if ( !outputmeta ) {
+		return;
+	}
+	if ( (outputfile = fopen(metafilename,"a"))==NULL ) {
+		error(errno,"cannot open `%s'",metafilename);
+	}
+
+
+	if ( fprintf(outputfile,"%s: ",key)<=0 ) {
+		error(0,"cannot write to file `%s'",metafilename);
+	}
+	if ( vfprintf(outputfile,format,ap)<0 ) {
+		error(0,"cannot write to file `%s'(vfprintf)",metafilename);
+	}
+	if ( fprintf(outputfile,"\n")<=0 ) {
+		error(0,"cannot write to file `%s'",metafilename);
+	}
+
+
+
+	if ( fclose(outputfile) ) {
+		error(errno,"closing file `%s'",metafilename);
+	}
 }
 
 void version(const char *prog, const char *vers)
@@ -277,7 +312,8 @@ Run COMMAND with restrictions.\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
   -s, --streamsize=SIZE  truncate COMMAND stdout/stderr streams at SIZE kB\n\
   -E, --outexit=FILE     write COMMAND exitcode to FILE\n\
-  -T, --outtime=FILE     write COMMAND runtime to FILE\n");
+  -T, --outtime=FILE     write COMMAND runtime to FILE\n\
+  -M, --outmeta=FILE     write COMMAND metadata to FILE\n");
 	printf("\
   -v, --verbose          display some extra warnings and information\n\
   -q, --quiet            suppress all warnings and verbose output\n\
@@ -302,6 +338,7 @@ void output_exit_time(int exitcode)
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
 	verbose("command exited with exitcode %d",exitcode);
+	write_meta("exitcode","%d",exitcode);
 
 	if ( outputexit ) {
 		verbose("writing exitcode to file `%s'",exitfilename);
@@ -323,6 +360,11 @@ void output_exit_time(int exitcode)
 	userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
 	sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
 	cpudiff = userdiff + sysdiff;
+
+	write_meta("wall-time","%.3f", walldiff);
+	write_meta("user-time","%.3f", userdiff);
+	write_meta("sys-time", "%.3f", sysdiff);
+	write_meta("cpu-time", "%.3f", cpudiff);
 
 	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys",
 	        walldiff, userdiff, sysdiff);
@@ -366,6 +408,8 @@ void output_exit_time(int exitcode)
 		if ( fclose(outputfile) ) {
 			error(errno,"closing file `%s'",timefilename);
 		}
+
+		write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
 	}
 }
 
@@ -391,6 +435,7 @@ void output_cgroup_stats()
 	}
 
 	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
+	write_meta("memory-bytes","%" PRId64, max_usage);
 
 	cgroup_free(&cg);
 }
@@ -503,6 +548,8 @@ void terminate(int sig)
 	} else {
 		warning("received signal %d: aborting command",sig);
 	}
+
+	write_meta("signal", "%d", sig);
 
 	/* First try to kill graciously, then hard */
 	verbose("sending SIGTERM");
@@ -838,6 +885,10 @@ int main(int argc, char **argv)
 		case 'E': /* outputexit option */
 			outputexit = 1;
 			exitfilename = strdup(optarg);
+			break;
+		case 'M': /* outputmeta option */
+			outputmeta = 1;
+			metafilename = strdup(optarg);
 			break;
 		case 'T': /* outputtime option */
 			outputtime = 1;

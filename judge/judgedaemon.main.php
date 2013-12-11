@@ -502,8 +502,10 @@ function judge($row)
 			. '&runtime=' . urlencode($runtime)
 			. '&judgehost=' . urlencode($myhost)
 			. '&output_run='   . rest_encode_file($testcasedir . '/program.out')
+			. '&output_error=' . rest_encode_file($testcasedir . '/program.err')
+			. '&output_meta='  . rest_encode_file($testcasedir . '/program.meta')
 			. '&output_diff='  . rest_encode_file($testcasedir . '/compare.out')
-			. '&output_error=' . rest_encode_file($testcasedir . '/error.out'));
+        );
 		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
 
 	} // end: for each testcase

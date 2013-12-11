@@ -161,6 +161,8 @@ touch compare.out                # Compare output
 touch result.out                 # Result of comparison
 touch program.out program.err    # Program output and stderr (for extra information)
 touch program.time program.exit  # Program runtime and exitcode
+touch program.meta               # Program metadata
+touch runguard.out runguard.err  # Runguard output and stderr(for extra information)
 
 logmsg $LOG_INFO "setting up testing (chroot) environment"
 
@@ -189,27 +191,21 @@ $GAINROOT cp -pR /dev/null ../dev/null
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
-runcheck ./run testdata.in program.out \
+runcheck ./run testdata.in runguard.out \
 	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT \
-	${USE_CHROOT:+-r "$PWD/.."} -u "$RUNUSER" \
-	-t $TIMELIMIT -C $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
-	-c -s $FILELIMIT -e program.err -E program.exit -T program.time -- \
-	$PREFIX/$PROGRAM 2>error.tmp
+	${USE_CHROOT:+-r "$PWD/.."} \
+	-p $PROCLIMIT \
+	--no-core --streamsize=$FILELIMIT \
+	--user="$RUNUSER" \
+	--walltime=$TIMELIMIT --cputime=$TIMELIMIT \
+	--memsize=$MEMLIMIT --filesize=$FILELIMIT \
+	--stdout=program.out --stderr=program.err \
+	--outexit=program.exit --outmeta=program.meta --outtime=program.time -- \
+	$PREFIX/$PROGRAM 2>runguard.err
 
 # Check for still running processes:
 if ps -u "$RUNUSER" >/dev/null 2>&1 ; then
 	error "found processes still running"
-fi
-
-# Append (heading/trailing) program stderr to error.tmp:
-if [ `wc -l < program.err` -gt 20 ]; then
-	echo "*** Program stderr output following (first and last 10 lines) ***" >>error.tmp
-	head -n 10 program.err >>error.tmp
-	echo "*** <snip> ***"  >>error.tmp
-	tail -n 10 program.err >>error.tmp
-elif [ -s program.err ]; then
-	echo "*** Program stderr output following ***" >>error.tmp
-	cat program.err >>error.tmp
 fi
 
 # We first compare the output, so that even if the submission gets a
@@ -225,7 +221,7 @@ logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
 if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
                        result.out compare.out >compare.tmp 2>&1 ; then
 	exitcode=$?
-	cat error.tmp >>error.out
+	cat runguard.err >>error.out
 	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
 fi
 
@@ -233,17 +229,17 @@ fi
 logmsg $LOG_DEBUG "checking program run exit-status"
 if grep  'timelimit exceeded' error.tmp >/dev/null 2>&1 ; then
 	echo "Timelimit exceeded, runtime: `cat program.time`" >>error.out
-	cat error.tmp >>error.out
+	cat runguard.err >>error.out
 	cleanexit ${E_TIMELIMIT:--1}
 fi
 if [ ! -r program.exit ]; then
-	cat error.tmp >>error.out
+	cat runguard.err >>error.out
 	error "'program.exit' not readable"
 fi
 # Check that program.exit was written to (no runguard error)
 if [ "`cat program.exit`" != "0" ]; then
 	echo "Non-zero exitcode `cat program.exit`" >>error.out
-	cat error.tmp >>error.out
+	cat runguard.err >>error.out
 	cleanexit ${E_RUN_ERROR:--1}
 fi
 
@@ -262,7 +258,7 @@ fi
 #fi
 #if grep  'File size limit exceeded' error.tmp >/dev/null 2>&1 ; then
 #	echo "File size limit exceeded." >>error.out
-#	cat error.tmp >>error.out
+#	cat runguard.err >>error.out
 #	cleanexit ${E_OUTPUT_LIMIT:--1}
 #fi
 
@@ -272,23 +268,23 @@ descrp="${descrp:+ ($descrp)}"
 
 if [ "$result" = "accepted" ]; then
 	echo "Correct${descrp}! Runtime is `cat program.time` seconds." >>error.out
-	cat error.tmp >>error.out
+	cat runguard.err >>error.out
 	cleanexit ${E_CORRECT:--1}
 elif [ "$result" = "presentation error" ]; then
 	echo "Presentation error${descrp}." >>error.out
-	cat error.tmp >>error.out
+	cat runguard.err >>error.out
 	cleanexit ${E_PRESENTATION_ERROR:--1}
 elif [ ! -s program.out ]; then
 	echo "Program produced no output." >>error.out
-	cat error.tmp >>error.out
+	cat runguard.err >>error.out
 	cleanexit ${E_NO_OUTPUT:--1}
 elif [ "$result" = "wrong answer" ]; then
 	echo "Wrong answer${descrp}." >>error.out
-	cat error.tmp >>error.out
+	cat runguard.err >>error.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 else
 	echo "Unknown result: Wrong answer#${descrp}#${result}#." >>error.out
-	cat error.tmp >>error.out
+	cat runguard.err >>error.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 fi
 
