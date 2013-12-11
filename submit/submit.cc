@@ -469,7 +469,7 @@ void usage()
 	       "    %s --problem e --language=cpp ProblemE.cc\n\n",progname);
 	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
 	       "    %s -p hello -l C HelloWorld.cpp\n\n",progname);
-	printf("Submit multiple files (the problem and languare are taken from the first):\n"
+	printf("Submit multiple files (the problem and language are taken from the first):\n"
 	       "    %s hello.java message.java\n\n",progname);
 	printf(
 "The following options should not be necessary for normal use:\n"
