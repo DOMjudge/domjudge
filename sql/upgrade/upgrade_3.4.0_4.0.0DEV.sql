@@ -80,6 +80,27 @@ CREATE TABLE `userrole` (
   CONSTRAINT `userrole_ibfk_2` FOREIGN KEY (`roleid`) REFERENCES `role` (`roleid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of users and roles';
 
+CREATE TABLE `rankcache_jury` (
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
+  `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
+  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
+  PRIMARY KEY  (`cid`,`teamid`),
+  KEY `order` USING BTREE (`cid`,`correct`, `totaltime`),
+  CONSTRAINT `rankcache_jury_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (jury version)';
+
+CREATE TABLE `rankcache_public` (
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
+  `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
+  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
+  PRIMARY KEY  (`cid`,`teamid`),
+  KEY `order` USING BTREE (`cid`,`correct`,`totaltime`),
+  CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
+
+
 -- Before modifying the datetime to decimal(32.9) data type, we have
 -- to move the data to be able to convert it afterwards.
 

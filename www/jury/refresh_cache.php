@@ -74,6 +74,11 @@ foreach( $teams as $team ) {
 		calcScoreRow($cid, $team['login'], $pr);
 	}
 
+	// Now recompute the rank for both jury and public
+	echo " rankcache";
+	updateRankCache($cid, $team['login'], true);
+	updateRankCache($cid, $team['login'], false);
+
 	echo "\n";
 	ob_flush();
 }

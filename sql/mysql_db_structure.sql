@@ -220,6 +220,34 @@ CREATE TABLE `problem` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
 
 --
+-- Table structure for table `rankcache_jury`
+--
+
+CREATE TABLE `rankcache_jury` (
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
+  `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
+  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
+  PRIMARY KEY  (`cid`,`teamid`),
+  KEY `order` USING BTREE (`cid`,`correct`, `totaltime`),
+  CONSTRAINT `rankcache_jury_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (jury version)';
+
+--
+-- Table structure for table `rankcache_public`
+--
+
+CREATE TABLE `rankcache_public` (
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
+  `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
+  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
+  PRIMARY KEY  (`cid`,`teamid`),
+  KEY `order` USING BTREE (`cid`,`correct`,`totaltime`),
+  CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
+
+--
 -- Table structure for table `role`
 --
 

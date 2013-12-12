@@ -15,31 +15,6 @@
 require_once(LIBDIR . '/lib.misc.php');
 
 /**
- * Calculate the penalty time.
- *
- * This expects bool $solved (whether there was at least one correct
- * submission by this team for this problem) and int $num_submissions
- * (the total number of tries for this problem by this team)
- * as input, uses the 'penalty_time' variable and outputs the number
- * of penalty minutes.
- *
- * The current formula is as follows:
- * - Penalty time is only counted for problems that the team finally
- *   solved. Yet unsolved problems always have zero penalty minutes.
- * - The penalty is 'penalty_time' (usually 20 minutes) for each
- *   unsuccessful try. By definition, the number of unsuccessful
- *   tries is the number of submissions for a problem minus 1: the
- *   final, correct one.
- */
-
-function calcPenaltyTime($solved, $num_submissions)
-{
-	if ( ! $solved ) return 0;
-
-	return ( $num_submissions - 1 ) * dbconfig_get('penalty_time', 20);
-}
-
-/**
  * Generate scoreboard data based on the cached data in table
  * 'scoreboard_{public,jury}'. If the function is called while
  * $jury set to true, the scoreboard will always be
@@ -644,6 +619,99 @@ function putTeamRow($cdata, $teamids) {
 }
 
 /**
+ * Calculate the rank for a single team based on the cache tables
+ */
+function calcTeamRank($cdata, $teamid, $jury = FALSE) {
+
+	global $DB;
+
+	if ( empty($cdata) ) return;
+
+	$fdata = calcFreezeData($cdata);
+	$cid = $cdata['cid'];
+
+	// Use jury scoreboard when jury or final scoreboard should be displayed
+	$tblname = $jury || $fdata['showfinal'] ? 'jury' : 'public';
+
+	// Find number of solved problems, penaly time and sortorder for this team
+	$team = $DB->q("MAYBETUPLE SELECT correct, totaltime
+	                FROM rankcache_$tblname
+	                WHERE cid = %i
+	                AND teamid = %s", $cid, $teamid);
+	$correct   = ( $team == NULL ) ? 0 : $team['correct'];
+	$totaltime = ( $team == NULL ) ? 0 : $team['totaltime'];
+
+	$sortorder = $DB->q('VALUE SELECT sortorder
+	      FROM team_category
+	      LEFT JOIN team ON (team_category.categoryid = team.categoryid)
+	      WHERE login = %s', $teamid);
+
+	// Number of teams that definitely ranked higher
+	$better = $DB->q("VALUE SELECT COUNT(teamid)
+	     FROM rankcache_$tblname AS rc
+	     LEFT JOIN team
+	          ON (team.login = rc.teamid)
+	     LEFT JOIN team_category
+	          ON (team_category.categoryid = team.categoryid)
+	     WHERE cid = %i
+	     AND sortorder = %i
+	     AND enabled = 1
+	     AND (correct > %i OR (correct = %i AND totaltime < %i))",
+	     $cid, $sortorder, $correct, $correct, $totaltime);
+	$rank = $better + 1;
+
+	// Resolve ties based on latest correct, only necessary when we actually
+	// solved at least one problem, so this list should usually be short
+	if ( $correct > 0 ) {
+		$tied = $DB->q("COLUMN SELECT teamid
+		       FROM rankcache_$tblname AS rc
+		       LEFT JOIN team
+		            ON (team.login = rc.teamid)
+		       LEFT JOIN team_category
+		            ON (team_category.categoryid = team.categoryid)
+		       WHERE cid = %i
+		       AND sortorder = %i
+		       AND enabled = 1
+		       AND correct = %i
+		       AND totaltime = %i",
+		       $cid, $sortorder, $correct, $totaltime);
+
+		// All teams that are tied for this position, in most cases this will
+		// only be the team we are finding the rank for, only retrieve rest of
+		// the data when there are actual ties
+		if ( count($tied) > 1 ) {
+			// initialize teamdata for each team
+			$teamdata = array();
+			foreach ( $tied as $login ) {
+				$teamdata[$login]['solve_times'] = array();
+			}
+
+			// Get submission times for each of the teams
+			$scoredata = $DB->q("SELECT teamid, totaltime
+			                     FROM scoreboard_$tblname AS sc
+			                     LEFT JOIN problem
+			                          ON (sc.probid = problem.probid)
+			                     WHERE sc.cid = %i
+			                     AND is_correct = 1
+			                     AND allow_submit = 1
+			                     AND teamid IN (%As)", $cid, $tied);
+			while ( $srow = $scoredata->next() ) {
+				$teamdata[$srow['teamid']]['solve_times'][] = $srow['totaltime'];
+			}
+			
+			// Now check for each team if it is ranked higher than $teamid
+			foreach ( $tied as $login ) {
+				if ( $login == $teamid ) continue;
+				if ( tiebreaker($teamdata[$login], $teamdata[$teamid]) < 0)
+					$rank++;
+			}
+		}
+	}
+
+	return $rank;
+}
+
+/**
  * Generate scoreboard links for jury only.
  */
 function jurylink($target, $content) {
@@ -680,7 +748,7 @@ function printContestStart($cdata)
  * criteria:
  * - highest number of correct solutions;
  * - least amount of total time spent on these solutions;
- * - fastest submission time for their most recent correct solution.
+ * - the tie-breaker function below
  */
 function cmpscore($a, $b) {
 	// more correct than someone else means higher rank
@@ -691,9 +759,17 @@ function cmpscore($a, $b) {
 	if ( $a['total_time'] != $b['total_time'] ) {
 		return $a['total_time'] < $b['total_time'] ? -1 : 1;
 	}
-	// else tie-breaker rule: fastest submission time for latest
-	// correct problem, when times are equal, compare one-to-latest,
-	// etc...
+	// else tie-breaker rule
+	return tiebreaker($a, $b);
+}
+
+/**
+ * Tie-breaker comparison function, called from the 'cmpscore' function
+ * above. Scores two arrays, $a and $b, based on the following criterion:
+ * - fastest submission time for latest correct problem, when times
+ *   are equal, compare one-to-latest, etc...
+ */
+function tiebreaker($a, $b) {
 	$atimes = $a['solve_times'];
 	$btimes = $b['solve_times'];
 	rsort($atimes);
