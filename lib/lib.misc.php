@@ -170,13 +170,13 @@ function calcScoreRow($cid, $team, $prob) {
 	}
 
 	// insert or update the values in the public/team scores table
-	$DB->q('REPLACE INTO scoreboard_public
+	$DB->q('REPLACE INTO scorecache_public
 	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
 	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
 	       $cid, $team, $prob, $submitted_p, $pending_p, $time_p, $correct_p);
 
 	// insert or update the values in the jury scores table
-	$DB->q('REPLACE INTO scoreboard_jury
+	$DB->q('REPLACE INTO scorecache_jury
 	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
 	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
 	       $cid, $team, $prob, $submitted_j, $pending_j, $time_j, $correct_j);
@@ -223,7 +223,7 @@ function updateRankCache($cid, $team, $jury) {
 
 	// Fetch values from scoreboard cache per problem
 	$scoredata = $DB->q("SELECT submissions, is_correct, totaltime
-	                     FROM scoreboard_$tblname
+	                     FROM scorecache_$tblname
 	                     WHERE cid = %i and teamid = %s", $cid, $team);
 	$num_correct = 0;
 	$total_time = 0;

@@ -260,10 +260,10 @@ CREATE TABLE `role` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Possible user roles';
 
 --
--- Table structure for table `scoreboard_jury`
+-- Table structure for table `scorecache_jury`
 --
 
-CREATE TABLE `scoreboard_jury` (
+CREATE TABLE `scorecache_jury` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
@@ -275,10 +275,10 @@ CREATE TABLE `scoreboard_jury` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (jury version)';
 
 --
--- Table structure for table `scoreboard_public`
+-- Table structure for table `scorecache_public`
 --
 
-CREATE TABLE `scoreboard_public` (
+CREATE TABLE `scorecache_public` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
   `probid` varchar(8) NOT NULL COMMENT 'Problem ID',

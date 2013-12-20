@@ -100,6 +100,10 @@ CREATE TABLE `rankcache_public` (
   CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
 
+-- Rename scoreboard cache tables to match new rankcache_{jury,public}.
+
+RENAME TABLE `scoreboard_jury`   TO `scorecache_jury`;
+RENAME TABLE `scoreboard_public` TO `scorecache_public`;
 
 -- Before modifying the datetime to decimal(32.9) data type, we have
 -- to move the data to be able to convert it afterwards.

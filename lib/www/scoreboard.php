@@ -16,7 +16,7 @@ require_once(LIBDIR . '/lib.misc.php');
 
 /**
  * Generate scoreboard data based on the cached data in table
- * 'scoreboard_{public,jury}'. If the function is called while
+ * 'scorecache_{public,jury}'. If the function is called while
  * $jury set to true, the scoreboard will always be
  * current, regardless of the freezetime setting in the contesttable.
  *
@@ -64,11 +64,11 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	$SUMMARY = initSummary($probs);
 	$SCORES = initScores($teams);
 
-	// scoreboard_jury is always up to date, scoreboard_public might be frozen.
+	// scorecache_jury is always up to date, scorecache_public might be frozen.
 	if ( $jury || $showfinal ) {
-		$cachetable = 'scoreboard_jury';
+		$cachetable = 'scorecache_jury';
 	} else {
-		$cachetable = 'scoreboard_public';
+		$cachetable = 'scorecache_public';
 	}
 
 	// Get all stuff from the cached table, but don't bother with outdated
@@ -262,7 +262,7 @@ function initSummary($probs) {
 
 /**
  * Output the general scoreboard based on the cached data in table
- * 'scoreboard_{team,jury}'. $myteamid can be passed to highlight a
+ * 'scorecache_{team,jury}'. $myteamid can be passed to highlight a
  * specific row.
  * If this function is called while IS_JURY is defined, the scoreboard
  * will always be current, regardless of the freezetime setting in the
@@ -685,7 +685,7 @@ function putTeamRow($cdata, $teamids) {
 
 		// Get values for this team about problems from scoreboard cache
 		$MATRIX = array();
-		$scoredata = $DB->q("SELECT * FROM scoreboard_jury WHERE cid = %i AND teamid IN (%As)", $cid, $teamids);
+		$scoredata = $DB->q("SELECT * FROM scorecache_jury WHERE cid = %i AND teamid IN (%As)", $cid, $teamids);
 
 		// loop all info the scoreboard cache and put it in our own datastructure
 		while ( $srow = $scoredata->next() ) {
@@ -812,7 +812,7 @@ function calcTeamRank($cdata, $teamid, $jury = FALSE) {
 
 			// Get submission times for each of the teams
 			$scoredata = $DB->q("SELECT teamid, totaltime
-			                     FROM scoreboard_$tblname AS sc
+			                     FROM scorecache_$tblname AS sc
 			                     LEFT JOIN problem
 			                          ON (sc.probid = problem.probid)
 			                     WHERE sc.cid = %i

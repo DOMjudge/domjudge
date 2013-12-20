@@ -774,7 +774,7 @@ maximum testcase size.
 by default. It's very desirable to set one.
 <item>When maximising performance is required, you can
 consider to use the <em>Memory</em> table storage engine
-for the scoreboard_public and scoreboard_jury tables. They will be
+for the scorecache_public and scorecache_jury tables. They will be
 lost in case of a full crash, but can be recalculated from the jury
 interface.
 </itemize>
@@ -1181,8 +1181,8 @@ x|contest          |Contest definitions with start/end time.@
 x|language         |Definition of allowed submission languages.@
 x|problem          |Definition of problems (name, corresponding contest, etc.).@
  |role             |Possible user roles.@
- |scoreboard&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
- |scoreboard&lowbar;public|separately, because of possibility of score freezing.@
+ |scorecache&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
+ |scorecache&lowbar;public|separately, because of possibility of score freezing.@
  |submission       |Submission metadata of solutions to problems.@
  |submission&lowbar;file  |Submitted code files.@
 x|team             |Definition of teams.@

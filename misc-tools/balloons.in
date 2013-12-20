@@ -115,7 +115,7 @@ while ( TRUE ) {
 
 			if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
 
-				$probs_solved = $DB->q('COLUMN SELECT probid FROM scoreboard_jury
+				$probs_solved = $DB->q('COLUMN SELECT probid FROM scorecache_jury
 				                        WHERE cid = %i AND teamid = %s AND is_correct = 1',
 				                       $cid, $row['login']);
 				$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
