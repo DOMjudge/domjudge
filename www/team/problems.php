@@ -134,11 +134,11 @@ $.plot(
 		echo "<td><a$link>" . $row['name'] . "</a></td>";
 
 		$solved = $DB->q('VALUE SELECT COUNT(*)
-				FROM scoreboard_public
+				FROM scorecache_public
 				WHERE probid = %s AND is_correct = 1 AND teamid!=%s', $row['probid'], 'domjudge');
 		echo "<td><a$link>" . $solved . "</a></td>";
 		$unsolved = $DB->q('VALUE SELECT COUNT(*)
-				FROM scoreboard_public
+				FROM scorecache_public
 				WHERE probid = %s AND is_correct = 0 AND teamid!=%s', $row['probid'], 'domjudge');
 		echo "<td><a$link>" . $unsolved . "</a></td>";
 		$ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
@@ -158,7 +158,7 @@ $.plot(
 			$sample_string = join(' | ', $sample_string);
 		}
 		echo "<td>$sample_string</td>";
-		$status = $DB->q('MAYBEVALUE SELECT is_correct FROM scoreboard_public WHERE probid=%s AND teamid=%s', $row['probid'], $login);
+		$status = $DB->q('MAYBEVALUE SELECT is_correct FROM scorecache_public WHERE probid=%s AND teamid=%s', $row['probid'], $login);
 		if ( $status === NULL ) {
 			$status = "untouched";
 		} else if ( $status == 1 ) {

@@ -25,10 +25,10 @@ if( ! $name ) {
 echo "<h1>Problem details</h1>\n";
 
 $solved = $DB->q('VALUE SELECT COUNT(*)
-		FROM scoreboard_public
+		FROM scorecache_public
 		WHERE probid = %s AND is_correct = 1 AND teamid!=%s', $pid, 'domjudge');
 $unsolved = $DB->q('VALUE SELECT COUNT(*)
-		FROM scoreboard_public
+		FROM scorecache_public
 		WHERE probid = %s AND is_correct = 0 AND teamid!=%s', $pid, 'domjudge');
 $ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 

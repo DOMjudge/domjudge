@@ -36,10 +36,10 @@ ALTER TABLE `event`
 ALTER TABLE `problem`
   MODIFY COLUMN `probid` varchar(50) NOT NULL COMMENT 'Unique ID (string)';
 
-ALTER TABLE `scoreboard_jury`
+ALTER TABLE `scorecache_jury`
   MODIFY COLUMN `probid` varchar(50) NOT NULL COMMENT 'Problem ID';
 
-ALTER TABLE `scoreboard_public`
+ALTER TABLE `scorecache_public`
   MODIFY COLUMN `probid` varchar(50) NOT NULL COMMENT 'Problem ID';
 
 ALTER TABLE `submission`
@@ -58,7 +58,7 @@ ALTER TABLE `testcase`
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('separate_start_end', '0', 'bool', 'Enable separate start and end times per problem in a contest.');
 
-UPDATE `configuration` SET `value` = '"Y-m-d H:i"' WHERE `name` = 'time_format';
+UPDATE `configuration` SET `value` = '"%Y-%m-%d %H:%M"' WHERE `name` = 'time_format';
 
 --
 -- Finally remove obsolete structures after moving data

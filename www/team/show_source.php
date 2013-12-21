@@ -21,7 +21,7 @@ $solved = $DB->q('VALUE SELECT COUNT(*) FROM judging WHERE submitid=%i AND resul
 if (!$solved) {
 	error("invalid request"); // this submission was not solved
 }
-$solved = $DB->q('MAYBEVALUE SELECT is_correct FROM scoreboard_public WHERE probid=%s AND teamid=%s', $source['probid'], $login);
+$solved = $DB->q('MAYBEVALUE SELECT is_correct FROM scorecache_public WHERE probid=%s AND teamid=%s', $source['probid'], $login);
 if (!$solved) {
 	error("invalid request"); // you did not solve the same problem
 }

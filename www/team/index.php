@@ -146,7 +146,7 @@ echo "</div>\n\n";
 echo "<h3 class=\"teamoverview\"><a name=\"stats\" href=\"#stats\">Stats</a></h3>\n\n";
 echo "<div id=\"stats\">\n";
 echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">solved</h3>\n\n";
-$solved = $DB->q('SELECT probid,submissions FROM scoreboard_public WHERE is_correct=1 AND teamid=%s AND cid=%i', $login, $cid);
+$solved = $DB->q('SELECT probid,submissions FROM scorecache_public WHERE is_correct=1 AND teamid=%s AND cid=%i', $login, $cid);
 if( $solved->count() == 0 ) {
 	echo "<p class=\"nodata\">No solved problems.</p>\n\n";
 } else {
@@ -155,7 +155,7 @@ if( $solved->count() == 0 ) {
 	}
 }
 echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">unsolved, but tried</h3>\n\n";
-$unsolved = $DB->q('SELECT probid,submissions FROM scoreboard_public WHERE is_correct=0 AND teamid=%s AND cid=%i', $login, $cid);
+$unsolved = $DB->q('SELECT probid,submissions FROM scorecache_public WHERE is_correct=0 AND teamid=%s AND cid=%i', $login, $cid);
 if( $unsolved->count() == 0 ) {
 	echo "<p class=\"nodata\">No unsolved problems.</p>\n\n";
 } else {

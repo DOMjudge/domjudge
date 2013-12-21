@@ -372,7 +372,7 @@ function putTeam($login) {
 	echo "</table>\n\n";
 
 	echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">solved</h3>\n\n";
-	$solved = $DB->q('SELECT probid,submissions FROM scoreboard_public WHERE is_correct=1 AND teamid=%s AND cid=%i', $login, getCurContest());
+	$solved = $DB->q('SELECT probid,submissions FROM scorecache_public WHERE is_correct=1 AND teamid=%s AND cid=%i', $login, getCurContest());
 	if( $solved->count() == 0 ) {
 		echo "<p class=\"nodata\">No solved problems.</p>\n\n";
 	} else {
@@ -381,7 +381,7 @@ function putTeam($login) {
 		}
 	}
 	echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">unsolved, but tried</h3>\n\n";
-	$unsolved = $DB->q('SELECT probid,submissions FROM scoreboard_public WHERE is_correct=0 AND teamid=%s AND cid=%i', $login, getCurContest());
+	$unsolved = $DB->q('SELECT probid,submissions FROM scorecache_public WHERE is_correct=0 AND teamid=%s AND cid=%i', $login, getCurContest());
 	if( $unsolved->count() == 0 ) {
 		echo "<p class=\"nodata\">No unsolved problems.</p>\n\n";
 	} else {
