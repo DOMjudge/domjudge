@@ -2325,7 +2325,11 @@ be run via makefile rules as follows:
 make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
 make maintainer-install
 </code>
-Note that these targets have to be executed <em>separately</em>.
+Note that these targets have to be executed <em>separately</em> and
+they replace the steps described in the section
+<ref id="install_config:installsystem" name="Installation system">;
+also no <tt>--prefix</tt> flag or other directoriess have to be
+specified to <tt>configure</tt>.
 
 <sect>Bootstrapping from Git repository sources
 <p>
