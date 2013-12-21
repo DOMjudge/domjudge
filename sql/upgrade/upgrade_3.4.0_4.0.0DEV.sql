@@ -86,7 +86,7 @@ CREATE TABLE `rankcache_jury` (
   `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
   PRIMARY KEY  (`cid`,`teamid`),
-  KEY `order` USING BTREE (`cid`,`correct`, `totaltime`),
+  KEY `order` (`cid`,`correct`, `totaltime`) USING BTREE,
   CONSTRAINT `rankcache_jury_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (jury version)';
 
@@ -96,7 +96,7 @@ CREATE TABLE `rankcache_public` (
   `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
   PRIMARY KEY  (`cid`,`teamid`),
-  KEY `order` USING BTREE (`cid`,`correct`,`totaltime`),
+  KEY `order` (`cid`,`correct`,`totaltime`) USING BTREE,
   CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
 
