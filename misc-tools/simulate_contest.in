@@ -136,8 +136,7 @@ while ( $cdata['cid']==$cid && difftime(now(),$cdata['endtime'])<0 ) { // bug!
 	// Check for submissions that require inserting at current time
 	foreach ( $submissions as &$subm ) {
 
-		$stime = strftime(MYSQL_DATETIME_FORMAT,
-		                  strtotime($cdata['starttime'],0) + $subm[$ftime]*60);
+		$stime = $cdata['starttime'] + $subm[$ftime]*60;
 
 		if ( !isset($subm['inserted']) && difftime($stime,now())<=0 ) {
 

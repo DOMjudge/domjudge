@@ -16,8 +16,10 @@ $KEYS['judging'] = array('judgingid');
 $KEYS['judging_run'] = array('runid');
 $KEYS['language'] = array('langid');
 $KEYS['problem'] = array('probid');
-$KEYS['scoreboard_jury'] = array('cid','teamid','probid');
-$KEYS['scoreboard_public'] = array('cid','teamid','probid');
+$KEYS['rankcache_jury'] = array('cid','teamid');
+$KEYS['rankcache_public'] = array('cid','teamid');
+$KEYS['scorecache_jury'] = array('cid','teamid','probid');
+$KEYS['scorecache_public'] = array('cid','teamid','probid');
 $KEYS['submission'] = array('submitid');
 $KEYS['submission_file'] = array('submitfileid');
 $KEYS['team'] = array('login');
@@ -90,8 +92,15 @@ $RELATIONS['problem'] = array (
 	'cid' => 'contest.cid',
 );
 
-$RELATIONS['scoreboard_jury'] =
-$RELATIONS['scoreboard_public'] = array (
+$RELATIONS['rankcache_jury'] =
+$RELATIONS['rankcache_public'] = array (
+	'cid' => 'contest.cid&CASCADE',
+	'teamid' => 'team.login&NOCONSTRAINT'
+);
+
+
+$RELATIONS['scorecache_jury'] =
+$RELATIONS['scorecache_public'] = array (
 	'cid' => 'contest.cid&NOCONSTRAINT',
 	'teamid' => 'team.login&NOCONSTRAINT',
 	'probid' => 'problem.probid&NOCONSTRAINT',

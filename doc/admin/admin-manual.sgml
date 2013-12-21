@@ -1,4 +1,8 @@
-<!doctype linuxdoc system>
+<!doctype linuxdoc system [
+<!ENTITY % admin "INCLUDE">
+<!ENTITY % judge "IGNORE">
+<!ENTITY domjudgeoverview SYSTEM "../domjudge-overview-inc.sgml">
+]>
 <!--
  DOMjudge Administrator's Manual
  This manual is part of the DOMjudge Programming Contest Jury System
@@ -27,188 +31,7 @@ Document version: %h
 
 <toc>
 
-<chapt>DOMjudge overview <label id="overview">
-<p>
-
-DOMjudge is a system for running programming contests, like the ACM
-ICPC regional and world championship programming contests.
-
-This means that teams are on-site and have a fixed time period (mostly
-5 hours) and one computer to solve a number of problems (mostly 6-10).
-Problems are solved by writing a program in one of the allowed
-languages, that reads input according to the problem input
-specification and writes the correct, corresponding output.
-
-The judging is done by submitting the source code of the solution to
-the jury. There the jury system automatically compiles and runs the
-program and compares the program output with the expected output.
-
-This software can be used to handle the submission and judging during
-such contests. It also handles feedback to the teams and communication
-on problems (clarification requests). It has web interfaces for the
-jury, the teams (their submissions and clarification requests) and the
-public (scoreboard).
-
-<sect>Features
-<p>
-
-A global overview of the features that DOMjudge provides:
-<itemize>
-<item>Automatic judging with distributed (scalable) judge hosts
-<item>Web interface for portability and simplicity
-<item>Modular system for plugging in languages/compilers and more
-<item>Detailed jury information (submissions, judgings) and options
-      (rejudge, clarifications)
-<item>Designed with security in mind
-<item>Has been used in many live contests
-<item>Open Source, Free Software
-</itemize>
-
-
-<sect>Requirements
-<p>
-
-This is a (rough) list of the requirements for DOMjudge.
-
-<itemize>
-<item>At least one machine running Linux, with (sudo) root access
-<item>Apache web server with PHP 5.2 or newer and PHP-command line interface
-<item>MySQL or MariaDB database server version 4.1.0 or newer
-<item>Compilers for the languages you want to support
-</itemize>
-
-A <ref id="install_config:requirements" name="detailed list of requirements">
-is contained in the <ref id="install_config" name="Installation and Configuration">
-chapter.
-
-<sect>Copyright and licencing
-<p>
-
-DOMjudge is developed by Jaap Eldering, Keith Johnson, Thijs
-Kinkhorst and Tobias Werth; Peter van de Werken has retired as
-developer. Many other people have contributed:
-Jeroen Bransen,
-Stijn van Drongelen,
-Rob Franken,
-Nicky Gerritsen,
-Jacob Kleerekoper,
-Jan Kuipers,
-Jeroen Schot,
-and Jeroen van Wolffelaar.
-Some code has been ported from the ETH Zurich fork by Christoph
-Krautz, Thomas Rast et al.
-
-Development is hosted at Study Association
-<htmlurl name="A-Eskwadraat" url="http://www.a-eskwadraat.nl/">,
-<htmlurl name="Utrecht University" url="http://www.uu.nl/">,
-The Netherlands.
-
-It is Copyright (c) 2004 - 2013 by the DOMjudge developers and its contributors.
-
-DOMjudge, including its documentation, is free software; you can redistribute
-it and/or modify it under the terms of the <url name="GNU General Public License"
-url="http://www.gnu.org/copyleft/gpl.html"> as published by the Free Software
-Foundation; either version 2, or (at your option) any later version. See the
-file COPYING.
-
-This software is partly based on code by other people. These
-acknowledgements are made in the respective files, but we would like
-to name them here too:
-<itemize>
-<item> dash (i386) is included, built from the Debian dash sources
-       (copyright various people, see <tt>doc/dash.copyright</tt>).
-<item> mkstemps.h and basename.h are modified versions from the
-       GNU libiberty library (copyright Free Software Foundation).
-<item> lib.database.php by Jeroen van Wolffelaar et al.
-<item> submit.cc and submitdaemon.cc are based on submit.pl and
-       submitdaemon.pl by Eelco Dolstra.
-<item> runguard.c was originally based on timeout from The
-       Coroner's Toolkit by Wietse Venema.
-<item> sorttable.js by Stuart Langridge.
-<item> jscolor.js by Jan Odvarko.
-<item> tabber.js by Patrick Fitzgerald.
-<item> GeSHi syntax highlighter library by Benny Baumann, Nigel McNie.
-<item> The DOMjudge logo is based on the NKP 2004 logo made by
-       Erik van Sebille.
-<item> Several icons have been taken from the phpMyAdmin project.
-<item> Several M4 autoconf macros from the <htmlurl name="Autoconf archive"
-       url="http://www.gnu.org/software/autoconf-archive/"> by various
-       people are included under <tt>m4/</tt>.
-</itemize>
-
-<sect1>Non-GPL licenced parts of DOMjudge
-<p>
-
-A binary version of the dash shell (statically compiled)
-is distributed with DOMjudge. This program is copyright by various
-people under the BSD licence and a part under the GNU GPL version 2,
-see <tt>COPYING.BSD</tt> and <tt>doc/dash.copyright</tt> for more details.
-Sources can be downloaded from:
-<url url="http://www.domjudge.org/sources/">.
-
-The <tt>sorttable.js</tt> script is copyright by Stuart Langridge and
-licenced under the MIT licence, see <tt>COPYING.MIT</tt>. This
-software was downloaded from
-<url url="http://www.kryogenix.org/code/browser/sorttable/">.
-The <tt>jscolor.js</tt> script is copyright by Jan Odvarko and licenced
-under the GNU LGPL. It was obtained at <url url="http://jscolor.com">.
-The <tt>tabber.js</tt> script is copyright by Patrick Fitzgerald and
-licenced under the MIT licence, see <tt>COPYING.MIT</tt>. It was
-downloaded from <url url="http://www.barelyfitz.com/projects/tabber/">.
-
-The M4 autoconf macros are licenced under all-permissive and GPL3+
-licences; see the respective files for details.
-
-DOMjudge includes specifications of a number of interfaces. These
-specifications are dedicated to the public domain, as
-specified in the <htmlurl
-name="Creative Commons Public Domain Dedication (CC0 1.0)"
-url="http://creativecommons.org/publicdomain/zero/1.0/">. These
-specifications can be found as appendices in the judge manual and as
-separate ASCII text files in the documentation directory:
-<itemize>
-<item> The checktestdata language grammar.
-<item> The DOMjudge problem format zip-bundle.
-</itemize>
-
-
-<sect1>About the name and logo
-<p>
-
-The name of this judging system is inspired by a very important and
-well known landmark in the city of Utrecht: the dome tower, called the
-`Dom' in Dutch. The logo of the 2004 Dutch Programming
-Championships (for which this system was originally developed) depicts
-a representation of the Dom in zeros and ones. We based the name and
-logo of DOMjudge on that.
-
-We would like to thank Erik van Sebille, the original creator of the
-logo. The logo is under a GPL licence, but Erik suggested a "free as
-in beer" licence first: you're allowed to use it, but you owe Erik a
-free beer in case might you encounter him.
-
-<sect>Contact
-<p>
-The DOMjudge homepage can be found at:
-<htmlurl name="http://www.domjudge.org/"
-url="http://www.domjudge.org/">
-
-We have a low volume <htmlurl name="mailing list for announcements"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
-of new releases.
-
-The authors can be reached through the development mailing list:
-<htmlurl name="domjudge-devel@lists.a-eskwadraat.nl"
-url="mailto:domjudge-devel@lists.a-eskwadraat.nl">. You need
-to be subscribed before you can post. See
-<htmlurl name="the list information page"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
-for subscription and more details.
-
-Some developers and users of DOMjudge linger on the IRC channel
-dedicated to DOMjudge on the Freenode network:
-server <tt>irc.freenode.net</tt>, channel <tt>#domjudge</tt>.
-Feel free to drop by with your questions and comments.
+&domjudgeoverview;
 
 <chapt>Contest planning<label id="contest_planning">
 <p>
@@ -322,7 +145,9 @@ The following software is required for running DOMjudge.
        executables.
 
 <item> Apache web server with support for PHP &gt;= 5.2.0 and the mysqli
-       and json extensions for PHP. We also recommend the posix extension
+       and json extensions for PHP. PHP needs to be running as an Apache
+       module (the most common configuration); a (fast)CGI setup is not
+       currently supported. We also recommend the posix extension
        for extra debugging information.
 
 <item> MySQL or MariaDB &gt;= 4.1.x database and client software
@@ -500,7 +325,7 @@ what should (not) happen.
 Optionally:
 <itemize>
 <item> Install the submit client on the team workstations.
-<item> Generate one-time passwords for all the teams in the web interface.
+<item> Generate passwords for all the teams in the web interface.
 <item> Further tighten the security of the system, e.g. by applying
        firewall rules.
 <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
@@ -549,7 +374,7 @@ apt-get install gcc g++ make mysql-server \
 </code>
 
 On a judgehost, the following should be sufficient. The last line shows some
-example compilers to install for C, C++, Java (GNU), Java (Oracle/Sun), Haskell
+example compilers to install for C, C++, Java (GNU), Java (Oracle), Haskell
 and Pascal; change the list as appropriate.
 
 <code>
@@ -706,7 +531,7 @@ must run the interpreter on the source. See <tt>compile_perl.sh</tt>
 and <tt>compile_java_javac.sh</tt> in <tt>lib/judge</tt> for
 examples.
 
-DOMjudge supports the use of Oracle (Sun) Java within a chroot environment. For
+DOMjudge supports the use of Oracle Java within a chroot environment. For
 this, a chroot environment which includes the Java libraries must
 first be built. This can be accomplished with the included script
 <tt>dj_make_chroot</tt>: run this as root and pass as arguments
@@ -948,8 +773,8 @@ maximum testcase size.
 <item>Root password: MySQL does not have a password for the root user
 by default. It's very desirable to set one.
 <item>When maximising performance is required, you can
-consider to use the <em>Memory</em> (formerly <em>Heap</em>) table
-for the scoreboard_public and scoreboard_jury tables. They will be
+consider to use the <em>Memory</em> table storage engine
+for the scorecache_public and scorecache_jury tables. They will be
 lost in case of a full crash, but can be recalculated from the jury
 interface.
 </itemize>
@@ -990,9 +815,8 @@ configuring the DOMjudge pages with an alias directive, or as a
 virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
 
-The judgehosts connect to DOMjudge via the DOMjudge API, via the
-web interface. You need to enable support for <tt>.htaccess</tt> files
-in Apache for this to work.
+The judgehosts connect to DOMjudge via the DOMjudge API so need
+to be able to access at least this part of the web interface.
 
 <sect>Logging &amp; debugging
 <p>
@@ -1065,6 +889,14 @@ or interpreted languages such as Python, then a complete chroot
 environment must be built and configured. See the appendix on
 <ref id="problems:java-chroot" name="setting up a chroot"> for more
 details.
+
+The judgehost connects to the domserver via a REST API. You need to
+create an account for the judgedaemons to use (this may be a
+shared account between all judgedaemons) with a difficult,
+random password and the 'judgehost' role. On each judgedaemon,
+create a file <tt>etc/restapi.secret</tt> containing the URL,
+username and password whitespace-separated on one line, for example:
+<verb>http://example.edu/domjudge/api/  judgehosts  MzfJYWF5agSlUfmiGEy5mgkfqU</verb>
 
 Upon its first connection to the domserver API the judgehost will be
 auto-registered and will be by default enabled. If you wish to
@@ -1219,32 +1051,6 @@ $ judgedaemon -n <X>
 </code>
 
 
-<sect1>Source code syntax highlighting
-<p>
-
-To support coloured display of submitted source code in the jury
-interface, two external classes of syntax highlighters are supported:
-<url name="GeSHi" url="http://qbnz.com/highlighter"> and the
-<url name="PEAR" url="http://pear.php.net">
-<url name="Text_Highlighter class" url="http://pear.php.net/package/Text_Highlighter/">. DOMjudge includes a copy of GeSHi under the <tt>lib/ext/</tt> dir, but
-tries to find either of those in your PHP include path. When none are
-found, DOMjudge falls back to source code display without highlighting.
-
-<sect2>GeSHi
-<p>
-GeSHi is included by default under the <tt>lib/ext/</tt> dir.
-
-<sect2>PEAR Text Highlighter
-<p>
-If you prefer the PEAR Text Highlighter, first move away the
-<tt>lib/ext/geshi</tt> directory.
-You can install the Text Highlighter system wide with the
-PEAR-provided tools, like this: <tt>pear install Text_Highlighter</tt>.
-Alternatively you can download the source code from the
-Text_Highlighter website and unpack that under the <tt>lib/ext/</tt>
-directory on the domserver. Rename the
-resulting <tt>Text_Highlighter-x.y.z</tt> directory to just <tt>Text</tt>.
-
 <sect1>NTP time synchronisation
 <p>
 
@@ -1374,15 +1180,18 @@ x|contest          |Contest definitions with start/end time.@
  |judging&lowbar;run      |Result of one testcase within a judging.@
 x|language         |Definition of allowed submission languages.@
 x|problem          |Definition of problems (name, corresponding contest, etc.).@
- |scoreboard&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
- |scoreboard&lowbar;public|separately, because of possibility of score freezing.@
+ |role             |Possible user roles.@
+ |scorecache&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
+ |scorecache&lowbar;public|separately, because of possibility of score freezing.@
  |submission       |Submission metadata of solutions to problems.@
- |submission_file  |Submitted code files.@
+ |submission&lowbar;file  |Submitted code files.@
 x|team             |Definition of teams.@
 x|team&lowbar;affiliation |Definition of institutions a team can be affiliated with.@
 x|team&lowbar;category    |Different category groups teams can be put in.@
  |team&lowbar;unread      |Records which clarifications are read by which team.@
-x|testcase         |Definition of testdata for each problem.
+x|testcase         |Definition of testdata for each problem.@
+x|user             |Users that will able to access the system.@
+x|userrole         |Mapping of users to their roles.
 </tabular>
 
 Now follows a longer description (including fields) per table that has
@@ -1396,8 +1205,10 @@ underscore characters are valid, i.e. <tt>a-z, A-Z, 0-9, -, &lowbar;</tt>.
 
 <descrip>
 <tag>configuration</tag>
-This table contains configuration settings and is work in progress.
-These entries are simply stored as <tt>name, value</tt> pairs.
+This table contains configuration settings.
+These entries are simply stored as <tt>name, value</tt> pairs, where
+the values are JSON encoded, <tt>type</tt> contains the allowed data
+type, and <tt>description</tt> documents the configuration setting.
 
 <tag>contest</tag>
 The contests that the software will run. E.g. a test session and the
@@ -1412,6 +1223,11 @@ open for submissions. Optional <tt>freezetime</tt> and
 <tt>unfreezetime</tt> control scoreboard freezing. For a
 detailed treating of these, see section <ref
 id="contestsetup:milestones" name="Contest milestones">.
+All contest times can be specified relative to <tt>starttime</tt>,
+except of course <tt>starttime</tt> itself. The input given in the
+jury interface (either relative or absolute) is stored in the
+<tt>*time_string</tt> fields, while a calculated absolute version is
+stored in the fields without the <tt>_string</tt> suffix.
 
 The <tt>enabled</tt> field can be unset to allow for easier editing of
 contest times, as disabled contests are not checked to overlap with
@@ -1474,22 +1290,11 @@ cross site scripting or other attacks. The file type is stored in
 <tt>problemtext_type</tt>.
 
 <tag>team</tag>
-Table of teams: <tt>login</tt> is the account/login-name of the team
+Table of teams: <tt>login</tt> is a short name for the team
 (which is referenced to in other tables as <tt>teamid</tt>) and
 <tt>name</tt> the displayed name of the team. <tt>categoryid</tt> is
 the ID of the category the team is in; <tt>affilid</tt> is the
 affiliation ID of the team.
-
-<tt>authtoken</tt> is a generic field used by several of the supported
-authentication mechanisms to store a piece of information it needs to
-identify the team. The content of the field for each of the mechanisms is:
-<itemize>
-<item>IPADDRESS: field contains the IP address of the team's workstation
-<item>PHP_SESSIONS: contains a hash of the password that the team can log in
-with
-<item>LDAP: contains the LDAP name (e.g. CN) corresponding to this
-DOMjudge user
-</itemize>
 
 When <tt>enabled</tt> is set to 0, the team immediately disappears from
 the scoreboards and cannot use the team web interface anymore, even
@@ -1511,16 +1316,11 @@ url="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Officially_assigned_code_el
 of the country and <tt>comments</tt> is a free form field
 that is displayed in the jury interface.
 
-Both for the country and the affiliation, a logo can be displayed on
-the scoreboard. For this to work, the <tt>affilid</tt> must match a
-logo picture located in
-<tt>www/images/affiliations/&lt;affilid&gt;.png</tt> and
-<tt>country</tt> must match a (flag) picture in
+A country flag can be displayed on the scoreboard. For this to work,
+the <tt>country</tt> field must match a (flag) picture in
 <tt>www/images/countries/&lt;country&gt;.png</tt>. All
 country flags are present there, named with their 3-character ISO
-codes. See also <tt>www/images/countries/README</tt>. If
-either file is not present the respective ID string will be printed
-instead.
+codes. See also <tt>www/images/countries/README</tt>.
 
 <tag>team_category</tag>
 <tt>categoryid</tt> is the reference ID and <tt>name</tt> is a string:
@@ -1548,6 +1348,12 @@ judgehosts. <tt>probid</tt> is the corresponding problem and
 <tt>description</tt> is an optional description for this testcase. See
 also <ref id="contestsetup:testdata" name="providing testdata">.
 
+<tag>user</tag>
+This table has the users that the system knows about with their
+login credentials. Each user may have one or more roles, like
+being part of a team, being a jury member or administrator.
+There are also functional accounts, like for judgedaemons.
+
 </descrip>
 
 <sect>Contest milestones<label id="contestsetup:milestones">
@@ -1566,9 +1372,10 @@ that was displayed before). Nothing can be submitted yet and the
 problem set is not revealed. Clarifications can be viewed and sent.
 
 At starttime, the scoreboard is displayed and submissions are accepted.
-At endtime the contest stops. New incoming submissions will be stored
-but not processed; unjudged submissions received before endtime will
-still be judged.
+At endtime the contest stops. New incoming submissions will still be
+processed and judged, but the result will not be shown anymore to teams;
+they instead receive the verdict`too-late'. Unjudged submissions received
+before endtime will still be judged normally.
 
 <em>freezetime</em> and <em>unfreezetime</em> control scoreboard
 freezing. freezetime is the time after which the public and team
@@ -1595,32 +1402,32 @@ contest at any time.
 
 
 
-<sect>Team authentication
+<sect>User authentication
 <label id="contestsetup:authentication">
 <p>
 
-The authentication system lets domserver know which team it is dealing
-with. This system is modular, allowing flexible addition of new
-methods, if required. The following methods are available by default
-for team authentication.
+The authentication system lets domserver know which user it is dealing
+with and which role(s) the user has. This system is modular, allowing
+flexible addition of new methods, if required. The following methods
+are available by default for authentication.
 
 <sect1>PHP session with passwords (default)
 <p>
 
-Each team receives a password and PHP's session management is used to
-keep track of which team is logged in. This method is easiest to
-setup. It does require the administrator to generate passwords for all
-teams (this can be done in the jury interface) and distribute those,
+Each user receives a password and PHP's session management is used to
+keep track of which user is logged in. This method is easiest to
+setup. It does require the administrator to generate users and passwords
+for all teams (this can be done in the jury interface) and distribute those,
 though. Also, each team has to login each time they (re)start their
 browser. The password is stored in a salted MD5 hash in the
-<tt>authtoken</tt> field in database (team table).
+<tt>password</tt> field in database (user table).
 
 <sect1>IP-address based
 <p>
 
 The IP-address of a team's workstation is used as the primary means of
 authentication. The system assumes that someone coming from a specific
-IP is the team with that IP listed in the team table. When a team
+IP is the user with that IP listed in the user table. When a team
 browses to the web interface, this is checked and the appropriate team
 page is presented.
 
@@ -1638,8 +1445,8 @@ There are three possible ways of configuring team IP-addresses.
 <p>
 
 Before the contest starts, when entering teams into the database, add
-the IP that each team will have to that team's entry in the
-<tt>authtoken</tt> field. When the teams
+the IP that each team will have to that user's entry in the
+<tt>ip_address</tt> field. When the teams
 arrive, everything will work directly and without further
 configuration (except when teams switch workplaces). If possible, this
 is the recommended modus operandi, because it's the least hassle just
@@ -1648,12 +1455,12 @@ before and during the contest.
 <sect2>Use one-time passwords
 <p>
 
-Supply the teams with a one time password with which to authenticate.
-Beforehand, generate passwords for each team in the jury interface.
-When the test session (or contest) starts and a team connects to the
-web interface and have an unknown IP, they will be prompted for
-username and password. Once supplied, the IP is stored and the
-password is removed and not needed anymore the next time.
+Supply the teams with a one time username and password with which to
+authenticate. Beforehand, generate passwords for each team in the jury
+interface. When the test session (or contest) starts and a team
+connects to the web interface and have an unknown IP, they will be
+prompted for username and password. Once supplied, the IP is stored
+and the assword is removed and not needed anymore the next time.
 
 This is also a secure option, but requires a bit more hassle from the
 teams, and maybe from the organisers who have to distribute pieces of
@@ -1663,8 +1470,8 @@ paper.
 authenticate themselves once. If an IP is set, a next authentication
 will be refused (to avoid trouble with lingering passwords). In order
 to fully re-authenticate a team, the IP address needs to be unset. You
-might also want to generate a new password for this specific team.
-Furthermore, a team must explicitly connect to the team interface,
+might also want to generate a new password for this specific user.
+Furthermore, a team must explicitly connect to the team interface URL,
 because with an unknown IP, the root DOMjudge website will redirect to
 the public interface.
 
@@ -1678,17 +1485,17 @@ the team interface cannot be viewed until at least one submission
 was made; there are also more constraints on the system.
 See the section on the Dolstra protocol for details.
 
-The <tt>authtoken</tt> field in the database contains either the
-IP-address, or an MD5 hash of the one-time password if this was set
-and the team has not authenticated yet.
+The user table in the database contains either the
+IP-address, or an MD5 hash of the one-time password
+when the team has not authenticated yet.
 
 <sect1>Using an external LDAP server
 <p>
 
 This method can be useful when you want to integrate DOMjudge into a
 larger system, or already have credentials on an LDAP server
-available. The <tt>authtoken</tt> field in the database must contain
-the LDAP username of the DOMjudge team. Furthermore, in
+available. The <tt>username</tt> field in the database must contain
+the LDAP username of the DOMjudge user. Furthermore, in
 <tt>etc/domserver-config.php</tt> the <tt>LDAP_*</tt> configuration
 settings must be adapted to your setup. Note that multiple (backup)
 servers can be specified: they are queried in order to try to
@@ -1698,17 +1505,17 @@ LDAP server(s), PHP sessions are used to track login into DOMjudge.
 <sect1>Fixed team authentication
 <p>
 
-This method automatically authenticates each connection to the team
-web interface as a fixed, configurable team. This can be useful for
+This method automatically authenticates each connection to the
+web interface as a fixed, configurable user. This can be useful for
 testing or demonstration purposes, but probably not for real use
-scenario's.
+scenarios.
 
 <sect1>Adding new authentication methods
 <p>
 
 The authentication system is modular and adding new authentication
 methods is fairly easy. The authentication is handled in the file
-<tt>lib/www/auth.team.php</tt>. Adding a new method amounts to editing
+<tt>lib/www/auth.php</tt>. Adding a new method amounts to editing
 the functions in that file to handle your specific case.
 
 
@@ -1749,8 +1556,9 @@ problem can also be imported from a zip-bundle on the problems
 overview webpage; in that case, note that if the file
 <tt>domjudge-problem.ini</tt> is not present, a default value is
 chosen for the unmodifiable primary key <tt>probid</tt> (as well as
-for the other keys).
-
+for the other keys). It is possible to upload multiple zip
+files in one go, each of which will be added as a separate
+problem.
 
 <sect>Start the daemons
 <p>
@@ -2012,8 +1820,8 @@ The web based tool is reachable from the main page in the jury
 interface, where each balloon has to be checked off by the person
 handing it out.
 
-For the daemon, set the BALLOON_CMD in <tt>bin/balloons</tt> to define
-how notifications
+For the daemon, set the <tt>BALLOON_CMD</tt> in
+<tt>etc/domserver-config.php</tt> to define how notifications
 are sent. Examples are to mail to a specific mailbox or to send
 prints to a printer. When configured, start <tt>bin/balloons</tt>
 and notification will start.

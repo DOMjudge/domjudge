@@ -77,7 +77,7 @@ while ( ($src = readdir($dh))!==FALSE ) {
 
 	$cid = substr($cid,1);
 	$sid = substr($sid,1);
-	$submittime = strftime(MYSQL_DATETIME_FORMAT,filemtime($f));
+	$submittime = filemtime($f);
 
 	// Store submission in array
 	if ( !isset($submissions[$sid]) ) {

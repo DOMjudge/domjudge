@@ -45,8 +45,8 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 <tr><td><label for="data_0__activatetime_string_">Activate time:</label></td>
 <td><?php echo addInput('data[0][activatetime_string]', @$row['activatetime_string'], 20, 19, 'required pattern="' . $pattern_dateorneg . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> -hh:mm)</td></tr>
 
-<tr><td><label for="data_0__starttime_">Start time:</label></td>
-<td><?php echo addInput('data[0][starttime]', @$row['starttime'], 20, 19, 'required pattern="' . $pattern_datetime . '"')?> (yyyy-mm-dd hh:mm:ss)</td></tr>
+<tr><td><label for="data_0__starttime_string_">Start time:</label></td>
+<td><?php echo addInput('data[0][starttime_string]', @$row['starttime_string'], 20, 19, 'required pattern="' . $pattern_datetime . '"')?> (yyyy-mm-dd hh:mm:ss)</td></tr>
 
 <tr><td><label for="data_0__freezetime_string_">Scoreboard freeze time:</label></td>
 <td><?php echo addInput('data[0][freezetime_string]', @$row['freezetime_string'], 20, 19, 'pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
@@ -112,7 +112,7 @@ echo '<tr><td>Activate time:</td><td>' .
 	htmlspecialchars(@$data['activatetime_string']) .
 	"</td></tr>\n";
 echo '<tr><td>Start time:</td><td>' .
-	htmlspecialchars($data['starttime']) .
+	htmlspecialchars($data['starttime_string']) .
 	"</td></tr>\n";
 echo '<tr><td>Scoreboard freeze:</td><td>' .
 	(empty($data['freezetime_string']) ? "-" : htmlspecialchars(@$data['freezetime_string'])) .

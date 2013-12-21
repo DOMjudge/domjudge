@@ -117,7 +117,7 @@ if ( $submdata['valid'] ) {
 <tr><td>Language:</td><td>
 	<a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a></td></tr>
-<tr><td>Submitted:</td><td><?php echo  htmlspecialchars($submdata['submittime']) ?></td></tr>
+<tr><td>Submitted:</td><td><?php echo printtime($submdata['submittime']) ?></td></tr>
 <tr><td>Source:</td><td>
 	<a href="show_source.php?id=<?php echo $id?>">view source code</a></td></tr>
 <tr><td>Max runtime:</td><td>
@@ -247,15 +247,14 @@ if ( isset($jid) )  {
 	}
 
 	// Time (start, end, used)
-	echo "<p class=\"judgetime\">Judging started: " . htmlspecialchars($jud['starttime']);
+	echo "<p class=\"judgetime\">Judging started: " . printtime($jud['starttime'],'%H:%M:%S');
 
-	$unix_start = strtotime($jud['starttime']);
 	if ( $judging_ended ) {
-		echo ', ended: ' . htmlspecialchars($jud['endtime']) .
+		echo ', ended: ' . printtime($jud['endtime'],'%H:%M:%S') .
 			' (judging took '.
-				printtimediff($unix_start, strtotime($jud['endtime']) ) . ')';
+				printtimediff($jud['starttime'], $jud['endtime']) . ')';
 	} elseif ( $jud['valid'] ) {
-		echo ' [still judging - busy ' . printtimediff($unix_start) . ']';
+		echo ' [still judging - busy ' . printtimediff($jud['starttime']) . ']';
 	} else {
 		echo ' [aborted]';
 	}
@@ -322,9 +321,9 @@ if ( isset($jid) )  {
 		"<tr><th scope=\"col\">#</th><th scope=\"col\">runtime</th>" .
 		"<th scope=\"col\">result</th>";
 	if ( $lastjud !== NULL ) {
-		echo "<th scope=\"col\" name=\"lastruntime\">" .
+		echo "<th scope=\"col\" class=\"lastruntime\">" .
 			"<span class=\"prevsubmit\">s$lastsubmitid runtime</span></th>" .
-			"<th scope=\"col\" name=\"lastresult\">" .
+			"<th scope=\"col\" class=\"lastresult\">" .
 			"<span class=\"prevsubmit\">s$lastsubmitid result</span></th>";
 	}
 
@@ -352,9 +351,9 @@ if ( isset($jid) )  {
 		if ( $lastjud !== NULL ) {
 			$lastrun = $lastruninfo[$key];
 			if ( $lastjud['result']=='compiler-error' ) $lastrun['runresult'] = 'compiler-error';
-			echo "<td name=\"lastruntime\"><a href=\"$link\">" .
+			echo "<td class=\"lastruntime\"><a href=\"$link\">" .
 				"<span class=\"prevsubmit\">" . sprintf('%.2f', $lastrun['runtime']) . "</span></a></td>" .
-				"<td name=\"lastresult\"><a href=\"$link\">" .
+				"<td class=\"lastresult\"><a href=\"$link\">" .
 				"<span class=\"sol prevsubmit\">$lastrun[runresult]</span></a></td>";
 		}
 
@@ -373,9 +372,9 @@ if ( isset($jid) )  {
 	    "<td title=\"max/sum runtime\"><a>" .
 	    sprintf('%.2f/%.2f',$max_runtime,$sum_runtime) . "</a></td>" .
 	    "<td><a>" . printresult(@$jud['result']) . "</a></td>" .
-	    "<td name=\"lastruntime\" title=\"previous max/sum runtime\"><a>" .
+	    "<td class=\"lastruntime\" title=\"previous max/sum runtime\"><a>" .
 	    sprintf('%.2f/%.2f',$max_lastruntime,$sum_lastruntime) . "</a></td>" .
-	    "<td name=\"lastresult\"><a><span class=\"sol prevsubmit\">" . @$lastjud['result'] . "</span></a></td>" .
+	    "<td class=\"lastresult\"><a><span class=\"sol prevsubmit\">" . @$lastjud['result'] . "</span></a></td>" .
 	    "<td></td></tr>\n" .
 	    "</tfoot>\n</table>\n\n";
 

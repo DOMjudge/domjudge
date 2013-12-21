@@ -47,7 +47,7 @@ if ( ! isset($_POST['cancel']) ) {
 
 		// special case for many-to-many mappings
 		$mappingdata = null;
-		if ( is_array($itemdata['mapping']) ) {
+		if ( is_array(@$itemdata['mapping']) ) {
 			$mappingdata = $itemdata['mapping'];
 			unset($itemdata['mapping']);
 		}

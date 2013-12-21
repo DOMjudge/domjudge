@@ -9,7 +9,7 @@
 require('init.php');
 
 $id = (int)@$_REQUEST['id'];
-$title = 'User '.htmlspecialchars(@$id);
+$title = $id ? 'User '.htmlspecialchars(@$id) : 'Add user';
 
 if ( isset($_GET['cmd'] ) ) {
     $cmd = $_GET['cmd'];
@@ -35,6 +35,7 @@ if ( !empty($cmd) ):
         $row = $DB->q('TUPLE SELECT * FROM user WHERE userid = %s',
             $id);
         echo addHidden('keydata[0][userid]', $row['userid']);
+        echo addHidden('keydata[0][username]', $row['username']);
         echo htmlspecialchars($row['username']);
     } else {
         echo "<tr><td><label for=\"data_0__login_\">Username:</label></td><td class=\"username\">";
@@ -48,9 +49,12 @@ if ( !empty($cmd) ):
 <tr><td><label for="data_0__email_">Email:</label></td>
 <td><?php echo addInputField('email', 'data[0][email]', @$row['email'], ' size="35" maxlength="255"')?></td></tr>
 
-<tr><td><label for="data_0__authtoken_">Auth token:</label></td>
-<td><?php echo addInput('data[0][authtoken]', @$row['authtoken'], 35, 255)?></td></tr>
-
+<tr><td><label for="data_0__password_">Password:</label></td><td><?php
+if ( !empty($row['password']) ) {
+	echo "<em>set</em>";
+} else {
+	echo "<em>not set</em>";
+} ?> - to change: <?php echo addInputField('password', 'data[0][password]', "", ' size="19" maxlength="255"')?></td></tr>
 <tr><td><label for="data_0__ip_address_">IP Address:</label></td>
 <td><?php echo addInput('data[0][ip_address]', @$row['ip_address'], 35, 255)?></td></tr>
 
@@ -63,7 +67,7 @@ if ( !empty($cmd) ):
 <td><?php
 $tmap = $DB->q("KEYVALUETABLE SELECT login,name FROM team ORDER BY name");
 $tmap[''] = 'none';
-echo addSelect('data[0][teamid]', $tmap, @$row['teamid'], true);
+echo addSelect('data[0][teamid]', $tmap, isset($row['teamid'])?$row['teamid']:@$_GET['forteam'], true);
 ?>
 </td></tr>
 
@@ -121,7 +125,20 @@ if ( $row['enabled'] != 1 ) {
 <div class="col1"><table>
 <tr><td>Login:     </td><td class="teamid"><?php echo $row['username']?></td></tr>
 <tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
-<tr><td>Email:      </td><td><?php echo htmlspecialchars($row['email'])?></td></tr>
+<tr><td>Email:      </td><td><?php
+if ( !empty($row['email']) ) {
+	echo "<a href=\"mailto:" . urlencode($row['email']) . "\">" .
+	     htmlspecialchars($row['email']) . "</a>";
+} else {
+	echo "-";
+}
+?></td></tr>
+<tr><td>Password:  </td><td><?php
+if ( !empty($row['password']) ) {
+	echo "set";
+} else {
+	echo "not set";
+} ?></td></tr>
 <tr><td>Roles:</td>
     <td><?php
     if ($roles->count() == 0) echo "No roles assigned";
@@ -131,7 +148,14 @@ if ( $row['enabled'] != 1 ) {
         }
     }
     ?></td></tr>
-<tr><td>Team:</td><td class="teamid"><?php echo htmlspecialchars($row['teamid'])?></td></tr>
+<tr><td>Team:</td><?php
+if ( $row['teamid'] ) {
+	echo "<td class=\"teamid\"><a href=\"team.php?id=" .
+	     urlencode($row['teamid']) . "\">" .
+	     htmlspecialchars($row['teamid']) . "</a></td>";
+} else {
+	echo "<td>-</td>";
+} ?></tr>
 <tr><td>Last login:</td><td><?php echo htmlspecialchars($row['last_login'])?></td></tr>
 <tr><td>Last IP:   </td><td><?php echo
     (@$row['ip_address'] ? printhost($row['ip_address'], TRUE):'') ?></td></tr>

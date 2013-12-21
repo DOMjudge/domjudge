@@ -90,6 +90,10 @@ const char output_timelimit_str[4][16] = {
 	"hard-timelimit",
 	"hard-timelimit"
 };
+/* Bitmask of soft/hard timelimit (used in array above and
+ * {wall,cpu}timelimit_reached variabled below). */
+const int soft_timelimit = 1;
+const int hard_timelimit = 2;
 
 const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
 
@@ -324,12 +328,12 @@ void output_exit_time(int exitcode)
 	        walldiff, userdiff, sysdiff);
 
 	if ( use_walltime && walldiff > walltime[0] ) {
-		walllimit_reached |= 1;
+		walllimit_reached |= soft_timelimit;
 		warning("timelimit exceeded (soft wall time)");
 	}
 
 	if ( use_cputime && cpudiff > cputime[0] ) {
-		cpulimit_reached |= 1;
+		cpulimit_reached |= soft_timelimit;
 		warning("timelimit exceeded (soft cpu time)");
 	}
 
@@ -346,6 +350,10 @@ void output_exit_time(int exitcode)
 			break;
 		default:
 			error(0,"cannot write unknown time type `%d' to file",outputtimetype);
+		}
+		/* Hard limitlimit reached always has precedence. */
+		if ( (walllimit_reached | cpulimit_reached) & hard_timelimit ) {
+			timelimit_reached |= hard_timelimit;
 		}
 
 		if ( (outputfile = fopen(timefilename,"w"))==NULL ) {
@@ -490,7 +498,7 @@ void terminate(int sig)
 	}
 
 	if ( sig==SIGALRM ) {
-		walllimit_reached |= 2;
+		walllimit_reached |= hard_timelimit;
 		warning("timelimit exceeded (hard wall time): aborting command");
 	} else {
 		warning("received signal %d: aborting command",sig);
@@ -1095,7 +1103,7 @@ int main(int argc, char **argv)
 		if ( ! WIFEXITED(status) ) {
 			if ( WIFSIGNALED(status) ) {
 				if ( WTERMSIG(status)==SIGXCPU ) {
-					cpulimit_reached |= 2;
+					cpulimit_reached |= hard_timelimit;
 					warning("timelimit exceeded (hard cpu time)");
 				} else {
 					warning("command terminated with signal %d",WTERMSIG(status));

@@ -27,7 +27,7 @@
 #error "Commandline submission requested, but network headers not available."
 #endif
 #if ( SUBMIT_ENABLE_WEB && ! ( HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H ) )
-#error "Webinterface submission requested, but libcURL not available."
+#error "Webinterface submission requested, but libcURL or libJSONcpp not available."
 #endif
 
 /* Standard include headers */
@@ -469,7 +469,7 @@ void usage()
 	       "    %s --problem e --language=cpp ProblemE.cc\n\n",progname);
 	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
 	       "    %s -p hello -l C HelloWorld.cpp\n\n",progname);
-	printf("Submit multiple files (the problem and languare are taken from the first):\n"
+	printf("Submit multiple files (the problem and language are taken from the first):\n"
 	       "    %s hello.java message.java\n\n",progname);
 	printf(
 "The following options should not be necessary for normal use:\n"

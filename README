@@ -56,16 +56,12 @@ are covered by other copyrights. This will be noted in the files
 themselves and these copyrights/attributions can also be found in the
 administrator manual.
 
-The lib/ext/ dir contains convenience copies of libraries produced
-by other projects and used by DOMjudge. They are licenced as follows:
-- geshi: GeSHi Syntax Highlighter, copyright Benny Baumann, Nigel McNie.
-  Licenced under the GNU GPL version 2+.
-
 Various JavaScript libraries/snippets are included under www/js/:
 - sorttable.js: copyright Stuart Langridge, licenced under the MIT
   licence, see COPYING.MIT.
 - jscolor.js: copyright Jan Odvarko, licenced under the GNU LGPL.
 - tabber.js: copyright Patrick Fitzgerald, licenced under the MIT licence.
+- ace editor: licenced under BSD licence, see COPYING.BSD.
 
 The M4 autoconf macros are licenced under all-permissive and GPL3+
 licences; see the respective files under m4/ for details.

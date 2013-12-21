@@ -139,16 +139,6 @@ function judgings_POST($args)
 	$active = $DB->q('MAYBEVALUE SELECT active FROM judgehost WHERE hostname = %s', $host);
 	if ( !$active ) return '';
 
-	// we have to check for the judgability of problems/languages this way,
-	// because we use an UPDATE below where joining is not possible.
-	$probs = $DB->q('COLUMN SELECT probid FROM problem WHERE allow_judge = 1');
-	if ( count($probs) == 0 ) return '';
-	$judgable_prob = array_unique(array_values($probs));
-
-	$langs = $DB->q('COLUMN SELECT langid FROM language WHERE allow_judge = 1');
-	if ( count($langs) == 0 ) return '';
-	$judgable_lang = array_unique(array_values($langs));
-
 	$cdata = getCurContest(TRUE);
 	$cid = $cdata['cid'];
 
@@ -156,13 +146,12 @@ function judgings_POST($args)
 	$submitid = $DB->q('MAYBEVALUE SELECT submitid
 	                    FROM submission s
 	                    LEFT JOIN team t ON (s.teamid = t.login)
-	                    WHERE judgehost IS NULL AND cid = %i
-	                    AND langid IN (%As) AND probid IN (%As)
-	                    AND submittime < %s AND valid = 1
+	                    LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
+	                    WHERE judgehost IS NULL AND s.cid = %i
+			    AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
 	                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
 	                    LIMIT 1',
-	                    $cid, $judgable_lang, $judgable_prob,
-	                    $cdata['endtime']);
+	                    $cid);
 
 	if ( $submitid ) {
 		// update exactly one submission with our judgehost name
@@ -498,6 +487,9 @@ $api->provideFunction('GET', 'testcase_files', 'testcase_files', $doc, $args, $e
 
 /**
  * Judging Queue
+ *
+ * FIXME: duplicates code with judgings_post
+ * not used in judgedaemon
  */
 function queue($args)
 {
@@ -507,32 +499,18 @@ function queue($args)
 	$cdata = getCurContest(TRUE);
 	$cid = $cdata['cid'];
 
-	// we have to check for the judgability of problems/languages this way,
-	// because we use an UPDATE below where joining is not possible.
-	$probs = $DB->q('COLUMN SELECT probid FROM problem WHERE allow_judge = 1');
-	if( count($probs) == 0 ) {
-		return '';
-	}
-	$judgable_prob = array_unique(array_values($probs));
-	$langs = $DB->q('COLUMN SELECT langid FROM language WHERE allow_judge = 1');
-	if( count($langs) == 0 ) {
-		return '';
-	}
-	$judgable_lang = array_unique(array_values($langs));
-
 	$hasLimit = array_key_exists('limit', $args);
 	// TODO: validate limit
 
 	$submitids = $DB->q('SELECT submitid
 			     FROM submission s
 			     LEFT JOIN team t ON (s.teamid = t.login)
-			     WHERE judgehost IS NULL AND cid = %i
-			     AND langid IN (%As) AND probid IN (%As)
-			     AND submittime < %s AND valid = 1
+	                     LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
+			     WHERE judgehost IS NULL AND s.cid = %i
+			     AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
 			     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC'
 			     . ($hasLimit ? ' LIMIT %i' : ' %_'),
-			     $cid, $judgable_lang, $judgable_prob,
-			     $cdata['endtime'],
+			     $cid, 
 			     ($hasLimit ? $args['limit'] : -1));
 
 	return $submitids->getTable();

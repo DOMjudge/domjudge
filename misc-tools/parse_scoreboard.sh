@@ -33,16 +33,13 @@ for ((i=0; i<${#fields[@]}; i++)); do header[$i]=${fields[$i]} ; done
 # Check to see if 'team' and 'solved' headers can be found, note that
 # 'affil' header may (not) be available..
 nprobs=0
-if [ ${header[1]} = 'team' -a ${header[2]} = 'score' ]; then
-	probstart=4
-	fteam=1
-	nprobs=$((${#header[@]} - probstart))
+if [ ${header[1]} != 'team' -o ${header[2]} != 'score' ]; then
+	echo "Error: input does not look like a DOMjudge scoreboard dump."
+	exit 1
 fi
-if [ ${header[2]} = 'team' -a ${header[3]} = 'score' ]; then
-	probstart=5
-	fteam=2
-	nprobs=$((${#header[@]} - probstart))
-fi
+probstart=4
+fteam=1
+nprobs=$((${#header[@]} - probstart + 1))
 if [ $nprobs -lt 1 ]; then
 	echo "Error: input does not look like a DOMjudge scoreboard dump."
 	exit 1
@@ -57,11 +54,11 @@ while readcsvline ; do
 	team=${fields[$fteam]}
 	for ((i=probstart; i<probstart+nprobs; i++)); do
 		# Check if the problem is solved:
-		[ "${fields[$i]#*(}" = "${fields[$i]}" ] && continue
+		[ "${fields[$i]#*/}" = "${fields[$i]}" ] && continue
 
-		prob=${header[$i]}
-		nsub="${fields[$i]%% *}"
-		time=`echo "${fields[$i]}" | sed -r 's/.* \(([0-9]+) \+ [0-9]+\)/\1/'`
+		prob=${header[$((i-1))]}
+		nsub="${fields[$i]%%/*}"
+		time="${fields[$i]##*/}"
 
 		# Insert wrong-answer submissions (one minute before correct
 		# submission) to get right amount of penalty time.

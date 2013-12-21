@@ -9,7 +9,7 @@
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
 require(ETCDIR . '/judgehost-config.php');
-$credfile = ETCDIR . '/restpasswords.secret';
+$credfile = ETCDIR . '/restapi.secret';
 $credentials = @file($credfile);
 if (!$credentials) {
 	user_error("Cannot read REST API credentials file " . $credfile,
@@ -18,7 +18,7 @@ if (!$credentials) {
 }
 foreach ($credentials as $credential) {
 	if ( $credential{0} == '#' ) continue;
-	list ($resturl, $restuser, $restpass) = explode("\t", trim($credential));
+	list ($resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
 	break;
 }
 if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
@@ -274,7 +274,7 @@ function judge($row)
 	// If a database gets reset without removing the judging
 	// directories, we might hit an old directory: rename it.
 	if ( file_exists($workdir) ) {
-		$oldworkdir = $workdir . '-old-' . getmypid() . '-' . now();
+		$oldworkdir = $workdir . '-old-' . getmypid() . '-' . strftime('%Y-%m-%d_%H:%M');
 		if ( !rename($workdir, $oldworkdir) ) {
 			error("Could not rename stale working directory to '$oldworkdir'");
 		}
@@ -284,6 +284,10 @@ function judge($row)
 
 	system("mkdir -p '$workdir/compile'", $retval);
 	if ( $retval != 0 ) error("Could not create '$workdir/compile'");
+
+	// Make sure the workdir is accessible for the domjudge-run user.
+	// Will be revoked again after this run finished.
+	chmod($workdir, 0755);
 
 	if ( !chdir($workdir) ) error("Could not chdir to '$workdir'");
 
@@ -317,7 +321,11 @@ function judge($row)
 		. '&output_compile=' . rest_encode_file($workdir . '/compile.out'));
 
 	// compile error: our job here is done
-	if ( ! $compile_success ) return;
+	if ( ! $compile_success ) {
+		// revoke readablity for domjudge-run user to this workdir
+		chmod($workdir, 0700);
+		return;
+	}
 
 	// Optionally create chroot environment
 	if ( USE_CHROOT && CHROOT_SCRIPT ) {
@@ -326,10 +334,7 @@ function judge($row)
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}
 
-	// Make sure the workdir is accessible for the domjudge-run user.
-	// Will be revoked again after this run finished.
-	chmod ($workdir, 0755);
-
+	$totalcases = 0;
 	while ( TRUE ) {
 		// get the next testcase
 		$testcase = request('testcases', 'GET', 'judgingid=' . urlencode($row['judgingid']));
@@ -338,6 +343,7 @@ function judge($row)
 		// empty means: no more testcases for this judging.
 		if ( empty($tc) ) break;
 
+		$totalcases++;
 		logmsg(LOG_DEBUG, "Running testcase $tc[rank]...");
 		$testcasedir = $workdir . "/testcase" . sprintf('%03d', $tc['rank']);
 
@@ -382,7 +388,7 @@ function judge($row)
 		system("mkdir -p '$programdir'", $retval);
 		if ( $retval!=0 ) error("Could not create directory '$programdir'");
 
-		system("cp -pPRl '$workdir'/compile/* '$programdir'", $retval);
+		system("cp -PR '$workdir'/compile/* '$programdir'", $retval);
 		if ( $retval!=0 ) error("Could not copy program to '$programdir'");
 
 		// do the actual test-run
@@ -429,6 +435,11 @@ function judge($row)
 		logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
 		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
+	}
+
+	// Sanity check: need to have had at least one testcase
+	if ( $totalcases == 0 ) {
+		logmsg(LOG_WARNING, "No testcases judged for s$row[submitid]/j$row[judgingid]!");
 	}
 
 	// done!

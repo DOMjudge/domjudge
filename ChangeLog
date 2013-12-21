@@ -4,16 +4,25 @@ Version 4.0.0 - DEV
 -------------------
  - [INCOMPATIBLE CHANGE] checktestdata logical operators are now '&&' and '||'.
  - Introduce REST API; used by judgedaemon to communicate with domserver.
+ - New scoreboard layout: more compact, affil. logos replaced by names.
+ - Store timestamps in database as Unix epoch, independent of time zones
+   with subsecond resolution.
  - Store recognized language extensions in database and query from
    submit client through REST API.
  - Show diff of team and reference output even if run stopped prematurely.
  - Make timelimit overshoot margin configurable.
+ - Judge too-late submissions without scoring them (Closes #99).
  - Update jscolor and sorttable javascript to latest upstream versions.
  - Misc. minor bugs fixed reported by Coverity scan.
  - Replace flex++ by flexc++, fixes a missing build dep. and code cleanup.
  - Add support for new languages: Prolog, Ruby.
  - Add note that submit client requires the IPADDRESS (or FIXED)
    authentication method (Closes #125).
+ - Replace GeSHi syntax highlighter with Ace javascript code editor.
+ - [security] Compile as unprivileged user to prevent compile-time access
+   to e.g. testdata files.
+ - Added rankcache_* tables to improve scoreboard page for large contests
+   (thanks to the Amrita people), renamed scoreboard_* tables to match.
 
 Online-judge branch specific changes:
  - Add time_format configuration variable for webpage date/time display.

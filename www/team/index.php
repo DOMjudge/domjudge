@@ -40,7 +40,9 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 	echo "function getMainExtension(ext)\n{\n";
 	echo "\tswitch(ext) {\n";
 	foreach ( $langdata as $langid => $extensions ) {
-		foreach ( json_decode($extensions) as $ext ) {
+		$exts = json_decode($extensions);
+		if ( !is_array($exts) ) continue;
+		foreach ( $exts as $ext ) {
 			echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
 		}
 	}

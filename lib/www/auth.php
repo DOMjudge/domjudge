@@ -127,7 +127,7 @@ function show_failed_login($msg)
 // not return.
 function show_loginpage()
 {
-	global $ip;
+	global $ip, $pagename;
 
 	switch ( AUTH_METHOD ) {
 	case 'EXTERNAL':
@@ -265,7 +265,7 @@ function do_login()
 
 		if ( !$userdata ||
 			 $userdata['enabled']!='1' ||
-		     !ldap_check_credentials($userdata['authtoken'], $pass) ) {
+		     !ldap_check_credentials($userdata['username'], $pass) ) {
 			sleep(3);
 			show_failed_login("Invalid username or password supplied. " .
 			                  "Please try again or contact a staff member.");
@@ -310,7 +310,7 @@ function do_login_native($user, $pass)
 	global $DB, $userdata, $username;
 
 	$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
-			    WHERE username = %s AND authtoken = %s',
+			    WHERE username = %s AND password = %s',
 			   $user, md5($user."#".$pass));
 
 	if ( !$userdata || $userdata['enabled']!='1') {

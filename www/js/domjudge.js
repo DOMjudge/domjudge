@@ -13,7 +13,7 @@ function XMLHttpHandle()
 	return ajaxRequest;
 }
 
-function updateClarifications(ajaxtitle)
+function updateClarifications(doreload)
 {
 	var handle = XMLHttpHandle();
 	if (!handle) {
@@ -30,9 +30,11 @@ function updateClarifications(ajaxtitle)
 				newstr = ' ('+cnew+' new)';
 				elem.className = 'new';
 			}
-			elem.innerHTML = 'clarifications' + newstr;
-			if(ajaxtitle) {
-				document.title = ajaxtitle + newstr;
+			if ( elem.innerHTML != 'clarifications' + newstr ) {
+				elem.innerHTML = 'clarifications' + newstr;
+				if(doreload) {
+					location.reload()
+				}
 			}
 		}
 	};
@@ -241,7 +243,7 @@ function addFileUpload() {
 function togglelastruns() {
 	var names = {'lastruntime':0, 'lastresult':1};
 	for (var name in names) {
-		cells = document.getElementsByName(name);
+		cells = document.getElementsByClassName(name);
 		for (i = 0; i < cells.length; i++) {
 			cells[i].style.display = (cells[i].style.display == 'none') ? 'table-cell' : 'none';
 		}

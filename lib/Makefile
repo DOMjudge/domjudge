@@ -15,7 +15,6 @@ clean-l:
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_libdir)    *.php
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_libwwwdir) www/*.php
-	cp -pR ext/* $(DESTDIR)$(domserver_libextdir)
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libdir)    alert
 
 install-judgehost:

@@ -6,9 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-/** Constant to define MySQL datetime format in strftime() function notation. */
-define('MYSQL_DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S');
-
 /** Perl regex class of allowed characters in identifier strings. */
 define('IDENTIFIER_CHARS', '[a-zA-Z0-9_-]');
 
@@ -47,7 +44,7 @@ function getCurContest($fulldata = FALSE) {
 
 	global $DB;
 	$now = $DB->q('MAYBETUPLE SELECT * FROM contest
-	               WHERE enabled = 1 AND activatetime <= NOW()
+	               WHERE enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
 	               ORDER BY activatetime DESC LIMIT 1');
 
 	if ( $now == NULL ) return FALSE;
@@ -173,13 +170,13 @@ function calcScoreRow($cid, $team, $prob) {
 	}
 
 	// insert or update the values in the public/team scores table
-	$DB->q('REPLACE INTO scoreboard_public
+	$DB->q('REPLACE INTO scorecache_public
 	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
 	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
 	       $cid, $team, $prob, $submitted_p, $pending_p, $time_p, $correct_p);
 
 	// insert or update the values in the jury scores table
-	$DB->q('REPLACE INTO scoreboard_jury
+	$DB->q('REPLACE INTO scorecache_jury
 	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
 	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
 	       $cid, $team, $prob, $submitted_j, $pending_j, $time_j, $correct_j);
@@ -188,7 +185,96 @@ function calcScoreRow($cid, $team, $prob) {
 		error("calcScoreRow failed to release lock '$lockstr'");
 	}
 
+	// If we found a new correct result, update the rank cache too
+	if ( $correct_j > 0 ) {
+		updateRankCache($cid, $team, true);
+	}
+	if ( $correct_p > 0 ) {
+		updateRankCache($cid, $team, false);
+	}
+
 	return;
+}
+
+/**
+ * Update tables used for efficiently computing team ranks
+ *
+ * Given a contestid and teamid (re)calculate the time 
+ * and solved problems for a team. Third parameter indictates
+ * if the cache for jury of public should be updated.
+ *
+ * Due to current transactions usage, this function MUST NOT contain
+ * any START TRANSACTION or COMMIT statements.
+ */
+function updateRankCache($cid, $team, $jury) {
+	global $DB;
+
+	logmsg(LOG_DEBUG, "updateRankCache '$cid' '$team' '$jury'");
+
+	// Find table name
+	$tblname = $jury ? 'jury' : 'public';
+
+	// First acquire an advisory lock to prevent other calls to
+	// calcScoreRow() from interfering with our update.
+	$lockstr = "domjudge.$cid.$team.$tblname";
+	if ( $DB->q("VALUE SELECT GET_LOCK('$lockstr',3)") != 1 ) {
+		error("updateRankCache failed to obtain lock '$lockstr'");
+	}
+
+	// Fetch values from scoreboard cache per problem
+	$scoredata = $DB->q("SELECT submissions, is_correct, totaltime
+	                     FROM scorecache_$tblname
+	                     WHERE cid = %i and teamid = %s", $cid, $team);
+	$num_correct = 0;
+	$total_time = 0;
+	while ( $srow = $scoredata->next() ) {
+		// Only count solved problems
+		if ( $srow['is_correct'] ) {
+			$penalty = calcPenaltyTime( $srow['is_correct'],
+			                            $srow['submissions'] );
+			$num_correct++;
+			$total_time += $srow['totaltime'] + $penalty;
+		}
+	}
+
+	// Update the rank cache table
+	$DB->q("REPLACE INTO rankcache_$tblname
+	        (cid, teamid, correct, totaltime)
+	        VALUES (%i,%s,%i,%i)",
+	       $cid, $team, $num_correct, $total_time);
+
+	// Release the lock
+	if ( $DB->q("VALUE SELECT RELEASE_LOCK('$lockstr')") != 1 ) {
+		error("updateRankCache failed to release lock '$lockstr'");
+	}
+}
+
+
+/**
+ * Calculate the penalty time.
+ *
+ * This is here because it is used by the caching functions above.
+ *
+ * This expects bool $solved (whether there was at least one correct
+ * submission by this team for this problem) and int $num_submissions
+ * (the total number of tries for this problem by this team)
+ * as input, uses the 'penalty_time' variable and outputs the number
+ * of penalty minutes.
+ *
+ * The current formula is as follows:
+ * - Penalty time is only counted for problems that the team finally
+ *   solved. Yet unsolved problems always have zero penalty minutes.
+ * - The penalty is 'penalty_time' (usually 20 minutes) for each
+ *   unsuccessful try. By definition, the number of unsuccessful
+ *   tries is the number of submissions for a problem minus 1: the
+ *   final, correct one.
+ */
+
+function calcPenaltyTime($solved, $num_submissions)
+{
+	if ( ! $solved ) return 0;
+
+	return ( $num_submissions - 1 ) * dbconfig_get('penalty_time', 20);
 }
 
 /**
@@ -281,24 +367,27 @@ function overshoot_parse($timelimit, $token)
 	}
 }
 
+/* The functions below abstract away the precise time format used
+ * internally. We currently use Unix epoch with up to 9 decimals for
+ * subsecond precision.
+ */
+
 /**
- * Simulate MySQL NOW() function to create insert queries that do not
- * change when replicated later.
+ * Simulate MySQL UNIX_TIMESTAMP() function to create insert queries
+ * that do not change when replicated later.
  */
 function now()
 {
-	return strftime(MYSQL_DATETIME_FORMAT);
+	return microtime(TRUE);
 }
 
 /**
  * Returns >0, =0, <0 when $time1 >, =, < $time2 respectively.
- * This function converts the strings to integer seconds and returns
- * their difference. We don't use the default second argument 'now()'
- * for 'strtotime()' since it could (theoretically) change.
+ * Returned value is time difference in seconds.
  */
 function difftime($time1, $time2)
 {
-	return strtotime($time1, 0) - strtotime($time2, 0);
+	return $time1 - $time2;
 }
 
 /**

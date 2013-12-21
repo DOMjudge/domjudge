@@ -21,22 +21,26 @@ if ( isset($_POST['donow']) ) {
 	// so we need to get it from the form data.
 	$docid = $time == 'activate' ? array_pop(array_keys($_POST['donow'][$time])) : $cid;
 
-	auditlog('contest', $docid, $time. ' now', $now);
-	// starttime is special because it doesn't have relative time support
+	$now = floor($now);
+	$nowstring = strftime('%Y-%m-%d %H:%M:%S',$now);
+	auditlog('contest', $docid, $time. ' now', $nowstring);
+
+	// starttime is special because other, relative times depend on it.
 	if ( $time == 'start' ) {
 		$cdata['starttime'] = $now;
+		$cdata['starttime_string'] = $nowstring;
 		foreach(array('endtime','freezetime','unfreezetime','activatetime') as $f) {
 			$cdata[$f] = check_relative_time($cdata[$f.'_string'], $cdata['starttime'], $f);
 		}
-		$DB->q('UPDATE contest SET starttime = %s, endtime = %s, freezetime = %s,
-			unfreezetime = %s, activatetime = %s
-		        WHERE cid = %i', $cdata['starttime'], $cdata['endtime'],
-			$cdata['freezetime'], $cdata['unfreezetime'], $cdata['activatetime'],
-			$docid);
+		$DB->q('UPDATE contest SET starttime = %s, starttime_string = %s,
+		        endtime = %s, freezetime = %s, unfreezetime = %s, activatetime = %s
+		        WHERE cid = %i', $cdata['starttime'], $cdata['starttime_string'],
+		       $cdata['endtime'], $cdata['freezetime'], $cdata['unfreezetime'],
+		       $cdata['activatetime'], $docid);
 		header ("Location: ./contests.php?edited=1");
 	} else {
 		$DB->q('UPDATE contest SET ' . $time . 'time = %s, ' . $time . 'time_string = %s
-		        WHERE cid = %i', $now, $now, $docid);
+		        WHERE cid = %i', $now, $nowstring, $docid);
 		header ("Location: ./contests.php");
 	}
 	exit;
@@ -69,8 +73,8 @@ if ( empty($cid) )  {
 	echo "none</legend>\n\n";
 
 	$row = $DB->q('MAYBETUPLE SELECT * FROM contest
-	               WHERE activatetime > now() AND enabled = 1
-                       ORDER BY activatetime LIMIT 1');
+	               WHERE activatetime > UNIX_TIMESTAMP() AND enabled = 1
+	               ORDER BY activatetime LIMIT 1');
 
 	if ( $row ) {
 		echo "<p>No active contest. Upcoming:<br/> <em>" .
@@ -112,7 +116,7 @@ if ( empty($cid) )  {
 
 		echo "</td><td>" .
 		     ucfirst($time) . " time:</td><td>" .
-		     htmlspecialchars($row[$time.'time']) . "</td><td>";
+		     printtime($row[$time.'time'],'%Y-%m-%d %H:%M (%Z)') . "</td><td>";
 
 		// Show a button for setting the time to now(), only when that
 		// makes sense. E.g. only for end contest when contest has started.
@@ -160,7 +164,7 @@ if( count($res) == 0 ) {
 			"<td class=\"tdright\">" . $link .
 			"c" . (int)$row['cid'] . "</a></td>\n";
 		foreach ($times as $time) {
-			echo "<td title=\"".htmlspecialchars(@$row[$time. 'time']) . "\">" .
+			echo "<td title=\"".printtime(@$row[$time. 'time'],'%Y-%m-%d %H:%M') . "\">" .
 			      $link . ( isset($row[$time.'time']) ?
 			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
 		}

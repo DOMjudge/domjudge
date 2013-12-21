@@ -46,23 +46,15 @@ function printyn ($val) {
 }
 
 /**
- * print a time dependent on configured time_format.
- * if $contesttime is set, show time from start of contest, after
- * removing ignored intervals.
+ * Print a time in default configured time_format, or formatted as
+ * specified. The format is according to strftime().
+ * FIXME: reintroduce contest relative time: show time from start of
+ * contest, after removing ignored intervals.
  */
-function printtime($datetime, $contesttime = FALSE) {
-	if ( ! $datetime ) return '';
-	if ( $contesttime ) {
-		$reltime = (int)floor(calcContestTime($datetime));
-		$sign = ( $reltime<0 ? -1 : 1 );
-		$reltime *= $sign;
-		$s = $reltime%60; $reltime = ($reltime - $s)/60;
-		$m = $reltime%60; $reltime = ($reltime - $m)/60;
-		$h = $sign*$reltime;
-		return sprintf("%d:%02d", $h, $m);
-	} else {
-		return htmlspecialchars(date(dbconfig_get('time_format', 'H:i'), strtotime($datetime)));
-	}
+function printtime($datetime, $format = NULL) {
+	if ( empty($datetime) ) return '';
+	if ( is_null($format) ) $format = dbconfig_get('time_format', '%H:%M');
+	return htmlspecialchars(strftime($format,floor($datetime)));
 }
 
 /**
@@ -81,28 +73,30 @@ function printhost($hostname, $full = FALSE) {
 }
 
 /**
- * print the time something took from start to end.
- * input: timestamps, end defaults to now.
+ * Print the time something took from start to end (which defaults to now).
  */
-function printtimediff($start, $end = null) {
-
-	if( ! $end )	$end = time();
+function printtimediff($start, $end = NULL)
+{
+	if ( is_null($end) ) $end = microtime(TRUE);
 	$ret = '';
-	$diff = $end - $start;
+	$diff = floor($end - $start);
 
-	$h = floor($diff/3600);
-	$diff %= 3600;
-	if($h > 0) {
-		$ret .= $h.' h ';
+	if ( $diff > 24*60*60 ) {
+		$d = floor($diff/(24*60*60));
+		$ret .= $d . "d ";
+		$diff -= $d * 24*60*60;
 	}
-
+	if ( $diff > 60*60 ) {
+		$h = floor($diff/(60*60));
+		$ret .= $h . ":";
+		$diff -= $h * 60*60;
+	}
 	$m = floor($diff/60);
-	$diff %= 60;
-	if ( $m > 0 ) {
-		$ret .= $m.' m ';
-	}
+	$ret .= sprintf('%02d:', $m);
+	$diff -= $m * 60;
+	$ret .= sprintf('%02d', $diff);
 
-	return $ret . $diff .' s';
+	return $ret;
 }
 
 /**

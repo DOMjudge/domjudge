@@ -49,7 +49,7 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 if ( empty($row['polltime']) ) {
 	echo "Judgehost never checked in.";
 } else {
-	$reltime = time() - strtotime($row['polltime']);
+	$reltime = floor(difftime(now(),$row['polltime']));
 	if ( $reltime < JUDGEHOST_WARNING ) {
 		echo "OK";
 	} else if ( $reltime < JUDGEHOST_CRITICAL ) {
@@ -100,15 +100,14 @@ if( $res->count() == 0 ) {
 	     "scope=\"col\">verified</th></tr>\n</thead>\n<tbody>\n";
 
 	while( $jud = $res->next() ) {
-		$start = strtotime($jud['starttime']);
 		if ( empty($jud['endtime']) ) {
 			if ( $jud['valid'] ) {
-				$runtime = printtimediff($start, NULL);
+				$runtime = printtimediff($jud['starttime'], NULL);
 			} else {
 				$runtime = '[aborted]';
 			}
 		} else {
-			$runtime = printtimediff($start, strtotime($jud['endtime']));
+			$runtime = printtimediff($jud['starttime'], $jud['endtime']);
 		}
 		$link = ' href="submission.php?id=' . (int)$jud['submitid'] .
 			'&amp;jid=' . (int)$jud['judgingid'] . '"';

@@ -74,6 +74,11 @@ foreach( $teams as $team ) {
 		calcScoreRow($cid, $team['login'], $pr);
 	}
 
+	// Now recompute the rank for both jury and public
+	echo " rankcache";
+	updateRankCache($cid, $team['login'], true);
+	updateRankCache($cid, $team['login'], false);
+
 	echo "\n";
 	ob_flush();
 }
@@ -81,10 +86,10 @@ foreach( $teams as $team ) {
 echo "</pre>\n\n<p>Deleting irrelevant data...</p>\n\n";
 
 // drop all contests that are not current, teams and problems that do not exist
-$DB->q('DELETE FROM scoreboard_jury
+$DB->q('DELETE FROM scorecache_jury
         WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%As)',
        $cid, $teamlist, $probs);
-$DB->q('DELETE FROM scoreboard_public
+$DB->q('DELETE FROM scorecache_public
         WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%As)',
        $cid, $teamlist, $probs);
 

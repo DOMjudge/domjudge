@@ -27,7 +27,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('re
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('results_remap', '{"presentation-error":"wrong-answer"}', 'array_keyval', 'Remap testcase result, e.g. to disable a specific result type such as ''presentation-error''.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('lazy_eval_results', '1', 'bool', 'Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('enable_printing', '0', 'bool', 'Enable teams and jury to send source code to a printer via the DOMjudge web interface.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('time_format', '"Y-m-d H:i"', 'string', 'The format used to print times. For formatting options see the PHP \'date\' function.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('time_format', '"%Y-%m-%d %H:%M"', 'string', 'The format used to print times. For formatting options see the PHP \'strftime\' function.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('separate_start_end', '0', 'bool', 'Enable separate start and end times per problem in a contest.');
 
 -- 
@@ -76,13 +76,13 @@ INSERT INTO `team_category` VALUES (1, 'System', 9, '#ff2bea', 0);
 -- Dumping data for table `team`
 -- 
 
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `authtoken`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 1, NULL, '127.0.0.1', NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
 
 -- 
 -- Dumping data for table `user`
 -- 
 
-INSERT INTO `user` (`userid`, `username`, `name`, `authtoken`) VALUES ('1', 'admin', 'Administrator', MD5('admin#admin'));
+INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES ('1', 'admin', 'Administrator', MD5('admin#admin'));
 
 -- 
 -- Dumping data for table `userrole`

@@ -160,11 +160,14 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		// present and valid.
 		if ( IS_JURY ) {
 			$link = ' href="submission.php?id=' . $sid . '"';
-		} elseif ( isset($restrictions['correct']) ) {
-			$link = ' href="show_source.php?id=' . $sid . '"';
-		} elseif ( $row['result'] && $row['valid'] &&
+		} elseif ( $row['submittime'] < $cdata['endtime'] &&
+		           $row['result'] && $row['valid'] &&
 		           (!dbconfig_get('verification_required',0) || $row['verified']) ) {
-			$link = ' href="submission_details.php?id=' . $sid . '"';
+			if ( isset($restrictions['correct']) ) {
+				$link = ' href="show_source.php?id=' . $sid . '"';
+			} else {
+				$link = ' href="submission_details.php?id=' . $sid . '"';
+			}
 		} else {
 			$link = '';
 		}
@@ -203,33 +206,17 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 			"<a$link>" . htmlspecialchars($row['probid']) . '</a></td>';
 		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
 			"<a$link>" . htmlspecialchars($row['langid']) . '</a></td>';
-		echo '<td class="result">';
-		if ( IS_JURY ) {
-			echo "<a$link>";
-			if ( ! $row['result'] ) {
-				if ( $row['submittime'] >= $cdata['endtime'] ) {
-					echo printresult('too-late', TRUE);
-				} else {
-					echo printresult($row['judgehost'] ? '' : 'queued', TRUE);
-				}
-			} else {
-					echo printresult($row['result']);
-			}
-			echo '</a>';
+		echo "<td class=\"result\"><a$link>";
+		if ( $row['submittime'] >= $cdata['endtime'] ) {
+			echo printresult('too-late');
+		} else if ( ! $row['result'] ||
+		            ( !IS_JURY && ! $row['verified'] &&
+		              dbconfig_get('verification_required', 0) ) ) {
+			echo printresult($row['judgehost'] || !IS_JURY ? '' : 'queued');
 		} else {
-			if ( ! $row['result'] ||
-			     ( dbconfig_get('verification_required', 0) && ! $row['verified'] ) ) {
-				if ( $row['submittime'] >= $cdata['endtime'] ) {
-					echo "<a>" . printresult('too-late') . "</a>";
-				} else {
-					echo "<a>" . printresult('', TRUE) . "</a>";
-				}
-			} else {
-				echo "<a$link>";
-				echo printresult($row['result']) . '</a>';
-			}
+			echo printresult($row['result']);
 		}
-		echo "</td>";
+		echo "</a></td>";
 
 		$maxtime = $totaltime = "n/a";
 		if ( $row['result'] == 'correct' || IS_JURY ) {
@@ -340,7 +327,6 @@ function putTeam($login) {
 
 	if ( empty($team) ) error ("No team found by this id.");
 
-	$affillogo = "../images/affiliations/" . urlencode($team['affilid']) . ".png";
 	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";
 	$teamimage = "../images/teams/" . urlencode($team['login']) . ".jpg";
 
@@ -366,12 +352,6 @@ function putTeam($login) {
 
 	if ( !empty($team['affilid']) ) {
 		echo '<tr><td>Affiliation:</td><td>';
-		if ( is_readable($affillogo) ) {
-			echo '<img src="' . $affillogo . '" alt="' .
-				htmlspecialchars($team['affilid']) . '" /> ';
-		} else {
-			echo htmlspecialchars($team['affilid']) . ' - ';
-		}
 		echo htmlspecialchars($team['affname']);
 		echo "</td></tr>\n";
 		if ( !empty($team['country']) ) {
@@ -416,40 +396,20 @@ function putTeam($login) {
  */
 function putClock() {
 	global $cdata, $username;
-	$what = $fmt = "";
-	$activatetime_u = strtotime($cdata['activatetime']);
-	$starttime_u = strtotime($cdata['starttime']);
-	$endtime_u = strtotime($cdata['endtime']);
 
 	// current time
 	echo '<div id="clock"><span id="timecur">' . strftime('%a %d %b %Y %T %Z') . "</span>";
 	// timediff to end of contest
-	if ( strcmp(now(), $cdata['starttime']) >= 0 && strcmp(now(), $cdata['endtime']) < 0) {
-		$left = $endtime_u-time();
-		$what = "time left: ";
-	} else if ( strcmp(now(), $cdata['activatetime']) >= 0 && strcmp(now(), $cdata['starttime']) < 0) {
-		$left = $starttime_u-time();
-		$what = "time to start: ";
+	if ( difftime(now(), $cdata['starttime']) >= 0 &&
+	     difftime(now(), $cdata['endtime'])   <  0 ) {
+		$left = "time left: " . printtimediff(now(),$cdata['endtime']);
+	} else if ( difftime(now(), $cdata['activatetime']) >= 0 &&
+	            difftime(now(), $cdata['starttime'])    <  0 ) {
+		$left = "time to start: " . printtimediff(now(),$cdata['starttime']);
+	} else {
+		$left = "";
 	}
-	if ( !empty($left) ) {
-		$fmt = '';
-		if ( $left > 24*60*60 ) {
-			$d = floor($left/(24*60*60));
-			$fmt .= $d . "d ";
-			$left -= $d * 24*60*60;
-		}
-		if ( $left > 60*60 ) {
-			$h = floor($left/(60*60));
-			$fmt .= $h . ":";
-			$left -= $h * 60*60;
-		}
-		$m = floor($left/60);
-		$fmt .= sprintf('%02d:', $m);
-		$left -= $m * 60;
-		$fmt .= sprintf('%02d', $left);
-
-	}
-	echo "<br /><span id=\"timeleft\">" . $what . $fmt . "</span>";
+	echo "<br /><span id=\"timeleft\">" . $left . "</span>";
 	if ( logged_in() ) {
 		echo "<br /><span id=\"username\">logged in as " . $username
 			. ( have_logout() ? " <a href=\"../logout.php\">×</a>" : "" )
@@ -459,9 +419,9 @@ function putClock() {
 
 	echo "<script type=\"text/javascript\">
 	var initial = " . time() . ";
-	var activatetime = " . $activatetime_u . ";
-	var starttime = " . $starttime_u . ";
-	var endtime = " . $endtime_u . ";
+	var activatetime = " . $cdata['activatetime'] . ";
+	var starttime = " . $cdata['starttime'] . ";
+	var endtime = " . $cdata['endtime'] . ";
 	var offset = 1;
 	var date = new Date(initial*1000);
 	var timecurelt = document.getElementById(\"timecur\");
@@ -604,4 +564,34 @@ function have_problemtexts()
 {
 	global $DB, $cid;
 	return $DB->q('VALUE SELECT COUNT(*) FROM problem WHERE problemtext_type IS NOT NULL AND cid = %i', $cid) > 0;
+}
+
+/**
+ * Maps domjudge language id to Ace language id
+ */
+function langidToAce($langid) {
+	switch ($langid) {
+	case 'c':
+	case 'cpp':
+	case 'cxx':
+		return 'c_cpp';
+	case 'pas':
+		return 'pascal';
+	case 'hs':
+		return 'haskell';
+	case 'pl':
+		return 'perl';
+	case 'bash':
+		return 'sh';
+	case 'py2':
+	case 'py3':
+		return 'python';
+	case 'adb':
+		return 'ada';
+	case 'plg':
+		return 'prolog';
+	case 'rb':
+		return 'ruby';
+	}
+	return $langid;
 }

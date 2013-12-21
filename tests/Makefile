@@ -42,11 +42,15 @@ test-boolfind: $(SUBMITCMD)
 	@echo "Submitting boolfind test sources..." ; \
 	for i in boolfind-test-* ; do $(SUBMIT) ; done
 
-test-stress: $(SUBMITCMD)
+test-stress: filename-tests.tar.gz $(SUBMITCMD)
+	tar xzf $<
 	@echo "Submitting stress test sources..." ; \
 	for i in stress-test-* ; do $(SUBMIT) ;	done
 
 $(SUBMITCMD):
 	$(MAKE) -C $(TOPDIR)/submit submit
+
+clean-l:
+	rm -f test-file\ name*
 
 .PHONY: test-normal test-fltcmp test-stress
