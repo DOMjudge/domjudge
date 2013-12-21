@@ -2309,28 +2309,6 @@ through <htmlurl name="our development mailing list"
 url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">.
 
 
-<sect>Maintainer mode installation
-<p>
-
-Besides the two modes of installation described in section
-<ref id="install_config:installsystem" name="Installation system">,
-DOMjudge provides a special maintainer mode installation.
-This method does an in-place installation within the source
-tree. This allows one to immediately see effects when modifying
-code.
-
-This method requires some special steps which can most easily
-be run via makefile rules as follows:
-<code>
-make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
-make maintainer-install
-</code>
-Note that these targets have to be executed <em>separately</em> and
-they replace the steps described in the section
-<ref id="install_config:installsystem" name="Installation system">;
-also no <tt>--prefix</tt> flag or other directoriess have to be
-specified to <tt>configure</tt>.
-
 <sect>Bootstrapping from Git repository sources
 <p>
 
@@ -2366,6 +2344,28 @@ apt-get install autoconf automake flexc++ bisonc++
 When this software is present, bootstrapping can be done by running
 <tt>make dist</tt>, which creates the <tt>configure</tt> script and
 generates documentation from SGML/LaTeX sources.
+
+<sect>Maintainer mode installation
+<p>
+
+Besides the two modes of installation described in section
+<ref id="install_config:installsystem" name="Installation system">,
+DOMjudge provides a special maintainer mode installation.
+This method does an in-place installation within the source
+tree. This allows one to immediately see effects when modifying
+code.
+
+This method requires some special steps which can most easily
+be run via makefile rules as follows:
+<code>
+make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
+make maintainer-install
+</code>
+Note that these targets have to be executed <em>separately</em> and
+they replace the steps described in the section
+<ref id="install_config:installsystem" name="Installation system">;
+also no <tt>--prefix</tt> flag or other directoriess have to be
+specified to <tt>configure</tt>.
 
 <sect>Makefile structure
 <p>
