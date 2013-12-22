@@ -1,0 +1,227 @@
+#!/usr/bin/env php
+<?php
+/**
+ * @configure_input@
+ *
+ * Import contest data from another contest system through a
+ * "run-forwarding feed" provided by a JSON API.
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+
+require('@domserver_etcdir@/domserver-static.php');
+require(ETCDIR . '/domserver-config.php');
+
+define('SCRIPT_ID', 'import-forwardfeed');
+define('LOGFILE', LOGDIR.'/import.log');
+
+require(LIBDIR . '/init.php');
+
+require(LIBEXTDIR . '/spyc/spyc.php');
+
+setup_database_connection();
+
+$verbose = LOG_DEBUG;
+$waittime = 5;
+
+$cdata = getCurContest(TRUE);
+$cid = $cdata['cid'];
+
+$config = spyc_load_file('import-forwardfeed.yaml');
+
+$resturl = $config['restapi']['url'];
+$restuser = @$config['restapi']['user'];
+$restpass = @$config['restapi']['pass'];
+
+function request($url, $verb = 'GET', $data = '') {
+	global $resturl, $restuser, $restpass;
+
+	$url = $resturl . "/" . $url;
+	if ( $verb == 'GET' ) {
+		$url .= '?' . $data;
+	}
+
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
+	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	if ( $verb == 'POST' ) {
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		if ( is_array($data) ) {
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
+		}
+	} else if ( $verb == 'PUT' || $verb == 'DELETE' ) {
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $verb);
+	}
+	if ( $verb == 'POST' || $verb == 'PUT' ) {
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+	}
+
+	$response = curl_exec($ch);
+	if ( !$response ) {
+		error("Error while executing curl with url " . $url . ": " . curl_error($ch));
+	}
+	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	if ( $status < 200 || $status >= 300 ) {
+		error("Error while executing curl with url " . $url .
+		      ": http status code: " . $status . ", response: " . $response);
+	}
+
+	curl_close($ch);
+	return $response;
+}
+
+/**
+ * Decode a json encoded string and handle errors.
+ */
+function dj_json_decode($str) {
+	$res = json_decode($str, TRUE);
+	if ( $res === NULL ) {
+		error("Error retrieving API data. API gave us: " . $str);
+	}
+	return $res;
+}
+
+
+logmsg(LOG_NOTICE, "Forwarding-feed import started [DOMjudge/".DOMJUDGE_VERSION."]");
+
+initsignals();
+
+// First check if we have the right contest, teams, problems, and
+// languages loaded.
+
+function remap($type, $id)
+{
+	global $config;
+	if ( empty($config['remapping'][$type][$id]) ) return $id;
+
+	return $config['remapping'][$type][$id];
+}
+
+$contest = dj_json_decode(request('contest'));
+if ( remap('contest',$contest['id'])!=$cid ||
+     difftime($contest['start'],$cdata['starttime'])!=0 ||
+     $contest['length']!=difftime($cdata['endtime'],$cdata['starttime']) ) {
+	error("Contest ID, or start/end times do not match with external CCS data.");
+}
+
+$problems = dj_json_decode(request('problems'));
+foreach ( $problems as $prob ) {
+
+	$id = $DB->q('MAYBEVALUE SELECT probid FROM problem
+	              WHERE probid = %s AND cid = %i AND allow_submit = 1',
+	             remap('problem',$prob['id']), $cid);
+
+	if ( empty($id) ) {
+		error("Problem ID '".$prob['id']."' from external CCS not available locally.");
+	}
+}
+
+$languages = dj_json_decode(request('languages'));
+foreach ( $languages as $lang ) {
+
+	$id = $DB->q('MAYBEVALUE SELECT langid FROM language
+	              WHERE langid = %s AND allow_submit = 1',
+	             remap('language',$lang['id']));
+
+	if ( empty($id) ) {
+		error("Language ID '".$lang['id']."' from external CCS not available locally.");
+	}
+}
+
+$teams = dj_json_decode(request('teams'));
+foreach ( $teams as $team ) {
+
+	$id = $DB->q('MAYBEVALUE SELECT login FROM team
+	              WHERE login = %s AND enabled = 1',
+	             remap('team',$team['id']));
+
+	if ( empty($id) ) {
+		error("Team ID '".$team['id']."' from external CCS not available locally.");
+	}
+}
+
+// Last obtained submission and judging IDs from external CCS
+$lastsubmitid = -1;
+$lastjudgingid = -1;
+
+// Constantly check API for new submissions and judgings
+while ( TRUE ) {
+
+	// Check whether we have received an exit signal
+	if ( function_exists('pcntl_signal_dispatch') ) pcntl_signal_dispatch();
+	if ( $exitsignalled ) {
+		logmsg(LOG_NOTICE, "Received signal, exiting.");
+		exit;
+	}
+
+	// Check new submissions
+	$submissions = dj_json_decode(request('submissions','GET',"fromid=".($lastsubmitid+1)));
+
+	foreach( $submissions as $subm ) {
+
+		$lastsubmitid = max($lastsubmitid,$subm['id']);
+
+		$res = $DB->q('MAYBETUPLE SELECT submitid, teamid, probid, langid, submittime
+		               FROM submission WHERE externalid = %i', $subm['id']);
+
+		if ( !empty($res) ) {
+			if ( $res['teamid']!=remap('team',$subm['team']) ||
+			     $res['probid']!=remap('problem',$subm['problem']) ||
+			     $res['langid']!=remap('language',$subm['language']) ||
+			     $res['submittime']!=$subm['time'] ) {
+				error("External submission '".$subm['id']."' already exists as s".
+				      $res['submitid']." with non-matching data.");
+			}
+			logmsg(LOG_DEBUG,"Skipping re-import of submission '".
+			       $subm['id']."' (s".$res['submitid'].")");
+			continue;
+		}
+
+		$res = dj_json_decode(request('submission_files','GET','id='.$subm['id']));
+
+		$files = array();
+		$filenames = array();
+
+		foreach ( $res as $f ) {
+			$filenames[] = $f['filename'];
+			if ( !($tmpfname = mkstemps(TMPDIR."/import_feed-XXXXXX",0)) ) {
+				error("Could not create temporary file.");
+			}
+			file_put_contents($tmpfname, base64_decode($f['content']));
+			$files[] = $tmpfname;
+		}
+		// FIXME: put 'mainclass' file at front of list?
+
+		$id = submit_solution(remap('team',$subm['team']),
+		                      remap('problem',$subm['problem']),
+		                      remap('language',$subm['language']),
+		                      $files, $filenames, NULL,
+		                      $subm['id'], $subm['time']);
+
+		logmsg(LOG_INFO,"Imported submission '".$subm['id']."' as s$id");
+
+		foreach ( $files as $file ) unlink($file);
+	}
+
+	// Check new judgings
+	$lastjudgingid++;
+	$judgings = dj_json_decode(request('judgings','GET',"fromid=$lastjudgingid"));
+
+	foreach ( $judgings as $jud ) {
+
+		$lastjudgingid = max($lastjudgingid,$jud['id']);
+
+		$DB->q('UPDATE submission SET externalresult = %s
+		        WHERE externalid = %i',
+		       remap('result',$jud['outcome']), $jud['submission']);
+
+		logmsg(LOG_INFO, "Updated external result for s".$jud['submission'].
+		       " to '".remap('result',$jud['outcome'])."'");
+	}
+
+	sleep($waittime);
+}
