@@ -88,7 +88,7 @@ CREATE TABLE `contest` (
   `endtime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
   `unfreezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
   `finalizetime` decimal(32,9) NULL COMMENT 'Time when contest was finalized, null if not yet',
-  `finalizecomment` TEXT NULL COMMENT 'Comments by the finalizer',
+  `finalizecomment` text COMMENT 'Comments by the finalizer',
   `b` smallint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of extra bronze medals',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether this contest can be active',
   PRIMARY KEY (`cid`),
