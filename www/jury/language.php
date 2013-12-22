@@ -6,8 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 require('init.php');
 
 $id = @$_REQUEST['id'];
@@ -75,7 +73,7 @@ if ( !empty($cmd) ):
 <?php echo addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
 
 <tr><td><label for="data_0__time_factor_">Time factor:</label></td>
-<td><?php echo addInputField('number', 'data[0][time_factor]', @$row['time_factor'], ' size="5" maxlength="5" min="0"')?> x</td></tr>
+<td><?php echo addInputField('number', 'data[0][time_factor]', @$row['time_factor'], ' min="0"')?> x</td></tr>
 </table>
 
 <?php
@@ -97,7 +95,7 @@ if ( ! $data ) error("Missing or invalid language id");
 
 echo "<h1>Language ".htmlspecialchars($id)."</h1>\n\n";
 
-echo addForm($pagename) . "<p>\n" .
+echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 	addHidden('id', $id) .
 	addHidden('val[toggle_judge]',  !$data['allow_judge']) .
 	addHidden('val[toggle_submit]', !$data['allow_submit']).

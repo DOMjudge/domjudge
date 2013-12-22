@@ -95,7 +95,7 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 function presentSource ($sourcedata, $langid)
 {
 	$head = '<div class="tabbertab">' .
-		'<h2 class="filename"><a name="source' . htmlspecialchars($sourcedata['rank']) .
+		'<h2 class="filename"><a id="source' . htmlspecialchars($sourcedata['rank']) .
 		'"></a>' .
 		htmlspecialchars($sourcedata['filename']) . "</h2> <a " .
 		"href=\"show_source.php?id=" . urlencode($sourcedata['submitid']) .
@@ -106,18 +106,20 @@ function presentSource ($sourcedata, $langid)
 		"<img class=\"picto\" src=\"../images/edit.png\" alt=\"edit\" title=\"edit\" />" .
 		"</a>\n\n";
 
-	if ( strlen($sourcedata['sourcecode'])==0 ) {
-		// Someone submitted an empty file. Cope gracefully.
-		$head .= "<p class=\"nodata\">empty file</p>\n\n";
-	} else if ( strlen($sourcedata['sourcecode']) < 32 * 1024 ) {
-		// Source < 32kB (for longer source code,
-		// highlighter tends to take very long time or timeout)
-		$head .= highlight($sourcedata['sourcecode'], $langid);
-	} else {
-		$head .= highlight_native($sourcedata['sourcecode'], $langid);
-	}
+	$langid = langidToAce($langid);
 
-	return $head .= '</div>';
+	$ace = '<pre class="editor" id="editor' . htmlspecialchars($sourcedata['rank']) . '">'
+		. htmlspecialchars($sourcedata['sourcecode']) . '</pre>' .
+		'<script src="../js/ace/ace.js" type="text/javascript" charset="utf-8"></script>' .
+		'<script>' .
+		'var editor = ace.edit("editor' . htmlspecialchars($sourcedata['rank']) . '");' .
+		'editor.setTheme("ace/theme/eclipse");' .
+		'editor.setOptions({ maxLines: Infinity });' .
+		'editor.setReadOnly(true);' .
+		'editor.getSession().setMode("ace/mode/' . $langid . '");' .
+		'</script>';
+
+	return $head . $ace . '</div>';
 }
 
 function presentDiff ($old, $new)
@@ -128,7 +130,6 @@ function presentDiff ($old, $new)
 	$difftext = createDiff($new, SUBMITDIR.'/'.$newsourcefile, $new['submitid'],
 	                       $old, SUBMITDIR.'/'.$oldsourcefile, $old['submitid']);
 
-	$oldid = htmlspecialchars($old['submitid']);
 	return '<div class="tabbertab">' .
 		'<h2 class="filename">' .
 		htmlspecialchars($old['filename']) . "</h2>\n\n" .
@@ -213,7 +214,6 @@ if ( isset($_GET['fetch']) ) {
 
 $title = "Source: s$id";
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/highlight.php');
 
 // display highlighted content of the source files
 $sources = $DB->q('TABLE SELECT *
@@ -224,7 +224,7 @@ $html = '<script type="text/javascript" src="../js/tabber.js"></script>' .
 	'<div class="tabber">';
 foreach($sources as $sourcedata)
 {
-	$html .= presentSource($sourcedata, $submission['langid']);	
+	$html .= presentSource($sourcedata, $submission['langid']);
 }
 $html .= "</div>";
 
@@ -274,10 +274,10 @@ if ( !empty($submission['origsubmitid']) ) {
 }
 echo "</h2>\n\n";
 if ( $olddata !== NULL ) {
-       echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
+	echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
 }
 if ( $submission['origsubmitid'] ) {
-       echo "<p><a href=\"#origdiff\">Go to diff to original submission</a></p>\n\n";
+	echo "<p><a href=\"#origdiff\">Go to diff to original submission</a></p>\n\n";
 }
 
 

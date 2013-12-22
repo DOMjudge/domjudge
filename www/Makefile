@@ -14,7 +14,7 @@ install-domserver:
 	for d in . affiliations countries ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/$$d images/$$d/*.png ; \
 	done
-	for d in public team jury plugin ; do \
+	for d in public team jury plugin api ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/$$d $$d/*.php ; \
 	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/teams images/teams/*.jpg

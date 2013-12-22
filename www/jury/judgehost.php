@@ -15,14 +15,20 @@ if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
 	error("Missing or invalid judge hostname");
 }
 
-if ( isset($_POST['cmd']) &&
-	( $_POST['cmd'] == 'activate' || $_POST['cmd'] == 'deactivate' ) ) {
+if ( isset($_REQUEST['cmd']) &&
+	( $_REQUEST['cmd'] == 'activate' || $_REQUEST['cmd'] == 'deactivate' ) ) {
 
 	requireAdmin();
 
 	$DB->q('UPDATE judgehost SET active = %i WHERE hostname = %s',
-	       ($_POST['cmd'] == 'activate' ? 1 : 0), $id);
-	auditlog('judgehost', $id, 'marked ' . ($_POST['cmd']=='activate'?'active':'inactive'));
+	       ($_REQUEST['cmd'] == 'activate' ? 1 : 0), $id);
+	auditlog('judgehost', $id, 'marked ' . ($_REQUEST['cmd']=='activate'?'active':'inactive'));
+
+	// the request came from the overview page
+	if ( isset($_GET['cmd']) ) {
+		header("Location: judgehosts.php");
+		exit;
+	}
 }
 
 $row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $id);
@@ -43,13 +49,13 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 if ( empty($row['polltime']) ) {
 	echo "Judgehost never checked in.";
 } else {
-	$reltime = time() - strtotime($row['polltime']);
-	if ( $reltime < 30 ) {
+	$reltime = floor(difftime(now(),$row['polltime']));
+	if ( $reltime < JUDGEHOST_WARNING ) {
 		echo "OK";
-	} else if ( $reltime < 120 ) {
+	} else if ( $reltime < JUDGEHOST_CRITICAL ) {
 		echo "Warning";
 	} else {
-		echo "Error";
+		echo "Critical";
 	}
 	echo ", judgehost last checked in ". $reltime . " seconds ago.";
 }
@@ -61,7 +67,7 @@ if ( empty($row['polltime']) ) {
 if ( IS_ADMIN ) {
 	$cmd = ($row['active'] == 1 ? 'deactivate' : 'activate');
 
-	echo addForm('judgehost.php') . "<p>\n" .
+	echo addForm($pagename) . "<p>\n" .
 		addHidden('id',  $row['hostname']) .
 		addHidden('cmd', $cmd) .
 		addSubmit($cmd) . "</p>\n" .
@@ -94,21 +100,20 @@ if( $res->count() == 0 ) {
 	     "scope=\"col\">verified</th></tr>\n</thead>\n<tbody>\n";
 
 	while( $jud = $res->next() ) {
-		$start = strtotime($jud['starttime']);
 		if ( empty($jud['endtime']) ) {
 			if ( $jud['valid'] ) {
-				$runtime = printtimediff($start, NULL);
+				$runtime = printtimediff($jud['starttime'], NULL);
 			} else {
 				$runtime = '[aborted]';
 			}
 		} else {
-			$runtime = printtimediff($start, strtotime($jud['endtime']));
+			$runtime = printtimediff($jud['starttime'], $jud['endtime']);
 		}
 		$link = ' href="submission.php?id=' . (int)$jud['submitid'] .
 			'&amp;jid=' . (int)$jud['judgingid'] . '"';
 		echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
 		echo "<td><a$link>j" . (int)$jud['judgingid'] . '</a></td>';
-		echo "<td><a$link>" . printtime($jud['starttime'], TRUE) . '</a></td>';
+		echo "<td><a$link>" . printtime($jud['starttime'], NULL, TRUE) . '</a></td>';
 		echo "<td><a$link>" . $runtime . '</a></td>';
 		echo "<td><a$link>" . printresult(@$jud['result'], $jud['valid']) . '</a></td>';
 		echo "<td class=\"tdcenter\"><a$link>" . printyn($jud['valid']) . '</a></td>';

@@ -17,3 +17,4 @@ define('TMPDIR',      '@judgehost_tmpdir@');
 define('JUDGEDIR',    '@judgehost_judgedir@');
 
 define('RUNUSER',     '@RUNUSER@');
+define('USE_CGROUPS', '@USE_CGROUPS@');

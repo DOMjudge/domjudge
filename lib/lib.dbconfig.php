@@ -145,6 +145,8 @@ function dbconfig_store()
  * Query configuration variable, with optional default value in case
  * the variable does not exist and boolean to indicate if cached
  * values can be used.
+ *
+ * When $name is null, then all variables will be returned.
  */
 function dbconfig_get($name, $default = null, $cacheok = true)
 {
@@ -154,6 +156,14 @@ function dbconfig_get($name, $default = null, $cacheok = true)
 		dbconfig_init();
 	}
 
+	if ( is_null ($name) ) {
+		$ret = array();
+		foreach ( $LIBDBCONFIG as $name => $config ) {
+			$ret[$name] = $config['value'];
+		}
+		return $ret;
+	}
+		
 	if ( isset($LIBDBCONFIG[$name]) ) return $LIBDBCONFIG[$name]['value'];
 
 	if ( $default===null ) {

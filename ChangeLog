@@ -1,7 +1,31 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.4.0 - DEV
+Version 4.0.0 - DEV
 -------------------
+ - [INCOMPATIBLE CHANGE] checktestdata logical operators are now '&&' and '||'.
+ - Introduce REST API; used by judgedaemon to communicate with domserver.
+ - New scoreboard layout: more compact, affil. logos replaced by names.
+ - Store timestamps in database as Unix epoch, independent of time zones
+   with subsecond resolution.
+ - Store recognized language extensions in database and query from
+   submit client through REST API.
+ - Show diff of team and reference output even if run stopped prematurely.
+ - Make timelimit overshoot margin configurable.
+ - Judge too-late submissions without scoring them (Closes #99).
+ - Update jscolor and sorttable javascript to latest upstream versions.
+ - Misc. minor bugs fixed reported by Coverity scan.
+ - Replace flex++ by flexc++, fixes a missing build dep. and code cleanup.
+ - Add support for new languages: Prolog, Ruby.
+ - Add note that submit client requires the IPADDRESS (or FIXED)
+   authentication method (Closes #125).
+ - Replace GeSHi syntax highlighter with Ace javascript code editor.
+ - [security] Compile as unprivileged user to prevent compile-time access
+   to e.g. testdata files.
+ - Added rankcache_* tables to improve scoreboard page for large contests
+   (thanks to the Amrita people), renamed scoreboard_* tables to match.
+
+Version 3.4.0 - (unreleased)
+----------------------------
  - Add problem text to database and support viewing in PDF/HTML/ASCII.
  - Add optional printing support via DOMjudge web interface. Using
    local system printing remains the preferred way.
@@ -52,10 +76,33 @@ Version 3.4.0 - DEV
  - Switch make_chroot to Debian 7.0 'Wheezy' and OpenJDK 7.
  - Add support for memory control in rungard with Linux cgroups.
    Patch provided by Keith Johnson.
+ - Prevent network access from runguard when cgroups are enabled.
  - Pass ONLINE_JUDGE and DOMJUDGE directives to submissions.
  - Add support for new languages: Python3, Ada, Fortran, Lua, Scala.
- - Checktestdata logical operators are now '&&' and '||'. The old '&' and
-   '|' are obsoleted and will be removed in the next major release.
+ - Make it explicit that rejuding 'all' does not include CORRECT submissions.
+ - Allow to (de)activate judgehosts on the judgehosts overview page.
+ - Apply the z-index to the clock only, otherwise the refresh button
+   stops being clickable.
+ - Remove unnecessary sleep from submitting test sources.
+ - Run C preprocessor on Fortran source to be able to pass defines.
+ - Also install an Ubuntu chroot creation script.
+ - Support deleting a problem description.
+ - Move the balloon daemon configuration into domserver-config, and install
+   it by default.
+ - Mount lib64 in the chroot if it exists.
+ - Allow multiple judgedaemons to be run on the same host, and use cgroups
+   to bind each to a separate CPU core.
+ - Judgehosts will auto-register with the domserver and do not need to be
+   manually listed beforehand.
+ - Fix bug that teampage_first_visit would be updated on each visit.
+ - Update clock in web interface each second through JavaScript.
+ - Further tighten permissions on files written when judging submissions,
+   to make the case when not using chroot more secure.
+ - Add c++ as a language extension for C++.
+ - Display a total and maximum of all testcase runtimes for a submission,
+   and always print runtimes with two decimals.
+ - Judgehosts update their status after each testcase to prevent
+   warning/critical status with many testcases.
 
 Version 3.3.0 - 29 May 2012
 ---------------------------

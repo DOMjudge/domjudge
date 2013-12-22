@@ -29,8 +29,6 @@ $waittime = 5;
  * Returns a text to be sent when notifying of a new balloon.
  */
 function notification_text($team, $problem, $probs_solved, $probs_data, $comment) {
-	global $cdata;
-
 	$ret =
 		"A problem has been solved:\n".
 		"\n".
@@ -57,11 +55,6 @@ $infreeze = FALSE;
 
 logmsg(LOG_NOTICE, "Balloon notifications started [DOMjudge/".DOMJUDGE_VERSION."]");
 
-// Tick use required between PHP 4.3.0 and 5.3.0 for handling signals,
-// must be declared globally.
-if ( version_compare(PHP_VERSION, '5.3', '<' ) ) {
-	declare(ticks = 1);
-}
 initsignals();
 
 // Constantly check database for new correct submissions
@@ -117,7 +110,7 @@ while ( TRUE ) {
 
 			if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
 
-				$probs_solved = $DB->q('COLUMN SELECT probid FROM scoreboard_jury
+				$probs_solved = $DB->q('COLUMN SELECT probid FROM scorecache_jury
 				                        WHERE cid = %i AND teamid = %s AND is_correct = 1',
 				                       $cid, $row['login']);
 				$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color

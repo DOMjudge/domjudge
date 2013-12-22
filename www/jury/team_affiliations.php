@@ -23,19 +23,14 @@ if( $res->count() == 0 ) {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th>ID</th>" .
 		"<th>name</th>" .
-		"<th class=\"sorttable_nosort\">logo</th>" .
 		"<th>country</th>" .
 		"<th>#teams</th></tr>\n</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
-		$affillogo = "../images/affiliations/" . urlencode($row['affilid']) . ".png";
 		$countryflag = "../images/countries/" . urlencode($row['country']) . ".png";
 		$link = '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">';
 		echo '<tr><td>' . $link . htmlspecialchars($row['affilid']) .
 			'</a></td><td>' . $link . htmlspecialchars($row['name']) .
-			'</a></td><td class="tdcenter">' . $link .
-			( is_readable($affillogo) ? '<img src="' . $affillogo .
-			  '" alt="' . htmlspecialchars($row['name']) . '" />' : '&nbsp;' ) .
 			'</a></td><td class="tdcenter">' . $link .
 			htmlspecialchars($row['country']) .
 			( is_readable($countryflag) ? ' <img src="' . $countryflag .

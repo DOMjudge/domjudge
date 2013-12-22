@@ -1,26 +1,13 @@
 /*
    runguard -- run command with restrictions.
-   Copyright (C) 2004-2013 Jaap Eldering (eldering@a-eskwadraat.nl)
-   Copyright (C) 2013      Keith Johnson
+
+   Part of the DOMjudge Programming Contest Jury System and licenced
+   under the GNU GPL. See README and COPYING for details.
 
    Multiple minor improvements ported from the DOMjudge-ETH tree.
 
    Based on an idea from the timeout program, written by Wietse Venema
    as part of The Coroner's Toolkit.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
    Program specifications:
@@ -82,7 +69,6 @@
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
-#define AUTHORS "Jaap Eldering"
 
 #define max(x,y) ((x) > (y) ? (x) : (y))
 
@@ -92,6 +78,22 @@
 
 #define BUF_SIZE 4*1024
 char buf[BUF_SIZE];
+
+/* Types of time for writing to file. */
+#define WALL_TIME_TYPE 0
+#define CPU_TIME_TYPE  1
+
+/* Strings to write to file when exceeding no/soft/hard/both limits. */
+const char output_timelimit_str[4][16] = {
+	"",
+	"soft-timelimit",
+	"hard-timelimit",
+	"hard-timelimit"
+};
+/* Bitmask of soft/hard timelimit (used in array above and
+ * {wall,cpu}timelimit_reached variabled below). */
+const int soft_timelimit = 1;
+const int hard_timelimit = 2;
 
 const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
 
@@ -114,12 +116,17 @@ char  *timefilename;
 #ifdef USE_CGROUPS
 char  *cgroupname;
 const char *cpuset;
+
+/* Linux Out-Of-Memory adjustment for current process. */
+#define OOM_PATH_NEW "/proc/self/oom_score_adj"
+#define OOM_PATH_OLD "/proc/self/oom_adj"
+#define OOM_RESET_VALUE 0
 #endif
 
 int runuid;
 int rungid;
 int use_root;
-int use_time;
+int use_walltime;
 int use_cputime;
 int use_user;
 int use_group;
@@ -128,13 +135,15 @@ int redir_stderr;
 int limit_streamsize;
 int outputexit;
 int outputtime;
+int outputtimetype;
 int no_coredump;
 int be_verbose;
 int be_quiet;
 int show_help;
 int show_version;
 
-double runtime, cputime; /* in seconds */
+double walltime[2], cputime[2]; /* in seconds, soft and hard limits */
+int walllimit_reached, cpulimit_reached; /* 1=soft, 2=hard, 3=both limits reached */
 #ifdef USE_CGROUPS
 int64_t memsize;
 #else
@@ -160,7 +169,7 @@ struct option const long_opts[] = {
 	{"root",       required_argument, NULL,         'r'},
 	{"user",       required_argument, NULL,         'u'},
 	{"group",      required_argument, NULL,         'g'},
-	{"time",       required_argument, NULL,         't'},
+	{"walltime",   required_argument, NULL,         't'},
 	{"cputime",    required_argument, NULL,         'C'},
 	{"memsize",    required_argument, NULL,         'm'},
 	{"filesize",   required_argument, NULL,         'f'},
@@ -235,14 +244,14 @@ void error(int errnum, const char *format, ...)
 	exit(exit_failure);
 }
 
-void version()
+void version(const char *prog, const char *vers)
 {
 	printf("\
-%s -- version %s\n\
-Written by %s\n\n\
-%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n\
+%s -- part of DOMjudge version %s\n\
+Written by the DOMjudge developers\n\n\
+DOMjudge comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n\
 are welcome to redistribute it under certain conditions.  See the GNU\n\
-General Public Licence for details.\n",PROGRAM,VERSION,AUTHORS,PROGRAM);
+General Public Licence for details.\n", prog, vers);
 	exit(0);
 }
 
@@ -256,8 +265,8 @@ Run COMMAND with restrictions.\n\
   -r, --root=ROOT        run COMMAND with root directory set to ROOT\n\
   -u, --user=USER        run COMMAND as user with username or ID USER\n\
   -g, --group=GROUP      run COMMAND under group with name or ID GROUP\n\
-  -t, --time=TIME        kill COMMAND after TIME seconds (float)\n\
-  -C, --cputime=TIME     set maximum CPU time to TIME seconds (float)\n\
+  -t, --walltime=TIME    kill COMMAND after TIME wallclock seconds\n\
+  -C, --cputime=TIME     set maximum CPU time to TIME seconds\n\
   -m, --memsize=SIZE     set all (total, stack, etc) memory limits to SIZE kB\n\
   -f, --filesize=SIZE    set maximum created filesize to SIZE kB;\n");
 	printf("\
@@ -276,15 +285,20 @@ Run COMMAND with restrictions.\n\
       --version          output version information and exit\n");
 	printf("\n\
 Note that root privileges are needed for the `root' and `user' options.\n\
+The COMMAND path is relative to the changed ROOT directory if specified.\n\
+TIME may be specified as a float; two floats separated by `:' are treated\n\
+as soft and hard limits. The runtime written to file is that of the last\n\
+of wall/cpu time options set, and defaults to CPU time when neither is set.\n\
 When run setuid without the `user' option, the user ID is set to the\n\
 real user ID.\n");
 	exit(0);
 }
 
-void output_exit_time(int exitcode, double timediff)
+void output_exit_time(int exitcode)
 {
 	FILE  *outputfile;
-	double userdiff, sysdiff;
+	double walldiff, cpudiff, userdiff, sysdiff, outdiff;
+	int timelimit_reached;
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
 	verbose("command exited with exitcode %d",exitcode);
@@ -295,7 +309,7 @@ void output_exit_time(int exitcode, double timediff)
 		if ( (outputfile = fopen(exitfilename,"w"))==NULL ) {
 			error(errno,"cannot open `%s'",exitfilename);
 		}
-		if ( fprintf(outputfile,"%d\n",exitcode)==0 ) {
+		if ( fprintf(outputfile,"%d\n",exitcode)<=0 ) {
 			error(0,"cannot write to file `%s'",exitfilename);
 		}
 		if ( fclose(outputfile) ) {
@@ -303,23 +317,50 @@ void output_exit_time(int exitcode, double timediff)
 		}
 	}
 
+	walldiff = (endtime.tv_sec  - starttime.tv_sec ) +
+	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
+
 	userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
 	sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
+	cpudiff = userdiff + sysdiff;
 
 	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys",
-	        timediff, userdiff, sysdiff);
+	        walldiff, userdiff, sysdiff);
 
-	if ( use_cputime && (userdiff+sysdiff) > cputime ) {
-		warning("timelimit exceeded (cpu time)");
+	if ( use_walltime && walldiff > walltime[0] ) {
+		walllimit_reached |= soft_timelimit;
+		warning("timelimit exceeded (soft wall time)");
+	}
+
+	if ( use_cputime && cpudiff > cputime[0] ) {
+		cpulimit_reached |= soft_timelimit;
+		warning("timelimit exceeded (soft cpu time)");
 	}
 
 	if ( outputtime ) {
 		verbose("writing runtime to file `%s'",timefilename);
+		switch ( outputtimetype ) {
+		case WALL_TIME_TYPE:
+			outdiff = walldiff;
+			timelimit_reached = walllimit_reached;
+			break;
+		case CPU_TIME_TYPE:
+			outdiff = cpudiff;
+			timelimit_reached = cpulimit_reached;
+			break;
+		default:
+			error(0,"cannot write unknown time type `%d' to file",outputtimetype);
+		}
+		/* Hard limitlimit reached always has precedence. */
+		if ( (walllimit_reached | cpulimit_reached) & hard_timelimit ) {
+			timelimit_reached |= hard_timelimit;
+		}
 
 		if ( (outputfile = fopen(timefilename,"w"))==NULL ) {
 			error(errno,"cannot open `%s'",timefilename);
 		}
-		if ( fprintf(outputfile,"%.3f\n",userdiff+sysdiff)==0 ) {
+		if ( fprintf(outputfile,"%.3f %s\n",outdiff,
+		             output_timelimit_str[timelimit_reached])<=0 ) {
 			error(0,"cannot write to file `%s'",timefilename);
 		}
 		if ( fclose(outputfile) ) {
@@ -341,15 +382,15 @@ void output_cgroup_stats()
 		error(0,"cgroup_new_cgroup");
 	}
 	if ((ret = cgroup_get_cgroup(cg)) != 0) {
-		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
 	}
 	cg_controller = cgroup_get_controller(cg, "memory");
 	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
 	if ( ret!=0 ) {
-		error(0,"get cgroup value - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"get cgroup value: %s(%d)", cgroup_strerror(ret), ret);
 	}
 
-	fprintf(stderr, "Total memory used: %" PRId64 " kB\n", max_usage/1024);
+	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
 
 	cgroup_free(&cg);
 }
@@ -371,9 +412,9 @@ void cgroup_create()
 	cgroup_add_value_int64(cg_controller, "memory.limit_in_bytes", memsize);
 	cgroup_add_value_int64(cg_controller, "memory.memsw.limit_in_bytes", memsize);
 
-	/* Set up cpu restrictions; we pin the task to a specific set of cpus,
-	   based on the environment variable CPUSET. We also give it exclusive
-	   access to those cores, and set no limits on memory nodes */
+	/* Set up cpu restrictions; we pin the task to a specific set of
+	   cpus. We also give it exclusive access to those cores, and set
+	   no limits on memory nodes */
 	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
 		cg_controller = cgroup_add_controller(cg, "cpuset");
 		/* To make a cpuset exclusive, some additional setup outside of domjudge is
@@ -382,13 +423,13 @@ void cgroup_create()
 		cgroup_add_value_string(cg_controller, "cpuset.mems", "0");
 		cgroup_add_value_string(cg_controller, "cpuset.cpus", cpuset);
 	} else {
-		fprintf(stderr, "CPUSET undefined\n");
+		verbose("cpuset undefined");
 	}
 
 	/* Perform the actual creation of the cgroup */
 	ret = cgroup_create_cgroup(cg, 1);
 	if ( ret!=0 ) {
-		error(0,"creating cgroup - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"creating cgroup: %s(%d)", cgroup_strerror(ret), ret);
 	}
 
 	cgroup_free(&cg);
@@ -405,13 +446,13 @@ void cgroup_attach()
 	}
 	ret = cgroup_get_cgroup(cg);
 	if ( ret!=0 ) {
-		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
 	}
 
 	/* Attach task to the cgroup */
 	ret = cgroup_attach_task(cg);
 	if ( ret!=0 ) {
-		error(0,"attach task to cgroup - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"attach task to cgroup: %s(%d)", cgroup_strerror(ret), ret);
 	}
 
 	cgroup_free(&cg);
@@ -428,12 +469,12 @@ void cgroup_delete()
 	}
 	ret = cgroup_get_cgroup(cg);
 	if ( ret!=0 ) {
-		error(0,"get cgroup information - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
 	}
 	/* Clean up our cgroup */
 	ret = cgroup_delete_cgroup(cg, 1);
 	if ( ret!=0 ) {
-		error(0,"deleting cgroup - %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"deleting cgroup: %s(%d)", cgroup_strerror(ret), ret);
 	}
 	cgroup_free(&cg);
 }
@@ -445,11 +486,20 @@ void terminate(int sig)
 
 	/* Reset signal handlers to default */
 	sigact.sa_handler = SIG_DFL;
-	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) warning("error restoring signal handler");
-	if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) warning("error restoring signal handler");
+	sigact.sa_flags = 0;
+	if ( sigemptyset(&sigact.sa_mask)!=0 ) {
+		warning("could not initialize signal mask");
+	}
+	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
+		warning("could not restore signal handler");
+	}
+	if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) {
+		warning("could not restore signal handler");
+	}
 
 	if ( sig==SIGALRM ) {
-		warning("timelimit exceeded (wall time): aborting command");
+		walllimit_reached |= hard_timelimit;
+		warning("timelimit exceeded (hard wall time): aborting command");
 	} else {
 		warning("received signal %d: aborting command",sig);
 	}
@@ -498,7 +548,7 @@ int groupid(char *name)
 	return (int) grp->gr_gid;
 }
 
-inline long readoptarg(const char *desc, long minval, long maxval)
+long read_optarg_int(const char *desc, long minval, long maxval)
 {
 	long arg;
 	char *ptr;
@@ -509,6 +559,37 @@ inline long readoptarg(const char *desc, long minval, long maxval)
 	}
 
 	return arg;
+}
+
+void read_optarg_time(const char *desc, double *times)
+{
+	char *optcopy, *ptr, *sep;
+
+	if ( (optcopy=strdup(optarg))==NULL ) error(0,"strdup() failed");
+
+	/* Check for soft:hard limit separator and cut string. */
+	if ( (sep=strchr(optcopy,':'))!=NULL ) *sep = 0;
+
+	times[0] = strtod(optcopy,&ptr);
+	if ( errno || *ptr!='\0' || !finite(times[0]) || times[0]<=0 ) {
+		error(errno,"invalid %s specified: `%s'",desc,optarg);
+	}
+
+	/* And repeat for hard limit if we found the ':' separator. */
+	if ( sep!=NULL ) {
+		times[1] = strtod(sep+1,&ptr);
+		if ( errno || *ptr!='\0' || !finite(times[1]) || times[1]<=0 ) {
+			error(errno,"invalid %s specified: `%s'",desc,optarg);
+		}
+		if ( times[1]<times[0] ) {
+			error(0,"invalid %s specified: hard limit is lower than soft limit",desc);
+		}
+	} else {
+		/* Set soft and hard limits equal. */
+		times[1] = times[0];
+	}
+
+	free(optcopy);
 }
 
 void setrestrictions()
@@ -538,9 +619,17 @@ void setrestrictions()
 	}
 
 	if ( use_cputime ) {
-		rlim_t cputime_limit = (rlim_t)cputime + 1;
-		verbose("setting CPU-time limit to %d seconds",(int)cputime_limit);
-		lim.rlim_cur = lim.rlim_max = cputime_limit;
+		/* The CPU-time resource limit can only be specified in
+		   seconds, so round up: we can measure actual CPU time used
+		   more accurately. Also set the real hard limit one second
+		   higher: at the soft limit the kernel will send SIGXCPU at
+		   the hard limit a SIGKILL. The SIGXCPU can be caught, but is
+		   not by default and gives us a reliable way to detect if the
+		   CPU-time limit was reached. */
+		rlim_t cputime_limit = (rlim_t)ceil(cputime[1]);
+		verbose("setting hard CPU-time limit to %d(+1) seconds",(int)cputime_limit);
+		lim.rlim_cur = cputime_limit;
+		lim.rlim_max = cputime_limit+1;
 		setlim(CPU);
 	}
 
@@ -585,7 +674,7 @@ void setrestrictions()
 	if ( use_root ) {
 		/* Small security issue: when running setuid-root, people can find
 		   out which directories exist from error message. */
-		if ( chdir(rootdir) ) error(errno,"cannot chdir to `%s'",rootdir);
+		if ( chdir(rootdir)!=0 ) error(errno,"cannot chdir to `%s'",rootdir);
 
 		/* Get absolute pathname of rootdir, by reading it. */
 		if ( getcwd(cwd,PATH_MAX)==NULL ) error(errno,"cannot get directory");
@@ -605,7 +694,9 @@ void setrestrictions()
 		}
 		free(path);
 
-		if ( chroot(".") ) error(errno,"cannot change root to `%s'",cwd);
+		if ( chroot(".")!=0 ) error(errno,"cannot change root to `%s'",cwd);
+		/* Just to make sure and satisfy Coverity scan: */
+		if ( chdir("/")!=0 ) error(errno,"cannot chdir to `/' in chroot");
 		verbose("using root-directory `%s'",cwd);
 	}
 
@@ -638,13 +729,15 @@ int main(int argc, char **argv)
 	int   i, r, nfds;
 #ifdef USE_CGROUPS
 	int   ret;
+	FILE *fp;
+	char *oom_path;
 #endif
 	int   status;
 	int   exitcode;
 	char *valid_users;
 	char *ptr;
 	int   opt;
-	double timediff, tmpd;
+	double tmpd;
 	size_t data_passed[3];
 	ssize_t nread, nwritten;
 
@@ -654,7 +747,9 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	/* Parse command-line options */
-	use_root = use_time = use_cputime = use_user = outputexit = outputtime = no_coredump = 0;
+	use_root = use_walltime = use_cputime = use_user = no_coredump = 0;
+	outputexit = outputtime = walllimit_reached = cpulimit_reached = 0;
+	outputtimetype = CPU_TIME_TYPE;
 	memsize = filesize = nproc = RLIM_INFINITY;
 	redir_stdout = redir_stderr = limit_streamsize = 0;
 	be_verbose = be_quiet = 0;
@@ -681,22 +776,18 @@ int main(int argc, char **argv)
 			if ( errno || *ptr!='\0' ) rungid = groupid(optarg);
 			if ( rungid<0 ) error(0,"invalid groupname or ID specified: `%s'",optarg);
 			break;
-		case 't': /* time option */
-			use_time = 1;
-			runtime = strtod(optarg,&ptr);
-			if ( errno || *ptr!='\0' || !finite(runtime) || runtime<=0 ) {
-				error(errno,"invalid runtime specified: `%s'",optarg);
-			}
+		case 't': /* wallclock time option */
+			use_walltime = 1;
+			outputtimetype = WALL_TIME_TYPE;
+			read_optarg_time("walltime",walltime);
 			break;
 		case 'C': /* CPU time option */
 			use_cputime = 1;
-			cputime = strtod(optarg,&ptr);
-			if ( errno || *ptr!='\0' || !finite(cputime) || cputime<=0 ) {
-				error(errno,"invalid cputime specified: `%s'",optarg);
-			}
+			outputtimetype = CPU_TIME_TYPE;
+			read_optarg_time("cputime",cputime);
 			break;
 		case 'm': /* memsize option */
-			memsize = (rlim_t) readoptarg("memory limit",1,LONG_MAX);
+			memsize = (rlim_t) read_optarg_int("memory limit",1,LONG_MAX);
 			/* Convert limit from kB to bytes and check for overflow */
 			if ( memsize!=(memsize*1024)/1024 ) {
 				memsize = RLIM_INFINITY;
@@ -705,7 +796,7 @@ int main(int argc, char **argv)
 			}
 			break;
 		case 'f': /* filesize option */
-			filesize = (rlim_t) readoptarg("filesize limit",1,LONG_MAX);
+			filesize = (rlim_t) read_optarg_int("filesize limit",1,LONG_MAX);
 			/* Convert limit from kB to bytes and check for overflow */
 			if ( filesize!=(filesize*1024)/1024 ) {
 				filesize = RLIM_INFINITY;
@@ -714,13 +805,13 @@ int main(int argc, char **argv)
 			}
 			break;
 		case 'p': /* nproc option */
-			nproc = (rlim_t) readoptarg("process limit",1,LONG_MAX);
+			nproc = (rlim_t) read_optarg_int("process limit",1,LONG_MAX);
 			break;
 		case 'P': /* cpuset option */
 			#ifdef USE_CGROUPS
 				cpuset = optarg;
 			#else
-				error(0,"This option is only supported when compiled with cgroup support.");
+				error(0,"option `-P' is only supported when compiled with cgroup support.");
 			#endif
 			break;
 		case 'c': /* no-core option */
@@ -736,7 +827,7 @@ int main(int argc, char **argv)
 			break;
 		case 's': /* streamsize option */
 			limit_streamsize = 1;
-			streamsize = (size_t) readoptarg("streamsize limit",0,LONG_MAX);
+			streamsize = (size_t) read_optarg_int("streamsize limit",0,LONG_MAX);
 			/* Convert limit from kB to bytes and check for overflow */
 			if ( streamsize!=(streamsize*1024)/1024 ) {
 				streamsize = (size_t) LONG_MAX;
@@ -768,7 +859,7 @@ int main(int argc, char **argv)
 	}
 
 	if ( show_help ) usage();
-	if ( show_version ) version();
+	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( argc<=optind ) error(0,"no command specified");
 
@@ -826,7 +917,28 @@ int main(int argc, char **argv)
 	cgroup_create();
 
 	unshare(CLONE_FILES|CLONE_FS|CLONE_NEWIPC|CLONE_NEWNET|CLONE_NEWNS|CLONE_NEWUTS|CLONE_SYSVSEM);
+
+	/* Check if any Linux Out-Of-Memory killer adjustments have to
+	 * be made. The oom_adj or oom_score_adj is inherited by child
+	 * processes, and at least older versions of sshd seemed to set
+	 * it, leading to processes getting a timelimit instead of memory
+	 * exceeded, when running via SSH. */
+	fp = NULL;
+	if ( !fp && (fp = fopen(OOM_PATH_NEW,"r+")) ) oom_path = strdup(OOM_PATH_NEW);
+	if ( !fp && (fp = fopen(OOM_PATH_OLD,"r+")) ) oom_path = strdup(OOM_PATH_OLD);
+	if ( fp!=NULL ) {
+		if ( fscanf(fp,"%d",&ret)!=1 ) error(errno,"cannot read from `%s'",oom_path);
+		if ( ret<0 ) {
+			verbose("resetting `%s' from %d to %d",oom_path,ret,OOM_RESET_VALUE);
+			rewind(fp);
+			if ( fprintf(fp,"%d\n",OOM_RESET_VALUE)<=0 ) {
+				error(errno,"cannot write to `%s'",oom_path);
+			}
+		}
+		if ( fclose(fp)!=0 ) error(errno,"closing file `%s'",oom_path);
+	}
 #endif
+
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
 		error(errno,"cannot fork");
@@ -912,7 +1024,7 @@ int main(int argc, char **argv)
 			error(errno,"installing signal handler");
 		}
 
-		if ( use_time ) {
+		if ( use_walltime ) {
 			/* Kill child when we receive SIGALRM */
 			if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) {
 				error(errno,"installing signal handler");
@@ -921,13 +1033,13 @@ int main(int argc, char **argv)
 			/* Trigger SIGALRM via setitimer:  */
 			itimer.it_interval.tv_sec  = 0;
 			itimer.it_interval.tv_usec = 0;
-			itimer.it_value.tv_sec  = (int) runtime;
-			itimer.it_value.tv_usec = (int)(modf(runtime,&tmpd) * 1E6);
+			itimer.it_value.tv_sec  = (int) walltime[1];
+			itimer.it_value.tv_usec = (int)(modf(walltime[1],&tmpd) * 1E6);
 
 			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
 				error(errno,"setting timer");
 			}
-			verbose("using timelimit of %.3f seconds",runtime);
+			verbose("setting hard wall-time limit to %.3f seconds",walltime[1]);
 		}
 
 		if ( times(&startticks)==(clock_t) -1 ) {
@@ -986,14 +1098,16 @@ int main(int argc, char **argv)
 
 		if ( gettimeofday(&endtime,NULL) ) error(errno,"getting time");
 
-		timediff = (endtime.tv_sec  - starttime.tv_sec ) +
-		           (endtime.tv_usec - starttime.tv_usec)*1E-6;
-
 		/* Test whether command has finished abnormally */
 		exitcode = 0;
 		if ( ! WIFEXITED(status) ) {
 			if ( WIFSIGNALED(status) ) {
-				warning("command terminated with signal %d",WTERMSIG(status));
+				if ( WTERMSIG(status)==SIGXCPU ) {
+					cpulimit_reached |= hard_timelimit;
+					warning("timelimit exceeded (hard cpu time)");
+				} else {
+					warning("command terminated with signal %d",WTERMSIG(status));
+				}
 				exitcode = 128+WTERMSIG(status);
 			} else
 			if ( WIFSTOPPED(status) ) {
@@ -1014,7 +1128,7 @@ int main(int argc, char **argv)
 		/* Drop root before writing to output file(s). */
 		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
 
-		output_exit_time(exitcode, timediff);
+		output_exit_time(exitcode);
 
 		/* Return the exitstatus of the command */
 		return exitcode;

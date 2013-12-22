@@ -1,4 +1,4 @@
-This is the Programming Contest Jury System "DOMjudge" version 3.4.0DEV
+This is the Programming Contest Jury System "DOMjudge" version 4.0.0DEV
 
 DOMjudge is a system for running a programming contest, like the
 ACM ICPC regional and world championship programming contests.
@@ -25,18 +25,24 @@ interface of DOMjudge). A LaTeX installation including the packages
 For more information, see the administrator documentation.
 
 All documentation is also available online at the DOMjudge homepage:
-	http://domjudge.sourceforge.net/documentation
+	http://www.domjudge.org/documentation
 Please note that this documentation is from the latest stable
 release and thus might not apply to your version.
+
+A fresh copy of the repository source tree must first be bootstrapped,
+generating the configure script and documentation. This can be done
+by running 'make dist', see the online documentation, section
+"Developer information" for more details.
 
 
 Copyright & Licencing
 ---------------------
 
-DOMjudge is Copyright (c) 2004 - 2013 by The DOMjudge Developers.
-The DOMjudge developers are Jaap Eldering, Thijs Kinkhorst,
-Peter van de Werken, Tobias Werth, and Nicky Gerritsen. Development is
-hosted at Study Association "A-Eskwadraat", Utrecht University,
+DOMjudge is Copyright (c) 2004 - 2013 by the DOMjudge developers and
+all respective contributors. The current DOMjudge developers are Jaap
+Eldering, Keith Johnson, Thijs Kinkhorst and Tobias Werth; see the
+administrator's manual for a complete list of contributors. Development
+is hosted at Study Association "A-Eskwadraat", Utrecht University,
 The Netherlands.
 
 DOMjudge, including its documentation, is free software; you can
@@ -50,16 +56,12 @@ are covered by other copyrights. This will be noted in the files
 themselves and these copyrights/attributions can also be found in the
 administrator manual.
 
-The lib/ext/ dir contains convenience copies of libraries produced
-by other projects and used by DOMjudge. They are licenced as follows:
-- geshi: GeSHi Syntax Highlighter, copyright Benny Baumann, Nigel McNie.
-  Licenced under the GNU GPL version 2+.
-
 Various JavaScript libraries/snippets are included under www/js/:
 - sorttable.js: copyright Stuart Langridge, licenced under the MIT
   licence, see COPYING.MIT.
 - jscolor.js: copyright Jan Odvarko, licenced under the GNU LGPL.
 - tabber.js: copyright Patrick Fitzgerald, licenced under the MIT licence.
+- ace editor: licenced under BSD licence, see COPYING.BSD.
 
 The M4 autoconf macros are licenced under all-permissive and GPL3+
 licences; see the respective files under m4/ for details.
@@ -68,14 +70,14 @@ Furthermore, a binary version of the dash shell (statically compiled)
 is distributed with DOMjudge. This program is copyright by various
 people under the BSD licence and a part under the GNU GPL version 2,
 see doc/dash.copyright for more details.
-Sources can be downloaded from: http://domjudge.sourceforge.net/sources/
+Sources can be downloaded from: http://www.domjudge.org/sources/
 
 
 Contact
 -------
 
 The DOMjudge homepage can be found at:
-http://domjudge.sourceforge.net/
+http://www.domjudge.org/
 
 Announcements of new releases are sent to our low volume announcements
 mailinglist. Subscription to this list is done via

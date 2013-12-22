@@ -1,5 +1,5 @@
 /*
- * This _should_ give WRONG-ANSWER but does in fact give TIMELIMIT.
+ * This _should_ give NO-OUTPUT but does in fact give TIMELIMIT.
  * The reason is that program and runguard stderr are mixed and
  * searched by testcase_run.sh for the string 'timelimit exceeded'.
  * This a minor bug that doesn't provide a team any advantages. It

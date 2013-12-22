@@ -15,8 +15,13 @@ endif
 ifneq ($(SUBMIT_DEFAULT),0)
 SUBMITCLIENT = submit$(EXEEXT)
 SUBMIT_PROGS += $(SUBMITCLIENT)
+# Statically link against libmagic and libJSONcpp to prevent
+# dependency on team workstations (this might be GCC specific):
 ifneq ($(LIBMAGIC),)
-$(SUBMITCLIENT): $(LIBMAGIC)
+$(SUBMITCLIENT): LDFLAGS += -Wl,-Bstatic $(LIBMAGIC) -Wl,-Bdynamic
+endif
+ifneq ($(LIBJSONCPP),)
+$(SUBMITCLIENT): LDFLAGS += -Wl,-Bstatic $(LIBJSONCPP) -Wl,-Bdynamic
 endif
 ifneq ($(SUBMIT_ENABLE_WEB),0)
 $(SUBMITCLIENT): CXXFLAGS += $(CURL_CFLAGS)
@@ -28,6 +33,7 @@ else
 $(SUBMITCLIENT): LDFLAGS += $(CURL_LIBS)
 endif
 endif
+$(SUBMITCLIENT): LDFLAGS := $(filter-out -pie,$(LDFLAGS))
 endif
 
 SUBMITHEADERS = submitcommon.hxx $(TOPDIR)/etc/submit-config.h

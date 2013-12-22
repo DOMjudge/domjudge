@@ -1,6 +1,7 @@
 %baseclass-preinclude "parsetype.h"
 
 %filenames parser
+
 %scanner scanner.h
 
 %lsp-needed
@@ -16,7 +17,7 @@
 %token VARNAME INTEGER FLOAT STRING
 %token OPT_FIXED OPT_SCIENTIFIC
 
-%left LOGIC_AND '&' LOGIC_OR '|'
+%left LOGIC_AND LOGIC_OR
 %left '+' '-'
 %left '*' '/' '%'
 %left '^'
@@ -113,8 +114,6 @@ fact:
 test:
 	'!' test      { $$ = parse_t('!',$2); }
 |	'(' test ')'  { $$ = parse_t($2); }
-|	test '&' test { $$ = parse_t('&',$1,$3); }
-|	test '|' test { $$ = parse_t('|',$1,$3); }
 |	test LOGIC_AND test                     { $$ = parse_t('&',$1,$3); }
 |	test LOGIC_OR  test                     { $$ = parse_t('|',$1,$3); }
 |	expr compare expr                       { $$ = parse_t('?',$2,$1,$3); }

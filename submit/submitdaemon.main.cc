@@ -40,6 +40,7 @@ using namespace std;
 /* These defines are needed in 'version' and 'logmsg' */
 #define DOMJUDGE_PROGRAM "DOMjudge/" DOMJUDGE_VERSION
 #define PROGRAM "submitdaemon"
+#define VERSION DOMJUDGE_VERSION "/" REVISION
 
 /* Logging and error functions */
 #include "lib.error.h"
@@ -100,7 +101,6 @@ char client_addr[NI_MAXHOST]; /* string of client IP address */
 struct sockaddr_storage client_sock; /* client socket information */
 socklen_t socklen = sizeof(sockaddr_storage);
 
-void version();
 void usage();
 void create_server();
 int  handle_client();
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 	}
 
 	if ( show_help ) usage();
-	if ( show_version ) version();
+	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( inet4_only && inet6_only ) {
 		error(0,"both options `inet4-only' and `inet6-only' specified");
@@ -253,16 +253,6 @@ int main(int argc, char **argv)
 	}
 
 	return FAILURE; /* This should never be reached */
-}
-
-void version()
-{
-	printf("%s %s\n\n",DOMJUDGE_PROGRAM,PROGRAM);
-	printf(
-"%s comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n"
-"are welcome to redistribute it under certain conditions.  See the GNU\n"
-"General Public Licence for details.\n",PROGRAM);
-	exit(0);
 }
 
 void usage()
@@ -380,6 +370,7 @@ int handle_client()
 	int nargs;
 	int redir_fd[3];
 	int status;
+	int fd;
 	pid_t cpid;
 	FILE *rpipe;
 	char line[linelen];
@@ -468,11 +459,11 @@ int handle_client()
 		tempfile = allocstr("%s/cmdsubmit.%s.%s.XXXXXX.%s",TMPDIR,
 		                    problem.c_str(),team.c_str(),language.c_str());
 
-		if ( mkstemps(tempfile,language.length()+1)<0 || strlen(tempfile)==0 ) {
+		if ( (fd=mkstemps(tempfile,language.length()+1))<0 || strlen(tempfile)==0 ) {
 			senderror(client_fd,errno,"mkstemps cannot create tempfile");
 		}
-
-		logmsg(LOG_INFO,"created tempfile: `%s'",tempfile);
+		/* Close fd because we only need the filename */
+		if ( close(fd)!=0 ) error(errno,"closing tempfile");
 
 		/* Copy the source-file */
 		args[0] = (char *) team.c_str();
@@ -494,10 +485,10 @@ int handle_client()
 	   and then add a database entry for this file. */
 	nargs = 4 + 2*filenames.size();
 	varargs = (const char **) calloc(sizeof(char *),nargs);
-	varargs[0] = (char *) team.c_str();
+	varargs[0] = team.c_str();
 	varargs[1] = client_addr;
-	varargs[2] = (char *) problem.c_str();
-	varargs[3] = (char *) language.c_str();
+	varargs[2] = problem.c_str();
+	varargs[3] = language.c_str();
 	for(i=0; i<filenames.size(); i++) {
 		varargs[4+2*i]   = tempfiles[i].c_str();
 		varargs[4+2*i+1] = fileorigs[i].c_str();
@@ -508,6 +499,7 @@ int handle_client()
 	if ( (cpid = execute(LIBSUBMITDIR"/submit_db.php",varargs,nargs,redir_fd,1))<0 ) {
 		senderror(client_fd,errno,"starting submit_db");
 	}
+	free(varargs);
 
 	if ( (rpipe = fdopen(redir_fd[1],"r"))==NULL ) {
 		senderror(client_fd,errno,"binding submit_db stdout to stream");

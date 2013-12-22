@@ -154,8 +154,13 @@ void readprogram(istream &in)
 	debug("parsing script...");
 
 	Parser parseprog(in);
-	if ( parseprog.parse()!=0 ) {
-		cerr << "parse error reading program" << endl;
+	try {
+		if ( parseprog.parse()!=0 ) {
+			cerr << "parse error reading program" << endl;
+			exit(exit_failure);
+		}
+	} catch ( exception& e ) {
+		cerr << "parse error: " << e.what() << endl;
 		exit(exit_failure);
 	}
 

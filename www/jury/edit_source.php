@@ -49,10 +49,10 @@ $title = 'Edit Source: s' . $id;
 require(LIBWWWDIR . '/header.php');
 
 
-echo '<h2><a name="source"></a>Edit submission ' .
+echo '<h2><a id="source"></a>Edit submission ' .
 	"<a href=\"submission.php?id=$id\">s$id</a> source files</h2>\n\n";
 
-echo addForm('edit_source.php', 'post', null, 'multipart/form-data');
+echo addForm($pagename, 'post', null, 'multipart/form-data');
 
 
 $sources = $DB->q('TABLE SELECT *
@@ -60,12 +60,30 @@ $sources = $DB->q('TABLE SELECT *
                    WHERE submitid = %i ORDER BY rank', $id);
 
 echo '<script type="text/javascript" src="../js/tabber.js"></script>' .
+	'<script src="../js/ace/ace.js" type="text/javascript" charset="utf-8"></script>' .
 	'<div class="tabber">';
 foreach($sources as $sourcedata)
 {
 	echo '<div class="tabbertab' . ($_GET['rank'] === $sourcedata['rank'] ? ' tabbertabdefault' : '') .'">';
 	echo '<h2 class="filename">' . htmlspecialchars($sourcedata['filename']) . '</h2>';
 	echo addTextArea('source' . $sourcedata['rank'], $sourcedata['sourcecode'], 120, 40) . "<br />\n";
+	$editor = 'editor' . htmlspecialchars($sourcedata['rank']);
+	$langid = langidToAce($submission['langid']);
+	echo '<div class="editor" id="' . $editor . '"></div>';
+	echo '<script>' .
+		'var textarea = document.getElementById("source' . htmlspecialchars($sourcedata['rank']) . '");' .
+		'textarea.style.display = \'none\';' .
+		'var ' . $editor . ' = ace.edit("' . $editor . '");' .
+		$editor . '.setTheme("ace/theme/eclipse");' .
+		$editor . '.getSession().setValue(textarea.value);' . 
+		$editor . '.getSession().on(\'change\', function(){' .
+			'var textarea = document.getElementById("source' . htmlspecialchars($sourcedata['rank']) . '");' .
+			'textarea.value = ' . $editor . '.getSession().getValue();' . 
+		'});' .
+		$editor . '.setOptions({ maxLines: Infinity });' .
+		$editor . '.setReadOnly(false);' .
+		$editor . '.getSession().setMode("ace/mode/' . $langid . '");' .
+		'</script>';
 	echo "</div>\n";
 }
 echo "</div>\n";

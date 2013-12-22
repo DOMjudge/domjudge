@@ -6,8 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 $ext_id = (int)@$_REQUEST['ext_id'];
 
 $id = (int)@$_REQUEST['id'];
@@ -70,7 +68,7 @@ if ( !isset($jid) ) {
 	}
 }
 
-$jury_member = getJuryMember();
+$jury_member = $username;
 
 if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 
@@ -110,7 +108,7 @@ if ( $submdata['valid'] ) {
 }
 
 ?>
-<table width="100%">
+<table id="submission_layout">
 <tr><td>
 <table>
 <caption>Submission</caption>
@@ -129,8 +127,8 @@ if ( $submdata['valid'] ) {
 	<a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a></td></tr>
 <tr><td>Submitted:</td><td><?php
-	echo printtime($submdata['submittime'], TRUE) .
-		' (' . htmlspecialchars($submdata['submittime']) . ')'; ?></td></tr>
+    echo printtime($submdata['submittime'], NULL, TRUE) .
+		' (' . printtime($submdata['submittime']) . ')'; ?></td></tr>
 <tr><td>Source:</td><td>
 	<a href="show_source.php?id=<?php echo $id?>">view source code</a></td></tr>
 <tr><td>Max runtime:</td><td>
@@ -168,7 +166,7 @@ if ( count($jdata) > 0 ) {
 		}
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
-			'<td>' . $link . printtime($jud['starttime'], TRUE) . '</a></td>' .
+			'<td>' . $link . printtime($jud['starttime'], NULL, TRUE) . '</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
 			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) . '</a></td>' .
 			"</tr>\n";
@@ -278,15 +276,14 @@ if ( isset($jid) )  {
 	}
 
 	// Time (start, end, used)
-	echo "<p class=\"judgetime\">Judging started: " . htmlspecialchars($jud['starttime']);
+	echo "<p class=\"judgetime\">Judging started: " . printtime($jud['starttime'],'%H:%M:%S');
 
-	$unix_start = strtotime($jud['starttime']);
 	if ( $judging_ended ) {
-		echo ', ended: ' . htmlspecialchars($jud['endtime']) .
+		echo ', ended: ' . printtime($jud['endtime'],'%H:%M:%S') .
 			' (judging took '.
-				printtimediff($unix_start, strtotime($jud['endtime']) ) . ')';
+				printtimediff($jud['starttime'], $jud['endtime']) . ')';
 	} elseif ( $jud['valid'] ) {
-		echo ' [still judging - busy ' . printtimediff($unix_start) . ']';
+		echo ' [still judging - busy ' . printtimediff($jud['starttime']) . ']';
 	} else {
 		echo ' [aborted]';
 	}
@@ -353,20 +350,23 @@ if ( isset($jid) )  {
 		"<tr><th scope=\"col\">#</th><th scope=\"col\">runtime</th>" .
 		"<th scope=\"col\">result</th>";
 	if ( $lastjud !== NULL ) {
-		echo "<th scope=\"col\" name=\"lastruntime\">" .
+		echo "<th scope=\"col\" class=\"lastruntime\">" .
 			"<span class=\"prevsubmit\">s$lastsubmitid runtime</span></th>" .
-			"<th scope=\"col\" name=\"lastresult\">" .
+			"<th scope=\"col\" class=\"lastresult\">" .
 			"<span class=\"prevsubmit\">s$lastsubmitid result</span></th>";
 	}
 
 	echo "<th scope=\"col\">description</th>" .
 	    "</tr>\n</thead>\n<tbody>\n";
 
-	$total_runtime = 0;
+	$sum_runtime = 0;
+	$max_runtime = 0;
+	$sum_lastruntime = 0;
+	$max_lastruntime = 0;
 	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
 		echo "<tr><td><a href=\"$link\">$run[rank]</a></td>".
-		    "<td><a href=\"$link\">$run[runtime]</a></td>" .
+		    "<td><a href=\"$link\">" . sprintf('%.2f',$run['runtime']) . "</a></td>" .
 		    "<td><a href=\"$link\"><span class=\"sol ";
 		switch ( $run['runresult'] ) {
 		case 'correct':
@@ -380,9 +380,9 @@ if ( isset($jid) )  {
 		if ( $lastjud !== NULL ) {
 			$lastrun = $lastruninfo[$key];
 			if ( $lastjud['result']=='compiler-error' ) $lastrun['runresult'] = 'compiler-error';
-			echo "<td name=\"lastruntime\"><a href=\"$link\">" .
-				"<span class=\"prevsubmit\">$lastrun[runtime]</span></a></td>" .
-				"<td name=\"lastresult\"><a href=\"$link\">" .
+			echo "<td class=\"lastruntime\"><a href=\"$link\">" .
+				"<span class=\"prevsubmit\">" . sprintf('%.2f', $lastrun['runtime']) . "</span></a></td>" .
+				"<td class=\"lastresult\"><a href=\"$link\">" .
 				"<span class=\"sol prevsubmit\">$lastrun[runresult]</span></a></td>";
 		}
 
@@ -390,10 +390,22 @@ if ( isset($jid) )  {
 		    htmlspecialchars(str_cut($run['description'],20)) . "</a></td>" .
 			"</tr>\n";
 
-		$total_runtime += $run['runtime'];
+		$sum_runtime += $run['runtime'];
+		$max_runtime = max($max_runtime,$run['runtime']);
+		if ( $lastjud !== NULL ) {
+			$sum_lastruntime += $lastrun['runtime'];
+			$max_lastruntime = max($max_lastruntime,$lastrun['runtime']);
+		}
 	}
-	echo "<tr class=\"summary\"><td></td><td><a>$total_runtime</a></td><td></td><td><a>total runtime</a></td></tr>\n";
-	echo "</tbody>\n</table>\n\n";
+	echo "</tbody>\n<tfoot><tr class=\"summary\"><td></td>" .
+	    "<td title=\"max/sum runtime\"><a>" .
+	    sprintf('%.2f/%.2f',$max_runtime,$sum_runtime) . "</a></td>" .
+	    "<td><a>" . printresult(@$jud['result']) . "</a></td>" .
+	    "<td class=\"lastruntime\" title=\"previous max/sum runtime\"><a>" .
+	    sprintf('%.2f/%.2f',$max_lastruntime,$sum_lastruntime) . "</a></td>" .
+	    "<td class=\"lastresult\"><a><span class=\"sol prevsubmit\">" . @$lastjud['result'] . "</span></a></td>" .
+	    "<td></td></tr>\n" .
+	    "</tfoot>\n</table>\n\n";
 
 ?>
 <script type="text/javascript">
@@ -408,10 +420,18 @@ togglelastruns();
 		echo "<h4 id=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
 
 		if ( $run['runresult']===NULL ) {
-			echo "<p class=\"nodata\">Run not finished yet.</p>\n";
+			echo "<p class=\"nodata\">Run not started/finished yet.</p>\n";
 			continue;
 		}
 
+		$timelimit_str = '';
+		if ( $run['runresult']=='timelimit' ) {
+			if ( preg_match('/Timelimit exceeded.* hard-timelimit/',$run['output_error']) ) {
+				$timelimit_str = '<b>(terminated)</b>';
+			} else {
+				$timelimit_str = '<b>(finished late)</b>';
+			}
+		}
 		echo "<table>\n" .
 		    "<tr><td>Description:</td><td>" .
 		    htmlspecialchars($run['description']) . "</td></tr>" .
@@ -423,8 +443,7 @@ togglelastruns();
 		    "<a href=\"team_output.php?probid=" . htmlspecialchars($submdata['probid']) .
 		    "&amp;runid=" . $run['runid'] . "\">Team Output</a>" .
 		    "</td></tr>" .
-		    "<tr><td>Runtime:</td><td>$run[runtime] sec" .
-		    ( $run['runresult']=='timelimit' ? ' (terminated)' : '' ) ."</td></tr>" .
+		    "<tr><td>Runtime:</td><td>$run[runtime] sec $timelimit_str</td></tr>" .
 		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
 		    ( $run['runresult']=='correct' ? '' : 'in' ) .
 		    "correct\">$run[runresult]</span></td></tr>" .

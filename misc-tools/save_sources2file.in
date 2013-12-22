@@ -51,7 +51,7 @@ while( $subm = $res->next() ) {
 
 		$filepath = $sourcesdir . '/' . $file;
 		file_put_contents($filepath, $source['sourcecode']);
-		touch($filepath, strtotime($subm['submittime']));
+		touch($filepath, $subm['submittime']);
 
 		logmsg(LOG_DEBUG, "saved file '$file'");
 	}

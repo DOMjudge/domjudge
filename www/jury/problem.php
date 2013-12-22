@@ -6,8 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 require('init.php');
 
 $id = @$_REQUEST['id'];
@@ -101,7 +99,7 @@ if ( !empty($cmd) ):
 ?>
 <tr><td><label for="data_0__cid_">Contest:</label></td>
 <td><?php
-$cmap = $DB->q("KEYVALUETABLE SELECT cid,contestname FROM contest ORDER BY cid");
+$cmap = $DB->q("KEYVALUETABLE SELECT cid,contestname FROM contest ORDER BY cid DESC");
 echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 ?>
 </td></tr>
@@ -125,11 +123,11 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 ?>
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
 <td><?php echo addInputField('number','data[0][timelimit]', @$row['timelimit'],
-	' size="5" maxlength="5" min="1" max="10000" required')?> sec</td></tr>
+	' min="1" max="10000" required')?> sec</td></tr>
 
 <tr><td><label for="data_0__color_">Balloon colour:</label></td>
 <td><?php echo addInputField('color','data[0][color]', @$row['color'],
-	' size="8" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
+	' class="color {required:false,adjust:false,hash:true,caps:false}"')?>
 <a target="_blank"
 href="http://www.w3schools.com/cssref/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
@@ -156,7 +154,7 @@ echo addHidden('cmd', $cmd) .
 
 if ( class_exists("ZipArchive") ) {
 	echo "<br /><em>or</em><br /><br />\n" .
-	addForm('problem.php', 'post', null, 'multipart/form-data') .
+	addForm($pagename, 'post', null, 'multipart/form-data') .
 	addHidden('id', @$row['probid']) .
 	'<label for="problem_archive__">Upload problem archive:</label>' .
 	addFileField('problem_archive[]') .
@@ -181,7 +179,8 @@ if ( ! $data ) error("Missing or invalid problem id");
 
 echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
 
-echo addForm($pagename, 'post', null, 'multipart/form-data') . "<p>\n" .
+echo addForm($pagename . '?id=' . urlencode($id),
+             'post', null, 'multipart/form-data') . "<p>\n" .
 	addHidden('id', $id) .
 	addHidden('val[toggle_judge]',  !$data['allow_judge']) .
 	addHidden('val[toggle_submit]', !$data['allow_submit']).
@@ -213,10 +212,9 @@ echo addForm($pagename, 'post', null, 'multipart/form-data') . "<p>\n" .
 <tr><td>Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
 <?php
 if ( !empty($data['color']) ) {
-	echo '<tr><td>Colour:</td><td><img style="background-color: ' .
+	echo '<tr><td>Colour:</td><td><div class="circle" style="background-color: ' .
 		htmlspecialchars($data['color']) .
-		';" alt="problem colour ' . htmlspecialchars($data['color']) .
-		'" src="../images/circle.png" /> ' . htmlspecialchars($data['color']) .
+		';"></div> ' . htmlspecialchars($data['color']) .
 		"</td></tr>\n";
 }
 if ( !empty($data['problemtext_type']) ) {

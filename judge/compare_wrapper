@@ -2,15 +2,12 @@
 
 # Compare wrapper-script to be called from 'testcase_run.sh'.
 #
-# This script is written to comply with the ICPC Validator Interface Standard
-# as described in http://www.ecs.csus.edu/pc2/doc/valistandard.html.
-#
-# Usage: $0 <testdata.in> <program.out> <testdata.out> <result.xml> <diff.out>
+# Usage: $0 <testdata.in> <program.out> <testdata.out> <result.out> <diff.out>
 #
 # <testdata.in>   File containing testdata input.
 # <program.out>   File containing the program output.
 # <testdata.out>  File containing the correct output.
-# <result.xml>    File containing an XML document describing the result.
+# <result.out>    File describing the judging verdict.
 # <diff.out>      File to write program/correct output differences to (optional).
 #
 #
@@ -46,12 +43,7 @@ DIFFOUT="${5:-/dev/null}"
 writeresult()
 {
     ( cat <<EOF
-<?xml version="1.0"?>
-<!DOCTYPE result [
-  <!ELEMENT result (#PCDATA)>
-  <!ATTLIST result outcome CDATA #REQUIRED>
-]>
-<result outcome="$1">$1</result>
+result=$1
 EOF
     ) > "$RESULT"
 }

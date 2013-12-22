@@ -17,8 +17,10 @@ $KEYS['judging_run'] = array('runid');
 $KEYS['language'] = array('langid');
 $KEYS['problem'] = array('probid');
 $KEYS['removed_interval'] = array('intervalid');
-$KEYS['scoreboard_jury'] = array('cid','teamid','probid');
-$KEYS['scoreboard_public'] = array('cid','teamid','probid');
+$KEYS['rankcache_jury'] = array('cid','teamid');
+$KEYS['rankcache_public'] = array('cid','teamid');
+$KEYS['scorecache_jury'] = array('cid','teamid','probid');
+$KEYS['scorecache_public'] = array('cid','teamid','probid');
 $KEYS['submission'] = array('submitid');
 $KEYS['submission_file'] = array('submitfileid');
 $KEYS['team'] = array('login');
@@ -26,7 +28,9 @@ $KEYS['team_affiliation'] = array('affilid');
 $KEYS['team_category'] = array('categoryid');
 $KEYS['team_unread'] = array('teamid','mesgid','type');
 $KEYS['testcase'] = array('testcaseid');
-
+$KEYS['user'] = array('userid');
+$KEYS['role'] = array('roleid');
+$KEYS['userrole'] = array('userid', 'roleid');
 
 /** For each table, list all attributes that reference foreign keys
  *  and specify the source of that key. Optionally appended to the
@@ -39,6 +43,10 @@ $KEYS['testcase'] = array('testcaseid');
  *                references a foreign key.
  */
 $RELATIONS = array();
+
+$RELATIONS['user'] = array();
+$RELATIONS['role'] = array();
+$RELATIONS['userrole'] = array();
 
 $RELATIONS['auditlog'] = array();
 
@@ -88,9 +96,15 @@ $RELATIONS['removed_interval'] = array (
 	'cid' => 'contest.cid',
 );
 
+$RELATIONS['rankcache_jury'] =
+$RELATIONS['rankcache_public'] = array (
+	'cid' => 'contest.cid&CASCADE',
+	'teamid' => 'team.login&NOCONSTRAINT'
+);
 
-$RELATIONS['scoreboard_jury'] =
-$RELATIONS['scoreboard_public'] = array (
+
+$RELATIONS['scorecache_jury'] =
+$RELATIONS['scorecache_public'] = array (
 	'cid' => 'contest.cid&NOCONSTRAINT',
 	'teamid' => 'team.login&NOCONSTRAINT',
 	'probid' => 'problem.probid&NOCONSTRAINT',

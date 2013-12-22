@@ -7,6 +7,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+$REQUIRED_ROLES = array('jury','balloon');
 require('init.php');
 $title = 'Balloon Status';
 
@@ -37,12 +38,11 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Balloon Status</h1>\n\n";
 
-if ( isset($cdata['freezetime']) &&
-     time() > strtotime($cdata['freezetime']) ) {
+if ( isset($cdata['freezetime']) && difftime($cdata['freezetime'],now())<=0 ) {
 	echo "<h4>Scoreboard is now frozen.</h4>\n\n";
 }
 
-echo addForm('balloons.php', 'get') . "<p>\n" .
+echo addForm($pagename, 'get') . "<p>\n" .
     addHidden('viewall', ($viewall ? 0 : 1)) .
     addSubmit($viewall ? 'view unsent only' : 'view all') . "</p>\n" .
     addEndForm();
@@ -83,13 +83,8 @@ while ( $row = $res->next() ) {
 	$first_contest = $first_problem[$row['probid']] = $first_team[$row['login']] = $row['balloonid'];
 }
 
-$conteststart  = strtotime($cdata['starttime']);
-if ( !empty($cdata['freezetime']) ) {
-	$contestfreeze = strtotime($cdata['freezetime']);
-}
-
 if ( !empty($BALLOONS) ) {
-	echo addForm('balloons.php');
+	echo addForm($pagename);
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
 		"<tr><th class=\"sorttable_numeric\">ID</th>" .
@@ -104,14 +99,13 @@ if ( !empty($BALLOONS) ) {
 		// start a new row, 'disable' if balloon has been handed out already
 		echo '<tr'  . ( $row['done'] == 1 ? ' class="disabled"' : '' ) . '>';
 		echo '<td>b' . (int)$row['balloonid'] . '</td>';
-		echo '<td>' . printtime($row['submittime'], TRUE) . '</td>';
+		echo '<td>' . printtime($row['submittime'], NULL, TRUE) . '</td>';
 
 		// the balloon earned
 		echo '<td class="probid">' .
-			'<img class="balloonimage" style="background-color: ' .
+			'<div class="circle" style="background-color: ' .
 		    htmlspecialchars($probs_data[$row['probid']]['color']) .
-			';" alt="problem colour ' . htmlspecialchars($probs_data[$row['probid']]['color']) .
-		    '" src="../images/circle.png" /> ' . htmlspecialchars($row['probid']) . '</td>';
+			';"></div> ' . htmlspecialchars($row['probid']) . '</td>';
 
 		// team name, location (room) and category
 		echo '<td class="teamid">' . htmlspecialchars($row['login']) . '</td><td>' .
@@ -123,12 +117,10 @@ if ( !empty($BALLOONS) ) {
 		sort($TOTAL_BALLOONS[$row['login']]);
 		$TOTAL_BALLOONS[$row['login']] = array_unique($TOTAL_BALLOONS[$row['login']]);
 		foreach($TOTAL_BALLOONS[$row['login']] as $prob_solved) {
-			echo '<img title="' . htmlspecialchars($prob_solved) .
-				'" class="balloonimage" style="background-color: ' .
+			echo '<div title="' . htmlspecialchars($prob_solved) .
+				'" class="circle" style="background-color: ' .
 				htmlspecialchars($probs_data[$prob_solved]['color']) .
-				';" alt="problem colour ' .
-				htmlspecialchars($probs_data[$row['probid']]['color']) .
-				'" src="../images/circle.png" /> ';
+				';"></div> ';
 		}
 		echo '</td><td>';
 
@@ -137,7 +129,7 @@ if ( !empty($BALLOONS) ) {
 			echo '<input type="submit" name="done[' .
 				(int)$row['balloonid'] . ']" value="done" />';
 		}
-		
+
 		echo '</td><td>';
 
 		$comments = array();
@@ -146,7 +138,7 @@ if ( !empty($BALLOONS) ) {
 		} else {
 			if ( $first_team[$row['login']] == $row['balloonid'] ) {
 				$comments[] = 'first for team';
-			}	
+			}
 			if ( $first_problem[$row['probid']] == $row['balloonid'] ) {
 				$comments[] = 'first for problem';
 			}

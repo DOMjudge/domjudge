@@ -4,7 +4,7 @@
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
- * 
+ *
  * Originally based on: lib.database.php 1.4.1, Copyright (C) 2001-2010
  * Jeroen van Wolffelaar <jeroen@php.net>, et al.; licenced under the
  * GNU GPL version 2 or higher.
@@ -259,7 +259,7 @@ class db
 			global $DEBUG_NUM_QUERIES;
 			$DEBUG_NUM_QUERIES++;
 			if ( isset($_SERVER['REMOTE_ADDR']) ) {
-				printf("<p>SQL: $this->database: <tt>%s</tt> ({$elapsed_ms}ms)</p>\n",
+				printf("<p>SQL: $this->database: <kbd>%s</kbd> ({$elapsed_ms}ms)</p>\n",
 				       htmlspecialchars($query));
 			} else {
 				printf("SQL: $this->database: %s ({$elapsed_ms}ms)\n",$query);
@@ -299,7 +299,7 @@ class db
 	{
 		if($this->_connection) return;
 
-		$pers = ( $this->persist && version_compare(PHP_VERSION, '5.3', '>=') ) ? "p:" : ""; 
+		$pers = ( $this->persist && version_compare(PHP_VERSION, '5.3', '>=') ) ? "p:" : "";
 		if(!function_exists('mysqli_real_connect')) {
 			throw new RuntimeException("PHP database module missing "
 			    . "(no such function: 'mysqli_real_connect')");
@@ -307,10 +307,13 @@ class db
 
 		$this->_connection = mysqli_init();
 		@mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, $this->flags);
-		if(!$this->_connection) {
+
+		if(mysqli_connect_error() || !$this->_connection) {
 			throw new RuntimeException("Could not connect to database server "
 			    . "(host=$this->host,user=$this->user,password="
-			    . str_repeat('*', strlen($this->password)) . ",db=$this->database)");
+			    . str_repeat('*', strlen($this->password)) . ",db=$this->database). "
+			    . "Error " . mysqli_connect_errno() . ": "
+			    . mysqli_connect_error() );
 		}
 		mysqli_set_charset($this->_connection, DJ_CHARACTER_SET_MYSQL);
 	}
@@ -391,14 +394,14 @@ class db_result
 			throw new BadMethodCallException(
 			    'Result does not contain a valid resource.');
 		}
-		$this->tuple = mysqli_fetch_assoc($this->_result);
+		$this->_tuple = mysqli_fetch_assoc($this->_result);
 		$this->_nextused = TRUE;
-		if (is_null ($this->tuple) )
+		if (is_null ($this->_tuple) )
 		{
 			$this->free();
 			return FALSE;
 		}
-		return $this->tuple;
+		return $this->_tuple;
 	}
 
 	public function getcolumn($field=NULL)
@@ -410,7 +413,7 @@ class db_result
 		$col = array();
 		while($this->next())
 		{
-			$col[]=$field?$this->tuple[$field]:current($this->tuple);
+			$col[]=$field?$this->_tuple[$field]:current($this->_tuple);
 		}
 		return $col;
 	}
@@ -425,7 +428,7 @@ class db_result
 		$table = array();
 		while ($this->next())
 		{
-			$table[] = $this->tuple;
+			$table[] = $this->_tuple;
 		}
 		return $table;
 	}
@@ -440,7 +443,7 @@ class db_result
 		}
 		$table = array();
 		while ($this->next()) {
-			$table[$this->tuple[$key]] = $this->tuple;
+			$table[$this->_tuple[$key]] = $this->_tuple;
 		}
 		return $table;
 	}
@@ -461,8 +464,8 @@ class db_result
 
 		$table = array();
 		while ($this->next()) {
-			$key = array_shift($this->tuple);
-			$value = array_shift($this->tuple);
+			$key = array_shift($this->_tuple);
+			$value = array_shift($this->_tuple);
 			$table[$key] = $value;
 		}
 		return $table;

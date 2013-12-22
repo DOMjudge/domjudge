@@ -59,12 +59,12 @@ while ( $jud = $res->next() ) {
 	$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
 	       $jud['judgingid']);
 
-	$DB->q('UPDATE submission SET judgehost = NULL, judgemark = NULL
+	$DB->q('UPDATE submission SET judgehost = NULL
 	        WHERE submitid = %i', $jud['submitid']);
 
 	calcScoreRow($cid, $jud['teamid'], $jud['probid']);
 	$DB->q('COMMIT');
-	
+
 	auditlog('judging', $jud['judgingid'], 'mark invalid', '(rejudge)');
 }
 

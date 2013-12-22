@@ -41,6 +41,9 @@ DEBMIRROR="http://archive.ubuntu.com/ubuntu"
 # Which debootstrap package to install on non-Debian systems:
 DEBOOTDEB="debootstrap_1.0.48+deb7u1_all.deb"
 
+# Which debootstrap package to install on non-Debian systems:
+DEBOOTDEB="debootstrap_1.0.48+deb7u1_all.deb"
+
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
 

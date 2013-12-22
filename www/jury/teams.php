@@ -33,7 +33,7 @@ if( $teams->count() == 0 ) {
 	echo "<p class=\"nodata\">No teams defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th>" .
+		"<tr><th scope=\"col\">ID</th><th scope=\"col\">teamname</th>" .
 		"<th scope=\"col\">category</th><th scope=\"col\">affiliation</th>" .
 		"<th scope=\"col\">host</th><th scope=\"col\">room</th>" .
 		"<th class=\"sorttable_nosort\"></th><th class=\"thleft\" " .

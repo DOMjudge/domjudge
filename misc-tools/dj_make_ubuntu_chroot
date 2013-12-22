@@ -107,14 +107,14 @@ if [ -n "$EXCLUDEDEBS" ]; then
 	EXCLUDEOPT="--exclude=$EXCLUDEDEBS"
 fi
 
-BOOSTRAP_COMMAND="/usr/sbin/debootstrap"
+BOOTSTRAP_COMMAND="/usr/sbin/debootstrap"
 if [ -n "$DEBPROXY" ]; then
-    BOOSTRAP_COMMAND="http_proxy=\"$DEBPROXY\" $BOOSTRAP_COMMAND"
+    BOOTSTRAP_COMMAND="http_proxy=\"$DEBPROXY\" $BOOTSTRAP_COMMAND"
 fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 
-$BOOSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
+$BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 	--variant=minbase --arch "$ARCH" $CODENAME "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"

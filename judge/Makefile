@@ -15,11 +15,11 @@ judgedaemon: judgedaemon.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
+compare check_float runguard: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
+
 compare: $(LIBOBJECTS)
-compare$(OBJEXT): $(LIBHEADERS)
 
 check_float: -lm $(LIBOBJECTS)
-check_float$(OBJEXT): -lm $(LIBHEADERS)
 
 runguard: -lm $(LIBCGROUP)
 runguard: CFLAGS += -std=c99
@@ -39,7 +39,7 @@ install-judgehost:
 		run run_wrapper run_boolfind runjury_boolfind \
 		compare compare_wrapper compare_float compare_boolfind \
 		check_diff.sh check_float check_boolfind sh-static
-	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libjudgedir) parse_result.xslt \
+	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libjudgedir) \
 		judgedaemon.main.php
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) judgedaemon
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) runguard runpipe

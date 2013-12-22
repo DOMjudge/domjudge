@@ -1,11 +1,11 @@
 /**
  * jscolor, JavaScript Color Picker
  *
- * @version 1.4.0
+ * @version 1.4.1
  * @license GNU Lesser General Public License, http://www.gnu.org/copyleft/lesser.html
  * @author  Jan Odvarko, http://odvarko.cz
  * @created 2008-06-15
- * @updated 2012-07-06
+ * @updated 2013-04-08
  * @link    http://jscolor.com
  */
 
@@ -318,10 +318,10 @@ var jscolor = {
 	},
 
 
-	/*
-	 * Usage example:
-	 * var myColor = new jscolor.color(myInputElement)
-	 */
+	//
+	// Usage example:
+	// var myColor = new jscolor.color(myInputElement)
+	//
 
 	color : function(target, prop) {
 
@@ -627,6 +627,21 @@ var jscolor = {
 					dispatchImmediateChange();
 				}
 			};
+			if('ontouchstart' in window) { // if touch device
+				p.box.addEventListener('touchmove', function(e) {
+					var event={
+						'offsetX': e.touches[0].pageX-touchOffset.X,
+						'offsetY': e.touches[0].pageY-touchOffset.Y
+					};
+					if (holdPad || holdSld) {
+						holdPad && setPad(event);
+						holdSld && setSld(event);
+						dispatchImmediateChange();
+					}
+					e.stopPropagation(); // prevent move "view" on broswer
+					e.preventDefault(); // prevent Default - Android Fix (else android generated only 1-2 touchmove events)
+				}, false);
+			}
 			p.padM.onmouseup =
 			p.padM.onmouseout = function() { if(holdPad) { holdPad=false; jscolor.fireEvent(valueElement,'change'); } };
 			p.padM.onmousedown = function(e) {
@@ -635,17 +650,43 @@ var jscolor = {
 					case 0: if (THIS.hsv[2] === 0) { THIS.fromHSV(null, null, 1.0); }; break;
 					case 1: if (THIS.hsv[1] === 0) { THIS.fromHSV(null, 1.0, null); }; break;
 				}
+				holdSld=false;
 				holdPad=true;
 				setPad(e);
 				dispatchImmediateChange();
 			};
+			if('ontouchstart' in window) {
+				p.padM.addEventListener('touchstart', function(e) {
+					touchOffset={
+						'X': e.target.offsetParent.offsetLeft,
+						'Y': e.target.offsetParent.offsetTop
+					};
+					this.onmousedown({
+						'offsetX':e.touches[0].pageX-touchOffset.X,
+						'offsetY':e.touches[0].pageY-touchOffset.Y
+					});
+				});
+			}
 			p.sldM.onmouseup =
 			p.sldM.onmouseout = function() { if(holdSld) { holdSld=false; jscolor.fireEvent(valueElement,'change'); } };
 			p.sldM.onmousedown = function(e) {
+				holdPad=false;
 				holdSld=true;
 				setSld(e);
 				dispatchImmediateChange();
 			};
+			if('ontouchstart' in window) {
+				p.sldM.addEventListener('touchstart', function(e) {
+					touchOffset={
+						'X': e.target.offsetParent.offsetLeft,
+						'Y': e.target.offsetParent.offsetTop
+					};
+					this.onmousedown({
+						'offsetX':e.touches[0].pageX-touchOffset.X,
+						'offsetY':e.touches[0].pageY-touchOffset.Y
+					});
+				});
+			}
 
 			// picker
 			var dims = getPickerDims(THIS);
@@ -896,7 +937,8 @@ var jscolor = {
 			styleElement = jscolor.fetchElement(this.styleElement);
 		var
 			holdPad = false,
-			holdSld = false;
+			holdSld = false,
+			touchOffset = {};
 		var
 			leaveValue = 1<<0,
 			leaveStyle = 1<<1,

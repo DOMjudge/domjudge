@@ -21,8 +21,6 @@ $verify_multiple = isset($_REQUEST['verify_multiple']);
 
 <?php
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 $nchecked = 0;
 $nunchecked = 0;
 

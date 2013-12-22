@@ -7,8 +7,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 require('init.php');
 $title="Scoreboard";
 // set auto refresh
@@ -23,9 +21,8 @@ if ( !isset($_GET['clear']) ) {
 	if ( count($filter) ) $refresh .= '?' . http_build_query($filter);
 }
 
-$menu = false;
+$menu = true;
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/scoreboard.php');
 
 $isstatic = @$_SERVER['argv'][1] == 'static' || isset($_REQUEST['static']);
 

@@ -8,6 +8,8 @@
 
 require_once('../configure.php');
 
+$pagename = basename($_SERVER['PHP_SELF']);
+
 define('IS_JURY', false);
 define('IS_PUBLIC', true);
 
@@ -17,6 +19,8 @@ setup_database_connection();
 
 require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/print.php');
+require_once(LIBWWWDIR . '/auth.php');
+require_once(LIBWWWDIR . '/scoreboard.php');
 
 $cdata = getCurContest(TRUE);
 $cid = (int)$cdata['cid'];

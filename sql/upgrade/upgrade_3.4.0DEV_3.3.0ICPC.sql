@@ -16,7 +16,7 @@ ALTER TABLE `team` DROP COLUMN `penalty`;
 --
 
 ALTER TABLE contest
-  ADD `finalizetime` DATETIME NULL COMMENT 'Time when contest was finalized, null if not yet',
+  ADD `finalizetime` decimal(32,9) NULL COMMENT 'Time when contest was finalized, null if not yet',
   ADD `finalizecomment` TEXT NULL COMMENT 'Comments by the finalizer',
   ADD `b` smallint(3) unsigned NOT NULL default '0' COMMENT 'Number of extra bronze medals';
 
@@ -36,8 +36,8 @@ ALTER TABLE `submission`
 CREATE TABLE `removed_interval` (
   `intervalid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `starttime` datetime NOT NULL COMMENT 'Initial time of removed interval',
-  `endtime` datetime NOT NULL COMMENT 'Final time of removed interval',
+  `starttime` decimal(32,9) NOT NULL COMMENT 'Initial time of removed interval',
+  `endtime` decimal(32,9) NOT NULL COMMENT 'Final time of removed interval',
   PRIMARY KEY (`intervalid`),
   KEY `cid` (`cid`),
   CONSTRAINT `removed_interval_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE

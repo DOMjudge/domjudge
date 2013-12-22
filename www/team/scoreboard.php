@@ -24,6 +24,6 @@ if ( !isset($_GET['clear']) ) {
 require(LIBWWWDIR . '/header.php');
 
 // call the general putScoreBoard function from scoreboad.php
-putScoreBoard($cdata, $login, FALSE, $filter);
+putScoreBoard($cdata, $teamid, FALSE, $filter);
 
 require(LIBWWWDIR . '/footer.php');

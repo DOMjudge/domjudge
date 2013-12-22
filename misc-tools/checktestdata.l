@@ -1,17 +1,6 @@
-%{
-    #define _SKIP_YYFLEXLEXER_
-    #include "scanner.h"
-    #include "parser.h"
+%filenames scanner
 
-	#include <string>
-%}
-
-%option yyclass="Scanner" outfile="yylex.cc"
-%option c++ 8bit warn noyywrap yylineno
-
-	/* start condition for strings */
-	std::string str_buf;
-
+// Define an exclusive sub-scanner:
 %x string
 
 %%
@@ -25,9 +14,9 @@ INARRAY  { return Parser::TEST_INARRAY; }
 \|\|     { return Parser::LOGIC_OR; }
 
 \<       { return Parser::CMP_LT; }
->        { return Parser::CMP_GT; }
+\>       { return Parser::CMP_GT; }
 \<=      { return Parser::CMP_LE; }
->=       { return Parser::CMP_GE; }
+\>=      { return Parser::CMP_GE; }
 ==       { return Parser::CMP_EQ; }
 !=       { return Parser::CMP_NE; }
 
@@ -68,59 +57,79 @@ SCIENTIFIC { return Parser::OPT_SCIENTIFIC; }
 	return Parser::INTEGER;
 }
 
- /* String parsing -- adapted from the flex manual page */
+ /* String parsing -- adapted from the flex and flexc++ manuals */
 
 \" {
-	/* start of string */
-	str_buf.clear();
-	BEGIN(string);
+	/* begin of string */
+	begin(StartCondition__::string);
 }
 
 <string>{
 \" {
 	/* end of string */
-	BEGIN(INITIAL);
-	yytext = strdup(str_buf.c_str());
+	setMatched(matched().substr(0,matched().length()-1));
+	begin(StartCondition__::INITIAL);
 	return Parser::STRING;
 }
 
 \n {
-	/* allow string constants to span multiple lines */
-	str_buf += '\n';
+	/* Allow string constants to span multiple lines. */
+	more();
 }
 
 \\[0-7]{1,3} {
 	/* octal escape sequence */
-	unsigned int result;
+	size_t esc_pos = matched().rfind('\\');
+	std::string oct_str = matched().substr(esc_pos+1);
+	int res;
+	size_t pos = 0;
 
-	(void) sscanf(yytext+1,"%o",&result);
+	try {
+		res = std::stoi(oct_str,&pos,8);
+	} catch ( ... ) {
+		res = -1;
+	}
 
-	/* should check for bounds of escape sequence: result < 256 */
-	str_buf += (char) result;
+	if ( pos!=oct_str.length() || res<0 || res>=256 ) {
+		throw(ScannerException("bad escape sequence '\\"+oct_str+
+		                       "' on line "+std::to_string(lineNr())));
+	}
+	setMatched(matched().substr(0,esc_pos)+(char)res);
+	more();
 }
 
-\\[0-9]+ {
-	/* error: bad escape sequence */
-}
-
+\\[ntrbf\"\\] {
 	/* Escape sequences for some special characters */
-\\n         str_buf += '\n';
-\\t         str_buf += '\t';
-\\r         str_buf += '\r';
-\\b         str_buf += '\b';
-\\f         str_buf += '\f';
-\\\"        str_buf += '"';
-\\\\        str_buf += '\\';
+	char c = matched().back(), res;
+	switch ( c ) {
+	case 'n':  res = '\n'; break;
+	case 't':  res = '\t'; break;
+	case 'r':  res = '\r'; break;
+	case 'b':  res = '\b'; break;
+	case 'f':  res = '\f'; break;
+	case '\"': res = '\"'; break;
+	case '\\': res = '\\'; break;
+	default:
+		throw(ScannerException("unknown escape character '\\"+std::string(1,c)+
+		                       "' on line "+std::to_string(lineNr())));
+	}
+	setMatched(matched().substr(0,matched().length()-2)+res);
+	more();
+}
 
 \\\n {
 	/* ignore escaped newlines */
+	setMatched(matched().substr(0,matched().length()-2));
+	more();
 }
 
 	/* treat all other backslashes normally */
-\\.         str_buf += yytext;
+\\.     more();
 
-	/* Fast match any text not containing special characters */
-[^\\\n\"]+ str_buf += yytext;
+[^\\\n\"]+ {
+	/* Fast match any text not containing special characters. */
+	more();
+}
 
 } /* end of string parsing */
 
@@ -134,7 +143,7 @@ SCIENTIFIC { return Parser::OPT_SCIENTIFIC; }
 
 . {
 	/* return all others characters as-is. */
-	return yytext[0];
+	return matched()[0];
 }
 
 %%

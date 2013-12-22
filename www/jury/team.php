@@ -6,8 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 require('init.php');
 
 $id = @$_REQUEST['id'];
@@ -36,13 +34,13 @@ if ( !empty($cmd) ):
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Login:</td><td class=\"teamid\">";
+		echo "<tr><td>ID:</td><td class=\"teamid\">";
 		$row = $DB->q('TUPLE SELECT * FROM team WHERE login = %s',
 			$_GET['id']);
 		echo addHidden('keydata[0][login]', $row['login']);
 		echo htmlspecialchars($row['login']);
 	} else {
-		echo "<tr><td><label for=\"data_0__login_\">Login:</label></td><td class=\"teamid\">";
+		echo "<tr><td><label for=\"data_0__login_\">ID:</label></td><td class=\"teamid\">";
 		echo addInput('data[0][login]', null, 8, 15, 'pattern="' . IDENTIFIER_CHARS . '+" title="Alphanumerics only" required');
 	}
 	echo "</td></tr>\n";
@@ -65,15 +63,13 @@ $amap[''] = 'none';
 echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 ?>
 </td></tr>
-<tr><td><label for="data_0__authtoken_">Auth token:</label></td>
-<td><?php echo addInput('data[0][authtoken]', @$row['authtoken'], 35, 255)?></td></tr>
 <tr><td><label for="data_0__penalty_">Penalty time:</label></td>
 <td><?php echo addInput('data[0][penalty]', (isset($row['penalty'])?$row['penalty']:'0'), 10, 15)?></td></tr>
 <tr><td><label for="data_0__room_">Location:</label></td>
 <td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td><label for="data_0__comments_">Comments:</label></td>
 <td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
-<tr><td><label for="data_0__enabled_">Enabled:</label></td>
+<tr><td>Enabled:</td>
 <td><?php echo addRadioButton('data[0][enabled]', (!isset($row['']) || $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>
 <?php echo addRadioButton('data[0][enabled]', (isset($row['enabled']) && !$row['enabled']), 0)?> <label for="data_0__enabled_0">no</label></td></tr>
 </table>
@@ -106,6 +102,8 @@ $row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname, a.name AS af
 
 if ( ! $row ) error("Missing or invalid team id");
 
+$users = $DB->q('TABLE SELECT userid,username FROM user WHERE teamid = %s', $id);
+
 $affillogo   = "../images/affiliations/" . urlencode($row['affilid']) . ".png";
 $countryflag = "../images/countries/"    . urlencode($row['country']) . ".png";
 $teamimage   = "../images/teams/"        . urlencode($row['login'])   . ".jpg";
@@ -119,7 +117,7 @@ if ( $row['enabled'] != 1 ) {
 ?>
 
 <div class="col1"><table>
-<tr><td>Login:     </td><td class="teamid"><?php echo $row['login']?></td></tr>
+<tr><td>ID:        </td><td class="teamid"><?php echo $row['login']?></td></tr>
 <tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
 <tr><td>Penalty time:</td><td><?php echo htmlspecialchars($row['penalty'])?></td></tr>
 <tr><td>Host:</td><td><?php echo
@@ -127,6 +125,15 @@ if ( $row['enabled'] != 1 ) {
 <?php if (!empty($row['room'])): ?>
 <tr><td>Location:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>
+<tr><td>User:</td><td><?php
+if ( count($users) ) {
+	foreach($users as $user) {
+		echo "<a href=\"user.php?id=" . urlencode($user['userid']) . "\">" . htmlspecialchars($user['username']) . "</a> ";
+	}
+} else {
+	echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode($row['login']) . "\"><small>(add)</small></a>";
+}
+?></td></tr>
 </table></div>
 
 <div class="col2"><table>

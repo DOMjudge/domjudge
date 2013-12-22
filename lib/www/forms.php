@@ -35,11 +35,12 @@ function addPwField($name , $value = null) {
 
 /**
  * Form checkbox
+ */
 function addCheckBox($name, $checked = false, $value = null) {
 	return addInputField('checkbox', $name, $value,
 	                     ($checked ? ' checked="checked"' : ''));
 }
- */
+
 
 /**
  * Form radio button
@@ -128,7 +129,7 @@ function addSelect($name, $values, $default = null, $usekeys = false, $multi = f
 function addSubmit($value, $name = null, $onclick = null, $enable = true, $extraattrs = "") {
 	return addInputField('submit', $name, $value,
 		(empty($onclick) ? null : ' onclick="'.htmlspecialchars($onclick).'"') .
-		($enable ? '' : ' disabled="disabled"') . 
+		($enable ? '' : ' disabled="disabled"') .
 		(empty($extraattrs) ? '' : " $extraattrs"));
 }
 /**
@@ -178,7 +179,6 @@ function addEndForm()
 /**
  * File upload field
  */
-function addFileField($name, $size = null, $extraattr = "") {
-	return addInputField('file', $name , null,
-	                     (is_null($size) ? null : " size=\"".(int)($size).'"').$extraattr);
+function addFileField($name, $dummy = null, $extraattr = "") {
+	return addInputField('file', $name , null, $extraattr);
 }

@@ -7,7 +7,8 @@
 #
 # <testdata.in>     File containing test-input with absolute pathname.
 # <testdata.out>    File containing test-output with absolute pathname.
-# <timelimit>       Timelimit in seconds.
+# <timelimit>       Timelimit in seconds, optionally followed by ':' and
+#                   the hard limit to kill still running submissions.
 # <workdir>         Directory where to execute submission in a chroot-ed
 #                   environment. For best security leave it as empty as possible.
 #                   Certainly do not place output-files there!
@@ -21,12 +22,6 @@
 # usage of 'run' see that script. Likewise, for comparing results, a
 # program 'compare' is called by default.
 #
-# The program 'xsltproc' is used to parse the result from
-# 'result.xml' according to the ICPC Validator Interface Standard as
-# described in http://www.ecs.csus.edu/pc2/doc/valistandard.html.
-# If the compare program returns with nonzero exitcode however, this
-# is viewed as an internal error.
-
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
 trap 'cleanup ; error' EXIT
@@ -163,7 +158,7 @@ chmod a+x "$WORKDIR" "$WORKDIR/execdir"
 # Create files which are expected to exist:
 touch error.out                  # Error output
 touch compare.out                # Compare output
-touch result.xml result.out      # Result of comparison (XML and plaintext version)
+touch result.out                 # Result of comparison
 touch program.out program.err    # Program output and stderr (for extra information)
 touch program.time program.exit  # Program runtime and exitcode
 
@@ -195,8 +190,9 @@ $GAINROOT cp -pR /dev/null ../dev/null
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck ./run testdata.in program.out \
-	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT ${USE_CHROOT:+-r "$PWD/.."} -u "$RUNUSER" \
-	-C $TIMELIMIT -t $((2*TIMELIMIT)) -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
+	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT \
+	${USE_CHROOT:+-r "$PWD/.."} -u "$RUNUSER" \
+	-t $TIMELIMIT -C $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
 	-c -s $FILELIMIT -e program.err -E program.exit -T program.time -- \
 	$PREFIX/$PROGRAM 2>error.tmp
 
@@ -216,10 +212,27 @@ elif [ -s program.err ]; then
 	cat program.err >>error.tmp
 fi
 
+# We first compare the output, so that even if the submission gets a
+# timelimit exceeded or runtime error verdict later, the jury can
+# still view the diff with what the submission produced.
+logmsg $LOG_INFO "comparing output"
+
+# Copy testdata output, only after program has run
+cp "$TESTOUT" "$WORKDIR/testdata.out"
+
+logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
+
+if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
+                       result.out compare.out >compare.tmp 2>&1 ; then
+	exitcode=$?
+	cat error.tmp >>error.out
+	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
+fi
+
 # Check for errors from running the program:
 logmsg $LOG_DEBUG "checking program run exit-status"
 if grep  'timelimit exceeded' error.tmp >/dev/null 2>&1 ; then
-	echo "Timelimit exceeded." >>error.out
+	echo "Timelimit exceeded, runtime: `cat program.time`" >>error.out
 	cat error.tmp >>error.out
 	cleanexit ${E_TIMELIMIT:--1}
 fi
@@ -253,22 +266,6 @@ fi
 #	cleanexit ${E_OUTPUT_LIMIT:--1}
 #fi
 
-logmsg $LOG_INFO "comparing output"
-
-# Copy testdata output, only after program has run
-cp "$TESTOUT" "$WORKDIR/testdata.out"
-
-logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
-
-if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
-                       result.xml compare.out >compare.tmp 2>&1 ; then
-	exitcode=$?
-	cat error.tmp >>error.out
-	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
-fi
-
-# Parse result.xml with xsltproc
-xsltproc "$SCRIPTDIR"/parse_result.xslt result.xml > result.out
 result=`grep '^result='      result.out | cut -d = -f 2- | tr '[:upper:]' '[:lower:]'`
 descrp=`grep '^description=' result.out | cut -d = -f 2-`
 descrp="${descrp:+ ($descrp)}"
@@ -290,7 +287,7 @@ elif [ "$result" = "wrong answer" ]; then
 	cat error.tmp >>error.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 else
-	echo "Unknown result: Wrong answer${descrp}." >>error.out
+	echo "Unknown result: Wrong answer#${descrp}#${result}#." >>error.out
 	cat error.tmp >>error.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 fi

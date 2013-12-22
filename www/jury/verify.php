@@ -12,7 +12,7 @@ $val     = @$_POST['val'];
 $comment = @$_POST['comment'];
 if ( empty($id) ) error("No judging ID passed to mark as verified.");
 
-$jury_member = getJuryMember();
+$jury_member = $username;
 
 // Explicitly unset jury_member when unmarking verified: otherwise this
 // judging would be marked as "claimed".

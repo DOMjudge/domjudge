@@ -52,6 +52,9 @@ LIBCGROUP = @LIBCGROUP@
 # libmagic
 LIBMAGIC = @LIBMAGIC@
 
+# libJSONcpp
+LIBJSONCPP = @LIBJSONCPP@
+
 # libcURL
 CURL_CFLAGS = @CURL_CFLAGS@
 CURL_LIBS   = @CURL_LIBS@
@@ -128,7 +131,7 @@ domserver_dirs = $(domserver_bindir) $(domserver_etcdir) $(domserver_wwwdir) \
                  $(domserver_libwwwdir) $(domserver_logdir) $(domserver_rundir) \
                  $(domserver_tmpdir) $(domserver_submitdir) $(domserver_sqldir)/upgrade \
                  $(addprefix $(domserver_wwwdir)/images/,affiliations countries teams) \
-                 $(addprefix $(domserver_wwwdir)/,public team jury plugin js)
+                 $(addprefix $(domserver_wwwdir)/,public team jury plugin api js)
 
 judgehost_dirs = $(judgehost_bindir) $(judgehost_etcdir) $(judgehost_libdir) \
                  $(judgehost_libjudgedir) $(judgehost_logdir) $(judgehost_rundir) \

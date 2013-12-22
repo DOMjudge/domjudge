@@ -27,19 +27,27 @@ function check_team($data, $keydata = null)
 	return $data;
 }
 
+function check_user($data, $keydata = null)
+{
+	$id = (isset($data['username']) ? $data['username'] : $keydata['username']);
+	if ( ! preg_match ( ID_REGEX, $id ) ) {
+		ch_error("Username may only contain characters " . IDENTIFIER_CHARS . ".");
+	}
+	if ( ! empty($data['email'])  && ! filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+		ch_error("Email not valid.");
+	}
+	if ( !empty($data['password']) ) {
+		$data['password'] = md5("$id#".$data['password']);
+	}
+	return $data;
+}
+
+
 function check_affiliation($data, $keydata = null)
 {
 	$id = (isset($data['affilid']) ? $data['affilid'] : $keydata['affilid']);
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Team affiliation ID may only contain characters " . IDENTIFIER_CHARS . ".");
-	}
-	$affillogo = '../images/affiliations/' . urlencode($id) . '.png';
-	if ( ! file_exists ( $affillogo ) ) {
-		ch_error("Affiliation " . $id .
-		         " does not have a logo (looking for $affillogo).");
-	} elseif ( ! is_readable ( $affillogo ) ) {
-		ch_error("Affiliation " . $data['affilid'] .
-		         " has a logo, but it's not readable ($affillogo).");
 	}
 	return $data;
 }
@@ -110,8 +118,6 @@ function check_judgehost($data, $keydata = null)
 
 function check_language($data, $keydata = null)
 {
-	global $langexts;
-
 	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 0 ) {
 		ch_error("Timelimit is not a valid positive factor");
 	}
@@ -120,17 +126,13 @@ function check_language($data, $keydata = null)
 		ch_error("Language ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
 
-	if ( @$langexts[$id]!=$id ) {
-		ch_error("Language ID/extension not found or set incorrectly " .
-		         "in LANG_EXTS from domserver-config.php");
-	}
-
 	return $data;
 }
 
 function check_relative_time($time, $starttime, $field, $removed_intervals = null)
 {
 	// FIXME: need to incorporate removed intervals
+	if ( empty($time) ) return null;
 	if ($time[0] == '+' || $time[0] == '-') {
 		// convert relative times to absolute ones
 		$neg = ($time[0] == '-');
@@ -149,22 +151,22 @@ function check_relative_time($time, $starttime, $field, $removed_intervals = nul
 				$seconds *= -1;
 			}
 			// calculate the absolute time, adjusting for removed intervals
-			$abstime = strtotime($starttime) + $seconds;
+			$abstime = $starttime + $seconds;
 			if ( is_array($removed_intervals) ) {
 				foreach ( $removed_intervals as $intv ) {
-					if ( strtotime($intv['starttime'])<=$abstime ) {
+					if ( difftime($intv['starttime'],$abstime)<=0 ) {
 						$abstime += difftime($intv['endtime'],$intv['starttime']);
 					}
 				}
 			}
-			$ret = strftime(MYSQL_DATETIME_FORMAT, $abstime);
+			$ret = $abstime;
 		} else {
 			ch_error($field . " is not correctly formatted, expecting: +/-hh:mm(:ss)");
 			$ret = null;
 		}
 	} else {
-		// time is absolute, just copy
-		$ret = $time;
+		// Time string is absolute, just convert to Unix epoch
+		$ret = strtotime($time);
 	}
 
 	return $ret;
@@ -173,8 +175,6 @@ function check_relative_time($time, $starttime, $field, $removed_intervals = nul
 function check_removed_intervals($contest, $intervals)
 {
 	foreach ( $intervals as $data ) {
-		check_datetime($data['starttime']);
-		check_datetime($data['endtime']);
 		if ( difftime($data['endtime'], $data['starttime']) <= 0 ) {
 			ch_error('Interval ends before (or when) it starts');
 		}
@@ -215,18 +215,17 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
 	}
 
 	// are these dates valid?
-	foreach(array('starttime','endtime','freezetime',
-		'unfreezetime','activatetime') as $f) {
-		if ($f != 'starttime') {
+	foreach ( array('starttime','endtime','freezetime',
+	                'unfreezetime','activatetime') as $f ) {
+		if ( $f == 'starttime' ) {
+			$data[$f] = strtotime($data[$f.'_string']);
+		} else {
 			// The true input date/time strings are preserved in the
 			// *_string variables, since these may be relative times
 			// that need to be kept as is.
 			$data[$f] = $data[$f.'_string'];
 			$data[$f] = check_relative_time($data[$f], $data['starttime'], $f,
 			                                $removed_intervals);
-		}
-		if ( !empty($data[$f]) ) {
-			check_datetime($data[$f]);
 		}
 	}
 
@@ -298,69 +297,13 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
 	return $data;
 }
 
-/**
- * Check whether a string is in a valid datetime format, e.g.:
- * 2001-05-12 13:45:00.
- * Checks for the presence of the right parts, and whether the
- * date is sensible (e.g. not 31 February)
- */
-function check_datetime($datetime)
-{
-	$datetime = trim($datetime);
-
-	// It must be 19 chars or we're wrong anyway.
-	if (strlen($datetime) != 19) {
-		ch_error ("Cannot parse date, not length 19: " . $datetime);
-	}
-	$y = substr($datetime, 0, 4);
-	$m = substr($datetime, 5, 2);
-	$d = substr($datetime, 8, 2);
-	$hr = substr($datetime, 11, 2);
-	$mi = substr($datetime, 14, 2);
-	$se = substr($datetime, 17, 2);
-
-	// Is this a valid date?
-	if (is_numeric($y) && is_numeric($m) && is_numeric($d) &&
-		is_numeric($hr) && is_numeric($mi) && is_numeric($se)) {
-		// They are numeric.
-
-		// is this a sensible date?
-		$valid = checkdate($m,$d,$y);
-		if (!$valid) {
-			ch_error ("Cannot parse date, not a valid date: " . $datetime);
-		}
-
-		if ( $hr < 0 || $hr > 23 ) {
-			ch_error ("Cannot parse date, invalid hour: " . $datetime);
-		}
-		if ( $mi < 0 || $mi > 59 ) {
-			ch_error ("Cannot parse date, invalid minute: " . $datetime);
-		}
-		if ( $se < 0 || $se > 59 ) {
-			ch_error ("Cannot parse date, invalid second: " . $datetime);
-		}
-	} else {
-		ch_error ("Cannot parse date, params not numeric: " . $datetime);
-	}
-
-	return $datetime;
-}
-
 function check_submission($data, $keydata = null)
 {
-	check_datetime($data['submittime']);
-
 	return $data;
 }
 
 function check_judging($data, $keydata = null)
 {
-	foreach(array('starttime','endtime') as $f) {
-		if ( !empty($data[$f]) ) {
-			check_datetime($data[$f]);
-		}
-	}
-
 	if ( !empty($data['endtime']) && difftime($data['endtime'], $data['starttime']) < 0 ) {
 		ch_error('Judging ended before it started');
 	}
@@ -370,3 +313,4 @@ function check_judging($data, $keydata = null)
 
 	return $data;
 }
+

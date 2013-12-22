@@ -104,7 +104,7 @@ function putClar($clar)
 	echo "</td></tr>\n";
 
 	echo '<tr><td>Time:</td><td>';
-	echo printtime($clar['submittime'], TRUE);
+	echo printtime($clar['submittime'], NULL, TRUE);
 	echo "</td></tr>\n";
 
 	echo '<tr><td></td><td class="filename">';
@@ -169,6 +169,7 @@ function summarizeClarification($body, $maxchars = 80)
  */
 function putClarificationList($clars, $team = NULL)
 {
+	global $username;
 	if ( $team==NULL && ! IS_JURY ) {
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
@@ -201,7 +202,7 @@ function putClarificationList($clars, $team = NULL)
 			echo '<td>' . $link . $clar['clarid'] . '</a></td>';
 		}
 
-		echo '<td>' . $link . printtime($clar['submittime'], TRUE) . '</a></td>';
+		echo '<td>' . $link . printtime($clar['submittime'], NULL, TRUE) . '</a></td>';
 
 		$sender = htmlspecialchars($clar['sender']);
 		$recipient = htmlspecialchars($clar['recipient']);
@@ -251,7 +252,7 @@ function putClarificationList($clars, $team = NULL)
 				echo "<a class=\"button\" href=\"clarification.php?claim=1&amp;id=" .
 					htmlspecialchars($clar['clarid']) . "\">claim</a>";
 			} else {
-				if ( !$clar['answered'] && $jury_member==getJuryMember() ) {
+				if ( !$clar['answered'] && $jury_member==$username ) {
 					echo "<a class=\"button\" href=\"clarification.php?unclaim=1&amp;id=" .
 						htmlspecialchars($clar['clarid']) . "\">unclaim</a>";
 				} else {
@@ -337,7 +338,7 @@ function appendAnswer() {
 			$teams = $DB->q('KEYVALUETABLE SELECT login, CONCAT(login, ": ", name) as name
 			                 FROM team
 			                 ORDER BY categoryid ASC, team.name COLLATE utf8_general_ci ASC');
-			$options = array_merge($options,$teams);
+			$options += $teams;
 		} else {
 			if ( $clar['sender'] ) {
 				$options[$clar['sender']] = $clar['sender'] .': '.
@@ -362,7 +363,7 @@ function appendAnswer() {
 	}
 	$categs = getClarCategories();
 	$defclar = key($categs);
-	$options = array_merge($probs, $categs);
+	$options = $probs + $categs;
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options, ($respid ? $clar['probid'] : $defclar), true) .
 	     "</td></tr>\n";

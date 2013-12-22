@@ -6,8 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$pagename = basename($_SERVER['PHP_SELF']);
-
 $id = $_REQUEST['id'];
 
 require('init.php');

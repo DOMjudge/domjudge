@@ -20,9 +20,10 @@ $row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
                LEFT JOIN submission s USING (submitid)
                LEFT JOIN language   l USING (langid)
                LEFT JOIN problem    p ON (p.probid = s.probid)
-               WHERE j.submitid = %i AND teamid = %s AND j.valid = 1',$sid,$login);
+               WHERE j.submitid = %i AND teamid = %s AND j.valid = 1',$sid,$teamid);
 
-if( ! $row || (dbconfig_get('verification_required',0) && !$row['verified']) ) {
+if( !$row || $row['submittime'] >= $cdata['endtime'] ||
+    (dbconfig_get('verification_required',0) && !$row['verified']) ) {
 	echo "<p>Submission not found for this team or not judged yet.</p>\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
@@ -44,7 +45,7 @@ if( ! $row['valid'] ) {
 	<td><?php echo htmlspecialchars($row['probname'])?> [<span class="probid"><?php echo
 	htmlspecialchars($row['probid']) ?></span>]</td></tr>
 <tr><td>Submitted:</td>
-	<td><?php echo printtime($row['submittime'], TRUE)?></td></tr>
+	<td><?php echo printtime($row['submittime'], NULL, TRUE)?></td></tr>
 <tr><td>Language:</td>
 	<td><?php echo htmlspecialchars($row['langname'])?></td></tr>
 </table>

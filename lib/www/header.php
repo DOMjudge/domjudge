@@ -1,7 +1,7 @@
 <?php
 /**
  * Common page header.
- * Before including this, one can set $title, $ajaxtitle, $refresh,
+ * Before including this, one can set $title, $refresh,
  * $printercss, $jscolor and $menu.
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
@@ -19,23 +19,21 @@ header('Content-Type: text/html; charset=' . DJ_CHARACTER_SET);
  */
 if ( ! IS_PUBLIC ) header('X-Frame-Options: DENY');
 
-if ( isset($refresh) &&
-     (!isset($_COOKIE["domjudge_refresh"]) ||
-      (bool)$_COOKIE["domjudge_refresh"]) ) {
+$refresh_cookie = (!isset($_COOKIE["domjudge_refresh"]) || (bool)$_COOKIE["domjudge_refresh"]);
+
+if ( isset($refresh) && $refresh_cookie ) {
 	header('Refresh: ' . $refresh);
 }
 
 if(!isset($menu)) {
 	$menu = true;
 }
-if(!isset($ajaxtitle)) {
-	$ajaxtitle = '';
-}
 ?>
 <!DOCTYPE html>
 <html lang="en" xml:lang="en">
 <head>
 	<!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
+<meta charset="<?php echo DJ_CHARACTER_SET?>">
 <title><?php echo $title?></title>
 <link rel="shortcut icon" href="../images/favicon.png" type="image/png" />
 <link rel="stylesheet" href="../style.css" type="text/css" />
@@ -60,7 +58,7 @@ if ( ! empty($extrahead) ) echo $extrahead;
 <?php
 
 if ( IS_JURY ) {
-	echo "<body onload=\"setInterval('updateClarifications(\'$ajaxtitle\')', 20000)\">\n";
+	echo "<body onload=\"setInterval('updateClarifications(" . ($pagename=='clarifications.php' && $refresh_cookie) . ")', 20000)\">\n";
 } else {
 	echo "<body>\n";
 }

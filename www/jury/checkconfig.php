@@ -132,20 +132,6 @@ result('software', 'PHP max_file_uploads',
        'than the maximum number of test cases per problem and the ' .
        'configuration setting \'sourcefiles_limit\'.');
 
-require ( LIBWWWDIR . '/highlight.php');
-$highlighter = highlighter_init();
-
-if ( $highlighter == 'native' ) {
-	result('software', 'Sourcecode syntax highlighting',
-		'W', 'Optionally, install one of the supported source code ' .
-		'syntax highlighters for use when displaying the submitted ' .
-		'source code. See the manual for details.');
-} else {
-	result('software', 'Sourcecode syntax highlighting',
-		'O', 'Will format sourcecode for display with "' .
-			htmlspecialchars($highlighter) .'".');
-}
-
 if ( class_exists("ZipArchive") ) {
 	result('software', 'Problem up/download via zip bundles',
 	       'O', 'PHP ZipArchive class available for importing and exporting problem data.');
@@ -186,6 +172,15 @@ flushresults();
 
 // CONFIGURATION
 
+if ( $DB->q('VALUE SELECT count(*) FROM user WHERE username = "admin" AND password=MD5("admin#admin")') != 0 ) {
+	result('configuration', 'Default admin password', 'E',
+		'The "admin" user still has the default password. You should change it immediately.');
+} else {
+	result('configuration', 'Default admin password', 'O',
+		'Password for "admin" has been changed from the default.');
+}
+
+
 if ( DEBUG == 0 ) {
 	result('configuration', 'Debugging', 'O', 'Debugging disabled.');
 } else {
@@ -202,17 +197,6 @@ if ( !TEST_MODE ) {
 		'Should not be enabled on live systems.');
 }
 
-
-if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
-	result('configuration', 'Protected Jury interface', 'W',
-		"You are not using HTTP Authentication for the Jury interface. " .
-		"Are you sure that the jury interface is adequately protected?");
-} else {
-	result('configuration', 'Protected Jury interface', 'O',
-		'Logged in as user ' .
-		htmlspecialchars($_SERVER['REMOTE_USER']) .
-		".");
-}
 
 if ( !is_writable(TMPDIR) ) {
        result('configuration', 'TMPDIR writable', 'W',

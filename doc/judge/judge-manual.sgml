@@ -1,6 +1,9 @@
 <!doctype linuxdoc system [
 <!ENTITY checktestdatagrammar SYSTEM "checktestdata-grammar-inc.sgml">
 <!ENTITY problemformat SYSTEM "problem-format-inc.sgml">
+<!ENTITY % admin "IGNORE">
+<!ENTITY % judge "INCLUDE">
+<!ENTITY domjudgeoverview SYSTEM "../domjudge-overview-inc.sgml">
 ]>
 <!--
  DOMjudge Jury Manual
@@ -14,9 +17,9 @@
 <!--
  This is some comment character magic to circumvent problems
  with an unexpanded git archive $Format$ keyword.
-$Format: -%x2d%x3e
+ $Format: -%x2d%x3e
 <date>%aD
-%x3c!%x2d- $  -->
+%x3c!%x2d- $ -->
 
 <abstract>
 This document provides information about DOMjudge aimed at a jury
@@ -28,92 +31,11 @@ A separate manual is available for teams and administrators.
 <!-- $Format: -%x2d%x3e
 Document version: %h
 %x3c!%x2d- $ -->
-
 </abstract>
 
 <toc>
 
-<chapt>DOMjudge Overview
-<p>
-
-DOMjudge is a system for running a programming contest, like the ACM
-ICPC regional and world championship programming contests.
-
-This means that teams are on-site and have a fixed time period (mostly
-5 hours) and one computer to solve a number of problems (mostly 6-10).
-Problems are solved by writing a program in one of the allowed
-languages, that reads input according to the problem input
-specification and writes the correct, corresponding output.
-
-The judging is done by submitting the source code of the solution to
-the jury. There the jury system automatically compiles and runs the
-program and compares the program output with the expected output.
-
-This software can be used to handle the submission and judging during
-such contests. It also handles feedback to the teams and communication
-on problems (clarification requests). It has web-interfaces for the
-jury, the teams (their submissions and clarification requests) and the
-public (scoreboard).
-
-<sect>Features
-<p>
-
-A global overview of the features that DOMjudge provides:
-
-<itemize>
-<item>Automatic judging with distributed (scalable) judge hosts
-<item>Web-interface for portability and simplicity
-<item>Modular system for plugging in languages/compilers
-<item>Detailed jury information (submissions, judgings) and options
-      (rejudge, clarifications)
-<item>Designed with security in mind
-<item>Has been used in many live contests
-<item>Open Source, Free Software
-</itemize>
-
-
-<sect>Copyright and licencing
-<p>
-
-DOMjudge is developed by Jaap Eldering, Thijs Kinkhorst,
-Peter van de Werken and Tobias Werth. Development is hosted at
-Study Association <htmlurl name="A-Eskwadraat"
-url="http://www.a-eskwadraat.nl/">, <htmlurl name="Utrecht University"
-url="http://www.uu.nl/">, The Netherlands.
-
-It is Copyright (c) 2004 - 2013 by The DOMjudge Developers.
-
-DOMjudge, including its documentation, is free software; you can redistribute
-it and/or modify it under the terms of the <url name="GNU General Public License"
-url="http://www.gnu.org/copyleft/gpl.html"> as published by the Free Software
-Foundation; either version 2, or (at your option) any later version. See the
-file COPYING.
-
-Additionally, parts of this system are based on other programs, which
-are covered by other copyrights. See the file README for details.
-
-<sect>Contact
-<p>
-The DOMjudge homepage can be found at:
-<htmlurl name="http://domjudge.sourceforge.net/"
-url="http://domjudge.sourceforge.net/">
-
-We have a low volume <htmlurl name="mailing list for announcements"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
-of new releases.
-
-The authors can be reached at the following address:
-<htmlurl name="domjudge-devel@lists.a-eskwadraat.nl"
-url="mailto:domjudge-devel@lists.a-eskwadraat.nl">.  You need
-to be subscribed before you can post. See
-<htmlurl name="the list information page"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
-for subscription and more details.
-
-Some developers and users of DOMjudge linger on the IRC channel
-dedicated to DOMjudge on the Freenode network:
-server <tt>irc.freenode.net</tt>, channel <tt>#domjudge</tt>.
-Feel free to drop by with your questions and comments.
+&domjudgeoverview;
 
 <chapt>General
 <p>
@@ -138,14 +60,8 @@ canonical overview of current standings.
 The DOMjudge system discerns between <em>judges</em> and
 <em>administrators</em> (admins). An administrator is responsible for
 the technical side of DOMjudge: installation and keeping it running.
-The jury web interface may be used by both.
-
-Depending on configuration, there may either be a separate
-administrator view or one is shared between judges and administrators.
-In the first case you will not have access to the admin-specific
-options. In the latter, you may see options directed at admins, like
-options to edit or delete data. Only use these options if you're sure
-that it's correct to do so.
+The jury web interface may be used by both, but depending on your
+assigned role you may have more options.
 
 <sect>Scoreboard
 <p>
@@ -171,7 +87,14 @@ them, when set.
 
 Nearly everything on the scoreboard can be clicked to reveal more
 detailed information about the item in question: team names, specific
-submissions and problem headers.
+submissions and problem headers. Many cells will show additional
+`title text' information when hovering over them. The score column
+lists the number of solved problems and the total penalty time for
+each team. Each cell in a problem column lists the number of
+submissions, and if the problem was solved, this is followed by
+the time of the first correct submission in minutes since contest
+start. Any penalty time incurred for previous incorrect submissions is
+included in the team's total time.
 
 <chapt>Before the contest
 <p>
@@ -196,8 +119,13 @@ problem on the scoreboard. Disallow judge will make DOMjudge accept
 submissions, but leave them queued; this is useful in case an
 unexpected problem shows up with one of the problems. Timelimit is the
 maximum number of seconds a submission for this problem is allowed to
-run before a `TIMELIMIT' response is given (to be multiplied possibly by a language
-factor). Problems can be imported and exported into and from DOMjudge
+run before a `TIMELIMIT' response is given (to be multiplied possibly
+by a language factor). Note that a `timelimit overshoot' can be
+configured to let submissions run a bit longer. Although DOMjudge will
+use the actual limit to determine the verdict, this allows judges to
+see if a submission is close to the timelimit.
+
+Problems can be imported and exported into and from DOMjudge
 using zip-files that contain the problem metadata and testdata files.
 See appendix <ref id="problem-format" name="DOMjuge problem format
 specification">. Problems can have special <em>compare</em> and
@@ -214,7 +142,7 @@ e.g. Java.
 <sect>Verifying testdata
 <p>
 
-DOMjudge comes with some small tools to check for mistakes in the
+DOMjudge comes with some tools to check for mistakes in the
 testdata. These tools are all located in the <tt>misc-tools</tt>
 directory in the source tree.
 
@@ -305,7 +233,7 @@ might be having difficulties.
 <sect>Judging Submissions
 <p>
 
-<sect1>Flow of submitted solutions 
+<sect1>Flow of submitted solutions
 <p>
 
 The flow of an incoming submission is as follows.
@@ -335,7 +263,7 @@ a code.
 <descrip>
 <tag>QUEUED/PENDING</tag>submission received and awaiting a judgehost to process it *;
 <tag>JUDGING       </tag>a judgehost is currently compiling/running/testing the submission *;
-<tag>TOO-LATE      </tag>submission received but submitted after the contest ended;
+<tag>TOO-LATE      </tag>submission submitted after the contest ended;
 <tag>CORRECT       </tag>submission correct, problem solved;
 <tag>COMPILER-ERROR</tag>the compiler gave an error while compiling the program;
 <tag>TIMELIMIT     </tag>program execution time exceeded the time defined for the problem;
@@ -409,9 +337,9 @@ explaining what has been rejudged and why.
 <p>
 Finally, there is the option to <em>ignore</em> specific submissions
 using the button on the submission page. When a submission is being
-ignored, it is as if was never submitted: it is not visible to the
-team that sent it nor on the scoreboard. It will show striked through
-in the jury submissions list though. This can be used to effectively
+ignored, it is as if was never submitted: it will show strike-through
+in the jury's and affected team's submission list, and it is not
+visible on the scoreboard. This can be used to effectively
 delete a submission for some reason, e.g. when a team erroneously sent
 it for the wrong problem. The submission can also be unignored again.
 
@@ -461,8 +389,10 @@ automatically updated, even without reloading the page.
 <chapt>After the contest
 <p>
 Once the contest is over, the system will still accept submissions but
-will not judge them anymore. Teams will see this as a `TOO-LATE'
-response.
+these will receive the verdict `TOO-LATE'. These submissions will
+still be judged and can be inspected by the jury, but they will not
+affect scoring and none of the judging details will be visible to the
+teams.
 
 <p>
 If the scoreboard was frozen, it will remain frozen until the time set

@@ -86,18 +86,27 @@ if( $res->count() == 0 ) {
 			echo "judgehost-nocon";
 			echo "\" title =\"never checked in\">";
 		} else {
-			$reltime = time() - strtotime($row['polltime']);
-			if ( $reltime < 30 ) {
+			$reltime = difftime(now(),$row['polltime']);
+			if ( $reltime < JUDGEHOST_WARNING ) {
 				echo "judgehost-ok";
-			} else if ( $reltime < 120 ) {
+			} else if ( $reltime < JUDGEHOST_CRITICAL ) {
 				echo "judgehost-warn";
 			} else {
-				echo "judgehost-err";
+				echo "judgehost-crit";
 			}
 			echo "\" title =\"last checked in $reltime seconds ago\">";
 		}
 		echo $link . CIRCLE_SYM . "</a></td>";
 		if ( IS_ADMIN ) {
+			if ( $row['active'] ) {
+				$activepicto = "pause"; $activecmd = "deactivate";
+			} else {
+				$activepicto = "play"; $activecmd = "activate";
+			}
+			echo "<td><a href=\"judgehost.php?id=" . $row['hostname'] . "&amp;cmd=" .
+			     $activecmd . "\"><img class=\"picto\" alt=\"" . $activecmd .
+			     "\" title=\"" . $activecmd . " judgehost\" " .
+			     "src=\"../images/" . $activepicto . ".png\" /></a></td>";
 			echo "<td>" . delLink('judgehost','hostname',$row['hostname']) ."</td>";
 		}
 		echo "</tr>\n";
@@ -106,7 +115,7 @@ if( $res->count() == 0 ) {
 }
 
 if ( IS_ADMIN ) {
-	echo addForm('judgehosts.php') .
+	echo addForm($pagename) .
 		"<p>" .
 		addSubmit('Start all judgehosts', 'cmd-activate') .
 		addSubmit('Stop all judgehosts', 'cmd-deactivate') .

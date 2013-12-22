@@ -6,8 +6,8 @@
 /apache.conf
 /config.h.in
 /config.h
-/htpasswd-jury
 /htpasswd-plugin
 /dbpasswords.secret
+/restapi.secret
 /sudoers-domjudge
 /cgroup-domjudge.conf

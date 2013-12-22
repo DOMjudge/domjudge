@@ -112,7 +112,6 @@ if ( ! empty($MATRIX) ) {
 
 		XMLaddnode($elem, 'num_submissions', $data['num_submissions']);
 		XMLaddnode($elem, 'num_solved', $data['num_correct']);
-		XMLaddnode($elem, 'best_time', $data['best_time']);
 	}
 
 	// Add legends for problems, languages, affiliations and categories

@@ -13,7 +13,7 @@ function XMLHttpHandle()
 	return ajaxRequest;
 }
 
-function updateClarifications(ajaxtitle)
+function updateClarifications(doreload)
 {
 	var handle = XMLHttpHandle();
 	if (!handle) {
@@ -23,19 +23,21 @@ function updateClarifications(ajaxtitle)
 		if (handle.readyState == 4) {
 			var elem = document.getElementById('menu_clarifications');
 			var cnew = handle.responseText;
-			var newstr = ''
+			var newstr = '';
 			if (cnew == 0) {
 				elem.className = null;
 			} else {
 				newstr = ' ('+cnew+' new)';
 				elem.className = 'new';
 			}
-			elem.innerHTML = 'clarifications' + newstr;
-			if(ajaxtitle) {
-				document.title = ajaxtitle + newstr;
+			if ( elem.innerHTML != 'clarifications' + newstr ) {
+				elem.innerHTML = 'clarifications' + newstr;
+				if(doreload) {
+					location.reload()
+				}
 			}
 		}
-	}
+	};
 	handle.open("GET", "update_clarifications.php", true);
 	handle.send(null);
 }
@@ -186,7 +188,7 @@ function initFileUploads(maxfiles) {
 			fileadd.style.display = "none";
 		}
 	}
-	fileelt.onclick = function() { doReload = false; }
+	fileelt.onclick = function() { doReload = false; };
 	fileelt.onchange = fileelt.onmouseout = function () {
 		if ( this.value != "" ) {
 			detectProblemLanguage(this.value);
@@ -216,7 +218,7 @@ function addFileUpload() {
 function togglelastruns() {
 	var names = {'lastruntime':0, 'lastresult':1};
 	for (var name in names) {
-		cells = document.getElementsByName(name);
+		cells = document.getElementsByClassName(name);
 		for (i = 0; i < cells.length; i++) {
 			cells[i].style.display = (cells[i].style.display == 'none') ? 'table-cell' : 'none';
 		}
@@ -224,7 +226,7 @@ function togglelastruns() {
 }
 
 function updateClock()
-{	
+{
 	curtime = initial+offset;
 	date.setTime(curtime*1000);
 
@@ -250,7 +252,7 @@ function updateClock()
 			h = Math.floor(left/(60*60));
 			fmt += h + ":";
 			left -= h * 60*60;
-		} 
+		}
 		m = Math.floor(left/60);
 		if ( m < 10 ) { fmt += "0"; }
 		fmt += m + ":";
@@ -304,6 +306,10 @@ function getRank(row) {
 	return row.getElementsByTagName("td")[0];
 }
 
+function getHeartCol(row) {
+	return row.getElementsByTagName("td")[1];
+}
+
 function getTeamname(row) {
 	return row.getElementsByTagName("td")[2];
 }
@@ -347,9 +353,9 @@ function toggle(id, show) {
 }
 
 function addHeart(rank, row, id, isFav) {
-	var firstCol = getRank(row);
+	var heartCol = getHeartCol(row);
 	var color = isFav ? "red" : "gray";
-	return "<span style=\"cursor:pointer;color:" + color + ";\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\">&#9829;</span>" + firstCol.innerHTML;
+	return heartCol.innerHTML + "<span class=\"heart\" style=\"color:" + color + ";\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\">&#9829;</span>";
 }
 
 function initFavouriteTeams() {
@@ -369,11 +375,12 @@ function initFavouriteTeams() {
 			continue;
 		}
 		var firstCol = getRank(scoreboard[j]);
+		var heartCol = getHeartCol(scoreboard[j]);
 		var rank = firstCol.innerHTML;
 		for (var i = 0; i < favTeams.length; i++) {
 			if (teamname.innerHTML == favTeams[i]) {
 				found = true;
-				firstCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
+				heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
 				toAdd[cntFound] = scoreboard[j].cloneNode(true);
 				if (rank == "") {
 					// make rank explicit in case of tie
@@ -385,7 +392,7 @@ function initFavouriteTeams() {
 			}
 		}
 		if (!found) {
-			firstCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
+			heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
 		}
 		if (rank != "") {
 			lastRank = rank;

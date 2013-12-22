@@ -147,7 +147,8 @@ else
 	use_cgroups=no
 fi
 AC_ARG_ENABLE(cgroups,AS_HELP_STRING([--enable-cgroups],
-[Use Linux cgroups for memory control (default: $use_cgroups).]), [], [])
+[Use Linux cgroups for memory control (default: if supported).
+ This requires Linux kernel >= 3.2.0 and libcgroup.]), [], [])
 
 if test "x$enable_cgroups" = xno; then
 	use_cgroups=no
@@ -254,7 +255,13 @@ AC_CHECK_PROGS(HTPASSWD,[htpasswd htpasswd2],[no htpasswd binary found])
 # Check for including optional libmagic.
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
-# Checks for libcURL when submit is enabled.
+# Check for JSONcpp library to decode language/extensions list from
+# REST API (this also requires libcURL below).
+AC_LANG_PUSH([C++])
+AC_CHECK_HEADERS([jsoncpp/json/json.h],AC_SUBST(LIBJSONCPP,[-ljsoncpp]))
+AC_LANG_POP([C++])
+
+# Check for libcURL and JSONcpp when submit is enabled.
 if test "$submit_enablehttp" = "1" ; then
 	AX_LIB_CURL([7.9.7],[],[
 		AC_MSG_ERROR([libcURL not found (required for http submit method)])
@@ -287,7 +294,7 @@ if test "x$enable_checktestdata" != "xno"; then
 	# Check for gmpxx headers separately, as they are C++.
 	AC_LANG_PUSH([C++])
 	AC_CHECK_HEADERS([gmpxx.h])
-	AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmp -lgmpxx'),[],[-lgmp])
+	AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmpxx -lgmp'),[],[-lgmp])
 	AC_LANG_POP([C++])
 fi
 
