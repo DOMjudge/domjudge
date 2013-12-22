@@ -559,11 +559,14 @@ function daemonize($pidfile = NULL)
  * validates it and puts it into the database. Additionally it
  * moves it to a backup storage.
  */
-function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid = NULL)
+function submit_solution($team, $prob, $lang, $files, $filenames,
+                         $origsubmitid = NULL, $extid = NULL, $submittime = NULL)
 {
 	if( empty($team) ) error("No value for Team.");
 	if( empty($prob) ) error("No value for Problem.");
 	if( empty($lang) ) error("No value for Language.");
+
+	if ( empty($submittime) ) $submittime = now();
 
 	if ( !is_array($files) || count($files)==0 ) error("No files specified.");
 	if ( !is_array($filenames) || count($filenames)!=count($files) ) {
@@ -578,10 +581,8 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 
 	$sourcesize = dbconfig_get('sourcesize_limit');
 
-	// If no contest has started yet, refuse submissions.
-	$now = now();
-
-	if( difftime($cdata['starttime'], $now) > 0 ) {
+	// Refuse submissions before start of contest.
+	if( difftime($cdata['starttime'], $submittime) > 0 ) {
 		error("The contest is closed, no submissions accepted. [c$cid]");
 	}
 
@@ -622,9 +623,9 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 
 	// Insert submission into the database
 	$id = $DB->q('RETURNID INSERT INTO submission
-				  (cid, teamid, probid, langid, submittime, origsubmitid)
-				  VALUES (%i, %s, %s, %s, %s, %i)',
-	             $cid, $team, $probid, $langid, $now, $origsubmitid);
+				  (cid, teamid, probid, langid, submittime, origsubmitid, externalid)
+				  VALUES (%i, %s, %s, %s, %s, %i, %s)',
+	             $cid, $team, $probid, $langid, $submittime, $origsubmitid, $extid);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
@@ -638,7 +639,7 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
 	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
-	       now(), $cid, $team, $langid, $probid, $id);
+	       $submittime, $cid, $team, $langid, $probid, $id);
 
 	if ( is_writable( SUBMITDIR ) ) {
 		// Copy the submission to SUBMITDIR for safe-keeping
@@ -659,7 +660,7 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 		logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
 	}
 
-	if( difftime($cdata['endtime'], $now) <= 0 ) {
+	if( difftime($cdata['endtime'], $submittime) <= 0 ) {
 		logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$cid]");
 	}
 
