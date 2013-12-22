@@ -16,8 +16,8 @@ ALTER TABLE `team` DROP COLUMN `penalty`;
 --
 
 ALTER TABLE contest
-  ADD `finalizetime` DATETIME NULL COMMENT 'Time when contest was finalized, null if not yet',
-  ADD `finalizecomment` TEXT NULL COMMENT 'Comments by the finalizer',
+  ADD `finalizetime` datetime COMMENT 'Time when contest was finalized, null if not yet',
+  ADD `finalizecomment` text COMMENT 'Comments by the finalizer',
   ADD `b` smallint(3) unsigned NOT NULL default '0' COMMENT 'Number of extra bronze medals';
 
 -- Drop constraint before changing data
