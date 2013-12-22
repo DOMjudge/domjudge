@@ -87,7 +87,7 @@ CREATE TABLE `contest` (
   `freezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of freezetime',
   `endtime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
   `unfreezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
-  `finalizetime` decimal(32,9) NULL COMMENT 'Time when contest was finalized, null if not yet',
+  `finalizetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time when contest was finalized, null if not yet',
   `finalizecomment` text COMMENT 'Comments by the finalizer',
   `b` smallint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of extra bronze medals',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether this contest can be active',
@@ -256,8 +256,8 @@ CREATE TABLE `rankcache_public` (
 CREATE TABLE `removed_interval` (
   `intervalid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `starttime` decimal(32,9) NOT NULL COMMENT 'Initial time of removed interval',
-  `endtime` decimal(32,9) NOT NULL COMMENT 'Final time of removed interval',
+  `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Initial time of removed interval',
+  `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Final time of removed interval',
   PRIMARY KEY (`intervalid`),
   KEY `cid` (`cid`),
   CONSTRAINT `removed_interval_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE

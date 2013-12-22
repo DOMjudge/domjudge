@@ -141,7 +141,7 @@ if ( IS_ADMIN ) {
 if ( !empty($data['finalizetime']) ) {
 	echo "<h3>Finalized</h3>\n\n";
 	echo "<table>\n" .
-	     "<tr><td>Finalized at:</td><td>" . htmlspecialchars($data['finalizetime']) . "</td></tr>\n" .
+	     "<tr><td>Finalized at:</td><td>" . printtime($data['finalizetime']) . "</td></tr>\n" .
              "<tr><td>B:</td><td>" . htmlspecialchars($data['b']) . "</td></tr>\n" .
 	     "</table>\n<p>Comment:</p>\n<pre class=\"output_text\">" . htmlspecialchars($data['finalizecomment']) . "</pre>\n";
 
