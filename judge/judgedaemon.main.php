@@ -185,11 +185,6 @@ if ($retval != 1) {
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
-// Tick use required between PHP 4.3.0 and 5.3.0 for handling signals,
-// must be declared globally.
-if ( version_compare(PHP_VERSION, '5.3', '<' ) ) {
-	declare(ticks = 1);
-}
 initsignals();
 
 if ( isset($options['daemon']) ) daemonize(PIDFILE);
