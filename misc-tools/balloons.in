@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 /**
+ * @configure_input@
+ *
  * Notify contest crew when there is a new, correct submission (for
  * which a balloon has to be handed out). Alternatively there's also
  * a web based tool in the jury interface. This daemon and that tool

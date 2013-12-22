@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 /**
+ * @configure_input@
+ *
  * Generates a combined scoreboard aggregated from multiple sites.
  * The scoreboard is static, i.e. without automatic refresh, and with
  * no links to subpages. It does depend on the style.css.

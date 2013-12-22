@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 /**
+ * @configure_input@
+ *
  * Output public scoreboard static HTML to standard out.
  * This is basically a snapshot of the public scoreboard in the
  * DOMjudge web interface, but without automatic refresh, and
