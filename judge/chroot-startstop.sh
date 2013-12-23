@@ -21,7 +21,7 @@ set -e
 SUBDIRMOUNTS="etc usr lib lib64"
 
 # Location where to bind mount from:
-CHROOTORIGINAL="/home/analyst/chroot"
+CHROOTORIGINAL="/chroot/domjudge"
 
 case "$1" in
 	start)
