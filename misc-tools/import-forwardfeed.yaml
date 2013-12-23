@@ -1,0 +1,30 @@
+# This YAML file specifies the configuration for live importing from
+# another, external Contest Control System into DOMjudge.
+
+# URL and optional credentials of the external CCS. It should export
+# a JSON API with the same interface as the one in DOMjudge.
+restapi:
+	url: http://example.com/domjudge/api
+	user: admin
+	pass: admin
+
+
+# Here remapping of identifiers from the external CCS to DOMjudge
+# internal IDs can be specified. If an external ID is not found in the
+# respective list below, then it is passed unmodified to DOMjudge.
+# Below some examples.
+remapping:
+	contest:
+		2: 5
+	problem:
+	language:
+		1: cpp
+		2: c
+		3: java
+	team:
+	result:
+		AC: correct
+		CE: compiler-error
+		WA: wrong-answer
+		TLE: timelimit
+		RTE: run-error
