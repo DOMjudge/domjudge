@@ -22,10 +22,10 @@ require_once("common-config.php");
 //   use of any authentication module available for Apache, and will
 //   get the username from the REMOTE_USER environment variable.
 // FIXED
-//   Use one fixed team user that is automatically logged in. This
+//   Use one fixed user that is automatically logged in. This
 //   can be useful e.g. for a demo or testing environment. Define
-//   FIXED_TEAM to the team user to be used, e.g.:
-//   define('FIXED_TEAM', 'domjudge');
+//   FIXED_USER to the user to be used, e.g.:
+//   define('FIXED_USER', 'domjudge');
 define('AUTH_METHOD', 'PHP_SESSIONS');
 
 // Strict checking of team's IP addresses (when using the IPADDRESS

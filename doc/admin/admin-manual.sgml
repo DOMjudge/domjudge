@@ -311,7 +311,7 @@ make check
 </code>
 Note that this requires <tt>AUTH_METHOD</tt> in
 <tt>etc/domserver-config.php</tt> to be configured to
-<tt>IPADDRESS</tt> or <tt>FIXED</tt>, such that one team has
+<tt>IPADDRESS</tt> or <tt>FIXED</tt>, such that one user/team has
 passwordless access to the web interface. You may also want to set the
 environment variable <tt>SUBMITBASEURL</tt> to your DOMjudge base URL,
 e.g. <tt>http://domjudge.example.com/</tt>.
