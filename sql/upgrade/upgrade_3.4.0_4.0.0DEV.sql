@@ -196,6 +196,8 @@ UPDATE `configuration` SET `value` = '"%H:%M"', `description` = 'The format used
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('timelimit_overshoot', '"1s|10%"', 'string', 'Time that submissions are kept running beyond timelimt before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.');
 
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_sample_output', '0', 'bool', 'Should teams be able to view a diff of their and the reference output to sample testcases?');
+
 UPDATE `language` SET `extensions` = '["adb","ads"]' WHERE `langid` = 'adb';
 UPDATE `language` SET `extensions` = '["awk"]' WHERE `langid` = 'awk';
 UPDATE `language` SET `extensions` = '["bash"]' WHERE `langid` = 'bash';

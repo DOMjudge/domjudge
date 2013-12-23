@@ -76,7 +76,9 @@ if ( ( $show_compile == 2 ) ||
 	echo "<p class=\"nodata\">Compilation output is disabled.</p>\n";
 }
 
-if ( @$row['result']!='compiler-error' ) {
+$show_sample = dbconfig_get('show_sample_output', 0);
+
+if ( $show_sample && @$row['result']!='compiler-error' ) {
 	$runs = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
 	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 	                                             r.judgingid = %i )
@@ -85,6 +87,10 @@ if ( @$row['result']!='compiler-error' ) {
 
 	$runinfo = $runs->gettable();
 	echo '<h3>Run(s) on the provided sample data</h3>';
+
+	if ( count($runinfo)==0 ) {
+		echo "<p class=\"nodata\">No sample cases available.</p>\n";
+	}
 
 	foreach ( $runinfo as $run ) {
 		echo "<h4 id=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
