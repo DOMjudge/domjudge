@@ -715,13 +715,16 @@ function putTeamRow($cdata, $teamids) {
 		}
 
 		// Fill in empty places in the matrix
-		foreach ($teams as $login => $team ) {
-			// for each problem
+		foreach ( array_keys($teams) as $team ) {
 			foreach ( array_keys($probs) as $prob ) {
 				// provide default scores when nothing submitted for this team,problem yet
-				if ( ! isset ( $MATRIX[$team][$prob] ) ) {
-					$MATRIX[$team][$prob] = array('num_submissions' => 0, 'num_pending' => 0,
-					                              'is_correct' => 0, 'time' => 0, 'penalty' => 0);
+				if ( ! isset($MATRIX[$team][$prob]) ) {
+					$MATRIX[$team][$prob] = array(
+						'is_correct'      => FALSE,
+						'num_submissions' => 0,
+						'num_pending'     => 0,
+						'time'            => 0,
+						'penalty'         => 0);
 				}
 			}
 		}

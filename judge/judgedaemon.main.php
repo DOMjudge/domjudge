@@ -287,13 +287,13 @@ function judge($row)
 	if ( !chdir($workdir) ) error("Could not chdir to '$workdir'");
 
 	// Get the source code from the DB and store in local file(s)
-	$sources = request('submission_files', 'GET', 'submitid=' . urlencode($row['submitid']));
+	$sources = request('submission_files', 'GET', 'id=' . urlencode($row['submitid']));
 	$sources = dj_json_decode($sources);
 	$files = array();
 	foreach ( $sources as $source ) {
 		$srcfile = "$workdir/compile/$source[filename]";
 		$files[] = "'$source[filename]'";
-		if ( file_put_contents($srcfile, base64_decode($source['sourcecode'])) === FALSE ) {
+		if ( file_put_contents($srcfile, base64_decode($source['content'])) === FALSE ) {
 			error("Could not create $srcfile");
 		}
 	}
