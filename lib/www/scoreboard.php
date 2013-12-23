@@ -196,8 +196,10 @@ function getTeams($filter, $jury) {
 	                ( $jury ? '' : ' AND visible = 1' ) .
 	                (isset($filter['affilid']) ? ' AND team.affilid IN (%As) ' : ' %_') .
 	                (isset($filter['country']) ? ' AND country IN (%As) ' : ' %_') .
-	                (isset($filter['categoryid']) ? ' AND team.categoryid IN (%As) ' : ' %_'),
-	                @$filter['affilid'], @$filter['country'], @$filter['categoryid']);
+	                (isset($filter['categoryid']) ? ' AND team.categoryid IN (%As) ' : ' %_') .
+	                (isset($filter['teams']) ? ' AND login IN (%As) ' : ' %_'),
+	                @$filter['affilid'], @$filter['country'], @$filter['categoryid'],
+	                @$filter['teams']);
 }
 
 /**
@@ -221,7 +223,6 @@ function getCategories($jury) {
  * used for determining the ranking.
  */
 function initScores($teams) {
-	// initialize all problems with data
 	$SCORES = array();
 	foreach ($teams as $login => $team ) {
 		$SCORES[$login]['num_correct'] = 0;
