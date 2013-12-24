@@ -237,7 +237,7 @@ if ( count($data)==0 ) {
 <th scope="col">size</th><th scope="col">md5</th>
 <?php
 	if ( IS_ADMIN ) echo '<th scope="col">upload new</th>';
-?><th scope="col">sample</th><th scope="col">description</th>
+?><th scope="col">sample</th><th scope="col">description</th><th></th>
 </tr></thead>
 <tbody>
 <?php

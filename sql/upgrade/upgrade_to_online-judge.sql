@@ -8,8 +8,8 @@
 --
 
 -- @UPGRADE-CHECK@
-ALTER TABLE `testcase` ADD  COLUMN `sample` tinyint(1) default NULL;
-ALTER TABLE `testcase` DROP COLUMN `sample`;
+ALTER TABLE `problem` ADD  COLUMN `start` datetime default NULL;
+ALTER TABLE `problem` DROP COLUMN `start`;
 
 --
 -- Create additional structures
@@ -23,9 +23,6 @@ ALTER TABLE `team`
   CHANGE COLUMN `teampage_first_visited` `teampage_visited` datetime default NULL COMMENT 'Time of last teampage view',
   MODIFY COLUMN `hostname` varchar(255) default NULL COMMENT 'Teampage last visited from this address',
   ADD COLUMN `maillog` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Whether the team gets mails for each submission' AFTER `hostname`;
-
-ALTER TABLE `testcase`
-  ADD COLUMN `sample` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Sample testcases can be shared with teams.' AFTER `description`;
 
 ALTER TABLE `clarification`
   MODIFY COLUMN `probid` varchar(50) default NULL COMMENT 'Problem associated to this clarification';
@@ -59,6 +56,7 @@ ALTER TABLE `testcase`
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('separate_start_end', '0', 'bool', 'Enable separate start and end times per problem in a contest.');
 
 UPDATE `configuration` SET `value` = '"%Y-%m-%d %H:%M"' WHERE `name` = 'time_format';
+UPDATE `configuration` SET `value` = '1' WHERE `name` = 'show_sample_output';
 
 --
 -- Finally remove obsolete structures after moving data

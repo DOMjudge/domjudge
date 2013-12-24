@@ -185,11 +185,6 @@ if ($retval != 1) {
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
-// Tick use required between PHP 4.3.0 and 5.3.0 for handling signals,
-// must be declared globally.
-if ( version_compare(PHP_VERSION, '5.3', '<' ) ) {
-	declare(ticks = 1);
-}
 initsignals();
 
 if ( isset($options['daemon']) ) daemonize(PIDFILE);
@@ -292,13 +287,13 @@ function judge($row)
 	if ( !chdir($workdir) ) error("Could not chdir to '$workdir'");
 
 	// Get the source code from the DB and store in local file(s)
-	$sources = request('submission_files', 'GET', 'submitid=' . urlencode($row['submitid']));
+	$sources = request('submission_files', 'GET', 'id=' . urlencode($row['submitid']));
 	$sources = dj_json_decode($sources);
 	$files = array();
 	foreach ( $sources as $source ) {
 		$srcfile = "$workdir/compile/$source[filename]";
 		$files[] = "'$source[filename]'";
-		if ( file_put_contents($srcfile, base64_decode($source['sourcecode'])) === FALSE ) {
+		if ( file_put_contents($srcfile, base64_decode($source['content'])) === FALSE ) {
 			error("Could not create $srcfile");
 		}
 	}

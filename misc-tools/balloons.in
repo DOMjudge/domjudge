@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 /**
+ * @configure_input@
+ *
  * Notify contest crew when there is a new, correct submission (for
  * which a balloon has to be handed out). Alternatively there's also
  * a web based tool in the jury interface. This daemon and that tool
@@ -55,11 +57,6 @@ $infreeze = FALSE;
 
 logmsg(LOG_NOTICE, "Balloon notifications started [DOMjudge/".DOMJUDGE_VERSION."]");
 
-// Tick use required between PHP 4.3.0 and 5.3.0 for handling signals,
-// must be declared globally.
-if ( version_compare(PHP_VERSION, '5.3', '<' ) ) {
-	declare(ticks = 1);
-}
 initsignals();
 
 // Constantly check database for new correct submissions

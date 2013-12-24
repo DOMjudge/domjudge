@@ -470,6 +470,12 @@ function initsignals()
 
 	$exitsignalled = FALSE;
 
+	// Tick use required between PHP 4.3.0 and 5.3.0 for handling
+	// signals, must be declared globally.
+	if ( version_compare(PHP_VERSION, '5.3', '<' ) ) {
+		declare(ticks = 1);
+	}
+
 	if ( ! function_exists('pcntl_signal') ) {
 		logmsg(LOG_INFO, "Signal handling not available");
 		return;

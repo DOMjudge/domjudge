@@ -51,10 +51,14 @@ function contest()
 {
 	global $cid, $cdata;
 
-	return array('id'      => $cid,
+	return array(
+		'id'      => $cid,
 		'name'    => $cdata['contestname'],
 		'start'   => $cdata['starttime'],
-		'end'     => $cdata['endtime']);
+		'end'     => $cdata['endtime'],
+		'length'  => $cdata['endtime'] - $cdata['starttime'],
+		'penalty' => 60*dbconfig_get('penalty_time', 20),
+		);
 }
 $doc = "Get information about the current contest: id, name, start and end.";
 $api->provideFunction('GET', 'contest', 'contest', $doc);
@@ -66,11 +70,11 @@ function problems()
 {
 	global $cid, $DB;
 
-	$q = $DB->q('SELECT probid, name, color FROM problem
+	$q = $DB->q('SELECT probid AS id, name, color FROM problem
 	             WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
 	return $q->gettable();
 }
-$doc = "Get a list of problems in the contest, with for each problem: probid, name and color.";
+$doc = "Get a list of problems in the contest, with for each problem: id, name and color.";
 $api->provideFunction('GET', 'problems', 'problems', $doc);
 
 /**
@@ -110,10 +114,10 @@ function judgings($args)
 		if ( array_key_exists('result', $args) &&
 		     $args['result'] != $data['result'] ) continue;
 
-		$res[] = array('judgingid' => $row['judgingid'],
-		               'submitid'  => $row['submitid'],
-		               'result'    => $data['result'],
-		               'time'      => $row['eventtime']);
+		$res[] = array('id'         => $row['judgingid'],
+		               'submission' => $row['submitid'],
+		               'outcome'    => $data['result'],
+		               'time'       => $row['eventtime']);
 	}
 	return $res;
 }
@@ -354,7 +358,8 @@ function submissions($args)
 {
 	global $cid, $DB;
 
-	$query = 'SELECT submitid, teamid, probid, langid, submittime, valid FROM submission WHERE cid = %i';
+	$query = 'SELECT submitid, teamid, probid, langid, submittime, valid
+	          FROM submission WHERE cid = %i';
 
 	$hasLanguage = array_key_exists('language', $args);
 	$query .= ($hasLanguage ? ' AND langid = %s' : ' AND TRUE %_');
@@ -364,9 +369,9 @@ function submissions($args)
 	$query .= ($hasFromid ? ' AND submitid >= %i' : ' AND TRUE %_');
 	$fromId = ($hasFromid ? $args['fromid'] : 0);
 
-	$hasSubmitid = array_key_exists('submitid', $args);
+	$hasSubmitid = array_key_exists('id', $args);
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' AND TRUE %_');
-	$submitid = ($hasSubmitid ? $args['submitid'] : 0);
+	$submitid = ($hasSubmitid ? $args['id'] : 0);
 
 	$query .= ' ORDER BY submitid';
 
@@ -378,17 +383,19 @@ function submissions($args)
 	$q = $DB->q($query, $cid, $language, $fromId, $submitid, $limit);
 	$res = array();
 	while ( $row = $q->next() ) {
-		$res[] = array('submitid' => $row['submitid'],
-			'teamid' => $row['teamid'],
-			'probid' => $row['probid'],
-			'langid' => $row['langid'],
-			'submittime' => $row['submittime'],
-			'valid' => (bool)$row['valid']);
+		$res[] = array(
+			'id'        => $row['submitid'],
+			'team'      => $row['teamid'],
+			'problem'   => $row['probid'],
+			'language'  => $row['langid'],
+			'time'      => $row['submittime'],
+			'valid'     => (bool)$row['valid'],
+			);
 	}
 	return $res;
 }
 $args = array('language' => 'Search only for submissions in a certain language.',
-              'submitid' => 'Search only a certain ID',
+              'id' => 'Search only a certain ID',
               'fromid' => 'Search from a certain ID',
               'limit' => 'Get only the first N submissions');
 $doc = 'Get a list of all submissions. Should we give away all info about submissions? Or is there something we would like to hide, for example language?';
@@ -402,24 +409,24 @@ function submission_files($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('submitid'));
+	checkargs($args, array('id'));
 
 	$sources = $DB->q('SELECT filename, sourcecode
-			   FROM submission_file WHERE submitid = %i ORDER BY rank', $args['submitid']);
+	                   FROM submission_file WHERE submitid = %i ORDER BY rank', $args['id']);
 
 	$ret = array();
 	while($src = $sources->next()) {
 		$ret[] = array(
 		         'filename' => $src['filename'],
-		         'sourcecode' => base64_encode($src['sourcecode'])
+		         'content'  => base64_encode($src['sourcecode']),
 		         );
 	}
 
 	return $ret;
 }
-$args = array('submitid' => 'Get only the corresponding submission files.');
+$args = array('id' => 'Get only the corresponding submission files.');
 $doc = 'Get a list of all submission files. The file contents will be base64 encoded.';
-$exArgs = array(array('submitid' => 3));
+$exArgs = array(array('id' => 3));
 $roles = array('jury','judgehost');
 $api->provideFunction('GET', 'submission_files', 'submission_files', $doc, $args, $exArgs, $roles);
 
@@ -554,7 +561,11 @@ function teams($args)
 	global $DB;
 
 	// Construct query
-	$query = 'SELECT login, name, categoryid as category, affilid as affiliation FROM team WHERE';
+	$query = 'SELECT login AS id, t.name, a.country AS nationality,
+	          t.categoryid AS category, a.name AS affiliation
+	          FROM team t
+	          LEFT JOIN team_affiliation a USING(affilid)
+	          WHERE';
 
 	$byCategory = array_key_exists('category', $args);
 	$query .= ($byCategory ? ' categoryid = %i' : ' TRUE %_');
@@ -608,15 +619,18 @@ function languages()
 {
 	global $DB;
 
-	$q = $DB->q('SELECT langid, name, extensions, allow_submit, allow_judge, time_factor FROM language');
+	$q = $DB->q('SELECT langid, name, extensions, allow_judge, time_factor
+	             FROM language WHERE allow_submit = 1');
 	$res = array();
 	while ( $row = $q->next() ) {
-		$res[] = array('langid' => $row['langid'],
-			'name' => $row['name'],
-			'extensions' => json_decode($row['extensions']),
-			'allow_judge' => (bool)$row['allow_judge'],
+		$res[] = array(
+			'id'           => $row['langid'],
+			'name'         => $row['name'],
+			'extensions'   => json_decode($row['extensions']),
+			'allow_judge'  => (bool)$row['allow_judge'],
 			'allow_submit' => (bool)$row['allow_submit'],
-			'time_factor' => (float)$row['time_factor']);
+			'time_factor'  => (float)$row['time_factor'],
+			);
 	}
 	return $res;
 }

@@ -37,9 +37,9 @@ if ( dbconfig_get('verification_required', 0) ) {
 	calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
 
 	// log to event table (case of no verification required is handled
-	// in judge/judgedaemon)
+	// in the REST API function judging_runs_POST)
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
-	        VALUES (%s, %i, %i, %s, %s, %i, "problem judged")',
+	        VALUES (%s, %i, %s, %s, %s, %i, "problem judged")',
 	       now(), $jdata['cid'], $jdata['teamid'], $jdata['langid'],
 	       $jdata['probid'], $jdata['submitid']);
 

@@ -45,7 +45,7 @@ function logged_in()
 	// when userdata is empty:
 	switch ( AUTH_METHOD ) {
 	case 'FIXED':
-		$username = FIXED_TEAM;
+		$username = FIXED_USER;
 		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $username);
 		break;
 	case 'EXTERNAL':
