@@ -413,7 +413,7 @@ CREATE TABLE `testcase` (
   `md5sum_output` char(32) DEFAULT NULL COMMENT 'Checksum of output data',
   `input` longblob COMMENT 'Input data',
   `output` longblob COMMENT 'Output data',
-  `probid` varchar(8) NOT NULL COMMENT 'Corresponding problem ID',
+  `probid` varchar(50) NOT NULL COMMENT 'Corresponding problem ID',
   `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of this testcase',
   `sample` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Sample testcases can be shared with teams.',

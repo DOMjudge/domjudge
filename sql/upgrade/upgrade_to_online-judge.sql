@@ -46,7 +46,7 @@ ALTER TABLE `submission`
   MODIFY COLUMN `probid` varchar(50) NOT NULL COMMENT 'Problem ID';
 
 ALTER TABLE `testcase`
-  MODIFY COLUMN `probid` varchar(8) NOT NULL COMMENT 'Corresponding problem ID';
+  MODIFY COLUMN `probid` varchar(50) NOT NULL COMMENT 'Corresponding problem ID';
 
 --
 -- Transfer data from old to new structure
