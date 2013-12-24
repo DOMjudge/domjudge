@@ -23,12 +23,11 @@ class RestApi {
 	 * Arguments:
 	 * $httpMethod    Currently supported: GET, PUT, POST.
 	 * $name          Name of the function.
-	 * $callback      Callback to the actual implementation of this function.
 	 * $docs          Documentation for this function.
 	 * $optArgs       List of optional arguments.
 	 * $exArgs        Example usage of arguments
 	 */
-	public function provideFunction($httpMethod, $name, $callback, $docs = '',
+	public function provideFunction($httpMethod, $name, $docs = '',
 	                                $optArgs = array(), $exArgs = array(), $roles = null)
 	{
 		if ( !in_array($httpMethod,array('GET','POST','PUT')) ) {
@@ -39,6 +38,10 @@ class RestApi {
 			$this->createError("Multiple definitions of " . $name .
 			                   " for " . $httpMethod . ".", INTERNAL_SERVER_ERROR);
 		}
+
+		$callback = $name;
+		if ( $httpMethod!='GET' ) $callback .= '_' . $httpMethod;
+
 		$this->apiFunctions[$name . '#' . $httpMethod] =
 		    array("callback" => $callback,
 		          "optArgs"  => $optArgs,

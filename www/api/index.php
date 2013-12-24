@@ -41,7 +41,7 @@ function info()
 	             'domjudge_version' => DOMJUDGE_VERSION);
 }
 $doc = "Get general API information.";
-$api->provideFunction('GET', 'info', 'info', $doc);
+$api->provideFunction('GET', 'info', $doc);
 
 
 /**
@@ -61,7 +61,7 @@ function contest()
 		);
 }
 $doc = "Get information about the current contest: id, name, start and end.";
-$api->provideFunction('GET', 'contest', 'contest', $doc);
+$api->provideFunction('GET', 'contest', $doc);
 
 /**
  * Problems information
@@ -75,7 +75,7 @@ function problems()
 	return $q->gettable();
 }
 $doc = "Get a list of problems in the contest, with for each problem: id, name and color.";
-$api->provideFunction('GET', 'problems', 'problems', $doc);
+$api->provideFunction('GET', 'problems', $doc);
 
 /**
  * Judgings information
@@ -128,7 +128,7 @@ $args = array('result' => 'Search only for judgings with a certain result.',
               'limit' => 'Get only the first N judgings');
 $exArgs = array(array('result' => 'correct'), array('fromid' => 800, 'limit' => 10));
 $roles = array('jury');
-$api->provideFunction('GET', 'judgings', 'judgings', $doc, $args, $exArgs, $roles);
+$api->provideFunction('GET', 'judgings', $doc, $args, $exArgs, $roles);
 
 function judgings_POST($args)
 {
@@ -193,7 +193,7 @@ $doc = 'Request a new judging to be judged.';
 $args = array('judgehost' => 'Judging is to be judged by this specific judgehost.');
 $exArgs = array();
 $roles = array('judgehost');
-$api->provideFunction('POST', 'judgings', 'judgings_POST', $doc, $args, $exArgs, $roles);
+$api->provideFunction('POST', 'judgings', $doc, $args, $exArgs, $roles);
 
 function judgings_PUT($args)
 {
@@ -237,7 +237,7 @@ $args = array('judgingid' => 'Judging corresponds to this specific judgingid.',
 	'output_compile' => 'Ouput of compilation phase.');
 $exArgs = array();
 $roles = array('judgehost');
-$api->provideFunction('PUT', 'judgings', 'judgings_PUT', $doc, $args, $exArgs, $roles);
+$api->provideFunction('PUT', 'judgings', $doc, $args, $exArgs, $roles);
 
 /**
  * Judging_Runs
@@ -333,7 +333,7 @@ $args = array('judgingid' => 'Judging_run corresponds to this specific judgingid
 	'judgehost' => 'Judgehost performing this judging');
 $exArgs = array();
 $roles = array('judgehost');
-$api->provideFunction('POST', 'judging_runs', 'judging_runs_POST', $doc, $args, $exArgs, $roles);
+$api->provideFunction('POST', 'judging_runs', $doc, $args, $exArgs, $roles);
 
 /**
  * DB configuration
@@ -349,7 +349,7 @@ function config($args)
 $doc = 'Get configuration variables.';
 $args = array('name' => 'Search only a single config variable.');
 $exArgs = array(array('name' => 'sourcesize_limit'));
-$api->provideFunction('GET', 'config', 'config', $doc, $args, $exArgs);
+$api->provideFunction('GET', 'config', $doc, $args, $exArgs);
 
 /**
  * Submissions information
@@ -400,7 +400,7 @@ $args = array('language' => 'Search only for submissions in a certain language.'
               'limit' => 'Get only the first N submissions');
 $doc = 'Get a list of all submissions. Should we give away all info about submissions? Or is there something we would like to hide, for example language?';
 $exArgs = array(array('fromid' => 100, 'limit' => 10), array('language' => 'cpp'));
-$api->provideFunction('GET', 'submissions', 'submissions', $doc, $args, $exArgs);
+$api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
 
 /**
  * Submission Files
@@ -428,7 +428,7 @@ $args = array('id' => 'Get only the corresponding submission files.');
 $doc = 'Get a list of all submission files. The file contents will be base64 encoded.';
 $exArgs = array(array('id' => 3));
 $roles = array('jury','judgehost');
-$api->provideFunction('GET', 'submission_files', 'submission_files', $doc, $args, $exArgs, $roles);
+$api->provideFunction('GET', 'submission_files', $doc, $args, $exArgs, $roles);
 
 /**
  * Testcases
@@ -460,7 +460,7 @@ $args = array('judgingid' => 'Get the next-to-judge testcase for this judging.')
 $doc = 'Get a testcase.';
 $exArgs = array();
 $roles = array('jury','judgehost');
-$api->provideFunction('GET', 'testcases', 'testcases', $doc, $args, $exArgs, $roles);
+$api->provideFunction('GET', 'testcases', $doc, $args, $exArgs, $roles);
 
 function testcase_files($args)
 {
@@ -490,7 +490,7 @@ $args = array('testcaseid' => 'Get only the corresponding testcase.',
 $doc = 'Get a testcase file.';
 $exArgs = array(array('testcaseid' => '3', 'input' => TRUE));
 $roles = array('jury','judgehost');
-$api->provideFunction('GET', 'testcase_files', 'testcase_files', $doc, $args, $exArgs, $roles);
+$api->provideFunction('GET', 'testcase_files', $doc, $args, $exArgs, $roles);
 
 /**
  * Judging Queue
@@ -526,7 +526,7 @@ $args = array('limit' => 'Get only the first N queued submissions');
 $doc = 'Get a list of all queued submission ids.';
 $exArgs = array(array('limit' => 10));
 $roles = array('jury','judgehost');
-$api->provideFunction('GET', 'queue', 'queue', $doc, $args, $exArgs, $roles);
+$api->provideFunction('GET', 'queue', $doc, $args, $exArgs, $roles);
 
 /**
  * Affiliation information
@@ -551,7 +551,7 @@ function affiliations($args)
 $doc = 'Get a list of affiliations, with for each affiliation: affilid, name and country.';
 $optArgs = array('country' => 'ISO 3166-1 alpha-3 country code to search for.');
 $exArgs = array(array('country' => 'NLD'));
-$api->provideFunction('GET', 'affiliations', 'affiliations', $doc, $optArgs, $exArgs);
+$api->provideFunction('GET', 'affiliations', $doc, $optArgs, $exArgs);
 
 /**
  * Team information
@@ -590,7 +590,7 @@ $args = array('category' => 'ID of a single category to search for.',
               'login' => 'Search for a specific team.');
 $doc = 'Get a list of teams containing login, name, category and affiliation.';
 $exArgs = array(array('category' => 1, 'affiliation' => 'UU'));
-$api->provideFunction('GET', 'teams', 'teams', $doc, $args, $exArgs);
+$api->provideFunction('GET', 'teams', $doc, $args, $exArgs);
 
 /**
  * Category information
@@ -610,7 +610,7 @@ function categories()
 	return $res;
 }
 $doc = 'Get a list of all categories.';
-$api->provideFunction('GET', 'categories', 'categories', $doc);
+$api->provideFunction('GET', 'categories', $doc);
 
 /**
  * Language information
@@ -635,7 +635,7 @@ function languages()
 	return $res;
 }
 $doc = 'Get a list of all suported programming languages.';
-$api->provideFunction('GET', 'languages', 'languages', $doc);
+$api->provideFunction('GET', 'languages', $doc);
 
 /**
  * Clarification information
@@ -658,7 +658,7 @@ function clarifications($args)
 $doc = 'Get a list of all public clarifications.';
 $args = array('problem' => 'Search for clarifications about a specific problem.');
 $exArgs = array(array('problem' => 'H'));
-$api->provideFunction('GET', 'clarifications', 'clarifications', $doc, $args, $exArgs);
+$api->provideFunction('GET', 'clarifications', $doc, $args, $exArgs);
 
 /**
  * Judgehosts
@@ -680,7 +680,7 @@ $doc = 'Get a list of judgehosts.';
 $args = array('hostname' => 'Search only for judgehosts with given hostname.');
 $exArgs = array(array('hostname' => 'sparehost'));
 $roles = array('jury');
-$api->provideFunction('GET', 'judgehosts', 'judgehosts', $doc, $args, $exArgs, $roles);
+$api->provideFunction('GET', 'judgehosts', $doc, $args, $exArgs, $roles);
 
 function judgehosts_POST($args)
 {
@@ -714,7 +714,7 @@ $doc = 'Add a new judgehost to the list of judgehosts. Also restarts (and return
 $args = array('hostname' => 'Add this specific judgehost and activate it.');
 $exArgs = array(array('hostname' => 'judge007'));
 $roles = array('judgehost');
-$api->provideFunction('POST', 'judgehosts', 'judgehosts_POST', $doc, $args, $exArgs, $roles);
+$api->provideFunction('POST', 'judgehosts', $doc, $args, $exArgs, $roles);
 
 function judgehosts_PUT($args)
 {
@@ -736,7 +736,7 @@ $doc = 'Update the configuration of a judgehost.';
 $args = array('active' => 'Activate judgehost?');
 $exArgs = array();
 $roles = array('judgehost');
-$api->provideFunction('PUT', 'judgehosts', 'judgehosts_PUT', $doc, $args, $exArgs, $roles);
+$api->provideFunction('PUT', 'judgehosts', $doc, $args, $exArgs, $roles);
 
 /**
  * Scoreboard (not finished yet)
@@ -764,7 +764,7 @@ $args = array('category' => 'ID of a single category to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
               'country' => 'ISO 3166-1 alpha-3 country code to search for.');
 $exArgs = array(array('category' => 1, 'affiliation' => 'UU'), array('country' => 'NLD'));
-$api->provideFunction('GET', 'scoreboard', 'scoreboard', $doc, $args, $exArgs);
+$api->provideFunction('GET', 'scoreboard', $doc, $args, $exArgs);
 
 // Now provide the api, which will handle the request
 $api->provideApi();
