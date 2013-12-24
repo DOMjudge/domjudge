@@ -21,7 +21,7 @@ class RestApi {
 	 * Add a function to the list of functions that this API supports.
 	 *
 	 * Arguments:
-	 * $httpMethod    Currently only GET is supported.
+	 * $httpMethod    Currently supported: GET, PUT, POST.
 	 * $name          Name of the function.
 	 * $callback      Callback to the actual implementation of this function.
 	 * $docs          Documentation for this function.
@@ -31,17 +31,20 @@ class RestApi {
 	public function provideFunction($httpMethod, $name, $callback, $docs = '',
 	                                $optArgs = array(), $exArgs = array(), $roles = null)
 	{
-		if ( $httpMethod != 'GET' && $httpMethod != 'POST' && $httpMethod != 'PUT' ) {
-			$this->createError("Only get/post/put methods supported.", INTERNAL_SERVER_ERROR);
+		if ( !in_array($httpMethod,array('GET','POST','PUT')) ) {
+			$this->createError("Only get/post/put methods supported.",
+			                   INTERNAL_SERVER_ERROR);
 		}
 		if ( array_key_exists($name . '#' . $httpMethod, $this->apiFunctions) ) {
-			$this->createError("Multiple definitions of " . $name . " for " . $httpMethod . ".", INTERNAL_SERVER_ERROR);
+			$this->createError("Multiple definitions of " . $name .
+			                   " for " . $httpMethod . ".", INTERNAL_SERVER_ERROR);
 		}
-		$this->apiFunctions[$name . '#' . $httpMethod] = array("callback" => $callback,
-		                                   "optArgs" => $optArgs,
-		                                   "docs" => $docs,
-		                                   "exArgs" => $exArgs,
-		                                   "roles" => $roles);
+		$this->apiFunctions[$name . '#' . $httpMethod] =
+		    array("callback" => $callback,
+		          "optArgs"  => $optArgs,
+		          "docs"     => $docs,
+		          "exArgs"   => $exArgs,
+		          "roles"    => $roles);
 	}
 
 	/**
@@ -53,9 +56,7 @@ class RestApi {
 			$this->createError("PATH_INFO not set.", INTERNAL_SERVER_ERROR);
 		}
 
-		if ( $_SERVER['REQUEST_METHOD'] != 'GET' &&
-		     $_SERVER['REQUEST_METHOD'] != 'POST' &&
-		     $_SERVER['REQUEST_METHOD'] != 'PUT' ) {
+		if ( !in_array($_SERVER['REQUEST_METHOD'],array('GET','POST','PUT')) ) {
 			$this->createError("Only get/post/put methods supported.", METHOD_NOT_ALLOWED);
 		}
 
@@ -186,7 +187,8 @@ class RestApi {
 
 	public function createError($message, $code = BAD_REQUEST)
 	{
-		$protocol = (isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
+		$protocol = (isset($_SERVER['SERVER_PROTOCOL']) ?
+		             $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
 		header($protocol . " " . $code);
 		$this->createResponse(array('error' => $message));
 	}
