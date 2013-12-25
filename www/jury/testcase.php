@@ -263,7 +263,7 @@ foreach( $data as $rank => $row ) {
 		}
 		if ( $inout=='input' ) {
 			if ( IS_ADMIN ) {
-				echo "<td rowspan=\"2\"	align=\"center]\" onclick=\"editTcSample($rank)\">" .
+				echo "<td rowspan=\"2\"	class=\"testsample\" onclick=\"editTcSample($rank)\">" .
 				    addSelect("sample[$rank]",array("no", "yes"), $row['sample'], true) . "</td>";
 
 				// hide sample dropdown field if javascript is enabled
@@ -278,7 +278,7 @@ foreach( $data as $rank => $row ) {
 				    "<img src=\"../images/delete.png\" alt=\"delete\"" .
 				    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
 			} else {
-				echo "<td rowspan=\"2\" align=\"center\">" .
+				echo "<td rowspan=\"2\" align=\"testsample\">" .
 					printyn($row['issample']) . "</td>";
 				echo "<td rowspan=\"2\" class=\"testdesc\">" .
 				    htmlspecialchars($row['description']) . "</td>";
