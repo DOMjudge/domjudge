@@ -47,6 +47,12 @@ tr.summary td { border-top: 1px solid black; }
 
 .testmd5 { font-family: monospace; }
 
+.testsample {
+	text-align: center;
+	border-left: 1px solid silver;
+	max-width: 200px;
+}
+
 .testdesc {
 	border-left: 1px solid silver;
 	max-width: 400px;
