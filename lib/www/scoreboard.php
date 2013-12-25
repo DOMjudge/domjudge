@@ -403,9 +403,12 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 			echo '<td class=';
 			// CSS class for correct/incorrect/neutral results
 			if( $matrix[$team][$prob]['is_correct'] ) {
+				// The best times for each problem may not have been
+				// calculated (if called from putTeamRow()), so we
+				// have to suppress an undefined index here.
 				echo '"score_correct' .
-					( $summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]==$matrix[$team][$prob]['time'] ?
-					  ' score_first' : '') . '"';
+					( @$summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]
+				      ===$matrix[$team][$prob]['time'] ? ' score_first' : '') . '"';
 			} elseif ( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
 				echo '"score_pending"';
 			} elseif ( $matrix[$team][$prob]['num_submissions'] > 0 ) {
