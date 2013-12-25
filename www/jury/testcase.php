@@ -37,10 +37,18 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 	exit(0);
 }
 
-$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank, description,
-                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-                OCTET_LENGTH(output) AS size_output, md5sum_output
-                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+// We may need to re-update the testcase data, so make it a function.
+function get_testcase_data()
+{
+	global $DB, $data, $probid;
+
+	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
+	                description, sample,
+	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
+	                OCTET_LENGTH(output) AS size_output, md5sum_output
+	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+}
+get_testcase_data();
 
 // Reorder testcases
 if ( isset ($_GET['move']) ) {
@@ -191,11 +199,7 @@ if ( !empty($result) ) {
 	echo "<ul>\n$result</ul>\n\n";
 
 	// Reload testcase data after updates
-	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
-	                description, sample,
-	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-	                OCTET_LENGTH(output) AS size_output, md5sum_output
-	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+	get_testcase_data();
 }
 
 // Check if ranks must be renumbered (if test cases have been deleted).
@@ -213,10 +217,7 @@ if ( count($data)<(int)key($data) ) {
 	echo "<p>Test case rankings reordered.</p>\n\n";
 
 	// Reload testcase data after updates
-	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank, description,
-	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-	                OCTET_LENGTH(output) AS size_output, md5sum_output
-	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+	get_testcase_data();
 }
 
 echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem " .
