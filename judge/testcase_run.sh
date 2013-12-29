@@ -42,6 +42,12 @@ cleanup ()
 			ln -s "$TESTOUT" "$WORKDIR/testdata.out"
 		fi
 	fi
+
+	# Copy runguard and program stderr to error output. The display is
+	# truncated to normal size in the jury web interface.
+	cat runguard.err >> error.out
+	echo  "********** program stderr follows **********" >> error.out
+	cat program.err  >> error.out
 }
 
 cleanexit ()
@@ -220,7 +226,6 @@ logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
 if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
                        result.out compare.out >compare.tmp 2>&1 ; then
 	exitcode=$?
-	cat runguard.err >>error.out
 	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
 fi
 
@@ -228,7 +233,6 @@ fi
 logmsg $LOG_DEBUG "checking program run exit-status"
 if grep  'timelimit exceeded' error.tmp >/dev/null 2>&1 ; then
 	echo "Timelimit exceeded, runtime: `cat program.time`" >>error.out
-	cat runguard.err >>error.out
 	cleanexit ${E_TIMELIMIT:--1}
 fi
 if [ ! -r program.exit ]; then
@@ -238,7 +242,6 @@ fi
 # Check that program.exit was written to (no runguard error)
 if [ "`cat program.exit`" != "0" ]; then
 	echo "Non-zero exitcode `cat program.exit`" >>error.out
-	cat runguard.err >>error.out
 	cleanexit ${E_RUN_ERROR:--1}
 fi
 
@@ -257,7 +260,6 @@ fi
 #fi
 #if grep  'File size limit exceeded' error.tmp >/dev/null 2>&1 ; then
 #	echo "File size limit exceeded." >>error.out
-#	cat runguard.err >>error.out
 #	cleanexit ${E_OUTPUT_LIMIT:--1}
 #fi
 
@@ -267,23 +269,18 @@ descrp="${descrp:+ ($descrp)}"
 
 if [ "$result" = "accepted" ]; then
 	echo "Correct${descrp}! Runtime is `cat program.time` seconds." >>error.out
-	cat runguard.err >>error.out
 	cleanexit ${E_CORRECT:--1}
 elif [ "$result" = "presentation error" ]; then
 	echo "Presentation error${descrp}." >>error.out
-	cat runguard.err >>error.out
 	cleanexit ${E_PRESENTATION_ERROR:--1}
 elif [ ! -s program.out ]; then
 	echo "Program produced no output." >>error.out
-	cat runguard.err >>error.out
 	cleanexit ${E_NO_OUTPUT:--1}
 elif [ "$result" = "wrong answer" ]; then
 	echo "Wrong answer${descrp}." >>error.out
-	cat runguard.err >>error.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 else
 	echo "Unknown result: Wrong answer#${descrp}#${result}#." >>error.out
-	cat runguard.err >>error.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 fi
 
