@@ -718,6 +718,15 @@ void setrestrictions()
 		if ( setrlimit(RLIMIT_CORE,&lim)!=0 ) error(errno,"disabling core dumps");
 	}
 
+#ifdef USE_CGROUPS
+	/* Put the child process in the cgroup */
+	cgroup_attach();
+#endif
+
+	/* Run the command in a separate process group so that the command
+	   and all its children can be killed off with one signal. */
+	if ( setsid()==-1 ) error(errno,"setsid failed");
+
 	/* Set root-directory and change directory to there. */
 	if ( use_root ) {
 		/* Small security issue: when running setuid-root, people can find
@@ -997,7 +1006,12 @@ int main(int argc, char **argv)
 	case -1: /* error */
 		error(errno,"cannot fork");
 	case  0: /* run controlled command */
-		/* Connect pipes to command (stdin/)stdout/stderr and close unneeded fd's */
+		/* Apply all restrictions for child process. */
+		setrestrictions();
+
+		/* Connect pipes to command (stdin/)stdout/stderr and close
+		 * unneeded fd's. Do this after setting restrictions to let
+		 * any messages not go to command stderr pipe. */
 		for(i=1; i<=2; i++) {
 			if ( dup2(child_pipefd[i][PIPE_IN],i)<0 ) {
 				error(errno,"redirecting child fd %d",i);
@@ -1007,18 +1021,6 @@ int main(int argc, char **argv)
 				error(errno,"closing pipe for fd %d",i);
 			}
 		}
-
-		/* Run the command in a separate process group so that the command
-		   and all its children can be killed off with one signal. */
-		if ( setsid()==-1 ) error(errno,"setsid failed");
-
-#ifdef USE_CGROUPS
-		/* Put the child process in the cgroup */
-		cgroup_attach();
-#endif
-
-		/* Apply all restrictions for child process. */
-		setrestrictions();
 
 		/* And execute child command. */
 		execvp(cmdname,cmdargs);
