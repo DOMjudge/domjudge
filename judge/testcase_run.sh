@@ -161,8 +161,7 @@ touch compare.out                # Compare output
 touch result.out                 # Result of comparison
 touch program.out program.err    # Program output and stderr (for extra information)
 touch program.time program.exit  # Program runtime and exitcode
-touch program.meta               # Program metadata
-touch runguard.out runguard.err  # Runguard output and stderr(for extra information)
+touch program.meta runguard.err  # Metadata and runguard stderr
 
 logmsg $LOG_INFO "setting up testing (chroot) environment"
 
@@ -191,15 +190,15 @@ $GAINROOT cp -pR /dev/null ../dev/null
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
-runcheck ./run testdata.in runguard.out \
+runcheck ./run testdata.in program.out \
 	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT \
 	${USE_CHROOT:+-r "$PWD/.."} \
-	-p $PROCLIMIT \
+	--nproc=$PROCLIMIT \
 	--no-core --streamsize=$FILELIMIT \
 	--user="$RUNUSER" \
 	--walltime=$TIMELIMIT --cputime=$TIMELIMIT \
 	--memsize=$MEMLIMIT --filesize=$FILELIMIT \
-	--stdout=program.out --stderr=program.err \
+	--stderr=program.err \
 	--outexit=program.exit --outmeta=program.meta --outtime=program.time -- \
 	$PREFIX/$PROGRAM 2>runguard.err
 
