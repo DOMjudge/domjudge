@@ -26,6 +26,8 @@ Version 4.0.0 - DEV
  - Added support for publicly visible sample testcases.
  - Move compile/run/compare scripts to database (Closes #123).
  - Add option to have compiler-error not add penalty time (Closes #127).
+ - Gather and store metadata from runguard and start work to completely
+   separate program/runguard stderr output (Closes #122).
 
 Version 3.4.0 - (unreleased)
 ----------------------------

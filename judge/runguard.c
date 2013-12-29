@@ -111,8 +111,6 @@ char **cmdargs;
 char  *rootdir;
 char  *stdoutfilename;
 char  *stderrfilename;
-char  *exitfilename;
-char  *timefilename;
 char  *metafilename;
 #ifdef USE_CGROUPS
 char  *cgroupname;
@@ -136,9 +134,7 @@ int use_group;
 int redir_stdout;
 int redir_stderr;
 int limit_streamsize;
-int outputexit;
 int outputmeta;
-int outputtime;
 int outputtimetype;
 int no_coredump;
 int be_verbose;
@@ -183,8 +179,6 @@ struct option const long_opts[] = {
 	{"stdout",     required_argument, NULL,         'o'},
 	{"stderr",     required_argument, NULL,         'e'},
 	{"streamsize", required_argument, NULL,         's'},
-	{"outexit",    required_argument, NULL,         'E'},
-	{"outtime",    required_argument, NULL,         'T'},
 	{"outmeta",    required_argument, NULL,         'M'},
 	{"verbose",    no_argument,       NULL,         'v'},
 	{"quiet",      no_argument,       NULL,         'q'},
@@ -305,9 +299,7 @@ Run COMMAND with restrictions.\n\
   -o, --stdout=FILE      redirect COMMAND stdout output to FILE\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
   -s, --streamsize=SIZE  truncate COMMAND stdout/stderr streams at SIZE kB\n\
-  -E, --outexit=FILE     write COMMAND exitcode to FILE\n\
-  -T, --outtime=FILE     write COMMAND runtime to FILE\n\
-  -M, --outmeta=FILE     write COMMAND metadata to FILE\n");
+  -M, --outmeta=FILE     write metadata (runtime, exitcode, etc.) to FILE\n");
 	printf("\
   -v, --verbose          display some extra warnings and information\n\
   -q, --quiet            suppress all warnings and verbose output\n\
@@ -326,27 +318,12 @@ real user ID.\n");
 
 void output_exit_time(int exitcode)
 {
-	FILE  *outputfile;
-	double walldiff, cpudiff, userdiff, sysdiff, outdiff;
+	double walldiff, cpudiff, userdiff, sysdiff;
 	int timelimit_reached;
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
 	verbose("command exited with exitcode %d",exitcode);
 	write_meta("exitcode","%d",exitcode);
-
-	if ( outputexit ) {
-		verbose("writing exitcode to file `%s'",exitfilename);
-
-		if ( (outputfile = fopen(exitfilename,"w"))==NULL ) {
-			error(errno,"cannot open `%s'",exitfilename);
-		}
-		if ( fprintf(outputfile,"%d\n",exitcode)<=0 ) {
-			error(0,"cannot write to file `%s'",exitfilename);
-		}
-		if ( fclose(outputfile) ) {
-			error(errno,"closing file `%s'",exitfilename);
-		}
-	}
 
 	walldiff = (endtime.tv_sec  - starttime.tv_sec ) +
 	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
@@ -373,38 +350,25 @@ void output_exit_time(int exitcode)
 		warning("timelimit exceeded (soft cpu time)");
 	}
 
-	if ( outputtime ) {
-		verbose("writing runtime to file `%s'",timefilename);
-		switch ( outputtimetype ) {
-		case WALL_TIME_TYPE:
-			outdiff = walldiff;
-			timelimit_reached = walllimit_reached;
-			break;
-		case CPU_TIME_TYPE:
-			outdiff = cpudiff;
-			timelimit_reached = cpulimit_reached;
-			break;
-		default:
-			error(0,"cannot write unknown time type `%d' to file",outputtimetype);
-		}
-		/* Hard limitlimit reached always has precedence. */
-		if ( (walllimit_reached | cpulimit_reached) & hard_timelimit ) {
-			timelimit_reached |= hard_timelimit;
-		}
-
-		if ( (outputfile = fopen(timefilename,"w"))==NULL ) {
-			error(errno,"cannot open `%s'",timefilename);
-		}
-		if ( fprintf(outputfile,"%.3f %s\n",outdiff,
-		             output_timelimit_str[timelimit_reached])<=0 ) {
-			error(0,"cannot write to file `%s'",timefilename);
-		}
-		if ( fclose(outputfile) ) {
-			error(errno,"closing file `%s'",timefilename);
-		}
-
-		write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
+	switch ( outputtimetype ) {
+	case WALL_TIME_TYPE:
+		write_meta("time-used","wall-time");
+		timelimit_reached = walllimit_reached;
+		break;
+	case CPU_TIME_TYPE:
+		write_meta("time-used","cpu-time");
+		timelimit_reached = cpulimit_reached;
+		break;
+	default:
+		error(0,"cannot write unknown time type `%d' to file",outputtimetype);
 	}
+
+	/* Hard limitlimit reached always has precedence. */
+	if ( (walllimit_reached | cpulimit_reached) & hard_timelimit ) {
+		timelimit_reached |= hard_timelimit;
+	}
+
+	write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
 }
 
 #ifdef USE_CGROUPS
@@ -800,14 +764,14 @@ int main(int argc, char **argv)
 
 	/* Parse command-line options */
 	use_root = use_walltime = use_cputime = use_user = no_coredump = 0;
-	outputexit = outputtime = walllimit_reached = cpulimit_reached = 0;
+	outputmeta = walllimit_reached = cpulimit_reached = 0;
 	outputtimetype = CPU_TIME_TYPE;
 	memsize = filesize = nproc = RLIM_INFINITY;
 	redir_stdout = redir_stderr = limit_streamsize = 0;
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:E:T:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:M:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -887,17 +851,9 @@ int main(int argc, char **argv)
 				streamsize *= 1024;
 			}
 			break;
-		case 'E': /* outputexit option */
-			outputexit = 1;
-			exitfilename = strdup(optarg);
-			break;
 		case 'M': /* outputmeta option */
 			outputmeta = 1;
 			metafilename = strdup(optarg);
-			break;
-		case 'T': /* outputtime option */
-			outputtime = 1;
-			timefilename = strdup(optarg);
 			break;
 		case 'v': /* verbose option */
 			be_verbose = 1;

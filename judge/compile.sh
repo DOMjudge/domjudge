@@ -111,7 +111,7 @@ cd "$WORKDIR"
 chmod a+rwx "$WORKDIR/compile"
 
 # Create files which are expected to exist: compiler output and runtime
-touch compile.out compile.time
+touch compile.out compile.meta
 
 cd "$WORKDIR/compile"
 
@@ -128,14 +128,14 @@ logmsg $LOG_INFO "starting compile"
 # the compiler writing to different filenames and deleting intermediate files.
 exitcode=0
 $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
-	-t $COMPILETIME -c -f 65536 -T "$WORKDIR/compile.time" -- \
+	-t $COMPILETIME -c -f 65536 -M "$WORKDIR/compile.meta" -- \
 	"$COMPILE_SCRIPT" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
 cd "$WORKDIR"
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
-if grep 'timelimit exceeded' compile.tmp >/dev/null 2>&1 ; then
+if grep '^time-result: .*timelimit' compile.meta >/dev/null 2>&1 ; then
 	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
 	cleanexit ${E_COMPILER_ERROR:--1}
 fi

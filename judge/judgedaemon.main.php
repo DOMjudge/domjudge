@@ -8,6 +8,8 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
+require(LIBEXTDIR . '/spyc/spyc.php');
+
 require(ETCDIR . '/judgehost-config.php');
 $credfile = ETCDIR . '/restapi.secret';
 $credentials = @file($credfile);
@@ -489,11 +491,12 @@ function judge($row)
 		}
 		$result = $EXITCODES[$retval];
 
-		// Try to read runtime from file
+		// Try to read metadata from file
 		$runtime = NULL;
-		if ( is_readable($testcasedir . '/program.time') ) {
-			$fdata = getFileContents($testcasedir . '/program.time');
-			list($runtime) = sscanf($fdata,"%f");
+		if ( is_readable($testcasedir . '/program.meta') ) {
+			$metadata = spyc_load_file($testcasedir . '/program.meta');
+
+			$runtime = $metadata[$metadata['time-used']];
 		}
 
 		request('judging_runs', 'POST', 'judgingid=' . urlencode($row['judgingid'])

@@ -166,7 +166,6 @@ touch error.out                  # Error output
 touch compare.out                # Compare output
 touch result.out                 # Result of comparison
 touch program.out program.err    # Program output and stderr (for extra information)
-touch program.time program.exit  # Program runtime and exitcode
 touch program.meta runguard.err  # Metadata and runguard stderr
 
 logmsg $LOG_INFO "setting up testing (chroot) environment"
@@ -204,8 +203,7 @@ runcheck ./run testdata.in program.out \
 	--user="$RUNUSER" \
 	--walltime=$TIMELIMIT --cputime=$TIMELIMIT \
 	--memsize=$MEMLIMIT --filesize=$FILELIMIT \
-	--stderr=program.err \
-	--outexit=program.exit --outmeta=program.meta --outtime=program.time -- \
+	--stderr=program.err --outmeta=program.meta -- \
 	$PREFIX/$PROGRAM 2>runguard.err
 
 # Check for still running processes:
@@ -230,18 +228,19 @@ if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
 fi
 
 # Check for errors from running the program:
+if [ ! -r program.meta ]; then
+	error "'program.meta' not readable"
+fi
 logmsg $LOG_DEBUG "checking program run exit-status"
-if grep  'timelimit exceeded' error.tmp >/dev/null 2>&1 ; then
-	echo "Timelimit exceeded, runtime: `cat program.time`" >>error.out
+timeused=`    grep '^time-used: ' program.meta | sed 's/time-used: //'`
+program_time=`grep "^$timeused: " program.meta | sed "s/$timeused: //"`
+program_exit=`grep '^exitcode: '  program.meta | sed 's/exitcode: //'`
+if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
+	echo "Timelimit exceeded, runtime: $program_time" >>error.out
 	cleanexit ${E_TIMELIMIT:--1}
 fi
-if [ ! -r program.exit ]; then
-	cat runguard.err >>error.out
-	error "'program.exit' not readable"
-fi
-# Check that program.exit was written to (no runguard error)
-if [ "`cat program.exit`" != "0" ]; then
-	echo "Non-zero exitcode `cat program.exit`" >>error.out
+if [ "$program_exit" != "0" ]; then
+	echo "Non-zero exitcode $program_exit" >>error.out
 	cleanexit ${E_RUN_ERROR:--1}
 fi
 
@@ -250,15 +249,15 @@ fi
 ### Disabled, because these are not consistently         ###
 ### reported the same way by all different compilers.    ###
 ############################################################
-#if grep  'Floating point exception' error.tmp >/dev/null 2>&1 ; then
+#if grep  'Floating point exception' program.err >/dev/null 2>&1 ; then
 #	echo "Floating point exception." >>error.out
 #	cleanexit ${E_RUN_ERROR:--1}
 #fi
-#if grep  'Segmentation fault' error.tmp >/dev/null 2>&1 ; then
+#if grep  'Segmentation fault' program.err >/dev/null 2>&1 ; then
 #	echo "Segmentation fault." >>tee error.out
 #	cleanexit ${E_RUN_ERROR:--1}
 #fi
-#if grep  'File size limit exceeded' error.tmp >/dev/null 2>&1 ; then
+#if grep  'File size limit exceeded' program.err >/dev/null 2>&1 ; then
 #	echo "File size limit exceeded." >>error.out
 #	cleanexit ${E_OUTPUT_LIMIT:--1}
 #fi
@@ -268,7 +267,7 @@ descrp=`grep '^description=' result.out | cut -d = -f 2-`
 descrp="${descrp:+ ($descrp)}"
 
 if [ "$result" = "accepted" ]; then
-	echo "Correct${descrp}! Runtime is `cat program.time` seconds." >>error.out
+	echo "Correct${descrp}! Runtime is $program_time seconds." >>error.out
 	cleanexit ${E_CORRECT:--1}
 elif [ "$result" = "presentation error" ]; then
 	echo "Presentation error${descrp}." >>error.out
