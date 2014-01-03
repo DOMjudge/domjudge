@@ -250,17 +250,18 @@ void error(int errnum, const char *format, ...)
 	exit(exit_failure);
 }
 
-void write_meta(const char *key, const char*format, ...) {
+void write_meta(const char *key, const char *format, ...)
+{
 	FILE  *outputfile;
 	va_list ap;
+
+	if ( !outputmeta ) return;
+
 	va_start(ap,format);
-	if ( !outputmeta ) {
-		return;
-	}
+
 	if ( (outputfile = fopen(metafilename,"a"))==NULL ) {
 		error(errno,"cannot open `%s'",metafilename);
 	}
-
 
 	if ( fprintf(outputfile,"%s: ",key)<=0 ) {
 		error(0,"cannot write to file `%s'",metafilename);
@@ -272,11 +273,11 @@ void write_meta(const char *key, const char*format, ...) {
 		error(0,"cannot write to file `%s'",metafilename);
 	}
 
-
-
 	if ( fclose(outputfile) ) {
 		error(errno,"closing file `%s'",metafilename);
 	}
+
+	va_end(ap);
 }
 
 void version(const char *prog, const char *vers)
@@ -765,7 +766,9 @@ void setrestrictions()
 		if ( setuid(getuid()) ) error(errno,"cannot reset real user ID");
 		verbose("reset user ID to `%d' for command",getuid());
 	}
-	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped. Do not run judgedaemon as root.");
+	if ( geteuid()==0 || getuid()==0 ) {
+		error(0,"root privileges not dropped. Do not run judgedaemon as root.");
+	}
 }
 
 int main(int argc, char **argv)
