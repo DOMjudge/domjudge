@@ -233,7 +233,7 @@ judging one solution can tie up a judgehost for several minutes, and if there's
 a problem with one judgehost it can be resolved while judging continues on the
 others.
 
-As a rule of thumb, we recommend one judgehost per 10-20 teams.
+As a rule of thumb, we recommend one judgehost per 20 teams.
 
 However, overprovisioning does not hurt: DOMjudge scales easily in the
 number of judegehosts, so if hardware is available, by all means use it. But
