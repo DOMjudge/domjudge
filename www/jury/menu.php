@@ -5,6 +5,7 @@
 <?php   } ?>
 <?php	if ( checkrole('jury') ) { ?>
 <a href="problems.php" accesskey="p">problems</a>
+<a href="executables.php" accesskey="e">executables</a>
 <?php   } ?>
 <?php	if ( IS_ADMIN ) { ?>
 <a href="judgehosts.php" accesskey="j">judgehosts</a>
