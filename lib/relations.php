@@ -11,6 +11,7 @@ $KEYS['balloon'] = array('balloonid');
 $KEYS['clarification'] = array('clarid');
 $KEYS['contest'] = array('cid');
 $KEYS['event'] = array('eventid');
+$KEYS['executable'] = array('execid');
 $KEYS['judgehost'] = array('hostname');
 $KEYS['judging'] = array('judgingid');
 $KEYS['judging_run'] = array('runid');
@@ -72,6 +73,8 @@ $RELATIONS['event'] = array (
 	'judgingid' => 'judging.judgingid&NOCONSTRAINT',
 	'teamid' => 'team.login&NOCONSTRAINT',
 );
+
+$RELATIONS['executable'] = array();
 
 $RELATIONS['judgehost'] = array();
 
