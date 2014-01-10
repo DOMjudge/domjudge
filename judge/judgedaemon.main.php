@@ -391,6 +391,60 @@ function judge($row)
 		                 overshoot_time($row['maxruntime'],
 		                                dbconfig_get_rest('timelimit_overshoot'));
 
+		if ( !empty($row['special_compare']) ) {
+			// FIXME: make sure we don't have to escape special_compare
+			// TODO: outline this code to work for all kinds of executable zip files
+			$execpath = "$workdirpath/executable/" . $row['special_compare'];
+			$execmd5path = $execpath . "/md5sum";
+			$execbuildpath = $execpath . "/build";
+			$execrunpath = $execpath . "/run";
+			$execzippath = $execpath . "/executable.zip";
+			if ( empty($row['special_compare_md5sum']) ) {
+				error("unknown compare script '" . $row['special_compare'] . "' specified");
+			}
+			if ( !file_exists($execpath) || !file_exists($execmd5path)
+				|| file_get_contents($execmd5path) != $row['special_compare_md5sum'] ) {
+				logmsg(LOG_INFO, "Fetching new executable '" . $row['special_compare'] . "'");
+				system("rm -rf $execpath");
+				system("mkdir -p '$execpath'", $retval);
+				if ( $retval!=0 ) error("Could not create directory '$execpath'");
+				$content = request('executable', 'GET', 'execid=' . urlencode($row['special_compare']));
+				$content = base64_decode(dj_json_decode($content));
+				if ( file_put_contents($execzippath, $content) === FALSE ) {
+					error("Could not create executable zip file in $execpath");
+				}
+				unset($content);
+				if ( md5_file($execzippath) != $row['special_compare_md5sum'] ) {
+					error("Zip file corrupted during download.");
+				}
+				if ( file_put_contents($execmd5path, $row['special_compare_md5sum']) === FALSE ) {
+					error("Could not write md5sum to file.");
+				}
+
+				logmsg(LOG_INFO, "Unzipping");
+				system("unzip -d $execpath $execzippath", $retval);
+				if ( $retval!=0 ) error("Could not unzip zipfile in $execpath");
+
+				if ( !file_exists($execbuildpath) || !is_executable($execbuildpath) ) {
+					error("Invalid executable, must contain executable file 'build'.");
+				}
+
+				logmsg(LOG_INFO, "Compiling");
+				$olddir = getcwd();
+				chdir($execpath);
+				system("./build", $retval);
+				if ( $retval!=0 ) error("Could not run ./build in $execpath");
+				chdir($olddir);
+				if ( !file_exists($execrunpath) || !is_executable($execrunpath) ) {
+					error("Invalid build file, must produce an executable file 'run'.");
+				}
+
+				logmsg(LOG_INFO, "Symlinking");
+				system("ln -sf $execrunpath " . LIBJUDGEDIR . "/compare_" . $row['special_compare'], $retval);
+				if ( $retval!=0 ) error("Could not create symlink to run ./build in $execpath");
+			}
+		}
+
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
 		       "'$row[special_run]' '$row[special_compare]'", $retval);
