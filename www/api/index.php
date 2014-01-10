@@ -182,6 +182,12 @@ function judgings_POST($args)
 	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s',
 	       now(), $row['teamid']);
 
+	// TODO: integrate in query above
+	if ( !empty($row['special_compare']) ) {
+		$special_compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_compare']);
+		$row['special_compare_md5sum'] = $special_compare_md5sum;
+	}
+
 	$jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)
 	               VALUES(%i,%i,%s,%s)', $row['submitid'], $row['cid'], now(), $host);
 
@@ -491,6 +497,24 @@ $doc = 'Get a testcase file.';
 $exArgs = array(array('testcaseid' => '3', 'input' => TRUE));
 $roles = array('jury','judgehost');
 $api->provideFunction('GET', 'testcase_files', $doc, $args, $exArgs, $roles);
+
+// executable zip, e.g. for compare scripts
+function executable($args)
+{
+	global $DB, $api;
+
+	checkargs($args, array('execid'));
+
+	$content = $DB->q("VALUE SELECT SQL_NO_CACHE zipfile FROM executable
+	                   WHERE execid = %s", $args['execid']);
+
+	return base64_encode($content);
+}
+$args = array('execid' => 'Get only the corresponding executable.');
+$doc = 'Get an executable zip file.';
+$exArgs = array(array('execid' => 'ignorews'));
+$roles = array('jury','judgehost');
+$api->provideFunction('GET', 'executable', 'executable', $doc, $args, $exArgs, $roles);
 
 /**
  * Judging Queue
