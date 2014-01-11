@@ -670,7 +670,6 @@ function putTeamRow($cdata, $teamids) {
 	if ( count($teamids) == 1 ) {
 		$teams   = getTeams(array("teams" => $teamids), true);
 		$probs   = getProblems($cdata);
-		$categs  = getCategories(true);
 		$SCORES  = initScores($teams);
 		$SUMMARY = initSummary($probs);
 
@@ -684,7 +683,7 @@ function putTeamRow($cdata, $teamids) {
 				$SCORES[$login]['num_correct'] = $totals['correct'];
 				$SCORES[$login]['total_time']  = $totals['totaltime'];
 			}
-			if ($displayrank) $SCORES[$login]['rank'] = calcTeamRank($cdata, $login, true);
+			if ($displayrank) $SCORES[$login]['rank'] = calcTeamRank($cdata, $login, $totals, true);
 		}
 
 		// Get values for this team about problems from scoreboard cache
@@ -729,7 +728,7 @@ function putTeamRow($cdata, $teamids) {
 		                'summary'    => $SUMMARY,
 		                'teams'      => $teams,
 		                'problems'   => $probs,
-		                'categories' => $categs );
+		                'categories' => null );
 	}
 	else {
 		// Otherwise, calculate scoreboard as jury to display non-visible teams
@@ -751,7 +750,7 @@ function putTeamRow($cdata, $teamids) {
 /**
  * Calculate the rank for a single team based on the cache tables
  */
-function calcTeamRank($cdata, $teamid, $jury = FALSE) {
+function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 
 	global $DB;
 
@@ -763,13 +762,8 @@ function calcTeamRank($cdata, $teamid, $jury = FALSE) {
 	// Use jury scoreboard when jury or final scoreboard should be displayed
 	$tblname = $jury || $fdata['showfinal'] ? 'jury' : 'public';
 
-	// Find number of solved problems, penaly time and sortorder for this team
-	$team = $DB->q("MAYBETUPLE SELECT correct, totaltime
-	                FROM rankcache_$tblname
-	                WHERE cid = %i
-	                AND teamid = %s", $cid, $teamid);
-	$correct   = ( $team == NULL ) ? 0 : $team['correct'];
-	$totaltime = ( $team == NULL ) ? 0 : $team['totaltime'];
+	$correct   = (isset($teamtotals['correct'])   ? $teamtotals['correct']   : 0);
+	$totaltime = (isset($teamtotals['totaltime']) ? $teamtotals['totaltime'] : 0);
 
 	$sortorder = $DB->q('VALUE SELECT sortorder
 	      FROM team_category
