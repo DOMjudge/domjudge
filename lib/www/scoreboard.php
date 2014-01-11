@@ -647,6 +647,7 @@ function putTeamRow($cdata, $teamids) {
 	if ( empty($cdata) ) return;
 
 	$fdata = calcFreezeData($cdata);
+	$displayrank = IS_JURY || !$fdata['showfrozen'];
 	$cid = $cdata['cid'];
 
 	if ( ! $fdata['cstarted'] ) {
@@ -683,7 +684,7 @@ function putTeamRow($cdata, $teamids) {
 				$SCORES[$login]['num_correct'] = $totals['correct'];
 				$SCORES[$login]['total_time']  = $totals['totaltime'];
 			}
-			$SCORES[$login]['rank'] = calcTeamRank($cdata, $login, true);
+			if ($displayrank) $SCORES[$login]['rank'] = calcTeamRank($cdata, $login, true);
 		}
 
 		// Get values for this team about problems from scoreboard cache
@@ -738,7 +739,6 @@ function putTeamRow($cdata, $teamids) {
 	// Render the row based on this info
 	$myteamid = null;
 	$static = FALSE;
-	$displayrank = IS_JURY || !$fdata['showfrozen'];
 
 	if ( ! IS_JURY ) echo "<div id=\"teamscoresummary\">\n";
 	renderScoreBoardTable($cdata,$sdata,$myteamid,$static,
