@@ -19,6 +19,26 @@ if ( isset($_GET['cmd'] ) ) {
 	$refresh = '15;url='.$pagename.'?id='.urlencode($id);
 }
 
+if ( isset($_GET['fetch']) ) {
+	$filename = $id . "-script.zip";
+
+	$size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH(zipfile)
+	                FROM executable WHERE execid = %s",
+	               $id);
+
+	// sanity check before we start to output headers
+	if ( $size===NULL || !is_numeric($size)) error("Problem while fetching executable");
+
+	header("Content-Type: application/zip; name=\"$filename\"");
+	header("Content-Disposition: attachment; filename=\"$filename\"");
+	header("Content-Length: $size");
+
+	echo $DB->q("VALUE SELECT SQL_NO_CACHE zipfile FROM executable
+	             WHERE execid = %s", $id);
+
+	exit(0);
+}
+
 if ( isset($_POST['upload']) ) {
 	if ( !empty($_FILES['executable_archive']['tmp_name'][0]) ) {
 		foreach($_FILES['executable_archive']['tmp_name'] as $fileid => $tmpname) {
@@ -160,7 +180,9 @@ echo "<br />\n" . rejudgeForm('executable', $id) . "\n\n"; // FIXME: useful?
 
 if ( IS_ADMIN ) {
 	echo "<p>" .
-		exportLink($id) . "\n" .
+		'<a href="executable.php?fetch&id=' . urlencode($id) .
+		'"><img src="../images/b_save.png" ' .
+		' title="export executable as zip-file" alt="export" /></a>' .
 		editLink('executable',$id) . "\n" .
 		delLink('executable','execid', $id) . "</p>\n\n";
 }
