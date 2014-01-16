@@ -165,6 +165,7 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <tr><td>Name:        </td><td><?php echo htmlspecialchars($data['description'])?></td></tr>
 <tr><td>md5sum:      </td><td><?php echo htmlspecialchars($data['md5sum'])?></td></tr>
 <tr><td>size:        </td><td><?php echo htmlspecialchars($data['size'])?> Bytes</td></tr>
+<tr><td>content:        </td><td><a href="show_executable.php?id=<?php echo htmlspecialchars($id)?>">view content of zip file</a></td></tr>
 <?php
 if ( IS_ADMIN && class_exists("ZipArchive") ) {
 	echo '<tr>' .
