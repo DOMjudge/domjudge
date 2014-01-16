@@ -100,6 +100,15 @@ CREATE TABLE `rankcache_public` (
   CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
 
+CREATE TABLE `executable` (
+  `execid` varchar(32) NOT NULL COMMENT 'Unique ID (string)',
+  `md5sum` char(32) DEFAULT NULL COMMENT 'Md5sum of zip file',
+  `zipfile` longblob COMMENT 'Zip file',
+  `description` varchar(255) DEFAULT NULL COMMENT 'Description of this executable',
+  PRIMARY KEY (`execid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Compile, compare, and run script executable bundles';
+
+
 -- Rename scoreboard cache tables to match new rankcache_{jury,public}.
 
 RENAME TABLE `scoreboard_jury`   TO `scorecache_jury`;

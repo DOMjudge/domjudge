@@ -129,13 +129,13 @@ CREATE TABLE `event` (
 -- Table structure for table `executable`
 --
 
-CREATE TABLE IF NOT EXISTS `executable` (
-  `execid` varchar(32) CHARACTER SET utf8 NOT NULL COMMENT 'Unique identifier',
-  `md5sum` char(32) CHARACTER SET utf8 DEFAULT NULL COMMENT 'Md5sum of zip file',
+CREATE TABLE `executable` (
+  `execid` varchar(32) NOT NULL COMMENT 'Unique ID (string)',
+  `md5sum` char(32) DEFAULT NULL COMMENT 'Md5sum of zip file',
   `zipfile` longblob COMMENT 'Zip file',
-  `description` varchar(255) CHARACTER SET utf8 DEFAULT NULL COMMENT 'Description of this executable',
-  UNIQUE KEY `execid` (`execid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Compile, compare, and run script executable bundles';
+  `description` varchar(255) DEFAULT NULL COMMENT 'Description of this executable',
+  PRIMARY KEY (`execid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Compile, compare, and run script executable bundles';
 
 --
 -- Table structure for table `judgehost`
