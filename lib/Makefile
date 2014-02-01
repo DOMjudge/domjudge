@@ -14,9 +14,11 @@ clean-l:
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_libdir)    *.php
+	$(INSTALL_TREE) -t $(DESTDIR)$(domserver_libextdir) ext/*
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_libwwwdir) www/*.php
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libdir)    alert
 
 install-judgehost:
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libdir)    *.php *.sh
+	$(INSTALL_TREE) -t $(DESTDIR)$(judgehost_libextdir) ext/*
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libdir)    alert

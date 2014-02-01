@@ -10,6 +10,7 @@ define('DOMJUDGE_VERSION', '@DOMJUDGE_VERSION@');
 define('BINDIR',      '@judgehost_bindir@');
 define('ETCDIR',      '@judgehost_etcdir@');
 define('LIBDIR',      '@judgehost_libdir@');
+define('LIBEXTDIR',   '@judgehost_libextdir@');
 define('LIBJUDGEDIR', '@judgehost_libjudgedir@');
 define('LOGDIR',      '@judgehost_logdir@');
 define('RUNDIR',      '@judgehost_rundir@');
