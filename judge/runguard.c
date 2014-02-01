@@ -118,6 +118,8 @@ char  *metafilename;
 char  *cgroupname;
 const char *cpuset;
 
+FILE  *metafile;
+
 /* Linux Out-Of-Memory adjustment for current process. */
 #define OOM_PATH_NEW "/proc/self/oom_score_adj"
 #define OOM_PATH_OLD "/proc/self/oom_adj"
@@ -252,29 +254,20 @@ void error(int errnum, const char *format, ...)
 
 void write_meta(const char *key, const char *format, ...)
 {
-	FILE  *outputfile;
 	va_list ap;
 
 	if ( !outputmeta ) return;
 
 	va_start(ap,format);
 
-	if ( (outputfile = fopen(metafilename,"a"))==NULL ) {
-		error(errno,"cannot open `%s'",metafilename);
-	}
-
-	if ( fprintf(outputfile,"%s: ",key)<=0 ) {
+	if ( fprintf(metafile,"%s: ",key)<=0 ) {
 		error(0,"cannot write to file `%s'",metafilename);
 	}
-	if ( vfprintf(outputfile,format,ap)<0 ) {
+	if ( vfprintf(metafile,format,ap)<0 ) {
 		error(0,"cannot write to file `%s'(vfprintf)",metafilename);
 	}
-	if ( fprintf(outputfile,"\n")<=0 ) {
+	if ( fprintf(metafile,"\n")<=0 ) {
 		error(0,"cannot write to file `%s'",metafilename);
-	}
-
-	if ( fclose(outputfile) ) {
-		error(errno,"closing file `%s'",metafilename);
 	}
 
 	va_end(ap);
@@ -930,6 +923,10 @@ int main(int argc, char **argv)
 	cmdname = argv[optind];
 	cmdargs = argv+optind;
 
+	if ( outputmeta && (metafile = fopen(metafilename,"w"))==NULL ) {
+		error(errno,"cannot open `%s'",metafilename);
+	}
+
 	/* Check that new uid is in list of valid uid's.
 	   This must be done before chroot for /etc/passwd lookup. */
 	if ( use_user ) {
@@ -1185,6 +1182,10 @@ int main(int argc, char **argv)
 		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
 
 		output_exit_time(exitcode);
+
+		if ( outputmeta && fclose(metafile)!=0 ) {
+			error(errno,"closing file `%s'",metafilename);
+		}
 
 		/* Return the exitstatus of the command */
 		return exitcode;
