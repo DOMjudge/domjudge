@@ -391,7 +391,7 @@ function judge($row)
 		                 overshoot_time($row['maxruntime'],
 		                                dbconfig_get_rest('timelimit_overshoot'));
 
-		if ( !empty($row['special_compare']) ) {
+		if ( !empty($row['special_compare']) && $row['special_compare'] != 'float' ) {
 			// FIXME: make sure we don't have to escape special_compare
 			// TODO: outline this code to work for all kinds of executable zip files
 			$execpath = "$workdirpath/executable/" . $row['special_compare'];
