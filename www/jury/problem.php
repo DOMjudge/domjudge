@@ -239,7 +239,8 @@ if ( !empty($data['special_run']) ) {
 }
 if ( !empty($data['special_compare']) ) {
 	echo '<tr><td>Special compare script:</td><td class="filename">' .
-		htmlspecialchars($data['special_compare']) . "</td></tr>\n";
+		'<a href="executable.php?id=' . urlencode($data['special_compare']) . '">' .
+		htmlspecialchars($data['special_compare']) . "</a></td></tr>\n";
 }
 
 if ( IS_ADMIN && class_exists("ZipArchive") ) {

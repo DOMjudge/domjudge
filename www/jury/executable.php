@@ -166,6 +166,20 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <tr><td>md5sum:      </td><td><?php echo htmlspecialchars($data['md5sum'])?></td></tr>
 <tr><td>size:        </td><td><?php echo htmlspecialchars($data['size'])?> Bytes</td></tr>
 <tr><td>content:        </td><td><a href="show_executable.php?id=<?php echo htmlspecialchars($id)?>">view content of zip file</a></td></tr>
+<tr><td>used as compare script:</td><td>
+<?php
+$res = $DB->q('SELECT probid FROM problem WHERE special_compare = %s ORDER BY probid', $data['execid']);
+if ( $res->count() > 0 ) {
+	while( $row = $res->next() ) { 
+		echo '<a href="problem.php?id=' . $row['probid'] . '">'
+			. $row['probid'] . '</a> ';
+	}
+} else {
+	echo "<span class=\"nodata\">none</span>";
+}
+	
+?>
+</td></tr>
 <?php
 if ( IS_ADMIN && class_exists("ZipArchive") ) {
 	echo '<tr>' .
