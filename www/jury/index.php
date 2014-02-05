@@ -27,6 +27,7 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <?php if ( checkrole('jury') ) { ?>
 <li><a href="clarifications.php">Clarifications</a></li>
 <li><a href="contests.php">Contests</a></li>
+<li><a href="executables.php">Executables</a></li>
 <li><a href="judgehosts.php">Judgehosts</a></li>
 <li><a href="languages.php">Languages</a></li>
 <li><a href="problems.php">Problems</a></li>
