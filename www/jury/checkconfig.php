@@ -241,7 +241,7 @@ flushresults();
 
 // PROBLEMS
 
-$res = $DB->q('SELECT probid, timelimit FROM problem ORDER BY probid');
+$res = $DB->q('SELECT probid, timelimit, special_compare FROM problem ORDER BY probid');
 
 $details = '';
 while($row = $res->next()) {
