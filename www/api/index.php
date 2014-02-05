@@ -514,7 +514,7 @@ $args = array('execid' => 'Get only the corresponding executable.');
 $doc = 'Get an executable zip file.';
 $exArgs = array(array('execid' => 'ignorews'));
 $roles = array('jury','judgehost');
-$api->provideFunction('GET', 'executable', 'executable', $doc, $args, $exArgs, $roles);
+$api->provideFunction('GET', 'executable', $doc, $args, $exArgs, $roles);
 
 /**
  * Judging Queue
