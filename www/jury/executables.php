@@ -36,7 +36,15 @@ if( $res->count() == 0 ) {
 			"</td><td>" . $link . htmlspecialchars($row['description'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['md5sum'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['size'])."</a>".
-			"</td></tr>\n";
+			"</td>";
+		if ( IS_ADMIN ) {
+			echo '<td title="export executable as zip-file"><a href="executable.php?fetch&id=' . urlencode($row['execid']) .
+			     '"><img src="../images/b_save.png" alt="export" /></a></td>' .
+			     "<td class=\"editdel\">" .
+			     editLink('executable', $row['execid']) . " " .
+			     delLink('executable','execid',$row['execid']) . "</td>";
+		}
+		echo "</tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
 }
