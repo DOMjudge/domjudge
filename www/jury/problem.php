@@ -139,7 +139,14 @@ src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 <td><?php echo addInput('data[0][special_run]', @$row['special_run'], 30, 25)?></td></tr>
 
 <tr><td><label for="data_0__special_compare_">Special compare script:</label></td>
-<td><?php echo addInput('data[0][special_compare]', @$row['special_compare'], 30, 25)?></td></tr>
+<td>
+<?php 
+$execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable ORDER BY execid DESC");
+$execmap['float'] = 'float';
+$execmap[''] = 'none';
+echo addSelect('data[0][special_compare]', $execmap, @$row['special_compare'], True);
+?>
+</td></tr>
 
 </table>
 

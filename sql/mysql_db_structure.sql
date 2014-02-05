@@ -222,7 +222,7 @@ CREATE TABLE `problem` (
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
   `timelimit` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time for this problem',
   `special_run` varchar(25) DEFAULT NULL COMMENT 'Script to run submissions for this problem',
-  `special_compare` varchar(25) DEFAULT NULL COMMENT 'Script to compare problem and jury output for this problem',
+  `special_compare` varchar(32) DEFAULT NULL COMMENT 'Script to compare problem and jury output for this problem',
   `color` varchar(25) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard',
   `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
   `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text',
