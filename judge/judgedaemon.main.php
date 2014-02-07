@@ -465,6 +465,18 @@ function judge($row)
 			}
 		}
 
+		if ( !empty($row['special_run']) ) {
+			$execrunpath = fetch_executable($workdirpath, $row['special_run'], $row['special_run_md5sum']);
+			if ( $execrunpath != null ) {
+				logmsg(LOG_INFO, "Symlinking");
+				system("ln -sf $execrunpath " . LIBJUDGEDIR . "/runjury_" . $row['special_run'], $retval);
+				if ( $retval!=0 ) error("Could not create symlink to run ./build in $execpath");
+				# FIXME: are there other use cases of the run_... - script?
+				system("ln -sf " . LIBJUDGEDIR . "/run_wrapper " . LIBJUDGEDIR . "/run_" . $row['special_run'], $retval);
+				if ( $retval!=0 ) error("Could not create symlink to run_wrapper in $execpath");
+			}
+		}
+
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
 		       "'$row[special_run]' '$row[special_compare]'", $retval);

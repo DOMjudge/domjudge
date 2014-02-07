@@ -183,10 +183,14 @@ function judgings_POST($args)
 	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s',
 	       now(), $row['teamid']);
 
-	// TODO: integrate in query above
+	// TODO: refactor + integrate in query above
 	if ( !empty($row['special_compare']) ) {
 		$special_compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_compare']);
 		$row['special_compare_md5sum'] = $special_compare_md5sum;
+	}
+	if ( !empty($row['special_run']) ) {
+		$special_run_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_run']);
+		$row['special_run_md5sum'] = $special_run_md5sum;
 	}
 	if ( !empty($row['compile_script']) ) {
 		$compile_script_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['compile_script']);
