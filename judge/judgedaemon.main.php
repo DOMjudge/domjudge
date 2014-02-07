@@ -352,6 +352,17 @@ function judge($row)
 		}
 	}
 
+	if ( empty($row['compile_script']) ) {
+		error("No compile script specified for language " . $row['langid'] . ".");
+	}
+
+	$execrunpath = fetch_executable($workdirpath, $row['compile_script'], $row['compile_script_md5sum']);
+	if ( $execrunpath != null ) {
+		logmsg(LOG_INFO, "Symlinking");
+		system("ln -sf $execrunpath " . LIBJUDGEDIR . "/compile_" . $row['langid'] . ".sh", $retval);
+		if ( $retval!=0 ) error("Could not create symlink to run ./build in $execpath");
+	}
+
 	// Compile the program.
 	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt $row[langid] '$workdir' " .
 	       implode(' ', $files), $retval);

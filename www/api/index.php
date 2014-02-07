@@ -174,7 +174,8 @@ function judgings_POST($args)
 
 	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid,
 	               CEILING(time_factor*timelimit) AS maxruntime,
-	               special_run, special_compare
+		       special_run, special_compare,
+		       compile_script
 	               FROM submission s, problem p, language l
 	               WHERE s.probid = p.probid AND s.langid = l.langid AND
 	               submitid = %i', $submitid);
@@ -186,6 +187,10 @@ function judgings_POST($args)
 	if ( !empty($row['special_compare']) ) {
 		$special_compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_compare']);
 		$row['special_compare_md5sum'] = $special_compare_md5sum;
+	}
+	if ( !empty($row['compile_script']) ) {
+		$compile_script_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['compile_script']);
+		$row['compile_script_md5sum'] = $compile_script_md5sum;
 	}
 
 	$jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)

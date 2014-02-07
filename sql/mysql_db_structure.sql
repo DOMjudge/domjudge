@@ -207,6 +207,7 @@ CREATE TABLE `language` (
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted in this language?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions in this language judged?',
   `time_factor` float NOT NULL DEFAULT '1' COMMENT 'Language-specific factor multiplied by problem run times',
+  `compile_script` varchar(32) DEFAULT NULL COMMENT 'Script to compile source code for this language',
   PRIMARY KEY  (`langid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Programming languages in which teams can submit solutions';
 
