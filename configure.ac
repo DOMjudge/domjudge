@@ -188,6 +188,7 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(judgehost_bindir,      $bindir)
 	AC_SUBST(judgehost_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_libdir,      $libdir/${PACKAGE_TARNAME})
+	AC_SUBST(judgehost_libextdir,   $libdir/${PACKAGE_TARNAME}/ext)
 	AC_SUBST(judgehost_libjudgedir, $libdir/${PACKAGE_TARNAME}/judge)
 	AC_SUBST(judgehost_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_rundir,      $localstatedir/run/${PACKAGE_TARNAME})
@@ -231,6 +232,7 @@ AX_WITH_COMMENT(6,[     ])
 AX_PATH(judgehost_bindir,       [$judgehost_root/bin])
 AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
 AX_PATH(judgehost_libdir,       [$judgehost_root/lib])
+AX_PATH(judgehost_libextdir,    [$judgehost_root/lib/ext])
 AX_PATH(judgehost_libjudgedir,  [$judgehost_root/lib/judge])
 AX_PATH(judgehost_logdir,       [$judgehost_root/log])
 AX_PATH(judgehost_rundir,       [$judgehost_root/run])
@@ -393,6 +395,7 @@ echo " * judgehost...........: $judgehost_root"
 echo "    - bin..............: $judgehost_bindir"
 echo "    - etc..............: $judgehost_etcdir"
 echo "    - lib..............: $judgehost_libdir"
+echo "    - libext...........: $judgehost_libextdir"
 echo "    - libjudge.........: $judgehost_libjudgedir"
 echo "    - log..............: $judgehost_logdir"
 echo "    - run..............: $judgehost_rundir"

@@ -406,9 +406,12 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 			echo '<td class=';
 			// CSS class for correct/incorrect/neutral results
 			if( $matrix[$team][$prob]['is_correct'] ) {
+				// The best times for each problem may not have been
+				// calculated (if called from putTeamRow()), so we
+				// have to suppress an undefined index here.
 				echo '"score_correct' .
-					( $summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]==$matrix[$team][$prob]['time'] ?
-					  ' score_first' : '') . '"';
+					( @$summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]
+				      ===$matrix[$team][$prob]['time'] ? ' score_first' : '') . '"';
 			} elseif ( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
 				echo '"score_pending"';
 			} elseif ( $matrix[$team][$prob]['num_submissions'] > 0 ) {
@@ -655,6 +658,7 @@ function putTeamRow($cdata, $teamids) {
 	if ( empty($cdata) ) return;
 
 	$fdata = calcFreezeData($cdata);
+	$displayrank = IS_JURY || !$fdata['showfrozen'];
 	$cid = $cdata['cid'];
 
 	if ( ! $fdata['cstarted'] ) {
@@ -677,7 +681,6 @@ function putTeamRow($cdata, $teamids) {
 	if ( count($teamids) == 1 ) {
 		$teams   = getTeams(array("teams" => $teamids), true);
 		$probs   = getProblems($cdata);
-		$categs  = getCategories(true);
 		$SCORES  = initScores($teams);
 		$SUMMARY = initSummary($probs);
 
@@ -691,7 +694,7 @@ function putTeamRow($cdata, $teamids) {
 				$SCORES[$login]['num_correct'] = $totals['correct'];
 				$SCORES[$login]['total_time']  = $totals['totaltime'];
 			}
-			$SCORES[$login]['rank'] = calcTeamRank($cdata, $login, true);
+			if ($displayrank) $SCORES[$login]['rank'] = calcTeamRank($cdata, $login, $totals, true);
 		}
 
 		// Get values for this team about problems from scoreboard cache
@@ -736,7 +739,7 @@ function putTeamRow($cdata, $teamids) {
 		                'summary'    => $SUMMARY,
 		                'teams'      => $teams,
 		                'problems'   => $probs,
-		                'categories' => $categs );
+		                'categories' => null );
 	}
 	else {
 		// Otherwise, calculate scoreboard as jury to display non-visible teams
@@ -746,7 +749,6 @@ function putTeamRow($cdata, $teamids) {
 	// Render the row based on this info
 	$myteamid = null;
 	$static = FALSE;
-	$displayrank = IS_JURY || !$fdata['showfrozen'];
 
 	if ( ! IS_JURY ) echo "<div id=\"teamscoresummary\">\n";
 	renderScoreBoardTable($cdata,$sdata,$myteamid,$static,
@@ -759,7 +761,7 @@ function putTeamRow($cdata, $teamids) {
 /**
  * Calculate the rank for a single team based on the cache tables
  */
-function calcTeamRank($cdata, $teamid, $jury = FALSE) {
+function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 
 	global $DB;
 
@@ -771,13 +773,8 @@ function calcTeamRank($cdata, $teamid, $jury = FALSE) {
 	// Use jury scoreboard when jury or final scoreboard should be displayed
 	$tblname = $jury || $fdata['showfinal'] ? 'jury' : 'public';
 
-	// Find number of solved problems, penaly time and sortorder for this team
-	$team = $DB->q("MAYBETUPLE SELECT correct, totaltime
-	                FROM rankcache_$tblname
-	                WHERE cid = %i
-	                AND teamid = %s", $cid, $teamid);
-	$correct   = ( $team == NULL ) ? 0 : $team['correct'];
-	$totaltime = ( $team == NULL ) ? 0 : $team['totaltime'];
+	$correct   = (isset($teamtotals['correct'])   ? $teamtotals['correct']   : 0);
+	$totaltime = (isset($teamtotals['totaltime']) ? $teamtotals['totaltime'] : 0);
 
 	$sortorder = $DB->q('VALUE SELECT sortorder
 	      FROM team_category

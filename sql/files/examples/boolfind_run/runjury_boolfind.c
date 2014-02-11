@@ -3,7 +3,8 @@
  * for the sample "boolfind" interactive problem.
  */
 
-#include "config.h"
+/* Include POSIX.1-2008 base specification */
+#define _POSIX_C_SOURCE 200809L
 
 #include <stdio.h>
 #include <stdlib.h>

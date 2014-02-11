@@ -24,12 +24,17 @@ config: $(SUBST_CONFIGS)
 
 domserver: apache.conf dbpasswords.secret
 
-judgehost: dbpasswords.secret
+judgehost: dbpasswords.secret restapi.secret
 
 dbpasswords.secret:
 	echo "# Randomly generated on host `hostname`, `date`" > $@
 	chmod go= $@
 	./gendbpasswords >> $@
+
+restapi.secret:
+	echo "# Randomly generated on host `hostname`, `date`" > $@
+	chmod go= $@
+	./genrestapicredentials >> $@
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
@@ -47,7 +52,7 @@ install-judgehost:
 	-$(INSTALL_USER) -t $(DESTDIR)$(judgehost_etcdir) \
 		judgehost-config.php common-config.php
 	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \
-		dbpasswords.secret
+		dbpasswords.secret restapi.secret
 
 # Let only distclean (_not_ the local variant) depend on password
 # removal, so these don't get removed with maintainer-clean.

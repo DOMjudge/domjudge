@@ -92,6 +92,10 @@ $DB->q('DELETE FROM scorecache_jury
 $DB->q('DELETE FROM scorecache_public
         WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%As)',
        $cid, $teamlist, $probs);
+$DB->q('DELETE FROM rankcache_jury
+        WHERE cid != %i OR teamid NOT IN (%As)', $cid, $teamlist);
+$DB->q('DELETE FROM rankcache_public
+        WHERE cid != %i OR teamid NOT IN (%As)', $cid, $teamlist);
 
 $time_end = microtime(TRUE);
 

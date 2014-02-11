@@ -128,6 +128,18 @@ CREATE TABLE `event` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Log of all events during a contest';
 
 --
+-- Table structure for table `executable`
+--
+
+CREATE TABLE `executable` (
+  `execid` varchar(32) NOT NULL COMMENT 'Unique ID (string)',
+  `md5sum` char(32) DEFAULT NULL COMMENT 'Md5sum of zip file',
+  `zipfile` longblob COMMENT 'Zip file',
+  `description` varchar(255) DEFAULT NULL COMMENT 'Description of this executable',
+  PRIMARY KEY (`execid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Compile, compare, and run script executable bundles';
+
+--
 -- Table structure for table `judgehost`
 --
 
@@ -197,6 +209,7 @@ CREATE TABLE `language` (
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted in this language?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions in this language judged?',
   `time_factor` float NOT NULL DEFAULT '1' COMMENT 'Language-specific factor multiplied by problem run times',
+  `compile_script` varchar(32) DEFAULT NULL COMMENT 'Script to compile source code for this language',
   PRIMARY KEY  (`langid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Programming languages in which teams can submit solutions';
 
@@ -211,8 +224,8 @@ CREATE TABLE `problem` (
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
   `timelimit` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time for this problem',
-  `special_run` varchar(25) DEFAULT NULL COMMENT 'Script to run submissions for this problem',
-  `special_compare` varchar(25) DEFAULT NULL COMMENT 'Script to compare problem and jury output for this problem',
+  `special_run` varchar(32) DEFAULT NULL COMMENT 'Script to run submissions for this problem',
+  `special_compare` varchar(32) DEFAULT NULL COMMENT 'Script to compare problem and jury output for this problem',
   `color` varchar(25) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard',
   `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
   `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text',
@@ -434,6 +447,7 @@ CREATE TABLE `testcase` (
   `probid` varchar(8) NOT NULL COMMENT 'Corresponding problem ID',
   `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of this testcase',
+  `sample` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Sample testcases that can be shared with teams',
   PRIMARY KEY  (`testcaseid`),
   UNIQUE KEY `rank` (`probid`,`rank`),
   KEY `probid` (`probid`),

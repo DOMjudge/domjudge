@@ -100,10 +100,22 @@ CREATE TABLE `rankcache_public` (
   CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
 
+CREATE TABLE `executable` (
+  `execid` varchar(32) NOT NULL COMMENT 'Unique ID (string)',
+  `md5sum` char(32) DEFAULT NULL COMMENT 'Md5sum of zip file',
+  `zipfile` longblob COMMENT 'Zip file',
+  `description` varchar(255) DEFAULT NULL COMMENT 'Description of this executable',
+  PRIMARY KEY (`execid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Compile, compare, and run script executable bundles';
+
+
 -- Rename scoreboard cache tables to match new rankcache_{jury,public}.
 
 RENAME TABLE `scoreboard_jury`   TO `scorecache_jury`;
 RENAME TABLE `scoreboard_public` TO `scorecache_public`;
+
+ALTER TABLE `testcase`
+  ADD COLUMN `sample` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Sample testcases that can be shared with teams' AFTER `description`;
 
 -- Before modifying the datetime to decimal(32.9) data type, we have
 -- to move the data to be able to convert it afterwards.
@@ -192,6 +204,8 @@ UPDATE `team` SET
 UPDATE `configuration` SET `value` = '"%H:%M"', `description` = 'The format used to print times. For formatting options see the PHP \'strftime\' function.' WHERE `name` = 'time_format';
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('timelimit_overshoot', '"1s|10%"', 'string', 'Time that submissions are kept running beyond timelimt before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.');
+
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_sample_output', '0', 'bool', 'Should teams be able to view a diff of their and the reference output to sample testcases?');
 
 UPDATE `language` SET `extensions` = '["adb","ads"]' WHERE `langid` = 'adb';
 UPDATE `language` SET `extensions` = '["awk"]' WHERE `langid` = 'awk';

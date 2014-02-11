@@ -184,6 +184,8 @@ install)
 	cat $SQLDIR/mysql_db_structure.sql \
 	    $SQLDIR/mysql_db_defaultdata.sql \
 	    $SQLDIR/mysql_db_examples.sql \
+	    $SQLDIR/mysql_db_files_defaultdata.sql \
+	    $SQLDIR/mysql_db_files_examples.sql \
 	     | mysql -D "$DBNAME"
 	verbose "SQL structure and default/example data installed."
 	rm -f $TMPFILE
@@ -194,6 +196,7 @@ bare-install)
 	create_db_users
  	cat $SQLDIR/mysql_db_structure.sql \
  	    $SQLDIR/mysql_db_defaultdata.sql \
+	    $SQLDIR/mysql_db_files_defaultdata.sql \
 	     | mysql -D "$DBNAME"
 	verbose "SQL structure and defaults installed(No sample data)."
 	rm -f $TMPFILE

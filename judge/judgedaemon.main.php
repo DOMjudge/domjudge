@@ -107,6 +107,60 @@ function usage()
 	exit;
 }
 
+// fetches new executable from database if necessary
+// runs build to compile executable
+// returns execrunpath on update, null otherwise
+function fetch_executable($workdirpath, $execid, $md5sum) {
+	// FIXME: make sure we don't have to escape $execid
+	$execpath = "$workdirpath/executable/" . $execid;
+	$execmd5path = $execpath . "/md5sum";
+	$execbuildpath = $execpath . "/build";
+	$execrunpath = $execpath . "/run";
+	$execzippath = $execpath . "/executable.zip";
+	if ( empty($md5sum) ) {
+		error("unknown executable '" . $execid . "' specified");
+	}
+	if ( !file_exists($execpath) || !file_exists($execmd5path)
+		|| file_get_contents($execmd5path) != $md5sum ) {
+		logmsg(LOG_INFO, "Fetching new executable '" . $execid . "'");
+		system("rm -rf $execpath");
+		system("mkdir -p '$execpath'", $retval);
+		if ( $retval!=0 ) error("Could not create directory '$execpath'");
+		$content = request('executable', 'GET', 'execid=' . urlencode($execid));
+		$content = base64_decode(dj_json_decode($content));
+		if ( file_put_contents($execzippath, $content) === FALSE ) {
+			error("Could not create executable zip file in $execpath");
+		}
+		unset($content);
+		if ( md5_file($execzippath) != $md5sum ) {
+			error("Zip file corrupted during download.");
+		}
+		if ( file_put_contents($execmd5path, $md5sum) === FALSE ) {
+			error("Could not write md5sum to file.");
+		}
+
+		logmsg(LOG_INFO, "Unzipping");
+		system("unzip -d $execpath $execzippath", $retval);
+		if ( $retval!=0 ) error("Could not unzip zipfile in $execpath");
+
+		if ( !file_exists($execbuildpath) || !is_executable($execbuildpath) ) {
+			error("Invalid executable, must contain executable file 'build'.");
+		}
+
+		logmsg(LOG_INFO, "Compiling");
+		$olddir = getcwd();
+		chdir($execpath);
+		system("./build", $retval);
+		if ( $retval!=0 ) error("Could not run ./build in $execpath");
+		chdir($olddir);
+		if ( !file_exists($execrunpath) || !is_executable($execrunpath) ) {
+			error("Invalid build file, must produce an executable file 'run'.");
+		}
+		return $execrunpath;
+	}
+	return null;
+}
+
 $options = getopt("dv:n:hV");
 // With PHP version >= 5.3 we can also use long options.
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
@@ -298,6 +352,17 @@ function judge($row)
 		}
 	}
 
+	if ( empty($row['compile_script']) ) {
+		error("No compile script specified for language " . $row['langid'] . ".");
+	}
+
+	$execrunpath = fetch_executable($workdirpath, $row['compile_script'], $row['compile_script_md5sum']);
+	if ( $execrunpath != null ) {
+		logmsg(LOG_INFO, "Symlinking");
+		system("ln -sf $execrunpath " . LIBJUDGEDIR . "/compile_" . $row['langid'] . ".sh", $retval);
+		if ( $retval!=0 ) error("Could not create symlink to run ./build in $execpath");
+	}
+
 	// Compile the program.
 	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt $row[langid] '$workdir' " .
 	       implode(' ', $files), $retval);
@@ -390,6 +455,27 @@ function judge($row)
 		$hardtimelimit = $row['maxruntime'] +
 		                 overshoot_time($row['maxruntime'],
 		                                dbconfig_get_rest('timelimit_overshoot'));
+
+		if ( !empty($row['special_compare']) && $row['special_compare'] != 'float' ) {
+			$execrunpath = fetch_executable($workdirpath, $row['special_compare'], $row['special_compare_md5sum']);
+			if ( $execrunpath != null ) {
+				logmsg(LOG_INFO, "Symlinking");
+				system("ln -sf $execrunpath " . LIBJUDGEDIR . "/compare_" . $row['special_compare'], $retval);
+				if ( $retval!=0 ) error("Could not create symlink to run ./build in $execpath");
+			}
+		}
+
+		if ( !empty($row['special_run']) ) {
+			$execrunpath = fetch_executable($workdirpath, $row['special_run'], $row['special_run_md5sum']);
+			if ( $execrunpath != null ) {
+				logmsg(LOG_INFO, "Symlinking");
+				system("ln -sf $execrunpath " . LIBJUDGEDIR . "/runjury_" . $row['special_run'], $retval);
+				if ( $retval!=0 ) error("Could not create symlink to run ./build in $execpath");
+				# FIXME: are there other use cases of the run_... - script?
+				system("ln -sf " . LIBJUDGEDIR . "/run_wrapper " . LIBJUDGEDIR . "/run_" . $row['special_run'], $retval);
+				if ( $retval!=0 ) error("Could not create symlink to run_wrapper in $execpath");
+			}
+		}
 
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .

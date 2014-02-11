@@ -37,10 +37,18 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 	exit(0);
 }
 
-$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank, description,
-                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-                OCTET_LENGTH(output) AS size_output, md5sum_output
-                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+// We may need to re-update the testcase data, so make it a function.
+function get_testcase_data()
+{
+	global $DB, $data, $probid;
+
+	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
+	                description, sample,
+	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
+	                OCTET_LENGTH(output) AS size_output, md5sum_output
+	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+}
+get_testcase_data();
 
 // Reorder testcases
 if ( isset ($_GET['move']) ) {
@@ -132,6 +140,14 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 		}
 	}
 
+	if ( isset($_POST['sample'][$rank]) ) {
+		$DB->q('UPDATE testcase SET sample = %i WHERE probid = %s
+		        AND rank = %i', $_POST['sample'][$rank], $probid, $rank);
+		$result .= "<li>Set testcase $rank to be " .
+		           ($_POST['sample'][$rank] ? "" : "not ") .
+		           "a sample testcase</li>\n";
+	}
+
 	if ( isset($_POST['description'][$rank]) ) {
 		$DB->q('UPDATE testcase SET description = %s WHERE probid = %s
 		        AND rank = %i', $_POST['description'][$rank], $probid, $rank);
@@ -158,10 +174,11 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 		if ( !empty($content['input']) && !empty($content['output']) ) {
 			$DB->q("INSERT INTO testcase
-			        (probid,rank,md5sum_input,md5sum_output,input,output,description)
-			        VALUES (%s,%i,%s,%s,%s,%s,%s)",
+			        (probid,rank,md5sum_input,md5sum_output,input,output,description,sample)
+			        VALUES (%s,%i,%s,%s,%s,%s,%s,%i)",
 			       $probid, $rank, md5(@$content['input']), md5(@$content['output']),
-			       @$content['input'], @$content['output'], @$_POST['add_desc']);
+			       @$content['input'], @$content['output'], @$_POST['add_desc'],
+			       @$_POST['add_sample']);
 			auditlog('testcase', $probid, 'added', "rank $rank");
 
 			$result .= "<li>Added new testcase $rank from " .
@@ -182,10 +199,7 @@ if ( !empty($result) ) {
 	echo "<ul>\n$result</ul>\n\n";
 
 	// Reload testcase data after updates
-	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank, description,
-	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-	                OCTET_LENGTH(output) AS size_output, md5sum_output
-	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+	get_testcase_data();
 }
 
 // Check if ranks must be renumbered (if test cases have been deleted).
@@ -203,10 +217,7 @@ if ( count($data)<(int)key($data) ) {
 	echo "<p>Test case rankings reordered.</p>\n\n";
 
 	// Reload testcase data after updates
-	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank, description,
-	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-	                OCTET_LENGTH(output) AS size_output, md5sum_output
-	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+	get_testcase_data();
 }
 
 echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem " .
@@ -227,7 +238,7 @@ if ( count($data)==0 ) {
 <th scope="col">size</th><th scope="col">md5</th>
 <?php
 	if ( IS_ADMIN ) echo '<th scope="col">upload new</th>';
-?><th scope="col">description</th><th></th>
+?><th scope="col">sample</th><th scope="col">description</th><th></th>
 </tr></thead>
 <tbody>
 <?php
@@ -253,6 +264,12 @@ foreach( $data as $rank => $row ) {
 		}
 		if ( $inout=='input' ) {
 			if ( IS_ADMIN ) {
+				echo "<td rowspan=\"2\"	class=\"testsample\" onclick=\"editTcSample($rank)\">" .
+				    addSelect("sample[$rank]",array("no", "yes"), $row['sample'], true) . "</td>";
+
+				// hide sample dropdown field if javascript is enabled
+				echo "<script type=\"text/javascript\" language=\"JavaScript\">" .
+				    "hideTcSample($rank, '". printyn($row['sample'])."');</script>";
 				echo "<td rowspan=\"2\" class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
 				    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"2\">" .
 				    htmlspecialchars($row['description']) . "</textarea></td>" .
@@ -262,6 +279,8 @@ foreach( $data as $rank => $row ) {
 				    "<img src=\"../images/delete.png\" alt=\"delete\"" .
 				    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
 			} else {
+				echo "<td rowspan=\"2\" align=\"testsample\">" .
+					printyn($row['issample']) . "</td>";
 				echo "<td rowspan=\"2\" class=\"testdesc\">" .
 				    htmlspecialchars($row['description']) . "</td>";
 			}
@@ -285,6 +304,7 @@ if ( IS_ADMIN ) {
 <table>
 <tr><td>Input testdata: </td><td><?php echo addFileField('add_input')  ?></td></tr>
 <tr><td>Output testdata:</td><td><?php echo addFileField('add_output') ?></td></tr>
+<tr><td>Sample testcase:</td><td><?php echo addSelect('add_sample', array("no","yes"), 0, true);?></td></tr>
 <tr><td>Description:    </td><td><?php echo addInput('add_desc','',30); ?></td></tr>
 </table>
 <?php

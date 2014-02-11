@@ -136,10 +136,23 @@ src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 <td><?php echo addFileField('data[0][problemtext]', 30, ' accept="text/plain,text/html,application/pdf"')?></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>
-<td><?php echo addInput('data[0][special_run]', @$row['special_run'], 30, 25)?></td></tr>
+<td>
+<?php 
+$execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable ORDER BY execid");
+$execmap[''] = 'none';
+echo addSelect('data[0][special_run]', $execmap, @$row['special_run'], True);
+?>
+</td></tr>
 
 <tr><td><label for="data_0__special_compare_">Special compare script:</label></td>
-<td><?php echo addInput('data[0][special_compare]', @$row['special_compare'], 30, 25)?></td></tr>
+<td>
+<?php 
+$execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable ORDER BY execid");
+$execmap['float'] = 'float';
+$execmap[''] = 'none';
+echo addSelect('data[0][special_compare]', $execmap, @$row['special_compare'], True);
+?>
+</td></tr>
 
 </table>
 
@@ -226,13 +239,15 @@ if ( !empty($data['problemtext_type']) ) {
 	              "return confirm('Delete problem description text?')") .
 	    "</td></tr>\n";
 }
-if ( !empty($data['special_run']) ) {
+if ( !empty($data['special_compare']) ) {
 	echo '<tr><td>Special run script:</td><td class="filename">' .
-		htmlspecialchars($data['special_run']) . "</td></tr>\n";
+		'<a href="executable.php?id=' . urlencode($data['special_run']) . '">' .
+		htmlspecialchars($data['special_run']) . "</a></td></tr>\n";
 }
 if ( !empty($data['special_compare']) ) {
 	echo '<tr><td>Special compare script:</td><td class="filename">' .
-		htmlspecialchars($data['special_compare']) . "</td></tr>\n";
+		'<a href="executable.php?id=' . urlencode($data['special_compare']) . '">' .
+		htmlspecialchars($data['special_compare']) . "</a></td></tr>\n";
 }
 
 if ( IS_ADMIN && class_exists("ZipArchive") ) {

@@ -58,6 +58,7 @@ if ( ! empty($extrahead) ) echo $extrahead;
 <?php
 
 if ( IS_JURY ) {
+	global $pagename;
 	echo "<body onload=\"setInterval('updateClarifications(" . ($pagename=='clarifications.php' && $refresh_cookie) . ")', 20000)\">\n";
 } else {
 	echo "<body>\n";
