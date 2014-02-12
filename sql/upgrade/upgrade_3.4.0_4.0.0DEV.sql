@@ -100,6 +100,13 @@ CREATE TABLE `rankcache_public` (
   CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
 
+
+-- Rename scoreboard cache tables to match new rankcache_{jury,public}.
+
+RENAME TABLE `scoreboard_jury`   TO `scorecache_jury`;
+RENAME TABLE `scoreboard_public` TO `scorecache_public`;
+
+
 CREATE TABLE `executable` (
   `execid` varchar(32) NOT NULL COMMENT 'Unique ID (string)',
   `md5sum` char(32) DEFAULT NULL COMMENT 'Md5sum of zip file',
@@ -108,11 +115,12 @@ CREATE TABLE `executable` (
   PRIMARY KEY (`execid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Compile, compare, and run script executable bundles';
 
+ALTER TABLE `problem`
+  CHANGE COLUMN `special_run` varchar(32) DEFAULT NULL COMMENT 'Script to run submissions for this problem',
+  CHANGE COLUMN `special_compare` varchar(32) DEFAULT NULL COMMENT 'Script to compare problem and jury output for this problem';
 
--- Rename scoreboard cache tables to match new rankcache_{jury,public}.
-
-RENAME TABLE `scoreboard_jury`   TO `scorecache_jury`;
-RENAME TABLE `scoreboard_public` TO `scorecache_public`;
+ALTER TABLE `language`
+  CHANGE COLUMN `compile_script` varchar(32) DEFAULT NULL COMMENT 'Script to compile source code for this language';
 
 ALTER TABLE `testcase`
   ADD COLUMN `sample` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Sample testcases that can be shared with teams' AFTER `description`;
