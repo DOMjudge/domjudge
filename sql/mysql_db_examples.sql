@@ -9,8 +9,8 @@
 -- 
 
 INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `activatetime_string`, `starttime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`, `enabled`) VALUES
-(1, 'Demo practice session', 1357023600.000000000, 1357027200.000000000, NULL, 1357034400.000000000, NULL, '-1:00', '2013-01-01 09:00:00', NULL, '+2:00', NULL, 1),
-(2, 'Demo contest', 1357036200.000000000, 1357038000.000000000, 1451660400.000000000, 1451664000.000000000, 1451665800.000000000, '2013-01-01 11:30:00', '2013-01-01 12:00:00', '2016-01-01 16:00:00', '2016-01-01 17:00:00', '2016-01-01 17:30:00', 1);
+(1, 'Demo practice session', UNIX_TIMESTAMP('2013-01-01 08:00:00'), UNIX_TIMESTAMP('2013-01-01 09:00:00'), NULL, UNIX_TIMESTAMP('2013-01-01 11:00:00'), NULL, '-1:00', '2013-01-01 09:00:00', NULL, '+2:00', NULL, 1),
+(2, 'Demo contest', UNIX_TIMESTAMP('2013-01-01 11:30:00'), UNIX_TIMESTAMP('2013-01-01 12:00:00'), UNIX_TIMESTAMP('2016-01-01 16:00:00'), UNIX_TIMESTAMP('2016-01-01 17:00:00'), UNIX_TIMESTAMP('2016-01-01 17:30:00'), '2013-01-01 11:30:00', '2013-01-01 12:00:00', '2016-01-01 16:00:00', '2016-01-01 17:00:00', '2016-01-01 17:30:00', 1);
 
 --
 -- Dumping data for table `executable`
