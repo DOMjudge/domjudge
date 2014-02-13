@@ -116,11 +116,11 @@ CREATE TABLE `executable` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Compile, compare, and run script executable bundles';
 
 ALTER TABLE `problem`
-  CHANGE COLUMN `special_run` varchar(32) DEFAULT NULL COMMENT 'Script to run submissions for this problem',
-  CHANGE COLUMN `special_compare` varchar(32) DEFAULT NULL COMMENT 'Script to compare problem and jury output for this problem';
+  MODIFY COLUMN `special_run` varchar(32) DEFAULT NULL COMMENT 'Script to run submissions for this problem',
+  MODIFY COLUMN `special_compare` varchar(32) DEFAULT NULL COMMENT 'Script to compare problem and jury output for this problem';
 
 ALTER TABLE `language`
-  CHANGE COLUMN `compile_script` varchar(32) DEFAULT NULL COMMENT 'Script to compile source code for this language';
+  ADD COLUMN `compile_script` varchar(32) DEFAULT NULL COMMENT 'Script to compile source code for this language';
 
 ALTER TABLE `testcase`
   ADD COLUMN `sample` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Sample testcases that can be shared with teams' AFTER `description`;
