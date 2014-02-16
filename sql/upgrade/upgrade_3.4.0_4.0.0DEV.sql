@@ -232,8 +232,6 @@ UPDATE `language` SET `extensions` = '["py3"]' WHERE `langid` = 'py3';
 UPDATE `language` SET `extensions` = '["scala"]' WHERE `langid` = 'scala';
 UPDATE `language` SET `extensions` = '["sh"]' WHERE `langid` = 'sh';
 
--- FIXME: besides this, the script zipfiles also have to be inserted
--- from the dist-generated files mysql_db_files_{defaultdata,examples}.sql
 INSERT INTO `executable` (`execid`, `description`) VALUES ('adb', 'adb');
 INSERT INTO `executable` (`execid`, `description`) VALUES ('awk', 'awk');
 INSERT INTO `executable` (`execid`, `description`) VALUES ('bash', 'bash');
@@ -256,6 +254,10 @@ INSERT INTO `executable` (`execid`, `description`) VALUES ('scala', 'scala');
 INSERT INTO `executable` (`execid`, `description`) VALUES ('sh', 'sh');
 INSERT INTO `executable` (`execid`, `description`) VALUES ('boolfind_cmp', 'boolfind comparator');
 INSERT INTO `executable` (`execid`, `description`) VALUES ('boolfind_run', 'boolfind run script');
+
+source mysql_db_files_defaultdata.sql
+source mysql_db_files_examples.sql
+
 
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (1, 'admin',          'Administrative User');
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (2, 'jury',           'Jury User');

@@ -44,6 +44,7 @@ install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
 dist: configure
+config: dist
 
 # List of SUBDIRS for recursive targets:
 config:            SUBDIRS=etc doc lib sql www judge submit tests misc-tools
