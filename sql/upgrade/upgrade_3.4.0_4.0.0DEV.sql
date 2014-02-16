@@ -258,6 +258,12 @@ INSERT INTO `executable` (`execid`, `description`) VALUES ('boolfind_run', 'bool
 source mysql_db_files_defaultdata.sql
 source mysql_db_files_examples.sql
 
+-- Update languages to use executable scripts, special case Java:
+UPDATE `language` SET `compile_script` = `langid`;
+UPDATE `language` SET `compile_script` = 'java_javac_detect' WHERE `langid` = 'java';
+
+UPDATE `problem` SET `special_compare` = 'float' WHERE `probid` = 'fltcmp';
+UPDATE `problem` SET `special_compare` = 'boolfind_cmp', `special_run` = 'boolfind_run' WHERE `probid` = 'boolfind';
 
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (1, 'admin',          'Administrative User');
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (2, 'jury',           'Jury User');
