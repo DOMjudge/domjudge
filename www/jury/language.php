@@ -74,7 +74,7 @@ if ( !empty($cmd) ):
 
 <tr><td><label for="data_0__time_factor_">Time factor:</label></td>
 <td><?php echo addInputField('number', 'data[0][time_factor]', @$row['time_factor'], ' min="0"')?> x</td></tr>
-<tr><td><label for="data_0__compile_script">Compile script:</label></td>
+<tr><td><label for="data_0__compile_script_">Compile script:</label></td>
 <td>
 <?php
 $execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable ORDER BY execid");
