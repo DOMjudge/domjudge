@@ -7,7 +7,7 @@ config: dj-setup-database zipfiles
 
 zipfiles:
 	rm -f mysql_db_files_defaultdata.sql mysql_db_files_examples.sql
-	find files -mindepth 2 -maxdepth 2 -type d -exec  zip -jr {}.zip {} \;
+	find files -mindepth 2 -maxdepth 2 -type d -exec  zip -qjr {}.zip {} \;
 	for i in `find files/defaultdata -mindepth 1 -maxdepth 1 -type d`; do \
 		echo "UPDATE executable SET zipfile = LOAD_FILE('$(CURDIR)/$$i.zip'), md5sum = '`md5sum $$i.zip | cut -f1 -d\\ `' WHERE execid = '`basename $$i`';" >> mysql_db_files_defaultdata.sql; \
 	done
