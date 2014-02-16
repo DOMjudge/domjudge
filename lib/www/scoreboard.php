@@ -208,7 +208,7 @@ function getTeams($filter, $jury) {
  */
 function getCategories($jury) {
 	global $DB;
-	
+
 	return $DB->q('KEYTABLE SELECT categoryid AS ARRAYKEY,
 	               categoryid, name, color FROM team_category ' .
 	              ($jury ? '' : 'WHERE visible = 1 ' ) .
@@ -247,7 +247,7 @@ function initSummary($probs) {
 	                 'affils'      => array(),
 	                 'countries'   => array(),
 	                 'problems'    => array());
-	
+
 	// initialize all problems with data
 	foreach( array_keys($probs) as $prob ) {
 		if ( !isset($SUMMARY['problems'][$prob]) ) {
@@ -390,7 +390,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 			(IS_JURY ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
 			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
 			htmlspecialchars($teams[$team]['name']) . '<br />' .
-			'<span class="univ">' . $affilname . '</span>' . 
+			'<span class="univ">' . $affilname . '</span>' .
 			($static ? '' : '</a>') .
 			'</td>';
 		echo
@@ -662,7 +662,7 @@ function putTeamRow($cdata, $teamids) {
 
 		return;
 	}
-	
+
 	// For computing team row, use smart trick when only a single team is requested such
 	// that we don't need to compute the whole scoreboard.
 	// This does not fully populate the summary, so the first correct problem per problem
@@ -692,12 +692,12 @@ function putTeamRow($cdata, $teamids) {
 
 		// loop all info the scoreboard cache and put it in our own datastructure
 		while ( $srow = $scoredata->next() ) {
-	
+
 			// skip this row if the problem is not known by us
 			if ( ! array_key_exists ( $srow['probid'], $probs ) ) continue;
-	
+
 			$penalty = calcPenaltyTime( $srow['is_correct'], $srow['submissions'] );
-	
+
 			// fill our matrix with the scores from the database
 			$MATRIX[$srow['teamid']][$srow['probid']] = array (
 				'is_correct'      => (bool) $srow['is_correct'],
@@ -822,7 +822,7 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 			while ( $srow = $scoredata->next() ) {
 				$teamdata[$srow['teamid']]['solve_times'][] = $srow['totaltime'];
 			}
-			
+
 			// Now check for each team if it is ranked higher than $teamid
 			foreach ( $tied as $login ) {
 				if ( $login == $teamid ) continue;

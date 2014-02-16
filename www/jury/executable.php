@@ -170,14 +170,14 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <?php
 $res = $DB->q('SELECT probid FROM problem WHERE special_compare = %s ORDER BY probid', $data['execid']);
 if ( $res->count() > 0 ) {
-	while( $row = $res->next() ) { 
+	while( $row = $res->next() ) {
 		echo '<a href="problem.php?id=' . $row['probid'] . '">'
 			. $row['probid'] . '</a> ';
 	}
 } else {
 	echo "<span class=\"nodata\">none</span>";
 }
-	
+
 ?>
 </td></tr>
 <?php

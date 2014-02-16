@@ -182,7 +182,7 @@ legend {
 	border-collapse: collapse;
 	clear: both;
 }
-.scoreboard td { 
+.scoreboard td {
 	font-size: small;
 	vertical-align: middle;
 	text-align: center;
@@ -202,7 +202,7 @@ legend {
 	padding: 0px;
 	max-width: 15em;
 	text-align: right;
-	font-weight: bold; 
+	font-weight: bold;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;

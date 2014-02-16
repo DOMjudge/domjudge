@@ -76,7 +76,7 @@ if ( !empty($cmd) ):
 <td><?php echo addInputField('number', 'data[0][time_factor]', @$row['time_factor'], ' min="0"')?> x</td></tr>
 <tr><td><label for="data_0__compile_script">Compile script:</label></td>
 <td>
-<?php 
+<?php
 $execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable ORDER BY execid");
 $execmap[''] = 'none';
 echo addSelect('data[0][compile_script]', $execmap, @$row['compile_script'], True);
@@ -129,7 +129,7 @@ echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 if ( empty($data['compile_script']) ) {
 	echo '<span class="nodata">none specified</span>';
 } else {
-	echo '<a href="executable.php?id=' . urlencode($data['compile_script']) . '">' . 
+	echo '<a href="executable.php?id=' . urlencode($data['compile_script']) . '">' .
 		htmlspecialchars($data['compile_script']) . '</a>';
 }
 ?>

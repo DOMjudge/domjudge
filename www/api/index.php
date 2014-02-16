@@ -550,7 +550,7 @@ function queue($args)
 			     AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
 			     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC'
 			     . ($hasLimit ? ' LIMIT %i' : ' %_'),
-			     $cid, 
+			     $cid,
 			     ($hasLimit ? $args['limit'] : -1));
 
 	return $submitids->getTable();
