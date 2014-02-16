@@ -30,14 +30,14 @@ if ( isset($_POST['import']) ) {
 
 		$contest = array();
 		$contest['contestname'] = $contest_yaml_data['name'];
-		$contest['starttime'] = strftime(MYSQL_DATETIME_FORMAT, strtotime($contest_yaml_data['start-time']));
-		$contest['activatetime'] = '-1:00';
-		$contest['endtime'] = '+' . $contest_yaml_data['duration'];
+		$contest['starttime_string'] = strftime('%Y-%m-%d %H:%M:%S', strtotime($contest_yaml_data['start-time']));
+		$contest['activatetime_string'] = '-1:00';
+		$contest['endtime_string'] = '+' . $contest_yaml_data['duration'];
 		if ( ! empty($contest_yaml_data['scoreboard-freeze']) ) {
-			$contest['freezetime'] = '+' . $contest_yaml_data['scoreboard-freeze'];
+			$contest['freezetime_string'] = '+' . $contest_yaml_data['scoreboard-freeze'];
 		}
 		// TODO or 1?
-		$contest['enabled'] = 0;
+		$contest['enabled'] = 1;
 
 		$contest = check_contest($contest);
 
@@ -59,7 +59,7 @@ if ( isset($_POST['import']) ) {
 
 		// TODO: event-feed-port
 
-		$LIBDBCONFIG['penalty_time']['value'] = $contest_yaml_data['penaltytime'];
+		$LIBDBCONFIG['penalty_time']['value'] = (int)$contest_yaml_data['penaltytime'];
 		$LIBDBCONFIG['clar_answers']['value'] = $contest_yaml_data['default-clars'];
 		$categories = array();
 		foreach ( $contest_yaml_data['clar-categories'] as $category ) {
@@ -68,6 +68,7 @@ if ( isset($_POST['import']) ) {
 		}
 		$LIBDBCONFIG['clar_categories']['value'] = $categories;
 
+	/* Disable importing language details, as there's very little to actually import:
 		$DB->q("DELETE FROM language");
 		foreach ($contest_yaml_data['languages'] as $language) {
 			$lang = array();
@@ -80,6 +81,7 @@ if ( isset($_POST['import']) ) {
 
 			$DB->q("INSERT INTO language SET %S", $lang);
 		}
+	*/
 
 		foreach ($contest_yaml_data['problemset'] as $problem) {
 			// TODO better lang-id?
@@ -96,7 +98,7 @@ if ( isset($_POST['import']) ) {
 			$prob['allow_judge'] = 1;
 			// TODO Fredrik?
 			$prob['timelimit'] = 10;
-			$prob['color'] = $pbolem['rgb'];
+			$prob['color'] = $problem['rgb'];
 
 			$DB->q("INSERT INTO problem SET %S", $prob);
 		}
