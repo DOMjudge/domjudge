@@ -2,7 +2,7 @@
 /**
  * Code to import and export tsv formats as specified by the ICPC
  * Contest Control System Standard.
- * 
+ *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -101,7 +101,7 @@ function tsv_teams_prepare($content)
 	foreach($content as $line) {
 		$l++;
 		$line = explode("\t", trim($line));
-		
+
 		// teams.tsv contains data pertaining both to affiliations and teams.
 		// hence return data for both tables.
 
@@ -112,9 +112,9 @@ function tsv_teams_prepare($content)
 				'externalid' => @$line[1],
 				'categoryid' => @$line[2],
 				'name' => @$line[3],
-				'affilid' => @$line[4]), 
+				'affilid' => @$line[4]),
 			'team_affiliation' => array (
-				'affilid' => @$line[4], 
+				'affilid' => @$line[4],
 				'name' => @$line[5],
 				'country' => @$line[6]) );
 	}

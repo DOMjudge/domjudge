@@ -15,19 +15,19 @@ require(LIBEXTDIR . '/spyc/spyc.php');
 if ( isset($_POST['import']) ) {
 
 	if ( isset($_FILES) && isset($_FILES['import_config']) && isset($_FILES['import_config']['name']) && isset($_FILES['import_config']['tmp_name']) ) {
-		
+
 		$file = $_FILES['import_config']['name'];
-		
+
 		$contest_yaml_data = Spyc::YAMLLoad($_FILES['import_config']['tmp_name']);
-		
+
 		if ( empty($contest_yaml_data) ) {
 			echo "<p>Error parsing YAML file.</p>\n";
 			require(LIBWWWDIR . '/footer.php');
 			exit;
 		}
-		
+
 		require(LIBWWWDIR . '/checkers.jury.php');
-		
+
 		$contest = array();
 		$contest['contestname'] = $contest_yaml_data['name'];
 		$contest['starttime'] = strftime(MYSQL_DATETIME_FORMAT, strtotime($contest_yaml_data['start-time']));
@@ -40,9 +40,9 @@ if ( isset($_POST['import']) ) {
 		$contest['enabled'] = 0;
 
 		$contest = check_contest($contest);
-		
+
 		$cid = $DB->q("RETURNID INSERT INTO contest SET %S", $contest);
-		
+
 		if ( ! empty($CHECKER_ERRORS) ) {
 			echo "<p>Contest data not valid:</p>\n";
 			echo "<ul>\n";
@@ -54,11 +54,11 @@ if ( isset($_POST['import']) ) {
 			exit;
 
 		}
-		
+
 		dbconfig_init();
-		
+
 		// TODO: event-feed-port
-		
+
 		$LIBDBCONFIG['penalty_time']['value'] = $contest_yaml_data['penaltytime'];
 		$LIBDBCONFIG['clar_answers']['value'] = $contest_yaml_data['default-clars'];
 		$categories = array();
@@ -67,7 +67,7 @@ if ( isset($_POST['import']) ) {
 			$categories[$cat_key] = $category;
 		}
 		$LIBDBCONFIG['clar_categories']['value'] = $categories;
-		
+
 		$DB->q("DELETE FROM language");
 		foreach ($contest_yaml_data['languages'] as $language) {
 			$lang = array();
@@ -77,10 +77,10 @@ if ( isset($_POST['import']) ) {
 			$lang['allow_submit'] = 1;
 			$lang['allow_judge'] = 1;
 			$lang['time_factor'] = 1;
-			
+
 			$DB->q("INSERT INTO language SET %S", $lang);
 		}
-		
+
 		foreach ($contest_yaml_data['problemset'] as $problem) {
 			// TODO better lang-id?
 			$prob = array();
@@ -97,30 +97,30 @@ if ( isset($_POST['import']) ) {
 			// TODO Fredrik?
 			$prob['timelimit'] = 10;
 			$prob['color'] = $pbolem['rgb'];
-			
+
 			$DB->q("INSERT INTO problem SET %S", $prob);
 		}
-		
+
 		dbconfig_store();
-		
+
 		// Redirect to the original page to prevent accidental redo's
 		header('Location: import-export-config.php?import-ok&file='.$file);
 
 	} else {
-		
+
 		echo "<p>Error uploading file.</p>\n";
 		require(LIBWWWDIR . '/footer.php');
 		exit;
-		
+
 	}
-	
+
 } elseif ( isset($_POST['export']) ) {
-	
+
 	// Fetch data from database and store in an associative array
 	$cid = @$_POST['contest'];
-	
+
 	$contest_row = $DB->q("MAYBETUPLE SELECT * FROM contest WHERE cid = %i", $cid);
-	
+
 	if ( ! $contest_row ) {
 		echo "<p>Contest not found.</p>\n";
 		require(LIBWWWDIR . '/footer.php');
@@ -136,11 +136,11 @@ if ( isset($_POST['import']) ) {
 	$contest_data['short-name'] = $contest_row['contestname'];
 	$contest_data['start-time'] = date('c', strtotime($contest_row['starttime']));
 	$contest_data['duration'] = printtimerel(calcContestTime($contest_row['endtime'], $contest_row));
-	
+
 	if ( ! is_null($contest_row['freezetime']) ) {
 		$contest_data['scoreboard-freeze'] = printtimerel(calcContestTime($contest_row['freezetime'], $contest_row));
 	}
-	
+
 	// TODO: event-feed-port
 	$contest_data['penaltytime'] = dbconfig_get('penalty_time');
 	$contest_data['default-clars'] = dbconfig_get('clar_answers');
@@ -148,27 +148,27 @@ if ( isset($_POST['import']) ) {
 	$contest_data['languages'] = array();
 	$q = $DB->q("SELECT * FROM language");
 	while ( $lang = $q->next() ) {
-		
+
 		$language = array();
 		$language['name'] = $lang['name'];
 		// TODO: compiler, -flags, runner, -flags?
 		$contest_data['languages'][] = $language;
-		
+
 	}
 	$contest_data['problemset'] = array();
 	$q = $DB->q("SELECT * FROM problem WHERE cid = %i", $cid);
 	while ( $prob = $q->next() ) {
-		
+
 		$problem = array();
 		$problem['letter'] = $prob['probid'];
 		$problem['short-name'] = $prob['name'];
 		$problem['color'] = $prob['color'];
 		// TODO? rgb? Fredrik?
 		$contest_data['problemset'][] = $problem;
-		
+
 	}
 
-	
+
 	$yaml = Spyc::YAMLDump($contest_data);
 
 	echo $yaml;
