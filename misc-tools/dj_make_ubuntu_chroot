@@ -117,7 +117,7 @@ $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 	--variant=minbase --arch "$ARCH" $CODENAME "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
-cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
+cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
 
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 deb $DEBMIRROR precise main

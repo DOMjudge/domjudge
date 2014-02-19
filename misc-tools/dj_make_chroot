@@ -117,7 +117,7 @@ echo "Running debootstrap to install base system, this may take a while..."
 	--variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
-cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
+cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
 
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
