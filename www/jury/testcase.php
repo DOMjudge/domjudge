@@ -257,8 +257,8 @@ foreach( $data as $rank => $row ) {
 		echo "<td class=\"filename\"><a href=\"./testcase.php?probid=" .
 		    urlencode($probid) . "&amp;rank=$rank&amp;fetch=" . $inout . "\">" .
 		    htmlspecialchars($probid) . $rank . "." . substr($inout,0,-3) . "</a></td>" .
-		    "<td class=\"testsize\">" . htmlspecialchars($row["size_$inout"]) . "&nbsp;B</td>" .
-		    "<td class=\"testmd5\">" . htmlspecialchars($row["md5sum_$inout"]) . "</td>";
+		    "<td class=\"size\">" . htmlspecialchars($row["size_$inout"]) . "&nbsp;B</td>" .
+		    "<td class=\"md5\">" . htmlspecialchars($row["md5sum_$inout"]) . "</td>";
 		if ( IS_ADMIN ) {
 		    echo "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";
 		}

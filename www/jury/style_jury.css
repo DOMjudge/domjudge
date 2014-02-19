@@ -24,6 +24,13 @@
 	border-bottom: 2px solid #f2e93a;
 }
 
+.size {
+	text-align: right;
+	font-family: monospace;
+}
+
+.md5 { font-family: monospace; }
+
 .testcases tr:hover { background: #ffffff; }
 .testcases a { color: blue; }
 .testcases td {
@@ -39,13 +46,6 @@ tr.summary td { border-top: 1px solid black; }
 	line-height: 0.9;
 	border-right: 1px solid silver;
 }
-
-.testsize {
-	text-align: right;
-	font-family: monospace;
-}
-
-.testmd5 { font-family: monospace; }
 
 .testsample {
 	text-align: center;
