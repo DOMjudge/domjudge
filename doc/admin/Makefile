@@ -30,7 +30,5 @@ admin-manual.pdf: %.pdf: %.sgml $(TOPDIR)/doc/domjudge-overview-inc.sgml \
 admin-manual.html: admin-manual.sgml $(TOPDIR)/doc/docs_header.html $(FIGSPNG)
 	linuxdoc -B html --header=$(TOPDIR)/doc/docs_header.html $< >/dev/null
 
-dist: docs
-
 maintainer-clean-l:
 	-rm -f $(FIGSPNG) $(FIGSEPS) admin-manual*.html admin-manual.pdf

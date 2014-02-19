@@ -23,7 +23,5 @@ judge-manual.html: judge-manual.sgml $(SPEC_SGML) $(TOPDIR)/doc/docs_header.html
 $(SPEC_TXT): %.txt: %.sgml %-inc.sgml
 	linuxdoc -B txt $< >/dev/null
 
-dist: docs
-
 maintainer-clean-l:
 	-rm -f judge-manual*.html judge-manual.pdf $(SPEC_TXT)

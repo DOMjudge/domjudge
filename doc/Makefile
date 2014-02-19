@@ -11,5 +11,9 @@ SUBDIRS = admin team judge examples
 
 config: SUBDIRS=team
 
+# Cleanup LaTeX logs, etc. after generating documentation for distribution.
+distdocs: docs
+	$(MAKE) clean
+
 install-docs-l:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/logos logos/DOMjudgelogo.pdf logos/DOMjudgelogo.png
