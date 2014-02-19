@@ -94,6 +94,14 @@ php_flag magic_quotes_runtime off
 #php_value memory_limit        128M
 #</IfModule>
 
+# Increase post limits for REST API
+<Directory @domserver_wwwdir@/api>
+
+<IfModule mod_php5.c>
+php_value upload_max_filesize 64M
+php_value post_max_size       64M
+</IfModule>
+
 </Directory>
 
 # Optionally enable IP-restrictions for teams, recommended if you know the
