@@ -195,7 +195,7 @@ echo "<br />\n" . rejudgeForm('executable', $id) . "\n\n"; // FIXME: useful?
 
 if ( IS_ADMIN ) {
 	echo "<p>" .
-		'<a href="executable.php?fetch&id=' . urlencode($id) .
+		'<a href="executable.php?fetch&amp;id=' . urlencode($id) .
 		'"><img src="../images/b_save.png" ' .
 		' title="export executable as zip-file" alt="export" /></a>' .
 		editLink('executable',$id) . "\n" .
