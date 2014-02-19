@@ -23,7 +23,7 @@ if( $res->count() == 0 ) {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">description</th>" .
 	     "<th scope=\"col\">size</th><th scope=\"col\">md5</th>" .
-	     "</tr></thead>\n<tbody>\n";
+	     "<th></th><th></th></tr></thead>\n<tbody>\n";
 
 	$lastcid = -1;
 
@@ -39,7 +39,7 @@ if( $res->count() == 0 ) {
 				htmlspecialchars($row['md5sum'])."</a>".
 			"</td>";
 		if ( IS_ADMIN ) {
-			echo '<td title="export executable as zip-file"><a href="executable.php?fetch&id=' . urlencode($row['execid']) .
+			echo '<td title="export executable as zip-file"><a href="executable.php?fetch&amp;id=' . urlencode($row['execid']) .
 			     '"><img src="../images/b_save.png" alt="export" /></a></td>' .
 			     "<td class=\"editdel\">" .
 			     editLink('executable', $row['execid']) . " " .
