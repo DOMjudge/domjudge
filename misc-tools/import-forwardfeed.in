@@ -23,7 +23,7 @@ require(LIBEXTDIR . '/spyc/spyc.php');
 
 setup_database_connection();
 
-$verbose = LOG_DEBUG;
+$verbose = LOG_NOTICE;
 $waittime = 5;
 
 $cdata = getCurContest(TRUE);
@@ -102,10 +102,12 @@ function remap($type, $id)
 }
 
 $contest = dj_json_decode(request('contest'));
-if ( remap('contest',$contest['id'])!=$cid ||
-     difftime($contest['start'],$cdata['starttime'])!=0 ||
+if ( remap('contest',$contest['id'])!=$cid ) {
+	error("Contest ID does not match with external CCS data.");
+}
+if ( difftime($contest['start'],$cdata['starttime'])!=0 ||
      $contest['length']!=difftime($cdata['endtime'],$cdata['starttime']) ) {
-	error("Contest ID, or start/end times do not match with external CCS data.");
+	error("Contest times do not match with external CCS data.");
 }
 
 $problems = dj_json_decode(request('problems'));
