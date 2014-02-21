@@ -25,9 +25,6 @@ gentexconfig: gentexconfig.in $(TOPDIR)/paths.mk
 $(MANUALSPDF): %pdf: %tex team-manual-preamble.tex $(TOPDIR)/etc/domserver-config.php
 	./genteammanuals
 
-dist-l: $(MANUALSPDF)
-	$(MAKE) clean-l
-
 clean-l:
 	-rm -f $(addprefix team-manual*.,aux log out)
 

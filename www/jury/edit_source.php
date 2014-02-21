@@ -75,10 +75,10 @@ foreach($sources as $sourcedata)
 		'textarea.style.display = \'none\';' .
 		'var ' . $editor . ' = ace.edit("' . $editor . '");' .
 		$editor . '.setTheme("ace/theme/eclipse");' .
-		$editor . '.getSession().setValue(textarea.value);' . 
+		$editor . '.getSession().setValue(textarea.value);' .
 		$editor . '.getSession().on(\'change\', function(){' .
 			'var textarea = document.getElementById("source' . htmlspecialchars($sourcedata['rank']) . '");' .
-			'textarea.value = ' . $editor . '.getSession().getValue();' . 
+			'textarea.value = ' . $editor . '.getSession().getValue();' .
 		'});' .
 		$editor . '.setOptions({ maxLines: Infinity });' .
 		$editor . '.setReadOnly(false);' .

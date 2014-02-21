@@ -100,6 +100,13 @@ CREATE TABLE `rankcache_public` (
   CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
 
+
+-- Rename scoreboard cache tables to match new rankcache_{jury,public}.
+
+RENAME TABLE `scoreboard_jury`   TO `scorecache_jury`;
+RENAME TABLE `scoreboard_public` TO `scorecache_public`;
+
+
 CREATE TABLE `executable` (
   `execid` varchar(32) NOT NULL COMMENT 'Unique ID (string)',
   `md5sum` char(32) DEFAULT NULL COMMENT 'Md5sum of zip file',
@@ -108,11 +115,12 @@ CREATE TABLE `executable` (
   PRIMARY KEY (`execid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Compile, compare, and run script executable bundles';
 
+ALTER TABLE `problem`
+  MODIFY COLUMN `special_run` varchar(32) DEFAULT NULL COMMENT 'Script to run submissions for this problem',
+  MODIFY COLUMN `special_compare` varchar(32) DEFAULT NULL COMMENT 'Script to compare problem and jury output for this problem';
 
--- Rename scoreboard cache tables to match new rankcache_{jury,public}.
-
-RENAME TABLE `scoreboard_jury`   TO `scorecache_jury`;
-RENAME TABLE `scoreboard_public` TO `scorecache_public`;
+ALTER TABLE `language`
+  ADD COLUMN `compile_script` varchar(32) DEFAULT NULL COMMENT 'Script to compile source code for this language';
 
 ALTER TABLE `testcase`
   ADD COLUMN `sample` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Sample testcases that can be shared with teams' AFTER `description`;
@@ -223,6 +231,39 @@ UPDATE `language` SET `extensions` = '["py2","py"]' WHERE `langid` = 'py2';
 UPDATE `language` SET `extensions` = '["py3"]' WHERE `langid` = 'py3';
 UPDATE `language` SET `extensions` = '["scala"]' WHERE `langid` = 'scala';
 UPDATE `language` SET `extensions` = '["sh"]' WHERE `langid` = 'sh';
+
+INSERT INTO `executable` (`execid`, `description`) VALUES ('adb', 'adb');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('awk', 'awk');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('bash', 'bash');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('c', 'c');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('cpp', 'cpp');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('csharp', 'csharp');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('f95', 'f95');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('hs', 'hs');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('java_gcj', 'java_gcj');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('java_javac', 'java_javac');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('java_javac_detect', 'java_javac_detect');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('lua', 'lua');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('pas', 'pas');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('pl', 'pl');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('plg', 'plg');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('py2', 'py2');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('py3', 'py3');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('rb', 'rb');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('scala', 'scala');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('sh', 'sh');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('boolfind_cmp', 'boolfind comparator');
+INSERT INTO `executable` (`execid`, `description`) VALUES ('boolfind_run', 'boolfind run script');
+
+source mysql_db_files_defaultdata.sql
+source mysql_db_files_examples.sql
+
+-- Update languages to use executable scripts, special case Java:
+UPDATE `language` SET `compile_script` = `langid`;
+UPDATE `language` SET `compile_script` = 'java_javac_detect' WHERE `langid` = 'java';
+
+UPDATE `problem` SET `special_compare` = 'float' WHERE `probid` = 'fltcmp';
+UPDATE `problem` SET `special_compare` = 'boolfind_cmp', `special_run` = 'boolfind_run' WHERE `probid` = 'boolfind';
 
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (1, 'admin',          'Administrative User');
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (2, 'jury',           'Jury User');

@@ -25,7 +25,7 @@ $html = '<script type="text/javascript" src="../js/tabber.js"></script>' .
 	'<script src="../js/ace/ace.js" type="text/javascript" charset="utf-8"></script>' .
 	'<script src="../js/ace/ext-modelist.js" type="text/javascript" charset="utf-8"></script>' .
 	'<div class="tabber">';
-if ( !($tmpfname = mkstemps(TMPDIR."/executable-XXXXXX",0)) ) { 
+if ( !($tmpfname = mkstemps(TMPDIR."/executable-XXXXXX",0)) ) {
 	error("failed to create temporary file");
 }
 if ( FALSE === file_put_contents($tmpfname, $executable['zipfile']) ) {
@@ -61,13 +61,13 @@ for ($j = 0; $j < $zip->numFiles; $j++) {
 		'var editor = ace.edit("editor' . $j . '");' .
 		'editor.setTheme("ace/theme/eclipse");' .
 		'editor.setOptions({ maxLines: Infinity });' .
-		'editor.setReadOnly(true);' . "\n" . 
-		'function modefunc' . $j . '() {' . "\n" . 
-		'    var modelist = ace.require(\'ace/ext/modelist\');' . "\n" . 
-		'    var filePath = "' . $filename . '";' . "\n" . 
-		'    var mode = modelist.getModeForPath(filePath).mode;' . "\n" . 
-		'    editor.getSession().setMode(mode);' . "\n" . 
-		'};' . ' modefunc' . $j . '();' . "\n" . 
+		'editor.setReadOnly(true);' . "\n" .
+		'function modefunc' . $j . '() {' . "\n" .
+		'    var modelist = ace.require(\'ace/ext/modelist\');' . "\n" .
+		'    var filePath = "' . $filename . '";' . "\n" .
+		'    var mode = modelist.getModeForPath(filePath).mode;' . "\n" .
+		'    editor.getSession().setMode(mode);' . "\n" .
+		'};' . ' modefunc' . $j . '();' . "\n" .
 		'</script>';
 
 	$html .= '</div>';

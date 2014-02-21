@@ -9,7 +9,7 @@ INI = $(PROBLEMS:=.ini)
 PDF = $(PROBLEMS:=.pdf)
 ZIP = $(PROBLEMS:=.zip)
 
-docs: dist
+docs: $(PDF) $(ZIP)
 
 install-docs:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples example.*
@@ -34,9 +34,6 @@ $(ZIP): %.zip: %.pdf %.ini $$(foreach ext,in out c cc java,$$(wildcard $$**.$$(e
 	TMPDIR=`mktemp -d --tmpdir dj_probzip_XXXXXX` ; \
 	cp $^ $$TMPDIR ; mv $$TMPDIR/$*.ini $$TMPDIR/domjudge-problem.ini ; \
 	zip -q -j -r $@ $$TMPDIR ; rm -rf $$TMPDIR
-
-dist-l: $(PDF) $(ZIP)
-	$(MAKE) clean-l
 
 clean-l:
 	-rm -f $(PROBLEMS:=.aux) $(PROBLEMS:=.log)

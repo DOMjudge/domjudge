@@ -217,6 +217,9 @@ upgrade)
 	fi
 	TMPOUT=`mktemp --tmpdir domjudge-sql.XXXXXX`
 	read_dbpasswords
+	# Make sure we're in the SQL directory, for relative path 'source'
+	# statements to work.
+	cd "$SQLDIR"
 	for i in "$SQLDIR"/upgrade/*.sql ; do
 		if [ ! -r "$i" ]; then
 			echo "Error: cannot read upgrade script '$i'."

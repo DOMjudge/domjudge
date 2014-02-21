@@ -170,14 +170,14 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <?php
 $res = $DB->q('SELECT probid FROM problem WHERE special_compare = %s ORDER BY probid', $data['execid']);
 if ( $res->count() > 0 ) {
-	while( $row = $res->next() ) { 
+	while( $row = $res->next() ) {
 		echo '<a href="problem.php?id=' . $row['probid'] . '">'
 			. $row['probid'] . '</a> ';
 	}
 } else {
 	echo "<span class=\"nodata\">none</span>";
 }
-	
+
 ?>
 </td></tr>
 <?php
@@ -195,7 +195,7 @@ echo "<br />\n" . rejudgeForm('executable', $id) . "\n\n"; // FIXME: useful?
 
 if ( IS_ADMIN ) {
 	echo "<p>" .
-		'<a href="executable.php?fetch&id=' . urlencode($id) .
+		'<a href="executable.php?fetch&amp;id=' . urlencode($id) .
 		'"><img src="../images/b_save.png" ' .
 		' title="export executable as zip-file" alt="export" /></a>' .
 		editLink('executable',$id) . "\n" .

@@ -5,7 +5,7 @@
 export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            docs install-docs config submitclient
+            docs distdocs install-docs config submitclient
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
@@ -43,7 +43,8 @@ build domserver judgehost docs: paths.mk config
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure
+dist: configure distdocs
+config: dist
 
 # List of SUBDIRS for recursive targets:
 config:            SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
@@ -55,7 +56,8 @@ install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
 docs:              SUBDIRS=    doc
 install-docs:      SUBDIRS=    doc         www                    misc-tools
 submitclient:      SUBDIRS=                          submit
-dist:              SUBDIRS=    doc                                misc-tools
+dist:              SUBDIRS=            sql                        misc-tools
+distdocs:          SUBDIRS=    doc
 clean:             SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 distclean:         SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
 maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
@@ -138,7 +140,7 @@ maintainer-conf: configure
 # Install the system in place: don't really copy stuff, but create
 # symlinks where necessary to let it work from the source tree.
 # This stuff is a hack!
-maintainer-install: all domserver-create-dirs judgehost-create-dirs
+maintainer-install: build domserver-create-dirs judgehost-create-dirs
 # Replace lib{judge,submit}dir with symlink to prevent lots of symlinks:
 	-rmdir $(judgehost_libjudgedir) $(domserver_libsubmitdir)
 	-rm -f $(judgehost_libjudgedir) $(domserver_libsubmitdir)

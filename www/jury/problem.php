@@ -137,7 +137,7 @@ src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>
 <td>
-<?php 
+<?php
 $execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable ORDER BY execid");
 $execmap[''] = 'none';
 echo addSelect('data[0][special_run]', $execmap, @$row['special_run'], True);
@@ -146,7 +146,7 @@ echo addSelect('data[0][special_run]', $execmap, @$row['special_run'], True);
 
 <tr><td><label for="data_0__special_compare_">Special compare script:</label></td>
 <td>
-<?php 
+<?php
 $execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable ORDER BY execid");
 $execmap['float'] = 'float';
 $execmap[''] = 'none';

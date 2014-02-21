@@ -1,8 +1,7 @@
 #!/bin/sh
 #
 # Script to generate a minimal chroot environment with Oracle (Sun) Java
-# support to allow for Java programs to run in a chroot.  Also includes
-# support for C#, python3, lua, and scala.
+# support to allow for Java programs to run in a chroot.
 #
 # This script downloads and installs an Ubuntu base system.
 # Minimum requirements: a Linux system with glibc >= 2.3, wget, ar and
@@ -19,6 +18,9 @@ set -e
 CHROOTDIR=$1
 ARCH=$2
 
+# Ubuntu release (codename) to bootstrap:
+RELEASE="precise"
+
 # List of possible architectures to install chroot for:
 ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 
@@ -26,10 +28,9 @@ ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 INCLUDEDEBS=""
 
 # Packages to install after upgrade (space separated):
-#INSTALLDEBS="mono-mcs mono-gmcs mono-dmcs lua5.2 python3"
-INSTALLDEBS=""
-# The url for scala(should point to the version you want)
-SCALAPKG="http://www.scala-lang.org/downloads/distrib/files/scala-2.10.2.tgz"
+INSTALLDEBS="openjdk-7-jre-headless locales"
+# For C# support add: mono-mcs mono-gmcs mono-dmcs
+# However running mono within chroot still gives errors...
 
 # Packages to remove after upgrade (space separated):
 REMOVEDEBS=""
@@ -37,10 +38,9 @@ REMOVEDEBS=""
 # Ubuntu mirror, modify to match closest mirror
 DEBMIRROR="http://ru.archive.ubuntu.com./ubuntu/"
 DEBOOTDEB="debootstrap_1.0.46_all.deb"
-# "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
-CODENAME="precise"
 
-# A local caching proxy to use for debian packages(Typically an install of aptcacher-ng)
+# A local caching proxy to use for debian packages
+# (typically an install of aptcacher-ng), for example:
 #DEBPROXY="http://aptcacher-ng.example.com:3142/"
 DEBPROXY=""
 
@@ -79,6 +79,14 @@ cd "$CHROOTDIR"
 CHROOTDIR="$PWD"
 
 if [ ! -x /usr/sbin/debootstrap ]; then
+
+	echo "This script will install debootstrap on your system."
+	echo -n "Continue? (y/N) "
+	read yn
+	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
+		exit 1;
+	fi
+
 	if [ -f /etc/debian_version ]; then
 
 		cd /
@@ -115,18 +123,18 @@ fi
 echo "Running debootstrap to install base system, this may take a while..."
 
 $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
-	--variant=minbase --arch "$ARCH" $CODENAME "$CHROOTDIR" "$DEBMIRROR"
+	--variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
-cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
+cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
 
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
-deb $DEBMIRROR precise main
-deb $DEBMIRROR precise universe
-deb $DEBMIRROR precise-updates main
-deb $DEBMIRROR precise-updates universe
-deb $DEBMIRROR precise-security main
-deb $DEBMIRROR precise-security universe
+deb $DEBMIRROR $RELEASE main
+deb $DEBMIRROR $RELEASE universe
+deb $DEBMIRROR $RELEASE-updates main
+deb $DEBMIRROR $RELEASE-updates universe
+deb $DEBMIRROR $RELEASE-security main
+deb $DEBMIRROR $RELEASE-security universe
 EOF
 
 cat > "$CHROOTDIR/etc/apt/apt.conf" <<EOF
@@ -171,10 +179,6 @@ debconf	debconf/priority	select	high
 debconf	debconf/frontend	select	Noninteractive
 locales	locales/locales_to_be_generated	multiselect	
 locales	locales/default_environment_locale	select	None
-
-# Oracle-java7-installer license agreement
-debconf shared/accepted-oracle-license-v1-1 select true
-debconf shared/accepted-oracle-license-v1-1 seen true
 EOF
 
 # Disable upstart init scripts(so upgrades work), we don't need to actually run
@@ -187,17 +191,6 @@ chroot "$CHROOTDIR" /bin/sh -c "ln -s /bin/true /sbin/initctl"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
-
-# Install (oracle) java
-chroot "$CHROOTDIR" /bin/sh -c "apt-get install python-software-properties"
-chroot "$CHROOTDIR" /bin/sh -c "apt-add-repository -y ppa:webupd8team/java"
-chroot "$CHROOTDIR" /bin/sh -c "apt-get update"
-chroot "$CHROOTDIR" /bin/sh -c "apt-get install oracle-java7-installer"
-
-# Install scala(in /usr/local so it is on the path)
-#mkdir -p "$CHROOTDIR/usr/local"
-#curl $SCALAPKG | tar xzf - --no-same-owner --strip-components=1 -C "$CHROOTDIR/usr/local"
-#chmod +x "$CHROOTDIR"/usr/local/bin/*
 
 # Do some cleanup of the chroot
 chroot "$CHROOTDIR" /bin/sh -c "apt-get remove --purge $REMOVEDEBS"

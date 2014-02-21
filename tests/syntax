@@ -7,7 +7,7 @@ if [ -x /usr/bin/php ]; then
 		php -l $i | grep -v "^No syntax errors detected in "
 	done
 
-	for i in `grep -rsl "#\!.*php" ..|egrep -v '/\.(svn|git)/'|grep -v \.php`; do
+	for i in `grep -rsl "^#\!.*php" ..|egrep -v '/\.(svn|git)/'|grep -v \.php`; do
 		php -l $i | grep -v "^No syntax errors detected in "
 	done
 else
@@ -15,7 +15,7 @@ else
 fi
 
 if [ -x /usr/bin/checkbashisms ]; then
-	checkbashisms `grep -rsl "#\!.*/bin/sh" ..|egrep -v '\.(svn|git)/'|egrep -v '^\.\./(config|autom4te)'`
+	checkbashisms `grep -rsl "^#\!.*/bin/sh" ..|egrep -v '\.(svn|git)/'|egrep -v '^\.\./(config|autom4te)'`
 else
 	echo "checkbashisms not found in /usr/bin/checkbashisms"
 fi
