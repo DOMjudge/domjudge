@@ -52,13 +52,13 @@ build:             SUBDIRS=        lib         judge submit import tests misc-to
 domserver:         SUBDIRS=etc             www       submit import
 install-domserver: SUBDIRS=etc     lib sql www       submit import       misc-tools
 judgehost:         SUBDIRS=etc                 judge
-install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
+install-judgehost: SUBDIRS=etc     lib         judge                     misc-tools
 docs:              SUBDIRS=    doc
-install-docs:      SUBDIRS=    doc         www                    misc-tools
+install-docs:      SUBDIRS=    doc         www                           misc-tools
 submitclient:      SUBDIRS=                          submit
-dist:              SUBDIRS=            sql                        misc-tools
+dist:              SUBDIRS=            sql                               misc-tools
 distdocs:          SUBDIRS=    doc
-clean:             SUBDIRS=etc doc lib sql www judge submit tests misc-tools
+clean:             SUBDIRS=etc doc lib sql www judge submit        tests misc-tools
 distclean:         SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
 maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
 
