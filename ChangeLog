@@ -23,6 +23,8 @@ Version 4.0.0 - DEV
    to e.g. testdata files.
  - Added rankcache_* tables to improve scoreboard page for large contests
    (thanks to the Amrita people), renamed scoreboard_* tables to match.
+ - Added support for publicly visible sample testcases.
+ - Move compile/run/compare scripts to database (Closes #123).
 
 Version 3.4.0 - (unreleased)
 ----------------------------
