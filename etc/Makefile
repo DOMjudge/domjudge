@@ -38,7 +38,7 @@ restapi.secret:
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
-		apache.conf domserver-static.php
+		apache.conf domserver-static.php import-forwardfeed.yaml
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_etcdir) \
 		gendbpasswords
 	-$(INSTALL_USER) -t $(DESTDIR)$(domserver_etcdir) \

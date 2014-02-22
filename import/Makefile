@@ -3,23 +3,21 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = $(SUBMIT_PROGS)
+SUBST_FILES = import.php import-RESTfeed import-XMLfeed
 
-SUBST_CONFIGS = import.php import-forwardfeed
-
-config: $(SUBST_CONFIGS)
+config: $(SUBST_FILES)
 
 build:
 
-domserver: import.php
+domserver: $(SUBST_FILES)
 
-$(SUBST_CONFIGS): %: %.in ../paths.mk
+$(SUBST_FILES): %: %.in ../paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
 install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libsubmitdir) \
-		import.php
+		$(SUBST_FILES)
 
 distclean-l:
-	-rm -f import.php
+	-rm -f $(SUBST_FILES)
