@@ -5,7 +5,7 @@ include $(TOPDIR)/Makefile.global
 
 TARGETS = $(SUBMIT_PROGS)
 
-SUBST_CONFIGS = import.php
+SUBST_CONFIGS = import.php import-forwardfeed
 
 config: $(SUBST_CONFIGS)
 
