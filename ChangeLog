@@ -25,6 +25,7 @@ Version 4.0.0 - DEV
    (thanks to the Amrita people), renamed scoreboard_* tables to match.
  - Added support for publicly visible sample testcases.
  - Move compile/run/compare scripts to database (Closes #123).
+ - Add option to have compiler-error not add penalty time (Closes #127).
 
 Version 3.4.0 - (unreleased)
 ----------------------------
