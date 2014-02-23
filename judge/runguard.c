@@ -509,16 +509,21 @@ void terminate(int sig)
 
 	write_meta("signal", "%d", sig);
 
-	/* First try to kill graciously, then hard */
+	/* First try to kill graciously, then hard.
+	   Don't report an already exited process as error. */
 	verbose("sending SIGTERM");
-	if ( kill(-child_pid,SIGTERM)!=0 ) error(errno,"sending SIGTERM to command");
+	if ( kill(-child_pid,SIGTERM)!=0 && errno!=ESRCH ) {
+		error(errno,"sending SIGTERM to command");
+	}
 
 	/* Prefer nanosleep over sleep because of higher resolution and
 	   it does not interfere with signals. */
 	nanosleep(&killdelay,NULL);
 
 	verbose("sending SIGKILL");
-	if ( kill(-child_pid,SIGKILL)!=0 ) error(errno,"sending SIGKILL to command");
+	if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
+		error(errno,"sending SIGKILL to command");
+	}
 
 	/* Wait another while to make sure the process is killed by now. */
 	nanosleep(&killdelay,NULL);
