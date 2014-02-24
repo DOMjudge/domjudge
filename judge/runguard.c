@@ -112,11 +112,11 @@ char  *rootdir;
 char  *stdoutfilename;
 char  *stderrfilename;
 char  *metafilename;
+FILE  *metafile;
+
 #ifdef USE_CGROUPS
 char  *cgroupname;
 const char *cpuset;
-
-FILE  *metafile;
 
 /* Linux Out-Of-Memory adjustment for current process. */
 #define OOM_PATH_NEW "/proc/self/oom_score_adj"
