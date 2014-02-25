@@ -18,7 +18,6 @@ verbose()
 
 usage() {
 	cat <<EOF
-Unknown subcommand '$1'
 Usage: $0 [option]... <command>
 
 Commands:
@@ -271,6 +270,7 @@ upgrade)
 	;;
 
 	*)
+	echo "Error: Unknown subcommand '$1'"
 	usage
 	exit 1
 	;;
