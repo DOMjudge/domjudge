@@ -476,9 +476,11 @@ function judge($row)
 			}
 		}
 
+		$execpath = "$workdirpath/executable/" . $row['special_compare'];
+		$execrunpath = $execpath . "/run";
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
-		       "'$row[special_run]' '$row[special_compare]'", $retval);
+		       "'$row[special_run]' '$execrunpath'", $retval);
 
 		// what does the exitcode mean?
 		if( ! isset($EXITCODES[$retval]) ) {
