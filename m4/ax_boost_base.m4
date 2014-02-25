@@ -33,7 +33,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 21
+#serial 23
 
 AC_DEFUN([AX_BOOST_BASE],
 [
@@ -94,6 +94,18 @@ if test "x$want_boost" = "xyes"; then
     case $ax_arch in
       x86_64|ppc64|s390x|sparc64|aarch64)
         libsubdirs="lib64 lib lib64"
+        ;;
+    esac
+
+    dnl allow for real multi-arch paths e.g. /usr/lib/x86_64-linux-gnu. Give
+    dnl them priority over the other paths since, if libs are found there, they
+    dnl are almost assuredly the ones desired.
+    AC_REQUIRE([AC_CANONICAL_HOST])
+    libsubdirs="lib/${host_cpu}-${host_os} $libsubdirs"
+
+    case ${host_cpu} in
+      i?86)
+        libsubdirs="lib/i386-${host_os} $libsubdirs"
         ;;
     esac
 

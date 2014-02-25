@@ -8,7 +8,7 @@
 #
 # DESCRIPTION
 #
-#   Checks for minimum curl library version VERSION. If successfull executes
+#   Checks for minimum curl library version VERSION. If successful executes
 #   ACTION-IF-SUCCESS otherwise ACTION-IF-FAILURE.
 #
 #   Defines CURL_LIBS and CURL_CFLAGS.
@@ -16,7 +16,7 @@
 #   A simple example:
 #
 #     AX_LIB_CURL([7.19.4],,[
-#       AC_MSG_ERROR([Your system lacks of libcurl >= 7.19.4])
+#       AC_MSG_ERROR([Your system lacks libcurl >= 7.19.4])
 #     ])
 #
 #   This macro is a rearranged version of AC_LIB_CURL from Akos Maroy.
@@ -30,7 +30,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 7
+#serial 8
 
 AU_ALIAS([AC_CHECK_CURL], [AX_LIB_CURL])
 AC_DEFUN([AX_LIB_CURL], [
