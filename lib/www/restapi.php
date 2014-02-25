@@ -87,6 +87,18 @@ class RestApi {
 		if ( $_SERVER['REQUEST_METHOD'] == 'PUT' ) {
 			list($name, $primary_key) = explode('/', $name);
 			$arguments['__primary_key'] = $primary_key;
+		} else if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
+			$postmax = trim(ini_get('post_max_size'));
+			$modifier = strtolower($postmax[strlen($postmax) - 1]);
+			if ( !ctype_digit($modifier) ) {
+				$postmax = substr($postmax, 0, strlen($postmax) - 1);
+				$mult = array('k' => 1024, 'm' => 1024*1024, 'g' => 1024*1024*1024);
+				$postmax *= $mult[$modifier];
+			}
+			if ( $postmax < $_SERVER['CONTENT_LENGTH'] ) {
+				$this->createError("Size of post data too large (" . $_SERVER['CONTENT_LENGTH']
+						. "), increase post_max_size (" . $postmax . ") in your apache config.");
+			}
 		}
 		$name = $name . '#' . $_SERVER['REQUEST_METHOD'];
 		if ( !array_key_exists($name, $this->apiFunctions) ) {
