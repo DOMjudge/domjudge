@@ -359,14 +359,11 @@ function judge($row)
 	}
 
 	$execrunpath = fetch_executable($workdirpath, $row['compile_script'], $row['compile_script_md5sum']);
-	if ( $execrunpath != null ) {
-		logmsg(LOG_INFO, "Symlinking");
-		system("ln -sf $execrunpath " . LIBJUDGEDIR . "/compile_" . $row['langid'] . ".sh", $retval);
-		if ( $retval!=0 ) error("Could not create symlink to run ./build in $execpath");
-	}
 
 	// Compile the program.
-	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt $row[langid] '$workdir' " .
+	$execpath = "$workdirpath/executable/" . $row['compile_script'];
+	$execrunpath = $execpath . "/run";
+	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
 	       implode(' ', $files), $retval);
 
 	// what does the exitcode mean?
