@@ -112,6 +112,7 @@ CREATE TABLE `executable` (
   `md5sum` char(32) DEFAULT NULL COMMENT 'Md5sum of zip file',
   `zipfile` longblob COMMENT 'Zip file',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of this executable',
+  `type` varchar(8) NOT NULL COMMENT 'Type of executable',
   PRIMARY KEY (`execid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Compile, compare, and run script executable bundles';
 

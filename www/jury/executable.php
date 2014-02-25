@@ -104,7 +104,7 @@ if ( !empty($cmd) ):
 
 	if ( $cmd == 'edit' ) {
 		echo "<tr><td>Executable ID:</td><td class=\"exec\">";
-		$row = $DB->q('TUPLE SELECT execid, description, md5sum, OCTET_LENGTH(zipfile) AS size
+		$row = $DB->q('TUPLE SELECT execid, description, md5sum, type, OCTET_LENGTH(zipfile) AS size
 		               FROM executable
 		               WHERE execid = %s', $id);
 		echo addHidden('keydata[0][execid]', $row['execid']);
@@ -120,6 +120,8 @@ if ( !empty($cmd) ):
 ?>
 <tr><td><label for="data_0__description_">Executable description:</label></td>
 <td><?php echo addInput('data[0][description]', @$row['description'], 30, 255, 'required')?></td></tr>
+<tr><td><label for="data_0__type_">Executable type:</label></td>
+<td><?php echo addSelect('data[0][type]', array('compare' => 'compare', 'compile' => 'compile', 'run' => 'run'), @$row['type'], True)?></td></tr>
 
 </table>
 
@@ -147,7 +149,7 @@ exit;
 
 endif;
 
-$data = $DB->q('TUPLE SELECT execid, description, md5sum, OCTET_LENGTH(zipfile) AS size
+$data = $DB->q('TUPLE SELECT execid, description, md5sum, type, OCTET_LENGTH(zipfile) AS size
 	       FROM executable
 	       WHERE execid = %s', $id);
 
@@ -164,6 +166,7 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <tr><td>ID:          </td><td class="execid"><?php echo htmlspecialchars($data['execid'])?></td></tr>
 <tr><td>Name:        </td><td><?php echo htmlspecialchars($data['description'])?></td></tr>
 <tr><td>md5sum:      </td><td><?php echo htmlspecialchars($data['md5sum'])?></td></tr>
+<tr><td>type:        </td><td><?php echo htmlspecialchars($data['type'])?></td></tr>
 <tr><td>size:        </td><td><?php echo htmlspecialchars($data['size'])?> Bytes</td></tr>
 <tr><td>content:        </td><td><a href="show_executable.php?id=<?php echo htmlspecialchars($id)?>">view content of zip file</a></td></tr>
 <tr><td>used as compare script:</td><td>

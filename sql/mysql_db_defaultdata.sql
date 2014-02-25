@@ -35,27 +35,27 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('ti
 -- Dumping data for table `executable`
 --
 
-INSERT INTO `executable` (`execid`, `description`) VALUES
-('adb', 'adb'),
-('awk', 'awk'),
-('bash', 'bash'),
-('c', 'c'),
-('cpp', 'cpp'),
-('csharp', 'csharp'),
-('f95', 'f95'),
-('hs', 'hs'),
-('java_gcj', 'java_gcj'),
-('java_javac', 'java_javac'),
-('java_javac_detect', 'java_javac_detect'),
-('lua', 'lua'),
-('pas', 'pas'),
-('pl', 'pl'),
-('plg', 'plg'),
-('py2', 'py2'),
-('py3', 'py3'),
-('rb', 'rb'),
-('scala', 'scala'),
-('sh', 'sh');
+INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
+('adb', 'adb', 'compile'),
+('awk', 'awk', 'compile'),
+('bash', 'bash', 'compile'),
+('c', 'c', 'compile'),
+('cpp', 'cpp', 'compile'),
+('csharp', 'csharp', 'compile'),
+('f95', 'f95', 'compile'),
+('hs', 'hs', 'compile'),
+('java_gcj', 'java_gcj', 'compile'),
+('java_javac', 'java_javac', 'compile'),
+('java_javac_detect', 'java_javac_detect', 'compile'),
+('lua', 'lua', 'compile'),
+('pas', 'pas', 'compile'),
+('pl', 'pl', 'compile'),
+('plg', 'plg', 'compile'),
+('py2', 'py2', 'compile'),
+('py3', 'py3', 'compile'),
+('rb', 'rb', 'compile'),
+('scala', 'scala', 'compile'),
+('sh', 'sh', 'compile');
 
 -- 
 -- Dumping data for table `language`

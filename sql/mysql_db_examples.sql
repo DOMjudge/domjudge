@@ -16,9 +16,9 @@ INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freez
 -- Dumping data for table `executable`
 --
 
-INSERT INTO `executable` (`execid`, `description`) VALUES
-('boolfind_cmp', 'boolfind comparator'),
-('boolfind_run', 'boolfind run script');
+INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
+('boolfind_cmp', 'boolfind comparator', 'compare'),
+('boolfind_run', 'boolfind run script', 'run');
 
 -- 
 -- Dumping data for table `judgehost`
