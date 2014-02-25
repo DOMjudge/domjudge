@@ -3,7 +3,7 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = check_float compare runguard runpipe
+TARGETS = check_float runguard runpipe
 
 judgehost: build
 
@@ -15,9 +15,7 @@ judgedaemon: judgedaemon.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
-compare check_float runguard: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
-
-compare: $(LIBOBJECTS)
+check_float runguard: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
 
 check_float: -lm $(LIBOBJECTS)
 
@@ -34,7 +32,7 @@ install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libjudgedir) \
 		compile*.sh testcase_run.sh chroot-startstop.sh \
 		run run_wrapper \
-		compare compare_wrapper compare_float \
+		compare_wrapper compare_float \
 		check_diff.sh check_float sh-static
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libjudgedir) \
 		judgedaemon.main.php

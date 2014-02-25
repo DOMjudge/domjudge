@@ -183,6 +183,10 @@ function judgings_POST($args)
 	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s',
 	       now(), $row['teamid']);
 
+	if ( empty($row['special_compare']) ) {
+		// FIXME: fetch default compare script from configuration
+		$row['special_compare'] = 'compare';
+	}
 	// TODO: refactor + integrate in query above
 	if ( !empty($row['special_compare']) ) {
 		$special_compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_compare']);

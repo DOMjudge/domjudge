@@ -40,6 +40,7 @@ INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
 ('awk', 'awk', 'compile'),
 ('bash', 'bash', 'compile'),
 ('c', 'c', 'compile'),
+('compare', 'default compare script', 'compare'),
 ('cpp', 'cpp', 'compile'),
 ('csharp', 'csharp', 'compile'),
 ('f95', 'f95', 'compile'),
