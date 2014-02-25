@@ -44,6 +44,7 @@ INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
 ('cpp', 'cpp', 'compile'),
 ('csharp', 'csharp', 'compile'),
 ('f95', 'f95', 'compile'),
+('float', 'default compare script for floats with prec 1E-7', 'compare'),
 ('hs', 'hs', 'compile'),
 ('java_gcj', 'java_gcj', 'compile'),
 ('java_javac', 'java_javac', 'compile'),

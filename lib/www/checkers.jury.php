@@ -102,7 +102,7 @@ function check_problem($data, $keydata = null)
 		ch_error("Problem statement has unknown file type.");
 	}
 
-	if ( !empty($data['special_compare']) && $data['special_compare'] != 'float' ) {
+	if ( !empty($data['special_compare']) ) {
 		global $DB;
 		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s AND type = %s', $data['special_compare'], 'compare') ) {
 			ch_error("Unknown special compare script (or wrong type): " . $data['special_compare']);

@@ -37,7 +37,7 @@
 #include <ctype.h>
 
 #define PROGRAM "check_float"
-#define VERSION DOMJUDGE_VERSION "/" REVISION
+#define VERSION DOMJUDGE_VERSION
 
 #include "lib.error.h"
 #include "lib.misc.h"

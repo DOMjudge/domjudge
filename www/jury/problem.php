@@ -152,7 +152,6 @@ echo addSelect('data[0][special_run]', $execmap, @$row['special_run'], True);
 $execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable
 			WHERE type = 'compare'
 			ORDER BY execid");
-$execmap['float'] = 'float';
 $execmap[''] = 'none';
 echo addSelect('data[0][special_compare]', $execmap, @$row['special_compare'], True);
 ?>

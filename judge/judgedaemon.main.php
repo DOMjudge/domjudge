@@ -458,7 +458,7 @@ function judge($row)
 		                 overshoot_time($row['maxruntime'],
 		                                dbconfig_get_rest('timelimit_overshoot'));
 
-		if ( !empty($row['special_compare']) && $row['special_compare'] != 'float' ) {
+		if ( !empty($row['special_compare']) ) {
 			$execrunpath = fetch_executable($workdirpath, $row['special_compare'], $row['special_compare_md5sum']);
 			if ( $execrunpath != null ) {
 				logmsg(LOG_INFO, "Symlinking");
