@@ -169,13 +169,22 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <tr><td>type:        </td><td><?php echo htmlspecialchars($data['type'])?></td></tr>
 <tr><td>size:        </td><td><?php echo htmlspecialchars($data['size'])?> Bytes</td></tr>
 <tr><td>content:        </td><td><a href="show_executable.php?id=<?php echo htmlspecialchars($id)?>">view content of zip file</a></td></tr>
-<tr><td>used as compare script:</td><td>
+<tr><td>used as <?=$data['type'] ?> script:</td><td>
 <?php
-$res = $DB->q('SELECT probid FROM problem WHERE special_compare = %s ORDER BY probid', $data['execid']);
+if ( $data['type'] == 'compare' ) {
+	$res = $DB->q('SELECT probid AS id FROM problem WHERE special_compare = %s ORDER BY probid', $data['execid']);
+	$page = "problem";
+} else if ( $data['type'] == 'compile' ) {
+	$res = $DB->q('SELECT langid AS id FROM language WHERE compile_script = %s ORDER BY langid', $data['execid']);
+	$page = "language";
+} else if ( $data['type'] == 'run' ) {
+	$res = $DB->q('SELECT probid AS id FROM problem WHERE special_run = %s ORDER BY probid', $data['execid']);
+	$page = "problem";
+}
 if ( $res->count() > 0 ) {
 	while( $row = $res->next() ) {
-		echo '<a href="problem.php?id=' . $row['probid'] . '">'
-			. $row['probid'] . '</a> ';
+		echo '<a href="' . $page . '.php?id=' . $row['id'] . '">'
+			. $row['id'] . '</a> ';
 	}
 } else {
 	echo "<span class=\"nodata\">none</span>";
