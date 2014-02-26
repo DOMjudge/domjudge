@@ -218,6 +218,9 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('sh
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_penalty', '1', 'bool', 'Should submissions with compiler-error incur penalty time (and show on the scoreboard)?');
 
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_compare', '"compare"', 'string', 'The script used to compare outputs if no special compare script specified.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_run', '"run"', 'string', 'The script used to run submissions if no special run script specified.');
+
 UPDATE `language` SET `extensions` = '["adb","ads"]' WHERE `langid` = 'adb';
 UPDATE `language` SET `extensions` = '["awk"]' WHERE `langid` = 'awk';
 UPDATE `language` SET `extensions` = '["bash"]' WHERE `langid` = 'bash';

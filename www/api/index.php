@@ -184,22 +184,16 @@ function judgings_POST($args)
 	       now(), $row['teamid']);
 
 	if ( empty($row['special_compare']) ) {
-		// FIXME: fetch default compare script from configuration
-		$row['special_compare'] = 'compare';
-	}
-	// TODO: refactor + integrate in query above
-	if ( !empty($row['special_compare']) ) {
-		$special_compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_compare']);
-		$row['special_compare_md5sum'] = $special_compare_md5sum;
+		$row['special_compare'] = dbconfig_get('default_compare');
 	}
 	if ( empty($row['special_run']) ) {
-		// FIXME: fetch default run script from configuration
-		$row['special_run'] = 'run';
+		$row['special_run'] = dbconfig_get('default_run');
 	}
-	if ( !empty($row['special_run']) ) {
-		$special_run_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_run']);
-		$row['special_run_md5sum'] = $special_run_md5sum;
-	}
+	// TODO: refactor + integrate in query above?
+	$special_compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_compare']);
+	$row['special_compare_md5sum'] = $special_compare_md5sum;
+	$special_run_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_run']);
+	$row['special_run_md5sum'] = $special_run_md5sum;
 	if ( !empty($row['compile_script']) ) {
 		$compile_script_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['compile_script']);
 		$row['compile_script_md5sum'] = $compile_script_md5sum;
