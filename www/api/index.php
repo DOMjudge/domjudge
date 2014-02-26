@@ -174,7 +174,7 @@ function judgings_POST($args)
 
 	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid,
 	               CEILING(time_factor*timelimit) AS maxruntime,
-		       special_run, special_compare,
+		       special_run AS run, special_compare AS compare,
 		       compile_script
 	               FROM submission s, problem p, language l
 	               WHERE s.probid = p.probid AND s.langid = l.langid AND
@@ -183,17 +183,17 @@ function judgings_POST($args)
 	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s',
 	       now(), $row['teamid']);
 
-	if ( empty($row['special_compare']) ) {
-		$row['special_compare'] = dbconfig_get('default_compare');
+	if ( empty($row['compare']) ) {
+		$row['compare'] = dbconfig_get('default_compare');
 	}
-	if ( empty($row['special_run']) ) {
-		$row['special_run'] = dbconfig_get('default_run');
+	if ( empty($row['run']) ) {
+		$row['run'] = dbconfig_get('default_run');
 	}
 	// TODO: refactor + integrate in query above?
-	$special_compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_compare']);
-	$row['special_compare_md5sum'] = $special_compare_md5sum;
-	$special_run_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_run']);
-	$row['special_run_md5sum'] = $special_run_md5sum;
+	$compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['compare']);
+	$row['compare_md5sum'] = $compare_md5sum;
+	$run_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['run']);
+	$row['run_md5sum'] = $run_md5sum;
 	if ( !empty($row['compile_script']) ) {
 		$compile_script_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['compile_script']);
 		$row['compile_script_md5sum'] = $compile_script_md5sum;

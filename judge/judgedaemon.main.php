@@ -452,8 +452,8 @@ function judge($row)
 		                 overshoot_time($row['maxruntime'],
 		                                dbconfig_get_rest('timelimit_overshoot'));
 
-		$compare_runpath = fetch_executable($workdirpath, $row['special_compare'], $row['special_compare_md5sum']);
-		$run_runpath = fetch_executable($workdirpath, $row['special_run'], $row['special_run_md5sum']);
+		$compare_runpath = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
+		$run_runpath = fetch_executable($workdirpath, $row['run'], $row['run_md5sum']);
 
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
