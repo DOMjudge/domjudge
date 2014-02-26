@@ -56,6 +56,7 @@ INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
 ('py2', 'py2', 'compile'),
 ('py3', 'py3', 'compile'),
 ('rb', 'rb', 'compile'),
+('run', 'default run script', 'run'),
 ('scala', 'scala', 'compile'),
 ('sh', 'sh', 'compile');
 

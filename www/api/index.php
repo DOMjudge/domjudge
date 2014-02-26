@@ -192,6 +192,10 @@ function judgings_POST($args)
 		$special_compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_compare']);
 		$row['special_compare_md5sum'] = $special_compare_md5sum;
 	}
+	if ( empty($row['special_run']) ) {
+		// FIXME: fetch default run script from configuration
+		$row['special_run'] = 'run';
+	}
 	if ( !empty($row['special_run']) ) {
 		$special_run_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['special_run']);
 		$row['special_run_md5sum'] = $special_run_md5sum;

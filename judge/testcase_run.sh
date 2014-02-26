@@ -3,7 +3,7 @@
 # Script to test (run and compare) submissions with a single testcase
 #
 # Usage: $0 <testdata.in> <testdata.out> <timelimit> <workdir>
-#           [<special-run> [<special-compare>]]
+#           <run> <compare>
 #
 # <testdata.in>     File containing test-input with absolute pathname.
 # <testdata.out>    File containing test-output with absolute pathname.
@@ -12,15 +12,10 @@
 # <workdir>         Directory where to execute submission in a chroot-ed
 #                   environment. For best security leave it as empty as possible.
 #                   Certainly do not place output-files there!
-# <special-run>     Extension name of specialized run or compare script to use.
-# <special-compare> Specify empty string for <special-run> if only
-#                   <special-compare> is to be used. The script
-#                   'run_<special-run>' or 'compare_<special-compare>'
-#                   will be called if argument is non-empty.
+# <run>             Absolute path to run script to use.
+# <compare>         Absolute path to compare script to use.
 #
-# For running the solution a script 'run' is called (default). For
-# usage of 'run' see that script. Likewise, for comparing results, a
-# program 'compare' is called by default.
+# Default run and compare scripts can be configured in the database.
 #
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
@@ -127,15 +122,14 @@ TESTIN="$1";    shift
 TESTOUT="$1";   shift
 TIMELIMIT="$1"; shift
 WORKDIR="$1";   shift
-SPECIALRUN="$1";
+RUN_SCRIPT="$1";
 COMPARE_SCRIPT="$2";
 logmsg $LOG_DEBUG "arguments: '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$WORKDIR'"
-logmsg $LOG_DEBUG "optionals: '$SPECIALRUN' '$COMPARE_SCRIPT'"
+logmsg $LOG_DEBUG "optionals: '$RUN_SCRIPT' '$COMPARE_SCRIPT'"
 
-RUN_SCRIPT="$SCRIPTDIR/run${SPECIALRUN:+_$SPECIALRUN}"
-if [ -n "$SPECIALRUN" ]; then
-	RUN_JURYPROG="$SCRIPTDIR/runjury_${SPECIALRUN}"
-fi
+# optional runjury program
+RUN_JURYPROG="${RUN_SCRIPT}jury"
+logmsg $LOG_DEBUG "run_juryprog: '$RUN_JURYPROG'"
 
 [ -r "$TESTIN"  ] || error "test-input not found: $TESTIN"
 [ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT"
@@ -177,9 +171,9 @@ mkdir -p -m 0711 ../bin ../dev
 cp -p  "$RUN_SCRIPT"  ./run
 cp -pL "$STATICSHELL" ../bin/sh
 chmod a+rx run ../bin/sh
-# If using a custom run script, copy additional support programs
+# If using a custom runjury script, copy additional support programs
 # if required:
-if [ -n "$SPECIALRUN" -a -f "$RUN_JURYPROG" ]; then
+if [ -x "$RUN_JURYPROG" ]; then
 	cp -p "$RUN_JURYPROG" ./runjury
 	cp -pL "$RUNPIPE"     ../bin/runpipe
 	chmod a+rx runjury ../bin/runpipe
