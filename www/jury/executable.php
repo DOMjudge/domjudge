@@ -137,7 +137,7 @@ echo addHidden('cmd', $cmd) .
 if ( class_exists("ZipArchive") ) {
 	echo "<br /><em>or</em><br /><br />\n" .
 	addForm($pagename, 'post', null, 'multipart/form-data') .
-	addHidden('id', @$row['probid']) .
+	addHidden('id', @$row['execid']) .
 	'<label for="executable_archive__">Upload executable archive:</label>' .
 	addFileField('executable_archive[]') .
 	addSubmit('Upload', 'upload') .
