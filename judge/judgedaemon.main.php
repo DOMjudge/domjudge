@@ -111,7 +111,7 @@ function usage()
 
 // fetches new executable from database if necessary
 // runs build to compile executable
-// returns execrunpath on update, null otherwise
+// returns absolute path to run script
 function fetch_executable($workdirpath, $execid, $md5sum) {
 	// FIXME: make sure we don't have to escape $execid
 	$execpath = "$workdirpath/executable/" . $execid;
@@ -158,9 +158,8 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 		if ( !file_exists($execrunpath) || !is_executable($execrunpath) ) {
 			error("Invalid build file, must produce an executable file 'run'.");
 		}
-		return $execrunpath;
 	}
-	return null;
+	return $execrunpath;
 }
 
 $options = getopt("dv:n:hV");
@@ -361,8 +360,6 @@ function judge($row)
 	$execrunpath = fetch_executable($workdirpath, $row['compile_script'], $row['compile_script_md5sum']);
 
 	// Compile the program.
-	$execpath = "$workdirpath/executable/" . $row['compile_script'];
-	$execrunpath = $execpath . "/run";
 	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
 	       implode(' ', $files), $retval);
 
@@ -455,22 +452,12 @@ function judge($row)
 		                 overshoot_time($row['maxruntime'],
 		                                dbconfig_get_rest('timelimit_overshoot'));
 
-		if ( !empty($row['special_compare']) ) {
-			$execrunpath = fetch_executable($workdirpath, $row['special_compare'], $row['special_compare_md5sum']);
-		}
+		$compare_runpath = fetch_executable($workdirpath, $row['special_compare'], $row['special_compare_md5sum']);
+		$run_runpath = fetch_executable($workdirpath, $row['special_run'], $row['special_run_md5sum']);
 
-		if ( !empty($row['special_run']) ) {
-			$execrunpath = fetch_executable($workdirpath, $row['special_run'], $row['special_run_md5sum']);
-		}
-
-		#FIXME: cleanup
-		$execpath = "$workdirpath/executable/" . $row['special_compare'];
-		$execrunpath = $execpath . "/run";
-		$execpath2 = "$workdirpath/executable/" . $row['special_run'];
-		$execrunpath2 = $execpath2 . "/run";
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
-		       "'$execrunpath2' '$execrunpath'", $retval);
+		       "'$run_runpath' '$compare_runpath'", $retval);
 
 		// what does the exitcode mean?
 		if( ! isset($EXITCODES[$retval]) ) {
