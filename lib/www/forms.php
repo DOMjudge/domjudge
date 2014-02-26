@@ -98,18 +98,13 @@ function matchSelect($val, $default)
  */
 function addSelect($name, $values, $default = null, $usekeys = false, $multi = false)
 {
-	// only one element
-	if ( count($values) == 1 ) {
-		$k = key($values); $v = array_pop($values);
-		return addHidden($name, ($usekeys ? $k:$v)) .
-			htmlspecialchars($v) . "\n";
-	}
-
 	$size = 5;
 	if ( is_int($multi) ) $size = $multi;
 
 	$ret = '<select name="' . htmlspecialchars($name) . '"' .
 		($multi ? " multiple=\"multiple\" size=\"$size\"" : '') .
+		// Only one element, so fix the selection list:
+	    (count($values)==1 ? " disabled=\"disabled\" " : '') .
 		' id="' . htmlspecialchars(strtr($name,'[]','__')) . "\">\n";
 	foreach ($values as $k => $v) {
 		if ( ! $usekeys ) $k = $v;
