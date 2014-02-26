@@ -29,8 +29,6 @@ runpipe: runpipe.c $(LIBHEADERS) $(LIBSOURCES)
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libjudgedir) \
 		compile*.sh testcase_run.sh chroot-startstop.sh \
-		run run_wrapper \
-		compare_wrapper \
 		check_diff.sh sh-static
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libjudgedir) \
 		judgedaemon.main.php
