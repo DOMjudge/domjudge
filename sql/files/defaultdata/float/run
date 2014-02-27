@@ -24,12 +24,9 @@
 # standard output. It must exit with exitcode zero to indicate
 # successful checking.
 
-# Check program. The default program name below is defined by
-# replacing 'compare_' by 'check_' in this programs name. So by
-# copying or symlinking this default 'compare_wrapper' to
-# compare_<your_compare>, the program 'check_<your_compare>' will be
-# called; modify as required.
-CHECK_PROGRAM="${0%/*}/check_${0##*compare_}"
+SCRIPT=$(readlink -f "$0")
+SCRIPTPATH=$(dirname "$SCRIPT")
+CHECK_PROGRAM="${SCRIPTPATH}/check_float"
 
 # Options to pass to check program:
 CHECK_OPTIONS=""

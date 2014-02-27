@@ -2,10 +2,9 @@
 
 # Script to compile submissions.
 #
-# Usage: $0 <lang> <workdir> <file>...
+# Usage: $0 <compile_script> <workdir> <file>...
 #
-# <lang>            Language ID and extension of the source, see config-file
-#                   for details.
+# <compile_script>  Absolute path to compile script.
 # <workdir>         Base directory of this judging. Compilation is done in
 #                   <workdir>/compile, compiler output is stored in <workdir>.
 # <file>...         Source file(s) to be compiled. Files are passed in the
@@ -14,15 +13,14 @@
 #                   the first file should conventionally be interpreted as the
 #                   "main" file.
 #
-# This script supports languages by calling separate compile scripts
-# depending on <lang>, namely 'compile_<lang>.sh'. These compile
-# scripts should compile the source(s) to a statically linked, standalone
-# executable, or you should turn off USE_CHROOT, or create a chroot
+# This script supports languages by calling separate compile scripts.
+# These compile scripts should compile the source(s) to a statically linked,
+# standalone executable, or you should turn off USE_CHROOT, or create a chroot
 # environment that has interpreter/dynamic library support.
 #
 # Syntax for these compile scripts is:
 #
-#   compile_<lang>.sh <dest> <memlimit> <source file>...
+#   <compile_script> <dest> <memlimit> <source file>...
 #
 # where <dest> is the filename of a resulting executable file that the
 # compile script must create. This executable should run the submission
@@ -92,12 +90,10 @@ RUNGUARD="$DJ_BINDIR/runguard"
 logmsg $LOG_INFO "starting '$0', PID = $$"
 
 [ $# -ge 3 ] || error "not enough arguments. See script-code for usage."
-LANG="$1";    shift
+COMPILE_SCRIPT="$1";    shift
 WORKDIR="$1"; shift
-logmsg $LOG_DEBUG "arguments: '$LANG' '$WORKDIR'"
+logmsg $LOG_DEBUG "arguments: '$COMPILE_SCRIPT' '$WORKDIR'"
 logmsg $LOG_DEBUG "source file(s): $@"
-
-COMPILE_SCRIPT="$SCRIPTDIR/compile_$LANG.sh"
 
 [ -d "$WORKDIR" -a -w "$WORKDIR" -a -x "$WORKDIR" ] || \
 	error "Workdir not found or not writable: $WORKDIR"
@@ -111,7 +107,7 @@ cd "$WORKDIR"
 chmod a+rwx "$WORKDIR/compile"
 
 # Create files which are expected to exist: compiler output and runtime
-touch compile.out compile.time
+touch compile.out compile.meta
 
 cd "$WORKDIR/compile"
 
@@ -128,14 +124,14 @@ logmsg $LOG_INFO "starting compile"
 # the compiler writing to different filenames and deleting intermediate files.
 exitcode=0
 $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
-	-t $COMPILETIME -c -f 65536 -T "$WORKDIR/compile.time" -- \
+	-t $COMPILETIME -c -f 65536 -M "$WORKDIR/compile.meta" -- \
 	"$COMPILE_SCRIPT" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
 cd "$WORKDIR"
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
-if grep 'timelimit exceeded' compile.tmp >/dev/null 2>&1 ; then
+if grep '^time-result: .*timelimit' compile.meta >/dev/null 2>&1 ; then
 	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
 	cleanexit ${E_COMPILER_ERROR:--1}
 fi

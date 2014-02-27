@@ -28,7 +28,7 @@ $(SUBMITCLIENT): CXXFLAGS += $(CURL_CFLAGS)
 # Try to link statically against libcURL to prevent dependency
 # on team workstations:
 ifneq ($(CURL_STATIC),)
-$(SUBMITCLIENT): LDFLAGS += $(CURL_STATIC)
+$(SUBMITCLIENT): LDFLAGS += $(CURL_STATIC) -lpthread
 else
 $(SUBMITCLIENT): LDFLAGS += $(CURL_LIBS)
 endif

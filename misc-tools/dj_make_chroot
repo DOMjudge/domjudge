@@ -41,9 +41,6 @@ DEBMIRROR="http://archive.ubuntu.com/ubuntu"
 # Which debootstrap package to install on non-Debian systems:
 DEBOOTDEB="debootstrap_1.0.48+deb7u1_all.deb"
 
-# Which debootstrap package to install on non-Debian systems:
-DEBOOTDEB="debootstrap_1.0.48+deb7u1_all.deb"
-
 # A local caching proxy to use for debian packages
 # (typically an install of aptcacher-ng), for example:
 #DEBPROXY="http://aptcacher-ng.example.com:3142/"

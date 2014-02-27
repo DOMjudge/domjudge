@@ -77,7 +77,9 @@ if ( !empty($cmd) ):
 <tr><td><label for="data_0__compile_script_">Compile script:</label></td>
 <td>
 <?php
-$execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable ORDER BY execid");
+$execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable
+			WHERE type = 'compile'
+			ORDER BY execid");
 $execmap[''] = 'none';
 echo addSelect('data[0][compile_script]', $execmap, @$row['compile_script'], True);
 ?>

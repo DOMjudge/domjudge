@@ -180,6 +180,13 @@ if ( $DB->q('VALUE SELECT count(*) FROM user WHERE username = "admin" AND passwo
 		'Password for "admin" has been changed from the default.');
 }
 
+foreach (array('compare', 'run') as $type) {
+	if ( $DB->q('VALUE SELECT count(*) FROM executable WHERE execid = %s', dbconfig_get('default_' . $type)) == 0 ) {
+		result('configuration', 'Default ' . $type .' script', 'E',
+			'The default ' . $type . ' script "' . dbconfig_get('default_' . $type) . '" does not exist.');
+	}
+}
+
 
 if ( DEBUG == 0 ) {
 	result('configuration', 'Debugging', 'O', 'Debugging disabled.');
@@ -250,7 +257,7 @@ flushresults();
 
 // PROBLEMS
 
-$res = $DB->q('SELECT probid, timelimit, special_compare FROM problem ORDER BY probid');
+$res = $DB->q('SELECT probid, timelimit, special_compare, special_run FROM problem ORDER BY probid');
 
 $details = '';
 while($row = $res->next()) {

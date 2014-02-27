@@ -96,6 +96,16 @@ php_flag magic_quotes_runtime off
 
 </Directory>
 
+# Increase post limits for REST API
+<Directory @domserver_wwwdir@/api>
+
+<IfModule mod_php5.c>
+php_value upload_max_filesize 64M
+php_value post_max_size       64M
+</IfModule>
+
+</Directory>
+
 # Optionally enable IP-restrictions for teams, recommended if you know the
 # IP range the teams will be on.
 #<Directory @domserver_wwwdir@/team>

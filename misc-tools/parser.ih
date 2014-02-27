@@ -24,6 +24,13 @@ inline void Parser::print()
     print__();           // displays tokens if --print was specified
 }
 
+#if ( BISONCPP_VERSION >= 40200LL )
+inline void Parser::exceptionHandler__(std::exception const &exc)
+{
+    throw;              // re-implement to handle exceptions thrown by actions
+}
+#endif
+
 
     // Add here includes that are only required for the compilation
     // of Parser's sources.

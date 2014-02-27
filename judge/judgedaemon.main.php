@@ -8,6 +8,8 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
+require(LIBEXTDIR . '/spyc/spyc.php');
+
 require(ETCDIR . '/judgehost-config.php');
 $credfile = ETCDIR . '/restapi.secret';
 $credentials = @file($credfile);
@@ -109,7 +111,7 @@ function usage()
 
 // fetches new executable from database if necessary
 // runs build to compile executable
-// returns execrunpath on update, null otherwise
+// returns absolute path to run script
 function fetch_executable($workdirpath, $execid, $md5sum) {
 	// FIXME: make sure we don't have to escape $execid
 	$execpath = "$workdirpath/executable/" . $execid;
@@ -156,9 +158,8 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 		if ( !file_exists($execrunpath) || !is_executable($execrunpath) ) {
 			error("Invalid build file, must produce an executable file 'run'.");
 		}
-		return $execrunpath;
 	}
-	return null;
+	return $execrunpath;
 }
 
 $options = getopt("dv:n:hV");
@@ -357,14 +358,9 @@ function judge($row)
 	}
 
 	$execrunpath = fetch_executable($workdirpath, $row['compile_script'], $row['compile_script_md5sum']);
-	if ( $execrunpath != null ) {
-		logmsg(LOG_INFO, "Symlinking");
-		system("ln -sf $execrunpath " . LIBJUDGEDIR . "/compile_" . $row['langid'] . ".sh", $retval);
-		if ( $retval!=0 ) error("Could not create symlink to run ./build in $execpath");
-	}
 
 	// Compile the program.
-	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt $row[langid] '$workdir' " .
+	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
 	       implode(' ', $files), $retval);
 
 	// what does the exitcode mean?
@@ -456,30 +452,12 @@ function judge($row)
 		                 overshoot_time($row['maxruntime'],
 		                                dbconfig_get_rest('timelimit_overshoot'));
 
-		if ( !empty($row['special_compare']) && $row['special_compare'] != 'float' ) {
-			$execrunpath = fetch_executable($workdirpath, $row['special_compare'], $row['special_compare_md5sum']);
-			if ( $execrunpath != null ) {
-				logmsg(LOG_INFO, "Symlinking");
-				system("ln -sf $execrunpath " . LIBJUDGEDIR . "/compare_" . $row['special_compare'], $retval);
-				if ( $retval!=0 ) error("Could not create symlink to run ./build in $execpath");
-			}
-		}
-
-		if ( !empty($row['special_run']) ) {
-			$execrunpath = fetch_executable($workdirpath, $row['special_run'], $row['special_run_md5sum']);
-			if ( $execrunpath != null ) {
-				logmsg(LOG_INFO, "Symlinking");
-				system("ln -sf $execrunpath " . LIBJUDGEDIR . "/runjury_" . $row['special_run'], $retval);
-				if ( $retval!=0 ) error("Could not create symlink to run ./build in $execpath");
-				# FIXME: are there other use cases of the run_... - script?
-				system("ln -sf " . LIBJUDGEDIR . "/run_wrapper " . LIBJUDGEDIR . "/run_" . $row['special_run'], $retval);
-				if ( $retval!=0 ) error("Could not create symlink to run_wrapper in $execpath");
-			}
-		}
+		$compare_runpath = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
+		$run_runpath = fetch_executable($workdirpath, $row['run'], $row['run_md5sum']);
 
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
-		       "'$row[special_run]' '$row[special_compare]'", $retval);
+		       "'$run_runpath' '$compare_runpath'", $retval);
 
 		// what does the exitcode mean?
 		if( ! isset($EXITCODES[$retval]) ) {
@@ -489,11 +467,12 @@ function judge($row)
 		}
 		$result = $EXITCODES[$retval];
 
-		// Try to read runtime from file
+		// Try to read metadata from file
 		$runtime = NULL;
-		if ( is_readable($testcasedir . '/program.time') ) {
-			$fdata = getFileContents($testcasedir . '/program.time');
-			list($runtime) = sscanf($fdata,"%f");
+		if ( is_readable($testcasedir . '/program.meta') ) {
+			$metadata = spyc_load_file($testcasedir . '/program.meta');
+
+			$runtime = $metadata[$metadata['time-used']];
 		}
 
 		request('judging_runs', 'POST', 'judgingid=' . urlencode($row['judgingid'])
@@ -502,8 +481,9 @@ function judge($row)
 			. '&runtime=' . urlencode($runtime)
 			. '&judgehost=' . urlencode($myhost)
 			. '&output_run='   . rest_encode_file($testcasedir . '/program.out')
+			. '&output_error=' . rest_encode_file($testcasedir . '/error.out')
 			. '&output_diff='  . rest_encode_file($testcasedir . '/compare.out')
-			. '&output_error=' . rest_encode_file($testcasedir . '/error.out'));
+        );
 		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
 
 	} // end: for each testcase

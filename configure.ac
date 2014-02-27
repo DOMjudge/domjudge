@@ -290,6 +290,9 @@ AC_ARG_ENABLE(checktestdata,AS_HELP_STRING([--enable-checktestdata],
 if test "x$enable_checktestdata" != "xno"; then
 	AC_SUBST(CHECKTESTDATA_ENABLED,[yes])
 
+	AX_PROG_BISONCPP
+	AX_PROG_FLEXCPP
+
 	AX_BOOST_BASE([1.33.1],[],[AC_MSG_ERROR([Boost not available.])])
 	AX_BOOST_REGEX
 

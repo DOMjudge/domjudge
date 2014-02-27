@@ -112,6 +112,7 @@ CREATE TABLE `executable` (
   `md5sum` char(32) DEFAULT NULL COMMENT 'Md5sum of zip file',
   `zipfile` longblob COMMENT 'Zip file',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of this executable',
+  `type` varchar(8) NOT NULL COMMENT 'Type of executable',
   PRIMARY KEY (`execid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Compile, compare, and run script executable bundles';
 
@@ -214,6 +215,11 @@ UPDATE `configuration` SET `value` = '"%H:%M"', `description` = 'The format used
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('timelimit_overshoot', '"1s|10%"', 'string', 'Time that submissions are kept running beyond timelimt before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.');
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_sample_output', '0', 'bool', 'Should teams be able to view a diff of their and the reference output to sample testcases?');
+
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_penalty', '1', 'bool', 'Should submissions with compiler-error incur penalty time (and show on the scoreboard)?');
+
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_compare', '"compare"', 'string', 'The script used to compare outputs if no special compare script specified.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_run', '"run"', 'string', 'The script used to run submissions if no special run script specified.');
 
 UPDATE `language` SET `extensions` = '["adb","ads"]' WHERE `langid` = 'adb';
 UPDATE `language` SET `extensions` = '["awk"]' WHERE `langid` = 'awk';

@@ -3,7 +3,7 @@
 # Script to test (run and compare) submissions with a single testcase
 #
 # Usage: $0 <testdata.in> <testdata.out> <timelimit> <workdir>
-#           [<special-run> [<special-compare>]]
+#           <run> <compare>
 #
 # <testdata.in>     File containing test-input with absolute pathname.
 # <testdata.out>    File containing test-output with absolute pathname.
@@ -12,15 +12,10 @@
 # <workdir>         Directory where to execute submission in a chroot-ed
 #                   environment. For best security leave it as empty as possible.
 #                   Certainly do not place output-files there!
-# <special-run>     Extension name of specialized run or compare script to use.
-# <special-compare> Specify empty string for <special-run> if only
-#                   <special-compare> is to be used. The script
-#                   'run_<special-run>' or 'compare_<special-compare>'
-#                   will be called if argument is non-empty.
+# <run>             Absolute path to run script to use.
+# <compare>         Absolute path to compare script to use.
 #
-# For running the solution a script 'run' is called (default). For
-# usage of 'run' see that script. Likewise, for comparing results, a
-# program 'compare' is called by default.
+# Default run and compare scripts can be configured in the database.
 #
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
@@ -42,6 +37,12 @@ cleanup ()
 			ln -s "$TESTOUT" "$WORKDIR/testdata.out"
 		fi
 	fi
+
+	# Copy runguard and program stderr to error output. The display is
+	# truncated to normal size in the jury web interface.
+	cat runguard.err >> error.out
+	echo  "********** program stderr follows **********" >> error.out
+	cat program.err  >> error.out
 }
 
 cleanexit ()
@@ -121,16 +122,14 @@ TESTIN="$1";    shift
 TESTOUT="$1";   shift
 TIMELIMIT="$1"; shift
 WORKDIR="$1";   shift
-SPECIALRUN="$1";
-SPECIALCOMPARE="$2";
+RUN_SCRIPT="$1";
+COMPARE_SCRIPT="$2";
 logmsg $LOG_DEBUG "arguments: '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$WORKDIR'"
-logmsg $LOG_DEBUG "optionals: '$SPECIALRUN' '$SPECIALCOMPARE'"
+logmsg $LOG_DEBUG "optionals: '$RUN_SCRIPT' '$COMPARE_SCRIPT'"
 
-COMPARE_SCRIPT="$SCRIPTDIR/compare${SPECIALCOMPARE:+_$SPECIALCOMPARE}"
-RUN_SCRIPT="$SCRIPTDIR/run${SPECIALRUN:+_$SPECIALRUN}"
-if [ -n "$SPECIALRUN" ]; then
-	RUN_JURYPROG="$SCRIPTDIR/runjury_${SPECIALRUN}"
-fi
+# optional runjury program
+RUN_JURYPROG="${RUN_SCRIPT}jury"
+logmsg $LOG_DEBUG "run_juryprog: '$RUN_JURYPROG'"
 
 [ -r "$TESTIN"  ] || error "test-input not found: $TESTIN"
 [ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT"
@@ -160,7 +159,7 @@ touch error.out                  # Error output
 touch compare.out                # Compare output
 touch result.out                 # Result of comparison
 touch program.out program.err    # Program output and stderr (for extra information)
-touch program.time program.exit  # Program runtime and exitcode
+touch program.meta runguard.err  # Metadata and runguard stderr
 
 logmsg $LOG_INFO "setting up testing (chroot) environment"
 
@@ -172,9 +171,9 @@ mkdir -p -m 0711 ../bin ../dev
 cp -p  "$RUN_SCRIPT"  ./run
 cp -pL "$STATICSHELL" ../bin/sh
 chmod a+rx run ../bin/sh
-# If using a custom run script, copy additional support programs
+# If using a custom runjury script, copy additional support programs
 # if required:
-if [ -n "$SPECIALRUN" -a -f "$RUN_JURYPROG" ]; then
+if [ -x "$RUN_JURYPROG" ]; then
 	cp -p "$RUN_JURYPROG" ./runjury
 	cp -pL "$RUNPIPE"     ../bin/runpipe
 	chmod a+rx runjury ../bin/runpipe
@@ -191,25 +190,18 @@ logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck ./run testdata.in program.out \
 	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT \
-	${USE_CHROOT:+-r "$PWD/.."} -u "$RUNUSER" \
-	-t $TIMELIMIT -C $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
-	-c -s $FILELIMIT -e program.err -E program.exit -T program.time -- \
-	$PREFIX/$PROGRAM 2>error.tmp
+	${USE_CHROOT:+-r "$PWD/.."} \
+	--nproc=$PROCLIMIT \
+	--no-core --streamsize=$FILELIMIT \
+	--user="$RUNUSER" \
+	--walltime=$TIMELIMIT --cputime=$TIMELIMIT \
+	--memsize=$MEMLIMIT --filesize=$FILELIMIT \
+	--stderr=program.err --outmeta=program.meta -- \
+	$PREFIX/$PROGRAM 2>runguard.err
 
 # Check for still running processes:
 if ps -u "$RUNUSER" >/dev/null 2>&1 ; then
 	error "found processes still running"
-fi
-
-# Append (heading/trailing) program stderr to error.tmp:
-if [ `wc -l < program.err` -gt 20 ]; then
-	echo "*** Program stderr output following (first and last 10 lines) ***" >>error.tmp
-	head -n 10 program.err >>error.tmp
-	echo "*** <snip> ***"  >>error.tmp
-	tail -n 10 program.err >>error.tmp
-elif [ -s program.err ]; then
-	echo "*** Program stderr output following ***" >>error.tmp
-	cat program.err >>error.tmp
 fi
 
 # We first compare the output, so that even if the submission gets a
@@ -225,25 +217,23 @@ logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
 if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
                        result.out compare.out >compare.tmp 2>&1 ; then
 	exitcode=$?
-	cat error.tmp >>error.out
 	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
 fi
 
 # Check for errors from running the program:
+if [ ! -r program.meta ]; then
+	error "'program.meta' not readable"
+fi
 logmsg $LOG_DEBUG "checking program run exit-status"
-if grep  'timelimit exceeded' error.tmp >/dev/null 2>&1 ; then
-	echo "Timelimit exceeded, runtime: `cat program.time`" >>error.out
-	cat error.tmp >>error.out
+timeused=`    grep '^time-used: ' program.meta | sed 's/time-used: //'`
+program_time=`grep "^$timeused: " program.meta | sed "s/$timeused: //"`
+program_exit=`grep '^exitcode: '  program.meta | sed 's/exitcode: //'`
+if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
+	echo "Timelimit exceeded, runtime: $program_time" >>error.out
 	cleanexit ${E_TIMELIMIT:--1}
 fi
-if [ ! -r program.exit ]; then
-	cat error.tmp >>error.out
-	error "'program.exit' not readable"
-fi
-# Check that program.exit was written to (no runguard error)
-if [ "`cat program.exit`" != "0" ]; then
-	echo "Non-zero exitcode `cat program.exit`" >>error.out
-	cat error.tmp >>error.out
+if [ "$program_exit" != "0" ]; then
+	echo "Non-zero exitcode $program_exit" >>error.out
 	cleanexit ${E_RUN_ERROR:--1}
 fi
 
@@ -252,17 +242,16 @@ fi
 ### Disabled, because these are not consistently         ###
 ### reported the same way by all different compilers.    ###
 ############################################################
-#if grep  'Floating point exception' error.tmp >/dev/null 2>&1 ; then
+#if grep  'Floating point exception' program.err >/dev/null 2>&1 ; then
 #	echo "Floating point exception." >>error.out
 #	cleanexit ${E_RUN_ERROR:--1}
 #fi
-#if grep  'Segmentation fault' error.tmp >/dev/null 2>&1 ; then
+#if grep  'Segmentation fault' program.err >/dev/null 2>&1 ; then
 #	echo "Segmentation fault." >>tee error.out
 #	cleanexit ${E_RUN_ERROR:--1}
 #fi
-#if grep  'File size limit exceeded' error.tmp >/dev/null 2>&1 ; then
+#if grep  'File size limit exceeded' program.err >/dev/null 2>&1 ; then
 #	echo "File size limit exceeded." >>error.out
-#	cat error.tmp >>error.out
 #	cleanexit ${E_OUTPUT_LIMIT:--1}
 #fi
 
@@ -271,24 +260,19 @@ descrp=`grep '^description=' result.out | cut -d = -f 2-`
 descrp="${descrp:+ ($descrp)}"
 
 if [ "$result" = "accepted" ]; then
-	echo "Correct${descrp}! Runtime is `cat program.time` seconds." >>error.out
-	cat error.tmp >>error.out
+	echo "Correct${descrp}! Runtime is $program_time seconds." >>error.out
 	cleanexit ${E_CORRECT:--1}
 elif [ "$result" = "presentation error" ]; then
 	echo "Presentation error${descrp}." >>error.out
-	cat error.tmp >>error.out
 	cleanexit ${E_PRESENTATION_ERROR:--1}
 elif [ ! -s program.out ]; then
 	echo "Program produced no output." >>error.out
-	cat error.tmp >>error.out
 	cleanexit ${E_NO_OUTPUT:--1}
 elif [ "$result" = "wrong answer" ]; then
 	echo "Wrong answer${descrp}." >>error.out
-	cat error.tmp >>error.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 else
 	echo "Unknown result: Wrong answer#${descrp}#${result}#." >>error.out
-	cat error.tmp >>error.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 fi
 

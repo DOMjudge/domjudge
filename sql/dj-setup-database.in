@@ -16,6 +16,26 @@ verbose()
 	[ -z "$QUIET" ] && echo "$@"
 }
 
+usage() {
+	cat <<EOF
+Usage: $0 [option]... <command>
+
+Commands:
+  status        check database installation status
+  genpass       generate password file
+  install       create database, example contest and users if not existing
+  bare-install  create database, setup defaults if not existing
+  uninstall     remove database users and database, INCLUDING ALL DATA!
+  upgrade       upgrade MySQL database schema to current version
+
+Options:
+  -u <user>  connect to MySQL with DB admin <user>
+  -p <pass>  use password <pass> for DB admin user
+  -r         read DB admin password from prompt
+
+EOF
+}
+
 # Wrapper around mysql command to allow setting options, user, etc.
 mysql()
 {
@@ -142,14 +162,17 @@ while getopts ':u:p:qr' OPT ; do
 			;;
 		:)
 			echo "Error: option '$OPTARG' requires an argument."
+			usage
 			exit 1
 			;;
 		?)
 			echo "Error: unknown option '$OPTARG'."
+			usage
 			exit 1
 			;;
 		*)
 			echo "Error: unknown error reading option '$OPT', value '$OPTARG'."
+			usage
 			exit 1
 			;;
 	esac
@@ -247,24 +270,8 @@ upgrade)
 	;;
 
 	*)
-	cat <<EOF
-Unknown subcommand '$1'
-Usage: $0 [option]... <command>
-
-Commands:
-  status        check database installation status
-  genpass       generate password file
-  install       create database, example contest and users if not existing
-  bare-install  create database, setup defaults if not existing
-  uninstall     remove database users and database, INCLUDING ALL DATA!
-  upgrade       upgrade MySQL database schema to current version
-
-Options:
-  -u <user>  connect to MySQL with DB admin <user>
-  -p <pass>  use password <pass> for DB admin user
-  -r         read DB admin password from prompt
-
-EOF
+	echo "Error: Unknown subcommand '$1'"
+	usage
 	exit 1
 	;;
 

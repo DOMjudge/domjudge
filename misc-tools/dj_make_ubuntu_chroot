@@ -37,6 +37,8 @@ REMOVEDEBS=""
 
 # Ubuntu mirror, modify to match closest mirror
 DEBMIRROR="http://ru.archive.ubuntu.com./ubuntu/"
+
+# Which debootstrap package to install on non-Debian/Ubuntu systems:
 DEBOOTDEB="debootstrap_1.0.46_all.deb"
 
 # A local caching proxy to use for debian packages

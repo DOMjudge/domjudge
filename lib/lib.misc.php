@@ -136,8 +136,10 @@ function calcScoreRow($cid, $team, $prob) {
 	                  FROM submission s
 	                  LEFT JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
 	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
-	                  WHERE teamid = %s AND probid = %s AND s.cid = %i AND s.valid = 1
-	                  AND submittime < c.endtime
+	                  WHERE teamid = %s AND probid = %s AND s.cid = %i AND s.valid = 1 ' .
+	                 ( dbconfig_get('compile_penalty', 1) ? "" :
+	                   "AND j.result != 'compiler-error' ") .
+	                 'AND submittime < c.endtime
 	                  ORDER BY submittime',
 	                 $team, $prob, $cid);
 

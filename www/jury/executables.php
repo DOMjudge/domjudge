@@ -14,7 +14,7 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Executables</h1>\n\n";
 
 // Select all data, sort problems from the current contest on top.
-$res = $DB->q('SELECT execid, description, md5sum, OCTET_LENGTH(zipfile) AS size
+$res = $DB->q('SELECT execid, description, md5sum, type, OCTET_LENGTH(zipfile) AS size
                FROM executable ORDER BY execid');
 
 if( $res->count() == 0 ) {
@@ -22,7 +22,7 @@ if( $res->count() == 0 ) {
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">description</th>" .
-	     "<th scope=\"col\">size</th><th scope=\"col\">md5</th>" .
+	     "<th scope=\"col\">type</th><th scope=\"col\">size</th><th scope=\"col\">md5</th>" .
 	     "<th></th><th></th></tr></thead>\n<tbody>\n";
 
 	$lastcid = -1;
@@ -33,6 +33,7 @@ if( $res->count() == 0 ) {
 		echo "<tr><td class=\"execid\">" . $link .
 				htmlspecialchars($row['execid'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['description'])."</a>".
+			"</td><td>" . $link . htmlspecialchars($row['type'])."</a>".
 			"</td><td class=\"size\">" . $link .
 				htmlspecialchars($row['size'])."&nbsp;B</a>".
 			"</td><td class=\"md5\">" . $link .

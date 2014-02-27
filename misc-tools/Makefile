@@ -28,6 +28,8 @@ $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
+ifeq ($(CHECKTESTDATA_ENABLED),yes)
+
 lex.cc scannerbase.h: checktestdata.l scanner.h scanner.ih
 	flexc++ $<
 
@@ -38,8 +40,6 @@ checksucc = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 || \
 		{ echo "Running './checktestdata $$opts $$prog $$data' did not succeed..." ; exit 1; }
 checkfail = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 && \
 		{ echo "Running './checktestdata $$opts $$prog $$data' did not fail..."    ; exit 1; }
-
-ifeq ($(CHECKTESTDATA_ENABLED),yes)
 
 libchecktestdata.o: %.o: %.cc %.h $(PARSER_GEN)
 
@@ -98,7 +98,9 @@ ifeq ($(CHECKTESTDATA_ENABLED),yes)
 		checktestdata.fltcmp checktestdata.hello
 endif
 
+ifeq ($(CHECKTESTDATA_ENABLED),yes)
 dist-l: $(PARSER_GEN)
+endif
 
 clean-l:
 	-rm -f $(TARGETS) $(OBJECTS)
