@@ -19,7 +19,7 @@ CHROOTDIR=$1
 ARCH=$2
 
 # Debian release to bootstrap:
-RELEASE="precise"
+RELEASE="wheezy"
 
 # List of possible architectures to install chroot for:
 ARCHLIST="amd64,armel,armhf,i386,ia64,powerpc,s390,s390x,sparc"
@@ -36,7 +36,7 @@ INSTALLDEBS="openjdk-7-jre-headless locales"
 REMOVEDEBS=""
 
 # Debian mirror. http.debian.net will pick the 'closest'.
-DEBMIRROR="http://archive.ubuntu.com/ubuntu"
+DEBMIRROR="http://http.debian.net/debian"
 
 # Which debootstrap package to install on non-Debian systems:
 DEBOOTDEB="debootstrap_1.0.48+deb7u1_all.deb"
@@ -134,10 +134,8 @@ cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
 
 # Stable ($RELEASE)
-deb $DEBMIRROR			$RELEASE		main restricted universe multiverse
-deb http://archive.ubuntu.com/ubuntu precise main restricted universe multiverse
-deb http://archive.ubuntu.com/ubuntu precise-updates main restricted universe multiverse
-deb http://archive.ubuntu.com/ubuntu precise-security main restricted universe multiverse
+deb $DEBMIRROR			$RELEASE		main
+deb http://security.debian.org	$RELEASE/updates	main
 
 # Testing
 #deb $DEBMIRROR			testing		main
