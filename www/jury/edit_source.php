@@ -8,8 +8,12 @@
 
 require('init.php');
 
+if ( empty($teamid) || !checkrole('team') ) {
+	error("You cannot re-submit code without being a team.");
+}
+
 // submit code
-if ( isset($_POST['submitter']) ) {
+if ( isset($_POST['origsubmitid']) ) {
 	$sources = $DB->q('TABLE SELECT *
 			   FROM submission_file LEFT JOIN submission USING(submitid)
 			   WHERE submitid = %i ORDER BY rank', $_POST['origsubmitid']);
@@ -27,7 +31,7 @@ if ( isset($_POST['submitter']) ) {
 		$filenames[] = $sourcedata['filename'];
 	}
 
-	$newid = submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'],
+	$newid = submit_solution($teamid, $_POST['probid'], $_POST['langid'],
 	                $files, $filenames, $_POST['origsubmitid']);
 
 	foreach($files as $file)
@@ -97,7 +101,6 @@ echo addSelect('probid', $probs, $submission['probid'], true);
 echo addSelect('langid', $langs, $submission['langid'], true);
 
 echo addHidden('teamid', $submission['teamid']);
-echo addHidden('submitter', 'domjudge');
 echo addHidden('origsubmitid', $submission['origsubmitid'] === NULL ? $id : $submission['origsubmitid']);
 echo addSubmit('submit');
 
