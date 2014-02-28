@@ -107,18 +107,15 @@ function val($node, $tag) {
 	return $node->getElementsByTagName($tag)->item(0)->nodeValue;
 }
 
-function stderr($msg) {
-	file_put_contents('php://stderr', $msg);
-}
-
 // First check if we have the right contest, teams, problems, and
 // languages loaded.
 `mv $feedurl $feedurl.mine.xml`;
 $feedXML = file_get_contents($feedurl . '.mine.xml');
 $feedDOM = DOMDocument::loadXML($feedXML);
 if ( $feedDOM == NULL ) error("Could not read XML feed from '$feedurl'.");
+$xpath = new DOMXpath($feedDOM);
 
-$contest = $feedDOM->getElementsByTagName('/contest/info');
+$contest = $xpath->query('/contest/info')->item(0);
 sscanf(val($contest,'length'),"%d:%d:%d",$h,$m,$s);
 $length = 3600*$h + 60*$m + $s;
 if ( difftime(val($contest,'starttime'),$cdata['starttime'])!=0 ||
@@ -126,7 +123,7 @@ if ( difftime(val($contest,'starttime'),$cdata['starttime'])!=0 ||
 	error("Contest times do not match with external CCS data.");
 }
 
-$problems = $feedDOM->getElementsByTagName('/contest/problem');
+$problems = $xpath->query('/contest/problem');
 foreach ( $problems as $prob ) {
 
 	$id = $DB->q('MAYBEVALUE SELECT probid FROM problem
@@ -138,7 +135,7 @@ foreach ( $problems as $prob ) {
 	}
 }
 
-$languages = $feedDOM->getElementsByTagName('/contest/language');
+$languages = $xpath->query('/contest/language');
 foreach ( $languages as $lang ) {
 
 	$id = $DB->q('MAYBEVALUE SELECT langid FROM language
@@ -150,7 +147,7 @@ foreach ( $languages as $lang ) {
 	}
 }
 
-$teams = $feedDOM->getElementsByTagName('/contest/team');
+$teams = $xpath->query('/contest/team');
 foreach ( $teams as $team ) {
 
 	$id = $DB->q('MAYBEVALUE SELECT login FROM team
@@ -173,14 +170,16 @@ while ( TRUE ) {
 	}
 
 	if ( !is_readable("testfeed.xml") ) {
-		stderr(".\n");
+		file_put_contents('php://stderr', ".");
 		continue;
 	}
 	`mv $feedurl $feedurl.mine.xml`;
 	$feedXML = file_get_contents($feedurl . '.mine.xml');
 	$feedDOM = DOMDocument::loadXML($feedXML);
 	if ( $feedDOM == NULL ) continue;
-	$runs = $feedDOM->getElementsByTagName('run');
+	$xpath = new DOMXpath($feedDOM);
+
+	$runs = $xpath->query('/contest/run');
 
 	foreach ( $runs as $run ) {
 
@@ -190,11 +189,12 @@ while ( TRUE ) {
 		               FROM submission WHERE externalid = %i', $id);
 
 		if ( !empty($res) ) {
-			if ( $res['teamid']!=remap('team',$subm['team']) ||
-			     $res['probid']!=remap('problem',$subm['problem']) ||
-			     $res['langid']!=remap('language',$subm['language']) ||
-			     ($res['submittime']!=$subm['time'] && val($run, 'judged')!=='True') ) {
-				error("External submission '".$subm['id']."' already exists as s".
+			if ( $res['teamid']!=remap('team',    val($run,'team')) ||
+			     $res['probid']!=remap('problem', val($run,'problem')) ||
+			     $res['langid']!=remap('language',val($run,'language')) ||
+			     (abs((float)$res['submittime']-(float)val($run,'timestamp'))>0.1 &&
+			      val($run, 'judged')!=='True') ) {
+				error("External submission '".val($run,'id')."' already exists as s".
 				      $res['submitid']." with non-matching data.");
 			}
 			logmsg(LOG_DEBUG,"Skipping re-import of submission '".
@@ -205,7 +205,7 @@ while ( TRUE ) {
 
 		if ( val($run, 'judged')!=='True' ) {
 			// We're inserting a new submission
-			$res = dj_json_decode(request('submission_files','GET','id='.$subm['id']));
+			$res = dj_json_decode(request('submission_files','GET','id='.val($run,'id')));
 
 			$files = array();
 			$filenames = array();
@@ -226,7 +226,7 @@ while ( TRUE ) {
 			                      $files, $filenames, NULL,
 			                      $id, val($run, 'timestamp'));
 
-			logmsg(LOG_INFO,"Imported submission '".$subm['id']."' as s$id");
+			logmsg(LOG_INFO,"Imported submission '".val($run,'id')."' as s$id");
 
 			foreach ( $files as $file ) unlink($file);
 
