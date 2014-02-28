@@ -48,6 +48,7 @@ function request($url, $verb = 'GET', $data = '') {
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 	if ( $verb == 'POST' ) {
 		curl_setopt($ch, CURLOPT_POST, TRUE);
 		if ( is_array($data) ) {
@@ -140,6 +141,9 @@ foreach ( $teams as $team ) {
 	$id = $DB->q('MAYBEVALUE SELECT login FROM team
 	              WHERE login = %s AND enabled = 1',
 	             remap('team',$team['id']));
+
+// 	$DB->q('UPDATE team SET name = %s WHERE login = %s',
+// 	       $team['name'],remap('team',$team['id']));
 
 	if ( empty($id) ) {
 		error("Team ID '".$team['id']."' from external CCS not available locally.");
