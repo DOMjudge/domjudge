@@ -95,8 +95,8 @@ INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (1, 'admin',        
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (2, 'jury',           'Jury User');
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (3, 'team',           'Team Member');
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (4, 'balloon',        'Balloon runner');
-INSERT INTO `role` (`role`, `description`) VALUES ('print',             'print');
-INSERT INTO `role` (`role`, `description`) VALUES ('judgehost',         '(Internal/System) Judgehost');
+INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (5, 'print',             'print');
+INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (6, 'judgehost',         '(Internal/System) Judgehost');
 INSERT INTO `role` (`role`, `description`) VALUES ('event_reader',      '(Internal/System) event_reader');
 INSERT INTO `role` (`role`, `description`) VALUES ('full_event_reader', '(Internal/System) full_event_reader');
 

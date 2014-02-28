@@ -4,7 +4,7 @@ endif
 include $(TOPDIR)/Makefile.global
 
 # Note:
-# Although dbpasswords.secret is generated during
+# Although dbpasswords.secret and restapi.secret is generated during
 # building/installing, we only remove them with 'distclean', for in
 # maintainer-install mode it's inconvenient to have these regenerated
 # with different passwords from those in the database.
@@ -22,9 +22,9 @@ $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 
 config: $(SUBST_CONFIGS)
 
-domserver: apache.conf dbpasswords.secret
+domserver: apache.conf dbpasswords.secret restapi.secret
 
-judgehost: dbpasswords.secret restapi.secret
+judgehost:
 
 dbpasswords.secret:
 	echo "# Randomly generated on host `hostname`, `date`" > $@
@@ -51,8 +51,7 @@ install-judgehost:
 		judgehost-static.php sudoers-domjudge
 	-$(INSTALL_USER) -t $(DESTDIR)$(judgehost_etcdir) \
 		judgehost-config.php common-config.php
-	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \
-		dbpasswords.secret restapi.secret
+	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir)
 
 # Let only distclean (_not_ the local variant) depend on password
 # removal, so these don't get removed with maintainer-clean.
@@ -62,7 +61,7 @@ distclean-l:
 	-rm -f $(SUBST_CONFIGS) config.h
 
 clean-passwords:
-	-rm -f dbpasswords.secret
+	-rm -f dbpasswords.secret restapi.secret
 
 maintainer-clean-l:
 	-rm -f config.h.in
