@@ -68,9 +68,6 @@ BOOST_REGEX_LIB = @BOOST_REGEX_LIB@
 # libgmpxx
 LIBGMPXX = @LIBGMPXX@
 
-# htpasswd
-HTPASSWD = @HTPASSWD@
-
 # User:group file ownership of password files
 DOMJUDGE_USER   = @DOMJUDGE_USER@
 WEBSERVER_GROUP = @WEBSERVER_GROUP@
