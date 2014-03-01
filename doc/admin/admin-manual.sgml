@@ -365,7 +365,7 @@ software on the DOMjudge server as mentioned above when using Debian
 GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
-apt-get install gcc g++ make mysql-server \
+apt-get install gcc g++ make zip mysql-server \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql php5-json \
         php-geshi phpmyadmin ntp \
 	libboost-regex-dev libgmp3-dev linuxdoc-tools linuxdoc-tools-text \
@@ -993,7 +993,7 @@ format and prebuilt from SGML sources. Rebuilding these is not normally
 necessary. To rebuild them on a Debian-like system, the following commands
 should do it:
 <code>
-sudo apt-get install linuxdoc-tools make transfig ghostscript groff texlive-latex-recommended
+sudo apt-get install linuxdoc-tools make zip transfig ghostscript groff texlive-latex-recommended
 make -C doc/admin docs
 make -C doc/judge docs
 </code>
