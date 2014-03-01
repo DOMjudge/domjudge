@@ -42,9 +42,7 @@ function request($url, $verb = 'GET', $data = '') {
 	global $resturl, $restuser, $restpass;
 
 	$url = $resturl . "/" . $url;
-	if ( $verb == 'GET' ) {
-		$url .= '?' . $data;
-	}
+	if ( $verb == 'GET' && !empty($data) ) $url .= '?' . $data;
 
 	$ch = curl_init($url);
 	curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
@@ -109,13 +107,13 @@ function val($node, $tag) {
 
 // First check if we have the right contest, teams, problems, and
 // languages loaded.
-`mv $feedurl $feedurl.mine.xml`;
-$feedXML = file_get_contents($feedurl . '.mine.xml');
+$feedXML = file_get_contents($feedurl);
 $feedDOM = DOMDocument::loadXML($feedXML);
 if ( $feedDOM == NULL ) error("Could not read XML feed from '$feedurl'.");
 $xpath = new DOMXpath($feedDOM);
 
-$contest = $xpath->query('/contest/info')->item(0);
+$infos = $xpath->query('/contest/info');
+$contest = $infos->item($infos->length-1);
 sscanf(val($contest,'length'),"%d:%d:%d",$h,$m,$s);
 $length = 3600*$h + 60*$m + $s;
 if ( difftime(val($contest,'starttime'),$cdata['starttime'])!=0 ||
@@ -171,12 +169,15 @@ while ( TRUE ) {
 
 	if ( !is_readable("testfeed.xml") ) {
 		file_put_contents('php://stderr', ".");
+		sleep($waittime);
 		continue;
 	}
 	`mv $feedurl $feedurl.mine.xml`;
+	logmsg(LOG_DEBUG,"moved '$feedurl' to '$feedurl.mine.xml'");
+
 	$feedXML = file_get_contents($feedurl . '.mine.xml');
 	$feedDOM = DOMDocument::loadXML($feedXML);
-	if ( $feedDOM == NULL ) continue;
+	if ( $feedDOM == NULL ) error("Could not parse '$feedurl.mine.xml'");
 	$xpath = new DOMXpath($feedDOM);
 
 	$runs = $xpath->query('/contest/run');
