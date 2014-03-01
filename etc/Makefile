@@ -51,7 +51,6 @@ install-judgehost:
 		judgehost-static.php sudoers-domjudge
 	-$(INSTALL_USER) -t $(DESTDIR)$(judgehost_etcdir) \
 		judgehost-config.php common-config.php
-	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir)
 
 # Let only distclean (_not_ the local variant) depend on password
 # removal, so these don't get removed with maintainer-clean.
