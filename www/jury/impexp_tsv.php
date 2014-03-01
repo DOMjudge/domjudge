@@ -39,7 +39,7 @@ function tsv_import($fmt)
 	// the first line of the tsv is always the format with a version number.
 	// currently we hardcode version 1 because there are no others
 	$version = array_shift($content);
-	if ( trim($version) != "$fmt\t1" ) {
+	if ( trim($version) != "File_Version\t1" ) {
 		error ("Unknown format or version: $version");
 	}
 
