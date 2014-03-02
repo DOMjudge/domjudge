@@ -55,12 +55,12 @@ function request($url, $verb = 'GET', $data = '') {
 	}
 
 	$response = curl_exec($ch);
-	if ( !$response ) {
-		error("Error while executing curl with url " . $url . ": " . curl_error($ch));
+	if ( $response === FALSE ) {
+		error("Error while executing curl $verb to url " . $url . ": " . curl_error($ch));
 	}
 	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	if ( $status < 200 || $status >= 300 ) {
-		error("Error while executing curl with url " . $url . ": http status code: " . $status . ", response: " . $response);
+		error("Error while executing curl $verb to url " . $url . ": http status code: " . $status . ", response: " . $response);
 	}
 
 	curl_close($ch);
@@ -483,7 +483,7 @@ function judge($row)
 			. '&output_run='   . rest_encode_file($testcasedir . '/program.out')
 			. '&output_error=' . rest_encode_file($testcasedir . '/error.out')
 			. '&output_diff='  . rest_encode_file($testcasedir . '/compare.out')
-        );
+		);
 		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
 
 	} // end: for each testcase
