@@ -197,9 +197,11 @@ while ( TRUE ) {
 				error("External submission '".val($run,'id')."' already exists as s".
 				      $res['submitid']." with non-matching data.");
 			}
-			logmsg(LOG_DEBUG,"Skipping re-import of submission '".
-			       $id."' (s".$res['submitid'].")");
-			continue;
+			if ( val($run, 'judged') !== 'True' ) {
+				logmsg(LOG_DEBUG,"Skipping re-import of submission '".
+						$id."' (s".$res['submitid'].")");
+				continue;
+			}
 		}
 
 
