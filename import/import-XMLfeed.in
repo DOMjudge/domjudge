@@ -116,7 +116,7 @@ sscanf(val($contest,'length'),"%d:%d:%d",$h,$m,$s);
 $length = 3600*$h + 60*$m + $s;
 if ( difftime(val($contest,'starttime'),$cdata['starttime'])!=0 ||
      $length!=difftime($cdata['endtime'],$cdata['starttime']) ) {
-	error("Contest times do not match with external CCS data.");
+	warning("Contest times do not match with external CCS data.");
 }
 
 $problems = $xpath->query('/contest/problem');
@@ -183,6 +183,7 @@ while ( TRUE ) {
 	foreach ( $runs as $run ) {
 
 		$id = val($run, 'id');
+		logmsg(LOG_DEBUG,"Found submission (id = $id)");
 
 		$res = $DB->q('MAYBETUPLE SELECT submitid, teamid, probid, langid, submittime
 		               FROM submission WHERE externalid = %i', $id);
@@ -204,7 +205,7 @@ while ( TRUE ) {
 
 		if ( val($run, 'judged')!=='True' ) {
 			// We're inserting a new submission
-			$res = dj_json_decode(request('submission_files','GET','id='.val($run,'id')));
+			$res = dj_json_decode(request('submissionFiles/'.val($run,'id'),'GET'));
 
 			$files = array();
 			$filenames = array();
