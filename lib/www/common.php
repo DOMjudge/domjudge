@@ -138,7 +138,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		"</tr>\n</thead>\n<tbody>\n";
 
 	// print each row with links to detailed information
-	$iseven = $subcnt = $corcnt = $igncnt = $vercnt = $quecnt = 0;
+	$iseven = $subcnt = $corcnt = $igncnt = $vercnt = $quecnt = $extdiffcnt = 0;
 	while( $row = $res->next() ) {
 
 		$sid = (int)$row['submitid'];
@@ -196,6 +196,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		} else {
 			echo printresult($row['result']);
 			if ( isset($row['externalresult']) && $row['result'] !== $row['externalresult'] ) {
+				$extdiffcnt++;
 				echo " (&#x26a1;" . printresult($row['externalresult']) . ")";
 			}
 		}
@@ -272,11 +273,18 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 					, $cid, @$restrictions['teamid'], @$restrictions['probid']
 					, @$restrictions['langid'], @$restrictions['judgehost']
 					);
+		$extdiffcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
+						.' AND result IS NOT NULL AND externalresult IS NOT NULL'
+						.' AND result != externalresult'
+					, $cid, @$restrictions['teamid'], @$restrictions['probid']
+					, @$restrictions['langid'], @$restrictions['judgehost']
+					);
 		}
 		echo "<p>Total correct: $corcnt, submitted: $subcnt";
 		if($vercnt > 0)	echo ", unverified: $vercnt";
 		if($igncnt > 0) echo ", ignored: $igncnt";
 		if($quecnt > 0) echo ", judgement pending: $quecnt";
+		if($extdiffcnt > 0) echo ", external diff: $extdiffcnt";
 		echo "</p>\n\n";
 	}
 
