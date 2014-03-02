@@ -115,11 +115,7 @@ create_db_users()
 	local user pass
 	(
 	echo "CREATE DATABASE \`$DBNAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
-# Need to add both '%' and 'localhost' as entries, because a default
-# fresh MySQL installation has a Host='localhost',User='' entry which
-# is more specific than Host='%' and thus leads to Access Denied errors.
 	echo "CREATE USER
-		'$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD',
 		'$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
 
 	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER';"
@@ -134,6 +130,8 @@ remove_db_users()
 	local user pass
 	(
 	echo "DROP DATABASE IF EXISTS \`$DBNAME\`;"
+# Also drop "@%" users, since those may have been created by pre-4.0 versions
+# of DOMjudge.
 # In MySQL < 5.0.2, 'DROP USER' only removes the user, not its privileges:
 	echo "REVOKE ALL PRIVILEGES, GRANT OPTION FROM
 		'$domjudge_DBUSER'@'%', '$domjudge_DBUSER'@'localhost';"
