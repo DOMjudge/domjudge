@@ -25,7 +25,7 @@ RELEASE="precise"
 ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 
 # Packages to include during bootstrap process (comma separated):
-INCLUDEDEBS=""
+INCLUDEDEBS="apt-transport-https"
 
 # Packages to install after upgrade (space separated):
 INSTALLDEBS="openjdk-7-jre-headless locales"
@@ -36,7 +36,7 @@ INSTALLDEBS="openjdk-7-jre-headless locales"
 REMOVEDEBS=""
 
 # Ubuntu mirror, modify to match closest mirror
-DEBMIRROR="http://ru.archive.ubuntu.com./ubuntu/"
+DEBMIRROR="https://packages/ubuntu/"
 
 # Which debootstrap package to install on non-Debian/Ubuntu systems:
 DEBOOTDEB="debootstrap_1.0.46_all.deb"
@@ -129,6 +129,7 @@ $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
+cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
 
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 deb $DEBMIRROR $RELEASE main
