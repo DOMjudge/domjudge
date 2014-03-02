@@ -585,7 +585,8 @@ function submit_solution($team, $prob, $lang, $files, $filenames,
 
 	// Refuse submissions before start of contest.
 	if( difftime($cdata['starttime'], $submittime) > 0 ) {
-		error("The contest is closed, no submissions accepted. [c$cid]");
+	//	error("The contest is closed, no submissions accepted. [c$cid]");
+		return;
 	}
 
 	// Check 2: valid parameters?
