@@ -301,13 +301,13 @@ function confirmClar() {
 function replaceAnswer() {
 	var newtext = document.forms['sendclar'].answertext.value;
 	var elem = document.getElementById('bodytext');
-	elem.innerHTML = newtext;
+	elem.value = newtext;
 	return false;
 }
 function appendAnswer() {
 	var newtext = document.forms['sendclar'].answertext.value;
 	var elem = document.getElementById('bodytext');
-	elem.innerHTML += '\n' + newtext;
+	elem.value += '\n' + newtext;
 	return false;
 }
 <?php endif; ?>
