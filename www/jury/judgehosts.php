@@ -86,7 +86,7 @@ if( $res->count() == 0 ) {
 			echo "judgehost-nocon";
 			echo "\" title =\"never checked in\">";
 		} else {
-			$reltime = difftime(now(),$row['polltime']);
+			$reltime = floor(difftime(now(),$row['polltime']));
 			if ( $reltime < JUDGEHOST_WARNING ) {
 				echo "judgehost-ok";
 			} else if ( $reltime < JUDGEHOST_CRITICAL ) {
