@@ -32,9 +32,10 @@ if ( isset($_POST['import']) ) {
 		$contest['contestname'] = $contest_yaml_data['name'];
 		$contest['starttime_string'] = strftime('%Y-%m-%d %H:%M:%S', strtotime($contest_yaml_data['start-time']));
 		$contest['activatetime_string'] = '-1:00';
-		$contest['endtime_string'] = '+' . $contest_yaml_data['duration'];
+		// chop off final ":00" because our contests do not support that precision in relative notation
+		$contest['endtime_string'] = '+' . substr($contest_yaml_data['duration'],0,-3);
 		if ( ! empty($contest_yaml_data['scoreboard-freeze']) ) {
-			$contest['freezetime_string'] = '+' . $contest_yaml_data['scoreboard-freeze'];
+			$contest['freezetime_string'] = '+' . substr($contest_yaml_data['scoreboard-freeze'],0,-3);
 		}
 		// TODO or 1?
 		$contest['enabled'] = 1;
