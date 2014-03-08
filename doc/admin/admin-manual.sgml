@@ -1050,6 +1050,22 @@ Finally, start each of the judgedaemons with:
 $ judgedaemon -n <X>
 </code>
 
+<sect1>Encrypted communications (HTTPS)
+<p>
+
+DOMjudge can be configured to run on HTTPS, so teams and judgedaemons
+communicate with the domserver securely over encrypted SSL/TLS connections.
+Setting up SSL for Apache is documented in the
+<htmlurl url="http://httpd.apache.org/docs/2.4/ssl/" name="Apache manual">
+and in many tutorials around the web.
+
+<p>
+The judgedaemons must recognise the CA you're using, otherwise they will
+refuse to connect over HTTPS. If your judgedaemon gives an error message
+about an untrusted certificate, put your domserver's certificate in
+<tt>/etc/ssl/certs/yourname.crt</tt> of each judgehost (and on the team
+machines when using the commandline submit client) and run:
+<code># c_rehash</code>
 
 <sect1>NTP time synchronisation
 <p>
