@@ -30,7 +30,7 @@ if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
  * $url is the part appended to the base DOMjudge $resturl.
  * $verb is the HTTP method to use: GET, POST, PUT, or DELETE
  * $data is the urlencoded data passed as GET or POST parameters.
- * When $fallonerror is set to false, any error will be turned into a
+ * When $failonerror is set to false, any error will be turned into a
  * warning and null is returned.
  */
 function request($url, $verb = 'GET', $data = '', $failonerror = true) {
