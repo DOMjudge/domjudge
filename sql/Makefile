@@ -38,6 +38,8 @@ install-domserver:
 		$(ZIPSQL)
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/upgrade \
 	 	upgrade/upgrade_*.sql upgrade/README
+
+	$(INSTALL_DIR) $(addprefix $(DESTDIR)$(domserver_sqldir)/files/,defaultdata examples)
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/files/defaultdata \
 	 	files/defaultdata/*.zip
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/files/examples \
