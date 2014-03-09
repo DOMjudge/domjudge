@@ -14,9 +14,7 @@ require(ETCDIR . '/judgehost-config.php');
 $credfile = ETCDIR . '/restapi.secret';
 $credentials = @file($credfile);
 if (!$credentials) {
-	user_error("Cannot read REST API credentials file " . $credfile,
-		E_USER_ERROR);
-	exit();
+	error("Cannot read REST API credentials file " . $credfile);
 }
 foreach ($credentials as $credential) {
 	if ( $credential{0} == '#' ) continue;
@@ -24,12 +22,18 @@ foreach ($credentials as $credential) {
 	break;
 }
 if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
-	// FIXME: do check API access here
-	user_error("Cannot access REST API.", E_USER_ERROR);
-	exit();
+	error("Error parsing REST API credentials.");
 }
 
-function request($url, $verb = 'GET', $data = '') {
+/**
+ * Perform a request to the REST API and handl any errors.
+ * $url is the part appended to the base DOMjudge $resturl.
+ * $verb is the HTTP method to use: GET, POST, PUT, or DELETE
+ * $data is the urlencoded data passed as GET or POST parameters.
+ * When $fallonerror is set to false, any error will be turned into a
+ * warning and null is returned.
+ */
+function request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	global $resturl, $restuser, $restpass;
 
 	$url = $resturl . "/" . $url;
@@ -56,17 +60,24 @@ function request($url, $verb = 'GET', $data = '') {
 
 	$response = curl_exec($ch);
 	if ( $response === FALSE ) {
-		error("Error while executing curl $verb to url " . $url . ": " . curl_error($ch));
+		$errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($ch);
+		if ($failonerror) error($errstr);
+		else { warning($errstr); return null; }
 	}
 	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	if ( $status < 200 || $status >= 300 ) {
-		error("Error while executing curl $verb to url " . $url . ": http status code: " . $status . ", response: " . $response);
+		$errstr = "Error while executing curl $verb to url " . $url . ": http status code: " . $status . ", response: " . $response;
+		if ($failonerror) { error($errstr); }
+		else { warning($errstr); return null; }
 	}
 
 	curl_close($ch);
 	return $response;
 }
 
+/**
+ * Retrieve a value from the configuration through the REST API.
+ */
 function dbconfig_get_rest($name) {
 	$res = request('config', 'GET', 'name=' . urlencode($name));
 	$res = dj_json_decode($res);
@@ -278,8 +289,11 @@ while ( TRUE ) {
 		exit;
 	}
 
-	$judging = request('judgings', 'POST', 'judgehost=' . urlencode($myhost));
-	$row = dj_json_decode($judging);
+	// Request open submissions to judge. Any errors will be treated as
+	// non-fatal: we will just keep on retrying in this loop.
+	$judging = request('judgings', 'POST', 'judgehost=' . urlencode($myhost), false);
+	// If $judging is null, an error occurred; don't try to decode.
+	if (!is_null($judging)) $row = dj_json_decode($judging);
 
 	// nothing returned -> no open submissions for us
 	if ( empty($row) ) {
