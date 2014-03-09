@@ -11,7 +11,7 @@ config: configure.php
 domserver: configure.php
 
 install-domserver:
-	for d in . affiliations countries ; do \
+	for d in . countries ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/$$d images/$$d/*.png ; \
 	done
 	for d in public team jury plugin api ; do \
