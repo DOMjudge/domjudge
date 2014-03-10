@@ -367,7 +367,7 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 <code>
 apt-get install gcc g++ make zip mysql-server \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql php5-json \
-        php-geshi phpmyadmin ntp \
+	phpmyadmin ntp \
 	libboost-regex-dev libgmp3-dev linuxdoc-tools linuxdoc-tools-text \
 	transfig groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended
