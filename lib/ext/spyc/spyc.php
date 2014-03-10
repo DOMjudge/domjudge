@@ -1,7 +1,7 @@
 <?php
 /**
    * Spyc -- A Simple PHP YAML Class
-   * @version 0.5
+   * @version 0.5.1
    * @author Vlad Andersen <vlad.andersen@gmail.com>
    * @author Chris Wanstrath <chris@ozmm.org>
    * @link http://code.google.com/p/spyc/
@@ -433,17 +433,15 @@ class Spyc {
         $i--;
       }
 
+      // Strip out comments
+      if (strpos ($line, '#')) {
+          $line = preg_replace('/\s*#([^"\']+)$/','',$line);
+      }
+
       while (++$i < $cnt && self::greedilyNeedNextLine($line)) {
         $line = rtrim ($line, " \n\t\r") . ' ' . ltrim ($Source[$i], " \t");
       }
       $i--;
-
-
-
-      if (strpos ($line, '#')) {
-        if (strpos ($line, '"') === false && strpos ($line, "'") === false)
-          $line = preg_replace('/\s+#(.+)$/','',$line);
-      }
 
       $lineArray = $this->_parseLine($line);
 
@@ -654,6 +652,7 @@ class Spyc {
     } while (strpos ($inline, '[') !== false || strpos ($inline, '{') !== false);
 
     $explode = explode(', ',$inline);
+    $explode = array_map('trim', $explode);
     $stringi = 0; $i = 0;
 
     while (1) {
