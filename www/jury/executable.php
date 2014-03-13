@@ -90,12 +90,6 @@ if ( isset($_POST['upload']) ) {
 	}
 }
 
-// This doesn't return, call before sending headers
-// FIXME: add option to download executable
-if ( isset($cmd) && $cmd == 'viewtext' ) putProblemText($id);
-
-$jscolor=true;
-
 require(LIBWWWDIR . '/header.php');
 
 if ( !empty($cmd) ):
