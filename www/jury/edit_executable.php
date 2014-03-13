@@ -20,16 +20,21 @@ if ( isset($_POST['storeid']) ) {
 	if ( FALSE === file_put_contents($tmpfname, $executable['zipfile']) ) {
 		error("failed to write zip file to temporary file");
 	}
+	if ( !($tmpfdirpath = mkstemps(TMPDIR."/executable-XXXXXX",0)) ) {
+		error("failed to create temporary file");
+	}
+	$tmpexecdir = $tmpfdirpath . "-dir";
+	system("mkdir $tmpexecdir", $retval);
+	if ( $retval!=0 ) {
+		error("failed to created temporary directory");
+	}
+	chmod($tmpexecdir, 0700);
+	system("unzip $tmpfname -d $tmpexecdir", $retval);
+	if ( $retval!=0 ) {
+		error("Could not unzip executable to temporary directory.");
+	}
+	
 	$zip = openZipFile($tmpfname);
-	$newzip = new ZipArchive;
-	if ( !($tmpfname2 = mkstemps(TMPDIR."/executable-XXXXXX",0)) ) {
-		error("Could not create temporary file.");
-	}
-
-	$res = $newzip->open($tmpfname2, ZipArchive::OVERWRITE);
-	if ( $res !== TRUE ) {
-		error("Could not create temporary zip file.");
-	}
 	$skip = 0;
 	for ($j = 0; $j < $zip->numFiles; $j++) {
 		$filename = $zip->getNameIndex($j);
@@ -40,23 +45,31 @@ if ( isset($_POST['storeid']) ) {
 		$content = $zip->getFromIndex($j);
 		if (!mb_check_encoding($content, 'ASCII')) {
 			$skip++;
-			// add binary files from old zip
-			$newzip->addFromString($filename, $content);
+			// skip binary files from old zip
 			continue;
 		}
 		// FIXME: skip files based on size?
 
 		// overwrite other files
 		$index = $j - $skip;
-		$newzip->addFromString($filename, $_POST['texta' . $index]);
+		if ( FALSE === file_put_contents($tmpexecdir . "/" . $filename, str_replace("\r\n", "\n", $_POST['texta' . $index])) ) {
+			error("Could not overwrite zip file contents.");
+		}
 	}
-	$newzip->close();
-	$content = file_get_contents($tmpfname2);
+	$zip->close();
+
+	system("zip -r -j $tmpfname $tmpexecdir", $retval);
+	if ( $retval!=0 ) {
+		error("failed to zip executable files.");
+	}
+	$content = file_get_contents($tmpfname . ".zip");
 
 	$DB->q('UPDATE executable SET zipfile = %s, md5sum = %s WHERE execid = %s', $content, md5($content), $id);
 
 	unlink($tmpfname);
-	unlink($tmpfname2);
+	unlink($tmpfname . ".zip");
+	system("rm -rf '$tmpexecdir'");
+	unlink($tmpfdirpath);
 
 	header('Location: executable.php?id=' . $id);
 	exit;
