@@ -15,7 +15,7 @@ Version 4.0.0 - DEV
  - Update jscolor and sorttable javascript to latest upstream versions.
  - Misc. minor bugs fixed reported by Coverity scan.
  - Replace flex++ by flexc++, fixes a missing build dep. and code cleanup.
- - Add support for new languages: Prolog, Ruby.
+ - Add support for new languages: Prolog, Ruby, JavaScript.
  - Add note that submit client requires the IPADDRESS (or FIXED)
    authentication method (Closes #125).
  - Replace GeSHi syntax highlighter with Ace javascript code editor.
