@@ -20,11 +20,7 @@ if ( isset($_POST['storeid']) ) {
 	if ( FALSE === file_put_contents($tmpfname, $executable['zipfile']) ) {
 		error("failed to write zip file to temporary file");
 	}
-	if ( !($tmpfdirpath = mkstemps(TMPDIR."/executable-XXXXXX",0)) ) {
-		error("failed to create temporary file");
-	}
-	$tmpexecdir = $tmpfdirpath . "-dir";
-	system("mkdir $tmpexecdir", $retval);
+	$tmpexecdir = system("mktemp -d --tmpdir=$TMPDIR executable-XXXXXX", $retval);
 	if ( $retval!=0 ) {
 		error("failed to created temporary directory");
 	}
@@ -69,7 +65,6 @@ if ( isset($_POST['storeid']) ) {
 	unlink($tmpfname);
 	unlink($tmpfname . ".zip");
 	system("rm -rf '$tmpexecdir'");
-	unlink($tmpfdirpath);
 
 	header('Location: executable.php?id=' . $id);
 	exit;
