@@ -2077,11 +2077,13 @@ or
 Error occurred during initialization of VM
 Could not reserve enough space for object heap
 </code>
-Then the problem is probably that the jvm needs more memory than what
-is reserved by the Java compile script. You should try to increase the
-<tt>MEMRESERVED</tt> variable in <tt>judge/compile_java.sh</tt> and
-check that the configuration variable <tt>memory-limit</tt> is set
-larger than <tt>MEMRESERVED</tt>.
+Then the problem is probably that the jvm needs more memory than what is
+reserved by the Java compile script. You should try to increase the
+<tt>MEMRESERVED</tt> variable in <tt>judge/compile_java.sh</tt> and check that
+the configuration variable <tt>memory limit</tt> is set larger than
+<tt>MEMRESERVED</tt>. If that does not help, you should try to increase the
+configuration variable <tt>process limit</tt> (since the JVM uses a lot of
+processes for garbage collection).
 
 <sect>Java class naming
 <p>
