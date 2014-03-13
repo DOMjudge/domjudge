@@ -779,3 +779,18 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null, $force_usernam
 	        VALUES(%s, %i, %s, %s, %s, %s, %s)',
 	       now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
 }
+
+/**
+ * Convert PHP ini values to bytes, as per
+ * http://www.php.net/manual/en/function.ini-get.php
+ */
+function phpini_to_bytes($size_str) {
+	switch (substr ($size_str, -1))
+	{
+		case 'M': case 'm': return (int)$size_str * 1048576;
+		case 'K': case 'k': return (int)$size_str * 1024;
+		case 'G': case 'g': return (int)$size_str * 1073741824;
+		default: return $size_str;
+	}
+}
+

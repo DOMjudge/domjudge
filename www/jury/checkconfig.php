@@ -132,6 +132,31 @@ result('software', 'PHP max_file_uploads',
        'than the maximum number of test cases per problem and the ' .
        'configuration setting \'sourcefiles_limit\'.');
 
+
+$sizes = array();
+$postmaxvars = array('post_max_size', 'memory_limit', 'upload_max_filesize');
+foreach($postmaxvars as $var) {
+	/* skip 0 or empty values, and -1 which means 'unlimited' */
+	if( $size = phpini_to_bytes(ini_get($var)) ) {
+		if ( $size != '-1' ) {
+			$sizes[$var] = $size;
+		}
+	}
+}
+
+$resulttext = 'PHP POST/upload filesize is limited to ' .min($sizes) . ' B. '.
+	"\n\nThis limit needs to be larger than the testcases you want to upload and than the amount of program output you expect the judgedaemons to post back to DOMjudge. We recommend at least 50 MB.\n\nNote that you need to ensure that all of the following php.ini parameters are at minimum the desired size:\n";
+foreach($postmaxvars as $var) {
+	$resulttext .= "$var (now set to " .
+		(isset($sizes[$var]) ? $sizes[$var] . " B" : "unlimited") .
+		")\n";
+}
+
+result('software', 'PHP POST/upload filesize',
+       min($sizes) < 52428800 ? 'W':'O',
+       $resulttext
+); 
+
 if ( class_exists("ZipArchive") ) {
 	result('software', 'Problem up/download via zip bundles',
 	       'O', 'PHP ZipArchive class available for importing and exporting problem data.');
