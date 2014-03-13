@@ -49,27 +49,33 @@ if ( isset($_POST['upload']) ) {
 			$newid = $_FILES['executable_archive']['name'][$fileid];
 			$newid = substr($newid, 0, strlen($newid) - strlen(".zip"));
 			$desc = $newid;
-			if ( isset($id) ) {
+			$type = 'unknown';
+			if ( isset($_POST['type']) ) {
+				$type = $_POST['type'];
+			}
+			if ( !empty($id) ) {
 				$desc = $DB->q('VALUE SELECT description FROM executable WHERE execid=%s', $id);
+				$type = $DB->q('VALUE SELECT type FROM executable WHERE execid=%s', $id);
 			}
 			$ini_array = parse_ini_string($zip->getFromName($prop_file));
 			if ( !empty($ini_array) ) {
 				$newid = $ini_array['execid'];
 				$desc = $ini_array['description'];
+				$type = $ini_array['type'];
 			}
 			if ( $zip->getFromName('build') === FALSE ) {
 				error("Need 'build' script/executable when adding a new executable.");
 			}
 			$content = file_get_contents($_FILES['executable_archive']['tmp_name'][$fileid]);
-			if ( isset($id) ) {
-				$DB->q("UPDATE executable SET description=%s, md5sum=%s, zipfile=%s" .
+			if ( !empty($id) ) {
+				$DB->q("UPDATE executable SET description=%s, md5sum=%s, zipfile=%s, type=%s" .
 					" WHERE execid=%s",
-					$desc, md5($content), $content, $id);
+					$desc, md5($content), $content, $type, $id);
 				$newid = $id;
 			} else {
-				$DB->q("INSERT INTO executable (execid, description, md5sum, zipfile) " .
-					"VALUES (%s, %s, %s, %s)",
-					$newid, $desc, md5($content), $content);
+				$DB->q("INSERT INTO executable (execid, description, md5sum, zipfile, type) " .
+					"VALUES (%s, %s, %s, %s, %s)",
+					$newid, $desc, md5($content), $content, $type);
 			}
 			$zip->close();
 			auditlog('executable', $id, 'upload zip', $_FILES['executable_archive']['name'][$fileid]);
@@ -139,6 +145,7 @@ if ( class_exists("ZipArchive") ) {
 	addForm($pagename, 'post', null, 'multipart/form-data') .
 	addHidden('id', @$row['execid']) .
 	'<label for="executable_archive__">Upload executable archive:</label>' .
+	($cmd == 'add' ? addSelect('type', array('compare' => 'compare', 'compile' => 'compile', 'run' => 'run')) : '') .
 	addFileField('executable_archive[]') .
 	addSubmit('Upload', 'upload') .
 	addEndForm();

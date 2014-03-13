@@ -56,6 +56,7 @@ if ( IS_ADMIN ) {
 	if ( class_exists("ZipArchive") ) {
 		echo "\n" . addForm('executable.php', 'post', null, 'multipart/form-data') .
 	 		'Executable archive(s): ' .
+			addSelect('type', array('compare' => 'compare', 'compile' => 'compile', 'run' => 'run')) .
 	 		addFileField('executable_archive[]', null, ' required multiple accept="application/zip"') .
 	 		addSubmit('Upload', 'upload') .
 	 		addEndForm() . "\n";
