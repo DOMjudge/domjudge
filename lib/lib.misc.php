@@ -577,8 +577,8 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 						  langid = %s AND allow_submit = 1', $lang) ) {
 		error("Language '$lang' not found in database or not submittable.");
 	}
-	if( ! $login = $DB->q('MAYBEVALUE SELECT login FROM team WHERE login = %s',$team) ) {
-		error("Team '$team' not found in database.");
+	if( ! $login = $DB->q('MAYBEVALUE SELECT login FROM team WHERE login = %s AND enabled = 1',$team) ) {
+		error("Team '$team' not found in database or not enabled.");
 	}
 	$team = $login;
 	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem WHERE probid = %s
