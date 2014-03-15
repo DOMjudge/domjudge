@@ -112,10 +112,10 @@ function tsv_teams_prepare($content)
 				'externalid' => @$line[1],
 				'categoryid' => @$line[2],
 				'name' => @$line[3],
-				'affilid' => tsv_clean_affilid(@$line[4])),
+				'affilid' => tsv_clean_affilid(@$line[5])),
 			'team_affiliation' => array (
-				'affilid' => tsv_clean_affilid(@$line[4]),
-				'name' => @$line[5],
+				'affilid' => tsv_clean_affilid(@$line[5]),
+				'name' => @$line[4],
 				'country' => @$line[6]) );
 	}
 
