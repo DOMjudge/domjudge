@@ -112,9 +112,9 @@ function tsv_teams_prepare($content)
 				'externalid' => @$line[1],
 				'categoryid' => @$line[2],
 				'name' => @$line[3],
-				'affilid' => @$line[4]), 
+				'affilid' => tsv_clean_affilid(@$line[4])),
 			'team_affiliation' => array (
-				'affilid' => @$line[4], 
+				'affilid' => tsv_clean_affilid(@$line[4]),
 				'name' => @$line[5],
 				'country' => @$line[6]) );
 	}
@@ -216,4 +216,14 @@ function tsv_scoreboard_get()
 	}
 
 	return $data;
+}
+
+/**
+ * DOMjudge currently requires an affiliation ID to contain only
+ * IDENTIFIER_CHARS. Until this is fixed (?), modify input value to
+ * replace all invalid chars with _.
+ */
+function tsv_clean_affilid($id)
+{
+	return preg_replace('/[^' . substr(IDENTIFIER_CHARS,1) . '/', '_', $id);
 }
