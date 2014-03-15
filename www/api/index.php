@@ -420,6 +420,43 @@ $exArgs = array(array('fromid' => 100, 'limit' => 10), array('language' => 'cpp'
 $api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
 
 /**
+ * POST a new submission
+ */
+function submissions_POST($args)
+{
+	global $userdata;
+	checkargs($args, array('probid','langid'));
+
+	if ( count($_FILES['code']['tmp_name']) > dbconfig_get('sourcefiles_limit',100) ) {
+		error("Tried to submit more than the allowed number of source files.");
+	}
+
+	// rebuild array of filenames, paths to get rid of empty upload fields
+	$FILEPATHS = $FILENAMES = array();
+	foreach($_FILES['code']['tmp_name'] as $fileid => $tmpname ) {
+		if ( !empty($tmpname) ) {
+			checkFileUpload($_FILES['code']['error'][$fileid]);
+			$FILEPATHS[] = $_FILES['code']['tmp_name'][$fileid];
+			$FILENAMES[] = $_FILES['code']['name'][$fileid];
+		}
+	}
+
+	$sid = submit_solution($userdata['teamid'], $args['probid'], $args['langid'], $FILEPATHS, $FILENAMES);
+
+	auditlog('submission', $sid, 'added', 'via api');
+
+	return $sid;
+}
+
+$args = array('code[]' => 'Array of source files to submit',
+              'probid' => 'Problem ID',
+              'langid' => 'Language ID');
+$doc = 'Post a new submission. You need to be authenticated with a team role. Returns the submission id.';
+$exArgs = array();
+$roles = array('team');
+$api->provideFunction('POST', 'submissions', $doc, $args, $exArgs, $roles);
+
+/**
  * Submission Files
  */
 function submission_files($args)
