@@ -241,11 +241,15 @@ function addFileUpload() {
 }
 
 function togglelastruns() {
-	var names = {'lastruntime':0, 'lastresult':1};
+	var names = {'lastruntime':0, 'lastresult':1, 'lasttcruns':2};
 	for (var name in names) {
 		cells = document.getElementsByClassName(name);
 		for (i = 0; i < cells.length; i++) {
-			cells[i].style.display = (cells[i].style.display == 'none') ? 'table-cell' : 'none';
+			style = 'inline';
+			if (name == 'lasttcruns') {
+				style = 'table-row';
+			}
+			cells[i].style.display = (cells[i].style.display == 'none') ? style : 'none';
 		}
 	}
 }

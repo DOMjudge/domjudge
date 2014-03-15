@@ -159,7 +159,7 @@ function addForm($action, $method = 'post', $id = '', $enctype = '', $charset = 
 		$charset = ' accept-charset="'.htmlspecialchars($charset).'"';
 	}
 
-	return '<form action="'. $action .'" method="'. $method .'"'.
+	return '<form style="display:inline;" action="'. $action .'" method="'. $method .'"'.
 		$enctype . $id . $charset . $extra .">\n";
 }
 

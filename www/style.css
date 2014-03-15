@@ -224,6 +224,11 @@ legend {
 .score_pending   { background: #6666FF; }
 .score_incorrect { background: #e87272; }
 
+.tc_box { text-align:center;font-size:85%;width:1.2em;display:inline-block;padding:2px;margin:1px;color:black;}
+.tc_correct   { background: #60e760; }
+.tc_pending   { background: #BBBBBB; }
+.tc_incorrect { background: #e87272; }
+
 #scoresolv,#scoretotal { width: 2.5em; }
 .scorenc,.scorett,.scorepl { text-align: center; width: 2ex; }
 .scorenc { font-weight: bold; }
