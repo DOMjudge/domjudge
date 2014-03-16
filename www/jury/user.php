@@ -63,7 +63,7 @@ if ( !empty($row['password']) ) {
 <?php echo addRadioButton('data[0][enabled]', (isset($row['enabled']) && !$row['enabled']), 0)?> <label for="data_0__enabled_0">no</label></td></tr>
 
 <!-- team selection -->
-<tr><td><label for="data_0__affilid_">Team:</label></td>
+<tr><td><label for="data_0__teamid_">Team:</label></td>
 <td><?php
 $tmap = $DB->q("KEYVALUETABLE SELECT login,name FROM team ORDER BY name");
 $tmap[''] = 'none';
@@ -72,7 +72,7 @@ echo addSelect('data[0][teamid]', $tmap, isset($row['teamid'])?$row['teamid']:@$
 </td></tr>
 
 <!-- role selection -->
-<tr><td><label for="data_0__affilid_">Roles:</label></td>
+<tr><td>Roles:</td>
 <td><?php
 $roles = $DB->q("TABLE SELECT role.roleid,role,description,max(userrole.userid=%s) AS hasrole ".
     "FROM role ".
