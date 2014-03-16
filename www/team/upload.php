@@ -55,10 +55,6 @@ function err($string)
 	exit;
 }
 
-if ( count($_FILES['code']['tmp_name']) > dbconfig_get('sourcefiles_limit',100) ) {
-	err("Tried to submit more than the allowed number of source files.");
-}
-
 ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
 
 // rebuild array of filenames, paths to get rid of empty upload fields

@@ -553,6 +553,9 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 	if( empty($lang) ) error("No value for Language.");
 
 	if ( !is_array($files) || count($files)==0 ) error("No files specified.");
+	if ( count($files) > dbconfig_get('sourcefiles_limit',100) ) {
+		error("Tried to submit more than the allowed number of source files.");
+	}
 	if ( !is_array($filenames) || count($filenames)!=count($files) ) {
 		error("Nonmatching (number of) filenames specified.");
 	}

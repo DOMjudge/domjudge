@@ -41,10 +41,6 @@ for($i=5; $i<count($argv); $i+=2) {
 	$filenames[] = $argv[$i+1];
 }
 
-if ( count($filenames) > dbconfig_get('sourcefiles_limit',100) ) {
-	error("Tried to submit more than the allowed number of source files.");
-}
-
 logmsg(LOG_DEBUG, "arguments: '$team' '$ip' '$prob' '$langext' and " .
        count($files) . " files specified");
 
