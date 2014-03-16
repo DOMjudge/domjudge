@@ -13,8 +13,6 @@ $pagename = basename($_SERVER['PHP_SELF']);
 define('IS_JURY', false);
 define('IS_PUBLIC', false);
 
-if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
-
 require_once(LIBDIR . '/init.php');
 
 setup_database_connection();

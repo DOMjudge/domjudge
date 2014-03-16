@@ -23,8 +23,6 @@ require_once(LIBWWWDIR . '/forms.php');
 require_once(LIBWWWDIR . '/printing.php');
 require_once(LIBWWWDIR . '/auth.php');
 
-if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
-
 // The functions do_login and show_loginpage, if called, do not return.
 if ( @$_POST['cmd']=='login' ) do_login();
 if ( !logged_in() ) show_loginpage();

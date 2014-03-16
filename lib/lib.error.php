@@ -82,9 +82,6 @@ function logmsg($msglevel, $string) {
 				} else {
 					echo "<p>" . $msg . "</p>\n";
 				}
-				// Add strings for non-interactive parsing:
-				if ( $msglevel == LOG_ERR ||
-				     $msglevel == LOG_WARNING ) echo "\n<!-- @@@$msg@@@ -->\n";
 			}
 		} else {
 			fwrite(STDERR, $stamp . $string . "\n");

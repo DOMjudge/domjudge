@@ -138,7 +138,6 @@ function show_loginpage()
 	case 'IPADDRESS':
 	case 'PHP_SESSIONS':
 	case 'LDAP':
-		if ( NONINTERACTIVE ) error("Not authenticated");
 		$title = 'Not Authenticated';
 		$menu = false;
 
