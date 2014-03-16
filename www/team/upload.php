@@ -55,8 +55,6 @@ function err($string)
 	exit;
 }
 
-ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
-
 // rebuild array of filenames, paths to get rid of empty upload fields
 $FILEPATHS = $FILENAMES = array();
 foreach($_FILES['code']['tmp_name'] as $fileid => $tmpname ) {
