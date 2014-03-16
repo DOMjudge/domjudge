@@ -46,26 +46,26 @@ function logged_in()
 	switch ( AUTH_METHOD ) {
 	case 'FIXED':
 		$username = FIXED_USER;
-		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $username);
+		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s AND enabled = 1', $username);
 		break;
 	case 'EXTERNAL':
 		if ( empty($_SERVER['REMOTE_USER']) ) {
 			$username = $userdata = null;
 		} else {
 			$username = $_SERVER['REMOTE_USER'];
-			$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $username);
+			$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s AND enabled = 1', $username);
 		}
 		break;
 
 	case 'IPADDRESS':
-		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE ip_address = %s', $ip);
+		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE ip_address = %s AND enabled = 1', $ip);
 		break;
 
 	case 'PHP_SESSIONS':
 	case 'LDAP':
 		if (session_id() == "") session_start();
 		if ( isset($_SESSION['username']) ) {
-			$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s',
+			$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s AND enabled = 1',
 			                   $_SESSION['username']);
 		}
 		break;
@@ -76,7 +76,7 @@ function logged_in()
 
 	if ( !empty($userdata) ) {
 		$username = $userdata['username'];
-		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s', $userdata['teamid']);
+		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s AND enabled = 1', $userdata['teamid']);
 
 		// Pull the list of roles that a user has
 		$userdata['roles'] = get_user_roles($userdata['userid']);
@@ -259,10 +259,9 @@ function do_login()
 		}
 
 		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
-		                    WHERE username = %s', $user);
+		                    WHERE username = %s AND enabled = 1', $user);
 
 		if ( !$userdata ||
-			 $userdata['enabled']!='1' ||
 		     !ldap_check_credentials($userdata['username'], $pass) ) {
 			sleep(3);
 			show_failed_login("Invalid username or password supplied. " .
@@ -311,10 +310,10 @@ function do_login_native($user, $pass)
 	global $DB, $userdata, $username;
 
 	$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
-			    WHERE username = %s AND password = %s',
+			    WHERE username = %s AND password = %s AND enabled = 1',
 			   $user, md5($user."#".$pass));
 
-	if ( !$userdata || $userdata['enabled']!='1') {
+	if ( !$userdata ) {
 		sleep(1);
 		show_failed_login("Invalid username or password supplied. " .
 				  "Please try again or contact a staff member.");
