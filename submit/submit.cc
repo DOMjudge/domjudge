@@ -885,6 +885,7 @@ int websubmit()
 	curlsetopt(MAXREDIRS,     10);
 	curlsetopt(TIMEOUT,       timeout_secs);
 	curlsetopt(URL,           url);
+	curlsetopt(NETRC,         CURL_NETRC_OPTIONAL);
 	curlsetopt(HTTPPOST,      post);
 	curlsetopt(HTTPGET,       0);
 	curlsetopt(WRITEFUNCTION, writesstream);
