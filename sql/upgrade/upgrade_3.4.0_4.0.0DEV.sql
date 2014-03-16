@@ -175,6 +175,37 @@ ALTER TABLE `team`
   ADD COLUMN `judging_last_started` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Start time of last judging for priorization' AFTER `comments`,
   ADD COLUMN `teampage_first_visited` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of first teampage view' AFTER `judging_last_started`;
 
+-- We move the affilid primary key to shortname and create a new
+-- auto-incremented affilid. We drop and recreate the foreign key
+-- constraint in the team table to allow the update.
+SET FOREIGN_KEY_CHECKS = 0;
+
+ALTER TABLE `team`
+  DROP FOREIGN KEY `team_ibfk_2`,
+  ADD COLUMN `affilid_old` varchar(30) NOT NULL AFTER `affilid`;
+
+ALTER TABLE `team_affiliation`
+  ADD COLUMN `shortname` varchar(30) NOT NULL COMMENT 'Short descriptive name' AFTER `affilid`;
+
+UPDATE `team_affiliation` SET `shortname` = `affilid`;
+UPDATE `team` SET `affilid_old` = `affilid`;
+
+ALTER TABLE `team`
+  MODIFY COLUMN `affilid` int(4) unsigned DEFAULT NULL COMMENT 'Team affiliation ID';
+
+ALTER TABLE `team_affiliation`
+  MODIFY COLUMN `affilid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID';
+
+UPDATE `team`
+  LEFT JOIN `team_affiliation` affil ON team.affilid_old = affil.shortname
+  SET team.affilid = affil.affilid;
+
+ALTER TABLE `team`
+  DROP COLUMN `affilid_old`,
+  ADD FOREIGN KEY (`affilid`) REFERENCES `team_affiliation` (`affilid`) ON DELETE SET NULL;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
 --
 -- Transfer data from old to new structure
 --
