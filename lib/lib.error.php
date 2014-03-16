@@ -59,20 +59,33 @@ function logmsg($msglevel, $string) {
 		// if this is the webinterface, print it to stdout, else to stderr
 		if ( IS_WEB ) {
 			$msg = htmlspecialchars($string);
-			// string 'ERROR' parsed by submit client, don't modify!
-			if ( $msglevel == LOG_ERR ) {
-				echo "<fieldset class=\"error\"><legend>ERROR</legend> " .
-					 $msg . "</fieldset>\n";
-			} else
-			if ( $msglevel == LOG_WARNING ) {
-				echo "<fieldset class=\"warning\"><legend>Warning</legend> " .
-					$msg . "</fieldset>\n";
+			// if this is the API, do not add HTML formatting and send HTTP status code
+			if ( defined('DOMJUDGE_API_VERSION') ) {
+				if ( $msglevel == LOG_ERR && ! headers_sent() ) {
+					$protocol = (isset($_SERVER['SERVER_PROTOCOL']) ?
+						$_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
+					header($protocol . " 500 Internal Server Error");
+				}
+				// Note: should we skip non-fatal messages in the API? A warning
+				// will probably mess up json output.
+				echo $msg . "\n";
+			// normal interactive web interface: output with markup
 			} else {
-				echo "<p>" . $msg . "</p>\n";
+				// string 'ERROR' parsed by submit client, don't modify!
+				if ( $msglevel == LOG_ERR ) {
+					echo "<fieldset class=\"error\"><legend>ERROR</legend> " .
+						 $msg . "</fieldset>\n";
+				} else
+				if ( $msglevel == LOG_WARNING ) {
+					echo "<fieldset class=\"warning\"><legend>Warning</legend> " .
+						$msg . "</fieldset>\n";
+				} else {
+					echo "<p>" . $msg . "</p>\n";
+				}
+				// Add strings for non-interactive parsing:
+				if ( $msglevel == LOG_ERR ||
+				     $msglevel == LOG_WARNING ) echo "\n<!-- @@@$msg@@@ -->\n";
 			}
-			// Add strings for non-interactive parsing:
-			if ( $msglevel == LOG_ERR ||
-			     $msglevel == LOG_WARNING ) echo "\n<!-- @@@$msg@@@ -->\n";
 		} else {
 			fwrite(STDERR, $stamp . $string . "\n");
 			fflush(STDERR);
