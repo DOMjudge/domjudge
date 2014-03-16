@@ -35,13 +35,12 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 			$_GET['id']);
 		echo addHidden('keydata[0][affilid]', $row['affilid']) .
 			htmlspecialchars($row['affilid']);
-	} else {
-		echo "<tr><td><label for=\"data_0__affilid_\">Affiliation ID:</label></td><td>";
-		echo addInput('data[0][affilid]', null, 11, 10, 'required');
+		echo "</td></tr>\n";
 	}
-	echo "</td></tr>\n";
 
 ?>
+<tr><td><label for="data_0__shortname_">Shortname:</label></td>
+<td><?php echo addInput('data[0][shortname]', @$row['shortname'], 40, 30, 'required')?></td></tr>
 
 <tr><td><label for="data_0__name_">Name:</label></td>
 <td><?php echo addInput('data[0][name]', @$row['name'], 40, 255, 'required')?></td></tr>
@@ -83,13 +82,14 @@ echo "<h1>Affiliation: ".htmlspecialchars($data['name'])."</h1>\n\n";
 
 echo "<table>\n";
 echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['affilid']) . "</td></tr>\n";
+echo '<tr><td>Shortname:</td><td>' . htmlspecialchars($data['shortname']) . "</td></tr>\n";
 echo '<tr><td>Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
 
 echo '<tr><td>Logo:</td><td>';
 
 if ( is_readable($affillogo) ) {
 	echo '<img src="' . $affillogo . '" alt="' .
-		htmlspecialchars($data['affilid']) . "\" /></td></tr>\n";
+		htmlspecialchars($data['shortname']) . "\" /></td></tr>\n";
 } else {
 	echo "not available</td></tr>\n";
 }

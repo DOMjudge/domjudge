@@ -41,7 +41,7 @@ UPDATE `problem` SET problemtext = 0x255044462D312E350A25D0D4C5D80A342030206F626
 -- Dumping data for table `team_affiliation`
 -- 
 
-INSERT INTO `team_affiliation` (`affilid`, `name`, `country`, `comments`) VALUES ('UU', 'Utrecht University', 'NLD', NULL);
+INSERT INTO `team_affiliation` (`shortname`, `name`, `country`, `comments`) VALUES ('UU', 'Utrecht University', 'NLD', NULL);
 
 -- 
 -- Dumping data for table `team_category`
@@ -56,7 +56,7 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 -- Dumping data for table `team`
 -- 
 
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('egteam', 'Example teamname', 2, 'UU', NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('egteam', 'Example teamname', 2, 1, NULL, NULL, NULL, NULL);
 
 -- 
 -- Dumping data for table `testcase`

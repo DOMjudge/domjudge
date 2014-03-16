@@ -92,7 +92,7 @@ if ( isset($_GET['restrict']) ) {
 	$restrictions[$key] = $value;
 }
 
-$row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname, a.name AS affname
+$row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname, a.shortname AS affshortname, a.name AS affname
                FROM team t
                LEFT JOIN team_category c USING (categoryid)
                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
@@ -144,9 +144,7 @@ if ( !empty($row['affilid']) ) {
 	echo '<tr><td>Affiliation:</td><td>';
 	if ( is_readable($affillogo) ) {
 		echo '<img src="' . $affillogo . '" alt="' .
-			htmlspecialchars($row['affilid']) . '" /> ';
-	} else {
-		echo htmlspecialchars($row['affilid']) . ' - ';
+			htmlspecialchars($row['affshortname']) . '" /> ';
 	}
 	echo '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">' .
 		htmlspecialchars($row['affname']) . "</a></td></tr>\n";

@@ -9,7 +9,9 @@
 require('init.php');
 $title = 'Teams';
 
-$teams = $DB->q('SELECT t.*,c.name AS catname,a.name AS affname
+$teams = $DB->q('SELECT t.*,
+                 c.name AS catname,
+                 a.shortname AS affshortname, a.name AS affname
                  FROM team t
                  LEFT JOIN team_category c USING (categoryid)
                  LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
@@ -64,7 +66,7 @@ if( $teams->count() == 0 ) {
 			"<td>" . $link .
 				htmlspecialchars($row['catname'])."</a></td>".
 			"<td title=\"".htmlspecialchars($row['affname'])."\">" . $link .
-				($row['affilid'] ? htmlspecialchars($row['affilid']) : '&nbsp;') .
+				($row['affshortname'] ? htmlspecialchars($row['affshortname']) : '&nbsp;') .
 			"</a></td><td title=\"";
 
 		if ( @$row['hostname'] ) {

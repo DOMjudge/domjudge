@@ -604,7 +604,7 @@ function affiliations($args)
 	global $DB;
 
 	// Construct query
-	$query = 'SELECT affilid, name, country FROM team_affiliation WHERE';
+	$query = 'SELECT affilid, shortname, name, country FROM team_affiliation WHERE';
 
 	$byCountry = array_key_exists('country', $args);
 	$query .= ($byCountry ? ' country = %s' : ' TRUE %_');
@@ -616,7 +616,7 @@ function affiliations($args)
 	$q = $DB->q($query, $country);
 	return $q->gettable();
 }
-$doc = 'Get a list of affiliations, with for each affiliation: affilid, name and country.';
+$doc = 'Get a list of affiliations, with for each affiliation: affilid, shortname, name and country.';
 $optArgs = array('country' => 'ISO 3166-1 alpha-3 country code to search for.');
 $exArgs = array(array('country' => 'NLD'));
 $api->provideFunction('GET', 'affiliations', $doc, $optArgs, $exArgs);

@@ -358,7 +358,7 @@ CREATE TABLE `team` (
   `login` varchar(15) NOT NULL COMMENT 'Team login name',
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Team name',
   `categoryid` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Team category ID',
-  `affilid` varchar(10) DEFAULT NULL COMMENT 'Team affiliation ID',
+  `affilid` int(4) unsigned DEFAULT NULL COMMENT 'Team affiliation ID',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the team is visible and operational',
   `members` longtext COMMENT 'Team member names (freeform)',
   `room` varchar(15) DEFAULT NULL COMMENT 'Physical location of team',
@@ -379,7 +379,8 @@ CREATE TABLE `team` (
 --
 
 CREATE TABLE `team_affiliation` (
-  `affilid` varchar(10) NOT NULL COMMENT 'Unique ID',
+  `affilid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `shortname` varchar(30) NOT NULL COMMENT 'Short descriptive name',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `country` char(3) DEFAULT NULL COMMENT 'ISO 3166-1 alpha-3 country code',
   `comments` longtext COMMENT 'Comments',
