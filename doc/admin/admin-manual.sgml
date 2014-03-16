@@ -182,10 +182,8 @@ functionality.
        system and team workstations in sync)
 
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">~
-       (to use the command line submit client with the web interface)
-
-<item> <htmlurl name="libJSONcpp" url="http://jsoncpp.sourceforge.net/">~
-       (for command line submit client to recognize submission languages)
+       and <htmlurl name="libJSONcpp" url="http://jsoncpp.sourceforge.net/">~
+       (to use the command line submit client via the API)
 
 <item> <htmlurl name="libmagic" url="http://www.darwinsys.com/file/">~
        (for command line submit client to detect binary file submissions)
@@ -383,18 +381,17 @@ apt-get install make sudo php5-cli php5-curl php5-json procps \
 </code>
 
 Finally, to build the command-line submit client, install the
-following additional software. Note that the submit client can only be
-used when the <tt>IPADDRESS</tt> authentication method is used.
+following additional software.
 
 <code>
 apt-get install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
 </code>
 
-LibcURL is required for submitting via the web interface, the other
-libraries are not strictly required, but highly recommended for
-optimal functioning. These libraries are statically linked into the
-<tt>submit</tt> binary so that these libraries are not needed on the
-team workstations where <tt>submit</tt> is installed.
+Libmagic is not strictly required, but highly recommended for
+detecting binary file submissions. These libraries are statically
+linked into the <tt>submit</tt> binary so that these libraries
+are not needed on the team workstations where <tt>submit</tt> is
+installed.
 
 
 <sect>Installation system
@@ -686,23 +683,20 @@ be made. These are sometimes needed in non-standard environments.
 
 DOMjudge supports two submission methods: via the command line submit
 program and via the web interface. From experience, both methods have
-users that prefer the one above the other. Note that the submit client
-can only be used when the <tt>IPADDRESS</tt> authentication method is
-used.
+users that prefer the one above the other.
 
 The command line submit client can send submissions by either using
-the web interface internally (<em>http</em> protocol, the default),
+the API interface internally (<em>http</em> protocol, the default),
 or using a special command line submit protocol, called
 <em>Dolstra</em>. The latter has some special features but is not
 usually needed. See <ref id="dolstra" name="Submitdaemon and the
-Dolstra protocol"> for
-details on this.
+Dolstra protocol"> for details on this.
 
 Using the http protocol with the submit client requires the libcURL
-library development files at compile time (the submit client is
-statically linked to libcURL to avoid a runtime dependency).
+and libjsonCPP library development files at compile time (the submit
+client is statically linked to avoid a runtime dependency).
 
-The database is the authoritative version for submission sources;
+The database is the authoritative version for submission source files;
 file system storage is available as an easy way
 to access the source files and as backup. The program
 <tt>bin/restore_sources2db</tt> is available to recover the submission
@@ -921,6 +915,24 @@ latter option makes for easier usage. A sample script
 <tt>submit_wrapper.sh</tt> is included, which sets this variable.
 See that script for more details on how to set this up.
 
+The submit client authenticates to the DOMjudge API via either the
+configured authentication scheme, or can use the DOMjudge internal
+username and password combination for a given user account regardless
+of authentication scheme. For example, when the IPADDRESS scheme is
+used, no additional configuration is required because submmissions
+will come from the correct IP address of the team. When another
+scheme is used, it may be necessary to place username and password
+combinations in the team's account so the submit client can use
+those. In this case these are always the DOMjudge internal
+password, so not e.g. LDAP passwords when using that scheme. The
+credentials are placed in the file <tt>~/.netrc</tt>, with example
+content:
+<verb>machine domserver.example.com login user0123 password Fba^2bHzz</verb>
+See the netrc(4) manual page for more details.
+You may want to distribute those <tt>.netrc</tt> files in advance
+over the team accounts. Make sure they are only readable for the
+user itself.
+
 <sect1>The submit client under Windows/Cygwin
 <p>
 
@@ -1050,7 +1062,7 @@ Finally, start each of the judgedaemons with:
 $ judgedaemon -n <X>
 </code>
 
-<sect1>Encrypted communications (HTTPS)
+<sect1>Encrypted communications (HTTPS) <label id="https">
 <p>
 
 DOMjudge can be configured to run on HTTPS, so teams and judgedaemons
@@ -1675,6 +1687,12 @@ has these features and can be distributed over the workstations.
   </itemize>
 <item> Make sure compilers for the supported languages are installed and working.
 <item> Provide teams with the command line submit client and check that it works.
+  <itemize>
+  <item> If needed, set environment variables to configure the client.
+  <item> Optionally distribute <tt>.netrc</tt> files with team credentials.
+  <item> If using https and a self signed certificate, add this certificate
+         to the local trust store (see <ref id="https" name="HTTPS setup">).
+  </itemize>
 <item> Make the sample in- and output data from the problem set available.
 <item> Add your SSH key to their authorized_keys file, so you can always access
 their account for wiping and emergencies.
