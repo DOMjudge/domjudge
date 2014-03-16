@@ -190,7 +190,7 @@ result('software', 'MySQL maximum connections',
 result('software', 'MySQL maximum packet size',
 	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O',
 	'MySQL\'s max_allowed_packet is set to ' .
-	printsize($mysqldata['max_allowed_packet'] . '. You may ' .
+	printsize($mysqldata['max_allowed_packet']) . '. You may ' .
 	'want to raise this to about twice the maximum test case size.');
 
 flushresults();
