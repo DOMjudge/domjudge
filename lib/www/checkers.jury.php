@@ -29,6 +29,7 @@ function check_team($data, $keydata = null)
 
 function check_user($data, $keydata = null)
 {
+	global $DB;
 	$id = (isset($data['username']) ? $data['username'] : $keydata['username']);
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Username may only contain characters " . IDENTIFIER_CHARS . ".");
@@ -39,6 +40,16 @@ function check_user($data, $keydata = null)
 	if ( !empty($data['password']) ) {
 		$data['password'] = md5("$id#".$data['password']);
 	}
+	if ( !empty($data['ip_address']) ) {
+		if ( !filter_var($data['ip_address'], FILTER_VALIDATE_IP) ) {
+			ch_error("Invalid IP address.");
+		}
+		$ip = $DB->q("VALUE SELECT count(*) FROM user WHERE ip_address = %s AND username != %s", $data['ip_address'], $id);
+		if ( $ip > 0 ) {
+			ch_error("IP address already assigned to another user.");
+		}
+	}
+
 	return $data;
 }
 
