@@ -144,11 +144,11 @@ foreach($postmaxvars as $var) {
 	}
 }
 
-$resulttext = 'PHP POST/upload filesize is limited to ' .min($sizes) . ' B. '.
+$resulttext = 'PHP POST/upload filesize is limited to ' . printsize(min($sizes)) .
 	"\n\nThis limit needs to be larger than the testcases you want to upload and than the amount of program output you expect the judgedaemons to post back to DOMjudge. We recommend at least 50 MB.\n\nNote that you need to ensure that all of the following php.ini parameters are at minimum the desired size:\n";
 foreach($postmaxvars as $var) {
 	$resulttext .= "$var (now set to " .
-		(isset($sizes[$var]) ? $sizes[$var] . " B" : "unlimited") .
+		(isset($sizes[$var]) ? printsize($sizes[$var]) : "unlimited") .
 		")\n";
 }
 
@@ -190,7 +190,7 @@ result('software', 'MySQL maximum connections',
 result('software', 'MySQL maximum packet size',
 	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O',
 	'MySQL\'s max_allowed_packet is set to ' .
-	(int)$mysqldata['max_allowed_packet']/1024/1024 . 'MB. You may ' .
+	printsize($mysqldata['max_allowed_packet'] . '. You may ' .
 	'want to raise this to about twice the maximum test case size.');
 
 flushresults();
@@ -302,7 +302,7 @@ $oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
                    dbconfig_get('filesize_limit')*1024);
 while($r = $oversize->next()) {
 	$details .= $r['probid'] . ": testcase #" . $r['rank'] .
-	    " output size (" . $r['size'] . " B) exceeds filesize_limit\n";
+	    " output size (" . printsize($r['size']) . ") exceeds filesize_limit\n";
 }
 
 $has_errors = $details != '';

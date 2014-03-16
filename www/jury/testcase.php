@@ -129,7 +129,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			}
 			$result .= "<li>Updated $inout for testcase $rank from " .
 			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
-			    " (" . htmlspecialchars($_FILES[$fileid]['size'][$rank]) . " B)";
+			    " (" . printsize($_FILES[$fileid]['size'][$rank]) . ")";
 			if ( $inout=='output' &&
 			     $_FILES[$fileid]['size'][$rank]>dbconfig_get('filesize_limit')*1024 ) {
 				$result .= ".<br /><b>Warning: file size exceeds " .
@@ -183,9 +183,9 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 			$result .= "<li>Added new testcase $rank from " .
 			    htmlspecialchars($_FILES['add_input']['name']) .
-			    " (" . htmlspecialchars($_FILES['add_input']['size']) . " B) and " .
+			    " (" . printsize($_FILES['add_input']['size']) . ") and " .
 			    htmlspecialchars($_FILES['add_output']['name']) .
-			    " (" . htmlspecialchars($_FILES['add_output']['size']) . " B)";
+			    " (" . printsize($_FILES['add_output']['size']) . ")";
 			if ( $_FILES['add_output']['size']>dbconfig_get('filesize_limit')*1024 ) {
 				$result .= ".<br /><b>Warning: output file size exceeds " .
 				    "<code>filesize_limit</code> of " . dbconfig_get('filesize_limit') .
@@ -257,7 +257,7 @@ foreach( $data as $rank => $row ) {
 		echo "<td class=\"filename\"><a href=\"./testcase.php?probid=" .
 		    urlencode($probid) . "&amp;rank=$rank&amp;fetch=" . $inout . "\">" .
 		    htmlspecialchars($probid) . $rank . "." . substr($inout,0,-3) . "</a></td>" .
-		    "<td class=\"size\">" . htmlspecialchars($row["size_$inout"]) . "&nbsp;B</td>" .
+		    "<td class=\"size\">" . printsize($row["size_$inout"]) . "</td>" .
 		    "<td class=\"md5\">" . htmlspecialchars($row["md5sum_$inout"]) . "</td>";
 		if ( IS_ADMIN ) {
 		    echo "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";

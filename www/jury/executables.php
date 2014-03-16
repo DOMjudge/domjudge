@@ -35,7 +35,7 @@ if( $res->count() == 0 ) {
 			"</td><td>" . $link . htmlspecialchars($row['description'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['type'])."</a>".
 			"</td><td class=\"size\">" . $link .
-				htmlspecialchars($row['size'])."&nbsp;B</a>".
+				printsize($row['size'])."</a>".
 			"</td><td class=\"md5\">" . $link .
 				htmlspecialchars($row['md5sum'])."</a>".
 			"</td>";
