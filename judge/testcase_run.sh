@@ -201,7 +201,7 @@ runcheck ./run testdata.in program.out \
 
 # Check for still running processes:
 if ps -u "$RUNUSER" >/dev/null 2>&1 ; then
-	error "found processes still running"
+	error "found processes still running as '$RUNUSER', check manually"
 fi
 
 # We first compare the output, so that even if the submission gets a
