@@ -441,12 +441,12 @@ void usage()
 "\n"
 "For PROBLEM use the ID of the problem (letter, number or short name)\n"
 "in lower- or uppercase. When not specified, PROBLEM defaults to the\n"
-"first FILENAME excluding the extension. For example, 'c.java' will\n"
-"indicate problem 'C'.\n"
+"first FILENAME excluding the extension. For example, 'B.java' will\n"
+"indicate problem 'B'.\n"
 "\n");
 	if ( languages.size()==0 ) {
 		printf(
-"For LANGUAGE use one the ID of the language (typically the main language\n"
+"For LANGUAGE use the ID of the language (typically the main language\n"
 "extension) in lower- or uppercase.\n");
 	} else {
 		printf(
@@ -459,12 +459,12 @@ void usage()
 	}
 	printf(
 "The default for LANGUAGE is the extension of FILENAME. For example,\n"
-"'c.java' will indicate a Java solution.\n"
+"'B.java' will indicate a Java solution.\n"
 "\n"
 "Examples:\n"
 "\n");
-	printf("Submit problem 'c' in Java:\n"
-	       "    %s c.java\n\n",progname);
+	printf("Submit problem 'b' in Java:\n"
+	       "    %s b.java\n\n",progname);
 	printf("Submit problem 'e' in C++:\n"
 	       "    %s --problem e --language=cpp ProblemE.cc\n\n",progname);
 	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
