@@ -111,7 +111,7 @@ if ( !empty($cmd) ):
 		echo htmlspecialchars($row['execid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__execid_\">Executable ID:</label></td><td>";
-		echo addInput('data[0][exec]', null, 8, 10, " required pattern=\"" . IDENTIFIER_CHARS . "+\"");
+		echo addInput('data[0][execid]', null, 8, 10, " required pattern=\"" . IDENTIFIER_CHARS . "+\"");
 		echo " (alphanumerics only)";
 	}
 	echo "</td></tr>\n";
