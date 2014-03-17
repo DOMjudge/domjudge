@@ -153,9 +153,7 @@ foreach($postmaxvars as $var) {
 }
 
 result('software', 'PHP POST/upload filesize',
-       min($sizes) < 52428800 ? 'W':'O',
-       $resulttext
-); 
+       min($sizes) < 52428800 ? 'W':'O', '', $resulttext);
 
 if ( class_exists("ZipArchive") ) {
 	result('software', 'Problem up/download via zip bundles',
@@ -176,8 +174,7 @@ while($row = $mysqldatares->next()) {
 
 result('software', 'MySQL version',
 	version_compare('4.1', $mysqldata['version'], '>=') ? 'E':'O',
-	'Connected to MySQL server version ' .
-	htmlspecialchars($mysqldata['version']) .
+	'Connected to MySQL server version ' . $mysqldata['version'] .
 	'. Minimum required is 4.1.');
 
 result('software', 'MySQL maximum connections',
@@ -188,7 +185,7 @@ result('software', 'MySQL maximum connections',
 	'prevent connection refusal during the contest.');
 
 result('software', 'MySQL maximum packet size',
-	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O',
+	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O', '',
 	'MySQL\'s max_allowed_packet is set to ' .
 	printsize($mysqldata['max_allowed_packet']) . '. You may ' .
 	'want to raise this to about twice the maximum test case size.');
@@ -217,7 +214,7 @@ if ( DEBUG == 0 ) {
 	result('configuration', 'Debugging', 'O', 'Debugging disabled.');
 } else {
 	result('configuration', 'Debugging', 'W',
-		'Debug information enabled (level ' . htmlspecialchars(DEBUG).").\n" .
+		'Debug information enabled (level ' . DEBUG .").\n" .
 		'Should not be enabled on live systems.');
 }
 
