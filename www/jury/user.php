@@ -156,7 +156,7 @@ if ( $row['teamid'] ) {
 } else {
 	echo "<td>-</td>";
 } ?></tr>
-<tr><td>Last login:</td><td><?php echo htmlspecialchars($row['last_login'])?></td></tr>
+<tr><td>Last login:</td><td><?php echo printtime($row['last_login'], '%a %d %b %Y %T %Z')?></td></tr>
 <tr><td>Last IP:   </td><td><?php echo
     (@$row['ip_address'] ? printhost($row['ip_address'], TRUE):'') ?></td></tr>
 </table></div>
