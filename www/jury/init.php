@@ -45,6 +45,10 @@ if (!$allowed) {
 }
 
 require_once(LIBWWWDIR . '/common.jury.php');
+if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES)
+  && isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > 0 ) {
+	error("POST data exceeded php.ini's 'post_max_size' directive.");
+}
 
 $cdata = getCurContest(TRUE);
 $cid = (int)$cdata['cid'];
