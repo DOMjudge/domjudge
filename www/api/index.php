@@ -264,7 +264,7 @@ function judging_runs_POST($args)
 	global $DB, $api;
 
 	checkargs($args, array('judgingid', 'testcaseid', 'runresult', 'runtime',
-	                       'output_run', 'output_diff', 'output_error', 'judgehost'));
+	                       'output_run', 'output_diff', 'output_error', 'output_system', 'judgehost'));
 
 	$results_remap = dbconfig_get('results_remap');
 	$results_prio = dbconfig_get('results_prio');
@@ -276,12 +276,13 @@ function judging_runs_POST($args)
 	}
 
 	$DB->q('INSERT INTO judging_run (judgingid, testcaseid, runresult,
-	        runtime, output_run, output_diff, output_error)
-	        VALUES (%i, %i, %s, %f, %s, %s, %s)',
+	        runtime, output_run, output_diff, output_error, output_system)
+	        VALUES (%i, %i, %s, %f, %s, %s, %s, %s)',
 	       $args['judgingid'], $args['testcaseid'], $args['runresult'], $args['runtime'],
 	       base64_decode($args['output_run']),
 	       base64_decode($args['output_diff']),
-	       base64_decode($args['output_error']));
+	       base64_decode($args['output_error']),
+	       base64_decode($args['output_system']));
 
 	// result of this judging_run has been stored. now check whether
 	// we're done or if more testcases need to be judged.
@@ -347,6 +348,7 @@ $args = array('judgingid' => 'Judging_run corresponds to this specific judgingid
 	'output_run' => 'Program output of this run.',
 	'output_diff' => 'Program diff of this run.',
 	'output_error' => 'Program error output of this run.',
+	'output_system' => 'Judging system output of this run.',
 	'judgehost' => 'Judgehost performing this judging');
 $exArgs = array();
 $roles = array('judgehost');

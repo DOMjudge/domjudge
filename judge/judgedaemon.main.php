@@ -495,7 +495,8 @@ function judge($row)
 			. '&runtime=' . urlencode($runtime)
 			. '&judgehost=' . urlencode($myhost)
 			. '&output_run='   . rest_encode_file($testcasedir . '/program.out')
-			. '&output_error=' . rest_encode_file($testcasedir . '/error.out')
+			. '&output_error=' . rest_encode_file($testcasedir . '/program.err')
+			. '&output_system=' . rest_encode_file($testcasedir . '/system.out')
 			. '&output_diff='  . rest_encode_file($testcasedir . '/compare.out')
 		);
 		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);

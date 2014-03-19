@@ -442,12 +442,20 @@ togglelastruns();
 			echo "<p class=\"nodata\">There was no program output.</p>\n";
 		}
 
-		echo "<h5>Error output (info/debug/errors)</h5>\n";
+		echo "<h5>Program error output</h5>\n";
 		if ( strlen(@$run['output_error']) > 0 ) {
 			echo "<pre class=\"output_text\">".
 			    htmlspecialchars($run['output_error'])."</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no stderr output.</p>\n";
+		}
+
+		echo "<h5>Judging system output (info/debug/errors)</h5>\n";
+		if ( strlen(@$run['output_system']) > 0 ) {
+			echo "<pre class=\"output_text\">".
+			    htmlspecialchars($run['output_system'])."</pre>\n\n";
+		} else {
+			echo "<p class=\"nodata\">There was no judging system output.</p>\n";
 		}
 
 		if ( $run['runresult'] == 'correct' ) {

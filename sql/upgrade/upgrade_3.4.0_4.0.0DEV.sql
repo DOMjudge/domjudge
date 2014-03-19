@@ -42,6 +42,9 @@ ALTER TABLE `event`
   ADD FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE;
 
+ALTER TABLE `judging_run`
+  ADD COLUMN `output_system` longblob COMMENT 'Judging system output' AFTER `output_error`;
+
 ALTER TABLE `language`
   ADD COLUMN `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)' AFTER `name`;
 

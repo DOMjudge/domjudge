@@ -189,6 +189,7 @@ CREATE TABLE `judging_run` (
   `output_run` longblob COMMENT 'Output of running the program',
   `output_diff` longblob COMMENT 'Diffing the program output and testcase output',
   `output_error` longblob COMMENT 'Standard error output of the program',
+  `output_system` longblob COMMENT 'Judging system output',
   PRIMARY KEY  (`runid`),
   UNIQUE KEY `testcaseid` (`judgingid`, `testcaseid`),
   KEY `judgingid` (`judgingid`),
