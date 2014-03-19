@@ -247,7 +247,7 @@ if ( isset($jid) )  {
 	                       $submdata['submittime']);
 	$lastjud = NULL;
 	if ( $lastsubmitid !== NULL ) {
-		$lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result, verify_comment
+		$lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result, verify_comment, endtime
 		                   FROM judging
 		                   WHERE submitid = %s AND valid = 1
 		                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
