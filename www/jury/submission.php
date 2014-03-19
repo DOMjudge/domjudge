@@ -261,11 +261,13 @@ if ( isset($jid) )  {
 		}
 	}
 
-	list($tclist, $sum_runtime, $max_runtime) = display_runinfo($runinfo, $jud['result'] !== NULL);
+	$judging_ended = !empty($jud['endtime']);
+	list($tclist, $sum_runtime, $max_runtime) = display_runinfo($runinfo, $judging_ended);
 	$tclist = "<tr><td>testcase runs:</td><td>" . $tclist . "</td></tr>\n";
 
 	if ( $lastjud !== NULL ) {
-		list($lasttclist, $sum_lastruntime, $max_lastruntime) = display_runinfo($lastruninfo, $lastjud['result'] !== NULL);
+		$lastjudging_ended = !empty($lastjud['endtime']);
+		list($lasttclist, $sum_lastruntime, $max_lastruntime) = display_runinfo($lastruninfo, $lastjudging_ended);
 		$lasttclist = "<tr class=\"lasttcruns\"><td><a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a> runs:</td><td>" .
 				$lasttclist . "</td></tr>\n";
 	}
@@ -307,7 +309,6 @@ if ( isset($jid) )  {
 	// Time (start, end, used)
 	echo "<span class=\"judgetime\">Judging started: " . printtime($jud['starttime'],'%H:%M:%S');
 
-	$judging_ended = !empty($jud['endtime']);
 	if ( $judging_ended ) {
 		echo ', ended: ' . printtime($jud['endtime'],'%H:%M:%S') .
 			' (judging took '.
