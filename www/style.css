@@ -226,7 +226,8 @@ legend {
 
 .tc_box { text-align:center;font-size:85%;width:1.2em;display:inline-block;padding:2px;margin:1px;color:black;}
 .tc_correct   { background: #60e760; }
-.tc_pending   { background: #BBBBBB; }
+.tc_pending   { background: #6666FF; }
+.tc_unused    { background: #BBBBBB; }
 .tc_incorrect { background: #e87272; }
 
 #scoresolv,#scoretotal { width: 2.5em; }

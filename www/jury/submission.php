@@ -39,12 +39,12 @@ function compile_output($output, $success) {
 	}
 }
 
-function display_runinfo($runinfo) {
+function display_runinfo($runinfo, $is_final) {
 	$sum_runtime = 0;
 	$max_runtime = 0;
 	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
-		$class = "tc_pending";
+		$class = ( $is_final ? "tc_unused" : "tc_pending" );
 		$short = "?";
 		switch ( $run['runresult'] ) {
 		case 'correct':
@@ -58,8 +58,8 @@ function display_runinfo($runinfo) {
 			$class = "tc_incorrect";
 		}
 		$tclist .= "<a title=\"desc: " . htmlspecialchars($run['description']) . 
-			", runtime: " . $run['runtime'] . "s, result: " . $run['runresult'] . "\"" .
-			" href=\"$link\"" . 
+			($run['runresult'] !== NULL ?  ", runtime: " . $run['runtime'] . "s, result: " . $run['runresult'] : '') . 
+			"\" href=\"$link\"" . 
 			($run['runresult'] == correct ? ' onclick="display_correctruns(true);" ' : '') .
 			"><span class=\"$class tc_box\">" . $short . "</span></a>";
 
@@ -261,12 +261,14 @@ if ( isset($jid) )  {
 		}
 	}
 
-	list($tclist, $sum_runtime, $max_runtime) = display_runinfo($runinfo);
+	list($tclist, $sum_runtime, $max_runtime) = display_runinfo($runinfo, $jud['result'] !== NULL);
 	$tclist = "<tr><td>testcase runs:</td><td>" . $tclist . "</td></tr>\n";
 
-	list($lasttclist, $sum_lastruntime, $max_lastruntime) = display_runinfo($lastruninfo);
-	$lasttclist = "<tr class=\"lasttcruns\"><td><a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a> runs:</td><td>" .
-		$lasttclist . "</td></tr>\n";
+	if ( $lastjud !== NULL ) {
+		list($lasttclist, $sum_lastruntime, $max_lastruntime) = display_runinfo($lastruninfo, $lastjud['result'] !== NULL);
+		$lasttclist = "<tr class=\"lasttcruns\"><td><a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a> runs:</td><td>" .
+				$lasttclist . "</td></tr>\n";
+	}
 
 	echo "<h2>Judging j" . (int)$jud['judgingid'] .
 		($jud['valid'] == 1 ? '' : ' (INVALID)');
@@ -333,7 +335,9 @@ if ( isset($jid) )  {
 
 	echo "<table>\n";
 	echo $tclist . "<br/>\n";
-	echo $lasttclist;
+	if ( $lastjud !== NULL ) {
+		echo $lasttclist;
+	}
 	echo "</table>\n";
 	
 	// display following data only when the judging has been completed
@@ -396,7 +400,9 @@ togglelastruns();
 		echo "<h4 id=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
 
 		if ( $run['runresult']===NULL ) {
-			echo "<p class=\"nodata\">Run not started/finished yet.</p>\n";
+			echo "<p class=\"nodata\">" .
+				( $jud['result'] === NULL ? 'Run not started/finished yet.' : 'Run not used for final result.' ) . 
+				"</p>\n";
 			continue;
 		}
 
