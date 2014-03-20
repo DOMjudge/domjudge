@@ -218,7 +218,7 @@ CREATE TABLE `language` (
 --
 
 CREATE TABLE `problem` (
-  `probid` int(4) NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `shortname` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
@@ -283,7 +283,7 @@ CREATE TABLE `role` (
 CREATE TABLE `scorecache_jury` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` int(4) NOT NULL COMMENT 'Problem ID',
+  `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made',
   `pending` int(4) NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
@@ -298,7 +298,7 @@ CREATE TABLE `scorecache_jury` (
 CREATE TABLE `scorecache_public` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` int(4) NOT NULL COMMENT 'Problem ID',
+  `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made',
   `pending` int(4) NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
@@ -315,7 +315,7 @@ CREATE TABLE `submission` (
   `origsubmitid` int(4) unsigned DEFAULT NULL COMMENT 'If set, specifies original submission in case of edit/resubmit',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` int(4) NOT NULL COMMENT 'Problem ID',
+  `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
   `langid` varchar(8) NOT NULL COMMENT 'Language ID',
   `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time submitted',
   `judgehost` varchar(50) DEFAULT NULL COMMENT 'Current/last judgehost judging this submission',
@@ -428,7 +428,7 @@ CREATE TABLE `testcase` (
   `md5sum_output` char(32) DEFAULT NULL COMMENT 'Checksum of output data',
   `input` longblob COMMENT 'Input data',
   `output` longblob COMMENT 'Output data',
-  `probid` int(4) NOT NULL COMMENT 'Corresponding problem ID',
+  `probid` int(4) unsigned NOT NULL COMMENT 'Corresponding problem ID',
   `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of this testcase',
   `sample` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Sample testcases that can be shared with teams',
