@@ -251,7 +251,7 @@ $doc = 'Update a judging.';
 $args = array('judgingid' => 'Judging corresponds to this specific judgingid.',
 	'judgehost' => 'Judging is judged by this specific judgehost.',
 	'compile_success' => 'Did the compilation succeed?',
-	'output_compile' => 'Ouput of compilation phase.');
+	'output_compile' => 'Ouput of compilation phase (base64 encoded).');
 $exArgs = array();
 $roles = array('judgehost');
 $api->provideFunction('PUT', 'judgings', $doc, $args, $exArgs, $roles);
@@ -348,7 +348,10 @@ $args = array('judgingid' => 'Judging_run corresponds to this specific judgingid
 	'output_run' => 'Program output of this run.',
 	'output_diff' => 'Program diff of this run.',
 	'output_error' => 'Program error output of this run.',
-	'output_system' => 'Judging system output of this run.',
+	'output_run' => 'Program output of this run (base64 encoded).',
+	'output_diff' => 'Program diff of this run (base64 encoded).',
+	'output_error' => 'Program error output of this run (base64 encoded).',
+	'output_system' => 'Judging system output of this run (base64 encoded).',
 	'judgehost' => 'Judgehost performing this judging');
 $exArgs = array();
 $roles = array('judgehost');
@@ -534,12 +537,12 @@ function testcase_files($args)
 	$content = $DB->q("VALUE SELECT SQL_NO_CACHE $inout FROM testcase
 	                   WHERE testcaseid = %i", $args['testcaseid']);
 
-	return $content;
+	return base64_encode($content);
 }
 $args = array('testcaseid' => 'Get only the corresponding testcase.',
 	'input' => 'Get the input file.',
 	'output' => 'Get the output file.');
-$doc = 'Get a testcase file.';
+$doc = 'Get a testcase file, base64 encoded.';
 $exArgs = array(array('testcaseid' => '3', 'input' => TRUE));
 $roles = array('jury','judgehost');
 $api->provideFunction('GET', 'testcase_files', $doc, $args, $exArgs, $roles);
@@ -557,7 +560,7 @@ function executable($args)
 	return base64_encode($content);
 }
 $args = array('execid' => 'Get only the corresponding executable.');
-$doc = 'Get an executable zip file.';
+$doc = 'Get an executable zip file, base64 encoded.';
 $exArgs = array(array('execid' => 'ignorews'));
 $roles = array('jury','judgehost');
 $api->provideFunction('GET', 'executable', $doc, $args, $exArgs, $roles);

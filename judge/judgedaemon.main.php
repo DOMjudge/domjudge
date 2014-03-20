@@ -430,7 +430,7 @@ function judge($row)
 				$content = request('testcase_files', 'GET', 'testcaseid='
 						. urlencode($tc['testcaseid'])
 						. '&' . $inout);
-				$content = dj_json_decode($content);
+				$content = base64_decode(dj_json_decode($content));
 				if ( file_put_contents($tcfile[$inout] . ".new", $content) === FALSE ) {
 					error("Could not create $tcfile[$inout].new");
 				}
