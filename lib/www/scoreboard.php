@@ -171,7 +171,7 @@ function getProblems($cdata) {
 	global $DB;
 
 	return $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
-	               probid, name, color, LENGTH(problemtext) AS hastext FROM problem
+	               probid, shortname, name, color, LENGTH(problemtext) AS hastext FROM problem
 	               WHERE cid = %i AND allow_submit = 1
 	               ORDER BY probid', $cdata['cid']);
 }
@@ -313,7 +313,7 @@ function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE
 		jurylink(null, 'score') . '</th>' . "\n";
 	foreach( $probs as $pr ) {
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">';
-		$str = htmlspecialchars($pr['probid']) .
+		$str = htmlspecialchars($pr['shortname']) .
 		       (!empty($pr['color']) ? ' <div class="circle" style="background: ' .
 			htmlspecialchars($pr['color']) . ';"></div>' : '') ;
 

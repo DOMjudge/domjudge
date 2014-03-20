@@ -13,12 +13,12 @@ if ( !isset($id) ) {
 	error("No problem id given.");
 }
 
-$ini_keys = array('probid', 'name', 'timelimit', 'special_run',
+$ini_keys = array('probid', 'shortname', 'name', 'timelimit', 'special_run',
 		  'special_compare', 'color');
 
 $problem = $DB->q('MAYBETUPLE SELECT problemtext, problemtext_type, ' .
-                 join(',', $ini_keys) . ' FROM problem p WHERE probid = %s',$id);
-if ( empty($problem) ) error ("Problem $id not found");
+                 join(',', $ini_keys) . ' FROM problem p WHERE probid = %i',$id);
+if ( empty($problem) ) error ("Problem p$id not found");
 
 $inistring = "";
 foreach ($ini_keys as $ini_val) {
@@ -44,7 +44,7 @@ if ( !empty($problem['problemtext']) ) {
 }
 
 $testcases = $DB->q('SELECT description, testcaseid, rank FROM testcase
-		     WHERE probid = %s ORDER BY rank', $id);
+		     WHERE probid = %i ORDER BY rank', $id);
 while ($tc = $testcases->next()) {
 	$fname = $id . "_" . $tc['rank'] .
 	         (empty($tc['description'])?"":"_".$tc['description']);

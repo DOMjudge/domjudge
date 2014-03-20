@@ -70,8 +70,8 @@ function check_problem($data, $keydata = null)
 		ch_error("Timelimit is not a valid positive integer");
 	}
 	$id = (isset($data['probid']) ? $data['probid'] : $keydata['probid']);
-	if ( ! preg_match ( ID_REGEX, $id ) ) {
-		ch_error("Problem ID may only contain characters " . IDENTIFIER_CHARS . ".");
+	if ( ! preg_match ( ID_REGEX, $data['shortname'] ) ) {
+		ch_error("Problem shortname may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
 
 	if ( !empty($_FILES['data']['name'][0]['problemtext']) ) {

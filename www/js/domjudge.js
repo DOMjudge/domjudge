@@ -105,7 +105,7 @@ function detectProblemLanguage(filename)
 	if ( elt.value != '' ) return;
 
 	for (i=0;i<elt.length;i++) {
-		if ( elt.options[i].value.toLowerCase() == parts[1] ) {
+		if ( elt.options[i].text.toLowerCase() == parts[1] ) {
 			elt.selectedIndex = i;
 		}
 	}

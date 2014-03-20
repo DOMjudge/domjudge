@@ -21,9 +21,9 @@ $fdata = calcFreezeData($cdata);
 echo "<script type=\"text/javascript\">\n<!--\n";
 
 if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
-	$probdata = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
+	$probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
 	                    WHERE cid = %i AND allow_submit = 1
-	                    ORDER BY probid', $cid);
+	                    ORDER BY shortname', $cid);
 
 	$langdata = $DB->q('KEYVALUETABLE SELECT langid, extensions
 	                    FROM language WHERE allow_submit = 1');
@@ -41,8 +41,8 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 
 	echo "function getProbDescription(probid)\n{\n";
 	echo "\tswitch(probid) {\n";
-	foreach($probdata as $probid => $probname) {
-		echo "\t\tcase '" . htmlspecialchars($probid) . "': return '" . htmlspecialchars($probname) . "';\n";
+	foreach($probdata as $probinfo) {
+		echo "\t\tcase '" . htmlspecialchars($probinfo['shortname']) . "': return '" . htmlspecialchars($probinfo['name']) . "';\n";
 	}
 	echo "\t\tdefault: return '';\n\t}\n}\n\n";
 }
@@ -75,8 +75,8 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 
 
 		$probs = array();
-		foreach($probdata as $probid => $dummy) {
-			$probs[$probid]=$probid;
+		foreach($probdata as $probinfo) {
+			$probs[$probinfo['probid']]=$probinfo['shortname'];
 		}
 		$probs[''] = 'problem';
 		echo addSelect('probid', $probs, '', true);
@@ -109,11 +109,13 @@ echo "</div>\n\n";
 
 echo "<div id=\"clarlist\">\n";
 
-$requests = $DB->q('SELECT * FROM clarification
-                    WHERE cid = %i AND sender = %s
+$requests = $DB->q('SELECT c.*, p.shortname FROM clarification c
+                    LEFT JOIN problem p USING(probid)
+                    WHERE c.cid = %i AND c.sender = %s
                     ORDER BY submittime DESC, clarid DESC', $cid, $teamid);
 
-$clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
+$clarifications = $DB->q('SELECT c.*, p.shortname, u.type AS unread FROM clarification c
+                          LEFT JOIN problem p USING (probid)
                           LEFT JOIN team_unread u ON
                           (c.clarid=u.mesgid AND u.type="clarification" AND u.teamid = %s)
                           WHERE c.cid = %i AND c.sender IS NULL

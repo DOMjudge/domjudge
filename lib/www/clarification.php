@@ -79,9 +79,9 @@ function putClar($clar)
 	} else {
 		if ( IS_JURY ) {
 			echo '<a href="problem.php?id=' . urlencode($clar['probid']) . '">' .
-				'Problem ' . $clar['probid'].": ".$clar['probname'] . '</a>';
+				'Problem ' . $clar['shortname'].": ".$clar['probname'] . '</a>';
 		} else {
-			echo 'Problem ' . $clar['probid'].": ".$clar['probname'];
+			echo 'Problem ' . $clar['shortname'].": ".$clar['probname'];
 		}
 	}
 	echo "</td></tr>\n";
@@ -112,7 +112,7 @@ function putClarification($id,  $team = NULL)
 
 	$clar = $DB->q('TUPLE SELECT * FROM clarification WHERE clarid = %i', $id);
 
-	$clars = $DB->q('SELECT c.*, p.name AS probname, t.name AS toname, f.name AS fromname
+	$clars = $DB->q('SELECT c.*, p.shortname, p.name AS probname, t.name AS toname, f.name AS fromname
 	                 FROM clarification c
 	                 LEFT JOIN problem p ON (c.probid = p.probid AND p.allow_submit = 1)
 	                 LEFT JOIN team t ON (t.login = c.recipient)
@@ -203,7 +203,7 @@ function putClarificationList($clars, $team = NULL)
 		if ( is_null($clar['probid']) ) {
 			echo "general";
 		} else {
-			echo "problem ".$clar['probid'];
+			echo "problem ".$clar['shortname'];
 		}
 		echo "</a></td>";
 
@@ -323,9 +323,9 @@ function confirmClar() {
 	// Select box for a specific problem (only when the contest
 	// has started) or general issue.
 	if ( difftime($cdata['starttime'], now()) <= 0 ) {
-		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid, ": ", name) as name
+		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(shortname, ": ", name) as name
 		                 FROM problem WHERE cid = %i AND allow_submit = 1
-		                 ORDER BY probid ASC', $cid);
+		                 ORDER BY shortname ASC', $cid);
 	} else {
 		$probs = array();
 	}

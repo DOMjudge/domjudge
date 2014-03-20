@@ -70,7 +70,7 @@ foreach( $teams as $team ) {
 
 	// for each problem fetch the result
 	foreach( $probs as $pr ) {
-		echo " " .htmlspecialchars($pr);
+		echo " p" .htmlspecialchars($pr);
 		calcScoreRow($cid, $team['login'], $pr);
 	}
 
@@ -87,10 +87,10 @@ echo "</pre>\n\n<p>Deleting irrelevant data...</p>\n\n";
 
 // drop all contests that are not current, teams and problems that do not exist
 $DB->q('DELETE FROM scorecache_jury
-        WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%As)',
+        WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%Ai)',
        $cid, $teamlist, $probs);
 $DB->q('DELETE FROM scorecache_public
-        WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%As)',
+        WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%Ai)',
        $cid, $teamlist, $probs);
 $DB->q('DELETE FROM rankcache_jury
         WHERE cid != %i OR teamid NOT IN (%As)', $cid, $teamlist);

@@ -311,7 +311,7 @@ while ( TRUE ) {
 	$waiting = FALSE;
 
 	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
-	       "($row[teamid]/$row[probid]/$row[langid]), id j$row[judgingid]...");
+	       "($row[teamid]/p$row[probid]/$row[langid]), id j$row[judgingid]...");
 
 	judge($row);
 
@@ -451,7 +451,7 @@ function judge($row)
 		// Only log downloading input and/or output testdata once.
 		if ( count($fetched)>0 ) {
 			logmsg(LOG_INFO, "Fetched new " . implode($fetched,',') .
-			       " testcase $tc[rank] for problem $tc[probid]");
+			       " testcase $tc[rank] for problem p$tc[probid]");
 		}
 
 		// Copy program with all possible additional files to testcase

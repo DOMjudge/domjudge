@@ -1,6 +1,6 @@
 {
 	"name": "domjudge/domjudge",
-	"description": "Programming Contest Control System",
+	"description": "DOMjudge Programming Contest Control System",
 	"homepage": "http://www.domjudge.org",
 	"license": "GPL-2.0+",
 	"require": {

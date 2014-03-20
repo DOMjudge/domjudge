@@ -92,13 +92,13 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		 LEFT JOIN judging  j ON (s.submitid = j.submitid AND j.valid=1)
 		 WHERE s.cid = %i ' .
 	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %s '    : '%_') .
-	    (isset($restrictions['probid'])    ? 'AND s.probid = %s '    : '%_') .
+	    (isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
 	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
 	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
 
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid,
 					s.submittime, s.judgehost, s.valid, t.name AS teamname,
-					p.name AS probname, l.name AS langname,
+					p.shortname, p.name AS probname, l.name AS langname,
 					j.result, j.judgehost, j.verified, j.jury_member, j.seen '
 				  . $sqlbody
 				  . (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '')
@@ -179,7 +179,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 				"<a$link>" . htmlspecialchars(str_cut($row['teamname'],30)) . '</a></td>';
 		}
 		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
-			"<a$link>" . htmlspecialchars($row['probid']) . '</a></td>';
+			"<a$link>" . htmlspecialchars($row['shortname']) . '</a></td>';
 		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
 			"<a$link>" . htmlspecialchars($row['langid']) . '</a></td>';
 		echo "<td class=\"result\"><a$link>";
@@ -431,14 +431,14 @@ function putProblemText($probid)
 {
 	global $DB, $cdata;
 
-	$prob = $DB->q("MAYBETUPLE SELECT cid, problemtext, problemtext_type
+	$prob = $DB->q("MAYBETUPLE SELECT cid, shortname, problemtext, problemtext_type
 	                FROM problem WHERE OCTET_LENGTH(problemtext) > 0
-	                AND probid = %s", $probid);
+	                AND probid = %i", $probid);
 
 	if ( empty($prob) ||
 	     !(IS_JURY ||
 	       ($prob['cid']==$cdata['cid'] && difftime($cdata['starttime'],now())<=0)) ) {
-		error("Problem '$probid' not found or not available");
+		error("Problem p$probid not found or not available");
 	}
 
 	switch ( $prob['problemtext_type'] ) {
@@ -452,11 +452,11 @@ function putProblemText($probid)
 		$mimetype = 'text/plain';
 		break;
 	default:
-		error("Problem '$probid' text has unknown type");
+		error("Problem p$probid text has unknown type");
 	}
 
 
-	$filename = "prob-$probid.$prob[problemtext_type]";
+	$filename = "prob-$prob[shortname].$prob[problemtext_type]";
 
 	header("Content-Type: $mimetype; name=\"$filename\"");
 	header("Content-Disposition: inline; filename=\"$filename\"");
@@ -482,7 +482,7 @@ function putProblemTextList()
 	} else {
 
 		// otherwise, display list
-		$res = $DB->q('SELECT p.probid,p.name,p.color,p.problemtext_type
+		$res = $DB->q('SELECT p.probid,p.shortname,p.name,p.color,p.problemtext_type
 		               FROM problem p WHERE cid = %i AND allow_submit = 1 AND
 		               problemtext_type IS NOT NULL ORDER BY p.probid', $cid);
 
@@ -493,7 +493,7 @@ function putProblemTextList()
 				      '<img src="../images/' . urlencode($row['problemtext_type']) .
 				      '.png" alt="' . htmlspecialchars($row['problemtext_type']) .
 				      '" /> <a href="?id=' . urlencode($row['probid']) . '">' .
-				      'Problem ' . htmlspecialchars($row['probid']) . ': ' .
+				      'Problem ' . htmlspecialchars($row['shortname']) . ': ' .
 				      htmlspecialchars($row['name']) . "</a></li>\n";
 			}
 			echo "</ul>\n";

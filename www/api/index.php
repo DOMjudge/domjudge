@@ -70,11 +70,11 @@ function problems()
 {
 	global $cid, $DB;
 
-	$q = $DB->q('SELECT probid AS id, name, color FROM problem
+	$q = $DB->q('SELECT probid AS id, shortname, name, color FROM problem
 	             WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
 	return $q->gettable();
 }
-$doc = "Get a list of problems in the contest, with for each problem: id, name and color.";
+$doc = "Get a list of problems in the contest, with for each problem: id, shortname, name and color.";
 $api->provideFunction('GET', 'problems', $doc);
 
 /**
@@ -293,7 +293,7 @@ function judging_runs_POST($args)
 	$runresults = $DB->q('COLUMN SELECT runresult
 	                      FROM judging_run LEFT JOIN testcase USING(testcaseid)
 	                      WHERE judgingid = %i ORDER BY rank', $args['judgingid']);
-	$numtestcases = $DB->q('VALUE SELECT count(*) FROM testcase WHERE probid = %s', $probid);
+	$numtestcases = $DB->q('VALUE SELECT count(*) FROM testcase WHERE probid = %i', $probid);
 
 	$allresults = array_pad($runresults, $numtestcases, null);
 
@@ -316,14 +316,14 @@ function judging_runs_POST($args)
 		if ( ! dbconfig_get('verification_required', 0) ) {
 			$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
 				submitid, judgingid, description)
-				VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
+				VALUES(%s, %i, %s, %s, %i, %i, %i, "problem judged")',
 				now(), $row['cid'], $row['teamid'], $row['langid'], $row['probid'],
 				$row['submitid'], $args['judgingid']);
 			if ( $result == 'correct' ) {
 				// prevent duplicate balloons in case of multiple correct submissions
 				$numcorrect = $DB->q('VALUE SELECT count(submitid)
 						      FROM balloon LEFT JOIN submission USING(submitid)
-						      WHERE valid = 1 AND probid = %s AND teamid = %s',
+						      WHERE valid = 1 AND probid = %i AND teamid = %s',
 						      $row['probid'], $row['teamid']);
 				if ( $numcorrect == 0 ) {
 					$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
@@ -429,8 +429,15 @@ $api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
  */
 function submissions_POST($args)
 {
-	global $userdata;
-	checkargs($args, array('probid','langid'));
+	global $userdata, $cid, $DB;
+	checkargs($args, array('shortname','langid'));
+
+	$probid = $DB->q("MAYBEVALUE SELECT probid FROM problem
+	                  WHERE shortname = %s AND cid = %i AND allow_submit = 1",
+	                  $args['shortname'], $cid);
+	if ( empty($probid ) ) {
+		error("Problem " . $args['shortname'] . " not found or or not submittable");
+	}
 
 	// rebuild array of filenames, paths to get rid of empty upload fields
 	$FILEPATHS = $FILENAMES = array();
@@ -442,7 +449,7 @@ function submissions_POST($args)
 		}
 	}
 
-	$sid = submit_solution($userdata['teamid'], $args['probid'], $args['langid'], $FILEPATHS, $FILENAMES);
+	$sid = submit_solution($userdata['teamid'], $probid, $args['langid'], $FILEPATHS, $FILENAMES);
 
 	auditlog('submission', $sid, 'added', 'via api');
 
@@ -450,7 +457,7 @@ function submissions_POST($args)
 }
 
 $args = array('code[]' => 'Array of source files to submit',
-              'probid' => 'Problem ID',
+              'shortname' => 'Problem shortname',
               'langid' => 'Language ID');
 $doc = 'Post a new submission. You need to be authenticated with a team role. Returns the submission id.';
 $exArgs = array();
@@ -504,7 +511,7 @@ function testcases($args)
 	                        WHERE judgingid = %i", $args['judgingid']);
 	$sqlextra = count($judging_runs) ? "AND testcaseid NOT IN (%Ai)" : "%_";
 	$testcase = $DB->q("MAYBETUPLE SELECT testcaseid, rank, probid, md5sum_input, md5sum_output
-	                    FROM testcase WHERE probid = %s $sqlextra ORDER BY rank LIMIT 1",
+	                    FROM testcase WHERE probid = %i $sqlextra ORDER BY rank LIMIT 1",
 	                   $row['probid'], $judging_runs);
 
 	// would probably never be empty, because then endtime would also
@@ -721,7 +728,7 @@ function clarifications($args)
 	          WHERE cid = %i AND sender IS NULL AND recipient IS NULL';
 
 	$byProblem = array_key_exists('problem', $args);
-	$query .= ($byProblem ? ' AND probid = %s' : ' AND TRUE %_');
+	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
 	$problem = ($byProblem ? $args['problem'] : null);
 
 	$q = $DB->q($query, $cid, $problem);

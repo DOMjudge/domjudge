@@ -9,9 +9,7 @@
 require('init.php');
 
 $id = @$_REQUEST['id'];
-$title = 'Problem '.htmlspecialchars(@$id);
-
-if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid problem id");
+$title = 'Problem p'.htmlspecialchars(@$id);
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
@@ -26,20 +24,20 @@ if ( !empty($pcmd) ) {
 	if ( empty($id) ) error("Missing problem id");
 
 	if ( isset($pcmd['toggle_submit']) ) {
-		$DB->q('UPDATE problem SET allow_submit = %i WHERE probid = %s',
+		$DB->q('UPDATE problem SET allow_submit = %i WHERE probid = %i',
 			   $_POST['val']['toggle_submit'], $id);
 		auditlog('problem', $id, 'set allow submit', $_POST['val']['toggle_submit']);
 	}
 
 	if ( isset($pcmd['toggle_judge']) ) {
-		$DB->q('UPDATE problem SET allow_judge = %i WHERE probid = %s',
+		$DB->q('UPDATE problem SET allow_judge = %i WHERE probid = %i',
 			   $_POST['val']['toggle_judge'], $id);
 		auditlog('problem', $id, 'set allow judge', $_POST['val']['toggle_judge']);
 	}
 
 	if ( isset($pcmd['delete_text']) ) {
 		$DB->q('UPDATE problem SET problemtext = NULL, problemtext_type = NULL
-		        WHERE probid = %s', $id);
+		        WHERE probid = %i', $id);
 		auditlog('problem', $id, 'delete problem text');
 	}
 }
@@ -80,23 +78,22 @@ if ( !empty($cmd) ):
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Problem ID:</td><td class=\"probid\">";
-		$row = $DB->q('TUPLE SELECT p.probid,p.cid,p.name,p.allow_submit,p.allow_judge,
+		echo "<tr><td>Problem ID:</td><td>";
+		$row = $DB->q('TUPLE SELECT p.probid,p.cid,p.shortname,p.name,p.allow_submit,p.allow_judge,
 	                                    p.timelimit,p.special_run,p.special_compare,p.color,
 	                                    COUNT(testcaseid) AS testcases
 		               FROM problem p
 		               LEFT JOIN testcase USING (probid)
-		               WHERE probid = %s GROUP BY probid', $id);
+		               WHERE probid = %i GROUP BY probid', $id);
 		echo addHidden('keydata[0][probid]', $row['probid']);
-		echo htmlspecialchars($row['probid']);
-	} else {
-		echo "<tr><td><label for=\"data_0__probid_\">Problem ID:</label></td><td>";
-		echo addInput('data[0][probid]', null, 8, 10, " required pattern=\"" . IDENTIFIER_CHARS . "+\"");
-		echo " (alphanumerics only)";
-	}
-	echo "</td></tr>\n";
+		echo "p" . htmlspecialchars($row['probid']);
+		echo "</td></tr>\n";
+	} 
 
 ?>
+<tr><td><label for="data_0__shortname_">Shortname:</label></td><td>
+<?php echo addInput('data[0][shortname]', @$row['shortname'], 8, 10, " required pattern=\"" . IDENTIFIER_CHARS . "+\"") .
+      "(alphanumerics only)"; ?></td></tr>
 <tr><td><label for="data_0__cid_">Contest:</label></td>
 <td><?php
 $cmap = $DB->q("KEYVALUETABLE SELECT cid,contestname FROM contest ORDER BY cid DESC");
@@ -186,17 +183,17 @@ exit;
 
 endif;
 
-$data = $DB->q('TUPLE SELECT p.probid,p.cid,p.name,p.allow_submit,p.allow_judge,
+$data = $DB->q('TUPLE SELECT p.probid,p.cid,p.shortname,p.name,p.allow_submit,p.allow_judge,
                              p.timelimit,p.special_run,p.special_compare,p.color,
                              p.problemtext_type,c.contestname, count(rank) AS ntestcases
                 FROM problem p
                 NATURAL JOIN contest c
                 LEFT JOIN testcase USING (probid)
-                WHERE probid = %s GROUP BY probid', $id);
+                WHERE probid = %i GROUP BY probid', $id);
 
 if ( ! $data ) error("Missing or invalid problem id");
 
-echo "<h1>Problem ".htmlspecialchars($id)."</h1>\n\n";
+echo "<h1>Problem p".htmlspecialchars($id)."</h1>\n\n";
 
 echo addForm($pagename . '?id=' . urlencode($id),
              'post', null, 'multipart/form-data') . "<p>\n" .
@@ -206,7 +203,8 @@ echo addForm($pagename . '?id=' . urlencode($id),
 	"</p>\n";
 ?>
 <table>
-<tr><td>ID:          </td><td class="probid"><?php echo htmlspecialchars($data['probid'])?></td></tr>
+<tr><td>ID:          </td><td>p<?php echo htmlspecialchars($data['probid'])?></td></tr>
+<tr><td>Shortname:   </td><td class="probid"><?php echo htmlspecialchars($data['shortname'])?></td></tr>
 <tr><td>Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
 <tr><td>Contest:     </td><td><?php echo htmlspecialchars($data['contestname']) .
 									' (c' . htmlspecialchars($data['cid']) .')'?></td></tr>
@@ -275,7 +273,7 @@ if ( IS_ADMIN ) {
 		delLink('problem','probid', $id) . "</p>\n\n";
 }
 
-echo "<h2>Submissions for " . htmlspecialchars($id) . "</h2>\n\n";
+echo "<h2>Submissions for p" . htmlspecialchars($id) . "</h2>\n\n";
 
 $restrictions = array( 'probid' => $id );
 putSubmissions($cdata, $restrictions);

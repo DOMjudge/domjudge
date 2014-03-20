@@ -270,7 +270,7 @@ flushresults();
 
 // PROBLEMS
 
-$res = $DB->q('SELECT probid, timelimit, special_compare, special_run FROM problem ORDER BY probid');
+$res = $DB->q('SELECT probid, shortname, timelimit, special_compare, special_run FROM problem ORDER BY probid');
 
 $details = '';
 while($row = $res->next()) {
@@ -278,19 +278,19 @@ while($row = $res->next()) {
 	check_problem($row);
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
 		foreach($CHECKER_ERRORS as $chk_err) {
-			$details .= $row['probid'].': ' . $chk_err."\n";
+			$details .= 'p'.$row['probid'].': ' . $chk_err."\n";
 		}
 	}
 	if ( ! $DB->q("MAYBEVALUE SELECT count(testcaseid) FROM testcase
  	               WHERE input IS NOT NULL AND output IS NOT NULL AND
- 	               probid = %s", $row['probid']) ) {
-		$details .= $row['probid'].": missing in/output testcase.\n";
+ 	               probid = %i", $row['probid']) ) {
+		$details .= 'p'.$row['probid'].": missing in/output testcase.\n";
 	}
 }
 foreach(array('input','output') as $inout) {
 	$mismatch = $DB->q("SELECT probid, rank FROM testcase WHERE md5($inout) != md5sum_$inout");
 	while($r = $mismatch->next()) {
-		$details .= $r['probid'] . ": testcase #" . $r['rank'] .
+		$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
 		    " MD5 sum mismatch between $inout and md5sum_$inout\n";
 	}
 }
@@ -298,14 +298,14 @@ $oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
                     FROM testcase WHERE OCTET_LENGTH(output) > %i",
                    dbconfig_get('filesize_limit')*1024);
 while($r = $oversize->next()) {
-	$details .= $r['probid'] . ": testcase #" . $r['rank'] .
+	$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
 	    " output size (" . printsize($r['size']) . ") exceeds filesize_limit\n";
 }
 
 $has_errors = $details != '';
 $probs = $DB->q("COLUMN SELECT probid FROM problem WHERE color IS NULL");
 foreach($probs as $probid) {
-       $details .= $probid . ": has no color\n";
+       $details .= 'p'.$probid . ": has no color\n";
 }
 
 result('problems, languages, teams', 'Problems integrity',
@@ -421,9 +421,9 @@ $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
 
 $details = '';
 while($row = $res->next()) {
-	$details .= 'Submission s' .  $row['submitid'] . ' is for problem "' .
+	$details .= 'Submission s' .  $row['submitid'] . ' is for problem p' .
 		$row['probid'] .
-		'" while this problem is not found (in c'. $row['cid'] . ")\n";
+		' while this problem is not found (in c'. $row['cid'] . ")\n";
 }
 
 $res = $DB->q('SELECT * FROM submission ORDER BY submitid');

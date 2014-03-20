@@ -44,7 +44,7 @@ CREATE TABLE `clarification` (
   `sender` varchar(15) DEFAULT NULL COMMENT 'Team login, null means jury',
   `recipient` varchar(15) DEFAULT NULL COMMENT 'Team login, null means to jury or to all',
   `jury_member` varchar(15) DEFAULT NULL COMMENT 'Name of jury member who answered this',
-  `probid` varchar(8) DEFAULT NULL COMMENT 'Problem associated to this clarification',
+  `probid` int(4) unsigned DEFAULT NULL COMMENT 'Problem associated to this clarification',
   `body` longtext NOT NULL COMMENT 'Clarification text',
   `answered` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),
@@ -103,7 +103,7 @@ CREATE TABLE `event` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `clarid` int(4) unsigned DEFAULT NULL COMMENT 'Clarification ID',
   `langid` varchar(8) DEFAULT NULL COMMENT 'Language ID',
-  `probid` varchar(8) DEFAULT NULL COMMENT 'Problem ID',
+  `probid` int(4) unsigned DEFAULT NULL COMMENT 'Problem ID',
   `submitid` int(4) unsigned DEFAULT NULL COMMENT 'Submission ID',
   `judgingid` int(4) unsigned DEFAULT NULL COMMENT 'Judging ID',
   `teamid` varchar(15) DEFAULT NULL COMMENT 'Team login',
@@ -218,7 +218,8 @@ CREATE TABLE `language` (
 --
 
 CREATE TABLE `problem` (
-  `probid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
+  `probid` int(4) NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `shortname` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Are submissions accepted for this problem?',
@@ -230,6 +231,7 @@ CREATE TABLE `problem` (
   `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
   `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text',
   PRIMARY KEY  (`probid`),
+  UNIQUE KEY `shortname` (`shortname`,`cid`),
   KEY `cid` (`cid`),
   CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
@@ -281,7 +283,7 @@ CREATE TABLE `role` (
 CREATE TABLE `scorecache_jury` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `probid` int(4) NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made',
   `pending` int(4) NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
@@ -296,7 +298,7 @@ CREATE TABLE `scorecache_jury` (
 CREATE TABLE `scorecache_public` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `probid` int(4) NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made',
   `pending` int(4) NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
@@ -313,7 +315,7 @@ CREATE TABLE `submission` (
   `origsubmitid` int(4) unsigned DEFAULT NULL COMMENT 'If set, specifies original submission in case of edit/resubmit',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `probid` int(4) NOT NULL COMMENT 'Problem ID',
   `langid` varchar(8) NOT NULL COMMENT 'Language ID',
   `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time submitted',
   `judgehost` varchar(50) DEFAULT NULL COMMENT 'Current/last judgehost judging this submission',
@@ -426,7 +428,7 @@ CREATE TABLE `testcase` (
   `md5sum_output` char(32) DEFAULT NULL COMMENT 'Checksum of output data',
   `input` longblob COMMENT 'Input data',
   `output` longblob COMMENT 'Output data',
-  `probid` varchar(8) NOT NULL COMMENT 'Corresponding problem ID',
+  `probid` int(4) NOT NULL COMMENT 'Corresponding problem ID',
   `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of this testcase',
   `sample` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Sample testcases that can be shared with teams',

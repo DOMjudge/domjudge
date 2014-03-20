@@ -66,10 +66,10 @@ foreach($_FILES['code']['tmp_name'] as $fileid => $tmpname ) {
 /* Determine the problem */
 $probid = @$_POST['probid'];
 $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
-                WHERE allow_submit = 1 AND probid = %s AND cid = %i',
+                WHERE allow_submit = 1 AND probid = %i AND cid = %i',
                $probid, $cid);
 
-if ( ! isset($prob) ) err("Unable to find problem '$probid'");
+if ( ! isset($prob) ) err("Unable to find problem p$probid");
 $probid = $prob['probid'];
 
 /* Determine the language */

@@ -175,17 +175,20 @@ echo addForm($pagename . '?id=' . urlencode($id),
 if ( $data['type'] == 'compare' ) {
 	$res = $DB->q('SELECT probid AS id FROM problem WHERE special_compare = %s ORDER BY probid', $data['execid']);
 	$page = "problem";
+	$prefix = "p";
 } else if ( $data['type'] == 'compile' ) {
 	$res = $DB->q('SELECT langid AS id FROM language WHERE compile_script = %s ORDER BY langid', $data['execid']);
 	$page = "language";
+	$prefix = "";
 } else if ( $data['type'] == 'run' ) {
 	$res = $DB->q('SELECT probid AS id FROM problem WHERE special_run = %s ORDER BY probid', $data['execid']);
 	$page = "problem";
+	$prefix = "p";
 }
 if ( $res->count() > 0 ) {
 	while( $row = $res->next() ) {
 		echo '<a href="' . $page . '.php?id=' . $row['id'] . '">'
-			. $row['id'] . '</a> ';
+			. $prefix . $row['id'] . '</a> ';
 	}
 } else {
 	echo "<span class=\"nodata\">none</span>";

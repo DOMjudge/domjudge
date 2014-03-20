@@ -67,7 +67,7 @@ function problemVisible($probid)
 	if ( !$cdata || difftime(now(),$cdata['starttime']) < 0 ) return FALSE;
 
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
-	               WHERE cid = %i AND allow_submit = 1 AND probid = %s',
+	               WHERE cid = %i AND allow_submit = 1 AND probid = %i',
 	              $cdata['cid'], $probid) !== NULL;
 }
 
@@ -121,7 +121,7 @@ function calcScoreRow($cid, $team, $prob) {
 	                  FROM submission s
 	                  LEFT JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
 	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
-	                  WHERE teamid = %s AND probid = %s AND s.cid = %i AND s.valid = 1 ' .
+	                  WHERE teamid = %s AND probid = %i AND s.cid = %i AND s.valid = 1 ' .
 	                 ( dbconfig_get('compile_penalty', 1) ? "" :
 	                   "AND j.result != 'compiler-error' ") .
 	                 'AND submittime < c.endtime
@@ -174,13 +174,13 @@ function calcScoreRow($cid, $team, $prob) {
 	// insert or update the values in the public/team scores table
 	$DB->q('REPLACE INTO scorecache_public
 	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
-	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
+	        VALUES (%i,%s,%i,%i,%i,%i,%i)',
 	       $cid, $team, $prob, $submitted_p, $pending_p, $time_p, $correct_p);
 
 	// insert or update the values in the jury scores table
 	$DB->q('REPLACE INTO scorecache_jury
 	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
-	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
+	        VALUES (%i,%s,%i,%i,%i,%i,%i)',
 	       $cid, $team, $prob, $submitted_j, $pending_j, $time_j, $correct_j);
 
 	if ( $DB->q("VALUE SELECT RELEASE_LOCK('$lockstr')") != 1 ) {
@@ -586,7 +586,7 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 	$team = $login;
 	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem WHERE probid = %s
 							AND cid = %i AND allow_submit = "1"', $prob, $cid) ) {
-		error("Problem '$prob' not found in database or not submittable [c$cid].");
+		error("Problem p$prob not found in database or not submittable [c$cid].");
 	}
 
 	// Reindex arrays numerically to allow simultaneously iterating
@@ -613,7 +613,7 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 	// Insert submission into the database
 	$id = $DB->q('RETURNID INSERT INTO submission
 				  (cid, teamid, probid, langid, submittime, origsubmitid)
-				  VALUES (%i, %s, %s, %s, %s, %i)',
+				  VALUES (%i, %s, %i, %s, %s, %i)',
 	             $cid, $team, $probid, $langid, $now, $origsubmitid);
 
 	for($rank=0; $rank<count($files); $rank++) {
@@ -627,7 +627,7 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
-	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
+	        VALUES(%s, %i, %s, %s, %i, %i, "problem submitted")',
 	       now(), $cid, $team, $langid, $probid, $id);
 
 	if ( is_writable( SUBMITDIR ) ) {
@@ -663,7 +663,7 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 function getSourceFilename($fdata)
 {
 	return implode('.', array('c'.$fdata['cid'], 's'.$fdata['submitid'],
-	                          $fdata['teamid'], $fdata['probid'], $fdata['langid'],
+	                          $fdata['teamid'], 'p'.$fdata['probid'], $fdata['langid'],
 	                          $fdata['rank'], $fdata['filename']));
 }
 

@@ -92,7 +92,7 @@ if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
                     s.submittime, s.valid, c.cid, c.contestname,
-                    t.name AS teamname, l.name AS langname, p.name AS probname,
+                    t.name AS teamname, l.name AS langname, p.shortname, p.name AS probname,
                     CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
                     LEFT JOIN team     t ON (t.login  = s.teamid)
@@ -175,7 +175,7 @@ echo '<br/><br/>';
 	<span class="teamid"><?php echo htmlspecialchars($submdata['teamid'])?></span>:
 	<?php echo htmlspecialchars($submdata['teamname'])?></a>,
 <img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>">
-	<span class="probid"><?php echo htmlspecialchars($submdata['probid'])?></span>:
+	<span class="probid"><?php echo htmlspecialchars($submdata['shortname'])?></span>:
 	<?php echo htmlspecialchars($submdata['probname'])?></a>,
 <img title="language" alt="Language:" src="../images/lang.png"/> <a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a>,

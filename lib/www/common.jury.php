@@ -198,7 +198,7 @@ function importZippedProblem($zip, $probid = NULL)
 			unset($ini_array['probid']);
 			unset($ini_array['cid']);
 
-			$DB->q('UPDATE problem SET %S WHERE probid = %s', $ini_array, $probid);
+			$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array, $probid);
 		}
 	}
 
@@ -206,7 +206,7 @@ function importZippedProblem($zip, $probid = NULL)
 	foreach (array('pdf', 'html', 'txt') as $type) {
 		$text = $zip->getFromName('problem.' . $type);
 		if ($text !== FALSE) {
-			$DB->q('UPDATE problem SET problemtext = %s, problemtext_type = %s WHERE probid = %s',
+			$DB->q('UPDATE problem SET problemtext = %s, problemtext_type = %s WHERE probid = %i',
 				$text, $type, $probid);
 			break;
 		}
@@ -214,7 +214,7 @@ function importZippedProblem($zip, $probid = NULL)
 
 	// Insert/update testcases
 	$maxrank = 1 + $DB->q('VALUE SELECT max(rank) FROM testcase
-	                       WHERE probid = %s', $probid);
+	                       WHERE probid = %i', $probid);
 	for ($j = 0; $j < $zip->numFiles; $j++) {
 		$filename = $zip->getNameIndex($j);
 		if ( ends_with($filename, ".in") ) {
@@ -226,7 +226,7 @@ function importZippedProblem($zip, $probid = NULL)
 
 				$DB->q('INSERT INTO testcase (probid, rank,
 				        md5sum_input, md5sum_output, input, output, description)
-				        VALUES (%s, %i, %s, %s, %s, %s, %s)',
+				        VALUES (%i, %i, %s, %s, %s, %s, %s)',
 				       $probid, $maxrank, md5($testin), md5($testout),
 				       $testin, $testout, $basename);
 				$maxrank++;
@@ -235,7 +235,7 @@ function importZippedProblem($zip, $probid = NULL)
 	}
 
 	// submit reference solutions
-	if ( $DB->q('VALUE SELECT allow_submit FROM problem WHERE probid = %s', $probid) ) {
+	if ( $DB->q('VALUE SELECT allow_submit FROM problem WHERE probid = %i', $probid) ) {
 		// First find all submittable languages:
 		$langs = $DB->q('KEYVALUETABLE SELECT langid, extensions
  		                 FROM language WHERE allow_submit = 1');

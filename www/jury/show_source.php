@@ -236,7 +236,7 @@ if ($submission['origsubmitid']) {
 	$origsources = $DB->q('TABLE SELECT * FROM submission_file
 	                       WHERE submitid = %i', $submission['origsubmitid']);
 	$olddata     = $DB->q('MAYBETUPLE SELECT * FROM submission
-	                       WHERE teamid = %s AND probid = %s AND langid = %s AND submittime < %s
+	                       WHERE teamid = %s AND probid = %i AND langid = %s AND submittime < %s
 	                       AND origsubmitid = %i ORDER BY submittime DESC LIMIT 1',
 	                      'domjudge',$submission['probid'],$submission['langid'],
 	                      $submission['submittime'], $submission['origsubmitid']);
@@ -244,7 +244,7 @@ if ($submission['origsubmitid']) {
 	                       WHERE submitid = %i', $olddata['submitid']);
 } else {
 	$olddata     = $DB->q('MAYBETUPLE SELECT * FROM submission
-	                       WHERE teamid = %s AND probid = %s AND langid = %s AND submittime < %s
+	                       WHERE teamid = %s AND probid = %i AND langid = %s AND submittime < %s
 	                       ORDER BY submittime DESC LIMIT 1',
 	                      $submission['teamid'],$submission['probid'],$submission['langid'],
 	                      $submission['submittime']);
