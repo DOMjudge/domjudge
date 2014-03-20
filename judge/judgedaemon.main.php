@@ -35,6 +35,8 @@ if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
  */
 function request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	global $resturl, $restuser, $restpass;
+	
+	logmsg(LOG_DEBUG, "API request $verb $url");
 
 	$url = $resturl . "/" . $url;
 	if ( $verb == 'GET' ) {
