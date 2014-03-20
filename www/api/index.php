@@ -701,7 +701,6 @@ function languages()
 			'name'         => $row['name'],
 			'extensions'   => json_decode($row['extensions']),
 			'allow_judge'  => (bool)$row['allow_judge'],
-			'allow_submit' => (bool)$row['allow_submit'],
 			'time_factor'  => (float)$row['time_factor'],
 			);
 	}
