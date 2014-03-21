@@ -11,6 +11,9 @@ ZIP = $(PROBLEMS:=.zip)
 
 docs: $(PDF) $(ZIP)
 
+# Used by sql/Makefile:
+pdf: $(PDF)
+
 install-docs:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples example.*
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples hello.pdf hello.in hello.out
@@ -40,3 +43,5 @@ clean-l:
 
 maintainer-clean-l:
 	-rm -f $(INI) $(PDF) $(ZIP)
+
+.PHONY: pdf
