@@ -207,6 +207,106 @@ ALTER TABLE `team`
   DROP COLUMN `affilid_old`,
   ADD FOREIGN KEY (`affilid`) REFERENCES `team_affiliation` (`affilid`) ON DELETE SET NULL;
 
+-- Similarly, we move the probid primary key to shortname and create a
+-- new auto-incremented probid. We drop and recreate all (foreign) key
+-- constraint in tables referencing probid to allow the update.
+ALTER TABLE `clarification`
+  DROP FOREIGN KEY `clarification_ibfk_3`,
+  DROP KEY `probid`,
+  ADD COLUMN `probid_old` varchar(8) DEFAULT NULL AFTER `probid`;
+ALTER TABLE `event`
+  DROP FOREIGN KEY `event_ibfk_4`,
+  DROP KEY `probid`,
+  ADD COLUMN `probid_old` varchar(8) DEFAULT NULL AFTER `probid`;
+ALTER TABLE `scorecache_jury`
+  DROP PRIMARY KEY,
+  ADD COLUMN `probid_old` varchar(8) DEFAULT NULL AFTER `probid`;
+ALTER TABLE `scorecache_public`
+  DROP PRIMARY KEY,
+  ADD COLUMN `probid_old` varchar(8) DEFAULT NULL AFTER `probid`;
+ALTER TABLE `submission`
+  DROP FOREIGN KEY `submission_ibfk_3`,
+  DROP KEY `probid`,
+  ADD COLUMN `probid_old` varchar(8) DEFAULT NULL AFTER `probid`;
+ALTER TABLE `testcase`
+  DROP FOREIGN KEY `testcase_ibfk_1`,
+  DROP KEY `probid`,
+  DROP KEY `rank`,
+  ADD COLUMN `probid_old` varchar(8) DEFAULT NULL AFTER `probid`;
+
+ALTER TABLE `problem`
+  ADD COLUMN `shortname` varchar(8) NOT NULL COMMENT 'Unique ID (string)' AFTER `probid`;
+
+UPDATE `problem` SET `shortname` = `probid`;
+
+UPDATE `clarification`     SET `probid_old` = `probid`;
+UPDATE `event`             SET `probid_old` = `probid`;
+UPDATE `scorecache_jury`   SET `probid_old` = `probid`;
+UPDATE `scorecache_public` SET `probid_old` = `probid`;
+UPDATE `submission`        SET `probid_old` = `probid`;
+UPDATE `testcase`          SET `probid_old` = `probid`;
+
+ALTER TABLE `clarification`
+  MODIFY COLUMN `probid` int(4) unsigned DEFAULT NULL COMMENT 'Problem associated to this clarification';
+ALTER TABLE `event`
+  MODIFY COLUMN `probid` int(4) unsigned DEFAULT NULL COMMENT 'Problem ID';
+ALTER TABLE `scorecache_jury`
+  MODIFY COLUMN `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID';
+ALTER TABLE `scorecache_public`
+  MODIFY COLUMN `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID';
+ALTER TABLE `submission`
+  MODIFY COLUMN `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID';
+ALTER TABLE `testcase`
+  MODIFY COLUMN `probid` int(4) unsigned NOT NULL COMMENT 'Corresponding problem ID';
+
+ALTER TABLE `problem`
+  MODIFY COLUMN `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  ADD UNIQUE KEY `shortname` (`shortname`,`cid`);
+
+UPDATE `clarification`
+  LEFT JOIN `problem` ON clarification.probid_old = problem.shortname
+  SET clarification.probid = problem.probid;
+UPDATE `event`
+  LEFT JOIN `problem` ON event.probid_old = problem.shortname
+  SET event.probid = problem.probid;
+UPDATE `scorecache_jury`
+  LEFT JOIN `problem` ON scorecache_jury.probid_old = problem.shortname
+  SET scorecache_jury.probid = problem.probid;
+UPDATE `scorecache_public`
+  LEFT JOIN `problem` ON scorecache_public.probid_old = problem.shortname
+  SET scorecache_public.probid = problem.probid;
+UPDATE `submission`
+  LEFT JOIN `problem` ON submission.probid_old = problem.shortname
+  SET submission.probid = problem.probid;
+UPDATE `testcase`
+  LEFT JOIN `problem` ON testcase.probid_old = problem.shortname
+  SET testcase.probid = problem.probid;
+
+ALTER TABLE `clarification`
+  DROP COLUMN `probid_old`,
+  ADD KEY `probid` (`probid`),
+  ADD CONSTRAINT `clarification_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE SET NULL;
+ALTER TABLE `event`
+  DROP COLUMN `probid_old`,
+  ADD KEY `probid` (`probid`),
+  ADD CONSTRAINT `event_ibfk_4` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE;
+ALTER TABLE `scorecache_jury`
+  DROP COLUMN `probid_old`,
+  ADD PRIMARY KEY (`cid`,`teamid`,`probid`);
+ALTER TABLE `scorecache_public`
+  DROP COLUMN `probid_old`,
+  ADD PRIMARY KEY (`cid`,`teamid`,`probid`);
+ALTER TABLE `submission`
+  DROP COLUMN `probid_old`,
+  ADD KEY `probid` (`probid`),
+  ADD CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE;
+ALTER TABLE `testcase`
+  DROP COLUMN `probid_old`,
+  ADD KEY `probid` (`probid`),
+  ADD UNIQUE KEY `rank` (`probid`,`rank`),
+  ADD CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE;
+-- Pfew, we're done with changing probid!
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 --
