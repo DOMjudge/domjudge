@@ -405,8 +405,8 @@ source mysql_db_files_examples.sql
 UPDATE `language` SET `compile_script` = `langid`;
 UPDATE `language` SET `compile_script` = 'java_javac_detect' WHERE `langid` = 'java';
 
-UPDATE `problem` SET `special_compare` = 'float' WHERE `probid` = 'fltcmp';
-UPDATE `problem` SET `special_compare` = 'boolfind_cmp', `special_run` = 'boolfind_run' WHERE `probid` = 'boolfind';
+UPDATE `problem` SET `special_compare` = 'float' WHERE `shortname` = 'fltcmp';
+UPDATE `problem` SET `special_compare` = 'boolfind_cmp', `special_run` = 'boolfind_run' WHERE `shortname` = 'boolfind';
 
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (1, 'admin',          'Administrative User');
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (2, 'jury',           'Jury User');
