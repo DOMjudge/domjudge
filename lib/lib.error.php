@@ -74,11 +74,11 @@ function logmsg($msglevel, $string) {
 				// string 'ERROR' parsed by submit client, don't modify!
 				if ( $msglevel == LOG_ERR ) {
 					echo "<fieldset class=\"error\"><legend>ERROR</legend> " .
-						 $msg . "</fieldset>\n";
+						 $msg . "</fieldset><!-- trigger HTML validator error: --><b>\n";
 				} else
 				if ( $msglevel == LOG_WARNING ) {
 					echo "<fieldset class=\"warning\"><legend>Warning</legend> " .
-						$msg . "</fieldset>\n";
+						$msg . "</fieldset><!-- trigger HTML validator error: --><b>\n";
 				} else {
 					echo "<p>" . $msg . "</p>\n";
 				}
