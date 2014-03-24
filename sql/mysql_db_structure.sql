@@ -411,8 +411,7 @@ CREATE TABLE `team_category` (
 CREATE TABLE `team_unread` (
   `teamid` varchar(15) NOT NULL DEFAULT '' COMMENT 'Team login',
   `mesgid` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Clarification ID',
-  `type` varchar(25) NOT NULL DEFAULT 'clarification' COMMENT 'Type of message (now always "clarification")',
-  PRIMARY KEY (`teamid`,`type`,`mesgid`),
+  PRIMARY KEY (`teamid`,`mesgid`),
   KEY `mesgid` (`mesgid`),
   CONSTRAINT `team_unread_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE,
   CONSTRAINT `team_unread_ibfk_2` FOREIGN KEY (`mesgid`) REFERENCES `clarification` (`clarid`) ON DELETE CASCADE

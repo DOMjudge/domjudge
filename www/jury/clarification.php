@@ -94,12 +94,12 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		// mark the messages as unread for the team(s)
 		$teams = $DB->q('COLUMN SELECT login FROM team');
 		foreach($teams as $login) {
-			$DB->q('INSERT INTO team_unread (mesgid, type, teamid)
-			        VALUES (%i, "clarification", %s)', $newid, $login);
+			$DB->q('INSERT INTO team_unread (mesgid, teamid)
+			        VALUES (%i, %s)', $newid, $login);
 		}
 	} else {
-		$DB->q('INSERT INTO team_unread (mesgid, type, teamid)
-		        VALUES (%i, "clarification", %s)', $newid, $sendto);
+		$DB->q('INSERT INTO team_unread (mesgid, teamid)
+		        VALUES (%i, %s)', $newid, $sendto);
 	}
 
 	$DB->q('COMMIT');

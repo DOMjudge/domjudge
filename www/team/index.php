@@ -117,7 +117,7 @@ $requests = $DB->q('SELECT c.*, p.shortname FROM clarification c
 $clarifications = $DB->q('SELECT c.*, p.shortname, u.type AS unread FROM clarification c
                           LEFT JOIN problem p USING (probid)
                           LEFT JOIN team_unread u ON
-                          (c.clarid=u.mesgid AND u.type="clarification" AND u.teamid = %s)
+                          (c.clarid=u.mesgid AND u.teamid = %s)
                           WHERE c.cid = %i AND c.sender IS NULL
                           AND ( c.recipient IS NULL OR c.recipient = %s )
                           ORDER BY c.submittime DESC, c.clarid DESC',
