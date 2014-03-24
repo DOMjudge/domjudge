@@ -62,7 +62,7 @@ CREATE TABLE `clarification` (
 --
 
 CREATE TABLE `configuration` (
-  `configid` int(4) NOT NULL AUTO_INCREMENT COMMENT 'Configuration ID',
+  `configid` int(4) NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `name` varchar(25) NOT NULL COMMENT 'Name of the configuration variable',
   `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)',
   `type` varchar(25) DEFAULT NULL COMMENT 'Type of the value (metatype for use in the webinterface)',
@@ -76,7 +76,7 @@ CREATE TABLE `configuration` (
 --
 
 CREATE TABLE `contest` (
-  `cid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Contest ID',
+  `cid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `contestname` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `activatetime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest becomes visible in team/public views',
   `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest starts, submissions accepted',
@@ -181,7 +181,7 @@ CREATE TABLE `judging` (
 --
 
 CREATE TABLE `judging_run` (
-  `runid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique identifier',
+  `runid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `judgingid` int(4) unsigned NOT NULL COMMENT 'Judging ID',
   `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
   `runresult` varchar(25) DEFAULT NULL COMMENT 'Result of this run, NULL if not finished yet',
@@ -358,7 +358,7 @@ CREATE TABLE `submission_file` (
 --
 
 CREATE TABLE `team` (
-  `teamid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Team unique ID',
+  `teamid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Team name',
   `categoryid` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Team category ID',
   `affilid` int(4) unsigned DEFAULT NULL COMMENT 'Team affiliation ID',
@@ -422,7 +422,7 @@ CREATE TABLE `team_unread` (
 --
 
 CREATE TABLE `testcase` (
-  `testcaseid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique identifier',
+  `testcaseid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `md5sum_input` char(32) DEFAULT NULL COMMENT 'Checksum of input data',
   `md5sum_output` char(32) DEFAULT NULL COMMENT 'Checksum of output data',
   `input` longblob COMMENT 'Input data',

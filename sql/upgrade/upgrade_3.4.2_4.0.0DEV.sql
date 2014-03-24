@@ -178,6 +178,16 @@ ALTER TABLE `team`
   ADD COLUMN `judging_last_started` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Start time of last judging for priorization' AFTER `comments`,
   ADD COLUMN `teampage_first_visited` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of first teampage view' AFTER `judging_last_started`;
 
+-- Consistent description of primary key 'Unique ID':
+ALTER TABLE `configuration`
+  MODIFY COLUMN `configid`   int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID';
+ALTER TABLE `contest`
+  MODIFY COLUMN `cid`        int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID';
+ALTER TABLE `judging_run`
+  MODIFY COLUMN `runid`      int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID';
+ALTER TABLE `testcaseid`
+  MODIFY COLUMN `testcaseid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID';
+
 -- We move the affilid primary key to shortname and create a new
 -- auto-incremented affilid. We drop and recreate the foreign key
 -- constraint in the team table to allow the update.
