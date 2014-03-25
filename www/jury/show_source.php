@@ -235,11 +235,10 @@ if ($submission['origsubmitid']) {
 	                       WHERE submitid = %i', $submission['origsubmitid']);
 	$origsources = $DB->q('TABLE SELECT * FROM submission_file
 	                       WHERE submitid = %i', $submission['origsubmitid']);
-//FIXME DOMjudge special team value
 	$olddata     = $DB->q('MAYBETUPLE SELECT * FROM submission
-	                       WHERE teamid = %s AND probid = %i AND langid = %s AND submittime < %s
+	                       WHERE probid = %i AND langid = %s AND submittime < %s
 	                       AND origsubmitid = %i ORDER BY submittime DESC LIMIT 1',
-	                      'domjudge',$submission['probid'],$submission['langid'],
+	                      $submission['probid'],$submission['langid'],
 	                      $submission['submittime'], $submission['origsubmitid']);
 	$oldsources  = $DB->q('TABLE SELECT * FROM submission_file
 	                       WHERE submitid = %i', $olddata['submitid']);

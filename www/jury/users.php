@@ -44,8 +44,8 @@ if( $users->count() == 0 ) {
 		        htmlspecialchars($row['email'])."</a></td>".
 		    "<td>" . $link .
 		        htmlspecialchars($row['roles'])."</a></td>".
-		    "<td>" . $link . "t" .
-		        htmlspecialchars($row['teamid'])."</a></td>";
+		    "<td>" . (isset($row['teamid']) ? $link . "t" .
+		        htmlspecialchars($row['teamid']) : '')."</a></td>";
 		echo "<td class=\"";
 		if ($status == 1) {
 			echo 'team-ok" title="logged in: ' . printtime($row['last_login']) . '"';

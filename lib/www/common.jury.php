@@ -250,13 +250,13 @@ function importZippedProblem($zip, $probid = NULL)
 					break;
 				}
 			}
-			if( !empty($langid) ) {
+			if( !empty($langid) && !empty($teamid) ) {
 				if ( !($tmpfname = mkstemps(TMPDIR."/ref_solution-XXXXXX",0)) ) {
 					error("Could not create temporary file.");
 				}
 				file_put_contents($tmpfname, $zip->getFromIndex($j));
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
-					submit_solution('domjudge', $probid, $langid, array($tmpfname), array($filename));
+					submit_solution($teamid, $probid, $langid, array($tmpfname), array($filename));
 				}
 				unlink($tmpfname);
 			}
