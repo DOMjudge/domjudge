@@ -42,6 +42,7 @@ function compile_output($output, $success) {
 function display_runinfo($runinfo, $is_final) {
 	$sum_runtime = 0;
 	$max_runtime = 0;
+	$tclist = "";
 	foreach ( $runinfo as $key => $run ) {
 		$link = '#run-' . $run['rank'];
 		$class = ( $is_final ? "tc_unused" : "tc_pending" );
@@ -60,7 +61,7 @@ function display_runinfo($runinfo, $is_final) {
 		$tclist .= "<a title=\"desc: " . htmlspecialchars($run['description']) . 
 			($run['runresult'] !== NULL ?  ", runtime: " . $run['runtime'] . "s, result: " . $run['runresult'] : '') . 
 			"\" href=\"$link\"" . 
-			($run['runresult'] == correct ? ' onclick="display_correctruns(true);" ' : '') .
+			($run['runresult'] == 'correct' ? ' onclick="display_correctruns(true);" ' : '') .
 			"><span class=\"$class tc_box\">" . $short . "</span></a>";
 
 		$sum_runtime += $run['runtime'];
