@@ -488,7 +488,7 @@ void usage()
 #endif
 #if ( SUBMIT_ENABLE_WEB )
 "Set URL to the base address of the webinterface without the\n"
-"'team/upload.php' suffix.\n"
+"'api/' suffix.\n"
 "\n"
 #endif
 #if ( SUBMIT_ENABLE_WEB && SUBMIT_ENABLE_CMD )
