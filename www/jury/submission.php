@@ -253,7 +253,7 @@ if ( isset($jid) )  {
 		                   WHERE submitid = %s AND valid = 1
 		                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
 		if ( $lastjud !== NULL ) {
-			$lastruns = $DB->q('SELECT r.runtime, r.runresult FROM testcase t
+			$lastruns = $DB->q('SELECT r.runtime, r.runresult, rank, description FROM testcase t
 			                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 			                                                 r.judgingid = %i )
 			                    WHERE t.probid = %s ORDER BY rank',
