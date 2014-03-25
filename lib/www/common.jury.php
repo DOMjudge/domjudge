@@ -163,7 +163,7 @@ if (!function_exists('parse_ini_string')) {
  */
 function importZippedProblem($zip, $probid = NULL)
 {
-	global $DB;
+	global $DB, $teamid;
 	$prop_file = 'domjudge-problem.ini';
 
 	$ini_keys = array('probid', 'cid', 'name', 'allow_submit', 'allow_judge',
