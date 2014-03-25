@@ -26,82 +26,11 @@ SET FOREIGN_KEY_CHECKS = 1;
 ALTER TABLE `configuration`
   MODIFY COLUMN `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)';
 
-ALTER TABLE `event`
-  ADD KEY `cid` (`cid`),
-  ADD KEY `clarid` (`clarid`),
-  ADD KEY `langid` (`langid`),
-  ADD KEY `probid` (`probid`),
-  ADD KEY `submitid` (`submitid`),
-  ADD KEY `judgingid` (`judgingid`),
-  ADD KEY `teamid` (`teamid`),
-  ADD FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
-  ADD FOREIGN KEY (`clarid`) REFERENCES `clarification` (`clarid`) ON DELETE CASCADE,
-  ADD FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
-  ADD FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
-  ADD FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
-  ADD FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE CASCADE,
-  ADD FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE;
-
 ALTER TABLE `judging_run`
   ADD COLUMN `output_system` longblob COMMENT 'Judging system output' AFTER `output_error`;
 
 ALTER TABLE `language`
   ADD COLUMN `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)' AFTER `name`;
-
-CREATE TABLE `user` (
-  `userid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `username` varchar(255) NOT NULL COMMENT 'User login name',
-  `name` varchar(255) NOT NULL COMMENT 'Name',
-  `email` varchar(255) DEFAULT NULL COMMENT 'Email address',
-  `last_login` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of last successful login',
-  `last_ip_address` varchar(255) DEFAULT NULL COMMENT 'Last IP address of successful login',
-  `password` varchar(32) DEFAULT NULL COMMENT 'Password hash',
-  `ip_address` varchar(255) DEFAULT NULL COMMENT 'IP Address used to autologin',
-  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the user is able to log in',
-  `teamid` varchar(15) DEFAULT NULL COMMENT 'Team associated with',
-  PRIMARY KEY (`userid`),
-  UNIQUE KEY `username` (`username`),
-  KEY `teamid` (`teamid`),
-  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Users that have access to DOMjudge';
-
-CREATE TABLE `role` (
-  `roleid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `role` varchar(15) NOT NULL COMMENT 'Role name',
-  `description` varchar(255) NOT NULL COMMENT 'Description for the web interface',
-  PRIMARY KEY (`roleid`),
-  UNIQUE KEY `role` (`role`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Possible user roles';
-
-CREATE TABLE `userrole` (
-  `userid` int(4) unsigned NOT NULL COMMENT 'User ID',
-  `roleid` int(4) unsigned NOT NULL COMMENT 'Role ID',
-  KEY `userid` (`userid`),
-  KEY `roleid` (`roleid`),
-  CONSTRAINT `userrole_pk` PRIMARY KEY (`userid`, `roleid`),
-  CONSTRAINT `userrole_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `user` (`userid`) ON DELETE CASCADE,
-  CONSTRAINT `userrole_ibfk_2` FOREIGN KEY (`roleid`) REFERENCES `role` (`roleid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of users and roles';
-
-CREATE TABLE `rankcache_jury` (
-  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
-  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
-  PRIMARY KEY  (`cid`,`teamid`),
-  KEY `order` (`cid`,`correct`, `totaltime`) USING BTREE,
-  CONSTRAINT `rankcache_jury_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (jury version)';
-
-CREATE TABLE `rankcache_public` (
-  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
-  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
-  PRIMARY KEY  (`cid`,`teamid`),
-  KEY `order` (`cid`,`correct`,`totaltime`) USING BTREE,
-  CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
 
 
 -- Rename scoreboard cache tables to match new rankcache_{jury,public}.
@@ -317,7 +246,161 @@ ALTER TABLE `testcase`
   ADD CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE;
 -- Pfew, we're done with changing probid!
 
+-- Finally, replace team 'login' by AUTO_INCREMENT teamid:
+ALTER TABLE `clarification`
+  CHANGE COLUMN `sender` `sender_old` varchar(15) DEFAULT NULL,
+  CHANGE COLUMN `recipient` `recipient_old` varchar(15) DEFAULT NULL,
+  ADD COLUMN `sender` int(4) unsigned DEFAULT NULL COMMENT 'Team ID, null means jury' AFTER `sender_old`,
+  ADD COLUMN `recipient` int(4) unsigned DEFAULT NULL COMMENT 'Team ID, null means to jury or to all' AFTER `recipient_old`;
+ALTER TABLE `event`
+  CHANGE COLUMN `teamid` `teamid_old` varchar(15) DEFAULT NULL,
+  ADD COLUMN `teamid` int(4) unsigned DEFAULT NULL COMMENT 'Team ID' AFTER `teamid_old`;
+ALTER TABLE `scorecache_jury`
+  DROP PRIMARY KEY,
+  CHANGE COLUMN `teamid` `teamid_old` varchar(15) NOT NULL,
+  ADD COLUMN `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID' AFTER `teamid_old`;
+ALTER TABLE `scorecache_public`
+  DROP PRIMARY KEY,
+  CHANGE COLUMN `teamid` `teamid_old` varchar(15) NOT NULL,
+  ADD COLUMN `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID' AFTER `teamid_old`;
+ALTER TABLE `submission`
+  DROP FOREIGN KEY `submission_ibfk_2`,
+  DROP KEY `teamid`,
+  DROP KEY `teamid_2`,
+  CHANGE COLUMN `teamid` `teamid_old` varchar(15) NOT NULL,
+  ADD COLUMN `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID' AFTER `teamid_old`;
+ALTER TABLE `team_unread`
+  DROP FOREIGN KEY `team_unread_ibfk_1`,
+  DROP PRIMARY KEY,
+  CHANGE COLUMN `teamid` `teamid_old` varchar(15) NOT NULL,
+  ADD COLUMN `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID' AFTER `teamid_old`;
+
+ALTER TABLE `team`
+  DROP PRIMARY KEY,
+  ADD COLUMN `teamid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID' FIRST,
+  ADD PRIMARY KEY (`teamid`);
+
+UPDATE `clarification`
+  LEFT JOIN `team` ON clarification.sender_old = team.login
+  SET clarification.sender = team.teamid;
+UPDATE `clarification`
+  LEFT JOIN `team` ON clarification.recipient_old = team.login
+  SET clarification.recipient = team.teamid;
+UPDATE `event`
+  LEFT JOIN `team` ON event.teamid_old = team.login
+  SET event.teamid = team.teamid;
+UPDATE `scorecache_jury`
+  LEFT JOIN `team` ON scorecache_jury.teamid_old = team.login
+  SET scorecache_jury.teamid = team.teamid;
+UPDATE `scorecache_public`
+  LEFT JOIN `team` ON scorecache_public.teamid_old = team.login
+  SET scorecache_public.teamid = team.teamid;
+UPDATE `submission`
+  LEFT JOIN `team` ON submission.teamid_old = team.login
+  SET submission.teamid = team.teamid;
+UPDATE `team_unread`
+  LEFT JOIN `team` ON team_unread.teamid_old = team.login
+  SET team_unread.teamid = team.teamid;
+
+ALTER TABLE `clarification`
+  DROP COLUMN `recipient_old`,
+  DROP COLUMN `sender_old`;
+ALTER TABLE `event`
+  DROP COLUMN `teamid_old`,
+  ADD KEY `teamid` (`teamid`),
+  ADD CONSTRAINT `event_ibfk_7` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE;
+ALTER TABLE `scorecache_jury`
+  DROP COLUMN `teamid_old`,
+  ADD PRIMARY KEY (`cid`,`teamid`,`probid`);
+ALTER TABLE `scorecache_public`
+  DROP COLUMN `teamid_old`,
+  ADD PRIMARY KEY (`cid`,`teamid`,`probid`);
+ALTER TABLE `submission`
+  DROP COLUMN `teamid_old`,
+  ADD KEY `teamid` (`cid`,`teamid`),
+  ADD KEY `teamid_2` (`teamid`),
+  ADD CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE;
+ALTER TABLE `team_unread`
+  DROP COLUMN `teamid_old`,
+  ADD PRIMARY KEY (`teamid`,`type`,`mesgid`),
+  ADD CONSTRAINT `team_unread_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE;
+
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- Create some new tables and keys after ID updates to reduce
+-- changes necessary.
+
+ALTER TABLE `event`
+  ADD KEY `cid` (`cid`),
+  ADD KEY `clarid` (`clarid`),
+  ADD KEY `langid` (`langid`),
+  ADD KEY `probid` (`probid`),
+  ADD KEY `submitid` (`submitid`),
+  ADD KEY `judgingid` (`judgingid`),
+  ADD KEY `teamid` (`teamid`),
+  ADD FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`clarid`) REFERENCES `clarification` (`clarid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE;
+
+CREATE TABLE `user` (
+  `userid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `username` varchar(255) NOT NULL COMMENT 'User login name',
+  `name` varchar(255) NOT NULL COMMENT 'Name',
+  `email` varchar(255) DEFAULT NULL COMMENT 'Email address',
+  `last_login` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of last successful login',
+  `last_ip_address` varchar(255) DEFAULT NULL COMMENT 'Last IP address of successful login',
+  `password` varchar(32) DEFAULT NULL COMMENT 'Password hash',
+  `ip_address` varchar(255) DEFAULT NULL COMMENT 'IP Address used to autologin',
+  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the user is able to log in',
+  `teamid` int(4) unsigned DEFAULT NULL COMMENT 'Team associated with',
+  PRIMARY KEY (`userid`),
+  UNIQUE KEY `username` (`username`),
+  KEY `teamid` (`teamid`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Users that have access to DOMjudge';
+
+CREATE TABLE `role` (
+  `roleid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `role` varchar(15) NOT NULL COMMENT 'Role name',
+  `description` varchar(255) NOT NULL COMMENT 'Description for the web interface',
+  PRIMARY KEY (`roleid`),
+  UNIQUE KEY `role` (`role`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Possible user roles';
+
+CREATE TABLE `userrole` (
+  `userid` int(4) unsigned NOT NULL COMMENT 'User ID',
+  `roleid` int(4) unsigned NOT NULL COMMENT 'Role ID',
+  KEY `userid` (`userid`),
+  KEY `roleid` (`roleid`),
+  CONSTRAINT `userrole_pk` PRIMARY KEY (`userid`, `roleid`),
+  CONSTRAINT `userrole_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `user` (`userid`) ON DELETE CASCADE,
+  CONSTRAINT `userrole_ibfk_2` FOREIGN KEY (`roleid`) REFERENCES `role` (`roleid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of users and roles';
+
+CREATE TABLE `rankcache_jury` (
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `teamid` int(4) unsiged NOT NULL COMMENT 'Team login',
+  `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
+  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
+  PRIMARY KEY  (`cid`,`teamid`),
+  KEY `order` (`cid`,`correct`, `totaltime`) USING BTREE,
+  CONSTRAINT `rankcache_jury_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (jury version)';
+
+CREATE TABLE `rankcache_public` (
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Team login',
+  `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
+  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
+  PRIMARY KEY  (`cid`,`teamid`),
+  KEY `order` (`cid`,`correct`,`totaltime`) USING BTREE,
+  CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
+
 
 --
 -- Transfer data from old to new structure
@@ -475,3 +558,6 @@ ALTER TABLE `team_unread`
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`teamid`,`mesgid`),
   DROP COLUMN `type`;
+
+ALTER TABLE `team`
+  DROP COLUMN `login`;
