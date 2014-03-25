@@ -53,7 +53,7 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 -- Dumping data for table `team`
 -- 
 
-INSERT INTO `team` (1, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES (2, 'Example teamname', 2, 1, NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES (2, 'Example teamname', 2, 1, NULL, NULL, NULL, NULL);
 
 -- 
 -- Dumping data for table `testcase`
