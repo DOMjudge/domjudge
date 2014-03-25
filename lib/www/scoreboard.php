@@ -787,7 +787,7 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 	// Resolve ties based on latest correct, only necessary when we actually
 	// solved at least one problem, so this list should usually be short
 	if ( $correct > 0 ) {
-		$tied = $DB->q("COLUMN SELECT teamid
+		$tied = $DB->q("COLUMN SELECT team.teamid
 		       FROM rankcache_$tblname AS rc
 		       LEFT JOIN team
 		            ON (team.teamid = rc.teamid)
