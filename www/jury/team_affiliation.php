@@ -128,8 +128,8 @@ if ( $teams->count() == 0 ) {
 	while ($team = $teams->next()) {
 		$listteams[] = $team['teamid'];
 		$link = '<a href="team.php?id=' . urlencode($team['teamid']) . '">';
-		echo "<tr><td>t" .
-		$link . htmlspecialchars($team['teamid']) . "</a></td><td>" .
+		echo "<tr><td>" .
+		$link . "t" .htmlspecialchars($team['teamid']) . "</a></td><td>" .
 		$link . htmlspecialchars($team['name']) . "</a></td></tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
