@@ -65,7 +65,7 @@ if ( !empty($row['password']) ) {
 <!-- team selection -->
 <tr><td><label for="data_0__teamid_">Team:</label></td>
 <td><?php
-$tmap = $DB->q("KEYVALUETABLE SELECT login,name FROM team ORDER BY name");
+$tmap = $DB->q("KEYVALUETABLE SELECT teamid,name FROM team ORDER BY name");
 $tmap[''] = 'none';
 echo addSelect('data[0][teamid]', $tmap, isset($row['teamid'])?$row['teamid']:@$_GET['forteam'], true);
 ?>

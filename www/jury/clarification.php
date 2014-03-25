@@ -15,7 +15,7 @@ if ( isset($_REQUEST['id']) ) {
 	if ( ! $id ) error("Missing clarification id");
 
 	$req = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
-	               LEFT JOIN team t ON (t.login = q.sender)
+	               LEFT JOIN team t ON (t.teamid = q.sender)
 	               WHERE q.cid = %i AND q.clarid = %i', $cid, $id);
 
 	if ( ! $req ) error("clarification $id not found, cid = $cid");
@@ -92,14 +92,14 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		        VALUES(%s, %i, %i, "clarification")', now(), $cid, $newid);
 
 		// mark the messages as unread for the team(s)
-		$teams = $DB->q('COLUMN SELECT login FROM team');
-		foreach($teams as $login) {
+		$teams = $DB->q('COLUMN SELECT teamid FROM team');
+		foreach($teams as $teamid) {
 			$DB->q('INSERT INTO team_unread (mesgid, teamid)
-			        VALUES (%i, %s)', $newid, $login);
+			        VALUES (%i, %i)', $newid, $teamid);
 		}
 	} else {
 		$DB->q('INSERT INTO team_unread (mesgid, teamid)
-		        VALUES (%i, %s)', $newid, $sendto);
+		        VALUES (%i, %i)', $newid, $sendto);
 	}
 
 	$DB->q('COMMIT');
@@ -152,13 +152,13 @@ if ( !$req['answered'] ) {
 
 if ( ! empty ( $req['respid'] ) ) {
 	$orig = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
-	                LEFT JOIN team t ON (t.login = q.sender)
+	                LEFT JOIN team t ON (t.teamid = q.sender)
 	                WHERE q.clarid = %i', $respid);
 	echo '<p>See the <a href="clarification.php?id=' . $respid .
 		'">original clarification ' . $respid . '</a> by ' .
 		( $orig['sender']==NULL ? 'Jury' :
 			'<a href="team.php?id=' . urlencode($orig['sender']) . '">' .
-			htmlspecialchars($orig['sender'] . ': ' . $orig['name']) .
+			htmlspecialchars($orig['name'] . " (t" . $orig['sender'] . ")") .
 			'</a>' ) .
 		"</p>\n\n";
 

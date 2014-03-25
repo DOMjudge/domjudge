@@ -23,7 +23,7 @@ $KEYS['scorecache_jury'] = array('cid','teamid','probid');
 $KEYS['scorecache_public'] = array('cid','teamid','probid');
 $KEYS['submission'] = array('submitid');
 $KEYS['submission_file'] = array('submitfileid');
-$KEYS['team'] = array('login');
+$KEYS['team'] = array('teamid');
 $KEYS['team_affiliation'] = array('affilid');
 $KEYS['team_category'] = array('categoryid');
 $KEYS['team_unread'] = array('teamid','mesgid');
@@ -57,8 +57,8 @@ $RELATIONS['clarification'] = array (
 $RELATIONS['clarification'] = array (
 	'cid' => 'contest.cid',
 	'respid' => 'clarification.clarid&SETNULL',
-	'sender' => 'team.login&NOCONSTRAINT',
-	'recipient' => 'team.login&NOCONSTRAINT',
+	'sender' => 'team.teamid&NOCONSTRAINT',
+	'recipient' => 'team.teamid&NOCONSTRAINT',
 	'probid' => 'problem.probid&SETNULL',
 );
 
@@ -71,7 +71,7 @@ $RELATIONS['event'] = array (
 	'probid' => 'problem.probid&NOCONSTRAINT',
 	'submitid' => 'submission.submitid&NOCONSTRAINT',
 	'judgingid' => 'judging.judgingid&NOCONSTRAINT',
-	'teamid' => 'team.login&NOCONSTRAINT',
+	'teamid' => 'team.teamid&NOCONSTRAINT',
 );
 
 $RELATIONS['executable'] = array();
@@ -98,21 +98,21 @@ $RELATIONS['problem'] = array (
 $RELATIONS['rankcache_jury'] =
 $RELATIONS['rankcache_public'] = array (
 	'cid' => 'contest.cid&CASCADE',
-	'teamid' => 'team.login&NOCONSTRAINT'
+	'teamid' => 'team.teamid&NOCONSTRAINT'
 );
 
 
 $RELATIONS['scorecache_jury'] =
 $RELATIONS['scorecache_public'] = array (
 	'cid' => 'contest.cid&NOCONSTRAINT',
-	'teamid' => 'team.login&NOCONSTRAINT',
+	'teamid' => 'team.teamid&NOCONSTRAINT',
 	'probid' => 'problem.probid&NOCONSTRAINT',
 );
 
 $RELATIONS['submission'] = array (
 	'origsubmitid' => 'submission.submitid&SETNULL',
 	'cid' => 'contest.cid',
-	'teamid' => 'team.login',
+	'teamid' => 'team.teamid',
 	'probid' => 'problem.probid',
 	'langid' => 'language.langid',
 	'judgehost' => 'judgehost.hostname&SETNULL',
@@ -132,7 +132,7 @@ $RELATIONS['team_affiliation'] = array();
 $RELATIONS['team_category'] = array();
 
 $RELATIONS['team_unread'] = array(
-	'teamid' => 'team.login',
+	'teamid' => 'team.teamid',
 	'mesgid' => 'clarification.clarid',
 );
 

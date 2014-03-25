@@ -76,19 +76,19 @@ function logged_in()
 
 	if ( !empty($userdata) ) {
 		$username = $userdata['username'];
-		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s AND enabled = 1', $userdata['teamid']);
+		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE teamid = %i AND enabled = 1', $userdata['teamid']);
 
 		// Pull the list of roles that a user has
 		$userdata['roles'] = get_user_roles($userdata['userid']);
 	}
 
 	if ( !empty($teamdata) ) {
-		$teamid = $teamdata['login'];
+		$teamid = $teamdata['teamid'];
 		// Is this the first visit? Record that in the team table.
 		if ( empty($teamdata['teampage_first_visited']) ) {
 			$hostname = gethostbyaddr($ip);
 			$DB->q('UPDATE team SET teampage_first_visited = %s, hostname = %s
-			        WHERE login = %s',
+			        WHERE teamid = %i',
 			       now(), $hostname, $teamid);
 		}
 	}

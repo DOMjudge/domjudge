@@ -95,7 +95,7 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
                     t.name AS teamname, l.name AS langname, p.shortname, p.name AS probname,
                     CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
-                    LEFT JOIN team     t ON (t.login  = s.teamid)
+                    LEFT JOIN team     t ON (t.teamid = s.teamid)
                     LEFT JOIN problem  p ON (p.probid = s.probid)
                     LEFT JOIN language l ON (l.langid = s.langid)
                     LEFT JOIN contest  c ON (c.cid    = s.cid)
@@ -172,8 +172,7 @@ echo '<br/><br/>';
 ?>
 
 <img title="team" alt="Team:" src="../images/team.png"/> <a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>">
-	<span class="teamid"><?php echo htmlspecialchars($submdata['teamid'])?></span>:
-	<?php echo htmlspecialchars($submdata['teamname'])?></a>,
+	<?php echo htmlspecialchars($submdata['teamname'] . " (t" . $submdata['teamid'].")")?></a>,
 <img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>">
 	<span class="probid"><?php echo htmlspecialchars($submdata['shortname'])?></span>:
 	<?php echo htmlspecialchars($submdata['probname'])?></a>,
@@ -242,7 +241,7 @@ if ( isset($jid) )  {
 
 	$lastsubmitid = $DB->q('MAYBEVALUE SELECT submitid
 	                        FROM submission
-	                        WHERE teamid = %s AND probid = %s AND submittime < %s
+	                        WHERE teamid = %i AND probid = %i AND submittime < %s
 	                        ORDER BY submittime DESC LIMIT 1',
 	                       $submdata['teamid'],$submdata['probid'],
 	                       $submdata['submittime']);

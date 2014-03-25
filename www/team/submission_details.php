@@ -20,7 +20,7 @@ $row = $DB->q('MAYBETUPLE SELECT p.probid, shortname, p.name AS probname, submit
                LEFT JOIN submission s USING (submitid)
                LEFT JOIN language   l USING (langid)
                LEFT JOIN problem    p ON (p.probid = s.probid)
-               WHERE j.submitid = %i AND teamid = %s AND j.valid = 1',$sid,$teamid);
+               WHERE j.submitid = %i AND teamid = %i AND j.valid = 1',$sid,$teamid);
 
 if( !$row || $row['submittime'] >= $cdata['endtime'] ||
     (dbconfig_get('verification_required',0) && !$row['verified']) ) {

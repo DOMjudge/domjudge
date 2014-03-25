@@ -338,24 +338,6 @@ result('problems, languages, teams',
 	$details == '' ? 'O': $langseverity,
 	$details);
 
-
-
-$res = $DB->q('SELECT * FROM team ORDER BY login');
-
-$details = '';
-while($row = $res->next()) {
-	$CHECKER_ERRORS = array();
-	check_team($row);
-	if ( count ( $CHECKER_ERRORS ) > 0 ) {
-		foreach($CHECKER_ERRORS as $chk_err) {
-			$details .= $row['login'].': ' . $chk_err . "\n";
-		}
-	}
-}
-
-result('problems, languages, teams', 'Team integrity',
-	$details == '' ? 'O': 'E', $details);
-
 $details = '';
 if ( dbconfig_get('show_affiliations', 1) ) {
 	$res = $DB->q('SELECT affilid FROM team_affiliation ORDER BY affilid');

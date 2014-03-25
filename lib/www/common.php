@@ -86,12 +86,12 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 
 	$sqlbody =
 		'FROM submission s
-		 LEFT JOIN team     t ON (t.login    = s.teamid)
+		 LEFT JOIN team     t ON (t.teamid   = s.teamid)
 		 LEFT JOIN problem  p ON (p.probid   = s.probid)
 		 LEFT JOIN language l ON (l.langid   = s.langid)
 		 LEFT JOIN judging  j ON (s.submitid = j.submitid AND j.valid=1)
 		 WHERE s.cid = %i ' .
-	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %s '    : '%_') .
+	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
 	    (isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
 	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
 	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
@@ -174,8 +174,8 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		}
 		echo "<td><a$link>" . printtime($row['submittime']) . "</a></td>";
 		if ( IS_JURY ) {
-			echo '<td title="' .
-				htmlspecialchars($row['teamid'].': '.$row['teamname']) . '">' .
+			echo '<td title="t' .
+				htmlspecialchars($row['teamid']) . '">' .
 				"<a$link>" . htmlspecialchars(str_cut($row['teamname'],30)) . '</a></td>';
 		}
 		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
@@ -279,7 +279,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 /**
  * Output team information (for team and public interface)
  */
-function putTeam($login) {
+function putTeam($teamid) {
 
 	global $DB;
 
@@ -287,12 +287,12 @@ function putTeam($login) {
 	                a.name AS affname, a.country FROM team t
 	                LEFT JOIN team_category c USING (categoryid)
 	                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
-	                WHERE login = %s', $login);
+	                WHERE teamid = %i', $teamid);
 
 	if ( empty($team) ) error ("No team found by this id.");
 
 	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";
-	$teamimage = "../images/teams/" . urlencode($team['login']) . ".jpg";
+	$teamimage = "../images/teams/" . urlencode($team['teamid']) . ".jpg";
 
 	echo "<h1>Team ".htmlspecialchars($team['name'])."</h1>\n\n";
 

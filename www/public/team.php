@@ -10,9 +10,9 @@ $id = @$_GET['id'];
 
 require('init.php');
 
-if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
+if ( ! is_numeric($id) );
 
-$title = 'Team '.htmlspecialchars(@$id);
+$title = 'Team t'.htmlspecialchars(@$id);
 $menu = false;
 require(LIBWWWDIR . '/header.php');
 

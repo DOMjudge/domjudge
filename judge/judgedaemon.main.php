@@ -311,7 +311,7 @@ while ( TRUE ) {
 	$waiting = FALSE;
 
 	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
-	       "($row[teamid]/p$row[probid]/$row[langid]), id j$row[judgingid]...");
+	       "(t$row[teamid]/p$row[probid]/$row[langid]), id j$row[judgingid]...");
 
 	judge($row);
 

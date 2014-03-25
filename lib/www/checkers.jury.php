@@ -18,15 +18,6 @@ function ch_error($string)
 	$CHECKER_ERRORS[] = $string;
 }
 
-function check_team($data, $keydata = null)
-{
-	$id = (isset($data['login']) ? $data['login'] : $keydata['login']);
-	if ( ! preg_match ( ID_REGEX, $id ) ) {
-		ch_error("Team ID (login) may only contain characters " . IDENTIFIER_CHARS . ".");
-	}
-	return $data;
-}
-
 function check_user($data, $keydata = null)
 {
 	global $DB;

@@ -13,7 +13,7 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Affiliations</h1>\n\n";
 
-$res = $DB->q('SELECT a.*, COUNT(login) AS cnt FROM team_affiliation a
+$res = $DB->q('SELECT a.*, COUNT(teamid) AS cnt FROM team_affiliation a
                LEFT JOIN team USING (affilid)
                GROUP BY affilid ORDER BY name');
 

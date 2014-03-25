@@ -26,10 +26,10 @@ require_once(LIBDIR . '/lib.misc.php');
  * This function returns an array (scores, summary, matrix)
  * containing the following:
  *
- * scores[login](num_correct, total_time, solve_times[], rank,
+ * scores[teamid](num_correct, total_time, solve_times[], rank,
  *               teamname, categoryid, sortorder, country, affilid)
  *
- * matrix[login][probid](is_correct, num_submissions, num_pending, time, penalty)
+ * matrix[teamid][probid](is_correct, num_submissions, num_pending, time, penalty)
  *
  * summary(num_correct, total_time, affils[affilid], countries[country], problems[probid]
  *    probid(num_submissions, num_pending, num_correct, best_time_sort[sortorder] )
@@ -184,7 +184,7 @@ function getProblems($cdata) {
 function getTeams($filter, $jury) {
 	global $DB;
 
-	return $DB->q('KEYTABLE SELECT login AS ARRAYKEY, login, team.name,
+	return $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, teamid, team.name,
 	                 team.categoryid, team.affilid, sortorder,
 	                 country, color, team_affiliation.name AS affilname
 	                 FROM team
@@ -197,7 +197,7 @@ function getTeams($filter, $jury) {
 	                (isset($filter['affilid']) ? ' AND team.affilid IN (%As) ' : ' %_') .
 	                (isset($filter['country']) ? ' AND country IN (%As) ' : ' %_') .
 	                (isset($filter['categoryid']) ? ' AND team.categoryid IN (%As) ' : ' %_') .
-	                (isset($filter['teams']) ? ' AND login IN (%As) ' : ' %_'),
+	                (isset($filter['teams']) ? ' AND teamid IN (%Ai) ' : ' %_'),
 	                @$filter['affilid'], @$filter['country'], @$filter['categoryid'], @$filter['teams']);
 }
 
@@ -223,16 +223,16 @@ function getCategories($jury) {
  */
 function initScores($teams) {
 	$SCORES = array();
-	foreach ($teams as $login => $team ) {
-		$SCORES[$login]['num_correct'] = 0;
-		$SCORES[$login]['total_time']  = 0;
-		$SCORES[$login]['solve_times'] = array();
-		$SCORES[$login]['rank']        = 0;
-		$SCORES[$login]['teamname']    = $team['name'];
-		$SCORES[$login]['categoryid']  = $team['categoryid'];
-		$SCORES[$login]['sortorder']   = $team['sortorder'];
-		$SCORES[$login]['affilid']     = $team['affilid'];
-		$SCORES[$login]['country']     = $team['country'];
+	foreach ($teams as $teamid => $team ) {
+		$SCORES[$teamid]['num_correct'] = 0;
+		$SCORES[$teamid]['total_time']  = 0;
+		$SCORES[$teamid]['solve_times'] = array();
+		$SCORES[$teamid]['rank']        = 0;
+		$SCORES[$teamid]['teamname']    = $team['name'];
+		$SCORES[$teamid]['categoryid']  = $team['categoryid'];
+		$SCORES[$teamid]['sortorder']   = $team['sortorder'];
+		$SCORES[$teamid]['affilid']     = $team['affilid'];
+		$SCORES[$teamid]['country']     = $team['country'];
 	}
 	return $SCORES;
 }
@@ -674,16 +674,16 @@ function putTeamRow($cdata, $teamids) {
 		$SUMMARY = initSummary($probs);
 
 		// Calculate rank, num correct and total time from rank cache
-		foreach ($teams as $login => $team ) {
+		foreach ($teams as $teamid => $team ) {
 			$totals = $DB->q("MAYBETUPLE SELECT correct, totaltime
 			                  FROM rankcache_jury
 			                  WHERE cid = %i
-			                  AND teamid = %s", $cid, $login);
+			                  AND teamid = %i", $cid, $teamid);
 			if ( $totals != null ) {
-				$SCORES[$login]['num_correct'] = $totals['correct'];
-				$SCORES[$login]['total_time']  = $totals['totaltime'];
+				$SCORES[$teamid]['num_correct'] = $totals['correct'];
+				$SCORES[$teamid]['total_time']  = $totals['totaltime'];
 			}
-			if ($displayrank) $SCORES[$login]['rank'] = calcTeamRank($cdata, $login, $totals, true);
+			if ($displayrank) $SCORES[$teamid]['rank'] = calcTeamRank($cdata, $teamid, $totals, true);
 		}
 
 		// Get values for this team about problems from scoreboard cache
@@ -768,13 +768,13 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 	$sortorder = $DB->q('VALUE SELECT sortorder
 	      FROM team_category
 	      LEFT JOIN team ON (team_category.categoryid = team.categoryid)
-	      WHERE login = %s', $teamid);
+	      WHERE teamid = %i', $teamid);
 
 	// Number of teams that definitely ranked higher
-	$better = $DB->q("VALUE SELECT COUNT(teamid)
+	$better = $DB->q("VALUE SELECT COUNT(team.teamid)
 	     FROM rankcache_$tblname AS rc
 	     LEFT JOIN team
-	          ON (team.login = rc.teamid)
+	          ON (team.teamid = rc.teamid)
 	     LEFT JOIN team_category
 	          ON (team_category.categoryid = team.categoryid)
 	     WHERE cid = %i
@@ -790,7 +790,7 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 		$tied = $DB->q("COLUMN SELECT teamid
 		       FROM rankcache_$tblname AS rc
 		       LEFT JOIN team
-		            ON (team.login = rc.teamid)
+		            ON (team.teamid = rc.teamid)
 		       LEFT JOIN team_category
 		            ON (team_category.categoryid = team.categoryid)
 		       WHERE cid = %i
@@ -806,8 +806,8 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 		if ( count($tied) > 1 ) {
 			// initialize teamdata for each team
 			$teamdata = array();
-			foreach ( $tied as $login ) {
-				$teamdata[$login]['solve_times'] = array();
+			foreach ( $tied as $tiedid ) {
+				$teamdata[$tiedid]['solve_times'] = array();
 			}
 
 			// Get submission times for each of the teams
@@ -818,15 +818,15 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 			                     WHERE sc.cid = %i
 			                     AND is_correct = 1
 			                     AND allow_submit = 1
-			                     AND teamid IN (%As)", $cid, $tied);
+			                     AND teamid IN (%Ai)", $cid, $tied);
 			while ( $srow = $scoredata->next() ) {
 				$teamdata[$srow['teamid']]['solve_times'][] = $srow['totaltime'];
 			}
 
 			// Now check for each team if it is ranked higher than $teamid
-			foreach ( $tied as $login ) {
-				if ( $login == $teamid ) continue;
-				if ( tiebreaker($teamdata[$login], $teamdata[$teamid]) < 0)
+			foreach ( $tied as $tiedid ) {
+				if ( $tiedid == $teamid ) continue;
+				if ( tiebreaker($teamdata[$tiedid], $teamdata[$teamid]) < 0)
 					$rank++;
 			}
 		}

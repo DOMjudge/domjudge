@@ -149,7 +149,7 @@ function judgings_POST($args)
 	// Prioritize teams according to last judging time
 	$submitid = $DB->q('MAYBEVALUE SELECT submitid
 	                    FROM submission s
-	                    LEFT JOIN team t ON (s.teamid = t.login)
+	                    LEFT JOIN team t ON (s.teamid = t.teamid)
 	                    LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
 	                    WHERE judgehost IS NULL AND s.cid = %i
 			    AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
@@ -180,7 +180,7 @@ function judgings_POST($args)
 	               WHERE s.probid = p.probid AND s.langid = l.langid AND
 	               submitid = %i', $submitid);
 
-	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s',
+	$DB->q('UPDATE team SET judging_last_started = %s WHERE teamid = %i',
 	       now(), $row['teamid']);
 
 	if ( empty($row['compare']) ) {
@@ -316,14 +316,14 @@ function judging_runs_POST($args)
 		if ( ! dbconfig_get('verification_required', 0) ) {
 			$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
 				submitid, judgingid, description)
-				VALUES(%s, %i, %s, %s, %i, %i, %i, "problem judged")',
+				VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
 				now(), $row['cid'], $row['teamid'], $row['langid'], $row['probid'],
 				$row['submitid'], $args['judgingid']);
 			if ( $result == 'correct' ) {
 				// prevent duplicate balloons in case of multiple correct submissions
 				$numcorrect = $DB->q('VALUE SELECT count(submitid)
 						      FROM balloon LEFT JOIN submission USING(submitid)
-						      WHERE valid = 1 AND probid = %i AND teamid = %s',
+						      WHERE valid = 1 AND probid = %i AND teamid = %i',
 						      $row['probid'], $row['teamid']);
 				if ( $numcorrect == 0 ) {
 					$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
@@ -591,7 +591,7 @@ function queue($args)
 
 	$submitids = $DB->q('SELECT submitid
 			     FROM submission s
-			     LEFT JOIN team t ON (s.teamid = t.login)
+			     LEFT JOIN team t ON (s.teamid = t.teamid)
 	                     LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
 			     WHERE judgehost IS NULL AND s.cid = %i
 			     AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
@@ -641,7 +641,7 @@ function teams($args)
 	global $DB;
 
 	// Construct query
-	$query = 'SELECT login AS id, t.name, a.country AS nationality,
+	$query = 'SELECT teamid AS id, t.name, a.country AS nationality,
 	          t.categoryid AS category, a.name AS affiliation
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
@@ -657,18 +657,18 @@ function teams($args)
 	$query .= ($byAffil ? ' affilid = %s' : ' TRUE %_');
 	$affiliation = ($byAffil ? $args['affiliation'] : 0);
 
-	$byLogin = array_key_exists('login', $args);
-	$query .= ($byLogin ? ' AND login = %s' : ' AND TRUE %_');
-	$login = ($byLogin ? $args['login'] : 0);
+	$byTeamid = array_key_exists('teamid', $args);
+	$query .= ($byTeamid ? ' AND teamid = %i' : ' AND TRUE %_');
+	$teamid = ($byTeamid ? $args['teamid'] : 0);
 
 	// Run query and return result
-	$q = $DB->q($query, $category, $affiliation, $login);
+	$q = $DB->q($query, $category, $affiliation, $teamid);
 	return $q->gettable();
 }
 $args = array('category' => 'ID of a single category to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
-              'login' => 'Search for a specific team.');
-$doc = 'Get a list of teams containing login, name, category and affiliation.';
+              'teamid' => 'Search for a specific team.');
+$doc = 'Get a list of teams containing teamid, name, category and affiliation.';
 $exArgs = array(array('category' => 1, 'affiliation' => 'UU'));
 $api->provideFunction('GET', 'teams', $doc, $args, $exArgs);
 

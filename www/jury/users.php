@@ -44,7 +44,7 @@ if( $users->count() == 0 ) {
 		        htmlspecialchars($row['email'])."</a></td>".
 		    "<td>" . $link .
 		        htmlspecialchars($row['roles'])."</a></td>".
-		    "<td>" . $link .
+		    "<td>" . $link . "t" .
 		        htmlspecialchars($row['teamid'])."</a></td>";
 		echo "<td class=\"";
 		if ($status == 1) {

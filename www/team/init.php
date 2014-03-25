@@ -44,4 +44,4 @@ $cid = (int)$cdata['cid'];
 
 $nunread_clars = $DB->q('VALUE SELECT COUNT(*) FROM team_unread
                          LEFT JOIN clarification ON(mesgid=clarid)
-                         WHERE teamid = %s AND cid = %i', $teamid, $cid);
+                         WHERE teamid = %i AND cid = %i', $teamid, $cid);

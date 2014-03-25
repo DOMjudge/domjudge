@@ -46,21 +46,21 @@ if( $teams->count() == 0 ) {
 
 		$status = $numsub = $numcor = 0;
 		if ( isset($row['teampage_first_visited']) ) $status = 1;
-		if ( isset($nsubmits[$row['login']]) &&
-			 $nsubmits[$row['login']]['cnt']>0 ) {
+		if ( isset($nsubmits[$row['teamid']]) &&
+			 $nsubmits[$row['teamid']]['cnt']>0 ) {
 			$status = 2;
-			$numsub = (int)$nsubmits[$row['login']]['cnt'];
+			$numsub = (int)$nsubmits[$row['teamid']]['cnt'];
 		}
-		if ( isset($ncorrect[$row['login']]) &&
-			 $ncorrect[$row['login']]['cnt']>0 ) {
+		if ( isset($ncorrect[$row['teamid']]) &&
+			 $ncorrect[$row['teamid']]['cnt']>0 ) {
 			$status = 3;
-			$numcor = (int)$ncorrect[$row['login']]['cnt'];
+			$numcor = (int)$ncorrect[$row['teamid']]['cnt'];
 		}
-		$link = '<a href="team.php?id='.urlencode($row['login']) . '">';
+		$link = '<a href="team.php?id='.urlencode($row['teamid']) . '">';
 		echo "<tr class=\"category" . (int)$row['categoryid']  .
 			($row['enabled'] == 1 ? '' : ' sub_ignore') .  "\">".
-			"<td class=\"teamid\">" . $link .
-				htmlspecialchars($row['login'])."</a></td>".
+			"<td>" . $link . "t" .
+				htmlspecialchars($row['teamid'])."</a></td>".
 			"<td>" . $link .
 				htmlspecialchars($row['name'])."</a></td>".
 			"<td>" . $link .
@@ -92,8 +92,8 @@ if( $teams->count() == 0 ) {
 		echo "<td class=\"teamstat\" title=\"$numcor correct / $numsub submitted\">$link$numcor / $numsub</a></td>";
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-				editLink('team', $row['login']) . " " .
-				delLink('team','login',$row['login']) . "</td>";
+				editLink('team', $row['teamid']) . " " .
+				delLink('team','teamid',$row['teamid']) . "</td>";
 		}
 		echo "</tr>\n";
 	}

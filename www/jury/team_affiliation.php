@@ -118,18 +118,18 @@ if ( IS_ADMIN ) {
 echo "<h2>Teams from " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $listteams = array();
-$teams = $DB->q('SELECT login,name FROM team WHERE affilid = %s', $id);
+$teams = $DB->q('SELECT teamid,name FROM team WHERE affilid = %s', $id);
 if ( $teams->count() == 0 ) {
 	echo "<p class=\"nodata\">no teams</p>\n\n";
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
-		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th></tr>\n" .
+		"<tr><th scope=\"col\">ID</th><th scope=\"col\">teamname</th></tr>\n" .
 		"</thead>\n<tbody>\n";
 	while ($team = $teams->next()) {
-		$listteams[] = $team['login'];
-		$link = '<a href="team.php?id=' . urlencode($team['login']) . '">';
-		echo "<tr><td class=\"teamid\">" .
-		$link . htmlspecialchars($team['login']) . "</a></td><td>" .
+		$listteams[] = $team['teamid'];
+		$link = '<a href="team.php?id=' . urlencode($team['teamid']) . '">';
+		echo "<tr><td>t" .
+		$link . htmlspecialchars($team['teamid']) . "</a></td><td>" .
 		$link . htmlspecialchars($team['name']) . "</a></td></tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";

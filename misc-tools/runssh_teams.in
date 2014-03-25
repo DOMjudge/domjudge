@@ -27,7 +27,7 @@ $program = escapeshellarg($program);
 
 logmsg(LOG_DEBUG, "running program $program");
 
-$teams = $DB->q('COLUMN SELECT login FROM team ORDER BY login');
+$teams = $DB->q('COLUMN SELECT userid FROM user WHERE teamid IS NOT NULL ORDER BY login');
 
 foreach($teams as $team) {
 	$team = escapeshellarg($team);

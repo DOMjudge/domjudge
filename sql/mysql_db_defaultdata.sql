@@ -112,7 +112,7 @@ INSERT INTO `team_category` VALUES (1, 'System', 9, '#ff2bea', 0);
 -- Dumping data for table `team`
 -- 
 
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES (1, 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
 
 -- 
 -- Dumping data for table `user`
