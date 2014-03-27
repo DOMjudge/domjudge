@@ -524,10 +524,6 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 ALTER TABLE `submission` DROP KEY `judgemark`;
 ALTER TABLE `submission` DROP COLUMN `judgemark`;
 ALTER TABLE `team` DROP COLUMN `authtoken`;
-ALTER TABLE `team_unread`
-  DROP PRIMARY KEY,
-  DROP COLUMN `type`,
-  ADD PRIMARY KEY(`teamid`,`mesgid`);
 
 ALTER TABLE `auditlog` DROP COLUMN `logtime_old`;
 
