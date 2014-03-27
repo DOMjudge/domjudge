@@ -460,3 +460,8 @@ ALTER TABLE `submission` DROP COLUMN `submittime_old`;
 ALTER TABLE `team`
   DROP COLUMN `judging_last_started_old`,
   DROP COLUMN `teampage_first_visited_old`;
+
+ALTER TABLE `team_unread`
+  DROP PRIMARY KEY,
+  ADD PRIMARY KEY (`teamid`,`mesgid`),
+  DROP COLUMN `type`;
