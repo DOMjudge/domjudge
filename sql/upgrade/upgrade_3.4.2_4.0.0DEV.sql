@@ -114,7 +114,7 @@ ALTER TABLE `contest`
   MODIFY COLUMN `cid`        int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID';
 ALTER TABLE `judging_run`
   MODIFY COLUMN `runid`      int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID';
-ALTER TABLE `testcaseid`
+ALTER TABLE `testcase`
   MODIFY COLUMN `testcaseid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID';
 
 -- We move the affilid primary key to shortname and create a new
