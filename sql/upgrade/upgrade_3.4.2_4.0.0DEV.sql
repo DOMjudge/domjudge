@@ -154,8 +154,6 @@ ALTER TABLE `clarification`
   DROP KEY `probid`,
   ADD COLUMN `probid_old` varchar(8) DEFAULT NULL AFTER `probid`;
 ALTER TABLE `event`
-  DROP FOREIGN KEY `event_ibfk_4`,
-  DROP KEY `probid`,
   ADD COLUMN `probid_old` varchar(8) DEFAULT NULL AFTER `probid`;
 ALTER TABLE `scorecache_jury`
   DROP PRIMARY KEY,
@@ -226,9 +224,7 @@ ALTER TABLE `clarification`
   ADD KEY `probid` (`probid`),
   ADD CONSTRAINT `clarification_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE SET NULL;
 ALTER TABLE `event`
-  DROP COLUMN `probid_old`,
-  ADD KEY `probid` (`probid`),
-  ADD CONSTRAINT `event_ibfk_4` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE;
+  DROP COLUMN `probid_old`;
 ALTER TABLE `scorecache_jury`
   DROP COLUMN `probid_old`,
   ADD PRIMARY KEY (`cid`,`teamid`,`probid`);
@@ -273,7 +269,8 @@ ALTER TABLE `team_unread`
   DROP FOREIGN KEY `team_unread_ibfk_1`,
   DROP PRIMARY KEY,
   CHANGE COLUMN `teamid` `teamid_old` varchar(15) NOT NULL,
-  ADD COLUMN `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID' AFTER `teamid_old`;
+  ADD COLUMN `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID' AFTER `teamid_old`,
+  MODIFY COLUMN `mesgid` int(4) unsigned NOT NULL COMMENT 'Clarification ID';
 
 ALTER TABLE `team`
   DROP PRIMARY KEY,
@@ -306,9 +303,7 @@ ALTER TABLE `clarification`
   DROP COLUMN `recipient_old`,
   DROP COLUMN `sender_old`;
 ALTER TABLE `event`
-  DROP COLUMN `teamid_old`,
-  ADD KEY `teamid` (`teamid`),
-  ADD CONSTRAINT `event_ibfk_7` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE;
+  DROP COLUMN `teamid_old`;
 ALTER TABLE `scorecache_jury`
   DROP COLUMN `teamid_old`,
   ADD PRIMARY KEY (`cid`,`teamid`,`probid`);
@@ -383,7 +378,7 @@ CREATE TABLE `userrole` (
 
 CREATE TABLE `rankcache_jury` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` int(4) unsiged NOT NULL COMMENT 'Team login',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
   `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
   PRIMARY KEY  (`cid`,`teamid`),
@@ -393,7 +388,7 @@ CREATE TABLE `rankcache_jury` (
 
 CREATE TABLE `rankcache_public` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` int(4) unsigned NOT NULL COMMENT 'Team login',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
   `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
   PRIMARY KEY  (`cid`,`teamid`),
