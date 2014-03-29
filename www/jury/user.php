@@ -32,7 +32,7 @@ if ( !empty($cmd) ):
 
     if ( $cmd == 'edit' ) {
         echo "<tr><td>Username:</td><td class=\"username\">";
-        $row = $DB->q('TUPLE SELECT * FROM user WHERE userid = %s',
+        $row = $DB->q('TUPLE SELECT * FROM user WHERE userid = %i',
             $id);
         echo addHidden('keydata[0][userid]', $row['userid']);
         echo addHidden('keydata[0][username]', $row['username']);
@@ -105,10 +105,12 @@ exit;
 
 endif;
 
-$row = $DB->q('MAYBETUPLE SELECT u.*
-               FROM user u
-               WHERE u.userid = %s', $id);
-$roles = $DB->q('SELECT role.* FROM userrole LEFT JOIN role ON userrole.roleid = role.roleid WHERE userrole.userid = %s', $id);
+$row = $DB->q('MAYBETUPLE SELECT u.*, t.name AS teamname FROM user u
+               LEFT JOIN team t USING(teamid)
+               WHERE u.userid = %i', $id);
+$roles = $DB->q('SELECT role.* FROM userrole
+                 LEFT JOIN role USING(roleid)
+                 WHERE userrole.userid = %i', $id);
 
 if ( ! $row ) error("Missing or invalid user id");
 
@@ -152,7 +154,7 @@ if ( !empty($row['password']) ) {
 if ( $row['teamid'] ) {
 	echo "<td class=\"teamid\"><a href=\"team.php?id=" .
 	     urlencode($row['teamid']) . "\">" .
-	     htmlspecialchars($row['teamid']) . "</a></td>";
+	     htmlspecialchars($row['teamname'] . " (t" .$row['teamid'].")") . "</a></td>";
 } else {
 	echo "<td>-</td>";
 } ?></tr>

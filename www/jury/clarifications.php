@@ -21,18 +21,27 @@ echo "<p><a href=\"#newrequests\">View New Clarification Requests</a></p>\n";
 echo "<p><a href=\"#oldrequests\">View Old Clarification Requests</a></p>\n";
 echo "<p><a href=\"#clarifications\">View General Clarifications</a></p>\n\n";
 
-$newrequests    = $DB->q('SELECT c.*, p.shortname FROM clarification c
+$newrequests    = $DB->q('SELECT c.*, p.shortname, t.name AS toname, f.name AS fromname
+                          FROM clarification c
                           LEFT JOIN problem p USING(probid)
+                          LEFT JOIN team t ON (t.teamid = c.recipient)
+                          LEFT JOIN team f ON (f.teamid = c.sender)
                           WHERE c.sender IS NOT NULL AND c.cid = %i AND c.answered = 0
                           ORDER BY submittime DESC, clarid DESC', $cid);
 
-$oldrequests    = $DB->q('SELECT c.*, p.shortname FROM clarification c
+$oldrequests    = $DB->q('SELECT c.*, p.shortname, t.name AS toname, f.name AS fromname
+                          FROM clarification c
                           LEFT JOIN problem p USING(probid)
+                          LEFT JOIN team t ON (t.teamid = c.recipient)
+                          LEFT JOIN team f ON (f.teamid = c.sender)
                           WHERE c.sender IS NOT NULL AND c.cid = %i AND c.answered != 0
                           ORDER BY submittime DESC, clarid DESC', $cid);
 
-$clarifications = $DB->q('SELECT c.*, p.shortname FROM clarification c
+$clarifications = $DB->q('SELECT c.*, p.shortname, t.name AS toname, f.name AS fromname
+                          FROM clarification c
                           LEFT JOIN problem p USING(probid)
+                          LEFT JOIN team t ON (t.teamid = c.recipient)
+                          LEFT JOIN team f ON (f.teamid = c.sender)
                           WHERE c.sender IS NULL AND c.cid = %i
                           AND ( c.respid IS NULL OR c.recipient IS NULL )
                           ORDER BY submittime DESC, clarid DESC', $cid);

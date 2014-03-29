@@ -183,15 +183,16 @@ function putClarificationList($clars, $team = NULL)
 
 		echo '<td>' . $link . printtime($clar['submittime']) . '</a></td>';
 
-		$sender = htmlspecialchars($clar['sender']);
-		$recipient = htmlspecialchars($clar['recipient']);
-
-		if ($sender == NULL && $recipient == NULL) {
+		if ( $clar['sender']  == NULL ) {
 			$sender = 'Jury';
-			$recipient = 'All';
+			if ( $clar['recipient'] == NULL ) {
+				$recipient = 'All';
+			} else {
+				$recipient = htmlspecialchars($clar['toname']);
+			}
 		} else {
-			if ( $sender    == NULL ) $sender = 'Jury';
-			if ( $recipient == NULL ) $recipient = 'Jury';
+			$sender = htmlspecialchars($clar['fromname']);
+			$recipient = 'Jury';
 		}
 
 		echo '<td>' . $link . $sender . '</a></td>' .
