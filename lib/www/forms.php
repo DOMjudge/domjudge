@@ -103,8 +103,6 @@ function addSelect($name, $values, $default = null, $usekeys = false, $multi = f
 
 	$ret = '<select name="' . htmlspecialchars($name) . '"' .
 		($multi ? " multiple=\"multiple\" size=\"$size\"" : '') .
-		// Only one element, so fix the selection list:
-	    (count($values)==1 ? " disabled=\"disabled\" " : '') .
 		' id="' . htmlspecialchars(strtr($name,'[]','__')) . "\">\n";
 	foreach ($values as $k => $v) {
 		if ( ! $usekeys ) $k = $v;
