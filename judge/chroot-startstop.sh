@@ -66,19 +66,10 @@ case "$1" in
 				sudo -n umount "$PWD/$i" < /dev/null
 			fi
 		done
-
-# FIXME: it seems that after unmounting, we sometimes still get error
-# messages "Device or resource busy" when trying to rmdir the
-# mountpoints. A 'sync' doesn't help, so we wait one second. This is
-# not enough in all cases, but hopefully for most at least...
-		sleep 1
-
-		for i in $SUBDIRMOUNTS ; do
-			if [ -d "$CHROOTORIGINAL/$i" ]; then
-				rmdir $i || true
-			fi
-		done
-		rmdir proc || true
+# KLUDGE: We don't rmdir the empty mountpoint directories, since after
+# unmounting, we sometimes still get error messages "Device or
+# resource busy" when trying to. This seems only to occur when
+# multiple judgedaemons are run on a single host...
 		;;
 
 	*)
