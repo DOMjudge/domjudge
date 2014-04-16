@@ -38,11 +38,12 @@ cleanup ()
 		fi
 	fi
 
-	# Copy runguard and program stderr to error output. The display is
+	# Copy runguard and program stderr to system output. The display is
 	# truncated to normal size in the jury web interface.
-	cat runguard.err >> error.out
-	echo  "********** program stderr follows **********" >> error.out
-	cat program.err  >> error.out
+	if [ -s runguard.err ]; then
+		echo  "********** runguard stderr follows **********" >> system.out
+		cat runguard.err >> system.out
+	fi
 }
 
 cleanexit ()
@@ -155,7 +156,7 @@ fi
 chmod a+x "$WORKDIR" "$WORKDIR/execdir"
 
 # Create files which are expected to exist:
-touch error.out                  # Error output
+touch system.out                 # Judging system output (info/debug/error)
 touch compare.out                # Compare output
 touch result.out                 # Result of comparison
 touch program.out program.err    # Program output and stderr (for extra information)
@@ -200,8 +201,9 @@ runcheck ./run testdata.in program.out \
 	$PREFIX/$PROGRAM 2>runguard.err
 
 # Check for still running processes:
-if ps -u "$RUNUSER" >/dev/null 2>&1 ; then
-	error "found processes still running"
+output=`ps -u "$RUNUSER" -o pid= -o comm=`
+if [ -n "$output" ] ; then
+	error "found processes still running as '$RUNUSER', check manually:\n$output"
 fi
 
 # We first compare the output, so that even if the submission gets a
@@ -229,11 +231,11 @@ timeused=`    grep '^time-used: ' program.meta | sed 's/time-used: //'`
 program_time=`grep "^$timeused: " program.meta | sed "s/$timeused: //"`
 program_exit=`grep '^exitcode: '  program.meta | sed 's/exitcode: //'`
 if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
-	echo "Timelimit exceeded, runtime: $program_time" >>error.out
+	echo "Timelimit exceeded, runtime: $program_time" >>system.out
 	cleanexit ${E_TIMELIMIT:--1}
 fi
 if [ "$program_exit" != "0" ]; then
-	echo "Non-zero exitcode $program_exit" >>error.out
+	echo "Non-zero exitcode $program_exit" >>system.out
 	cleanexit ${E_RUN_ERROR:--1}
 fi
 
@@ -243,15 +245,15 @@ fi
 ### reported the same way by all different compilers.    ###
 ############################################################
 #if grep  'Floating point exception' program.err >/dev/null 2>&1 ; then
-#	echo "Floating point exception." >>error.out
+#	echo "Floating point exception." >>system.out
 #	cleanexit ${E_RUN_ERROR:--1}
 #fi
 #if grep  'Segmentation fault' program.err >/dev/null 2>&1 ; then
-#	echo "Segmentation fault." >>tee error.out
+#	echo "Segmentation fault." >>tee system.out
 #	cleanexit ${E_RUN_ERROR:--1}
 #fi
 #if grep  'File size limit exceeded' program.err >/dev/null 2>&1 ; then
-#	echo "File size limit exceeded." >>error.out
+#	echo "File size limit exceeded." >>system.out
 #	cleanexit ${E_OUTPUT_LIMIT:--1}
 #fi
 
@@ -260,19 +262,19 @@ descrp=`grep '^description=' result.out | cut -d = -f 2-`
 descrp="${descrp:+ ($descrp)}"
 
 if [ "$result" = "accepted" ]; then
-	echo "Correct${descrp}! Runtime is $program_time seconds." >>error.out
+	echo "Correct${descrp}! Runtime is $program_time seconds." >>system.out
 	cleanexit ${E_CORRECT:--1}
 elif [ "$result" = "presentation error" ]; then
-	echo "Presentation error${descrp}." >>error.out
+	echo "Presentation error${descrp}." >>system.out
 	cleanexit ${E_PRESENTATION_ERROR:--1}
 elif [ ! -s program.out ]; then
-	echo "Program produced no output." >>error.out
+	echo "Program produced no output." >>system.out
 	cleanexit ${E_NO_OUTPUT:--1}
 elif [ "$result" = "wrong answer" ]; then
-	echo "Wrong answer${descrp}." >>error.out
+	echo "Wrong answer${descrp}." >>system.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 else
-	echo "Unknown result: Wrong answer#${descrp}#${result}#." >>error.out
+	echo "Unknown result: Wrong answer#${descrp}#${result}#." >>system.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 fi
 

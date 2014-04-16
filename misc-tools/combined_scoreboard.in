@@ -96,7 +96,7 @@ foreach($sites as $site) {
 		              'rank'        => 0,
 		              'solve_times' => array(),
 		              'sortorder'   => 0);
-		$teams[$teamid] = array('login'      => $teamid,
+		$teams[$teamid] = array('teamid'     => $teamid,
 		                        'name'       => $team['teamname'],
 		                        'categoryid' => $team['categoryid'],
 		                        'affilid'    => $team['affilid'],

@@ -9,9 +9,9 @@
 require('init.php');
 
 $id = @$_REQUEST['id'];
-$title = 'Team '.htmlspecialchars(@$id);
+$title = 'Team t'.htmlspecialchars(@$id);
 
-if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid team id");
+if ( !empty($id) && ! is_numeric($id) ) error("Invalid team id");
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
@@ -34,16 +34,13 @@ if ( !empty($cmd) ):
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>ID:</td><td class=\"teamid\">";
-		$row = $DB->q('TUPLE SELECT * FROM team WHERE login = %s',
+		echo "<tr><td>ID:</td><td>";
+		$row = $DB->q('TUPLE SELECT * FROM team WHERE teamid = %i',
 			$_GET['id']);
-		echo addHidden('keydata[0][login]', $row['login']);
-		echo htmlspecialchars($row['login']);
-	} else {
-		echo "<tr><td><label for=\"data_0__login_\">ID:</label></td><td class=\"teamid\">";
-		echo addInput('data[0][login]', null, 8, 15, 'pattern="' . IDENTIFIER_CHARS . '+" title="Alphanumerics only" required');
+		echo addHidden('keydata[0][teamid]', $row['teamid']);
+		echo "t" . htmlspecialchars($row['teamid']);
+		echo "</td></tr>\n";
 	}
-	echo "</td></tr>\n";
 
 ?>
 <tr><td><label for="data_0__name_">Team name:</label></td>
@@ -94,19 +91,19 @@ if ( isset($_GET['restrict']) ) {
 	$restrictions[$key] = $value;
 }
 
-$row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname, a.name AS affname
+$row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname, a.shortname AS affshortname, a.name AS affname
                FROM team t
                LEFT JOIN team_category c USING (categoryid)
                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
-               WHERE login = %s', $id);
+               WHERE teamid = %i', $id);
 
 if ( ! $row ) error("Missing or invalid team id");
 
-$users = $DB->q('TABLE SELECT userid,username FROM user WHERE teamid = %s', $id);
+$users = $DB->q('TABLE SELECT userid,username FROM user WHERE teamid = %i', $id);
 
 $affillogo   = "../images/affiliations/" . urlencode($row['affilid']) . ".png";
 $countryflag = "../images/countries/"    . urlencode($row['country']) . ".png";
-$teamimage   = "../images/teams/"        . urlencode($row['login'])   . ".jpg";
+$teamimage   = "../images/teams/"        . urlencode($row['teamid'])  . ".jpg";
 
 echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 
@@ -117,7 +114,7 @@ if ( $row['enabled'] != 1 ) {
 ?>
 
 <div class="col1"><table>
-<tr><td>ID:        </td><td class="teamid"><?php echo $row['login']?></td></tr>
+<tr><td>ID:        </td><td>t<?php echo htmlspecialchars($row['teamid'])?></td></tr>
 <tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
 <tr><td>Penalty time:</td><td><?php echo htmlspecialchars($row['penalty'])?></td></tr>
 <tr><td>Host:</td><td><?php echo
@@ -131,7 +128,7 @@ if ( count($users) ) {
 		echo "<a href=\"user.php?id=" . urlencode($user['userid']) . "\">" . htmlspecialchars($user['username']) . "</a> ";
 	}
 } else {
-	echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode($row['login']) . "\"><small>(add)</small></a>";
+	echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode($row['teamid']) . "\"><small>(add)</small></a>";
 }
 ?></td></tr>
 </table></div>
@@ -147,9 +144,7 @@ if ( !empty($row['affilid']) ) {
 	echo '<tr><td>Affiliation:</td><td>';
 	if ( is_readable($affillogo) ) {
 		echo '<img src="' . $affillogo . '" alt="' .
-			htmlspecialchars($row['affilid']) . '" /> ';
-	} else {
-		echo htmlspecialchars($row['affilid']) . ' - ';
+			htmlspecialchars($row['affshortname']) . '" /> ';
 	}
 	echo '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">' .
 		htmlspecialchars($row['affname']) . "</a></td></tr>\n";
@@ -175,7 +170,7 @@ echo "</table></div>\n";
 if ( IS_ADMIN ) {
 	echo "<p class=\"nomorecol\">" .
 		editLink('team', $id). "\n" .
-		delLink('team','login',$id) .
+		delLink('team','teamid',$id) .
 		"</p>\n\n";
 }
 

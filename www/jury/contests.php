@@ -81,7 +81,7 @@ if ( empty($cid) )  {
 	if ( $row ) {
 		echo "<p>No active contest. Upcoming:<br/> <em>" .
 		     htmlspecialchars($row['contestname']) .
-		     "</em>; active from " . $row['activatetime'] .
+		     "</em>; active from " . printtime($row['activatetime'], '%a %d %b %Y %T %Z') .
 		     "<br /><br />\n";
 		if ( IS_ADMIN ) echo "<input type=\"submit\" " .
 		     "name=\"donow[activate][" . (int)$row['cid'] .

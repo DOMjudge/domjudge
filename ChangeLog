@@ -3,7 +3,11 @@ DOMjudge Programming Contest Judging System
 Version 4.0.0 - DEV
 -------------------
  - [INCOMPATIBLE CHANGE] checktestdata logical operators are now '&&' and '||'.
- - Introduce REST API; used by judgedaemon to communicate with domserver.
+ - Introduce REST API; used by judgedaemon and submit client to communicate
+   with domserver.
+ - Problem short names now need to be unique per contest, but not globally.
+ - Redesign authentication system: there's a single set of users for all
+   interfaces, which may have different roles, such as team or admin.
  - New scoreboard layout: more compact, affil. logos replaced by names.
  - Store timestamps in database as Unix epoch, independent of time zones
    with subsecond resolution.
@@ -15,9 +19,7 @@ Version 4.0.0 - DEV
  - Update jscolor and sorttable javascript to latest upstream versions.
  - Misc. minor bugs fixed reported by Coverity scan.
  - Replace flex++ by flexc++, fixes a missing build dep. and code cleanup.
- - Add support for new languages: Prolog, Ruby.
- - Add note that submit client requires the IPADDRESS (or FIXED)
-   authentication method (Closes #125).
+ - Add support for new languages: Prolog, Ruby, JavaScript.
  - Replace GeSHi syntax highlighter with Ace javascript code editor.
  - [security] Compile as unprivileged user to prevent compile-time access
    to e.g. testdata files.

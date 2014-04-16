@@ -14,7 +14,7 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Problems</h1>\n\n";
 
 // Select all data, sort problems from the current contest on top.
-$res = $DB->q('SELECT p.probid,p.name,p.allow_submit,p.allow_judge,p.timelimit,p.color,
+$res = $DB->q('SELECT p.probid,p.shortname,p.name,p.allow_submit,p.allow_judge,p.timelimit,p.color,
                p.problemtext_type, c.*, COUNT(testcaseid) AS testcases
                FROM problem p
                NATURAL JOIN contest c
@@ -25,7 +25,7 @@ if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No problems defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
+	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">shortname</th><th scope=\"col\">name</th>" .
 	     "<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" .
 	     "<th scope=\"col\">allow<br />submit</th>" .
 	     "<th scope=\"col\">allow<br />judge</th>" .
@@ -48,8 +48,9 @@ if( $res->count() == 0 ) {
 		$link = '<a href="problem.php?id=' . urlencode($row['probid']) . '">';
 
 		echo "<tr class=\"" . implode(' ',$classes) .
-		    "\"><td class=\"probid\">" . $link .
+		    "\"><td>" . $link . "p" .
 				htmlspecialchars($row['probid'])."</a>".
+			"</td><td class=\"probid\">" . $link . htmlspecialchars($row['shortname'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
 			"</td><td title=\"".htmlspecialchars($row['contestname'])."\">".
 			$link . 'c' . htmlspecialchars($row['cid']) . "</a>" .

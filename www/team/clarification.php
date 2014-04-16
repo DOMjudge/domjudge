@@ -29,11 +29,11 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	// Disallow problems that are not submittable or
 	// before contest start.
 	$probid = $_POST['problem'];
-	if ( !(problemVisible($probid) || substr($probid, 0, 1)=='#') ) $probid = null;
+	if ( !(problemVisible($probid) && (int)$probid<1000000 ) ) $probid = null;
 
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, submittime, sender, probid, body)
-	                 VALUES (%i, %s, %s, %s, %s)',
+	                 VALUES (%i, %s, %i, %i, %s)',
 	                $cid, now(), $teamid, $probid, $_POST['bodytext']);
 
 	auditlog('clarification', $newid, 'added');

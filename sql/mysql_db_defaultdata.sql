@@ -54,6 +54,7 @@ INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
 ('java_gcj', 'java_gcj', 'compile'),
 ('java_javac', 'java_javac', 'compile'),
 ('java_javac_detect', 'java_javac_detect', 'compile'),
+('js', 'js', 'compile'),
 ('lua', 'lua', 'compile'),
 ('pas', 'pas', 'compile'),
 ('pl', 'pl', 'compile'),
@@ -79,6 +80,7 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 ('f95', 'Fortran', '["f95","f90"]', 0, 1, 1, 'f95'),
 ('hs', 'Haskell', '["hs","lhs"]', 0, 1, 2, 'hs'),
 ('java', 'Java', '["java"]', 1, 1, 1.5, 'java_javac_detect'),
+('js', 'JavaScript', '["js"]', 0, 1, 1.5, 'js'),
 ('lua', 'Lua', '["lua"]', 0, 1, 1, 'lua'),
 ('pas', 'Pascal', '["pas","p"]', 0, 1, 1, 'pas'),
 ('pl', 'Perl', '["pl"]', 0, 1, 1, 'pl'),
@@ -113,7 +115,7 @@ INSERT INTO `team_category` VALUES (1, 'System', 9, '#ff2bea', 0);
 -- Dumping data for table `team`
 -- 
 
-INSERT INTO `team` (`login`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES ('domjudge', 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES (1, 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
 
 -- 
 -- Dumping data for table `user`

@@ -103,8 +103,6 @@ function addSelect($name, $values, $default = null, $usekeys = false, $multi = f
 
 	$ret = '<select name="' . htmlspecialchars($name) . '"' .
 		($multi ? " multiple=\"multiple\" size=\"$size\"" : '') .
-		// Only one element, so fix the selection list:
-	    (count($values)==1 ? " disabled=\"disabled\" " : '') .
 		' id="' . htmlspecialchars(strtr($name,'[]','__')) . "\">\n";
 	foreach ($values as $k => $v) {
 		if ( ! $usekeys ) $k = $v;
@@ -159,7 +157,7 @@ function addForm($action, $method = 'post', $id = '', $enctype = '', $charset = 
 		$charset = ' accept-charset="'.htmlspecialchars($charset).'"';
 	}
 
-	return '<form action="'. $action .'" method="'. $method .'"'.
+	return '<form style="display:inline;" action="'. $action .'" method="'. $method .'"'.
 		$enctype . $id . $charset . $extra .">\n";
 }
 

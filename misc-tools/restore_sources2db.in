@@ -47,6 +47,16 @@ if ( !($dh = @opendir($sourcesdir)) ) {
 
 $submissions = array();
 
+$probname2id = $DB->q('KEYVALUETABLE SELECT shortname, probid FROM problem');
+
+// Check if team.login column is present and use it for a keyvalue map:
+$res = $DB->q("MAYBETUPLE SELECT * FROM information_schema.COLUMNS
+               WHERE TABLE_SCHEMA = 'domjudge-test' AND
+               TABLE_NAME = 'team' AND COLUMN_NAME = 'login'");
+if ( !empty($res) ) {
+	$teamlogin2id = $DB->q('KEYVALUETABLE SELECT login, teamid FROM team');
+}
+
 while ( ($src = readdir($dh))!==FALSE ) {
 
 	$f = $sourcesdir . '/' . $src;
@@ -78,6 +88,16 @@ while ( ($src = readdir($dh))!==FALSE ) {
 	$cid = substr($cid,1);
 	$sid = substr($sid,1);
 	$submittime = filemtime($f);
+
+	// Convert old-style probid to new numeric one:
+	if ( !ctype_digit($probid) && !empty($probname2id[$probid]) ) {
+		$probid = $probname2id[$probid];
+	}
+
+	// Convert old-style team login to new numeric teamid:
+	if ( !ctype_digit($teamid) && !empty($teamlogin2id[$teamid]) ) {
+		$teamid = $teamlogin2id[$teamid];
+	}
 
 	// Store submission in array
 	if ( !isset($submissions[$sid]) ) {

@@ -132,6 +132,29 @@ result('software', 'PHP max_file_uploads',
        'than the maximum number of test cases per problem and the ' .
        'configuration setting \'sourcefiles_limit\'.');
 
+
+$sizes = array();
+$postmaxvars = array('post_max_size', 'memory_limit', 'upload_max_filesize');
+foreach($postmaxvars as $var) {
+	/* skip 0 or empty values, and -1 which means 'unlimited' */
+	if( $size = phpini_to_bytes(ini_get($var)) ) {
+		if ( $size != '-1' ) {
+			$sizes[$var] = $size;
+		}
+	}
+}
+
+$resulttext = 'PHP POST/upload filesize is limited to ' . printsize(min($sizes)) .
+	"\n\nThis limit needs to be larger than the testcases you want to upload and than the amount of program output you expect the judgedaemons to post back to DOMjudge. We recommend at least 50 MB.\n\nNote that you need to ensure that all of the following php.ini parameters are at minimum the desired size:\n";
+foreach($postmaxvars as $var) {
+	$resulttext .= "$var (now set to " .
+		(isset($sizes[$var]) ? printsize($sizes[$var]) : "unlimited") .
+		")\n";
+}
+
+result('software', 'PHP POST/upload filesize',
+       min($sizes) < 52428800 ? 'W':'O', '', $resulttext);
+
 if ( class_exists("ZipArchive") ) {
 	result('software', 'Problem up/download via zip bundles',
 	       'O', 'PHP ZipArchive class available for importing and exporting problem data.');
@@ -151,8 +174,7 @@ while($row = $mysqldatares->next()) {
 
 result('software', 'MySQL version',
 	version_compare('4.1', $mysqldata['version'], '>=') ? 'E':'O',
-	'Connected to MySQL server version ' .
-	htmlspecialchars($mysqldata['version']) .
+	'Connected to MySQL server version ' . $mysqldata['version'] .
 	'. Minimum required is 4.1.');
 
 result('software', 'MySQL maximum connections',
@@ -163,9 +185,9 @@ result('software', 'MySQL maximum connections',
 	'prevent connection refusal during the contest.');
 
 result('software', 'MySQL maximum packet size',
-	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O',
+	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O', '',
 	'MySQL\'s max_allowed_packet is set to ' .
-	(int)$mysqldata['max_allowed_packet']/1024/1024 . 'MB. You may ' .
+	printsize($mysqldata['max_allowed_packet']) . '. You may ' .
 	'want to raise this to about twice the maximum test case size.');
 
 flushresults();
@@ -192,7 +214,7 @@ if ( DEBUG == 0 ) {
 	result('configuration', 'Debugging', 'O', 'Debugging disabled.');
 } else {
 	result('configuration', 'Debugging', 'W',
-		'Debug information enabled (level ' . htmlspecialchars(DEBUG).").\n" .
+		'Debug information enabled (level ' . DEBUG .").\n" .
 		'Should not be enabled on live systems.');
 }
 
@@ -257,7 +279,7 @@ flushresults();
 
 // PROBLEMS
 
-$res = $DB->q('SELECT probid, timelimit, special_compare, special_run FROM problem ORDER BY probid');
+$res = $DB->q('SELECT probid, shortname, timelimit, special_compare, special_run FROM problem ORDER BY probid');
 
 $details = '';
 while($row = $res->next()) {
@@ -265,19 +287,19 @@ while($row = $res->next()) {
 	check_problem($row);
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
 		foreach($CHECKER_ERRORS as $chk_err) {
-			$details .= $row['probid'].': ' . $chk_err."\n";
+			$details .= 'p'.$row['probid'].': ' . $chk_err."\n";
 		}
 	}
 	if ( ! $DB->q("MAYBEVALUE SELECT count(testcaseid) FROM testcase
  	               WHERE input IS NOT NULL AND output IS NOT NULL AND
- 	               probid = %s", $row['probid']) ) {
-		$details .= $row['probid'].": missing in/output testcase.\n";
+ 	               probid = %i", $row['probid']) ) {
+		$details .= 'p'.$row['probid'].": missing in/output testcase.\n";
 	}
 }
 foreach(array('input','output') as $inout) {
 	$mismatch = $DB->q("SELECT probid, rank FROM testcase WHERE md5($inout) != md5sum_$inout");
 	while($r = $mismatch->next()) {
-		$details .= $r['probid'] . ": testcase #" . $r['rank'] .
+		$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
 		    " MD5 sum mismatch between $inout and md5sum_$inout\n";
 	}
 }
@@ -285,14 +307,14 @@ $oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
                     FROM testcase WHERE OCTET_LENGTH(output) > %i",
                    dbconfig_get('filesize_limit')*1024);
 while($r = $oversize->next()) {
-	$details .= $r['probid'] . ": testcase #" . $r['rank'] .
-	    " output size (" . $r['size'] . " B) exceeds filesize_limit\n";
+	$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
+	    " output size (" . printsize($r['size']) . ") exceeds filesize_limit\n";
 }
 
 $has_errors = $details != '';
 $probs = $DB->q("COLUMN SELECT probid FROM problem WHERE color IS NULL");
 foreach($probs as $probid) {
-       $details .= $probid . ": has no color\n";
+       $details .= 'p'.$probid . ": has no color\n";
 }
 
 result('problems, languages, teams', 'Problems integrity',
@@ -324,24 +346,6 @@ result('problems, languages, teams',
 	'Languages integrity',
 	$details == '' ? 'O': $langseverity,
 	$details);
-
-
-
-$res = $DB->q('SELECT * FROM team ORDER BY login');
-
-$details = '';
-while($row = $res->next()) {
-	$CHECKER_ERRORS = array();
-	check_team($row);
-	if ( count ( $CHECKER_ERRORS ) > 0 ) {
-		foreach($CHECKER_ERRORS as $chk_err) {
-			$details .= $row['login'].': ' . $chk_err . "\n";
-		}
-	}
-}
-
-result('problems, languages, teams', 'Team integrity',
-	$details == '' ? 'O': 'E', $details);
 
 $details = '';
 if ( dbconfig_get('show_affiliations', 1) ) {
@@ -408,9 +412,9 @@ $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
 
 $details = '';
 while($row = $res->next()) {
-	$details .= 'Submission s' .  $row['submitid'] . ' is for problem "' .
+	$details .= 'Submission s' .  $row['submitid'] . ' is for problem p' .
 		$row['probid'] .
-		'" while this problem is not found (in c'. $row['cid'] . ")\n";
+		' while this problem is not found (in c'. $row['cid'] . ")\n";
 }
 
 $res = $DB->q('SELECT * FROM submission ORDER BY submitid');
@@ -470,7 +474,7 @@ while($row = $res->next()) {
 // check for valid judgings that are already running too long
 $res = $DB->q('SELECT judgingid, submitid, starttime
                FROM judging WHERE valid = 1 AND endtime IS NULL AND
-               (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(starttime)) > 300');
+               (UNIX_TIMESTAMP()-starttime) > 300');
 while($row = $res->next()) {
 	$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
 		" is running for longer than 5 minutes, probably the judgedaemon crashed\n";

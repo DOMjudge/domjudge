@@ -13,8 +13,6 @@ $pagename = basename($_SERVER['PHP_SELF']);
 define('IS_JURY', false);
 define('IS_PUBLIC', false);
 
-if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
-
 require_once(LIBDIR . '/init.php');
 
 setup_database_connection();
@@ -46,5 +44,4 @@ $cid = (int)$cdata['cid'];
 
 $nunread_clars = $DB->q('VALUE SELECT COUNT(*) FROM team_unread
                          LEFT JOIN clarification ON(mesgid=clarid)
-                         WHERE type="clarification" AND teamid = %s
-                         AND cid = %i', $teamid, $cid);
+                         WHERE teamid = %i AND cid = %i', $teamid, $cid);

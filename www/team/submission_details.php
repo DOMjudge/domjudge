@@ -14,13 +14,13 @@ $sid = (int)@$_GET['id'];
 
 
 // select also on teamid so we can only select our own submissions
-$row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
+$row = $DB->q('MAYBETUPLE SELECT p.probid, shortname, p.name AS probname, submittime,
                s.valid, l.name AS langname, result, output_compile, verified, judgingid
                FROM judging j
                LEFT JOIN submission s USING (submitid)
                LEFT JOIN language   l USING (langid)
                LEFT JOIN problem    p ON (p.probid = s.probid)
-               WHERE j.submitid = %i AND teamid = %s AND j.valid = 1',$sid,$teamid);
+               WHERE j.submitid = %i AND teamid = %i AND j.valid = 1',$sid,$teamid);
 
 if( !$row || $row['submittime'] >= $cdata['endtime'] ||
     (dbconfig_get('verification_required',0) && !$row['verified']) ) {
@@ -43,7 +43,7 @@ if( ! $row['valid'] ) {
 <table>
 <tr><td>Problem:</td>
 	<td><?php echo htmlspecialchars($row['probname'])?> [<span class="probid"><?php echo
-	htmlspecialchars($row['probid']) ?></span>]</td></tr>
+	htmlspecialchars($row['shortname']) ?></span>]</td></tr>
 <tr><td>Submitted:</td>
 	<td><?php echo printtime($row['submittime'], NULL, TRUE)?></td></tr>
 <tr><td>Language:</td>
@@ -82,7 +82,7 @@ if ( $show_sample && @$row['result']!='compiler-error' ) {
 	$runs = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
 	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 	                                             r.judgingid = %i )
-	                WHERE t.probid = %s AND t.sample = 1 ORDER BY rank',
+	                WHERE t.probid = %i AND t.sample = 1 ORDER BY rank',
 	               $row['judgingid'], $row['probid']);
 
 	$runinfo = $runs->gettable();

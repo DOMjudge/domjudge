@@ -16,10 +16,10 @@ $INOROUT = array('input','output');
 if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 	$rank  = $_GET['rank'];
 	$fetch = $_GET['fetch'];
-	$filename = $probid . $rank . "." . substr($fetch,0,-3);
+	$filename = $probid . "." . $rank . "." . substr($fetch,0,-3);
 
 	$size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH($fetch)
-	                FROM testcase WHERE probid = %s AND rank = %i",
+	                FROM testcase WHERE probid = %i AND rank = %i",
 	               $probid, $rank);
 
 	// sanity check before we start to output headers
@@ -32,7 +32,7 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 	// This may not be good enough for large testsets, but streaming them
 	// directly from the database query result seems overkill to implement.
 	echo $DB->q("VALUE SELECT SQL_NO_CACHE $fetch FROM testcase
-	             WHERE probid = %s AND rank = %i", $probid, $rank);
+	             WHERE probid = %i AND rank = %i", $probid, $rank);
 
 	exit(0);
 }
@@ -46,7 +46,7 @@ function get_testcase_data()
 	                description, sample,
 	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
 	                OCTET_LENGTH(output) AS size_output, md5sum_output
-	                FROM testcase WHERE probid = %s ORDER BY rank', $probid);
+	                FROM testcase WHERE probid = %i ORDER BY rank', $probid);
 }
 get_testcase_data();
 
@@ -76,11 +76,11 @@ if ( isset ($_GET['move']) ) {
 		$tmprank = 999999;
 		$DB->q('START TRANSACTION');
 		$DB->q('UPDATE testcase SET rank = %i
-		        WHERE probid = %s AND rank = %i', $tmprank, $probid, $other);
+		        WHERE probid = %i AND rank = %i', $tmprank, $probid, $other);
 		$DB->q('UPDATE testcase SET rank = %i
-		        WHERE probid = %s AND rank = %i', $other, $probid, $rank);
+		        WHERE probid = %i AND rank = %i', $other, $probid, $rank);
 		$DB->q('UPDATE testcase SET rank = %i
-		        WHERE probid = %s AND rank = %i', $rank, $probid, $tmprank);
+		        WHERE probid = %i AND rank = %i', $rank, $probid, $tmprank);
 		$DB->q('COMMIT');
 		auditlog('testcase', $probid, 'switch rank', "$rank <=> $other");
 	}
@@ -90,7 +90,7 @@ if ( isset ($_GET['move']) ) {
 	return;
 }
 
-$title = 'Testcases for problem '.htmlspecialchars(@$probid);
+$title = 'Testcases for problem p'.htmlspecialchars(@$probid);
 
 require(LIBWWWDIR . '/header.php');
 
@@ -115,21 +115,21 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 			$content = file_get_contents($_FILES[$fileid]['tmp_name'][$rank]);
 			if ( $DB->q("VALUE SELECT count(testcaseid)
- 			             FROM testcase WHERE probid = %s AND rank = %i",
+ 			             FROM testcase WHERE probid = %i AND rank = %i",
 			            $probid, $rank) ) {
 				$DB->q("UPDATE testcase SET md5sum_$inout = %s, $inout = %s
-				        WHERE probid = %s AND rank = %i",
+				        WHERE probid = %i AND rank = %i",
 				       md5($content), $content, $probid, $rank);
 				auditlog('testcase', $probid, 'updated', "$inout rank $rank");
 			} else {
 				$DB->q("INSERT INTO testcase (probid,rank,md5sum_$inout,$inout)
-				        VALUES (%s,%i,%s,%s)",
+				        VALUES (%i,%i,%s,%s)",
 				       $probid, $rank, md5($content), $content);
 				auditlog('testcase', $probid, 'added', "$inout rank $rank");
 			}
 			$result .= "<li>Updated $inout for testcase $rank from " .
 			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
-			    " (" . htmlspecialchars($_FILES[$fileid]['size'][$rank]) . " B)";
+			    " (" . printsize($_FILES[$fileid]['size'][$rank]) . ")";
 			if ( $inout=='output' &&
 			     $_FILES[$fileid]['size'][$rank]>dbconfig_get('filesize_limit')*1024 ) {
 				$result .= ".<br /><b>Warning: file size exceeds " .
@@ -141,7 +141,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 	}
 
 	if ( isset($_POST['sample'][$rank]) ) {
-		$DB->q('UPDATE testcase SET sample = %i WHERE probid = %s
+		$DB->q('UPDATE testcase SET sample = %i WHERE probid = %i
 		        AND rank = %i', $_POST['sample'][$rank], $probid, $rank);
 		$result .= "<li>Set testcase $rank to be " .
 		           ($_POST['sample'][$rank] ? "" : "not ") .
@@ -149,7 +149,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 	}
 
 	if ( isset($_POST['description'][$rank]) ) {
-		$DB->q('UPDATE testcase SET description = %s WHERE probid = %s
+		$DB->q('UPDATE testcase SET description = %s WHERE probid = %i
 		        AND rank = %i', $_POST['description'][$rank], $probid, $rank);
 		auditlog('testcase', $probid, 'updated description', "rank $rank");
 
@@ -175,7 +175,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 		if ( !empty($content['input']) && !empty($content['output']) ) {
 			$DB->q("INSERT INTO testcase
 			        (probid,rank,md5sum_input,md5sum_output,input,output,description,sample)
-			        VALUES (%s,%i,%s,%s,%s,%s,%s,%i)",
+			        VALUES (%i,%i,%s,%s,%s,%s,%s,%i)",
 			       $probid, $rank, md5(@$content['input']), md5(@$content['output']),
 			       @$content['input'], @$content['output'], @$_POST['add_desc'],
 			       @$_POST['add_sample']);
@@ -183,9 +183,9 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 			$result .= "<li>Added new testcase $rank from " .
 			    htmlspecialchars($_FILES['add_input']['name']) .
-			    " (" . htmlspecialchars($_FILES['add_input']['size']) . " B) and " .
+			    " (" . printsize($_FILES['add_input']['size']) . ") and " .
 			    htmlspecialchars($_FILES['add_output']['name']) .
-			    " (" . htmlspecialchars($_FILES['add_output']['size']) . " B)";
+			    " (" . printsize($_FILES['add_output']['size']) . ")";
 			if ( $_FILES['add_output']['size']>dbconfig_get('filesize_limit')*1024 ) {
 				$result .= ".<br /><b>Warning: output file size exceeds " .
 				    "<code>filesize_limit</code> of " . dbconfig_get('filesize_limit') .
@@ -211,7 +211,7 @@ if ( count($data)<(int)key($data) ) {
 	$newrank = 1;
 	foreach( $data as $rank => $row ) {
 		$DB->q('UPDATE testcase SET rank = %i
-		        WHERE probid = %s AND rank = %i', $newrank++, $probid, $rank);
+		        WHERE probid = %i AND rank = %i', $newrank++, $probid, $rank);
 	}
 
 	echo "<p>Test case rankings reordered.</p>\n\n";
@@ -220,7 +220,7 @@ if ( count($data)<(int)key($data) ) {
 	get_testcase_data();
 }
 
-echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem " .
+echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem p" .
 	htmlspecialchars($probid) . "</a></p>\n\n";
 
 if ( IS_ADMIN ) {
@@ -256,8 +256,8 @@ foreach( $data as $rank => $row ) {
 		}
 		echo "<td class=\"filename\"><a href=\"./testcase.php?probid=" .
 		    urlencode($probid) . "&amp;rank=$rank&amp;fetch=" . $inout . "\">" .
-		    htmlspecialchars($probid) . $rank . "." . substr($inout,0,-3) . "</a></td>" .
-		    "<td class=\"size\">" . htmlspecialchars($row["size_$inout"]) . "&nbsp;B</td>" .
+		    htmlspecialchars($probid) . "." . $rank . "." . substr($inout,0,-3) . "</a></td>" .
+		    "<td class=\"size\">" . printsize($row["size_$inout"]) . "</td>" .
 		    "<td class=\"md5\">" . htmlspecialchars($row["md5sum_$inout"]) . "</td>";
 		if ( IS_ADMIN ) {
 		    echo "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";

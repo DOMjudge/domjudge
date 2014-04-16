@@ -71,7 +71,7 @@ echo addHidden('cmd', $cmd) .
 
 if ( ! $id ) error("Missing or invalid category id");
 
-$data = $DB->q('TUPLE SELECT * FROM team_category WHERE categoryid = %s', $id);
+$data = $DB->q('TUPLE SELECT * FROM team_category WHERE categoryid = %i', $id);
 
 $title = "Category: " . htmlspecialchars($data['name']);
 
@@ -102,18 +102,18 @@ if ( IS_ADMIN ) {
 echo "<h2>Teams in " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $listteams = array();
-$teams = $DB->q('SELECT login,name FROM team WHERE categoryid = %i', $id);
+$teams = $DB->q('SELECT teamid,name FROM team WHERE categoryid = %i', $id);
 if ( $teams->count() == 0 ) {
 	echo "<p class=\"nodata\">no teams</p>\n\n";
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
-		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th></tr>\n" .
+		"<tr><th scope=\"col\">ID</th><th scope=\"col\">teamname</th></tr>\n" .
 		"</thead>\n<tbody>\n";
 	while ($team = $teams->next()) {
-		$listteams[] = $team['login'];
-		$link = '<a href="team.php?id=' . urlencode($team['login']) . '">';
-		echo "<tr><td class=\"teamid\">" .
-		$link . htmlspecialchars($team['login']) . "</a></td><td>" .
+		$listteams[] = $team['teamid'];
+		$link = '<a href="team.php?id=' . urlencode($team['teamid']) . '">';
+		echo "<tr><td>" .
+		$link . "t" . htmlspecialchars($team['teamid']) . "</a></td><td>" .
 		$link . htmlspecialchars($team['name']) . "</a></td></tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";

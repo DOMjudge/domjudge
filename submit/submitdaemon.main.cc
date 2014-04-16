@@ -323,6 +323,7 @@ void create_server()
 		int optval = 1;
 		if ( setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&optval,sizeof(int))!=0 ) {
 			warning(errno,"cannot set %s socket options",addr_family_name.c_str());
+			close(fd);
 			continue;
 		}
 
@@ -336,12 +337,14 @@ void create_server()
 				continue;
 			} else {
 				warning(errno,"binding server %s socket",addr_family_name.c_str());
+				close(fd);
 				continue;
 			}
 		}
 
 		if ( listen(fd,backlog)!=0 ) {
 			warning(errno,"starting listening via %s",addr_family_name.c_str());
+			close(fd);
 			continue;
 		}
 

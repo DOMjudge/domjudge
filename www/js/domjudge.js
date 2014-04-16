@@ -105,7 +105,7 @@ function detectProblemLanguage(filename)
 	if ( elt.value != '' ) return;
 
 	for (i=0;i<elt.length;i++) {
-		if ( elt.options[i].value.toLowerCase() == parts[1] ) {
+		if ( elt.options[i].text.toLowerCase() == parts[1] ) {
 			elt.selectedIndex = i;
 		}
 	}
@@ -241,11 +241,15 @@ function addFileUpload() {
 }
 
 function togglelastruns() {
-	var names = {'lastruntime':0, 'lastresult':1};
+	var names = {'lastruntime':0, 'lastresult':1, 'lasttcruns':2};
 	for (var name in names) {
 		cells = document.getElementsByClassName(name);
 		for (i = 0; i < cells.length; i++) {
-			cells[i].style.display = (cells[i].style.display == 'none') ? 'table-cell' : 'none';
+			style = 'inline';
+			if (name == 'lasttcruns') {
+				style = 'table-row';
+			}
+			cells[i].style.display = (cells[i].style.display == 'none') ? style : 'none';
 		}
 	}
 }

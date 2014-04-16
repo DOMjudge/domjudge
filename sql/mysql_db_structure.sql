@@ -41,10 +41,10 @@ CREATE TABLE `clarification` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `respid` int(4) unsigned DEFAULT NULL COMMENT 'In reply to clarification ID',
   `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time sent',
-  `sender` varchar(15) DEFAULT NULL COMMENT 'Team login, null means jury',
-  `recipient` varchar(15) DEFAULT NULL COMMENT 'Team login, null means to jury or to all',
+  `sender` int(4) unsigned DEFAULT NULL COMMENT 'Team ID, null means jury',
+  `recipient` int(4) unsigned DEFAULT NULL COMMENT 'Team ID, null means to jury or to all',
   `jury_member` varchar(15) DEFAULT NULL COMMENT 'Name of jury member who answered this',
-  `probid` varchar(8) DEFAULT NULL COMMENT 'Problem or category associated to this clarification',
+  `probid` int(4) unsigned DEFAULT NULL COMMENT 'Problem or category associated to this clarification',
   `body` longtext NOT NULL COMMENT 'Clarification text',
   `answered` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),
@@ -61,7 +61,7 @@ CREATE TABLE `clarification` (
 --
 
 CREATE TABLE `configuration` (
-  `configid` int(4) NOT NULL AUTO_INCREMENT COMMENT 'Configuration ID',
+  `configid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `name` varchar(25) NOT NULL COMMENT 'Name of the configuration variable',
   `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)',
   `type` varchar(25) DEFAULT NULL COMMENT 'Type of the value (metatype for use in the webinterface)',
@@ -75,7 +75,7 @@ CREATE TABLE `configuration` (
 --
 
 CREATE TABLE `contest` (
-  `cid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Contest ID',
+  `cid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `contestname` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `activatetime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest becomes visible in team/public views',
   `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest starts, submissions accepted',
@@ -105,10 +105,10 @@ CREATE TABLE `event` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `clarid` int(4) unsigned DEFAULT NULL COMMENT 'Clarification ID',
   `langid` varchar(8) DEFAULT NULL COMMENT 'Language ID',
-  `probid` varchar(8) DEFAULT NULL COMMENT 'Problem ID',
+  `probid` int(4) unsigned DEFAULT NULL COMMENT 'Problem ID',
   `submitid` int(4) unsigned DEFAULT NULL COMMENT 'Submission ID',
   `judgingid` int(4) unsigned DEFAULT NULL COMMENT 'Judging ID',
-  `teamid` varchar(15) DEFAULT NULL COMMENT 'Team login',
+  `teamid` int(4) unsigned DEFAULT NULL COMMENT 'Team ID',
   `description` longtext NOT NULL COMMENT 'Event description',
   PRIMARY KEY  (`eventid`),
   KEY `cid` (`cid`),
@@ -124,7 +124,7 @@ CREATE TABLE `event` (
   CONSTRAINT `event_ibfk_4` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
   CONSTRAINT `event_ibfk_5` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
   CONSTRAINT `event_ibfk_6` FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE CASCADE,
-  CONSTRAINT `event_ibfk_7` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE
+  CONSTRAINT `event_ibfk_7` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Log of all events during a contest';
 
 --
@@ -183,7 +183,7 @@ CREATE TABLE `judging` (
 --
 
 CREATE TABLE `judging_run` (
-  `runid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique identifier',
+  `runid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `judgingid` int(4) unsigned NOT NULL COMMENT 'Judging ID',
   `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
   `runresult` varchar(25) DEFAULT NULL COMMENT 'Result of this run, NULL if not finished yet',
@@ -191,6 +191,7 @@ CREATE TABLE `judging_run` (
   `output_run` longblob COMMENT 'Output of running the program',
   `output_diff` longblob COMMENT 'Diffing the program output and testcase output',
   `output_error` longblob COMMENT 'Standard error output of the program',
+  `output_system` longblob COMMENT 'Judging system output',
   PRIMARY KEY  (`runid`),
   UNIQUE KEY `testcaseid` (`judgingid`, `testcaseid`),
   KEY `judgingid` (`judgingid`),
@@ -219,7 +220,8 @@ CREATE TABLE `language` (
 --
 
 CREATE TABLE `problem` (
-  `probid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
+  `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `shortname` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Are submissions accepted for this problem?',
@@ -231,6 +233,7 @@ CREATE TABLE `problem` (
   `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
   `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text',
   PRIMARY KEY  (`probid`),
+  UNIQUE KEY `shortname` (`shortname`,`cid`),
   KEY `cid` (`cid`),
   CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
@@ -241,7 +244,7 @@ CREATE TABLE `problem` (
 
 CREATE TABLE `rankcache_jury` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
   `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
   PRIMARY KEY  (`cid`,`teamid`),
@@ -255,7 +258,7 @@ CREATE TABLE `rankcache_jury` (
 
 CREATE TABLE `rankcache_public` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
   `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
   PRIMARY KEY  (`cid`,`teamid`),
@@ -295,8 +298,8 @@ CREATE TABLE `role` (
 
 CREATE TABLE `scorecache_jury` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
+  `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made',
   `pending` int(4) NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
@@ -310,8 +313,8 @@ CREATE TABLE `scorecache_jury` (
 
 CREATE TABLE `scorecache_public` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
+  `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
   `submissions` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made',
   `pending` int(4) NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
@@ -329,8 +332,8 @@ CREATE TABLE `submission` (
   `externalid` int(4) unsigned DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
   `externalresult` varchar(25) DEFAULT NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` varchar(15) NOT NULL COMMENT 'Team login',
-  `probid` varchar(8) NOT NULL COMMENT 'Problem ID',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
+  `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
   `langid` varchar(8) NOT NULL COMMENT 'Language ID',
   `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time submitted',
   `judgehost` varchar(50) DEFAULT NULL COMMENT 'Current/last judgehost judging this submission',
@@ -345,7 +348,7 @@ CREATE TABLE `submission` (
   KEY `judgehost_2` (`judgehost`),
   KEY `origsubmitid` (`origsubmitid`),
   CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
-  CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE,
+  CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL,
@@ -374,10 +377,10 @@ CREATE TABLE `submission_file` (
 --
 
 CREATE TABLE `team` (
-  `login` varchar(15) NOT NULL COMMENT 'Team login name',
+  `teamid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Team name',
   `categoryid` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Team category ID',
-  `affilid` varchar(10) DEFAULT NULL COMMENT 'Team affiliation ID',
+  `affilid` int(4) unsigned DEFAULT NULL COMMENT 'Team affiliation ID',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the team is visible and operational',
   `members` longtext COMMENT 'Team member names (freeform)',
   `room` varchar(15) DEFAULT NULL COMMENT 'Physical location of team',
@@ -387,7 +390,7 @@ CREATE TABLE `team` (
   `hostname` varchar(255) DEFAULT NULL COMMENT 'Teampage first visited from this address',
   `penalty` int(4) NOT NULL DEFAULT '0' COMMENT 'Additional penalty time in minutes',
   `externalid` int(4) unsigned DEFAULT NULL COMMENT 'Specifies ID of team if imported from external source',
-  PRIMARY KEY  (`login`),
+  PRIMARY KEY  (`teamid`),
   UNIQUE KEY `name` (`name`),
   KEY `affilid` (`affilid`),
   KEY `categoryid` (`categoryid`),
@@ -400,7 +403,8 @@ CREATE TABLE `team` (
 --
 
 CREATE TABLE `team_affiliation` (
-  `affilid` varchar(10) NOT NULL COMMENT 'Unique ID',
+  `affilid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `shortname` varchar(30) NOT NULL COMMENT 'Short descriptive name',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `country` char(3) DEFAULT NULL COMMENT 'ISO 3166-1 alpha-3 country code',
   `comments` longtext COMMENT 'Comments',
@@ -426,12 +430,11 @@ CREATE TABLE `team_category` (
 --
 
 CREATE TABLE `team_unread` (
-  `teamid` varchar(15) NOT NULL DEFAULT '' COMMENT 'Team login',
-  `mesgid` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Clarification ID',
-  `type` varchar(25) NOT NULL DEFAULT 'clarification' COMMENT 'Type of message (now always "clarification")',
-  PRIMARY KEY (`teamid`,`type`,`mesgid`),
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
+  `mesgid` int(4) unsigned NOT NULL COMMENT 'Clarification ID',
+  PRIMARY KEY (`teamid`,`mesgid`),
   KEY `mesgid` (`mesgid`),
-  CONSTRAINT `team_unread_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE CASCADE,
+  CONSTRAINT `team_unread_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE,
   CONSTRAINT `team_unread_ibfk_2` FOREIGN KEY (`mesgid`) REFERENCES `clarification` (`clarid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='List of items a team has not viewed yet';
 
@@ -440,12 +443,12 @@ CREATE TABLE `team_unread` (
 --
 
 CREATE TABLE `testcase` (
-  `testcaseid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique identifier',
+  `testcaseid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `md5sum_input` char(32) DEFAULT NULL COMMENT 'Checksum of input data',
   `md5sum_output` char(32) DEFAULT NULL COMMENT 'Checksum of output data',
   `input` longblob COMMENT 'Input data',
   `output` longblob COMMENT 'Output data',
-  `probid` varchar(8) NOT NULL COMMENT 'Corresponding problem ID',
+  `probid` int(4) unsigned NOT NULL COMMENT 'Corresponding problem ID',
   `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of this testcase',
   `sample` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Sample testcases that can be shared with teams',
@@ -469,11 +472,11 @@ CREATE TABLE `user` (
   `password` varchar(32) DEFAULT NULL COMMENT 'Password hash',
   `ip_address` varchar(255) DEFAULT NULL COMMENT 'IP Address used to autologin',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the user is able to log in',
-  `teamid` varchar(15) DEFAULT NULL COMMENT 'Team associated with',
+  `teamid` int(4) unsigned DEFAULT NULL COMMENT 'Team associated with',
   PRIMARY KEY (`userid`),
   UNIQUE KEY `username` (`username`),
   KEY `teamid` (`teamid`),
-  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`login`) ON DELETE SET NULL
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Users that have access to DOMjudge';
 
 

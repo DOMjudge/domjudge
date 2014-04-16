@@ -74,7 +74,15 @@ fi
 
 [ -z "$CHROOTDIR" ] && error "No installation directory given."
 [ -z "$ARCH" ]      && error "No architecture given."
-[ -e "$CHROOTDIR" ] && error "'$CHROOTDIR' already exists, remove manually."
+
+if [ -e "$CHROOTDIR" ]; then
+	echo -n "'$CHROOTDIR' already exists. Remove? (y/N) "
+	read yn
+	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
+		error "Chrootdir already exists, exiting."
+	fi
+	rm -rf "$CHROOTDIR"
+fi
 
 mkdir -p "$CHROOTDIR"
 cd "$CHROOTDIR"

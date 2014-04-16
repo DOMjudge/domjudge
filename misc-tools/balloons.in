@@ -35,13 +35,13 @@ function notification_text($team, $problem, $probs_solved, $probs_data, $comment
 		"A problem has been solved:\n".
 		"\n".
 		(empty($team['room']) ? "" : "Location: ".$team['room']."\n" ) .
-		"Team:     ".$team['login'].": ".$team['name']."\n".
+		"Team:     ".$team['name']." (t".$team['teamid'].")\n".
 		"Problem:  ".$problem.": ".$probs_data[$problem]['name'].
 		(empty($probs_data[$problem]['color']) ? "" : " (colour: ".$probs_data[$problem]['color'].")" ) . "\n\n" .
 		"Current balloon status for this team:\n";
 
 	foreach($probs_solved as $probid) {
-		$ret .= " - " . $probid .": " . $probs_data[$probid]['name'] .
+		$ret .= " - " . $probs_data[$probid]['shortname'] .": " . $probs_data[$probid]['name'] .
 			(empty($probs_data[$probid]['color']) ? "" : " (colour: ".$probs_data[$probid]['color'].")" )."\n";
 	}
 
@@ -93,10 +93,10 @@ while ( TRUE ) {
 	do {
 
 		$res = $DB->q("SELECT b.*, s.probid, s.submittime,
-		               t.login, t.name AS teamname, t.room, c.name AS catname
+		               t.teamid, t.name AS teamname, t.room, c.name AS catname
 		               FROM balloon b
 		               LEFT JOIN submission s USING (submitid)
-		               LEFT JOIN team t ON (t.login = s.teamid)
+		               LEFT JOIN team t ON (t.teamid = s.teamid)
 		               LEFT JOIN team_category c USING(categoryid)
 		               WHERE s.cid = %i AND b.done = 0 $freezecond
 		               ORDER BY submitid ASC",
@@ -105,17 +105,17 @@ while ( TRUE ) {
 		while ( $row = $res->next() ) {
 			$team = array ('name'   => $row['teamname'],
 			               'room'   => $row['room'],
-			               'login'  => $row['login']);
+			               'teamid' => $row['teamid']);
 
-			logmsg(LOG_DEBUG,"New problem solved: ".$row['probid'].
-				   " by team ".$row['login']);
+			logmsg(LOG_DEBUG,"New problem solved: p".$row['probid'].
+				   " by team t".$row['teamid']);
 
 			if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
 
 				$probs_solved = $DB->q('COLUMN SELECT probid FROM scorecache_jury
-				                        WHERE cid = %i AND teamid = %s AND is_correct = 1',
-				                       $cid, $row['login']);
-				$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
+				                        WHERE cid = %i AND teamid = %i AND is_correct = 1',
+				                       $cid, $row['teamid']);
+				$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,shortname,name,color
 				                      FROM problem WHERE cid = %i', $cid);
 
 				// current limitation is that this gets reset if the balloon daemon is restarted
@@ -125,17 +125,17 @@ while ( TRUE ) {
 					$nonfirst_contest = true;
 				} else {
 					if (!isset($nonfirst_problem[$row['probid']])) {
-						$comment = 'first for problem ';
+						$comment = 'first for problem';
 						$nonfirst_problem[$row['probid']] = true;
 					}
-					if (!isset($nonfirst_team[$row['login']])) {
+					if (!isset($nonfirst_team[$row['teamid']])) {
 						$comment = 'first for team';
-						$nonfirst_team[$row['login']] = true;
+						$nonfirst_team[$row['teamid']] = true;
 					}
 				}
 
-				logmsg(LOG_INFO,"Sending notification: team '".
-					   $row['login']."', problem '".$row['probid']."'.");
+				logmsg(LOG_INFO,"Sending notification: team t".
+					   $row['teamid'].", problem p".$row['probid'].".");
 
 				logmsg(LOG_DEBUG,"Running command: '".BALLOON_CMD."'");
 

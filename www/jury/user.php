@@ -32,7 +32,7 @@ if ( !empty($cmd) ):
 
     if ( $cmd == 'edit' ) {
         echo "<tr><td>Username:</td><td class=\"username\">";
-        $row = $DB->q('TUPLE SELECT * FROM user WHERE userid = %s',
+        $row = $DB->q('TUPLE SELECT * FROM user WHERE userid = %i',
             $id);
         echo addHidden('keydata[0][userid]', $row['userid']);
         echo addHidden('keydata[0][username]', $row['username']);
@@ -63,16 +63,16 @@ if ( !empty($row['password']) ) {
 <?php echo addRadioButton('data[0][enabled]', (isset($row['enabled']) && !$row['enabled']), 0)?> <label for="data_0__enabled_0">no</label></td></tr>
 
 <!-- team selection -->
-<tr><td><label for="data_0__affilid_">Team:</label></td>
+<tr><td><label for="data_0__teamid_">Team:</label></td>
 <td><?php
-$tmap = $DB->q("KEYVALUETABLE SELECT login,name FROM team ORDER BY name");
+$tmap = $DB->q("KEYVALUETABLE SELECT teamid,name FROM team ORDER BY name");
 $tmap[''] = 'none';
 echo addSelect('data[0][teamid]', $tmap, isset($row['teamid'])?$row['teamid']:@$_GET['forteam'], true);
 ?>
 </td></tr>
 
 <!-- role selection -->
-<tr><td><label for="data_0__affilid_">Roles:</label></td>
+<tr><td>Roles:</td>
 <td><?php
 $roles = $DB->q("TABLE SELECT role.roleid,role,description,max(userrole.userid=%s) AS hasrole ".
     "FROM role ".
@@ -105,10 +105,12 @@ exit;
 
 endif;
 
-$row = $DB->q('MAYBETUPLE SELECT u.*
-               FROM user u
-               WHERE u.userid = %s', $id);
-$roles = $DB->q('SELECT role.* FROM userrole LEFT JOIN role ON userrole.roleid = role.roleid WHERE userrole.userid = %s', $id);
+$row = $DB->q('MAYBETUPLE SELECT u.*, t.name AS teamname FROM user u
+               LEFT JOIN team t USING(teamid)
+               WHERE u.userid = %i', $id);
+$roles = $DB->q('SELECT role.* FROM userrole
+                 LEFT JOIN role USING(roleid)
+                 WHERE userrole.userid = %i', $id);
 
 if ( ! $row ) error("Missing or invalid user id");
 
@@ -152,11 +154,11 @@ if ( !empty($row['password']) ) {
 if ( $row['teamid'] ) {
 	echo "<td class=\"teamid\"><a href=\"team.php?id=" .
 	     urlencode($row['teamid']) . "\">" .
-	     htmlspecialchars($row['teamid']) . "</a></td>";
+	     htmlspecialchars($row['teamname'] . " (t" .$row['teamid'].")") . "</a></td>";
 } else {
 	echo "<td>-</td>";
 } ?></tr>
-<tr><td>Last login:</td><td><?php echo htmlspecialchars($row['last_login'])?></td></tr>
+<tr><td>Last login:</td><td><?php echo printtime($row['last_login'], '%a %d %b %Y %T %Z')?></td></tr>
 <tr><td>Last IP:   </td><td><?php echo
     (@$row['ip_address'] ? printhost($row['ip_address'], TRUE):'') ?></td></tr>
 </table></div>

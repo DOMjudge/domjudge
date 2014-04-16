@@ -20,7 +20,10 @@ logmsg ()
 
 	msglevel="$1"; shift
 	stamp="[`date '+%b %d %T'`] $PROGNAME[$$]:"
-	msg="$@"
+# Expand backslash escape sequences using printf, since support for
+# echo with(out) option -e is unreliable. First use echo to put spaces
+# between arguments.
+	msg=`printf '%b' "$(echo "$@")"`
 
 	if [ "$msglevel" -le "${VERBOSE:-$LOG_ERR}" ]; then
 		echo "$stamp $msg" >&2

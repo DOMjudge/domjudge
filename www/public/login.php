@@ -8,8 +8,6 @@
 
 require('init.php');
 
-if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
-
 if ( @$_POST['cmd']=='login' ) do_login();
 if ( !logged_in() ) show_loginpage();
 

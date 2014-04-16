@@ -137,6 +137,24 @@ function printtimerel($rel_time) {
 }
 
 /**
+ * Print (file) size in human readable format by using B,KB,MB,GB suffixes.
+ * Input is a integer (the size in bytes), output a string with suffix.
+ */
+function printsize($size, $decimals = 1)
+{
+	$factor = 1024;
+	$units = array('B', 'KB', 'MB', 'GB');
+	$display = (int)$size;
+
+	for ($i = 0; $i < count($units) && $display > $factor; $i++) {
+		$display /= $factor;
+	}
+
+	if ( $i==0 ) $decimals = 0;
+	return sprintf("%.${decimals}lf&nbsp;%s", $display, $units[$i]);
+}
+
+/**
  * Cut a string at $size chars and append ..., only if neccessary.
  */
 function str_cut ($str, $size) {

@@ -32,6 +32,16 @@ case 'PHP_SESSIONS':
 for a user will not affect existing logged-in sessions.</p>
 <?php
 break;
+case 'FIXED':
+case 'LDAP':
+case 'EXTERNAL':
+?>
+<p>You are using the '<?php echo AUTH_METHOD; ?>' authentication scheme.
+This scheme does not support resetting passwords (within DOMjudge).</p>
+<?php
+require(LIBWWWDIR . '/footer.php');
+exit;
+break;
 default:
 ?>
 <p>Unknown authentication scheme in use.</p>

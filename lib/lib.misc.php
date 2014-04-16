@@ -71,7 +71,7 @@ function problemVisible($probid)
 	if ( !$cdata || difftime(now(),$cdata['starttime']) < 0 ) return FALSE;
 
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
-	               WHERE cid = %i AND allow_submit = 1 AND probid = %s',
+	               WHERE cid = %i AND allow_submit = 1 AND probid = %i',
 	              $cdata['cid'], $probid) !== NULL;
 }
 
@@ -136,7 +136,7 @@ function calcScoreRow($cid, $team, $prob) {
 	                  FROM submission s
 	                  LEFT JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
 	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
-	                  WHERE teamid = %s AND probid = %s AND s.cid = %i AND s.valid = 1 ' .
+	                  WHERE teamid = %i AND probid = %i AND s.cid = %i AND s.valid = 1 ' .
 	                 ( dbconfig_get('compile_penalty', 1) ? "" :
 	                   "AND j.result != 'compiler-error' ") .
 	                 'AND submittime < c.endtime
@@ -189,13 +189,13 @@ function calcScoreRow($cid, $team, $prob) {
 	// insert or update the values in the public/team scores table
 	$DB->q('REPLACE INTO scorecache_public
 	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
-	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
+	        VALUES (%i,%i,%i,%i,%i,%i,%i)',
 	       $cid, $team, $prob, $submitted_p, $pending_p, $time_p, $correct_p);
 
 	// insert or update the values in the jury scores table
 	$DB->q('REPLACE INTO scorecache_jury
 	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
-	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
+	        VALUES (%i,%i,%i,%i,%i,%i,%i)',
 	       $cid, $team, $prob, $submitted_j, $pending_j, $time_j, $correct_j);
 
 	if ( $DB->q("VALUE SELECT RELEASE_LOCK('$lockstr')") != 1 ) {
@@ -241,7 +241,7 @@ function updateRankCache($cid, $team, $jury) {
 	// Fetch values from scoreboard cache per problem
 	$scoredata = $DB->q("SELECT submissions, is_correct, totaltime
 	                     FROM scorecache_$tblname
-	                     WHERE cid = %i and teamid = %s", $cid, $team);
+	                     WHERE cid = %i and teamid = %i", $cid, $team);
 	$num_correct = 0;
 	$total_time = 0;
 	while ( $srow = $scoredata->next() ) {
@@ -257,7 +257,7 @@ function updateRankCache($cid, $team, $jury) {
 	// Update the rank cache table
 	$DB->q("REPLACE INTO rankcache_$tblname
 	        (cid, teamid, correct, totaltime)
-	        VALUES (%i,%s,%i,%i)",
+	        VALUES (%i,%i,%i,%i)",
 	       $cid, $team, $num_correct, $total_time);
 
 	// Release the lock
@@ -571,6 +571,9 @@ function submit_solution($team, $prob, $lang, $files, $filenames,
 	if ( empty($submittime) ) $submittime = now();
 
 	if ( !is_array($files) || count($files)==0 ) error("No files specified.");
+	if ( count($files) > dbconfig_get('sourcefiles_limit',100) ) {
+		error("Tried to submit more than the allowed number of source files.");
+	}
 	if ( !is_array($filenames) || count($filenames)!=count($files) ) {
 		error("Nonmatching (number of) filenames specified.");
 	}
@@ -594,13 +597,12 @@ function submit_solution($team, $prob, $lang, $files, $filenames,
 						  langid = %s AND allow_submit = 1', $lang) ) {
 		error("Language '$lang' not found in database or not submittable.");
 	}
-	if( ! $login = $DB->q('MAYBEVALUE SELECT login FROM team WHERE login = %s',$team) ) {
-		error("Team '$team' not found in database.");
+	if( ! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team WHERE teamid = %i AND enabled = 1',$team) ) {
+		error("Team '$team' not found in database or not enabled.");
 	}
-	$team = $login;
 	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem WHERE probid = %s
 							AND cid = %i AND allow_submit = "1"', $prob, $cid) ) {
-		error("Problem '$prob' not found in database or not submittable [c$cid].");
+		error("Problem p$prob not found in database or not submittable [c$cid].");
 	}
 
 	// Reindex arrays numerically to allow simultaneously iterating
@@ -627,8 +629,8 @@ function submit_solution($team, $prob, $lang, $files, $filenames,
 	// Insert submission into the database
 	$id = $DB->q('RETURNID INSERT INTO submission
 				  (cid, teamid, probid, langid, submittime, origsubmitid, externalid)
-				  VALUES (%i, %s, %s, %s, %s, %i, %s)',
-	             $cid, $team, $probid, $langid, $submittime, $origsubmitid, $extid);
+				  VALUES (%i, %i, %i, %s, %s, %i)',
+	             $cid, $teamid, $probid, $langid, $submittime, $origsubmitid, $extid);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
@@ -637,19 +639,19 @@ function submit_solution($team, $prob, $lang, $files, $filenames,
 	}
 
 	// Recalculate scoreboard cache for pending submissions
-	calcScoreRow($cid, $team, $probid);
+	calcScoreRow($cid, $teamid, $probid);
 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
-	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
-	       $submittime, $cid, $team, $langid, $probid, $id);
+	        VALUES(%s, %i, %i, %s, %i, %i, "problem submitted")',
+	       $submittime, $cid, $teamid, $langid, $probid, $id);
 
 	if ( is_writable( SUBMITDIR ) ) {
 		// Copy the submission to SUBMITDIR for safe-keeping
 		for($rank=0; $rank<count($files); $rank++) {
 			$fdata = array('cid' => $cid,
 			               'submitid' => $id,
-			               'teamid' => $team,
+			               'teamid' => $teamid,
 			               'probid' => $probid,
 			               'langid' => $langid,
 			               'rank' => $rank,
@@ -677,7 +679,7 @@ function submit_solution($team, $prob, $lang, $files, $filenames,
 function getSourceFilename($fdata)
 {
 	return implode('.', array('c'.$fdata['cid'], 's'.$fdata['submitid'],
-	                          $fdata['teamid'], $fdata['probid'], $fdata['langid'],
+	                          't'.$fdata['teamid'], 'p'.$fdata['probid'], $fdata['langid'],
 	                          $fdata['rank'], $fdata['filename']));
 }
 
@@ -796,3 +798,18 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null, $force_usernam
 	        VALUES(%s, %i, %s, %s, %s, %s, %s)',
 	       now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
 }
+
+/**
+ * Convert PHP ini values to bytes, as per
+ * http://www.php.net/manual/en/function.ini-get.php
+ */
+function phpini_to_bytes($size_str) {
+	switch (substr ($size_str, -1))
+	{
+		case 'M': case 'm': return (int)$size_str * 1048576;
+		case 'K': case 'k': return (int)$size_str * 1024;
+		case 'G': case 'g': return (int)$size_str * 1073741824;
+		default: return $size_str;
+	}
+}
+

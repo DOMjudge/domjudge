@@ -14,9 +14,7 @@ require(ETCDIR . '/judgehost-config.php');
 $credfile = ETCDIR . '/restapi.secret';
 $credentials = @file($credfile);
 if (!$credentials) {
-	user_error("Cannot read REST API credentials file " . $credfile,
-		E_USER_ERROR);
-	exit();
+	error("Cannot read REST API credentials file " . $credfile);
 }
 foreach ($credentials as $credential) {
 	if ( $credential{0} == '#' ) continue;
@@ -24,13 +22,21 @@ foreach ($credentials as $credential) {
 	break;
 }
 if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
-	// FIXME: do check API access here
-	user_error("Cannot access REST API.", E_USER_ERROR);
-	exit();
+	error("Error parsing REST API credentials.");
 }
 
-function request($url, $verb = 'GET', $data = '') {
+/**
+ * Perform a request to the REST API and handl any errors.
+ * $url is the part appended to the base DOMjudge $resturl.
+ * $verb is the HTTP method to use: GET, POST, PUT, or DELETE
+ * $data is the urlencoded data passed as GET or POST parameters.
+ * When $failonerror is set to false, any error will be turned into a
+ * warning and null is returned.
+ */
+function request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	global $resturl, $restuser, $restpass;
+	
+	logmsg(LOG_DEBUG, "API request $verb $url");
 
 	$url = $resturl . "/" . $url;
 	if ( $verb == 'GET' ) {
@@ -55,18 +61,25 @@ function request($url, $verb = 'GET', $data = '') {
 	}
 
 	$response = curl_exec($ch);
-	if ( !$response ) {
-		error("Error while executing curl with url " . $url . ": " . curl_error($ch));
+	if ( $response === FALSE ) {
+		$errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($ch);
+		if ($failonerror) error($errstr);
+		else { warning($errstr); return null; }
 	}
 	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	if ( $status < 200 || $status >= 300 ) {
-		error("Error while executing curl with url " . $url . ": http status code: " . $status . ", response: " . $response);
+		$errstr = "Error while executing curl $verb to url " . $url . ": http status code: " . $status . ", response: " . $response;
+		if ($failonerror) { error($errstr); }
+		else { warning($errstr); return null; }
 	}
 
 	curl_close($ch);
 	return $response;
 }
 
+/**
+ * Retrieve a value from the configuration through the REST API.
+ */
 function dbconfig_get_rest($name) {
 	$res = request('config', 'GET', 'name=' . urlencode($name));
 	$res = dj_json_decode($res);
@@ -278,8 +291,11 @@ while ( TRUE ) {
 		exit;
 	}
 
-	$judging = request('judgings', 'POST', 'judgehost=' . urlencode($myhost));
-	$row = dj_json_decode($judging);
+	// Request open submissions to judge. Any errors will be treated as
+	// non-fatal: we will just keep on retrying in this loop.
+	$judging = request('judgings', 'POST', 'judgehost=' . urlencode($myhost), false);
+	// If $judging is null, an error occurred; don't try to decode.
+	if (!is_null($judging)) $row = dj_json_decode($judging);
 
 	// nothing returned -> no open submissions for us
 	if ( empty($row) ) {
@@ -295,7 +311,7 @@ while ( TRUE ) {
 	$waiting = FALSE;
 
 	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
-	       "($row[teamid]/$row[probid]/$row[langid]), id j$row[judgingid]...");
+	       "(t$row[teamid]/p$row[probid]/$row[langid]), id j$row[judgingid]...");
 
 	judge($row);
 
@@ -414,7 +430,7 @@ function judge($row)
 				$content = request('testcase_files', 'GET', 'testcaseid='
 						. urlencode($tc['testcaseid'])
 						. '&' . $inout);
-				$content = dj_json_decode($content);
+				$content = base64_decode(dj_json_decode($content));
 				if ( file_put_contents($tcfile[$inout] . ".new", $content) === FALSE ) {
 					error("Could not create $tcfile[$inout].new");
 				}
@@ -435,7 +451,7 @@ function judge($row)
 		// Only log downloading input and/or output testdata once.
 		if ( count($fetched)>0 ) {
 			logmsg(LOG_INFO, "Fetched new " . implode($fetched,',') .
-			       " testcase $tc[rank] for problem $tc[probid]");
+			       " testcase $tc[rank] for problem p$tc[probid]");
 		}
 
 		// Copy program with all possible additional files to testcase
@@ -481,9 +497,10 @@ function judge($row)
 			. '&runtime=' . urlencode($runtime)
 			. '&judgehost=' . urlencode($myhost)
 			. '&output_run='   . rest_encode_file($testcasedir . '/program.out')
-			. '&output_error=' . rest_encode_file($testcasedir . '/error.out')
+			. '&output_error=' . rest_encode_file($testcasedir . '/program.err')
+			. '&output_system=' . rest_encode_file($testcasedir . '/system.out')
 			. '&output_diff='  . rest_encode_file($testcasedir . '/compare.out')
-        );
+		);
 		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
 
 	} // end: for each testcase

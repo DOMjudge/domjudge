@@ -52,7 +52,7 @@ CREATE TABLE `removed_interval` (
 --
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', '{"general":"General issue","technical":"Technical issue"}', 'array_keyval', 'List of additional clarification categories');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', '{1000001:"General issue",1000002:"Technical issue"}', 'array_keyval', 'List of additional clarification categories');
 
 --
 -- Finally remove obsolete structures after moving data

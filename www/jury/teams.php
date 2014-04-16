@@ -9,7 +9,9 @@
 require('init.php');
 $title = 'Teams';
 
-$teams = $DB->q('SELECT t.*,c.name AS catname,a.name AS affname
+$teams = $DB->q('SELECT t.*,
+                 c.name AS catname,
+                 a.shortname AS affshortname, a.name AS affname
                  FROM team t
                  LEFT JOIN team_category c USING (categoryid)
                  LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
@@ -33,7 +35,7 @@ if( $teams->count() == 0 ) {
 	echo "<p class=\"nodata\">No teams defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-		"<tr><th scope=\"col\">ID</th><th scope=\"col\">teamname</th>" .
+		"<tr><th class=\"sorttable_numeric\" scope=\"col\">ID</th><th scope=\"col\">teamname</th>" .
 		"<th scope=\"col\">category</th><th scope=\"col\">affiliation</th>" .
 		"<th scope=\"col\">host</th><th scope=\"col\">room</th>" .
 		"<th class=\"sorttable_nosort\"></th><th class=\"thleft\" " .
@@ -44,27 +46,27 @@ if( $teams->count() == 0 ) {
 
 		$status = $numsub = $numcor = 0;
 		if ( isset($row['teampage_first_visited']) ) $status = 1;
-		if ( isset($nsubmits[$row['login']]) &&
-			 $nsubmits[$row['login']]['cnt']>0 ) {
+		if ( isset($nsubmits[$row['teamid']]) &&
+			 $nsubmits[$row['teamid']]['cnt']>0 ) {
 			$status = 2;
-			$numsub = (int)$nsubmits[$row['login']]['cnt'];
+			$numsub = (int)$nsubmits[$row['teamid']]['cnt'];
 		}
-		if ( isset($ncorrect[$row['login']]) &&
-			 $ncorrect[$row['login']]['cnt']>0 ) {
+		if ( isset($ncorrect[$row['teamid']]) &&
+			 $ncorrect[$row['teamid']]['cnt']>0 ) {
 			$status = 3;
-			$numcor = (int)$ncorrect[$row['login']]['cnt'];
+			$numcor = (int)$ncorrect[$row['teamid']]['cnt'];
 		}
-		$link = '<a href="team.php?id='.urlencode($row['login']) . '">';
+		$link = '<a href="team.php?id='.urlencode($row['teamid']) . '">';
 		echo "<tr class=\"category" . (int)$row['categoryid']  .
 			($row['enabled'] == 1 ? '' : ' sub_ignore') .  "\">".
-			"<td class=\"teamid\">" . $link .
-				htmlspecialchars($row['login'])."</a></td>".
+			"<td>" . $link . "t" .
+				htmlspecialchars($row['teamid'])."</a></td>".
 			"<td>" . $link .
 				htmlspecialchars($row['name'])."</a></td>".
 			"<td>" . $link .
 				htmlspecialchars($row['catname'])."</a></td>".
 			"<td title=\"".htmlspecialchars($row['affname'])."\">" . $link .
-				($row['affilid'] ? htmlspecialchars($row['affilid']) : '&nbsp;') .
+				($row['affshortname'] ? htmlspecialchars($row['affshortname']) : '&nbsp;') .
 			"</a></td><td title=\"";
 
 		if ( @$row['hostname'] ) {
@@ -90,8 +92,8 @@ if( $teams->count() == 0 ) {
 		echo "<td class=\"teamstat\" title=\"$numcor correct / $numsub submitted\">$link$numcor / $numsub</a></td>";
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-				editLink('team', $row['login']) . " " .
-				delLink('team','login',$row['login']) . "</td>";
+				editLink('team', $row['teamid']) . " " .
+				delLink('team','teamid',$row['teamid']) . "</td>";
 		}
 		echo "</tr>\n";
 	}

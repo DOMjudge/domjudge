@@ -40,7 +40,7 @@ auditlog('scoreboard', null, 'refresh cache');
 ob_implicit_flush();
 
 // get the contest, teams and problems
-$teams = $DB->q('TABLE SELECT login FROM team ORDER BY login');
+$teams = $DB->q('TABLE SELECT teamid FROM team ORDER BY teamid');
 $probs = $DB->q('COLUMN SELECT probid FROM problem
                  WHERE cid = %i ORDER BY probid', $cid);
 
@@ -64,20 +64,20 @@ $teamlist = array();
 // for each team, fetch the status of each problem
 foreach( $teams as $team ) {
 
-	$teamlist[] = $team['login'];
+	$teamlist[] = $team['teamid'];
 
-	echo "Team " . htmlspecialchars($team['login']) . ":";
+	echo "Team t" . htmlspecialchars($team['teamid']) . ":";
 
 	// for each problem fetch the result
 	foreach( $probs as $pr ) {
-		echo " " .htmlspecialchars($pr);
-		calcScoreRow($cid, $team['login'], $pr);
+		echo " p" .htmlspecialchars($pr);
+		calcScoreRow($cid, $team['teamid'], $pr);
 	}
 
 	// Now recompute the rank for both jury and public
 	echo " rankcache";
-	updateRankCache($cid, $team['login'], true);
-	updateRankCache($cid, $team['login'], false);
+	updateRankCache($cid, $team['teamid'], true);
+	updateRankCache($cid, $team['teamid'], false);
 
 	echo "\n";
 	ob_flush();
@@ -87,15 +87,15 @@ echo "</pre>\n\n<p>Deleting irrelevant data...</p>\n\n";
 
 // drop all contests that are not current, teams and problems that do not exist
 $DB->q('DELETE FROM scorecache_jury
-        WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%As)',
+        WHERE cid != %i OR teamid NOT IN (%Ai) OR probid NOT IN (%Ai)',
        $cid, $teamlist, $probs);
 $DB->q('DELETE FROM scorecache_public
-        WHERE cid != %i OR teamid NOT IN (%As) OR probid NOT IN (%As)',
+        WHERE cid != %i OR teamid NOT IN (%Ai) OR probid NOT IN (%Ai)',
        $cid, $teamlist, $probs);
 $DB->q('DELETE FROM rankcache_jury
-        WHERE cid != %i OR teamid NOT IN (%As)', $cid, $teamlist);
+        WHERE cid != %i OR teamid NOT IN (%Ai)', $cid, $teamlist);
 $DB->q('DELETE FROM rankcache_public
-        WHERE cid != %i OR teamid NOT IN (%As)', $cid, $teamlist);
+        WHERE cid != %i OR teamid NOT IN (%Ai)', $cid, $teamlist);
 
 $time_end = microtime(TRUE);
 

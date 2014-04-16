@@ -18,17 +18,9 @@ function ch_error($string)
 	$CHECKER_ERRORS[] = $string;
 }
 
-function check_team($data, $keydata = null)
-{
-	$id = (isset($data['login']) ? $data['login'] : $keydata['login']);
-	if ( ! preg_match ( ID_REGEX, $id ) ) {
-		ch_error("Team ID (login) may only contain characters " . IDENTIFIER_CHARS . ".");
-	}
-	return $data;
-}
-
 function check_user($data, $keydata = null)
 {
+	global $DB;
 	$id = (isset($data['username']) ? $data['username'] : $keydata['username']);
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Username may only contain characters " . IDENTIFIER_CHARS . ".");
@@ -39,6 +31,16 @@ function check_user($data, $keydata = null)
 	if ( !empty($data['password']) ) {
 		$data['password'] = md5("$id#".$data['password']);
 	}
+	if ( !empty($data['ip_address']) ) {
+		if ( !filter_var($data['ip_address'], FILTER_VALIDATE_IP) ) {
+			ch_error("Invalid IP address.");
+		}
+		$ip = $DB->q("VALUE SELECT count(*) FROM user WHERE ip_address = %s AND username != %s", $data['ip_address'], $id);
+		if ( $ip > 0 ) {
+			ch_error("IP address already assigned to another user.");
+		}
+	}
+
 	return $data;
 }
 
@@ -59,8 +61,8 @@ function check_problem($data, $keydata = null)
 		ch_error("Timelimit is not a valid positive integer");
 	}
 	$id = (isset($data['probid']) ? $data['probid'] : $keydata['probid']);
-	if ( ! preg_match ( ID_REGEX, $id ) ) {
-		ch_error("Problem ID may only contain characters " . IDENTIFIER_CHARS . ".");
+	if ( ! preg_match ( ID_REGEX, $data['shortname'] ) ) {
+		ch_error("Problem shortname may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
 
 	if ( !empty($_FILES['data']['name'][0]['problemtext']) ) {

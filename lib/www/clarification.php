@@ -16,7 +16,7 @@ function setClarificationViewed($clar, $team)
 {
 	global $DB;
 	$DB->q('DELETE FROM team_unread
-	        WHERE mesgid = %i AND type = "clarification" AND teamid = %s',
+	        WHERE mesgid = %i AND teamid = %i',
 	       $clar, $team);
 }
 
@@ -34,14 +34,14 @@ function canViewClarification($team, $clar)
 
 /**
  * Returns the list of clarification categories as a key,value array.
- * Keys are prepended with '#' to distinguish them from problem IDs.
+ * Keys should have values >= 1000000 to distinguish them from problem IDs.
  */
 function getClarCategories(&$default = null)
 {
 	$categs = dbconfig_get('clar_categories');
 
 	$clarcategories = array();
-	foreach ( $categs as $key => $val ) $clarcategories['#'.$key] = $val;
+	foreach ( $categs as $key => $val ) $clarcategories[$key] = $val;
 
 	return $clarcategories;
 }
@@ -54,15 +54,13 @@ function putClar($clar)
 {
 	// $clar['sender'] is set to the team ID, or empty if sent by the jury.
 	if ( !empty($clar['sender']) ) {
-		$from = '<span class="teamid">' . htmlspecialchars($clar['sender']) .
-			'</span>: ' . htmlspecialchars($clar['fromname']);
+		$from = htmlspecialchars($clar['fromname'] . ' (t'.$clar['sender'] . ')') ;
 	} else {
 		$from = 'Jury';
 		if ( IS_JURY ) $from .= ' (' . htmlspecialchars($clar['jury_member']) . ')';
 	}
 	if ( $clar['recipient'] && empty($clar['sender']) ) {
-		$to = '<span class="teamid">' . htmlspecialchars($clar['recipient']) .
-			'</span>: ' . htmlspecialchars($clar['toname']);
+		$to = htmlspecialchars($clar['toname'] . ' (t'.$clar['recipient'] . ')') ;
 	} else {
 		$to = ( $clar['sender'] ) ? 'Jury' : 'All';
 	}
@@ -96,9 +94,9 @@ function putClar($clar)
 	} else {
 		if ( IS_JURY ) {
 			echo '<a href="problem.php?id=' . urlencode($clar['probid']) . '">' .
-				'Problem ' . $clar['probid'].": ".$clar['probname'] . '</a>';
+				'Problem ' . $clar['shortname'].": ".$clar['probname'] . '</a>';
 		} else {
-			echo 'Problem ' . $clar['probid'].": ".$clar['probname'];
+			echo 'Problem ' . $clar['shortname'].": ".$clar['probname'];
 		}
 	}
 	echo "</td></tr>\n";
@@ -129,11 +127,11 @@ function putClarification($id,  $team = NULL)
 
 	$clar = $DB->q('TUPLE SELECT * FROM clarification WHERE clarid = %i', $id);
 
-	$clars = $DB->q('SELECT c.*, p.name AS probname, t.name AS toname, f.name AS fromname
+	$clars = $DB->q('SELECT c.*, p.shortname, p.name AS probname, t.name AS toname, f.name AS fromname
 	                 FROM clarification c
 	                 LEFT JOIN problem p ON (c.probid = p.probid AND p.allow_submit = 1)
-	                 LEFT JOIN team t ON (t.login = c.recipient)
-	                 LEFT JOIN team f ON (f.login = c.sender)
+	                 LEFT JOIN team t ON (t.teamid = c.recipient)
+	                 LEFT JOIN team f ON (f.teamid = c.sender)
 	                 WHERE c.respid = %i OR c.clarid = %i
 	                 ORDER BY c.submittime, c.clarid',
 	                $clar['clarid'], $clar['clarid']);
@@ -204,26 +202,27 @@ function putClarificationList($clars, $team = NULL)
 
 		echo '<td>' . $link . printtime($clar['submittime'], NULL, TRUE) . '</a></td>';
 
-		$sender = htmlspecialchars($clar['sender']);
-		$recipient = htmlspecialchars($clar['recipient']);
-
-		if ($sender == NULL && $recipient == NULL) {
+		if ( $clar['sender']  == NULL ) {
 			$sender = 'Jury';
-			$recipient = 'All';
+			if ( $clar['recipient'] == NULL ) {
+				$recipient = 'All';
+			} else {
+				$recipient = htmlspecialchars($clar['toname']);
+			}
 		} else {
-			if ( $sender    == NULL ) $sender = 'Jury';
-			if ( $recipient == NULL ) $recipient = 'Jury';
+			$sender = htmlspecialchars($clar['fromname']);
+			$recipient = 'Jury';
 		}
 
-		echo '<td class="teamid">' . $link . $sender . '</a></td>' .
-		     '<td class="teamid">' . $link . $recipient . '</a></td>';
+		echo '<td>' . $link . $sender . '</a></td>' .
+		     '<td>' . $link . $recipient . '</a></td>';
 
 		echo '<td>' . $link;
 		if ( empty($clar['probid']) ) { /* empty */ }
 		elseif ( substr($clar['probid'], 0, 1)=='#' ) {
 			echo $categs[$clar['probid']];
 		} else {
-			echo "problem ".$clar['probid'];
+			echo "problem ".$clar['shortname'];
 		}
 		echo "</a></td>";
 
@@ -268,7 +267,7 @@ function putClarificationList($clars, $team = NULL)
 
 /**
  * Output a form to send a new clarification.
- * Set team to a login, to make only that team (or ALL) selectable.
+ * Set respid to a teamid, to make only that team (or ALL) selectable.
  */
 function putClarificationForm($action, $cid, $respid = NULL)
 {
@@ -321,8 +320,8 @@ function appendAnswer() {
 	if ( $respid ) {
 		$clar = $DB->q('MAYBETUPLE SELECT c.*, t.name AS toname, f.name AS fromname
 		                FROM clarification c
-		                LEFT JOIN team t ON (t.login = c.recipient)
-		                LEFT JOIN team f ON (f.login = c.sender)
+		                LEFT JOIN team t ON (t.teamid = c.recipient)
+		                LEFT JOIN team f ON (f.teamid = c.sender)
 		                WHERE c.clarid = %i', $respid);
 	}
 
@@ -335,17 +334,17 @@ function appendAnswer() {
 
 		$options = array('domjudge-must-select' => '(select...)', '' => 'ALL');
 		if ( ! $respid ) {
-			$teams = $DB->q('KEYVALUETABLE SELECT login, CONCAT(login, ": ", name) as name
+			$teams = $DB->q('KEYVALUETABLE SELECT teamid, name
 			                 FROM team
 			                 ORDER BY categoryid ASC, team.name COLLATE utf8_general_ci ASC');
 			$options += $teams;
 		} else {
 			if ( $clar['sender'] ) {
-				$options[$clar['sender']] = $clar['sender'] .': '.
-					$clar['fromname'];
+				$options[$clar['sender']] = 
+					$clar['fromname'] . ' (t' . $clar['sender'] . ')';
 			} else if ( $clar['recipient'] ) {
-				$options[$clar['recipient']] = $clar['recipient'] .': '.
-					$clar['toname'];
+				$options[$clar['recipient']] =
+					$clar['toname'] . ' (t' . $clar['recipient'] . ')';
 			}
 		}
 		echo addSelect('sendto', $options, 'domjudge-must-select', true);
@@ -357,9 +356,11 @@ function appendAnswer() {
 	// Select box for a specific problem (only when the contest
 	// has started) or other issue.
 	if ( difftime($cdata['starttime'], now()) <= 0 ) {
-		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(probid, ": ", name) as name
+		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(shortname, ": ", name) as name
 		                 FROM problem WHERE cid = %i AND allow_submit = 1
-		                 ORDER BY probid ASC', $cid);
+		                 ORDER BY shortname ASC', $cid);
+	} else {
+		$probs = array();
 	}
 	$categs = getClarCategories();
 	$defclar = key($categs);

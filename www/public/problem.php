@@ -10,7 +10,7 @@ require('init.php');
 
 // download a given problem statement
 $id = @$_REQUEST['id'];
-if ( preg_match('/^' . IDENTIFIER_CHARS . '+$/', $id) ) {
+if ( is_numeric($id) ) {
 	putProblemText($id);
 	exit;
 }

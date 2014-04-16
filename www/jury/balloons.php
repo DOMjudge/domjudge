@@ -59,10 +59,10 @@ if ( ! dbconfig_get('show_balloons_postfreeze',0) && isset($cdata['freezetime'])
 // Get all relevant info from the balloon table.
 // Order by done, so we have the unsent balloons at the top.
 $res = $DB->q("SELECT b.*, s.probid, s.submittime,
-               t.login, t.name AS teamname, t.room, c.name AS catname
+               t.teamid, t.name AS teamname, t.room, c.name AS catname
                FROM balloon b
                LEFT JOIN submission s USING (submitid)
-               LEFT JOIN team t ON (t.login = s.teamid)
+               LEFT JOIN team t USING(teamid)
                LEFT JOIN team_category c USING(categoryid)
                WHERE s.cid = %i $freezecond
                ORDER BY done ASC, balloonid DESC",
@@ -80,7 +80,7 @@ while ( $row = $res->next() ) {
 
 	// keep overwriting these variables - in the end they'll
 	// contain the id's of the first balloon in each type
-	$first_contest = $first_problem[$row['probid']] = $first_team[$row['login']] = $row['balloonid'];
+	$first_contest = $first_problem[$row['probid']] = $first_team[$row['teamid']] = $row['balloonid'];
 }
 
 if ( !empty($BALLOONS) ) {
@@ -108,15 +108,15 @@ if ( !empty($BALLOONS) ) {
 			';"></div> ' . htmlspecialchars($row['probid']) . '</td>';
 
 		// team name, location (room) and category
-		echo '<td class="teamid">' . htmlspecialchars($row['login']) . '</td><td>' .
+		echo '<td>t' . htmlspecialchars($row['teamid']) . '</td><td>' .
 			htmlspecialchars($row['teamname']) . '</td><td>' .
 			htmlspecialchars($row['room']) . '</td><td>' .
 			htmlspecialchars($row['catname']) . '</td><td>';
 
 		// list of balloons for this team
-		sort($TOTAL_BALLOONS[$row['login']]);
-		$TOTAL_BALLOONS[$row['login']] = array_unique($TOTAL_BALLOONS[$row['login']]);
-		foreach($TOTAL_BALLOONS[$row['login']] as $prob_solved) {
+		sort($TOTAL_BALLOONS[$row['teamid']]);
+		$TOTAL_BALLOONS[$row['teamid']] = array_unique($TOTAL_BALLOONS[$row['teamid']]);
+		foreach($TOTAL_BALLOONS[$row['teamid']] as $prob_solved) {
 			echo '<div title="' . htmlspecialchars($prob_solved) .
 				'" class="circle" style="background-color: ' .
 				htmlspecialchars($probs_data[$prob_solved]['color']) .
@@ -136,7 +136,7 @@ if ( !empty($BALLOONS) ) {
 		if ( $first_contest == $row['balloonid'] ) {
 			$comments[] = 'first in contest';
 		} else {
-			if ( $first_team[$row['login']] == $row['balloonid'] ) {
+			if ( $first_team[$row['teamid']] == $row['balloonid'] ) {
 				$comments[] = 'first for team';
 			}
 			if ( $first_problem[$row['probid']] == $row['balloonid'] ) {

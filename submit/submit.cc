@@ -461,12 +461,12 @@ void usage()
 "\n"
 "For PROBLEM use the ID of the problem (letter, number or short name)\n"
 "in lower- or uppercase. When not specified, PROBLEM defaults to the\n"
-"first FILENAME excluding the extension. For example, 'c.java' will\n"
-"indicate problem 'C'.\n"
+"first FILENAME excluding the extension. For example, 'B.java' will\n"
+"indicate problem 'B'.\n"
 "\n");
 	if ( languages.size()==0 ) {
 		printf(
-"For LANGUAGE use one the ID of the language (typically the main language\n"
+"For LANGUAGE use the ID of the language (typically the main language\n"
 "extension) in lower- or uppercase.\n");
 	} else {
 		printf(
@@ -479,12 +479,12 @@ void usage()
 	}
 	printf(
 "The default for LANGUAGE is the extension of FILENAME. For example,\n"
-"'c.java' will indicate a Java solution.\n"
+"'B.java' will indicate a Java solution.\n"
 "\n"
 "Examples:\n"
 "\n");
-	printf("Submit problem 'c' in Java:\n"
-	       "    %s c.java\n\n",progname);
+	printf("Submit problem 'b' in Java:\n"
+	       "    %s b.java\n\n",progname);
 	printf("Submit problem 'e' in C++:\n"
 	       "    %s --problem e --language=cpp ProblemE.cc\n\n",progname);
 	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
@@ -508,7 +508,7 @@ void usage()
 #endif
 #if ( SUBMIT_ENABLE_WEB )
 "Set URL to the base address of the webinterface without the\n"
-"'team/upload.php' suffix.\n"
+"'api/' suffix.\n"
 "\n"
 #endif
 #if ( SUBMIT_ENABLE_WEB && SUBMIT_ENABLE_CMD )
@@ -638,7 +638,7 @@ int getlangexts()
 /* helper macros to easily set curl options */
 #define curlsetopt(opt,val) \
 	if ( curl_easy_setopt(handle, CURLOPT_ ## opt, val)!=CURLE_OK ) { \
-		warning(0,"setting curl option '" #opt "': %s, aborting download",curlerrormsg); \
+		warning(0,"setting curl option '" #opt "': %s, aborting",curlerrormsg); \
 		curl_easy_cleanup(handle); \
 		free(url); \
 		return 1; }
@@ -855,16 +855,17 @@ int websubmit()
 {
 	CURL *handle;
 	CURLcode res;
+	long http_code;
 	char curlerrormsg[CURL_ERROR_SIZE];
 	struct curl_httppost *post = NULL;
 	struct curl_httppost *last = NULL;
 	char *url;
 	stringstream curloutput;
 	string line;
-	size_t pos;
-	int uploadstatus_read;
+	Json::Reader reader;
+	Json::Value root;
 
-	url = strdup((baseurl+"team/upload.php").c_str());
+	url = strdup((baseurl+"api/submissions").c_str());
 
 	curlerrormsg[0] = 0;
 
@@ -895,18 +896,16 @@ int websubmit()
 	for(size_t i=0; i<filenames.size(); i++) {
 		curlformadd(COPYNAME,"code[]", FILE, filenames[i].c_str());
 	}
-	curlformadd(COPYNAME,"probid", COPYCONTENTS,problem.c_str());
+	curlformadd(COPYNAME,"shortname", COPYCONTENTS,problem.c_str());
 	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
-	curlformadd(COPYNAME,"noninteractive",COPYCONTENTS,"1");
-	curlformadd(COPYNAME,"submit", COPYCONTENTS,"submit");
 
 	/* Set options for post */
 	curlsetopt(ERRORBUFFER,   curlerrormsg);
-	curlsetopt(FAILONERROR,   1);
 	curlsetopt(FOLLOWLOCATION,1);
 	curlsetopt(MAXREDIRS,     10);
 	curlsetopt(TIMEOUT,       timeout_secs);
 	curlsetopt(URL,           url);
+	curlsetopt(NETRC,         CURL_NETRC_OPTIONAL);
 	curlsetopt(HTTPPOST,      post);
 	curlsetopt(HTTPGET,       0);
 	curlsetopt(WRITEFUNCTION, writesstream);
@@ -921,48 +920,44 @@ int websubmit()
 
 	logmsg(LOG_NOTICE,"connecting to %s",url);
 
+	// Something went wrong when connecting to the API
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
 		curl_formfree(post);
 		curl_easy_cleanup(handle);
-		error(0,"downloading '%s': %s",url,curlerrormsg);
+		error(0,"'%s': %s",url,curlerrormsg);
+	}
+
+	free(url);
+
+	// The connection worked, but we may have received an HTTP error
+	curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &http_code);
+	if ( http_code >= 300 ) { 
+		while ( getline(curloutput,line) ) {
+			printf("%s\n", line.c_str());
+		}
+		curl_formfree(post);
+		curl_easy_cleanup(handle);
+		error(0, "Submission failed.");
 	}
 
 #undef curlsetopt
 #undef curlformadd
-
-	curl_formfree(post);
-	curl_easy_cleanup(handle);
-
-	free(url);
-
-	// Read curl output and find upload status
-	uploadstatus_read = 0;
-	while ( getline(curloutput,line) ) {
-
-		// Search line for upload status or errors
- 		if ( (pos=line.find(NONINTSTR,0))!=string::npos ) {
-			size_t msgstart = pos+strlen(NONINTSTR);
-			size_t msgend = line.find(NONINTSTR,msgstart);
-			string msg = line.substr(msgstart,msgend-msgstart);
-			if ( (pos=msg.find(ERRMATCH,0))!=string::npos ) {
-				error(0,"webserver returned: %s",msg.erase(pos,strlen(ERRMATCH)).c_str());
-			}
-			if ( (pos=msg.find(WARNMATCH,0))!=string::npos ) {
-				warning(0,"webserver returned: %s",msg.erase(pos,strlen(WARNMATCH)).c_str());
-			}
- 		}
-		if ( line.find("uploadstatus",0)!=string::npos ) {
-			line = remove_html_tags(line);
-			if ( line.find("ERROR",0) !=string::npos ||
-				 line.find("failed",0)!=string::npos ) {
-				error(0,"webserver returned: %s",line.c_str());
-			}
-			logmsg(LOG_NOTICE,"webserver returned: %s",line.c_str());
-			uploadstatus_read = 1;
-		}
+	// We got a successful HTTP response. It worked.
+	// But check that we indeed received a submission ID.
+	if ( !reader.parse(curloutput, root) ) {
+		curl_formfree(post);
+		curl_easy_cleanup(handle);
+		error(0,"parsing REST API output: %s",
+		        reader.getFormattedErrorMessages().c_str());
 	}
 
-	if ( ! uploadstatus_read ) error(0,"no upload status or error reported by webserver");
+	if ( !root.isInt() ) {
+		curl_formfree(post);
+		curl_easy_cleanup(handle);
+		error(0,"REST API returned unexpected JSON data");
+	}
+
+	logmsg(LOG_NOTICE,"Submission received, id = s%i", root.asInt());
 
 	return 0;
 }

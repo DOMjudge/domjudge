@@ -70,11 +70,11 @@ function problems()
 {
 	global $cid, $DB;
 
-	$q = $DB->q('SELECT probid AS id, name, color FROM problem
+	$q = $DB->q('SELECT probid AS id, shortname, name, color FROM problem
 	             WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
 	return $q->gettable();
 }
-$doc = "Get a list of problems in the contest, with for each problem: id, name and color.";
+$doc = "Get a list of problems in the contest, with for each problem: id, shortname, name and color.";
 $api->provideFunction('GET', 'problems', $doc);
 
 /**
@@ -149,7 +149,7 @@ function judgings_POST($args)
 	// Prioritize teams according to last judging time
 	$submitid = $DB->q('MAYBEVALUE SELECT submitid
 	                    FROM submission s
-	                    LEFT JOIN team t ON (s.teamid = t.login)
+	                    LEFT JOIN team t ON (s.teamid = t.teamid)
 	                    LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
 	                    WHERE judgehost IS NULL AND s.cid = %i
 			    AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
@@ -180,7 +180,7 @@ function judgings_POST($args)
 	               WHERE s.probid = p.probid AND s.langid = l.langid AND
 	               submitid = %i', $submitid);
 
-	$DB->q('UPDATE team SET judging_last_started = %s WHERE login = %s',
+	$DB->q('UPDATE team SET judging_last_started = %s WHERE teamid = %i',
 	       now(), $row['teamid']);
 
 	if ( empty($row['compare']) ) {
@@ -251,7 +251,7 @@ $doc = 'Update a judging.';
 $args = array('judgingid' => 'Judging corresponds to this specific judgingid.',
 	'judgehost' => 'Judging is judged by this specific judgehost.',
 	'compile_success' => 'Did the compilation succeed?',
-	'output_compile' => 'Ouput of compilation phase.');
+	'output_compile' => 'Ouput of compilation phase (base64 encoded).');
 $exArgs = array();
 $roles = array('judgehost');
 $api->provideFunction('PUT', 'judgings', $doc, $args, $exArgs, $roles);
@@ -264,7 +264,7 @@ function judging_runs_POST($args)
 	global $DB, $api;
 
 	checkargs($args, array('judgingid', 'testcaseid', 'runresult', 'runtime',
-	                       'output_run', 'output_diff', 'output_error', 'judgehost'));
+	                       'output_run', 'output_diff', 'output_error', 'output_system', 'judgehost'));
 
 	$results_remap = dbconfig_get('results_remap');
 	$results_prio = dbconfig_get('results_prio');
@@ -276,12 +276,13 @@ function judging_runs_POST($args)
 	}
 
 	$DB->q('INSERT INTO judging_run (judgingid, testcaseid, runresult,
-	        runtime, output_run, output_diff, output_error)
-	        VALUES (%i, %i, %s, %f, %s, %s, %s)',
+	        runtime, output_run, output_diff, output_error, output_system)
+	        VALUES (%i, %i, %s, %f, %s, %s, %s, %s)',
 	       $args['judgingid'], $args['testcaseid'], $args['runresult'], $args['runtime'],
 	       base64_decode($args['output_run']),
 	       base64_decode($args['output_diff']),
-	       base64_decode($args['output_error']));
+	       base64_decode($args['output_error']),
+	       base64_decode($args['output_system']));
 
 	// result of this judging_run has been stored. now check whether
 	// we're done or if more testcases need to be judged.
@@ -292,7 +293,7 @@ function judging_runs_POST($args)
 	$runresults = $DB->q('COLUMN SELECT runresult
 	                      FROM judging_run LEFT JOIN testcase USING(testcaseid)
 	                      WHERE judgingid = %i ORDER BY rank', $args['judgingid']);
-	$numtestcases = $DB->q('VALUE SELECT count(*) FROM testcase WHERE probid = %s', $probid);
+	$numtestcases = $DB->q('VALUE SELECT count(*) FROM testcase WHERE probid = %i', $probid);
 
 	$allresults = array_pad($runresults, $numtestcases, null);
 
@@ -315,14 +316,14 @@ function judging_runs_POST($args)
 		if ( ! dbconfig_get('verification_required', 0) ) {
 			$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
 				submitid, judgingid, description)
-				VALUES(%s, %i, %s, %s, %s, %i, %i, "problem judged")',
+				VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
 				now(), $row['cid'], $row['teamid'], $row['langid'], $row['probid'],
 				$row['submitid'], $args['judgingid']);
 			if ( $result == 'correct' ) {
 				// prevent duplicate balloons in case of multiple correct submissions
 				$numcorrect = $DB->q('VALUE SELECT count(submitid)
 						      FROM balloon LEFT JOIN submission USING(submitid)
-						      WHERE valid = 1 AND probid = %s AND teamid = %s',
+						      WHERE valid = 1 AND probid = %i AND teamid = %i',
 						      $row['probid'], $row['teamid']);
 				if ( $numcorrect == 0 ) {
 					$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
@@ -347,6 +348,10 @@ $args = array('judgingid' => 'Judging_run corresponds to this specific judgingid
 	'output_run' => 'Program output of this run.',
 	'output_diff' => 'Program diff of this run.',
 	'output_error' => 'Program error output of this run.',
+	'output_run' => 'Program output of this run (base64 encoded).',
+	'output_diff' => 'Program diff of this run (base64 encoded).',
+	'output_error' => 'Program error output of this run (base64 encoded).',
+	'output_system' => 'Judging system output of this run (base64 encoded).',
 	'judgehost' => 'Judgehost performing this judging');
 $exArgs = array();
 $roles = array('judgehost');
@@ -420,6 +425,46 @@ $exArgs = array(array('fromid' => 100, 'limit' => 10), array('language' => 'cpp'
 $api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
 
 /**
+ * POST a new submission
+ */
+function submissions_POST($args)
+{
+	global $userdata, $cid, $DB;
+	checkargs($args, array('shortname','langid'));
+
+	$probid = $DB->q("MAYBEVALUE SELECT probid FROM problem
+	                  WHERE shortname = %s AND cid = %i AND allow_submit = 1",
+	                  $args['shortname'], $cid);
+	if ( empty($probid ) ) {
+		error("Problem " . $args['shortname'] . " not found or or not submittable");
+	}
+
+	// rebuild array of filenames, paths to get rid of empty upload fields
+	$FILEPATHS = $FILENAMES = array();
+	foreach($_FILES['code']['tmp_name'] as $fileid => $tmpname ) {
+		if ( !empty($tmpname) ) {
+			checkFileUpload($_FILES['code']['error'][$fileid]);
+			$FILEPATHS[] = $_FILES['code']['tmp_name'][$fileid];
+			$FILENAMES[] = $_FILES['code']['name'][$fileid];
+		}
+	}
+
+	$sid = submit_solution($userdata['teamid'], $probid, $args['langid'], $FILEPATHS, $FILENAMES);
+
+	auditlog('submission', $sid, 'added', 'via api');
+
+	return $sid;
+}
+
+$args = array('code[]' => 'Array of source files to submit',
+              'shortname' => 'Problem shortname',
+              'langid' => 'Language ID');
+$doc = 'Post a new submission. You need to be authenticated with a team role. Returns the submission id.';
+$exArgs = array();
+$roles = array('team');
+$api->provideFunction('POST', 'submissions', $doc, $args, $exArgs, $roles);
+
+/**
  * Submission Files
  */
 function submission_files($args)
@@ -466,7 +511,7 @@ function testcases($args)
 	                        WHERE judgingid = %i", $args['judgingid']);
 	$sqlextra = count($judging_runs) ? "AND testcaseid NOT IN (%Ai)" : "%_";
 	$testcase = $DB->q("MAYBETUPLE SELECT testcaseid, rank, probid, md5sum_input, md5sum_output
-	                    FROM testcase WHERE probid = %s $sqlextra ORDER BY rank LIMIT 1",
+	                    FROM testcase WHERE probid = %i $sqlextra ORDER BY rank LIMIT 1",
 	                   $row['probid'], $judging_runs);
 
 	// would probably never be empty, because then endtime would also
@@ -499,12 +544,12 @@ function testcase_files($args)
 	$content = $DB->q("VALUE SELECT SQL_NO_CACHE $inout FROM testcase
 	                   WHERE testcaseid = %i", $args['testcaseid']);
 
-	return $content;
+	return base64_encode($content);
 }
 $args = array('testcaseid' => 'Get only the corresponding testcase.',
 	'input' => 'Get the input file.',
 	'output' => 'Get the output file.');
-$doc = 'Get a testcase file.';
+$doc = 'Get a testcase file, base64 encoded.';
 $exArgs = array(array('testcaseid' => '3', 'input' => TRUE));
 $roles = array('jury','judgehost');
 $api->provideFunction('GET', 'testcase_files', $doc, $args, $exArgs, $roles);
@@ -522,7 +567,7 @@ function executable($args)
 	return base64_encode($content);
 }
 $args = array('execid' => 'Get only the corresponding executable.');
-$doc = 'Get an executable zip file.';
+$doc = 'Get an executable zip file, base64 encoded.';
 $exArgs = array(array('execid' => 'ignorews'));
 $roles = array('jury','judgehost');
 $api->provideFunction('GET', 'executable', $doc, $args, $exArgs, $roles);
@@ -546,7 +591,7 @@ function queue($args)
 
 	$submitids = $DB->q('SELECT submitid
 			     FROM submission s
-			     LEFT JOIN team t ON (s.teamid = t.login)
+			     LEFT JOIN team t ON (s.teamid = t.teamid)
 	                     LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
 			     WHERE judgehost IS NULL AND s.cid = %i
 			     AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
@@ -571,7 +616,7 @@ function affiliations($args)
 	global $DB;
 
 	// Construct query
-	$query = 'SELECT affilid, name, country FROM team_affiliation WHERE';
+	$query = 'SELECT affilid, shortname, name, country FROM team_affiliation WHERE';
 
 	$byCountry = array_key_exists('country', $args);
 	$query .= ($byCountry ? ' country = %s' : ' TRUE %_');
@@ -583,7 +628,7 @@ function affiliations($args)
 	$q = $DB->q($query, $country);
 	return $q->gettable();
 }
-$doc = 'Get a list of affiliations, with for each affiliation: affilid, name and country.';
+$doc = 'Get a list of affiliations, with for each affiliation: affilid, shortname, name and country.';
 $optArgs = array('country' => 'ISO 3166-1 alpha-3 country code to search for.');
 $exArgs = array(array('country' => 'NLD'));
 $api->provideFunction('GET', 'affiliations', $doc, $optArgs, $exArgs);
@@ -596,7 +641,7 @@ function teams($args)
 	global $DB;
 
 	// Construct query
-	$query = 'SELECT login AS id, t.name, a.country AS nationality,
+	$query = 'SELECT teamid AS id, t.name, a.country AS nationality,
 	          t.categoryid AS category, a.name AS affiliation
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
@@ -612,18 +657,18 @@ function teams($args)
 	$query .= ($byAffil ? ' affilid = %s' : ' TRUE %_');
 	$affiliation = ($byAffil ? $args['affiliation'] : 0);
 
-	$byLogin = array_key_exists('login', $args);
-	$query .= ($byLogin ? ' AND login = %s' : ' AND TRUE %_');
-	$login = ($byLogin ? $args['login'] : 0);
+	$byTeamid = array_key_exists('teamid', $args);
+	$query .= ($byTeamid ? ' AND teamid = %i' : ' AND TRUE %_');
+	$teamid = ($byTeamid ? $args['teamid'] : 0);
 
 	// Run query and return result
-	$q = $DB->q($query, $category, $affiliation, $login);
+	$q = $DB->q($query, $category, $affiliation, $teamid);
 	return $q->gettable();
 }
 $args = array('category' => 'ID of a single category to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
-              'login' => 'Search for a specific team.');
-$doc = 'Get a list of teams containing login, name, category and affiliation.';
+              'teamid' => 'Search for a specific team.');
+$doc = 'Get a list of teams containing teamid, name, category and affiliation.';
 $exArgs = array(array('category' => 1, 'affiliation' => 'UU'));
 $api->provideFunction('GET', 'teams', $doc, $args, $exArgs);
 
@@ -663,7 +708,6 @@ function languages()
 			'name'         => $row['name'],
 			'extensions'   => json_decode($row['extensions']),
 			'allow_judge'  => (bool)$row['allow_judge'],
-			'allow_submit' => (bool)$row['allow_submit'],
 			'time_factor'  => (float)$row['time_factor'],
 			);
 	}
@@ -684,7 +728,7 @@ function clarifications($args)
 	          WHERE cid = %i AND sender IS NULL AND recipient IS NULL';
 
 	$byProblem = array_key_exists('problem', $args);
-	$query .= ($byProblem ? ' AND probid = %s' : ' AND TRUE %_');
+	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
 	$problem = ($byProblem ? $args['problem'] : null);
 
 	$q = $DB->q($query, $cid, $problem);
