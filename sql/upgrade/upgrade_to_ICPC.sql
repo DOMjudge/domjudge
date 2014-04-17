@@ -22,8 +22,8 @@ ALTER TABLE contest
 
 -- Drop constraint before changing data
 ALTER TABLE `clarification`
-  MODIFY COLUMN `probid` int(4) unsigned default NULL COMMENT 'Problem or category associated to this clarification',
-  DROP FOREIGN KEY `clarification_ibfk_3`;
+  DROP FOREIGN KEY `clarification_ibfk_3`,
+  MODIFY COLUMN `probid` varchar(8) default NULL COMMENT 'Problem or category associated to this clarification';
 
 ALTER TABLE `team`
   ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`,
@@ -54,7 +54,7 @@ CREATE TABLE `removed_interval` (
 --
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', '{1000001:"General issue",1000002:"Technical issue"}', 'array_keyval', 'List of additional clarification categories');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', '{general:"General issue",tech:"Technical issue"}', 'array_keyval', 'List of additional clarification categories');
 
 --
 -- Finally remove obsolete structures after moving data

@@ -34,7 +34,7 @@ function canViewClarification($team, $clar)
 
 /**
  * Returns the list of clarification categories as a key,value array.
- * Keys should have values >= 1000000 to distinguish them from problem IDs.
+ * Keys should be non-numeric to distinguish them from problem IDs.
  */
 function getClarCategories(&$default = null)
 {
@@ -89,7 +89,7 @@ function putClar($clar)
 
 	echo '<tr><td>Subject:</td><td>';
 	if ( empty($clar['probid']) ) { /* empty */ }
-	elseif ( substr($clar['probid'], 0, 1)=='#' ) {
+	elseif ( !ctype_digit($clar['probid']) ) {
 		echo $categs[$clar['probid']];
 	} else {
 		if ( IS_JURY ) {
@@ -219,7 +219,7 @@ function putClarificationList($clars, $team = NULL)
 
 		echo '<td>' . $link;
 		if ( empty($clar['probid']) ) { /* empty */ }
-		elseif ( substr($clar['probid'], 0, 1)=='#' ) {
+		elseif ( !ctype_digit($clar['probid']) ) {
 			echo $categs[$clar['probid']];
 		} else {
 			echo "problem ".$clar['shortname'];
@@ -364,7 +364,7 @@ function appendAnswer() {
 	}
 	$categs = getClarCategories();
 	$defclar = key($categs);
-	$options = $probs + $categs;
+	$options = $categs + $probs;
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options, ($respid ? $clar['probid'] : $defclar), true) .
 	     "</td></tr>\n";

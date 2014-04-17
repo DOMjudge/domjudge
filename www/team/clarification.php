@@ -29,7 +29,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	// Disallow problems that are not submittable or
 	// before contest start.
 	$probid = $_POST['problem'];
-	if ( !(problemVisible($probid) && (int)$probid<1000000 ) ) $probid = null;
+	if ( ctype_digit($probid) && !problemVisible($probid) ) $probid = null;
 
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, submittime, sender, probid, body)
