@@ -22,16 +22,18 @@ ALTER TABLE contest
 
 -- Drop constraint before changing data
 ALTER TABLE `clarification`
-  MODIFY COLUMN `probid` varchar(8) default NULL COMMENT 'Problem or category associated to this clarification',
+  MODIFY COLUMN `probid` int(4) unsigned default NULL COMMENT 'Problem or category associated to this clarification',
   DROP FOREIGN KEY `clarification_ibfk_3`;
 
 ALTER TABLE `team`
   ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`,
-  ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of team if imported from external source';
+  ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of team if imported from external source',
+  ADD UNIQUE KEY `externalid` (`externalid`);
 
 ALTER TABLE `submission`
   ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
-  ADD COLUMN `externalresult` varchar(25) default NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis';
+  ADD COLUMN `externalresult` varchar(25) default NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
+  ADD UNIQUE KEY `externalid` (`externalid`);
 
 CREATE TABLE `removed_interval` (
   `intervalid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',

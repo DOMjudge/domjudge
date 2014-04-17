@@ -87,10 +87,10 @@ CREATE TABLE `contest` (
   `freezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of freezetime',
   `endtime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
   `unfreezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
+  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether this contest can be active',
   `finalizetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time when contest was finalized, null if not yet',
   `finalizecomment` text COMMENT 'Comments by the finalizer',
   `b` smallint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of extra bronze medals',
-  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether this contest can be active',
   PRIMARY KEY (`cid`),
   KEY `cid` (`cid`,`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';
@@ -329,8 +329,6 @@ CREATE TABLE `scorecache_public` (
 CREATE TABLE `submission` (
   `submitid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
   `origsubmitid` int(4) unsigned DEFAULT NULL COMMENT 'If set, specifies original submission in case of edit/resubmit',
-  `externalid` int(4) unsigned DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
-  `externalresult` varchar(25) DEFAULT NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
   `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
@@ -338,6 +336,8 @@ CREATE TABLE `submission` (
   `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time submitted',
   `judgehost` varchar(50) DEFAULT NULL COMMENT 'Current/last judgehost judging this submission',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'If false ignore this submission in all scoreboard calculations',
+  `externalid` int(4) unsigned DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
+  `externalresult` varchar(25) DEFAULT NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `externalid` (`externalid`),
   KEY `teamid` (`cid`,`teamid`),
@@ -392,6 +392,7 @@ CREATE TABLE `team` (
   `externalid` int(4) unsigned DEFAULT NULL COMMENT 'Specifies ID of team if imported from external source',
   PRIMARY KEY  (`teamid`),
   UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `externalid` (`externalid`),
   KEY `affilid` (`affilid`),
   KEY `categoryid` (`categoryid`),
   CONSTRAINT `team_ibfk_1` FOREIGN KEY (`categoryid`) REFERENCES `team_category` (`categoryid`) ON DELETE CASCADE,
