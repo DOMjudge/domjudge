@@ -22,6 +22,8 @@ require(LIBDIR . '/init.php');
 
 require(LIBEXTDIR . '/spyc/spyc.php');
 
+require(LIBWWWDIR . '/checkers.jury.php');
+
 setup_database_connection();
 
 $verbose = LOG_NOTICE;
@@ -103,6 +105,69 @@ function val($node, $tag) {
 	return $node->getElementsByTagName($tag)->item(0)->nodeValue;
 }
 
+function update_contest_times($data)
+{
+	global $DB, $cdata, $cid;
+
+	// Preserve relative times:
+	foreach (array('activatetime', 'freezetime', 'unfreezetime') as $time) {
+		if ( !empty($cdata[$time]) && strpos('+-',$cdata[$time][0])!==FALSE ) {
+			$data[$time] = $cdata[$time];
+		} else {
+			$data[$time] = NULL;
+		}
+	}
+
+	// Code below copied from www/jury/edit.php
+	$CHECKER_ERRORS = array();
+	$itemdata = check_contest($data,array('cid' => $cid));
+	if ( count($CHECKER_ERRORS) ) {
+		error("Errors while processing contest $cid:\n" .
+		      implode(";\n", $CHECKER_ERRORS));
+	}
+
+	$DB->q("UPDATE contest SET %S WHERE cid = %i", $itemdata, $cid);
+	auditlog('contest', $cid, 'updated');
+}
+
+function check_contest_times($update = FALSE)
+{
+	global $DB, $cdata, $cid, $xpath;
+
+	$infos = $xpath->query('/contest/info');
+	$contest = $infos->item($infos->length-1);
+
+	sscanf(val($contest,'length'),"%d:%d:%d",$h,$m,$s);
+	$length = 3600*$h + 60*$m + $s;
+
+	// Special-case contest starttime "undefined":
+	if ( val($contest,'starttime')=='undefined' ) {
+		logmsg(LOG_NOTICE, 'Read contest starttime "undefined", disabling contest.');
+
+		$data = array('starttime' => '2999-01-01 00:00',
+		              'endtime' => sprintf('+%02d:%02d', $h,$m),
+		              'enabled' => 0);
+
+		update_contest_times($data);
+		logmsg(LOG_INFO, "Contest c$cid disabled.");
+		return;
+	}
+
+	if ( difftime(val($contest,'starttime'),$cdata['starttime'])!=0 ||
+	     $length!=difftime($cdata['endtime'],$cdata['starttime']) ) {
+		warning("Contest times do not match with external CCS data.");
+
+		if ( $update ) {
+			$data = array('starttime' => strftime('%Y-%m-%d %H:%M', (int)$val($contest,'starttime')),
+			              'endtime' => sprintf('+%02d:%02d', $h,$m),
+			              'enabled' => 1);
+
+			update_contest_times($data);
+			logmsg(LOG_INFO, "Contest c$cid start/end times updated.");
+		}
+	}
+}
+
 // First check if we have the right contest, teams, problems, and
 // languages loaded.
 $feedXML = file_get_contents($feedurl);
@@ -110,14 +175,7 @@ $feedDOM = DOMDocument::loadXML($feedXML);
 if ( $feedDOM == NULL ) error("Could not read XML feed from '$feedurl'.");
 $xpath = new DOMXpath($feedDOM);
 
-$infos = $xpath->query('/contest/info');
-$contest = $infos->item($infos->length-1);
-sscanf(val($contest,'length'),"%d:%d:%d",$h,$m,$s);
-$length = 3600*$h + 60*$m + $s;
-if ( difftime(val($contest,'starttime'),$cdata['starttime'])!=0 ||
-     $length!=difftime($cdata['endtime'],$cdata['starttime']) ) {
-	warning("Contest times do not match with external CCS data.");
-}
+check_contest_times();
 
 $problems = $xpath->query('/contest/problem');
 foreach ( $problems as $prob ) {
@@ -177,6 +235,9 @@ while ( TRUE ) {
 	$feedDOM = DOMDocument::loadXML($feedXML);
 	if ( $feedDOM == NULL ) error("Could not parse '$feedurl.mine.xml'");
 	$xpath = new DOMXpath($feedDOM);
+
+	// Check and update any changes in contest starttime
+	check_contest_times(TRUE);
 
 	$runs = $xpath->query('/contest/run');
 
