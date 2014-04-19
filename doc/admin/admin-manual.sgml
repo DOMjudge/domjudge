@@ -162,7 +162,8 @@ The following software is required for running DOMjudge.
 
 <item> A lot of standard (GNU) programs, a probably incomplete list:
        hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
-       grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail, pgrep
+       grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail, pgrep,
+       zip, unzip
 
 <item> sudo to gain root privileges
 
@@ -192,10 +193,6 @@ functionality.
         url="http://pecl.php.net/package/xdiff">~
        (to reliably make diffs between submissions, DOMjudge will try
         alternative approaches if it's not available)
-
-<item> <htmlurl name="PHP zip Extension"
-        url="http://www.php.net/manual/en/book.zip.php">~
-       (to upload problem data via zip bundles)
 
 <item> <htmlurl name="beep" url="http://www.johnath.com/beep/"> for
        audible notification of errors, submissions and judgings, when
@@ -340,10 +337,6 @@ Optionally:
        following PHP extensions can be installed:
        <itemize>
        <item>xdiff PECL extension for diffs between submissions;
-       <item>zip PHP-bundled extension (<tt>--enable-zip</tt>)
-             for uploading problem data as zip-bundles (enabled
-             by default in Debian, but not in all other Linux
-             distributions).
        </itemize>
 </itemize>
 
