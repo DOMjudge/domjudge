@@ -94,11 +94,9 @@ to name them here too:
 <itemize>
 <item> dash (i386) is included, built from the Debian dash sources
        (copyright various people, see <tt>doc/dash.copyright</tt>).
-<item> mkstemps.h and basename.h are modified versions from the
+<item> basename.h is a modified version from the
        GNU libiberty library (copyright Free Software Foundation).
 <item> lib.database.php by Jeroen van Wolffelaar et al.
-<item> submit.cc and submitdaemon.cc are based on submit.pl and
-       submitdaemon.pl by Eelco Dolstra.
 <item> runguard.c was originally based on timeout from The
        Coroner's Toolkit by Wietse Venema.
 <item> sorttable.js by Stuart Langridge.

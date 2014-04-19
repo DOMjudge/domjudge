@@ -12,22 +12,9 @@
 
 #include "submit-config.h"
 
-/* Check whether default submission method is available; bail out if not */
-#if ( SUBMIT_DEFAULT == 1 ) && ( SUBMIT_ENABLE_CMD != 1 )
-#error "Commandline default submission requested, but server not enabled."
-#endif
-#if ( SUBMIT_DEFAULT == 2 ) && ( SUBMIT_ENABLE_WEB != 1 )
-#error "Webinterface default submission requested, but server not enabled."
-#endif
-#if ( SUBMIT_DEFAULT < 1 ) || ( SUBMIT_DEFAULT > 2 )
-#error "Unknown submission method requested."
-#endif
-/* Check whether submission method dependencies are available */
-#if ( SUBMIT_ENABLE_CMD && ! ( HAVE_NETDB_H && HAVE_NETINET_IN_H ) )
-#error "Commandline submission requested, but network headers not available."
-#endif
-#if ( SUBMIT_ENABLE_WEB && ! ( HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H ) )
-#error "Webinterface submission requested, but libcURL or libJSONcpp not available."
+/* Check whether submit dependencies are available */
+#if ( ! ( HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H ) )
+#error "libcURL or libJSONcpp not available."
 #endif
 
 /* Standard include headers */
@@ -43,17 +30,9 @@
 #include <sys/socket.h>
 #include <getopt.h>
 #include <termios.h>
-#if ( SUBMIT_ENABLE_CMD )
-#include <netinet/in.h>
-#include <netdb.h>
-#endif
-#ifdef HAVE_CURL_CURL_H
 #include <curl/curl.h>
 #include <curl/easy.h>
-#endif
-#ifdef HAVE_JSONCPP_JSON_JSON_H
 #include <jsoncpp/json/json.h>
-#endif
 #ifdef HAVE_MAGIC_H
 #include <magic.h>
 #endif
@@ -77,12 +56,8 @@ using namespace std;
 /* Misc. other functions */
 #include "lib.misc.h"
 
-/* Include some functions, which are not always available */
-#include "mkstemps.h"
+/* Include GNU version of basename() */
 #include "basename.h"
-
-/* Common send/receive functions */
-#include "submitcommon.hxx"
 
 const int timeout_secs = 60; /* seconds before send/receive timeouts with an error */
 
@@ -94,21 +69,15 @@ char *logfile;
 
 const char *progname;
 
-int port = SUBMITPORT;
-
 int quiet;
-int use_websubmit;
 int show_help;
 int show_version;
 
 struct option const long_opts[] = {
 	{"problem",  required_argument, NULL,         'p'},
 	{"language", required_argument, NULL,         'l'},
-	{"server",   required_argument, NULL,         's'},
 	{"team",     required_argument, NULL,         't'},
 	{"url",      required_argument, NULL,         'u'},
-	{"port",     required_argument, NULL,         'P'},
-	{"web",      optional_argument, NULL,         'w'},
 	{"verbose",  optional_argument, NULL,         'v'},
 	{"quiet",    no_argument,       NULL,         'q'},
 	{"help",     no_argument,       &show_help,    1 },
@@ -125,17 +94,9 @@ char readanswer(const char *answers);
 int  file_istext(char *filename);
 #endif
 
-#if ( SUBMIT_ENABLE_CMD )
-int  cmdsubmit();
-#endif
-#if ( SUBMIT_ENABLE_WEB )
 int  websubmit();
-#endif
-#if HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H
 int  getlangexts();
-#endif
 
-#ifdef HAVE_CURL_CURL_H
 /* Helper function for using libcurl in websubmit() and getlangexts() */
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 {
@@ -145,19 +106,20 @@ size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 
 	return size*nmemb;
 }
-#endif
 
-#if ( SUBMIT_ENABLE_CMD )
-int socket_fd; /* filedescriptor of the connection to server socket */
+std::string stringtolower(std::string str)
+{
+	unsigned int i;
 
-struct addrinfo *server_ais, *server_ai; /* server adress information */
-char server_addr[NI_MAXHOST];            /* server IP address string  */
-#endif
+	for(i=0; i<str.length(); i++) str[i] = tolower(str[i]);
+
+	return str;
+}
 
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, server, team, baseurl;
+string problem, language, extension, team, baseurl;
 vector<string> filenames;
 char *submitdir;
 
@@ -205,49 +167,26 @@ int main(int argc, char **argv)
 
 	logmsg(LOG_INFO,"started");
 
-	/* Read defaults for server, team and baseurl from environment */
-	server = string("localhost");
+	/* Read defaults for user, team and baseurl from environment */
 	baseurl = string("http://localhost/domjudge/");
 
-	if ( getenv("SUBMITSERVER") !=NULL ) server  = string(getenv("SUBMITSERVER"));
 	if ( getenv("SUBMITBASEURL")!=NULL ) baseurl = string(getenv("SUBMITBASEURL"));
 
 	if ( getenv("USER")!=NULL ) team = string(getenv("USER"));
 	if ( getenv("TEAM")!=NULL ) team = string(getenv("TEAM"));
 
-	/* Parse command-line options */
-#if ( SUBMIT_DEFAULT == 1 )
-	use_websubmit = 0;
-#else
-	use_websubmit = 1;
-#endif
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:s:t:u:P:w::v::q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"p:l:t:u:v::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
 
 		case 'p': problem   = string(optarg); break;
 		case 'l': extension = string(optarg); break;
-		case 's': server    = string(optarg); break;
 		case 't': team      = string(optarg); break;
 		case 'u': baseurl   = string(optarg); break;
 
-		case 'P': /* port option */
-			port = strtol(optarg,&ptr,10);
-			if ( *ptr!=0 || port<0 || port>65535 ) {
-				usage2(0,"invalid tcp port specified: `%s'",optarg);
-			}
-			break;
-		case 'w': /* websubmit option */
-			if ( optarg!=NULL ) {
-				use_websubmit = strtol(optarg,&ptr,10);
-				if ( *ptr!=0 ) usage2(0,"invalid value specified: `%s'",optarg);
-			} else {
-				use_websubmit = 1;
-			}
-			break;
 		case 'v': /* verbose option */
 			if ( optarg!=NULL ) {
 				verbose = strtol(optarg,&ptr,10);
@@ -345,21 +284,12 @@ int main(int argc, char **argv)
 	if ( problem.empty()  ) usage2(0,"no problem specified");
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( team.empty()     ) usage2(0,"no team specified");
-
-	if (use_websubmit) {
-		if ( baseurl.empty() ) usage2(0,"no url specified");
-	} else {
-		if ( server.empty() ) usage2(0,"no server specified");
-	}
+	if ( baseurl.empty()  ) usage2(0,"no url specified");
 
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
 	logmsg(LOG_DEBUG,"team is `%s'",team.c_str());
-	if (use_websubmit) {
-		logmsg(LOG_DEBUG,"url is `%s'",baseurl.c_str());
-	} else {
-		logmsg(LOG_DEBUG,"server is `%s'",server.c_str());
-	}
+	logmsg(LOG_DEBUG,"url is `%s'",baseurl.c_str());
 
 	/* Ask user for confirmation */
 	if ( ! quiet ) {
@@ -376,11 +306,7 @@ int main(int argc, char **argv)
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
 		printf("  team:        %s\n",team.c_str());
-		if (use_websubmit) {
-			printf("  url:         %s\n",baseurl.c_str());
-		} else {
-			printf("  server/port: %s/%d\n",server.c_str(),port);
-		}
+		printf("  url:         %s\n",baseurl.c_str());
 
 		if ( nwarnings>0 ) printf("There are warnings for this submission!\a\n");
 		printf("Do you want to continue? (y/n) ");
@@ -389,20 +315,7 @@ int main(int argc, char **argv)
 		if ( c=='n' ) error(0,"submission aborted by user");
 	}
 
-	if ( use_websubmit ) {
-#if ( SUBMIT_ENABLE_WEB )
-		return websubmit();
-#else
-		error(0,"websubmit requested, but not available");
-#endif
-	} else {
-#if ( SUBMIT_ENABLE_CMD )
-		return cmdsubmit();
-#else
-		error(0,"cmdsubmit requested, but not available");
-#endif
-	}
-
+	return websubmit();
 }
 
 void usage()
@@ -685,139 +598,6 @@ int getlangexts()
 
 #endif /* HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H */
 
-#if ( SUBMIT_ENABLE_CMD )
-
-int cmdsubmit()
-{
-	int redir_fd[3];
-	int temp_fd;
-	const char *args[2];
-	char *template_str, *tempfile;
-	vector<string> tempfiles;
-	struct timeval timeout;
-	struct addrinfo hints;
-	char *port_str;
-	int err;
-	size_t i;
-
-	/* Make tempfiles to submit */
-	template_str = allocstr("%s/%s.XXXXXX.%s",submitdir,
-	                        problem.c_str(),extension.c_str());
-	for(i=0; i<filenames.size(); i++) {
-		tempfile = strdup(template_str);
-		temp_fd = mkstemps(tempfile,extension.length()+1);
-		if ( temp_fd<0 || strlen(tempfile)==0 ) {
-			error(errno,"mkstemps cannot create tempfile");
-		}
-		/* Close temp_fd because we only need the filename */
-		if ( close(temp_fd)!=0 ) error(errno,"closing tempfile");
-
-		/* Construct copy command and execute it */
-		args[0] = filenames[i].c_str();
-		args[1] = tempfile;
-		redir_fd[0] = redir_fd[1] = redir_fd[2] = FDREDIR_NONE;
-		if ( execute(COPY_CMD,args,2,redir_fd,1)!=0 ) {
-			error(0,"cannot copy `%s' to `%s'",args[0],args[1]);
-		}
-
-		if ( chmod(tempfile,USERPERMFILE)!=0 ) {
-			error(errno,"setting permissions on `%s'",tempfile);
-		}
-
-		logmsg(LOG_INFO,"copied `%s' to tempfile `%s'",filenames[i].c_str(),tempfile);
-		tempfiles.push_back(tempfile);
-		free(tempfile);
-	}
-	free(template_str);
-
-	/* Connect to the submission server */
-	logmsg(LOG_NOTICE,"connecting to the server (%s, %d/tcp)...",
-	       server.c_str(),port);
-
-	/* Set preferred network connection options: use both IPv4 and
- 	   IPv6 by default */
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_flags    = AI_ADDRCONFIG | AI_CANONNAME;
-	hints.ai_socktype = SOCK_STREAM;
-
-	port_str = allocstr("%d",port);
-	if ( (err = getaddrinfo(server.c_str(),port_str,&hints,&server_ais)) ) {
-		error(0,"getaddrinfo: %s",gai_strerror(err));
-	}
-	free(port_str);
-
-	/* Try to connect to addresses for server in given order */
-	socket_fd = -1;
-	for(server_ai=server_ais; server_ai!=NULL; server_ai=server_ai->ai_next) {
-
-		err = getnameinfo(server_ai->ai_addr,server_ai->ai_addrlen,server_addr,
-		                  sizeof(server_addr),NULL,0,NI_NUMERICHOST);
-		if ( err!=0 ) error(0,"getnameinfo: %s",gai_strerror(err));
-
-		logmsg(LOG_DEBUG,"trying to connect to address `%s'",server_addr);
-
-		socket_fd = socket(server_ai->ai_family,server_ai->ai_socktype,
-		                   server_ai->ai_protocol);
-		if ( socket_fd>=0 ) {
-			if ( connect(socket_fd,server_ai->ai_addr,server_ai->ai_addrlen)==0 ) {
-				break;
-			} else {
-				close(socket_fd);
-				socket_fd = -1;
-			}
-		}
-	}
-	if ( socket_fd<0 ) error(0,"cannot connect to the server");
-
-	/* Set socket timeout option on read/write */
-	timeout.tv_sec  = timeout_secs;
-	timeout.tv_usec = 0;
-
-	if ( setsockopt(socket_fd,SOL_SOCKET,SO_SNDTIMEO,&timeout,sizeof(timeout)) < 0) {
-		error(errno,"setting socket option");
-	}
-
-	if ( setsockopt(socket_fd,SOL_SOCKET,SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0) {
-		error(errno,"setting socket option");
-	}
-
-	logmsg(LOG_INFO,"connected, server address is `%s'",server_addr);
-
-	receive(socket_fd);
-
-	/* Send submission info */
-	logmsg(LOG_NOTICE,"sending data...");
-	sendit(socket_fd,"+team %s",team.c_str());
-	receive(socket_fd);
-	sendit(socket_fd,"+problem %s",problem.c_str());
-	receive(socket_fd);
-	sendit(socket_fd,"+language %s",extension.c_str());
-	receive(socket_fd);
-	for(i=0; i<filenames.size(); i++) {
-		sendit(socket_fd,"+filename %s",gnu_basename(tempfiles[i].c_str()));
-		receive(socket_fd);
-		sendit(socket_fd,"+fileorig %s",gnu_basename(filenames[i].c_str()));
-		receive(socket_fd);
-	}
-	sendit(socket_fd,"+done");
-
-	/* Keep reading until end of file, then check for errors */
-	while ( receive(socket_fd) );
-	if ( strncasecmp(lastmesg,"done",4)!=0 ) {
-		error(0,"connection closed unexpectedly");
-	}
-
-	freeaddrinfo(server_ais);
-
-	logmsg(LOG_NOTICE,"submission successful");
-
-    return 0;
-}
-
-#endif /* SUBMIT_ENABLE_CMD */
-
-#if ( SUBMIT_ENABLE_WEB )
-
 string remove_html_tags(string s)
 {
 	size_t p1, p2;
@@ -941,6 +721,5 @@ int websubmit()
 
 	return 0;
 }
-#endif /* SUBMIT_ENABLE_WEB */
 
 //  vim:ts=4:sw=4:

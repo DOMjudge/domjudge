@@ -5,6 +5,7 @@ Version 4.0.0 - DEV
  - [INCOMPATIBLE CHANGE] checktestdata logical operators are now '&&' and '||'.
  - Introduce REST API; used by judgedaemon and submit client to communicate
    with domserver.
+ - Removed submitdeamon; submit client now always uses the REST API.
  - Problem short names now need to be unique per contest, but not globally.
  - Redesign authentication system: there's a single set of users for all
    interfaces, which may have different roles, such as team or admin.
