@@ -37,7 +37,7 @@ if(!isset($ajaxtitle)) {
 <head>
 	<!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
 <title><?php echo $title?></title>
-<link rel="shortcut icon" href="../images/favicon.png" type="image/png" />
+<link rel="icon" href="../images/favicon.png" type="image/png" />
 <link rel="stylesheet" href="../style.css" type="text/css" />
 <?php
 if ( IS_JURY ) {
