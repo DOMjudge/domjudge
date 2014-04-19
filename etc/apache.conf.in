@@ -62,6 +62,7 @@ RewriteEngine On
 RewriteRule .svn/ - [F]
 RewriteRule .git/ - [F]
 RewriteRule .gitignore$ - [F]
+RewriteRule Makefile$ - [F]
 </IfModule>
 
 # Disable some evil PHP magic
