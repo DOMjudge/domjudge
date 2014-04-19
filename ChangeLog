@@ -2,6 +2,10 @@ DOMjudge Programming Contest Judging System
 
 Version 3.3.7 - DEV
 -------------------
+ - Disallow access to Makefile's in the www tree.
+ - Suppress notice of undefined index in scoreboard rendering.
+ - Bugfix: properly close unused resources (found by Coverity scan).
+ - Misc. documentation improvements and HTML validity fixes.
 
 Version 3.3.6 - 8 December 2013
 -------------------------------
