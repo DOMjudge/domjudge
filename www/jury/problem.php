@@ -35,11 +35,6 @@ if ( !empty($pcmd) ) {
 		auditlog('problem', $id, 'set allow judge', $_POST['val']['toggle_judge']);
 	}
 
-	if ( isset($pcmd['delete_text']) ) {
-		$DB->q('UPDATE problem SET problemtext = NULL, problemtext_type = NULL
-		        WHERE probid = %i', $id);
-		auditlog('problem', $id, 'delete problem text');
-	}
 }
 if ( isset($_POST['upload']) ) {
 	if ( !empty($_FILES['problem_archive']['tmp_name'][0]) ) {
@@ -81,14 +76,14 @@ if ( !empty($cmd) ):
 		echo "<tr><td>Problem ID:</td><td>";
 		$row = $DB->q('TUPLE SELECT p.probid,p.cid,p.shortname,p.name,p.allow_submit,p.allow_judge,
 	                                    p.timelimit,p.special_run,p.special_compare,p.color,
-	                                    COUNT(testcaseid) AS testcases
+	                                    p.problemtext_type, COUNT(testcaseid) AS testcases
 		               FROM problem p
 		               LEFT JOIN testcase USING (probid)
 		               WHERE probid = %i GROUP BY probid', $id);
 		echo addHidden('keydata[0][probid]', $row['probid']);
 		echo "p" . htmlspecialchars($row['probid']);
 		echo "</td></tr>\n";
-	} 
+	}
 
 ?>
 <tr><td><label for="data_0__shortname_">Shortname:</label></td><td>
@@ -133,7 +128,13 @@ href="http://www.w3schools.com/cssref/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__problemtext_">Problem text:</label></td>
-<td><?php echo addFileField('data[0][problemtext]', 30, ' accept="text/plain,text/html,application/pdf"')?></td></tr>
+<td><?php
+echo addFileField('data[0][problemtext]', 30, ' accept="text/plain,text/html,application/pdf"');
+if ( !empty($row['problemtext_type']) ) {
+	echo addCheckBox('unset[0][problemtext]') .
+		'<label for="unset_0__problemtext_">delete</label>';
+}
+?></td></tr>
 
 <tr><td><label for="data_0__special_run_">Special run script:</label></td>
 <td>
@@ -238,10 +239,7 @@ if ( !empty($data['problemtext_type']) ) {
 	echo '<tr><td>Problem text:</td><td class="nobreak"><a href="problem.php?id=' .
 	    urlencode($id) . '&amp;cmd=viewtext"><img src="../images/' .
 	    urlencode($data['problemtext_type']) . '.png" alt="problem text" ' .
-	    'title="view problem description" /></a> ' .
-	    addSubmit('delete', 'cmd[delete_text]',
-	              "return confirm('Delete problem description text?')") .
-	    "</td></tr>\n";
+	    'title="view problem description" /></a> ' . "</td></tr>\n";
 }
 if ( !empty($data['special_compare']) ) {
 	echo '<tr><td>Special run script:</td><td class="filename">' .

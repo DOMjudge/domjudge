@@ -105,6 +105,10 @@ function check_problem($data, $keydata = null)
 	     !isset($data['problemtext_type']) ) {
 		ch_error("Problem statement has unknown file type.");
 	}
+	// Unset problemtext_type if problemtext was set to null explicitly.
+	if ( array_key_exists('problemtext', $data) && empty($data['problemtext']) ) {
+		$data['problemtext_type'] = NULL;
+	}
 
 	if ( !empty($data['special_compare']) ) {
 		global $DB;
