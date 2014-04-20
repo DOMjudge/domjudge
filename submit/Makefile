@@ -3,9 +3,6 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-# Check if we have to build the submit client and which libraries
-# need to be linked:
-ifneq ($(SUBMIT_DEFAULT),0)
 SUBMITCLIENT = submit$(EXEEXT)
 SUBMIT_PROGS += $(SUBMITCLIENT)
 # Statically link against libmagic and libJSONcpp to prevent
@@ -16,7 +13,6 @@ endif
 ifneq ($(LIBJSONCPP),)
 $(SUBMITCLIENT): LDFLAGS += -Wl,-Bstatic $(LIBJSONCPP) -Wl,-Bdynamic
 endif
-ifneq ($(SUBMIT_ENABLE_WEB),0)
 $(SUBMITCLIENT): CXXFLAGS += $(CURL_CFLAGS)
 # Try to link statically against libcURL to prevent dependency
 # on team workstations:
@@ -25,9 +21,7 @@ $(SUBMITCLIENT): LDFLAGS += $(CURL_STATIC) -lpthread
 else
 $(SUBMITCLIENT): LDFLAGS += $(CURL_LIBS)
 endif
-endif
 $(SUBMITCLIENT): LDFLAGS := $(filter-out -pie,$(LDFLAGS))
-endif
 
 SUBMITHEADERS = $(TOPDIR)/etc/submit-config.h
 

@@ -9,10 +9,6 @@
 require('init.php');
 $title = 'Submit';
 
-if ( ! ENABLE_WEBSUBMIT_SERVER ) {
-	error("Websubmit disabled.");
-}
-
 if ( !isset($_POST['submit']) ) {
 	header('Location: ./');
 	return;

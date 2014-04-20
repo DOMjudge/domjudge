@@ -378,24 +378,16 @@ flushresults();
 // SUBMISSIONS, JUDINGS
 
 $submres = 'O';
-$submnote = 'Websubmit ' . ( ENABLE_WEBSUBMIT_SERVER ? 'en':'dis' ) ."abled.\n".
-	 'Submitserver ' . ( ENABLE_CMDSUBMIT_SERVER ? 'en':'dis' ) ."abled.\n\n";
-
-if ( ! ENABLE_WEBSUBMIT_SERVER && ! ENABLE_CMDSUBMIT_SERVER ) {
-	$submres = 'E';
-	$submnote .= 'Both Websubmit and Submitserver disabled. No way to make submissions.';
+if ( ! is_writable(SUBMITDIR) ) {
+	$submres = 'W';
+	$submnote .= 'The webserver has no write access to SUBMITDIR (' .
+	             htmlspecialchars(SUBMITDIR) .
+	             '), and thus will not be able to make backup copies of submissions.';
 } else {
-	if ( ENABLE_WEBSUBMIT_SERVER && ! is_writable(SUBMITDIR) ) {
-		$submres = 'W';
-		$submnote .= 'The webserver has no write access to SUBMITDIR (' .
-			htmlspecialchars(SUBMITDIR) .
-			'), and thus will not be able to make backup copies of submissions.';
-	} else {
-		$submnote .= 'No issues found.';
-	}
+	$submnote .= 'No issues found.';
 }
 
-result('submissions and judgings', 'Submit method', $submres, $submnote);
+result('submissions and judgings', 'Submissions', $submres, $submnote);
 
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s

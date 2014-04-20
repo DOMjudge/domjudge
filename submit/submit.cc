@@ -1,8 +1,6 @@
 /*
  * submit -- command-line submit program for solutions.
  *
- * Based on submit.pl by Eelco Dolstra.
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  *
@@ -338,17 +336,7 @@ void usage()
 "      --version            output version information and exit\n"
 "\n"
 "The following option(s) should not be necessary for normal use\n"
-#if ( SUBMIT_ENABLE_CMD )
-"  -t, --team=TEAM          submit as team TEAM\n"
-"  -s, --server=SERVER      submit to server SERVER\n"
-"  -P, --port=PORT          connect to SERVER on tcp-port PORT\n"
-#endif
-#if ( SUBMIT_ENABLE_WEB )
 "  -u, --url=URL            submit to webserver with base address URL\n"
-#endif
-#if ( SUBMIT_ENABLE_WEB && SUBMIT_ENABLE_CMD )
-"  -w, --web[=0|1]          toggle or set submit to the webinterface\n"
-#endif
 "\n"
 "Explanation of submission options:\n"
 "\n"
@@ -374,6 +362,9 @@ void usage()
 "The default for LANGUAGE is the extension of FILENAME. For example,\n"
 "'B.java' will indicate a Java solution.\n"
 "\n"
+"Set URL to the base address of the webinterface without the\n"
+"'api/' suffix.\n"
+"\n"
 "Examples:\n"
 "\n");
 	printf("Submit problem 'b' in Java:\n"
@@ -384,31 +375,6 @@ void usage()
 	       "    %s -p hello -l C HelloWorld.cpp\n\n",progname);
 	printf("Submit multiple files (the problem and language are taken from the first):\n"
 	       "    %s hello.java message.java\n\n",progname);
-	printf(
-"The following options should not be necessary for normal use:\n"
-"\n"
-#if ( SUBMIT_ENABLE_CMD )
-"Specify with TEAM the team ID you want to submit as. The default\n"
-"value for TEAM is taken from the environment variable 'TEAM' or\n"
-"your login name if 'TEAM' is not defined.\n"
-"\n"
-"Set SERVER to the hostname or IP-address of the submit-server.\n"
-"The default value for SERVER is defined internally or otherwise\n"
-"taken from the environment variable 'SUBMITSERVER', or 'localhost'\n"
-"if 'SUBMITSERVER' is not defined; PORT can be used to set an alternative\n"
-"TCP port to connect to.\n"
-"\n"
-#endif
-#if ( SUBMIT_ENABLE_WEB )
-"Set URL to the base address of the webinterface without the\n"
-"'api/' suffix.\n"
-"\n"
-#endif
-#if ( SUBMIT_ENABLE_WEB && SUBMIT_ENABLE_CMD )
-"The TEAM/SERVER/PORT options are only used when submitting to the\n"
-"commandline daemon, and URL only when using the webinterface.\n"
-#endif
-	);
 	exit(0);
 }
 

@@ -39,7 +39,6 @@ $configvars = array(
 	'FILELIMIT'                 => 4096,
 	'PROCLIMIT'                 => 15,
 	'USERSUBMITDIR'             => '.domjudge',
-	'SUBMIT_DEFAULT'            => '2',
 	);
 
 foreach ($configvars as $var => $default) {
