@@ -30,6 +30,8 @@ function check_user($data, $keydata = null)
 	}
 	if ( !empty($data['password']) ) {
 		$data['password'] = md5("$id#".$data['password']);
+	} else {
+		unset($data['password']);
 	}
 	if ( !empty($data['ip_address']) ) {
 		if ( !filter_var($data['ip_address'], FILTER_VALIDATE_IP) ) {
