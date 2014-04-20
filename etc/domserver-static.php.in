@@ -19,6 +19,6 @@ define('RUNDIR',      '@domserver_rundir@');
 define('TMPDIR',      '@domserver_tmpdir@');
 define('SUBMITDIR',   '@domserver_submitdir@');
 
-define('SUBMITCLIENT_ENABLED', @SUBMITCLIENT_ENABLED@);
+define('SUBMITCLIENT_ENABLED', '@SUBMITCLIENT_ENABLED@');
 
 set_include_path(get_include_path() . PATH_SEPARATOR . LIBEXTDIR);
