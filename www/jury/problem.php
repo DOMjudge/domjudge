@@ -254,14 +254,6 @@ if ( !empty($data['special_compare']) ) {
 		htmlspecialchars($data['special_compare']) . "</a></td></tr>\n";
 }
 
-if ( IS_ADMIN && class_exists("ZipArchive") ) {
-	echo '<tr>' .
-		'<td>Problem archive:</td>' .
-		'<td>' . addFileField('problem_archive[]') .
-		addSubmit('Upload', 'upload') . '</td>' .
-		"</tr>\n";
-}
-
 echo "</table>\n" . addEndForm();
 
 echo "<br />\n" . rejudgeForm('problem', $id) . "\n\n";
