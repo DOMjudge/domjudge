@@ -155,7 +155,7 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 		}
 
 		logmsg(LOG_INFO, "Unzipping");
-		system("unzip -d $execpath $execzippath", $retval);
+		system("unzip -q -d $execpath $execzippath", $retval);
 		if ( $retval!=0 ) error("Could not unzip zipfile in $execpath");
 
 		if ( !file_exists($execbuildpath) || !is_executable($execbuildpath) ) {

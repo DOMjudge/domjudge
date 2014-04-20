@@ -25,7 +25,7 @@ if ( isset($_POST['storeid']) ) {
 		error("failed to created temporary directory");
 	}
 	chmod($tmpexecdir, 0700);
-	system("unzip $tmpfname -d $tmpexecdir", $retval);
+	system("unzip -q $tmpfname -d $tmpexecdir", $retval);
 	if ( $retval!=0 ) {
 		error("Could not unzip executable to temporary directory.");
 	}
