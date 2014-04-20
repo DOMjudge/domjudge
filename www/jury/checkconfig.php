@@ -380,11 +380,11 @@ flushresults();
 $submres = 'O';
 if ( ! is_writable(SUBMITDIR) ) {
 	$submres = 'W';
-	$submnote .= 'The webserver has no write access to SUBMITDIR (' .
+	$submnote = 'The webserver has no write access to SUBMITDIR (' .
 	             htmlspecialchars(SUBMITDIR) .
 	             '), and thus will not be able to make backup copies of submissions.';
 } else {
-	$submnote .= 'No issues found.';
+	$submnote = 'No issues found.';
 }
 
 result('submissions and judgings', 'Submissions', $submres, $submnote);
