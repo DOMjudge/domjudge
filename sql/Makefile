@@ -15,10 +15,10 @@ $(ZIPFILES): %.zip: $$(wildcard $$*/*)
 	@rm -f $@
 	zip -qjr $@ $*
 
-problempdf:
-	$(MAKE) -C $(TOPDIR)/doc/examples pdf
+$(TOPDIR)/doc/examples/.pdf-generated:
+	$(MAKE) -C $(TOPDIR)/doc/examples .pdf-generated
 
-$(ZIPSQL): problempdf
+$(ZIPSQL): $(TOPDIR)/doc/examples/.pdf-generated
 $(ZIPSQL): $(ZIPFILES)
 	@[ -n "$(QUIET)" ] || echo "Generating '$@'..."
 	@rm -f $@
