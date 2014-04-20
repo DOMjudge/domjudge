@@ -45,7 +45,7 @@ checksucc = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 || \
 checkfail = ./checktestdata $$opts $$prog $$data >/dev/null 2>&1 && \
 		{ echo "Running './checktestdata $$opts $$prog $$data' did not fail..."    ; exit 1; }
 
-libchecktestdata.o: %.o: %.cc %.h $(PARSER_GEN)
+libchecktestdata.o: %.o: %.cc %.h parser.h
 
 checktestdata: CPPFLAGS += $(BOOST_CPPFLAGS)
 checktestdata: LDFLAGS  += $(BOOST_LDFLAGS) -Wl,-Bstatic $(LIBGMPXX) $(BOOST_REGEX_LIB) -Wl,-Bdynamic
