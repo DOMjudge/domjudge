@@ -35,6 +35,9 @@ MKDIR_P = @MKDIR_P@
 INSTALL = @INSTALL@
 @SET_MAKE@
 
+# Build submit client?
+SUBMITCLIENT_ENABLED = @SUBMITCLIENT_ENABLED@
+
 # Build checktestdata program?
 CHECKTESTDATA_ENABLED = @CHECKTESTDATA_ENABLED@
 
@@ -167,6 +170,7 @@ define substconfigvars
 	-e 's,@WEBSERVER_GROUP[@],@WEBSERVER_GROUP@,g' \
 	-e 's,@BEEP[@],@BEEP@,g' \
 	-e 's,@RUNUSER[@],@RUNUSER@,g' \
+	-e 's,@SUBMITCLIENT_ENABLED[@],@SUBMITCLIENT_ENABLED@,g' \
 	-e 's,@USE_CGROUPS[@],@USE_CGROUPS@,g' \
 	> $@
 endef

@@ -25,7 +25,7 @@
 \newcommand{\cmd}[1]{\mbox{\texttt{#1}}}
 
 % Only show text if the submitclient is configured
-\newcommand{\ifcmdsubmit}[1]{\ifthenelse{\equal{\SUBMITDEFAULT}{0}}{}{#1}}
+\newcommand{\ifcmdsubmit}[1]{\ifthenelse{\equal{\SUBMITCLIENTENABLED}{yes}}{#1}{}}
 
 % Our titlepage, should be called at start of team manual document
 % Argument list:
