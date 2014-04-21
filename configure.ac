@@ -282,7 +282,7 @@ AC_DEFINE_UNQUOTED(_XOPEN_SOURCE, 500,       [Include SUSv2 (UNIX 98) extensions
 
 # Checks for header files.
 AC_HEADER_STDBOOL
-AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h termios.h unistd.h magic.h libcgroup.h])
+AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/param.h sys/time.h syslog.h termios.h unistd.h magic.h libcgroup.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
