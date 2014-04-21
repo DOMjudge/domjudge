@@ -459,7 +459,11 @@ function submissions_POST($args)
 $args = array('code[]' => 'Array of source files to submit',
               'shortname' => 'Problem shortname',
               'langid' => 'Language ID');
-$doc = 'Post a new submission. You need to be authenticated with a team role. Returns the submission id.';
+$doc = 'Post a new submission. You need to be authenticated with a team role. Returns the submission id. This is used by the submit client.
+
+A trivial command line submisson using the curl binary could look like this:
+
+curl -n -F "shortname=hello" -F "langid=c" -F "code[]=@test1.c" -F "code[]=@test2.c"  http://localhost/domjudge/api/submissions';
 $exArgs = array();
 $roles = array('team');
 $api->provideFunction('POST', 'submissions', $doc, $args, $exArgs, $roles);
