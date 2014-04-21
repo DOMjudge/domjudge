@@ -22,10 +22,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
 #include <getopt.h>
 #include <termios.h>
 #include <curl/curl.h>
@@ -74,7 +71,6 @@ int show_version;
 struct option const long_opts[] = {
 	{"problem",  required_argument, NULL,         'p'},
 	{"language", required_argument, NULL,         'l'},
-	{"team",     required_argument, NULL,         't'},
 	{"url",      required_argument, NULL,         'u'},
 	{"verbose",  optional_argument, NULL,         'v'},
 	{"quiet",    no_argument,       NULL,         'q'},
@@ -117,7 +113,7 @@ std::string stringtolower(std::string str)
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, team, baseurl;
+string problem, language, extension, baseurl;
 vector<string> filenames;
 char *submitdir;
 
@@ -165,13 +161,9 @@ int main(int argc, char **argv)
 
 	logmsg(LOG_INFO,"started");
 
-	/* Read defaults for user, team and baseurl from environment */
+	/* Read default for baseurl from environment */
 	baseurl = string("http://localhost/domjudge/");
-
 	if ( getenv("SUBMITBASEURL")!=NULL ) baseurl = string(getenv("SUBMITBASEURL"));
-
-	if ( getenv("USER")!=NULL ) team = string(getenv("USER"));
-	if ( getenv("TEAM")!=NULL ) team = string(getenv("TEAM"));
 
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
@@ -182,7 +174,6 @@ int main(int argc, char **argv)
 
 		case 'p': problem   = string(optarg); break;
 		case 'l': extension = string(optarg); break;
-		case 't': team      = string(optarg); break;
 		case 'u': baseurl   = string(optarg); break;
 
 		case 'v': /* verbose option */
@@ -208,9 +199,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-#if HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H
 	if ( getlangexts()!=0 ) warning(0,"could not obtain language extensions");
-#endif
 
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
@@ -281,12 +270,10 @@ int main(int argc, char **argv)
 
 	if ( problem.empty()  ) usage2(0,"no problem specified");
 	if ( language.empty() ) usage2(0,"no language specified");
-	if ( team.empty()     ) usage2(0,"no team specified");
 	if ( baseurl.empty()  ) usage2(0,"no url specified");
 
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
-	logmsg(LOG_DEBUG,"team is `%s'",team.c_str());
 	logmsg(LOG_DEBUG,"url is `%s'",baseurl.c_str());
 
 	/* Ask user for confirmation */
@@ -303,7 +290,6 @@ int main(int argc, char **argv)
 		}
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
-		printf("  team:        %s\n",team.c_str());
 		printf("  url:         %s\n",baseurl.c_str());
 
 		if ( nwarnings>0 ) printf("There are warnings for this submission!\a\n");
@@ -472,7 +458,6 @@ magicerror:
 
 #endif /* HAVE_MAGIC_H */
 
-#if HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H
 int getlangexts()
 {
 	CURL *handle;
@@ -560,21 +545,6 @@ int getlangexts()
   invalid_json:
 	warning(0,"REST API returned unexpected JSON data");
 	return 1;
-}
-
-#endif /* HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H */
-
-string remove_html_tags(string s)
-{
-	size_t p1, p2;
-
-	while ( (p1=s.find('<',0))!=string::npos ) {
-		p2 = s.find('>',p1);
-		if ( p2==string::npos ) break;
-		s.erase(p1,p2-p1+1);
-	}
-
-	return s;
 }
 
 int websubmit()
