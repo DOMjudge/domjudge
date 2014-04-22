@@ -444,16 +444,6 @@ while($row = $res->next()) {
 		$row['numvalid'] . ")\n";
 }
 
-// check for unknown result strings
-$res = $DB->q('SELECT judgingid, submitid, result
-	FROM judging WHERE result IS NOT NULL AND result NOT IN (%As)',
-	$EXITCODES);
-while($row = $res->next()) {
-	$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
-		' has an unknown result code "' .
-		$row['result'] . "\"\n";
-}
-
 // check for valid judgings that are already running too long
 $res = $DB->q('SELECT judgingid, submitid, starttime
                FROM judging WHERE valid = 1 AND endtime IS NULL AND
