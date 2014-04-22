@@ -485,8 +485,7 @@ Some settings that are tightly coupled to the filesystem can be
 configured in the files in <tt>etc</tt>: <tt>domserver-config.php,
 judgehost-config.php, common-config.php</tt> for the configuration
 options of the domserver, judgehost and shared configuration options
-respectively. The latter should be synchronised between domserver and
-judgehosts. Descriptions of settings are included in these files.
+respectively. Descriptions of settings are included in these files.
 The judgedaemon must be restarted for changes to take effect, while
 these are directly picked up by the webinterfaces.
 

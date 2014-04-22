@@ -13,7 +13,7 @@ include $(TOPDIR)/Makefile.global
 # anyways, but it is more convenient to be able to share the passwords
 # between domserver and judgehost installs.
 
-SUBST_CONFIGS = apache.conf domserver-static.php domserver-static.h \
+SUBST_CONFIGS = apache.conf domserver-static.php \
                 judgehost-static.php runguard-config.h submit-config.h \
                 sudoers-domjudge cgroup-domjudge.conf
 
