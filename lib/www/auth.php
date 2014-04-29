@@ -263,7 +263,7 @@ function do_login()
 
 		if ( !$userdata ||
 		     !ldap_check_credentials($userdata['username'], $pass) ) {
-			sleep(3);
+			sleep(1);
 			show_failed_login("Invalid username or password supplied. " .
 			                  "Please try again or contact a staff member.");
 		}
