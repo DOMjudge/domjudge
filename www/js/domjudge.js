@@ -193,7 +193,7 @@ function reloadPage()
 {
 	// interval is in seconds
 	if (doReload) {
-		location.reload(true);
+		location.reload();
 	}
 }
 
