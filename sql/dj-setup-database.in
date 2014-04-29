@@ -114,11 +114,9 @@ create_db_users()
 {
 	local user pass
 	(
-	echo "CREATE DATABASE \`$DBNAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
-	echo "CREATE USER
-		'$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+	echo "CREATE DATABASE IF NOT EXISTS \`$DBNAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
 
-	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER';"
+	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
 
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
