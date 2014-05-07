@@ -251,7 +251,7 @@ function importZippedProblem($zip, $probid = NULL)
 				}
 			}
 			if( !empty($langid) && !empty($teamid) ) {
-				if ( !($tmpfname = mkstemps(TMPDIR."/ref_solution-XXXXXX",0)) ) {
+				if ( !($tmpfname = tempnam(TMPDIR, "ref_solution-")) ) {
 					error("Could not create temporary file.");
 				}
 				file_put_contents($tmpfname, $zip->getFromIndex($j));

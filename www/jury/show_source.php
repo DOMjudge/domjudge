@@ -59,8 +59,8 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 		} else {
 			// Try generating temporary files for executing diff.
 
-			$oldfile = mkstemps(TMPDIR."/source-old-s$oldid-XXXXXX",0);
-			$newfile = mkstemps(TMPDIR."/source-new-s$id-XXXXXX",0);
+			$oldfile = tempnam(TMPDIR, "source-old-s$oldid-");
+			$newfile = tempnam(TMPDIR, "source-new-s$id-");
 
 			if( ! $oldfile || ! $newfile ) {
 				$difftext = "DOMjudge: error generating temporary files for diff.";

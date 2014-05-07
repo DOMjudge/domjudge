@@ -28,7 +28,7 @@ foreach ($ini_keys as $ini_val) {
 }
 
 $zip = new ZipArchive;
-if ( !($tmpfname = mkstemps(TMPDIR."/export-XXXXXX",0)) ) {
+if ( !($tmpfname = tempnam(TMPDIR, "export-")) ) {
 	error("Could not create temporary file.");
 }
 

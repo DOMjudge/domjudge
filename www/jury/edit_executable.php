@@ -14,7 +14,7 @@ if ( isset($_POST['storeid']) ) {
 	$executable = $DB->q('MAYBETUPLE SELECT * FROM executable
 		WHERE execid = %s', $id);
 	if ( empty($executable) ) error ("Executable $id not found");
-	if ( !($tmpfname = mkstemps(TMPDIR."/executable-XXXXXX",0)) ) {
+	if ( !($tmpfname = tempnam(TMPDIR, "/executable-")) ) {
 		error("failed to create temporary file");
 	}
 	if ( FALSE === file_put_contents($tmpfname, $executable['zipfile']) ) {
@@ -88,7 +88,7 @@ $html = '<script type="text/javascript" src="../js/tabber.js"></script>' .
 	'<script src="../js/ace/ace.js" type="text/javascript" charset="utf-8"></script>' .
 	'<script src="../js/ace/ext-modelist.js" type="text/javascript" charset="utf-8"></script>' .
 	'<div class="tabber">';
-if ( !($tmpfname = mkstemps(TMPDIR."/executable-XXXXXX",0)) ) {
+if ( !($tmpfname = tempnam(TMPDIR, "executable-")) ) {
 	error("failed to create temporary file");
 }
 if ( FALSE === file_put_contents($tmpfname, $executable['zipfile']) ) {
