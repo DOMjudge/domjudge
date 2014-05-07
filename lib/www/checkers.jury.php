@@ -62,7 +62,6 @@ function check_problem($data, $keydata = null)
 			(int)$data['timelimit'] != $data['timelimit'] ) {
 		ch_error("Timelimit is not a valid positive integer");
 	}
-	$id = (isset($data['probid']) ? $data['probid'] : $keydata['probid']);
 	if ( ! preg_match ( ID_REGEX, $data['shortname'] ) ) {
 		ch_error("Problem shortname may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
@@ -81,7 +80,7 @@ function check_problem($data, $keydata = null)
 		     function_exists("finfo_open") ) {
 			$finfo = finfo_open(FILEINFO_MIME);
 
-			list($type, $enc) = explode('; ', finfo_file($finfo, $tempname));
+			list($type) = explode('; ', finfo_file($finfo, $tempname));
 
 			finfo_close($finfo);
 

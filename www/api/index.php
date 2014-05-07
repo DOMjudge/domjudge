@@ -771,7 +771,7 @@ function judgehosts_POST($args)
 
 	checkargs($args, array('hostname'));
 
-	$q = $DB->q('INSERT IGNORE INTO judgehost (hostname) VALUES(%s)',
+	$DB->q('INSERT IGNORE INTO judgehost (hostname) VALUES(%s)',
 	            $args['hostname']);
 
 	// If there are any unfinished judgings in the queue in my name,
