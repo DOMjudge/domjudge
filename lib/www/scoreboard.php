@@ -276,7 +276,7 @@ function initSummary($probs) {
  * if $displayrank is false the first column will not display the
  * team's current rank but a question mark.
  */
-function renderScoreBoardTable($cdata, $sdata, $myteamid = null, $static = FALSE,
+function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 	$limitteams = null, $displayrank = TRUE, $center = FALSE, $showlegends = TRUE)
 {
 	// 'unpack' the scoreboard data:
@@ -595,7 +595,7 @@ collapse("filter");
 		<?php
 	}
 
-	renderScoreBoardTable($cdata,$sdata,$myteamid,$static);
+	renderScoreBoardTable($sdata,$myteamid,$static);
 
 	// last modified date, now if we are the jury, else include the
 	// freeze time
@@ -740,7 +740,7 @@ function putTeamRow($cdata, $teamids) {
 	$static = FALSE;
 
 	if ( ! IS_JURY ) echo "<div id=\"teamscoresummary\">\n";
-	renderScoreBoardTable($cdata,$sdata,$myteamid,$static,
+	renderScoreBoardTable($sdata,$myteamid,$static,
 	                      $teamids,$displayrank,TRUE,FALSE);
 	if ( ! IS_JURY ) echo "</div>\n\n";
 
