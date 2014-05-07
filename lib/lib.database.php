@@ -370,6 +370,7 @@ class db_result
 	private $_count;
 	private $_tuple;
 	private $_nextused;
+	private $_fields;
 
 	function __construct($res)
 	{
