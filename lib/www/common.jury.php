@@ -242,7 +242,8 @@ function importZippedProblem($zip, $probid = NULL)
 
 		for ($j = 0; $j < $zip->numFiles; $j++) {
 			$filename = $zip->getNameIndex($j);
-			$extension = end(explode(".", $filename));
+			$filename_parts = explode(".", $filename);
+			$extension = end($filename_parts);
 			unset($langid);
 			foreach ( $langs as $key => $exts ) {
 				if ( in_array($extension,json_decode($exts)) ) {

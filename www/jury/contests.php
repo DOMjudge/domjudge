@@ -19,7 +19,12 @@ if ( isset($_POST['donow']) ) {
 	if ( !in_array($time, $times) ) error("Unknown value for timetype");
 	// for activatetime  we don't have a current contest to use,
 	// so we need to get it from the form data.
-	$docid = $time == 'activate' ? array_pop(array_keys($_POST['donow'][$time])) : $cid;
+	if ($time == 'activate' ) {
+		$keys = array_keys($_POST['donow'][$time]);
+		$docid = array_pop($keys);
+	} else {
+		$docid = $cid;
+	}
 
 	$now = floor($now);
 	$nowstring = strftime('%Y-%m-%d %H:%M:%S',$now);
