@@ -2,10 +2,11 @@ DOMjudge Programming Contest Judging System
 
 Version 3.4.3 - DEV
 -------------------
- - Disallow access to Makefile's in the www tree.
+ - Disallow access to Makefiles in the www tree.
  - Suppress notice of undefined index in scoreboard rendering.
  - Don't remove chroot mountpoints after unmounting.
  - Bugfix: properly close unused resources (found by Coverity scan).
+ - Bugfix: correctly pass flags parameter to mysqli_real_connect().
  - Misc. documentation improvements and HTML validity fixes.
 
 Version 3.4.2 - 8 December 2013
