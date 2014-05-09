@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 3.4.3 - DEV
--------------------
+Version 3.4.3 - 9 May 2014
+--------------------------
  - Disallow access to Makefiles in the www tree.
  - Suppress notice of undefined index in scoreboard rendering.
  - Don't remove chroot mountpoints after unmounting.
