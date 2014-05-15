@@ -15,7 +15,7 @@
 #<VirtualHost *>
 #ServerName _default_
 #DocumentRoot @domserver_wwwdir@
-#Alias /api @domserver_wwwdir@/index.php
+#Alias /api @domserver_wwwdir@/api/index.php
 #</VirtualHost>
 
 # Alternatively, use HTTPS and redirect HTTP to HTTPS:
