@@ -51,7 +51,11 @@ Alias /domjudge @domserver_wwwdir@
 # This section applies to both options above.
 
 <Directory @domserver_wwwdir@>
-allow from all
+# For Apache 2.2:
+Order allow,deny
+Allow from all
+# For Apache 2.4 use the following instead:
+# Require all granted
 
 Options FollowSymlinks
 DirectoryIndex index.php
@@ -81,8 +85,11 @@ Require valid-user
 AuthUserFile @domserver_etcdir@/htpasswd-jury
 
 # Optionally restrict access to just the jury computers:
-# deny from all
-# allow from 192.168.1.0/24
+#  # Apache 2.2:
+#  Deny from all
+#  Allow from 192.168.1.0/24
+#  # Apache 2.4:
+#  Require ip 192.168.1.0/24
 
 # If you want to allow large file uploads for testcases, you must
 # ensure that the following PHP settings are all set to high enough
@@ -112,8 +119,11 @@ AuthUserFile @domserver_etcdir@/htpasswd-jury
 # Optionally enable IP-restrictions for teams, recommended if you know the
 # IP range the teams will be on.
 #<Directory @domserver_wwwdir@/team>
-# deny from all
-# allow from 10.20.30.0/24
+#  # Apache 2.2:
+#  Deny from all
+#  Allow from 10.20.30.0/24
+#  # Apache 2.4:
+#  Require ip 10.20.30.0/24
 #</Directory>
 
 
@@ -125,8 +135,11 @@ Require valid-user
 AuthUserFile @domserver_etcdir@/htpasswd-plugin
 
 # Optionally restrict access to just the relevant hosts:
-# deny from all
-# allow from 172.30.20.0/24
+#  # Apache 2.2:
+#  Deny from all
+#  Allow from 172.30.20.0/24
+#  # Apache 2.4:
+#  Require ip 172.30.20.0/24
 </Directory>
 
 # vim: syntax=apachestyle
