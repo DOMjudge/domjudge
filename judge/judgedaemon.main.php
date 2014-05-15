@@ -11,18 +11,25 @@ if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 require(LIBEXTDIR . '/spyc/spyc.php');
 
 require(ETCDIR . '/judgehost-config.php');
-$credfile = ETCDIR . '/restapi.secret';
-$credentials = @file($credfile);
-if (!$credentials) {
-	error("Cannot read REST API credentials file " . $credfile);
-}
-foreach ($credentials as $credential) {
-	if ( $credential{0} == '#' ) continue;
-	list ($resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
-	break;
-}
-if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
-	error("Error parsing REST API credentials.");
+
+$resturl = $restuser = $restpass = null;
+
+function read_credentials() {
+	global $resturl, $restuser, $restpass;
+
+	$credfile = ETCDIR . '/restapi.secret';
+	$credentials = @file($credfile);
+	if (!$credentials) {
+		error("Cannot read REST API credentials file " . $credfile);
+	}
+	foreach ($credentials as $credential) {
+		if ( $credential{0} == '#' ) continue;
+		list ($resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
+		break;
+	}
+	if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
+		error("Error parsing REST API credentials.");
+	}
 }
 
 /**
@@ -254,6 +261,8 @@ if ($retval != 1) {
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
 initsignals();
+
+read_credentials();
 
 if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
