@@ -63,6 +63,7 @@
 #include <inttypes.h>
 #include <libcgroup.h>
 #include <sched.h>
+#include <sys/sysinfo.h>
 #else
 #undef USE_CGROUPS
 #endif
@@ -922,6 +923,16 @@ int main(int argc, char **argv)
 	}
 
 #ifdef USE_CGROUPS
+	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
+		int ret = strtol(cpuset, &ptr, 10);
+		/* check if input is only a single integer */
+		if ( *ptr == '\0' ) {
+			/* check if we have enough cores available */
+			if ( ret >= get_nprocs() ) {
+				error(0, "processor number ID given with cpuset is %d while you only have %d cores", ret, get_nprocs());
+			}
+		}
+	}
 	/* Make libcgroup ready for use */
 	ret = cgroup_init();
 	if ( ret!=0 ) {
