@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 3.4.4 - DEV
 -------------------
+ - Document Apache 2.4 directives in generated apache.conf.
+ - Rename SQL upgrade script. 
 
 Version 3.4.3 - 9 May 2014
 --------------------------
