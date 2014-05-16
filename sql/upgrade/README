@@ -12,11 +12,8 @@ which fails if the upgrade was applied already. The scripts should be
 applied in order; this can be done manually, but it is probably easier
 to use the command 'dj-setup-database upgrade'.
 
-Upgrading to a new minor/major version is supported, but only to the
-latest bugfix release in that series. For example, there is only one
-upgrade script between versions 3.1.X and 3.2.Y and this will be
-between the latest two bugfix releases of both series. The upgrade
-scripts between the different 3.1.X bugfix releases are also present,
-so this gives a unique upgrade path: first to the latest bugfix
-release in the current series, then to the latest bugfix release in
-the newer series.
+Upgrading to a new minor/major version is supported. Usually, there
+will not be database changes between bugfix releases of any given
+branch, so the upgrade_A.B.C_X.Y.0.sql script will be sufficient also
+for X.Y.1, X.Y.2 etc. If such a change between bugfixes is necessary,
+a separate upgrade_X.Y.0_X.Y.N.sql script will be provided.
