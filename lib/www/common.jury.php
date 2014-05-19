@@ -189,10 +189,13 @@ function importZippedProblem($zip, $probid = NULL)
 			if ( !isset($ini_array['name'])      ) $ini_array['name'] = $ini_array['probid'];
 			if ( !isset($ini_array['timelimit']) ) $ini_array['timelimit'] = $def_timelimit;
 
-			$DB->q('INSERT INTO problem (' . implode(', ',array_keys($ini_array)) .
-			       ') VALUES (%As)', $ini_array);
-
+			// rename probid to shortname
 			$probid = $ini_array['probid'];
+			unset($ini_array['probid']);
+			$ini_array['shortname'] = $probid;
+
+			$probid = $DB->q('RETURNID INSERT INTO problem (' . implode(', ',array_keys($ini_array)) .
+			       ') VALUES (%As)', $ini_array);
 		} else {
 			// Remove keys that cannot be modified:
 			unset($ini_array['probid']);
