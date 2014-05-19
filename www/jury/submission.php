@@ -325,23 +325,18 @@ if ( isset($jid) )  {
 
 	echo "</span>\n";
 
-	// If compilation failed, there's no more info to show, so stop here
-	if ( @$jud['result']=='compiler-error' ) {
-		compile_output(@$jud['output_compile'], FALSE);
-		require(LIBWWWDIR . '/footer.php');
-		exit(0);
-	}
+	if ( @$jud['result']!=='compiler-error' ) {
+		echo ", max/sum runtime: " . sprintf('%.2f/%.2fs',$max_runtime,$sum_runtime);
+		echo " <span class=\"lastruntime\">(<a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a>: "
+			. sprintf('%.2f/%.2fs',$max_lastruntime,$sum_lastruntime) .
+			")</span>";
 
-	echo ", max/sum runtime: " . sprintf('%.2f/%.2fs',$max_runtime,$sum_runtime);
-	echo " <span class=\"lastruntime\">(<a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a>: "
-		. sprintf('%.2f/%.2fs',$max_lastruntime,$sum_lastruntime) .
-		")</span>";
-
-	echo "<table>\n$tclist";
-	if ( $lastjud !== NULL ) {
-		echo $lasttclist;
+		echo "<table>\n$tclist";
+		if ( $lastjud !== NULL ) {
+			echo $lasttclist;
+		}
+		echo "</table>\n";
 	}
-	echo "</table>\n";
 	
 	// display following data only when the judging has been completed
 	if ( $judging_ended ) {
@@ -389,8 +384,10 @@ togglelastruns();
 </script>
 <?php
 
-	compile_output(@$jud['output_compile'], TRUE);
-	if ( @$jud['output_compile'] === NULL ) {
+	compile_output(@$jud['output_compile'], @$jud['result']!=='compiler-error');
+
+	// If compilation is not finished yet or failed, there's no more info to show, so stop here
+	if ( @$jud['output_compile'] === NULL || @$jud['result']=='compiler-error' ) {
 		require(LIBWWWDIR . '/footer.php');
 		exit(0);
 	}
