@@ -295,7 +295,7 @@ Run COMMAND with restrictions.\n\
   -f, --filesize=SIZE    set maximum created filesize to SIZE kB;\n");
 	printf("\
   -p, --nproc=N          set maximum no. processes to N\n\
-  -P, --cpuset=ID        use only processor number ID\n\
+  -P, --cpuset=ID        use only processor number ID (or set, e.g. \"0,2-3\")\n\
   -c, --no-core          disable core dumps\n\
   -o, --stdout=FILE      redirect COMMAND stdout output to FILE\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
@@ -928,8 +928,9 @@ int main(int argc, char **argv)
 		/* check if input is only a single integer */
 		if ( *ptr == '\0' ) {
 			/* check if we have enough cores available */
-			if ( ret >= get_nprocs() ) {
-				error(0, "processor number ID given with cpuset is %d while you only have %d cores", ret, get_nprocs());
+			if ( ret < 0 || ret >= get_nprocs() ) {
+				error(0, "processor ID %d given as cpuset, but only %d cores available",
+				      ret, get_nprocs());
 			}
 		}
 	}
