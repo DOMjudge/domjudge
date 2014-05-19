@@ -250,12 +250,11 @@ foreach ( $EXITCODES as $code => $name ) {
 // Pass SYSLOG variable via environment for compare program
 if ( defined('SYSLOG') && SYSLOG ) putenv('DJ_SYSLOG=' . SYSLOG);
 
-system("pgrep -u $runuser", $retval);
-if ($retval == 0) {
-	error("Still some processes by $runuser found, aborting");
-}
-if ($retval != 1) {
-	error("Error while checking processes for user $runuser");
+$output = array();
+exec("ps -u '$runuser' -o pid= -o comm=", $output, $retval);
+if ( count($output) != 0 ) {
+	error("found processes still running as '$runuser', check manually:\n" .
+	      implode("\n", $output));
 }
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
