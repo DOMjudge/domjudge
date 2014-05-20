@@ -84,6 +84,8 @@ $execmap[''] = 'none';
 echo addSelect('data[0][compile_script]', $execmap, @$row['compile_script'], True);
 ?>
 </td></tr>
+<tr><td><label for="data_0__extensions">Extensions:</label></td>
+<td><?php echo addInput('data[0][extensions]', @$row['extensions'], 20, 255, 'required')?> (as JSON encoded array)</td></tr>
 </table>
 
 <?php
@@ -136,6 +138,7 @@ if ( empty($data['compile_script']) ) {
 }
 ?>
 </td></tr>
+<tr><td>Extensions:  </td><td><?php echo htmlspecialchars($data['extensions'])?></td></tr>
 </table>
 
 <?php
