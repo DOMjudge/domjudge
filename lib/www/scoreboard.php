@@ -173,7 +173,7 @@ function getProblems($cdata) {
 	return $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
 	               probid, shortname, name, color, LENGTH(problemtext) AS hastext FROM problem
 	               WHERE cid = %i AND allow_submit = 1
-	               ORDER BY probid', $cdata['cid']);
+	               ORDER BY shortname', $cdata['cid']);
 }
 
 /**
