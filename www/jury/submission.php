@@ -134,7 +134,7 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 	} else if ( empty($jury_member) && isset($_REQUEST['claim']) ) {
 		warning("Cannot claim this submission: no jury member specified.");
 	} else {
-		if ( !empty($jdata[$jid]['jury_member']) && isset($_REQUEST['claim']) ) {
+		if ( !empty($jdata[$jid]['jury_member']) && isset($_REQUEST['claim']) && $jury_member !== $jdata[$jid]['jury_member'] ) {
 			warning("Submission claimed and previous owner " .
 			        @$jdata[$jid]['jury_member'] . " replaced.");
 		}
