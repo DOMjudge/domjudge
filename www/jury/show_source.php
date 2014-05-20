@@ -267,7 +267,7 @@ if ( !empty($origsources) ) {
 	$html .= multifilediff($sources, $origsources, $origdata);
 }
 
-echo "<h2>Source code for submission s" .htmlspecialchars($id);
+echo "<h2>Source code for submission <a href=\"submission.php?id=" . urlencode($id) . "\">s" .htmlspecialchars($id) . "</a>";
 if ( !empty($submission['origsubmitid']) ) {
 	$origid = $submission['origsubmitid'];
 	echo  " (resubmit of <a href=\"submission.php?id=" . urlencode($origid) . "\">s$origid</a>)";
