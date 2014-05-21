@@ -130,6 +130,8 @@ span.extra {
 	padding: 2px;
 	padding-left: 5px;
 	padding-right: 5px;
+	position: relative;
+	z-index: 1;
 }
 #menutop a.new {
 	color: #FF0000;
@@ -138,7 +140,6 @@ span.extra {
 #menutopright {
 	position: absolute; right: 1ex; top: 1ex;
 	text-align: right;
-	z-index: -1;
 }
 #clock {
 /*	font-size: small; */
