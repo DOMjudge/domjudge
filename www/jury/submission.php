@@ -408,7 +408,7 @@ togglelastruns();
 
 		$timelimit_str = '';
 		if ( $run['runresult']=='timelimit' ) {
-			if ( preg_match('/Timelimit exceeded.* hard-timelimit/',$run['output_error']) ) {
+			if ( preg_match('/timelimit exceeded.*hard wall time/',$run['output_system']) ) {
 				$timelimit_str = '<b>(terminated)</b>';
 			} else {
 				$timelimit_str = '<b>(finished late)</b>';
