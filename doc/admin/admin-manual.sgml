@@ -537,7 +537,7 @@ apt-get install gcc g++ make libcurl4-gnutls-dev mysql-server \
 	ntp sudo procps xsltproc \
 	libboost-regex-dev libgmp3-dev linuxdoc-tools linuxdoc-tools-text \
 	transfig groff texlive-latex-recommended texlive-latex-extra \
-	texlive-fonts-recommended
+	texlive-fonts-recommended texlive-lang-european
 </code>
 
 On a judgehost, the following should be sufficient. The last line shows some
@@ -1163,7 +1163,8 @@ can be passed to set the base URI of the DOMjudge webinterface; it
 should end with a slash and defaults to <tt>http://example.com/domjudge/</tt>.
 The following should do it on a Debian-like system:
 <code>
-sudo apt-get install make transfig texlive-latex-extra texlive-latex-recommended
+sudo apt-get install make transfig texlive-latex-extra \
+     texlive-latex-recommended texlive-lang-european
 cd .../docs/team
 ./genteammanual [-w http://your.location.example.com/domjudge/] [targetdir]
 </code>
