@@ -18,7 +18,7 @@ if ( !empty($_GET['probid']) ) {
 }
 
 require(LIBWWWDIR . '/header.php');
-echo "<h1>" . $title . "</h1>\n\n";
+echo "<h1>" . htmlspecialchars($title) . "</h1>\n\n";
 
 $res = $DB->q('SELECT result,
 		   COUNT(result) as count,
@@ -38,7 +38,7 @@ $problems = $DB->q('SELECT p.probid,p.name FROM problem p WHERE p.cid = %i ORDER
 print '<p>';
 print '<a href="statistics.php">All problems</a>&nbsp;&nbsp;&nbsp;';
 while($row = $problems->next()) {
-	print '<a href="statistics.php?probid=' . $row['probid'] . '">' . $row['name'] . '</a>&nbsp;&nbsp;&nbsp;';
+	print '<a href="statistics.php?probid=' . urlencode($row['probid']) . '">' . htmlspecialchars($row['name']) . '</a>&nbsp;&nbsp;&nbsp;';
 }
 print '</p>';
 
@@ -90,4 +90,3 @@ $(function () {
 
 <?php
 require(LIBWWWDIR . '/footer.php');
-?>
