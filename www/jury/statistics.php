@@ -30,7 +30,7 @@ $res = $DB->q('SELECT result,
 		   LEFT OUTER JOIN team t ON(s.teamid=t.teamid)
 		   WHERE s.cid = %i AND s.valid = 1 AND t.categoryid = 2 ' .
 		   ( empty($_GET['probid']) ? '%_' : 'AND s.probid = %i ' ) .
-		   'AND submittime < c.endtime
+		   'AND submittime < c.endtime AND submittime >= c.starttime
 		   GROUP BY minute, result', $bar_size * 60, $bar_size, $cid, @$_GET['probid']);
 
 // All problems
