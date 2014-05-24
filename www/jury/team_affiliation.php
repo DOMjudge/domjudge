@@ -9,10 +9,7 @@
 require('init.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
-$id = @$_GET['id'];
-$title = "Affiliation: " .htmlspecialchars(@$id);
-
-if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid affiliation id");
+$id = (int)@$_GET['id'];
 
 $cmd = @$_GET['cmd'];
 
@@ -69,11 +66,12 @@ echo addHidden('cmd', $cmd) .
 }
 
 
-require(LIBWWWDIR . '/header.php');
-
 $data = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
-
 if ( ! $data ) error("Missing or invalid affiliation id");
+
+$title = "Affiliation: " .htmlspecialchars($data['shortname']);
+
+require(LIBWWWDIR . '/header.php');
 
 $affillogo = "../images/affiliations/" . urlencode($data['affilid']) . ".png";
 $countryflag = "../images/countries/" . urlencode($data['country']) . ".png";
