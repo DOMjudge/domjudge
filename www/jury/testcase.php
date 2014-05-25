@@ -6,17 +6,22 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$probid = @$_REQUEST['probid'];
-
 require('init.php');
 
 $INOROUT = array('input','output');
+
+$probid = (int)@$_REQUEST['probid'];
+
+$prob = $DB->q('MAYBETUPLE SELECT probid, shortname, name
+                FROM problem WHERE probid = %i', $probid);
+
+if ( ! $prob ) error("Missing or invalid problem id");
 
 // Download testcase
 if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 	$rank  = $_GET['rank'];
 	$fetch = $_GET['fetch'];
-	$filename = $probid . "." . $rank . "." . substr($fetch,0,-3);
+	$filename = $prob['shortname'] . "." . $rank . "." . substr($fetch,0,-3);
 
 	$size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH($fetch)
 	                FROM testcase WHERE probid = %i AND rank = %i",
@@ -93,8 +98,6 @@ if ( isset ($_GET['move']) ) {
 $title = 'Testcases for problem p'.htmlspecialchars(@$probid);
 
 require(LIBWWWDIR . '/header.php');
-
-if ( ! $probid ) error("Missing or invalid problem id");
 
 echo "<h1>" . $title ."</h1>\n\n";
 

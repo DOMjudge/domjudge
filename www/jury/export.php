@@ -58,9 +58,11 @@ while ($tc = $testcases->next()) {
 }
 $zip->close();
 
+$filename = 'p' . $id . '-' . $problem['shortname'] . '.zip';
+
 header("Content-Description: File Transfer");
-header("Content-Disposition: attachment; filename=" . $id . ".zip");
-header("Content-Type: application/zip");
+header("Content-Disposition: attachment; filename=\"$filename\"");
+header("Content-Type: application/zip; name=\"$filename\"");
 header("Content-Length: " . filesize($tmpfname) . "\n\n");
 header("Content-Transfer-Encoding: binary");
 
