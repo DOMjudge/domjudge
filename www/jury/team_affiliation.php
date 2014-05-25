@@ -9,7 +9,7 @@
 require('init.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
-$id = (int)@$_GET['id'];
+$id = getRequestID();
 
 $cmd = @$_GET['cmd'];
 
@@ -27,12 +27,12 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Affiliation ID:</td><td>";
-		$row = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s',
-			$_GET['id']);
-		echo addHidden('keydata[0][affilid]', $row['affilid']) .
-			htmlspecialchars($row['affilid']);
-		echo "</td></tr>\n";
+		$row = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
+		if ( !$row ) error("Missing or invalid affiliation id");
+
+		echo "<tr><td>Affiliation ID:</td><td>" .
+			addHidden('keydata[0][affilid]', $row['affilid']) .
+			htmlspecialchars($row['affilid']) . "</td></tr>\n";
 	}
 
 ?>
@@ -66,7 +66,7 @@ echo addHidden('cmd', $cmd) .
 }
 
 
-$data = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
+$data = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
 if ( ! $data ) error("Missing or invalid affiliation id");
 
 $title = "Affiliation: " .htmlspecialchars($data['shortname']);

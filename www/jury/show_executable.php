@@ -8,7 +8,7 @@
 
 require('init.php');
 
-$id = $_GET['id'];
+$id = getRequestID(FALSE);
 $executable = $DB->q('MAYBETUPLE SELECT * FROM executable
 	      WHERE execid = %s', $id);
 if ( empty($executable) ) error ("Executable $id not found");

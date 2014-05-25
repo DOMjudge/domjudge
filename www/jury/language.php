@@ -8,10 +8,8 @@
 
 require('init.php');
 
-$id = @$_REQUEST['id'];
+$id = getRequestID(FALSE);
 $title = 'Language '.htmlspecialchars(@$id);
-
-if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid language id");
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
@@ -49,11 +47,12 @@ if ( !empty($cmd) ):
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Language ID/ext:</td><td>";
-		$row = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s',
-			$_GET['id']);
-		echo addHidden('keydata[0][langid]', $row['langid']);
-		echo htmlspecialchars($row['langid']);
+		$row = $DB->q('MAYBETUPLE SELECT * FROM language WHERE langid = %s', $id);
+		if ( !$row ) error("Missing or invalid language id");
+
+		echo "<tr><td>Language ID/ext:</td><td>" .
+			addHidden('keydata[0][langid]', $row['langid']) .
+			htmlspecialchars($row['langid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__langid_\">Language ID/ext:</label></td><td>";
 		echo addInput('data[0][langid]', null, 8, 8,  'required pattern="' . IDENTIFIER_CHARS . '+" title="alphanumerics only"');

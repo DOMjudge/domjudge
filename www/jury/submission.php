@@ -6,9 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$id = (int)@$_REQUEST['id'];
-if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
-
 function compile_output($output, $success) {
 	$color = "#6666FF";
 	$msg = "not finished yet";
@@ -70,6 +67,11 @@ function display_runinfo($runinfo, $is_final) {
 	return array($tclist, $sum_runtime, $max_runtime);
 }
 
+require('init.php');
+
+$id = getRequestID();
+if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
+
 // Also check for $id in claim POST variable as submissions.php cannot
 // send the submission ID as a separate variable.
 if ( is_array(@$_POST['claim']) ) {
@@ -78,8 +80,6 @@ if ( is_array(@$_POST['claim']) ) {
 if ( is_array(@$_POST['unclaim']) ) {
 	foreach( $_POST['unclaim'] as $key => $val ) $id = (int)$key;
 }
-
-require('init.php');
 
 // If jid is set but not id, try to deduce it from the database.
 if ( isset($jid) && ! $id ) {

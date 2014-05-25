@@ -8,10 +8,8 @@
 
 require('init.php');
 
-$id = @$_REQUEST['id'];
+$id = getRequestID();
 $title = 'Team t'.htmlspecialchars(@$id);
-
-if ( !empty($id) && ! is_numeric($id) ) error("Invalid team id");
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
@@ -34,12 +32,12 @@ if ( !empty($cmd) ):
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>ID:</td><td>";
-		$row = $DB->q('TUPLE SELECT * FROM team WHERE teamid = %i',
-			$_GET['id']);
-		echo addHidden('keydata[0][teamid]', $row['teamid']);
-		echo "t" . htmlspecialchars($row['teamid']);
-		echo "</td></tr>\n";
+		$row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE teamid = %i', $id);
+		if ( !$row ) error("Missing or invalid team id");
+
+		echo "<tr><td>ID:</td><td>" .
+			addHidden('keydata[0][teamid]', $row['teamid']) .
+			"t" . htmlspecialchars($row['teamid']) . "</td></tr>\n";
 	}
 
 ?>
@@ -95,7 +93,7 @@ $row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname, a.shortname 
                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
                WHERE teamid = %i', $id);
 
-if ( ! $row ) error("Missing or invalid team id");
+if ( !$row ) error("Invalid team identifier");
 
 $users = $DB->q('TABLE SELECT userid,username FROM user WHERE teamid = %i', $id);
 

@@ -43,7 +43,7 @@ if ( isset($_POST['origsubmitid']) ) {
 	exit;
 }
 
-$id = (int)$_GET['id'];
+$id = getRequestID();
 $submission = $DB->q('MAYBETUPLE SELECT * FROM submission s
                   WHERE submitid = %i', $id);
 

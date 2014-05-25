@@ -6,10 +6,10 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$id = (int)@$_GET['id'];
-
 require('init.php');
 require(LIBWWWDIR . '/scoreboard.php');
+
+$id = getRequestID();
 
 $cmd = @$_GET['cmd'];
 
@@ -28,12 +28,12 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Category ID:</td><td>";
-		$row = $DB->q('TUPLE SELECT * FROM team_category WHERE categoryid = %i',
-			$_GET['id']);
-		echo addHidden('keydata[0][categoryid]', $row['categoryid']) .
-			htmlspecialchars($row['categoryid']) .
-			"</td></tr>\n";
+		$row = $DB->q('MAYBETUPLE SELECT * FROM team_category WHERE categoryid = %i', $id);
+		if ( !$row ) error("Missing or invalid category id");
+
+		echo "<tr><td>Category ID:</td><td>" .
+			addHidden('keydata[0][categoryid]', $row['categoryid']) .
+			htmlspecialchars($row['categoryid']) . "</td></tr>\n";
 	}
 
 ?>
@@ -69,9 +69,8 @@ echo addHidden('cmd', $cmd) .
 	exit;
 }
 
-if ( ! $id ) error("Missing or invalid category id");
-
 $data = $DB->q('TUPLE SELECT * FROM team_category WHERE categoryid = %i', $id);
+if ( !$data ) error("Missing or invalid category id");
 
 $title = "Category: " . htmlspecialchars($data['name']);
 

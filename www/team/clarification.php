@@ -9,9 +9,9 @@
 
 require('init.php');
 
-if ( isset($_REQUEST['id']) ) {
-	$id = (int)$_REQUEST['id'];
-	if ( ! $id ) error("Missing clarification id");
+$id = getRequestID();
+
+if ( isset($id) ) {
 
 	$req = $DB->q('MAYBETUPLE SELECT * FROM clarification
 	               WHERE cid = %i AND clarid = %i', $cid, $id);

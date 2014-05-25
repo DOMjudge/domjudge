@@ -10,7 +10,7 @@ require('init.php');
 $title = 'Submission details';
 require(LIBWWWDIR . '/header.php');
 
-$sid = (int)@$_GET['id'];
+$id = getRequestID();
 
 
 // select also on teamid so we can only select our own submissions
@@ -20,7 +20,7 @@ $row = $DB->q('MAYBETUPLE SELECT p.probid, shortname, p.name AS probname, submit
                LEFT JOIN submission s USING (submitid)
                LEFT JOIN language   l USING (langid)
                LEFT JOIN problem    p ON (p.probid = s.probid)
-               WHERE j.submitid = %i AND teamid = %i AND j.valid = 1',$sid,$teamid);
+               WHERE j.submitid = %i AND teamid = %i AND j.valid = 1',$id,$teamid);
 
 if( !$row || $row['submittime'] >= $cdata['endtime'] ||
     (dbconfig_get('verification_required',0) && !$row['verified']) ) {
@@ -30,7 +30,7 @@ if( !$row || $row['submittime'] >= $cdata['endtime'] ||
 }
 
 // update seen status when viewing submission
-$DB->q("UPDATE judging j SET j.seen = 1 WHERE j.submitid = %i", $sid);
+$DB->q("UPDATE judging j SET j.seen = 1 WHERE j.submitid = %i", $id);
 
 echo "<h1>Submission details</h1>\n";
 

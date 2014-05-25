@@ -6,14 +6,12 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$id = @$_REQUEST['id'];
-
 require('init.php');
-$refresh = '15;url=judgehost.php?id='.urlencode($id);
 
-if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
-	error("Missing or invalid judge hostname");
-}
+$id = getRequestID(FALSE);
+if ( empty($id) ) error("Missing judge hostname");
+
+$refresh = '15;url=judgehost.php?id='.urlencode($id);
 
 if ( isset($_REQUEST['cmd']) &&
 	( $_REQUEST['cmd'] == 'activate' || $_REQUEST['cmd'] == 'deactivate' ) ) {

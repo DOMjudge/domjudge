@@ -8,7 +8,7 @@
 
 require('init.php');
 
-$id = @$_REQUEST['id'];
+$id = getRequestID();
 $title = 'Problem p'.htmlspecialchars(@$id);
 
 if ( isset($_POST['cmd']) ) {

@@ -8,7 +8,7 @@
 
 require('init.php');
 
-$id = $_GET['id'];
+$id = getRequestID();
 if ( !isset($id) ) {
 	error("No problem id given.");
 }

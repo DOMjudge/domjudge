@@ -8,7 +8,7 @@
 
 require('init.php');
 
-$id = (int)@$_REQUEST['id'];
+$id = getRequestID();
 $title = $id ? 'User '.htmlspecialchars(@$id) : 'Add user';
 
 if ( isset($_GET['cmd'] ) ) {
@@ -31,12 +31,13 @@ if ( !empty($cmd) ):
     echo "<table>\n";
 
     if ( $cmd == 'edit' ) {
-        echo "<tr><td>Username:</td><td class=\"username\">";
-        $row = $DB->q('TUPLE SELECT * FROM user WHERE userid = %i',
-            $id);
-        echo addHidden('keydata[0][userid]', $row['userid']);
-        echo addHidden('keydata[0][username]', $row['username']);
-        echo htmlspecialchars($row['username']);
+        $row = $DB->q('MAYBETUPLE SELECT * FROM user WHERE userid = %i', $id);
+		if ( !$row ) error("Missing or invalid user id");
+
+        echo "<tr><td>Username:</td><td class=\"username\">" .
+		    addHidden('keydata[0][userid]', $row['userid']) .
+		    addHidden('keydata[0][username]', $row['username']) .
+		    htmlspecialchars($row['username']);
     } else {
         echo "<tr><td><label for=\"data_0__login_\">Username:</label></td><td class=\"username\">";
         echo addInput('data[0][username]', null, 8, 15, 'pattern="' . IDENTIFIER_CHARS . '+" title="Alphanumerics only" required');

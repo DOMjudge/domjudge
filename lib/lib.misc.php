@@ -55,6 +55,33 @@ function getCurContest($fulldata = FALSE) {
 }
 
 /**
+ * Parse 'id' from HTTP GET or POST variables and check that it is a
+ * valid number, or string consisting of IDENTIFIER_CHARS.
+ *
+ * Returns id as int or string, or NULL if none found.
+ */
+function getRequestID($numeric = TRUE)
+{
+	if ( empty($_REQUEST['id']) ) return NULL;
+
+	$id = $_REQUEST['id'];
+	if ( $numeric ) {
+		if ( !preg_match('/^[0-9]+$/', $id) ) {
+			error("Identifier specified is not a number");
+		}
+		return (int)$id;
+	} else {
+		if ( !preg_match('/^' . IDENTIFIER_CHARS . '*$/',$id) ) {
+			error("Identifier specified contains invalid characters");
+		}
+		return $id;
+	}
+
+	// This should never happen:
+	error("Could not parse identifier");
+}
+
+/**
  * Returns whether the problem with probid is visible to teams and the
  * public. That is, it is in the active contest, which has started and
  * it is submittable.

@@ -8,10 +8,8 @@
 
 require('init.php');
 
-$id = @$_REQUEST['id'];
+$id = getRequestID(FALSE);
 $title = 'Executable '.htmlspecialchars(@$id);
-
-if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid executable id");
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
@@ -150,9 +148,9 @@ exit;
 
 endif;
 
-$data = $DB->q('TUPLE SELECT execid, description, md5sum, type, OCTET_LENGTH(zipfile) AS size
-	       FROM executable
-	       WHERE execid = %s', $id);
+$data = $DB->q('MAYBETUPLE SELECT execid, description, md5sum, type,
+                                  OCTET_LENGTH(zipfile) AS size
+                FROM executable WHERE execid = %s', $id);
 
 if ( ! $data ) error("Missing or invalid problem id");
 
