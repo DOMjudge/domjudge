@@ -183,14 +183,18 @@ if ( $data['type'] == 'compare' ) {
 	$page = "problem";
 	$prefix = "p";
 }
-if ( $res->count() > 0 ) {
-	while( $row = $res->next() ) {
-		echo '<a href="' . $page . '.php?id=' . $row['id'] . '">'
-			. $prefix . $row['id'] . '</a> ';
-	}
-} else {
-	echo "<span class=\"nodata\">none</span>";
+$used = FALSE;
+if ( ($data['type'] == 'compare' || $data['type'] == 'run') &&
+     dbconfig_get('default_'.$data['type']) == $data['execid'] ) {
+	$used = TRUE;
+	echo '<em>default ' . $data['type'] . '</em> ';
 }
+while( $row = $res->next() ) {
+	$used = TRUE;
+	echo '<a href="' . $page . '.php?id=' . $row['id'] . '">'
+	    . $prefix . $row['id'] . '</a> ';
+}
+if ( ! $used ) echo "<span class=\"nodata\">none</span>";
 
 ?>
 </td></tr>
