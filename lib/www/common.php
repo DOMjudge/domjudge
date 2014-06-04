@@ -487,7 +487,7 @@ function putProblemTextList()
 		// otherwise, display list
 		$res = $DB->q('SELECT p.probid,p.shortname,p.name,p.color,p.problemtext_type
 		               FROM problem p WHERE cid = %i AND allow_submit = 1 AND
-		               problemtext_type IS NOT NULL ORDER BY p.probid', $cid);
+		               problemtext_type IS NOT NULL ORDER BY p.shortname', $cid);
 
 		if ( $res->count() > 0 ) {
 			echo "<ul>\n";

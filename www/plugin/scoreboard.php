@@ -38,7 +38,7 @@ unset($tmp);
 
 // Get problems, languages, affiliations and categories for legend
 $probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, color FROM problem
-                 WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
+                 WHERE cid = %i AND allow_submit = 1 ORDER BY shortname', $cid);
 
 $langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name FROM language
                  WHERE allow_submit = 1 ORDER BY langid');
