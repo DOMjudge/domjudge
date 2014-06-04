@@ -170,7 +170,7 @@ The DOMjudge homepage can be found at:
 url="http://www.domjudge.org/">
 
 We have a low volume <htmlurl name="mailing list for announcements"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
+url="https://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
 of new releases.
 
 The authors can be reached through the development mailing list:
@@ -178,7 +178,7 @@ The authors can be reached through the development mailing list:
 url="mailto:domjudge-devel@lists.a-eskwadraat.nl">. You need
 to be subscribed before you can post. See
 <htmlurl name="the list information page"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
+url="https://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
 for subscription and more details.
 
 Some developers and users of DOMjudge linger on the IRC channel
