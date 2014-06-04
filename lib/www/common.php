@@ -185,6 +185,9 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		echo "<td class=\"result\"><a$link>";
 		if ( $row['submittime'] >= $cdata['endtime'] ) {
 			echo printresult('too-late');
+			if ( IS_JURY && $row['result'] ) {
+				echo " (" . printresult($row['result']) . ")";
+			}
 		} else if ( ! $row['result'] ||
 		            ( !IS_JURY && ! $row['verified'] &&
 		              dbconfig_get('verification_required', 0) ) ) {
