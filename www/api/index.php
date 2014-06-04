@@ -309,6 +309,8 @@ function judging_runs_POST($args)
 
 	$allresults = array_pad($runresults, $numtestcases, null);
 
+	$before = $DB->q('VALUE SELECT result FROM judging WHERE judgingid = %i', $args['judgingid']);
+
 	if ( ($result = getFinalResult($allresults, $results_prio))!==NULL ) {
 		if ( count($runresults) == $numtestcases || dbconfig_get('lazy_eval_results', true) ) {
 			$DB->q('UPDATE judging SET result = %s, endtime = %s ' .
@@ -318,33 +320,36 @@ function judging_runs_POST($args)
 				'WHERE judgingid = %i', $result, $args['judgingid']);
 		}
 
-		$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid
-				FROM judging LEFT JOIN submission s USING(submitid)
-				WHERE judgingid = %i',$args['judgingid']);
-		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
+		if ( $before !== $result ) {
 
-		// log to event table if no verification required
-		// (case of verification required is handled in www/jury/verify.php)
-		if ( ! dbconfig_get('verification_required', 0) ) {
-			$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-				submitid, judgingid, description)
-				VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
-				now(), $row['cid'], $row['teamid'], $row['langid'], $row['probid'],
-				$row['submitid'], $args['judgingid']);
-			if ( $result == 'correct' ) {
-				// prevent duplicate balloons in case of multiple correct submissions
-				$numcorrect = $DB->q('VALUE SELECT count(submitid)
-						      FROM balloon LEFT JOIN submission USING(submitid)
-						      WHERE valid = 1 AND probid = %i AND teamid = %i',
-						      $row['probid'], $row['teamid']);
-				if ( $numcorrect == 0 ) {
-					$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
-						$row['submitid']);
+			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid
+					FROM judging LEFT JOIN submission s USING(submitid)
+					WHERE judgingid = %i',$args['judgingid']);
+			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
+
+			// log to event table if no verification required
+			// (case of verification required is handled in www/jury/verify.php)
+			if ( ! dbconfig_get('verification_required', 0) ) {
+				$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
+					submitid, judgingid, description)
+					VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
+					now(), $row['cid'], $row['teamid'], $row['langid'], $row['probid'],
+					$row['submitid'], $args['judgingid']);
+				if ( $result == 'correct' ) {
+					// prevent duplicate balloons in case of multiple correct submissions
+					$numcorrect = $DB->q('VALUE SELECT count(submitid)
+							      FROM balloon LEFT JOIN submission USING(submitid)
+							      WHERE valid = 1 AND probid = %i AND teamid = %i',
+							      $row['probid'], $row['teamid']);
+					if ( $numcorrect == 0 ) {
+						$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
+							$row['submitid']);
+					}
 				}
 			}
-		}
 
-		auditlog('judging', $args['judgingid'], 'judged', $result, $args['judgehost']);
+			auditlog('judging', $args['judgingid'], 'judged', $result, $args['judgehost']);
+		}
 	}
 
 	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s',
