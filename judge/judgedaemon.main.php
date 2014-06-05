@@ -496,7 +496,9 @@ function judge($row)
 		if ( is_readable($testcasedir . '/program.meta') ) {
 			$metadata = spyc_load_file($testcasedir . '/program.meta');
 
-			$runtime = $metadata[$metadata['time-used']];
+			if ( isset($metadata['time-used']) ) {
+				$runtime = @$metadata[$metadata['time-used']];
+			}
 		}
 
 		request('judging_runs', 'POST', 'judgingid=' . urlencode($row['judgingid'])
