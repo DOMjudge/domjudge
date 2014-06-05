@@ -1,23 +1,44 @@
 /*
  * Detect Java main function for the given list of classes.
- * Warning: Does not work when one of the class names is 'DetectMain'.
+ * First argument is the search directory.
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
 
 import java.lang.reflect.*;
+import java.net.*;
 
 public class DetectMain {
 	public static void main ( String[] args ) {
-		String result = null;
+		// Check arguments
+		if ( args.length < 2 ) {
+			System.err.println("Usage: java DetectMain <dir> <class1> "
+			                   + "[ <class2> ... ]");
+			System.exit(1);
+			return;
+		}
+
+		// Load classes from specific directory
+		URL dir;
+		try {
+			dir = new URL("file://" + args[0] + "/");
+		} catch ( MalformedURLException e ) {
+			System.err.println("Error: malformed directory '" + args[0] + "'");
+			System.exit(1);
+			return;
+		}
+		ClassLoader cl = new URLClassLoader( new URL[] { dir } );
 
 		// Go through all classes
-		for ( String arg : args ) {
+		String result = null;
+		for ( int i = 1; i < args.length; i++) {
+			String arg = args[i];
+
 			// Instantiate class
 			Class<?> c;
 			try {
-				c = Class.forName(arg);
+				c = Class.forName(arg, false, cl);
 			} catch ( ClassNotFoundException e ) {
 				System.err.println("Error: class '" + arg + "' not found.");
 				System.exit(1);

@@ -49,7 +49,7 @@ rm -f $TMPFILE
 CLASSNAMES=$(find * -type f -regex '^.*\.class$' \
             | sed -e 's/\.class$//' -e 's/\//./g')
 COMPILESCRIPTDIR=$(dirname $0)
-MAINCLASS=$(java -cp ".:$COMPILESCRIPTDIR" DetectMain $CLASSNAMES)
+MAINCLASS=$(java -cp $COMPILESCRIPTDIR DetectMain `pwd` $CLASSNAMES)
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
