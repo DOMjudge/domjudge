@@ -316,7 +316,7 @@ function getCookie(name) {
 }
 
 function getSelectedTeams() {
-	var cookieVal = getCookie("dj_teamselection");
+	var cookieVal = getCookie("domjudge_teamselection");
 	if (cookieVal == null || cookieVal == "") {
 		return new Array();
 	}
@@ -376,7 +376,7 @@ function toggle(id, show) {
 	}
 
 	var cookieVal = JSON.stringify(favTeams);
-	setCookie("dj_teamselection", cookieVal);
+	setCookie("domjudge_teamselection", cookieVal);
 
 	window.location.reload();
 }
