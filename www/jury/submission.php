@@ -6,33 +6,42 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-function compile_output($output, $success) {
+function display_compile_output($output, $success) {
 	$color = "#6666FF";
 	$msg = "not finished yet";
 	if ( $output !== NULL ) {
 		if ($success) {
 			$color = '#1daa1d';
-			$title = "There were no compiler errors or warnings.";
-			if ( strlen($output) > 0 ) {
-				$title = htmlspecialchars($output);
+			$msg = 'successful';
+			if ( !empty($output) ) {
+				$msg .= ' (with ' . mb_substr_count($output, "\n") . ' line(s) of output)';
 			}
-			$msg = 'successful (with ' . substr_count($output, "\n") . ' line(s) of output)';
 		} else {
 			$color = 'red';
 			$msg = 'unsuccessful';
 		}
 	}
-	echo "<h3 id=\"compile\">Compilation <span " . ( isset($title) ? "title=\"$title\" " : '' ) . "style=\"color:$color;\">$msg</span></h3>\n\n";
 
-	if ( $output === NULL || $success ) {
-		return;
-	}
+	echo '<h3 id="compile">' .
+		(empty($output) ? '' : "<a href=\"javascript:collapse('compile')\">") .
+		"Compilation <span style=\"color:$color;\">$msg</span>" .
+		(empty($output) ? '' : "</a>" ) . "</h3>\n\n";
 
-	if ( strlen($output) > 0 ) {
-		echo "<pre class=\"output_text\">".
+	if ( !empty($output) ) {
+		echo '<pre class="output_text" class="details" id="detailcompile">' .
 			htmlspecialchars($output)."</pre>\n\n";
 	} else {
-		echo "<p class=\"nodata\">There were no compiler errors or warnings.</p>\n";
+		echo '<p class="nodata" class="details" id="detailcompile">' .
+			"There were no compiler errors or warnings.</p>\n";
+	}
+
+	// Collapse compile output when compiled succesfully.
+	if ( $success ) {
+		echo "<script type=\"text/javascript\">
+<!--
+	collapse('compile');
+// -->
+</script>\n";
 	}
 }
 
@@ -384,7 +393,7 @@ togglelastruns();
 </script>
 <?php
 
-	compile_output(@$jud['output_compile'], @$jud['result']!=='compiler-error');
+	display_compile_output(@$jud['output_compile'], @$jud['result']!=='compiler-error');
 
 	// If compilation is not finished yet or failed, there's no more info to show, so stop here
 	if ( @$jud['output_compile'] === NULL || @$jud['result']=='compiler-error' ) {
