@@ -551,13 +551,13 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	if ( $filter!==FALSE && $static!==TRUE ) {
 
 		$categids = $DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category ' .
-				    (IS_JURY ? '' : 'WHERE visible = 1 ' ));
+		                   (IS_JURY ? '' : 'WHERE visible = 1 ' ));
 		// show only affilids/countries with visible teams
 		$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, team_affiliation.name, country
-				  FROM team_affiliation
-				  JOIN team USING(affilid)
-				  WHERE categoryid IN (%As)
-				  GROUP BY affilid', array_keys($categids));
+		                  FROM team_affiliation
+		                  LEFT JOIN team USING(affilid)
+		                  WHERE categoryid IN (%As) GROUP BY affilid',
+		                 array_keys($categids));
 
 		$affilids  = array();
 		$countries = array();
@@ -766,39 +766,30 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 	$totaltime = (isset($teamtotals['totaltime']) ? $teamtotals['totaltime'] : 0);
 
 	$sortorder = $DB->q('VALUE SELECT sortorder
-	      FROM team_category
-	      LEFT JOIN team ON (team_category.categoryid = team.categoryid)
-	      WHERE teamid = %i', $teamid);
+	                     FROM team_category
+	                     LEFT JOIN team USING (categoryid)
+	                     WHERE teamid = %i', $teamid);
 
 	// Number of teams that definitely ranked higher
 	$better = $DB->q("VALUE SELECT COUNT(team.teamid)
-	     FROM rankcache_$tblname AS rc
-	     LEFT JOIN team
-	          ON (team.teamid = rc.teamid)
-	     LEFT JOIN team_category
-	          ON (team_category.categoryid = team.categoryid)
-	     WHERE cid = %i
-	     AND sortorder = %i
-	     AND enabled = 1
-	     AND (correct > %i OR (correct = %i AND totaltime < %i))",
-	     $cid, $sortorder, $correct, $correct, $totaltime);
+	                  FROM rankcache_$tblname AS rc
+	                  LEFT JOIN team USING (teamid)
+	                  LEFT JOIN team_category USING (categoryid)
+	                  WHERE cid = %i AND sortorder = %i AND enabled = 1
+	                  AND (correct > %i OR (correct = %i AND totaltime < %i))",
+	                 $cid, $sortorder, $correct, $correct, $totaltime);
 	$rank = $better + 1;
 
 	// Resolve ties based on latest correct, only necessary when we actually
 	// solved at least one problem, so this list should usually be short
 	if ( $correct > 0 ) {
 		$tied = $DB->q("COLUMN SELECT team.teamid
-		       FROM rankcache_$tblname AS rc
-		       LEFT JOIN team
-		            ON (team.teamid = rc.teamid)
-		       LEFT JOIN team_category
-		            ON (team_category.categoryid = team.categoryid)
-		       WHERE cid = %i
-		       AND sortorder = %i
-		       AND enabled = 1
-		       AND correct = %i
-		       AND totaltime = %i",
-		       $cid, $sortorder, $correct, $totaltime);
+		                FROM rankcache_$tblname AS rc
+		                LEFT JOIN team USING (teamid)
+		                LEFT JOIN team_category USING (categoryid)
+		                WHERE cid = %i AND sortorder = %i AND enabled = 1
+		                AND correct = %i AND totaltime = %i",
+		               $cid, $sortorder, $correct, $totaltime);
 
 		// All teams that are tied for this position, in most cases this will
 		// only be the team we are finding the rank for, only retrieve rest of
@@ -813,12 +804,10 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 			// Get submission times for each of the teams
 			$scoredata = $DB->q("SELECT teamid, totaltime
 			                     FROM scorecache_$tblname AS sc
-			                     LEFT JOIN problem
-			                          ON (sc.probid = problem.probid)
-			                     WHERE sc.cid = %i
-			                     AND is_correct = 1
-			                     AND allow_submit = 1
-			                     AND teamid IN (%Ai)", $cid, $tied);
+			                     LEFT JOIN problem USING (probid)
+			                     WHERE sc.cid = %i AND is_correct = 1
+			                     AND allow_submit = 1 AND teamid IN (%Ai)",
+			                    $cid, $tied);
 			while ( $srow = $scoredata->next() ) {
 				$teamdata[$srow['teamid']]['solve_times'][] = $srow['totaltime'];
 			}
