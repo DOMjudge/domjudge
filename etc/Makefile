@@ -44,13 +44,13 @@ install-domserver:
 	-$(INSTALL_USER) -t $(DESTDIR)$(domserver_etcdir) \
 		domserver-config.php common-config.php
 	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
-		dbpasswords.secret
+		dbpasswords.secret restapi.secret
 
 install-judgehost:
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
 		judgehost-static.php sudoers-domjudge
 	-$(INSTALL_USER) -t $(DESTDIR)$(judgehost_etcdir) \
-		judgehost-config.php common-config.php
+		judgehost-config.php common-config.php restapi.secret
 
 # Let only distclean (_not_ the local variant) depend on password
 # removal, so these don't get removed with maintainer-clean.
