@@ -35,16 +35,19 @@ INSTALLDEBS="openjdk-7-jre-headless locales"
 # Packages to remove after upgrade (space separated):
 REMOVEDEBS=""
 
-# Ubuntu mirror, modify to match closest mirror
-DEBMIRROR="http://us.archive.ubuntu.com./ubuntu/"
-
 # Which debootstrap package to install on non-Debian/Ubuntu systems:
 DEBOOTDEB="debootstrap_1.0.46_all.deb"
+
+# The Debian mirror/proxy below can be passed as environment
+# variables; if none are given the following defaults are used.
+
+# Ubuntu mirror, modify to match closest mirror
+[ -z "$DEBMIRROR" ] && DEBMIRROR="http://us.archive.ubuntu.com./ubuntu/"
 
 # A local caching proxy to use for debian packages
 # (typically an install of aptcacher-ng), for example:
 #DEBPROXY="http://aptcacher-ng.example.com:3142/"
-DEBPROXY=""
+[ -z "$DEBPROXY" ] && DEBPROXY=""
 
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
