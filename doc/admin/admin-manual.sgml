@@ -356,10 +356,10 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 <code>
 apt-get install gcc g++ make zip unzip mysql-server \
 	apache2 php5 php5-cli libapache2-mod-php5 php5-mysql php5-json \
-	phpmyadmin ntp \
+	bsdmainutils phpmyadmin ntp \
 	libboost-regex-dev libgmp3-dev linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
-	texlive-fonts-recommended texlive-lang-european
+	texlive-fonts-recommended texlive-lang-dutch
 </code>
 
 On a judgehost, the following should be sufficient. The last line shows some
@@ -368,7 +368,14 @@ and Pascal; change the list as appropriate.
 
 <code>
 apt-get install make sudo php5-cli php5-curl php5-json procps \
-	gcc g++ gcj openjdk-6-jre-headless openjdk-6-jdk ghc fp-compiler
+	gcc g++ gcj-jre-headless gcj-jdk openjdk-7-jre-headless openjdk-7-jdk \
+	ghc fp-compiler
+</code>
+
+If you want to build the chroot for more security, you need debootstrap and
+wget:
+<code>
+apt-get install debootstrap wget
 </code>
 
 Finally, to build the command-line submit client, install the
