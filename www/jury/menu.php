@@ -41,14 +41,34 @@ if ( checkrole('team') ) {
 
 putClock();
 
+$notify_flag  =  isset($_COOKIE["domjudge_notify"])  && (bool)$_COOKIE["domjudge_notify"];
 $refresh_flag = !isset($_COOKIE["domjudge_refresh"]) || (bool)$_COOKIE["domjudge_refresh"];
 
+echo "<div id=\"toggles\">\n";
 if ( isset($refresh) ) {
-	echo "<div id=\"refresh\">\n" .
-	    addForm('toggle_refresh.php', 'get') .
+	echo addForm('toggle_refresh.php', 'get') .
 	    addHidden('enable', ($refresh_flag ? 0 : 1)) .
 	    addSubmit(($refresh_flag ? 'Dis' : 'En' ) . 'able refresh', 'submit') .
-	    addEndForm() . "</div>\n";
+	    addEndForm();
 }
 
-echo "</div></nav>\n";
+// Default hide this from view, only show when javascript and
+// notifications are available:
+echo '<div id="notify" style="display: none">' .
+	addForm('toggle_notify.php', 'get') .
+	addHidden('enable', ($notify_flag ? 0 : 1)) .
+	addSubmit(($notify_flag ? 'Dis' : 'En' ) . 'able notifications', 'submit',
+	          'return toggleNotifications(' . ($notify_flag ? 'false' : 'true') . ')') .
+	addEndForm() . "</div>";
+
+?>
+<script type="text/javascript">
+<!--
+    if ( 'Notification' in window ) {
+		document.getElementById('notify').style.display = 'block';
+	}
+// -->
+</script>
+
+</div>
+</div></nav>

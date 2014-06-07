@@ -61,6 +61,68 @@ function updateMenu(doreload_clarifications, doreload_judgehosts)
 	handle.send(null);
 }
 
+// If the browser supports desktop notifications, toggle whether these
+// are enabled. This requires user permission.
+// Returns whether setting it was successful.
+function toggleNotifications(enable)
+{
+	if ( enable ) {
+		if ( !('Notification' in window) ) {
+			alert('This browser does not support desktop notifications.');
+			return false;
+		}
+
+		// Ask user (via browser) for permission if not already granted.
+		if ( Notification.permission=='denied' ) {
+			alert('Browser denied permission to send desktop notifications.\n' +
+			      'Re-enable notification permission in the browser and retry.');
+		} else
+			if ( Notification.permission!=='granted' ) {
+				Notification.requestPermission(function (permission) {
+					// Safari and Chrome don't support the static 'permission'
+					// variable, so in this case we set it ourselves.
+					if ( !('permission' in Notification) ) {
+						Notification.permission = permission;
+					}
+					if ( Notification.permission!=='granted' ) {
+						alert('Browser denied permission to send desktop notifications.');
+					} else {
+						sendNotification('DOMjudge notifications enabled.', 'notify', 5);
+						navigateToUrl("toggle_notify.php?enable=1");
+						return false;
+					}
+				});
+			}
+
+		return (Notification.permission==='granted');
+	} else {
+		// disable: no need/possibility to ask user to revoke permission.
+
+		// FIXME: Should we close any notifications currently showing?
+	}
+
+	return true;
+}
+
+// Send a notification if notifications have been enabled.
+// The argument timeout is in seconds and defaults to 5 minutes.
+function sendNotification(title, tag, timeout)
+{
+	if ( typeof tag     === 'undefined' ) tag = null;
+	if ( typeof timeout === 'undefined' ) timeout = 600;
+
+	if ( getCookie('domjudge_notify')==1 ) {
+		var not = new Notification(title, { // options:
+// FIXME: adding 'tag' seems to break notifications in Chromium 35 on Debian.
+//			tag: tag,
+		    onShow: function () { setTimeout(not.close, timeout*1000); }
+// FIXME: setting timeout doesn't work in Chromium nor in Firefox
+// (also overriden by default 4 second close timeout, see:
+// https://bugzilla.mozilla.org/show_bug.cgi?id=875114).
+		});
+	}
+}
+
 // make corresponding testcase description editable
 function editTcDesc(descid)
 {
