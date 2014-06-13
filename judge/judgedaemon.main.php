@@ -331,12 +331,13 @@ function judge($row)
 	global $EXITCODES, $myhost, $options, $workdirpath;
 
 	// Set configuration variables for called programs
-	putenv('USE_CHROOT='       . (USE_CHROOT ? '1' : ''));
-	putenv('COMPILETIME='      . dbconfig_get_rest('compile_time'));
-	putenv('MEMLIMIT='         . dbconfig_get_rest('memory_limit'));
-	putenv('COMPILEMEMLIMIT='  . dbconfig_get_rest('compile_memory'));
-	putenv('FILELIMIT='        . dbconfig_get_rest('filesize_limit'));
-	putenv('PROCLIMIT='        . dbconfig_get_rest('process_limit'));
+	putenv('USE_CHROOT='        . (USE_CHROOT ? '1' : ''));
+	putenv('COMPILETIME='       . dbconfig_get_rest('compile_time'));
+	putenv('MEMLIMIT='          . dbconfig_get_rest('memory_limit'));
+	putenv('COMPILEMEMLIMIT='   . dbconfig_get_rest('compile_memory'));
+	putenv('COMPILEFILELIMIT='  . dbconfig_get_rest('compile_filesize'));
+	putenv('FILELIMIT='         . dbconfig_get_rest('filesize_limit'));
+	putenv('PROCLIMIT='         . dbconfig_get_rest('process_limit'));
 
 	$cpuset_opt = "";
 	if ( isset($options['daemonid']) ) $cpuset_opt = "-n ${options['daemonid']}";
