@@ -153,7 +153,7 @@ foreach($postmaxvars as $var) {
 }
 
 result('software', 'PHP POST/upload filesize',
-       min($sizes) < 52428800 ? 'W':'O', '', $resulttext);
+       min($sizes) < 52428800 ? 'W':'O', $resulttext);
 
 if ( class_exists("ZipArchive") ) {
 	result('software', 'Problem up/download via zip bundles',
