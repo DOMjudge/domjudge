@@ -362,20 +362,14 @@ apt-get install gcc g++ make zip unzip mysql-server \
 	texlive-fonts-recommended texlive-lang-dutch
 </code>
 
-On a judgehost, the following should be sufficient. The last line shows some
+On a judgehost, the following should be sufficient. The last two lines show some
 example compilers to install for C, C++, Java (GNU), Java (Oracle), Haskell
 and Pascal; change the list as appropriate.
 
 <code>
-apt-get install make sudo php5-cli php5-curl php5-json procps \
+apt-get install make sudo debootstrap php5-cli php5-curl php5-json procps \
 	gcc g++ gcj-jre-headless gcj-jdk openjdk-7-jre-headless openjdk-7-jdk \
 	ghc fp-compiler
-</code>
-
-If you want to build the chroot for more security, you need debootstrap and
-wget:
-<code>
-apt-get install debootstrap wget
 </code>
 
 Finally, to build the command-line submit client, install the
