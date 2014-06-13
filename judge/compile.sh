@@ -124,7 +124,7 @@ logmsg $LOG_INFO "starting compile"
 # the compiler writing to different filenames and deleting intermediate files.
 exitcode=0
 $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
-	-t $COMPILETIME -c -f 65536 -M "$WORKDIR/compile.meta" -- \
+	-t $COMPILETIME -c -f $FILELIMIT -s $FILELIMIT -M "$WORKDIR/compile.meta" -- \
 	"$COMPILE_SCRIPT" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
