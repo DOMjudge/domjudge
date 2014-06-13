@@ -443,6 +443,9 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('co
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_compare', '"compare"', 'string', 'The script used to compare outputs if no special compare script specified.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_run', '"run"', 'string', 'The script used to run submissions if no special run script specified.');
 
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_memory', '2097152', 'int', 'Maximum memory usage (in kB) by *compilers*.  This is only to safeguard against malicious code, so a reasonable but large amount should do.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_filesize', '65536', 'int', 'Maximum filesize (in kB) compilers may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.');
+
 UPDATE `language` SET `extensions` = '["adb","ads"]' WHERE `langid` = 'adb';
 UPDATE `language` SET `extensions` = '["awk"]' WHERE `langid` = 'awk';
 UPDATE `language` SET `extensions` = '["bash"]' WHERE `langid` = 'bash';
