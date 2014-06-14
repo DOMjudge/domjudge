@@ -15,7 +15,7 @@
  * @EXPECTED_RESULTS@: COMPILER-ERROR
  */
 #endif
-#warning "This message will fill stdout..."
+#warning "This message will fill stderr..."
 #ifndef A1
 #define A1
 #else
