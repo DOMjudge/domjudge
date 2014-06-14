@@ -563,7 +563,7 @@ tedious, standard part. See the boolfind example for details.
 <p>
 
 Implementing a special compare program, also called a
-<em>validator</em>, can be done by writing a program that's run by
+<em>validator</em>, can be done by writing a program that is run by
 a wrapper script like the <tt>run</tt> script in the boolfind example.
 
 Copy this wrapper to your new executable archive and let the jury write a
@@ -580,7 +580,7 @@ of the check program and any parameters can also be modified in the
 wrapper (i.e. <tt>run</tt>) script.
 
 For example, to compare output while ignoring DOS/UNIX newline differences, one
-can copy wrapper to and in that file set the variable
+can copy the wrapper from <tt>check_float</tt> and in that file set the variable
 <tt>CHECK_PROGRAM="`which diff`"</tt> and replace the line
 <code>
 "$CHECK_PROGRAM" $CHECK_OPTIONS "$TESTIN" "$PROGRAM" "$TESTOUT" > "$DIFFOUT"
