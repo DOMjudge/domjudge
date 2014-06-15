@@ -1195,6 +1195,7 @@ automatically by the software:
  |clarification    |Clarification requests/replies are stored here.@
 x|configuration    |Runtime configuration settings.@
 x|contest          |Contest definitions with start/end time.@
+x|executable       |Executable compile/run/compare scripts.@
  |event            |Log of events during contests.@
  |judgehost        |Computers (hostnames) that function as judgehosts.@
  |judging          |Judgings of submissions.@
@@ -1219,8 +1220,7 @@ Now follows a longer description (including fields) per table that has
 to be filled manually. As a general remark: almost all tables have an
 identifier field. Most of these are numeric and automatically
 increasing; these do not need to be specified. The tables
-<tt>language</tt>, <tt>problem</tt>, <tt>team</tt>, and
-<tt>team&lowbar;affiliation</tt> have text strings as identifier
+<tt>executable</tt> and <tt>language</tt> have text strings as identifier
 fields. These need to be manually specified and only alpha-numeric, dash and
 underscore characters are valid, i.e. <tt>a-z, A-Z, 0-9, -, &lowbar;</tt>.
 
@@ -1253,6 +1253,10 @@ stored in the fields without the <tt>_string</tt> suffix.
 The <tt>enabled</tt> field can be unset to allow for easier editing of
 contest times, as disabled contests are not checked to overlap with
 other contests. A disabled contest will also not become active.
+
+<tag>executable</tag>
+This table stores zip-bundles of executable scripts that can be used
+as compile, run, and compare scripts.
 
 <tag>language</tag>
 Programming languages in which to accept and judge submissions.
