@@ -205,17 +205,15 @@ install)
 	read_dbpasswords
 	create_db_users
 	RESTPW=`cat $RESTPWFILE | grep -v ^# | cut  -f3`
-	echo "INSERT INTO user (userid, username, name, password) VALUES (2, 'judgehost', 'User for judgedaemons', MD5('judgehost#$RESTPW'));" > $SQLDIR/mysql_db_judgedaemon.sql
-	echo "INSERT INTO userrole (userid, roleid) VALUES (2, 6);" >> $SQLDIR/mysql_db_judgedaemon.sql
+	(
 	cat $SQLDIR/mysql_db_structure.sql \
 	    $SQLDIR/mysql_db_defaultdata.sql \
 	    $SQLDIR/mysql_db_examples.sql \
 	    $SQLDIR/mysql_db_files_defaultdata.sql \
-	    $SQLDIR/mysql_db_files_examples.sql \
-	    $SQLDIR/mysql_db_judgedaemon.sql \
-	     | mysql -D "$DBNAME"
+	    $SQLDIR/mysql_db_files_examples.sql
+	echo "UPDATE user SET password = MD5('judgehost#$RESTPW');"
+	) | mysql -D "$DBNAME"
 	verbose "SQL structure and default/example data installed."
-	rm -f $TMPFILE $SQLDIR/mysql_db_judgedaemon.sql
 	;;
 
 bare-install)
@@ -225,8 +223,7 @@ bare-install)
  	    $SQLDIR/mysql_db_defaultdata.sql \
 	    $SQLDIR/mysql_db_files_defaultdata.sql \
 	     | mysql -D "$DBNAME"
-	verbose "SQL structure and defaults installed(No sample data)."
-	rm -f $TMPFILE
+	verbose "SQL structure and defaults installed (no sample data)."
 	;;
 
 uninstall)

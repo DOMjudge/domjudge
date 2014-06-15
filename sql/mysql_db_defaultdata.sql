@@ -120,10 +120,14 @@ INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room
 -- Dumping data for table `user`
 -- 
 
-INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES ('1', 'admin', 'Administrator', MD5('admin#admin'));
+INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES
+(1, 'admin', 'Administrator', MD5('admin#admin')),
+(2, 'judgehost', 'User for judgedaemons', NULL);
 
 -- 
 -- Dumping data for table `userrole`
 -- 
 
-INSERT INTO `userrole` (`userid`, `roleid`) VALUES ('1', '1');
+INSERT INTO `userrole` (`userid`, `roleid`) VALUES
+(1, 1),
+(2, 6);
