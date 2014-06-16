@@ -336,9 +336,11 @@ if ( isset($jid) )  {
 
 	if ( @$jud['result']!=='compiler-error' ) {
 		echo ", max/sum runtime: " . sprintf('%.2f/%.2fs',$max_runtime,$sum_runtime);
-		echo " <span class=\"lastruntime\">(<a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a>: "
-			. sprintf('%.2f/%.2fs',$max_lastruntime,$sum_lastruntime) .
-			")</span>";
+		if ( isset($max_lastruntime) ) {
+			echo " <span class=\"lastruntime\">(<a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a>: "
+				. sprintf('%.2f/%.2fs',$max_lastruntime,$sum_lastruntime) .
+				")</span>";
+		}
 
 		echo "<table>\n$tclist";
 		if ( $lastjud !== NULL ) {

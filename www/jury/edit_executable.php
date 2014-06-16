@@ -95,6 +95,7 @@ if ( FALSE === file_put_contents($tmpfname, $executable['zipfile']) ) {
 	error("failed to write zip file to temporary file");
 }
 $zip = openZipFile($tmpfname);
+$skippedBinary = array();
 for ($j = 0; $j < $zip->numFiles; $j++) {
 	$filename = $zip->getNameIndex($j);
 	if ($filename[strlen($filename)-1] == "/") {
