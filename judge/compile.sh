@@ -38,6 +38,7 @@ cleanexit ()
 {
 	trap - EXIT
 
+	chmod go= "$WORKDIR/compile"
 	logmsg $LOG_DEBUG "exiting, code = '$1'"
 	exit $1
 }
