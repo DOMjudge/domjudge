@@ -9,6 +9,7 @@ $KEYS = array();
 $KEYS['auditlog'] = array('logid');
 $KEYS['balloon'] = array('balloonid');
 $KEYS['clarification'] = array('clarid');
+$KEYS['configuration'] = array('configid');
 $KEYS['contest'] = array('cid');
 $KEYS['event'] = array('eventid');
 $KEYS['executable'] = array('execid');
@@ -19,6 +20,7 @@ $KEYS['language'] = array('langid');
 $KEYS['problem'] = array('probid');
 $KEYS['rankcache_jury'] = array('cid','teamid');
 $KEYS['rankcache_public'] = array('cid','teamid');
+$KEYS['role'] = array('roleid');
 $KEYS['scorecache_jury'] = array('cid','teamid','probid');
 $KEYS['scorecache_public'] = array('cid','teamid','probid');
 $KEYS['submission'] = array('submitid');
@@ -29,7 +31,6 @@ $KEYS['team_category'] = array('categoryid');
 $KEYS['team_unread'] = array('teamid','mesgid');
 $KEYS['testcase'] = array('testcaseid');
 $KEYS['user'] = array('userid');
-$KEYS['role'] = array('roleid');
 $KEYS['userrole'] = array('userid', 'roleid');
 
 /** For each table, list all attributes that reference foreign keys
@@ -44,13 +45,9 @@ $KEYS['userrole'] = array('userid', 'roleid');
  */
 $RELATIONS = array();
 
-$RELATIONS['user'] = array();
-$RELATIONS['role'] = array();
-$RELATIONS['userrole'] = array();
-
 $RELATIONS['auditlog'] = array();
 
-$RELATIONS['clarification'] = array (
+$RELATIONS['balloon'] = array (
 	'submitid' => 'submission.submitid',
 );
 
@@ -85,8 +82,8 @@ $RELATIONS['judging'] = array (
 );
 
 $RELATIONS['judging_run'] = array (
-	'judgingid' => 'judging.judgingid',
 	'testcaseid' => 'testcase.testcaseid&RESTRICT',
+	'judgingid' => 'judging.judgingid',
 );
 
 $RELATIONS['language'] = array();
@@ -101,6 +98,7 @@ $RELATIONS['rankcache_public'] = array (
 	'teamid' => 'team.teamid&NOCONSTRAINT'
 );
 
+$RELATIONS['role'] = array();
 
 $RELATIONS['scorecache_jury'] =
 $RELATIONS['scorecache_public'] = array (
@@ -110,12 +108,12 @@ $RELATIONS['scorecache_public'] = array (
 );
 
 $RELATIONS['submission'] = array (
-	'origsubmitid' => 'submission.submitid&SETNULL',
 	'cid' => 'contest.cid',
 	'teamid' => 'team.teamid',
 	'probid' => 'problem.probid',
 	'langid' => 'language.langid',
 	'judgehost' => 'judgehost.hostname&SETNULL',
+	'origsubmitid' => 'submission.submitid&SETNULL',
 );
 
 $RELATIONS['submission_file'] = array (
@@ -138,6 +136,14 @@ $RELATIONS['team_unread'] = array(
 
 $RELATIONS['testcase'] = array(
 	'probid' => 'problem.probid',
+);
+
+$RELATIONS['user'] = array(
+	'teamid' => 'team.teamid&SETNULL',
+);
+$RELATIONS['userrole'] = array(
+	'userid' => 'user.userid&CASCADE',
+	'roleid' => 'role.roleid&CASCADE',
 );
 
 /**
