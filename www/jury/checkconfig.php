@@ -500,8 +500,7 @@ if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 		$res = $DB->q('SELECT ' . $fields . ' FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
 		while ( $row = $res->next() ) {
 			foreach ( $foreign_keys as $foreign_key => $val ) {
-				@list( $target, $action ) = explode('&', $val);
-				if ( empty($action) ) $action = 'CASCADE';
+				list( $target, $action ) = explode('&', $val);
 				if ( empty($row[$foreign_key]) || $action=='NOCONSTRAINT' ) {
 					continue;
 				}

@@ -34,10 +34,10 @@ $KEYS['user'] = array('userid');
 $KEYS['userrole'] = array('userid', 'roleid');
 
 /** For each table, list all attributes that reference foreign keys
- *  and specify the source of that key. Optionally appended to the
+ *  and specify the source of that key. Appended to the
  *  foreign key is '&<ACTION>' where ACTION can be any of the
  *  following referential actions on delete of the foreign row:
- *  CASCADE:  also delete the source row (default if not specified)
+ *  CASCADE:  also delete the source row
  *  SETNULL:  set source key to NULL
  *  RESTRICT: disallow delete of foreign row
  *  NOCONSTRAINT: no constraint is specified, even though the field
@@ -48,11 +48,11 @@ $RELATIONS = array();
 $RELATIONS['auditlog'] = array();
 
 $RELATIONS['balloon'] = array (
-	'submitid' => 'submission.submitid',
+	'submitid' => 'submission.submitid&CASCADE',
 );
 
 $RELATIONS['clarification'] = array (
-	'cid' => 'contest.cid',
+	'cid' => 'contest.cid&CASCADE',
 	'respid' => 'clarification.clarid&SETNULL',
 	'sender' => 'team.teamid&NOCONSTRAINT',
 	'recipient' => 'team.teamid&NOCONSTRAINT',
@@ -77,19 +77,19 @@ $RELATIONS['judgehost'] = array();
 
 $RELATIONS['judging'] = array (
 	'cid' => 'contest.cid',
-	'submitid' => 'submission.submitid',
+	'submitid' => 'submission.submitid&CASCADE',
 	'judgehost' => 'judgehost.hostname&SETNULL',
 );
 
 $RELATIONS['judging_run'] = array (
 	'testcaseid' => 'testcase.testcaseid&RESTRICT',
-	'judgingid' => 'judging.judgingid',
+	'judgingid' => 'judging.judgingid&CASCADE',
 );
 
 $RELATIONS['language'] = array();
 
 $RELATIONS['problem'] = array (
-	'cid' => 'contest.cid',
+	'cid' => 'contest.cid&CASCADE',
 );
 
 $RELATIONS['rankcache_jury'] =
@@ -108,20 +108,20 @@ $RELATIONS['scorecache_public'] = array (
 );
 
 $RELATIONS['submission'] = array (
-	'cid' => 'contest.cid',
-	'teamid' => 'team.teamid',
-	'probid' => 'problem.probid',
-	'langid' => 'language.langid',
+	'cid' => 'contest.cid&CASCADE',
+	'teamid' => 'team.teamid&CASCADE',
+	'probid' => 'problem.probid&CASCADE',
+	'langid' => 'language.langid&CASCADE',
 	'judgehost' => 'judgehost.hostname&SETNULL',
 	'origsubmitid' => 'submission.submitid&SETNULL',
 );
 
 $RELATIONS['submission_file'] = array (
-	'submitid' => 'submission.submitid',
+	'submitid' => 'submission.submitid&CASCADE',
 );
 
 $RELATIONS['team'] = array (
-	'categoryid' => 'team_category.categoryid',
+	'categoryid' => 'team_category.categoryid&CASCADE',
 	'affilid' => 'team_affiliation.affilid&SETNULL',
 );
 
@@ -130,12 +130,12 @@ $RELATIONS['team_affiliation'] = array();
 $RELATIONS['team_category'] = array();
 
 $RELATIONS['team_unread'] = array(
-	'teamid' => 'team.teamid',
-	'mesgid' => 'clarification.clarid',
+	'teamid' => 'team.teamid&CASCADE',
+	'mesgid' => 'clarification.clarid&CASCADE',
 );
 
 $RELATIONS['testcase'] = array(
-	'probid' => 'problem.probid',
+	'probid' => 'problem.probid&CASCADE',
 );
 
 $RELATIONS['user'] = array(
