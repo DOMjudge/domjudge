@@ -34,6 +34,8 @@ if ( isset($_POST['import']) ) {
 		$contest['activatetime_string'] = '-1:00';
 		// chop off final ":00" because our contests do not support that precision in relative notation
 		$contest['endtime_string'] = '+' . substr($contest_yaml_data['duration'],0,-3);
+		// unfreezetime is not supported by the current standard
+		$contest['unfreezetime_string'] = null;
 		if ( ! empty($contest_yaml_data['scoreboard-freeze']) ) {
 			$contest['freezetime_string'] = '+' . substr($contest_yaml_data['scoreboard-freeze'],0,-3);
 		}
@@ -61,6 +63,8 @@ if ( isset($_POST['import']) ) {
 		// TODO: event-feed-port
 
 		$LIBDBCONFIG['penalty_time']['value'] = (int)$contest_yaml_data['penaltytime'];
+
+	/* clarification answers/categories currently not supported; ignore them.
 		$LIBDBCONFIG['clar_answers']['value'] = $contest_yaml_data['default-clars'];
 		$categories = array();
 		foreach ( $contest_yaml_data['clar-categories'] as $category ) {
@@ -68,6 +72,7 @@ if ( isset($_POST['import']) ) {
 			$categories[$cat_key] = $category;
 		}
 		$LIBDBCONFIG['clar_categories']['value'] = $categories;
+	*/
 
 	/* Disable importing language details, as there's very little to actually import:
 		$DB->q("DELETE FROM language");
@@ -133,7 +138,7 @@ if ( isset($_POST['import']) ) {
 	$contest_data = array();
 	$contest_data['name'] = $contest_row['contestname'];
 	$contest_data['short-name'] = $contest_row['contestname'];
-	$contest_data['start-time'] = date('c', strtotime($contest_row['starttime']));
+	$contest_data['start-time'] = date('c', $contest_row['starttime']);
 	$contest_data['duration'] = printtimerel(calcContestTime($contest_row['endtime'], $contest_row));
 	
 	if ( ! is_null($contest_row['freezetime']) ) {
@@ -142,8 +147,10 @@ if ( isset($_POST['import']) ) {
 	
 	// TODO: event-feed-port
 	$contest_data['penaltytime'] = dbconfig_get('penalty_time');
+	/*
 	$contest_data['default-clars'] = dbconfig_get('clar_answers');
 	$contest_data['clar-categories'] = array_values(dbconfig_get('clar_categories'));
+	*/
 	$contest_data['languages'] = array();
 	$q = $DB->q("SELECT * FROM language");
 	while ( $lang = $q->next() ) {
