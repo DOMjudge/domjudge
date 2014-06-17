@@ -275,7 +275,9 @@ ALTER TABLE `team_unread`
 ALTER TABLE `team`
   DROP PRIMARY KEY,
   ADD COLUMN `teamid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID' FIRST,
-  ADD PRIMARY KEY (`teamid`);
+  ADD COLUMN `externalid` varchar(128) DEFAULT NULL COMMENT 'Team ID in an external system' AFTER `teamid`,
+  ADD PRIMARY KEY (`teamid`),
+  ADD KEY `externalid` (`externalid`);
 
 UPDATE `clarification`
   LEFT JOIN `team` ON clarification.sender_old = team.login
