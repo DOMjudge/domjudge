@@ -123,22 +123,6 @@ php_value post_max_size       64M
 #  Require ip 10.20.30.0/24
 #</Directory>
 
-
-# Require authentication to plugin interface
-<Directory @domserver_wwwdir@/plugin>
-AuthType Basic
-AuthName "DOMjudge Plugin Interface"
-Require valid-user
-AuthUserFile @domserver_etcdir@/htpasswd-plugin
-
-# Optionally restrict access to just the relevant hosts:
-#  # Apache 2.2:
-#  Deny from all
-#  Allow from 172.30.20.0/24
-#  # Apache 2.4:
-#  Require ip 172.30.20.0/24
-</Directory>
-
 # vim: syntax=apachestyle
 # Local Variables:
 # mode: apache

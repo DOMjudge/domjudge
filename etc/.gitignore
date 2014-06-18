@@ -5,7 +5,6 @@
 /apache.conf
 /config.h.in
 /config.h
-/htpasswd-plugin
 /dbpasswords.secret
 /restapi.secret
 /sudoers-domjudge

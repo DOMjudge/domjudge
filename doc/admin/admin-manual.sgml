@@ -1094,46 +1094,6 @@ the administrator interface. The exact command used to send the
 files to a printer can be changed the function <tt>send_print()</tt>
 in <tt>lib/www/printing.php</tt>.
 
-<sect1>The plugin web interface
-<p>
-
-Next to the public, team and jury web interfaces, DOMjudge also
-provides a <em>plugin</em> web interface. This web interface is still in
-beta/development so subject to change. The interface provides contest data
-from DOMjudge in XML format and is meant to provide external programs
-(plugins) with data on the contest. This allows for all kinds of
-extensions beyond the core functionality of DOMjudge such as providing
-a fancy scoreboard with more statistics, aggregation of scoreboard
-data for a final presentation during the prize ceremony.
-
-As we are still thinking about possible uses and thus the data to be
-provided, the exact specification of this interface may change. Also,
-we are especially interested in feedback and ideas.
-
-There are currently two data-sets provided within the <tt>plugin</tt>
-subdirectory of the DOMjudge web interface, both in XML format:
-<descrip>
-<tag><tt>scoreboard.php</tt></tag>
-	This page provides a representation of the scoreboard.
-	Additionally it includes legend tables for problems,
-	languages, affiliations and team categories. It does not
-	accept any arguments.
-<tag><tt>event.php</tt></tag>
-	This page provides a representation of events that happened
-	during the contest, including submissions, judgings, contest
-	state changes and general clarifications. This page accepts
-	two arguments <tt>fromid</tt> and <tt>toid</tt> to limit the
-	output to events with event ID in that range.
-</descrip>
-See these pages or the accompanying <tt>xsd</tt>-files for the exact
-structure.
-
-A nice example plugin is <url name="DOMjura" url="https://github.com/nickygerritsen/DOMjura">
-by Nicky Gerritsen. This provides a graphical resolver of the
-scoreboard from the freeze time until end of contest and can be used
-during the final prize ceremony. It is a reimplementation of the
-resolver made by Tim deBoer for the ICPC World Finals.
-
 <sect>Upgrading
 <p>
 

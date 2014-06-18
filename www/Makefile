@@ -14,11 +14,10 @@ install-domserver:
 	for d in . countries ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/$$d images/$$d/*.png ; \
 	done
-	for d in public team jury plugin api ; do \
+	for d in public team jury api ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/$$d $$d/*.php ; \
 	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/teams images/teams/*.jpg
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/plugin       plugin/*.xsd
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/jury         jury/*.css
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/js           js/*.js js/*.gif js/*.png
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)              *.php style.css
