@@ -237,21 +237,20 @@ function judgings_PUT($args)
 				base64_decode($args['output_compile']), now(),
 				$judgingid, $args['judgehost']);
 			auditlog('judging', $judgingid, 'judged', 'compiler-error', $args['judgehost']);
-		}
-		$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$judgingid);
-		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 
-		// log to event table if no verification required
-		// (case of verification required is handled in www/jury/verify.php)
-		if ( ! dbconfig_get('verification_required', 0) ) {
-			$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-				submitid, judgingid, description)
-				VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
-				now(), $row['cid'], $row['teamid'], $row['langid'], $row['probid'],
-				$row['submitid'], $judgingid);
-		}
+			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$judgingid);
+			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 
-		auditlog('judging', $args['judgingid'], 'judged', $result, $args['judgehost']);
+			// log to event table if no verification required
+			// (case of verification required is handled in www/jury/verify.php)
+			if ( ! dbconfig_get('verification_required', 0) ) {
+				$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
+					submitid, judgingid, description)
+					VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
+					now(), $row['cid'], $row['teamid'], $row['langid'], $row['probid'],
+					$row['submitid'], $judgingid);
+			}
+		}
 	}
 
 	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s',
