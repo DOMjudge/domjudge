@@ -32,7 +32,6 @@ ALTER TABLE `judging_run`
 ALTER TABLE `language`
   ADD COLUMN `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)' AFTER `name`;
 
-
 -- Rename scoreboard cache tables to match new rankcache_{jury,public}.
 
 RENAME TABLE `scoreboard_jury`   TO `scorecache_jury`;
@@ -275,9 +274,7 @@ ALTER TABLE `team_unread`
 ALTER TABLE `team`
   DROP PRIMARY KEY,
   ADD COLUMN `teamid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID' FIRST,
-  ADD COLUMN `externalid` varchar(128) DEFAULT NULL COMMENT 'Team ID in an external system' AFTER `teamid`,
-  ADD PRIMARY KEY (`teamid`),
-  ADD KEY `externalid` (`externalid`);
+  ADD PRIMARY KEY (`teamid`);
 
 UPDATE `clarification`
   LEFT JOIN `team` ON clarification.sender_old = team.login
@@ -398,6 +395,9 @@ CREATE TABLE `rankcache_public` (
   CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
 
+ALTER TABLE `team`
+  ADD COLUMN `externalid` varchar(128) DEFAULT NULL COMMENT 'Team ID in an external system' AFTER `teamid`,
+  ADD KEY `externalid` (`externalid`);
 
 --
 -- Transfer data from old to new structure
