@@ -33,7 +33,7 @@ $RELATIONS['clarification']['recipient'] = 'team.teamid&NOCONSTRAINT';
 foreach ( array('jury','public') as $type ) {
 	$RELATIONS['rankcache_'.$type]['teamid'] = 'team.teamid&NOCONSTRAINT';
 
-	$RELATIONS['scorecache_'.$type]['cid'] = 'contest.cid&NOCONSTRAINT',
+	$RELATIONS['scorecache_'.$type]['cid'] = 'contest.cid&NOCONSTRAINT';
 	$RELATIONS['scorecache_'.$type]['teamid'] = 'team.teamid&NOCONSTRAINT';
 	$RELATIONS['scorecache_'.$type]['probid'] = 'problem.probid&NOCONSTRAINT';
 }
