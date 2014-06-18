@@ -37,7 +37,7 @@ requireAdmin();
 </li>
 </ul>
 
-<h2>Import teams from icpc.baylor.edu</h2>
+<h2>Import teams / Upload standings from / to icpc.baylor.edu</h2>
 
 <p>
 Create a "Web Services Token" with appropriate rights in the "Export" section
@@ -55,6 +55,6 @@ echo "<tr><td><label for=\"contest\">Contest ID:</label></td>" .
 echo "<tr><td><label for=\"token\">Access token:</label></td>" .
 	"<td>" . addInput('token', @$token, null, null, 'required') . "</td></tr>\n";
 echo "</table>\n";
-echo addSubmit("Fetch teams") . addEndForm();
+echo addSubmit('Fetch teams', 'fetch') . addSubmit('Upload standings', 'upload') . addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
