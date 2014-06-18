@@ -63,6 +63,9 @@ if ( $json === NULL ) {
 	error("Error retrieving API data. API gave us: " . $response);
 }
 
+$participants = $DB->q('VALUE SELECT categoryid FROM team_category WHERE name=%s', 'Participants');
+$teamrole = $DB->q('VALUE SELECT roleid FROM role WHERE role=%s', 'team');
+
 $new_affils = array();
 $new_teams = array();
 $updated_teams = array();
@@ -92,15 +95,15 @@ foreach ( $json['icpcExport']['contest']['group'] as $group ) {
 		$enabled = $team['status'] === 'ACCEPTED';
 		if ( empty($id) ) {
 			$id = $DB->q('RETURNID INSERT INTO team (name, categoryid, affilid, enabled, members, comments, externalid) VALUES (%s, %i, %i, %i, %s, %s, %i)',
-				$team['teamName'], 2, $affilid, $enabled, $members, "Status: " . $team['status'], $team['reservationId']);
+				$team['teamName'], $participants, $affilid, $enabled, $members, "Status: " . $team['status'], $team['reservationId']);
 			$username = sprintf("team%04d", $id);
 			$userid = $DB->q('RETURNID INSERT INTO user (username, name, teamid) VALUES (%s,%s,%i)', $username, $team['teamName'], $id);
-			$DB->q('INSERT INTO userrole (userid, roleid) VALUES (%i,%i)', $userid, 3);
+			$DB->q('INSERT INTO userrole (userid, roleid) VALUES (%i,%i)', $userid, $teamrole);
 			$new_teams[] = $team['teamName'];
 		} else {
 			$username = sprintf("team%04d", $id);
 			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i, affilid=%i, enabled=%i, members=%s, comments=%s WHERE teamid=%i',
-				$team['teamName'], 2, $affilid, $enabled, $members, "Status: " . $team['status'], $id);
+				$team['teamName'], $participants, $affilid, $enabled, $members, "Status: " . $team['status'], $id);
 			$cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s WHERE username=%s', $username);
 			if ( $cnt > 0 ) {
 				$updated_teams[] = $team['teamName'];
