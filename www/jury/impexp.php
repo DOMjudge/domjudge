@@ -14,6 +14,8 @@ requireAdmin();
 ?>
 <h1>Import and Export</h1>
 
+<h2>Import via file upload</h2>
+
 <ul>
 <li><a href="import-export-config.php">Contest data (contest.yaml)</a></li>
 <li><a href="problems.php#problem_archive__">Problem archive</a></li>
@@ -35,12 +37,12 @@ requireAdmin();
 </li>
 </ul>
 
-<h1>Import teams from icpc.baylor.edu</h1>
+<h2>Import teams from icpc.baylor.edu</h2>
 
 <p>
 Create a "Web Services Token" with appropriate rights in the "Export" section
 for your contest at <a
-href="http://icpc.baylor.edu/login">http://icpc.baylor.edu/login</a>. You can
+href="https://icpc.baylor.edu/login">https://icpc.baylor.edu/login</a>. You can
 find the Contest ID (e.g. <tt>Southwestern-Europe-2014</tt>) in the URL.
 </p>
 
@@ -49,9 +51,9 @@ find the Contest ID (e.g. <tt>Southwestern-Europe-2014</tt>) in the URL.
 echo addForm("impexp_baylor.php");
 echo "<table>\n";
 echo "<tr><td><label for=\"contest\">Contest ID:</label></td>" .
-	"<td>" . addInput('contest', @$contest) . "</td></tr>\n";
-echo "<tr><td><label for=\"token\">Access token</label></td>" .
-	"<td>" . addInput('token', @$token) . "</td></tr>\n";
+	"<td>" . addInput('contest', @$contest, null, null, 'required') . "</td></tr>\n";
+echo "<tr><td><label for=\"token\">Access token:</label></td>" .
+	"<td>" . addInput('token', @$token, null, null, 'required') . "</td></tr>\n";
 echo "</table>\n";
 echo addSubmit("Fetch teams") . addEndForm();
 

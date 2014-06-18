@@ -9,6 +9,8 @@
 
 require('init.php');
 
+define('ICPCWS', 'https://icpc.baylor.edu/ws/clics/');
+
 function updated($array, $table, $type = 'created') {
 	if ( count($array) == 0 ) {
 		echo "<p class=\"nodata\">No " . $table . "s $type.</p>\n";
@@ -34,11 +36,10 @@ echo "<h1>$title</h1>\n";
 
 if ( empty($token) || empty($contest) ) {
 	error("Unknown access token or contest.");
-	exit;
 }
 
-$ch = curl_init("https://icpc.baylor.edu/ws/clics/$contest");
-curl_setopt($ch, CURLOPT_USERAGENT, "DOMJudge4.0");
+$ch = curl_init(ICPCWS . $contest);
+curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
 curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 curl_setopt($ch, CURLOPT_USERPWD, "$token:");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);

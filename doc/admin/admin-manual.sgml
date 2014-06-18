@@ -1072,6 +1072,12 @@ about an untrusted certificate, put your domserver's certificate in
 machines when using the commandline submit client) and run:
 <code># c_rehash</code>
 
+<p>
+When loading teams from the ICPC registration system through the import
+feature in DOMjudge, the certificate from icpc.baylor.edu must similarily
+be acceped by your local installation or if not, added via the procedure
+above. 
+
 <sect1>NTP time synchronisation
 <p>
 
