@@ -211,7 +211,7 @@ install)
 	    $SQLDIR/mysql_db_examples.sql \
 	    $SQLDIR/mysql_db_files_defaultdata.sql \
 	    $SQLDIR/mysql_db_files_examples.sql
-	echo "UPDATE user SET password = MD5('judgehost#$RESTPW');"
+	echo "UPDATE user SET password = MD5('judgehost#$RESTPW') WHERE userid=2;"
 	) | mysql -D "$DBNAME"
 	verbose "SQL structure and default/example data installed."
 	;;
