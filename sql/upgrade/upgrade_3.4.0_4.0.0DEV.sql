@@ -510,9 +510,11 @@ INSERT INTO `role` (`role`, `description`) VALUES ('judgehost',         '(Intern
 INSERT INTO `role` (`role`, `description`) VALUES ('event_reader',      '(Internal/System) event_reader');
 INSERT INTO `role` (`role`, `description`) VALUES ('full_event_reader', '(Internal/System) full_event_reader');
 
-INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES ('1', 'admin', 'Administrator', MD5('admin#admin'));
+INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES (1, 'admin', 'Administrator', MD5('admin#admin'));
+INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES (2, 'judgehost', 'User for judgedaemons', NULL);
 
-INSERT INTO `userrole` (`userid`, `roleid`) VALUES ('1', '1');
+INSERT INTO `userrole` (`userid`, `roleid`) VALUES (1, 1);
+INSERT INTO `userrole` (`userid`, `roleid`) VALUES (2, 6);
 
 INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('plg', 'Prolog', '["plg"]', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('rb', 'Ruby', '["rb"]', 0, 1, 1);
