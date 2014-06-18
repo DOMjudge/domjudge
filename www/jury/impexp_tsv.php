@@ -202,6 +202,7 @@ function tsv_scoreboard_get()
 	$data = array();
 	foreach ($sb['scores'] as $teamid => $srow) {
 		$maxtime = -1;
+		$drow = array();
 		foreach($sb['matrix'][$teamid] as $prob) {
 			$drow[] = $prob['num_submissions'];
 			$drow[] = $prob['is_correct'] ? $prob['time'] : -1;
