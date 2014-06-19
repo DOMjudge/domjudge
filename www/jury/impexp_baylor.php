@@ -26,7 +26,7 @@ function updated($array, $table, $type = 'created') {
 	echo "<hr/>\n";
 }
 
-if ( $_REQUEST['fetch'] ) {
+if ( isset($_REQUEST['fetch']) ) {
 	$title = 'Import teams from icpc.baylor.edu';
 } else {
 	$title = 'Upload standings to icpc.baylor.edu';
@@ -45,7 +45,7 @@ if ( empty($token) || empty($contest) ) {
 }
 
 
-if ( $_REQUEST['fetch'] ) {
+if ( isset($_REQUEST['fetch']) ) {
 	$ch = curl_init(ICPCWSCLICS . $contest);
 } else {
 	$ch = curl_init(ICPCWSSTANDINGS . $contest);
@@ -55,7 +55,7 @@ curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 curl_setopt($ch, CURLOPT_USERPWD, "$token:");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json"));
-if ( $_REQUEST['upload'] ) {
+if ( isset($_REQUEST['upload']) ) {
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml'));
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 	$data = '<?xml version="1.0" encoding="UTF-8"?><icpc computeCitations="1" name="Upload_via_DOMjudge_' . date("c") . '">';
@@ -95,7 +95,7 @@ if ( $status < 200 || $status >= 300 ) {
 }
 curl_close($ch);
 
-if ( $_REQUEST['upload'] ) {
+if ( isset($_REQUEST['upload']) ) {
 	echo "Uploaded standings to icpc.baylor.edu (Response was: $response).<br/>";
 	echo "Do not forget to certify the standings there - it maybe necessary to logout/login there to see the standings.";
 	exit;
