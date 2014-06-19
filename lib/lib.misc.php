@@ -366,7 +366,6 @@ function overshoot_time($timelimit, $overshoot_cfg)
 {
 	$tokens = preg_split('/([+&|])/', $overshoot_cfg, -1, PREG_SPLIT_DELIM_CAPTURE);
 	if ( count($tokens)!=1 && count($tokens)!=3 ) {
-		var_dump($tokens);
 		error("invalid timelimit overshoot string '$overshoot_cfg'");
 	}
 

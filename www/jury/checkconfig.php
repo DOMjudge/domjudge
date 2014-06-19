@@ -166,6 +166,7 @@ if ( class_exists("ZipArchive") ) {
 	       'to be able to import or export problem data via zip bundles.');
 }
 
+$mysqldata = array();
 $mysqldatares = $DB->q('SHOW variables WHERE
                         Variable_name = "max_connections" OR
                         Variable_name = "max_allowed_packet" OR
