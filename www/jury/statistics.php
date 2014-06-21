@@ -77,7 +77,7 @@ $(function () {
 			newchart.data = cur;
 			charts.push(newchart);
 		}
-		$.plot($("#placeholder"), charts, { 
+		$.plot($("#placeholder"), charts, {
 			xaxis: { min : 0, max : contestlen },
 			legend: { position : "nw" },
 			series: {

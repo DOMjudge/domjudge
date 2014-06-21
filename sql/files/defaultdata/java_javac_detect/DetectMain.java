@@ -59,7 +59,7 @@ public class DetectMain {
 			   && Modifier.isPublic(mainMethod.getModifiers())
 			   && mainMethod.getReturnType().equals(Void.TYPE) ) {
 				if ( result != null ) {
-					System.err.println("Warning: found another 'main' in '" 
+					System.err.println("Warning: found another 'main' in '"
 					                   + arg + "'");
 				}
 				else {

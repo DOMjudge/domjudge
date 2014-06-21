@@ -627,7 +627,7 @@ int websubmit()
 
 	// The connection worked, but we may have received an HTTP error
 	curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &http_code);
-	if ( http_code >= 300 ) { 
+	if ( http_code >= 300 ) {
 		while ( getline(curloutput,line) ) {
 			printf("%s\n", line.c_str());
 		}

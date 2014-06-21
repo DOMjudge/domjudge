@@ -64,9 +64,9 @@ function display_runinfo($runinfo, $is_final) {
 			$short = substr($run['runresult'], 0, 1);
 			$class = "tc_incorrect";
 		}
-		$tclist .= "<a title=\"desc: " . htmlspecialchars($run['description']) . 
-			($run['runresult'] !== NULL ?  ", runtime: " . $run['runtime'] . "s, result: " . $run['runresult'] : '') . 
-			"\" href=\"$link\"" . 
+		$tclist .= "<a title=\"desc: " . htmlspecialchars($run['description']) .
+			($run['runresult'] !== NULL ?  ", runtime: " . $run['runtime'] . "s, result: " . $run['runresult'] : '') .
+			"\" href=\"$link\"" .
 			($run['runresult'] == 'correct' ? ' onclick="display_correctruns(true);" ' : '') .
 			"><span class=\"$class tc_box\">" . $short . "</span></a>";
 
@@ -240,7 +240,7 @@ if ( isset($jid) )  {
 	if ($jud['submitid'] != $id) error(
 		sprintf("judingid j%d belongs to submitid s%d, not s%d",
 			$jid, $jud['submitid'], $id));
-	
+
 	// Display testcase runs
 	$runs = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
 	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
@@ -315,7 +315,7 @@ if ( isset($jid) )  {
 	echo 'Result: ' . printresult($jud['result'], $jud['valid']) . ( $lastjud === NULL ? '' :
 		'<span class="lastresult"> (<a href="submission.php?id=' . $lastsubmitid . '">s' . $lastsubmitid. '</a>: '
 		. @$lastjud['result'] . ')</span>' ) . ', ' .
-		'Judgehost: <a href="judgehost.php?id=' . urlencode($jud['judgehost']) . '">' . 
+		'Judgehost: <a href="judgehost.php?id=' . urlencode($jud['judgehost']) . '">' .
 		printhost($jud['judgehost']) . '</a>, ';
 
 	// Time (start, end, used)
@@ -348,7 +348,7 @@ if ( isset($jid) )  {
 		}
 		echo "</table>\n";
 	}
-	
+
 	// display following data only when the judging has been completed
 	if ( $judging_ended ) {
 
@@ -412,7 +412,7 @@ togglelastruns();
 
 		if ( $run['runresult']===NULL ) {
 			echo "<p class=\"nodata\">" .
-				( $jud['result'] === NULL ? 'Run not started/finished yet.' : 'Run not used for final result.' ) . 
+				( $jud['result'] === NULL ? 'Run not started/finished yet.' : 'Run not used for final result.' ) .
 				"</p>\n";
 			continue;
 		}

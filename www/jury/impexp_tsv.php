@@ -2,7 +2,7 @@
 /**
  * Code to import and export tsv formats as specified by the ICPC
  * Contest Control System Standard.
- * 
+ *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -101,7 +101,7 @@ function tsv_teams_prepare($content)
 	foreach($content as $line) {
 		$l++;
 		$line = explode("\t", trim($line));
-		
+
 		// teams.tsv contains data pertaining both to affiliations and teams.
 		// hence return data for both tables.
 
@@ -130,7 +130,7 @@ function tsv_teams_set($data)
 		// it is legitimate that a team has no affiliation. Do not add it then.
 		if ( !empty($row['team_affiliation']['shortname']) ) {
 			$DB->q("REPLACE INTO team_affiliation SET %S", $row['team_affiliation']);
-			$affilid = $DB->q("VALUE SELECT affilid FROM team_affiliation WHERE shortname = %s LIMIT 1", $row['team_affiliation']['shortname']); 
+			$affilid = $DB->q("VALUE SELECT affilid FROM team_affiliation WHERE shortname = %s LIMIT 1", $row['team_affiliation']['shortname']);
 			auditlog('team_affiliation', $affilid, 'replaced', 'imported from tsv');
 			$row['team']['affilid'] = $affilid;
 		}

@@ -2,7 +2,7 @@
 /**
  * Code to import teams and upload standings from and to
  * https://icpc.baylor.edu/.
- * 
+ *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
@@ -74,7 +74,7 @@ if ( isset($_REQUEST['upload']) ) {
 			$lastProblem = 0;
 		}
 		$data .= '<Standing LastProblemTime="' . $lastProblem . '" ProblemsSolved="' .  $totals['correct'] . '" Rank="' . $rank .
-			'" ReservationID="' . $row['externalid'] . '" TotalTime="' . 
+			'" ReservationID="' . $row['externalid'] . '" TotalTime="' .
 			$totals['totaltime'] .
 			'"/>';
 	}
