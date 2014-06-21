@@ -8,10 +8,8 @@
 
 require('init.php');
 
-$id = @$_REQUEST['id'];
+$id = getRequestID(FALSE);
 $title = 'Language '.htmlspecialchars(@$id);
-
-if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid language id");
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
@@ -49,11 +47,12 @@ if ( !empty($cmd) ):
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Language ID/ext:</td><td>";
-		$row = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s',
-			$_GET['id']);
-		echo addHidden('keydata[0][langid]', $row['langid']);
-		echo htmlspecialchars($row['langid']);
+		$row = $DB->q('MAYBETUPLE SELECT * FROM language WHERE langid = %s', $id);
+		if ( !$row ) error("Missing or invalid language id");
+
+		echo "<tr><td>Language ID/ext:</td><td>" .
+			addHidden('keydata[0][langid]', $row['langid']) .
+			htmlspecialchars($row['langid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__langid_\">Language ID/ext:</label></td><td>";
 		echo addInput('data[0][langid]', null, 8, 8,  'required pattern="' . IDENTIFIER_CHARS . '+" title="alphanumerics only"');
@@ -73,7 +72,7 @@ if ( !empty($cmd) ):
 <?php echo addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
 
 <tr><td><label for="data_0__time_factor_">Time factor:</label></td>
-<td><?php echo addInputField('number', 'data[0][time_factor]', @$row['time_factor'], ' min="0"')?> x</td></tr>
+<td><?php echo addInputField('number', 'data[0][time_factor]', @$row['time_factor'], ' min="0" step="any"')?> x</td></tr>
 <tr><td><label for="data_0__compile_script_">Compile script:</label></td>
 <td>
 <?php
@@ -84,6 +83,8 @@ $execmap[''] = 'none';
 echo addSelect('data[0][compile_script]', $execmap, @$row['compile_script'], True);
 ?>
 </td></tr>
+<tr><td><label for="data_0__extensions_">Extensions:</label></td>
+<td><?php echo addInput('data[0][extensions]', @$row['extensions'], 20, 255, 'required')?> (as JSON encoded array)</td></tr>
 </table>
 
 <?php
@@ -136,6 +137,7 @@ if ( empty($data['compile_script']) ) {
 }
 ?>
 </td></tr>
+<tr><td>Extensions:  </td><td><?php echo htmlspecialchars($data['extensions'])?></td></tr>
 </table>
 
 <?php

@@ -108,13 +108,12 @@ function tsv_teams_prepare($content)
 		// we may do more integrity/format checking of the data here.
 		$data[] = array (
 			'team' => array (
-				'login' => @$line[0],
+				'teamid' => @$line[0],
 				'externalid' => @$line[1],
 				'categoryid' => @$line[2],
-				'name' => @$line[3],
-				'affilid' => tsv_clean_affilid(@$line[5])),
+				'name' => @$line[3]),
 			'team_affiliation' => array (
-				'affilid' => tsv_clean_affilid(@$line[5]),
+				'shortname' => @$line[5],
 				'name' => @$line[4],
 				'country' => @$line[6]) );
 	}
@@ -129,12 +128,14 @@ function tsv_teams_set($data)
 	$c = 0;
 	foreach ($data as $row) {
 		// it is legitimate that a team has no affiliation. Do not add it then.
-		if ( !empty($row['team_affiliation']['affilid']) ) {
+		if ( !empty($row['team_affiliation']['shortname']) ) {
 			$DB->q("REPLACE INTO team_affiliation SET %S", $row['team_affiliation']);
-			auditlog('team_affiliation', $row['team_affiliation']['affilid'], 'replaced', 'imported from tsv');
+			$affilid = $DB->q("VALUE SELECT affilid FROM team_affiliation WHERE shortname = %s LIMIT 1", $row['team_affiliation']['shortname']); 
+			auditlog('team_affiliation', $affilid, 'replaced', 'imported from tsv');
+			$row['team']['affilid'] = $affilid;
 		}
 		$DB->q("REPLACE INTO team SET %S", $row['team']);
-		auditlog('team', $row['team']['login'], 'replaced', 'imported from tsv');
+		auditlog('team', $row['team']['teamid'], 'replaced', 'imported from tsv');
 		$c++;
 	}
 	return $c;
@@ -176,10 +177,8 @@ function tsv_groups_get()
 
 function tsv_teams_get()
 {
-	// login is our team number
-	// we use affilid as the short name
 	global $DB;
-	return $DB->q('TABLE SELECT login, externalid, categoryid, t.name, a.name as affilname, a.affilid, a.country
+	return $DB->q('TABLE SELECT teamid, externalid, categoryid, t.name, a.name as affilname, a.shortname, a.country
 	               FROM team t LEFT JOIN team_affiliation a USING(affilid)
 	               WHERE enabled = 1');
 
@@ -201,29 +200,20 @@ function tsv_scoreboard_get()
 	$sb = genScoreBoard($cdata, true);
 
 	$data = array();
-	foreach ($sb['scores'] as $login => $srow) {
+	foreach ($sb['scores'] as $teamid => $srow) {
 		$maxtime = -1;
-		foreach($sb['matrix'][$login] as $prob) {
+		$drow = array();
+		foreach($sb['matrix'][$teamid] as $prob) {
 			$drow[] = $prob['num_submissions'];
 			$drow[] = $prob['is_correct'] ? $prob['time'] : -1;
 			$maxtime = max($maxtime, $prob['time']);
 		}
 		$data[] = array_merge (
-			array($sb['teams'][$login]['affilname'], $sb['teams'][$login]['externalid'],
+			array($sb['teams'][$teamid]['affilname'], @$sb['teams'][$teamid]['externalid'],
 				$srow['rank'], $srow['num_correct'], $srow['total_time'], $maxtime),
 			$drow
 			);
 	}
 
 	return $data;
-}
-
-/**
- * DOMjudge currently requires an affiliation ID to contain only
- * IDENTIFIER_CHARS. Until this is fixed (?), modify input value to
- * replace all invalid chars with _.
- */
-function tsv_clean_affilid($id)
-{
-	return preg_replace('/[^' . substr(IDENTIFIER_CHARS,1) . '/', '_', $id);
 }

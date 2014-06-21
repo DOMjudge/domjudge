@@ -57,44 +57,6 @@ test "x$enable_CFLAGS_setting"   = xyes && AC_SUBST(CFLAGS,   $DEF_CXFLAGS)
 test "x$enable_CXXFLAGS_setting" = xyes && AC_SUBST(CXXFLAGS, $DEF_CXFLAGS)
 test "x$enable_LDFLAGS_setting"  = xyes && AC_SUBST(LDFLAGS,  $DEF_LDFLAGS)
 
-# {{{ submitclient
-
-def_submitclient_protocols="http"
-
-AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--enable-submitclient@<:@=ARG@:>@],
-[enable submit client binary (default: http); set ARG to protocol list
-to support, where the first will be default. Supported protocols are
-in default order 'http,dolstra'.]),
-[
-if test "x$enableval" = xyes ; then
-	submitclient_protocols=$def_submitclient_protocols
-elif test "x$enableval" = xno ; then
-	submitclient_protocols=''
-else
-	submitclient_protocols="$enableval"
-fi
-],
-[submitclient_protocols=$def_submitclient_protocols])
-
-AC_MSG_CHECKING(submitclient)
-submit_default=0
-case `echo "x$submitclient_protocols" | sed 's/,.*//'` in
-	xdolstra) submit_default=1; AC_MSG_RESULT([enabled (dolstra)]) ;;
-	xhttp)    submit_default=2; AC_MSG_RESULT([enabled (http)])  ;;
-	*)        submit_default=0; AC_MSG_RESULT([disabled]) ;;
-esac
-
-submit_enabledolstra=0
-submit_enablehttp=0
-for i in `echo "$submitclient_protocols" | sed 's/,/ /g'` ; do
-    eval submit_enable$i=1
-done
-
-AC_SUBST(SUBMIT_DEFAULT,    $submit_default)
-AC_SUBST(SUBMIT_ENABLE_WEB, $submit_enablehttp)
-AC_SUBST(SUBMIT_ENABLE_CMD, $submit_enabledolstra)
-# }}}
-
 # {{{ File ownership for e.g. password files.
 
 AX_WITH_COMMENT(0,[])
@@ -260,15 +222,24 @@ AC_LANG_PUSH([C++])
 AC_CHECK_HEADERS([jsoncpp/json/json.h],AC_SUBST(LIBJSONCPP,[-ljsoncpp]))
 AC_LANG_POP([C++])
 
-# Check for libcURL and JSONcpp when submit is enabled.
-if test "$submit_enablehttp" = "1" ; then
+# {{{ submitclient
+
+AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--enable-submitclient],
+[enable submit client program (default: yes).
+ This requires JSONcpp and cURL libraries and optionally
+ libmagic for detecting submission of binary files.]))
+
+if test "x$enable_submitclient" != "xno"; then
+	AC_SUBST(SUBMITCLIENT_ENABLED,[yes])
+
+	# Check for libcURL and JSONcpp when submit is enabled.
 	AX_LIB_CURL([7.9.7],[],[
-		AC_MSG_ERROR([libcURL not found (required for http submit method)])
+		AC_MSG_ERROR([libcURL not found (required for submit client)])
 	])
 	save_CPPFLAGS="$CPPFLAGS"
 	CPPFLAGS="$CPPFLAGS $CURL_CFLAGS"
 	AC_CHECK_HEADERS([curl/curl.h],[],[
-		AC_MSG_ERROR([libcURL headers not found (required for http submit method)])
+		AC_MSG_ERROR([libcURL headers not found (required for submit client)])
 	])
 	CPPFLAGS="$save_CPPFLAGS"
 	# The 'curl-config --static-libs' option is accepted since 7.17.1
@@ -278,6 +249,7 @@ if test "$submit_enablehttp" = "1" ; then
 		AC_SUBST(CURL_STATIC,"")
 	])
 fi
+# }}}
 
 # Check for building "checktestdata" program.
 AC_ARG_ENABLE(checktestdata,AS_HELP_STRING([--enable-checktestdata],
@@ -310,7 +282,7 @@ AC_DEFINE_UNQUOTED(_XOPEN_SOURCE, 500,       [Include SUSv2 (UNIX 98) extensions
 
 # Checks for header files.
 AC_HEADER_STDBOOL
-AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h termios.h unistd.h magic.h libcgroup.h])
+AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/param.h sys/time.h syslog.h termios.h unistd.h magic.h libcgroup.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -349,29 +321,17 @@ echo " * webserver group.....: $WEBSERVER_GROUP"
 echo ""
 echo " * use Linux cgroups...: $use_cgroups"
 echo ""
+if test "x$SUBMITCLIENT_ENABLED" = xyes ; then
+   echo " * submitclient........: enabled, cURL version: $curl_version"
+else
+   echo " * submitclient........: disabled"
+fi
+echo ""
 if test "x$CHECKTESTDATA_ENABLED" = xyes ; then
    echo " * checktestdata.......: enabled"
 else
    echo " * checktestdata.......: disabled"
 fi
-echo ""
-if test $SUBMIT_DEFAULT -eq 0 ; then # {{{
-	echo " * submitclient........: disabled"
-else
-	echo -n " * submitclient........: enabled (default: "
-	if test $SUBMIT_DEFAULT -eq 1 ; then echo "dolstra)" ; fi
-	if test $SUBMIT_DEFAULT -eq 2 ; then echo "http)" ; fi
-	if test $SUBMIT_ENABLE_WEB -eq 0 ; then
-		echo "    - http.............: no"
-	else
-		echo "    - http.............: yes, cURL version: $curl_version"
-	fi
-	if test $SUBMIT_ENABLE_CMD -eq 0 ; then
-		echo "    - dolstra..........: no"
-	else
-		echo "    - dolstra..........: yes"
-	fi
-fi # }}}
 echo ""
 echo " * documentation.......: $domjudge_docdir"
 echo ""

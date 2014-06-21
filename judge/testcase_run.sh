@@ -201,7 +201,7 @@ runcheck ./run testdata.in program.out \
 	$PREFIX/$PROGRAM 2>runguard.err
 
 # Check for still running processes:
-output=`ps -u "$RUNUSER" -o pid= -o comm=`
+output=`ps -u "$RUNUSER" -o pid= -o comm= || true`
 if [ -n "$output" ] ; then
 	error "found processes still running as '$RUNUSER', check manually:\n$output"
 fi

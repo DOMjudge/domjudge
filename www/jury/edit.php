@@ -23,6 +23,7 @@ if(!in_array($t, array_keys($KEYS))) error ("Unknown table.");
 
 $data          =  $_POST['data'];
 $keydata       = @$_POST['keydata'];
+$unset         = @$_POST['unset'];
 $skipwhenempty = @$_POST['skipwhenempty'];
 $referrer      = @$_POST['referrer'];
 
@@ -41,6 +42,13 @@ if ( ! isset($_POST['cancel']) ) {
 		// set empty string to null
 		foreach ( $itemdata  as $k => $v ) {
 			if ( $v === "" ) {
+				$itemdata[$k] = null;
+			}
+		}
+
+		// unset things explicitly requested
+		if ( !empty($unset[$i]) ) {
+			foreach ( $unset[$i] as $k => $v ) {
 				$itemdata[$k] = null;
 			}
 		}

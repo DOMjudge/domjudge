@@ -13,6 +13,8 @@
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', '{"general":"General issue","technical":"Technical issue"}', 'array_keyval', 'List of additional clarification categories');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_time', '30', 'int', 'Maximum seconds available for compiling.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_memory', '2097152', 'int', 'Maximum memory usage (in kB) by *compilers*. This is only to safeguard against malicious code, so a reasonable but large amount should do.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_filesize', '65536', 'int', 'Maximum filesize (in kB) compilers may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('memory_limit', '524288', 'int', 'Maximum memory usage (in kB) by submissions. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB!');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('filesize_limit', '4096', 'int', 'Maximum filesize (in kB) submissions may write. Solutions will abort when trying to write more, so this should be greater than the maximum testdata output.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('process_limit', '15', 'int', 'Maximum number of processes that the submission is allowed to start (including shell and possibly interpreters).');
@@ -121,10 +123,14 @@ INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room
 -- Dumping data for table `user`
 -- 
 
-INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES ('1', 'admin', 'Administrator', MD5('admin#admin'));
+INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES
+(1, 'admin', 'Administrator', MD5('admin#admin')),
+(2, 'judgehost', 'User for judgedaemons', NULL);
 
 -- 
 -- Dumping data for table `userrole`
 -- 
 
-INSERT INTO `userrole` (`userid`, `roleid`) VALUES ('1', '1');
+INSERT INTO `userrole` (`userid`, `roleid`) VALUES
+(1, 1),
+(2, 6);

@@ -47,16 +47,16 @@ dist: configure distdocs
 config: dist
 
 # List of SUBDIRS for recursive targets:
-config:            SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
+config:            SUBDIRS=etc doc lib sql www judge        import tests misc-tools
 build:             SUBDIRS=        lib         judge submit import tests misc-tools
-domserver:         SUBDIRS=etc             www       submit import
-install-domserver: SUBDIRS=etc     lib sql www       submit import       misc-tools
+domserver:         SUBDIRS=etc             www              import
+install-domserver: SUBDIRS=etc     lib sql www              import       misc-tools
 judgehost:         SUBDIRS=etc                 judge
 install-judgehost: SUBDIRS=etc     lib         judge                     misc-tools
 docs:              SUBDIRS=    doc
 install-docs:      SUBDIRS=    doc         www                           misc-tools
 submitclient:      SUBDIRS=                          submit
-dist:              SUBDIRS=            sql                               misc-tools
+dist:              SUBDIRS=        lib sql                               misc-tools
 distdocs:          SUBDIRS=    doc
 clean:             SUBDIRS=etc doc lib sql www judge submit        tests misc-tools
 distclean:         SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
@@ -131,7 +131,6 @@ maintainer-conf: configure
 	            --with-judgehost_tmpdir=$(CURDIR)/output/tmp \
 	            --with-judgehost_judgedir=$(CURDIR)/output/judging \
 	            --with-domserver_submitdir=$(CURDIR)/output/submissions \
-	            --enable-submitclient=http,dolstra \
 	            CFLAGS='$(MAINT_CXFLAGS)' \
 	            CXXFLAGS='$(MAINT_CXFLAGS)' \
 	            LDFLAGS='$(MAINT_LDFLAGS)' \

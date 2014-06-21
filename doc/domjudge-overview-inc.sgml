@@ -5,7 +5,7 @@ DOMjudge is a system for running programming contests, like the ACM
 ICPC regional and world championship programming contests.
 
 This means that teams are on-site and have a fixed time period (mostly
-5 hours) and one computer to solve a number of problems (mostly 6-10).
+5 hours) and one computer to solve a number of problems (mostly 8-11).
 Problems are solved by writing a program in one of the allowed
 languages, that reads input according to the problem input
 specification and writes the correct, corresponding output.
@@ -27,7 +27,7 @@ A global overview of the features that DOMjudge provides:
 <itemize>
 <item>Automatic judging with distributed (scalable) judge hosts
 <item>Web interface for portability and simplicity
-<item>Modular system for plugging in languages/compilers and more
+<item>Modular system for plugging in languages/compilers and validators
 <item>Detailed jury information (submissions, judgings, diffs) and
       options (rejudge, clarifications, resubmit)
 <item>Designed with security in mind
@@ -94,11 +94,9 @@ to name them here too:
 <itemize>
 <item> dash (i386) is included, built from the Debian dash sources
        (copyright various people, see <tt>doc/dash.copyright</tt>).
-<item> mkstemps.h and basename.h are modified versions from the
+<item> basename.h is a modified version from the
        GNU libiberty library (copyright Free Software Foundation).
 <item> lib.database.php by Jeroen van Wolffelaar et al.
-<item> submit.cc and submitdaemon.cc are based on submit.pl and
-       submitdaemon.pl by Eelco Dolstra.
 <item> runguard.c was originally based on timeout from The
        Coroner's Toolkit by Wietse Venema.
 <item> sorttable.js by Stuart Langridge.
@@ -172,7 +170,7 @@ The DOMjudge homepage can be found at:
 url="http://www.domjudge.org/">
 
 We have a low volume <htmlurl name="mailing list for announcements"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
+url="https://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
 of new releases.
 
 The authors can be reached through the development mailing list:
@@ -180,7 +178,7 @@ The authors can be reached through the development mailing list:
 url="mailto:domjudge-devel@lists.a-eskwadraat.nl">. You need
 to be subscribed before you can post. See
 <htmlurl name="the list information page"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
+url="https://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
 for subscription and more details.
 
 Some developers and users of DOMjudge linger on the IRC channel

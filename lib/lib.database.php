@@ -306,7 +306,7 @@ class db
 		}
 
 		$this->_connection = mysqli_init();
-		@mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, $this->flags);
+		@mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, NULL, NULL, $this->flags);
 
 		if(mysqli_connect_error() || !$this->_connection) {
 			throw new RuntimeException("Could not connect to database server "
@@ -370,6 +370,7 @@ class db_result
 	private $_count;
 	private $_tuple;
 	private $_nextused;
+	private $_fields;
 
 	function __construct($res)
 	{

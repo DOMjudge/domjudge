@@ -9,10 +9,7 @@
 require('init.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
-$id = @$_GET['id'];
-$title = "Affiliation: " .htmlspecialchars(@$id);
-
-if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid affiliation id");
+$id = getRequestID();
 
 $cmd = @$_GET['cmd'];
 
@@ -30,12 +27,12 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Affiliation ID:</td><td>";
-		$row = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s',
-			$_GET['id']);
-		echo addHidden('keydata[0][affilid]', $row['affilid']) .
-			htmlspecialchars($row['affilid']);
-		echo "</td></tr>\n";
+		$row = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
+		if ( !$row ) error("Missing or invalid affiliation id");
+
+		echo "<tr><td>Affiliation ID:</td><td>" .
+			addHidden('keydata[0][affilid]', $row['affilid']) .
+			htmlspecialchars($row['affilid']) . "</td></tr>\n";
 	}
 
 ?>
@@ -69,11 +66,12 @@ echo addHidden('cmd', $cmd) .
 }
 
 
-require(LIBWWWDIR . '/header.php');
-
-$data = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
-
+$data = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
 if ( ! $data ) error("Missing or invalid affiliation id");
+
+$title = "Affiliation: " .htmlspecialchars($data['shortname']);
+
+require(LIBWWWDIR . '/header.php');
 
 $affillogo = "../images/affiliations/" . urlencode($data['affilid']) . ".png";
 $countryflag = "../images/countries/" . urlencode($data['country']) . ".png";

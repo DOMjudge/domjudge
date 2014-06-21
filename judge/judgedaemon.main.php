@@ -11,18 +11,25 @@ if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 require(LIBEXTDIR . '/spyc/spyc.php');
 
 require(ETCDIR . '/judgehost-config.php');
-$credfile = ETCDIR . '/restapi.secret';
-$credentials = @file($credfile);
-if (!$credentials) {
-	error("Cannot read REST API credentials file " . $credfile);
-}
-foreach ($credentials as $credential) {
-	if ( $credential{0} == '#' ) continue;
-	list ($resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
-	break;
-}
-if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
-	error("Error parsing REST API credentials.");
+
+$resturl = $restuser = $restpass = null;
+
+function read_credentials() {
+	global $resturl, $restuser, $restpass;
+
+	$credfile = ETCDIR . '/restapi.secret';
+	$credentials = @file($credfile);
+	if (!$credentials) {
+		error("Cannot read REST API credentials file " . $credfile);
+	}
+	foreach ($credentials as $credential) {
+		if ( $credential{0} == '#' ) continue;
+		list ($resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
+		break;
+	}
+	if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
+		error("Error parsing REST API credentials.");
+	}
 }
 
 /**
@@ -155,7 +162,7 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 		}
 
 		logmsg(LOG_INFO, "Unzipping");
-		system("unzip -d $execpath $execzippath", $retval);
+		system("unzip -q -d $execpath $execzippath", $retval);
 		if ( $retval!=0 ) error("Could not unzip zipfile in $execpath");
 
 		if ( !file_exists($execbuildpath) || !is_executable($execbuildpath) ) {
@@ -243,17 +250,18 @@ foreach ( $EXITCODES as $code => $name ) {
 // Pass SYSLOG variable via environment for compare program
 if ( defined('SYSLOG') && SYSLOG ) putenv('DJ_SYSLOG=' . SYSLOG);
 
-system("pgrep -u $runuser", $retval);
-if ($retval == 0) {
-	error("Still some processes by $runuser found, aborting");
-}
-if ($retval != 1) {
-	error("Error while checking processes for user $runuser");
+$output = array();
+exec("ps -u '$runuser' -o pid= -o comm=", $output, $retval);
+if ( count($output) != 0 ) {
+	error("found processes still running as '$runuser', check manually:\n" .
+	      implode("\n", $output));
 }
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
 initsignals();
+
+read_credentials();
 
 if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
@@ -323,11 +331,13 @@ function judge($row)
 	global $EXITCODES, $myhost, $options, $workdirpath;
 
 	// Set configuration variables for called programs
-	putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
-	putenv('COMPILETIME='   . dbconfig_get_rest('compile_time'));
-	putenv('MEMLIMIT='      . dbconfig_get_rest('memory_limit'));
-	putenv('FILELIMIT='     . dbconfig_get_rest('filesize_limit'));
-	putenv('PROCLIMIT='     . dbconfig_get_rest('process_limit'));
+	putenv('USE_CHROOT='        . (USE_CHROOT ? '1' : ''));
+	putenv('COMPILETIME='       . dbconfig_get_rest('compile_time'));
+	putenv('MEMLIMIT='          . dbconfig_get_rest('memory_limit'));
+	putenv('COMPILEMEMLIMIT='   . dbconfig_get_rest('compile_memory'));
+	putenv('COMPILEFILELIMIT='  . dbconfig_get_rest('compile_filesize'));
+	putenv('FILELIMIT='         . dbconfig_get_rest('filesize_limit'));
+	putenv('PROCLIMIT='         . dbconfig_get_rest('process_limit'));
 
 	$cpuset_opt = "";
 	if ( isset($options['daemonid']) ) $cpuset_opt = "-n ${options['daemonid']}";
@@ -488,7 +498,9 @@ function judge($row)
 		if ( is_readable($testcasedir . '/program.meta') ) {
 			$metadata = spyc_load_file($testcasedir . '/program.meta');
 
-			$runtime = $metadata[$metadata['time-used']];
+			if ( isset($metadata['time-used']) ) {
+				$runtime = @$metadata[$metadata['time-used']];
+			}
 		}
 
 		request('judging_runs', 'POST', 'judgingid=' . urlencode($row['judgingid'])

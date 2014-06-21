@@ -9,8 +9,8 @@
 require('init.php');
 
 // download a given problem statement
-$id = @$_REQUEST['id'];
-if ( is_numeric($id) ) {
+$id = getRequestID();
+if ( !empty($id) ) {
 	putProblemText($id);
 	exit;
 }

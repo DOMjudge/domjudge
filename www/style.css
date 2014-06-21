@@ -31,12 +31,7 @@ a:active          { color: red;    }
 
 .disabled         { color: silver; }
 .disabled a       { color: gray;   }
-.disabled .circle {
-	opacity: 0.2;
-	/* what follows is for IE-compatibility */
-	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
-	filter: alpha(opacity=20);
-}
+.disabled .circle { opacity: 0.2;  }
 .nodata           { color: gray; font-style: italic; }
 
 /* general table layout (not in scoreboard or lists) */
@@ -130,6 +125,8 @@ span.extra {
 	padding: 2px;
 	padding-left: 5px;
 	padding-right: 5px;
+	position: relative;
+	z-index: 1;
 }
 #menutop a.new {
 	color: #FF0000;
@@ -145,7 +142,6 @@ span.extra {
 	border: 1px dashed #ccc;
 	padding: 4px;
 	color: gray;
-	z-index: -1;
 }
 #timeleft { color: #800080;}
 #refresh {
@@ -212,7 +208,7 @@ legend {
 .univ {
 	font-size: 80%;
 	font-weight: normal;
-	color: darkgray;
+	color: dimgrey;
 }
 
 .scoreheader {

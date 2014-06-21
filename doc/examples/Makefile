@@ -12,7 +12,8 @@ ZIP = $(PROBLEMS:=.zip)
 docs: $(PDF) $(ZIP)
 
 # Used by sql/Makefile:
-pdf: $(PDF)
+.pdf-generated: $(PDF)
+	touch .pdf-generated
 
 install-docs:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples example.*
@@ -22,6 +23,7 @@ install-docs:
 
 $(PDF): %.pdf: %.tex %.in %.out $(TOPDIR)/doc/logos/DOMjudgelogo.pdf
 	pdflatex -interaction=nonstopmode $< > /dev/null
+	touch .pdf-generated
 
 $(INI): %.ini:
 	@[ -n "$(QUIET)" ] || echo "Generating '$@'..."
@@ -42,6 +44,4 @@ clean-l:
 	-rm -f $(PROBLEMS:=.aux) $(PROBLEMS:=.log)
 
 maintainer-clean-l:
-	-rm -f $(INI) $(PDF) $(ZIP)
-
-.PHONY: pdf
+	-rm -f $(INI) $(PDF) $(ZIP) .pdf-generated

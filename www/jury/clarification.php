@@ -10,9 +10,9 @@
 require('init.php');
 $title = 'Clarifications';
 
-if ( isset($_REQUEST['id']) ) {
-	$id = (int)$_REQUEST['id'];
-	if ( ! $id ) error("Missing clarification id");
+$id = getRequestID();
+
+if ( isset($id) ) {
 
 	$req = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
 	               LEFT JOIN team t ON (t.teamid = q.sender)

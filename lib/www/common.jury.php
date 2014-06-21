@@ -189,10 +189,13 @@ function importZippedProblem($zip, $probid = NULL)
 			if ( !isset($ini_array['name'])      ) $ini_array['name'] = $ini_array['probid'];
 			if ( !isset($ini_array['timelimit']) ) $ini_array['timelimit'] = $def_timelimit;
 
-			$DB->q('INSERT INTO problem (' . implode(', ',array_keys($ini_array)) .
-			       ') VALUES (%As)', $ini_array);
-
+			// rename probid to shortname
 			$probid = $ini_array['probid'];
+			unset($ini_array['probid']);
+			$ini_array['shortname'] = $probid;
+
+			$probid = $DB->q('RETURNID INSERT INTO problem (' . implode(', ',array_keys($ini_array)) .
+			       ') VALUES (%As)', $ini_array);
 		} else {
 			// Remove keys that cannot be modified:
 			unset($ini_array['probid']);
@@ -242,7 +245,8 @@ function importZippedProblem($zip, $probid = NULL)
 
 		for ($j = 0; $j < $zip->numFiles; $j++) {
 			$filename = $zip->getNameIndex($j);
-			$extension = end(explode(".", $filename));
+			$filename_parts = explode(".", $filename);
+			$extension = end($filename_parts);
 			unset($langid);
 			foreach ( $langs as $key => $exts ) {
 				if ( in_array($extension,json_decode($exts)) ) {
@@ -251,7 +255,7 @@ function importZippedProblem($zip, $probid = NULL)
 				}
 			}
 			if( !empty($langid) && !empty($teamid) ) {
-				if ( !($tmpfname = mkstemps(TMPDIR."/ref_solution-XXXXXX",0)) ) {
+				if ( !($tmpfname = tempnam(TMPDIR, "ref_solution-")) ) {
 					error("Could not create temporary file.");
 				}
 				file_put_contents($tmpfname, $zip->getFromIndex($j));

@@ -1,6 +1,6 @@
 # @configure_input@
 
-# Example sudoers configuration for DOMjudge.
+# Example sudoers configuration for DOMjudge judgehosts.
 # Check the file paths (especially the chroot prefix),
 # give it file mode 0440 and place this file into /etc/sudoers.d/
 # (most recent sudo versions; otherwise use an #include statement

@@ -8,10 +8,8 @@
 
 require('init.php');
 
-$id = @$_REQUEST['id'];
+$id = getRequestID(FALSE);
 $title = 'Executable '.htmlspecialchars(@$id);
-
-if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid executable id");
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
@@ -150,9 +148,9 @@ exit;
 
 endif;
 
-$data = $DB->q('TUPLE SELECT execid, description, md5sum, type, OCTET_LENGTH(zipfile) AS size
-	       FROM executable
-	       WHERE execid = %s', $id);
+$data = $DB->q('MAYBETUPLE SELECT execid, description, md5sum, type,
+                                  OCTET_LENGTH(zipfile) AS size
+                FROM executable WHERE execid = %s', $id);
 
 if ( ! $data ) error("Missing or invalid problem id");
 
@@ -185,14 +183,18 @@ if ( $data['type'] == 'compare' ) {
 	$page = "problem";
 	$prefix = "p";
 }
-if ( $res->count() > 0 ) {
-	while( $row = $res->next() ) {
-		echo '<a href="' . $page . '.php?id=' . $row['id'] . '">'
-			. $prefix . $row['id'] . '</a> ';
-	}
-} else {
-	echo "<span class=\"nodata\">none</span>";
+$used = FALSE;
+if ( ($data['type'] == 'compare' || $data['type'] == 'run') &&
+     dbconfig_get('default_'.$data['type']) == $data['execid'] ) {
+	$used = TRUE;
+	echo '<em>default ' . $data['type'] . '</em> ';
 }
+while( $row = $res->next() ) {
+	$used = TRUE;
+	echo '<a href="' . $page . '.php?id=' . $row['id'] . '">'
+	    . $prefix . $row['id'] . '</a> ';
+}
+if ( ! $used ) echo "<span class=\"nodata\">none</span>";
 
 ?>
 </td></tr>

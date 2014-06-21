@@ -21,8 +21,9 @@ if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No executables defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">description</th>" .
-	     "<th scope=\"col\">type</th><th scope=\"col\">size</th><th scope=\"col\">md5</th>" .
+	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">type</th>" .
+	     "<th scope=\"col\">description</th>" .
+	     "<th scope=\"col\">size</th><th scope=\"col\">md5</th>" .
 	     "<th></th><th></th></tr></thead>\n<tbody>\n";
 
 	$lastcid = -1;
@@ -32,8 +33,8 @@ if( $res->count() == 0 ) {
 
 		echo "<tr><td class=\"execid\">" . $link .
 				htmlspecialchars($row['execid'])."</a>".
-			"</td><td>" . $link . htmlspecialchars($row['description'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['type'])."</a>".
+			"</td><td>" . $link . htmlspecialchars(str_cut($row['description'],40))."</a>".
 			"</td><td class=\"size\">" . $link .
 				printsize($row['size'])."</a>".
 			"</td><td class=\"md5\">" . $link .

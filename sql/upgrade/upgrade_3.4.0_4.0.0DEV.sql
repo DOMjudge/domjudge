@@ -32,7 +32,6 @@ ALTER TABLE `judging_run`
 ALTER TABLE `language`
   ADD COLUMN `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)' AFTER `name`;
 
-
 -- Rename scoreboard cache tables to match new rankcache_{jury,public}.
 
 RENAME TABLE `scoreboard_jury`   TO `scorecache_jury`;
@@ -396,6 +395,9 @@ CREATE TABLE `rankcache_public` (
   CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
 
+ALTER TABLE `team`
+  ADD COLUMN `externalid` varchar(128) DEFAULT NULL COMMENT 'Team ID in an external system' AFTER `teamid`,
+  ADD KEY `externalid` (`externalid`);
 
 --
 -- Transfer data from old to new structure
@@ -442,6 +444,9 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('co
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_compare', '"compare"', 'string', 'The script used to compare outputs if no special compare script specified.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_run', '"run"', 'string', 'The script used to run submissions if no special run script specified.');
+
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_memory', '2097152', 'int', 'Maximum memory usage (in kB) by *compilers*.  This is only to safeguard against malicious code, so a reasonable but large amount should do.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_filesize', '65536', 'int', 'Maximum filesize (in kB) compilers may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.');
 
 UPDATE `language` SET `extensions` = '["adb","ads"]' WHERE `langid` = 'adb';
 UPDATE `language` SET `extensions` = '["awk"]' WHERE `langid` = 'awk';
@@ -505,9 +510,11 @@ INSERT INTO `role` (`role`, `description`) VALUES ('judgehost',         '(Intern
 INSERT INTO `role` (`role`, `description`) VALUES ('event_reader',      '(Internal/System) event_reader');
 INSERT INTO `role` (`role`, `description`) VALUES ('full_event_reader', '(Internal/System) full_event_reader');
 
-INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES ('1', 'admin', 'Administrator', MD5('admin#admin'));
+INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES (1, 'admin', 'Administrator', MD5('admin#admin'));
+INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES (2, 'judgehost', 'User for judgedaemons', NULL);
 
-INSERT INTO `userrole` (`userid`, `roleid`) VALUES ('1', '1');
+INSERT INTO `userrole` (`userid`, `roleid`) VALUES (1, 1);
+INSERT INTO `userrole` (`userid`, `roleid`) VALUES (2, 6);
 
 INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('plg', 'Prolog', '["plg"]', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('rb', 'Ruby', '["rb"]', 0, 1, 1);

@@ -63,6 +63,7 @@
 #include <inttypes.h>
 #include <libcgroup.h>
 #include <sched.h>
+#include <sys/sysinfo.h>
 #else
 #undef USE_CGROUPS
 #endif
@@ -294,7 +295,7 @@ Run COMMAND with restrictions.\n\
   -f, --filesize=SIZE    set maximum created filesize to SIZE kB;\n");
 	printf("\
   -p, --nproc=N          set maximum no. processes to N\n\
-  -P, --cpuset=ID        use only processor number ID\n\
+  -P, --cpuset=ID        use only processor number ID (or set, e.g. \"0,2-3\")\n\
   -c, --no-core          disable core dumps\n\
   -o, --stdout=FILE      redirect COMMAND stdout output to FILE\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
@@ -922,6 +923,17 @@ int main(int argc, char **argv)
 	}
 
 #ifdef USE_CGROUPS
+	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
+		int ret = strtol(cpuset, &ptr, 10);
+		/* check if input is only a single integer */
+		if ( *ptr == '\0' ) {
+			/* check if we have enough cores available */
+			if ( ret < 0 || ret >= get_nprocs() ) {
+				error(0, "processor ID %d given as cpuset, but only %d cores available",
+				      ret, get_nprocs());
+			}
+		}
+	}
 	/* Make libcgroup ready for use */
 	ret = cgroup_init();
 	if ( ret!=0 ) {
@@ -1060,7 +1072,10 @@ int main(int argc, char **argv)
 			error(errno,"getting start clock ticks");
 		}
 
-		/* Wait for child data or exit. */
+		/* Wait for child data or exit.
+		   Initialize status here to quelch clang++ warning about
+		   uninitialized value; it is set by the wait() call. */
+		status = 0;
 		while ( 1 ) {
 
 			FD_ZERO(&readfds);
@@ -1082,7 +1097,8 @@ int main(int argc, char **argv)
 
 			/* Check to see if data is available and pass it on */
 			for(i=1; i<=2; i++) {
-				if ( child_pipefd[i][PIPE_OUT] != -1 && FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
+				if ( child_pipefd[i][PIPE_OUT] != -1 &&
+				     FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
 					nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
 					if ( nread==-1 ) error(errno,"reading child fd %d",i);
 					if ( nread==0 ) {

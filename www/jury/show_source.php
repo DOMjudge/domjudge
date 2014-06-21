@@ -59,8 +59,8 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 		} else {
 			// Try generating temporary files for executing diff.
 
-			$oldfile = mkstemps(TMPDIR."/source-old-s$oldid-XXXXXX",0);
-			$newfile = mkstemps(TMPDIR."/source-new-s$id-XXXXXX",0);
+			$oldfile = tempnam(TMPDIR, "source-old-s$oldid-");
+			$newfile = tempnam(TMPDIR, "source-new-s$id-");
 
 			if( ! $oldfile || ! $newfile ) {
 				$difftext = "DOMjudge: error generating temporary files for diff.";
@@ -194,7 +194,7 @@ function multifilediff ($sources, $oldsources, $olddata)
 
 require('init.php');
 
-$id = (int)$_GET['id'];
+$id = getRequestID();
 $submission = $DB->q('MAYBETUPLE SELECT * FROM submission s
 	      WHERE submitid = %i',$id);
 if ( empty($submission) ) error ("Submission $id not found");
@@ -267,7 +267,7 @@ if ( !empty($origsources) ) {
 	$html .= multifilediff($sources, $origsources, $origdata);
 }
 
-echo "<h2>Source code for submission s" .htmlspecialchars($id);
+echo "<h2>Source code for submission <a href=\"submission.php?id=" . urlencode($id) . "\">s" .htmlspecialchars($id) . "</a>";
 if ( !empty($submission['origsubmitid']) ) {
 	$origid = $submission['origsubmitid'];
 	echo  " (resubmit of <a href=\"submission.php?id=" . urlencode($origid) . "\">s$origid</a>)";

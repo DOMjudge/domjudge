@@ -20,7 +20,7 @@ $fdata = calcFreezeData($cdata);
 
 echo "<script type=\"text/javascript\">\n<!--\n";
 
-if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
+if ( $fdata['cstarted'] ) {
 	$probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
 	                    WHERE cid = %i AND allow_submit = 1
 	                    ORDER BY shortname', $cid);
@@ -58,7 +58,7 @@ echo "<div id=\"submitlist\">\n";
 echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
 
 
-if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
+if ( $fdata['cstarted'] ) {
 	if ( $submitted ) {
 		echo "<p class=\"submissiondone\">submission done <a href=\"./\">x</a></p>\n\n";
 	} else {

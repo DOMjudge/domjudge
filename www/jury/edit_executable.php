@@ -14,7 +14,7 @@ if ( isset($_POST['storeid']) ) {
 	$executable = $DB->q('MAYBETUPLE SELECT * FROM executable
 		WHERE execid = %s', $id);
 	if ( empty($executable) ) error ("Executable $id not found");
-	if ( !($tmpfname = mkstemps(TMPDIR."/executable-XXXXXX",0)) ) {
+	if ( !($tmpfname = tempnam(TMPDIR, "/executable-")) ) {
 		error("failed to create temporary file");
 	}
 	if ( FALSE === file_put_contents($tmpfname, $executable['zipfile']) ) {
@@ -25,7 +25,7 @@ if ( isset($_POST['storeid']) ) {
 		error("failed to created temporary directory");
 	}
 	chmod($tmpexecdir, 0700);
-	system("unzip $tmpfname -d $tmpexecdir", $retval);
+	system("unzip -q $tmpfname -d $tmpexecdir", $retval);
 	if ( $retval!=0 ) {
 		error("Could not unzip executable to temporary directory.");
 	}
@@ -70,7 +70,7 @@ if ( isset($_POST['storeid']) ) {
 	exit;
 }
 
-$id = $_GET['id'];
+$id = getRequestID(FALSE);
 $executable = $DB->q('MAYBETUPLE SELECT * FROM executable
 	      WHERE execid = %s', $id);
 if ( empty($executable) ) error ("Executable $id not found");
@@ -88,13 +88,14 @@ $html = '<script type="text/javascript" src="../js/tabber.js"></script>' .
 	'<script src="../js/ace/ace.js" type="text/javascript" charset="utf-8"></script>' .
 	'<script src="../js/ace/ext-modelist.js" type="text/javascript" charset="utf-8"></script>' .
 	'<div class="tabber">';
-if ( !($tmpfname = mkstemps(TMPDIR."/executable-XXXXXX",0)) ) {
+if ( !($tmpfname = tempnam(TMPDIR, "executable-")) ) {
 	error("failed to create temporary file");
 }
 if ( FALSE === file_put_contents($tmpfname, $executable['zipfile']) ) {
 	error("failed to write zip file to temporary file");
 }
 $zip = openZipFile($tmpfname);
+$skippedBinary = array();
 for ($j = 0; $j < $zip->numFiles; $j++) {
 	$filename = $zip->getNameIndex($j);
 	if ($filename[strlen($filename)-1] == "/") {

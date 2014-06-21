@@ -6,38 +6,42 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$ext_id = (int)@$_REQUEST['ext_id'];
-
-$id = (int)@$_REQUEST['id'];
-if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
-
-function compile_output($output, $success) {
+function display_compile_output($output, $success) {
 	$color = "#6666FF";
 	$msg = "not finished yet";
 	if ( $output !== NULL ) {
 		if ($success) {
 			$color = '#1daa1d';
-			$title = "There were no compiler errors or warnings.";
-			if ( strlen($output) > 0 ) {
-				$title = htmlspecialchars($output);
+			$msg = 'successful';
+			if ( !empty($output) ) {
+				$msg .= ' (with ' . mb_substr_count($output, "\n") . ' line(s) of output)';
 			}
-			$msg = 'successful (with ' . substr_count($output, "\n") . ' line(s) of output)';
 		} else {
 			$color = 'red';
 			$msg = 'unsuccessful';
 		}
 	}
-	echo "<h3 id=\"compile\">Compilation <span " . ( isset($title) ? "title=\"$title\" " : '' ) . "style=\"color:$color;\">$msg</span></h3>\n\n";
 
-	if ( $output === NULL || $success ) {
-		return;
-	}
+	echo '<h3 id="compile">' .
+		(empty($output) ? '' : "<a href=\"javascript:collapse('compile')\">") .
+		"Compilation <span style=\"color:$color;\">$msg</span>" .
+		(empty($output) ? '' : "</a>" ) . "</h3>\n\n";
 
-	if ( strlen($output) > 0 ) {
-		echo "<pre class=\"output_text\">".
+	if ( !empty($output) ) {
+		echo '<pre class="output_text details" id="detailcompile">' .
 			htmlspecialchars($output)."</pre>\n\n";
 	} else {
-		echo "<p class=\"nodata\">There were no compiler errors or warnings.</p>\n";
+		echo '<p class="nodata details" id="detailcompile">' .
+			"There were no compiler errors or warnings.</p>\n";
+	}
+
+	// Collapse compile output when compiled succesfully.
+	if ( $success ) {
+		echo "<script type=\"text/javascript\">
+<!--
+	collapse('compile');
+// -->
+</script>\n";
 	}
 }
 
@@ -72,6 +76,13 @@ function display_runinfo($runinfo, $is_final) {
 	return array($tclist, $sum_runtime, $max_runtime);
 }
 
+require('init.php');
+
+$id = getRequestID();
+if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
+
+$ext_id = (int)@$_REQUEST['ext_id'];
+
 // Also check for $id in claim POST variable as submissions.php cannot
 // send the submission ID as a separate variable.
 if ( is_array(@$_POST['claim']) ) {
@@ -80,8 +91,6 @@ if ( is_array(@$_POST['claim']) ) {
 if ( is_array(@$_POST['unclaim']) ) {
 	foreach( $_POST['unclaim'] as $key => $val ) $id = (int)$key;
 }
-
-require('init.php');
 
 // If jid is set but not id, try to deduce it from the database.
 if ( isset($jid) && ! $id ) {
@@ -143,7 +152,7 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 	} else if ( empty($jury_member) && isset($_REQUEST['claim']) ) {
 		warning("Cannot claim this submission: no jury member specified.");
 	} else {
-		if ( !empty($jdata[$jid]['jury_member']) && isset($_REQUEST['claim']) ) {
+		if ( !empty($jdata[$jid]['jury_member']) && isset($_REQUEST['claim']) && $jury_member !== $jdata[$jid]['jury_member'] ) {
 			warning("Submission claimed and previous owner " .
 			        @$jdata[$jid]['jury_member'] . " replaced.");
 		}
@@ -342,23 +351,20 @@ if ( isset($jid) )  {
 
 	echo "</span>\n";
 
-	// If compilation failed, there's no more info to show, so stop here
-	if ( @$jud['result']=='compiler-error' ) {
-		compile_output(@$jud['output_compile'], FALSE);
-		require(LIBWWWDIR . '/footer.php');
-		exit(0);
-	}
+	if ( @$jud['result']!=='compiler-error' ) {
+		echo ", max/sum runtime: " . sprintf('%.2f/%.2fs',$max_runtime,$sum_runtime);
+		if ( isset($max_lastruntime) ) {
+			echo " <span class=\"lastruntime\">(<a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a>: "
+				. sprintf('%.2f/%.2fs',$max_lastruntime,$sum_lastruntime) .
+				")</span>";
+		}
 
-	echo ", max/sum runtime: " . sprintf('%.2f/%.2fs',$max_runtime,$sum_runtime);
-	echo " <span class=\"lastruntime\">(<a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a>: "
-		. sprintf('%.2f/%.2fs',$max_lastruntime,$sum_lastruntime) .
-		")</span>";
-
-	echo "<table>\n$tclist";
-	if ( $lastjud !== NULL ) {
-		echo $lasttclist;
+		echo "<table>\n$tclist";
+		if ( $lastjud !== NULL ) {
+			echo $lasttclist;
+		}
+		echo "</table>\n";
 	}
-	echo "</table>\n";
 	
 	// display following data only when the judging has been completed
 	if ( $judging_ended ) {
@@ -418,8 +424,10 @@ togglelastruns();
 </script>
 <?php
 
-	compile_output(@$jud['output_compile'], TRUE);
-	if ( @$jud['output_compile'] === NULL ) {
+	display_compile_output(@$jud['output_compile'], @$jud['result']!=='compiler-error');
+
+	// If compilation is not finished yet or failed, there's no more info to show, so stop here
+	if ( @$jud['output_compile'] === NULL || @$jud['result']=='compiler-error' ) {
 		require(LIBWWWDIR . '/footer.php');
 		exit(0);
 	}
@@ -440,7 +448,7 @@ togglelastruns();
 
 		$timelimit_str = '';
 		if ( $run['runresult']=='timelimit' ) {
-			if ( preg_match('/Timelimit exceeded.* hard-timelimit/',$run['output_error']) ) {
+			if ( preg_match('/timelimit exceeded.*hard wall time/',$run['output_system']) ) {
 				$timelimit_str = '<b>(terminated)</b>';
 			} else {
 				$timelimit_str = '<b>(finished late)</b>';
@@ -454,8 +462,7 @@ togglelastruns();
 		    "&amp;rank=" . $run['rank'] . "&amp;fetch=input\">Input</a> / " .
 		    "<a href=\"testcase.php?probid=" . htmlspecialchars($submdata['probid']) .
 		    "&amp;rank=" . $run['rank'] . "&amp;fetch=output\">Reference Output</a> / " .
-		    "<a href=\"team_output.php?probid=" . htmlspecialchars($submdata['probid']) .
-		    "&amp;runid=" . $run['runid'] . "\">Team Output</a>" .
+		    "<a href=\"team_output.php?runid=" . $run['runid'] . "\">Team Output</a>" .
 		    "</td></tr>" .
 		    "<tr><td>Runtime:</td><td>$run[runtime] sec $timelimit_str</td></tr>" .
 		    "<tr><td>Result: </td><td><span class=\"sol sol_" .

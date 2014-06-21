@@ -30,6 +30,8 @@ function check_user($data, $keydata = null)
 	}
 	if ( !empty($data['password']) ) {
 		$data['password'] = md5("$id#".$data['password']);
+	} else {
+		unset($data['password']);
 	}
 	if ( !empty($data['ip_address']) ) {
 		if ( !filter_var($data['ip_address'], FILTER_VALIDATE_IP) ) {
@@ -60,7 +62,6 @@ function check_problem($data, $keydata = null)
 			(int)$data['timelimit'] != $data['timelimit'] ) {
 		ch_error("Timelimit is not a valid positive integer");
 	}
-	$id = (isset($data['probid']) ? $data['probid'] : $keydata['probid']);
 	if ( ! preg_match ( ID_REGEX, $data['shortname'] ) ) {
 		ch_error("Problem shortname may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
@@ -79,7 +80,7 @@ function check_problem($data, $keydata = null)
 		     function_exists("finfo_open") ) {
 			$finfo = finfo_open(FILEINFO_MIME);
 
-			list($type, $enc) = explode('; ', finfo_file($finfo, $tempname));
+			list($type) = explode('; ', finfo_file($finfo, $tempname));
 
 			finfo_close($finfo);
 
@@ -102,6 +103,10 @@ function check_problem($data, $keydata = null)
 	if ( !empty($data['problemtext']) &&
 	     !isset($data['problemtext_type']) ) {
 		ch_error("Problem statement has unknown file type.");
+	}
+	// Unset problemtext_type if problemtext was set to null explicitly.
+	if ( array_key_exists('problemtext', $data) && empty($data['problemtext']) ) {
+		$data['problemtext_type'] = NULL;
 	}
 
 	if ( !empty($data['special_compare']) ) {

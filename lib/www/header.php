@@ -33,7 +33,7 @@ if(!isset($menu)) {
 <html lang="en" xml:lang="en">
 <head>
 	<!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
-<meta charset="<?php echo DJ_CHARACTER_SET?>">
+<meta charset="<?php echo DJ_CHARACTER_SET?>"/>
 <title><?php echo $title?></title>
 <link rel="icon" href="../images/favicon.png" type="image/png" />
 <link rel="stylesheet" href="../style.css" type="text/css" />

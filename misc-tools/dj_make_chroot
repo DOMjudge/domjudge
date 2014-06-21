@@ -35,16 +35,19 @@ INSTALLDEBS="openjdk-7-jre-headless locales"
 # Debian packages to remove after upgrade (space separated):
 REMOVEDEBS=""
 
-# Debian mirror. http.debian.net will pick the 'closest'.
-DEBMIRROR="http://http.debian.net/debian"
-
 # Which debootstrap package to install on non-Debian systems:
 DEBOOTDEB="debootstrap_1.0.48+deb7u1_all.deb"
+
+# The Debian mirror/proxy below can be passed as environment
+# variables; if none are given the following defaults are used.
+
+# Debian mirror. http.debian.net will pick the 'closest'.
+[ -z "$DEBMIRROR" ] && DEBMIRROR="http://http.debian.net/debian"
 
 # A local caching proxy to use for debian packages
 # (typically an install of aptcacher-ng), for example:
 #DEBPROXY="http://aptcacher-ng.example.com:3142/"
-DEBPROXY=""
+[ -z "$DEBPROXY" ] && DEBPROXY=""
 
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive

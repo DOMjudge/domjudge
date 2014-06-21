@@ -42,7 +42,7 @@ ob_implicit_flush();
 // get the contest, teams and problems
 $teams = $DB->q('TABLE SELECT teamid FROM team ORDER BY teamid');
 $probs = $DB->q('COLUMN SELECT probid FROM problem
-                 WHERE cid = %i ORDER BY probid', $cid);
+                 WHERE cid = %i ORDER BY shortname', $cid);
 
 echo "<p>Recalculating all values for the scoreboard cache (" .
 	count($teams) . " teams, " . count($probs) ." problems, contest c" .

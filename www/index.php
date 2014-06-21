@@ -21,8 +21,8 @@ require_once(LIBWWWDIR . '/auth.php');
 
 $target = 'public/';
 if ( logged_in() ) {
-	if     ( checkrole('team',false) ) $target = 'team/';
-	elseif ( checkrole('jury') )       $target = 'jury/';
+	if     ( checkrole('jury') )       $target = 'jury/';
+	elseif ( checkrole('team',false) ) $target = 'team/';
 	elseif ( checkrole('balloon') )    $target = 'jury/balloons.php';
 }
 

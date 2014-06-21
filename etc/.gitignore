@@ -1,12 +1,10 @@
 /domserver-static.php
-/domserver-static.h
 /judgehost-static.php
 /runguard-config.h
 /submit-config.h
 /apache.conf
 /config.h.in
 /config.h
-/htpasswd-plugin
 /dbpasswords.secret
 /restapi.secret
 /sudoers-domjudge

@@ -22,7 +22,7 @@ if ( isset($_POST['origsubmitid']) ) {
 	$filenames = array();
 	foreach($sources as $sourcedata)
 	{
-		if ( !($tmpfname = mkstemps(TMPDIR."/edit_source-XXXXXX",0)) ) {
+		if ( !($tmpfname = tempnam(TMPDIR, "edit_source-")) ) {
 			error("Could not create temporary file.");
 		}
 		file_put_contents($tmpfname, $_POST['source' . $sourcedata['rank']]);
@@ -43,7 +43,7 @@ if ( isset($_POST['origsubmitid']) ) {
 	exit;
 }
 
-$id = (int)$_GET['id'];
+$id = getRequestID();
 $submission = $DB->q('MAYBETUPLE SELECT * FROM submission s
                   WHERE submitid = %i', $id);
 

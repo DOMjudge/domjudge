@@ -62,7 +62,9 @@ function flushresults() {
 		if ( $row['flushed'] ) continue;
 		$row['flushed'] = TRUE;
 
-		if ( empty($row['details']) ) $row['details'] = 'No issues found.';
+		if ( empty($row['details']) && empty($row['details_html']) ) {
+			$row['details'] = 'No issues found.';
+		}
 
 		if ( $row['section'] != $lastsection ) {
 			echo "<tr><th colspan=\"2\">" .
@@ -164,6 +166,7 @@ if ( class_exists("ZipArchive") ) {
 	       'to be able to import or export problem data via zip bundles.');
 }
 
+$mysqldata = array();
 $mysqldatares = $DB->q('SHOW variables WHERE
                         Variable_name = "max_connections" OR
                         Variable_name = "max_allowed_packet" OR
@@ -387,24 +390,15 @@ flushresults();
 // SUBMISSIONS, JUDINGS
 
 $submres = 'O';
-$submnote = 'Websubmit ' . ( ENABLE_WEBSUBMIT_SERVER ? 'en':'dis' ) ."abled.\n".
-	 'Submitserver ' . ( ENABLE_CMDSUBMIT_SERVER ? 'en':'dis' ) ."abled.\n\n";
-
-if ( ! ENABLE_WEBSUBMIT_SERVER && ! ENABLE_CMDSUBMIT_SERVER ) {
-	$submres = 'E';
-	$submnote .= 'Both Websubmit and Submitserver disabled. No way to make submissions.';
-} else {
-	if ( ENABLE_WEBSUBMIT_SERVER && ! is_writable(SUBMITDIR) ) {
-		$submres = 'W';
-		$submnote .= 'The webserver has no write access to SUBMITDIR (' .
-			htmlspecialchars(SUBMITDIR) .
-			'), and thus will not be able to make backup copies of submissions.';
-	} else {
-		$submnote .= 'No issues found.';
-	}
+$submnote = NULL;
+if ( ! is_writable(SUBMITDIR) ) {
+	$submres = 'W';
+	$submnote = 'The webserver has no write access to SUBMITDIR (' .
+	             htmlspecialchars(SUBMITDIR) .
+	             '), and thus will not be able to make backup copies of submissions.';
 }
 
-result('submissions and judgings', 'Submit method', $submres, $submnote);
+result('submissions and judgings', 'Submissions', $submres, $submnote);
 
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
@@ -459,16 +453,6 @@ $res = $DB->q('SELECT submitid, SUM(valid) as numvalid
 while($row = $res->next()) {
 	$details .= 'Submission s' . $row['submitid'] . ' has more than one valid judging (' .
 		$row['numvalid'] . ")\n";
-}
-
-// check for unknown result strings
-$res = $DB->q('SELECT judgingid, submitid, result
-	FROM judging WHERE result IS NOT NULL AND result NOT IN (%As)',
-	$EXITCODES);
-while($row = $res->next()) {
-	$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
-		' has an unknown result code "' .
-		$row['result'] . "\"\n";
 }
 
 // check for valid judgings that are already running too long
@@ -526,8 +510,7 @@ if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 		$res = $DB->q('SELECT ' . $fields . ' FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
 		while ( $row = $res->next() ) {
 			foreach ( $foreign_keys as $foreign_key => $val ) {
-				@list( $target, $action ) = explode('&', $val);
-				if ( empty($action) ) $action = 'CASCADE';
+				list( $target, $action ) = explode('&', $val);
 				if ( empty($row[$foreign_key]) || $action=='NOCONSTRAINT' ) {
 					continue;
 				}

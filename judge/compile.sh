@@ -38,6 +38,7 @@ cleanexit ()
 {
 	trap - EXIT
 
+	chmod go= "$WORKDIR/compile"
 	logmsg $LOG_DEBUG "exiting, code = '$1'"
 	exit $1
 }
@@ -123,8 +124,8 @@ logmsg $LOG_INFO "starting compile"
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
 exitcode=0
-$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
-	-t $COMPILETIME -c -f 65536 -M "$WORKDIR/compile.meta" -- \
+$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -m $COMPILEMEMLIMIT \
+	-t $COMPILETIME -c -f $COMPILEFILELIMIT -s $COMPILEFILELIMIT -M "$WORKDIR/compile.meta" -- \
 	"$COMPILE_SCRIPT" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
@@ -132,7 +133,8 @@ cd "$WORKDIR"
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep '^time-result: .*timelimit' compile.meta >/dev/null 2>&1 ; then
-	echo "Compiling aborted after $COMPILETIME seconds." >compile.out
+	echo "Compiling aborted after $COMPILETIME seconds, compiler output:" >compile.out
+	cat compile.tmp >>compile.out
 	cleanexit ${E_COMPILER_ERROR:--1}
 fi
 if [ $exitcode -ne 0 ]; then

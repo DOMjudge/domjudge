@@ -189,6 +189,9 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		echo "<td class=\"result\"><a$link>";
 		if ( $row['submittime'] >= $cdata['endtime'] ) {
 			echo printresult('too-late');
+			if ( IS_JURY && $row['result'] ) {
+				echo " (" . printresult($row['result']) . ")";
+			}
 		} else if ( ! $row['result'] ||
 		            ( !IS_JURY && ! $row['verified'] &&
 		              dbconfig_get('verification_required', 0) ) ) {
@@ -499,7 +502,7 @@ function putProblemTextList()
 		// otherwise, display list
 		$res = $DB->q('SELECT p.probid,p.shortname,p.name,p.color,p.problemtext_type
 		               FROM problem p WHERE cid = %i AND allow_submit = 1 AND
-		               problemtext_type IS NOT NULL ORDER BY p.probid', $cid);
+		               problemtext_type IS NOT NULL ORDER BY p.shortname', $cid);
 
 		if ( $res->count() > 0 ) {
 			echo "<ul>\n";

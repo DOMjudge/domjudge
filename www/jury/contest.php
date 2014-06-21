@@ -6,10 +6,10 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$id = (int)@$_GET['id'];
-
 require('init.php');
-$title = "Contest";
+
+$id = getRequestID();
+$title = $id ? 'Contest c'.htmlspecialchars(@$id) : 'Add contest';
 
 require(LIBWWWDIR . '/header.php');
 
@@ -26,10 +26,11 @@ if ( !empty($_GET['cmd']) ):
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Contest ID:</td><td>";
-		$row = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i',
-			$_GET['id']);
-		echo addHidden('keydata[0][cid]', $row['cid']) .
+		$row = $DB->q('MAYBETUPLE SELECT * FROM contest WHERE cid = %s', $id);
+		if ( !$row ) error("Missing or invalid contest id");
+
+		echo "<tr><td>Contest ID:</td><td>" .
+			addHidden('keydata[0][cid]', $row['cid']) .
 			'c' . htmlspecialchars($row['cid']) .
 			"</td></tr>\n";
 	}
