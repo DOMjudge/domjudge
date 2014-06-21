@@ -115,28 +115,6 @@ function printtimediff($start, $end = NULL)
 }
 
 /**
- * print the relative time in h:mm:ss format
- */
-function printtimerel($rel_time) {
-
-	$h = floor($rel_time/3600);
-	$rel_time %= 3600;
-
-	$m = floor($rel_time/60);
-	if ($m < 10) {
-		$m = '0' . $m;
-	}
-	$rel_time %= 60;
-	
-	$s = $rel_time;
-	if ($s < 10) {
-		$s = '0' . $s;
-	}
-
-	return $h . ':' . $m . ':' . $s;
-}
-
-/**
  * Print (file) size in human readable format by using B,KB,MB,GB suffixes.
  * Input is a integer (the size in bytes), output a string with suffix.
  */
