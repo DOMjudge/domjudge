@@ -189,6 +189,13 @@ class db
 			user_error("Internal error in q()", E_USER_ERROR);
 		}
 		if ($argv) {
+			if(DEBUG) {
+				$backtrace = debug_backtrace();
+				$callsite = ' in file:' . $backtrace[1]['file'] . ', ' .
+					    ' line:' . $backtrace[1]['line'] . ', ';
+			} else {
+				$callsite = '';
+			}
 			throw new BadMethodCallException("Not all arguments to q() are"
 			    . " processed");
 		}
