@@ -76,7 +76,7 @@ $res = $DB->q("SELECT b.*, s.probid, s.submittime,
 $BALLOONS = $TOTAL_BALLOONS = array();
 while ( $row = $res->next() ) {
 	$BALLOONS[] = $row;
-	$TOTAL_BALLOONS[$row['login']][] = $row['probid'];
+	$TOTAL_BALLOONS[$row['teamid']][] = $row['probid'];
 
 	// keep overwriting these variables - in the end they'll
 	// contain the id's of the first balloon in each type
