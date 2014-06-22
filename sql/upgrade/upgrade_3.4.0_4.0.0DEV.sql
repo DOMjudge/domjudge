@@ -1,6 +1,8 @@
 -- This script upgrades table structure, data, and privileges
 -- from/to the exact version numbers specified in the filename.
 
+-- It needs to be run from the sql/ directory (not sql/upgrade/).
+
 --
 -- First execute a check whether this upgrade should apply. The check
 -- below should fail if this upgrade has already been applied, but
