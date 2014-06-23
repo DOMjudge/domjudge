@@ -18,7 +18,7 @@ endif
 
 SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
               combined_scoreboard runssh_judgehosts runssh_teams balloons \
-              simulate_contest create_cgroups
+              simulate_contest create_cgroups create_accounts
 
 config: $(SUBST_FILES)
 
@@ -91,7 +91,7 @@ checktestdata:
 endif # CHECKTESTDATA_ENABLED
 
 install-domserver:
-	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) balloons
+	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) balloons create_accounts
 
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) dj_make_*chroot create_cgroups
