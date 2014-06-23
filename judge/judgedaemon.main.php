@@ -250,6 +250,9 @@ foreach ( $EXITCODES as $code => $name ) {
 // Pass SYSLOG variable via environment for compare program
 if ( defined('SYSLOG') && SYSLOG ) putenv('DJ_SYSLOG=' . SYSLOG);
 
+if ( ! posix_getpwnam($runuser) ) {
+	error ("runuser $runuser does not exist.");
+}
 $output = array();
 exec("ps -u '$runuser' -o pid= -o comm=", $output, $retval);
 if ( count($output) != 0 ) {
