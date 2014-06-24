@@ -158,7 +158,7 @@ function check_contest_times($update = FALSE)
 		warning("Contest times do not match with external CCS data.");
 
 		if ( $update ) {
-			$data = array('starttime' => strftime('%Y-%m-%d %H:%M', (int)$val($contest,'starttime')),
+			$data = array('starttime' => strftime('%Y-%m-%d %H:%M', (int)val($contest,'starttime')),
 			              'endtime' => sprintf('+%02d:%02d', $h,$m),
 			              'enabled' => 1);
 
@@ -204,8 +204,8 @@ foreach ( $languages as $lang ) {
 $teams = $xpath->query('/contest/team');
 foreach ( $teams as $team ) {
 
-	$id = $DB->q('MAYBEVALUE SELECT login FROM team
-	              WHERE login = %s AND enabled = 1',
+	$id = $DB->q('MAYBEVALUE SELECT teamid FROM team
+	              WHERE teamid = %s AND enabled = 1',
 	             remap('team',val($team,'id')));
 
 	if ( empty($id) ) {
@@ -275,7 +275,7 @@ while ( TRUE ) {
 
 			foreach ( $res as $f ) {
 				$filenames[] = $f['filename'];
-				if ( !($tmpfname = mkstemps(TMPDIR."/import_feed-XXXXXX",0)) ) {
+				if ( !($tmpfname = tempnam(TMPDIR,"/import_feed-XXXXXX")) ) {
 					error("Could not create temporary file.");
 				}
 				file_put_contents($tmpfname, base64_decode($f['content']));
