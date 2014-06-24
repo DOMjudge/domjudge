@@ -117,9 +117,11 @@ if ( $teams->count() == 0 ) {
 	}
 	echo "</tbody>\n</table>\n\n";
 
-	putTeamRow($cdata,$listteams);
-}
+	echo "<h2>Submissions for " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
+	$restrictions = array( 'categoryid' => $id );
+	putSubmissions($cdata, $restrictions);
+}
 
 require(LIBWWWDIR . '/footer.php');
 
