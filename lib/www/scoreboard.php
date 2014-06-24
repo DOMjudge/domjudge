@@ -546,8 +546,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 				" - ends: " . printtime($cdata['endtime']) . "</h4>\n\n";
 
 		if ( $fdata['showfrozen'] ) {
-			$timerem = floor((strtotime($cdata['endtime']) -
-			                  strtotime($cdata['freezetime']))/60);
+			$timerem = floor($cdata['endtime'] - $cdata['freezetime'])/60;
 			if ( IS_JURY ) {
 				echo '<p><em><a href="../public/">The public scoreboard</a> ' .
 					"was frozen with $timerem minutes remaining.</em></p>\n";
