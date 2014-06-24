@@ -86,12 +86,13 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 
 	$sqlbody =
 		'FROM submission s
-		 LEFT JOIN team     t ON (t.teamid   = s.teamid)
-		 LEFT JOIN problem  p ON (p.probid   = s.probid)
-		 LEFT JOIN language l ON (l.langid   = s.langid)
-		 LEFT JOIN judging  j ON (s.submitid = j.submitid AND j.valid=1)
+		 LEFT JOIN team          t  USING (teamid)
+		 LEFT JOIN problem       p  USING (probid)
+		 LEFT JOIN language      l  USING (langid)
+		 LEFT JOIN judging       j  ON (s.submitid = j.submitid AND j.valid=1)
 		 WHERE s.cid = %i ' .
 	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
+	    (isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
 	    (isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
 	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
 	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
@@ -105,7 +106,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 				  . (isset($restrictions['judged'])  ? 'AND ' . $judgedclause : '')
 				  .'ORDER BY s.submittime DESC, s.submitid DESC '
 				  . ($limit > 0 ? 'LIMIT 0, %i' : '%_')
-				, $cid, @$restrictions['teamid'], @$restrictions['probid']
+				, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
 				, @$restrictions['langid'], @$restrictions['judgehost']
 				, $limit);
 
@@ -244,28 +245,28 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 
 		if( $limit > 0 ) {
 		$subcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-					, $cid, @$restrictions['teamid'], @$restrictions['probid']
+					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
 					, @$restrictions['langid'], @$restrictions['judgehost']
 					);
 		$corcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
 						.' AND j.result like %s'
-					, $cid, @$restrictions['teamid'], @$restrictions['probid']
+					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
 					, @$restrictions['langid'], @$restrictions['judgehost']
 					, 'CORRECT'
 					);
 		$igncnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
 						.' AND s.valid = 0'
-					, $cid, @$restrictions['teamid'], @$restrictions['probid']
+					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
 					, @$restrictions['langid'], @$restrictions['judgehost']
 					);
 		$vercnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
 						.' AND verified = 0 AND result IS NOT NULL'
-					, $cid, @$restrictions['teamid'], @$restrictions['probid']
+					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
 					, @$restrictions['langid'], @$restrictions['judgehost']
 					);
 		$quecnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
 						.' AND result IS NULL'
-					, $cid, @$restrictions['teamid'], @$restrictions['probid']
+					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
 					, @$restrictions['langid'], @$restrictions['judgehost']
 					);
 		}
