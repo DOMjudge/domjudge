@@ -78,8 +78,8 @@ echo "<tr><td>Contest name:</td><td>";
 echo htmlspecialchars($row['contestname']) . "</td></tr>\n";
 
 echo "<tr><td>Started:</td><td>";
-echo htmlspecialchars($row['starttime']) .
-     ', ended ' . htmlspecialchars($row['endtime']) .
+echo printtime($row['starttime']) .
+     ', ended ' . printtime($row['endtime']) .
 	"</td></tr>\n";
 echo "<tr><td><label for=\"b\">B:</label></td>" .
      "<td>" . addInput('b', (int)@$row['b'], 4, 10) .
