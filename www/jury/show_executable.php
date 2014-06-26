@@ -184,7 +184,7 @@ echo $html;
 
 if ( isset($_GET['edit_source']) ) {
 	echo addHidden('storeid', $id);
-	echo addSubmit('submit');
+	echo addSubmit('save');
 
 	echo addEndForm();
 }
