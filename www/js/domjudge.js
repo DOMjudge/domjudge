@@ -13,7 +13,7 @@ function XMLHttpHandle()
 	return ajaxRequest;
 }
 
-function updateClarifications(doreload)
+function updateMenu(doreload_clarifications, doreload_judgehosts)
 {
 	var handle = XMLHttpHandle();
 	if (!handle) {
@@ -21,24 +21,39 @@ function updateClarifications(doreload)
 	}
 	handle.onreadystatechange = function() {
 		if (handle.readyState == 4) {
+			var resp = JSON.parse(handle.responseText);
+
 			var elem = document.getElementById('menu_clarifications');
-			var cnew = handle.responseText;
 			var newstr = '';
-			if (cnew == 0) {
+			if (resp[0] == 0) {
 				elem.className = null;
 			} else {
-				newstr = ' ('+cnew+' new)';
+				newstr = ' ('+resp[0]+' new)';
 				elem.className = 'new';
 			}
 			if ( elem.innerHTML != 'clarifications' + newstr ) {
 				elem.innerHTML = 'clarifications' + newstr;
-				if(doreload) {
+				if(doreload_clarifications) {
+					location.reload()
+				}
+			}
+			var elem = document.getElementById('menu_judgehosts');
+			var newstr = '';
+			if (resp[1] == 0) {
+				elem.className = null;
+			} else {
+				newstr = ' ('+resp[1]+' down)';
+				elem.className = 'new';
+			}
+			if ( elem.innerHTML != 'judgehosts' + newstr ) {
+				elem.innerHTML = 'judgehosts' + newstr;
+				if(doreload_judgehosts) {
 					location.reload()
 				}
 			}
 		}
 	};
-	handle.open("GET", "update_clarifications.php", true);
+	handle.open("GET", "update_menu.php", true);
 	handle.send(null);
 }
 

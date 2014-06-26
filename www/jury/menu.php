@@ -6,9 +6,13 @@
 <?php	if ( checkrole('jury') ) { ?>
 <a href="problems.php" accesskey="p">problems</a>
 <?php   } ?>
-<?php	if ( IS_ADMIN ) { ?>
-<a href="judgehosts.php" accesskey="j">judgehosts</a>
-<?php   } ?>
+<?php	if ( IS_ADMIN ) { 
+	if ( ( $nhosts_down > 0 ) && checkrole('jury') ) { ?>
+<a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts">judgehosts (<?php echo $nhosts_down?> down)</a>
+<?php	} else { ?>
+<a href="judgehosts.php" accesskey="j" id="menu_judgehosts">judgehosts</a>
+<?php	} 
+	} ?>
 <?php	if ( checkrole('jury') ) { ?>
 <a href="teams.php" accesskey="t">teams</a>
 <a href="users.php" accesskey="u">users</a>

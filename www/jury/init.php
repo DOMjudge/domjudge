@@ -53,6 +53,8 @@ if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES)
 $cdata = getCurContest(TRUE);
 $cid = (int)$cdata['cid'];
 
-$nunread_clars = $DB->q('VALUE SELECT COUNT(*) FROM clarification
-                         WHERE sender IS NOT NULL AND cid = %i
-                         AND answered = 0', $cid);
+$nunread_clars = (int) $DB->q('VALUE SELECT COUNT(*) FROM clarification
+                               WHERE sender IS NOT NULL AND cid = %i
+                               AND answered = 0', $cid);
+$nhosts_down   = (int) $DB->q('VALUE SELECT COUNT(*) FROM judgehost
+                               WHERE active = 1 AND unix_timestamp()-polltime >= ' . JUDGEHOST_CRITICAL);
