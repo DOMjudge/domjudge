@@ -20,12 +20,12 @@ if ( isset($_POST['storeid']) ) {
 	if ( FALSE === file_put_contents($tmpfname, $executable['zipfile']) ) {
 		error("failed to write zip file to temporary file");
 	}
-	$tmpexecdir = system("mktemp -d --tmpdir=$TMPDIR executable-XXXXXX", $retval);
+	$tmpexecdir = system("mktemp -d --tmpdir=" . TMPDIR, $retval);
 	if ( $retval!=0 ) {
-		error("failed to created temporary directory");
+		error("failed to create temporary directory");
 	}
 	chmod($tmpexecdir, 0700);
-	system("unzip -q $tmpfname -d $tmpexecdir", $retval);
+	system("unzip -q $tmpfname -d '$tmpexecdir'", $retval);
 	if ( $retval!=0 ) {
 		error("Could not unzip executable to temporary directory.");
 	}
@@ -45,7 +45,7 @@ if ( isset($_POST['storeid']) ) {
 	}
 	$zip->close();
 
-	system("zip -r -j $tmpfname $tmpexecdir", $retval);
+	system("zip -r -j $tmpfname '$tmpexecdir'", $retval);
 	if ( $retval!=0 ) {
 		error("failed to zip executable files.");
 	}
@@ -111,7 +111,7 @@ for ($j = 0; $j < $zip->numFiles; $j++) {
 		continue; // skip binary files
 	}
 
-	$html .= '<div class="tabbertab' . ((int)$_GET['rank'] === $j ? ' tabbertabdefault' : '') .'">' .
+	$html .= '<div class="tabbertab' . ((int) @$_GET['rank'] === $j ? ' tabbertabdefault' : '') .'">' .
 		'<h2 class="filename"><a id="source' . $j . '"></a>' .
 		htmlspecialchars($filename) . "</h2>\n\n";
 	// FIXME: skip files based on size?
