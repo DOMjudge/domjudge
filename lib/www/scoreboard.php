@@ -346,6 +346,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		} else {
 			$color = $teams[$team]['color'];
 		}
+		echo ' teamid="' . $teams[$team]['teamid'] . '"';
 		echo '><td class="scorepl">';
 		// Only print rank when score is different from the previous team
 		if ( ! $displayrank ) {

@@ -355,7 +355,7 @@ function getHeartCol(row) {
 }
 
 function getTeamname(row) {
-	return row.getElementsByTagName("td")[2];
+	return row.getAttribute("teamid");
 }
 
 function toggle(id, show) {
@@ -370,13 +370,13 @@ function toggle(id, show) {
 			if (scoreTeamname == null) {
 				continue;
 			}
-			if (scoreTeamname.innerHTML == favTeams[i]) {
+			if (scoreTeamname == favTeams[i]) {
 				visCnt++;
 				break;
 			}
 		}
 	}
-	var teamname = getTeamname(scoreboard[id + visCnt]).innerHTML;
+	var teamname = getTeamname(scoreboard[id + visCnt]);
 	if (show) {
 		favTeams[favTeams.length] = teamname;
 	} else {
@@ -422,7 +422,7 @@ function initFavouriteTeams() {
 		var heartCol = getHeartCol(scoreboard[j]);
 		var rank = firstCol.innerHTML;
 		for (var i = 0; i < favTeams.length; i++) {
-			if (teamname.innerHTML == favTeams[i]) {
+			if (teamname == favTeams[i]) {
 				found = true;
 				heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
 				toAdd[cntFound] = scoreboard[j].cloneNode(true);
