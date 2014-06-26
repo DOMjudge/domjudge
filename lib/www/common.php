@@ -371,12 +371,13 @@ function putClock() {
 	var activatetime = " . $cdata['activatetime'] . ";
 	var starttime = " . $cdata['starttime'] . ";
 	var endtime = " . $cdata['endtime'] . ";
-	var offset = 1;
+	var offset = 0;
 	var date = new Date(initial*1000);
 	var timecurelt = document.getElementById(\"timecur\");
 	var timeleftelt = document.getElementById(\"timeleft\");
 
 	setInterval(function(){updateClock();},1000);
+	updateClock();
 </script>\n";
 }
 
