@@ -1,0 +1,5 @@
+SET(r=10)
+INT(0,r) NEWLINE
+SET(r=5)
+INT(0,r) NEWLINE
+SET(a[r]=2)

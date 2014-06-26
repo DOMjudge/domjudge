@@ -121,6 +121,10 @@ The following commands are available:
 
     Assert that 'condition' is true, fail otherwise.
 
+<tag><tt>SET(&lt;variable&gt; name '=' &lt;expr&gt; value])</tt></tag>
+
+    Assign 'value' to variable 'name'.
+
 <tag><tt>UNSET(&lt;varname&gt; a [,&lt;varname&gt; b ...])</tt></tag>
 
     Unset all values for variables a, b, ... This includes all values

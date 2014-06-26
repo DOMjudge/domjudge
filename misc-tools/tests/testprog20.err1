@@ -1,0 +1,4 @@
+SET(r=10)
+INT(0,r) NEWLINE
+UNSET(r)
+INT(0,r) NEWLINE
