@@ -112,7 +112,8 @@ if ( isset($_POST['import']) ) {
 		dbconfig_store();
 
 		// Redirect to the original page to prevent accidental redo's
-		header('Location: import-export-config.php?import-ok&file='.$file);
+		header('Location: impexp_contestyaml.php?import-ok&file='.$file);
+		exit;
 
 	} else {
 
@@ -194,12 +195,12 @@ if ( isset($_GET['import-ok']) ) {
 }
 
 echo "<h2>Import from YAML</h2>\n\n";
-echo addForm('import-export-config.php', 'post', null, 'multipart/form-data');
+echo addForm('impexp_contestyaml.php', 'post', null, 'multipart/form-data');
 echo msgbox("Please note!", "Importing a contest.yaml will overwrite some settings (e.g. penalty time, clarification categories, clarification answers, etc.). This action can not be undone!");
 echo addFileField('import_config');
 echo addSubmit('Import', 'import') . addEndForm();
 echo "<h2>Export to YAML</h2>\n\n";
-echo addForm('import-export-config.php');
+echo addForm('impexp_contestyaml.php');
 echo '<label for="contest">Select contest: </label>';
 $contests = $DB->q("KEYVALUETABLE SELECT cid, contestname FROM contest");
 echo addSelect('contest', $contests, null, true);
