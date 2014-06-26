@@ -61,8 +61,9 @@ if ( isset($_POST['import']) ) {
 		dbconfig_init();
 
 		// TODO: event-feed-port
-
-		$LIBDBCONFIG['penalty_time']['value'] = (int)$contest_yaml_data['penaltytime'];
+		if (isset($contest_yaml_data)) {
+			$LIBDBCONFIG['penalty_time']['value'] = (int)$contest_yaml_data['penaltytime'];
+		}
 
 	/* clarification answers/categories currently not supported; ignore them.
 		$LIBDBCONFIG['clar_answers']['value'] = $contest_yaml_data['default-clars'];
@@ -196,7 +197,7 @@ if ( isset($_GET['import-ok']) ) {
 
 echo "<h2>Import from YAML</h2>\n\n";
 echo addForm('impexp_contestyaml.php', 'post', null, 'multipart/form-data');
-echo msgbox("Please note!", "Importing a contest.yaml will overwrite some settings (e.g. penalty time, clarification categories, clarification answers, etc.). This action can not be undone!");
+echo msgbox("Please note!", "Importing a contest.yaml may overwrite some settings (e.g. penalty time, clarification categories, clarification answers, etc.). This action can not be undone!");
 echo addFileField('import_config');
 echo addSubmit('Import', 'import') . addEndForm();
 echo "<h2>Export to YAML</h2>\n\n";
