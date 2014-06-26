@@ -34,6 +34,10 @@ if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
 	exit;
 }
 
+if ( !file_exists(LIBDIR . '/relations.php') ) {
+	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
+}
+
 require_once(LIBDIR . '/relations.php');
 require_once(LIBWWWDIR . '/checkers.jury.php');
 
