@@ -33,7 +33,7 @@ if ( isset($_REQUEST['viewall']) ) $viewall = $_REQUEST['viewall'];
 
 setcookie('domjudge_balloonviewall', $viewall);
 
-$refresh = '30;url=balloons.php';
+$refresh = '15;url=balloons.php';
 require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Balloon Status</h1>\n\n";

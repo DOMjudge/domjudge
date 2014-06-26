@@ -9,6 +9,8 @@
 require('init.php');
 $title = 'Judgehosts';
 
+$refresh = '15;url=judgehosts.php';
+
 require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Judgehosts</h1>\n\n";
