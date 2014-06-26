@@ -191,8 +191,8 @@ class db
 		if ($argv) {
 			if(DEBUG) {
 				$backtrace = debug_backtrace();
-				$callsite = ' in file:' . $backtrace[1]['file'] . ', ' .
-					    ' line:' . $backtrace[1]['line'] . ', ';
+				$callsite = ' in file:' . $backtrace[0]['file'] . ', ' .
+					    ' line:' . $backtrace[0]['line'] . ', ';
 			} else {
 				$callsite = '';
 			}
