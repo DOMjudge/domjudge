@@ -11,7 +11,7 @@
 
 .filename, .hostname { font-family: monospace; }
 
-.highlight { background-color: yellow; }
+.highlight { background-color: yellow !important; }
 
 .msgbox {
 	background-color: #fffff0;
