@@ -545,3 +545,21 @@ function langidToAce($langid) {
 	}
 	return $langid;
 }
+
+/**
+ * Output JavaScript function that contains the language extensions as
+ * configured in the database so the frontend can use them to automatically
+ * detect the language from the filename extension.
+ */
+function putgetMainExtension($langdata) {
+	echo "function getMainExtension(ext)\n{\n";
+	echo "\tswitch(ext) {\n";
+	foreach ( $langdata as $langid => $langdata ) {
+		$exts = json_decode($langdata['extensions']);
+		if ( !is_array($exts) ) continue;
+		foreach ( $exts as $ext ) {
+			echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
+		}
+	}
+	echo "\t\tdefault: return '';\n\t}\n}\n\n";
+}
