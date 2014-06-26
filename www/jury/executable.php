@@ -18,7 +18,7 @@ if ( isset($_GET['cmd'] ) ) {
 }
 
 if ( isset($_GET['fetch']) ) {
-	$filename = $id . "-script.zip";
+	$filename = $id . ".zip";
 
 	$size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH(zipfile)
 	                FROM executable WHERE execid = %s",
