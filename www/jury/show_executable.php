@@ -74,13 +74,12 @@ if ( isset($_GET['fetch']) ) {
 $title = "Executable: $id";
 require(LIBWWWDIR . '/header.php');
 
-if ( isset($_GET['edit_source']) ) {
-	echo '<h2><a id="source"></a>Edit content of executable ' .
-		"<a href=\"executable.php?id=$id\">$id</a></h2>\n\n";
+$edit_mode = ( isset($_GET['edit_source']) );
 
+echo '<h2>' . ( $edit_mode ? 'Edit content of e' : 'E' ) . "xecutable " .htmlspecialchars($id). "</h2>\n\n";
+
+if ( $edit_mode ) {
 	echo addForm($pagename, 'post', null, 'multipart/form-data');
-} else {
-		echo "<h2>Executable zip file for " .htmlspecialchars($id). "</h2>";
 }
 
 $html = '<script type="text/javascript" src="../js/tabber.js"></script>' .
@@ -98,7 +97,7 @@ $skippedBinary = array();
 for ($j = 0; $j < $zip->numFiles; $j++) {
 	$filename = $zip->getNameIndex($j);
 	if ($filename[strlen($filename)-1] == "/") {
-		if ( isset($_GET['edit_source']) ) {
+		if ( $edit_mode ) {
 			echo addHidden("skipped[$j]", 1);
 		}
 		continue; // skip directory entries
@@ -106,67 +105,52 @@ for ($j = 0; $j < $zip->numFiles; $j++) {
         $content = $zip->getFromIndex($j);
 	if (!mb_check_encoding($content, 'ASCII')) {
 		$skippedBinary[] = $filename;
-		if ( isset($_GET['edit_source']) ) {
+		if ( $edit_mode ) {
 			echo addHidden("skipped[$j]", 1);
 		}
 		continue; // skip binary files
 	}
-	// FIXME: skip files based on size?
-	// FIXME: use a common function to view syntax highlighted files in combination with tabbed view
-	if ( isset($_GET['edit_source']) ) {
-		$html .= '<div class="tabbertab' . ((int)$_GET['rank'] === $j ? ' tabbertabdefault' : '') .'">' .
-			'<h2 class="filename"><a id="source' . $j . '"></a>' .
-			htmlspecialchars($filename) . "</h2>\n\n";
 
-		$html .= addTextArea('texta'. $j, $content, 120, 40) . "<br/>\n" .
-			'<div class="editor" id="editor' . $j . '">'
-			. htmlspecialchars($content) . '</div>' .
-			'<script>' . "\n" .
-			'var textarea = document.getElementById("texta' . $j . '");' . "\n" .
-			'textarea.style.display = \'none\';' . "\n" .
-			'var editor' .$j. ' = ace.edit("editor' . $j . '");' . "\n" .
-			'editor' .$j. '.setTheme("ace/theme/eclipse");' . "\n" .
-			'editor' .$j. '.setOptions({ maxLines: Infinity });' .
-			'editor' .$j. '.getSession().setValue(textarea.value);' .
-			'editor' .$j. '.getSession().on(\'change\', function(){' .
-				'var textarea = document.getElementById("texta' . $j . '");' .
-				'textarea.value = editor' .$j. '.getSession().getValue();' .
-			'});' .
-			'function modefunc' . $j . '() {' . "\n" .
-			'    var modelist = ace.require(\'ace/ext/modelist\');' . "\n" .
-			'    var filePath = "' . $filename . '";' . "\n" .
-			'    var mode = modelist.getModeForPath(filePath).mode;' . "\n" .
-			'    editor' .$j. '.getSession().setMode(mode);' . "\n" .
-			'    editor' .$j. '.setReadOnly(false);' . "\n" .
-			'};' . ' modefunc' . $j . '();' . "\n" .
-			'</script>';
+	$html .= '<div class="tabbertab' . ((int)$_GET['rank'] === $j ? ' tabbertabdefault' : '') .'">' .
+		'<h2 class="filename"><a id="source' . $j . '"></a>' .
+		htmlspecialchars($filename) . "</h2>\n\n";
+	// FIXME: skip files based on size?
+	if ( $edit_mode ) {
+		$html .= addTextArea('texta'. $j, $content, 120, 40) . "<br/>\n";
 	} else {
-		$html .= '<div class="tabbertab">' .
-			'<h2 class="filename"><a id="source' . $j . '"></a>' .
-			htmlspecialchars($filename) . "</h2> <a " .
-			"href=\"show_executable.php?id=" . urlencode($id) .
-			"&amp;fetch=" . $j . "\">" .
+		$html .= "<a href=\"show_executable.php?id=" . urlencode($id) . "&amp;fetch=" . $j . "\">" .
 			"<img class=\"picto\" src=\"../images/b_save.png\" alt=\"download\" title=\"download\" /></a> " .
-			"<a href=\"show_executable.php?edit_source=1&id=" . urlencode($id) .
-			"&amp;rank=" . $j . "\">" .
+			"<a href=\"show_executable.php?edit_source=1&id=" . urlencode($id) . "&amp;rank=" . $j . "\">" .
 			"<img class=\"picto\" src=\"../images/edit.png\" alt=\"edit\" title=\"edit\" />" .
 			"</a>\n\n";
-
-		$html .= '<pre class="editor" id="editor' . $j . '">'
-			. htmlspecialchars($content) . '</pre>' .
-			'<script>' .
-			'var editor = ace.edit("editor' . $j . '");' .
-			'editor.setTheme("ace/theme/eclipse");' .
-			'editor.setOptions({ maxLines: Infinity });' .
-			'editor.setReadOnly(true);' . "\n" .
-			'function modefunc' . $j . '() {' . "\n" .
-			'    var modelist = ace.require(\'ace/ext/modelist\');' . "\n" .
-			'    var filePath = "' . $filename . '";' . "\n" .
-			'    var mode = modelist.getModeForPath(filePath).mode;' . "\n" .
-			'    editor.getSession().setMode(mode);' . "\n" .
-			'};' . ' modefunc' . $j . '();' . "\n" .
-			'</script>';
 	}
+
+	$html .= '<div class="editor" id="editor' . $j . '">' . htmlspecialchars($content) . '</div>';
+	$html .= '<script>' . "\n";
+
+	if ( $edit_mode ) {
+		$html .= 'var textarea = document.getElementById("texta' . $j . '");' . "\n"
+		       . 'textarea.style.display = \'none\';' . "\n";
+	}
+	$html .= 'var editor' .$j. ' = ace.edit("editor' . $j . '");' . "\n" .
+		'editor' .$j. '.setTheme("ace/theme/eclipse");' . "\n" .
+		'editor' .$j. '.setOptions({ maxLines: Infinity });';
+
+	if ( $edit_mode ) {
+		$html .= 'editor' .$j. '.getSession().setValue(textarea.value);' .
+			'editor' .$j. '.getSession().on(\'change\', function(){' .
+			'var textarea = document.getElementById("texta' . $j . '");' .
+			'textarea.value = editor' .$j. '.getSession().getValue();' .
+			'});';
+	}
+	$html .= 'function modefunc' . $j . '() {' . "\n" .
+		'    var modelist = ace.require(\'ace/ext/modelist\');' . "\n" .
+		'    var filePath = "' . $filename . '";' . "\n" .
+		'    var mode = modelist.getModeForPath(filePath).mode;' . "\n" .
+		'    editor' .$j. '.getSession().setMode(mode);' . "\n" .
+		'    editor' .$j. '.setReadOnly(' . ( isset($_GET['edit_source']) ? 'false' : 'true' ) . ');' . "\n" .
+		'};' . ' modefunc' . $j . '();' . "\n" .
+		'</script>';
 
 	$html .= '</div>';
 }
@@ -182,7 +166,7 @@ if ( count($skippedBinary) > 0 ) {
 }
 echo $html;
 
-if ( isset($_GET['edit_source']) ) {
+if ( $edit_mode ) {
 	echo addHidden('storeid', $id);
 	echo addSubmit('save');
 
