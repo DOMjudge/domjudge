@@ -68,6 +68,15 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 
 $res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
 
+$work10min   = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - starttime)
+                       FROM judging WHERE starttime >= %i GROUP BY judgehost',
+                      now()-10*60);
+
+$workcontest = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - starttime)
+                       FROM judging WHERE starttime >= %i GROUP BY judgehost',
+                      $cdata['starttime']);
+
+$clen = difftime(now(),$cdata['starttime']);
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No judgehosts defined</p>\n\n";
@@ -75,7 +84,8 @@ if( $res->count() == 0 ) {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 	     "<tr><th scope=\"col\">hostname</th>" .
 		 "<th scope=\"col\">active</th>" .
-		 "<th class=\"sorttable_nosort\">status</th></tr>\n" .
+		 "<th class=\"sorttable_nosort\">status</th>" .
+		 "<th class=\"sorttable_nosort\">load</th></tr>\n" .
 		 "</thead>\n<tbody>\n";
 	while($row = $res->next()) {
 		$link = '<a href="judgehost.php?id=' . urlencode($row['hostname']) . '">';
@@ -99,6 +109,10 @@ if( $res->count() == 0 ) {
 			echo "\" title =\"last checked in $reltime seconds ago\">";
 		}
 		echo $link . CIRCLE_SYM . "</a></td>";
+		echo "<td title=\"load during whole contest and last 10 minutes\">" .$link .
+		    sprintf('%.2f&nbsp;%.2f',
+		            @$workcontest[$row['hostname']] / $clen,
+		            @$work10min[  $row['hostname']] / (10*60)) . "</a></td>";
 		if ( IS_ADMIN ) {
 			if ( $row['active'] ) {
 				$activepicto = "pause"; $activecmd = "deactivate";
