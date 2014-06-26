@@ -95,7 +95,7 @@ if ( isset($_POST['import']) ) {
 				require(LIBWWWDIR . '/footer.php');
 				exit;
 			}
-			$prob['probid'] = $problem['letter'];
+			$prob['shortname'] = $problem['letter'];
 			$prob['cid'] = $cid;
 			$prob['name'] = $problem['short-name'];
 			$prob['allow_submit'] = 1;
