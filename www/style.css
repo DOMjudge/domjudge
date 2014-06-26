@@ -183,7 +183,10 @@ legend {
 	vertical-align: middle;
 	text-align: center;
 }
-.scoreboard tr { border-bottom: 1px solid black; }
+.scoreboard tr {
+	border-bottom: 1px solid black; 
+	height: 42px;
+}
 .scoreboard td, .scoreboard th {
 	border-right: 1px solid silver;
 }
