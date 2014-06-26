@@ -29,26 +29,17 @@ if ( isset($_POST['storeid']) ) {
 	if ( $retval!=0 ) {
 		error("Could not unzip executable to temporary directory.");
 	}
-	
+
 	$zip = openZipFile($tmpfname);
-	$skip = 0;
 	for ($j = 0; $j < $zip->numFiles; $j++) {
-		$filename = $zip->getNameIndex($j);
-		if ($filename[strlen($filename)-1] == "/") {
-			$skip++;
-			continue; // skip directory entries
-		}
-		$content = $zip->getFromIndex($j);
-		if (!mb_check_encoding($content, 'ASCII')) {
-			$skip++;
-			// skip binary files from old zip
+		if ( isset($_POST['skipped'][$j]) ) {
+			// this file was skipped before
 			continue;
 		}
-		// FIXME: skip files based on size?
+		$filename = $zip->getNameIndex($j);
 
-		// overwrite other files
-		$index = $j - $skip;
-		if ( FALSE === file_put_contents($tmpexecdir . "/" . $filename, str_replace("\r\n", "\n", $_POST['texta' . $index])) ) {
+		// overwrite it
+		if ( FALSE === file_put_contents($tmpexecdir . "/" . $filename, str_replace("\r\n", "\n", $_POST['texta' . $j])) ) {
 			error("Could not overwrite zip file contents.");
 		}
 	}
@@ -99,11 +90,14 @@ $skippedBinary = array();
 for ($j = 0; $j < $zip->numFiles; $j++) {
 	$filename = $zip->getNameIndex($j);
 	if ($filename[strlen($filename)-1] == "/") {
+		echo addHidden("skipped[$j]", 1);
+		// FIXME: display skipped dirs
 		continue; // skip directory entries
 	}
         $content = $zip->getFromIndex($j);
 	if (!mb_check_encoding($content, 'ASCII')) {
 		$skippedBinary[] = $filename;
+		echo addHidden("skipped[$j]", 1);
 		continue; // skip binary files
 	}
 	// FIXME: skip files based on size?
