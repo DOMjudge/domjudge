@@ -78,8 +78,8 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 ('csharp', 'C#', '["csharp","cs"]', 0, 1, 1, 'csharp'),
 ('f95', 'Fortran', '["f95","f90"]', 0, 1, 1, 'f95'),
 ('hs', 'Haskell', '["hs","lhs"]', 0, 1, 2, 'hs'),
-('java', 'Java', '["java"]', 1, 1, 1.5, 'java_javac_detect'),
-('js', 'JavaScript', '["js"]', 0, 1, 1.5, 'js'),
+('java', 'Java', '["java"]', 1, 1, 1, 'java_javac_detect'),
+('js', 'JavaScript', '["js"]', 0, 1, 1, 'js'),
 ('lua', 'Lua', '["lua"]', 0, 1, 1, 'lua'),
 ('pas', 'Pascal', '["pas","p"]', 0, 1, 1, 'pas'),
 ('pl', 'Perl', '["pl"]', 0, 1, 1, 'pl'),
@@ -87,7 +87,7 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 ('py2', 'Python 2', '["py2","py"]', 0, 1, 1, 'py2'),
 ('py3', 'Python 3', '["py3"]', 0, 1, 1, 'py3'),
 ('rb', 'Ruby', '["rb"]', 0, 1, 1, 'rb'),
-('scala', 'Scala', '["scala"]', 0, 1, 1.5, 'scala'),
+('scala', 'Scala', '["scala"]', 0, 1, 1, 'scala'),
 ('sh', 'POSIX shell', '["sh"]', 0, 1, 1, 'sh');
 
 

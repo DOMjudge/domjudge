@@ -1243,8 +1243,7 @@ with the judging of a specific language; after resolution of the
 problem this can be set to <em>yes</em> again.
 
 <tt>time_factor</tt> is the relative factor by which the timelimit is
-multiplied for solutions in this language. For example Java is/was
-known to be structurally slower than C/C++.
+multiplied for solutions in this language.
 
 <tag>problem</tag>
 This table contains the problem definitions. <tt>probid</tt> is the
