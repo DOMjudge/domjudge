@@ -214,6 +214,7 @@ legend {
 .scoreheader {
 	font-variant: small-caps;
 	border-bottom: 2px solid black;
+	white-space: nowrap;
 }
 .score_correct   { background: #60e760; }
 .score_first     { background: #1daa1d !important; }
