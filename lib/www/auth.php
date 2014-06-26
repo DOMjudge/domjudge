@@ -362,7 +362,7 @@ function do_logout()
 	require(LIBWWWDIR . '/header.php');
 	echo "<h1>Logged out</h1>\n\n<p>Successfully logged out as user '" .
 	    htmlspecialchars($username) . "'.</p>\n" .
-	    "<p><a href=\"./\">Click here to return to the main site.</a></p>\n\n";
+	    "<p><a href=\"../\">Click here to return to the main site.</a></p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }

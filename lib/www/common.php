@@ -361,7 +361,7 @@ function putClock() {
 	echo "<br /><span id=\"timeleft\">" . $left . "</span>";
 	if ( logged_in() ) {
 		echo "<br /><span id=\"username\">logged in as " . $username
-			. ( have_logout() ? " <a href=\"../logout.php\">×</a>" : "" )
+			. ( have_logout() ? " <a href=\"../auth/logout.php\">×</a>" : "" )
 			. "</span>";
 	}
 	echo "</div>";

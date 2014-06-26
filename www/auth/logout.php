@@ -6,7 +6,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-require_once('configure.php');
+require_once('../configure.php');
 
 define('IS_JURY', false);
 define('IS_PUBLIC', false);
