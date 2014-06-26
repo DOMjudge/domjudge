@@ -106,10 +106,11 @@ function dj_json_decode($str) {
 
 /**
  * Encode file contents for POST-ing to REST API.
- * Returns contents of $file as encoded string.
+ * Returns contents of $file (optionally limited in size, see
+ * getFileContents) as encoded string.
  */
-function rest_encode_file($file) {
-	return urlencode(base64_encode(getFileContents($file)));
+function rest_encode_file($file, $sizelimit = TRUE) {
+	return urlencode(base64_encode(getFileContents($file, $sizelimit)));
 }
 
 $waittime = 5;
@@ -511,7 +512,7 @@ function judge($row)
 			. '&runresult=' . urlencode($result)
 			. '&runtime=' . urlencode($runtime)
 			. '&judgehost=' . urlencode($myhost)
-			. '&output_run='   . rest_encode_file($testcasedir . '/program.out')
+			. '&output_run='   . rest_encode_file($testcasedir . '/program.out', FALSE)
 			. '&output_error=' . rest_encode_file($testcasedir . '/program.err')
 			. '&output_system=' . rest_encode_file($testcasedir . '/system.out')
 			. '&output_diff='  . rest_encode_file($testcasedir . '/compare.out')
