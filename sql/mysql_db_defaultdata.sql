@@ -77,7 +77,7 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 ('cpp', 'C++', '["cpp","cc","c++"]', 1, 1, 1, 'cpp'),
 ('csharp', 'C#', '["csharp","cs"]', 0, 1, 1, 'csharp'),
 ('f95', 'Fortran', '["f95","f90"]', 0, 1, 1, 'f95'),
-('hs', 'Haskell', '["hs","lhs"]', 0, 1, 2, 'hs'),
+('hs', 'Haskell', '["hs","lhs"]', 0, 1, 1, 'hs'),
 ('java', 'Java', '["java"]', 1, 1, 1, 'java_javac_detect'),
 ('js', 'JavaScript', '["js"]', 0, 1, 1, 'js'),
 ('lua', 'Lua', '["lua"]', 0, 1, 1, 'lua'),
