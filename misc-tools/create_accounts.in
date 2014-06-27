@@ -4,10 +4,11 @@
  * @configure_input@
  *
  * Given a space-separated list of usernames and passwords on
- * standard input, creates an account for each user with a
- * corresponding team of the same name.
+ * standard input, creates a jury account for each user with a
+ * corresponding team of the same name, to be able to edit and
+ * resubmit.
  *
- * There's no real error handling (duplciate user/teamnames etc).
+ * There's no real error handling (duplicate user/teamnames etc).
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
