@@ -4,9 +4,11 @@
  * @configure_input@
  *
  * Given a space-separated list of usernames and passwords on
- * standard input, creates a jury account for each user with a
- * corresponding team of the same name, to be able to edit and
- * resubmit.
+ * standard input, creates an account for each user and a
+ * corresponding team of the same name. The two variables
+ * at the top of the script define which role(s) the users will
+ * have and which category their team will be in; this defaults
+ * to jury users with a team of their own.
  *
  * There's no real error handling (duplicate user/teamnames etc).
  *
