@@ -159,46 +159,44 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 // Headers might already have been included.
 require_once(LIBWWWDIR . '/header.php');
 
-echo "<br/><h1 style=\"display:inline;\">Submission s".$id;
-if ( $submdata['valid'] ) {
-	echo "</h1>\n\n";
-} else {
-	echo " (ignored)</h1>\n\n";
-	echo "<p>This submission is not used during the scoreboard
-		  calculations.</p>\n\n";
-}
+echo "<br/><h1 style=\"display:inline;\">Submission s" . $id .
+	( $submdata['valid'] ? '' : ' (ignored)' ) . "</h1>\n\n";
 if ( IS_ADMIN ) {
 	$val = ! $submdata['valid'];
 	$unornot = $val ? 'un' : '';
-	echo "\n" . addForm('ignore.php') .
+	echo "&nbsp;\n" . addForm('ignore.php') .
 		addHidden('id',  $id) .
 		addHidden('val', $val) .
 			'<input type="submit" value="' . $unornot .
 			'IGNORE this submission" onclick="return confirm(\'Really ' . $unornot .
 			"ignore submission s$id?');\" /></form>\n";
 }
-echo '<br/><br/>';
+if ( ! $submdata['valid'] ) {
+	echo "<p>This submission is not used during scoreboard calculations.</p>\n\n";
+}
 
+// Condensed submission info on a single line with icons:
 ?>
 
+<p>
 <img title="team" alt="Team:" src="../images/team.png"/> <a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>">
-	<?php echo htmlspecialchars($submdata['teamname'] . " (t" . $submdata['teamid'].")")?></a>,
+    <?php echo htmlspecialchars($submdata['teamname'] . " (t" . $submdata['teamid'].")")?></a>&nbsp;&nbsp;
 <img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>">
 	<span class="probid"><?php echo htmlspecialchars($submdata['shortname'])?></span>:
-	<?php echo htmlspecialchars($submdata['probname'])?></a>,
+	<?php echo htmlspecialchars($submdata['probname'])?></a>&nbsp;&nbsp;
 <img title="language" alt="Language:" src="../images/lang.png"/> <a href="language.php?id=<?php echo $submdata['langid']?>">
-	<?php echo htmlspecialchars($submdata['langname'])?></a>,
-<img title="submittime" alt="Submittime:" src="../images/submittime.png"/> <?php echo printtime($submdata['submittime']) ?>,
+	<?php echo htmlspecialchars($submdata['langname'])?></a>&nbsp;&nbsp;
+<img title="submittime" alt="Submittime:" src="../images/submittime.png"/> <?php echo printtime($submdata['submittime']) ?>&nbsp;&nbsp;
 <img title="allowed runtime" alt="Allowed runtime:" src="../images/allowedtime.png"/>
-	<?php echo  htmlspecialchars($submdata['maxruntime']) ?>s,
+	<?php echo  htmlspecialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
 <img title="view source code" alt="" src="../images/code.png"/>
 <a href="show_source.php?id=<?= $id ?>" style="font-weight:bold;">view source code</a>
+</p>
 
 <?php
 
 if ( count($jdata) > 1 ) {
-	echo "<br/><br/>";
-	echo "<table class=\"list\">\n" .
+	echo "<p><table class=\"list\">\n" .
 		"<caption>Judgings</caption>\n<thead>\n" .
 		"<tr><td></td><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
 		"<th scope=\"col\">judgehost</th><th scope=\"col\">result</th>" .
@@ -223,10 +221,10 @@ if ( count($jdata) > 1 ) {
 			"</tr>\n";
 
 	}
-    echo "</tbody>\n</table>\n\n";
+    echo "</tbody>\n</table>\n</p>\n\n";
 
 } else if ( count($jdata) == 0 ) {
-	echo "<br/><br/><em>Not judged yet</em>";
+	echo "<p><em>Not judged yet</em></p>\n\n";
 }
 
 
@@ -284,7 +282,7 @@ if ( isset($jid) )  {
 
 	echo "<br/><h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .
 		($jud['valid'] == 1 ? '' : ' (INVALID)') .
-		"</h2>\n\n";
+		"</h2>\n\n&nbsp;";
 	if ( !$jud['verified'] ) {
 		echo addForm($pagename . '?id=' . urlencode($id) . '&amp;jid=' . urlencode($jid));
 
