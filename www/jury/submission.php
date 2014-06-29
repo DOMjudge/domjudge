@@ -23,7 +23,7 @@ function display_compile_output($output, $success) {
 	}
 
 	echo '<h3 id="compile">' .
-		(empty($output) ? '' : "<a href=\"javascript:collapse('compile')\">") .
+		(empty($output) ? '' : "<a class=\"collapse\" href=\"javascript:collapse('compile')\">") .
 		"Compilation <span style=\"color:$color;\">$msg</span>" .
 		(empty($output) ? '' : "</a>" ) . "</h3>\n\n";
 

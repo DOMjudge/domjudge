@@ -47,8 +47,8 @@ function flushresults($header, $results, $collapse = FALSE)
 
 	$section++;
 
-	echo "<h2><a href=\"javascript:collapse($section)\">$header</a></h2>\n\n";
-	echo "<ul class=\"details\" id=\"detail$section\">\n";
+	echo "<h2><a class=\"collapse\" href=\"javascript:collapse($section)\">" .
+		"$header</a></h2>\n\n<ul class=\"details\" id=\"detail$section\">\n";
 	foreach ($results as $row) {
 		echo "<li>$row</li>\n";
 	}
