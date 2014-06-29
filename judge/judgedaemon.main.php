@@ -336,10 +336,10 @@ function judge($row)
 
 	// Set configuration variables for called programs
 	putenv('USE_CHROOT='        . (USE_CHROOT ? '1' : ''));
-	putenv('COMPILETIME='       . dbconfig_get_rest('compile_time'));
+	putenv('SCRIPTTIMELIMIT='   . dbconfig_get_rest('script_timelimit'));
+	putenv('SCRIPTMEMLIMIT='    . dbconfig_get_rest('script_memory_limit'));
+	putenv('SCRIPTFILELIMIT='   . dbconfig_get_rest('script_filesize'));
 	putenv('MEMLIMIT='          . dbconfig_get_rest('memory_limit'));
-	putenv('COMPILEMEMLIMIT='   . dbconfig_get_rest('compile_memory'));
-	putenv('COMPILEFILELIMIT='  . dbconfig_get_rest('compile_filesize'));
 	putenv('FILELIMIT='         . dbconfig_get_rest('filesize_limit'));
 	putenv('PROCLIMIT='         . dbconfig_get_rest('process_limit'));
 
