@@ -157,10 +157,11 @@ chmod a+x "$WORKDIR" "$WORKDIR/execdir"
 
 # Create files which are expected to exist:
 touch system.out                 # Judging system output (info/debug/error)
-touch compare.out                # Compare output
 touch result.out                 # Result of comparison
 touch program.out program.err    # Program output and stderr (for extra information)
 touch program.meta runguard.err  # Metadata and runguard stderr
+touch compare.out                # Compare output
+touch compare.meta compare.err   # Compare runguard metadata and stderr
 
 logmsg $LOG_INFO "setting up testing (chroot) environment"
 
@@ -214,13 +215,28 @@ logmsg $LOG_INFO "comparing output"
 # Copy testdata output, only after program has run
 cp "$TESTOUT" "$WORKDIR/testdata.out"
 
-logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
+logmsg $LOG_DEBUG "starting compare script '$COMPARE_SCRIPT'"
 
-if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
-                       result.out compare.out >compare.tmp 2>&1 ; then
-	exitcode=$?
-	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
+exitcode=0
+chmod a+w result.out compare.out
+$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
+	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
+	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
+	"$COMPARE_SCRIPT" testdata.in program.out testdata.out \
+	                  result.out compare.out >compare.tmp 2>&1 || exitcode=$?
+
+logmsg $LOG_DEBUG "checking compare script exit-status"
+if grep '^time-result: .*timelimit' compare.meta >/dev/null 2>&1 ; then
+	echo "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:" >compare.out
+	cat compare.tmp >>compare.out
+	cleanexit ${E_COMPARE_ERROR:--1}
 fi
+if [ $exitcode -ne 0 ]; then
+	echo "Comparing failed with exitcode $exitcode, compare output:" >compare.out
+	cat compare.tmp >>compare.out
+	cleanexit ${E_COMPARE_ERROR:--1}
+fi
+cat compare.tmp >>compare.out
 
 # Check for errors from running the program:
 if [ ! -r program.meta ]; then
