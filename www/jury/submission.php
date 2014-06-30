@@ -280,7 +280,7 @@ if ( isset($jid) )  {
 				$lasttclist . "</td></tr>\n";
 	}
 
-	echo "<br/><h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .
+	echo "<h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .
 		($jud['valid'] == 1 ? '' : ' (INVALID)') .
 		"</h2>\n\n&nbsp;";
 	if ( !$jud['verified'] ) {
