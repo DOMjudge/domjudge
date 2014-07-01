@@ -42,8 +42,8 @@ if( ! $row['valid'] ) {
 
 <table>
 <tr><td>Problem:</td>
-	<td><?php echo htmlspecialchars($row['probname'])?> [<span class="probid"><?php echo
-	htmlspecialchars($row['shortname']) ?></span>]</td></tr>
+	<td><span class="probid"><?php echo htmlspecialchars($row['shortname']) ?></span> -
+    <?php echo htmlspecialchars($row['probname'])?></td></tr>
 <tr><td>Submitted:</td>
 	<td><?php echo printtime($row['submittime'])?></td></tr>
 <tr><td>Language:</td>
