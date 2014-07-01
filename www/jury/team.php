@@ -9,7 +9,8 @@
 require('init.php');
 
 $id = getRequestID();
-$title = 'Team t'.htmlspecialchars(@$id);
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'team' . ($id ? ' t'.htmlspecialchars(@$id) : ''));
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
@@ -25,7 +26,7 @@ if ( !empty($cmd) ):
 
 	requireAdmin();
 
-	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " team</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php');
 

@@ -10,17 +10,18 @@ require('init.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
 $id = getRequestID();
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'affiliation' . ($id ? ' '.htmlspecialchars(@$id) : ''));
 
-$cmd = @$_GET['cmd'];
+require(LIBWWWDIR . '/header.php');
 
-if ( $cmd == 'add' || $cmd == 'edit' ) {
+if ( !empty($_GET['cmd']) ):
 
 	requireAdmin();
 
-	$title = "Affiliation: " . htmlspecialchars($cmd);
+	$cmd = $_GET['cmd'];
 
-	require(LIBWWWDIR . '/header.php');
-	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " affiliation</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php');
 
@@ -61,17 +62,14 @@ echo addHidden('cmd', $cmd) .
 	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
 	addEndForm();
 
-	require(LIBWWWDIR . '/footer.php');
-	exit;
-}
+require(LIBWWWDIR . '/footer.php');
+exit;
+
+endif;
 
 
 $data = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
 if ( ! $data ) error("Missing or invalid affiliation id");
-
-$title = "Affiliation: " .htmlspecialchars($data['shortname']);
-
-require(LIBWWWDIR . '/header.php');
 
 $affillogo = "../images/affiliations/" . urlencode($data['affilid']) . ".png";
 $countryflag = "../images/countries/" . urlencode($data['country']) . ".png";

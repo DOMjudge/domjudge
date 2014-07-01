@@ -10,6 +10,8 @@ require('init.php');
 
 $id = getRequestID();
 $title = 'Problem p'.htmlspecialchars(@$id);
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'problem' . ($id ? ' p'.htmlspecialchars(@$id) : ''));
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
@@ -66,7 +68,7 @@ if ( !empty($cmd) ):
 
 	requireAdmin();
 
-	echo "<h2>" .  htmlspecialchars(ucfirst($cmd)) . " problem</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php', 'post', null, 'multipart/form-data');
 
@@ -194,7 +196,8 @@ $data = $DB->q('TUPLE SELECT p.probid,p.cid,p.shortname,p.name,p.allow_submit,p.
 
 if ( ! $data ) error("Missing or invalid problem id");
 
-echo "<h1>Problem p".htmlspecialchars($id)."</h1>\n\n";
+echo "<h1>Problem ".htmlspecialchars($data['shortname']).
+	" - ".htmlspecialchars($data['name'])."</h1>\n\n";
 
 echo addForm($pagename . '?id=' . urlencode($id),
              'post', null, 'multipart/form-data') . "<p>\n" .

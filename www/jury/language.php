@@ -9,7 +9,8 @@
 require('init.php');
 
 $id = getRequestID(FALSE);
-$title = 'Language '.htmlspecialchars(@$id);
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'language' . ($id ? ' '.htmlspecialchars(@$id) : ''));
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
@@ -40,7 +41,7 @@ if ( !empty($cmd) ):
 
 	requireAdmin();
 
-	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " language</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php');
 
@@ -104,7 +105,7 @@ $data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 
 if ( ! $data ) error("Missing or invalid language id");
 
-echo "<h1>Language ".htmlspecialchars($id)."</h1>\n\n";
+echo "<h1>Language ".htmlspecialchars($data['name'])."</h1>\n\n";
 
 echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 	addHidden('id', $id) .

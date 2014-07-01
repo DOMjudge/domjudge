@@ -10,18 +10,20 @@ require('init.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
 $id = getRequestID();
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'category' . ($id ? ' '.htmlspecialchars(@$id) : ''));
 
-$cmd = @$_GET['cmd'];
+require(LIBWWWDIR . '/header.php');
 
-if ( $cmd == 'add' || $cmd == 'edit' ) {
+if ( !empty($_GET['cmd']) ):
 
 	requireAdmin();
 
-	$title = "Category: " . htmlspecialchars($cmd);
+	$cmd = $_GET['cmd'];
+
 	$jscolor = true;
 
-	require(LIBWWWDIR . '/header.php');
-	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " category</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php');
 
@@ -65,18 +67,15 @@ echo addHidden('cmd', $cmd) .
 	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
 	addEndForm();
 
-	require(LIBWWWDIR . '/footer.php');
-	exit;
-}
+require(LIBWWWDIR . '/footer.php');
+exit;
+
+endif;
 
 $data = $DB->q('TUPLE SELECT * FROM team_category WHERE categoryid = %i', $id);
 if ( !$data ) error("Missing or invalid category id");
 
-$title = "Category: " . htmlspecialchars($data['name']);
-
-require(LIBWWWDIR . '/header.php');
-
-echo "<h1>$title</h1>\n\n";
+echo "<h1>Category: " . htmlspecialchars($data['name']) . "</h1>\n\n";
 
 echo "<table>\n";
 echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['categoryid']) . "</td></tr>\n";

@@ -9,7 +9,8 @@
 require('init.php');
 
 $id = getRequestID();
-$title = $id ? 'User '.htmlspecialchars(@$id) : 'Add user';
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'user' . ($id ? ' '.htmlspecialchars(@$id) : ''));
 
 if ( isset($_GET['cmd'] ) ) {
     $cmd = $_GET['cmd'];
@@ -24,7 +25,7 @@ if ( !empty($cmd) ):
 
     requireAdmin();
 
-    echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " user</h2>\n\n";
+    echo "<h2>$title</h2>\n\n";
 
     echo addForm('edit.php');
 
