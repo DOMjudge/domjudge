@@ -58,10 +58,11 @@ if ( ! dbconfig_get('show_balloons_postfreeze',0) && isset($cdata['freezetime'])
 
 // Get all relevant info from the balloon table.
 // Order by done, so we have the unsent balloons at the top.
-$res = $DB->q("SELECT b.*, s.probid, s.submittime,
+$res = $DB->q("SELECT b.*, s.submittime, p.probid, p.shortname AS probshortname,
                t.teamid, t.name AS teamname, t.room, c.name AS catname
                FROM balloon b
                LEFT JOIN submission s USING (submitid)
+               LEFT JOIN problem p USING (probid)
                LEFT JOIN team t USING(teamid)
                LEFT JOIN team_category c USING(categoryid)
                WHERE s.cid = %i $freezecond
@@ -105,7 +106,7 @@ if ( !empty($BALLOONS) ) {
 		echo '<td class="probid">' .
 			'<div class="circle" style="background-color: ' .
 		    htmlspecialchars($probs_data[$row['probid']]['color']) .
-			';"></div> ' . htmlspecialchars($row['probid']) . '</td>';
+			';"></div> ' . htmlspecialchars($row['probshortname']) . '</td>';
 
 		// team name, location (room) and category
 		echo '<td>t' . htmlspecialchars($row['teamid']) . '</td><td>' .
