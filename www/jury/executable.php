@@ -9,7 +9,8 @@
 require('init.php');
 
 $id = getRequestID(FALSE);
-$title = 'Executable '.htmlspecialchars(@$id);
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'executable' . ($id ? ' '.htmlspecialchars(@$id) : ''));
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
@@ -94,7 +95,7 @@ if ( !empty($cmd) ):
 
 	requireAdmin();
 
-	echo "<h2>" .  htmlspecialchars(ucfirst($cmd)) . " executable</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php', 'post', null, 'multipart/form-data');
 
