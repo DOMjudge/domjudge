@@ -55,7 +55,7 @@ if ( empty($row['polltime']) ) {
 	} else {
 		echo "Critical";
 	}
-	echo ", judgehost last checked in ". $reltime . " seconds ago.";
+	echo ", time since judgehost last checked in: " . printtimediff($row['polltime']) . 's.';
 }
 ?>
 </td></tr>
