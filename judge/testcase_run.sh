@@ -227,11 +227,15 @@ if [ ! -r program.meta ]; then
 	error "'program.meta' not readable"
 fi
 logmsg $LOG_DEBUG "checking program run exit-status"
-timeused=`    grep '^time-used: ' program.meta | sed 's/time-used: //'`
-program_time=`grep "^$timeused: " program.meta | sed "s/$timeused: //"`
-program_exit=`grep '^exitcode: '  program.meta | sed 's/exitcode: //'`
+# FIXME: a proper YAML parser should be used here, but the format is
+# rigid enough that we can use simple shell tools.
+timeused=`        grep '^time-used: ' program.meta | sed 's/time-used: //'`
+program_cputime=` grep '^cpu-time: '  program.meta | sed 's/cpu-time: //'`
+program_walltime=`grep '^wall-time: ' program.meta | sed 's/wall-time: //'`
+program_exit=`    grep '^exitcode: '  program.meta | sed 's/exitcode: //'`
+runtime="${program_cputime}s cpu, ${program_walltime}s wall"
 if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
-	echo "Timelimit exceeded, runtime: $program_time" >>system.out
+	echo "Timelimit exceeded, runtime: $runtime." >>system.out
 	cleanexit ${E_TIMELIMIT:--1}
 fi
 if [ "$program_exit" != "0" ]; then
@@ -262,7 +266,7 @@ descrp=`grep '^description=' result.out | cut -d = -f 2-`
 descrp="${descrp:+ ($descrp)}"
 
 if [ "$result" = "accepted" ]; then
-	echo "Correct${descrp}! Runtime is $program_time seconds." >>system.out
+	echo "Correct${descrp}! Runtime: $runtime." >>system.out
 	cleanexit ${E_CORRECT:--1}
 elif [ "$result" = "presentation error" ]; then
 	echo "Presentation error${descrp}." >>system.out
