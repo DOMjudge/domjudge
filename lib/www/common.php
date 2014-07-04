@@ -114,7 +114,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 				  . (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '')
 				  . (isset($restrictions['judged'])  ? 'AND ' . $judgedclause : '')
 				  . (isset($restrictions['correct'])  ? 'AND ' . $correctclause : '')
-				  .'GROUP BY jr.judgingid ORDER BY s.submittime DESC, s.submitid DESC '
+				  .'GROUP BY s.submitid ORDER BY s.submittime DESC, s.submitid DESC '
 				  . ($limit > 0 ? 'LIMIT 0, %i' : '%_')
 				, $cid, @$restrictions['teamid'], @$restrictions['probid']
 				, @$restrictions['langid'], @$restrictions['judgehost']
@@ -223,7 +223,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		$maxtime = $totaltime = "n/a";
 		if ( $row['result'] == 'correct' || IS_JURY ) {
 			$maxtime = sprintf("%3.3lfs", $row['maxtime']);
-			$totaltime = sprintf("%3.3lfs", $row['totaltime']);
+			$totaltime = sprintf("%3.3lfs", $row['sumtime']);
 		}
 		echo "<td><a$link>$maxtime</a></td><td><a$link>$totaltime</a></td>";
 
