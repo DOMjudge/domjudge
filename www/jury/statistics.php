@@ -4,7 +4,7 @@ require('init.php');
 
 // Include flot javascript library
 $extrahead = '';
-$extrahead .= '<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../js/flot/excanvas.min.js"></script><![endif]-->';
+$extrahead .= '<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../js/flot/excanvas.js"></script><![endif]-->';
 $extrahead .= '<script language="javascript" type="text/javascript" src="../js/flot/jquery.js"></script>';
 $extrahead .= '<script language="javascript" type="text/javascript" src="../js/flot/jquery.flot.js"></script>';
 $extrahead .= '<script language="javascript" type="text/javascript" src="../js/flot/jquery.flot.stack.js"></script>';
