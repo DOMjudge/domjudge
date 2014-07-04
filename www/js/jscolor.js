@@ -1,11 +1,11 @@
 /**
  * jscolor, JavaScript Color Picker
  *
- * @version 1.4.1
+ * @version 1.4.2
  * @license GNU Lesser General Public License, http://www.gnu.org/copyleft/lesser.html
  * @author  Jan Odvarko, http://odvarko.cz
  * @created 2008-06-15
- * @updated 2013-04-08
+ * @updated 2013-11-25
  * @link    http://jscolor.com
  */
 
@@ -628,7 +628,7 @@ var jscolor = {
 				}
 			};
 			if('ontouchstart' in window) { // if touch device
-				p.box.addEventListener('touchmove', function(e) {
+				var handle_touchmove = function(e) {
 					var event={
 						'offsetX': e.touches[0].pageX-touchOffset.X,
 						'offsetY': e.touches[0].pageY-touchOffset.Y
@@ -640,7 +640,9 @@ var jscolor = {
 					}
 					e.stopPropagation(); // prevent move "view" on broswer
 					e.preventDefault(); // prevent Default - Android Fix (else android generated only 1-2 touchmove events)
-				}, false);
+				};
+				p.box.removeEventListener('touchmove', handle_touchmove, false)
+				p.box.addEventListener('touchmove', handle_touchmove, false)
 			}
 			p.padM.onmouseup =
 			p.padM.onmouseout = function() { if(holdPad) { holdPad=false; jscolor.fireEvent(valueElement,'change'); } };
