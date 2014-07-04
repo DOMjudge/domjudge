@@ -97,6 +97,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		 LEFT JOIN problem  p ON (p.probid   = s.probid)
 		 LEFT JOIN language l ON (l.langid   = s.langid)
 		 LEFT JOIN judging  j ON (s.submitid = j.submitid AND j.valid=1)
+		 LEFT JOIN judging_run jr ON (j.judgingid = jr.judgingid)
 		 WHERE s.cid = %i ' .
 	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %s '    : '%_') .
 	    (isset($restrictions['probid'])    ? 'AND s.probid = %s '    : '%_') .
@@ -107,12 +108,13 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 					s.submittime, s.judgehost, s.valid, t.name AS teamname,
 					t.categoryid,
 					p.name AS probname, l.name AS langname,
-					j.result, j.judgehost, j.verified, j.jury_member, j.seen '
+					j.result, j.judgehost, j.verified, j.jury_member, j.seen,
+					MAX(jr.runtime) AS maxtime, SUM(jr.runtime) as sumtime'
 				  . $sqlbody
 				  . (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '')
 				  . (isset($restrictions['judged'])  ? 'AND ' . $judgedclause : '')
 				  . (isset($restrictions['correct'])  ? 'AND ' . $correctclause : '')
-				  .'ORDER BY s.submittime DESC, s.submitid DESC '
+				  .'GROUP BY jr.judgingid ORDER BY s.submittime DESC, s.submitid DESC '
 				  . ($limit > 0 ? 'LIMIT 0, %i' : '%_')
 				, $cid, @$restrictions['teamid'], @$restrictions['probid']
 				, @$restrictions['langid'], @$restrictions['judgehost']
@@ -220,10 +222,8 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 
 		$maxtime = $totaltime = "n/a";
 		if ( $row['result'] == 'correct' || IS_JURY ) {
-			$maxtime = $DB->q('VALUE SELECT MAX(runtime) FROM judging_run WHERE judgingid IN (SELECT judgingid FROM judging WHERE valid=1 AND submitid=%i)', $sid);
-			$maxtime = sprintf("%3.3lfs", $maxtime);
-			$totaltime = $DB->q('VALUE SELECT SUM(runtime) FROM judging_run WHERE judgingid IN (SELECT judgingid FROM judging WHERE valid=1 AND submitid=%i)', $sid);
-			$totaltime = sprintf("%3.3lfs", $totaltime);
+			$maxtime = sprintf("%3.3lfs", $row['maxtime']);
+			$totaltime = sprintf("%3.3lfs", $row['totaltime']);
 		}
 		echo "<td><a$link>$maxtime</a></td><td><a$link>$totaltime</a></td>";
 
