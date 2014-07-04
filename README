@@ -61,7 +61,8 @@ Various JavaScript libraries/snippets are included under www/js/:
   licence, see COPYING.MIT.
 - jscolor.js: copyright Jan Odvarko, licenced under the GNU LGPL.
 - tabber.js: copyright Patrick Fitzgerald, licenced under the MIT licence.
-- ace editor: licenced under BSD licence, see COPYING.BSD.
+- Ace editor: licenced under BSD licence, see COPYING.BSD.
+- Flot/jQuery: licenced under MIT licence, see COPYING.MIT.
 
 The M4 autoconf macros are licenced under all-permissive and GPL3+
 licences; see the respective files under m4/ for details.
