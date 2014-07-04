@@ -1100,6 +1100,23 @@ the administrator interface. The exact command used to send the
 files to a printer can be changed the function <tt>send_print()</tt>
 in <tt>lib/www/printing.php</tt>.
 
+<sect1>Judging consistency
+<p>
+
+The following issues can be considered to improve consistency in
+judging.
+
+<itemize>
+<item> Disable CPU frequency scaling and Intel "Turbo Boost" to
+prevent fluctuations in CPU power.
+<item> Disable address-space randomization to make programs with
+memory addressing bugs give more reproducible results:
+<code>
+echo 0 &gt; /proc/sys/kernel/randomize_va_space
+</code>
+</itemize>
+
+
 <sect>Upgrading
 <p>
 
