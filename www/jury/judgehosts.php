@@ -68,6 +68,10 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 
 $res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
 
+// NOTE: these queries do not take into account the time spent on a
+// current judging. It is tricky, however, to determine if a judging
+// is currently running or has crashed, so we simply ignore this.
+
 $work10min   = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - starttime)
                        FROM judging WHERE starttime >= %i GROUP BY judgehost',
                       now()-10*60);
