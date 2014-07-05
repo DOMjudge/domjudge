@@ -390,8 +390,9 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			(!empty($color) ? ' style="background: ' . $color . ';"' : '') .
 			(IS_JURY ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
 			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
-			htmlspecialchars($teams[$team]['name']) . '<br />' .
-			'<span class="univ">' . $affilname . '</span>' .
+			htmlspecialchars($teams[$team]['name']) .
+			($SHOW_AFFILIATIONS ? '<br /><span class="univ">' . $affilname .
+			 '</span>' : '') .
 			($static ? '' : '</a>') .
 			'</td>';
 		echo
