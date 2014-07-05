@@ -564,8 +564,8 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$affilids  = array();
 		$countries = array();
 		foreach( $affils as $id => $affil ) {
-			$affilids[$id]  = $affil['name'];
-			$countries[] = $affil['country'];
+			$affilids[$id] = $affil['name'];
+			if ( isset($affil['country']) ) $countries[] = $affil['country'];
 		}
 
 		$countries = array_unique($countries);
