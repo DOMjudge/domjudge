@@ -1,10 +1,10 @@
 DOMjudge Programming Contest Judging System
 
-Version 4.0.0 - DEV
--------------------
+Version 4.0.0 Release Candidate 1
+---------------------------------
  - checktestdata logical operators are now '&&' and '||'.
  - Introduce REST API; used by judgedaemon and submit client to communicate
-   with domserver.
+   with domserver. API is not officially declared 'stable' at this point.
  - Removed submitdeamon; submit client now always uses the REST API.
  - Removed xml plugin interface; use the REST API instead.
  - Move nearly all judgehost configuration to the database, making it
