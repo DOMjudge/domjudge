@@ -2,13 +2,21 @@ DOMjudge Programming Contest Judging System
 
 Version 4.0.0 - DEV
 -------------------
- - [INCOMPATIBLE CHANGE] checktestdata logical operators are now '&&' and '||'.
+ - checktestdata logical operators are now '&&' and '||'.
  - Introduce REST API; used by judgedaemon and submit client to communicate
    with domserver.
  - Removed submitdeamon; submit client now always uses the REST API.
- - Problem short names now need to be unique per contest, but not globally.
+ - Removed xml plugin interface; use the REST API instead.
+ - Move nearly all judgehost configuration to the database, making it
+   controllable centrally from the DOMjudge web interface, including all
+   compile and check scripts.
+ - Problem, team and affiliation now have a numeric auto-incrementing ID.
+   Problem short names now need to be unique per contest, but not globally.
  - Redesign authentication system: there's a single set of users for all
    interfaces, which may have different roles, such as team or admin.
+ - Submitclient now also works with user/password authentication.
+ - New authentication scheme 'external' leverages Apache to provide a
+   REMOTE_USER value.
  - New scoreboard layout: more compact, affil. logos replaced by names.
  - Store timestamps in database as Unix epoch, independent of time zones
    with subsecond resolution.
@@ -31,6 +39,12 @@ Version 4.0.0 - DEV
  - Add option to have compiler-error not add penalty time (Closes #127).
  - Gather and store metadata from runguard and start work to completely
    separate program/runguard stderr output (Closes #122).
+ - Add statistics page with a graph of submissions during the contest.
+ - Add ICPC import/export, both via TSV files and via their web service.
+ - Notify admin of judgehosts that are down by indicating this in the
+   menu bar.
+ - Overhauled layout of submission detail page.
+ - Changed Java classname detection to use reflection instead of javap.
 
 Version 3.4.0 - (unreleased)
 ----------------------------
