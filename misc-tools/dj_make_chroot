@@ -135,7 +135,7 @@ fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 
-$BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
+eval $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 	--variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
@@ -167,7 +167,7 @@ EOF
 
 # Add apt proxy settings if desired
 if [ -n "$DEBPROXY" ]; then
-    echo "Acquire::http::Proxy \"$DEBPROXY\"" >> "$CHROOTDIR/etc/apt/apt.conf"
+    echo "Acquire::http::Proxy \"$DEBPROXY\";" >> "$CHROOTDIR/etc/apt/apt.conf"
 fi
 
 mount -t proc proc "$CHROOTDIR/proc"
