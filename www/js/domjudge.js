@@ -57,6 +57,16 @@ function updateMenu(doreload_clarifications, doreload_judgehosts)
 					}
 				}
 			}
+
+			for(i=0; i<nclars; i++) {
+				sendNotification('New clarification.',
+				                 'clar_'+resp['clarifications'][i]['clarid']);
+			}
+			for(i=0; i<nhosts; i++) {
+				sendNotification('Judgehost down.',
+				                 'host_'+resp['judgehosts'][i]['hostname']+'@'+
+				                 Math.floor(resp['judgehosts'][i]['polltime']));
+			}
 		}
 	};
 	handle.open("GET", "updates.php", true);
