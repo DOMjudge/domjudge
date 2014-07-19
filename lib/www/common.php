@@ -497,7 +497,7 @@ function putProblemTextList()
 				print '<li> ' .
 				      '<img src="../images/' . urlencode($row['problemtext_type']) .
 				      '.png" alt="' . htmlspecialchars($row['problemtext_type']) .
-				      '" /> <a href="?id=' . urlencode($row['probid']) . '">' .
+				      '" /> <a href="problem.php?id=' . urlencode($row['probid']) . '">' .
 				      'Problem ' . htmlspecialchars($row['shortname']) . ': ' .
 				      htmlspecialchars($row['name']) . "</a></li>\n";
 			}

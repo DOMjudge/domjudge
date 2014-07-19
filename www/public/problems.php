@@ -8,13 +8,6 @@
 
 require('init.php');
 
-// download a given problem statement
-$id = getRequestID();
-if ( !empty($id) ) {
-	putProblemText($id);
-	exit;
-}
-
 $title = 'Problem statements';
 require(LIBWWWDIR . '/header.php');
 
