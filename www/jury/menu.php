@@ -6,18 +6,21 @@
 <?php	if ( checkrole('jury') ) { ?>
 <a href="problems.php" accesskey="p">problems</a>
 <?php   } ?>
-<?php	if ( IS_ADMIN ) { 
-	if ( ( $nhosts_down > 0 ) && checkrole('jury') ) { ?>
-<a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts">judgehosts (<?php echo $nhosts_down?> down)</a>
+<?php	if ( IS_ADMIN ) {
+	$ndown = count($updates['judgehosts']);
+	if ( $ndown > 0 ) { ?>
+<a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts">judgehosts (<?php echo $ndown ?> down)</a>
 <?php	} else { ?>
 <a href="judgehosts.php" accesskey="j" id="menu_judgehosts">judgehosts</a>
-<?php	} 
+<?php	}
 	} ?>
 <?php	if ( checkrole('jury') ) { ?>
 <a href="teams.php" accesskey="t">teams</a>
 <a href="users.php" accesskey="u">users</a>
-<?php	if ( ( $nunread_clars > 0 ) && checkrole('jury') ) { ?>
-<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications (<?php echo $nunread_clars?> new)</a>
+<?php
+	$nunread = count($updates['clarifications']);
+	if ( $nunread > 0 ) { ?>
+<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications (<?php echo $nunread ?> new)</a>
 <?php	} else { ?>
 <a href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications</a>
 <?php	} ?>

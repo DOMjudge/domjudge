@@ -53,8 +53,14 @@ if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES)
 $cdata = getCurContest(TRUE);
 $cid = (int)$cdata['cid'];
 
-$nunread_clars = (int) $DB->q('VALUE SELECT COUNT(*) FROM clarification
-                               WHERE sender IS NOT NULL AND cid = %i
-                               AND answered = 0', $cid);
-$nhosts_down   = (int) $DB->q('VALUE SELECT COUNT(*) FROM judgehost
-                               WHERE active = 1 AND unix_timestamp()-polltime >= ' . JUDGEHOST_CRITICAL);
+// Data to be sent as AJAX updates:
+$updates = array(
+	'clarifications' =>
+	$DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
+	        FROM clarification
+	        WHERE sender IS NOT NULL AND cid = %i AND answered = 0', $cid),
+	'judgehosts' =>
+	$DB->q('TABLE SELECT hostname, polltime
+	        FROM judgehost
+	        WHERE active = 1 AND unix_timestamp()-polltime >= ' . JUDGEHOST_CRITICAL),
+);

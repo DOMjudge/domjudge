@@ -22,14 +22,16 @@ function updateMenu(doreload_clarifications, doreload_judgehosts)
 	handle.onreadystatechange = function() {
 		if (handle.readyState == 4) {
 			var resp = JSON.parse(handle.responseText);
+			var nclars = resp.clarifications.length;
+			var nhosts = resp.judgehosts.length;
 
 			var elem = document.getElementById('menu_clarifications');
 			var newstr = '';
 			if ( elem!==null ) {
-				if (resp[0] == 0) {
+				if ( nclars == 0 ) {
 					elem.className = null;
 				} else {
-					newstr = ' ('+resp[0]+' new)';
+					newstr = ' ('+nclars+' new)';
 					elem.className = 'new';
 				}
 				if ( elem.innerHTML != 'clarifications' + newstr ) {
@@ -42,10 +44,10 @@ function updateMenu(doreload_clarifications, doreload_judgehosts)
 			var elem = document.getElementById('menu_judgehosts');
 			var newstr = '';
 			if ( elem!==null ) {
-				if (resp[1] == 0) {
+				if ( nhosts == 0 ) {
 					elem.className = null;
 				} else {
-					newstr = ' ('+resp[1]+' down)';
+					newstr = ' ('+nhosts+' down)';
 					elem.className = 'new';
 				}
 				if ( elem.innerHTML != 'judgehosts' + newstr ) {
@@ -57,7 +59,7 @@ function updateMenu(doreload_clarifications, doreload_judgehosts)
 			}
 		}
 	};
-	handle.open("GET", "update_menu.php", true);
+	handle.open("GET", "updates.php", true);
 	handle.send(null);
 }
 

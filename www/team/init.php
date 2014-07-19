@@ -42,6 +42,19 @@ if ( $teamdata['enabled'] != 1 ) {
 $cdata = getCurContest(TRUE);
 $cid = (int)$cdata['cid'];
 
-$nunread_clars = $DB->q('VALUE SELECT COUNT(*) FROM team_unread
-                         LEFT JOIN clarification ON(mesgid=clarid)
-                         WHERE teamid = %i AND cid = %i', $teamid, $cid);
+// Data to be sent as AJAX updates:
+$updates = array(
+	'clarifications' =>
+	$DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
+	        FROM team_unread
+	        LEFT JOIN clarification ON(mesgid=clarid)
+	        WHERE teamid = %i AND cid = %i', $teamid, $cid),
+	'judgings' =>
+	$DB->q('TABLE SELECT s.submitid, j.judgingid, j.result, s.submittime
+	        FROM judging j
+	        LEFT JOIN submission s USING(submitid)
+	        WHERE s.teamid = %i AND j.cid = %i AND j.seen = 0
+ 	        AND j.valid=1 AND s.submittime < %i' .
+	       ( dbconfig_get('verification_required', 0) ?
+	         ' AND j.verified = 1' : ''), $teamid, $cid, $cdata['endtime']),
+);
