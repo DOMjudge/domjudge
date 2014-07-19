@@ -184,7 +184,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
 			"<a$link>" . htmlspecialchars($row['langid']) . '</a></td>';
 		echo "<td class=\"result\"><a$link>";
-		if ( $row['submittime'] >= $cdata['endtime'] ) {
+		if ( difftime($row['submittime'],$cdata['endtime']) >= 0 ) {
 			echo printresult('too-late');
 			if ( IS_JURY && $row['result'] ) {
 				echo " (" . printresult($row['result']) . ")";
