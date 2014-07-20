@@ -60,12 +60,14 @@ function updateMenu(doreload_clarifications, doreload_judgehosts)
 
 			for(i=0; i<nclars; i++) {
 				sendNotification('New clarification.',
-				                 'clar_'+resp['clarifications'][i]['clarid']);
+				                 {'tag': 'clar_'+resp.clarifications[i].clarid,
+				                  'link': 'clarification.php?id='+resp.clarifications[i].clarid,
+				                  'body': resp.clarifications[i].body });
 			}
 			for(i=0; i<nhosts; i++) {
 				sendNotification('Judgehost down.',
-				                 'host_'+resp['judgehosts'][i]['hostname']+'@'+
-				                 Math.floor(resp['judgehosts'][i]['polltime']));
+				                 {'tag': 'host_'+resp.judgehosts[i].hostname+'@'+
+				                  Math.floor(resp.judgehosts[i].polltime)});
 			}
 		}
 	};
@@ -122,37 +124,55 @@ function toggleNotifications(enable)
 }
 
 // Send a notification if notifications have been enabled.
-// The argument timeout is in seconds and defaults to 5 minutes.
+// The options argument is passed to the Notification constructor,
+// except that the following tags (if found) are interpreted and
+// removed from options:
+// * timeout    notification timeout in seconds (default: 5 minutes)
+// * link       URL to redirect to on click, relative to DOMjudge base
+//
 // We use HTML5 localStorage to keep track of which notifications the
 // client has already received to display each notification only once.
-function sendNotification(title, tag, timeout)
+function sendNotification(title, options)
 {
-	if ( typeof tag     === 'undefined' ) tag = null;
-	if ( typeof timeout === 'undefined' ) timeout = 600;
+	if ( getCookie('domjudge_notify')!=1 ) return;
 
-	if ( getCookie('domjudge_notify')==1 ) {
-		// Check if we already sent this notification:
-		var senttags = localStorage.getItem('notifications_sent');
-		if ( senttags===null || senttags=='' ) {
-			senttags = [];
-		} else {
-			senttags = senttags.split(',');
-		}
-		if ( tag!==null && senttags.indexOf(tag)>=0 ) return;
+//	if ( typeof options.tag === 'undefined' ) options.tag = null;
 
-		var not = new Notification(title, { // options:
-// FIXME: adding 'tag' seems to break notifications in Chromium 35 on Debian.
-			tag: tag,
-		    onShow: function () { setTimeout(not.close, timeout*1000); }
+	// Check if we already sent this notification:
+	var senttags = localStorage.getItem('notifications_sent');
+	if ( senttags===null || senttags=='' ) {
+		senttags = [];
+	} else {
+		senttags = senttags.split(',');
+	}
+	if ( options.tag!==null && senttags.indexOf(options.tag)>=0 ) return;
+
+	var timeout = 600;
+	if ( typeof options.timeout !== 'undefined' ) {
+		timeout = options.timeout;
+		delete options.timeout;
+	}
+
+	var link = null;
+	if ( typeof options.link !== 'undefined' ) {
+		link = options.link;
+		delete options.link;
+	}
+
+	var not = new Notification(title, options);
+
+	not.onshow = function() { setTimeout(not.close, timeout*1000); }
 // FIXME: setting timeout doesn't work in Chromium nor in Firefox
 // (also overriden by default 4 second close timeout, see:
 // https://bugzilla.mozilla.org/show_bug.cgi?id=875114).
-		});
 
-		if ( tag!==null ) {
-			senttags.push(tag);
-			localStorage.setItem('notifications_sent',senttags.join(','));
-		}
+	if ( link!==null ) {
+		not.onclick = function() { window.open(link); }
+	}
+
+	if ( options.tag!==null ) {
+		senttags.push(options.tag);
+		localStorage.setItem('notifications_sent',senttags.join(','));
 	}
 }
 
