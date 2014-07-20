@@ -80,7 +80,12 @@ function toggleNotifications(enable)
 {
 	if ( enable ) {
 		if ( !('Notification' in window) ) {
-			alert('This browser does not support desktop notifications.');
+			alert('Your browser does not support desktop notifications.');
+			return false;
+		}
+		if ( !('localStorage' in window) || window.localStorage===null ) {
+			alert('Your browser does not support local storage;\n'+
+			      'this is required to keep track of sent notifications.');
 			return false;
 		}
 
@@ -118,20 +123,36 @@ function toggleNotifications(enable)
 
 // Send a notification if notifications have been enabled.
 // The argument timeout is in seconds and defaults to 5 minutes.
+// We use HTML5 localStorage to keep track of which notifications the
+// client has already received to display each notification only once.
 function sendNotification(title, tag, timeout)
 {
 	if ( typeof tag     === 'undefined' ) tag = null;
 	if ( typeof timeout === 'undefined' ) timeout = 600;
 
 	if ( getCookie('domjudge_notify')==1 ) {
+		// Check if we already sent this notification:
+		var senttags = localStorage.getItem('notifications_sent');
+		if ( senttags===null || senttags=='' ) {
+			senttags = [];
+		} else {
+			senttags = senttags.split(',');
+		}
+		if ( tag!==null && senttags.indexOf(tag)>=0 ) return;
+
 		var not = new Notification(title, { // options:
 // FIXME: adding 'tag' seems to break notifications in Chromium 35 on Debian.
-//			tag: tag,
+			tag: tag,
 		    onShow: function () { setTimeout(not.close, timeout*1000); }
 // FIXME: setting timeout doesn't work in Chromium nor in Firefox
 // (also overriden by default 4 second close timeout, see:
 // https://bugzilla.mozilla.org/show_bug.cgi?id=875114).
 		});
+
+		if ( tag!==null ) {
+			senttags.push(tag);
+			localStorage.setItem('notifications_sent',senttags.join(','));
+		}
 	}
 }
 
