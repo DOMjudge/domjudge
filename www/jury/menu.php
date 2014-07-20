@@ -2,10 +2,10 @@
 <a href="index.php" accesskey="h">home</a>
 <?php	if ( checkrole('balloon') ) { ?>
 <a href="balloons.php" accesskey="b">balloons</a>
-<?php   } ?>
+<?php	} ?>
 <?php	if ( checkrole('jury') ) { ?>
 <a href="problems.php" accesskey="p">problems</a>
-<?php   } ?>
+<?php	} ?>
 <?php	if ( IS_ADMIN ) {
 	$ndown = count($updates['judgehosts']);
 	if ( $ndown > 0 ) { ?>
@@ -25,13 +25,13 @@
 <a href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications</a>
 <?php	} ?>
 <a href="submissions.php" accesskey="s">submissions</a>
-<?php   } ?>
-<?php   if ( have_printing() ) { ?>
+<?php	} ?>
+<?php	if ( have_printing() ) { ?>
 <a href="print.php" accesskey="p">print</a>
-<?php   } ?>
+<?php	} ?>
 <?php	if ( checkrole('jury') ) { ?>
 <a href="scoreboard.php" accesskey="b">scoreboard</a>
-<?php   } ?>
+<?php	} ?>
 <?php
 if ( checkrole('team') ) {
 	echo "<a target=\"_top\" href=\"../team/\" accesskey=\"t\">→team</a>\n";
