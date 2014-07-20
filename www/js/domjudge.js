@@ -25,30 +25,34 @@ function updateMenu(doreload_clarifications, doreload_judgehosts)
 
 			var elem = document.getElementById('menu_clarifications');
 			var newstr = '';
-			if (resp[0] == 0) {
-				elem.className = null;
-			} else {
-				newstr = ' ('+resp[0]+' new)';
-				elem.className = 'new';
-			}
-			if ( elem.innerHTML != 'clarifications' + newstr ) {
-				elem.innerHTML = 'clarifications' + newstr;
-				if(doreload_clarifications) {
-					location.reload()
+			if ( elem!==null ) {
+				if (resp[0] == 0) {
+					elem.className = null;
+				} else {
+					newstr = ' ('+resp[0]+' new)';
+					elem.className = 'new';
+				}
+				if ( elem.innerHTML != 'clarifications' + newstr ) {
+					elem.innerHTML = 'clarifications' + newstr;
+					if(doreload_clarifications) {
+						location.reload()
+					}
 				}
 			}
 			var elem = document.getElementById('menu_judgehosts');
 			var newstr = '';
-			if (resp[1] == 0) {
-				elem.className = null;
-			} else {
-				newstr = ' ('+resp[1]+' down)';
-				elem.className = 'new';
-			}
-			if ( elem.innerHTML != 'judgehosts' + newstr ) {
-				elem.innerHTML = 'judgehosts' + newstr;
-				if(doreload_judgehosts) {
-					location.reload()
+			if ( elem!==null ) {
+				if (resp[1] == 0) {
+					elem.className = null;
+				} else {
+					newstr = ' ('+resp[1]+' down)';
+					elem.className = 'new';
+				}
+				if ( elem.innerHTML != 'judgehosts' + newstr ) {
+					elem.innerHTML = 'judgehosts' + newstr;
+					if(doreload_judgehosts) {
+						location.reload()
+					}
 				}
 			}
 		}
