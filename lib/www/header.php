@@ -61,7 +61,8 @@ if ( IS_JURY ) {
 	global $pagename;
 	echo "<body onload=\"setInterval('updateMenu(" .
 		(int)($pagename=='clarifications.php' && $refresh_cookie) . ", " .
-		(int)($pagename=='judgehosts.php' && $refresh_cookie) . ")', 20000)\">\n";
+		(int)($pagename=='judgehosts.php' && $refresh_cookie) . ")', 20000); " .
+		"updateMenu(0,0)\">\n";
 } else {
 	echo "<body>\n";
 }
