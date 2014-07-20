@@ -266,7 +266,8 @@ if ( IS_ADMIN ) {
 		delLink('problem','probid', $id) . "</p>\n\n";
 }
 
-echo "<h2>Submissions for p" . htmlspecialchars($id) . "</h2>\n\n";
+echo "<h2>Submissions for " . htmlspecialchars($data['shortname']) .
+	" - " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $restrictions = array( 'probid' => $id );
 putSubmissions($cdata, $restrictions);

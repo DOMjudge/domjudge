@@ -151,7 +151,7 @@ if ( IS_ADMIN ) {
 		editLink('language', $data['langid']) . "\n" .
 		delLink('language','langid',$data['langid']) . "</p>\n\n";
 }
-echo "<h2>Submissions in " . htmlspecialchars($id) . "</h2>\n\n";
+echo "<h2>Submissions in " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $restrictions = array( 'langid' => $id );
 putSubmissions($cdata, $restrictions);
