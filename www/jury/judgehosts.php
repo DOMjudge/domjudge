@@ -72,15 +72,20 @@ $res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
 // current judging. It is tricky, however, to determine if a judging
 // is currently running or has crashed, so we simply ignore this.
 
-$work10min   = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - starttime)
-                       FROM judging WHERE starttime >= %i GROUP BY judgehost',
-                      now()-10*60);
+$now = now();
+$work2min    = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - GREATEST(%i,starttime))
+                       FROM judging WHERE endtime > %i GROUP BY judgehost',
+                      $now-2*60, $now-2*60);
 
-$workcontest = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - starttime)
-                       FROM judging WHERE starttime >= %i GROUP BY judgehost',
-                      $cdata['starttime']);
+$work10min   = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - GREATEST(%i,starttime))
+                       FROM judging WHERE endtime > %i GROUP BY judgehost',
+                      $now-10*60, $now-10*60);
 
-$clen = difftime(now(),$cdata['starttime']);
+$workcontest = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - GREATEST(%i,starttime))
+                       FROM judging WHERE endtime > %i GROUP BY judgehost',
+                      $cdata['starttime'], $cdata['starttime']);
+
+$clen = difftime($now,$cdata['starttime']);
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No judgehosts defined</p>\n\n";
@@ -102,7 +107,7 @@ if( $res->count() == 0 ) {
 			echo "judgehost-nocon";
 			echo "\" title =\"never checked in\">";
 		} else {
-			$reltime = floor(difftime(now(),$row['polltime']));
+			$reltime = floor(difftime($now,$row['polltime']));
 			if ( $reltime < JUDGEHOST_WARNING ) {
 				echo "judgehost-ok";
 			} else if ( $reltime < JUDGEHOST_CRITICAL ) {
@@ -113,10 +118,11 @@ if( $res->count() == 0 ) {
 			echo "\" title =\"last checked in $reltime seconds ago\">";
 		}
 		echo $link . CIRCLE_SYM . "</a></td>";
-		echo "<td title=\"load during whole contest and last 10 minutes\">" .$link .
-		    sprintf('%.2f&nbsp;%.2f',
-		            @$workcontest[$row['hostname']] / $clen,
-		            @$work10min[  $row['hostname']] / (10*60)) . "</a></td>";
+		echo "<td title=\"load during the last 2 and 10 minutes and the whole contest\">" .$link .
+		    sprintf('%.2f&nbsp;%.2f&nbsp;%.2f',
+		            @$work2min[   $row['hostname']] / (2*60),
+		            @$work10min[  $row['hostname']] / (10*60),
+		            @$workcontest[$row['hostname']] / $clen) . "</a></td>";
 		if ( IS_ADMIN ) {
 			if ( $row['active'] ) {
 				$activepicto = "pause"; $activecmd = "deactivate";
