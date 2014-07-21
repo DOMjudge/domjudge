@@ -106,8 +106,9 @@ function toggleNotifications(enable)
 					if ( Notification.permission!=='granted' ) {
 						alert('Browser denied permission to send desktop notifications.');
 					} else {
-						sendNotification('DOMjudge notifications enabled.', 'notify', 5);
-						navigateToUrl("toggle_notify.php?enable=1");
+						sendNotification('DOMjudge notifications enabled.',
+						                 {'timeout': 5});
+						window.location.href = 'toggle_notify.php?enable=1';
 						return false;
 					}
 				});
