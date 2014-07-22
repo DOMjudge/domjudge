@@ -2,9 +2,16 @@ DOMjudge Programming Contest Judging System
 
 Version 4.0.0 - DEV
 -------------------
+ - Fix chroot create script when using an APT proxy.
+ - Fix broken link to problem download for teams and public.
+ - Small tweaks to new judgehost load display.
+ - Display problem/language name instead of ID above submission lists.
+ - Install ACE and flot Javascript library files.
+ - Rename SQL upgrade snippet to release name.
+ - A few miscellaneous minor code improvements.
 
-Version 4.0.0 Release Candidate 1
----------------------------------
+Version 4.0.0 Release Candidate 1 - 8 July 2014
+-----------------------------------------------
  - checktestdata logical operators are now '&&' and '||'.
  - Introduce REST API; used by judgedaemon and submit client to communicate
    with domserver. API is not officially declared 'stable' at this point.
