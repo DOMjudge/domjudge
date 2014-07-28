@@ -19,7 +19,7 @@ compare: $(LIBOBJECTS)
 compare$(OBJEXT): $(LIBHEADERS)
 
 check_float: -lm $(LIBOBJECTS)
-check_float$(OBJEXT): -lm $(LIBHEADERS)
+check_float$(OBJEXT): $(LIBHEADERS)
 
 runguard: -lm $(LIBCGROUP)
 runguard: CFLAGS += -std=c99
