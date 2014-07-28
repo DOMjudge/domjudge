@@ -278,7 +278,7 @@ On the domserver host:
        sudo apache2ctl graceful
        </tt>
 <item> Check that the web interface works (/team, /public and /jury).
-<item> Change the admin password from its default value.
+<item> Change the admin password from its default value ('admin').
 <item> Check that the API (/api) works and create credentials for the judgehosts.
 <item> Create accounts and add useful contest data through the jury web
        interface or with phpMyAdmin.
@@ -478,10 +478,13 @@ directory without arguments.
 
 <sect>Configuration
 <p>
-
 Configuration of the judge system is mostly done by editing the
 configuration variables on the page <tt>Configuration settings</tt>
-available in the administrator interface. Changes take effect immediately.
+available in the administrator interface, and changes take effect
+immediately. The administrator interface
+can be reached on <tt>http://yourhost/domjudge/jury/</tt> and the
+default username is <tt>admin</tt> with password <tt>admin</tt>.
+Make sure to change the default password immediately.
 
 Some settings that are tightly coupled to the filesystem can be
 configured in the files in <tt>etc</tt>: <tt>domserver-config.php,
