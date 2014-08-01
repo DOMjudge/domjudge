@@ -216,12 +216,6 @@ AC_PROG_MKDIR_P
 # Check for including optional libmagic.
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
-# Check for JSONcpp library to decode language/extensions list from
-# REST API (this also requires libcURL below).
-AC_LANG_PUSH([C++])
-AC_CHECK_HEADERS([jsoncpp/json/json.h],AC_SUBST(LIBJSONCPP,[-ljsoncpp]))
-AC_LANG_POP([C++])
-
 # {{{ submitclient
 
 AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--enable-submitclient],
@@ -248,6 +242,15 @@ if test "x$enable_submitclient" != "xno"; then
 	],[
 		AC_SUBST(CURL_STATIC,"")
 	])
+
+	# Check for JSONcpp library to decode language/extensions list from
+	# REST API (this also requires libcURL below).
+	AC_LANG_PUSH([C++])
+	AC_CHECK_HEADERS([jsoncpp/json/json.h],AC_SUBST(LIBJSONCPP,[-ljsoncpp]),[
+		AC_MSG_ERROR([JSONcpp headers not found (required for submit client)])
+	])
+	AC_LANG_POP([C++])
+
 fi
 # }}}
 
@@ -259,13 +262,15 @@ AC_ARG_ENABLE(checktestdata,AS_HELP_STRING([--enable-checktestdata],
 if test "x$enable_checktestdata" != "xno"; then
 	AC_SUBST(CHECKTESTDATA_ENABLED,[yes])
 
-	AX_BOOST_BASE([1.33.1],[],[AC_MSG_ERROR([Boost not available.])])
+	AX_BOOST_BASE([1.33.1],[],[
+		AC_MSG_ERROR([Boost not found (required for checktestdata)])])
 	AX_BOOST_REGEX
 
 	# Check for gmpxx headers separately, as they are C++.
 	AC_LANG_PUSH([C++])
 	AC_CHECK_HEADERS([gmpxx.h])
-	AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmpxx -lgmp'),[],[-lgmp])
+	AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmpxx -lgmp'),[
+		AC_MSG_ERROR([GMPlib not found (required for checktestdata)])],[-lgmp])
 	AC_LANG_POP([C++])
 fi
 
