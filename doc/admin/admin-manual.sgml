@@ -2281,7 +2281,7 @@ On Debian(-based) systems, the following apt-get command should
 install the additionally required packages (next to the
 <ref id="install_config:package-install" name="standard set of packages">):
 <code>
-apt-get install autoconf automake flexc++ bisonc++
+apt-get install autoconf automake git flexc++ bisonc++
 </code>
 
 When this software is present, bootstrapping can be done by running
