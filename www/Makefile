@@ -6,8 +6,6 @@ include $(TOPDIR)/Makefile.global
 configure.php: configure.php.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
-config: configure.php
-
 domserver: configure.php
 
 install-domserver:

@@ -28,9 +28,11 @@ SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
               combined_scoreboard runssh_judgehosts runssh_teams balloons \
               simulate_contest create_cgroups create_accounts
 
-config: $(SUBST_FILES)
+build: $(TARGETS) $(SUBST_FILES)
 
-build: $(TARGETS)
+domserver: balloons create_accounts
+
+judgehost: create_cgroups
 
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)

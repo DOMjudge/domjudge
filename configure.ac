@@ -362,9 +362,7 @@ echo "    - run..............: $judgehost_rundir"
 echo "    - tmp..............: $judgehost_tmpdir"
 echo "    - judge............: $judgehost_judgedir"
 echo ""
-echo "Now you might want to run some of:"
-echo ""
-echo "    make domserver judgehost docs"
+echo "Run 'make' without arguments to get a list of (build) targets."
 echo ""
 fi # !QUIET
 # }}}

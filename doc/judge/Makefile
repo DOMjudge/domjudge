@@ -6,7 +6,7 @@ include $(TOPDIR)/Makefile.global
 SPEC_SGML = checktestdata-grammar-inc.sgml problem-format-inc.sgml
 SPEC_TXT  = $(SPEC_SGML:-inc.sgml=.txt)
 
-docs: judge-manual.pdf judge-manual.html $(SPEC_TXT)
+docs distdocs: judge-manual.pdf judge-manual.html $(SPEC_TXT)
 
 install-docs: docs
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/judge \
@@ -25,3 +25,5 @@ $(SPEC_TXT): %.txt: %.sgml %-inc.sgml
 
 maintainer-clean-l:
 	-rm -f judge-manual*.html judge-manual.pdf $(SPEC_TXT)
+
+.PHONY: docs distdocs install-docs

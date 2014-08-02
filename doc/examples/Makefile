@@ -9,7 +9,7 @@ INI = $(PROBLEMS:=.ini)
 PDF = $(PROBLEMS:=.pdf)
 ZIP = $(PROBLEMS:=.zip)
 
-docs: $(PDF) $(ZIP)
+docs distdocs: $(PDF) $(ZIP)
 
 # Used by sql/Makefile:
 .pdf-generated: $(PDF)
@@ -45,3 +45,5 @@ clean-l:
 
 maintainer-clean-l:
 	-rm -f $(INI) $(PDF) $(ZIP) .pdf-generated
+
+.PHONY: docs distdocs install-docs

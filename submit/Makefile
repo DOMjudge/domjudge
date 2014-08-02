@@ -27,12 +27,13 @@ $(SUBMITCLIENT): LDFLAGS := $(filter-out -pie,$(LDFLAGS))
 SUBMITHEADERS = $(TOPDIR)/etc/submit-config.h
 
 ifeq ($(SUBMITCLIENT_ENABLED),yes)
-TARGETS += $(SUBMITCLIENT)
-endif
-
-build: $(TARGETS)
-
 submitclient: $(SUBMITCLIENT)
+TARGETS += $(SUBMITCLIENT)
+else
+submitclient:
+	@echo "Submit client is disabled."
+	@exit 1
+endif
 
 # Explicitly link with C++ compiler, as without any C++ extensions
 # these are recognized as plain C objects.

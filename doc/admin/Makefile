@@ -3,7 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-docs: admin-manual.pdf admin-manual.html
+docs distdocs: admin-manual.pdf admin-manual.html
 
 install-docs: docs
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/admin \
@@ -18,3 +18,5 @@ admin-manual.html: admin-manual.sgml $(TOPDIR)/doc/docs_header.html
 
 maintainer-clean-l:
 	-rm -f admin-manual*.html admin-manual.pdf
+
+.PHONY: docs distdocs install-docs
