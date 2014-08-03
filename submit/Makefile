@@ -9,10 +9,10 @@ SUBMITCLIENT = submit$(EXEEXT)
 # Statically link against libmagic and libJSONcpp to prevent
 # dependency on team workstations (this might be GCC specific):
 ifneq ($(LIBMAGIC),)
-$(SUBMITCLIENT): LDFLAGS += -Wl,-Bstatic $(LIBMAGIC) -Wl,-Bdynamic
+$(SUBMITCLIENT): LDFLAGS += $(STATIC_LINK_START) $(LIBMAGIC) $(STATIC_LINK_END)
 endif
 ifneq ($(LIBJSONCPP),)
-$(SUBMITCLIENT): LDFLAGS += -Wl,-Bstatic $(LIBJSONCPP) -Wl,-Bdynamic
+$(SUBMITCLIENT): LDFLAGS += $(STATIC_LINK_START) $(LIBJSONCPP) $(STATIC_LINK_END)
 endif
 $(SUBMITCLIENT): CXXFLAGS += $(CURL_CFLAGS)
 # Try to link statically against libcURL to prevent dependency

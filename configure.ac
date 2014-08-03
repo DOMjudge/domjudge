@@ -250,11 +250,11 @@ if test "x$enable_submitclient" != "xno"; then
 	])
 	CPPFLAGS="$save_CPPFLAGS"
 	# The 'curl-config --static-libs' option is accepted since 7.17.1
-	AX_COMPARE_VERSION([$curl_version],[ge],[7.17.1],[
-		AC_SUBST(CURL_STATIC,`curl-config --static-libs`)
-	],[
-		AC_SUBST(CURL_STATIC,"")
-	])
+	AC_SUBST(CURL_STATIC,"")
+	if test "x$enable_static_linking" = "xyes"; then
+		AX_COMPARE_VERSION([$curl_version],[ge],[7.17.1],[
+			AC_SUBST(CURL_STATIC,`curl-config --static-libs`)])
+	fi
 
 	# Check for JSONcpp library to decode language/extensions list from
 	# REST API (this also requires libcURL below).
@@ -285,6 +285,17 @@ if test "x$enable_checktestdata" != "xno"; then
 	AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmpxx -lgmp'),[
 		AC_MSG_ERROR([GMPlib not found (required for checktestdata)])],[-lgmp])
 	AC_LANG_POP([C++])
+fi
+
+# Check option to link statically against "special" libraries for
+# submit client and checktestdata programs.
+AC_ARG_ENABLE(static-linking,AS_HELP_STRING([--enable-static-linking],
+[enable static linking against libcurl,libmagic,libjsoncpp for 'submit'
+ and libgmpxx,libboost_regex for 'checktestdata' (default: no).]))
+
+if test "x$enable_static_linking" = "xyes"; then
+	AC_SUBST(STATIC_LINK_START,[-Wl,-Bstatic])
+	AC_SUBST(STATIC_LINK_END,  [-Wl,-Bdynamic])
 fi
 
 # See 'man feature_test_macros' under Linux:
