@@ -1885,8 +1885,9 @@ the jury web interface work. A solution is to make it readable to a
 special group the web server runs as. This is done when using the
 default configuration and installation method and when <tt>make
 install-{domserver,judgehost}</tt> is run as root. The webserver group
-can be set with <tt>configure --with-webserver-group=GROUP</tt> which
-defaults to <tt>www-data</tt>.
+can be set with <tt>configure --with-webserver-group=GROUP</tt>; by
+default it is tried to be determined from groups available on the
+system, e.g. <tt>www-data</tt> or <tt>apache</tt>.
 
 Judgehosts and the domserver communicate with each other over HTTP.
 Also all parties accessing the domserver web interface obvioulsly use
@@ -1938,7 +1939,7 @@ than DOMjudge.
 <p>
 
 The default installation sets permissions correctly for the web
-server user (commonly <tt>www-data</tt>).
+server user (commonly <tt>www-data</tt> or <tt>apache</tt>).
 The following information is for those who want to verify the setup
 or make modifications to the settings.
 

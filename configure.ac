@@ -75,11 +75,23 @@ fi
 
 AC_MSG_CHECKING([webserver-group])
 AC_ARG_WITH([webserver-group], [AS_HELP_STRING([--with-webserver-group=GROUP],
-[Webserver group for password files (default: www-data).])], [], [])
+[Webserver group for password files (default: try to detect).])], [], [])
 
 if test "x$with_webserver_group" = x; then
-	AC_SUBST(WEBSERVER_GROUP,"www-data")
-	AC_MSG_RESULT([$WEBSERVER_GROUP (default)])
+	# Try a number of group names and choose first one found
+	found=0
+	for g in www-data apache httpd ; do
+		if getent group $g >/dev/null 2>&1 ; then
+		   found=1
+		   break
+		fi
+	done
+	if test $found -ne 0 ; then
+		AC_SUBST(WEBSERVER_GROUP,"$g")
+		AC_MSG_RESULT([$WEBSERVER_GROUP (detected)])
+	else
+		AC_MSG_ERROR([webserver group could not be detected, use --with-webserver-group=GROUP)])
+	fi
 else
 	AC_SUBST(WEBSERVER_GROUP,$with_webserver_group)
 	AC_MSG_RESULT([$WEBSERVER_GROUP])
