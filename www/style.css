@@ -243,7 +243,7 @@ td.scorenc { border-color: silver; border-right: 0; }
 	border-bottom: none;
 	font-variant: small-caps;
 }
-#scorethisisme .scoretn {
+.scorethisisme .scoretn {
 	background: #ff6600;
 	font-weight: bold;
 }

@@ -341,12 +341,12 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		}
 		// check whether this is us, otherwise use category colour
 		if ( @$myteamid == $team ) {
-			echo ' id="scorethisisme"';
+			echo ' class="scorethisisme"';
 			unset($color);
 		} else {
 			$color = $teams[$team]['color'];
 		}
-		echo ' teamid="' . $teams[$team]['teamid'] . '"';
+		echo ' id="team:' . $teams[$team]['teamid'] . '"';
 		echo '><td class="scorepl">';
 		// Only print rank when score is different from the previous team
 		if ( ! $displayrank ) {
