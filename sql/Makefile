@@ -6,6 +6,7 @@ include $(TOPDIR)/Makefile.global
 EXECDIRS=$(shell find files -mindepth 2 -maxdepth 2 -type d)
 ZIPFILES=$(EXECDIRS:=.zip)
 ZIPSQL=mysql_db_files_defaultdata.sql mysql_db_files_examples.sql
+CONFSTUB=files/config.h
 
 domserver: dj-setup-database
 
@@ -39,6 +40,12 @@ $(ZIPSQL): $(ZIPFILES)
 		done ; \
 	fi
 
+# Extract DOMjudge version from README here as a hack, because the
+# system isn't configured yet.
+$(CONFSTUB): %: %.in $(TOPDIR)/README
+	VERSION=`sed -n '1s/^.*version //p' $(TOPDIR)/README | tr -d '\n'` ; \
+	sed "s/@VERSION@/$$VERSION/" $< > $@
+
 dj-setup-database: %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
@@ -57,10 +64,10 @@ install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/files/examples \
 	 	files/examples/*.zip
 
-dist-l: $(ZIPSQL) $(ZIPFILES)
+dist-l: $(ZIPSQL) $(ZIPFILES) $(CONFSTUB)
 
 distclean-l:
 	-rm -f dj-setup-database
 
 maintainer-clean-l:
-	-rm -f $(ZIPSQL) $(ZIPFILES)
+	-rm -f $(ZIPSQL) $(ZIPFILES) $(CONFSTUB)

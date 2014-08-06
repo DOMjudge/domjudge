@@ -1,1 +1,1 @@
-../../../../etc/config.h
+../../config.h
