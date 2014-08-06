@@ -61,3 +61,6 @@ dist-l: $(ZIPSQL) $(ZIPFILES)
 
 distclean-l:
 	-rm -f dj-setup-database
+
+maintainer-clean-l:
+	-rm -f $(ZIPSQL) $(ZIPFILES)
