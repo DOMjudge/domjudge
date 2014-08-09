@@ -231,7 +231,7 @@ AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
 # {{{ submitclient
 
-AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--enable-submitclient],
+AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--disable-submitclient],
 [enable submit client program (default: yes).
  This requires JSONcpp and cURL libraries and optionally
  libmagic for detecting submission of binary files.]))
@@ -268,7 +268,7 @@ fi
 # }}}
 
 # Check for building "checktestdata" program.
-AC_ARG_ENABLE(checktestdata,AS_HELP_STRING([--enable-checktestdata],
+AC_ARG_ENABLE(checktestdata,AS_HELP_STRING([--disable-checktestdata],
 [enable building of checktestdata program (default: yes).
  This requires the Boost regex and GNU GMP libraries.]))
 
