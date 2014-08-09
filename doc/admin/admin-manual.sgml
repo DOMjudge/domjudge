@@ -381,10 +381,10 @@ apt-get install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
 </code>
 
 Libmagic is not strictly required, but highly recommended for
-detecting binary file submissions. These libraries are statically
-linked into the <tt>submit</tt> binary so that these libraries
-are not needed on the team workstations where <tt>submit</tt> is
-installed.
+detecting binary file submissions. Pass the option
+<tt>--enable-static-linking</tt> to configure so that these libraries
+are statically linked into the <tt>submit</tt> binary and not needed
+on the team workstations where <tt>submit</tt> is installed.
 
 
 <sect>Installation system
