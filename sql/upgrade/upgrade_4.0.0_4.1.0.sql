@@ -14,6 +14,10 @@ SELECT 1;
 -- Create additional structures
 --
 
+ALTER TABLE `configuration`
+  DROP KEY `name`,
+  ADD UNIQUE KEY `name` (`name`);
+
 --
 -- Transfer data from old to new structure
 --
