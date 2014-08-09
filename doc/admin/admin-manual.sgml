@@ -1027,7 +1027,7 @@ distributions may be different (send us your feedback!).
 <p>
 <itemize>
 <item> Install the necessary packages:
-<tt># apt-get install libcgroup-dev cgroup-bin</tt>
+<tt># apt-get install libcgroup-dev</tt>
 <item> Edit grub config to add memory cgroup and swap accounting to the boot options. Edit <tt>/etc/default/grub</tt> and change the default commandline to <tt>GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"</tt>.
 Then run <tt>update-grub</tt> and reboot.
 <item> Compile DOMjudge with cgroup support. Re-run <tt>./configure</tt> and look for cgroup in the output. Then rebuild the runguard with <tt>make build</tt>.
