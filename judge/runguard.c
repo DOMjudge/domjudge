@@ -22,7 +22,9 @@
    output of the command, unless that is optionally redirected to file.
 
    The command and its children are sent a SIGTERM after the runtime
-   has passed, followed by a SIGKILL after 'killdelay'.
+   has passed, followed by a SIGKILL after 'killdelay'. The program is
+   considered to have finished when the main program thread exits. At
+   that time any children still running are killed.
  */
 
 #include "config.h"
