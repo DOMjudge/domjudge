@@ -254,8 +254,8 @@ External software:
 <item> Install Apache, PHP and (recommended) phpMyAdmin.
 <item> Make sure PHP works for the web server and command line scripts.
 <item> Install necessary compilers on the judgehosts.
-<item> See also <ref id="install_config:apt-getinstall"
-       name="an example command line for Debian GNU/Linux">.
+<item> See also <ref id="install_config:package-install"
+       name="an example command line for Debian and RedHat">.
 </itemize>
 
 DOMjudge:
@@ -346,8 +346,8 @@ Optionally:
 For a detailed list of the hardware and software requirements,
 please refer to the previous chapter on contest planning.
 
-<label id="install_config:apt-getinstall">
-<sect1>Debian installation command
+<label id="install_config:package-install">
+<sect1>Debian and RedHat installation commands
 <p>
 
 For your convenience, the following command will install needed
@@ -363,15 +363,36 @@ apt-get install gcc g++ make zip unzip mysql-server \
 	texlive-fonts-recommended texlive-lang-dutch
 </code>
 
+The following command can be used on RedHat Enterprise Linux, and
+related distributions like CentOS and Fedora.
+<code>
+yum install gcc gcc-c++ make zip unzip mariadb-server \
+	httpd php php-cli php-mbstring php-mysql \
+	boost-devel gmp-devel ntp linuxdoc-tools \
+	texlive-collection-latexrecommended texlive-wrapfig
+</code>
+Note that the TeX Live packages <tt>expdlist</tt>, <tt>moreverb</tt>,
+and <tt>svn</tt> still have be installed manually to rebuild the team
+manuals.
+
 On a judgehost, the following should be sufficient. The last two lines show some
 example compilers to install for C, C++, Java (GNU), Java (Oracle), Haskell
 and Pascal; change the list as appropriate.
 
+For Debian:
 <code>
 apt-get install make sudo debootstrap php5-cli php5-curl php5-json procps \
 	gcc g++ gcj-jre-headless gcj-jdk openjdk-7-jre-headless openjdk-7-jdk \
 	ghc fp-compiler
 </code>
+
+For RedHat:
+<code>
+yum install make sudo glibc-static php-cli php-mbstring php-process procps-ng \
+	gcc gcc-c++ java-1.7.0-openjdk-headless java-1.7.0-openjdk-devel \
+	ghc-compiler fpc
+</code>
+Note that <tt>fpc</tt> is not available in RedHat 7.
 
 Finally, to build the command-line submit client, install the
 following additional software.
@@ -379,6 +400,12 @@ following additional software.
 <code>
 apt-get install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
 </code>
+
+<code>
+yum install libcurl-devel jsoncpp-devel file-devel
+</code>
+The package <tt>jsoncpp-devel</tt> is available in Fedora, but not in
+RHEL/CentOS.
 
 Libmagic is not strictly required, but highly recommended for
 detecting binary file submissions. These libraries are statically
@@ -1028,6 +1055,7 @@ distributions may be different (send us your feedback!).
 <itemize>
 <item> Install the necessary packages:
 <tt># apt-get install libcgroup-dev</tt>
+(or <tt># yum install libcgroup-devel</tt> on RedHat)
 <item> Edit grub config to add memory cgroup and swap accounting to the boot options. Edit <tt>/etc/default/grub</tt> and change the default commandline to <tt>GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"</tt>.
 Then run <tt>update-grub</tt> and reboot.
 <item> Compile DOMjudge with cgroup support. Re-run <tt>./configure</tt> and look for cgroup in the output. Then rebuild the runguard with <tt>make build</tt>.
@@ -2251,8 +2279,7 @@ additional software to be installed:
 
 On Debian(-based) systems, the following apt-get command should
 install the additionally required packages (next to the
-<ref id="install_config:apt-getinstall"
-       name="standard set of packages">):
+<ref id="install_config:package-install" name="standard set of packages">):
 <code>
 apt-get install autoconf automake flexc++ bisonc++
 </code>
