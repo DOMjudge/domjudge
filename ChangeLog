@@ -2,6 +2,11 @@ DOMjudge Programming Contest Judging System
 
 Version 4.0.1 - DEV
 -------------------
+ - Install genrestapi and www/auth/*. Thanks Glenn Martin for reporting.
+ - Remove Bisonc++/Flexc++ checks from configure.
+ - Detect Apache group and other minor fixes in configure.
+ - Add RedHat installation commands and miscellaneous other
+   documentation improvements.
 
 Version 4.0.0 - 22 July 2014
 ----------------------------
