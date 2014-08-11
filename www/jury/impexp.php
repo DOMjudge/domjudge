@@ -55,6 +55,7 @@ echo "<tr><td><label for=\"contest\">Contest ID:</label></td>" .
 echo "<tr><td><label for=\"token\">Access token:</label></td>" .
 	"<td>" . addInput('token', @$token, null, null, 'required') . "</td></tr>\n";
 echo "</table>\n";
-echo addSubmit('Fetch teams', 'fetch') . addSubmit('Upload standings', 'upload') . addEndForm();
+echo addSubmit('Fetch teams', 'fetch') .
+     addSubmit('Upload standings', 'upload') . addEndForm();
 
 require(LIBWWWDIR . '/footer.php');

@@ -201,18 +201,22 @@ flushresults();
 
 // CONFIGURATION
 
-if ( $DB->q('VALUE SELECT count(*) FROM user WHERE username = "admin" AND password=MD5("admin#admin")') != 0 ) {
+if ( $DB->q('VALUE SELECT count(*) FROM user
+             WHERE username = "admin" AND password=MD5("admin#admin")') != 0 ) {
 	result('configuration', 'Default admin password', 'E',
-		'The "admin" user still has the default password. You should change it immediately.');
+	       'The "admin" user still has the default password. ' .
+	       'You should change it immediately.');
 } else {
 	result('configuration', 'Default admin password', 'O',
-		'Password for "admin" has been changed from the default.');
+	       'Password for "admin" has been changed from the default.');
 }
 
 foreach (array('compare', 'run') as $type) {
-	if ( $DB->q('VALUE SELECT count(*) FROM executable WHERE execid = %s', dbconfig_get('default_' . $type)) == 0 ) {
+	if ( $DB->q('VALUE SELECT count(*) FROM executable WHERE execid = %s',
+	            dbconfig_get('default_' . $type)) == 0 ) {
 		result('configuration', 'Default ' . $type .' script', 'E',
-			'The default ' . $type . ' script "' . dbconfig_get('default_' . $type) . '" does not exist.');
+		       'The default ' . $type . ' script "' .
+		       dbconfig_get('default_' . $type) . '" does not exist.');
 	}
 }
 
@@ -221,8 +225,8 @@ if ( DEBUG == 0 ) {
 	result('configuration', 'Debugging', 'O', 'Debugging disabled.');
 } else {
 	result('configuration', 'Debugging', 'W',
-		'Debug information enabled (level ' . DEBUG .").\n" .
-		'Should not be enabled on live systems.');
+	       'Debug information enabled (level ' . DEBUG .").\n" .
+	       'Should not be enabled on live systems.');
 }
 
 if ( !is_writable(TMPDIR) ) {
@@ -231,7 +235,8 @@ if ( !is_writable(TMPDIR) ) {
               'Showing diffs and editing of submissions may not work.');
 } else {
        result('configuration', 'TMPDIR writable', 'O',
-              'TMPDIR (' . TMPDIR . ') can be used to store temporary files for submission diffs and edits.');
+              'TMPDIR (' . TMPDIR . ') can be used to store temporary ' .
+	          'files for submission diffs and edits.');
 }
 
 flushresults();
@@ -240,10 +245,10 @@ flushresults();
 
 if($cid == null) {
 	result('contests', 'Active contest', 'E',
-		'No currently active contest found. System will not function.');
+	       'No currently active contest found. System will not function.');
 } else {
 	result('contests', 'Active contest', 'O',
-		'Currently active contest: c'.(int)$cid);
+	       'Currently active contest: c'.(int)$cid);
 }
 
 // get all contests
@@ -277,7 +282,8 @@ flushresults();
 
 // PROBLEMS
 
-$res = $DB->q('SELECT probid, shortname, timelimit, special_compare, special_run FROM problem ORDER BY probid');
+$res = $DB->q('SELECT probid, shortname, timelimit, special_compare, special_run
+               FROM problem ORDER BY probid');
 
 $details = '';
 while($row = $res->next()) {
@@ -373,11 +379,11 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 	}
 
 	result('problems, languages, teams', 'Team affiliation icons',
-		($details == '') ? 'O' : 'W', $details);
+	       ($details == '') ? 'O' : 'W', $details);
 
 } else {
 	result('problems, languages, teams', 'Team affiliation icons',
-		'O', 'Affiliation icons disabled in config.');
+	       'O', 'Affiliation icons disabled in config.');
 }
 
 flushresults();
@@ -389,8 +395,8 @@ $submnote = NULL;
 if ( ! is_writable(SUBMITDIR) ) {
 	$submres = 'W';
 	$submnote = 'The webserver has no write access to SUBMITDIR (' .
-	             htmlspecialchars(SUBMITDIR) .
-	             '), and thus will not be able to make backup copies of submissions.';
+	            htmlspecialchars(SUBMITDIR) . '), and thus will not ' .
+	            'be able to make backup copies of submissions.';
 }
 
 result('submissions and judgings', 'Submissions', $submres, $submnote);
@@ -424,7 +430,8 @@ $res = $DB->q('SELECT s.submitid FROM submission s
                WHERE f.submitid IS NULL');
 
 while($row = $res->next()) {
-	$details .= 'Submission s' . $row['submitid'] . " does not have any associated source files\n";
+	$details .= 'Submission s' . $row['submitid'] .
+	            " does not have any associated source files\n";
 }
 
 // check for submissions that have been marked by a judgehost but that
@@ -434,7 +441,8 @@ $res = $DB->q('SELECT s.submitid FROM submission s
                WHERE j.submitid IS NULL AND s.judgehost IS NOT NULL');
 
 while($row = $res->next()) {
-	$details .= 'Submission s' . $row['submitid'] . " has a judgehost but no entry in judgings\n";
+	$details .= 'Submission s' . $row['submitid'] .
+	            " has a judgehost but no entry in judgings\n";
 }
 
 result('submissions and judgings', 'Submission integrity',
@@ -446,8 +454,8 @@ $details = '';
 $res = $DB->q('SELECT submitid, SUM(valid) as numvalid
 	FROM judging GROUP BY submitid HAVING numvalid > 1');
 while($row = $res->next()) {
-	$details .= 'Submission s' . $row['submitid'] . ' has more than one valid judging (' .
-		$row['numvalid'] . ")\n";
+	$details .= 'Submission s' . $row['submitid'] .
+	            ' has more than one valid judging (' . $row['numvalid'] . ")\n";
 }
 
 // check for valid judgings that are already running too long
@@ -456,7 +464,7 @@ $res = $DB->q('SELECT judgingid, submitid, starttime
                (UNIX_TIMESTAMP()-starttime) > 300');
 while($row = $res->next()) {
 	$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
-		" is running for longer than 5 minutes, probably the judgedaemon crashed\n";
+	            " is running for longer than 5 minutes, probably the judgedaemon crashed\n";
 }
 
 // check for start/endtime problems and contestids
@@ -475,9 +483,9 @@ while($row = $res->next()) {
 	}
 	if($row['s_cid'] != NULL && $row['s_cid'] != $row['j_cid']) {
 		$CHEKCER_ERRORS[] = 'Judging j' .$row['judgingid'] .
-		    ' is from a different contest (c' . $row['j_cid'] .
-		    ') than its submission s' . $row['j_submitid'] .
-		    ' (c' . $row['s_cid'] . ')';
+		                    ' is from a different contest (c' . $row['j_cid'] .
+		                    ') than its submission s' . $row['j_submitid'] .
+		                    ' (c' . $row['s_cid'] . ')';
 	}
 	check_judging($row);
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
@@ -488,7 +496,7 @@ while($row = $res->next()) {
 }
 
 result('submissions and judgings', 'Judging integrity',
-	($details == '' ? 'O':'E'), $details);
+       ($details == '' ? 'O':'E'), $details);
 
 flushresults();
 
@@ -511,9 +519,9 @@ if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 				}
 				$f = explode('.', $target);
 				if ( $DB->q("VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
-						$row[$foreign_key]) < 1 ) {
+				            $row[$foreign_key]) < 1 ) {
 					$details .= "foreign key constraint fails for $table.$foreign_key = \"" .
-						$row[$foreign_key] . "\" (not found in $target)\n";
+					            $row[$foreign_key] . "\" (not found in $target)\n";
 				}
 			}
 		}
@@ -522,10 +530,10 @@ if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 	// problems found are of level warning, because the severity may be different depending
 	// on which table it is.
 	result('referential integrity', 'Inter-table relationships',
-		($details == '' ? 'O':'W'), $details);
+	       ($details == '' ? 'O':'W'), $details);
 } else {
-	result('referential integrity', 'Inter-table relationships',
-		'R', 'Not checked.', '<a href="?refint">check now</a> (potentially slow operation)');
+	result('referential integrity', 'Inter-table relationships', 'R',
+	       'Not checked.', '<a href="?refint">check now</a> (potentially slow operation)');
 }
 
 flushresults();

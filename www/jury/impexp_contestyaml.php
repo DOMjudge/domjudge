@@ -14,7 +14,9 @@ require(LIBEXTDIR . '/spyc/spyc.php');
 
 if ( isset($_POST['import']) ) {
 
-	if ( isset($_FILES) && isset($_FILES['import_config']) && isset($_FILES['import_config']['name']) && isset($_FILES['import_config']['tmp_name']) ) {
+	if ( isset($_FILES) && isset($_FILES['import_config']) &&
+	     isset($_FILES['import_config']['name']) &&
+	     isset($_FILES['import_config']['tmp_name']) ) {
 
 		$file = $_FILES['import_config']['name'];
 
@@ -30,14 +32,17 @@ if ( isset($_POST['import']) ) {
 
 		$contest = array();
 		$contest['contestname'] = $contest_yaml_data['name'];
-		$contest['starttime_string'] = strftime('%Y-%m-%d %H:%M:%S', strtotime($contest_yaml_data['start-time']));
+		$contest['starttime_string'] =
+		    strftime('%Y-%m-%d %H:%M:%S', strtotime($contest_yaml_data['start-time']));
 		$contest['activatetime_string'] = '-1:00';
-		// chop off final ":00" because our contests do not support that precision in relative notation
+		// chop off final ":00" because our contests do not support
+		// that precision in relative notation
 		$contest['endtime_string'] = '+' . substr($contest_yaml_data['duration'],0,-3);
 		// unfreezetime is not supported by the current standard
 		$contest['unfreezetime_string'] = null;
 		if ( ! empty($contest_yaml_data['scoreboard-freeze']) ) {
-			$contest['freezetime_string'] = '+' . substr($contest_yaml_data['scoreboard-freeze'],0,-3);
+			$contest['freezetime_string'] =
+			    '+' . substr($contest_yaml_data['scoreboard-freeze'],0,-3);
 		}
 		// TODO or 1?
 		$contest['enabled'] = 1;
@@ -69,7 +74,8 @@ if ( isset($_POST['import']) ) {
 		$LIBDBCONFIG['clar_answers']['value'] = $contest_yaml_data['default-clars'];
 		$categories = array();
 		foreach ( $contest_yaml_data['clar-categories'] as $category ) {
-			$cat_key = substr(str_replace(array(' ', ',', '.'), '-', strtolower($category)), 0, 9);
+			$cat_key = substr(str_replace(array(' ', ',', '.'), '-',
+			                  strtolower($category)), 0, 9);
 			$categories[$cat_key] = $category;
 		}
 		$LIBDBCONFIG['clar_categories']['value'] = $categories;
@@ -80,7 +86,9 @@ if ( isset($_POST['import']) ) {
 		foreach ($contest_yaml_data['languages'] as $language) {
 			$lang = array();
 			// TODO better lang-id?
-			$lang['langid'] = str_replace(array('+', '#', ' '), array('p', 'sharp', '-'), strtolower($language['name']));
+			$lang['langid'] = str_replace(array('+', '#', ' '),
+	                                      array('p', 'sharp', '-'),
+										  strtolower($language['name']));
 			$lang['name'] = $language['name'];
 			$lang['allow_submit'] = 1;
 			$lang['allow_judge'] = 1;
@@ -93,7 +101,8 @@ if ( isset($_POST['import']) ) {
 		foreach ($contest_yaml_data['problemset'] as $problem) {
 			// TODO better lang-id?
 			$prob = array();
-			if ( $DB->q("MAYBEVALUE SELECT probid FROM problem WHERE probid = %s", $problem['letter']) ) {
+			if ( $DB->q("MAYBEVALUE SELECT probid FROM problem
+			             WHERE probid = %s", $problem['letter']) ) {
 				echo "<p>A problem with problem id $problem[letter] already exists.</p>\n";
 				require(LIBWWWDIR . '/footer.php');
 				exit;
@@ -141,10 +150,12 @@ if ( isset($_POST['import']) ) {
 	$contest_data['name'] = $contest_row['contestname'];
 	$contest_data['short-name'] = $contest_row['contestname'];
 	$contest_data['start-time'] = date('c', $contest_row['starttime']);
-	$contest_data['duration'] = printtimerel(calcContestTime($contest_row['endtime'], $contest_row));
+	$contest_data['duration'] =
+	    printtimerel(calcContestTime($contest_row['endtime'], $contest_row));
 
 	if ( ! is_null($contest_row['freezetime']) ) {
-		$contest_data['scoreboard-freeze'] = printtimerel(calcContestTime($contest_row['freezetime'], $contest_row));
+		$contest_data['scoreboard-freeze'] =
+		    printtimerel(calcContestTime($contest_row['freezetime'], $contest_row));
 	}
 
 	// TODO: event-feed-port
@@ -192,12 +203,15 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Import / export configuration</h1>\n\n";
 
 if ( isset($_GET['import-ok']) ) {
-	echo msgbox("Import successful!", "The file " . htmlspecialchars(@$_GET['file']) . " is successfully imported.");
+	echo msgbox("Import successful!", "The file " . htmlspecialchars(@$_GET['file']) .
+	            " is successfully imported.");
 }
 
 echo "<h2>Import from YAML</h2>\n\n";
 echo addForm('impexp_contestyaml.php', 'post', null, 'multipart/form-data');
-echo msgbox("Please note!", "Importing a contest.yaml may overwrite some settings (e.g. penalty time, clarification categories, clarification answers, etc.). This action can not be undone!");
+echo msgbox("Please note!", "Importing a contest.yaml may overwrite some settings " .
+            "(e.g. penalty time, clarification categories, clarification answers, etc.)." .
+            "This action can not be undone!");
 echo addFileField('import_config');
 echo addSubmit('Import', 'import') . addEndForm();
 echo "<h2>Export to YAML</h2>\n\n";

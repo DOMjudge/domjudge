@@ -91,24 +91,24 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		 LEFT JOIN language      l  USING (langid)
 		 LEFT JOIN judging       j  ON (s.submitid = j.submitid AND j.valid=1)
 		 WHERE s.cid = %i ' .
-	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
-	    (isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
-	    (isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
-	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
-	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
+		(isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
+		(isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
+		(isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
+		(isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
+		(isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
 
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid,
 					s.submittime, s.judgehost, s.valid, t.name AS teamname,
 					p.shortname, p.name AS probname, l.name AS langname,
-					j.result, j.judgehost, j.verified, j.jury_member, j.seen '
-				  . $sqlbody
-				  . (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '')
-				  . (isset($restrictions['judged'])  ? 'AND ' . $judgedclause : '')
-				  .'ORDER BY s.submittime DESC, s.submitid DESC '
-				  . ($limit > 0 ? 'LIMIT 0, %i' : '%_')
-				, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-				, @$restrictions['langid'], @$restrictions['judgehost']
-				, $limit);
+					j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
+	              $sqlbody .
+	              (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '') .
+	              (isset($restrictions['judged'])    ? 'AND ' . $judgedclause : '') .
+	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
+	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cid,
+	              @$restrictions['teamid'], @$restrictions['categoryid'],
+	              @$restrictions['probid'], @$restrictions['langid'],
+	              @$restrictions['judgehost'], $limit);
 
 	// nothing found...
 	if( $res->count() == 0 ) {
@@ -224,10 +224,12 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 
 			echo "<td><a$link>$verified</a></td><td>";
 			if ( $claim ) {
-				echo "<a class=\"button\" href=\"submission.php?claim=1&amp;id=" . htmlspecialchars($row['submitid']) . "\">claim</a>";
+				echo "<a class=\"button\" href=\"submission.php?claim=1&amp;id=" .
+					htmlspecialchars($row['submitid']) . "\">claim</a>";
 			} else {
 				if ( !$row['verified'] && $jury_member==$username ) {
-					echo "<a class=\"button\" href=\"submission.php?unclaim=1&amp;id=" . htmlspecialchars($row['submitid']) . "\">unclaim</a>";
+					echo "<a class=\"button\" href=\"submission.php?unclaim=1&amp;id=" .
+						htmlspecialchars($row['submitid']) . "\">unclaim</a>";
 				} else {
 					echo "<a$link>$jury_member</a>";
 				}
@@ -243,37 +245,36 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 	if ( IS_JURY ) {
 		echo addEndForm();
 
-		if( $limit > 0 ) {
-		$subcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-					, @$restrictions['langid'], @$restrictions['judgehost']
-					);
-		$corcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-						.' AND j.result like %s'
-					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-					, @$restrictions['langid'], @$restrictions['judgehost']
-					, 'CORRECT'
-					);
-		$igncnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-						.' AND s.valid = 0'
-					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-					, @$restrictions['langid'], @$restrictions['judgehost']
-					);
-		$vercnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-						.' AND verified = 0 AND result IS NOT NULL'
-					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-					, @$restrictions['langid'], @$restrictions['judgehost']
-					);
-		$quecnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-						.' AND result IS NULL'
-					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-					, @$restrictions['langid'], @$restrictions['judgehost']
-					);
+		if ( $limit > 0 ) {
+			$subcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody, $cid,
+			                 @$restrictions['teamid'], @$restrictions['categoryid'],
+			                 @$restrictions['probid'], @$restrictions['langid'],
+			                 @$restrictions['judgehost']);
+			$corcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			                 ' AND j.result LIKE \'correct\'', $cid,
+			                 @$restrictions['teamid'], @$restrictions['categoryid'],
+			                 @$restrictions['probid'], @$restrictions['langid'],
+			                 @$restrictions['judgehost']);
+			$igncnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			                 ' AND s.valid = 0', $cid,
+			                 @$restrictions['teamid'], @$restrictions['categoryid'],
+			                 @$restrictions['probid'], @$restrictions['langid'],
+			                 @$restrictions['judgehost']);
+			$vercnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			                 ' AND verified = 0 AND result IS NOT NULL', $cid,
+			                 @$restrictions['teamid'], @$restrictions['categoryid'],
+			                 @$restrictions['probid'], @$restrictions['langid'],
+			                 @$restrictions['judgehost']);
+			$quecnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			                 ' AND result IS NULL', $cid,
+			                 @$restrictions['teamid'], @$restrictions['categoryid'],
+			                 @$restrictions['probid'], @$restrictions['langid'],
+			                 @$restrictions['judgehost']);
 		}
 		echo "<p>Total correct: $corcnt, submitted: $subcnt";
-		if($vercnt > 0)	echo ", unverified: $vercnt";
-		if($igncnt > 0) echo ", ignored: $igncnt";
-		if($quecnt > 0) echo ", judgement pending: $quecnt";
+		if ( $vercnt > 0 ) echo ", unverified: $vercnt";
+		if ( $igncnt > 0 ) echo ", ignored: $igncnt";
+		if ( $quecnt > 0 ) echo ", judgement pending: $quecnt";
 		echo "</p>\n\n";
 	}
 
@@ -513,7 +514,8 @@ function putProblemTextList()
 function have_problemtexts()
 {
 	global $DB, $cid;
-	return $DB->q('VALUE SELECT COUNT(*) FROM problem WHERE problemtext_type IS NOT NULL AND cid = %i', $cid) > 0;
+	return $DB->q('VALUE SELECT COUNT(*) FROM problem
+	               WHERE problemtext_type IS NOT NULL AND cid = %i', $cid) > 0;
 }
 
 /**

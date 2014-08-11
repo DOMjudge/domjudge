@@ -42,7 +42,7 @@ function read_credentials() {
  */
 function request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	global $resturl, $restuser, $restpass;
-	
+
 	logmsg(LOG_DEBUG, "API request $verb $url");
 
 	$url = $resturl . "/" . $url;
@@ -75,7 +75,8 @@ function request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	}
 	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	if ( $status < 200 || $status >= 300 ) {
-		$errstr = "Error while executing curl $verb to url " . $url . ": http status code: " . $status . ", response: " . $response;
+		$errstr = "Error while executing curl $verb to url " . $url .
+		    ": http status code: " . $status . ", response: " . $response;
 		if ($failonerror) { error($errstr); }
 		else { warning($errstr); return null; }
 	}
@@ -288,7 +289,8 @@ $unfinished = dj_json_decode($unfinished);
 foreach ( $unfinished as $jud ) {
 	$workdir = "$workdirpath/c$jud[cid]-s$jud[submitid]-j$jud[judgingid]";
 	@chmod($workdir, 0700);
-	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] . " in my name; given back");
+	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] .
+	       " in my name; given back");
 }
 
 $waiting = FALSE;
@@ -387,7 +389,8 @@ function judge($row)
 		error("No compile script specified for language " . $row['langid'] . ".");
 	}
 
-	$execrunpath = fetch_executable($workdirpath, $row['compile_script'], $row['compile_script_md5sum']);
+	$execrunpath = fetch_executable($workdirpath, $row['compile_script'],
+	                                $row['compile_script_md5sum']);
 
 	// Compile the program.
 	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .

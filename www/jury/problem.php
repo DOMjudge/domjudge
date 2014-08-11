@@ -45,7 +45,8 @@ if ( isset($_POST['upload']) ) {
 			$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
 			$newid = importZippedProblem($zip, empty($id) ? NULL : $id);
 			$zip->close();
-			auditlog('problem', $newid, 'upload zip', $_FILES['problem_archive']['name'][$fileid]);
+			auditlog('problem', $newid, 'upload zip',
+			         $_FILES['problem_archive']['name'][$fileid]);
 		}
 		if ( count($_FILES['problem_archive']['tmp_name']) == 1 ) {
 			header('Location: '.$pagename.'?id='.urlencode((empty($newid)?$id:$newid)));
@@ -77,8 +78,8 @@ if ( !empty($cmd) ):
 	if ( $cmd == 'edit' ) {
 		echo "<tr><td>Problem ID:</td><td>";
 		$row = $DB->q('TUPLE SELECT p.probid,p.cid,p.shortname,p.name,p.allow_submit,p.allow_judge,
-	                                    p.timelimit,p.special_run,p.special_compare,p.color,
-	                                    p.problemtext_type, COUNT(testcaseid) AS testcases
+		                            p.timelimit,p.special_run,p.special_compare,p.color,
+		                            p.problemtext_type, COUNT(testcaseid) AS testcases
 		               FROM problem p
 		               LEFT JOIN testcase USING (probid)
 		               WHERE probid = %i GROUP BY probid', $id);
@@ -89,8 +90,9 @@ if ( !empty($cmd) ):
 
 ?>
 <tr><td><label for="data_0__shortname_">Shortname:</label></td><td>
-<?php echo addInput('data[0][shortname]', @$row['shortname'], 8, 10, " required pattern=\"" . IDENTIFIER_CHARS . "+\"") .
-      "(alphanumerics only)"; ?></td></tr>
+<?php echo addInput('data[0][shortname]', @$row['shortname'], 8, 10,
+                    " required pattern=\"" . IDENTIFIER_CHARS . "+\"") .
+           "(alphanumerics only)"; ?></td></tr>
 <tr><td><label for="data_0__cid_">Contest:</label></td>
 <td><?php
 $cmap = $DB->q("KEYVALUETABLE SELECT cid,contestname FROM contest ORDER BY cid DESC");
