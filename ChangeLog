@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 3.3.8 - DEV
+-------------------
+
 Version 3.3.7 - 14 August 2014
 ------------------------------
  - Disallow access to Makefile's in the www tree.
