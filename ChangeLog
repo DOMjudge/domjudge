@@ -2,11 +2,17 @@ DOMjudge Programming Contest Judging System
 
 Version 3.4.5 - DEV
 -------------------
+ - Fix problems with libboost detection in configure script.
+ - Fix CSS issue with highlighted rows on contests page.
+ - Fix inconsistency in SQL example contest data.
+ - Drop unnecessary linker flag from Makefile compile stage rule.
+ - HTML5 fix: allow non-integer steps in language time factor.
+ - Misc. documentation improvements.
 
 Version 3.4.4 - 15 May 2014
 ---------------------------
  - Document Apache 2.4 directives in generated apache.conf.
- - Rename SQL upgrade script. 
+ - Rename SQL upgrade script.
 
 Version 3.4.3 - 9 May 2014
 --------------------------
