@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 4.0.2 - DEV
+-------------------
+
 Version 4.0.1 - 14 August 2014
 ------------------------------
  - Install genrestapi and www/auth/*. Thanks Glenn Martin for reporting.
