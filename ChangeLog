@@ -5,6 +5,10 @@ Version 3.3.7 - DEV
  - Disallow access to Makefile's in the www tree.
  - Suppress notice of undefined index in scoreboard rendering.
  - Bugfix: properly close unused resources (found by Coverity scan).
+ - Include Apache version 2.4 configuration to apache.conf file.
+ - Fix CSS issue with highlighted rows on contests page.
+ - Fix inconsistency in SQL example contest data.
+ - Drop unnecessary linker flag from Makefile compile stage rule.
  - Misc. documentation improvements and HTML validity fixes.
 
 Version 3.3.6 - 8 December 2013
