@@ -163,7 +163,7 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 			error("Could not write md5sum to file.");
 		}
 
-		logmsg(LOG_INFO, "Unzipping");
+		logmsg(LOG_DEBUG, "Unzipping");
 		system("unzip -q -d $execpath $execzippath", $retval);
 		if ( $retval!=0 ) error("Could not unzip zipfile in $execpath");
 
@@ -171,7 +171,7 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 			error("Invalid executable, must contain executable file 'build'.");
 		}
 
-		logmsg(LOG_INFO, "Compiling");
+		logmsg(LOG_DEBUG, "Compiling");
 		$olddir = getcwd();
 		chdir($execpath);
 		system("./build", $retval);
@@ -413,6 +413,7 @@ function judge($row)
 	if ( ! $compile_success ) {
 		// revoke readablity for domjudge-run user to this workdir
 		chmod($workdir, 0700);
+		logmsg(LOG_NOTICE,"Judging s$row[submitid]/j$row[judgingid]: compile error")
 		return;
 	}
 
