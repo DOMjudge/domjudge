@@ -1,7 +1,10 @@
 DOMjudge Programming Contest Judging System
 
-Version 4.0.2 - DEV
--------------------
+Version 4.0.2 - 16 August 2014
+------------------------------
+ - Fix 'compare' and 'float' executable scripts.
+ - Improve log messages during compilation.
+ - Minor documentation improvements.
 
 Version 4.0.1 - 14 August 2014
 ------------------------------
