@@ -6,8 +6,9 @@ include $(TOPDIR)/Makefile.global
 EXECDIRS=$(shell find files -mindepth 2 -maxdepth 2 -type d)
 ZIPFILES=$(EXECDIRS:=.zip)
 ZIPSQL=mysql_db_files_defaultdata.sql mysql_db_files_examples.sql
+CONFSTUB=files/config.h
 
-config: dj-setup-database $(ZIPSQL)
+config: dj-setup-database
 
 # Use secondary expansion to use stem $* in dependencies:
 .SECONDEXPANSION:
@@ -39,6 +40,12 @@ $(ZIPSQL): $(ZIPFILES)
 		done ; \
 	fi
 
+# Extract DOMjudge version from README here as a hack, because the
+# system isn't configured yet.
+$(CONFSTUB): %: %.in $(TOPDIR)/README
+	VERSION=`sed -n '1s/^.*version //p' $(TOPDIR)/README | tr -d '\n'` ; \
+	sed "s/@VERSION@/$$VERSION/" $< > $@
+
 dj-setup-database: %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
@@ -57,7 +64,13 @@ install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/files/examples \
 	 	files/examples/*.zip
 
-distclean-l:
-	-rm -f dj-setup-database $(ZIPSQL) $(ZIPFILES)
+# Make $(CONFSTUB) a dependency, and the other stuff sub-rules to make
+# sure that config.h already exists when creating the zipfiles.
+dist-l: $(CONFSTUB)
+	$(MAKE) $(ZIPSQL)
 
-dist-l: $(ZIPSQL) $(ZIPFILES)
+distclean-l:
+	-rm -f dj-setup-database
+
+maintainer-clean-l:
+	-rm -f $(ZIPSQL) $(ZIPFILES) $(CONFSTUB)
