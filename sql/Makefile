@@ -10,6 +10,11 @@ CONFSTUB=files/config.h
 
 domserver: dj-setup-database
 
+build-scripts:
+	@for d in $(EXECDIRS) ; do \
+		[ -x $$d/build ] && ( cd $$d && ./build ) ; \
+	done
+
 # Use secondary expansion to use stem $* in dependencies:
 .SECONDEXPANSION:
 $(ZIPFILES): %.zip: $$(wildcard $$*/*)

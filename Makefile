@@ -67,6 +67,11 @@ distdocs:
 config:
 	$(MAKE) -C etc config
 
+# Special rule to build any compile/run/compare scripts. This is
+# useful for testing, e.g. when submitting a Coverity scan.
+build-scripts:
+	$(MAKE) -C sql build-scripts
+
 # List of SUBDIRS for recursive targets:
 build:             SUBDIRS=        lib                            misc-tools
 domserver:         SUBDIRS=etc         sql www                    misc-tools
