@@ -413,7 +413,7 @@ function judge($row)
 	if ( ! $compile_success ) {
 		// revoke readablity for domjudge-run user to this workdir
 		chmod($workdir, 0700);
-		logmsg(LOG_NOTICE,"Judging s$row[submitid]/j$row[judgingid]: compile error")
+		logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid]: compile error");
 		return;
 	}
 
