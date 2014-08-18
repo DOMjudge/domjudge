@@ -373,7 +373,9 @@ yum install gcc gcc-c++ make zip unzip mariadb-server \
 </code>
 Note that the TeX Live packages <tt>expdlist</tt>, <tt>moreverb</tt>,
 and <tt>svn</tt> still have be installed manually to rebuild the team
-manuals.
+manuals. Furthermore, <tt>phpmyadmin</tt> is available from the
+<htmlurl name="Fedora EPEL repository"
+url="https://fedoraproject.org/wiki/EPEL">.
 
 On a judgehost, the following should be sufficient. The last two lines show some
 example compilers to install for C, C++, Java (GNU), Java (Oracle), Haskell
@@ -473,7 +475,11 @@ There are three different methods for installing DOMjudge:
 	passing the option <tt>--enable-fhs</tt> to <tt>configure</tt>
 	and in this case the prefix defaults to <tt>/usr/local</tt>.
 	Files will be placed e.g. in <tt>PREFIX/share/domjudge,
-	PREFIX/bin, /var/log, /tmp, /etc/domjudge</tt>.
+	PREFIX/bin, PREFIX/var/log, PREFIX/etc/domjudge</tt>, while
+	<tt>/tmp</tt> will be used for temporary files. You may want
+	to pass options <tt>--sysconfdir=/etc</tt> and
+	<tt>--localstatedir=/var</tt> to <tt>configure</tt> to disable
+	the prefix for these.
 
 <tag>Maintainer install</tag>
 	Meant for those wishing to do development on the DOMjudge
