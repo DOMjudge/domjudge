@@ -69,7 +69,10 @@ install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/files/examples \
 	 	files/examples/*.zip
 
-dist-l: $(ZIPSQL) $(ZIPFILES) $(CONFSTUB)
+# Make $(CONFSTUB) a dependency, and the other stuff sub-rules to make
+# sure that config.h already exists when creating the zipfiles.
+dist-l: $(CONFSTUB)
+	$(MAKE) $(ZIPSQL)
 
 distclean-l:
 	-rm -f dj-setup-database
