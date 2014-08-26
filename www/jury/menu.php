@@ -51,7 +51,7 @@ echo "<div id=\"toggles\">\n";
 if ( isset($refresh) ) {
 	echo addForm('toggle_refresh.php', 'get') .
 	    addHidden('enable', ($refresh_flag ? 0 : 1)) .
-	    addSubmit(($refresh_flag ? 'Dis' : 'En' ) . 'able refresh', 'submit') .
+	    addSubmit(($refresh_flag ? 'Dis' : 'En' ) . 'able refresh', 'toggle_refresh') .
 	    addEndForm();
 }
 
@@ -60,7 +60,7 @@ if ( isset($refresh) ) {
 echo '<div id="notify" style="display: none">' .
 	addForm('toggle_notify.php', 'get') .
 	addHidden('enable', ($notify_flag ? 0 : 1)) .
-	addSubmit(($notify_flag ? 'Dis' : 'En' ) . 'able notifications', 'submit',
+	addSubmit(($notify_flag ? 'Dis' : 'En' ) . 'able notifications', 'toggle_notify',
 	          'return toggleNotifications(' . ($notify_flag ? 'false' : 'true') . ')') .
 	addEndForm() . "</div>";
 
