@@ -116,7 +116,7 @@ if ( $show_sample && @$row['result']!='compiler-error' ) {
 		echo "<h5>Diff output</h5>\n";
 		if ( @$run['output_diff'] ) {
 			echo "<pre class=\"output_text\">";
-			echo parseDiff($run['output_diff']);
+			echo parseRunDiff($run['output_diff']);
 			echo "</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no diff output.</p>\n";
