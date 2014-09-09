@@ -165,7 +165,7 @@ if [ -n "$DEBPROXY" ]; then
 fi
 
 mount -t proc proc "$CHROOTDIR/proc"
-mount -t sysfs sysfd "$CHROOTDIR/sys"
+mount -t sysfs sysfs "$CHROOTDIR/sys"
 
 # Required for some warning messages about writing to log files
 mount --bind /dev/pts "$CHROOTDIR/dev/pts"
