@@ -19,7 +19,7 @@ CHROOTDIR=$1
 ARCH=$2
 
 # Ubuntu release (codename) to bootstrap:
-RELEASE="precise"
+RELEASE="trusty"
 
 # List of possible architectures to install chroot for:
 ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
@@ -165,6 +165,7 @@ if [ -n "$DEBPROXY" ]; then
 fi
 
 mount -t proc proc "$CHROOTDIR/proc"
+mount -t sysfs sysfd "$CHROOTDIR/sys"
 
 # Required for some warning messages about writing to log files
 mount --bind /dev/pts "$CHROOTDIR/dev/pts"
@@ -223,6 +224,7 @@ cp /etc/passwd "$CHROOTDIR/etc/passwd"
 sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
 
 umount "$CHROOTDIR/dev/pts"
+umount "$CHROOTDIR/sys"
 umount "$CHROOTDIR/proc"
 
 exit 0
