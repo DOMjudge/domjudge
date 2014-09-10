@@ -2,6 +2,10 @@ DOMjudge Programming Contest Judging System
 
 Version 4.0.3DEV
 ----------------
+ - Fix diff display on team submission output page when showing the
+   result of sample testcases is enabled (#137, thanks Ruud Koot).
+ - In Haskell run script, set maximum stack size to someting small to
+   prevent ghc from running out of memory (#138, thanks Ruud Koot).
 
 Version 4.0.2 - 16 August 2014
 ------------------------------
