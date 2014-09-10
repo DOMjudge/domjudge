@@ -19,7 +19,7 @@ CHROOTDIR=$1
 ARCH=$2
 
 # Ubuntu release (codename) to bootstrap:
-RELEASE="trusty"
+RELEASE="$(lsb_release -c -s)"
 
 # List of possible architectures to install chroot for:
 ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
