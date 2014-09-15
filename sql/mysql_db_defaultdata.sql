@@ -6,9 +6,9 @@
 -- externally (e.g. to 'domjudge').
 
 
--- 
+--
 -- Dumping data for table `configuration`
--- 
+--
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('script_timelimit', '30', 'int', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('script_memory_limit', '2097152', 'int', 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.');
@@ -34,6 +34,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('en
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('time_format', '"%H:%M"', 'string', 'The format used to print times. For formatting options see the PHP \'strftime\' function.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_compare', '"compare"', 'string', 'The script used to compare outputs if no special compare script specified.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_run', '"run"', 'string', 'The script used to run submissions if no special run script specified.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('allow_registration', '0', 'bool', 'Allow users to register themselves with the system?');
 
 --
 -- Dumping data for table `executable`
@@ -65,9 +66,9 @@ INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
 ('scala', 'scala', 'compile'),
 ('sh', 'sh', 'compile');
 
--- 
+--
 -- Dumping data for table `language`
--- 
+--
 
 INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`, `compile_script`) VALUES
 ('adb', 'Ada', '["adb","ads"]', 0, 1, 1, 'adb'),
@@ -91,9 +92,9 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 ('sh', 'POSIX shell', '["sh"]', 0, 1, 1, 'sh');
 
 
--- 
+--
 -- Dumping data for table `role`
--- 
+--
 
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (1, 'admin',          'Administrative User');
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (2, 'jury',           'Jury User');
@@ -104,29 +105,30 @@ INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (6, 'judgehost',    
 INSERT INTO `role` (`role`, `description`) VALUES ('event_reader',      '(Internal/System) event_reader');
 INSERT INTO `role` (`role`, `description`) VALUES ('full_event_reader', '(Internal/System) full_event_reader');
 
--- 
+--
 -- Dumping data for table `team_category`
--- 
+--
 -- System category
 INSERT INTO `team_category` VALUES (1, 'System', 9, '#ff2bea', 0);
+INSERT INTO `team_category` VALUES (2, 'Self-Registered', 8, '#33cc44', 1);
 
--- 
+--
 -- Dumping data for table `team`
--- 
+--
 
 INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES (1, 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
 
--- 
+--
 -- Dumping data for table `user`
--- 
+--
 
 INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES
 (1, 'admin', 'Administrator', MD5('admin#admin')),
 (2, 'judgehost', 'User for judgedaemons', NULL);
 
--- 
+--
 -- Dumping data for table `userrole`
--- 
+--
 
 INSERT INTO `userrole` (`userid`, `roleid`) VALUES
 (1, 1),

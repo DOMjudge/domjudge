@@ -9,6 +9,7 @@
 require('init.php');
 
 if ( @$_POST['cmd']=='login' ) do_login();
+if ( @$_POST['cmd']=='register' ) do_register();
 if ( !logged_in() ) show_loginpage();
 
 header("Location: ./");
