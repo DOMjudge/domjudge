@@ -1046,7 +1046,7 @@ make -C doc/judge docs
 
 <sect1>Linux Control Groups (cgroups) in the judgedaemon
 <p>
-DOMjudge has experimental support for using Linux Control Groups or cgroups
+DOMjudge has support for using Linux Control Groups or cgroups
 for process isolation in the judgedaemon. Using cgroups gives more accurate
 measurement of actually allocated memory, which is helpful with interpreters
 like Java that reserve but not actually use lots of memory. Also, the feature
