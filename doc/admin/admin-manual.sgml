@@ -296,7 +296,7 @@ On the judgehosts:
        on all judgehosts.
 <item> Optionally build a chroot to support interpreted or
        byte-compiled langauges such as Java, see the appendix on
-       <ref id="problems:java-chroot" name="setting up a chroot">.
+       <ref id="problems:chroot" name="setting up a chroot">.
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
 </itemize>
 It should be done by now. As a check that (almost) everything works,
@@ -574,7 +574,7 @@ the target directory to build the chroot environment in and as second
 argument the target machine architecture. Start the script without
 arguments for usage information. See also sections
 <ref id="install_config:judgehost" name="Installation of a judgehost">
-and <ref id="problems:java-chroot" name="Problems: Java & chroot">.
+and <ref id="problems:chroot" name="Problems: Setting up a chroot">.
 
 <sect>Configuration of special run and compare programs
 <p>
@@ -911,7 +911,7 @@ file. If you want to support languages that cannot be compiled to
 statically linked binaries, e.g. byte-compiled languages such as Java,
 or interpreted languages such as Python, then a complete chroot
 environment must be built and configured. See the appendix on
-<ref id="problems:java-chroot" name="setting up a chroot"> for more
+<ref id="problems:chroot" name="setting up a chroot"> for more
 details.
 
 The judgehost connects to the domserver via a REST API. You need to
@@ -2032,35 +2032,41 @@ default and the above is not necessary.
 <p>
 
 
-<sect>Java compilers and the chroot <label id="problems:java-chroot">
+<sect>Setting up the chroot <label id="problems:chroot">
 <p>
 
+With the default configuration, submitted programs are run within a
+minimal chroot environment. For this the programs have to be statically
+linked, because they do not have access to shared libraries.
+
+To be able to run submissions of languages that don't support statically
+linked binaries (think interpreted languages and bytecode compiled
+languages.) One can build a bigger chroot environment which contains all
+necessary ingredients to let the submissions run DOMjudge supports this
+with some manual setup.
+
+First of all, a chroot tree with those interpreters or runtimes needs to
+be created The script <tt>bin/dj_make_chroot</tt> creates one from
+Debian GNU/Linux sources. Add the required packages for the needed
+languages to the INSTALLDEBS variable in that script; run that script
+without arguments for basic usage information.
+
+Next, edit the script <tt>lib/judge/chroot-startstop.sh</tt> and adapt
+it to work with your local system and uncomment the script in
+<tt>etc/judgehost-config.php</tt>.
+
+<sect>Java compilers
+<p>
 Java is difficult to deal with in an automatic way. It is probably
 most preferable to use Oracle (previously Sun) Java, because that's the
 version contestants will be used to. The GNU Compiler for Java (GCJ) is
 easier to deal with but may lack some features.
 
-With the default configuration, submitted programs are run within a minimal
-chroot environment. For this the programs have to be statically
-linked, because they do not have access to shared libraries.
+The recommended way of using Java is by setting up the chroot as in the
+previous section, but you can also choose one of the alternatives as
+described below.
 
-For most languages compilers support this, but for Java, this is a bit
-problematic. The Oracle Java compiler `javac' is not a real compiler:
-a bytecode interpreter `java' is needed to run the binaries and thus
-this cannot simply run in a chroot environment.
-
-There are some options to support Java as a language:
 <enum>
-<item> One can build a bigger chroot environment which contains
-       all necessary ingredients to let Java work within it.
-       DOMjudge supports this with some manual setup.
-
-       First of all, a chroot tree with Java support must be created.
-       The script <tt>bin/dj_make_chroot</tt> creates one from Debian GNU/Linux
-       sources; run that script without arguments for basic usage
-       information. Next, edit the script <tt>lib/judge/chroot-startstop.sh</tt>
-       and adapt it to work with your local system and uncomment the
-       script in <tt>etc/judgehost-config.php</tt>.
 <item> As an alternative the <tt>gcj</tt> compiler from GNU can be
        used instead of Oracle's version. This one generates true machine
        code and can link statically. However a few function calls
@@ -2154,14 +2160,6 @@ accessible within the chroot-ed environment the program is run in).
 To filter these warnings, take a look at
 <tt>judge/compile_java_gcjmod.sh</tt> and replace or symlink
 <tt>judge/compile_java.sh</tt> by/to this file.
-
-<sect>C#/mono support
-<p>
-
-Using the mono compiler and runtime for C# gives rise to similar
-problems as with Java. Although the C# language has been added to
-DOMjudge, there's no support yet to run it within a chroot
-environment. So in that case, <tt>USE_CHROOT</tt> must be disabled.
 
 <sect>Memory limit errors in the web interface<label id="problems:memory">
 <p>
