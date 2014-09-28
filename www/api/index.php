@@ -12,9 +12,11 @@ require('init.php');
 
 function infreeze($time)
 {
+	global $cdata;
+
 	if ( ( ! empty($cdata['freezetime']) &&
 		difftime($time, $cdata['freezetime'])>0 ) &&
-		!( ! empty($cdata['unfreezetime']) &&
+		( empty($cdata['unfreezetime']) ||
 		difftime($time, $cdata['unfreezetime'])<=0 ) ) return TRUE;
 	return FALSE;
 }
@@ -52,15 +54,17 @@ function contest()
 	global $cid, $cdata;
 
 	return array(
-		'id'      => $cid,
-		'name'    => $cdata['contestname'],
-		'start'   => $cdata['starttime'],
-		'end'     => $cdata['endtime'],
-		'length'  => $cdata['endtime'] - $cdata['starttime'],
-		'penalty' => 60*dbconfig_get('penalty_time', 20),
+		'id'       => $cid,
+		'name'     => $cdata['contestname'],
+		'start'    => $cdata['starttime'],
+		'freeze'   => $cdata['freezetime'],
+		'end'      => $cdata['endtime'],
+		'length'   => $cdata['endtime'] - $cdata['starttime'],
+		'unfreeze' => $cdata['unfreezetime'],
+		'penalty'  => 60*dbconfig_get('penalty_time', 20),
 		);
 }
-$doc = "Get information about the current contest: id, name, start and end.";
+$doc = "Get information about the current contest: id, name, start, freeze, unfreeze, length, penalty and end.";
 $api->provideFunction('GET', 'contest', $doc);
 
 /**
@@ -394,7 +398,7 @@ $api->provideFunction('GET', 'config', $doc, $args, $exArgs);
  */
 function submissions($args)
 {
-	global $cid, $DB;
+	global $cid, $DB, $cdata;
 
 	$query = 'SELECT submitid, teamid, probid, langid, submittime, valid
 	          FROM submission WHERE cid = %i';
@@ -411,6 +415,12 @@ function submissions($args)
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' AND TRUE %_');
 	$submitid = ($hasSubmitid ? $args['id'] : 0);
 
+	if ( infreeze(now()) && !checkrole('jury') ) {
+		$query .= ' AND submittime <= %i';
+	} else {
+		$query .= ' AND TRUE %_';
+	}
+
 	$query .= ' ORDER BY submitid';
 
 	$hasLimit = array_key_exists('limit', $args);
@@ -418,7 +428,7 @@ function submissions($args)
 	$limit = ($hasLimit ? $args['limit'] : -1);
 	// TODO: validate limit
 
-	$q = $DB->q($query, $cid, $language, $fromId, $submitid, $limit);
+	$q = $DB->q($query, $cid, $language, $fromId, $submitid, $cdata['freezetime'], $limit);
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
