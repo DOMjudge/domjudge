@@ -68,7 +68,8 @@ function detectProblemLanguage(filename)
 	var addfile = document.getElementById("addfile");
 	if ( addfile ) addfile.disabled = false;
 
-	var parts = filename.toLowerCase().split('.').reverse();
+	var parts = filename.replace(/^.*[\\\/]/, '')
+	            .toLowerCase().split('.').reverse();
 	if ( parts.length < 2 ) return;
 
 	// problem ID
