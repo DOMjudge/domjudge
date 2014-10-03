@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 3.4.6 - DEV
 -------------------
+ - Fix problem autoselect in team page (thanks Jeroen Bransen).
+ - Improve chroot documentation (thanks Rob Franken).
 
 Version 3.4.5 - 14 August 2014
 ------------------------------
