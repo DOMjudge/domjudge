@@ -8,7 +8,8 @@ Version 4.0.3DEV
    prevent ghc from running out of memory (#138, thanks Ruud Koot).
  - Fix problem autoselect in team page (thanks Jeroen Bransen).
  - Improve chroot documentation (thanks Rob Franken).
- - Fix API returning submissions after freeze (thanks Nicky Gerritsen).
+ - Fix API returning submissions after freeze and disabled teams,
+   and add a 'user' endpoint (thanks Nicky Gerritsen).
 
 Version 4.0.2 - 16 August 2014
 ------------------------------
