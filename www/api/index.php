@@ -68,6 +68,28 @@ $doc = "Get information about the current contest: id, name, start, freeze, unfr
 $api->provideFunction('GET', 'contest', $doc);
 
 /**
+ * Get information about the current user
+ */
+function user()
+{
+	global $userdata;
+
+	$return = array(
+		'id'       => $userdata['userid'],
+		'teamid'   => $userdata['teamid'],
+		'email'    => $userdata['email'],
+		'ip'       => $userdata['ip_address'],
+		'lastip'   => $userdata['last_ip_address'],
+		'name'     => $userdata['name'],
+		'username' => $userdata['username'],
+		'roles'    => $userdata['roles'],
+	);
+	return $return;
+}
+$doc = "Get information about the currently logged in user. If no user is logged in, will return null for all values.";
+$api->provideFunction('GET', 'user', $doc);
+
+/**
  * Problems information
  */
 function problems()
@@ -675,7 +697,7 @@ function teams($args)
 	          t.categoryid AS category, a.name AS affiliation
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
-	          WHERE';
+	          WHERE t.enabled = 1 AND';
 
 	$byCategory = array_key_exists('category', $args);
 	$query .= ($byCategory ? ' categoryid = %i' : ' TRUE %_');
