@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 4.0.3DEV
-----------------
+Version 4.0.3 - 6 October 2014
+------------------------------
  - Fix diff display on team submission output page when showing the
    result of sample testcases is enabled (#137, thanks Ruud Koot).
  - In Haskell run script, set maximum stack size to someting small to
