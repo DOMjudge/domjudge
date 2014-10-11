@@ -49,7 +49,11 @@ server {
 	location ~ ^/api/(.+)$ {
 		include fastcgi_params;
 		fastcgi_param SCRIPT_FILENAME $document_root/api/index.php;
-		fastcgi_param PATH_INFO $1;
+		set $path_info $1;
+		if ($path_info = index.php) {
+			set $path_info "";
+		}
+		fastcgi_param PATH_INFO $path_info;
 		fastcgi_pass domjudge;
 	}
 
