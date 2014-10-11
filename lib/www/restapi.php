@@ -91,7 +91,7 @@ class RestApi {
 			$postmax = phpini_to_bytes(trim(ini_get('post_max_size')));
 			if ( $postmax != -1 && $postmax < $_SERVER['CONTENT_LENGTH'] ) {
 				$this->createError("Size of post data too large (" . $_SERVER['CONTENT_LENGTH']
-						. "), increase post_max_size (" . $postmax . ") in your apache config.");
+						. "), increase post_max_size (" . $postmax . ") in your apache or nginx config.");
 			}
 		}
 		$name = $name . '#' . $_SERVER['REQUEST_METHOD'];

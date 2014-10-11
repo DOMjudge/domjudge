@@ -3,6 +3,7 @@
 /runguard-config.h
 /submit-config.h
 /apache.conf
+/nginx-conf
 /config.h.in
 /config.h
 /dbpasswords.secret

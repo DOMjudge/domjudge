@@ -1,0 +1,130 @@
+# @configure_input@
+
+# nginx configuration for DOMjudge
+
+### upstream ###
+#
+# always include this and make sure it points to the socket of PHP-FPM
+upstream domjudge {
+	server unix:/var/run/php5-fpm-www-data.sock;
+}
+
+### http host config ###
+#
+# Use this block if you want DOMjudge to live in
+# the root of your webserver without http
+
+server {
+	listen 80;
+	listen [::]:80;
+
+	server_name _default_;
+
+	root @domserver_wwwdir@;
+
+	# set max upload size. Make sure the PHP values also high enough
+	client_max_body_size 64M;
+
+	index index.php;
+
+	# Disable VCS metadata access, if present
+	location ~ \.svn {
+		deny all;
+	}
+	location ~ \.git {
+		deny all;
+	}
+	location ~ .gitignore$ {
+		deny all;
+	}
+	location ~ Makefile$ {
+		deny all;
+	}
+
+	location / {
+		try_files $uri $uri/ index.php;
+	}
+
+	# Send all requests to the API to /api/index.php
+	location ~ ^/api/(.+)$ {
+		include fastcgi_params;
+		fastcgi_param SCRIPT_FILENAME $document_root/api/index.php;
+		fastcgi_param PATH_INFO $1;
+		fastcgi_pass domjudge;
+	}
+
+	# Handle all PHP files
+	location ~ ^(.+?\.php)(/.*)?$ {
+		include fastcgi_params;
+		fastcgi_param SCRIPT_FILENAME $document_root$1;
+		fastcgi_param PATH_INFO $2;
+		fastcgi_pass domjudge;
+	}
+}
+
+# Alternatively, use HTTPS and redirect HTTP to HTTPS:
+
+# server {
+# 	listen   80;
+# 	listen   [::]:80;
+# 	server_name _default_;
+# 	return 301 https://$server_name$request_uri;  # enforce https
+# }
+
+# server {
+# 	listen 37.34.61.89:443;
+# 	listen [2a01:7c8:aaad:41b::1337]:443;
+
+# 	server_name _default_;
+
+# 	ssl on;
+# 	ssl_certificate /path/to/your/SSL-certificate-with-chain.crt;
+# 	ssl_certificate_key /path/to/your/SSL-key.key;
+# 	ssl_session_timeout 5m;
+# 	ssl_protocols SSLv3 TLSv1;
+# 	ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+# 	ssl_prefer_server_ciphers on;
+
+# 	root @domserver_wwwdir@;
+
+# 	# set max upload size. Make sure the PHP values also high enough
+# 	client_max_body_size 64M;
+
+# 	index index.php;
+
+# 	# Disable VCS metadata access, if present
+# 	location ~ \.svn {
+# 		deny all;
+# 	}
+# 	location ~ \.git {
+# 		deny all;
+# 	}
+# 	location ~ .gitignore$ {
+# 		deny all;
+# 	}
+# 	location ~ Makefile$ {
+# 		deny all;
+# 	}
+
+# 	location / {
+# 		try_files $uri $uri/ index.php;
+# 	}
+
+# 	# Send all requests to the API to /api/index.php
+# 	location ~ ^/api/(.+)$ {
+# 		include fastcgi_params;
+# 		fastcgi_param SCRIPT_FILENAME $document_root/api/index.php;
+# 		fastcgi_param PATH_INFO $1;
+# 		fastcgi_param HTTPS on;
+# 		fastcgi_pass domjudge;
+# 	}
+
+# 	# Handle all PHP files
+# 	location ~ ^(.+?\.php)(/.*)?$ {
+# 		include fastcgi_params;
+# 		fastcgi_param SCRIPT_FILENAME $document_root$1;
+# 		fastcgi_param PATH_INFO $2;
+# 		fastcgi_param HTTPS on;
+# 		fastcgi_pass domjudge;
+# 	}
+# }
