@@ -40,7 +40,7 @@ $(ZIPSQL): $(ZIPFILES)
 			[ -n "$(QUIET)" ] || echo "  adding '$$i'" ; \
 			f=`basename $$i` ; \
 			prob="$${f%.*}" ; \
-			ext="$${f#$prob}" ; \
+			ext="$${f#$$prob.}" ; \
 			printf "UPDATE problem SET problemtext = 0x%s, problemtext_type = '$$ext' WHERE shortname = '$$prob';\n" "`hexdump -v -e '/1 \"%02X\"' $$i`" >> $@ ; \
 		done ; \
 	fi
