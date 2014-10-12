@@ -35,24 +35,45 @@ function getFileContents($filename, $sizelimit = true) {
 }
 
 /**
- * Will return either the current contest id, or
- * the most recently finished one.
+ * Will return all the contests that are currently active
  * When fulldata is true, returns the total row as an array
- * instead of just the ID.
+ * instead of just the ID (array indices will be contest ID's then).
  */
-function getCurContest($fulldata = FALSE) {
+function getCurContests($fulldata = FALSE) {
 
 	global $DB;
-	$now = $DB->q('MAYBETUPLE SELECT * FROM contest
-	               WHERE enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
-	               ORDER BY activatetime DESC LIMIT 1');
+	// We assume endtime is always set
+	$contests = $DB->q('SELECT * FROM contest
+			    WHERE enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
+			    AND GREATEST(endtime, IFNULL(unfreezetime, endtime)) > UNIX_TIMESTAMP()
+			    ORDER BY activatetime');
+	$contests = $contests->getkeytable('cid');
+	if ( !$fulldata ) {
+		return array_keys($contests);
+	}
 
-	if ( $now == NULL ) return FALSE;
-
-	if ( !$fulldata ) return $now['cid'];
-
-	return $now;
+	return $contests;
 }
+
+///**
+// * Will return either the current contest id, or
+// * the most recently finished one.
+// * When fulldata is true, returns the total row as an array
+// * instead of just the ID.
+// */
+//function getCurContest($fulldata = FALSE) {
+//
+//	global $DB;
+//	$now = $DB->q('MAYBETUPLE SELECT * FROM contest
+//	               WHERE enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
+//	               ORDER BY activatetime DESC LIMIT 1');
+//
+//	if ( $now == NULL ) return FALSE;
+//
+//	if ( !$fulldata ) return $now['cid'];
+//
+//	return $now;
+//}
 
 /**
  * Parse 'id' from HTTP GET or POST variables and check that it is a

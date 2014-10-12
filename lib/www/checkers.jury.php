@@ -239,32 +239,6 @@ function check_contest($data, $keydata = null)
 		}
 	}
 
-	// a check whether this contest overlaps in time with any other, the
-	// system can only deal with exactly ONE current contest at any time.
-	// A new contest N overlaps with an existing contest E if the activate- or
-	// end time or N is inside E (N is (partially) contained in E), or if
-	// the activatetime is before E and the end time after E (E is completely
-	// contained in N).
-	if ( $data['enabled'] ) {
-		global $DB;
-		$overlaps = $DB->q('COLUMN SELECT cid FROM contest WHERE
-	                        enabled = 1 AND
-		                    ( (%s >= activatetime AND %s <= endtime) OR
-		                      (%s >= activatetime AND %s <= endtime) OR
-		                      (%s <= activatetime AND %s >= endtime) ) ' .
-		                   (isset($keydata['cid'])?'AND cid != %i ':'%_') .
-		                   'ORDER BY cid',
-		                   $data['activatetime'], $data['activatetime'],
-		                   $data['endtime'], $data['endtime'],
-		                   $data['activatetime'], $data['endtime'],
-		                   @$keydata['cid']);
-
-		if(count($overlaps) > 0) {
-			ch_error('This contest overlaps with the following contest(s): c' .
-			         implode(',c', $overlaps));
-		}
-	}
-
 	return $data;
 }
 

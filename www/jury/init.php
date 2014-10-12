@@ -50,8 +50,11 @@ if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES)
 	error("POST data exceeded php.ini's 'post_max_size' directive.");
 }
 
-$cdata = getCurContest(TRUE);
-$cid = (int)$cdata['cid'];
+$cdatas = getCurContests(TRUE);
+$cids = array_map(function($contest)
+{
+	return $contest['cid'];
+}, $cdatas);
 
 // Data to be sent as AJAX updates:
 $updates = array(
