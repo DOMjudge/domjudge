@@ -111,6 +111,10 @@ if ( !$data['enabled'] ) {
 $numteams = $DB->q("VALUE SELECT COUNT(*) AS teamcount
 		    FROM gewis_contestteam
 		    WHERE cid = %i", $id);
+$numprobs = $DB->q("VALUE SELECT COUNT(*) AS problemcount
+		    FROM gewis_contestproblem
+		    WHERE cid = %i", $id);
+
 
 echo "<table>\n";
 echo '<tr><td>CID:</td><td>c' .
@@ -140,6 +144,14 @@ if ( $numteams==0 ) {
 	echo (int)$numteams;
 }
 echo ' <a href="contestteam.php?cid='.urlencode($data['cid']).'">details/edit</a>';
+echo '</td></tr>';
+echo '<tr><td>Problems:</td><td>';
+if ( $numprobs==0 ) {
+	echo '<em>no problems</em>';
+} else {
+	echo (int)$numprobs;
+}
+echo ' <a href="contestproblem.php?cid='.urlencode($data['cid']).'">details/edit</a>';
 echo '</td></tr>';
 echo '<tr><td>Scoreboard unfreeze:</td><td>' .
 	(empty($data['unfreezetime_string']) ? "-" : htmlspecialchars(@$data['unfreezetime_string'])) .

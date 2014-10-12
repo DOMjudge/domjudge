@@ -8,38 +8,39 @@
 
 require('init.php');
 
-$probid = (int)@$_REQUEST['probid'];
+$cid = (int)@$_REQUEST['cid'];
 
-$prob = $DB->q('MAYBETUPLE SELECT probid, shortname, name
-		FROM problem WHERE probid = %i', $probid);
+$contest = $DB->q('MAYBETUPLE SELECT cid, contestname
+		  FROM contest WHERE cid = %i', $cid);
 
-if ( ! $prob ) error("Missing or invalid problem id");
+if ( ! $contest ) error("Missing or invalid contest id");
 
 // We may need to re-update the problem data, so make it a function.
 function get_contestproblem_data()
 {
-	global $DB, $data, $probid;
+	global $DB, $data, $cid;
 
-	$data = $DB->q('KEYTABLE SELECT cid AS ARRAYKEY, contestname
+	$data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, shortname, name
 			FROM gewis_contestproblem
-			NATURAL JOIN contest
-			WHERE probid = %i ORDER BY cid', $probid);
+			INNER JOIN problem USING (probid)
+			WHERE gewis_contestproblem.cid = %i ORDER BY probid', $cid);
 }
 get_contestproblem_data();
 
-$title = 'Contests for problem p'.htmlspecialchars(@$probid);
+$title = 'Problems for contest c'.htmlspecialchars(@$cid);
 
 require(LIBWWWDIR . '/header.php');
 
 echo "<h1>" . $title ."</h1>\n\n";
 
 $result = '';
-if ( isset($_POST['probid']) && IS_ADMIN ) {
-	if ( isset($_POST['cid']) ) {
-		$DB->q("INSERT INTO gewis_contestproblem (probid, cid) VALUES (%i, %i)", $probid, $_POST['cid']);
-		$contestname = $DB->q("VALUE SELECT contestname FROM contest WHERE cid = %i", $_POST['cid']);
-		$result .= "<li>Added to contest ${contestname} (c${_POST['cid']})</li>\n";
-		auditlog('problem', $probid, 'added contest', "contest c{$_POST['cid']}");
+if ( isset($_POST['cid']) && IS_ADMIN ) {
+	if ( isset($_POST['probid']) ) {
+		$DB->q("INSERT INTO gewis_contestproblem (cid, probid) VALUES (%i, %i)", $cid, $_POST['probid']);
+		$contestname = $DB->q("VALUE SELECT contestname FROM contest WHERE cid = %i", $cid);
+		$problem = $DB->q("VALUE SELECT shortname FROM problem WHERE probid = %i", $_POST['probid']);
+		$result .= "<li>Added problem ${problem} (p${_POST['probid']})</li>\n";
+		auditlog('contest', $cid, 'added problem', "problem t{$_POST['probid']}");
 	}
 }
 if ( !empty($result) ) {
@@ -49,30 +50,31 @@ if ( !empty($result) ) {
 	get_contestproblem_data();
 }
 
-echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem p" .
-	htmlspecialchars($probid) . "</a></p>\n\n";
+echo "<p><a href=\"contest.php?id=" . urlencode($cid) . "\">back to contest c" .
+	htmlspecialchars($cid) . "</a></p>\n\n";
 
 if ( count($data)==0 ) {
-	echo "<p class=\"nodata\">No contest(s) yet.</p>\n";
+	echo "<p class=\"nodata\">No problem(s) yet.</p>\n";
 } else {
 	?>
 <table class="list">
 <thead><tr>
-<th scope="col">CID</th><th scope="col">name</th><th></th>
+<th scope="col">ID</th><th scope="col">shortname</th><th scope="col">name</th><th></th>
 </tr></thead>
 <tbody>
 <?php
 }
 
-foreach( $data as $cid => $row ) {
-	$link = '<a href="contest.php?id=' . urlencode($cid) . '">';
+foreach( $data as $probid => $row ) {
+	$link = '<a href="problem.php?id=' . urlencode($probid) . '">';
 	echo "<tr>";
-	echo "<td class=\"cid\">" . $link .
-	    "c" . htmlspecialchars($cid) ."</a></td>" .
-	    "<td class=\"name\">" . $link . htmlspecialchars($row["contestname"]) . "</a></td>";
+	echo "<td class=\"tid\">" . $link .
+	    "t" . htmlspecialchars($probid) ."</a></td>" .
+	    "<td class=\"probid\">" . $link . htmlspecialchars($row["shortname"]) . "</a></td>" .
+	    "<td class=\"name\">" . $link . htmlspecialchars($row["name"]) . "</a></td>";
 		if ( IS_ADMIN ) {
-			echo "<td><a href=\"delete.php?table=gewis_contestproblem&amp;cid=$cid&amp;probid=$probid&amp;referrer=" .
-			    urlencode('contestproblem.php?probid='.$probid) . "\">" .
+			echo "<td><a href=\"delete.php?table=gewis_contestproblem&amp;probid=$probid&amp;cid=$cid&amp;referrer=" .
+			    urlencode('contestproblem.php?cid='.$cid) . "\">" .
 			    "<img src=\"../images/delete.png\" alt=\"delete\"" .
 			    " title=\"remove this problem from this contest\" class=\"picto\" /></a></td>";
 		} else {
@@ -85,33 +87,33 @@ if ( count($data)!=0 ) echo "</tbody>\n</table>\n";
 
 if ( IS_ADMIN ) {
 	echo addForm($pagename, 'post', null, 'multipart/form-data') .
-	     addHidden('probid', $probid);
+	     addHidden('cid', $cid);
 
-	$cmap = $DB->q("KEYVALUETABLE SELECT c.cid, c.contestname
-			FROM contest c
-			LEFT JOIN gewis_contestproblem g ON c.cid = g.cid AND g.probid = %i
-			WHERE g.probid IS NULL
-			ORDER BY cid DESC", $probid);
-	if (!empty($cmap)) {
+	$pmap = $DB->q("KEYVALUETABLE SELECT p.probid, p.shortname
+		    FROM problem p
+		    LEFT JOIN gewis_contestproblem g ON p.probid = g.probid AND g.cid = %i
+		    WHERE g.cid IS NULL
+		    ORDER BY probid", $cid);
+	if (!empty($pmap)) {
 		?>
-		<h3>Add to contest</h3>
-
+		<h3>Add team</h3>
 		<table>
 			<tr>
-				<td>Contest:</td>
+				<td>Team:</td>
 				<td>
 					<?php
-					foreach ($cmap as $cid => $cname) {
-						$cmap[$cid] = "c$cid: $cname";
+					foreach ($pmap as $probid => $pname) {
+						$pmap[$probid] = "p$probid: $pname";
 					}
-					echo addSelect('cid', $cmap, null, true);
+					echo addSelect('probid', $pmap, null, true);
 					?>
 				</td>
 			</tr>
 		</table>
-	<?php
+		<?php
+
+		echo "<br />" . addSubmit('Add problem') . addEndForm();
 	}
-	echo "<br />" . addSubmit('Add to contest') . addEndForm();
 }
 
 require(LIBWWWDIR . '/footer.php');

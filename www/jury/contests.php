@@ -175,10 +175,13 @@ if( count($res) == 0 ) {
 	foreach($times as $time) echo "<th scope=\"col\">$time</th>";
 	echo "<th scope=\"col\">process<br />balloons?</th>";
 	echo "<th scope=\"col\" class=\"sorttable_numeric\"># teams</th>";
+	echo "<th scope=\"col\" class=\"sorttable_numeric\"># problems</th>";
 	echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
 
 	$iseven = false;
 	foreach($res as $row) {
+
+		$numprobs = $DB->q('VALUE SELECT COUNT(*) FROM gewis_contestproblem WHERE cid = %i', $row['cid']);
 
 		$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
 
@@ -195,6 +198,7 @@ if( count($res) == 0 ) {
 		}
 		echo "<td>" . $link . ($row['process_balloons'] ? 'yes' : 'no') . "</a></td>\n";
 		echo "<td>" . $link . $row['numteams'] . "</a></td>\n";
+		echo "<td>" . $link . $numprobs . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
 		$iseven = ! $iseven;
 

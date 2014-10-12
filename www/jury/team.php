@@ -66,20 +66,20 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 
 <!-- contest selection -->
 <tr><td>Contests:</td>
-	<td><?php
-		$contests = $DB->q("TABLE SELECT contest.cid,contestname,max(gewis_contestteam.teamid=%s) AS incontest
-				FROM contest
-				LEFT JOIN gewis_contestteam ON gewis_contestteam.cid = contest.cid
-				GROUP BY contest.cid", @$row['teamid']);
-		$i=0;
-		foreach ($contests as $contest) {
-			echo "<label>";
-			echo addCheckbox("data[0][mapping][items][$i]", $contest['incontest']==1, $contest['cid']);
-			echo $contest['contestname'] . " (c${contest['cid']})</label><br/>";
-			$i++;
-		}
-		?>
-	</td></tr>
+<td><?php
+	$contests = $DB->q("TABLE SELECT contest.cid,contestname,max(gewis_contestteam.teamid=%s) AS incontest
+			FROM contest
+			LEFT JOIN gewis_contestteam ON gewis_contestteam.cid = contest.cid
+			GROUP BY contest.cid", @$row['teamid']);
+	$i=0;
+	foreach ($contests as $contest) {
+		echo "<label>";
+		echo addCheckbox("data[0][mapping][items][$i]", $contest['incontest']==1, $contest['cid']);
+		echo $contest['contestname'] . " (c${contest['cid']})</label><br/>";
+		$i++;
+	}
+	?>
+</td></tr>
 
 <tr><td>Enabled:</td>
 <td><?php echo addRadioButton('data[0][enabled]', (!isset($row['']) || $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>

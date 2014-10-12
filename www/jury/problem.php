@@ -162,9 +162,29 @@ echo addSelect('data[0][special_compare]', $execmap, @$row['special_compare'], T
 ?>
 </td></tr>
 
+<!-- contest selection -->
+<tr><td>Contests:</td>
+	<td><?php
+		$contests = $DB->q("TABLE SELECT contest.cid,contestname,max(gewis_contestproblem.probid=%s) AS incontest
+		FROM contest
+		LEFT JOIN gewis_contestproblem ON gewis_contestproblem.cid = contest.cid
+		GROUP BY contest.cid", @$row['probid']);
+		$i=0;
+		foreach ($contests as $contest) {
+			echo "<label>";
+			echo addCheckbox("data[0][mapping][items][$i]", $contest['incontest']==1, $contest['cid']);
+			echo $contest['contestname'] . " (c${contest['cid']})</label><br/>";
+			$i++;
+		}
+		?>
+	</td></tr>
+
 </table>
 
 <?php
+echo addHidden('data[0][mapping][fk][0]', 'probid') .
+     addHidden('data[0][mapping][fk][1]', 'cid') .
+     addHidden('data[0][mapping][table]', 'gewis_contestproblem');
 echo addHidden('cmd', $cmd) .
 	addHidden('table','problem') .
 	addHidden('referrer', @$_GET['referrer']) .
@@ -191,12 +211,9 @@ endif;
 $data = $DB->q('TUPLE SELECT p.probid,p.cid,p.shortname,p.name,p.allow_submit,p.allow_judge,
                              p.timelimit,p.special_run,p.special_compare,p.color,
 			     p.problemtext_type, count(rank) AS ntestcases
-                FROM problem p
-                LEFT JOIN testcase USING (probid)
-                WHERE probid = %i GROUP BY probid', $id);
-$numcontests = $DB->q("VALUE SELECT COUNT(*) AS contestcount
-		       FROM gewis_contestproblem
-		       WHERE probid = %i", $id);
+		FROM problem p
+		LEFT JOIN testcase USING (probid)
+		WHERE probid = %i GROUP BY probid', $id);
 
 if ( ! $data ) error("Missing or invalid problem id");
 
@@ -214,14 +231,6 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <tr><td>ID:          </td><td>p<?php echo htmlspecialchars($data['probid'])?></td></tr>
 <tr><td>Shortname:   </td><td class="probid"><?php echo htmlspecialchars($data['shortname'])?></td></tr>
 <tr><td>Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
-<tr><td>Contests:    </td><td><?php
-	if ( $numcontests==0 ) {
-		echo '<em>no contests</em>';
-	} else {
-		echo (int)$numcontests;
-	}
-	echo ' <a href="contestproblem.php?probid='.urlencode($data['probid']).'">details/edit</a>';
-?></td></tr>
 <tr><td>Allow submit:</td><td class="nobreak"><?php echo printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
@@ -274,6 +283,46 @@ if ( IS_ADMIN ) {
 		exportLink($id) . "\n" .
 		editLink('problem',$id) . "\n" .
 		delLink('problem','probid', $id) . "</p>\n\n";
+}
+
+echo "<h3>Contests</h3>\n\n";
+
+$res = $DB->q('TABLE SELECT contest.*
+	       FROM contest
+	       INNER JOIN gewis_contestproblem USING (cid)
+	       WHERE gewis_contestproblem.probid = %i
+	       ORDER BY starttime DESC', $id);
+
+if( count($res) == 0 ) {
+	echo "<p class=\"nodata\">No contests defined</p>\n\n";
+} else {
+	$times = array ('activate','start','freeze','end','unfreeze');
+	echo "<table class=\"list sortable\">\n<thead>\n" .
+	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
+	foreach($times as $time) echo "<th scope=\"col\">$time</th>";
+	echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
+
+	$iseven = false;
+	foreach($res as $row) {
+
+		$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
+
+		echo '<tr class="' .
+		     ( $iseven ? 'roweven': 'rowodd' ) .
+		     (!$row['enabled']    ? ' disabled' :'') . '">' .
+		     "<td class=\"tdright\">" . $link .
+		     "c" . (int)$row['cid'] . "</a></td>\n";
+		foreach ($times as $time) {
+			echo "<td title=\"".printtime(@$row[$time. 'time'],'%Y-%m-%d %H:%M') . "\">" .
+			     $link . ( isset($row[$time.'time']) ?
+					printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
+		}
+		echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
+		$iseven = ! $iseven;
+
+		echo "</tr>\n";
+	}
+	echo "</tbody>\n</table>\n\n";
 }
 
 echo "<h2>Submissions for " . htmlspecialchars($data['shortname']) .
