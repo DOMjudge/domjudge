@@ -73,13 +73,17 @@ function putClar($clar)
 
 	echo '<tr><td>Subject:</td><td>';
 	if ( is_null($clar['probid']) ) {
-		echo "General issue";
+		echo 'c' . $clar['cid'] . " - General issue";
 	} else {
 		if ( IS_JURY ) {
-			echo '<a href="problem.php?id=' . urlencode($clar['probid']) . '">' .
-				'Problem ' . $clar['shortname'].": ".$clar['probname'] . '</a>';
+			echo
+				'<a href="problem.php?id=' . urlencode($clar['probid']) . '">' .
+				'c' . $clar['cid'] . ' - Problem ' . $clar['shortname'] . ": " .
+				$clar['probname'] . '</a>';
 		} else {
-			echo 'Problem ' . $clar['shortname'].": ".$clar['probname'];
+			echo
+				'c' . $clar['cid'] . ' - Problem ' . $clar['shortname'] . ": " .
+				$clar['probname'];
 		}
 	}
 	echo "</td></tr>\n";
