@@ -28,6 +28,10 @@ DROP TABLE `gewis_contestproblem`;
 ALTER TABLE `problem`
   CHANGE COLUMN `cid` `cid` INT(4) UNSIGNED DEFAULT NULL COMMENT 'Contest ID (not used anymore, see table `gewis_contestproblem`)';
 
+-- Add a column to keep track of whether balloons will be processed for this contest
+ALTER TABLE `contest`
+  ADD COLUMN `process_balloons` TINYINT(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?'
+
 CREATE TABLE `gewis_contestproblem` (
   `cid` INT(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
   `probid` INT(4) UNSIGNED NOT NULL COMMENT 'Problem ID',

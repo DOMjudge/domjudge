@@ -169,6 +169,7 @@ if( count($res) == 0 ) {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
 	foreach($times as $time) echo "<th scope=\"col\">$time</th>";
+	echo "<th scope=\"col\">process<br />balloons?</th>";
 	echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
 
 	$iseven = false;
@@ -187,6 +188,7 @@ if( count($res) == 0 ) {
 			      $link . ( isset($row[$time.'time']) ?
 			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
 		}
+		echo "<td>" . $link . ($row['process_balloons'] ? 'yes' : 'no') . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
 		$iseven = ! $iseven;
 

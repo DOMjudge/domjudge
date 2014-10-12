@@ -407,8 +407,11 @@ function judging_runs_POST($args)
 							      WHERE valid = 1 AND probid = %i AND teamid = %i AND cid = %i',
 							      $row['probid'], $row['teamid'], $row['cid']);
 					if ( $numcorrect == 0 ) {
-						$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
-							$row['submitid']);
+						$balloons_enabled = (bool)$DB->q("VALUE SELECT process_balloons FROM contest WHERE cid = %i", $row['cid']);
+						if ( $balloons_enabled ) {
+							$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
+							       $row['submitid']);
+						}
 					}
 				}
 			}
