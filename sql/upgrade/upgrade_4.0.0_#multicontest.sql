@@ -30,8 +30,10 @@ ALTER TABLE `problem`
 
 -- Add a column to keep track of whether balloons will be processed for this contest
 ALTER TABLE `contest`
-  ADD COLUMN `process_balloons` TINYINT(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?'
+  ADD COLUMN `process_balloons` TINYINT(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?';
 
+
+-- Create a table linking contests and problems
 CREATE TABLE `gewis_contestproblem` (
   `cid` INT(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
   `probid` INT(4) UNSIGNED NOT NULL COMMENT 'Problem ID',
@@ -42,13 +44,27 @@ CREATE TABLE `gewis_contestproblem` (
   CONSTRAINT `contestproblem_ibfk_2` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of contests and problems';
 
+-- Create a table linking contests and teams
+CREATE TABLE `gewis_contestteam` (
+  `cid` INT(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
+  `teamid` INT(4) UNSIGNED NOT NULL COMMENT 'Team ID',
+  KEY `cid` (`cid`),
+  KEY `teamid` (`teamid`),
+  CONSTRAINT `contestteam_pk` PRIMARY KEY (`teamid`, `cid`),
+  CONSTRAINT `contestteam_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  CONSTRAINT `contestteam_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of contests and teams';
+
 --
 -- Transfer data from old to new structure
 --
 
--- Copy data to new table
+-- Copy data to new tables
 INSERT INTO `gewis_contestproblem` (`cid`, `probid`)
   SELECT `cid`, `probid` FROM `problem`;
+
+INSERT INTO `gewis_contestteam` (`cid`, `teamid`)
+  SELECT `cid`, `teamid` FROM `contest` INNER JOIN `team`;
 
 -- Remove data from old column
 UPDATE `problem` SET `cid` = NULL;

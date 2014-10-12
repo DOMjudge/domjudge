@@ -63,18 +63,39 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td><label for="data_0__comments_">Comments:</label></td>
 <td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
+
+<!-- contest selection -->
+<tr><td>Contests:</td>
+	<td><?php
+		$contests = $DB->q("TABLE SELECT contest.cid,contestname,max(gewis_contestteam.teamid=%s) AS incontest
+				FROM contest
+				LEFT JOIN gewis_contestteam ON gewis_contestteam.cid = contest.cid
+				GROUP BY contest.cid", @$row['teamid']);
+		$i=0;
+		foreach ($contests as $contest) {
+			echo "<label>";
+			echo addCheckbox("data[0][mapping][items][$i]", $contest['incontest']==1, $contest['cid']);
+			echo $contest['contestname'] . " (c${contest['cid']})</label><br/>";
+			$i++;
+		}
+		?>
+	</td></tr>
+
 <tr><td>Enabled:</td>
 <td><?php echo addRadioButton('data[0][enabled]', (!isset($row['']) || $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>
 <?php echo addRadioButton('data[0][enabled]', (isset($row['enabled']) && !$row['enabled']), 0)?> <label for="data_0__enabled_0">no</label></td></tr>
 </table>
 
 <?php
+echo addHidden('data[0][mapping][fk][0]', 'teamid') .
+     addHidden('data[0][mapping][fk][1]', 'cid') .
+     addHidden('data[0][mapping][table]', 'gewis_contestteam');
 echo addHidden('cmd', $cmd) .
-	addHidden('table','team') .
-	addHidden('referrer', @$_GET['referrer']) .
-	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
-	addEndForm();
+     addHidden('table','team') .
+     addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?(strstr(@$_GET['referrer'],'?') === FALSE?'?edited=1':'&edited=1'):'')) .
+     addSubmit('Save') .
+     addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
+     addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
 exit;
@@ -95,6 +116,18 @@ $row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname, a.shortname 
                WHERE teamid = %i', $id);
 
 if ( !$row ) error("Invalid team identifier");
+
+if ( isset($_GET['edited']) ) {
+
+	echo addForm('refresh_cache.php') .
+	     msgbox (
+		     "Warning: Refresh scoreboard cache",
+		     "If the membership of a team in a contest was changed, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
+		     addSubmit('recalculate caches now', 'refresh')
+	     ) .
+	     addEndForm();
+
+}
 
 $users = $DB->q('TABLE SELECT userid,username FROM user WHERE teamid = %i', $id);
 
@@ -171,6 +204,46 @@ if ( IS_ADMIN ) {
 }
 
 echo rejudgeForm('team', $id) . "\n\n";
+
+echo "<h3>Contests</h3>\n\n";
+
+$res = $DB->q('TABLE SELECT contest.*
+	       FROM contest
+	       INNER JOIN gewis_contestteam USING (cid)
+	       WHERE gewis_contestteam.teamid = %i
+	       ORDER BY starttime DESC', $id);
+
+if( count($res) == 0 ) {
+	echo "<p class=\"nodata\">No contests defined</p>\n\n";
+} else {
+	$times = array ('activate','start','freeze','end','unfreeze');
+	echo "<table class=\"list sortable\">\n<thead>\n" .
+	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
+	foreach($times as $time) echo "<th scope=\"col\">$time</th>";
+	echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
+
+	$iseven = false;
+	foreach($res as $row) {
+
+		$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
+
+		echo '<tr class="' .
+		     ( $iseven ? 'roweven': 'rowodd' ) .
+		     (!$row['enabled']    ? ' disabled' :'') . '">' .
+		     "<td class=\"tdright\">" . $link .
+		     "c" . (int)$row['cid'] . "</a></td>\n";
+		foreach ($times as $time) {
+			echo "<td title=\"".printtime(@$row[$time. 'time'],'%Y-%m-%d %H:%M') . "\">" .
+			     $link . ( isset($row[$time.'time']) ?
+					printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
+		}
+		echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
+		$iseven = ! $iseven;
+
+		echo "</tr>\n";
+	}
+	echo "</tbody>\n</table>\n\n";
+}
 
 echo "<h3>Score</h3>\n\n";
 

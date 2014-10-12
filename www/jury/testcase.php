@@ -45,13 +45,13 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 // We may need to re-update the testcase data, so make it a function.
 function get_testcase_data()
 {
-	global $DB, $data, $probid;
+	global $DB, $data, $contestid;
 
 	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
 	                description, sample,
 	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
 	                OCTET_LENGTH(output) AS size_output, md5sum_output
-	                FROM testcase WHERE probid = %i ORDER BY rank', $probid);
+			FROM testcase WHERE probid = %i ORDER BY rank', $contestid);
 }
 get_testcase_data();
 

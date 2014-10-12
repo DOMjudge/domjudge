@@ -15,7 +15,7 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, shortname, name
 
 if ( ! $prob ) error("Missing or invalid problem id");
 
-// We may need to re-update the testcase data, so make it a function.
+// We may need to re-update the problem data, so make it a function.
 function get_contestproblem_data()
 {
 	global $DB, $data, $probid;
@@ -27,7 +27,7 @@ function get_contestproblem_data()
 }
 get_contestproblem_data();
 
-$title = 'Testcases for problem p'.htmlspecialchars(@$probid);
+$title = 'Contests for problem p'.htmlspecialchars(@$probid);
 
 require(LIBWWWDIR . '/header.php');
 
@@ -86,28 +86,31 @@ if ( count($data)!=0 ) echo "</tbody>\n</table>\n";
 if ( IS_ADMIN ) {
 	echo addForm($pagename, 'post', null, 'multipart/form-data') .
 	     addHidden('probid', $probid);
-	echo "<script type=\"text/javascript\">\n";
-	foreach ( $data as $rank => $row ) {
-		echo "hideTcDescEdit($rank);\n";
+
+	$cmap = $DB->q("KEYVALUETABLE SELECT c.cid, c.contestname
+			FROM contest c
+			LEFT JOIN gewis_contestproblem g ON c.cid = g.cid AND g.probid = %i
+			WHERE g.probid IS NULL
+			ORDER BY cid DESC", $probid);
+	if (!empty($cmap)) {
+		?>
+		<h3>Add to contest</h3>
+
+		<table>
+			<tr>
+				<td>Contest:</td>
+				<td>
+					<?php
+					foreach ($cmap as $cid => $cname) {
+						$cmap[$cid] = "c$cid: $cname";
+					}
+					echo addSelect('cid', $cmap, null, true);
+					?>
+				</td>
+			</tr>
+		</table>
+	<?php
 	}
-	echo "</script>\n\n";
-
-?>
-<h3>Add to contest</h3>
-
-<table>
-<tr><td>Contest: </td><td>
-<?php
-$cmap = $DB->q("KEYVALUETABLE SELECT cid,contestname FROM contest ORDER BY cid DESC");
-foreach($cmap as $cid => $cname) {
-	$cmap[$cid] = "c$cid: $cname";
-}
-echo addSelect('cid', $cmap, null, true);
-?>
-</td></tr>
-</table>
-<?php
-
 	echo "<br />" . addSubmit('Add to contest') . addEndForm();
 }
 

@@ -64,6 +64,15 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES (2, 'Example teamname', 3, 1, NULL, NULL, NULL, NULL);
 
 --
+-- Dumping data for table `gewis_contestteam`
+--
+
+INSERT INTO `gewis_contestteam` (`cid`, `teamid`) VALUES (1, 1);
+INSERT INTO `gewis_contestteam` (`cid`, `teamid`) VALUES (2, 1);
+INSERT INTO `gewis_contestteam` (`cid`, `teamid`) VALUES (1, 2);
+INSERT INTO `gewis_contestteam` (`cid`, `teamid`) VALUES (2, 2);
+
+--
 -- Dumping data for table `testcase`
 --
 

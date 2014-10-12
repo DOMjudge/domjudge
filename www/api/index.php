@@ -533,13 +533,14 @@ function submissions_POST($args)
 {
 	global $userdata, $DB, $api;
 	checkargs($args, array('shortname','langid'));
-	$contests = getCurContests(TRUE);
+	checkargs($userdata, array('teamid'));
+	$contests = getCurContests(TRUE, $userdata['teamid']);
 	if ( !isset($args['cid']) && count($contests) == 1 ) {
 		$cid = key($contests);
 	} elseif ( isset($args['cid']) && isset($contests[$args['cid']]) ) {
 		$cid = $args['cid'];
 	} else {
-		$api->createError("Can not find that contest");
+		$api->createError("Can not find that contest or you are not part of it");
 	}
 
 	$probid = $DB->q("MAYBEVALUE SELECT probid FROM problem

@@ -38,15 +38,24 @@ function getFileContents($filename, $sizelimit = true) {
  * Will return all the contests that are currently active
  * When fulldata is true, returns the total row as an array
  * instead of just the ID (array indices will be contest ID's then).
+ * If $onlyofteam is not null, only show contests that team is part of
  */
-function getCurContests($fulldata = FALSE) {
+function getCurContests($fulldata = FALSE, $onlyofteam = null) {
 
 	global $DB;
 	// We assume endtime is always set
-	$contests = $DB->q('SELECT * FROM contest
+	if ( $onlyofteam ) {
+		$contests = $DB->q('SELECT * FROM contest
+			    INNER JOIN gewis_contestteam USING (cid)
+			    WHERE teamid = %i AND enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
+			    AND GREATEST(endtime, IFNULL(unfreezetime, endtime)) > UNIX_TIMESTAMP()
+			    ORDER BY activatetime', $onlyofteam);
+	} else {
+		$contests = $DB->q('SELECT * FROM contest
 			    WHERE enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
 			    AND GREATEST(endtime, IFNULL(unfreezetime, endtime)) > UNIX_TIMESTAMP()
 			    ORDER BY activatetime');
+	}
 	$contests = $contests->getkeytable('cid');
 	if ( !$fulldata ) {
 		return array_keys($contests);

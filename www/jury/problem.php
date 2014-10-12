@@ -214,7 +214,7 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <tr><td>ID:          </td><td>p<?php echo htmlspecialchars($data['probid'])?></td></tr>
 <tr><td>Shortname:   </td><td class="probid"><?php echo htmlspecialchars($data['shortname'])?></td></tr>
 <tr><td>Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
-<tr><td># Contests:  </td><td><?php
+<tr><td>Contests:    </td><td><?php
 	if ( $numcontests==0 ) {
 		echo '<em>no contests</em>';
 	} else {

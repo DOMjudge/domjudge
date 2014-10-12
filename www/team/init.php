@@ -40,7 +40,7 @@ if ( $teamdata['enabled'] != 1 ) {
 	error("Team is not enabled.");
 }
 
-$cdatas = getCurContests(TRUE);
+$cdatas = getCurContests(TRUE, $teamdata['teamid']);
 $cids = array_keys($cdatas);
 
 // If the cookie has a existing contest, use it

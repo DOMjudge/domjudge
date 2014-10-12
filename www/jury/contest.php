@@ -108,6 +108,10 @@ if ( !$data['enabled'] ) {
 	echo "<p><em>This contest is disabled.</em></p>\n\n";
 }
 
+$numteams = $DB->q("VALUE SELECT COUNT(*) AS teamcount
+		    FROM gewis_contestteam
+		    WHERE cid = %i", $id);
+
 echo "<table>\n";
 echo '<tr><td>CID:</td><td>c' .
 	(int)$data['cid'] . "</td></tr>\n";
@@ -129,6 +133,14 @@ echo '<tr><td>End time:</td><td>' .
 echo '<tr><td>Process balloons:</td><td>' .
      ($data['process_balloons'] ? 'yes' : 'no') .
      "</td></tr>\n";
+echo '<tr><td>Teams:</td><td>';
+if ( $numteams==0 ) {
+	echo '<em>no teams</em>';
+} else {
+	echo (int)$numteams;
+}
+echo ' <a href="contestteam.php?cid='.urlencode($data['cid']).'">details/edit</a>';
+echo '</td></tr>';
 echo '<tr><td>Scoreboard unfreeze:</td><td>' .
 	(empty($data['unfreezetime_string']) ? "-" : htmlspecialchars(@$data['unfreezetime_string'])) .
 	"</td></tr>\n";

@@ -366,8 +366,7 @@ function putClock() {
 			. "</span>";
 	}
 
-	global $cid;
-	$cdatas = getCurContests(TRUE);
+	global $cid, $cdatas;
 	// Show a contest selection form, if there are contests
 	if ( count($cdatas) > 1 ) {
 		echo "<div id=\"selectcontest\">\n";

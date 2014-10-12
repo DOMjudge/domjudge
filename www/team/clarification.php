@@ -16,10 +16,10 @@ if ( isset($id) ) {
 	$req = $DB->q('MAYBETUPLE SELECT * FROM clarification
 	               WHERE cid = %i AND clarid = %i', $cid, $id);
 	if ( ! $req ) error("clarification $id not found");
-	if ( ! canViewClarification($teamid, $req) ) {
+	if ( ! canViewClarification($contestid, $req) ) {
 		error("Permission denied");
 	}
-	$myrequest = ( $req['sender'] == $teamid );
+	$myrequest = ( $req['sender'] == $contestid );
 
 	$respid = empty($req['respid']) ? $id : $req['respid'];
 }
@@ -33,7 +33,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, submittime, sender, probid, body)
 	                 VALUES (%i, %s, %i, %i, %s)',
-	                $cid, now(), $teamid,
+			$cid, now(), $contestid,
 	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
 	                $_POST['bodytext']);
 
@@ -54,7 +54,7 @@ if ( isset($id) ) {
 	} else {
 		echo "<h1>Clarification</h1>\n\n";
 	}
-	putClarification($respid, $teamid);
+	putClarification($respid, $contestid);
 
 	echo "<h2>Send Clarification Request</h2>\n\n";
 	putClarificationForm("clarification.php", $id, $cid);

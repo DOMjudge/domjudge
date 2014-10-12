@@ -89,6 +89,7 @@ CREATE TABLE `contest` (
   `endtime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
   `unfreezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether this contest can be active',
+  `process_balloons` TINYINT(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?',
   PRIMARY KEY (`cid`),
   KEY `cid` (`cid`,`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';
@@ -249,6 +250,20 @@ CREATE TABLE `gewis_contestproblem` (
   CONSTRAINT `contestproblem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
   CONSTRAINT `contestproblem_ibfk_2` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of contests and problems';
+
+--
+-- Table structure for table `gewis_contestteam`
+--
+
+CREATE TABLE `gewis_contestteam` (
+  `cid` INT(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
+  `teamid` INT(4) UNSIGNED NOT NULL COMMENT 'Team ID',
+  KEY `cid` (`cid`),
+  KEY `teamid` (`teamid`),
+  PRIMARY KEY (`teamid`, `cid`),
+  CONSTRAINT `contestteam_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  CONSTRAINT `contestteam_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of contests and teams';
 
 --
 -- Table structure for table `rankcache_jury`

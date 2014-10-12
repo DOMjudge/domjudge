@@ -55,7 +55,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	if ( ! $cstarted && ! $jury ) return;
 
 	// get the teams, problems and categories
-	$teams = getTeams($filter, $jury);
+	$teams = getTeams($filter, $jury, $cdata);
 	$probs = getProblems($cdata);
 	$categs = getCategories($jury);
 
@@ -180,26 +180,27 @@ function getProblems($cdata) {
 /**
  * Helper function for genScoreBoard.
  *
- * Return all teams, possibly filtered.
+ * Return all teams of current contest, possibly filtered.
  */
-function getTeams($filter, $jury) {
+function getTeams($filter, $jury, $cdata) {
 	global $DB;
 
 	return $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, teamid, externalid,
 	                 team.name, team.categoryid, team.affilid, sortorder,
 	                 country, color, team_affiliation.name AS affilname
 	                 FROM team
+			 INNER JOIN gewis_contestteam USING (teamid)
 	                 LEFT JOIN team_category
 	                        ON (team_category.categoryid = team.categoryid)
 	                 LEFT JOIN team_affiliation
 	                        ON (team_affiliation.affilid = team.affilid)
-	                 WHERE enabled = 1' .
+			 WHERE enabled = 1 AND cid = %i' .
 	                ( $jury ? '' : ' AND visible = 1' ) .
 	                (isset($filter['affilid']) ? ' AND team.affilid IN (%As) ' : ' %_') .
 	                (isset($filter['country']) ? ' AND country IN (%As) ' : ' %_') .
 	                (isset($filter['categoryid']) ? ' AND team.categoryid IN (%As) ' : ' %_') .
 	                (isset($filter['teams']) ? ' AND teamid IN (%Ai) ' : ' %_'),
-	                @$filter['affilid'], @$filter['country'], @$filter['categoryid'], @$filter['teams']);
+			$cdata['cid'], @$filter['affilid'], @$filter['country'], @$filter['categoryid'], @$filter['teams']);
 }
 
 /**
@@ -559,8 +560,9 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, team_affiliation.name, country
 		                  FROM team_affiliation
 		                  LEFT JOIN team USING(affilid)
-		                  WHERE categoryid IN (%As) GROUP BY affilid',
-		                 array_keys($categids));
+				  INNER JOIN gewis_contestteam ON gewis_contestteam.teamid = team.teamid
+				  WHERE categoryid IN (%As) AND cid = %i GROUP BY affilid',
+				 array_keys($categids), $cdata['cid']);
 
 		$affilids  = array();
 		$countries = array();
@@ -679,7 +681,7 @@ function putTeamRow($cdata, $teamids) {
 	// This does not fully populate the summary, so the first correct problem per problem
 	// is not computed and hence not shown in the individual team row.
 	if ( count($teamids) == 1 ) {
-		$teams   = getTeams(array("teams" => $teamids), true);
+		$teams   = getTeams(array("teams" => $teamids), true, $cdata);
 		$probs   = getProblems($cdata);
 		$SCORES  = initScores($teams);
 		$SUMMARY = initSummary($probs);

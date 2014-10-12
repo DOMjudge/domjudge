@@ -160,7 +160,11 @@ echo "</fieldset>\n\n";
 
 
 // Get data. Starttime seems most logical sort criterion.
-$res = $DB->q('TABLE SELECT * FROM contest ORDER BY starttime DESC');
+$res = $DB->q('TABLE SELECT contest.*, COUNT(teamid) AS numteams
+	       FROM contest
+	       LEFT JOIN gewis_contestteam USING (cid)
+	       GROUP BY cid
+	       ORDER BY starttime DESC');
 
 if( count($res) == 0 ) {
 	echo "<p class=\"nodata\">No contests defined</p>\n\n";
@@ -170,6 +174,7 @@ if( count($res) == 0 ) {
 	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
 	foreach($times as $time) echo "<th scope=\"col\">$time</th>";
 	echo "<th scope=\"col\">process<br />balloons?</th>";
+	echo "<th scope=\"col\" class=\"sorttable_numeric\"># teams</th>";
 	echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
 
 	$iseven = false;
@@ -189,6 +194,7 @@ if( count($res) == 0 ) {
 			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
 		}
 		echo "<td>" . $link . ($row['process_balloons'] ? 'yes' : 'no') . "</a></td>\n";
+		echo "<td>" . $link . $row['numteams'] . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
 		$iseven = ! $iseven;
 

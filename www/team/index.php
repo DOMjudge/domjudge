@@ -43,7 +43,7 @@ echo "initReload(" . $refreshtime . ");\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
-putTeamRow($cdata, array($teamid));
+putTeamRow($cdata, array($contestid));
 
 echo "<div id=\"submitlist\">\n";
 
@@ -96,7 +96,7 @@ if ( $fdata['cstarted'] ) {
 	}
 }
 // call putSubmissions function from common.php for this team.
-$restrictions = array( 'teamid' => $teamid );
+$restrictions = array( 'teamid' => $contestid );
 putSubmissions($cdata, $restrictions, null, $submitted);
 
 echo "</div>\n\n";
@@ -109,7 +109,7 @@ $requests = $DB->q('SELECT c.*, p.shortname, t.name AS toname, f.name AS fromnam
                     LEFT JOIN team t ON (t.teamid = c.recipient)
                     LEFT JOIN team f ON (f.teamid = c.sender)
                     WHERE c.cid = %i AND c.sender = %i
-                    ORDER BY submittime DESC, clarid DESC', $cid, $teamid);
+		    ORDER BY submittime DESC, clarid DESC', $cid, $contestid);
 
 $clarifications = $DB->q('SELECT c.*, p.shortname, t.name AS toname, f.name AS fromname
                           FROM clarification c
@@ -121,7 +121,7 @@ $clarifications = $DB->q('SELECT c.*, p.shortname, t.name AS toname, f.name AS f
                           WHERE c.cid = %i AND c.sender IS NULL
                           AND ( c.recipient IS NULL OR c.recipient = %i )
                           ORDER BY c.submittime DESC, c.clarid DESC',
-                          $teamid, $cid, $teamid);
+			  $contestid, $cid, $contestid);
 
 echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 
@@ -129,7 +129,7 @@ echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 if ( $clarifications->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarifications.</p>\n\n";
 } else {
-	putClarificationList($clarifications,$teamid);
+	putClarificationList($clarifications,$contestid);
 }
 
 echo "<h3 class=\"teamoverview\">Clarification Requests</h3>\n";
@@ -137,7 +137,7 @@ echo "<h3 class=\"teamoverview\">Clarification Requests</h3>\n";
 if ( $requests->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarification requests.</p>\n\n";
 } else {
-	putClarificationList($requests,$teamid);
+	putClarificationList($requests,$contestid);
 }
 
 echo addForm('clarification.php','get') .
