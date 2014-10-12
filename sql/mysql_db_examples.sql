@@ -30,9 +30,17 @@ INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('example-judgehost1', 0);
 -- Dumping data for table `problem`
 --
 
-INSERT INTO `problem` (`probid`, `shortname`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES (1, 'hello', 2, 'Hello World', 1, 1, 5, NULL, NULL, 'magenta');
-INSERT INTO `problem` (`probid`, `shortname`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES (2, 'fltcmp', 2, 'Float special compare test', 1, 1, 5, NULL, 'float', 'yellow');
-INSERT INTO `problem` (`probid`, `shortname`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES (3, 'boolfind', 2, 'Boolean switch search', 1, 1, 5, 'boolfind_run', 'boolfind_cmp', 'limegreen');
+INSERT INTO `problem` (`probid`, `shortname`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES (1, 'hello', NULL, 'Hello World', 1, 1, 5, NULL, NULL, 'magenta');
+INSERT INTO `problem` (`probid`, `shortname`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES (2, 'fltcmp', NULL, 'Float special compare test', 1, 1, 5, NULL, 'float', 'yellow');
+INSERT INTO `problem` (`probid`, `shortname`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES (3, 'boolfind', NULL, 'Boolean switch search', 1, 1, 5, 'boolfind_run', 'boolfind_cmp', 'limegreen');
+
+--
+-- Dumping data for table `gewis_contestproblem`
+--
+
+INSERT INTO `gewis_contestproblem` (`cid`, `probid`) VALUES (2, 1);
+INSERT INTO `gewis_contestproblem` (`cid`, `probid`) VALUES (2, 2);
+INSERT INTO `gewis_contestproblem` (`cid`, `probid`) VALUES (2, 3);
 
 --
 -- Dumping data for table `team_affiliation`

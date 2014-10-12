@@ -220,7 +220,7 @@ CREATE TABLE `language` (
 CREATE TABLE `problem` (
   `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `shortname` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
-  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `cid` int(4) unsigned DEFAULT NULL COMMENT 'Contest ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
@@ -235,6 +235,20 @@ CREATE TABLE `problem` (
   KEY `cid` (`cid`),
   CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
+
+--
+-- Table structure for table `gewis_contestproblem`
+--
+
+CREATE TABLE `gewis_contestproblem` (
+  `cid` INT(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
+  `probid` INT(4) UNSIGNED NOT NULL COMMENT 'Problem ID',
+  KEY `cid` (`cid`),
+  KEY `probid` (`probid`),
+  PRIMARY KEY (`probid`, `cid`),
+  CONSTRAINT `contestproblem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  CONSTRAINT `contestproblem_ibfk_2` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of contests and problems';
 
 --
 -- Table structure for table `rankcache_jury`
