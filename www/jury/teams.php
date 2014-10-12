@@ -17,15 +17,17 @@ $teams = $DB->q('SELECT t.*,
                  LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
                  ORDER BY c.sortorder, t.name COLLATE utf8_general_ci');
 
+$cids = getCurContests(FALSE);
+
 $nsubmits = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
                     FROM submission s
-                    WHERE cid = %i GROUP BY teamid', $cid);
+		    WHERE cid IN (%Ai) GROUP BY teamid', $cids);
 
 $ncorrect = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
                     FROM submission s
                     LEFT JOIN judging j USING (submitid)
-                    WHERE j.valid = 1 AND j.result = "correct" AND s.cid = %i
-                    GROUP BY teamid', $cid);
+		    WHERE j.valid = 1 AND j.result = "correct" AND s.cid IN (%Ai)
+		    GROUP BY teamid', $cids);
 
 require(LIBWWWDIR . '/header.php');
 

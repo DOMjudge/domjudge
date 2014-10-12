@@ -10,9 +10,8 @@ require('init.php');
 
 
 
-function infreeze($time)
+function infreeze($cdata, $time)
 {
-	global $cdata;
 
 	if ( ( ! empty($cdata['freezetime']) &&
 		difftime($time, $cdata['freezetime'])>0 ) &&
@@ -51,8 +50,14 @@ $api->provideFunction('GET', 'info', $doc);
  */
 function contest()
 {
-	global $cid, $cdata;
+	global $cids, $cdatas;
 
+	if (empty($cdatas)) {
+		return null;
+	}
+
+	$cid = $cids[0];
+	$cdata = $cdatas[$cid];
 	return array(
 		'id'       => $cid,
 		'name'     => $cdata['contestname'],
@@ -65,7 +70,32 @@ function contest()
 		);
 }
 $doc = "Get information about the current contest: id, name, start, freeze, unfreeze, length, penalty and end.";
+$doc .= "If more than one contest is active, return information about the first one";
 $api->provideFunction('GET', 'contest', $doc);
+
+
+/**
+ * Contests information
+ */
+function contests()
+{
+	global $cdatas;
+
+	return array_map(function($cdata) {
+		return array(
+			'id' => $cdata['cid'],
+			'name' => $cdata['contestname'],
+			'start' => $cdata['starttime'],
+			'freeze' => $cdata['freezetime'],
+			'end' => $cdata['endtime'],
+			'length' => $cdata['endtime'] - $cdata['starttime'],
+			'unfreeze' => $cdata['unfreezetime'],
+			'penalty' => 60 * dbconfig_get('penalty_time', 20),
+		);
+	}, $cdatas);
+}
+$doc = "Get information about all the current contests: id, name, start, freeze, unfreeze, length, penalty and end.";
+$api->provideFunction('GET', 'contests', $doc);
 
 /**
  * Get information about the current user
@@ -92,26 +122,34 @@ $api->provideFunction('GET', 'user', $doc);
 /**
  * Problems information
  */
-function problems()
+function problems($args)
 {
-	global $cid, $DB;
+	global $DB;
+
+	checkargs($args, array('cid'));
 
 	$q = $DB->q('SELECT probid AS id, shortname, name, color FROM problem
-	             WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
+		     INNER JOIN gewis_contestproblem USING (probid)
+		     WHERE gewis_contestproblem.cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
 	return $q->gettable();
 }
-$doc = "Get a list of problems in the contest, with for each problem: id, shortname, name and color.";
-$api->provideFunction('GET', 'problems', $doc);
+$doc = "Get a list of problems in a contest, with for each problem: id, shortname, name and color.";
+$args = array('cid' => 'Contest ID.');
+$exArgs = array(array('cid' => 2));
+$api->provideFunction('GET', 'problems', $doc, $args, $exArgs);
 
 /**
  * Judgings information
  */
 function judgings($args)
 {
-	global $cid, $DB;
+	global $DB;
 
-	$query = 'SELECT submitid, judgingid, eventtime FROM event WHERE cid = %i' .
-	         ' AND description = "problem judged"';
+	$query = 'SELECT submitid, judgingid, eventtime FROM event WHERE description = "problem judged"';
+
+	$hasCid = array_key_exists('cid', $args);
+	$query .= ($hasCid ? ' AND cid = %i' : ' AND TRUE %_');
+	$cid = ($hasCid ? $args['cid'] : 0);
 
 	$hasFromid = array_key_exists('fromid', $args);
 	$query .= ($hasFromid ? ' AND judgingid >= %i' : ' AND TRUE %_');
@@ -148,11 +186,12 @@ function judgings($args)
 	return $res;
 }
 $doc = 'Get all judgings (including those post-freeze, so currently limited to jury).';
-$args = array('result' => 'Search only for judgings with a certain result.',
+$args = array('cid' => 'Contest ID. If not provided, get judgings of all active contests',
+	      'result' => 'Search only for judgings with a certain result.',
               'fromid' => 'Search from a certain ID',
               'judgingid' => 'Search only for a certain ID',
               'limit' => 'Get only the first N judgings');
-$exArgs = array(array('result' => 'correct'), array('fromid' => 800, 'limit' => 10));
+$exArgs = array(array('cid' => 2), array('result' => 'correct'), array('fromid' => 800, 'limit' => 10));
 $roles = array('jury');
 $api->provideFunction('GET', 'judgings', $doc, $args, $exArgs, $roles);
 
@@ -169,19 +208,19 @@ function judgings_POST($args)
 	$active = $DB->q('MAYBEVALUE SELECT active FROM judgehost WHERE hostname = %s', $host);
 	if ( !$active ) return '';
 
-	$cdata = getCurContest(TRUE);
-	$cid = $cdata['cid'];
+	$cdatas = getCurContests(TRUE);
+	$cids = array_keys($cdatas);
 
 	// Prioritize teams according to last judging time
 	$submitid = $DB->q('MAYBEVALUE SELECT submitid
 	                    FROM submission s
 	                    LEFT JOIN team t ON (s.teamid = t.teamid)
 	                    LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
-	                    WHERE judgehost IS NULL AND s.cid = %i
+			    WHERE judgehost IS NULL AND s.cid IN (%Ai)
 			    AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
 	                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
 	                    LIMIT 1',
-	                    $cid);
+			    $cids);
 
 	if ( $submitid ) {
 		// update exactly one submission with our judgehost name
@@ -262,7 +301,8 @@ function judgings_PUT($args)
 				'WHERE judgingid = %i AND judgehost = %s',
 				base64_decode($args['output_compile']), now(),
 				$judgingid, $args['judgehost']);
-			auditlog('judging', $judgingid, 'judged', 'compiler-error', $args['judgehost']);
+			$cid = $DB->q('VALUE SELECT s.cid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$judgingid);
+			auditlog('judging', $judgingid, 'judged', 'compiler-error', $args['judgehost'], $cid);
 
 			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$judgingid);
 			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
@@ -364,8 +404,8 @@ function judging_runs_POST($args)
 					// prevent duplicate balloons in case of multiple correct submissions
 					$numcorrect = $DB->q('VALUE SELECT count(submitid)
 							      FROM balloon LEFT JOIN submission USING(submitid)
-							      WHERE valid = 1 AND probid = %i AND teamid = %i',
-							      $row['probid'], $row['teamid']);
+							      WHERE valid = 1 AND probid = %i AND teamid = %i AND cid = %i',
+							      $row['probid'], $row['teamid'], $row['cid']);
 					if ( $numcorrect == 0 ) {
 						$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
 							$row['submitid']);
@@ -421,10 +461,14 @@ $api->provideFunction('GET', 'config', $doc, $args, $exArgs);
  */
 function submissions($args)
 {
-	global $cid, $DB, $cdata;
+	global $DB, $cdatas, $api;
 
 	$query = 'SELECT submitid, teamid, probid, langid, submittime, valid
-	          FROM submission WHERE cid = %i AND valid = 1';
+		  FROM submission WHERE TRUE';
+
+	$hasCid = array_key_exists('cid', $args);
+	$query .= ($hasCid ? ' AND cid = %i' : ' AND TRUE %_');
+	$cid = ($hasCid ? $args['cid'] : 0);
 
 	$hasLanguage = array_key_exists('language', $args);
 	$query .= ($hasLanguage ? ' AND langid = %s' : ' AND TRUE %_');
@@ -438,10 +482,16 @@ function submissions($args)
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' AND TRUE %_');
 	$submitid = ($hasSubmitid ? $args['id'] : 0);
 
-	if ( infreeze(now()) && !checkrole('jury') ) {
+	if ( $cid == 0 && !checkrole('jury') ) {
+		$api->createError("argument 'cid' is mandatory for non-jury users");
+	}
+
+	if ( $cid != 0 && infreeze($cdatas[$cid], now()) && !checkrole('jury') ) {
 		$query .= ' AND submittime <= %i';
+		$freezetime = $cdatas[$cid]['freezetime'];
 	} else {
 		$query .= ' AND TRUE %_';
+		$freezetime = 0;
 	}
 
 	$query .= ' ORDER BY submitid';
@@ -451,7 +501,7 @@ function submissions($args)
 	$limit = ($hasLimit ? $args['limit'] : -1);
 	// TODO: validate limit
 
-	$q = $DB->q($query, $cid, $language, $fromId, $submitid, $cdata['freezetime'], $limit);
+	$q = $DB->q($query, $cid, $language, $fromId, $submitid, $freezetime, $limit);
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
@@ -464,7 +514,8 @@ function submissions($args)
 	}
 	return $res;
 }
-$args = array('language' => 'Search only for submissions in a certain language.',
+$args = array('cid' => 'Contest ID. If not provided, get submissions of all active contests',
+	      'language' => 'Search only for submissions in a certain language.',
               'id' => 'Search only a certain ID',
               'fromid' => 'Search from a certain ID',
               'limit' => 'Get only the first N submissions');
@@ -477,11 +528,20 @@ $api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
  */
 function submissions_POST($args)
 {
-	global $userdata, $cid, $DB;
+	global $userdata, $DB, $api;
 	checkargs($args, array('shortname','langid'));
+	$contests = getCurContests(TRUE);
+	if ( !isset($args['cid']) && count($contests) == 1 ) {
+		$cid = key($contests);
+	} elseif ( isset($args['cid']) && isset($contests[$args['cid']]) ) {
+		$cid = $args['cid'];
+	} else {
+		$api->createError("Can not find that contest");
+	}
 
 	$probid = $DB->q("MAYBEVALUE SELECT probid FROM problem
-	                  WHERE shortname = %s AND cid = %i AND allow_submit = 1",
+			  INNER JOIN gewis_contestproblem USING (probid)
+			  WHERE shortname = %s AND gewis_contestproblem.cid = %i AND allow_submit = 1",
 	                  $args['shortname'], $cid);
 	if ( empty($probid ) ) {
 		error("Problem " . $args['shortname'] . " not found or or not submittable");
@@ -497,21 +557,22 @@ function submissions_POST($args)
 		}
 	}
 
-	$sid = submit_solution($userdata['teamid'], $probid, $args['langid'], $FILEPATHS, $FILENAMES);
+	$sid = submit_solution($userdata['teamid'], $probid, $cid, $args['langid'], $FILEPATHS, $FILENAMES);
 
-	auditlog('submission', $sid, 'added', 'via api');
+	auditlog('submission', $sid, 'added', 'via api', null, $cid);
 
 	return $sid;
 }
 
 $args = array('code[]' => 'Array of source files to submit',
               'shortname' => 'Problem shortname',
-              'langid' => 'Language ID');
+	      'langid' => 'Language ID',
+	      'cid' => 'Contest ID. Required if more than one contest is active');
 $doc = 'Post a new submission. You need to be authenticated with a team role. Returns the submission id. This is used by the submit client.
 
 A trivial command line submisson using the curl binary could look like this:
 
-curl -n -F "shortname=hello" -F "langid=c" -F "code[]=@test1.c" -F "code[]=@test2.c"  http://localhost/domjudge/api/submissions';
+curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "code[]=@test2.c"  http://localhost/domjudge/api/submissions';
 $exArgs = array();
 $roles = array('team');
 $api->provideFunction('POST', 'submissions', $doc, $args, $exArgs, $roles);
@@ -635,8 +696,8 @@ function queue($args)
 	global $DB;
 
 	// TODO: make this configurable
-	$cdata = getCurContest(TRUE);
-	$cid = $cdata['cid'];
+	$cdatas = getCurContests(TRUE);
+	$cids = array_keys($cdatas);
 
 	$hasLimit = array_key_exists('limit', $args);
 	// TODO: validate limit
@@ -645,11 +706,11 @@ function queue($args)
 			     FROM submission s
 			     LEFT JOIN team t ON (s.teamid = t.teamid)
 	                     LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
-			     WHERE judgehost IS NULL AND s.cid = %i
+			     WHERE judgehost IS NULL AND s.cid IN (%Ai)
 			     AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
 			     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC'
 			     . ($hasLimit ? ' LIMIT %i' : ' %_'),
-			     $cid,
+			     $cids,
 			     ($hasLimit ? $args['limit'] : -1));
 
 	return $submitids->getTable();
@@ -773,17 +834,17 @@ $api->provideFunction('GET', 'languages', $doc);
  */
 function clarifications($args)
 {
-	global $cid, $DB;
+	global $cids, $DB;
 
 	// Find public clarifications, maybe later also provide more info for jury
 	$query = 'SELECT clarid, submittime, probid, body FROM clarification
-	          WHERE cid = %i AND sender IS NULL AND recipient IS NULL';
+		  WHERE cid IN (%Ai) AND sender IS NULL AND recipient IS NULL';
 
 	$byProblem = array_key_exists('problem', $args);
 	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
 	$problem = ($byProblem ? $args['problem'] : null);
 
-	$q = $DB->q($query, $cid, $problem);
+	$q = $DB->q($query, $cids, $problem);
 	return $q->getTable();
 }
 $doc = 'Get a list of all public clarifications.';
@@ -836,7 +897,7 @@ function judgehosts_POST($args)
 		       $jud['judgingid']);
 		$DB->q('UPDATE submission SET judgehost = NULL
 		        WHERE submitid = %i', $jud['submitid']);
-		auditlog('judging', $jud['judgingid'], 'given back', null, $args['hostname']);
+		auditlog('judging', $jud['judgingid'], 'given back', null, $args['hostname'], $jud['cid']);
 	}
 
 	return $ret;
@@ -874,7 +935,9 @@ $api->provideFunction('PUT', 'judgehosts', $doc, $args, $exArgs, $roles);
  */
 function scoreboard($args)
 {
-	global $cdata;
+	checkargs($args, array('cid'));
+
+	global $cdatas;
 
 	$filter = array();
 	if ( array_key_exists('category', $args) ) {
@@ -887,14 +950,15 @@ function scoreboard($args)
 		$filter['affilid'] = array($args['affiliation']);
 	}
 	// TODO: refine this output, maybe add separate function to get summary
-	$scores = genScoreBoard($cdata, FALSE, $filter);
+	$scores = genScoreBoard($cdatas[$args['cid']], FALSE, $filter);
 	return $scores['matrix'];
 }
 $doc = 'Get the scoreboard. Should give the same information as public/jury scoreboards, i.e. after freeze the public one is not updated.';
-$args = array('category' => 'ID of a single category to search for.',
+$args = array('cid' => 'ID of the contest to get the scoreboard for',
+	      'category' => 'ID of a single category to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
               'country' => 'ISO 3166-1 alpha-3 country code to search for.');
-$exArgs = array(array('category' => 1, 'affiliation' => 'UU'), array('country' => 'NLD'));
+$exArgs = array(array('cid' => 2, 'category' => 1, 'affiliation' => 'UU'), array('cid' => 2, 'country' => 'NLD'));
 $api->provideFunction('GET', 'scoreboard', $doc, $args, $exArgs);
 
 // Now provide the api, which will handle the request

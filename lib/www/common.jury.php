@@ -166,7 +166,7 @@ function importZippedProblem($zip, $probid = NULL)
 	global $DB, $teamid;
 	$prop_file = 'domjudge-problem.ini';
 
-	$ini_keys = array('probid', 'cid', 'name', 'allow_submit', 'allow_judge',
+	$ini_keys = array('probid', 'name', 'allow_submit', 'allow_judge',
 	                  'timelimit', 'special_run', 'special_compare', 'color');
 
 	$def_timelimit = 10;
@@ -179,6 +179,12 @@ function importZippedProblem($zip, $probid = NULL)
 			error("Need '" . $prop_file . "' file when adding a new problem.");
 		}
 	} else {
+		// Keep track of which contests to add this problem to
+		$cids = array();
+		if (isset($ini_array['cids']))
+		{
+			$cids = explode(',', $ini_array['cids']);
+		}
 		// Only preserve valid keys:
 		$ini_array = array_intersect_key($ini_array,array_flip($ini_keys));
 
@@ -186,8 +192,7 @@ function importZippedProblem($zip, $probid = NULL)
 			if ( !isset($ini_array['probid']) ) {
 				error("Need 'probid' in '" . $prop_file . "' when adding a new problem.");
 			}
-			// Set sensible defaults for cid and name if not specified:
-			if ( !isset($ini_array['cid'])       ) $ini_array['cid'] = getCurContest();
+			// Set sensible defaults for name and timelimit if not specified:
 			if ( !isset($ini_array['name'])      ) $ini_array['name'] = $ini_array['probid'];
 			if ( !isset($ini_array['timelimit']) ) $ini_array['timelimit'] = $def_timelimit;
 
@@ -196,13 +201,15 @@ function importZippedProblem($zip, $probid = NULL)
 			unset($ini_array['probid']);
 			$ini_array['shortname'] = $probid;
 
-			$probid = $DB->q('RETURNID INSERT INTO problem (' .
-			                 implode(', ',array_keys($ini_array)) .
-			                 ') VALUES (%As)', $ini_array);
+			$probid = $DB->q('RETURNID INSERT INTO problem (' . implode(', ',array_keys($ini_array)) .
+			       ') VALUES (%As)', $ini_array);
+
+			foreach ($cids as $cid) {
+				$DB->q("INSERT INTO gewis_contestproblem (cid, probid) VALUES (%i, %i)", $probid, $cid);
+			}
 		} else {
 			// Remove keys that cannot be modified:
 			unset($ini_array['probid']);
-			unset($ini_array['cid']);
 
 			$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array, $probid);
 		}
@@ -272,11 +279,11 @@ function importZippedProblem($zip, $probid = NULL)
 				}
 				file_put_contents($tmpfname, $zip->getFromIndex($j));
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
-					submit_solution($teamid, $probid, $langid, array($tmpfname), array($filename));
-					echo "<li>Added jury solution from: <tt>$filename</tt></li>\n";
-					$njurysols++;
-				} else {
-					echo "<li>Could not add jury solution <tt>$filename</tt>: too large.</li>\n";
+					$cids = getCurContests(FALSE);
+					foreach ($cids as $cid) {
+						submit_solution($teamid, $probid, $cid, $langid,
+								array($tmpfname), array($filename));
+					}
 				}
 				unlink($tmpfname);
 			}

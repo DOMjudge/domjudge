@@ -365,6 +365,25 @@ function putClock() {
 			. ( have_logout() ? " <a href=\"../auth/logout.php\">×</a>" : "" )
 			. "</span>";
 	}
+
+	global $cid;
+	$cdatas = getCurContests(TRUE);
+	// Show a contest selection form, if there are contests
+	if ( count($cdatas) > 1 ) {
+		echo "<div id=\"selectcontest\">\n";
+		echo addForm('change_contest.php', 'get', 'selectcontestform');
+		$contests = array_map(function($c) { return 'c' . $c['cid'] . ': ' . $c['contestname']; }, $cdatas);
+		echo 'Selected contest: ' . addSelect('cid', $contests, $cid, true);
+		echo addEndForm();
+		echo "<script type=\"text/javascript\">
+	document.getElementById('cid').addEventListener('change', function() {
+		document.getElementById('selectcontestform').submit();
+	});
+</script>
+";
+		echo "</div>\n";
+	}
+
 	echo "</div>";
 
 	echo "<script type=\"text/javascript\">
@@ -489,7 +508,7 @@ function putProblemTextList()
 
 		// otherwise, display list
 		$res = $DB->q('SELECT p.probid,p.shortname,p.name,p.color,p.problemtext_type
-		               FROM problem p WHERE cid = %i AND allow_submit = 1 AND
+			       FROM problem p INNER JOIN gewis_contestproblem USING (probid) WHERE gewis_contestproblem.cid = %i AND allow_submit = 1 AND
 		               problemtext_type IS NOT NULL ORDER BY p.shortname', $cid);
 
 		if ( $res->count() > 0 ) {
@@ -514,8 +533,7 @@ function putProblemTextList()
 function have_problemtexts()
 {
 	global $DB, $cid;
-	return $DB->q('VALUE SELECT COUNT(*) FROM problem
-	               WHERE problemtext_type IS NOT NULL AND cid = %i', $cid) > 0;
+	return $DB->q('VALUE SELECT COUNT(*) FROM problem INNER JOIN gewis_contestproblem USING (probid) WHERE problemtext_type IS NOT NULL AND gewis_contestproblem.cid = %i', $cid) > 0;
 }
 
 /**

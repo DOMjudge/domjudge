@@ -37,7 +37,7 @@ $verifier = 'auto-verifier';
 $res = $DB->q("SELECT s.*, j.judgingid, j.result, j.verified, j.jury_member
                FROM submission s
                LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
-               WHERE s.cid = %i AND j.result IS NOT NULL", $cid);
+	       WHERE s.cid IN (%Ai) AND j.result IS NOT NULL", $cids);
 
 $section = 0;
 

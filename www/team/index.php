@@ -7,7 +7,7 @@
 require('init.php');
 $title = htmlspecialchars($teamdata['name']);
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
+require_once(LIBWWWDIR . '/forms.php');
 
 // Don't use HTTP meta refresh, but javascript: otherwise we cannot
 // cancel it when the user starts editing the submit form. This also
@@ -24,7 +24,8 @@ echo "<script type=\"text/javascript\">\n<!--\n";
 
 if ( $fdata['cstarted'] ) {
 	$probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
-	                    WHERE cid = %i AND allow_submit = 1
+			INNER JOIN gewis_contestproblem USING (probid)
+			    WHERE gewis_contestproblem.cid = %i AND allow_submit = 1
 	                    ORDER BY shortname', $cid);
 
 	putgetMainExtension($langdata);

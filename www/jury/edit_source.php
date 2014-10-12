@@ -31,7 +31,9 @@ if ( isset($_POST['origsubmitid']) ) {
 		$filenames[] = $sourcedata['filename'];
 	}
 
-	$newid = submit_solution($teamid, $_POST['probid'], $_POST['langid'],
+	$cid = $DB->q('VALUE SELECT cid FROM submission WHERE submitid = %i', $_POST['origsubmitid']);
+
+	$newid = submit_solution($teamid, $_POST['probid'], $cid, $_POST['langid'],
 	                $files, $filenames, $_POST['origsubmitid']);
 
 	foreach($files as $file)
@@ -92,8 +94,9 @@ foreach($sources as $sourcedata)
 }
 echo "</div>\n";
 
-$probs = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem WHERE
-                 allow_submit = 1 AND cid = %i ORDER BY name', $cid);
+$probs = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
+		 INNER JOIN gewis_contestproblem USING (probid) WHERE
+		 allow_submit = 1 AND gewis_contestproblem.cid = %i ORDER BY name', $submission['cid']);
 $langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language WHERE
                  allow_submit = 1 ORDER BY name');
 

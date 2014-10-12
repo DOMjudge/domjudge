@@ -51,10 +51,17 @@ if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES)
 }
 
 $cdatas = getCurContests(TRUE);
-$cids = array_map(function($contest)
-{
-	return $contest['cid'];
-}, $cdatas);
+$cids = array_keys($cdatas);
+
+// If the cookie has a existing contest, use it
+if ( isset($_COOKIE['domjudge_cid']) && isset($cdatas[$_COOKIE['domjudge_cid']]) )  {
+	$cid = $_COOKIE['domjudge_cid'];
+	$cdata = $cdatas[$cid];
+} elseif ( count($cids) >= 1 ) {
+	// Otherwise, select the first contest
+	$cid = $cids[0];
+	$cdata = $cdatas[$cid];
+}
 
 // Data to be sent as AJAX updates:
 $updates = array(

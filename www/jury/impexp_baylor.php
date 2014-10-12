@@ -63,16 +63,17 @@ if ( isset($_REQUEST['upload']) ) {
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 	$data = '<?xml version="1.0" encoding="UTF-8"?><icpc computeCitations="1" name="Upload_via_DOMjudge_' . date("c") . '">';
 	$teams = $DB->q('SELECT teamid,externalid FROM team WHERE externalid IS NOT NULL AND enabled=1');
+	$cdatas = getCurContests(TRUE);
 	while( $row = $teams->next() ) {
-		$totals = $DB->q("MAYBETUPLE SELECT correct, totaltime
-					FROM rankcache_jury
-					WHERE cid = %i
-					AND teamid = %i", $cid, $row['teamid']);
+		$totals = $DB->q("MAYBETUPLE SELECT correct, totaltime, cid
+					FROM rankcache_public
+					WHERE cid IN (%Ai)
+					AND teamid = %i", getCurContests(FALSE), $row['teamid']);
 		if ( $totals === null ) {
 			$totals['correct'] = $totals['totaltime'] = 0;
 		}
-		$rank = calcTeamRank($cdata, $row['teamid'], $totals, TRUE);
-		$lastProblem = $DB->q('MAYBEVALUE SELECT MAX(totaltime) FROM scorecache_jury WHERE teamid=%i AND cid=%i', $row['teamid'], $cid);
+		$rank = calcTeamRank($cdatas[$row['cid']], $row['teamid'], $totals, FALSE);
+		$lastProblem = $DB->q('MAYBEVALUE SELECT MAX(totaltime) FROM scorecache_public WHERE teamid=%i AND cid=%i', $row['teamid'], $row['cid']);
 		if ( $lastProblem === NULL ) {
 			$lastProblem = 0;
 		}

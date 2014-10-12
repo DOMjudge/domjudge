@@ -48,7 +48,6 @@ function usage()
 	exit;
 }
 
-$options = getopt("c:frsv:hV");
 // With PHP version >= 5.3 we can also use long options.
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
 if ( $options===FALSE ) {
@@ -63,7 +62,8 @@ if ( isset($options['s']) ) $options['scoreb']  = $options['s'];
 if ( isset($options['v']) ) $options['verbose'] = $options['v'];
 
 if ( isset($options['V']) ) version();
-if ( isset($options['h']) ) usage();
+if ( isset($options['h']) || !isset($options['c']) ) usage();
+$cid = $options['c'];
 
 setup_database_connection();
 
@@ -219,8 +219,11 @@ function parse_scoreboard($fd)
 
 logmsg(LOG_NOTICE, "started, file = '$resultsfile'");
 
-$cdata = getCurContest(TRUE);
-$cid = $cdata['cid'];
+$cdatas = getCurContests(TRUE);
+if ( !isset($cdatas[$cid]) ) {
+	error("Contest c${cid} does not exist");
+}
+$cdata = $cdatas[$cid];
 
 if ( ($fd = @fopen($resultsfile, 'r'))===FALSE ) {
 	error("results file '$resultsfile' not found or readable");
@@ -318,7 +321,11 @@ while ( $cdata['cid']==$cid && difftime(now(),$cdata['endtime'])<0 ) { // bug!
 	}
 
 	sleep($waittime);
-	$cdata = getCurContest(TRUE);
+	$cdatas = getCurContests(TRUE);
+	if ( !isset($cdatas[$cid]) ) {
+		error("Contest c${cid} does not exist");
+	}
+	$cdata = $cdatas[$cid];
 }
 
 logmsg(LOG_NOTICE, "contest finished, exiting.");

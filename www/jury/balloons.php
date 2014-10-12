@@ -47,27 +47,44 @@ echo addForm($pagename, 'get') . "<p>\n" .
     addSubmit($viewall ? 'view unsent only' : 'view all') . "</p>\n" .
     addEndForm();
 
-// Problem metadata: colours and names.
-$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
-		      FROM problem WHERE cid = %i', $cid);
+$cdatas = getCurContests(TRUE);
+$cids = array_keys($cdatas);
 
-$freezecond = '';
-if ( ! dbconfig_get('show_balloons_postfreeze',0) && isset($cdata['freezetime']) ) {
-	$freezecond = 'AND submittime <= "' . $cdata['freezetime'] . '"';
+// Problem metadata: colours and names.
+$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,gewis_contestproblem.cid
+		      FROM problem
+		      INNER JOIN gewis_contestproblem USING (probid)
+		      WHERE gewis_contestproblem.cid IN (%Ai)', $cids);
+
+$freezecond = array();
+if ( !dbconfig_get('show_balloons_postfreeze',0)) {
+	foreach ($cdatas as $cdata) {
+		if ( isset($cdata['freezetime']) ) {
+			$freezecond[] = '(submittime <= "' . $cdata['freezetime'] . '" AND s.cid = ' . $cdata['cid'] . ')';
+		} else {
+			$freezecond[] = '(s.cid = ' . $cdata['cid'] . ')';
+		}
+	}
+}
+
+if ( empty($freezecond) ) {
+	$freezecond = '';
+} else {
+	$freezecond = 'AND (' . implode(' OR ', $freezecond) . ')';
 }
 
 // Get all relevant info from the balloon table.
 // Order by done, so we have the unsent balloons at the top.
 $res = $DB->q("SELECT b.*, s.submittime, p.probid, p.shortname AS probshortname,
-               t.teamid, t.name AS teamname, t.room, c.name AS catname
+	       t.teamid, t.name AS teamname, t.room, c.name AS catname, s.cid
                FROM balloon b
                LEFT JOIN submission s USING (submitid)
                LEFT JOIN problem p USING (probid)
                LEFT JOIN team t USING(teamid)
                LEFT JOIN team_category c USING(categoryid)
-               WHERE s.cid = %i $freezecond
+	       WHERE s.cid IN (%Ai) $freezecond
                ORDER BY done ASC, balloonid DESC",
-              $cid);
+	      $cids);
 
 /* Loop over the result, store the total of balloons for a team
  * (saves a query within the inner loop).
@@ -81,7 +98,7 @@ while ( $row = $res->next() ) {
 
 	// keep overwriting these variables - in the end they'll
 	// contain the id's of the first balloon in each type
-	$first_contest = $first_problem[$row['probid']] = $first_team[$row['teamid']] = $row['balloonid'];
+	$first_contest[$row['cid']] = $first_problem[$row['probid']] = $first_team[$row['teamid']] = $row['balloonid'];
 }
 
 if ( !empty($BALLOONS) ) {
@@ -89,7 +106,7 @@ if ( !empty($BALLOONS) ) {
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
 		"<tr><th class=\"sorttable_numeric\">ID</th>" .
-	        "<th>time</th><th>solved</th><th>team</th>" .
+		"<th>time</th><th>contest</th><th>solved</th><th>team</th>" .
 	        "<th></th><th>loc.</th><th>category</th><th>total</th>" .
 	        "<th></th><th></th></tr>\n</thead>\n";
 
@@ -101,6 +118,9 @@ if ( !empty($BALLOONS) ) {
 		echo '<tr'  . ( $row['done'] == 1 ? ' class="disabled"' : '' ) . '>';
 		echo '<td>b' . (int)$row['balloonid'] . '</td>';
 		echo '<td>' . printtime( $row['submittime'] ) . '</td>';
+
+		// contest of this problem
+		echo '<td>' . htmlspecialchars('c' . $row['cid']) . '</td>';
 
 		// the balloon earned
 		echo '<td class="probid">' .
@@ -134,7 +154,7 @@ if ( !empty($BALLOONS) ) {
 		echo '</td><td>';
 
 		$comments = array();
-		if ( $first_contest == $row['balloonid'] ) {
+		if ( $first_contest[$row['cid']] == $row['balloonid'] ) {
 			$comments[] = 'first in contest';
 		} else {
 			if ( $first_team[$row['teamid']] == $row['balloonid'] ) {

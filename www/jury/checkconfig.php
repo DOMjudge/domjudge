@@ -243,12 +243,13 @@ flushresults();
 
 // CONTESTS
 
-if($cid == null) {
-	result('contests', 'Active contest', 'E',
-	       'No currently active contest found. System will not function.');
+if( empty($cids) ) {
+	result('contests', 'Active contests', 'E',
+		'No currently active contests found. System will not function.');
 } else {
-	result('contests', 'Active contest', 'O',
-	       'Currently active contest: c'.(int)$cid);
+	$cidstring = implode(', ', array_map(function($cid) { return 'c'.$cid;}, $cids));
+	result('contests', 'Active contests', 'O',
+		'Currently active contests: ' . $cidstring);
 }
 
 // get all contests

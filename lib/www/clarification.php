@@ -157,6 +157,7 @@ function putClarificationList($clars, $team = NULL)
 
 	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
 		( IS_JURY ? "<th scope=\"col\">ID</th>" : "") .
+	     "<th scope=\"col\">contest</th>" .
 	     "<th scope=\"col\">time</th>" .
 	     "<th scope=\"col\">from</th>" .
 	     "<th scope=\"col\">to</th><th scope=\"col\">subject</th>" .
@@ -181,6 +182,7 @@ function putClarificationList($clars, $team = NULL)
 			echo '<td>' . $link . $clar['clarid'] . '</a></td>';
 		}
 
+		echo '<td>' . $link . 'c' . $clar['cid'] . '</a></td>';
 		echo '<td>' . $link . printtime($clar['submittime']) . '</a></td>';
 
 		if ( $clar['sender']  == NULL ) {
@@ -249,16 +251,21 @@ function putClarificationList($clars, $team = NULL)
  * Output a form to send a new clarification.
  * Set respid to a teamid, to make only that team (or ALL) selectable.
  */
-function putClarificationForm($action, $cid, $respid = NULL)
+function putClarificationForm($action, $respid = NULL, $onlycontest = NULL)
 {
-	if ( empty($cid) ) {
-		echo '<p class="nodata">No active contest</p>';
+	$cdatas = getCurContests(TRUE);
+	if ( isset($onlycontest) ) {
+		$cdatas = array($onlycontest => $cdatas[$onlycontest]);
+	}
+	$cids = array_keys($cdatas);
+	if ( empty($cids) ) {
+		echo '<p class="nodata">No active contests</p>';
 		return;
 	}
 
 	require_once('forms.php');
 
-	global $DB, $cdata;
+	global $DB;
 ?>
 
 <script type="text/javascript">
@@ -321,14 +328,20 @@ function confirmClar() {
 
 	// Select box for a specific problem (only when the contest
 	// has started) or general issue.
-	if ( difftime($cdata['starttime'], now()) <= 0 ) {
-		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(shortname, ": ", name) as name
-		                 FROM problem WHERE cid = %i AND allow_submit = 1
-		                 ORDER BY shortname ASC', $cid);
-	} else {
-		$probs = array();
+	$options = array();
+	foreach ($cdatas as $cid => $cdata) {
+		$row = $DB->q('TUPLE SELECT CONCAT(cid, "-general") AS c, CONCAT("c", cid, " - General issue") AS value
+			       FROM contest WHERE cid = %i', $cid);
+		$options[$row['c']] = $row['value'];
+		if ( difftime($cdata['starttime'], now()) <= 0 ) {
+			$options = array_merge($options,
+					       $DB->q('KEYVALUETABLE SELECT CONCAT(gewis_contestproblem.cid, "-", probid), CONCAT("c", gewis_contestproblem.cid, " - ", shortname, ": ", name) as name
+					       FROM problem
+					       INNER JOIN gewis_contestproblem USING (probid)
+					       WHERE gewis_contestproblem.cid = %i AND allow_submit = 1
+					       ORDER BY shortname ASC', $cid));
+		}
 	}
-	$options = array('general' => 'General issue') + $probs;
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options, ($respid ? $clar['probid'] : 'general'), true) .
 	     "</td></tr>\n";

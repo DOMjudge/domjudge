@@ -37,7 +37,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
 	                $_POST['bodytext']);
 
-	auditlog('clarification', $newid, 'added');
+	auditlog('clarification', $newid, 'added', null, null, $cid);
 
 	// redirect back to the original location
 	header('Location: ./');
@@ -57,11 +57,11 @@ if ( isset($id) ) {
 	putClarification($respid, $teamid);
 
 	echo "<h2>Send Clarification Request</h2>\n\n";
-	putClarificationForm("clarification.php", $cdata['cid'], $id);
+	putClarificationForm("clarification.php", $id, $cid);
 } else {
 	// display a clarification request send box
 	echo "<h1>Send Clarification Request</h1>\n\n";
-	putClarificationForm("clarification.php", $cdata['cid']);
+	putClarificationForm("clarification.php", null, $cid);
 }
 
 require(LIBWWWDIR . '/footer.php');

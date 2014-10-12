@@ -95,7 +95,8 @@ function problemVisible($probid)
 	if ( !$cdata || difftime(now(),$cdata['starttime']) < 0 ) return FALSE;
 
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
-	               WHERE cid = %i AND allow_submit = 1 AND probid = %i',
+		   INNER JOIN gewis_contestproblem USING (probid)
+		       WHERE gewis_contestproblem.cid = %i AND allow_submit = 1 AND probid = %i',
 	              $cdata['cid'], $probid) !== NULL;
 }
 
@@ -538,11 +539,15 @@ function daemonize($pidfile = NULL)
  * validates it and puts it into the database. Additionally it
  * moves it to a backup storage.
  */
-function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid = NULL)
+function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $origsubmitid = NULL)
 {
+	global $cdatas, $DB;
+
 	if( empty($team) ) error("No value for Team.");
 	if( empty($prob) ) error("No value for Problem.");
 	if( empty($lang) ) error("No value for Language.");
+	if( empty($contest) ) error("No value for Contest.");
+	if( !isset($cdatas[$contest]) ) error("Unknown Contest.");
 
 	if ( !is_array($files) || count($files)==0 ) error("No files specified.");
 	if ( count($files) > dbconfig_get('sourcefiles_limit',100) ) {
@@ -556,15 +561,13 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 		error("Duplicate filenames detected.");
 	}
 
-	global $cdata,$cid, $DB;
-
 	$sourcesize = dbconfig_get('sourcesize_limit');
 
 	// If no contest has started yet, refuse submissions.
 	$now = now();
 
-	if( difftime($cdata['starttime'], $now) > 0 ) {
-		error("The contest is closed, no submissions accepted. [c$cid]");
+	if( difftime($cdatas[$contest]['starttime'], $now) > 0 ) {
+		error("The contest is closed, no submissions accepted. [c$contest]");
 	}
 
 	// Check 2: valid parameters?
@@ -575,9 +578,9 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 	if( ! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team WHERE teamid = %i AND enabled = 1',$team) ) {
 		error("Team '$team' not found in database or not enabled.");
 	}
-	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem WHERE probid = %s
-							AND cid = %i AND allow_submit = "1"', $prob, $cid) ) {
-		error("Problem p$prob not found in database or not submittable [c$cid].");
+	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem INNER JOIN gewis_contestproblem USING (probid) WHERE probid = %s
+							AND gewis_contestproblem.cid = %i AND allow_submit = "1"', $prob, $contest) ) {
+		error("Problem p$prob not found in database or not submittable [c$contest].");
 	}
 
 	// Reindex arrays numerically to allow simultaneously iterating
@@ -605,7 +608,7 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 	$id = $DB->q('RETURNID INSERT INTO submission
 				  (cid, teamid, probid, langid, submittime, origsubmitid)
 				  VALUES (%i, %i, %i, %s, %s, %i)',
-	             $cid, $teamid, $probid, $langid, $now, $origsubmitid);
+		     $contest, $teamid, $probid, $langid, $now, $origsubmitid);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
@@ -614,17 +617,17 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 	}
 
 	// Recalculate scoreboard cache for pending submissions
-	calcScoreRow($cid, $teamid, $probid);
+	calcScoreRow($contest, $teamid, $probid);
 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
 	        VALUES(%s, %i, %i, %s, %i, %i, "problem submitted")',
-	       now(), $cid, $teamid, $langid, $probid, $id);
+	       now(), $contest, $teamid, $langid, $probid, $id);
 
 	if ( is_writable( SUBMITDIR ) ) {
 		// Copy the submission to SUBMITDIR for safe-keeping
 		for($rank=0; $rank<count($files); $rank++) {
-			$fdata = array('cid' => $cid,
+			$fdata = array('cid' => $contest,
 			               'submitid' => $id,
 			               'teamid' => $teamid,
 			               'probid' => $probid,
@@ -640,8 +643,8 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 		logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
 	}
 
-	if( difftime($cdata['endtime'], $now) <= 0 ) {
-		logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$cid]");
+	if( difftime($cdatas[$contest]['endtime'], $now) <= 0 ) {
+		logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$contest]");
 	}
 
 	return $id;
@@ -758,9 +761,9 @@ function XMLgetattr($node, $attr)
 /**
  * Log an action to the auditlog table.
  */
-function auditlog($datatype, $dataid, $action, $extrainfo = null, $force_username = null)
+function auditlog($datatype, $dataid, $action, $extrainfo = null, $force_username = null, $contestid = null)
 {
-	global $cid, $username, $DB;
+	global $username, $DB;
 
 	if ( !empty($force_username) ) {
 		$user = $force_username;
@@ -771,7 +774,7 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null, $force_usernam
 	$DB->q('INSERT INTO auditlog
 	        (logtime, cid, user, datatype, dataid, action, extrainfo)
 	        VALUES(%s, %i, %s, %s, %s, %s, %s)',
-	       now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
+	       now(), $contestid, $user, $datatype, $dataid, $action, $extrainfo);
 }
 
 /**

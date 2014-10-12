@@ -165,14 +165,15 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 /**
  * Helper function for genScoreBoard.
  *
- * Return the problems for the current contest.
+ * Return the problems for a given contest.
  */
 function getProblems($cdata) {
 	global $DB;
 
 	return $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
 	               probid, shortname, name, color, LENGTH(problemtext) AS hastext FROM problem
-	               WHERE cid = %i AND allow_submit = 1
+		       INNER JOIN gewis_contestproblem USING (probid)
+		       WHERE gewis_contestproblem.cid = %i AND allow_submit = 1
 	               ORDER BY shortname', $cdata['cid']);
 }
 
@@ -509,7 +510,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
  * renderScoreBoardTable for displaying the actual table.
  *
  * Arguments:
- * $cdata       current contest data, as from 'getCurContest(TRUE)'
+ * $cdata       current contest data, as from an index in 'getCurContests(TRUE)'
  * $myteamid    set to highlight that teamid in the scoreboard
  * $static      generate a static scoreboard, e.g. for external use
  * $filter      set to TRUE to generate filter options, or pass array
@@ -620,6 +621,14 @@ collapse("filter");
 function calcFreezeData($cdata)
 {
 	$fdata = array();
+
+	if ( $cdata == null ) {
+		return array(
+			'showfinal' => false,
+			'showfrozen' => false,
+			'cstarted' => false
+		);
+	}
 
 	// Show final scores if contest is over and unfreezetime has been
 	// reached, or if contest is over and no freezetime had been set.

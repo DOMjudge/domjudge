@@ -39,14 +39,17 @@ auditlog('scoreboard', null, 'refresh cache');
 // no output buffering... we want to see what's going on real-time
 ob_implicit_flush();
 
+$contests = getCurContests(TRUE);
+
 // get the contest, teams and problems
 $teams = $DB->q('TABLE SELECT teamid FROM team ORDER BY teamid');
-$probs = $DB->q('COLUMN SELECT probid FROM problem
-                 WHERE cid = %i ORDER BY shortname', $cid);
+$probs = $DB->q('TABLE SELECT probid, gewis_contestproblem.cid FROM problem
+		 INNER JOIN gewis_contestproblem USING (probid)
+		 WHERE gewis_contestproblem.cid IN (%Ai) ORDER BY shortname', $cids);
 
 echo "<p>Recalculating all values for the scoreboard cache (" .
-	count($teams) . " teams, " . count($probs) ." problems, contest c" .
-	htmlspecialchars($cid) . ")...</p>\n\n<pre>\n";
+	count($teams) . " teams, " . count($probs) ." problems, " .
+     count($contests) ." contests)...</p>\n\n<pre>\n";
 
 if ( count($teams) == 0 ) {
 	echo "No teams defined, doing nothing.</pre>\n\n";
@@ -55,6 +58,11 @@ if ( count($teams) == 0 ) {
 }
 if ( count($probs) == 0 ) {
 	echo "No problems defined, doing nothing.</pre>\n\n";
+	require(LIBWWWDIR . '/footer.php');
+	exit;
+}
+if ( count($contests) == 0 ) {
+	echo "No contests active, doing nothing.</pre>\n\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
@@ -70,14 +78,16 @@ foreach( $teams as $team ) {
 
 	// for each problem fetch the result
 	foreach( $probs as $pr ) {
-		echo " p" .htmlspecialchars($pr);
-		calcScoreRow($cid, $team['teamid'], $pr);
+		echo " c" . $pr['cid'] . "-p" .htmlspecialchars($pr['probid']);
+		calcScoreRow($pr['cid'], $team['teamid'], $pr['probid']);
 	}
 
 	// Now recompute the rank for both jury and public
-	echo " rankcache";
-	updateRankCache($cid, $team['teamid'], true);
-	updateRankCache($cid, $team['teamid'], false);
+	foreach ($contests as $contest) {
+		echo " c" . $contest['cid'] . "-rankcache";
+		updateRankCache($contest['cid'], $team['teamid'], true);
+		updateRankCache($contest['cid'], $team['teamid'], false);
+	}
 
 	echo "\n";
 	ob_flush();
@@ -87,15 +97,32 @@ echo "</pre>\n\n<p>Deleting irrelevant data...</p>\n\n";
 
 // drop all contests that are not current, teams and problems that do not exist
 $DB->q('DELETE FROM scorecache_jury
-        WHERE cid != %i OR teamid NOT IN (%Ai) OR probid NOT IN (%Ai)',
-       $cid, $teamlist, $probs);
+		WHERE cid NOT IN (%Ai) OR teamid NOT IN (%Ai)',
+       $cids, $teamlist);
 $DB->q('DELETE FROM scorecache_public
-        WHERE cid != %i OR teamid NOT IN (%Ai) OR probid NOT IN (%Ai)',
-       $cid, $teamlist, $probs);
+		WHERE cid NOT IN (%Ai) OR teamid NOT IN (%Ai)',
+       $cids, $teamlist);
+
+foreach ($contests as $contest) {
+	$probids = $DB->q('COLUMN SELECT probid FROM problem
+		 INNER JOIN gewis_contestproblem USING (probid)
+		 WHERE gewis_contestproblem.cid = %i ORDER BY shortname', $contest['cid']);
+	// probid -1 will never happen, but otherwise the array is empty and that is not supported
+	if ( empty($probids) ) {
+		$probids = array(-1);
+	}
+	// drop all contests that are not current, teams and problems that do not exist
+	$DB->q('DELETE FROM scorecache_jury
+		WHERE cid = %i AND probid NOT IN (%Ai)',
+		$contest['cid'], $probids);
+	$DB->q('DELETE FROM scorecache_public
+		WHERE cid = %i AND probid NOT IN (%Ai)',
+		$contest['cid'], $probids);
+}
 $DB->q('DELETE FROM rankcache_jury
-        WHERE cid != %i OR teamid NOT IN (%Ai)', $cid, $teamlist);
+	WHERE cid NOT IN (%Ai) OR teamid NOT IN (%Ai)', $cids, $teamlist);
 $DB->q('DELETE FROM rankcache_public
-        WHERE cid != %i OR teamid NOT IN (%Ai)', $cid, $teamlist);
+	WHERE cid NOT IN (%Ai) OR teamid NOT IN (%Ai)', $cids, $teamlist);
 
 $time_end = microtime(TRUE);
 
