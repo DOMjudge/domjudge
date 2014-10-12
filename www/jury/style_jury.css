@@ -13,6 +13,9 @@
 
 .highlight { background-color: yellow !important; }
 
+.highlight.roweven { background-color: yellow !important; }
+.highlight.rowodd { background-color: #ffffaa !important; }
+
 .msgbox {
 	background-color: #fffff0;
 	border: 1px solid #f2e93a;
