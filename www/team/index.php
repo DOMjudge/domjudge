@@ -97,7 +97,7 @@ if ( $fdata['cstarted'] ) {
 }
 // call putSubmissions function from common.php for this team.
 $restrictions = array( 'teamid' => $contestid );
-putSubmissions($cdata, $restrictions, null, $submitted);
+putSubmissions(array($cdata['cid'] => $cdata), $restrictions, null, $submitted);
 
 echo "</div>\n\n";
 

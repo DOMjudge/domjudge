@@ -263,6 +263,6 @@ if ( isset($key) ) {
 echo "</h3>\n\n";
 
 $restrictions['teamid'] = $id;
-putSubmissions($cdata, $restrictions);
+putSubmissions($cdatas, $restrictions, 0, null, true);
 
 require(LIBWWWDIR . '/footer.php');

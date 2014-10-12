@@ -280,6 +280,6 @@ echo "<h2>Submissions for " . htmlspecialchars($data['shortname']) .
 	" - " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $restrictions = array( 'probid' => $id );
-putSubmissions($cdata, $restrictions);
+putSubmissions($cdatas, $restrictions, 0, null, true);
 
 require(LIBWWWDIR . '/footer.php');
