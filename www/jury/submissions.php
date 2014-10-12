@@ -18,6 +18,11 @@ if ( isset($_COOKIE['domjudge_submissionview']) && isset($viewtypes[$_COOKIE['do
 	$view = $_COOKIE['domjudge_submissionview'];
 }
 
+// Restore most recent contest view setting from cookie (overridden by explicit selection)
+if ( isset($_COOKIE['domjudge_submissioncontest']) && in_array($_COOKIE['domjudge_submissioncontest'], $contestfiltertypes) ) {
+	$contest = $_COOKIE['domjudge_submissioncontest'];
+}
+
 if ( isset($_REQUEST['view']) ) {
 	// did someone press any of the four view buttons?
 	foreach ($viewtypes as $i => $name) {
@@ -33,11 +38,15 @@ if ( isset($_REQUEST['contest']) ) {
 
 require('init.php');
 $refresh = '15;url=submissions.php?' .
-	urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view]);
+	   urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view]) .
+	   '&contest=' . urlencode($contest);
 $title = 'Submissions';
 
 // Set cookie of submission view type, expiry defaults to end of session.
 setcookie('domjudge_submissionview', $view);
+
+// Set cookie of contest view type, expiry defaults to end of session.
+setcookie('domjudge_submissioncontest', $contest);
 
 $jury_member = $username;
 
