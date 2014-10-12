@@ -50,6 +50,7 @@ class db
 		%_: nothing, but do process one argument
 		%A?: array of type ?, comma separated
 		%S: array of key => ., becomes key=., comma separated
+		%SS: array of key => ., becomes key=., AND separated
 
 		query can be prepended with a keyword to change the returned data
 		format:
@@ -162,9 +163,15 @@ class db
 					foreach ( $val as $field => $value ) {
 						$parts[] = '`'.$field.'` = '.$this->val2sql($value);
 					}
-					$query .= implode(', ', $parts);
+					$separator = ', ';
+					$skip = 1;
+					if ( strlen($part) > 1 && $part{1} == 'S' ) {
+						$separator = ' AND ';
+						$skip = 2;
+					}
+					$query .= implode($separator, $parts);
 					unset($parts);
-					$query .= substr($part,1);
+					$query .= substr($part,$skip);
 					break;
 				case 's':
 				case 'c':

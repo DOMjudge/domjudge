@@ -102,15 +102,6 @@ if ( !empty($cmd) ):
 <?php echo addInput('data[0][shortname]', @$row['shortname'], 8, 10,
                     " required pattern=\"" . IDENTIFIER_CHARS . "+\"") .
            "(alphanumerics only)"; ?></td></tr>
-<tr><td><label for="data_0__cid_">Contest:</label></td>
-<td><?php
-$cmap = $DB->q("KEYVALUETABLE SELECT cid,contestname FROM contest ORDER BY cid DESC");
-foreach($cmap as $cid => $cname) {
-	$cmap[$cid] = "c$cid: $cname";
-}
-echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
-?>
-</td></tr>
 
 <tr><td><label for="data_0__name_">Problem name:</label></td>
 <td><?php echo addInput('data[0][name]', @$row['name'], 30, 255, 'required')?></td></tr>
@@ -199,11 +190,13 @@ endif;
 
 $data = $DB->q('TUPLE SELECT p.probid,p.cid,p.shortname,p.name,p.allow_submit,p.allow_judge,
                              p.timelimit,p.special_run,p.special_compare,p.color,
-                             p.problemtext_type,c.contestname, count(rank) AS ntestcases
+			     p.problemtext_type, count(rank) AS ntestcases
                 FROM problem p
-                NATURAL JOIN contest c
                 LEFT JOIN testcase USING (probid)
                 WHERE probid = %i GROUP BY probid', $id);
+$numcontests = $DB->q("VALUE SELECT COUNT(*) AS contestcount
+		       FROM gewis_contestproblem
+		       WHERE probid = %i", $id);
 
 if ( ! $data ) error("Missing or invalid problem id");
 
@@ -221,8 +214,14 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <tr><td>ID:          </td><td>p<?php echo htmlspecialchars($data['probid'])?></td></tr>
 <tr><td>Shortname:   </td><td class="probid"><?php echo htmlspecialchars($data['shortname'])?></td></tr>
 <tr><td>Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
-<tr><td>Contest:     </td><td><?php echo htmlspecialchars($data['contestname']) .
-									' (c' . htmlspecialchars($data['cid']) .')'?></td></tr>
+<tr><td># Contests:  </td><td><?php
+	if ( $numcontests==0 ) {
+		echo '<em>no contests</em>';
+	} else {
+		echo (int)$numcontests;
+	}
+	echo ' <a href="contestproblem.php?probid='.urlencode($data['probid']).'">details/edit</a>';
+?></td></tr>
 <tr><td>Allow submit:</td><td class="nobreak"><?php echo printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .

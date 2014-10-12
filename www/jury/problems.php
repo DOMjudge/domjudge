@@ -13,20 +13,30 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Problems</h1>\n\n";
 
-// Select all data, sort problems from the current contest on top.
+// Select all data
 $res = $DB->q('SELECT p.probid,p.shortname,p.name,p.allow_submit,p.allow_judge,p.timelimit,p.color,
-               p.problemtext_type, c.*, COUNT(testcaseid) AS testcases
+	       p.problemtext_type, COUNT(testcaseid) AS testcases
                FROM problem p
-               NATURAL JOIN contest c
                LEFT JOIN testcase USING (probid)
-               GROUP BY probid ORDER BY (p.cid = %i) DESC, p.cid, probid', $cid);
+	       GROUP BY probid ORDER BY probid');
+
+// Get number of contests per problem
+$contestinfo = $DB->q("TABLE SELECT probid, cid
+		       FROM gewis_contestproblem");
+$contestproblems = array();
+foreach ($contestinfo as $row) {
+	if ( !isset($contestproblems[$row['probid']]) ) {
+		$contestproblems[$row['probid']] = array();
+	}
+	$contestproblems[$row['probid']][] = $row['cid'];
+}
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No problems defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">shortname</th><th scope=\"col\">name</th>" .
-	     "<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" .
+	     "<th scope=\"col\" class=\"sorttable_numeric\"># contests</th>" .
 	     "<th scope=\"col\">allow<br />submit</th>" .
 	     "<th scope=\"col\">allow<br />judge</th>" .
 	     "<th scope=\"col\">time<br />limit</th>" .
@@ -40,11 +50,7 @@ if( $res->count() == 0 ) {
 
 	while($row = $res->next()) {
 		$classes = array();
-		if ( $row['cid'] != $cid ) $classes[] = 'disabled';
-		if ( $row['cid'] != $lastcid ) {
-			if ( $lastcid != -1 ) $classes[] = 'contestswitch';
-			$lastcid = $row['cid'];
-		}
+		if ( count(array_intersect($contestproblems[$row['probid']], $cids)) == 0 ) $classes[] = 'disabled';
 		$link = '<a href="problem.php?id=' . urlencode($row['probid']) . '">';
 
 		echo "<tr class=\"" . implode(' ',$classes) .
@@ -53,7 +59,7 @@ if( $res->count() == 0 ) {
 			"</td><td class=\"probid\">" . $link . htmlspecialchars($row['shortname'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
 			"</td><td title=\"".htmlspecialchars($row['contestname'])."\">".
-			$link . 'c' . htmlspecialchars($row['cid']) . "</a>" .
+			$link . htmlspecialchars(count($contestproblems[$row['probid']])) . "</a>" .
 			"</td><td class=\"tdcenter\">" . $link .
 			printyn($row['allow_submit']) . "</a>" .
 			"</td><td class=\"tdcenter\">" . $link .

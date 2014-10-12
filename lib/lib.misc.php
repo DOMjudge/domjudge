@@ -55,26 +55,6 @@ function getCurContests($fulldata = FALSE) {
 	return $contests;
 }
 
-///**
-// * Will return either the current contest id, or
-// * the most recently finished one.
-// * When fulldata is true, returns the total row as an array
-// * instead of just the ID.
-// */
-//function getCurContest($fulldata = FALSE) {
-//
-//	global $DB;
-//	$now = $DB->q('MAYBETUPLE SELECT * FROM contest
-//	               WHERE enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
-//	               ORDER BY activatetime DESC LIMIT 1');
-//
-//	if ( $now == NULL ) return FALSE;
-//
-//	if ( !$fulldata ) return $now['cid'];
-//
-//	return $now;
-//}
-
 /**
  * Parse 'id' from HTTP GET or POST variables and check that it is a
  * valid number, or string consisting of IDENTIFIER_CHARS.
