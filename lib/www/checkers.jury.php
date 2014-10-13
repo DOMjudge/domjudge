@@ -194,7 +194,7 @@ function check_contest($data, $keydata = null)
 {
 	// are these dates valid?
 	foreach ( array('starttime','endtime','freezetime',
-	                'unfreezetime','activatetime') as $f ) {
+			'unfreezetime','activatetime','deactivatetime') as $f ) {
 		if ( $f == 'starttime' ) {
 			$data[$f] = strtotime($data[$f.'_string']);
 		} else {
@@ -207,7 +207,7 @@ function check_contest($data, $keydata = null)
 	}
 
 	// are required times specified?
-	foreach(array('activatetime','starttime','endtime') as $f) {
+	foreach(array('activatetime','starttime','endtime','deactivatetime') as $f) {
 		if ( empty($data[$f]) ) {
 			ch_error("Contest $f is empty");
 			return $data;
@@ -215,7 +215,7 @@ function check_contest($data, $keydata = null)
 	}
 
 	// the ordering of times is:
-	// activatetime <= starttime <= freezetime < endtime <= unfreezetime
+	// activatetime <= starttime <= freezetime < endtime <= unfreezetime <= deactivatetime
 
 	// are contest start/end times in order?
 	if ( difftime($data['endtime'], $data['starttime']) <= 0 ) {
@@ -236,6 +236,13 @@ function check_contest($data, $keydata = null)
 		}
 		if ( difftime($data['unfreezetime'], $data['endtime']) < 0 ) {
 			ch_error('Unfreezetime must be larger than endtime.');
+		}
+		if ( difftime($data['deactivatetime'], $data['unfreezetime']) < 0 ) {
+			ch_error('Deactivatetime must be larger than unfreezetime.');
+		}
+	} else {
+		if ( difftime($data['deactivatetime'], $data['endtime']) < 0 ) {
+			ch_error('Deactivatetime must be larger than endtime.');
 		}
 	}
 

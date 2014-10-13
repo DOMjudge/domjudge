@@ -8,7 +8,7 @@
 
 require('init.php');
 require(LIBWWWDIR . '/checkers.jury.php');
-$times = array ('activate','start','freeze','end','unfreeze');
+$times = array ('activate','start','freeze','end','unfreeze','deactivate');
 $now = now();
 
 if ( isset($_POST['donow']) ) {
@@ -29,14 +29,14 @@ if ( isset($_POST['donow']) ) {
 		$docdata = $cdatas[$docid];
 		$docdata['starttime'] = $now;
 		$docdata['starttime_string'] = $nowstring;
-		foreach(array('endtime','freezetime','unfreezetime','activatetime') as $f) {
+		foreach(array('endtime','freezetime','unfreezetime','activatetime','deactivatetime') as $f) {
 			$docdata[$f] = check_relative_time($docdata[$f.'_string'], $docdata['starttime'], $f);
 		}
 		$DB->q('UPDATE contest SET starttime = %s, starttime_string = %s,
-		        endtime = %s, freezetime = %s, unfreezetime = %s, activatetime = %s
+			endtime = %s, freezetime = %s, unfreezetime = %s, activatetime = %s, deactivatetime = %s
 			WHERE cid = %i', $docdata['starttime'], $docdata['starttime_string'],
 		       $docdata['endtime'], $docdata['freezetime'], $docdata['unfreezetime'],
-		       $docdata['activatetime'], $docid);
+		       $docdata['activatetime'], $docdata['deactivatetime'], $docid);
 		header ("Location: ./contests.php?edited=1");
 	} else {
 		$DB->q('UPDATE contest SET ' . $time . 'time = %s, ' . $time . 'time_string = %s
@@ -68,7 +68,9 @@ if ( isset($_GET['edited']) ) {
 
 echo "<fieldset><legend>Current contests: ";
 
-if ( empty($cids) )  {
+$curcids = getCurContests(FALSE);
+
+if ( empty($curcids) )  {
 	echo "none</legend>\n\n";
 
 	$row = $DB->q('MAYBETUPLE SELECT * FROM contest
@@ -137,6 +139,8 @@ if ( empty($cids) )  {
 					($time == 'start' && !$hasstarted) ||
 					($time == 'end' && $hasstarted && !$hasended &&
 					 (empty($row['freezetime']) || $hasfrozen)) ||
+					($time == 'deactivate' && $hasended &&
+					 (empty($row['unfreezetime']) || $hasunfrozen)) ||
 					($time == 'freeze' && $hasstarted && !$hasended &&
 					 !$hasfrozen) ||
 					($time == 'unfreeze' && $hasfrozen && !$hasunfrozen &&
@@ -188,7 +192,7 @@ if( count($res) == 0 ) {
 		echo '<tr class="' .
 			( $iseven ? 'roweven': 'rowodd' ) .
 			(!$row['enabled']    ? ' disabled' :'') .
-			(in_array($row['cid'], $cids) ? ' highlight':'') . '">' .
+			(in_array($row['cid'], $curcids) ? ' highlight':'') . '">' .
 			"<td class=\"tdright\">" . $link .
 			"c" . (int)$row['cid'] . "</a></td>\n";
 		foreach ($times as $time) {

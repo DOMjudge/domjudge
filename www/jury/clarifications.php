@@ -22,8 +22,6 @@ echo "<p><a href=\"#newrequests\">View New Clarification Requests</a></p>\n";
 echo "<p><a href=\"#oldrequests\">View Old Clarification Requests</a></p>\n";
 echo "<p><a href=\"#clarifications\">View General Clarifications</a></p>\n\n";
 
-$cids = getCurContests(FALSE);
-
 $newrequests    = $DB->q('SELECT c.*, p.shortname, t.name AS toname, f.name AS fromname
                           FROM clarification c
                           LEFT JOIN problem p USING(probid)

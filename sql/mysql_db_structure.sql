@@ -83,13 +83,15 @@ CREATE TABLE `contest` (
   `freezetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time scoreboard is frozen',
   `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time after which no more submissions are accepted',
   `unfreezetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Unfreeze a frozen scoreboard at this time',
+  `deactivatetime` decimal(32,9) UNSIGNED NOT NULL COMMENT 'Time contest becomes invisible in team/public views',
   `activatetime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of activatetime',
   `starttime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute (only!) string representation of starttime',
   `freezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of freezetime',
   `endtime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
   `unfreezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
+  `deactivatetime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether this contest can be active',
-  `process_balloons` TINYINT(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?',
+  `process_balloons` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?',
   PRIMARY KEY (`cid`),
   KEY `cid` (`cid`,`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';
@@ -242,8 +244,8 @@ CREATE TABLE `problem` (
 --
 
 CREATE TABLE `gewis_contestproblem` (
-  `cid` INT(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
-  `probid` INT(4) UNSIGNED NOT NULL COMMENT 'Problem ID',
+  `cid` int(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
+  `probid` int(4) UNSIGNED NOT NULL COMMENT 'Problem ID',
   KEY `cid` (`cid`),
   KEY `probid` (`probid`),
   PRIMARY KEY (`probid`, `cid`),
@@ -256,8 +258,8 @@ CREATE TABLE `gewis_contestproblem` (
 --
 
 CREATE TABLE `gewis_contestteam` (
-  `cid` INT(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
-  `teamid` INT(4) UNSIGNED NOT NULL COMMENT 'Team ID',
+  `cid` int(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
+  `teamid` int(4) UNSIGNED NOT NULL COMMENT 'Team ID',
   KEY `cid` (`cid`),
   KEY `teamid` (`teamid`),
   PRIMARY KEY (`teamid`, `cid`),

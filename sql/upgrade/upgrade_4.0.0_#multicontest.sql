@@ -16,7 +16,7 @@
 --
 
 -- @UPGRADE-CHECK@
-CREATE TABLE `gewis_contestproblem` (`dummy` INT(4) UNSIGNED);
+CREATE TABLE `gewis_contestproblem` (`dummy` int(4) UNSIGNED);
 DROP TABLE `gewis_contestproblem`;
 
 --
@@ -26,17 +26,19 @@ DROP TABLE `gewis_contestproblem`;
 -- Make cid of problem table NULLable. We could actually remove it but this
 -- could be problematic if later upstream decides to
 ALTER TABLE `problem`
-  CHANGE COLUMN `cid` `cid` INT(4) UNSIGNED DEFAULT NULL COMMENT 'Contest ID (not used anymore, see table `gewis_contestproblem`)';
+  CHANGE COLUMN `cid` `cid` int(4) UNSIGNED DEFAULT NULL COMMENT 'Contest ID (not used anymore, see table `gewis_contestproblem`)';
 
 -- Add a column to keep track of whether balloons will be processed for this contest
 ALTER TABLE `contest`
-  ADD COLUMN `process_balloons` TINYINT(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?';
+  ADD COLUMN `deactivatetime` decimal(32,9) UNSIGNED NOT NULL COMMENT 'Time contest becomes invisible in team/public views' AFTER `unfreezetime`,
+  ADD COLUMN `deactivatetime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime' AFTER `unfreezetime_string`,
+  ADD COLUMN `process_balloons` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?';
 
 
 -- Create a table linking contests and problems
 CREATE TABLE `gewis_contestproblem` (
-  `cid` INT(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
-  `probid` INT(4) UNSIGNED NOT NULL COMMENT 'Problem ID',
+  `cid` int(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
+  `probid` int(4) UNSIGNED NOT NULL COMMENT 'Problem ID',
   KEY `cid` (`cid`),
   KEY `probid` (`probid`),
   CONSTRAINT `contestproblem_pk` PRIMARY KEY (`probid`, `cid`),
@@ -46,8 +48,8 @@ CREATE TABLE `gewis_contestproblem` (
 
 -- Create a table linking contests and teams
 CREATE TABLE `gewis_contestteam` (
-  `cid` INT(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
-  `teamid` INT(4) UNSIGNED NOT NULL COMMENT 'Team ID',
+  `cid` int(4) UNSIGNED NOT NULL COMMENT 'Contest ID',
+  `teamid` int(4) UNSIGNED NOT NULL COMMENT 'Team ID',
   KEY `cid` (`cid`),
   KEY `teamid` (`teamid`),
   CONSTRAINT `contestteam_pk` PRIMARY KEY (`teamid`, `cid`),

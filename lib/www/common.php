@@ -97,21 +97,27 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
 	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
 
-	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.cid,
-					s.submittime, s.judgehost, s.valid, t.name AS teamname,
-					p.shortname, p.name AS probname, l.name AS langname,
-					j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
-	              $sqlbody .
-	              (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '') .
-	              (isset($restrictions['judged'])    ? 'AND ' . $judgedclause : '') .
-	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
-		      ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
-	              @$restrictions['teamid'], @$restrictions['categoryid'],
-	              @$restrictions['probid'], @$restrictions['langid'],
-	              @$restrictions['judgehost'], $limit);
+	if ( empty($cids) ) {
+		$res = null;
+	} else {
+		$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.cid,
+			      s.submittime, s.judgehost, s.valid, t.name AS teamname,
+			      p.shortname, p.name AS probname, l.name AS langname,
+			      j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
+			      $sqlbody .
+			      (isset($restrictions['verified']) ?
+			      'AND ' . $verifyclause : '') .
+			      (isset($restrictions['judged']) ?
+			      'AND ' . $judgedclause : '') .
+			      'ORDER BY s.submittime DESC, s.submitid DESC ' .
+			      ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
+			      @$restrictions['teamid'], @$restrictions['categoryid'],
+			      @$restrictions['probid'], @$restrictions['langid'],
+			      @$restrictions['judgehost'], $limit);
+	}
 
 	// nothing found...
-	if( $res->count() == 0 ) {
+	if( empty($cids) || $res->count() == 0 ) {
 		echo "<p class=\"nodata\">No submissions</p>\n\n";
 		return;
 	}
@@ -379,11 +385,16 @@ function putClock() {
 		echo 'Selected contest: ' . addSelect('cid', $contests, $cid, true);
 		echo addEndForm();
 		echo "<script type=\"text/javascript\">
-	document.getElementById('cid').addEventListener('change', function() {
-		document.getElementById('selectcontestform').submit();
+		      document.getElementById('cid').addEventListener('change', function() {
+		      document.getElementById('selectcontestform').submit();
 	});
 </script>
 ";
+		echo "</div>\n";
+	} elseif ( count($cdatas) == 1 && IS_JURY ) {
+		echo "<div id=\"selectcontest\">\n";
+		$contest = $cdatas[$cid];
+		echo 'Active contest: c' . $cid . ': ' . $contest['contestname'];
 		echo "</div>\n";
 	}
 

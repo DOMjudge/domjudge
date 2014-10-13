@@ -39,22 +39,27 @@ function getFileContents($filename, $sizelimit = true) {
  * When fulldata is true, returns the total row as an array
  * instead of just the ID (array indices will be contest ID's then).
  * If $onlyofteam is not null, only show contests that team is part of
+ * If $alsofuture is true, also show the contests that start in the future
  */
-function getCurContests($fulldata = FALSE, $onlyofteam = null) {
+function getCurContests($fulldata = FALSE, $onlyofteam = null, $alsofuture = false) {
 
 	global $DB;
-	// We assume endtime is always set
-	if ( $onlyofteam ) {
-		$contests = $DB->q('SELECT * FROM contest
-			    INNER JOIN gewis_contestteam USING (cid)
-			    WHERE teamid = %i AND enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
-			    AND GREATEST(endtime, IFNULL(unfreezetime, endtime)) > UNIX_TIMESTAMP()
-			    ORDER BY activatetime', $onlyofteam);
+	if ( $alsofuture ) {
+		$extra = '';
 	} else {
-		$contests = $DB->q('SELECT * FROM contest
-			    WHERE enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
-			    AND GREATEST(endtime, IFNULL(unfreezetime, endtime)) > UNIX_TIMESTAMP()
-			    ORDER BY activatetime');
+		$extra = 'AND activatetime <= UNIX_TIMESTAMP()';
+	}
+	if ( $onlyofteam ) {
+		$contests = $DB->q("SELECT * FROM contest
+				INNER JOIN gewis_contestteam USING (cid)
+				WHERE teamid = %i AND enabled = 1 ${extra}
+				AND deactivatetime > UNIX_TIMESTAMP()
+				ORDER BY activatetime", $onlyofteam);
+	} else {
+		$contests = $DB->q("SELECT * FROM contest
+				WHERE enabled = 1 ${extra}
+				AND deactivatetime > UNIX_TIMESTAMP()
+				ORDER BY activatetime");
 	}
 	$contests = $contests->getkeytable('cid');
 	if ( !$fulldata ) {
