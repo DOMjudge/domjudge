@@ -105,10 +105,11 @@ if ( !empty($BALLOONS) ) {
 	echo addForm($pagename);
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
-		"<tr><th class=\"sorttable_numeric\">ID</th>" .
-		"<th>time</th><th>contest</th><th>solved</th><th>team</th>" .
-	        "<th></th><th>loc.</th><th>category</th><th>total</th>" .
-	        "<th></th><th></th></tr>\n</thead>\n";
+	     "<tr><th class=\"sorttable_numeric\">ID</th>" .
+	     "<th>time</th>" . ( count($cids) > 1 ? "<th>contest</th>" : "") .
+	     "<th>solved</th><th>team</th>" .
+	     "<th></th><th>loc.</th><th>category</th><th>total</th>" .
+	     "<th></th><th></th></tr>\n</thead>\n";
 
 	foreach ( $BALLOONS as $row ) {
 
@@ -119,8 +120,10 @@ if ( !empty($BALLOONS) ) {
 		echo '<td>b' . (int)$row['balloonid'] . '</td>';
 		echo '<td>' . printtime( $row['submittime'] ) . '</td>';
 
-		// contest of this problem
-		echo '<td>' . htmlspecialchars('c' . $row['cid']) . '</td>';
+		if ( count($cids) > 1 ) {
+			// contest of this problem, only when more than one active
+			echo '<td>' . htmlspecialchars('c' . $row['cid']) . '</td>';
+		}
 
 		// the balloon earned
 		echo '<td class="probid">' .

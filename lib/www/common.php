@@ -57,7 +57,7 @@ function parseRunDiff($difftext){
  * match <key> = <value>. Output is always limited to the
  * current or last contest.
  */
-function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $withcontestcolumn = false)
+function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 {
 	global $DB, $username;
 
@@ -131,7 +131,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
 
 		(IS_JURY ? "<th scope=\"col\" class=\"sorttable_numeric\">ID</th>" : '') .
-		($withcontestcolumn ? "<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" : '') .
+		(IS_JURY && count($cids) > 1 ? "<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" : '') .
 		"<th scope=\"col\">time</th>" .
 		(IS_JURY ? "<th scope=\"col\">team</th>" : '') .
 		"<th scope=\"col\">problem</th>" .
@@ -180,7 +180,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 		if ( IS_JURY ) {
 			echo "<td><a$link>s$sid</a></td>";
 		}
-		if ( $withcontestcolumn ) {
+		if ( IS_JURY && count($cids) > 1 ) {
 			echo "<td><a$link>c${row['cid']}</a></td>";
 		}
 		echo "<td><a$link>" . printtime($row['submittime']) . "</a></td>";

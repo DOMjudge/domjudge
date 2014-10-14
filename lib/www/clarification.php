@@ -38,6 +38,8 @@ function canViewClarification($team, $clar)
  */
 function putClar($clar)
 {
+	global $cids;
+
 	// $clar['sender'] is set to the team ID, or empty if sent by the jury.
 	if ( !empty($clar['sender']) ) {
 		$from = htmlspecialchars($clar['fromname'] . ' (t'.$clar['sender'] . ')') ;
@@ -72,18 +74,20 @@ function putClar($clar)
 	echo "</td></tr>\n";
 
 	echo '<tr><td>Subject:</td><td>';
+	$prefix = '';
+	if ( IS_JURY && count($cids) > 1 )
+	{
+		$prefix = 'c' . $clar['cid'] . ' - ';
+	}
 	if ( is_null($clar['probid']) ) {
-		echo 'c' . $clar['cid'] . " - General issue";
+		echo $prefix . "General issue";
 	} else {
 		if ( IS_JURY ) {
-			echo
-				'<a href="problem.php?id=' . urlencode($clar['probid']) . '">' .
-				'c' . $clar['cid'] . ' - Problem ' . $clar['shortname'] . ": " .
-				$clar['probname'] . '</a>';
+			echo '<a href="problem.php?id=' . urlencode($clar['probid']) .
+			     '">' . $prefix . 'Problem ' . $clar['shortname'] . ": " .
+			     $clar['probname'] . '</a>';
 		} else {
-			echo
-				'c' . $clar['cid'] . ' - Problem ' . $clar['shortname'] . ": " .
-				$clar['probname'];
+			echo 'Problem ' . $clar['shortname'] . ": " . $clar['probname'];
 		}
 	}
 	echo "</td></tr>\n";
@@ -154,14 +158,15 @@ function summarizeClarification($body)
  */
 function putClarificationList($clars, $team = NULL)
 {
-	global $username;
+	global $username, $cids;
+
 	if ( $team==NULL && ! IS_JURY ) {
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
 	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
-		( IS_JURY ? "<th scope=\"col\">ID</th>" : "") .
-	     "<th scope=\"col\">contest</th>" .
+	     ( IS_JURY ? "<th scope=\"col\">ID</th>" : "") .
+	     ( IS_JURY && count($cids) > 1 ? "<th scope=\"col\">contest</th>" : "") .
 	     "<th scope=\"col\">time</th>" .
 	     "<th scope=\"col\">from</th>" .
 	     "<th scope=\"col\">to</th><th scope=\"col\">subject</th>" .
@@ -186,7 +191,9 @@ function putClarificationList($clars, $team = NULL)
 			echo '<td>' . $link . $clar['clarid'] . '</a></td>';
 		}
 
-		echo '<td>' . $link . 'c' . $clar['cid'] . '</a></td>';
+		echo ( IS_JURY && count($cids) > 1 ? ('<td>' . $link . 'c' .
+						      $clar['cid'] . '</a></td>') : '');
+
 		echo '<td>' . $link . printtime($clar['submittime']) . '</a></td>';
 
 		if ( $clar['sender']  == NULL ) {

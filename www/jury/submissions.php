@@ -65,16 +65,19 @@ for($i=0; $i<count($viewtypes); ++$i) {
 }
 echo "</p>\n" . addEndForm();
 
-echo addForm($pagename, 'get') . "<p>Show contests:\n";
-echo addHidden('view['.$view.']', $viewtypes[$view]);
-echo addSubmit('all', 'contest', null, ($contest != 'all'));
-echo addSubmit('selected', 'contest', null, ($contest != 'selected'));
-echo " ('selected' contest can be chosen using dropdown in upper right corner)</p>\n" . addEndForm();
+if ( count($cids) > 1 ) {
+	echo addForm($pagename, 'get') . "<p>Show contests:\n";
+	echo addHidden('view[' . $view . ']', $viewtypes[$view]);
+	echo addSubmit('all', 'contest', null, ($contest != 'all'));
+	echo addSubmit('selected', 'contest', null, ($contest != 'selected'));
+	echo " ('selected' contest can be chosen using dropdown in upper right" .
+	     "corner)</p>\n" . addEndForm();
+}
 
 if ( $contest == 'selected' ) {
 	$cdatas = array($cid => $cdata);
 }
 
-putSubmissions($cdatas, $restrictions, ($viewtypes[$view] == 'newest' ? 50 : 0), null, true);
+putSubmissions($cdatas, $restrictions, ($viewtypes[$view] == 'newest' ? 50 : 0));
 
 require(LIBWWWDIR . '/footer.php');

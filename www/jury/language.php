@@ -154,6 +154,6 @@ if ( IS_ADMIN ) {
 echo "<h2>Submissions in " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $restrictions = array( 'langid' => $id );
-putSubmissions($cdatas, $restrictions, 0, null, true);
+putSubmissions($cdatas, $restrictions);
 
 require(LIBWWWDIR . '/footer.php');
