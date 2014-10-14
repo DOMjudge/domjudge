@@ -341,16 +341,27 @@ function confirmClar() {
 	// has started) or general issue.
 	$options = array();
 	foreach ($cdatas as $cid => $cdata) {
-		$row = $DB->q('TUPLE SELECT CONCAT(cid, "-general") AS c, CONCAT("c", cid, " - General issue") AS value
+		$row = $DB->q('TUPLE SELECT CONCAT(cid, "general") AS c
 			       FROM contest WHERE cid = %i', $cid);
-		$options[$row['c']] = $row['value'];
+		if ( IS_JURY && count($cdatas) > 1 )
+		{
+			$options[$row['c']] = "c{$cid} - General issue";
+		} else {
+			$options[$row['c']] = "General issue";
+		}
 		if ( difftime($cdata['starttime'], now()) <= 0 ) {
-			$options = array_merge($options,
-					       $DB->q('KEYVALUETABLE SELECT CONCAT(gewis_contestproblem.cid, "-", probid), CONCAT("c", gewis_contestproblem.cid, " - ", shortname, ": ", name) as name
-					       FROM problem
-					       INNER JOIN gewis_contestproblem USING (probid)
-					       WHERE gewis_contestproblem.cid = %i AND allow_submit = 1
-					       ORDER BY shortname ASC', $cid));
+			$problem_options = $DB->q('KEYVALUETABLE SELECT CONCAT(gewis_contestproblem.cid, "-", probid), CONCAT(shortname, ": ", name) as name
+						   FROM problem
+						   INNER JOIN gewis_contestproblem USING (probid)
+						   WHERE gewis_contestproblem.cid = %i AND allow_submit = 1
+						   ORDER BY shortname ASC', $cid);
+			if ( IS_JURY && count($cdatas) > 1 ) {
+				foreach ($problem_options as &$problem_option) {
+					$problem_option = "c" . $cid . ' - ' . $problem_option;
+				}
+				unset($problem_option);
+			}
+			$options = array_merge($options, $problem_options);
 		}
 	}
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
