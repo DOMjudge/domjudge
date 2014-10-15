@@ -547,7 +547,10 @@ function putProblemTextList()
 function have_problemtexts()
 {
 	global $DB, $cid;
-	return $DB->q('VALUE SELECT COUNT(*) FROM problem INNER JOIN gewis_contestproblem USING (probid) WHERE problemtext_type IS NOT NULL AND gewis_contestproblem.cid = %i', $cid) > 0;
+	return $DB->q('VALUE SELECT COUNT(*) FROM problem
+		       INNER JOIN gewis_contestproblem USING (probid)
+		       WHERE problemtext_type IS NOT NULL
+		       AND gewis_contestproblem.cid = %i', $cid) > 0;
 }
 
 /**

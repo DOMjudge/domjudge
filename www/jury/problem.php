@@ -101,7 +101,7 @@ if ( !empty($cmd) ):
 <tr><td><label for="data_0__shortname_">Shortname:</label></td><td>
 <?php echo addInput('data[0][shortname]', @$row['shortname'], 8, 10,
                     " required pattern=\"" . IDENTIFIER_CHARS . "+\"") .
-           "(alphanumerics only)"; ?></td></tr>
+		    "(alphanumerics only)"; ?></td></tr>
 
 <tr><td><label for="data_0__name_">Problem name:</label></td>
 <td><?php echo addInput('data[0][name]', @$row['name'], 30, 255, 'required')?></td></tr>

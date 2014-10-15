@@ -37,7 +37,7 @@ function checkrole($rolename, $check_superset = TRUE) {
 // Returns whether the connected user is logged in, sets $username, $teamdata
 function logged_in()
 {
-	global $DB, $ip, $username, $contestid, $teamdata, $userdata;
+	global $DB, $ip, $username, $teamid, $teamdata, $userdata;
 
 	if ( !empty($username) && !empty($userdata) && !empty($teamdata) ) return TRUE;
 
@@ -83,13 +83,13 @@ function logged_in()
 	}
 
 	if ( !empty($teamdata) ) {
-		$contestid = $teamdata['teamid'];
+		$teamid = $teamdata['teamid'];
 		// Is this the first visit? Record that in the team table.
 		if ( empty($teamdata['teampage_first_visited']) ) {
 			$hostname = gethostbyaddr($ip);
 			$DB->q('UPDATE team SET teampage_first_visited = %s, hostname = %s
 			        WHERE teamid = %i',
-			       now(), $hostname, $contestid);
+			       now(), $hostname, $teamid);
 		}
 	}
 

@@ -245,11 +245,11 @@ flushresults();
 
 if( empty($cids) ) {
 	result('contests', 'Active contests', 'E',
-		'No currently active contests found. System will not function.');
+	       'No currently active contests found. System will not function.');
 } else {
 	$cidstring = implode(', ', array_map(function($cid) { return 'c'.$cid;}, $cids));
 	result('contests', 'Active contests', 'O',
-		'Currently active contests: ' . $cidstring);
+	       'Currently active contests: ' . $cidstring);
 }
 
 // get all contests

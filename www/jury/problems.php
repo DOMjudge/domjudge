@@ -58,7 +58,7 @@ if( $res->count() == 0 ) {
 				htmlspecialchars($row['probid'])."</a>".
 			"</td><td class=\"probid\">" . $link . htmlspecialchars($row['shortname'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
-			"</td><td title=\"".htmlspecialchars($row['contestname'])."\">".
+			"</td><td>".
 			$link . htmlspecialchars(count($contestproblems[$row['probid']])) . "</a>" .
 			"</td><td class=\"tdcenter\">" . $link .
 			printyn($row['allow_submit']) . "</a>" .

@@ -38,8 +38,12 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Balloon Status</h1>\n\n";
 
-if ( isset($cdata['freezetime']) && difftime($cdata['freezetime'],now())<=0 ) {
-	echo "<h4>Scoreboard is now frozen.</h4>\n\n";
+foreach ($cdatas as $cdata) {
+	if ( isset($cdata['freezetime']) &&
+	     difftime($cdata['freezetime'], now()) <= 0
+	) {
+		echo "<h4>Scoreboard of c${cdata['cid']} is now frozen.</h4>\n\n";
+	}
 }
 
 echo addForm($pagename, 'get') . "<p>\n" .
@@ -85,6 +89,7 @@ if ( empty($cids) ) {
 		       WHERE s.cid IN (%Ai) $freezecond
 		       ORDER BY done ASC, balloonid DESC",
 		       $cids);
+}
 
 /* Loop over the result, store the total of balloons for a team
  * (saves a query within the inner loop).
