@@ -277,6 +277,13 @@ On the domserver host:
        sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf &&
        sudo apache2ctl graceful
        </tt>
+       Or for Apache 2.4 and up:
+       <tt>
+       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
+       sudo a2enconf domjudge &&
+       sudo apache2ctl graceful
+       </tt>
+       
 <item> Check that the web interface works (/team, /public and /jury).
 <item> Change the admin password from its default value ('admin').
 <item> Check that the API (/api) works and create credentials for the judgehosts.
