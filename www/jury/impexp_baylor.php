@@ -62,14 +62,14 @@ if ( isset($_REQUEST['upload']) ) {
 	$teams = $DB->q('SELECT teamid,externalid FROM team WHERE externalid IS NOT NULL AND enabled=1');
 	while( $row = $teams->next() ) {
 		$totals = $DB->q("MAYBETUPLE SELECT correct, totaltime
-					FROM rankcache_public
+					FROM rankcache_jury
 					WHERE cid = %i
 					AND teamid = %i", $cid, $row['teamid']);
 		if ( $totals === null ) {
 			$totals['correct'] = $totals['totaltime'] = 0;
 		}
 		$rank = calcTeamRank($cdata, $row['teamid'], $totals, FALSE);
-		$lastProblem = $DB->q('MAYBEVALUE SELECT MAX(totaltime) FROM scorecache_public WHERE teamid=%i AND cid=%i', $row['teamid'], $cid);
+		$lastProblem = $DB->q('MAYBEVALUE SELECT MAX(totaltime) FROM scorecache_jury WHERE teamid=%i AND cid=%i', $row['teamid'], $cid);
 		if ( $lastProblem === NULL ) {
 			$lastProblem = 0;
 		}
