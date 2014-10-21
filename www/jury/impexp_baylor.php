@@ -56,6 +56,9 @@ curl_setopt($ch, CURLOPT_USERPWD, "$token:");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json"));
 if ( isset($_REQUEST['upload']) ) {
+	if ( difftime($cdata['endtime'],now()) >= 0 ) {
+		error("Contest did not end yet. Refusing to upload standings before contest end.");
+	}
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml'));
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 	$data = '<?xml version="1.0" encoding="UTF-8"?><icpc computeCitations="1" name="Upload_via_DOMjudge_' . date("c") . '">';
