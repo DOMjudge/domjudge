@@ -71,7 +71,7 @@ if ( isset($_REQUEST['upload']) ) {
 		if ( $totals === null ) {
 			$totals['correct'] = $totals['totaltime'] = 0;
 		}
-		$rank = calcTeamRank($cdata, $row['teamid'], $totals, FALSE);
+		$rank = calcTeamRank($cdata, $row['teamid'], $totals, TRUE);
 		$lastProblem = $DB->q('MAYBEVALUE SELECT MAX(totaltime) FROM scorecache_jury WHERE teamid=%i AND cid=%i', $row['teamid'], $cid);
 		if ( $lastProblem === NULL ) {
 			$lastProblem = 0;
