@@ -112,7 +112,7 @@ $teamrole = $DB->q('VALUE SELECT roleid FROM role WHERE role=%s', 'team');
 $new_affils = array();
 $new_teams = array();
 $updated_teams = array();
-foreach ( $json['icpcExport']['contest']['group'] as $group ) {
+foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 	foreach ( $group['team'] as $team ) {
 		// Note: affiliations are not updated and not deleted even if all teams are canceled
 		$affilid = $DB->q('MAYBEVALUE SELECT affilid FROM team_affiliation WHERE name=%s', $team['institutionName']);
