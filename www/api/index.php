@@ -413,6 +413,7 @@ function config($args)
 $doc = 'Get configuration variables.';
 $args = array('name' => 'Search only a single config variable.');
 $exArgs = array(array('name' => 'sourcesize_limit'));
+$roles = array('jury','judgehost');
 $api->provideFunction('GET', 'config', $doc, $args, $exArgs);
 
 /**
@@ -423,7 +424,7 @@ function submissions($args)
 	global $cid, $DB, $cdata;
 
 	$query = 'SELECT submitid, teamid, probid, langid, submittime, valid
-	          FROM submission WHERE cid = %i';
+	          FROM submission WHERE cid = %i AND valid = 1';
 
 	$hasLanguage = array_key_exists('language', $args);
 	$query .= ($hasLanguage ? ' AND langid = %s' : ' AND TRUE %_');
@@ -459,7 +460,6 @@ function submissions($args)
 			'problem'   => $row['probid'],
 			'language'  => $row['langid'],
 			'time'      => $row['submittime'],
-			'valid'     => (bool)$row['valid'],
 			);
 	}
 	return $res;
@@ -468,7 +468,7 @@ $args = array('language' => 'Search only for submissions in a certain language.'
               'id' => 'Search only a certain ID',
               'fromid' => 'Search from a certain ID',
               'limit' => 'Get only the first N submissions');
-$doc = 'Get a list of all submissions. Should we give away all info about submissions? Or is there something we would like to hide, for example language?';
+$doc = 'Get a list of all valid submissions.';
 $exArgs = array(array('fromid' => 100, 'limit' => 10), array('language' => 'cpp'));
 $api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
 
