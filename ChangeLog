@@ -1,7 +1,15 @@
 DOMjudge Programming Contest Judging System
 
-Version 4.0.4 - DEV
--------------------
+Version 4.0.4 - 27 oktober 2014
+-------------------------------
+ - Fix generated SQL examples file.
+ - Add Apache 2.4 example configuration steps to manual.
+ - API 'configuration' is now only available to jury and
+   'submission' is now limited to valid submissions.
+ - Fix ICPC teams import for changes on the webservice side.
+ - Fix ICPC standings upload to prevent accidental upload
+   of frozen instead of final scoreboard.
+ - Judgehost outputs a warning when not using cgroups.
 
 Version 4.0.3 - 6 October 2014
 ------------------------------
