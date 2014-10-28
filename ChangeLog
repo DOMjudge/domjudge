@@ -3,7 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 4.0.5 - DEV
 -------------------
 
-Version 4.0.4 - 27 oktober 2014
+Version 4.0.4 - 27 October 2014
 -------------------------------
  - Fix generated SQL examples file.
  - Add Apache 2.4 example configuration steps to manual.
