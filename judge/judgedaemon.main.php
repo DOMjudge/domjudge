@@ -13,9 +13,10 @@ require(LIBEXTDIR . '/spyc/spyc.php');
 require(ETCDIR . '/judgehost-config.php');
 
 $resturl = $restuser = $restpass = null;
+$endpoints = array();
 
 function read_credentials() {
-	global $resturl, $restuser, $restpass;
+	global $endpoints;
 
 	$credfile = ETCDIR . '/restapi.secret';
 	$credentials = @file($credfile);
@@ -25,15 +26,20 @@ function read_credentials() {
 	foreach ($credentials as $credential) {
 		if ( $credential{0} == '#' ) continue;
 		list ($resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
-		break;
+		$endpoints[] = array(
+			"url" => $resturl,
+			"user" => $restuser,
+			"pass" => $restpass,
+			"waiting" => FALSE
+		);
 	}
-	if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
+	if ( count($endpoints) <= 0 ) {
 		error("Error parsing REST API credentials.");
 	}
 }
 
 /**
- * Perform a request to the REST API and handl any errors.
+ * Perform a request to the REST API and handle any errors.
  * $url is the part appended to the base DOMjudge $resturl.
  * $verb is the HTTP method to use: GET, POST, PUT, or DELETE
  * $data is the urlencoded data passed as GET or POST parameters.
@@ -278,28 +284,58 @@ if ( !defined('USE_CGROUPS') || !USE_CGROUPS ) {
 	logmsg(LOG_WARNING, "Not using cgroups. Using cgroups is highly recommended. See the manual for details.");
 }
 
-// Create directory where to test submissions
-$workdirpath = JUDGEDIR . "/$myhost";
-system("mkdir -p $workdirpath/testcase", $retval);
-if ( $retval != 0 ) error("Could not create $workdirpath");
-chmod("$workdirpath/testcase", 0700);
 
-// Auto-register judgehost via REST
-// If there are any unfinished judgings in the queue in my name,
-// they will not be finished. Give them back.
-$unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
-$unfinished = dj_json_decode($unfinished);
-foreach ( $unfinished as $jud ) {
-	$workdir = "$workdirpath/c$jud[cid]-s$jud[submitid]-j$jud[judgingid]";
-	@chmod($workdir, 0700);
-	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] .
-	       " in my name; given back");
+
+// Perform setup work for each endpoint we are communicating with
+foreach ($endpoints as $index=>$endpoint) {
+	$resturl  = $endpoint['url'];
+	$restuser = $endpoint['user'];
+	$restpass = $endpoint['pass'];
+
+	logmsg(LOG_NOTICE, "Registering judgehost on endpoint $resturl");
+
+	// Create directory where to test submissions
+	$workdirpath = JUDGEDIR . "/$myhost/endpoint-$index";
+	system("mkdir -p $workdirpath/testcase", $retval);
+	if ( $retval != 0 ) error("Could not create $workdirpath");
+	chmod("$workdirpath/testcase", 0700);
+
+	// Auto-register judgehost via REST
+	// If there are any unfinished judgings in the queue in my name,
+	// they will not be finished. Give them back.
+	$unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
+	$unfinished = dj_json_decode($unfinished);
+	foreach ( $unfinished as $jud ) {
+		$workdir = "$workdirpath/c$jud[cid]-s$jud[submitid]-j$jud[judgingid]";
+		@chmod($workdir, 0700);
+		logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] .
+			   " in my name; given back");
+	}
 }
 
-$waiting = FALSE;
-
 // Constantly check API for unjudged submissions
+$currentEndpoint = 0;
 while ( TRUE ) {
+
+	// If all endpoints are waiting, sleep for a bit
+	$dosleep = TRUE;
+	foreach ($endpoints as $index=>$endpoint) {
+		if ($endpoint["waiting"] == FALSE) {
+			$dosleep = FALSE;
+			break;
+		}
+	}
+	// Sleep only if everything is "waiting" and only if we're looking at the first endpoint again
+	if ($dosleep && $currentEndpoint==0) {
+		sleep($waittime);
+	}
+
+	// Increment our currentEndpoint pointer
+	$currentEndpoint = ($currentEndpoint + 1) % count($endpoints);
+	$resturl  = $endpoints[$currentEndpoint]["url"];
+	$restuser = $endpoints[$currentEndpoint]["user"];
+	$restpass = $endpoints[$currentEndpoint]["pass"];
+	$workdirpath = JUDGEDIR . "/$myhost/endpoint-$currentEndpoint";
 
 	// Check whether we have received an exit signal
 	if ( function_exists('pcntl_signal_dispatch') ) pcntl_signal_dispatch();
@@ -316,19 +352,18 @@ while ( TRUE ) {
 
 	// nothing returned -> no open submissions for us
 	if ( empty($row) ) {
-		if ( ! $waiting ) {
-			logmsg(LOG_INFO, "No submissions in queue, waiting...");
-			$waiting = TRUE;
+		if ( ! $endpoints[$currentEndpoint]["waiting"] ) {
+			logmsg(LOG_INFO, "No submissions in queue(for endpoint $currentEndpoint), waiting...");
+			$endpoints[$currentEndpoint]["waiting"] = TRUE;
 		}
-		sleep($waittime);
 		continue;
 	}
 
 	// we have gotten a submission for judging
-	$waiting = FALSE;
+	$endpoints[$currentEndpoint]["waiting"] = FALSE;
 
-	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
-	       "(t$row[teamid]/p$row[probid]/$row[langid]), id j$row[judgingid]...");
+	logmsg(LOG_NOTICE, "Judging submission s$row[submitid](endpoint $currentEndpoint) ".
+		   "(t$row[teamid]/p$row[probid]/$row[langid]), id j$row[judgingid]...");
 
 	judge($row);
 
