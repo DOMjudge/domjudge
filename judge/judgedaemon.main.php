@@ -25,8 +25,11 @@ function read_credentials() {
 	}
 	foreach ($credentials as $credential) {
 		if ( $credential{0} == '#' ) continue;
-		list ($resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
-		$endpoints[] = array(
+		list ($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
+		if (array_key_exists($endpointID, $endpoints)) {
+			error("Error parsing REST API credentials. Duplicate endpoint ID");
+		}
+		$endpoints[$endpointID] = array(
 			"url" => $resturl,
 			"user" => $restuser,
 			"pass" => $restpass,
@@ -287,7 +290,7 @@ if ( !defined('USE_CGROUPS') || !USE_CGROUPS ) {
 
 
 // Perform setup work for each endpoint we are communicating with
-foreach ($endpoints as $index=>$endpoint) {
+foreach ($endpoints as $id=>$endpoint) {
 	$resturl  = $endpoint['url'];
 	$restuser = $endpoint['user'];
 	$restpass = $endpoint['pass'];
@@ -295,7 +298,7 @@ foreach ($endpoints as $index=>$endpoint) {
 	logmsg(LOG_NOTICE, "Registering judgehost on endpoint $resturl");
 
 	// Create directory where to test submissions
-	$workdirpath = JUDGEDIR . "/$myhost/endpoint-$index";
+	$workdirpath = JUDGEDIR . "/$myhost/endpoint-$id";
 	system("mkdir -p $workdirpath/testcase", $retval);
 	if ( $retval != 0 ) error("Could not create $workdirpath");
 	chmod("$workdirpath/testcase", 0700);
@@ -314,12 +317,13 @@ foreach ($endpoints as $index=>$endpoint) {
 }
 
 // Constantly check API for unjudged submissions
+$endpointIDs = array_keys($endpoints);
 $currentEndpoint = 0;
 while ( TRUE ) {
 
 	// If all endpoints are waiting, sleep for a bit
 	$dosleep = TRUE;
-	foreach ($endpoints as $index=>$endpoint) {
+	foreach ($endpoints as $id=>$endpoint) {
 		if ($endpoint["waiting"] == FALSE) {
 			$dosleep = FALSE;
 			break;
@@ -332,10 +336,11 @@ while ( TRUE ) {
 
 	// Increment our currentEndpoint pointer
 	$currentEndpoint = ($currentEndpoint + 1) % count($endpoints);
-	$resturl  = $endpoints[$currentEndpoint]["url"];
-	$restuser = $endpoints[$currentEndpoint]["user"];
-	$restpass = $endpoints[$currentEndpoint]["pass"];
-	$workdirpath = JUDGEDIR . "/$myhost/endpoint-$currentEndpoint";
+	$endpointID = $endpointIDs[$currentEndpoint];
+	$resturl  = $endpoints[$endpointID]["url"];
+	$restuser = $endpoints[$endpointID]["user"];
+	$restpass = $endpoints[$endpointID]["pass"];
+	$workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
 
 	// Check whether we have received an exit signal
 	if ( function_exists('pcntl_signal_dispatch') ) pcntl_signal_dispatch();
@@ -352,17 +357,17 @@ while ( TRUE ) {
 
 	// nothing returned -> no open submissions for us
 	if ( empty($row) ) {
-		if ( ! $endpoints[$currentEndpoint]["waiting"] ) {
-			logmsg(LOG_INFO, "No submissions in queue(for endpoint $currentEndpoint), waiting...");
-			$endpoints[$currentEndpoint]["waiting"] = TRUE;
+		if ( ! $endpoints[$endpointID]["waiting"] ) {
+			logmsg(LOG_INFO, "No submissions in queue(for endpoint $endpointID), waiting...");
+			$endpoints[$endpointID]["waiting"] = TRUE;
 		}
 		continue;
 	}
 
 	// we have gotten a submission for judging
-	$endpoints[$currentEndpoint]["waiting"] = FALSE;
+	$endpoints[$endpointID]["waiting"] = FALSE;
 
-	logmsg(LOG_NOTICE, "Judging submission s$row[submitid](endpoint $currentEndpoint) ".
+	logmsg(LOG_NOTICE, "Judging submission s$row[submitid](endpoint $endpointID) ".
 		   "(t$row[teamid]/p$row[probid]/$row[langid]), id j$row[judgingid]...");
 
 	judge($row);
