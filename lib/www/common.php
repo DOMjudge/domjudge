@@ -73,7 +73,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		if ( $restrictions['verified'] ) {
 			$verifyclause = '(j.verified = 1) ';
 		} else {
-			$verifyclause = '(j.verified = 0 OR s.judgehost IS NULL) ';
+			$verifyclause = '(j.verified = 0 OR (j.verified IS NULL AND s.judgehost IS NULL)) ';
 		}
 	}
 	if ( isset($restrictions['judged']) ) {
