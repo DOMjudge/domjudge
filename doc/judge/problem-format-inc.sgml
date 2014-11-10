@@ -35,9 +35,11 @@ determines the initial ordering of the testcases after import.
 
 <tag><tt>&lt;solution&gt;.&lt;ext&gt;</tt></tag>
 
-Submits code of reference solution as team 'domjudge' if &lt;ext&gt; is a known
-language extension. The contest, the problem, and the language have to be
-enabled. The contest must be started. If you include a comment starting with
+Reference solutions for the problem. If &lt;ext&gt; is a known
+language extension and the current user is associated to a team, then
+source code is submitted as that team. The contest, problem, and
+language have to be enabled and the contest must be started.
+If you include a comment starting with
 '<tt>@EXPECTED_RESULTS@: </tt>' followed by the possible outcomes, you can use
 the <em>judging verifier</em> in the admin interface to verify the results.
 
