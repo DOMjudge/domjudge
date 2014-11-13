@@ -218,7 +218,7 @@ bare-install|install)
 			$SQLDIR/mysql_db_examples.sql \
 			$SQLDIR/mysql_db_files_examples.sql"
 	fi
-	RESTPW=`cat $RESTPWFILE | grep -v ^# | cut	-f3`
+	RESTPW=`cat $RESTPWFILE | grep -v ^# | cut -f4`
 	(
 		cat $FILES
 		echo "UPDATE user SET password = MD5('judgehost#$RESTPW') WHERE username='judgehost';"
