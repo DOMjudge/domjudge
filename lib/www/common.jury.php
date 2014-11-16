@@ -175,7 +175,9 @@ function importZippedProblem($zip, $probid = NULL)
 	$ini_array = parse_ini_string($zip->getFromName($prop_file));
 
 	if ( empty($ini_array) ) {
-		if ( $probid===NULL ) error("Need '" . $prop_file . "' file when adding a new problem.");
+		if ( $probid===NULL ) {
+			error("Need '" . $prop_file . "' file when adding a new problem.");
+		}
 	} else {
 		// Only preserve valid keys:
 		$ini_array = array_intersect_key($ini_array,array_flip($ini_keys));
@@ -194,8 +196,9 @@ function importZippedProblem($zip, $probid = NULL)
 			unset($ini_array['probid']);
 			$ini_array['shortname'] = $probid;
 
-			$probid = $DB->q('RETURNID INSERT INTO problem (' . implode(', ',array_keys($ini_array)) .
-			       ') VALUES (%As)', $ini_array);
+			$probid = $DB->q('RETURNID INSERT INTO problem (' .
+			                 implode(', ',array_keys($ini_array)) .
+			                 ') VALUES (%As)', $ini_array);
 		} else {
 			// Remove keys that cannot be modified:
 			unset($ini_array['probid']);
@@ -208,9 +211,10 @@ function importZippedProblem($zip, $probid = NULL)
 	// Add problem statement
 	foreach (array('pdf', 'html', 'txt') as $type) {
 		$text = $zip->getFromName('problem.' . $type);
-		if ($text !== FALSE) {
-			$DB->q('UPDATE problem SET problemtext = %s, problemtext_type = %s WHERE probid = %i',
-				$text, $type, $probid);
+		if ( $text!==FALSE ) {
+			$DB->q('UPDATE problem SET problemtext = %s, problemtext_type = %s
+			        WHERE probid = %i', $text, $type, $probid);
+			echo "<p>Added problem statement from: <tt>problem.$type</tt></p>\n";
 			break;
 		}
 	}
@@ -218,13 +222,15 @@ function importZippedProblem($zip, $probid = NULL)
 	// Insert/update testcases
 	$maxrank = 1 + $DB->q('VALUE SELECT max(rank) FROM testcase
 	                       WHERE probid = %i', $probid);
+	$ncases = 0;
+	echo "<ul>\n";
 	for ($j = 0; $j < $zip->numFiles; $j++) {
 		$filename = $zip->getNameIndex($j);
 		if ( ends_with($filename, ".in") ) {
 			$basename = basename($filename, ".in");
 			$fileout = $basename . ".out";
 			$testout = $zip->getFromName($fileout);
-			if ($testout !== FALSE) {
+			if ( $testout!==FALSE) {
 				$testin = $zip->getFromIndex($j);
 
 				$DB->q('INSERT INTO testcase (probid, rank,
@@ -233,16 +239,22 @@ function importZippedProblem($zip, $probid = NULL)
 				       $probid, $maxrank, md5($testin), md5($testout),
 				       $testin, $testout, $basename);
 				$maxrank++;
+				$ncases++;
+				echo "<li>Added testcase from: <tt>$basename.{in,out}</tt></li>\n";
 			}
 		}
 	}
+	echo "</ul>\n<p>Added $ncases testcase(s).</p>\n";
 
 	// submit reference solutions
-	if ( $DB->q('VALUE SELECT allow_submit FROM problem WHERE probid = %i', $probid) ) {
+	if ( $DB->q('VALUE SELECT allow_submit FROM problem
+	             WHERE probid = %i', $probid) && !empty($teamid) ) {
 		// First find all submittable languages:
 		$langs = $DB->q('KEYVALUETABLE SELECT langid, extensions
  		                 FROM language WHERE allow_submit = 1');
 
+		$njurysols = 0;
+		echo "<ul>\n";
 		for ($j = 0; $j < $zip->numFiles; $j++) {
 			$filename = $zip->getNameIndex($j);
 			$filename_parts = explode(".", $filename);
@@ -254,17 +266,25 @@ function importZippedProblem($zip, $probid = NULL)
 					break;
 				}
 			}
-			if( !empty($langid) && !empty($teamid) ) {
+			if ( !empty($langid) ) {
 				if ( !($tmpfname = tempnam(TMPDIR, "ref_solution-")) ) {
 					error("Could not create temporary file.");
 				}
 				file_put_contents($tmpfname, $zip->getFromIndex($j));
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
 					submit_solution($teamid, $probid, $langid, array($tmpfname), array($filename));
+					echo "<li>Added jury solution from: <tt>$filename</tt></li>\n";
+					$njurysols++;
+				} else {
+					echo "<li>Could not add jury solution <tt>$filename</tt>: too large.</li>\n";
 				}
 				unlink($tmpfname);
 			}
 		}
+		echo "</ul>\n<p>Added $njurysols jury solution(s).</p>\n";
+	} else {
+		echo "<p>No jury solutions added: problem not submittable " .
+		    "or no team associated.</p>\n";
 	}
 
 	return $probid;

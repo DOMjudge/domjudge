@@ -38,6 +38,14 @@ if ( !empty($pcmd) ) {
 	}
 
 }
+
+// This doesn't return, call before sending headers
+if ( isset($cmd) && $cmd == 'viewtext' ) putProblemText($id);
+
+$jscolor=true;
+
+require(LIBWWWDIR . '/header.php');
+
 if ( isset($_POST['upload']) ) {
 	if ( !empty($_FILES['problem_archive']['tmp_name'][0]) ) {
 		foreach($_FILES['problem_archive']['tmp_name'] as $fileid => $tmpname) {
@@ -49,21 +57,22 @@ if ( isset($_POST['upload']) ) {
 			         $_FILES['problem_archive']['name'][$fileid]);
 		}
 		if ( count($_FILES['problem_archive']['tmp_name']) == 1 ) {
-			header('Location: '.$pagename.'?id='.urlencode((empty($newid)?$id:$newid)));
-		} else {
-			header('Location: problems.php');
+			$probid = empty($newid) ? $id : $newid;
+			$data = $DB->q('TUPLE SELECT shortname, name FROM problem
+			                WHERE probid = %i', $probid);
+
+			echo '<p><a href="' . $pagename.'?id='.urlencode($probid) .
+			    '">Return to problem ' . $data['shortname'] . ': ' .
+			    $data['shortname'] . ".</a></p>\n";
 		}
+		echo "<p><a href=\"problems.php\">Return to problems overview.</a></p>\n";
 	} else {
 		error("Missing filename for problem upload");
 	}
+
+	require(LIBWWWDIR . '/footer.php');
+	exit;
 }
-
-// This doesn't return, call before sending headers
-if ( isset($cmd) && $cmd == 'viewtext' ) putProblemText($id);
-
-$jscolor=true;
-
-require(LIBWWWDIR . '/header.php');
 
 if ( !empty($cmd) ):
 
