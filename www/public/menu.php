@@ -2,7 +2,7 @@
 <a href="index.php" accesskey="h">home</a>
 <?php
 if ( have_problemtexts() ) {
-	echo "<a href=\"problem.php\" accesskey=\"p\">problems</a>\n";
+	echo "<a href=\"problems.php\" accesskey=\"p\">problems</a>\n";
 }
 logged_in(); // fill userdata
 if ( checkrole('team') ) {

@@ -7,7 +7,8 @@
  */
 
 require('init.php');
-$title = ($nunread_clars ? '('.$nunread_clars.') ' : '') . 'Clarification Requests';
+
+$title = 'Clarification Requests';
 
 $jury_member = $username;
 

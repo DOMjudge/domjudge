@@ -19,8 +19,6 @@ SUBMIT = \
 	fi ; \
 	echo
 
-build: $(TARGETS)
-
 check-syntax:
 	./syntax
 

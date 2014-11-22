@@ -2,7 +2,7 @@
 AC_INIT([DOMjudge],
         m4_esyscmd([sed -n '1s/^.*version //p' README | tr -d '\n']),
         [domjudge-devel@lists.A-Eskwadraat.nl])
-AC_PREREQ([2.60])
+AC_PREREQ([2.64])
 AC_CONFIG_HEADERS([etc/config.h])
 AC_CONFIG_SRCDIR([Makefile.global])
 
@@ -75,11 +75,23 @@ fi
 
 AC_MSG_CHECKING([webserver-group])
 AC_ARG_WITH([webserver-group], [AS_HELP_STRING([--with-webserver-group=GROUP],
-[Webserver group for password files (default: www-data).])], [], [])
+[Webserver group for password files (default: try to detect).])], [], [])
 
 if test "x$with_webserver_group" = x; then
-	AC_SUBST(WEBSERVER_GROUP,"www-data")
-	AC_MSG_RESULT([$WEBSERVER_GROUP (default)])
+	# Try a number of group names and choose first one found
+	found=0
+	for g in www-data apache httpd ; do
+		if getent group $g >/dev/null 2>&1 ; then
+		   found=1
+		   break
+		fi
+	done
+	if test $found -ne 0 ; then
+		AC_SUBST(WEBSERVER_GROUP,"$g")
+		AC_MSG_RESULT([$WEBSERVER_GROUP (detected)])
+	else
+		AC_MSG_ERROR([webserver group could not be detected, use --with-webserver-group=GROUP)])
+	fi
 else
 	AC_SUBST(WEBSERVER_GROUP,$with_webserver_group)
 	AC_MSG_RESULT([$WEBSERVER_GROUP])
@@ -207,6 +219,7 @@ AX_WITH_COMMENT(7,[      ])
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
+AC_PROG_CXXCPP
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -216,15 +229,9 @@ AC_PROG_MKDIR_P
 # Check for including optional libmagic.
 AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
 
-# Check for JSONcpp library to decode language/extensions list from
-# REST API (this also requires libcURL below).
-AC_LANG_PUSH([C++])
-AC_CHECK_HEADERS([jsoncpp/json/json.h],AC_SUBST(LIBJSONCPP,[-ljsoncpp]))
-AC_LANG_POP([C++])
-
 # {{{ submitclient
 
-AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--enable-submitclient],
+AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--disable-submitclient],
 [enable submit client program (default: yes).
  This requires JSONcpp and cURL libraries and optionally
  libmagic for detecting submission of binary files.]))
@@ -243,33 +250,52 @@ if test "x$enable_submitclient" != "xno"; then
 	])
 	CPPFLAGS="$save_CPPFLAGS"
 	# The 'curl-config --static-libs' option is accepted since 7.17.1
-	AX_COMPARE_VERSION([$curl_version],[ge],[7.17.1],[
-		AC_SUBST(CURL_STATIC,`curl-config --static-libs`)
-	],[
-		AC_SUBST(CURL_STATIC,"")
+	AC_SUBST(CURL_STATIC,"")
+	if test "x$enable_static_linking" = "xyes"; then
+		AX_COMPARE_VERSION([$curl_version],[ge],[7.17.1],[
+			AC_SUBST(CURL_STATIC,`curl-config --static-libs`)])
+	fi
+
+	# Check for JSONcpp library to decode language/extensions list from
+	# REST API (this also requires libcURL below).
+	AC_LANG_PUSH([C++])
+	AC_CHECK_HEADERS([jsoncpp/json/json.h],AC_SUBST(LIBJSONCPP,[-ljsoncpp]),[
+		AC_MSG_ERROR([JSONcpp headers not found (required for submit client)])
 	])
+	AC_LANG_POP([C++])
+
 fi
 # }}}
 
 # Check for building "checktestdata" program.
-AC_ARG_ENABLE(checktestdata,AS_HELP_STRING([--enable-checktestdata],
+AC_ARG_ENABLE(checktestdata,AS_HELP_STRING([--disable-checktestdata],
 [enable building of checktestdata program (default: yes).
  This requires the Boost regex and GNU GMP libraries.]))
 
 if test "x$enable_checktestdata" != "xno"; then
 	AC_SUBST(CHECKTESTDATA_ENABLED,[yes])
 
-	AX_PROG_BISONCPP
-	AX_PROG_FLEXCPP
-
-	AX_BOOST_BASE([1.33.1],[],[AC_MSG_ERROR([Boost not available.])])
+	AX_BOOST_BASE([1.33.1],[],[
+		AC_MSG_ERROR([Boost not found (required for checktestdata)])])
 	AX_BOOST_REGEX
 
 	# Check for gmpxx headers separately, as they are C++.
 	AC_LANG_PUSH([C++])
 	AC_CHECK_HEADERS([gmpxx.h])
-	AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmpxx -lgmp'),[],[-lgmp])
+	AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmpxx -lgmp'),[
+		AC_MSG_ERROR([GMPlib not found (required for checktestdata)])],[-lgmp])
 	AC_LANG_POP([C++])
+fi
+
+# Check option to link statically against "special" libraries for
+# submit client and checktestdata programs.
+AC_ARG_ENABLE(static-linking,AS_HELP_STRING([--enable-static-linking],
+[enable static linking against libcurl,libmagic,libjsoncpp for 'submit'
+ and libgmpxx,libboost_regex for 'checktestdata' (default: no).]))
+
+if test "x$enable_static_linking" = "xyes"; then
+	AC_SUBST(STATIC_LINK_START,[-Wl,-Bstatic])
+	AC_SUBST(STATIC_LINK_END,  [-Wl,-Bdynamic])
 fi
 
 # See 'man feature_test_macros' under Linux:
@@ -360,9 +386,7 @@ echo "    - run..............: $judgehost_rundir"
 echo "    - tmp..............: $judgehost_tmpdir"
 echo "    - judge............: $judgehost_judgedir"
 echo ""
-echo "Now you might want to run some of:"
-echo ""
-echo "    make domserver judgehost docs"
+echo "Run 'make' without arguments to get a list of (build) targets."
 echo ""
 fi # !QUIET
 # }}}

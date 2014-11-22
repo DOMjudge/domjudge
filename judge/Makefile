@@ -5,11 +5,7 @@ include $(TOPDIR)/Makefile.global
 
 TARGETS = runguard runpipe
 
-judgehost: build
-
-config: judgedaemon
-
-build: $(TARGETS)
+judgehost: $(TARGETS) judgedaemon
 
 judgedaemon: judgedaemon.in $(TOPDIR)/paths.mk
 	$(substconfigvars)

@@ -15,7 +15,7 @@ requireAdmin();
 <h1>Import and Export</h1>
 
 <ul>
-<li><a href="import-export-config.php">Contest data (contest.yaml)</a></li>
+<li><a href="impexp_contestyaml.php">Contest data (contest.yaml)</a></li>
 <li><a href="problems.php#problem_archive__">Problem archive</a></li>
 <li>Tab separated, export:
 	<a href="impexp_tsv.php?act=ex&amp;fmt=groups">groups.tsv</a>,
@@ -53,6 +53,7 @@ echo "<tr><td><label for=\"contest\">Contest ID:</label></td>" .
 echo "<tr><td><label for=\"token\">Access token:</label></td>" .
 	"<td>" . addInput('token', @$token, null, null, 'required') . "</td></tr>\n";
 echo "</table>\n";
-echo addSubmit('Fetch teams', 'fetch') . addSubmit('Upload standings', 'upload') . addEndForm();
+echo addSubmit('Fetch teams', 'fetch') .
+     addSubmit('Upload standings', 'upload') . addEndForm();
 
 require(LIBWWWDIR . '/footer.php');

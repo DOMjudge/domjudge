@@ -34,9 +34,8 @@ $earlier = array();
 $matchstring = '@EXPECTED_RESULTS@: ';
 $verifier = 'auto-verifier';
 
-$res = $DB->q("SELECT s.*, f.sourcecode, j.judgingid, j.result, j.verified, j.jury_member
+$res = $DB->q("SELECT s.*, j.judgingid, j.result, j.verified, j.jury_member
                FROM submission s
-               LEFT JOIN submission_file f ON (s.submitid = f.submitid AND f.rank=0)
                LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
                WHERE s.cid = %i AND j.result IS NOT NULL", $cid);
 
@@ -48,8 +47,8 @@ function flushresults($header, $results, $collapse = FALSE)
 
 	$section++;
 
-	echo "<h2><a href=\"javascript:collapse($section)\">$header</a></h2>\n\n";
-	echo "<ul class=\"details\" id=\"detail$section\">\n";
+	echo "<h2><a class=\"collapse\" href=\"javascript:collapse($section)\">" .
+		"$header</a></h2>\n\n<ul class=\"details\" id=\"detail$section\">\n";
 	foreach ($results as $row) {
 		echo "<li>$row</li>\n";
 	}
@@ -69,12 +68,22 @@ function flushresults($header, $results, $collapse = FALSE)
 while( $row = $res->next() ) {
 	$sid = $row['submitid'];
 
-	if ( ($pos = mb_strpos($row['sourcecode'],$matchstring)) !== FALSE && $row['verified']==0 ) {
+	// Try to find the verification match string in one of the source
+	// files. The first match is used.
+	$files = $DB->q("KEYVALUETABLE SELECT rank, sourcecode
+	                 FROM submission_file WHERE submitid = %i", $sid);
+
+	foreach ( $files AS $rank => $source ) {
+		if ( ($pos = mb_stripos($source,$matchstring)) !== FALSE ) break;
+	}
+
+	if ( $pos !== FALSE && $row['verified']==0 ) {
 		$nchecked++;
 
 		$beginpos = $pos + mb_strlen($matchstring);
-		$endpos = mb_strpos($row['sourcecode'],"\n",$beginpos);
-		$results = explode(',',trim(mb_substr($row['sourcecode'],$beginpos,$endpos-$beginpos)));
+		$endpos = mb_strpos($source,"\n",$beginpos);
+		$str = mb_substr($source,$beginpos,$endpos-$beginpos);
+		$results = explode(',',trim(mb_strtoupper($str)));
 
 		$result = mb_strtoupper($row['result']);
 

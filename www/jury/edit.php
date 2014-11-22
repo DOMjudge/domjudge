@@ -15,6 +15,9 @@ requireAdmin();
 $cmd = @$_POST['cmd'];
 if ( $cmd != 'add' && $cmd != 'edit' ) error ("Unknown action.");
 
+if ( !file_exists(LIBDIR . '/relations.php') ) {
+	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
+}
 require(LIBDIR .  '/relations.php');
 
 $t = @$_POST['table'];
@@ -29,7 +32,9 @@ $referrer      = @$_POST['referrer'];
 
 if ( empty($data) ) error ("No data.");
 // ensure referrer only contains a single filename, not complete URLs
-if ( ! preg_match('/^[.a-zA-Z0-9?&=_-]*$/', $referrer ) ) error ("Invalid characters in referrer.");
+if ( ! preg_match('/^[.a-zA-Z0-9?&=_-]*$/', $referrer ) ) {
+	error ("Invalid characters in referrer.");
+}
 
 require(LIBWWWDIR . '/checkers.jury.php');
 

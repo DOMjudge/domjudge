@@ -10,6 +10,8 @@ require('init.php');
 
 $id = getRequestID();
 $title = 'Problem p'.htmlspecialchars(@$id);
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'problem' . ($id ? ' p'.htmlspecialchars(@$id) : ''));
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
@@ -36,24 +38,6 @@ if ( !empty($pcmd) ) {
 	}
 
 }
-if ( isset($_POST['upload']) ) {
-	if ( !empty($_FILES['problem_archive']['tmp_name'][0]) ) {
-		foreach($_FILES['problem_archive']['tmp_name'] as $fileid => $tmpname) {
-			checkFileUpload( $_FILES['problem_archive']['error'][$fileid] );
-			$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
-			$newid = importZippedProblem($zip, empty($id) ? NULL : $id);
-			$zip->close();
-			auditlog('problem', $newid, 'upload zip', $_FILES['problem_archive']['name'][$fileid]);
-		}
-		if ( count($_FILES['problem_archive']['tmp_name']) == 1 ) {
-			header('Location: '.$pagename.'?id='.urlencode((empty($newid)?$id:$newid)));
-		} else {
-			header('Location: problems.php');
-		}
-	} else {
-		error("Missing filename for problem upload");
-	}
-}
 
 // This doesn't return, call before sending headers
 if ( isset($cmd) && $cmd == 'viewtext' ) putProblemText($id);
@@ -62,11 +46,39 @@ $jscolor=true;
 
 require(LIBWWWDIR . '/header.php');
 
+if ( isset($_POST['upload']) ) {
+	if ( !empty($_FILES['problem_archive']['tmp_name'][0]) ) {
+		foreach($_FILES['problem_archive']['tmp_name'] as $fileid => $tmpname) {
+			checkFileUpload( $_FILES['problem_archive']['error'][$fileid] );
+			$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
+			$newid = importZippedProblem($zip, empty($id) ? NULL : $id);
+			$zip->close();
+			auditlog('problem', $newid, 'upload zip',
+			         $_FILES['problem_archive']['name'][$fileid]);
+		}
+		if ( count($_FILES['problem_archive']['tmp_name']) == 1 ) {
+			$probid = empty($newid) ? $id : $newid;
+			$data = $DB->q('TUPLE SELECT shortname, name FROM problem
+			                WHERE probid = %i', $probid);
+
+			echo '<p><a href="' . $pagename.'?id='.urlencode($probid) .
+			    '">Return to problem ' . $data['shortname'] . ': ' .
+			    $data['shortname'] . ".</a></p>\n";
+		}
+		echo "<p><a href=\"problems.php\">Return to problems overview.</a></p>\n";
+	} else {
+		error("Missing filename for problem upload");
+	}
+
+	require(LIBWWWDIR . '/footer.php');
+	exit;
+}
+
 if ( !empty($cmd) ):
 
 	requireAdmin();
 
-	echo "<h2>" .  htmlspecialchars(ucfirst($cmd)) . " problem</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php', 'post', null, 'multipart/form-data');
 
@@ -75,8 +87,8 @@ if ( !empty($cmd) ):
 	if ( $cmd == 'edit' ) {
 		echo "<tr><td>Problem ID:</td><td>";
 		$row = $DB->q('TUPLE SELECT p.probid,p.cid,p.shortname,p.name,p.allow_submit,p.allow_judge,
-	                                    p.timelimit,p.special_run,p.special_compare,p.color,
-	                                    p.problemtext_type, COUNT(testcaseid) AS testcases
+		                            p.timelimit,p.special_run,p.special_compare,p.color,
+		                            p.problemtext_type, COUNT(testcaseid) AS testcases
 		               FROM problem p
 		               LEFT JOIN testcase USING (probid)
 		               WHERE probid = %i GROUP BY probid', $id);
@@ -87,8 +99,9 @@ if ( !empty($cmd) ):
 
 ?>
 <tr><td><label for="data_0__shortname_">Shortname:</label></td><td>
-<?php echo addInput('data[0][shortname]', @$row['shortname'], 8, 10, " required pattern=\"" . IDENTIFIER_CHARS . "+\"") .
-      "(alphanumerics only)"; ?></td></tr>
+<?php echo addInput('data[0][shortname]', @$row['shortname'], 8, 10,
+                    " required pattern=\"" . IDENTIFIER_CHARS . "+\"") .
+           "(alphanumerics only)"; ?></td></tr>
 <tr><td><label for="data_0__cid_">Contest:</label></td>
 <td><?php
 $cmap = $DB->q("KEYVALUETABLE SELECT cid,contestname FROM contest ORDER BY cid DESC");
@@ -194,7 +207,8 @@ $data = $DB->q('TUPLE SELECT p.probid,p.cid,p.shortname,p.name,p.allow_submit,p.
 
 if ( ! $data ) error("Missing or invalid problem id");
 
-echo "<h1>Problem p".htmlspecialchars($id)."</h1>\n\n";
+echo "<h1>Problem ".htmlspecialchars($data['shortname']).
+	" - ".htmlspecialchars($data['name'])."</h1>\n\n";
 
 echo addForm($pagename . '?id=' . urlencode($id),
              'post', null, 'multipart/form-data') . "<p>\n" .
@@ -263,7 +277,8 @@ if ( IS_ADMIN ) {
 		delLink('problem','probid', $id) . "</p>\n\n";
 }
 
-echo "<h2>Submissions for p" . htmlspecialchars($id) . "</h2>\n\n";
+echo "<h2>Submissions for " . htmlspecialchars($data['shortname']) .
+	" - " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $restrictions = array( 'probid' => $id );
 putSubmissions($cdata, $restrictions);

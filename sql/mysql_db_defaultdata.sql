@@ -6,18 +6,18 @@
 -- externally (e.g. to 'domjudge').
 
 
--- 
+--
 -- Dumping data for table `configuration`
--- 
+--
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', '{"general":"General issue","technical":"Technical issue"}', 'array_keyval', 'List of additional clarification categories');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_time', '30', 'int', 'Maximum seconds available for compiling.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_memory', '2097152', 'int', 'Maximum memory usage (in kB) by *compilers*. This is only to safeguard against malicious code, so a reasonable but large amount should do.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_filesize', '65536', 'int', 'Maximum filesize (in kB) compilers may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('script_timelimit', '30', 'int', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('script_memory_limit', '2097152', 'int', 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('script_filesize', '65536', 'int', 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('memory_limit', '524288', 'int', 'Maximum memory usage (in kB) by submissions. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB!');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('filesize_limit', '4096', 'int', 'Maximum filesize (in kB) submissions may write. Solutions will abort when trying to write more, so this should be greater than the maximum testdata output.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('process_limit', '15', 'int', 'Maximum number of processes that the submission is allowed to start (including shell and possibly interpreters).');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('process_limit', '64', 'int', 'Maximum number of processes that the submission is allowed to start (including shell and possibly interpreters).');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('sourcesize_limit', '256', 'int', 'Maximum source code size (in kB) of a submission. This setting should be kept in sync with that in "etc/submit-config.h.in".');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('sourcefiles_limit', '100', 'int', 'Maximum number of source files in one submission. Set to one to disable multiple file submissions.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('timelimit_overshoot', '"1s|10%"', 'string', 'Time that submissions are kept running beyond timelimt before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.');
@@ -37,6 +37,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('en
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('time_format', '"%H:%M"', 'string', 'The format used to print times. For formatting options see the PHP \'strftime\' function.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_compare', '"compare"', 'string', 'The script used to compare outputs if no special compare script specified.');
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_run', '"run"', 'string', 'The script used to run submissions if no special run script specified.');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('allow_registration', '0', 'bool', 'Allow users to register themselves with the system?');
 
 --
 -- Dumping data for table `executable`
@@ -68,9 +69,9 @@ INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
 ('scala', 'scala', 'compile'),
 ('sh', 'sh', 'compile');
 
--- 
+--
 -- Dumping data for table `language`
--- 
+--
 
 INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`, `compile_script`) VALUES
 ('adb', 'Ada', '["adb","ads"]', 0, 1, 1, 'adb'),
@@ -80,9 +81,9 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 ('cpp', 'C++', '["cpp","cc","c++"]', 1, 1, 1, 'cpp'),
 ('csharp', 'C#', '["csharp","cs"]', 0, 1, 1, 'csharp'),
 ('f95', 'Fortran', '["f95","f90"]', 0, 1, 1, 'f95'),
-('hs', 'Haskell', '["hs","lhs"]', 0, 1, 2, 'hs'),
-('java', 'Java', '["java"]', 1, 1, 1.5, 'java_javac_detect'),
-('js', 'JavaScript', '["js"]', 0, 1, 1.5, 'js'),
+('hs', 'Haskell', '["hs","lhs"]', 0, 1, 1, 'hs'),
+('java', 'Java', '["java"]', 1, 1, 1, 'java_javac_detect'),
+('js', 'JavaScript', '["js"]', 0, 1, 1, 'js'),
 ('lua', 'Lua', '["lua"]', 0, 1, 1, 'lua'),
 ('pas', 'Pascal', '["pas","p"]', 0, 1, 1, 'pas'),
 ('pl', 'Perl', '["pl"]', 0, 1, 1, 'pl'),
@@ -90,13 +91,13 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 ('py2', 'Python 2', '["py2","py"]', 0, 1, 1, 'py2'),
 ('py3', 'Python 3', '["py3"]', 0, 1, 1, 'py3'),
 ('rb', 'Ruby', '["rb"]', 0, 1, 1, 'rb'),
-('scala', 'Scala', '["scala"]', 0, 1, 1.5, 'scala'),
+('scala', 'Scala', '["scala"]', 0, 1, 1, 'scala'),
 ('sh', 'POSIX shell', '["sh"]', 0, 1, 1, 'sh');
 
 
--- 
+--
 -- Dumping data for table `role`
--- 
+--
 
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (1, 'admin',          'Administrative User');
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (2, 'jury',           'Jury User');
@@ -107,29 +108,30 @@ INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (6, 'judgehost',    
 INSERT INTO `role` (`role`, `description`) VALUES ('event_reader',      '(Internal/System) event_reader');
 INSERT INTO `role` (`role`, `description`) VALUES ('full_event_reader', '(Internal/System) full_event_reader');
 
--- 
+--
 -- Dumping data for table `team_category`
--- 
+--
 -- System category
 INSERT INTO `team_category` VALUES (1, 'System', 9, '#ff2bea', 0);
+INSERT INTO `team_category` VALUES (2, 'Self-Registered', 8, '#33cc44', 1);
 
--- 
+--
 -- Dumping data for table `team`
--- 
+--
 
 INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES (1, 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
 
--- 
+--
 -- Dumping data for table `user`
--- 
+--
 
 INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES
 (1, 'admin', 'Administrator', MD5('admin#admin')),
 (2, 'judgehost', 'User for judgedaemons', NULL);
 
--- 
+--
 -- Dumping data for table `userrole`
--- 
+--
 
 INSERT INTO `userrole` (`userid`, `roleid`) VALUES
 (1, 1),

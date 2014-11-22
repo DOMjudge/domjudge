@@ -159,6 +159,21 @@ Please supply your credentials below, or contact a staff member for assistance.
 </form>
 
 <?php
+if (dbconfig_get('allow_registration', false)) { ?>
+<p>If you do not have an account, you can register for one below: </p>
+<form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">
+<input type="hidden" name="cmd" value="register" />
+<table>
+<tr><td><label for="login">Username:</label></td><td><input type="text" id="login" name="login" value="" size="15" maxlength="15" accesskey="l" /></td></tr>
+<tr><td><label for="passwd">Password:</label></td><td><input type="password" id="passwd" name="passwd" value="" size="15" maxlength="255" accesskey="p" /></td></tr>
+<tr><td><label for="passwd2">Retype password:</label></td><td><input type="password" id="passwd2" name="passwd2" value="" size="15" maxlength="255" accesskey="r" /></td></tr>
+<tr><td></td><td><input type="submit" value="Register" /></td></tr>
+</table>
+</form>
+<?php } // endif allow_registration ?>
+
+
+<?php
 		putDOMjudgeVersion();
 		include(LIBWWWDIR . '/footer.php');
 		break;
@@ -322,6 +337,69 @@ function do_login_native($user, $pass)
 	$username = $userdata['username'];
 }
 
+function do_register() {
+        global $DB, $ip;
+        if ( !dbconfig_get('allow_registration', false) ) {
+            error("Self-Registration is disabled.");
+        }
+        if ( AUTH_METHOD != "PHP_SESSIONS" ) {
+            error("You can only register if the site is using PHP Sessions for authentication.");
+        }
+
+        $login = trim($_POST['login']);
+        $pass = trim($_POST['passwd']);
+        $pass2 = trim($_POST['passwd2']);
+
+        if ( $login == '' || $pass == '') {
+            error("You must enter all fields");
+        }
+
+        if ( !ctype_alnum($login) ) {
+            error("Username must consist of only alphanumeric characters.");
+        }
+
+        if ( $pass != $pass2 ) {
+            error("Your passwords do not match. Please go back and try registering again.");
+        }
+        $user = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $login);
+        if ( $user ) {
+            error("That login is already taken.");
+        }
+        $team = $DB->q('MAYBETUPLE SELECT * FROM team WHERE name = %s', $login);
+        if ( $team ) {
+            error("That login is already taken.");
+        }
+
+		// Create the team object
+        $i = array();
+        $i['name'] = $login;
+        $i['categoryid'] = 2; // Self-registered category id
+        $i['enabled'] = 1;
+        $i['comments'] = "Registered by $ip on " . date('r');
+
+        $teamid = $DB->q("RETURNID INSERT INTO team SET %S", $i);
+        auditlog('team', $teamid, 'registered by ' . $ip);
+
+		// Associate a user with the team we just made
+        $i = array();
+        $i['username'] = $login;
+        $i['password'] = md5($login."#".$pass);
+        $i['name'] = $login;
+        $i['teamid'] = $teamid;
+        $newid = $DB->q("RETURNID INSERT INTO user SET %S", $i);
+        auditlog('user', $newid, 'registered by ' . $ip);
+
+        $DB->q("INSERT INTO `userrole` (`userid`, `roleid`) VALUES ($newid, 3)");
+
+        $title = 'Account Registered';
+        $menu = false;
+
+        require(LIBWWWDIR . '/header.php');
+        echo "<h1>Account registered</h1>\n\n<p><a href=\"./\">Click here to login.</a></p>\n\n";
+        require(LIBWWWDIR . '/footer.php');
+		exit;
+}
+
 // Logout a team. Function does not return and should generate a page
 // showing logout and optionally refer to a login page.
 function do_logout()
@@ -362,7 +440,7 @@ function do_logout()
 	require(LIBWWWDIR . '/header.php');
 	echo "<h1>Logged out</h1>\n\n<p>Successfully logged out as user '" .
 	    htmlspecialchars($username) . "'.</p>\n" .
-	    "<p><a href=\"./\">Click here to return to the main site.</a></p>\n\n";
+	    "<p><a href=\"../\">Click here to return to the main site.</a></p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }

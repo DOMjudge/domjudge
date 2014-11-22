@@ -68,10 +68,6 @@ while ( ($src = readdir($dh))!==FALSE ) {
 
 	// Reconstruct submission data from filename and mtime
 	$fdata = explode('.', $src, 7);
-	if ( $fdata[0][0]!='c' || $fdata[1][0]!='s' ) {
-		logmsg(LOG_DEBUG, "skipping '$src': does not match pattern");
-		continue;
-	}
 	// Detect and support obsolete (version <=3.2) sourcefile format
 	if ( count($fdata)==5 ) {
 		logmsg(LOG_DEBUG, "detected old sourcefile format: '$src'");
@@ -80,13 +76,15 @@ while ( ($src = readdir($dh))!==FALSE ) {
 		$filename = 'source.'.$langid;
 	} else if ( count($fdata)==7 ) {
 		list($cid, $sid, $teamid, $probid, $langid, $rank, $filename) = $fdata;
+		if ( $cid[0]=='c' ) $cid = substr($cid,1);
+		if ( $sid[0]=='s' ) $sid = substr($sid,1);
+		if ( $teamid[0]=='t' ) $teamid = substr($teamid,1);
+		if ( $probid[0]=='p' ) $probid = substr($probid,1);
 	} else {
 		logmsg(LOG_DEBUG, "skipping '$src': does not match pattern");
 		continue;
 	}
 
-	$cid = substr($cid,1);
-	$sid = substr($sid,1);
 	$submittime = filemtime($f);
 
 	// Convert old-style probid to new numeric one:

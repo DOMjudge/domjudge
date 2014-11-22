@@ -23,7 +23,7 @@ function display_compile_output($output, $success) {
 	}
 
 	echo '<h3 id="compile">' .
-		(empty($output) ? '' : "<a href=\"javascript:collapse('compile')\">") .
+		(empty($output) ? '' : "<a class=\"collapse\" href=\"javascript:collapse('compile')\">") .
 		"Compilation <span style=\"color:$color;\">$msg</span>" .
 		(empty($output) ? '' : "</a>" ) . "</h3>\n\n";
 
@@ -64,9 +64,9 @@ function display_runinfo($runinfo, $is_final) {
 			$short = substr($run['runresult'], 0, 1);
 			$class = "tc_incorrect";
 		}
-		$tclist .= "<a title=\"desc: " . htmlspecialchars($run['description']) . 
-			($run['runresult'] !== NULL ?  ", runtime: " . $run['runtime'] . "s, result: " . $run['runresult'] : '') . 
-			"\" href=\"$link\"" . 
+		$tclist .= "<a title=\"desc: " . htmlspecialchars($run['description']) .
+			($run['runresult'] !== NULL ?  ", runtime: " . $run['runtime'] . "s, result: " . $run['runresult'] : '') .
+			"\" href=\"$link\"" .
 			($run['runresult'] == 'correct' ? ' onclick="display_correctruns(true);" ' : '') .
 			"><span class=\"$class tc_box\">" . $short . "</span></a>";
 
@@ -168,42 +168,41 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 // Headers might already have been included.
 require_once(LIBWWWDIR . '/header.php');
 
-echo "<br/><h1 style=\"display:inline;\">Submission s".$id;
-if ( $submdata['valid'] ) {
-	echo "</h1>\n\n";
-} else {
-	echo " (ignored)</h1>\n\n";
-	echo "<p>This submission is not used during the scoreboard
-		  calculations.</p>\n\n";
-}
+echo "<br/><h1 style=\"display:inline;\">Submission s" . $id .
+	( $submdata['valid'] ? '' : ' (ignored)' ) . "</h1>\n\n";
 if ( IS_ADMIN ) {
 	$val = ! $submdata['valid'];
 	$unornot = $val ? 'un' : '';
-	echo "\n" . addForm('ignore.php') .
+	echo "&nbsp;\n" . addForm('ignore.php') .
 		addHidden('id',  $id) .
 		addHidden('val', $val) .
 			'<input type="submit" value="' . $unornot .
 			'IGNORE this submission" onclick="return confirm(\'Really ' . $unornot .
 			"ignore submission s$id?');\" /></form>\n";
 }
-echo '<br/><br/>';
+if ( ! $submdata['valid'] ) {
+	echo "<p>This submission is not used during scoreboard calculations.</p>\n\n";
+}
 
+// Condensed submission info on a single line with icons:
 ?>
 
+<p>
 <img title="team" alt="Team:" src="../images/team.png"/> <a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>">
-	<?php echo htmlspecialchars($submdata['teamname'] . " (t" . $submdata['teamid'].")")?></a>,
+    <?php echo htmlspecialchars($submdata['teamname'] . " (t" . $submdata['teamid'].")")?></a>&nbsp;&nbsp;
 <img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>">
 	<span class="probid"><?php echo htmlspecialchars($submdata['shortname'])?></span>:
-	<?php echo htmlspecialchars($submdata['probname'])?></a>,
+	<?php echo htmlspecialchars($submdata['probname'])?></a>&nbsp;&nbsp;
 <img title="language" alt="Language:" src="../images/lang.png"/> <a href="language.php?id=<?php echo $submdata['langid']?>">
-	<?php echo htmlspecialchars($submdata['langname'])?></a>,
+	<?php echo htmlspecialchars($submdata['langname'])?></a>&nbsp;&nbsp;
 <img title="submittime" alt="Submittime:" src="../images/submittime.png"/> <?php
 	echo printtime($submdata['submittime'], NULL, TRUE) .
-		' (' . printtime($submdata['submittime']) . ')'; ?>,
+		' (' . printtime($submdata['submittime']) . ')'; ?>&nbsp;&nbsp;
 <img title="allowed runtime" alt="Allowed runtime:" src="../images/allowedtime.png"/>
-	<?php echo  htmlspecialchars($submdata['maxruntime']) ?>s,
+	<?php echo  htmlspecialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
 <img title="view source code" alt="" src="../images/code.png"/>
 <a href="show_source.php?id=<?= $id ?>" style="font-weight:bold;">view source code</a>
+</p>
 
 <?php
 
@@ -214,8 +213,7 @@ if ( isset($submdata['externalid']) ) {
 }
 
 if ( count($jdata) > 1 ) {
-	echo "<br/><br/>";
-	echo "<table class=\"list\">\n" .
+	echo "<p><table class=\"list\">\n" .
 		"<caption>Judgings</caption>\n<thead>\n" .
 		"<tr><td></td><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
 		"<th scope=\"col\">judgehost</th><th scope=\"col\">result</th>" .
@@ -240,10 +238,10 @@ if ( count($jdata) > 1 ) {
 			"</tr>\n";
 
 	}
-    echo "</tbody>\n</table>\n\n";
+    echo "</tbody>\n</table>\n</p>\n\n";
 
 } else if ( count($jdata) == 0 ) {
-	echo "<br/><br/><em>Not judged yet</em>";
+	echo "<p><em>Not judged yet</em></p>\n\n";
 }
 
 
@@ -257,7 +255,7 @@ if ( isset($jid) )  {
 	if ($jud['submitid'] != $id) error(
 		sprintf("judingid j%d belongs to submitid s%d, not s%d",
 			$jid, $jud['submitid'], $id));
-	
+
 	// Display testcase runs
 	$runs = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
 	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
@@ -299,9 +297,9 @@ if ( isset($jid) )  {
 				$lasttclist . "</td></tr>\n";
 	}
 
-	echo "<br/><h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .
+	echo "<h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .
 		($jud['valid'] == 1 ? '' : ' (INVALID)') .
-		"</h2>\n\n";
+		"</h2>\n\n&nbsp;";
 	if ( !$jud['verified'] ) {
 		echo addForm($pagename . '?id=' . urlencode($id) . '&amp;jid=' . urlencode($jid));
 
@@ -332,7 +330,7 @@ if ( isset($jid) )  {
 	echo 'Result: ' . printresult($jud['result'], $jud['valid']) . ( $lastjud === NULL ? '' :
 		'<span class="lastresult"> (<a href="submission.php?id=' . $lastsubmitid . '">s' . $lastsubmitid. '</a>: '
 		. @$lastjud['result'] . ')</span>' ) . ', ' .
-		'Judgehost: <a href="judgehost.php?id=' . urlencode($jud['judgehost']) . '">' . 
+		'Judgehost: <a href="judgehost.php?id=' . urlencode($jud['judgehost']) . '">' .
 		printhost($jud['judgehost']) . '</a>, ';
 
 	// Time (start, end, used)
@@ -365,7 +363,7 @@ if ( isset($jid) )  {
 		}
 		echo "</table>\n";
 	}
-	
+
 	// display following data only when the judging has been completed
 	if ( $judging_ended ) {
 
@@ -441,7 +439,7 @@ togglelastruns();
 
 		if ( $run['runresult']===NULL ) {
 			echo "<p class=\"nodata\">" .
-				( $jud['result'] === NULL ? 'Run not started/finished yet.' : 'Run not used for final result.' ) . 
+				( $jud['result'] === NULL ? 'Run not started/finished yet.' : 'Run not used for final result.' ) .
 				"</p>\n";
 			continue;
 		}

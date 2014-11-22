@@ -22,7 +22,9 @@
    output of the command, unless that is optionally redirected to file.
 
    The command and its children are sent a SIGTERM after the runtime
-   has passed, followed by a SIGKILL after 'killdelay'.
+   has passed, followed by a SIGKILL after 'killdelay'. The program is
+   considered to have finished when the main program thread exits. At
+   that time any children still running are killed.
  */
 
 #include "config.h"
@@ -460,6 +462,21 @@ void cgroup_attach()
 	}
 
 	cgroup_free(&cg);
+}
+
+void cgroup_kill()
+{
+	int ret;
+	void *handle = NULL;
+	pid_t pid;
+
+	/* kill any remaining tasks, and wait for them to be gone */
+	while(1) {
+		ret = cgroup_get_task_begin(cgroupname, "memory", &handle, &pid);
+		cgroup_get_task_end(&handle);
+		if (ret == ECGEOF) break;
+		kill(pid, SIGKILL);
+	}
 }
 
 void cgroup_delete()
@@ -1152,6 +1169,7 @@ int main(int argc, char **argv)
 
 #ifdef USE_CGROUPS
 		output_cgroup_stats();
+		cgroup_kill();
 		cgroup_delete();
 #endif
 

@@ -73,7 +73,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		if ( $restrictions['verified'] ) {
 			$verifyclause = '(j.verified = 1) ';
 		} else {
-			$verifyclause = '(j.verified = 0 OR s.judgehost IS NULL) ';
+			$verifyclause = '(j.verified = 0 OR (j.verified IS NULL AND s.judgehost IS NULL)) ';
 		}
 	}
 	if ( isset($restrictions['judged']) ) {
@@ -94,25 +94,25 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		 LEFT JOIN language      l  USING (langid)
 		 LEFT JOIN judging       j  ON (s.submitid = j.submitid AND j.valid=1)
 		 WHERE s.cid = %i ' .
-	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
-	    (isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
-	    (isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
-	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
-	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
+		(isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
+		(isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
+		(isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
+		(isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
+		(isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
 
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.externalresult,
 					s.submittime, s.judgehost, s.valid, t.name AS teamname,
 					p.shortname, p.name AS probname, l.name AS langname,
-					j.result, j.judgehost, j.verified, j.jury_member, j.seen '
-				  . $sqlbody
-				  . (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '')
-				  . (isset($restrictions['judged'])  ? 'AND ' . $judgedclause : '')
-				  . (isset($restrictions['externaldiff'])  ? 'AND ' . $externalclause : '')
-				  .'ORDER BY s.submittime DESC, s.submitid DESC '
-				  . ($limit > 0 ? 'LIMIT 0, %i' : '%_')
-				, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-				, @$restrictions['langid'], @$restrictions['judgehost']
-				, $limit);
+					j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
+	              $sqlbody .
+	              (isset($restrictions['verified'])  ? 'AND ' . $verifyclause : '') .
+	              (isset($restrictions['judged'])    ? 'AND ' . $judgedclause : '') .
+	              (isset($restrictions['externaldiff'])  ? 'AND ' . $externalclause : '') .
+	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
+	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cid,
+	              @$restrictions['teamid'], @$restrictions['categoryid'],
+	              @$restrictions['probid'], @$restrictions['langid'],
+	              @$restrictions['judgehost'], $limit);
 
 	// nothing found...
 	if( $res->count() == 0 ) {
@@ -188,7 +188,7 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
 			"<a$link>" . htmlspecialchars($row['langid']) . '</a></td>';
 		echo "<td class=\"result\"><a$link>";
-		if ( $row['submittime'] >= $cdata['endtime'] ) {
+		if ( difftime($row['submittime'],$cdata['endtime']) >= 0 ) {
 			echo printresult('too-late');
 			if ( IS_JURY && $row['result'] ) {
 				echo " (" . printresult($row['result']) . ")";
@@ -232,10 +232,12 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 
 			echo "<td><a$link>$verified</a></td><td>";
 			if ( $claim ) {
-				echo "<a class=\"button\" href=\"submission.php?claim=1&amp;id=" . htmlspecialchars($row['submitid']) . "\">claim</a>";
+				echo "<a class=\"button\" href=\"submission.php?claim=1&amp;id=" .
+					htmlspecialchars($row['submitid']) . "\">claim</a>";
 			} else {
 				if ( !$row['verified'] && $jury_member==$username ) {
-					echo "<a class=\"button\" href=\"submission.php?unclaim=1&amp;id=" . htmlspecialchars($row['submitid']) . "\">unclaim</a>";
+					echo "<a class=\"button\" href=\"submission.php?unclaim=1&amp;id=" .
+						htmlspecialchars($row['submitid']) . "\">unclaim</a>";
 				} else {
 					echo "<a$link>$jury_member</a>";
 				}
@@ -251,43 +253,42 @@ function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 	if ( IS_JURY ) {
 		echo addEndForm();
 
-		if( $limit > 0 ) {
-		$subcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-					, @$restrictions['langid'], @$restrictions['judgehost']
-					);
-		$corcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-						.' AND j.result like %s'
-					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-					, @$restrictions['langid'], @$restrictions['judgehost']
-					, 'CORRECT'
-					);
-		$igncnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-						.' AND s.valid = 0'
-					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-					, @$restrictions['langid'], @$restrictions['judgehost']
-					);
-		$vercnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-						.' AND verified = 0 AND result IS NOT NULL'
-					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-					, @$restrictions['langid'], @$restrictions['judgehost']
-					);
-		$quecnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-						.' AND result IS NULL'
-					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-					, @$restrictions['langid'], @$restrictions['judgehost']
-					);
-		$extdiffcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody
-						.' AND result IS NOT NULL AND externalresult IS NOT NULL'
-						.' AND result != externalresult'
-					, $cid, @$restrictions['teamid'], @$restrictions['categoryid'], @$restrictions['probid']
-					, @$restrictions['langid'], @$restrictions['judgehost']
-					);
+		if ( $limit > 0 ) {
+			$subcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody, $cid,
+			                 @$restrictions['teamid'], @$restrictions['categoryid'],
+			                 @$restrictions['probid'], @$restrictions['langid'],
+			                 @$restrictions['judgehost']);
+			$corcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			                 ' AND j.result LIKE \'correct\'', $cid,
+			                 @$restrictions['teamid'], @$restrictions['categoryid'],
+			                 @$restrictions['probid'], @$restrictions['langid'],
+			                 @$restrictions['judgehost']);
+			$igncnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			                 ' AND s.valid = 0', $cid,
+			                 @$restrictions['teamid'], @$restrictions['categoryid'],
+			                 @$restrictions['probid'], @$restrictions['langid'],
+			                 @$restrictions['judgehost']);
+			$vercnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			                 ' AND verified = 0 AND result IS NOT NULL', $cid,
+			                 @$restrictions['teamid'], @$restrictions['categoryid'],
+			                 @$restrictions['probid'], @$restrictions['langid'],
+			                 @$restrictions['judgehost']);
+			$quecnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			                 ' AND result IS NULL', $cid,
+			                 @$restrictions['teamid'], @$restrictions['categoryid'],
+			                 @$restrictions['probid'], @$restrictions['langid'],
+			                 @$restrictions['judgehost']);
+			$extdiffcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			                     ' AND result IS NOT NULL AND externalresult IS NOT NULL' .
+			                     ' AND result != externalresult', $cid,
+			                     @$restrictions['teamid'], @$restrictions['categoryid'],
+			                     @$restrictions['probid'], @$restrictions['langid'],
+			                     @$restrictions['judgehost']);
 		}
 		echo "<p>Total correct: $corcnt, submitted: $subcnt";
-		if($vercnt > 0)	echo ", unverified: $vercnt";
-		if($igncnt > 0) echo ", ignored: $igncnt";
-		if($quecnt > 0) echo ", judgement pending: $quecnt";
+		if ( $vercnt > 0 ) echo ", unverified: $vercnt";
+		if ( $igncnt > 0 ) echo ", ignored: $igncnt";
+		if ( $quecnt > 0 ) echo ", judgement pending: $quecnt";
 		if($extdiffcnt > 0) echo ", external diff: $extdiffcnt";
 		echo "</p>\n\n";
 	}
@@ -376,7 +377,7 @@ function putClock() {
 	echo "<br /><span id=\"timeleft\">" . $left . "</span>";
 	if ( logged_in() ) {
 		echo "<br /><span id=\"username\">logged in as " . $username
-			. ( have_logout() ? " <a href=\"../logout.php\">×</a>" : "" )
+			. ( have_logout() ? " <a href=\"../auth/logout.php\">×</a>" : "" )
 			. "</span>";
 	}
 	echo "</div>";
@@ -386,12 +387,13 @@ function putClock() {
 	var activatetime = " . $cdata['activatetime'] . ";
 	var starttime = " . $cdata['starttime'] . ";
 	var endtime = " . $cdata['endtime'] . ";
-	var offset = 1;
+	var offset = 0;
 	var date = new Date(initial*1000);
 	var timecurelt = document.getElementById(\"timecur\");
 	var timeleftelt = document.getElementById(\"timeleft\");
 
 	setInterval(function(){updateClock();},1000);
+	updateClock();
 </script>\n";
 }
 
@@ -511,7 +513,7 @@ function putProblemTextList()
 				print '<li> ' .
 				      '<img src="../images/' . urlencode($row['problemtext_type']) .
 				      '.png" alt="' . htmlspecialchars($row['problemtext_type']) .
-				      '" /> <a href="?id=' . urlencode($row['probid']) . '">' .
+				      '" /> <a href="problem.php?id=' . urlencode($row['probid']) . '">' .
 				      'Problem ' . htmlspecialchars($row['shortname']) . ': ' .
 				      htmlspecialchars($row['name']) . "</a></li>\n";
 			}
@@ -527,7 +529,8 @@ function putProblemTextList()
 function have_problemtexts()
 {
 	global $DB, $cid;
-	return $DB->q('VALUE SELECT COUNT(*) FROM problem WHERE problemtext_type IS NOT NULL AND cid = %i', $cid) > 0;
+	return $DB->q('VALUE SELECT COUNT(*) FROM problem
+	               WHERE problemtext_type IS NOT NULL AND cid = %i', $cid) > 0;
 }
 
 /**
@@ -558,4 +561,22 @@ function langidToAce($langid) {
 		return 'ruby';
 	}
 	return $langid;
+}
+
+/**
+ * Output JavaScript function that contains the language extensions as
+ * configured in the database so the frontend can use them to automatically
+ * detect the language from the filename extension.
+ */
+function putgetMainExtension($langdata) {
+	echo "function getMainExtension(ext)\n{\n";
+	echo "\tswitch(ext) {\n";
+	foreach ( $langdata as $langid => $langdata ) {
+		$exts = json_decode($langdata['extensions']);
+		if ( !is_array($exts) ) continue;
+		foreach ( $exts as $ext ) {
+			echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
+		}
+	}
+	echo "\t\tdefault: return '';\n\t}\n}\n\n";
 }

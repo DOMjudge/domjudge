@@ -130,7 +130,7 @@ function tsv_teams_set($data)
 		// it is legitimate that a team has no affiliation. Do not add it then.
 		if ( !empty($row['team_affiliation']['shortname']) ) {
 			$DB->q("REPLACE INTO team_affiliation SET %S", $row['team_affiliation']);
-			$affilid = $DB->q("VALUE SELECT affilid FROM team_affiliation WHERE shortname = %s LIMIT 1", $row['team_affiliation']['shortname']); 
+			$affilid = $DB->q("VALUE SELECT affilid FROM team_affiliation WHERE shortname = %s LIMIT 1", $row['team_affiliation']['shortname']);
 			auditlog('team_affiliation', $affilid, 'replaced', 'imported from tsv');
 			$row['team']['affilid'] = $affilid;
 		}

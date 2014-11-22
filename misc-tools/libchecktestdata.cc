@@ -864,6 +864,10 @@ void gentoken(command cmd, ostream &datastream)
 		if ( !dotest(cmd.args[0]) ) error("assertion failed");
 	}
 
+	else if ( cmd.name()=="SET" ) {
+		setvar(cmd.args[0],eval(cmd.args[1]));
+	}
+
 	else if ( cmd.name()=="UNSET" ) {
 		unsetvars(cmd.args);
 	}
@@ -993,6 +997,10 @@ void checktoken(command cmd)
 
 	else if ( cmd.name()=="ASSERT" ) {
 		if ( !dotest(cmd.args[0]) ) error("assertion failed");
+	}
+
+	else if ( cmd.name()=="SET" ) {
+		setvar(cmd.args[0],eval(cmd.args[1]));
 	}
 
 	else if ( cmd.name()=="UNSET" ) {

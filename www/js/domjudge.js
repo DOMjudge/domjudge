@@ -13,7 +13,7 @@ function XMLHttpHandle()
 	return ajaxRequest;
 }
 
-function updateClarifications(doreload)
+function updateMenu(doreload_clarifications, doreload_judgehosts)
 {
 	var handle = XMLHttpHandle();
 	if (!handle) {
@@ -21,25 +21,160 @@ function updateClarifications(doreload)
 	}
 	handle.onreadystatechange = function() {
 		if (handle.readyState == 4) {
+			var resp = JSON.parse(handle.responseText);
+			var nclars = resp.clarifications.length;
+			var nhosts = resp.judgehosts.length;
+
 			var elem = document.getElementById('menu_clarifications');
-			var cnew = handle.responseText;
 			var newstr = '';
-			if (cnew == 0) {
-				elem.className = null;
-			} else {
-				newstr = ' ('+cnew+' new)';
-				elem.className = 'new';
-			}
-			if ( elem.innerHTML != 'clarifications' + newstr ) {
-				elem.innerHTML = 'clarifications' + newstr;
-				if(doreload) {
-					location.reload()
+			if ( elem!==null ) {
+				if ( nclars == 0 ) {
+					elem.className = null;
+				} else {
+					newstr = ' ('+nclars+' new)';
+					elem.className = 'new';
 				}
+				if ( elem.innerHTML != 'clarifications' + newstr ) {
+					elem.innerHTML = 'clarifications' + newstr;
+					if(doreload_clarifications) {
+						location.reload()
+					}
+				}
+			}
+			var elem = document.getElementById('menu_judgehosts');
+			var newstr = '';
+			if ( elem!==null ) {
+				if ( nhosts == 0 ) {
+					elem.className = null;
+				} else {
+					newstr = ' ('+nhosts+' down)';
+					elem.className = 'new';
+				}
+				if ( elem.innerHTML != 'judgehosts' + newstr ) {
+					elem.innerHTML = 'judgehosts' + newstr;
+					if(doreload_judgehosts) {
+						location.reload()
+					}
+				}
+			}
+
+			for(i=0; i<nclars; i++) {
+				sendNotification('New clarification.',
+				                 {'tag': 'clar_'+resp.clarifications[i].clarid,
+				                  'link': 'clarification.php?id='+resp.clarifications[i].clarid,
+				                  'body': resp.clarifications[i].body });
+			}
+			for(i=0; i<nhosts; i++) {
+				sendNotification('Judgehost down.',
+				                 {'tag': 'host_'+resp.judgehosts[i].hostname+'@'+
+				                  Math.floor(resp.judgehosts[i].polltime)});
 			}
 		}
 	};
-	handle.open("GET", "update_clarifications.php", true);
+	handle.open("GET", "updates.php", true);
 	handle.send(null);
+}
+
+// If the browser supports desktop notifications, toggle whether these
+// are enabled. This requires user permission.
+// Returns whether setting it was successful.
+function toggleNotifications(enable)
+{
+	if ( enable ) {
+		if ( !('Notification' in window) ) {
+			alert('Your browser does not support desktop notifications.');
+			return false;
+		}
+		if ( !('localStorage' in window) || window.localStorage===null ) {
+			alert('Your browser does not support local storage;\n'+
+			      'this is required to keep track of sent notifications.');
+			return false;
+		}
+
+		// Ask user (via browser) for permission if not already granted.
+		if ( Notification.permission=='denied' ) {
+			alert('Browser denied permission to send desktop notifications.\n' +
+			      'Re-enable notification permission in the browser and retry.');
+		} else
+			if ( Notification.permission!=='granted' ) {
+				Notification.requestPermission(function (permission) {
+					// Safari and Chrome don't support the static 'permission'
+					// variable, so in this case we set it ourselves.
+					if ( !('permission' in Notification) ) {
+						Notification.permission = permission;
+					}
+					if ( Notification.permission!=='granted' ) {
+						alert('Browser denied permission to send desktop notifications.');
+					} else {
+						sendNotification('DOMjudge notifications enabled.',
+						                 {'timeout': 5});
+						window.location.href = 'toggle_notify.php?enable=1';
+						return false;
+					}
+				});
+			}
+
+		return (Notification.permission==='granted');
+	} else {
+		// disable: no need/possibility to ask user to revoke permission.
+
+		// FIXME: Should we close any notifications currently showing?
+	}
+
+	return true;
+}
+
+// Send a notification if notifications have been enabled.
+// The options argument is passed to the Notification constructor,
+// except that the following tags (if found) are interpreted and
+// removed from options:
+// * timeout    notification timeout in seconds (default: 5 minutes)
+// * link       URL to redirect to on click, relative to DOMjudge base
+//
+// We use HTML5 localStorage to keep track of which notifications the
+// client has already received to display each notification only once.
+function sendNotification(title, options)
+{
+	if ( getCookie('domjudge_notify')!=1 ) return;
+
+//	if ( typeof options.tag === 'undefined' ) options.tag = null;
+
+	// Check if we already sent this notification:
+	var senttags = localStorage.getItem('notifications_sent');
+	if ( senttags===null || senttags=='' ) {
+		senttags = [];
+	} else {
+		senttags = senttags.split(',');
+	}
+	if ( options.tag!==null && senttags.indexOf(options.tag)>=0 ) return;
+
+	var timeout = 600;
+	if ( typeof options.timeout !== 'undefined' ) {
+		timeout = options.timeout;
+		delete options.timeout;
+	}
+
+	var link = null;
+	if ( typeof options.link !== 'undefined' ) {
+		link = options.link;
+		delete options.link;
+	}
+
+	var not = new Notification(title, options);
+
+	not.onshow = function() { setTimeout(not.close, timeout*1000); }
+// FIXME: setting timeout doesn't work in Chromium nor in Firefox
+// (also overriden by default 4 second close timeout, see:
+// https://bugzilla.mozilla.org/show_bug.cgi?id=875114).
+
+	if ( link!==null ) {
+		not.onclick = function() { window.open(link); }
+	}
+
+	if ( options.tag!==null ) {
+		senttags.push(options.tag);
+		localStorage.setItem('notifications_sent',senttags.join(','));
+	}
 }
 
 // make corresponding testcase description editable
@@ -95,7 +230,8 @@ function detectProblemLanguage(filename)
 	var addfile = document.getElementById("addfile");
 	if ( addfile ) addfile.disabled = false;
 
-	var parts = filename.toLowerCase().split('.').reverse();
+	var parts = filename.replace(/^.*[\\\/]/, '')
+	            .toLowerCase().split('.').reverse();
 	if ( parts.length < 2 ) return;
 
 	// problem ID
@@ -340,7 +476,9 @@ function getHeartCol(row) {
 }
 
 function getTeamname(row) {
-	return row.getElementsByTagName("td")[2];
+	var res = row.getAttribute("id");
+	if ( res == null ) return res;
+	return res.replace(/^team:/, '');
 }
 
 function toggle(id, show) {
@@ -355,13 +493,13 @@ function toggle(id, show) {
 			if (scoreTeamname == null) {
 				continue;
 			}
-			if (scoreTeamname.innerHTML == favTeams[i]) {
+			if (scoreTeamname == favTeams[i]) {
 				visCnt++;
 				break;
 			}
 		}
 	}
-	var teamname = getTeamname(scoreboard[id + visCnt]).innerHTML;
+	var teamname = getTeamname(scoreboard[id + visCnt]);
 	if (show) {
 		favTeams[favTeams.length] = teamname;
 	} else {
@@ -407,7 +545,7 @@ function initFavouriteTeams() {
 		var heartCol = getHeartCol(scoreboard[j]);
 		var rank = firstCol.innerHTML;
 		for (var i = 0; i < favTeams.length; i++) {
-			if (teamname.innerHTML == favTeams[i]) {
+			if (teamname == favTeams[i]) {
 				found = true;
 				heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
 				toAdd[cntFound] = scoreboard[j].cloneNode(true);

@@ -17,6 +17,8 @@ $refreshtime = 30;
 $submitted = @$_GET['submitted'];
 
 $fdata = calcFreezeData($cdata);
+$langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions
+		    FROM language WHERE allow_submit = 1');
 
 echo "<script type=\"text/javascript\">\n<!--\n";
 
@@ -25,24 +27,13 @@ if ( $fdata['cstarted'] ) {
 	                    WHERE cid = %i AND allow_submit = 1
 	                    ORDER BY shortname', $cid);
 
-	$langdata = $DB->q('KEYVALUETABLE SELECT langid, extensions
-	                    FROM language WHERE allow_submit = 1');
-
-	echo "function getMainExtension(ext)\n{\n";
-	echo "\tswitch(ext) {\n";
-	foreach ( $langdata as $langid => $extensions ) {
-		$exts = json_decode($extensions);
-		if ( !is_array($exts) ) continue;
-		foreach ( $exts as $ext ) {
-			echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
-		}
-	}
-	echo "\t\tdefault: return '';\n\t}\n}\n\n";
+	putgetMainExtension($langdata);
 
 	echo "function getProbDescription(probid)\n{\n";
 	echo "\tswitch(probid) {\n";
 	foreach($probdata as $probinfo) {
-		echo "\t\tcase '" . htmlspecialchars($probinfo['shortname']) . "': return '" . htmlspecialchars($probinfo['name']) . "';\n";
+		echo "\t\tcase '" . htmlspecialchars($probinfo['shortname']) .
+		    "': return '" . htmlspecialchars($probinfo['name']) . "';\n";
 	}
 	echo "\t\tdefault: return '';\n\t}\n}\n\n";
 }
@@ -64,8 +55,9 @@ if ( $fdata['cstarted'] ) {
 	} else {
 		$maxfiles = dbconfig_get('sourcefiles_limit',100);
 
-		echo addForm('upload.php','post',null,'multipart/form-data', null, ' onreset="resetUploadForm('.$refreshtime .', ' . $maxfiles . ');"') .
-		"<p id=\"submitform\">\n\n";
+		echo addForm('upload.php','post',null,'multipart/form-data', null,
+		             ' onreset="resetUploadForm('.$refreshtime .', '.$maxfiles.');"') .
+		    "<p id=\"submitform\">\n\n";
 
 		echo "<input type=\"file\" name=\"code[]\" id=\"maincode\" required";
 		if ( $maxfiles > 1 ) {
@@ -80,8 +72,9 @@ if ( $fdata['cstarted'] ) {
 		}
 		$probs[''] = 'problem';
 		echo addSelect('probid', $probs, '', true);
-		$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language
-				 WHERE allow_submit = 1 ORDER BY name');
+		foreach($langdata as $langid => $langdata) {
+			$langs[$langid] = $langdata['name'];
+		}
 		$langs[''] = 'language';
 		echo addSelect('langid', $langs, '', true);
 

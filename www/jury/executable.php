@@ -9,7 +9,8 @@
 require('init.php');
 
 $id = getRequestID(FALSE);
-$title = 'Executable '.htmlspecialchars(@$id);
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'executable' . ($id ? ' '.htmlspecialchars(@$id) : ''));
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
@@ -18,14 +19,16 @@ if ( isset($_GET['cmd'] ) ) {
 }
 
 if ( isset($_GET['fetch']) ) {
-	$filename = $id . "-script.zip";
+	$filename = $id . ".zip";
 
 	$size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH(zipfile)
 	                FROM executable WHERE execid = %s",
 	               $id);
 
 	// sanity check before we start to output headers
-	if ( $size===NULL || !is_numeric($size)) error("Problem while fetching executable");
+	if ( $size===NULL || !is_numeric($size) ) {
+		error("Problem while fetching executable");
+	}
 
 	header("Content-Type: application/zip; name=\"$filename\"");
 	header("Content-Disposition: attachment; filename=\"$filename\"");
@@ -42,7 +45,6 @@ if ( isset($_POST['upload']) ) {
 		foreach($_FILES['executable_archive']['tmp_name'] as $fileid => $tmpname) {
 			checkFileUpload( $_FILES['executable_archive']['error'][$fileid] );
 			$zip = openZipFile($_FILES['executable_archive']['tmp_name'][$fileid]);
-			global $DB;
 			$prop_file = 'domjudge-executable.ini';
 			$newid = $_FILES['executable_archive']['name'][$fileid];
 			$newid = substr($newid, 0, strlen($newid) - strlen(".zip"));
@@ -66,17 +68,18 @@ if ( isset($_POST['upload']) ) {
 			}
 			$content = file_get_contents($_FILES['executable_archive']['tmp_name'][$fileid]);
 			if ( !empty($id) ) {
-				$DB->q("UPDATE executable SET description=%s, md5sum=%s, zipfile=%s, type=%s" .
-					" WHERE execid=%s",
-					$desc, md5($content), $content, $type, $id);
+				$DB->q('UPDATE executable SET description=%s, md5sum=%s, zipfile=%s, type=%s
+				        WHERE execid=%s',
+				       $desc, md5($content), $content, $type, $id);
 				$newid = $id;
 			} else {
-				$DB->q("INSERT INTO executable (execid, description, md5sum, zipfile, type) " .
-					"VALUES (%s, %s, %s, %s, %s)",
-					$newid, $desc, md5($content), $content, $type);
+				$DB->q('INSERT INTO executable (execid, description, md5sum, zipfile, type)
+				        VALUES (%s, %s, %s, %s, %s)',
+				       $newid, $desc, md5($content), $content, $type);
 			}
 			$zip->close();
-			auditlog('executable', $id, 'upload zip', $_FILES['executable_archive']['name'][$fileid]);
+			auditlog('executable', $id, 'upload zip',
+			         $_FILES['executable_archive']['name'][$fileid]);
 		}
 		if ( count($_FILES['executable_archive']['tmp_name']) == 1 ) {
 			header('Location: '.$pagename.'?id='.urlencode((empty($newid)?$id:$newid)));
@@ -94,7 +97,7 @@ if ( !empty($cmd) ):
 
 	requireAdmin();
 
-	echo "<h2>" .  htmlspecialchars(ucfirst($cmd)) . " executable</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php', 'post', null, 'multipart/form-data');
 
@@ -102,14 +105,16 @@ if ( !empty($cmd) ):
 
 	if ( $cmd == 'edit' ) {
 		echo "<tr><td>Executable ID:</td><td class=\"exec\">";
-		$row = $DB->q('TUPLE SELECT execid, description, md5sum, type, OCTET_LENGTH(zipfile) AS size
+		$row = $DB->q('TUPLE SELECT execid, description, md5sum, type,
+		               OCTET_LENGTH(zipfile) AS size
 		               FROM executable
 		               WHERE execid = %s', $id);
 		echo addHidden('keydata[0][execid]', $row['execid']);
 		echo htmlspecialchars($row['execid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__execid_\">Executable ID:</label></td><td>";
-		echo addInput('data[0][execid]', null, 8, 10, " required pattern=\"" . IDENTIFIER_CHARS . "+\"");
+		echo addInput('data[0][execid]', null, 8, 10,
+		              " required pattern=\"" . IDENTIFIER_CHARS . "+\"");
 		echo " (alphanumerics only)";
 	}
 	echo "</td></tr>\n";
@@ -119,7 +124,9 @@ if ( !empty($cmd) ):
 <tr><td><label for="data_0__description_">Executable description:</label></td>
 <td><?php echo addInput('data[0][description]', @$row['description'], 30, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__type_">Executable type:</label></td>
-<td><?php echo addSelect('data[0][type]', array('compare' => 'compare', 'compile' => 'compile', 'run' => 'run'), @$row['type'], True)?></td></tr>
+<td><?php echo addSelect('data[0][type]', array('compare' => 'compare',
+	                                            'compile' => 'compile',
+	                                            'run' => 'run'), @$row['type'], True)?></td></tr>
 
 </table>
 
@@ -137,7 +144,9 @@ if ( class_exists("ZipArchive") ) {
 	addForm($pagename, 'post', null, 'multipart/form-data') .
 	addHidden('id', @$row['execid']) .
 	'<label for="executable_archive__">Upload executable archive:</label>' .
-	($cmd == 'add' ? addSelect('type', array('compare' => 'compare', 'compile' => 'compile', 'run' => 'run')) : '') .
+	($cmd == 'add' ? addSelect('type', array('compare' => 'compare',
+	                                         'compile' => 'compile',
+	                                         'run' => 'run')) : '') .
 	addFileField('executable_archive[]') .
 	addSubmit('Upload', 'upload') .
 	addEndForm();
@@ -171,15 +180,18 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <tr><td>used as <?=$data['type'] ?> script:</td><td>
 <?php
 if ( $data['type'] == 'compare' ) {
-	$res = $DB->q('SELECT probid AS id FROM problem WHERE special_compare = %s ORDER BY probid', $data['execid']);
+	$res = $DB->q('SELECT probid AS id FROM problem
+	               WHERE special_compare = %s ORDER BY probid', $data['execid']);
 	$page = "problem";
 	$prefix = "p";
 } else if ( $data['type'] == 'compile' ) {
-	$res = $DB->q('SELECT langid AS id FROM language WHERE compile_script = %s ORDER BY langid', $data['execid']);
+	$res = $DB->q('SELECT langid AS id FROM language
+	               WHERE compile_script = %s ORDER BY langid', $data['execid']);
 	$page = "language";
 	$prefix = "";
 } else if ( $data['type'] == 'run' ) {
-	$res = $DB->q('SELECT probid AS id FROM problem WHERE special_run = %s ORDER BY probid', $data['execid']);
+	$res = $DB->q('SELECT probid AS id FROM problem
+	               WHERE special_run = %s ORDER BY probid', $data['execid']);
 	$page = "problem";
 	$prefix = "p";
 }

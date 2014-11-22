@@ -12,9 +12,11 @@ require('init.php');
 
 function infreeze($time)
 {
+	global $cdata;
+
 	if ( ( ! empty($cdata['freezetime']) &&
 		difftime($time, $cdata['freezetime'])>0 ) &&
-		!( ! empty($cdata['unfreezetime']) &&
+		( empty($cdata['unfreezetime']) ||
 		difftime($time, $cdata['unfreezetime'])<=0 ) ) return TRUE;
 	return FALSE;
 }
@@ -52,16 +54,40 @@ function contest()
 	global $cid, $cdata;
 
 	return array(
-		'id'      => $cid,
-		'name'    => $cdata['contestname'],
-		'start'   => $cdata['starttime'],
-		'end'     => $cdata['endtime'],
-		'length'  => $cdata['endtime'] - $cdata['starttime'],
-		'penalty' => 60*dbconfig_get('penalty_time', 20),
+		'id'       => $cid,
+		'name'     => $cdata['contestname'],
+		'start'    => $cdata['starttime'],
+		'freeze'   => $cdata['freezetime'],
+		'end'      => $cdata['endtime'],
+		'length'   => $cdata['endtime'] - $cdata['starttime'],
+		'unfreeze' => $cdata['unfreezetime'],
+		'penalty'  => 60*dbconfig_get('penalty_time', 20),
 		);
 }
-$doc = "Get information about the current contest: id, name, start and end.";
+$doc = "Get information about the current contest: id, name, start, freeze, unfreeze, length, penalty and end.";
 $api->provideFunction('GET', 'contest', $doc);
+
+/**
+ * Get information about the current user
+ */
+function user()
+{
+	global $userdata;
+
+	$return = array(
+		'id'       => $userdata['userid'],
+		'teamid'   => $userdata['teamid'],
+		'email'    => $userdata['email'],
+		'ip'       => $userdata['ip_address'],
+		'lastip'   => $userdata['last_ip_address'],
+		'name'     => $userdata['name'],
+		'username' => $userdata['username'],
+		'roles'    => $userdata['roles'],
+	);
+	return $return;
+}
+$doc = "Get information about the currently logged in user. If no user is logged in, will return null for all values.";
+$api->provideFunction('GET', 'user', $doc);
 
 /**
  * Problems information
@@ -387,6 +413,7 @@ function config($args)
 $doc = 'Get configuration variables.';
 $args = array('name' => 'Search only a single config variable.');
 $exArgs = array(array('name' => 'sourcesize_limit'));
+$roles = array('jury','judgehost');
 $api->provideFunction('GET', 'config', $doc, $args, $exArgs);
 
 /**
@@ -394,10 +421,10 @@ $api->provideFunction('GET', 'config', $doc, $args, $exArgs);
  */
 function submissions($args)
 {
-	global $cid, $DB;
+	global $cid, $DB, $cdata;
 
 	$query = 'SELECT submitid, teamid, probid, langid, submittime, valid
-	          FROM submission WHERE cid = %i';
+	          FROM submission WHERE cid = %i AND valid = 1';
 
 	$hasLanguage = array_key_exists('language', $args);
 	$query .= ($hasLanguage ? ' AND langid = %s' : ' AND TRUE %_');
@@ -411,6 +438,12 @@ function submissions($args)
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' AND TRUE %_');
 	$submitid = ($hasSubmitid ? $args['id'] : 0);
 
+	if ( infreeze(now()) && !checkrole('jury') ) {
+		$query .= ' AND submittime <= %i';
+	} else {
+		$query .= ' AND TRUE %_';
+	}
+
 	$query .= ' ORDER BY submitid';
 
 	$hasLimit = array_key_exists('limit', $args);
@@ -418,7 +451,7 @@ function submissions($args)
 	$limit = ($hasLimit ? $args['limit'] : -1);
 	// TODO: validate limit
 
-	$q = $DB->q($query, $cid, $language, $fromId, $submitid, $limit);
+	$q = $DB->q($query, $cid, $language, $fromId, $submitid, $cdata['freezetime'], $limit);
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
@@ -427,7 +460,6 @@ function submissions($args)
 			'problem'   => $row['probid'],
 			'language'  => $row['langid'],
 			'time'      => $row['submittime'],
-			'valid'     => (bool)$row['valid'],
 			);
 	}
 	return $res;
@@ -436,7 +468,7 @@ $args = array('language' => 'Search only for submissions in a certain language.'
               'id' => 'Search only a certain ID',
               'fromid' => 'Search from a certain ID',
               'limit' => 'Get only the first N submissions');
-$doc = 'Get a list of all submissions. Should we give away all info about submissions? Or is there something we would like to hide, for example language?';
+$doc = 'Get a list of all valid submissions.';
 $exArgs = array(array('fromid' => 100, 'limit' => 10), array('language' => 'cpp'));
 $api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
 
@@ -665,7 +697,7 @@ function teams($args)
 	          t.categoryid AS category, a.name AS affiliation
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
-	          WHERE';
+	          WHERE t.enabled = 1 AND';
 
 	$byCategory = array_key_exists('category', $args);
 	$query .= ($byCategory ? ' categoryid = %i' : ' TRUE %_');

@@ -14,6 +14,14 @@
 # Abort when a single command fails:
 set -e
 
+cleanup() {
+    # Unmount things on cleanup
+    umount -f "$CHROOTDIR/proc" >/dev/null 2>&1  || /bin/true
+    umount -f "$CHROOTDIR/sys" >/dev/null 2>&1  || /bin/true
+    umount -f "$CHROOTDIR/dev/pts" >/dev/null 2>&1  || /bin/true
+}
+trap cleanup EXIT
+
 # Read command-line parameters:
 CHROOTDIR=$1
 ARCH=$2
@@ -135,7 +143,7 @@ fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 
-$BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
+eval $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 	--variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
@@ -167,7 +175,7 @@ EOF
 
 # Add apt proxy settings if desired
 if [ -n "$DEBPROXY" ]; then
-    echo "Acquire::http::Proxy \"$DEBPROXY\"" >> "$CHROOTDIR/etc/apt/apt.conf"
+    echo "Acquire::http::Proxy \"$DEBPROXY\";" >> "$CHROOTDIR/etc/apt/apt.conf"
 fi
 
 mount -t proc proc "$CHROOTDIR/proc"
@@ -179,24 +187,24 @@ mount --bind /dev/pts "$CHROOTDIR/dev/pts"
 export LC_ALL=C
 
 chroot "$CHROOTDIR" /bin/sh -c debconf-set-selections <<EOF
-passwd	passwd/root-password-crypted	password	
-passwd	passwd/user-password-crypted	password	
-passwd	passwd/root-password		password	
-passwd	passwd/root-password-again	password	
-passwd	passwd/user-password-again	password	
-passwd	passwd/user-password		password	
+passwd	passwd/root-password-crypted	password
+passwd	passwd/user-password-crypted	password
+passwd	passwd/root-password		password
+passwd	passwd/root-password-again	password
+passwd	passwd/user-password-again	password
+passwd	passwd/user-password		password
 passwd	passwd/shadow			boolean	true
-passwd	passwd/username-bad		note	
-passwd	passwd/password-mismatch	note	
-passwd	passwd/username			string	
+passwd	passwd/username-bad		note
+passwd	passwd/password-mismatch	note
+passwd	passwd/username			string
 passwd	passwd/make-user		boolean	true
 passwd	passwd/md5			boolean	false
-passwd	passwd/user-fullname		string	
-passwd	passwd/user-uid			string	
-passwd	passwd/password-empty		note	
+passwd	passwd/user-fullname		string
+passwd	passwd/user-uid			string
+passwd	passwd/password-empty		note
 debconf	debconf/priority	select	high
 debconf	debconf/frontend	select	Noninteractive
-locales	locales/locales_to_be_generated	multiselect	
+locales	locales/locales_to_be_generated	multiselect
 locales	locales/default_environment_locale	select	None
 EOF
 

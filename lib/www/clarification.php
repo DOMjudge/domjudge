@@ -340,7 +340,7 @@ function appendAnswer() {
 			$options += $teams;
 		} else {
 			if ( $clar['sender'] ) {
-				$options[$clar['sender']] = 
+				$options[$clar['sender']] =
 					$clar['fromname'] . ' (t' . $clar['sender'] . ')';
 			} else if ( $clar['recipient'] ) {
 				$options[$clar['recipient']] =

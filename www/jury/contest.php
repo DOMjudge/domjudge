@@ -9,7 +9,8 @@
 require('init.php');
 
 $id = getRequestID();
-$title = $id ? 'Contest c'.htmlspecialchars(@$id) : 'Add contest';
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'contest' . ($id ? ' c'.htmlspecialchars(@$id) : ''));
 
 require(LIBWWWDIR . '/header.php');
 
@@ -19,7 +20,7 @@ if ( !empty($_GET['cmd']) ):
 
 	$cmd = $_GET['cmd'];
 
-	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " contest</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php');
 

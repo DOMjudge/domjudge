@@ -345,11 +345,12 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		}
 		// check whether this is us, otherwise use category colour
 		if ( @$myteamid == $team ) {
-			echo ' id="scorethisisme"';
+			echo ' class="scorethisisme"';
 			unset($color);
 		} else {
 			$color = $teams[$team]['color'];
 		}
+		echo ' id="team:' . $teams[$team]['teamid'] . '"';
 		echo '><td class="scorepl">';
 		// Only print rank when score is different from the previous team
 		if ( ! $displayrank ) {
@@ -393,8 +394,9 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			(!empty($color) ? ' style="background: ' . $color . ';"' : '') .
 			(IS_JURY ? ' title="' . htmlspecialchars($team) . '"' : '') . '>' .
 			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
-			htmlspecialchars($teams[$team]['name']) . '<br />' .
-			'<span class="univ">' . $affilname . '</span>' .
+			htmlspecialchars($teams[$team]['name']) .
+			($SHOW_AFFILIATIONS ? '<br /><span class="univ">' . $affilname .
+			 '</span>' : '') .
 			($static ? '' : '</a>') .
 			'</td>';
 		echo
@@ -573,8 +575,8 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$affilids  = array();
 		$countries = array();
 		foreach( $affils as $id => $affil ) {
-			$affilids[$id]  = $affil['name'];
-			$countries[] = $affil['country'];
+			$affilids[$id] = $affil['name'];
+			if ( isset($affil['country']) ) $countries[] = $affil['country'];
 		}
 
 		$countries = array_unique($countries);
@@ -585,7 +587,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 
 <table class="scorefilter">
 <tr>
-<td><a href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
+<td><a class="collapse" href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
 <td><div id="detailfilter">
 <?php
 

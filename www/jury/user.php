@@ -9,7 +9,8 @@
 require('init.php');
 
 $id = getRequestID();
-$title = $id ? 'User '.htmlspecialchars(@$id) : 'Add user';
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'user' . ($id ? ' '.htmlspecialchars(@$id) : ''));
 
 if ( isset($_GET['cmd'] ) ) {
     $cmd = $_GET['cmd'];
@@ -24,7 +25,7 @@ if ( !empty($cmd) ):
 
     requireAdmin();
 
-    echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " user</h2>\n\n";
+    echo "<h2>$title</h2>\n\n";
 
     echo addForm('edit.php');
 
@@ -34,8 +35,10 @@ if ( !empty($cmd) ):
         $row = $DB->q('MAYBETUPLE SELECT * FROM user WHERE userid = %i', $id);
 		if ( !$row ) error("Missing or invalid user id");
 
-        echo "<tr><td>Username:</td><td class=\"username\">" .
+		echo "<tr><td>User ID:</td><td>" .
 		    addHidden('keydata[0][userid]', $row['userid']) .
+		    htmlspecialchars($row['userid']) . "</td></tr>\n" .
+		    "<tr><td>Username:</td><td class=\"username\">" .
 		    addHidden('keydata[0][username]', $row['username']) .
 		    htmlspecialchars($row['username']);
     } else {
@@ -115,7 +118,7 @@ $roles = $DB->q('SELECT role.* FROM userrole
 
 if ( ! $row ) error("Missing or invalid user id");
 
-$userimage   = "../images/users/"        . urlencode($row['username'])   . ".jpg";
+$userimage = "../images/users/" . urlencode($row['username']) . ".jpg";
 
 echo "<h1>User ".htmlspecialchars($row['name'])."</h1>\n\n";
 
@@ -126,8 +129,9 @@ if ( $row['enabled'] != 1 ) {
 ?>
 
 <div class="col1"><table>
-<tr><td>Login:     </td><td class="teamid"><?php echo $row['username']?></td></tr>
-<tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
+<tr><td>ID:        </td><td><?php echo htmlspecialchars($row['userid']) ?></td></tr>
+<tr><td>Login:     </td><td class="teamid"><?php echo htmlspecialchars($row['username']) ?></td></tr>
+<tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name']) ?></td></tr>
 <tr><td>Email:      </td><td><?php
 if ( !empty($row['email']) ) {
 	echo "<a href=\"mailto:" . urlencode($row['email']) . "\">" .

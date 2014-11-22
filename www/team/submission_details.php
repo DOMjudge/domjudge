@@ -42,8 +42,8 @@ if( ! $row['valid'] ) {
 
 <table>
 <tr><td>Problem:</td>
-	<td><?php echo htmlspecialchars($row['probname'])?> [<span class="probid"><?php echo
-	htmlspecialchars($row['shortname']) ?></span>]</td></tr>
+	<td><span class="probid"><?php echo htmlspecialchars($row['shortname']) ?></span> -
+    <?php echo htmlspecialchars($row['probname'])?></td></tr>
 <tr><td>Submitted:</td>
 	<td><?php echo printtime($row['submittime'], NULL, TRUE)?></td></tr>
 <tr><td>Language:</td>
@@ -116,7 +116,7 @@ if ( $show_sample && @$row['result']!='compiler-error' ) {
 		echo "<h5>Diff output</h5>\n";
 		if ( @$run['output_diff'] ) {
 			echo "<pre class=\"output_text\">";
-			echo parseDiff($run['output_diff']);
+			echo parseRunDiff($run['output_diff']);
 			echo "</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no diff output.</p>\n";

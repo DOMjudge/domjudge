@@ -62,6 +62,13 @@ while ( $jud = $res->next() ) {
 	$DB->q('UPDATE submission SET judgehost = NULL
 	        WHERE submitid = %i', $jud['submitid']);
 
+	// Prioritize single submission rejudgings
+	if ( $table == 'submission' ) {
+		$DB->q('UPDATE team SET judging_last_started = NULL
+		        WHERE teamid IN (SELECT teamid FROM submission
+		        WHERE submitid = %i)', $jud['submitid']);
+	}
+
 	calcScoreRow($cid, $jud['teamid'], $jud['probid']);
 	$DB->q('COMMIT');
 

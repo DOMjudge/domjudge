@@ -243,7 +243,7 @@ function calcScoreRow($cid, $team, $prob) {
 /**
  * Update tables used for efficiently computing team ranks
  *
- * Given a contestid and teamid (re)calculate the time 
+ * Given a contestid and teamid (re)calculate the time
  * and solved problems for a team. Third parameter indictates
  * if the cache for jury of public should be updated.
  *

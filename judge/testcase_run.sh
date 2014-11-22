@@ -157,10 +157,11 @@ chmod a+x "$WORKDIR" "$WORKDIR/execdir"
 
 # Create files which are expected to exist:
 touch system.out                 # Judging system output (info/debug/error)
-touch compare.out                # Compare output
 touch result.out                 # Result of comparison
 touch program.out program.err    # Program output and stderr (for extra information)
 touch program.meta runguard.err  # Metadata and runguard stderr
+touch compare.out                # Compare output
+touch compare.meta compare.err   # Compare runguard metadata and stderr
 
 logmsg $LOG_INFO "setting up testing (chroot) environment"
 
@@ -214,24 +215,43 @@ logmsg $LOG_INFO "comparing output"
 # Copy testdata output, only after program has run
 cp "$TESTOUT" "$WORKDIR/testdata.out"
 
-logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
+logmsg $LOG_DEBUG "starting compare script '$COMPARE_SCRIPT'"
 
-if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
-                       result.out compare.out >compare.tmp 2>&1 ; then
-	exitcode=$?
-	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
+exitcode=0
+chmod a+w result.out compare.out
+$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
+	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
+	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
+	"$COMPARE_SCRIPT" testdata.in program.out testdata.out \
+	                  result.out compare.out >compare.tmp 2>&1 || exitcode=$?
+
+logmsg $LOG_DEBUG "checking compare script exit-status"
+if grep '^time-result: .*timelimit' compare.meta >/dev/null 2>&1 ; then
+	echo "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:" >compare.out
+	cat compare.tmp >>compare.out
+	cleanexit ${E_COMPARE_ERROR:--1}
 fi
+if [ $exitcode -ne 0 ]; then
+	echo "Comparing failed with exitcode $exitcode, compare output:" >compare.out
+	cat compare.tmp >>compare.out
+	cleanexit ${E_COMPARE_ERROR:--1}
+fi
+cat compare.tmp >>compare.out
 
 # Check for errors from running the program:
 if [ ! -r program.meta ]; then
 	error "'program.meta' not readable"
 fi
 logmsg $LOG_DEBUG "checking program run exit-status"
-timeused=`    grep '^time-used: ' program.meta | sed 's/time-used: //'`
-program_time=`grep "^$timeused: " program.meta | sed "s/$timeused: //"`
-program_exit=`grep '^exitcode: '  program.meta | sed 's/exitcode: //'`
+# FIXME: a proper YAML parser should be used here, but the format is
+# rigid enough that we can use simple shell tools.
+timeused=`        grep '^time-used: ' program.meta | sed 's/time-used: //'`
+program_cputime=` grep '^cpu-time: '  program.meta | sed 's/cpu-time: //'`
+program_walltime=`grep '^wall-time: ' program.meta | sed 's/wall-time: //'`
+program_exit=`    grep '^exitcode: '  program.meta | sed 's/exitcode: //'`
+runtime="${program_cputime}s cpu, ${program_walltime}s wall"
 if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
-	echo "Timelimit exceeded, runtime: $program_time" >>system.out
+	echo "Timelimit exceeded, runtime: $runtime." >>system.out
 	cleanexit ${E_TIMELIMIT:--1}
 fi
 if [ "$program_exit" != "0" ]; then
@@ -262,7 +282,7 @@ descrp=`grep '^description=' result.out | cut -d = -f 2-`
 descrp="${descrp:+ ($descrp)}"
 
 if [ "$result" = "accepted" ]; then
-	echo "Correct${descrp}! Runtime is $program_time seconds." >>system.out
+	echo "Correct${descrp}! Runtime: $runtime." >>system.out
 	cleanexit ${E_CORRECT:--1}
 elif [ "$result" = "presentation error" ]; then
 	echo "Presentation error${descrp}." >>system.out

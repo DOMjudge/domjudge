@@ -100,7 +100,8 @@ function presentSource ($sourcedata, $langid)
 		htmlspecialchars($sourcedata['filename']) . "</h2> <a " .
 		"href=\"show_source.php?id=" . urlencode($sourcedata['submitid']) .
 		"&amp;fetch=" . urlencode($sourcedata['rank']) .
-		"\"><img class=\"picto\" src=\"../images/b_save.png\" alt=\"download\" title=\"download\" /></a> " .
+		"\"><img class=\"picto\" src=\"../images/b_save.png\" " .
+	    "alt=\"download\" title=\"download\" /></a> " .
 		"<a href=\"edit_source.php?id=" . urlencode($sourcedata['submitid']) .
 		"&amp;rank=" . urlencode($sourcedata['rank']) . "\">" .
 		"<img class=\"picto\" src=\"../images/edit.png\" alt=\"edit\" title=\"edit\" />" .
@@ -204,7 +205,8 @@ if ( isset($_GET['fetch']) ) {
 
 	$row = $DB->q('TUPLE SELECT filename, sourcecode FROM submission_file
 	               WHERE submitid = %i AND rank = %i', $id, $_GET['fetch']);
-	header("Content-Type: text/plain; name=\"" . $row['filename'] . "\"; charset=" . DJ_CHARACTER_SET);
+	header("Content-Type: text/plain; name=\"" . $row['filename'] .
+	       "\"; charset=" . DJ_CHARACTER_SET);
 	header("Content-Disposition: attachment; filename=\"" . $row['filename'] . "\"");
 	header("Content-Length: " . strlen($row['sourcecode']));
 
@@ -254,7 +256,8 @@ if ($submission['origsubmitid']) {
 
 if ($olddata !== NULL) {
 	$oldid = $olddata['submitid'];
-	$html .= "<h2><a name=\"diff\"></a>Diff to submission <a href=\"submission.php?id=$oldid\">s$oldid</a></h2>\n";
+	$html .= "<h2><a name=\"diff\"></a>Diff to submission " .
+	         "<a href=\"submission.php?id=$oldid\">s$oldid</a></h2>\n";
 
 	$html .= multifilediff($sources, $oldsources, $olddata);
 
@@ -262,12 +265,14 @@ if ($olddata !== NULL) {
 
 if ( !empty($origsources) ) {
 	$origid = $submission['origsubmitid'];
-	$html .= "<h2><a name=\"origdiff\"></a>Diff to original submission <a href=\"submission.php?id=$origid\">s$origid</a></h2>\n\n";
+	$html .= "<h2><a name=\"origdiff\"></a>Diff to original submission " .
+	         "<a href=\"submission.php?id=$origid\">s$origid</a></h2>\n\n";
 
 	$html .= multifilediff($sources, $origsources, $origdata);
 }
 
-echo "<h2>Source code for submission <a href=\"submission.php?id=" . urlencode($id) . "\">s" .htmlspecialchars($id) . "</a>";
+echo "<h2>Source code for submission <a href=\"submission.php?id=" .
+	urlencode($id) . "\">s" .htmlspecialchars($id) . "</a>";
 if ( !empty($submission['origsubmitid']) ) {
 	$origid = $submission['origsubmitid'];
 	echo  " (resubmit of <a href=\"submission.php?id=" . urlencode($origid) . "\">s$origid</a>)";

@@ -13,7 +13,7 @@ include $(TOPDIR)/Makefile.global
 # anyways, but it is more convenient to be able to share the passwords
 # between domserver and judgehost installs.
 
-SUBST_CONFIGS = apache.conf domserver-static.php \
+SUBST_CONFIGS = apache.conf nginx-conf domserver-static.php \
                 judgehost-static.php runguard-config.h submit-config.h \
                 sudoers-domjudge cgroup-domjudge.conf
 
@@ -22,7 +22,7 @@ $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 
 config: $(SUBST_CONFIGS)
 
-domserver: apache.conf dbpasswords.secret restapi.secret
+domserver: apache.conf nginx-conf dbpasswords.secret restapi.secret
 
 judgehost:
 
@@ -38,9 +38,9 @@ restapi.secret:
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
-		apache.conf domserver-static.php import-forwardfeed.yaml
+		apache.conf nginx-conf domserver-static.php import-forwardfeed.yaml
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_etcdir) \
-		gendbpasswords
+		gendbpasswords genrestapicredentials
 	-$(INSTALL_USER) -t $(DESTDIR)$(domserver_etcdir) \
 		domserver-config.php common-config.php
 	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \

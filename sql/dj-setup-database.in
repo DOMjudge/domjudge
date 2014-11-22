@@ -201,34 +201,33 @@ genpass)
 	echo "Password file '$RESTPWFILE' created."
 	;;
 
-install)
-	read_dbpasswords
-	create_db_users
-	RESTPW=`cat $RESTPWFILE | grep -v ^# | cut  -f3`
-	(
-	cat $SQLDIR/mysql_db_structure.sql \
-	    $SQLDIR/mysql_db_defaultdata.sql \
-	    $SQLDIR/mysql_db_examples.sql \
-	    $SQLDIR/mysql_db_files_defaultdata.sql \
-	    $SQLDIR/mysql_db_files_examples.sql
-	echo "UPDATE user SET password = MD5('judgehost#$RESTPW') WHERE username='judgehost';"
-	) | mysql -D "$DBNAME"
-	verbose "SQL structure and default/example data installed."
-	;;
-
-bare-install)
-	read_dbpasswords
-	create_db_users
- 	cat $SQLDIR/mysql_db_structure.sql \
- 	    $SQLDIR/mysql_db_defaultdata.sql \
-	    $SQLDIR/mysql_db_files_defaultdata.sql \
-	     | mysql -D "$DBNAME"
-	verbose "SQL structure and defaults installed (no sample data)."
-	;;
-
 uninstall)
 	read_dbpasswords
 	remove_db_users
+	;;
+
+bare-install|install)
+	read_dbpasswords
+	create_db_users
+	FILES="$SQLDIR/mysql_db_structure.sql \
+		$SQLDIR/mysql_db_defaultdata.sql \
+		$SQLDIR/mysql_db_files_defaultdata.sql"
+
+	if [ "$1" = "install" ]; then
+		FILES="$FILES \
+			$SQLDIR/mysql_db_examples.sql \
+			$SQLDIR/mysql_db_files_examples.sql"
+	fi
+	RESTPW=`cat $RESTPWFILE | grep -v ^# | cut -f4`
+	(
+		cat $FILES
+		echo "UPDATE user SET password = MD5('judgehost#$RESTPW') WHERE username='judgehost';"
+	) | mysql -D "$DBNAME"
+	if [ "$1" = "install" ]; then
+		verbose "SQL structure and default/example data installed."
+	else
+		verbose "SQL structure and defaults installed (no sample data)."
+	fi
 	;;
 
 # Upgrades the DB structure and permissions to current version

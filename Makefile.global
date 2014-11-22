@@ -44,11 +44,6 @@ INSTALL_DIR     = $(MKDIR_P)
 # This is a bit of a hack:
 INSTALL_TREE    = cp -R
 
-# Check whether we are running under Cygwin:
-ifneq ($(findstring CYGWIN,$(shell uname)),)
-CYGWIN = 1
-endif
-
 # Library objects required in multiple places:
 LIBSBASE   = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc)
 LIBHEADERS = $(addsuffix .h,$(LIBSBASE))

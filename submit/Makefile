@@ -9,10 +9,10 @@ SUBMITCLIENT = submit$(EXEEXT)
 # Statically link against libmagic and libJSONcpp to prevent
 # dependency on team workstations (this might be GCC specific):
 ifneq ($(LIBMAGIC),)
-$(SUBMITCLIENT): LDFLAGS += -Wl,-Bstatic $(LIBMAGIC) -Wl,-Bdynamic
+$(SUBMITCLIENT): LDFLAGS += $(STATIC_LINK_START) $(LIBMAGIC) $(STATIC_LINK_END)
 endif
 ifneq ($(LIBJSONCPP),)
-$(SUBMITCLIENT): LDFLAGS += -Wl,-Bstatic $(LIBJSONCPP) -Wl,-Bdynamic
+$(SUBMITCLIENT): LDFLAGS += $(STATIC_LINK_START) $(LIBJSONCPP) $(STATIC_LINK_END)
 endif
 $(SUBMITCLIENT): CXXFLAGS += $(CURL_CFLAGS)
 # Try to link statically against libcURL to prevent dependency
@@ -27,12 +27,13 @@ $(SUBMITCLIENT): LDFLAGS := $(filter-out -pie,$(LDFLAGS))
 SUBMITHEADERS = $(TOPDIR)/etc/submit-config.h
 
 ifeq ($(SUBMITCLIENT_ENABLED),yes)
-TARGETS += $(SUBMITCLIENT)
-endif
-
-build: $(TARGETS)
-
 submitclient: $(SUBMITCLIENT)
+TARGETS += $(SUBMITCLIENT)
+else
+submitclient:
+	@echo "Submit client is disabled."
+	@exit 1
+endif
 
 # Explicitly link with C++ compiler, as without any C++ extensions
 # these are recognized as plain C objects.

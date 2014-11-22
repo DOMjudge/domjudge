@@ -33,7 +33,7 @@ if ( isset($_REQUEST['viewall']) ) $viewall = $_REQUEST['viewall'];
 
 setcookie('domjudge_balloonviewall', $viewall);
 
-$refresh = '30;url=balloons.php';
+$refresh = '15;url=balloons.php';
 require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Balloon Status</h1>\n\n";
@@ -58,10 +58,11 @@ if ( ! dbconfig_get('show_balloons_postfreeze',0) && isset($cdata['freezetime'])
 
 // Get all relevant info from the balloon table.
 // Order by done, so we have the unsent balloons at the top.
-$res = $DB->q("SELECT b.*, s.probid, s.submittime,
+$res = $DB->q("SELECT b.*, s.submittime, p.probid, p.shortname AS probshortname,
                t.teamid, t.name AS teamname, t.room, c.name AS catname
                FROM balloon b
                LEFT JOIN submission s USING (submitid)
+               LEFT JOIN problem p USING (probid)
                LEFT JOIN team t USING(teamid)
                LEFT JOIN team_category c USING(categoryid)
                WHERE s.cid = %i $freezecond
@@ -76,7 +77,7 @@ $res = $DB->q("SELECT b.*, s.probid, s.submittime,
 $BALLOONS = $TOTAL_BALLOONS = array();
 while ( $row = $res->next() ) {
 	$BALLOONS[] = $row;
-	$TOTAL_BALLOONS[$row['login']][] = $row['probid'];
+	$TOTAL_BALLOONS[$row['teamid']][] = $row['probid'];
 
 	// keep overwriting these variables - in the end they'll
 	// contain the id's of the first balloon in each type
@@ -105,7 +106,7 @@ if ( !empty($BALLOONS) ) {
 		echo '<td class="probid">' .
 			'<div class="circle" style="background-color: ' .
 		    htmlspecialchars($probs_data[$row['probid']]['color']) .
-			';"></div> ' . htmlspecialchars($row['probid']) . '</td>';
+			';"></div> ' . htmlspecialchars($row['probshortname']) . '</td>';
 
 		// team name, location (room) and category
 		echo '<td>t' . htmlspecialchars($row['teamid']) . '</td><td>' .

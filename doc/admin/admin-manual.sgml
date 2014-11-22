@@ -254,8 +254,8 @@ External software:
 <item> Install Apache, PHP and (recommended) phpMyAdmin.
 <item> Make sure PHP works for the web server and command line scripts.
 <item> Install necessary compilers on the judgehosts.
-<item> See also <ref id="install_config:apt-getinstall"
-       name="an example command line for Debian GNU/Linux">.
+<item> See also <ref id="install_config:package-install"
+       name="an example command line for Debian and RedHat">.
 </itemize>
 
 DOMjudge:
@@ -277,8 +277,15 @@ On the domserver host:
        sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf &&
        sudo apache2ctl graceful
        </tt>
+       Or for Apache 2.4 and up:
+       <tt>
+       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
+       sudo a2enconf domjudge &&
+       sudo apache2ctl graceful
+       </tt>
+       
 <item> Check that the web interface works (/team, /public and /jury).
-<item> Change the admin password from its default value.
+<item> Change the admin password from its default value ('admin').
 <item> Check that the API (/api) works and create credentials for the judgehosts.
 <item> Create accounts and add useful contest data through the jury web
        interface or with phpMyAdmin.
@@ -296,7 +303,7 @@ On the judgehosts:
        on all judgehosts.
 <item> Optionally build a chroot to support interpreted or
        byte-compiled langauges such as Java, see the appendix on
-       <ref id="problems:java-chroot" name="setting up a chroot">.
+       <ref id="problems:chroot" name="setting up a chroot">.
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
 </itemize>
 It should be done by now. As a check that (almost) everything works,
@@ -346,8 +353,8 @@ Optionally:
 For a detailed list of the hardware and software requirements,
 please refer to the previous chapter on contest planning.
 
-<label id="install_config:apt-getinstall">
-<sect1>Debian installation command
+<label id="install_config:package-install">
+<sect1>Debian and RedHat installation commands
 <p>
 
 For your convenience, the following command will install needed
@@ -363,15 +370,39 @@ apt-get install gcc g++ make zip unzip mysql-server \
 	texlive-fonts-recommended texlive-lang-dutch
 </code>
 
+The following command can be used on RedHat Enterprise Linux, and
+related distributions like CentOS and Fedora.
+<code>
+yum install gcc gcc-c++ make zip unzip mariadb-server \
+	httpd php php-cli php-mbstring php-mysql \
+	boost-devel gmp-devel ntp linuxdoc-tools \
+	texlive-collection-latexrecommended texlive-wrapfig
+</code>
+Note that the TeX Live packages <tt>expdlist</tt>, <tt>moreverb</tt>,
+and <tt>svn</tt> still have be installed manually to rebuild the team
+manuals. Furthermore, <tt>phpmyadmin</tt> is available from the
+<htmlurl name="Fedora EPEL repository"
+url="https://fedoraproject.org/wiki/EPEL">.
+
 On a judgehost, the following should be sufficient. The last two lines show some
 example compilers to install for C, C++, Java (GNU), Java (Oracle), Haskell
 and Pascal; change the list as appropriate.
 
+For Debian:
 <code>
 apt-get install make sudo debootstrap php5-cli php5-curl php5-json procps \
 	gcc g++ gcj-jre-headless gcj-jdk openjdk-7-jre-headless openjdk-7-jdk \
 	ghc fp-compiler
 </code>
+
+For RedHat:
+<code>
+yum install make sudo php-cli php-mbstring php-process procps-ng \
+	gcc gcc-c++ glibc-static libstdc++-static \
+	java-1.7.0-openjdk-headless java-1.7.0-openjdk-devel \
+	ghc-compiler fpc
+</code>
+Note that <tt>fpc</tt> is not available in RedHat 7.
 
 Finally, to build the command-line submit client, install the
 following additional software.
@@ -380,11 +411,17 @@ following additional software.
 apt-get install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
 </code>
 
+<code>
+yum install libcurl-devel jsoncpp-devel file-devel
+</code>
+The package <tt>jsoncpp-devel</tt> is available in Fedora, but not in
+RHEL/CentOS.
+
 Libmagic is not strictly required, but highly recommended for
-detecting binary file submissions. These libraries are statically
-linked into the <tt>submit</tt> binary so that these libraries
-are not needed on the team workstations where <tt>submit</tt> is
-installed.
+detecting binary file submissions. Pass the option
+<tt>--enable-static-linking</tt> to configure so that these libraries
+are statically linked into the <tt>submit</tt> binary and not needed
+on the team workstations where <tt>submit</tt> is installed.
 
 
 <sect>Installation system
@@ -445,7 +482,11 @@ There are three different methods for installing DOMjudge:
 	passing the option <tt>--enable-fhs</tt> to <tt>configure</tt>
 	and in this case the prefix defaults to <tt>/usr/local</tt>.
 	Files will be placed e.g. in <tt>PREFIX/share/domjudge,
-	PREFIX/bin, /var/log, /tmp, /etc/domjudge</tt>.
+	PREFIX/bin, PREFIX/var/log, PREFIX/etc/domjudge</tt>, while
+	<tt>/tmp</tt> will be used for temporary files. You may want
+	to pass options <tt>--sysconfdir=/etc</tt> and
+	<tt>--localstatedir=/var</tt> to <tt>configure</tt> to disable
+	the prefix for these.
 
 <tag>Maintainer install</tag>
 	Meant for those wishing to do development on the DOMjudge
@@ -478,10 +519,13 @@ directory without arguments.
 
 <sect>Configuration
 <p>
-
 Configuration of the judge system is mostly done by editing the
 configuration variables on the page <tt>Configuration settings</tt>
-available in the administrator interface. Changes take effect immediately.
+available in the administrator interface, and changes take effect
+immediately. The administrator interface
+can be reached on <tt>http://yourhost/domjudge/jury/</tt> and the
+default username is <tt>admin</tt> with password <tt>admin</tt>.
+Make sure to change the default password immediately.
 
 Some settings that are tightly coupled to the filesystem can be
 configured in the files in <tt>etc</tt>: <tt>domserver-config.php,
@@ -537,7 +581,7 @@ the target directory to build the chroot environment in and as second
 argument the target machine architecture. Start the script without
 arguments for usage information. See also sections
 <ref id="install_config:judgehost" name="Installation of a judgehost">
-and <ref id="problems:java-chroot" name="Problems: Java & chroot">.
+and <ref id="problems:chroot" name="Problems: Setting up a chroot">.
 
 <sect>Configuration of special run and compare programs
 <p>
@@ -862,7 +906,7 @@ certain operations. There's a pregenerated <tt>/etc/sudoers.d/</tt> snippet
 in <tt>etc/sudoers-domjudge</tt> that contains all required rules. You can
 put the lines in the snippet at the end of  <tt>/etc/sudoers</tt>, or, for
 modern sudo versions, place the file in <tt>/etc/sudoers.d/</tt>. If you
-change the user you run the judgehost at, or the installation paths, be
+change the user you run the judgedaemon as, or the installation paths, be
 sure to update the sudoers rules accordingly.
 
 When the chroot setting is enabled (default), a static POSIX shell has
@@ -874,16 +918,19 @@ file. If you want to support languages that cannot be compiled to
 statically linked binaries, e.g. byte-compiled languages such as Java,
 or interpreted languages such as Python, then a complete chroot
 environment must be built and configured. See the appendix on
-<ref id="problems:java-chroot" name="setting up a chroot"> for more
+<ref id="problems:chroot" name="setting up a chroot"> for more
 details.
 
 The judgehost connects to the domserver via a REST API. You need to
 create an account for the judgedaemons to use (this may be a
 shared account between all judgedaemons) with a difficult,
 random password and the 'judgehost' role. On each judgedaemon,
-create a file <tt>etc/restapi.secret</tt> containing the URL,
+create a file <tt>etc/restapi.secret</tt> containing the id, URL,
 username and password whitespace-separated on one line, for example:
-<verb>http://example.edu/domjudge/api/  judgehosts  MzfJYWF5agSlUfmiGEy5mgkfqU</verb>
+<verb>default http://example.edu/domjudge/api/  judgehosts  MzfJYWF5agSlUfmiGEy5mgkfqU</verb>
+Multiple lines may be specified to allow a judgedaemon to work for multiple
+domservers. The id is used to differentiate between multiple domservers,
+and should be unique.
 
 Upon its first connection to the domserver API the judgehost will be
 auto-registered and will be by default enabled. If you wish to
@@ -1009,7 +1056,7 @@ make -C doc/judge docs
 
 <sect1>Linux Control Groups (cgroups) in the judgedaemon
 <p>
-DOMjudge has experimental support for using Linux Control Groups or cgroups
+DOMjudge has support for using Linux Control Groups or cgroups
 for process isolation in the judgedaemon. Using cgroups gives more accurate
 measurement of actually allocated memory, which is helpful with interpreters
 like Java that reserve but not actually use lots of memory. Also, the feature
@@ -1024,7 +1071,8 @@ distributions may be different (send us your feedback!).
 <p>
 <itemize>
 <item> Install the necessary packages:
-<tt># apt-get install libcgroup-dev cgroup-bin</tt>
+<tt># apt-get install libcgroup-dev</tt>
+(or <tt># yum install libcgroup-devel</tt> on RedHat)
 <item> Edit grub config to add memory cgroup and swap accounting to the boot options. Edit <tt>/etc/default/grub</tt> and change the default commandline to <tt>GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"</tt>.
 Then run <tt>update-grub</tt> and reboot.
 <item> Compile DOMjudge with cgroup support. Re-run <tt>./configure</tt> and look for cgroup in the output. Then rebuild the runguard with <tt>make build</tt>.
@@ -1099,6 +1147,23 @@ enabled via the <tt>enable_printing</tt> configuration option in
 the administrator interface. The exact command used to send the
 files to a printer can be changed the function <tt>send_print()</tt>
 in <tt>lib/www/printing.php</tt>.
+
+<sect1>Judging consistency
+<p>
+
+The following issues can be considered to improve consistency in
+judging.
+
+<itemize>
+<item> Disable CPU frequency scaling and Intel "Turbo Boost" to
+prevent fluctuations in CPU power.
+<item> Disable address-space randomization to make programs with
+memory addressing bugs give more reproducible results:
+<code>
+echo 0 &gt; /proc/sys/kernel/randomize_va_space
+</code>
+</itemize>
+
 
 <sect>Upgrading
 <p>
@@ -1243,8 +1308,7 @@ with the judging of a specific language; after resolution of the
 problem this can be set to <em>yes</em> again.
 
 <tt>time_factor</tt> is the relative factor by which the timelimit is
-multiplied for solutions in this language. For example Java is/was
-known to be structurally slower than C/C++.
+multiplied for solutions in this language.
 
 <tag>problem</tag>
 This table contains the problem definitions. <tt>probid</tt> is the
@@ -1866,8 +1930,9 @@ the jury web interface work. A solution is to make it readable to a
 special group the web server runs as. This is done when using the
 default configuration and installation method and when <tt>make
 install-{domserver,judgehost}</tt> is run as root. The webserver group
-can be set with <tt>configure --with-webserver-group=GROUP</tt> which
-defaults to <tt>www-data</tt>.
+can be set with <tt>configure --with-webserver-group=GROUP</tt>; by
+default it is tried to be determined from groups available on the
+system, e.g. <tt>www-data</tt> or <tt>apache</tt>.
 
 Judgehosts and the domserver communicate with each other over HTTP.
 Also all parties accessing the domserver web interface obvioulsly use
@@ -1919,7 +1984,7 @@ than DOMjudge.
 <p>
 
 The default installation sets permissions correctly for the web
-server user (commonly <tt>www-data</tt>).
+server user (commonly <tt>www-data</tt> or <tt>apache</tt>).
 The following information is for those who want to verify the setup
 or make modifications to the settings.
 
@@ -1977,35 +2042,41 @@ default and the above is not necessary.
 <p>
 
 
-<sect>Java compilers and the chroot <label id="problems:java-chroot">
+<sect>Setting up the chroot <label id="problems:chroot">
 <p>
 
+With the default configuration, submitted programs are run within a
+minimal chroot environment. For this the programs have to be statically
+linked, because they do not have access to shared libraries.
+
+To be able to run submissions of languages that don't support statically
+linked binaries (think interpreted languages and bytecode compiled
+languages, amongst which Java and C#), one can build a bigger chroot
+environment which contains all necessary ingredients to let the
+submissions run. DOMjudge supports this with some manual setup.
+
+First of all, a chroot tree with those interpreters or runtimes needs to
+be created. The script <tt>bin/dj_make_chroot</tt> creates one from
+Debian GNU/Linux sources. Add the required packages for the needed
+languages to the INSTALLDEBS variable in that script; run that script
+without arguments for basic usage information.
+
+Next, edit the script <tt>lib/judge/chroot-startstop.sh</tt> and adapt
+it to work with your local system and uncomment the script in
+<tt>etc/judgehost-config.php</tt>.
+
+<sect>Java compilers
+<p>
 Java is difficult to deal with in an automatic way. It is probably
 most preferable to use Oracle (previously Sun) Java, because that's the
 version contestants will be used to. The GNU Compiler for Java (GCJ) is
 easier to deal with but may lack some features.
 
-With the default configuration, submitted programs are run within a minimal
-chroot environment. For this the programs have to be statically
-linked, because they do not have access to shared libraries.
+The recommended way of using Java is by setting up the chroot as in the
+previous section, but you can also choose one of the alternatives as
+described below.
 
-For most languages compilers support this, but for Java, this is a bit
-problematic. The Oracle Java compiler `javac' is not a real compiler:
-a bytecode interpreter `java' is needed to run the binaries and thus
-this cannot simply run in a chroot environment.
-
-There are some options to support Java as a language:
 <enum>
-<item> One can build a bigger chroot environment which contains
-       all necessary ingredients to let Java work within it.
-       DOMjudge supports this with some manual setup.
-
-       First of all, a chroot tree with Java support must be created.
-       The script <tt>bin/dj_make_chroot</tt> creates one from Debian GNU/Linux
-       sources; run that script without arguments for basic usage
-       information. Next, edit the script <tt>lib/judge/chroot-startstop.sh</tt>
-       and adapt it to work with your local system and uncomment the
-       script in <tt>etc/judgehost-config.php</tt>.
 <item> As an alternative the <tt>gcj</tt> compiler from GNU can be
        used instead of Oracle's version. This one generates true machine
        code and can link statically. However a few function calls
@@ -2099,14 +2170,6 @@ accessible within the chroot-ed environment the program is run in).
 To filter these warnings, take a look at
 <tt>judge/compile_java_gcjmod.sh</tt> and replace or symlink
 <tt>judge/compile_java.sh</tt> by/to this file.
-
-<sect>C#/mono support
-<p>
-
-Using the mono compiler and runtime for C# gives rise to similar
-problems as with Java. Although the C# language has been added to
-DOMjudge, there's no support yet to run it within a chroot
-environment. So in that case, <tt>USE_CHROOT</tt> must be disabled.
 
 <sect>Memory limit errors in the web interface<label id="problems:memory">
 <p>
@@ -2231,10 +2294,9 @@ additional software to be installed:
 
 On Debian(-based) systems, the following apt-get command should
 install the additionally required packages (next to the
-<ref id="install_config:apt-getinstall"
-       name="standard set of packages">):
+<ref id="install_config:package-install" name="standard set of packages">):
 <code>
-apt-get install autoconf automake flexc++ bisonc++
+apt-get install autoconf automake git flexc++ bisonc++
 </code>
 
 When this software is present, bootstrapping can be done by running
