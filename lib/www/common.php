@@ -378,7 +378,7 @@ function putClock() {
 	if ( count($cdatas) > 1 ) {
 		echo "<div id=\"selectcontest\">\n";
 		echo addForm('change_contest.php', 'get', 'selectcontestform');
-		$contests = array_map(function($c) { return 'c' . $c['cid'] . ': ' . $c['contestname']; }, $cdatas);
+		$contests = array_map(function($c) { return $c['shortname']; }, $cdatas);
 		echo 'Selected contest: ' . addSelect('cid', $contests, $cid, true);
 		echo addEndForm();
 		echo "<script type=\"text/javascript\">
