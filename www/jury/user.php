@@ -51,7 +51,7 @@ if ( !empty($cmd) ):
 <tr><td><label for="data_0__name_">Full name:</label></td>
 <td><?php echo addInput('data[0][name]', @$row['name'], 35, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__email_">Email:</label></td>
-<td><?php echo addInputField('email', 'data[0][email]', @$row['email'], ' size="35" maxlength="255"')?></td></tr>
+<td><?php echo addInputField('email', 'data[0][email]', @$row['email'], ' size="35" maxlength="255" autocomplete="off"')?></td></tr>
 
 <tr><td><label for="data_0__password_">Password:</label></td><td><?php
 if ( !empty($row['password']) ) {
