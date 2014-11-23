@@ -37,6 +37,7 @@ function usage()
 	    "Alternatively, with the -s option, a DOMjudge scoreboard can be used as input.\n" .
 	    "The header must contain at least the team and problem columns and these must\n" .
 	    "match with the following rows. A final summary line is ignored.\n\n" .
+	    "  -C       contest ID to play simulation in (defaults to unique active contest).\n" .
 	    "  -c       team category ID for simulated teams (default: $def_categ)\n" .
 	    "  -f       automatically verify simulated submissions (useful when the\n" .
 	    "             configuration option VERIFICATION_REQUIRED is enabled\n" .
@@ -48,6 +49,7 @@ function usage()
 	exit;
 }
 
+$options = getopt("C:c:frsv:hV");
 // With PHP version >= 5.3 we can also use long options.
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
 if ( $options===FALSE ) {
@@ -55,6 +57,7 @@ if ( $options===FALSE ) {
 	usage();
 }
 
+if ( isset($options['C']) ) $options['cid']     = $options['C'];
 if ( isset($options['c']) ) $options['teamcat'] = $options['c'];
 if ( isset($options['f']) ) $options['verify']  = $options['f'];
 if ( isset($options['r']) ) $options['remove']  = $options['r'];
@@ -62,10 +65,17 @@ if ( isset($options['s']) ) $options['scoreb']  = $options['s'];
 if ( isset($options['v']) ) $options['verbose'] = $options['v'];
 
 if ( isset($options['V']) ) version();
-if ( isset($options['h']) || !isset($options['c']) ) usage();
-$cid = $options['c'];
+if ( isset($options['h']) ) usage();
 
 setup_database_connection();
+
+$cids = getCurrentContests();
+$cid = NULL;
+if ( count($cids)==1 ) $cid = reset($cids);
+if ( isset($options['cid']) ) $cid = $options['cid'];
+if ( $cid===NULL ) {
+	error("No contest ID specified and no unique active contest found.");
+}
 
 $categ = $def_categ;
 if ( isset($options['teamcat']) ) {
