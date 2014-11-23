@@ -135,29 +135,9 @@ echo addSelect('data[0][special_compare]', $execmap, @$row['special_compare'], T
 ?>
 </td></tr>
 
-<!-- contest selection -->
-<tr><td>Contests:</td>
-	<td><?php
-		$contests = $DB->q("TABLE SELECT contest.cid,contestname,max(contestproblem.probid=%s) AS incontest
-		FROM contest
-		LEFT JOIN contestproblem USING (cid)
-		GROUP BY contest.cid", @$row['probid']);
-		$i=0;
-		foreach ($contests as $contest) {
-			echo "<label>";
-			echo addCheckbox("data[0][mapping][items][$i]", $contest['incontest']==1, $contest['cid']);
-			echo $contest['contestname'] . " (c${contest['cid']})</label><br/>";
-			$i++;
-		}
-		?>
-	</td></tr>
-
 </table>
 
 <?php
-echo addHidden('data[0][mapping][fk][0]', 'probid') .
-     addHidden('data[0][mapping][fk][1]', 'cid') .
-     addHidden('data[0][mapping][table]', 'contestproblem');
 echo addHidden('cmd', $cmd) .
 	addHidden('table','problem') .
 	addHidden('referrer', @$_GET['referrer']) .
@@ -254,7 +234,9 @@ if ( IS_ADMIN ) {
 if ( $cid === null) {
 	echo "<h3>Contests</h3>\n\n";
 
-	$res = $DB->q('TABLE SELECT contest.*
+	$res = $DB->q('TABLE SELECT contest.*, contestproblem.shortname AS problemshortname,
+				    contestproblem.allow_submit, contestproblem.allow_judge,
+				    contestproblem.color
 		       FROM contest
 		       INNER JOIN contestproblem USING (cid)
 		       WHERE contestproblem.probid = %i
@@ -267,8 +249,13 @@ if ( $cid === null) {
 		$times = array('activate', 'start', 'freeze', 'end', 'unfreeze');
 		echo "<table class=\"list sortable\">\n<thead>\n" .
 		     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
-		foreach ( $times as $time ) echo "<th scope=\"col\">$time</th>";
-		echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
+		echo "<th scope=\"col\">contest<br />shortname</th>\n";
+		echo "<th scope=\"col\">contest<br />name</th>";
+		echo "<th scope=\"col\">problem<br />shortname</th>";
+		echo "<th scope=\"col\">allow<br />submit</th>";
+		echo "<th scope=\"col\">allow<br />judge</th>";
+		echo "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>\n";
+		echo "</tr>\n</thead>\n<tbody>\n";
 
 		$iseven = false;
 		foreach ( $res as $row ) {
@@ -280,12 +267,18 @@ if ( $cid === null) {
 			     (!$row['enabled'] ? ' disabled' : '') . '">' .
 			     "<td class=\"tdright\">" . $link .
 			     "c" . (int)$row['cid'] . "</a></td>\n";
-			foreach ( $times as $time ) {
-				echo "<td title=\"" . printtime(@$row[$time . 'time'], '%Y-%m-%d %H:%M') . "\">" .
-				     $link . (isset($row[$time . 'time']) ?
-						printtime($row[$time . 'time']) : '-') . "</a></td>\n";
-			}
+			echo "<td>" . $link . htmlspecialchars($row['shortname']) . "</a></td>\n";
 			echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
+			echo "<td>" . $link . htmlspecialchars($row['problemshortname']) . "</a></td>\n";
+			echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_submit']) . "</a></td>\n";
+			echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_judge']) . "</a></td>\n";
+			echo ( !empty($row['color'])
+				? '<td title="' . htmlspecialchars($row['color']) .
+				  '">' . $link . '<div class="circle" style="background-color: ' .
+				  htmlspecialchars($row['color']) .
+				  ';"></div></a></td>'
+				: '<td>'. $link . '&nbsp;</a></td>' );
+
 			$iseven = !$iseven;
 
 			echo "</tr>\n";
