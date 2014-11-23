@@ -1228,13 +1228,15 @@ automatically by the software:
  |clarification    |Clarification requests/replies are stored here.@
 x|configuration    |Runtime configuration settings.@
 x|contest          |Contest definitions with start/end time.@
+x|contestproblem   |Coupling of problems to contests and data specific to it.@
+x|contestteam      |Coupling of teams to contests.@
 x|executable       |Executable compile/run/compare scripts.@
  |event            |Log of events during contests.@
  |judgehost        |Computers (hostnames) that function as judgehosts.@
  |judging          |Judgings of submissions.@
  |judging&lowbar;run      |Result of one testcase within a judging.@
 x|language         |Definition of allowed submission languages.@
-x|problem          |Definition of problems (name, corresponding contest, etc.).@
+x|problem          |Definition of problems (name, timelimit, etc.).@
  |role             |Possible user roles.@
  |scorecache&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
  |scorecache&lowbar;public|separately, because of possibility of score freezing.@
@@ -1283,9 +1285,29 @@ jury interface (either relative or absolute) is stored in the
 <tt>*time_string</tt> fields, while a calculated absolute version is
 stored in the fields without the <tt>_string</tt> suffix.
 
-The <tt>enabled</tt> field can be unset to allow for easier editing of
-contest times, as disabled contests are not checked to overlap with
-other contests. A disabled contest will also not become active.
+The <tt>public</tt> field can be used to limit which contests are
+displayed as public scoreboards.
+
+<tag>contestproblem</tag>
+This table couples problems to contests: <tt>cid</tt> and
+<tt>probid</tt> describe the pairing.
+
+Furthermore, it stores problem data that is specific for the included
+contest: <tt>shortname</tt> is a contest-unique identifier string for
+the problem; <tt>allow_submit</tt> determines whether teams can submit
+solutions for this problem. Non-submittable problems are also not
+displayed on the scoreboard. This can be used to define spare
+problems, which can then be added to the contest quickly;
+<tt>allow_judge</tt> determines whether judgehosts will judge
+submissions for this problem. See also the explanation for language.
+
+The <tt>color</tt> tag can be filled with a CSS colour specification
+to associate with this problem; see also section <ref id="scoreboard:colours"
+name="Scoreboard: colours">.
+
+<tag>contesteam</tag>
+This table couples teams to contests. Teams can only submit solutions to
+problems in contests that they are part of.
 
 <tag>executable</tag>
 This table stores zip-bundles of executable scripts that can be used
