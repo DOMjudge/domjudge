@@ -10,31 +10,32 @@
 -- Dumping data for table `configuration`
 --
 
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('script_timelimit', '30', 'int', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('script_memory_limit', '2097152', 'int', 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('script_filesize', '65536', 'int', 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('memory_limit', '524288', 'int', 'Maximum memory usage (in kB) by submissions. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB!');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('filesize_limit', '4096', 'int', 'Maximum filesize (in kB) submissions may write. Solutions will abort when trying to write more, so this should be greater than the maximum testdata output.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('process_limit', '64', 'int', 'Maximum number of processes that the submission is allowed to start (including shell and possibly interpreters).');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('sourcesize_limit', '256', 'int', 'Maximum source code size (in kB) of a submission. This setting should be kept in sync with that in "etc/submit-config.h.in".');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('sourcefiles_limit', '100', 'int', 'Maximum number of source files in one submission. Set to one to disable multiple file submissions.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('timelimit_overshoot', '"1s|10%"', 'string', 'Time that submissions are kept running beyond timelimt before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('verification_required', '0', 'bool', 'Is verification of judgings by jury required before publication?');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_affiliations', '1', 'bool', 'Show affiliations names and icons in the scoreboard?');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_compile', '2', 'int', 'Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_sample_output', '0', 'bool', 'Should teams be able to view a diff of their and the reference output to sample testcases?');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('show_balloons_postfreeze', '0', 'bool', 'Give out balloon notifications after the scoreboard has been frozen?');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('penalty_time', '20', 'int', 'Penalty time in minutes per wrong submission (if finally solved).');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('compile_penalty', '1', 'bool', 'Should submissions with compiler-error incur penalty time (and show on the scoreboard)?');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('results_prio', '{"memory-limit":99,"output-limit":99,"run-error":99,"timelimit":99,"wrong-answer":30,"presentation-error":20,"no-output":10,"correct":1}', 'array_keyval', 'Priorities of results for determining final result with multiple testcases. Higher priority is used first as final result. With equal priority, the first occurring result determines the final result.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('results_remap', '{"presentation-error":"wrong-answer"}', 'array_keyval', 'Remap testcase result, e.g. to disable a specific result type such as ''presentation-error''.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('lazy_eval_results', '1', 'bool', 'Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('enable_printing', '0', 'bool', 'Enable teams and jury to send source code to a printer via the DOMjudge web interface.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('time_format', '"%H:%M"', 'string', 'The format used to print times. For formatting options see the PHP \'strftime\' function.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_compare', '"compare"', 'string', 'The script used to compare outputs if no special compare script specified.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('default_run', '"run"', 'string', 'The script used to run submissions if no special run script specified.');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('allow_registration', '0', 'bool', 'Allow users to register themselves with the system?');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('script_timelimit', '30', 'int', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.'),
+('script_memory_limit', '2097152', 'int', 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.'),
+('script_filesize', '65536', 'int', 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.'),
+('memory_limit', '524288', 'int', 'Maximum memory usage (in kB) by submissions. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB!'),
+('filesize_limit', '4096', 'int', 'Maximum filesize (in kB) submissions may write. Solutions will abort when trying to write more, so this should be greater than the maximum testdata output.'),
+('process_limit', '64', 'int', 'Maximum number of processes that the submission is allowed to start (including shell and possibly interpreters).'),
+('sourcesize_limit', '256', 'int', 'Maximum source code size (in kB) of a submission. This setting should be kept in sync with that in "etc/submit-config.h.in".'),
+('sourcefiles_limit', '100', 'int', 'Maximum number of source files in one submission. Set to one to disable multiple file submissions.'),
+('timelimit_overshoot', '"1s|10%"', 'string', 'Time that submissions are kept running beyond timelimt before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.'),
+('verification_required', '0', 'bool', 'Is verification of judgings by jury required before publication?'),
+('show_affiliations', '1', 'bool', 'Show affiliations names and icons in the scoreboard?'),
+('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?'),
+('show_compile', '2', 'int', 'Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always.'),
+('show_sample_output', '0', 'bool', 'Should teams be able to view a diff of their and the reference output to sample testcases?'),
+('show_balloons_postfreeze', '0', 'bool', 'Give out balloon notifications after the scoreboard has been frozen?'),
+('penalty_time', '20', 'int', 'Penalty time in minutes per wrong submission (if finally solved).'),
+('compile_penalty', '1', 'bool', 'Should submissions with compiler-error incur penalty time (and show on the scoreboard)?'),
+('results_prio', '{"memory-limit":99,"output-limit":99,"run-error":99,"timelimit":99,"wrong-answer":30,"presentation-error":20,"no-output":10,"correct":1}', 'array_keyval', 'Priorities of results for determining final result with multiple testcases. Higher priority is used first as final result. With equal priority, the first occurring result determines the final result.'),
+('results_remap', '{"presentation-error":"wrong-answer"}', 'array_keyval', 'Remap testcase result, e.g. to disable a specific result type such as ''presentation-error''.'),
+('lazy_eval_results', '1', 'bool', 'Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged.'),
+('enable_printing', '0', 'bool', 'Enable teams and jury to send source code to a printer via the DOMjudge web interface.'),
+('time_format', '"%H:%M"', 'string', 'The format used to print times. For formatting options see the PHP \'strftime\' function.'),
+('default_compare', '"compare"', 'string', 'The script used to compare outputs if no special compare script specified.'),
+('default_run', '"run"', 'string', 'The script used to run submissions if no special run script specified.'),
+('allow_registration', '0', 'bool', 'Allow users to register themselves with the system?');
 
 --
 -- Dumping data for table `executable`
@@ -96,27 +97,30 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 -- Dumping data for table `role`
 --
 
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (1, 'admin',          'Administrative User');
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (2, 'jury',           'Jury User');
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (3, 'team',           'Team Member');
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (4, 'balloon',        'Balloon runner');
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (5, 'print',             'print');
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (6, 'judgehost',         '(Internal/System) Judgehost');
-INSERT INTO `role` (`role`, `description`) VALUES ('event_reader',      '(Internal/System) event_reader');
-INSERT INTO `role` (`role`, `description`) VALUES ('full_event_reader', '(Internal/System) full_event_reader');
+INSERT INTO `role` (`roleid`, `role`, `description`) VALUES
+(1, 'admin',             'Administrative User'),
+(2, 'jury',              'Jury User'),
+(3, 'team',              'Team Member'),
+(4, 'balloon',           'Balloon runner'),
+(5, 'print',             'print'),
+(6, 'judgehost',         '(Internal/System) Judgehost'),
+(7, 'event_reader',      '(Internal/System) event_reader'),
+(8, 'full_event_reader', '(Internal/System) full_event_reader');
 
 --
 -- Dumping data for table `team_category`
 --
 -- System category
-INSERT INTO `team_category` VALUES (1, 'System', 9, '#ff2bea', 0);
-INSERT INTO `team_category` VALUES (2, 'Self-Registered', 8, '#33cc44', 1);
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visible`) VALUES
+(1, 'System', 9, '#ff2bea', 0),
+(2, 'Self-Registered', 8, '#33cc44', 1);
 
 --
 -- Dumping data for table `team`
 --
 
-INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES (1, 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES
+(1, 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
 
 --
 -- Dumping data for table `user`
