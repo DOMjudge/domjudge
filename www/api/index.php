@@ -59,17 +59,18 @@ function contest()
 	$cid = $cids[0];
 	$cdata = $cdatas[$cid];
 	return array(
-		'id'       => $cid,
-		'name'     => $cdata['contestname'],
-		'start'    => $cdata['starttime'],
-		'freeze'   => $cdata['freezetime'],
-		'end'      => $cdata['endtime'],
-		'length'   => $cdata['endtime'] - $cdata['starttime'],
-		'unfreeze' => $cdata['unfreezetime'],
-		'penalty'  => 60*dbconfig_get('penalty_time', 20),
+		'id'        => $cid,
+		'shortname' => $cdata['shortname'],
+		'name'      => $cdata['contestname'],
+		'start'     => $cdata['starttime'],
+		'freeze'    => $cdata['freezetime'],
+		'end'       => $cdata['endtime'],
+		'length'    => $cdata['endtime'] - $cdata['starttime'],
+		'unfreeze'  => $cdata['unfreezetime'],
+		'penalty'   => 60*dbconfig_get('penalty_time', 20),
 		);
 }
-$doc = "Get information about the current contest: id, name, start, freeze, unfreeze, length, penalty and end.";
+$doc = "Get information about the current contest: id, shortname, name, start, freeze, unfreeze, length, penalty and end.";
 $doc .= "If more than one contest is active, return information about the first one";
 $api->provideFunction('GET', 'contest', $doc);
 
@@ -84,6 +85,7 @@ function contests()
 	return array_map(function($cdata) {
 		return array(
 			'id' => $cdata['cid'],
+			'shortname' => $cdata['shortname'],
 			'name' => $cdata['contestname'],
 			'start' => $cdata['starttime'],
 			'freeze' => $cdata['freezetime'],
@@ -94,7 +96,7 @@ function contests()
 		);
 	}, $cdatas);
 }
-$doc = "Get information about all the current contests: id, name, start, freeze, unfreeze, length, penalty and end.";
+$doc = "Get information about all the current contests: id, shortname, name, start, freeze, unfreeze, length, penalty and end.";
 $api->provideFunction('GET', 'contests', $doc);
 
 /**

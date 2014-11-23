@@ -38,7 +38,8 @@ function getFileContents($filename, $sizelimit = true) {
  * Will return all the contests that are currently active
  * When fulldata is true, returns the total row as an array
  * instead of just the ID (array indices will be contest ID's then).
- * If $onlyofteam is not null, only show contests that team is part of
+ * If $onlyofteam is not null, only show contests that team is part of. If it is -1, only show
+ * publicly visible contests
  * If $alsofuture is true, also show the contests that start in the future
  * The results will have the value of field $key in the database as key
  */
@@ -50,12 +51,18 @@ function getCurContests($fulldata = FALSE, $onlyofteam = null, $alsofuture = fal
 	} else {
 		$extra = 'AND activatetime <= UNIX_TIMESTAMP()';
 	}
-	if ( $onlyofteam ) {
+	if ( $onlyofteam !== null && $onlyofteam > 0 )
+	{
 		$contests = $DB->q("SELECT * FROM contest
 				INNER JOIN contestteam USING (cid)
 				WHERE teamid = %i AND enabled = 1 ${extra}
 				AND deactivatetime > UNIX_TIMESTAMP()
 				ORDER BY activatetime", $onlyofteam);
+	} elseif ($onlyofteam === -1) {
+		$contests = $DB->q("SELECT * FROM contest
+				WHERE enabled = 1 AND public = 1 ${extra}
+				AND deactivatetime > UNIX_TIMESTAMP()
+				ORDER BY activatetime");
 	} else {
 		$contests = $DB->q("SELECT * FROM contest
 				WHERE enabled = 1 ${extra}

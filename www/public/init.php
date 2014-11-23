@@ -23,7 +23,7 @@ require_once(LIBWWWDIR . '/auth.php');
 require_once(LIBWWWDIR . '/scoreboard.php');
 require_once(LIBWWWDIR . '/forms.php');
 
-$cdatas = getCurContests(TRUE);
+$cdatas = getCurContests(TRUE, -1);
 $cids = array_keys($cdatas);
 
 // If the cookie has a existing contest, use it
