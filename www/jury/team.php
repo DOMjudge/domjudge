@@ -67,7 +67,7 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <!-- contest selection -->
 <tr><td>Contests:</td>
 <td><?php
-	$contests = $DB->q("TABLE SELECT contest.cid,contestname,max(contestteam.teamid=%s) AS incontest
+	$contests = $DB->q("TABLE SELECT contest.cid,shortname,contestname,max(contestteam.teamid=%s) AS incontest
 			FROM contest
 			LEFT JOIN contestteam USING (cid)
 			GROUP BY contest.cid", @$row['teamid']);
@@ -75,7 +75,7 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 	foreach ($contests as $contest) {
 		echo "<label>";
 		echo addCheckbox("data[0][mapping][items][$i]", $contest['incontest']==1, $contest['cid']);
-		echo $contest['contestname'] . " (c${contest['cid']})</label><br/>";
+		echo $contest['contestname'] . " (${contest['shortname']} - c${contest['cid']})</label><br/>";
 		$i++;
 	}
 	?>

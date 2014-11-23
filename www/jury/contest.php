@@ -161,7 +161,6 @@ if ( $numteams==0 ) {
 } else {
 	echo (int)$numteams;
 }
-echo ' <a href="contestteam.php?cid='.urlencode($data['cid']).'">details/edit</a>';
 echo '</td></tr>';
 echo '<tr><td>Problems:</td><td>';
 if ( $numprobs==0 ) {
@@ -169,7 +168,6 @@ if ( $numprobs==0 ) {
 } else {
 	echo (int)$numprobs;
 }
-echo ' <a href="contestproblem.php?cid='.urlencode($data['cid']).'">details/edit</a>';
 echo '</td></tr>';
 echo '<tr><td>Scoreboard unfreeze:</td><td>' .
 	(empty($data['unfreezetime_string']) ? "-" : htmlspecialchars(@$data['unfreezetime_string'])) .
