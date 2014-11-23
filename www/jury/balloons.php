@@ -7,9 +7,26 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+$contestfiltertypes = array('all', 'selected');
+$contest = 'all';
+
+// Restore most recent contest view setting from cookie (overridden by explicit selection)
+if ( isset($_COOKIE['domjudge_ballooncontest']) && in_array($_COOKIE['domjudge_ballooncontest'], $contestfiltertypes) ) {
+	$contest = $_COOKIE['domjudge_ballooncontest'];
+}
+
+if ( isset($_REQUEST['contest']) ) {
+	if ( in_array($_REQUEST['contest'], $contestfiltertypes) ) {
+		$contest = $_REQUEST['contest'];
+	}
+}
+
 $REQUIRED_ROLES = array('jury','balloon');
 require('init.php');
 $title = 'Balloon Status';
+
+// Set cookie of contest view type, expiry defaults to end of session.
+setcookie('domjudge_ballooncontest', $contest);
 
 if ( isset($_POST['done']) ) {
 	foreach($_POST['done'] as $done => $dummy) {
@@ -51,6 +68,18 @@ echo addForm($pagename, 'get') . "<p>\n" .
     addSubmit($viewall ? 'view unsent only' : 'view all') . "</p>\n" .
     addEndForm();
 
+if ( count($cids) > 1 ) {
+	echo addForm($pagename, 'get') . "<p>Show contests:\n";
+	echo addSubmit('all', 'contest', null, ($contest != 'all'));
+	echo addSubmit('selected', 'contest', null, ($contest != 'selected'));
+	echo " ('selected' contest can be chosen using dropdown in upper right" .
+	     "corner)</p>\n" . addEndForm();
+}
+
+if ( $contest == 'selected' ) {
+	$cids = array($cid);
+}
+
 // Problem metadata: colours and names.
 $probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,cid
 		      FROM problem
@@ -77,13 +106,14 @@ if ( empty($freezecond) ) {
 // Get all relevant info from the balloon table.
 // Order by done, so we have the unsent balloons at the top.
 $res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
-	       t.teamid, t.name AS teamname, t.room, c.name AS catname, s.cid
+	       t.teamid, t.name AS teamname, t.room, c.name AS catname, s.cid, co.shortname
 	       FROM balloon b
 	       LEFT JOIN submission s USING (submitid)
 	       LEFT JOIN problem p USING (probid)
-	       LEFT JOIN contestproblem cp USING (probid)
+	       LEFT JOIN contestproblem cp USING (probid, cid)
 	       LEFT JOIN team t USING(teamid)
 	       LEFT JOIN team_category c USING(categoryid)
+	       LEFT JOIN contest co USING (cid)
 	       WHERE s.cid IN %Ai $freezecond
 	       ORDER BY done ASC, balloonid DESC",
 	       $cids);
@@ -124,7 +154,7 @@ if ( !empty($BALLOONS) ) {
 
 		if ( count($cids) > 1 ) {
 			// contest of this problem, only when more than one active
-			echo '<td>' . htmlspecialchars('c' . $row['cid']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['shortname']) . '</td>';
 		}
 
 		// the balloon earned
