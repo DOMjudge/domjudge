@@ -95,6 +95,7 @@ CREATE TABLE `contest` (
   `process_balloons` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?',
   `public` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Is this contest visible for public',
   PRIMARY KEY (`cid`),
+  UNIQUE KEY `shortname` (`shortname`),
   KEY `cid` (`cid`,`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';
 

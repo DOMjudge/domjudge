@@ -25,7 +25,8 @@ ALTER TABLE `contest`
   ADD COLUMN `deactivatetime` decimal(32,9) UNSIGNED NOT NULL COMMENT 'Time contest becomes invisible in team/public views' AFTER `unfreezetime`,
   ADD COLUMN `deactivatetime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime' AFTER `unfreezetime_string`,
   ADD COLUMN `process_balloons` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?',
-  ADD COLUMN `public` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Is this contest visible for public';
+  ADD COLUMN `public` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Is this contest visible for public',
+  ADD UNIQUE KEY `shortname` (`shortname`);
 
 -- Create a table linking contests and problems
 CREATE TABLE `contestproblem` (
