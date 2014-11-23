@@ -1726,10 +1726,8 @@ view the standings and edit data.
 
 The jury interface has two possible views: one for jury members,
 and one for DOMjudge administrators. The second view is the same as
-the jury view, but with more features added. Which to show is decided
-by using the HTTP authentication login used to access the web interface;
-you can list which HTTP users are admin with the variable
-<tt>DOMJUDGE_ADMINS</tt> in <tt>etc/domserver-config.php</tt>.
+the jury view, but with more features added, and can be enabled by
+giving a user the 'admin' role (instead of or next to the 'jury' role).
 
 This separation is handy as a matter of security (jury members cannot
 (accidentally) modify things that shouldn't be) and clarity (jury members
