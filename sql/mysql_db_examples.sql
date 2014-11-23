@@ -8,9 +8,9 @@
 -- Dumping data for table `contest`
 --
 
-INSERT INTO `contest` (`cid`, `contestname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `deactivatetime`, `activatetime_string`, `starttime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`, `deactivatetime_string`, `enabled`, `process_balloons`) VALUES
-(1, 'Demo practice session', UNIX_TIMESTAMP('2014-01-01 08:00:00'), UNIX_TIMESTAMP('2014-01-01 09:00:00'), NULL, UNIX_TIMESTAMP('2014-01-01 11:00:00'), NULL, UNIX_TIMESTAMP('2014-01-01 15:00:00'), '-1:00', '2014-01-01 09:00:00', NULL, '+2:00', NULL, '+6:00', 1, 1),
-(2, 'Demo contest', UNIX_TIMESTAMP('2014-01-01 11:30:00'), UNIX_TIMESTAMP('2014-01-01 12:00:00'), UNIX_TIMESTAMP('2016-01-01 16:00:00'), UNIX_TIMESTAMP('2016-01-01 17:00:00'), UNIX_TIMESTAMP('2016-01-01 17:30:00'), UNIX_TIMESTAMP('2016-01-01 18:30:00'), '-00:30', '2014-01-01 12:00:00', '2016-01-01 16:00:00', '2016-01-01 17:00:00', '2016-01-01 17:30:00', '2016-01-01 18:30:00', 1, 1);
+INSERT INTO `contest` (`cid`, `contestname`, `shortname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `deactivatetime`, `activatetime_string`, `starttime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`, `deactivatetime_string`, `enabled`, `process_balloons`) VALUES
+(1, 'Demo practice session', 'demoprac', UNIX_TIMESTAMP('2014-01-01 08:00:00'), UNIX_TIMESTAMP('2014-01-01 09:00:00'), NULL, UNIX_TIMESTAMP('2014-01-01 11:00:00'), NULL, UNIX_TIMESTAMP('2014-01-01 15:00:00'), '-1:00', '2014-01-01 09:00:00', NULL, '+2:00', NULL, '+6:00', 1, 1),
+(2, 'Demo contest', 'demo', UNIX_TIMESTAMP('2014-01-01 11:30:00'), UNIX_TIMESTAMP('2014-01-01 12:00:00'), UNIX_TIMESTAMP('2016-01-01 16:00:00'), UNIX_TIMESTAMP('2016-01-01 17:00:00'), UNIX_TIMESTAMP('2016-01-01 17:30:00'), UNIX_TIMESTAMP('2016-01-01 18:30:00'), '-00:30', '2014-01-01 12:00:00', '2016-01-01 16:00:00', '2016-01-01 17:00:00', '2016-01-01 17:30:00', '2016-01-01 18:30:00', 1, 1);
 
 --
 -- Dumping data for table `executable`
@@ -30,17 +30,18 @@ INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('example-judgehost1', 0);
 -- Dumping data for table `problem`
 --
 
-INSERT INTO `problem` (`probid`, `shortname`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES (1, 'hello', NULL, 'Hello World', 1, 1, 5, NULL, NULL, 'magenta');
-INSERT INTO `problem` (`probid`, `shortname`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES (2, 'fltcmp', NULL, 'Float special compare test', 1, 1, 5, NULL, 'float', 'yellow');
-INSERT INTO `problem` (`probid`, `shortname`, `cid`, `name`, `allow_submit`, `allow_judge`, `timelimit`, `special_run`, `special_compare`, `color`) VALUES (3, 'boolfind', NULL, 'Boolean switch search', 1, 1, 5, 'boolfind_run', 'boolfind_cmp', 'limegreen');
+INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_compare`) VALUES (1, 'Hello World', 5, NULL, NULL);
+INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_compare`) VALUES (2, 'Float special compare test', 5, NULL, 'float');
+INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_compare`) VALUES (3, 'Boolean switch search', 5, 'boolfind_run', 'boolfind_cmp');
 
 --
--- Dumping data for table `gewis_contestproblem`
+-- Dumping data for table `contestproblem`
 --
 
-INSERT INTO `gewis_contestproblem` (`cid`, `probid`) VALUES (2, 1);
-INSERT INTO `gewis_contestproblem` (`cid`, `probid`) VALUES (2, 2);
-INSERT INTO `gewis_contestproblem` (`cid`, `probid`) VALUES (2, 3);
+INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `allow_judge`, `color`) VALUES (1, 1, 'hello', 1, 1, 'lightblue');
+INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `allow_judge`, `color`) VALUES (2, 1, 'hello', 1, 1, 'magenta');
+INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `allow_judge`, `color`) VALUES (2, 2, 'fltcmp', 1, 1, 'yellow');
+INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `allow_judge`, `color`) VALUES (2, 3, 'boolfind', 1, 1, 'limegreen');
 
 --
 -- Dumping data for table `team_affiliation`
@@ -64,13 +65,13 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES (2, 'Example teamname', 3, 1, NULL, NULL, NULL, NULL);
 
 --
--- Dumping data for table `gewis_contestteam`
+-- Dumping data for table `contestteam`
 --
 
-INSERT INTO `gewis_contestteam` (`cid`, `teamid`) VALUES (1, 1);
-INSERT INTO `gewis_contestteam` (`cid`, `teamid`) VALUES (2, 1);
-INSERT INTO `gewis_contestteam` (`cid`, `teamid`) VALUES (1, 2);
-INSERT INTO `gewis_contestteam` (`cid`, `teamid`) VALUES (2, 2);
+INSERT INTO `contestteam` (`cid`, `teamid`) VALUES (1, 1);
+INSERT INTO `contestteam` (`cid`, `teamid`) VALUES (2, 1);
+INSERT INTO `contestteam` (`cid`, `teamid`) VALUES (1, 2);
+INSERT INTO `contestteam` (`cid`, `teamid`) VALUES (2, 2);
 
 --
 -- Dumping data for table `testcase`
