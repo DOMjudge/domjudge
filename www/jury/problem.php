@@ -9,6 +9,11 @@
 require('init.php');
 
 $id = getRequestID();
+$cid = null;
+if ( isset($_GET['cid']) && is_numeric($_GET['cid']) ) {
+	$cid = $_GET['cid'];
+	$cdatas = array($cid => $cdatas[$cid]);
+}
 $title = 'Problem p'.htmlspecialchars(@$id);
 $title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
                  'problem' . ($id ? ' p'.htmlspecialchars(@$id) : ''));
@@ -18,7 +23,11 @@ if ( isset($_POST['cmd']) ) {
 } elseif ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
 } else {
-	$refresh = '15;url='.$pagename.'?id='.urlencode($id);
+	$extra = '';
+	if ( $cid !== null ) {
+		$extra = '&cid=' . urlencode($cid);
+	}
+	$refresh = '15;url='.$pagename.'?id='.urlencode($id).$extra;
 }
 
 // This doesn't return, call before sending headers
@@ -234,44 +243,47 @@ if ( IS_ADMIN ) {
 		delLink('problem','probid', $id) . "</p>\n\n";
 }
 
-echo "<h3>Contests</h3>\n\n";
+if ( $cid === null) {
+	echo "<h3>Contests</h3>\n\n";
 
-$res = $DB->q('TABLE SELECT contest.*
-	       FROM contest
-	       INNER JOIN contestproblem USING (cid)
-	       WHERE contestproblem.probid = %i
-	       ORDER BY starttime DESC', $id);
+	$res = $DB->q('TABLE SELECT contest.*
+		       FROM contest
+		       INNER JOIN contestproblem USING (cid)
+		       WHERE contestproblem.probid = %i
+		       ORDER BY starttime DESC', $id);
 
-if( count($res) == 0 ) {
-	echo "<p class=\"nodata\">No contests defined</p>\n\n";
-} else {
-	$times = array ('activate','start','freeze','end','unfreeze');
-	echo "<table class=\"list sortable\">\n<thead>\n" .
-	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
-	foreach($times as $time) echo "<th scope=\"col\">$time</th>";
-	echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
-
-	$iseven = false;
-	foreach($res as $row) {
-
-		$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
-
-		echo '<tr class="' .
-		     ( $iseven ? 'roweven': 'rowodd' ) .
-		     (!$row['enabled']    ? ' disabled' :'') . '">' .
-		     "<td class=\"tdright\">" . $link .
-		     "c" . (int)$row['cid'] . "</a></td>\n";
-		foreach ($times as $time) {
-			echo "<td title=\"".printtime(@$row[$time. 'time'],'%Y-%m-%d %H:%M') . "\">" .
-			     $link . ( isset($row[$time.'time']) ?
-					printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
-		}
-		echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
-		$iseven = ! $iseven;
-
-		echo "</tr>\n";
+	if ( count($res) == 0 ) {
+		echo "<p class=\"nodata\">No contests defined</p>\n\n";
 	}
-	echo "</tbody>\n</table>\n\n";
+	else {
+		$times = array('activate', 'start', 'freeze', 'end', 'unfreeze');
+		echo "<table class=\"list sortable\">\n<thead>\n" .
+		     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
+		foreach ( $times as $time ) echo "<th scope=\"col\">$time</th>";
+		echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
+
+		$iseven = false;
+		foreach ( $res as $row ) {
+
+			$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
+
+			echo '<tr class="' .
+			     ($iseven ? 'roweven' : 'rowodd') .
+			     (!$row['enabled'] ? ' disabled' : '') . '">' .
+			     "<td class=\"tdright\">" . $link .
+			     "c" . (int)$row['cid'] . "</a></td>\n";
+			foreach ( $times as $time ) {
+				echo "<td title=\"" . printtime(@$row[$time . 'time'], '%Y-%m-%d %H:%M') . "\">" .
+				     $link . (isset($row[$time . 'time']) ?
+						printtime($row[$time . 'time']) : '-') . "</a></td>\n";
+			}
+			echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
+			$iseven = !$iseven;
+
+			echo "</tr>\n";
+		}
+		echo "</tbody>\n</table>\n\n";
+	}
 }
 
 echo "<h2>Submissions for " . htmlspecialchars($data['name']) . "</h2>\n\n";

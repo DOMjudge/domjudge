@@ -101,14 +101,15 @@ $title = 'Submission s'.@$id;
 if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
-                    s.submittime, s.valid, c.cid, c.contestname,
-                    t.name AS teamname, l.name AS langname, p.shortname, p.name AS probname,
+		    s.submittime, s.valid, c.cid, c.shortname AS contestshortname, c.contestname,
+		    t.name AS teamname, l.name AS langname, cp.shortname, p.name AS probname,
                     CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
                     LEFT JOIN team     t ON (t.teamid = s.teamid)
                     LEFT JOIN problem  p ON (p.probid = s.probid)
                     LEFT JOIN language l ON (l.langid = s.langid)
                     LEFT JOIN contest  c ON (c.cid    = s.cid)
+		    LEFT JOIN contestproblem cp ON (cp.probid = p.probid AND cp.cid = c.cid)
                     WHERE submitid = %i', $id);
 
 if ( ! $submdata ) error ("Missing submission data");
@@ -179,9 +180,12 @@ if ( ! $submdata['valid'] ) {
 ?>
 
 <p>
-<img title="team" alt="Team:" src="../images/team.png"/> <a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>">
+<img title="team" alt="Team:" src="../images/team.png"/> <a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>&cid=<?php echo urlencode($submdata['cid'])?>">
     <?php echo htmlspecialchars($submdata['teamname'] . " (t" . $submdata['teamid'].")")?></a>&nbsp;&nbsp;
-<img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>">
+<img title="contest" alt="Contest:" src="../images/contest.png"/> <a href="contest.php?id=<?php echo $submdata['cid']?>">
+	<span class="contestid"><?php echo htmlspecialchars($submdata['contestshortname'])?></span>:
+	<?php echo htmlspecialchars($submdata['contestname'])?></a>&nbsp;&nbsp;
+<img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>&cid=<?php echo urlencode($submdata['cid'])?>">
 	<span class="probid"><?php echo htmlspecialchars($submdata['shortname'])?></span>:
 	<?php echo htmlspecialchars($submdata['probname'])?></a>&nbsp;&nbsp;
 <img title="language" alt="Language:" src="../images/lang.png"/> <a href="language.php?id=<?php echo $submdata['langid']?>">
