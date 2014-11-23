@@ -22,7 +22,7 @@ $res = $DB->q('SELECT p.probid,p.shortname,p.name,p.allow_submit,p.allow_judge,p
 
 // Get number of contests per problem
 $contestinfo = $DB->q("TABLE SELECT probid, cid
-		       FROM gewis_contestproblem");
+		       FROM contestproblem");
 $contestproblems = array();
 foreach ($contestinfo as $row) {
 	if ( !isset($contestproblems[$row['probid']]) ) {

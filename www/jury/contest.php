@@ -112,10 +112,10 @@ if ( !$data['enabled'] ) {
 }
 
 $numteams = $DB->q("VALUE SELECT COUNT(*) AS teamcount
-		    FROM gewis_contestteam
+		    FROM contestteam
 		    WHERE cid = %i", $id);
 $numprobs = $DB->q("VALUE SELECT COUNT(*) AS problemcount
-		    FROM gewis_contestproblem
+		    FROM contestproblem
 		    WHERE cid = %i", $id);
 
 

@@ -166,7 +166,7 @@ echo "</fieldset>\n\n";
 // Get data. Starttime seems most logical sort criterion.
 $res = $DB->q('TABLE SELECT contest.*, COUNT(teamid) AS numteams
 	       FROM contest
-	       LEFT JOIN gewis_contestteam USING (cid)
+	       LEFT JOIN contestteam USING (cid)
 	       GROUP BY cid
 	       ORDER BY starttime DESC');
 
@@ -185,7 +185,7 @@ if( count($res) == 0 ) {
 	$iseven = false;
 	foreach($res as $row) {
 
-		$numprobs = $DB->q('VALUE SELECT COUNT(*) FROM gewis_contestproblem WHERE cid = %i', $row['cid']);
+		$numprobs = $DB->q('VALUE SELECT COUNT(*) FROM contestproblem WHERE cid = %i', $row['cid']);
 
 		$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
 

@@ -517,9 +517,9 @@ function putProblemTextList()
 	} else {
 
 		// otherwise, display list
-		$res = $DB->q('SELECT p.probid,p.shortname,p.name,p.color,p.problemtext_type
-			       FROM problem p INNER JOIN gewis_contestproblem USING (probid) WHERE gewis_contestproblem.cid = %i AND allow_submit = 1 AND
-		               problemtext_type IS NOT NULL ORDER BY p.shortname', $cid);
+		$res = $DB->q('SELECT probid,shortname,name,color,problemtext_type
+			       FROM problem INNER JOIN contestproblem USING (probid) WHERE cid = %i AND allow_submit = 1 AND
+			       problemtext_type IS NOT NULL ORDER BY shortname', $cid);
 
 		if ( $res->count() > 0 ) {
 			echo "<ul>\n";
@@ -544,9 +544,9 @@ function have_problemtexts()
 {
 	global $DB, $cid;
 	return $DB->q('VALUE SELECT COUNT(*) FROM problem
-		       INNER JOIN gewis_contestproblem USING (probid)
+		       INNER JOIN contestproblem USING (probid)
 		       WHERE problemtext_type IS NOT NULL
-		       AND gewis_contestproblem.cid = %i', $cid) > 0;
+		       AND cid = %i', $cid) > 0;
 }
 
 /**

@@ -51,7 +51,7 @@ function getCurContests($fulldata = FALSE, $onlyofteam = null, $alsofuture = fal
 	}
 	if ( $onlyofteam ) {
 		$contests = $DB->q("SELECT * FROM contest
-				INNER JOIN gewis_contestteam USING (cid)
+				INNER JOIN contestteam USING (cid)
 				WHERE teamid = %i AND enabled = 1 ${extra}
 				AND deactivatetime > UNIX_TIMESTAMP()
 				ORDER BY activatetime", $onlyofteam);
@@ -109,8 +109,8 @@ function problemVisible($probid)
 	if ( !$cdata || difftime(now(),$cdata['starttime']) < 0 ) return FALSE;
 
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
-		   INNER JOIN gewis_contestproblem USING (probid)
-		       WHERE gewis_contestproblem.cid = %i AND allow_submit = 1 AND probid = %i',
+		   INNER JOIN contestproblem USING (probid)
+		       WHERE cid = %i AND allow_submit = 1 AND probid = %i',
 	              $cdata['cid'], $probid) !== NULL;
 }
 
@@ -592,8 +592,8 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	if( ! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team WHERE teamid = %i AND enabled = 1',$team) ) {
 		error("Team '$team' not found in database or not enabled.");
 	}
-	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem INNER JOIN gewis_contestproblem USING (probid) WHERE probid = %s
-							AND gewis_contestproblem.cid = %i AND allow_submit = "1"', $prob, $contest) ) {
+	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem INNER JOIN contestproblem USING (probid) WHERE probid = %s
+							AND cid = %i AND allow_submit = "1"', $prob, $contest) ) {
 		error("Problem p$prob not found in database or not submittable [c$contest].");
 	}
 

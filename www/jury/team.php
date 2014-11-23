@@ -67,9 +67,9 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <!-- contest selection -->
 <tr><td>Contests:</td>
 <td><?php
-	$contests = $DB->q("TABLE SELECT contest.cid,contestname,max(gewis_contestteam.teamid=%s) AS incontest
+	$contests = $DB->q("TABLE SELECT contest.cid,contestname,max(contestteam.teamid=%s) AS incontest
 			FROM contest
-			LEFT JOIN gewis_contestteam ON gewis_contestteam.cid = contest.cid
+			LEFT JOIN contestteam USING (cid)
 			GROUP BY contest.cid", @$row['teamid']);
 	$i=0;
 	foreach ($contests as $contest) {
@@ -89,7 +89,7 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <?php
 echo addHidden('data[0][mapping][fk][0]', 'teamid') .
      addHidden('data[0][mapping][fk][1]', 'cid') .
-     addHidden('data[0][mapping][table]', 'gewis_contestteam');
+     addHidden('data[0][mapping][table]', 'contestteam');
 echo addHidden('cmd', $cmd) .
      addHidden('table','team') .
      addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?(strstr(@$_GET['referrer'],'?') === FALSE?'?edited=1':'&edited=1'):'')) .
@@ -209,8 +209,8 @@ echo "<h3>Contests</h3>\n\n";
 
 $res = $DB->q('TABLE SELECT contest.*
 	       FROM contest
-	       INNER JOIN gewis_contestteam USING (cid)
-	       WHERE gewis_contestteam.teamid = %i
+	       INNER JOIN contestteam USING (cid)
+	       WHERE contestteam.teamid = %i
 	       ORDER BY starttime DESC', $id);
 
 if( count($res) == 0 ) {

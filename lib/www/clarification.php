@@ -350,10 +350,10 @@ function confirmClar() {
 			$options[$row['c']] = "General issue";
 		}
 		if ( difftime($cdata['starttime'], now()) <= 0 ) {
-			$problem_options = $DB->q('KEYVALUETABLE SELECT CONCAT(gewis_contestproblem.cid, "-", probid), CONCAT(shortname, ": ", name) as name
+			$problem_options = $DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid), CONCAT(shortname, ": ", name) as name
 						   FROM problem
-						   INNER JOIN gewis_contestproblem USING (probid)
-						   WHERE gewis_contestproblem.cid = %i AND allow_submit = 1
+						   INNER JOIN contestproblem USING (probid)
+						   WHERE cid = %i AND allow_submit = 1
 						   ORDER BY shortname ASC', $cid);
 			if ( IS_JURY && count($cdatas) > 1 ) {
 				foreach ($problem_options as &$problem_option) {

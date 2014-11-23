@@ -95,10 +95,10 @@ foreach($sources as $sourcedata)
 echo "</div>\n";
 
 $probs = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
-		 INNER JOIN gewis_contestproblem USING (probid) WHERE
-		 allow_submit = 1 AND gewis_contestproblem.cid = %i ORDER BY name', $submission['cid']);
+		 INNER JOIN contestproblem USING (probid) WHERE
+		 allow_submit = 1 AND cid = %i ORDER BY name', $submission['cid']);
 $langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language WHERE
-                 allow_submit = 1 ORDER BY name');
+		 allow_submit = 1 ORDER BY name');
 
 echo addSelect('probid', $probs, $submission['probid'], true);
 echo addSelect('langid', $langs, $submission['langid'], true);

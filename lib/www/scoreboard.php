@@ -172,8 +172,8 @@ function getProblems($cdata) {
 
 	return $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
 	               probid, shortname, name, color, LENGTH(problemtext) AS hastext FROM problem
-		       INNER JOIN gewis_contestproblem USING (probid)
-		       WHERE gewis_contestproblem.cid = %i AND allow_submit = 1
+		       INNER JOIN contestproblem USING (probid)
+		       WHERE cid = %i AND allow_submit = 1
 	               ORDER BY shortname', $cdata['cid']);
 }
 
@@ -189,7 +189,7 @@ function getTeams($filter, $jury, $cdata) {
 	                 team.name, team.categoryid, team.affilid, sortorder,
 	                 country, color, team_affiliation.name AS affilname
 	                 FROM team
-			 INNER JOIN gewis_contestteam USING (teamid)
+			 INNER JOIN contestteam USING (teamid)
 	                 LEFT JOIN team_category
 	                        ON (team_category.categoryid = team.categoryid)
 	                 LEFT JOIN team_affiliation
@@ -560,7 +560,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, team_affiliation.name, country
 		                  FROM team_affiliation
 		                  LEFT JOIN team USING(affilid)
-				  INNER JOIN gewis_contestteam ON gewis_contestteam.teamid = team.teamid
+				  INNER JOIN contestteam ON contestteam.teamid = team.teamid
 				  WHERE categoryid IN %As AND cid = %i GROUP BY affilid',
 				 array_keys($categids), $cdata['cid']);
 

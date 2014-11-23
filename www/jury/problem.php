@@ -165,9 +165,9 @@ echo addSelect('data[0][special_compare]', $execmap, @$row['special_compare'], T
 <!-- contest selection -->
 <tr><td>Contests:</td>
 	<td><?php
-		$contests = $DB->q("TABLE SELECT contest.cid,contestname,max(gewis_contestproblem.probid=%s) AS incontest
+		$contests = $DB->q("TABLE SELECT contest.cid,contestname,max(contestproblem.probid=%s) AS incontest
 		FROM contest
-		LEFT JOIN gewis_contestproblem ON gewis_contestproblem.cid = contest.cid
+		LEFT JOIN contestproblem ON cid = contest.cid
 		GROUP BY contest.cid", @$row['probid']);
 		$i=0;
 		foreach ($contests as $contest) {
@@ -184,7 +184,7 @@ echo addSelect('data[0][special_compare]', $execmap, @$row['special_compare'], T
 <?php
 echo addHidden('data[0][mapping][fk][0]', 'probid') .
      addHidden('data[0][mapping][fk][1]', 'cid') .
-     addHidden('data[0][mapping][table]', 'gewis_contestproblem');
+     addHidden('data[0][mapping][table]', 'contestproblem');
 echo addHidden('cmd', $cmd) .
 	addHidden('table','problem') .
 	addHidden('referrer', @$_GET['referrer']) .
@@ -289,8 +289,8 @@ echo "<h3>Contests</h3>\n\n";
 
 $res = $DB->q('TABLE SELECT contest.*
 	       FROM contest
-	       INNER JOIN gewis_contestproblem USING (cid)
-	       WHERE gewis_contestproblem.probid = %i
+	       INNER JOIN contestproblem USING (cid)
+	       WHERE contestproblem.probid = %i
 	       ORDER BY starttime DESC', $id);
 
 if( count($res) == 0 ) {

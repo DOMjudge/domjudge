@@ -52,10 +52,10 @@ echo addForm($pagename, 'get') . "<p>\n" .
     addEndForm();
 
 // Problem metadata: colours and names.
-$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,gewis_contestproblem.cid
+$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,cid
 		      FROM problem
-		      INNER JOIN gewis_contestproblem USING (probid)
-		      WHERE gewis_contestproblem.cid IN %Ai', $cids);
+		      INNER JOIN contestproblem USING (probid)
+		      WHERE cid IN %Ai', $cids);
 
 $freezecond = array();
 if ( !dbconfig_get('show_balloons_postfreeze',0)) {

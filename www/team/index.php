@@ -24,9 +24,9 @@ echo "<script type=\"text/javascript\">\n<!--\n";
 
 if ( $fdata['cstarted'] ) {
 	$probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
-			INNER JOIN gewis_contestproblem USING (probid)
-			    WHERE gewis_contestproblem.cid = %i AND allow_submit = 1
-	                    ORDER BY shortname', $cid);
+			INNER JOIN contestproblem USING (probid)
+			    WHERE cid = %i AND allow_submit = 1
+			    ORDER BY shortname', $cid);
 
 	putgetMainExtension($langdata);
 

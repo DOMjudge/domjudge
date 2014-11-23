@@ -14,7 +14,7 @@ $teams = $DB->q('SELECT t.*,
 		 a.shortname AS affshortname, a.name AS affname,
 		 COUNT(cid) AS numcontests
 		 FROM team t
-		 LEFT JOIN gewis_contestteam g USING (teamid)
+		 LEFT JOIN contestteam g USING (teamid)
 		 LEFT JOIN team_category c USING (categoryid)
 		 LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
 		 GROUP BY teamid

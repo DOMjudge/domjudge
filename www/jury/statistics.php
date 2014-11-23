@@ -34,7 +34,7 @@ $res = $DB->q('SELECT result,
 		   GROUP BY minute, result', $bar_size * 60, $bar_size, $cid, @$_GET['probid']);
 
 // All problems
-$problems = $DB->q('SELECT p.probid,p.name FROM problem p INNER JOIN gewis_contestproblem g USING (probid) WHERE g.cid = %i ORDER by p.shortname', $cid);
+$problems = $DB->q('SELECT p.probid,p.name FROM problem p INNER JOIN contestproblem USING (probid) WHERE cid = %i ORDER by shortname', $cid);
 print '<p>';
 print '<a href="statistics.php">All problems</a>&nbsp;&nbsp;&nbsp;';
 while($row = $problems->next()) {

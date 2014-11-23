@@ -129,8 +129,8 @@ function problems($args)
 	checkargs($args, array('cid'));
 
 	$q = $DB->q('SELECT probid AS id, shortname, name, color FROM problem
-		     INNER JOIN gewis_contestproblem USING (probid)
-		     WHERE gewis_contestproblem.cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
+		     INNER JOIN contestproblem USING (probid)
+		     WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
 	return $q->gettable();
 }
 $doc = "Get a list of problems in a contest, with for each problem: id, shortname, name and color.";
@@ -544,8 +544,8 @@ function submissions_POST($args)
 	}
 
 	$probid = $DB->q("MAYBEVALUE SELECT probid FROM problem
-			  INNER JOIN gewis_contestproblem USING (probid)
-			  WHERE shortname = %s AND gewis_contestproblem.cid = %i AND allow_submit = 1",
+			  INNER JOIN contestproblem USING (probid)
+			  WHERE shortname = %s AND cid = %i AND allow_submit = 1",
 	                  $args['shortname'], $cid);
 	if ( empty($probid ) ) {
 		error("Problem " . $args['shortname'] . " not found or or not submittable");

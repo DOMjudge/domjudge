@@ -21,7 +21,7 @@ function get_contestteam_data()
 	global $DB, $data, $cid;
 
 	$data = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, name
-			FROM gewis_contestteam
+			FROM contestteam
 			NATURAL JOIN team
 			WHERE cid = %i ORDER BY teamid', $cid);
 }
@@ -36,7 +36,7 @@ echo "<h1>" . $title ."</h1>\n\n";
 $result = '';
 if ( isset($_POST['cid']) && IS_ADMIN ) {
 	if ( isset($_POST['teamid']) ) {
-		$DB->q("INSERT INTO gewis_contestteam (cid, teamid) VALUES (%i, %i)", $cid, $_POST['teamid']);
+		$DB->q("INSERT INTO contestteam (cid, teamid) VALUES (%i, %i)", $cid, $_POST['teamid']);
 		$contestname = $DB->q("VALUE SELECT contestname FROM contest WHERE cid = %i", $cid);
 		$teamname = $DB->q("VALUE SELECT name FROM team WHERE teamid = %i", $_POST['teamid']);
 		$result .= "<li>Added team ${teanmae} (t${_POST['teamid']})</li>\n";
@@ -72,7 +72,7 @@ foreach( $data as $teamid => $row ) {
 	    "t" . htmlspecialchars($teamid) ."</a></td>" .
 	    "<td class=\"name\">" . $link . htmlspecialchars($row["name"]) . "</a></td>";
 		if ( IS_ADMIN ) {
-			echo "<td><a href=\"delete.php?table=gewis_contestteam&amp;teamid=$teamid&amp;cid=$cid&amp;referrer=" .
+			echo "<td><a href=\"delete.php?table=contestteam&amp;teamid=$teamid&amp;cid=$cid&amp;referrer=" .
 			    urlencode('contestteam.php?cid='.$cid) . "\">" .
 			    "<img src=\"../images/delete.png\" alt=\"delete\"" .
 			    " title=\"remove this team from this contest\" class=\"picto\" /></a></td>";
@@ -90,8 +90,8 @@ if ( IS_ADMIN ) {
 
 	$tmap = $DB->q("KEYVALUETABLE SELECT t.teamid, t.name
 		    FROM team t
-		    LEFT JOIN gewis_contestteam g ON t.teamid = g.teamid AND g.cid = %i
-		    WHERE g.cid IS NULL
+		    LEFT JOIN contestteam ct ON t.teamid = ct.teamid AND ct.cid = %i
+		    WHERE ct.cid IS NULL
 		    ORDER BY teamid", $cid);
 	if (!empty($tmap)) {
 		?>

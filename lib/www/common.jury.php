@@ -205,7 +205,7 @@ function importZippedProblem($zip, $probid = NULL)
 			       ') VALUES %As', $ini_array);
 
 			foreach ($cids as $cid) {
-				$DB->q("INSERT INTO gewis_contestproblem (cid, probid) VALUES (%i, %i)", $probid, $cid);
+				$DB->q("INSERT INTO contestproblem (cid, probid) VALUES (%i, %i)", $probid, $cid);
 			}
 		} else {
 			// Remove keys that cannot be modified:

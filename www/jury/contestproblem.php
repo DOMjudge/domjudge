@@ -21,9 +21,9 @@ function get_contestproblem_data()
 	global $DB, $data, $cid;
 
 	$data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, shortname, name
-			FROM gewis_contestproblem
+			FROM contestproblem
 			INNER JOIN problem USING (probid)
-			WHERE gewis_contestproblem.cid = %i ORDER BY probid', $cid);
+			WHERE cid = %i ORDER BY probid', $cid);
 }
 get_contestproblem_data();
 
@@ -36,7 +36,7 @@ echo "<h1>" . $title ."</h1>\n\n";
 $result = '';
 if ( isset($_POST['cid']) && IS_ADMIN ) {
 	if ( isset($_POST['probid']) ) {
-		$DB->q("INSERT INTO gewis_contestproblem (cid, probid) VALUES (%i, %i)", $cid, $_POST['probid']);
+		$DB->q("INSERT INTO contestproblem (cid, probid) VALUES (%i, %i)", $cid, $_POST['probid']);
 		$contestname = $DB->q("VALUE SELECT contestname FROM contest WHERE cid = %i", $cid);
 		$problem = $DB->q("VALUE SELECT shortname FROM problem WHERE probid = %i", $_POST['probid']);
 		$result .= "<li>Added problem ${problem} (p${_POST['probid']})</li>\n";
@@ -73,7 +73,7 @@ foreach( $data as $probid => $row ) {
 	    "<td class=\"probid\">" . $link . htmlspecialchars($row["shortname"]) . "</a></td>" .
 	    "<td class=\"name\">" . $link . htmlspecialchars($row["name"]) . "</a></td>";
 		if ( IS_ADMIN ) {
-			echo "<td><a href=\"delete.php?table=gewis_contestproblem&amp;probid=$probid&amp;cid=$cid&amp;referrer=" .
+			echo "<td><a href=\"delete.php?table=contestproblem&amp;probid=$probid&amp;cid=$cid&amp;referrer=" .
 			    urlencode('contestproblem.php?cid='.$cid) . "\">" .
 			    "<img src=\"../images/delete.png\" alt=\"delete\"" .
 			    " title=\"remove this problem from this contest\" class=\"picto\" /></a></td>";
@@ -89,10 +89,10 @@ if ( IS_ADMIN ) {
 	echo addForm($pagename, 'post', null, 'multipart/form-data') .
 	     addHidden('cid', $cid);
 
-	$pmap = $DB->q("KEYVALUETABLE SELECT p.probid, p.shortname
+	$pmap = $DB->q("KEYVALUETABLE SELECT p.probid, cp.shortname
 		    FROM problem p
-		    LEFT JOIN gewis_contestproblem g ON p.probid = g.probid AND g.cid = %i
-		    WHERE g.cid IS NULL
+		    LEFT JOIN contestproblem cp ON p.probid = cp.probid AND cid = %i
+		    WHERE cid IS NULL
 		    ORDER BY probid", $cid);
 	if (!empty($pmap)) {
 		?>

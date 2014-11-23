@@ -62,9 +62,9 @@ foreach($_FILES['code']['tmp_name'] as $fileid => $tmpname ) {
 /* Determine the problem */
 $probid = @$_POST['probid'];
 $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
-		INNER JOIN gewis_contestproblem USING (probid)
-		WHERE allow_submit = 1 AND probid = %i AND gewis_contestproblem.cid = %i',
-               $probid, $cid);
+		INNER JOIN contestproblem USING (probid)
+		WHERE allow_submit = 1 AND probid = %i AND cid = %i',
+	       $probid, $cid);
 
 if ( ! isset($prob) ) err("Unable to find problem p$probid");
 $probid = $prob['probid'];
