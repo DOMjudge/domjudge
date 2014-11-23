@@ -139,7 +139,7 @@ echo addSelect('data[0][special_compare]', $execmap, @$row['special_compare'], T
 	<td><?php
 		$contests = $DB->q("TABLE SELECT contest.cid,contestname,max(contestproblem.probid=%s) AS incontest
 		FROM contest
-		LEFT JOIN contestproblem ON cid = contest.cid
+		LEFT JOIN contestproblem USING (cid)
 		GROUP BY contest.cid", @$row['probid']);
 		$i=0;
 		foreach ($contests as $contest) {
