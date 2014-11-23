@@ -40,9 +40,10 @@ require(LIBWWWDIR . '/header.php');
 if ( isset($_POST['upload']) ) {
 	if ( !empty($_FILES['problem_archive']['tmp_name'][0]) ) {
 		foreach($_FILES['problem_archive']['tmp_name'] as $fileid => $tmpname) {
+			$cid = $_POST['contest'];
 			checkFileUpload( $_FILES['problem_archive']['error'][$fileid] );
 			$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
-			$newid = importZippedProblem($zip, empty($id) ? NULL : $id);
+			$newid = importZippedProblem($zip, empty($id) ? NULL : $id, $cid);
 			$zip->close();
 			auditlog('problem', $newid, 'upload zip',
 			         $_FILES['problem_archive']['name'][$fileid]);
@@ -166,9 +167,16 @@ echo addHidden('cmd', $cmd) .
 
 
 if ( class_exists("ZipArchive") ) {
+	$contests = $DB->q("KEYVALUETABLE SELECT cid, CONCAT('c', cid, ': ' , shortname, ' - ', contestname) FROM contest");
+	$values = array(-1 => 'Do not add / update contest data');
+	foreach ($contests as $cid => $contest) {
+		$values[$cid] = $contest;
+	}
 	echo "<br /><em>or</em><br /><br />\n" .
 	addForm($pagename, 'post', null, 'multipart/form-data') .
 	addHidden('id', @$row['probid']) .
+	'Contest: ' .
+	addSelect('contest', $values, -1, true) .
 	'<label for="problem_archive__">Upload problem archive:</label>' .
 	addFileField('problem_archive[]') .
 	addSubmit('Upload', 'upload') .

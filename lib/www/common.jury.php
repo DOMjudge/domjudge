@@ -161,13 +161,13 @@ if (!function_exists('parse_ini_string')) {
  * and update problem with it, or insert new problem when probid=NULL.
  * Returns probid on success, or generates error on failure.
  */
-function importZippedProblem($zip, $probid = NULL)
+function importZippedProblem($zip, $probid = NULL, $cid = -1)
 {
 	global $DB, $teamid;
 	$prop_file = 'domjudge-problem.ini';
 
-	$ini_keys = array('probid', 'name', 'allow_submit', 'allow_judge',
-	                  'timelimit', 'special_run', 'special_compare', 'color');
+	$ini_keys_problem = array('name', 'timelimit', 'special_run', 'special_compare');
+	$ini_keys_contest_problem = array('probid', 'allow_submit', 'allow_judge', 'color');
 
 	$def_timelimit = 10;
 
@@ -179,39 +179,51 @@ function importZippedProblem($zip, $probid = NULL)
 			error("Need '" . $prop_file . "' file when adding a new problem.");
 		}
 	} else {
-		// Keep track of which contests to add this problem to
-		$cids = array();
-		if (isset($ini_array['cids']))
-		{
-			$cids = explode(',', $ini_array['cids']);
-		}
 		// Only preserve valid keys:
-		$ini_array = array_intersect_key($ini_array,array_flip($ini_keys));
+		$ini_array_problem = array_intersect_key($ini_array,array_flip($ini_keys_problem));
+		$ini_array_contest_problem = array_intersect_key($ini_array,array_flip($ini_keys_contest_problem));
 
 		if ( $probid===NULL ) {
-			if ( !isset($ini_array['probid']) ) {
+			if ( !isset($ini_array_contest_problem['probid']) ) {
 				error("Need 'probid' in '" . $prop_file . "' when adding a new problem.");
 			}
 			// Set sensible defaults for name and timelimit if not specified:
-			if ( !isset($ini_array['name'])      ) $ini_array['name'] = $ini_array['probid'];
-			if ( !isset($ini_array['timelimit']) ) $ini_array['timelimit'] = $def_timelimit;
+			if ( !isset($ini_array_problem['name'])      ) $ini_array_problem['name'] = $ini_array_problem['probid'];
+			if ( !isset($ini_array_problem['timelimit']) ) $ini_array_problem['timelimit'] = $def_timelimit;
 
 			// rename probid to shortname
-			$probid = $ini_array['probid'];
-			unset($ini_array['probid']);
-			$ini_array['shortname'] = $probid;
+			$shortname = $ini_array_contest_problem['probid'];
+			unset($ini_array_contest_problem['probid']);
+			$ini_array_contest_problem['shortname'] = $shortname;
 
-			$probid = $DB->q('RETURNID INSERT INTO problem (' . implode(', ',array_keys($ini_array)) .
-			       ') VALUES %As', $ini_array);
+			$probid = $DB->q('RETURNID INSERT INTO problem (' . implode(', ',array_keys($ini_array_problem)) .
+			       ') VALUES %As', $ini_array_problem);
 
-			foreach ($cids as $cid) {
-				$DB->q("INSERT INTO contestproblem (cid, probid) VALUES (%i, %i)", $probid, $cid);
+			if ($cid != -1) {
+				$ini_array_contest_problem['cid'] = $cid;
+				$ini_array_contest_problem['probid'] = $probid;
+				$DB->q('INSERT INTO contestproblem (' . implode(', ',array_keys($ini_array_contest_problem)) .
+				       ') VALUES %As', $ini_array_contest_problem);
 			}
 		} else {
-			// Remove keys that cannot be modified:
-			unset($ini_array['probid']);
 
-			$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array, $probid);
+			$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array_problem, $probid);
+
+			if ( $cid != -1 ) {
+				if ($DB->q("MAYBEVALUE SELECT probid FROM contestproblem WHERE probid = %i AND cid = %i", $probid, $cid)) {
+					// Remove keys that cannot be modified:
+					unset($ini_array_contest_problem['probid']);
+					$DB->q('UPDATE contestproblem SET %S WHERE probid = %i AND cid = %i', $ini_array_contest_problem, $probid, $cid);
+				} else {
+					$shortname = $ini_array_contest_problem['probid'];
+					unset($ini_array_contest_problem['probid']);
+					$ini_array_contest_problem['shortname'] = $shortname;
+					$ini_array_contest_problem['cid'] = $cid;
+					$ini_array_contest_problem['probid'] = $probid;
+					$DB->q('INSERT INTO contestproblem (' . implode(', ',array_keys($ini_array_contest_problem)) .
+					       ') VALUES %As', $ini_array_contest_problem);
+				}
+			}
 		}
 	}
 
@@ -254,8 +266,7 @@ function importZippedProblem($zip, $probid = NULL)
 	echo "</ul>\n<p>Added $ncases testcase(s).</p>\n";
 
 	// submit reference solutions
-	if ( $DB->q('VALUE SELECT allow_submit FROM problem
-	             WHERE probid = %i', $probid) && !empty($teamid) ) {
+	if ( $cid != -1 && $DB->q('VALUE SELECT allow_submit FROM problem INNER JOIN contestproblem using (probid) WHERE probid = %i AND cid = %i', $probid, $cid) ) {
 		// First find all submittable languages:
 		$langs = $DB->q('KEYVALUETABLE SELECT langid, extensions
  		                 FROM language WHERE allow_submit = 1');
@@ -279,11 +290,8 @@ function importZippedProblem($zip, $probid = NULL)
 				}
 				file_put_contents($tmpfname, $zip->getFromIndex($j));
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
-					$cids = getCurContests(FALSE);
-					foreach ($cids as $cid) {
-						submit_solution($teamid, $probid, $cid, $langid,
-								array($tmpfname), array($filename));
-					}
+					submit_solution($teamid, $probid, $cid, $langid,
+							array($tmpfname), array($filename));
 				}
 				unlink($tmpfname);
 			}

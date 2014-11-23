@@ -192,6 +192,10 @@ function check_relative_time($time, $starttime, $field)
 
 function check_contest($data, $keydata = null)
 {
+	if ( isset($data['shortname']) && ! preg_match ( ID_REGEX, $data['shortname'] ) ) {
+		ch_error("Contest shortname may only contain characters " . IDENTIFIER_CHARS . ".");
+	}
+
 	// are these dates valid?
 	foreach ( array('starttime','endtime','freezetime',
 			'unfreezetime','activatetime','deactivatetime') as $f ) {
