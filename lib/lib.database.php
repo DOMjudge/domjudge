@@ -49,8 +49,8 @@ class db
 		%l: literal (no quoting/escaping)
 		%_: nothing, but do process one argument
 		%A?: array of type ?, comma separated, surrounded by braces
-		%S: array of key => ., becomes key=., comma separated
-		%SS: array of key => ., becomes key=., AND separated
+		%S:  array of key => ., becomes key=., comma separated
+		%SS: array of key => ., becomes key=., "AND" separated
 
 		query can be prepended with a keyword to change the returned data
 		format:
@@ -147,8 +147,8 @@ class db
 				case 'A':
 					if (!is_array($val)) {
 						throw new InvalidArgumentException(
-							"%A in \$DATABASE->q() has to correspond to a "
-							. "array, it's" . " now a '$val' (Query:"
+							"%A in \$DATABASE->q() has to correspond to an "
+							. "array, it is" . " now a '$val' (Query:"
 							. "'$key $query')!");
 					}
 					$GLOBALS['MODE'] = $part{1};

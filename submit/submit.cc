@@ -293,8 +293,9 @@ int main(int argc, char **argv)
 			}
 			printf("\n");
 		}
-		if ( !contest.empty() )
+		if ( !contest.empty() ) {
 			printf("  contest:     %s\n",contest.c_str());
+		}
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
 		printf("  url:         %s\n",baseurl.c_str());

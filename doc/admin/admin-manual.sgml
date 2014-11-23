@@ -1305,7 +1305,7 @@ The <tt>color</tt> tag can be filled with a CSS colour specification
 to associate with this problem; see also section <ref id="scoreboard:colours"
 name="Scoreboard: colours">.
 
-<tag>contesteam</tag>
+<tag>contestteam</tag>
 This table couples teams to contests. Teams can only submit solutions to
 problems in contests that they are part of.
 

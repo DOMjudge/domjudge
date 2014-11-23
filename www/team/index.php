@@ -7,7 +7,6 @@
 require('init.php');
 $title = htmlspecialchars($teamdata['name']);
 require(LIBWWWDIR . '/header.php');
-require_once(LIBWWWDIR . '/forms.php');
 
 // Don't use HTTP meta refresh, but javascript: otherwise we cannot
 // cancel it when the user starts editing the submit form. This also
@@ -24,9 +23,9 @@ echo "<script type=\"text/javascript\">\n<!--\n";
 
 if ( $fdata['cstarted'] ) {
 	$probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
-			INNER JOIN contestproblem USING (probid)
-			    WHERE cid = %i AND allow_submit = 1
-			    ORDER BY shortname', $cid);
+	                    INNER JOIN contestproblem USING (probid)
+	                    WHERE cid = %i AND allow_submit = 1
+	                    ORDER BY shortname', $cid);
 
 	putgetMainExtension($langdata);
 
@@ -106,7 +105,7 @@ echo "<div id=\"clarlist\">\n";
 $requests = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname
 		    FROM clarification c
 		    LEFT JOIN problem p USING(probid)
-		    left join contestproblem cp USING (probid, cid)
+		    LEFT JOIN contestproblem cp USING (probid, cid)
 		    LEFT JOIN team t ON (t.teamid = c.recipient)
 		    LEFT JOIN team f ON (f.teamid = c.sender)
 		    WHERE c.cid = %i AND c.sender = %i
@@ -115,7 +114,7 @@ $requests = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromna
 $clarifications = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname
 			  FROM clarification c
 			  LEFT JOIN problem p USING (probid)
-			  left join contestproblem cp USING (probid, cid)
+			  LEFT JOIN contestproblem cp USING (probid, cid)
 			  LEFT JOIN team t ON (t.teamid = c.recipient)
 			  LEFT JOIN team f ON (f.teamid = c.sender)
 			  LEFT JOIN team_unread u ON
