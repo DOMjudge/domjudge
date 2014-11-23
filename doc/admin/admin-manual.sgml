@@ -976,12 +976,14 @@ user itself.
 <sect1>The submit client under Windows/Cygwin
 <p>
 
-The submit client can also be built under Windows when the Cygwin
-environment is installed. First the Cygwin <url name="setup.exe"
-url="http://cygwin.com/setup.exe"> program must be downloaded and
-installed with GCC, curl-devel and maybe some more packages included.
+<em>Note: this feature is not well supported anymore; we
+recommend using the web interface for submitting in Windows.</em>
 
 <p>
+The submit client can also be built under Windows when the Cygwin
+environment is installed. First install <url name="Cygwin"
+url="https://cygwin.com/install.html">, and include GCC, curl-devel
+and maybe some more packages.
 When Cygwin is correctly installed with all necessary development
 tools, the submit binary can be created by running <tt>configure</tt>
 followed by <tt>make submit.exe</tt> in the <tt>submit</tt> directory.
