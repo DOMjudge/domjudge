@@ -216,8 +216,9 @@ function judgings_POST($args)
 	                    FROM submission s
 	                    LEFT JOIN team t ON (s.teamid = t.teamid)
 	                    LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
+			    LEFT JOIN contestproblem cp USING (probid, cid)
 			    WHERE judgehost IS NULL AND s.cid IN %Ai
-			    AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
+			    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
 	                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
 	                    LIMIT 1',
 			    $cids);
@@ -534,14 +535,17 @@ function submissions_POST($args)
 	global $userdata, $DB, $api;
 	checkargs($args, array('shortname','langid'));
 	checkargs($userdata, array('teamid'));
-	$contests = getCurContests(TRUE, $userdata['teamid']);
-	if ( !isset($args['cid']) && count($contests) == 1 ) {
-		$cid = key($contests);
-	} elseif ( isset($args['cid']) && isset($contests[$args['cid']]) ) {
-		$cid = $args['cid'];
+	$contests = getCurContests(TRUE, $userdata['teamid'], false, 'shortname');
+	$contest_shortname = null;
+
+	if ( !isset($args['contest']) && count($contests) == 1 ) {
+		$contest_shortname = key($contests);
+	} elseif ( isset($args['contest']) && isset($contests[$args['contest']]) ) {
+		$contest_shortname = $args['contest'];
 	} else {
-		$api->createError("Can not find that contest or you are not part of it");
+		$api->createError("Can not find that contest, or you are not part of it, or multiple active contests found");
 	}
+	$cid = $contests[$contest_shortname]['cid'];
 
 	$probid = $DB->q("MAYBEVALUE SELECT probid FROM problem
 			  INNER JOIN contestproblem USING (probid)
@@ -571,7 +575,7 @@ function submissions_POST($args)
 $args = array('code[]' => 'Array of source files to submit',
               'shortname' => 'Problem shortname',
 	      'langid' => 'Language ID',
-	      'cid' => 'Contest ID. Required if more than one contest is active');
+	      'contest' => 'Contest short name. Required if more than one contest is active');
 $doc = 'Post a new submission. You need to be authenticated with a team role. Returns the submission id. This is used by the submit client.
 
 A trivial command line submisson using the curl binary could look like this:
@@ -709,9 +713,10 @@ function queue($args)
 	$submitids = $DB->q('SELECT submitid
 			     FROM submission s
 			     LEFT JOIN team t ON (s.teamid = t.teamid)
-	                     LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
+			     LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
+			     LEFT JOIN contestproblem cp USING (probid, cid)
 			     WHERE judgehost IS NULL AND s.cid IN %Ai
-			     AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
+			     AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
 			     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC'
 			     . ($hasLimit ? ' LIMIT %i' : ' %_'),
 			     $cids,

@@ -86,10 +86,11 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 
 	$sqlbody =
 		'FROM submission s
-		 LEFT JOIN team          t  USING (teamid)
-		 LEFT JOIN problem       p  USING (probid)
-		 LEFT JOIN language      l  USING (langid)
-		 LEFT JOIN judging       j  ON (s.submitid = j.submitid AND j.valid=1)
+		 LEFT JOIN team           t  USING (teamid)
+		 LEFT JOIN problem        p  USING (probid)
+		 LEFT JOIN contestproblem cp USING (probid, cid)
+		 LEFT JOIN language       l  USING (langid)
+		 LEFT JOIN judging        j  ON (s.submitid = j.submitid AND j.valid=1)
 		 WHERE s.cid IN %Ai ' .
 	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
 	    (isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
@@ -98,19 +99,19 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
 
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.cid,
-		      s.submittime, s.judgehost, s.valid, t.name AS teamname,
-		      p.shortname, p.name AS probname, l.name AS langname,
-		      j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
-		      $sqlbody .
-		      (isset($restrictions['verified']) ?
-		      'AND ' . $verifyclause : '') .
-		      (isset($restrictions['judged']) ?
-		      'AND ' . $judgedclause : '') .
-		      'ORDER BY s.submittime DESC, s.submitid DESC ' .
-		      ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
-		      @$restrictions['teamid'], @$restrictions['categoryid'],
-		      @$restrictions['probid'], @$restrictions['langid'],
-		      @$restrictions['judgehost'], $limit);
+	              s.submittime, s.judgehost, s.valid, t.name AS teamname,
+		      cp.shortname, p.name AS probname, l.name AS langname,
+	              j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
+	              $sqlbody .
+	              (isset($restrictions['verified']) ?
+	              'AND ' . $verifyclause : '') .
+	              (isset($restrictions['judged']) ?
+	              'AND ' . $judgedclause : '') .
+	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
+	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
+	              @$restrictions['teamid'], @$restrictions['categoryid'],
+	              @$restrictions['probid'], @$restrictions['langid'],
+	              @$restrictions['judgehost'], $limit);
 
 	// nothing found...
 	if( $res->count() == 0 ) {

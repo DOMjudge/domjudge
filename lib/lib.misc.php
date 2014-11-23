@@ -40,8 +40,9 @@ function getFileContents($filename, $sizelimit = true) {
  * instead of just the ID (array indices will be contest ID's then).
  * If $onlyofteam is not null, only show contests that team is part of
  * If $alsofuture is true, also show the contests that start in the future
+ * The results will have the value of field $key in the database as key
  */
-function getCurContests($fulldata = FALSE, $onlyofteam = null, $alsofuture = false) {
+function getCurContests($fulldata = FALSE, $onlyofteam = null, $alsofuture = false, $key = 'cid') {
 
 	global $DB;
 	if ( $alsofuture ) {
@@ -61,7 +62,7 @@ function getCurContests($fulldata = FALSE, $onlyofteam = null, $alsofuture = fal
 				AND deactivatetime > UNIX_TIMESTAMP()
 				ORDER BY activatetime");
 	}
-	$contests = $contests->getkeytable('cid');
+	$contests = $contests->getkeytable($key);
 	if ( !$fulldata ) {
 		return array_keys($contests);
 	}

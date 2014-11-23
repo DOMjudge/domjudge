@@ -608,7 +608,7 @@ int websubmit()
 	curlformadd(COPYNAME,"shortname", COPYCONTENTS,problem.c_str());
 	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
 	if ( !contest.empty() ) {
-		curlformadd(COPYNAME,"cid", COPYCONTENTS,contest.c_str());
+		curlformadd(COPYNAME,"contest", COPYCONTENTS,contest.c_str());
 	}
 
 	/* Set options for post */

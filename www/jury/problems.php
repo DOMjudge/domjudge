@@ -14,8 +14,8 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Problems</h1>\n\n";
 
 // Select all data
-$res = $DB->q('SELECT p.probid,p.shortname,p.name,p.allow_submit,p.allow_judge,p.timelimit,p.color,
-	       p.problemtext_type, COUNT(testcaseid) AS testcases
+$res = $DB->q('SELECT p.probid,p.name,p.timelimit,
+               p.problemtext_type, COUNT(testcaseid) AS testcases
                FROM problem p
                LEFT JOIN testcase USING (probid)
 	       GROUP BY probid ORDER BY probid');
@@ -35,12 +35,9 @@ if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No problems defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">shortname</th><th scope=\"col\">name</th>" .
+	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
 	     "<th scope=\"col\" class=\"sorttable_numeric\"># contests</th>" .
-	     "<th scope=\"col\">allow<br />submit</th>" .
-	     "<th scope=\"col\">allow<br />judge</th>" .
 	     "<th scope=\"col\">time<br />limit</th>" .
-	     "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .
 	     "<th scope=\"col\">test<br />cases</th>" .
 	     "<th scope=\"col\"></th>" .
 	    ( IS_ADMIN ? "<th scope=\"col\"></th>" : '' ) .
@@ -56,22 +53,11 @@ if( $res->count() == 0 ) {
 		echo "<tr class=\"" . implode(' ',$classes) .
 		    "\"><td>" . $link . "p" .
 				htmlspecialchars($row['probid'])."</a>".
-			"</td><td class=\"probid\">" . $link . htmlspecialchars($row['shortname'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
 			"</td><td>".
 			$link . htmlspecialchars(count($contestproblems[$row['probid']])) . "</a>" .
-			"</td><td class=\"tdcenter\">" . $link .
-			printyn($row['allow_submit']) . "</a>" .
-			"</td><td class=\"tdcenter\">" . $link .
-			printyn($row['allow_judge']) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
-			"</td>".
-			( !empty($row['color'])
-			? '<td title="' . htmlspecialchars($row['color']) .
-		      '">' . $link . '<div class="circle" style="background-color: ' .
-			htmlspecialchars($row['color']) .
-		      ';"></div></a>'
-			: '<td>' . $link . '&nbsp;</a>' );
+			"</td>";
 		echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
 		    "\">" . $row['testcases'] . "</a></td>";
 		if ( !empty($row['problemtext_type']) ) {
