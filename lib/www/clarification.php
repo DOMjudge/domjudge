@@ -363,7 +363,7 @@ function confirmClar() {
 				}
 				unset($problem_option);
 			}
-			$options = array_merge($options, $problem_options);
+			$options += $problem_options;
 		}
 	}
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
