@@ -59,7 +59,7 @@ foreach ($cdatas as $cdata) {
 	if ( isset($cdata['freezetime']) &&
 	     difftime($cdata['freezetime'], now()) <= 0
 	) {
-		echo "<h4>Scoreboard of c${cdata['cid']} is now frozen.</h4>\n\n";
+		echo "<h4>Scoreboard of c${cdata['cid']} (${cdata['shortname']}) is now frozen.</h4>\n\n";
 	}
 }
 

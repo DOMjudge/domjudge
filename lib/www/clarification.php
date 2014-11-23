@@ -77,7 +77,7 @@ function putClar($clar)
 	$prefix = '';
 	if ( IS_JURY && count($cids) > 1 )
 	{
-		$prefix = 'c' . $clar['cid'] . ' - ';
+		$prefix = $clar['contestshortname'] . ' - ';
 	}
 	if ( is_null($clar['probid']) ) {
 		echo $prefix . "General issue";
@@ -114,15 +114,17 @@ function putClarification($id,  $team = NULL)
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
-	global $DB;
+	global $DB, $cids;
 
 	$clar = $DB->q('TUPLE SELECT * FROM clarification WHERE clarid = %i', $id);
 
-	$clars = $DB->q('SELECT c.*, p.shortname, p.name AS probname, t.name AS toname, f.name AS fromname
+	$clars = $DB->q('SELECT c.*, cp.shortname, p.name AS probname, t.name AS toname, f.name AS fromname, co.shortname AS contestshortname
 	                 FROM clarification c
-	                 LEFT JOIN problem p ON (c.probid = p.probid AND p.allow_submit = 1)
+			 LEFT JOIN problem p ON (c.probid = p.probid)
 	                 LEFT JOIN team t ON (t.teamid = c.recipient)
 	                 LEFT JOIN team f ON (f.teamid = c.sender)
+			 LEFT JOIN contest co ON (co.cid = c.cid)
+			 LEFT JOIN contestproblem cp ON (cp.probid = c.probid AND cp.cid = c.cid AND cp.allow_submit = 1)
 	                 WHERE c.respid = %i OR c.clarid = %i
 	                 ORDER BY c.submittime, c.clarid',
 	                $clar['clarid'], $clar['clarid']);
@@ -191,8 +193,8 @@ function putClarificationList($clars, $team = NULL)
 			echo '<td>' . $link . $clar['clarid'] . '</a></td>';
 		}
 
-		echo ( IS_JURY && count($cids) > 1 ? ('<td>' . $link . 'c' .
-						      $clar['cid'] . '</a></td>') : '');
+		echo ( IS_JURY && count($cids) > 1 ? ('<td>' . $link .
+						      $clar['contestshortname'] . '</a></td>') : '');
 
 		echo '<td>' . $link . printtime($clar['submittime']) . '</a></td>';
 
@@ -341,11 +343,11 @@ function confirmClar() {
 	// has started) or general issue.
 	$options = array();
 	foreach ($cdatas as $cid => $cdata) {
-		$row = $DB->q('TUPLE SELECT CONCAT(cid, "general") AS c
+		$row = $DB->q('TUPLE SELECT CONCAT(cid, "-general") AS c
 			       FROM contest WHERE cid = %i', $cid);
 		if ( IS_JURY && count($cdatas) > 1 )
 		{
-			$options[$row['c']] = "c{$cid} - General issue";
+			$options[$row['c']] = "{$cdata['shortname']} - General issue";
 		} else {
 			$options[$row['c']] = "General issue";
 		}
@@ -357,7 +359,7 @@ function confirmClar() {
 						   ORDER BY shortname ASC', $cid);
 			if ( IS_JURY && count($cdatas) > 1 ) {
 				foreach ($problem_options as &$problem_option) {
-					$problem_option = "c" . $cid . ' - ' . $problem_option;
+					$problem_option = $cdata['shortname'] . ' - ' . $problem_option;
 				}
 				unset($problem_option);
 			}
