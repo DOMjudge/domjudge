@@ -467,8 +467,10 @@ function putProblemText($probid)
 	global $DB, $cdata;
 
 	$prob = $DB->q("MAYBETUPLE SELECT cid, shortname, problemtext, problemtext_type
-	                FROM problem WHERE OCTET_LENGTH(problemtext) > 0
-	                AND probid = %i", $probid);
+			FROM problem INNER JOIN contestproblem USING (probid)
+			WHERE OCTET_LENGTH(problemtext) > 0
+			AND probid = %i
+			AND cid = %i", $probid, $cdata['cid']);
 
 	if ( empty($prob) ||
 	     !(IS_JURY ||

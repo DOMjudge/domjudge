@@ -42,6 +42,8 @@ $pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
 $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 ?>
 
+<tr><td><label for="data_0__shortname_">Short name:</label></td>
+<td><?php echo addInput('data[0][shortname]', @$row['shortname'], 40, 10, 'required')?></td></tr>
 <tr><td><label for="data_0__contestname_">Contest name:</label></td>
 <td><?php echo addInput('data[0][contestname]', @$row['contestname'], 40, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__activatetime_string_">Activate time:</label></td>
@@ -65,6 +67,10 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 <tr><td>Process balloons:</td><td>
 <?php echo addRadioButton('data[0][process_balloons]', (!isset($row['process_balloons']) ||  $row['process_balloons']), 1)?> <label for="data_0__process_balloons_1">yes</label>
 <?php echo addRadioButton('data[0][process_balloons]', ( isset($row['process_balloons']) && !$row['process_balloons']), 0)?> <label for="data_0__process_balloons_0">no</label></td></tr>
+
+<tr><td>Public:</td><td>
+<?php echo addRadioButton('data[0][public]', (!isset($row['public']) ||  $row['public']), 1)?> <label for="data_0__public_1">yes</label>
+<?php echo addRadioButton('data[0][public]', ( isset($row['public']) && !$row['public']), 0)?> <label for="data_0__public_0">no</label></td></tr>
 
 <tr><td>Enabled:</td><td>
 <?php echo addRadioButton('data[0][enabled]', (!isset($row['enabled']) ||  $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>
@@ -122,6 +128,9 @@ $numprobs = $DB->q("VALUE SELECT COUNT(*) AS problemcount
 echo "<table>\n";
 echo '<tr><td>CID:</td><td>c' .
 	(int)$data['cid'] . "</td></tr>\n";
+echo '<tr><td>Short name:</td><td>' .
+     htmlspecialchars($data['shortname']) .
+     "</td></tr>\n";
 echo '<tr><td>Name:</td><td>' .
 	htmlspecialchars($data['contestname']) .
 	"</td></tr>\n";
@@ -142,6 +151,9 @@ echo '<tr><td>Dectivate time:</td><td>' .
      "</td></tr>\n";
 echo '<tr><td>Process balloons:</td><td>' .
      ($data['process_balloons'] ? 'yes' : 'no') .
+     "</td></tr>\n";
+echo '<tr><td>Public:</td><td>' .
+     ($data['public'] ? 'yes' : 'no') .
      "</td></tr>\n";
 echo '<tr><td>Teams:</td><td>';
 if ( $numteams==0 ) {

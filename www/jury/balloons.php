@@ -76,11 +76,12 @@ if ( empty($freezecond) ) {
 
 // Get all relevant info from the balloon table.
 // Order by done, so we have the unsent balloons at the top.
-$res = $DB->q("SELECT b.*, s.submittime, p.probid, p.shortname AS probshortname,
+$res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
 	       t.teamid, t.name AS teamname, t.room, c.name AS catname, s.cid
 	       FROM balloon b
 	       LEFT JOIN submission s USING (submitid)
 	       LEFT JOIN problem p USING (probid)
+	       LEFT JOIN contestproblem cp USING (probid)
 	       LEFT JOIN team t USING(teamid)
 	       LEFT JOIN team_category c USING(categoryid)
 	       WHERE s.cid IN %Ai $freezecond

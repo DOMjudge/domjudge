@@ -283,8 +283,9 @@ flushresults();
 
 // PROBLEMS
 
-$res = $DB->q('SELECT probid, shortname, timelimit, special_compare, special_run
-               FROM problem ORDER BY probid');
+$res = $DB->q('SELECT probid, cid, shortname, timelimit, special_compare, special_run
+	       FROM problem INNER JOIN contestproblem USING (probid)
+	       ORDER BY probid');
 
 $details = '';
 while($row = $res->next()) {
@@ -292,13 +293,13 @@ while($row = $res->next()) {
 	check_problem($row);
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
 		foreach($CHECKER_ERRORS as $chk_err) {
-			$details .= 'p'.$row['probid'].': ' . $chk_err."\n";
+			$details .= 'p'.$row['probid']." in contest c" . $row['cid'] .': ' . $chk_err."\n";
 		}
 	}
 	if ( ! $DB->q("MAYBEVALUE SELECT count(testcaseid) FROM testcase
  	               WHERE input IS NOT NULL AND output IS NOT NULL AND
  	               probid = %i", $row['probid']) ) {
-		$details .= 'p'.$row['probid'].": missing in/output testcase.\n";
+		$details .= 'p'.$row['probid']." in contest c" . $row['cid'] . ": missing in/output testcase.\n";
 	}
 }
 foreach(array('input','output') as $inout) {
@@ -317,9 +318,9 @@ while($r = $oversize->next()) {
 }
 
 $has_errors = $details != '';
-$probs = $DB->q("COLUMN SELECT probid FROM problem WHERE color IS NULL");
-foreach($probs as $probid) {
-       $details .= 'p'.$probid . ": has no color\n";
+$probs = $DB->q("TABLE SELECT probid, cid FROM contestproblem WHERE color IS NULL");
+foreach($probs as $probdata) {
+       $details .= 'p'.$probdata['probid'] . " in contest c" . $probdata['cid'] . ": has no color\n";
 }
 
 result('problems, languages, teams', 'Problems integrity',
@@ -404,7 +405,8 @@ result('submissions and judgings', 'Submissions', $submres, $submnote);
 
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
-               LEFT OUTER JOIN problem p USING (probid) WHERE s.cid != p.cid');
+	       LEFT OUTER JOIN contestproblem p USING (probid)
+	       WHERE s.cid != p.cid');
 
 $details = '';
 while($row = $res->next()) {
