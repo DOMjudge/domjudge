@@ -44,10 +44,24 @@ function editLink($table, $value, $multi = false)
  */
 function delLink($table, $field, $value)
 {
-	return "<a href=\"delete.php?table=" . urlencode($table) . "&amp;" .
-		$field . "=" . urlencode($value) ."\"><img src=\"../images/delete.png\" " .
-		"alt=\"delete\" title=\"delete this " . htmlspecialchars($table) .
-		"\" class=\"picto\" /></a>";
+	return delLinkMultiple($table, array($field), array($value));
+}
+
+/**
+ * Return a link to delete a specific data element from a given table.
+ * Takes the table, the key fields to match on and the values.
+ */
+function delLinkMultiple($table, $fields, $values, $referrer = '')
+{
+	$arguments = '';
+	foreach ($fields as $i => $field) {
+		$arguments .= '&amp;' . $field . '=' . urlencode($values[$i]);
+	}
+	return "<a href=\"delete.php?table=" . urlencode($table) . $arguments .
+	       "&amp;referrer=" . urlencode($referrer)
+	       ."\"><img src=\"../images/delete.png\" " .
+	       "alt=\"delete\" title=\"delete this " . htmlspecialchars($table) .
+	       "\" class=\"picto\" /></a>";
 }
 
 /**

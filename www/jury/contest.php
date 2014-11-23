@@ -12,6 +12,8 @@ $id = getRequestID();
 $title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
                  'contest' . ($id ? ' c'.htmlspecialchars(@$id) : ''));
 
+$jscolor=true;
+
 require(LIBWWWDIR . '/header.php');
 
 if ( !empty($_GET['cmd']) ):
@@ -78,7 +80,101 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 
 </table>
 
+<h3>Problems</h3>
+<table>
+	<thead>
+	<tr>
+		<th>ID</th>
+		<th>name</th>
+		<th>short name</th>
+		<th>allow submit</th>
+		<th>allow judge</th>
+		<th>color</th>
+	</tr>
+	</thead>
+	<tbody>
+	<?php
+	$current_problems = $DB->q("TABLE SELECT * FROM contestproblem INNER JOIN problem
+				    USING (probid) WHERE cid = %i ORDER BY shortname", $id);
+	$i = 0;
+	$used_problems = array();
+	foreach ($current_problems as $current_problem) {
+		$used_problems[] = $current_problem['probid'];
+		echo "<tr>\n";
+		echo "<td>" . addHidden("data[0][mapping][items][$i]", $current_problem['probid']) .
+		     "p" . $current_problem['probid'] . "</td>\n";
+		echo "<td>" . $current_problem['name'] . "</td>\n";
+		echo "<td>" .
+		     addInput("data[0][mapping][extra][$i][shortname]", $current_problem['shortname'], 8,
+			      10) . "</td>\n";
+		echo "<td>";
+		echo addRadioButton("data[0][mapping][extra][$i][allow_submit]",
+				(!isset($current_problem['allow_submit']) || $current_problem['allow_submit']), 1) .
+		     "<label for='data_0__mapping__extra__{$i}__allow_submit_1'>yes</label>";
+		echo addRadioButton("data[0][mapping][extra][$i][allow_submit]",
+				(isset($current_problem['allow_submit']) && !$current_problem['allow_submit']), 0) .
+		     "<label for='data_0__mapping__extra__{$i}__allow_submit_0'>no</label>";
+		echo "</td>\n";
+		echo "<td>";
+		echo addRadioButton("data[0][mapping][extra][$i][allow_judge]",
+				(!isset($current_problem['allow_judge']) || $current_problem['allow_judge']), 1) .
+		     "<label for='data_0__mapping__extra__{$i}__allow_judge_1'>yes</label>";
+		echo addRadioButton("data[0][mapping][extra][$i][allow_judge]",
+				(isset($current_problem['allow_judge']) && !$current_problem['allow_judge']), 0) .
+		     "<label for='data_0__mapping__extra__{$i}__allow_judge_0'>no</label>";
+		echo "</td>\n";
+		echo "<td>" .
+		     addInputField('color', "data[0][mapping][extra][$i][color]", $current_problem['color'],
+				   ' class="color {required:false,adjust:false,hash:true,caps:false}"') .
+		     "<a target=\"_blank\" href=\"http://www.w3schools.com/cssref/css_colornames.asp\">" .
+		     "<img src=\"../images/b_help.png\" class=\"smallpicto\" alt=\"\"></td>\n";
+		echo "</tr>\n";
+		$i++;
+	}
+
+	$unused_problems = $DB->q("KEYVALUETABLE SELECT probid, CONCAT('p', probid, ' - ', name)
+				   FROM problem WHERE probid NOT IN %Ai ORDER BY probid", $used_problems);
+	$values = array('' => '-- Select problem --');
+	foreach ($unused_problems as $probid => $text) {
+		$values[$probid] = $text;
+	}
+
+	if ( !empty($unused_problems) ) {
+		for ( $j = 0; $j < 12; $j++ ) {
+			echo "<tr>\n";
+			echo "<td colspan=\"2\">" .
+			     addSelect("data[0][mapping][items][$i]", $values, null, true) . "</td>\n";
+			echo "<td>" .
+			     addInput("data[0][mapping][extra][$i][shortname]", null,
+				      8, 10) . "</td>\n";
+			echo "<td>";
+			echo addRadioButton("data[0][mapping][extra][$i][allow_submit]", true, 1) .
+			     "<label for='data_0__mapping__extra__{$i}__allow_submit_1'>yes</label>";
+			echo addRadioButton("data[0][mapping][extra][$i][allow_submit]", false, 0) .
+			     "<label for='data_0__mapping__extra__{$i}__allow_submit_0'>no</label>";
+			echo "</td>\n";
+			echo "<td>";
+			echo addRadioButton("data[0][mapping][extra][$i][allow_judge]", true, 1) .
+			     "<label for='data_0__mapping__extra__{$i}__allow_judge_1'>yes</label>";
+			echo addRadioButton("data[0][mapping][extra][$i][allow_judge]", false, 0) .
+			     "<label for='data_0__mapping__extra__{$i}__allow_judge_0'>no</label>";
+			echo "</td>\n";
+			echo "<td>" . addInputField('color', "data[0][mapping][extra][$i][color]", null,
+						    ' class="color {required:false,adjust:false,hash:true,caps:false}"') .
+			     "<a target=\"_blank\" href=\"http://www.w3schools.com/cssref/css_colornames.asp\">" .
+			     "<img src=\"../images/b_help.png\" class=\"smallpicto\" alt=\"\"></td>\n";
+			echo "</tr>\n";
+			$i++;
+		}
+	}
+	?>
+	</tbody>
+</table>
+
 <?php
+echo addHidden('data[0][mapping][fk][0]', 'cid') .
+     addHidden('data[0][mapping][fk][1]', 'probid') .
+     addHidden('data[0][mapping][table]', 'contestproblem');
 echo addHidden('cmd', $cmd) .
 	addHidden('table','contest') .
 	addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?(strstr(@$_GET['referrer'],'?') === FALSE?'?edited=1':'&edited=1'):'')) .
@@ -181,6 +277,55 @@ if ( IS_ADMIN ) {
 	echo "<p>" .
 		editLink('contest',$data['cid']) . "\n" .
 		delLink('contest','cid',$data['cid']) ."</p>\n\n";
+}
+
+echo "<h3>Problems</h3>\n\n";
+
+$res = $DB->q('TABLE SELECT *
+		       FROM problem
+		       INNER JOIN contestproblem USING (probid)
+		       WHERE cid = %i
+		       ORDER BY shortname', $id);
+
+if ( count($res) == 0 ) {
+	echo "<p class=\"nodata\">No problems added yet</p>\n\n";
+}
+else {
+	echo "<table class=\"list sortable\">\n<thead>\n" .
+	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">probid</th>";
+	echo "<th scope=\"col\">name</th>";
+	echo "<th scope=\"col\">shortname</th>";
+	echo "<th scope=\"col\">allow<br />submit</th>";
+	echo "<th scope=\"col\">allow<br />judge</th>";
+	echo "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>\n";
+	echo "</tr>\n</thead>\n<tbody>\n";
+
+	$iseven = false;
+	foreach ( $res as $row ) {
+
+		$link = '<a href="problem.php?id=' . urlencode($row['probid']) . '">';
+
+		echo '<tr class="' .
+		     ($iseven ? 'roweven' : 'rowodd') . '">' .
+		     "<td class=\"tdright\">" . $link .
+		     "p" . (int)$row['probid'] . "</a></td>\n";
+		echo "<td>" . $link . htmlspecialchars($row['name']) . "</a></td>\n";
+		echo "<td>" . $link . htmlspecialchars($row['shortname']) . "</a></td>\n";
+		echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_submit']) . "</a></td>\n";
+		echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_judge']) . "</a></td>\n";
+		echo ( !empty($row['color'])
+			? '<td title="' . htmlspecialchars($row['color']) .
+			  '">' . $link . '<div class="circle" style="background-color: ' .
+			  htmlspecialchars($row['color']) .
+			  ';"></div></a></td>'
+			: '<td>'. $link . '&nbsp;</a></td>' );
+		echo "<td>" . delLinkMultiple('contestproblem',array('cid','probid'),array($id, $row['probid']), 'contest.php?id='.$id) ."</td>";
+
+		$iseven = !$iseven;
+
+		echo "</tr>\n";
+	}
+	echo "</tbody>\n</table>\n\n";
 }
 
 require(LIBWWWDIR . '/footer.php');
