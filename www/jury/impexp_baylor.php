@@ -67,7 +67,7 @@ if ( isset($_REQUEST['upload']) ) {
 	while( $row = $teams->next() ) {
 		$totals = $DB->q("MAYBETUPLE SELECT correct, totaltime, cid
 					FROM rankcache_public
-					WHERE cid IN (%Ai)
+					WHERE cid IN %Ai
 					AND teamid = %i", getCurContests(FALSE), $row['teamid']);
 		if ( $totals === null ) {
 			$totals['correct'] = $totals['totaltime'] = 0;

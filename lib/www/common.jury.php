@@ -202,7 +202,7 @@ function importZippedProblem($zip, $probid = NULL)
 			$ini_array['shortname'] = $probid;
 
 			$probid = $DB->q('RETURNID INSERT INTO problem (' . implode(', ',array_keys($ini_array)) .
-			       ') VALUES (%As)', $ini_array);
+			       ') VALUES %As', $ini_array);
 
 			foreach ($cids as $cid) {
 				$DB->q("INSERT INTO gewis_contestproblem (cid, probid) VALUES (%i, %i)", $probid, $cid);

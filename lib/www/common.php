@@ -90,34 +90,30 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		 LEFT JOIN problem       p  USING (probid)
 		 LEFT JOIN language      l  USING (langid)
 		 LEFT JOIN judging       j  ON (s.submitid = j.submitid AND j.valid=1)
-		 WHERE s.cid IN (%Ai) ' .
+		 WHERE s.cid IN %Ai ' .
 	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
 	    (isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
 	    (isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
 	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
 	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
 
-	if ( empty($cids) ) {
-		$res = null;
-	} else {
-		$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.cid,
-			      s.submittime, s.judgehost, s.valid, t.name AS teamname,
-			      p.shortname, p.name AS probname, l.name AS langname,
-			      j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
-			      $sqlbody .
-			      (isset($restrictions['verified']) ?
-			      'AND ' . $verifyclause : '') .
-			      (isset($restrictions['judged']) ?
-			      'AND ' . $judgedclause : '') .
-			      'ORDER BY s.submittime DESC, s.submitid DESC ' .
-			      ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
-			      @$restrictions['teamid'], @$restrictions['categoryid'],
-			      @$restrictions['probid'], @$restrictions['langid'],
-			      @$restrictions['judgehost'], $limit);
-	}
+	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.cid,
+		      s.submittime, s.judgehost, s.valid, t.name AS teamname,
+		      p.shortname, p.name AS probname, l.name AS langname,
+		      j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
+		      $sqlbody .
+		      (isset($restrictions['verified']) ?
+		      'AND ' . $verifyclause : '') .
+		      (isset($restrictions['judged']) ?
+		      'AND ' . $judgedclause : '') .
+		      'ORDER BY s.submittime DESC, s.submitid DESC ' .
+		      ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
+		      @$restrictions['teamid'], @$restrictions['categoryid'],
+		      @$restrictions['probid'], @$restrictions['langid'],
+		      @$restrictions['judgehost'], $limit);
 
 	// nothing found...
-	if( empty($cids) || $res->count() == 0 ) {
+	if( $res->count() == 0 ) {
 		echo "<p class=\"nodata\">No submissions</p>\n\n";
 		return;
 	}

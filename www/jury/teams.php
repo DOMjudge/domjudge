@@ -20,15 +20,15 @@ $teams = $DB->q('SELECT t.*,
 		 GROUP BY teamid
 		 ORDER BY c.sortorder, t.name COLLATE utf8_general_ci');
 
-$nsubmits = (empty($cids) ? array() : $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
-					      FROM submission s
-					      WHERE cid IN (%Ai) GROUP BY teamid', $cids));
+$nsubmits = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
+		    FROM submission s
+		    WHERE cid IN %Ai GROUP BY teamid', $cids);
 
-$ncorrect = (empty($cids) ? array() : $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
-					      FROM submission s
-					      LEFT JOIN judging j USING (submitid)
-					      WHERE j.valid = 1 AND j.result = "correct" AND s.cid IN (%Ai)
-					      GROUP BY teamid', $cids));
+$ncorrect = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
+		    FROM submission s
+		    LEFT JOIN judging j USING (submitid)
+		    WHERE j.valid = 1 AND j.result = "correct" AND s.cid IN %Ai
+		    GROUP BY teamid', $cids);
 
 require(LIBWWWDIR . '/header.php');
 

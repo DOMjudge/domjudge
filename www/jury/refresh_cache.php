@@ -89,10 +89,10 @@ echo "<p>Deleting irrelevant data...</p>\n\n";
 
 // drop all contests that are not current, teams and problems that do not exist
 $DB->q('DELETE FROM scorecache_jury
-		WHERE cid NOT IN (%Ai)',
+		WHERE cid NOT IN %Ai',
        $cids);
 $DB->q('DELETE FROM scorecache_public
-		WHERE cid NOT IN (%Ai)',
+		WHERE cid NOT IN %Ai',
        $cids);
 
 foreach ($contests as $contest) {
@@ -111,22 +111,22 @@ foreach ($contests as $contest) {
 	}
 	// drop all contests that are not current, teams and problems that do not exist
 	$DB->q('DELETE FROM scorecache_jury
-		WHERE cid = %i AND probid NOT IN (%Ai)',
+		WHERE cid = %i AND probid NOT IN %Ai',
 		$contest['cid'], $probids);
 	$DB->q('DELETE FROM scorecache_public
-		WHERE cid = %i AND probid NOT IN (%Ai)',
+		WHERE cid = %i AND probid NOT IN %Ai',
 		$contest['cid'], $probids);
 	$DB->q('DELETE FROM scorecache_jury
-		WHERE cid = %i AND teamid NOT IN (%Ai)',
+		WHERE cid = %i AND teamid NOT IN %Ai',
 	       $contest['cid'], $teamids);
 	$DB->q('DELETE FROM scorecache_public
-		WHERE cid = %i AND teamid NOT IN (%Ai)',
+		WHERE cid = %i AND teamid NOT IN %Ai',
 	       $contest['cid'], $teamids);
 
 	$DB->q('DELETE FROM rankcache_jury
-	WHERE cid = %i AND teamid NOT IN (%Ai)', $contest['cid'], $teamids);
+	WHERE cid = %i AND teamid NOT IN %Ai', $contest['cid'], $teamids);
 	$DB->q('DELETE FROM rankcache_public
-	WHERE cid = %i AND teamid NOT IN (%Ai)', $contest['cid'], $teamids);
+	WHERE cid = %i AND teamid NOT IN %Ai', $contest['cid'], $teamids);
 }
 
 $time_end = microtime(TRUE);

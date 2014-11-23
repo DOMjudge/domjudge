@@ -84,7 +84,7 @@ echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
 // select only specific fields to avoid retrieving large blobs
 $res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
 			   result, verified, valid FROM judging
-			   WHERE cid IN (%Ai) AND judgehost = %s
+			   WHERE cid IN %Ai AND judgehost = %s
 			   ORDER BY starttime DESC, judgingid DESC',
 			   getCurContests(FALSE), $row['hostname']);
 

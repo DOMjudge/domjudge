@@ -216,7 +216,7 @@ function judgings_POST($args)
 	                    FROM submission s
 	                    LEFT JOIN team t ON (s.teamid = t.teamid)
 	                    LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
-			    WHERE judgehost IS NULL AND s.cid IN (%Ai)
+			    WHERE judgehost IS NULL AND s.cid IN %Ai
 			    AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
 	                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
 	                    LIMIT 1',
@@ -626,7 +626,7 @@ function testcases($args)
 
 	$judging_runs = $DB->q("COLUMN SELECT testcaseid FROM judging_run
 	                        WHERE judgingid = %i", $args['judgingid']);
-	$sqlextra = count($judging_runs) ? "AND testcaseid NOT IN (%Ai)" : "%_";
+	$sqlextra = count($judging_runs) ? "AND testcaseid NOT IN %Ai" : "%_";
 	$testcase = $DB->q("MAYBETUPLE SELECT testcaseid, rank, probid, md5sum_input, md5sum_output
 	                    FROM testcase WHERE probid = %i $sqlextra ORDER BY rank LIMIT 1",
 	                   $row['probid'], $judging_runs);
@@ -710,7 +710,7 @@ function queue($args)
 			     FROM submission s
 			     LEFT JOIN team t ON (s.teamid = t.teamid)
 	                     LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
-			     WHERE judgehost IS NULL AND s.cid IN (%Ai)
+			     WHERE judgehost IS NULL AND s.cid IN %Ai
 			     AND l.allow_judge = 1 AND p.allow_judge = 1 AND valid = 1
 			     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC'
 			     . ($hasLimit ? ' LIMIT %i' : ' %_'),
@@ -842,7 +842,7 @@ function clarifications($args)
 
 	// Find public clarifications, maybe later also provide more info for jury
 	$query = 'SELECT clarid, submittime, probid, body FROM clarification
-		  WHERE cid IN (%Ai) AND sender IS NULL AND recipient IS NULL';
+		  WHERE cid IN %Ai AND sender IS NULL AND recipient IS NULL';
 
 	$byProblem = array_key_exists('problem', $args);
 	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');

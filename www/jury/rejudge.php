@@ -40,16 +40,16 @@ global $DB;
 // Special case 'submission' and 'contest' for admin overrides
 if ( IS_ADMIN && ($table == 'submission' || $table == 'contest') ) {
 	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid, j.cid
-	               FROM judging j
-	               LEFT JOIN submission s USING (submitid)
-		       WHERE j.cid IN (%Ai) AND j.valid = 1 AND ' .
+		       FROM judging j
+		       LEFT JOIN submission s USING (submitid)
+		       WHERE j.cid IN %Ai AND j.valid = 1 AND ' .
 		       $tablemap[$table] . ' = %s', getCurContests(FALSE), $id);
 } else {
 	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid, j.cid
-	               FROM judging j
-	               LEFT JOIN submission s USING (submitid)
-		       WHERE j.cid IN (%Ai) AND j.valid = 1 AND
-	               result IS NOT NULL AND result != "correct" AND ' .
+		       FROM judging j
+		       LEFT JOIN submission s USING (submitid)
+		       WHERE j.cid IN %Ai AND j.valid = 1 AND
+		       result IS NOT NULL AND result != "correct" AND ' .
 		       $tablemap[$table] . ' = %s', getCurContests(FALSE), $id);
 }
 

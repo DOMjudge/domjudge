@@ -196,10 +196,10 @@ function getTeams($filter, $jury, $cdata) {
 	                        ON (team_affiliation.affilid = team.affilid)
 			 WHERE enabled = 1 AND cid = %i' .
 	                ( $jury ? '' : ' AND visible = 1' ) .
-	                (isset($filter['affilid']) ? ' AND team.affilid IN (%As) ' : ' %_') .
-	                (isset($filter['country']) ? ' AND country IN (%As) ' : ' %_') .
-	                (isset($filter['categoryid']) ? ' AND team.categoryid IN (%As) ' : ' %_') .
-	                (isset($filter['teams']) ? ' AND teamid IN (%Ai) ' : ' %_'),
+			(isset($filter['affilid']) ? ' AND team.affilid IN %As ' : ' %_') .
+			(isset($filter['country']) ? ' AND country IN %As ' : ' %_') .
+			(isset($filter['categoryid']) ? ' AND team.categoryid IN %As ' : ' %_') .
+			(isset($filter['teams']) ? ' AND teamid IN %Ai ' : ' %_'),
 			$cdata['cid'], @$filter['affilid'], @$filter['country'], @$filter['categoryid'], @$filter['teams']);
 }
 
@@ -561,7 +561,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		                  FROM team_affiliation
 		                  LEFT JOIN team USING(affilid)
 				  INNER JOIN gewis_contestteam ON gewis_contestteam.teamid = team.teamid
-				  WHERE categoryid IN (%As) AND cid = %i GROUP BY affilid',
+				  WHERE categoryid IN %As AND cid = %i GROUP BY affilid',
 				 array_keys($categids), $cdata['cid']);
 
 		$affilids  = array();
@@ -701,7 +701,7 @@ function putTeamRow($cdata, $teamids) {
 
 		// Get values for this team about problems from scoreboard cache
 		$MATRIX = array();
-		$scoredata = $DB->q("SELECT * FROM scorecache_jury WHERE cid = %i AND teamid IN (%As)", $cid, $teamids);
+		$scoredata = $DB->q("SELECT * FROM scorecache_jury WHERE cid = %i AND teamid IN %As", $cid, $teamids);
 
 		// loop all info the scoreboard cache and put it in our own datastructure
 		while ( $srow = $scoredata->next() ) {
@@ -819,7 +819,7 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 			                     FROM scorecache_$tblname AS sc
 			                     LEFT JOIN problem USING (probid)
 			                     WHERE sc.cid = %i AND is_correct = 1
-			                     AND allow_submit = 1 AND teamid IN (%Ai)",
+					     AND allow_submit = 1 AND teamid IN %Ai",
 			                    $cid, $tied);
 			while ( $srow = $scoredata->next() ) {
 				$teamdata[$srow['teamid']]['solve_times'][] = $srow['totaltime'];
