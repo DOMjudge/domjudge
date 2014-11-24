@@ -93,7 +93,7 @@ CREATE TABLE `contest` (
   `deactivatetime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether this contest can be active',
   `process_balloons` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Will balloons be processed for this contest?',
-  `public` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Is this contest visible for the public or non-associated teams?',
+  `public` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Is this contest visible for the public and non-associated teams?',
   PRIMARY KEY (`cid`),
   UNIQUE KEY `shortname` (`shortname`),
   KEY `cid` (`cid`,`enabled`)
