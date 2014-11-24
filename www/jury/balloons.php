@@ -7,9 +7,26 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+$contestfiltertypes = array('all', 'selected');
+$contest = 'all';
+
+// Restore most recent contest view setting from cookie (overridden by explicit selection)
+if ( isset($_COOKIE['domjudge_ballooncontest']) && in_array($_COOKIE['domjudge_ballooncontest'], $contestfiltertypes) ) {
+	$contest = $_COOKIE['domjudge_ballooncontest'];
+}
+
+if ( isset($_REQUEST['contest']) ) {
+	if ( in_array($_REQUEST['contest'], $contestfiltertypes) ) {
+		$contest = $_REQUEST['contest'];
+	}
+}
+
 $REQUIRED_ROLES = array('jury','balloon');
 require('init.php');
 $title = 'Balloon Status';
+
+// Set cookie of contest view type, expiry defaults to end of session.
+setcookie('domjudge_ballooncontest', $contest);
 
 if ( isset($_POST['done']) ) {
 	foreach($_POST['done'] as $done => $dummy) {
@@ -38,8 +55,12 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Balloon Status</h1>\n\n";
 
-if ( isset($cdata['freezetime']) && difftime($cdata['freezetime'],now())<=0 ) {
-	echo "<h4>Scoreboard is now frozen.</h4>\n\n";
+foreach ($cdatas as $cdata) {
+	if ( isset($cdata['freezetime']) &&
+	     difftime($cdata['freezetime'], now()) <= 0
+	) {
+		echo "<h4>Scoreboard of c${cdata['cid']} (${cdata['shortname']}) is now frozen.</h4>\n\n";
+	}
 }
 
 echo addForm($pagename, 'get') . "<p>\n" .
@@ -47,27 +68,55 @@ echo addForm($pagename, 'get') . "<p>\n" .
     addSubmit($viewall ? 'view unsent only' : 'view all') . "</p>\n" .
     addEndForm();
 
-// Problem metadata: colours and names.
-$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
-		      FROM problem WHERE cid = %i', $cid);
+if ( count($cids) > 1 ) {
+	echo addForm($pagename, 'get') . "<p>Show contests:\n";
+	echo addSubmit('all', 'contest', null, ($contest != 'all'));
+	echo addSubmit('selected', 'contest', null, ($contest != 'selected'));
+	echo " ('selected' contest can be chosen using dropdown in upper right" .
+	     "corner)</p>\n" . addEndForm();
+}
 
-$freezecond = '';
-if ( ! dbconfig_get('show_balloons_postfreeze',0) && isset($cdata['freezetime']) ) {
-	$freezecond = 'AND submittime <= "' . $cdata['freezetime'] . '"';
+if ( $contest == 'selected' ) {
+	$cids = array($cid);
+}
+
+// Problem metadata: colours and names.
+$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,cid
+		      FROM problem
+		      INNER JOIN contestproblem USING (probid)
+		      WHERE cid IN %Ai', $cids);
+
+$freezecond = array();
+if ( !dbconfig_get('show_balloons_postfreeze',0)) {
+	foreach ($cdatas as $cdata) {
+		if ( isset($cdata['freezetime']) ) {
+			$freezecond[] = '(submittime <= "' . $cdata['freezetime'] . '" AND s.cid = ' . $cdata['cid'] . ')';
+		} else {
+			$freezecond[] = '(s.cid = ' . $cdata['cid'] . ')';
+		}
+	}
+}
+
+if ( empty($freezecond) ) {
+	$freezecond = '';
+} else {
+	$freezecond = 'AND (' . implode(' OR ', $freezecond) . ')';
 }
 
 // Get all relevant info from the balloon table.
 // Order by done, so we have the unsent balloons at the top.
-$res = $DB->q("SELECT b.*, s.submittime, p.probid, p.shortname AS probshortname,
-               t.teamid, t.name AS teamname, t.room, c.name AS catname
-               FROM balloon b
-               LEFT JOIN submission s USING (submitid)
-               LEFT JOIN problem p USING (probid)
-               LEFT JOIN team t USING(teamid)
-               LEFT JOIN team_category c USING(categoryid)
-               WHERE s.cid = %i $freezecond
-               ORDER BY done ASC, balloonid DESC",
-              $cid);
+$res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
+	       t.teamid, t.name AS teamname, t.room, c.name AS catname, s.cid, co.shortname
+	       FROM balloon b
+	       LEFT JOIN submission s USING (submitid)
+	       LEFT JOIN problem p USING (probid)
+	       LEFT JOIN contestproblem cp USING (probid, cid)
+	       LEFT JOIN team t USING(teamid)
+	       LEFT JOIN team_category c USING(categoryid)
+	       LEFT JOIN contest co USING (cid)
+	       WHERE s.cid IN %Ai $freezecond
+	       ORDER BY done ASC, balloonid DESC",
+	       $cids);
 
 /* Loop over the result, store the total of balloons for a team
  * (saves a query within the inner loop).
@@ -75,23 +124,24 @@ $res = $DB->q("SELECT b.*, s.submittime, p.probid, p.shortname AS probshortname,
  * once over the db result.
  */
 $BALLOONS = $TOTAL_BALLOONS = array();
-while ( $row = $res->next() ) {
+while ( !empty($cids) && $row = $res->next() ) {
 	$BALLOONS[] = $row;
 	$TOTAL_BALLOONS[$row['teamid']][] = $row['probid'];
 
 	// keep overwriting these variables - in the end they'll
 	// contain the id's of the first balloon in each type
-	$first_contest = $first_problem[$row['probid']] = $first_team[$row['teamid']] = $row['balloonid'];
+	$first_contest[$row['cid']] = $first_problem[$row['probid']] = $first_team[$row['teamid']] = $row['balloonid'];
 }
 
 if ( !empty($BALLOONS) ) {
 	echo addForm($pagename);
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
-		"<tr><th class=\"sorttable_numeric\">ID</th>" .
-	        "<th>time</th><th>solved</th><th>team</th>" .
-	        "<th></th><th>loc.</th><th>category</th><th>total</th>" .
-	        "<th></th><th></th></tr>\n</thead>\n";
+	     "<tr><th class=\"sorttable_numeric\">ID</th>" .
+	     "<th>time</th>" . ( count($cids) > 1 ? "<th>contest</th>" : "") .
+	     "<th>solved</th><th>team</th>" .
+	     "<th></th><th>loc.</th><th>category</th><th>total</th>" .
+	     "<th></th><th></th></tr>\n</thead>\n";
 
 	foreach ( $BALLOONS as $row ) {
 
@@ -101,6 +151,11 @@ if ( !empty($BALLOONS) ) {
 		echo '<tr'  . ( $row['done'] == 1 ? ' class="disabled"' : '' ) . '>';
 		echo '<td>b' . (int)$row['balloonid'] . '</td>';
 		echo '<td>' . printtime($row['submittime'], NULL, TRUE) . '</td>';
+
+		if ( count($cids) > 1 ) {
+			// contest of this problem, only when more than one active
+			echo '<td>' . htmlspecialchars($row['shortname']) . '</td>';
+		}
 
 		// the balloon earned
 		echo '<td class="probid">' .
@@ -134,7 +189,7 @@ if ( !empty($BALLOONS) ) {
 		echo '</td><td>';
 
 		$comments = array();
-		if ( $first_contest == $row['balloonid'] ) {
+		if ( $first_contest[$row['cid']] == $row['balloonid'] ) {
 			$comments[] = 'first in contest';
 		} else {
 			if ( $first_team[$row['teamid']] == $row['balloonid'] ) {

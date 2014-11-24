@@ -84,9 +84,9 @@ echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
 // select only specific fields to avoid retrieving large blobs
 $res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
 			   result, verified, valid FROM judging
-			   WHERE cid = %i AND judgehost = %s
+			   WHERE cid IN %Ai AND judgehost = %s
 			   ORDER BY starttime DESC, judgingid DESC',
-			   $cid, $row['hostname']);
+			   getCurContests(FALSE), $row['hostname']);
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No judgings.</p>\n\n";

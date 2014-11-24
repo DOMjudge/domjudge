@@ -18,8 +18,8 @@ require_once(LIBWWWDIR . '/scoreboard.php');
 require_once(LIBWWWDIR . '/auth.php');
 require_once(LIBWWWDIR . '/restapi.php');
 
-$cdata = getCurContest(TRUE);
-$cid = (int)$cdata['cid'];
+$cdatas = getCurContests(TRUE, -1);
+$cids = array_keys($cdatas);
 
 if ( ! logged_in() &&
      isset($_SERVER['PHP_AUTH_USER']) &&

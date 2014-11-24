@@ -78,23 +78,62 @@ CREATE TABLE `configuration` (
 CREATE TABLE `contest` (
   `cid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `contestname` varchar(255) NOT NULL COMMENT 'Descriptive name',
+  `shortname` varchar(255) NOT NULL COMMENT 'Short name for this contest',
   `activatetime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest becomes visible in team/public views',
   `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest starts, submissions accepted',
   `freezetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time scoreboard is frozen',
   `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time after which no more submissions are accepted',
   `unfreezetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Unfreeze a frozen scoreboard at this time',
+  `deactivatetime` decimal(32,9) UNSIGNED NOT NULL COMMENT 'Time contest becomes invisible in team/public views',
   `activatetime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of activatetime',
   `starttime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute (only!) string representation of starttime',
   `freezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of freezetime',
   `endtime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
   `unfreezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
+  `deactivatetime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether this contest can be active',
   `finalizetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time when contest was finalized, null if not yet',
   `finalizecomment` text COMMENT 'Comments by the finalizer',
   `b` smallint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of extra bronze medals',
+  `process_balloons` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Will balloons be processed for this contest?',
+  `public` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Is this contest visible for the public or non-associated teams?',
   PRIMARY KEY (`cid`),
+  UNIQUE KEY `shortname` (`shortname`),
   KEY `cid` (`cid`,`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';
+
+--
+-- Table structure for table `contestproblem`
+--
+
+CREATE TABLE `contestproblem` (
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
+  `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest (string)',
+  `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Are submissions accepted for this problem?',
+  `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
+  `color` varchar(25) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard',
+  PRIMARY KEY (`cid`,`probid`),
+  UNIQUE KEY `shortname` (`cid`,`shortname`),
+  KEY `cid` (`cid`),
+  KEY `probid` (`probid`),
+  CONSTRAINT `contestproblem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  CONSTRAINT `contestproblem_ibfk_2` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of contests and problems';
+
+--
+-- Table structure for table `contestteam`
+--
+
+CREATE TABLE `contestteam` (
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
+  PRIMARY KEY (`teamid`,`cid`),
+  KEY `cid` (`cid`),
+  KEY `teamid` (`teamid`),
+  CONSTRAINT `contestteam_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  CONSTRAINT `contestteam_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of contests and teams';
 
 --
 -- Table structure for table `event`
@@ -222,21 +261,13 @@ CREATE TABLE `language` (
 
 CREATE TABLE `problem` (
   `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `shortname` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
-  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
-  `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Are submissions accepted for this problem?',
-  `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
   `timelimit` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time for this problem',
   `special_run` varchar(32) DEFAULT NULL COMMENT 'Script to run submissions for this problem',
   `special_compare` varchar(32) DEFAULT NULL COMMENT 'Script to compare problem and jury output for this problem',
-  `color` varchar(25) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard',
   `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
   `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text',
-  PRIMARY KEY  (`probid`),
-  UNIQUE KEY `shortname` (`shortname`,`cid`),
-  KEY `cid` (`cid`),
-  CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
+  PRIMARY KEY  (`probid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
 
 --

@@ -175,7 +175,7 @@ if ( isset($_POST['import']) ) {
 
 	}
 	$contest_data['problemset'] = array();
-	$q = $DB->q("SELECT * FROM problem WHERE cid = %i", $cid);
+	$q = $DB->q("SELECT * FROM problem INNER JOIN contestproblem USING (probid) WHERE cid IN %Ai", getCurContests(FALSE));
 	while ( $prob = $q->next() ) {
 
 		$problem = array();

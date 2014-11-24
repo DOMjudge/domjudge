@@ -99,27 +99,30 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 -- Dumping data for table `role`
 --
 
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (1, 'admin',          'Administrative User');
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (2, 'jury',           'Jury User');
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (3, 'team',           'Team Member');
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (4, 'balloon',        'Balloon runner');
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (5, 'print',             'print');
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES (6, 'judgehost',         '(Internal/System) Judgehost');
-INSERT INTO `role` (`role`, `description`) VALUES ('event_reader',      '(Internal/System) event_reader');
-INSERT INTO `role` (`role`, `description`) VALUES ('full_event_reader', '(Internal/System) full_event_reader');
+INSERT INTO `role` (`roleid`, `role`, `description`) VALUES
+(1, 'admin',             'Administrative User'),
+(2, 'jury',              'Jury User'),
+(3, 'team',              'Team Member'),
+(4, 'balloon',           'Balloon runner'),
+(5, 'print',             'print'),
+(6, 'judgehost',         '(Internal/System) Judgehost'),
+(7, 'event_reader',      '(Internal/System) event_reader'),
+(8, 'full_event_reader', '(Internal/System) full_event_reader');
 
 --
 -- Dumping data for table `team_category`
 --
 -- System category
-INSERT INTO `team_category` VALUES (1, 'System', 9, '#ff2bea', 0);
-INSERT INTO `team_category` VALUES (2, 'Self-Registered', 8, '#33cc44', 1);
+INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visible`) VALUES
+(1, 'System', 9, '#ff2bea', 0),
+(2, 'Self-Registered', 8, '#33cc44', 1);
 
 --
 -- Dumping data for table `team`
 --
 
-INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES (1, 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES
+(1, 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
 
 --
 -- Dumping data for table `user`

@@ -35,27 +35,54 @@ function getFileContents($filename, $sizelimit = false) {
 }
 
 /**
- * Will return either the current contest id, or the most recently
- * finished one. When fulldata is true, returns the total row as an
- * array (including list of removed_intervals) instead of just the ID.
+ * Will return all the contests that are currently active
+ * When fulldata is true, returns the total row as an array
+ * (including list of removed_intervals)
+ * instead of just the ID (array indices will be contest ID's then).
+ * If $onlyofteam is not null, only show contests that team is part
+ * of. If it is -1, only show publicly visible contests
+ * If $alsofuture is true, also show the contests that start in the future
+ * The results will have the value of field $key in the database as key
  */
-function getCurContest($fulldata = FALSE) {
-
+function getCurContests($fulldata = FALSE, $onlyofteam = NULL,
+                        $alsofuture = FALSE, $key = 'cid')
+{
 	global $DB;
-	$now = $DB->q('MAYBETUPLE SELECT * FROM contest
-	               WHERE enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
-	               ORDER BY activatetime DESC LIMIT 1');
+	if ( $alsofuture ) {
+		$extra = '';
+	} else {
+		$extra = 'AND activatetime <= UNIX_TIMESTAMP()';
+	}
+	if ( $onlyofteam !== null && $onlyofteam > 0 ) {
+		$contests = $DB->q("SELECT * FROM contest
+		                    LEFT JOIN contestteam USING (cid)
+		                    WHERE (contestteam.teamid = %i OR contest.public = 1) AND enabled = 1 ${extra}
+		                    AND deactivatetime > UNIX_TIMESTAMP()
+		                    ORDER BY activatetime", $onlyofteam);
+	} elseif ( $onlyofteam === -1 ) {
+		$contests = $DB->q("SELECT * FROM contest
+		                    WHERE enabled = 1 AND public = 1 ${extra}
+		                    AND deactivatetime > UNIX_TIMESTAMP()
+		                    ORDER BY activatetime");
+	} else {
+		$contests = $DB->q("SELECT * FROM contest
+		                    WHERE enabled = 1 ${extra}
+		                    AND deactivatetime > UNIX_TIMESTAMP()
+		                    ORDER BY activatetime");
+	}
+	$contests = $contests->getkeytable($key);
+	if ( !$fulldata ) {
+		return array_keys($contests);
+	}
 
-	if ( $now == NULL ) return FALSE;
+	foreach ($contests as $cid => &$contest) {
+		$res = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
+		               FROM removed_interval WHERE cid = %i', $cid);
 
-	if ( !$fulldata ) return $now['cid'];
+		$contest['removed_intervals'] = $res;
+	}
 
-	$res = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
-	               FROM removed_interval WHERE cid = %i', $now['cid']);
-
-	$now['removed_intervals'] = $res;
-
-	return $now;
+	return $contests;
 }
 
 /**
@@ -98,6 +125,7 @@ function problemVisible($probid)
 	if ( !$cdata || difftime(now(),$cdata['starttime']) < 0 ) return FALSE;
 
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
+	               INNER JOIN contestproblem USING (probid)
 	               WHERE cid = %i AND allow_submit = 1 AND probid = %i',
 	              $cdata['cid'], $probid) !== NULL;
 }
@@ -548,12 +576,15 @@ function daemonize($pidfile = NULL)
  * validates it and puts it into the database. Additionally it
  * moves it to a backup storage.
  */
-function submit_solution($team, $prob, $lang, $files, $filenames,
+function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
                          $origsubmitid = NULL, $extid = NULL, $submittime = NULL)
 {
+	global $cdatas, $DB;
+
 	if( empty($team) ) error("No value for Team.");
 	if( empty($prob) ) error("No value for Problem.");
 	if( empty($lang) ) error("No value for Language.");
+	if( empty($contest) ) error("No value for Contest.");
 
 	if ( empty($submittime) ) $submittime = now();
 
@@ -569,13 +600,11 @@ function submit_solution($team, $prob, $lang, $files, $filenames,
 		error("Duplicate filenames detected.");
 	}
 
-	global $cdata,$cid, $DB;
-
 	$sourcesize = dbconfig_get('sourcesize_limit');
 
 	// Refuse submissions before start of contest.
-	if( difftime($cdata['starttime'], $submittime) > 0 ) {
-	//	error("The contest is closed, no submissions accepted. [c$cid]");
+	if( difftime($cdatas[$contest]['starttime'], $submittime) > 0 ) {
+	//	error("The contest is closed, no submissions accepted. [c$contest]");
 		return;
 	}
 
@@ -587,10 +616,13 @@ function submit_solution($team, $prob, $lang, $files, $filenames,
 	if( ! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team WHERE teamid = %i AND enabled = 1',$team) ) {
 		error("Team '$team' not found in database or not enabled.");
 	}
-	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem WHERE probid = %s
-							AND cid = %i AND allow_submit = "1"', $prob, $cid) ) {
-		error("Problem p$prob not found in database or not submittable [c$cid].");
+	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem
+	                        INNER JOIN contestproblem USING (probid) WHERE probid = %s
+							AND cid = %i AND allow_submit = "1"', $prob, $contest) ) {
+		error("Problem p$prob not found in database or not submittable [c$contest].");
 	}
+	if( !isset($cdatas[$contest]) ) error("Unknown Contest.");
+	$cid = $contest;
 
 	// Reindex arrays numerically to allow simultaneously iterating
 	// over both $files and $filenames.
@@ -615,9 +647,9 @@ function submit_solution($team, $prob, $lang, $files, $filenames,
 
 	// Insert submission into the database
 	$id = $DB->q('RETURNID INSERT INTO submission
-				  (cid, teamid, probid, langid, submittime, origsubmitid, externalid)
-				  VALUES (%i, %i, %i, %s, %s, %i, %i)',
-	             $cid, $teamid, $probid, $langid, $submittime, $origsubmitid, $extid);
+	              (cid, teamid, probid, langid, submittime, origsubmitid, externalid)
+	              VALUES (%i, %i, %i, %s, %s, %i, %i)',
+	             $cid, $teamid, $probid, $langid, $now, $origsubmitid, $extid);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
@@ -652,7 +684,7 @@ function submit_solution($team, $prob, $lang, $files, $filenames,
 		logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
 	}
 
-	if( difftime($cdata['endtime'], $submittime) <= 0 ) {
+	if( difftime($cdatas[$cid]['endtime'], $submittime) <= 0 ) {
 		logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$cid]");
 	}
 
@@ -770,9 +802,10 @@ function XMLgetattr($node, $attr)
 /**
  * Log an action to the auditlog table.
  */
-function auditlog($datatype, $dataid, $action, $extrainfo = null, $force_username = null)
+function auditlog($datatype, $dataid, $action, $extrainfo = null,
+                  $force_username = null, $cid = null)
 {
-	global $cid, $username, $DB;
+	global $username, $DB;
 
 	if ( !empty($force_username) ) {
 		$user = $force_username;

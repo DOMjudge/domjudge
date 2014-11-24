@@ -48,8 +48,9 @@ class db
 		%f: floating point
 		%l: literal (no quoting/escaping)
 		%_: nothing, but do process one argument
-		%A?: array of type ?, comma separated
-		%S: array of key => ., becomes key=., comma separated
+		%A?: array of type ?, comma separated, surrounded by braces
+		%S:  array of key => ., becomes key=., comma separated
+		%SS: array of key => ., becomes key=., "AND" separated
 
 		query can be prepended with a keyword to change the returned data
 		format:
@@ -144,16 +145,22 @@ class db
 			$val = array_shift($argv);
 			switch ($part{0}) {
 				case 'A':
-					if (!is_array($val) || !$val) {
+					if (!is_array($val)) {
 						throw new InvalidArgumentException(
-							"%A in \$DATABASE->q() has to correspond to a "
-							. "non-empty array, it's" . " now a '$val' (Query:"
+							"%A in \$DATABASE->q() has to correspond to an "
+							. "array, it is" . " now a '$val' (Query:"
 							. "'$key $query')!");
 					}
 					$GLOBALS['MODE'] = $part{1};
-					$query .= implode( ', '
-					                 , array_map( array($this, 'val2sql')
-					                            , $val));
+					if (!$val) {
+						$query .= '(NULL)';
+					} else {
+						$query .= '(';
+						$query .= implode( ', '
+								 , array_map( array($this, 'val2sql')
+									    , $val));
+						$query .= ')';
+					}
 					unset($GLOBALS['MODE']);
 					$query .= substr($part,2);
 					break;
@@ -162,9 +169,15 @@ class db
 					foreach ( $val as $field => $value ) {
 						$parts[] = '`'.$field.'` = '.$this->val2sql($value);
 					}
-					$query .= implode(', ', $parts);
+					$separator = ', ';
+					$skip = 1;
+					if ( strlen($part) > 1 && $part{1} == 'S' ) {
+						$separator = ' AND ';
+						$skip = 2;
+					}
+					$query .= implode($separator, $parts);
 					unset($parts);
-					$query .= substr($part,1);
+					$query .= substr($part,$skip);
 					break;
 				case 's':
 				case 'c':

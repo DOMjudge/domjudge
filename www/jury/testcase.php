@@ -12,7 +12,7 @@ $INOROUT = array('input','output');
 
 $probid = (int)@$_REQUEST['probid'];
 
-$prob = $DB->q('MAYBETUPLE SELECT probid, shortname, name
+$prob = $DB->q('MAYBETUPLE SELECT probid, name
                 FROM problem WHERE probid = %i', $probid);
 
 if ( ! $prob ) error("Missing or invalid problem id");
@@ -21,7 +21,7 @@ if ( ! $prob ) error("Missing or invalid problem id");
 if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 	$rank  = $_GET['rank'];
 	$fetch = $_GET['fetch'];
-	$filename = $prob['shortname'] . "." . $rank . "." . substr($fetch,0,-3);
+	$filename = $prob['probid'] . "." . $rank . "." . substr($fetch,0,-3);
 
 	$size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH($fetch)
 	                FROM testcase WHERE probid = %i AND rank = %i",
@@ -48,10 +48,10 @@ function get_testcase_data()
 	global $DB, $data, $probid;
 
 	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
-	                description, sample,
-	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-	                OCTET_LENGTH(output) AS size_output, md5sum_output
-	                FROM testcase WHERE probid = %i ORDER BY rank', $probid);
+			description, sample,
+			OCTET_LENGTH(input)  AS size_input,  md5sum_input,
+			OCTET_LENGTH(output) AS size_output, md5sum_output
+			FROM testcase WHERE probid = %i ORDER BY rank', $probid);
 }
 get_testcase_data();
 

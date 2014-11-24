@@ -15,10 +15,10 @@ $id = getRequestID();
 if ( isset($id) ) {
 
 	$req = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
-	               LEFT JOIN team t ON (t.teamid = q.sender)
-	               WHERE q.cid = %i AND q.clarid = %i', $cid, $id);
+		       LEFT JOIN team t ON (t.teamid = q.sender)
+		       WHERE q.cid IN %Ai AND q.clarid = %i', $cids, $id);
 
-	if ( ! $req ) error("clarification $id not found, cid = $cid");
+	if ( ! $req ) error("clarification $id not found, cids = " . implode(', ', $cids));
 
 	$respid = (int) (empty($req['respid']) ? $id : $req['respid']);
 	$isgeneral = FALSE;
@@ -69,13 +69,20 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		$sendto = $_POST['sendto'];
 	}
 
+	list($cid, $problem) = explode('-', $_POST['problem']);
+	if ( !$problem ) {
+		$problem = $_POST['problem'];
+	} elseif ( $problem == 'general' ) {
+		$problem = null;
+	}
+
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, respid, submittime, recipient, probid, body,
  	                  answered, jury_member)
 	                 VALUES (%i, ' .
 	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %s, %s, %i, ' .
 	                (isset($jury_member) ? '%s)' : 'NULL %_)'),
-	                $cid, $respid, now(), $sendto, $_POST['problem'],
+	                $cid, $respid, now(), $sendto, $problem,
 	                $_POST['bodytext'], 1, $jury_member);
 	auditlog('clarification', $newid, 'added');
 
@@ -181,10 +188,10 @@ if ( !empty($req['sender']) ) {
 // display a clarification send box
 if ( $isgeneral ) {
 	echo "<h1>Send Clarification</h1>\n\n";
-	putClarificationForm("clarification.php", $cdata['cid']);
+	putClarificationForm("clarification.php");
 } else {
 	echo "<h1>Send Response</h1>\n\n";
-	putClarificationForm("clarification.php", $cdata['cid'], $respid);
+	putClarificationForm("clarification.php", $respid);
 }
 
 require(LIBWWWDIR . '/footer.php');

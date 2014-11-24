@@ -10,22 +10,27 @@ require('init.php');
 $title = 'Teams';
 
 $teams = $DB->q('SELECT t.*,
-                 c.name AS catname,
-                 a.shortname AS affshortname, a.name AS affname
-                 FROM team t
-                 LEFT JOIN team_category c USING (categoryid)
-                 LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
-                 ORDER BY c.sortorder, t.name COLLATE utf8_general_ci');
+		 c.name AS catname,
+		 a.shortname AS affshortname, a.name AS affname,
+		 COUNT(co.cid) AS numcontests
+		 FROM team t
+		 INNER JOIN contest co
+		 LEFT JOIN contestteam ct ON ct.teamid = t.teamid AND ct.cid = co.cid
+		 LEFT JOIN team_category c USING (categoryid)
+		 LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
+		 WHERE (co.public = 1 OR ct.cid IS NOT NULL)
+		 GROUP BY teamid
+		 ORDER BY c.sortorder, t.name COLLATE utf8_general_ci');
 
 $nsubmits = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
-                    FROM submission s
-                    WHERE cid = %i GROUP BY teamid', $cid);
+		    FROM submission s
+		    WHERE cid IN %Ai GROUP BY teamid', $cids);
 
 $ncorrect = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, COUNT(teamid) AS cnt
-                    FROM submission s
-                    LEFT JOIN judging j USING (submitid)
-                    WHERE j.valid = 1 AND j.result = "correct" AND s.cid = %i
-                    GROUP BY teamid', $cid);
+		    FROM submission s
+		    LEFT JOIN judging j USING (submitid)
+		    WHERE j.valid = 1 AND j.result = "correct" AND s.cid IN %Ai
+		    GROUP BY teamid', $cids);
 
 require(LIBWWWDIR . '/header.php');
 
@@ -37,6 +42,7 @@ if( $teams->count() == 0 ) {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th class=\"sorttable_numeric\" scope=\"col\">ID</th><th scope=\"col\">teamname</th>" .
 		"<th scope=\"col\">category</th><th scope=\"col\">affiliation</th>" .
+		"<th scope=\"col\" class=\"sorttable_numeric\"># contests</th>" .
 		"<th scope=\"col\">host</th><th scope=\"col\">room</th>" .
 		"<th class=\"sorttable_nosort\"></th><th class=\"thleft\" " .
 		"scope=\"col\">status</th><th></th>" .
@@ -67,7 +73,7 @@ if( $teams->count() == 0 ) {
 				htmlspecialchars($row['catname'])."</a></td>".
 			"<td title=\"".htmlspecialchars($row['affname'])."\">" . $link .
 				($row['affshortname'] ? htmlspecialchars($row['affshortname']) : '&nbsp;') .
-			"</a></td><td title=\"";
+			"</a></td><td>" . $link . $row['numcontests']."</a></td><td title=\"";
 
 		if ( @$row['hostname'] ) {
 			echo htmlspecialchars($row['hostname']) . "\">" . $link .

@@ -13,24 +13,31 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Problems</h1>\n\n";
 
-// Select all data, sort problems from the current contest on top.
-$res = $DB->q('SELECT p.probid,p.shortname,p.name,p.allow_submit,p.allow_judge,p.timelimit,p.color,
-               p.problemtext_type, c.*, COUNT(testcaseid) AS testcases
+// Select all data
+$res = $DB->q('SELECT p.probid,p.name,p.timelimit,
+               p.problemtext_type, COUNT(testcaseid) AS testcases
                FROM problem p
-               NATURAL JOIN contest c
                LEFT JOIN testcase USING (probid)
-               GROUP BY probid ORDER BY (p.cid = %i) DESC, p.cid, probid', $cid);
+	       GROUP BY probid ORDER BY probid');
+
+// Get number of contests per problem
+$contestinfo = $DB->q("TABLE SELECT probid, cid
+		       FROM contestproblem");
+$contestproblems = array();
+foreach ($contestinfo as $row) {
+	if ( !isset($contestproblems[$row['probid']]) ) {
+		$contestproblems[$row['probid']] = array();
+	}
+	$contestproblems[$row['probid']][] = $row['cid'];
+}
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No problems defined</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
-	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">shortname</th><th scope=\"col\">name</th>" .
-	     "<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" .
-	     "<th scope=\"col\">allow<br />submit</th>" .
-	     "<th scope=\"col\">allow<br />judge</th>" .
+	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
+	     "<th scope=\"col\" class=\"sorttable_numeric\"># contests</th>" .
 	     "<th scope=\"col\">time<br />limit</th>" .
-	     "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>" .
 	     "<th scope=\"col\">test<br />cases</th>" .
 	     "<th scope=\"col\"></th>" .
 	    ( IS_ADMIN ? "<th scope=\"col\"></th>" : '' ) .
@@ -40,32 +47,17 @@ if( $res->count() == 0 ) {
 
 	while($row = $res->next()) {
 		$classes = array();
-		if ( $row['cid'] != $cid ) $classes[] = 'disabled';
-		if ( $row['cid'] != $lastcid ) {
-			if ( $lastcid != -1 ) $classes[] = 'contestswitch';
-			$lastcid = $row['cid'];
-		}
+		if ( count(array_intersect($contestproblems[$row['probid']], $cids)) == 0 ) $classes[] = 'disabled';
 		$link = '<a href="problem.php?id=' . urlencode($row['probid']) . '">';
 
 		echo "<tr class=\"" . implode(' ',$classes) .
 		    "\"><td>" . $link . "p" .
 				htmlspecialchars($row['probid'])."</a>".
-			"</td><td class=\"probid\">" . $link . htmlspecialchars($row['shortname'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
-			"</td><td title=\"".htmlspecialchars($row['contestname'])."\">".
-			$link . 'c' . htmlspecialchars($row['cid']) . "</a>" .
-			"</td><td class=\"tdcenter\">" . $link .
-			printyn($row['allow_submit']) . "</a>" .
-			"</td><td class=\"tdcenter\">" . $link .
-			printyn($row['allow_judge']) . "</a>" .
+			"</td><td>".
+			$link . htmlspecialchars(count($contestproblems[$row['probid']])) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
-			"</td>".
-			( !empty($row['color'])
-			? '<td title="' . htmlspecialchars($row['color']) .
-		      '">' . $link . '<div class="circle" style="background-color: ' .
-			htmlspecialchars($row['color']) .
-		      ';"></div></a>'
-			: '<td>' . $link . '&nbsp;</a>' );
+			"</td>";
 		echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
 		    "\">" . $row['testcases'] . "</a></td>";
 		if ( !empty($row['problemtext_type']) ) {
@@ -91,11 +83,18 @@ if( $res->count() == 0 ) {
 if ( IS_ADMIN ) {
 	echo "<p>" . addLink('problem') . "</p>\n\n";
 	if ( class_exists("ZipArchive") ) {
+		$contests = $DB->q("KEYVALUETABLE SELECT cid, CONCAT('c', cid, ': ' , shortname, ' - ', contestname) FROM contest");
+		$values = array(-1 => 'Do not link to a contest');
+		foreach ($contests as $cid => $contest) {
+			$values[$cid] = $contest;
+		}
 		echo "\n" . addForm('problem.php', 'post', null, 'multipart/form-data') .
-	 		'Problem archive(s): ' .
-	 		addFileField('problem_archive[]', null, ' required multiple accept="application/zip"') .
-	 		addSubmit('Upload', 'upload') .
-	 		addEndForm() . "\n";
+		     'Contest: ' .
+		     addSelect('contest', $values, -1, true) .
+		     'Problem archive(s): ' .
+		     addFileField('problem_archive[]', null, ' required multiple accept="application/zip"') .
+		     addSubmit('Upload', 'upload') .
+		     addEndForm() . "\n";
 	}
 }
 

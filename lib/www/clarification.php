@@ -52,6 +52,8 @@ function getClarCategories(&$default = null)
  */
 function putClar($clar)
 {
+	global $cids;
+
 	// $clar['sender'] is set to the team ID, or empty if sent by the jury.
 	if ( !empty($clar['sender']) ) {
 		$from = htmlspecialchars($clar['fromname'] . ' (t'.$clar['sender'] . ')') ;
@@ -88,15 +90,20 @@ function putClar($clar)
 	$categs = getClarCategories();
 
 	echo '<tr><td>Subject:</td><td>';
-	if ( empty($clar['probid']) ) { /* empty */ }
-	elseif ( !ctype_digit($clar['probid']) ) {
-		echo $categs[$clar['probid']];
+	$prefix = '';
+	if ( IS_JURY && count($cids) > 1 )
+	{
+		$prefix = $clar['contestshortname'] . ' - ';
+	}
+	if ( is_null($clar['probid']) ) {
+		echo $prefix . "General issue";
 	} else {
 		if ( IS_JURY ) {
-			echo '<a href="problem.php?id=' . urlencode($clar['probid']) . '">' .
-				'Problem ' . $clar['shortname'].": ".$clar['probname'] . '</a>';
+			echo '<a href="problem.php?id=' . urlencode($clar['probid']) .
+			     '">' . $prefix . 'Problem ' . $clar['shortname'] . ": " .
+			     $clar['probname'] . '</a>';
 		} else {
-			echo 'Problem ' . $clar['shortname'].": ".$clar['probname'];
+			echo 'Problem ' . $clar['shortname'] . ": " . $clar['probname'];
 		}
 	}
 	echo "</td></tr>\n";
@@ -123,15 +130,17 @@ function putClarification($id,  $team = NULL)
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
-	global $DB;
+	global $DB, $cids;
 
 	$clar = $DB->q('TUPLE SELECT * FROM clarification WHERE clarid = %i', $id);
 
-	$clars = $DB->q('SELECT c.*, p.shortname, p.name AS probname, t.name AS toname, f.name AS fromname
+	$clars = $DB->q('SELECT c.*, cp.shortname, p.name AS probname, t.name AS toname, f.name AS fromname, co.shortname AS contestshortname
 	                 FROM clarification c
-	                 LEFT JOIN problem p ON (c.probid = p.probid AND p.allow_submit = 1)
+			 LEFT JOIN problem p ON (c.probid = p.probid)
 	                 LEFT JOIN team t ON (t.teamid = c.recipient)
 	                 LEFT JOIN team f ON (f.teamid = c.sender)
+			 LEFT JOIN contest co ON (co.cid = c.cid)
+			 LEFT JOIN contestproblem cp ON (cp.probid = c.probid AND cp.cid = c.cid AND cp.allow_submit = 1)
 	                 WHERE c.respid = %i OR c.clarid = %i
 	                 ORDER BY c.submittime, c.clarid',
 	                $clar['clarid'], $clar['clarid']);
@@ -167,13 +176,15 @@ function summarizeClarification($body, $maxchars = 80)
  */
 function putClarificationList($clars, $team = NULL)
 {
-	global $username;
+	global $username, $cids;
+
 	if ( $team==NULL && ! IS_JURY ) {
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
 	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
-		( IS_JURY ? "<th scope=\"col\">ID</th>" : "") .
+	     ( IS_JURY ? "<th scope=\"col\">ID</th>" : "") .
+	     ( IS_JURY && count($cids) > 1 ? "<th scope=\"col\">contest</th>" : "") .
 	     "<th scope=\"col\">time</th>" .
 	     "<th scope=\"col\">from</th>" .
 	     "<th scope=\"col\">to</th><th scope=\"col\">subject</th>" .
@@ -199,6 +210,9 @@ function putClarificationList($clars, $team = NULL)
 		if ( IS_JURY ) {
 			echo '<td>' . $link . $clar['clarid'] . '</a></td>';
 		}
+
+		echo ( IS_JURY && count($cids) > 1 ? ('<td>' . $link .
+						      $clar['contestshortname'] . '</a></td>') : '');
 
 		echo '<td>' . $link . printtime($clar['submittime'], NULL, TRUE) . '</a></td>';
 
@@ -269,16 +283,21 @@ function putClarificationList($clars, $team = NULL)
  * Output a form to send a new clarification.
  * Set respid to a teamid, to make only that team (or ALL) selectable.
  */
-function putClarificationForm($action, $cid, $respid = NULL)
+function putClarificationForm($action, $respid = NULL, $onlycontest = NULL)
 {
-	if ( empty($cid) ) {
-		echo '<p class="nodata">No active contest</p>';
+	$cdatas = getCurContests(TRUE);
+	if ( isset($onlycontest) ) {
+		$cdatas = array($onlycontest => $cdatas[$onlycontest]);
+	}
+	$cids = array_keys($cdatas);
+	if ( empty($cids) ) {
+		echo '<p class="nodata">No active contests</p>';
 		return;
 	}
 
 	require_once('forms.php');
 
-	global $DB, $cdata;
+	global $DB;
 ?>
 
 <script type="text/javascript">
@@ -354,17 +373,26 @@ function appendAnswer() {
 	}
 
 	// Select box for a specific problem (only when the contest
-	// has started) or other issue.
-	if ( difftime($cdata['starttime'], now()) <= 0 ) {
-		$probs = $DB->q('KEYVALUETABLE SELECT probid, CONCAT(shortname, ": ", name) as name
-		                 FROM problem WHERE cid = %i AND allow_submit = 1
-		                 ORDER BY shortname ASC', $cid);
-	} else {
-		$probs = array();
-	}
+	// has started) or other issues.
 	$categs = getClarCategories();
 	$defclar = key($categs);
-	$options = $categs + $probs;
+	$options = $categs;
+	foreach ($cdatas as $cid => $cdata) {
+		if ( difftime($cdata['starttime'], now()) <= 0 ) {
+			$problem_options = $DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid), CONCAT(shortname, ": ", name) as name
+						   FROM problem
+						   INNER JOIN contestproblem USING (probid)
+						   WHERE cid = %i AND allow_submit = 1
+						   ORDER BY shortname ASC', $cid);
+			if ( IS_JURY && count($cdatas) > 1 ) {
+				foreach ($problem_options as &$problem_option) {
+					$problem_option = $cdata['shortname'] . ' - ' . $problem_option;
+				}
+				unset($problem_option);
+			}
+			$options += $problem_options;
+		}
+	}
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options, ($respid ? $clar['probid'] : $defclar), true) .
 	     "</td></tr>\n";

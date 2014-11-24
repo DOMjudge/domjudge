@@ -50,17 +50,27 @@ if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES)
 	error("POST data exceeded php.ini's 'post_max_size' directive.");
 }
 
-$cdata = getCurContest(TRUE);
-$cid = (int)$cdata['cid'];
+$cdatas = getCurContests(TRUE, null, TRUE);
+$cids = array_keys($cdatas);
+
+// If the cookie has a existing contest, use it
+if ( isset($_COOKIE['domjudge_cid']) && isset($cdatas[$_COOKIE['domjudge_cid']]) )  {
+	$cid = $_COOKIE['domjudge_cid'];
+	$cdata = $cdatas[$cid];
+} elseif ( count($cids) >= 1 ) {
+	// Otherwise, select the first contest
+	$cid = $cids[0];
+	$cdata = $cdatas[$cid];
+}
 
 // Data to be sent as AJAX updates:
 $updates = array(
 	'clarifications' =>
 	$DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
-	        FROM clarification
-	        WHERE sender IS NOT NULL AND cid = %i AND answered = 0', $cid),
+		FROM clarification
+		WHERE sender IS NOT NULL AND cid IN %Ai AND answered = 0', $cids),
 	'judgehosts' =>
 	$DB->q('TABLE SELECT hostname, polltime
-	        FROM judgehost
+		FROM judgehost
 	        WHERE active = 1 AND unix_timestamp()-polltime >= ' . JUDGEHOST_CRITICAL),
 );

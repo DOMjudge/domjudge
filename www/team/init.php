@@ -23,6 +23,7 @@ require_once(LIBWWWDIR . '/clarification.php');
 require_once(LIBWWWDIR . '/scoreboard.php');
 require_once(LIBWWWDIR . '/printing.php');
 require_once(LIBWWWDIR . '/auth.php');
+require_once(LIBWWWDIR . '/forms.php');
 
 // The functions do_login and show_loginpage, if called, do not return.
 if ( @$_POST['cmd']=='login' ) do_login();
@@ -39,19 +40,29 @@ if ( $teamdata['enabled'] != 1 ) {
 	error("Team is not enabled.");
 }
 
-$cdata = getCurContest(TRUE);
-$cid = (int)$cdata['cid'];
+$cdatas = getCurContests(TRUE, $teamdata['teamid']);
+$cids = array_keys($cdatas);
+
+// If the cookie has a existing contest, use it
+if ( isset($_COOKIE['domjudge_cid']) && isset($cdatas[$_COOKIE['domjudge_cid']]) )  {
+	$cid = $_COOKIE['domjudge_cid'];
+	$cdata = $cdatas[$cid];
+} elseif ( count($cids) >= 1 ) {
+	// Otherwise, select the first contest
+	$cid = $cids[0];
+	$cdata = $cdatas[$cid];
+}
 
 // Data to be sent as AJAX updates:
 $updates = array(
 	'clarifications' =>
 	$DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
-	        FROM team_unread
-	        LEFT JOIN clarification ON(mesgid=clarid)
-	        WHERE teamid = %i AND cid = %i', $teamid, $cid),
+		FROM team_unread
+		LEFT JOIN clarification ON(mesgid=clarid)
+		WHERE teamid = %i AND cid IN %Ai', $teamid, $cids),
 	'judgings' =>
 	$DB->q('TABLE SELECT s.submitid, j.judgingid, j.result, s.submittime
-	        FROM judging j
+		FROM judging j
 	        LEFT JOIN submission s USING(submitid)
 	        WHERE s.teamid = %i AND j.cid = %i AND j.seen = 0
  	        AND j.valid=1 AND s.submittime < %i' .

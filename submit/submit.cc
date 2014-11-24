@@ -76,6 +76,7 @@ struct option const long_opts[] = {
 	{"url",      required_argument, NULL,         'u'},
 	{"time",     required_argument, NULL,         'T'},	// TODO not yet used
 	{"verbose",  optional_argument, NULL,         'v'},
+	{"contest",  required_argument, NULL,         'c'},
 	{"quiet",    no_argument,       NULL,         'q'},
 	{"help",     no_argument,       &show_help,    1 },
 	{"version",  no_argument,       &show_version, 1 },
@@ -116,7 +117,7 @@ std::string stringtolower(std::string str)
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, team, password, baseurl;
+string problem, language, extension, team, password, baseurl, contest;
 long submissiontime; /* in ms since start of contest, -1 means unset */
 vector<string> filenames;
 char *submitdir;
@@ -167,7 +168,9 @@ int main(int argc, char **argv)
 
 	/* Read default for baseurl from environment */
 	baseurl = string("http://localhost/domjudge/");
+	contest = "";
 	if ( getenv("SUBMITBASEURL")!=NULL ) baseurl = string(getenv("SUBMITBASEURL"));
+	if ( getenv("SUBMITCONTEST")!=NULL ) contest = string(getenv("SUBMITCONTEST"));
 
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
@@ -182,6 +185,7 @@ int main(int argc, char **argv)
 		case 't': team      = string(optarg); break;
 		case 'x': password  = string(optarg); break;
 		case 'u': baseurl   = string(optarg); break;
+		case 'c': contest   = string(optarg); break;
 
 		case 'T': /* time option */
 			submissiontime = strtol(optarg,&ptr,10);
@@ -285,6 +289,7 @@ int main(int argc, char **argv)
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( baseurl.empty()  ) usage2(0,"no url specified");
 
+	logmsg(LOG_DEBUG,"contest is `%s'",contest.c_str());
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
 	logmsg(LOG_DEBUG,"url is `%s'",baseurl.c_str());
@@ -300,6 +305,9 @@ int main(int argc, char **argv)
 				printf(" %s",filenames[i].c_str());
 			}
 			printf("\n");
+		}
+		if ( !contest.empty() ) {
+			printf("  contest:     %s\n",contest.c_str());
 		}
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
@@ -332,6 +340,10 @@ void usage()
 "Submit a solution for a problem.\n"
 "\n"
 "Options (see below for more information)\n"
+"  -c  --contest=CONTESTID  submit for contest CONTESTID.\n"
+"                               Defaults to the value of the\n"
+"                               environment variable 'SUBMITCONTEST'.\n"
+"                               Mandatory when more than one contest is active.\n"
 "  -p, --problem=PROBLEM    submit for problem PROBLEM\n"
 "  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
 "  -T, --time=TIME          contest relative time for the submission in ms.\n"
@@ -379,6 +391,8 @@ void usage()
 "\n");
 	printf("Submit problem 'b' in Java:\n"
 	       "    %s b.java\n\n",progname);
+	printf("Submit problem 'z' in C# for contest 2:\n"
+	       "    %s --contest=2 z.cs\n\n",progname);
 	printf("Submit problem 'e' in C++:\n"
 	       "    %s --problem e --language=cpp ProblemE.cc\n\n",progname);
 	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
@@ -618,6 +632,9 @@ int websubmit()
 	}
 	curlformadd(COPYNAME,"shortname", COPYCONTENTS,problem.c_str());
 	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
+	if ( !contest.empty() ) {
+		curlformadd(COPYNAME,"contest", COPYCONTENTS,contest.c_str());
+	}
 
 	/* Set options for post */
 	curlsetopt(ERRORBUFFER,   curlerrormsg);

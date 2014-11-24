@@ -114,9 +114,29 @@ if ( ! isset($_POST['cancel']) ) {
 
 			// Remove all old mappings
 			$DB->q('DELETE FROM %l WHERE %S', $junctiontable, $prikey);
-			foreach ($mappingdata['items'] as $mapdest) {
-				$ret = $DB->q('INSERT INTO %l (%l, %l) VALUES (%s,%s)',
-				              $junctiontable, $fk[0], $fk[1], $prikey[$fk[0]], $mapdest);
+			foreach ($mappingdata['items'] as $key => $mapdest) {
+				// Skip empty rows
+				if ( empty($mapdest) ) {
+					continue;
+				}
+				$columns = array($fk[0], $fk[1]);
+				$values = array($prikey[$fk[0]], $mapdest);
+				if ( isset($mappingdata['extra'][$key]) ) {
+					foreach ($mappingdata['extra'][$key] as $column => $value) {
+						$columns[] = $column;
+						$values[] = $value;
+					}
+				}
+
+				$query = "INSERT INTO %l (";
+				$query .= implode(',', array_fill(0, count($columns), '%l'));
+				$query .= ') VALUES (';
+				$query .= implode(',', array_fill(0, count($values), '%s'));
+				$query .= ')';
+				$arguments = array($query, $junctiontable);
+				$arguments = array_merge($arguments, $columns);
+				$arguments = array_merge($arguments, $values);
+				$ret = call_user_func_array(array($DB, 'q'), $arguments);
 			}
 		}
 	}

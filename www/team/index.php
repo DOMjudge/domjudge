@@ -7,7 +7,6 @@
 require('init.php');
 $title = htmlspecialchars($teamdata['name']);
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
 
 // Don't use HTTP meta refresh, but javascript: otherwise we cannot
 // cancel it when the user starts editing the submit form. This also
@@ -24,6 +23,7 @@ echo "<script type=\"text/javascript\">\n<!--\n";
 
 if ( $fdata['cstarted'] ) {
 	$probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
+	                    INNER JOIN contestproblem USING (probid)
 	                    WHERE cid = %i AND allow_submit = 1
 	                    ORDER BY shortname', $cid);
 
@@ -96,31 +96,33 @@ if ( $fdata['cstarted'] ) {
 }
 // call putSubmissions function from common.php for this team.
 $restrictions = array( 'teamid' => $teamid );
-putSubmissions($cdata, $restrictions, null, $submitted);
+putSubmissions(array($cdata['cid'] => $cdata), $restrictions, null, $submitted);
 
 echo "</div>\n\n";
 
 echo "<div id=\"clarlist\">\n";
 
-$requests = $DB->q('SELECT c.*, p.shortname, t.name AS toname, f.name AS fromname
-                    FROM clarification c
-                    LEFT JOIN problem p USING(probid)
-                    LEFT JOIN team t ON (t.teamid = c.recipient)
-                    LEFT JOIN team f ON (f.teamid = c.sender)
-                    WHERE c.cid = %i AND c.sender = %i
-                    ORDER BY submittime DESC, clarid DESC', $cid, $teamid);
+$requests = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname
+		    FROM clarification c
+		    LEFT JOIN problem p USING(probid)
+		    LEFT JOIN contestproblem cp USING (probid, cid)
+		    LEFT JOIN team t ON (t.teamid = c.recipient)
+		    LEFT JOIN team f ON (f.teamid = c.sender)
+		    WHERE c.cid = %i AND c.sender = %i
+		    ORDER BY submittime DESC, clarid DESC', $cid, $teamid);
 
-$clarifications = $DB->q('SELECT c.*, p.shortname, t.name AS toname, f.name AS fromname
-                          FROM clarification c
-                          LEFT JOIN problem p USING (probid)
-                          LEFT JOIN team t ON (t.teamid = c.recipient)
-                          LEFT JOIN team f ON (f.teamid = c.sender)
-                          LEFT JOIN team_unread u ON
+$clarifications = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname
+			  FROM clarification c
+			  LEFT JOIN problem p USING (probid)
+			  LEFT JOIN contestproblem cp USING (probid, cid)
+			  LEFT JOIN team t ON (t.teamid = c.recipient)
+			  LEFT JOIN team f ON (f.teamid = c.sender)
+			  LEFT JOIN team_unread u ON
                           (c.clarid=u.mesgid AND u.teamid = %i)
                           WHERE c.cid = %i AND c.sender IS NULL
                           AND ( c.recipient IS NULL OR c.recipient = %i )
                           ORDER BY c.submittime DESC, c.clarid DESC',
-                          $teamid, $cid, $teamid);
+			 $teamid, $cid, $teamid);
 
 echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 

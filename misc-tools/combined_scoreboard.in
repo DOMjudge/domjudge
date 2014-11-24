@@ -14,6 +14,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+// TODO: this is broken. Not only in multicontest, but `renderScoreBoard` does not exist either
+
 // List sites here from which to combine scoreboards
 $sites = array(
 	array('url' => "http://example.com/domjudge/", 'username' => "", 'password' => ""),
@@ -159,7 +161,7 @@ $sdata = array('scores'     => $scores,
                'teams'      => $teams,
                'categories' => $categs);
 
-$cdata = getCurContest(TRUE);
+$cdatas = getCurContests(TRUE);
 
 // Change dir to get correct relative path to affiliation/country images
 chdir(WWWDIR . '/public/');
