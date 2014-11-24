@@ -4,6 +4,8 @@
 -- data, but preferably use 'dj-setup-database'. Database should be set
 -- externally (e.g. to 'domjudge').
 
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+
 --
 -- Dumping data for table `contest`
 --
@@ -55,15 +57,6 @@ INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_co
 INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_compare`) VALUES (3, 'Boolean switch search', 5, 'boolfind_run', 'boolfind_cmp');
 
 --
--- Dumping data for table `contestproblem`
---
-
-INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `allow_judge`, `color`) VALUES (1, 1, 'hello', 1, 1, 'lightblue');
-INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `allow_judge`, `color`) VALUES (2, 1, 'hello', 1, 1, 'magenta');
-INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `allow_judge`, `color`) VALUES (2, 2, 'fltcmp', 1, 1, 'yellow');
-INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `allow_judge`, `color`) VALUES (2, 3, 'boolfind', 1, 1, 'limegreen');
-
---
 -- Dumping data for table `team_affiliation`
 --
 
@@ -96,3 +89,5 @@ INSERT INTO `testcase` (`testcaseid`, `md5sum_input`, `md5sum_output`, `input`, 
 (3, 'a94c7fc1f4dac435f6fc5d5d4c7ba173', '2c266fa701a6034e02d928331d5bd4ef', 0x320a342e303030303030303030303030300a352e303030303030303030303030310a, 0x302e32350a32452d310a, 2, 2, 'High precision inputs'),
 (4, 'fc157fa74267ba846e8ddc9c0747ad53', 'd38340056cc41e311beae85f906d7f24', 0x330a2b300a496e660a6e616e0a, 0x696e660a300a4e614e0a, 2, 3, 'Inf/NaN checks'),
 (5, '90864a8759427d63b40f1f5f75e32308', '6267776644f5bd2bf0edccf5a210e087', 0x310a350a310a310a300a310a300a, 0x4f555450555420310a, 3, 1, NULL);
+
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
