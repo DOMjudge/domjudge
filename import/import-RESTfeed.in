@@ -26,8 +26,7 @@ setup_database_connection();
 $verbose = LOG_NOTICE;
 $waittime = 5;
 
-$cdata = getCurContest(TRUE);
-$cid = $cdata['cid'];
+$cdatas = getCurContests(TRUE);
 
 $config = spyc_load_file(ETCDIR . '/import-forwardfeed.yaml');
 
@@ -102,7 +101,8 @@ function remap($type, $id)
 }
 
 $contest = dj_json_decode(request('contest'));
-if ( remap('contest',$contest['id'])!=$cid ) {
+$cid = remap('contest',$contest['id']);
+if ( !isset($cdatas[$cid]) ) {
 	error("Contest ID does not match with external CCS data.");
 }
 if ( difftime($contest['start'],$cdata['starttime'])!=0 ||
@@ -114,6 +114,7 @@ $problems = dj_json_decode(request('problems'));
 foreach ( $problems as $prob ) {
 
 	$id = $DB->q('MAYBEVALUE SELECT probid FROM problem
+	              INNER JOIN contestproblem USING (probid)
 	              WHERE probid = %s AND cid = %i AND allow_submit = 1',
 	             remap('problem',$prob['id']), $cid);
 
@@ -137,9 +138,11 @@ foreach ( $languages as $lang ) {
 $teams = dj_json_decode(request('teams'));
 foreach ( $teams as $team ) {
 
-	$id = $DB->q('MAYBEVALUE SELECT login FROM team
-	              WHERE login = %s AND enabled = 1',
-	             remap('team',$team['id']));
+	$id = $DB->q('MAYBEVALUE SELECT login FROM team t
+	              INNER JOIN contest c ON c.cid = %i
+	              LEFT JOIN contestteam ct ON ct.teamid = t.teamid AND ct.cid = c.cid
+	              WHERE (c.public = 1 OR ct.teamid IS NOT NULL) AND t.login = %s AND t.enabled = 1',
+	             $cid, remap('team',$team['id']));
 
 // 	$DB->q('UPDATE team SET name = %s WHERE login = %s',
 // 	       $team['name'],remap('team',$team['id']));
@@ -203,6 +206,7 @@ while ( TRUE ) {
 
 		$id = submit_solution(remap('team',$subm['team']),
 		                      remap('problem',$subm['problem']),
+		                      $cid,
 		                      remap('language',$subm['language']),
 		                      $files, $filenames, NULL,
 		                      $subm['id'], $subm['time']);
