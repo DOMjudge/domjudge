@@ -9,10 +9,10 @@
 require('init.php');
 
 $id = getRequestID();
-$cid = null;
+$current_cid = null;
 if ( isset($_GET['cid']) && is_numeric($_GET['cid']) ) {
-	$cid = $_GET['cid'];
-	$cdatas = array($cid => $cdatas[$cid]);
+	$current_cid = $_GET['cid'];
+	$cdatas = array($current_cid => $cdatas[$current_cid]);
 }
 $title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
                  'team' . ($id ? ' t'.htmlspecialchars(@$id) : ''));
@@ -21,8 +21,8 @@ if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
 } else {
 	$extra = '';
-	if ( $cid !== null ) {
-		$extra = '&cid=' . urlencode($cid);
+	if ( $current_cid !== null ) {
+		$extra = '&cid=' . urlencode($current_cid);
 	}
 	$refresh = '15;url='.$pagename.'?id='.urlencode($id).$extra.
 		(isset($_GET['restrict'])?'&restrict='.urlencode($_GET['restrict']):'');
@@ -79,6 +79,7 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 	$contests = $DB->q("TABLE SELECT contest.cid,shortname,contestname,max(contestteam.teamid=%s) AS incontest
 			FROM contest
 			LEFT JOIN contestteam USING (cid)
+			WHERE contest.public = 0
 			GROUP BY contest.cid", @$row['teamid']);
 	$i=0;
 	foreach ($contests as $contest) {
@@ -214,13 +215,13 @@ if ( IS_ADMIN ) {
 
 echo rejudgeForm('team', $id) . "\n\n";
 
-if ( $cid === null ) {
+if ( $current_cid === null ) {
 	echo "<h3>Contests</h3>\n\n";
 
 	$res = $DB->q('TABLE SELECT contest.*
 		       FROM contest
-		       INNER JOIN contestteam USING (cid)
-		       WHERE contestteam.teamid = %i
+		       LEFT JOIN contestteam USING (cid)
+		       WHERE (contestteam.teamid = %i OR contest.public = 1)
 		       ORDER BY starttime DESC', $id);
 
 	if ( count($res) == 0 ) {
@@ -231,7 +232,7 @@ if ( $cid === null ) {
 		echo "<table class=\"list sortable\">\n<thead>\n" .
 		     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
 		foreach ( $times as $time ) echo "<th scope=\"col\">$time</th>";
-		echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
+		echo "<th scope=\"col\">name</th><th scope=\"col\">public</th></tr>\n</thead>\n<tbody>\n";
 
 		$iseven = false;
 		foreach ( $res as $row ) {
@@ -249,6 +250,7 @@ if ( $cid === null ) {
 						printtime($row[$time . 'time']) : '-') . "</a></td>\n";
 			}
 			echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
+			echo "<td>" . $link . ($row['public'] ? 'yes' : 'no') . "</a></td>\n";
 			$iseven = !$iseven;
 
 			echo "</tr>\n";

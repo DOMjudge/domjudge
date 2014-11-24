@@ -9,10 +9,10 @@
 require('init.php');
 
 $id = getRequestID();
-$cid = null;
+$current_cid = null;
 if ( isset($_GET['cid']) && is_numeric($_GET['cid']) ) {
-	$cid = $_GET['cid'];
-	$cdatas = array($cid => $cdatas[$cid]);
+	$current_cid = $_GET['cid'];
+	$cdatas = array($current_cid => $cdatas[$current_cid]);
 }
 $title = 'Problem p'.htmlspecialchars(@$id);
 $title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
@@ -24,8 +24,8 @@ if ( isset($_POST['cmd']) ) {
 	$cmd = $_GET['cmd'];
 } else {
 	$extra = '';
-	if ( $cid !== null ) {
-		$extra = '&cid=' . urlencode($cid);
+	if ( $current_cid !== null ) {
+		$extra = '&cid=' . urlencode($current_cid);
 	}
 	$refresh = '15;url='.$pagename.'?id='.urlencode($id).$extra;
 }
@@ -231,7 +231,7 @@ if ( IS_ADMIN ) {
 		delLink('problem','probid', $id) . "</p>\n\n";
 }
 
-if ( $cid === null) {
+if ( $current_cid === null) {
 	echo "<h3>Contests</h3>\n\n";
 
 	$res = $DB->q('TABLE SELECT contest.*, contestproblem.shortname AS problemshortname,

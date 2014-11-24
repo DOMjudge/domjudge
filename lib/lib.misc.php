@@ -54,8 +54,8 @@ function getCurContests($fulldata = FALSE, $onlyofteam = NULL,
 	}
 	if ( $onlyofteam !== null && $onlyofteam > 0 ) {
 		$contests = $DB->q("SELECT * FROM contest
-		                    INNER JOIN contestteam USING (cid)
-		                    WHERE teamid = %i AND enabled = 1 ${extra}
+		                    LEFT JOIN contestteam USING (cid)
+		                    WHERE (contestteam.teamid = %i OR contest.public = 1) AND enabled = 1 ${extra}
 		                    AND deactivatetime > UNIX_TIMESTAMP()
 		                    ORDER BY activatetime", $onlyofteam);
 	} elseif ( $onlyofteam === -1 ) {

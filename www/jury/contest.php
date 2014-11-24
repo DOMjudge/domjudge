@@ -252,10 +252,14 @@ echo '<tr><td>Public:</td><td>' .
      ($data['public'] ? 'yes' : 'no') .
      "</td></tr>\n";
 echo '<tr><td>Teams:</td><td>';
-if ( $numteams==0 ) {
-	echo '<em>no teams</em>';
+if ( $data['public'] ) {
+	echo "<em>all teams</em>";
 } else {
-	echo (int)$numteams;
+	if ( $numteams == 0 ) {
+		echo '<em>no teams</em>';
+	} else {
+		echo (int)$numteams;
+	}
 }
 echo '</td></tr>';
 echo '<tr><td>Problems:</td><td>';

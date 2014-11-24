@@ -50,7 +50,13 @@ $api->provideFunction('GET', 'info', $doc);
  */
 function contest()
 {
-	global $cids, $cdatas;
+	global $cids, $cdatas, $userdata;
+
+	if ( checkrole('jury') ) {
+		$cdatas = getCurContests(TRUE);
+	} elseif ( isset($userdata['teamid']) ) {
+		$cdatas = getCurContests(TRUE, $userdata['teamid']);
+	}
 
 	if (empty($cdatas)) {
 		return null;
@@ -80,7 +86,13 @@ $api->provideFunction('GET', 'contest', $doc);
  */
 function contests()
 {
-	global $cdatas;
+	global $cdatas, $userdata;
+
+	if ( checkrole('jury') ) {
+		$cdatas = getCurContests(TRUE);
+	} elseif ( isset($userdata['teamid']) ) {
+		$cdatas = getCurContests(TRUE, $userdata['teamid']);
+	}
 
 	return array_map(function($cdata) {
 		return array(

@@ -185,21 +185,22 @@ function getProblems($cdata) {
 function getTeams($filter, $jury, $cdata) {
 	global $DB;
 
-	return $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, teamid, externalid,
+	return $DB->q('KEYTABLE SELECT team.teamid AS ARRAYKEY, team.teamid, externalid,
 	                 team.name, team.categoryid, team.affilid, sortorder,
 	                 country, color, team_affiliation.name AS affilname
 	                 FROM team
-			 INNER JOIN contestteam USING (teamid)
+	                 INNER JOIN contest ON contest.cid = %i
+	                 LEFT JOIN contestteam ON contestteam.teamid = team.teamid AND contestteam.cid = contest.cid
 	                 LEFT JOIN team_category
 	                        ON (team_category.categoryid = team.categoryid)
 	                 LEFT JOIN team_affiliation
 	                        ON (team_affiliation.affilid = team.affilid)
-			 WHERE enabled = 1 AND cid = %i' .
+	                 WHERE team.enabled = 1 AND (contestteam.teamid IS NOT NULL OR contest.public = 1)' .
 	                ( $jury ? '' : ' AND visible = 1' ) .
 			(isset($filter['affilid']) ? ' AND team.affilid IN %As ' : ' %_') .
 			(isset($filter['country']) ? ' AND country IN %As ' : ' %_') .
 			(isset($filter['categoryid']) ? ' AND team.categoryid IN %As ' : ' %_') .
-			(isset($filter['teams']) ? ' AND teamid IN %Ai ' : ' %_'),
+			(isset($filter['teams']) ? ' AND team.teamid IN %Ai ' : ' %_'),
 			$cdata['cid'], @$filter['affilid'], @$filter['country'], @$filter['categoryid'], @$filter['teams']);
 }
 
@@ -560,9 +561,10 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, team_affiliation.name, country
 		                  FROM team_affiliation
 		                  LEFT JOIN team USING(affilid)
-				  INNER JOIN contestteam ON contestteam.teamid = team.teamid
-				  WHERE categoryid IN %As AND cid = %i GROUP BY affilid',
-				 array_keys($categids), $cdata['cid']);
+		                  INNER JOIN contest ON contest.cid = %i
+		                  LEFT JOIN contestteam ON contestteam.teamid = team.teamid AND contestteam.cid = contest.cid
+		                  WHERE categoryid IN %As AND contest.cid = %i AND (contest.public = 1 OR contestteam.teamid IS NOT NULL) GROUP BY affilid',
+		                 $cdata['cid'], array_keys($categids), $cdata['cid']);
 
 		$affilids  = array();
 		$countries = array();

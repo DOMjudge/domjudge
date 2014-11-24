@@ -12,11 +12,13 @@ $title = 'Teams';
 $teams = $DB->q('SELECT t.*,
 		 c.name AS catname,
 		 a.shortname AS affshortname, a.name AS affname,
-		 COUNT(cid) AS numcontests
+		 COUNT(co.cid) AS numcontests
 		 FROM team t
-		 LEFT JOIN contestteam g USING (teamid)
+		 INNER JOIN contest co
+		 LEFT JOIN contestteam ct ON ct.teamid = t.teamid AND ct.cid = co.cid
 		 LEFT JOIN team_category c USING (categoryid)
 		 LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
+		 WHERE (co.public = 1 OR ct.cid IS NOT NULL)
 		 GROUP BY teamid
 		 ORDER BY c.sortorder, t.name COLLATE utf8_general_ci');
 

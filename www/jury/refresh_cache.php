@@ -43,8 +43,11 @@ $contests = getCurContests(TRUE);
 
 foreach ($contests as $contest) {
 	// get the contest, teams and problems
-	$teams = $DB->q('TABLE SELECT t.teamid FROM team t INNER JOIN contestteam g USING (teamid) WHERE g.cid = %i ORDER BY teamid',
-			$contest['cid']);
+	$teams = $DB->q('TABLE SELECT t.teamid FROM team t
+	                 INNER JOIN contest c ON c.cid = %i
+	                 LEFT JOIN contestteam ct ON ct.teamid = t.teamid AND ct.cid = c.cid
+	                 WHERE (c.public = 1 OR ct.teamid IS NOT NULL) ORDER BY teamid',
+	                $contest['cid']);
 	$probs = $DB->q('TABLE SELECT probid, cid FROM problem
 		 INNER JOIN contestproblem USING (probid)
 		 WHERE cid = %i ORDER BY shortname',
@@ -99,8 +102,11 @@ foreach ($contests as $contest) {
 	$probids = $DB->q('COLUMN SELECT probid FROM problem
 		 INNER JOIN contestproblem USING (probid)
 		 WHERE cid = %i ORDER BY shortname', $contest['cid']);
-	$teamids = $DB->q('COLUMN SELECT t.teamid FROM team t INNER JOIN contestteam ct USING (teamid) WHERE ct.cid = %i ORDER BY teamid',
-			  $contest['cid']);
+	$teamids = $DB->q('COLUMN SELECT t.teamid FROM team t
+	                   INNER JOIN contest c ON c.cid = %i
+	                   LEFT JOIN contestteam ct ON ct.teamid = t.teamid AND ct.cid = c.cid
+	                   WHERE (c.public = 1 OR ct.teamid IS NOT NULL) ORDER BY teamid',
+	                  $contest['cid']);
 	// probid -1 will never happen, but otherwise the array is empty and that is not supported
 	if ( empty($probids) ) {
 		$probids = array(-1);
