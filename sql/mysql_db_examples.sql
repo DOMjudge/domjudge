@@ -10,9 +10,9 @@
 -- Dumping data for table `contest`
 --
 
-INSERT INTO `contest` (`cid`, `contestname`, `shortname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `deactivatetime`, `activatetime_string`, `starttime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`, `deactivatetime_string`, `enabled`, `process_balloons`) VALUES
-(1, 'Demo practice session', 'demoprac', UNIX_TIMESTAMP('2014-01-01 08:00:00'), UNIX_TIMESTAMP('2014-01-01 09:00:00'), NULL, UNIX_TIMESTAMP('2014-01-01 11:00:00'), NULL, UNIX_TIMESTAMP('2014-01-01 15:00:00'), '-1:00', '2014-01-01 09:00:00', NULL, '+2:00', NULL, '+6:00', 1, 1),
-(2, 'Demo contest', 'demo', UNIX_TIMESTAMP('2014-01-01 11:30:00'), UNIX_TIMESTAMP('2014-01-01 12:00:00'), UNIX_TIMESTAMP('2016-01-01 16:00:00'), UNIX_TIMESTAMP('2016-01-01 17:00:00'), UNIX_TIMESTAMP('2016-01-01 17:30:00'), UNIX_TIMESTAMP('2016-01-01 18:30:00'), '-00:30', '2014-01-01 12:00:00', '2016-01-01 16:00:00', '2016-01-01 17:00:00', '2016-01-01 17:30:00', '2016-01-01 18:30:00', 1, 1);
+INSERT INTO `contest` (`cid`, `contestname`, `shortname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `deactivatetime`, `activatetime_string`, `starttime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`, `deactivatetime_string`, `enabled`, `process_balloons`, `public`) VALUES
+(1, 'Demo practice session', 'demoprac', UNIX_TIMESTAMP('2014-01-01 08:00:00'), UNIX_TIMESTAMP('2014-01-01 09:00:00'), NULL, UNIX_TIMESTAMP('2014-01-01 11:00:00'), NULL, UNIX_TIMESTAMP('2014-01-01 15:00:00'), '-1:00', '2014-01-01 09:00:00', NULL, '+2:00', NULL, '+6:00', 1, 1, 0),
+(2, 'Demo contest', 'demo', UNIX_TIMESTAMP('2014-01-01 11:30:00'), UNIX_TIMESTAMP('2014-01-01 12:00:00'), UNIX_TIMESTAMP('2016-01-01 16:00:00'), UNIX_TIMESTAMP('2016-01-01 17:00:00'), UNIX_TIMESTAMP('2016-01-01 17:30:00'), UNIX_TIMESTAMP('2016-01-01 18:30:00'), '-00:30', '2014-01-01 12:00:00', '2016-01-01 16:00:00', '2016-01-01 17:00:00', '2016-01-01 17:30:00', '2016-01-01 18:30:00', 1, 1, 1);
 
 --
 -- Dumping data for table `contestproblem`
@@ -29,10 +29,7 @@ INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `all
 --
 
 INSERT INTO `contestteam` (`cid`, `teamid`) VALUES
-(1, 1),
-(2, 1),
-(1, 2),
-(2, 2);
+(1, 2);
 
 --
 -- Dumping data for table `executable`

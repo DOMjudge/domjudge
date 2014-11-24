@@ -73,7 +73,7 @@ INSERT INTO `contestteam` (`cid`, `teamid`)
 UPDATE `configuration` SET `name` = 'script_timelimit', `description` = 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.' WHERE `name` = 'compile_time';
 UPDATE `configuration` SET `name` = 'script_memory_limit', `description` = 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.' WHERE `name` = 'compile_memory';
 UPDATE `configuration` SET `name` = 'script_filesize', `description` = 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.' WHERE `name` = 'compile_filesize';
-UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`contestname`, ' ', ''), 1, 6));
+UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`contestname`, ' ', ''), 1, 6)), `public` = 1, `deactivatetime` = UNIX_TIMESTAMP('2016-01-01 18:30:00'), `deactivatetime_string` = '2016-01-01 18:30:00';
 
 --
 -- Finally remove obsolete structures after moving data
