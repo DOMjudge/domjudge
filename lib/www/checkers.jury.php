@@ -201,6 +201,9 @@ function check_contest($data, $keydata = null)
 			'unfreezetime','activatetime','deactivatetime') as $f ) {
 		if ( $f == 'starttime' ) {
 			$data[$f] = strtotime($data[$f.'_string']);
+			if ( $data[$f] === FALSE ) {
+				error("Cannot parse starttime: " . $data[$f.'_string']);
+			}
 		} else {
 			// The true input date/time strings are preserved in the
 			// *_string variables, since these may be relative times
