@@ -195,7 +195,7 @@ if ( ! $submdata['valid'] ) {
 
 <?php
 
-if ( count($jdata) > 1 ) {
+if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 	echo "<p><table class=\"list\">\n" .
 		"<caption>Judgings</caption>\n<thead>\n" .
 		"<tr><td></td><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
@@ -223,8 +223,10 @@ if ( count($jdata) > 1 ) {
 	}
     echo "</tbody>\n</table>\n</p>\n\n";
 
-} else if ( count($jdata) == 0 ) {
-	echo "<p><em>Not judged yet</em></p>\n\n";
+}
+
+if ( !isset($jid) ) {
+	echo "<p><em>Not (re)judged yet</em></p>\n\n";
 }
 
 
