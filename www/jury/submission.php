@@ -180,12 +180,12 @@ if ( ! $submdata['valid'] ) {
 ?>
 
 <p>
-<img title="team" alt="Team:" src="../images/team.png"/> <a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>&cid=<?php echo urlencode($submdata['cid'])?>">
+<img title="team" alt="Team:" src="../images/team.png"/> <a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>&amp;cid=<?php echo urlencode($submdata['cid'])?>">
     <?php echo htmlspecialchars($submdata['teamname'] . " (t" . $submdata['teamid'].")")?></a>&nbsp;&nbsp;
 <img title="contest" alt="Contest:" src="../images/contest.png"/> <a href="contest.php?id=<?php echo $submdata['cid']?>">
 	<span class="contestid"><?php echo htmlspecialchars($submdata['contestshortname'])?></span>:
 	<?php echo htmlspecialchars($submdata['contestname'])?></a>&nbsp;&nbsp;
-<img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>&cid=<?php echo urlencode($submdata['cid'])?>">
+<img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>&amp;cid=<?php echo urlencode($submdata['cid'])?>">
 	<span class="probid"><?php echo htmlspecialchars($submdata['shortname'])?></span>:
 	<?php echo htmlspecialchars($submdata['probname'])?></a>&nbsp;&nbsp;
 <img title="language" alt="Language:" src="../images/lang.png"/> <a href="language.php?id=<?php echo $submdata['langid']?>">
