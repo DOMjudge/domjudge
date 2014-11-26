@@ -3,7 +3,7 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = checkinput
+TARGETS =
 OBJECTS =
 
 # Function to parse version number from bisonc++/flexc++ --version and
