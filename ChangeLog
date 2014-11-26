@@ -3,6 +3,12 @@ DOMjudge Programming Contest Judging System
 Version 4.0.5 - DEV
 -------------------
  - Add fixed/improved version of simulate_contest script.
+ - Improve error message when parsing contest starttime fails.
+ - Also display judgings list if there is only one invalid judging
+   and display "Not (re)judged yet" message whenever there is no
+   active/selected judging.
+ - ICPC import: aad missing variable to user query and error
+   when required PHP cURL extension is missing.
 
 Version 4.0.4 - 27 October 2014
 -------------------------------
