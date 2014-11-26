@@ -1,9 +1,4 @@
 /checkinput
-/checktestdata
-/lex.cc
-/parse.cc
-/parserbase.h
-/scannerbase.h
 /runssh_judgehosts
 /runssh_teams
 /save_sources2file

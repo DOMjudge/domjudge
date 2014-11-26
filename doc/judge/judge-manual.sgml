@@ -159,7 +159,9 @@ problems.
 
 <tag>checktestdata</tag>
 
-This program can be used as a more advanced replacement of checkinput.
+This program can be used as a more advanced replacement of checkinput
+and is available from a <htmlurl name="separate repository"
+url="https://github.com/DOMjudge/checktestdata">.
 It allows you to not only check on simple (spacing) layout errors, but
 a simple grammar file must be specified for the testdata, according to
 which the testdata is checked. This allows e.g. for bounds checking.

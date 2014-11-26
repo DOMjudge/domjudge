@@ -267,31 +267,11 @@ if test "x$enable_submitclient" != "xno"; then
 fi
 # }}}
 
-# Check for building "checktestdata" program.
-AC_ARG_ENABLE(checktestdata,AS_HELP_STRING([--disable-checktestdata],
-[enable building of checktestdata program (default: yes).
- This requires the Boost regex and GNU GMP libraries.]))
-
-if test "x$enable_checktestdata" != "xno"; then
-	AC_SUBST(CHECKTESTDATA_ENABLED,[yes])
-
-	AX_BOOST_BASE([1.33.1],[],[
-		AC_MSG_ERROR([Boost not found (required for checktestdata)])])
-	AX_BOOST_REGEX
-
-	# Check for gmpxx headers separately, as they are C++.
-	AC_LANG_PUSH([C++])
-	AC_CHECK_HEADERS([gmpxx.h])
-	AC_CHECK_LIB(gmpxx,abs,AC_SUBST(LIBGMPXX,'-lgmpxx -lgmp'),[
-		AC_MSG_ERROR([GMPlib not found (required for checktestdata)])],[-lgmp])
-	AC_LANG_POP([C++])
-fi
-
 # Check option to link statically against "special" libraries for
-# submit client and checktestdata programs.
+# submit client.
 AC_ARG_ENABLE(static-linking,AS_HELP_STRING([--enable-static-linking],
-[enable static linking against libcurl,libmagic,libjsoncpp for 'submit'
- and libgmpxx,libboost_regex for 'checktestdata' (default: no).]))
+[enable static linking against libcurl, libmagic, libjsoncpp for 'submit'
+ (default: no).]))
 
 if test "x$enable_static_linking" = "xyes"; then
 	AC_SUBST(STATIC_LINK_START,[-Wl,-Bstatic])
@@ -351,12 +331,6 @@ if test "x$SUBMITCLIENT_ENABLED" = xyes ; then
    echo " * submitclient........: enabled, cURL version: $curl_version"
 else
    echo " * submitclient........: disabled"
-fi
-echo ""
-if test "x$CHECKTESTDATA_ENABLED" = xyes ; then
-   echo " * checktestdata.......: enabled"
-else
-   echo " * checktestdata.......: disabled"
 fi
 echo ""
 echo " * documentation.......: $domjudge_docdir"
