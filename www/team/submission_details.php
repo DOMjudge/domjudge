@@ -20,8 +20,7 @@ $row = $DB->q('MAYBETUPLE SELECT p.probid, cp.shortname, p.name AS probname, sub
                LEFT JOIN submission s      USING (submitid)
                LEFT JOIN language   l      USING (langid)
                LEFT JOIN problem    p      ON (p.probid = s.probid)
-	       LEFT JOIN contest    c      ON (c.cid = s.cid)
-	       LEFT JOIN contestproblem cp ON (cp.probid = p.probid AND cp.cid = c.cid)
+               LEFT JOIN contestproblem cp ON (cp.probid = p.probid AND cp.cid = s.cid)
                WHERE j.submitid = %i AND teamid = %i AND j.valid = 1',$id,$teamid);
 
 if( !$row || $row['submittime'] >= $cdata['endtime'] ||
