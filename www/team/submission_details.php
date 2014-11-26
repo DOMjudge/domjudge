@@ -14,12 +14,14 @@ $id = getRequestID();
 
 
 // select also on teamid so we can only select our own submissions
-$row = $DB->q('MAYBETUPLE SELECT p.probid, shortname, p.name AS probname, submittime,
+$row = $DB->q('MAYBETUPLE SELECT p.probid, cp.shortname, p.name AS probname, submittime,
                s.valid, l.name AS langname, result, output_compile, verified, judgingid
                FROM judging j
-               LEFT JOIN submission s USING (submitid)
-               LEFT JOIN language   l USING (langid)
-               LEFT JOIN problem    p ON (p.probid = s.probid)
+               LEFT JOIN submission s      USING (submitid)
+               LEFT JOIN language   l      USING (langid)
+               LEFT JOIN problem    p      ON (p.probid = s.probid)
+	       LEFT JOIN contest    c      ON (c.cid = s.cid)
+	       LEFT JOIN contestproblem cp ON (cp.probid = p.probid AND cp.cid = c.cid)
                WHERE j.submitid = %i AND teamid = %i AND j.valid = 1',$id,$teamid);
 
 if( !$row || $row['submittime'] >= $cdata['endtime'] ||
