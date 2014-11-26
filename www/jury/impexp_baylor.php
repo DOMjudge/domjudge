@@ -43,7 +43,9 @@ echo "<h1>$title</h1>\n";
 if ( empty($token) || empty($contest) ) {
 	error("Unknown access token or contest.");
 }
-
+if ( !function_exists('curl_init') ) {
+	error("PHP cURL extension required. Please install the php5-curl package.");
+}
 
 if ( isset($_REQUEST['fetch']) ) {
 	$ch = curl_init(ICPCWSCLICS . $contest);
