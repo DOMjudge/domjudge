@@ -7,7 +7,7 @@ Version 4.0.5 - DEV
  - Also display judgings list if there is only one invalid judging
    and display "Not (re)judged yet" message whenever there is no
    active/selected judging.
- - ICPC import: aad missing variable to user query and error
+ - ICPC import: add missing variable to user query and error
    when required PHP cURL extension is missing.
 
 Version 4.0.4 - 27 October 2014
