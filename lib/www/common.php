@@ -286,7 +286,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 			                 @$restrictions['judgehost']);
 			$extdiffcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
 			                     ' AND result IS NOT NULL AND externalresult IS NOT NULL' .
-			                     ' AND result != externalresult', $cid,
+			                     ' AND result != externalresult', $cids,
 			                     @$restrictions['teamid'], @$restrictions['categoryid'],
 			                     @$restrictions['probid'], @$restrictions['langid'],
 			                     @$restrictions['judgehost']);
