@@ -20,7 +20,12 @@ var jscolor = {
 
 
 	install : function() {
-		jscolor.addEvent(window, 'load', jscolor.init);
+		// Only load when HTML5 color is not supported:
+		var i = document.createElement("input");
+		i.setAttribute("type", "color");
+		if ( i.type == "text" ) {
+			jscolor.addEvent(window, 'load', jscolor.init);
+		}
 	},
 
 
