@@ -221,7 +221,10 @@ while ( TRUE ) {
 		// FIXME: put 'mainclass' file at front of list?
 
 		$teamid = getTeamID(remap('team',$team['id']));
-		error("Got submission for non-existent local team with Team ID '".$team['id']);
+
+		if ( empty($teamid) ) {
+			error("Got submission for non-existent local team with Team ID '".$team['id']."' and external ID '" .remap('team',$team['id'])."'");
+		}
 
 		$id = submit_solution($teamid,
 		                      remap('problem',$subm['problem']),
