@@ -206,15 +206,15 @@ if ( ! $submdata['valid'] ) {
 	<?php echo  htmlspecialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
 <img title="view source code" alt="" src="../images/code.png"/>
 <a href="show_source.php?id=<?= $id ?>" style="font-weight:bold;">view source code</a>
-</p>
-
 <?php
 
 if ( isset($submdata['externalid']) ) {
-	echo ", External ID: <a href=\"" . EXT_CCS_URL . urlencode($submdata['externalid']) .
+	echo "&nbsp;&nbsp;External ID: <a href=\"" . EXT_CCS_URL . urlencode($submdata['externalid']) .
 		"\" target=\"extCCS\">" . htmlspecialchars($submdata['externalid']) . "</a>, " .
 		printresult($submdata['externalresult']);
 }
+
+echo "</p>\n";
 
 if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 	echo "<p><table class=\"list\">\n" .
