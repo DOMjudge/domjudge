@@ -161,7 +161,7 @@ if ( empty($curcids) )  {
 
 		echo "</table>\n";
 
-		echo "</legend>\n</fieldset>\n</form>\n\n";
+		echo "</fieldset>\n</form>\n\n";
 	}
 
 }
@@ -187,7 +187,9 @@ if( count($res) == 0 ) {
 	echo "<th scope=\"col\">public?</th>";
 	echo "<th scope=\"col\" class=\"sorttable_numeric\"># teams</th>";
 	echo "<th scope=\"col\" class=\"sorttable_numeric\"># problems</th>";
-	echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
+	echo "<th scope=\"col\">name</th>" .
+	     ( IS_ADMIN ? "<th scope=\"col\"></th>" : '' ) .
+	     "</tr>\n</thead>\n<tbody>\n";
 
 	$iseven = false;
 	foreach($res as $row) {

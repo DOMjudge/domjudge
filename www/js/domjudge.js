@@ -426,7 +426,6 @@ function updateClock()
 		fmt += left;
 	}
 
-	timecurelt.innerHTML = date.toString().replace(/(\w{3})\ (\w{3})\ (\d{2})\ (\d{4})\ (\d{2}:\d{2}:\d{2}).*\((\w+)\)/, "$1 $3 $2 $4 $5 $6");
 	timeleftelt.innerHTML = what + fmt;
 	offset++;
 }

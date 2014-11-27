@@ -43,7 +43,9 @@ echo "<h1>$title</h1>\n";
 if ( empty($token) || empty($contest) ) {
 	error("Unknown access token or contest.");
 }
-
+if ( !function_exists('curl_init') ) {
+	error("PHP cURL extension required. Please install the php5-curl package.");
+}
 
 if ( isset($_REQUEST['fetch']) ) {
 	$ch = curl_init(ICPCWSCLICS . $contest);
@@ -151,7 +153,7 @@ foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 			$username = sprintf("team%04d", $id);
 			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i, affilid=%i, enabled=%i, members=%s, comments=%s WHERE teamid=%i',
 				$team['teamName'], $participants, $affilid, $enabled, $members, "Status: " . $team['status'], $id);
-			$cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s WHERE username=%s', $username);
+			$cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s WHERE username=%s', $team['teamName'], $username);
 			if ( $cnt > 0 ) {
 				$updated_teams[] = $team['teamName'];
 			}

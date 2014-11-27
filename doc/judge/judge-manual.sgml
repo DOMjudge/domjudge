@@ -142,24 +142,10 @@ e.g. Java.
 <sect>Verifying testdata
 <p>
 
-DOMjudge comes with some tools to check for mistakes in the
-testdata. These tools are all located in the <tt>misc-tools</tt>
-directory in the source tree.
-
-<descrip>
-<tag>checkinput checkinput.awk fixinput.awk</tag>
-
-The 'checkinput' programs are meant to check testdata input (and
-optionally also output). They check for simple layout issues like
-leading and trailing whitespace, non-printable characters, etc.
-There's both a C program and AWK script which do essentially the same
-thing. See 'checkinput.c' for details. All scripts take a testdata
-file as argument. The 'fixinput.awk' script corrects some of these
-problems.
-
-<tag>checktestdata</tag>
-
-This program can be used as a more advanced replacement of checkinput.
+For checking whether the your testdata conforms to the specifications
+of your problem statement, we recommend the checktestdata program,
+which is available from a <htmlurl name="separate repository"
+url="https://github.com/DOMjudge/checktestdata">.
 It allows you to not only check on simple (spacing) layout errors, but
 a simple grammar file must be specified for the testdata, according to
 which the testdata is checked. This allows e.g. for bounds checking.
@@ -186,7 +172,6 @@ INT(1,2) SPACE SPACE INT(1,2)
 does <em>not</em> match <tt>1__2</tt> (where the two underscores
 represent spaces), because the first <tt>SPACE</tt> command already
 matches both, so the second cannot match anything.
-</descrip>
 
 <sect>Testing jury solutions
 <p>

@@ -40,7 +40,7 @@ if( $res->count() == 0 ) {
 	     "<th scope=\"col\">time<br />limit</th>" .
 	     "<th scope=\"col\">test<br />cases</th>" .
 	     "<th scope=\"col\"></th>" .
-	    ( IS_ADMIN ? "<th scope=\"col\"></th>" : '' ) .
+	    ( IS_ADMIN ? "<th scope=\"col\"></th><th scope=\"col\"></th>" : '' ) .
 	     "</tr></thead>\n<tbody>\n";
 
 	$lastcid = -1;
@@ -51,15 +51,14 @@ if( $res->count() == 0 ) {
 		$link = '<a href="problem.php?id=' . urlencode($row['probid']) . '">';
 
 		echo "<tr class=\"" . implode(' ',$classes) .
-		    "\"><td>" . $link . "p" .
+			"\"><td>" . $link . "p" .
 				htmlspecialchars($row['probid'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
 			"</td><td>".
 			$link . htmlspecialchars(count($contestproblems[$row['probid']])) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
-			"</td>";
-		echo "</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
-		    "\">" . $row['testcases'] . "</a></td>";
+			"</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
+			"\">" . $row['testcases'] . "</a></td>";
 		if ( !empty($row['problemtext_type']) ) {
 			echo '<td title="view problem description">' .
 			     '<a href="problem.php?id=' . urlencode($row['probid']) .

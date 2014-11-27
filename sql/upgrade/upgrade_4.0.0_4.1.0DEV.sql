@@ -19,13 +19,15 @@ ALTER TABLE `configuration`
   DROP KEY `name`,
   ADD UNIQUE KEY `name` (`name`);
 
--- Add a column to keep track of whether balloons will be processed for this contest
 ALTER TABLE `contest`
   ADD COLUMN `shortname` varchar(255) NOT NULL COMMENT 'Short name for this contest' AFTER `contestname`,
   ADD COLUMN `deactivatetime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest becomes invisible in team/public views' AFTER `unfreezetime`,
   ADD COLUMN `deactivatetime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime' AFTER `unfreezetime_string`,
   ADD COLUMN `process_balloons` tinyint(1) unsigned DEFAULT '1' COMMENT 'Will balloons be processed for this contest?',
   ADD COLUMN `public` tinyint(1) unsigned DEFAULT '1' COMMENT 'Is this contest visible for the public and non-associated teams?';
+
+-- We add a unique key on contest.shortname and contestproblem.shortname
+-- later, after filling it with data.
 
 -- Create a table linking contests and problems
 CREATE TABLE `contestproblem` (
@@ -61,9 +63,6 @@ CREATE TABLE `contestteam` (
 INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `allow_judge`, `color`)
   SELECT `cid`, `probid`, `shortname`, `allow_submit`, `allow_judge`, `color` FROM `problem`;
 
-INSERT INTO `contestteam` (`cid`, `teamid`)
-  SELECT `cid`, `teamid` FROM `contest` INNER JOIN `team`;
-
 --
 -- Add/remove sample/initial contents
 --
@@ -71,7 +70,7 @@ INSERT INTO `contestteam` (`cid`, `teamid`)
 UPDATE `configuration` SET `name` = 'script_timelimit', `description` = 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.' WHERE `name` = 'compile_time';
 UPDATE `configuration` SET `name` = 'script_memory_limit', `description` = 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.' WHERE `name` = 'compile_memory';
 UPDATE `configuration` SET `name` = 'script_filesize', `description` = 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.' WHERE `name` = 'compile_filesize';
-UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`contestname`, ' ', ''), 1, 6)), `public` = 1, `deactivatetime` = UNIX_TIMESTAMP('2016-01-01 18:30:00'), `deactivatetime_string` = '2016-01-01 18:30:00';
+UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`contestname`, ' ', ''), 1, 10)), `public` = 1, `deactivatetime` = UNIX_TIMESTAMP('2016-12-31 23:59:59'), `deactivatetime_string` = '2016-12-31 23:59:59';
 
 -- Add UNIQUE keys
 ALTER TABLE `contest`
