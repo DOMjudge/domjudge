@@ -21,5 +21,5 @@ setup_database_connection();
 require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/print.php');
 
-$cdata = getCurContest(TRUE);
-$cid = (int)$cdata['cid'];
+$cdatas = getCurContests(TRUE);
+$cids = array_keys($cdatas);

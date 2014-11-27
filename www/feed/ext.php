@@ -10,6 +10,15 @@ require('init.php');
 
 require(LIBWWWDIR . '/scoreboard.php');
 
+define('TEAMS_CATEGORY', 3);
+
+if (count($cdatas) != 1 ) {
+	error("Feed only supports exactly one active contest.");
+} else {
+	$cdata = array_pop($cdatas);
+	$cid = array_pop($cids);
+}
+
 // needed for short verdicts
 $result_map = array(
 	'correct' => 'AC',
@@ -24,17 +33,17 @@ $result_map = array(
 );
 
 // Get problems, languages, affiliations, categories and events
-$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, color FROM problem
+$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, color FROM problem INNER JOIN contestproblem USING(probid)
                  WHERE cid = %i AND allow_submit = 1 ORDER BY shortname', $cid);
 
 $teams = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, name, affilid, categoryid
-                 FROM team WHERE categoryid = 2 ORDER BY teamid');
+                 FROM team WHERE categoryid = %i AND enabled = 1 ORDER BY teamid', TEAMS_CATEGORY);
 
 $affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, name, country, shortname
                   FROM team_affiliation ORDER BY name');
 
 $categs = $DB->q('KEYTABLE SELECT categoryid AS ARRAYKEY, name, color
-                  FROM team_category WHERE visible = 1 AND categoryid = 2 ORDER BY name');
+                  FROM team_category WHERE visible = 1 AND categoryid = %i ORDER BY name', TEAMS_CATEGORY);
 
 $events = $DB->q('SELECT * FROM event WHERE cid = %i AND ' .
                  (isset($_REQUEST['fromid']) ? 'eventid >= %i ' : 'TRUE %_ ') . 'AND ' .
@@ -52,7 +61,7 @@ $length = ($cdata['endtime']) - ($cdata['starttime']);
 $lengthString = sprintf('%02d:%02d:%02d', $length/(60*60), ($length/60) % 60, $length % 60);
 XMLaddnode($info, 'length', $lengthString);
 XMLaddnode($info, 'penalty', 20);
-XMLaddnode($info, 'started', 'False');
+XMLaddnode($info, 'started', 'True');
 XMLaddnode($info, 'starttime', ($cdata['starttime']));
 XMLaddnode($info, 'title', $cdata['contestname']);
 
