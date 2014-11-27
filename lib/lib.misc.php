@@ -649,7 +649,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	$id = $DB->q('RETURNID INSERT INTO submission
 	              (cid, teamid, probid, langid, submittime, origsubmitid, externalid)
 	              VALUES (%i, %i, %i, %s, %s, %i, %i)',
-	             $cid, $teamid, $probid, $langid, $now, $origsubmitid, $extid);
+	             $cid, $teamid, $probid, $langid, $submittime, $origsubmitid, $extid);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
