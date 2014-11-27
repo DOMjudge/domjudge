@@ -158,7 +158,7 @@ if ( $row['enabled'] != 1 ) {
 <div class="col1"><table>
 <tr><td>ID:        </td><td>t<?php echo htmlspecialchars($row['teamid'])?></td></tr>
 <tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
-<tr><td>Penalty time:</td><td><?php echo htmlspecialchars($row['penalty'])?></td></tr>
+<tr><td>Penalty time:</td><td><?php echo htmlspecialchars(@$row['penalty'])?></td></tr>
 <tr><td>Host:</td><td><?php echo
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
 <?php if (!empty($row['room'])): ?>
