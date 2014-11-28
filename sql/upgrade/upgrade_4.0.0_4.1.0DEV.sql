@@ -70,6 +70,9 @@ INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `all
 UPDATE `configuration` SET `name` = 'script_timelimit', `description` = 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.' WHERE `name` = 'compile_time';
 UPDATE `configuration` SET `name` = 'script_memory_limit', `description` = 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.' WHERE `name` = 'compile_memory';
 UPDATE `configuration` SET `name` = 'script_filesize', `description` = 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.' WHERE `name` = 'compile_filesize';
+
+UPDATE `configuration` SET `description` = 'Show country flags and affiliations names on the scoreboard?' WHERE `name` = 'show_affiliations';
+
 UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`contestname`, ' ', ''), 1, 10)), `public` = 1, `deactivatetime` = UNIX_TIMESTAMP('2016-12-31 23:59:59'), `deactivatetime_string` = '2016-12-31 23:59:59';
 
 -- Add UNIQUE keys
