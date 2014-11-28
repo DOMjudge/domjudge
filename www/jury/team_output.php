@@ -10,11 +10,12 @@ require('init.php');
 
 $runid  = (int)$_GET['runid'];
 
-$row = $DB->q('MAYBETUPLE SELECT OCTET_LENGTH(output_run) as size, rank, p.shortname
+$row = $DB->q('MAYBETUPLE SELECT OCTET_LENGTH(output_run) as size, rank, cp.shortname
                FROM judging_run
                LEFT JOIN testcase t USING (testcaseid)
                LEFT JOIN judging j USING (judgingid)
                LEFT JOIN problem p USING (probid)
+               LEFT JOIN contestproblem cp USING (probid)
                WHERE runid=%i', $runid);
 
 // sanity check before we start to output headers
