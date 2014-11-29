@@ -579,12 +579,12 @@ function daemonize($pidfile = NULL)
 function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
                          $origsubmitid = NULL, $extid = NULL, $submittime = NULL)
 {
-	global $cdatas, $DB;
+	global $DB;
 
 	if( empty($team) ) error("No value for Team.");
 	if( empty($prob) ) error("No value for Problem.");
-	if( empty($lang) ) error("No value for Language.");
 	if( empty($contest) ) error("No value for Contest.");
+	if( empty($lang) ) error("No value for Language.");
 
 	if ( empty($submittime) ) $submittime = now();
 
@@ -602,8 +602,14 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 
 	$sourcesize = dbconfig_get('sourcesize_limit');
 
-	// Refuse submissions before start of contest.
-	if( difftime($cdatas[$contest]['starttime'], $submittime) > 0 ) {
+	// If no contest has started yet, refuse submissions.
+	$now = now();
+
+	$contestdata = $DB->q('MAYBETUPLE SELECT starttime,endtime FROM contest WHERE cid = %i', $contest);
+	if ( ! isset($contestdata) ) {
+		error("Contest c$contest not found.");
+	}
+	if( difftime($contestdata['starttime'], $submittime) > 0 ) {
 	//	error("The contest is closed, no submissions accepted. [c$contest]");
 		return;
 	}
@@ -621,8 +627,6 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 							AND cid = %i AND allow_submit = "1"', $prob, $contest) ) {
 		error("Problem p$prob not found in database or not submittable [c$contest].");
 	}
-	if( !isset($cdatas[$contest]) ) error("Unknown Contest.");
-	$cid = $contest;
 
 	// Reindex arrays numerically to allow simultaneously iterating
 	// over both $files and $filenames.
@@ -649,7 +653,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	$id = $DB->q('RETURNID INSERT INTO submission
 	              (cid, teamid, probid, langid, submittime, origsubmitid, externalid)
 	              VALUES (%i, %i, %i, %s, %s, %i, %i)',
-	             $cid, $teamid, $probid, $langid, $submittime, $origsubmitid, $extid);
+	             $contest, $teamid, $probid, $langid, $submittime, $origsubmitid, $extid);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
@@ -658,7 +662,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	}
 
 	// Recalculate scoreboard cache for pending submissions
-	calcScoreRow($cid, $teamid, $probid);
+	calcScoreRow($contest, $teamid, $probid);
 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
@@ -668,7 +672,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	if ( is_writable( SUBMITDIR ) ) {
 		// Copy the submission to SUBMITDIR for safe-keeping
 		for($rank=0; $rank<count($files); $rank++) {
-			$fdata = array('cid' => $cid,
+			$fdata = array('cid' => $contest,
 			               'submitid' => $id,
 			               'teamid' => $teamid,
 			               'probid' => $probid,
@@ -684,8 +688,8 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 		logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
 	}
 
-	if( difftime($cdatas[$cid]['endtime'], $submittime) <= 0 ) {
-		logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$cid]");
+	if( difftime($contestdata['endtime'], $submittime) <= 0 ) {
+		logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$contest]");
 	}
 
 	return $id;

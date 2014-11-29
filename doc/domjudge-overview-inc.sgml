@@ -151,7 +151,6 @@ url="http://creativecommons.org/publicdomain/zero/1.0/">. These
 specifications can be found as appendices in the judge manual and as
 separate ASCII text files in the documentation directory:
 <itemize>
-<item> The checktestdata language grammar.
 <item> The DOMjudge problem format zip-bundle.
 </itemize>
 ]]>

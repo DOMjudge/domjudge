@@ -1,5 +1,4 @@
 <!doctype linuxdoc system [
-<!ENTITY checktestdatagrammar SYSTEM "checktestdata-grammar-inc.sgml">
 <!ENTITY problemformat SYSTEM "problem-format-inc.sgml">
 <!ENTITY % admin "IGNORE">
 <!ENTITY % judge "INCLUDE">
@@ -149,29 +148,12 @@ url="https://github.com/DOMjudge/checktestdata">.
 It allows you to not only check on simple (spacing) layout errors, but
 a simple grammar file must be specified for the testdata, according to
 which the testdata is checked. This allows e.g. for bounds checking.
-See appendix <ref id="checktestdata-grammar"> for a grammar specification.
-Two sample scripts <tt>checktestdata.{hello,fltcmp}</tt> are provided
-for the sample problems <tt>hello</tt> and <tt>fltcmp</tt>.
 
 This program is built upon the separate library <tt>libchecktestdata.h</tt>
-(see <tt>checktestdata.cc</tt> as an example for how to use this library)
 that can be used to write the syntax checking part of special
 compare scripts: it can easily handle the tedious task of verifying
 that a team's submission output is syntactically valid, leaving just
-the task of semantic validation to another program. When you want to
-support `presentation error' as a verdict, also in variable output
-problems, the option <tt>whitespace-ok</tt> can be useful. This
-allows any non-empty sequence of whitespace (no newlines though) where
-the <tt>SPACE</tt> command is used, as well as leading and trailing
-whitespace on lines (when using the <tt>NEWLINE</tt> command). Please
-note that with this option enabled, whitespace matching is greedy, so
-the script code
-<code>
-INT(1,2) SPACE SPACE INT(1,2)
-</code>
-does <em>not</em> match <tt>1__2</tt> (where the two underscores
-represent spaces), because the first <tt>SPACE</tt> command already
-matches both, so the second cannot match anything.
+the task of semantic validation to another program.
 
 <sect>Testing jury solutions
 <p>
@@ -392,8 +374,6 @@ submissions, and the awards ceremony can start.
 
 
 <appendix>
-
-&checktestdatagrammar;
 
 &problemformat;
 

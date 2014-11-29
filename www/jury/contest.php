@@ -89,7 +89,9 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 		<th>short name</th>
 		<th>allow submit</th>
 		<th>allow judge</th>
-		<th>color</th>
+		<th>color
+		<a target="_blank" href="http://www.w3schools.com/cssref/css_colornames.asp">
+		<img src="../images/b_help.png" class="smallpicto" alt="?"></a></th>
 	</tr>
 	</thead>
 	<tbody>
@@ -126,8 +128,7 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 		echo "<td>" .
 		     addInputField('color', "data[0][mapping][extra][$i][color]", $current_problem['color'],
 				   ' class="color {required:false,adjust:false,hash:true,caps:false}"') .
-		     "<a target=\"_blank\" href=\"http://www.w3schools.com/cssref/css_colornames.asp\">" .
-		     "<img src=\"../images/b_help.png\" class=\"smallpicto\" alt=\"\"></td>\n";
+		     "</td>\n";
 		echo "</tr>\n";
 		$i++;
 	}
