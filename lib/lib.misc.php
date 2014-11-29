@@ -667,7 +667,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
 	        VALUES(%s, %i, %i, %s, %i, %i, "problem submitted")',
-	       $submittime, $cid, $teamid, $langid, $probid, $id);
+	       $submittime, $contest, $teamid, $langid, $probid, $id);
 
 	if ( is_writable( SUBMITDIR ) ) {
 		// Copy the submission to SUBMITDIR for safe-keeping
