@@ -63,5 +63,5 @@ echo "allow_submit = 1" >> $TMPDIR/domjudge-problem.ini
 echo "name = \"$name\"" >> $TMPDIR/domjudge-problem.ini
 
 
-zip -jr domjudge.zip $TMPDIR
+find $TMPDIR | sort | xargs zip -j domjudge.zip 
 echo "data stored in $TMPDIR and domjudge.zip";
