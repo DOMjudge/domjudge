@@ -193,7 +193,7 @@ while ( TRUE ) {
 		               FROM submission WHERE externalid = %i', $subm['id']);
 
 		if ( !empty($res) ) {
-			if ( $res['teamid']!=getTeamID(remap('team',$team['id'])) ||
+			if ( $res['teamid']!=getTeamID(remap('team',$subm['team'])) ||
 			     $res['probid']!=remap('problem',$subm['problem']) ||
 			     $res['langid']!=remap('language',$subm['language']) ||
 			     $res['submittime']!=$subm['time'] ) {
@@ -220,10 +220,10 @@ while ( TRUE ) {
 		}
 		// FIXME: put 'mainclass' file at front of list?
 
-		$teamid = getTeamID(remap('team',$team['id']));
+		$teamid = getTeamID(remap('team',$subm['team']));
 
 		if ( empty($teamid) ) {
-			error("Got submission for non-existent local team with Team ID '".$team['id']."' and external ID '" .remap('team',$team['id'])."'");
+			error("Got submission for non-existent local team with Team ID '".$subm['team']."' and external ID '" .remap('team',$subm['team'])."'");
 		}
 
 		$id = submit_solution($teamid,
