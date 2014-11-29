@@ -10,7 +10,10 @@ require('init.php');
 
 require(LIBWWWDIR . '/scoreboard.php');
 
+// The categoryid where all the 'real' teams are in in DOMjudge
 define('TEAMS_CATEGORY', 3);
+// If defined, the region all teams are part of.
+define('TEAMS_REGION', 'Northwestern Europe');
 
 if (count($cdatas) != 1 ) {
 	error("Feed only supports exactly one active contest.");
@@ -36,7 +39,7 @@ $result_map = array(
 $probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, color FROM problem INNER JOIN contestproblem USING(probid)
                  WHERE cid = %i AND allow_submit = 1 ORDER BY shortname', $cid);
 
-$teams = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, name, affilid, categoryid
+$teams = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, name, externalid, affilid, categoryid
                  FROM team WHERE categoryid = %i AND enabled = 1 ORDER BY teamid', TEAMS_CATEGORY);
 
 $affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, name, country, shortname
@@ -84,9 +87,15 @@ foreach( $teams as $team => $data ) {
 	$node = XMLaddnode($root, 'team');
 	XMLaddnode($node, 'id', $id_cnt);
 	XMLaddnode($node, 'name', $data['name']);
+        if ( isset($data['externalid']) ) {
+		XMLaddnode($node, 'externalid', $data['externalid']);
+	}
 	if ( isset($data['affilid']) ) {
 		XMLaddnode($node, 'nationality', $affils[$data['affilid']]['country']);
 		XMLaddnode($node, 'university', $affils[$data['affilid']]['shortname']);
+	}
+	if ( defined('TEAMS_REGION') ) {
+		XMLaddnode($node, 'region', TEAMS_REGION);
 	}
 }
 
