@@ -26,26 +26,42 @@ for i in data/secret/*in; do
 done
 
 for ext in cpp cc c java; do 
-	for i in submissions/accepted/*$ext; do
-		base=`basename $i .$ext`
-		cp $i $TMPDIR/ac-${base}.$ext
-		echo -e "\n\n// @EXPECTED_RESULTS@: CORRECT" >> $TMPDIR/ac-${base}.$ext
-	done
-	for i in submissions/wrong_answer/*$ext; do
-		base=`basename $i .$ext`
-		cp $i $TMPDIR/ac-${base}.$ext
-		echo -e "\n\n// @EXPECTED_RESULTS@: WRONG-ANSWER" >> $TMPDIR/wa-${base}.$ext
-	done
-	for i in submissions/time_limit_exceeded/*$ext; do
-		base=`basename $i .$ext`
-		cp $i $TMPDIR/ac-${base}.$ext
-		echo -e "\n\n// @EXPECTED_RESULTS@: TIMELIMIT" >> $TMPDIR/tle-${base}.$ext
-	done
-	for i in submissions/run_time_error/*$ext; do
-		base=`basename $i .$ext`
-		cp $i $TMPDIR/ac-${base}.$ext
-		echo -e "\n\n// @EXPECTED_RESULTS@: RUN-ERROR" >> $TMPDIR/rte-${base}.$ext
-	done
+	if [ -r submissions/accepted ]; then
+		for i in `find submissions/accepted/ -name \*$ext`; do
+			base=`basename $i .$ext`
+			cp $i $TMPDIR/ac-${base}.$ext
+			echo -e "\n\n// @EXPECTED_RESULTS@: CORRECT" >> $TMPDIR/ac-${base}.$ext
+		done
+	fi
+	if [ -r submissions/wrong_answer ]; then
+		for i in `find submissions/wrong_answer/ -name \*$ext`; do
+			base=`basename $i .$ext`
+			cp $i $TMPDIR/ac-${base}.$ext
+			echo -e "\n\n// @EXPECTED_RESULTS@: WRONG-ANSWER" >> $TMPDIR/wa-${base}.$ext
+		done
+	fi
+	if [ -r submissions/time_limit_exceeded ]; then
+		for i in `find submissions/time_limit_exceeded/ -name \*$ext`; do
+			base=`basename $i .$ext`
+			cp $i $TMPDIR/ac-${base}.$ext
+			echo -e "\n\n// @EXPECTED_RESULTS@: TIMELIMIT" >> $TMPDIR/tle-${base}.$ext
+		done
+	fi
+	if [ -r submissions/run_time_error ]; then
+		for i in `find submissions/run_time_error/ -name \*$ext`; do
+			base=`basename $i .$ext`
+			cp $i $TMPDIR/ac-${base}.$ext
+			echo -e "\n\n// @EXPECTED_RESULTS@: RUN-ERROR" >> $TMPDIR/rte-${base}.$ext
+		done
+	fi
 done
 
-echo "data stored in $TMPDIR";
+timelimit=`cat .timelimit`
+name=`cat problem_statement/problem.en.tex | grep problemname | cut -d{ -f2 | cut -d} -f1`
+echo "timelimit = \"$timelimit\"" >> $TMPDIR/domjudge-problem.ini
+echo "allow_submit = 1" >> $TMPDIR/domjudge-problem.ini
+echo "name = \"$name\"" >> $TMPDIR/domjudge-problem.ini
+
+
+zip -jr domjudge.zip $TMPDIR
+echo "data stored in $TMPDIR and domjudge.zip";
