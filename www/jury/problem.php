@@ -50,12 +50,12 @@ if ( isset($_POST['upload']) ) {
 		}
 		if ( count($_FILES['problem_archive']['tmp_name']) == 1 ) {
 			$probid = empty($newid) ? $id : $newid;
-			$data = $DB->q('TUPLE SELECT shortname, name FROM problem
-			                WHERE probid = %i', $probid);
+			$probname = $DB->q('VALUE SELECT name FROM problem
+			                    WHERE probid = %i', $probid);
 
 			echo '<p><a href="' . $pagename.'?id='.urlencode($probid) .
-			    '">Return to problem ' . $data['shortname'] . ': ' .
-			    $data['shortname'] . ".</a></p>\n";
+			    '">Return to problem p' . htmlspecialchars($probid) .
+			    ': ' . htmlspecialchars($probname) . ".</a></p>\n";
 		}
 		echo "<p><a href=\"problems.php\">Return to problems overview.</a></p>\n";
 	} else {
