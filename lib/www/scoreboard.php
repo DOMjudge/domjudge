@@ -819,9 +819,10 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 			// Get submission times for each of the teams
 			$scoredata = $DB->q("SELECT teamid, totaltime
 			                     FROM scorecache_$tblname AS sc
-			                     LEFT JOIN problem USING (probid)
+			                     LEFT JOIN problem p USING (probid)
+			                     LEFT JOIN contestproblem cp USING (probid, cid)
 			                     WHERE sc.cid = %i AND is_correct = 1
-					     AND allow_submit = 1 AND teamid IN %Ai",
+			                     AND allow_submit = 1 AND teamid IN %Ai",
 			                    $cid, $tied);
 			while ( $srow = $scoredata->next() ) {
 				$teamdata[$srow['teamid']]['solve_times'][] = $srow['totaltime'];
