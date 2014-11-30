@@ -121,9 +121,6 @@ function calcContestTime($walltime, $contest_data = null)
 /**
  * Scoreboard calculation
  *
- * This is here because it needs to be called by the judgedaemon script
- * as well.
- *
  * Given a contestid, teamid and a problemid,
  * (re)calculate the values for one row in the scoreboard.
  *
