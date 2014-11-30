@@ -170,7 +170,7 @@ int main(int argc, char **argv)
 
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:t:u:v::q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"p:l:u:c:v::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
@@ -319,7 +319,7 @@ void usage()
 "Submit a solution for a problem.\n"
 "\n"
 "Options (see below for more information)\n"
-"  -c  --contest=CONTESTID  submit for contest CONTESTID.\n"
+"  -c  --contest=CONTESTID  submit for contest named CONTESTID.\n"
 "                               Defaults to the value of the\n"
 "                               environment variable 'SUBMITCONTEST'.\n"
 "                               Mandatory when more than one contest is active.\n"
