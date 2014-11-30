@@ -6,6 +6,15 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+// Returns a piece of SQL code to return a field, truncated to a fixed
+// character length, and with a message if truncation happened.
+function truncate_SQL_field($field)
+{
+	$size = 50000;
+	$msg = "\n[output truncated after 50,000 B]\n";
+	return "IF( CHAR_LENGTH($field)>$size , CONCAT(LEFT($field,$size),'$msg') , $field)";
+}
+
 function display_compile_output($output, $success) {
 	$color = "#6666FF";
 	$msg = "not finished yet";
@@ -263,7 +272,13 @@ if ( isset($jid) )  {
 			$jid, $jud['submitid'], $id));
 
 	// Display testcase runs
-	$runs = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
+	$runs = $DB->q('SELECT r.runid, r.judgingid, r.testcaseid, r.runresult, r.runtime, ' .
+	                       truncate_SQL_field('r.output_run')    . ' AS output_run, ' .
+	                       truncate_SQL_field('r.output_diff')   . ' AS output_diff, ' .
+	                       truncate_SQL_field('r.output_error')  . ' AS output_error, ' .
+	                       truncate_SQL_field('r.output_system') . ' AS output_system,
+	                       t.rank, t.description
+	                FROM testcase t
 	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 	                                             r.judgingid = %i )
 	                WHERE t.probid = %s ORDER BY rank',
