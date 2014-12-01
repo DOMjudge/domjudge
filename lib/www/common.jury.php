@@ -306,7 +306,12 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
 					submit_solution($teamid, $probid, $cid, $langid,
 							array($tmpfname), array($filename));
+					echo "<li>Added jury solution from: <tt>$filename</tt></li>\n";
+					$njurysols++;
+				} else {
+					echo "<li>Could not add jury solution <tt>$filename</tt>: too large.</li>\n";
 				}
+
 				unlink($tmpfname);
 			}
 		}
