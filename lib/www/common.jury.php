@@ -177,7 +177,7 @@ if (!function_exists('parse_ini_string')) {
  */
 function importZippedProblem($zip, $probid = NULL, $cid = -1)
 {
-	global $DB, $teamid;
+	global $DB, $teamid, $cdatas;
 	$prop_file = 'domjudge-problem.ini';
 
 	$ini_keys_problem = array('name', 'timelimit', 'special_run', 'special_compare');
@@ -280,7 +280,11 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 	echo "</ul>\n<p>Added $ncases testcase(s).</p>\n";
 
 	// submit reference solutions
-	if ( $cid != -1 && $DB->q('VALUE SELECT allow_submit FROM problem INNER JOIN contestproblem using (probid) WHERE probid = %i AND cid = %i', $probid, $cid) ) {
+	if ( $cid == -1 ) {
+		echo "<p>No jury solutions added: problem is not linked to a contest (yet).</p>\n";
+	} else if ( empty($teamid) ) {
+		echo "<p>No jury solutions added: must associate team with your user first.</p>\n";
+	} else if ( $DB->q('VALUE SELECT allow_submit FROM problem INNER JOIN contestproblem using (probid) WHERE probid = %i AND cid = %i', $probid, $cid) ) {
 		// First find all submittable languages:
 		$langs = $DB->q('KEYVALUETABLE SELECT langid, extensions
  		                 FROM language WHERE allow_submit = 1');
@@ -291,6 +295,10 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			$filename = $zip->getNameIndex($j);
 			$filename_parts = explode(".", $filename);
 			$extension = end($filename_parts);
+			if ( in_array($extension, array('in', 'out', 'ini')) ) {
+				// skipping test data and domjudge-problem.ini
+				continue;
+			}
 			unset($langid);
 			foreach ( $langs as $key => $exts ) {
 				if ( in_array($extension,json_decode($exts)) ) {
@@ -298,9 +306,11 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 					break;
 				}
 			}
-			if( !empty($langid) && !empty($teamid) ) {
+			if ( empty($langid) ) {
+				echo "<li>Could not add jury solution <tt>$filename</tt>: unknown language.</li>\n";
+			} else {
 				if ( !($tmpfname = tempnam(TMPDIR, "ref_solution-")) ) {
-					error("Could not create temporary file.");
+					error("Could not create temporary file in directory " . TMPDIR);
 				}
 				file_put_contents($tmpfname, $zip->getFromIndex($j));
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
@@ -319,6 +329,10 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 	} else {
 		echo "<p>No jury solutions added: problem not submittable " .
 		    "or no team associated.</p>\n";
+	}
+	if ( !in_array($cid, array_keys($cdatas)) ) {
+		echo "<p>The corresponding contest is not activated yet." .
+			"To view the submissions in the submissions list, you have to activate the contest first.</p>\n";
 	}
 
 	return $probid;
