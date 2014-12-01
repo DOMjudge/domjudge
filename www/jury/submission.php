@@ -126,9 +126,9 @@ if ( ! $submdata ) error ("Missing submission data");
 $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime,
 		 judgehost, verified, jury_member, verify_comment
 		 FROM judging
-		 WHERE cid IN %Ai AND submitid = %i
+		 WHERE cid = %i AND submitid = %i
 		 ORDER BY starttime ASC, judgingid ASC',
-		 getCurContests(FALSE), $id);
+		 $submdata['cid'], $id);
 
 // When there's no judging selected through the request, we select the
 // valid one.
