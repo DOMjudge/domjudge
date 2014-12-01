@@ -13,7 +13,7 @@ $users = $DB->q('SELECT u.*, GROUP_CONCAT(r.role) AS roles
                  FROM user u
                  LEFT JOIN userrole map ON u.userid = map.userid
                  LEFT JOIN role r ON (r.roleid = map.roleid)
-                 GROUP BY u.userid');
+                 GROUP BY u.userid ORDER BY username');
 
 require(LIBWWWDIR . '/header.php');
 
