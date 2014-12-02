@@ -209,7 +209,7 @@ if ( ! $submdata['valid'] ) {
 <?php
 
 if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
-	echo "<p><table class=\"list\">\n" .
+	echo "<table class=\"list\">\n" .
 		"<caption>Judgings</caption>\n<thead>\n" .
 		"<tr><td></td><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
 		"<th scope=\"col\">judgehost</th><th scope=\"col\">result</th>" .
@@ -234,7 +234,7 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 			"</tr>\n";
 
 	}
-    echo "</tbody>\n</table>\n</p>\n\n";
+    echo "</tbody>\n</table>\n\n";
 
 }
 
