@@ -95,7 +95,7 @@ if ( isset ($_GET['move']) ) {
 	return;
 }
 
-$title = 'Testcases for problem p'.htmlspecialchars(@$probid).' - '.$prob['name'];
+$title = 'Testcases for problem p'.htmlspecialchars(@$probid).' - '.htmlspecialchars($prob['name']);
 
 require(LIBWWWDIR . '/header.php');
 
