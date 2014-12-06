@@ -9,7 +9,9 @@
 require('init.php');
 $title = 'Judgehosts';
 
-$refresh = '15;url=judgehosts.php';
+if ( !$_REQUEST['cmd'] ) {
+	$refresh = '15;url=judgehosts.php';
+}
 
 require(LIBWWWDIR . '/header.php');
 
