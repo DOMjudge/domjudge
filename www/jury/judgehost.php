@@ -29,7 +29,7 @@ if ( isset($_REQUEST['cmd']) &&
 	}
 }
 
-$row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $id);
+$row = $DB->q('TUPLE SELECT judgehost.*, restrictionname FROM judgehost LEFT JOIN judgehost_restriction USING (restrictionid) WHERE hostname = %s', $id);
 
 $title = 'Judgehost '.htmlspecialchars($row['hostname']);
 
@@ -42,6 +42,15 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 <table>
 <tr><td>Name:  </td><td><?php echo printhost($row['hostname'], TRUE)?></td></tr>
 <tr><td>Active:</td><td><?php echo printyn($row['active'])?></td></tr>
+<tr><td>Restriction:</td><td>
+	<?php if ( is_null($row['restrictionname']) ) {
+		echo '<i>None</i>';
+	} else {
+		echo '<a href="judgehost_restriction.php?id=' . urlencode($row['restrictionid']) . '">' .
+		     $row['restrictionname'] . '</a>';
+	}
+	?>
+</td></tr>
 <tr><td>Status:</td><td>
 <?php
 if ( empty($row['polltime']) ) {

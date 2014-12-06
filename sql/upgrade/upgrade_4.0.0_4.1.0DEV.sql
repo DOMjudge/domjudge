@@ -55,6 +55,19 @@ CREATE TABLE `contestteam` (
   CONSTRAINT `contestteam_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of contests and teams';
 
+-- Create a table for judgehost restrictions
+CREATE TABLE `judgehost_restriction` (
+  `restrictionid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `restrictionname` varchar(255) NOT NULL COMMENT 'Descriptive name',
+  `restrictions` longtext COMMENT 'JSON-encoded restrictions',
+  PRIMARY KEY  (`restrictionid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Restrictions for judgehosts';
+
+-- Add the restriction column to the judgehost table
+ALTER TABLE `judgehost`
+  ADD COLUMN `restrictionid` int(4) unsigned DEFAULT NULL COMMENT 'Optional set of restrictions for this judgehost',
+  ADD CONSTRAINT `restriction_ibfk_1` FOREIGN KEY (`restrictionid`) REFERENCES `judgehost_restriction` (`restrictionid`) ON DELETE SET NULL;
+
 --
 -- Transfer data from old to new structure
 --

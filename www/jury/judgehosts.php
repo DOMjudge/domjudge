@@ -28,9 +28,12 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 
 	requireAdmin();
 
+	$restrictions = $DB->q('KEYVALUETABLE SELECT restrictionid, restrictionname FROM judgehost_restriction ORDER BY restrictionid');
+	$restrictions = array(null => '-- No restrictions --') + $restrictions;
+
 	echo addForm('edit.php');
 	echo "\n<table>\n" .
-		"<tr><th>Hostname</th><th>Active</th></tr>\n";
+		"<tr><th>Hostname</th><th>Active</th><th>Restrictions</th></tr>\n";
 	if ( $cmd == 'add' ) {
 		for ($i=0; $i<10; ++$i) {
 			echo "<tr><td>" .
@@ -38,6 +41,8 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 				"</td><td>" .
 				addSelect("data[$i][active]",
 					array(1=>'yes',0=>'no'), '1', true) .
+				"</td><td>" .
+				addSelect("data[$i][restrictionid]", $restrictions, null, true) .
 				"</td></tr>\n";
 		}
 	} else {
@@ -50,6 +55,8 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 				"</td><td>" .
 				addSelect("data[$i][active]",
 					array(1=>'yes',0=>'no'), $row['active'], true) .
+				"</td><td>" .
+				addSelect("data[$i][restrictionid]", $restrictions, $row['restrictionid'], true) .
 				"</td></tr>\n";
 			++$i;
 		}
@@ -66,7 +73,10 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 
 }
 
-$res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
+$res = $DB->q('SELECT judgehost.*, judgehost_restriction.restrictionname
+	       FROM judgehost
+	       LEFT JOIN judgehost_restriction USING (restrictionid)
+	       ORDER BY hostname');
 
 // NOTE: these queries do not take into account the time spent on a
 // current judging. It is tricky, however, to determine if a judging
@@ -94,6 +104,7 @@ if( $res->count() == 0 ) {
 	     "<tr><th scope=\"col\">hostname</th>" .
 		 "<th scope=\"col\">active</th>" .
 		 "<th class=\"sorttable_nosort\">status</th>" .
+	     "<th class=\"sorttable_nosort\">restriction</th>" .
 		 "<th class=\"sorttable_nosort\">load</th></tr>\n" .
 		 "</thead>\n<tbody>\n";
 	while($row = $res->next()) {
@@ -118,6 +129,7 @@ if( $res->count() == 0 ) {
 			echo "\" title =\"last checked in $reltime seconds ago\">";
 		}
 		echo $link . CIRCLE_SYM . "</a></td>";
+		echo "<td>" . $link . (is_null($row['restrictionname']) ? '<i>none</i>' : $row['restrictionname']) . '</a></td>';
 		echo "<td title=\"load during the last 2 and 10 minutes and the whole contest\">" .$link .
 		    sprintf('%.2f&nbsp;%.2f&nbsp;%.2f',
 		            @$work2min[   $row['hostname']] / (2*60),

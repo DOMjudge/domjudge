@@ -225,17 +225,50 @@ function judgings_POST($args)
 	$cdatas = getCurContests(TRUE);
 	$cids = array_keys($cdatas);
 
+	// Get judgehost restrictions
+	$contests = array();
+	$problems = array();
+	$languages = array();
+	$restrictions = $DB->q("MAYBEVALUE SELECT restrictions FROM judgehost
+			    INNER JOIN judgehost_restriction USING (restrictionid)
+			    WHERE hostname = %s", $host);
+	if ( $restrictions ) {
+		$restrictions = json_decode($restrictions, true);
+		$contests = $restrictions['contest'];
+		$problems = $restrictions['problem'];
+		$languages = $restrictions['language'];
+	}
+
+	$extra = '';
+	if ( empty($contests) ) {
+		$extra .= '%_';
+	} else {
+		$extra .= 'AND s.cid IN %Ai ';
+	}
+
+	if ( empty($problems) ) {
+		$extra .= '%_';
+	} else {
+		$extra .= 'AND s.probid IN %Ai ';
+	}
+
+	if ( empty($languages) ) {
+		$extra .= '%_';
+	} else {
+		$extra .= 'AND s.langid IN %As ';
+	}
+
 	// Prioritize teams according to last judging time
 	$submitid = $DB->q('MAYBEVALUE SELECT submitid
 	                    FROM submission s
 	                    LEFT JOIN team t ON (s.teamid = t.teamid)
 	                    LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
 			    LEFT JOIN contestproblem cp USING (probid, cid)
-			    WHERE judgehost IS NULL AND s.cid IN %Ai
+			    WHERE judgehost IS NULL AND s.cid IN %Ai ' . $extra . '
 			    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
 	                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
 	                    LIMIT 1',
-			    $cids);
+			   $cids, $contests, $problems, $languages);
 
 	if ( $submitid ) {
 		// update exactly one submission with our judgehost name

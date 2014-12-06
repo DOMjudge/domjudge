@@ -210,7 +210,10 @@ The flow of an incoming submission is as follows.
       checks, or accepted and stored as a <em>submission</em>.
 <item>The first available <em>judgehost</em> compiles, runs and checks
       the submission. The outcome and outputs are stored as a
-      <em>judging</em> of this submission.
+      <em>judging</em> of this submission. Note that judgehosts may be
+      restricted to certain contests, languages and problems, so that it can be
+      the case that a judgehost is available, but not judging an available
+      submission.
 <item>If verification is not required, the result is automatically
       recorded and the team can view the result and the scoreboard is
       updated (unless after the scoreboard freeze). A judge can

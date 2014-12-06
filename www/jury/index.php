@@ -29,6 +29,7 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <li><a href="contests.php">Contests</a></li>
 <li><a href="executables.php">Executables</a></li>
 <li><a href="judgehosts.php">Judgehosts</a></li>
+<li><a href="judgehost_restrictions.php">Judgehost Restrictions</a></li>
 <li><a href="languages.php">Languages</a></li>
 <li><a href="problems.php">Problems</a></li>
 <li><a href="scoreboard.php">Scoreboard</a></li>
