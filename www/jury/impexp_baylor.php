@@ -129,7 +129,7 @@ foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 
 		// collect team members
 		$members = "";
-		$members_json = $team['teamMember'];
+		$members_json = $team['teamMembers']['teamMember'];
 		// FIXME: if there's only team member, it's not encapsulated in an array :-/
 		if ( isset($members_json['@team']) ) {
 			$members_json  = array($members_json);
