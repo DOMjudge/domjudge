@@ -129,15 +129,18 @@ foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 		}
 
 		// collect team members
-		$members = "";
-		$members_json = $team['teamMember'];
+		$members_a = $mails_a = array();
+		$members_json = $team['teamMembers']['teamMember'];
 		// FIXME: if there's only team member, it's not encapsulated in an array :-/
 		if ( isset($members_json['@team']) ) {
 			$members_json  = array($members_json);
 		}
 		foreach ( $members_json as $member ) {
-			$members .= $member['firstName'] . " " . $member['lastName'] . "\n";
+			$members_a[] = $member['firstName'] . " " . $member['lastName'];
+			$mails_a[]   = $member['email'];
 		}
+		$members = implode("\n", $members_a);
+		$mails = implode(",", $mails_a);
 
 		// Note: teams are not deleted but disabled depending on their status
 		$id = $DB->q('MAYBEVALUE SELECT teamid FROM team WHERE externalid=%i', $team['reservationId']);
@@ -146,14 +149,14 @@ foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 			$id = $DB->q('RETURNID INSERT INTO team (name, categoryid, affilid, enabled, members, comments, externalid) VALUES (%s, %i, %i, %i, %s, %s, %i)',
 				$team['teamName'], $participants, $affilid, $enabled, $members, "Status: " . $team['status'], $team['reservationId']);
 			$username = sprintf("team%04d", $id);
-			$userid = $DB->q('RETURNID INSERT INTO user (username, name, teamid) VALUES (%s,%s,%i)', $username, $team['teamName'], $id);
+			$userid = $DB->q('RETURNID INSERT INTO user (username, name, teamid, email) VALUES (%s,%s,%i,%s)', $username, $team['teamName'], $id, $mails);
 			$DB->q('INSERT INTO userrole (userid, roleid) VALUES (%i,%i)', $userid, $teamrole);
 			$new_teams[] = $team['teamName'];
 		} else {
 			$username = sprintf("team%04d", $id);
 			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i, affilid=%i, enabled=%i, members=%s, comments=%s WHERE teamid=%i',
 				$team['teamName'], $participants, $affilid, $enabled, $members, "Status: " . $team['status'], $id);
-			$cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s WHERE username=%s', $team['teamName'], $username);
+			$cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s, email=%s WHERE username=%s', $team['teamName'], $mails, $username);
 			if ( $cnt > 0 ) {
 				$updated_teams[] = $team['teamName'];
 			}
