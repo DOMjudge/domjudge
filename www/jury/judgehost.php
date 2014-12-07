@@ -47,7 +47,7 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 		echo '<i>None</i>';
 	} else {
 		echo '<a href="judgehost_restriction.php?id=' . urlencode($row['restrictionid']) . '">' .
-		     $row['restrictionname'] . '</a>';
+		     htmlspecialchars($row['restrictionname']) . '</a>';
 	}
 	?>
 </td></tr>
