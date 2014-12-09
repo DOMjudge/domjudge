@@ -31,7 +31,16 @@ $verified = array();
 $nomatch = array();
 $earlier = array();
 
-$matchstring = '@EXPECTED_RESULTS@: ';
+$matchstrings = array('@EXPECTED_RESULTS@: ',
+                      '@EXPECTED_SCORE@: ');
+
+// Remap results as specified by the Kattis problem package format,
+// see: http://www.problemarchive.org/wiki/index.php/Problem_Format
+$resultremap = array('ACCEPTED' => 'CORRECT',
+                     'WRONG_ANSWER' => 'WRONG-ANSWER',
+                     'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
+                     'RUN_TIME_ERROR' => 'RUN-ERROR');
+
 $verifier = 'auto-verifier';
 
 $res = $DB->q("SELECT s.*, j.judgingid, j.result, j.verified, j.jury_member
@@ -73,8 +82,11 @@ while( $row = $res->next() ) {
 	$files = $DB->q("KEYVALUETABLE SELECT rank, sourcecode
 	                 FROM submission_file WHERE submitid = %i", $sid);
 
-	foreach ( $files AS $rank => $source ) {
-		if ( ($pos = mb_stripos($source,$matchstring)) !== FALSE ) break;
+	$pos = FALSE;
+	foreach ( $files as $rank => $source ) {
+		foreach ( $matchstrings as $matchstring ) {
+			if ( ($pos = mb_stripos($source,$matchstring)) !== FALSE ) break(2);
+		}
 	}
 
 	if ( $pos !== FALSE && $row['verified']==0 ) {
@@ -84,6 +96,12 @@ while( $row = $res->next() ) {
 		$endpos = mb_strpos($source,"\n",$beginpos);
 		$str = mb_substr($source,$beginpos,$endpos-$beginpos);
 		$results = explode(',',trim(mb_strtoupper($str)));
+
+		foreach ( $results as $key => $val ) {
+			if ( in_array($val,array_keys($resultremap)) ) {
+				$results[$key] = $resultremap[$val];
+			}
+		}
 
 		$result = mb_strtoupper($row['result']);
 
@@ -117,7 +135,7 @@ while( $row = $res->next() ) {
 		$nunchecked++;
 
 		if ( $pos===FALSE ) {
-			$nomatch[] = "string '<code>$matchstring</code>' not found in " .
+			$nomatch[] = "string '<code>$matchstrings[0]</code>' not found in " .
 				"<a href=\"submission.php?id=" . $sid .
 				"\">s$sid</a>, leaving submission unchecked";
 		} else {
