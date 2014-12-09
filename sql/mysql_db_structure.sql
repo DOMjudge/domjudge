@@ -187,6 +187,7 @@ CREATE TABLE `judgehost` (
   `polltime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of last poll by autojudger',
   `restrictionid` int(4) unsigned DEFAULT NULL COMMENT 'Optional set of restrictions for this judgehost',
   PRIMARY KEY  (`hostname`),
+  KEY `restrictionid` (`restrictionid`),
   CONSTRAINT `restriction_ibfk_1` FOREIGN KEY (`restrictionid`) REFERENCES `judgehost_restriction` (`restrictionid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Hostnames of the autojudgers';
 
@@ -198,8 +199,7 @@ CREATE TABLE `judgehost_restriction` (
   `restrictionid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `restrictionname` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `restrictions` longtext COMMENT 'JSON-encoded restrictions',
-  PRIMARY KEY  (`restrictionid`),
-  KEY `restrictionid` (`restrictionid`)
+  PRIMARY KEY  (`restrictionid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Restrictions for judgehosts';
 
 --
