@@ -72,7 +72,7 @@ others.
 As a rule of thumb, we recommend one judgehost per 20 teams.
 
 However, overprovisioning does not hurt: DOMjudge scales easily in the
-number of judegehosts, so if hardware is available, by all means use it. But
+number of judgehosts, so if hardware is available, by all means use it. But
 running a contest with fewer machines will equally work well, only the waiting
 time for teams to receive an answer may increase.
 
@@ -216,7 +216,7 @@ Software required for building DOMjudge:
 
 In the most basic setup the team workstations only need (next to the tools needed
 for program development) a web browser. The web interface fully works with any
-known browser, but a HTML5-capable browser adds more convenience funcions. With
+known browser, but a HTML5-capable browser adds more convenience functions. With
 JavaScript disabled, all basic functionality remains working, with the notable
 exception of multiple file uploads on non-HTML5-ready browsers.
 
@@ -291,7 +291,7 @@ On the judgehosts:
 <item> Put the right credentials in the file <tt>etc/restapi.secret</tt>
        on all judgehosts.
 <item> Optionally build a chroot to support interpreted or
-       byte-compiled langauges such as Java, see the appendix on
+       byte-compiled languages such as Java, see the appendix on
        <ref id="problems:chroot" name="setting up a chroot">.
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
 </itemize>
@@ -949,7 +949,7 @@ The submit client authenticates to the DOMjudge API via either the
 configured authentication scheme, or can use the DOMjudge internal
 username and password combination for a given user account regardless
 of authentication scheme. For example, when the IPADDRESS scheme is
-used, no additional configuration is required because submmissions
+used, no additional configuration is required because submissions
 will come from the correct IP address of the team. When another
 scheme is used, it may be necessary to place username and password
 combinations in the team's account so the submit client can use
@@ -1075,7 +1075,7 @@ the actual cgroups that DOMjudge will use. For that, you can use the
 script under <tt>misc-tools/create_cgroups</tt>. Edit the script to
 match your situation first.
 This script needs to be re-run after each boot (e.g., add it to
-the judegedaemon init script).
+the judgedaemon init script).
 
 <sect1>Multiple judgedaemons per machine
 <p>
@@ -1114,8 +1114,8 @@ machines when using the commandline submit client) and run:
 
 <p>
 When loading teams from the ICPC registration system through the import
-feature in DOMjudge, the certificate from icpc.baylor.edu must similarily
-be acceped by your local installation or if not, added via the procedure
+feature in DOMjudge, the certificate from icpc.baylor.edu must similarly
+be accepted by your local installation or if not, added via the procedure
 above. 
 
 <sect1>NTP time synchronisation
@@ -1128,7 +1128,7 @@ sure the time between domserver and team computers is in sync.
 <p>
 
 It is recommended to configure the local desktop printing of team
-workstations whereever possible: this has the most simple interface
+workstations where ever possible: this has the most simple interface
 and allows teams to print from within their editor.
 
 <p>
@@ -1529,7 +1529,7 @@ authenticate. Beforehand, generate passwords for each team in the jury
 interface. When the test session (or contest) starts and a team
 connects to the web interface and have an unknown IP, they will be
 prompted for username and password. Once supplied, the IP is stored
-and the assword is removed and not needed anymore the next time.
+and the password is removed and not needed anymore the next time.
 
 This is also a secure option, but requires a bit more hassle from the
 teams, and maybe from the organisers who have to distribute pieces of
@@ -1947,7 +1947,7 @@ default it is tried to be determined from groups available on the
 system, e.g. <tt>www-data</tt> or <tt>apache</tt>.
 
 Judgehosts and the domserver communicate with each other over HTTP.
-Also all parties accessing the domserver web interface obvioulsly use
+Also all parties accessing the domserver web interface obviously use
 this protocol. We advise to setup HTTPS so interactions between domserver,
 judgehosts and teams are all protected. If you need to use a self-signed
 certificate, you can consider to install it on the team workstations
@@ -2247,7 +2247,7 @@ multi-site contest.
 
 Network: there must be a relatively reliable network connection between the
 locations and the central DOMjudge installation, because teams cannot submit or
-query the scoreboard if the network is down. Because of travelling an unsecured
+query the scoreboard if the network is down. Because of traversing an unsecured
 network, you may want to consider HTTPS for encrypting the traffic.  If you
 want to limit internet access, it must be done in such a way that the remote
 DOMjudge installation can still be reached.
@@ -2329,7 +2329,7 @@ make maintainer-install
 Note that these targets have to be executed <em>separately</em> and
 they replace the steps described in the section
 <ref id="install_config:installsystem" name="Installation system">;
-also no <tt>--prefix</tt> flag or other directoriess have to be
+also no <tt>--prefix</tt> flag or other directories have to be
 specified to <tt>configure</tt>.
 
 <sect>Makefile structure
