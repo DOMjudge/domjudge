@@ -66,6 +66,7 @@ CREATE TABLE `judgehost_restriction` (
 -- Add the restriction column to the judgehost table
 ALTER TABLE `judgehost`
   ADD COLUMN `restrictionid` int(4) unsigned DEFAULT NULL COMMENT 'Optional set of restrictions for this judgehost',
+  ADD KEY `restrictionid` (`restrictionid`),
   ADD CONSTRAINT `restriction_ibfk_1` FOREIGN KEY (`restrictionid`) REFERENCES `judgehost_restriction` (`restrictionid`) ON DELETE SET NULL;
 
 --
