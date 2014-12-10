@@ -922,6 +922,9 @@ Multiple lines may be specified to allow a judgedaemon to work for multiple
 domservers. The id is used to differentiate between multiple domservers,
 and should be unique.
 
+Then start the judgedaemon:
+<code>bin/judgedaemon</code>
+
 Upon its first connection to the domserver API the judgehost will be
 auto-registered and will be by default enabled. If you wish to
 add a new judgehost but have it initially disabled, you can add it
