@@ -170,10 +170,11 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 function getProblems($cdata) {
 	global $DB;
 
-	return $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
-	               probid, shortname, name, color, LENGTH(problemtext) AS hastext FROM problem
-		       INNER JOIN contestproblem USING (probid)
-		       WHERE cid = %i AND allow_submit = 1
+	return $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, shortname,
+	               name, color, LENGTH(problemtext) AS hastext
+	               FROM problem
+	               INNER JOIN contestproblem USING (probid)
+	               WHERE cid = %i AND allow_submit = 1
 	               ORDER BY shortname', $cdata['cid']);
 }
 
@@ -186,22 +187,21 @@ function getTeams($filter, $jury, $cdata) {
 	global $DB;
 
 	return $DB->q('KEYTABLE SELECT team.teamid AS ARRAYKEY, team.teamid, externalid,
-	                 team.name, team.categoryid, team.affilid, sortorder,
-	                 country, color, team_affiliation.name AS affilname
-	                 FROM team
-	                 INNER JOIN contest ON contest.cid = %i
-	                 LEFT JOIN contestteam ON contestteam.teamid = team.teamid AND contestteam.cid = contest.cid
-	                 LEFT JOIN team_category
-	                        ON (team_category.categoryid = team.categoryid)
-	                 LEFT JOIN team_affiliation
-	                        ON (team_affiliation.affilid = team.affilid)
-	                 WHERE team.enabled = 1 AND (contestteam.teamid IS NOT NULL OR contest.public = 1)' .
-	                ( $jury ? '' : ' AND visible = 1' ) .
-			(isset($filter['affilid']) ? ' AND team.affilid IN %As ' : ' %_') .
-			(isset($filter['country']) ? ' AND country IN %As ' : ' %_') .
-			(isset($filter['categoryid']) ? ' AND team.categoryid IN %As ' : ' %_') .
-			(isset($filter['teams']) ? ' AND team.teamid IN %Ai ' : ' %_'),
-			$cdata['cid'], @$filter['affilid'], @$filter['country'], @$filter['categoryid'], @$filter['teams']);
+	               team.name, team.categoryid, team.affilid, sortorder,
+	               country, color, team_affiliation.name AS affilname
+	               FROM team
+	               INNER JOIN contest ON (contest.cid = %i)
+	               LEFT JOIN contestteam ct USING (teamid, cid)
+	               LEFT JOIN team_category USING (categoryid)
+	               LEFT JOIN team_affiliation USING (affilid)
+	               WHERE team.enabled = 1 AND (ct.teamid IS NOT NULL OR contest.public = 1)' .
+	              ( $jury ? '' : ' AND visible = 1' ) .
+	              (isset($filter['affilid']) ? ' AND team.affilid IN %As ' : ' %_') .
+	              (isset($filter['country']) ? ' AND country IN %As ' : ' %_') .
+	              (isset($filter['categoryid']) ? ' AND team.categoryid IN %As ' : ' %_') .
+	              (isset($filter['teams']) ? ' AND team.teamid IN %Ai ' : ' %_'),
+	              $cdata['cid'], @$filter['affilid'], @$filter['country'],
+	              @$filter['categoryid'], @$filter['teams']);
 }
 
 /**

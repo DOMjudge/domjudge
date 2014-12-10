@@ -593,16 +593,18 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	}
 
 	// Check 2: valid parameters?
-	if( ! $langid = $DB->q('MAYBEVALUE SELECT langid FROM language WHERE
-						  langid = %s AND allow_submit = 1', $lang) ) {
+	if( ! $langid = $DB->q('MAYBEVALUE SELECT langid FROM language
+	                        WHERE langid = %s AND allow_submit = 1', $lang) ) {
 		error("Language '$lang' not found in database or not submittable.");
 	}
-	if( ! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team WHERE teamid = %i AND enabled = 1',$team) ) {
+	if( ! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team
+	                        WHERE teamid = %i AND enabled = 1',$team) ) {
 		error("Team '$team' not found in database or not enabled.");
 	}
 	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem
-	                        INNER JOIN contestproblem USING (probid) WHERE probid = %s
-							AND cid = %i AND allow_submit = "1"', $prob, $contest) ) {
+	                        INNER JOIN contestproblem USING (probid)
+	                        WHERE probid = %s AND cid = %i AND allow_submit = 1',
+	                       $prob, $contest) ) {
 		error("Problem p$prob not found in database or not submittable [c$contest].");
 	}
 

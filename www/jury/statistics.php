@@ -20,21 +20,22 @@ if ( !empty($_GET['probid']) ) {
 require(LIBWWWDIR . '/header.php');
 echo "<h1>" . htmlspecialchars($title) . "</h1>\n\n";
 
-$res = $DB->q('SELECT result,
-		   COUNT(result) as count,
-		   (c.freezetime IS NOT NULL && submittime >= c.freezetime) AS afterfreeze,
-		   (FLOOR(submittime - c.starttime) DIV %i) * %i AS minute
-		   FROM submission s
-		   JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
-		   LEFT OUTER JOIN contest c ON(c.cid=s.cid)
-		   LEFT OUTER JOIN team t ON(s.teamid=t.teamid)
-		   WHERE s.cid = %i AND s.valid = 1 AND t.categoryid = 2 ' .
-		   ( empty($_GET['probid']) ? '%_' : 'AND s.probid = %i ' ) .
-		   'AND submittime < c.endtime AND submittime >= c.starttime
-		   GROUP BY minute, result', $bar_size * 60, $bar_size, $cid, @$_GET['probid']);
+$res = $DB->q('SELECT result, COUNT(result) as count,
+               (c.freezetime IS NOT NULL && submittime >= c.freezetime) AS afterfreeze,
+               (FLOOR(submittime - c.starttime) DIV %i) * %i AS minute
+               FROM submission s
+               JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
+               LEFT OUTER JOIN contest c USING(cid)
+               LEFT OUTER JOIN team t USING(teamid)
+               WHERE s.cid = %i AND s.valid = 1 AND t.categoryid = 2 ' .
+              ( empty($_GET['probid']) ? '%_' : 'AND s.probid = %i ' ) .
+              'AND submittime < c.endtime AND submittime >= c.starttime
+               GROUP BY minute, result', $bar_size * 60, $bar_size, $cid, @$_GET['probid']);
 
 // All problems
-$problems = $DB->q('SELECT p.probid,p.name FROM problem p INNER JOIN contestproblem USING (probid) WHERE cid = %i ORDER by shortname', $cid);
+$problems = $DB->q('SELECT p.probid,p.name FROM problem p
+                    INNER JOIN contestproblem USING (probid)
+                    WHERE cid = %i ORDER by shortname', $cid);
 print '<p>';
 print '<a href="statistics.php">All problems</a>&nbsp;&nbsp;&nbsp;';
 while($row = $problems->next()) {

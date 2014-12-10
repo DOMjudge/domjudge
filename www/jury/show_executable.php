@@ -12,7 +12,7 @@ require('init.php');
 if ( isset($_POST['storeid']) ) {
 	$id = $_POST['storeid'];
 	$executable = $DB->q('MAYBETUPLE SELECT * FROM executable
-		WHERE execid = %s', $id);
+	                      WHERE execid = %s', $id);
 	if ( empty($executable) ) error ("Executable $id not found");
 	if ( !($tmpfname = tempnam(TMPDIR, "/executable-")) ) {
 		error("failed to create temporary file");

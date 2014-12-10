@@ -284,8 +284,8 @@ flushresults();
 // PROBLEMS
 
 $res = $DB->q('SELECT probid, cid, shortname, timelimit, special_compare, special_run
-	       FROM problem INNER JOIN contestproblem USING (probid)
-	       ORDER BY probid');
+               FROM problem INNER JOIN contestproblem USING (probid)
+               ORDER BY probid');
 
 $details = '';
 while($row = $res->next()) {
@@ -303,7 +303,8 @@ while($row = $res->next()) {
 	}
 }
 foreach(array('input','output') as $inout) {
-	$mismatch = $DB->q("SELECT probid, rank FROM testcase WHERE md5($inout) != md5sum_$inout");
+	$mismatch = $DB->q("SELECT probid, rank FROM testcase
+	                    WHERE md5($inout) != md5sum_$inout");
 	while($r = $mismatch->next()) {
 		$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
 		    " MD5 sum mismatch between $inout and md5sum_$inout\n";
@@ -405,8 +406,8 @@ result('submissions and judgings', 'Submissions', $submres, $submnote);
 
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
-	       LEFT OUTER JOIN contestproblem p USING (probid)
-	       WHERE s.cid != p.cid');
+               LEFT OUTER JOIN contestproblem p USING (probid)
+               WHERE s.cid != p.cid');
 
 $details = '';
 while($row = $res->next()) {
@@ -513,7 +514,8 @@ if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 			continue;
 		}
 		$fields = implode(', ', array_keys($foreign_keys));
-		$res = $DB->q('SELECT ' . $fields . ' FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
+		$res = $DB->q('SELECT ' . $fields . ' FROM ' . $table .
+		              ' ORDER BY ' . implode(',', $KEYS[$table]));
 		while ( $row = $res->next() ) {
 			foreach ( $foreign_keys as $foreign_key => $val ) {
 				list( $target, $action ) = explode('&', $val);

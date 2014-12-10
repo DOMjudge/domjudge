@@ -64,18 +64,20 @@ if ( isset($_REQUEST['upload']) ) {
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml'));
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 	$data = '<?xml version="1.0" encoding="UTF-8"?><icpc computeCitations="1" name="Upload_via_DOMjudge_' . date("c") . '">';
-	$teams = $DB->q('SELECT teamid,externalid FROM team WHERE externalid IS NOT NULL AND enabled=1');
+	$teams = $DB->q('SELECT teamid, externalid FROM team
+	                 WHERE externalid IS NOT NULL AND enabled=1');
 	$cdatas = getCurContests(TRUE);
 	while( $row = $teams->next() ) {
-		$totals = $DB->q("MAYBETUPLE SELECT correct, totaltime, cid
-					FROM rankcache_public
-					WHERE cid IN %Ai
-					AND teamid = %i", getCurContests(FALSE), $row['teamid']);
+		$totals = $DB->q('MAYBETUPLE SELECT correct, totaltime, cid
+		                  FROM rankcache_public
+		                  WHERE cid IN %Ai AND teamid = %i',
+		                 getCurContests(FALSE), $row['teamid']);
 		if ( $totals === null ) {
 			$totals['correct'] = $totals['totaltime'] = 0;
 		}
 		$rank = calcTeamRank($cdatas[$row['cid']], $row['teamid'], $totals, FALSE);
-		$lastProblem = $DB->q('MAYBEVALUE SELECT MAX(totaltime) FROM scorecache_public WHERE teamid=%i AND cid=%i', $row['teamid'], $row['cid']);
+		$lastProblem = $DB->q('MAYBEVALUE SELECT MAX(totaltime) FROM scorecache_public
+		                       WHERE teamid=%i AND cid=%i', $row['teamid'], $row['cid']);
 		if ( $lastProblem === NULL ) {
 			$lastProblem = 0;
 		}
@@ -121,10 +123,13 @@ $updated_teams = array();
 foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 	foreach ( $group['team'] as $team ) {
 		// Note: affiliations are not updated and not deleted even if all teams are canceled
-		$affilid = $DB->q('MAYBEVALUE SELECT affilid FROM team_affiliation WHERE name=%s', $team['institutionName']);
+		$affilid = $DB->q('MAYBEVALUE SELECT affilid FROM team_affiliation
+		                   WHERE name=%s', $team['institutionName']);
 		if ( empty($affilid) ) {
-			$affilid = $DB->q('RETURNID INSERT INTO team_affiliation (name, shortname, country) VALUES (%s, %s, %s)',
-				$team['institutionName'], $team['institutionShortName'], $team['country']);
+			$affilid = $DB->q('RETURNID INSERT INTO team_affiliation
+			                   (name, shortname, country) VALUES (%s, %s, %s)',
+			                  $team['institutionName'],
+			                  $team['institutionShortName'], $team['country']);
 			$new_affils[] = $team['institutionName'];
 		}
 
@@ -143,20 +148,27 @@ foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 		$mails = implode(",", $mails_a);
 
 		// Note: teams are not deleted but disabled depending on their status
-		$id = $DB->q('MAYBEVALUE SELECT teamid FROM team WHERE externalid=%i', $team['reservationId']);
+		$id = $DB->q('MAYBEVALUE SELECT teamid FROM team
+		              WHERE externalid=%i', $team['reservationId']);
 		$enabled = $team['status'] === 'ACCEPTED';
 		if ( empty($id) ) {
-			$id = $DB->q('RETURNID INSERT INTO team (name, categoryid, affilid, enabled, members, comments, externalid) VALUES (%s, %i, %i, %i, %s, %s, %i)',
-				$team['teamName'], $participants, $affilid, $enabled, $members, "Status: " . $team['status'], $team['reservationId']);
+			$id = $DB->q('RETURNID INSERT INTO team
+			              (name, categoryid, affilid, enabled, members, comments, externalid)
+			              VALUES (%s, %i, %i, %i, %s, %s, %i)',
+			             $team['teamName'], $participants, $affilid, $enabled, $members,
+			             "Status: " . $team['status'], $team['reservationId']);
 			$username = sprintf("team%04d", $id);
-			$userid = $DB->q('RETURNID INSERT INTO user (username, name, teamid, email) VALUES (%s,%s,%i,%s)', $username, $team['teamName'], $id, $mails);
+			$userid = $DB->q('RETURNID INSERT INTO user (username, name, teamid, email)
+			                  VALUES (%s,%s,%i,%s)', $username, $team['teamName'], $id, $mails);
 			$DB->q('INSERT INTO userrole (userid, roleid) VALUES (%i,%i)', $userid, $teamrole);
 			$new_teams[] = $team['teamName'];
 		} else {
 			$username = sprintf("team%04d", $id);
-			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i, affilid=%i, enabled=%i, members=%s, comments=%s WHERE teamid=%i',
+			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i, affilid=%i,
+			               enabled=%i, members=%s, comments=%s WHERE teamid=%i',
 				$team['teamName'], $participants, $affilid, $enabled, $members, "Status: " . $team['status'], $id);
-			$cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s, email=%s WHERE username=%s', $team['teamName'], $mails, $username);
+			$cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s, email=%s
+			                WHERE username=%s', $team['teamName'], $mails, $username);
 			if ( $cnt > 0 ) {
 				$updated_teams[] = $team['teamName'];
 			}

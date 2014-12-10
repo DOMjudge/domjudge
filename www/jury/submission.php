@@ -110,25 +110,25 @@ $title = 'Submission s'.@$id;
 if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
-		    s.submittime, s.valid, c.cid, c.shortname AS contestshortname, c.contestname,
-		    t.name AS teamname, l.name AS langname, cp.shortname, p.name AS probname,
+                    s.submittime, s.valid, c.cid, c.shortname AS contestshortname, c.contestname,
+                    t.name AS teamname, l.name AS langname, cp.shortname, p.name AS probname,
                     CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
                     LEFT JOIN team     t ON (t.teamid = s.teamid)
                     LEFT JOIN problem  p ON (p.probid = s.probid)
                     LEFT JOIN language l ON (l.langid = s.langid)
                     LEFT JOIN contest  c ON (c.cid    = s.cid)
-		    LEFT JOIN contestproblem cp ON (cp.probid = p.probid AND cp.cid = c.cid)
+                    LEFT JOIN contestproblem cp ON (cp.probid = p.probid AND cp.cid = c.cid)
                     WHERE submitid = %i', $id);
 
 if ( ! $submdata ) error ("Missing submission data");
 
 $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime,
-		 judgehost, verified, jury_member, verify_comment
-		 FROM judging
-		 WHERE cid = %i AND submitid = %i
-		 ORDER BY starttime ASC, judgingid ASC',
-		 $submdata['cid'], $id);
+                 judgehost, verified, jury_member, verify_comment
+                 FROM judging
+                 WHERE cid = %i AND submitid = %i
+                 ORDER BY starttime ASC, judgingid ASC',
+                $submdata['cid'], $id);
 
 // When there's no judging selected through the request, we select the
 // valid one.

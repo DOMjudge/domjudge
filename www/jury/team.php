@@ -76,11 +76,12 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <!-- contest selection -->
 <tr><td>Contests:</td>
 <td><?php
-	$contests = $DB->q("TABLE SELECT contest.cid,shortname,contestname,max(contestteam.teamid=%s) AS incontest
-			FROM contest
-			LEFT JOIN contestteam USING (cid)
-			WHERE contest.public = 0
-			GROUP BY contest.cid", @$row['teamid']);
+	$contests = $DB->q("TABLE SELECT c.cid, c.shortname, c.contestname,
+	                                 max(ct.teamid=%s) AS incontest
+	                    FROM contest c
+	                    LEFT JOIN contestteam ct USING (cid)
+	                    WHERE contest.public = 0
+	                    GROUP BY c.cid", @$row['teamid']);
 	$i=0;
 	foreach ($contests as $contest) {
 		echo "<label>";
@@ -119,7 +120,8 @@ if ( isset($_GET['restrict']) ) {
 	$restrictions[$key] = $value;
 }
 
-$row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname, a.shortname AS affshortname, a.name AS affname
+$row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname,
+                                 a.shortname AS affshortname, a.name AS affname
                FROM team t
                LEFT JOIN team_category c USING (categoryid)
                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
@@ -219,10 +221,10 @@ if ( $current_cid === null ) {
 	echo "<h3>Contests</h3>\n\n";
 
 	$res = $DB->q('TABLE SELECT contest.*
-		       FROM contest
-		       LEFT JOIN contestteam USING (cid)
-		       WHERE (contestteam.teamid = %i OR contest.public = 1)
-		       ORDER BY starttime DESC', $id);
+	               FROM contest
+	               LEFT JOIN contestteam ct USING (cid)
+	               WHERE (ct.teamid = %i OR contest.public = 1)
+	               ORDER BY starttime DESC', $id);
 
 	if ( count($res) == 0 ) {
 		echo "<p class=\"nodata\">No contests defined</p>\n\n";

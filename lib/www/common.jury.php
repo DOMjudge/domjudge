@@ -210,13 +210,15 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			unset($ini_array_contest_problem['probid']);
 			$ini_array_contest_problem['shortname'] = $shortname;
 
-			$probid = $DB->q('RETURNID INSERT INTO problem (' . implode(', ',array_keys($ini_array_problem)) .
-			       ') VALUES %As', $ini_array_problem);
+			$probid = $DB->q('RETURNID INSERT INTO problem (' .
+			                 implode(', ',array_keys($ini_array_problem)) .
+			                 ') VALUES %As', $ini_array_problem);
 
 			if ($cid != -1) {
 				$ini_array_contest_problem['cid'] = $cid;
 				$ini_array_contest_problem['probid'] = $probid;
-				$DB->q('INSERT INTO contestproblem (' . implode(', ',array_keys($ini_array_contest_problem)) .
+				$DB->q('INSERT INTO contestproblem (' .
+				       implode(', ',array_keys($ini_array_contest_problem)) .
 				       ') VALUES %As', $ini_array_contest_problem);
 			}
 		} else {
@@ -224,17 +226,20 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array_problem, $probid);
 
 			if ( $cid != -1 ) {
-				if ($DB->q("MAYBEVALUE SELECT probid FROM contestproblem WHERE probid = %i AND cid = %i", $probid, $cid)) {
+				if ( $DB->q("MAYBEVALUE SELECT probid FROM contestproblem
+				             WHERE probid = %i AND cid = %i", $probid, $cid) ) {
 					// Remove keys that cannot be modified:
 					unset($ini_array_contest_problem['probid']);
-					$DB->q('UPDATE contestproblem SET %S WHERE probid = %i AND cid = %i', $ini_array_contest_problem, $probid, $cid);
+					$DB->q('UPDATE contestproblem SET %S WHERE probid = %i AND cid = %i',
+					       $ini_array_contest_problem, $probid, $cid);
 				} else {
 					$shortname = $ini_array_contest_problem['probid'];
 					unset($ini_array_contest_problem['probid']);
 					$ini_array_contest_problem['shortname'] = $shortname;
 					$ini_array_contest_problem['cid'] = $cid;
 					$ini_array_contest_problem['probid'] = $probid;
-					$DB->q('INSERT INTO contestproblem (' . implode(', ',array_keys($ini_array_contest_problem)) .
+					$DB->q('INSERT INTO contestproblem (' .
+					       implode(', ',array_keys($ini_array_contest_problem)) .
 					       ') VALUES %As', $ini_array_contest_problem);
 				}
 			}

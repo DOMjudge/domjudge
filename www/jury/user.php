@@ -78,10 +78,10 @@ echo addSelect('data[0][teamid]', $tmap, isset($row['teamid'])?$row['teamid']:@$
 <!-- role selection -->
 <tr><td>Roles:</td>
 <td><?php
-$roles = $DB->q("TABLE SELECT role.roleid,role,description,max(userrole.userid=%s) AS hasrole ".
-    "FROM role ".
-    "LEFT JOIN userrole ON userrole.roleid = role.roleid ".
-    "GROUP BY role.roleid", @$row['userid']);
+$roles = $DB->q('TABLE SELECT r.roleid, r.role, r.description, max(ur.userid=%s) AS hasrole
+                 FROM role r
+                 LEFT JOIN userrole ur USING (roleid)
+                 GROUP BY r.roleid', @$row['userid']);
 $i=0;
 foreach ($roles as $role) {
     echo "<label>";

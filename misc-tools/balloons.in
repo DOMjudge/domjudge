@@ -112,14 +112,13 @@ while ( TRUE ) {
 		do {
 
 			$res = $DB->q("SELECT b.*, s.probid, s.submittime,
-				       t.teamid, t.name AS teamname, t.room, c.name AS catname
-				       FROM balloon b
-				       LEFT JOIN submission s USING (submitid)
-				       LEFT JOIN team t ON (t.teamid = s.teamid)
-				       LEFT JOIN team_category c USING(categoryid)
-				       WHERE s.cid = %i AND b.done = 0 $freezecond
-				       ORDER BY submitid ASC",
-				       $cid);
+			               t.teamid, t.name AS teamname, t.room, c.name AS catname
+			               FROM balloon b
+			               LEFT JOIN submission s USING (submitid)
+			               LEFT JOIN team t USING (teamid)
+			               LEFT JOIN team_category c USING (categoryid)
+			               WHERE s.cid = %i AND b.done = 0 $freezecond
+			               ORDER BY submitid ASC", $cid);
 
 			while ($row = $res->next()) {
 				$team = array('name' => $row['teamname'],
@@ -127,16 +126,16 @@ while ( TRUE ) {
 					      'teamid' => $row['teamid']);
 
 				logmsg(LOG_DEBUG, "New problem solved: p" . $row['probid'] .
-						  " by team t" . $row['teamid'] .
-						  " for contest c" . $cid);
+				                  " by team t" . $row['teamid'] .
+				                  " for contest c" . $cid);
 
 				if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
 
 					$probs_solved = $DB->q('COLUMN SELECT probid FROM scorecache_jury
-								WHERE cid = %i AND teamid = %i AND is_correct = 1',
+					                        WHERE cid = %i AND teamid = %i AND is_correct = 1',
 							       $cid, $row['teamid']);
 					$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,shortname,name,color
-							      FROM problem WHERE cid = %i', $cid);
+					                      FROM problem WHERE cid = %i', $cid);
 
 					// current limitation is that this gets reset if the balloon daemon is restarted
 					$comment = '';
@@ -154,10 +153,10 @@ while ( TRUE ) {
 						}
 					}
 
-					logmsg(LOG_INFO, "Sending notification: team t" .
-							 $row['teamid'] . ", problem p" .
-							 $row['probid'] . ", contest c" .
-							 $cid . ".");
+					logmsg(LOG_INFO, "Sending notification:" .
+					       " team t" .$row['teamid'] .
+					       ", problem p" . $row['probid'] .
+					       ", contest c" . $cid . ".");
 
 					logmsg(LOG_DEBUG, "Running command: '" . BALLOON_CMD . "'");
 
@@ -166,15 +165,14 @@ while ( TRUE ) {
 							      BALLOON_CMD . "'");
 
 					fwrite($handle, notification_text($team, $row['probid'],
-									  $cdata, $probs_solved,
-									  $probs_data, $comment));
+					                                  $cdata, $probs_solved,
+					                                  $probs_data, $comment));
 					if ( ($exitcode = pclose($handle)) != 0 ) {
 						warning("Notification command exited with exitcode $exitcode");
 					}
 				}
 
-				$DB->q('UPDATE balloon SET done=1
-					WHERE balloonid = %i',
+				$DB->q('UPDATE balloon SET done=1 WHERE balloonid = %i',
 				       $row['balloonid']);
 			}
 

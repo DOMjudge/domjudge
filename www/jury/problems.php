@@ -18,7 +18,7 @@ $res = $DB->q('SELECT p.probid,p.name,p.timelimit,
                p.problemtext_type, COUNT(testcaseid) AS testcases
                FROM problem p
                LEFT JOIN testcase USING (probid)
-	       GROUP BY probid ORDER BY probid');
+               GROUP BY probid ORDER BY probid');
 
 // Get number of contests per problem
 $contestinfo = $DB->q("TABLE SELECT probid, cid

@@ -261,14 +261,15 @@ function judgings_POST($args)
 	// Prioritize teams according to last judging time
 	$submitid = $DB->q('MAYBEVALUE SELECT submitid
 	                    FROM submission s
-	                    LEFT JOIN team t ON (s.teamid = t.teamid)
-	                    LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
-			    LEFT JOIN contestproblem cp USING (probid, cid)
-			    WHERE judgehost IS NULL AND s.cid IN %Ai ' . $extra . '
-			    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
+	                    LEFT JOIN team t USING (teamid)
+	                    LEFT JOIN problem p USING (probid)
+	                    LEFT JOIN language l USING (langid)
+	                    LEFT JOIN contestproblem cp USING (probid, cid)
+	                    WHERE judgehost IS NULL AND s.cid IN %Ai ' . $extra . '
+	                    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
 	                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
 	                    LIMIT 1',
-			   $cids, $contests, $problems, $languages);
+	                   $cids, $contests, $problems, $languages);
 
 	if ( $submitid ) {
 		// update exactly one submission with our judgehost name
@@ -287,11 +288,12 @@ function judgings_POST($args)
 
 	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid,
 	               CEILING(time_factor*timelimit) AS maxruntime,
-		       special_run AS run, special_compare AS compare,
-		       compile_script
-	               FROM submission s, problem p, language l
-	               WHERE s.probid = p.probid AND s.langid = l.langid AND
-	               submitid = %i', $submitid);
+	               special_run AS run, special_compare AS compare,
+	               compile_script
+	               FROM submission s
+	               LEFT JOIN problem p USING (probid)
+	               LEFT JOIN language l USING (langid)
+	               WHERE submitid = %i', $submitid);
 
 	$DB->q('UPDATE team SET judging_last_started = %s WHERE teamid = %i',
 	       now(), $row['teamid']);
@@ -303,12 +305,15 @@ function judgings_POST($args)
 		$row['run'] = dbconfig_get('default_run');
 	}
 	// TODO: refactor + integrate in query above?
-	$compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['compare']);
+	$compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable
+	                          WHERE execid = %s', $row['compare']);
 	$row['compare_md5sum'] = $compare_md5sum;
-	$run_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['run']);
+	$run_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable
+	                      WHERE execid = %s', $row['run']);
 	$row['run_md5sum'] = $run_md5sum;
 	if ( !empty($row['compile_script']) ) {
-		$compile_script_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable WHERE execid = %s', $row['compile_script']);
+		$compile_script_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable
+		                                 WHERE execid = %s', $row['compile_script']);
 		$row['compile_script_md5sum'] = $compile_script_md5sum;
 	}
 
@@ -349,20 +354,26 @@ function judgings_PUT($args)
 				'WHERE judgingid = %i AND judgehost = %s',
 				base64_decode($args['output_compile']), now(),
 				$judgingid, $args['judgehost']);
-			$cid = $DB->q('VALUE SELECT s.cid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$judgingid);
-			auditlog('judging', $judgingid, 'judged', 'compiler-error', $args['judgehost'], $cid);
+			$cid = $DB->q('VALUE SELECT s.cid FROM judging
+			               LEFT JOIN submission s USING(submitid)
+			               WHERE judgingid = %i', $judgingid);
+			auditlog('judging', $judgingid, 'judged', 'compiler-error',
+			         $args['judgehost'], $cid);
 
-			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid FROM judging LEFT JOIN submission s USING(submitid) WHERE judgingid = %i',$judgingid);
+			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid
+			               FROM judging
+			               LEFT JOIN submission s USING(submitid)
+			               WHERE judgingid = %i',$judgingid);
 			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 
 			// log to event table if no verification required
 			// (case of verification required is handled in www/jury/verify.php)
 			if ( ! dbconfig_get('verification_required', 0) ) {
 				$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-					submitid, judgingid, description)
-					VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
-					now(), $row['cid'], $row['teamid'], $row['langid'], $row['probid'],
-					$row['submitid'], $judgingid);
+				        submitid, judgingid, description)
+				        VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
+				       now(), $row['cid'], $row['teamid'], $row['langid'],
+				       $row['probid'], $row['submitid'], $judgingid);
 			}
 		}
 	}
@@ -426,36 +437,41 @@ function judging_runs_POST($args)
 
 	if ( ($result = getFinalResult($allresults, $results_prio))!==NULL ) {
 		if ( count($runresults) == $numtestcases || dbconfig_get('lazy_eval_results', true) ) {
-			$DB->q('UPDATE judging SET result = %s, endtime = %s ' .
-				'WHERE judgingid = %i', $result, now(), $args['judgingid']);
+			$DB->q('UPDATE judging SET result = %s, endtime = %s
+			        WHERE judgingid = %i', $result, now(), $args['judgingid']);
 		} else {
-			$DB->q('UPDATE judging SET result = %s ' .
-				'WHERE judgingid = %i', $result, $args['judgingid']);
+			$DB->q('UPDATE judging SET result = %s
+			        WHERE judgingid = %i', $result, $args['judgingid']);
 		}
 
 		if ( $before !== $result ) {
 
 			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid
-					FROM judging LEFT JOIN submission s USING(submitid)
-					WHERE judgingid = %i',$args['judgingid']);
+			               FROM judging
+			               LEFT JOIN submission s USING(submitid)
+			               WHERE judgingid = %i',$args['judgingid']);
 			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 
 			// log to event table if no verification required
 			// (case of verification required is handled in www/jury/verify.php)
 			if ( ! dbconfig_get('verification_required', 0) ) {
 				$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-					submitid, judgingid, description)
-					VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
-					now(), $row['cid'], $row['teamid'], $row['langid'], $row['probid'],
-					$row['submitid'], $args['judgingid']);
+				        submitid, judgingid, description)
+				        VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
+				       now(), $row['cid'], $row['teamid'], $row['langid'],
+				       $row['probid'], $row['submitid'], $args['judgingid']);
 				if ( $result == 'correct' ) {
 					// prevent duplicate balloons in case of multiple correct submissions
 					$numcorrect = $DB->q('VALUE SELECT count(submitid)
-							      FROM balloon LEFT JOIN submission USING(submitid)
-							      WHERE valid = 1 AND probid = %i AND teamid = %i AND cid = %i',
-							      $row['probid'], $row['teamid'], $row['cid']);
+					                      FROM balloon
+					                      LEFT JOIN submission USING(submitid)
+					                      WHERE valid = 1 AND probid = %i
+					                      AND teamid = %i AND cid = %i',
+					                     $row['probid'], $row['teamid'], $row['cid']);
 					if ( $numcorrect == 0 ) {
-						$balloons_enabled = (bool)$DB->q("VALUE SELECT process_balloons FROM contest WHERE cid = %i", $row['cid']);
+						$balloons_enabled = (bool)$DB->q("VALUE SELECT process_balloons
+						                                  FROM contest WHERE cid = %i",
+						                                 $row['cid']);
 						if ( $balloons_enabled ) {
 							$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
 							       $row['submitid']);
@@ -515,7 +531,7 @@ function submissions($args)
 	global $DB, $cdatas, $api;
 
 	$query = 'SELECT submitid, teamid, probid, langid, submittime, valid
-		  FROM submission WHERE TRUE';
+	          FROM submission WHERE TRUE';
 
 	$hasCid = array_key_exists('cid', $args);
 	$query .= ($hasCid ? ' AND cid = %i' : ' AND TRUE %_');
@@ -566,7 +582,7 @@ function submissions($args)
 	return $res;
 }
 $args = array('cid' => 'Contest ID. If not provided, get submissions of all active contests',
-	      'language' => 'Search only for submissions in a certain language.',
+              'language' => 'Search only for submissions in a certain language.',
               'id' => 'Search only a certain ID',
               'fromid' => 'Search from a certain ID',
               'limit' => 'Get only the first N submissions');
@@ -594,10 +610,10 @@ function submissions_POST($args)
 	}
 	$cid = $contests[$contest_shortname]['cid'];
 
-	$probid = $DB->q("MAYBEVALUE SELECT probid FROM problem
-			  INNER JOIN contestproblem USING (probid)
-			  WHERE shortname = %s AND cid = %i AND allow_submit = 1",
-	                  $args['shortname'], $cid);
+	$probid = $DB->q('MAYBEVALUE SELECT probid FROM problem
+	                  INNER JOIN contestproblem USING (probid)
+	                  WHERE shortname = %s AND cid = %i AND allow_submit = 1',
+	                 $args['shortname'], $cid);
 	if ( empty($probid ) ) {
 		error("Problem " . $args['shortname'] . " not found or or not submittable");
 	}
@@ -621,8 +637,8 @@ function submissions_POST($args)
 
 $args = array('code[]' => 'Array of source files to submit',
               'shortname' => 'Problem shortname',
-	      'langid' => 'Language ID',
-	      'contest' => 'Contest short name. Required if more than one contest is active');
+              'langid' => 'Language ID',
+              'contest' => 'Contest short name. Required if more than one contest is active');
 $doc = 'Post a new submission. You need to be authenticated with a team role. Returns the submission id. This is used by the submit client.
 
 A trivial command line submisson using the curl binary could look like this:
@@ -641,8 +657,8 @@ function submission_files($args)
 
 	checkargs($args, array('id'));
 
-	$sources = $DB->q('SELECT filename, sourcecode
-	                   FROM submission_file WHERE submitid = %i ORDER BY rank', $args['id']);
+	$sources = $DB->q('SELECT filename, sourcecode FROM submission_file
+	                   WHERE submitid = %i ORDER BY rank', $args['id']);
 
 	$ret = array();
 	while($src = $sources->next()) {
@@ -758,16 +774,16 @@ function queue($args)
 	// TODO: validate limit
 
 	$submitids = $DB->q('SELECT submitid
-			     FROM submission s
-			     LEFT JOIN team t ON (s.teamid = t.teamid)
-			     LEFT JOIN problem p USING (probid) LEFT JOIN language l USING (langid)
-			     LEFT JOIN contestproblem cp USING (probid, cid)
-			     WHERE judgehost IS NULL AND s.cid IN %Ai
-			     AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
-			     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC'
-			     . ($hasLimit ? ' LIMIT %i' : ' %_'),
-			     $cids,
-			     ($hasLimit ? $args['limit'] : -1));
+	                     FROM submission s
+	                     LEFT JOIN team t USING (teamid)
+	                     LEFT JOIN problem p USING (probid)
+	                     LEFT JOIN language l USING (langid)
+	                     LEFT JOIN contestproblem cp USING (probid, cid)
+	                     WHERE judgehost IS NULL AND s.cid IN %Ai
+	                     AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
+	                     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC' .
+	                    ($hasLimit ? ' LIMIT %i' : ' %_'),
+	                    $cids, ($hasLimit ? $args['limit'] : -1));
 
 	return $submitids->getTable();
 }
@@ -848,7 +864,8 @@ function categories()
 {
 	global $DB;
 
-	$q = $DB->q('SELECT categoryid, name, color, visible FROM team_category ORDER BY sortorder');
+	$q = $DB->q('SELECT categoryid, name, color, visible
+	             FROM team_category ORDER BY sortorder');
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array('categoryid' => $row['categoryid'],
@@ -894,7 +911,7 @@ function clarifications($args)
 
 	// Find public clarifications, maybe later also provide more info for jury
 	$query = 'SELECT clarid, submittime, probid, body FROM clarification
-		  WHERE cid IN %Ai AND sender IS NULL AND recipient IS NULL';
+	          WHERE cid IN %Ai AND sender IS NULL AND recipient IS NULL';
 
 	$byProblem = array_key_exists('problem', $args);
 	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
@@ -937,7 +954,7 @@ function judgehosts_POST($args)
 	checkargs($args, array('hostname'));
 
 	$DB->q('INSERT IGNORE INTO judgehost (hostname) VALUES(%s)',
-	            $args['hostname']);
+	       $args['hostname']);
 
 	// If there are any unfinished judgings in the queue in my name,
 	// they will not be finished. Give them back.
@@ -1011,7 +1028,7 @@ function scoreboard($args)
 }
 $doc = 'Get the scoreboard. Should give the same information as public/jury scoreboards, i.e. after freeze the public one is not updated.';
 $args = array('cid' => 'ID of the contest to get the scoreboard for',
-	      'category' => 'ID of a single category to search for.',
+              'category' => 'ID of a single category to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
               'country' => 'ISO 3166-1 alpha-3 country code to search for.');
 $exArgs = array(array('cid' => 2, 'category' => 1, 'affiliation' => 'UU'), array('cid' => 2, 'country' => 'NLD'));
