@@ -80,7 +80,7 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 	                                 max(ct.teamid=%s) AS incontest
 	                    FROM contest c
 	                    LEFT JOIN contestteam ct USING (cid)
-	                    WHERE contest.public = 0
+	                    WHERE c.public = 0
 	                    GROUP BY c.cid", @$row['teamid']);
 	$i=0;
 	foreach ($contests as $contest) {
