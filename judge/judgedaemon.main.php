@@ -277,8 +277,6 @@ initsignals();
 
 read_credentials();
 
-if ( isset($options['daemon']) ) daemonize(PIDFILE);
-
 // Warn when chroot has been disabled. This has security implications.
 if ( ! USE_CHROOT ) {
 	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
@@ -315,6 +313,9 @@ foreach ($endpoints as $id=>$endpoint) {
 			   " in my name; given back");
 	}
 }
+
+// If all startup done, daemonize
+if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
 // Constantly check API for unjudged submissions
 $endpointIDs = array_keys($endpoints);
