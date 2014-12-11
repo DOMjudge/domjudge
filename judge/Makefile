@@ -22,6 +22,10 @@ runguard$(OBJEXT): $(TOPDIR)/etc/runguard-config.h
 runpipe: runpipe.c $(LIBHEADERS) $(LIBSOURCES)
 	$(CC) $(CFLAGS) -static -o $@ $< $(LIBSOURCES)
 
+chroot-startstop.sh: chroot-startstop.sh.in $(TOPDIR)/paths.mk
+	$(substconfigvars)
+	chmod a+x $@
+
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libjudgedir) \
 		compile*.sh testcase_run.sh chroot-startstop.sh \
