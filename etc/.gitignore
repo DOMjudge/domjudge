@@ -10,3 +10,4 @@
 /restapi.secret
 /sudoers-domjudge
 /cgroup-domjudge.conf
+/domjudge-judgehost.init

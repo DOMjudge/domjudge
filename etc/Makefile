@@ -15,7 +15,7 @@ include $(TOPDIR)/Makefile.global
 
 SUBST_CONFIGS = apache.conf nginx-conf domserver-static.php \
                 judgehost-static.php runguard-config.h submit-config.h \
-                sudoers-domjudge cgroup-domjudge.conf
+                sudoers-domjudge cgroup-domjudge.conf domjudge-judgehost.init
 
 $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
