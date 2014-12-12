@@ -5,9 +5,11 @@ include $(TOPDIR)/Makefile.global
 
 TARGETS = runguard runpipe
 
-judgehost: $(TARGETS) judgedaemon
+SUBST_FILES = judgedaemon chroot-startstop.sh
 
-judgedaemon: judgedaemon.in $(TOPDIR)/paths.mk
+judgehost: $(TARGETS) $(SUBST_FILES)
+
+$(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
@@ -21,10 +23,6 @@ runguard$(OBJEXT): $(TOPDIR)/etc/runguard-config.h
 # not 0.6 MB (!) in size?
 runpipe: runpipe.c $(LIBHEADERS) $(LIBSOURCES)
 	$(CC) $(CFLAGS) -static -o $@ $< $(LIBSOURCES)
-
-chroot-startstop.sh: chroot-startstop.sh.in $(TOPDIR)/paths.mk
-	$(substconfigvars)
-	chmod a+x $@
 
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libjudgedir) \
