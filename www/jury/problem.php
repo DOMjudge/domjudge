@@ -77,7 +77,7 @@ if ( !empty($cmd) ):
 	if ( $cmd == 'edit' ) {
 		echo "<tr><td>Problem ID:</td><td>";
 		$row = $DB->q('TUPLE SELECT p.probid,p.name,
-					    p.timelimit,p.special_run,p.special_compare,
+		                            p.timelimit,p.memlimit,p.special_run,p.special_compare,
 		                            p.problemtext_type, COUNT(testcaseid) AS testcases
 		               FROM problem p
 		               LEFT JOIN testcase USING (probid)
@@ -101,6 +101,9 @@ if ( !empty($cmd) ):
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
 <td><?php echo addInputField('number','data[0][timelimit]', @$row['timelimit'],
 	' min="1" max="10000" required')?> sec</td></tr>
+
+<tr><td><label for="data_0__memlimit_">Memory limit:</label></td>
+<td><?php echo addInputField('number','data[0][memlimit]', @$row['memlimit'])?> kB</td></tr>
 
 <tr><td><label for="data_0__problemtext_">Problem text:</label></td>
 <td><?php
@@ -167,7 +170,7 @@ exit;
 endif;
 
 $data = $DB->q('TUPLE SELECT p.probid,p.name,
-                             p.timelimit,p.special_run,p.special_compare,
+                             p.timelimit,p.memlimit,p.special_run,p.special_compare,
                              p.problemtext_type, count(rank) AS ntestcases
                 FROM problem p
                 LEFT JOIN testcase USING (probid)
@@ -194,6 +197,8 @@ echo addForm($pagename . '?id=' . urlencode($id),
 	echo ' <a href="testcase.php?probid='.urlencode($data['probid']).'">details/edit</a>';
 ?></td></tr>
 <tr><td>Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
+<tr><td>Memory limit:</td><td><?php
+	echo (isset($data['memlimit']) ? (int)$data['memlimit'] : '-') ?> kB</td></tr>
 <?php
 if ( !empty($data['color']) ) {
 	echo '<tr><td>Colour:</td><td><div class="circle" style="background-color: ' .

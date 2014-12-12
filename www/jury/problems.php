@@ -14,7 +14,7 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Problems</h1>\n\n";
 
 // Select all data
-$res = $DB->q('SELECT p.probid,p.name,p.timelimit,
+$res = $DB->q('SELECT p.probid,p.name,p.timelimit,p.memlimit,
                p.problemtext_type, COUNT(testcaseid) AS testcases
                FROM problem p
                LEFT JOIN testcase USING (probid)
@@ -38,6 +38,7 @@ if( $res->count() == 0 ) {
 	     "<tr><th scope=\"col\">ID</th><th scope=\"col\">name</th>" .
 	     "<th scope=\"col\" class=\"sorttable_numeric\"># contests</th>" .
 	     "<th scope=\"col\">time<br />limit</th>" .
+	     "<th scope=\"col\">memory<br />limit</th>" .
 	     "<th scope=\"col\">test<br />cases</th>" .
 	     "<th scope=\"col\"></th>" .
 	    ( IS_ADMIN ? "<th scope=\"col\"></th><th scope=\"col\"></th>" : '' ) .
@@ -57,6 +58,7 @@ if( $res->count() == 0 ) {
 			"</td><td>".
 			$link . htmlspecialchars(count($contestproblems[$row['probid']])) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
+			"</td><td>" . $link . (isset($row['memlimit']) ? (int)$row['memlimit'] : '-') . "</a>" .
 			"</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
 			"\">" . $row['testcases'] . "</a></td>";
 		if ( !empty($row['problemtext_type']) ) {

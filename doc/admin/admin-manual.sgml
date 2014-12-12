@@ -1344,6 +1344,10 @@ submissions for this problem. See also the explanation for language.
 within which solutions for this problem have to run (taking into
 account <tt>time_factor</tt> per language).
 
+<tt>memlimit</tt> is the memory limit in kB allotted for this problem.
+If empty then the global configuration setting <tt>memory_limit</tt>
+is used.
+
 <tt>special_run</tt> if not empty defines a custom run program
 <tt>run_&lt;special_run&gt;</tt> to run compiled submissions for
 this problem and <tt>special_compare</tt> if not empty defines a
