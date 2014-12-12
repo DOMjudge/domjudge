@@ -48,10 +48,10 @@ function get_testcase_data()
 	global $DB, $data, $probid;
 
 	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
-			description, sample,
-			OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-			OCTET_LENGTH(output) AS size_output, md5sum_output
-			FROM testcase WHERE probid = %i ORDER BY rank', $probid);
+	                description, sample,
+	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
+	                OCTET_LENGTH(output) AS size_output, md5sum_output
+	                FROM testcase WHERE probid = %i ORDER BY rank', $probid);
 }
 get_testcase_data();
 
