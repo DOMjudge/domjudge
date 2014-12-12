@@ -335,7 +335,8 @@ if ( isset($jid) )  {
 	                       truncate_SQL_field('r.output_error')  . ' AS output_error, ' .
 	                       truncate_SQL_field('r.output_system') . ' AS output_system, ' .
 	                       truncate_SQL_field('t.output')        . ' AS output_reference,
-	                       t.rank, t.description
+	                       t.rank, t.description,
+	                       t.image_type, t.image_thumb
 	                FROM testcase t
 	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 	                                             r.judgingid = %i )
@@ -519,6 +520,7 @@ togglelastruns();
 				$timelimit_str = '<b>(finished late)</b>';
 			}
 		}
+		echo "<table>\n<tr><td>";
 		echo "<table>\n" .
 		    "<tr><td>Description:</td><td>" .
 		    htmlspecialchars($run['description']) . "</td></tr>" .
@@ -534,6 +536,16 @@ togglelastruns();
 		    ( $run['runresult']=='correct' ? '' : 'in' ) .
 		    "correct\">$run[runresult]</span></td></tr>" .
 		    "</table>\n\n";
+		echo "</td><td>";
+		if ( isset($run['image_thumb']) ) {
+			$imgurl = "./testcase.php?probid=" .  urlencode($submdata['probid']) .
+			    "&amp;rank=" . $run['rank'] . "&amp;fetch=image";
+			echo "<a href=\"$imgurl\">";
+			echo '<img src="data:image/' . $run['image_type'] . ';base64,' .
+			    base64_encode($run['image_thumb']) . '"/>';
+			echo "</a>";
+		}
+		echo "</td></tr></table>\n\n";
 
 		echo "<h5>Diff output</h5>\n";
 		if ( strlen(@$run['output_diff']) > 0 ) {
