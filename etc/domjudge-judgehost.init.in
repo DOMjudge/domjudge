@@ -24,7 +24,7 @@ RUNDIR=@judgehost_rundir@
 CHROOTDIR=@judgehost_chrootdir@
 CGROUPDIR=@judgehost_cgroupdir@
 DAEMON=$BINDIR/judgedaemon
-PIDFILE=$RUNDIR$NAME.pid
+PIDFILE=$RUNDIR/$NAME.pid
 DESC="DOMjudge Judgedaemon"
 RUNAS=@DOMJUDGE_USER@
 
