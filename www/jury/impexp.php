@@ -22,7 +22,8 @@ requireAdmin();
 <li>Tab separated, export:
 	<a href="impexp_tsv.php?act=ex&amp;fmt=groups">groups.tsv</a>,
 	<a href="impexp_tsv.php?act=ex&amp;fmt=teams">teams.tsv</a>,
-	<a href="impexp_tsv.php?act=ex&amp;fmt=scoreboard">scoreboard.tsv</a>
+	<a href="impexp_tsv.php?act=ex&amp;fmt=scoreboard">scoreboard.tsv</a>,
+	<a href="impexp_tsv.php?act=ex&amp;fmt=results">results.tsv</a>
 <li>
 <?php echo addForm('impexp_tsv.php', 'post', null, 'multipart/form-data') .
 	'Tab separated, import: ' .

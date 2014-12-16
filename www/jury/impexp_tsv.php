@@ -207,7 +207,7 @@ function tsv_export($fmt)
 		case 'groups':     $data = tsv_groups_get();     $version = 1; break;
 		case 'teams':      $data = tsv_teams_get();      $version = 1; break;
 		case 'scoreboard': $data = tsv_scoreboard_get(); $version = 1; break;
-	//	case 'results':    $data = tsv_results_get();    $version = 1; break;
+		case 'results':    $data = tsv_results_get();    $version = 1; break;
 	//	case 'userdata':   $data = tsv_userdata_get();   $version = 1; break;
 	//	case 'accounts':   $data = tsv_accounts_get();   $version = 1; break;
 		default: error('Specified format not (yet) supported.');
@@ -271,6 +271,101 @@ function tsv_scoreboard_get()
 			$drow
 			);
 	}
+
+	return $data;
+}
+
+$extid_to_name = array();
+
+// sort data array according to rank and name
+function cmp_extid_name($a, $b) {
+	global $extid_to_name;
+	if ( $a[1] != $b[1] ) {
+		// Honorable mention has no rank
+		if ( $a[1] == "" ) {
+			return 1;
+		} else if ( $b[1] == "" ) {
+			return -11;
+		}
+		return $a[1] - $b[1];
+	}
+	$name_a = $extid_to_name[$a[0]];
+	$name_b = $extid_to_name[$b[0]];
+	return strcmp($name_a, $name_b);
+}
+
+function tsv_results_get()
+{
+	// we'll here assume that the requested file will be of the current contest,
+	// as all our scoreboard interfaces do
+	// 1 	External ID 	24314 	integer
+	// 2 	Rank in contest 	1 	integer
+	// 3 	Award 	Gold Medal 	string
+	// 4 	Number of problems the team has solved 	4 	integer
+	// 5 	Total Time 	534 	integer
+	// 6 	Time of the last submission 	233 	integer
+	// 7 	Group Winner 	North American 	string
+	global $cdata, $DB, $extid_to_name;
+
+	$categs = $DB->q('COLUMN SELECT categoryid FROM team_category WHERE visible = 1');
+	$sb = genScoreBoard($cdata, true, array('categoryid' => $categs));
+	$additional_bronze = $DB->q('VALUE SELECT b FROM contest WHERE cid = %i', $cdata['cid']);
+	$extid_to_name = $DB->q('KEYVALUETABLE SELECT externalid, name FROM team ORDER BY externalid');
+
+	$numteams = sizeof($sb['scores']);
+
+	// determine number of problems solved by median team
+	$cnt = 0;
+	foreach ($sb['scores'] as $teamid => $srow) {
+		$cnt++;
+		$median = $srow['num_correct'];
+		if ($cnt > $numteams/2) { // XXX: lower or upper median?
+			break;
+		}
+	}
+
+	$ranks = array();
+	$group_winners = array();
+	$data = array();
+	foreach ($sb['scores'] as $teamid => $srow) {
+		$maxtime = -1;
+		foreach($sb['matrix'][$teamid] as $prob) {
+			$maxtime = max($maxtime, $prob['time']);
+		}
+
+		$rank = $srow['rank'];
+		$num_correct = $srow['num_correct'];
+		if ( $rank <= 4 ) {
+			$awardstring = "Gold Medal";
+		} else if ( $rank <= 8 ) {
+			$awardstring = "Silver Medal";
+		} else if ( $rank <= 12 + $additional_bronze ) {
+			$awardstring = "Bronze Medal";
+		} else if ( $num_correct >= $median ) {
+			// teams with equally solved number of problems get the same rank
+			if ( !isset($ranks[$num_correct]) ) {
+				$ranks[$num_correct] = $rank;
+			}
+			$rank = $ranks[$num_correct];
+			$awardstring = "Ranked";
+		} else {
+			$awardstring = "Honorable";
+			$rank = "";
+		}
+
+		$groupwinner = "";
+		if ( !isset($group_winners[$srow['categoryid']]) ) {
+			$group_winners[$srow['categoryid']] = true;
+			$groupwinner = $DB->q('VALUE SELECT name FROM team_category WHERE categoryid = %i', $srow['categoryid']);
+		}
+
+		$data[] = array(@$sb['teams'][$teamid]['externalid'],
+				$rank, $awardstring, $srow['num_correct'],
+				$srow['total_time'], $maxtime, $groupwinner);
+	}
+
+	// sort by rank/name
+	uasort($data, 'cmp_extid_name');
 
 	return $data;
 }
