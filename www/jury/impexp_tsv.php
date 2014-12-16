@@ -57,6 +57,10 @@ function tsv_import($fmt)
 			$data = tsv_teams_prepare($content);
 			$c = tsv_teams_set($data);
 			break;
+		case 'accounts':
+			$data = tsv_accounts_prepare($content);
+			$c = tsv_accounts_set($data);
+			break;
 		default: error("Unknown format");
 	}
 
@@ -140,6 +144,59 @@ function tsv_teams_set($data)
 	}
 	return $c;
 }
+
+
+function tsv_accounts_prepare($content)
+{
+	global $DB;
+	$data = array();
+	$l = 1;
+	$juryroleid = $DB->q('VALUE SELECT roleid FROM role WHERE role = %s', 'jury');
+	$adminroleid = $DB->q('VALUE SELECT roleid FROM role WHERE role = %s', 'admin');
+	foreach($content as $line) {
+		$l++;
+		$line = explode("\t", trim($line));
+
+		if ($line[0] != 'admin' && $line[0] != 'judge') {
+			error('unknown role id in line ' . $l . ': ' . $line[0]);
+		}
+		$line[0] = ($line == 'admin' ? $adminroleid : $juryroleid);
+
+		// accounts.tsv contains data pertaining both to users and userroles.
+		// hence return data for both tables.
+
+		// we may do more integrity/format checking of the data here.
+		$data[] = array (
+			'user' => array (
+				'name' => $line[2],
+				'username' => $line[3],
+				'password' => md5($line[3].'#'.$line[4])),
+			'userrole' => array (
+				'userid' => -1, // need to get appropriate userid later
+				'roleid' => $line[0])
+			);
+	}
+
+	return $data;
+}
+
+
+function tsv_accounts_set($data)
+{
+	global $DB;
+	$c = 0;
+	foreach ($data as $row) {
+		$DB->q("REPLACE INTO user SET %S", $row['user']);
+		$userid = $DB->q("VALUE SELECT userid FROM user WHERE username = %s", $row['user']['username']);
+		auditlog('user', $userid, 'replaced', 'imported from tsv');
+		$row['userrole']['userid'] = $userid;
+		$DB->q("REPLACE INTO userrole SET %S", $row['userrole']);
+		auditlog('userrole', $userid, 'replaced', 'imported from tsv');
+		$c++;
+	}
+	return $c;
+}
+
 
 /** Export functions **/
 function tsv_export($fmt)
