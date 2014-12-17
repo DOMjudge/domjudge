@@ -157,7 +157,6 @@ chmod a+x "$WORKDIR" "$WORKDIR/execdir"
 
 # Create files which are expected to exist:
 touch system.out                 # Judging system output (info/debug/error)
-touch result.out                 # Result of comparison
 touch program.out program.err    # Program output and stderr (for extra information)
 touch program.meta runguard.err  # Metadata and runguard stderr
 touch compare.out                # Compare output
@@ -218,25 +217,43 @@ cp "$TESTOUT" "$WORKDIR/testdata.out"
 logmsg $LOG_DEBUG "starting compare script '$COMPARE_SCRIPT'"
 
 exitcode=0
-chmod a+w result.out compare.out
-$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
+# Make files writable for $RUNUSER
+chmod a+w compare.out
+mkdir feedback                   # Create dir for feedback files
+for i in judgemessage.txt teammessage.txt score.txt judgeerror.txt diffposition.txt; do
+	touch feedback/$i        # Create possible feedback files
+	chmod a+w feedback/$i
+done
+# TODO; get and pass additional arguments to validator
+runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
 	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
-	"$COMPARE_SCRIPT" testdata.in program.out testdata.out \
-	                  result.out compare.out >compare.tmp 2>&1 || exitcode=$?
+	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ < program.out \
+	                  >compare.tmp 2>&1
 
-logmsg $LOG_DEBUG "checking compare script exit-status"
+# Append output validator error messages
+# TODO: display extra
+if [ -s feedback/judgeerror.txt ]; then
+	echo -e "\n---------- output validator (error) messages ----------\n" >> compare.out
+	cat feedback/judgeerror.txt >> compare.out
+fi
+
+logmsg $LOG_DEBUG "checking compare script exit-status: $exitcode"
 if grep '^time-result: .*timelimit' compare.meta >/dev/null 2>&1 ; then
 	echo "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:" >compare.out
 	cat compare.tmp >>compare.out
 	cleanexit ${E_COMPARE_ERROR:--1}
 fi
-if [ $exitcode -ne 0 ]; then
+if [ $exitcode -ne 42 ] && [ $exitcode -ne 43 ]; then
 	echo "Comparing failed with exitcode $exitcode, compare output:" >compare.out
 	cat compare.tmp >>compare.out
 	cleanexit ${E_COMPARE_ERROR:--1}
 fi
-cat compare.tmp >>compare.out
+# Append output validator stdin/stderr - display extra?
+if [ -s compare.tmp ]; then
+	echo -e "\n---------- output validator stdout/stderr messages ----------\n" >> compare.out
+	cat compare.tmp >>compare.out
+fi
 
 # Check for errors from running the program:
 if [ ! -r program.meta ]; then
@@ -259,42 +276,11 @@ if [ "$program_exit" != "0" ]; then
 	cleanexit ${E_RUN_ERROR:--1}
 fi
 
-############################################################
-### Checks for other runtime errors:                     ###
-### Disabled, because these are not consistently         ###
-### reported the same way by all different compilers.    ###
-############################################################
-#if grep  'Floating point exception' program.err >/dev/null 2>&1 ; then
-#	echo "Floating point exception." >>system.out
-#	cleanexit ${E_RUN_ERROR:--1}
-#fi
-#if grep  'Segmentation fault' program.err >/dev/null 2>&1 ; then
-#	echo "Segmentation fault." >>tee system.out
-#	cleanexit ${E_RUN_ERROR:--1}
-#fi
-#if grep  'File size limit exceeded' program.err >/dev/null 2>&1 ; then
-#	echo "File size limit exceeded." >>system.out
-#	cleanexit ${E_OUTPUT_LIMIT:--1}
-#fi
-
-result=`grep '^result='      result.out | cut -d = -f 2- | tr '[:upper:]' '[:lower:]'`
-descrp=`grep '^description=' result.out | cut -d = -f 2-`
-descrp="${descrp:+ ($descrp)}"
-
-if [ "$result" = "accepted" ]; then
+if [ $exitcode -eq 42 ]; then
 	echo "Correct${descrp}! Runtime: $runtime." >>system.out
 	cleanexit ${E_CORRECT:--1}
-elif [ "$result" = "presentation error" ]; then
-	echo "Presentation error${descrp}." >>system.out
-	cleanexit ${E_PRESENTATION_ERROR:--1}
-elif [ ! -s program.out ]; then
-	echo "Program produced no output." >>system.out
-	cleanexit ${E_NO_OUTPUT:--1}
-elif [ "$result" = "wrong answer" ]; then
+elif [ $exitcode -eq 43 ]; then
 	echo "Wrong answer${descrp}." >>system.out
-	cleanexit ${E_WRONG_ANSWER:--1}
-else
-	echo "Unknown result: Wrong answer#${descrp}#${result}#." >>system.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 fi
 
