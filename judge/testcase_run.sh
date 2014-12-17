@@ -14,6 +14,7 @@
 #                   Certainly do not place output-files there!
 # <run>             Absolute path to run script to use.
 # <compare>         Absolute path to compare script to use.
+# <compare-args>    Arguments to path to compare script
 #
 # Default run and compare scripts can be configured in the database.
 #
@@ -125,8 +126,9 @@ TIMELIMIT="$1"; shift
 WORKDIR="$1";   shift
 RUN_SCRIPT="$1";
 COMPARE_SCRIPT="$2";
+COMPARE_ARGS="$3";
 logmsg $LOG_DEBUG "arguments: '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$WORKDIR'"
-logmsg $LOG_DEBUG "optionals: '$RUN_SCRIPT' '$COMPARE_SCRIPT'"
+logmsg $LOG_DEBUG "optionals: '$RUN_SCRIPT' '$COMPARE_SCRIPT' '$COMPARE_ARGS'"
 
 # optional runjury program
 RUN_JURYPROG="${RUN_SCRIPT}jury"
@@ -228,7 +230,7 @@ done
 runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
 	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
-	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ < program.out \
+	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
 	                  >compare.tmp 2>&1
 
 # Append output validator error messages

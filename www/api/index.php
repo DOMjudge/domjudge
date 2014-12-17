@@ -290,7 +290,7 @@ function judgings_POST($args)
 	               CEILING(time_factor*timelimit) AS maxruntime,
 	               p.memlimit, p.outputlimit,
 	               special_run AS run, special_compare AS compare,
-	               compile_script
+	               special_compare_args AS compare_args, compile_script
 	               FROM submission s
 	               LEFT JOIN problem p USING (probid)
 	               LEFT JOIN language l USING (langid)

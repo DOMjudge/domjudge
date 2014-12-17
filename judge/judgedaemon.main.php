@@ -535,7 +535,7 @@ function judge($row)
 
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
-		       "'$run_runpath' '$compare_runpath'", $retval);
+		       "'$run_runpath' '$compare_runpath' '$row[compare_args]'", $retval);
 
 		// what does the exitcode mean?
 		if( ! isset($EXITCODES[$retval]) ) {

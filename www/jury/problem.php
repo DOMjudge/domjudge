@@ -78,7 +78,7 @@ if ( !empty($cmd) ):
 		echo "<tr><td>Problem ID:</td><td>";
 		$row = $DB->q('TUPLE SELECT p.probid,p.name,
 		                            p.timelimit,p.memlimit,p.outputlimit,
-		                            p.special_run,p.special_compare,
+		                            p.special_run,p.special_compare, p.special_compare_args,
 		                            p.problemtext_type, COUNT(testcaseid) AS testcases
 		               FROM problem p
 		               LEFT JOIN testcase USING (probid)
@@ -140,6 +140,9 @@ echo addSelect('data[0][special_compare]', $execmap, @$row['special_compare'], T
 ?>
 </td></tr>
 
+<tr><td><label for="data_0__special_compare_args_">Special compare args:</label></td>
+<td><?php echo addInput('data[0][special_compare_args]', @$row['special_compare_args'], 30, 255)?></td></tr>
+
 </table>
 
 <?php
@@ -175,7 +178,7 @@ endif;
 
 $data = $DB->q('TUPLE SELECT p.probid,p.name,
                              p.timelimit,p.memlimit,p.outputlimit,
-                             p.special_run,p.special_compare,
+                             p.special_run,p.special_compare,p.special_compare_args,
                              p.problemtext_type, count(rank) AS ntestcases
                 FROM problem p
                 LEFT JOIN testcase USING (probid)
@@ -228,6 +231,10 @@ if ( !empty($data['special_compare']) ) {
 	echo '<tr><td>Special compare script:</td><td class="filename">' .
 		'<a href="executable.php?id=' . urlencode($data['special_compare']) . '">' .
 		htmlspecialchars($data['special_compare']) . "</a></td></tr>\n";
+}
+if ( !empty($data['special_compare_args']) ) {
+	echo '<tr><td>Compare script arguments:</td><td>' .
+		htmlspecialchars($data['special_compare_args']) . "</td></tr>\n";
 }
 
 echo "</table>\n" . addEndForm();
