@@ -128,8 +128,8 @@ echo addSelect('data[0][cid]', $cmap, @$row['cid'], true);
 	' size="5" maxlength="5" min="1" max="10000" required')?> sec</td></tr>
 
 <tr><td><label for="data_0__color_">Balloon colour:</label></td>
-<td><?php echo addInputField('color','data[0][color]', @$row['color'],
-	' size="8" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
+<td><?php echo addInput('data[0][color]', @$row['color'], 10, 25,
+	'class="color {required:false,adjust:false,hash:true,caps:false}"')?>
 <a target="_blank"
 href="http://www.w3schools.com/cssref/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>

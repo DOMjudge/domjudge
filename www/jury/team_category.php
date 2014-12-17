@@ -45,8 +45,8 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 <td><?php echo addInputField('number', 'data[0][sortorder]', (empty($row['sortorder'])?0:$row['sortorder']), ' size="3" maxlength="2"')?></td></tr>
 
 <tr><td><label for="data_0__color_">Colour:</label></td>
-<td><?php echo addInputField('color','data[0][color]', @$row['color'],
-	' size="15" maxlength="25" class="color {required:false,adjust:false,hash:true,caps:false}"')?>
+<td><?php echo addInput('data[0][color]', @$row['color'], 15, 25,
+	'class="color {required:false,adjust:false,hash:true,caps:false}"')?>
 <a target="_blank"
 href="http://www.w3schools.com/cssref/css_colornames.asp"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
