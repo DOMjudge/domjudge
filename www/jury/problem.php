@@ -33,8 +33,6 @@ if ( isset($_POST['cmd']) ) {
 // This doesn't return, call before sending headers
 if ( isset($cmd) && $cmd == 'viewtext' ) putProblemText($id);
 
-$jscolor=true;
-
 require(LIBWWWDIR . '/header.php');
 
 if ( isset($_POST['upload']) ) {
