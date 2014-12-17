@@ -50,7 +50,7 @@ INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('example-judgehost1', 0);
 --
 
 INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_compare`) VALUES (1, 'Hello World', 5, NULL, NULL);
-INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_compare`) VALUES (2, 'Float special compare test', 5, NULL, 'float');
+INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_compare`, `special_compare_args`) VALUES (2, 'Float special compare test', 5, NULL, 'compare', 'float_tolerance 1E-6');
 INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_compare`) VALUES (3, 'Boolean switch search', 5, 'boolfind_run', 'boolfind_cmp');
 
 --
