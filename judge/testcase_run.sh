@@ -161,7 +161,6 @@ chmod a+x "$WORKDIR" "$WORKDIR/execdir"
 touch system.out                 # Judging system output (info/debug/error)
 touch program.out program.err    # Program output and stderr (for extra information)
 touch program.meta runguard.err  # Metadata and runguard stderr
-touch compare.out                # Compare output
 touch compare.meta compare.err   # Compare runguard metadata and stderr
 
 logmsg $LOG_INFO "setting up testing (chroot) environment"
@@ -220,7 +219,6 @@ logmsg $LOG_DEBUG "starting compare script '$COMPARE_SCRIPT'"
 
 exitcode=0
 # Make files writable for $RUNUSER
-chmod a+w compare.out
 mkdir feedback                   # Create dir for feedback files
 for i in judgemessage.txt teammessage.txt score.txt judgeerror.txt diffposition.txt; do
 	touch feedback/$i        # Create possible feedback files
@@ -236,25 +234,25 @@ runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
 # Append output validator error messages
 # TODO: display extra
 if [ -s feedback/judgeerror.txt ]; then
-	echo -e "\n---------- output validator (error) messages ----------\n" >> compare.out
-	cat feedback/judgeerror.txt >> compare.out
+	echo -e "\n---------- output validator (error) messages ----------\n" >> feedback/judgemessage.txt
+	cat feedback/judgeerror.txt >> feedback/judgemessage.txt
 fi
 
 logmsg $LOG_DEBUG "checking compare script exit-status: $exitcode"
 if grep '^time-result: .*timelimit' compare.meta >/dev/null 2>&1 ; then
-	echo "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:" >compare.out
-	cat compare.tmp >>compare.out
-	cleanexit ${E_COMPARE_ERROR:--1}
-fi
-if [ $exitcode -ne 42 ] && [ $exitcode -ne 43 ]; then
-	echo "Comparing failed with exitcode $exitcode, compare output:" >compare.out
-	cat compare.tmp >>compare.out
+	echo "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:" >> feedback/judgemessage.txt
+	cat compare.tmp >> feedback/judgemessage.txt
 	cleanexit ${E_COMPARE_ERROR:--1}
 fi
 # Append output validator stdin/stderr - display extra?
 if [ -s compare.tmp ]; then
-	echo -e "\n---------- output validator stdout/stderr messages ----------\n" >> compare.out
-	cat compare.tmp >>compare.out
+	echo -e "\n---------- output validator stdout/stderr messages ----------\n" >> feedback/judgemessage.txt
+	cat compare.tmp >> feedback/judgemessage.txt
+fi
+if [ $exitcode -ne 42 ] && [ $exitcode -ne 43 ]; then
+	echo "Comparing failed with exitcode $exitcode, compare output:" >> feedback/judgemessage.txt
+	cat compare.tmp >> feedback/judgemessage.txt
+	cleanexit ${E_COMPARE_ERROR:--1}
 fi
 
 # Check for errors from running the program:

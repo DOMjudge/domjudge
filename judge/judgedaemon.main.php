@@ -563,7 +563,7 @@ function judge($row)
 			. '&output_run='   . rest_encode_file($testcasedir . '/program.out', FALSE)
 			. '&output_error=' . rest_encode_file($testcasedir . '/program.err')
 			. '&output_system=' . rest_encode_file($testcasedir . '/system.out')
-			. '&output_diff='  . rest_encode_file($testcasedir . '/compare.out')
+			. '&output_diff='  . rest_encode_file($testcasedir . '/feedback/judgemessage.txt')
 		);
 		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
 
