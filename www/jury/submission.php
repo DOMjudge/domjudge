@@ -192,8 +192,7 @@ if ( ! $submdata['valid'] ) {
 <img title="team" alt="Team:" src="../images/team.png"/> <a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>&amp;cid=<?php echo urlencode($submdata['cid'])?>">
     <?php echo htmlspecialchars($submdata['teamname'] . " (t" . $submdata['teamid'].")")?></a>&nbsp;&nbsp;
 <img title="contest" alt="Contest:" src="../images/contest.png"/> <a href="contest.php?id=<?php echo $submdata['cid']?>">
-	<span class="contestid"><?php echo htmlspecialchars($submdata['contestshortname'])?></span>:
-	<?php echo htmlspecialchars($submdata['contestname'])?></a>&nbsp;&nbsp;
+	<span class="contestid"><?php echo htmlspecialchars($submdata['contestshortname'])?></span></a>&nbsp;&nbsp;
 <img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>&amp;cid=<?php echo urlencode($submdata['cid'])?>">
 	<span class="probid"><?php echo htmlspecialchars($submdata['shortname'])?></span>:
 	<?php echo htmlspecialchars($submdata['probname'])?></a>&nbsp;&nbsp;
@@ -234,8 +233,7 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 			"</tr>\n";
 
 	}
-    echo "</tbody>\n</table>\n\n";
-
+    echo "</tbody>\n</table><br />\n\n";
 }
 
 if ( !isset($jid) ) {
