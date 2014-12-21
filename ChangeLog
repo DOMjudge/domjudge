@@ -10,6 +10,7 @@ Version 4.0.5 - DEV
  - ICPC import: add missing variable to user query, fix importing
    of team member names and error when required PHP cURL extension
    is missing.
+ - Remove broken use of HTML5 color fields; rely on jscolor instead.
 
 Version 4.0.4 - 27 October 2014
 -------------------------------
