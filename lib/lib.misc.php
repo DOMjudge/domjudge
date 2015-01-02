@@ -727,63 +727,6 @@ function wrap_unquoted($text, $width = 75, $quote = '>')
 }
 
 /**
- * DOM XML tree helper functions (PHP 5).
- * The XML tree is assumed to be named '$xmldoc' and the XPath object '$xpath'.
- */
-
-/**
- * Create node and add below $paren.
- * $value is an optional element value and $attrs an array whose
- * key,value pairs are added as node attributes. All strings are htmlspecialchars
- */
-function XMLaddnode($paren, $name, $value = NULL, $attrs = NULL)
-{
-	global $xmldoc;
-
-	if ( $value === NULL ) {
-		$node = $xmldoc->createElement(htmlspecialchars($name));
-	} else {
-		$node = $xmldoc->createElement(htmlspecialchars($name), htmlspecialchars($value));
-	}
-
-	if ( count($attrs) > 0 ) {
-		foreach( $attrs as $key => $value ) {
-			$node->setAttribute(htmlspecialchars($key), htmlspecialchars($value));
-		}
-	}
-
-	$paren->appendChild($node);
-	return $node;
-}
-
-/**
- * Retrieve node by a path from root, or relative to paren if non-null.
- * Generates error if no or more than one nodes are found.
- */
-function XMLgetnode($path, $paren = NULL)
-{
-	global $xpath;
-
-	$nodelist = $xpath->query($path,$paren);
-
-	if ( $nodelist->length!=1 ) error("Not exactly one XML node found");
-
-	return $nodelist->item(0);
-}
-
-/**
- * Returns attribute value of a node, or null if attribute does not exist.
- */
-function XMLgetattr($node, $attr)
-{
-	$attrnode = $node->attributes->getNamedItem($attr);
-
-	if ( $attrnode===NULL ) return NULL;
-
-	return $attrnode->nodeValue;
-}
-
-/**
  * Log an action to the auditlog table.
  */
 function auditlog($datatype, $dataid, $action, $extrainfo = null,
