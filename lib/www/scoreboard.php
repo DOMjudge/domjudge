@@ -320,7 +320,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		       (!empty($pr['color']) ? ' <div class="circle" style="background: ' .
 			htmlspecialchars($pr['color']) . ';"></div>' : '') ;
 
-		if ( IS_JURY || $pr['hastext']>0 ) {
+		if ( !$static && (IS_JURY || $pr['hastext']>0) ) {
 		     echo '<a href="problem.php?id=' . urlencode($pr['probid']) .
 			     '">' . $str . '</a></th>';
 		} else {
@@ -518,15 +518,18 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
  * $filter      set to TRUE to generate filter options, or pass array
  *              with keys 'affilid', 'country', 'categoryid' pointing
  *              to array of values to filter on these.
+ * $sdata       if not NULL, use this as scoreboard data instead of fetching it locally
  */
-function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALSE)
+function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALSE, $sdata = NULL)
 {
 	global $DB, $pagename;
 
 	if ( empty( $cdata ) ) { echo "<p class=\"nodata\">No active contest</p>\n"; return; }
 
 	$fdata = calcFreezeData($cdata);
-	$sdata = genScoreBoard($cdata, IS_JURY, $filter);
+	if ( $sdata === NULL ) {
+		$sdata = genScoreBoard($cdata, IS_JURY, $filter);
+	}
 
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";

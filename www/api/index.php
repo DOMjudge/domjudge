@@ -830,7 +830,7 @@ function teams($args)
 
 	// Construct query
 	$query = 'SELECT teamid AS id, t.name, a.country AS nationality,
-	          t.categoryid AS category, a.name AS affiliation
+	          t.categoryid AS category, a.affilid, a.name AS affiliation
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
 	          WHERE t.enabled = 1 AND';
@@ -867,13 +867,14 @@ function categories()
 {
 	global $DB;
 
-	$q = $DB->q('SELECT categoryid, name, color, visible
+	$q = $DB->q('SELECT categoryid, name, color, visible, sortorder
 	             FROM team_category ORDER BY sortorder');
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array('categoryid' => $row['categoryid'],
 			'name' => $row['name'],
 			'color' => $row['color'],
+			'sortorder' => $row['sortorder'],
 			'visible' => (bool)$row['visible']);
 	}
 	return $res;
