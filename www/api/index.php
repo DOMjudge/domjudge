@@ -833,6 +833,7 @@ function teams($args)
 	          t.categoryid AS category, a.affilid, a.name AS affiliation
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
+	          LEFT JOIN team_category c USING (categoryid)
 	          WHERE t.enabled = 1 AND';
 
 	$byCategory = array_key_exists('category', $args);
@@ -849,6 +850,8 @@ function teams($args)
 	$query .= ($byTeamid ? ' AND teamid = %i' : ' AND TRUE %_');
 	$teamid = ($byTeamid ? $args['teamid'] : 0);
 
+	$query .= ($args['public'] ? ' AND visible = 1' : '');
+
 	// Run query and return result
 	$q = $DB->q($query, $category, $affiliation, $teamid);
 	return $q->gettable();
@@ -858,29 +861,28 @@ $args = array('category' => 'ID of a single category to search for.',
               'teamid' => 'Search for a specific team.');
 $doc = 'Get a list of teams containing teamid, name, category and affiliation.';
 $exArgs = array(array('category' => 1, 'affiliation' => 'UU'));
-$api->provideFunction('GET', 'teams', $doc, $args, $exArgs);
+$api->provideFunction('GET', 'teams', $doc, $args, $exArgs, null, true);
 
 /**
  * Category information
  */
-function categories()
+function categories($args)
 {
 	global $DB;
-
+	$extra = ($args['public'] ? 'WHERE visible = 1' : '');
 	$q = $DB->q('SELECT categoryid, name, color, visible, sortorder
-	             FROM team_category ORDER BY sortorder');
+	             FROM team_category ' . $extra . ' ORDER BY sortorder');
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array('categoryid' => $row['categoryid'],
 			'name' => $row['name'],
 			'color' => $row['color'],
-			'sortorder' => $row['sortorder'],
-			'visible' => (bool)$row['visible']);
+			'sortorder' => $row['sortorder']);
 	}
 	return $res;
 }
 $doc = 'Get a list of all categories.';
-$api->provideFunction('GET', 'categories', $doc);
+$api->provideFunction('GET', 'categories', $doc, array(), array(), null, true);
 
 /**
  * Language information
@@ -1027,16 +1029,16 @@ function scoreboard($args)
 		$filter['affilid'] = array($args['affiliation']);
 	}
 	// TODO: refine this output, maybe add separate function to get summary
-	$scores = genScoreBoard($cdatas[$args['cid']], FALSE, $filter);
+	$scores = genScoreBoard($cdatas[$args['cid']], !$args['public'], $filter);
 	return $scores['matrix'];
 }
-$doc = 'Get the scoreboard. Should give the same information as public/jury scoreboards, i.e. after freeze the public one is not updated.';
+$doc = 'Get the scoreboard. Returns scoreboard for jury members if authenticated as a jury member (and public is not 1).';
 $args = array('cid' => 'ID of the contest to get the scoreboard for',
               'category' => 'ID of a single category to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
               'country' => 'ISO 3166-1 alpha-3 country code to search for.');
 $exArgs = array(array('cid' => 2, 'category' => 1, 'affiliation' => 'UU'), array('cid' => 2, 'country' => 'NLD'));
-$api->provideFunction('GET', 'scoreboard', $doc, $args, $exArgs);
+$api->provideFunction('GET', 'scoreboard', $doc, $args, $exArgs, null, true);
 
 // Now provide the api, which will handle the request
 $api->provideApi();

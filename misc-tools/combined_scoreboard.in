@@ -10,8 +10,12 @@
  * Use this when you run a contest with multiple sites and you want to
  * have a combined scoreboard of all participating teams.
  *
- * It accepts as argument the shortname of the local contest data to use.
- * If ommitted, it will use the first active contest
+ * It accepts two arguments:
+ * -j      If given, try to get the jury scoreboards. This only works if
+ *         authenticated as a jury member on each site. Otherwise, the
+ *         public scoreboard of that site will be shown
+ * -c NAME Use the contest with shortname 'NAME' locally. If ommitted,
+ *         it will use the first active contest
  *
  * The following should match on all sites:
  * - Contest data (date/times, etc.)
@@ -44,9 +48,18 @@ require(ETCDIR . '/domserver-config.php');
 
 define('SCRIPT_ID', 'combined_scoreboard');
 
-// FIXME: need to read from command-line args?
-define('IS_JURY', FALSE);
-define('IS_PUBLIC', TRUE);
+// Read options
+$opts = getopt('jc:');
+
+if ( isset($opts['j']) ) {
+	$public = 0;
+	define('IS_JURY', TRUE);
+	define('IS_PUBLIC', FALSE);
+} else {
+	$public = 1;
+	define('IS_JURY', FALSE);
+	define('IS_PUBLIC', TRUE);
+}
 
 // Needed for accessing contest ID from database:
 require_once(LIBDIR . '/init.php');
@@ -135,7 +148,7 @@ foreach ( $sites as $site_id => $site ) {
 	}
 
 	// Get categories
-	$remote_categories = file_get_contents($site['url'] . '/api/categories', null, $ctx);
+	$remote_categories = file_get_contents($site['url'] . '/api/categories?public=' . $public, null, $ctx);
 	$remote_categories = json_decode($remote_categories, true);
 	if ( !$remote_categories ) {
 		fprintf(STDERR, "Can not fetch categories of site ${site['url']}!\n");
@@ -152,7 +165,7 @@ foreach ( $sites as $site_id => $site ) {
 	}
 
 	// Get teams
-	$remote_teams = file_get_contents($site['url'] . '/api/teams', null, $ctx);
+	$remote_teams = file_get_contents($site['url'] . '/api/teams?public=' . $public, null, $ctx);
 	$remote_teams = json_decode($remote_teams, true);
 	if ( !$remote_teams ) {
 		fprintf(STDERR, "Can not fetch teams of site ${site['url']}!\n");
@@ -177,7 +190,7 @@ foreach ( $sites as $site_id => $site ) {
 	}
 
 	// Get scoreboard
-	$scoreboard = file_get_contents($site['url'] . '/api/scoreboard?cid=' . $cid, null, $ctx);
+	$scoreboard = file_get_contents($site['url'] . '/api/scoreboard?cid=' . $cid . '&public=' . $public, null, $ctx);
 	$scoreboard = json_decode($scoreboard, true);
 	if ( !$scoreboard ) {
 		fprintf(STDERR, "Can not fetch scoreboard of site ${site['url']}!\n");
@@ -258,10 +271,10 @@ $sdata = array('scores'     => $scores,
 
 $cdatas = getCurContests(TRUE);
 $cdata = null;
-if ( isset($argv[1]) )
+if ( isset($opts['c']) )
 {
 	foreach ( $cdatas as $contest ) {
-		if ( $contest['shortname'] == $argv[1] ) {
+		if ( $contest['shortname'] == $opts['c'] ) {
 			$cdata = $contest;
 			break;
 		}
