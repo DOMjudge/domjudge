@@ -38,8 +38,10 @@ function tsv_import($fmt)
 	$content = file($_FILES['tsv']['tmp_name']);
 	// the first line of the tsv is always the format with a version number.
 	// currently we hardcode version 1 because there are no others
-	$version = array_shift($content);
-	if ( trim($version) != "$fmt\t1" ) {
+	$version = rtrim(array_shift($content));
+	// Two variants are in use: one where the first token is a static string
+	// "File_Version" and the second where it's the type, e.g. "groups".
+	if ( !preg_match("/^(File_Version|$fmt)\t1$/", $version) ) {
 		error ("Unknown format or version: $version");
 	}
 
