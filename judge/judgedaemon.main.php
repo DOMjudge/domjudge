@@ -384,7 +384,7 @@ function judge($row)
 	putenv('USE_CHROOT='        . (USE_CHROOT ? '1' : ''));
 	putenv('SCRIPTTIMELIMIT='   . dbconfig_get_rest('script_timelimit'));
 	putenv('SCRIPTMEMLIMIT='    . dbconfig_get_rest('script_memory_limit'));
-	putenv('SCRIPTFILELIMIT='   . dbconfig_get_rest('script_filesize'));
+	putenv('SCRIPTFILELIMIT='   . dbconfig_get_rest('script_filesize_limit'));
 	putenv('MEMLIMIT='          . $row['memlimit']);
 	putenv('FILELIMIT='         . dbconfig_get_rest('filesize_limit'));
 	putenv('PROCLIMIT='         . dbconfig_get_rest('process_limit'));
