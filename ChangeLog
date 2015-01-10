@@ -19,7 +19,7 @@ Version 4.1.0 - DEV
  - Add support for multiple simultaneous contests.
  - Allow to add restrictions on contests, problems and languages to
    judgehosts.
- - Add optional per problem memory limits (#152).
+ - Add optional per problem memory/output limits (Closes #152).
 
 Version 4.0.0 - 22 July 2014
 ----------------------------

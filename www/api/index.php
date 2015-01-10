@@ -287,7 +287,8 @@ function judgings_POST($args)
 	if ( empty($submitid) || $numupd == 0 ) return '';
 
 	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid,
-	               CEILING(time_factor*timelimit) AS maxruntime, p.memlimit,
+	               CEILING(time_factor*timelimit) AS maxruntime,
+	               p.memlimit, p.outputlimit,
 	               special_run AS run, special_compare AS compare,
 	               compile_script
 	               FROM submission s
@@ -300,6 +301,9 @@ function judgings_POST($args)
 
 	if ( empty($row['memlimit']) ) {
 		$row['memlimit'] = dbconfig_get('memory_limit');
+	}
+	if ( empty($row['outputlimit']) ) {
+		$row['outputlimit'] = dbconfig_get('output_limit');
 	}
 	if ( empty($row['compare']) ) {
 		$row['compare'] = dbconfig_get('default_compare');
