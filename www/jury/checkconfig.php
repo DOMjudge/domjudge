@@ -312,10 +312,10 @@ foreach(array('input','output') as $inout) {
 }
 $oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
                     FROM testcase WHERE OCTET_LENGTH(output) > %i",
-                   dbconfig_get('filesize_limit')*1024);
+                   dbconfig_get('output_limit')*1024);
 while($r = $oversize->next()) {
 	$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
-	    " output size (" . printsize($r['size']) . ") exceeds filesize_limit\n";
+	    " output size (" . printsize($r['size']) . ") exceeds output_limit\n";
 }
 
 $has_errors = $details != '';
