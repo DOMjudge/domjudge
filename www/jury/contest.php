@@ -126,8 +126,8 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 		     "<label for='data_0__mapping__extra__{$i}__allow_judge_0'>no</label>";
 		echo "</td>\n";
 		echo "<td>" .
-		     addInputField('color', "data[0][mapping][extra][$i][color]", $current_problem['color'],
-				   ' class="color {required:false,adjust:false,hash:true,caps:false}"') .
+		     addInput("data[0][mapping][extra][$i][color]", $current_problem['color'], 15, 25,
+		     'class="color {required:false,adjust:false,hash:true,caps:false}"') .
 		     "</td>\n";
 		echo "</tr>\n";
 		$i++;
@@ -160,10 +160,8 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 			echo addRadioButton("data[0][mapping][extra][$i][allow_judge]", false, 0) .
 			     "<label for='data_0__mapping__extra__{$i}__allow_judge_0'>no</label>";
 			echo "</td>\n";
-			echo "<td>" . addInputField('color', "data[0][mapping][extra][$i][color]", null,
-						    ' class="color {required:false,adjust:false,hash:true,caps:false}"') .
-			     "<a target=\"_blank\" href=\"http://www.w3schools.com/cssref/css_colornames.asp\">" .
-			     "<img src=\"../images/b_help.png\" class=\"smallpicto\" alt=\"\"></td>\n";
+			echo "<td>" . addInput("data[0][mapping][extra][$i][color]", null, 15, 25,
+			      'class="color {required:false,adjust:false,hash:true,caps:false}"') . "</td>";
 			echo "</tr>\n";
 			$i++;
 		}
@@ -374,7 +372,7 @@ else {
 			  htmlspecialchars($row['color']) .
 			  ';"></div></a></td>'
 			: '<td>'. $link . '&nbsp;</a></td>' );
-		echo "<td>" . delLinkMultiple('contestproblem',array('cid','probid'),array($id, $row['probid']), 'contest.php?id='.$id) ."</td>";
+		if ( IS_ADMIN ) echo "<td>" . delLinkMultiple('contestproblem',array('cid','probid'),array($id, $row['probid']), 'contest.php?id='.$id) ."</td>";
 
 		$iseven = !$iseven;
 

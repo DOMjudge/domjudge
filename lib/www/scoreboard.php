@@ -169,12 +169,11 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 function getProblems($cdata) {
 	global $DB;
 
-	return $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,
-	               probid, shortname, name, color, allow_judge,
-	               LENGTH(problemtext) AS hastext
+	return $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, shortname,
+	               name, color, LENGTH(problemtext) AS hastext, allow_judge
 	               FROM problem
-		       INNER JOIN contestproblem USING (probid)
-		       WHERE cid = %i AND allow_submit = 1
+	               INNER JOIN contestproblem USING (probid)
+	               WHERE cid = %i AND allow_submit = 1
 	               ORDER BY shortname', $cdata['cid']);
 }
 
@@ -187,22 +186,21 @@ function getTeams($filter, $jury, $cdata) {
 	global $DB;
 
 	return $DB->q('KEYTABLE SELECT team.teamid AS ARRAYKEY, team.teamid, team.externalid,
-	                 team.name, team.categoryid, team.affilid, sortorder,
-	                 country, color, team_affiliation.name AS affilname
-	                 FROM team
-	                 INNER JOIN contest ON contest.cid = %i
-	                 LEFT JOIN contestteam ON contestteam.teamid = team.teamid AND contestteam.cid = contest.cid
-	                 LEFT JOIN team_category
-	                        ON (team_category.categoryid = team.categoryid)
-	                 LEFT JOIN team_affiliation
-	                        ON (team_affiliation.affilid = team.affilid)
-	                 WHERE team.enabled = 1 AND (contestteam.teamid IS NOT NULL OR contest.public = 1)' .
-	                ( $jury ? '' : ' AND visible = 1' ) .
-			(isset($filter['affilid']) ? ' AND team.affilid IN %As ' : ' %_') .
-			(isset($filter['country']) ? ' AND country IN %As ' : ' %_') .
-			(isset($filter['categoryid']) ? ' AND team.categoryid IN %As ' : ' %_') .
-			(isset($filter['teams']) ? ' AND team.teamid IN %Ai ' : ' %_'),
-			$cdata['cid'], @$filter['affilid'], @$filter['country'], @$filter['categoryid'], @$filter['teams']);
+	               team.name, team.categoryid, team.affilid, sortorder,
+	               country, color, team_affiliation.name AS affilname
+	               FROM team
+	               INNER JOIN contest ON (contest.cid = %i)
+	               LEFT JOIN contestteam ct USING (teamid, cid)
+	               LEFT JOIN team_category USING (categoryid)
+	               LEFT JOIN team_affiliation USING (affilid)
+	               WHERE team.enabled = 1 AND (ct.teamid IS NOT NULL OR contest.public = 1)' .
+	              ( $jury ? '' : ' AND visible = 1' ) .
+	              (isset($filter['affilid']) ? ' AND team.affilid IN %As ' : ' %_') .
+	              (isset($filter['country']) ? ' AND country IN %As ' : ' %_') .
+	              (isset($filter['categoryid']) ? ' AND team.categoryid IN %As ' : ' %_') .
+	              (isset($filter['teams']) ? ' AND team.teamid IN %Ai ' : ' %_'),
+	              $cdata['cid'], @$filter['affilid'], @$filter['country'],
+	              @$filter['categoryid'], @$filter['teams']);
 }
 
 /**
@@ -323,7 +321,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		       (!empty($pr['color']) ? ' <div class="circle" style="background: ' .
 			htmlspecialchars($pr['color']) . ';"></div>' : '') ;
 
-		if ( IS_JURY || $pr['hastext']>0 ) {
+		if ( !$static && (IS_JURY || $pr['hastext']>0) ) {
 		     echo '<a href="problem.php?id=' . urlencode($pr['probid']) .
 			     '">' . $str . '</a></th>';
 		} else {
@@ -521,15 +519,18 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
  * $filter      set to TRUE to generate filter options, or pass array
  *              with keys 'affilid', 'country', 'categoryid' pointing
  *              to array of values to filter on these.
+ * $sdata       if not NULL, use this as scoreboard data instead of fetching it locally
  */
-function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALSE)
+function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALSE, $sdata = NULL)
 {
 	global $DB, $pagename;
 
 	if ( empty( $cdata ) ) { echo "<p class=\"nodata\">No active contest</p>\n"; return; }
 
 	$fdata = calcFreezeData($cdata);
-	$sdata = genScoreBoard($cdata, IS_JURY, $filter);
+	if ( $sdata === NULL ) {
+		$sdata = genScoreBoard($cdata, IS_JURY, $filter);
+	}
 
 	// page heading with contestname and start/endtimes
 	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";

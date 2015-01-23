@@ -9,9 +9,9 @@
 # allowing this interpreted source to be used transparantly as if it
 # was compiled to a standalone binary.
 #
-# NOTICE: this compiler script cannot be used with the USE_CHROOT
-# configuration option turned on! (Unless proper preconfiguration of
-# the chroot environment has been taken care of.)
+# NOTICE: when this compiler script is used with USE_CHROOT on, the
+# chroot requires python3 to be installed and a user with the uid of
+# the domjudge-run user needs to be present in /etc/passwd in the chroot.
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
@@ -24,6 +24,12 @@ if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
 	grep -n '^#!' "$MAINSOURCE"
 	exit 1
 fi
+
+# Check syntax
+python3 -m py_compile $@
+EXITCODE=$?
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+rm -f *.pyc
 
 # Write executing script:
 cat > $DEST <<EOF

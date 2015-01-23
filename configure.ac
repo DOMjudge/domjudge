@@ -168,6 +168,8 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(judgehost_rundir,      $localstatedir/run/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_tmpdir,      /tmp)
 	AC_SUBST(judgehost_judgedir,    $localstatedir/lib/${PACKAGE_TARNAME}/judgings)
+	AC_SUBST(judgehost_chrootdir,   /chroot/${PACKAGE_TARNAME})
+	AC_SUBST(judgehost_cgroupdir,   /cgroup)
 
 	AC_SUBST(domjudge_docdir,       $docdir)
 fi
@@ -212,6 +214,8 @@ AX_PATH(judgehost_logdir,       [$judgehost_root/log])
 AX_PATH(judgehost_rundir,       [$judgehost_root/run])
 AX_PATH(judgehost_tmpdir,       [$judgehost_root/tmp])
 AX_PATH(judgehost_judgedir,     [$judgehost_root/judgings])
+AX_PATH(judgehost_chrootdir,    [/chroot/domjudge])
+AX_PATH(judgehost_cgroupdir,    [/cgroup])
 AX_WITH_COMMENT(7,[      ])
 
 # }}}
@@ -359,6 +363,8 @@ echo "    - log..............: $judgehost_logdir"
 echo "    - run..............: $judgehost_rundir"
 echo "    - tmp..............: $judgehost_tmpdir"
 echo "    - judge............: $judgehost_judgedir"
+echo "    - chroot...........: $judgehost_chrootdir"
+echo "    - cgroup...........: $judgehost_cgroupdir"
 echo ""
 echo "Run 'make' without arguments to get a list of (build) targets."
 echo ""

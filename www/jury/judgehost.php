@@ -29,7 +29,7 @@ if ( isset($_REQUEST['cmd']) &&
 	}
 }
 
-$row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $id);
+$row = $DB->q('TUPLE SELECT judgehost.*, restrictionname FROM judgehost LEFT JOIN judgehost_restriction USING (restrictionid) WHERE hostname = %s', $id);
 
 $title = 'Judgehost '.htmlspecialchars($row['hostname']);
 
@@ -42,6 +42,15 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 <table>
 <tr><td>Name:  </td><td><?php echo printhost($row['hostname'], TRUE)?></td></tr>
 <tr><td>Active:</td><td><?php echo printyn($row['active'])?></td></tr>
+<tr><td>Restriction:</td><td>
+	<?php if ( is_null($row['restrictionname']) ) {
+		echo '<i>None</i>';
+	} else {
+		echo '<a href="judgehost_restriction.php?id=' . urlencode($row['restrictionid']) . '">' .
+		     htmlspecialchars($row['restrictionname']) . '</a>';
+	}
+	?>
+</td></tr>
 <tr><td>Status:</td><td>
 <?php
 if ( empty($row['polltime']) ) {
@@ -83,10 +92,10 @@ echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
 // get the judgings for a specific key and value pair
 // select only specific fields to avoid retrieving large blobs
 $res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
-			   result, verified, valid FROM judging
-			   WHERE cid IN %Ai AND judgehost = %s
-			   ORDER BY starttime DESC, judgingid DESC',
-			   getCurContests(FALSE), $row['hostname']);
+               result, verified, valid FROM judging
+               WHERE cid IN %Ai AND judgehost = %s
+               ORDER BY starttime DESC, judgingid DESC',
+              getCurContests(FALSE), $row['hostname']);
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No judgings.</p>\n\n";

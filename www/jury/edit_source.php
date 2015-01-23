@@ -15,8 +15,9 @@ if ( empty($teamid) || !checkrole('team') ) {
 // submit code
 if ( isset($_POST['origsubmitid']) ) {
 	$sources = $DB->q('TABLE SELECT *
-			   FROM submission_file LEFT JOIN submission USING(submitid)
-			   WHERE submitid = %i ORDER BY rank', $_POST['origsubmitid']);
+	                   FROM submission_file
+	                   LEFT JOIN submission USING(submitid)
+	                   WHERE submitid = %i ORDER BY rank', $_POST['origsubmitid']);
 
 	$files = array();
 	$filenames = array();
@@ -31,7 +32,8 @@ if ( isset($_POST['origsubmitid']) ) {
 		$filenames[] = $sourcedata['filename'];
 	}
 
-	$cid = $DB->q('VALUE SELECT cid FROM submission WHERE submitid = %i', $_POST['origsubmitid']);
+	$cid = $DB->q('VALUE SELECT cid FROM submission
+	               WHERE submitid = %i', $_POST['origsubmitid']);
 
 	$newid = submit_solution($teamid, $_POST['probid'], $cid, $_POST['langid'],
 	                $files, $filenames, $_POST['origsubmitid']);
@@ -47,7 +49,7 @@ if ( isset($_POST['origsubmitid']) ) {
 
 $id = getRequestID();
 $submission = $DB->q('MAYBETUPLE SELECT * FROM submission s
-                  WHERE submitid = %i', $id);
+                      WHERE submitid = %i', $id);
 
 if ( empty($submission) ) error ("Submission $id not found");
 
@@ -62,7 +64,8 @@ echo addForm($pagename, 'post', null, 'multipart/form-data');
 
 
 $sources = $DB->q('TABLE SELECT *
-                   FROM submission_file LEFT JOIN submission USING(submitid)
+                   FROM submission_file
+                   LEFT JOIN submission USING(submitid)
                    WHERE submitid = %i ORDER BY rank', $id);
 
 echo '<script type="text/javascript" src="../js/tabber.js"></script>' .
@@ -95,10 +98,10 @@ foreach($sources as $sourcedata)
 echo "</div>\n";
 
 $probs = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
-		 INNER JOIN contestproblem USING (probid) WHERE
-		 allow_submit = 1 AND cid = %i ORDER BY name', $submission['cid']);
-$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language WHERE
-		 allow_submit = 1 ORDER BY name');
+                 INNER JOIN contestproblem USING (probid)
+	             WHERE allow_submit = 1 AND cid = %i ORDER BY name', $submission['cid']);
+$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language
+                 WHERE allow_submit = 1 ORDER BY name');
 
 echo addSelect('probid', $probs, $submission['probid'], true);
 echo addSelect('langid', $langs, $submission['langid'], true);

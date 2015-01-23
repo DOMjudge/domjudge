@@ -5,9 +5,11 @@ include $(TOPDIR)/Makefile.global
 
 TARGETS = runguard runpipe
 
-judgehost: $(TARGETS) judgedaemon
+SUBST_FILES = judgedaemon chroot-startstop.sh
 
-judgedaemon: judgedaemon.in $(TOPDIR)/paths.mk
+judgehost: $(TARGETS) $(SUBST_FILES)
+
+$(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
@@ -35,4 +37,4 @@ clean-l:
 	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT))
 
 distclean-l:
-	-rm -f judgedaemon
+	-rm -f $(SUBST_FILES)

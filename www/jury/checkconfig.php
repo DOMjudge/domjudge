@@ -293,8 +293,8 @@ flushresults();
 // PROBLEMS
 
 $res = $DB->q('SELECT probid, cid, shortname, timelimit, special_compare, special_run
-	       FROM problem INNER JOIN contestproblem USING (probid)
-	       ORDER BY probid');
+               FROM problem INNER JOIN contestproblem USING (probid)
+               ORDER BY probid');
 
 $details = '';
 while($row = $res->next()) {
@@ -312,7 +312,8 @@ while($row = $res->next()) {
 	}
 }
 foreach(array('input','output') as $inout) {
-	$mismatch = $DB->q("SELECT probid, rank FROM testcase WHERE md5($inout) != md5sum_$inout");
+	$mismatch = $DB->q("SELECT probid, rank FROM testcase
+	                    WHERE md5($inout) != md5sum_$inout");
 	while($r = $mismatch->next()) {
 		$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
 		    " MD5 sum mismatch between $inout and md5sum_$inout\n";
@@ -320,10 +321,10 @@ foreach(array('input','output') as $inout) {
 }
 $oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
                     FROM testcase WHERE OCTET_LENGTH(output) > %i",
-                   dbconfig_get('filesize_limit')*1024);
+                   dbconfig_get('output_limit')*1024);
 while($r = $oversize->next()) {
 	$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
-	    " output size (" . printsize($r['size']) . ") exceeds filesize_limit\n";
+	    " output size (" . printsize($r['size']) . ") exceeds output_limit\n";
 }
 
 $has_errors = $details != '';
@@ -414,8 +415,8 @@ result('submissions and judgings', 'Submissions', $submres, $submnote);
 
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
-	       LEFT OUTER JOIN contestproblem p USING (probid)
-	       WHERE s.cid != p.cid');
+               LEFT OUTER JOIN contestproblem p USING (probid)
+               WHERE s.cid != p.cid');
 
 $details = '';
 while($row = $res->next()) {
@@ -522,7 +523,8 @@ if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 			continue;
 		}
 		$fields = implode(', ', array_keys($foreign_keys));
-		$res = $DB->q('SELECT ' . $fields . ' FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
+		$res = $DB->q('SELECT ' . $fields . ' FROM ' . $table .
+		              ' ORDER BY ' . implode(',', $KEYS[$table]));
 		while ( $row = $res->next() ) {
 			foreach ( $foreign_keys as $foreign_key => $val ) {
 				list( $target, $action ) = explode('&', $val);

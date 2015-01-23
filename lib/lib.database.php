@@ -153,7 +153,7 @@ class db
 					}
 					$GLOBALS['MODE'] = $part{1};
 					if (!$val) {
-						$query .= '(NULL)';
+						$query .= '(\'\')';
 					} else {
 						$query .= '(';
 						$query .= implode( ', '

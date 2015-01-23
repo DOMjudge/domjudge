@@ -188,8 +188,22 @@ CREATE TABLE `judgehost` (
   `hostname` varchar(50) NOT NULL COMMENT 'Resolvable hostname of judgehost',
   `active` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Should this host take on judgings?',
   `polltime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of last poll by autojudger',
-  PRIMARY KEY  (`hostname`)
+  `restrictionid` int(4) unsigned DEFAULT NULL COMMENT 'Optional set of restrictions for this judgehost',
+  PRIMARY KEY  (`hostname`),
+  KEY `restrictionid` (`restrictionid`),
+  CONSTRAINT `restriction_ibfk_1` FOREIGN KEY (`restrictionid`) REFERENCES `judgehost_restriction` (`restrictionid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Hostnames of the autojudgers';
+
+--
+-- Table structure for table `judgehost_restriction`
+--
+
+CREATE TABLE `judgehost_restriction` (
+  `restrictionid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `restrictionname` varchar(255) NOT NULL COMMENT 'Descriptive name',
+  `restrictions` longtext COMMENT 'JSON-encoded restrictions',
+  PRIMARY KEY  (`restrictionid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Restrictions for judgehosts';
 
 --
 -- Table structure for table `judging`
@@ -263,6 +277,8 @@ CREATE TABLE `problem` (
   `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `timelimit` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time for this problem',
+  `memlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum memory available (in kB) for this problem',
+  `outputlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum output size (in kB) for this problem',
   `special_run` varchar(32) DEFAULT NULL COMMENT 'Script to run submissions for this problem',
   `special_compare` varchar(32) DEFAULT NULL COMMENT 'Script to compare problem and jury output for this problem',
   `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',

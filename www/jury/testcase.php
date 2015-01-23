@@ -48,10 +48,10 @@ function get_testcase_data()
 	global $DB, $data, $probid;
 
 	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
-			description, sample,
-			OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-			OCTET_LENGTH(output) AS size_output, md5sum_output
-			FROM testcase WHERE probid = %i ORDER BY rank', $probid);
+	                description, sample,
+	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
+	                OCTET_LENGTH(output) AS size_output, md5sum_output
+	                FROM testcase WHERE probid = %i ORDER BY rank', $probid);
 }
 get_testcase_data();
 
@@ -95,7 +95,7 @@ if ( isset ($_GET['move']) ) {
 	return;
 }
 
-$title = 'Testcases for problem p'.htmlspecialchars(@$probid).' - '.$prob['name'];
+$title = 'Testcases for problem p'.htmlspecialchars(@$probid).' - '.htmlspecialchars($prob['name']);
 
 require(LIBWWWDIR . '/header.php');
 
@@ -134,9 +134,9 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
 			    " (" . printsize($_FILES[$fileid]['size'][$rank]) . ")";
 			if ( $inout=='output' &&
-			     $_FILES[$fileid]['size'][$rank]>dbconfig_get('filesize_limit')*1024 ) {
+			     $_FILES[$fileid]['size'][$rank]>dbconfig_get('output_limit')*1024 ) {
 				$result .= ".<br /><b>Warning: file size exceeds " .
-				    "<code>filesize_limit</code> of " . dbconfig_get('filesize_limit') .
+				    "<code>output_limit</code> of " . dbconfig_get('output_limit') .
 				    " kB. This will always result in wrong answers!</b>";
 			}
 			$result .= "</li>\n";
@@ -175,27 +175,28 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			}
 		}
 
-		if ( !empty($content['input']) && !empty($content['output']) ) {
-			$DB->q("INSERT INTO testcase
-			        (probid,rank,md5sum_input,md5sum_output,input,output,description,sample)
-			        VALUES (%i,%i,%s,%s,%s,%s,%s,%i)",
-			       $probid, $rank, md5(@$content['input']), md5(@$content['output']),
-			       @$content['input'], @$content['output'], @$_POST['add_desc'],
-			       @$_POST['add_sample']);
-			auditlog('testcase', $probid, 'added', "rank $rank");
+		$DB->q("INSERT INTO testcase
+		        (probid,rank,md5sum_input,md5sum_output,input,output,description,sample)
+		        VALUES (%i,%i,%s,%s,%s,%s,%s,%i)",
+		       $probid, $rank, md5(@$content['input']), md5(@$content['output']),
+		       @$content['input'], @$content['output'], @$_POST['add_desc'],
+		       @$_POST['add_sample']);
+		auditlog('testcase', $probid, 'added', "rank $rank");
 
-			$result .= "<li>Added new testcase $rank from " .
-			    htmlspecialchars($_FILES['add_input']['name']) .
-			    " (" . printsize($_FILES['add_input']['size']) . ") and " .
-			    htmlspecialchars($_FILES['add_output']['name']) .
-			    " (" . printsize($_FILES['add_output']['size']) . ")";
-			if ( $_FILES['add_output']['size']>dbconfig_get('filesize_limit')*1024 ) {
-				$result .= ".<br /><b>Warning: output file size exceeds " .
-				    "<code>filesize_limit</code> of " . dbconfig_get('filesize_limit') .
-				    " kB. This will always result in wrong answers!</b>";
-			}
-			$result .= "</li>\n";
+		$result .= "<li>Added new testcase $rank from " .
+			htmlspecialchars($_FILES['add_input']['name']) .
+			" (" . printsize($_FILES['add_input']['size']) . ") and " .
+			htmlspecialchars($_FILES['add_output']['name']) .
+			" (" . printsize($_FILES['add_output']['size']) . ").";
+		if ( $_FILES['add_output']['size']>dbconfig_get('output_limit')*1024 ) {
+			$result .= "<br /><b>Warning: output file size exceeds " .
+			    "<code>output_limit</code> of " . dbconfig_get('output_limit') .
+			    " kB. This will always result in wrong answers!</b>";
 		}
+		if ( empty($content['input']) || empty($content['output']) ) {
+			$result .= "<br /><b>Warning: empty testcase file(s)!</b>";
+		}
+		$result .= "</li>\n";
 	}
 }
 if ( !empty($result) ) {

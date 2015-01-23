@@ -38,8 +38,9 @@ if ( isset($_POST['donow']) ) {
 			$docdata[$f] = check_relative_time($docdata[$f.'_string'], $docdata['starttime'], $f);
 		}
 		$DB->q('UPDATE contest SET starttime = %s, starttime_string = %s,
-			endtime = %s, freezetime = %s, unfreezetime = %s, activatetime = %s, deactivatetime = %s
-			WHERE cid = %i', $docdata['starttime'], $docdata['starttime_string'],
+		        endtime = %s, freezetime = %s, unfreezetime = %s,
+		        activatetime = %s, deactivatetime = %s
+		        WHERE cid = %i', $docdata['starttime'], $docdata['starttime_string'],
 		       $docdata['endtime'], $docdata['freezetime'], $docdata['unfreezetime'],
 		       $docdata['activatetime'], $docdata['deactivatetime'], $docid);
 		header ("Location: ./contests.php?edited=1");
@@ -170,8 +171,11 @@ echo "</fieldset>\n\n";
 
 
 // Get data. Starttime seems most logical sort criterion.
-$res = $DB->q('TABLE SELECT contest.*,COUNT(intervalid) as numintervals
-               FROM contest LEFT JOIN removed_interval USING(cid)
+$res = $DB->q('TABLE SELECT contest.*, COUNT(teamid) AS numteams,
+                            COUNT(intervalid) as numintervals
+               FROM contest
+               LEFT JOIN contestteam USING (cid)
+               LEFT JOIN removed_interval USING(cid)
                GROUP BY cid ORDER BY contest.starttime DESC');
 
 if( count($res) == 0 ) {

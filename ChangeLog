@@ -12,12 +12,14 @@ Version 4.1.0 - DEV
  - Update ACE editor to 1.1.6, JScolor to 1.4.3.
  - Improve installation on and documentation for RedHat(like) Linux.
  - Apply runguard limits also to compare scripts (#68).
- - No longer compile submit and checktestdata statically by default,
-   use --enable-static-linking on configure to re-enable.
+ - Move checktestdata to stand-alone repository.
  - In runguard, kill all remaing processes in the cgroup at the end
    of the run; preventing leftover processes in corner cases like
    detaching from itself.
- - Add support for multiple simultaneous contests
+ - Add support for multiple simultaneous contests.
+ - Allow to add restrictions on contests, problems and languages to
+   judgehosts.
+ - Add optional per problem memory/output limits (Closes #152).
 
 Version 4.0.0 - 22 July 2014
 ----------------------------

@@ -102,16 +102,12 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
 
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.externalresult, s.cid,
-	              s.submittime, s.judgehost, s.valid, t.name AS teamname,
-		      cp.shortname, p.name AS probname, l.name AS langname,
-	              j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
+	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
+	               cp.shortname, p.name AS probname, l.name AS langname,
+	               j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
 	              $sqlbody .
-	              (isset($restrictions['verified']) ?
-	              'AND ' . $verifyclause : '') .
-	              (isset($restrictions['judged']) ?
-	              'AND ' . $judgedclause : '') .
-	              (isset($restrictions['externaldiff']) ?
-	              'AND ' . $externalclause : '') .
+	              (isset($restrictions['verified']) ? 'AND ' . $verifyclause : '') .
+	              (isset($restrictions['judged'])   ? 'AND ' . $judgedclause : '') .
 	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
 	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
 	              @$restrictions['teamid'], @$restrictions['categoryid'],

@@ -17,7 +17,9 @@ $ini_keys = array('shortname', 'name', 'timelimit', 'special_run',
 		  'special_compare', 'color');
 
 $problem = $DB->q('MAYBETUPLE SELECT problemtext, problemtext_type, ' .
-		 join(',', $ini_keys) . ' FROM problem p LEFT JOIN contestproblem cp USING (probid) WHERE probid = %i LIMIT 1',$id);
+                  join(',', $ini_keys) . ' FROM problem p
+                   LEFT JOIN contestproblem cp USING (probid)
+                   WHERE probid = %i LIMIT 1', $id);
 if ( empty($problem) ) error ("Problem p$id not found");
 
 $inistring = "";
