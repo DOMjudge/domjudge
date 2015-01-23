@@ -47,7 +47,8 @@ if ( !($dh = @opendir($sourcesdir)) ) {
 
 $submissions = array();
 
-$probname2id = $DB->q('KEYVALUETABLE SELECT shortname, probid FROM problem');
+$probname2id = $DB->q("KEYVALUETABLE SELECT CONCAT(cid, '-', shortname), probid
+                       FROM contestproblem");
 
 // Check if team.login column is present and use it for a keyvalue map:
 $res = $DB->q("MAYBETUPLE SELECT * FROM information_schema.COLUMNS
@@ -72,6 +73,8 @@ while ( ($src = readdir($dh))!==FALSE ) {
 	if ( count($fdata)==5 ) {
 		logmsg(LOG_DEBUG, "detected old sourcefile format: '$src'");
 		list($cid, $sid, $teamid, $probid, $langid) = $fdata;
+		if ( $cid[0]=='c' ) $cid = substr($cid,1);
+		if ( $sid[0]=='s' ) $sid = substr($sid,1);
 		$rank = 0;
 		$filename = 'source.'.$langid;
 	} else if ( count($fdata)==7 ) {
@@ -88,8 +91,8 @@ while ( ($src = readdir($dh))!==FALSE ) {
 	$submittime = filemtime($f);
 
 	// Convert old-style probid to new numeric one:
-	if ( !ctype_digit($probid) && !empty($probname2id[$probid]) ) {
-		$probid = $probname2id[$probid];
+	if ( !ctype_digit($probid) && !empty($probname2id[$cid.'-'.$probid]) ) {
+		$probid = $probname2id[$cid.'-'.$probid];
 	}
 
 	// Convert old-style team login to new numeric teamid:
