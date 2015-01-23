@@ -20,6 +20,9 @@ ALTER TABLE contest
   ADD COLUMN `finalizecomment` text COMMENT 'Comments by the finalizer',
   ADD COLUMN `b` smallint(3) unsigned NOT NULL default '0' COMMENT 'Number of extra bronze medals';
 
+ALTER TABLE contestproblem
+  ADD COLUMN `lazy_eval_results` tinyint(1) unsigned DEFAULT NULL COMMENT 'Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting';
+
 -- Drop constraint before changing data
 ALTER TABLE `clarification`
   DROP FOREIGN KEY `clarification_ibfk_3`,

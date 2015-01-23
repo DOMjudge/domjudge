@@ -113,6 +113,7 @@ CREATE TABLE `contestproblem` (
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
   `color` varchar(25) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard',
+  `lazy_eval_results` tinyint(1) unsigned DEFAULT NULL COMMENT 'Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting',
   PRIMARY KEY (`cid`,`probid`),
   UNIQUE KEY `shortname` (`cid`,`shortname`),
   KEY `cid` (`cid`),

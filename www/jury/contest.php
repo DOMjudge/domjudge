@@ -92,6 +92,7 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 		<th>color
 		<a target="_blank" href="http://www.w3schools.com/cssref/css_colornames.asp">
 		<img src="../images/b_help.png" class="smallpicto" alt="?"></a></th>
+		<th>lazy evaluation</th>
 	</tr>
 	</thead>
 	<tbody>
@@ -129,6 +130,10 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 		     addInput("data[0][mapping][extra][$i][color]", $current_problem['color'], 15, 25,
 		     'class="color {required:false,adjust:false,hash:true,caps:false}"') .
 		     "</td>\n";
+		echo "<td>" .
+		     addInputField('number',"data[0][mapping][extra][$i][lazy_eval_results]",
+		                   @$current_problem['lazy_eval_results'],' min="0" max="1"') .
+		     "</td>\n";
 		echo "</tr>\n";
 		$i++;
 	}
@@ -162,6 +167,9 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 			echo "</td>\n";
 			echo "<td>" . addInput("data[0][mapping][extra][$i][color]", null, 15, 25,
 			      'class="color {required:false,adjust:false,hash:true,caps:false}"') . "</td>";
+			echo "<td>" .
+			     addInputField('number',"data[0][mapping][extra][$i][lazy_eval_results]",
+			                   null, ' min="0" max="1"') . "</td>\n";
 			echo "</tr>\n";
 			$i++;
 		}
