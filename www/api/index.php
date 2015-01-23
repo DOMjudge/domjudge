@@ -456,9 +456,20 @@ function judging_runs_POST($args)
 	$before = $DB->q('VALUE SELECT result FROM judging WHERE judgingid = %i', $args['judgingid']);
 
 	if ( ($result = getFinalResult($allresults, $results_prio))!==NULL ) {
-		if ( count($runresults) == $numtestcases || dbconfig_get('lazy_eval_results', true) ) {
-			// NOTE: setting endtime here determines in testcases_GET
-			// whether a next testcase will be handed out.
+		// NOTE: setting endtime here determines in testcases_GET
+		// whether a next testcase will be handed out.
+
+		// Lookup global lazy evaluation of results setting and
+		// possible problem specific override.
+		$lazy_eval = dbconfig_get('lazy_eval_results', true);
+		$prob_lazy = $DB->q('MAYBEVALUE SELECT cp.lazy_eval_results
+		                     FROM judging j
+		                     LEFT JOIN submission s USING(submitid)
+		                     LEFT JOIN contestproblem cp USING(cid,probid)
+		                     WHERE judgingid = %i', $args['judgingid']);
+		if ( isset($prob_lazy) ) $lazy_eval = (bool)$prob_lazy;
+
+		if ( count($runresults) == $numtestcases || $lazy_eval ) {
 			$DB->q('UPDATE judging SET result = %s, endtime = %s
 			        WHERE judgingid = %i', $result, now(), $args['judgingid']);
 		} else {
