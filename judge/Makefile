@@ -37,4 +37,4 @@ clean-l:
 	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT))
 
 distclean-l:
-	-rm -f judgedaemon
+	-rm -f $(SUBST_FILES)
