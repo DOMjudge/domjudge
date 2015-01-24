@@ -444,6 +444,8 @@ function judging_runs_POST($args)
 
 	if ( ($result = getFinalResult($allresults, $results_prio))!==NULL ) {
 		if ( count($runresults) == $numtestcases || dbconfig_get('lazy_eval_results', true) ) {
+			// NOTE: setting endtime here determines in testcases_GET
+			// whether a next testcase will be handed out.
 			$DB->q('UPDATE judging SET result = %s, endtime = %s
 			        WHERE judgingid = %i', $result, now(), $args['judgingid']);
 		} else {
