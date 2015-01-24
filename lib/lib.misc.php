@@ -136,17 +136,16 @@ function problemVisible($probid)
  * NOTE: It is assumed that removed intervals do not overlap and that
  * they all fall within the contest start and end times.
  */
-function calcContestTime($walltime, $contest_data = null)
+function calcContestTime($walltime, $cid)
 {
-	if ( is_null($contest_data) ) {
-		global $cdata;
-	} else {
-		$cdata = $contest_data;
-	}
+	global $cdatas;
 
-	$contesttime = difftime($walltime, $cdata['starttime']);
+	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
 
-	foreach ( $cdata['removed_intervals'] as $intv ) {
+	$intervals = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
+	                     FROM removed_interval WHERE cid = %i', $cid);
+
+	foreach ( $intervals as $intv ) {
 		if ( difftime($intv['starttime'], $walltime)<0 ) {
 			$contesttime -= min(
 				difftime($walltime,        $intv['starttime']),
@@ -202,14 +201,8 @@ function calcScoreRow($cid, $team, $prob) {
 	// for each submission
 	while( $row = $result->next() ) {
 
-		// calcContestTime needs a cdata filled with starttime and removed_intervals
-		$cdata['cid'] = $cid;
-		$cdata['starttime'] = $DB->q("VALUE SELECT starttime FROM contest WHERE cid=%i", $cid);
-		$cdata['removed_intervals'] = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
-						      FROM removed_interval WHERE cid = %i', $cid);
-
 		// Contest submit time in minutes for scoring.
-		$submittime = (int)floor(calcContestTime($row['submittime'], $cdata) / 60);
+		$submittime = (int)floor(calcContestTime($row['submittime'],$cid) / 60);
 
 		// Check if this submission has a publicly visible judging result:
 		if ( (dbconfig_get('verification_required', 0) && ! $row['verified']) ||
