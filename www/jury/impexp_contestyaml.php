@@ -151,11 +151,11 @@ if ( isset($_POST['import']) ) {
 	$contest_data['short-name'] = $contest_row['contestname'];
 	$contest_data['start-time'] = date('c', $contest_row['starttime']);
 	$contest_data['duration'] =
-	    printtimerel(calcContestTime($contest_row['endtime'], $contest_row));
+		printtimerel(calcContestTime($contest_row['endtime'], $contest_row['cid']));
 
 	if ( ! is_null($contest_row['freezetime']) ) {
 		$contest_data['scoreboard-freeze'] =
-		    printtimerel(calcContestTime($contest_row['freezetime'], $contest_row));
+			printtimerel(calcContestTime($contest_row['freezetime'], $contest_row['cid']));
 	}
 
 	// TODO: event-feed-port

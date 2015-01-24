@@ -129,15 +129,11 @@ function problemVisible($probid)
  * to allow minimal changes wrt. the removed intervals required for
  * the ICPC specification.
  */
-function calcContestTime($walltime, $contest_data = null)
+function calcContestTime($walltime, $cid)
 {
-	if ( is_null($contest_data) ) {
-		global $cdata;
-	} else {
-		$cdata = $contest_data;
-	}
+	global $cdatas;
 
-	$contesttime = difftime($walltime, $cdata['starttime']);
+	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
 
 	return $contesttime;
 }
@@ -188,7 +184,7 @@ function calcScoreRow($cid, $team, $prob) {
 	while( $row = $result->next() ) {
 
 		// Contest submit time in minutes for scoring.
-		$submittime = (int)floor(calcContestTime($row['submittime']) / 60);
+		$submittime = (int)floor(calcContestTime($row['submittime'],$cid) / 60);
 
 		// Check if this submission has a publicly visible judging result:
 		if ( (dbconfig_get('verification_required', 0) && ! $row['verified']) ||
