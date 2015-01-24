@@ -124,7 +124,8 @@ if ( ! isset($_POST['cancel']) ) {
 				if ( isset($mappingdata['extra'][$key]) ) {
 					foreach ($mappingdata['extra'][$key] as $column => $value) {
 						$columns[] = $column;
-						$values[] = $value;
+						// set empty string to null
+						$values[] = ($value === "" ? null : $value);
 					}
 				}
 
