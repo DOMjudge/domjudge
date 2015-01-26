@@ -32,7 +32,7 @@ $res = $DB->q('SELECT result, COUNT(result) as count,
                JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
                LEFT OUTER JOIN contest c ON(c.cid=j.cid)
                LEFT OUTER JOIN team t USING(teamid)
-               WHERE s.cid = %i AND s.valid = 1 AND t.categoryid = $partCat ' .
+               WHERE s.cid = %i AND s.valid = 1 AND t.categoryid = %i ' .
               ( empty($_GET['probid']) ? '%_' : 'AND s.probid = %i ' ) .
               'AND submittime < c.endtime AND submittime >= c.starttime
                GROUP BY minute, result', $bar_size * 60, $bar_size, $cid, $partCat, @$_GET['probid']);
