@@ -359,6 +359,7 @@ else {
 	echo "<th scope=\"col\">allow<br />submit</th>";
 	echo "<th scope=\"col\">allow<br />judge</th>";
 	echo "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>\n";
+	echo "<th scope=\"col\">lazy eval</th>\n";
 	echo "</tr>\n</thead>\n<tbody>\n";
 
 	$iseven = false;
@@ -380,6 +381,8 @@ else {
 			  htmlspecialchars($row['color']) .
 			  ';"></div></a></td>'
 			: '<td>'. $link . '&nbsp;</a></td>' );
+		echo "<td>" . $link . ( isset($row['lazy_eval_results']) ?
+		                        printyn($row['lazy_eval_results']) : '-' ) . "</a></td>\n";
 		if ( IS_ADMIN ) echo "<td>" . delLinkMultiple('contestproblem',array('cid','probid'),array($id, $row['probid']), 'contest.php?id='.$id) ."</td>";
 
 		$iseven = !$iseven;

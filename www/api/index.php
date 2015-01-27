@@ -450,7 +450,7 @@ function judging_runs_POST($args)
 		$prob_lazy = $DB->q('MAYBEVALUE SELECT cp.lazy_eval_results
 		                     FROM judging j
 		                     LEFT JOIN submission s USING(submitid)
-		                     LEFT JOIN contestproblem cp USING(cid,probid)
+		                     LEFT JOIN contestproblem cp ON (cp.cid=j.cid AND cp.probid=s.probid)
 		                     WHERE judgingid = %i', $args['judgingid']);
 		if ( isset($prob_lazy) ) $lazy_eval = (bool)$prob_lazy;
 
