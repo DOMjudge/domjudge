@@ -58,12 +58,16 @@ function printtime($datetime, $format = NULL, $contesttime = FALSE) {
 		$reltime = (int)floor(calcContestTime($datetime));
 		$sign = ( $reltime<0 ? -1 : 1 );
 		$reltime *= $sign;
+		// We're not showing seconds, while the last minute before
+		// contest start should show as "-0:01", so if there's a
+		// nonzero amount of seconds before the contest, we have to
+		// add a minute.
 		$s = $reltime%60; $reltime = ($reltime - $s)/60;
+		if ( $sign<0 && $s>0 ) $reltime++;
 		$m = $reltime%60; $reltime = ($reltime - $m)/60;
 		$h = $reltime;
-		// The last minute before contest start should show as "-00:01"
 		if ( $sign<0 ) {
-			return sprintf("-%d:%02d", $h, $m+1);
+			return sprintf("-%d:%02d", $h, $m);
 		} else {
 			return sprintf("%d:%02d", $h, $m);
 		}
