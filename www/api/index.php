@@ -846,7 +846,7 @@ function teams($args)
 	global $DB;
 
 	// Construct query
-	$query = 'SELECT teamid AS id, t.name, a.country AS nationality,
+	$query = 'SELECT teamid AS id, t.name, t.members, a.country AS nationality,
 	          t.categoryid AS category, a.affilid, a.name AS affiliation
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)

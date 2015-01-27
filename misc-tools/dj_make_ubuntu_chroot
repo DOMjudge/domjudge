@@ -227,9 +227,6 @@ chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
 	/usr/bin/gpasswd /usr/bin/passwd /usr/lib/pt_chown \
 	/bin/su /bin/mount /bin/umount /sbin/unix_chkpwd"
 
-# Copy passwd file from host, necessary for python
-cp /etc/passwd "$CHROOTDIR/etc/passwd"
-
 # Disable root account
 sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
 

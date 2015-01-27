@@ -14,23 +14,28 @@ $bar_size = 10;
 
 $title = "Statistics";
 if ( !empty($_GET['probid']) ) {
-	$title .= " - Problem " . $DB->q('VALUE SELECT shortname FROM problem WHERE probid = %i', $_GET['probid']);
+	$shortname = $DB->q('VALUE SELECT shortname FROM problem p
+			     INNER JOIN contestproblem USING (probid)
+			     WHERE p.probid = %i', $_GET['probid']);
+	$title .= " - Problem " . htmlspecialchars($shortname);
 }
 
 require(LIBWWWDIR . '/header.php');
 echo "<h1>" . htmlspecialchars($title) . "</h1>\n\n";
+
+$partCat = $DB->q('VALUE SELECT categoryid FROM team_category WHERE name=%s', 'Participants');
 
 $res = $DB->q('SELECT result, COUNT(result) as count,
                (c.freezetime IS NOT NULL && submittime >= c.freezetime) AS afterfreeze,
                (FLOOR(submittime - c.starttime) DIV %i) * %i AS minute
                FROM submission s
                JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
-               LEFT OUTER JOIN contest c USING(cid)
+               LEFT OUTER JOIN contest c ON(c.cid=j.cid)
                LEFT OUTER JOIN team t USING(teamid)
-               WHERE s.cid = %i AND s.valid = 1 AND t.categoryid = 2 ' .
+               WHERE s.cid = %i AND s.valid = 1 AND t.categoryid = %i ' .
               ( empty($_GET['probid']) ? '%_' : 'AND s.probid = %i ' ) .
               'AND submittime < c.endtime AND submittime >= c.starttime
-               GROUP BY minute, result', $bar_size * 60, $bar_size, $cid, @$_GET['probid']);
+               GROUP BY minute, result', $bar_size * 60, $bar_size, $cid, $partCat, @$_GET['probid']);
 
 // All problems
 $problems = $DB->q('SELECT p.probid,p.name FROM problem p

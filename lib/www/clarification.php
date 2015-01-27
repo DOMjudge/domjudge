@@ -134,13 +134,17 @@ function putClarification($id,  $team = NULL)
 
 	$clar = $DB->q('TUPLE SELECT * FROM clarification WHERE clarid = %i', $id);
 
-	$clars = $DB->q('SELECT c.*, cp.shortname, p.name AS probname, t.name AS toname, f.name AS fromname, co.shortname AS contestshortname
+	$clars = $DB->q('SELECT c.*, cp.shortname, p.name AS probname,
+	                 t.name AS toname, f.name AS fromname,
+	                 co.shortname AS contestshortname
 	                 FROM clarification c
-			 LEFT JOIN problem p ON (c.probid = p.probid)
+	                 LEFT JOIN problem p ON (c.probid = p.probid)
 	                 LEFT JOIN team t ON (t.teamid = c.recipient)
 	                 LEFT JOIN team f ON (f.teamid = c.sender)
-			 LEFT JOIN contest co ON (co.cid = c.cid)
-			 LEFT JOIN contestproblem cp ON (cp.probid = c.probid AND cp.cid = c.cid AND cp.allow_submit = 1)
+	                 LEFT JOIN contest co ON (co.cid = c.cid)
+	                 LEFT JOIN contestproblem cp ON (cp.probid = c.probid AND
+	                                                 cp.cid = c.cid AND
+	                                                 cp.allow_submit = 1)
 	                 WHERE c.respid = %i OR c.clarid = %i
 	                 ORDER BY c.submittime, c.clarid',
 	                $clar['clarid'], $clar['clarid']);
@@ -379,11 +383,13 @@ function appendAnswer() {
 	$options = $categs;
 	foreach ($cdatas as $cid => $cdata) {
 		if ( difftime($cdata['starttime'], now()) <= 0 ) {
-			$problem_options = $DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid), CONCAT(shortname, ": ", name) as name
-						   FROM problem
-						   INNER JOIN contestproblem USING (probid)
-						   WHERE cid = %i AND allow_submit = 1
-						   ORDER BY shortname ASC', $cid);
+			$problem_options =
+				$DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
+				                             CONCAT(shortname, ": ", name) as name
+				        FROM problem
+				        INNER JOIN contestproblem USING (probid)
+				        WHERE cid = %i AND allow_submit = 1
+				        ORDER BY shortname ASC', $cid);
 			if ( IS_JURY && count($cdatas) > 1 ) {
 				foreach ($problem_options as &$problem_option) {
 					$problem_option = $cdata['shortname'] . ' - ' . $problem_option;

@@ -10,8 +10,7 @@
 # was compiled to a standalone binary.
 #
 # NOTICE: when this compiler script is used with USE_CHROOT on, the
-# chroot requires python3 to be installed and a user with the uid of
-# the domjudge-run user needs to be present in /etc/passwd in the chroot.
+# chroot requires python3 to be installed
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
@@ -41,7 +40,8 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-export ONLINE_JUDGE=1 DOMJUDGE=1
+# set non-existing HOME variable to make python happy
+export ONLINE_JUDGE=1 DOMJUDGE=1 HOME=/does/not/exist
 
 exec python3 "$MAINSOURCE"
 EOF

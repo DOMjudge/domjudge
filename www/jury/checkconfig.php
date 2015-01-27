@@ -130,6 +130,13 @@ if ( function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()==1 ) {
 	result('software', 'PHP magic quotes', 'O', 'PHP magic quotes disabled.');
 }
 
+if ( extension_loaded('suhosin') ) {
+	result('software', 'suhosin', 'E',
+	       'PHP suhosin extension loaded. This may result in dropping POST arguments, e.g. output_run.');
+} else {
+	result('software', 'suhosin', 'O', 'PHP suhosin extension disabled.');
+}
+
 $max_file_check = max(100,dbconfig_get('sourcefiles_limit', 100));
 result('software', 'PHP max_file_uploads',
        (int) ini_get('max_file_uploads') < $max_file_check ? 'W':'O',
