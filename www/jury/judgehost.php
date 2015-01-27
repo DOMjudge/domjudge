@@ -91,7 +91,7 @@ echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
 
 // get the judgings for a specific key and value pair
 // select only specific fields to avoid retrieving large blobs
-$res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
+$res = $DB->q('SELECT judgingid, submitid, cid, starttime, endtime, judgehost,
                result, verified, valid FROM judging
                WHERE cid IN %Ai AND judgehost = %s
                ORDER BY starttime DESC, judgingid DESC',
@@ -120,7 +120,7 @@ if( $res->count() == 0 ) {
 			'&amp;jid=' . (int)$jud['judgingid'] . '"';
 		echo '<tr' . ( $jud['valid'] ? '' : ' class="disabled"' ) . '>';
 		echo "<td><a$link>j" . (int)$jud['judgingid'] . '</a></td>';
-		echo "<td><a$link>" . printtime($jud['starttime'], NULL, TRUE) . '</a></td>';
+		echo "<td><a$link>" . printtime($jud['starttime'], NULL, $jud['cid']) . '</a></td>';
 		echo "<td><a$link>" . $runtime . '</a></td>';
 		echo "<td><a$link>" . printresult(@$jud['result'], $jud['valid']) . '</a></td>';
 		echo "<td class=\"tdcenter\"><a$link>" . printyn($jud['valid']) . '</a></td>';

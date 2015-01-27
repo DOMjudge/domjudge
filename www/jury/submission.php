@@ -208,7 +208,7 @@ if ( ! $submdata['valid'] ) {
 <img title="language" alt="Language:" src="../images/lang.png"/> <a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a>&nbsp;&nbsp;
 <img title="submittime" alt="Submittime:" src="../images/submittime.png"/> <?php
-	echo printtime($submdata['submittime'], NULL, TRUE) .
+	echo printtime($submdata['submittime'], NULL, $submdata['cid']) .
 		' (' . printtime($submdata['submittime']) . ')'; ?>&nbsp;&nbsp;
 <img title="allowed runtime" alt="Allowed runtime:" src="../images/allowedtime.png"/>
 	<?php echo  htmlspecialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
@@ -244,7 +244,7 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 		}
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
-			'<td>' . $link . printtime($jud['starttime'], NULL, TRUE) . '</a></td>' .
+			'<td>' . $link . printtime($jud['starttime'], NULL, $jud['cid']) . '</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
 			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) . '</a></td>' .
 			"</tr>\n";

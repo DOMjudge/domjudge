@@ -148,7 +148,7 @@ if ( !empty($BALLOONS) ) {
 		// start a new row, 'disable' if balloon has been handed out already
 		echo '<tr'  . ( $row['done'] == 1 ? ' class="disabled"' : '' ) . '>';
 		echo '<td>b' . (int)$row['balloonid'] . '</td>';
-		echo '<td>' . printtime($row['submittime'], NULL, TRUE) . '</td>';
+		echo '<td>' . printtime($row['submittime'], NULL, $row['cid']) . '</td>';
 
 		if ( count($cids) > 1 ) {
 			// contest of this problem, only when more than one active

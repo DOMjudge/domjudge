@@ -14,7 +14,7 @@ $id = getRequestID();
 
 
 // select also on teamid so we can only select our own submissions
-$row = $DB->q('MAYBETUPLE SELECT p.probid, cp.shortname, p.name AS probname, submittime,
+$row = $DB->q('MAYBETUPLE SELECT p.probid, j.cid, cp.shortname, p.name AS probname, submittime,
                s.valid, l.name AS langname, result, output_compile, verified, judgingid
                FROM judging j
                LEFT JOIN submission s      USING (submitid)
@@ -46,7 +46,7 @@ if( ! $row['valid'] ) {
 	<td><span class="probid"><?php echo htmlspecialchars($row['shortname']) ?></span> -
     <?php echo htmlspecialchars($row['probname'])?></td></tr>
 <tr><td>Submitted:</td>
-	<td><?php echo printtime($row['submittime'], NULL, TRUE)?></td></tr>
+	<td><?php echo printtime($row['submittime'], NULL, $row['cid'])?></td></tr>
 <tr><td>Language:</td>
 	<td><?php echo htmlspecialchars($row['langname'])?></td></tr>
 </table>

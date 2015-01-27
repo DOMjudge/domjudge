@@ -138,7 +138,7 @@ function problemVisible($probid)
  */
 function calcContestTime($walltime, $cid)
 {
-	global $cdatas;
+	global $DB, $cdatas;
 
 	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
 
