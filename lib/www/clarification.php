@@ -36,7 +36,7 @@ function canViewClarification($team, $clar)
  * Returns the list of clarification categories as a key,value array.
  * Keys should be non-numeric to distinguish them from problem IDs.
  */
-function getClarCategories(&$default = null)
+function getClarCategories()
 {
 	$categs = dbconfig_get('clar_categories');
 
@@ -93,17 +93,19 @@ function putClar($clar)
 	$prefix = '';
 	if ( IS_JURY && count($cids) > 1 )
 	{
-		$prefix = $clar['contestshortname'] . ' - ';
+		$prefix = htmlspecialchars($clar['contestshortname']) . ' - ';
 	}
 	if ( is_null($clar['probid']) ) {
 		echo $prefix . "General issue";
+	} elseif ( !ctype_digit($clar['probid']) ) {
+		echo $prefix . htmlspecialchars($categs[$clar['probid']]);
 	} else {
 		if ( IS_JURY ) {
 			echo '<a href="problem.php?id=' . urlencode($clar['probid']) .
-			     '">' . $prefix . 'Problem ' . $clar['shortname'] . ": " .
-			     $clar['probname'] . '</a>';
+			     '">' . $prefix . 'Problem ' . htmlspecialchars($clar['shortname']) . ": " .
+			     htmlspecialchars($clar['probname']) . '</a>';
 		} else {
-			echo 'Problem ' . $clar['shortname'] . ": " . $clar['probname'];
+			echo 'Problem ' . htmlspecialchars($clar['shortname'] . ": " . $clar['probname']);
 		}
 	}
 	echo "</td></tr>\n";
