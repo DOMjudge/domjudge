@@ -26,7 +26,7 @@ ALTER TABLE contestproblem
 -- Drop constraint before changing data
 ALTER TABLE `clarification`
   DROP FOREIGN KEY `clarification_ibfk_3`,
-  MODIFY COLUMN `probid` varchar(8) default NULL COMMENT 'Problem or category associated to this clarification';
+  MODIFY COLUMN `probid` varchar(128) default NULL COMMENT 'Problem or category associated to this clarification';
 
 ALTER TABLE `team`
   ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`,
