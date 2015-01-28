@@ -308,13 +308,15 @@ function putClarificationForm($action, $respid = NULL, $onlycontest = NULL)
 <!--
 function confirmClar() {
 <?php if ( IS_JURY ): ?>
-	var sendto = document.forms['sendclar'].sendto.value;
+	var sendto_field = document.forms['sendclar'].sendto;
+	var sendto = sendto_field.value;
+	var sendto_text = sendto_field.options[sendto_field.selectedIndex].text;
+
 	if ( sendto=='domjudge-must-select' ) {
 		alert('You must select a recipient for this clarification.');
 		return false;
 	}
-	if ( sendto=='' ) sendto = "ALL";
-	return confirm("Send clarification to " + sendto + "?");
+	return confirm("Send clarification to " + sendto_text + "?");
 <?php else : ?>
 	return confirm("Send clarification request to Jury?");
 <?php endif; ?>

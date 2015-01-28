@@ -95,7 +95,7 @@ if ( empty($curcids) )  {
 	}
 
 } else {
-	$rows = $DB->q('TABLE SELECT * FROM contest WHERE cid IN %Ai', $cids);
+	$rows = $DB->q('TABLE SELECT * FROM contest WHERE cid IN %Ai', $curcids);
 	echo "</legend>\n\n";
 
 	foreach ($rows as $row) {
