@@ -66,16 +66,15 @@ if ( isset($_REQUEST['upload']) ) {
 	$data = '<?xml version="1.0" encoding="UTF-8"?><icpc computeCitations="1" name="Upload_via_DOMjudge_' . date("c") . '">';
 	$teams = $DB->q('SELECT teamid, externalid FROM team
 	                 WHERE externalid IS NOT NULL AND enabled=1');
-	$cdatas = getCurContests(TRUE);
 	while( $row = $teams->next() ) {
-		$totals = $DB->q('MAYBETUPLE SELECT correct, totaltime, cid
+		$totals = $DB->q('MAYBETUPLE SELECT correct, totaltime
 		                  FROM rankcache_public
-		                  WHERE cid IN %Ai AND teamid = %i',
-		                 getCurContests(FALSE), $row['teamid']);
+		                  WHERE cid = %i AND teamid = %i',
+		                 $cid, $row['teamid']);
 		if ( $totals === null ) {
 			$totals['correct'] = $totals['totaltime'] = 0;
 		}
-		$rank = calcTeamRank($cdatas[$row['cid']], $row['teamid'], $totals, FALSE);
+		$rank = calcTeamRank($cdata, $row['teamid'], $totals, FALSE);
 		$lastProblem = $DB->q('MAYBEVALUE SELECT MAX(totaltime) FROM scorecache_public
 		                       WHERE teamid=%i AND cid=%i', $row['teamid'], $row['cid']);
 		if ( $lastProblem === NULL ) {
@@ -122,7 +121,7 @@ $new_teams = array();
 $updated_teams = array();
 foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 	foreach ( $group['team'] as $team ) {
-		// Note: affiliations are not updated and not deleted even if all teams are canceled
+		// Note: affiliations are not updated and not deleted even if all teams have canceled
 		$affilid = $DB->q('MAYBEVALUE SELECT affilid FROM team_affiliation
 		                   WHERE name=%s', $team['institutionName']);
 		if ( empty($affilid) ) {
@@ -136,7 +135,7 @@ foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 		// collect team members
 		$members_a = $mails_a = array();
 		$members_json = $team['teamMembers']['teamMember'];
-		// FIXME: if there's only team member, it's not encapsulated in an array :-/
+		// FIXME: if there's only 1 team member, it's not encapsulated in an array :-/
 		if ( isset($members_json['@team']) ) {
 			$members_json  = array($members_json);
 		}
