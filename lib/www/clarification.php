@@ -382,8 +382,11 @@ function appendAnswer() {
 	// has started) or other issues.
 	$categs = getClarCategories();
 	$defclar = key($categs);
-	$options = $categs;
+	$options = array();
 	foreach ($cdatas as $cid => $cdata) {
+		foreach($categs as $categid => $categname) {
+			$options["$cid-$categid"] = $cdata['shortname'] . ' - ' .$categname;
+		}
 		if ( difftime($cdata['starttime'], now()) <= 0 ) {
 			$problem_options =
 				$DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
