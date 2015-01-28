@@ -77,17 +77,17 @@ function putClar($clar)
 	$prefix = '';
 	if ( IS_JURY && count($cids) > 1 )
 	{
-		$prefix = $clar['contestshortname'] . ' - ';
+		$prefix = htmlspecialchars($clar['contestshortname']) . ' - ';
 	}
 	if ( is_null($clar['probid']) ) {
 		echo $prefix . "General issue";
 	} else {
 		if ( IS_JURY ) {
 			echo '<a href="problem.php?id=' . urlencode($clar['probid']) .
-			     '">' . $prefix . 'Problem ' . $clar['shortname'] . ": " .
-			     $clar['probname'] . '</a>';
+			     '">' . $prefix . 'Problem ' . htmlspecialchars($clar['shortname'] . ": " .
+			     $clar['probname']) . '</a>';
 		} else {
-			echo 'Problem ' . $clar['shortname'] . ": " . $clar['probname'];
+			echo 'Problem ' . htmlspecialchars($clar['shortname'] . ": " . $clar['probname']);
 		}
 	}
 	echo "</td></tr>\n";
