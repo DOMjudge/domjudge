@@ -22,7 +22,7 @@ if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
 } elseif ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
-} else {
+} elseif ( isset($id) ) {
 	$extra = '';
 	if ( $current_cid !== null ) {
 		$extra = '&cid=' . urlencode($current_cid);
