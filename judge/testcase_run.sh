@@ -234,7 +234,7 @@ runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
 # Append output validator error messages
 # TODO: display extra
 if [ -s feedback/judgeerror.txt ]; then
-	echo -e "\n---------- output validator (error) messages ----------\n" >> feedback/judgemessage.txt
+	printf "\n---------- output validator (error) messages ----------\n" >> feedback/judgemessage.txt
 	cat feedback/judgeerror.txt >> feedback/judgemessage.txt
 fi
 
@@ -246,7 +246,7 @@ if grep '^time-result: .*timelimit' compare.meta >/dev/null 2>&1 ; then
 fi
 # Append output validator stdin/stderr - display extra?
 if [ -s compare.tmp ]; then
-	echo -e "\n---------- output validator stdout/stderr messages ----------\n" >> feedback/judgemessage.txt
+	printf "\n---------- output validator stdout/stderr messages ----------\n" >> feedback/judgemessage.txt
 	cat compare.tmp >> feedback/judgemessage.txt
 fi
 if [ $exitcode -ne 42 ] && [ $exitcode -ne 43 ]; then
