@@ -2,23 +2,22 @@
 
 # Compare wrapper-script to be called from 'testcase_run.sh'.
 #
-# Usage: $0 <testdata.in> <program.out> <testdata.out> <result.out> <diff.out>
+# Usage: $0 <testdata.in> <testdata.out> <feedback_dir> [optional arguments] < <team output>
 #
 # <testdata.in>   File containing testdata input.
-# <program.out>   File containing the program output.
 # <testdata.out>  File containing the correct output.
-# <result.out>    File describing the judging verdict.
-# <diff.out>      File to write program/correct output differences to (optional).
+# <feedback_dir>  Directory where one can store judgemessage.txt, teammessage.txt, score.txt...
 #
 #
-# Exits successfully except when an internal error occurs. Submitted
-# program output is considered correct when diff.out is empty (and
-# specified).
+# Exits with exitcode
+# - 1  if an internal error occurs,
+# - 42 if the team output is a correct output,
+# - 43 if the team output is incorrect.
 #
 # This script calls another program to check the results.
 # Calling syntax:
 #
-#    $CHECK_PROGRAM <testdata.in> <program.out> <testdata.out>
+#    $CHECK_PROGRAM <testdata.in> <testdata.out> < <team output>
 #
 # The $CHECK_PROGRAM should return the contents of <diff.out> to
 # standard output. It must exit with exitcode zero to indicate
@@ -32,41 +31,32 @@ CHECK_PROGRAM="${SCRIPTPATH}/check_boolfind"
 CHECK_OPTIONS=""
 
 TESTIN="$1"
-PROGRAM="$2"
-TESTOUT="$3"
-RESULT="$4"
-DIFFOUT="${5:-/dev/null}"
-
-writeresult()
-{
-    ( cat <<EOF
-result=$1
-EOF
-    ) > "$RESULT"
-}
+TESTOUT="$2"
+FEEDBACKDIR="$3"
+DIFFOUT="${FEEDBACKDIR}/judgemessage.txt"
 
 if [ ! -x "$CHECK_PROGRAM" ]; then
 	echo "Error: '$CHECK_PROGRAM' not found or executable." >&2
-	writeresult "Internal error"
+	echo "Internal error"
 	exit 1
 fi
 
 # Run the program:
-"$CHECK_PROGRAM" $CHECK_OPTIONS "$TESTIN" "$PROGRAM" "$TESTOUT" > "$DIFFOUT"
+"$CHECK_PROGRAM" $CHECK_OPTIONS "$TESTIN" "$TESTOUT" < /dev/stdin > "$DIFFOUT"
 EXITCODE=$?
 
 # Exit with failure, when non-zero exitcode found:
 if [ $EXITCODE -ne 0 ]; then
 	echo "Error: '$CHECK_PROGRAM' exited with exitcode $EXITCODE." >&2
-	writeresult "Internal error"
+	echo "Internal error"
 	exit 1
 fi
 
 # Check result and write result file:
 if [ -s "$DIFFOUT" ]; then
-	writeresult "Wrong answer"
+	exit 43 # Wrong Answer
 else
-	writeresult "Accepted"
+	exit 42 # Correct
 fi
 
 exit 0
