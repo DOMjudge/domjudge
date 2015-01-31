@@ -130,6 +130,12 @@ function rejudgeForm($table, $id)
 
 
 /**
+ * Returns TRUE iff string $haystack starts with string $needle
+ */
+function starts_with($haystack, $needle) {
+	return mb_substr($haystack, 0, mb_strlen($needle)) === $needle;
+}
+/**
  * Returns TRUE iff string $haystack ends with string $needle
  */
 function ends_with($haystack, $needle) {
@@ -260,29 +266,40 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 	// Insert/update testcases
 	$maxrank = 1 + $DB->q('VALUE SELECT max(rank) FROM testcase
 	                       WHERE probid = %i', $probid);
-	$ncases = 0;
-	echo "<ul>\n";
-	for ($j = 0; $j < $zip->numFiles; $j++) {
-		$filename = $zip->getNameIndex($j);
-		if ( ends_with($filename, ".in") ) {
-			$basename = basename($filename, ".in");
-			$fileout = $basename . ".out";
-			$testout = $zip->getFromName($fileout);
-			if ( $testout!==FALSE) {
-				$testin = $zip->getFromIndex($j);
 
-				$DB->q('INSERT INTO testcase (probid, rank,
-				        md5sum_input, md5sum_output, input, output, description)
-				        VALUES (%i, %i, %s, %s, %s, %s, %s)',
-				       $probid, $maxrank, md5($testin), md5($testout),
-				       $testin, $testout, $basename);
-				$maxrank++;
-				$ncases++;
-				echo "<li>Added testcase from: <tt>$basename.{in,out}</tt></li>\n";
+	// first insert sample, then secret data in alphabetical order
+	foreach (array('sample', 'secret') as $type) {
+		$ncases = 0;
+		$datafiles = array();
+		for ($j = 0; $j < $zip->numFiles; $j++) {
+			$filename = $zip->getNameIndex($j);
+			if ( starts_with($filename, "data/$type/") && ends_with($filename, ".in") ) {
+				$basename = basename($filename, ".in");
+				$fileout = "data/$type/" . $basename . ".ans";
+				if ( $zip->locateName($fileout) !== FALSE ) {
+					$datafiles[] = $basename;
+				}
 			}
 		}
+		asort($datafiles);
+
+		echo "<ul>\n";
+		foreach ($datafiles as $datafile) {
+			$testin  = $zip->getFromName("data/$type/$datafile.in");
+			$testout = $zip->getFromName("data/$type/$datafile.ans");
+
+			$DB->q('INSERT INTO testcase (probid, rank, sample,
+				md5sum_input, md5sum_output, input, output, description)
+				VALUES (%i, %i, %i, %s, %s, %s, %s, %s)',
+				$probid, $maxrank, $type == 'sample' ? 1 : 0,
+				md5($testin), md5($testout),
+				$testin, $testout, $datafile);
+			$maxrank++;
+			$ncases++;
+			echo "<li>Added $type testcase from: <tt>$datafile.{in,out}</tt></li>\n";
+		}
+		echo "</ul>\n<p>Added $ncases $type testcase(s).</p>\n";
 	}
-	echo "</ul>\n<p>Added $ncases testcase(s).</p>\n";
 
 	// submit reference solutions
 	if ( $cid == -1 ) {
