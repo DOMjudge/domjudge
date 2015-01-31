@@ -57,7 +57,7 @@ if ( isset($_POST['upload']) ) {
 		}
 		echo "<p><a href=\"problems.php\">Return to problems overview.</a></p>\n";
 	} else {
-		error("Missing filename for problem upload");
+		error("Missing filename for problem upload. Maybe you have to increase upload_max_filesize, see config checker.");
 	}
 
 	require(LIBWWWDIR . '/footer.php');
