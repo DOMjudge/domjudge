@@ -349,8 +349,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 		}
 		echo "</ul>\n<p>Added $njurysols jury solution(s).</p>\n";
 	} else {
-		echo "<p>No jury solutions added: problem not submittable " .
-		    "or no team associated.</p>\n";
+		echo "<p>No jury solutions added: problem not submittable</p>\n";
 	}
 	if ( !in_array($cid, array_keys($cdatas)) ) {
 		echo "<p>The corresponding contest is not activated yet." .
