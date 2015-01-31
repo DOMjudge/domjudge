@@ -336,7 +336,9 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				}
 			}
 
-			$DB->q('UPDATE problem SET %S WHERE probid = %i', $yaml_array_problem, $probid);
+			if ( sizeof($yaml_array_problem) > 0 ) {
+				$DB->q('UPDATE problem SET %S WHERE probid = %i', $yaml_array_problem, $probid);
+			}
 		}
 	}
 
