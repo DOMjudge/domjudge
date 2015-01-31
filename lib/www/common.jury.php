@@ -325,7 +325,71 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				$yaml_array_problem['special_compare_args'] = $problem_yaml_data['validator_flags'];
 			}
 			if ( isset($problem_yaml_data['validation']) && $problem_yaml_data['validation'] == 'custom' ) {
+				// search for validator
 				// TODO: import and connect validator
+				$validator_files = array();
+				for ($j = 0; $j < $zip->numFiles; $j++) {
+					$filename = $zip->getNameIndex($j);
+					if ( starts_with($filename, "output_validators/") && !ends_with($filename, "/") ) {
+						$validator_files[] = $filename;
+					}
+				}
+				if ( sizeof($validator_files) == 0 ) {
+					echo "<p>Custom validator specified but not found.</p>\n";
+				} else if ( sizeof ($validator_files) > 1 ) {
+					// must be in common directory
+					$validator_dir = mb_substr($validator_files[0], 0, mb_strrpos($validator_files[0], "/"));
+					$same_dir = TRUE;
+					foreach ( $validator_files as $validator_file ) {
+						if ( !starts_with($validator_file, $validator_dir) ) {
+							$same_dir = FALSE;
+							echo "<p>$validator_file does not start with $validator_dir</p>\n";
+							break;
+						}
+					}
+					if ( !$same_dir ) {
+						echo "<p>Found multiple custom output validators.</p>\n";
+					} else {
+						$tmpzipfiledir = exec("mktemp -d --tmpdir=" . TMPDIR, $dontcare, $retval);
+						if ( $retval!=0 ) {
+							error("failed to create temporary directory");
+						}
+						chmod($tmpzipfiledir, 0700);
+						foreach ( $validator_files as $validator_file ) {
+							$content = $zip->getFromName($validator_file);
+							$filebase = basename($validator_file);
+							$newfilename = $tmpzipfiledir . "/" . $filebase;
+							file_put_contents($newfilename, $content);
+							if ( $filebase === 'build' || $filebase === 'run' ) {
+								// mark special files as executable
+								chmod($newfilename, 0700);
+							}
+						}
+
+						exec("zip -r -j '$tmpzipfiledir/outputvalidator.zip' '$tmpzipfiledir'", $dontcare, $retval);
+						if ( $retval!=0 ) {
+							error("failed to create zip file for output validator.");
+						}
+
+						$ovzip = file_get_contents("$tmpzipfiledir/outputvalidator.zip");
+						$probname = $DB->q("VALUE SELECT name FROM problem WHERE probid=%i", $probid);
+						$ovname = $probname . "_cmp";
+						if ( $DB->q("MAYBEVALUE SELECT execid FROM executable WHERE execid=%s", $ovname) ) {
+							// avoid name clash
+							$clashcnt = 2;
+							while ( $DB->q("MAYBEVALUE SELECT execid FROM executable WHERE execid=%s", $ovname . "_" . $clashcnt) ) {
+								$clashcnt++;
+							}
+							$ovname = $ovname . "_" . $clashcnt;
+						}
+						$DB->q("INSERT INTO executable (execid, md5sum, zipfile, description, type) VALUES (%s, %s, %s, %s, %s)",
+							$ovname, md5($ovzip), $ovzip, 'output validator for ' . $probname, 'compare');
+
+						$DB->q("UPDATE problem SET special_compare=%s WHERE probid=%i", $ovname, $probid);
+
+						echo "<p>Added output validator '$ovname'.</p>\n";
+					}
+				}
 			}
 			if ( isset($problem_yaml_data['limits']) ) {
 				if ( isset($problem_yaml_data['limits']['memory']) ) {
