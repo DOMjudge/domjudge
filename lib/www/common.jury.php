@@ -176,6 +176,53 @@ if (!function_exists('parse_ini_string')) {
 	}
 }
 
+$matchstrings = array('@EXPECTED_RESULTS@: ',
+		      '@EXPECTED_SCORE@: ');
+
+
+function normalizeExpectedResult($result) {
+	// Remap results as specified by the Kattis problem package format,
+	// see: http://www.problemarchive.org/wiki/index.php/Problem_Format
+	$resultremap = array('ACCEPTED' => 'CORRECT',
+			     'WRONG_ANSWER' => 'WRONG-ANSWER',
+			     'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
+			     'RUN_TIME_ERROR' => 'RUN-ERROR');
+
+	$result = trim(mb_strtoupper($result));
+	if ( in_array($result,array_keys($resultremap)) ) {
+		return $resultremap[$result];
+	}
+	return $result;
+}
+
+/**
+ * checks given source file for expected results string
+ * returns NULL if no such string exists
+ * returns array of expected results otherwise
+ */
+function getExpectedResults($source) {
+	global $matchstrings;
+	$pos = FALSE;
+	foreach ( $matchstrings as $matchstring ) {
+		if ( ($pos = mb_stripos($source,$matchstring)) !== FALSE ) break;
+	}
+
+	if ( $pos === FALSE) {
+		return NULL;
+	}
+
+	$beginpos = $pos + mb_strlen($matchstring);
+	$endpos = mb_strpos($source,"\n",$beginpos);
+	$str = mb_substr($source,$beginpos,$endpos-$beginpos);
+	$results = explode(',',trim(mb_strtoupper($str)));
+
+	foreach ( $results as $key => $val ) {
+		$results[$key] = normalizeExpectedResult($val);
+	}
+
+	return $results;
+}
+
 /**
  * Read problem description file and testdata from zip archive
  * and update problem with it, or insert new problem when probid=NULL.
@@ -183,7 +230,7 @@ if (!function_exists('parse_ini_string')) {
  */
 function importZippedProblem($zip, $probid = NULL, $cid = -1)
 {
-	global $DB, $teamid, $cdatas;
+	global $DB, $teamid, $cdatas, $matchstrings;
 	$prop_file = 'domjudge-problem.ini';
 
 	$ini_keys_problem = array('name', 'timelimit', 'special_run', 'special_compare');
@@ -317,8 +364,8 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			$filename = $zip->getNameIndex($j);
 			$filename_parts = explode(".", $filename);
 			$extension = end($filename_parts);
-			if ( in_array($extension, array('in', 'out', 'ini')) ) {
-				// skipping test data and domjudge-problem.ini
+			if ( !starts_with($filename, 'submissions/') || ends_with($filename, '/') ) {
+				// skipping non-submission files and directories silently
 				continue;
 			}
 			unset($langid);
@@ -334,10 +381,20 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				if ( !($tmpfname = tempnam(TMPDIR, "ref_solution-")) ) {
 					error("Could not create temporary file in directory " . TMPDIR);
 				}
-				file_put_contents($tmpfname, $zip->getFromIndex($j));
+				$offset = mb_strlen('submissions/');
+				$expectedResult = normalizeExpectedResult(mb_substr($filename, $offset, mb_strpos($filename, '/', $offset) - $offset));
+				$source = $zip->getFromIndex($j);
+				$results = getExpectedResults($source);
+				if ( $results === NULL ) {
+					// annotate source code with expected result
+					$source = "// added by import: " . $matchstrings[0] . $expectedResult . "\n" . $source;
+				} else if ( !in_array($expectedResult, $results) ) {
+					warning("annotated result '" . implode(', ', $results) . "' does not match directory for $filename");
+				}
+				file_put_contents($tmpfname, $source);
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
 					submit_solution($teamid, $probid, $cid, $langid,
-							array($tmpfname), array($filename));
+							array($tmpfname), array(basename($filename)));
 					echo "<li>Added jury solution from: <tt>$filename</tt></li>\n";
 					$njurysols++;
 				} else {
@@ -357,41 +414,4 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 	}
 
 	return $probid;
-}
-
-// checks given source file for expected results string
-// returns NULL if no such string exists
-// returns array of expected results otherwise
-function getExpectedResults($source) {
-	$matchstrings = array('@EXPECTED_RESULTS@: ',
-			      '@EXPECTED_SCORE@: ');
-	
-	// Remap results as specified by the Kattis problem package format,
-	// see: http://www.problemarchive.org/wiki/index.php/Problem_Format
-	$resultremap = array('ACCEPTED' => 'CORRECT',
-			     'WRONG_ANSWER' => 'WRONG-ANSWER',
-			     'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
-			     'RUN_TIME_ERROR' => 'RUN-ERROR');
-
-	$pos = FALSE;
-	foreach ( $matchstrings as $matchstring ) {
-		if ( ($pos = mb_stripos($source,$matchstring)) !== FALSE ) break;
-	}
-
-	if ( $pos === FALSE) {
-		return NULL;
-	}
-
-	$beginpos = $pos + mb_strlen($matchstring);
-	$endpos = mb_strpos($source,"\n",$beginpos);
-	$str = mb_substr($source,$beginpos,$endpos-$beginpos);
-	$results = explode(',',trim(mb_strtoupper($str)));
-
-	foreach ( $results as $key => $val ) {
-		if ( in_array($val,array_keys($resultremap)) ) {
-			$results[$key] = $resultremap[$val];
-		}
-	}
-
-	return $results;
 }
