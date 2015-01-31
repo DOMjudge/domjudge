@@ -7,6 +7,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+require(LIBEXTDIR . '/spyc/spyc.php');
+
 /**
  * Return a link to add a new row to a specific table.
  */
@@ -232,6 +234,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 {
 	global $DB, $teamid, $cdatas, $matchstrings;
 	$prop_file = 'domjudge-problem.ini';
+	$yaml_file = 'problem.yaml';
 
 	$ini_keys_problem = array('name', 'timelimit', 'special_run', 'special_compare');
 	$ini_keys_contest_problem = array('probid', 'allow_submit', 'allow_judge', 'color');
@@ -296,6 +299,44 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 					       ') VALUES %As', $ini_array_contest_problem);
 				}
 			}
+		}
+	}
+
+	// parse problem.yaml
+	$problem_yaml = $zip->getFromName($yaml_file);
+	if ( $problem_yaml !== FALSE ) {
+		$problem_yaml_data = spyc_load($problem_yaml);
+
+		if ( !empty($problem_yaml_data) ) {
+			// FIXME: parse UUID and compare to probid
+			$yaml_array_problem = array();
+			if ( isset($problem_yaml_data['name']) ) {
+				if ( is_array($problem_yaml_data['name']) ) {
+					foreach ($problem_yaml_data['name'] as $lang => $name) {
+						// TODO: select a specific instead of the first language
+						$yaml_array_problem['name'] = $name;
+						break;
+					}
+				} else {
+					$yaml_array_problem['name'] = $problem_yaml_data['name'];
+				}
+			}
+			if ( isset($problem_yaml_data['validator_flags']) ) {
+				$yaml_array_problem['special_compare_args'] = $problem_yaml_data['validator_flags'];
+			}
+			if ( isset($problem_yaml_data['validation']) && $problem_yaml_data['validation'] == 'custom' ) {
+				// TODO: import and connect validator
+			}
+			if ( isset($problem_yaml_data['limits']) ) {
+				if ( isset($problem_yaml_data['limits']['memory']) ) {
+					$yaml_array_problem['memlimit'] = 1024 * $problem_yaml_data['limits']['memory'];
+				}
+				if ( isset($problem_yaml_data['limits']['output']) ) {
+					$yaml_array_problem['outputlimit'] = 1024 * $problem_yaml_data['limits']['output'];
+				}
+			}
+
+			$DB->q('UPDATE problem SET %S WHERE probid = %i', $yaml_array_problem, $probid);
 		}
 	}
 
