@@ -225,6 +225,56 @@ function getExpectedResults($source) {
 	return $results;
 }
 
+// Return resized thumbnail and mime-type (the part after 'image/')
+// from image contents.
+function get_image_thumb_type($image)
+{
+	if ( !function_exists('gd_info') ) {
+		error("Cannot import image: the PHP GD library is missing.");
+	}
+
+	$info = getimagesizefromstring($image);
+	$type = image_type_to_extension($info[2], FALSE);
+
+	if ( !in_array($type, array('jpeg', 'png', 'gif')) ) {
+		error("Unsupported image type '$type' found.");
+	}
+
+	$orig = imagecreatefromstring($image);
+	$thumb = imagecreatetruecolor(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+	if ( $orig===FALSE || $thumb===FALSE ) {
+		error('Cannot create GD image.');
+	}
+
+	if ( !imagecopyresampled($thumb, $orig, 0, 0, 0, 0,
+	                         THUMBNAIL_SIZE, THUMBNAIL_SIZE, $info[0], $info[1]) ) {
+		error('Cannot create resized thumbnail image.');
+	}
+
+	// The GD image library doesn't have functionality to output an
+	// image to string, so we capture the output buffer.
+	ob_flush();
+	ob_start();
+
+	$success = FALSE;
+	switch ( $type ) {
+	case 'jpeg': $success = imagejpeg($thumb); break;
+	case 'png':  $success = imagepng($thumb); break;
+	case 'gif':  $success = imagegif($thumb); break;
+	}
+	$thumbstr = ob_get_contents();
+
+	ob_end_clean();
+
+	if ( !$success ) error('Failed to output thumbnail image.');
+
+	imagedestroy($orig);
+	imagedestroy($thumb);
+
+	return array($thumbstr, $type);
+}
+
+
 /**
  * Read problem description file and testdata from zip archive
  * and update problem with it, or insert new problem when probid=NULL.
@@ -447,13 +497,26 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			if ( ($descfile = $zip->getFromName("data/$type/$datafile.desc")) !== FALSE ) {
 				$description .= ": \n" . $descfile;
 			}
+			$image_file = $image_type = $image_thumb = FALSE;
+			foreach (array('png', 'jpg', 'jpeg', 'gif') as $img_ext) {
+				if ( ($image_file = $zip->getFromName("data/$type/$datafile" . "." . $img_ext)) !== FALSE ) {
+					list($image_thumb, $image_type) = get_image_thumb_type($image_file);
+					break;
+				}
+			}
 
 			$DB->q('INSERT INTO testcase (probid, rank, sample,
-				md5sum_input, md5sum_output, input, output, description)
-				VALUES (%i, %i, %i, %s, %s, %s, %s, %s)',
+				md5sum_input, md5sum_output, input, output, description' .
+				( $image_file !== FALSE ? ', image, image_thumb, image_type' : '' ) .
+				')' . 
+				'VALUES (%i, %i, %i, %s, %s, %s, %s, %s' . 
+				( $image_file !== FALSE ? ', %s, %s, %s' : '%_ %_ %_' ) .
+				')',
 				$probid, $maxrank, $type == 'sample' ? 1 : 0,
 				md5($testin), md5($testout),
-				$testin, $testout, $description);
+				$testin, $testout, $description,
+				$image_file, $image_thumb, $image_type
+			);
 			$maxrank++;
 			$ncases++;
 			echo "<li>Added $type testcase from: <tt>$datafile.{in,ans}</tt></li>\n";

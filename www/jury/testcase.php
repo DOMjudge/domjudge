@@ -72,55 +72,6 @@ function get_testcase_data()
 }
 get_testcase_data();
 
-// Return resized thumbnail and mime-type (the part after 'image/')
-// from image contents.
-function get_image_thumb_type($image)
-{
-	if ( !function_exists('gd_info') ) {
-		error("Cannot import image: the PHP GD library is missing.");
-	}
-
-	$info = getimagesizefromstring($image);
-	$type = image_type_to_extension($info[2], FALSE);
-
-	if ( !in_array($type, array('jpeg', 'png', 'gif')) ) {
-		error("Unsupported image type '$type' found.");
-	}
-
-	$orig = imagecreatefromstring($image);
-	$thumb = imagecreatetruecolor(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
-	if ( $orig===FALSE || $thumb===FALSE ) {
-		error('Cannot create GD image.');
-	}
-
-	if ( !imagecopyresampled($thumb, $orig, 0, 0, 0, 0,
-	                         THUMBNAIL_SIZE, THUMBNAIL_SIZE, $info[0], $info[1]) ) {
-		error('Cannot create resized thumbnail image.');
-	}
-
-	// The GD image library doesn't have functionality to output an
-	// image to string, so we capture the output buffer.
-	ob_flush();
-	ob_start();
-
-	$success = FALSE;
-	switch ( $type ) {
-	case 'jpeg': $success = imagejpeg($thumb); break;
-	case 'png':  $success = imagepng($thumb); break;
-	case 'gif':  $success = imagegif($thumb); break;
-	}
-	$thumbstr = ob_get_contents();
-
-	ob_end_clean();
-
-	if ( !$success ) error('Failed to output thumbnail image.');
-
-	imagedestroy($orig);
-	imagedestroy($thumb);
-
-	return array($thumbstr, $type);
-}
-
 // Reorder testcases
 if ( isset ($_GET['move']) ) {
 	$move = $_GET['move'];
