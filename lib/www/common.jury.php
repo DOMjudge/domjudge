@@ -308,7 +308,10 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 		$problem_yaml_data = spyc_load($problem_yaml);
 
 		if ( !empty($problem_yaml_data) ) {
-			// FIXME: parse UUID and compare to probid
+			if ( isset($problem_yaml_data['uuid']) && $cid != -1 ) {
+				$DB->q('UPDATE contestproblem SET shortname=%s WHERE cid=%i AND probid=%i',
+					$problem_yaml_data['uuid'], $cid, $probid);
+			}
 			$yaml_array_problem = array();
 			if ( isset($problem_yaml_data['name']) ) {
 				if ( is_array($problem_yaml_data['name']) ) {
@@ -326,7 +329,6 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			}
 			if ( isset($problem_yaml_data['validation']) && $problem_yaml_data['validation'] == 'custom' ) {
 				// search for validator
-				// TODO: import and connect validator
 				$validator_files = array();
 				for ($j = 0; $j < $zip->numFiles; $j++) {
 					$filename = $zip->getNameIndex($j);
@@ -441,16 +443,20 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 		foreach ($datafiles as $datafile) {
 			$testin  = $zip->getFromName("data/$type/$datafile.in");
 			$testout = $zip->getFromName("data/$type/$datafile.ans");
+			$description = $datafile;
+			if ( ($descfile = $zip->getFromName("data/$type/$datafile.desc")) !== FALSE ) {
+				$description .= ": \n" . $descfile;
+			}
 
 			$DB->q('INSERT INTO testcase (probid, rank, sample,
 				md5sum_input, md5sum_output, input, output, description)
 				VALUES (%i, %i, %i, %s, %s, %s, %s, %s)',
 				$probid, $maxrank, $type == 'sample' ? 1 : 0,
 				md5($testin), md5($testout),
-				$testin, $testout, $datafile);
+				$testin, $testout, $description);
 			$maxrank++;
 			$ncases++;
-			echo "<li>Added $type testcase from: <tt>$datafile.{in,out}</tt></li>\n";
+			echo "<li>Added $type testcase from: <tt>$datafile.{in,ans}</tt></li>\n";
 		}
 		echo "</ul>\n<p>Added $ncases $type testcase(s).</p>\n";
 	}
