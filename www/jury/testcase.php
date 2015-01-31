@@ -119,17 +119,16 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			$content = file_get_contents($_FILES[$fileid]['tmp_name'][$rank]);
 			if ( $DB->q("VALUE SELECT count(testcaseid)
  			             FROM testcase WHERE probid = %i AND rank = %i",
-			            $probid, $rank) ) {
-				$DB->q("UPDATE testcase SET md5sum_$inout = %s, $inout = %s
-				        WHERE probid = %i AND rank = %i",
-				       md5($content), $content, $probid, $rank);
-				auditlog('testcase', $probid, 'updated', "$inout rank $rank");
-			} else {
-				$DB->q("INSERT INTO testcase (probid,rank,md5sum_$inout,$inout)
-				        VALUES (%i,%i,%s,%s)",
-				       $probid, $rank, md5($content), $content);
-				auditlog('testcase', $probid, 'added', "$inout rank $rank");
+			            $probid, $rank)==0 ) {
+				error("cannot find testcase $rank for probid = $probid");
 			}
+
+			$DB->q("UPDATE testcase SET md5sum_$inout = %s, $inout = %s
+			        WHERE probid = %i AND rank = %i",
+			       md5($content), $content, $probid, $rank);
+
+			auditlog('testcase', $probid, 'updated', "$inout rank $rank");
+
 			$result .= "<li>Updated $inout for testcase $rank from " .
 			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
 			    " (" . printsize($_FILES[$fileid]['size'][$rank]) . ")";
