@@ -337,17 +337,21 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 
 		// rank, team name, total correct, total time
 		echo '<tr';
+		$classes = array();
 		if ( $totals['sortorder'] != $prevsortorder ) {
-			echo ' class="sortorderswitch"';
+			$classes[] = "sortorderswitch";
 			$prevsortorder = $totals['sortorder'];
 			$prevteam = null;
 		}
 		// check whether this is us, otherwise use category colour
 		if ( @$myteamid == $team ) {
-			echo ' class="scorethisisme"';
+			$classes[] = "scorethisisme";
 			unset($color);
 		} else {
 			$color = $teams[$team]['color'];
+		}
+		if ( count($classes)>0 ) {
+			echo ' class="' . implode(' ', $classes) . '"';
 		}
 		echo ' id="team:' . $teams[$team]['teamid'] . '"';
 		echo '><td class="scorepl">';
