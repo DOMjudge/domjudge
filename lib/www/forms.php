@@ -152,9 +152,15 @@ function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '') {
  */
 function addAddRowButton($templateid, $tableid, $value = 'Add row', $name = null)
 {
-	return addInputField('button', $name, $value, 'onclick="addRow(\'' .
-				     htmlspecialchars($templateid) . '\', \'' .
-				     htmlspecialchars($tableid) . '\')"');
+	$return = addInputField('button', $name, $value, 'onclick="addRow(\'' . 
+	                                htmlspecialchars($templateid) . '\', \'' . 
+	                                htmlspecialchars($tableid) . '\')"');
+	$return .= "<script type=\"text/javascript\">
+    $(function() {
+        addFirstRow('" . htmlspecialchars($templateid) . "', '" . htmlspecialchars($tableid) . "');
+    });
+</script>";
+	return $return;
 }
 
 /**
