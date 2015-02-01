@@ -275,9 +275,11 @@ if ( $current_cid === null ) {
 	}
 }
 
-echo "<h3>Score</h3>\n\n";
+if ( $cid ) {
+	echo "<h3>Score</h3>\n\n";
 
-putTeamRow($cdata,array($id));
+	putTeamRow($cdata, array($id));
+}
 
 echo '<h3>Submissions';
 if ( isset($key) ) {
