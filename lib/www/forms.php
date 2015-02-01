@@ -142,6 +142,14 @@ function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '') {
 		$attr . '>'.htmlspecialchars($text) ."</textarea>\n";
 }
 
+/**
+ * 'Add row' button, that adds a row to a table based on a template using jQuery and javascript
+ * Usage:
+ * templateid: HTML ID of the template tag to use
+ * tableid: HTML ID of the table to add a row to
+ * value: Text to display in the button
+ * name: Name (and ID) of the button or null if not needed
+ */
 function addAddRowButton($templateid, $tableid, $value = 'Add row', $name = null)
 {
 	return addInputField('button', $name, $value, 'onclick="addRow(\'' .
