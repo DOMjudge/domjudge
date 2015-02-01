@@ -406,9 +406,9 @@ function putClock() {
 
 	echo "<script type=\"text/javascript\">
 	var initial = " . time() . ";
-	var activatetime = " . $cdata['activatetime'] . ";
-	var starttime = " . $cdata['starttime'] . ";
-	var endtime = " . $cdata['endtime'] . ";
+	var activatetime = " . ( isset($cdata['activatetime']) ? $cdata['activatetime'] : -1 ) . ";
+	var starttime = " . ( isset($cdata['starttime']) ? $cdata['starttime'] : -1 ) . ";
+	var endtime = " . ( isset($cdata['endtime']) ? $cdata['endtime'] : -1 ) . ";
 	var offset = 0;
 	var date = new Date(initial*1000);
 	var timeleftelt = document.getElementById(\"timeleft\");
