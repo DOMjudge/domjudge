@@ -34,19 +34,25 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 	$restrictions = array(null => '-- No restrictions --') + $restrictions;
 
 	echo addForm('edit.php');
-	echo "\n<table>\n" .
+?>
+<script type="text/template" id="judgehost_template">
+<tr>
+	<td>
+		<?php echo addInput("data[{id}][hostname]", null, 20, 50, 'pattern="[A-Za-z0-9._-]+"'); ?>
+	</td>
+	<td>
+		<?php echo addSelect("data[{id}][active]", array(1=>'yes',0=>'no'), '1', true); ?>
+	</td>
+	<td>
+		<?php echo addSelect("data[{id}][restrictionid]", $restrictions, null, true); ?>
+	</td>
+</tr>
+</script>
+<?php
+	echo "\n<table id=\"judgehosts\">\n" .
 		"<tr><th>Hostname</th><th>Active</th><th>Restrictions</th></tr>\n";
 	if ( $cmd == 'add' ) {
-		for ($i=0; $i<10; ++$i) {
-			echo "<tr><td>" .
-				addInput("data[$i][hostname]", null, 20, 50, 'pattern="[A-Za-z0-9._-]+"') .
-				"</td><td>" .
-				addSelect("data[$i][active]",
-					array(1=>'yes',0=>'no'), '1', true) .
-				"</td><td>" .
-				addSelect("data[$i][restrictionid]", $restrictions, null, true) .
-				"</td></tr>\n";
-		}
+		// Nothing, added by javascript in addAddRowButton
 	} else {
 		$res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
 		$i = 0;
@@ -67,6 +73,7 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 	echo addHidden('cmd', $cmd) .
 		( $cmd == 'add' ? addHidden('skipwhenempty', 'hostname') : '' ) .
 		addHidden('table','judgehost') .
+		( $cmd == 'add' ? addAddRowButton('judgehost_template', 'judgehosts') : '' ) .
 		addSubmit('Save Judgehosts') .
 		addEndForm();
 

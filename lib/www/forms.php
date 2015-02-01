@@ -142,6 +142,13 @@ function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '') {
 		$attr . '>'.htmlspecialchars($text) ."</textarea>\n";
 }
 
+function addAddRowButton($templateid, $tableid, $value = 'Add row', $name = null)
+{
+	return addInputField('button', $name, $value, 'onclick="addRow(\'' .
+				     htmlspecialchars($templateid) . '\', \'' .
+				     htmlspecialchars($tableid) . '\')"');
+}
+
 /**
  * Make a <form> start-tag.
  */
