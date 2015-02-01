@@ -298,7 +298,7 @@ function judgings_POST($args)
 
 	if ( empty($submitid) || $numupd == 0 ) return '';
 
-	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid,
+	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid, s.rejudgingid,
 	               CEILING(time_factor*timelimit) AS maxruntime,
 	               p.memlimit, p.outputlimit,
 	               special_run AS run, special_compare AS compare,
@@ -336,8 +336,19 @@ function judgings_POST($args)
 		$row['compile_script_md5sum'] = $compile_script_md5sum;
 	}
 
-	$jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)
-	               VALUES(%i,%i,%s,%s)', $row['submitid'], $row['cid'], now(), $host);
+	$is_rejudge = isset($row['rejudgingid']);
+	if ( $is_rejudge ) {
+		// FIXME: what happens if there is no valid judging?
+		$prev_rejudgingid = $DB->q('MAYBEVALUE SELECT judgingid
+					    FROM judging
+					    WHERE submitid=%i AND valid=1',
+					    $submitid);
+	}
+	$jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' . 
+		      ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '' ) .
+		      ') VALUES(%i,%i,%s,%s' . ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
+		      ')', $submitid, $row['cid'], now(), $host, 
+		      @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge);
 
 	$row['judgingid'] = $jid;
 
@@ -990,9 +1001,12 @@ function judgehosts_POST($args)
 
 	// If there are any unfinished judgings in the queue in my name,
 	// they will not be finished. Give them back.
-	$res = $DB->q('TABLE SELECT judgingid, submitid, cid FROM judging
-	               WHERE judgehost = %s AND endtime IS NULL AND valid = 1',
-	              $args['hostname']);
+	$query = 'SELECT judgingid, submitid, cid
+		  FROM judging j
+		  LEFT JOIN rejudging r USING (rejudgingid)
+		  WHERE judgehost = %s AND j.endtime IS NULL
+		  AND (j.valid = 1 OR r.valid = 1)';
+	$res = $DB->q($query, $args['hostname']);
 	foreach ( $res as $jud ) {
 		$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
 		       $jud['judgingid']);

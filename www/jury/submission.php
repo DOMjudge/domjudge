@@ -165,6 +165,7 @@ require('init.php');
 
 $id = getRequestID();
 if ( !empty($_GET['jid']) ) $jid = (int)$_GET['jid'];
+if ( !empty($_GET['rejudgingid']) ) $rejudgingid = (int)$_GET['rejudgingid'];
 
 // Also check for $id in claim POST variable as submissions.php cannot
 // send the submission ID as a separate variable.
@@ -175,10 +176,20 @@ if ( is_array(@$_POST['unclaim']) ) {
 	foreach( $_POST['unclaim'] as $key => $val ) $id = (int)$key;
 }
 
-// If jid is set but not id, try to deduce it from the database.
+if ( isset($jid) && isset($rejudgingid) ) {
+	error("You cannot specify jid and rejudgingid at the same time.");
+}
+
+// If jid is set but not id, try to deduce it the id from the database.
 if ( isset($jid) && ! $id ) {
 	$id = $DB->q('MAYBEVALUE SELECT submitid FROM judging
 	              WHERE judgingid = %i', $jid);
+}
+
+// If jid is not set but rejudgingid, try to deduce the jid from the database.
+if ( !isset($jid) && isset($id) ) {
+	$jid = $DB->q('MAYBEVALUE SELECT judgingid FROM judging
+	              WHERE submitid=%i AND rejudgingid = %i', $id, $rejudgingid);
 }
 
 $title = 'Submission s'.@$id;
@@ -188,7 +199,7 @@ if ( ! $id ) error("Missing or invalid submission id");
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
                     s.submittime, s.valid, c.cid, c.shortname AS contestshortname, c.contestname,
                     t.name AS teamname, l.name AS langname, cp.shortname, p.name AS probname,
-                    CEILING(time_factor*timelimit) AS maxruntime
+		    CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
                     LEFT JOIN team     t ON (t.teamid = s.teamid)
                     LEFT JOIN problem  p ON (p.probid = s.probid)
@@ -199,9 +210,10 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
 
 if ( ! $submdata ) error ("Missing submission data");
 
-$jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime,
-                 judgehost, verified, jury_member, verify_comment
-                 FROM judging
+$jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, j.valid, j.starttime,
+                 j.judgehost, j.verified, j.jury_member, j.verify_comment, r.reason, r.rejudgingid
+                 FROM judging j
+		 LEFT JOIN rejudging r USING(rejudgingid)
                  WHERE cid = %i AND submitid = %i
                  ORDER BY starttime ASC, judgingid ASC',
                 $submdata['cid'], $id);
@@ -288,6 +300,7 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 		"<caption>Judgings</caption>\n<thead>\n" .
 		"<tr><td></td><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
 		"<th scope=\"col\">judgehost</th><th scope=\"col\">result</th>" .
+		"<th scope=\"col\">rejudging</th>" .
 		"</tr>\n</thead>\n<tbody>\n";
 
 	// print the judgings
@@ -301,11 +314,14 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 		} else {
 			echo '<td>' . $link . '&nbsp;</a></td>';
 		}
+		
+		$rinfo = isset($jud['rejudgingid']) ? 'r' . $jud['rejudgingid'] . ' (' . $jud['reason'] . ')' : '';
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
 			'<td>' . $link . printtime($jud['starttime']) . '</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
 			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) . '</a></td>' .
+			'<td>' . $link . htmlspecialchars($rinfo) . '</a></td>' .
 			"</tr>\n";
 
 	}
@@ -377,8 +393,19 @@ if ( isset($jid) )  {
 				$lasttclist . "</td></tr>\n";
 	}
 
-	echo "<h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .
-		($jud['valid'] == 1 ? '' : ' (INVALID)') .
+	$state = '';
+	if ( isset($jud['rejudgingid']) ) {
+		$reason = $DB->q('VALUE SELECT reason FROM rejudging WHERE rejudgingid=%i', $jud['rejudgingid']);
+		$state = ' (rejudging <a href="rejudging.php?id=' .
+			 urlencode($jud['rejudgingid']) . '">r' .
+			 htmlspecialchars($jud['rejudgingid']) .
+			 '</a>, reason: ' .
+			 htmlspecialchars($reason) . ')';
+	} else if ( $jud['valid'] != 1 ) {
+		$state = ' (INVALID)';
+	}
+
+	echo "<h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .  $state .
 		"</h2>\n\n&nbsp;";
 	if ( !$jud['verified'] ) {
 		echo addForm($pagename . '?id=' . urlencode($id) . '&amp;jid=' . urlencode($jid));

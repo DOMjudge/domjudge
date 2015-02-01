@@ -25,6 +25,7 @@
 <a href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications</a>
 <?php	} ?>
 <a href="submissions.php" accesskey="s">submissions</a>
+<a href="rejudgings.php" accesskey="r">rejudgings</a>
 <?php	} ?>
 <?php	if ( have_printing() ) { ?>
 <a href="print.php" accesskey="p">print</a>
