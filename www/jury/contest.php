@@ -264,9 +264,9 @@ if ( !$data['enabled'] ) {
 	echo "<p><em>This contest is disabled.</em></p>\n\n";
 }
 
-$numteams = $DB->q("VALUE SELECT COUNT(*) AS teamcount
-		    FROM contestteam
-		    WHERE cid = %i", $id);
+$teams = $DB->q("TABLE SELECT team.*
+                 FROM team INNER JOIN contestteam USING (teamid)
+                 WHERE cid = %i", $id);
 $numprobs = $DB->q("VALUE SELECT COUNT(*) AS problemcount
 		    FROM contestproblem
 		    WHERE cid = %i", $id);
@@ -292,6 +292,9 @@ echo '<tr><td>Scoreboard freeze:</td><td>' .
 	"</td></tr>\n";
 echo '<tr><td>End time:</td><td>' .
 	htmlspecialchars($data['endtime_string']) .
+	"</td></tr>\n";;
+echo '<tr><td>Scoreboard unfreeze:</td><td>' .
+	(empty($data['unfreezetime_string']) ? "-" : htmlspecialchars(@$data['unfreezetime_string'])) .
 	"</td></tr>\n";
 echo '<tr><td>Dectivate time:</td><td>' .
      htmlspecialchars(@$data['deactivatetime_string']) .
@@ -306,23 +309,21 @@ echo '<tr><td>Teams:</td><td>';
 if ( $data['public'] ) {
 	echo "<em>all teams</em>";
 } else {
-	if ( $numteams == 0 ) {
+	if ( empty($teams) ) {
 		echo '<em>no teams</em>';
 	} else {
-		echo (int)$numteams;
+		foreach ( $teams as $i => $team ) {
+			if ( $i != 0 ) {
+				echo '</td></tr>';
+				echo '<tr><td></td><td>';
+			}
+			echo '<a href="team.php?id=' . $team['teamid'] . '&cid=' . $id . '">';
+			echo $team['name'] . ' (t' . $team['teamid'] . ')';
+			echo '</a>';
+		}
 	}
 }
 echo '</td></tr>';
-echo '<tr><td>Problems:</td><td>';
-if ( $numprobs==0 ) {
-	echo '<em>no problems</em>';
-} else {
-	echo (int)$numprobs;
-}
-echo '</td></tr>';
-echo '<tr><td>Scoreboard unfreeze:</td><td>' .
-	(empty($data['unfreezetime_string']) ? "-" : htmlspecialchars(@$data['unfreezetime_string'])) .
-	"</td></tr>\n";
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
