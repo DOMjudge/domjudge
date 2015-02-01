@@ -186,6 +186,28 @@ if ( count($users) ) {
 	echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode($row['teamid']) . "\"><small>(add)</small></a>";
 }
 ?></td></tr>
+<?php
+$private_contests = $DB->q("TABLE SELECT contest.* FROM contest
+			    INNER JOIN contestteam USING (cid)
+			    WHERE public = 0 AND teamid = %i", $id);
+if ( !empty($private_contests)) {
+	foreach ( $private_contests as $i => $contest ) {
+		echo "<tr><td>\n";
+		if ( $i == 0 ) {
+			echo 'Private contests:';
+		}
+		echo "</td><td>\n";
+		if ( IS_JURY ) {
+			echo '<a href="contest.php?id=' . $contest['cid'] . '">';
+		}
+		echo 'c' . $contest['cid'] . ' - ' . $contest['shortname'];
+		if ( IS_JURY ) {
+			echo '</a>';
+		}
+		echo "</td></tr>\n";
+	}
+}
+?>
 </table></div>
 
 <div class="col2"><table>
@@ -230,50 +252,6 @@ if ( IS_ADMIN ) {
 }
 
 echo rejudgeForm('team', $id) . "\n\n";
-
-if ( $current_cid === null ) {
-	echo "<h3>Contests</h3>\n\n";
-
-	$res = $DB->q('TABLE SELECT contest.*
-	               FROM contest
-	               LEFT JOIN contestteam ct USING (cid)
-	               WHERE (ct.teamid = %i OR contest.public = 1)
-	               ORDER BY starttime DESC', $id);
-
-	if ( count($res) == 0 ) {
-		echo "<p class=\"nodata\">No contests defined</p>\n\n";
-	}
-	else {
-		$times = array('activate', 'start', 'freeze', 'end', 'unfreeze');
-		echo "<table class=\"list sortable\">\n<thead>\n" .
-		     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
-		foreach ( $times as $time ) echo "<th scope=\"col\">$time</th>";
-		echo "<th scope=\"col\">name</th><th scope=\"col\">public</th></tr>\n</thead>\n<tbody>\n";
-
-		$iseven = false;
-		foreach ( $res as $row ) {
-
-			$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
-
-			echo '<tr class="' .
-			     ($iseven ? 'roweven' : 'rowodd') .
-			     (!$row['enabled'] ? ' disabled' : '') . '">' .
-			     "<td class=\"tdright\">" . $link .
-			     "c" . (int)$row['cid'] . "</a></td>\n";
-			foreach ( $times as $time ) {
-				echo "<td title=\"" . printtime(@$row[$time . 'time'], '%Y-%m-%d %H:%M') . "\">" .
-				     $link . (isset($row[$time . 'time']) ?
-						printtime($row[$time . 'time']) : '-') . "</a></td>\n";
-			}
-			echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
-			echo "<td>" . $link . ($row['public'] ? 'yes' : 'no') . "</a></td>\n";
-			$iseven = !$iseven;
-
-			echo "</tr>\n";
-		}
-		echo "</tbody>\n</table>\n\n";
-	}
-}
 
 if ( $cid ) {
 	echo "<h3>Score</h3>\n\n";
