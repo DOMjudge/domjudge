@@ -14,9 +14,13 @@ $id = getRequestID();
 
 if ( isset($id) ) {
 
-	$req = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
-		       LEFT JOIN team t ON (t.teamid = q.sender)
-		       WHERE q.cid IN %Ai AND q.clarid = %i', $cids, $id);
+	if ( empty($cids) ) {
+		$req = null;
+	} else {
+		$req = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
+			           LEFT JOIN team t ON (t.teamid = q.sender)
+			           WHERE q.cid IN (%Ai) AND q.clarid = %i', $cids, $id);
+	}
 
 	if ( ! $req ) error("clarification $id not found, cids = " . implode(', ', $cids));
 

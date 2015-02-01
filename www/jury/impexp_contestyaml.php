@@ -175,16 +175,19 @@ if ( isset($_POST['import']) ) {
 
 	}
 	$contest_data['problemset'] = array();
-	$q = $DB->q("SELECT * FROM problem INNER JOIN contestproblem USING (probid) WHERE cid IN %Ai", getCurContests(FALSE));
-	while ( $prob = $q->next() ) {
+	$contests = getCurContests(FALSE);
+	if ( !empty($contests) ) {
+		$q = $DB->q("SELECT * FROM problem INNER JOIN contestproblem USING (probid) WHERE cid IN (%Ai)",
+		            $contests);
+		while ( $prob = $q->next() ) {
 
-		$problem = array();
-		$problem['letter'] = $prob['probid'];
-		$problem['short-name'] = $prob['name'];
-		$problem['color'] = $prob['color'];
-		// TODO? rgb? Fredrik?
-		$contest_data['problemset'][] = $problem;
-
+			$problem = array();
+			$problem['letter'] = $prob['probid'];
+			$problem['short-name'] = $prob['name'];
+			$problem['color'] = $prob['color'];
+			// TODO? rgb? Fredrik?
+			$contest_data['problemset'][] = $problem;
+		}
 	}
 
 

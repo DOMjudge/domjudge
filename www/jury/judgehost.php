@@ -91,13 +91,16 @@ echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
 
 // get the judgings for a specific key and value pair
 // select only specific fields to avoid retrieving large blobs
-$res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
-               result, verified, valid FROM judging
-               WHERE cid IN %Ai AND judgehost = %s
-               ORDER BY starttime DESC, judgingid DESC',
-              getCurContests(FALSE), $row['hostname']);
+$cids = getCurContests(FALSE);
+if ( !empty($cids) ) {
+	$res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
+	               result, verified, valid FROM judging
+	               WHERE cid IN (%Ai) AND judgehost = %s
+	               ORDER BY starttime DESC, judgingid DESC',
+	              $cids, $row['hostname']);
+}
 
-if( $res->count() == 0 ) {
+if( empty($cids) || $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No judgings.</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .

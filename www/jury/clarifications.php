@@ -34,7 +34,11 @@ require(LIBWWWDIR . '/clarification.php');
 
 echo "<h1>Clarifications</h1>\n\n";
 
-if ( count($cids) > 1 ) {
+if ( empty($cids) ) {
+	warning('No active contest(s)');
+	require(LIBWWWDIR . '/footer.php');
+	exit;
+} elseif ( count($cids) > 1 ) {
 	echo addForm($pagename, 'get') . "<p>Show contests:\n";
 	echo addSubmit('all', 'contest', null, ($contest != 'all'));
 	echo addSubmit('selected', 'contest', null, ($contest != 'selected'));
@@ -59,7 +63,7 @@ $sqlbody = 'SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname,
             LEFT JOIN team t ON (t.teamid = c.recipient)
             LEFT JOIN team f ON (f.teamid = c.sender)
             LEFT JOIN contest co USING (cid)
-            WHERE c.cid IN %Ai ';
+            WHERE c.cid IN (%Ai) ';
 
 $newrequests    = $DB->q($sqlbody .
                          'AND c.sender IS NOT NULL AND c.answered = 0

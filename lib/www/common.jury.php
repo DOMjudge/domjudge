@@ -318,14 +318,14 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 
 			$probid = $DB->q('RETURNID INSERT INTO problem (' .
 			                 implode(', ',array_keys($ini_array_problem)) .
-			                 ') VALUES %As', $ini_array_problem);
+			                 ') VALUES (%As)', $ini_array_problem);
 
 			if ($cid != -1) {
 				$ini_array_contest_problem['cid'] = $cid;
 				$ini_array_contest_problem['probid'] = $probid;
 				$DB->q('INSERT INTO contestproblem (' .
 				       implode(', ',array_keys($ini_array_contest_problem)) .
-				       ') VALUES %As', $ini_array_contest_problem);
+				       ') VALUES (%As)', $ini_array_contest_problem);
 			}
 		} else {
 
@@ -346,7 +346,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 					$ini_array_contest_problem['probid'] = $probid;
 					$DB->q('INSERT INTO contestproblem (' .
 					       implode(', ',array_keys($ini_array_contest_problem)) .
-					       ') VALUES %As', $ini_array_contest_problem);
+					       ') VALUES (%As)', $ini_array_contest_problem);
 				}
 			}
 		}

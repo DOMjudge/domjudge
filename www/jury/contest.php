@@ -134,7 +134,10 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 	}
 
 	$unused_problems = $DB->q("KEYVALUETABLE SELECT probid, CONCAT('p', probid, ' - ', name)
-				   FROM problem WHERE probid NOT IN %Ai ORDER BY probid", $used_problems);
+	                           FROM problem " .
+	                           (empty($used_problems) ? '%_' : 'WHERE probid NOT IN (%Ai)') .
+	                           " ORDER BY probid", 
+	                          $used_problems);
 	$values = array('' => '-- Select problem --');
 	foreach ($unused_problems as $probid => $text) {
 		$values[$probid] = $text;

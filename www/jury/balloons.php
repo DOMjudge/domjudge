@@ -79,10 +79,14 @@ if ( $contest == 'selected' ) {
 }
 
 // Problem metadata: colours and names.
-$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,cid
-                      FROM problem
-                      INNER JOIN contestproblem USING (probid)
-                      WHERE cid IN %Ai', $cids);
+if ( empty($cids) ) {
+	$probs_data = array();
+} else {
+	$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,cid
+	                      FROM problem
+	                      INNER JOIN contestproblem USING (probid)
+	                      WHERE cid IN (%Ai)', $cids);
+}
 
 $freezecond = array();
 if ( !dbconfig_get('show_balloons_postfreeze',0)) {
@@ -103,18 +107,21 @@ if ( empty($freezecond) ) {
 
 // Get all relevant info from the balloon table.
 // Order by done, so we have the unsent balloons at the top.
-$res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
-               t.teamid, t.name AS teamname, t.room, c.name AS catname, s.cid, co.shortname
-               FROM balloon b
-               LEFT JOIN submission s USING (submitid)
-               LEFT JOIN problem p USING (probid)
-               LEFT JOIN contestproblem cp USING (probid, cid)
-               LEFT JOIN team t USING(teamid)
-               LEFT JOIN team_category c USING(categoryid)
-               LEFT JOIN contest co USING (cid)
-               WHERE s.cid IN %Ai $freezecond
-               ORDER BY done ASC, balloonid DESC",
-              $cids);
+$res = null;
+if ( !empty($cids) ) {
+	$res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
+	               t.teamid, t.name AS teamname, t.room, c.name AS catname, s.cid, co.shortname
+	               FROM balloon b
+	               LEFT JOIN submission s USING (submitid)
+	               LEFT JOIN problem p USING (probid)
+	               LEFT JOIN contestproblem cp USING (probid, cid)
+	               LEFT JOIN team t USING(teamid)
+	               LEFT JOIN team_category c USING(categoryid)
+	               LEFT JOIN contest co USING (cid)
+	               WHERE s.cid IN (%Ai) $freezecond
+	               ORDER BY done ASC, balloonid DESC",
+	              $cids);
+}
 
 /* Loop over the result, store the total of balloons for a team
  * (saves a query within the inner loop).

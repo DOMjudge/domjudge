@@ -91,13 +91,18 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		 LEFT JOIN contestproblem cp USING (probid, cid)
 		 LEFT JOIN language       l  USING (langid)
 		 LEFT JOIN judging        j  ON (s.submitid = j.submitid AND j.valid=1)
-		 WHERE s.cid IN %Ai ' .
+		 WHERE s.cid IN (%Ai) ' .
 	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
 	    (isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
 	    (isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
 	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
 	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
 
+	// No contests; automatically nothing found and the query can not be run...
+	if ( empty($cids) ) {
+		echo "<p class=\"nodata\">No submissions</p>\n\n";
+		return;
+	}
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.cid,
 	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
 	               cp.shortname, p.name AS probname, l.name AS langname,

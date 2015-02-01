@@ -48,7 +48,7 @@ class db
 		%f: floating point
 		%l: literal (no quoting/escaping)
 		%_: nothing, but do process one argument
-		%A?: array of type ?, comma separated, surrounded by braces
+		%A?: array of type ?, comma separated
 		%S:  array of key => ., becomes key=., comma separated
 		%SS: array of key => ., becomes key=., "AND" separated
 
@@ -145,22 +145,16 @@ class db
 			$val = array_shift($argv);
 			switch ($part{0}) {
 				case 'A':
-					if (!is_array($val)) {
+					if (!is_array($val) || !$val) {
 						throw new InvalidArgumentException(
 							"%A in \$DATABASE->q() has to correspond to an "
-							. "array, it is" . " now a '$val' (Query:"
+							. "non-empty array, it is" . " now a '$val' (Query:"
 							. "'$key $query')!");
 					}
 					$GLOBALS['MODE'] = $part{1};
-					if (!$val) {
-						$query .= '(\'\')';
-					} else {
-						$query .= '(';
-						$query .= implode( ', '
-								 , array_map( array($this, 'val2sql')
-									    , $val));
-						$query .= ')';
-					}
+					$query .= implode( ', '
+							 , array_map( array($this, 'val2sql')
+								    , $val));
 					unset($GLOBALS['MODE']);
 					$query .= substr($part,2);
 					break;

@@ -33,10 +33,13 @@ $earlier = array();
 
 $verifier = 'auto-verifier';
 
-$res = $DB->q("SELECT s.*, j.judgingid, j.result, j.verified, j.jury_member
-               FROM submission s
-               LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
-               WHERE s.cid IN %Ai AND j.result IS NOT NULL", $cids);
+$res = null;
+if ( !empty($cids) ) {
+	$res = $DB->q("SELECT s.*, j.judgingid, j.result, j.verified, j.jury_member
+	               FROM submission s
+	               LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
+	               WHERE s.cid IN (%Ai) AND j.result IS NOT NULL", $cids);
+}
 
 $section = 0;
 
@@ -64,7 +67,7 @@ function flushresults($header, $results, $collapse = FALSE)
 	flush();
 }
 
-while( $row = $res->next() ) {
+while( !empty($cids) && $row = $res->next() ) {
 	$sid = $row['submitid'];
 
 	// Try to find the verification match string in one of the source
