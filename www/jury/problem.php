@@ -11,8 +11,9 @@ require('init.php');
 $id = getRequestID();
 $current_cid = null;
 if ( isset($_GET['cid']) && is_numeric($_GET['cid']) ) {
-	$current_cid = $_GET['cid'];
-	$cdatas = array($current_cid => $cdatas[$current_cid]);
+	$cid = $_GET['cid'];
+	$cdata = $cdatas[$cid];
+	$current_cid = $cid;
 }
 $title = 'Problem p'.htmlspecialchars(@$id);
 $title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
