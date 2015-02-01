@@ -88,10 +88,10 @@ if ( $num_contests > 0 ) {
 <tr>
 	<td>Private contests:</td>
 	<td>
-		<?php echo addInput('data[0][mapping][items]', '', 50); ?>
+		<?php echo addInput('data[0][mapping][0][items]', '', 50); ?>
 		<script type="text/javascript">
 			$(function() {
-				$('#data_0__mapping__items_').tokenInput('ajax_contests.php?public=0', {
+				$('#data_0__mapping__0__items_').tokenInput('ajax_contests.php?public=0', {
 					propertyToSearch: 'search',
 					hintText: 'Type to search for contest ID, name, or short name',
 					noResultsText: 'No private contests found',
@@ -112,9 +112,9 @@ if ( $num_contests > 0 ) {
 </table>
 
 <?php
-echo addHidden('data[0][mapping][fk][0]', 'teamid') .
-     addHidden('data[0][mapping][fk][1]', 'cid') .
-     addHidden('data[0][mapping][table]', 'contestteam');
+echo addHidden('data[0][mapping][0][fk][0]', 'teamid') .
+     addHidden('data[0][mapping][0][fk][1]', 'cid') .
+     addHidden('data[0][mapping][0][table]', 'contestteam');
 echo addHidden('cmd', $cmd) .
      addHidden('table','team') .
      addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?(strstr(@$_GET['referrer'],'?') === FALSE?'?edited=1':'&edited=1'):'')) .

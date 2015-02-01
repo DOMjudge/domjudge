@@ -103,30 +103,30 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 	foreach ($current_problems as $current_problem) {
 		$used_problems[] = $current_problem['probid'];
 		echo "<tr>\n";
-		echo "<td>" . addHidden("data[0][mapping][items][$i]", $current_problem['probid']) .
+		echo "<td>" . addHidden("data[0][mapping][0][items][$i]", $current_problem['probid']) .
 		     "p" . $current_problem['probid'] . "</td>\n";
 		echo "<td>" . $current_problem['name'] . "</td>\n";
 		echo "<td>" .
-		     addInput("data[0][mapping][extra][$i][shortname]", $current_problem['shortname'], 8,
+		     addInput("data[0][mapping][0][extra][$i][shortname]", $current_problem['shortname'], 8,
 			      10) . "</td>\n";
 		echo "<td>";
-		echo addRadioButton("data[0][mapping][extra][$i][allow_submit]",
+		echo addRadioButton("data[0][mapping][0][extra][$i][allow_submit]",
 				(!isset($current_problem['allow_submit']) || $current_problem['allow_submit']), 1) .
-		     "<label for='data_0__mapping__extra__{$i}__allow_submit_1'>yes</label>";
-		echo addRadioButton("data[0][mapping][extra][$i][allow_submit]",
+		     "<label for='data_0__mapping__0__extra__{$i}__allow_submit_1'>yes</label>";
+		echo addRadioButton("data[0][mapping][0][extra][$i][allow_submit]",
 				(isset($current_problem['allow_submit']) && !$current_problem['allow_submit']), 0) .
-		     "<label for='data_0__mapping__extra__{$i}__allow_submit_0'>no</label>";
+		     "<label for='data_0__mapping__0__extra__{$i}__allow_submit_0'>no</label>";
 		echo "</td>\n";
 		echo "<td>";
-		echo addRadioButton("data[0][mapping][extra][$i][allow_judge]",
+		echo addRadioButton("data[0][mapping][0][extra][$i][allow_judge]",
 				(!isset($current_problem['allow_judge']) || $current_problem['allow_judge']), 1) .
-		     "<label for='data_0__mapping__extra__{$i}__allow_judge_1'>yes</label>";
-		echo addRadioButton("data[0][mapping][extra][$i][allow_judge]",
+		     "<label for='data_0__mapping__9__extra__{$i}__allow_judge_1'>yes</label>";
+		echo addRadioButton("data[0][mapping][0][extra][$i][allow_judge]",
 				(isset($current_problem['allow_judge']) && !$current_problem['allow_judge']), 0) .
-		     "<label for='data_0__mapping__extra__{$i}__allow_judge_0'>no</label>";
+		     "<label for='data_0__mapping__0__extra__{$i}__allow_judge_0'>no</label>";
 		echo "</td>\n";
 		echo "<td>" .
-		     addInput("data[0][mapping][extra][$i][color]", $current_problem['color'], 15, 25,
+		     addInput("data[0][mapping][0][extra][$i][color]", $current_problem['color'], 15, 25,
 		     'class="color {required:false,adjust:false,hash:true,caps:false}"') .
 		     "</td>\n";
 		echo "</tr>\n";
@@ -147,23 +147,23 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 		for ( $j = 0; $j < 12; $j++ ) {
 			echo "<tr>\n";
 			echo "<td colspan=\"2\">" .
-			     addSelect("data[0][mapping][items][$i]", $values, null, true) . "</td>\n";
+			     addSelect("data[0][mapping][0][items][$i]", $values, null, true) . "</td>\n";
 			echo "<td>" .
-			     addInput("data[0][mapping][extra][$i][shortname]", null,
+			     addInput("data[0][mapping][0][extra][$i][shortname]", null,
 				      8, 10) . "</td>\n";
 			echo "<td>";
-			echo addRadioButton("data[0][mapping][extra][$i][allow_submit]", true, 1) .
-			     "<label for='data_0__mapping__extra__{$i}__allow_submit_1'>yes</label>";
-			echo addRadioButton("data[0][mapping][extra][$i][allow_submit]", false, 0) .
-			     "<label for='data_0__mapping__extra__{$i}__allow_submit_0'>no</label>";
+			echo addRadioButton("data[0][mapping][0][extra][$i][allow_submit]", true, 1) .
+			     "<label for='data_0__mapping__0__extra__{$i}__allow_submit_1'>yes</label>";
+			echo addRadioButton("data[0][mapping][0][extra][$i][allow_submit]", false, 0) .
+			     "<label for='data_0__mapping__0__extra__{$i}__allow_submit_0'>no</label>";
 			echo "</td>\n";
 			echo "<td>";
-			echo addRadioButton("data[0][mapping][extra][$i][allow_judge]", true, 1) .
-			     "<label for='data_0__mapping__extra__{$i}__allow_judge_1'>yes</label>";
-			echo addRadioButton("data[0][mapping][extra][$i][allow_judge]", false, 0) .
-			     "<label for='data_0__mapping__extra__{$i}__allow_judge_0'>no</label>";
+			echo addRadioButton("data[0][mapping][0][extra][$i][allow_judge]", true, 1) .
+			     "<label for='data_0__mapping__0__extra__{$i}__allow_judge_1'>yes</label>";
+			echo addRadioButton("data[0][mapping][0][extra][$i][allow_judge]", false, 0) .
+			     "<label for='data_0__mapping__0__extra__{$i}__allow_judge_0'>no</label>";
 			echo "</td>\n";
-			echo "<td>" . addInput("data[0][mapping][extra][$i][color]", null, 15, 25,
+			echo "<td>" . addInput("data[0][mapping][0][extra][$i][color]", null, 15, 25,
 			      'class="color {required:false,adjust:false,hash:true,caps:false}"') . "</td>";
 			echo "</tr>\n";
 			$i++;
@@ -174,9 +174,9 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 </table>
 
 <?php
-echo addHidden('data[0][mapping][fk][0]', 'cid') .
-     addHidden('data[0][mapping][fk][1]', 'probid') .
-     addHidden('data[0][mapping][table]', 'contestproblem');
+echo addHidden('data[0][mapping][0][fk][0]', 'cid') .
+     addHidden('data[0][mapping][0][fk][1]', 'probid') .
+     addHidden('data[0][mapping][0][table]', 'contestproblem');
 echo addHidden('cmd', $cmd) .
 	addHidden('table','contest') .
 	addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?(strstr(@$_GET['referrer'],'?') === FALSE?'?edited=1':'&edited=1'):'')) .

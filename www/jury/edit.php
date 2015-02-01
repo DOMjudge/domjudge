@@ -63,10 +63,6 @@ if ( ! isset($_POST['cancel']) ) {
 		if ( is_array(@$itemdata['mapping']) ) {
 			$mappingdata = $itemdata['mapping'];
 
-			// If the items is not an array, it is set by tokenizer and it should be split on ,
-			if ( !is_array($mappingdata['items']) ) {
-				$mappingdata['items'] = explode(',', $mappingdata['items']);
-			}
 			unset($itemdata['mapping']);
 		}
 
@@ -111,38 +107,45 @@ if ( ! isset($_POST['cancel']) ) {
 
 		// special case for many-to-many mappings
 		if ( $mappingdata != null ) {
-			$junctiontable = $mappingdata['table'];
-			$fk = $mappingdata['fk'];
-
-			// Make sure this is a valid mapping
-			check_manymany_mapping($junctiontable, $fk);
-
-			// Remove all old mappings
-			$DB->q('DELETE FROM %l WHERE %S', $junctiontable, $prikey);
-			foreach ($mappingdata['items'] as $key => $mapdest) {
-				// Skip empty rows
-				if ( empty($mapdest) ) {
-					continue;
+			foreach ( $mappingdata as $mapping ) {
+				// If the items is not an array, it is set by tokenizer and it should be split on ,
+				if ( !is_array($mapping['items']) ) {
+					$mapping['items'] = explode(',', $mapping['items']);
 				}
-				$columns = array($fk[0], $fk[1]);
-				$values = array($prikey[$fk[0]], $mapdest);
-				if ( isset($mappingdata['extra'][$key]) ) {
-					foreach ($mappingdata['extra'][$key] as $column => $value) {
-						$columns[] = $column;
-						// set empty string to null
-						$values[] = ($value === "" ? null : $value);
+
+				$junctiontable = $mapping['table'];
+				$fk = $mapping['fk'];
+
+				// Make sure this is a valid mapping
+				check_manymany_mapping($junctiontable, $fk);
+
+				// Remove all old mappings
+				$DB->q('DELETE FROM %l WHERE %S', $junctiontable, $prikey);
+				foreach ( $mapping['items'] as $key => $mapdest ) {
+					// Skip empty rows
+					if ( empty($mapdest) ) {
+						continue;
 					}
-				}
+					$columns = array($fk[0], $fk[1]);
+					$values = array($prikey[$fk[0]], $mapdest);
+					if ( isset($mapping['extra'][$key]) ) {
+						foreach ( $mapping['extra'][$key] as $column => $value ) {
+							$columns[] = $column;
+							// set empty string to null
+							$values[] = ($value === "" ? null : $value);
+						}
+					}
 
-				$query = "INSERT INTO %l (";
-				$query .= implode(',', array_fill(0, count($columns), '%l'));
-				$query .= ') VALUES (';
-				$query .= implode(',', array_fill(0, count($values), '%s'));
-				$query .= ')';
-				$arguments = array($query, $junctiontable);
-				$arguments = array_merge($arguments, $columns);
-				$arguments = array_merge($arguments, $values);
-				$ret = call_user_func_array(array($DB, 'q'), $arguments);
+					$query = "INSERT INTO %l (";
+					$query .= implode(',', array_fill(0, count($columns), '%l'));
+					$query .= ') VALUES (';
+					$query .= implode(',', array_fill(0, count($values), '%s'));
+					$query .= ')';
+					$arguments = array($query, $junctiontable);
+					$arguments = array_merge($arguments, $columns);
+					$arguments = array_merge($arguments, $values);
+					$ret = call_user_func_array(array($DB, 'q'), $arguments);
+				}
 			}
 		}
 	}
