@@ -352,7 +352,7 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
 apt-get install gcc g++ make zip unzip mysql-server \
-	apache2 php5 php5-cli libapache2-mod-php5
+	apache2 php5 php5-cli libapache2-mod-php5 \
 	php5-gd php5-curl php5-mysql php5-json \
 	bsdmainutils phpmyadmin ntp \
 	linuxdoc-tools linuxdoc-tools-text \
