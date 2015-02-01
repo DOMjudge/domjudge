@@ -266,7 +266,8 @@ function putClarificationList($clars, $team = NULL)
 
 /**
  * Output a form to send a new clarification.
- * Set respid to a teamid, to make only that team (or ALL) selectable.
+ * Set respid to a clarid, to make only responses to same
+ * sender(s)/recipient(s) or ALL selectable.
  */
 function putClarificationForm($action, $respid = NULL, $onlycontest = NULL)
 {
@@ -375,7 +376,8 @@ function confirmClar() {
 		}
 	}
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
-	     addSelect('problem', $options, ($respid ? $clar['probid'] : 'general'), true) .
+	     addSelect('problem', $options,
+	               ($respid ? $clar['cid'].'-'.$clar['probid'] : 'general'), true) .
 	     "</td></tr>\n";
 
 	?>

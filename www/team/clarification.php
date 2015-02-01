@@ -28,14 +28,16 @@ if ( isset($id) ) {
 if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	// Disallow problems that are not submittable or
 	// before contest start.
-	if ( !problemVisible($_POST['problem']) ) $_POST['problem'] = 'general';
+	$probid = NULL;
+	if ( isset($_POST['problem']) ) {
+		$probid = preg_replace('/\d+-/', '', $_POST['problem']);
+		if ( !problemVisible($probid) ) $probid = NULL;
+	}
 
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, submittime, sender, probid, body)
 	                 VALUES (%i, %s, %i, %i, %s)',
-			$cid, now(), $teamid,
-	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
-	                $_POST['bodytext']);
+	                $cid, now(), $teamid, $probid, $_POST['bodytext']);
 
 	auditlog('clarification', $newid, 'added', null, null, $cid);
 
