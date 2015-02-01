@@ -62,6 +62,11 @@ if ( ! isset($_POST['cancel']) ) {
 		$mappingdata = null;
 		if ( is_array(@$itemdata['mapping']) ) {
 			$mappingdata = $itemdata['mapping'];
+
+			// If the items is not an array, it is set by tokenizer and it should be split on ,
+			if ( !is_array($mappingdata['items']) ) {
+				$mappingdata['items'] = explode(',', $mappingdata['items']);
+			}
 			unset($itemdata['mapping']);
 		}
 

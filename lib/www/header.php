@@ -49,6 +49,10 @@ if ( IS_JURY ) {
 		echo "<script type=\"text/javascript\" src=\"" .
 		"../js/jscolor.js\"></script>\n";
 	}
+	if (isset($jqtokeninput)) {
+		echo "<link rel=\"stylesheet\" href=\"../token-input.css\" type=\"text/css\" />";
+		echo "<script type=\"text/javascript\" src=\"../js/jquery.tokeninput.min.js\"></script>\n";
+	}
 	echo "<script type=\"text/javascript\" src=\"" .
 		"../js/sorttable.js\"></script>\n";
 }

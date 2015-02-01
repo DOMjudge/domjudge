@@ -28,6 +28,8 @@ if ( isset($_GET['cmd'] ) ) {
 		(isset($_GET['restrict'])?'&restrict='.urlencode($_GET['restrict']):'');
 }
 
+$jqtokeninput = true;
+
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
@@ -73,24 +75,36 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <tr><td><label for="data_0__comments_">Comments:</label></td>
 <td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
 
+<?php
+$num_contests = $DB->q("VALUE SELECT COUNT(*) FROM contest c WHERE c.public = 0");
+if ( $num_contests > 0 ) {
+	$prepopulate = $DB->q("TABLE SELECT contest.cid AS id, contest.contestname, contest.shortname,
+			   CONCAT(contest.contestname, ' (', contest.shortname, ' - c', contest.cid, ')') AS search
+			   FROM contest INNER JOIN contestteam USING (cid)
+			   WHERE teamid = %i", $id);
+?>
+
 <!-- contest selection -->
-<tr><td>Contests:</td>
-<td><?php
-	$contests = $DB->q("TABLE SELECT c.cid, c.shortname, c.contestname,
-	                                 max(ct.teamid=%s) AS incontest
-	                    FROM contest c
-	                    LEFT JOIN contestteam ct USING (cid)
-	                    WHERE c.public = 0
-	                    GROUP BY c.cid", @$row['teamid']);
-	$i=0;
-	foreach ($contests as $contest) {
-		echo "<label>";
-		echo addCheckbox("data[0][mapping][items][$i]", $contest['incontest']==1, $contest['cid']);
-		echo $contest['contestname'] . " (${contest['shortname']} - c${contest['cid']})</label><br/>";
-		$i++;
-	}
-	?>
-</td></tr>
+<tr>
+	<td>Private contests:</td>
+	<td>
+		<?php echo addInput('data[0][mapping][items]', '', 50); ?>
+		<script type="text/javascript">
+			$(function() {
+				$('#data_0__mapping__items_').tokenInput('ajax_contests.php?public=0', {
+					propertyToSearch: 'search',
+					hintText: 'Type to search for contest ID, name, or short name',
+					noResultsText: 'No private contests found',
+					preventDuplicates: true,
+					prePopulate: <?php echo json_encode($prepopulate); ?>
+				});
+			});
+		</script>
+	</td>
+</tr>
+<?php
+}
+?>
 
 <tr><td>Enabled:</td>
 <td><?php echo addRadioButton('data[0][enabled]', (!isset($row['']) || $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>
