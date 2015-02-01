@@ -15,7 +15,18 @@ $title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' 
 
 require(LIBWWWDIR . '/header.php');
 
-if ( !empty($_GET['cmd']) ):
+// Get these lists here, as they are needed both on the edit and view pages.
+$contests  = $DB->q("KEYVALUETABLE SELECT cid, CONCAT('c', cid, ' - ', shortname)
+                     FROM contest ORDER BY cid");
+$problems  = $DB->q("KEYVALUETABLE SELECT probid, CONCAT('p', probid, ' - ', name)
+                     FROM problem ORDER BY probid");
+$languages = $DB->q("KEYVALUETABLE SELECT langid, CONCAT(langid, ' - ', name)
+                     FROM language ORDER BY langid");
+$lists = array('contest' => $contests,
+               'problem' => $problems,
+               'language' => $languages);
+
+if ( !empty($_GET['cmd']) ) {
 
 	requireAdmin();
 
@@ -27,12 +38,9 @@ if ( !empty($_GET['cmd']) ):
 
 	echo "<table>\n";
 
-	$contests = $DB->q("KEYVALUETABLE SELECT cid, CONCAT('c', cid, ' - ', shortname) FROM contest ORDER BY cid");
-	$problems = $DB->q("KEYVALUETABLE SELECT probid, CONCAT('p', probid, ' - ', name) FROM problem ORDER BY probid");
-	$languages = $DB->q("KEYVALUETABLE SELECT langid, CONCAT(langid, ' - ', name) FROM language ORDER BY langid");
-
 	if ( $cmd == 'edit' ) {
-		$row = $DB->q('MAYBETUPLE SELECT * FROM judgehost_restriction WHERE restrictionid = %i', $id);
+		$row = $DB->q('MAYBETUPLE SELECT * FROM judgehost_restriction
+		               WHERE restrictionid = %i', $id);
 		if ( !$row ) error("Missing or invalid judgehost restriction id");
 
 		$row['restrictions'] = json_decode($row['restrictions'], true);
@@ -43,73 +51,41 @@ if ( !empty($_GET['cmd']) ):
 	}
 
 	?>
+<tr><td><label for="data_0__restrictionname_">Name:</label></td>
+    <td><?php echo addInput('data[0][restrictionname]', @$row['restrictionname'], 15, 255, 'required')?></td></tr>
+<?php
 
-	<tr><td><label for="data_0__restrictionname_">Name:</label></td>
-		<td><?php echo addInput('data[0][restrictionname]', @$row['restrictionname'], 15, 255, 'required')?></td></tr>
+	foreach ( array('contest','problem','language') as $type ) {
+		?>
+<tr><td colspan="2">
+<h3>Restrict to any of the following <?php echo $type; ?>s (leave empty to allow all)</h3>
+</td></tr>
+<?php
+		if ( isset($row) && isset($row['restrictions'][$type]) ) {
+			$start = count($row['restrictions'][$type]);
 
-	<tr><td colspan="2">
-		<h3>Restrict to any of the following contests (leave empty to allow all)</h3>
-	</td></tr>
-
-	<?php
-	if ( isset($row) && isset($row['restrictions']['contest']) ) {
-		$start = count($row['restrictions']['contest']);
-
-		foreach ( $row['restrictions']['contest'] as $j => $restriction ) {
-			?><tr><td></td><td><?php echo addSelect("data[0][restrictions][contest][${j}]", array(null => "-- Remove restriction") + $contests, $restriction, true)?></td></tr><?php
+			foreach ( $row['restrictions'][$type] as $j => $restriction ) {
+				echo '<tr><td></td><td>' .
+				     addSelect("data[0][restrictions][$type][${j}]",
+				               array(null => "-- Remove restriction") + $lists[$type],
+				               $restriction, true) .
+				     "</td></tr>\n";
+			}
+		} else {
+			$start = 0;
 		}
-	} else {
-		$start = 0;
-	}
-	?>
 
-	<?php for ($j = $start, $i = 0; $i < 10; $i++, $j = $i + $start): ?>
-	<tr><td></td><td><?php echo addSelect("data[0][restrictions][contest][${j}]", array(null => "-- Do not restrict") + $contests, null, true)?></td></tr>
-	<?php endfor; ?>
-
-	<tr><td colspan="2">
-		<h3>Restrict to any of the following problems (leave empty to allow all)</h3>
-	</td></tr>
-
-	<?php
-	if ( isset($row) && isset($row['restrictions']['problem']) ) {
-		$start = count($row['restrictions']['problem']);
-
-		foreach ( $row['restrictions']['problem'] as $j => $restriction ) {
-			?><tr><td></td><td><?php echo addSelect("data[0][restrictions][problem][${j}]", array(null => "-- Remove restriction") + $problems, $restriction, true)?></td></tr><?php
+		for ($j = $start, $i = 0; $i < 10; $i++, $j = $i + $start) {
+			echo '<tr><td></td><td>' .
+			     addSelect("data[0][restrictions][$type][${j}]",
+			               array(null => "-- Do not restrict") + $lists[$type],
+				           null, true) .
+			     "</td></tr>\n";
 		}
-	} else {
-		$start = 0;
 	}
-	?>
 
-	<?php for ($j = $start, $i = 0; $i < 10; $i++, $j = $i + $start): ?>
-	<tr><td></td><td><?php echo addSelect("data[0][restrictions][problem][${j}]", array(null => "-- Do not restrict") + $problems, null, true)?></td></tr>
-	<?php endfor; ?>
+	echo "</table>\n\n";
 
-	<tr><td colspan="2">
-		<h3>Restrict to any of the following languages (leave empty to allow all)</h3>
-	</td></tr>
-
-	<?php
-	if ( isset($row) && isset($row['restrictions']['language']) ) {
-		$start = count($row['restrictions']['language']);
-
-		foreach ( $row['restrictions']['language'] as $j => $restriction ) {
-			?><tr><td></td><td><?php echo addSelect("data[0][restrictions][language][${j}]", array(null => "-- Remove restriction") + $languages, $restriction, true)?></td></tr><?php
-		}
-	} else {
-		$start = 0;
-	}
-	?>
-
-	<?php for ($j = $start, $i = 0; $i < 10; $i++, $j = $i + $start): ?>
-	<tr><td></td><td><?php echo addSelect("data[0][restrictions][language][${j}]", array(null => "-- Do not restrict") + $languages, null, true)?></td></tr>
-	<?php endfor; ?>
-
-	</table>
-
-	<?php
 	echo addHidden('cmd', $cmd) .
 	     addHidden('table','judgehost_restriction') .
 	     addHidden('referrer', @$_GET['referrer']) .
@@ -119,8 +95,7 @@ if ( !empty($_GET['cmd']) ):
 
 	require(LIBWWWDIR . '/footer.php');
 	exit;
-
-endif;
+}
 
 $data = $DB->q('TUPLE SELECT * FROM judgehost_restriction WHERE restrictionid = %i', $id);
 if ( !$data ) error("Missing or invalid restriction id");
@@ -132,37 +107,17 @@ echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['restrictionid']) . "</td><
 echo '<tr><td>Name:</td><td>' . htmlspecialchars($data['restrictionname']) . "</td></tr>\n";
 
 $restrictions = json_decode($data['restrictions'], true);
-$contests = $DB->q("KEYVALUETABLE SELECT cid, CONCAT('c', cid, ' - ', shortname) FROM contest ORDER BY cid");
-$problems = $DB->q("KEYVALUETABLE SELECT probid, CONCAT('p', probid, ' - ', name) FROM problem ORDER BY probid");
-$languages = $DB->q("KEYVALUETABLE SELECT langid, CONCAT(langid, ' - ', name) FROM language ORDER BY langid");
 
-if ( empty($restrictions['contest']) && empty($restrictions['problem']) && empty($restrictions['language']) ) {
-	echo "<tr><td></td><td><i>No restrictions</i></td>\n";
-} else {
-	if ( !empty($restrictions['contest']) ) {
+foreach ( array('contest','problem','language') as $type ) {
+	echo "<tr><td>Restrict to ${type}s:</td>";
+	if ( empty($restrictions[$type]) ) {
+		echo "<td class=\"nodata\">none</td></tr>\n";
+	} else {
 		$first = true;
-		foreach ( $restrictions['contest'] as $contest ) {
-			echo "<tr><td>" . ($first ? 'Restrict to contests:' : '') . "</td>";
+		foreach ( $restrictions[$type] as $val ) {
+			if ( !$first ) echo '<tr><td></td>';
 			$first = false;
-			echo "<td>" . $contests[$contest] . "</td></tr>\n";
-		}
-	}
-
-	if ( !empty($restrictions['problem']) ) {
-		$first = true;
-		foreach ( $restrictions['problem'] as $problem ) {
-			echo "<tr><td>" . ($first ? 'Restrict to problems:' : '') . "</td>";
-			$first = false;
-			echo "<td>" . $problems[$problem] . "</td></tr>\n";
-		}
-	}
-
-	if ( !empty($restrictions['language']) ) {
-		$first = true;
-		foreach ( $restrictions['language'] as $language ) {
-			echo "<tr><td>" . ($first ? 'Restrict to languages:' : '') . "</td>";
-			$first = false;
-			echo "<td>" . $languages[$language] . "</td></tr>\n";
+			echo "<td>" . $lists[$type][$val] . "</td></tr>\n";
 		}
 	}
 }
