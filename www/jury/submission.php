@@ -472,7 +472,10 @@ if ( isset($jid) )  {
 
 			if ( ! ($verification_required && $jud['verified']) ) {
 				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
-				if ( $val ) echo ' with comment ' . addInput('comment', '', 25);
+				if ( $val ) {
+					echo ' with comment ' . addInput('comment', '', 25) .
+					    addSubmit('verify and post', 'verify');
+				}
 				echo "</p>" . addEndForm();
 			} else {
 				echo "</p>\n";
@@ -514,7 +517,7 @@ togglelastruns();
 
 		$timelimit_str = '';
 		if ( $run['runresult']=='timelimit' ) {
-			if ( preg_match('/timelimit exceeded.*hard wall time/',$run['output_system']) ) {
+			if ( preg_match('/timelimit exceeded.*hard (wall|cpu) time/',$run['output_system']) ) {
 				$timelimit_str = '<b>(terminated)</b>';
 			} else {
 				$timelimit_str = '<b>(finished late)</b>';
