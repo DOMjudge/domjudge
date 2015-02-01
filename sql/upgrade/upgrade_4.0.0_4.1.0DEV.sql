@@ -75,8 +75,8 @@ ALTER TABLE `problem`
   ADD COLUMN `special_compare_args` varchar(255) DEFAULT NULL COMMENT 'Optional arguments to special_compare script' AFTER `special_compare`;
 
 ALTER TABLE `testcase`
-  ADD COLUMN `image` longblob DEFAULT NULL COMMENT 'A graphical representation of this testcase' AFTER `description`,
-  ADD COLUMN `image_thumb` longblob DEFAULT NULL COMMENT 'Aumatically created thumbnail of the image' AFTER `image`,
+  ADD COLUMN `image` longblob COMMENT 'A graphical representation of this testcase' AFTER `description`,
+  ADD COLUMN `image_thumb` longblob COMMENT 'Aumatically created thumbnail of the image' AFTER `image`,
   ADD COLUMN `image_type` varchar(4) DEFAULT NULL COMMENT 'File type of the image and thumbnail' AFTER `image_thumb`;
 
 --
