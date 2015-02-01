@@ -54,9 +54,11 @@ $cdatas = getCurContests(TRUE, null, TRUE);
 $cids = array_keys($cdatas);
 
 // If the cookie has a existing contest, use it
-if ( isset($_COOKIE['domjudge_cid']) && isset($cdatas[$_COOKIE['domjudge_cid']]) )  {
-	$cid = $_COOKIE['domjudge_cid'];
-	$cdata = $cdatas[$cid];
+if ( isset($_COOKIE['domjudge_cid']) )  {
+	if ( isset($cdatas[$_COOKIE['domjudge_cid']]) ) {
+		$cid = $_COOKIE['domjudge_cid'];
+		$cdata = $cdatas[$cid];
+	}
 } elseif ( count($cids) >= 1 ) {
 	// Otherwise, select the first contest
 	$cid = $cids[0];

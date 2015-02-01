@@ -372,11 +372,20 @@ function putClock() {
 
 	global $cid, $cdatas;
 	// Show a contest selection form, if there are contests
-	if ( count($cdatas) > 1 ) {
+	if ( IS_JURY || count($cdatas) > 1 ) {
 		echo "<div id=\"selectcontest\">\n";
 		echo addForm('change_contest.php', 'get', 'selectcontestform');
 		$contests = array_map(function($c) { return $c['shortname']; }, $cdatas);
-		echo 'contest: ' . addSelect('cid', $contests, $cid, true);
+		if ( IS_JURY ) {
+			$values = array(
+				// -1 because setting cookies to null/'' unsets then and that is not what we want
+				-1 => '- No contest'
+			);
+		}
+		foreach ( $contests as $contestid => $name ) {
+			$values[$contestid] = $name;
+		}
+		echo 'contest: ' . addSelect('cid', $values, $cid, true);
 		echo addEndForm();
 		echo "<script type=\"text/javascript\">
 		      document.getElementById('cid').addEventListener('change', function() {
@@ -384,11 +393,6 @@ function putClock() {
 	});
 </script>
 ";
-		echo "</div>\n";
-	} elseif ( count($cdatas) == 1 && IS_JURY ) {
-		echo "<div id=\"selectcontest\">\n";
-		$contest = $cdatas[$cid];
-		echo 'contest: ' . $contest['shortname'];
 		echo "</div>\n";
 	}
 
