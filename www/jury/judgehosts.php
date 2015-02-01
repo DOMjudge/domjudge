@@ -9,7 +9,7 @@
 require('init.php');
 $title = 'Judgehosts';
 
-if ( !$_REQUEST['cmd'] ) {
+if ( !isset($_REQUEST['cmd']) ) {
 	$refresh = '15;url=judgehosts.php';
 }
 
