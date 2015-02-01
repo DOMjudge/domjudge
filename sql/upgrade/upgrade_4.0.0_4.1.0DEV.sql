@@ -103,6 +103,10 @@ UPDATE `configuration` SET `name` = 'output_limit', `description` = 'Maximum out
 
 UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`contestname`, ' ', ''), 1, 10)), `public` = 1, `deactivatetime` = UNIX_TIMESTAMP('2016-12-31 23:59:59'), `deactivatetime_string` = '2016-12-31 23:59:59';
 
+-- Update compare scripts to support new Kattis 42/43 exitcode format:
+source mysql_db_files_defaultdata.sql
+source mysql_db_files_examples.sql
+
 -- Add UNIQUE keys
 ALTER TABLE `contest`
   ADD UNIQUE KEY `shortname` (`shortname`);
