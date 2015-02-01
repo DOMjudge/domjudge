@@ -130,6 +130,14 @@ if ( function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()==1 ) {
 	result('software', 'PHP magic quotes', 'O', 'PHP magic quotes disabled.');
 }
 
+if ( !function_exists('gd_info') ) {
+	result('software', 'PHP GD library', 'W',
+	       'The PHP GD library is not available. Test case images cannot be uploaded.');
+} else {
+	result('software', 'PHP GD library', 'O',
+	       'The PHP GD library is available to handle test case images.');
+}
+
 if ( extension_loaded('suhosin') ) {
 	result('software', 'suhosin', 'E',
 	       'PHP suhosin extension loaded. This may result in dropping POST arguments, e.g. output_run.');

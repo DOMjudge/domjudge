@@ -146,7 +146,7 @@ The following software is required for running DOMjudge.
        executables.
 
 <item> Apache web server with support for PHP &gt;= 5.2.0 and the mysqli,
-       curl and json extensions for PHP. PHP needs to be running as an
+       GD, curl and json extensions for PHP. PHP needs to be running as an
        Apache module (the most common configuration); a (fast)CGI setup
        is not currently supported. We also recommend the posix extension
        for extra debugging information.
@@ -353,7 +353,7 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 <code>
 apt-get install gcc g++ make zip unzip mysql-server \
 	apache2 php5 php5-cli libapache2-mod-php5
-	php5-curl php5-mysql php5-json \
+	php5-gd php5-curl php5-mysql php5-json \
 	bsdmainutils phpmyadmin ntp \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
@@ -364,7 +364,7 @@ The following command can be used on RedHat Enterprise Linux, and
 related distributions like CentOS and Fedora.
 <code>
 yum install gcc gcc-c++ make zip unzip mariadb-server \
-	httpd php php-cli php-mbstring php-mysql \
+	httpd php-gd php-cli php-mbstring php-mysql \
 	ntp linuxdoc-tools \
 	texlive-collection-latexrecommended texlive-wrapfig
 </code>
