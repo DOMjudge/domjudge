@@ -90,73 +90,47 @@ are covered by other copyrights. See the administrator's manual for details.
 <![ %admin; [
 This software is partly based on code by other people. These
 acknowledgements are made in the respective files, but we would like
-to name them here too:
+to name them here too (with non-GPL licences where applicable):
 <itemize>
-<item> dash (i386) is included, built from the Debian dash sources
-       (copyright various people, see <tt>doc/dash.copyright</tt>).
+<item> dash (i386) is included, statically compiled from the Debian
+       dash sources (copyright by various people under the BSD licence
+       and a part under the GNU GPL version 2. See <tt>COPYING.BSD</tt>
+       <tt>doc/dash.copyright</tt> for more details).
+       Sources can be downloaded from: <url url="http://www.domjudge.org/sources/">.
 <item> basename.h is a modified version from the
        GNU libiberty library (copyright Free Software Foundation).
 <item> lib.database.php by Jeroen van Wolffelaar et al.
 <item> runguard.c was originally based on timeout from The
        Coroner's Toolkit by Wietse Venema.
-<item> sorttable.js by Stuart Langridge.
-<item> jscolor.js by Jan Odvarko.
-<item> tabber.js by Patrick Fitzgerald.
-<item> Ace code editor.
-<item> Flot JavaScript library by IOLA and Ole Laursen.
-<item> jQuery JavaScript library by the jQuery Foundation.
-<item> jQuery TokenInput by James Smith.
+<item> sorttable.js, by Stuart Langridge, licenced under
+       the MIT licence, see <tt>COPYING.MIT</tt>.
+       It was downloaded from <url url="http://www.kryogenix.org/code/browser/sorttable/">.
+<item> jscolor.js by Jan Odvarko, licenced under the GNU LGPL. It
+       was obtained at <url url="http://jscolor.com">.
+<item> tabber.js by Patrick Fitzgerald, licenced under the MIT
+       licence, see <tt>COPYING.MIT</tt>. It was downloaded from
+       <url url="http://www.barelyfitz.com/projects/tabber/">.
+<item> Ace code editor by Ajax.org B.V., licenced under the BSD
+       licence, see <tt>COPYING.BSD</tt>. It was downloaded from
+       <url url="https://github.com/ajaxorg/ace-builds">.
+<item> Flot JavaScript library by IOLA and Ole Laursen, licenced
+       under the MIT licence, see <tt>COPYING.MIT</tt>. It was
+       downloaded from <url url="http://www.flotcharts.org/">.
+<item> jQuery JavaScript library by the jQuery Foundation, licenced
+       under the MIT licence, see <tt>COPYING.MIT</tt>. It was
+       downloaded from <url url="http://jquery.com/">.
+<item> jQuery TokenInput by James Smith, dual
+       licenced under the GPL and MIT licences, see <tt>COPYING</tt>
+       and <tt>COPYING.MIT</tt>. It was downloaded from
+       <url url="http://loopj.com/jquery-tokeninput/">.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
        Erik van Sebille.
 <item> Several icons have been taken from the phpMyAdmin project.
 <item> Several M4 autoconf macros from the <htmlurl name="Autoconf archive"
        url="http://www.gnu.org/software/autoconf-archive/"> by various
-       people are included under <tt>m4/</tt>.
-</itemize>
-
-<sect1>Non-GPL licenced parts of DOMjudge
-<p>
-
-A binary version of the dash shell (statically compiled)
-is distributed with DOMjudge. This program is copyright by various
-people under the BSD licence and a part under the GNU GPL version 2,
-see <tt>COPYING.BSD</tt> and <tt>doc/dash.copyright</tt> for more details.
-Sources can be downloaded from:
-<url url="http://www.domjudge.org/sources/">.
-
-The following JavaScript snippets/libraries are included:
-<itemize>
-<item> The <tt>sorttable.js</tt> script is copyright by Stuart
-Langridge and licenced under the MIT licence, see <tt>COPYING.MIT</tt>.
-It was downloaded from <url url="http://www.kryogenix.org/code/browser/sorttable/">.
-<item> The <tt>jscolor.js</tt> script is copyright by Jan Odvarko and
-licenced under the GNU LGPL. It was obtained at <url url="http://jscolor.com">.
-<item> The <tt>tabber.js</tt> script is copyright by Patrick
-Fitzgerald and licenced under the MIT licence, see <tt>COPYING.MIT</tt>.
-It was downloaded from <url url="http://www.barelyfitz.com/projects/tabber/">.
-<item>The Ace code editor is copyright by Ajax.org B.V. and licenced
-under the BSD licence, see <tt>COPYING.BSD</tt>. It was downloaded
-from <url url="https://github.com/ajaxorg/ace-builds">.
-<item>The Flot Library is copyright by IOLA and Ole Laursen and
-licenced under the MIT licence, see <tt>COPYING.MIT</tt>. It was
-downloaded from <url url="http://www.flotcharts.org/">.
-<item>The jQuery Library is copyright by the jQuery Foundation and
-licenced under the MIT licence, see <tt>COPYING.MIT</tt>. It was
-downloaded from <url url="http://www.flotcharts.org/">.
-</itemize>
-
-The M4 autoconf macros are licenced under all-permissive and GPL3+
-licences; see the respective files for details.
-
-DOMjudge includes specifications of a number of interfaces. These
-specifications are dedicated to the public domain, as
-specified in the <htmlurl
-name="Creative Commons Public Domain Dedication (CC0 1.0)"
-url="http://creativecommons.org/publicdomain/zero/1.0/">. These
-specifications can be found as appendices in the judge manual and as
-separate ASCII text files in the documentation directory:
-<itemize>
-<item> The DOMjudge problem format zip-bundle.
+       people are included under <tt>m4/</tt>. These are licenced
+       under all-permissive and GPL3+ licences; see the respective
+       files for details.
 </itemize>
 ]]>
 
