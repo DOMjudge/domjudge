@@ -103,7 +103,9 @@ to name them here too:
 <item> jscolor.js by Jan Odvarko.
 <item> tabber.js by Patrick Fitzgerald.
 <item> Ace code editor.
-<item> Flot/jQuery JavaScript libraries.
+<item> Flot JavaScript library by IOLA and Ole Laursen.
+<item> jQuery JavaScript library by the jQuery Foundation.
+<item> jQuery TokenInput by James Smith.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
        Erik van Sebille.
 <item> Several icons have been taken from the phpMyAdmin project.
@@ -135,7 +137,10 @@ It was downloaded from <url url="http://www.barelyfitz.com/projects/tabber/">.
 <item>The Ace code editor is copyright by Ajax.org B.V. and licenced
 under the BSD licence, see <tt>COPYING.BSD</tt>. It was downloaded
 from <url url="https://github.com/ajaxorg/ace-builds">.
-<item>The Flot/jQuery libraries are copyright by various people and
+<item>The Flot Library is copyright by IOLA and Ole Laursen and
+licenced under the MIT licence, see <tt>COPYING.MIT</tt>. It was
+downloaded from <url url="http://www.flotcharts.org/">.
+<item>The jQuery Library is copyright by the jQuery Foundation and
 licenced under the MIT licence, see <tt>COPYING.MIT</tt>. It was
 downloaded from <url url="http://www.flotcharts.org/">.
 </itemize>
