@@ -236,42 +236,53 @@ function judgings_POST($args)
 	                        WHERE hostname = %s', $host);
 	if ( $restrictions ) {
 		$restrictions = json_decode($restrictions, true);
-		$contests = $restrictions['contest'];
-		$problems = $restrictions['problem'];
-		$languages = $restrictions['language'];
+		$contests = @$restrictions['contest'];
+		$problems = @$restrictions['problem'];
+		$languages = @$restrictions['language'];
+		$rejudge_own = @$restrictions['rejudge_own'];
 	}
 
-	$extra = '';
+	$extra_join = '';
+	$extra_where = '';
 	if ( empty($contests) ) {
-		$extra .= '%_';
+		$extra_where .= '%_ ';
 	} else {
-		$extra .= 'AND s.cid IN (%Ai) ';
+		$extra_where .= 'AND s.cid IN (%Ai) ';
 	}
 
 	if ( empty($problems) ) {
-		$extra .= '%_';
+		$extra_where .= '%_ ';
 	} else {
-		$extra .= 'AND s.probid IN (%Ai) ';
+		$extra_join  .= 'LEFT JOIN problem p USING (probid) ';
+		$extra_where .= 'AND s.probid IN (%Ai) ';
 	}
 
 	if ( empty($languages) ) {
-		$extra .= '%_';
+		$extra_where .= '%_ ';
 	} else {
-		$extra .= 'AND s.langid IN (%As) ';
+		$extra_where .= 'AND s.langid IN (%As) ';
+	}
+
+	if ( isset($rejudge_own) && (bool)$rejudge_own==false ) {
+		$extra_join  .= 'LEFT JOIN judging j ON (j.submitid=s.submitid AND j.judgehost=%s) ';
+		$extra_where .= 'AND j.judgehost IS NULL ';
+	} else {
+		$extra_join  .= '%_ ';
 	}
 
 	// Prioritize teams according to last judging time
-	$submitid = $DB->q('MAYBEVALUE SELECT submitid
+	$submitid = $DB->q('MAYBEVALUE SELECT s.submitid
 	                    FROM submission s
 	                    LEFT JOIN team t USING (teamid)
-	                    LEFT JOIN problem p USING (probid)
 	                    LEFT JOIN language l USING (langid)
-	                    LEFT JOIN contestproblem cp USING (probid, cid)
-	                    WHERE judgehost IS NULL AND s.cid IN (%Ai) ' . $extra . '
-	                    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
-	                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
+	                    LEFT JOIN contestproblem cp USING (probid, cid) ' .
+	                   $extra_join .
+	                   'WHERE s.judgehost IS NULL AND s.cid IN (%Ai)
+	                    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
+	                   $extra_where .
+	                   'ORDER BY judging_last_started ASC, submittime ASC, s.submitid ASC
 	                    LIMIT 1',
-	                   $cids, $contests, $problems, $languages);
+	                   $host, $cids, $contests, $problems, $languages);
 
 	if ( $submitid ) {
 		// update exactly one submission with our judgehost name

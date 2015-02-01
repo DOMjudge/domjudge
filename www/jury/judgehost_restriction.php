@@ -84,6 +84,16 @@ if ( !empty($_GET['cmd']) ) {
 		}
 	}
 
+	$rejudge_own = !isset($row['restrictions']['rejudge_own']) ||
+	  (bool)$row['restrictions']['rejudge_own'];
+
+	echo '<tr><td>Rejudge on same judgehost:</td><td>' .
+	    addRadioButton('data[0][restrictions][rejudge_own]', $rejudge_own, 1) .
+	    '<label for="data_0__restrictions__rejudge_own_1">yes</label>' .
+	    addRadioButton('data[0][restrictions][rejudge_own]', !$rejudge_own, 0) .
+	    '<label for="data_0__restrictions__rejudge_own_0">no</label>' .
+	    "</td></tr>\n";
+
 	echo "</table>\n\n";
 
 	echo addHidden('cmd', $cmd) .
@@ -121,6 +131,10 @@ foreach ( array('contest','problem','language') as $type ) {
 		}
 	}
 }
+
+echo '<tr><td>Rejudge by same judgehost:</td><td>' .
+     printyn(!isset($restrictions['rejudge_own']) ||
+             (bool)$restrictions['rejudge_own']) . "</td></tr>\n";
 
 echo "</table>\n\n";
 
