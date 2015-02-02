@@ -56,16 +56,19 @@ chapter.
 <sect>Copyright and licencing
 <p>
 
-DOMjudge is developed by Jaap Eldering, Keith Johnson, Thijs
-Kinkhorst and Tobias Werth; Peter van de Werken has retired as
-developer. Many other people have contributed:
+DOMjudge is developed by Jaap Eldering, Nicky Gerritsen, Keith
+Johnson, Thijs Kinkhorst and Tobias Werth; Peter van de Werken has
+retired as developer. Many other people have contributed (apologies
+for any oversights):
 Jeroen Bransen,
 Stijn van Drongelen,
 Rob Franken,
-Nicky Gerritsen,
 Jacob Kleerekoper,
+Ruud Koot,
 Jan Kuipers,
+Alex Muntada,
 Jeroen Schot,
+Matt Steele,
 and Jeroen van Wolffelaar.
 Some code has been ported from the ETH Zurich fork by Christoph
 Krautz, Thomas Rast et al.
