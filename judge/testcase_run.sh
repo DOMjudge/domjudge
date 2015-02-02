@@ -281,7 +281,7 @@ if [ $exitcode -eq 42 ]; then
 	cleanexit ${E_CORRECT:--1}
 elif [ $exitcode -eq 43 ]; then
 	# Special case detect no-output:
-	if [ -s program.out ];  then
+	if [ ! -s program.out ];  then
 		echo "Program produced no output." >>system.out
 		cleanexit ${E_NO_OUTPUT:--1}
 	fi
