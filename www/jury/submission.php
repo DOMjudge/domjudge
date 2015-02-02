@@ -529,8 +529,8 @@ togglelastruns();
 		    "&amp;rank=" . $run['rank'] . "&amp;fetch=input\">Input</a> / " .
 		    "<a href=\"testcase.php?probid=" . htmlspecialchars($submdata['probid']) .
 		    "&amp;rank=" . $run['rank'] . "&amp;fetch=output\">Reference Output</a> / " .
-		    "<a href=\"team_output.php?runid=" . $run['runid'] . "\">Team Output</a>" .
-		    "</td></tr>" .
+		    "<a href=\"team_output.php?runid=" . $run['runid'] . "&amp;cid=" .
+		    $submdata['cid'] . "\">Team Output</a></td></tr>" .
 		    "<tr><td>Runtime:</td><td>$run[runtime] sec $timelimit_str</td></tr>" .
 		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
 		    ( $run['runresult']=='correct' ? '' : 'in' ) .
