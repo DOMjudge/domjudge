@@ -93,7 +93,7 @@ int equal(flt f1, flt f2, flt float_abs_tol, flt float_rel_tol)
 	return 0;
 }
 
-const char *USAGE = "Usage: %s judge_in judge_ans feedback_file [options] < team_out";
+const char *USAGE = "Usage: %s judge_in judge_ans feedback_dir [options] < team_out";
 
 int main(int argc, char **argv) {
 	if(argc < 4) {
