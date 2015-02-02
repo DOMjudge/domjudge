@@ -280,6 +280,11 @@ if [ $exitcode -eq 42 ]; then
 	echo "Correct! Runtime: $runtime." >>system.out
 	cleanexit ${E_CORRECT:--1}
 elif [ $exitcode -eq 43 ]; then
+	# Special case detect no-output:
+	if [ -s program.out ];  then
+		echo "Program produced no output." >>system.out
+		cleanexit ${E_NO_OUTPUT:--1}
+	fi
 	echo "Wrong answer." >>system.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 fi
