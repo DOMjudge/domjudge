@@ -1,11 +1,11 @@
 /**
  * jscolor, JavaScript Color Picker
  *
- * @version 1.4.3
+ * @version 1.4.4
  * @license GNU Lesser General Public License, http://www.gnu.org/copyleft/lesser.html
  * @author  Jan Odvarko, http://odvarko.cz
  * @created 2008-06-15
- * @updated 2014-07-16
+ * @updated 2014-12-09
  * @link    http://jscolor.com
  */
 
@@ -70,6 +70,10 @@ var jscolor = {
 		var matchClass = new RegExp('(^|\\s)('+jscolor.bindClass+')(\\s*(\\{[^}]*\\})|\\s|$)', 'i');
 		var e = document.getElementsByTagName('input');
 		for(var i=0; i<e.length; i+=1) {
+			if(jscolor.isColorAttrSupported && e[i].type.toLowerCase() == 'color') {
+				// skip inputs of type 'color' if the browser supports this feature
+				continue;
+			}
 			var m;
 			if(!e[i].color && e[i].className && (m = e[i].className.match(matchClass))) {
 				var prop = {};
@@ -946,6 +950,15 @@ var jscolor = {
 			leaveStyle = 1<<1,
 			leavePad = 1<<2,
 			leaveSld = 1<<3;
+
+		jscolor.isColorAttrSupported = false;
+		var el = document.createElement('input');
+		if(el.setAttribute) {
+			el.setAttribute('type', 'color');
+			if(el.type.toLowerCase() == 'color') {
+				jscolor.isColorAttrSupported = true;
+			}
+		}
 
 		// target
 		jscolor.addEvent(target, 'focus', function() {
