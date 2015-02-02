@@ -277,10 +277,10 @@ if [ "$program_exit" != "0" ]; then
 fi
 
 if [ $exitcode -eq 42 ]; then
-	echo "Correct${descrp}! Runtime: $runtime." >>system.out
+	echo "Correct! Runtime: $runtime." >>system.out
 	cleanexit ${E_CORRECT:--1}
 elif [ $exitcode -eq 43 ]; then
-	echo "Wrong answer${descrp}." >>system.out
+	echo "Wrong answer." >>system.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 fi
 
