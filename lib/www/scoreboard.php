@@ -170,7 +170,7 @@ function getProblems($cdata) {
 	global $DB;
 
 	return $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, shortname,
-	               name, color, LENGTH(problemtext) AS hastext,
+	               name, color, LENGTH(problemtext) AS hastext
 	               FROM problem
 	               INNER JOIN contestproblem USING (probid)
 	               WHERE cid = %i AND allow_submit = 1
