@@ -170,7 +170,7 @@ function getProblems($cdata) {
 	global $DB;
 
 	return $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, shortname,
-	               name, color, LENGTH(problemtext) AS hastext, allow_judge
+	               name, color, LENGTH(problemtext) AS hastext,
 	               FROM problem
 	               INNER JOIN contestproblem USING (probid)
 	               WHERE cid = %i AND allow_submit = 1
@@ -317,7 +317,6 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 	foreach( $probs as $pr ) {
 		echo '<th title="problem \'' . htmlspecialchars($pr['name']) . '\'" scope="col">';
 		$str = htmlspecialchars($pr['shortname']) .
-		       ($pr['allow_judge'] ? '':' ¶') .
 		       (!empty($pr['color']) ? ' <div class="circle" style="background: ' .
 			htmlspecialchars($pr['color']) . ';"></div>' : '') ;
 
