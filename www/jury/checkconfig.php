@@ -236,17 +236,6 @@ if ( DEBUG == 0 ) {
 	       'Should not be enabled on live systems.');
 }
 
-if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
-	result('configuration', 'Protected Jury interface', 'W',
-		"You are not using HTTP Authentication for the Jury interface. " .
-		"Are you sure that the jury interface is adequately protected?");
-} else {
-	result('configuration', 'Protected Jury interface', 'O',
-		'Logged in as user ' .
-		htmlspecialchars($_SERVER['REMOTE_USER']) .
-		".");
-}
-
 if ( !is_writable(TMPDIR) ) {
        result('configuration', 'TMPDIR writable', 'W',
               'TMPDIR (' . TMPDIR . ') is not writable by the webserver; ' .
