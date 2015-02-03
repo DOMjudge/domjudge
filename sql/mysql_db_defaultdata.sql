@@ -23,7 +23,6 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('sourcefiles_limit', '100', 'int', 'Maximum number of source files in one submission. Set to one to disable multiple file submissions.'),
 ('timelimit_overshoot', '"1s|10%"', 'string', 'Time that submissions are kept running beyond timelimt before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.'),
 ('verification_required', '0', 'bool', 'Is verification of judgings by jury required before publication?'),
-('disable_verify', '0', 'bool', 'Disable the "mark verified" button to allow suspension of notification of accepted submissions. Requires "verification_required=yes" to work!'),
 ('show_affiliations', '1', 'bool', 'Show country flags and affiliations names on the scoreboard?'),
 ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?'),
 ('show_compile', '2', 'int', 'Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always.'),
