@@ -373,13 +373,6 @@ span.fileinputs {
 	position: relative;
 }
 
-#testmode {
-	text-align: center;
-	font-variant: small-caps;
-	margin-bottom: 1em;
-	color: red;
-}
-
 input#addfile {
 	margin-top: 1ex;
 }
