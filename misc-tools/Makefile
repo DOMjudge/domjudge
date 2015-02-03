@@ -7,7 +7,7 @@ TARGETS =
 OBJECTS =
 
 SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
-              combined_scoreboard balloons \
+              combined_scoreboard judging_statistics balloons \
               simulate_contest create_cgroups create_accounts
 
 build: $(TARGETS) $(SUBST_FILES)
