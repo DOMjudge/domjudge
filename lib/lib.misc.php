@@ -17,7 +17,7 @@ define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/');
  * If $sizelimit is true (default), then only limit this to
  * the first 50,000 bytes and attach a note saying so.
  */
-function getFileContents($filename, $sizelimit = false) {
+function getFileContents($filename, $sizelimit = true) {
 
 	if ( ! file_exists($filename) ) {
 		return '';
