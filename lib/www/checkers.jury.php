@@ -179,7 +179,7 @@ function check_relative_time($time, $starttime, $field)
 			}
 			$ret = $starttime + $seconds;
 		} else {
-			ch_error($field . " is not correctly formatted, expecting: +/-hh:mm");
+			ch_error($field . " is not correctly formatted, expecting: +/-hh:mm(:ss)");
 			$ret = null;
 		}
 	} else {
