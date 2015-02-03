@@ -236,14 +236,16 @@ if ( DEBUG == 0 ) {
 	       'Should not be enabled on live systems.');
 }
 
-if ( !TEST_MODE ) {
-	result('configuration', 'Real mode', 'O', 'System running in Real mode.');
+if ( !isset( $_SERVER['REMOTE_USER'] ) ) {
+	result('configuration', 'Protected Jury interface', 'W',
+		"You are not using HTTP Authentication for the Jury interface. " .
+		"Are you sure that the jury interface is adequately protected?");
 } else {
-	result('configuration', 'Real mode', 'W',
-		"Test mode enabled.\n" .
-		'Should not be enabled on live systems.');
+	result('configuration', 'Protected Jury interface', 'O',
+		'Logged in as user ' .
+		htmlspecialchars($_SERVER['REMOTE_USER']) .
+		".");
 }
-
 
 if ( !is_writable(TMPDIR) ) {
        result('configuration', 'TMPDIR writable', 'W',
