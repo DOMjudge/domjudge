@@ -71,10 +71,7 @@ int show_version;
 struct option const long_opts[] = {
 	{"problem",  required_argument, NULL,         'p'},
 	{"language", required_argument, NULL,         'l'},
-	{"team",     required_argument, NULL,         't'},
-	{"password", required_argument, NULL,         'x'},	// TODO not yet used
 	{"url",      required_argument, NULL,         'u'},
-	{"time",     required_argument, NULL,         'T'},	// TODO not yet used
 	{"verbose",  optional_argument, NULL,         'v'},
 	{"contest",  required_argument, NULL,         'c'},
 	{"quiet",    no_argument,       NULL,         'q'},
@@ -117,8 +114,7 @@ std::string stringtolower(std::string str)
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, team, password, baseurl, contest;
-long submissiontime; /* in ms since start of contest, -1 means unset */
+string problem, language, extension, baseurl, contest;
 vector<string> filenames;
 char *submitdir;
 
@@ -174,25 +170,15 @@ int main(int argc, char **argv)
 
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
-	submissiontime = -1;
-	while ( (c = getopt_long(argc,argv,"p:l:t:x:u:T:c:v::q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"p:l:u:c:v::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
 
 		case 'p': problem   = string(optarg); break;
 		case 'l': extension = string(optarg); break;
-		case 't': team      = string(optarg); break;
-		case 'x': password  = string(optarg); break;
 		case 'u': baseurl   = string(optarg); break;
 		case 'c': contest   = string(optarg); break;
-
-		case 'T': /* time option */
-			submissiontime = strtol(optarg,&ptr,10);
-			if ( *ptr!=0 || submissiontime<0 ) {
-				usage2(0,"invalid submission time specified: `%s'",optarg);
-			}
-			break;
 		case 'v': /* verbose option */
 			if ( optarg!=NULL ) {
 				verbose = strtol(optarg,&ptr,10);
@@ -311,15 +297,7 @@ int main(int argc, char **argv)
 		}
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
-		printf("  team:        %s\n",team.c_str());
 		printf("  url:         %s\n",baseurl.c_str());
-		if ( submissiontime>=0 ) {
-			printf("  submit time: %ld:%02ld:%02ld.%03ld\n",
-			       (submissiontime / 3600000L),
-			       (submissiontime / 60000) % 60,
-			       (submissiontime / 1000) % 60,
-			       (submissiontime % 1000));
-		}
 
 		if ( nwarnings>0 ) printf("There are warnings for this submission!\a\n");
 		printf("Do you want to continue? (y/n) ");
@@ -346,7 +324,6 @@ void usage()
 "                               Mandatory when more than one contest is active.\n"
 "  -p, --problem=PROBLEM    submit for problem PROBLEM\n"
 "  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
-"  -T, --time=TIME          contest relative time for the submission in ms.\n"
 "  -v, --verbose[=LEVEL]    increase verbosity or set to LEVEL, where LEVEL\n"
 "                               must be numerically specified as in 'syslog.h'\n"
 "                               defaults to LOG_INFO without argument\n"
@@ -356,8 +333,6 @@ void usage()
 "      --version            output version information and exit\n"
 "\n"
 "The following option(s) should not be necessary for normal use\n"
-"  -t, --team=TEAM          submit as team TEAM\n"
-"  -x, --password=PASSWORD  authenticate using password PASSWORD\n"
 "  -u, --url=URL            submit to webserver with base address URL\n"
 "\n"
 "Explanation of submission options:\n"
