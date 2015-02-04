@@ -119,7 +119,7 @@ if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
                     s.submittime, s.valid, c.cid, c.shortname AS contestshortname, c.contestname,
-                    s.externalid, s.externalresult,
+                    s.externalid, s.externalresult, t.externalid AS team_externalid,
                     t.name AS teamname, l.name AS langname, cp.shortname, p.name AS probname,
                     CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
@@ -411,7 +411,16 @@ if ( isset($jid) )  {
 
 			if ( ! ($verification_required && $jud['verified']) ) {
 				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
-				if ( $val ) echo ' with comment ' . addInput('comment', '', 25);
+				if ( $val ) {
+					$url = ICAT_URL.'/insert_entry.php';
+					echo ' with comment ' . addInput('comment', '', 25) .
+					    addInputField('button','post_icat','post to iCAT',
+					                  " onclick=\"postVerifyCommentToICAT(".
+					                  "'$url','$username','".
+					                  $submdata['team_externalid']."','" .
+					                  $submdata['probid']."','".
+					                  $submdata['externalid']."')\"");
+				}
 				echo "</p>" . addEndForm();
 			} else {
 				echo "</p>\n";

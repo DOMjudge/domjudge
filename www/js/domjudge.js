@@ -582,3 +582,39 @@ function initFavouriteTeams() {
 		tbody.insertBefore(copy, scoreboard[i + 1]);
 	}
 }
+
+// This function is a specific addition for using DOMjudge within a
+// ICPC analyst setup, to automatically include an analyst's comment
+// on the submission in the iCAT system.
+function postVerifyCommentToICAT(url, user, teamid, probid, submissionid)
+{
+	var form = document.createElement("form");
+	form.setAttribute("method", "post");
+	form.setAttribute("action", url);
+	form.setAttribute("hidden", true);
+
+	// setting form target to a window named 'formresult'
+	form.setAttribute("target", "formresult");
+
+	function addField(name, value) {
+		var field = document.createElement("input");
+		field.setAttribute("name", name);
+		field.setAttribute("id",   name);
+		field.setAttribute("value", value);
+		form.appendChild(field);
+	}
+
+	var msg = document.getElementById("comment").value;
+
+	addField("user", user);
+	addField("priority", 0);
+	addField("text", "Team #t"+teamid+" on problem #p"+probid+
+	                 " (#s"+submissionid+"): "+msg);
+
+	document.body.appendChild(form);
+
+	// creating the 'formresult' window prior to submitting the form
+	window.open('about:blank', 'formresult');
+
+	form.submit();
+}

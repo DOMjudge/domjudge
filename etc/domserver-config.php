@@ -43,6 +43,9 @@ define('BALLOON_CMD', '');
 // Specify URL to external CCS, e.g. Kattis
 define('EXT_CCS_URL', 'https://ccs.example.com/');
 
+// Specify URL of the iCAT webinterface
+define('ICAT_URL', 'http://icat.example.com/icat/');
+
 // After what delay of a judgehost not checking in should its status
 // start displaying as warning or critical.
 define('JUDGEHOST_WARNING', 30);
