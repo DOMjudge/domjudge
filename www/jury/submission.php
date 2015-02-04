@@ -133,7 +133,7 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
 if ( ! $submdata ) error ("Missing submission data");
 
 $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, valid, starttime,
-                 judgehost, verified, jury_member, verify_comment
+                 judgehost, verified, jury_member, verify_comment, cid
                  FROM judging
                  WHERE cid = %i AND submitid = %i
                  ORDER BY starttime ASC, judgingid ASC',
