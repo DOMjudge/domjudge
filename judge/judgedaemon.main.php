@@ -147,13 +147,15 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 	// FIXME: make sure we don't have to escape $execid
 	$execpath = "$workdirpath/executable/" . $execid;
 	$execmd5path = $execpath . "/md5sum";
+	$execdeploypath = $execpath . "/.deployed";
 	$execbuildpath = $execpath . "/build";
 	$execrunpath = $execpath . "/run";
 	$execzippath = $execpath . "/executable.zip";
 	if ( empty($md5sum) ) {
 		error("unknown executable '" . $execid . "' specified");
 	}
-	if ( !file_exists($execpath) || !file_exists($execmd5path)
+	if ( !file_exists($execpath) || !file_exists($execmd5path) ||
+	     !file_exists($exedeploypath)
 		|| file_get_contents($execmd5path) != $md5sum ) {
 		logmsg(LOG_INFO, "Fetching new executable '" . $execid . "'");
 		system("rm -rf $execpath");
@@ -251,6 +253,9 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 			error("Invalid build file, must produce an executable file 'run'.");
 		}
 	}
+	// Create file to mark executable successfully deployed.
+	touch($execdeploypath);
+
 	return $execrunpath;
 }
 
