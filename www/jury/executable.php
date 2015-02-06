@@ -122,9 +122,9 @@ if ( !empty($cmd) ):
 <td><?php echo addInput('data[0][description]', @$row['description'], 30, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__type_">Executable type:</label></td>
 <td><?php echo addSelect('data[0][type]', array('compare' => 'compare',
-	                                            'compile' => 'compile',
-	                                            'run' => 'run'), @$row['type'], True)?></td></tr>
-
+                                                'compile' => 'compile',
+                                                'run' => 'run'), @$row['type'], True)?></td></tr>
+<tr><td>Content:     </td><td><a href="show_executable.php?edit_source=1&amp;id=<?php echo htmlspecialchars($id)?>">edit file contents</a></td></tr>
 </table>
 
 <?php
@@ -173,7 +173,7 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <tr><td>md5sum:      </td><td><?php echo htmlspecialchars($data['md5sum'])?></td></tr>
 <tr><td>type:        </td><td><?php echo htmlspecialchars($data['type'])?></td></tr>
 <tr><td>size:        </td><td><?php echo htmlspecialchars($data['size'])?> Bytes</td></tr>
-<tr><td>content:        </td><td><a href="show_executable.php?id=<?php echo htmlspecialchars($id)?>">view content of zip file</a></td></tr>
+<tr><td>content:     </td><td><a href="show_executable.php?id=<?php echo htmlspecialchars($id)?>">view file contents</a></td></tr>
 <tr><td>used as <?=$data['type'] ?> script:</td><td>
 <?php
 if ( $data['type'] == 'compare' ) {
