@@ -330,7 +330,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
  */
 function putTeam($teamid) {
 
-	global $DB;
+	global $DB, $cid;
 
 	$team = $DB->q('MAYBETUPLE SELECT t.*, c.name AS catname,
 	                a.name AS affname, a.country FROM team t
@@ -385,21 +385,29 @@ function putTeam($teamid) {
 	echo "</table>\n\n";
 
 	echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">solved</h3>\n\n";
-	$solved = $DB->q('SELECT probid,submissions FROM scorecache_public WHERE is_correct=1 AND teamid=%s AND cid=%i', $login, getCurContest());
+	$solved = $DB->q('SELECT probid,submissions,shortname
+			  FROM scorecache_public
+			  LEFT JOIN contestproblem USING (probid,cid)
+			  WHERE is_correct=1 AND teamid=%i AND cid=%i',
+			  $teamid, $cid);
 	if( $solved->count() == 0 ) {
 		echo "<p class=\"nodata\">No solved problems.</p>\n\n";
 	} else {
 		while( $row = $solved->next() ) {
-			echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . $row['probid'] . "&nbsp;(" . $row['submissions'] . ")</a> ";
+			echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . htmlspecialchars($row['shortname']) . "&nbsp;(" . $row['submissions'] . ")</a> ";
 		}
 	}
 	echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">unsolved, but tried</h3>\n\n";
-	$unsolved = $DB->q('SELECT probid,submissions FROM scorecache_public WHERE is_correct=0 AND teamid=%s AND cid=%i', $login, getCurContest());
+	$unsolved = $DB->q('SELECT probid,submissions,shortname
+			    FROM scorecache_public
+			    LEFT JOIN contestproblem USING (probid,cid)
+			    WHERE is_correct=0 AND teamid=%i AND cid=%i',
+			    $teamid, $cid);
 	if( $unsolved->count() == 0 ) {
 		echo "<p class=\"nodata\">No unsolved problems.</p>\n\n";
 	} else {
 		while( $row = $unsolved->next() ) {
-			echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . $row['probid'] . "&nbsp;(" . $row['submissions'] . ")</a> ";
+			echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . htmlspecialchars($row['shortname']) . "&nbsp;(" . $row['submissions'] . ")</a> ";
 		}
 	}
 }
