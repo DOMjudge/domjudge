@@ -22,13 +22,15 @@ $INOROUT = array('input','output');
 // Download testcase
 $fetch = ($in ? 'input' : 'output');
 
-$testcase = $DB->q("SELECT probid, rank, OCTET_LENGTH($fetch) AS size FROM testcase
-                    WHERE sample=1 AND testcaseid=%i", $tcid);
+$testcase = $DB->q("SELECT rank, shortname, OCTET_LENGTH($fetch) AS size
+		    FROM testcase
+		    LEFT JOIN contestproblem USING (probid)
+                    WHERE sample=1 AND testcaseid=%i AND cid=%i", $tcid, $cid);
 if ( $testcase->count() != 1 ) {
 	error("Problem downloading sample data.");
 }
 $testcase = $testcase->next();
-$filename = $testcase['probid'] . $testcase['rank'] . "." . substr($fetch,0,-3);
+$filename = $testcase['shortname'] . '_' . $testcase['rank'] . "." . substr($fetch,0,-3);
 
 // sanity check before we start to output headers
 if ( $testcase['size']===NULL || !is_numeric($testcase['size'])) error("Problem while fetching testcase");
