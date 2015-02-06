@@ -85,6 +85,82 @@ function display_runinfo($runinfo, $is_final) {
 	return array($tclist, $sum_runtime, $max_runtime);
 }
 
+function compute_lcsdiff($line1, $line2) {
+	$tokens1 = preg_split('/\s+/', $line1);
+	$tokens2 = preg_split('/\s+/', $line2);
+	$cutoff = 100; // a) LCS gets inperformant, b) the output is not longer readable
+
+	$n1 = min($cutoff, sizeof($tokens1));
+	$n2 = min($cutoff, sizeof($tokens2));
+
+	// compute longest common sequence length
+	$dp = array_fill(0, $n1+1, array_fill(0, $n2+1, 0));
+	for ($i = 1; $i < $n1 + 1; $i++) {
+		for ($j = 1; $j < $n2 + 1; $j++) {
+			if ($tokens1[$i-1] == $tokens2[$j-1]) {
+				$dp[$i][$j] = $dp[$i-1][$j-1] + 1;
+			} else {
+				$dp[$i][$j] = max($dp[$i-1][$j], $dp[$i][$j-1]);
+			}
+		}
+	}
+
+	if ($n1 == $n2 && $n1 == $dp[$n1][$n2]) {
+		return array(false, htmlspecialchars($line1) . "\n");
+	}
+
+	// reconstruct lcs
+	$i = $n1 + 1;
+	$j = $n2 + 1;
+	$lcs = array();
+	while ($i > 0 && $j > 0) {
+		if ($tokens1[$i-1] == $tokens2[$j-1]) {
+			$lcs[] = $tokens1[$i-1];
+			$i--;
+			$j--;
+		} else if ($dp[$i-1][$j] > $dp[$i][$j-1]) {
+			$i--;
+		} else {
+			$j--;
+		}
+	}
+	$lcs = array_reverse($lcs);
+
+	// reconstruct diff
+	$diff = "";
+	$l = sizeof($lcs);
+	$i = 0;
+	$j = 0;
+	for ($k = 0; $k < $l ; $k++) {
+		while ($i < $n1 && $tokens1[$i] != $lcs[$k]) {
+			$diff .= "<del>" . htmlspecialchars($tokens1[$i]) . "</del> ";
+			$i++;
+		}
+		while ($j < $n2 && $tokens2[$j] != $lcs[$k]) {
+			$diff .= "<ins>" . htmlspecialchars($tokens2[$j]) . "</ins> ";
+			$j++;
+		}
+		$diff .= $lcs[$k] . " ";
+		$i++;
+		$j++;
+	}
+	while ($i < $n1 && $tokens1[$i] != $lcs[$k]) {
+		$diff .= "<del>" . htmlspecialchars($tokens1[$i]) . "</del> ";
+		$i++;
+	}
+	while ($j < $n2 && $tokens2[$j] != $lcs[$k]) {
+		$diff .= "<ins>" . htmlspecialchars($tokens2[$j]) . "</ins> ";
+		$j++;
+	}
+
+	if ($cutoff < sizeof($tokens1) || $cutoff < sizeof($tokens2)) {
+		$diff .= "[cut off rest of line...]";
+	}
+	$diff .= "\n";
+
+	return array(TRUE, $diff);
+}
+
 require('init.php');
 
 $id = getRequestID();
@@ -274,8 +350,10 @@ if ( isset($jid) )  {
 	                       truncate_SQL_field('r.output_run')    . ' AS output_run, ' .
 	                       truncate_SQL_field('r.output_diff')   . ' AS output_diff, ' .
 	                       truncate_SQL_field('r.output_error')  . ' AS output_error, ' .
-	                       truncate_SQL_field('r.output_system') . ' AS output_system,
-	                       t.rank, t.description
+	                       truncate_SQL_field('r.output_system') . ' AS output_system, ' .
+	                       truncate_SQL_field('t.output')        . ' AS output_reference,
+	                       t.rank, t.description,
+	                       t.image_type, t.image_thumb
 	                FROM testcase t
 	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 	                                             r.judgingid = %i )
@@ -474,12 +552,13 @@ togglelastruns();
 
 		$timelimit_str = '';
 		if ( $run['runresult']=='timelimit' ) {
-			if ( preg_match('/timelimit exceeded.*hard wall time/',$run['output_system']) ) {
+			if ( preg_match('/timelimit exceeded.*hard (wall|cpu) time/',$run['output_system']) ) {
 				$timelimit_str = '<b>(terminated)</b>';
 			} else {
 				$timelimit_str = '<b>(finished late)</b>';
 			}
 		}
+		echo "<table>\n<tr><td>";
 		echo "<table>\n" .
 		    "<tr><td>Description:</td><td>" .
 		    htmlspecialchars($run['description']) . "</td></tr>" .
@@ -488,13 +567,23 @@ togglelastruns();
 		    "&amp;rank=" . $run['rank'] . "&amp;fetch=input\">Input</a> / " .
 		    "<a href=\"testcase.php?probid=" . htmlspecialchars($submdata['probid']) .
 		    "&amp;rank=" . $run['rank'] . "&amp;fetch=output\">Reference Output</a> / " .
-		    "<a href=\"team_output.php?runid=" . $run['runid'] . "\">Team Output</a>" .
-		    "</td></tr>" .
+		    "<a href=\"team_output.php?runid=" . $run['runid'] . "&amp;cid=" .
+		    $submdata['cid'] . "\">Team Output</a></td></tr>" .
 		    "<tr><td>Runtime:</td><td>$run[runtime] sec $timelimit_str</td></tr>" .
 		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
 		    ( $run['runresult']=='correct' ? '' : 'in' ) .
 		    "correct\">$run[runresult]</span></td></tr>" .
 		    "</table>\n\n";
+		echo "</td><td>";
+		if ( isset($run['image_thumb']) ) {
+			$imgurl = "./testcase.php?probid=" .  urlencode($submdata['probid']) .
+			    "&amp;rank=" . $run['rank'] . "&amp;fetch=image";
+			echo "<a href=\"$imgurl\">";
+			echo '<img src="data:image/' . $run['image_type'] . ';base64,' .
+			    base64_encode($run['image_thumb']) . '"/>';
+			echo "</a>";
+		}
+		echo "</td></tr></table>\n\n";
 
 		echo "<h5>Diff output</h5>\n";
 		if ( strlen(@$run['output_diff']) > 0 ) {
@@ -503,6 +592,45 @@ togglelastruns();
 			echo "</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no diff output.</p>\n";
+		}
+
+		if ( $run['runresult'] !== 'correct' ) {
+			echo "<pre class=\"output_text\">";
+			// TODO: can be improved using diffposition.txt
+			// FIXME: only show when diffposition.txt is set?
+			// FIXME: cut off after XXX lines
+			$lines_team = preg_split('/\n/', trim($run['output_run']));
+			$lines_ref  = preg_split('/\n/', trim($run['output_reference']));
+
+			$diffs = array();
+			$firstErr = sizeof($lines_team) + 1;
+			$lastErr  = -1;
+			for ($i = 0; $i < min(sizeof($lines_team), sizeof($lines_ref)); $i++) {
+				$lcs = compute_lcsdiff($lines_team[$i], $lines_ref[$i]);
+				if ( $lcs[0] === TRUE ) {
+					$firstErr = min($firstErr, $i);
+					$lastErr  = max($lastErr, $i);
+				}
+				$diffs[] = $lcs[1];
+			}
+			$contextLines = 5;
+			$firstErr -= $contextLines;
+			$lastErr  += $contextLines;
+			$firstErr = max(0, $firstErr);
+			$lastErr  = min(sizeof($diffs)-1, $lastErr);
+			echo "<table class=\"lcsdiff\">\n";
+			if ($firstErr > 0) {
+				echo "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
+			}
+			for ($i = $firstErr; $i <= $lastErr; $i++) {
+				echo "<tr><td class=\"linenr\">" . ($i + 1) . "</td><td>" . $diffs[$i] . "</td></tr>";
+			}
+			if ($lastErr < sizeof($diffs) - 1) {
+				echo "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
+			}
+			echo "</table>";
+
+			echo "</pre>\n\n";
 		}
 
 		echo "<h5>Program output</h5>\n";

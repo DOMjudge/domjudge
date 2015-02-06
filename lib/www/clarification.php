@@ -102,8 +102,8 @@ function putClar($clar)
 	} else {
 		if ( IS_JURY ) {
 			echo '<a href="problem.php?id=' . urlencode($clar['probid']) .
-			     '">' . $prefix . 'Problem ' . htmlspecialchars($clar['shortname']) . ": " .
-			     htmlspecialchars($clar['probname']) . '</a>';
+			     '">' . $prefix . 'Problem ' . htmlspecialchars($clar['shortname'] . ": " .
+			     $clar['probname']) . '</a>';
 		} else {
 			echo 'Problem ' . htmlspecialchars($clar['shortname'] . ": " . $clar['probname']);
 		}
@@ -287,7 +287,8 @@ function putClarificationList($clars, $team = NULL)
 
 /**
  * Output a form to send a new clarification.
- * Set respid to a teamid, to make only that team (or ALL) selectable.
+ * Set respid to a clarid, to make only responses to same
+ * sender(s)/recipient(s) or ALL selectable.
  */
 function putClarificationForm($action, $respid = NULL, $onlycontest = NULL)
 {
@@ -407,7 +408,8 @@ function appendAnswer() {
 		}
 	}
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
-	     addSelect('problem', $options, ($respid ? $clar['probid'] : $defclar), true) .
+	     addSelect('problem', $options,
+	               ($respid ? $clar['cid'].'-'.$clar['probid'] : $defclar), true) .
 	     "</td></tr>\n";
 
 	?>

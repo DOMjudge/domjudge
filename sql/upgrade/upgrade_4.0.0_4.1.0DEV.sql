@@ -71,7 +71,13 @@ ALTER TABLE `judgehost`
 
 ALTER TABLE `problem`
   ADD COLUMN `memlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum memory available (in kB) for this problem' AFTER `timelimit`,
-  ADD COLUMN `outputlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum output size (in kB) for this problem' AFTER `memlimit`;
+  ADD COLUMN `outputlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum output size (in kB) for this problem' AFTER `memlimit`,
+  ADD COLUMN `special_compare_args` varchar(255) DEFAULT NULL COMMENT 'Optional arguments to special_compare script' AFTER `special_compare`;
+
+ALTER TABLE `testcase`
+  ADD COLUMN `image` longblob COMMENT 'A graphical representation of this testcase' AFTER `description`,
+  ADD COLUMN `image_thumb` longblob COMMENT 'Aumatically created thumbnail of the image' AFTER `image`,
+  ADD COLUMN `image_type` varchar(4) DEFAULT NULL COMMENT 'File type of the image and thumbnail' AFTER `image_thumb`;
 
 --
 -- Transfer data from old to new structure
@@ -96,6 +102,10 @@ UPDATE `configuration` SET `description` = 'Show country flags and affiliations 
 UPDATE `configuration` SET `name` = 'output_limit', `description` = 'Maximum output (in kB) submissions may generate. Any excessive output is truncated, so this should be greater than the maximum testdata output.' WHERE `name` = 'filesize_limit';
 
 UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`contestname`, ' ', ''), 1, 10)), `public` = 1, `deactivatetime` = UNIX_TIMESTAMP('2016-12-31 23:59:59'), `deactivatetime_string` = '2016-12-31 23:59:59';
+
+-- Update compare scripts to support new Kattis 42/43 exitcode format:
+source mysql_db_files_defaultdata.sql
+source mysql_db_files_examples.sql
 
 -- Add UNIQUE keys
 ALTER TABLE `contest`

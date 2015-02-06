@@ -282,6 +282,7 @@ CREATE TABLE `problem` (
   `outputlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum output size (in kB) for this problem',
   `special_run` varchar(32) DEFAULT NULL COMMENT 'Script to run submissions for this problem',
   `special_compare` varchar(32) DEFAULT NULL COMMENT 'Script to compare problem and jury output for this problem',
+  `special_compare_args` varchar(255) DEFAULT NULL COMMENT 'Optional arguments to special_compare script',
   `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
   `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text',
   PRIMARY KEY  (`probid`)
@@ -501,6 +502,9 @@ CREATE TABLE `testcase` (
   `probid` int(4) unsigned NOT NULL COMMENT 'Corresponding problem ID',
   `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of this testcase',
+  `image` longblob COMMENT 'A graphical representation of this testcase',
+  `image_thumb` longblob COMMENT 'Aumatically created thumbnail of the image',
+  `image_type` varchar(4) DEFAULT NULL COMMENT 'File type of the image and thumbnail',
   `sample` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Sample testcases that can be shared with teams',
   PRIMARY KEY  (`testcaseid`),
   UNIQUE KEY `rank` (`probid`,`rank`),

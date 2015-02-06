@@ -54,9 +54,11 @@ $cdatas = getCurContests(TRUE, null, TRUE);
 $cids = array_keys($cdatas);
 
 // If the cookie has a existing contest, use it
-if ( isset($_COOKIE['domjudge_cid']) && isset($cdatas[$_COOKIE['domjudge_cid']]) )  {
-	$cid = $_COOKIE['domjudge_cid'];
-	$cdata = $cdatas[$cid];
+if ( isset($_COOKIE['domjudge_cid']) )  {
+	if ( isset($cdatas[$_COOKIE['domjudge_cid']]) ) {
+		$cid = $_COOKIE['domjudge_cid'];
+		$cdata = $cdatas[$cid];
+	}
 } elseif ( count($cids) >= 1 ) {
 	// Otherwise, select the first contest
 	$cid = $cids[0];
@@ -66,9 +68,9 @@ if ( isset($_COOKIE['domjudge_cid']) && isset($cdatas[$_COOKIE['domjudge_cid']])
 // Data to be sent as AJAX updates:
 $updates = array(
 	'clarifications' =>
-	$DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
+	empty($cids) ? array() : $DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
 		FROM clarification
-		WHERE sender IS NOT NULL AND cid IN %Ai AND answered = 0', $cids),
+		WHERE sender IS NOT NULL AND cid IN (%Ai) AND answered = 0', $cids),
 	'judgehosts' =>
 	$DB->q('TABLE SELECT hostname, polltime
 		FROM judgehost

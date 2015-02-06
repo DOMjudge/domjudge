@@ -94,13 +94,18 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		 LEFT JOIN contestproblem cp USING (probid, cid)
 		 LEFT JOIN language       l  USING (langid)
 		 LEFT JOIN judging        j  ON (s.submitid = j.submitid AND j.valid=1)
-		 WHERE s.cid IN %Ai ' .
+		 WHERE s.cid IN (%Ai) ' .
 	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
 	    (isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
 	    (isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
 	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
 	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
 
+	// No contests; automatically nothing found and the query can not be run...
+	if ( empty($cids) ) {
+		echo "<p class=\"nodata\">No submissions</p>\n\n";
+		return;
+	}
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.externalresult, s.cid,
 	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
 	               cp.shortname, p.name AS probname, l.name AS langname,
@@ -381,11 +386,20 @@ function putClock() {
 
 	global $cid, $cdatas;
 	// Show a contest selection form, if there are contests
-	if ( count($cdatas) > 1 ) {
+	if ( IS_JURY || count($cdatas) > 1 ) {
 		echo "<div id=\"selectcontest\">\n";
 		echo addForm('change_contest.php', 'get', 'selectcontestform');
 		$contests = array_map(function($c) { return $c['shortname']; }, $cdatas);
-		echo 'contest: ' . addSelect('cid', $contests, $cid, true);
+		if ( IS_JURY ) {
+			$values = array(
+				// -1 because setting cookies to null/'' unsets then and that is not what we want
+				-1 => '- No contest'
+			);
+		}
+		foreach ( $contests as $contestid => $name ) {
+			$values[$contestid] = $name;
+		}
+		echo 'contest: ' . addSelect('cid', $values, $cid, true);
 		echo addEndForm();
 		echo "<script type=\"text/javascript\">
 		      document.getElementById('cid').addEventListener('change', function() {
@@ -393,11 +407,6 @@ function putClock() {
 	});
 </script>
 ";
-		echo "</div>\n";
-	} elseif ( count($cdatas) == 1 && IS_JURY ) {
-		echo "<div id=\"selectcontest\">\n";
-		$contest = $cdatas[$cid];
-		echo 'contest: ' . $contest['shortname'];
 		echo "</div>\n";
 	}
 
@@ -411,9 +420,9 @@ function putClock() {
 
 	echo "<script type=\"text/javascript\">
 	var initial = " . time() . ";
-	var activatetime = " . $cdata['activatetime'] . ";
-	var starttime = " . $cdata['starttime'] . ";
-	var endtime = " . $cdata['endtime'] . ";
+	var activatetime = " . ( isset($cdata['activatetime']) ? $cdata['activatetime'] : -1 ) . ";
+	var starttime = " . ( isset($cdata['starttime']) ? $cdata['starttime'] : -1 ) . ";
+	var endtime = " . ( isset($cdata['endtime']) ? $cdata['endtime'] : -1 ) . ";
 	var offset = 0;
 	var date = new Date(initial*1000);
 	var timeleftelt = document.getElementById(\"timeleft\");

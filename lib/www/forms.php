@@ -22,7 +22,7 @@ function addInputField($type, $name = null, $value = null, $attributes = '') {
 	return '<input type="'.$type.'"'.
 		($name  !== null ? ' name="'.htmlspecialchars($name).'"' : '') . $id .
 		($value !== null ? ' value="'.htmlspecialchars($value).'"' : '') .
-		$attributes . " />\n";
+		' ' . $attributes . " />\n";
 }
 
 /**
@@ -140,6 +140,27 @@ function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '') {
 		'rows="'.(int)$rows .'" cols="'.(int)$cols.'" '.
 		'id="' . htmlspecialchars(strtr($name,'[]','__')).'" ' .
 		$attr . '>'.htmlspecialchars($text) ."</textarea>\n";
+}
+
+/**
+ * 'Add row' button, that adds a row to a table based on a template using jQuery and javascript
+ * Usage:
+ * templateid: HTML ID of the template tag to use
+ * tableid: HTML ID of the table to add a row to
+ * value: Text to display in the button
+ * name: Name (and ID) of the button or null if not needed
+ */
+function addAddRowButton($templateid, $tableid, $value = 'Add row', $name = null)
+{
+	$return = addInputField('button', $name, $value, 'onclick="addRow(\'' . 
+	                                htmlspecialchars($templateid) . '\', \'' . 
+	                                htmlspecialchars($tableid) . '\')"');
+	$return .= "<script type=\"text/javascript\">
+    $(function() {
+        addFirstRow('" . htmlspecialchars($templateid) . "', '" . htmlspecialchars($tableid) . "');
+    });
+</script>";
+	return $return;
 }
 
 /**

@@ -7,26 +7,9 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$contestfiltertypes = array('all', 'selected');
-$contest = 'all';
-
-// Restore most recent contest view setting from cookie (overridden by explicit selection)
-if ( isset($_COOKIE['domjudge_ballooncontest']) && in_array($_COOKIE['domjudge_ballooncontest'], $contestfiltertypes) ) {
-	$contest = $_COOKIE['domjudge_ballooncontest'];
-}
-
-if ( isset($_REQUEST['contest']) ) {
-	if ( in_array($_REQUEST['contest'], $contestfiltertypes) ) {
-		$contest = $_REQUEST['contest'];
-	}
-}
-
 $REQUIRED_ROLES = array('jury','balloon');
 require('init.php');
 $title = 'Balloon Status';
-
-// Set cookie of contest view type, expiry defaults to end of session.
-setcookie('domjudge_ballooncontest', $contest);
 
 if ( isset($_POST['done']) ) {
 	foreach($_POST['done'] as $done => $dummy) {
@@ -66,23 +49,20 @@ echo addForm($pagename, 'get') . "<p>\n" .
     addSubmit($viewall ? 'view unsent only' : 'view all') . "</p>\n" .
     addEndForm();
 
-if ( count($cids) > 1 ) {
-	echo addForm($pagename, 'get') . "<p>Show contests:\n";
-	echo addSubmit('all', 'contest', null, ($contest != 'all'));
-	echo addSubmit('selected', 'contest', null, ($contest != 'selected'));
-	echo " ('selected' contest can be chosen using dropdown in upper right" .
-	     "corner)</p>\n" . addEndForm();
-}
-
-if ( $contest == 'selected' ) {
-	$cids = array($cid);
+$contestids = $cids;
+if ( $cid !== null ) {
+	$contestids = array($cid);
 }
 
 // Problem metadata: colours and names.
-$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,cid
-                      FROM problem
-                      INNER JOIN contestproblem USING (probid)
-                      WHERE cid IN %Ai', $cids);
+if ( empty($cids) ) {
+	$probs_data = array();
+} else {
+	$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,cid
+	                      FROM problem
+	                      INNER JOIN contestproblem USING (probid)
+			      WHERE cid IN (%Ai)', $contestids);
+}
 
 $freezecond = array();
 if ( !dbconfig_get('show_balloons_postfreeze',0)) {
@@ -103,18 +83,21 @@ if ( empty($freezecond) ) {
 
 // Get all relevant info from the balloon table.
 // Order by done, so we have the unsent balloons at the top.
-$res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
-               t.teamid, t.name AS teamname, t.room, c.name AS catname, s.cid, co.shortname
-               FROM balloon b
-               LEFT JOIN submission s USING (submitid)
-               LEFT JOIN problem p USING (probid)
-               LEFT JOIN contestproblem cp USING (probid, cid)
-               LEFT JOIN team t USING(teamid)
-               LEFT JOIN team_category c USING(categoryid)
-               LEFT JOIN contest co USING (cid)
-               WHERE s.cid IN %Ai $freezecond
-               ORDER BY done ASC, balloonid DESC",
-              $cids);
+$res = null;
+if ( !empty($contestids) ) {
+	$res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
+	               t.teamid, t.name AS teamname, t.room, c.name AS catname, s.cid, co.shortname
+	               FROM balloon b
+	               LEFT JOIN submission s USING (submitid)
+	               LEFT JOIN problem p USING (probid)
+	               LEFT JOIN contestproblem cp USING (probid, cid)
+	               LEFT JOIN team t USING(teamid)
+	               LEFT JOIN team_category c USING(categoryid)
+	               LEFT JOIN contest co USING (cid)
+	               WHERE s.cid IN (%Ai) $freezecond
+	               ORDER BY done ASC, balloonid DESC",
+		      $contestids);
+}
 
 /* Loop over the result, store the total of balloons for a team
  * (saves a query within the inner loop).
@@ -122,7 +105,7 @@ $res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname
  * once over the db result.
  */
 $BALLOONS = $TOTAL_BALLOONS = array();
-while ( !empty($cids) && $row = $res->next() ) {
+while ( !empty($contestids) && $row = $res->next() ) {
 	$BALLOONS[] = $row;
 	$TOTAL_BALLOONS[$row['teamid']][] = $row['probid'];
 
@@ -136,7 +119,7 @@ if ( !empty($BALLOONS) ) {
 
 	echo "<table class=\"list sortable balloons\">\n<thead>\n" .
 	     "<tr><th class=\"sorttable_numeric\">ID</th>" .
-	     "<th>time</th>" . ( count($cids) > 1 ? "<th>contest</th>" : "") .
+	     "<th>time</th>" . ( count($contestids) > 1 ? "<th>contest</th>" : "") .
 	     "<th>solved</th><th>team</th>" .
 	     "<th></th><th>loc.</th><th>category</th><th>total</th>" .
 	     "<th></th><th></th></tr>\n</thead>\n";
@@ -150,7 +133,7 @@ if ( !empty($BALLOONS) ) {
 		echo '<td>b' . (int)$row['balloonid'] . '</td>';
 		echo '<td>' . printtime($row['submittime'], NULL, $row['cid']) . '</td>';
 
-		if ( count($cids) > 1 ) {
+		if ( count($contestids) > 1 ) {
 			// contest of this problem, only when more than one active
 			echo '<td>' . htmlspecialchars($row['shortname']) . '</td>';
 		}

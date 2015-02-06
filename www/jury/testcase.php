@@ -9,6 +9,7 @@
 require('init.php');
 
 $INOROUT = array('input','output');
+$FILES   = array('input','output','image');
 
 $probid = (int)@$_REQUEST['probid'];
 
@@ -17,11 +18,26 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, name
 
 if ( ! $prob ) error("Missing or invalid problem id");
 
+function filebase($probid, $rank)
+{
+	return 'p' . htmlspecialchars($probid) . '.t' . $rank . '.';
+}
+
 // Download testcase
-if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
+if ( isset($_GET['fetch']) && in_array($_GET['fetch'], $FILES) ) {
 	$rank  = $_GET['rank'];
 	$fetch = $_GET['fetch'];
-	$filename = $prob['probid'] . "." . $rank . "." . substr($fetch,0,-3);
+
+	if ( $fetch=='image' ) {
+		$ext = $DB->q('MAYBEVALUE SELECT image_type
+		               FROM testcase WHERE probid = %i AND rank = %i',
+		              $probid, $rank);
+		$type = 'image/' . $ext;
+	} else {
+		$ext = substr($fetch,0,-3);
+		$type = 'text/plain';
+	}
+	$filename = filebase($prob['probid'],$rank) . $ext;
 
 	$size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH($fetch)
 	                FROM testcase WHERE probid = %i AND rank = %i",
@@ -30,7 +46,7 @@ if ( isset ($_GET['fetch']) && in_array($_GET['fetch'], $INOROUT)) {
 	// sanity check before we start to output headers
 	if ( $size===NULL || !is_numeric($size)) error("Problem while fetching testcase");
 
-	header("Content-Type: text/plain; name=\"$filename\"");
+	header("Content-Type: $type; name=\"$filename\"");
 	header("Content-Disposition: attachment; filename=\"$filename\"");
 	header("Content-Length: $size");
 
@@ -48,9 +64,10 @@ function get_testcase_data()
 	global $DB, $data, $probid;
 
 	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
-	                description, sample,
+	                description, sample, image_type,
 	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-	                OCTET_LENGTH(output) AS size_output, md5sum_output
+	                OCTET_LENGTH(output) AS size_output, md5sum_output,
+	                OCTET_LENGTH(image)  AS size_image
 	                FROM testcase WHERE probid = %i ORDER BY rank', $probid);
 }
 get_testcase_data();
@@ -106,11 +123,11 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 	$maxrank = 0;
 	foreach($data as $rank => $row) {
-	foreach($INOROUT as $inout) {
+	foreach($FILES as $file) {
 
 		if ( $rank>$maxrank ) $maxrank = $rank;
 
-		$fileid = 'update_'.$inout;
+		$fileid = 'update_'.$file;
 		if ( !empty($_FILES[$fileid]['name'][$rank]) ) {
 
 			// Check for upload errors:
@@ -119,17 +136,24 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			$content = file_get_contents($_FILES[$fileid]['tmp_name'][$rank]);
 			if ( $DB->q("VALUE SELECT count(testcaseid)
  			             FROM testcase WHERE probid = %i AND rank = %i",
-			            $probid, $rank) ) {
-				$DB->q("UPDATE testcase SET md5sum_$inout = %s, $inout = %s
+			            $probid, $rank)==0 ) {
+				error("cannot find testcase $rank for probid = $probid");
+			}
+
+			if ( $file=='image' ) {
+				list($thumb, $type) = get_image_thumb_type($content);
+
+				$DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
+				        WHERE probid = %i AND rank = %i',
+				       $content, $thumb, $type, $probid, $rank);
+			} else {
+				$DB->q("UPDATE testcase SET md5sum_$file = %s, $file = %s
 				        WHERE probid = %i AND rank = %i",
 				       md5($content), $content, $probid, $rank);
-				auditlog('testcase', $probid, 'updated', "$inout rank $rank");
-			} else {
-				$DB->q("INSERT INTO testcase (probid,rank,md5sum_$inout,$inout)
-				        VALUES (%i,%i,%s,%s)",
-				       $probid, $rank, md5($content), $content);
-				auditlog('testcase', $probid, 'added', "$inout rank $rank");
 			}
+
+			auditlog('testcase', $probid, 'updated', "$file rank $rank");
+
 			$result .= "<li>Updated $inout for testcase $rank from " .
 			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
 			    " (" . printsize($_FILES[$fileid]['size'][$rank]) . ")";
@@ -166,12 +190,12 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 		$content = array();
 		$rank = $maxrank + 1;
-		foreach($INOROUT as $inout) {
-			if ( empty($_FILES['add_'.$inout]['name']) ) {
-				warning("No $inout file specified for new testcase, ignoring.");
+		foreach($FILES as $file) {
+			if ( empty($_FILES['add_'.$file]['name']) ) {
+				warning("No $file file specified for new testcase, ignoring.");
 			} else {
-				checkFileUpload ( $_FILES['add_'.$inout]['error'] );
-				$content[$inout] = file_get_contents($_FILES['add_'.$inout]['tmp_name']);
+				checkFileUpload ( $_FILES['add_'.$file]['error'] );
+				$content[$file] = file_get_contents($_FILES['add_'.$file]['tmp_name']);
 			}
 		}
 
@@ -181,6 +205,15 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 		       $probid, $rank, md5(@$content['input']), md5(@$content['output']),
 		       @$content['input'], @$content['output'], @$_POST['add_desc'],
 		       @$_POST['add_sample']);
+
+		if ( !empty($content['image']) ) {
+			list($thumb, $type) = get_image_thumb_type($content['image']);
+
+			$DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
+			        WHERE probid = %i AND rank = %i',
+			       @$content['image'], $thumb, $type, $probid, $rank);
+		}
+
 		auditlog('testcase', $probid, 'added', "rank $rank");
 
 		$result .= "<li>Added new testcase $rank from " .
@@ -242,7 +275,7 @@ if ( count($data)==0 ) {
 <th scope="col">size</th><th scope="col">md5</th>
 <?php
 	if ( IS_ADMIN ) echo '<th scope="col">upload new</th>';
-?><th scope="col">sample</th><th scope="col">description</th><th></th>
+?><th scope="col">sample</th><th scope="col">description / image</th><th></th>
 </tr></thead>
 <tbody>
 <?php
@@ -250,7 +283,7 @@ if ( count($data)==0 ) {
 
 foreach( $data as $rank => $row ) {
 	foreach($INOROUT as $inout) {
-		echo "<tr>";
+		echo '<tr' . ( $inout=='output' ? ' class="testcase-middle"' : '' ) . '>';
 		if ( $inout=='input' ) {
 			echo "<td rowspan=\"2\" class=\"testrank\">" .
 			    "<a href=\"./testcase.php?probid=" . urlencode($probid) .
@@ -260,7 +293,7 @@ foreach( $data as $rank => $row ) {
 		}
 		echo "<td class=\"filename\"><a href=\"./testcase.php?probid=" .
 		    urlencode($probid) . "&amp;rank=$rank&amp;fetch=" . $inout . "\">" .
-		    htmlspecialchars($probid) . "." . $rank . "." . substr($inout,0,-3) . "</a></td>" .
+		    filebase($probid,$rank) . substr($inout,0,-3) . "</a></td>" .
 		    "<td class=\"size\">" . printsize($row["size_$inout"]) . "</td>" .
 		    "<td class=\"md5\">" . htmlspecialchars($row["md5sum_$inout"]) . "</td>";
 		if ( IS_ADMIN ) {
@@ -274,8 +307,8 @@ foreach( $data as $rank => $row ) {
 				// hide sample dropdown field if javascript is enabled
 				echo "<script type=\"text/javascript\" language=\"JavaScript\">" .
 				    "hideTcSample($rank, '". printyn($row['sample'])."');</script>";
-				echo "<td rowspan=\"2\" class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
-				    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"2\">" .
+				echo "<td class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
+				    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"1\">" .
 				    htmlspecialchars($row['description']) . "</textarea></td>" .
 				    "<td rowspan=\"2\" class=\"editdel\">" .
 				    "<a href=\"delete.php?table=testcase&amp;testcaseid=$row[testcaseid]&amp;referrer=" .
@@ -285,9 +318,22 @@ foreach( $data as $rank => $row ) {
 			} else {
 				echo "<td rowspan=\"2\" align=\"testsample\">" .
 					printyn($row['issample']) . "</td>";
-				echo "<td rowspan=\"2\" class=\"testdesc\">" .
+				echo "<td class=\"testdesc\">" .
 				    htmlspecialchars($row['description']) . "</td>";
 			}
+		} else {
+			echo '<td class="testimage filename">';
+			if ( $row['size_image'] ) {
+				echo "<a href=\"./testcase.php?probid=" . urlencode($probid) .
+				    "&amp;rank=$rank&amp;fetch=image\">" .
+				    filebase($probid,$rank). $row['image_type'] . "</a>";
+			} else {
+				echo '<span class="nodata">No image.</span>';
+			}
+			if ( IS_ADMIN ) {
+				echo '&nbsp;' . addFileField("update_image[$rank]");
+			}
+			echo "</td>";
 		}
 		echo "</tr>\n";
 	}
@@ -310,6 +356,7 @@ if ( IS_ADMIN ) {
 <tr><td>Output testdata:</td><td><?php echo addFileField('add_output') ?></td></tr>
 <tr><td>Sample testcase:</td><td><?php echo addSelect('add_sample', array("no","yes"), 0, true);?></td></tr>
 <tr><td>Description:    </td><td><?php echo addInput('add_desc','',30); ?></td></tr>
+<tr><td>Image:          </td><td><?php echo addFileField('add_image') ?></td></tr>
 </table>
 <?php
 

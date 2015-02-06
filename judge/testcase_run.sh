@@ -14,6 +14,7 @@
 #                   Certainly do not place output-files there!
 # <run>             Absolute path to run script to use.
 # <compare>         Absolute path to compare script to use.
+# <compare-args>    Arguments to path to compare script
 #
 # Default run and compare scripts can be configured in the database.
 #
@@ -125,8 +126,9 @@ TIMELIMIT="$1"; shift
 WORKDIR="$1";   shift
 RUN_SCRIPT="$1";
 COMPARE_SCRIPT="$2";
+COMPARE_ARGS="$3";
 logmsg $LOG_DEBUG "arguments: '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$WORKDIR'"
-logmsg $LOG_DEBUG "optionals: '$RUN_SCRIPT' '$COMPARE_SCRIPT'"
+logmsg $LOG_DEBUG "optionals: '$RUN_SCRIPT' '$COMPARE_SCRIPT' '$COMPARE_ARGS'"
 
 # optional runjury program
 RUN_JURYPROG="${RUN_SCRIPT}jury"
@@ -157,10 +159,8 @@ chmod a+x "$WORKDIR" "$WORKDIR/execdir"
 
 # Create files which are expected to exist:
 touch system.out                 # Judging system output (info/debug/error)
-touch result.out                 # Result of comparison
 touch program.out program.err    # Program output and stderr (for extra information)
 touch program.meta runguard.err  # Metadata and runguard stderr
-touch compare.out                # Compare output
 touch compare.meta compare.err   # Compare runguard metadata and stderr
 
 logmsg $LOG_INFO "setting up testing (chroot) environment"
@@ -218,25 +218,42 @@ cp "$TESTOUT" "$WORKDIR/testdata.out"
 logmsg $LOG_DEBUG "starting compare script '$COMPARE_SCRIPT'"
 
 exitcode=0
-chmod a+w result.out compare.out
-$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
+# Make files writable for $RUNUSER
+mkdir feedback                   # Create dir for feedback files
+for i in judgemessage.txt teammessage.txt score.txt judgeerror.txt diffposition.txt; do
+	touch feedback/$i        # Create possible feedback files
+	chmod a+w feedback/$i
+done
+# TODO; get and pass additional arguments to validator
+runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
 	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
-	"$COMPARE_SCRIPT" testdata.in program.out testdata.out \
-	                  result.out compare.out >compare.tmp 2>&1 || exitcode=$?
+	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
+	                  >compare.tmp 2>&1
 
-logmsg $LOG_DEBUG "checking compare script exit-status"
+# Append output validator error messages
+# TODO: display extra
+if [ -s feedback/judgeerror.txt ]; then
+	printf "\n---------- output validator (error) messages ----------\n" >> feedback/judgemessage.txt
+	cat feedback/judgeerror.txt >> feedback/judgemessage.txt
+fi
+
+logmsg $LOG_DEBUG "checking compare script exit-status: $exitcode"
 if grep '^time-result: .*timelimit' compare.meta >/dev/null 2>&1 ; then
-	echo "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:" >compare.out
-	cat compare.tmp >>compare.out
+	echo "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:" >> feedback/judgemessage.txt
+	cat compare.tmp >> feedback/judgemessage.txt
 	cleanexit ${E_COMPARE_ERROR:--1}
 fi
-if [ $exitcode -ne 0 ]; then
-	echo "Comparing failed with exitcode $exitcode, compare output:" >compare.out
-	cat compare.tmp >>compare.out
+# Append output validator stdin/stderr - display extra?
+if [ -s compare.tmp ]; then
+	printf "\n---------- output validator stdout/stderr messages ----------\n" >> feedback/judgemessage.txt
+	cat compare.tmp >> feedback/judgemessage.txt
+fi
+if [ $exitcode -ne 42 ] && [ $exitcode -ne 43 ]; then
+	echo "Comparing failed with exitcode $exitcode, compare output:" >> feedback/judgemessage.txt
+	cat compare.tmp >> feedback/judgemessage.txt
 	cleanexit ${E_COMPARE_ERROR:--1}
 fi
-cat compare.tmp >>compare.out
 
 # Check for errors from running the program:
 if [ ! -r program.meta ]; then
@@ -259,42 +276,16 @@ if [ "$program_exit" != "0" ]; then
 	cleanexit ${E_RUN_ERROR:--1}
 fi
 
-############################################################
-### Checks for other runtime errors:                     ###
-### Disabled, because these are not consistently         ###
-### reported the same way by all different compilers.    ###
-############################################################
-#if grep  'Floating point exception' program.err >/dev/null 2>&1 ; then
-#	echo "Floating point exception." >>system.out
-#	cleanexit ${E_RUN_ERROR:--1}
-#fi
-#if grep  'Segmentation fault' program.err >/dev/null 2>&1 ; then
-#	echo "Segmentation fault." >>tee system.out
-#	cleanexit ${E_RUN_ERROR:--1}
-#fi
-#if grep  'File size limit exceeded' program.err >/dev/null 2>&1 ; then
-#	echo "File size limit exceeded." >>system.out
-#	cleanexit ${E_OUTPUT_LIMIT:--1}
-#fi
-
-result=`grep '^result='      result.out | cut -d = -f 2- | tr '[:upper:]' '[:lower:]'`
-descrp=`grep '^description=' result.out | cut -d = -f 2-`
-descrp="${descrp:+ ($descrp)}"
-
-if [ "$result" = "accepted" ]; then
-	echo "Correct${descrp}! Runtime: $runtime." >>system.out
+if [ $exitcode -eq 42 ]; then
+	echo "Correct! Runtime: $runtime." >>system.out
 	cleanexit ${E_CORRECT:--1}
-elif [ "$result" = "presentation error" ]; then
-	echo "Presentation error${descrp}." >>system.out
-	cleanexit ${E_PRESENTATION_ERROR:--1}
-elif [ ! -s program.out ]; then
-	echo "Program produced no output." >>system.out
-	cleanexit ${E_NO_OUTPUT:--1}
-elif [ "$result" = "wrong answer" ]; then
-	echo "Wrong answer${descrp}." >>system.out
-	cleanexit ${E_WRONG_ANSWER:--1}
-else
-	echo "Unknown result: Wrong answer#${descrp}#${result}#." >>system.out
+elif [ $exitcode -eq 43 ]; then
+	# Special case detect no-output:
+	if [ ! -s program.out ];  then
+		echo "Program produced no output." >>system.out
+		cleanexit ${E_NO_OUTPUT:--1}
+	fi
+	echo "Wrong answer." >>system.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 fi
 

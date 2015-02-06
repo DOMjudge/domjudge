@@ -11,8 +11,9 @@ require('init.php');
 $id = getRequestID();
 $current_cid = null;
 if ( isset($_GET['cid']) && is_numeric($_GET['cid']) ) {
-	$current_cid = $_GET['cid'];
-	$cdatas = array($current_cid => $cdatas[$current_cid]);
+	$cid = $_GET['cid'];
+	$cdata = $cdatas[$cid];
+	$current_cid = $cid;
 }
 $title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
                  'team' . ($id ? ' t'.htmlspecialchars(@$id) : ''));
@@ -27,6 +28,8 @@ if ( isset($_GET['cmd'] ) ) {
 	$refresh = '15;url='.$pagename.'?id='.urlencode($id).$extra.
 		(isset($_GET['restrict'])?'&restrict='.urlencode($_GET['restrict']):'');
 }
+
+$jqtokeninput = true;
 
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');
@@ -75,24 +78,36 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <tr><td><label for="data_0__comments_">Comments:</label></td>
 <td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
 
+<?php
+$num_contests = $DB->q("VALUE SELECT COUNT(*) FROM contest c WHERE c.public = 0");
+if ( $num_contests > 0 ) {
+	$prepopulate = $DB->q("TABLE SELECT contest.cid AS id, contest.contestname, contest.shortname,
+			   CONCAT(contest.contestname, ' (', contest.shortname, ' - c', contest.cid, ')') AS search
+			   FROM contest INNER JOIN contestteam USING (cid)
+			   WHERE teamid = %i", $id);
+?>
+
 <!-- contest selection -->
-<tr><td>Contests:</td>
-<td><?php
-	$contests = $DB->q("TABLE SELECT c.cid, c.shortname, c.contestname,
-	                                 max(ct.teamid=%s) AS incontest
-	                    FROM contest c
-	                    LEFT JOIN contestteam ct USING (cid)
-	                    WHERE c.public = 0
-	                    GROUP BY c.cid", @$row['teamid']);
-	$i=0;
-	foreach ($contests as $contest) {
-		echo "<label>";
-		echo addCheckbox("data[0][mapping][items][$i]", $contest['incontest']==1, $contest['cid']);
-		echo $contest['contestname'] . " (${contest['shortname']} - c${contest['cid']})</label><br/>";
-		$i++;
-	}
-	?>
-</td></tr>
+<tr>
+	<td>Private contests:</td>
+	<td>
+		<?php echo addInput('data[0][mapping][0][items]', '', 50); ?>
+		<script type="text/javascript">
+			$(function() {
+				$('#data_0__mapping__0__items_').tokenInput('ajax_contests.php?public=0', {
+					propertyToSearch: 'search',
+					hintText: 'Type to search for contest ID, name, or short name',
+					noResultsText: 'No private contests found',
+					preventDuplicates: true,
+					prePopulate: <?php echo json_encode($prepopulate); ?>
+				});
+			});
+		</script>
+	</td>
+</tr>
+<?php
+}
+?>
 
 <tr><td>Enabled:</td>
 <td><?php echo addRadioButton('data[0][enabled]', (!isset($row['']) || $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>
@@ -100,9 +115,9 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 </table>
 
 <?php
-echo addHidden('data[0][mapping][fk][0]', 'teamid') .
-     addHidden('data[0][mapping][fk][1]', 'cid') .
-     addHidden('data[0][mapping][table]', 'contestteam');
+echo addHidden('data[0][mapping][0][fk][0]', 'teamid') .
+     addHidden('data[0][mapping][0][fk][1]', 'cid') .
+     addHidden('data[0][mapping][0][table]', 'contestteam');
 echo addHidden('cmd', $cmd) .
      addHidden('table','team') .
      addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?(strstr(@$_GET['referrer'],'?') === FALSE?'?edited=1':'&edited=1'):'')) .
@@ -175,6 +190,28 @@ if ( count($users) ) {
 	echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode($row['teamid']) . "\"><small>(add)</small></a>";
 }
 ?></td></tr>
+<?php
+$private_contests = $DB->q("TABLE SELECT contest.* FROM contest
+			    INNER JOIN contestteam USING (cid)
+			    WHERE public = 0 AND teamid = %i", $id);
+if ( !empty($private_contests)) {
+	foreach ( $private_contests as $i => $contest ) {
+		echo "<tr><td>\n";
+		if ( $i == 0 ) {
+			echo 'Private contests:';
+		}
+		echo "</td><td>\n";
+		if ( IS_JURY ) {
+			echo '<a href="contest.php?id=' . $contest['cid'] . '">';
+		}
+		echo 'c' . $contest['cid'] . ' - ' . $contest['shortname'];
+		if ( IS_JURY ) {
+			echo '</a>';
+		}
+		echo "</td></tr>\n";
+	}
+}
+?>
 </table></div>
 
 <div class="col2"><table>
@@ -220,53 +257,11 @@ if ( IS_ADMIN ) {
 
 echo rejudgeForm('team', $id) . "\n\n";
 
-if ( $current_cid === null ) {
-	echo "<h3>Contests</h3>\n\n";
+if ( $cid ) {
+	echo "<h3>Score</h3>\n\n";
 
-	$res = $DB->q('TABLE SELECT contest.*
-	               FROM contest
-	               LEFT JOIN contestteam ct USING (cid)
-	               WHERE (ct.teamid = %i OR contest.public = 1)
-	               ORDER BY starttime DESC', $id);
-
-	if ( count($res) == 0 ) {
-		echo "<p class=\"nodata\">No contests defined</p>\n\n";
-	}
-	else {
-		$times = array('activate', 'start', 'freeze', 'end', 'unfreeze');
-		echo "<table class=\"list sortable\">\n<thead>\n" .
-		     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
-		foreach ( $times as $time ) echo "<th scope=\"col\">$time</th>";
-		echo "<th scope=\"col\">name</th><th scope=\"col\">public</th></tr>\n</thead>\n<tbody>\n";
-
-		$iseven = false;
-		foreach ( $res as $row ) {
-
-			$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
-
-			echo '<tr class="' .
-			     ($iseven ? 'roweven' : 'rowodd') .
-			     (!$row['enabled'] ? ' disabled' : '') . '">' .
-			     "<td class=\"tdright\">" . $link .
-			     "c" . (int)$row['cid'] . "</a></td>\n";
-			foreach ( $times as $time ) {
-				echo "<td title=\"" . printtime(@$row[$time . 'time'], '%Y-%m-%d %H:%M') . "\">" .
-				     $link . (isset($row[$time . 'time']) ?
-						printtime($row[$time . 'time']) : '-') . "</a></td>\n";
-			}
-			echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
-			echo "<td>" . $link . ($row['public'] ? 'yes' : 'no') . "</a></td>\n";
-			$iseven = !$iseven;
-
-			echo "</tr>\n";
-		}
-		echo "</tbody>\n</table>\n\n";
-	}
+	putTeamRow($cdata, array($id));
 }
-
-echo "<h3>Score</h3>\n\n";
-
-putTeamRow($cdata,array($id));
 
 echo '<h3>Submissions';
 if ( isset($key) ) {

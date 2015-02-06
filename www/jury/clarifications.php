@@ -6,26 +6,9 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$contestfiltertypes = array('all', 'selected');
-$contest = 'all';
-
-// Restore most recent contest view setting from cookie (overridden by explicit selection)
-if ( isset($_COOKIE['domjudge_clarifcontest']) && in_array($_COOKIE['domjudge_clarifcontest'], $contestfiltertypes) ) {
-	$contest = $_COOKIE['domjudge_clarifcontest'];
-}
-
-if ( isset($_REQUEST['contest']) ) {
-	if ( in_array($_REQUEST['contest'], $contestfiltertypes) ) {
-		$contest = $_REQUEST['contest'];
-	}
-}
-
 require('init.php');
 
 $title = 'Clarification Requests';
-
-// Set cookie of contest view type, expiry defaults to end of session.
-setcookie('domjudge_clarifcontest', $contest);
 
 $jury_member = $username;
 
@@ -34,16 +17,15 @@ require(LIBWWWDIR . '/clarification.php');
 
 echo "<h1>Clarifications</h1>\n\n";
 
-if ( count($cids) > 1 ) {
-	echo addForm($pagename, 'get') . "<p>Show contests:\n";
-	echo addSubmit('all', 'contest', null, ($contest != 'all'));
-	echo addSubmit('selected', 'contest', null, ($contest != 'selected'));
-	echo " ('selected' contest can be chosen using dropdown in upper right" .
-	     "corner)</p>\n" . addEndForm();
+if ( empty($cids) ) {
+	warning('No active contest(s)');
+	require(LIBWWWDIR . '/footer.php');
+	exit;
 }
 
-if ( $contest == 'selected' ) {
-	$cids = array($cid);
+$contestids = $cids;
+if ( $cid !== null ) {
+    $contestids = array($cid);
 }
 
 echo "<p><a href=\"clarification.php\">Send Clarification</a></p>\n";
@@ -59,19 +41,19 @@ $sqlbody = 'SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname,
             LEFT JOIN team t ON (t.teamid = c.recipient)
             LEFT JOIN team f ON (f.teamid = c.sender)
             LEFT JOIN contest co USING (cid)
-            WHERE c.cid IN %Ai ';
+            WHERE c.cid IN (%Ai) ';
 
 $newrequests    = $DB->q($sqlbody .
                          'AND c.sender IS NOT NULL AND c.answered = 0
-                          ORDER BY submittime DESC, clarid DESC', $cids);
+			  ORDER BY submittime DESC, clarid DESC', $contestids);
 
 $oldrequests    = $DB->q($sqlbody .
                          'AND c.sender IS NOT NULL AND c.answered != 0
-                          ORDER BY submittime DESC, clarid DESC', $cids);
+			  ORDER BY submittime DESC, clarid DESC', $contestids);
 
 $clarifications = $DB->q($sqlbody .
                          'AND c.sender IS NULL AND ( c.respid IS NULL OR c.recipient IS NULL )
-                          ORDER BY submittime DESC, clarid DESC', $cids);
+			  ORDER BY submittime DESC, clarid DESC', $contestids);
 
 echo '<h3><a name="newrequests"></a>' .
 	"New Requests:</h3>\n";

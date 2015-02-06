@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	testin  = fopen(argv[1],"r");
-	progout = fopen(argv[2],"r");
+	progout = stdin;
 
 	if ( testin==NULL || progout==NULL ) {
 		fprintf(stderr,"error: cannot open files\n");

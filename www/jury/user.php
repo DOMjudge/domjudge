@@ -85,7 +85,7 @@ $roles = $DB->q('TABLE SELECT r.roleid, r.role, r.description, max(ur.userid=%s)
 $i=0;
 foreach ($roles as $role) {
     echo "<label>";
-    echo addCheckbox("data[0][mapping][items][$i]", $role['hasrole']==1, $role['roleid']);
+    echo addCheckbox("data[0][mapping][0][items][$i]", $role['hasrole']==1, $role['roleid']);
     echo $role['description'] . "</label><br/>";
     $i++;
 }
@@ -94,9 +94,9 @@ foreach ($roles as $role) {
 
 </table>
 <?php
-echo addHidden('data[0][mapping][fk][0]', 'userid') .
-     addHidden('data[0][mapping][fk][1]', 'roleid') .
-     addHidden('data[0][mapping][table]', 'userrole');
+echo addHidden('data[0][mapping][0][fk][0]', 'userid') .
+     addHidden('data[0][mapping][0][fk][1]', 'roleid') .
+     addHidden('data[0][mapping][0][table]', 'userrole');
 echo addHidden('cmd', $cmd) .
     addHidden('table','user') .
     addHidden('referrer', @$_GET['referrer']) .

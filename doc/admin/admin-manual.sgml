@@ -146,7 +146,7 @@ The following software is required for running DOMjudge.
        executables.
 
 <item> Apache web server with support for PHP &gt;= 5.2.0 and the mysqli,
-       curl and json extensions for PHP. PHP needs to be running as an
+       GD, curl and json extensions for PHP. PHP needs to be running as an
        Apache module (the most common configuration); a (fast)CGI setup
        is not currently supported. We also recommend the posix extension
        for extra debugging information.
@@ -352,8 +352,8 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
 apt-get install gcc g++ make zip unzip mysql-server \
-	apache2 php5 php5-cli libapache2-mod-php5
-	php5-curl php5-mysql php5-json \
+	apache2 php5 php5-cli libapache2-mod-php5 \
+	php5-gd php5-curl php5-mysql php5-json \
 	bsdmainutils phpmyadmin ntp \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
@@ -364,7 +364,7 @@ The following command can be used on RedHat Enterprise Linux, and
 related distributions like CentOS and Fedora.
 <code>
 yum install gcc gcc-c++ make zip unzip mariadb-server \
-	httpd php php-cli php-mbstring php-mysql \
+	httpd php-gd php-cli php-mbstring php-mysql \
 	ntp linuxdoc-tools \
 	texlive-collection-latexrecommended texlive-wrapfig
 </code>
@@ -1598,20 +1598,11 @@ the files can be uploaded. The judgehosts cache a copy based on MD5 sum, so if
 you need to make changes later, re-upload the data in the web interface and
 it will automatically be picked up.
 
-Testdata can also be imported into the system from a zip-bundle on
-each problem webpage. Each pair of files
-<tt>&lt;path-to-file&gt;/&lt;filename&gt;.in</tt> and corresponding
-<tt>*.out</tt> found in the zip-bundle will be added as testdata.
-Furthermore, when the file <tt>domjudge-problem.ini</tt> exists, then
-problem properties are read from that file in INI-syntax. All keys
-from the problem table are supported, so an example contents could be:
-<code>
-probid = hello
+Testdata can also be imported into the system from a problem zip file,
+following the <htmlurl name="Kattis problem package format"
+url="http://www.problemarchive.org/wiki/index.php/Problem_Format">.
 
-name = Hello world!
-allow_submit=false
-color=blue
-</code>
+<!-- FIXME: rewrite this
 Testcases will be added to those already present and imported
 properties will overwrite those in the database. A completely new
 problem can also be imported from a zip-bundle on the problems
@@ -1621,6 +1612,7 @@ chosen for the unmodifiable primary key <tt>probid</tt> (as well as
 for the other keys). It is possible to upload multiple zip
 files in one go, each of which will be added as a separate
 problem.
+-->
 
 <sect>Start the daemons
 <p>

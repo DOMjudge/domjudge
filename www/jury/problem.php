@@ -11,8 +11,9 @@ require('init.php');
 $id = getRequestID();
 $current_cid = null;
 if ( isset($_GET['cid']) && is_numeric($_GET['cid']) ) {
-	$current_cid = $_GET['cid'];
-	$cdatas = array($current_cid => $cdatas[$current_cid]);
+	$cid = $_GET['cid'];
+	$cdata = $cdatas[$cid];
+	$current_cid = $cid;
 }
 $title = 'Problem p'.htmlspecialchars(@$id);
 $title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
@@ -22,7 +23,7 @@ if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
 } elseif ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
-} else {
+} elseif ( isset($id) ) {
 	$extra = '';
 	if ( $current_cid !== null ) {
 		$extra = '&cid=' . urlencode($current_cid);
@@ -57,7 +58,7 @@ if ( isset($_POST['upload']) ) {
 		}
 		echo "<p><a href=\"problems.php\">Return to problems overview.</a></p>\n";
 	} else {
-		error("Missing filename for problem upload");
+		error("Missing filename for problem upload. Maybe you have to increase upload_max_filesize, see config checker.");
 	}
 
 	require(LIBWWWDIR . '/footer.php');
@@ -78,7 +79,7 @@ if ( !empty($cmd) ):
 		echo "<tr><td>Problem ID:</td><td>";
 		$row = $DB->q('TUPLE SELECT p.probid,p.name,
 		                            p.timelimit,p.memlimit,p.outputlimit,
-		                            p.special_run,p.special_compare,
+		                            p.special_run,p.special_compare, p.special_compare_args,
 		                            p.problemtext_type, COUNT(testcaseid) AS testcases
 		               FROM problem p
 		               LEFT JOIN testcase USING (probid)
@@ -140,6 +141,9 @@ echo addSelect('data[0][special_compare]', $execmap, @$row['special_compare'], T
 ?>
 </td></tr>
 
+<tr><td><label for="data_0__special_compare_args_">Special compare args:</label></td>
+<td><?php echo addInput('data[0][special_compare_args]', @$row['special_compare_args'], 30, 255)?></td></tr>
+
 </table>
 
 <?php
@@ -175,7 +179,7 @@ endif;
 
 $data = $DB->q('TUPLE SELECT p.probid,p.name,
                              p.timelimit,p.memlimit,p.outputlimit,
-                             p.special_run,p.special_compare,
+                             p.special_run,p.special_compare,p.special_compare_args,
                              p.problemtext_type, count(rank) AS ntestcases
                 FROM problem p
                 LEFT JOIN testcase USING (probid)
@@ -228,6 +232,10 @@ if ( !empty($data['special_compare']) ) {
 	echo '<tr><td>Special compare script:</td><td class="filename">' .
 		'<a href="executable.php?id=' . urlencode($data['special_compare']) . '">' .
 		htmlspecialchars($data['special_compare']) . "</a></td></tr>\n";
+}
+if ( !empty($data['special_compare_args']) ) {
+	echo '<tr><td>Compare script arguments:</td><td>' .
+		htmlspecialchars($data['special_compare_args']) . "</td></tr>\n";
 }
 
 echo "</table>\n" . addEndForm();

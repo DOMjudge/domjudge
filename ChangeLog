@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 4.1.0 - DEV
 -------------------
+ - [INCOMPATIBLE CHANGE] Changed to Kattis problem format; in particular
+   the specification of compare scripts has changed.
  - Update dj_make_ubuntu_chroot to Trusty (#139, thanks Ruud Koot).
  - Add support for HTML5 desktop notifications of clarifications,
    judgings and judgehost status (#133).
@@ -20,6 +22,7 @@ Version 4.1.0 - DEV
  - Allow to add restrictions on contests, problems and languages to
    judgehosts.
  - Add optional per problem memory/output limits (Closes #152).
+ - Allow storing optional descriptive image for each test case.
 
 Version 4.0.0 - 22 July 2014
 ----------------------------

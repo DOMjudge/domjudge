@@ -147,13 +147,15 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 	// FIXME: make sure we don't have to escape $execid
 	$execpath = "$workdirpath/executable/" . $execid;
 	$execmd5path = $execpath . "/md5sum";
+	$execdeploypath = $execpath . "/.deployed";
 	$execbuildpath = $execpath . "/build";
 	$execrunpath = $execpath . "/run";
 	$execzippath = $execpath . "/executable.zip";
 	if ( empty($md5sum) ) {
 		error("unknown executable '" . $execid . "' specified");
 	}
-	if ( !file_exists($execpath) || !file_exists($execmd5path)
+	if ( !file_exists($execpath) || !file_exists($execmd5path) ||
+	     !file_exists($execdeploypath)
 		|| file_get_contents($execmd5path) != $md5sum ) {
 		logmsg(LOG_INFO, "Fetching new executable '" . $execid . "'");
 		system("rm -rf $execpath");
@@ -176,20 +178,84 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 		system("unzip -q -d $execpath $execzippath", $retval);
 		if ( $retval!=0 ) error("Could not unzip zipfile in $execpath");
 
-		if ( !file_exists($execbuildpath) || !is_executable($execbuildpath) ) {
-			error("Invalid executable, must contain executable file 'build'.");
+		$do_compile = TRUE;
+		if ( !file_exists($execbuildpath) ) {
+			if ( file_exists($execrunpath) ) {
+				// 'run' already exists, 'build' does not => don't compile anything
+				logmsg(LOG_DEBUG, "'run' exists without 'build', we are done");
+				$do_compile = FALSE;
+			} else {
+				// detect lang and write build file
+				$langexts = array(
+						'c' => array('c'),
+						'cpp' => array('cpp', 'C', 'cc'),
+						'java' => array('java'),
+						'py' => array('py', 'py2', 'py3')
+				);
+				$buildscript = "#!/bin/sh\n\n";
+				$execlang = FALSE;
+				$source = "";
+				foreach ($langexts as $lang => $langext) {
+					if ( ($handle = opendir($execpath)) === FALSE ) {
+						error("Could not open $execpath");
+					}
+					while ( ($file = readdir($handle)) !== FALSE ) {
+						$ext = pathinfo($file, PATHINFO_EXTENSION);
+						if ( in_array($ext, $langext) ) {
+							$execlang = $lang;
+							$source = $file;
+							break;
+						}
+					}
+					closedir($handle);
+					if ( $execlang !== FALSE ) break;
+				}
+				if ( $execlang === FALSE ) {
+					error("executable must either provide an executable file named 'build' or a C/C++/Java or Python file.");
+				}
+				switch ( $execlang ) {
+				case 'c':
+					$buildscript .= "gcc -Wall -O2 -std=gnu99 '$source' -o $execrunpath -lm\n"; 
+					break;
+				case 'cpp':
+					$buildscript .= "g++ -Wall -O2 -std=c++11 '$source' -o $execrunpath\n"; 
+					break;
+				case 'java':
+					$source = basename($source, ".java");
+					$buildscript .= "javac -cp $execpath -d $execpath '$source'.java\n"; 
+					$buildscript .= "echo '#!/bin/sh' > run\n";
+					// no main class detection here
+					$buildscript .= "echo 'java -cp $execpath '$source' >> run\n";
+					break;
+				case 'py':
+					$buildscript .= "echo '#!/bin/sh' > run\n";
+					$buildscript .= "echo 'python '$source' >> run\n";
+					break;
+				}
+				if ( file_put_contents($execbuildpath, $buildscript) === FALSE ) {
+					error("Could not write file 'build' in $exepath");
+				}
+				chmod($execbuildpath, 0700);
+			}
+		} else if ( !is_executable($execbuildpath) ) {
+			error("Invalid executable, file 'build' exists but is not executable.");
 		}
 
-		logmsg(LOG_DEBUG, "Compiling");
-		$olddir = getcwd();
-		chdir($execpath);
-		system("./build", $retval);
-		if ( $retval!=0 ) error("Could not run ./build in $execpath");
-		chdir($olddir);
+		if ( $do_compile ) {
+			logmsg(LOG_DEBUG, "Compiling");
+			$olddir = getcwd();
+			chdir($execpath);
+			system("./build", $retval);
+			if ( $retval!=0 ) error("Could not run ./build in $execpath");
+			chdir($olddir);
+		}
 		if ( !file_exists($execrunpath) || !is_executable($execrunpath) ) {
 			error("Invalid build file, must produce an executable file 'run'.");
 		}
 	}
+	// Create file to mark executable successfully deployed.
+	touch($execdeploypath);
+
 	return $execrunpath;
 }
 
@@ -535,7 +601,7 @@ function judge($row)
 
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
-		       "'$run_runpath' '$compare_runpath'", $retval);
+		       "'$run_runpath' '$compare_runpath' '$row[compare_args]'", $retval);
 
 		// what does the exitcode mean?
 		if( ! isset($EXITCODES[$retval]) ) {
@@ -563,7 +629,7 @@ function judge($row)
 			. '&output_run='   . rest_encode_file($testcasedir . '/program.out', FALSE)
 			. '&output_error=' . rest_encode_file($testcasedir . '/program.err')
 			. '&output_system=' . rest_encode_file($testcasedir . '/system.out')
-			. '&output_diff='  . rest_encode_file($testcasedir . '/compare.out')
+			. '&output_diff='  . rest_encode_file($testcasedir . '/feedback/judgemessage.txt')
 		);
 		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
 

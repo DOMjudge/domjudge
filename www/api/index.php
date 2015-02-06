@@ -224,6 +224,8 @@ function judgings_POST($args)
 
 	$cdatas = getCurContests(TRUE);
 	$cids = array_keys($cdatas);
+	
+	if ( empty($cids) ) return '';
 
 	// Get judgehost restrictions
 	$contests = array();
@@ -234,42 +236,53 @@ function judgings_POST($args)
 	                        WHERE hostname = %s', $host);
 	if ( $restrictions ) {
 		$restrictions = json_decode($restrictions, true);
-		$contests = $restrictions['contest'];
-		$problems = $restrictions['problem'];
-		$languages = $restrictions['language'];
+		$contests = @$restrictions['contest'];
+		$problems = @$restrictions['problem'];
+		$languages = @$restrictions['language'];
+		$rejudge_own = @$restrictions['rejudge_own'];
 	}
 
-	$extra = '';
+	$extra_join = '';
+	$extra_where = '';
 	if ( empty($contests) ) {
-		$extra .= '%_';
+		$extra_where .= '%_ ';
 	} else {
-		$extra .= 'AND s.cid IN %Ai ';
+		$extra_where .= 'AND s.cid IN (%Ai) ';
 	}
 
 	if ( empty($problems) ) {
-		$extra .= '%_';
+		$extra_where .= '%_ ';
 	} else {
-		$extra .= 'AND s.probid IN %Ai ';
+		$extra_join  .= 'LEFT JOIN problem p USING (probid) ';
+		$extra_where .= 'AND s.probid IN (%Ai) ';
 	}
 
 	if ( empty($languages) ) {
-		$extra .= '%_';
+		$extra_where .= '%_ ';
 	} else {
-		$extra .= 'AND s.langid IN %As ';
+		$extra_where .= 'AND s.langid IN (%As) ';
+	}
+
+	if ( isset($rejudge_own) && (bool)$rejudge_own==false ) {
+		$extra_join  .= 'LEFT JOIN judging j ON (j.submitid=s.submitid AND j.judgehost=%s) ';
+		$extra_where .= 'AND j.judgehost IS NULL ';
+	} else {
+		$extra_join  .= '%_ ';
 	}
 
 	// Prioritize teams according to last judging time
-	$submitid = $DB->q('MAYBEVALUE SELECT submitid
+	$submitid = $DB->q('MAYBEVALUE SELECT s.submitid
 	                    FROM submission s
 	                    LEFT JOIN team t USING (teamid)
-	                    LEFT JOIN problem p USING (probid)
 	                    LEFT JOIN language l USING (langid)
-	                    LEFT JOIN contestproblem cp USING (probid, cid)
-	                    WHERE judgehost IS NULL AND s.cid IN %Ai ' . $extra . '
-	                    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
-	                    ORDER BY judging_last_started ASC, submittime ASC, submitid ASC
+	                    LEFT JOIN contestproblem cp USING (probid, cid) ' .
+	                   $extra_join .
+	                   'WHERE s.judgehost IS NULL AND s.cid IN (%Ai)
+	                    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
+	                   $extra_where .
+	                   'ORDER BY judging_last_started ASC, submittime ASC, s.submitid ASC
 	                    LIMIT 1',
-	                   $cids, $contests, $problems, $languages);
+	                   $host, $cids, $contests, $problems, $languages);
 
 	if ( $submitid ) {
 		// update exactly one submission with our judgehost name
@@ -290,7 +303,7 @@ function judgings_POST($args)
 	               CEILING(time_factor*timelimit) AS maxruntime,
 	               p.memlimit, p.outputlimit,
 	               special_run AS run, special_compare AS compare,
-	               compile_script
+	               special_compare_args AS compare_args, compile_script
 	               FROM submission s
 	               LEFT JOIN problem p USING (probid)
 	               LEFT JOIN language l USING (langid)
@@ -514,9 +527,6 @@ $args = array('judgingid' => 'Judging_run corresponds to this specific judgingid
 	'testcaseid' => 'Judging_run corresponding to this specific testcaseid.',
 	'runresult' => 'Result of this run.',
 	'runtime' => 'Runtime of this run.',
-	'output_run' => 'Program output of this run.',
-	'output_diff' => 'Program diff of this run.',
-	'output_error' => 'Program error output of this run.',
 	'output_run' => 'Program output of this run (base64 encoded).',
 	'output_diff' => 'Program diff of this run (base64 encoded).',
 	'output_error' => 'Program error output of this run (base64 encoded).',
@@ -713,7 +723,7 @@ function testcases($args)
 
 	$judging_runs = $DB->q("COLUMN SELECT testcaseid FROM judging_run
 	                        WHERE judgingid = %i", $args['judgingid']);
-	$sqlextra = count($judging_runs) ? "AND testcaseid NOT IN %Ai" : "%_";
+	$sqlextra = count($judging_runs) ? "AND testcaseid NOT IN (%Ai)" : "%_";
 	$testcase = $DB->q("MAYBETUPLE SELECT testcaseid, rank, probid, md5sum_input, md5sum_output
 	                    FROM testcase WHERE probid = %i $sqlextra ORDER BY rank LIMIT 1",
 	                   $row['probid'], $judging_runs);
@@ -789,6 +799,10 @@ function queue($args)
 	// TODO: make this configurable
 	$cdatas = getCurContests(TRUE);
 	$cids = array_keys($cdatas);
+	
+	if ( empty($cids) ) {
+		return array();
+	}
 
 	$hasLimit = array_key_exists('limit', $args);
 	// TODO: validate limit
@@ -799,7 +813,7 @@ function queue($args)
 	                     LEFT JOIN problem p USING (probid)
 	                     LEFT JOIN language l USING (langid)
 	                     LEFT JOIN contestproblem cp USING (probid, cid)
-	                     WHERE judgehost IS NULL AND s.cid IN %Ai
+	                     WHERE judgehost IS NULL AND s.cid IN (%Ai)
 	                     AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
 	                     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC' .
 	                    ($hasLimit ? ' LIMIT %i' : ' %_'),
@@ -931,15 +945,19 @@ $api->provideFunction('GET', 'languages', $doc);
 function clarifications($args)
 {
 	global $cids, $DB;
+	
+	if ( empty($cids) ) {
+		return array();
+	}
 
 	// Find public clarifications, maybe later also provide more info for jury
 	$query = 'SELECT clarid, submittime, probid, body FROM clarification
-	          WHERE cid IN %Ai AND sender IS NULL AND recipient IS NULL';
+	          WHERE cid IN (%Ai) AND sender IS NULL AND recipient IS NULL';
 
 	$byProblem = array_key_exists('problem', $args);
 	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
 	$problem = ($byProblem ? $args['problem'] : null);
-
+	
 	$q = $DB->q($query, $cids, $problem);
 	return $q->getTable();
 }

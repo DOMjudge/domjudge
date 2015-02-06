@@ -60,7 +60,7 @@ if ( count($cids) ) {
 	$DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
 		FROM team_unread
 		LEFT JOIN clarification ON(mesgid=clarid)
-		WHERE teamid = %i AND cid IN %Ai', $teamid, $cids);
+		WHERE teamid = %i AND cid IN (%Ai)', $teamid, $cids);
 }
 if ( !empty($cid) ) {
 	$updates['judgings'] =
