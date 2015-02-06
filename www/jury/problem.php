@@ -110,10 +110,10 @@ $pattern_datetime = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d";
 ?>
 <tr><td><label for="data_0__start_">Start time:</label></td>
 <td><?php echo addInput('data[0][start]', @$row['start'], 20, 19,
-                        'required pattern="' . $pattern_datetime . '"')?> (yyyy-mm-dd hh:mm:ss) </td></tr>
+                        'pattern="' . $pattern_datetime . '"')?> (yyyy-mm-dd hh:mm:ss) </td></tr>
 <tr><td><label for="data_0__end_">End time:</label></td>
 <td><?php echo addInput('data[0][end]', @$row['end'], 20, 19,
-                        'required pattern="' . $pattern_datetime . '"')?> (yyyy-mm-dd hh:mm:ss) </td></tr>
+                        'pattern="' . $pattern_datetime . '"')?> (yyyy-mm-dd hh:mm:ss) </td></tr>
 <?
 	} // separate_start_end
 ?>
