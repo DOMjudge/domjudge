@@ -120,7 +120,7 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 -- Dumping data for table `team`
 --
 
-INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES
+INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_visited`) VALUES
 (1, 'DOMjudge', 1, NULL, NULL, NULL, NULL, NULL);
 
 --
