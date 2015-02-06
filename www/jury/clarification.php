@@ -88,7 +88,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	                $cid, $respid, now(), $sendto,
 			$problem,
 	                $_POST['bodytext'], 1, $jury_member);
-	auditlog('clarification', $newid, 'added');
+	auditlog('clarification', $newid, 'added', null, null, $cid);
 
 	if ( ! $isgeneral ) {
 		$DB->q('UPDATE clarification SET answered = 1, jury_member = ' .
