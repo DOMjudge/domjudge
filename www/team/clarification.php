@@ -26,13 +26,13 @@ if ( isset($id) ) {
 
 // insert a request (if posted)
 if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
+
+	list($cid, $probid) = explode('-', $_POST['problem']);
+	if ( !ctype_digit($probid) ) $probid = NULL;
+
 	// Disallow problems that are not submittable or
 	// before contest start.
-	$probid = NULL;
-	if ( isset($_POST['problem']) ) {
-		$probid = preg_replace('/\d+-/', '', $_POST['problem']);
-		if ( !problemVisible($probid) ) $probid = NULL;
-	}
+	if ( isset($problem) !problemVisible($probid) ) $probid = NULL;
 
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, submittime, sender, probid, body)
