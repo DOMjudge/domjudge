@@ -46,6 +46,11 @@ for($i=0; $i<count($viewtypes); ++$i) {
 }
 echo "</p>\n" . addEndForm();
 
-putSubmissions($cdata, $restrictions, ($viewtypes[$view] == 'newest' ? 50 : 0));
+$contests = $cdatas;
+if ( $cid !== null ) {
+	$contests = array($cid => $cdata);
+}
+
+putSubmissions($contests, $restrictions, ($viewtypes[$view] == 'newest' ? 50 : 0));
 
 require(LIBWWWDIR . '/footer.php');

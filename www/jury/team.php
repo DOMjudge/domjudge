@@ -8,17 +8,28 @@
 
 require('init.php');
 
-$id = @$_REQUEST['id'];
-$title = 'Team '.htmlspecialchars(@$id);
-
-if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid team id");
+$id = getRequestID();
+$current_cid = null;
+if ( isset($_GET['cid']) && is_numeric($_GET['cid']) ) {
+	$cid = $_GET['cid'];
+	$cdata = $cdatas[$cid];
+	$current_cid = $cid;
+}
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'team' . ($id ? ' t'.htmlspecialchars(@$id) : ''));
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
 } else {
-	$refresh = '15;url='.$pagename.'?id='.urlencode($id).
+	$extra = '';
+	if ( $current_cid !== null ) {
+		$extra = '&cid=' . urlencode($current_cid);
+	}
+	$refresh = '15;url='.$pagename.'?id='.urlencode($id).$extra.
 		(isset($_GET['restrict'])?'&restrict='.urlencode($_GET['restrict']):'');
 }
+
+$jqtokeninput = true;
 
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');
@@ -27,23 +38,20 @@ if ( !empty($cmd) ):
 
 	requireAdmin();
 
-	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " team</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php');
 
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>ID:</td><td class=\"teamid\">";
-		$row = $DB->q('TUPLE SELECT * FROM team WHERE login = %s',
-			$_GET['id']);
-		echo addHidden('keydata[0][login]', $row['login']);
-		echo htmlspecialchars($row['login']);
-	} else {
-		echo "<tr><td><label for=\"data_0__login_\">ID:</label></td><td class=\"teamid\">";
-		echo addInput('data[0][login]', null, 8, 15, 'pattern="' . IDENTIFIER_CHARS . '+" title="Alphanumerics only" required');
+		$row = $DB->q('MAYBETUPLE SELECT * FROM team WHERE teamid = %i', $id);
+		if ( !$row ) error("Missing or invalid team id");
+
+		echo "<tr><td>ID:</td><td>" .
+			addHidden('keydata[0][teamid]', $row['teamid']) .
+			"t" . htmlspecialchars($row['teamid']) . "</td></tr>\n";
 	}
-	echo "</td></tr>\n";
 
 ?>
 <tr><td><label for="data_0__name_">Team name:</label></td>
@@ -67,18 +75,53 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <td><?php echo addInput('data[0][room]', @$row['room'], 10, 15)?></td></tr>
 <tr><td><label for="data_0__comments_">Comments:</label></td>
 <td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
+
+<?php
+$num_contests = $DB->q("VALUE SELECT COUNT(*) FROM contest c WHERE c.public = 0");
+if ( $num_contests > 0 ) {
+	$prepopulate = $DB->q("TABLE SELECT contest.cid AS id, contest.contestname, contest.shortname,
+			   CONCAT(contest.contestname, ' (', contest.shortname, ' - c', contest.cid, ')') AS search
+			   FROM contest INNER JOIN contestteam USING (cid)
+			   WHERE teamid = %i", $id);
+?>
+
+<!-- contest selection -->
+<tr>
+	<td>Private contests:</td>
+	<td>
+		<?php echo addInput('data[0][mapping][0][items]', '', 50); ?>
+		<script type="text/javascript">
+			$(function() {
+				$('#data_0__mapping__0__items_').tokenInput('ajax_contests.php?public=0', {
+					propertyToSearch: 'search',
+					hintText: 'Type to search for contest ID, name, or short name',
+					noResultsText: 'No private contests found',
+					preventDuplicates: true,
+					prePopulate: <?php echo json_encode($prepopulate); ?>
+				});
+			});
+		</script>
+	</td>
+</tr>
+<?php
+}
+?>
+
 <tr><td>Enabled:</td>
 <td><?php echo addRadioButton('data[0][enabled]', (!isset($row['']) || $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>
 <?php echo addRadioButton('data[0][enabled]', (isset($row['enabled']) && !$row['enabled']), 0)?> <label for="data_0__enabled_0">no</label></td></tr>
 </table>
 
 <?php
+echo addHidden('data[0][mapping][0][fk][0]', 'teamid') .
+     addHidden('data[0][mapping][0][fk][1]', 'cid') .
+     addHidden('data[0][mapping][0][table]', 'contestteam');
 echo addHidden('cmd', $cmd) .
-	addHidden('table','team') .
-	addHidden('referrer', @$_GET['referrer']) .
-	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
-	addEndForm();
+     addHidden('table','team') .
+     addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?(strstr(@$_GET['referrer'],'?') === FALSE?'?edited=1':'&edited=1'):'')) .
+     addSubmit('Save') .
+     addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
+     addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
 exit;
@@ -92,19 +135,32 @@ if ( isset($_GET['restrict']) ) {
 	$restrictions[$key] = $value;
 }
 
-$row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname, a.name AS affname
+$row = $DB->q('MAYBETUPLE SELECT t.*, a.country, c.name AS catname,
+                                 a.shortname AS affshortname, a.name AS affname
                FROM team t
                LEFT JOIN team_category c USING (categoryid)
                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
-               WHERE login = %s', $id);
+               WHERE teamid = %i', $id);
 
-if ( ! $row ) error("Missing or invalid team id");
+if ( !$row ) error("Invalid team identifier");
 
-$users = $DB->q('TABLE SELECT userid,username FROM user WHERE teamid = %s', $id);
+if ( isset($_GET['edited']) ) {
+
+	echo addForm('refresh_cache.php') .
+	     msgbox (
+		     "Warning: Refresh scoreboard cache",
+		     "If the membership of a team in a contest was changed, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
+		     addSubmit('recalculate caches now', 'refresh')
+	     ) .
+	     addEndForm();
+
+}
+
+$users = $DB->q('TABLE SELECT userid,username FROM user WHERE teamid = %i', $id);
 
 $affillogo   = "../images/affiliations/" . urlencode($row['affilid']) . ".png";
 $countryflag = "../images/countries/"    . urlencode($row['country']) . ".png";
-$teamimage   = "../images/teams/"        . urlencode($row['login'])   . ".jpg";
+$teamimage   = "../images/teams/"        . urlencode($row['teamid'])  . ".jpg";
 
 echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
 
@@ -115,7 +171,7 @@ if ( $row['enabled'] != 1 ) {
 ?>
 
 <div class="col1"><table>
-<tr><td>ID:        </td><td class="teamid"><?php echo $row['login']?></td></tr>
+<tr><td>ID:        </td><td>t<?php echo htmlspecialchars($row['teamid'])?></td></tr>
 <tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
 <tr><td>Host:</td><td><?php echo
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
@@ -128,9 +184,31 @@ if ( count($users) ) {
 		echo "<a href=\"user.php?id=" . urlencode($user['userid']) . "\">" . htmlspecialchars($user['username']) . "</a> ";
 	}
 } else {
-	echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode($row['login']) . "\"><small>(add)</small></a>";
+	echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode($row['teamid']) . "\"><small>(add)</small></a>";
 }
 ?></td></tr>
+<?php
+$private_contests = $DB->q("TABLE SELECT contest.* FROM contest
+			    INNER JOIN contestteam USING (cid)
+			    WHERE public = 0 AND teamid = %i", $id);
+if ( !empty($private_contests)) {
+	foreach ( $private_contests as $i => $contest ) {
+		echo "<tr><td>\n";
+		if ( $i == 0 ) {
+			echo 'Private contests:';
+		}
+		echo "</td><td>\n";
+		if ( IS_JURY ) {
+			echo '<a href="contest.php?id=' . $contest['cid'] . '">';
+		}
+		echo 'c' . $contest['cid'] . ' - ' . $contest['shortname'];
+		if ( IS_JURY ) {
+			echo '</a>';
+		}
+		echo "</td></tr>\n";
+	}
+}
+?>
 </table></div>
 
 <div class="col2"><table>
@@ -144,9 +222,7 @@ if ( !empty($row['affilid']) ) {
 	echo '<tr><td>Affiliation:</td><td>';
 	if ( is_readable($affillogo) ) {
 		echo '<img src="' . $affillogo . '" alt="' .
-			htmlspecialchars($row['affilid']) . '" /> ';
-	} else {
-		echo htmlspecialchars($row['affilid']) . ' - ';
+			htmlspecialchars($row['affshortname']) . '" /> ';
 	}
 	echo '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">' .
 		htmlspecialchars($row['affname']) . "</a></td></tr>\n";
@@ -172,15 +248,17 @@ echo "</table></div>\n";
 if ( IS_ADMIN ) {
 	echo "<p class=\"nomorecol\">" .
 		editLink('team', $id). "\n" .
-		delLink('team','login',$id) .
+		delLink('team','teamid',$id) .
 		"</p>\n\n";
 }
 
 echo rejudgeForm('team', $id) . "\n\n";
 
-echo "<h3>Score</h3>\n\n";
+if ( $cid ) {
+	echo "<h3>Score</h3>\n\n";
 
-putTeamRow($cdata,array($id));
+	putTeamRow($cdata, array($id));
+}
 
 echo '<h3>Submissions';
 if ( isset($key) ) {
@@ -196,6 +274,6 @@ if ( isset($key) ) {
 echo "</h3>\n\n";
 
 $restrictions['teamid'] = $id;
-putSubmissions($cdata, $restrictions);
+putSubmissions($cdatas, $restrictions);
 
 require(LIBWWWDIR . '/footer.php');

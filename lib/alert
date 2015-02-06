@@ -27,8 +27,6 @@ case "$MSGTYPE" in
 	error) # internal system error
 		beep "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
 		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
-		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
-		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
 		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000"
 		;;
 
@@ -40,13 +38,11 @@ case "$MSGTYPE" in
 	usererr) # user error
 		beep "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
 		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
-		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
-		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
 		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000"
 		;;
 
 	submit) # team submission received
-		beep "-f 400 -l 100 -n -f 400 -l 70"
+#		beep "-f 400 -l 100 -n -f 400 -l 70"
 		;;
 
 	accept) # submission judged and accepted
@@ -54,7 +50,7 @@ case "$MSGTYPE" in
 		;;
 
 	reject) # submission judged and rejected
-		beep "-f 400 -l 100 -n -f 350 -l 70"
+#		beep "-f 400 -l 100 -n -f 350 -l 70"
 		;;
 
 	*)

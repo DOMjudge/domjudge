@@ -5,7 +5,7 @@ DOMjudge is a system for running programming contests, like the ACM
 ICPC regional and world championship programming contests.
 
 This means that teams are on-site and have a fixed time period (mostly
-5 hours) and one computer to solve a number of problems (mostly 6-10).
+5 hours) and one computer to solve a number of problems (mostly 8-11).
 Problems are solved by writing a program in one of the allowed
 languages, that reads input according to the problem input
 specification and writes the correct, corresponding output.
@@ -27,7 +27,7 @@ A global overview of the features that DOMjudge provides:
 <itemize>
 <item>Automatic judging with distributed (scalable) judge hosts
 <item>Web interface for portability and simplicity
-<item>Modular system for plugging in languages/compilers and more
+<item>Modular system for plugging in languages/compilers and validators
 <item>Detailed jury information (submissions, judgings, diffs) and
       options (rejudge, clarifications, resubmit)
 <item>Designed with security in mind
@@ -56,16 +56,19 @@ chapter.
 <sect>Copyright and licencing
 <p>
 
-DOMjudge is developed by Jaap Eldering, Keith Johnson, Thijs
-Kinkhorst and Tobias Werth; Peter van de Werken has retired as
-developer. Many other people have contributed:
+DOMjudge is developed by Jaap Eldering, Nicky Gerritsen, Keith
+Johnson, Thijs Kinkhorst and Tobias Werth; Peter van de Werken has
+retired as developer. Many other people have contributed (apologies
+for any oversights):
 Jeroen Bransen,
 Stijn van Drongelen,
 Rob Franken,
-Nicky Gerritsen,
 Jacob Kleerekoper,
+Ruud Koot,
 Jan Kuipers,
+Alex Muntada,
 Jeroen Schot,
+Matt Steele,
 and Jeroen van Wolffelaar.
 Some code has been ported from the ETH Zurich fork by Christoph
 Krautz, Thomas Rast et al.
@@ -75,7 +78,7 @@ Development is hosted at Study Association
 <htmlurl name="Utrecht University" url="http://www.uu.nl/">,
 The Netherlands.
 
-It is Copyright (c) 2004 - 2013 by the DOMjudge developers and its contributors.
+It is Copyright (c) 2004 - 2015 by the DOMjudge developers and its contributors.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the <url name="GNU General Public License"
@@ -90,62 +93,47 @@ are covered by other copyrights. See the administrator's manual for details.
 <![ %admin; [
 This software is partly based on code by other people. These
 acknowledgements are made in the respective files, but we would like
-to name them here too:
+to name them here too (with non-GPL licences where applicable):
 <itemize>
-<item> dash (i386) is included, built from the Debian dash sources
-       (copyright various people, see <tt>doc/dash.copyright</tt>).
-<item> mkstemps.h and basename.h are modified versions from the
+<item> dash (i386) is included, statically compiled from the Debian
+       dash sources (copyright by various people under the BSD licence
+       and a part under the GNU GPL version 2. See <tt>COPYING.BSD</tt>
+       <tt>doc/dash.copyright</tt> for more details).
+       Sources can be downloaded from: <url url="http://www.domjudge.org/sources/">.
+<item> basename.h is a modified version from the
        GNU libiberty library (copyright Free Software Foundation).
 <item> lib.database.php by Jeroen van Wolffelaar et al.
-<item> submit.cc and submitdaemon.cc are based on submit.pl and
-       submitdaemon.pl by Eelco Dolstra.
 <item> runguard.c was originally based on timeout from The
        Coroner's Toolkit by Wietse Venema.
-<item> sorttable.js by Stuart Langridge.
-<item> jscolor.js by Jan Odvarko.
-<item> tabber.js by Patrick Fitzgerald.
-<item> Ace code editor.
+<item> sorttable.js, by Stuart Langridge, licenced under
+       the MIT licence, see <tt>COPYING.MIT</tt>.
+       It was downloaded from <url url="http://www.kryogenix.org/code/browser/sorttable/">.
+<item> jscolor.js by Jan Odvarko, licenced under the GNU LGPL. It
+       was obtained at <url url="http://jscolor.com">.
+<item> tabber.js by Patrick Fitzgerald, licenced under the MIT
+       licence, see <tt>COPYING.MIT</tt>. It was downloaded from
+       <url url="http://www.barelyfitz.com/projects/tabber/">.
+<item> Ace code editor by Ajax.org B.V., licenced under the BSD
+       licence, see <tt>COPYING.BSD</tt>. It was downloaded from
+       <url url="https://github.com/ajaxorg/ace-builds">.
+<item> Flot JavaScript library by IOLA and Ole Laursen, licenced
+       under the MIT licence, see <tt>COPYING.MIT</tt>. It was
+       downloaded from <url url="http://www.flotcharts.org/">.
+<item> jQuery JavaScript library by the jQuery Foundation, licenced
+       under the MIT licence, see <tt>COPYING.MIT</tt>. It was
+       downloaded from <url url="http://jquery.com/">.
+<item> jQuery TokenInput by James Smith, dual
+       licenced under the GPL and MIT licences, see <tt>COPYING</tt>
+       and <tt>COPYING.MIT</tt>. It was downloaded from
+       <url url="http://loopj.com/jquery-tokeninput/">.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
        Erik van Sebille.
 <item> Several icons have been taken from the phpMyAdmin project.
 <item> Several M4 autoconf macros from the <htmlurl name="Autoconf archive"
        url="http://www.gnu.org/software/autoconf-archive/"> by various
-       people are included under <tt>m4/</tt>.
-</itemize>
-
-<sect1>Non-GPL licenced parts of DOMjudge
-<p>
-
-A binary version of the dash shell (statically compiled)
-is distributed with DOMjudge. This program is copyright by various
-people under the BSD licence and a part under the GNU GPL version 2,
-see <tt>COPYING.BSD</tt> and <tt>doc/dash.copyright</tt> for more details.
-Sources can be downloaded from:
-<url url="http://www.domjudge.org/sources/">.
-
-The <tt>sorttable.js</tt> script is copyright by Stuart Langridge and
-licenced under the MIT licence, see <tt>COPYING.MIT</tt>. This
-software was downloaded from
-<url url="http://www.kryogenix.org/code/browser/sorttable/">.
-The <tt>jscolor.js</tt> script is copyright by Jan Odvarko and licenced
-under the GNU LGPL. It was obtained at <url url="http://jscolor.com">.
-The <tt>tabber.js</tt> script is copyright by Patrick Fitzgerald and
-licenced under the MIT licence, see <tt>COPYING.MIT</tt>. It was
-downloaded from <url url="http://www.barelyfitz.com/projects/tabber/">.
-
-The M4 autoconf macros are licenced under all-permissive and GPL3+
-licences; see the respective files for details.
-
-DOMjudge includes specifications of a number of interfaces. These
-specifications are dedicated to the public domain, as
-specified in the <htmlurl
-name="Creative Commons Public Domain Dedication (CC0 1.0)"
-url="http://creativecommons.org/publicdomain/zero/1.0/">. These
-specifications can be found as appendices in the judge manual and as
-separate ASCII text files in the documentation directory:
-<itemize>
-<item> The checktestdata language grammar.
-<item> The DOMjudge problem format zip-bundle.
+       people are included under <tt>m4/</tt>. These are licenced
+       under all-permissive and GPL3+ licences; see the respective
+       files for details.
 </itemize>
 ]]>
 
@@ -172,7 +160,7 @@ The DOMjudge homepage can be found at:
 url="http://www.domjudge.org/">
 
 We have a low volume <htmlurl name="mailing list for announcements"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
+url="https://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
 of new releases.
 
 The authors can be reached through the development mailing list:
@@ -180,7 +168,7 @@ The authors can be reached through the development mailing list:
 url="mailto:domjudge-devel@lists.a-eskwadraat.nl">. You need
 to be subscribed before you can post. See
 <htmlurl name="the list information page"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
+url="https://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
 for subscription and more details.
 
 Some developers and users of DOMjudge linger on the IRC channel

@@ -9,7 +9,11 @@ INI = $(PROBLEMS:=.ini)
 PDF = $(PROBLEMS:=.pdf)
 ZIP = $(PROBLEMS:=.zip)
 
-docs: dist
+docs distdocs: $(PDF) $(ZIP)
+
+# Used by sql/Makefile:
+.pdf-generated: $(PDF)
+	touch .pdf-generated
 
 install-docs:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples example.*
@@ -19,6 +23,7 @@ install-docs:
 
 $(PDF): %.pdf: %.tex %.in %.out $(TOPDIR)/doc/logos/DOMjudgelogo.pdf
 	pdflatex -interaction=nonstopmode $< > /dev/null
+	touch .pdf-generated
 
 $(INI): %.ini:
 	@[ -n "$(QUIET)" ] || echo "Generating '$@'..."
@@ -35,11 +40,10 @@ $(ZIP): %.zip: %.pdf %.ini $$(foreach ext,in out c cc java,$$(wildcard $$**.$$(e
 	cp $^ $$TMPDIR ; mv $$TMPDIR/$*.ini $$TMPDIR/domjudge-problem.ini ; \
 	zip -q -j -r $@ $$TMPDIR ; rm -rf $$TMPDIR
 
-dist-l: $(PDF) $(ZIP)
-	$(MAKE) clean-l
-
 clean-l:
 	-rm -f $(PROBLEMS:=.aux) $(PROBLEMS:=.log)
 
 maintainer-clean-l:
-	-rm -f $(INI) $(PDF) $(ZIP)
+	-rm -f $(INI) $(PDF) $(ZIP) .pdf-generated
+
+.PHONY: docs distdocs install-docs

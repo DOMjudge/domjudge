@@ -34,6 +34,10 @@ if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
 	exit;
 }
 
+if ( !file_exists(LIBDIR . '/relations.php') ) {
+	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
+}
+
 require_once(LIBDIR . '/relations.php');
 require_once(LIBWWWDIR . '/checkers.jury.php');
 
@@ -62,7 +66,9 @@ function flushresults() {
 		if ( $row['flushed'] ) continue;
 		$row['flushed'] = TRUE;
 
-		if ( empty($row['details']) ) $row['details'] = 'No issues found.';
+		if ( empty($row['details']) && empty($row['details_html']) ) {
+			$row['details'] = 'No issues found.';
+		}
 
 		if ( $row['section'] != $lastsection ) {
 			echo "<tr><th colspan=\"2\">" .
@@ -124,6 +130,21 @@ if ( function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()==1 ) {
 	result('software', 'PHP magic quotes', 'O', 'PHP magic quotes disabled.');
 }
 
+if ( !function_exists('gd_info') ) {
+	result('software', 'PHP GD library', 'W',
+	       'The PHP GD library is not available. Test case images cannot be uploaded.');
+} else {
+	result('software', 'PHP GD library', 'O',
+	       'The PHP GD library is available to handle test case images.');
+}
+
+if ( extension_loaded('suhosin') ) {
+	result('software', 'suhosin', 'E',
+	       'PHP suhosin extension loaded. This may result in dropping POST arguments, e.g. output_run.');
+} else {
+	result('software', 'suhosin', 'O', 'PHP suhosin extension disabled.');
+}
+
 $max_file_check = max(100,dbconfig_get('sourcefiles_limit', 100));
 result('software', 'PHP max_file_uploads',
        (int) ini_get('max_file_uploads') < $max_file_check ? 'W':'O',
@@ -131,6 +152,29 @@ result('software', 'PHP max_file_uploads',
        (int) ini_get('max_file_uploads') . '. This should be set higher ' .
        'than the maximum number of test cases per problem and the ' .
        'configuration setting \'sourcefiles_limit\'.');
+
+
+$sizes = array();
+$postmaxvars = array('post_max_size', 'memory_limit', 'upload_max_filesize');
+foreach($postmaxvars as $var) {
+	/* skip 0 or empty values, and -1 which means 'unlimited' */
+	if( $size = phpini_to_bytes(ini_get($var)) ) {
+		if ( $size != '-1' ) {
+			$sizes[$var] = $size;
+		}
+	}
+}
+
+$resulttext = 'PHP POST/upload filesize is limited to ' . printsize(min($sizes)) .
+	"\n\nThis limit needs to be larger than the testcases you want to upload and than the amount of program output you expect the judgedaemons to post back to DOMjudge. We recommend at least 50 MB.\n\nNote that you need to ensure that all of the following php.ini parameters are at minimum the desired size:\n";
+foreach($postmaxvars as $var) {
+	$resulttext .= "$var (now set to " .
+		(isset($sizes[$var]) ? printsize($sizes[$var]) : "unlimited") .
+		")\n";
+}
+
+result('software', 'PHP POST/upload filesize',
+       min($sizes) < 52428800 ? 'W':'O', '', $resulttext);
 
 if ( class_exists("ZipArchive") ) {
 	result('software', 'Problem up/download via zip bundles',
@@ -141,6 +185,7 @@ if ( class_exists("ZipArchive") ) {
 	       'to be able to import or export problem data via zip bundles.');
 }
 
+$mysqldata = array();
 $mysqldatares = $DB->q('SHOW variables WHERE
                         Variable_name = "max_connections" OR
                         Variable_name = "max_allowed_packet" OR
@@ -151,8 +196,7 @@ while($row = $mysqldatares->next()) {
 
 result('software', 'MySQL version',
 	version_compare('4.1', $mysqldata['version'], '>=') ? 'E':'O',
-	'Connected to MySQL server version ' .
-	htmlspecialchars($mysqldata['version']) .
+	'Connected to MySQL server version ' . $mysqldata['version'] .
 	'. Minimum required is 4.1.');
 
 result('software', 'MySQL maximum connections',
@@ -163,21 +207,32 @@ result('software', 'MySQL maximum connections',
 	'prevent connection refusal during the contest.');
 
 result('software', 'MySQL maximum packet size',
-	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O',
+	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O', '',
 	'MySQL\'s max_allowed_packet is set to ' .
-	(int)$mysqldata['max_allowed_packet']/1024/1024 . 'MB. You may ' .
+	printsize($mysqldata['max_allowed_packet']) . '. You may ' .
 	'want to raise this to about twice the maximum test case size.');
 
 flushresults();
 
 // CONFIGURATION
 
-if ( $DB->q('VALUE SELECT count(*) FROM user WHERE username = "admin" AND password=MD5("admin#admin")') != 0 ) {
+if ( $DB->q('VALUE SELECT count(*) FROM user
+             WHERE username = "admin" AND password=MD5("admin#admin")') != 0 ) {
 	result('configuration', 'Default admin password', 'E',
-		'The "admin" user still has the default password. You should change it immediately.');
+	       'The "admin" user still has the default password. ' .
+	       'You should change it immediately.');
 } else {
 	result('configuration', 'Default admin password', 'O',
-		'Password for "admin" has been changed from the default.');
+	       'Password for "admin" has been changed from the default.');
+}
+
+foreach (array('compare', 'run') as $type) {
+	if ( $DB->q('VALUE SELECT count(*) FROM executable WHERE execid = %s',
+	            dbconfig_get('default_' . $type)) == 0 ) {
+		result('configuration', 'Default ' . $type .' script', 'E',
+		       'The default ' . $type . ' script "' .
+		       dbconfig_get('default_' . $type) . '" does not exist.');
+	}
 }
 
 
@@ -185,8 +240,8 @@ if ( DEBUG == 0 ) {
 	result('configuration', 'Debugging', 'O', 'Debugging disabled.');
 } else {
 	result('configuration', 'Debugging', 'W',
-		'Debug information enabled (level ' . htmlspecialchars(DEBUG).").\n" .
-		'Should not be enabled on live systems.');
+	       'Debug information enabled (level ' . DEBUG .").\n" .
+	       'Should not be enabled on live systems.');
 }
 
 if ( !is_writable(TMPDIR) ) {
@@ -195,19 +250,21 @@ if ( !is_writable(TMPDIR) ) {
               'Showing diffs and editing of submissions may not work.');
 } else {
        result('configuration', 'TMPDIR writable', 'O',
-              'TMPDIR (' . TMPDIR . ') can be used to store temporary files for submission diffs and edits.');
+              'TMPDIR (' . TMPDIR . ') can be used to store temporary ' .
+	          'files for submission diffs and edits.');
 }
 
 flushresults();
 
 // CONTESTS
 
-if($cid == null) {
-	result('contests', 'Active contest', 'E',
-		'No currently active contest found. System will not function.');
+if( empty($cids) ) {
+	result('contests', 'Active contests', 'E',
+	       'No currently active contests found. System will not function.');
 } else {
-	result('contests', 'Active contest', 'O',
-		'Currently active contest: c'.(int)$cid);
+	$cidstring = implode(', ', array_map(function($cid) { return 'c'.$cid;}, $cids));
+	result('contests', 'Active contests', 'O',
+	       'Currently active contests: ' . $cidstring);
 }
 
 // get all contests
@@ -241,7 +298,9 @@ flushresults();
 
 // PROBLEMS
 
-$res = $DB->q('SELECT probid, timelimit FROM problem ORDER BY probid');
+$res = $DB->q('SELECT probid, cid, shortname, timelimit, special_compare, special_run
+               FROM problem INNER JOIN contestproblem USING (probid)
+               ORDER BY probid');
 
 $details = '';
 while($row = $res->next()) {
@@ -249,34 +308,35 @@ while($row = $res->next()) {
 	check_problem($row);
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
 		foreach($CHECKER_ERRORS as $chk_err) {
-			$details .= $row['probid'].': ' . $chk_err."\n";
+			$details .= 'p'.$row['probid']." in contest c" . $row['cid'] .': ' . $chk_err."\n";
 		}
 	}
 	if ( ! $DB->q("MAYBEVALUE SELECT count(testcaseid) FROM testcase
  	               WHERE input IS NOT NULL AND output IS NOT NULL AND
- 	               probid = %s", $row['probid']) ) {
-		$details .= $row['probid'].": missing in/output testcase.\n";
+ 	               probid = %i", $row['probid']) ) {
+		$details .= 'p'.$row['probid']." in contest c" . $row['cid'] . ": missing in/output testcase.\n";
 	}
 }
 foreach(array('input','output') as $inout) {
-	$mismatch = $DB->q("SELECT probid, rank FROM testcase WHERE md5($inout) != md5sum_$inout");
+	$mismatch = $DB->q("SELECT probid, rank FROM testcase
+	                    WHERE md5($inout) != md5sum_$inout");
 	while($r = $mismatch->next()) {
-		$details .= $r['probid'] . ": testcase #" . $r['rank'] .
+		$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
 		    " MD5 sum mismatch between $inout and md5sum_$inout\n";
 	}
 }
 $oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
                     FROM testcase WHERE OCTET_LENGTH(output) > %i",
-                   dbconfig_get('filesize_limit')*1024);
+                   dbconfig_get('output_limit')*1024);
 while($r = $oversize->next()) {
-	$details .= $r['probid'] . ": testcase #" . $r['rank'] .
-	    " output size (" . $r['size'] . " B) exceeds filesize_limit\n";
+	$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
+	    " output size (" . printsize($r['size']) . ") exceeds output_limit\n";
 }
 
 $has_errors = $details != '';
-$probs = $DB->q("COLUMN SELECT probid FROM problem WHERE color IS NULL");
-foreach($probs as $probid) {
-       $details .= $probid . ": has no color\n";
+$probs = $DB->q("TABLE SELECT probid, cid FROM contestproblem WHERE color IS NULL");
+foreach($probs as $probdata) {
+       $details .= 'p'.$probdata['probid'] . " in contest c" . $probdata['cid'] . ": has no color\n";
 }
 
 result('problems, languages, teams', 'Problems integrity',
@@ -309,24 +369,6 @@ result('problems, languages, teams',
 	$details == '' ? 'O': $langseverity,
 	$details);
 
-
-
-$res = $DB->q('SELECT * FROM team ORDER BY login');
-
-$details = '';
-while($row = $res->next()) {
-	$CHECKER_ERRORS = array();
-	check_team($row);
-	if ( count ( $CHECKER_ERRORS ) > 0 ) {
-		foreach($CHECKER_ERRORS as $chk_err) {
-			$details .= $row['login'].': ' . $chk_err . "\n";
-		}
-	}
-}
-
-result('problems, languages, teams', 'Team integrity',
-	$details == '' ? 'O': 'E', $details);
-
 $details = '';
 if ( dbconfig_get('show_affiliations', 1) ) {
 	$res = $DB->q('SELECT affilid FROM team_affiliation ORDER BY affilid');
@@ -355,11 +397,11 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 	}
 
 	result('problems, languages, teams', 'Team affiliation icons',
-		($details == '') ? 'O' : 'W', $details);
+	       ($details == '') ? 'O' : 'W', $details);
 
 } else {
 	result('problems, languages, teams', 'Team affiliation icons',
-		'O', 'Affiliation icons disabled in config.');
+	       'O', 'Affiliation icons disabled in config.');
 }
 
 flushresults();
@@ -367,34 +409,26 @@ flushresults();
 // SUBMISSIONS, JUDINGS
 
 $submres = 'O';
-$submnote = 'Websubmit ' . ( ENABLE_WEBSUBMIT_SERVER ? 'en':'dis' ) ."abled.\n".
-	 'Submitserver ' . ( ENABLE_CMDSUBMIT_SERVER ? 'en':'dis' ) ."abled.\n\n";
-
-if ( ! ENABLE_WEBSUBMIT_SERVER && ! ENABLE_CMDSUBMIT_SERVER ) {
-	$submres = 'E';
-	$submnote .= 'Both Websubmit and Submitserver disabled. No way to make submissions.';
-} else {
-	if ( ENABLE_WEBSUBMIT_SERVER && ! is_writable(SUBMITDIR) ) {
-		$submres = 'W';
-		$submnote .= 'The webserver has no write access to SUBMITDIR (' .
-			htmlspecialchars(SUBMITDIR) .
-			'), and thus will not be able to make backup copies of submissions.';
-	} else {
-		$submnote .= 'No issues found.';
-	}
+$submnote = NULL;
+if ( ! is_writable(SUBMITDIR) ) {
+	$submres = 'W';
+	$submnote = 'The webserver has no write access to SUBMITDIR (' .
+	            htmlspecialchars(SUBMITDIR) . '), and thus will not ' .
+	            'be able to make backup copies of submissions.';
 }
 
-result('submissions and judgings', 'Submit method', $submres, $submnote);
+result('submissions and judgings', 'Submissions', $submres, $submnote);
 
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
-               LEFT OUTER JOIN problem p USING (probid) WHERE s.cid != p.cid');
+               LEFT OUTER JOIN contestproblem p USING (probid)
+               WHERE s.cid != p.cid');
 
 $details = '';
 while($row = $res->next()) {
-	$details .= 'Submission s' .  $row['submitid'] . ' is for problem "' .
+	$details .= 'Submission s' .  $row['submitid'] . ' is for problem p' .
 		$row['probid'] .
-		'" while this problem is not found (in c'. $row['cid'] . ")\n";
+		' while this problem is not found (in c'. $row['cid'] . ")\n";
 }
 
 $res = $DB->q('SELECT * FROM submission ORDER BY submitid');
@@ -415,7 +449,8 @@ $res = $DB->q('SELECT s.submitid FROM submission s
                WHERE f.submitid IS NULL');
 
 while($row = $res->next()) {
-	$details .= 'Submission s' . $row['submitid'] . " does not have any associated source files\n";
+	$details .= 'Submission s' . $row['submitid'] .
+	            " does not have any associated source files\n";
 }
 
 // check for submissions that have been marked by a judgehost but that
@@ -425,7 +460,8 @@ $res = $DB->q('SELECT s.submitid FROM submission s
                WHERE j.submitid IS NULL AND s.judgehost IS NOT NULL');
 
 while($row = $res->next()) {
-	$details .= 'Submission s' . $row['submitid'] . " has a judgehost but no entry in judgings\n";
+	$details .= 'Submission s' . $row['submitid'] .
+	            " has a judgehost but no entry in judgings\n";
 }
 
 result('submissions and judgings', 'Submission integrity',
@@ -437,27 +473,17 @@ $details = '';
 $res = $DB->q('SELECT submitid, SUM(valid) as numvalid
 	FROM judging GROUP BY submitid HAVING numvalid > 1');
 while($row = $res->next()) {
-	$details .= 'Submission s' . $row['submitid'] . ' has more than one valid judging (' .
-		$row['numvalid'] . ")\n";
-}
-
-// check for unknown result strings
-$res = $DB->q('SELECT judgingid, submitid, result
-	FROM judging WHERE result IS NOT NULL AND result NOT IN (%As)',
-	$EXITCODES);
-while($row = $res->next()) {
-	$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
-		' has an unknown result code "' .
-		$row['result'] . "\"\n";
+	$details .= 'Submission s' . $row['submitid'] .
+	            ' has more than one valid judging (' . $row['numvalid'] . ")\n";
 }
 
 // check for valid judgings that are already running too long
 $res = $DB->q('SELECT judgingid, submitid, starttime
                FROM judging WHERE valid = 1 AND endtime IS NULL AND
-               (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(starttime)) > 300');
+               (UNIX_TIMESTAMP()-starttime) > 300');
 while($row = $res->next()) {
 	$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
-		" is running for longer than 5 minutes, probably the judgedaemon crashed\n";
+	            " is running for longer than 5 minutes, probably the judgedaemon crashed\n";
 }
 
 // check for start/endtime problems and contestids
@@ -476,9 +502,9 @@ while($row = $res->next()) {
 	}
 	if($row['s_cid'] != NULL && $row['s_cid'] != $row['j_cid']) {
 		$CHEKCER_ERRORS[] = 'Judging j' .$row['judgingid'] .
-		    ' is from a different contest (c' . $row['j_cid'] .
-		    ') than its submission s' . $row['j_submitid'] .
-		    ' (c' . $row['s_cid'] . ')';
+		                    ' is from a different contest (c' . $row['j_cid'] .
+		                    ') than its submission s' . $row['j_submitid'] .
+		                    ' (c' . $row['s_cid'] . ')';
 	}
 	check_judging($row);
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
@@ -489,7 +515,7 @@ while($row = $res->next()) {
 }
 
 result('submissions and judgings', 'Judging integrity',
-	($details == '' ? 'O':'E'), $details);
+       ($details == '' ? 'O':'E'), $details);
 
 flushresults();
 
@@ -503,19 +529,19 @@ if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 			continue;
 		}
 		$fields = implode(', ', array_keys($foreign_keys));
-		$res = $DB->q('SELECT ' . $fields . ' FROM ' . $table . ' ORDER BY ' . implode(',', $KEYS[$table]));
+		$res = $DB->q('SELECT ' . $fields . ' FROM ' . $table .
+		              ' ORDER BY ' . implode(',', $KEYS[$table]));
 		while ( $row = $res->next() ) {
 			foreach ( $foreign_keys as $foreign_key => $val ) {
-				@list( $target, $action ) = explode('&', $val);
-				if ( empty($action) ) $action = 'CASCADE';
+				list( $target, $action ) = explode('&', $val);
 				if ( empty($row[$foreign_key]) || $action=='NOCONSTRAINT' ) {
 					continue;
 				}
 				$f = explode('.', $target);
 				if ( $DB->q("VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
-						$row[$foreign_key]) < 1 ) {
+				            $row[$foreign_key]) < 1 ) {
 					$details .= "foreign key constraint fails for $table.$foreign_key = \"" .
-						$row[$foreign_key] . "\" (not found in $target)\n";
+					            $row[$foreign_key] . "\" (not found in $target)\n";
 				}
 			}
 		}
@@ -524,10 +550,10 @@ if ( $_SERVER['QUERY_STRING'] == 'refint' ) {
 	// problems found are of level warning, because the severity may be different depending
 	// on which table it is.
 	result('referential integrity', 'Inter-table relationships',
-		($details == '' ? 'O':'W'), $details);
+	       ($details == '' ? 'O':'W'), $details);
 } else {
-	result('referential integrity', 'Inter-table relationships',
-		'R', 'Not checked.', '<a href="?refint">check now</a> (potentially slow operation)');
+	result('referential integrity', 'Inter-table relationships', 'R',
+	       'Not checked.', '<a href="?refint">check now</a> (potentially slow operation)');
 }
 
 flushresults();

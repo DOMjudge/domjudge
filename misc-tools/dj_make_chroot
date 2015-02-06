@@ -6,13 +6,21 @@
 # This script downloads and installs a Debian base system.
 # Minimum requirements: a Linux system with glibc >= 2.3, wget, ar and
 # a POSIX shell in /bin/sh. About 250 MB disk space is needed. It must
-# be run as root and will install the Debian debootstrap package.
+# be run as root and will install the debootstrap package.
 #
 # Part of the DOMjudge Programming Contest Jury System and licenced
 # under the GNU GPL. See README and COPYING for details.
 
 # Abort when a single command fails:
 set -e
+
+cleanup() {
+    # Unmount things on cleanup
+    umount -f "$CHROOTDIR/proc" >/dev/null 2>&1  || /bin/true
+    umount -f "$CHROOTDIR/sys" >/dev/null 2>&1  || /bin/true
+    umount -f "$CHROOTDIR/dev/pts" >/dev/null 2>&1  || /bin/true
+}
+trap cleanup EXIT
 
 # Read command-line parameters:
 CHROOTDIR=$1
@@ -35,11 +43,19 @@ INSTALLDEBS="openjdk-7-jre-headless locales"
 # Debian packages to remove after upgrade (space separated):
 REMOVEDEBS=""
 
-# Debian mirror. http.debian.net will pick the 'closest'.
-DEBMIRROR="http://http.debian.net/debian"
-
 # Which debootstrap package to install on non-Debian systems:
 DEBOOTDEB="debootstrap_1.0.48+deb7u1_all.deb"
+
+# The Debian mirror/proxy below can be passed as environment
+# variables; if none are given the following defaults are used.
+
+# Debian mirror. http.debian.net will pick the 'closest'.
+[ -z "$DEBMIRROR" ] && DEBMIRROR="http://http.debian.net/debian"
+
+# A local caching proxy to use for debian packages
+# (typically an install of aptcacher-ng), for example:
+#DEBPROXY="http://aptcacher-ng.example.com:3142/"
+[ -z "$DEBPROXY" ] && DEBPROXY=""
 
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
@@ -69,7 +85,15 @@ fi
 
 [ -z "$CHROOTDIR" ] && error "No installation directory given."
 [ -z "$ARCH" ]      && error "No architecture given."
-[ -e "$CHROOTDIR" ] && error "'$CHROOTDIR' already exists, remove manually."
+
+if [ -e "$CHROOTDIR" ]; then
+	echo -n "'$CHROOTDIR' already exists. Remove? (y/N) "
+	read yn
+	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
+		error "Chrootdir already exists, exiting."
+	fi
+	rm -rf "$CHROOTDIR"
+fi
 
 mkdir -p "$CHROOTDIR"
 cd "$CHROOTDIR"
@@ -112,12 +136,19 @@ if [ -n "$EXCLUDEDEBS" ]; then
 	EXCLUDEOPT="--exclude=$EXCLUDEDEBS"
 fi
 
+BOOTSTRAP_COMMAND="/usr/sbin/debootstrap"
+if [ -n "$DEBPROXY" ]; then
+    BOOTSTRAP_COMMAND="http_proxy=\"$DEBPROXY\" $BOOTSTRAP_COMMAND"
+fi
+
 echo "Running debootstrap to install base system, this may take a while..."
-/usr/sbin/debootstrap $INCLUDEOPT $EXCLUDEOPT \
+
+eval $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 	--variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
-cp /etc/resolv.conf /etc/hostname "$CHROOTDIR/etc" || true
+cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
+cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
 
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
@@ -143,37 +174,49 @@ Acquire::Retries "3";
 Acquire::PDiffs "false";
 EOF
 
+# Add apt proxy settings if desired
+if [ -n "$DEBPROXY" ]; then
+    echo "Acquire::http::Proxy \"$DEBPROXY\";" >> "$CHROOTDIR/etc/apt/apt.conf"
+fi
+
 mount -t proc proc "$CHROOTDIR/proc"
+
+# Required for some warning messages about writing to log files
+mount --bind /dev/pts "$CHROOTDIR/dev/pts"
 
 # Prevent perl locale warnings in the chroot:
 export LC_ALL=C
 
 chroot "$CHROOTDIR" /bin/sh -c debconf-set-selections <<EOF
-passwd	passwd/root-password-crypted	password	
-passwd	passwd/user-password-crypted	password	
-passwd	passwd/root-password		password	
-passwd	passwd/root-password-again	password	
-passwd	passwd/user-password-again	password	
-passwd	passwd/user-password		password	
+passwd	passwd/root-password-crypted	password
+passwd	passwd/user-password-crypted	password
+passwd	passwd/root-password		password
+passwd	passwd/root-password-again	password
+passwd	passwd/user-password-again	password
+passwd	passwd/user-password		password
 passwd	passwd/shadow			boolean	true
-passwd	passwd/username-bad		note	
-passwd	passwd/password-mismatch	note	
-passwd	passwd/username			string	
+passwd	passwd/username-bad		note
+passwd	passwd/password-mismatch	note
+passwd	passwd/username			string
 passwd	passwd/make-user		boolean	true
 passwd	passwd/md5			boolean	false
-passwd	passwd/user-fullname		string	
-passwd	passwd/user-uid			string	
-passwd	passwd/password-empty		note	
+passwd	passwd/user-fullname		string
+passwd	passwd/user-uid			string
+passwd	passwd/password-empty		note
 debconf	debconf/priority	select	high
 debconf	debconf/frontend	select	Noninteractive
-locales	locales/locales_to_be_generated	multiselect	
+locales	locales/locales_to_be_generated	multiselect
 locales	locales/default_environment_locale	select	None
 EOF
 
+# Upgrade the system, and install/remove packages as desired
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
-chroot "$CHROOTDIR" /bin/sh -c "apt-get remove $REMOVEDEBS"
+
+# Do some cleanup of the chroot
+chroot "$CHROOTDIR" /bin/sh -c "apt-get remove --purge $REMOVEDEBS"
+chroot "$CHROOTDIR" /bin/sh -c "apt-get autoremove --purge"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 
 # Remove unnecessary setuid bits
@@ -185,6 +228,7 @@ chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
 # Disable root account
 sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
 
+umount "$CHROOTDIR/dev/pts"
 umount "$CHROOTDIR/proc"
 
 exit 0

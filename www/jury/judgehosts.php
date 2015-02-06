@@ -9,6 +9,10 @@
 require('init.php');
 $title = 'Judgehosts';
 
+if ( !isset($_REQUEST['cmd']) ) {
+	$refresh = '15;url=judgehosts.php';
+}
+
 require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Judgehosts</h1>\n\n";
@@ -26,18 +30,29 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 
 	requireAdmin();
 
+	$restrictions = $DB->q('KEYVALUETABLE SELECT restrictionid, restrictionname FROM judgehost_restriction ORDER BY restrictionid');
+	$restrictions = array(null => '-- No restrictions --') + $restrictions;
+
 	echo addForm('edit.php');
-	echo "\n<table>\n" .
-		"<tr><th>Hostname</th><th>Active</th></tr>\n";
+?>
+<script type="text/template" id="judgehost_template">
+<tr>
+	<td>
+		<?php echo addInput("data[{id}][hostname]", null, 20, 50, 'pattern="[A-Za-z0-9._-]+"'); ?>
+	</td>
+	<td>
+		<?php echo addSelect("data[{id}][active]", array(1=>'yes',0=>'no'), '1', true); ?>
+	</td>
+	<td>
+		<?php echo addSelect("data[{id}][restrictionid]", $restrictions, null, true); ?>
+	</td>
+</tr>
+</script>
+<?php
+	echo "\n<table id=\"judgehosts\">\n" .
+		"<tr><th>Hostname</th><th>Active</th><th>Restrictions</th></tr>\n";
 	if ( $cmd == 'add' ) {
-		for ($i=0; $i<10; ++$i) {
-			echo "<tr><td>" .
-				addInput("data[$i][hostname]", null, 20, 50, 'pattern="[A-Za-z0-9._-]+"') .
-				"</td><td>" .
-				addSelect("data[$i][active]",
-					array(1=>'yes',0=>'no'), '1', true) .
-				"</td></tr>\n";
-		}
+		// Nothing, added by javascript in addAddRowButton
 	} else {
 		$res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
 		$i = 0;
@@ -48,6 +63,8 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 				"</td><td>" .
 				addSelect("data[$i][active]",
 					array(1=>'yes',0=>'no'), $row['active'], true) .
+				"</td><td>" .
+				addSelect("data[$i][restrictionid]", $restrictions, $row['restrictionid'], true) .
 				"</td></tr>\n";
 			++$i;
 		}
@@ -56,6 +73,7 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 	echo addHidden('cmd', $cmd) .
 		( $cmd == 'add' ? addHidden('skipwhenempty', 'hostname') : '' ) .
 		addHidden('table','judgehost') .
+		( $cmd == 'add' ? addAddRowButton('judgehost_template', 'judgehosts') : '' ) .
 		addSubmit('Save Judgehosts') .
 		addEndForm();
 
@@ -64,8 +82,29 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 
 }
 
-$res = $DB->q('SELECT * FROM judgehost ORDER BY hostname');
+$res = $DB->q('SELECT judgehost.*, judgehost_restriction.restrictionname
+	       FROM judgehost
+	       LEFT JOIN judgehost_restriction USING (restrictionid)
+	       ORDER BY hostname');
 
+// NOTE: these queries do not take into account the time spent on a
+// current judging. It is tricky, however, to determine if a judging
+// is currently running or has crashed, so we simply ignore this.
+
+$now = now();
+$work2min    = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - GREATEST(%i,starttime))
+                       FROM judging WHERE endtime > %i GROUP BY judgehost',
+                      $now-2*60, $now-2*60);
+
+$work10min   = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - GREATEST(%i,starttime))
+                       FROM judging WHERE endtime > %i GROUP BY judgehost',
+                      $now-10*60, $now-10*60);
+
+$workcontest = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - GREATEST(%i,starttime))
+                       FROM judging WHERE endtime > %i GROUP BY judgehost',
+                      $cdata['starttime'], $cdata['starttime']);
+
+$clen = difftime($now,$cdata['starttime']);
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No judgehosts defined</p>\n\n";
@@ -73,7 +112,9 @@ if( $res->count() == 0 ) {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 	     "<tr><th scope=\"col\">hostname</th>" .
 		 "<th scope=\"col\">active</th>" .
-		 "<th class=\"sorttable_nosort\">status</th></tr>\n" .
+		 "<th class=\"sorttable_nosort\">status</th>" .
+	     "<th class=\"sorttable_nosort\">restriction</th>" .
+		 "<th class=\"sorttable_nosort\">load</th></tr>\n" .
 		 "</thead>\n<tbody>\n";
 	while($row = $res->next()) {
 		$link = '<a href="judgehost.php?id=' . urlencode($row['hostname']) . '">';
@@ -86,7 +127,7 @@ if( $res->count() == 0 ) {
 			echo "judgehost-nocon";
 			echo "\" title =\"never checked in\">";
 		} else {
-			$reltime = difftime(now(),$row['polltime']);
+			$reltime = floor(difftime($now,$row['polltime']));
 			if ( $reltime < JUDGEHOST_WARNING ) {
 				echo "judgehost-ok";
 			} else if ( $reltime < JUDGEHOST_CRITICAL ) {
@@ -97,6 +138,12 @@ if( $res->count() == 0 ) {
 			echo "\" title =\"last checked in $reltime seconds ago\">";
 		}
 		echo $link . CIRCLE_SYM . "</a></td>";
+		echo "<td>" . $link . (is_null($row['restrictionname']) ? '<i>none</i>' : $row['restrictionname']) . '</a></td>';
+		echo "<td title=\"load during the last 2 and 10 minutes and the whole contest\">" .$link .
+		    sprintf('%.2f&nbsp;%.2f&nbsp;%.2f',
+		            @$work2min[   $row['hostname']] / (2*60),
+		            @$work10min[  $row['hostname']] / (10*60),
+		            @$workcontest[$row['hostname']] / $clen) . "</a></td>";
 		if ( IS_ADMIN ) {
 			if ( $row['active'] ) {
 				$activepicto = "pause"; $activecmd = "deactivate";

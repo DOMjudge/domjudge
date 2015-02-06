@@ -1,6 +1,6 @@
 \documentclass[11pt,a4paper,twoside]{article}
 
-\usepackage{a4wide}
+\usepackage[hmargin=2.7cm,vmargin=3cm]{geometry}
 \usepackage{moreverb}
 \usepackage{graphicx}
 \usepackage{wrapfig}
@@ -25,7 +25,7 @@
 \newcommand{\cmd}[1]{\mbox{\texttt{#1}}}
 
 % Only show text if the submitclient is configured
-\newcommand{\ifcmdsubmit}[1]{\ifthenelse{\equal{\SUBMITDEFAULT}{0}}{}{#1}}
+\newcommand{\ifcmdsubmit}[1]{\ifthenelse{\equal{\SUBMITCLIENTENABLED}{yes}}{#1}{}}
 
 % Our titlepage, should be called at start of team manual document
 % Argument list:
@@ -41,7 +41,7 @@
 \newcommand{\titlestuff}[4]{%
 
   \thispagestyle{plain}
-  \vspace*{-3cm}
+  \vspace*{-2cm}
   \parbox[t]{\linewidth}{%
     \begin{wrapfigure}[1]{r}{2cm}
       \vspace*{-1cm}\hfill

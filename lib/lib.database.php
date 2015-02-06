@@ -49,7 +49,8 @@ class db
 		%l: literal (no quoting/escaping)
 		%_: nothing, but do process one argument
 		%A?: array of type ?, comma separated
-		%S: array of key => ., becomes key=., comma separated
+		%S:  array of key => ., becomes key=., comma separated
+		%SS: array of key => ., becomes key=., "AND" separated
 
 		query can be prepended with a keyword to change the returned data
 		format:
@@ -146,14 +147,14 @@ class db
 				case 'A':
 					if (!is_array($val) || !$val) {
 						throw new InvalidArgumentException(
-							"%A in \$DATABASE->q() has to correspond to a "
-							. "non-empty array, it's" . " now a '$val' (Query:"
+							"%A in \$DATABASE->q() has to correspond to an "
+							. "non-empty array, it is" . " now a '$val' (Query:"
 							. "'$key $query')!");
 					}
 					$GLOBALS['MODE'] = $part{1};
 					$query .= implode( ', '
-					                 , array_map( array($this, 'val2sql')
-					                            , $val));
+							 , array_map( array($this, 'val2sql')
+								    , $val));
 					unset($GLOBALS['MODE']);
 					$query .= substr($part,2);
 					break;
@@ -162,9 +163,15 @@ class db
 					foreach ( $val as $field => $value ) {
 						$parts[] = '`'.$field.'` = '.$this->val2sql($value);
 					}
-					$query .= implode(', ', $parts);
+					$separator = ', ';
+					$skip = 1;
+					if ( strlen($part) > 1 && $part{1} == 'S' ) {
+						$separator = ' AND ';
+						$skip = 2;
+					}
+					$query .= implode($separator, $parts);
 					unset($parts);
-					$query .= substr($part,1);
+					$query .= substr($part,$skip);
 					break;
 				case 's':
 				case 'c':
@@ -189,8 +196,15 @@ class db
 			user_error("Internal error in q()", E_USER_ERROR);
 		}
 		if ($argv) {
+			if(DEBUG) {
+				$backtrace = debug_backtrace();
+				$callsite = ' in file:' . $backtrace[0]['file'] . ', ' .
+					    ' line:' . $backtrace[0]['line'] . ', ';
+			} else {
+				$callsite = '';
+			}
 			throw new BadMethodCallException("Not all arguments to q() are"
-			    . " processed");
+			    . " processed.\n$callsite");
 		}
 
 		$res = $this->execute($query);
@@ -306,7 +320,7 @@ class db
 		}
 
 		$this->_connection = mysqli_init();
-		@mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, $this->flags);
+		@mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, NULL, NULL, $this->flags);
 
 		if(mysqli_connect_error() || !$this->_connection) {
 			throw new RuntimeException("Could not connect to database server "
@@ -370,6 +384,7 @@ class db_result
 	private $_count;
 	private $_tuple;
 	private $_nextused;
+	private $_fields;
 
 	function __construct($res)
 	{

@@ -46,27 +46,30 @@ function logged_in()
 	switch ( AUTH_METHOD ) {
 	case 'FIXED':
 		$username = FIXED_USER;
-		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $username);
+		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
+		                    WHERE username = %s AND enabled = 1', $username);
 		break;
 	case 'EXTERNAL':
 		if ( empty($_SERVER['REMOTE_USER']) ) {
 			$username = $userdata = null;
 		} else {
 			$username = $_SERVER['REMOTE_USER'];
-			$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $username);
+			$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
+			                    WHERE username = %s AND enabled = 1', $username);
 		}
 		break;
 
 	case 'IPADDRESS':
-		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE ip_address = %s', $ip);
+		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
+		                    WHERE ip_address = %s AND enabled = 1', $ip);
 		break;
 
 	case 'PHP_SESSIONS':
 	case 'LDAP':
 		if (session_id() == "") session_start();
 		if ( isset($_SESSION['username']) ) {
-			$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s',
-			                   $_SESSION['username']);
+			$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
+			                    WHERE username = %s AND enabled = 1', $_SESSION['username']);
 		}
 		break;
 
@@ -76,22 +79,22 @@ function logged_in()
 
 	if ( !empty($userdata) ) {
 		$username = $userdata['username'];
-		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team WHERE login = %s', $userdata['teamid']);
-		$DB->q('UPDATE user SET last_login = %s, last_ip_address = %s
-			    WHERE username = %s',
-			   now(), $ip, $username);
+		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team
+		                    WHERE teamid = %i AND enabled = 1', $userdata['teamid']);
 
 		// Pull the list of roles that a user has
 		$userdata['roles'] = get_user_roles($userdata['userid']);
 	}
 
 	if ( !empty($teamdata) ) {
-		$teamid = $teamdata['login'];
-		// record visit in team table
-		$hostname = gethostbyaddr($ip);
-		$DB->q('UPDATE team SET teampage_visited = %s, hostname = %s
-		        WHERE login = %s',
-		       now(), $hostname, $teamid);
+		$teamid = $teamdata['teamid'];
+		// Is this the first visit? Record that in the team table.
+		if ( empty($teamdata['teampage_first_visited']) ) {
+			$hostname = gethostbyaddr($ip);
+			$DB->q('UPDATE team SET teampage_first_visited = %s, hostname = %s
+			        WHERE teamid = %i',
+			       now(), $hostname, $teamid);
+		}
 	}
 
 	return $username!==NULL;
@@ -139,7 +142,6 @@ function show_loginpage()
 	case 'IPADDRESS':
 	case 'PHP_SESSIONS':
 	case 'LDAP':
-		if ( NONINTERACTIVE ) error("Not authenticated");
 		$title = 'Not Authenticated';
 		$menu = false;
 
@@ -159,6 +161,21 @@ Please supply your credentials below, or contact a staff member for assistance.
 <tr><td></td><td><input type="submit" value="Login" /></td></tr>
 </table>
 </form>
+
+<?php
+if (dbconfig_get('allow_registration', false)) { ?>
+<p>If you do not have an account, you can register for one below: </p>
+<form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">
+<input type="hidden" name="cmd" value="register" />
+<table>
+<tr><td><label for="login">Username:</label></td><td><input type="text" id="login" name="login" value="" size="15" maxlength="15" accesskey="l" /></td></tr>
+<tr><td><label for="passwd">Password:</label></td><td><input type="password" id="passwd" name="passwd" value="" size="15" maxlength="255" accesskey="p" /></td></tr>
+<tr><td><label for="passwd2">Retype password:</label></td><td><input type="password" id="passwd2" name="passwd2" value="" size="15" maxlength="255" accesskey="r" /></td></tr>
+<tr><td></td><td><input type="submit" value="Register" /></td></tr>
+</table>
+</form>
+<?php } // endif allow_registration ?>
+
 
 <?php
 		putDOMjudgeVersion();
@@ -261,12 +278,11 @@ function do_login()
 		}
 
 		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
-		                    WHERE username = %s', $user);
+		                    WHERE username = %s AND enabled = 1', $user);
 
 		if ( !$userdata ||
-			 $userdata['enabled']!='1' ||
 		     !ldap_check_credentials($userdata['username'], $pass) ) {
-			sleep(3);
+			sleep(1);
 			show_failed_login("Invalid username or password supplied. " .
 			                  "Please try again or contact a staff member.");
 		}
@@ -290,6 +306,8 @@ function do_login()
 
 	// Authentication success. We could just return here, but we do a
 	// redirect to clear the POST data from the browser.
+	$DB->q('UPDATE user SET last_login = %s, last_ip_address = %s
+	        WHERE username = %s', now(), $ip, $username);
 	$script = ($_SERVER['PHP_SELF']);
 	if ( preg_match( '/\/public\/login\.php$/', $_SERVER['PHP_SELF'] ) ) {
 		logged_in(); // fill userdata
@@ -310,16 +328,79 @@ function do_login_native($user, $pass)
 	global $DB, $userdata, $username;
 
 	$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
-			    WHERE username = %s AND password = %s',
-			   $user, md5($user."#".$pass));
+	                    WHERE username = %s AND password = %s AND enabled = 1',
+	                   $user, md5($user."#".$pass));
 
-	if ( !$userdata || $userdata['enabled']!='1') {
+	if ( !$userdata ) {
 		sleep(1);
 		show_failed_login("Invalid username or password supplied. " .
-				  "Please try again or contact a staff member.");
+		                  "Please try again or contact a staff member.");
 	}
 
 	$username = $userdata['username'];
+}
+
+function do_register() {
+        global $DB, $ip;
+        if ( !dbconfig_get('allow_registration', false) ) {
+            error("Self-Registration is disabled.");
+        }
+        if ( AUTH_METHOD != "PHP_SESSIONS" ) {
+            error("You can only register if the site is using PHP Sessions for authentication.");
+        }
+
+        $login = trim($_POST['login']);
+        $pass = trim($_POST['passwd']);
+        $pass2 = trim($_POST['passwd2']);
+
+        if ( $login == '' || $pass == '') {
+            error("You must enter all fields");
+        }
+
+        if ( !ctype_alnum($login) ) {
+            error("Username must consist of only alphanumeric characters.");
+        }
+
+        if ( $pass != $pass2 ) {
+            error("Your passwords do not match. Please go back and try registering again.");
+        }
+        $user = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $login);
+        if ( $user ) {
+            error("That login is already taken.");
+        }
+        $team = $DB->q('MAYBETUPLE SELECT * FROM team WHERE name = %s', $login);
+        if ( $team ) {
+            error("That login is already taken.");
+        }
+
+		// Create the team object
+        $i = array();
+        $i['name'] = $login;
+        $i['categoryid'] = 2; // Self-registered category id
+        $i['enabled'] = 1;
+        $i['comments'] = "Registered by $ip on " . date('r');
+
+        $teamid = $DB->q("RETURNID INSERT INTO team SET %S", $i);
+        auditlog('team', $teamid, 'registered by ' . $ip);
+
+		// Associate a user with the team we just made
+        $i = array();
+        $i['username'] = $login;
+        $i['password'] = md5($login."#".$pass);
+        $i['name'] = $login;
+        $i['teamid'] = $teamid;
+        $newid = $DB->q("RETURNID INSERT INTO user SET %S", $i);
+        auditlog('user', $newid, 'registered by ' . $ip);
+
+        $DB->q("INSERT INTO `userrole` (`userid`, `roleid`) VALUES ($newid, 3)");
+
+        $title = 'Account Registered';
+        $menu = false;
+
+        require(LIBWWWDIR . '/header.php');
+        echo "<h1>Account registered</h1>\n\n<p><a href=\"./\">Click here to login.</a></p>\n\n";
+        require(LIBWWWDIR . '/footer.php');
+		exit;
 }
 
 // Logout a team. Function does not return and should generate a page
@@ -362,7 +443,7 @@ function do_logout()
 	require(LIBWWWDIR . '/header.php');
 	echo "<h1>Logged out</h1>\n\n<p>Successfully logged out as user '" .
 	    htmlspecialchars($username) . "'.</p>\n" .
-	    "<p><a href=\"./\">Click here to return to the main site.</a></p>\n\n";
+	    "<p><a href=\"../\">Click here to return to the main site.</a></p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
@@ -370,5 +451,7 @@ function do_logout()
 function get_user_roles($userid)
 {
 	global $DB;
-	return $DB->q('COLUMN SELECT role.role FROM userrole LEFT JOIN role ON userrole.roleid = role.roleid WHERE userrole.userid = %s', $userid);
+	return $DB->q('COLUMN SELECT role.role FROM userrole
+	               LEFT JOIN role USING (roleid)
+	               WHERE userrole.userid = %s', $userid);
 }

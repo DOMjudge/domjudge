@@ -1,6 +1,7 @@
 <?php
 /**
- * View/download problem texts
+ * View/download a specific problem text. This page could later be
+ * extended to provide more details, like sample test cases.
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
@@ -8,18 +9,9 @@
 
 require('init.php');
 
+$id = getRequestID();
+if ( empty($id) ) error("Missing problem id");
+
 // download a given problem statement
-$id = @$_REQUEST['id'];
-if ( preg_match('/^' . IDENTIFIER_CHARS . '+$/', $id) ) {
-	putProblemText($id);
-	exit;
-}
-
-$title = 'Problem statements';
-require(LIBWWWDIR . '/header.php');
-
-echo "<h1>Problem statements</h1>\n\n";
-
-putProblemTextList();
-
-require(LIBWWWDIR . '/footer.php');
+putProblemText($id);
+exit;

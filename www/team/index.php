@@ -7,7 +7,6 @@
 require('init.php');
 $title = htmlspecialchars($teamdata['name']);
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
 
 // Don't use HTTP meta refresh, but javascript: otherwise we cannot
 // cancel it when the user starts editing the submit form. This also
@@ -17,41 +16,29 @@ $refreshtime = 300;
 $submitted = @$_GET['submitted'];
 
 $fdata = calcFreezeData($cdata);
+$langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions
+		    FROM language WHERE allow_submit = 1');
 
 echo "<script type=\"text/javascript\">\n<!--\n";
 
-if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
+if ( $fdata['cstarted'] ) {
+	$extra = "";
 	if ( dbconfig_get('separate_start_end',0) ) {
-		$now = now();
-		$probdata = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
-		                    WHERE cid = %i AND allow_submit = 1 AND
-		                    (start < %s OR start IS NULL) AND
-		                    (end   > %s or end   IS NULL)
-		                    ORDER BY probid', $cid, $now, $now);
-	} else {
-		$probdata = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
-		                    WHERE cid = %i AND allow_submit = 1
-		                    ORDER BY probid', $cid);
+		$extra = " AND (start < NOW() OR start IS NULL)
+			   AND (end   > NOW() or end   IS NULL) ";
 	}
+	$probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
+			    INNER JOIN contestproblem USING (probid)
+			    WHERE cid = %i AND allow_submit = 1 ' . $extra . '
+			    ORDER BY shortname', $cid);
 
-	$langdata = $DB->q('KEYVALUETABLE SELECT langid, extensions
-	                    FROM language WHERE allow_submit = 1');
-
-	echo "function getMainExtension(ext)\n{\n";
-	echo "\tswitch(ext) {\n";
-	foreach ( $langdata as $langid => $extensions ) {
-		$exts = json_decode($extensions);
-		if ( !is_array($exts) ) continue;
-		foreach ( $exts as $ext ) {
-			echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
-		}
-	}
-	echo "\t\tdefault: return '';\n\t}\n}\n\n";
+	putgetMainExtension($langdata);
 
 	echo "function getProbDescription(probid)\n{\n";
 	echo "\tswitch(probid) {\n";
-	foreach($probdata as $probid => $probname) {
-		echo "\t\tcase '" . htmlspecialchars($probid) . "': return '" . htmlspecialchars($probname) . "';\n";
+	foreach($probdata as $probinfo) {
+		echo "\t\tcase '" . htmlspecialchars($probinfo['shortname']) .
+		    "': return '" . htmlspecialchars($probinfo['name']) . "';\n";
 	}
 	echo "\t\tdefault: return '';\n\t}\n}\n\n";
 }
@@ -67,14 +54,15 @@ echo "<div id=\"submitlist\">\n";
 echo "<h3 class=\"teamoverview\"><a name=\"submit\" href=\"#submit\">Submit</a></h3>\n\n";
 
 
-if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
+if ( $fdata['cstarted'] ) {
 	if ( $submitted ) {
 		echo "<p class=\"submissiondone\">submission done <a href=\"./\">x</a></p>\n\n";
 	} else {
 		$maxfiles = dbconfig_get('sourcefiles_limit',100);
 
-		echo addForm('upload.php','post',null,'multipart/form-data', null, ' onreset="resetUploadForm('.$refreshtime .', ' . $maxfiles . ');"') .
-		"<p id=\"submitform\">\n\n";
+		echo addForm('upload.php','post',null,'multipart/form-data', null,
+		             ' onreset="resetUploadForm('.$refreshtime .', '.$maxfiles.');"') .
+		    "<p id=\"submitform\">\n\n";
 
 		echo "<input type=\"file\" name=\"code[]\" id=\"maincode\" required";
 		if ( $maxfiles > 1 ) {
@@ -84,16 +72,15 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 
 
 		$probs = array();
-		foreach($probdata as $probid => $dummy) {
-			$probs[$probid]=$probid;
+		foreach($probdata as $probinfo) {
+			$probs[$probinfo['probid']]=$probinfo['shortname'];
 		}
-		$pid = (isset($_REQUEST['id']) ? $_REQUEST['id'] : NULL);
-		if ( $pid == NULL ) {
-			$probs[''] = 'problem';
+		$probs[''] = 'problem';
+		echo addSelect('probid', $probs, '', true);
+		$langs = array();
+		foreach($langdata as $langid => $langdata) {
+			$langs[$langid] = $langdata['name'];
 		}
-		echo addSelect('probid', $probs, ($pid == NULL ? '' : $pid), true);
-		$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language
-				 WHERE allow_submit = 1 ORDER BY name');
 		$langs[''] = 'language';
 		echo addSelect('langid', $langs, '', true);
 
@@ -117,7 +104,7 @@ if ( ENABLE_WEBSUBMIT_SERVER && $fdata['cstarted'] ) {
 echo "<h3 class=\"teamoverview\"><a name=\"submissions\" href=\"#submissions\">Submissions</a></h3>\n\n";
 // call putSubmissions function from common.php for this team.
 $restrictions = array( 'teamid' => $teamid );
-putSubmissions($cdata, $restrictions, null, $submitted);
+putSubmissions(array($cdata['cid'] => $cdata), $restrictions, null, $submitted);
 
 ?>
 <div style="text-align:center;">
@@ -168,17 +155,26 @@ echo "</div>\n\n";
 
 echo "<div id=\"clarlist\">\n";
 
-$requests = $DB->q('SELECT * FROM clarification
-                    WHERE cid = %i AND sender = %s
+$requests = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname
+                    FROM clarification c
+                    LEFT JOIN problem p USING(probid)
+                    LEFT JOIN contestproblem cp USING (probid, cid)
+                    LEFT JOIN team t ON (t.teamid = c.recipient)
+                    LEFT JOIN team f ON (f.teamid = c.sender)
+                    WHERE c.cid = %i AND c.sender = %i
                     ORDER BY submittime DESC, clarid DESC', $cid, $teamid);
 
-$clarifications = $DB->q('SELECT c.*, u.type AS unread FROM clarification c
-                          LEFT JOIN team_unread u ON
-                          (c.clarid=u.mesgid AND u.type="clarification" AND u.teamid = %s)
+$clarifications = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname
+                          FROM clarification c
+                          LEFT JOIN problem p USING (probid)
+                          LEFT JOIN contestproblem cp USING (probid, cid)
+                          LEFT JOIN team t ON (t.teamid = c.recipient)
+                          LEFT JOIN team f ON (f.teamid = c.sender)
+                          LEFT JOIN team_unread u ON (c.clarid=u.mesgid AND u.teamid = %i)
                           WHERE c.cid = %i AND c.sender IS NULL
-                          AND ( c.recipient IS NULL OR c.recipient = %s )
+                          AND ( c.recipient IS NULL OR c.recipient = %i )
                           ORDER BY c.submittime DESC, c.clarid DESC',
-                          $teamid, $cid, $teamid);
+                         $teamid, $cid, $teamid);
 
 echo "<h3 class=\"teamoverview\"><a name=\"clarifications\" href=\"#clarifications\">Clarifications</a></h3>\n";
 

@@ -1,9 +1,56 @@
 DOMjudge Programming Contest Judging System
 
-Version 4.0.0 - DEV
+Version 4.1.0 - DEV
 -------------------
- - [INCOMPATIBLE CHANGE] checktestdata logical operators are now '&&' and '||'.
- - Introduce REST API; used by judgedaemon to communicate with domserver.
+ - [INCOMPATIBLE CHANGE] Changed to Kattis problem format; in particular
+   the specification of compare scripts has changed.
+ - Update dj_make_ubuntu_chroot to Trusty (#139, thanks Ruud Koot).
+ - Add support for HTML5 desktop notifications of clarifications,
+   judgings and judgehost status (#133).
+ - Fix diff display on team submission output page when showing the
+   result of sample testcases is enabled (#137, thanks Ruud Koot).
+ - In Haskell run script, set maximum stack size to someting small to
+   prevent ghc from running out of memory (#138, thanks Ruud Koot).
+ - Update ACE editor to 1.1.6, JScolor to 1.4.3.
+ - Improve installation on and documentation for RedHat(like) Linux.
+ - Apply runguard limits also to compare scripts (#68).
+ - Move checktestdata to stand-alone repository.
+ - In runguard, kill all remaing processes in the cgroup at the end
+   of the run; preventing leftover processes in corner cases like
+   detaching from itself.
+ - Add support for multiple simultaneous contests.
+ - Allow to add restrictions on contests, problems and languages to
+   judgehosts.
+ - Add optional per problem memory/output limits (Closes #152).
+ - Allow storing optional descriptive image for each test case.
+
+Version 4.0.0 - 22 July 2014
+----------------------------
+ - Fix chroot create script when using an APT proxy.
+ - Fix broken link to problem download for teams and public.
+ - Small tweaks to new judgehost load display.
+ - Display problem/language name instead of ID above submission lists.
+ - Install ACE and flot Javascript library files.
+ - Rename SQL upgrade snippet to release name.
+ - A few miscellaneous minor code improvements.
+
+Version 4.0.0 Release Candidate 1 - 8 July 2014
+-----------------------------------------------
+ - checktestdata logical operators are now '&&' and '||'.
+ - Introduce REST API; used by judgedaemon and submit client to communicate
+   with domserver. API is not officially declared 'stable' at this point.
+ - Removed submitdeamon; submit client now always uses the REST API.
+ - Removed xml plugin interface; use the REST API instead.
+ - Move nearly all judgehost configuration to the database, making it
+   controllable centrally from the DOMjudge web interface, including all
+   compile and check scripts.
+ - Problem, team and affiliation now have a numeric auto-incrementing ID.
+   Problem short names now need to be unique per contest, but not globally.
+ - Redesign authentication system: there's a single set of users for all
+   interfaces, which may have different roles, such as team or admin.
+ - Submitclient now also works with user/password authentication.
+ - New authentication scheme 'external' leverages Apache to provide a
+   REMOTE_USER value.
  - New scoreboard layout: more compact, affil. logos replaced by names.
  - Store timestamps in database as Unix epoch, independent of time zones
    with subsecond resolution.
@@ -15,14 +62,23 @@ Version 4.0.0 - DEV
  - Update jscolor and sorttable javascript to latest upstream versions.
  - Misc. minor bugs fixed reported by Coverity scan.
  - Replace flex++ by flexc++, fixes a missing build dep. and code cleanup.
- - Add support for new languages: Prolog, Ruby.
- - Add note that submit client requires the IPADDRESS (or FIXED)
-   authentication method (Closes #125).
+ - Add support for new languages: Prolog, Ruby, JavaScript.
  - Replace GeSHi syntax highlighter with Ace javascript code editor.
  - [security] Compile as unprivileged user to prevent compile-time access
    to e.g. testdata files.
  - Added rankcache_* tables to improve scoreboard page for large contests
    (thanks to the Amrita people), renamed scoreboard_* tables to match.
+ - Added support for publicly visible sample testcases.
+ - Move compile/run/compare scripts to database (Closes #123).
+ - Add option to have compiler-error not add penalty time (Closes #127).
+ - Gather and store metadata from runguard and start work to completely
+   separate program/runguard stderr output (Closes #122).
+ - Add statistics page with a graph of submissions during the contest.
+ - Add ICPC import/export, both via TSV files and via their web service.
+ - Notify admin of judgehosts that are down by indicating this in the
+   menu bar.
+ - Overhauled layout of submission detail page.
+ - Changed Java classname detection to use reflection instead of javap.
 
 Online-judge branch specific changes:
  - Add time_format configuration variable for webpage date/time display.

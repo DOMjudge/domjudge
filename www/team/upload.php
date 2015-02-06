@@ -6,18 +6,10 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-/* for easy parsing of the status by the commandline websubmit client */
-define('NONINTERACTIVE', isset($_REQUEST['noninteractive']));
-
 require('init.php');
 $title = 'Submit';
 
-if ( ! ENABLE_WEBSUBMIT_SERVER ) {
-	error("Websubmit disabled.");
-}
-
 if ( !isset($_POST['submit']) ) {
-	if (NONINTERACTIVE) error("No 'submit' done.");
 	header('Location: ./');
 	return;
 }
@@ -41,7 +33,6 @@ function err($string)
 {
 	// Annoying PHP: we need to import global variables here...
 	global $title;
-	if (NONINTERACTIVE) error($string);
 
 	require(LIBWWWDIR . '/header.php');
 
@@ -55,12 +46,6 @@ function err($string)
 	exit;
 }
 
-if ( count($_FILES['code']['tmp_name']) > dbconfig_get('sourcefiles_limit',100) ) {
-	err("Tried to submit more than the allowed number of source files.");
-}
-
-ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
-
 // rebuild array of filenames, paths to get rid of empty upload fields
 $FILEPATHS = $FILENAMES = array();
 foreach($_FILES['code']['tmp_name'] as $fileid => $tmpname ) {
@@ -71,13 +56,17 @@ foreach($_FILES['code']['tmp_name'] as $fileid => $tmpname ) {
 	}
 }
 
+// FIXME: the following checks are also performed inside
+// submit_solution.
+
 /* Determine the problem */
 $probid = @$_POST['probid'];
 $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
-                WHERE allow_submit = 1 AND probid = %s AND cid = %i',
+                INNER JOIN contestproblem USING (probid)
+                WHERE allow_submit = 1 AND probid = %i AND cid = %i',
                $probid, $cid);
 
-if ( ! isset($prob) ) err("Unable to find problem '$probid'");
+if ( ! isset($prob) ) err("Unable to find problem p$probid");
 $probid = $prob['probid'];
 
 if ( dbconfig_get('separate_start_end',0) ) {
@@ -101,21 +90,8 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
 if ( ! isset($lang) ) err("Unable to find language '$langid'");
 $langid = $lang['langid'];
 
-$sid = submit_solution($teamid, $probid, $langid, $FILEPATHS, $FILENAMES);
+$sid = submit_solution($teamid, $probid, $cid, $langid, $FILEPATHS, $FILENAMES);
 
-auditlog('submission', $sid, 'added', NONINTERACTIVE?'noninteractive':null);
+auditlog('submission', $sid, 'added', null, null, $cid);
 
-// Redirect back to index page when interactively used.
-if ( !NONINTERACTIVE ) {
-	header('Location: index.php?submitted=' . urlencode($sid) );
-}
-
-require(LIBWWWDIR . '/header.php');
-
-echo '<div id="uploadstatus">';
-if (NONINTERACTIVE) echo '<!-- noninteractive-upload-successful -->';
-echo "<p><a href=\"index.php?submitted=" . urlencode($sid) . "\">Submission successful.</a></p>";
-echo "</div>\n";
-
-require(LIBWWWDIR . '/footer.php');
-
+header('Location: index.php?submitted=' . urlencode($sid) );

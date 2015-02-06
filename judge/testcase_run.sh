@@ -3,7 +3,7 @@
 # Script to test (run and compare) submissions with a single testcase
 #
 # Usage: $0 <testdata.in> <testdata.out> <timelimit> <workdir>
-#           [<special-run> [<special-compare>]]
+#           <run> <compare>
 #
 # <testdata.in>     File containing test-input with absolute pathname.
 # <testdata.out>    File containing test-output with absolute pathname.
@@ -12,15 +12,11 @@
 # <workdir>         Directory where to execute submission in a chroot-ed
 #                   environment. For best security leave it as empty as possible.
 #                   Certainly do not place output-files there!
-# <special-run>     Extension name of specialized run or compare script to use.
-# <special-compare> Specify empty string for <special-run> if only
-#                   <special-compare> is to be used. The script
-#                   'run_<special-run>' or 'compare_<special-compare>'
-#                   will be called if argument is non-empty.
+# <run>             Absolute path to run script to use.
+# <compare>         Absolute path to compare script to use.
+# <compare-args>    Arguments to path to compare script
 #
-# For running the solution a script 'run' is called (default). For
-# usage of 'run' see that script. Likewise, for comparing results, a
-# program 'compare' is called by default.
+# Default run and compare scripts can be configured in the database.
 #
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
@@ -41,6 +37,13 @@ cleanup ()
 			rm -f "$WORKDIR/testdata.out"
 			ln -s "$TESTOUT" "$WORKDIR/testdata.out"
 		fi
+	fi
+
+	# Copy runguard and program stderr to system output. The display is
+	# truncated to normal size in the jury web interface.
+	if [ -s runguard.err ]; then
+		echo  "********** runguard stderr follows **********" >> system.out
+		cat runguard.err >> system.out
 	fi
 }
 
@@ -121,16 +124,15 @@ TESTIN="$1";    shift
 TESTOUT="$1";   shift
 TIMELIMIT="$1"; shift
 WORKDIR="$1";   shift
-SPECIALRUN="$1";
-SPECIALCOMPARE="$2";
+RUN_SCRIPT="$1";
+COMPARE_SCRIPT="$2";
+COMPARE_ARGS="$3";
 logmsg $LOG_DEBUG "arguments: '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$WORKDIR'"
-logmsg $LOG_DEBUG "optionals: '$SPECIALRUN' '$SPECIALCOMPARE'"
+logmsg $LOG_DEBUG "optionals: '$RUN_SCRIPT' '$COMPARE_SCRIPT' '$COMPARE_ARGS'"
 
-COMPARE_SCRIPT="$SCRIPTDIR/compare${SPECIALCOMPARE:+_$SPECIALCOMPARE}"
-RUN_SCRIPT="$SCRIPTDIR/run${SPECIALRUN:+_$SPECIALRUN}"
-if [ -n "$SPECIALRUN" ]; then
-	RUN_JURYPROG="$SCRIPTDIR/runjury_${SPECIALRUN}"
-fi
+# optional runjury program
+RUN_JURYPROG="${RUN_SCRIPT}jury"
+logmsg $LOG_DEBUG "run_juryprog: '$RUN_JURYPROG'"
 
 [ -r "$TESTIN"  ] || error "test-input not found: $TESTIN"
 [ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT"
@@ -156,11 +158,10 @@ fi
 chmod a+x "$WORKDIR" "$WORKDIR/execdir"
 
 # Create files which are expected to exist:
-touch error.out                  # Error output
-touch compare.out                # Compare output
-touch result.out                 # Result of comparison
+touch system.out                 # Judging system output (info/debug/error)
 touch program.out program.err    # Program output and stderr (for extra information)
-touch program.time program.exit  # Program runtime and exitcode
+touch program.meta runguard.err  # Metadata and runguard stderr
+touch compare.meta compare.err   # Compare runguard metadata and stderr
 
 logmsg $LOG_INFO "setting up testing (chroot) environment"
 
@@ -172,9 +173,9 @@ mkdir -p -m 0711 ../bin ../dev
 cp -p  "$RUN_SCRIPT"  ./run
 cp -pL "$STATICSHELL" ../bin/sh
 chmod a+rx run ../bin/sh
-# If using a custom run script, copy additional support programs
+# If using a custom runjury script, copy additional support programs
 # if required:
-if [ -n "$SPECIALRUN" -a -f "$RUN_JURYPROG" ]; then
+if [ -x "$RUN_JURYPROG" ]; then
 	cp -p "$RUN_JURYPROG" ./runjury
 	cp -pL "$RUNPIPE"     ../bin/runpipe
 	chmod a+rx runjury ../bin/runpipe
@@ -191,25 +192,19 @@ logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck ./run testdata.in program.out \
 	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT \
-	${USE_CHROOT:+-r "$PWD/.."} -u "$RUNUSER" \
-	-t $TIMELIMIT -C $TIMELIMIT -m $MEMLIMIT -f $FILELIMIT -p $PROCLIMIT \
-	-c -s $FILELIMIT -e program.err -E program.exit -T program.time -- \
-	$PREFIX/$PROGRAM 2>error.tmp
+	${USE_CHROOT:+-r "$PWD/.."} \
+	--nproc=$PROCLIMIT \
+	--no-core --streamsize=$FILELIMIT \
+	--user="$RUNUSER" \
+	--walltime=$TIMELIMIT --cputime=$TIMELIMIT \
+	--memsize=$MEMLIMIT --filesize=$FILELIMIT \
+	--stderr=program.err --outmeta=program.meta -- \
+	$PREFIX/$PROGRAM 2>runguard.err
 
 # Check for still running processes:
-if ps -u "$RUNUSER" >/dev/null 2>&1 ; then
-	error "found processes still running"
-fi
-
-# Append (heading/trailing) program stderr to error.tmp:
-if [ `wc -l < program.err` -gt 20 ]; then
-	echo "*** Program stderr output following (first and last 10 lines) ***" >>error.tmp
-	head -n 10 program.err >>error.tmp
-	echo "*** <snip> ***"  >>error.tmp
-	tail -n 10 program.err >>error.tmp
-elif [ -s program.err ]; then
-	echo "*** Program stderr output following ***" >>error.tmp
-	cat program.err >>error.tmp
+output=`ps -u "$RUNUSER" -o pid= -o comm= || true`
+if [ -n "$output" ] ; then
+	error "found processes still running as '$RUNUSER', check manually:\n$output"
 fi
 
 # We first compare the output, so that even if the submission gets a
@@ -220,75 +215,77 @@ logmsg $LOG_INFO "comparing output"
 # Copy testdata output, only after program has run
 cp "$TESTOUT" "$WORKDIR/testdata.out"
 
-logmsg $LOG_DEBUG "starting script '$COMPARE_SCRIPT'"
+logmsg $LOG_DEBUG "starting compare script '$COMPARE_SCRIPT'"
 
-if ! "$COMPARE_SCRIPT" testdata.in program.out testdata.out \
-                       result.out compare.out >compare.tmp 2>&1 ; then
-	exitcode=$?
-	cat error.tmp >>error.out
-	error "compare exited with exitcode $exitcode: `cat compare.tmp`";
+exitcode=0
+# Make files writable for $RUNUSER
+mkdir feedback                   # Create dir for feedback files
+for i in judgemessage.txt teammessage.txt score.txt judgeerror.txt diffposition.txt; do
+	touch feedback/$i        # Create possible feedback files
+	chmod a+w feedback/$i
+done
+# TODO; get and pass additional arguments to validator
+runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
+	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
+	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
+	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
+	                  >compare.tmp 2>&1
+
+# Append output validator error messages
+# TODO: display extra
+if [ -s feedback/judgeerror.txt ]; then
+	printf "\n---------- output validator (error) messages ----------\n" >> feedback/judgemessage.txt
+	cat feedback/judgeerror.txt >> feedback/judgemessage.txt
+fi
+
+logmsg $LOG_DEBUG "checking compare script exit-status: $exitcode"
+if grep '^time-result: .*timelimit' compare.meta >/dev/null 2>&1 ; then
+	echo "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:" >> feedback/judgemessage.txt
+	cat compare.tmp >> feedback/judgemessage.txt
+	cleanexit ${E_COMPARE_ERROR:--1}
+fi
+# Append output validator stdin/stderr - display extra?
+if [ -s compare.tmp ]; then
+	printf "\n---------- output validator stdout/stderr messages ----------\n" >> feedback/judgemessage.txt
+	cat compare.tmp >> feedback/judgemessage.txt
+fi
+if [ $exitcode -ne 42 ] && [ $exitcode -ne 43 ]; then
+	echo "Comparing failed with exitcode $exitcode, compare output:" >> feedback/judgemessage.txt
+	cat compare.tmp >> feedback/judgemessage.txt
+	cleanexit ${E_COMPARE_ERROR:--1}
 fi
 
 # Check for errors from running the program:
+if [ ! -r program.meta ]; then
+	error "'program.meta' not readable"
+fi
 logmsg $LOG_DEBUG "checking program run exit-status"
-if grep  'timelimit exceeded' error.tmp >/dev/null 2>&1 ; then
-	echo "Timelimit exceeded, runtime: `cat program.time`" >>error.out
-	cat error.tmp >>error.out
+# FIXME: a proper YAML parser should be used here, but the format is
+# rigid enough that we can use simple shell tools.
+timeused=`        grep '^time-used: ' program.meta | sed 's/time-used: //'`
+program_cputime=` grep '^cpu-time: '  program.meta | sed 's/cpu-time: //'`
+program_walltime=`grep '^wall-time: ' program.meta | sed 's/wall-time: //'`
+program_exit=`    grep '^exitcode: '  program.meta | sed 's/exitcode: //'`
+runtime="${program_cputime}s cpu, ${program_walltime}s wall"
+if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
+	echo "Timelimit exceeded, runtime: $runtime." >>system.out
 	cleanexit ${E_TIMELIMIT:--1}
 fi
-if [ ! -r program.exit ]; then
-	cat error.tmp >>error.out
-	error "'program.exit' not readable"
-fi
-# Check that program.exit was written to (no runguard error)
-if [ "`cat program.exit`" != "0" ]; then
-	echo "Non-zero exitcode `cat program.exit`" >>error.out
-	cat error.tmp >>error.out
+if [ "$program_exit" != "0" ]; then
+	echo "Non-zero exitcode $program_exit" >>system.out
 	cleanexit ${E_RUN_ERROR:--1}
 fi
 
-############################################################
-### Checks for other runtime errors:                     ###
-### Disabled, because these are not consistently         ###
-### reported the same way by all different compilers.    ###
-############################################################
-#if grep  'Floating point exception' error.tmp >/dev/null 2>&1 ; then
-#	echo "Floating point exception." >>error.out
-#	cleanexit ${E_RUN_ERROR:--1}
-#fi
-#if grep  'Segmentation fault' error.tmp >/dev/null 2>&1 ; then
-#	echo "Segmentation fault." >>tee error.out
-#	cleanexit ${E_RUN_ERROR:--1}
-#fi
-#if grep  'File size limit exceeded' error.tmp >/dev/null 2>&1 ; then
-#	echo "File size limit exceeded." >>error.out
-#	cat error.tmp >>error.out
-#	cleanexit ${E_OUTPUT_LIMIT:--1}
-#fi
-
-result=`grep '^result='      result.out | cut -d = -f 2- | tr '[:upper:]' '[:lower:]'`
-descrp=`grep '^description=' result.out | cut -d = -f 2-`
-descrp="${descrp:+ ($descrp)}"
-
-if [ "$result" = "accepted" ]; then
-	echo "Correct${descrp}! Runtime is `cat program.time` seconds." >>error.out
-	cat error.tmp >>error.out
+if [ $exitcode -eq 42 ]; then
+	echo "Correct! Runtime: $runtime." >>system.out
 	cleanexit ${E_CORRECT:--1}
-elif [ "$result" = "presentation error" ]; then
-	echo "Presentation error${descrp}." >>error.out
-	cat error.tmp >>error.out
-	cleanexit ${E_PRESENTATION_ERROR:--1}
-elif [ ! -s program.out ]; then
-	echo "Program produced no output." >>error.out
-	cat error.tmp >>error.out
-	cleanexit ${E_NO_OUTPUT:--1}
-elif [ "$result" = "wrong answer" ]; then
-	echo "Wrong answer${descrp}." >>error.out
-	cat error.tmp >>error.out
-	cleanexit ${E_WRONG_ANSWER:--1}
-else
-	echo "Unknown result: Wrong answer#${descrp}#${result}#." >>error.out
-	cat error.tmp >>error.out
+elif [ $exitcode -eq 43 ]; then
+	# Special case detect no-output:
+	if [ ! -s program.out ];  then
+		echo "Program produced no output." >>system.out
+		cleanexit ${E_NO_OUTPUT:--1}
+	fi
+	echo "Wrong answer." >>system.out
 	cleanexit ${E_WRONG_ANSWER:--1}
 fi
 

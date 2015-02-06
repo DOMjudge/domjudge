@@ -7,7 +7,8 @@
  */
 
 require('init.php');
-$title = ($nunread_clars ? '('.$nunread_clars.') ' : '') . 'Clarification Requests';
+
+$title = 'Clarification Requests';
 
 $jury_member = $username;
 
@@ -16,23 +17,43 @@ require(LIBWWWDIR . '/clarification.php');
 
 echo "<h1>Clarifications</h1>\n\n";
 
+if ( empty($cids) ) {
+	warning('No active contest(s)');
+	require(LIBWWWDIR . '/footer.php');
+	exit;
+}
+
+$contestids = $cids;
+if ( $cid !== null ) {
+    $contestids = array($cid);
+}
+
 echo "<p><a href=\"clarification.php\">Send Clarification</a></p>\n";
 echo "<p><a href=\"#newrequests\">View New Clarification Requests</a></p>\n";
 echo "<p><a href=\"#oldrequests\">View Old Clarification Requests</a></p>\n";
 echo "<p><a href=\"#clarifications\">View General Clarifications</a></p>\n\n";
 
-$newrequests    = $DB->q('SELECT * FROM clarification
-                          WHERE sender IS NOT NULL AND cid = %i AND answered = 0
-                          ORDER BY submittime DESC, clarid DESC', $cid);
+$sqlbody = 'SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname,
+                   co.shortname AS contestshortname
+            FROM clarification c
+            LEFT JOIN problem p USING(probid)
+            LEFT JOIN contestproblem cp USING (probid, cid)
+            LEFT JOIN team t ON (t.teamid = c.recipient)
+            LEFT JOIN team f ON (f.teamid = c.sender)
+            LEFT JOIN contest co USING (cid)
+            WHERE c.cid IN (%Ai) ';
 
-$oldrequests    = $DB->q('SELECT * FROM clarification
-                          WHERE sender IS NOT NULL AND cid = %i AND answered != 0
-                          ORDER BY submittime DESC, clarid DESC', $cid);
+$newrequests    = $DB->q($sqlbody .
+                         'AND c.sender IS NOT NULL AND c.answered = 0
+			  ORDER BY submittime DESC, clarid DESC', $contestids);
 
-$clarifications = $DB->q('SELECT * FROM clarification
-                          WHERE sender IS NULL AND cid = %i
-                          AND ( respid IS NULL OR recipient IS NULL )
-                          ORDER BY submittime DESC, clarid DESC', $cid);
+$oldrequests    = $DB->q($sqlbody .
+                         'AND c.sender IS NOT NULL AND c.answered != 0
+			  ORDER BY submittime DESC, clarid DESC', $contestids);
+
+$clarifications = $DB->q($sqlbody .
+                         'AND c.sender IS NULL AND ( c.respid IS NULL OR c.recipient IS NULL )
+			  ORDER BY submittime DESC, clarid DESC', $contestids);
 
 echo '<h3><a name="newrequests"></a>' .
 	"New Requests:</h3>\n";

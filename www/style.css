@@ -31,12 +31,7 @@ a:active          { color: red;    }
 
 .disabled         { color: silver; }
 .disabled a       { color: gray;   }
-.disabled .circle {
-	opacity: 0.2;
-	/* what follows is for IE-compatibility */
-	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
-	filter: alpha(opacity=20);
-}
+.disabled .circle { opacity: 0.2;  }
 .nodata           { color: gray; font-style: italic; }
 
 /* general table layout (not in scoreboard or lists) */
@@ -130,6 +125,8 @@ span.extra {
 	padding: 2px;
 	padding-left: 5px;
 	padding-right: 5px;
+	position: relative;
+	z-index: 1;
 }
 #menutop a.new {
 	color: #FF0000;
@@ -145,10 +142,9 @@ span.extra {
 	border: 1px dashed #ccc;
 	padding: 4px;
 	color: gray;
-	z-index: -1;
 }
 #timeleft { color: #800080;}
-#refresh {
+#toggles {
 	margin-top: 5px;
 	margin-bottom: 5px;
 }
@@ -182,12 +178,15 @@ legend {
 	border-collapse: collapse;
 	clear: both;
 }
-.scoreboard td { 
+.scoreboard td {
 	font-size: small;
 	vertical-align: middle;
 	text-align: center;
 }
-.scoreboard tr { border-bottom: 1px solid black; }
+.scoreboard tr {
+	border-bottom: 1px solid black; 
+	height: 42px;
+}
 .scoreboard td, .scoreboard th {
 	border-right: 1px solid silver;
 }
@@ -202,7 +201,7 @@ legend {
 	padding: 0px;
 	max-width: 15em;
 	text-align: right;
-	font-weight: bold; 
+	font-weight: bold;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -212,17 +211,24 @@ legend {
 .univ {
 	font-size: 80%;
 	font-weight: normal;
-	color: darkgray;
+	color: dimgrey;
 }
 
 .scoreheader {
 	font-variant: small-caps;
 	border-bottom: 2px solid black;
+	white-space: nowrap;
 }
 .score_correct   { background: #60e760; }
 .score_first     { background: #1daa1d !important; }
 .score_pending   { background: #6666FF; }
 .score_incorrect { background: #e87272; }
+
+.tc_box { text-align:center;font-size:85%;width:1.2em;display:inline-block;padding:2px;margin:1px;color:black;}
+.tc_correct   { background: #60e760; }
+.tc_pending   { background: #6666FF; }
+.tc_unused    { background: #BBBBBB; }
+.tc_incorrect { background: #e87272; }
 
 #scoresolv,#scoretotal { width: 2.5em; }
 .scorenc,.scorett,.scorepl { text-align: center; width: 2ex; }
@@ -237,7 +243,7 @@ td.scorenc { border-color: silver; border-right: 0; }
 	border-bottom: none;
 	font-variant: small-caps;
 }
-#scorethisisme .scoretn {
+.scorethisisme .scoretn {
 	background: #ff6600;
 	font-weight: bold;
 }
@@ -455,4 +461,24 @@ ul.tabbernav li.tabberactive a:hover
 .heart {
 	padding: .3em;
 	cursor: pointer;
+}
+
+table.lcsdiff {
+	border-spacing: 0;
+	border-collapse: collapse;
+}
+table.lcsdiff td.linenr {
+	background-color: darkgray;
+	text-align: right;
+	border-right: solid 1px black;
+	padding-right: 7px;
+}
+
+ins {
+	background: #dfd;
+	text-decoration: none;
+}
+del {
+	background: #fdd;
+	text-decoration: none;
 }

@@ -22,7 +22,9 @@
    output of the command, unless that is optionally redirected to file.
 
    The command and its children are sent a SIGTERM after the runtime
-   has passed, followed by a SIGKILL after 'killdelay'.
+   has passed, followed by a SIGKILL after 'killdelay'. The program is
+   considered to have finished when the main program thread exits. At
+   that time any children still running are killed.
  */
 
 #include "config.h"
@@ -63,6 +65,7 @@
 #include <inttypes.h>
 #include <libcgroup.h>
 #include <sched.h>
+#include <sys/sysinfo.h>
 #else
 #undef USE_CGROUPS
 #endif
@@ -111,8 +114,9 @@ char **cmdargs;
 char  *rootdir;
 char  *stdoutfilename;
 char  *stderrfilename;
-char  *exitfilename;
-char  *timefilename;
+char  *metafilename;
+FILE  *metafile;
+
 #ifdef USE_CGROUPS
 char  *cgroupname;
 const char *cpuset;
@@ -133,8 +137,7 @@ int use_group;
 int redir_stdout;
 int redir_stderr;
 int limit_streamsize;
-int outputexit;
-int outputtime;
+int outputmeta;
 int outputtimetype;
 int no_coredump;
 int be_verbose;
@@ -179,8 +182,7 @@ struct option const long_opts[] = {
 	{"stdout",     required_argument, NULL,         'o'},
 	{"stderr",     required_argument, NULL,         'e'},
 	{"streamsize", required_argument, NULL,         's'},
-	{"outexit",    required_argument, NULL,         'E'},
-	{"outtime",    required_argument, NULL,         'T'},
+	{"outmeta",    required_argument, NULL,         'M'},
 	{"verbose",    no_argument,       NULL,         'v'},
 	{"quiet",      no_argument,       NULL,         'q'},
 	{"help",       no_argument,       &show_help,    1 },
@@ -191,6 +193,7 @@ struct option const long_opts[] = {
 void warning(   const char *, ...) __attribute__((format (printf, 1, 2)));
 void verbose(   const char *, ...) __attribute__((format (printf, 1, 2)));
 void error(int, const char *, ...) __attribute__((format (printf, 2, 3)));
+void write_meta(const char*, const char *, ...) __attribute__((format (printf, 2, 3)));
 
 void warning(const char *format, ...)
 {
@@ -241,7 +244,30 @@ void error(int errnum, const char *format, ...)
 	fprintf(stderr,"\nTry `%s --help' for more information.\n",progname);
 	va_end(ap);
 
+	write_meta("internal-error","%s","runguard error");
+
 	exit(exit_failure);
+}
+
+void write_meta(const char *key, const char *format, ...)
+{
+	va_list ap;
+
+	if ( !outputmeta ) return;
+
+	va_start(ap,format);
+
+	if ( fprintf(metafile,"%s: ",key)<=0 ) {
+		error(0,"cannot write to file `%s'",metafilename);
+	}
+	if ( vfprintf(metafile,format,ap)<0 ) {
+		error(0,"cannot write to file `%s'(vfprintf)",metafilename);
+	}
+	if ( fprintf(metafile,"\n")<=0 ) {
+		error(0,"cannot write to file `%s'",metafilename);
+	}
+
+	va_end(ap);
 }
 
 void version(const char *prog, const char *vers)
@@ -271,13 +297,12 @@ Run COMMAND with restrictions.\n\
   -f, --filesize=SIZE    set maximum created filesize to SIZE kB;\n");
 	printf("\
   -p, --nproc=N          set maximum no. processes to N\n\
-  -P, --cpuset=ID        use only processor number ID\n\
+  -P, --cpuset=ID        use only processor number ID (or set, e.g. \"0,2-3\")\n\
   -c, --no-core          disable core dumps\n\
   -o, --stdout=FILE      redirect COMMAND stdout output to FILE\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
   -s, --streamsize=SIZE  truncate COMMAND stdout/stderr streams at SIZE kB\n\
-  -E, --outexit=FILE     write COMMAND exitcode to FILE\n\
-  -T, --outtime=FILE     write COMMAND runtime to FILE\n");
+  -M, --outmeta=FILE     write metadata (runtime, exitcode, etc.) to FILE\n");
 	printf("\
   -v, --verbose          display some extra warnings and information\n\
   -q, --quiet            suppress all warnings and verbose output\n\
@@ -296,26 +321,12 @@ real user ID.\n");
 
 void output_exit_time(int exitcode)
 {
-	FILE  *outputfile;
-	double walldiff, cpudiff, userdiff, sysdiff, outdiff;
+	double walldiff, cpudiff, userdiff, sysdiff;
 	int timelimit_reached;
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
 	verbose("command exited with exitcode %d",exitcode);
-
-	if ( outputexit ) {
-		verbose("writing exitcode to file `%s'",exitfilename);
-
-		if ( (outputfile = fopen(exitfilename,"w"))==NULL ) {
-			error(errno,"cannot open `%s'",exitfilename);
-		}
-		if ( fprintf(outputfile,"%d\n",exitcode)<=0 ) {
-			error(0,"cannot write to file `%s'",exitfilename);
-		}
-		if ( fclose(outputfile) ) {
-			error(errno,"closing file `%s'",exitfilename);
-		}
-	}
+	write_meta("exitcode","%d",exitcode);
 
 	walldiff = (endtime.tv_sec  - starttime.tv_sec ) +
 	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
@@ -323,6 +334,11 @@ void output_exit_time(int exitcode)
 	userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
 	sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
 	cpudiff = userdiff + sysdiff;
+
+	write_meta("wall-time","%.3f", walldiff);
+	write_meta("user-time","%.3f", userdiff);
+	write_meta("sys-time", "%.3f", sysdiff);
+	write_meta("cpu-time", "%.3f", cpudiff);
 
 	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys",
 	        walldiff, userdiff, sysdiff);
@@ -337,36 +353,25 @@ void output_exit_time(int exitcode)
 		warning("timelimit exceeded (soft cpu time)");
 	}
 
-	if ( outputtime ) {
-		verbose("writing runtime to file `%s'",timefilename);
-		switch ( outputtimetype ) {
-		case WALL_TIME_TYPE:
-			outdiff = walldiff;
-			timelimit_reached = walllimit_reached;
-			break;
-		case CPU_TIME_TYPE:
-			outdiff = cpudiff;
-			timelimit_reached = cpulimit_reached;
-			break;
-		default:
-			error(0,"cannot write unknown time type `%d' to file",outputtimetype);
-		}
-		/* Hard limitlimit reached always has precedence. */
-		if ( (walllimit_reached | cpulimit_reached) & hard_timelimit ) {
-			timelimit_reached |= hard_timelimit;
-		}
-
-		if ( (outputfile = fopen(timefilename,"w"))==NULL ) {
-			error(errno,"cannot open `%s'",timefilename);
-		}
-		if ( fprintf(outputfile,"%.3f %s\n",outdiff,
-		             output_timelimit_str[timelimit_reached])<=0 ) {
-			error(0,"cannot write to file `%s'",timefilename);
-		}
-		if ( fclose(outputfile) ) {
-			error(errno,"closing file `%s'",timefilename);
-		}
+	switch ( outputtimetype ) {
+	case WALL_TIME_TYPE:
+		write_meta("time-used","wall-time");
+		timelimit_reached = walllimit_reached;
+		break;
+	case CPU_TIME_TYPE:
+		write_meta("time-used","cpu-time");
+		timelimit_reached = cpulimit_reached;
+		break;
+	default:
+		error(0,"cannot write unknown time type `%d' to file",outputtimetype);
 	}
+
+	/* Hard limitlimit reached always has precedence. */
+	if ( (walllimit_reached | cpulimit_reached) & hard_timelimit ) {
+		timelimit_reached |= hard_timelimit;
+	}
+
+	write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
 }
 
 #ifdef USE_CGROUPS
@@ -391,6 +396,7 @@ void output_cgroup_stats()
 	}
 
 	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
+	write_meta("memory-bytes","%" PRId64, max_usage);
 
 	cgroup_free(&cg);
 }
@@ -458,6 +464,21 @@ void cgroup_attach()
 	cgroup_free(&cg);
 }
 
+void cgroup_kill()
+{
+	int ret;
+	void *handle = NULL;
+	pid_t pid;
+
+	/* kill any remaining tasks, and wait for them to be gone */
+	while(1) {
+		ret = cgroup_get_task_begin(cgroupname, "memory", &handle, &pid);
+		cgroup_get_task_end(&handle);
+		if (ret == ECGEOF) break;
+		kill(pid, SIGKILL);
+	}
+}
+
 void cgroup_delete()
 {
 	int ret;
@@ -504,16 +525,23 @@ void terminate(int sig)
 		warning("received signal %d: aborting command",sig);
 	}
 
-	/* First try to kill graciously, then hard */
+	write_meta("signal", "%d", sig);
+
+	/* First try to kill graciously, then hard.
+	   Don't report an already exited process as error. */
 	verbose("sending SIGTERM");
-	if ( kill(-child_pid,SIGTERM)!=0 ) error(errno,"sending SIGTERM to command");
+	if ( kill(-child_pid,SIGTERM)!=0 && errno!=ESRCH ) {
+		error(errno,"sending SIGTERM to command");
+	}
 
 	/* Prefer nanosleep over sleep because of higher resolution and
 	   it does not interfere with signals. */
 	nanosleep(&killdelay,NULL);
 
 	verbose("sending SIGKILL");
-	if ( kill(-child_pid,SIGKILL)!=0 ) error(errno,"sending SIGKILL to command");
+	if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
+		error(errno,"sending SIGKILL to command");
+	}
 
 	/* Wait another while to make sure the process is killed by now. */
 	nanosleep(&killdelay,NULL);
@@ -670,6 +698,15 @@ void setrestrictions()
 		if ( setrlimit(RLIMIT_CORE,&lim)!=0 ) error(errno,"disabling core dumps");
 	}
 
+#ifdef USE_CGROUPS
+	/* Put the child process in the cgroup */
+	cgroup_attach();
+#endif
+
+	/* Run the command in a separate process group so that the command
+	   and all its children can be killed off with one signal. */
+	if ( setsid()==-1 ) error(errno,"setsid failed");
+
 	/* Set root-directory and change directory to there. */
 	if ( use_root ) {
 		/* Small security issue: when running setuid-root, people can find
@@ -718,7 +755,9 @@ void setrestrictions()
 		if ( setuid(getuid()) ) error(errno,"cannot reset real user ID");
 		verbose("reset user ID to `%d' for command",getuid());
 	}
-	if ( geteuid()==0 || getuid()==0 ) error(0,"root privileges not dropped. Do not run judgedaemon as root.");
+	if ( geteuid()==0 || getuid()==0 ) {
+		error(0,"root privileges not dropped. Do not run judgedaemon as root.");
+	}
 }
 
 int main(int argc, char **argv)
@@ -748,14 +787,14 @@ int main(int argc, char **argv)
 
 	/* Parse command-line options */
 	use_root = use_walltime = use_cputime = use_user = no_coredump = 0;
-	outputexit = outputtime = walllimit_reached = cpulimit_reached = 0;
+	outputmeta = walllimit_reached = cpulimit_reached = 0;
 	outputtimetype = CPU_TIME_TYPE;
 	memsize = filesize = nproc = RLIM_INFINITY;
 	redir_stdout = redir_stderr = limit_streamsize = 0;
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:E:T:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:M:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -835,13 +874,9 @@ int main(int argc, char **argv)
 				streamsize *= 1024;
 			}
 			break;
-		case 'E': /* outputexit option */
-			outputexit = 1;
-			exitfilename = strdup(optarg);
-			break;
-		case 'T': /* outputtime option */
-			outputtime = 1;
-			timefilename = strdup(optarg);
+		case 'M': /* outputmeta option */
+			outputmeta = 1;
+			metafilename = strdup(optarg);
 			break;
 		case 'v': /* verbose option */
 			be_verbose = 1;
@@ -866,6 +901,10 @@ int main(int argc, char **argv)
 	/* Command to be executed */
 	cmdname = argv[optind];
 	cmdargs = argv+optind;
+
+	if ( outputmeta && (metafile = fopen(metafilename,"w"))==NULL ) {
+		error(errno,"cannot open `%s'",metafilename);
+	}
 
 	/* Check that new uid is in list of valid uid's.
 	   This must be done before chroot for /etc/passwd lookup. */
@@ -901,6 +940,17 @@ int main(int argc, char **argv)
 	}
 
 #ifdef USE_CGROUPS
+	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
+		int ret = strtol(cpuset, &ptr, 10);
+		/* check if input is only a single integer */
+		if ( *ptr == '\0' ) {
+			/* check if we have enough cores available */
+			if ( ret < 0 || ret >= get_nprocs() ) {
+				error(0, "processor ID %d given as cpuset, but only %d cores available",
+				      ret, get_nprocs());
+			}
+		}
+	}
 	/* Make libcgroup ready for use */
 	ret = cgroup_init();
 	if ( ret!=0 ) {
@@ -943,7 +993,12 @@ int main(int argc, char **argv)
 	case -1: /* error */
 		error(errno,"cannot fork");
 	case  0: /* run controlled command */
-		/* Connect pipes to command (stdin/)stdout/stderr and close unneeded fd's */
+		/* Apply all restrictions for child process. */
+		setrestrictions();
+
+		/* Connect pipes to command (stdin/)stdout/stderr and close
+		 * unneeded fd's. Do this after setting restrictions to let
+		 * any messages not go to command stderr pipe. */
 		for(i=1; i<=2; i++) {
 			if ( dup2(child_pipefd[i][PIPE_IN],i)<0 ) {
 				error(errno,"redirecting child fd %d",i);
@@ -953,18 +1008,6 @@ int main(int argc, char **argv)
 				error(errno,"closing pipe for fd %d",i);
 			}
 		}
-
-		/* Run the command in a separate process group so that the command
-		   and all its children can be killed off with one signal. */
-		if ( setsid()==-1 ) error(errno,"setsid failed");
-
-#ifdef USE_CGROUPS
-		/* Put the child process in the cgroup */
-		cgroup_attach();
-#endif
-
-		/* Apply all restrictions for child process. */
-		setrestrictions();
 
 		/* And execute child command. */
 		execvp(cmdname,cmdargs);
@@ -1046,7 +1089,10 @@ int main(int argc, char **argv)
 			error(errno,"getting start clock ticks");
 		}
 
-		/* Wait for child data or exit. */
+		/* Wait for child data or exit.
+		   Initialize status here to quelch clang++ warning about
+		   uninitialized value; it is set by the wait() call. */
+		status = 0;
 		while ( 1 ) {
 
 			FD_ZERO(&readfds);
@@ -1068,7 +1114,8 @@ int main(int argc, char **argv)
 
 			/* Check to see if data is available and pass it on */
 			for(i=1; i<=2; i++) {
-				if ( child_pipefd[i][PIPE_OUT] != -1 && FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
+				if ( child_pipefd[i][PIPE_OUT] != -1 &&
+				     FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
 					nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
 					if ( nread==-1 ) error(errno,"reading child fd %d",i);
 					if ( nread==0 ) {
@@ -1122,6 +1169,7 @@ int main(int argc, char **argv)
 
 #ifdef USE_CGROUPS
 		output_cgroup_stats();
+		cgroup_kill();
 		cgroup_delete();
 #endif
 
@@ -1129,6 +1177,10 @@ int main(int argc, char **argv)
 		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
 
 		output_exit_time(exitcode);
+
+		if ( outputmeta && fclose(metafile)!=0 ) {
+			error(errno,"closing file `%s'",metafilename);
+		}
 
 		/* Return the exitstatus of the command */
 		return exitcode;

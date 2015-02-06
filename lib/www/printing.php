@@ -17,7 +17,10 @@ function have_printing()
 
 function put_print_form()
 {
-	global $DB, $langexts, $pagename;
+	global $DB, $pagename;
+
+	$langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions FROM language
+			 WHERE allow_submit = 1 ORDER BY name');
 	echo "<script type=\"text/javascript\">\n<!--\n";
 	echo "function detectLanguage(filename)
 	{
@@ -38,12 +41,8 @@ function put_print_form()
 		}
 
 	}\n";
-	echo "function getMainExtension(ext)\n{\n";
-	echo "\tswitch(ext) {\n";
-	foreach($langexts as $ext => $langid) {
-		echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
-	}
-	echo "\t\tdefault: return '';\n\t}\n}\n\n";
+
+	putgetMainExtension($langs);
 
 	echo "// -->\n</script>\n";
 
@@ -59,10 +58,12 @@ function put_print_form()
 	<tr><td><label for="langid">Language</label>:</td>
 	    <td><?php
 
-	$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language
-			 WHERE allow_submit = 1 ORDER BY name');
-	$langs[''] = 'plain text';
-	echo addSelect('langid', $langs, '', true);
+	$langlist = array();
+	foreach($langs as $langid => $langdata) {
+		$langlist[$langid] = $langdata['name'];
+	}
+	$langlist[''] = 'plain text';
+	echo addSelect('langid', $langlist, '', true);
 
 	?></td>
 	</tr>

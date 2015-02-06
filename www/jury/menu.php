@@ -2,29 +2,36 @@
 <a href="index.php" accesskey="h">home</a>
 <?php	if ( checkrole('balloon') ) { ?>
 <a href="balloons.php" accesskey="b">balloons</a>
-<?php   } ?>
+<?php	} ?>
 <?php	if ( checkrole('jury') ) { ?>
 <a href="problems.php" accesskey="p">problems</a>
-<?php   } ?>
-<?php	if ( IS_ADMIN ) { ?>
-<a href="judgehosts.php" accesskey="j">judgehosts</a>
-<?php   } ?>
+<?php	} ?>
+<?php	if ( IS_ADMIN ) {
+	$ndown = count($updates['judgehosts']);
+	if ( $ndown > 0 ) { ?>
+<a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts">judgehosts (<?php echo $ndown ?> down)</a>
+<?php	} else { ?>
+<a href="judgehosts.php" accesskey="j" id="menu_judgehosts">judgehosts</a>
+<?php	}
+	} ?>
 <?php	if ( checkrole('jury') ) { ?>
 <a href="teams.php" accesskey="t">teams</a>
 <a href="users.php" accesskey="u">users</a>
-<?php	if ( ( $nunread_clars > 0 ) && checkrole('jury') ) { ?>
-<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications (<?php echo $nunread_clars?> new)</a>
+<?php
+	$nunread = count($updates['clarifications']);
+	if ( $nunread > 0 ) { ?>
+<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications (<?php echo $nunread ?> new)</a>
 <?php	} else { ?>
 <a href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications</a>
 <?php	} ?>
 <a href="submissions.php" accesskey="s">submissions</a>
-<?php   } ?>
-<?php   if ( have_printing() ) { ?>
+<?php	} ?>
+<?php	if ( have_printing() ) { ?>
 <a href="print.php" accesskey="p">print</a>
-<?php   } ?>
+<?php	} ?>
 <?php	if ( checkrole('jury') ) { ?>
 <a href="scoreboard.php" accesskey="b">scoreboard</a>
-<?php   } ?>
+<?php	} ?>
 <?php
 if ( checkrole('team') ) {
 	echo "<a target=\"_top\" href=\"../team/\" accesskey=\"t\">→team</a>\n";
@@ -37,14 +44,34 @@ if ( checkrole('team') ) {
 
 putClock();
 
+$notify_flag  =  isset($_COOKIE["domjudge_notify"])  && (bool)$_COOKIE["domjudge_notify"];
 $refresh_flag = !isset($_COOKIE["domjudge_refresh"]) || (bool)$_COOKIE["domjudge_refresh"];
 
+echo "<div id=\"toggles\">\n";
 if ( isset($refresh) ) {
-	echo "<div id=\"refresh\">\n" .
-	    addForm('toggle_refresh.php', 'get') .
+	echo addForm('toggle_refresh.php', 'get') .
 	    addHidden('enable', ($refresh_flag ? 0 : 1)) .
-	    addSubmit(($refresh_flag ? 'Dis' : 'En' ) . 'able refresh', 'submit') .
-	    addEndForm() . "</div>\n";
+	    addSubmit(($refresh_flag ? 'Dis' : 'En' ) . 'able refresh', 'toggle_refresh') .
+	    addEndForm();
 }
 
-echo "</div></nav>\n";
+// Default hide this from view, only show when javascript and
+// notifications are available:
+echo '<div id="notify" style="display: none">' .
+	addForm('toggle_notify.php', 'get') .
+	addHidden('enable', ($notify_flag ? 0 : 1)) .
+	addSubmit(($notify_flag ? 'Dis' : 'En' ) . 'able notifications', 'toggle_notify',
+	          'return toggleNotifications(' . ($notify_flag ? 'false' : 'true') . ')') .
+	addEndForm() . "</div>";
+
+?>
+<script type="text/javascript">
+<!--
+    if ( 'Notification' in window ) {
+		document.getElementById('notify').style.display = 'block';
+	}
+// -->
+</script>
+
+</div>
+</div></nav>

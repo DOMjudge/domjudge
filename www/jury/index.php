@@ -27,10 +27,13 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <?php if ( checkrole('jury') ) { ?>
 <li><a href="clarifications.php">Clarifications</a></li>
 <li><a href="contests.php">Contests</a></li>
+<li><a href="executables.php">Executables</a></li>
 <li><a href="judgehosts.php">Judgehosts</a></li>
+<li><a href="judgehost_restrictions.php">Judgehost Restrictions</a></li>
 <li><a href="languages.php">Languages</a></li>
 <li><a href="problems.php">Problems</a></li>
 <li><a href="scoreboard.php">Scoreboard</a></li>
+<li><a href="statistics.php">Statistics</a></li>
 <li><a href="submissions.php">Submissions</a></li>
 <li><a href="users.php">Users</a></li>
 <li><a href="teams.php">Teams</a></li>
@@ -46,7 +49,8 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <ul>
 <li><a href="config.php">Configuration settings</a></li>
 <li><a href="checkconfig.php">Config checker</a></li>
-<li><a href="genpasswds.php">Manage user passwords</a></li>
+<li><a href="impexp.php">Import / export</a></li>
+<li><a href="genpasswds.php">Manage team passwords</a></li>
 <li><a href="refresh_cache.php">Refresh scoreboard cache</a></li>
 <li><a href="check_judgings.php">Judging verifier</a></li>
 <li><a href="auditlog.php">Activity log</a></li>

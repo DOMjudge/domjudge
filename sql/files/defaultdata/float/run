@@ -1,0 +1,58 @@
+#!/bin/sh
+
+# Compare wrapper-script to be called from 'testcase_run.sh'.
+#
+# Usage: $0 <testdata.in> <testdata.out> <feedback_dir> < <program.out>
+#
+# <testdata.in>   File containing testdata input.
+# <testdata.out>  File containing the correct, jury output.
+# <program.out>   File containing the team's program output.
+#
+#
+# Exits successfully except when an internal error occurs. Submitted
+# program output is considered correct when diff.out is empty (and
+# specified).
+#
+# This script calls another program to check the results.
+# Calling syntax:
+#
+#    $CHECK_PROGRAM <testdata.in> <program.out> <testdata.out>
+#
+# The $CHECK_PROGRAM should return the contents of <diff.out> to
+# standard output. It must exit with exitcode zero to indicate
+# successful checking.
+
+SCRIPT=$(readlink -f "$0")
+SCRIPTPATH=$(dirname "$SCRIPT")
+CHECK_PROGRAM="${SCRIPTPATH}/check_float"
+
+# Options to pass to check program:
+CHECK_OPTIONS=""
+
+TESTIN="$1"
+TESTOUT="$2"
+DIFFOUT="$3/judgemessage.txt"
+
+if [ ! -x "$CHECK_PROGRAM" ]; then
+	echo "Error: '$CHECK_PROGRAM' not found or executable." >&2
+	writeresult "Internal error"
+	exit 1
+fi
+
+# Run the program:
+"$CHECK_PROGRAM" $CHECK_OPTIONS "$TESTIN" - "$TESTOUT" > "$DIFFOUT"
+EXITCODE=$?
+
+# Exit with failure, when non-zero exitcode found:
+if [ $EXITCODE -ne 0 ]; then
+	echo "Error: '$CHECK_PROGRAM' exited with exitcode $EXITCODE." >&2
+	writeresult "Internal error"
+	exit 1
+fi
+
+# Check result and return with exit code appropriately:
+if [ -s "$DIFFOUT" ]; then
+	exit 43
+else
+	exit 42
+fi

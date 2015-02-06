@@ -7,7 +7,7 @@ echo "<a target=\"_top\" href=\"problems.php#\">problems</a>\n";
 echo "<a target=\"_top\" href=\"ranking.php\">ranking</a>\n";
 
 if ( have_problemtexts() ) {
-	echo "<a target=\"_top\" href=\"problem.php\" accesskey=\"t\">problems</a>\n";
+	echo "<a target=\"_top\" href=\"problems.php\" accesskey=\"t\">problems</a>\n";
 }
 
 if ( have_printing() ) {

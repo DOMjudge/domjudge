@@ -3,25 +3,6 @@
  * DOMjudge system and included by the specific configuration files.
  */
 
-// Possible exitcodes from testcase_run.sh and their meaning.
-$EXITCODES = array (
-	0   => 'correct',
-	101 => 'compiler-error',
-	102 => 'timelimit',
-	103 => 'run-error',
-	104 => 'no-output',
-	105 => 'wrong-answer',
-	106 => 'presentation-error',
-	107 => 'memory-limit',
-	108 => 'output-limit',
-/* Uncomment the next line to accept internal errors in the judging
- * backend as outcome. WARNING: it is highly discouraged to enable
- * this, as the judgehost may be in an inconsistent state after an
- * internal error occurred and it is recommended to inspect manually.
- */
-//	127 => 'internal-error'
-	);
-
 /** Loglevels and debugging */
 
 // Log to syslog facility; do not define to disable.

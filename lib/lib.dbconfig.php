@@ -163,7 +163,7 @@ function dbconfig_get($name, $default = null, $cacheok = true)
 		}
 		return $ret;
 	}
-		
+
 	if ( isset($LIBDBCONFIG[$name]) ) return $LIBDBCONFIG[$name]['value'];
 
 	if ( $default===null ) {

@@ -8,10 +8,9 @@
 
 require('init.php');
 
-$id = @$_REQUEST['id'];
-$title = 'Language '.htmlspecialchars(@$id);
-
-if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid language id");
+$id = getRequestID(FALSE);
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'language' . ($id ? ' '.htmlspecialchars(@$id) : ''));
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
@@ -42,18 +41,19 @@ if ( !empty($cmd) ):
 
 	requireAdmin();
 
-	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " language</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php');
 
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Language ID/ext:</td><td>";
-		$row = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s',
-			$_GET['id']);
-		echo addHidden('keydata[0][langid]', $row['langid']);
-		echo htmlspecialchars($row['langid']);
+		$row = $DB->q('MAYBETUPLE SELECT * FROM language WHERE langid = %s', $id);
+		if ( !$row ) error("Missing or invalid language id");
+
+		echo "<tr><td>Language ID/ext:</td><td>" .
+			addHidden('keydata[0][langid]', $row['langid']) .
+			htmlspecialchars($row['langid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__langid_\">Language ID/ext:</label></td><td>";
 		echo addInput('data[0][langid]', null, 8, 8,  'required pattern="' . IDENTIFIER_CHARS . '+" title="alphanumerics only"');
@@ -73,7 +73,19 @@ if ( !empty($cmd) ):
 <?php echo addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
 
 <tr><td><label for="data_0__time_factor_">Time factor:</label></td>
-<td><?php echo addInputField('number', 'data[0][time_factor]', @$row['time_factor'], ' min="0"')?> x</td></tr>
+<td><?php echo addInputField('number', 'data[0][time_factor]', @$row['time_factor'], ' min="0" step="any"')?> x</td></tr>
+<tr><td><label for="data_0__compile_script_">Compile script:</label></td>
+<td>
+<?php
+$execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable
+			WHERE type = 'compile'
+			ORDER BY execid");
+$execmap[''] = 'none';
+echo addSelect('data[0][compile_script]', $execmap, @$row['compile_script'], True);
+?>
+</td></tr>
+<tr><td><label for="data_0__extensions_">Extensions:</label></td>
+<td><?php echo addInput('data[0][extensions]', @$row['extensions'], 20, 255, 'required')?> (as JSON encoded array)</td></tr>
 </table>
 
 <?php
@@ -93,7 +105,7 @@ $data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 
 if ( ! $data ) error("Missing or invalid language id");
 
-echo "<h1>Language ".htmlspecialchars($id)."</h1>\n\n";
+echo "<h1>Language ".htmlspecialchars($data['name'])."</h1>\n\n";
 
 echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 	addHidden('id', $id) .
@@ -116,6 +128,17 @@ echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 		" judging for this language?')"); ?>
 </td></tr>
 <tr><td>Time factor:  </td><td><?php echo htmlspecialchars($data['time_factor'])?> x</td></tr>
+<tr><td>Compile script:</td><td class="filename">
+<?php
+if ( empty($data['compile_script']) ) {
+	echo '<span class="nodata">none specified</span>';
+} else {
+	echo '<a href="executable.php?id=' . urlencode($data['compile_script']) . '">' .
+		htmlspecialchars($data['compile_script']) . '</a>';
+}
+?>
+</td></tr>
+<tr><td>Extensions:  </td><td><?php echo htmlspecialchars($data['extensions'])?></td></tr>
 </table>
 
 <?php
@@ -128,9 +151,9 @@ if ( IS_ADMIN ) {
 		editLink('language', $data['langid']) . "\n" .
 		delLink('language','langid',$data['langid']) . "</p>\n\n";
 }
-echo "<h2>Submissions in " . htmlspecialchars($id) . "</h2>\n\n";
+echo "<h2>Submissions in " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $restrictions = array( 'langid' => $id );
-putSubmissions($cdata, $restrictions);
+putSubmissions($cdatas, $restrictions);
 
 require(LIBWWWDIR . '/footer.php');

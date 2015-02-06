@@ -39,18 +39,26 @@ global $DB;
 
 // Special case 'submission' and 'contest' for admin overrides
 if ( IS_ADMIN && ($table == 'submission' || $table == 'contest') ) {
-	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid
-	               FROM judging j
-	               LEFT JOIN submission s USING (submitid)
-	               WHERE j.cid = %i AND j.valid = 1 AND ' .
-	               $tablemap[$table] . ' = %s', $cid, $id);
+	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid, j.cid
+		       FROM judging j
+		       LEFT JOIN submission s USING (submitid)
+		       WHERE j.valid = 1 AND ' .
+		       $tablemap[$table] . ' = %s', $id);
 } else {
-	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid
-	               FROM judging j
-	               LEFT JOIN submission s USING (submitid)
-	               WHERE j.cid = %i AND j.valid = 1 AND
-	               result IS NOT NULL AND result != "correct" AND ' .
-	               $tablemap[$table] . ' = %s', $cid, $id);
+	$res = null;
+	$cids = getCurContests(FALSE);
+	if ( !empty($cids) ) {
+		$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid, j.cid
+		               FROM judging j 
+		               LEFT JOIN submission s USING (submitid)
+		               WHERE j.cid IN (%Ai) AND j.valid = 1 AND 
+		               result IS NOT NULL AND result != "correct" AND ' .
+		              $tablemap[$table] . ' = %s', $cids, $id);
+	}
+}
+
+if ( !$res || $res->count() == 0 ) {
+	error("No judgings matched.");
 }
 
 while ( $jud = $res->next() ) {
@@ -62,7 +70,14 @@ while ( $jud = $res->next() ) {
 	$DB->q('UPDATE submission SET judgehost = NULL
 	        WHERE submitid = %i', $jud['submitid']);
 
-	calcScoreRow($cid, $jud['teamid'], $jud['probid']);
+	// Prioritize single submission rejudgings
+	if ( $table == 'submission' ) {
+		$DB->q('UPDATE team SET judging_last_started = NULL
+		        WHERE teamid IN (SELECT teamid FROM submission
+		        WHERE submitid = %i)', $jud['submitid']);
+	}
+
+	calcScoreRow($jud['cid'], $jud['teamid'], $jud['probid']);
 	$DB->q('COMMIT');
 
 	auditlog('judging', $jud['judgingid'], 'mark invalid', '(rejudge)');

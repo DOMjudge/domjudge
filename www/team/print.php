@@ -10,7 +10,6 @@ require('init.php');
 
 $title = 'Print';
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
 
 echo "<h1>Print source</h1>\n\n";
 

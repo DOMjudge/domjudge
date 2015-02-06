@@ -9,39 +9,36 @@
 require('init.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
-$id = @$_GET['id'];
-$title = "Affiliation: " .htmlspecialchars(@$id);
+$id = getRequestID();
+$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+                 'affiliation' . ($id ? ' '.htmlspecialchars(@$id) : ''));
 
-if ( ! preg_match('/^' . IDENTIFIER_CHARS . '*$/', $id) ) error("Invalid affiliation id");
+require(LIBWWWDIR . '/header.php');
 
-$cmd = @$_GET['cmd'];
-
-if ( $cmd == 'add' || $cmd == 'edit' ) {
+if ( !empty($_GET['cmd']) ):
 
 	requireAdmin();
 
-	$title = "Affiliation: " . htmlspecialchars($cmd);
+	$cmd = $_GET['cmd'];
 
-	require(LIBWWWDIR . '/header.php');
-	echo "<h2>" . htmlspecialchars(ucfirst($cmd)) . " affiliation</h2>\n\n";
+	echo "<h2>$title</h2>\n\n";
 
 	echo addForm('edit.php');
 
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Affiliation ID:</td><td>";
-		$row = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s',
-			$_GET['id']);
-		echo addHidden('keydata[0][affilid]', $row['affilid']) .
-			htmlspecialchars($row['affilid']);
-	} else {
-		echo "<tr><td><label for=\"data_0__affilid_\">Affiliation ID:</label></td><td>";
-		echo addInput('data[0][affilid]', null, 11, 10, 'required');
+		$row = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
+		if ( !$row ) error("Missing or invalid affiliation id");
+
+		echo "<tr><td>Affiliation ID:</td><td>" .
+			addHidden('keydata[0][affilid]', $row['affilid']) .
+			htmlspecialchars($row['affilid']) . "</td></tr>\n";
 	}
-	echo "</td></tr>\n";
 
 ?>
+<tr><td><label for="data_0__shortname_">Shortname:</label></td>
+<td><?php echo addInput('data[0][shortname]', @$row['shortname'], 40, 30, 'required')?></td></tr>
 
 <tr><td><label for="data_0__name_">Name:</label></td>
 <td><?php echo addInput('data[0][name]', @$row['name'], 40, 255, 'required')?></td></tr>
@@ -65,15 +62,13 @@ echo addHidden('cmd', $cmd) .
 	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
 	addEndForm();
 
-	require(LIBWWWDIR . '/footer.php');
-	exit;
-}
+require(LIBWWWDIR . '/footer.php');
+exit;
+
+endif;
 
 
-require(LIBWWWDIR . '/header.php');
-
-$data = $DB->q('TUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
-
+$data = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
 if ( ! $data ) error("Missing or invalid affiliation id");
 
 $affillogo = "../images/affiliations/" . urlencode($data['affilid']) . ".png";
@@ -83,13 +78,14 @@ echo "<h1>Affiliation: ".htmlspecialchars($data['name'])."</h1>\n\n";
 
 echo "<table>\n";
 echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['affilid']) . "</td></tr>\n";
+echo '<tr><td>Shortname:</td><td>' . htmlspecialchars($data['shortname']) . "</td></tr>\n";
 echo '<tr><td>Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
 
 echo '<tr><td>Logo:</td><td>';
 
 if ( is_readable($affillogo) ) {
 	echo '<img src="' . $affillogo . '" alt="' .
-		htmlspecialchars($data['affilid']) . "\" /></td></tr>\n";
+		htmlspecialchars($data['shortname']) . "\" /></td></tr>\n";
 } else {
 	echo "not available</td></tr>\n";
 }
@@ -118,18 +114,18 @@ if ( IS_ADMIN ) {
 echo "<h2>Teams from " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $listteams = array();
-$teams = $DB->q('SELECT login,name FROM team WHERE affilid = %s', $id);
+$teams = $DB->q('SELECT teamid,name FROM team WHERE affilid = %s', $id);
 if ( $teams->count() == 0 ) {
 	echo "<p class=\"nodata\">no teams</p>\n\n";
 } else {
 	echo "<table class=\"list\">\n<thead>\n" .
-		"<tr><th scope=\"col\">login</th><th scope=\"col\">teamname</th></tr>\n" .
+		"<tr><th scope=\"col\">ID</th><th scope=\"col\">teamname</th></tr>\n" .
 		"</thead>\n<tbody>\n";
 	while ($team = $teams->next()) {
-		$listteams[] = $team['login'];
-		$link = '<a href="team.php?id=' . urlencode($team['login']) . '">';
-		echo "<tr><td class=\"teamid\">" .
-		$link . htmlspecialchars($team['login']) . "</a></td><td>" .
+		$listteams[] = $team['teamid'];
+		$link = '<a href="team.php?id=' . urlencode($team['teamid']) . '">';
+		echo "<tr><td>" .
+		$link . "t" .htmlspecialchars($team['teamid']) . "</a></td><td>" .
 		$link . htmlspecialchars($team['name']) . "</a></td></tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";

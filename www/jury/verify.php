@@ -44,9 +44,11 @@ if ( dbconfig_get('verification_required', 0) ) {
 	       $jdata['probid'], $jdata['submitid']);
 
 	if ( $jdata['result'] == 'correct' ) {
-		$DB->q('INSERT INTO balloon (submitid)
-		        VALUES(%i)',
-		        $jdata['submitid']);
+		$balloons_enabled = (bool)$DB->q("VALUE SELECT process_balloons FROM contest WHERE cid = %i", $jdata['cid']);
+		if ( $balloons_enabled ) {
+			$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
+			       $jdata['submitid']);
+		}
 	}
 }
 

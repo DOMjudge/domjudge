@@ -8,6 +8,9 @@
 require('init.php');
 requireAdmin();
 
+if ( !file_exists(LIBDIR . '/relations.php') ) {
+	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
+}
 require(LIBDIR . '/relations.php');
 
 $t = @$_REQUEST['table'];
@@ -66,7 +69,7 @@ if (isset($_POST['confirm'] ) ) {
 
 	// LIMIT 1 is a security measure to prevent our bugs from
 	// wiping a table by accident.
-	$DB->q("DELETE FROM $t WHERE %S LIMIT 1", $k);
+	$DB->q("DELETE FROM $t WHERE %SS LIMIT 1", $k);
 	auditlog($t, implode(', ', $k), 'deleted');
 
 	echo "<p>" . ucfirst($t) . " <strong>" . htmlspecialchars(implode(", ", $k)) .

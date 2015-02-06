@@ -28,16 +28,6 @@ require_once("common-config.php");
 //   define('FIXED_USER', 'domjudge');
 define('AUTH_METHOD', 'PHP_SESSIONS');
 
-// Strict checking of team's IP addresses (when using the IPADDRESS
-// authentication method).
-// The commandline submitdaemon can optionally check for correct source
-// IP of teams (additionally to the security of "callback" via scp, see
-// the admin manual appendix on the submitdaemon).
-// The 'false' setting allows automatic updating of IP addresses during
-// submission of teams that have their address unset. Otherwise these
-// addresses have to be configured beforehand.
-define('STRICTIPCHECK', false);
-
 // List of LDAP servers (space separated) to query when using the LDAP
 // authentication method. Secondly, DN to search in, where '&' will be
 // replaced by the authtoken as set in the team's DOMjudge database entry.
@@ -54,6 +44,9 @@ define('BALLOON_CMD', '');
 // start displaying as warning or critical.
 define('JUDGEHOST_WARNING', 30);
 define('JUDGEHOST_CRITICAL', 120);
+
+// Maximum width/height of a thumbnail for uploaded testcase images.
+define('THUMBNAIL_SIZE', 128);
 
 // Internal and output character set used, don't change.
 define('DJ_CHARACTER_SET', 'utf-8');

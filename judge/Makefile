@@ -3,23 +3,17 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = check_float check_boolfind runjury_boolfind compare runguard runpipe
+TARGETS = runguard runpipe
 
-judgehost: build
+SUBST_FILES = judgedaemon chroot-startstop.sh
 
-config: judgedaemon
+judgehost: $(TARGETS) $(SUBST_FILES)
 
-build: $(TARGETS)
-
-judgedaemon: judgedaemon.in $(TOPDIR)/paths.mk
+$(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
-compare check_float runguard: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
-
-compare: $(LIBOBJECTS)
-
-check_float: -lm $(LIBOBJECTS)
+runguard: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
 
 runguard: -lm $(LIBCGROUP)
 runguard: CFLAGS += -std=c99
@@ -30,15 +24,10 @@ runguard$(OBJEXT): $(TOPDIR)/etc/runguard-config.h
 runpipe: runpipe.c $(LIBHEADERS) $(LIBSOURCES)
 	$(CC) $(CFLAGS) -static -o $@ $< $(LIBSOURCES)
 
-runjury_boolfind: runjury_boolfind.c
-	$(CC) $(CFLAGS) -static -o $@ $<
-
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libjudgedir) \
 		compile*.sh testcase_run.sh chroot-startstop.sh \
-		run run_wrapper run_boolfind runjury_boolfind \
-		compare compare_wrapper compare_float compare_boolfind \
-		check_diff.sh check_float check_boolfind sh-static
+		check_diff.sh sh-static
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libjudgedir) \
 		judgedaemon.main.php
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) judgedaemon
@@ -48,4 +37,4 @@ clean-l:
 	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT))
 
 distclean-l:
-	-rm -f judgedaemon
+	-rm -f $(SUBST_FILES)

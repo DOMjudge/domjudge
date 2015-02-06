@@ -6,13 +6,12 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$id = $_REQUEST['id'];
-
 require('init.php');
 
-if ( ! $id || preg_match('/\W/', $id) ) error("Missing or invalid team id");
+$id = getRequestID();
+if ( empty($id) ) error("Missing or invalid team id");
 
-$title = 'Team '.htmlspecialchars(@$id);
+$title = 'Team t'.htmlspecialchars(@$id);
 require(LIBWWWDIR . '/header.php');
 
 putTeam($id);

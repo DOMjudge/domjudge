@@ -1,15 +1,15 @@
 /*
- * This will crash the judging daemon: it forks processes and places
- * these in a new session, such that testcase_run cannot retrace and
- * kill these. They are left running and should be killed before
- * restarting the judging daemon.
+ * When cgroups are enabled, this will hit timelimit and then be killed.
  *
- * This is not really that bad: any team submitting this kind of code
- * should be disqualified anyways. Furthermore only this judging
- * daemon is affected and can be restarted easily. It aborts on
- * purpose to force checking of the reasons of a crash.
+ * Without cgroups however, this will crash the judging daemon: it
+ * forks processes and places these in a new session, such that
+ * testcase_run cannot retrace and kill these. They are left running
+ * and should be killed before restarting the judging daemon. The
+ * cgroups code can detect this because the processes will belong to the
+ * same cgroup.
  *
- * @EXPECTED_RESULTS@: NONE-JUDGEDAEMON-CRASHES
+ * @EXPECTED_RESULTS@: TIMELIMIT
+ * (or judgedaemon crash when cgroups disabled)
  */
 
 #include <unistd.h>

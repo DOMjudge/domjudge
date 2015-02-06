@@ -26,11 +26,16 @@ class RestApi {
 	 * $docs          Documentation for this function.
 	 * $optArgs       List of optional arguments.
 	 * $exArgs        Example usage of arguments
+	 * $roles         If a non-empty array, one of these roles is required
+	 *                to use this action
+	 * $allows_public If true, this function allows the 'public' optional
+	 *                argument to only show public data, even for users with
+	 *                more roles
 	 */
-	public function provideFunction($httpMethod, $name, $docs = '',
-	                                $optArgs = array(), $exArgs = array(), $roles = null)
+	public function provideFunction($httpMethod, $name, $docs = '', $optArgs = array(),
+	                                $exArgs = array(), $roles = null, $allows_public = false)
 	{
-		if ( !in_array($httpMethod,array('GET','POST','PUT')) ) {
+		if ( !in_array($httpMethod, array('GET', 'POST', 'PUT')) ) {
 			$this->createError("Only get/post/put methods supported.",
 			                   INTERNAL_SERVER_ERROR);
 		}
@@ -40,14 +45,18 @@ class RestApi {
 		}
 
 		$callback = $name;
-		if ( $httpMethod!='GET' ) $callback .= '_' . $httpMethod;
+		if ( $httpMethod != 'GET' ) $callback .= '_' . $httpMethod;
+
+		if ( $allows_public ) {
+			$optArgs['public'] = 'only show public data, even for users with more roles';
+		}
 
 		$this->apiFunctions[$name . '#' . $httpMethod] =
-		    array("callback" => $callback,
-		          "optArgs"  => $optArgs,
-		          "docs"     => $docs,
-		          "exArgs"   => $exArgs,
-		          "roles"    => $roles);
+			array("callback" => $callback,
+			      "optArgs" => $optArgs,
+			      "docs" => $docs,
+			      "exArgs" => $exArgs,
+			      "roles" => $roles);
 	}
 
 	/**
@@ -87,6 +96,12 @@ class RestApi {
 		if ( $_SERVER['REQUEST_METHOD'] == 'PUT' ) {
 			list($name, $primary_key) = explode('/', $name);
 			$arguments['__primary_key'] = $primary_key;
+		} else if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
+			$postmax = phpini_to_bytes(trim(ini_get('post_max_size')));
+			if ( $postmax != -1 && $postmax < $_SERVER['CONTENT_LENGTH'] ) {
+				$this->createError("Size of post data too large (" . $_SERVER['CONTENT_LENGTH']
+						. "), increase post_max_size (" . $postmax . ") in your PHP config.");
+			}
 		}
 		$name = $name . '#' . $_SERVER['REQUEST_METHOD'];
 		if ( !array_key_exists($name, $this->apiFunctions) ) {
@@ -117,6 +132,19 @@ class RestApi {
 			}
 			$args[$key] = $value;
 		}
+
+		// Special case for public:
+		if ( array_key_exists('public', $func['optArgs']) )
+		{
+			if ( checkrole('jury') && !isset($args['public']) ) {
+				// Default for jury is non-public
+				$args['public'] = 0;
+			} elseif ( !checkrole('jury') ) {
+				// Only allowed for non-jury is public
+				$args['public'] = 1;
+			}
+		}
+
 		$this->createResponse(call_user_func($func['callback'], $args));
 	}
 

@@ -1,5 +1,4 @@
 <!doctype linuxdoc system [
-<!ENTITY checktestdatagrammar SYSTEM "checktestdata-grammar-inc.sgml">
 <!ENTITY problemformat SYSTEM "problem-format-inc.sgml">
 <!ENTITY % admin "IGNORE">
 <!ENTITY % judge "INCLUDE">
@@ -142,51 +141,19 @@ e.g. Java.
 <sect>Verifying testdata
 <p>
 
-DOMjudge comes with some tools to check for mistakes in the
-testdata. These tools are all located in the <tt>misc-tools</tt>
-directory in the source tree.
-
-<descrip>
-<tag>checkinput checkinput.awk fixinput.awk</tag>
-
-The 'checkinput' programs are meant to check testdata input (and
-optionally also output). They check for simple layout issues like
-leading and trailing whitespace, non-printable characters, etc.
-There's both a C program and AWK script which do essentially the same
-thing. See 'checkinput.c' for details. All scripts take a testdata
-file as argument. The 'fixinput.awk' script corrects some of these
-problems.
-
-<tag>checktestdata</tag>
-
-This program can be used as a more advanced replacement of checkinput.
+For checking whether the your testdata conforms to the specifications
+of your problem statement, we recommend the checktestdata program,
+which is available from a <htmlurl name="separate repository"
+url="https://github.com/DOMjudge/checktestdata">.
 It allows you to not only check on simple (spacing) layout errors, but
 a simple grammar file must be specified for the testdata, according to
 which the testdata is checked. This allows e.g. for bounds checking.
-See appendix <ref id="checktestdata-grammar"> for a grammar specification.
-Two sample scripts <tt>checktestdata.{hello,fltcmp}</tt> are provided
-for the sample problems <tt>hello</tt> and <tt>fltcmp</tt>.
 
 This program is built upon the separate library <tt>libchecktestdata.h</tt>
-(see <tt>checktestdata.cc</tt> as an example for how to use this library)
 that can be used to write the syntax checking part of special
 compare scripts: it can easily handle the tedious task of verifying
 that a team's submission output is syntactically valid, leaving just
-the task of semantic validation to another program. When you want to
-support `presentation error' as a verdict, also in variable output
-problems, the option <tt>whitespace-ok</tt> can be useful. This
-allows any non-empty sequence of whitespace (no newlines though) where
-the <tt>SPACE</tt> command is used, as well as leading and trailing
-whitespace on lines (when using the <tt>NEWLINE</tt> command). Please
-note that with this option enabled, whitespace matching is greedy, so
-the script code
-<code>
-INT(1,2) SPACE SPACE INT(1,2)
-</code>
-does <em>not</em> match <tt>1__2</tt> (where the two underscores
-represent spaces), because the first <tt>SPACE</tt> command already
-matches both, so the second cannot match anything.
-</descrip>
+the task of semantic validation to another program.
 
 <sect>Testing jury solutions
 <p>
@@ -243,7 +210,10 @@ The flow of an incoming submission is as follows.
       checks, or accepted and stored as a <em>submission</em>.
 <item>The first available <em>judgehost</em> compiles, runs and checks
       the submission. The outcome and outputs are stored as a
-      <em>judging</em> of this submission.
+      <em>judging</em> of this submission. Note that judgehosts may be
+      restricted to certain contests, languages and problems, so that it can be
+      the case that a judgehost is available, but not judging an available
+      submission.
 <item>If verification is not required, the result is automatically
       recorded and the team can view the result and the scoreboard is
       updated (unless after the scoreboard freeze). A judge can
@@ -407,8 +377,6 @@ submissions, and the awards ceremony can start.
 
 
 <appendix>
-
-&checktestdatagrammar;
 
 &problemformat;
 

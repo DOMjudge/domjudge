@@ -9,9 +9,9 @@
 
 require('init.php');
 
-if ( isset($_REQUEST['id']) ) {
-	$id = (int)$_REQUEST['id'];
-	if ( ! $id ) error("Missing clarification id");
+$id = getRequestID();
+
+if ( isset($id) ) {
 
 	$req = $DB->q('MAYBETUPLE SELECT * FROM clarification
 	               WHERE cid = %i AND clarid = %i', $cid, $id);
@@ -28,16 +28,18 @@ if ( isset($_REQUEST['id']) ) {
 if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	// Disallow problems that are not submittable or
 	// before contest start.
-	if ( !problemVisible($_POST['problem']) ) $_POST['problem'] = 'general';
+	$probid = NULL;
+	if ( isset($_POST['problem']) ) {
+		$probid = preg_replace('/\d+-/', '', $_POST['problem']);
+		if ( !problemVisible($probid) ) $probid = NULL;
+	}
 
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, submittime, sender, probid, body)
-	                 VALUES (%i, %s, %s, %s, %s)',
-	                $cid, now(), $teamid,
-	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
-	                $_POST['bodytext']);
+	                 VALUES (%i, %s, %i, %i, %s)',
+	                $cid, now(), $teamid, $probid, $_POST['bodytext']);
 
-	auditlog('clarification', $newid, 'added');
+	auditlog('clarification', $newid, 'added', null, null, $cid);
 
 	// redirect back to the original location
 	header('Location: ./');
@@ -57,12 +59,11 @@ if ( isset($id) ) {
 	putClarification($respid, $teamid);
 
 	echo "<h2>Send Clarification Request</h2>\n\n";
-	putClarificationForm("clarification.php", $cdata['cid'], $id);
+	putClarificationForm("clarification.php", $id, $cid);
 } else {
 	// display a clarification request send box
 	echo "<h1>Send Clarification Request</h1>\n\n";
-	$pid = (isset($_REQUEST['pid']) ? $_REQUEST['pid'] : NULL);
-	putClarificationForm("clarification.php", $cdata['cid'], NULL, $pid);
+	putClarificationForm("clarification.php", null, $cid);
 }
 
 require(LIBWWWDIR . '/footer.php');

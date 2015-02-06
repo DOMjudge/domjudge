@@ -8,27 +8,33 @@
 
 require('init.php');
 
-$id = $_GET['id'];
+$id = getRequestID();
 if ( !isset($id) ) {
 	error("No problem id given.");
 }
 
-$ini_keys = array('probid', 'name', 'timelimit', 'special_run',
+$ini_keys = array('shortname', 'name', 'timelimit', 'special_run',
 		  'special_compare', 'color');
 
 $problem = $DB->q('MAYBETUPLE SELECT problemtext, problemtext_type, ' .
-                 join(',', $ini_keys) . ' FROM problem p WHERE probid = %s',$id);
-if ( empty($problem) ) error ("Problem $id not found");
+                  join(',', $ini_keys) . ' FROM problem p
+                   LEFT JOIN contestproblem cp USING (probid)
+                   WHERE probid = %i LIMIT 1', $id);
+if ( empty($problem) ) error ("Problem p$id not found");
 
 $inistring = "";
 foreach ($ini_keys as $ini_val) {
 	if ( !empty($problem[$ini_val]) ) {
-		$inistring .= $ini_val . "='" . $problem[$ini_val] . "'\n";
+		$ini_val_final = $ini_val;
+		if ( $ini_val == 'shortname' ) {
+			$ini_val_final = 'probid';
+		}
+		$inistring .= $ini_val_final . "='" . $problem[$ini_val] . "'\n";
 	}
 }
 
 $zip = new ZipArchive;
-if ( !($tmpfname = mkstemps(TMPDIR."/export-XXXXXX",0)) ) {
+if ( !($tmpfname = tempnam(TMPDIR, "export-")) ) {
 	error("Could not create temporary file.");
 }
 
@@ -44,7 +50,7 @@ if ( !empty($problem['problemtext']) ) {
 }
 
 $testcases = $DB->q('SELECT description, testcaseid, rank FROM testcase
-		     WHERE probid = %s ORDER BY rank', $id);
+		     WHERE probid = %i ORDER BY rank', $id);
 while ($tc = $testcases->next()) {
 	$fname = $id . "_" . $tc['rank'] .
 	         (empty($tc['description'])?"":"_".$tc['description']);
@@ -58,9 +64,11 @@ while ($tc = $testcases->next()) {
 }
 $zip->close();
 
+$filename = 'p' . $id . '-' . $problem['shortname'] . '.zip';
+
 header("Content-Description: File Transfer");
-header("Content-Disposition: attachment; filename=" . $id . ".zip");
-header("Content-Type: application/zip");
+header("Content-Disposition: attachment; filename=\"$filename\"");
+header("Content-Type: application/zip; name=\"$filename\"");
 header("Content-Length: " . filesize($tmpfname) . "\n\n");
 header("Content-Transfer-Encoding: binary");
 

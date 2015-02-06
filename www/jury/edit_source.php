@@ -8,17 +8,22 @@
 
 require('init.php');
 
+if ( empty($teamid) || !checkrole('team') ) {
+	error("You cannot re-submit code without being a team.");
+}
+
 // submit code
-if ( isset($_POST['submitter']) ) {
+if ( isset($_POST['origsubmitid']) ) {
 	$sources = $DB->q('TABLE SELECT *
-			   FROM submission_file LEFT JOIN submission USING(submitid)
-			   WHERE submitid = %i ORDER BY rank', $_POST['origsubmitid']);
+	                   FROM submission_file
+	                   LEFT JOIN submission USING(submitid)
+	                   WHERE submitid = %i ORDER BY rank', $_POST['origsubmitid']);
 
 	$files = array();
 	$filenames = array();
 	foreach($sources as $sourcedata)
 	{
-		if ( !($tmpfname = mkstemps(TMPDIR."/edit_source-XXXXXX",0)) ) {
+		if ( !($tmpfname = tempnam(TMPDIR, "edit_source-")) ) {
 			error("Could not create temporary file.");
 		}
 		file_put_contents($tmpfname, $_POST['source' . $sourcedata['rank']]);
@@ -27,7 +32,10 @@ if ( isset($_POST['submitter']) ) {
 		$filenames[] = $sourcedata['filename'];
 	}
 
-	$newid = submit_solution($_POST['submitter'], $_POST['probid'], $_POST['langid'],
+	$cid = $DB->q('VALUE SELECT cid FROM submission
+	               WHERE submitid = %i', $_POST['origsubmitid']);
+
+	$newid = submit_solution($teamid, $_POST['probid'], $cid, $_POST['langid'],
 	                $files, $filenames, $_POST['origsubmitid']);
 
 	foreach($files as $file)
@@ -39,9 +47,9 @@ if ( isset($_POST['submitter']) ) {
 	exit;
 }
 
-$id = (int)$_GET['id'];
+$id = getRequestID();
 $submission = $DB->q('MAYBETUPLE SELECT * FROM submission s
-                  WHERE submitid = %i', $id);
+                      WHERE submitid = %i', $id);
 
 if ( empty($submission) ) error ("Submission $id not found");
 
@@ -56,7 +64,8 @@ echo addForm($pagename, 'post', null, 'multipart/form-data');
 
 
 $sources = $DB->q('TABLE SELECT *
-                   FROM submission_file LEFT JOIN submission USING(submitid)
+                   FROM submission_file
+                   LEFT JOIN submission USING(submitid)
                    WHERE submitid = %i ORDER BY rank', $id);
 
 echo '<script type="text/javascript" src="../js/tabber.js"></script>' .
@@ -75,10 +84,10 @@ foreach($sources as $sourcedata)
 		'textarea.style.display = \'none\';' .
 		'var ' . $editor . ' = ace.edit("' . $editor . '");' .
 		$editor . '.setTheme("ace/theme/eclipse");' .
-		$editor . '.getSession().setValue(textarea.value);' . 
+		$editor . '.getSession().setValue(textarea.value);' .
 		$editor . '.getSession().on(\'change\', function(){' .
 			'var textarea = document.getElementById("source' . htmlspecialchars($sourcedata['rank']) . '");' .
-			'textarea.value = ' . $editor . '.getSession().getValue();' . 
+			'textarea.value = ' . $editor . '.getSession().getValue();' .
 		'});' .
 		$editor . '.setOptions({ maxLines: Infinity });' .
 		$editor . '.setReadOnly(false);' .
@@ -88,16 +97,16 @@ foreach($sources as $sourcedata)
 }
 echo "</div>\n";
 
-$probs = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem WHERE
-                 allow_submit = 1 AND cid = %i ORDER BY name', $cid);
-$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language WHERE
-                 allow_submit = 1 ORDER BY name');
+$probs = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
+                 INNER JOIN contestproblem USING (probid)
+	             WHERE allow_submit = 1 AND cid = %i ORDER BY name', $submission['cid']);
+$langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language
+                 WHERE allow_submit = 1 ORDER BY name');
 
 echo addSelect('probid', $probs, $submission['probid'], true);
 echo addSelect('langid', $langs, $submission['langid'], true);
 
 echo addHidden('teamid', $submission['teamid']);
-echo addHidden('submitter', 'domjudge');
 echo addHidden('origsubmitid', $submission['origsubmitid'] === NULL ? $id : $submission['origsubmitid']);
 echo addSubmit('submit');
 

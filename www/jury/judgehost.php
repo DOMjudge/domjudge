@@ -6,14 +6,12 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$id = @$_REQUEST['id'];
-
 require('init.php');
-$refresh = '15;url=judgehost.php?id='.urlencode($id);
 
-if ( ! $id || ! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
-	error("Missing or invalid judge hostname");
-}
+$id = getRequestID(FALSE);
+if ( empty($id) ) error("Missing judge hostname");
+
+$refresh = '15;url=judgehost.php?id='.urlencode($id);
 
 if ( isset($_REQUEST['cmd']) &&
 	( $_REQUEST['cmd'] == 'activate' || $_REQUEST['cmd'] == 'deactivate' ) ) {
@@ -31,7 +29,7 @@ if ( isset($_REQUEST['cmd']) &&
 	}
 }
 
-$row = $DB->q('TUPLE SELECT * FROM judgehost WHERE hostname = %s', $id);
+$row = $DB->q('TUPLE SELECT judgehost.*, restrictionname FROM judgehost LEFT JOIN judgehost_restriction USING (restrictionid) WHERE hostname = %s', $id);
 
 $title = 'Judgehost '.htmlspecialchars($row['hostname']);
 
@@ -44,6 +42,15 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 <table>
 <tr><td>Name:  </td><td><?php echo printhost($row['hostname'], TRUE)?></td></tr>
 <tr><td>Active:</td><td><?php echo printyn($row['active'])?></td></tr>
+<tr><td>Restriction:</td><td>
+	<?php if ( is_null($row['restrictionname']) ) {
+		echo '<i>None</i>';
+	} else {
+		echo '<a href="judgehost_restriction.php?id=' . urlencode($row['restrictionid']) . '">' .
+		     htmlspecialchars($row['restrictionname']) . '</a>';
+	}
+	?>
+</td></tr>
 <tr><td>Status:</td><td>
 <?php
 if ( empty($row['polltime']) ) {
@@ -57,7 +64,7 @@ if ( empty($row['polltime']) ) {
 	} else {
 		echo "Critical";
 	}
-	echo ", judgehost last checked in ". $reltime . " seconds ago.";
+	echo ", time since judgehost last checked in: " . printtimediff($row['polltime']) . 's.';
 }
 ?>
 </td></tr>
@@ -84,13 +91,16 @@ echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
 
 // get the judgings for a specific key and value pair
 // select only specific fields to avoid retrieving large blobs
-$res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
-			   result, verified, valid FROM judging
-			   WHERE cid = %i AND judgehost = %s
-			   ORDER BY starttime DESC, judgingid DESC',
-			   $cid, $row['hostname']);
+$cids = getCurContests(FALSE);
+if ( !empty($cids) ) {
+	$res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
+	               result, verified, valid FROM judging
+	               WHERE cid IN (%Ai) AND judgehost = %s
+	               ORDER BY starttime DESC, judgingid DESC',
+	              $cids, $row['hostname']);
+}
 
-if( $res->count() == 0 ) {
+if( empty($cids) || $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No judgings.</p>\n\n";
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .

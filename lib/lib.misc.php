@@ -35,23 +35,73 @@ function getFileContents($filename, $sizelimit = true) {
 }
 
 /**
- * Will return either the current contest id, or
- * the most recently finished one.
+ * Will return all the contests that are currently active
  * When fulldata is true, returns the total row as an array
- * instead of just the ID.
+ * instead of just the ID (array indices will be contest ID's then).
+ * If $onlyofteam is not null, only show contests that team is part
+ * of. If it is -1, only show publicly visible contests
+ * If $alsofuture is true, also show the contests that start in the future
+ * The results will have the value of field $key in the database as key
  */
-function getCurContest($fulldata = FALSE) {
-
+function getCurContests($fulldata = FALSE, $onlyofteam = NULL,
+                        $alsofuture = FALSE, $key = 'cid')
+{
 	global $DB;
-	$now = $DB->q('MAYBETUPLE SELECT * FROM contest
-	               WHERE enabled = 1 AND activatetime <= UNIX_TIMESTAMP()
-	               ORDER BY activatetime DESC LIMIT 1');
+	if ( $alsofuture ) {
+		$extra = '';
+	} else {
+		$extra = 'AND activatetime <= UNIX_TIMESTAMP()';
+	}
+	if ( $onlyofteam !== null && $onlyofteam > 0 ) {
+		$contests = $DB->q("SELECT * FROM contest
+		                    LEFT JOIN contestteam USING (cid)
+		                    WHERE (contestteam.teamid = %i OR contest.public = 1) AND enabled = 1 ${extra}
+		                    AND deactivatetime > UNIX_TIMESTAMP()
+		                    ORDER BY activatetime", $onlyofteam);
+	} elseif ( $onlyofteam === -1 ) {
+		$contests = $DB->q("SELECT * FROM contest
+		                    WHERE enabled = 1 AND public = 1 ${extra}
+		                    AND deactivatetime > UNIX_TIMESTAMP()
+		                    ORDER BY activatetime");
+	} else {
+		$contests = $DB->q("SELECT * FROM contest
+		                    WHERE enabled = 1 ${extra}
+		                    AND deactivatetime > UNIX_TIMESTAMP()
+		                    ORDER BY activatetime");
+	}
+	$contests = $contests->getkeytable($key);
+	if ( !$fulldata ) {
+		return array_keys($contests);
+	}
 
-	if ( $now == NULL ) return FALSE;
+	return $contests;
+}
 
-	if ( !$fulldata ) return $now['cid'];
+/**
+ * Parse 'id' from HTTP GET or POST variables and check that it is a
+ * valid number, or string consisting of IDENTIFIER_CHARS.
+ *
+ * Returns id as int or string, or NULL if none found.
+ */
+function getRequestID($numeric = TRUE)
+{
+	if ( empty($_REQUEST['id']) ) return NULL;
 
-	return $now;
+	$id = $_REQUEST['id'];
+	if ( $numeric ) {
+		if ( !preg_match('/^[0-9]+$/', $id) ) {
+			error("Identifier specified is not a number");
+		}
+		return (int)$id;
+	} else {
+		if ( !preg_match('/^' . IDENTIFIER_CHARS . '*$/',$id) ) {
+			error("Identifier specified contains invalid characters");
+		}
+		return $id;
+	}
+
+	// This should never happen:
+	error("Could not parse identifier");
 }
 
 /**
@@ -67,7 +117,8 @@ function problemVisible($probid)
 	if ( !$cdata || difftime(now(),$cdata['starttime']) < 0 ) return FALSE;
 
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
-	               WHERE cid = %i AND allow_submit = 1 AND probid = %s',
+	               INNER JOIN contestproblem USING (probid)
+	               WHERE cid = %i AND allow_submit = 1 AND probid = %i',
 	              $cdata['cid'], $probid) !== NULL;
 }
 
@@ -78,20 +129,17 @@ function problemVisible($probid)
  * to allow minimal changes wrt. the removed intervals required for
  * the ICPC specification.
  */
-function calcContestTime($walltime)
+function calcContestTime($walltime, $cid)
 {
-	global $cdata;
+	global $cdatas;
 
-	$contesttime = difftime($walltime, $cdata['starttime']);
+	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
 
 	return $contesttime;
 }
 
 /**
  * Scoreboard calculation
- *
- * This is here because it needs to be called by the judgedaemon script
- * as well.
  *
  * Given a contestid, teamid and a problemid,
  * (re)calculate the values for one row in the scoreboard.
@@ -121,8 +169,10 @@ function calcScoreRow($cid, $team, $prob) {
 	                  FROM submission s
 	                  LEFT JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
 	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
-	                  WHERE teamid = %s AND probid = %s AND s.cid = %i AND s.valid = 1
-	                  AND submittime < c.endtime
+	                  WHERE teamid = %i AND probid = %i AND s.cid = %i AND s.valid = 1 ' .
+	                 ( dbconfig_get('compile_penalty', 1) ? "" :
+	                   "AND j.result != 'compiler-error' ") .
+	                 'AND submittime < c.endtime
 	                  ORDER BY submittime',
 	                 $team, $prob, $cid);
 
@@ -134,7 +184,7 @@ function calcScoreRow($cid, $team, $prob) {
 	while( $row = $result->next() ) {
 
 		// Contest submit time in minutes for scoring.
-		$submittime = (int)floor(calcContestTime($row['submittime']) / 60);
+		$submittime = (int)floor(calcContestTime($row['submittime'],$cid) / 60);
 
 		// Check if this submission has a publicly visible judging result:
 		if ( (dbconfig_get('verification_required', 0) && ! $row['verified']) ||
@@ -172,13 +222,13 @@ function calcScoreRow($cid, $team, $prob) {
 	// insert or update the values in the public/team scores table
 	$DB->q('REPLACE INTO scorecache_public
 	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
-	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
+	        VALUES (%i,%i,%i,%i,%i,%i,%i)',
 	       $cid, $team, $prob, $submitted_p, $pending_p, $time_p, $correct_p);
 
 	// insert or update the values in the jury scores table
 	$DB->q('REPLACE INTO scorecache_jury
 	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
-	        VALUES (%i,%s,%s,%i,%i,%i,%i)',
+	        VALUES (%i,%i,%i,%i,%i,%i,%i)',
 	       $cid, $team, $prob, $submitted_j, $pending_j, $time_j, $correct_j);
 
 	if ( $DB->q("VALUE SELECT RELEASE_LOCK('$lockstr')") != 1 ) {
@@ -199,7 +249,7 @@ function calcScoreRow($cid, $team, $prob) {
 /**
  * Update tables used for efficiently computing team ranks
  *
- * Given a contestid and teamid (re)calculate the time 
+ * Given a contestid and teamid (re)calculate the time
  * and solved problems for a team. Third parameter indictates
  * if the cache for jury of public should be updated.
  *
@@ -224,7 +274,7 @@ function updateRankCache($cid, $team, $jury) {
 	// Fetch values from scoreboard cache per problem
 	$scoredata = $DB->q("SELECT submissions, is_correct, totaltime
 	                     FROM scorecache_$tblname
-	                     WHERE cid = %i and teamid = %s", $cid, $team);
+	                     WHERE cid = %i and teamid = %i", $cid, $team);
 	$num_correct = 0;
 	$total_time = 0;
 	while ( $srow = $scoredata->next() ) {
@@ -240,7 +290,7 @@ function updateRankCache($cid, $team, $jury) {
 	// Update the rank cache table
 	$DB->q("REPLACE INTO rankcache_$tblname
 	        (cid, teamid, correct, totaltime)
-	        VALUES (%i,%s,%i,%i)",
+	        VALUES (%i,%i,%i,%i)",
 	       $cid, $team, $num_correct, $total_time);
 
 	// Release the lock
@@ -333,7 +383,6 @@ function overshoot_time($timelimit, $overshoot_cfg)
 {
 	$tokens = preg_split('/([+&|])/', $overshoot_cfg, -1, PREG_SPLIT_DELIM_CAPTURE);
 	if ( count($tokens)!=1 && count($tokens)!=3 ) {
-		var_dump($tokens);
 		error("invalid timelimit overshoot string '$overshoot_cfg'");
 	}
 
@@ -397,45 +446,6 @@ function difftime($time1, $time2)
 function alert($msgtype, $description = '')
 {
 	system(LIBDIR . "/alert '$msgtype' '$description' &");
-}
-
-/**
- * Create a unique file from a template string.
- *
- * Returns a full path to the filename or FALSE on failure.
- */
-function mkstemps($template, $suffixlen)
-{
-	if ( $suffixlen<0 || strlen($template)<$suffixlen+6 ) return FALSE;
-
-	if ( substr($template,-($suffixlen+6),6)!='XXXXXX' ) return FALSE;
-
-	$letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	$TMP_MAX = 16384;
-
-	umask(0133);
-
-	for($try=0; $try<$TMP_MAX; $try++) {
-		$value = mt_rand();
-
-		$filename = $template;
-		$pos = strlen($filename)-$suffixlen-6;
-
-		for($i=0; $i<6; $i++) {
-			$filename{$pos+$i} = $letters{$value % 62};
-			$value /= 62;
-		}
-
-		$fd = @fopen($filename,"x");
-
-		if ( $fd !== FALSE ) {
-			fclose($fd);
-			return $filename;
-		}
-	}
-
-	// We couldn't create a non-existent filename from the template:
-	return FALSE;
 }
 
 /**
@@ -544,13 +554,19 @@ function daemonize($pidfile = NULL)
  * validates it and puts it into the database. Additionally it
  * moves it to a backup storage.
  */
-function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid = NULL)
+function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $origsubmitid = NULL)
 {
+	global $DB;
+
 	if( empty($team) ) error("No value for Team.");
 	if( empty($prob) ) error("No value for Problem.");
+	if( empty($contest) ) error("No value for Contest.");
 	if( empty($lang) ) error("No value for Language.");
 
 	if ( !is_array($files) || count($files)==0 ) error("No files specified.");
+	if ( count($files) > dbconfig_get('sourcefiles_limit',100) ) {
+		error("Tried to submit more than the allowed number of source files.");
+	}
 	if ( !is_array($filenames) || count($filenames)!=count($files) ) {
 		error("Nonmatching (number of) filenames specified.");
 	}
@@ -559,29 +575,33 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 		error("Duplicate filenames detected.");
 	}
 
-	global $cdata,$cid, $DB;
-
 	$sourcesize = dbconfig_get('sourcesize_limit');
 
 	// If no contest has started yet, refuse submissions.
 	$now = now();
 
-	if( difftime($cdata['starttime'], $now) > 0 ) {
-		error("The contest is closed, no submissions accepted. [c$cid]");
+	$contestdata = $DB->q('MAYBETUPLE SELECT starttime,endtime FROM contest WHERE cid = %i', $contest);
+	if ( ! isset($contestdata) ) {
+		error("Contest c$contest not found.");
+	}
+	if( difftime($contestdata['starttime'], $now) > 0 ) {
+		error("The contest is closed, no submissions accepted. [c$contest]");
 	}
 
 	// Check 2: valid parameters?
-	if( ! $langid = $DB->q('MAYBEVALUE SELECT langid FROM language WHERE
-						  langid = %s AND allow_submit = 1', $lang) ) {
+	if( ! $langid = $DB->q('MAYBEVALUE SELECT langid FROM language
+	                        WHERE langid = %s AND allow_submit = 1', $lang) ) {
 		error("Language '$lang' not found in database or not submittable.");
 	}
-	if( ! $login = $DB->q('MAYBEVALUE SELECT login FROM team WHERE login = %s',$team) ) {
-		error("Team '$team' not found in database.");
+	if( ! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team
+	                        WHERE teamid = %i AND enabled = 1',$team) ) {
+		error("Team '$team' not found in database or not enabled.");
 	}
-	$team = $login;
-	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem WHERE probid = %s
-							AND cid = %i AND allow_submit = "1"', $prob, $cid) ) {
-		error("Problem '$prob' not found in database or not submittable [c$cid].");
+	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem
+	                        INNER JOIN contestproblem USING (probid)
+	                        WHERE probid = %s AND cid = %i AND allow_submit = 1',
+	                       $prob, $contest) ) {
+		error("Problem p$prob not found in database or not submittable [c$contest].");
 	}
 
 	// Reindex arrays numerically to allow simultaneously iterating
@@ -607,9 +627,9 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 
 	// Insert submission into the database
 	$id = $DB->q('RETURNID INSERT INTO submission
-				  (cid, teamid, probid, langid, submittime, origsubmitid)
-				  VALUES (%i, %s, %s, %s, %s, %i)',
-	             $cid, $team, $probid, $langid, $now, $origsubmitid);
+	              (cid, teamid, probid, langid, submittime, origsubmitid)
+	              VALUES (%i, %i, %i, %s, %s, %i)',
+	             $contest, $teamid, $probid, $langid, $now, $origsubmitid);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
@@ -618,19 +638,19 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 	}
 
 	// Recalculate scoreboard cache for pending submissions
-	calcScoreRow($cid, $team, $probid);
+	calcScoreRow($contest, $teamid, $probid);
 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
-	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
-	       now(), $cid, $team, $langid, $probid, $id);
+	        VALUES(%s, %i, %i, %s, %i, %i, "problem submitted")',
+	       now(), $contest, $teamid, $langid, $probid, $id);
 
 	if ( is_writable( SUBMITDIR ) ) {
 		// Copy the submission to SUBMITDIR for safe-keeping
 		for($rank=0; $rank<count($files); $rank++) {
-			$fdata = array('cid' => $cid,
+			$fdata = array('cid' => $contest,
 			               'submitid' => $id,
-			               'teamid' => $team,
+			               'teamid' => $teamid,
 			               'probid' => $probid,
 			               'langid' => $langid,
 			               'rank' => $rank,
@@ -644,8 +664,8 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 		logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
 	}
 
-	if( difftime($cdata['endtime'], $now) <= 0 ) {
-		logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$cid]");
+	if( difftime($contestdata['endtime'], $now) <= 0 ) {
+		logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$contest]");
 	}
 
 	return $id;
@@ -658,7 +678,7 @@ function submit_solution($team, $prob, $lang, $files, $filenames, $origsubmitid 
 function getSourceFilename($fdata)
 {
 	return implode('.', array('c'.$fdata['cid'], 's'.$fdata['submitid'],
-	                          $fdata['teamid'], $fdata['probid'], $fdata['langid'],
+	                          't'.$fdata['teamid'], 'p'.$fdata['probid'], $fdata['langid'],
 	                          $fdata['rank'], $fdata['filename']));
 }
 
@@ -703,68 +723,12 @@ function wrap_unquoted($text, $width = 75, $quote = '>')
 }
 
 /**
- * DOM XML tree helper functions (PHP 5).
- * The XML tree is assumed to be named '$xmldoc' and the XPath object '$xpath'.
- */
-
-/**
- * Create node and add below $paren.
- * $value is an optional element value and $attrs an array whose
- * key,value pairs are added as node attributes. All strings are htmlspecialchars
- */
-function XMLaddnode($paren, $name, $value = NULL, $attrs = NULL)
-{
-	global $xmldoc;
-
-	if ( $value === NULL ) {
-		$node = $xmldoc->createElement(htmlspecialchars($name));
-	} else {
-		$node = $xmldoc->createElement(htmlspecialchars($name), htmlspecialchars($value));
-	}
-
-	if ( count($attrs) > 0 ) {
-		foreach( $attrs as $key => $value ) {
-			$node->setAttribute(htmlspecialchars($key), htmlspecialchars($value));
-		}
-	}
-
-	$paren->appendChild($node);
-	return $node;
-}
-
-/**
- * Retrieve node by a path from root, or relative to paren if non-null.
- * Generates error if no or more than one nodes are found.
- */
-function XMLgetnode($path, $paren = NULL)
-{
-	global $xpath;
-
-	$nodelist = $xpath->query($path,$paren);
-
-	if ( $nodelist->length!=1 ) error("Not exactly one XML node found");
-
-	return $nodelist->item(0);
-}
-
-/**
- * Returns attribute value of a node, or null if attribute does not exist.
- */
-function XMLgetattr($node, $attr)
-{
-	$attrnode = $node->attributes->getNamedItem($attr);
-
-	if ( $attrnode===NULL ) return NULL;
-
-	return $attrnode->nodeValue;
-}
-
-/**
  * Log an action to the auditlog table.
  */
-function auditlog($datatype, $dataid, $action, $extrainfo = null, $force_username = null)
+function auditlog($datatype, $dataid, $action, $extrainfo = null,
+                  $force_username = null, $cid = null)
 {
-	global $cid, $username, $DB;
+	global $username, $DB;
 
 	if ( !empty($force_username) ) {
 		$user = $force_username;
@@ -777,3 +741,18 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null, $force_usernam
 	        VALUES(%s, %i, %s, %s, %s, %s, %s)',
 	       now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
 }
+
+/**
+ * Convert PHP ini values to bytes, as per
+ * http://www.php.net/manual/en/function.ini-get.php
+ */
+function phpini_to_bytes($size_str) {
+	switch (substr ($size_str, -1))
+	{
+		case 'M': case 'm': return (int)$size_str * 1048576;
+		case 'K': case 'k': return (int)$size_str * 1024;
+		case 'G': case 'g': return (int)$size_str * 1073741824;
+		default: return $size_str;
+	}
+}
+

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+gcc -Wall -ansi -pedantic -O2 check_boolfind.c -o check_boolfind

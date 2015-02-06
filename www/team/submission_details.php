@@ -10,17 +10,18 @@ require('init.php');
 $title = 'Submission details';
 require(LIBWWWDIR . '/header.php');
 
-$sid = (int)@$_GET['id'];
+$id = getRequestID();
 
 
 // select also on teamid so we can only select our own submissions
-$row = $DB->q('MAYBETUPLE SELECT p.probid, p.name AS probname, submittime,
+$row = $DB->q('MAYBETUPLE SELECT p.probid, cp.shortname, p.name AS probname, submittime,
                s.valid, l.name AS langname, result, output_compile, verified, judgingid
                FROM judging j
-               LEFT JOIN submission s USING (submitid)
-               LEFT JOIN language   l USING (langid)
-               LEFT JOIN problem    p ON (p.probid = s.probid)
-               WHERE j.submitid = %i AND teamid = %s AND j.valid = 1',$sid,$teamid);
+               LEFT JOIN submission s      USING (submitid)
+               LEFT JOIN language   l      USING (langid)
+               LEFT JOIN problem    p      ON (p.probid = s.probid)
+               LEFT JOIN contestproblem cp ON (cp.probid = p.probid AND cp.cid = s.cid)
+               WHERE j.submitid = %i AND teamid = %i AND j.valid = 1',$id,$teamid);
 
 if( !$row || $row['submittime'] >= $cdata['endtime'] ||
     (dbconfig_get('verification_required',0) && !$row['verified']) ) {
@@ -30,7 +31,7 @@ if( !$row || $row['submittime'] >= $cdata['endtime'] ||
 }
 
 // update seen status when viewing submission
-$DB->q("UPDATE judging j SET j.seen = 1 WHERE j.submitid = %i", $sid);
+$DB->q("UPDATE judging j SET j.seen = 1 WHERE j.submitid = %i", $id);
 
 echo "<h1>Submission details</h1>\n";
 
@@ -42,8 +43,8 @@ if( ! $row['valid'] ) {
 
 <table>
 <tr><td>Problem:</td>
-	<td><a href="problem_details.php?id=<?= urlencode($row['probid']) ?>"><?php echo htmlspecialchars($row['probname'])?> [<span class="probid"><?php echo
-	htmlspecialchars($row['probid']) ?></span>]</a></td></tr>
+	<td><span class="probid"><?php echo htmlspecialchars($row['shortname']) ?></span> -
+    <?php echo htmlspecialchars($row['probname'])?></td></tr>
 <tr><td>Submitted:</td>
 	<td><?php echo printtime($row['submittime'])?></td></tr>
 <tr><td>Language:</td>
@@ -82,7 +83,7 @@ if ( $show_sample && @$row['result']!='compiler-error' ) {
 	$runs = $DB->q('SELECT r.*, t.rank, t.description FROM testcase t
 	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 	                                             r.judgingid = %i )
-	                WHERE t.probid = %s AND t.sample = 1 ORDER BY rank',
+	                WHERE t.probid = %i AND t.sample = 1 ORDER BY rank',
 	               $row['judgingid'], $row['probid']);
 
 	$runinfo = $runs->gettable();

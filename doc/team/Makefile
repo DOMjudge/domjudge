@@ -6,9 +6,11 @@ include $(TOPDIR)/Makefile.global
 MANUALSTEX=team-manual.tex $(wildcard team-manual-??.tex)
 MANUALSPDF=$(MANUALSTEX:%tex=%pdf)
 
-config: gentexconfig
+docs: gentexconfig $(MANUALSPDF)
 
-docs: $(MANUALSPDF)
+# For distdocs we cannot generate gentexconfig, since paths.mk is not
+# yet available:
+distdocs: $(MANUALSPDF)
 
 install-docs:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domjudge_docdir)/team \
@@ -25,9 +27,6 @@ gentexconfig: gentexconfig.in $(TOPDIR)/paths.mk
 $(MANUALSPDF): %pdf: %tex team-manual-preamble.tex $(TOPDIR)/etc/domserver-config.php
 	./genteammanuals
 
-dist-l: $(MANUALSPDF)
-	$(MAKE) clean-l
-
 clean-l:
 	-rm -f $(addprefix team-manual*.,aux log out)
 
@@ -36,3 +35,5 @@ distclean-l:
 
 maintainer-clean-l:
 	-rm -f $(MANUALSPDF)
+
+.PHONY: docs distdocs install-docs

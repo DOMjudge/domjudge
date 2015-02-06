@@ -10,15 +10,19 @@
 require('init.php');
 $title = 'Clarifications';
 
-if ( isset($_REQUEST['id']) ) {
-	$id = (int)$_REQUEST['id'];
-	if ( ! $id ) error("Missing clarification id");
+$id = getRequestID();
 
-	$req = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
-	               LEFT JOIN team t ON (t.login = q.sender)
-	               WHERE q.cid = %i AND q.clarid = %i', $cid, $id);
+if ( isset($id) ) {
 
-	if ( ! $req ) error("clarification $id not found, cid = $cid");
+	if ( empty($cids) ) {
+		$req = null;
+	} else {
+		$req = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
+			           LEFT JOIN team t ON (t.teamid = q.sender)
+			           WHERE q.cid IN (%Ai) AND q.clarid = %i', $cids, $id);
+	}
+
+	if ( ! $req ) error("clarification $id not found, cids = " . implode(', ', $cids));
 
 	$respid = (int) (empty($req['respid']) ? $id : $req['respid']);
 	$isgeneral = FALSE;
@@ -69,6 +73,12 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		$sendto = $_POST['sendto'];
 	}
 
+	list($cid, $problem) = explode('-', $_POST['problem']);
+	if ($problem == 'general')
+	{
+		$problem = null;
+	}
+
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, respid, submittime, recipient, probid, body,
  	                  answered, jury_member)
@@ -76,7 +86,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %s, %s, %i, ' .
 	                (isset($jury_member) ? '%s)' : 'NULL %_)'),
 	                $cid, $respid, now(), $sendto,
-	                ($_POST['problem'] == 'general' ? NULL : $_POST['problem']),
+			$problem,
 	                $_POST['bodytext'], 1, $jury_member);
 	auditlog('clarification', $newid, 'added');
 
@@ -92,14 +102,14 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		        VALUES(%s, %i, %i, "clarification")', now(), $cid, $newid);
 
 		// mark the messages as unread for the team(s)
-		$teams = $DB->q('COLUMN SELECT login FROM team');
-		foreach($teams as $login) {
-			$DB->q('INSERT INTO team_unread (mesgid, type, teamid)
-			        VALUES (%i, "clarification", %s)', $newid, $login);
+		$teams = $DB->q('COLUMN SELECT teamid FROM team');
+		foreach($teams as $teamid) {
+			$DB->q('INSERT INTO team_unread (mesgid, teamid)
+			        VALUES (%i, %i)', $newid, $teamid);
 		}
 	} else {
-		$DB->q('INSERT INTO team_unread (mesgid, type, teamid)
-		        VALUES (%i, "clarification", %s)', $newid, $sendto);
+		$DB->q('INSERT INTO team_unread (mesgid, teamid)
+		        VALUES (%i, %i)', $newid, $sendto);
 	}
 
 	$DB->q('COMMIT');
@@ -152,13 +162,13 @@ if ( !$req['answered'] ) {
 
 if ( ! empty ( $req['respid'] ) ) {
 	$orig = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
-	                LEFT JOIN team t ON (t.login = q.sender)
+	                LEFT JOIN team t ON (t.teamid = q.sender)
 	                WHERE q.clarid = %i', $respid);
 	echo '<p>See the <a href="clarification.php?id=' . $respid .
 		'">original clarification ' . $respid . '</a> by ' .
 		( $orig['sender']==NULL ? 'Jury' :
 			'<a href="team.php?id=' . urlencode($orig['sender']) . '">' .
-			htmlspecialchars($orig['sender'] . ': ' . $orig['name']) .
+			htmlspecialchars($orig['name'] . " (t" . $orig['sender'] . ")") .
 			'</a>' ) .
 		"</p>\n\n";
 
@@ -182,10 +192,10 @@ if ( !empty($req['sender']) ) {
 // display a clarification send box
 if ( $isgeneral ) {
 	echo "<h1>Send Clarification</h1>\n\n";
-	putClarificationForm("clarification.php", $cdata['cid']);
+	putClarificationForm("clarification.php");
 } else {
 	echo "<h1>Send Response</h1>\n\n";
-	putClarificationForm("clarification.php", $cdata['cid'], $respid);
+	putClarificationForm("clarification.php", $respid);
 }
 
 require(LIBWWWDIR . '/footer.php');

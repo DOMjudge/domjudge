@@ -30,18 +30,19 @@ $waittime = 5;
 /**
  * Returns a text to be sent when notifying of a new balloon.
  */
-function notification_text($team, $problem, $probs_solved, $probs_data, $comment) {
+function notification_text($team, $problem, $contest, $probs_solved, $probs_data, $comment) {
 	$ret =
 		"A problem has been solved:\n".
 		"\n".
 		(empty($team['room']) ? "" : "Location: ".$team['room']."\n" ) .
-		"Team:     ".$team['login'].": ".$team['name']."\n".
+		"Contest:  ".$contest['contestname']." (c".$contest['cid'].")\n".
+		"Team:     ".$team['name']." (t".$team['teamid'].")\n".
 		"Problem:  ".$problem.": ".$probs_data[$problem]['name'].
 		(empty($probs_data[$problem]['color']) ? "" : " (colour: ".$probs_data[$problem]['color'].")" ) . "\n\n" .
 		"Current balloon status for this team:\n";
 
 	foreach($probs_solved as $probid) {
-		$ret .= " - " . $probid .": " . $probs_data[$probid]['name'] .
+		$ret .= " - " . $probs_data[$probid]['shortname'] .": " . $probs_data[$probid]['name'] .
 			(empty($probs_data[$probid]['color']) ? "" : " (colour: ".$probs_data[$probid]['color'].")" )."\n";
 	}
 
@@ -52,7 +53,11 @@ function notification_text($team, $problem, $probs_solved, $probs_data, $comment
 	return $ret;
 }
 
-$cid = null;
+$cids = array();
+$cdatas = array();
+$nonfirst_contest = array();
+$nonfirst_problem = array();
+$nonfirst_team = array();
 $infreeze = FALSE;
 
 logmsg(LOG_NOTICE, "Balloon notifications started [DOMjudge/".DOMJUDGE_VERSION."]");
@@ -69,91 +74,110 @@ while ( TRUE ) {
 		exit;
 	}
 
-	$newcdata = getCurContest(TRUE);
-	$newcid = $newcdata['cid'];
-	$oldcid = $cid;
-	if ( $oldcid !== $newcid ) {
-		logmsg(LOG_NOTICE, "Contest has changed from " .
-		       (isset($oldcid) ? "c$oldcid" : "none" ) . " to " .
-		       (isset($newcid) ? "c$newcid" : "none" ) );
-		$cid = $newcid;
-		$cdata = $newcdata;
+	$newcdatas = getCurContests(TRUE);
+	$newcids = array_keys($newcdatas);
+	$oldcids = $cids;
+	$oldcidsstring = "none";
+	if ( !empty($oldcids) ) {
+		$oldcidsstring = implode(', ', array_map(function($cid) { return 'c' . $cid; }, $oldcids));
+	}
+	$newcidsstring = "none";
+	if ( !empty($newcids) ) {
+		$newcidsstring = implode(', ', array_map(function($cid) { return 'c' . $cid; }, $newcids));
+	}
+	if ( $oldcids !== $newcids ) {
+		logmsg(LOG_NOTICE, "Contests has changed from " .
+		       $oldcidsstring . " to " .
+		       $newcidsstring );
+		$cids = $newcids;
+		$cdatas = $newcdatas;
 	}
 
-	if ( isset($cdata['freezetime']) && ! $infreeze &&
-	     difftime(now(), $cdata['freezetime']) > 0 ) {
-		$infreeze = TRUE;
-		logmsg(LOG_NOTICE, "Scoreboard is frozen since " . $cdata['freezetime']);
-	}
-	$freezecond = '';
-	if ( ! dbconfig_get('show_balloons_postfreeze',0) && isset($cdata['freezetime']) ) {
-		$freezecond = 'AND submittime <= "' . $cdata['freezetime'] . '"';
-	}
-
-	do {
-
-		$res = $DB->q("SELECT b.*, s.probid, s.submittime,
-		               t.login, t.name AS teamname, t.room, c.name AS catname
-		               FROM balloon b
-		               LEFT JOIN submission s USING (submitid)
-		               LEFT JOIN team t ON (t.login = s.teamid)
-		               LEFT JOIN team_category c USING(categoryid)
-		               WHERE s.cid = %i AND b.done = 0 $freezecond
-		               ORDER BY submitid ASC",
-		              $cid);
-
-		while ( $row = $res->next() ) {
-			$team = array ('name'   => $row['teamname'],
-			               'room'   => $row['room'],
-			               'login'  => $row['login']);
-
-			logmsg(LOG_DEBUG,"New problem solved: ".$row['probid'].
-				   " by team ".$row['login']);
-
-			if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
-
-				$probs_solved = $DB->q('COLUMN SELECT probid FROM scorecache_jury
-				                        WHERE cid = %i AND teamid = %s AND is_correct = 1',
-				                       $cid, $row['login']);
-				$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color
-				                      FROM problem WHERE cid = %i', $cid);
-
-				// current limitation is that this gets reset if the balloon daemon is restarted
-				$comment = '';
-				if ( !isset($nonfirst_contest) ) {
-					$comment = 'first in contest';
-					$nonfirst_contest = true;
-				} else {
-					if (!isset($nonfirst_problem[$row['probid']])) {
-						$comment = 'first for problem ';
-						$nonfirst_problem[$row['probid']] = true;
-					}
-					if (!isset($nonfirst_team[$row['login']])) {
-						$comment = 'first for team';
-						$nonfirst_team[$row['login']] = true;
-					}
-				}
-
-				logmsg(LOG_INFO,"Sending notification: team '".
-					   $row['login']."', problem '".$row['probid']."'.");
-
-				logmsg(LOG_DEBUG,"Running command: '".BALLOON_CMD."'");
-
-				$handle = popen(BALLOON_CMD, 'w');
-				if ( ! $handle ) error("Could not run command '".BALLOON_CMD."'");
-
-				fwrite($handle,notification_text($team,$row['probid'],$probs_solved, $probs_data, $comment));
-				if ( ($exitcode = pclose($handle))!=0 ) {
-					warning("Notification command exited with exitcode $exitcode");
-				}
-			}
-
-			$DB->q('UPDATE balloon SET done=1
-			        WHERE balloonid = %i',
-			       $row['balloonid']);
+	foreach ($cdatas as $cid => $cdata) {
+		if ( isset($cdata['freezetime']) && !$infreeze &&
+		     difftime(now(), $cdata['freezetime']) > 0
+		) {
+			$infreeze = TRUE;
+			logmsg(LOG_NOTICE,
+			       "Scoreboard of contest c${cid} is frozen since " .
+			       $cdata['freezetime']);
+		}
+		$freezecond = '';
+		if ( !dbconfig_get('show_balloons_postfreeze', 0) &&
+		     isset($cdata['freezetime'])
+		) {
+			$freezecond = 'AND submittime <= "' . $cdata['freezetime'] . '"';
 		}
 
-	} while ( $res->count()!=0 );
+		do {
+
+			$res = $DB->q("SELECT b.*, s.probid, s.submittime,
+			               t.teamid, t.name AS teamname, t.room, c.name AS catname
+			               FROM balloon b
+			               LEFT JOIN submission s USING (submitid)
+			               LEFT JOIN team t USING (teamid)
+			               LEFT JOIN team_category c USING (categoryid)
+			               WHERE s.cid = %i AND b.done = 0 $freezecond
+			               ORDER BY submitid ASC", $cid);
+
+			while ($row = $res->next()) {
+				$team = array('name' => $row['teamname'],
+					      'room' => $row['room'],
+					      'teamid' => $row['teamid']);
+
+				logmsg(LOG_DEBUG, "New problem solved: p" . $row['probid'] .
+				                  " by team t" . $row['teamid'] .
+				                  " for contest c" . $cid);
+
+				if ( defined('BALLOON_CMD') && BALLOON_CMD ) {
+
+					$probs_solved = $DB->q('COLUMN SELECT probid FROM scorecache_jury
+					                        WHERE cid = %i AND teamid = %i AND is_correct = 1',
+							       $cid, $row['teamid']);
+					$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,shortname,name,color
+					                      FROM problem WHERE cid = %i', $cid);
+
+					// current limitation is that this gets reset if the balloon daemon is restarted
+					$comment = '';
+					if ( !isset($nonfirst_contest[$cid]) ) {
+						$comment = 'first in contest';
+						$nonfirst_contest[$cid] = true;
+					} else {
+						if ( !isset($nonfirst_problem[$cid]) || !isset($nonfirst_problem[$cid][$row['probid']]) ) {
+							$comment = 'first for problem';
+							$nonfirst_problem[$cid][$row['probid']] = true;
+						}
+						if ( !isset($nonfirst_team[$cid]) && !isset($nonfirst_team[$cid][$row['teamid']]) ) {
+							$comment = 'first for team';
+							$nonfirst_team[$cid][$row['teamid']] = true;
+						}
+					}
+
+					logmsg(LOG_INFO, "Sending notification:" .
+					       " team t" .$row['teamid'] .
+					       ", problem p" . $row['probid'] .
+					       ", contest c" . $cid . ".");
+
+					logmsg(LOG_DEBUG, "Running command: '" . BALLOON_CMD . "'");
+
+					$handle = popen(BALLOON_CMD, 'w');
+					if ( !$handle ) error("Could not run command '" .
+							      BALLOON_CMD . "'");
+
+					fwrite($handle, notification_text($team, $row['probid'],
+					                                  $cdata, $probs_solved,
+					                                  $probs_data, $comment));
+					if ( ($exitcode = pclose($handle)) != 0 ) {
+						warning("Notification command exited with exitcode $exitcode");
+					}
+				}
+
+				$DB->q('UPDATE balloon SET done=1 WHERE balloonid = %i',
+				       $row['balloonid']);
+			}
+
+		} while ($res->count() != 0);
+	}
 
 	sleep($waittime);
 }

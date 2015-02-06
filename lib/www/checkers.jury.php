@@ -18,17 +18,9 @@ function ch_error($string)
 	$CHECKER_ERRORS[] = $string;
 }
 
-function check_team($data, $keydata = null)
-{
-	$id = (isset($data['login']) ? $data['login'] : $keydata['login']);
-	if ( ! preg_match ( ID_REGEX, $id ) ) {
-		ch_error("Team ID (login) may only contain characters " . IDENTIFIER_CHARS . ".");
-	}
-	return $data;
-}
-
 function check_user($data, $keydata = null)
 {
+	global $DB;
 	$id = (isset($data['username']) ? $data['username'] : $keydata['username']);
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Username may only contain characters " . IDENTIFIER_CHARS . ".");
@@ -38,7 +30,19 @@ function check_user($data, $keydata = null)
 	}
 	if ( !empty($data['password']) ) {
 		$data['password'] = md5("$id#".$data['password']);
+	} else {
+		unset($data['password']);
 	}
+	if ( !empty($data['ip_address']) ) {
+		if ( !filter_var($data['ip_address'], FILTER_VALIDATE_IP) ) {
+			ch_error("Invalid IP address.");
+		}
+		$ip = $DB->q("VALUE SELECT count(*) FROM user WHERE ip_address = %s AND username != %s", $data['ip_address'], $id);
+		if ( $ip > 0 ) {
+			ch_error("IP address already assigned to another user.");
+		}
+	}
+
 	return $data;
 }
 
@@ -58,9 +62,8 @@ function check_problem($data, $keydata = null)
 			(int)$data['timelimit'] != $data['timelimit'] ) {
 		ch_error("Timelimit is not a valid positive integer");
 	}
-	$id = (isset($data['probid']) ? $data['probid'] : $keydata['probid']);
-	if ( ! preg_match ( ID_REGEX, $id ) ) {
-		ch_error("Problem ID may only contain characters " . IDENTIFIER_CHARS . ".");
+	if ( isset($data['shortname']) && ! preg_match ( ID_REGEX, $data['shortname'] ) ) {
+		ch_error("Problem shortname may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
 
 	if ( dbconfig_get('separate_start_end',0) ) {
@@ -99,7 +102,7 @@ function check_problem($data, $keydata = null)
 		     function_exists("finfo_open") ) {
 			$finfo = finfo_open(FILEINFO_MIME);
 
-			list($type, $enc) = explode('; ', finfo_file($finfo, $tempname));
+			list($type) = explode('; ', finfo_file($finfo, $tempname));
 
 			finfo_close($finfo);
 
@@ -122,6 +125,23 @@ function check_problem($data, $keydata = null)
 	if ( !empty($data['problemtext']) &&
 	     !isset($data['problemtext_type']) ) {
 		ch_error("Problem statement has unknown file type.");
+	}
+	// Unset problemtext_type if problemtext was set to null explicitly.
+	if ( array_key_exists('problemtext', $data) && empty($data['problemtext']) ) {
+		$data['problemtext_type'] = NULL;
+	}
+
+	if ( !empty($data['special_compare']) ) {
+		global $DB;
+		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s AND type = %s', $data['special_compare'], 'compare') ) {
+			ch_error("Unknown special compare script (or wrong type): " . $data['special_compare']);
+		}
+	}
+	if ( !empty($data['special_run']) ) {
+		global $DB;
+		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s AND type = %s', $data['special_run'], 'run') ) {
+			ch_error("Unknown special run script (or wrong type): " . $data['special_run']);
+		}
 	}
 
 	return $data;
@@ -147,6 +167,14 @@ function check_language($data, $keydata = null)
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Language ID may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
+	if ( empty($data['compile_script']) ) {
+		ch_error("No compile script specified for language: " . $id);
+	} else {
+		global $DB;
+		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s AND type = %s', $data['compile_script'], 'compile') ) {
+			ch_error("Unknown compile script (or wrong type): " . $data['compile_script']);
+		}
+	}
 
 	return $data;
 }
@@ -166,13 +194,14 @@ function check_relative_time($time, $starttime, $field)
 		     is_numeric($times[2]) && $times[2] < 60 ) {
 			$hours = $times[0];
 			$minutes = $times[1];
-			$seconds = 60 * ($minutes + 60 * $hours);
+			$seconds = $times[2];
+			$seconds = $seconds + 60 * ($minutes + 60 * $hours);
 			if ($neg) {
 				$seconds *= -1;
 			}
 			$ret = $starttime + $seconds;
 		} else {
-			ch_error($field . " is not correctly formatted, expecting: +/-hh:mm");
+			ch_error($field . " is not correctly formatted, expecting: +/-hh:mm(:ss)");
 			$ret = null;
 		}
 	} else {
@@ -185,11 +214,18 @@ function check_relative_time($time, $starttime, $field)
 
 function check_contest($data, $keydata = null)
 {
+	if ( isset($data['shortname']) && ! preg_match ( ID_REGEX, $data['shortname'] ) ) {
+		ch_error("Contest shortname may only contain characters " . IDENTIFIER_CHARS . ".");
+	}
+
 	// are these dates valid?
 	foreach ( array('starttime','endtime','freezetime',
-	                'unfreezetime','activatetime') as $f ) {
+			'unfreezetime','activatetime','deactivatetime') as $f ) {
 		if ( $f == 'starttime' ) {
 			$data[$f] = strtotime($data[$f.'_string']);
+			if ( $data[$f] === FALSE ) {
+				error("Cannot parse starttime: " . $data[$f.'_string']);
+			}
 		} else {
 			// The true input date/time strings are preserved in the
 			// *_string variables, since these may be relative times
@@ -200,7 +236,7 @@ function check_contest($data, $keydata = null)
 	}
 
 	// are required times specified?
-	foreach(array('activatetime','starttime','endtime') as $f) {
+	foreach(array('activatetime','starttime','endtime','deactivatetime') as $f) {
 		if ( empty($data[$f]) ) {
 			ch_error("Contest $f is empty");
 			return $data;
@@ -208,7 +244,7 @@ function check_contest($data, $keydata = null)
 	}
 
 	// the ordering of times is:
-	// activatetime <= starttime <= freezetime < endtime <= unfreezetime
+	// activatetime <= starttime <= freezetime < endtime <= unfreezetime <= deactivatetime
 
 	// are contest start/end times in order?
 	if ( difftime($data['endtime'], $data['starttime']) <= 0 ) {
@@ -230,31 +266,12 @@ function check_contest($data, $keydata = null)
 		if ( difftime($data['unfreezetime'], $data['endtime']) < 0 ) {
 			ch_error('Unfreezetime must be larger than endtime.');
 		}
-	}
-
-	// a check whether this contest overlaps in time with any other, the
-	// system can only deal with exactly ONE current contest at any time.
-	// A new contest N overlaps with an existing contest E if the activate- or
-	// end time or N is inside E (N is (partially) contained in E), or if
-	// the activatetime is before E and the end time after E (E is completely
-	// contained in N).
-	if ( $data['enabled'] ) {
-		global $DB;
-		$overlaps = $DB->q('COLUMN SELECT cid FROM contest WHERE
-	                        enabled = 1 AND
-		                    ( (%s >= activatetime AND %s <= endtime) OR
-		                      (%s >= activatetime AND %s <= endtime) OR
-		                      (%s <= activatetime AND %s >= endtime) ) ' .
-		                   (isset($keydata['cid'])?'AND cid != %i ':'%_') .
-		                   'ORDER BY cid',
-		                   $data['activatetime'], $data['activatetime'],
-		                   $data['endtime'], $data['endtime'],
-		                   $data['activatetime'], $data['endtime'],
-		                   @$keydata['cid']);
-
-		if(count($overlaps) > 0) {
-			ch_error('This contest overlaps with the following contest(s): c' .
-			         implode(',c', $overlaps));
+		if ( difftime($data['deactivatetime'], $data['unfreezetime']) < 0 ) {
+			ch_error('Deactivatetime must be larger than unfreezetime.');
+		}
+	} else {
+		if ( difftime($data['deactivatetime'], $data['endtime']) < 0 ) {
+			ch_error('Deactivatetime must be larger than endtime.');
 		}
 	}
 

@@ -5,7 +5,7 @@
 export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            docs install-docs config submitclient
+            docs install-docs
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
@@ -14,17 +14,17 @@ default:
 	@echo "No default target"
 	@echo
 	@echo "Try:"
+	@echo " - make all         (all targets below)"
+	@echo " - make build       (all except 'docs')"
 	@echo " - make domserver"
 	@echo " - make judgehost"
-	@echo " - make docs"
 	@echo " - make submitclient"
+	@echo " - make docs"
 	@echo or
 	@echo " - make install-domserver"
 	@echo " - make install-judgehost"
 	@echo " - make install-docs"
 	@echo or
-	@echo " - make all"
-	@echo " - make build"
 	@echo " - make clean"
 	@echo " - make distclean"
 	@exit 1
@@ -37,25 +37,44 @@ install:
 	@exit 1
 
 all: build docs
+build: domserver judgehost
+
+ifeq ($(SUBMITCLIENT_ENABLED),yes)
+build: submitclient
+endif
 
 # MAIN TARGETS
-build domserver judgehost docs: paths.mk config
+domserver judgehost docs submitclient: paths.mk config
+submitclient:
+	$(MAKE) -C submit submitclient
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure
+dist: configure distdocs
+
+# Generate documentation for distribution. Remove this dependency from
+# dist above for quicker building from git sources.
+distdocs:
+	$(MAKE) -C doc distdocs
+
+# Generate configuration files from configure settings:
+config:
+	$(MAKE) -C etc config
+
+# Special rule to build any compile/run/compare scripts. This is
+# useful for testing, e.g. when submitting a Coverity scan.
+build-scripts:
+	$(MAKE) -C sql build-scripts
 
 # List of SUBDIRS for recursive targets:
-config:            SUBDIRS=etc doc lib sql www judge submit tests misc-tools
-build:             SUBDIRS=        lib         judge submit tests misc-tools
-domserver:         SUBDIRS=etc             www       submit
-install-domserver: SUBDIRS=etc     lib sql www       submit       misc-tools
-judgehost:         SUBDIRS=etc                 judge
+build:             SUBDIRS=        lib                            misc-tools
+domserver:         SUBDIRS=etc         sql www                    misc-tools
+install-domserver: SUBDIRS=etc     lib sql www                    misc-tools
+judgehost:         SUBDIRS=etc                 judge              misc-tools
 install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
 docs:              SUBDIRS=    doc
-install-docs:      SUBDIRS=    doc         www                    misc-tools
-submitclient:      SUBDIRS=                          submit
-dist:              SUBDIRS=    doc                                misc-tools
+install-docs:      SUBDIRS=    doc         www
+dist:              SUBDIRS=        lib sql                        misc-tools
 clean:             SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 distclean:         SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit tests misc-tools
@@ -116,7 +135,7 @@ paths.mk:
 MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -D_FORTIFY_SOURCE=2 \
               -fPIE -Wformat -Wformat-security -ansi -pedantic
 MAINT_LDFLAGS=-fPIE -pie -Wl,-z,relro -Wl,-z,now
-maintainer-conf: configure
+maintainer-conf: dist
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
 	            --with-judgehost_root=$(CURDIR) \
@@ -129,7 +148,6 @@ maintainer-conf: configure
 	            --with-judgehost_tmpdir=$(CURDIR)/output/tmp \
 	            --with-judgehost_judgedir=$(CURDIR)/output/judging \
 	            --with-domserver_submitdir=$(CURDIR)/output/submissions \
-	            --enable-submitclient=http,dolstra \
 	            CFLAGS='$(MAINT_CXFLAGS)' \
 	            CXXFLAGS='$(MAINT_CXFLAGS)' \
 	            LDFLAGS='$(MAINT_LDFLAGS)' \
@@ -138,7 +156,7 @@ maintainer-conf: configure
 # Install the system in place: don't really copy stuff, but create
 # symlinks where necessary to let it work from the source tree.
 # This stuff is a hack!
-maintainer-install: all domserver-create-dirs judgehost-create-dirs
+maintainer-install: build domserver-create-dirs judgehost-create-dirs
 # Replace lib{judge,submit}dir with symlink to prevent lots of symlinks:
 	-rmdir $(judgehost_libjudgedir) $(domserver_libsubmitdir)
 	-rm -f $(judgehost_libjudgedir) $(domserver_libsubmitdir)
@@ -168,4 +186,5 @@ clean-autoconf:
 	-rm -rf config.status config.cache config.log autom4te.cache
 
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
-        clean-autoconf $(addprefix maintainer-,conf install uninstall)
+        clean-autoconf $(addprefix maintainer-,conf install uninstall) \
+        config submitclient distdocs

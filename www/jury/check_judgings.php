@@ -31,14 +31,15 @@ $verified = array();
 $nomatch = array();
 $earlier = array();
 
-$matchstring = '@EXPECTED_RESULTS@: ';
 $verifier = 'auto-verifier';
 
-$res = $DB->q("SELECT s.*, f.sourcecode, j.judgingid, j.result, j.verified, j.jury_member
-               FROM submission s
-               LEFT JOIN submission_file f ON (s.submitid = f.submitid AND f.rank=0)
-               LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
-               WHERE s.cid = %i AND j.result IS NOT NULL", $cid);
+$res = null;
+if ( !empty($cids) ) {
+	$res = $DB->q("SELECT s.*, j.judgingid, j.result, j.verified, j.jury_member
+	               FROM submission s
+	               LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
+	               WHERE s.cid IN (%Ai) AND j.result IS NOT NULL", $cids);
+}
 
 $section = 0;
 
@@ -48,8 +49,8 @@ function flushresults($header, $results, $collapse = FALSE)
 
 	$section++;
 
-	echo "<h2><a href=\"javascript:collapse($section)\">$header</a></h2>\n\n";
-	echo "<ul class=\"details\" id=\"detail$section\">\n";
+	echo "<h2><a class=\"collapse\" href=\"javascript:collapse($section)\">" .
+		"$header</a></h2>\n\n<ul class=\"details\" id=\"detail$section\">\n";
 	foreach ($results as $row) {
 		echo "<li>$row</li>\n";
 	}
@@ -66,15 +67,21 @@ function flushresults($header, $results, $collapse = FALSE)
 	flush();
 }
 
-while( $row = $res->next() ) {
+while( !empty($cids) && $row = $res->next() ) {
 	$sid = $row['submitid'];
 
-	if ( ($pos = mb_strpos($row['sourcecode'],$matchstring)) !== FALSE && $row['verified']==0 ) {
-		$nchecked++;
+	// Try to find the verification match string in one of the source
+	// files. The first match is used.
+	$files = $DB->q("KEYVALUETABLE SELECT rank, sourcecode
+	                 FROM submission_file WHERE submitid = %i", $sid);
 
-		$beginpos = $pos + mb_strlen($matchstring);
-		$endpos = mb_strpos($row['sourcecode'],"\n",$beginpos);
-		$results = explode(',',trim(mb_substr($row['sourcecode'],$beginpos,$endpos-$beginpos)));
+	$results = NULL;
+	foreach ( $files as $rank => $source ) {
+		if ( ($results = getExpectedResults($source)) !== NULL ) break;
+	}
+
+	if ( $results !== NULL && $row['verified']==0 ) {
+		$nchecked++;
 
 		$result = mb_strtoupper($row['result']);
 
@@ -108,7 +115,7 @@ while( $row = $res->next() ) {
 		$nunchecked++;
 
 		if ( $pos===FALSE ) {
-			$nomatch[] = "string '<code>$matchstring</code>' not found in " .
+			$nomatch[] = "string '<code>@EXPECTED_RESULTS@:</code>' not found in " .
 				"<a href=\"submission.php?id=" . $sid .
 				"\">s$sid</a>, leaving submission unchecked";
 		} else {

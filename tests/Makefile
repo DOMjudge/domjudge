@@ -4,7 +4,7 @@ endif
 include $(TOPDIR)/Makefile.global
 
 SUBMITCMD = $(TOPDIR)/submit/submit
-SUBMITOPTS = -q -w1 -p $(PROBLEM)
+SUBMITOPTS = -q -p $(PROBLEM)
 
 SUBMIT = \
 	echo -n "Submitting '$$i' " ; \
@@ -19,16 +19,14 @@ SUBMIT = \
 	fi ; \
 	echo
 
-build: $(TARGETS)
-
 check-syntax:
 	./syntax
 
 check: test-normal test-fltcmp test-boolfind
 
-PROBLEM=hello
-test-fltcmp: PROBLEM=fltcmp
-test-boolfind: PROBLEM=boolfind
+PROBLEM=A
+test-fltcmp: PROBLEM=B
+test-boolfind: PROBLEM=C
 
 test-normal: $(SUBMITCMD)
 	@echo "Submitting normal test sources..." ; \

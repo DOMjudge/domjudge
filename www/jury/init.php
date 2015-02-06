@@ -23,8 +23,6 @@ require_once(LIBWWWDIR . '/forms.php');
 require_once(LIBWWWDIR . '/printing.php');
 require_once(LIBWWWDIR . '/auth.php');
 
-if ( ! defined('NONINTERACTIVE') ) define('NONINTERACTIVE', false);
-
 // The functions do_login and show_loginpage, if called, do not return.
 if ( @$_POST['cmd']=='login' ) do_login();
 if ( !logged_in() ) show_loginpage();
@@ -47,10 +45,34 @@ if (!$allowed) {
 }
 
 require_once(LIBWWWDIR . '/common.jury.php');
+if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES)
+  && isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > 0 ) {
+	error("POST data exceeded php.ini's 'post_max_size' directive.");
+}
 
-$cdata = getCurContest(TRUE);
-$cid = (int)$cdata['cid'];
+$cdatas = getCurContests(TRUE, null, TRUE);
+$cids = array_keys($cdatas);
 
-$nunread_clars = $DB->q('VALUE SELECT COUNT(*) FROM clarification
-                         WHERE sender IS NOT NULL AND cid = %i
-                         AND answered = 0', $cid);
+// If the cookie has a existing contest, use it
+if ( isset($_COOKIE['domjudge_cid']) )  {
+	if ( isset($cdatas[$_COOKIE['domjudge_cid']]) ) {
+		$cid = $_COOKIE['domjudge_cid'];
+		$cdata = $cdatas[$cid];
+	}
+} elseif ( count($cids) >= 1 ) {
+	// Otherwise, select the first contest
+	$cid = $cids[0];
+	$cdata = $cdatas[$cid];
+}
+
+// Data to be sent as AJAX updates:
+$updates = array(
+	'clarifications' =>
+	empty($cids) ? array() : $DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
+		FROM clarification
+		WHERE sender IS NOT NULL AND cid IN (%Ai) AND answered = 0', $cids),
+	'judgehosts' =>
+	$DB->q('TABLE SELECT hostname, polltime
+		FROM judgehost
+	        WHERE active = 1 AND unix_timestamp()-polltime >= ' . JUDGEHOST_CRITICAL),
+);

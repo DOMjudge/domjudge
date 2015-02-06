@@ -8,27 +8,51 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
+require(LIBEXTDIR . '/spyc/spyc.php');
+
 require(ETCDIR . '/judgehost-config.php');
-$credfile = ETCDIR . '/restapi.secret';
-$credentials = @file($credfile);
-if (!$credentials) {
-	user_error("Cannot read REST API credentials file " . $credfile,
-		E_USER_ERROR);
-	exit();
-}
-foreach ($credentials as $credential) {
-	if ( $credential{0} == '#' ) continue;
-	list ($resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
-	break;
-}
-if ( !(isset($resturl) && isset($restuser) && isset($restpass)) ) {
-	// FIXME: do check API access here
-	user_error("Cannot access REST API.", E_USER_ERROR);
-	exit();
+
+$resturl = $restuser = $restpass = null;
+$endpoints = array();
+
+function read_credentials() {
+	global $endpoints;
+
+	$credfile = ETCDIR . '/restapi.secret';
+	$credentials = @file($credfile);
+	if (!$credentials) {
+		error("Cannot read REST API credentials file " . $credfile);
+	}
+	foreach ($credentials as $credential) {
+		if ( $credential{0} == '#' ) continue;
+		list ($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
+		if (array_key_exists($endpointID, $endpoints)) {
+			error("Error parsing REST API credentials. Duplicate endpoint ID.");
+		}
+		$endpoints[$endpointID] = array(
+			"url" => $resturl,
+			"user" => $restuser,
+			"pass" => $restpass,
+			"waiting" => FALSE
+		);
+	}
+	if ( count($endpoints) <= 0 ) {
+		error("Error parsing REST API credentials.");
+	}
 }
 
-function request($url, $verb = 'GET', $data = '') {
+/**
+ * Perform a request to the REST API and handle any errors.
+ * $url is the part appended to the base DOMjudge $resturl.
+ * $verb is the HTTP method to use: GET, POST, PUT, or DELETE
+ * $data is the urlencoded data passed as GET or POST parameters.
+ * When $failonerror is set to false, any error will be turned into a
+ * warning and null is returned.
+ */
+function request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	global $resturl, $restuser, $restpass;
+
+	logmsg(LOG_DEBUG, "API request $verb $url");
 
 	$url = $resturl . "/" . $url;
 	if ( $verb == 'GET' ) {
@@ -53,18 +77,26 @@ function request($url, $verb = 'GET', $data = '') {
 	}
 
 	$response = curl_exec($ch);
-	if ( !$response ) {
-		error("Error while executing curl with url " . $url . ": " . curl_error($ch));
+	if ( $response === FALSE ) {
+		$errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($ch);
+		if ($failonerror) error($errstr);
+		else { warning($errstr); return null; }
 	}
 	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	if ( $status < 200 || $status >= 300 ) {
-		error("Error while executing curl with url " . $url . ": http status code: " . $status . ", response: " . $response);
+		$errstr = "Error while executing curl $verb to url " . $url .
+		    ": http status code: " . $status . ", response: " . $response;
+		if ($failonerror) { error($errstr); }
+		else { warning($errstr); return null; }
 	}
 
 	curl_close($ch);
 	return $response;
 }
 
+/**
+ * Retrieve a value from the configuration through the REST API.
+ */
 function dbconfig_get_rest($name) {
 	$res = request('config', 'GET', 'name=' . urlencode($name));
 	$res = dj_json_decode($res);
@@ -84,10 +116,11 @@ function dj_json_decode($str) {
 
 /**
  * Encode file contents for POST-ing to REST API.
- * Returns contents of $file as encoded string.
+ * Returns contents of $file (optionally limited in size, see
+ * getFileContents) as encoded string.
  */
-function rest_encode_file($file) {
-	return urlencode(base64_encode(getFileContents($file)));
+function rest_encode_file($file, $sizelimit = TRUE) {
+	return urlencode(base64_encode(getFileContents($file, $sizelimit)));
 }
 
 $waittime = 5;
@@ -105,6 +138,125 @@ function usage()
 	    "  -h       display this help and exit\n" .
 	    "  -V       output version information and exit\n\n";
 	exit;
+}
+
+// fetches new executable from database if necessary
+// runs build to compile executable
+// returns absolute path to run script
+function fetch_executable($workdirpath, $execid, $md5sum) {
+	// FIXME: make sure we don't have to escape $execid
+	$execpath = "$workdirpath/executable/" . $execid;
+	$execmd5path = $execpath . "/md5sum";
+	$execdeploypath = $execpath . "/.deployed";
+	$execbuildpath = $execpath . "/build";
+	$execrunpath = $execpath . "/run";
+	$execzippath = $execpath . "/executable.zip";
+	if ( empty($md5sum) ) {
+		error("unknown executable '" . $execid . "' specified");
+	}
+	if ( !file_exists($execpath) || !file_exists($execmd5path) ||
+	     !file_exists($exedeploypath)
+		|| file_get_contents($execmd5path) != $md5sum ) {
+		logmsg(LOG_INFO, "Fetching new executable '" . $execid . "'");
+		system("rm -rf $execpath");
+		system("mkdir -p '$execpath'", $retval);
+		if ( $retval!=0 ) error("Could not create directory '$execpath'");
+		$content = request('executable', 'GET', 'execid=' . urlencode($execid));
+		$content = base64_decode(dj_json_decode($content));
+		if ( file_put_contents($execzippath, $content) === FALSE ) {
+			error("Could not create executable zip file in $execpath");
+		}
+		unset($content);
+		if ( md5_file($execzippath) != $md5sum ) {
+			error("Zip file corrupted during download.");
+		}
+		if ( file_put_contents($execmd5path, $md5sum) === FALSE ) {
+			error("Could not write md5sum to file.");
+		}
+
+		logmsg(LOG_DEBUG, "Unzipping");
+		system("unzip -q -d $execpath $execzippath", $retval);
+		if ( $retval!=0 ) error("Could not unzip zipfile in $execpath");
+
+		$do_compile = TRUE;
+		if ( !file_exists($execbuildpath) ) {
+			if ( file_exists($execrunpath) ) {
+				// 'run' already exists, 'build' does not => don't compile anything
+				logmsg(LOG_DEBUG, "'run' exists without 'build', we are done");
+				$do_compile = FALSE;
+			} else {
+				// detect lang and write build file
+				$langexts = array(
+						'c' => array('c'),
+						'cpp' => array('cpp', 'C', 'cc'),
+						'java' => array('java'),
+						'py' => array('py', 'py2', 'py3')
+				);
+				$buildscript = "#!/bin/sh\n\n";
+				$execlang = FALSE;
+				$source = "";
+				foreach ($langexts as $lang => $langext) {
+					if ( ($handle = opendir($execpath)) === FALSE ) {
+						error("Could not open $execpath");
+					}
+					while ( ($file = readdir($handle)) !== FALSE ) {
+						$ext = pathinfo($file, PATHINFO_EXTENSION);
+						if ( in_array($ext, $langext) ) {
+							$execlang = $lang;
+							$source = $file;
+							break;
+						}
+					}
+					closedir($handle);
+					if ( $execlang !== FALSE ) break;
+				}
+				if ( $execlang === FALSE ) {
+					error("executable must either provide an executable file named 'build' or a C/C++/Java or Python file.");
+				}
+				switch ( $execlang ) {
+				case 'c':
+					$buildscript .= "gcc -Wall -O2 -std=gnu99 '$source' -o $execrunpath -lm\n"; 
+					break;
+				case 'cpp':
+					$buildscript .= "g++ -Wall -O2 -std=c++11 '$source' -o $execrunpath\n"; 
+					break;
+				case 'java':
+					$source = basename($source, ".java");
+					$buildscript .= "javac -cp $execpath -d $execpath '$source'.java\n"; 
+					$buildscript .= "echo '#!/bin/sh' > run\n";
+					// no main class detection here
+					$buildscript .= "echo 'java -cp $execpath '$source' >> run\n";
+					break;
+				case 'py':
+					$buildscript .= "echo '#!/bin/sh' > run\n";
+					$buildscript .= "echo 'python '$source' >> run\n";
+					break;
+				}
+				if ( file_put_contents($execbuildpath, $buildscript) === FALSE ) {
+					error("Could not write file 'build' in $exepath");
+				}
+				chmod($execbuildpath, 0700);
+			}
+		} else if ( !is_executable($execbuildpath) ) {
+			error("Invalid executable, file 'build' exists but is not executable.");
+		}
+
+		if ( $do_compile ) {
+			logmsg(LOG_DEBUG, "Compiling");
+			$olddir = getcwd();
+			chdir($execpath);
+			system("./build", $retval);
+			if ( $retval!=0 ) error("Could not run ./build in $execpath");
+			chdir($olddir);
+		}
+		if ( !file_exists($execrunpath) || !is_executable($execrunpath) ) {
+			error("Invalid build file, must produce an executable file 'run'.");
+		}
+	}
+	// Create file to mark executable successfully deployed.
+	touch($execdeploypath);
+
+	return $execrunpath;
 }
 
 $options = getopt("dv:n:hV");
@@ -175,46 +327,87 @@ foreach ( $EXITCODES as $code => $name ) {
 // Pass SYSLOG variable via environment for compare program
 if ( defined('SYSLOG') && SYSLOG ) putenv('DJ_SYSLOG=' . SYSLOG);
 
-system("pgrep -u $runuser", $retval);
-if ($retval == 0) {
-	error("Still some processes by $runuser found, aborting");
+if ( ! posix_getpwnam($runuser) ) {
+	error ("runuser $runuser does not exist.");
 }
-if ($retval != 1) {
-	error("Error while checking processes for user $runuser");
+$output = array();
+exec("ps -u '$runuser' -o pid= -o comm=", $output, $retval);
+if ( count($output) != 0 ) {
+	error("found processes still running as '$runuser', check manually:\n" .
+	      implode("\n", $output));
 }
 
 logmsg(LOG_NOTICE, "Judge started on $myhost [DOMjudge/".DOMJUDGE_VERSION."]");
 
 initsignals();
 
-if ( isset($options['daemon']) ) daemonize(PIDFILE);
+read_credentials();
 
 // Warn when chroot has been disabled. This has security implications.
 if ( ! USE_CHROOT ) {
 	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
 }
-
-// Create directory where to test submissions
-$workdirpath = JUDGEDIR . "/$myhost";
-system("mkdir -p $workdirpath/testcase", $retval);
-if ( $retval != 0 ) error("Could not create $workdirpath");
-chmod("$workdirpath/testcase", 0700);
-
-// Auto-register judgehost via REST
-// If there are any unfinished judgings in the queue in my name,
-// they will not be finished. Give them back.
-$unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
-$unfinished = dj_json_decode($unfinished);
-foreach ( $unfinished as $jud ) {
-	$workdir = "$workdirpath/c$jud[cid]-s$jud[submitid]-j$jud[judgingid]";
-	@chmod($workdir, 0700);
-	logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] . " in my name; given back");
+if ( !defined('USE_CGROUPS') || !USE_CGROUPS ) {
+	logmsg(LOG_WARNING, "Not using cgroups. Using cgroups is highly recommended. See the manual for details.");
 }
 
-$waiting = FALSE;
+
+
+// Perform setup work for each endpoint we are communicating with
+foreach ($endpoints as $id=>$endpoint) {
+	$resturl  = $endpoint['url'];
+	$restuser = $endpoint['user'];
+	$restpass = $endpoint['pass'];
+
+	logmsg(LOG_NOTICE, "Registering judgehost on endpoint $resturl");
+
+	// Create directory where to test submissions
+	$workdirpath = JUDGEDIR . "/$myhost/endpoint-$id";
+	system("mkdir -p $workdirpath/testcase", $retval);
+	if ( $retval != 0 ) error("Could not create $workdirpath");
+	chmod("$workdirpath/testcase", 0700);
+
+	// Auto-register judgehost via REST
+	// If there are any unfinished judgings in the queue in my name,
+	// they will not be finished. Give them back.
+	$unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
+	$unfinished = dj_json_decode($unfinished);
+	foreach ( $unfinished as $jud ) {
+		$workdir = "$workdirpath/c$jud[cid]-s$jud[submitid]-j$jud[judgingid]";
+		@chmod($workdir, 0700);
+		logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] .
+			   " in my name; given back");
+	}
+}
+
+// If all startup done, daemonize
+if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
 // Constantly check API for unjudged submissions
+$endpointIDs = array_keys($endpoints);
+$currentEndpoint = 0;
 while ( TRUE ) {
+
+	// If all endpoints are waiting, sleep for a bit
+	$dosleep = TRUE;
+	foreach ($endpoints as $id=>$endpoint) {
+		if ($endpoint["waiting"] == FALSE) {
+			$dosleep = FALSE;
+			break;
+		}
+	}
+	// Sleep only if everything is "waiting" and only if we're looking at the first endpoint again
+	if ($dosleep && $currentEndpoint==0) {
+		sleep($waittime);
+	}
+
+	// Increment our currentEndpoint pointer
+	$currentEndpoint = ($currentEndpoint + 1) % count($endpoints);
+	$endpointID = $endpointIDs[$currentEndpoint];
+	$resturl  = $endpoints[$endpointID]["url"];
+	$restuser = $endpoints[$endpointID]["user"];
+	$restpass = $endpoints[$endpointID]["pass"];
+	$workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
 
 	// Check whether we have received an exit signal
 	if ( function_exists('pcntl_signal_dispatch') ) pcntl_signal_dispatch();
@@ -223,24 +416,26 @@ while ( TRUE ) {
 		exit;
 	}
 
-	$judging = request('judgings', 'POST', 'judgehost=' . urlencode($myhost));
-	$row = dj_json_decode($judging);
+	// Request open submissions to judge. Any errors will be treated as
+	// non-fatal: we will just keep on retrying in this loop.
+	$judging = request('judgings', 'POST', 'judgehost=' . urlencode($myhost), false);
+	// If $judging is null, an error occurred; don't try to decode.
+	if (!is_null($judging)) $row = dj_json_decode($judging);
 
 	// nothing returned -> no open submissions for us
 	if ( empty($row) ) {
-		if ( ! $waiting ) {
-			logmsg(LOG_INFO, "No submissions in queue, waiting...");
-			$waiting = TRUE;
+		if ( ! $endpoints[$endpointID]["waiting"] ) {
+			logmsg(LOG_INFO, "No submissions in queue (for endpoint $endpointID), waiting...");
+			$endpoints[$endpointID]["waiting"] = TRUE;
 		}
-		sleep($waittime);
 		continue;
 	}
 
 	// we have gotten a submission for judging
-	$waiting = FALSE;
+	$endpoints[$endpointID]["waiting"] = FALSE;
 
-	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] ".
-	       "($row[teamid]/$row[probid]/$row[langid]), id j$row[judgingid]...");
+	logmsg(LOG_NOTICE, "Judging submission s$row[submitid] (endpoint $endpointID) ".
+		   "(t$row[teamid]/p$row[probid]/$row[langid]), id j$row[judgingid]...");
 
 	judge($row);
 
@@ -252,11 +447,13 @@ function judge($row)
 	global $EXITCODES, $myhost, $options, $workdirpath;
 
 	// Set configuration variables for called programs
-	putenv('USE_CHROOT='    . (USE_CHROOT ? '1' : ''));
-	putenv('COMPILETIME='   . dbconfig_get_rest('compile_time'));
-	putenv('MEMLIMIT='      . dbconfig_get_rest('memory_limit'));
-	putenv('FILELIMIT='     . dbconfig_get_rest('filesize_limit'));
-	putenv('PROCLIMIT='     . dbconfig_get_rest('process_limit'));
+	putenv('USE_CHROOT='        . (USE_CHROOT ? '1' : ''));
+	putenv('SCRIPTTIMELIMIT='   . dbconfig_get_rest('script_timelimit'));
+	putenv('SCRIPTMEMLIMIT='    . dbconfig_get_rest('script_memory_limit'));
+	putenv('SCRIPTFILELIMIT='   . dbconfig_get_rest('script_filesize_limit'));
+	putenv('MEMLIMIT='          . $row['memlimit']);
+	putenv('FILELIMIT='         . $row['outputlimit']);
+	putenv('PROCLIMIT='         . dbconfig_get_rest('process_limit'));
 
 	$cpuset_opt = "";
 	if ( isset($options['daemonid']) ) $cpuset_opt = "-n ${options['daemonid']}";
@@ -298,8 +495,15 @@ function judge($row)
 		}
 	}
 
+	if ( empty($row['compile_script']) ) {
+		error("No compile script specified for language " . $row['langid'] . ".");
+	}
+
+	$execrunpath = fetch_executable($workdirpath, $row['compile_script'],
+	                                $row['compile_script_md5sum']);
+
 	// Compile the program.
-	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt $row[langid] '$workdir' " .
+	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
 	       implode(' ', $files), $retval);
 
 	// what does the exitcode mean?
@@ -319,6 +523,7 @@ function judge($row)
 	if ( ! $compile_success ) {
 		// revoke readablity for domjudge-run user to this workdir
 		chmod($workdir, 0700);
+		logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid]: compile error");
 		return;
 	}
 
@@ -353,7 +558,7 @@ function judge($row)
 				$content = request('testcase_files', 'GET', 'testcaseid='
 						. urlencode($tc['testcaseid'])
 						. '&' . $inout);
-				$content = dj_json_decode($content);
+				$content = base64_decode(dj_json_decode($content));
 				if ( file_put_contents($tcfile[$inout] . ".new", $content) === FALSE ) {
 					error("Could not create $tcfile[$inout].new");
 				}
@@ -374,7 +579,7 @@ function judge($row)
 		// Only log downloading input and/or output testdata once.
 		if ( count($fetched)>0 ) {
 			logmsg(LOG_INFO, "Fetched new " . implode($fetched,',') .
-			       " testcase $tc[rank] for problem $tc[probid]");
+			       " testcase $tc[rank] for problem p$tc[probid]");
 		}
 
 		// Copy program with all possible additional files to testcase
@@ -391,9 +596,12 @@ function judge($row)
 		                 overshoot_time($row['maxruntime'],
 		                                dbconfig_get_rest('timelimit_overshoot'));
 
+		$compare_runpath = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
+		$run_runpath = fetch_executable($workdirpath, $row['run'], $row['run_md5sum']);
+
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
-		       "'$row[special_run]' '$row[special_compare]'", $retval);
+		       "'$run_runpath' '$compare_runpath' '$row[compare_args]'", $retval);
 
 		// what does the exitcode mean?
 		if( ! isset($EXITCODES[$retval]) ) {
@@ -403,11 +611,14 @@ function judge($row)
 		}
 		$result = $EXITCODES[$retval];
 
-		// Try to read runtime from file
+		// Try to read metadata from file
 		$runtime = NULL;
-		if ( is_readable($testcasedir . '/program.time') ) {
-			$fdata = getFileContents($testcasedir . '/program.time');
-			list($runtime) = sscanf($fdata,"%f");
+		if ( is_readable($testcasedir . '/program.meta') ) {
+			$metadata = spyc_load_file($testcasedir . '/program.meta');
+
+			if ( isset($metadata['time-used']) ) {
+				$runtime = @$metadata[$metadata['time-used']];
+			}
 		}
 
 		request('judging_runs', 'POST', 'judgingid=' . urlencode($row['judgingid'])
@@ -415,9 +626,11 @@ function judge($row)
 			. '&runresult=' . urlencode($result)
 			. '&runtime=' . urlencode($runtime)
 			. '&judgehost=' . urlencode($myhost)
-			. '&output_run='   . rest_encode_file($testcasedir . '/program.out')
-			. '&output_diff='  . rest_encode_file($testcasedir . '/compare.out')
-			. '&output_error=' . rest_encode_file($testcasedir . '/error.out'));
+			. '&output_run='   . rest_encode_file($testcasedir . '/program.out', FALSE)
+			. '&output_error=' . rest_encode_file($testcasedir . '/program.err')
+			. '&output_system=' . rest_encode_file($testcasedir . '/system.out')
+			. '&output_diff='  . rest_encode_file($testcasedir . '/feedback/judgemessage.txt')
+		);
 		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
 
 	} // end: for each testcase

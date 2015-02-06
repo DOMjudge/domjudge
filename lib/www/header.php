@@ -33,9 +33,9 @@ if(!isset($menu)) {
 <html lang="en" xml:lang="en">
 <head>
 	<!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
-<meta charset="<?php echo DJ_CHARACTER_SET?>">
+<meta charset="<?php echo DJ_CHARACTER_SET?>"/>
 <title><?php echo $title?></title>
-<link rel="shortcut icon" href="../images/favicon.png" type="image/png" />
+<link rel="icon" href="../images/favicon.png" type="image/png" />
 <link rel="stylesheet" href="../style.css" type="text/css" />
 <?php
 if ( IS_JURY ) {
@@ -43,12 +43,18 @@ if ( IS_JURY ) {
 	if (isset($printercss)) {
 		echo "<link rel=\"stylesheet\" href=\"style_printer.css\" type=\"text/css\" media=\"print\" />\n";
 	}
+	echo "<script type=\"text/javascript\" src=\"../js/jquery.min.js\"></script>\n";
+	echo "<script type=\"text/javascript\" src=\"../js/jury.js\"></script>\n";
 	if (isset($jscolor)) {
 		echo "<script type=\"text/javascript\" src=\"" .
 		"../js/jscolor.js\"></script>\n";
 	}
 }
 if ( ! IS_PUBLIC ) {
+	if (isset($jqtokeninput)) {
+		echo "<link rel=\"stylesheet\" href=\"../token-input.css\" type=\"text/css\" />";
+		echo "<script type=\"text/javascript\" src=\"../js/jquery.tokeninput.min.js\"></script>\n";
+	}
 	echo "<script type=\"text/javascript\" src=\"" .
 		"../js/sorttable.js\"></script>\n";
 
@@ -68,7 +74,11 @@ if ( ! empty($extrahead) ) echo $extrahead;
 <?php
 
 if ( IS_JURY ) {
-	echo "<body onload=\"setInterval('updateClarifications(" . ($pagename=='clarifications.php' && $refresh_cookie) . ")', 20000)\">\n";
+	global $pagename;
+	echo "<body onload=\"setInterval('updateMenu(" .
+		(int)($pagename=='clarifications.php' && $refresh_cookie) . ", " .
+		(int)($pagename=='judgehosts.php' && $refresh_cookie) . ")', 20000); " .
+		"updateMenu(0,0)\">\n";
 } else {
 	echo "<body>\n";
 }

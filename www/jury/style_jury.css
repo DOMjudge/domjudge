@@ -11,7 +11,10 @@
 
 .filename, .hostname { font-family: monospace; }
 
-.highlight { background-color: yellow; }
+.highlight { background-color: yellow !important; }
+
+.highlight.roweven { background-color: yellow !important; }
+.highlight.rowodd { background-color: #ffffaa !important; }
 
 .msgbox {
 	background-color: #fffff0;
@@ -23,6 +26,13 @@
 	border-right: 2px solid #f2e93a;
 	border-bottom: 2px solid #f2e93a;
 }
+
+.size {
+	text-align: right;
+	font-family: monospace;
+}
+
+.md5 { font-family: monospace; }
 
 .testcases tr:hover { background: #ffffff; }
 .testcases a { color: blue; }
@@ -40,13 +50,6 @@ tr.summary td { border-top: 1px solid black; }
 	border-right: 1px solid silver;
 }
 
-.testsize {
-	text-align: right;
-	font-family: monospace;
-}
-
-.testmd5 { font-family: monospace; }
-
 .testsample {
 	text-align: center;
 	border-left: 1px solid silver;
@@ -56,6 +59,13 @@ tr.summary td { border-top: 1px solid black; }
 .testdesc {
 	border-left: 1px solid silver;
 	max-width: 400px;
+}
+
+.testimage {
+	border-left: 1px solid silver;
+}
+.testimage a {
+	display: inline;
 }
 
 /* set cell padding to 0 and <a> tag to 3 to make all of cell
@@ -72,6 +82,12 @@ tr.summary td { border-top: 1px solid black; }
 img.picto { width: 16px; height: 16px; }
 img.smallpicto { width: 11px; height: 11px; }
 img.helpicon { cursor: help; }
+
+a.collapse { color: black; text-decoration: none; } */
+
+.sortable th { cursor: s-resize; }
+.sortable th.sorttable_sorted { cursor: n-resize; }
+.sortable th.sorttable_nosort { cursor: auto; }
 
 .judgetime { font-size: smaller; font-style: italic; }
 
@@ -167,5 +183,6 @@ img.helpicon { cursor: help; }
 
 .thleft { text-align: left; }
 .tdcenter { text-align: center; }
+.tdcenter img {  vertical-align: text-top; }
 .tdright { text-align: right; }
 .teamstat { text-align: right; }

@@ -3,17 +3,19 @@
 # They need to be re-created after system boot; you may want to
 # add this script to an init script.
 
-# Change the following to the user you run the judgedaemon as.
+# Change the following to the user you start the judgedaemon as.
 # (hence: not the 'domjudge-run' user!)
 
 JUDGEHOSTUSER=@DOMJUDGE_USER@
+CGROUPBASE=@judgehost_cgroupdir@
 
 for i in cpuset memory; do
-	mkdir -p /cgroup/$i; mount -t cgroup -o$i $i /cgroup/$i/;
-	mkdir /cgroup/$i/domjudge
+	mkdir -p $CGROUPBASE/$i
+	mount -t cgroup -o$i $i $CGROUPBASE/$i/
+	mkdir -p $CGROUPBASE/$i/domjudge
 done
 
-chown -R $JUDGEHOSTUSER /cgroup/*/domjudge
+chown -R $JUDGEHOSTUSER $CGROUPBASE/*/domjudge
 
-cat /cgroup/cpuset/cpuset.cpus > /cgroup/cpuset/domjudge/cpuset.cpus
-cat /cgroup/cpuset/cpuset.mems > /cgroup/cpuset/domjudge/cpuset.mems
+cat $CGROUPBASE/cpuset/cpuset.cpus > $CGROUPBASE/cpuset/domjudge/cpuset.cpus
+cat $CGROUPBASE/cpuset/cpuset.mems > $CGROUPBASE/cpuset/domjudge/cpuset.mems

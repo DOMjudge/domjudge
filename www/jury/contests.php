@@ -8,18 +8,17 @@
 
 require('init.php');
 require(LIBWWWDIR . '/checkers.jury.php');
-$times = array ('activate','start','freeze','end','unfreeze');
+$times = array ('activate','start','freeze','end','unfreeze','deactivate');
 $now = now();
 
 if ( isset($_POST['donow']) ) {
 
 	requireAdmin();
 
+	$docid = $_POST['cid'];
+
 	$time = key($_POST['donow']);
 	if ( !in_array($time, $times) ) error("Unknown value for timetype");
-	// for activatetime  we don't have a current contest to use,
-	// so we need to get it from the form data.
-	$docid = $time == 'activate' ? array_pop(array_keys($_POST['donow'][$time])) : $cid;
 
 	$now = floor($now);
 	$nowstring = strftime('%Y-%m-%d %H:%M:%S',$now);
@@ -27,16 +26,18 @@ if ( isset($_POST['donow']) ) {
 
 	// starttime is special because other, relative times depend on it.
 	if ( $time == 'start' ) {
-		$cdata['starttime'] = $now;
-		$cdata['starttime_string'] = $nowstring;
-		foreach(array('endtime','freezetime','unfreezetime','activatetime') as $f) {
-			$cdata[$f] = check_relative_time($cdata[$f.'_string'], $cdata['starttime'], $f);
+		$docdata = $cdatas[$docid];
+		$docdata['starttime'] = $now;
+		$docdata['starttime_string'] = $nowstring;
+		foreach(array('endtime','freezetime','unfreezetime','activatetime','deactivatetime') as $f) {
+			$docdata[$f] = check_relative_time($docdata[$f.'_string'], $docdata['starttime'], $f);
 		}
 		$DB->q('UPDATE contest SET starttime = %s, starttime_string = %s,
-		        endtime = %s, freezetime = %s, unfreezetime = %s, activatetime = %s
-		        WHERE cid = %i', $cdata['starttime'], $cdata['starttime_string'],
-		       $cdata['endtime'], $cdata['freezetime'], $cdata['unfreezetime'],
-		       $cdata['activatetime'], $docid);
+		        endtime = %s, freezetime = %s, unfreezetime = %s,
+		        activatetime = %s, deactivatetime = %s
+		        WHERE cid = %i', $docdata['starttime'], $docdata['starttime_string'],
+		       $docdata['endtime'], $docdata['freezetime'], $docdata['unfreezetime'],
+		       $docdata['activatetime'], $docdata['deactivatetime'], $docid);
 		header ("Location: ./contests.php?edited=1");
 	} else {
 		$DB->q('UPDATE contest SET ' . $time . 'time = %s, ' . $time . 'time_string = %s
@@ -66,10 +67,11 @@ if ( isset($_GET['edited']) ) {
 
 // Display current contest data prominently
 
-echo "<form action=\"contests.php\" method=\"post\">\n";
-echo "<fieldset><legend>Current contest: ";
+echo "<fieldset><legend>Current contests: ";
 
-if ( empty($cid) )  {
+$curcids = getCurContests(FALSE);
+
+if ( empty($curcids) )  {
 	echo "none</legend>\n\n";
 
 	$row = $DB->q('MAYBETUPLE SELECT * FROM contest
@@ -77,71 +79,102 @@ if ( empty($cid) )  {
 	               ORDER BY activatetime LIMIT 1');
 
 	if ( $row ) {
+		echo "<form action=\"contests.php\" method=\"post\">\n";
+		echo addHidden('cid', $row['cid']);
 		echo "<p>No active contest. Upcoming:<br/> <em>" .
 		     htmlspecialchars($row['contestname']) .
-		     "</em>; active from " . $row['activatetime'] .
+		     ' (' . htmlspecialchars($row['shortname']) . ')' .
+		     "</em>; active from " . printtime($row['activatetime'], '%a %d %b %Y %T %Z') .
 		     "<br /><br />\n";
-		if ( IS_ADMIN ) echo "<input type=\"submit\" " .
-		     "name=\"donow[activate][" . (int)$row['cid'] .
-		     "]\" value=\"activate now\" />\n";
+		if ( IS_ADMIN ) echo addSubmit("activate now", "donow[activate]");
+		echo "</form>\n\n";
 	} else {
 		echo "<p class=\"nodata\">No upcoming contest</p>\n";
 	}
 
 } else {
-	$row = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $cid);
-	echo htmlspecialchars($row['contestname'] . " (c$cid)") . "</legend>\n\n";
-
-	$prevchecked = false;
-	$hasstarted = difftime($row['starttime'], $now) <= 0;
-	$hasended = difftime($row['endtime'], $now) <= 0;
-	$hasfrozen = !empty($row['freezetime']) && difftime($row['freezetime'], $now) <= 0;
-	$hasunfrozen = !empty($row['unfreezetime']) && difftime($row['unfreezetime'], $now) <= 0;
-
-	echo "<table>\n";
-	foreach ($times as $time) {
-		$haspassed = difftime($row[$time.'time'], $now) <= 0;
-
-		echo "<tr><td>";
-		// display checkmark when done or ellipsis when next up
-		if ( empty($row[$time.'time']) ) {
-			// don't display anything before an empty row
-		} elseif ( $haspassed ) {
-			echo "<img src=\"../images/s_success.png\" alt=\"&#10003;\" class=\"picto\" />\n";
-			$prevchecked = true;
-		} elseif ($prevchecked) {
-			echo "…";
-			$prevchecked = false;
-		}
-
-		echo "</td><td>" .
-		     ucfirst($time) . " time:</td><td>" .
-		     printtime($row[$time.'time'],'%Y-%m-%d %H:%M (%Z)') . "</td><td>";
-
-		// Show a button for setting the time to now(), only when that
-		// makes sense. E.g. only for end contest when contest has started.
-		// No button for 'activate', because when shown by definition always already active
-		if ( IS_ADMIN && (
-		 ( $time == 'start' && !$hasstarted ) ||
-		 ( $time == 'end' && $hasstarted && !$hasended && (empty($row['freezetime']) || $hasfrozen) ) ||
-		 ( $time == 'freeze' && $hasstarted && !$hasended && !$hasfrozen ) ||
-		 ( $time == 'unfreeze' && $hasfrozen && !$hasunfrozen && $hasended ) ) ) {
-			echo addSubmit("$time now", "donow[$time]");
-		}
-
-		echo "</td></tr>";
-
+	if ( empty($curcids) ) {
+		$rows = array();
+	} else {
+		$rows = $DB->q('TABLE SELECT * FROM contest WHERE cid IN (%Ai)', $curcids);
 	}
+	echo "</legend>\n\n";
 
-	echo "</table>\n\n";
+	foreach ($rows as $row) {
+		$prevchecked = false;
+		$hasstarted = difftime($row['starttime'], $now) <= 0;
+		$hasended = difftime($row['endtime'], $now) <= 0;
+		$hasfrozen = !empty($row['freezetime']) &&
+			     difftime($row['freezetime'], $now) <= 0;
+		$hasunfrozen = !empty($row['unfreezetime']) &&
+			       difftime($row['unfreezetime'], $now) <= 0;
+
+		$contestname = htmlspecialchars(sprintf('%s (%s - c%d)',
+							$row['contestname'],
+							$row['shortname'],
+							$row['cid']));
+
+		echo "<form action=\"contests.php\" method=\"post\">\n";
+		echo addHidden('cid', $row['cid']);
+		echo "<fieldset><legend>${contestname}</legend>\n";
+
+		echo "<table>\n";
+		foreach ($times as $time) {
+			$haspassed = difftime($row[$time . 'time'], $now) <= 0;
+
+			echo "<tr><td>";
+			// display checkmark when done or ellipsis when next up
+			if ( empty($row[$time . 'time']) ) {
+				// don't display anything before an empty row
+			} elseif ( $haspassed ) {
+				echo "<img src=\"../images/s_success.png\" alt=\"&#10003;\" class=\"picto\" />\n";
+				$prevchecked = true;
+			} elseif ( $prevchecked ) {
+				echo "…";
+				$prevchecked = false;
+			}
+
+			echo "</td><td>" .
+			     ucfirst($time) . " time:</td><td>" .
+			     printtime($row[$time . 'time'], '%Y-%m-%d %H:%M (%Z)') .
+			     "</td><td>";
+
+			// Show a button for setting the time to now(), only when that
+			// makes sense. E.g. only for end contest when contest has started.
+			// No button for 'activate', because when shown by definition always already active
+			if ( IS_ADMIN && (
+					($time == 'start' && !$hasstarted) ||
+					($time == 'end' && $hasstarted && !$hasended &&
+					 (empty($row['freezetime']) || $hasfrozen)) ||
+					($time == 'deactivate' && $hasended &&
+					 (empty($row['unfreezetime']) || $hasunfrozen)) ||
+					($time == 'freeze' && $hasstarted && !$hasended &&
+					 !$hasfrozen) ||
+					($time == 'unfreeze' && $hasfrozen && !$hasunfrozen &&
+					 $hasended))
+			) {
+				echo addSubmit("$time now", "donow[$time]");
+			}
+
+			echo "</td></tr>";
+
+		}
+
+		echo "</table>\n";
+
+		echo "</fieldset>\n</form>\n\n";
+	}
 
 }
 
-echo "</fieldset>\n</form>\n\n";
+echo "</fieldset>\n\n";
 
 
 // Get data. Starttime seems most logical sort criterion.
-$res = $DB->q('TABLE SELECT * FROM contest ORDER BY starttime DESC');
+$res = $DB->q('TABLE SELECT contest.*, COUNT(teamid) AS numteams
+               FROM contest
+               LEFT JOIN contestteam USING (cid)
+               GROUP BY cid ORDER BY starttime DESC');
 
 if( count($res) == 0 ) {
 	echo "<p class=\"nodata\">No contests defined</p>\n\n";
@@ -149,25 +182,39 @@ if( count($res) == 0 ) {
 	echo "<h3>All available contests</h3>\n\n";
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
+	echo "<th scope=\"col\">shortname</th>";
 	foreach($times as $time) echo "<th scope=\"col\">$time</th>";
-	echo "<th scope=\"col\">name</th></tr>\n</thead>\n<tbody>\n";
+	echo "<th scope=\"col\">process<br />balloons?</th>";
+	echo "<th scope=\"col\">public?</th>";
+	echo "<th scope=\"col\" class=\"sorttable_numeric\"># teams</th>";
+	echo "<th scope=\"col\" class=\"sorttable_numeric\"># problems</th>";
+	echo "<th scope=\"col\">name</th>" .
+	     ( IS_ADMIN ? "<th scope=\"col\"></th>" : '' ) .
+	     "</tr>\n</thead>\n<tbody>\n";
 
 	$iseven = false;
 	foreach($res as $row) {
+
+		$numprobs = $DB->q('VALUE SELECT COUNT(*) FROM contestproblem WHERE cid = %i', $row['cid']);
 
 		$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
 
 		echo '<tr class="' .
 			( $iseven ? 'roweven': 'rowodd' ) .
 			(!$row['enabled']    ? ' disabled' :'') .
-			($row['cid'] == $cid ? ' highlight':'') . '">' .
+			(in_array($row['cid'], $curcids) ? ' highlight':'') . '">' .
 			"<td class=\"tdright\">" . $link .
 			"c" . (int)$row['cid'] . "</a></td>\n";
+		echo "<td>" . $link . htmlspecialchars($row['shortname']) . "</a></td>\n";
 		foreach ($times as $time) {
 			echo "<td title=\"".printtime(@$row[$time. 'time'],'%Y-%m-%d %H:%M') . "\">" .
 			      $link . ( isset($row[$time.'time']) ?
 			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
 		}
+		echo "<td>" . $link . ($row['process_balloons'] ? 'yes' : 'no') . "</a></td>\n";
+		echo "<td>" . $link . ($row['public'] ? 'yes' : 'no') . "</a></td>\n";
+		echo "<td>" . $link . ($row['public'] ? '<em>all</em>' : $row['numteams']) . "</a></td>\n";
+		echo "<td>" . $link . $numprobs . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
 		$iseven = ! $iseven;
 

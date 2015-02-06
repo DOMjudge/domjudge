@@ -15,6 +15,9 @@ requireAdmin();
 $cmd = @$_POST['cmd'];
 if ( $cmd != 'add' && $cmd != 'edit' ) error ("Unknown action.");
 
+if ( !file_exists(LIBDIR . '/relations.php') ) {
+	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
+}
 require(LIBDIR .  '/relations.php');
 
 $t = @$_POST['table'];
@@ -23,12 +26,15 @@ if(!in_array($t, array_keys($KEYS))) error ("Unknown table.");
 
 $data          =  $_POST['data'];
 $keydata       = @$_POST['keydata'];
+$unset         = @$_POST['unset'];
 $skipwhenempty = @$_POST['skipwhenempty'];
 $referrer      = @$_POST['referrer'];
 
 if ( empty($data) ) error ("No data.");
 // ensure referrer only contains a single filename, not complete URLs
-if ( ! preg_match('/^[.a-zA-Z0-9?&=_-]*$/', $referrer ) ) error ("Invalid characters in referrer.");
+if ( ! preg_match('/^[.a-zA-Z0-9?&=_-]*$/', $referrer ) ) {
+	error ("Invalid characters in referrer.");
+}
 
 require(LIBWWWDIR . '/checkers.jury.php');
 
@@ -45,10 +51,18 @@ if ( ! isset($_POST['cancel']) ) {
 			}
 		}
 
+		// unset things explicitly requested
+		if ( !empty($unset[$i]) ) {
+			foreach ( $unset[$i] as $k => $v ) {
+				$itemdata[$k] = null;
+			}
+		}
+
 		// special case for many-to-many mappings
 		$mappingdata = null;
 		if ( is_array(@$itemdata['mapping']) ) {
 			$mappingdata = $itemdata['mapping'];
+
 			unset($itemdata['mapping']);
 		}
 
@@ -93,17 +107,45 @@ if ( ! isset($_POST['cancel']) ) {
 
 		// special case for many-to-many mappings
 		if ( $mappingdata != null ) {
-			$junctiontable = $mappingdata['table'];
-			$fk = $mappingdata['fk'];
+			foreach ( $mappingdata as $mapping ) {
+				// If the items is not an array, it is set by tokenizer and it should be split on ,
+				if ( !is_array($mapping['items']) ) {
+					$mapping['items'] = explode(',', $mapping['items']);
+				}
 
-			// Make sure this is a valid mapping
-			check_manymany_mapping($junctiontable, $fk);
+				$junctiontable = $mapping['table'];
+				$fk = $mapping['fk'];
 
-			// Remove all old mappings
-			$DB->q('DELETE FROM %l WHERE %S', $junctiontable, $prikey);
-			foreach ($mappingdata['items'] as $mapdest) {
-				$ret = $DB->q('INSERT INTO %l (%l, %l) VALUES (%s,%s)',
-				              $junctiontable, $fk[0], $fk[1], $prikey[$fk[0]], $mapdest);
+				// Make sure this is a valid mapping
+				check_manymany_mapping($junctiontable, $fk);
+
+				// Remove all old mappings
+				$DB->q('DELETE FROM %l WHERE %S', $junctiontable, $prikey);
+				foreach ( $mapping['items'] as $key => $mapdest ) {
+					// Skip empty rows
+					if ( empty($mapdest) ) {
+						continue;
+					}
+					$columns = array($fk[0], $fk[1]);
+					$values = array($prikey[$fk[0]], $mapdest);
+					if ( isset($mapping['extra'][$key]) ) {
+						foreach ( $mapping['extra'][$key] as $column => $value ) {
+							$columns[] = $column;
+							// set empty string to null
+							$values[] = ($value === "" ? null : $value);
+						}
+					}
+
+					$query = "INSERT INTO %l (";
+					$query .= implode(',', array_fill(0, count($columns), '%l'));
+					$query .= ') VALUES (';
+					$query .= implode(',', array_fill(0, count($values), '%s'));
+					$query .= ')';
+					$arguments = array($query, $junctiontable);
+					$arguments = array_merge($arguments, $columns);
+					$arguments = array_merge($arguments, $values);
+					$ret = call_user_func_array(array($DB, 'q'), $arguments);
+				}
 			}
 		}
 	}
@@ -153,7 +195,7 @@ function check_manymany_mapping($table, $keys) {
 	global $KEYS;
 	foreach($keys as $key) {
 		if (!in_array($key, $KEYS[$table])) {
-			error("Invalid many-to-many mapping.");
+			error("Invalid many-to-many mapping. Key \"$key\", table \"$table\"");
 		}
 
 		if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $key ) ) {

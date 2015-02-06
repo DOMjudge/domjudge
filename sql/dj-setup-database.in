@@ -10,10 +10,34 @@ ETCDIR="@domserver_etcdir@"
 SQLDIR="@domserver_sqldir@"
 
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
+RESTPWFILE="$ETCDIR/restapi.secret"
 
 verbose()
 {
 	[ -z "$QUIET" ] && echo "$@"
+}
+
+usage() {
+	cat <<EOF
+Usage: $0 [option]... <command>
+
+Commands:
+  status        check database installation status
+  genpass       generate password file
+  install       create database, example contest and users if not existing
+  bare-install  create database, setup defaults if not existing
+  uninstall     remove database users and database, INCLUDING ALL DATA!
+  upgrade       upgrade MySQL database schema to current version
+
+Options:
+  -u <user>  connect to MySQL with DB admin <user>
+  -p <pass>  use password <pass> for DB admin user
+  -r         read DB admin password from prompt
+
+Note: you may want to store your credentials in ~/.my.cnf in order to
+not have to pass any of the options above.
+
+EOF
 }
 
 # Wrapper around mysql command to allow setting options, user, etc.
@@ -93,15 +117,9 @@ create_db_users()
 {
 	local user pass
 	(
-	echo "CREATE DATABASE \`$DBNAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
-# Need to add both '%' and 'localhost' as entries, because a default
-# fresh MySQL installation has a Host='localhost',User='' entry which
-# is more specific than Host='%' and thus leads to Access Denied errors.
-	echo "CREATE USER
-		'$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD',
-		'$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+	echo "CREATE DATABASE IF NOT EXISTS \`$DBNAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
 
-	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER';"
+	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
 
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
@@ -113,6 +131,8 @@ remove_db_users()
 	local user pass
 	(
 	echo "DROP DATABASE IF EXISTS \`$DBNAME\`;"
+# Also drop "@%" users, since those may have been created by pre-4.0 versions
+# of DOMjudge.
 # In MySQL < 5.0.2, 'DROP USER' only removes the user, not its privileges:
 	echo "REVOKE ALL PRIVILEGES, GRANT OPTION FROM
 		'$domjudge_DBUSER'@'%', '$domjudge_DBUSER'@'localhost';"
@@ -142,14 +162,17 @@ while getopts ':u:p:qr' OPT ; do
 			;;
 		:)
 			echo "Error: option '$OPTARG' requires an argument."
+			usage
 			exit 1
 			;;
 		?)
 			echo "Error: unknown option '$OPTARG'."
+			usage
 			exit 1
 			;;
 		*)
 			echo "Error: unknown error reading option '$OPT', value '$OPTARG'."
+			usage
 			exit 1
 			;;
 	esac
@@ -176,32 +199,38 @@ genpass)
 	echo "Running '$ETCDIR/gendbpasswords'..."
 	$ETCDIR/gendbpasswords > "$PASSWDFILE"
 	echo "Password file '$PASSWDFILE' created."
-	;;
-
-install)
-	read_dbpasswords
-	create_db_users
-	cat $SQLDIR/mysql_db_structure.sql \
-	    $SQLDIR/mysql_db_defaultdata.sql \
-	    $SQLDIR/mysql_db_examples.sql \
-	     | mysql -D "$DBNAME"
-	verbose "SQL structure and default/example data installed."
-	rm -f $TMPFILE
-	;;
-
-bare-install)
-	read_dbpasswords
-	create_db_users
- 	cat $SQLDIR/mysql_db_structure.sql \
- 	    $SQLDIR/mysql_db_defaultdata.sql \
-	     | mysql -D "$DBNAME"
-	verbose "SQL structure and defaults installed(No sample data)."
-	rm -f $TMPFILE
+	echo "Running '$ETCDIR/genrestapicredentials'..."
+	$ETCDIR/genrestapicredentials > "$RESTPWFILE"
+	echo "Password file '$RESTPWFILE' created."
 	;;
 
 uninstall)
 	read_dbpasswords
 	remove_db_users
+	;;
+
+bare-install|install)
+	read_dbpasswords
+	create_db_users
+	FILES="$SQLDIR/mysql_db_structure.sql \
+		$SQLDIR/mysql_db_defaultdata.sql \
+		$SQLDIR/mysql_db_files_defaultdata.sql"
+
+	if [ "$1" = "install" ]; then
+		FILES="$FILES \
+			$SQLDIR/mysql_db_examples.sql \
+			$SQLDIR/mysql_db_files_examples.sql"
+	fi
+	RESTPW=`cat $RESTPWFILE | grep -v ^# | cut -f4`
+	(
+		cat $FILES
+		echo "UPDATE user SET password = MD5('judgehost#$RESTPW') WHERE username='judgehost';"
+	) | mysql -D "$DBNAME"
+	if [ "$1" = "install" ]; then
+		verbose "SQL structure and default/example data installed."
+	else
+		verbose "SQL structure and defaults installed (no sample data)."
+	fi
 	;;
 
 # Upgrades the DB structure and permissions to current version
@@ -214,6 +243,9 @@ upgrade)
 	fi
 	TMPOUT=`mktemp --tmpdir domjudge-sql.XXXXXX`
 	read_dbpasswords
+	# Make sure we're in the SQL directory, for relative path 'source'
+	# statements to work.
+	cd "$SQLDIR"
 	for i in "$SQLDIR"/upgrade/*.sql ; do
 		if [ ! -r "$i" ]; then
 			echo "Error: cannot read upgrade script '$i'."
@@ -241,24 +273,8 @@ upgrade)
 	;;
 
 	*)
-	cat <<EOF
-Unknown subcommand '$1'
-Usage: $0 [option]... <command>
-
-Commands:
-  status        check database installation status
-  genpass       generate password file
-  install       create database, example contest and users if not existing
-  bare-install  create database, setup defaults if not existing
-  uninstall     remove database users and database, INCLUDING ALL DATA!
-  upgrade       upgrade MySQL database schema to current version
-
-Options:
-  -u <user>  connect to MySQL with DB admin <user>
-  -p <pass>  use password <pass> for DB admin user
-  -r         read DB admin password from prompt
-
-EOF
+	echo "Error: Unknown subcommand '$1'"
+	usage
 	exit 1
 	;;
 

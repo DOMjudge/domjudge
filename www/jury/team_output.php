@@ -6,21 +6,23 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$probid = @$_REQUEST['probid'];
-
 require('init.php');
 
-$runid  = $_GET['runid'];
+$runid  = (int)$_GET['runid'];
+$cid    = (int)$_GET['cid'];
 
-$row = $DB->q('MAYBETUPLE SELECT OCTET_LENGTH(output_run) as size, rank
+$row = $DB->q('MAYBETUPLE SELECT OCTET_LENGTH(output_run) as size, rank, cp.shortname
                FROM judging_run
-               LEFT JOIN testcase USING (testcaseid)
-               WHERE runid=%i', $runid);
+               LEFT JOIN testcase t USING (testcaseid)
+               LEFT JOIN judging j USING (judgingid)
+               LEFT JOIN problem p USING (probid)
+               LEFT JOIN contestproblem cp ON (cp.probid=t.probid AND cp.cid=%i)
+               WHERE runid=%i', $cid, $runid);
 
 // sanity check before we start to output headers
 if ( $row===NULL || !is_numeric($row['size']) ) error("Problem while fetching team output");
 
-$filename = $probid . $row['rank'] . ".run" . $runid . ".team.out";
+$filename = $row['shortname'] . '.' . $row['rank'] . ".run" . $runid . ".team.out";
 
 header("Content-Type: application/octet-stream; name=\"$filename\"");
 header("Content-Disposition: inline; filename=\"$filename\"");
