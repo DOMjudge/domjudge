@@ -13,8 +13,10 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Ranking</h1>\n\n";
 
 $res = $DB->q('SELECT t.name, s.teamid, SUM(is_correct) AS score, SUM(submissions) AS subcnt, SUM(totaltime) AS time
-               FROM scorecache_public s, team t
-               WHERE categoryid = 1 AND s.teamid = t.login
+               FROM scorecache_public s
+	       LEFT JOIN team t USING (teamid)
+	       LEFT JOIN team_category tc USING (categoryid)
+               WHERE enabled = 1 AND visible = 1
 	       GROUP BY s.teamid
 	       ORDER BY score DESC, subcnt ASC, time ASC');
 
