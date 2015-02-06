@@ -115,11 +115,11 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
 	               cp.shortname, p.name AS probname, l.name AS langname,
 	               j.result, j.judgehost, j.verified, j.jury_member, j.seen,
-		       MAX(jr.runtime) AS maxtime, SUM(jr.runtime) as sumtime' .
+		       MAX(jr.runtime) AS maxtime, SUM(jr.runtime) as sumtime ' .
 	              $sqlbody .
 	              (isset($restrictions['verified']) ? 'AND ' . $verifyclause : '') .
 	              (isset($restrictions['judged'])   ? 'AND ' . $judgedclause : '') .
-	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
+	              'GROUP BY s.submitid ORDER BY s.submittime DESC, s.submitid DESC ' .
 	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
 	              @$restrictions['teamid'], @$restrictions['categoryid'],
 	              @$restrictions['probid'], @$restrictions['langid'],
