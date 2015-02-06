@@ -393,30 +393,20 @@ function putTeam($teamid) {
 function putSolvedUnsolved($teamid, $cid) {
 	global $DB;
 	echo "<div id=\"stats\">\n";
-	echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">solved</h3>\n\n";
-	$solved = $DB->q('SELECT probid,submissions,shortname
-			  FROM scorecache_public
-			  LEFT JOIN contestproblem USING (probid,cid)
-			  WHERE is_correct=1 AND teamid=%i AND cid=%i',
-			  $teamid, $cid);
-	if( $solved->count() == 0 ) {
-		echo "<p class=\"nodata\">No solved problems.</p>\n\n";
-	} else {
-		while( $row = $solved->next() ) {
-			echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . htmlspecialchars($row['shortname']) . "&nbsp;(" . $row['submissions'] . ")</a> ";
-		}
-	}
-	echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">unsolved, but tried</h3>\n\n";
-	$unsolved = $DB->q('SELECT probid,submissions,shortname
-			    FROM scorecache_public
-			    LEFT JOIN contestproblem USING (probid,cid)
-			    WHERE is_correct=0 AND teamid=%i AND cid=%i',
-			    $teamid, $cid);
-	if( $unsolved->count() == 0 ) {
-		echo "<p class=\"nodata\">No unsolved problems.</p>\n\n";
-	} else {
-		while( $row = $unsolved->next() ) {
-			echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . htmlspecialchars($row['shortname']) . "&nbsp;(" . $row['submissions'] . ")</a> ";
+
+	foreach (array('solved' => 1, 'unsolved' => 0) as $type => $correct) {
+		echo "<h3 class=\"solvedunsolved\">$type</h3>\n\n";
+		$rows = $DB->q('SELECT probid,submissions,shortname
+				FROM scorecache_public
+				LEFT JOIN contestproblem USING (probid,cid)
+				WHERE is_correct=%i AND teamid=%i AND cid=%i',
+				$correct, $teamid, $cid);
+		if( $rows->count() == 0 ) {
+			echo "<p class=\"nodata\">No $type problems.</p>\n\n";
+		} else {
+			while( $row = $rows->next() ) {
+				echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . htmlspecialchars($row['shortname']) . "&nbsp;(" . $row['submissions'] . ")</a> ";
+			}
 		}
 	}
 	echo "</div>\n\n";

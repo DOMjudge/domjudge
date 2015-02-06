@@ -306,6 +306,10 @@ h3.teamoverview {
 	padding-left: 1ex;
 }
 
+h3.solvedunsolved {
+	font-size: x-small;
+}
+
 #submitlist,#clarlist {
 	width: 48%;
 }
