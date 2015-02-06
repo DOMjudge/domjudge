@@ -130,28 +130,7 @@ putSubmissions(array($cdata['cid'] => $cdata), $restrictions, null, $submitted);
 
 echo "<h3 class=\"teamoverview\">Stats</h3>\n\n";
 
-
-echo "<div id=\"stats\">\n";
-echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">solved</h3>\n\n";
-$solved = $DB->q('SELECT probid,submissions FROM scorecache_public WHERE is_correct=1 AND teamid=%s AND cid=%i', $login, $cid);
-if( $solved->count() == 0 ) {
-	echo "<p class=\"nodata\">No solved problems.</p>\n\n";
-} else {
-	while( $row = $solved->next() ) {
-		echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . $row['probid'] . "&nbsp;(" . $row['submissions'] . ")</a> ";
-	}
-}
-echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">unsolved, but tried</h3>\n\n";
-$unsolved = $DB->q('SELECT probid,submissions FROM scorecache_public WHERE is_correct=0 AND teamid=%s AND cid=%i', $login, $cid);
-if( $unsolved->count() == 0 ) {
-	echo "<p class=\"nodata\">No unsolved problems.</p>\n\n";
-} else {
-	while( $row = $unsolved->next() ) {
-		echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . $row['probid'] . "&nbsp;(" . $row['submissions'] . ")</a> ";
-	}
-}
-
-echo "</div>\n\n";
+putSolvedUnsolved($teamid, $cid);
 
 echo "</div>\n\n";
 

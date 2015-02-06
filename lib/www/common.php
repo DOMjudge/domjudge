@@ -384,6 +384,15 @@ function putTeam($teamid) {
 
 	echo "</table>\n\n";
 
+	putSolvedUnsolved($teamid, $cid);
+}
+
+/**
+ * Output list of solved/unsolved problems for a team
+ */
+function putSolvedUnsolved($teamid, $cid) {
+	global $DB;
+	echo "<div id=\"stats\">\n";
 	echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">solved</h3>\n\n";
 	$solved = $DB->q('SELECT probid,submissions,shortname
 			  FROM scorecache_public
@@ -410,7 +419,9 @@ function putTeam($teamid) {
 			echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . htmlspecialchars($row['shortname']) . "&nbsp;(" . $row['submissions'] . ")</a> ";
 		}
 	}
+	echo "</div>\n\n";
 }
+
 
 /**
  * Output clock
