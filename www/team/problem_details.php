@@ -9,12 +9,13 @@
 require('init.php');
 $title = 'Problem details';
 require(LIBWWWDIR . '/header.php');
-require(LIBWWWDIR . '/forms.php');
 
 $pid = @$_GET['id'];
 
 // select also on teamid so we can only select our own submissions
-$name = $DB->q('MAYBEVALUE SELECT name FROM problem p WHERE probid=%s AND allow_submit = 1', $pid);
+$name = $DB->q('MAYBEVALUE SELECT shortname
+		FROM contestproblem
+		WHERE probid=%i AND cid=%i AND allow_submit = 1', $pid, $cid);
 
 if( ! $name ) {
 	echo "<p>Problem " . $pid . " not found.</p>\n";
@@ -24,16 +25,20 @@ if( ! $name ) {
 
 echo "<h1>Problem details</h1>\n";
 
-$solved = $DB->q('VALUE SELECT COUNT(*)
-		FROM scorecache_public
-		WHERE probid = %s AND is_correct = 1 AND teamid!=%s', $pid, 'domjudge');
-$unsolved = $DB->q('VALUE SELECT COUNT(*)
-		FROM scorecache_public
-		WHERE probid = %s AND is_correct = 0 AND teamid!=%s', $pid, 'domjudge');
+$solvedunsolved = $DB->q('KEYVALUETABLE SELECT is_correct, COUNT(*)
+		          FROM scorecache_public
+		          LEFT JOIN team USING (teamid)
+		          LEFT JOIN team_category USING (categoryid)
+		          WHERE probid = %i AND enabled = 1 AND visible = 1
+		          GROUP BY is_correct',
+                          $pid);
+
+$unsolved = isset($solvedunsolved[0]) ? $solvedunsolved[0] : 0;
+$solved   = isset($solvedunsolved[1]) ? $solvedunsolved[1] : 0;
 $ratio = sprintf("%3.3lf", ($solved / ($solved + $unsolved)));
 
 $samples = $DB->q("SELECT testcaseid, description FROM testcase
-                   WHERE probid=%s AND sample=1 AND description IS NOT NULL
+                   WHERE probid=%i AND sample=1
                    ORDER BY rank", $pid);
 if ( $samples->count() == 0) {
 	$sample_string = '<span class="nodata">no public samples</span>';
