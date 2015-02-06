@@ -155,7 +155,7 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 		error("unknown executable '" . $execid . "' specified");
 	}
 	if ( !file_exists($execpath) || !file_exists($execmd5path) ||
-	     !file_exists($exedeploypath)
+	     !file_exists($execdeploypath)
 		|| file_get_contents($execmd5path) != $md5sum ) {
 		logmsg(LOG_INFO, "Fetching new executable '" . $execid . "'");
 		system("rm -rf $execpath");
