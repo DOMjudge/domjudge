@@ -11,7 +11,7 @@ require(LIBWWWDIR . '/header.php');
 // Don't use HTTP meta refresh, but javascript: otherwise we cannot
 // cancel it when the user starts editing the submit form. This also
 // provides graceful degradation without javascript present.
-$refreshtime = 300;
+$refreshtime = 30;
 
 $submitted = @$_GET['submitted'];
 
@@ -46,12 +46,11 @@ if ( $fdata['cstarted'] ) {
 echo "initReload(" . $refreshtime . ");\n";
 echo "// -->\n</script>\n";
 
-// Put overview of team submissions (like scoreboard)
-//putTeamRow($cdata, array($teamid));
+echo "<br/><br/>\n\n";
 
 echo "<div id=\"submitlist\">\n";
 
-echo "<h3 class=\"teamoverview\"><a name=\"submit\" href=\"#submit\">Submit</a></h3>\n\n";
+echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
 
 
 if ( $fdata['cstarted'] ) {
@@ -101,10 +100,11 @@ if ( $fdata['cstarted'] ) {
 	}
 }
 
-echo "<h3 class=\"teamoverview\"><a name=\"submissions\" href=\"#submissions\">Submissions</a></h3>\n\n";
+
 // call putSubmissions function from common.php for this team.
 $restrictions = array( 'teamid' => $teamid );
 putSubmissions(array($cdata['cid'] => $cdata), $restrictions, null, $submitted);
+
 
 ?>
 <div style="text-align:center;">
@@ -128,9 +128,9 @@ putSubmissions(array($cdata['cid'] => $cdata), $restrictions, null, $submitted);
 </script> 
 <?php
 
-echo "</div>\n\n";
+echo "<h3 class=\"teamoverview\">Stats</h3>\n\n";
 
-echo "<h3 class=\"teamoverview\"><a name=\"stats\" href=\"#stats\">Stats</a></h3>\n\n";
+
 echo "<div id=\"stats\">\n";
 echo "<h3 class=\"teamoverview\" style=\"background:none;color:black;\">solved</h3>\n\n";
 $solved = $DB->q('SELECT probid,submissions FROM scorecache_public WHERE is_correct=1 AND teamid=%s AND cid=%i', $login, $cid);
@@ -150,6 +150,8 @@ if( $unsolved->count() == 0 ) {
 		echo "<a href=\"problem_details.php?id=" . urlencode($row['probid']) . "\" class=\"probid\" style=\"padding-left:2em;\">" . $row['probid'] . "&nbsp;(" . $row['submissions'] . ")</a> ";
 	}
 }
+
+echo "</div>\n\n";
 
 echo "</div>\n\n";
 
@@ -176,7 +178,7 @@ $clarifications = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS 
                           ORDER BY c.submittime DESC, c.clarid DESC',
                          $teamid, $cid, $teamid);
 
-echo "<h3 class=\"teamoverview\"><a name=\"clarifications\" href=\"#clarifications\">Clarifications</a></h3>\n";
+echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 
 # FIXME: column width and wrapping/shortening of clarification text
 if ( $clarifications->count() == 0 ) {
@@ -185,7 +187,7 @@ if ( $clarifications->count() == 0 ) {
 	putClarificationList($clarifications,$teamid);
 }
 
-echo "<h3 class=\"teamoverview\"><a name=\"clarreq\" href=\"#clarreq\">Clarification Requests</a></h3>\n";
+echo "<h3 class=\"teamoverview\">Clarification Requests</h3>\n";
 
 if ( $requests->count() == 0 ) {
 	echo "<p class=\"nodata\">No clarification requests.</p>\n\n";
