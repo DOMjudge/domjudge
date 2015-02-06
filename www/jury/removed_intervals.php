@@ -44,6 +44,15 @@ case 'add':
 	$intv = array('cid' => $mycid,
 	              'starttime' => $_REQUEST['starttime'],
 	              'endtime'   => $_REQUEST['endtime']);
+
+	foreach ( array('starttime','endtime') as $f ) {
+		if ( empty($intv[$f]) ) error("Removed interval $f is empty");
+		$intv[$f] = strtotime($intv[$f]);
+		if ( $intv[$f] === FALSE ) {
+			error("Cannot parse interval $f: " . $intv[$f]);
+		}
+	}
+
 	$removals = $DB->q('TABLE SELECT * FROM removed_interval WHERE cid = %i', $mycid);
 	$removals[] = $intv;
 	usort($removals, 'cmpintv');

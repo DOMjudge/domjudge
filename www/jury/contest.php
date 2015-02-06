@@ -17,6 +17,11 @@ $jqtokeninput = true;
 
 require(LIBWWWDIR . '/header.php');
 
+$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d";
+$pattern_offset    = "\d?\d:\d\d";
+$pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
+$pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
+
 if ( !empty($_GET['cmd']) ):
 
 	requireAdmin();
@@ -38,11 +43,6 @@ if ( !empty($_GET['cmd']) ):
 			'c' . htmlspecialchars($row['cid']) .
 			"</td></tr>\n";
 	}
-
-$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d";
-$pattern_offset    = "\d?\d:\d\d";
-$pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
-$pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 ?>
 
 <tr><td><label for="data_0__shortname_">Short name:</label></td>
@@ -374,19 +374,21 @@ if ( count($removals)==0 && ! IS_ADMIN ) {
 	echo "<table>\n";
 	echo "<tr><th>from</th><td></td><th>to</th><td></td><th>duration</th></tr>\n";
 	foreach ( $removals as $row ) {
-		echo "<tr><td title=\"" . htmlspecialchars($row['starttime']) . "\">" .
-		     printtime($row['starttime']) . "</td><td>&rarr;</td>" .
-		     "<td title=\"" . htmlspecialchars($row['endtime']) . "\">" .
-		     printtime($row['endtime']) . "</td><td></td><td>( " .
-		     printtimediff(strtotime($row['starttime']), strtotime($row['endtime'])) . " )</td>" .
+		echo "<tr><td>" . printtime($row['starttime'],'%Y-%m-%d %H:%M:%S') . "</td><td>&rarr;</td>" .
+		     "<td>" . printtime($row['endtime'],'%Y-%m-%d %H:%M:%S') . "</td><td></td><td>( " .
+		     printtimediff($row['starttime'], $row['endtime']) . " )</td>" .
 		     "<td><a href=\"removed_intervals.php?cmd=delete&amp;cid=$id&amp;intervalid=" .
 		     (int)$row['intervalid'] . "\" onclick=\"return confirm('Really delete interval?');\">" .
 		     "<img src=\"../images/delete.png\" alt=\"delete\" class=\"picto\" /></a></td>" .
 		     "</tr>\n";
 	}
 	if ( IS_ADMIN ) {
-		echo "<tr><td>" . addInput('starttime', null, 16, 50) . "</td><td>&rarr;</td>" .
-		         "<td>" . addInput('endtime',   null, 16, 50) . "</td><td></td>" .
+		echo "<tr><td>" . addInput('starttime', null, 17, 50,
+		                           'required pattern="' . $pattern_datetime . '"') .
+		         "</td><td>&rarr;</td>" .
+		         "<td>" . addInput('endtime',   null, 17, 50,
+		                           'required pattern="' . $pattern_datetime . '"') .
+		         "</td><td></td>" .
 		         "<td>" . addSubmit('Add') . "</td><td>(yyyy-mm-dd hh:mm:ss)</td></tr>\n";
 	}
 	echo "</table>\n\n";
