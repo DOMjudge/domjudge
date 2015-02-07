@@ -158,7 +158,7 @@ $(function() {
 		echo "<td>";
 		echo addRadioButton("data[0][mapping][0][extra][$i][allow_judge]",
 				(!isset($current_problem['allow_judge']) || $current_problem['allow_judge']), 1) .
-		     "<label for='data_0__mapping__9__extra__{$i}__allow_judge_1'>yes</label>";
+		     "<label for='data_0__mapping__0__extra__{$i}__allow_judge_1'>yes</label>";
 		echo addRadioButton("data[0][mapping][0][extra][$i][allow_judge]",
 				(isset($current_problem['allow_judge']) && !$current_problem['allow_judge']), 0) .
 		     "<label for='data_0__mapping__0__extra__{$i}__allow_judge_0'>no</label>";
