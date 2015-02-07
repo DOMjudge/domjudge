@@ -169,7 +169,7 @@ $(function() {
 		     'class="color {required:false,adjust:false,hash:true,caps:false}"') .
 		     "</td>\n";
 		echo "<td>" .
-		     addInputField('number',"data[0][mapping][extra][$i][lazy_eval_results]",
+		     addInputField('number',"data[0][mapping][0][extra][$i][lazy_eval_results]",
 		                   @$current_problem['lazy_eval_results'],' min="0" max="1"') .
 		     "</td>\n";
 		echo "</tr>\n";
@@ -209,7 +209,7 @@ $(function() {
 			echo "<td>" . addInput("data[0][mapping][0][extra][$i][color]", null, 15, 25,
 			      'class="color {required:false,adjust:false,hash:true,caps:false}"') . "</td>";
 			echo "<td>" .
-			     addInputField('number',"data[0][mapping][extra][$i][lazy_eval_results]",
+			     addInputField('number',"data[0][mapping][0][extra][$i][lazy_eval_results]",
 			                   null, ' min="0" max="1"') . "</td>\n";
 			echo "</tr>\n";
 			$i++;
