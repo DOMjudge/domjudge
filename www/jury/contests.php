@@ -52,9 +52,7 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Contests</h1>\n\n";
 
-
 if ( isset($_GET['edited']) ) {
-
 	echo addForm('refresh_cache.php') .
             msgbox (
                 "Warning: Refresh scoreboard cache",
@@ -62,7 +60,6 @@ if ( isset($_GET['edited']) ) {
 		addSubmit('recalculate caches now', 'refresh')
 		) .
 		addEndForm();
-
 }
 
 // Display current contest data prominently

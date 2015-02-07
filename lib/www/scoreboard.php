@@ -75,7 +75,6 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	// info from previous contests.
 	$scoredata = $DB->q("SELECT * FROM $cachetable WHERE cid = %i", $cid);
 
-
 	// loop all info the scoreboard cache and put it in our own datastructure
 	while ( $srow = $scoredata->next() ) {
 
