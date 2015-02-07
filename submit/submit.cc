@@ -179,6 +179,7 @@ int main(int argc, char **argv)
 		case 'l': extension = string(optarg); break;
 		case 'u': baseurl   = string(optarg); break;
 		case 'c': contest   = string(optarg); break;
+
 		case 'v': /* verbose option */
 			if ( optarg!=NULL ) {
 				verbose = strtol(optarg,&ptr,10);

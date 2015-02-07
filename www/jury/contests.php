@@ -57,7 +57,9 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Contests</h1>\n\n";
 
+
 if ( isset($_GET['edited']) ) {
+
 	echo addForm('refresh_cache.php') .
             msgbox (
                 "Warning: Refresh scoreboard cache",
@@ -175,12 +177,10 @@ echo "</fieldset>\n\n";
 
 
 // Get data. Starttime seems most logical sort criterion.
-$res = $DB->q('TABLE SELECT contest.*, COUNT(teamid) AS numteams,
-                            COUNT(intervalid) as numintervals
+$res = $DB->q('TABLE SELECT contest.*, COUNT(teamid) AS numteams
                FROM contest
                LEFT JOIN contestteam USING (cid)
-               LEFT JOIN removed_interval USING(cid)
-               GROUP BY cid ORDER BY contest.starttime DESC');
+               GROUP BY cid ORDER BY starttime DESC');
 
 if( count($res) == 0 ) {
 	echo "<p class=\"nodata\">No contests defined</p>\n\n";
@@ -203,7 +203,7 @@ if( count($res) == 0 ) {
 	foreach($res as $row) {
 
 		$numprobs = $DB->q('VALUE SELECT COUNT(*) FROM contestproblem WHERE cid = %i', $row['cid']);
-		$numteams = $DB->q('VALUE SELECT COUNT(*) FROM contestteam WHERE cid = %i', $row['cid']);
+		$numintvs = $DB->q('VALUE SELECT COUNT(*) FROM removed_interval WHERE cid = %i', $row['cid']);
 
 		$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
 
@@ -219,10 +219,10 @@ if( count($res) == 0 ) {
 			      $link . ( isset($row[$time.'time']) ?
 			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
 		}
-		echo "<td>" . $link . htmlspecialchars($row['numintervals']) . "</a></td>\n";
+		echo "<td>" . $link . $numintvs . "</a></td>\n";
 		echo "<td>" . $link . ($row['process_balloons'] ? 'yes' : 'no') . "</a></td>\n";
 		echo "<td>" . $link . ($row['public'] ? 'yes' : 'no') . "</a></td>\n";
-		echo "<td>" . $link . ($row['public'] ? '<em>all</em>' : $numteams) . "</a></td>\n";
+		echo "<td>" . $link . ($row['public'] ? '<em>all</em>' : $row['numteams']) . "</a></td>\n";
 		echo "<td>" . $link . $numprobs . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
 		$iseven = ! $iseven;

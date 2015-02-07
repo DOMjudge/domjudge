@@ -377,7 +377,7 @@ CREATE TABLE `scorecache_public` (
 --
 
 CREATE TABLE `submission` (
-  `submitid` int(4) unsigned NOT NULL auto_increment COMMENT 'Unique ID',
+  `submitid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `origsubmitid` int(4) unsigned DEFAULT NULL COMMENT 'If set, specifies original submission in case of edit/resubmit',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
