@@ -25,7 +25,7 @@ MEMRESERVED=350000
 TMPFILE=`mktemp --tmpdir domjudge_javac_output.XXXXXX` || exit 1
 
 # Byte-compile:
-javac -encoding UTF-8 -d . "$@" 2> "$TMPFILE"
+javac -encoding UTF-8 -sourcepath . -d . "$@" 2> "$TMPFILE"
 EXITCODE=$?
 if [ "$EXITCODE" -ne 0 ]; then
 	# Let's see if should have named the .java differently
@@ -38,7 +38,7 @@ if [ "$EXITCODE" -ne 0 ]; then
 	rm -f $TMPFILE
 	echo "Info: renaming main source '$MAINSOURCE' to '$PUBLICCLASS.java'"
 	mv "$MAINSOURCE" "$PUBLICCLASS.java"
-	javac -d . "$PUBLICCLASS.java"
+	javac -encoding UTF-8 -sourcepath . -d . "$PUBLICCLASS.java"
 	EXITCODE=$?
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi
