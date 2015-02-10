@@ -3,7 +3,6 @@ DOMjudge Programming Contest Judging System
 Version 4.0.5 - DEV
 -------------------
  - Add fixed/improved version of simulate_contest script.
- - Improve error message when parsing contest starttime fails.
  - Also display judgings list if there is only one invalid judging
    and display "Not (re)judged yet" message whenever there is no
    active/selected judging.
@@ -11,6 +10,12 @@ Version 4.0.5 - DEV
    of team member names and error when required PHP cURL extension
    is missing.
  - Remove broken use of HTML5 color fields; rely on jscolor instead.
+ - Fix diplay of compile output details.
+ - Properly initialize PHP array variable for languages.
+ - Fix bug where TLE terminated submissions would show as finished late.
+ - Fix bug possibly leading to invalid HTML forms.
+ - Improve various error messages.
+ - Various minor documentation improvements.
 
 Version 4.0.4 - 27 October 2014
 -------------------------------
