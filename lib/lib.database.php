@@ -197,7 +197,7 @@ class db
 				$callsite = '';
 			}
 			throw new BadMethodCallException("Not all arguments to q() are"
-			    . " processed");
+			    . " processed.\n$callsite");
 		}
 
 		$res = $this->execute($query);
