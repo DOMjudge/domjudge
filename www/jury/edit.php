@@ -164,7 +164,7 @@ function check_manymany_mapping($table, $keys) {
 	global $KEYS;
 	foreach($keys as $key) {
 		if (!in_array($key, $KEYS[$table])) {
-			error("Invalid many-to-many mapping.");
+			error("Invalid many-to-many mapping. Key \"$key\", table \"$table\"");
 		}
 
 		if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $key ) ) {
