@@ -28,10 +28,10 @@ function display_compile_output($output, $success) {
 		(empty($output) ? '' : "</a>" ) . "</h3>\n\n";
 
 	if ( !empty($output) ) {
-		echo '<pre class="output_text details" id="detailcompile">' .
+		echo '<pre class="output_text" id="detailcompile">' .
 			htmlspecialchars($output)."</pre>\n\n";
 	} else {
-		echo '<p class="nodata details" id="detailcompile">' .
+		echo '<p class="nodata" id="detailcompile">' .
 			"There were no compiler errors or warnings.</p>\n";
 	}
 
