@@ -53,7 +53,7 @@ if ( isset($_POST['upload']) ) {
 			header('Location: problems.php');
 		}
 	} else {
-		error("Missing filename for problem upload");
+		error("Missing filename for problem upload. Maybe you have to increase upload_max_filesize, see config checker.");
 	}
 }
 
