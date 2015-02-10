@@ -58,6 +58,7 @@ function put_print_form()
 	<tr><td><label for="langid">Language</label>:</td>
 	    <td><?php
 
+	$langlist = array();
 	foreach($langs as $langid => $langdata) {
 		$langlist[$langid] = $langdata['name'];
 	}
