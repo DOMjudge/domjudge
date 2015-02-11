@@ -383,7 +383,8 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 		}
 	}
 
-	$res = $DB->q('SELECT DISTINCT country FROM team_affiliation ORDER BY country');
+	$res = $DB->q('SELECT DISTINCT country FROM team_affiliation
+	               WHERE country IS NOT NULL ORDER BY country');
 	while ( $row = $res->next() ) {
 		$cflag = '../images/countries/' .
 			urlencode($row['country']) . '.png';
@@ -421,8 +422,8 @@ result('submissions and judgings', 'Submissions', $submres, $submnote);
 
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
-               LEFT OUTER JOIN contestproblem p USING (probid)
-               WHERE s.cid != p.cid');
+               LEFT JOIN contestproblem p USING (cid,probid)
+               WHERE p.shortname IS NULL');
 
 $details = '';
 while($row = $res->next()) {
