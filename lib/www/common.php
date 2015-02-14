@@ -113,6 +113,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	              $sqlbody .
 	              (isset($restrictions['verified']) ? 'AND ' . $verifyclause : '') .
 	              (isset($restrictions['judged'])   ? 'AND ' . $judgedclause : '') .
+	              (isset($restrictions['externaldiff']) ? 'AND ' . $externalclause : '') .
 	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
 	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
 	              @$restrictions['teamid'], @$restrictions['categoryid'],
