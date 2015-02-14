@@ -523,6 +523,9 @@ INSERT INTO `userrole` (`userid`, `roleid`) VALUES (2, 6);
 INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('plg', 'Prolog', '["plg"]', 0, 1, 1);
 INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`) VALUES ('rb', 'Ruby', '["rb"]', 0, 1, 1);
 
+-- Uncomment the line below to create a user associated to each existing team.
+--source upgrade/add_team_users_4.0.sql
+
 --
 -- Finally remove obsolete structures after moving data
 --
