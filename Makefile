@@ -81,23 +81,9 @@ maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit tests misc-tools
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))
-# Fix permissions for special directories (don't touch tmpdir when FHS enabled):
-	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
-	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_rundir)
-	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_submitdir)
-ifneq "$(FHS_ENABLED)" "yes"
-	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
-endif
 
 judgehost-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(judgehost_dirs))
-# Fix permissions for special directories (don't touch tmpdir when FHS enabled):
-	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_logdir)
-	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_rundir)
-	-$(INSTALL_USER) -m 0711 -d $(DESTDIR)$(judgehost_judgedir)
-ifneq "$(FHS_ENABLED)" "yes"
-	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_tmpdir)
-endif
 
 docs-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(docs_dirs))
@@ -105,12 +91,42 @@ docs-create-dirs:
 install-docs-l:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir) README ChangeLog COPYING*
 
-install-domserver install-judgehost: check-root
+# As final step try set ownership and permissions of a few special
+# files/directories. Print a warning and fail gracefully if this
+# doesn't work because we're not root.
+install-domserver-l:
+	-$(MAKE) check-root
+# Fix permissions for special directories (don't touch tmpdir when FHS enabled):
+	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
+	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_rundir)
+	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_submitdir)
+ifneq "$(FHS_ENABLED)" "yes"
+	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
+endif
+# Fix permissions and ownership for password files:
+	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(domserver_etcdir) \
+		etc/restapi.secret
+	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
+		etc/dbpasswords.secret
+
+install-judgehost-l:
+	-$(MAKE) check-root
+# Fix permissions for special directories (don't touch tmpdir when FHS enabled):
+	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_logdir)
+	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_rundir)
+	-$(INSTALL_USER) -m 0711 -d $(DESTDIR)$(judgehost_judgedir)
+ifneq "$(FHS_ENABLED)" "yes"
+	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_tmpdir)
+endif
+# Fix permissions and ownership for password files:
+	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \
+		etc/restapi.secret
 
 check-root:
 	@if [ `id -u` -ne 0 ]; then \
 		echo "**************************************************************" ; \
 		echo "***  You do not seem to have the required root privileges. ***" ; \
+		echo "***       Perform any failed commands below manually.      ***" ; \
 		echo "**************************************************************" ; \
 		exit 1 ; \
 	fi

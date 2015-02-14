@@ -41,16 +41,16 @@ install-domserver:
 		apache.conf nginx-conf domserver-static.php
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_etcdir) \
 		gendbpasswords genrestapicredentials
-	-$(INSTALL_USER) -t $(DESTDIR)$(domserver_etcdir) \
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
 		domserver-config.php common-config.php
-	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
-		dbpasswords.secret restapi.secret
+# Password files are installed from root Makefile.
 
 install-judgehost:
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
 		judgehost-static.php sudoers-domjudge
-	-$(INSTALL_USER) -t $(DESTDIR)$(judgehost_etcdir) \
-		judgehost-config.php common-config.php restapi.secret
+	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
+		judgehost-config.php common-config.php
+# Password files are installed from root Makefile.
 
 # Let only distclean (_not_ the local variant) depend on password
 # removal, so these don't get removed with maintainer-clean.
