@@ -92,17 +92,20 @@ $res = $DB->q('SELECT judgehost.*, judgehost_restriction.restrictionname
 // is currently running or has crashed, so we simply ignore this.
 
 $now = now();
-$work2min    = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - GREATEST(%i,starttime))
-                       FROM judging WHERE endtime > %i GROUP BY judgehost',
-                      $now-2*60, $now-2*60);
+$query = 'KEYVALUETABLE SELECT judgehost,
+          SUM(IF(endtime,endtime,%i) - GREATEST(%i,starttime))
+          FROM judging
+          WHERE endtime > %i OR (endtime IS NULL and valid = 1)
+          GROUP BY judgehost';
 
-$work10min   = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - GREATEST(%i,starttime))
-                       FROM judging WHERE endtime > %i GROUP BY judgehost',
-                      $now-10*60, $now-10*60);
+$from = $now-2*60;
+$work2min    = $DB->q($query, $now, $from, $from);
 
-$workcontest = $DB->q('KEYVALUETABLE SELECT judgehost, SUM(endtime - GREATEST(%i,starttime))
-                       FROM judging WHERE endtime > %i GROUP BY judgehost',
-                      $cdata['starttime'], $cdata['starttime']);
+$from = $now-10*60;
+$work10min   = $DB->q($query, $now, $from, $from);
+
+$from = $cdata['starttime'];
+$workcontest = $DB->q($query, $now, $from, $from);
 
 $clen = difftime($now,$cdata['starttime']);
 
