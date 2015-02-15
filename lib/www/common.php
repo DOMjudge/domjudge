@@ -290,26 +290,26 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		echo addEndForm();
 
 		if ( $limit > 0 ) {
-			$subcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody, $cids,
+			$subcnt = $DB->q('VALUE SELECT count(DISTINCT s.submitid) ' . $sqlbody, $cids,
 			                 @$restrictions['teamid'], @$restrictions['categoryid'],
 			                 @$restrictions['probid'], @$restrictions['langid'],
 			                 @$restrictions['judgehost']);
-			$corcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			$corcnt = $DB->q('VALUE SELECT count(DISTINCT s.submitid) ' . $sqlbody .
 					 ' AND j.result LIKE \'correct\'', $cids,
 			                 @$restrictions['teamid'], @$restrictions['categoryid'],
 			                 @$restrictions['probid'], @$restrictions['langid'],
 			                 @$restrictions['judgehost']);
-			$igncnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			$igncnt = $DB->q('VALUE SELECT count(DISTINCT s.submitid) ' . $sqlbody .
 					 ' AND s.valid = 0', $cids,
 			                 @$restrictions['teamid'], @$restrictions['categoryid'],
 			                 @$restrictions['probid'], @$restrictions['langid'],
 			                 @$restrictions['judgehost']);
-			$vercnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			$vercnt = $DB->q('VALUE SELECT count(DISTINCT s.submitid) ' . $sqlbody .
 					 ' AND verified = 0 AND result IS NOT NULL', $cids,
 			                 @$restrictions['teamid'], @$restrictions['categoryid'],
 			                 @$restrictions['probid'], @$restrictions['langid'],
 			                 @$restrictions['judgehost']);
-			$quecnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
+			$quecnt = $DB->q('VALUE SELECT count(DISTINCT s.submitid) ' . $sqlbody .
 					 ' AND result IS NULL', $cids,
 			                 @$restrictions['teamid'], @$restrictions['categoryid'],
 			                 @$restrictions['probid'], @$restrictions['langid'],
