@@ -425,7 +425,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 
 						$ovzip = file_get_contents("$tmpzipfiledir/outputvalidator.zip");
 						$probname = $DB->q("VALUE SELECT name FROM problem WHERE probid=%i", $probid);
-						$ovname = $probname . "_cmp";
+						$ovname = preg_replace('/[^a-zA-Z0-9]/', '_', $probname) . "_cmp";
 						if ( $DB->q("MAYBEVALUE SELECT execid FROM executable WHERE execid=%s", $ovname) ) {
 							// avoid name clash
 							$clashcnt = 2;
