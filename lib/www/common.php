@@ -399,7 +399,7 @@ function putSolvedUnsolved($teamid, $cid) {
 		$rows = $DB->q('SELECT probid,submissions,shortname
 				FROM scorecache_public
 				LEFT JOIN contestproblem USING (probid,cid)
-				WHERE is_correct=%i AND teamid=%i AND cid=%i',
+				WHERE is_correct=%i AND teamid=%i AND cid=%i AND submissions > 0',
 				$correct, $teamid, $cid);
 		if( $rows->count() == 0 ) {
 			echo "<p class=\"nodata\">No $type problems.</p>\n\n";
