@@ -87,10 +87,6 @@ $res = $DB->q('SELECT judgehost.*, judgehost_restriction.restrictionname
 	       LEFT JOIN judgehost_restriction USING (restrictionid)
 	       ORDER BY hostname');
 
-// NOTE: these queries do not take into account the time spent on a
-// current judging. It is tricky, however, to determine if a judging
-// is currently running or has crashed, so we simply ignore this.
-
 $now = now();
 $query = 'KEYVALUETABLE SELECT judgehost,
           SUM(IF(endtime,endtime,%i) - GREATEST(%i,starttime))
