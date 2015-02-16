@@ -95,7 +95,7 @@ install-docs-l:
 # files/directories. Print a warning and fail gracefully if this
 # doesn't work because we're not root.
 install-domserver-l:
-	-$(MAKE) check-root
+	$(MAKE) check-root
 # Fix permissions for special directories (don't touch tmpdir when FHS enabled):
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_rundir)
@@ -110,7 +110,7 @@ endif
 		etc/dbpasswords.secret
 
 install-judgehost-l:
-	-$(MAKE) check-root
+	$(MAKE) check-root
 # Fix permissions for special directories (don't touch tmpdir when FHS enabled):
 	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_logdir)
 	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_rundir)
@@ -123,12 +123,11 @@ endif
 		etc/restapi.secret
 
 check-root:
-	@if [ `id -u` -ne 0 ]; then \
+	@if [ `id -u` -ne 0 -a -n "$(QUIET)" ]; then \
 		echo "**************************************************************" ; \
 		echo "***  You do not seem to have the required root privileges. ***" ; \
 		echo "***       Perform any failed commands below manually.      ***" ; \
 		echo "**************************************************************" ; \
-		exit 1 ; \
 	fi
 
 dist-l:
