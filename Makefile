@@ -123,7 +123,7 @@ endif
 		etc/restapi.secret
 
 check-root:
-	@if [ `id -u` -ne 0 -a -n "$(QUIET)" ]; then \
+	@if [ `id -u` -ne 0 -a -z "$(QUIET)" ]; then \
 		echo "**************************************************************" ; \
 		echo "***  You do not seem to have the required root privileges. ***" ; \
 		echo "***       Perform any failed commands below manually.      ***" ; \
