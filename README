@@ -61,10 +61,13 @@ Various JavaScript libraries/snippets are included under www/js/:
   licence, see COPYING.MIT.
 - jscolor.js: copyright Jan Odvarko, licenced under the GNU LGPL.
 - tabber.js: copyright Patrick Fitzgerald, licenced under the MIT licence.
-- Ace editor: licenced under BSD licence, see COPYING.BSD.
-- Flot: licenced under MIT licence, see COPYING.MIT.
-- jQuery: licenced under MIT licence, see COPYING.MIT.
-- jQuery TokenInput: dual licensed under GPL and MIT licence, see COPYING and COPYING.MIT.
+- Ace editor: licenced under the BSD licence, see COPYING.BSD.
+- Flot: licenced under the MIT licence, see COPYING.MIT.
+- jQuery: licenced under the MIT licence, see COPYING.MIT.
+- jQuery TokenInput: dual licensed under GPL and MIT licences, see COPYING and COPYING.MIT.
+
+The default validator from the Kattis problemtools package is
+included, licenced under the MIT licence, see COPYING.MIT.
 
 The M4 autoconf macros are licenced under all-permissive and GPL3+
 licences; see the respective files under m4/ for details.
