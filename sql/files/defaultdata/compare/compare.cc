@@ -64,11 +64,10 @@ void openfile(Stream &stream, const char *file, const char *whoami) {
 }
 
 FILE *openfeedback(const char *feedbackdir, const char *feedback, const char *whoami) {
-	char path[10000];
-	snprintf(path, 10000, "%s/%s", feedbackdir, feedback);
-	FILE *res = fopen(path, "w");
+	std::string path = std::string(feedbackdir) + "/" + std::string(feedback);
+	FILE *res = fopen(path.c_str(), "w");
 	if (!res) {
-		judge_error("%s: failed to open %s for writing", whoami, path);
+		judge_error("%s: failed to open %s for writing", whoami, path.c_str());
 	}
 	return res;
 }
