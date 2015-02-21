@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 4.0.5 - DEV
 -------------------
+ - Add an SQL upgrade script to add a user for each existing team;
+   enable by uncommenting in sql/upgrade/upgrade_3.4.0_4.0.0.sql.
  - Add fixed/improved version of simulate_contest script.
  - Also display judgings list if there is only one invalid judging
    and display "Not (re)judged yet" message whenever there is no
@@ -14,6 +16,8 @@ Version 4.0.5 - DEV
  - Properly initialize PHP array variable for languages.
  - Fix bug where TLE terminated submissions would show as finished late.
  - Fix bug possibly leading to invalid HTML forms.
+ - Fix config check for missing country flags.
+ - Fix conflicting mount options in chroot-startstop.sh script.
  - Improve various error messages.
  - Various minor documentation improvements.
 
