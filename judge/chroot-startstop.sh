@@ -26,9 +26,9 @@ CHROOTORIGINAL="/chroot/domjudge"
 case "$1" in
 	start)
 
-# Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
+		# Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):
 		mkdir -p proc
-		sudo -n mount -n -t proc --bind /proc proc < /dev/null
+		sudo -n mount -n --bind /proc proc < /dev/null
 
 		for i in $SUBDIRMOUNTS ; do
 
