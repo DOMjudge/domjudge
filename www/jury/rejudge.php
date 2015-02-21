@@ -24,11 +24,16 @@ $tablemap = array (
 
 $table = @$_POST['table'];
 $id    = @$_POST['id'];
+$include_all = !empty($_POST['include_all']);
 
 if ( empty($table) || empty($id) ) {
 	error("no table or id passed for selection in rejudging");
 } elseif ( !isset($tablemap[$table]) ) {
 	error("unknown table in rejudging");
+}
+
+if ( !IS_ADMIN && $include_all ) {
+	error("rejudging pending/correct submissions requires admin rights");
 }
 
 global $DB;
@@ -37,24 +42,19 @@ global $DB;
 // allow us to call calcScoreRow() for the right rows, so we'll just loop
 // over the results one at a time.
 
-// Special case 'submission' and 'contest' for admin overrides
-if ( IS_ADMIN && ($table == 'submission' || $table == 'contest') ) {
+// Special case 'submission' for admin overrides
+if ( IS_ADMIN && ($table == 'submission') ) $include_all = true;
+
+$res = null;
+$cids = getCurContests(FALSE);
+if ( !empty($cids) ) {
 	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid, j.cid
-		       FROM judging j
-		       LEFT JOIN submission s USING (submitid)
-		       WHERE j.valid = 1 AND ' .
-		       $tablemap[$table] . ' = %s', $id);
-} else {
-	$res = null;
-	$cids = getCurContests(FALSE);
-	if ( !empty($cids) ) {
-		$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid, j.cid
-		               FROM judging j 
-		               LEFT JOIN submission s USING (submitid)
-		               WHERE j.cid IN (%Ai) AND j.valid = 1 AND 
-		               result IS NOT NULL AND result != "correct" AND ' .
-		              $tablemap[$table] . ' = %s', $cids, $id);
-	}
+	               FROM judging j
+	               LEFT JOIN submission s USING (submitid)
+	               WHERE j.cid IN (%Ai) AND j.valid = 1 AND ' .
+	              ( $include_all ? '' :
+	                'result != \'correct\' AND result IS NOT NULL AND ' ) .
+	              $tablemap[$table] . ' = %s', $cids, $id);
 }
 
 if ( !$res || $res->count() == 0 ) {

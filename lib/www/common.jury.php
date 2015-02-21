@@ -91,6 +91,7 @@ function rejudgeForm($table, $id)
 	$button = 'REJUDGE this submission';
 	$question = "Rejudge submission s$id?";
 	$disabled = false;
+	$allbutton = false;
 
 	// special case submission
 	if ( $table == 'submission' ) {
@@ -115,17 +116,18 @@ function rejudgeForm($table, $id)
 				$disabled = true;
 			}
 		}
-	} else if ( $table == 'contest' ) {
-		$button = "REJUDGE ALL for $table $id";
-		$question = "Rejudge all submissions for this $table?";
 	} else {
 		$button = "REJUDGE ALL for $table $id";
-		$question = "Rejudge all non-CORRECT submissions for this $table?";
+		$question = "Rejudge all submissions for this $table?";
+		if ( IS_ADMIN ) $allbutton = true;
 	}
 
 	$ret .= '<input type="submit" value="' . htmlspecialchars($button) . '" ' .
 		($disabled ? 'disabled="disabled"' : 'onclick="return confirm(\'' .
-		htmlspecialchars($question) . '\');"') . " />\n" . addEndForm();
+		htmlspecialchars($question) . '\');"') . " />\n" .
+		($allbutton ? addCheckBox('include_all') .
+		              'include pending/correct submissions' : '' ) .
+		addEndForm();
 
 	return $ret;
 }
