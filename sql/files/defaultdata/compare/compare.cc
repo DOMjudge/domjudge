@@ -65,7 +65,7 @@ void openfile(Stream &stream, const char *file, const char *whoami) {
 
 FILE *openfeedback(const char *feedbackdir, const char *feedback, const char *whoami) {
 	char path[10000];
-	sprintf(path, "%s/%s", feedbackdir, feedback);
+	snprintf(path, 10000, "%s/%s", feedbackdir, feedback);
 	FILE *res = fopen(path, "w");
 	if (!res) {
 		judge_error("%s: failed to open %s for writing", whoami, path);
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
 	while (true) {
 		// Space!  Can't live with it, can't live without it...
 		while (isspace(judgeans.peek())) {
-			char c = judgeans.get();
+			char c = (char)judgeans.get();
 			if (space_change_sensitive) {
 				char d = std::cin.get();
 				if (c != d) {
@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
 			++judgeans_pos;
 		}
 		while (isspace(std::cin.peek())) {
-			char d = std::cin.get();
+			char d = (char)std::cin.get();
 			if (space_change_sensitive) {
 				wrong_answer("Space change error: judge out of space, got %d from team", d);
 			}
