@@ -2,7 +2,7 @@
 //
 // @EXPECTED_RESULTS@: CORRECT
 
-if (process.env.DOMJUDGE === '') {
+if ( process.env.DOMJUDGE ) {
   console.log('Hello world!');
 } else {
   console.log('DOMJUDGE not defined');
