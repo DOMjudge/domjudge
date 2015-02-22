@@ -492,17 +492,16 @@ make domserver &amp;&amp; sudo make install-domserver
 make judgehost &amp;&amp; sudo make install-judgehost
 make docs &amp;&amp; make install-docs
 </code>
-Note that even when installing e.g. in your own home directory, root
-privileges are still required for domserver and judgehost
-installation, because user and group ownership of password files, some
-directories and to give sudo access to <tt>runguard</tt>. One should
-<em>not</em> run DOMjudge programs and daemons under the root user
-however, but under a normal user: <tt>runguard</tt> is specifically
-designed to be the only part invoked as root (through sudo) to make
-this unnecessary and running as root
-will give rise to problems, see <ref id="runguard-rootprivs"
-name="runguard: root privileges not dropped"> in the common problems
-section.
+Note that root privileges are required to set permissions and user and
+group ownership of password files and a few directories. If you run
+the installation targets as non-root, you will be warned that you have
+to perform these steps manually. Although DOMjudge can be installed as
+root, one should <em>not</em> run DOMjudge programs and daemons under
+the root user, but under a normal user: <tt>runguard</tt> is
+specifically designed to be the only part invoked as root (through
+sudo) to make this unnecessary and running as root will give rise to
+problems, see <ref id="runguard-rootprivs" name="runguard: root privileges not dropped">
+in the common problems section.
 
 For a list of basic make targets, run <tt>make</tt> in the source root
 directory without arguments.

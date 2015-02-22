@@ -11,7 +11,7 @@
 
 # The following is needed if you set USE_CHROOT=1 (recommended).
 # The chroot path below must match the path in chroot-startstop.sh.
-@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount -n -t proc --bind /proc proc
+@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount -n --bind /proc proc
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/umount /*/proc
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount --bind @judgehost_chrootdir@/*
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount -o remount\,ro\,bind @judgehost_judgedir@/*
