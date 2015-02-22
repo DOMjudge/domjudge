@@ -600,7 +600,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 			( count($affilids) > 1 ? addSelect('affilid[]',    $affilids,  @$filter['affilid'],    TRUE,  8) : "" ) .
 			( count($countries)> 1 ? addSelect('country[]',    $countries, @$filter['country'],    FALSE, 8) : "" ) .
 			( count($categids) > 1 ? addSelect('categoryid[]', $categids,  @$filter['categoryid'], TRUE,  8) : "" ) .
-			addSubmit('filter') . addSubmit('clear', 'clear') .
+			addSubmit('filter', 'filter') . addSubmit('clear', 'clear') .
 			addEndForm();
 		?>
 </div></td></tr>
@@ -626,6 +626,36 @@ collapse("filter");
 	     "using <a href=\"http://www.domjudge.org/\">DOMjudge</a></p>\n\n";
 
 	return;
+}
+
+/**
+ * Reads scoreboard filter settings from a cookie and explicit POST of
+ * filter settings. Also sets the cookie, so must be called before
+ * headers are sent. Returns the scoreboard filter settings array.
+ */
+function initScorefilter()
+{
+	$scorefilter = array();
+
+	// Read scoreboard filter options from cookie and explicit POST
+	if ( isset($_COOKIE['domjudge_scorefilter']) ) {
+		$scorefilter = json_decode($_COOKIE['domjudge_scorefilter'], TRUE);
+	}
+
+	if ( isset($_REQUEST['clear']) ) $scorefilter = array();
+
+	if ( isset($_REQUEST['filter']) ) {
+		$scorefilter = array();
+		foreach( array('affilid', 'country', 'categoryid') as $type ) {
+			if ( !empty($_REQUEST[$type]) ) {
+				$scorefilter[$type] = $_REQUEST[$type];
+			}
+		}
+	}
+
+	setcookie('domjudge_scorefilter', json_encode($scorefilter));
+
+	return $scorefilter;
 }
 
 /**
