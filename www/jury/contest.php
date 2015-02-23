@@ -17,6 +17,11 @@ $jqtokeninput = true;
 
 require(LIBWWWDIR . '/header.php');
 
+$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d";
+$pattern_offset    = "\d?\d:\d\d";
+$pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
+$pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
+
 if ( !empty($_GET['cmd']) ):
 
 	requireAdmin();
@@ -38,11 +43,6 @@ if ( !empty($_GET['cmd']) ):
 			'c' . htmlspecialchars($row['cid']) .
 			"</td></tr>\n";
 	}
-
-$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d";
-$pattern_offset    = "\d?\d:\d\d";
-$pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
-$pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 ?>
 
 <tr><td><label for="data_0__shortname_">Short name:</label></td>
