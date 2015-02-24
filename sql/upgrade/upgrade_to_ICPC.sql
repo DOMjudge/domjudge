@@ -8,8 +8,8 @@
 --
 
 -- @UPGRADE-CHECK@
-ALTER TABLE `team` ADD  COLUMN `penalty` int(4) default NULL;
-ALTER TABLE `team` DROP COLUMN `penalty`;
+ALTER TABLE `contest` ADD  COLUMN `finalizetime` int(4) default NULL;
+ALTER TABLE `contest` DROP COLUMN `finalizetime`;
 
 --
 -- Create additional structures
@@ -20,16 +20,12 @@ ALTER TABLE contest
   ADD COLUMN `finalizecomment` text COMMENT 'Comments by the finalizer',
   ADD COLUMN `b` smallint(3) unsigned NOT NULL default '0' COMMENT 'Number of extra bronze medals';
 
-ALTER TABLE contestproblem
-  ADD COLUMN `lazy_eval_results` tinyint(1) unsigned DEFAULT NULL COMMENT 'Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting';
-
 -- Drop constraint before changing data
 ALTER TABLE `clarification`
   DROP FOREIGN KEY `clarification_ibfk_3`,
   MODIFY COLUMN `probid` varchar(128) default NULL COMMENT 'Problem or category associated to this clarification';
 
 ALTER TABLE `team`
-  ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`,
   ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of team if imported from external source',
   ADD UNIQUE KEY `externalid` (`externalid`);
 
