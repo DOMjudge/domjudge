@@ -419,7 +419,7 @@ CREATE TABLE `team` (
   `judging_last_started` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Start time of last judging for priorization',
   `teampage_first_visited` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of first teampage view',
   `hostname` varchar(255) DEFAULT NULL COMMENT 'Teampage first visited from this address',
-  `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes',
+  `penalty` int(4) NOT NULL DEFAULT '0' COMMENT 'Additional penalty time in minutes',
   PRIMARY KEY  (`teamid`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `externalid` (`externalid`),
