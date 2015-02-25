@@ -25,10 +25,6 @@ ALTER TABLE `clarification`
   DROP FOREIGN KEY `clarification_ibfk_3`,
   MODIFY COLUMN `probid` varchar(128) default NULL COMMENT 'Problem or category associated to this clarification';
 
-ALTER TABLE `team`
-  ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of team if imported from external source',
-  ADD UNIQUE KEY `externalid` (`externalid`);
-
 ALTER TABLE `submission`
   ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
   ADD COLUMN `externalresult` varchar(25) default NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
