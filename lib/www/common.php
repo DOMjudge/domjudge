@@ -85,8 +85,9 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 			$judgedclause = 'AND (j.result IS NULL) ';
 		}
 	}
+	$externalclause = '';
 	if ( isset($restrictions['externaldiff']) ) {
-		$externalclause = '(j.result IS NOT NULL AND j.result != s.externalresult) ';
+		$externalclause = 'AND (j.result IS NOT NULL AND j.result != s.externalresult) ';
 	}
 
 	$sqlbody =
@@ -96,7 +97,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		 LEFT JOIN contestproblem cp USING (probid, cid)
 		 LEFT JOIN language       l  USING (langid)
 		 LEFT JOIN judging        j  ON (s.submitid = j.submitid AND j.valid=1)
-		 WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause .
+		 WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $externalclause .
 	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
 	    (isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
 	    (isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
@@ -113,9 +114,6 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	               cp.shortname, p.name AS probname, l.name AS langname,
 	               j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
 	              $sqlbody .
-	              (isset($restrictions['verified']) ? 'AND ' . $verifyclause : '') .
-	              (isset($restrictions['judged'])   ? 'AND ' . $judgedclause : '') .
-	              (isset($restrictions['externaldiff']) ? 'AND ' . $externalclause : '') .
 	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
 	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
 	              @$restrictions['teamid'], @$restrictions['categoryid'],
