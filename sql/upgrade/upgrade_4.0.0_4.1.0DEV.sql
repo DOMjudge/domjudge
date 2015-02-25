@@ -76,7 +76,10 @@ ALTER TABLE `problem`
   ADD COLUMN `special_compare_args` varchar(255) DEFAULT NULL COMMENT 'Optional arguments to special_compare script' AFTER `special_compare`;
 
 ALTER TABLE `team`
-  ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`;
+  MODIFY COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Team ID in an external system',
+  ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`,
+  DROP INDEX `externalid`,
+  ADD UNIQUE KEY `externalid` (`externalid`);
 
 ALTER TABLE `testcase`
   ADD COLUMN `image` longblob COMMENT 'A graphical representation of this testcase' AFTER `description`,
