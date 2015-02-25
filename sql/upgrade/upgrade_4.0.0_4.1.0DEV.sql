@@ -37,6 +37,7 @@ CREATE TABLE `contestproblem` (
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
   `color` varchar(25) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard',
+  `lazy_eval_results` tinyint(1) unsigned DEFAULT NULL COMMENT 'Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting',
   PRIMARY KEY (`cid`,`probid`),
   KEY `cid` (`cid`),
   KEY `probid` (`probid`),
@@ -73,6 +74,12 @@ ALTER TABLE `problem`
   ADD COLUMN `memlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum memory available (in kB) for this problem' AFTER `timelimit`,
   ADD COLUMN `outputlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum output size (in kB) for this problem' AFTER `memlimit`,
   ADD COLUMN `special_compare_args` varchar(255) DEFAULT NULL COMMENT 'Optional arguments to special_compare script' AFTER `special_compare`;
+
+ALTER TABLE `team`
+  MODIFY COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Team ID in an external system',
+  ADD COLUMN `penalty` int(4) NOT NULL default '0' COMMENT 'Additional penalty time in minutes' AFTER `hostname`,
+  DROP INDEX `externalid`,
+  ADD UNIQUE KEY `externalid` (`externalid`);
 
 ALTER TABLE `testcase`
   ADD COLUMN `image` longblob COMMENT 'A graphical representation of this testcase' AFTER `description`,

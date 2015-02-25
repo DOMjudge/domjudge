@@ -126,7 +126,7 @@ function rejudgeForm($table, $id)
 		($disabled ? 'disabled="disabled"' : 'onclick="return confirm(\'' .
 		htmlspecialchars($question) . '\');"') . " />\n" .
 		($allbutton ? addCheckBox('include_all') .
-		              'include pending/correct submissions' : '' ) .
+		              '<label for="include_all">include pending/correct submissions</label>' : '' ) .
 		addEndForm();
 
 	return $ret;

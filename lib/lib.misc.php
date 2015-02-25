@@ -279,6 +279,8 @@ function updateRankCache($cid, $team, $jury) {
 
 	logmsg(LOG_DEBUG, "updateRankCache '$cid' '$team' '$jury'");
 
+	$team_penalty = $DB->q("VALUE SELECT penalty FROM team WHERE teamid = %i", $team);
+
 	// Find table name
 	$tblname = $jury ? 'jury' : 'public';
 
@@ -294,7 +296,7 @@ function updateRankCache($cid, $team, $jury) {
 	                     FROM scorecache_$tblname
 	                     WHERE cid = %i and teamid = %i", $cid, $team);
 	$num_correct = 0;
-	$total_time = 0;
+	$total_time = $team_penalty;
 	while ( $srow = $scoredata->next() ) {
 		// Only count solved problems
 		if ( $srow['is_correct'] ) {

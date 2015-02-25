@@ -428,7 +428,7 @@ CREATE TABLE `submission_file` (
 
 CREATE TABLE `team` (
   `teamid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `externalid` varchar(128) DEFAULT NULL COMMENT 'Team ID in an external system',
+  `externalid` varchar(255) DEFAULT NULL COMMENT 'Team ID in an external system',
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Team name',
   `categoryid` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Team category ID',
   `affilid` int(4) unsigned DEFAULT NULL COMMENT 'Team affiliation ID',
@@ -442,9 +442,9 @@ CREATE TABLE `team` (
   `penalty` int(4) NOT NULL DEFAULT '0' COMMENT 'Additional penalty time in minutes',
   PRIMARY KEY  (`teamid`),
   UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `externalid` (`externalid`),
   KEY `affilid` (`affilid`),
   KEY `categoryid` (`categoryid`),
-  KEY `externalid` (`externalid`),
   CONSTRAINT `team_ibfk_1` FOREIGN KEY (`categoryid`) REFERENCES `team_category` (`categoryid`) ON DELETE CASCADE,
   CONSTRAINT `team_ibfk_2` FOREIGN KEY (`affilid`) REFERENCES `team_affiliation` (`affilid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All teams participating in the contest';

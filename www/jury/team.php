@@ -178,6 +178,9 @@ if ( $row['enabled'] != 1 ) {
 <tr><td>Penalty time:</td><td><?php echo htmlspecialchars(@$row['penalty'])?></td></tr>
 <tr><td>Host:</td><td><?php echo
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
+<?php if (!empty($row['penalty'])): ?>
+<tr><td>Penalty time:</td><td><?php echo htmlspecialchars($row['penalty'])?></td></tr>
+<?php endif; ?>
 <?php if (!empty($row['room'])): ?>
 <tr><td>Location:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
 <?php endif; ?>
