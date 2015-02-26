@@ -26,25 +26,33 @@ trap cleanup EXIT
 CHROOTDIR=$1
 ARCH=$2
 
-# Debian release to bootstrap:
+# Debian release (codename) to bootstrap (note: overriden right below):
 RELEASE="wheezy"
+
+# If host system is Debian, use its release and architecture by default
+if [ 'Debian' = "$(lsb_release -i -s || true)"]; then
+	RELEASE="$(lsb_release -c -s)"
+	if [ -z "$ARCH" ]; then
+		ARCH="$(dpkg --print-architecture)"
+	fi
+fi
 
 # List of possible architectures to install chroot for:
 ARCHLIST="amd64,armel,armhf,i386,ia64,powerpc,s390,s390x,sparc"
 
-# Debian packages to include during bootstrap process (comma separated):
+# Packages to include during bootstrap process (comma separated):
 INCLUDEDEBS=""
 
-# Debian packages to install after upgrade (space separated):
+# Packages to install after upgrade (space separated):
 INSTALLDEBS="openjdk-7-jre-headless locales"
 # For C# support add: mono-runtime libmono-system2.0-cil
 # However running mono within chroot still gives errors...
 
-# Debian packages to remove after upgrade (space separated):
+# Packages to remove after upgrade (space separated):
 REMOVEDEBS=""
 
 # Which debootstrap package to install on non-Debian systems:
-DEBOOTDEB="debootstrap_1.0.48+deb7u1_all.deb"
+DEBOOTDEB="debootstrap_1.0.48+deb7u2_all.deb"
 
 # The Debian mirror/proxy below can be passed as environment
 # variables; if none are given the following defaults are used.
@@ -62,13 +70,16 @@ export DEBIAN_FRONTEND=noninteractive
 
 usage()
 {
-    echo "Usage: $0 <chrootdir> <architecture>"
+    echo "Usage: $0 <chrootdir> [<architecture>]"
     echo "Creates a chroot environment with Oracle (Sun) Java support using the"
     echo "Debian GNU/Linux distribution."
     echo
     echo "This script must be run as root, <chrootdir> the non-existing target"
     echo "location of the chroot and <architecture> one of the following:"
     echo "$ARCHLIST"
+    echo
+    echo "If the host runs Debian, no architecture needs to be specified and"
+    echo "the host architecture and release are used."
 }
 
 error()
@@ -84,7 +95,7 @@ if [ `id -u` != 0 ]; then
 fi
 
 [ -z "$CHROOTDIR" ] && error "No installation directory given."
-[ -z "$ARCH" ]      && error "No architecture given."
+[ -z "$ARCH" ]      && error "No architecture given or detected."
 
 if [ -e "$CHROOTDIR" ]; then
 	echo -n "'$CHROOTDIR' already exists. Remove? (y/N) "
