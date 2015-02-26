@@ -311,7 +311,6 @@ function tsv_results_get()
 
 	$categs = $DB->q('COLUMN SELECT categoryid FROM team_category WHERE visible = 1');
 	$sb = genScoreBoard($cdata, true, array('categoryid' => $categs));
-	$additional_bronze = $DB->q('VALUE SELECT b FROM contest WHERE cid = %i', $cdata['cid']);
 	$extid_to_name = $DB->q('KEYVALUETABLE SELECT externalid, name FROM team ORDER BY externalid');
 
 	$numteams = sizeof($sb['scores']);
@@ -341,7 +340,7 @@ function tsv_results_get()
 			$awardstring = "Gold Medal";
 		} else if ( $rank <= 8 ) {
 			$awardstring = "Silver Medal";
-		} else if ( $rank <= 12 + $additional_bronze ) {
+		} else if ( $rank <= 12 ) {
 			$awardstring = "Bronze Medal";
 		} else if ( $num_correct >= $median ) {
 			// teams with equally solved number of problems get the same rank
