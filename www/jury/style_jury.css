@@ -186,3 +186,6 @@ a.collapse { color: black; text-decoration: none; } */
 .tdcenter img {  vertical-align: text-top; }
 .tdright { text-align: right; }
 .teamstat { text-align: right; }
+
+.tc_box_small { text-align:center;font-size:65%;width:1.0em;display:inline-block;padding:1px;margin:1px;color:black; }
+.tc_list_small { max-width:500px; }

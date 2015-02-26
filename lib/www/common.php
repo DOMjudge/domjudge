@@ -57,7 +57,7 @@ function parseRunDiff($difftext){
  * match <key> = <value>. Output is always limited to the
  * current or last contest.
  */
-function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
+function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $testcases = false)
 {
 	global $DB, $username;
 
@@ -112,7 +112,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.externalresult, s.cid,
 	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
 	               cp.shortname, p.name AS probname, l.name AS langname,
-	               j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
+	               j.result, j.judgehost, j.verified, j.jury_member, j.seen, j.judgingid ' .
 	              $sqlbody .
 	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
 	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
@@ -142,6 +142,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		"<th scope=\"col\">lang</th>" .
 		"<th scope=\"col\">result</th>" .
 		(IS_JURY ? "<th scope=\"col\">verified</th><th scope=\"col\">by</th>" : '') .
+		($testcases ? "<th scope=\"col\">test results</th>" : '') .
 
 		"</tr>\n</thead>\n<tbody>\n";
 
@@ -253,6 +254,36 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 				}
 			}
 			echo "</td>";
+			if ( $testcases ) {
+				$judgingid = $row['judgingid'];
+				$probid = $row['probid'];
+				$runinfo = $DB->q('TABLE SELECT r.runresult, t.rank
+						FROM testcase t
+						LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid
+							AND r.judgingid = %i )
+						WHERE t.probid = %i ORDER BY rank',
+						$judgingid, $probid);
+
+				$testcase_results = "";
+				$is_final = !empty($row['result']);
+				foreach ( $runinfo as $key => $run ) {
+					$class = ( $is_final ? "tc_unused" : "tc_pending" );
+					$text = "?";
+					switch ( $run['runresult'] ) {
+						case 'correct':
+							$class = "tc_correct";
+							$text = "✓";
+							break;
+						case NULL:
+							break;
+						default:
+							$text = substr($run['runresult'], 0, 1);
+							$class = "tc_incorrect";
+					}
+					$testcase_results .= "<span class=\"$class tc_box_small\">" . $text . "</span>";
+				}
+				echo "<td class=\"tc_list_small\">" . $testcase_results . "</td>";
+			}
 		}
 		echo "</tr>\n";
 
