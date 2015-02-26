@@ -142,10 +142,7 @@ function calcContestTime($walltime, $cid)
 
 	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
 
-	$intervals = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
-	                     FROM removed_interval WHERE cid = %i', $cid);
-
-	foreach ( $intervals as $intv ) {
+	foreach ( $cdatas[$cid]['removed_intervals'] as $intv ) {
 		if ( difftime($intv['starttime'], $walltime)<0 ) {
 			$contesttime -= min(
 				difftime($walltime,        $intv['starttime']),
