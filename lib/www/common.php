@@ -65,7 +65,7 @@ function parseRunDiff($difftext){
  *
  * FIXME: this has way too many IS_JURY branches, should be separated out.
  */
-function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
+function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $testcases = false)
 {
 	global $DB, $username;
 
@@ -136,7 +136,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.cid,
 	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
 	               cp.shortname, p.name AS probname, l.name AS langname,
-	               j.result, j.judgehost, j.verified, j.jury_member, j.seen, j.endtime,
+	               j.result, j.judgehost, j.verified, j.jury_member, j.seen, j.endtime, j.judgingid,
 	               (j.endtime IS NULL AND j.valid=0 AND
 	                (r.valid IS NULL OR r.valid=0)) AS aborted ' .
 	              (isset($restrictions['rejudgingid']) ? ', jold.result AS oldresult ' : '') .
@@ -175,6 +175,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		(IS_JURY ? "<th scope=\"col\">verified</th><th scope=\"col\">by</th>" : '') .
 		(IS_JURY && isset($restrictions['rejudgingid']) ?
 		 "<th scope=\"col\">old result</th>" : '') .
+		($testcases ? "<th scope=\"col\">test results</th>" : '') .
 
 		"</tr>\n</thead>\n<tbody>\n";
 
@@ -293,6 +294,36 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 			if ( isset($restrictions['rejudgingid']) ) {
 				echo "<td class=\"result\"><a href=\"submission.php?id=$sid\">" .
 				    printresult($row['oldresult']) . "</a></td>";
+			}
+			if ( $testcases ) {
+				$judgingid = $row['judgingid'];
+				$probid = $row['probid'];
+				$runinfo = $DB->q('TABLE SELECT r.runresult, t.rank
+						FROM testcase t
+						LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid
+							AND r.judgingid = %i )
+						WHERE t.probid = %i ORDER BY rank',
+						$judgingid, $probid);
+
+				$testcase_results = "";
+				$is_final = !empty($row['result']);
+				foreach ( $runinfo as $key => $run ) {
+					$class = ( $is_final ? "tc_unused" : "tc_pending" );
+					$text = "?";
+					switch ( $run['runresult'] ) {
+						case 'correct':
+							$class = "tc_correct";
+							$text = "✓";
+							break;
+						case NULL:
+							break;
+						default:
+							$text = substr($run['runresult'], 0, 1);
+							$class = "tc_incorrect";
+					}
+					$testcase_results .= "<span class=\"$class tc_box_small\">" . $text . "</span>";
+				}
+				echo "<td class=\"tc_list_small\">" . $testcase_results . "</td>";
 			}
 		}
 		echo "</tr>\n";

@@ -213,6 +213,6 @@ if ( $cid !== null ) {
 	$contests = array($cid => $cdata);
 }
 
-putSubmissions($contests, $restrictions, ($viewtypes[$view] == 'newest' ? 50 : 0));
+putSubmissions($contests, $restrictions, ($viewtypes[$view] == 'newest' ? 50 : 0), null, true);
 
 require(LIBWWWDIR . '/footer.php');

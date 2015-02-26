@@ -140,3 +140,16 @@ div.submissions-filter ul.token-input-list {
 	position: relative;
 	left: 100px;
 }
+
+.tc_box_small {
+	text-align: center;
+	font-size: 65%;
+	width: 1.0em;
+	display: inline-block;
+	padding: 1px;
+	margin: 1px;
+	color: black;
+}
+.tc_list_small {
+	max-width:500px;
+}
