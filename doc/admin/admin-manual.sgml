@@ -149,7 +149,9 @@ The following software is required for running DOMjudge.
        GD, curl and json extensions for PHP. PHP needs to be running as an
        Apache module (the most common configuration); a (fast)CGI setup
        is not currently supported. We also recommend the posix extension
-       for extra debugging information.
+       for extra debugging information. A configuration file for the
+       Nginx webserver is also included, and may be used instead of
+       Apache. However, this setup is less well tested and documented.
 
 <item> MySQL or MariaDB &gt;= 4.1.x database and client software
 
@@ -173,7 +175,7 @@ The following software is required for running DOMjudge.
 </itemize>
 
 The following items are optional, but may be required to use certain
-functionality.
+functionality or are generally useful.
 <itemize>
 
 <item> <htmlurl name="phpMyAdmin" url="http://www.phpmyadmin.net/">,
@@ -193,7 +195,7 @@ functionality.
 <item> <htmlurl name="PECL xdiff extension"
         url="http://pecl.php.net/package/xdiff">
        (to reliably make diffs between submissions, DOMjudge will try
-        alternative approaches if it's not available)
+        alternative approaches if it is not available)
 
 <item> <htmlurl name="beep" url="http://www.johnath.com/beep/"> for
        audible notification of errors, submissions and judgings, when
@@ -250,7 +252,7 @@ External software:
 DOMjudge:
 <itemize>
 <item> Extract the source tarball and run <tt>./configure
-       [--enable-fhs] --prefix=&lt;basepath&gt;</tt>.
+       [--enable-fhs|--prefix=&lt;basepath&gt;]</tt>.
 <item> Run <tt>make domserver judgehost docs</tt> or just those
        targets you want installed on the current host.
 <item> Run <tt>make install-{domserver,judgehost,docs}</tt>
@@ -258,7 +260,7 @@ DOMjudge:
 </itemize>
 On the domserver host:
 <itemize>
-<item> Install the MySQL database using <tt>bin/dj-setup-database -u root -r
+<item> Install the MySQL database using e.g. <tt>bin/dj-setup-database -u root -r
        install</tt> on the domserver host.
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it to your needs, reload web server:
@@ -276,8 +278,8 @@ On the domserver host:
 <item> Check that the web interface works (/team, /public and /jury).
 <item> Change the admin password from its default value ('admin').
 <item> Check that the API (/api) works and create credentials for the judgehosts.
-<item> Create accounts and add useful contest data through the jury web
-       interface or with phpMyAdmin.
+<item> Create teams, user accounts and add useful contest data through
+       the jury web interface or with phpMyAdmin.
 <item> Run the config checker in the jury web interface.
 </itemize>
 On the judgehosts:
@@ -289,7 +291,7 @@ On the judgehosts:
 <item> Add to <tt>/etc/sudoers.d/</tt> or append to <tt>/etc/sudoers</tt> the
        sudoers configuration as in <tt>etc/sudoers-domjudge</tt>.
 <item> Put the right credentials in the file <tt>etc/restapi.secret</tt>
-       on all judgehosts.
+       on all judgehosts (copied from the domserver).
 <item> Optionally build a chroot to support interpreted or
        byte-compiled languages such as Java, see the appendix on
        <ref id="problems:chroot" name="setting up a chroot">.
@@ -315,7 +317,6 @@ what should (not) happen.
 Optionally:
 <itemize>
 <item> Install the submit client on the team workstations.
-<item> Generate passwords for all the teams in the web interface.
 <item> Further tighten the security of the system, e.g. by applying
        firewall rules.
 <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
@@ -323,10 +324,8 @@ Optionally:
 <item> Setup the Java chroot environment on the judgehosts to use Java with chroot:<newline>
        <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
        <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
-       enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>
-       and add <tt>etc/sudoers-domjudge</tt> to <tt>/etc/sudoers.d/</tt> or
-       append it to <tt>/etc/sudoers</tt>.
-<item> Set up cgroup support in the judgedaemons.
+       enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>.
+<item> Set up cgroup support on the judgedaemons.
 
 <item> For additional features in the jury web interface, the
        following PHP extensions can be installed:
@@ -374,6 +373,26 @@ manuals. Furthermore, <tt>phpmyadmin</tt> is available from the
 <htmlurl name="Fedora EPEL repository"
 url="https://fedoraproject.org/wiki/EPEL">.
 
+Finally, to build the command-line submit client, install the
+following additional software.
+
+<code>
+apt-get install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
+</code>
+
+<code>
+yum install libcurl-devel jsoncpp-devel file-devel
+</code>
+The package <tt>jsoncpp-devel</tt> is available in Fedora, but not in
+RHEL/CentOS.
+
+Libmagic is not strictly required, but highly recommended for
+detecting binary file submissions. Pass the option
+<tt>--enable-static-linking</tt> to configure so that these libraries
+are statically linked into the <tt>submit</tt> binary and not needed
+on the team workstations where <tt>submit</tt> is installed.
+
+
 On a judgehost, the following should be sufficient. The last two lines show some
 example compilers to install for C, C++, Java (GNU), Java (Oracle), Haskell
 and Pascal; change the list as appropriate.
@@ -393,25 +412,6 @@ yum install make sudo php-cli php-mbstring php-process procps-ng \
 	ghc-compiler fpc
 </code>
 Note that <tt>fpc</tt> is not available in RedHat 7.
-
-Finally, to build the command-line submit client, install the
-following additional software.
-
-<code>
-apt-get install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
-</code>
-
-<code>
-yum install libcurl-devel jsoncpp-devel file-devel
-</code>
-The package <tt>jsoncpp-devel</tt> is available in Fedora, but not in
-RHEL/CentOS.
-
-Libmagic is not strictly required, but highly recommended for
-detecting binary file submissions. Pass the option
-<tt>--enable-static-linking</tt> to configure so that these libraries
-are statically linked into the <tt>submit</tt> binary and not needed
-on the team workstations where <tt>submit</tt> is installed.
 
 
 <sect>Installation system
@@ -531,14 +531,18 @@ name="other configurable scripts">.
 <sect>Executables
 <p>
 
-DOMjudge supports executable archives (in ZIP format) for configuration of
-languages, special run and compare programs. The archive must contain an
-executable file named <tt>build</tt>. When deploying a new (or changed)
-executable to a judgehost <tt>build</tt> is executed <em>once</em>. Afterwards
-an executable file name <tt>run</tt> must exist (it may have existed before).
+DOMjudge supports executable archives (uploaded and stored in ZIP
+format) for configuration of languages, special run and compare
+programs. The archive must contain an executable file named
+<tt>build</tt> or <tt>run</tt>. When deploying a new (or changed)
+executable to a judgehost <tt>build</tt> is executed <em>once</em> if
+present. Afterwards an executable file <tt>run</tt> must exist (it may
+have existed before), that is called to execute the compile, compare,
+or run script.
 
-Executables may be changed via the web interface in an online editor. Changes
-apply immediately to all further uses of that executable.
+Executables may be changed via the web interface in an online editor
+or by uploading a replacement zip file. Changes apply immediately to
+all further uses of that executable.
 
 <sect>Configuration of languages
 <p>
@@ -552,14 +556,14 @@ For more information, see for example the executables <tt>c</tt> or
 included for the most common languages already.
 
 Interpreted languages and non-statically linked binaries can in
-principle also be used, but requires that all dependencies are added
+principle also be used, but require that all dependencies are added
 to the chroot environment.
 
 Interpreted languages do not generate an executable and in principle
 do not need a compilation step. However, to be able to use interpreted
 languages (also Oracle's Java), a script must be generated during the
 compilation step, which will function as the executable: the script
-must run the interpreter on the source. See <tt>pl</tt>
+must run the interpreter on the source. See for example <tt>pl</tt>
 and <tt>java_javac_detect</tt> in the list of executables.
 
 DOMjudge supports the use of Oracle Java within a chroot environment. For
@@ -597,7 +601,7 @@ tedious, standard part. See the boolfind example for details.
 
 Implementing a special compare program, also called a
 <em>validator</em>, can be done by writing a program that is run by
-a wrapper script like the <tt>run</tt> script in the boolfind example.
+a wrapper script like the <tt>run</tt> script in the boolfind compare script example.
 
 Copy this wrapper to your new executable archive and let the jury write a
 checker program which can be called as
@@ -607,13 +611,13 @@ check_<tag> <testdata.in> <program.out> <testdata.out>
 This program should write some kind of difference to stdout. No
 output from the checker program results in a <em>correct</em> verdict
 and a nonzero exitcode in
-an internal (system) error. See as an example the included program
-<tt>check_float</tt>, which compares floating point numbers. The name
+an internal (system) error. See as an example the compare script
+<tt>float</tt>, which compares floating point numbers. The name
 of the check program and any parameters can also be modified in the
 wrapper (i.e. <tt>run</tt>) script.
 
 For example, to compare output while ignoring DOS/UNIX newline differences, one
-can copy the wrapper from <tt>check_float</tt> and in that file set the variable
+can copy the wrapper from <tt>float</tt> and in that file set the variable
 <tt>CHECK_PROGRAM="`which diff`"</tt> and replace the line
 <code>
 "$CHECK_PROGRAM" $CHECK_OPTIONS "$TESTIN" "$PROGRAM" "$TESTOUT" > "$DIFFOUT"
