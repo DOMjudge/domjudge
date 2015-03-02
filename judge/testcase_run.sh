@@ -54,7 +54,7 @@ cleanexit ()
 
 	cleanup
 
-	logmsg $LOG_DEBUG "exiting"
+	logmsg $LOG_DEBUG "exiting with status '$1'"
 	exit $1
 }
 
@@ -242,7 +242,7 @@ logmsg $LOG_DEBUG "checking compare script exit-status: $exitcode"
 if grep '^time-result: .*timelimit' compare.meta >/dev/null 2>&1 ; then
 	echo "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:" >> feedback/judgemessage.txt
 	cat compare.tmp >> feedback/judgemessage.txt
-	cleanexit ${E_COMPARE_ERROR:--1}
+	cleanexit ${E_COMPARE_ERROR:-1}
 fi
 # Append output validator stdin/stderr - display extra?
 if [ -s compare.tmp ]; then
@@ -252,7 +252,7 @@ fi
 if [ $exitcode -ne 42 ] && [ $exitcode -ne 43 ]; then
 	echo "Comparing failed with exitcode $exitcode, compare output:" >> feedback/judgemessage.txt
 	cat compare.tmp >> feedback/judgemessage.txt
-	cleanexit ${E_COMPARE_ERROR:--1}
+	cleanexit ${E_COMPARE_ERROR:-1}
 fi
 
 # Check for errors from running the program:
@@ -269,25 +269,25 @@ program_exit=`    grep '^exitcode: '  program.meta | sed 's/exitcode: //'`
 runtime="${program_cputime}s cpu, ${program_walltime}s wall"
 if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
 	echo "Timelimit exceeded, runtime: $runtime." >>system.out
-	cleanexit ${E_TIMELIMIT:--1}
+	cleanexit ${E_TIMELIMIT:-1}
 fi
 if [ "$program_exit" != "0" ]; then
 	echo "Non-zero exitcode $program_exit" >>system.out
-	cleanexit ${E_RUN_ERROR:--1}
+	cleanexit ${E_RUN_ERROR:-1}
 fi
 
 if [ $exitcode -eq 42 ]; then
 	echo "Correct! Runtime: $runtime." >>system.out
-	cleanexit ${E_CORRECT:--1}
+	cleanexit ${E_CORRECT:-1}
 elif [ $exitcode -eq 43 ]; then
 	# Special case detect no-output:
 	if [ ! -s program.out ];  then
 		echo "Program produced no output." >>system.out
-		cleanexit ${E_NO_OUTPUT:--1}
+		cleanexit ${E_NO_OUTPUT:-1}
 	fi
 	echo "Wrong answer." >>system.out
-	cleanexit ${E_WRONG_ANSWER:--1}
+	cleanexit ${E_WRONG_ANSWER:-1}
 fi
 
 # This should never be reached
-exit ${E_INTERNAL_ERROR:--1}
+exit ${E_INTERNAL_ERROR:-1}
