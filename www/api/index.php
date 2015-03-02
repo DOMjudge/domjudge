@@ -1003,9 +1003,6 @@ function judgehosts_POST($args)
 	               WHERE judgehost = %s AND endtime IS NULL AND valid = 1',
 	              $args['hostname']);
 	$ret = $res->getTable();
-	$res = $DB->q('SELECT judgingid, submitid, cid FROM judging
-	               WHERE judgehost = %s AND endtime IS NULL AND valid = 1',
-	              $args['hostname']);
 	while ( $jud = $res->next() ) {
 		$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
 		       $jud['judgingid']);
