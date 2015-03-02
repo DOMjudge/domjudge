@@ -142,10 +142,9 @@ function problems($args)
 
 	checkargs($args, array('cid'));
 
-	$q = $DB->q('SELECT probid AS id, shortname, name, color FROM problem
-		     INNER JOIN contestproblem USING (probid)
-		     WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
-	return $q->gettable();
+	return $DB->q('TABLE SELECT probid AS id, shortname, name, color FROM problem
+	               INNER JOIN contestproblem USING (probid)
+	               WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
 }
 $doc = "Get a list of problems in a contest, with for each problem: id, shortname, name and color.";
 $args = array('cid' => 'Contest ID.');
@@ -807,19 +806,17 @@ function queue($args)
 	$hasLimit = array_key_exists('limit', $args);
 	// TODO: validate limit
 
-	$submitids = $DB->q('SELECT submitid
-	                     FROM submission s
-	                     LEFT JOIN team t USING (teamid)
-	                     LEFT JOIN problem p USING (probid)
-	                     LEFT JOIN language l USING (langid)
-	                     LEFT JOIN contestproblem cp USING (probid, cid)
-	                     WHERE judgehost IS NULL AND s.cid IN (%Ai)
-	                     AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
-	                     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC' .
-	                    ($hasLimit ? ' LIMIT %i' : ' %_'),
-	                    $cids, ($hasLimit ? $args['limit'] : -1));
-
-	return $submitids->getTable();
+	return $DB->q('TABLE SELECT submitid
+	               FROM submission s
+	               LEFT JOIN team t USING (teamid)
+	               LEFT JOIN problem p USING (probid)
+	               LEFT JOIN language l USING (langid)
+	               LEFT JOIN contestproblem cp USING (probid, cid)
+	               WHERE judgehost IS NULL AND s.cid IN (%Ai)
+	               AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
+	               ORDER BY judging_last_started ASC, submittime ASC, submitid ASC' .
+	              ($hasLimit ? ' LIMIT %i' : ' %_'),
+	              $cids, ($hasLimit ? $args['limit'] : -1));
 }
 $args = array('limit' => 'Get only the first N queued submissions');
 $doc = 'Get a list of all queued submission ids.';
@@ -835,7 +832,7 @@ function affiliations($args)
 	global $DB;
 
 	// Construct query
-	$query = 'SELECT affilid, shortname, name, country FROM team_affiliation WHERE';
+	$query = 'TABLE SELECT affilid, shortname, name, country FROM team_affiliation WHERE';
 
 	$byCountry = array_key_exists('country', $args);
 	$query .= ($byCountry ? ' country = %s' : ' TRUE %_');
@@ -844,8 +841,7 @@ function affiliations($args)
 	$query .= ' ORDER BY name';
 
 	// Run query and return result
-	$q = $DB->q($query, $country);
-	return $q->gettable();
+	return $DB->q($query, $country);
 }
 $doc = 'Get a list of affiliations, with for each affiliation: affilid, shortname, name and country.';
 $optArgs = array('country' => 'ISO 3166-1 alpha-3 country code to search for.');
@@ -860,32 +856,29 @@ function teams($args)
 	global $DB;
 
 	// Construct query
-	$query = 'SELECT teamid AS id, t.name, t.members, a.country AS nationality,
+	$query = 'TABLE SELECT teamid AS id, t.name, t.members, a.country AS nationality,
 	          t.categoryid AS category, a.affilid, a.name AS affiliation
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
 	          LEFT JOIN team_category c USING (categoryid)
-	          WHERE t.enabled = 1 AND';
+	          WHERE t.enabled = 1';
 
 	$byCategory = array_key_exists('category', $args);
-	$query .= ($byCategory ? ' categoryid = %i' : ' TRUE %_');
+	$query .= ($byCategory ? ' AND categoryid = %i' : ' %_');
 	$category = ($byCategory ? $args['category'] : 0);
 
-	$query .= ' AND';
-
 	$byAffil = array_key_exists('affiliation', $args);
-	$query .= ($byAffil ? ' affilid = %s' : ' TRUE %_');
+	$query .= ($byAffil ? ' AND affilid = %s' : ' %_');
 	$affiliation = ($byAffil ? $args['affiliation'] : 0);
 
 	$byTeamid = array_key_exists('teamid', $args);
-	$query .= ($byTeamid ? ' AND teamid = %i' : ' AND TRUE %_');
+	$query .= ($byTeamid ? ' AND teamid = %i' : ' %_');
 	$teamid = ($byTeamid ? $args['teamid'] : 0);
 
 	$query .= ($args['public'] ? ' AND visible = 1' : '');
 
 	// Run query and return result
-	$q = $DB->q($query, $category, $affiliation, $teamid);
-	return $q->gettable();
+	return $DB->q($query, $category, $affiliation, $teamid);
 }
 $args = array('category' => 'ID of a single category to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
@@ -951,15 +944,14 @@ function clarifications($args)
 	}
 
 	// Find public clarifications, maybe later also provide more info for jury
-	$query = 'SELECT clarid, submittime, probid, body FROM clarification
+	$query = 'TABLE SELECT clarid, submittime, probid, body FROM clarification
 	          WHERE cid IN (%Ai) AND sender IS NULL AND recipient IS NULL';
 
 	$byProblem = array_key_exists('problem', $args);
 	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
 	$problem = ($byProblem ? $args['problem'] : null);
 	
-	$q = $DB->q($query, $cids, $problem);
-	return $q->getTable();
+	return $DB->q($query, $cids, $problem);
 }
 $doc = 'Get a list of all public clarifications.';
 $args = array('problem' => 'Search for clarifications about a specific problem.');
@@ -973,14 +965,13 @@ function judgehosts($args)
 {
 	global $DB;
 
-	$query = 'SELECT hostname, active, polltime FROM judgehost';
+	$query = 'TABLE SELECT hostname, active, polltime FROM judgehost';
 
 	$byHostname = array_key_exists('hostname', $args);
 	$query .= ($byHostname ? ' WHERE hostname = %s' : '%_');
 	$hostname = ($byHostname ? $args['hostname'] : null);
 
-	$q = $DB->q($query, $hostname);
-	return $q->getTable();
+	return $DB->q($query, $hostname);
 }
 $doc = 'Get a list of judgehosts.';
 $args = array('hostname' => 'Search only for judgehosts with given hostname.');
@@ -999,11 +990,10 @@ function judgehosts_POST($args)
 
 	// If there are any unfinished judgings in the queue in my name,
 	// they will not be finished. Give them back.
-	$res = $DB->q('SELECT judgingid, submitid, cid FROM judging
+	$res = $DB->q('TABLE SELECT judgingid, submitid, cid FROM judging
 	               WHERE judgehost = %s AND endtime IS NULL AND valid = 1',
 	              $args['hostname']);
-	$ret = $res->getTable();
-	while ( $jud = $res->next() ) {
+	foreach ( $res as $jud ) {
 		$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
 		       $jud['judgingid']);
 		$DB->q('UPDATE submission SET judgehost = NULL
@@ -1011,7 +1001,7 @@ function judgehosts_POST($args)
 		auditlog('judging', $jud['judgingid'], 'given back', null, $args['hostname'], $jud['cid']);
 	}
 
-	return $ret;
+	return $res;
 }
 $doc = 'Add a new judgehost to the list of judgehosts. Also restarts (and returns) unfinished judgings.';
 $args = array('hostname' => 'Add this specific judgehost and activate it.');

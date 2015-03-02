@@ -329,21 +329,21 @@ if ( isset($jid) )  {
 			$jid, $jud['submitid'], $id));
 
 	// Display testcase runs
-	$runs = $DB->q('SELECT r.runid, r.judgingid, r.testcaseid, r.runresult, r.runtime, ' .
-	                       truncate_SQL_field('r.output_run')    . ' AS output_run, ' .
-	                       truncate_SQL_field('r.output_diff')   . ' AS output_diff, ' .
-	                       truncate_SQL_field('r.output_error')  . ' AS output_error, ' .
-	                       truncate_SQL_field('r.output_system') . ' AS output_system, ' .
-	                       truncate_SQL_field('t.output')        . ' AS output_reference,
-	                       t.rank, t.description,
-	                       t.image_type, t.image_thumb
+	$runs = $DB->q('TABLE SELECT r.runid, r.judgingid,
+	                r.testcaseid, r.runresult, r.runtime, ' .
+	                truncate_SQL_field('r.output_run')    . ' AS output_run, ' .
+	                truncate_SQL_field('r.output_diff')   . ' AS output_diff, ' .
+	                truncate_SQL_field('r.output_error')  . ' AS output_error, ' .
+	                truncate_SQL_field('r.output_system') . ' AS output_system, ' .
+	                truncate_SQL_field('t.output')        . ' AS output_reference,
+	                t.rank, t.description, t.image_type, t.image_thumb
 	                FROM testcase t
 	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 	                                             r.judgingid = %i )
 	                WHERE t.probid = %s ORDER BY rank',
 	               $jid, $submdata['probid']);
-	$runinfo = $runs->gettable();
 
+	// Try to find data of a previous submission/judging of the same team/problem.
 	$lastsubmitid = $DB->q('MAYBEVALUE SELECT submitid
 	                        FROM submission
 	                        WHERE teamid = %i AND probid = %i AND submittime < %s
@@ -357,22 +357,22 @@ if ( isset($jid) )  {
 		                   WHERE submitid = %s AND valid = 1
 		                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
 		if ( $lastjud !== NULL ) {
-			$lastruns = $DB->q('SELECT r.runtime, r.runresult, rank, description FROM testcase t
+			$lastruns = $DB->q('TABLE SELECT r.runtime, r.runresult, rank, description
+			                    FROM testcase t
 			                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
 			                                                 r.judgingid = %i )
 			                    WHERE t.probid = %s ORDER BY rank',
 			                   $lastjud['judgingid'], $submdata['probid']);
-			$lastruninfo = $lastruns->gettable();
 		}
 	}
 
 	$judging_ended = !empty($jud['endtime']);
-	list($tclist, $sum_runtime, $max_runtime) = display_runinfo($runinfo, $judging_ended);
+	list($tclist, $sum_runtime, $max_runtime) = display_runinfo($runs, $judging_ended);
 	$tclist = "<tr><td>testcase runs:</td><td>" . $tclist . "</td></tr>\n";
 
 	if ( $lastjud !== NULL ) {
 		$lastjudging_ended = !empty($lastjud['endtime']);
-		list($lasttclist, $sum_lastruntime, $max_lastruntime) = display_runinfo($lastruninfo, $lastjudging_ended);
+		list($lasttclist, $sum_lastruntime, $max_lastruntime) = display_runinfo($lastruns, $lastjudging_ended);
 		$lasttclist = "<tr class=\"lasttcruns\"><td><a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a> runs:</td><td>" .
 				$lasttclist . "</td></tr>\n";
 	}
@@ -498,7 +498,7 @@ togglelastruns();
 		exit(0);
 	}
 
-	foreach ( $runinfo as $run ) {
+	foreach ( $runs as $run ) {
 
 		if ( $run['runresult'] == 'correct' ) {
 			echo "<div class=\"run_correct\">";
