@@ -2230,6 +2230,17 @@ this is a special user to run submissions as and should also not
 be used to run normal DOMjudge processes; this user is only for
 internal use.
 
+<sect>found processes still running ... apport<label id="problems:apport">
+<p>
+
+<verb>
+error: found processes still running as 'domjudge-run', check manually:
+2342 apport
+</verb>
+The above error occurs on submitting segmentation fault solutions if you have
+apport installed (which is default on Ubuntu).
+Disable or uninstall the apport daemon on all judgehosts.
+
 
 <chapt>Multi-site contests <label id="multisite">
 <p>
