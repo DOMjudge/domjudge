@@ -10,11 +10,6 @@ require('init.php');
 
 require(LIBWWWDIR . '/scoreboard.php');
 
-// The categoryid where all the 'real' teams are in in DOMjudge
-define('TEAMS_CATEGORY', 3);
-// If defined, the region all teams are part of.
-define('TEAMS_REGION', 'Northwestern Europe');
-
 if (count($cdatas) != 1 ) {
 	error("Feed only supports exactly one active contest.");
 } else {
@@ -86,14 +81,23 @@ function XMLgetnode($path, $paren = NULL)
 $probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, color FROM problem INNER JOIN contestproblem USING(probid)
                  WHERE cid = %i AND allow_submit = 1 ORDER BY shortname', $cid);
 
+$langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name FROM language
+                 WHERE allow_submit = 1 ORDER BY langid');
+
 $teams = $DB->q('KEYTABLE SELECT teamid AS ARRAYKEY, name, externalid, affilid, categoryid
-                 FROM team WHERE categoryid = %i AND enabled = 1 ORDER BY teamid', TEAMS_CATEGORY);
+                 FROM team WHERE enabled = 1 ORDER BY teamid');
 
 $affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, name, country, shortname
                   FROM team_affiliation ORDER BY name');
 
 $categs = $DB->q('KEYTABLE SELECT categoryid AS ARRAYKEY, name, color
-                  FROM team_category WHERE visible = 1 AND categoryid = %i ORDER BY name', TEAMS_CATEGORY);
+                  FROM team_category WHERE visible = 1 ORDER BY categoryid');
+
+$clars = $DB->q('SELECT t.clarid, t.submittime, t.sender, j.recipient, t.probid,
+		 t.body AS question, j.body AS answer
+		 FROM clarification t
+		 LEFT JOIN clarification j ON (t.clarid = j.respid)
+		 WHERE t.sender IS NOT NULL');
 
 $events = $DB->q('SELECT * FROM event WHERE cid = %i AND ' .
                  (isset($_REQUEST['fromid']) ? 'eventid >= %i ' : 'TRUE %_ ') . 'AND ' .
@@ -109,11 +113,44 @@ $info       = XMLaddnode($root, 'info');
 // write out general info
 $length = ($cdata['endtime']) - ($cdata['starttime']);
 $lengthString = sprintf('%02d:%02d:%02d', $length/(60*60), ($length/60) % 60, $length % 60);
+if ( isset($cdata['freezetime']) ) {
+	$freezelength = ($cdata['endtime']) - ($cdata['freezetime']);
+} else {
+	$freezelength = 0;
+}
+$freezelengthString = sprintf('%02d:%02d:%02d', $freezelength/(60*60), ($freezelength/60) % 60, $freezelength % 60);
 XMLaddnode($info, 'length', $lengthString);
-XMLaddnode($info, 'penalty', 20);
-XMLaddnode($info, 'started', 'True');
+XMLaddnode($info, 'scoreboard-freeze-length', $freezelengthString);
+XMLaddnode($info, 'penalty', dbconfig_get('penalty_time', 20));
+$started = now() - $cdata['starttime'] >= 0;
+XMLaddnode($info, 'started', $started ? 'True' : 'False');
 XMLaddnode($info, 'starttime', ($cdata['starttime']));
 XMLaddnode($info, 'title', $cdata['contestname']);
+
+// write out languages
+$id_cnt = 0;
+foreach( $langs as $lang => $data ) {
+	$id_cnt++;
+	$lang_to_id[$lang] = $id_cnt;
+	$node = XMLaddnode($root, 'language');
+	XMLaddnode($node, 'id', $id_cnt);
+	XMLaddnode($node, 'name', $data['name']);
+}
+
+// write out regions
+foreach( $categs as $region => $data ) {
+	$node = XMLaddnode($root, 'region');
+	XMLaddnode($node, 'external-id', $data['categoryid']);
+	XMLaddnode($node, 'name', $data['name']);
+}
+
+// write out possible verdicts
+foreach ( $result_map as $long_verdict => $acronym ) {
+	$node = XMLaddnode($root, 'judgement');
+	XMLaddnode($node, 'acronym', $acronym);
+	XMLaddnode($node, 'name', $long_verdict);
+}
+
 
 // write out problems
 $id_cnt = 0;
@@ -135,16 +172,34 @@ foreach( $teams as $team => $data ) {
 	XMLaddnode($node, 'id', $id_cnt);
 	XMLaddnode($node, 'name', $data['name']);
         if ( isset($data['externalid']) ) {
-		XMLaddnode($node, 'externalid', $data['externalid']);
+		XMLaddnode($node, 'external-id', $data['externalid']);
 	}
 	if ( isset($data['affilid']) ) {
 		XMLaddnode($node, 'nationality', $affils[$data['affilid']]['country']);
-		XMLaddnode($node, 'university', $affils[$data['affilid']]['shortname']);
+		XMLaddnode($node, 'university', $affils[$data['affilid']]['name']);
 	}
-	if ( defined('TEAMS_REGION') ) {
-		XMLaddnode($node, 'region', TEAMS_REGION);
+	XMLaddnode($node, 'region', $categs[$data['categoryid']]['name']);
+}
+
+// write out clars
+while ( $row = $clars->next() ) {
+	$node = XMLaddnode($root, 'clar');
+	XMLaddnode($node, 'id', $row['clarid']);
+	XMLaddnode($node, 'team', $team_to_id[$row['sender']]);
+	XMLaddnode($node, 'problem', $row['probid']); // FIXME: probid is shortname?
+	XMLaddnode($node, 'time', ($row['submittime']) - ($cdata['starttime']));
+	XMLaddnode($node, 'timestamp', $row['submittime']);
+	XMLaddnode($node, 'question', $row['question']);
+	if ( isset($row['answer']) ) {
+		XMLaddnode($node, 'answer', $row['answer']);
+		XMLaddnode($node, 'answered', 'True');
+		XMLaddnode($node, 'to-all', isset($row['recipient']) ? 'False' : 'True');
+	} else {
+		XMLaddnode($node, 'answered', 'False');
 	}
 }
+
+$compile_penalty = dbconfig_get('compile_penalty', 0);
 
 // write out runs
 while ( $row = $events->next() ) {
@@ -152,8 +207,10 @@ while ( $row = $events->next() ) {
 		continue;
 	}
 
-	$data = $DB->q('MAYBETUPLE SELECT submittime, teamid, probid, valid
-	                FROM submission WHERE valid = 1 AND submitid = %i',
+	$data = $DB->q('MAYBETUPLE SELECT submittime, teamid, probid, name AS langname, valid
+			FROM submission
+			LEFT JOIN language USING (langid)
+			WHERE valid = 1 AND submitid = %i',
 	               $row['submitid']);
 
 	if ( empty($data) ||
@@ -167,6 +224,7 @@ while ( $row = $events->next() ) {
 	XMLaddnode($run, 'team', $team_to_id[$data['teamid']]);
 	XMLaddnode($run, 'timestamp', ($row['eventtime']));
 	XMLaddnode($run, 'time', ($data['submittime']) - ($cdata['starttime']));
+	XMLaddnode($run, 'language', $data['langname']);
 
 	if ($row['description'] == 'problem submitted') {
 		XMLaddnode($run, 'judged', 'False');
@@ -186,9 +244,22 @@ while ( $row = $events->next() ) {
 			XMLaddnode($run, 'penalty', 'False');
 		} else {
 			XMLaddnode($run, 'solved', 'False');
-			XMLaddnode($run, 'penalty', 'True');
+			if ( $compile_penalty == 0 && $result == 'compiler-error' ) {
+				XMLaddnode($run, 'penalty', 'False');
+			} else {
+				XMLaddnode($run, 'penalty', 'True');
+			}
 		}
 	}
+}
+
+if ( isset($cdata['finalizetime']) ) {
+	$node = XMLaddnode($root, 'finalized');
+	XMLaddnode($node, 'timestamp', $cdata['finalizetime']);
+	XMLaddnode($node, 'last-gold', 4);
+	XMLaddnode($node, 'last-silver', 8);
+	XMLaddnode($node, 'last-bronze', 12 + $cdata['b']);
+	XMLaddnode($node, 'comment', $cdata['finalizecomment']);
 }
 
 header('Content-Type: text/xml; charset=' . DJ_CHARACTER_SET);
