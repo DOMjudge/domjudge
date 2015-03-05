@@ -17,13 +17,13 @@ require(LIBWWWDIR . '/header.php');
 if ( ! $id ) error("Missing or invalid rejudging id");
 
 $todo = $DB->q('VALUE SELECT COUNT(*) FROM submission
-		WHERE rejudgingid=%i', $id);
+                WHERE rejudgingid=%i', $id);
 $done = $DB->q('VALUE SELECT COUNT(*) FROM judging
-		WHERE rejudgingid=%i AND endtime IS NOT NULL', $id);
+                WHERE rejudgingid=%i AND endtime IS NOT NULL', $id);
 $todo -= $done;
 
 $rejdata = $DB->q('TUPLE SELECT * FROM rejudging
-	           WHERE rejudgingid=%i', $id);
+                   WHERE rejudgingid=%i', $id);
 
 if ( ! $rejdata ) error ("Missing rejudging data");
 
@@ -35,11 +35,11 @@ if ( isset($_REQUEST['apply']) ) {
 	}
 
 	$res = $DB->q('SELECT submitid, cid, teamid, probid
-		       FROM submission
-		       WHERE rejudgingid=%i', $id);
+	               FROM submission
+	               WHERE rejudgingid=%i', $id);
 
 	auditlog('rejudging', $id, 'applying rejudge', '(start)');
-	
+
 	$time_start = microtime(TRUE);
 
 	// no output buffering... we want to see what's going on real-time
@@ -53,13 +53,13 @@ if ( isset($_REQUEST['apply']) ) {
 		$DB->q('START TRANSACTION');
 		// first invalidate old judging, maybe different from prevjudgingid!
 		$DB->q('UPDATE judging SET valid=0
-			WHERE submitid=%i', $row['submitid']);
+		        WHERE submitid=%i', $row['submitid']);
 		// then set judging to valid
 		$DB->q('UPDATE judging SET valid=1
-			WHERE submitid=%i AND rejudgingid=%i', $row['submitid'], $id);
+		        WHERE submitid=%i AND rejudgingid=%i', $row['submitid'], $id);
 		// remove relation from submission to rejudge
 		$DB->q('UPDATE submission SET rejudgingid=NULL
-			WHERE submitid=%i', $row['submitid']);
+		        WHERE submitid=%i', $row['submitid']);
 		// last update cache
 		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 		$DB->q('COMMIT');
@@ -67,14 +67,14 @@ if ( isset($_REQUEST['apply']) ) {
 	echo "</ul>\n";
 
 	$DB->q('UPDATE rejudging
-		SET endtime=%s, userid_finish=%i
-		WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
+	        SET endtime=%s, userid_finish=%i
+	        WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
 
 	auditlog('rejudging', $id, 'applying rejudge', '(end)');
 
 	$time_end = microtime(TRUE);
 
-	echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode($id) . 
+	echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode($id) .
 		"\">r$id</a> applied in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
 
 	require(LIBWWWDIR . '/footer.php');
@@ -86,17 +86,18 @@ if ( isset($_REQUEST['apply']) ) {
 	auditlog('rejudging', $id, 'canceling rejudge', '(start)');
 
 	$res = $DB->q('SELECT submitid, cid, teamid, probid
-		       FROM submission
-		       WHERE rejudgingid=%i', $id);
+	               FROM submission
+	               WHERE rejudgingid=%i', $id);
 	while ( $row = $res->next() ) {
 		// restore old judgehost association
-		$valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging WHERE submitid=%i AND valid=1', $row['submitid']);
+		$valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging
+		                           WHERE submitid=%i AND valid=1', $row['submitid']);
 		$DB->q('UPDATE submission SET rejudgingid = NULL, judgehost=%s
-			WHERE rejudgingid = %i', $valid_judgehost, $id);
+		        WHERE rejudgingid = %i', $valid_judgehost, $id);
 	}
 	$DB->q('UPDATE rejudging
-		SET endtime=%s, userid_finish=%i, valid=0
-		WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
+	        SET endtime=%s, userid_finish=%i, valid=0
+	        WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
 
 	auditlog('rejudging', $id, 'canceled rejudge', '(end)');
 	header('Location: rejudging.php?id='.urlencode($id));
@@ -104,8 +105,8 @@ if ( isset($_REQUEST['apply']) ) {
 
 
 $userdata = $DB->q('KEYVALUETABLE SELECT userid, name FROM user
-		    WHERE userid=%i OR userid=%i',
-		    $rejdata['userid_start'], @$rejdata['userid_finish']);
+	                WHERE userid=%i OR userid=%i',
+	               $rejdata['userid_start'], @$rejdata['userid_finish']);
 
 echo '<br/><h1 style="display:inline;">Rejudging r' . $id .
 	( $rejdata['valid'] ? '' : ' (canceled)' ) . "</h1>\n\n";
@@ -123,7 +124,7 @@ foreach ( array('userid_start' => 'Issued by',
           as $user => $msg ) {
 	if ( isset($rejdata[$user]) ) {
 		echo "<tr><td>$msg:</td><td>" .
-			'<a href="user.php?id=' . urlencode($rejdata[$user]) . '">' . 
+			'<a href="user.php?id=' . urlencode($rejdata[$user]) . '">' .
 			htmlspecialchars($userdata[$rejdata[$user]])  .
 			"</a></td></tr>\n";
 	}
@@ -155,25 +156,25 @@ if ( !isset($rejdata['endtime']) ) {
 }
 
 $verdicts = array('compiler-error'     => 'CTE',
-		  'memory-limit'       => 'MLE',
-	          'output-limit'       => 'OLE',
-	          'run-error'          => 'RTE',
-	          'timelimit'          => 'TLE',
-	          'wrong-answer'       => 'WA',
-	          'presentation-error' => 'PE',
-	          'no-output'          => 'NO',
-	          'correct'            => 'AC');
+                  'memory-limit'       => 'MLE',
+                  'output-limit'       => 'OLE',
+                  'run-error'          => 'RTE',
+                  'timelimit'          => 'TLE',
+                  'wrong-answer'       => 'WA',
+                  'presentation-error' => 'PE',
+                  'no-output'          => 'NO',
+                  'correct'            => 'AC');
 
 $orig_verdicts = $DB->q('KEYVALUETABLE SELECT submitid, result
-			FROM judging
-			WHERE judgingid IN
-			( SELECT prevjudgingid
-			  FROM judging
-			  WHERE rejudgingid=%i AND endtime IS NOT NULL
-			)', $id);
+                         FROM judging
+                         WHERE judgingid IN
+                         ( SELECT prevjudgingid
+                           FROM judging
+                           WHERE rejudgingid=%i AND endtime IS NOT NULL
+                         )', $id);
 $new_verdicts = $DB->q('KEYVALUETABLE SELECT submitid, result
-			FROM judging
-			WHERE rejudgingid=%i AND endtime IS NOT NULL', $id);
+                        FROM judging
+                        WHERE rejudgingid=%i AND endtime IS NOT NULL', $id);
 
 $table = array();
 $used  = array();
@@ -274,7 +275,7 @@ foreach ($table as $orig_verdict => $changed_verdicts) {
 			$class = "changed";
 			$link = '<a href="#' . urlencode($orig_verdict) . '__' . urlencode($new_verdict) . '">';
 		}
-		echo "<td class=\"$class\">$link$cnt" .  ( empty($link) ? '' : '</a>' ) . "</td>\n";	
+		echo "<td class=\"$class\">$link$cnt" .  ( empty($link) ? '' : '</a>' ) . "</td>\n";
 	}
 	echo "</tr>\n";
 }
@@ -282,9 +283,9 @@ echo "</table>\n";
 
 echo "<h2>Details</h2>\n";
 $queued = $DB->q('COLUMN SELECT submitid FROM submission s
-		  WHERE rejudgingid=%i AND submitid NOT IN
-		  ( SELECT submitid FROM judging
-		    WHERE rejudgingid=%i AND endtime IS NOT NULL)', $id, $id);
+                  WHERE rejudgingid=%i AND submitid NOT IN
+                  ( SELECT submitid FROM judging
+                    WHERE rejudgingid=%i AND endtime IS NOT NULL)', $id, $id);
 if ( sizeof($queued) > 0 ) {
 	echo "<h3>" . printresult('queued') . "</h3>\n";
 	echo sublist($queued);
@@ -299,7 +300,8 @@ foreach ($table as $orig_verdict => $changed_verdicts) {
 	echo "<h3>" . printresult($orig_verdict) . "</h3>\n";
 
 	// output list of submission with identical result first
-	echo "<div style=\"font-size:small;\">unchanged: " . sublist($changed_verdicts[$orig_verdict]) . "</div>\n";
+	echo "<div style=\"font-size:small;\">unchanged: " .
+	    sublist($changed_verdicts[$orig_verdict]) . "</div>\n";
 
 	echo "<ul>\n";
 	foreach ($changed_verdicts as $new_verdict => $submitids) {

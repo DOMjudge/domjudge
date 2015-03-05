@@ -189,7 +189,7 @@ if ( isset($jid) && ! $id ) {
 // If jid is not set but rejudgingid, try to deduce the jid from the database.
 if ( !isset($jid) && isset($id) ) {
 	$jid = $DB->q('MAYBEVALUE SELECT judgingid FROM judging
-	              WHERE submitid=%i AND rejudgingid = %i', $id, $rejudgingid);
+	               WHERE submitid=%i AND rejudgingid = %i', $id, $rejudgingid);
 }
 
 $title = 'Submission s'.@$id;
@@ -199,7 +199,7 @@ if ( ! $id ) error("Missing or invalid submission id");
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
                     s.submittime, s.valid, c.cid, c.shortname AS contestshortname, c.contestname,
                     t.name AS teamname, l.name AS langname, cp.shortname, p.name AS probname,
-		    CEILING(time_factor*timelimit) AS maxruntime
+                    CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
                     LEFT JOIN team     t ON (t.teamid = s.teamid)
                     LEFT JOIN problem  p ON (p.probid = s.probid)
@@ -213,7 +213,7 @@ if ( ! $submdata ) error ("Missing submission data");
 $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, j.valid, j.starttime,
                  j.judgehost, j.verified, j.jury_member, j.verify_comment, r.reason, r.rejudgingid
                  FROM judging j
-		 LEFT JOIN rejudging r USING(rejudgingid)
+                 LEFT JOIN rejudging r USING (rejudgingid)
                  WHERE cid = %i AND submitid = %i
                  ORDER BY starttime ASC, judgingid ASC',
                 $submdata['cid'], $id);
@@ -314,7 +314,7 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 		} else {
 			echo '<td>' . $link . '&nbsp;</a></td>';
 		}
-		
+
 		$rinfo = isset($jud['rejudgingid']) ? 'r' . $jud['rejudgingid'] . ' (' . $jud['reason'] . ')' : '';
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .

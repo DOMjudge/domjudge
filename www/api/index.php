@@ -223,7 +223,7 @@ function judgings_POST($args)
 
 	$cdatas = getCurContests(TRUE);
 	$cids = array_keys($cdatas);
-	
+
 	if ( empty($cids) ) return '';
 
 	// Get judgehost restrictions
@@ -340,15 +340,15 @@ function judgings_POST($args)
 	if ( $is_rejudge ) {
 		// FIXME: what happens if there is no valid judging?
 		$prev_rejudgingid = $DB->q('MAYBEVALUE SELECT judgingid
-					    FROM judging
-					    WHERE submitid=%i AND valid=1',
-					    $submitid);
+		                            FROM judging
+		                            WHERE submitid=%i AND valid=1',
+		                           $submitid);
 	}
-	$jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' . 
-		      ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '' ) .
-		      ') VALUES(%i,%i,%s,%s' . ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
-		      ')', $submitid, $row['cid'], now(), $host, 
-		      @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge);
+	$jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' .
+	              ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '' ) .
+	              ') VALUES(%i,%i,%s,%s' . ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
+	              ')', $submitid, $row['cid'], now(), $host,
+	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge);
 
 	$row['judgingid'] = $jid;
 
@@ -809,7 +809,7 @@ function queue($args)
 	// TODO: make this configurable
 	$cdatas = getCurContests(TRUE);
 	$cids = array_keys($cdatas);
-	
+
 	if ( empty($cids) ) {
 		return array();
 	}
@@ -949,7 +949,7 @@ $api->provideFunction('GET', 'languages', $doc);
 function clarifications($args)
 {
 	global $cids, $DB;
-	
+
 	if ( empty($cids) ) {
 		return array();
 	}
@@ -961,7 +961,7 @@ function clarifications($args)
 	$byProblem = array_key_exists('problem', $args);
 	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
 	$problem = ($byProblem ? $args['problem'] : null);
-	
+
 	return $DB->q($query, $cids, $problem);
 }
 $doc = 'Get a list of all public clarifications.';
@@ -1002,10 +1002,10 @@ function judgehosts_POST($args)
 	// If there are any unfinished judgings in the queue in my name,
 	// they will not be finished. Give them back.
 	$query = 'SELECT judgingid, submitid, cid
-		  FROM judging j
-		  LEFT JOIN rejudging r USING (rejudgingid)
-		  WHERE judgehost = %s AND j.endtime IS NULL
-		  AND (j.valid = 1 OR r.valid = 1)';
+	          FROM judging j
+	          LEFT JOIN rejudging r USING (rejudgingid)
+	          WHERE judgehost = %s AND j.endtime IS NULL
+	          AND (j.valid = 1 OR r.valid = 1)';
 	$res = $DB->q($query, $args['hostname']);
 	foreach ( $res as $jud ) {
 		$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
