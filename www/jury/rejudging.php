@@ -67,7 +67,7 @@ if ( isset($_REQUEST['apply']) ) {
 	echo "</ul>\n";
 
 	$DB->q('UPDATE rejudging
-		SET endtime=%s, userid_accept=%i
+		SET endtime=%s, userid_finish=%i
 		WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
 
 	auditlog('rejudging', $id, 'applying rejudge', '(end)');
@@ -95,7 +95,7 @@ if ( isset($_REQUEST['apply']) ) {
 			WHERE rejudgingid = %i', $valid_judgehost, $id);
 	}
 	$DB->q('UPDATE rejudging
-		SET endtime=%s, userid_accept=%i, valid=0
+		SET endtime=%s, userid_finish=%i, valid=0
 		WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
 
 	auditlog('rejudging', $id, 'canceled rejudge', '(end)');
@@ -105,7 +105,7 @@ if ( isset($_REQUEST['apply']) ) {
 
 $userdata = $DB->q('KEYVALUETABLE SELECT userid, name FROM user
 		    WHERE userid=%i OR userid=%i',
-		    $rejdata['userid_start'], @$rejdata['userid_accept']);
+		    $rejdata['userid_start'], @$rejdata['userid_finish']);
 
 echo '<br/><h1 style="display:inline;">Rejudging r' . $id .
 	( $rejdata['valid'] ? '' : ' (canceled)' ) . "</h1>\n\n";
@@ -118,7 +118,9 @@ if ( empty($rejdata['reason']) ) {
 	echo htmlspecialchars($rejdata['reason']);
 }
 echo "</td></tr>\n";
-foreach (array('userid_start' => 'Issued by', 'userid_accept' => 'Accepted by') as $user => $msg) {
+foreach ( array('userid_start' => 'Issued by',
+                'userid_finish' => ($rejdata['valid'] ? 'Accepted' : 'Canceled') . ' by')
+          as $user => $msg ) {
 	if ( isset($rejdata[$user]) ) {
 		echo "<tr><td>$msg:</td><td>" .
 			'<a href="user.php?id=' . urlencode($rejdata[$user]) . '">' . 

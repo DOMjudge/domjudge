@@ -18,10 +18,10 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Rejudgings</h1>\n\n";
 
 $res = $DB->q('SELECT rejudgingid, starttime, endtime, reason, valid,
-	       s.name AS startuser, a.name AS acceptuser
+	       s.name AS startuser, a.name AS finishuser
 	       FROM rejudging
 	       LEFT JOIN user s ON (s.userid = userid_start)
-	       LEFT JOIN user a ON (a.userid = userid_accept)
+	       LEFT JOIN user a ON (a.userid = userid_finish)
 	       ORDER BY valid DESC, endtime, rejudgingid');
 
 if( $res->count() == 0 ) {
@@ -31,7 +31,7 @@ if( $res->count() == 0 ) {
 	     "<tr><th scope=\"col\">ID</th>" .
 		 "<th scope=\"col\">reason</th>" .
 		 "<th scope=\"col\">startuser</th>" .
-		 "<th scope=\"col\">acceptuser</th>" .
+		 "<th scope=\"col\">finishuser</th>" .
 		 "<th scope=\"col\">starttime</th>" .
 		 "<th scope=\"col\">endtime</th>" .
 		 "<th scope=\"col\">status</th></tr>\n" .
@@ -53,7 +53,7 @@ if( $res->count() == 0 ) {
 			"<td>" . $link . ($row['rejudgingid']) . '</a></td>' . 
 			"<td>" . $link . htmlspecialchars($row['reason']) . '</a></td>' . 
 			"<td>" . $link . htmlspecialchars($row['startuser']) .  "</a></td>" .
-			"<td>" . $link . htmlspecialchars($row['acceptuser']) .  "</a></td>" .
+			"<td>" . $link . htmlspecialchars($row['finishuser']) .  "</a></td>" .
 			"<td>" . $link . printtime($row['starttime']) .  "</a></td>" .
 			"<td>" . $link . printtime($row['endtime']) .  "</a></td>" .
 			"<td>" . $link;

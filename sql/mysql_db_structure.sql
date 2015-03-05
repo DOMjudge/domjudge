@@ -324,14 +324,14 @@ CREATE TABLE `rankcache_public` (
 CREATE TABLE `rejudging` (
   `rejudgingid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `userid_start` int(4) unsigned DEFAULT NULL COMMENT 'User ID of user who started the rejudge',
-  `userid_accept` int(4) unsigned DEFAULT NULL COMMENT 'User ID of user who accepted or canceled the rejudge',
+  `userid_finish` int(4) unsigned DEFAULT NULL COMMENT 'User ID of user who accepted or canceled the rejudge',
   `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Time rejudging started',
   `endtime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time rejudging ended, null = still busy',
   `reason` varchar(255) NOT NULL COMMENT 'Reason to start this rejudge',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Rejudging is marked as invalid if canceled',
   PRIMARY KEY  (`rejudgingid`),
   CONSTRAINT `rejudging_ibfk_1` FOREIGN KEY (`userid_start`) REFERENCES `user` (`userid`) ON DELETE SET NULL,
-  CONSTRAINT `rejudging_ibfk_2` FOREIGN KEY (`userid_accept`) REFERENCES `user` (`userid`) ON DELETE SET NULL
+  CONSTRAINT `rejudging_ibfk_2` FOREIGN KEY (`userid_finish`) REFERENCES `user` (`userid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rejudge group';
 
 --
