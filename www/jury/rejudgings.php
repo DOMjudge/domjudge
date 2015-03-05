@@ -8,10 +8,7 @@
 
 require('init.php');
 $title = 'Rejudgings';
-
-if ( !$_REQUEST['cmd'] ) {
-	$refresh = '15;url=rejudgings.php';
-}
+$refresh = '15;url=rejudgings.php';
 
 require(LIBWWWDIR . '/header.php');
 

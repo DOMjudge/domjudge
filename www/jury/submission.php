@@ -187,7 +187,7 @@ if ( isset($jid) && ! $id ) {
 }
 
 // If jid is not set but rejudgingid, try to deduce the jid from the database.
-if ( !isset($jid) && isset($id) ) {
+if ( !isset($jid) && isset($rejudgingid) ) {
 	$jid = $DB->q('MAYBEVALUE SELECT judgingid FROM judging
 	               WHERE submitid=%i AND rejudgingid = %i', $id, $rejudgingid);
 }
