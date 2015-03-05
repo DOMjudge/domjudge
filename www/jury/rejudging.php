@@ -128,7 +128,7 @@ foreach ( array('userid_start' => 'Issued by',
 			"</a></td></tr>\n";
 	}
 }
-foreach (array('starttime' => 'Starttime', 'endtime' => 'Applytime') as $time => $msg) {
+foreach (array('starttime' => 'Start time', 'endtime' => 'Apply time') as $time => $msg) {
 	echo "<tr><td>$msg:</td><td>";
 	if ( isset($rejdata[$time]) ) {
 		echo printtime($rejdata[$time]);
