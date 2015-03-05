@@ -239,14 +239,14 @@ foreach ($new_verdicts as $submitid => $new_verdict) {
 
 echo "<h2>Overview</h2>\n";
 echo '<table class="rejudgetable">' . "\n";
-echo "<tr><th/>"; // first column are table headers as well
+echo "<tr><th title=\"old vs. new verdicts\">-\+</th>"; // first column are table headers as well
 // write table header
 foreach ($verdicts as $verdict => $abbrev) {
 	if ( !isset($used[$verdict]) ) {
 		// filter out unused cols
 		continue;
 	}
-	echo "<th>$abbrev</th>\n";
+	echo "<th title=\"$verdict\">$abbrev</th>\n";
 }
 echo "</tr>";
 
@@ -256,14 +256,14 @@ foreach ($table as $orig_verdict => $changed_verdicts) {
 		continue;
 	}
 
-	$orig_verdict = $verdicts[$orig_verdict];
-	echo "<tr><th>$orig_verdict</th>";
+	$orig_verdict_abbrev = $verdicts[$orig_verdict];
+	echo "<tr><th title=\"$orig_verdict\">$orig_verdict_abbrev</th>";
 	foreach ($changed_verdicts as $new_verdict => $submitids) {
 		if ( !isset($used[$new_verdict]) ) {
 			// filter out unused cols
 			continue;
 		}
-		$new_verdict = $verdicts[$new_verdict];
+		$new_verdict_abbrev = $verdicts[$new_verdict];
 		$cnt = sizeof($submitids);
 		$link = '';
 		if ( $orig_verdict == $new_verdict ) {
@@ -273,7 +273,8 @@ foreach ($table as $orig_verdict => $changed_verdicts) {
 		} else {
 			// this case is the interesting one
 			$class = "changed";
-			$link = '<a href="#' . urlencode($orig_verdict) . '__' . urlencode($new_verdict) . '">';
+			$link = '<a href="#' . urlencode($orig_verdict_abbrev) . '__' .
+			                       urlencode($new_verdict_abbrev) . '">';
 		}
 		echo "<td class=\"$class\">$link$cnt" .  ( empty($link) ? '' : '</a>' ) . "</td>\n";
 	}
