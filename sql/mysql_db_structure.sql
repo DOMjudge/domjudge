@@ -227,6 +227,8 @@ CREATE TABLE `judging` (
   KEY `submitid` (`submitid`),
   KEY `judgehost` (`judgehost`),
   KEY `cid` (`cid`),
+  KEY `rejudgingid` (`rejudgingid`),
+  KEY `prevjudgingid` (`prevjudgingid`),
   CONSTRAINT `judging_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
   CONSTRAINT `judging_ibfk_2` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
   CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL,
@@ -330,6 +332,8 @@ CREATE TABLE `rejudging` (
   `reason` varchar(255) NOT NULL COMMENT 'Reason to start this rejudge',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Rejudging is marked as invalid if canceled',
   PRIMARY KEY  (`rejudgingid`),
+  KEY `userid_start` (`userid_start`),
+  KEY `userid_finish` (`userid_finish`),
   CONSTRAINT `rejudging_ibfk_1` FOREIGN KEY (`userid_start`) REFERENCES `user` (`userid`) ON DELETE SET NULL,
   CONSTRAINT `rejudging_ibfk_2` FOREIGN KEY (`userid_finish`) REFERENCES `user` (`userid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rejudge group';
@@ -399,6 +403,7 @@ CREATE TABLE `submission` (
   KEY `langid` (`langid`),
   KEY `judgehost_2` (`judgehost`),
   KEY `origsubmitid` (`origsubmitid`),
+  KEY `rejudgingid` (`rejudgingid`),
   CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,

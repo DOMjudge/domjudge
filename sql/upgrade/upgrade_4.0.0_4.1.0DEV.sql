@@ -80,6 +80,8 @@ CREATE TABLE `rejudging` (
   `reason` varchar(255) NOT NULL COMMENT 'Reason to start this rejudge',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Rejudging is marked as invalid if canceled',
   PRIMARY KEY  (`rejudgingid`),
+  KEY `userid_start` (`userid_start`),
+  KEY `userid_finish` (`userid_finish`),
   CONSTRAINT `rejudging_ibfk_1` FOREIGN KEY (`userid_start`) REFERENCES `user` (`userid`) ON DELETE SET NULL,
   CONSTRAINT `rejudging_ibfk_2` FOREIGN KEY (`userid_finish`) REFERENCES `user` (`userid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rejudge group';
@@ -87,11 +89,14 @@ CREATE TABLE `rejudging` (
 ALTER TABLE `judging`
   ADD COLUMN `rejudgingid` int(4) unsigned DEFAULT NULL COMMENT 'Rejudging ID (if rejudge)',
   ADD COLUMN `prevjudgingid` int(4) unsigned DEFAULT NULL COMMENT 'Previous valid judging (if rejudge)',
+  ADD KEY `rejudgingid` (`rejudgingid`),
+  ADD KEY `prevjudgingid` (`prevjudgingid`),
   ADD CONSTRAINT `judging_ibfk_4` FOREIGN KEY (`rejudgingid`) REFERENCES `rejudging` (`rejudgingid`) ON DELETE SET NULL,
   ADD CONSTRAINT `judging_ibfk_5` FOREIGN KEY (`prevjudgingid`) REFERENCES `judging` (`judgingid`) ON DELETE SET NULL;
 
 ALTER TABLE `submission`
   ADD `rejudgingid` int(4) unsigned DEFAULT NULL COMMENT 'Rejudging ID (if rejudge)',
+  ADD KEY `rejudgingid` (`rejudgingid`),
   ADD CONSTRAINT `submission_ibfk_7` FOREIGN KEY (`rejudgingid`) REFERENCES `rejudging` (`rejudgingid`) ON DELETE SET NULL;
 
 ALTER TABLE `problem`
