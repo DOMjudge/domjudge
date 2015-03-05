@@ -25,8 +25,14 @@
 <a href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications</a>
 <?php	} ?>
 <a href="submissions.php" accesskey="s">submissions</a>
-<a href="rejudgings.php" accesskey="r">rejudgings</a>
+<?php
+	$nrejudgings = count($updates['rejudgings']);
+	if ( $nrejudgings > 0 ) { ?>
+<a class="new" href="rejudgings.php" accesskey="r" id="menu_rejudgings">rejudgings (<?php echo $nrejudgings ?> active)</a>
+<?php	} else { ?>
+<a href="rejudgings.php" accesskey="r" id="menu_rejudgings">rejudgings</a>
 <?php	} ?>
+<?php   } /* checkrole('jury') */ ?>
 <?php	if ( have_printing() ) { ?>
 <a href="print.php" accesskey="p">print</a>
 <?php	} ?>
