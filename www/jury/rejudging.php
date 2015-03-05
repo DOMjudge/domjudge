@@ -47,9 +47,9 @@ if ( isset($_REQUEST['apply']) ) {
 	ob_implicit_flush(true);
 	ob_end_flush();
 
-	echo "<ul>\n";
+	echo "<p>\n";
 	while ( $row = $res->next() ) {
-		echo "<li>s" . htmlspecialchars($row['submitid']) . "</li>\n";
+		echo "s" . htmlspecialchars($row['submitid']) . ", ";
 		$DB->q('START TRANSACTION');
 		// first invalidate old judging, maybe different from prevjudgingid!
 		$DB->q('UPDATE judging SET valid=0
@@ -64,7 +64,7 @@ if ( isset($_REQUEST['apply']) ) {
 		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 		$DB->q('COMMIT');
 	}
-	echo "</ul>\n";
+	echo "\n</p>\n";
 
 	$DB->q('UPDATE rejudging
 	        SET endtime=%s, userid_finish=%i
