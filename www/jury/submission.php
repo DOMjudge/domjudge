@@ -110,8 +110,8 @@ function compute_lcsdiff($line1, $line2) {
 	}
 
 	// reconstruct lcs
-	$i = $n1 + 1;
-	$j = $n2 + 1;
+	$i = $n1;
+	$j = $n2;
 	$lcs = array();
 	while ($i > 0 && $j > 0) {
 		if ($tokens1[$i-1] == $tokens2[$j-1]) {
