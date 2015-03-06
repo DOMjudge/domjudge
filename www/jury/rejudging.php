@@ -212,7 +212,7 @@ function sublist($submitids) {
 	$links = array();
 	foreach ($submitids as $submitid) {
 		$links[] = '<a href="submission.php?id=' . urlencode($submitid) .
-			   '&rejudgingid=' . urlencode($id) . '">s' .
+			   '&amp;rejudgingid=' . urlencode($id) . '">s' .
 			   htmlspecialchars($submitid) . "</a>";
 	}
 	return implode(', ', $links);

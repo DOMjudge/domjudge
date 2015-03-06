@@ -63,7 +63,7 @@ if( $res->count() == 0 ) {
 		} else {
 			echo 'done';
 		}
-		echo "</tr>\n";
+		echo "</a></td></tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
 }
