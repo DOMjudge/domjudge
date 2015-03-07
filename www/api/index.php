@@ -868,7 +868,7 @@ function teams($args)
 
 	// Construct query
 	$query = 'TABLE SELECT teamid AS id, t.name, t.members, a.country AS nationality,
-	          t.categoryid AS category, a.affilid, a.name AS affiliation
+	          t.categoryid AS category, c.name AS `group`, a.affilid, a.name AS affiliation
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
 	          LEFT JOIN team_category c USING (categoryid)
@@ -891,10 +891,10 @@ function teams($args)
 	// Run query and return result
 	return $DB->q($query, $category, $affiliation, $teamid);
 }
-$args = array('category' => 'ID of a single category to search for.',
+$args = array('category' => 'ID of a single category/group to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
               'teamid' => 'Search for a specific team.');
-$doc = 'Get a list of teams containing teamid, name, category and affiliation.';
+$doc = 'Get a list of teams containing teamid, name, group and affiliation.';
 $exArgs = array(array('category' => 1, 'affiliation' => 'UU'));
 $api->provideFunction('GET', 'teams', $doc, $args, $exArgs, null, true);
 
@@ -916,7 +916,7 @@ function categories($args)
 	}
 	return $res;
 }
-$doc = 'Get a list of all categories.';
+$doc = 'Get a list of all categories/groups.';
 $api->provideFunction('GET', 'categories', $doc, array(), array(), null, true);
 
 /**
