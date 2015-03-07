@@ -142,7 +142,8 @@ function problems($args)
 
 	checkargs($args, array('cid'));
 
-	return $DB->q('TABLE SELECT probid AS id, shortname, name, color FROM problem
+	return $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color
+	               FROM problem
 	               INNER JOIN contestproblem USING (probid)
 	               WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
 }
