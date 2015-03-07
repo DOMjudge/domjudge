@@ -1047,10 +1047,12 @@ $roles = array('judgehost');
 $api->provideFunction('PUT', 'judgehosts', $doc, $args, $exArgs, $roles);
 
 /**
- * Scoreboard (not finished yet)
+ * Scoreboard
  */
 function scoreboard($args)
 {
+	global $DB;
+
 	checkargs($args, array('cid'));
 
 	global $cdatas;
@@ -1066,15 +1068,35 @@ function scoreboard($args)
 		$filter['affilid'] = array($args['affiliation']);
 	}
 	// TODO: refine this output, maybe add separate function to get summary
-	$scores = genScoreBoard($cdatas[$args['cid']], !$args['public'], $filter);
-	return $scores['matrix'];
+	$scoreboard = genScoreBoard($cdatas[$args['cid']], !$args['public'], $filter);
+
+	$prob2label = $DB->q('KEYVALUETABLE SELECT probid, shortname
+	                      FROM contestproblem WHERE cid = %i', $args['cid']);
+
+	$res = array();
+	foreach ( $scoreboard['scores'] as $teamid => $data ) {
+		$row = array('rank' => $data['rank'], 'team' => $teamid);
+		$row['score'] = array('num_solved' => $data['num_correct'],
+		                      'total_time' => $data['total_time']);
+		$row['problems'] = array();
+		foreach ( $scoreboard['matrix'][$teamid] as $probid => $pdata ) {
+			$row['problems'][] = array('problem'     => $probid,
+			                           'label'       => $prob2label[$probid],
+			                           'num_judged'  => $pdata['num_submissions'],
+			                           'num_pending' => $pdata['num_pending'],
+			                           'time'        => $pdata['time']);
+		}
+		$res[] = $row;
+	}
+	return $res;
 }
 $doc = 'Get the scoreboard. Returns scoreboard for jury members if authenticated as a jury member (and public is not 1).';
-$args = array('cid' => 'ID of the contest to get the scoreboard for',
+$args = array('cid' => 'ID of the contest to get the scoreboard for.',
               'category' => 'ID of a single category to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
               'country' => 'ISO 3166-1 alpha-3 country code to search for.');
-$exArgs = array(array('cid' => 2, 'category' => 1, 'affiliation' => 'UU'), array('cid' => 2, 'country' => 'NLD'));
+$exArgs = array(array('cid' => 2, 'category' => 1, 'affiliation' => 'UU'),
+                array('cid' => 2, 'country' => 'NLD'));
 $api->provideFunction('GET', 'scoreboard', $doc, $args, $exArgs, null, true);
 
 // Now provide the api, which will handle the request
