@@ -7,7 +7,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-require(LIBEXTDIR . '/spyc/spyc.php');
+require_once(LIBEXTDIR . '/spyc/spyc.php');
 
 /**
  * Return a link to add a new row to a specific table.

@@ -10,8 +10,6 @@ require('init.php');
 
 requireAdmin();
 
-require(LIBEXTDIR . '/spyc/spyc.php');
-
 if ( isset($_POST['import']) ) {
 
 	if ( isset($_FILES) && isset($_FILES['import_config']) &&
