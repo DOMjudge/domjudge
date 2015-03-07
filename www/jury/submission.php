@@ -144,11 +144,11 @@ function compute_lcsdiff($line1, $line2) {
 		$i++;
 		$j++;
 	}
-	while ($i < $n1 && $tokens1[$i] != $lcs[$k]) {
+	while ($i < $n1 && ($k >= $l || $tokens1[$i] != $lcs[$k])) {
 		$diff .= "<del>" . htmlspecialchars($tokens1[$i]) . "</del> ";
 		$i++;
 	}
-	while ($j < $n2 && $tokens2[$j] != $lcs[$k]) {
+	while ($j < $n2 && ($k >= $l || $tokens2[$j] != $lcs[$k])) {
 		$diff .= "<ins>" . htmlspecialchars($tokens2[$j]) . "</ins> ";
 		$j++;
 	}
