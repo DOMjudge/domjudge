@@ -19,7 +19,7 @@ define('LOGFILE', LOGDIR.'/import.log');
 
 require(LIBDIR . '/init.php');
 
-require(LIBEXTDIR . '/spyc/spyc.php');
+require_once(LIBEXTDIR . '/spyc/spyc.php');
 
 setup_database_connection();
 
