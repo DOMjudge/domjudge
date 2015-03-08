@@ -283,38 +283,9 @@ foreach ($table as $orig_verdict => $changed_verdicts) {
 echo "</table>\n";
 
 echo "<h2>Details</h2>\n";
-$queued = $DB->q('COLUMN SELECT submitid FROM submission s
-                  WHERE rejudgingid=%i AND submitid NOT IN
-                  ( SELECT submitid FROM judging
-                    WHERE rejudgingid=%i AND endtime IS NOT NULL)', $id, $id);
-if ( sizeof($queued) > 0 ) {
-	echo "<h3>" . printresult('queued') . "</h3>\n";
-	echo sublist($queued);
-}
-foreach ($table as $orig_verdict => $changed_verdicts) {
-	if ( !isset($used[$orig_verdict]) ) {
-		// filter out unused rows
-		continue;
-	}
 
-	echo "\n\n<hr/>\n";
-	echo "<h3>" . printresult($orig_verdict) . "</h3>\n";
+$restrictions = array('rejudgingid' => $id);
 
-	// output list of submission with identical result first
-	echo "<div style=\"font-size:small;\">unchanged: " .
-	    sublist($changed_verdicts[$orig_verdict]) . "</div>\n";
-
-	echo "<ul>\n";
-	foreach ($changed_verdicts as $new_verdict => $submitids) {
-		if ( sizeof($submitids) == 0 || $orig_verdict == $new_verdict ) {
-			// filter out 0s and identical submissions
-			continue;
-		}
-		echo '<li><a name="' . htmlspecialchars($verdicts[$orig_verdict]) . '__' .
-			htmlspecialchars($verdicts[$new_verdict]) . '"/>Changed to ' .
-			printresult($new_verdict) . ': ' . sublist($submitids) . "</li>\n";
-	}
-	echo "</ul>\n";
-}
+putSubmissions($cdatas, $restrictions);
 
 require(LIBWWWDIR . '/footer.php');

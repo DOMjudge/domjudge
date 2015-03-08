@@ -90,19 +90,26 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		}
 	}
 
+	// Special case the rejudgingid restriction by showing the
+	// corresponding judging and the old (active) judging result:
 	$sqlbody =
-		'FROM submission s
-		 LEFT JOIN team           t  USING (teamid)
-		 LEFT JOIN problem        p  USING (probid)
-		 LEFT JOIN contestproblem cp USING (probid, cid)
-		 LEFT JOIN language       l  USING (langid)
-		 LEFT JOIN judging        j  ON (s.submitid = j.submitid AND j.valid=1)
-		 WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause .
-	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
-	    (isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
-	    (isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
-	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
-	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
+	    'FROM submission s
+	     LEFT JOIN team           t  USING (teamid)
+	     LEFT JOIN problem        p  USING (probid)
+	     LEFT JOIN contestproblem cp USING (probid, cid)
+	     LEFT JOIN language       l  USING (langid) ' .
+	    (isset($restrictions['rejudgingid']) ?
+		'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.rejudgingid = %i)
+	     LEFT JOIN judging        jold ON (s.submitid = jold.submitid AND jold.valid = 1) ' :
+	    'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.valid = 1) %_ ') .
+	    'WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause .
+	    (isset($restrictions['teamid'])      ? 'AND s.teamid = %i '      : '%_ ') .
+	    (isset($restrictions['categoryid'])  ? 'AND t.categoryid = %i '  : '%_ ') .
+	    (isset($restrictions['probid'])      ? 'AND s.probid = %i '      : '%_ ') .
+	    (isset($restrictions['langid'])      ? 'AND s.langid = %s '      : '%_ ') .
+	    (isset($restrictions['judgehost'])   ? 'AND s.judgehost = %s '   : '%_ ') .
+	    (isset($restrictions['rejudgingid']) ? 'AND (s.rejudgingid = %i OR ' .
+	                                           '     j.rejudgingid = %i) ' : '%_ %_ ');
 
 	// No contests; automatically nothing found and the query can not be run...
 	if ( empty($cids) ) {
@@ -113,12 +120,15 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
 	               cp.shortname, p.name AS probname, l.name AS langname,
 	               j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
+	              (isset($restrictions['rejudgingid']) ? ', jold.result AS oldresult ' : '') .
 	              $sqlbody .
 	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
-	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
+	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), @$restrictions['rejudgingid'], $cids,
 	              @$restrictions['teamid'], @$restrictions['categoryid'],
 	              @$restrictions['probid'], @$restrictions['langid'],
-	              @$restrictions['judgehost'], $limit);
+	              @$restrictions['judgehost'],
+	              @$restrictions['rejudgingid'], @$restrictions['rejudgingid'],
+	              $limit);
 
 	// nothing found...
 	if( $res->count() == 0 ) {
@@ -142,6 +152,8 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		"<th scope=\"col\">lang</th>" .
 		"<th scope=\"col\">result</th>" .
 		(IS_JURY ? "<th scope=\"col\">verified</th><th scope=\"col\">by</th>" : '') .
+		(IS_JURY && isset($restrictions['rejudgingid']) ?
+		 "<th scope=\"col\">old result</th>" : '') .
 
 		"</tr>\n</thead>\n<tbody>\n";
 
@@ -154,7 +166,11 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		// to a different page, provided that the result is actually
 		// present and valid.
 		if ( IS_JURY ) {
-			$link = ' href="submission.php?id=' . $sid . '"';
+			// If rejudging list, link to the new rejudging:
+			$linkurl = 'submission.php?id=' . $sid .
+			    (isset($restrictions['rejudgingid']) ?
+			     '&amp;rejudgingid=' . $restrictions['rejudgingid'] : '');
+			$link = ' href="' . $linkurl . '"';
 		} elseif ( $row['submittime'] < $cdatas[$row['cid']]['endtime'] &&
 		           $row['result'] && $row['valid'] &&
 		           (!dbconfig_get('verification_required',0) || $row['verified']) ) {
@@ -238,17 +254,19 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 
 			echo "<td><a$link>$verified</a></td><td>";
 			if ( $claim ) {
-				echo "<a class=\"button\" href=\"submission.php?claim=1&amp;id=" .
-					htmlspecialchars($row['submitid']) . "\">claim</a>";
+				echo "<a class=\"button\" href=\"$linkurl&amp;claim=1\">claim</a>";
 			} else {
 				if ( !$row['verified'] && $jury_member==$username ) {
-					echo "<a class=\"button\" href=\"submission.php?unclaim=1&amp;id=" .
-						htmlspecialchars($row['submitid']) . "\">unclaim</a>";
+					echo "<a class=\"button\" href=\"$linkurl&amp;unclaim=1\">unclaim</a>";
 				} else {
 					echo "<a$link>$jury_member</a>";
 				}
 			}
 			echo "</td>";
+			if ( isset($restrictions['rejudgingid']) ) {
+				echo "<td class=\"result\"><a href=\"submission.php?id=$sid\">" .
+				    printresult($row['oldresult']) . "</a></td>";
+			}
 		}
 		echo "</tr>\n";
 
