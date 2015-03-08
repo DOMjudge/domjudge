@@ -17,6 +17,10 @@ ul.token-input-list {
     cursor: pointer;
 }
 
+ul.token-input-list-wide {
+    width: 800px;
+}
+
 ul.token-input-list li input {
     border: 0;
     width: 100px;
