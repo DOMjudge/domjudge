@@ -61,7 +61,7 @@ if( $res->count() == 0 ) {
 			$perc = (int) (100*((double)$done/(double)($done + $todo)));
 			echo "$perc% done";
 		} else {
-			echo 'done';
+			echo 'ready';
 		}
 		echo "</a></td></tr>\n";
 	}
