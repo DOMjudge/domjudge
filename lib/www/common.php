@@ -53,18 +53,22 @@ function parseRunDiff($difftext){
 }
 
 /**
- * Print a list of submissions, either all or only those that
- * match <key> = <value>. Output is always limited to the
- * current or last contest.
+ * Print a list of submissions from contests contained in the $cdatas
+ * contest data array, either all or only those that match
+ * <key> [= <value>] pairs specified in $restrictions:
+ *  - 'verified'  if set, only list submissions that are verified
+ *  - 'judged'    if set, only list submissions with completed judgings
+ *  - 'teamid', 'probid', 'langid', 'categoryid', 'judgehost' can be
+ *    set to an ID to filter on that respective team, language, etc.
+ * Output is limited to the number $limit, or unlimited by default.
+ * If $highlight is a submission ID, then that one is highlighted.
  */
 function putSubmissions($cdata, $restrictions, $limit = 0, $highlight = null)
 {
 	global $DB, $username;
 
 	/* We need two kind of queries: one for all submissions, and one
-	 * with the results for the valid ones. Restrictions is an array
-	 * of key/value pairs, to which the complete list of submissions
-	 * is restricted.
+	 * with the results for the valid ones.
 	 */
 
 	$cid = $cdata['cid'];
