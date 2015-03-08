@@ -1002,7 +1002,7 @@ function judgehosts_POST($args)
 
 	// If there are any unfinished judgings in the queue in my name,
 	// they will not be finished. Give them back.
-	$query = 'SELECT judgingid, submitid, cid
+	$query = 'TABLE SELECT judgingid, submitid, cid
 	          FROM judging j
 	          LEFT JOIN rejudging r USING (rejudgingid)
 	          WHERE judgehost = %s AND j.endtime IS NULL
