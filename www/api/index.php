@@ -1009,7 +1009,7 @@ function judgehosts_POST($args)
 	          AND (j.valid = 1 OR r.valid = 1)';
 	$res = $DB->q($query, $args['hostname']);
 	foreach ( $res as $jud ) {
-		$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
+		$DB->q('UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i',
 		       $jud['judgingid']);
 		$DB->q('UPDATE submission SET judgehost = NULL
 		        WHERE submitid = %i', $jud['submitid']);
