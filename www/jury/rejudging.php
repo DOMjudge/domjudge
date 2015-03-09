@@ -219,22 +219,7 @@ function addVerdict($unknownVerdict, &$verdicts, &$table) {
 }
 
 // generates a list with links to submissions
-function sublist($submitids) {
-	global $id;
-	if ( sizeof($submitids) == 0 ) {
-		return "<span class=\"nodata\">none</span>";
-	}
-	$links = array();
-	foreach ($submitids as $submitid) {
-		$links[] = '<a href="submission.php?id=' . urlencode($submitid) .
-			   '&amp;rejudgingid=' . urlencode($id) . '">s' .
-			   htmlspecialchars($submitid) . "</a>";
-	}
-	return implode(', ', $links);
-}
-
 foreach ($new_verdicts as $submitid => $new_verdict) {
-	// FIXME: check if no original verdict is avail or exclude that while creating rejudging?
 	$orig_verdict = $orig_verdicts[$submitid];
 
 	// add verdicts to data structures if they are unkown up to now
