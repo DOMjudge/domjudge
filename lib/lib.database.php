@@ -148,8 +148,8 @@ class db
 					if (!is_array($val) || !$val) {
 						$backtrace = debug_backtrace();
 						if (DEBUG) {
-							$callsite = 'in file: ' . $backtrace[1]['file'] . ', ' .
-								    ' line: ' . $backtrace[1]['line'] . ', ';
+							$callsite = 'in file: ' . $backtrace[0]['file'] . ', ' .
+								    ' line: ' . $backtrace[0]['line'] . ', ';
 						} else {
 							$callsite = '';
 						}
