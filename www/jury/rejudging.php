@@ -6,9 +6,24 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-require('init.php');
+$viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => "diff", 4 => 'all');
 
+$view = 1; // default view == unverified
+
+if ( isset($_REQUEST['view']) ) {
+	// did someone press any of the view buttons?
+	foreach ($viewtypes as $i => $name) {
+		if ( isset($_REQUEST['view'][$i]) ) $view = $i;
+	}
+}
+
+require('init.php');
 $id = getRequestID();
+
+$refresh = '15;url=rejudging.php?id=' . urlencode($id) . '&' .
+	urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view]) .
+	isset($_REQUEST['old_verdict']) ? '&old_verdict=' . urlencode($_REQUEST['old_verdict']) : '' .
+	isset($_REQUEST['new_verdict']) ? '&new_verdict=' . urlencode($_REQUEST['new_verdict']) : '' ;
 
 $title = 'Rejudging r'.@$id;
 
@@ -285,6 +300,27 @@ echo "</table>\n";
 echo "<h2>Details</h2>\n";
 
 $restrictions = array('rejudgingid' => $id);
+if ( $viewtypes[$view] == 'unverified' ) $restrictions['verified'] = 0;
+if ( $viewtypes[$view] == 'unjudged' ) $restrictions['judged'] = 0;
+if ( $viewtypes[$view] == 'diff' ) $restrictions['rejudgingdiff'] = 1;
+if ( isset($_REQUEST['old_verdict']) && $_REQUEST['old_verdict'] != 'all' ) {
+	$restrictions['old_result'] = $_REQUEST['old_verdict'];
+}
+if ( isset($_REQUEST['new_verdict']) && $_REQUEST['new_verdict'] != 'all' ) {
+	$restrictions['result'] = $_REQUEST['new_verdict'];
+}
+
+echo addForm($pagename, 'get') . "<p>Show submissions:\n" .
+	addHidden('id', $id);
+for($i=0; $i<count($viewtypes); ++$i) {
+	echo addSubmit($viewtypes[$i], 'view['.$i.']', null, ($view != $i));
+}
+$verdicts = array_keys($verdicts);
+array_unshift($verdicts, 'all');
+echo "<br/>old verdict: " . addSelect('old_verdict', $verdicts, ( isset($_REQUEST['old_verdict']) ? $_REQUEST['old_verdict'] : 'all' ));
+echo ", new verdict: " . addSelect('new_verdict', $verdicts, ( isset($_REQUEST['new_verdict']) ? $_REQUEST['new_verdict'] : 'all' ));
+echo addSubmit('filter');
+echo "</p>\n" . addEndForm();
 
 putSubmissions($cdatas, $restrictions);
 

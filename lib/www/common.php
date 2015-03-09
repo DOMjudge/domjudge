@@ -89,6 +89,18 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 			$judgedclause = 'AND (j.result IS NULL) ';
 		}
 	}
+	$rejudgingclause = '';
+	if ( isset($restrictions['rejudgingdiff']) ) {
+		if ( $restrictions['rejudgingdiff'] ) {
+			$rejudgingclause = 'AND (j.result != jold.result) ';
+		} else {
+			$rejudgingclause = 'AND (j.result = jold.result) ';
+		}
+	}
+
+	if ( isset($restrictions['old_result']) && !isset($restrictions['rejudgingid']) ) {
+		error('cannot specify restriction on old_result without specifying a rejudgingid');
+	}
 
 	// Special case the rejudgingid restriction by showing the
 	// corresponding judging and the old (active) judging result:
@@ -102,14 +114,16 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.rejudgingid = %i)
 	     LEFT JOIN judging        jold ON (s.submitid = jold.submitid AND jold.valid = 1) ' :
 	    'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.valid = 1) %_ ') .
-	    'WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause .
+	    'WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $rejudgingclause .
 	    (isset($restrictions['teamid'])      ? 'AND s.teamid = %i '      : '%_ ') .
 	    (isset($restrictions['categoryid'])  ? 'AND t.categoryid = %i '  : '%_ ') .
 	    (isset($restrictions['probid'])      ? 'AND s.probid = %i '      : '%_ ') .
 	    (isset($restrictions['langid'])      ? 'AND s.langid = %s '      : '%_ ') .
 	    (isset($restrictions['judgehost'])   ? 'AND s.judgehost = %s '   : '%_ ') .
 	    (isset($restrictions['rejudgingid']) ? 'AND (s.rejudgingid = %i OR ' .
-	                                           '     j.rejudgingid = %i) ' : '%_ %_ ');
+	                                           '     j.rejudgingid = %i) ' : '%_ %_ ') .
+	    (isset($restrictions['old_result'])  ? 'AND jold.result = %s '   : '%_ ') .
+	    (isset($restrictions['result'])      ? 'AND j.result = %s '   : '%_ ');
 
 	// No contests; automatically nothing found and the query can not be run...
 	if ( empty($cids) ) {
@@ -127,7 +141,8 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	              @$restrictions['teamid'], @$restrictions['categoryid'],
 	              @$restrictions['probid'], @$restrictions['langid'],
 	              @$restrictions['judgehost'],
-	              @$restrictions['rejudgingid'], @$restrictions['rejudgingid'],
+		      @$restrictions['rejudgingid'], @$restrictions['rejudgingid'],
+		      @$restrictions['old_result'], @$restrictions['result'],
 	              $limit);
 
 	// nothing found...
