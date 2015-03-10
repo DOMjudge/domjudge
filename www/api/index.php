@@ -467,8 +467,6 @@ function judging_runs_POST($args)
 	$before = $DB->q('VALUE SELECT result FROM judging WHERE judgingid = %i', $args['judgingid']);
 
 	if ( ($result = getFinalResult($allresults, $results_prio))!==NULL ) {
-		// NOTE: setting endtime here determines in testcases_GET
-		// whether a next testcase will be handed out.
 
 		// Lookup global lazy evaluation of results setting and
 		// possible problem specific override.
@@ -481,6 +479,8 @@ function judging_runs_POST($args)
 		if ( isset($prob_lazy) ) $lazy_eval = (bool)$prob_lazy;
 
 		if ( count($runresults) == $numtestcases || $lazy_eval ) {
+			// NOTE: setting endtime here determines in testcases_GET
+			// whether a next testcase will be handed out.
 			$DB->q('UPDATE judging SET result = %s, endtime = %s
 			        WHERE judgingid = %i', $result, now(), $args['judgingid']);
 		} else {
