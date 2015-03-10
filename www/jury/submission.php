@@ -337,7 +337,10 @@ if ( !isset($jid) ) {
 
 if ( isset($jid) )  {
 
-	$jud = $DB->q('TUPLE SELECT * FROM judging WHERE judgingid = %i', $jid);
+	$jud = $DB->q('TUPLE SELECT j.*, r.valid AS rvalid
+		       FROM judging j
+		       LEFT JOIN rejudging r USING (rejudgingid)
+		       WHERE judgingid = %i', $jid);
 
 	// sanity check
 	if ($jud['submitid'] != $id) error(
@@ -476,7 +479,7 @@ if ( isset($jid) )  {
 
 		// display verification data: verified, by whom, and comment.
 		// only if this is a valid judging, otherwise irrelevant
-		if ( $jud['valid'] ) {
+		if ( $jud['valid'] || (isset($jud['rejudgingid']) && $jud['rvalid'])) {
 			$verification_required = dbconfig_get('verification_required', 0);
 			if ( ! ($verification_required && $jud['verified']) ) {
 
