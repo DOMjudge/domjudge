@@ -7,7 +7,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-require(LIBEXTDIR . '/spyc/spyc.php');
+require_once(LIBEXTDIR . '/spyc/spyc.php');
 
 /**
  * Return a link to add a new row to a specific table.
@@ -127,6 +127,8 @@ function rejudgeForm($table, $id)
 		htmlspecialchars($question) . '\');"') . " />\n" .
 		($allbutton ? addCheckBox('include_all') .
 		              '<label for="include_all">include pending/correct submissions</label>' : '' ) .
+		addCheckBox('full_rejudge') . '<label for="full_rejudge">create rejudging with reason: </label>' .
+		addInput('reason', '', 0, 255) .
 		addEndForm();
 
 	return $ret;

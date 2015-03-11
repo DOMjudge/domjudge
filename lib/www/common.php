@@ -53,18 +53,22 @@ function parseRunDiff($difftext){
 }
 
 /**
- * Print a list of submissions, either all or only those that
- * match <key> = <value>. Output is always limited to the
- * current or last contest.
+ * Print a list of submissions from contests contained in the $cdatas
+ * contest data array, either all or only those that match
+ * <key> [= <value>] pairs specified in $restrictions:
+ *  - 'verified'  if set, only list submissions that are verified
+ *  - 'judged'    if set, only list submissions with completed judgings
+ *  - 'teamid', 'probid', 'langid', 'categoryid', 'judgehost' can be
+ *    set to an ID to filter on that respective team, language, etc.
+ * Output is limited to the number $limit, or unlimited by default.
+ * If $highlight is a submission ID, then that one is highlighted.
  */
 function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $testcases = false)
 {
 	global $DB, $username;
 
 	/* We need two kind of queries: one for all submissions, and one
-	 * with the results for the valid ones. Restrictions is an array
-	 * of key/value pairs, to which the complete list of submissions
-	 * is restricted.
+	 * with the results for the valid ones.
 	 */
 
 	$cids = array_keys($cdatas);
@@ -85,24 +89,45 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 			$judgedclause = 'AND (j.result IS NULL) ';
 		}
 	}
+	$rejudgingclause = '';
+	if ( isset($restrictions['rejudgingdiff']) ) {
+		if ( $restrictions['rejudgingdiff'] ) {
+			$rejudgingclause = 'AND (j.result != jold.result) ';
+		} else {
+			$rejudgingclause = 'AND (j.result = jold.result) ';
+		}
+	}
 	$externalclause = '';
 	if ( isset($restrictions['externaldiff']) ) {
 		$externalclause = 'AND (j.result IS NOT NULL AND j.result != s.externalresult) ';
 	}
 
+	if ( isset($restrictions['old_result']) && !isset($restrictions['rejudgingid']) ) {
+		error('cannot specify restriction on old_result without specifying a rejudgingid');
+	}
+
+	// Special case the rejudgingid restriction by showing the
+	// corresponding judging and the old (active) judging result:
 	$sqlbody =
-		'FROM submission s
-		 LEFT JOIN team           t  USING (teamid)
-		 LEFT JOIN problem        p  USING (probid)
-		 LEFT JOIN contestproblem cp USING (probid, cid)
-		 LEFT JOIN language       l  USING (langid)
-		 LEFT JOIN judging        j  ON (s.submitid = j.submitid AND j.valid=1)
-		 WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $externalclause .
-	    (isset($restrictions['teamid'])    ? 'AND s.teamid = %i '    : '%_') .
-	    (isset($restrictions['categoryid'])? 'AND t.categoryid = %i ': '%_') .
-	    (isset($restrictions['probid'])    ? 'AND s.probid = %i '    : '%_') .
-	    (isset($restrictions['langid'])    ? 'AND s.langid = %s '    : '%_') .
-	    (isset($restrictions['judgehost']) ? 'AND s.judgehost = %s ' : '%_') ;
+	    'FROM submission s
+	     LEFT JOIN team           t  USING (teamid)
+	     LEFT JOIN problem        p  USING (probid)
+	     LEFT JOIN contestproblem cp USING (probid, cid)
+	     LEFT JOIN language       l  USING (langid) ' .
+	    (isset($restrictions['rejudgingid']) ?
+		'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.rejudgingid = %i)
+	     LEFT JOIN judging        jold ON (j.prevjudgingid = jold.judgingid) ' :
+	    'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.valid = 1) %_ ') .
+	    'WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $rejudgingclause . $externalclause .
+	    (isset($restrictions['teamid'])      ? 'AND s.teamid = %i '      : '%_ ') .
+	    (isset($restrictions['categoryid'])  ? 'AND t.categoryid = %i '  : '%_ ') .
+	    (isset($restrictions['probid'])      ? 'AND s.probid = %i '      : '%_ ') .
+	    (isset($restrictions['langid'])      ? 'AND s.langid = %s '      : '%_ ') .
+	    (isset($restrictions['judgehost'])   ? 'AND s.judgehost = %s '   : '%_ ') .
+	    (isset($restrictions['rejudgingid']) ? 'AND (s.rejudgingid = %i OR ' .
+	                                           '     j.rejudgingid = %i) ' : '%_ %_ ') .
+	    (isset($restrictions['old_result'])  ? 'AND jold.result = %s '   : '%_ ') .
+	    (isset($restrictions['result'])      ? 'AND j.result = %s '   : '%_ ');
 
 	// No contests; automatically nothing found and the query can not be run...
 	if ( empty($cids) ) {
@@ -113,12 +138,16 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
 	               cp.shortname, p.name AS probname, l.name AS langname,
 	               j.result, j.judgehost, j.verified, j.jury_member, j.seen, j.judgingid ' .
+	              (isset($restrictions['rejudgingid']) ? ', jold.result AS oldresult ' : '') .
 	              $sqlbody .
 	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
-	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), $cids,
+	              ($limit > 0 ? 'LIMIT 0, %i' : '%_'), @$restrictions['rejudgingid'], $cids,
 	              @$restrictions['teamid'], @$restrictions['categoryid'],
 	              @$restrictions['probid'], @$restrictions['langid'],
-	              @$restrictions['judgehost'], $limit);
+	              @$restrictions['judgehost'],
+		      @$restrictions['rejudgingid'], @$restrictions['rejudgingid'],
+		      @$restrictions['old_result'], @$restrictions['result'],
+	              $limit);
 
 	// nothing found...
 	if( $res->count() == 0 ) {
@@ -142,6 +171,8 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 		"<th scope=\"col\">lang</th>" .
 		"<th scope=\"col\">result</th>" .
 		(IS_JURY ? "<th scope=\"col\">verified</th><th scope=\"col\">by</th>" : '') .
+		(IS_JURY && isset($restrictions['rejudgingid']) ?
+		 "<th scope=\"col\">old result</th>" : '') .
 		($testcases ? "<th scope=\"col\">test results</th>" : '') .
 
 		"</tr>\n</thead>\n<tbody>\n";
@@ -155,7 +186,11 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 		// to a different page, provided that the result is actually
 		// present and valid.
 		if ( IS_JURY ) {
-			$link = ' href="submission.php?id=' . $sid . '"';
+			// If rejudging list, link to the new rejudging:
+			$linkurl = 'submission.php?id=' . $sid .
+			    (isset($restrictions['rejudgingid']) ?
+			     '&amp;rejudgingid=' . $restrictions['rejudgingid'] : '');
+			$link = ' href="' . $linkurl . '"';
 		} elseif ( $row['submittime'] < $cdatas[$row['cid']]['endtime'] &&
 		           $row['result'] && $row['valid'] &&
 		           (!dbconfig_get('verification_required',0) || $row['verified']) ) {
@@ -243,17 +278,21 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 
 			echo "<td><a$link>$verified</a></td><td>";
 			if ( $claim ) {
-				echo "<a class=\"button\" href=\"submission.php?claim=1&amp;id=" .
-					htmlspecialchars($row['submitid']) . "\">claim</a>";
+				echo "<a class=\"button\" href=\"$linkurl&amp;claim=1\">claim</a>";
 			} else {
 				if ( !$row['verified'] && $jury_member==$username ) {
-					echo "<a class=\"button\" href=\"submission.php?unclaim=1&amp;id=" .
-						htmlspecialchars($row['submitid']) . "\">unclaim</a>";
+					echo "<a class=\"button\" href=\"$linkurl&amp;unclaim=1\">unclaim</a>";
 				} else {
 					echo "<a$link>$jury_member</a>";
 				}
 			}
 			echo "</td>";
+
+			if ( isset($restrictions['rejudgingid']) ) {
+				echo "<td class=\"result\"><a href=\"submission.php?id=$sid\">" .
+				    printresult($row['oldresult']) . "</a></td>";
+			}
+
 			if ( $testcases ) {
 				$judgingid = $row['judgingid'];
 				$probid = $row['probid'];
@@ -295,42 +334,29 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 		echo addEndForm();
 
 		if ( $limit > 0 ) {
-			$subcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody, $cids,
-			                 @$restrictions['teamid'], @$restrictions['categoryid'],
-			                 @$restrictions['probid'], @$restrictions['langid'],
-			                 @$restrictions['judgehost']);
-			$corcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
-					 ' AND j.result LIKE \'correct\'', $cids,
-			                 @$restrictions['teamid'], @$restrictions['categoryid'],
-			                 @$restrictions['probid'], @$restrictions['langid'],
-			                 @$restrictions['judgehost']);
-			$igncnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
-					 ' AND s.valid = 0', $cids,
-			                 @$restrictions['teamid'], @$restrictions['categoryid'],
-			                 @$restrictions['probid'], @$restrictions['langid'],
-			                 @$restrictions['judgehost']);
-			$vercnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
-					 ' AND verified = 0 AND result IS NOT NULL', $cids,
-			                 @$restrictions['teamid'], @$restrictions['categoryid'],
-			                 @$restrictions['probid'], @$restrictions['langid'],
-			                 @$restrictions['judgehost']);
-			$quecnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
-					 ' AND result IS NULL', $cids,
-			                 @$restrictions['teamid'], @$restrictions['categoryid'],
-			                 @$restrictions['probid'], @$restrictions['langid'],
-			                 @$restrictions['judgehost']);
-			$extdiffcnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody .
-			                     ' AND result IS NOT NULL AND externalresult IS NOT NULL' .
-			                     ' AND result != externalresult', $cids,
-			                     @$restrictions['teamid'], @$restrictions['categoryid'],
-			                     @$restrictions['probid'], @$restrictions['langid'],
-			                     @$restrictions['judgehost']);
+			$query_extras = array('subcnt' => '',
+				'corcnt' => ' AND j.result LIKE \'correct\'',
+				'igncnt' => ' AND s.valid = 0',
+				'vercnt' => ' AND verified = 0 AND result IS NOT NULL',
+				'quecnt' => ' AND result IS NULL',
+				'extcnt' => ' AND result IS NOT NULL AND externalresult' .
+			                    ' IS NOT NULL AND result != externalresult');
+
+			foreach ( $query_extras as $cnt => $query_extra ) {
+				$$cnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody . $query_extra,
+						 @$restrictions['rejudgingid'], $cids,
+						 @$restrictions['teamid'], @$restrictions['categoryid'],
+						 @$restrictions['probid'], @$restrictions['langid'],
+						 @$restrictions['judgehost'],
+						 @$restrictions['rejudgingid'], @$restrictions['rejudgingid'],
+						 @$restrictions['old_result'], @$restrictions['result']);
+			}
 		}
 		echo "<p>Total correct: $corcnt, submitted: $subcnt";
 		if ( $vercnt > 0 ) echo ", unverified: $vercnt";
 		if ( $igncnt > 0 ) echo ", ignored: $igncnt";
 		if ( $quecnt > 0 ) echo ", judgement pending: $quecnt";
-		if($extdiffcnt > 0) echo ", external diff: $extdiffcnt";
+		if ( $extcnt > 0 ) echo ", external diff: $extcnt";
 		echo "</p>\n\n";
 	}
 

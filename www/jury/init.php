@@ -68,11 +68,16 @@ if ( isset($_COOKIE['domjudge_cid']) )  {
 // Data to be sent as AJAX updates:
 $updates = array(
 	'clarifications' =>
-	empty($cids) ? array() : $DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
-		FROM clarification
-		WHERE sender IS NOT NULL AND cid IN (%Ai) AND answered = 0', $cids),
+	( empty($cids) ? array() :
+	  $DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
+	          FROM clarification
+	          WHERE sender IS NOT NULL AND cid IN (%Ai) AND answered = 0', $cids) ),
 	'judgehosts' =>
 	$DB->q('TABLE SELECT hostname, polltime
-		FROM judgehost
+	        FROM judgehost
 	        WHERE active = 1 AND unix_timestamp()-polltime >= ' . JUDGEHOST_CRITICAL),
+	'rejudgings' =>
+	$DB->q('TABLE SELECT rejudgingid
+	        FROM rejudging
+	        WHERE endtime IS NULL'),
 );

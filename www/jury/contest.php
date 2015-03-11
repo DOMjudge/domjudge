@@ -119,7 +119,156 @@ $(function() {
 </table>
 
 <h3>Problems</h3>
-<table>
+
+<?php
+
+$current_problems = $DB->q("TABLE SELECT contestproblem.*, problem.name FROM contestproblem
+                            INNER JOIN problem USING (probid)
+                            WHERE cid = %i ORDER BY shortname", $id);
+
+foreach ( $current_problems as &$current_problem ) {
+	$current_problem['allow_submit'] = (int)$current_problem['allow_submit'];
+	$current_problem['allow_judge'] = (int)$current_problem['allow_judge'];
+}
+unset($current_problem);
+
+$prepopulate = $DB->q("TABLE SELECT problem.probid AS id, problem.name,
+                       CONCAT(problem.name, ' (p', problem.probid, ')') AS search
+                       FROM problem INNER JOIN contestproblem USING (probid)
+                       WHERE cid = %i ORDER BY shortname", $id);
+
+$problem_name_mapping = $DB->q("KEYVALUETABLE SELECT probid, name FROM problem");
+?>
+
+<input type="text" id="problems_token_input" name="problems" />
+<script type="text/javascript">
+$(function() {
+	$('#problems_token_input').tokenInput('ajax_problems.php', {
+		overwriteClasses: {
+			tokenList: 'token-input-list token-input-list-wide'
+		},
+		propertyToSearch: 'search',
+		hintText: 'Type to search for problem ID or name',
+		noResultsText: 'No problems found',
+		preventDuplicates: true,
+		prePopulate: <?php echo json_encode($prepopulate); ?>,
+		onAdd: function(item) {
+			addRow(item.id);
+		},
+		onDelete: function(item) {
+			deleteRow(item.id);
+		}
+	});
+	
+	var current_problems = <?php echo json_encode($current_problems); ?>;
+	var problem_name_mapping = <?php echo json_encode($problem_name_mapping); ?>;
+	
+	$.each(current_problems, function(i, problem) {
+		addRow(problem.probid);
+	});
+	
+	function addRow(probId) {
+		var $template = $('#contestproblem_template');
+		var $table = $('#problems_table');
+		var maxId = $table.data('max-id');
+		if ( maxId === undefined ) {
+			// If not set on the table yet, we start at 0
+			maxId = 0;
+		} else {
+			// Oterwise we should add 1 to the old value
+			maxId++;
+		}
+		
+		// Set it back on the table
+		$table.data('max-id', maxId);
+		
+		var contest_problem_data = {
+			shortname: '',
+			allow_submit: true,
+			allow_judge: true,
+			color: '',
+			lazy_eval_results: ''
+		};
+		
+		for ( var i = 0; i < current_problems.length; i++ ) {
+			if ( current_problems[i].probid == probId ) {
+				contest_problem_data = current_problems[i];
+				break;
+			}
+		}
+		
+		var templateContents = $template.text()
+			.replace(/\{id\}/g, maxId)
+			.replace(/\{probid\}/g, probId)
+			.replace(/\{name\}/g, problem_name_mapping[probId])
+			.replace(/\{shortname\}/g, contest_problem_data.shortname)
+			.replace(/\{color\}/g, contest_problem_data.color)
+			.replace(/\{lazy_eval_results\}/g, contest_problem_data.lazy_eval_results);
+		
+		$('tbody', $table).append(templateContents);
+		
+		// Set allow submit / allow judge
+		var submit_id = '#data_0__mapping__0__extra__' + maxId + '__allow_submit_';
+		if ( contest_problem_data.allow_submit ) {
+			submit_id += '1';
+		} else {
+			submit_id += '0';
+		}
+		$(submit_id).attr('checked', 'checked');
+		
+		var judge_id = '#data_0__mapping__0__extra__' + maxId + '__allow_judge_';
+		if ( contest_problem_data.allow_judge ) {
+			judge_id += '1';
+		} else {
+			judge_id += '0';
+		}
+		$(judge_id).attr('checked', 'checked');
+		
+		jscolor.bind();
+	}
+	
+	function deleteRow(probId) {
+		var $tr = $('#problems_table tr[data-problem=' + probId + ']');
+		$tr.remove();
+	}
+});
+</script>
+<br />
+<script type="text/template" id="contestproblem_template">
+<tr data-problem="{probid}">
+	<td>
+		<?php echo addHidden("data[0][mapping][0][items][{id}]", '{probid}'); ?>
+		p{probid}
+	</td>
+	<td>
+		{name}
+	</td>
+	<td>
+		<?php echo addInput("data[0][mapping][0][extra][{id}][shortname]", '{shortname}', 8, 10); ?>
+	</td>
+	<td>
+		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_submit]", true, 1); ?>
+		<label for='data_0__mapping__0__extra__{id}__allow_submit_1'>yes</label>
+		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_submit]", false, 0); ?>
+		<label for='data_0__mapping__0__extra__{id}__allow_submit_0'>no</label>
+	</td>
+	<td>
+		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_judge]", true, 1); ?>
+		<label for='data_0__mapping__0__extra__{id}__allow_judge_1'>yes</label>
+		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_judge]", false, 0); ?>
+		<label for='data_0__mapping__0__extra__{id}__allow_judge_0'>no</label>
+	</td>
+	<td>
+		<?php echo addInput("data[0][mapping][0][extra][{id}][color]", '{color}', 15, 25, 
+                            'class="color {required:false,adjust:false,hash:true,caps:false}"'); ?>
+	</td>
+	<td>
+		<?php echo addInputField('number',"data[0][mapping][0][extra][{id}][lazy_eval_results]",
+                                 '{lazy_eval_results}', ' min="0" max="1"'); ?>
+	</td>
+</tr>
+</script>
+<table id="problems_table">
 	<thead>
 	<tr>
 		<th>ID</th>
@@ -134,88 +283,7 @@ $(function() {
 	</tr>
 	</thead>
 	<tbody>
-	<?php
-	$current_problems = $DB->q("TABLE SELECT * FROM contestproblem INNER JOIN problem
-				    USING (probid) WHERE cid = %i ORDER BY shortname", $id);
-	$i = 0;
-	$used_problems = array();
-	foreach ($current_problems as $current_problem) {
-		$used_problems[] = $current_problem['probid'];
-		echo "<tr>\n";
-		echo "<td>" . addHidden("data[0][mapping][0][items][$i]", $current_problem['probid']) .
-		     "p" . $current_problem['probid'] . "</td>\n";
-		echo "<td>" . $current_problem['name'] . "</td>\n";
-		echo "<td>" .
-		     addInput("data[0][mapping][0][extra][$i][shortname]", $current_problem['shortname'], 8,
-			      10) . "</td>\n";
-		echo "<td>";
-		echo addRadioButton("data[0][mapping][0][extra][$i][allow_submit]",
-				(!isset($current_problem['allow_submit']) || $current_problem['allow_submit']), 1) .
-		     "<label for='data_0__mapping__0__extra__{$i}__allow_submit_1'>yes</label>";
-		echo addRadioButton("data[0][mapping][0][extra][$i][allow_submit]",
-				(isset($current_problem['allow_submit']) && !$current_problem['allow_submit']), 0) .
-		     "<label for='data_0__mapping__0__extra__{$i}__allow_submit_0'>no</label>";
-		echo "</td>\n";
-		echo "<td>";
-		echo addRadioButton("data[0][mapping][0][extra][$i][allow_judge]",
-				(!isset($current_problem['allow_judge']) || $current_problem['allow_judge']), 1) .
-		     "<label for='data_0__mapping__0__extra__{$i}__allow_judge_1'>yes</label>";
-		echo addRadioButton("data[0][mapping][0][extra][$i][allow_judge]",
-				(isset($current_problem['allow_judge']) && !$current_problem['allow_judge']), 0) .
-		     "<label for='data_0__mapping__0__extra__{$i}__allow_judge_0'>no</label>";
-		echo "</td>\n";
-		echo "<td>" .
-		     addInput("data[0][mapping][0][extra][$i][color]", $current_problem['color'], 15, 25,
-		     'class="color {required:false,adjust:false,hash:true,caps:false}"') .
-		     "</td>\n";
-		echo "<td>" .
-		     addInputField('number',"data[0][mapping][0][extra][$i][lazy_eval_results]",
-		                   @$current_problem['lazy_eval_results'],' min="0" max="1"') .
-		     "</td>\n";
-		echo "</tr>\n";
-		$i++;
-	}
-
-	$unused_problems = $DB->q("KEYVALUETABLE SELECT probid, CONCAT('p', probid, ' - ', name)
-	                           FROM problem " .
-	                           (empty($used_problems) ? '%_' : 'WHERE probid NOT IN (%Ai)') .
-	                           " ORDER BY probid", 
-	                          $used_problems);
-	$values = array('' => '-- Select problem --');
-	foreach ($unused_problems as $probid => $text) {
-		$values[$probid] = $text;
-	}
-
-	if ( !empty($unused_problems) ) {
-		for ( $j = 0; $j < 12; $j++ ) {
-			echo "<tr>\n";
-			echo "<td colspan=\"2\">" .
-			     addSelect("data[0][mapping][0][items][$i]", $values, null, true) . "</td>\n";
-			echo "<td>" .
-			     addInput("data[0][mapping][0][extra][$i][shortname]", null,
-				      8, 10) . "</td>\n";
-			echo "<td>";
-			echo addRadioButton("data[0][mapping][0][extra][$i][allow_submit]", true, 1) .
-			     "<label for='data_0__mapping__0__extra__{$i}__allow_submit_1'>yes</label>";
-			echo addRadioButton("data[0][mapping][0][extra][$i][allow_submit]", false, 0) .
-			     "<label for='data_0__mapping__0__extra__{$i}__allow_submit_0'>no</label>";
-			echo "</td>\n";
-			echo "<td>";
-			echo addRadioButton("data[0][mapping][0][extra][$i][allow_judge]", true, 1) .
-			     "<label for='data_0__mapping__0__extra__{$i}__allow_judge_1'>yes</label>";
-			echo addRadioButton("data[0][mapping][0][extra][$i][allow_judge]", false, 0) .
-			     "<label for='data_0__mapping__0__extra__{$i}__allow_judge_0'>no</label>";
-			echo "</td>\n";
-			echo "<td>" . addInput("data[0][mapping][0][extra][$i][color]", null, 15, 25,
-			      'class="color {required:false,adjust:false,hash:true,caps:false}"') . "</td>";
-			echo "<td>" .
-			     addInputField('number',"data[0][mapping][0][extra][$i][lazy_eval_results]",
-			                   null, ' min="0" max="1"') . "</td>\n";
-			echo "</tr>\n";
-			$i++;
-		}
-	}
-	?>
+		<!-- Will be filled in javascript -->
 	</tbody>
 </table>
 

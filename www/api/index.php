@@ -142,10 +142,10 @@ function problems($args)
 
 	checkargs($args, array('cid'));
 
-	$q = $DB->q('SELECT probid AS id, shortname, name, color FROM problem
-		     INNER JOIN contestproblem USING (probid)
-		     WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
-	return $q->gettable();
+	return $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color
+	               FROM problem
+	               INNER JOIN contestproblem USING (probid)
+	               WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
 }
 $doc = "Get a list of problems in a contest, with for each problem: id, shortname, name and color.";
 $args = array('cid' => 'Contest ID.');
@@ -224,7 +224,7 @@ function judgings_POST($args)
 
 	$cdatas = getCurContests(TRUE);
 	$cids = array_keys($cdatas);
-	
+
 	if ( empty($cids) ) return '';
 
 	// Get judgehost restrictions
@@ -299,7 +299,7 @@ function judgings_POST($args)
 
 	if ( empty($submitid) || $numupd == 0 ) return '';
 
-	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid,
+	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid, s.rejudgingid,
 	               CEILING(time_factor*timelimit) AS maxruntime,
 	               p.memlimit, p.outputlimit,
 	               special_run AS run, special_compare AS compare,
@@ -337,8 +337,19 @@ function judgings_POST($args)
 		$row['compile_script_md5sum'] = $compile_script_md5sum;
 	}
 
-	$jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost)
-	               VALUES(%i,%i,%s,%s)', $row['submitid'], $row['cid'], now(), $host);
+	$is_rejudge = isset($row['rejudgingid']);
+	if ( $is_rejudge ) {
+		// FIXME: what happens if there is no valid judging?
+		$prev_rejudgingid = $DB->q('MAYBEVALUE SELECT judgingid
+		                            FROM judging
+		                            WHERE submitid=%i AND valid=1',
+		                           $submitid);
+	}
+	$jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' .
+	              ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '' ) .
+	              ') VALUES(%i,%i,%s,%s' . ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
+	              ')', $submitid, $row['cid'], now(), $host,
+	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge);
 
 	$row['judgingid'] = $jid;
 
@@ -799,7 +810,7 @@ function queue($args)
 	// TODO: make this configurable
 	$cdatas = getCurContests(TRUE);
 	$cids = array_keys($cdatas);
-	
+
 	if ( empty($cids) ) {
 		return array();
 	}
@@ -807,19 +818,17 @@ function queue($args)
 	$hasLimit = array_key_exists('limit', $args);
 	// TODO: validate limit
 
-	$submitids = $DB->q('SELECT submitid
-	                     FROM submission s
-	                     LEFT JOIN team t USING (teamid)
-	                     LEFT JOIN problem p USING (probid)
-	                     LEFT JOIN language l USING (langid)
-	                     LEFT JOIN contestproblem cp USING (probid, cid)
-	                     WHERE judgehost IS NULL AND s.cid IN (%Ai)
-	                     AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
-	                     ORDER BY judging_last_started ASC, submittime ASC, submitid ASC' .
-	                    ($hasLimit ? ' LIMIT %i' : ' %_'),
-	                    $cids, ($hasLimit ? $args['limit'] : -1));
-
-	return $submitids->getTable();
+	return $DB->q('TABLE SELECT submitid
+	               FROM submission s
+	               LEFT JOIN team t USING (teamid)
+	               LEFT JOIN problem p USING (probid)
+	               LEFT JOIN language l USING (langid)
+	               LEFT JOIN contestproblem cp USING (probid, cid)
+	               WHERE judgehost IS NULL AND s.cid IN (%Ai)
+	               AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
+	               ORDER BY judging_last_started ASC, submittime ASC, submitid ASC' .
+	              ($hasLimit ? ' LIMIT %i' : ' %_'),
+	              $cids, ($hasLimit ? $args['limit'] : -1));
 }
 $args = array('limit' => 'Get only the first N queued submissions');
 $doc = 'Get a list of all queued submission ids.';
@@ -835,7 +844,7 @@ function affiliations($args)
 	global $DB;
 
 	// Construct query
-	$query = 'SELECT affilid, shortname, name, country FROM team_affiliation WHERE';
+	$query = 'TABLE SELECT affilid, shortname, name, country FROM team_affiliation WHERE';
 
 	$byCountry = array_key_exists('country', $args);
 	$query .= ($byCountry ? ' country = %s' : ' TRUE %_');
@@ -844,8 +853,7 @@ function affiliations($args)
 	$query .= ' ORDER BY name';
 
 	// Run query and return result
-	$q = $DB->q($query, $country);
-	return $q->gettable();
+	return $DB->q($query, $country);
 }
 $doc = 'Get a list of affiliations, with for each affiliation: affilid, shortname, name and country.';
 $optArgs = array('country' => 'ISO 3166-1 alpha-3 country code to search for.');
@@ -860,37 +868,34 @@ function teams($args)
 	global $DB;
 
 	// Construct query
-	$query = 'SELECT teamid AS id, t.name, t.members, a.country AS nationality,
-	          t.categoryid AS category, a.affilid, a.name AS affiliation
+	$query = 'TABLE SELECT teamid AS id, t.name, t.members, a.country AS nationality,
+	          t.categoryid AS category, c.name AS `group`, a.affilid, a.name AS affiliation
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
 	          LEFT JOIN team_category c USING (categoryid)
-	          WHERE t.enabled = 1 AND';
+	          WHERE t.enabled = 1';
 
 	$byCategory = array_key_exists('category', $args);
-	$query .= ($byCategory ? ' categoryid = %i' : ' TRUE %_');
+	$query .= ($byCategory ? ' AND categoryid = %i' : ' %_');
 	$category = ($byCategory ? $args['category'] : 0);
 
-	$query .= ' AND';
-
 	$byAffil = array_key_exists('affiliation', $args);
-	$query .= ($byAffil ? ' affilid = %s' : ' TRUE %_');
+	$query .= ($byAffil ? ' AND affilid = %s' : ' %_');
 	$affiliation = ($byAffil ? $args['affiliation'] : 0);
 
 	$byTeamid = array_key_exists('teamid', $args);
-	$query .= ($byTeamid ? ' AND teamid = %i' : ' AND TRUE %_');
+	$query .= ($byTeamid ? ' AND teamid = %i' : ' %_');
 	$teamid = ($byTeamid ? $args['teamid'] : 0);
 
 	$query .= ($args['public'] ? ' AND visible = 1' : '');
 
 	// Run query and return result
-	$q = $DB->q($query, $category, $affiliation, $teamid);
-	return $q->gettable();
+	return $DB->q($query, $category, $affiliation, $teamid);
 }
-$args = array('category' => 'ID of a single category to search for.',
+$args = array('category' => 'ID of a single category/group to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
               'teamid' => 'Search for a specific team.');
-$doc = 'Get a list of teams containing teamid, name, category and affiliation.';
+$doc = 'Get a list of teams containing teamid, name, group and affiliation.';
 $exArgs = array(array('category' => 1, 'affiliation' => 'UU'));
 $api->provideFunction('GET', 'teams', $doc, $args, $exArgs, null, true);
 
@@ -912,7 +917,7 @@ function categories($args)
 	}
 	return $res;
 }
-$doc = 'Get a list of all categories.';
+$doc = 'Get a list of all categories/groups.';
 $api->provideFunction('GET', 'categories', $doc, array(), array(), null, true);
 
 /**
@@ -945,21 +950,20 @@ $api->provideFunction('GET', 'languages', $doc);
 function clarifications($args)
 {
 	global $cids, $DB;
-	
+
 	if ( empty($cids) ) {
 		return array();
 	}
 
 	// Find public clarifications, maybe later also provide more info for jury
-	$query = 'SELECT clarid, submittime, probid, body FROM clarification
+	$query = 'TABLE SELECT clarid, submittime, probid, body FROM clarification
 	          WHERE cid IN (%Ai) AND sender IS NULL AND recipient IS NULL';
 
 	$byProblem = array_key_exists('problem', $args);
 	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
 	$problem = ($byProblem ? $args['problem'] : null);
-	
-	$q = $DB->q($query, $cids, $problem);
-	return $q->getTable();
+
+	return $DB->q($query, $cids, $problem);
 }
 $doc = 'Get a list of all public clarifications.';
 $args = array('problem' => 'Search for clarifications about a specific problem.');
@@ -973,14 +977,13 @@ function judgehosts($args)
 {
 	global $DB;
 
-	$query = 'SELECT hostname, active, polltime FROM judgehost';
+	$query = 'TABLE SELECT hostname, active, polltime FROM judgehost';
 
 	$byHostname = array_key_exists('hostname', $args);
 	$query .= ($byHostname ? ' WHERE hostname = %s' : '%_');
 	$hostname = ($byHostname ? $args['hostname'] : null);
 
-	$q = $DB->q($query, $hostname);
-	return $q->getTable();
+	return $DB->q($query, $hostname);
 }
 $doc = 'Get a list of judgehosts.';
 $args = array('hostname' => 'Search only for judgehosts with given hostname.');
@@ -999,22 +1002,21 @@ function judgehosts_POST($args)
 
 	// If there are any unfinished judgings in the queue in my name,
 	// they will not be finished. Give them back.
-	$res = $DB->q('SELECT judgingid, submitid, cid FROM judging
-	               WHERE judgehost = %s AND endtime IS NULL AND valid = 1',
-	              $args['hostname']);
-	$ret = $res->getTable();
-	$res = $DB->q('SELECT judgingid, submitid, cid FROM judging
-	               WHERE judgehost = %s AND endtime IS NULL AND valid = 1',
-	              $args['hostname']);
-	while ( $jud = $res->next() ) {
-		$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
+	$query = 'TABLE SELECT judgingid, submitid, cid
+	          FROM judging j
+	          LEFT JOIN rejudging r USING (rejudgingid)
+	          WHERE judgehost = %s AND j.endtime IS NULL
+	          AND (j.valid = 1 OR r.valid = 1)';
+	$res = $DB->q($query, $args['hostname']);
+	foreach ( $res as $jud ) {
+		$DB->q('UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i',
 		       $jud['judgingid']);
 		$DB->q('UPDATE submission SET judgehost = NULL
 		        WHERE submitid = %i', $jud['submitid']);
 		auditlog('judging', $jud['judgingid'], 'given back', null, $args['hostname'], $jud['cid']);
 	}
 
-	return $ret;
+	return $res;
 }
 $doc = 'Add a new judgehost to the list of judgehosts. Also restarts (and returns) unfinished judgings.';
 $args = array('hostname' => 'Add this specific judgehost and activate it.');
@@ -1045,10 +1047,12 @@ $roles = array('judgehost');
 $api->provideFunction('PUT', 'judgehosts', $doc, $args, $exArgs, $roles);
 
 /**
- * Scoreboard (not finished yet)
+ * Scoreboard
  */
 function scoreboard($args)
 {
+	global $DB;
+
 	checkargs($args, array('cid'));
 
 	global $cdatas;
@@ -1064,15 +1068,35 @@ function scoreboard($args)
 		$filter['affilid'] = array($args['affiliation']);
 	}
 	// TODO: refine this output, maybe add separate function to get summary
-	$scores = genScoreBoard($cdatas[$args['cid']], !$args['public'], $filter);
-	return $scores['matrix'];
+	$scoreboard = genScoreBoard($cdatas[$args['cid']], !$args['public'], $filter);
+
+	$prob2label = $DB->q('KEYVALUETABLE SELECT probid, shortname
+	                      FROM contestproblem WHERE cid = %i', $args['cid']);
+
+	$res = array();
+	foreach ( $scoreboard['scores'] as $teamid => $data ) {
+		$row = array('rank' => $data['rank'], 'team' => $teamid);
+		$row['score'] = array('num_solved' => $data['num_correct'],
+		                      'total_time' => $data['total_time']);
+		$row['problems'] = array();
+		foreach ( $scoreboard['matrix'][$teamid] as $probid => $pdata ) {
+			$row['problems'][] = array('problem'     => $probid,
+			                           'label'       => $prob2label[$probid],
+			                           'num_judged'  => $pdata['num_submissions'],
+			                           'num_pending' => $pdata['num_pending'],
+			                           'time'        => $pdata['time']);
+		}
+		$res[] = $row;
+	}
+	return $res;
 }
 $doc = 'Get the scoreboard. Returns scoreboard for jury members if authenticated as a jury member (and public is not 1).';
-$args = array('cid' => 'ID of the contest to get the scoreboard for',
+$args = array('cid' => 'ID of the contest to get the scoreboard for.',
               'category' => 'ID of a single category to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
               'country' => 'ISO 3166-1 alpha-3 country code to search for.');
-$exArgs = array(array('cid' => 2, 'category' => 1, 'affiliation' => 'UU'), array('cid' => 2, 'country' => 'NLD'));
+$exArgs = array(array('cid' => 2, 'category' => 1, 'affiliation' => 'UU'),
+                array('cid' => 2, 'country' => 'NLD'));
 $api->provideFunction('GET', 'scoreboard', $doc, $args, $exArgs, null, true);
 
 // Now provide the api, which will handle the request

@@ -146,10 +146,17 @@ class db
 			switch ($part{0}) {
 				case 'A':
 					if (!is_array($val) || !$val) {
+						$backtrace = debug_backtrace();
+						if (DEBUG) {
+							$callsite = 'in file: ' . $backtrace[0]['file'] . ', ' .
+								    ' line: ' . $backtrace[0]['line'] . ', ';
+						} else {
+							$callsite = '';
+						}
 						throw new InvalidArgumentException(
 							"%A in \$DATABASE->q() has to correspond to an "
 							. "non-empty array, it is" . " now a '$val' (Query:"
-							. "'$key $query')!");
+							. "'$key $query')! $callsite");
 					}
 					$GLOBALS['MODE'] = $part{1};
 					$query .= implode( ', '
@@ -198,8 +205,8 @@ class db
 		if ($argv) {
 			if(DEBUG) {
 				$backtrace = debug_backtrace();
-				$callsite = ' in file:' . $backtrace[0]['file'] . ', ' .
-					    ' line:' . $backtrace[0]['line'] . ', ';
+				$callsite = ' in file: ' . $backtrace[0]['file'] . ', ' .
+					    ' line: ' . $backtrace[0]['line'] . ', ';
 			} else {
 				$callsite = '';
 			}
@@ -284,8 +291,8 @@ class db
 
 		if(DEBUG) {
 			$backtrace = debug_backtrace();
-			$callsite = ' file:' . $backtrace[1]['file'] . ', ' .
-			            ' line:' . $backtrace[1]['line'] . ', ';
+			$callsite = ' file: ' . $backtrace[1]['file'] . ', ' .
+			            ' line: ' . $backtrace[1]['line'] . ', ';
 		} else {
 			$callsite = '';
 		}

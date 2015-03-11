@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
 		while (isspace(judgeans.peek())) {
 			char c = (char)judgeans.get();
 			if (space_change_sensitive) {
-				char d = std::cin.get();
+				int d = std::cin.get();
 				if (c != d) {
 					wrong_answer("Space change error: got %d expected %d", d, c);
 				}

@@ -13,7 +13,7 @@ function XMLHttpHandle()
 	return ajaxRequest;
 }
 
-function updateMenu(doreload_clarifications, doreload_judgehosts)
+function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejudgings)
 {
 	var handle = XMLHttpHandle();
 	if (!handle) {
@@ -22,8 +22,9 @@ function updateMenu(doreload_clarifications, doreload_judgehosts)
 	handle.onreadystatechange = function() {
 		if (handle.readyState == 4) {
 			var resp = JSON.parse(handle.responseText);
-			var nclars = resp.clarifications.length;
-			var nhosts = resp.judgehosts.length;
+			var nclars  = resp.clarifications.length;
+			var nhosts  = resp.judgehosts.length;
+			var nrejuds = resp.rejudgings.length;
 
 			var elem = document.getElementById('menu_clarifications');
 			var newstr = '';
@@ -52,6 +53,22 @@ function updateMenu(doreload_clarifications, doreload_judgehosts)
 				}
 				if ( elem.innerHTML != 'judgehosts' + newstr ) {
 					elem.innerHTML = 'judgehosts' + newstr;
+					if(doreload_judgehosts) {
+						location.reload()
+					}
+				}
+			}
+			var elem = document.getElementById('menu_rejudgings');
+			var newstr = '';
+			if ( elem!==null ) {
+				if ( nrejuds == 0 ) {
+					elem.className = null;
+				} else {
+					newstr = ' ('+nrejuds+' active)';
+					elem.className = 'new';
+				}
+				if ( elem.innerHTML != 'rejudgings' + newstr ) {
+					elem.innerHTML = 'rejudgings' + newstr;
 					if(doreload_judgehosts) {
 						location.reload()
 					}
