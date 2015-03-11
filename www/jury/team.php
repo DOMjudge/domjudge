@@ -99,6 +99,7 @@ if ( $num_contests > 0 ) {
 					hintText: 'Type to search for contest ID, name, or short name',
 					noResultsText: 'No private contests found',
 					preventDuplicates: true,
+					excludeCurrent: true,
 					prePopulate: <?php echo json_encode($prepopulate); ?>
 				});
 			});

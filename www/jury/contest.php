@@ -93,6 +93,7 @@ if ( !empty($_GET['cmd']) ):
 					hintText: 'Type to search for team ID or name',
 					noResultsText: 'No teams found',
 					preventDuplicates: true,
+					excludeCurrent: true,
 					prePopulate: <?php echo json_encode($prepopulate); ?>
 				});
 			});
@@ -151,6 +152,7 @@ $(function() {
 		hintText: 'Type to search for problem ID or name',
 		noResultsText: 'No problems found',
 		preventDuplicates: true,
+		excludeCurrent: true,
 		prePopulate: <?php echo json_encode($prepopulate); ?>,
 		onAdd: function(item) {
 			addRow(item.id);
