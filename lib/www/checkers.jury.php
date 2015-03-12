@@ -166,6 +166,19 @@ function check_language($data, $keydata = null)
 	return $data;
 }
 
+function check_executable($data, $keydata = null)
+{
+	$id = (isset($data['execid']) ? $data['execid'] : $keydata['execid']);
+	if ( ! preg_match ( ID_REGEX, $id ) ) {
+		ch_error("Executable ID may only contain characters " . IDENTIFIER_CHARS . ".");
+	}
+	if ( !isset($data['type']) || !in_array($data['type'], $executable_types) ) {
+		ch_error("Executable type '" . $data['type'] . "' is invalid.");
+	}
+
+	return $data;
+}
+
 function check_relative_time($time, $starttime, $field)
 {
 	if ( empty($time) ) return null;

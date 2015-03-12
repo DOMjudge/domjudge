@@ -143,8 +143,8 @@ function usage()
 // fetches new executable from database if necessary
 // runs build to compile executable
 // returns absolute path to run script
-function fetch_executable($workdirpath, $execid, $md5sum) {
-	// FIXME: make sure we don't have to escape $execid
+function fetch_executable($workdirpath, $execid, $md5sum)
+{
 	$execpath = "$workdirpath/executable/" . $execid;
 	$execmd5path = $execpath . "/md5sum";
 	$execdeploypath = $execpath . "/.deployed";
