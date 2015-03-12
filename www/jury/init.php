@@ -53,6 +53,11 @@ if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES)
 $cdatas = getCurContests(TRUE, null, TRUE);
 $cids = array_keys($cdatas);
 
+// List of executable script types, used in various places:
+$executable_types = array('compare' => 'compare',
+                          'compile' => 'compile',
+                          'run'     => 'run');
+
 // If the cookie has a existing contest, use it
 if ( isset($_COOKIE['domjudge_cid']) )  {
 	if ( isset($cdatas[$_COOKIE['domjudge_cid']]) ) {
