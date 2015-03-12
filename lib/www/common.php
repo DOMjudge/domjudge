@@ -178,7 +178,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 		"</tr>\n</thead>\n<tbody>\n";
 
 	// print each row with links to detailed information
-	$iseven = $subcnt = $corcnt = $igncnt = $vercnt = $quecnt = $extdiffcnt = 0;
+	$iseven = $subcnt = $corcnt = $igncnt = $vercnt = $quecnt = $extcnt = 0;
 	while( $row = $res->next() ) {
 
 		$sid = (int)$row['submitid'];
@@ -246,7 +246,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 		} else {
 			echo printresult($row['result']);
 			if ( isset($row['externalresult']) && $row['result'] !== $row['externalresult'] ) {
-				$extdiffcnt++;
+				$extcnt++;
 				echo " (&#x26a1;" . printresult($row['externalresult']) . ")";
 			}
 		}
