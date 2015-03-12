@@ -42,7 +42,6 @@ if ( isset($_POST['import']) ) {
 			$contest['freezetime_string'] =
 			    '+' . substr($contest_yaml_data['scoreboard-freeze'],0,-3);
 		}
-		// TODO or 1?
 		$contest['enabled'] = 1;
 
 		$contest = check_contest($contest);

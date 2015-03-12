@@ -224,7 +224,7 @@ for i in judgemessage.txt teammessage.txt score.txt judgeerror.txt diffposition.
 	touch feedback/$i        # Create possible feedback files
 	chmod a+w feedback/$i
 done
-# TODO; get and pass additional arguments to validator
+
 runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
 	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \

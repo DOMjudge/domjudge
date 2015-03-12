@@ -324,7 +324,7 @@ function judgings_POST($args)
 	if ( empty($row['run']) ) {
 		$row['run'] = dbconfig_get('default_run');
 	}
-	// TODO: refactor + integrate in query above?
+
 	$compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable
 	                          WHERE execid = %s', $row['compare']);
 	$row['compare_md5sum'] = $compare_md5sum;
@@ -1067,7 +1067,7 @@ function scoreboard($args)
 	if ( array_key_exists('affiliation', $args) ) {
 		$filter['affilid'] = array($args['affiliation']);
 	}
-	// TODO: refine this output, maybe add separate function to get summary
+
 	$scoreboard = genScoreBoard($cdatas[$args['cid']], !$args['public'], $filter);
 
 	$prob2label = $DB->q('KEYVALUETABLE SELECT probid, shortname
