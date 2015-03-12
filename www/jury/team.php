@@ -81,10 +81,10 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 <?php
 $num_contests = $DB->q("VALUE SELECT COUNT(*) FROM contest c WHERE c.public = 0");
 if ( $num_contests > 0 ) {
-	$prepopulate = $DB->q("TABLE SELECT contest.cid AS id, contest.contestname, contest.shortname,
-			   CONCAT(contest.contestname, ' (', contest.shortname, ' - c', contest.cid, ')') AS search
-			   FROM contest INNER JOIN contestteam USING (cid)
-			   WHERE teamid = %i", $id);
+	$prepopulate = $DB->q("TABLE SELECT c.cid AS id, c.contestname, c.shortname,
+	                       CONCAT(contest.contestname, ' (', c.shortname, ' - c', c.cid, ')') AS search
+	                       FROM contest INNER JOIN contestteam USING (cid)
+	                       WHERE teamid = %i", $id);
 ?>
 
 <!-- contest selection -->
@@ -195,8 +195,8 @@ if ( count($users) ) {
 ?></td></tr>
 <?php
 $private_contests = $DB->q("TABLE SELECT contest.* FROM contest
-			    INNER JOIN contestteam USING (cid)
-			    WHERE public = 0 AND teamid = %i", $id);
+                            INNER JOIN contestteam USING (cid)
+                            WHERE public = 0 AND teamid = %i", $id);
 if ( !empty($private_contests)) {
 	foreach ( $private_contests as $i => $contest ) {
 		echo "<tr><td>\n";

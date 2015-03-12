@@ -15,8 +15,8 @@ $bar_size = 10;
 $title = "Statistics";
 if ( !empty($_GET['probid']) ) {
 	$shortname = $DB->q('VALUE SELECT shortname FROM problem p
-			     INNER JOIN contestproblem USING (probid)
-			     WHERE p.probid = %i', $_GET['probid']);
+	                     INNER JOIN contestproblem USING (probid)
+	                     WHERE p.probid = %i', $_GET['probid']);
 	$title .= " - Problem " . htmlspecialchars($shortname);
 }
 

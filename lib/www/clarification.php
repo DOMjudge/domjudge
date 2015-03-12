@@ -351,7 +351,7 @@ function confirmClar() {
 	$options = array();
 	foreach ($cdatas as $cid => $cdata) {
 		$row = $DB->q('TUPLE SELECT CONCAT(cid, "-general") AS c
-			       FROM contest WHERE cid = %i', $cid);
+		               FROM contest WHERE cid = %i', $cid);
 		if ( IS_JURY && count($cdatas) > 1 )
 		{
 			$options[$row['c']] = "{$cdata['shortname']} - General issue";

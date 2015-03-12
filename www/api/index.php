@@ -375,16 +375,16 @@ function judgings_PUT($args)
 
 	if ( isset($args['output_compile']) ) {
 		if ( $args['compile_success'] ) {
-			$DB->q('UPDATE judging SET output_compile = %s ' .
-				'WHERE judgingid = %i AND judgehost = %s',
-				base64_decode($args['output_compile']),
-				$judgingid, $args['judgehost']);
+			$DB->q('UPDATE judging SET output_compile = %s
+			        WHERE judgingid = %i AND judgehost = %s',
+			       base64_decode($args['output_compile']),
+			       $judgingid, $args['judgehost']);
 		} else {
-			$DB->q('UPDATE judging SET output_compile = %s, ' .
-				'result = "compiler-error", endtime=%s ' .
-				'WHERE judgingid = %i AND judgehost = %s',
-				base64_decode($args['output_compile']), now(),
-				$judgingid, $args['judgehost']);
+			$DB->q('UPDATE judging SET output_compile = %s,
+			        result = "compiler-error", endtime=%s
+			        WHERE judgingid = %i AND judgehost = %s',
+			       base64_decode($args['output_compile']), now(),
+			       $judgingid, $args['judgehost']);
 			$cid = $DB->q('VALUE SELECT s.cid FROM judging
 			               LEFT JOIN submission s USING(submitid)
 			               WHERE judgingid = %i', $judgingid);

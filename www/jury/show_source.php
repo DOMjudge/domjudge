@@ -197,7 +197,7 @@ require('init.php');
 
 $id = getRequestID();
 $submission = $DB->q('MAYBETUPLE SELECT * FROM submission s
-	      WHERE submitid = %i',$id);
+                      WHERE submitid = %i',$id);
 if ( empty($submission) ) error ("Submission $id not found");
 
 // Download was requested

@@ -45,15 +45,15 @@ $sqlbody = 'SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname,
 
 $newrequests    = $DB->q($sqlbody .
                          'AND c.sender IS NOT NULL AND c.answered = 0
-			  ORDER BY submittime DESC, clarid DESC', $contestids);
+                          ORDER BY submittime DESC, clarid DESC', $contestids);
 
 $oldrequests    = $DB->q($sqlbody .
                          'AND c.sender IS NOT NULL AND c.answered != 0
-			  ORDER BY submittime DESC, clarid DESC', $contestids);
+                          ORDER BY submittime DESC, clarid DESC', $contestids);
 
 $clarifications = $DB->q($sqlbody .
                          'AND c.sender IS NULL AND ( c.respid IS NULL OR c.recipient IS NULL )
-			  ORDER BY submittime DESC, clarid DESC', $contestids);
+                          ORDER BY submittime DESC, clarid DESC', $contestids);
 
 echo '<h3><a name="newrequests"></a>' .
 	"New Requests:</h3>\n";

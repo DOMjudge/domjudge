@@ -163,9 +163,11 @@ foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 			$new_teams[] = $team['teamName'];
 		} else {
 			$username = sprintf("team%04d", $id);
-			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i, affilid=%i,
-			               enabled=%i, members=%s, comments=%s WHERE teamid=%i',
-				$team['teamName'], $participants, $affilid, $enabled, $members, "Status: " . $team['status'], $id);
+			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i,
+			               affilid=%i, enabled=%i, members=%s, comments=%s
+			               WHERE teamid=%i',
+			              $team['teamName'], $participants, $affilid, $enabled,
+			              $members, "Status: " . $team['status'], $id);
 			$cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s, email=%s
 			                WHERE username=%s', $team['teamName'], $mails, $username);
 			if ( $cnt > 0 ) {

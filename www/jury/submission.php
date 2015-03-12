@@ -338,9 +338,9 @@ if ( !isset($jid) ) {
 if ( isset($jid) )  {
 
 	$jud = $DB->q('TUPLE SELECT j.*, r.valid AS rvalid
-		       FROM judging j
-		       LEFT JOIN rejudging r USING (rejudgingid)
-		       WHERE judgingid = %i', $jid);
+	               FROM judging j
+	               LEFT JOIN rejudging r USING (rejudgingid)
+	               WHERE judgingid = %i', $jid);
 
 	// sanity check
 	if ($jud['submitid'] != $id) error(

@@ -363,8 +363,9 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 
 		if ( !empty($problem_yaml_data) ) {
 			if ( isset($problem_yaml_data['uuid']) && $cid != -1 ) {
-				$DB->q('UPDATE contestproblem SET shortname=%s WHERE cid=%i AND probid=%i',
-					$problem_yaml_data['uuid'], $cid, $probid);
+				$DB->q('UPDATE contestproblem SET shortname=%s
+				        WHERE cid=%i AND probid=%i',
+				       $problem_yaml_data['uuid'], $cid, $probid);
 			}
 			$yaml_array_problem = array();
 			if ( isset($problem_yaml_data['name']) ) {
@@ -428,20 +429,26 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 						}
 
 						$ovzip = file_get_contents("$tmpzipfiledir/outputvalidator.zip");
-						$probname = $DB->q("VALUE SELECT name FROM problem WHERE probid=%i", $probid);
+						$probname = $DB->q("VALUE SELECT name FROM problem
+						                    WHERE probid=%i", $probid);
 						$ovname = preg_replace('/[^a-zA-Z0-9]/', '_', $probname) . "_cmp";
-						if ( $DB->q("MAYBEVALUE SELECT execid FROM executable WHERE execid=%s", $ovname) ) {
+						if ( $DB->q("MAYBEVALUE SELECT execid FROM executable
+						             WHERE execid=%s", $ovname) ) {
 							// avoid name clash
 							$clashcnt = 2;
-							while ( $DB->q("MAYBEVALUE SELECT execid FROM executable WHERE execid=%s", $ovname . "_" . $clashcnt) ) {
+							while ( $DB->q("MAYBEVALUE SELECT execid FROM executable
+							                WHERE execid=%s", $ovname . "_" . $clashcnt) ) {
 								$clashcnt++;
 							}
 							$ovname = $ovname . "_" . $clashcnt;
 						}
-						$DB->q("INSERT INTO executable (execid, md5sum, zipfile, description, type) VALUES (%s, %s, %s, %s, %s)",
-							$ovname, md5($ovzip), $ovzip, 'output validator for ' . $probname, 'compare');
+						$DB->q("INSERT INTO executable (execid, md5sum, zipfile,
+						        description, type) VALUES (%s, %s, %s, %s, %s)",
+						       $ovname, md5($ovzip), $ovzip,
+						       'output validator for ' . $probname, 'compare');
 
-						$DB->q("UPDATE problem SET special_compare=%s WHERE probid=%i", $ovname, $probid);
+						$DB->q("UPDATE problem SET special_compare=%s
+						        WHERE probid=%i", $ovname, $probid);
 
 						echo "<p>Added output validator '$ovname'.</p>\n";
 					}
@@ -510,17 +517,16 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			}
 
 			$DB->q('INSERT INTO testcase (probid, rank, sample,
-				md5sum_input, md5sum_output, input, output, description' .
-				( $image_file !== FALSE ? ', image, image_thumb, image_type' : '' ) .
-				')' . 
-				'VALUES (%i, %i, %i, %s, %s, %s, %s, %s' . 
-				( $image_file !== FALSE ? ', %s, %s, %s' : '%_ %_ %_' ) .
-				')',
-				$probid, $maxrank, $type == 'sample' ? 1 : 0,
-				md5($testin), md5($testout),
-				$testin, $testout, $description,
-				$image_file, $image_thumb, $image_type
-			);
+			        md5sum_input, md5sum_output, input, output, description' .
+			       ( $image_file !== FALSE ? ', image, image_thumb, image_type' : '' ) .
+			       ')' .
+			       'VALUES (%i, %i, %i, %s, %s, %s, %s, %s' .
+			       ( $image_file !== FALSE ? ', %s, %s, %s' : '%_ %_ %_' ) .
+			       ')',
+			       $probid, $maxrank, $type == 'sample' ? 1 : 0,
+			       md5($testin), md5($testout),
+			       $testin, $testout, $description,
+			       $image_file, $image_thumb, $image_type);
 			$maxrank++;
 			$ncases++;
 			echo "<li>Added $type testcase from: <tt>$datafile.{in,ans}</tt></li>\n";
@@ -533,10 +539,12 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 		echo "<p>No jury solutions added: problem is not linked to a contest (yet).</p>\n";
 	} else if ( empty($teamid) ) {
 		echo "<p>No jury solutions added: must associate team with your user first.</p>\n";
-	} else if ( $DB->q('VALUE SELECT allow_submit FROM problem INNER JOIN contestproblem using (probid) WHERE probid = %i AND cid = %i', $probid, $cid) ) {
+	} else if ( $DB->q('VALUE SELECT allow_submit FROM problem
+	                    INNER JOIN contestproblem using (probid)
+	                    WHERE probid = %i AND cid = %i', $probid, $cid) ) {
 		// First find all submittable languages:
 		$langs = $DB->q('KEYVALUETABLE SELECT langid, extensions
- 		                 FROM language WHERE allow_submit = 1');
+		                 FROM language WHERE allow_submit = 1');
 
 		$njurysols = 0;
 		echo "<ul>\n";

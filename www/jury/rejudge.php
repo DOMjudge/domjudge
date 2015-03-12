@@ -71,8 +71,8 @@ if ( $full_rejudge ) {
 		$reason = $table . ': ' . $id;
 	}
 	$rejudgingid = $DB->q('RETURNID INSERT INTO rejudging
-			       (userid_start, starttime, reason) VALUES (%i, %s, %s)',
-			       $userdata['userid'], now(), $reason);
+	                       (userid_start, starttime, reason) VALUES (%i, %s, %s)',
+	                      $userdata['userid'], now(), $reason);
 }
 
 while ( $jud = $res->next() ) {

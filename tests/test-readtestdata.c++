@@ -24,7 +24,7 @@ int main()
 	string dir  = "../../testcase/";
 	string filepath, fline;
 	ifstream fin;
-	
+
 	dp = opendir( dir.c_str() );
 	if ( dp == NULL ) {
 		cerr << "Error (" << errno << "): could not open dir " << dir << endl;

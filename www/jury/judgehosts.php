@@ -83,9 +83,9 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 }
 
 $res = $DB->q('SELECT judgehost.*, judgehost_restriction.restrictionname
-	       FROM judgehost
-	       LEFT JOIN judgehost_restriction USING (restrictionid)
-	       ORDER BY hostname');
+               FROM judgehost
+               LEFT JOIN judgehost_restriction USING (restrictionid)
+               ORDER BY hostname');
 
 $now = now();
 $query = 'KEYVALUETABLE SELECT judgehost,

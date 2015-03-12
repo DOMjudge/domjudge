@@ -83,7 +83,7 @@ if ( !empty($_GET['cmd']) ):
 	                       CONCAT(name, ' (t', teamid, ')') AS search
 	                       FROM team INNER JOIN contestteam USING (teamid)
 	                       WHERE cid = %i", $id);
-	
+
 ?>
 		<?php echo addInput('data[0][mapping][1][items]', '', 50); ?>
 		<script type="text/javascript">
@@ -161,14 +161,14 @@ $(function() {
 			deleteRow(item.id);
 		}
 	});
-	
+
 	var current_problems = <?php echo json_encode($current_problems); ?>;
 	var problem_name_mapping = <?php echo json_encode($problem_name_mapping); ?>;
-	
+
 	$.each(current_problems, function(i, problem) {
 		addRow(problem.probid);
 	});
-	
+
 	function addRow(probId) {
 		var $template = $('#contestproblem_template');
 		var $table = $('#problems_table');
@@ -180,10 +180,10 @@ $(function() {
 			// Oterwise we should add 1 to the old value
 			maxId++;
 		}
-		
+
 		// Set it back on the table
 		$table.data('max-id', maxId);
-		
+
 		var contest_problem_data = {
 			shortname: '',
 			allow_submit: true,
@@ -191,14 +191,14 @@ $(function() {
 			color: '',
 			lazy_eval_results: ''
 		};
-		
+
 		for ( var i = 0; i < current_problems.length; i++ ) {
 			if ( current_problems[i].probid == probId ) {
 				contest_problem_data = current_problems[i];
 				break;
 			}
 		}
-		
+
 		var templateContents = $template.text()
 			.replace(/\{id\}/g, maxId)
 			.replace(/\{probid\}/g, probId)
@@ -206,9 +206,9 @@ $(function() {
 			.replace(/\{shortname\}/g, contest_problem_data.shortname)
 			.replace(/\{color\}/g, contest_problem_data.color)
 			.replace(/\{lazy_eval_results\}/g, contest_problem_data.lazy_eval_results);
-		
+
 		$('tbody', $table).append(templateContents);
-		
+
 		// Set allow submit / allow judge
 		var submit_id = '#data_0__mapping__0__extra__' + maxId + '__allow_submit_';
 		if ( contest_problem_data.allow_submit ) {
@@ -217,7 +217,7 @@ $(function() {
 			submit_id += '0';
 		}
 		$(submit_id).attr('checked', 'checked');
-		
+
 		var judge_id = '#data_0__mapping__0__extra__' + maxId + '__allow_judge_';
 		if ( contest_problem_data.allow_judge ) {
 			judge_id += '1';
@@ -225,10 +225,10 @@ $(function() {
 			judge_id += '0';
 		}
 		$(judge_id).attr('checked', 'checked');
-		
+
 		jscolor.bind();
 	}
-	
+
 	function deleteRow(probId) {
 		var $tr = $('#problems_table tr[data-problem=' + probId + ']');
 		$tr.remove();
@@ -261,7 +261,7 @@ $(function() {
 		<label for='data_0__mapping__0__extra__{id}__allow_judge_0'>no</label>
 	</td>
 	<td>
-		<?php echo addInput("data[0][mapping][0][extra][{id}][color]", '{color}', 15, 25, 
+		<?php echo addInput("data[0][mapping][0][extra][{id}][color]", '{color}', 15, 25,
                             'class="color {required:false,adjust:false,hash:true,caps:false}"'); ?>
 	</td>
 	<td>
@@ -301,8 +301,8 @@ function clearTeamsOnPublic() {
 echo addHidden('data[0][mapping][0][fk][0]', 'cid') .
      addHidden('data[0][mapping][0][fk][1]', 'probid') .
      addHidden('data[0][mapping][0][table]', 'contestproblem');
-echo addHidden('data[0][mapping][1][fk][0]', 'cid') . 
-     addHidden('data[0][mapping][1][fk][1]', 'teamid') . 
+echo addHidden('data[0][mapping][1][fk][0]', 'cid') .
+     addHidden('data[0][mapping][1][fk][1]', 'teamid') .
      addHidden('data[0][mapping][1][table]', 'contestteam');
 echo addHidden('cmd', $cmd) .
 	addHidden('table','contest') .
@@ -346,8 +346,8 @@ $teams = $DB->q("TABLE SELECT team.*
                  FROM team INNER JOIN contestteam USING (teamid)
                  WHERE cid = %i", $id);
 $numprobs = $DB->q("VALUE SELECT COUNT(*) AS problemcount
-		    FROM contestproblem
-		    WHERE cid = %i", $id);
+                    FROM contestproblem
+                    WHERE cid = %i", $id);
 
 
 echo "<table>\n";
@@ -416,10 +416,10 @@ if ( IS_ADMIN ) {
 echo "<h3>Problems</h3>\n\n";
 
 $res = $DB->q('TABLE SELECT *
-		       FROM problem
-		       INNER JOIN contestproblem USING (probid)
-		       WHERE cid = %i
-		       ORDER BY shortname', $id);
+               FROM problem
+               INNER JOIN contestproblem USING (probid)
+               WHERE cid = %i
+               ORDER BY shortname', $id);
 
 if ( count($res) == 0 ) {
 	echo "<p class=\"nodata\">No problems added yet</p>\n\n";

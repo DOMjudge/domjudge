@@ -99,7 +99,7 @@ echo "</div>\n";
 
 $probs = $DB->q('KEYVALUETABLE SELECT probid, name FROM problem
                  INNER JOIN contestproblem USING (probid)
-	             WHERE allow_submit = 1 AND cid = %i ORDER BY name', $submission['cid']);
+                 WHERE allow_submit = 1 AND cid = %i ORDER BY name', $submission['cid']);
 $langs = $DB->q('KEYVALUETABLE SELECT langid, name FROM language
                  WHERE allow_submit = 1 ORDER BY name');
 

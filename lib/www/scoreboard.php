@@ -567,13 +567,15 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		if ( empty($categids) ) {
 			$affils = array();
 		} else {
-			$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY, team_affiliation.name, country
-		                      FROM team_affiliation
-		                      LEFT JOIN team USING(affilid)
-		                      INNER JOIN contest ON contest.cid = %i
-		                      LEFT JOIN contestteam ON contestteam.teamid = team.teamid AND contestteam.cid = contest.cid
-		                      WHERE categoryid IN (%As) AND contest.cid = %i AND (contest.public = 1 
-		                      OR contestteam.teamid IS NOT NULL) GROUP BY affilid', 
+			$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY,
+			                  team_affiliation.name, country
+			                  FROM team_affiliation
+			                  LEFT JOIN team t USING (affilid)
+			                  INNER JOIN contest c ON (contest.cid = %i)
+			                  LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
+			                  WHERE categoryid IN (%As) AND c.cid = %i AND
+			                  (c.public = 1 OR ct.teamid IS NOT NULL)
+			                  GROUP BY affilid',
 			                 $cdata['cid'], array_keys($categids), $cdata['cid']);
 		}
 

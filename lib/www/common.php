@@ -111,7 +111,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	     LEFT JOIN contestproblem cp USING (probid, cid)
 	     LEFT JOIN language       l  USING (langid) ' .
 	    (isset($restrictions['rejudgingid']) ?
-		'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.rejudgingid = %i)
+	    'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.rejudgingid = %i)
 	     LEFT JOIN judging        jold ON (j.prevjudgingid = jold.judgingid) ' :
 	    'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.valid = 1) %_ ') .
 	    'WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $rejudgingclause .
@@ -141,8 +141,8 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	              @$restrictions['teamid'], @$restrictions['categoryid'],
 	              @$restrictions['probid'], @$restrictions['langid'],
 	              @$restrictions['judgehost'],
-		      @$restrictions['rejudgingid'], @$restrictions['rejudgingid'],
-		      @$restrictions['old_result'], @$restrictions['result'],
+	              @$restrictions['rejudgingid'], @$restrictions['rejudgingid'],
+	              @$restrictions['old_result'], @$restrictions['result'],
 	              $limit);
 
 	// nothing found...
@@ -301,12 +301,12 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 
 			foreach ( $query_extras as $cnt => $query_extra ) {
 				$$cnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody . $query_extra,
-						 @$restrictions['rejudgingid'], $cids,
-						 @$restrictions['teamid'], @$restrictions['categoryid'],
-						 @$restrictions['probid'], @$restrictions['langid'],
-						 @$restrictions['judgehost'],
-						 @$restrictions['rejudgingid'], @$restrictions['rejudgingid'],
-						 @$restrictions['old_result'], @$restrictions['result']);
+				               @$restrictions['rejudgingid'], $cids,
+				               @$restrictions['teamid'], @$restrictions['categoryid'],
+				               @$restrictions['probid'], @$restrictions['langid'],
+				               @$restrictions['judgehost'],
+				               @$restrictions['rejudgingid'], @$restrictions['rejudgingid'],
+				               @$restrictions['old_result'], @$restrictions['result']);
 			}
 		}
 		echo "<p>Total correct: $corcnt, submitted: $subcnt";
@@ -502,10 +502,9 @@ function putProblemText($probid)
 	global $DB, $cdata;
 
 	$prob = $DB->q("MAYBETUPLE SELECT cid, shortname, problemtext, problemtext_type
-			FROM problem INNER JOIN contestproblem USING (probid)
-			WHERE OCTET_LENGTH(problemtext) > 0
-			AND probid = %i
-			AND cid = %i", $probid, $cdata['cid']);
+	                FROM problem INNER JOIN contestproblem USING (probid)
+	                WHERE OCTET_LENGTH(problemtext) > 0
+	                AND probid = %i AND cid = %i", $probid, $cdata['cid']);
 
 	if ( empty($prob) ||
 	     !(IS_JURY ||
@@ -555,8 +554,9 @@ function putProblemTextList()
 
 		// otherwise, display list
 		$res = $DB->q('SELECT probid,shortname,name,color,problemtext_type
-			       FROM problem INNER JOIN contestproblem USING (probid) WHERE cid = %i AND allow_submit = 1 AND
-			       problemtext_type IS NOT NULL ORDER BY shortname', $cid);
+		               FROM problem INNER JOIN contestproblem USING (probid)
+		               WHERE cid = %i AND allow_submit = 1 AND
+		               problemtext_type IS NOT NULL ORDER BY shortname', $cid);
 
 		if ( $res->count() > 0 ) {
 			echo "<ul>\n";
@@ -581,9 +581,9 @@ function have_problemtexts()
 {
 	global $DB, $cid;
 	return $DB->q('VALUE SELECT COUNT(*) FROM problem
-		       INNER JOIN contestproblem USING (probid)
-		       WHERE problemtext_type IS NOT NULL
-		       AND cid = %i', $cid) > 0;
+	               INNER JOIN contestproblem USING (probid)
+	               WHERE problemtext_type IS NOT NULL
+	               AND cid = %i', $cid) > 0;
 }
 
 /**

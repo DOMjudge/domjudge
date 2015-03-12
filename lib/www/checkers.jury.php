@@ -111,14 +111,20 @@ function check_problem($data, $keydata = null)
 
 	if ( !empty($data['special_compare']) ) {
 		global $DB;
-		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s AND type = %s', $data['special_compare'], 'compare') ) {
-			ch_error("Unknown special compare script (or wrong type): " . $data['special_compare']);
+		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable
+		               WHERE execid = %s AND type = %s',
+		              $data['special_compare'], 'compare') ) {
+			ch_error("Unknown special compare script (or wrong type): " .
+			         $data['special_compare']);
 		}
 	}
 	if ( !empty($data['special_run']) ) {
 		global $DB;
-		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s AND type = %s', $data['special_run'], 'run') ) {
-			ch_error("Unknown special run script (or wrong type): " . $data['special_run']);
+		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable
+		               WHERE execid = %s AND type = %s',
+		              $data['special_run'], 'run') ) {
+			ch_error("Unknown special run script (or wrong type): " .
+			         $data['special_run']);
 		}
 	}
 
@@ -149,8 +155,11 @@ function check_language($data, $keydata = null)
 		ch_error("No compile script specified for language: " . $id);
 	} else {
 		global $DB;
-		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s AND type = %s', $data['compile_script'], 'compile') ) {
-			ch_error("Unknown compile script (or wrong type): " . $data['compile_script']);
+		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable
+		               WHERE execid = %s AND type = %s',
+		              $data['compile_script'], 'compile') ) {
+			ch_error("Unknown compile script (or wrong type): " .
+			         $data['compile_script']);
 		}
 	}
 
