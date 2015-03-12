@@ -218,8 +218,6 @@ if ( IS_ADMIN && class_exists("ZipArchive") ) {
 
 echo "</table>\n" . addEndForm();
 
-echo "<br />\n" . rejudgeForm('executable', $id) . "\n\n"; // FIXME: useful?
-
 if ( IS_ADMIN ) {
 	echo "<p>" .
 		'<a href="executable.php?fetch&amp;id=' . urlencode($id) .
@@ -228,12 +226,5 @@ if ( IS_ADMIN ) {
 		editLink('executable',$id) . "\n" .
 		delLink('executable','execid', $id) . "</p>\n\n";
 }
-
-/* FIXME: useful?
-echo "<h2>Submissions for " . htmlspecialchars($id) . "</h2>\n\n";
-
-$restrictions = array( 'execid' => $id );
-putSubmissions($cdata, $restrictions);
-*/
 
 require(LIBWWWDIR . '/footer.php');
