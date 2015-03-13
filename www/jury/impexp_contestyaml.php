@@ -95,7 +95,7 @@ if ( isset($_POST['import']) ) {
 		}
 	*/
 
-		foreach ($contest_yaml_data['problemset'] as $problem) {
+		foreach ($contest_yaml_data['problems'] as $problem) {
 			// TODO better lang-id?
 			$prob = array();
 			if ( $DB->q("MAYBEVALUE SELECT probid FROM problem
@@ -173,7 +173,7 @@ if ( isset($_POST['import']) ) {
 		$contest_data['languages'][] = $language;
 
 	}
-	$contest_data['problemset'] = array();
+	$contest_data['problems'] = array();
 	$contests = getCurContests(FALSE);
 	if ( !empty($contests) ) {
 		$q = $DB->q("SELECT * FROM problem INNER JOIN contestproblem USING (probid) WHERE cid IN (%Ai)",
@@ -185,7 +185,7 @@ if ( isset($_POST['import']) ) {
 			$problem['short-name'] = $prob['name'];
 			$problem['color'] = $prob['color'];
 			// TODO? rgb? Fredrik?
-			$contest_data['problemset'][] = $problem;
+			$contest_data['problems'][] = $problem;
 		}
 	}
 
