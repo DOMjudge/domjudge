@@ -29,8 +29,13 @@ setup_database_connection();
 $verbose = LOG_NOTICE;
 $waittime = 5;
 
-$cdata = getCurContest(TRUE);
-$cid = $cdata['cid'];
+$cdatas = getCurContests(TRUE);
+$cids = array_keys($cdatas);
+if ( count($cdatas)!=1 ) {
+	error("Feed only supports exactly one active contest.");
+}
+$cdata = array_pop($cdatas);
+$cid = array_pop($cids);
 
 $config = spyc_load_file(ETCDIR . '/import-forwardfeed.yaml');
 
