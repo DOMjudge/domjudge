@@ -571,7 +571,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 			                  team_affiliation.name, country
 			                  FROM team_affiliation
 			                  LEFT JOIN team t USING (affilid)
-			                  INNER JOIN contest c ON (contest.cid = %i)
+			                  INNER JOIN contest c ON (c.cid = %i)
 			                  LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
 			                  WHERE categoryid IN (%As) AND c.cid = %i AND
 			                  (c.public = 1 OR ct.teamid IS NOT NULL)
