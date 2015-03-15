@@ -273,8 +273,8 @@ foreach ($table as $orig_verdict => $changed_verdicts) {
 		} else {
 			// this case is the interesting one
 			$class = "changed";
-			$link = '<a href="#' . urlencode($orig_verdict_abbrev) . '__' .
-			                       urlencode($new_verdict_abbrev) . '">';
+			$link = '<a href="rejudging.php?id=' . urlencode($id) . '&old_verdict=' .
+				urlencode($orig_verdict) . '&new_verdict=' . urlencode($new_verdict) . '">';
 		}
 		echo "<td class=\"$class\">$link$cnt" .  ( empty($link) ? '' : '</a>' ) . "</td>\n";
 	}
