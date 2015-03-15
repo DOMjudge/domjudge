@@ -18,8 +18,9 @@ Version 4.0.5 - DEV
  - Fix bug possibly leading to invalid HTML forms.
  - Fix config check for missing country flags.
  - Fix conflicting mount options in chroot-startstop.sh script.
+ - Fix switched name/shortname columns in affiliations overview. 
  - Improve various error messages.
- - Various minor documentation improvements.
+ - Various documentation improvements.
 
 Version 4.0.4 - 27 October 2014
 -------------------------------
