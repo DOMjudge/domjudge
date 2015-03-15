@@ -40,8 +40,9 @@ define('LDAP_DNQUERY', 'CN=&,OU=users,DC=example,DC=com');
 //define('BALLOON_CMD', 'lpr');
 define('BALLOON_CMD', '');
 
-// Specify URL to external CCS, e.g. Kattis
-define('EXT_CCS_URL', 'https://ccs.example.com/');
+// Specify URL to external CCS's submission page for linking external
+// submission IDs. The external ID is appended to the URL below.
+define('EXT_CCS_URL', 'https://ccs.example.com/submissions/');
 
 // Specify URL of the iCAT webinterface
 define('ICAT_URL', 'http://icat.example.com/icat/');
