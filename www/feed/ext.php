@@ -264,5 +264,5 @@ if ( isset($cdata['finalizetime']) ) {
 
 header('Content-Type: text/xml; charset=' . DJ_CHARACTER_SET);
 
-$xmldoc->formatOutput = false;
+$xmldoc->formatOutput = true;
 echo $xmldoc->saveXML();
