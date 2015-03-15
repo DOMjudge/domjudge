@@ -393,8 +393,8 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				}
 				if ( sizeof($validator_files) == 0 ) {
 					echo "<p>Custom validator specified but not found.</p>\n";
-				} else if ( sizeof ($validator_files) > 1 ) {
-					// must be in common directory
+				} else {
+					// file(s) have to share common directory
 					$validator_dir = mb_substr($validator_files[0], 0, mb_strrpos($validator_files[0], "/"));
 					$same_dir = TRUE;
 					foreach ( $validator_files as $validator_file ) {
