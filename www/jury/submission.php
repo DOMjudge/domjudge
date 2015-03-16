@@ -287,7 +287,9 @@ if ( ! $submdata['valid'] ) {
 	<?php echo htmlspecialchars($submdata['probname'])?></a>&nbsp;&nbsp;
 <img title="language" alt="Language:" src="../images/lang.png"/> <a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a>&nbsp;&nbsp;
-<img title="submittime" alt="Submittime:" src="../images/submittime.png"/> <?php echo printtime($submdata['submittime']) ?>&nbsp;&nbsp;
+<img title="submittime" alt="Submittime:" src="../images/submittime.png"/>
+	<?php echo '<span title="' . printtime($submdata['submittime'],'%Y-%m-%d %H:%M:%S (%Z)') . '">' .
+	           printtime($submdata['submittime']) . '</span>' ?>&nbsp;&nbsp;
 <img title="allowed runtime" alt="Allowed runtime:" src="../images/allowedtime.png"/>
 	<?php echo  htmlspecialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
 <img title="view source code" alt="" src="../images/code.png"/>
@@ -448,9 +450,8 @@ if ( isset($jid) )  {
 	echo "<span class=\"judgetime\">Judging started: " . printtime($jud['starttime'],'%H:%M:%S');
 
 	if ( $judging_ended ) {
-		echo ', ended: ' . printtime($jud['endtime'],'%H:%M:%S') .
-			' (judging took '.
-				printtimediff($jud['starttime'], $jud['endtime']) . ')';
+		echo ', finished in '.
+				printtimediff($jud['starttime'], $jud['endtime']) . ' s';
 	} elseif ( $jud['valid'] ) {
 		echo ' [still judging - busy ' . printtimediff($jud['starttime']) . ']';
 	} else {
