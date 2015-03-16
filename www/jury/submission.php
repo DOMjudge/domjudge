@@ -527,7 +527,7 @@ if ( isset($jid) )  {
 					                  " onclick=\"postVerifyCommentToICAT(".
 					                  "'$url','$username','".
 					                  $submdata['team_externalid']."','" .
-					                  $submdata['probid']."','".
+					                  $submdata['probshortname']."','".
 					                  $submdata['externalid']."')\"");
 				}
 				echo "</p>" . addEndForm();

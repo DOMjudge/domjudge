@@ -603,6 +603,7 @@ function initFavouriteTeams() {
 // This function is a specific addition for using DOMjudge within a
 // ICPC analyst setup, to automatically include an analyst's comment
 // on the submission in the iCAT system.
+// Note that team,prob,submission IDs are as expected by iCAT.
 function postVerifyCommentToICAT(url, user, teamid, probid, submissionid)
 {
 	var form = document.createElement("form");
