@@ -534,8 +534,8 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$sdata = genScoreBoard($cdata, IS_JURY, $filter);
 	}
 
-	// page heading with contestname and start/endtimes
-	echo "<h1>Scoreboard " . htmlspecialchars($cdata['contestname']) . "</h1>\n\n";
+	// page heading with contest name and start/endtimes
+	echo "<h1>Scoreboard " . htmlspecialchars($cdata['name']) . "</h1>\n\n";
 
 	if ( $fdata['showfinal'] ) {
 		echo "<h4>final standings</h4>\n\n";

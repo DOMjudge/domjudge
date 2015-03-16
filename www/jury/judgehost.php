@@ -29,7 +29,10 @@ if ( isset($_REQUEST['cmd']) &&
 	}
 }
 
-$row = $DB->q('TUPLE SELECT judgehost.*, restrictionname FROM judgehost LEFT JOIN judgehost_restriction USING (restrictionid) WHERE hostname = %s', $id);
+$row = $DB->q('TUPLE SELECT judgehost.*, r.name AS restrictionname
+               FROM judgehost
+               LEFT JOIN judgehost_restriction r USING (restrictionid)
+               WHERE hostname = %s', $id);
 
 $title = 'Judgehost '.htmlspecialchars($row['hostname']);
 

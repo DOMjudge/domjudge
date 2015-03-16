@@ -57,7 +57,7 @@ if( $res->count() == 0 ) {
 		$restrictions = json_decode($row['restrictions'], true);
 		$link = '<a href="judgehost_restriction.php?id=' . (int)$row['restrictionid'] . '">';
 		echo '<tr><td>' . $link. (int)$row['restrictionid'] .
-		     '</a></td><td>' . $link . htmlspecialchars($row['restrictionname']) .
+		     '</a></td><td>' . $link . htmlspecialchars($row['name']) .
 		     '</a></td><td class="tdright">' . $link . count($restrictions['contest']) .
 		     '</a></td><td class="tdright">' . $link . count($restrictions['problem']) .
 		     '</a></td><td class="tdright">' . $link . count($restrictions['language']) .

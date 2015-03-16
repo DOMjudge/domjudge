@@ -156,7 +156,7 @@ echo addHidden('cmd', $cmd) .
 
 
 if ( class_exists("ZipArchive") ) {
-	$contests = $DB->q("KEYVALUETABLE SELECT cid, CONCAT('c', cid, ': ' , shortname, ' - ', contestname) FROM contest");
+	$contests = $DB->q("KEYVALUETABLE SELECT cid, CONCAT('c', cid, ': ' , shortname, ' - ', name) FROM contest");
 	$values = array(-1 => 'Do not add / update contest data');
 	foreach ($contests as $cid => $contest) {
 		$values[$cid] = $contest;
@@ -284,7 +284,7 @@ if ( $current_cid === null) {
 			     "<td class=\"tdright\">" . $link .
 			     "c" . (int)$row['cid'] . "</a></td>\n";
 			echo "<td>" . $link . htmlspecialchars($row['shortname']) . "</a></td>\n";
-			echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
+			echo "<td>" . $link . htmlspecialchars($row['name']) . "</a></td>\n";
 			echo "<td>" . $link . htmlspecialchars($row['problemshortname']) . "</a></td>\n";
 			echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_submit']) . "</a></td>\n";
 			echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_judge']) . "</a></td>\n";

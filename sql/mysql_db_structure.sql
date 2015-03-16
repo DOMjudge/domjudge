@@ -77,7 +77,7 @@ CREATE TABLE `configuration` (
 
 CREATE TABLE `contest` (
   `cid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `contestname` varchar(255) NOT NULL COMMENT 'Descriptive name',
+  `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `shortname` varchar(255) NOT NULL COMMENT 'Short name for this contest',
   `activatetime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest becomes visible in team/public views',
   `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest starts, submissions accepted',
@@ -198,7 +198,7 @@ CREATE TABLE `judgehost` (
 
 CREATE TABLE `judgehost_restriction` (
   `restrictionid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `restrictionname` varchar(255) NOT NULL COMMENT 'Descriptive name',
+  `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `restrictions` longtext COMMENT 'JSON-encoded restrictions',
   PRIMARY KEY  (`restrictionid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Restrictions for judgehosts';

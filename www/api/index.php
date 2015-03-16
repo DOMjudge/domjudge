@@ -67,7 +67,7 @@ function contest()
 	return array(
 		'id'        => $cid,
 		'shortname' => $cdata['shortname'],
-		'name'      => $cdata['contestname'],
+		'name'      => $cdata['name'],
 		'start'     => $cdata['starttime'],
 		'freeze'    => $cdata['freezetime'],
 		'end'       => $cdata['endtime'],
@@ -98,7 +98,7 @@ function contests()
 		return array(
 			'id' => $cdata['cid'],
 			'shortname' => $cdata['shortname'],
-			'name' => $cdata['contestname'],
+			'name' => $cdata['name'],
 			'start' => $cdata['starttime'],
 			'freeze' => $cdata['freezetime'],
 			'end' => $cdata['endtime'],

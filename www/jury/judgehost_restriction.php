@@ -51,8 +51,8 @@ if ( !empty($_GET['cmd']) ) {
 	}
 
 	?>
-<tr><td><label for="data_0__restrictionname_">Name:</label></td>
-    <td><?php echo addInput('data[0][restrictionname]', @$row['restrictionname'], 15, 255, 'required')?></td></tr>
+<tr><td><label for="data_0__name_">Name:</label></td>
+    <td><?php echo addInput('data[0][name]', @$row['name'], 15, 255, 'required')?></td></tr>
 <?php
 
 	foreach ( array('contest','problem','language') as $type ) {
@@ -110,11 +110,11 @@ if ( !empty($_GET['cmd']) ) {
 $data = $DB->q('TUPLE SELECT * FROM judgehost_restriction WHERE restrictionid = %i', $id);
 if ( !$data ) error("Missing or invalid restriction id");
 
-echo "<h1>Restriction: " . htmlspecialchars($data['restrictionname']) . "</h1>\n\n";
+echo "<h1>Restriction: " . htmlspecialchars($data['name']) . "</h1>\n\n";
 
 echo "<table>\n";
 echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['restrictionid']) . "</td></tr>\n";
-echo '<tr><td>Name:</td><td>' . htmlspecialchars($data['restrictionname']) . "</td></tr>\n";
+echo '<tr><td>Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
 
 $restrictions = json_decode($data['restrictions'], true);
 
@@ -144,7 +144,7 @@ if ( IS_ADMIN ) {
 	     delLink('judgehost_restriction','restrictionid',$data['restrictionid']) . "</p>\n\n";
 }
 
-echo "<h2>Judgehosts having restriction " . htmlspecialchars($data['restrictionname']) . "</h2>\n\n";
+echo "<h2>Judgehosts having restriction " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $judgehosts = $DB->q('SELECT hostname, active FROM judgehost WHERE restrictionid = %i', $id);
 if ( $judgehosts->count() == 0 ) {

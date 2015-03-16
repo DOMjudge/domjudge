@@ -47,8 +47,8 @@ if ( !empty($_GET['cmd']) ):
 
 <tr><td><label for="data_0__shortname_">Short name:</label></td>
 <td><?php echo addInput('data[0][shortname]', @$row['shortname'], 40, 10, 'required')?></td></tr>
-<tr><td><label for="data_0__contestname_">Contest name:</label></td>
-<td><?php echo addInput('data[0][contestname]', @$row['contestname'], 40, 255, 'required')?></td></tr>
+<tr><td><label for="data_0__name_">Contest name:</label></td>
+<td><?php echo addInput('data[0][name]', @$row['name'], 40, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__activatetime_string_">Activate time:</label></td>
 <td><?php echo addInput('data[0][activatetime_string]', @$row['activatetime_string'], 20, 19, 'required pattern="' . $pattern_dateorneg . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> -hh:mm)</td></tr>
 
@@ -333,7 +333,7 @@ if ( isset($_GET['edited']) ) {
 
 $data = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $id);
 
-echo "<h1>Contest: ".htmlspecialchars($data['contestname'])."</h1>\n\n";
+echo "<h1>Contest: ".htmlspecialchars($data['name'])."</h1>\n\n";
 
 if ( in_array($data['cid'], $cids) ) {
 	echo "<p><em>This is an active contest.</em></p>\n\n";
@@ -357,7 +357,7 @@ echo '<tr><td>Short name:</td><td>' .
      htmlspecialchars($data['shortname']) .
      "</td></tr>\n";
 echo '<tr><td>Name:</td><td>' .
-	htmlspecialchars($data['contestname']) .
+	htmlspecialchars($data['name']) .
 	"</td></tr>\n";
 echo '<tr><td>Activate time:</td><td>' .
 	htmlspecialchars(@$data['activatetime_string']) .

@@ -79,7 +79,7 @@ if ( empty($curcids) )  {
 		echo "<form action=\"contests.php\" method=\"post\">\n";
 		echo addHidden('cid', $row['cid']);
 		echo "<p>No active contest. Upcoming:<br/> <em>" .
-		     htmlspecialchars($row['contestname']) .
+		     htmlspecialchars($row['name']) .
 		     ' (' . htmlspecialchars($row['shortname']) . ')' .
 		     "</em>; active from " . printtime($row['activatetime'], '%a %d %b %Y %T %Z') .
 		     "<br /><br />\n";
@@ -107,7 +107,7 @@ if ( empty($curcids) )  {
 			       difftime($row['unfreezetime'], $now) <= 0;
 
 		$contestname = htmlspecialchars(sprintf('%s (%s - c%d)',
-							$row['contestname'],
+							$row['name'],
 							$row['shortname'],
 							$row['cid']));
 
@@ -212,7 +212,7 @@ if( count($res) == 0 ) {
 		echo "<td>" . $link . ($row['public'] ? 'yes' : 'no') . "</a></td>\n";
 		echo "<td>" . $link . ($row['public'] ? '<em>all</em>' : $row['numteams']) . "</a></td>\n";
 		echo "<td>" . $link . $numprobs . "</a></td>\n";
-		echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
+		echo "<td>" . $link . htmlspecialchars($row['name']) . "</a></td>\n";
 		$iseven = ! $iseven;
 
 		if ( IS_ADMIN ) {

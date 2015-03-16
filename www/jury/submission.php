@@ -197,8 +197,9 @@ $title = 'Submission s'.@$id;
 if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
-                    s.submittime, s.valid, c.cid, c.shortname AS contestshortname, c.contestname,
-                    t.name AS teamname, l.name AS langname, cp.shortname, p.name AS probname,
+                    s.submittime, s.valid, c.cid, c.shortname AS contestshortname,
+                    c.name AS contestname, t.name AS teamname, l.name AS langname,
+                    cp.shortname, p.name AS probname,
                     CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
                     LEFT JOIN team     t ON (t.teamid = s.teamid)

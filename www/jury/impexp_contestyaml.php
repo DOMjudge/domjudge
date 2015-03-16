@@ -29,7 +29,7 @@ if ( isset($_POST['import']) ) {
 		require(LIBWWWDIR . '/checkers.jury.php');
 
 		$contest = array();
-		$contest['contestname'] = $contest_yaml_data['name'];
+		$contest['name'] = $contest_yaml_data['name'];
 		$contest['starttime_string'] =
 		    strftime('%Y-%m-%d %H:%M:%S', strtotime($contest_yaml_data['start-time']));
 		$contest['activatetime_string'] = '-1:00';
@@ -144,8 +144,8 @@ if ( isset($_POST['import']) ) {
 	}
 
 	$contest_data = array();
-	$contest_data['name'] = $contest_row['contestname'];
-	$contest_data['short-name'] = $contest_row['contestname'];
+	$contest_data['name'] = $contest_row['name'];
+	$contest_data['short-name'] = $contest_row['name'];
 	$contest_data['start-time'] = date('c', $contest_row['starttime']);
 	$contest_data['duration'] =
 		printtimerel(calcContestTime($contest_row['endtime'], $contest_row['cid']));
@@ -217,7 +217,7 @@ echo addSubmit('Import', 'import') . addEndForm();
 echo "<h2>Export to YAML</h2>\n\n";
 echo addForm('impexp_contestyaml.php');
 echo '<label for="contest">Select contest: </label>';
-$contests = $DB->q("KEYVALUETABLE SELECT cid, contestname FROM contest");
+$contests = $DB->q("KEYVALUETABLE SELECT cid, name FROM contest");
 echo addSelect('contest', $contests, null, true);
 echo addSubmit('Export', 'export') . addEndForm();
 
