@@ -199,7 +199,7 @@ if ( ! $id ) error("Missing or invalid submission id");
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
                     s.submittime, s.valid, c.cid, c.shortname AS contestshortname,
                     c.name AS contestname, t.name AS teamname, l.name AS langname,
-                    cp.shortname, p.name AS probname,
+                    cp.shortname AS probshortname, p.name AS probname,
                     CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
                     LEFT JOIN team     t ON (t.teamid = s.teamid)
@@ -283,7 +283,7 @@ if ( ! $submdata['valid'] ) {
 <img title="contest" alt="Contest:" src="../images/contest.png"/> <a href="contest.php?id=<?php echo $submdata['cid']?>">
 	<span class="contestid"><?php echo htmlspecialchars($submdata['contestshortname'])?></span></a>&nbsp;&nbsp;
 <img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>&amp;cid=<?php echo urlencode($submdata['cid'])?>">
-	<span class="probid"><?php echo htmlspecialchars($submdata['shortname'])?></span>:
+	<span class="probid"><?php echo htmlspecialchars($submdata['probshortname'])?></span>:
 	<?php echo htmlspecialchars($submdata['probname'])?></a>&nbsp;&nbsp;
 <img title="language" alt="Language:" src="../images/lang.png"/> <a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a>&nbsp;&nbsp;
