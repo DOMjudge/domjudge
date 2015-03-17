@@ -123,8 +123,7 @@ if ( !empty($row['problemtext_type']) ) {
 <td>
 <?php
 $execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable
-			WHERE type = 'run'
-			ORDER BY execid");
+                   WHERE type = 'run' ORDER BY execid");
 $execmap[''] = 'none';
 echo addSelect('data[0][special_run]', $execmap, @$row['special_run'], True);
 ?>
@@ -134,8 +133,7 @@ echo addSelect('data[0][special_run]', $execmap, @$row['special_run'], True);
 <td>
 <?php
 $execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable
-			WHERE type = 'compare'
-			ORDER BY execid");
+                   WHERE type = 'compare' ORDER BY execid");
 $execmap[''] = 'none';
 echo addSelect('data[0][special_compare]', $execmap, @$row['special_compare'], True);
 ?>
