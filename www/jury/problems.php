@@ -86,7 +86,8 @@ if( $res->count() == 0 ) {
 if ( IS_ADMIN ) {
 	echo "<p>" . addLink('problem') . "</p>\n\n";
 	if ( class_exists("ZipArchive") ) {
-		$contests = $DB->q("KEYVALUETABLE SELECT cid, CONCAT('c', cid, ': ' , shortname, ' - ', contestname) FROM contest");
+		$contests = $DB->q("KEYVALUETABLE SELECT cid,
+		                    CONCAT('c', cid, ': ', shortname, ' - ', name) FROM contest");
 		$values = array(-1 => 'Do not link to a contest');
 		foreach ($contests as $cid => $contest) {
 			$values[$cid] = $contest;
