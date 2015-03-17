@@ -59,8 +59,8 @@ if( $res->count() == 0 ) {
 			"</td><td>".
 			$link . htmlspecialchars(count($contestproblems[$row['probid']])) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
-			"</td><td>" . $link . (isset($row['memlimit']) ? (int)$row['memlimit'] : '-') . "</a>" .
-			"</td><td>" . $link . (isset($row['outputlimit']) ? (int)$row['outputlimit'] : '-') . "</a>" .
+			"</td><td>" . $link . (isset($row['memlimit']) ? (int)$row['memlimit'] : 'default') . "</a>" .
+			"</td><td>" . $link . (isset($row['outputlimit']) ? (int)$row['outputlimit'] : 'default') . "</a>" .
 			"</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
 			"\">" . $row['testcases'] . "</a></td>";
 		if ( !empty($row['problemtext_type']) ) {
