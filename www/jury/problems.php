@@ -20,16 +20,10 @@ $res = $DB->q('SELECT p.probid,p.name,p.timelimit,p.memlimit,p.outputlimit,
                LEFT JOIN testcase USING (probid)
                GROUP BY probid ORDER BY probid');
 
-// Get number of contests per problem
-$contestinfo = $DB->q("TABLE SELECT probid, cid
-                       FROM contestproblem");
-$contestproblems = array();
-foreach ($contestinfo as $row) {
-	if ( !isset($contestproblems[$row['probid']]) ) {
-		$contestproblems[$row['probid']] = array();
-	}
-	$contestproblems[$row['probid']][] = $row['cid'];
-}
+// Get number of active contests per problem
+$activecontests = $DB->q("KEYVALUETABLE SELECT probid, count(cid)
+                          FROM contestproblem
+                          WHERE cid IN (%As) GROUP BY probid", $cids);
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No problems defined</p>\n\n";
@@ -49,7 +43,7 @@ if( $res->count() == 0 ) {
 
 	while($row = $res->next()) {
 		$classes = array();
-		if ( count(array_intersect($contestproblems[$row['probid']], $cids)) == 0 ) $classes[] = 'disabled';
+		if ( !isset($activecontests[$row['probid']]) ) $classes[] = 'disabled';
 		$link = '<a href="problem.php?id=' . urlencode($row['probid']) . '">';
 
 		echo "<tr class=\"" . implode(' ',$classes) .
@@ -57,7 +51,7 @@ if( $res->count() == 0 ) {
 				htmlspecialchars($row['probid'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
 			"</td><td>".
-			$link . htmlspecialchars(count($contestproblems[$row['probid']])) . "</a>" .
+			$link . htmlspecialchars($activecontests[$row['probid']]) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
 			"</td><td>" . $link . (isset($row['memlimit']) ? (int)$row['memlimit'] : 'default') . "</a>" .
 			"</td><td>" . $link . (isset($row['outputlimit']) ? (int)$row['outputlimit'] : 'default') . "</a>" .
