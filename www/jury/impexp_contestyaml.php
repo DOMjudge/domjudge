@@ -33,6 +33,9 @@ if ( isset($_POST['import']) ) {
 		$contest['starttime_string'] =
 		    strftime('%Y-%m-%d %H:%M:%S', strtotime($contest_yaml_data['start-time']));
 		$contest['activatetime_string'] = '-1:00';
+		// FIXME: we're assuming that a contest doesn't run for more
+		// than 4 days here... Support relative time with days?
+		$contest['deactivatetime_string'] = '+99:00';
 		// chop off final ":00" because our contests do not support
 		// that precision in relative notation
 		$contest['endtime_string'] = '+' . substr($contest_yaml_data['duration'],0,-3);
