@@ -114,7 +114,7 @@ while( !empty($cids) && $row = $res->next() ) {
 	} else {
 		$nunchecked++;
 
-		if ( $pos===FALSE ) {
+		if ( $results===NULL ) {
 			$nomatch[] = "string '<code>@EXPECTED_RESULTS@:</code>' not found in " .
 				"<a href=\"submission.php?id=" . $sid .
 				"\">s$sid</a>, leaving submission unchecked";
