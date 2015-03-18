@@ -43,7 +43,7 @@ requireAdmin();
 Create a "Web Services Token" with appropriate rights in the "Export" section
 for your contest at <a
 href="https://icpc.baylor.edu/login">https://icpc.baylor.edu/login</a>. You can
-find the Contest ID (e.g. <tt>Southwestern-Europe-2014</tt>) in the URL.
+find the Contest ID (e.g. <code>Southwestern-Europe-2014</code>) in the URL.
 </p>
 
 <?php
