@@ -140,7 +140,7 @@ foreach( $langs as $lang => $data ) {
 // write out regions
 foreach( $categs as $region => $data ) {
 	$node = XMLaddnode($root, 'region');
-	XMLaddnode($node, 'external-id', $data['categoryid']);
+	XMLaddnode($node, 'external-id', $region);
 	XMLaddnode($node, 'name', $data['name']);
 }
 
