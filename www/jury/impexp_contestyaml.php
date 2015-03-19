@@ -28,8 +28,12 @@ if ( isset($_POST['import']) ) {
 
 		require(LIBWWWDIR . '/checkers.jury.php');
 
+		$invalid_regex = '/[^' . substr(IDENTIFIER_CHARS,1).'/';
+
 		$contest = array();
 		$contest['name'] = $contest_yaml_data['name'];
+		$contest['shortname'] = preg_replace($invalid_regex, '_',
+		                                     $contest_yaml_data['short-name']);
 		$contest['starttime_string'] =
 		    strftime('%Y-%m-%d %H:%M:%S', strtotime($contest_yaml_data['start-time']));
 		$contest['activatetime_string'] = '-1:00';
