@@ -100,23 +100,15 @@ if ( isset($_POST['import']) ) {
 
 		foreach ($contest_yaml_data['problems'] as $problem) {
 			// TODO better lang-id?
-			$prob = array();
-			if ( $DB->q("MAYBEVALUE SELECT probid FROM problem
-			             WHERE probid = %s", $problem['letter']) ) {
-				echo "<p>A problem with problem id $problem[letter] already exists.</p>\n";
-				require(LIBWWWDIR . '/footer.php');
-				exit;
-			}
-			$prob['probid'] = $problem['letter'];
-			$prob['cid'] = $cid;
-			$prob['name'] = $problem['short-name'];
-			$prob['allow_submit'] = 1;
-			$prob['allow_judge'] = 1;
-			// TODO Fredrik?
-			$prob['timelimit'] = 10;
-			$prob['color'] = $problem['rgb'];
 
-			$DB->q("INSERT INTO problem SET %S", $prob);
+			$probid = $DB->q('RETURNID INSERT INTO problem
+			                  SET name = %s, timelimit = %i',
+			                 $problem['short-name'], 10);
+			// TODO: ask Fredrik about configuration of timelimit
+
+			$DB->q('INSERT INTO contestproblem (cid, probid, shortname, color)
+			        VALUES (%i, %i, %s, %s)',
+			       $cid, $probid, $problem['letter'], $problem['rgb']);
 		}
 
 		dbconfig_store();
