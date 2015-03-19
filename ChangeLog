@@ -18,9 +18,12 @@ Version 4.0.5 - DEV
  - Fix bug possibly leading to invalid HTML forms.
  - Fix config check for missing country flags.
  - Fix conflicting mount options in chroot-startstop.sh script.
- - Fix switched name/shortname columns in affiliations overview. 
+ - Fix switched name/shortname columns in affiliations overview.
  - Improve various error messages.
  - Various documentation improvements.
+ - Force gcc to compile as C code, preventing a security issue where
+   submissions could be autodetected as C++ by filename extension.
+ - Update importing of problemset.yaml according to latest spec.
 
 Version 4.0.4 - 27 October 2014
 -------------------------------
