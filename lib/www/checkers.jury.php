@@ -75,9 +75,7 @@ function check_problem($data, $keydata = null)
 				$data['problemtext_type'] = $ext;
 			}
 		}
-		// These functions only exist in PHP >= 5.3.0.
-		if ( !isset($data['problemtext_type']) &&
-		     function_exists("finfo_open") ) {
+		if ( !isset($data['problemtext_type']) ) {
 			$finfo = finfo_open(FILEINFO_MIME);
 
 			list($type) = explode('; ', finfo_file($finfo, $tempname));

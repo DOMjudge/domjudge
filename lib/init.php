@@ -10,7 +10,7 @@ require_once(LIBDIR . '/lib.misc.php');
 require_once(LIBDIR . '/lib.dbconfig.php');
 require_once(LIBDIR . '/use_db.php');
 
-// Initialize default timezone to system default. PHP >= 5.3 generates
+// Initialize default timezone to system default. PHP generates
 // E_NOTICE warning messages otherwise.
 @date_default_timezone_set(@date_default_timezone_get());
 

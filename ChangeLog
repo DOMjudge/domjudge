@@ -24,6 +24,7 @@ Version 4.1.0 - DEV
  - Add optional per problem memory/output limits (Closes #152).
  - Allow storing optional descriptive image for each test case.
  - Root is not required anymore for 'make install'.
+ - Raise minimum required PHP version to 5.3.
 
 Version 4.0.0 - 22 July 2014
 ----------------------------
