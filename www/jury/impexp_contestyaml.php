@@ -90,7 +90,7 @@ if ( isset($_POST['import']) ) {
 		}
 	*/
 
-		foreach ($contest_yaml_data['problemset'] as $problem) {
+		foreach ($contest_yaml_data['problems'] as $problem) {
 			// TODO better lang-id?
 			$prob = array();
 			if ( $DB->q("MAYBEVALUE SELECT probid FROM problem WHERE probid = %s", $problem['letter']) ) {
@@ -163,7 +163,7 @@ if ( isset($_POST['import']) ) {
 		$contest_data['languages'][] = $language;
 
 	}
-	$contest_data['problemset'] = array();
+	$contest_data['problems'] = array();
 	$q = $DB->q("SELECT * FROM problem WHERE cid = %i", $cid);
 	while ( $prob = $q->next() ) {
 
@@ -172,7 +172,7 @@ if ( isset($_POST['import']) ) {
 		$problem['short-name'] = $prob['name'];
 		$problem['color'] = $prob['color'];
 		// TODO? rgb? Fredrik?
-		$contest_data['problemset'][] = $problem;
+		$contest_data['problems'][] = $problem;
 
 	}
 
