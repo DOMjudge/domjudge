@@ -138,6 +138,11 @@ UPDATE `configuration` SET `description` = 'Show country flags and affiliations 
 
 UPDATE `configuration` SET `name` = 'output_limit', `description` = 'Maximum output (in kB) submissions may generate. Any excessive output is truncated, so this should be greater than the maximum testdata output.' WHERE `name` = 'filesize_limit';
 
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('judgehost_warning', '30', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "warning".'),
+('judgehost_critical', '120', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "critical".'),
+('thumbnail_size', '128', 'int', 'Maximum width/height of a thumbnail for uploaded testcase images.');
+
 UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`name`, ' ', ''), 1, 10)), `public` = 1, `deactivatetime` = UNIX_TIMESTAMP('2016-12-31 23:59:59'), `deactivatetime_string` = '2016-12-31 23:59:59';
 
 -- Update compare scripts to support new Kattis 42/43 exitcode format:

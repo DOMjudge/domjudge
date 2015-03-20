@@ -60,9 +60,9 @@ if ( empty($row['polltime']) ) {
 	echo "Judgehost never checked in.";
 } else {
 	$reltime = floor(difftime(now(),$row['polltime']));
-	if ( $reltime < JUDGEHOST_WARNING ) {
+	if ( $reltime < dbconfig_get('judgehost_warning',30) ) {
 		echo "OK";
-	} else if ( $reltime < JUDGEHOST_CRITICAL ) {
+	} else if ( $reltime < dbconfig_get('judgehost_critical',120) ) {
 		echo "Warning";
 	} else {
 		echo "Critical";

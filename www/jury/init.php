@@ -80,7 +80,8 @@ $updates = array(
 	'judgehosts' =>
 	$DB->q('TABLE SELECT hostname, polltime
 	        FROM judgehost
-	        WHERE active = 1 AND unix_timestamp()-polltime >= ' . JUDGEHOST_CRITICAL),
+	        WHERE active = 1 AND unix_timestamp()-polltime >= %i',
+	       dbconfig_get('judgehost_critical',120)),
 	'rejudgings' =>
 	$DB->q('TABLE SELECT rejudgingid
 	        FROM rejudging
