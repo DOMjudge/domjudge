@@ -15,6 +15,7 @@
 #<VirtualHost *>
 #ServerName _default_
 #DocumentRoot @domserver_wwwdir@
+#RedirectMatch ^/api$ /api/
 #Alias /api @domserver_wwwdir@/api/index.php
 #</VirtualHost>
 
@@ -44,6 +45,7 @@
 # want DOMjudge in the root, but only occupy a subdir, like this:
 # www.example.com/domjudge
 
+RedirectMatch ^/domjudge/api$ /api/
 Alias /domjudge/api @domserver_wwwdir@/api/index.php
 Alias /domjudge @domserver_wwwdir@
 
