@@ -30,7 +30,7 @@ ARCH=$2
 RELEASE="trusty"
 
 # If host system is Debian, use its release and architecture by default
-if [ 'Debian' = "$(lsb_release -i -s || true)"]; then
+if [ 'Debian' = "$(lsb_release -i -s || true)" ]; then
 	RELEASE="$(lsb_release -c -s)"
 	if [ -z "$ARCH" ]; then
 		ARCH="$(dpkg --print-architecture)"
