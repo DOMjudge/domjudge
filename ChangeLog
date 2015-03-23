@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 4.0.5 - DEV
--------------------
+Version 4.0.5 - 23 March 2015
+-----------------------------
  - Add an SQL upgrade script to add a user for each existing team;
    enable by uncommenting in sql/upgrade/upgrade_3.4.0_4.0.0.sql.
  - Add fixed/improved version of simulate_contest script.
