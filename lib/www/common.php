@@ -112,7 +112,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	     LEFT JOIN language       l  USING (langid) ' .
 	    (isset($restrictions['rejudgingid']) ?
 	    'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.rejudgingid = %i)
-	     LEFT JOIN judging        jold ON (j.prevjudgingid = jold.judgingid) ' :
+	     LEFT JOIN judging        jold ON (j.prevjudgingid IS NULL AND s.submitid = jold.submitid AND jold.valid = 1 OR j.prevjudgingid = jold.judgingid) ' :
 	    'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.valid = 1) %_ ') .
 	    'WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $rejudgingclause .
 	    (isset($restrictions['teamid'])      ? 'AND s.teamid = %i '      : '%_ ') .
