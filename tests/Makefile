@@ -4,7 +4,7 @@ endif
 include $(TOPDIR)/Makefile.global
 
 SUBMITCMD = $(TOPDIR)/submit/submit
-SUBMITOPTS = -q -p $(PROBLEM)
+SUBMITOPTS = -q -c demo -p $(PROBLEM)
 
 SUBMIT = \
 	echo -n "Submitting '$$i' " ; \
