@@ -231,21 +231,47 @@ while ( $row = $events->next() ) {
 		XMLaddnode($run, 'judged', 'False');
 		XMLaddnode($run, 'status', 'fresh');
 	} else {
-		$result = $DB->q('MAYBEVALUE SELECT result FROM judging j
-		                  LEFT JOIN submission USING(submitid)
-		                  WHERE j.valid = 1 AND judgingid = %i', $row['judgingid']);
+		$jdata = $DB->q('MAYBETUPLE SELECT result, starttime FROM judging j
+		                 LEFT JOIN submission USING(submitid)
+		                 WHERE j.valid = 1 AND judgingid = %i', $row['judgingid']);
 
-		if (!isset($result)) continue;
+		if ( !isset($jdata['result']) ) continue;
+
+		$ntestcases = $DB->q('VALUE SELECT count(*) FROM testcase
+		                      WHERE probid = %i', $data['probid']);
+
+		$jruns = $DB->q('SELECT rank, runresult, runtime
+		                 FROM judging_run
+		                 LEFT JOIN testcase USING (testcaseid)
+		                 WHERE runresult IS NOT NULL AND judgingid = %i',
+		                $row['judgingid']);
+
+		// We don't store single judging_run timestamps, so calculate
+		// these cumulatively from judging starttime.
+		$timestamp = (float)$jdata['starttime'];
+
+		while ( $jrun = $jruns->next() ) {
+			$testcase = XMLaddnode($root, 'testcase');
+			XMLaddnode($testcase, 'i', $jrun['rank']);
+			XMLaddnode($testcase, 'judged', 'True');
+			XMLaddnode($testcase, 'judgement', $result_map[$jrun['runresult']]);
+			XMLaddnode($testcase, 'n', $ntestcases);
+			XMLaddnode($testcase, 'run-id', $row['submitid']);
+			XMLaddnode($testcase, 'solved', ($jrun['runresult']=='correct' ? 'True' : 'False'));
+			XMLaddnode($testcase, 'time', $jrun['runtime']);
+			XMLaddnode($testcase, 'timestamp', $timestamp);
+			$timestamp += (float)$jrun['runtime'];
+		}
 
 		XMLaddnode($run, 'judged', 'True');
 		XMLaddnode($run, 'status', 'done');
-		XMLaddnode($run, 'result', $result_map[$result]);
-		if ( $result == 'correct' ) {
+		XMLaddnode($run, 'result', $result_map[$jdata['result']]);
+		if ( $jdata['result'] == 'correct' ) {
 			XMLaddnode($run, 'solved', 'True');
 			XMLaddnode($run, 'penalty', 'False');
 		} else {
 			XMLaddnode($run, 'solved', 'False');
-			if ( $compile_penalty == 0 && $result == 'compiler-error' ) {
+			if ( $compile_penalty == 0 && $jdata['result'] == 'compiler-error' ) {
 				XMLaddnode($run, 'penalty', 'False');
 			} else {
 				XMLaddnode($run, 'penalty', 'True');
