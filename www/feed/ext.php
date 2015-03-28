@@ -78,7 +78,8 @@ function XMLgetnode($path, $paren = NULL)
 }
 
 // Get problems, languages, affiliations, categories and events
-$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, color FROM problem INNER JOIN contestproblem USING(probid)
+$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, color
+                 FROM problem INNER JOIN contestproblem USING(probid)
                  WHERE cid = %i AND allow_submit = 1 ORDER BY shortname', $cid);
 
 $langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name FROM language
@@ -94,10 +95,10 @@ $categs = $DB->q('KEYTABLE SELECT categoryid AS ARRAYKEY, name, color
                   FROM team_category WHERE visible = 1 ORDER BY categoryid');
 
 $clars = $DB->q('SELECT t.clarid, t.submittime, t.sender, j.recipient, t.probid,
-		 t.body AS question, j.body AS answer
-		 FROM clarification t
-		 LEFT JOIN clarification j ON (t.clarid = j.respid)
-		 WHERE t.sender IS NOT NULL');
+                 t.body AS question, j.body AS answer
+                 FROM clarification t
+                 LEFT JOIN clarification j ON (t.clarid = j.respid)
+                 WHERE t.sender IS NOT NULL');
 
 $events = $DB->q('SELECT * FROM event WHERE cid = %i AND ' .
                  (isset($_REQUEST['fromid']) ? 'eventid >= %i ' : 'TRUE %_ ') . 'AND ' .
@@ -208,9 +209,9 @@ while ( $row = $events->next() ) {
 	}
 
 	$data = $DB->q('MAYBETUPLE SELECT submittime, teamid, probid, name AS langname, valid
-			FROM submission
-			LEFT JOIN language USING (langid)
-			WHERE valid = 1 AND submitid = %i',
+	                FROM submission
+	                LEFT JOIN language USING (langid)
+	                WHERE valid = 1 AND submitid = %i',
 	               $row['submitid']);
 
 	if ( empty($data) ||
