@@ -47,14 +47,16 @@ function XMLaddnode($paren, $name, $value = NULL, $attrs = NULL)
 	global $xmldoc;
 
 	if ( $value === NULL ) {
-		$node = $xmldoc->createElement(htmlspecialchars($name));
+		$node = $xmldoc->createElement(htmlspecialchars($name,ENT_XML1));
 	} else {
-		$node = $xmldoc->createElement(htmlspecialchars($name), htmlspecialchars($value));
+		$node = $xmldoc->createElement(htmlspecialchars($name,ENT_XML1),
+		                               htmlspecialchars($value,ENT_XML1));
 	}
 
 	if ( count($attrs) > 0 ) {
 		foreach( $attrs as $key => $value ) {
-			$node->setAttribute(htmlspecialchars($key), htmlspecialchars($value));
+			$node->setAttribute(htmlspecialchars($key,ENT_XML1),
+			                    htmlspecialchars($value,ENT_XML1));
 		}
 	}
 
