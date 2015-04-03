@@ -114,10 +114,11 @@ $reset      = XMLaddnode($root, 'reset');
 $info       = XMLaddnode($root, 'info');
 
 // write out general info
-$length = ($cdata['endtime']) - ($cdata['starttime']);
+$length = calcContestTime($cdata['endtime'],$cid);
 $lengthString = sprintf('%02d:%02d:%02d', $length/(60*60), ($length/60) % 60, $length % 60);
 if ( isset($cdata['freezetime']) ) {
-	$freezelength = ($cdata['endtime']) - ($cdata['freezetime']);
+	$freezelength = calcContestTime($cdata['endtime'],$cid)
+	               -calcContestTime($cdata['freezetime'],$cid);
 } else {
 	$freezelength = 0;
 }
@@ -190,7 +191,7 @@ while ( $row = $clars->next() ) {
 	XMLaddnode($node, 'id', $row['clarid']);
 	XMLaddnode($node, 'team', $team_to_id[$row['sender']]);
 	XMLaddnode($node, 'problem', $row['probid']); // FIXME: probid is shortname?
-	XMLaddnode($node, 'time', ($row['submittime']) - ($cdata['starttime']));
+	XMLaddnode($node, 'time', calcContestTime($row['submittime'],$cid));
 	XMLaddnode($node, 'timestamp', $row['submittime']);
 	XMLaddnode($node, 'question', $row['question']);
 	if ( isset($row['answer']) ) {
@@ -226,7 +227,7 @@ while ( $row = $events->next() ) {
 	XMLaddnode($run, 'problem', $prob_to_id[$data['probid']]);
 	XMLaddnode($run, 'team', $team_to_id[$data['teamid']]);
 	XMLaddnode($run, 'timestamp', ($row['eventtime']));
-	XMLaddnode($run, 'time', ($data['submittime']) - ($cdata['starttime']));
+	XMLaddnode($run, 'time', calcContestTime($data['submittime'],$cid));
 	XMLaddnode($run, 'language', $data['langname']);
 
 	if ($row['description'] == 'problem submitted') {
