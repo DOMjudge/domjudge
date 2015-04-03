@@ -13,8 +13,8 @@ require(LIBWWWDIR . '/scoreboard.php');
 if (count($cdatas) != 1 ) {
 	error("Feed only supports exactly one active contest.");
 } else {
-	$cdata = array_pop($cdatas);
-	$cid = array_pop($cids);
+	$cdata = reset($cdatas);
+	$cid   = reset($cids);
 }
 
 // needed for short verdicts
