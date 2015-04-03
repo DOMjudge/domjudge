@@ -31,8 +31,8 @@ if( $res->count() == 0 ) {
 		$countryflag = "../images/countries/" . urlencode($row['country']) . ".png";
 		$link = '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">';
 		echo '<tr><td>' . $link . htmlspecialchars($row['affilid']) .
-			'</a></td><td>' . $link . htmlspecialchars($row['name']) .
 			'</a></td><td>' . $link . htmlspecialchars($row['shortname']) .
+			'</a></td><td>' . $link . htmlspecialchars($row['name']) .
 			'</a></td><td class="tdcenter">' . $link .
 			htmlspecialchars($row['country']) .
 			( is_readable($countryflag) ? ' <img src="' . $countryflag .
