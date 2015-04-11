@@ -28,10 +28,14 @@
  *  -v         Only judgings that are valid, and with valid submission.
  *
  * Secondly there are options for which statistics to report:
- *  -P   Per problem report min,max,avg runtimes for correct
- *          submissions, including variability.
- *  -T   Report variations between judgings for the
- *          same submission.
+ *  -R LIST    Report issues specified in the comma separated list.
+ *             Possible report keywords:
+ *               problems    min,max,avg runtimes for correct
+ *                           submissions, including variability.
+ *               variations  variations of results and runtime between
+ *                           multiple judgings for the same submission
+ *                           and of runtimes on all judgehosts.
+ *               misc        miscellaneous statistics.
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
@@ -44,7 +48,7 @@ require(ETCDIR . '/domserver-config.php');
 
 define('SCRIPT_ID', 'judging_statistics');
 
-define('SPREAD_LIST', 10);
+define('MAX_LIST_LEN', 10);
 
 /* Expects string formatted as "yyyy-mm-ddTHH:MM#yyyy-mm-ddTHH:MM"
  * and returns an array of two Unix epoch timestamps.
@@ -61,7 +65,7 @@ function parse_time_interval($arg)
 }
 
 // Read options
-$opts = getopt('c:l:p:s:t:J:S:vPT');
+$opts = getopt('c:l:p:s:t:J:S:vR:');
 
 $sql_where = '';
 $restr = array();
@@ -137,7 +141,7 @@ if ( count($judgings)==0 ) {
 
 // Create arrays of problem/submission IDs referencing to all
 // associated judgings.
-$problems = $submissions = array();
+$problems = $submissions = $judgehosts = array();
 foreach ( $judgings as $jid => &$data ) {
 	// First explicit cast to floats where applicable:
 	$data['duration']    = (float)$data['duration'];
@@ -145,19 +149,27 @@ foreach ( $judgings as $jid => &$data ) {
 	$data['runtime_max'] = (float)$data['runtime_max'];
 	$data['runtime_avg'] = (float)$data['runtime_avg'];
 
-	$problems[   $data['probid']][]   = $jid;
-	$submissions[$data['submitid']][] = $jid;
+	$problems[   $data['probid']][]    = $jid;
+	$submissions[$data['submitid']][]  = $jid;
+	$judgehosts[ $data['judgehost']][] = $jid;
 }
 
 ksort($problems);
 ksort($submissions);
 
 printf("Found %d judgings satisfying the constraints,\n" .
-       "in %d problems and %d submissions.\n\n",
-       count($judgings), count($problems), count($submissions));
+       "in %d problems, %d submissions, and on %d judgehosts.\n\n",
+       count($judgings), count($problems), count($submissions), count($judgehosts));
+
+if ( empty($opts['R']) ) {
+	printf("No reports specified (with the '-R' option), exiting.\n");
+	exit(0);
+}
+
+$reports = explode(',',strtolower($opts['R']));
 
 // Report per problem
-if ( isset($opts['P']) ) {
+if ( in_array('problems', $reports) ) {
 
 	$problegend = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, timelimit
 	                      FROM problem WHERE probid IN (%Ai)', array_keys($problems));
@@ -216,23 +228,40 @@ if ( isset($opts['P']) ) {
 }
 
 // Report variations between judgings for same submissions
-if ( isset($opts['T']) ) {
+if ( in_array('variations', $reports) ) {
 
-	echo "Submission variations statistics:\n";
-	echo "=================================\n\n";
+	echo "Variations statistics:\n";
+	echo "======================\n\n";
 
 	$results_differ = array();
+	$judruns_differ = array();
 	$runtime_spread = array();
 	foreach ( $submissions as $submitid => $jids ) {
 
 		// Check for different results:
 		$results = array();
+		$runresults = array();
 		foreach ( $jids as $jid ) {
 			if ( !in_array($judgings[$jid]['result'], $results) ) {
 				$results[] = $judgings[$jid]['result'];
 			}
+			// Check for differences in the list of judging_run results.
+			$judruns = $DB->q('KEYVALUETABLE SELECT rank, runresult
+			                   FROM judging_run
+			                   LEFT JOIN testcase USING(testcaseid)
+			                   WHERE judgingid = %i', $jid);
+			if ( !in_array($judruns, $runresults) ) {
+				$runresults[] = $judruns;
+			}
+
 		}
-		if ( count($results)!=1 ) $results_differ[] = $submitid;
+		if ( count($results)!=1 ) {
+			$results_differ[] = $submitid;
+		} else if ( count($runresults)!=1  ) {
+			// Only report differences in judging runs if the final
+			// results were the same.
+			$judruns_differ[] = $submitid;
+		}
 
 		// Check for variations in runtimes across judgings:
 		$rows = $DB->q('SELECT r.testcaseid,
@@ -267,27 +296,89 @@ if ( isset($opts['T']) ) {
 			foreach ( $submissions[$submitid] as $jid ) {
 				$results[$judgings[$jid]['result']][] = $jid;
 			}
-			echo " s$submitid:";
+			printf(" %5s:", "s$submitid");
 			foreach ( $results as $result => $jids ) {
 				echo " $result(j:" . implode(',', $jids) . ")";
 			}
 			echo "\n";
 		}
+		echo "\n";
 	}
-	echo "\n";
 
-	printf("Largest spread in testcase runtimes: %.3f, top %d:\n",
-	       reset($runtime_spread)[0], min(SPREAD_LIST,count($runtime_spread)));
+	if ( count($judruns_differ)>0 ) {
+		printf("Found %d submissions which have different judging run results:\n",
+		       count($judruns_differ));
+		foreach ( $judruns_differ as $submitid ) echo " s$submitid";
+		echo "\n";
+	}
 
-	for ($i=0; $i<SPREAD_LIST; $i++) {
+	printf("Largest spread in testcase runtimes: %.3f sec, top %d:\n",
+	       reset($runtime_spread)[0], min(MAX_LIST_LEN,count($runtime_spread)));
+
+	for ($i=0; $i<MAX_LIST_LEN; $i++) {
 		if ( !(list($key, $val) = each($runtime_spread)) ) break;
 		list($spread, $submitid) = $val;
-		printf("  s%d: %.3fs over %d judgings with result: %s\n",
-		       $submitid, $spread, count($submissions[$submitid]),
+		printf(" %5s: %.3fs over %d judgings with result: %s\n",
+		       "s$submitid", $spread, count($submissions[$submitid]),
 		       (in_array($submitid,$results_differ) ? '*multiple*' :
 		        $judgings[$submissions[$submitid][0]]['result']));
 	}
 	echo "\n";
+
+	printf("Variations between %d judgehosts:\n\n",count($judgehosts));
+	printf(" Judgehost              | #judgings | avg. runtime | std.dev. | avg. duration\n");
+	printf("-----------------------------------------------------------------------------\n");
+	foreach ( $judgehosts as $judgehost => $jids ) {
+		$totaltime = 0.0; // Actual time begin--end of judging
+		$totalrun  = 0.0; // Time spend juding runs
+		$sumsquare = 0.0;
+		$njudged = 0;
+		foreach ( $jids as $jid ) {
+			$runtime = $judgings[$jid]['runtime_avg']*$judgings[$jid]['ntestcases'];
+			$totaltime += $judgings[$jid]['duration'];
+			$totalrun  += $runtime;
+			$sumsquare += $runtime*$runtime;
+			$njudged++;
+		}
+		$avgtime = $totaltime / $njudged;
+		$avgrun  = $totalrun  / $njudged;
+		// FIXME: variance over all judgings from different problems
+		// doesn't make sense.
+		$variance = $sumsquare / $njudged - $avgrun;
+		printf(" %-22.22s | %9d | %12.4f | %8.3f | %12.4f \n",
+		       $judgehost, $njudged, $avgrun, sqrt($variance), $avgtime);
+	}
+	echo "\n";
+
+}
+
+// Report misc. statistics
+if ( in_array('misc', $reports) ) {
+
+	echo "Miscellaneous statistics:\n";
+	echo "=========================\n\n";
+
+	$rows = $DB->q('SELECT submitid, MIN(judgingid), submittime,
+	                MIN(starttime) - submittime AS timediff, COUNT(judgingid)
+	                FROM submission s
+	                INNER JOIN judging USING (submitid)
+	                WHERE submitid IN (%As)
+	                GROUP BY submitid HAVING timediff > 5
+	                ORDER BY timediff DESC', array_keys($submissions));
+
+	if ( $rows->count()==0 ) {
+		printf("No submissions with judgings delayed by 5+ seconds.\n\n");
+	} else {
+		printf("Found %d submissions with judging delayed by 5+ seconds, top %d:\n",
+		       $rows->count(), min(MAX_LIST_LEN,$rows->count()));
+		for ($i=0; $i<MAX_LIST_LEN; $i++) {
+			if ( !($row = $rows->next()) ) break;
+			printf(" %5s: submitted %s, first judged %.2fs later\n",
+			       's'.$row['submitid'], strftime('%F %T',$row['submittime']),
+			       $row['timediff']);
+		}
+		echo "\n";
+	}
 }
 
 echo "Done.\n";
