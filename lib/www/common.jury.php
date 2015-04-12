@@ -509,18 +509,30 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				}
 			}
 
+			$md5in  = md5($testin);
+			$md5out = md5($testout);
+
+			// Skip testcases that already exist identically
+			$id = $DB->q('MAYBEVALUE SELECT testcaseid FROM testcase
+			              WHERE md5sum_input = %s AND md5sum_output = %s AND
+			              description = %s AND sample = %i',
+			             $md5in, $md5out, $description, $type == 'sample' ? 1 : 0);
+			if ( isset($id) ) {
+				echo "<li>Skipped $type testcase <tt>$datafile</tt>: already exists</li>\n";
+				continue;
+			}
+
 			$DB->q('INSERT INTO testcase (probid, rank, sample,
-				md5sum_input, md5sum_output, input, output, description' .
-				( $image_file !== FALSE ? ', image, image_thumb, image_type' : '' ) .
-				')' . 
-				'VALUES (%i, %i, %i, %s, %s, %s, %s, %s' . 
-				( $image_file !== FALSE ? ', %s, %s, %s' : '%_ %_ %_' ) .
-				')',
-				$probid, $maxrank, $type == 'sample' ? 1 : 0,
-				md5($testin), md5($testout),
-				$testin, $testout, $description,
-				$image_file, $image_thumb, $image_type
-			);
+			        md5sum_input, md5sum_output, input, output, description' .
+			       ( $image_file !== FALSE ? ', image, image_thumb, image_type' : '' ) .
+			       ')' .
+			       'VALUES (%i, %i, %i, %s, %s, %s, %s, %s' .
+			       ( $image_file !== FALSE ? ', %s, %s, %s' : '%_ %_ %_' ) .
+			       ')',
+			       $probid, $maxrank, $type == 'sample' ? 1 : 0,
+			       $md5in, $md5out,
+			       $testin, $testout, $description,
+			       $image_file, $image_thumb, $image_type);
 			$maxrank++;
 			$ncases++;
 			echo "<li>Added $type testcase from: <tt>$datafile.{in,ans}</tt></li>\n";
