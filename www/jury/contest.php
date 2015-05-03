@@ -133,7 +133,7 @@ foreach ( $current_problems as &$current_problem ) {
 }
 unset($current_problem);
 
-$prepopulate = $DB->q("TABLE SELECT problem.probid AS id, problem.name,
+$prepopulate = $DB->q("TABLE SELECT problem.probid AS id, problem.name, contestproblem.points,
                        CONCAT(problem.name, ' (p', problem.probid, ')') AS search
                        FROM problem INNER JOIN contestproblem USING (probid)
                        WHERE cid = %i ORDER BY shortname", $id);
@@ -186,6 +186,7 @@ $(function() {
 
 		var contest_problem_data = {
 			shortname: '',
+			points: 1,
 			allow_submit: true,
 			allow_judge: true,
 			color: '',
@@ -204,6 +205,7 @@ $(function() {
 			.replace(/\{probid\}/g, probId)
 			.replace(/\{name\}/g, problem_name_mapping[probId])
 			.replace(/\{shortname\}/g, contest_problem_data.shortname)
+			.replace(/\{points\}/g, contest_problem_data.points)
 			.replace(/\{color\}/g, contest_problem_data.color)
 			.replace(/\{lazy_eval_results\}/g, contest_problem_data.lazy_eval_results);
 
@@ -248,6 +250,13 @@ $(function() {
 	<td>
 		<?php echo addInput("data[0][mapping][0][extra][{id}][shortname]", '{shortname}', 8, 10); ?>
 	</td>
+	<?php
+		if (dbconfig_get('use_perproblem_points', 0)) {
+			echo "<td>" .
+				addInput("data[0][mapping][0][extra][{id}][points]", '{points}', 4, 4) .
+				"</td>\n";
+		}
+	?>
 	<td>
 		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_submit]", true, 1); ?>
 		<label for='data_0__mapping__0__extra__{id}__allow_submit_1'>yes</label>
@@ -276,6 +285,9 @@ $(function() {
 		<th>ID</th>
 		<th>name</th>
 		<th>short name</th>
+		<?php if ( dbconfig_get('use_perproblem_points', 0) ) {
+			echo "<th>points</th>\n";
+		} ?>
 		<th>allow submit</th>
 		<th>allow judge</th>
 		<th>color
