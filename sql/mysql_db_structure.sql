@@ -107,6 +107,7 @@ CREATE TABLE `contestproblem` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
   `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest (string)',
+  `points` int(4) unsigned NOT NULL DEFAULT 1 COMMENT 'Number of points earned by solving this problem',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
   `color` varchar(25) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard',
@@ -298,10 +299,10 @@ CREATE TABLE `problem` (
 CREATE TABLE `rankcache_jury` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
-  `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
+  `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
   PRIMARY KEY  (`cid`,`teamid`),
-  KEY `order` (`cid`,`correct`, `totaltime`) USING BTREE,
+  KEY `order` (`cid`,`points`, `totaltime`) USING BTREE,
   CONSTRAINT `rankcache_jury_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (jury version)';
 
@@ -312,10 +313,10 @@ CREATE TABLE `rankcache_jury` (
 CREATE TABLE `rankcache_public` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
-  `correct` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of problems solved',
+  `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points',
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
   PRIMARY KEY  (`cid`,`teamid`),
-  KEY `order` (`cid`,`correct`,`totaltime`) USING BTREE,
+  KEY `order` (`cid`,`points`,`totaltime`) USING BTREE,
   CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
 

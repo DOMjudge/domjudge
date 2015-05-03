@@ -251,7 +251,7 @@ function calcScoreRow($cid, $team, $prob) {
  *
  * Given a contestid and teamid (re)calculate the time
  * and solved problems for a team. Third parameter indictates
- * if the cache for jury of public should be updated.
+ * if the cache for jury or public should be updated.
  *
  * Due to current transactions usage, this function MUST NOT contain
  * any START TRANSACTION or COMMIT statements.
@@ -274,26 +274,35 @@ function updateRankCache($cid, $team, $jury) {
 	}
 
 	// Fetch values from scoreboard cache per problem
-	$scoredata = $DB->q("SELECT submissions, is_correct, totaltime
-	                     FROM scorecache_$tblname
-	                     WHERE cid = %i and teamid = %i", $cid, $team);
-	$num_correct = 0;
+	$use_perproblem_points = dbconfig_get('use_perproblem_points', 0);
+	if ($use_perproblem_points) {
+		$scoredata = $DB->q("SELECT submissions, is_correct, cp.points, totaltime
+		                     FROM scorecache_$tblname
+		                     LEFT JOIN contestproblem cp USING(probid,cid)
+		                     WHERE cid = %i and teamid = %i", $cid, $team);
+	} else {
+		$scoredata = $DB->q("SELECT submissions, is_correct, totaltime
+		                     FROM scorecache_$tblname
+		                     WHERE cid = %i and teamid = %i", $cid, $team);
+	}
+	$num_points = 0;
 	$total_time = $team_penalty;
 	while ( $srow = $scoredata->next() ) {
 		// Only count solved problems
 		if ( $srow['is_correct'] ) {
 			$penalty = calcPenaltyTime( $srow['is_correct'],
 			                            $srow['submissions'] );
-			$num_correct++;
+			$points = $use_perproblem_points ? $srow['points'] : 1;
+			$num_points += $points;
 			$total_time += $srow['totaltime'] + $penalty;
 		}
 	}
 
 	// Update the rank cache table
 	$DB->q("REPLACE INTO rankcache_$tblname
-	        (cid, teamid, correct, totaltime)
+	        (cid, teamid, points, totaltime)
 	        VALUES (%i,%i,%i,%i)",
-	       $cid, $team, $num_correct, $total_time);
+	       $cid, $team, $num_points, $total_time);
 
 	// Release the lock
 	if ( $DB->q("VALUE SELECT RELEASE_LOCK('$lockstr')") != 1 ) {
@@ -593,11 +602,16 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	                        WHERE teamid = %i AND enabled = 1',$team) ) {
 		error("Team '$team' not found in database or not enabled.");
 	}
-	if( ! $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem
-	                        INNER JOIN contestproblem USING (probid)
-	                        WHERE probid = %s AND cid = %i AND allow_submit = 1',
-	                       $prob, $contest) ) {
+	$probdata = $DB->q('MAYBETUPLE SELECT probid, points FROM problem
+	                    INNER JOIN contestproblem USING (probid)
+	                    WHERE probid = %s AND cid = %i AND allow_submit = 1',
+	                   $prob, $contest);
+
+	if ( empty($probdata) ) {
 		error("Problem p$prob not found in database or not submittable [c$contest].");
+	} else {
+		$points = $probdata['points'];
+		$probid = $probdata['probid'];
 	}
 
 	// Reindex arrays numerically to allow simultaneously iterating

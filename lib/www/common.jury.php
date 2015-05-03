@@ -276,7 +276,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 	$yaml_file = 'problem.yaml';
 
 	$ini_keys_problem = array('name', 'timelimit', 'special_run', 'special_compare');
-	$ini_keys_contest_problem = array('probid', 'allow_submit', 'allow_judge', 'color');
+	$ini_keys_contest_problem = array('probid', 'allow_submit', 'allow_judge', 'points', 'color');
 
 	$def_timelimit = 10;
 
@@ -291,6 +291,9 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 		// Only preserve valid keys:
 		$ini_array_problem = array_intersect_key($ini_array,array_flip($ini_keys_problem));
 		$ini_array_contest_problem = array_intersect_key($ini_array,array_flip($ini_keys_contest_problem));
+
+		// Set default of 1 point for a problem if not specified
+		if ( !isset($ini_array_contest_problem['points']) ) $ini_array_problem['points'] = 1;
 
 		if ( $probid===NULL ) {
 			if ( !isset($ini_array_contest_problem['probid']) ) {
