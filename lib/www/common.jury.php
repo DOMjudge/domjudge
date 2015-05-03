@@ -293,7 +293,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 		$ini_array_contest_problem = array_intersect_key($ini_array,array_flip($ini_keys_contest_problem));
 
 		// Set default of 1 point for a problem if not specified
-		if ( !isset($ini_array_contest_problem['points']) ) $ini_array_problem['points'] = 1;
+		if ( !isset($ini_array_contest_problem['points']) ) $ini_array_contest_problem['points'] = 1;
 
 		if ( $probid===NULL ) {
 			if ( !isset($ini_array_contest_problem['probid']) ) {
