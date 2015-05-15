@@ -116,6 +116,16 @@ ALTER TABLE `testcase`
   ADD COLUMN `image_thumb` longblob COMMENT 'Aumatically created thumbnail of the image' AFTER `image`,
   ADD COLUMN `image_type` varchar(4) DEFAULT NULL COMMENT 'File type of the image and thumbnail' AFTER `image_thumb`;
 
+-- Add support for points per problem
+ALTER TABLE `contestproblem`
+  ADD COLUMN `points` int(4) unsigned NOT NULL DEFAULT '1' COMMENT 'Number of points earned by solving this problem' AFTER `shortname`;
+
+ALTER TABLE `rankcache_jury`
+  CHANGE COLUMN `correct` `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points';
+ALTER TABLE `rankcache_public`
+  CHANGE COLUMN `correct` `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points',
+  ADD KEY `order` (`cid`,`points`, `totaltime`) USING BTREE;
+
 --
 -- Transfer data from old to new structure
 --
@@ -141,7 +151,8 @@ UPDATE `configuration` SET `name` = 'output_limit', `description` = 'Maximum out
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('judgehost_warning', '30', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "warning".'),
 ('judgehost_critical', '120', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "critical".'),
-('thumbnail_size', '128', 'int', 'Maximum width/height of a thumbnail for uploaded testcase images.');
+('thumbnail_size', '128', 'int', 'Maximum width/height of a thumbnail for uploaded testcase images.'),
+('use_perproblem_points', '0', 'bool', 'Can different problems be worth different numbers of points?');
 
 UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`name`, ' ', ''), 1, 10)), `public` = 1, `deactivatetime` = UNIX_TIMESTAMP('2016-12-31 23:59:59'), `deactivatetime_string` = '2016-12-31 23:59:59';
 
