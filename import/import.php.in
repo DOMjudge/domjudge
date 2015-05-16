@@ -56,7 +56,8 @@ function import($team, $prob, $lang, $submittime, $files, $filenames, $extid, $e
 
 	if ( !is_array($files) || count($files)==0 ) error("No files specified.");
 	if ( !is_array($filenames) || count($filenames)!=count($files) ) {
-		error("Nonmatching (number of) filenames specified.");
+		error("Nonmatching (number of) filenames specified: " .
+		      count($filenames) . " vs. " count($files));
 	}
 
 	if ( count($filenames)!=count(array_unique($filenames)) ) {

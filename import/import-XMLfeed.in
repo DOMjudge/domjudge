@@ -116,10 +116,11 @@ function update_contest_times($data)
 
 	// Preserve relative times:
 	foreach (array('activatetime', 'freezetime', 'unfreezetime') as $time) {
-		if ( !empty($cdata[$time]) && strpos('+-',$cdata[$time][0])!==FALSE ) {
-			$data[$time] = $cdata[$time];
+		$timestr = $time.'_string';
+		if ( !empty($cdata[$timestr]) && strpos('+-',$cdata[$timestr][0])!==FALSE ) {
+			$data[$timestr] = $cdata[$timestr];
 		} else {
-			$data[$time] = NULL;
+			$data[$timestr] = NULL;
 		}
 	}
 
@@ -149,8 +150,10 @@ function check_contest_times($update = FALSE)
 	if ( val($contest,'starttime')=='undefined' ) {
 		logmsg(LOG_NOTICE, 'Read contest starttime "undefined", disabling contest.');
 
-		$data = array('starttime' => '2999-01-01 00:00',
-		              'endtime' => sprintf('+%02d:%02d', $h,$m),
+		$data = array('starttime_string' => '2999-01-01 00:00',
+		              'endtime_string' => sprintf('+%02d:%02d', $h,$m),
+		              'activatetime_string' => '-1:00',
+		              'deactivatetime_string' => '+99:00',
 		              'enabled' => 0);
 
 		update_contest_times($data);
@@ -163,8 +166,10 @@ function check_contest_times($update = FALSE)
 		warning("Contest times do not match with external CCS data.");
 
 		if ( $update ) {
-			$data = array('starttime' => strftime('%Y-%m-%d %H:%M', (int)val($contest,'starttime')),
-			              'endtime' => sprintf('+%02d:%02d', $h,$m),
+			$data = array('starttime_string' => strftime('%Y-%m-%d %H:%M:%S', (int)val($contest,'starttime')),
+			              'endtime_string' => sprintf('+%02d:%02d', $h,$m),
+			              'activatetime_string' => '-1:00',
+			              'deactivatetime_string' => '+99:00',
 			              'enabled' => 1);
 
 			update_contest_times($data);
@@ -175,17 +180,24 @@ function check_contest_times($update = FALSE)
 
 // First check if we have the right contest, teams, problems, and
 // languages loaded.
-$feedXML = file_get_contents($feedurl);
+`mv $feedurl $feedurl.mine.xml`;
+logmsg(LOG_DEBUG,"moved '$feedurl' to '$feedurl.mine.xml'");
+$feedXML = file_get_contents($feedurl . ".mine.xml");
+// Make sure the document is valid XML with a closing contest tag.
+//if ( strpos($feedXML, '</contest>')!==FALSE ) $feedXML .= "\n\n</contest>\n";
 $feedDOM = DOMDocument::loadXML($feedXML);
-if ( $feedDOM == NULL ) error("Could not read XML feed from '$feedurl'.");
+if ( $feedDOM == NULL ) error("Could not read XML feed from '$feedurl.mine.xml'.");
 $xpath = new DOMXpath($feedDOM);
 
 check_contest_times();
 
+`mv $feedurl.mine.xml $feedurl`;
+logmsg(LOG_DEBUG,"moved *to* '$feedurl' from '$feedurl.mine.xml'");
+
 $problems = $xpath->query('/contest/problem');
 foreach ( $problems as $prob ) {
 
-	$id = $DB->q('MAYBEVALUE SELECT probid FROM problem
+	$id = $DB->q('MAYBEVALUE SELECT probid FROM contestproblem
 	              WHERE probid = %s AND cid = %i AND allow_submit = 1',
 	             remap('problem',val($prob,'id')), $cid);
 
@@ -259,7 +271,7 @@ while ( TRUE ) {
 			     $res['probid']!=remap('problem', val($run,'problem')) ||
 			     $res['langid']!=remap('language',val($run,'language')) ||
 			     (abs((float)$res['submittime']-(float)val($run,'timestamp'))>0.1 &&
-			      val($run, 'judged')!=='True') ) {
+			      val($run, 'status')!=='done') ) {
 				error("External submission '".val($run,'id')."' already exists as s".
 				      $res['submitid']." with non-matching data.");
 			}
@@ -290,6 +302,7 @@ while ( TRUE ) {
 
 			$id = submit_solution(remap('team',    val($run,'team')),
 			                      remap('problem', val($run,'problem')),
+			                      $cid,
 			                      remap('language',val($run,'language')),
 			                      $files, $filenames, NULL,
 			                      $id, val($run, 'timestamp'));

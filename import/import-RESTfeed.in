@@ -110,7 +110,7 @@ function remap($type, $id)
 function getTeamID($externalid) {
 	global $DB;
 	return $DB->q('MAYBEVALUE SELECT teamid FROM team
-			WHERE externalid = %s AND enabled = 1',
+			WHERE teamid = %s AND enabled = 1',
 			$externalid);
 }
 
@@ -122,7 +122,7 @@ if ( remap('contest',$contest['id'])!=$cid ) {
 }
 if ( difftime($contest['start'],$cdata['starttime'])!=0 ||
      $contest['length']!=difftime($cdata['endtime'],$cdata['starttime']) ) {
-	error("Contest times do not match with external CCS data.
+	warning("Contest times do not match with external CCS data.
   Start:
   - ours:   $cdata[starttime]
   - theirs: $contest[start]
