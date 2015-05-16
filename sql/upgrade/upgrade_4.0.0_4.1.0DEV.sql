@@ -123,8 +123,7 @@ ALTER TABLE `contestproblem`
 ALTER TABLE `rankcache_jury`
   CHANGE COLUMN `correct` `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points';
 ALTER TABLE `rankcache_public`
-  CHANGE COLUMN `correct` `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points',
-  ADD KEY `order` (`cid`,`points`, `totaltime`) USING BTREE;
+  CHANGE COLUMN `correct` `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points';
 
 --
 -- Transfer data from old to new structure
