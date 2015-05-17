@@ -248,7 +248,7 @@ $(function() {
 		{name}
 	</td>
 	<td>
-		<?php echo addInput("data[0][mapping][0][extra][{id}][shortname]", '{shortname}', 8, 10); ?>
+		<?php echo addInput("data[0][mapping][0][extra][{id}][shortname]", '{shortname}', 8, 10, 'required'); ?>
 	</td>
 	<?php
 		if (dbconfig_get('use_perproblem_points', 0)) {
