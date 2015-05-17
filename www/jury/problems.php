@@ -51,7 +51,7 @@ if( $res->count() == 0 ) {
 				htmlspecialchars($row['probid'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
 			"</td><td>".
-			$link . htmlspecialchars($activecontests[$row['probid']]) . "</a>" .
+			$link . htmlspecialchars(isset($activecontests[$row['probid']])?$activecontests[$row['probid']]:0) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
 			"</td><td>" . $link . (isset($row['memlimit']) ? (int)$row['memlimit'] : 'default') . "</a>" .
 			"</td><td>" . $link . (isset($row['outputlimit']) ? (int)$row['outputlimit'] : 'default') . "</a>" .
