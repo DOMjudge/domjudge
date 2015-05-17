@@ -234,7 +234,7 @@ function check_contest($data, $keydata = null)
 	}
 
 	// are required times specified?
-	foreach(array('activatetime','starttime','endtime','deactivatetime') as $f) {
+	foreach(array('activatetime','starttime','endtime') as $f) {
 		if ( empty($data[$f]) ) {
 			ch_error("Contest $f is empty");
 			return $data;
@@ -268,7 +268,7 @@ function check_contest($data, $keydata = null)
 			ch_error('Deactivatetime must be larger than unfreezetime.');
 		}
 	} else {
-		if ( difftime($data['deactivatetime'], $data['endtime']) < 0 ) {
+		if ( !empty($data['deactivatetime']) && difftime($data['deactivatetime'], $data['endtime']) < 0 ) {
 			ch_error('Deactivatetime must be larger than endtime.');
 		}
 	}

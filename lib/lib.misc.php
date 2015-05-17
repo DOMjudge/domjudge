@@ -56,17 +56,17 @@ function getCurContests($fulldata = FALSE, $onlyofteam = NULL,
 		$contests = $DB->q("SELECT * FROM contest
 		                    LEFT JOIN contestteam USING (cid)
 		                    WHERE (contestteam.teamid = %i OR contest.public = 1) AND enabled = 1 ${extra}
-		                    AND deactivatetime > UNIX_TIMESTAMP()
+		                    AND deactivatetime IS NULL OR deactivatetime > UNIX_TIMESTAMP()
 		                    ORDER BY activatetime", $onlyofteam);
 	} elseif ( $onlyofteam === -1 ) {
 		$contests = $DB->q("SELECT * FROM contest
 		                    WHERE enabled = 1 AND public = 1 ${extra}
-		                    AND deactivatetime > UNIX_TIMESTAMP()
+		                    AND deactivatetime IS NULL OR deactivatetime > UNIX_TIMESTAMP()
 		                    ORDER BY activatetime");
 	} else {
 		$contests = $DB->q("SELECT * FROM contest
 		                    WHERE enabled = 1 ${extra}
-		                    AND deactivatetime > UNIX_TIMESTAMP()
+		                    AND deactivatetime IS NULL OR deactivatetime > UNIX_TIMESTAMP()
 		                    ORDER BY activatetime");
 	}
 	$contests = $contests->getkeytable($key);
