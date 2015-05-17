@@ -30,10 +30,10 @@ $cdatas = getCurContests(TRUE);
 $cids = array_keys($cdatas);
 if (count($cdatas) != 1 ) {
 	error("Feed only supports exactly one active contest.");
-} else {
-	$cdata = array_pop($cdatas);
-	$cid = array_pop($cids);
 }
+// get first=only elt from arrays
+$cdata = reset($cdatas);
+$cid = reset($cids);
 
 $config = spyc_load_file(ETCDIR . '/import-forwardfeed.yaml');
 
