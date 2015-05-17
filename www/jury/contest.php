@@ -250,13 +250,10 @@ $(function() {
 	<td>
 		<?php echo addInput("data[0][mapping][0][extra][{id}][shortname]", '{shortname}', 8, 10, 'required'); ?>
 	</td>
-	<?php
-		if (dbconfig_get('use_perproblem_points', 0)) {
-			echo "<td>" .
-				addInput("data[0][mapping][0][extra][{id}][points]", '{points}', 4, 4) .
-				"</td>\n";
-		}
-	?>
+	<td>
+		<?php echo addInputField('number',"data[0][mapping][0][extra][{id}][points]",
+                                 '{points}', ' min="0" max="9999" required'); ?>
+	</td>
 	<td>
 		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_submit]", true, 1); ?>
 		<label for='data_0__mapping__0__extra__{id}__allow_submit_1'>yes</label>
@@ -285,9 +282,7 @@ $(function() {
 		<th>ID</th>
 		<th>name</th>
 		<th>short name</th>
-		<?php if ( dbconfig_get('use_perproblem_points', 0) ) {
-			echo "<th>points</th>\n";
-		} ?>
+	        <th>points</th>
 		<th>allow submit</th>
 		<th>allow judge</th>
 		<th>color

@@ -25,7 +25,6 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?'),
 ('show_compile', '2', 'int', 'Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always.'),
 ('show_sample_output', '0', 'bool', 'Should teams be able to view a diff of their and the reference output to sample testcases?'),
-('use_perproblem_points', '0', 'bool', 'Can different problems be worth different numbers of points?'),
 ('show_balloons_postfreeze', '0', 'bool', 'Give out balloon notifications after the scoreboard has been frozen?'),
 ('penalty_time', '20', 'int', 'Penalty time in minutes per wrong submission (if finally solved).'),
 ('compile_penalty', '1', 'bool', 'Should submissions with compiler-error incur penalty time (and show on the scoreboard)?'),

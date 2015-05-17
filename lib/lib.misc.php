@@ -274,17 +274,10 @@ function updateRankCache($cid, $team, $jury) {
 	}
 
 	// Fetch values from scoreboard cache per problem
-	$use_perproblem_points = dbconfig_get('use_perproblem_points', 0);
-	if ($use_perproblem_points) {
-		$scoredata = $DB->q("SELECT submissions, is_correct, cp.points, totaltime
-		                     FROM scorecache_$tblname
-		                     LEFT JOIN contestproblem cp USING(probid,cid)
-		                     WHERE cid = %i and teamid = %i", $cid, $team);
-	} else {
-		$scoredata = $DB->q("SELECT submissions, is_correct, totaltime
-		                     FROM scorecache_$tblname
-		                     WHERE cid = %i and teamid = %i", $cid, $team);
-	}
+	$scoredata = $DB->q("SELECT submissions, is_correct, cp.points, totaltime
+			     FROM scorecache_$tblname
+			     LEFT JOIN contestproblem cp USING(probid,cid)
+			     WHERE cid = %i and teamid = %i", $cid, $team);
 	$num_points = 0;
 	$total_time = $team_penalty;
 	while ( $srow = $scoredata->next() ) {
@@ -292,8 +285,7 @@ function updateRankCache($cid, $team, $jury) {
 		if ( $srow['is_correct'] ) {
 			$penalty = calcPenaltyTime( $srow['is_correct'],
 			                            $srow['submissions'] );
-			$points = $use_perproblem_points ? $srow['points'] : 1;
-			$num_points += $points;
+			$num_points += $srow['points'];
 			$total_time += $srow['totaltime'] + $penalty;
 		}
 	}

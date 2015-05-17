@@ -71,14 +71,8 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 		$cachetable = 'scorecache_public';
 	}
 
-	// Get all stuff from the cached table, but don't bother with outdated
-	// info from previous contests.
-	$use_perproblem_points = dbconfig_get('use_perproblem_points', 0);
-	if (!$use_perproblem_points) {
-		$query = "SELECT 1 as points, $cachetable.* FROM $cachetable WHERE cid = %i";
-	} else {
-		$query = "SELECT points, $cachetable.* FROM $cachetable JOIN contestproblem USING(probid,cid) WHERE cid = %i";
-	}
+	// Get all stuff from the cached table from this contest
+	$query = "SELECT points, $cachetable.* FROM $cachetable JOIN contestproblem USING(probid,cid) WHERE cid = %i";
 	$scoredata = $DB->q($query, $cid);
 
 	// loop all info the scoreboard cache and put it in our own datastructure
@@ -301,9 +295,14 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 	$SHOW_AFFILIATIONS = dbconfig_get('show_affiliations', 1);
 	$SHOW_PENDING      = dbconfig_get('show_pending', 0);
 
-	// Check if need to show points
-	$showpoints = dbconfig_get('use_perproblem_points', 0);
-
+	// Do not show points if they are all 1
+	$showpoints = FALSE;
+	foreach( $probs as $pr ) {
+		if ($pr['points'] != 1) {
+			$showpoints = TRUE;
+			break;
+		}
+	}
 	echo '<table class="scoreboard' . (IS_JURY ? ' scoreboard_jury' : '') . ($center ? ' center' : '') . "\">\n";
 
 	// output table column groups (for the styles)
