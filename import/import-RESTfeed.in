@@ -28,12 +28,6 @@ $waittime = 5;
 
 $cdatas = getCurContests(TRUE);
 $cids = array_keys($cdatas);
-if (count($cdatas) != 1 ) {
-	error("Feed only supports exactly one active contest.");
-}
-// get first=only elt from arrays
-$cdata = reset($cdatas);
-$cid = reset($cids);
 
 $config = spyc_load_file(ETCDIR . '/import-forwardfeed.yaml');
 
@@ -115,11 +109,12 @@ function getTeamID($externalid) {
 }
 
 $contest = dj_json_decode(request('contest'));
-if ( remap('contest',$contest['id'])!=$cid ) {
-	error("Contest ID does not match with external CCS data.
-  ours:   $cid
-  theirs: $contest[id]");
+$cid = remap('contest',$contest['id']);
+if ( !isset($cdatas[$cid]) ) {
+	error("Contest id $cid not known or active.");
 }
+$cdata = $cdatas[$cid];
+
 if ( difftime($contest['start'],$cdata['starttime'])!=0 ||
      $contest['length']!=difftime($cdata['endtime'],$cdata['starttime']) ) {
 	warning("Contest times do not match with external CCS data.
