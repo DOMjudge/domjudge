@@ -185,7 +185,8 @@ logmsg(LOG_DEBUG,"moved '$feedurl' to '$feedurl.mine.xml'");
 $feedXML = file_get_contents($feedurl . ".mine.xml");
 // Make sure the document is valid XML with a closing contest tag.
 //if ( strpos($feedXML, '</contest>')!==FALSE ) $feedXML .= "\n\n</contest>\n";
-$feedDOM = DOMDocument::loadXML($feedXML);
+$feedDOM = new DOMDocument();
+$feedDOM->loadXML($feedXML);
 if ( $feedDOM == NULL ) error("Could not read XML feed from '$feedurl.mine.xml'.");
 $xpath = new DOMXpath($feedDOM);
 
@@ -249,7 +250,7 @@ while ( TRUE ) {
 	logmsg(LOG_DEBUG,"moved '$feedurl' to '$feedurl.mine.xml'");
 
 	$feedXML = file_get_contents($feedurl . '.mine.xml');
-	$feedDOM = DOMDocument::loadXML($feedXML);
+	$feedDOM->loadXML($feedXML);
 	if ( $feedDOM == NULL ) error("Could not parse '$feedurl.mine.xml'");
 	$xpath = new DOMXpath($feedDOM);
 
