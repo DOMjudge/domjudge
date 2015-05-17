@@ -436,6 +436,7 @@ else {
 	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">probid</th>";
 	echo "<th scope=\"col\">name</th>";
 	echo "<th scope=\"col\">shortname</th>";
+	echo "<th scope=\"col\">points</th>";
 	echo "<th scope=\"col\">allow<br />submit</th>";
 	echo "<th scope=\"col\">allow<br />judge</th>";
 	echo "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>\n";
@@ -453,6 +454,7 @@ else {
 		     "p" . (int)$row['probid'] . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['name']) . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['shortname']) . "</a></td>\n";
+		echo "<td>" . $link . htmlspecialchars($row['points']) . "</a></td>\n";
 		echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_submit']) . "</a></td>\n";
 		echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_judge']) . "</a></td>\n";
 		echo ( !empty($row['color'])
