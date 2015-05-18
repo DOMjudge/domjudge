@@ -528,7 +528,8 @@ if ( isset($jid) )  {
 					                  "'$url','$username','".
 					                  $submdata['team_externalid']."','" .
 					                  $submdata['probshortname']."','".
-					                  $submdata['externalid']."')\"");
+					                  $submdata['externalid']."');".
+					                  " alert('Comment posted to iCAT.');\"");
 				}
 				echo "</p>" . addEndForm();
 			} else {
