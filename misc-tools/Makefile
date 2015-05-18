@@ -8,7 +8,8 @@ OBJECTS =
 
 SUBST_FILES = save_sources2file restore_sources2db static_scoreboard \
               combined_scoreboard judging_statistics balloons \
-              simulate_contest create_cgroups create_accounts
+              simulate_contest create_cgroups create_accounts \
+	      multi_rejudge
 
 build: $(TARGETS) $(SUBST_FILES)
 
