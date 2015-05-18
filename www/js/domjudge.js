@@ -625,9 +625,9 @@ function postVerifyCommentToICAT(url, user, teamid, probid, submissionid)
 	var msg = document.getElementById("comment").value;
 
 	addField("user", user);
-	addField("priority", 0);
-	addField("text", "Team #t"+teamid+" on problem #p"+probid+
-	                 " (#s"+submissionid+"): "+msg);
+	addField("priority", 1);
+	addField("submission", submissionid);
+	addField("text", "Team #t"+teamid+" on problem #p"+probid+": "+msg);
 
 	document.body.appendChild(form);
 
