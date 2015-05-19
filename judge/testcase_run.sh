@@ -262,30 +262,42 @@ fi
 logmsg $LOG_DEBUG "checking program run exit-status"
 # FIXME: a proper YAML parser should be used here, but the format is
 # rigid enough that we can use simple shell tools.
-timeused=`        grep '^time-used: ' program.meta | sed 's/time-used: //'`
-program_cputime=` grep '^cpu-time: '  program.meta | sed 's/cpu-time: //'`
-program_walltime=`grep '^wall-time: ' program.meta | sed 's/wall-time: //'`
-program_exit=`    grep '^exitcode: '  program.meta | sed 's/exitcode: //'`
-runtime="${program_cputime}s cpu, ${program_walltime}s wall"
+timeused=`        grep '^time-used: '    program.meta | sed 's/time-used: //'`
+program_cputime=` grep '^cpu-time: '     program.meta | sed 's/cpu-time: //'`
+program_walltime=`grep '^wall-time: '    program.meta | sed 's/wall-time: //'`
+program_exit=`    grep '^exitcode: '     program.meta | sed 's/exitcode: //'`
+memory_bytes=`    grep '^memory-bytes: ' program.meta | sed 's/memory-bytes: //'`
+runtime="runtime: ${program_cputime}s cpu, ${program_walltime}s wall"
+memory="used memory: ${memory_bytes} bytes"
 if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
-	echo "Timelimit exceeded, runtime: $runtime." >>system.out
+	echo "Timelimit exceeded." >>system.out
+	echo ${runtime} >> system.out
+	echo ${memory} >> system.out
 	cleanexit ${E_TIMELIMIT:-1}
 fi
 if [ "$program_exit" != "0" ]; then
 	echo "Non-zero exitcode $program_exit" >>system.out
+	echo ${runtime} >> system.out
+	echo ${memory} >> system.out
 	cleanexit ${E_RUN_ERROR:-1}
 fi
 
 if [ $exitcode -eq 42 ]; then
-	echo "Correct! Runtime: $runtime." >>system.out
+	echo "Correct!" >>system.out
+	echo ${runtime} >> system.out
+	echo ${memory} >> system.out
 	cleanexit ${E_CORRECT:-1}
 elif [ $exitcode -eq 43 ]; then
 	# Special case detect no-output:
 	if [ ! -s program.out ];  then
 		echo "Program produced no output." >>system.out
+		echo ${runtime} >> system.out
+		echo ${memory} >> system.out
 		cleanexit ${E_NO_OUTPUT:-1}
 	fi
 	echo "Wrong answer." >>system.out
+	echo ${runtime} >> system.out
+	echo ${memory} >> system.out
 	cleanexit ${E_WRONG_ANSWER:-1}
 fi
 
