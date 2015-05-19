@@ -212,10 +212,13 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
 if ( ! $submdata ) error ("Missing submission data");
 
 $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, j.valid, j.starttime,
-                 j.judgehost, j.verified, j.jury_member, j.verify_comment, r.reason, r.rejudgingid
+                 j.judgehost, j.verified, j.jury_member, j.verify_comment, r.reason, r.rejudgingid,
+                 MAX(jr.runtime) AS max_runtime
                  FROM judging j
+                 LEFT JOIN judging_run jr USING(judgingid)
                  LEFT JOIN rejudging r USING (rejudgingid)
                  WHERE cid = %i AND submitid = %i
+                 GROUP BY (jr.judgingid)
                  ORDER BY starttime ASC, judgingid ASC',
                 $submdata['cid'], $id);
 
@@ -302,6 +305,7 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 	echo "<table class=\"list\">\n" .
 		"<caption>Judgings</caption>\n<thead>\n" .
 		"<tr><td></td><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
+		"<th scope=\"col\">max runtime</th>" .
 		"<th scope=\"col\">judgehost</th><th scope=\"col\">result</th>" .
 		"<th scope=\"col\">rejudging</th>" .
 		"</tr>\n</thead>\n<tbody>\n";
@@ -322,13 +326,14 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
 			'<td>' . $link . printtime($jud['starttime']) . '</a></td>' .
+			'<td>' . $link . htmlspecialchars($jud['max_runtime']) . ' s</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
 			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) . '</a></td>' .
 			'<td>' . $link . htmlspecialchars($rinfo) . '</a></td>' .
 			"</tr>\n";
 
 	}
-    echo "</tbody>\n</table><br />\n\n";
+	echo "</tbody>\n</table><br />\n\n";
 }
 
 if ( !isset($jid) ) {
