@@ -21,9 +21,13 @@ $res = $DB->q('SELECT p.probid,p.name,p.timelimit,p.memlimit,p.outputlimit,
                GROUP BY probid ORDER BY probid');
 
 // Get number of active contests per problem
-$activecontests = $DB->q("KEYVALUETABLE SELECT probid, count(cid)
-                          FROM contestproblem
-                          WHERE cid IN (%As) GROUP BY probid", $cids);
+if ( count($cids)!=0 ) {
+	$activecontests = $DB->q("KEYVALUETABLE SELECT probid, count(cid)
+	                          FROM contestproblem
+	                          WHERE cid IN (%As) GROUP BY probid", $cids);
+} else {
+	$activecontests = array();
+}
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No problems defined</p>\n\n";

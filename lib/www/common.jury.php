@@ -328,8 +328,10 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				             WHERE probid = %i AND cid = %i", $probid, $cid) ) {
 					// Remove keys that cannot be modified:
 					unset($ini_array_contest_problem['probid']);
-					$DB->q('UPDATE contestproblem SET %S WHERE probid = %i AND cid = %i',
-					       $ini_array_contest_problem, $probid, $cid);
+					if ( count($ini_array_contest_problem)!=0 ) {
+						$DB->q('UPDATE contestproblem SET %S WHERE probid = %i AND cid = %i',
+						       $ini_array_contest_problem, $probid, $cid);
+					}
 				} else {
 					$shortname = $ini_array_contest_problem['probid'];
 					unset($ini_array_contest_problem['probid']);
