@@ -526,7 +526,7 @@ if ( isset($jid) )  {
 					    addInputField('button','post_icat','post to iCAT',
 					                  " onclick=\"postVerifyCommentToICAT(".
 					                  "'$url','$username','".
-					                  $submdata['team_externalid']."','" .
+					                  $submdata['teamid']."','" .
 					                  $submdata['probshortname']."','".
 					                  $submdata['externalid']."');".
 					                  " alert('Comment posted to iCAT.');\"");
