@@ -260,8 +260,8 @@ if [ ! -r program.meta ]; then
 	error "'program.meta' not readable"
 fi
 logmsg $LOG_DEBUG "checking program run exit-status"
-# FIXME: a proper YAML parser should be used here, but the format is
-# rigid enough that we can use simple shell tools.
+# There's no bash YAML parser, and the format is rigid enough that we
+# can parse it with grep here.
 timeused=`        grep '^time-used: '    program.meta | sed 's/time-used: //'`
 program_cputime=` grep '^cpu-time: '     program.meta | sed 's/cpu-time: //'`
 program_walltime=`grep '^wall-time: '    program.meta | sed 's/wall-time: //'`

@@ -177,8 +177,10 @@ if ( isset($_POST['import']) ) {
 			$problem = array();
 			$problem['letter'] = $prob['probid'];
 			$problem['short-name'] = $prob['name'];
+			// Our color field can be both a HTML color name and an RGB value,
+			// so we output it only in the human-readable field "color" and
+			// leave the field "rgb" unset.
 			$problem['color'] = $prob['color'];
-			// TODO? rgb? Fredrik?
 			$contest_data['problems'][] = $problem;
 		}
 	}
