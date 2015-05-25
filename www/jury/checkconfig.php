@@ -104,9 +104,9 @@ echo "<table class=\"configcheck\">\n";
 
 // SOFTWARE
 
-if( !function_exists('version_compare') || version_compare( '5.3.0',PHP_VERSION,'>=') ) {
+if( !function_exists('version_compare') || version_compare( '5.3.3',PHP_VERSION,'>=') ) {
 	result('software', 'PHP version', 'E',
-		'You have PHP ' . PHP_VERSION . ', but need at least 5.3.0.',
+		'You have PHP ' . PHP_VERSION . ', but need at least 5.3.3.',
 		'See <a href="?phpinfo">phpinfo</a> for details.');
 } else {
 	result('software', 'PHP version', 'O',

@@ -32,10 +32,8 @@ function dbconfig_init()
 			error("JSON config '$key' decode: unexpected control character found");
 		case JSON_ERROR_SYNTAX:
 			error("JSON config '$key' decode: syntax error, malformed JSON");
-		/* Only available since PHP >= 5.3.3:
 		case JSON_ERROR_UTF8:
 			error("JSON config '$key' decode: malformed UTF-8 characters, possibly incorrectly encoded");
-		 */
 		default:
 			error("JSON config '$key' decode: unknown error");
 		}
@@ -112,10 +110,8 @@ function dbconfig_store()
 			error("JSON config '$key' encode: unexpected control character found");
 		case JSON_ERROR_SYNTAX:
 			error("JSON config '$key' encode: syntax error, malformed JSON");
-		/* Only available since PHP >= 5.3.3:
 		case JSON_ERROR_UTF8:
 			error("JSON config '$key' encode: malformed UTF-8 characters, possibly incorrectly encoded");
-		 */
 		default:
 			error("JSON config '$key' encode: unknown error");
 		}
