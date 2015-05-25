@@ -172,6 +172,7 @@ $res = $DB->q('TABLE SELECT contest.*, COUNT(teamid) AS numteams
                FROM contest
                LEFT JOIN contestteam USING (cid)
                GROUP BY cid ORDER BY starttime DESC');
+$numprobs = $DB->q('KEYVALUETABLE SELECT cid, COUNT(probid) FROM contest LEFT JOIN contestproblem USING(cid) GROUP BY cid');
 
 if( count($res) == 0 ) {
 	echo "<p class=\"nodata\">No contests defined</p>\n\n";
@@ -192,8 +193,6 @@ if( count($res) == 0 ) {
 	$iseven = false;
 	foreach($res as $row) {
 
-		$numprobs = $DB->q('VALUE SELECT COUNT(*) FROM contestproblem WHERE cid = %i', $row['cid']);
-
 		$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
 
 		echo '<tr class="' .
@@ -211,7 +210,7 @@ if( count($res) == 0 ) {
 		echo "<td>" . $link . ($row['process_balloons'] ? 'yes' : 'no') . "</a></td>\n";
 		echo "<td>" . $link . ($row['public'] ? 'yes' : 'no') . "</a></td>\n";
 		echo "<td>" . $link . ($row['public'] ? '<em>all</em>' : $row['numteams']) . "</a></td>\n";
-		echo "<td>" . $link . $numprobs . "</a></td>\n";
+		echo "<td>" . $link . $numprobs[$row['cid']] . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['name']) . "</a></td>\n";
 		$iseven = ! $iseven;
 
