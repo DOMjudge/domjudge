@@ -273,11 +273,15 @@ $res = $DB->q('SELECT * FROM contest ORDER BY cid');
 $detail = '';
 $has_errors = FALSE;
 while($cdata = $res->next()) {
+	$cp = $DB->q('SELECT * FROM contestproblem WHERE cid = %i', $cdata['cid']);
 
 	$detail .=  "c".(int)$cdata['cid'].": ";
 
 	$CHECKER_ERRORS = array();
 	check_contest($cdata, array('cid' => $cdata['cid']));
+	while( $cpdata = $cp->next() ) {
+		check_contestproblem($cpdata, array('cid' => $cpdata['cid'], 'probid' => $cpdata['probid']));
+	}
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
 		foreach($CHECKER_ERRORS as $chk_err) {
 			$detail .= $chk_err . "\n";

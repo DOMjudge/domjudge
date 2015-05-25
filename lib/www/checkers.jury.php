@@ -58,6 +58,8 @@ function check_affiliation($data, $keydata = null)
 
 function check_problem($data, $keydata = null)
 {
+	global $DB;
+
 	if ( ! is_numeric($data['timelimit']) || $data['timelimit'] < 0 ||
 			(int)$data['timelimit'] != $data['timelimit'] ) {
 		ch_error("Timelimit is not a valid positive integer");
@@ -108,7 +110,6 @@ function check_problem($data, $keydata = null)
 	}
 
 	if ( !empty($data['special_compare']) ) {
-		global $DB;
 		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable
 		               WHERE execid = %s AND type = %s',
 		              $data['special_compare'], 'compare') ) {
@@ -117,7 +118,6 @@ function check_problem($data, $keydata = null)
 		}
 	}
 	if ( !empty($data['special_run']) ) {
-		global $DB;
 		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable
 		               WHERE execid = %s AND type = %s',
 		              $data['special_run'], 'run') ) {
@@ -271,6 +271,20 @@ function check_contest($data, $keydata = null)
 		if ( !empty($data['deactivatetime']) && difftime($data['deactivatetime'], $data['endtime']) < 0 ) {
 			ch_error('Deactivatetime must be larger than endtime.');
 		}
+	}
+
+	return $data;
+}
+
+function check_contestproblem($data, $keydata = null)
+{
+	if ( !is_numeric($data['points']) || $data['points'] < 0 ) {
+		ch_error("Points must be a positive integer.");
+	}
+
+	if ( isset($data['lazy_eval_results'] ) &&
+	    ($data['lazy_eval_results'] < 0 || $data['lazy_eval_results'] > 1) ) {
+		ch_error("Lazy_eval_results must be empty , 0 or 1.");
 	}
 
 	return $data;

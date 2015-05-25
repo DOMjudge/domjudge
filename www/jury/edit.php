@@ -10,9 +10,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-// TODO: (RJL) check problem points field is valid. Code is in checkers.jury.php
-// but not being called. Might be in wrong place.
-
 require('init.php');
 requireAdmin();
 
