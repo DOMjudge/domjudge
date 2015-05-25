@@ -13,9 +13,27 @@ require(LIBWWWDIR . '/header.php');
 
 requireAdmin();
 
+define('PAGEMAX', 1000);
+
 echo "<h1>Activity log</h1>\n\n";
 
-$res = $DB->q('SELECT * FROM auditlog ORDER BY logtime DESC');
+$start = (empty($_GET['start'])?0:(int)$_GET['start']);
+$res = $DB->q('SELECT * FROM auditlog ORDER BY logtime DESC LIMIT %i,%i', $start, PAGEMAX+1);
+
+echo "<p>";
+if ( $start > 0 ) {
+	echo "<a href=\"?start=" . ($start-PAGEMAX < 0 ? 0 : $start-PAGEMAX) . "\">previous page</a>";
+} else {
+	echo "<span class=\"nodata\">previous page</span>";
+}
+echo " | ";
+if ( $res->count() == 1+PAGEMAX ) {
+	echo "<a href=\"?start=" . ($start+PAGEMAX) . "\">next page</a>";
+} else {
+	echo "<span class=\"nodata\">next page</span>";
+}
+echo "</p>";
+
 
 if ( $res->count() == 0 ) {
 	echo '<p class="nodata">No entries</p>';
@@ -23,13 +41,13 @@ if ( $res->count() == 0 ) {
 	exit;
 }
 
-echo "<table class=\"sortable\">\n" .
-     "<tr><th>id</th><th>when</th><th class=\"sorttable_numeric\">cid</th>" .
-     "<th>who</th><th colspan=\"3\">what</th><th>extra info</th></tr>\n";
+echo "<table class=\"list sortable\">\n" .
+     "<thead><tr><th>id</th><th>when</th><th class=\"sorttable_numeric\">cid</th>" .
+     "<th>who</th><th colspan=\"3\">what</th><th>extra info</th></tr></thead>\n<tbody>\n";
 while ( $logline = $res->next() ) {
 	echo "<tr><td>" .
 	htmlspecialchars($logline['logid']) . "</td>" .
-	"<td title=\"" . htmlspecialchars($logline['logtime']) . "\">" .
+	"<td title=\"" . htmlspecialchars(printtime($logline['logtime'], "%Y-%m-%d %H:%M:%S (%Z)")) . "\">" .
 	printtime($logline['logtime']) . "</td><td>" .
 	(empty($logline['cid'])?'':'c'.$logline['cid']) . "</td><td>" .
 	htmlspecialchars($logline['user']) . "</td><td>" .
@@ -63,7 +81,7 @@ while ( $logline = $res->next() ) {
 		if ( $link!==NULL ) {
 			echo "<a href=\"$link\">$name</a>";
 		} else {
-			echo $name;
+			echo "<a>$name</a>";
 		}
 	}
 
@@ -72,7 +90,6 @@ while ( $logline = $res->next() ) {
 	htmlspecialchars($logline['extrainfo']) . "</td><td>" .
 	"</td></tr>\n";
 }
-echo "</table>\n\n";
-
+echo "</tbody></table>\n\n";
 
 require(LIBWWWDIR . '/footer.php');
