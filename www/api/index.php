@@ -76,8 +76,8 @@ function contest()
 		'penalty'   => 60*dbconfig_get('penalty_time', 20),
 		);
 }
-$doc = "Get information about the current contest: id, shortname, name, start, freeze, unfreeze, length, penalty and end.";
-$doc .= "If more than one contest is active, return information about the first one";
+$doc = "Get information about the current contest: id, shortname, name, start, freeze, unfreeze, length, penalty and end. ";
+$doc .= "If more than one contest is active, return information about the first one.";
 $api->provideFunction('GET', 'contest', $doc);
 
 
