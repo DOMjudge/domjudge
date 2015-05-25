@@ -260,7 +260,6 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 }
 
 $options = getopt("dv:n:hV");
-// With PHP version >= 5.3 we can also use long options.
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
 if ( $options===FALSE ) {
 	echo "Error: parsing options failed.\n";
