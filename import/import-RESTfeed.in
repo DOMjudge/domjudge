@@ -104,8 +104,8 @@ function remap($type, $id)
 function getTeamID($externalid) {
 	global $DB;
 	return $DB->q('MAYBEVALUE SELECT teamid FROM team
-			WHERE teamid = %s AND enabled = 1',
-			$externalid);
+	               WHERE teamid = %s AND enabled = 1',
+	              $externalid);
 }
 
 $contest = dj_json_decode(request('contest'));
@@ -219,7 +219,8 @@ while ( TRUE ) {
 		$teamid = getTeamID(remap('team',$subm['team']));
 
 		if ( empty($teamid) ) {
-			error("Got submission for non-existent local team with Team ID '".$subm['team']."' and external ID '" .remap('team',$subm['team'])."'");
+			error("Got submission for non-existent local team with Team ID '".
+			      $subm['team']."' and external ID '".remap('team',$subm['team'])."'");
 		}
 
 		$id = submit_solution($teamid,

@@ -126,11 +126,11 @@ function import($team, $prob, $lang, $submittime, $files, $filenames, $extid, $e
 	$id = $DB->q('RETURNID INSERT INTO submission
 				  (cid, teamid, probid, langid, submittime, externalid, externalresult)
 				  VALUES (%i, %s, %s, %s, %s, %i, %s)',
-		     $cid, $team, $probid, $langid, $submittime, $extid, $extresult);
+	             $cid, $team, $probid, $langid, $submittime, $extid, $extresult);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
-			(submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
+		        (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
 		       $id, $filenames[$rank], $rank, getFileContents($files[$rank], false));
 	}
 
@@ -139,7 +139,7 @@ function import($team, $prob, $lang, $submittime, $files, $filenames, $extid, $e
 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
-		VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
+	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
 	       now(), $cid, $team, $langid, $probid, $id);
 
 	if ( is_writable( SUBMITDIR ) ) {
