@@ -27,6 +27,8 @@ $contestids = $cids;
 if ( $cid !== null ) {
     $contestids = array($cid);
 }
+// cid -1 will never happen, but otherwise the array is empty and that is not supported
+if ( empty($contestids) ) $contestids = array(-1);
 
 echo "<p><a href=\"clarification.php\">Send Clarification</a></p>\n";
 echo "<p><a href=\"#newrequests\">View New Clarification Requests</a></p>\n";

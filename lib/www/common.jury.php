@@ -320,8 +320,9 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				       ') VALUES (%As)', $ini_array_contest_problem);
 			}
 		} else {
-
-			$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array_problem, $probid);
+			if ( count($ini_array_problem)>0 ) {
+				$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array_problem, $probid);
+			}
 
 			if ( $cid != -1 ) {
 				if ( $DB->q("MAYBEVALUE SELECT probid FROM contestproblem
