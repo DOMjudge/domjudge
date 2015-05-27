@@ -415,7 +415,7 @@ CREATE TABLE `submission` (
   `externalid` int(4) unsigned DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
   `externalresult` varchar(25) DEFAULT NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
   PRIMARY KEY  (`submitid`),
-  UNIQUE KEY `externalid` (`externalid`),
+  UNIQUE KEY `externalid` (`cid`,`externalid`),
   KEY `teamid` (`cid`,`teamid`),
   KEY `judgehost` (`cid`,`judgehost`),
   KEY `teamid_2` (`teamid`),

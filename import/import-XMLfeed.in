@@ -266,7 +266,7 @@ while ( TRUE ) {
 		logmsg(LOG_DEBUG,"Found submission (id = $id)");
 
 		$res = $DB->q('MAYBETUPLE SELECT submitid, teamid, probid, langid, submittime
-		               FROM submission WHERE externalid = %i', $id);
+		               FROM submission WHERE cid = %i AND externalid = %i', $cid, $id);
 
 		if ( !empty($res) ) {
 			if ( $res['teamid']!=remap('team',    val($run,'team')) ||
@@ -317,8 +317,8 @@ while ( TRUE ) {
 			// We're inserting a new judging
 
 			$DB->q('UPDATE submission SET externalresult = %s
-			        WHERE externalid = %i',
-			       remap('result',val($run,'result')), $id);
+			        WHERE cid = %i AND externalid = %i',
+			       remap('result',val($run,'result')), $cid, $id);
 
 			logmsg(LOG_INFO, "Updated external result for s".$id.
 			       " to '".remap('result',val($run,'result'))."'");

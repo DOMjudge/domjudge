@@ -28,7 +28,7 @@ ALTER TABLE `clarification`
 ALTER TABLE `submission`
   ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
   ADD COLUMN `externalresult` varchar(25) default NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
-  ADD UNIQUE KEY `externalid` (`externalid`);
+  ADD UNIQUE KEY `externalid` (`cid`,`externalid`);
 
 CREATE TABLE `removed_interval` (
   `intervalid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',

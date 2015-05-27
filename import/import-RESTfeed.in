@@ -185,7 +185,8 @@ while ( TRUE ) {
 		$lastsubmitid = max($lastsubmitid,$subm['id']);
 
 		$res = $DB->q('MAYBETUPLE SELECT submitid, teamid, probid, langid, submittime
-		               FROM submission WHERE externalid = %i', $subm['id']);
+		               FROM submission WHERE cid = %i AND externalid = %i',
+		              $cid, $subm['id']);
 
 		if ( !empty($res) ) {
 			if ( $res['teamid']!=getTeamID(remap('team',$subm['team'])) ||
@@ -242,8 +243,8 @@ while ( TRUE ) {
 		$lastjudgingid = max($lastjudgingid,$jud['id']);
 
 		$DB->q('UPDATE submission SET externalresult = %s
-		        WHERE externalid = %i',
-		       remap('result',$jud['outcome']), $jud['submission']);
+		        WHERE cid = %i AND externalid = %i',
+		       remap('result',$jud['outcome']), $cid, $jud['submission']);
 
 		logmsg(LOG_INFO, "Updated external result for s".$jud['submission'].
 		       " to '".remap('result',$jud['outcome'])."'");
