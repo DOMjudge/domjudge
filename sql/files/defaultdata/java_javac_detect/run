@@ -46,15 +46,15 @@ fi
 rm -f $TMPFILE
 
 # Look for class that has the 'main' function:
-CLASSNAMES=$(find * -type f -regex '^.*\.class$' \
+CLASSNAMES=$(find ./* -type f -regex '^.*\.class$' \
             | sed -e 's/\.class$//' -e 's/\//./g')
 COMPILESCRIPTDIR=$(dirname $0)
-MAINCLASS=$(java -cp $COMPILESCRIPTDIR DetectMain `pwd` $CLASSNAMES)
+MAINCLASS=$(java -cp $COMPILESCRIPTDIR DetectMain "`pwd`" $CLASSNAMES)
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
-MEMLIMITJAVA=$(($MEMLIMIT - $MEMRESERVED))
+MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 
 # Write executing script:
 # Executes java byte-code interpreter with following options

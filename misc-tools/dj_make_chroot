@@ -84,7 +84,7 @@ usage()
 
 error()
 {
-    echo "Error: $@"
+    echo "Error: $*"
     echo
     usage
     exit 1

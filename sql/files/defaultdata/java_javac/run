@@ -40,7 +40,7 @@ if [ ! -f "$TMP.class" ]; then
 fi
 
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
-MEMLIMITJAVA=$(($MEMLIMIT - $MEMRESERVED))
+MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 
 # Write executing script:
 # Executes java byte-code interpreter with following options

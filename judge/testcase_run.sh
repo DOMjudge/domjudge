@@ -61,9 +61,9 @@ cleanexit ()
 # Runs command without error trapping and check exitcode
 runcheck ()
 {
-	logmsg $LOG_DEBUG "runcheck: $@"
+	logmsg $LOG_DEBUG "runcheck: $*"
 	set +e
-	$@
+	"$@"
 	exitcode=$?
 	set -e
 }

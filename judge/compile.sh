@@ -94,7 +94,7 @@ logmsg $LOG_INFO "starting '$0', PID = $$"
 COMPILE_SCRIPT="$1";    shift
 WORKDIR="$1"; shift
 logmsg $LOG_DEBUG "arguments: '$COMPILE_SCRIPT' '$WORKDIR'"
-logmsg $LOG_DEBUG "source file(s): $@"
+logmsg $LOG_DEBUG "source file(s): $*"
 
 [ -d "$WORKDIR" -a -w "$WORKDIR" -a -x "$WORKDIR" ] || \
 	error "Workdir not found or not writable: $WORKDIR"

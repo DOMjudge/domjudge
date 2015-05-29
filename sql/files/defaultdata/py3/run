@@ -25,10 +25,10 @@ if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
 fi
 
 # Check syntax
-python3 -m py_compile $@
+python3 -m py_compile "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
-rm -f *.pyc
+rm -f -- *.pyc
 
 # Write executing script:
 cat > $DEST <<EOF

@@ -3,7 +3,7 @@
 # Run some Syntax checking tests on PHP and Shell scripts
 
 if [ -x /usr/bin/php ]; then
-	for i in `find .. -name *.php`; do
+	for i in `find .. -name '*.php'`; do
 		php -l $i | grep -v "^No syntax errors detected in "
 	done
 
@@ -18,4 +18,10 @@ if [ -x /usr/bin/checkbashisms ]; then
 	checkbashisms `grep -rsl "^#\!.*/bin/sh" ..|egrep -v '\.(svn|git)/'|egrep -v '^\.\./(config|autom4te)'|egrep -v '^\.\./sql/files/defaultdata/hs/run'`
 else
 	echo "checkbashisms not found in /usr/bin/checkbashisms"
+fi
+
+if [ -x /usr/bin/shellcheck ]; then
+	shellcheck -e 2006,2034,2039,2086,2129 `grep -rslE "^#\!.*/bin/(ba)?sh" ..|egrep -v '\.(svn|git)/'|egrep -v '^\.\./(config|autom4te|install-sh)'|egrep -v '^\.\./sql/files/defaultdata/hs/run'`
+else
+	echo "shellcheck not found in /usr/bin/shellcheck"
 fi

@@ -221,7 +221,7 @@ bare-install|install)
 			$SQLDIR/mysql_db_examples.sql \
 			$SQLDIR/mysql_db_files_examples.sql"
 	fi
-	RESTPW=`cat $RESTPWFILE | grep -v ^# | cut -f4`
+	RESTPW=`grep -v ^# $RESTPWFILE | cut -f4`
 	(
 		cat $FILES
 		echo "UPDATE user SET password = MD5('judgehost#$RESTPW') WHERE username='judgehost';"
@@ -255,7 +255,7 @@ upgrade)
 		# filter possible error messages later.
 		UPGRADELINE=`grep -n '@UPGRADE-CHECK@' "$i" | cut -d : -f 1`
 		UPGRADELINE=$((UPGRADELINE+1))
-		if cat $i | mysql -D "$DBNAME" >$TMPOUT 2>&1 ; then
+		if mysql -D "$DBNAME" < "$i" >$TMPOUT 2>&1 ; then
 			echo "Upgraded script '$i'."
 		else
 			if grep -E "^ERROR .* at line ${UPGRADELINE}: " $TMPOUT >/dev/null 2>&1 ; then
