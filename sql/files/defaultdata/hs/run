@@ -7,9 +7,6 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
-# reset maximum stack size to someting small to prevent ghc from running out of memory
-ulimit -s 8192
-
 # -Wall:	Report all warnings
 # -O:		Optimize
 # -static:	Static link Haskell libraries
