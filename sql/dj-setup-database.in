@@ -44,11 +44,13 @@ EOF
 mysql()
 {
 	local user pass
+	# shellcheck disable=SC2153
 	if [ -n "$DBUSER" ]; then
 		user="-u $DBUSER"
 	else
 		user="${DBA_USER:+-u ${DBA_USER}}"
 	fi
+	# shellcheck disable=SC2153
 	if [ -n "$PASSWD" ]; then
 		pass="-p$PASSWD"
 	else
