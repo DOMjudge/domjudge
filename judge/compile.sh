@@ -73,7 +73,7 @@ fi
 
 # Logging:
 LOGLEVEL=$LOG_DEBUG
-PROGNAME="`basename $0`"
+PROGNAME="$(basename "$0")"
 
 # Check for judge backend debugging:
 if [ "$DEBUG" ]; then
@@ -124,7 +124,7 @@ logmsg $LOG_INFO "starting compile"
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
 exitcode=0
-$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -m $SCRIPTMEMLIMIT \
+$GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -m $SCRIPTMEMLIMIT \
 	-t $SCRIPTTIMELIMIT -c -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M "$WORKDIR/compile.meta" -- \
 	"$COMPILE_SCRIPT" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?

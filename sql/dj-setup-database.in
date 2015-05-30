@@ -56,7 +56,7 @@ mysql()
 		[ -n "$PROMPT_PASSWD" ] && pass="-p"
 		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
 	fi
-	command mysql $user $pass -h $DBHOST --silent --skip-column-names "$@"
+	command mysql $user "$pass" -h "$DBHOST" --silent --skip-column-names "$@"
 }
 
 read_dbpasswords()
@@ -96,20 +96,20 @@ status()
 	fi
 	read_dbpasswords || return 1
 
-	echo -n "Trying to connect to the server as DB admin: "
+	printf "Trying to connect to the server as DB admin: "
 	mysql -e 'SELECT "success.";' || return 1
 
-	echo -n "Trying to connect to the server with user '$domjudge_DBUSER': "
+	printf "Trying to connect to the server with user '$domjudge_DBUSER': "
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD mysql -e 'SELECT "success.";' || return 1
 
-	echo -n "Searching for database \`$DBNAME\`: "
+	printf "Searching for database \`$DBNAME\`: "
 	mysql -e "USE \`$DBNAME\`; SELECT 'found.';" || return 1
 
-	echo -n "Searching for data in database: "
+	printf "Searching for data in database: "
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD \
 		mysql -e "USE \`$DBNAME\`; SELECT name FROM team WHERE login = 'domjudge';" || return 1
 
-	echo -n "MySQL server version: "
+	printf "MySQL server version: "
 	mysql -e 'SELECT version();'
 }
 

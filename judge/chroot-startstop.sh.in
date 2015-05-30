@@ -35,7 +35,7 @@ case "$1" in
 			# Some dirs may be links to others, e.g. /lib64 -> /lib.
 			# Preserve those; bind mount the others.
 			if [ -L "$CHROOTORIGINAL/$i" ]; then
-				ln -s `readlink "$CHROOTORIGINAL/$i"` $i
+				ln -s "$(readlink "$CHROOTORIGINAL/$i")" $i
 			elif [ -d "$CHROOTORIGINAL/$i" ]; then
 				mkdir -p $i
 				sudo -n mount --bind "$CHROOTORIGINAL/$i" $i < /dev/null

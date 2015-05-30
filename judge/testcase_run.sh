@@ -99,7 +99,7 @@ fi
 
 # Logging:
 LOGLEVEL=$LOG_DEBUG
-PROGNAME="`basename $0`"
+PROGNAME="$(basename "$0")"
 
 # Check for judge backend debugging:
 if [ "$DEBUG" ]; then
@@ -151,7 +151,7 @@ if [ -z "$USE_CHROOT" ] || [ "$USE_CHROOT" -eq 0 ]; then
 	unset USE_CHROOT
 	PREFIX=$PWD
 else
-	PREFIX="/`basename $PWD`"
+	PREFIX="/$(basename "$PWD")"
 fi
 
 # Make testing/execute dir accessible for RUNUSER:
@@ -191,7 +191,7 @@ $GAINROOT cp -pR /dev/null ../dev/null
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck ./run testdata.in program.out \
-	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT \
+	$GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT \
 	${USE_CHROOT:+-r "$PWD/.."} \
 	--nproc=$PROCLIMIT \
 	--no-core --streamsize=$FILELIMIT \
@@ -199,7 +199,7 @@ runcheck ./run testdata.in program.out \
 	--walltime=$TIMELIMIT --cputime=$TIMELIMIT \
 	--memsize=$MEMLIMIT --filesize=$FILELIMIT \
 	--stderr=program.err --outmeta=program.meta -- \
-	$PREFIX/$PROGRAM 2>runguard.err
+	"$PREFIX/$PROGRAM" 2>runguard.err
 
 # Check for still running processes:
 output=`ps -u "$RUNUSER" -o pid= -o comm= || true`
@@ -225,7 +225,7 @@ for i in judgemessage.txt teammessage.txt score.txt judgeerror.txt diffposition.
 	chmod a+w feedback/$i
 done
 
-runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
+runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
 	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
 	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
