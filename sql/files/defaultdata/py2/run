@@ -31,7 +31,7 @@ EXITCODE=$?
 rm -f -- *.pyc
 
 # Write executing script:
-cat > $DEST <<EOF
+cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute python interpreter on source.
 
@@ -46,6 +46,6 @@ export ONLINE_JUDGE=1 DOMJUDGE=1 HOME=/does/not/exist
 exec python "$MAINSOURCE"
 EOF
 
-chmod a+x $DEST
+chmod a+x "$DEST"
 
 exit 0

@@ -28,7 +28,7 @@ fi
 # There is no portable way to test the syntax of an awk script.
 
 # Write executing script:
-cat > $DEST <<EOF
+cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute awk interpreter on source.
 
@@ -40,6 +40,6 @@ fi
 exec awk -v ONLINE_JUDGE=1 -v DOMJUDGE=1 -f "$MAINSOURCE"
 EOF
 
-chmod a+x $DEST
+chmod a+x "$DEST"
 
 exit 0

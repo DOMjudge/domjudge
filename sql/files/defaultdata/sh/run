@@ -29,7 +29,7 @@ EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
 # Write executing script:
-cat > $DEST <<EOF
+cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute shell interpreter on source.
 
@@ -43,6 +43,6 @@ export ONLINE_JUDGE=1 DOMJUDGE=1
 exec sh $RUNOPTIONS "$MAINSOURCE"
 EOF
 
-chmod a+x $DEST
+chmod a+x "$DEST"
 
 exit 0

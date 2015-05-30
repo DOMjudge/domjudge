@@ -26,10 +26,10 @@ SOURCEDIR="${MAINSOURCE%/*}"
 [ "$SOURCEDIR" = "$MAINSOURCE" ] && SOURCEDIR='.'
 TMP="$SOURCEDIR/$MAINCLASS"
 
-cp "$MAINSOURCE" $TMP.java
+cp "$MAINSOURCE" "$TMP.java"
 
 # Byte-compile:
-javac $TMP.java
+javac "$TMP.java"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
@@ -45,7 +45,7 @@ MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 # Write executing script:
 # Executes java byte-code interpreter with following options
 # -Xmx: maximum size of memory allocation pool
-cat > $DEST <<EOF
+cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute java interpreter on source.
 
@@ -54,9 +54,9 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec java -Xss8m -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 $MAINCLASS
+exec java -Xss8m -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 '$MAINCLASS'
 EOF
 
-chmod a+x $DEST
+chmod a+x "$DEST"
 
 exit 0

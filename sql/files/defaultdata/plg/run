@@ -7,6 +7,6 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
-exec swipl --goal=main,halt --stand_alone=true -o $DEST -c $MAINSOURCE
+exec swipl --goal=main,halt --stand_alone=true -o "$DEST" -c "$MAINSOURCE"
 
 exit 0
