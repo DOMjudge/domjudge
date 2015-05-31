@@ -1346,7 +1346,7 @@ submissions for this problem. See also the explanation for language.
 <tt>timelimit</tt> is the timelimit in seconds
 within which solutions for this problem have to run (taking into
 account <tt>time_factor</tt> per language). See also
-<ref id="problems:timelimit" name="enforcement of time limits"> for
+<ref id="problems:timelimits" name="enforcement of time limits"> for
 more details.
 
 <tt>memlimit</tt> is the memory limit in kB allotted for this problem.
