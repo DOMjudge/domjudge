@@ -218,7 +218,7 @@ $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, j.valid, j.start
                  LEFT JOIN judging_run jr USING(judgingid)
                  LEFT JOIN rejudging r USING (rejudgingid)
                  WHERE cid = %i AND submitid = %i
-                 GROUP BY (jr.judgingid)
+                 GROUP BY (j.judgingid)
                  ORDER BY starttime ASC, judgingid ASC',
                 $submdata['cid'], $id);
 
