@@ -154,7 +154,6 @@ function check_contest_times($update = FALSE)
 		$data = array('starttime_string' => '2999-01-01 00:00',
 		              'endtime_string' => sprintf('+%02d:%02d', $h,$m),
 		              'activatetime_string' => '-1:00',
-		              'deactivatetime_string' => '+99:00',
 		              'enabled' => 0);
 
 		update_contest_times($data);
