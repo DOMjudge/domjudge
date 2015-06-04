@@ -61,9 +61,9 @@ cleanexit ()
 # Runs command without error trapping and check exitcode
 runcheck ()
 {
-	logmsg $LOG_DEBUG "runcheck: $@"
+	logmsg $LOG_DEBUG "runcheck: $*"
 	set +e
-	$@
+	"$@"
 	exitcode=$?
 	set -e
 }
@@ -99,7 +99,7 @@ fi
 
 # Logging:
 LOGLEVEL=$LOG_DEBUG
-PROGNAME="`basename $0`"
+PROGNAME="$(basename "$0")"
 
 # Check for judge backend debugging:
 if [ "$DEBUG" ]; then
@@ -151,7 +151,7 @@ if [ -z "$USE_CHROOT" ] || [ "$USE_CHROOT" -eq 0 ]; then
 	unset USE_CHROOT
 	PREFIX=$PWD
 else
-	PREFIX="/`basename $PWD`"
+	PREFIX="/$(basename "$PWD")"
 fi
 
 # Make testing/execute dir accessible for RUNUSER:
@@ -191,7 +191,7 @@ $GAINROOT cp -pR /dev/null ../dev/null
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
 runcheck ./run testdata.in program.out \
-	$GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT \
+	$GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT \
 	${USE_CHROOT:+-r "$PWD/.."} \
 	--nproc=$PROCLIMIT \
 	--no-core --streamsize=$FILELIMIT \
@@ -199,7 +199,7 @@ runcheck ./run testdata.in program.out \
 	--walltime=$TIMELIMIT --cputime=$TIMELIMIT \
 	--memsize=$MEMLIMIT --filesize=$FILELIMIT \
 	--stderr=program.err --outmeta=program.meta -- \
-	$PREFIX/$PROGRAM 2>runguard.err
+	"$PREFIX/$PROGRAM" 2>runguard.err
 
 # Check for still running processes:
 output=`ps -u "$RUNUSER" -o pid= -o comm= || true`
@@ -224,8 +224,8 @@ for i in judgemessage.txt teammessage.txt score.txt judgeerror.txt diffposition.
 	touch feedback/$i        # Create possible feedback files
 	chmod a+w feedback/$i
 done
-# TODO; get and pass additional arguments to validator
-runcheck $GAINROOT $RUNGUARD ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
+
+runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
 	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
 	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
@@ -260,44 +260,40 @@ if [ ! -r program.meta ]; then
 	error "'program.meta' not readable"
 fi
 logmsg $LOG_DEBUG "checking program run exit-status"
-# FIXME: a proper YAML parser should be used here, but the format is
-# rigid enough that we can use simple shell tools.
+# There's no bash YAML parser, and the format is rigid enough that we
+# can parse it with grep here.
 timeused=`        grep '^time-used: '    program.meta | sed 's/time-used: //'`
 program_cputime=` grep '^cpu-time: '     program.meta | sed 's/cpu-time: //'`
 program_walltime=`grep '^wall-time: '    program.meta | sed 's/wall-time: //'`
 program_exit=`    grep '^exitcode: '     program.meta | sed 's/exitcode: //'`
 memory_bytes=`    grep '^memory-bytes: ' program.meta | sed 's/memory-bytes: //'`
-runtime="runtime: ${program_cputime}s cpu, ${program_walltime}s wall"
-memory="used memory: ${memory_bytes} bytes"
+resourceinfo="\
+runtime: ${program_cputime}s cpu, ${program_walltime}s wall
+memory used: ${memory_bytes} bytes"
 if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
 	echo "Timelimit exceeded." >>system.out
-	echo ${runtime} >> system.out
-	echo ${memory} >> system.out
+	echo "$resourceinfo" >>system.out
 	cleanexit ${E_TIMELIMIT:-1}
 fi
 if [ "$program_exit" != "0" ]; then
 	echo "Non-zero exitcode $program_exit" >>system.out
-	echo ${runtime} >> system.out
-	echo ${memory} >> system.out
+	echo "$resourceinfo" >>system.out
 	cleanexit ${E_RUN_ERROR:-1}
 fi
 
 if [ $exitcode -eq 42 ]; then
 	echo "Correct!" >>system.out
-	echo ${runtime} >> system.out
-	echo ${memory} >> system.out
+	echo "$resourceinfo" >>system.out
 	cleanexit ${E_CORRECT:-1}
 elif [ $exitcode -eq 43 ]; then
 	# Special case detect no-output:
 	if [ ! -s program.out ];  then
 		echo "Program produced no output." >>system.out
-		echo ${runtime} >> system.out
-		echo ${memory} >> system.out
+		echo "$resourceinfo" >>system.out
 		cleanexit ${E_NO_OUTPUT:-1}
 	fi
 	echo "Wrong answer." >>system.out
-	echo ${runtime} >> system.out
-	echo ${memory} >> system.out
+	echo "$resourceinfo" >>system.out
 	cleanexit ${E_WRONG_ANSWER:-1}
 fi
 

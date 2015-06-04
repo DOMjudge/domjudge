@@ -30,7 +30,8 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 
 	requireAdmin();
 
-	$restrictions = $DB->q('KEYVALUETABLE SELECT restrictionid, restrictionname FROM judgehost_restriction ORDER BY restrictionid');
+	$restrictions = $DB->q('KEYVALUETABLE SELECT restrictionid, name
+	                        FROM judgehost_restriction ORDER BY restrictionid');
 	$restrictions = array(null => '-- No restrictions --') + $restrictions;
 
 	echo addForm('edit.php');
@@ -82,10 +83,10 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 
 }
 
-$res = $DB->q('SELECT judgehost.*, judgehost_restriction.restrictionname
-	       FROM judgehost
-	       LEFT JOIN judgehost_restriction USING (restrictionid)
-	       ORDER BY hostname');
+$res = $DB->q('SELECT judgehost.*, judgehost_restriction.name
+               FROM judgehost
+               LEFT JOIN judgehost_restriction USING (restrictionid)
+               ORDER BY hostname');
 
 $now = now();
 $query = 'KEYVALUETABLE SELECT judgehost,
@@ -127,9 +128,9 @@ if( $res->count() == 0 ) {
 			echo "\" title =\"never checked in\">";
 		} else {
 			$reltime = floor(difftime($now,$row['polltime']));
-			if ( $reltime < JUDGEHOST_WARNING ) {
+			if ( $reltime < dbconfig_get('judgehost_warning',30) ) {
 				echo "judgehost-ok";
-			} else if ( $reltime < JUDGEHOST_CRITICAL ) {
+			} else if ( $reltime < dbconfig_get('judgehost_critical',120) ) {
 				echo "judgehost-warn";
 			} else {
 				echo "judgehost-crit";
@@ -137,7 +138,7 @@ if( $res->count() == 0 ) {
 			echo "\" title =\"last checked in $reltime seconds ago\">";
 		}
 		echo $link . CIRCLE_SYM . "</a></td>";
-		echo "<td>" . $link . (is_null($row['restrictionname']) ? '<i>none</i>' : $row['restrictionname']) . '</a></td>';
+		echo "<td>" . $link . (is_null($row['name']) ? '<i>none</i>' : $row['name']) . '</a></td>';
 		echo "<td title=\"load during the last 2 and 10 minutes and the whole contest\">" .$link .
 		    sprintf('%.2f&nbsp;%.2f&nbsp;%.2f',
 		            @$work2min[   $row['hostname']] / (2*60),

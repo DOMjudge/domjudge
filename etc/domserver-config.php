@@ -47,14 +47,6 @@ define('EXT_CCS_URL', 'https://ccs.example.com/submissions/');
 // Specify URL of the iCAT webinterface
 define('ICAT_URL', 'http://icat.example.com/icat/');
 
-// After what delay of a judgehost not checking in should its status
-// start displaying as warning or critical.
-define('JUDGEHOST_WARNING', 30);
-define('JUDGEHOST_CRITICAL', 120);
-
-// Maximum width/height of a thumbnail for uploaded testcase images.
-define('THUMBNAIL_SIZE', 128);
-
 // Internal and output character set used, don't change.
 define('DJ_CHARACTER_SET', 'utf-8');
 define('DJ_CHARACTER_SET_MYSQL', 'utf8');

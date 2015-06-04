@@ -44,11 +44,13 @@ EOF
 mysql()
 {
 	local user pass
+	# shellcheck disable=SC2153
 	if [ -n "$DBUSER" ]; then
 		user="-u $DBUSER"
 	else
 		user="${DBA_USER:+-u ${DBA_USER}}"
 	fi
+	# shellcheck disable=SC2153
 	if [ -n "$PASSWD" ]; then
 		pass="-p$PASSWD"
 	else
@@ -56,7 +58,7 @@ mysql()
 		[ -n "$PROMPT_PASSWD" ] && pass="-p"
 		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
 	fi
-	command mysql $user $pass -h $DBHOST --silent --skip-column-names "$@"
+	command mysql $user "$pass" -h "$DBHOST" --silent --skip-column-names "$@"
 }
 
 read_dbpasswords()
@@ -96,20 +98,20 @@ status()
 	fi
 	read_dbpasswords || return 1
 
-	echo -n "Trying to connect to the server as DB admin: "
+	printf "Trying to connect to the server as DB admin: "
 	mysql -e 'SELECT "success.";' || return 1
 
-	echo -n "Trying to connect to the server with user '$domjudge_DBUSER': "
+	printf "Trying to connect to the server with user '$domjudge_DBUSER': "
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD mysql -e 'SELECT "success.";' || return 1
 
-	echo -n "Searching for database \`$DBNAME\`: "
+	printf "Searching for database \`$DBNAME\`: "
 	mysql -e "USE \`$DBNAME\`; SELECT 'found.';" || return 1
 
-	echo -n "Searching for data in database: "
+	printf "Searching for data in database: "
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD \
 		mysql -e "USE \`$DBNAME\`; SELECT name FROM team WHERE login = 'domjudge';" || return 1
 
-	echo -n "MySQL server version: "
+	printf "MySQL server version: "
 	mysql -e 'SELECT version();'
 }
 
@@ -221,7 +223,7 @@ bare-install|install)
 			$SQLDIR/mysql_db_examples.sql \
 			$SQLDIR/mysql_db_files_examples.sql"
 	fi
-	RESTPW=`cat $RESTPWFILE | grep -v ^# | cut -f4`
+	RESTPW=`grep -v ^# $RESTPWFILE | cut -f4`
 	(
 		cat $FILES
 		echo "UPDATE user SET password = MD5('judgehost#$RESTPW') WHERE username='judgehost';"
@@ -255,7 +257,7 @@ upgrade)
 		# filter possible error messages later.
 		UPGRADELINE=`grep -n '@UPGRADE-CHECK@' "$i" | cut -d : -f 1`
 		UPGRADELINE=$((UPGRADELINE+1))
-		if cat $i | mysql -D "$DBNAME" >$TMPOUT 2>&1 ; then
+		if mysql -D "$DBNAME" < "$i" >$TMPOUT 2>&1 ; then
 			echo "Upgraded script '$i'."
 		else
 			if grep -E "^ERROR .* at line ${UPGRADELINE}: " $TMPOUT >/dev/null 2>&1 ; then

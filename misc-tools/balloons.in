@@ -35,7 +35,7 @@ function notification_text($team, $problem, $contest, $probs_solved, $probs_data
 		"A problem has been solved:\n".
 		"\n".
 		(empty($team['room']) ? "" : "Location: ".$team['room']."\n" ) .
-		"Contest:  ".$contest['contestname']." (c".$contest['cid'].")\n".
+		"Contest:  ".$contest['name']." (c".$contest['cid'].")\n".
 		"Team:     ".$team['name']." (t".$team['teamid'].")\n".
 		"Problem:  ".$problem.": ".$probs_data[$problem]['name'].
 		(empty($probs_data[$problem]['color']) ? "" : " (colour: ".$probs_data[$problem]['color'].")" ) . "\n\n" .
@@ -133,7 +133,7 @@ while ( TRUE ) {
 
 					$probs_solved = $DB->q('COLUMN SELECT probid FROM scorecache_jury
 					                        WHERE cid = %i AND teamid = %i AND is_correct = 1',
-							       $cid, $row['teamid']);
+					                       $cid, $row['teamid']);
 					$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,shortname,name,color
 					                      FROM problem WHERE cid = %i', $cid);
 

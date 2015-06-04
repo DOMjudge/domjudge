@@ -58,6 +58,8 @@ function check_affiliation($data, $keydata = null)
 
 function check_problem($data, $keydata = null)
 {
+	global $DB;
+
 	if ( ! is_numeric($data['timelimit']) || $data['timelimit'] < 0 ||
 			(int)$data['timelimit'] != $data['timelimit'] ) {
 		ch_error("Timelimit is not a valid positive integer");
@@ -75,9 +77,7 @@ function check_problem($data, $keydata = null)
 				$data['problemtext_type'] = $ext;
 			}
 		}
-		// These functions only exist in PHP >= 5.3.0.
-		if ( !isset($data['problemtext_type']) &&
-		     function_exists("finfo_open") ) {
+		if ( !isset($data['problemtext_type']) ) {
 			$finfo = finfo_open(FILEINFO_MIME);
 
 			list($type) = explode('; ', finfo_file($finfo, $tempname));
@@ -110,15 +110,19 @@ function check_problem($data, $keydata = null)
 	}
 
 	if ( !empty($data['special_compare']) ) {
-		global $DB;
-		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s AND type = %s', $data['special_compare'], 'compare') ) {
-			ch_error("Unknown special compare script (or wrong type): " . $data['special_compare']);
+		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable
+		               WHERE execid = %s AND type = %s',
+		              $data['special_compare'], 'compare') ) {
+			ch_error("Unknown special compare script (or wrong type): " .
+			         $data['special_compare']);
 		}
 	}
 	if ( !empty($data['special_run']) ) {
-		global $DB;
-		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s AND type = %s', $data['special_run'], 'run') ) {
-			ch_error("Unknown special run script (or wrong type): " . $data['special_run']);
+		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable
+		               WHERE execid = %s AND type = %s',
+		              $data['special_run'], 'run') ) {
+			ch_error("Unknown special run script (or wrong type): " .
+			         $data['special_run']);
 		}
 	}
 
@@ -149,9 +153,25 @@ function check_language($data, $keydata = null)
 		ch_error("No compile script specified for language: " . $id);
 	} else {
 		global $DB;
-		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s AND type = %s', $data['compile_script'], 'compile') ) {
-			ch_error("Unknown compile script (or wrong type): " . $data['compile_script']);
+		if ( ! $DB->q('MAYBEVALUE SELECT execid FROM executable
+		               WHERE execid = %s AND type = %s',
+		              $data['compile_script'], 'compile') ) {
+			ch_error("Unknown compile script (or wrong type): " .
+			         $data['compile_script']);
 		}
+	}
+
+	return $data;
+}
+
+function check_executable($data, $keydata = null)
+{
+	$id = (isset($data['execid']) ? $data['execid'] : $keydata['execid']);
+	if ( ! preg_match ( ID_REGEX, $id ) ) {
+		ch_error("Executable ID may only contain characters " . IDENTIFIER_CHARS . ".");
+	}
+	if ( !isset($data['type']) || !in_array($data['type'], $executable_types) ) {
+		ch_error("Executable type '" . $data['type'] . "' is invalid.");
 	}
 
 	return $data;
@@ -265,7 +285,7 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
 	}
 
 	// are required times specified?
-	foreach(array('activatetime','starttime','endtime','deactivatetime') as $f) {
+	foreach(array('activatetime','starttime','endtime') as $f) {
 		if ( empty($data[$f]) ) {
 			ch_error("Contest $f is empty");
 			return $data;
@@ -299,7 +319,7 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
 			ch_error('Deactivatetime must be larger than unfreezetime.');
 		}
 	} else {
-		if ( difftime($data['deactivatetime'], $data['endtime']) < 0 ) {
+		if ( !empty($data['deactivatetime']) && difftime($data['deactivatetime'], $data['endtime']) < 0 ) {
 			ch_error('Deactivatetime must be larger than endtime.');
 		}
 	}
@@ -310,6 +330,20 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
 	// the contest endtime, but _not_ after correcting the contest
 	// endtime for it.
 	if ( isset($keydata['cid']) ) check_removed_intervals($data,$removed_intervals);
+
+	return $data;
+}
+
+function check_contestproblem($data, $keydata = null)
+{
+	if ( !is_numeric($data['points']) || $data['points'] < 0 ) {
+		ch_error("Points must be a positive integer.");
+	}
+
+	if ( isset($data['lazy_eval_results'] ) &&
+	    ($data['lazy_eval_results'] < 0 || $data['lazy_eval_results'] > 1) ) {
+		ch_error("Lazy_eval_results must be empty , 0 or 1.");
+	}
 
 	return $data;
 }

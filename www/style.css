@@ -219,6 +219,15 @@ legend {
 	border-bottom: 2px solid black;
 	white-space: nowrap;
 }
+
+.problempoints {
+	font-size: smaller;
+	font-weight: normal;
+	color: #303030;
+	padding-left: 3pt;
+	padding-right: 3pt;
+}
+
 .score_correct   { background: #60e760; }
 .score_first     { background: #1daa1d !important; }
 .score_pending   { background: #6666FF; }

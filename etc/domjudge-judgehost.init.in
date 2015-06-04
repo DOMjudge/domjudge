@@ -72,7 +72,7 @@ case "$1" in
 	if [ -d $CHROOTDIR ]; then
 		mount -t proc proc $CHROOTDIR/proc
 	fi
-	start-stop-daemon --start --quiet --chuid $RUNAS --pidfile "$PIDFILE" --exec $DAEMON -- $OPTIONS
+	start-stop-daemon --start --quiet --chuid $RUNAS --pidfile "$PIDFILE" --exec "$DAEMON" -- $OPTIONS
 	log_end_msg $?
 	;;
   stop)

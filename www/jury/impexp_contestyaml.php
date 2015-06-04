@@ -31,7 +31,7 @@ if ( isset($_POST['import']) ) {
 		$invalid_regex = '/[^' . substr(IDENTIFIER_CHARS,1).'/';
 
 		$contest = array();
-		$contest['contestname'] = $contest_yaml_data['name'];
+		$contest['name'] = $contest_yaml_data['name'];
 		$contest['shortname'] = preg_replace($invalid_regex, '_',
 		                                     $contest_yaml_data['short-name']);
 		$contest['starttime_string'] =
@@ -49,7 +49,6 @@ if ( isset($_POST['import']) ) {
 			$contest['freezetime_string'] =
 			    '+' . substr($contest_yaml_data['scoreboard-freeze'],0,-3);
 		}
-		// TODO or 1?
 		$contest['enabled'] = 1;
 
 		$contest = check_contest($contest);
@@ -146,8 +145,8 @@ if ( isset($_POST['import']) ) {
 	$contest_row['removed_intervals'] = $res;
 
 	$contest_data = array();
-	$contest_data['name'] = $contest_row['contestname'];
-	$contest_data['short-name'] = $contest_row['contestname'];
+	$contest_data['name'] = $contest_row['name'];
+	$contest_data['short-name'] = $contest_row['name'];
 	$contest_data['start-time'] = date('c', $contest_row['starttime']);
 	$contest_data['duration'] =
 		printtimerel(calcContestTime($contest_row['endtime'], $contest_row['cid']));
@@ -181,8 +180,10 @@ if ( isset($_POST['import']) ) {
 			$problem = array();
 			$problem['letter'] = $prob['probid'];
 			$problem['short-name'] = $prob['name'];
+			// Our color field can be both a HTML color name and an RGB value,
+			// so we output it only in the human-readable field "color" and
+			// leave the field "rgb" unset.
 			$problem['color'] = $prob['color'];
-			// TODO? rgb? Fredrik?
 			$contest_data['problems'][] = $problem;
 		}
 	}
@@ -217,7 +218,7 @@ echo addSubmit('Import', 'import') . addEndForm();
 echo "<h2>Export to YAML</h2>\n\n";
 echo addForm('impexp_contestyaml.php');
 echo '<label for="contest">Select contest: </label>';
-$contests = $DB->q("KEYVALUETABLE SELECT cid, contestname FROM contest");
+$contests = $DB->q("KEYVALUETABLE SELECT cid, name FROM contest");
 echo addSelect('contest', $contests, null, true);
 echo addSubmit('Export', 'export') . addEndForm();
 

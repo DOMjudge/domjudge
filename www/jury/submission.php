@@ -211,7 +211,7 @@ if ( ! $id ) error("Missing or invalid submission id");
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
                     s.submittime, s.valid, c.cid, c.shortname AS contestshortname,
                     s.externalid, s.externalresult, t.externalid AS team_externalid,
-                    c.contestname, t.name AS teamname, l.name AS langname,
+                    c.name AS contestname, t.name AS teamname, l.name AS langname,
                     cp.shortname AS probshortname, p.name AS probname,
                     CEILING(time_factor*timelimit) AS maxruntime
                     FROM submission s
@@ -225,10 +225,13 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid,
 if ( ! $submdata ) error ("Missing submission data");
 
 $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, cid, result, j.valid, j.starttime,
-                 j.judgehost, j.verified, j.jury_member, j.verify_comment, r.reason, r.rejudgingid
+                 j.judgehost, j.verified, j.jury_member, j.verify_comment, r.reason, r.rejudgingid,
+                 MAX(jr.runtime) AS max_runtime
                  FROM judging j
+                 LEFT JOIN judging_run jr USING(judgingid)
                  LEFT JOIN rejudging r USING (rejudgingid)
                  WHERE cid = %i AND submitid = %i
+                 GROUP BY (j.judgingid)
                  ORDER BY starttime ASC, judgingid ASC',
                 $submdata['cid'], $id);
 
@@ -300,9 +303,9 @@ if ( ! $submdata['valid'] ) {
 	<?php echo htmlspecialchars($submdata['probname'])?></a>&nbsp;&nbsp;
 <img title="language" alt="Language:" src="../images/lang.png"/> <a href="language.php?id=<?php echo $submdata['langid']?>">
 	<?php echo htmlspecialchars($submdata['langname'])?></a>&nbsp;&nbsp;
-<img title="submittime" alt="Submittime:" src="../images/submittime.png"/> <?php
-	echo printtime($submdata['submittime'], NULL, $submdata['cid']) .
-		' (' . printtime($submdata['submittime']) . ')'; ?>&nbsp;&nbsp;
+<img title="submittime" alt="Submittime:" src="../images/submittime.png"/>
+	<?php echo '<span title="' . printtime($submdata['submittime'],'%Y-%m-%d %H:%M:%S (%Z)') . '">' .
+	           printtime($submdata['submittime'], NULL, $submdata['cid']) . '</span>'; ?>&nbsp;&nbsp;
 <img title="allowed runtime" alt="Allowed runtime:" src="../images/allowedtime.png"/>
 	<?php echo  htmlspecialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
 <img title="view source code" alt="" src="../images/code.png"/>
@@ -321,6 +324,7 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 	echo "<table class=\"list\">\n" .
 		"<caption>Judgings</caption>\n<thead>\n" .
 		"<tr><td></td><th scope=\"col\">ID</th><th scope=\"col\">start</th>" .
+		"<th scope=\"col\">max runtime</th>" .
 		"<th scope=\"col\">judgehost</th><th scope=\"col\">result</th>" .
 		"<th scope=\"col\">rejudging</th>" .
 		"</tr>\n</thead>\n<tbody>\n";
@@ -341,13 +345,14 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
 			'<td>' . $link . printtime($jud['starttime'], NULL, $jud['cid']) . '</a></td>' .
+			'<td>' . $link . htmlspecialchars($jud['max_runtime']) . ' s</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
 			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) . '</a></td>' .
 			'<td>' . $link . htmlspecialchars($rinfo) . '</a></td>' .
 			"</tr>\n";
 
 	}
-    echo "</tbody>\n</table><br />\n\n";
+	echo "</tbody>\n</table><br />\n\n";
 }
 
 if ( !isset($jid) ) {
@@ -360,9 +365,9 @@ if ( !isset($jid) ) {
 if ( isset($jid) )  {
 
 	$jud = $DB->q('TUPLE SELECT j.*, r.valid AS rvalid
-		       FROM judging j
-		       LEFT JOIN rejudging r USING (rejudgingid)
-		       WHERE judgingid = %i', $jid);
+	               FROM judging j
+	               LEFT JOIN rejudging r USING (rejudgingid)
+	               WHERE judgingid = %i', $jid);
 
 	// sanity check
 	if ($jud['submitid'] != $id) error(
@@ -469,9 +474,8 @@ if ( isset($jid) )  {
 	echo "<span class=\"judgetime\">Judging started: " . printtime($jud['starttime'],'%H:%M:%S');
 
 	if ( $judging_ended ) {
-		echo ', ended: ' . printtime($jud['endtime'],'%H:%M:%S') .
-			' (judging took '.
-				printtimediff($jud['starttime'], $jud['endtime']) . ')';
+		echo ', finished in '.
+				printtimediff($jud['starttime'], $jud['endtime']) . ' s';
 	} elseif ( $jud['valid'] ) {
 		echo ' [still judging - busy ' . printtimediff($jud['starttime']) . ']';
 	} else {

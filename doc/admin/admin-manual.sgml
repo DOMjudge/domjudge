@@ -145,7 +145,7 @@ The following software is required for running DOMjudge.
        preferably one that can generate statically linked stand-alone
        executables.
 
-<item> Apache web server with support for PHP &gt;= 5.2.0 and the mysqli,
+<item> Apache web server with support for PHP &gt;= 5.3.3 and the mysqli,
        GD, curl and json extensions for PHP. PHP needs to be running as an
        Apache module (the most common configuration); a (fast)CGI setup
        is not currently supported. We also recommend the posix extension
@@ -155,7 +155,7 @@ The following software is required for running DOMjudge.
 
 <item> MySQL or MariaDB &gt;= 4.1.x database and client software
 
-<item> PHP &gt;= 5.2.0 command line interface and the curl and json
+<item> PHP &gt;= 5.3.3 command line interface and the curl and json
        extensions.
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash)
@@ -274,7 +274,7 @@ On the domserver host:
        sudo a2enconf domjudge &&
        sudo apache2ctl graceful
        </tt>
-       
+
 <item> Check that the web interface works (/team, /public and /jury).
 <item> Change the admin password from its default value ('admin').
 <item> Check that the API (/api) works and create credentials for the judgehosts.
@@ -1122,7 +1122,7 @@ machines when using the commandline submit client) and run:
 When loading teams from the ICPC registration system through the import
 feature in DOMjudge, the certificate from icpc.baylor.edu must similarly
 be accepted by your local installation or if not, added via the procedure
-above. 
+above.
 
 <sect1>NTP time synchronisation
 <p>
@@ -1345,7 +1345,9 @@ submissions for this problem. See also the explanation for language.
 
 <tt>timelimit</tt> is the timelimit in seconds
 within which solutions for this problem have to run (taking into
-account <tt>time_factor</tt> per language).
+account <tt>time_factor</tt> per language). See also
+<ref id="problems:timelimits" name="enforcement of time limits"> for
+more details.
 
 <tt>memlimit</tt> is the memory limit in kB allotted for this problem.
 If empty then the global configuration setting <tt>memory_limit</tt>
@@ -2240,6 +2242,30 @@ error: found processes still running as 'domjudge-run', check manually:
 The above error occurs on submitting segmentation fault solutions if you have
 apport installed (which is default on Ubuntu).
 Disable or uninstall the apport daemon on all judgehosts.
+
+<sect>Enforcement of time limits<label id="problems:timelimits">
+<p>
+
+Time limits within DOMjudge are enforced primarily in CPU time, and
+secondly a more lax wall clock time limit is used to make sure that
+submissions cannot idle and hog judgedaemons. The way that time limits
+are calculated and passed through the system involves a number of
+steps, so documented here.
+
+Time limits are set per problem in seconds. Each language in turn may
+define a time factor (defaulting to 1) that multiplies it to get a
+specific time limit for that problem/language combination. This is
+the <em>soft timelimit</em>. The configuration setting <tt>timelimit
+overshoot</tt> is then used to calculate a <em>hard timelimit</em>.
+This overshoot can be specified in terms of an absolute and relative
+margin.
+
+The <tt>soft:hard</tt> timelimit pair is passed
+to <tt>testcase_run.sh</tt> and then on to <tt>runguard</tt> as both
+wall clock and CPU limit. Since the CPU option is passed second, this
+one is used by <tt>runguard</tt> when reporting whether the soft,
+actual timelimit has been surpassed. The submitted program gets
+killed when either the hard wall clock or CPU time has passed.
 
 
 <chapt>Multi-site contests <label id="multisite">

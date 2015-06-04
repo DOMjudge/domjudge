@@ -84,7 +84,7 @@ if ( empty($curcids) )  {
 		echo "<form action=\"contests.php\" method=\"post\">\n";
 		echo addHidden('cid', $row['cid']);
 		echo "<p>No active contest. Upcoming:<br/> <em>" .
-		     htmlspecialchars($row['contestname']) .
+		     htmlspecialchars($row['name']) .
 		     ' (' . htmlspecialchars($row['shortname']) . ')' .
 		     "</em>; active from " . printtime($row['activatetime'], '%a %d %b %Y %T %Z') .
 		     "<br /><br />\n";
@@ -113,7 +113,7 @@ if ( empty($curcids) )  {
 		$isfinal = !empty($row['finalizetime']);
 
 		$contestname = htmlspecialchars(sprintf('%s (%s - c%d)',
-							$row['contestname'],
+							$row['name'],
 							$row['shortname'],
 							$row['cid']));
 
@@ -179,6 +179,8 @@ $res = $DB->q('TABLE SELECT contest.*, COUNT(teamid) AS numteams
                FROM contest
                LEFT JOIN contestteam USING (cid)
                GROUP BY cid ORDER BY starttime DESC');
+$numprobs = $DB->q('KEYVALUETABLE SELECT cid, COUNT(probid) FROM contest LEFT JOIN contestproblem USING(cid) GROUP BY cid');
+$numintvs = $DB->q('KEYVALUETABLE SELECT cid, COUNT(intervalid) FROM removed_interval GROUP BY cid');
 
 if( count($res) == 0 ) {
 	echo "<p class=\"nodata\">No contests defined</p>\n\n";
@@ -200,9 +202,6 @@ if( count($res) == 0 ) {
 	$iseven = false;
 	foreach($res as $row) {
 
-		$numprobs = $DB->q('VALUE SELECT COUNT(*) FROM contestproblem WHERE cid = %i', $row['cid']);
-		$numintvs = $DB->q('VALUE SELECT COUNT(*) FROM removed_interval WHERE cid = %i', $row['cid']);
-
 		$link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
 
 		echo '<tr class="' .
@@ -217,12 +216,12 @@ if( count($res) == 0 ) {
 			      $link . ( isset($row[$time.'time']) ?
 			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
 		}
-		echo "<td>" . $link . $numintvs . "</a></td>\n";
+		echo "<td>" . $link . $numintvs[$row['cid']] . "</a></td>\n";
 		echo "<td>" . $link . ($row['process_balloons'] ? 'yes' : 'no') . "</a></td>\n";
 		echo "<td>" . $link . ($row['public'] ? 'yes' : 'no') . "</a></td>\n";
 		echo "<td>" . $link . ($row['public'] ? '<em>all</em>' : $row['numteams']) . "</a></td>\n";
-		echo "<td>" . $link . $numprobs . "</a></td>\n";
-		echo "<td>" . $link . htmlspecialchars($row['contestname']) . "</a></td>\n";
+		echo "<td>" . $link . $numprobs[$row['cid']] . "</a></td>\n";
+		echo "<td>" . $link . htmlspecialchars($row['name']) . "</a></td>\n";
 		$iseven = ! $iseven;
 
 		if ( IS_ADMIN ) {

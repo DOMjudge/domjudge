@@ -9,10 +9,10 @@ MAINSOURCE="$1"
 
 # -static:         Static link with all libraries
 # -bargs -static:  Static link with all libraries
-gnatmake -static -o $DEST "$@" -bargs -static
+gnatmake -static -o "$DEST" "$@" -bargs -static
 exitcode=$?
 
 # clean created files:
-rm -f $DEST.o $DEST.ali
+rm -f "$DEST.o" "$DEST.ali"
 
 exit $exitcode

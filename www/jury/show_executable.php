@@ -63,7 +63,7 @@ if ( isset($_POST['storeid']) ) {
 
 $id = getRequestID(FALSE);
 $executable = $DB->q('MAYBETUPLE SELECT * FROM executable
-	      WHERE execid = %s', $id);
+                      WHERE execid = %s', $id);
 if ( empty($executable) ) error ("Executable $id not found");
 
 // Download was requested

@@ -67,12 +67,12 @@ if ( isset($_REQUEST['upload']) ) {
 	$teams = $DB->q('SELECT teamid, externalid FROM team
 	                 WHERE externalid IS NOT NULL AND enabled=1');
 	while( $row = $teams->next() ) {
-		$totals = $DB->q('MAYBETUPLE SELECT correct, totaltime
+		$totals = $DB->q('MAYBETUPLE SELECT points, totaltime
 		                  FROM rankcache_public
 		                  WHERE cid = %i AND teamid = %i',
 		                 $cid, $row['teamid']);
 		if ( $totals === null ) {
-			$totals['correct'] = $totals['totaltime'] = 0;
+			$totals['points'] = $totals['totaltime'] = 0;
 		}
 		$rank = calcTeamRank($cdata, $row['teamid'], $totals, FALSE);
 		$lastProblem = $DB->q('MAYBEVALUE SELECT MAX(totaltime) FROM scorecache_public
@@ -80,7 +80,7 @@ if ( isset($_REQUEST['upload']) ) {
 		if ( $lastProblem === NULL ) {
 			$lastProblem = 0;
 		}
-		$data .= '<Standing LastProblemTime="' . $lastProblem . '" ProblemsSolved="' .  $totals['correct'] . '" Rank="' . $rank .
+		$data .= '<Standing LastProblemTime="' . $lastProblem . '" ProblemsSolved="' .  $totals['points'] . '" Rank="' . $rank .
 			'" ReservationID="' . $row['externalid'] . '" TotalTime="' .
 			$totals['totaltime'] .
 			'"/>';
@@ -163,9 +163,11 @@ foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 			$new_teams[] = $team['teamName'];
 		} else {
 			$username = sprintf("team%04d", $id);
-			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i, affilid=%i,
-			               enabled=%i, members=%s, comments=%s WHERE teamid=%i',
-				$team['teamName'], $participants, $affilid, $enabled, $members, "Status: " . $team['status'], $id);
+			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i,
+			               affilid=%i, enabled=%i, members=%s, comments=%s
+			               WHERE teamid=%i',
+			              $team['teamName'], $participants, $affilid, $enabled,
+			              $members, "Status: " . $team['status'], $id);
 			$cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s, email=%s
 			                WHERE username=%s', $team['teamName'], $mails, $username);
 			if ( $cnt > 0 ) {

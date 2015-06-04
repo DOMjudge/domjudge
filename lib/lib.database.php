@@ -291,8 +291,8 @@ class db
 
 		if(DEBUG) {
 			$backtrace = debug_backtrace();
-			$callsite = ' file: ' . $backtrace[1]['file'] . ', ' .
-			            ' line: ' . $backtrace[1]['line'] . ', ';
+			$callsite = ' file: ' . $backtrace[2]['file'] . ', ' .
+			            ' line: ' . $backtrace[2]['line'] . ', ';
 		} else {
 			$callsite = '';
 		}
@@ -320,7 +320,7 @@ class db
 	{
 		if($this->_connection) return;
 
-		$pers = ( $this->persist && version_compare(PHP_VERSION, '5.3', '>=') ) ? "p:" : "";
+		$pers = ($this->persist ? "p:" : "");
 		if(!function_exists('mysqli_real_connect')) {
 			throw new RuntimeException("PHP database module missing "
 			    . "(no such function: 'mysqli_real_connect')");

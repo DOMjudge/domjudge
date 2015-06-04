@@ -14,7 +14,7 @@ if ( !isset($id) ) {
 }
 
 $ini_keys = array('shortname', 'name', 'timelimit', 'special_run',
-		  'special_compare', 'color');
+                  'special_compare', 'color');
 
 $problem = $DB->q('MAYBETUPLE SELECT problemtext, problemtext_type, ' .
                   join(',', $ini_keys) . ' FROM problem p
@@ -50,13 +50,13 @@ if ( !empty($problem['problemtext']) ) {
 }
 
 $testcases = $DB->q('SELECT description, testcaseid, rank FROM testcase
-		     WHERE probid = %i ORDER BY rank', $id);
+                     WHERE probid = %i ORDER BY rank', $id);
 while ($tc = $testcases->next()) {
 	$fname = $id . "_" . $tc['rank'] .
 	         (empty($tc['description'])?"":"_".$tc['description']);
 	foreach(array('in','out') as $inout) {
 		$content = $DB->q("VALUE SELECT SQL_NO_CACHE " . $inout . "put FROM testcase
-				   WHERE testcaseid = %i", $tc['testcaseid']);
+		                   WHERE testcaseid = %i", $tc['testcaseid']);
 		$curfname = preg_replace('/[^A-Za-z0-9]/', '_', $fname) .  '.' . $inout;
 		$zip->addFromString($curfname, $content);
 		unset($content);

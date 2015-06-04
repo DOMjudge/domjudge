@@ -21,9 +21,13 @@ $res = $DB->q('SELECT p.probid,p.name,p.timelimit,p.memlimit,p.outputlimit,
                GROUP BY probid ORDER BY probid');
 
 // Get number of active contests per problem
-$activecontests = $DB->q("KEYVALUETABLE SELECT probid, count(cid)
-                          FROM contestproblem
-                          WHERE cid IN (%As) GROUP BY probid", $cids);
+if ( count($cids)!=0 ) {
+	$activecontests = $DB->q("KEYVALUETABLE SELECT probid, count(cid)
+	                          FROM contestproblem
+	                          WHERE cid IN (%As) GROUP BY probid", $cids);
+} else {
+	$activecontests = array();
+}
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No problems defined</p>\n\n";
@@ -51,10 +55,10 @@ if( $res->count() == 0 ) {
 				htmlspecialchars($row['probid'])."</a>".
 			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
 			"</td><td>".
-			$link . htmlspecialchars($activecontests[$row['probid']]) . "</a>" .
+			$link . htmlspecialchars(isset($activecontests[$row['probid']])?$activecontests[$row['probid']]:0) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
-			"</td><td>" . $link . (isset($row['memlimit']) ? (int)$row['memlimit'] : '-') . "</a>" .
-			"</td><td>" . $link . (isset($row['outputlimit']) ? (int)$row['outputlimit'] : '-') . "</a>" .
+			"</td><td>" . $link . (isset($row['memlimit']) ? (int)$row['memlimit'] : 'default') . "</a>" .
+			"</td><td>" . $link . (isset($row['outputlimit']) ? (int)$row['outputlimit'] : 'default') . "</a>" .
 			"</td><td><a href=\"testcase.php?probid=" . $row['probid'] .
 			"\">" . $row['testcases'] . "</a></td>";
 		if ( !empty($row['problemtext_type']) ) {
@@ -80,7 +84,8 @@ if( $res->count() == 0 ) {
 if ( IS_ADMIN ) {
 	echo "<p>" . addLink('problem') . "</p>\n\n";
 	if ( class_exists("ZipArchive") ) {
-		$contests = $DB->q("KEYVALUETABLE SELECT cid, CONCAT('c', cid, ': ' , shortname, ' - ', contestname) FROM contest");
+		$contests = $DB->q("KEYVALUETABLE SELECT cid,
+		                    CONCAT('c', cid, ': ', shortname, ' - ', name) FROM contest");
 		$values = array(-1 => 'Do not link to a contest');
 		foreach ($contests as $cid => $contest) {
 			$values[$cid] = $contest;

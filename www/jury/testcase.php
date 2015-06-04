@@ -135,7 +135,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 			$content = file_get_contents($_FILES[$fileid]['tmp_name'][$rank]);
 			if ( $DB->q("VALUE SELECT count(testcaseid)
- 			             FROM testcase WHERE probid = %i AND rank = %i",
+			             FROM testcase WHERE probid = %i AND rank = %i",
 			            $probid, $rank)==0 ) {
 				error("cannot find testcase $rank for probid = $probid");
 			}

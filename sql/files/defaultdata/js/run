@@ -26,7 +26,7 @@ if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
 fi
 
 # Write executing script:
-cat > $DEST <<EOF
+cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute Node interpreter on source.
 
@@ -40,6 +40,6 @@ export ONLINE_JUDGE=1 DOMJUDGE=1
 exec nodejs "$MAINSOURCE"
 EOF
 
-chmod a+x $DEST
+chmod a+x "$DEST"
 
 exit 0

@@ -46,20 +46,20 @@ fi
 rm -f $TMPFILE
 
 # Look for class that has the 'main' function:
-CLASSNAMES=$(find * -type f -regex '^.*\.class$' \
-            | sed -e 's/\.class$//' -e 's/\//./g')
-COMPILESCRIPTDIR=$(dirname $0)
-MAINCLASS=$(java -cp $COMPILESCRIPTDIR DetectMain `pwd` $CLASSNAMES)
+CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
+            | sed -e 's/\.class$//' -e 's/\//./g')"
+COMPILESCRIPTDIR="$(dirname "$0")"
+MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "`pwd`" $CLASSNAMES)
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
-MEMLIMITJAVA=$(($MEMLIMIT - $MEMRESERVED))
+MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 
 # Write executing script:
 # Executes java byte-code interpreter with following options
 # -Xmx: maximum size of memory allocation pool
-cat > $DEST <<EOF
+cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute java interpreter on source.
 
@@ -71,6 +71,6 @@ fi
 exec java -client -Xss8m -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 '$MAINCLASS'
 EOF
 
-chmod a+x $DEST
+chmod a+x "$DEST"
 
 exit 0

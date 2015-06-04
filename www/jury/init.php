@@ -53,6 +53,11 @@ if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES)
 $cdatas = getCurContests(TRUE, null, TRUE);
 $cids = array_keys($cdatas);
 
+// List of executable script types, used in various places:
+$executable_types = array('compare' => 'compare',
+                          'compile' => 'compile',
+                          'run'     => 'run');
+
 // If the cookie has a existing contest, use it
 if ( isset($_COOKIE['domjudge_cid']) )  {
 	if ( isset($cdatas[$_COOKIE['domjudge_cid']]) ) {
@@ -75,7 +80,8 @@ $updates = array(
 	'judgehosts' =>
 	$DB->q('TABLE SELECT hostname, polltime
 	        FROM judgehost
-	        WHERE active = 1 AND unix_timestamp()-polltime >= ' . JUDGEHOST_CRITICAL),
+	        WHERE active = 1 AND unix_timestamp()-polltime >= %i',
+	       dbconfig_get('judgehost_critical',120)),
 	'rejudgings' =>
 	$DB->q('TABLE SELECT rejudgingid
 	        FROM rejudging

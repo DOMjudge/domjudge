@@ -84,13 +84,13 @@ usage()
 
 error()
 {
-    echo "Error: $@"
+    echo "Error: $*"
     echo
     usage
     exit 1
 }
 
-if [ `id -u` != 0 ]; then
+if [ "`id -u`" != 0 ]; then
     echo "Warning: you probably need to run this program as root."
 fi
 
@@ -98,7 +98,7 @@ fi
 [ -z "$ARCH" ]      && error "No architecture given or detected."
 
 if [ -e "$CHROOTDIR" ]; then
-	echo -n "'$CHROOTDIR' already exists. Remove? (y/N) "
+	printf "'$CHROOTDIR' already exists. Remove? (y/N) "
 	read yn
 	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
 		error "Chrootdir already exists, exiting."
@@ -113,7 +113,7 @@ CHROOTDIR="$PWD"
 if [ ! -x /usr/sbin/debootstrap ]; then
 
 	echo "This script will install debootstrap on your system."
-	echo -n "Continue? (y/N) "
+	printf "Continue? (y/N) "
 	read yn
 	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
 		exit 1;
@@ -143,6 +143,7 @@ if [ -n "$INCLUDEDEBS" ]; then
 	INCLUDEOPT="--include=$INCLUDEDEBS"
 fi
 EXCLUDEOPT=""
+# shellcheck disable=SC2153
 if [ -n "$EXCLUDEDEBS" ]; then
 	EXCLUDEOPT="--exclude=$EXCLUDEDEBS"
 fi

@@ -25,13 +25,13 @@ if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
 fi
 
 # Check syntax
-python -m py_compile $@
+python -m py_compile "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
-rm -f *.pyc
+rm -f -- *.pyc
 
 # Write executing script:
-cat > $DEST <<EOF
+cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute python interpreter on source.
 
@@ -46,6 +46,6 @@ export ONLINE_JUDGE=1 DOMJUDGE=1 HOME=/does/not/exist
 exec python "$MAINSOURCE"
 EOF
 
-chmod a+x $DEST
+chmod a+x "$DEST"
 
 exit 0

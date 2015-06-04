@@ -3,19 +3,33 @@
 # Run some Syntax checking tests on PHP and Shell scripts
 
 if [ -x /usr/bin/php ]; then
-	for i in `find .. -name *.php`; do
-		php -l $i | grep -v "^No syntax errors detected in "
+	find .. -name '*.php' | \
+	while read i ; do
+		php -l "$i" | grep -v "^No syntax errors detected in "
 	done
 
-	for i in `grep -rsl "^#\!.*php" ..|egrep -v '/\.(svn|git)/'|grep -v \.php`; do
-		php -l $i | grep -v "^No syntax errors detected in "
+	grep -rsl "^#\!.*php" ..|egrep -v '/\.(svn|git)/'|grep -v '\.php' | \
+	while read i ; do
+		php -l "$i" | grep -v "^No syntax errors detected in "
 	done
 else
 	echo "PHP not found in /usr/bin/php"
 fi
 
 if [ -x /usr/bin/checkbashisms ]; then
-	checkbashisms `grep -rsl "^#\!.*/bin/sh" ..|egrep -v '\.(svn|git)/'|egrep -v '^\.\./(config|autom4te)'|egrep -v '^\.\./sql/files/defaultdata/hs/run'`
+	grep -rsl "^#\!.*/bin/sh" ..|egrep -v '\.(svn|git)/'|egrep -v '^\.\./(config|autom4te)'|egrep -v '^\.\./sql/files/defaultdata/hs/run' | \
+	while read i ; do
+		checkbashisms "$i"
+	done
 else
 	echo "checkbashisms not found in /usr/bin/checkbashisms"
+fi
+
+if [ -x /usr/bin/shellcheck ]; then
+	grep -rslE "^#\!.*/bin/(ba)?sh" ..|egrep -v '\.(svn|git)/'|egrep -v '^\.\./(config|autom4te|install-sh)'|egrep -v '^\.\./sql/files/defaultdata/hs/run' | \
+	while read i ; do
+		shellcheck -e 1072,2006,2034,2059,2086 "$i"
+	done
+else
+	echo "shellcheck not found in /usr/bin/shellcheck"
 fi

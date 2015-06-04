@@ -120,8 +120,8 @@ if ( isset($_REQUEST['apply']) ) {
 
 
 $userdata = $DB->q('KEYVALUETABLE SELECT userid, name FROM user
-	                WHERE userid=%i OR userid=%i',
-	               $rejdata['userid_start'], @$rejdata['userid_finish']);
+                    WHERE userid=%i OR userid=%i',
+                   $rejdata['userid_start'], @$rejdata['userid_finish']);
 
 echo '<br/><h1 style="display:inline;">Rejudging r' . $id .
 	( $rejdata['valid'] ? '' : ' (canceled)' ) . "</h1>\n\n";

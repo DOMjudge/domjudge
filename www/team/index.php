@@ -17,7 +17,7 @@ $submitted = @$_GET['submitted'];
 
 $fdata = calcFreezeData($cdata);
 $langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions
-		    FROM language WHERE allow_submit = 1');
+                    FROM language WHERE allow_submit = 1');
 
 echo "<script type=\"text/javascript\">\n<!--\n";
 

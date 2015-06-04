@@ -61,7 +61,7 @@ if ( empty($cids) ) {
 	$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,cid
 	                      FROM problem
 	                      INNER JOIN contestproblem USING (probid)
-			      WHERE cid IN (%Ai)', $contestids);
+	                      WHERE cid IN (%Ai)', $contestids);
 }
 
 $freezecond = array();
@@ -86,7 +86,8 @@ if ( empty($freezecond) ) {
 $res = null;
 if ( !empty($contestids) ) {
 	$res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
-	               t.teamid, t.name AS teamname, t.room, c.name AS catname, s.cid, co.shortname
+	               t.teamid, t.name AS teamname, t.room, c.name AS catname,
+ 	               s.cid, co.shortname
 	               FROM balloon b
 	               LEFT JOIN submission s USING (submitid)
 	               LEFT JOIN problem p USING (probid)
@@ -96,7 +97,7 @@ if ( !empty($contestids) ) {
 	               LEFT JOIN contest co USING (cid)
 	               WHERE s.cid IN (%Ai) $freezecond
 	               ORDER BY done ASC, balloonid DESC",
-		      $contestids);
+	              $contestids);
 }
 
 /* Loop over the result, store the total of balloons for a team

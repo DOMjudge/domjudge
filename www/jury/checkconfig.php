@@ -104,9 +104,9 @@ echo "<table class=\"configcheck\">\n";
 
 // SOFTWARE
 
-if( !function_exists('version_compare') || version_compare( '5.2.0',PHP_VERSION,'>=') ) {
+if( !function_exists('version_compare') || version_compare( '5.3.3',PHP_VERSION,'>=') ) {
 	result('software', 'PHP version', 'E',
-		'You have PHP ' . PHP_VERSION . ', but need at least 5.2.0.',
+		'You have PHP ' . PHP_VERSION . ', but need at least 5.3.3.',
 		'See <a href="?phpinfo">phpinfo</a> for details.');
 } else {
 	result('software', 'PHP version', 'O',
@@ -273,11 +273,15 @@ $res = $DB->q('SELECT * FROM contest ORDER BY cid');
 $detail = '';
 $has_errors = FALSE;
 while($cdata = $res->next()) {
+	$cp = $DB->q('SELECT * FROM contestproblem WHERE cid = %i', $cdata['cid']);
 
 	$detail .=  "c".(int)$cdata['cid'].": ";
 
 	$CHECKER_ERRORS = array();
 	check_contest($cdata, array('cid' => $cdata['cid']));
+	while( $cpdata = $cp->next() ) {
+		check_contestproblem($cpdata, array('cid' => $cpdata['cid'], 'probid' => $cpdata['probid']));
+	}
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
 		foreach($CHECKER_ERRORS as $chk_err) {
 			$detail .= $chk_err . "\n";

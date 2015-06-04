@@ -55,7 +55,7 @@ dj-setup-database: %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 	chmod a+x $@
 
-install-domserver:
+install-domserver: $(ZIPSQL)
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) dj-setup-database
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir) \
 		mysql_db_structure.sql mysql_db_defaultdata.sql mysql_db_examples.sql \

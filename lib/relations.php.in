@@ -54,8 +54,7 @@ function fk_check ($keyfield, $value) {
 			@list( $foreign, $action ) = explode('&', $val);
 			if ( empty($action) ) $action = 'CASCADE';
 			if ( $foreign == $keyfield ) {
-				$c = $DB->q("VALUE SELECT count(*) FROM $table WHERE $key = %s",
-					$value);
+				$c = $DB->q("VALUE SELECT count(*) FROM $table WHERE $key = %s", $value);
 				if ( $c > 0 ) $ret[$table] = $action;
 			}
 		}

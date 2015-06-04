@@ -20,7 +20,8 @@ ALTER TABLE `configuration`
   ADD UNIQUE KEY `name` (`name`);
 
 ALTER TABLE `contest`
-  ADD COLUMN `shortname` varchar(255) NOT NULL COMMENT 'Short name for this contest' AFTER `contestname`,
+  CHANGE COLUMN `contestname` `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
+  ADD COLUMN `shortname` varchar(255) NOT NULL COMMENT 'Short name for this contest' AFTER `name`,
   ADD COLUMN `deactivatetime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest becomes invisible in team/public views' AFTER `unfreezetime`,
   ADD COLUMN `deactivatetime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime' AFTER `unfreezetime_string`,
   ADD COLUMN `process_balloons` tinyint(1) unsigned DEFAULT '1' COMMENT 'Will balloons be processed for this contest?',
@@ -59,7 +60,7 @@ CREATE TABLE `contestteam` (
 -- Create a table for judgehost restrictions
 CREATE TABLE `judgehost_restriction` (
   `restrictionid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `restrictionname` varchar(255) NOT NULL COMMENT 'Descriptive name',
+  `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `restrictions` longtext COMMENT 'JSON-encoded restrictions',
   PRIMARY KEY  (`restrictionid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Restrictions for judgehosts';
@@ -115,6 +116,15 @@ ALTER TABLE `testcase`
   ADD COLUMN `image_thumb` longblob COMMENT 'Aumatically created thumbnail of the image' AFTER `image`,
   ADD COLUMN `image_type` varchar(4) DEFAULT NULL COMMENT 'File type of the image and thumbnail' AFTER `image_thumb`;
 
+-- Add support for points per problem
+ALTER TABLE `contestproblem`
+  ADD COLUMN `points` int(4) unsigned NOT NULL DEFAULT '1' COMMENT 'Number of points earned by solving this problem' AFTER `shortname`;
+
+ALTER TABLE `rankcache_jury`
+  CHANGE COLUMN `correct` `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points';
+ALTER TABLE `rankcache_public`
+  CHANGE COLUMN `correct` `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points';
+
 --
 -- Transfer data from old to new structure
 --
@@ -137,7 +147,12 @@ UPDATE `configuration` SET `description` = 'Show country flags and affiliations 
 
 UPDATE `configuration` SET `name` = 'output_limit', `description` = 'Maximum output (in kB) submissions may generate. Any excessive output is truncated, so this should be greater than the maximum testdata output.' WHERE `name` = 'filesize_limit';
 
-UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`contestname`, ' ', ''), 1, 10)), `public` = 1, `deactivatetime` = UNIX_TIMESTAMP('2016-12-31 23:59:59'), `deactivatetime_string` = '2016-12-31 23:59:59';
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('judgehost_warning', '30', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "warning".'),
+('judgehost_critical', '120', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "critical".'),
+('thumbnail_size', '128', 'int', 'Maximum width/height of a thumbnail for uploaded testcase images.');
+
+UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`name`, ' ', ''), 1, 10)), `public` = 1, `deactivatetime` = UNIX_TIMESTAMP('2016-12-31 23:59:59'), `deactivatetime_string` = '2016-12-31 23:59:59';
 
 -- Update compare scripts to support new Kattis 42/43 exitcode format:
 source mysql_db_files_defaultdata.sql

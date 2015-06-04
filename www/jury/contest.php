@@ -47,10 +47,10 @@ if ( !empty($_GET['cmd']) ):
 
 <tr><td><label for="data_0__shortname_">Short name:</label></td>
 <td><?php echo addInput('data[0][shortname]', @$row['shortname'], 40, 10, 'required')?></td></tr>
-<tr><td><label for="data_0__contestname_">Contest name:</label></td>
-<td><?php echo addInput('data[0][contestname]', @$row['contestname'], 40, 255, 'required')?></td></tr>
+<tr><td><label for="data_0__name_">Contest name:</label></td>
+<td><?php echo addInput('data[0][name]', @$row['name'], 40, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__activatetime_string_">Activate time:</label></td>
-<td><?php echo addInput('data[0][activatetime_string]', @$row['activatetime_string'], 20, 19, 'required pattern="' . $pattern_dateorneg . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> -hh:mm)</td></tr>
+<td><?php echo addInput('data[0][activatetime_string]', (empty($row['activatetime_string'])?strftime('%Y-%m-%d %H:%M:00'):$row['activatetime_string']), 20, 19, 'required pattern="' . $pattern_dateorneg . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> -hh:mm)</td></tr>
 
 <tr><td><label for="data_0__starttime_string_">Start time:</label></td>
 <td><?php echo addInput('data[0][starttime_string]', @$row['starttime_string'], 20, 19, 'required pattern="' . $pattern_datetime . '"')?> (yyyy-mm-dd hh:mm:ss)</td></tr>
@@ -65,7 +65,7 @@ if ( !empty($_GET['cmd']) ):
 <td><?php echo addInput('data[0][unfreezetime_string]', @$row['unfreezetime_string'], 20, 19, 'pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
 
 <tr><td><label for="data_0__deactivatetime_string_">Deactivate time:</label></td>
-<td><?php echo addInput('data[0][deactivatetime_string]', @$row['deactivatetime_string'], 20, 19, 'required pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][deactivatetime_string]', @$row['deactivatetime_string'], 20, 19, 'pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
 
 <tr><td>Process balloons:</td><td>
 <?php echo addRadioButton('data[0][process_balloons]', (!isset($row['process_balloons']) ||  $row['process_balloons']), 1)?> <label for="data_0__process_balloons_1">yes</label>
@@ -83,7 +83,7 @@ if ( !empty($_GET['cmd']) ):
 	                       CONCAT(name, ' (t', teamid, ')') AS search
 	                       FROM team INNER JOIN contestteam USING (teamid)
 	                       WHERE cid = %i", $id);
-	
+
 ?>
 		<?php echo addInput('data[0][mapping][1][items]', '', 50); ?>
 		<script type="text/javascript">
@@ -93,6 +93,7 @@ if ( !empty($_GET['cmd']) ):
 					hintText: 'Type to search for team ID or name',
 					noResultsText: 'No teams found',
 					preventDuplicates: true,
+					excludeCurrent: true,
 					prePopulate: <?php echo json_encode($prepopulate); ?>
 				});
 			});
@@ -132,7 +133,7 @@ foreach ( $current_problems as &$current_problem ) {
 }
 unset($current_problem);
 
-$prepopulate = $DB->q("TABLE SELECT problem.probid AS id, problem.name,
+$prepopulate = $DB->q("TABLE SELECT problem.probid AS id, problem.name, contestproblem.points,
                        CONCAT(problem.name, ' (p', problem.probid, ')') AS search
                        FROM problem INNER JOIN contestproblem USING (probid)
                        WHERE cid = %i ORDER BY shortname", $id);
@@ -151,6 +152,7 @@ $(function() {
 		hintText: 'Type to search for problem ID or name',
 		noResultsText: 'No problems found',
 		preventDuplicates: true,
+		excludeCurrent: true,
 		prePopulate: <?php echo json_encode($prepopulate); ?>,
 		onAdd: function(item) {
 			addRow(item.id);
@@ -159,14 +161,14 @@ $(function() {
 			deleteRow(item.id);
 		}
 	});
-	
+
 	var current_problems = <?php echo json_encode($current_problems); ?>;
 	var problem_name_mapping = <?php echo json_encode($problem_name_mapping); ?>;
-	
+
 	$.each(current_problems, function(i, problem) {
 		addRow(problem.probid);
 	});
-	
+
 	function addRow(probId) {
 		var $template = $('#contestproblem_template');
 		var $table = $('#problems_table');
@@ -178,35 +180,37 @@ $(function() {
 			// Oterwise we should add 1 to the old value
 			maxId++;
 		}
-		
+
 		// Set it back on the table
 		$table.data('max-id', maxId);
-		
+
 		var contest_problem_data = {
 			shortname: '',
+			points: 1,
 			allow_submit: true,
 			allow_judge: true,
 			color: '',
 			lazy_eval_results: ''
 		};
-		
+
 		for ( var i = 0; i < current_problems.length; i++ ) {
 			if ( current_problems[i].probid == probId ) {
 				contest_problem_data = current_problems[i];
 				break;
 			}
 		}
-		
+
 		var templateContents = $template.text()
 			.replace(/\{id\}/g, maxId)
 			.replace(/\{probid\}/g, probId)
 			.replace(/\{name\}/g, problem_name_mapping[probId])
 			.replace(/\{shortname\}/g, contest_problem_data.shortname)
+			.replace(/\{points\}/g, contest_problem_data.points)
 			.replace(/\{color\}/g, contest_problem_data.color)
 			.replace(/\{lazy_eval_results\}/g, contest_problem_data.lazy_eval_results);
-		
+
 		$('tbody', $table).append(templateContents);
-		
+
 		// Set allow submit / allow judge
 		var submit_id = '#data_0__mapping__0__extra__' + maxId + '__allow_submit_';
 		if ( contest_problem_data.allow_submit ) {
@@ -215,7 +219,7 @@ $(function() {
 			submit_id += '0';
 		}
 		$(submit_id).attr('checked', 'checked');
-		
+
 		var judge_id = '#data_0__mapping__0__extra__' + maxId + '__allow_judge_';
 		if ( contest_problem_data.allow_judge ) {
 			judge_id += '1';
@@ -223,10 +227,10 @@ $(function() {
 			judge_id += '0';
 		}
 		$(judge_id).attr('checked', 'checked');
-		
+
 		jscolor.bind();
 	}
-	
+
 	function deleteRow(probId) {
 		var $tr = $('#problems_table tr[data-problem=' + probId + ']');
 		$tr.remove();
@@ -244,7 +248,11 @@ $(function() {
 		{name}
 	</td>
 	<td>
-		<?php echo addInput("data[0][mapping][0][extra][{id}][shortname]", '{shortname}', 8, 10); ?>
+		<?php echo addInput("data[0][mapping][0][extra][{id}][shortname]", '{shortname}', 8, 10, 'required'); ?>
+	</td>
+	<td>
+		<?php echo addInputField('number',"data[0][mapping][0][extra][{id}][points]",
+                                 '{points}', ' min="0" max="9999" required'); ?>
 	</td>
 	<td>
 		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_submit]", true, 1); ?>
@@ -259,7 +267,7 @@ $(function() {
 		<label for='data_0__mapping__0__extra__{id}__allow_judge_0'>no</label>
 	</td>
 	<td>
-		<?php echo addInput("data[0][mapping][0][extra][{id}][color]", '{color}', 15, 25, 
+		<?php echo addInput("data[0][mapping][0][extra][{id}][color]", '{color}', 15, 25,
                             'class="color {required:false,adjust:false,hash:true,caps:false}"'); ?>
 	</td>
 	<td>
@@ -274,6 +282,7 @@ $(function() {
 		<th>ID</th>
 		<th>name</th>
 		<th>short name</th>
+	        <th>points</th>
 		<th>allow submit</th>
 		<th>allow judge</th>
 		<th>color
@@ -299,8 +308,8 @@ function clearTeamsOnPublic() {
 echo addHidden('data[0][mapping][0][fk][0]', 'cid') .
      addHidden('data[0][mapping][0][fk][1]', 'probid') .
      addHidden('data[0][mapping][0][table]', 'contestproblem');
-echo addHidden('data[0][mapping][1][fk][0]', 'cid') . 
-     addHidden('data[0][mapping][1][fk][1]', 'teamid') . 
+echo addHidden('data[0][mapping][1][fk][0]', 'cid') .
+     addHidden('data[0][mapping][1][fk][1]', 'teamid') .
      addHidden('data[0][mapping][1][table]', 'contestteam');
 echo addHidden('cmd', $cmd) .
 	addHidden('table','contest') .
@@ -331,7 +340,7 @@ if ( isset($_GET['edited']) ) {
 
 $data = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $id);
 
-echo "<h1>Contest: ".htmlspecialchars($data['contestname'])."</h1>\n\n";
+echo "<h1>Contest: ".htmlspecialchars($data['name'])."</h1>\n\n";
 
 if ( in_array($data['cid'], $cids) ) {
 	echo "<p><em>This is an active contest.</em></p>\n\n";
@@ -348,8 +357,8 @@ $teams = $DB->q("TABLE SELECT team.*
                  FROM team INNER JOIN contestteam USING (teamid)
                  WHERE cid = %i", $id);
 $numprobs = $DB->q("VALUE SELECT COUNT(*) AS problemcount
-		    FROM contestproblem
-		    WHERE cid = %i", $id);
+                    FROM contestproblem
+                    WHERE cid = %i", $id);
 
 
 echo "<table>\n";
@@ -359,7 +368,7 @@ echo '<tr><td>Short name:</td><td>' .
      htmlspecialchars($data['shortname']) .
      "</td></tr>\n";
 echo '<tr><td>Name:</td><td>' .
-	htmlspecialchars($data['contestname']) .
+	htmlspecialchars($data['name']) .
 	"</td></tr>\n";
 echo '<tr><td>Activate time:</td><td>' .
 	htmlspecialchars(@$data['activatetime_string']) .
@@ -466,10 +475,10 @@ if ( count($removals)==0 && ! IS_ADMIN ) {
 echo "<h3>Problems</h3>\n\n";
 
 $res = $DB->q('TABLE SELECT *
-		       FROM problem
-		       INNER JOIN contestproblem USING (probid)
-		       WHERE cid = %i
-		       ORDER BY shortname', $id);
+               FROM problem
+               INNER JOIN contestproblem USING (probid)
+               WHERE cid = %i
+               ORDER BY shortname', $id);
 
 if ( count($res) == 0 ) {
 	echo "<p class=\"nodata\">No problems added yet</p>\n\n";
@@ -479,6 +488,7 @@ else {
 	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">probid</th>";
 	echo "<th scope=\"col\">name</th>";
 	echo "<th scope=\"col\">shortname</th>";
+	echo "<th scope=\"col\">points</th>";
 	echo "<th scope=\"col\">allow<br />submit</th>";
 	echo "<th scope=\"col\">allow<br />judge</th>";
 	echo "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>\n";
@@ -496,6 +506,7 @@ else {
 		     "p" . (int)$row['probid'] . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['name']) . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['shortname']) . "</a></td>\n";
+		echo "<td>" . $link . htmlspecialchars($row['points']) . "</a></td>\n";
 		echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_submit']) . "</a></td>\n";
 		echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_judge']) . "</a></td>\n";
 		echo ( !empty($row['color'])

@@ -143,8 +143,8 @@ function usage()
 // fetches new executable from database if necessary
 // runs build to compile executable
 // returns absolute path to run script
-function fetch_executable($workdirpath, $execid, $md5sum) {
-	// FIXME: make sure we don't have to escape $execid
+function fetch_executable($workdirpath, $execid, $md5sum)
+{
 	$execpath = "$workdirpath/executable/" . $execid;
 	$execmd5path = $execpath . "/md5sum";
 	$execdeploypath = $execpath . "/.deployed";
@@ -156,7 +156,7 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 	}
 	if ( !file_exists($execpath) || !file_exists($execmd5path) ||
 	     !file_exists($execdeploypath)
-		|| file_get_contents($execmd5path) != $md5sum ) {
+		|| file_get_contents($execmd5path) !== $md5sum ) {
 		logmsg(LOG_INFO, "Fetching new executable '" . $execid . "'");
 		system("rm -rf $execpath");
 		system("mkdir -p '$execpath'", $retval);
@@ -167,7 +167,7 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 			error("Could not create executable zip file in $execpath");
 		}
 		unset($content);
-		if ( md5_file($execzippath) != $md5sum ) {
+		if ( md5_file($execzippath) !== $md5sum ) {
 			error("Zip file corrupted during download.");
 		}
 		if ( file_put_contents($execmd5path, $md5sum) === FALSE ) {
@@ -215,14 +215,14 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 				}
 				switch ( $execlang ) {
 				case 'c':
-					$buildscript .= "gcc -Wall -O2 -std=gnu99 '$source' -o $execrunpath -lm\n"; 
+					$buildscript .= "gcc -Wall -O2 -std=gnu99 '$source' -o $execrunpath -lm\n";
 					break;
 				case 'cpp':
-					$buildscript .= "g++ -Wall -O2 -std=c++11 '$source' -o $execrunpath\n"; 
+					$buildscript .= "g++ -Wall -O2 -std=c++11 '$source' -o $execrunpath\n";
 					break;
 				case 'java':
 					$source = basename($source, ".java");
-					$buildscript .= "javac -cp $execpath -d $execpath '$source'.java\n"; 
+					$buildscript .= "javac -cp $execpath -d $execpath '$source'.java\n";
 					$buildscript .= "echo '#!/bin/sh' > run\n";
 					// no main class detection here
 					$buildscript .= "echo 'java -cp $execpath '$source' >> run\n";
@@ -260,7 +260,6 @@ function fetch_executable($workdirpath, $execid, $md5sum) {
 }
 
 $options = getopt("dv:n:hV");
-// With PHP version >= 5.3 we can also use long options.
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
 if ( $options===FALSE ) {
 	echo "Error: parsing options failed.\n";
@@ -563,7 +562,7 @@ function judge($row)
 					error("Could not create $tcfile[$inout].new");
 				}
 				unset($content);
-				if ( md5_file("$tcfile[$inout].new") == $tc['md5sum_'.$inout]) {
+				if ( md5_file("$tcfile[$inout].new") === $tc['md5sum_'.$inout]) {
 					rename("$tcfile[$inout].new",$tcfile[$inout]);
 				} else {
 					error("File corrupted during download.");
@@ -572,7 +571,7 @@ function judge($row)
 			}
 			// sanity check (NOTE: performance impact is negligible with 5
 			// testcases and total 3.3 MB of data)
-			if ( md5_file($tcfile[$inout]) != $tc['md5sum_' . $inout] ) {
+			if ( md5_file($tcfile[$inout]) !== $tc['md5sum_' . $inout] ) {
 				error("File corrupted: md5sum mismatch: " . $tcfile[$inout]);
 			}
 		}

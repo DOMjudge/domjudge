@@ -40,8 +40,8 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Judgehost Restrictions</h1>\n\n";
 
 $res = $DB->q('SELECT judgehost_restriction.*, COUNT(hostname) AS numjudgehosts
-	       FROM judgehost_restriction LEFT JOIN judgehost USING (restrictionid)
-	       GROUP BY judgehost_restriction.restrictionid ORDER BY restrictionid');
+               FROM judgehost_restriction LEFT JOIN judgehost USING (restrictionid)
+               GROUP BY judgehost_restriction.restrictionid ORDER BY restrictionid');
 
 if( $res->count() == 0 ) {
 	echo "<p class=\"nodata\">No judgehost restrictions defined</p>\n\n";
@@ -57,7 +57,7 @@ if( $res->count() == 0 ) {
 		$restrictions = json_decode($row['restrictions'], true);
 		$link = '<a href="judgehost_restriction.php?id=' . (int)$row['restrictionid'] . '">';
 		echo '<tr><td>' . $link. (int)$row['restrictionid'] .
-		     '</a></td><td>' . $link . htmlspecialchars($row['restrictionname']) .
+		     '</a></td><td>' . $link . htmlspecialchars($row['name']) .
 		     '</a></td><td class="tdright">' . $link . count($restrictions['contest']) .
 		     '</a></td><td class="tdright">' . $link . count($restrictions['problem']) .
 		     '</a></td><td class="tdright">' . $link . count($restrictions['language']) .

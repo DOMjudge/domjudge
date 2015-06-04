@@ -59,7 +59,7 @@ for f in $SOURCES ; do
 		else
 			[ "$QUIET" ] || printf " $run"
 		fi
-		run=$(($run+1))
+		run=$((run+1))
 	done
 	[ "$QUIET" ] || printf "\n" ;
 done

@@ -27,6 +27,8 @@ $contestids = $cids;
 if ( $cid !== null ) {
     $contestids = array($cid);
 }
+// cid -1 will never happen, but otherwise the array is empty and that is not supported
+if ( empty($contestids) ) $contestids = array(-1);
 
 echo "<p><a href=\"clarification.php\">Send Clarification</a></p>\n";
 echo "<p><a href=\"#newrequests\">View New Clarification Requests</a></p>\n";
@@ -45,15 +47,15 @@ $sqlbody = 'SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname,
 
 $newrequests    = $DB->q($sqlbody .
                          'AND c.sender IS NOT NULL AND c.answered = 0
-			  ORDER BY submittime DESC, clarid DESC', $contestids);
+                          ORDER BY submittime DESC, clarid DESC', $contestids);
 
 $oldrequests    = $DB->q($sqlbody .
                          'AND c.sender IS NOT NULL AND c.answered != 0
-			  ORDER BY submittime DESC, clarid DESC', $contestids);
+                          ORDER BY submittime DESC, clarid DESC', $contestids);
 
 $clarifications = $DB->q($sqlbody .
                          'AND c.sender IS NULL AND ( c.respid IS NULL OR c.recipient IS NULL )
-			  ORDER BY submittime DESC, clarid DESC', $contestids);
+                          ORDER BY submittime DESC, clarid DESC', $contestids);
 
 echo '<h3><a name="newrequests"></a>' .
 	"New Requests:</h3>\n";

@@ -265,11 +265,11 @@ if ( in_array('variations', $reports) ) {
 
 		// Check for variations in runtimes across judgings:
 		$rows = $DB->q('SELECT r.testcaseid,
- 		                MIN(r.runtime) AS runtime_min,
- 		                MAX(r.runtime) AS runtime_max,
- 		                AVG(r.runtime) AS runtime_avg,
+		                MIN(r.runtime) AS runtime_min,
+		                MAX(r.runtime) AS runtime_max,
+		                AVG(r.runtime) AS runtime_avg,
 		                (MAX(r.runtime)-MIN(r.runtime)) AS runtime_spread,
- 		                COUNT(j.judgingid) AS njudgings
+		                COUNT(j.judgingid) AS njudgings
 		                FROM judging_run r
 		                LEFT JOIN judging j USING (judgingid)
 		                WHERE j.submitid = %i GROUP BY r.testcaseid',

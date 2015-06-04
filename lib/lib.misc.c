@@ -28,7 +28,7 @@ void _alert(const char *libdir, const char *msgtype, const char *description)
 {
 	static char none[1] = "";
 	char *cmd;
-	int dummy;
+	int dummy __attribute__((unused));
 
 	if ( description==NULL ) description = none;
 

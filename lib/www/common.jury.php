@@ -165,23 +165,6 @@ function openZipFile($filename) {
 	return $zip;
 }
 
-/**
- * Parse a configuration string
- * (needed if PHP version < 5.3)
- */
-if (!function_exists('parse_ini_string')) {
-	function parse_ini_string($ini, $process_sections = false, $scanner_mode = null) {
-		# Generate a temporary file.
-		$tempname = tempnam('/tmp', 'ini');
-		$fp = fopen($tempname, 'w');
-		fwrite($fp, $ini);
-		$ini = parse_ini_file($tempname, !empty($process_sections));
-		fclose($fp);
-		@unlink($tempname);
-		return $ini;
-	}
-}
-
 $matchstrings = array('@EXPECTED_RESULTS@: ',
 		      '@EXPECTED_SCORE@: ');
 
@@ -244,14 +227,16 @@ function get_image_thumb_type($image)
 		error("Unsupported image type '$type' found.");
 	}
 
+	$thumbsize = dbconfig_get('thumbnail_size', 128);
+
 	$orig = imagecreatefromstring($image);
-	$thumb = imagecreatetruecolor(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+	$thumb = imagecreatetruecolor($thumbsize, $thumbsize);
 	if ( $orig===FALSE || $thumb===FALSE ) {
 		error('Cannot create GD image.');
 	}
 
 	if ( !imagecopyresampled($thumb, $orig, 0, 0, 0, 0,
-	                         THUMBNAIL_SIZE, THUMBNAIL_SIZE, $info[0], $info[1]) ) {
+	                         $thumbsize, $thumbsize, $info[0], $info[1]) ) {
 		error('Cannot create resized thumbnail image.');
 	}
 
@@ -291,7 +276,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 	$yaml_file = 'problem.yaml';
 
 	$ini_keys_problem = array('name', 'timelimit', 'special_run', 'special_compare');
-	$ini_keys_contest_problem = array('probid', 'allow_submit', 'allow_judge', 'color');
+	$ini_keys_contest_problem = array('probid', 'allow_submit', 'allow_judge', 'points', 'color');
 
 	$def_timelimit = 10;
 
@@ -306,6 +291,9 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 		// Only preserve valid keys:
 		$ini_array_problem = array_intersect_key($ini_array,array_flip($ini_keys_problem));
 		$ini_array_contest_problem = array_intersect_key($ini_array,array_flip($ini_keys_contest_problem));
+
+		// Set default of 1 point for a problem if not specified
+		if ( !isset($ini_array_contest_problem['points']) ) $ini_array_contest_problem['points'] = 1;
 
 		if ( $probid===NULL ) {
 			if ( !isset($ini_array_contest_problem['probid']) ) {
@@ -332,16 +320,19 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				       ') VALUES (%As)', $ini_array_contest_problem);
 			}
 		} else {
-
-			$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array_problem, $probid);
+			if ( count($ini_array_problem)>0 ) {
+				$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array_problem, $probid);
+			}
 
 			if ( $cid != -1 ) {
 				if ( $DB->q("MAYBEVALUE SELECT probid FROM contestproblem
 				             WHERE probid = %i AND cid = %i", $probid, $cid) ) {
 					// Remove keys that cannot be modified:
 					unset($ini_array_contest_problem['probid']);
-					$DB->q('UPDATE contestproblem SET %S WHERE probid = %i AND cid = %i',
-					       $ini_array_contest_problem, $probid, $cid);
+					if ( count($ini_array_contest_problem)!=0 ) {
+						$DB->q('UPDATE contestproblem SET %S WHERE probid = %i AND cid = %i',
+						       $ini_array_contest_problem, $probid, $cid);
+					}
 				} else {
 					$shortname = $ini_array_contest_problem['probid'];
 					unset($ini_array_contest_problem['probid']);
@@ -363,8 +354,9 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 
 		if ( !empty($problem_yaml_data) ) {
 			if ( isset($problem_yaml_data['uuid']) && $cid != -1 ) {
-				$DB->q('UPDATE contestproblem SET shortname=%s WHERE cid=%i AND probid=%i',
-					$problem_yaml_data['uuid'], $cid, $probid);
+				$DB->q('UPDATE contestproblem SET shortname=%s
+				        WHERE cid=%i AND probid=%i',
+				       $problem_yaml_data['uuid'], $cid, $probid);
 			}
 			$yaml_array_problem = array();
 			if ( isset($problem_yaml_data['name']) ) {
@@ -428,20 +420,26 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 						}
 
 						$ovzip = file_get_contents("$tmpzipfiledir/outputvalidator.zip");
-						$probname = $DB->q("VALUE SELECT name FROM problem WHERE probid=%i", $probid);
+						$probname = $DB->q("VALUE SELECT name FROM problem
+						                    WHERE probid=%i", $probid);
 						$ovname = preg_replace('/[^a-zA-Z0-9]/', '_', $probname) . "_cmp";
-						if ( $DB->q("MAYBEVALUE SELECT execid FROM executable WHERE execid=%s", $ovname) ) {
+						if ( $DB->q("MAYBEVALUE SELECT execid FROM executable
+						             WHERE execid=%s", $ovname) ) {
 							// avoid name clash
 							$clashcnt = 2;
-							while ( $DB->q("MAYBEVALUE SELECT execid FROM executable WHERE execid=%s", $ovname . "_" . $clashcnt) ) {
+							while ( $DB->q("MAYBEVALUE SELECT execid FROM executable
+							                WHERE execid=%s", $ovname . "_" . $clashcnt) ) {
 								$clashcnt++;
 							}
 							$ovname = $ovname . "_" . $clashcnt;
 						}
-						$DB->q("INSERT INTO executable (execid, md5sum, zipfile, description, type) VALUES (%s, %s, %s, %s, %s)",
-							$ovname, md5($ovzip), $ovzip, 'output validator for ' . $probname, 'compare');
+						$DB->q("INSERT INTO executable (execid, md5sum, zipfile,
+						        description, type) VALUES (%s, %s, %s, %s, %s)",
+						       $ovname, md5($ovzip), $ovzip,
+						       'output validator for ' . $probname, 'compare');
 
-						$DB->q("UPDATE problem SET special_compare=%s WHERE probid=%i", $ovname, $probid);
+						$DB->q("UPDATE problem SET special_compare=%s
+						        WHERE probid=%i", $ovname, $probid);
 
 						echo "<p>Added output validator '$ovname'.</p>\n";
 					}
@@ -545,10 +543,12 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 		echo "<p>No jury solutions added: problem is not linked to a contest (yet).</p>\n";
 	} else if ( empty($teamid) ) {
 		echo "<p>No jury solutions added: must associate team with your user first.</p>\n";
-	} else if ( $DB->q('VALUE SELECT allow_submit FROM problem INNER JOIN contestproblem using (probid) WHERE probid = %i AND cid = %i', $probid, $cid) ) {
+	} else if ( $DB->q('VALUE SELECT allow_submit FROM problem
+	                    INNER JOIN contestproblem using (probid)
+	                    WHERE probid = %i AND cid = %i', $probid, $cid) ) {
 		// First find all submittable languages:
 		$langs = $DB->q('KEYVALUETABLE SELECT langid, extensions
- 		                 FROM language WHERE allow_submit = 1');
+		                 FROM language WHERE allow_submit = 1');
 
 		$njurysols = 0;
 		echo "<ul>\n";

@@ -67,7 +67,7 @@ function contest()
 	return array(
 		'id'        => $cid,
 		'shortname' => $cdata['shortname'],
-		'name'      => $cdata['contestname'],
+		'name'      => $cdata['name'],
 		'start'     => $cdata['starttime'],
 		'freeze'    => $cdata['freezetime'],
 		'end'       => $cdata['endtime'],
@@ -76,8 +76,8 @@ function contest()
 		'penalty'   => 60*dbconfig_get('penalty_time', 20),
 		);
 }
-$doc = "Get information about the current contest: id, shortname, name, start, freeze, unfreeze, length, penalty and end.";
-$doc .= "If more than one contest is active, return information about the first one";
+$doc = "Get information about the current contest: id, shortname, name, start, freeze, unfreeze, length, penalty and end. ";
+$doc .= "If more than one contest is active, return information about the first one.";
 $api->provideFunction('GET', 'contest', $doc);
 
 
@@ -98,7 +98,7 @@ function contests()
 		return array(
 			'id' => $cdata['cid'],
 			'shortname' => $cdata['shortname'],
-			'name' => $cdata['contestname'],
+			'name' => $cdata['name'],
 			'start' => $cdata['starttime'],
 			'freeze' => $cdata['freezetime'],
 			'end' => $cdata['endtime'],
@@ -324,7 +324,7 @@ function judgings_POST($args)
 	if ( empty($row['run']) ) {
 		$row['run'] = dbconfig_get('default_run');
 	}
-	// TODO: refactor + integrate in query above?
+
 	$compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable
 	                          WHERE execid = %s', $row['compare']);
 	$row['compare_md5sum'] = $compare_md5sum;
@@ -375,16 +375,16 @@ function judgings_PUT($args)
 
 	if ( isset($args['output_compile']) ) {
 		if ( $args['compile_success'] ) {
-			$DB->q('UPDATE judging SET output_compile = %s ' .
-				'WHERE judgingid = %i AND judgehost = %s',
-				base64_decode($args['output_compile']),
-				$judgingid, $args['judgehost']);
+			$DB->q('UPDATE judging SET output_compile = %s
+			        WHERE judgingid = %i AND judgehost = %s',
+			       base64_decode($args['output_compile']),
+			       $judgingid, $args['judgehost']);
 		} else {
-			$DB->q('UPDATE judging SET output_compile = %s, ' .
-				'result = "compiler-error", endtime=%s ' .
-				'WHERE judgingid = %i AND judgehost = %s',
-				base64_decode($args['output_compile']), now(),
-				$judgingid, $args['judgehost']);
+			$DB->q('UPDATE judging SET output_compile = %s,
+			        result = "compiler-error", endtime=%s
+			        WHERE judgingid = %i AND judgehost = %s',
+			       base64_decode($args['output_compile']), now(),
+			       $judgingid, $args['judgehost']);
 			$cid = $DB->q('VALUE SELECT s.cid FROM judging
 			               LEFT JOIN submission s USING(submitid)
 			               WHERE judgingid = %i', $judgingid);
@@ -1067,7 +1067,7 @@ function scoreboard($args)
 	if ( array_key_exists('affiliation', $args) ) {
 		$filter['affilid'] = array($args['affiliation']);
 	}
-	// TODO: refine this output, maybe add separate function to get summary
+
 	$scoreboard = genScoreBoard($cdatas[$args['cid']], !$args['public'], $filter);
 
 	$prob2label = $DB->q('KEYVALUETABLE SELECT probid, shortname

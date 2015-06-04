@@ -387,8 +387,13 @@ function appendAnswer() {
 	$defclar = key($categs);
 	$options = array();
 	foreach ($cdatas as $cid => $cdata) {
+
 		foreach($categs as $categid => $categname) {
-			$options["$cid-$categid"] = $cdata['shortname'] . ' - ' .$categname;
+			if ( IS_JURY && count($cdatas) > 1 ) {
+				$options["$cid-$categid"] = "{$cdata['shortname']} - $categname";
+			} else {
+				$options["$cid-$categid"] = $categname;
+			}
 		}
 		if ( difftime($cdata['starttime'], now()) <= 0 ) {
 			$problem_options =

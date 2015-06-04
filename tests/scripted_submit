@@ -27,7 +27,7 @@ CURLOPTS="-sq -m 30 -b $COOKIEJAR"
 
 error()
 {
-	echo "Error: $@"
+	echo "Error: $*"
 	exit 1
 }
 

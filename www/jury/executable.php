@@ -121,9 +121,7 @@ if ( !empty($cmd) ):
 <tr><td><label for="data_0__description_">Executable description:</label></td>
 <td><?php echo addInput('data[0][description]', @$row['description'], 30, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__type_">Executable type:</label></td>
-<td><?php echo addSelect('data[0][type]', array('compare' => 'compare',
-                                                'compile' => 'compile',
-                                                'run' => 'run'), @$row['type'], True)?></td></tr>
+<td><?php echo addSelect('data[0][type]', $executable_types, @$row['type'], True)?></td></tr>
 <tr><td>Content:     </td><td><a href="show_executable.php?edit_source=1&amp;id=<?php echo htmlspecialchars($id)?>">edit file contents</a></td></tr>
 </table>
 
@@ -141,9 +139,7 @@ if ( class_exists("ZipArchive") ) {
 	addForm($pagename, 'post', null, 'multipart/form-data') .
 	addHidden('id', @$row['execid']) .
 	'<label for="executable_archive__">Upload executable archive:</label>' .
-	($cmd == 'add' ? addSelect('type', array('compare' => 'compare',
-	                                         'compile' => 'compile',
-	                                         'run' => 'run')) : '') .
+	($cmd == 'add' ? addSelect('type', $executable_types) : '') .
 	addFileField('executable_archive[]') .
 	addSubmit('Upload', 'upload') .
 	addEndForm();

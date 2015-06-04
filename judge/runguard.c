@@ -293,7 +293,7 @@ Run COMMAND with restrictions.\n\
   -g, --group=GROUP      run COMMAND under group with name or ID GROUP\n\
   -t, --walltime=TIME    kill COMMAND after TIME wallclock seconds\n\
   -C, --cputime=TIME     set maximum CPU time to TIME seconds\n\
-  -m, --memsize=SIZE     set all (total, stack, etc) memory limits to SIZE kB\n\
+  -m, --memsize=SIZE     set total memory limit to SIZE kB\n\
   -f, --filesize=SIZE    set maximum created filesize to SIZE kB;\n");
 	printf("\
   -p, --nproc=N          set maximum no. processes to N\n\
@@ -668,15 +668,17 @@ void setrestrictions()
 		lim.rlim_cur = lim.rlim_max = memsize;
 		setlim(AS);
 		setlim(DATA);
-		setlim(STACK);
 	}
 #else
 	/* Memory limits should be unlimited when using cgroups */
 	lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
 	setlim(AS);
 	setlim(DATA);
-	setlim(STACK);
 #endif
+
+	/* Always set the stack size to be unlimited. */
+	lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
+	setlim(STACK);
 
 	if ( filesize!=RLIM_INFINITY ) {
 		verbose("setting filesize limit to %d bytes",(int)filesize);

@@ -14,13 +14,13 @@ if [ -z "$MSGTYPE" ]; then
 fi
 
 shift
-DESCRIPTION="$@"
+DESCRIPTION="$*"
 
 BEEPCMD=`which beep`
 
 beep()
 {
-	[ -x "$BEEPCMD" ] && $BEEPCMD $@
+	[ -x "$BEEPCMD" ] && $BEEPCMD "$@"
 }
 
 case "$MSGTYPE" in
