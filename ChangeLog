@@ -2,14 +2,13 @@ DOMjudge Programming Contest Judging System
 
 Version 5.0.0 - DEV
 -------------------
- - [INCOMPATIBLE CHANGE] Changed to Kattis problem format; in particular
-   the specification of compare scripts has changed.
+ - Add support for the problemarchive.org problem package format, thereby
+   dropping support for our custom format. In particular, the specification
+   of compare scripts has changed.
  - Add support for multiple simultaneous contests.
  - Add support for HTML5 desktop notifications of clarifications,
    judgings and judgehost status (#133).
  - Add support for optional user self-registration.
- - Add support for the problemarchive.org problem package format, thereby
-   dropping support for our custom format.
  - Add support for problem points, allowing one to assign different
    scoring weights to diffent problems in a contest.
  - Add selection options for rejudging, and preview rejuding results
