@@ -1,6 +1,6 @@
 DOMjudge Programming Contest Judging System
 
-Version 4.1.0 - DEV
+Version 5.0.0 - DEV
 -------------------
  - [INCOMPATIBLE CHANGE] Changed to Kattis problem format; in particular
    the specification of compare scripts has changed.
