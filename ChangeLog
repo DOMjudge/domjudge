@@ -2,6 +2,9 @@ DOMjudge Programming Contest Judging System
 
 Version 4.0.6 - DEV
 -------------------
+ - Prevent unintended collisions by using exact string comparison
+   in judgedaemon.
+ - Add a note to the manual about how timelimits are calculated and enforced.
 
 Version 4.0.5 - 23 March 2015
 -----------------------------
