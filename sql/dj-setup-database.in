@@ -56,7 +56,11 @@ mysql()
 		[ -n "$PROMPT_PASSWD" ] && pass="-p"
 		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
 	fi
-	command mysql $user $pass -h $DBHOST --silent --skip-column-names "$@"
+	if [ -n "$pass" ]; then
+		command mysql $user "$pass" -h "$DBHOST" --silent --skip-column-names "$@"
+	else
+		command mysql $user -h "$DBHOST" --silent --skip-column-names "$@"
+	fi
 }
 
 read_dbpasswords()
