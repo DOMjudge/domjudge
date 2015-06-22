@@ -79,7 +79,7 @@ if ( isset($_REQUEST['upload']) ) {
 			$lastProblem = 0;
 		}
 		$data .= '<Standing LastProblemTime="' . $lastProblem . '" ProblemsSolved="' .  $totals['correct'] . '" Rank="' . $rank .
-			'" ReservationID="' . $row['externalid'] . '" TotalTime="' .
+			'" TeamID="' . $row['externalid'] . '" TotalTime="' .
 			$totals['totaltime'] .
 			'"/>';
 	}
@@ -120,7 +120,8 @@ $updated_teams = array();
 foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 	foreach ( $group['team'] as $team ) {
 		// Note: affiliations are not updated and not deleted even if all teams are canceled
-		$affilid = $DB->q('MAYBEVALUE SELECT affilid FROM team_affiliation WHERE name=%s', $team['institutionName']);
+		$affilid = $DB->q('MAYBEVALUE SELECT affilid FROM team_affiliation
+		                   WHERE name=%s', $team['institutionName']);
 		if ( empty($affilid) ) {
 			$affilid = $DB->q('RETURNID INSERT INTO team_affiliation (name, shortname, country) VALUES (%s, %s, %s)',
 				$team['institutionName'], $team['institutionShortName'], $team['country']);
@@ -139,7 +140,8 @@ foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 		}
 
 		// Note: teams are not deleted but disabled depending on their status
-		$id = $DB->q('MAYBEVALUE SELECT teamid FROM team WHERE externalid=%i', $team['reservationId']);
+		$id = $DB->q('MAYBEVALUE SELECT teamid FROM team
+		              WHERE externalid=%i', $team['teamId']);
 		$enabled = $team['status'] === 'ACCEPTED';
 		if ( empty($id) ) {
 			$id = $DB->q('RETURNID INSERT INTO team (name, categoryid, affilid, enabled, members, comments, externalid) VALUES (%s, %i, %i, %i, %s, %s, %i)',
