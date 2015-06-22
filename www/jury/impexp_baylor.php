@@ -81,7 +81,7 @@ if ( isset($_REQUEST['upload']) ) {
 			$lastProblem = 0;
 		}
 		$data .= '<Standing LastProblemTime="' . $lastProblem . '" ProblemsSolved="' .  $totals['points'] . '" Rank="' . $rank .
-			'" ReservationID="' . $row['externalid'] . '" TotalTime="' .
+			'" TeamID="' . $row['externalid'] . '" TotalTime="' .
 			$totals['totaltime'] .
 			'"/>';
 	}
@@ -120,7 +120,12 @@ $new_affils = array();
 $new_teams = array();
 $updated_teams = array();
 foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
-	foreach ( $group['team'] as $team ) {
+	$teams = $group['teams']['team'];
+	if ( isset($teams['@group']) ) {
+		// FIXME: if there's only 1 team in a site, it's not encapsulated in an array :-/
+		$teams = array($teams);
+	}
+	foreach ( $teams as $team ) {
 		// Note: affiliations are not updated and not deleted even if all teams have canceled
 		$affilid = $DB->q('MAYBEVALUE SELECT affilid FROM team_affiliation
 		                   WHERE name=%s', $team['institutionName']);
@@ -140,6 +145,7 @@ foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 			$members_json  = array($members_json);
 		}
 		foreach ( $members_json as $member ) {
+			// FIXME: include role (coach, contestant, other) here?
 			$members_a[] = $member['firstName'] . " " . $member['lastName'];
 			$mails_a[]   = $member['email'];
 		}
@@ -148,7 +154,7 @@ foreach ( $json['icpcExport']['contest']['groups']['group'] as $group ) {
 
 		// Note: teams are not deleted but disabled depending on their status
 		$id = $DB->q('MAYBEVALUE SELECT teamid FROM team
-		              WHERE externalid=%i', $team['reservationId']);
+		              WHERE externalid=%i', $team['teamId']);
 		$enabled = $team['status'] === 'ACCEPTED';
 		if ( empty($id) ) {
 			$id = $DB->q('RETURNID INSERT INTO team
