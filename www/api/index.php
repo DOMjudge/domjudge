@@ -1076,7 +1076,7 @@ function scoreboard($args)
 	$res = array();
 	foreach ( $scoreboard['scores'] as $teamid => $data ) {
 		$row = array('rank' => $data['rank'], 'team' => $teamid);
-		$row['score'] = array('num_solved' => $data['num_correct'],
+		$row['score'] = array('num_solved' => $data['num_points'],
 		                      'total_time' => $data['total_time']);
 		$row['problems'] = array();
 		foreach ( $scoreboard['matrix'][$teamid] as $probid => $pdata ) {
@@ -1084,7 +1084,8 @@ function scoreboard($args)
 			                           'label'       => $prob2label[$probid],
 			                           'num_judged'  => $pdata['num_submissions'],
 			                           'num_pending' => $pdata['num_pending'],
-			                           'time'        => $pdata['time']);
+						   'time'        => $pdata['time'],
+						   'solved'      => isset($pdata['is_correct']));
 		}
 		$res[] = $row;
 	}
