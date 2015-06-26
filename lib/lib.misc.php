@@ -135,7 +135,8 @@ function problemVisible($probid)
  */
 function calcContestTime($walltime, $cid)
 {
-	global $cdatas;
+	// get contest data in case of non-public contests
+	$cdatas = getCurContests(TRUE);
 
 	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
 
