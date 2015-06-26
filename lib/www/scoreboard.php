@@ -611,12 +611,24 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$countries = array_unique($countries);
 		sort($countries);
 
+		$filteron = array();
+		$filtertext = "";
+		foreach (array('affilid' => 'affiliation', 'country' => 'country', 'categoryid' => 'category') as $type => $text) {
+			if ( isset($filter[$type]) ) {
+				$filteron[] = $text;
+			}
+		}
+		if ( sizeof($filteron) > 0 ) {
+			$filtertext = "(filtered on " . implode(", ", $filteron) . ")";
+		}
+
 		require_once(LIBWWWDIR . '/forms.php');
 		?>
 
 <table class="scorefilter">
 <tr>
 <td><a class="collapse" href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
+<td><?= $filtertext ?></td>
 <td><div id="detailfilter">
 <?php
 
