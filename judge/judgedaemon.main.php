@@ -342,6 +342,10 @@ initsignals();
 
 read_credentials();
 
+// Set umask to allow group,other access, as this is needed for the
+// unprivileged user.
+umask(0022);
+
 // Warn when chroot has been disabled. This has security implications.
 if ( ! USE_CHROOT ) {
 	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");

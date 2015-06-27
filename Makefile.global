@@ -40,9 +40,7 @@ INSTALL_PROG    = $(INSTALL)
 INSTALL_DATA    = $(INSTALL) -m 0644
 INSTALL_USER    = $(INSTALL) -m 0644 -o $(DOMJUDGE_USER)
 INSTALL_WEBSITE = $(INSTALL) -m 0644 -o $(DOMJUDGE_USER) -g $(WEBSERVER_GROUP)
-INSTALL_DIR     = $(MKDIR_P)
-# This is a bit of a hack:
-INSTALL_TREE    = cp -R
+INSTALL_DIR     = $(INSTALL) -d
 
 # Library objects required in multiple places:
 LIBSBASE   = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc)
