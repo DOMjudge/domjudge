@@ -267,6 +267,10 @@ initsignals();
 
 read_credentials();
 
+// Set umask to allow group,other access, as this is needed for the
+// unprivileged user.
+umask(0022);
+
 if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
 // Warn when chroot has been disabled. This has security implications.
