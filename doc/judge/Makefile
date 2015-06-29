@@ -13,11 +13,12 @@ install-docs: docs
 		judge-manual.pdf judge-manual*.html
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir) $(SPEC_TXT)
 
-judge-manual.pdf: judge-manual.sgml $(TOPDIR)/doc/domjudge-overview-inc.sgml \
-                                    $(TOPDIR)/doc/docs_header.tex $(SPEC_SGML)
+judge-manual.pdf: %.pdf: %.sgml $(TOPDIR)/doc/domjudge-overview-inc.sgml \
+                                $(TOPDIR)/doc/docs_header.tex $(SPEC_SGML)
 	linuxdoc -B latex -o pdf -P "`cat $(TOPDIR)/doc/docs_header.tex`" $< >/dev/null
 
-judge-manual.html: judge-manual.sgml $(SPEC_SGML) $(TOPDIR)/doc/docs_header.html
+judge-manual.html: %.html: %.sgml  $(TOPDIR)/doc/domjudge-overview-inc.sgml \
+                                   $(TOPDIR)/doc/docs_header.html $(SPEC_SGML)
 	linuxdoc -B html --header=$(TOPDIR)/doc/docs_header.html $< >/dev/null
 
 $(SPEC_TXT): %.txt: %.sgml %-inc.sgml
