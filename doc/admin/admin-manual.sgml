@@ -2079,7 +2079,8 @@ without arguments for basic usage information.
 
 Next, edit the script <tt>lib/judge/chroot-startstop.sh</tt> and adapt
 it to work with your local system and uncomment the script in
-<tt>etc/judgehost-config.php</tt>.
+<tt>etc/judgehost-config.php</tt>. Also make sure that the sudo rules
+match any path changes made in <tt>chroot-startstop.sh</tt>.
 
 <sect>Java compilers
 <p>
