@@ -6,6 +6,8 @@
 # using the chroot environment and Oracle Java compiler/interpreter and
 # adapt this script to your environment. See also bin/dj_make_chroot.sh
 # for a script to generate a minimal chroot environment with Oracle Java.
+# Note that if you modify paths in this script, then the associated
+# sudo rules (see etc/sudoers-domjudge) must also be updated.
 #
 # This script will be called from judgedaemon.main.php in the root
 # directory of the chroot environment with one parameter: either
