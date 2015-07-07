@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 5.0.0 - DEV
+-------------------
+
 Version 5.0.0 Release Candidate 1 - 7 July 2015
 -----------------------------------------------
  - Add support for the problemarchive.org problem package format, thereby
