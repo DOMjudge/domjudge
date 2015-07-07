@@ -4,7 +4,9 @@ Version 4.0.6 - DEV
 -------------------
  - Prevent unintended collisions by using exact string comparison
    in judgedaemon.
- - Add a note to the manual about how timelimits are calculated and enforced.
+ - Let dj-setup-database work with an empty DB password.
+ - Fix file permissions during install and running of judgedaemon.
+ - Made several documentation improvements.
 
 Version 4.0.5 - 23 March 2015
 -----------------------------
