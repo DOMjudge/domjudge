@@ -1,6 +1,6 @@
 The dash shell was taken from the Debian package dash-udeb version
-0.5.3-7, see http://packages.debian.org/etch/dash-udeb. The sources
-can be (re-)obtained from: http://domjudge.sourceforce.net/sources/
+0.5.3-7, see https://snapshot.debian.org/binary/dash-udeb/
+The sources can also be obtained from: https://www.domjudge.org/sources/
 
 Copyright (from the Debian copyright file):
 
