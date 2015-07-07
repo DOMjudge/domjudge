@@ -14,7 +14,7 @@ Version 5.0.0 Release Candidate 1 - 7 July 2015
  - Add support for optional user self-registration.
  - Add support for problem points, allowing one to assign different
    scoring weights to diffent problems in a contest.
- - Add selection options for rejudging, and preview rejuding results
+ - Add selection options for rejudging, and preview rejudging results
    before applying them.
  - Add optional per problem memory/output limits (Closes #152).
  - Apply runguard limits also to compare scripts (#68).
@@ -149,7 +149,7 @@ Version 3.4.0 - (unreleased)
  - Prevent network access from runguard when cgroups are enabled.
  - Pass ONLINE_JUDGE and DOMJUDGE directives to submissions.
  - Add support for new languages: Python3, Ada, Fortran, Lua, Scala.
- - Make it explicit that rejuding 'all' does not include CORRECT submissions.
+ - Make it explicit that rejudging 'all' does not include CORRECT submissions.
  - Allow to (de)activate judgehosts on the judgehosts overview page.
  - Apply the z-index to the clock only, otherwise the refresh button
    stops being clickable.
